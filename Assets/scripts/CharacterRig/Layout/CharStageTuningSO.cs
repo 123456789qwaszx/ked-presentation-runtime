@@ -1,0 +1,8 @@
+using UnityEngine;
+
+[CreateAssetMenu(menuName = "CPS/CharRig/Tuning/Stage Anchor Tuning", fileName = "CharStageTuning")]
+public sealed class CharStageTuningSO : ScriptableObject
+{
+    [Header("Global Offsets (px)")]
+    public AnchorOffset3 offsets = default;
+}

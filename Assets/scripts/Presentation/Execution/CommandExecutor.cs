@@ -1,0 +1,242 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Threading;
+using UnityEngine;
+
+public sealed class CommandExecutor : MonoBehaviour
+{
+    [Header("Debug")]
+    [SerializeField] private bool enableDebugLog = true;
+
+    // ---- Dependencies (set by Initialize) ----
+    private SequencePlayer _sequencePlayer;
+    private INodeCommandFactory _signalCommandFactory;
+    private INodeCommandFactory _charRigCommandFactory;
+
+    // ---- Runtime state: execution ----
+    private CancellationTokenSource _cts;
+    private Coroutine _mainRoutine;
+    private CommandRunScope _activeScope;
+
+    // ---- Runtime state: control flags ----
+    private int _runId;
+    private bool _isStopInProgress;
+    
+    private bool _coreInitialized;
+    private bool _dialogueFactoryAttached;
+
+    public bool IsInitialized => _coreInitialized && _dialogueFactoryAttached;
+
+    public void InitializeCore(
+        INodeCommandFactory signalCommandFactory,
+        INodeCommandFactory charRigCommandFactory)
+    {
+        _sequencePlayer = new SequencePlayer(this);
+        _signalCommandFactory = signalCommandFactory;
+        _charRigCommandFactory = charRigCommandFactory;
+        _coreInitialized = true;
+    }
+
+    private void OnDisable() => Stop(CleanupPolicy.Cancel);
+    private void OnDestroy() => Stop(CleanupPolicy.Cancel);
+    
+    
+    public void PlayStep(NodeSpec node, int stepIndex, CommandRunScope scope)
+    {
+        if (!IsInitialized) return;
+        if (node == null || scope == null) return;
+
+        _activeScope = scope;
+        
+        CleanupPolicy policy = DecideCleanupPolicy(_activeScope);
+        _activeScope.CleanupStep(policy);
+        
+        List<ISequenceCommand> commands = BuildCommandsFromStep(node, stepIndex);
+        if (commands == null || commands.Count == 0)
+        {
+            {
+                Log($"Step has no commands: stepIndex={stepIndex}");
+                return;
+            }
+        }
+        
+        ResetToken();
+        _activeScope.Token = _cts.Token;
+        
+        Log($"Step Play: stepIndex={stepIndex}, commands={commands.Count}");
+        _mainRoutine = StartCoroutine(RunNode(commands, _activeScope, _runId));
+    }
+    
+    private IEnumerator RunNode(List<ISequenceCommand> commands, CommandRunScope scope, int runId)
+    {
+        if (runId != _runId)
+        {
+            Log($"RunNode exited early: stale runId={runId}, current={_runId}");
+            yield break;
+        }
+
+        scope.SetNodeBusy(true);
+        
+        Log($"Node Begin (runId={runId})");
+        try
+        {
+            yield return _sequencePlayer.PlayCommands(
+                commands,
+                scope,
+                runId: runId,
+                isValid: () => runId == _runId,
+                trace: msg => Log(msg)
+            );
+        }
+        finally
+        {
+            if (runId == _runId && scope != null)
+            {
+                scope.SetNodeBusy(false);
+                scope.Token = CancellationToken.None;
+
+                _mainRoutine = null;
+
+                Log($"Node End (runId={runId})");
+            }
+        }
+    }
+
+    public void Stop() => Stop(CleanupPolicy.Cancel);
+    public void FinishAll() => Stop(CleanupPolicy.Finish);
+    
+    private void Stop(CleanupPolicy policy)
+    {
+        if (_isStopInProgress)
+            return;
+        
+        _isStopInProgress = true;
+
+        try
+        {
+            // Bump run generation so all in-flight routines from the previous session become invalid.
+            _runId++;
+            CancelAndDisposeToken();
+
+            if (_mainRoutine != null)
+            {
+                StopCoroutine(_mainRoutine);
+                _mainRoutine = null;
+            }
+
+            _sequencePlayer?.Stop();
+
+            if (_activeScope != null)
+            {
+                _activeScope.CleanupStep(policy);
+                _activeScope.CleanupRun(policy);
+                
+                _activeScope.SetNodeBusy(false);
+                _activeScope.Token = CancellationToken.None;
+                _activeScope = null;
+            }
+
+            Log($"Stop(policy={policy})");
+        }
+        finally
+        {
+            _isStopInProgress = false;
+        }
+    }
+
+    private List<ISequenceCommand> BuildCommandsFromStep(NodeSpec node, int stepIndex)
+    {
+        var list = new List<ISequenceCommand>();
+
+        if (node.steps == null || node.steps.Count == 0)
+        {
+            Log($"Node Empty (node={node})");
+            return list;
+        }
+        if (stepIndex < 0 || stepIndex >= node.steps.Count)
+        {
+            Log($"Invalid stepIndex: {stepIndex} (steps={node.steps.Count})");
+            return list;
+        }
+
+        StepSpec step = node.steps[stepIndex];
+        if (step == null || step.compiled == null || step.compiled.Count == 0)
+        {
+            Log($"Step Empty (step={step})");
+            return list;
+        }
+
+        foreach (CommandSpecBase spec in step.compiled)
+        {
+            if (spec == null)
+            {
+                Log("Null command spec in step; skipped.");
+                continue;
+            }
+
+            if (spec is CharRigCommandSpecBase)
+            {
+                if (!_charRigCommandFactory.TryCreate(spec, out ISequenceCommand charRigCommand) || charRigCommand == null)
+                {
+                    Log($"Failed to create command (specType={spec.GetType().Name})");
+                    continue;
+                }
+                list.Add(charRigCommand);
+                continue;
+            }
+            
+            if (!_signalCommandFactory.TryCreate(spec, out ISequenceCommand cmd) || cmd == null)
+            {
+                Debug.LogWarning($"Failed to create command (specType={spec.GetType().Name})");
+                continue;
+            }
+            
+            list.Add(cmd);
+        }
+
+        return list;
+    }
+    
+    
+    private void ResetToken()
+    { // Only responsible for creating a new token for the next run.
+        _cts?.Dispose();
+        _cts = new CancellationTokenSource();
+    }
+    
+    private void CancelAndDisposeToken()
+    {
+        if (_cts == null)
+            return;
+
+        try
+        {
+            if (!_cts.IsCancellationRequested)
+                _cts.Cancel();
+        }
+        catch (ObjectDisposedException) { }
+
+        _cts.Dispose();
+        _cts = null;
+    }
+    
+    private CleanupPolicy DecideCleanupPolicy(CommandRunScope scope)
+    {
+        if (scope == null)
+            return CleanupPolicy.Cancel;
+
+        // Skip means "complete immediately".
+        // if (scope.IsSkipping)
+        //     return CleanupPolicy.Finish;
+
+        return CleanupPolicy.Finish;
+    }
+    
+    
+    private void Log(string msg)
+    {
+        if (!enableDebugLog) return;
+        Debug.Log($"[CommandExecutor] {msg}", this);
+    }
+}
