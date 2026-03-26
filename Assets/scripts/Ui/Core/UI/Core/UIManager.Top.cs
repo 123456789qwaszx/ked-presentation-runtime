@@ -3,17 +3,9 @@ using UnityEngine;
 
 public partial class UIManager
 {
-    public T ShowTop<T>(Action<T> cb = null)
+    public T ShowTop<T>(Action<T> afterPatched = null)
         where T : UIBase, IUITop
     {
-        return ShowTopPatched(cb);
-    }
-
-    public T ShowTopPatched<T>(Action<T> afterPatched = null)
-        where T : UIBase, IUITop
-    {
-        BumpShowVersion();
-
         if (!TryResolve("Top", out T top))
             return null;
 
@@ -33,16 +25,12 @@ public partial class UIManager
 
     public void HideTop<T>() where T : UIBase
     {
-        BumpShowVersion();
-
         T top = GetUI<T>();
         ApplyState(top, active: false, interactable: false, blocksRaycasts: false, alpha: 0f);
     }
 
     public void ClearTop()
     {
-        BumpShowVersion();
-
         if (_layerTop == null) return;
 
         for (int i = _layerTop.childCount - 1; i >= 0; i--)

@@ -2,18 +2,9 @@ using System;
 
 public partial class UIManager
 {
-    // 기본 API를 Patched로 승격 (누락 방지)
-    public T PushPanel<T>(Action<T> callback = null)
+    public T PushPanel<T>(Action<T> afterPatched = null)
         where T : UIBase, IUIPanel
     {
-        return PushPanelPatched(callback);
-    }
-
-    public T PushPanelPatched<T>(Action<T> afterPatched = null)
-        where T : UIBase, IUIPanel
-    {
-        BumpShowVersion();
-
         if (!TryResolve("Panel", out T panel))
             return null;
 
@@ -38,8 +29,6 @@ public partial class UIManager
 
     public void PopPanel()
     {
-        BumpShowVersion();
-
         if (_panelStack.Count == 0)
             return;
 
@@ -51,8 +40,6 @@ public partial class UIManager
 
     public void PopAllPanels()
     {
-        BumpShowVersion();
-
         while (_panelStack.Count > 0)
             PopPanel();
     }
@@ -71,8 +58,6 @@ public partial class UIManager
     // - Bring an existing panel to top by popping (and hiding) panels above it.
     private void PopUntil(UIBase target)
     {
-        BumpShowVersion();
-
         while (_panelStack.Count > 0 && _panelStack.Peek() != target)
         {
             UIBase popped = _panelStack.Pop();

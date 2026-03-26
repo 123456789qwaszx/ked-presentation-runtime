@@ -3,17 +3,9 @@ using UnityEngine;
 
 public partial class UIManager
 {
-    public T ShowOverlay<T>(Action<T> cb = null)
+    public T ShowOverlay<T>(Action<T> afterPatched = null)
         where T : UIBase, IUIOverlay
     {
-        return ShowOverlayPatched(cb);
-    }
-
-    public T ShowOverlayPatched<T>(Action<T> afterPatched = null)
-        where T : UIBase, IUIOverlay
-    {
-        BumpShowVersion();
-
         if (!TryResolve("Overlay", out T overlay))
             return null;
 
@@ -33,16 +25,12 @@ public partial class UIManager
 
     public void HideOverlay<T>() where T : UIBase
     {
-        BumpShowVersion();
-
         T overlay = GetUI<T>();
         ApplyState(overlay, active: false, interactable: false, blocksRaycasts: false, alpha: 0f);
     }
 
     public void ClearOverlay()
     {
-        BumpShowVersion();
-
         if (_layerOverlay == null) return;
 
         for (int i = _layerOverlay.childCount - 1; i >= 0; i--)

@@ -10,16 +10,15 @@ public static class UITypeCache<T>
 
 public partial class UIManager : MonoBehaviour
 {
+    #region Singleton
     public static UIManager Instance { get; private set; }
 
     [Header("Singleton")]
     [SerializeField] private bool _dontDestroyOnLoad = true;
     private void Awake()
     {
-        // Singleton guard
         if (Instance != null && Instance != this)
         {
-            // 중복 인스턴스 제거
             Destroy(gameObject);
             return;
         }
@@ -31,10 +30,8 @@ public partial class UIManager : MonoBehaviour
 
         Init();
     }
-
-    // ---- Patch pipeline (optional)
-    private int _showVersion; // late coroutine 방지용 토큰
-
+    #endregion
+    
     // ---- UI registry / stack
     private readonly Dictionary<Type, UIBase> _uiMap = new();
     private readonly Stack<UIBase> _panelStack = new();
@@ -51,6 +48,11 @@ public partial class UIManager : MonoBehaviour
     [SerializeField, Range(0f, 1f)] private float _coveredAlpha = 0f;
 
     public UIBase CurSceneRoot { get; private set; }
+
+    public void Start()
+    {
+        SwitchRoot<TitleUIRoot>();
+    }
 
     // ----------------------------
     // Initialize
@@ -124,11 +126,6 @@ public partial class UIManager : MonoBehaviour
 
         typed = (T)raw;
         return true;
-    }
-
-    private void BumpShowVersion()
-    {
-        unchecked { _showVersion++; }
     }
 
     private static void Mount(UIBase ui, Transform slot)
