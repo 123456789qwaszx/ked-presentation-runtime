@@ -106,8 +106,7 @@ public sealed class EpisodeSelectionPanel : UIBase<EpisodeSelectionPanel.Refs>, 
     #endregion
     
     [SerializeField] private EpisodeGraphView episodeGraphView;
-
-
+    
     private bool _valid;
 
     protected override void Initialize()

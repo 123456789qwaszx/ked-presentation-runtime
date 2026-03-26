@@ -1,6 +1,7 @@
 using System;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using static UIRefValidation;
 
@@ -192,6 +193,7 @@ public class DialogueUIRoot : UIRoot<DialogueUIRoot.Refs>
 
         CloseCanvasGroup(_quickMenuCg);
     }
+    
 
     private void CacheRefs()
     {
@@ -279,162 +281,64 @@ public class DialogueUIRoot : UIRoot<DialogueUIRoot.Refs>
 
     private void BindHandlers()
     {
-        // Auto
-        BindEvent(_autoHotKeyButton, _ => OnAutoPressed?.Invoke());
-
-        // StepNext
-        BindEvent(_stepNextButton, _ =>
-        {
-            // Expand 상태면: StepNext 대신 HUD 복귀
-            if (_isExpanded)
-            {
-                SetExpanded(false);
-                return;
-            }
-
-            OnStepNextPressed?.Invoke();
-        });
-
-        // Quick menu open/close
-        BindEvent(_quickMenuToggleButton, _ =>
-        {
-            // Expand 상태면 QuickMenu도 못 열게 막고 싶으면 여기서 return 처리 가능
-            OnQuickMenuPressed?.Invoke();
-            ToggleCanvasGroup(_quickMenuCg);
-        });
-
-        // Expand
-        BindEvent(_quickExpandButton, _ =>
-        {
-            // 내부에서 실제 토글 먼저
-            ToggleExpand();
-
-            // 외부에서 로그/사운드 이벤트용
-            OnExpandPressed?.Invoke();
-        });
-
-        // Log
-        BindEvent(_quickLogButton, _ => OnShowPreviousLogPressed?.Invoke());
-
-        // Speed
-        BindEvent(_quickSpeedButton, _ => OnSetSpeedupPressed?.Invoke());
-
-        // Skip
-        BindEvent(_skipButton, _ => OnSkipPressed?.Invoke());
+        BindEvent(_autoHotKeyButton, PressAutoButton);
+        BindEvent(_stepNextButton, PressStepNextButton);
+        BindEvent(_quickMenuToggleButton, PressQuickMenuToggleButton);
+        BindEvent(_quickExpandButton, PressExpandButton);
+        BindEvent(_quickLogButton, PressLogButton);
+        BindEvent(_quickSpeedButton, PressSpeedButton);
+        BindEvent(_skipButton, PressSkipButton);
     }
 
-    private static void ToggleCanvasGroup(CanvasGroup cg)
+    #region Handler
+    
+    private void PressAutoButton(PointerEventData _)
     {
-        if (!cg) return;
-
-        bool isOpen = cg.alpha > 0.5f;
-        if (isOpen) CloseCanvasGroup(cg);
-        else OpenCanvasGroup(cg);
+        OnAutoPressed?.Invoke();
     }
-
-    // Presenter(Yarn)가 사용할: kind에 해당하는 박스 뷰를 얻는다.
-    public IDialogueBoxView GetBox(DialogueBoxKind kind)
+    
+    private void PressStepNextButton(PointerEventData _)
     {
-        int slotIndex = (int)kind;
-        if (slotIndex < 0 || slotIndex >= _boxBySlot.Length) return null;
-        return _boxBySlot[slotIndex];
-    }
-
-    // kind에 해당하는 슬롯만 보이게 한다.
-    public void ShowBox(DialogueBoxKind kind)
-    {
-        HideAllBoxes();
-
-        int slotIndex = (int)kind;
-        if (slotIndex < 0 || slotIndex >= _slots.Length) return;
-
-        OpenCanvasGroup(_slots[slotIndex]);
-
-        var box = _boxBySlot[slotIndex];
-        if (box != null)
-            box.SetVisible(true);
-    }
-
-    public void HideAllBoxes()
-    {
-        for (int i = 0; i < _slots.Length; i++)
+        if (_isExpanded)
         {
-            CloseCanvasGroup(_slots[i]);
-
-            var box = _boxBySlot[i];
-            if (box != null)
-                box.SetVisible(false);
+            SetExpanded(false);
+            return;
         }
-    }
 
-    private static void OpenCanvasGroup(CanvasGroup cg)
-    {
-        if (!cg) return;
-        cg.alpha = 1f;
-        cg.interactable = true;
-        cg.blocksRaycasts = true;
-    }
-
-    private static void CloseCanvasGroup(CanvasGroup cg)
-    {
-        if (!cg) return;
-        cg.alpha = 0f;
-        cg.interactable = false;
-        cg.blocksRaycasts = false;
+        OnStepNextPressed?.Invoke();
     }
     
-    public void SetAutoModeActive(bool active)
+    private void PressQuickMenuToggleButton(PointerEventData _)
     {
-        // 예: 아이콘 알파/색/텍스트 변경
-        if (_autoIconImage) _autoIconImage.enabled = true;
-        if (_autoRoot) _autoRoot.gameObject.SetActive(true);
+        OnQuickMenuPressed?.Invoke();
 
-        // 최소: 버튼 interactable 또는 텍스트 표시
-        if (_autoHotKeyText) _autoHotKeyText.text = active ? "AUTO ON" : "AUTO";
-    }
-
-    public void SetSkipModeActive(bool active)
-    {
-        if (_skipText) _skipText.text = active ? "SKIP ON" : "SKIP";
-    }
-
-    public void SetBacklogOpen(bool open)
-    {
-        // 예: 로그 버튼 하이라이트
-        if (_quickLogHotkeyText) _quickLogHotkeyText.text = open ? "LOG (OPEN)" : "LOG";
+        bool isOpen = _quickMenuCg.alpha > 0.5f;
+        
+        if (isOpen) CloseCanvasGroup(_quickMenuCg);
+        else OpenCanvasGroup(_quickMenuCg);
     }
     
-    public void SetInputBlocked(bool blocked)
+    private void PressExpandButton(PointerEventData _)
     {
-        if (_stepNextButton) _stepNextButton.interactable = !blocked;
-        if (_skipButton) _skipButton.interactable = !blocked;
-        if (_autoHotKeyButton) _autoHotKeyButton.interactable = !blocked;
+        ToggleExpand();
+        OnExpandPressed?.Invoke();
+    }
+    private void PressLogButton(PointerEventData _)
+    {
+        OnShowPreviousLogPressed?.Invoke();
     }
     
-    public void ToggleExpand()
+    private void PressSpeedButton(PointerEventData _)
     {
-        SetExpanded(!_isExpanded);
+        OnSetSpeedupPressed?.Invoke();
     }
 
-    public void SetExpanded(bool expanded)
+    private void PressSkipButton(PointerEventData _)
     {
-        _isExpanded = expanded;
-
-        SetLayerVisible(_dialogueBoxLayerCg,  visible: !expanded);
-        SetLayerVisible(_toggleBottomRightCg, visible: !expanded);
-        SetLayerVisible(_toggleTopRightCg,    visible: !expanded);
-        SetLayerVisible(_toggleTopLeftCg,     visible: !expanded);
-
-        //CloseCanvasGroup(_quickMenuCg);
+        OnSkipPressed?.Invoke();
     }
-
-    private static void SetLayerVisible(CanvasGroup cg, bool visible)
-    {
-        if (!cg) return;
-        cg.alpha = visible ? 1f : 0f;
-        cg.interactable = visible;
-        cg.blocksRaycasts = visible;
-    }
+    
+    #endregion
     
     private bool ValidateRefs()
     {
@@ -540,5 +444,107 @@ public class DialogueUIRoot : UIRoot<DialogueUIRoot.Refs>
     {
         if (acc.Length > 0) acc += "\n";
         acc += line;
+    }
+    
+    
+    // Presenter(Yarn)가 사용할: kind에 해당하는 박스 뷰를 얻는다.
+    public IDialogueBoxView GetBox(DialogueBoxKind kind)
+    {
+        int slotIndex = (int)kind;
+        if (slotIndex < 0 || slotIndex >= _boxBySlot.Length) return null;
+        return _boxBySlot[slotIndex];
+    }
+
+    // kind에 해당하는 슬롯만 보이게 한다.
+    public void ShowBox(DialogueBoxKind kind)
+    {
+        HideAllBoxes();
+
+        int slotIndex = (int)kind;
+        if (slotIndex < 0 || slotIndex >= _slots.Length) return;
+
+        OpenCanvasGroup(_slots[slotIndex]);
+
+        var box = _boxBySlot[slotIndex];
+        if (box != null)
+            box.SetVisible(true);
+    }
+
+    public void HideAllBoxes()
+    {
+        for (int i = 0; i < _slots.Length; i++)
+        {
+            CloseCanvasGroup(_slots[i]);
+
+            var box = _boxBySlot[i];
+            if (box != null)
+                box.SetVisible(false);
+        }
+    }
+
+    private static void OpenCanvasGroup(CanvasGroup cg)
+    {
+        if (!cg) return;
+        cg.alpha = 1f;
+        cg.interactable = true;
+        cg.blocksRaycasts = true;
+    }
+
+    private static void CloseCanvasGroup(CanvasGroup cg)
+    {
+        if (!cg) return;
+        cg.alpha = 0f;
+        cg.interactable = false;
+        cg.blocksRaycasts = false;
+    }
+    
+    public void SetAutoModeActive(bool active)
+    {
+        if (_autoIconImage) _autoIconImage.enabled = true;
+        if (_autoRoot) _autoRoot.gameObject.SetActive(true);
+
+        if (_autoHotKeyText) _autoHotKeyText.text = active ? "AUTO ON" : "AUTO";
+    }
+
+    public void SetSkipModeActive(bool active)
+    {
+        if (_skipText) _skipText.text = active ? "SKIP ON" : "SKIP";
+    }
+
+    public void SetBacklogOpen(bool open)
+    {
+        if (_quickLogHotkeyText) _quickLogHotkeyText.text = open ? "LOG (OPEN)" : "LOG";
+    }
+    
+    public void SetInputBlocked(bool blocked)
+    {
+        if (_stepNextButton) _stepNextButton.interactable = !blocked;
+        if (_skipButton) _skipButton.interactable = !blocked;
+        if (_autoHotKeyButton) _autoHotKeyButton.interactable = !blocked;
+    }
+    
+    public void ToggleExpand()
+    {
+        SetExpanded(!_isExpanded);
+    }
+
+    public void SetExpanded(bool expanded)
+    {
+        _isExpanded = expanded;
+
+        SetLayerVisible(_dialogueBoxLayerCg,  visible: !expanded);
+        SetLayerVisible(_toggleBottomRightCg, visible: !expanded);
+        SetLayerVisible(_toggleTopRightCg,    visible: !expanded);
+        SetLayerVisible(_toggleTopLeftCg,     visible: !expanded);
+
+        //CloseCanvasGroup(_quickMenuCg);
+    }
+
+    private static void SetLayerVisible(CanvasGroup cg, bool visible)
+    {
+        if (!cg) return;
+        cg.alpha = visible ? 1f : 0f;
+        cg.interactable = visible;
+        cg.blocksRaycasts = visible;
     }
 }
