@@ -6,11 +6,15 @@ public sealed class VnScreenBindings : IDisposable
 {
     private readonly UIBindingContext _ctx = new();
     private static UIManager UI => UIManager.Instance;
+    
+    private EpisodeFlowController _episodeFlowController;
 
     private UIBase _boundRoot;
-    
-    public VnScreenBindings()
-    { }
+
+    public VnScreenBindings(EpisodeFlowController episodeFlowController)
+    {
+        _episodeFlowController = episodeFlowController;
+    }
     
     #region Title
     public void GoToTitle()
@@ -58,7 +62,9 @@ public sealed class VnScreenBindings : IDisposable
     { }
 
     private void OpenStorySelectFlow()
-    { }
+    {
+        _episodeFlowController.OpenSelectChapterPanel();
+    }
     
     #endregion
     

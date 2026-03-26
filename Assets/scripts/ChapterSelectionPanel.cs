@@ -138,13 +138,13 @@ public sealed class ChapterSelectionPanel : UIPanel<ChapterSelectionPanel.Refs>
                 _slotChapterIds[i] = m.ChapterId;
 
                 card.Present(m);
-                card.SetSelected(m.ChapterId == _selectedChapterId);
+                //card.SetSelected(m.ChapterId == _selectedChapterId);
             }
             else
             {
                 _slotChapterIds[i] = -1;
                 card.Present(ChapterButtonCardModel.Empty());
-                card.SetSelected(false);
+                //card.SetSelected(false);
             }
         }
     }
@@ -159,7 +159,7 @@ public sealed class ChapterSelectionPanel : UIPanel<ChapterSelectionPanel.Refs>
             if (card == null) continue;
 
             // 인덱스(i+1) 비교 금지. 실제 chapterId로 비교
-            card.SetSelected(_slotChapterIds[i] == chapterId);
+            //card.SetSelected(_slotChapterIds[i] == chapterId);
         }
     }
     

@@ -160,8 +160,9 @@ public sealed class ChapterButtonCard : UIBase<ChapterButtonCard.Refs>
         if (_episodeHeadingLabelImage != null && m.EpisodeHeadingLabelSprite != null) _episodeHeadingLabelImage.sprite = m.EpisodeHeadingLabelSprite;
         if (_titleIconImage != null && m.TitleIcon != null)                           _titleIconImage.sprite           = m.TitleIcon;
 
-        SetInteractable(m.Interactable && !m.Locked);
-        SetLocked(m.Locked);
+        SetInteractable(true);
+        //SetInteractable(m.Interactable && !m.Locked);
+        //SetLocked(m.Locked);
     }
 
     public void SetSelected(bool selected)

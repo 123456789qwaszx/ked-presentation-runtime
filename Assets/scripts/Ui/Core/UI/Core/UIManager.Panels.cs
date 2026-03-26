@@ -18,6 +18,9 @@ public partial class UIManager
         else
             _panelStack.Push(panel);
 
+        ApplyPanelStackState();
+        afterPatched?.Invoke(panel);
+        
         // InvokeAfterPatch(panel, () =>
         // {
         //     ApplyPanelStackState(); // Top/coveredAlpha 정책 포함
