@@ -49,11 +49,6 @@ public partial class UIManager : MonoBehaviour
 
     public UIBase CurSceneRoot { get; private set; }
 
-    public void Start()
-    {
-        SwitchRoot<TitleUIRoot>();
-    }
-
     // ----------------------------
     // Initialize
     // ----------------------------
