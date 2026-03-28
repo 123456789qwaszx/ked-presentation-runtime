@@ -1,15 +1,10 @@
 using System.Collections;
 using UnityEngine;
 
-public interface IInlineSignalHost
+public sealed class PresentationSessionBridge : VnRuntimeBridge.ICpsSignalBridge, InlineEventMarkupHandler.IInlineSignalHost
 {
-    void RaiseSignal(string key);
-}
-
-public sealed class PresentationSessionBridge : VnRuntimeBridge.ICpsSignalBridge, IInlineSignalHost
-{
-    private readonly UnitySignalBus _unitySignalBus;
     private readonly PresentationSession _session;
+    private readonly UnitySignalBus _unitySignalBus;
     
     public PresentationSessionBridge(PresentationSession session,
         UnitySignalBus unitySignalBus)
@@ -17,18 +12,6 @@ public sealed class PresentationSessionBridge : VnRuntimeBridge.ICpsSignalBridge
         _session = session;
         _unitySignalBus = unitySignalBus;
     }
-    
-    // private void Update()
-    // {
-    //     if (Session != null)
-    //         Session.Tick();
-    //
-    //     if (Input.GetKeyDown(KeyCode.Space))
-    //     {
-    //         _unityInputSource.PulseAdvancePressed();
-    //     }
-    // }
-    
     
     public IEnumerator Beat(string beatKey)
     {

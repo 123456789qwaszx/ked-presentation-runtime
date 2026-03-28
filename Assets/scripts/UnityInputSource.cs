@@ -17,16 +17,6 @@ public sealed class UnityInputSource : IInputSource
     {
         _enableDebugLog = enableDebugLog;
     }
-    
-    // ===== IInputSource: consumed by CPS StepGateAdvancer =====
-    
-    public void PulseAdvancePressed()
-    {
-        _pulseFrame = Time.frameCount;
-
-        if (_enableDebugLog)
-            Debug.Log($"[UnityInputSource] PulseAdvancePressed (frame={_pulseFrame})");
-    }
 
     public bool ConsumeAdvancePressed()
     {

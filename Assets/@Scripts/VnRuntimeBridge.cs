@@ -12,12 +12,12 @@ public sealed class VnRuntimeBridge
     
 
     private readonly DialogueRunner _runner;
-    private readonly PresentationRouteEntry _cpsRouteEntry;
+    private readonly PresentationSessionEntry _cpsRouteEntry;
     private readonly ICpsSignalBridge _cpsSignalBridge;
     
     public VnRuntimeBridge(
         DialogueRunner runner,
-        PresentationRouteEntry cpsRouteEntry,
+        PresentationSessionEntry cpsRouteEntry,
         ICpsSignalBridge cpsSignalBridge)
     {
         _runner = runner;

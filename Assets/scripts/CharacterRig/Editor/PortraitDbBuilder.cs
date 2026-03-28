@@ -10,10 +10,10 @@ public static class PortraitDbBuilder
 {
     private const string DefaultSettingsPath = "Assets/Settings/PortraitBuildSettings.asset";
 
-    [MenuItem("Tools/CPS/Portraits/Build Generated DB")]
+    [MenuItem("Tools/CPS/Portraits/Build Generated Db")]
     public static void Build() => BuildInternal(false);
 
-    [MenuItem("Tools/CPS/Portraits/Build Generated DB (Strict)")]
+    [MenuItem("Tools/CPS/Portraits/Build Generated Db (Strict)")]
     public static void BuildStrict() => BuildInternal(true);
 
     private static void BuildInternal(bool forceStrict)
@@ -23,17 +23,17 @@ public static class PortraitDbBuilder
 
         EnsureFolder(Path.GetDirectoryName(settings.generatedDbPath));
 
-        var db = AssetDatabase.LoadAssetAtPath<PortraitGeneratedDBSO>(settings.generatedDbPath);
+        var db = AssetDatabase.LoadAssetAtPath<PortraitGeneratedDbSo>(settings.generatedDbPath);
         if (!db)
         {
-            db = ScriptableObject.CreateInstance<PortraitGeneratedDBSO>();
+            db = ScriptableObject.CreateInstance<PortraitGeneratedDbSo>();
             AssetDatabase.CreateAsset(db, settings.generatedDbPath);
         }
 
         var report = new List<string>();
         var entries = ScanPortraits(settings, report);
 
-        Undo.RecordObject(db, "Build Portrait Generated DB");
+        Undo.RecordObject(db, "Build Portrait Generated Db");
         db.entries = entries;
         db.generatedTicksUtc = DateTime.UtcNow.Ticks;
         db.generatedTimeReadable = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
@@ -46,7 +46,7 @@ public static class PortraitDbBuilder
         if (strictMode && HasErrors(report))
         {
             Debug.LogError(reportText, db);
-            throw new Exception("Portrait DB build failed (strict mode). See console for details.");
+            throw new Exception("Portrait Db build failed (strict mode). See console for details.");
         }
         else
         {
@@ -59,9 +59,9 @@ public static class PortraitDbBuilder
         PortraitEditorCache.Rebuild(db);
     }
 
-    private static List<PortraitGeneratedDBSO.Entry> ScanPortraits(PortraitBuildSettings settings, List<string> report)
+    private static List<PortraitGeneratedDbSo.Entry> ScanPortraits(PortraitBuildSettings settings, List<string> report)
     {
-        var list = new List<PortraitGeneratedDBSO.Entry>();
+        var list = new List<PortraitGeneratedDbSo.Entry>();
         var seen = new HashSet<string>(StringComparer.Ordinal);
 
         var validRoots = new List<string>();
@@ -164,7 +164,7 @@ public static class PortraitDbBuilder
                 return;
             }
 
-            list.Add(new PortraitGeneratedDBSO.Entry
+            list.Add(new PortraitGeneratedDbSo.Entry
             {
                 characterId = cid,
                 variantKey  = variant,
@@ -268,17 +268,17 @@ public static class PortraitDbBuilder
         return (variantFromFile ?? "").Trim();
     }
 
-    private static string BuildReportText(PortraitGeneratedDBSO db, List<string> report, bool strictMode)
+    private static string BuildReportText(PortraitGeneratedDbSo db, List<string> report, bool strictMode)
     {
         var head =
-            $"[PortraitDB] Build complete ({(strictMode ? "STRICT" : "NORMAL")} mode)\n" +
+            $"[PortraitDb] Build complete ({(strictMode ? "STRICT" : "NORMAL")} mode)\n" +
             $"  Entries: {db.TotalEntries}\n" +
             $"  Characters: {db.TotalCharacters}\n" +
             $"  Variants: {db.TotalVariants}\n" +
             $"  Unique Emotions: {db.TotalUniqueEmotions}\n" +
             $"  Generated: {db.generatedTimeReadable}\n";
 
-        if (report.Count == 0) return head + "✅ No warnings/errors.";
+        if (report.Count == 0) return head + "No warnings/errors.";
 
         return head + "\n" + string.Join("\n", report);
     }
@@ -331,7 +331,7 @@ public static class PortraitDbBuilder
             PortraitBuildSettings settings = AssetDatabase.LoadAssetAtPath<PortraitBuildSettings>(DefaultSettingsPath);
             if (settings != null && !string.IsNullOrEmpty(settings.generatedDbPath))
             {
-                PortraitGeneratedDBSO db = AssetDatabase.LoadAssetAtPath<PortraitGeneratedDBSO>(settings.generatedDbPath);
+                PortraitGeneratedDbSo db = AssetDatabase.LoadAssetAtPath<PortraitGeneratedDbSo>(settings.generatedDbPath);
                 if (db != null)
                 {
                     PortraitEditorCache.Rebuild(db);
@@ -340,11 +340,11 @@ public static class PortraitDbBuilder
             }
 
             // 2) fallback: 프로젝트에서 첫 번째 DB를 찾기 (설정이 없거나 경로가 틀린 경우)
-            var guid = AssetDatabase.FindAssets("t:PortraitGeneratedDBSO").FirstOrDefault();
+            var guid = AssetDatabase.FindAssets("t:PortraitGeneratedDbSo").FirstOrDefault();
             if (!string.IsNullOrEmpty(guid))
             {
                 var path = AssetDatabase.GUIDToAssetPath(guid);
-                var db = AssetDatabase.LoadAssetAtPath<PortraitGeneratedDBSO>(path);
+                var db = AssetDatabase.LoadAssetAtPath<PortraitGeneratedDbSo>(path);
                 if (db != null)
                     PortraitEditorCache.Rebuild(db);
             }

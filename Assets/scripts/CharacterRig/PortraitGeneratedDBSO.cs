@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-[CreateAssetMenu(menuName = "CPS/Portraits/Generated DB", fileName = "PortraitGeneratedDB")]
-public sealed class PortraitGeneratedDBSO : ScriptableObject
+[CreateAssetMenu(menuName = "CPS/Portraits/Generated Db", fileName = "PortraitGeneratedDb")]
+public sealed class PortraitGeneratedDbSo : ScriptableObject
 {
     [Serializable]
     public struct Entry
@@ -65,7 +65,7 @@ public sealed class PortraitGeneratedDBSO : ScriptableObject
     private void PrintStats()
     {
         Debug.Log(
-            $"[PortraitDB Stats]\n" +
+            $"[PortraitDb Stats]\n" +
             $"  Entries: {TotalEntries}\n" +
             $"  Characters: {TotalCharacters}\n" +
             $"  Variants: {TotalVariants}\n" +
@@ -80,12 +80,12 @@ public sealed class PortraitGeneratedDBSO : ScriptableObject
     {
         if (entries == null || entries.Count == 0)
         {
-            Debug.Log("DB is empty.", this);
+            Debug.Log("Db is empty.", this);
             return;
         }
 
         var chars = entries.Select(e => e.characterId).Distinct().OrderBy(c => c).ToList();
-        Debug.Log($"[PortraitDB] Characters ({chars.Count}):\n  " + string.Join(", ", chars), this);
+        Debug.Log($"[PortraitDb] Characters ({chars.Count}):\n  " + string.Join(", ", chars), this);
     }
 
     [ContextMenu("Find Missing Sprites")]
@@ -93,7 +93,7 @@ public sealed class PortraitGeneratedDBSO : ScriptableObject
     {
         if (entries == null || entries.Count == 0)
         {
-            Debug.Log("DB is empty.", this);
+            Debug.Log("Db is empty.", this);
             return;
         }
 
@@ -105,7 +105,7 @@ public sealed class PortraitGeneratedDBSO : ScriptableObject
         }
 
         Debug.LogWarning(
-            $"[PortraitDB] {missing.Count} missing sprites:\n" +
+            $"[PortraitDb] {missing.Count} missing sprites:\n" +
             string.Join("\n", missing.Select(e => $"  {e}")),
             this
         );
@@ -116,7 +116,7 @@ public sealed class PortraitGeneratedDBSO : ScriptableObject
     {
         if (entries == null || entries.Count == 0)
         {
-            Debug.Log("DB is empty.", this);
+            Debug.Log("Db is empty.", this);
             return;
         }
 
@@ -137,7 +137,7 @@ public sealed class PortraitGeneratedDBSO : ScriptableObject
         }
 
         Debug.LogWarning(
-            $"[PortraitDB] {duplicates.Count} duplicates:\n" +
+            $"[PortraitDb] {duplicates.Count} duplicates:\n" +
             string.Join("\n", duplicates.Select(e => $"  {e}")),
             this
         );

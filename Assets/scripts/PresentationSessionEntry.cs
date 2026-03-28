@@ -1,0 +1,32 @@
+using UnityEngine;
+using UnityEngine.Serialization;
+
+public sealed class PresentationSessionEntry : MonoBehaviour
+{
+    public PresentationSession PresentationSession { get; private set; }
+    public RouteCatalogSO routeCatalog;
+    public PlaybackSettings playbackSettings;
+
+    public void Initialize(PresentationSession presentationSession, RouteCatalogSO routeCatalogSo, PlaybackSettings settings)
+    {
+        PresentationSession = presentationSession;
+        routeCatalog = routeCatalogSo;
+        playbackSettings = settings;
+    }
+    
+    public void StartRoute(string routeKey)
+    {
+        if (!routeCatalog.TryResolve(routeKey, out Route route, out SequenceSpecSO sequence))
+        {
+            Debug.LogWarning($"[CpsRouteEntry] Failed to resolve routeKey='{routeKey}'");
+            return;
+        }
+
+        PresentationSession.Start(route, sequence);
+    }
+
+    public void RequestEnd()
+    {
+        PresentationSession.RequestEnd();
+    }
+}

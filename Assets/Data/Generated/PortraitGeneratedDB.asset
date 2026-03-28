@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ba5599f350ee0eb4da73ea693b4bd57c, type: 3}
   m_Name: PortraitGeneratedDB
-  m_EditorClassIdentifier: Assembly-CSharp::PortraitGeneratedDBSO
+  m_EditorClassIdentifier: Assembly-CSharp::PortraitGeneratedDbSo
   entries:
   - characterId: kuonji
     variantKey: kuonji_a
@@ -23,5 +23,5 @@ MonoBehaviour:
     emotionKey: 01
     sprite: {fileID: 21300000, guid: f0006a933c433794787fa34a377bd1b4, type: 3}
     assetPath: Assets/Art/Portraits/NPC/momoka/momoka_a_01.png
-  generatedTicksUtc: 639102935279857467
-  generatedTimeReadable: 2026-03-28 20:18:47
+  generatedTicksUtc: 639103038753225387
+  generatedTimeReadable: 2026-03-28 23:11:15

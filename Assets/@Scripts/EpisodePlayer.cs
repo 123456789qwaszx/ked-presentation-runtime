@@ -6,7 +6,7 @@ public sealed class EpisodePlayer : MonoBehaviour
 {
     public DialogueRunner dialogueRunner;
     [SerializeField] private YarnUIBridge yarnUIBridge;
-    [SerializeField] private PresentationRouteEntry presentationRouteEntry;
+    [SerializeField] private PresentationSessionEntry presentationRouteEntry;
     
     [SerializeField] public string yarnEntryKey;
     [SerializeField] public string presentationEntryKey;

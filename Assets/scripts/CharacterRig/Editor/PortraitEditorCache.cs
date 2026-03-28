@@ -6,11 +6,11 @@ using UnityEngine;
 
 public static class PortraitEditorCache
 {
-    private static PortraitGeneratedDBSO _db;
+    private static PortraitGeneratedDbSo _db;
     private static Dictionary<string, HashSet<string>> _variantsByChar;
     private static Dictionary<(string, string), HashSet<string>> _emotionsByCharVariant;
 
-    public static void Rebuild(PortraitGeneratedDBSO db)
+    public static void Rebuild(PortraitGeneratedDbSo db)
     {
         _db = db;
         _variantsByChar = new();

@@ -6,10 +6,10 @@ public sealed class PortraitResolver
 {
     private readonly Dictionary<(string characterId, char variantSuffix, string emotionKey), Sprite> _map = new();
 
-    public PortraitResolver(PortraitGeneratedDBSO db)
+    public PortraitResolver(PortraitGeneratedDbSo db)
     {
         if (db == null) throw new ArgumentNullException(nameof(db));
-        if (db.entries == null) throw new InvalidOperationException("PortraitGeneratedDBSO.entries is null.");
+        if (db.entries == null) throw new InvalidOperationException("PortraitGeneratedDbSs.entries is null.");
 
         var entries = db.entries;
         for (int i = 0; i < entries.Count; i++)
