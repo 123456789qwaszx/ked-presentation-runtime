@@ -5,27 +5,24 @@ public interface IRouteLauncher
     void StartRoute(string entryKey);
 }
 
-public sealed class CpsRouteEntry : MonoBehaviour, IRouteLauncher
+public sealed class PresentationRouteEntry : MonoBehaviour, IRouteLauncher
 {
-    [SerializeField] private RouteCatalogSO routeCatalog = null!;
-    [SerializeField] private CpsSessionBootstrap cps = null!;
+    [SerializeField] private RouteCatalogSO routeCatalog;
+    [SerializeField] private VnAppBootstrap vnAppBootstrap;
 
     public void StartRoute(string routeKey)
     {
-        //Debug.Log($"Starting route {routeKey}");
         if (routeCatalog == null)
         {
             Debug.LogError("[CpsRouteEntry] RouteCatalog is not assigned.");
             return;
         }
 
-        if (cps == null)
+        if (vnAppBootstrap == null)
         {
             Debug.LogError("[CpsRouteEntry] CpsSessionBootstrap is not assigned.");
             return;
         }
-
-        cps.Initialize();
 
         if (!routeCatalog.TryResolve(routeKey, out Route route, out SequenceSpecSO sequence))
         {
@@ -33,12 +30,12 @@ public sealed class CpsRouteEntry : MonoBehaviour, IRouteLauncher
             return;
         }
 
-        cps.Session.Start(route, sequence);
+        vnAppBootstrap.Session.Start(route, sequence);
     }
 
     public void RequestEnd()
     {
-        if (cps?.Session == null) return;
-        cps.Session.RequestEnd();
+        if (vnAppBootstrap?.Session == null) return;
+        vnAppBootstrap.Session.RequestEnd();
     }
 }

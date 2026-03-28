@@ -15,13 +15,13 @@ public sealed class VnRuntimeBridge
 
     // 추가: 강제 종료를 위해 (둘 다 MonoBehaviour면 SerializeField로 넣어도 되고, 생성자 주입도 OK)
     private readonly DialogueRunner _runner;
-    private readonly CpsRouteEntry _cpsRouteEntry;
+    private readonly PresentationRouteEntry _cpsRouteEntry;
 
 
     public VnRuntimeBridge(
         ICpsSignalBridge cps,
         DialogueRunner runner,
-        CpsRouteEntry cpsRouteEntry)
+        PresentationRouteEntry cpsRouteEntry)
     {
         _cps = cps;
         _runner = runner;

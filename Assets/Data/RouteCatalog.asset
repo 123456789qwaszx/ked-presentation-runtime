@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: RouteCatalog
   m_EditorClassIdentifier: Assembly-CSharp::RouteCatalogSO
   routes:
-  - routeKey: a
+  - routeKey: seq1
     sequenceCatalog: {fileID: 11400000, guid: f5c84b12e7c8a2140a5cecd428a8d63a, type: 2}
     startKey: seq1
   fallbackRouteKey: Default

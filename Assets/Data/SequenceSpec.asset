@@ -21,13 +21,21 @@ MonoBehaviour:
         interaction:
         - rid: 305542826026074172
         - rid: 305542826026074173
-        setup: []
-        motion: []
+        setup:
+        - rid: 305542826026074174
+        - rid: 305542826026074175
+        motion:
+        - rid: 305542826026074176
+        - rid: 305542826026074177
         dialogue: []
         fx: []
       compiled:
       - rid: 305542826026074172
       - rid: 305542826026074173
+      - rid: 305542826026074174
+      - rid: 305542826026074175
+      - rid: 305542826026074176
+      - rid: 305542826026074177
       gate:
         type: 1
         seconds: 0
@@ -45,7 +53,7 @@ MonoBehaviour:
           blockingHint: 0
           infiniteHint: 0
           durationHint: 0
-        rigPrefab: {fileID: 0}
+        rigPrefab: {fileID: 8529412948266249186, guid: 01c9b93a77829ef438fc74c4ef4c5004, type: 3}
         parentSlot: 0
         rigRootName: CharacterRig
         autoRolePrefixFromRoleKey: 1
@@ -69,3 +77,70 @@ MonoBehaviour:
         target: 7
         sizingMode: 1
         horizontalAlign: 1
+    - rid: 305542826026074174
+      type: {class: SetOriginSizeCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: momoka
+        _meta:
+          track: 10
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 3
+        toScale: {x: 2, y: 2}
+        toAngle: 0
+        anchorMin: {x: 0, y: 0}
+        anchorMax: {x: 1, y: 1}
+    - rid: 305542826026074175
+      type: {class: SetAnchorCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: momoka
+        _meta:
+          track: 10
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 0
+        preset: 1
+        baseRatioX: 0.5
+        globalTuning: {fileID: 0}
+        roleTuningDb: {fileID: 0}
+        poseKey: 
+        offset: {x: -480, y: -400}
+        overrideAnchoredPosition: 0
+        anchoredPositionOverride: {x: 0, y: 0}
+    - rid: 305542826026074176
+      type: {class: FadeInCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: momoka
+        _meta:
+          track: 20
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        targetMask: 1
+        duration: 2
+        ease: 9
+        EnableInteraction: 1
+        wait: 0
+    - rid: 305542826026074177
+      type: {class: TapEaseCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: momoka
+        _meta:
+          track: 20
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 1
+        strength: 20
+        duration: 2.6
+        taps: 30
+        damping: 70
+        timeEase: 10
+        prep: 1.5
+        wait: 1

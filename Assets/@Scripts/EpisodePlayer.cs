@@ -6,8 +6,10 @@ public sealed class EpisodePlayer : MonoBehaviour
 {
     public DialogueRunner dialogueRunner;
     [SerializeField] private YarnUIBridge yarnUIBridge;
+    [SerializeField] private PresentationRouteEntry presentationRouteEntry;
     
     [SerializeField] public string yarnEntryKey;
+    [SerializeField] public string presentationEntryKey;
     
     [Tooltip("Yarn 실행")]
     [SerializeField] private KeyCode runYarnKey = KeyCode.Alpha2;
@@ -21,19 +23,28 @@ public sealed class EpisodePlayer : MonoBehaviour
         if (Input.GetKeyDown(runYarnKey))
         {
             Debug.Log("TryStartYarnNode", this);
-            TryStartYarnNode(yarnEntryKey);
+            OpenDialogueUI();
+            StartPresentationRoute(presentationEntryKey);
+            StartYarnNode(yarnEntryKey);
         }
         
         if (Input.GetKeyDown(stopKey))
             StopDialogue();
     }
-    
-    public void TryStartYarnNode(string episodeId)
+
+    public void OpenDialogueUI()
     {
         UIManager.Instance.SwitchRoot<DialogueUIRoot>();
-        
+    }
+
+    public void StartPresentationRoute(string routeKey)
+    {
+        presentationRouteEntry.StartRoute(routeKey);
+    }
+    
+    public void StartYarnNode(string episodeId)
+    {
         yarnUIBridge.HasCharNameBox();
-        
         dialogueRunner.StartDialogue(episodeId);
     }
     
