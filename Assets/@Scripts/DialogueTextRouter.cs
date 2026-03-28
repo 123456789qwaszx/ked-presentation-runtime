@@ -1,0 +1,30 @@
+using TMPro;
+
+public interface IDialogueBoxView
+{
+    TMP_Text LineText { get; }
+    TMP_Text NameText { get; }
+    bool HasName { get; }
+
+    void SetVisible(bool visible);
+}
+
+public sealed class DialogueTextRouter
+{
+    public TMP_Text LineText { get; private set; }
+    public TMP_Text NameText { get; private set; }
+    public bool HasName => NameText != null;
+
+
+    public void Bind(IDialogueBoxView box)
+    {
+        LineText = box.LineText;
+        NameText = box.NameText;
+    }
+
+    public void Clear()
+    {
+        LineText = null;
+        NameText = null;
+    }
+}

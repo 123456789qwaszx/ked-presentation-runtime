@@ -6,15 +6,6 @@ using UnityEngine.UI;
 using static UIRefValidation;
 
 
-public interface IDialogueBoxView
-{
-    TMP_Text LineText { get; }
-    TMP_Text NameText { get; }
-    bool HasName { get; }
-
-    void SetVisible(bool visible);
-}
-
 public class DialogueUIRoot : UIRoot<DialogueUIRoot.Refs>
 {
     public event Action OnSkipPressed;
