@@ -58,17 +58,17 @@ public sealed class CpsSessionBootstrap : MonoBehaviour, ICpsSignalBridge, IInli
         StepGateAdvancer gateAdvancer = new (_inputSource, time, signals, latch);
         _gateAdvancer = gateAdvancer;
         
-        CharRigSlotResolver charRigSlotResolver = new(
-            UIManager.Instance.GetUI<DialogueUIRoot>(),
-            UIManager.Instance.GetUI<DialogueBox00_WithPortrait>()
-            );
+        CharRigSlotResolver charRigSlotResolver = new();
+        charRigSlotResolver.Initialize(
+                UIManager.Instance.GetUI<DialogueUIRoot>(),
+                 UIManager.Instance.GetUI<DialogueBox00_WithPortrait>());
         PortraitResolver portraitResolver = new (portraitRefsSo);
         
         CharacterRigAccess charRigAccess = new(charRigSlotResolver);
         SignalCommandFactory signalFactory = new(time, signals, latch);
         CharRigCommandFactory charRigFactory = new(charRigAccess, portraitResolver);
 
-        commandExecutor.InitializeCore(signalFactory, charRigFactory);
+        commandExecutor.Initialize(signalFactory, charRigFactory);
 
 
         Session = new PresentationSession(gatePlanner, gateAdvancer, commandExecutor, settings);

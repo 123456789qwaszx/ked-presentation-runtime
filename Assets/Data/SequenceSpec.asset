@@ -1,0 +1,71 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 77efca1a7ac39ca499c3be8e21666640, type: 3}
+  m_Name: SequenceSpec
+  m_EditorClassIdentifier: Assembly-CSharp::SequenceSpecSO
+  sequenceKey: seq1
+  nodes:
+  - editorName: 
+    steps:
+    - editorName: 
+      tracks:
+        interaction:
+        - rid: 305542826026074172
+        - rid: 305542826026074173
+        setup: []
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 305542826026074172
+      - rid: 305542826026074173
+      gate:
+        type: 1
+        seconds: 0
+        signalKey: 
+  references:
+    version: 2
+    RefIds:
+    - rid: 305542826026074172
+      type: {class: SetCharRigCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: momoka
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        rigPrefab: {fileID: 0}
+        parentSlot: 0
+        rigRootName: CharacterRig
+        autoRolePrefixFromRoleKey: 1
+        addRolePrefix: 1
+        destroyExistingRigWithSameName: 1
+        strict: 1
+    - rid: 305542826026074173
+      type: {class: SetPortraitSpriteCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: momoka
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        portrait:
+          character: momoka
+          emotion: 1
+          variant: a
+        target: 7
+        sizingMode: 1
+        horizontalAlign: 1

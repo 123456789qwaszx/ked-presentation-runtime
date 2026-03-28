@@ -3,18 +3,26 @@ using UnityEngine;
 
 public sealed class CharRigSlotResolver : ICharRigSlotResolver
 {
-    private readonly DialogueUIRoot _dialogueUIRoot;
-    private readonly DialogueBox00_WithPortrait _withPortraitBox;
-    
+    private DialogueUIRoot _dialogueUIRoot;
+    private DialogueBox00_WithPortrait _withPortraitBox;
 
-    public CharRigSlotResolver(DialogueUIRoot ui, DialogueBox00_WithPortrait withPortraitBox)
+    private bool _init;
+    public void Initialize(DialogueUIRoot ui, DialogueBox00_WithPortrait withPortraitBox)
     {
+        if (_init)
+            return;
+        
         _dialogueUIRoot = ui;
         _withPortraitBox = withPortraitBox;
+        
+        _init = true;
     }
 
     public RectTransform Resolve(CharRigSlot slot, bool strict)
     {
+        if (!_init)
+            Initialize(UIManager.Instance.GetUI<DialogueUIRoot>(), UIManager.Instance.GetUI<DialogueBox00_WithPortrait>());
+        
         RectTransform rt = slot switch
         {
             CharRigSlot.CharacterStageSlot00 => _dialogueUIRoot.CharRigSlot,

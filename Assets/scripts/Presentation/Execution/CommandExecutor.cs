@@ -23,19 +23,17 @@ public sealed class CommandExecutor : MonoBehaviour
     private int _runId;
     private bool _isStopInProgress;
     
-    private bool _coreInitialized;
-    private bool _dialogueFactoryAttached;
+    private bool _initialized;
 
-    public bool IsInitialized => _coreInitialized && _dialogueFactoryAttached;
 
-    public void InitializeCore(
+    public void Initialize(
         INodeCommandFactory signalCommandFactory,
         INodeCommandFactory charRigCommandFactory)
     {
         _sequencePlayer = new SequencePlayer(this);
         _signalCommandFactory = signalCommandFactory;
         _charRigCommandFactory = charRigCommandFactory;
-        _coreInitialized = true;
+        _initialized = true;
     }
 
     private void OnDisable() => Stop(CleanupPolicy.Cancel);
@@ -44,7 +42,7 @@ public sealed class CommandExecutor : MonoBehaviour
     
     public void PlayStep(NodeSpec node, int stepIndex, CommandRunScope scope)
     {
-        if (!IsInitialized) return;
+        if (!_initialized) return;
         if (node == null || scope == null) return;
 
         _activeScope = scope;
@@ -70,6 +68,7 @@ public sealed class CommandExecutor : MonoBehaviour
     
     private IEnumerator RunNode(List<ISequenceCommand> commands, CommandRunScope scope, int runId)
     {
+        
         if (runId != _runId)
         {
             Log($"RunNode exited early: stale runId={runId}, current={_runId}");

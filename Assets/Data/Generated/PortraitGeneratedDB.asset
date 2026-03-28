@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba5599f350ee0eb4da73ea693b4bd57c, type: 3}
+  m_Name: PortraitGeneratedDB
+  m_EditorClassIdentifier: Assembly-CSharp::PortraitGeneratedDBSO
+  entries:
+  - characterId: kuonji
+    variantKey: kuonji_a
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: 5400a22ba5aa20042897f8eff80d6cfa, type: 3}
+    assetPath: Assets/Art/Portraits/NPC/kuonji/kuonji_a_01.png
+  - characterId: momoka
+    variantKey: momoka_a
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: f0006a933c433794787fa34a377bd1b4, type: 3}
+    assetPath: Assets/Art/Portraits/NPC/momoka/momoka_a_01.png
+  generatedTicksUtc: 639102935279857467
+  generatedTimeReadable: 2026-03-28 20:18:47
