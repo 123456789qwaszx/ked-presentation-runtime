@@ -15,10 +15,10 @@ public sealed class DipInOutCommandSpecCharR : CharRigCommandSpecBase
     public SlideFromCharR dir = SlideFromCharR.Down;
 
     [Tooltip("How far to dip (px).")]
-    public float distance = 32f;
+    public float distance = 24f;
 
     [Tooltip("Total duration for enter + tiny hold + return. <=0 => snap.")]
-    public float duration = 0.8f;
+    public float duration = 0.4f;
 
     [Tooltip("Base ease used as a hint. Enter will use an Out-ish ease, return will use an In-ish ease.")]
     public Ease ease = Ease.InCubic;
@@ -62,8 +62,8 @@ public sealed class DipInOutCommandCharR : CommandBase, IStepScopedCommand
 
         // --- time split (auto, no extra knobs) ---
         // enter: 빠르게 쑥 (55%), hold: 짧게 멈칫 (10%), return: 부드럽게 복귀 (35%)
-        float tEnter  = total * 0.45f;
-        float tHold   = total * 0.12f;
+        float tEnter  = total * 0.32f;
+        float tHold   = total * 0.24f;
         float tReturn = Mathf.Max(0.0001f, total - tEnter - tHold);
 
         // --- ease mapping (auto) ---

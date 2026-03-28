@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.Serialization;
 
 public sealed class PresentationSessionEntry : MonoBehaviour
 {
@@ -12,6 +11,12 @@ public sealed class PresentationSessionEntry : MonoBehaviour
         PresentationSession = presentationSession;
         routeCatalog = routeCatalogSo;
         playbackSettings = settings;
+    }
+    
+    private void Update()
+    {
+        if (PresentationSession != null)
+            PresentationSession.Tick();
     }
     
     public void StartRoute(string routeKey)

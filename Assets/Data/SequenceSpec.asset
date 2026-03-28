@@ -37,9 +37,61 @@ MonoBehaviour:
       - rid: 305542826026074176
       - rid: 305542826026074177
       gate:
-        type: 1
+        type: 3
         seconds: 0
-        signalKey: 
+        signalKey: beat
+    - editorName: 
+      tracks:
+        interaction:
+        - rid: 305542832622927945
+        setup: []
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 305542832622927945
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+    - editorName: 
+      tracks:
+        interaction:
+        - rid: 305542832622927935
+        - rid: 305542832622927936
+        setup:
+        - rid: 305542832622927937
+        - rid: 305542832622927938
+        motion:
+        - rid: 305542832622927939
+        - rid: 305542832622927941
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 305542832622927935
+      - rid: 305542832622927936
+      - rid: 305542832622927937
+      - rid: 305542832622927938
+      - rid: 305542832622927939
+      - rid: 305542832622927941
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+    - editorName: 
+      tracks:
+        interaction:
+        - rid: 305542832622927947
+        setup: []
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 305542832622927947
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
   references:
     version: 2
     RefIds:
@@ -122,7 +174,7 @@ MonoBehaviour:
           infiniteHint: 0
           durationHint: 0
         targetMask: 1
-        duration: 2
+        duration: 1.4
         ease: 9
         EnableInteraction: 1
         wait: 0
@@ -141,6 +193,140 @@ MonoBehaviour:
         duration: 2.6
         taps: 30
         damping: 70
+        timeEase: 10
+        prep: 1.5
+        wait: 0
+    - rid: 305542832622927935
+      type: {class: SetCharRigCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: kuonji
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        rigPrefab: {fileID: 8529412948266249186, guid: 01c9b93a77829ef438fc74c4ef4c5004, type: 3}
+        parentSlot: 1
+        rigRootName: CharacterRig
+        autoRolePrefixFromRoleKey: 1
+        addRolePrefix: 1
+        destroyExistingRigWithSameName: 1
+        strict: 1
+    - rid: 305542832622927936
+      type: {class: SetPortraitSpriteCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: kuonji
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        portrait:
+          character: kuonji
+          emotion: 1
+          variant: a
+        target: 7
+        sizingMode: 1
+        horizontalAlign: 1
+    - rid: 305542832622927937
+      type: {class: SetOriginSizeCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: kuonji
+        _meta:
+          track: 10
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 3
+        toScale: {x: 2.15, y: 2.15}
+        toAngle: 0
+        anchorMin: {x: 0, y: 0}
+        anchorMax: {x: 1, y: 1}
+    - rid: 305542832622927938
+      type: {class: SetAnchorCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: kuonji
+        _meta:
+          track: 10
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 0
+        preset: 2
+        baseRatioX: 0.5
+        globalTuning: {fileID: 0}
+        roleTuningDb: {fileID: 0}
+        poseKey: 
+        offset: {x: 0, y: -360}
+        overrideAnchoredPosition: 0
+        anchoredPositionOverride: {x: 0, y: 0}
+    - rid: 305542832622927939
+      type: {class: FadeInCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: kuonji
+        _meta:
+          track: 20
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        targetMask: 1
+        duration: 0.4
+        ease: 9
+        EnableInteraction: 1
+        wait: 0
+    - rid: 305542832622927941
+      type: {class: JuicySlideInCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: kuonji
+        _meta:
+          track: 20
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 1
+        from: 0
+        distance: 222
+        duration: 0.55
+        ease: 9
+        punch: 24
+        wait: 1
+    - rid: 305542832622927945
+      type: {class: DipInOutCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: momoka
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 1
+        dir: 3
+        distance: 24
+        duration: 0.4
+        ease: 8
+        wait: 0
+    - rid: 305542832622927947
+      type: {class: TapEaseCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: momoka
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 1
+        strength: 34
+        duration: 2
+        taps: 3
+        damping: 7
         timeEase: 10
         prep: 1.5
         wait: 1

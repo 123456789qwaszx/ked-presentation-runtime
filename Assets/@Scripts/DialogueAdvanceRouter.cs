@@ -14,8 +14,8 @@ public sealed class DialogueAdvanceRouter
         AdvanceGate gate,
         DialogueRunner dialogueRunner,
         InlineEventMarkupHandler inlineMarkupHandler,
-        float cooldownAfterHurryUpSec  = 0.3f,  // 300ms
-        float cooldownAfterNextLineSec = 0.24f) // 240ms
+        float cooldownAfterHurryUpSec  = 0.28f,  // 280ms
+        float cooldownAfterNextLineSec = 0.12f) // 120ms
     {
         _gate = gate;
         _dialogueRunner = dialogueRunner;

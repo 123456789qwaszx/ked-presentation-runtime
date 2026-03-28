@@ -13,10 +13,10 @@ public sealed class TapEaseCommandSpecCharR : CharRigCommandSpecBase
 
     [Header("Tap")]
     [Tooltip("Tap strength in px. +right, -left.")]
-    public float strength = 20f;
+    public float strength = 34f;
 
     [Tooltip("Total duration.")]
-    public float duration = 0.26f;
+    public float duration = 2f;
 
     [Min(1)]
     [Tooltip("How many back-and-forth oscillations.")]
