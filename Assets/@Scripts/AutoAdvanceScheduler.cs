@@ -10,9 +10,8 @@ public sealed class AutoAdvanceScheduler
     private readonly VnUxState _uxState;
     private readonly VnFeaturePolicy _vnFeaturePolicy;
     private readonly UnityTimeSource _unityTimeSource;
-    private readonly Func<double> _getNow;
+    //private readonly Func<double> _getNow;
     
-    private readonly float _delaySeconds;
     private double _nextAutoAdvanceAt = double.PositiveInfinity;
     private bool _isAutoEnabled;
     private bool _lineFullyShown;
@@ -22,14 +21,12 @@ public sealed class AutoAdvanceScheduler
         VnUxState uxState, 
         VnFeaturePolicy vnFeaturePolicy,
         UnityTimeSource unityTimeSource,
-        Func<double> now,
         Action requestAdvance = null)
     {
         _yarnLineLifecycleBridge = yarnLineLifecycleBridge;
         _uxState = uxState;
         _vnFeaturePolicy = vnFeaturePolicy;
         _unityTimeSource = unityTimeSource;
-        _getNow = now;
         _requestAdvance = requestAdvance;
 
         RegisterHandler();
@@ -67,7 +64,7 @@ public sealed class AutoAdvanceScheduler
 
         // Enabled: if the current line is already fully shown, schedule auto-advance now
         if (_lineFullyShown)
-            _nextAutoAdvanceAt = _getNow() + _delaySeconds;
+            _nextAutoAdvanceAt = _unityTimeSource.UnscaledDeltaTime + _vnFeaturePolicy.autoDelaySeconds;
     }
     
     private void NotifyLineStart(YarnLineMeta meta)
@@ -83,7 +80,7 @@ public sealed class AutoAdvanceScheduler
         if (!_isAutoEnabled)
             return;
 
-        _nextAutoAdvanceAt = _getNow() + _delaySeconds;
+        _nextAutoAdvanceAt = _unityTimeSource.UnscaledDeltaTime + _vnFeaturePolicy.autoDelaySeconds;
     }
     
     public void NotifyChoicesPresented() => _nextAutoAdvanceAt = double.PositiveInfinity;
@@ -97,7 +94,7 @@ public sealed class AutoAdvanceScheduler
         if (_uxState.BacklogVisible) return;
         if (_uxState.ChoicesVisible) return;
 
-        double t = _getNow();
+        double t = _unityTimeSource.UnscaledDeltaTime;
         if (t >= _nextAutoAdvanceAt)
         {
             _nextAutoAdvanceAt = double.PositiveInfinity;

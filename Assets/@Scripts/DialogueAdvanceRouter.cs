@@ -1,29 +1,25 @@
 using UnityEngine;
 using Yarn.Unity;
 
-public sealed class DialogueAdvanceRouter
+public sealed class DialogueAdvanceRouter : MonoBehaviour
 {
-    private readonly AdvanceGate _gate;
-    private readonly DialogueRunner _dialogueRunner;
-    private readonly InlineEventMarkupHandler _inlineMarkupHandler;
+    private AdvanceGate _gate;
+    private DialogueRunner _dialogueRunner;
+    private InlineEventMarkupHandler _inlineMarkupHandler;
 
-    private readonly float _cooldownAfterHurryUpSec;
-    private readonly float _cooldownAfterNextLineSec;
+    [SerializeField] private float _cooldownAfterHurryUpSec = 0.28f;
+    [SerializeField] private float _cooldownAfterNextLineSec = Mathf.Max(0.12f, 0.1f); // Prevent double-skip: enforce a minimum cooldown
 
-    public DialogueAdvanceRouter(
-        AdvanceGate gate,
+    public void Initialize(
+        AdvanceGate gate, 
         DialogueRunner dialogueRunner,
-        InlineEventMarkupHandler inlineMarkupHandler,
-        float cooldownAfterHurryUpSec  = 0.28f,  // 280ms
-        float cooldownAfterNextLineSec = 0.12f) // 120ms
+        InlineEventMarkupHandler inlineMarkupHandler)
     {
         _gate = gate;
         _dialogueRunner = dialogueRunner;
         _inlineMarkupHandler = inlineMarkupHandler;
-
-        _cooldownAfterHurryUpSec  = cooldownAfterHurryUpSec;
-        _cooldownAfterNextLineSec = Mathf.Max(cooldownAfterNextLineSec, 0.1f); // Prevent double-skip: enforce a minimum cooldown
     }
+    
 
     public void DispatchAdvance()
     {

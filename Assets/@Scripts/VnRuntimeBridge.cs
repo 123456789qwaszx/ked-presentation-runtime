@@ -1,29 +1,29 @@
 using System.Collections;
+using UnityEngine;
 using Yarn.Unity;
 
-
-public sealed class VnRuntimeBridge
+public sealed class VnRuntimeBridge : MonoBehaviour
 {
-    public interface ICpsSignalBridge
+    public interface IPresentationSignalBridge
     {
         IEnumerator Beat(string beatKey); 
         IEnumerator WaitSignal(string key);
     }
     
+    private DialogueRunner _runner;
+    private PresentationSessionEntry _cpsRouteEntry;
+    private IPresentationSignalBridge _cpsSignalBridge;
 
-    private readonly DialogueRunner _runner;
-    private readonly PresentationSessionEntry _cpsRouteEntry;
-    private readonly ICpsSignalBridge _cpsSignalBridge;
-    
-    public VnRuntimeBridge(
+    public void Initialize(
         DialogueRunner runner,
         PresentationSessionEntry cpsRouteEntry,
-        ICpsSignalBridge cpsSignalBridge)
+        IPresentationSignalBridge cpsSignalBridge)
     {
         _runner = runner;
         _cpsRouteEntry = cpsRouteEntry;
         _cpsSignalBridge = cpsSignalBridge;
     }
+    
 
     public IEnumerator Beat(string beatKey)
     {

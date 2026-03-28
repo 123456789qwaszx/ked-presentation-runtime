@@ -8,12 +8,25 @@ public sealed class DialogueUIBindings : IDisposable
     private readonly UIManager _ui;
     
     private readonly EpisodePlayState _episodePlayState;
+    
+    private readonly VnFeatureController _vnFeatures;
+    private readonly VnUxState _uxState;
+    private readonly VnRuntimeBridge _vnSignalBridge;
+    private readonly DialogueAdvanceRouter _advanceRouter;
 
     public DialogueUIBindings(
-        EpisodePlayState episodePlayState
+        EpisodePlayState episodePlayState,
+        VnFeatureController vnFeatures,
+        VnUxState uxState,
+        VnRuntimeBridge vnSignalBridge,
+        DialogueAdvanceRouter advanceRouter
     )
     {
         _episodePlayState = episodePlayState;
+        _vnFeatures = vnFeatures;
+        _uxState = uxState;
+        _vnSignalBridge = vnSignalBridge;
+        _advanceRouter = advanceRouter;
     }
 
     public void Bind(DialogueUIRoot root)

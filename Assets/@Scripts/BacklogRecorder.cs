@@ -5,22 +5,22 @@ public sealed class BacklogRecorder
     private readonly YarnLineLifecycleBridge _yarnLineLifecycleBridge;
     private readonly UnityTimeSource _unityTimeSource;
     
-    private readonly List<DialogueLogEntry> _entries;
     private readonly int _maxCount;
+    private readonly List<DialogueLogEntry> _entries;
 
     public IReadOnlyList<DialogueLogEntry> Entries => _entries;
 
     public BacklogRecorder(
         YarnLineLifecycleBridge yarnLineLifecycleBridge,
-        UnityTimeSource unityTimeSource,
-        int maxCount)
+        VnFeaturePolicy vnFeaturePolicy,
+        UnityTimeSource unityTimeSource)
     {
         _yarnLineLifecycleBridge = yarnLineLifecycleBridge;
         _unityTimeSource = unityTimeSource;
         
-        _maxCount = maxCount <= 0 ?
-            100 
-            : maxCount;
+        _maxCount = 
+            vnFeaturePolicy.maxLogCount <= 0 ?
+                100 : vnFeaturePolicy.maxLogCount;
         _entries = new List<DialogueLogEntry>(_maxCount);
 
         RegisterHandler();
@@ -38,20 +38,7 @@ public sealed class BacklogRecorder
 
         _yarnLineLifecycleBridge.LineStart -= OnLineStart;
     }
-
-    public void Clear() => _entries.Clear();
-
-    public void Add(in DialogueLogEntry entry)
-    {
-        _entries.Add(entry);
-
-        // 매우 단순한 트림(필요하면 링버퍼로 교체)
-        if (_entries.Count > _maxCount)
-            _entries.RemoveAt(0);
-    }
     
-    
-    // ---- Yarn Lifecycle handlers ----
     private void OnLineStart(YarnLineMeta meta)
     {
         Add(new DialogueLogEntry
@@ -62,5 +49,16 @@ public sealed class BacklogRecorder
             rawText = meta.rawText,
             timestamp = _unityTimeSource.UnscaledDeltaTime
         });
+    }
+    
+    private void ClearBacklog() => _entries.Clear();
+
+    private void Add(in DialogueLogEntry entry)
+    {
+        _entries.Add(entry);
+
+        // 매우 단순한 트림(필요하면 링버퍼로 교체)
+        if (_entries.Count > _maxCount)
+            _entries.RemoveAt(0);
     }
 }

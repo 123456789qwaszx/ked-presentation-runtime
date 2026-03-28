@@ -2,16 +2,17 @@ using UnityEngine;
 
 public sealed class VnRawInputPoller : MonoBehaviour
 {
-    private DialogueAdvanceRouter _router;
+    private DialogueAdvanceRouter _dialogueAdvanceRouter;
+    public DialogueAdvanceRouter DialogueAdvanceRouter => _dialogueAdvanceRouter;
 
     public void Initialize(DialogueAdvanceRouter router)
     {
-        _router = router;
+        _dialogueAdvanceRouter = router;
     }
 
     private void Update()
     {
-        if (_router == null)
+        if (_dialogueAdvanceRouter == null)
             return;
 
         bool pressed = false;
@@ -20,6 +21,6 @@ public sealed class VnRawInputPoller : MonoBehaviour
             pressed = true;
 
         if (pressed)
-            _router.DispatchAdvance();
+            _dialogueAdvanceRouter.DispatchAdvance();
     }
 }

@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
 
-public sealed class PresentationSessionBridge : VnRuntimeBridge.ICpsSignalBridge, InlineEventMarkupHandler.IInlineSignalHost
+public sealed class PresentationSessionBridge : VnRuntimeBridge.IPresentationSignalBridge, InlineEventMarkupHandler.IInlineSignalHost
 {
     private readonly PresentationSession _session;
     private readonly UnitySignalBus _unitySignalBus;

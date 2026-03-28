@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 public enum VnPlayMode
 {
@@ -23,14 +22,12 @@ public class VnFeaturePolicy
 
 public sealed class VnFeatureController : MonoBehaviour
 {
-    private YarnLineLifecycleBridge _yarnLineLifecycleBridge;
     private EllipsisBreathTypewriter _typewriter;
     private VnUxState _uxState;
-
-    private AutoAdvanceScheduler _autoAdvanceScheduler;
     private BacklogRecorder _backlogRecorder;
+    private AutoAdvanceScheduler _autoAdvanceScheduler;
     
-    [Header("VnFeaturePolicy")]
+    [Header("FeaturePolicy")]
     [SerializeField] private VnFeaturePolicy vnFeaturePolicy;
 
     public VnPlayMode Mode => vnFeaturePolicy.vnPlayMode;
@@ -43,18 +40,16 @@ public sealed class VnFeatureController : MonoBehaviour
     public void Initialize(
         EllipsisBreathTypewriter ellipsisBreathTypewriter,
         VnUxState uxState,
-        YarnLineLifecycleBridge yarnLineLifecycleBridge,
-        AutoAdvanceScheduler autoAdvanceScheduler,
-        BacklogRecorder backlogRecorder
+        BacklogRecorder backlogRecorder,
+        AutoAdvanceScheduler autoAdvanceScheduler
        )
     {
         if (_init) return;
         
         _typewriter = ellipsisBreathTypewriter;
         _uxState = uxState;
-        _yarnLineLifecycleBridge = yarnLineLifecycleBridge;
-        _autoAdvanceScheduler = autoAdvanceScheduler;
         _backlogRecorder = backlogRecorder;
+        _autoAdvanceScheduler = autoAdvanceScheduler;
         
         _init = true;
         ApplyModeSideEffects(VnPlayMode.Manual, Mode);
@@ -109,6 +104,4 @@ public sealed class VnFeatureController : MonoBehaviour
             : 1f;
         _typewriter.SetSpeedMultiplier(mul);
     }
-
-    private void OnLineWillDismiss(YarnLineMeta meta) { }
 }
