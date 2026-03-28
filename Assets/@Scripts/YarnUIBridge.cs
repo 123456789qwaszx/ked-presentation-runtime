@@ -5,7 +5,6 @@ public sealed class YarnUIBridge : MonoBehaviour
 {
     [SerializeField] private LinePresenter linePresenter;
     [SerializeField] private EllipsisBreathTypewriter typewriter;
-    [SerializeField] private DialogueUIRoot dialogueUI;
     
     public DialogueTextRouter DialogueTextRouter { get; } = new();
     
@@ -16,6 +15,7 @@ public sealed class YarnUIBridge : MonoBehaviour
 
     private void Show(DialogueUIRoot.DialogueBoxKind kind)
     {
+        DialogueUIRoot dialogueUI = UIManager.Instance.GetUI<DialogueUIRoot>();
         if (UIManager.Instance.CurSceneRoot != dialogueUI)
             UIManager.Instance.SwitchRoot<DialogueUIRoot>();
         
@@ -48,6 +48,7 @@ public sealed class YarnUIBridge : MonoBehaviour
     
     public void CloseAllDialogue()
     {
+        DialogueUIRoot dialogueUI = UIManager.Instance.GetUI<DialogueUIRoot>();
         dialogueUI.HideAllBoxes();
 
         DialogueTextRouter.Clear();
