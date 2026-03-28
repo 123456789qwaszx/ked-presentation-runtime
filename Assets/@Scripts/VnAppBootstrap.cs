@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.Serialization;
 using Yarn.Unity;
 
 public class VnAppBootstrap : MonoBehaviour
@@ -24,6 +23,11 @@ public class VnAppBootstrap : MonoBehaviour
     [Header("VnAdvanceGate")]
     [SerializeField] private EllipsisBreathTypewriter ellipsisBreathTypewriter;
     [SerializeField] VnRawInputPoller vnRawInputPoller;
+    
+    [Header("YarnVnInputFeature")]
+    [SerializeField] YarnLineLifecycleBridge yarnLineLifecycleBridge;
+    [SerializeField] VnFeatureController vnFeatureController;
+    
     
     [Header("UI")]
     [SerializeField] private EpisodePlayer episodePlayer;
@@ -94,6 +98,19 @@ public class VnAppBootstrap : MonoBehaviour
         );
         
         vnRawInputPoller.Initialize(advanceRouter);
+        
+        yarnLineLifecycleBridge.Initialize();
+        
+        VnFeaturePolicy vnFeaturePolicy = new ();
+        BacklogRecorder backlogRecorder = new BacklogRecorder(yarnLineLifecycleBridge,
+            _unityTimeSource,
+            vnFeaturePolicy.maxLogCount);
+        AutoAdvanceScheduler auto = new AutoAdvanceScheduler(
+            yarnLineLifecycleBridge,
+            vnUxState, 
+            vnFeaturePolicy,
+            _unityTimeSource,
+            () => _unityTimeSource.UnscaledDeltaTime);
     }
     
     private void UIBootStrap()
