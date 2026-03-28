@@ -11,7 +11,7 @@ public sealed class VnRuntimeBridge : MonoBehaviour
     }
     
     private DialogueRunner _runner;
-    private PresentationSessionEntry _cpsRouteEntry;
+    private PresentationSessionEntry _presentationSessionEntry;
     private IPresentationSignalBridge _cpsSignalBridge;
 
     public void Initialize(
@@ -20,17 +20,24 @@ public sealed class VnRuntimeBridge : MonoBehaviour
         IPresentationSignalBridge cpsSignalBridge)
     {
         _runner = runner;
-        _cpsRouteEntry = cpsRouteEntry;
+        _presentationSessionEntry = cpsRouteEntry;
         _cpsSignalBridge = cpsSignalBridge;
     }
     
-
-    public IEnumerator Beat(string beatKey)
-    {
-        if (_cpsSignalBridge == null) yield break;
-        
-        yield return _cpsSignalBridge.Beat(beatKey);
-    }
-
+    public IEnumerator Beat(string beatKey) => _cpsSignalBridge.Beat(beatKey);
     public IEnumerator WaitSignal(string key) => _cpsSignalBridge?.WaitSignal(key);
+    
+    public void ForceCompleteEpisodeNow(string episodeId)
+    {
+        if (string.IsNullOrEmpty(episodeId))
+        {
+            Debug.LogWarning("[VnRuntimeBridge] ForceCompleteEpisodeNow called with empty episodeId.");
+            return;
+        }
+
+        if (_runner.IsDialogueRunning)
+            _runner.Stop();
+        
+        _presentationSessionEntry.RequestEnd();
+    }
 }

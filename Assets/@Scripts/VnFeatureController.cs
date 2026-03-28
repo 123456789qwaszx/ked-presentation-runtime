@@ -65,9 +65,11 @@ public sealed class VnFeatureController : MonoBehaviour
         
         if (_uxState.ChoicesVisible)
             return;
-        
+
         if (Mode == VnPlayMode.Auto)
-            _autoAdvanceScheduler?.Tick();
+        {
+            _autoAdvanceScheduler.Tick();
+        }
     }
 
     public void ToggleAuto()

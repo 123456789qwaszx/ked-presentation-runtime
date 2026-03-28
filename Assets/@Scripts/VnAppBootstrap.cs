@@ -35,23 +35,21 @@ public class VnAppBootstrap : MonoBehaviour
     [Header("UI")]
     [SerializeField] private EpisodePlayer episodePlayer;
     
-    private DialogueUIBindings _dialogueUIBindings;
     private EpisodeFlowController _episodeFlowController;
     private VnScreenBindings _screenBindings;
+    private DialogueUIBindings _dialogueUIBindings;
     
     private PresentationSessionBridge _presentationSessionBridge;
     
     private void Awake()
     {
-        VnFeatureControllerBootstrap();
-        
         PresentationSessionBootstrap();
         
         BuildBridgePresentationSessionToYarn();
         YarnBootstrap();
         VnAdvanceInputBootstrap();
-        
         UIBootStrap();
+        VnFeatureControllerBootstrap();
     }
     
     private void PresentationSessionBootstrap()
@@ -112,7 +110,8 @@ public class VnAppBootstrap : MonoBehaviour
             yarnLineLifecycleBridge,
             _vnUxState, 
             vnFeaturePolicy,
-            _unityTimeSource);
+            dialogueAdvanceRouter,
+            () => Time.unscaledTimeAsDouble);
         
         vnFeatureController.Initialize(ellipsisBreathTypewriter, _vnUxState, backlogRecorder, autoAdvanceScheduler);
     }
@@ -122,6 +121,13 @@ public class VnAppBootstrap : MonoBehaviour
         _dialogueUIBindings = new DialogueUIBindings(_episodePlayState, vnFeatureController, _vnUxState, vnRuntimeBridge, dialogueAdvanceRouter);
         _episodeFlowController = new EpisodeFlowController(_dialogueUIBindings, episodePlayer, _episodePlayState);
         _screenBindings = new VnScreenBindings(_episodeFlowController);
+
+        TestLauncherInitialize();
+    }
+
+    private void TestLauncherInitialize()
+    {
+        episodePlayer.Initialize(_screenBindings, _dialogueUIBindings);
     }
     
     private void Start()

@@ -4,6 +4,9 @@ using Yarn.Unity;
 
 public sealed class EpisodePlayer : MonoBehaviour
 {
+    private VnScreenBindings _vnScreenBindings;
+    private DialogueUIBindings _dialogueUIBindings;
+    
     public DialogueRunner dialogueRunner;
     [SerializeField] private YarnUIBridge yarnUIBridge;
     [SerializeField] private PresentationSessionEntry presentationRouteEntry;
@@ -16,7 +19,12 @@ public sealed class EpisodePlayer : MonoBehaviour
     
     [Tooltip("Stop")]
     [SerializeField] private KeyCode stopKey = KeyCode.Alpha3;
-    
+
+    public void Initialize(VnScreenBindings vnScreenBindings, DialogueUIBindings dialogueUIBindings)
+    {
+        _vnScreenBindings = vnScreenBindings;
+        _dialogueUIBindings = dialogueUIBindings;
+    }
     
     private void Update()
     {
@@ -35,6 +43,8 @@ public sealed class EpisodePlayer : MonoBehaviour
     public void OpenDialogueUI()
     {
         UIManager.Instance.SwitchRoot<DialogueUIRoot>();
+        DialogueUIRoot dialogueUIRoot = UIManager.Instance.GetUI<DialogueUIRoot>();
+        _dialogueUIBindings.Bind(dialogueUIRoot);
     }
 
     public void StartPresentationRoute(string routeKey)

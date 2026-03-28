@@ -1,17 +1,15 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 public sealed class DialogueUIBindings : IDisposable
 {
     private readonly UIBindingContext _ctx = new();
-
-    private readonly UIManager _ui;
     
     private readonly EpisodePlayState _episodePlayState;
-    
     private readonly VnFeatureController _vnFeatures;
     private readonly VnUxState _uxState;
-    private readonly VnRuntimeBridge _vnSignalBridge;
+    private readonly VnRuntimeBridge _vnRuntimeBridge;
     private readonly DialogueAdvanceRouter _advanceRouter;
 
     public DialogueUIBindings(
@@ -25,12 +23,14 @@ public sealed class DialogueUIBindings : IDisposable
         _episodePlayState = episodePlayState;
         _vnFeatures = vnFeatures;
         _uxState = uxState;
-        _vnSignalBridge = vnSignalBridge;
+        _vnRuntimeBridge = vnSignalBridge;
         _advanceRouter = advanceRouter;
     }
 
     public void Bind(DialogueUIRoot root)
     {
+        _ctx.Dispose();
+        
         // StepNext
         _ctx.Bind(root,
             r => r.OnStepNextPressed += HandleStepNextPressed,
@@ -67,51 +67,168 @@ public sealed class DialogueUIBindings : IDisposable
             r => r.OnSetSpeedupPressed -= HandleSpeedupPressed);
     }
 
+    // =========================================================
+    // DialogueUIRoot handlers
+    // =========================================================
+
     private void HandleStepNextPressed()
-    { }
+    {
+        if (_vnFeatures.IsAuto)
+        {
+            _vnFeatures.ToggleAuto();
+            UIManager.Instance.GetUI<DialogueUIRoot>().SetAutoModeActive(false);
+            return;
+        }
+
+        _advanceRouter.DispatchAdvance();
+    }
 
     private void HandleSkipPressed()
-    { }
+    {
+        if ((_uxState.ChoicesVisible || _uxState.BacklogVisible))
+            return;
+
+        string summary = "현재까지의 스토리(최근):";
+
+        UIManager.Instance.PushPanel<SkipConfirmPanel>(panel =>
+        {
+            panel.Present(
+                title: "에피소드를 스킵할까요?",
+                body: summary,
+                confirmLabel: "스킵하고 완료",
+                cancelLabel: "취소"
+            );
+
+            panel.OnConfirmed -= ConfirmSkipEpisode;
+            panel.OnCancelled -= CloseSkipConfirm;
+            
+            panel.OnConfirmed += ConfirmSkipEpisode;
+            panel.OnCancelled += CloseSkipConfirm;
+        });
+    }
 
     private void CloseSkipConfirm()
-    { }
+    {
+        var panel = UIManager.Instance.GetUI<SkipConfirmPanel>();
+        
+        panel.OnConfirmed -= ConfirmSkipEpisode;
+        panel.OnCancelled -= CloseSkipConfirm;
+        
+        UIManager.Instance.PopPanel();
+    }
 
-    
     private void ConfirmSkipEpisode()
     {
         CloseSkipConfirm();
 
-        _ui.GetUI<DialogueUIRoot>()?.SetSkipModeActive(false);
-        _episodePlayState?.ForceCompleteCurrentEpisodeNow();
+        string episodeId = _episodePlayState.SelectedEpisodeId;
+        if (string.IsNullOrEmpty(episodeId))
+        {
+            Debug.LogWarning("[VN] Skip confirmed but current episode id is empty.");
+            return;
+        }
+
+        UIManager.Instance.GetUI<DialogueUIRoot>()?.SetSkipModeActive(false);
+        _vnRuntimeBridge?.ForceCompleteEpisodeNow(episodeId);
     }
-    
+
     private void HandleAutoPressed()
-    { }
+    {
+        _vnFeatures.ToggleAuto();
+
+        var root = UIManager.Instance.GetUI<DialogueUIRoot>();
+        if (root != null)
+            root.SetAutoModeActive(_vnFeatures.IsAuto);
+
+        Debug.Log($"[VN] Auto toggled: {_vnFeatures.IsAuto}");
+    }
 
     private void HandleQuickMenuPressed()
     { }
 
     private void HandleExpandPressed()
-    { }
+    {
+        if (_uxState.BacklogVisible)
+            CloseBacklogPanel();
+        
+        if (_uxState.ChoicesVisible)
+            CloseChoicePanel();
+    }
 
     private void HandleShowPreviousLogPressed()
-    { }
+    {
+        if (_uxState.BacklogVisible)
+            return;
+
+        _uxState.SetBacklogVisible(true);
+
+        UIManager.Instance.PushPanel<BacklogPanel>(panel =>
+        {
+            _ctx.Bind(panel,
+                p => p.OnCloseRequested += CloseBacklogPanel,
+                p => p.OnCloseRequested -= CloseBacklogPanel);
+
+            panel.Present(_vnFeatures.Backlogs);
+        });
+    }
 
     private void CloseBacklogPanel()
-    { }
+    {
+        _uxState.SetBacklogVisible(false);
+        UIManager.Instance.PopPanel();
+    }
 
     private void HandleSpeedupPressed()
-    { }
+    {
+        _vnFeatures.ToggleSpeedup();
+    }
+
+    // =========================================================
+    // Choices (YarnUIBridge)
+    // =========================================================
 
     private void HandleChoicesPresented(IReadOnlyList<string> choices)
-    { }
+    {
+        _uxState.SetChoicesVisible(true);
 
-    private void HandleChoiceSelected(int index) 
-    { }
+        // 선택지 열리면 Auto는 멈춤
+        if (_vnFeatures.IsAuto)
+        {
+            _vnFeatures.ToggleAuto();
+            UIManager.Instance.GetUI<DialogueUIRoot>()?.SetAutoModeActive(false);
+        }
+
+        var existing = UIManager.Instance.GetUI<ChoicePanel>();
+        if (existing != null)
+        {
+            existing.Present(choices);
+            return;
+        }
+
+        UIManager.Instance.PushPanel<ChoicePanel>(panel =>
+        {
+            panel.Present(choices);
+
+            panel.OnChoiceSelected += HandleChoiceSelected;
+            panel.OnCloseRequested += CloseChoicePanel;
+        });
+    }
+
+    private void HandleChoiceSelected(int index) { }
 
     private void CloseChoicePanel()
-    { }
+    {
+        _uxState.SetChoicesVisible(false);
+        
+        var panel = UIManager.Instance.GetUI<ChoicePanel>();
+        
+        panel.OnChoiceSelected -= HandleChoiceSelected;
+        panel.OnCloseRequested -= CloseChoicePanel;
+        
+        UIManager.Instance.PopPanel();
+    }
     
+
     public void Dispose()
     {
         _ctx.Dispose();

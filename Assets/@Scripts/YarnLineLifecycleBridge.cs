@@ -61,11 +61,6 @@ public sealed class YarnLineLifecycleBridge : ActionMarkupHandler
     private bool _initialized;
     
     #region Lifecycle & Bindings
-    
-    private void Awake()
-    {
-        Initialize();
-    }
 
     public void Initialize()
     {

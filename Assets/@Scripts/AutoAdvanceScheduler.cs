@@ -9,8 +9,8 @@ public sealed class AutoAdvanceScheduler
     private readonly Action _requestAdvance;
     private readonly VnUxState _uxState;
     private readonly VnFeaturePolicy _vnFeaturePolicy;
-    private readonly UnityTimeSource _unityTimeSource;
-    //private readonly Func<double> _getNow;
+    private readonly DialogueAdvanceRouter _dialogueAdvanceRouter;
+    private readonly Func<double> _getNow;
     
     private double _nextAutoAdvanceAt = double.PositiveInfinity;
     private bool _isAutoEnabled;
@@ -20,14 +20,14 @@ public sealed class AutoAdvanceScheduler
         YarnLineLifecycleBridge yarnLineLifecycleBridge,
         VnUxState uxState, 
         VnFeaturePolicy vnFeaturePolicy,
-        UnityTimeSource unityTimeSource,
-        Action requestAdvance = null)
+        DialogueAdvanceRouter dialogueAdvanceRouter,
+        Func<double> getNow)
     {
         _yarnLineLifecycleBridge = yarnLineLifecycleBridge;
         _uxState = uxState;
         _vnFeaturePolicy = vnFeaturePolicy;
-        _unityTimeSource = unityTimeSource;
-        _requestAdvance = requestAdvance;
+        _dialogueAdvanceRouter = dialogueAdvanceRouter;
+        _getNow = getNow;
 
         RegisterHandler();
     }
@@ -64,7 +64,7 @@ public sealed class AutoAdvanceScheduler
 
         // Enabled: if the current line is already fully shown, schedule auto-advance now
         if (_lineFullyShown)
-            _nextAutoAdvanceAt = _unityTimeSource.UnscaledDeltaTime + _vnFeaturePolicy.autoDelaySeconds;
+            _nextAutoAdvanceAt = _getNow() + _vnFeaturePolicy.autoDelaySeconds;
     }
     
     private void NotifyLineStart(YarnLineMeta meta)
@@ -80,7 +80,7 @@ public sealed class AutoAdvanceScheduler
         if (!_isAutoEnabled)
             return;
 
-        _nextAutoAdvanceAt = _unityTimeSource.UnscaledDeltaTime + _vnFeaturePolicy.autoDelaySeconds;
+        _nextAutoAdvanceAt = _getNow() + _vnFeaturePolicy.autoDelaySeconds;
     }
     
     public void NotifyChoicesPresented() => _nextAutoAdvanceAt = double.PositiveInfinity;
@@ -94,12 +94,15 @@ public sealed class AutoAdvanceScheduler
         if (_uxState.BacklogVisible) return;
         if (_uxState.ChoicesVisible) return;
 
-        double t = _unityTimeSource.UnscaledDeltaTime;
+        double t = _getNow();
+        
+        //Debug.Log($"{_getNow()}");
         if (t >= _nextAutoAdvanceAt)
         {
+            //Debug.Log("{_getNow()}");
             _nextAutoAdvanceAt = double.PositiveInfinity;
             _lineFullyShown = false;
-            _requestAdvance?.Invoke();
+            _dialogueAdvanceRouter.DispatchAdvance();
         }
     }
 }

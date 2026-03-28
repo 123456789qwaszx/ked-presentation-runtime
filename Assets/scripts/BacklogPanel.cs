@@ -64,14 +64,12 @@ public sealed class BacklogPanel : UIPanel<BacklogPanel.Refs>, IManagedUI
     
     #region Present
     
-    public void Present(BacklogRecorder backlog)
+    public void Present(IReadOnlyList<DialogueLogEntry> entries)
     {
         if (!_valid)
             return;
 
         ClearEntries();
-
-        IReadOnlyList<DialogueLogEntry> entries = backlog.Entries;
         
         int count = entries.Count;
         if (count <= 0)

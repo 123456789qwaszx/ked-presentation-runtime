@@ -121,7 +121,7 @@ public class EpisodeFlowController : IDisposable
 
         UIManager.Instance.SwitchRoot<DialogueUIRoot>(root =>
         {
-            _dialogueInput?.Bind(root);
+            _dialogueInput.Bind(root);
             _episodePlayer.StartYarnNode(targetEpisodeId);
         });
     }
