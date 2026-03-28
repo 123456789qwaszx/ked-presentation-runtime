@@ -160,7 +160,7 @@ MonoBehaviour:
         globalTuning: {fileID: 0}
         roleTuningDb: {fileID: 0}
         poseKey: 
-        offset: {x: -480, y: -400}
+        offset: {x: -480, y: -385}
         overrideAnchoredPosition: 0
         anchoredPositionOverride: {x: 0, y: 0}
     - rid: 305542826026074176
@@ -241,7 +241,7 @@ MonoBehaviour:
           infiniteHint: 0
           durationHint: 0
         target: 3
-        toScale: {x: 2.15, y: 2.15}
+        toScale: {x: 2.18, y: 2.18}
         toAngle: 0
         anchorMin: {x: 0, y: 0}
         anchorMax: {x: 1, y: 1}
@@ -261,7 +261,7 @@ MonoBehaviour:
         globalTuning: {fileID: 0}
         roleTuningDb: {fileID: 0}
         poseKey: 
-        offset: {x: 0, y: -360}
+        offset: {x: 0, y: -400}
         overrideAnchoredPosition: 0
         anchoredPositionOverride: {x: 0, y: 0}
     - rid: 305542832622927939

@@ -363,7 +363,6 @@ public class DialogueUIRoot : UIRoot<DialogueUIRoot.Refs>
 
         // QuickMenu panel
         AppendMissing(ref missing, _quickMenuRoot, Refs.QuickMenu_Root);
-        // CanvasGroup은 View.CanvasGroup이 자동 추가하므로 엄격 체크가 필요 없으면 빼도 됨.
         AppendMissing(ref missing, _quickMenuCg, Refs.QuickMenu_Root);
         AppendMissing(ref missing, _quickMenuBgImage, Refs.QuickMenuBG_Image);
 
@@ -409,7 +408,7 @@ public class DialogueUIRoot : UIRoot<DialogueUIRoot.Refs>
         AppendMissing(ref missing, s1, Refs.DialogueBoxSlot01_Root);
         AppendMissing(ref missing, s2, Refs.DialogueBoxSlot02_Root);
 
-        // IDialogueBoxView (슬롯 밑에 반드시 있어야 함)
+        // IDialogueBoxView
         if (_boxBySlot == null || _boxBySlot.Length < 3)
         {
             if (missing.Length > 0) missing += "\n";

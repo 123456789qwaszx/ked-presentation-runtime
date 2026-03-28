@@ -10,16 +10,16 @@ public class EpisodeFlowController : IDisposable
     private readonly DialogueUIBindings _dialogueInput;
     private readonly EpisodePlayer _episodePlayer;
     
-    private EpisodePlayState _vnRuntimeBridge;
+    private EpisodePlayState _episodePlayState;
     
     public EpisodeFlowController(
         DialogueUIBindings dialogueInput,
         EpisodePlayer episodePlayer,
-        EpisodePlayState vnRuntimeBridge)
+        EpisodePlayState episodePlayState)
     {
         _dialogueInput = dialogueInput;
         _episodePlayer = episodePlayer;
-        _vnRuntimeBridge = vnRuntimeBridge;
+        _episodePlayState = episodePlayState;
     }
     
     public void OpenSelectChapterPanel()
@@ -60,7 +60,7 @@ public class EpisodeFlowController : IDisposable
             );
         }
 
-        panel.PresentChapters(models, selectedChapterId: _vnRuntimeBridge.CurrentChapterId);
+        panel.PresentChapters(models, selectedChapterId: _episodePlayState.CurrentChapterId);
     }
     
     private void OnChapterRequested(int chapterId) => OpenEpisodeSelectPanel(chapterId);
@@ -69,9 +69,9 @@ public class EpisodeFlowController : IDisposable
     
     private void OpenEpisodeSelectPanel(int chapterId)
     {
-        _vnRuntimeBridge.SetCurrentChapter(chapterId);
+        _episodePlayState.SetCurrentChapter(chapterId);
         string _selectedEpisodeId = "main05.02";
-        _vnRuntimeBridge.SetSelectedEpisode(_selectedEpisodeId);
+        _episodePlayState.SetSelectedEpisode(_selectedEpisodeId);
 
         UIManager.Instance.PushPanel<EpisodeSelectionPanel>(panel =>
         {
@@ -97,7 +97,7 @@ public class EpisodeFlowController : IDisposable
         if (string.IsNullOrEmpty(ownerEpisodeId))
             return;
 
-        _vnRuntimeBridge.BeginMainEpisode(ownerEpisodeId);
+        _episodePlayState.BeginMainEpisode(ownerEpisodeId);
 
         RefreshEpisodeSelectionPanel();
 
@@ -115,7 +115,7 @@ public class EpisodeFlowController : IDisposable
         if (string.IsNullOrEmpty(ownerEpisodeId) || string.IsNullOrEmpty(targetEpisodeId))
             return;
 
-        _vnRuntimeBridge.BeginAttachmentEpisode(ownerEpisodeId, targetEpisodeId);
+        _episodePlayState.BeginAttachmentEpisode(ownerEpisodeId, targetEpisodeId);
 
         UIManager.Instance.PopAllPanels();
 
@@ -129,7 +129,7 @@ public class EpisodeFlowController : IDisposable
     private void RebuildAndPresentEpisodeSelectionPanel(EpisodeSelectionPanel panel)
     {
         var chapterMeta = new ChapterMetaModel(
-            chapterIndex: $"챕터 {_vnRuntimeBridge.CurrentChapterId}",
+            chapterIndex: $"챕터 {_episodePlayState.CurrentChapterId}",
             eraText: "성력 996년",
             chapterTitle: "짙은 밤에 드리운 불빛"
         );
@@ -169,7 +169,7 @@ public class EpisodeFlowController : IDisposable
         };
         
         EpisodeSelectionPanelModel model = new EpisodeSelectionPanelModel(
-            chapterId: _vnRuntimeBridge.CurrentChapterId,
+            chapterId: _episodePlayState.CurrentChapterId,
             chapterMeta: chapterMeta,
             graph: new EpisodeGraphModel(nodes),
             selectedEpisodeId: "main05.01"

@@ -125,11 +125,16 @@ public sealed class DialogueUIBindings : IDisposable
         if (string.IsNullOrEmpty(episodeId))
         {
             Debug.LogWarning("[VN] Skip confirmed but current episode id is empty.");
-            return;
+            
+            //return;
         }
 
-        UIManager.Instance.GetUI<DialogueUIRoot>()?.SetSkipModeActive(false);
-        _vnRuntimeBridge?.ForceCompleteEpisodeNow(episodeId);
+        UIManager.Instance.GetUI<DialogueUIRoot>().SetSkipModeActive(false);
+        _vnRuntimeBridge.ForceCompleteEpisodeNow(episodeId);
+        _episodePlayState.ApplyEpisodeState(episodeId);
+        
+        UIManager.Instance.PopAllPanels();
+        UIManager.Instance.SwitchRoot<LobbyUIRoot>();
     }
 
     private void HandleAutoPressed()
@@ -139,8 +144,6 @@ public sealed class DialogueUIBindings : IDisposable
         var root = UIManager.Instance.GetUI<DialogueUIRoot>();
         if (root != null)
             root.SetAutoModeActive(_vnFeatures.IsAuto);
-
-        Debug.Log($"[VN] Auto toggled: {_vnFeatures.IsAuto}");
     }
 
     private void HandleQuickMenuPressed()

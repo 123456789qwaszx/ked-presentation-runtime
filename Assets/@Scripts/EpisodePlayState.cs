@@ -60,17 +60,19 @@ public sealed class EpisodePlayState
         AttachmentEpisodeId = null;
         AttachmentReturnOwnerEpisodeId = null;
     }
-
-    public void ForceCompleteCurrentEpisodeNow()
+    
+    public void ApplyEpisodeState(string episodeId)
     {
-        if (string.IsNullOrEmpty(CurrentPlayingEpisodeId))
-            return;
+        if (IsAttachmentMode)
+        {
+            SetSelectedEpisode(
+                !string.IsNullOrEmpty(AttachmentReturnOwnerEpisodeId) 
+                    ? AttachmentReturnOwnerEpisodeId
+                    : episodeId);
 
-        ForceCompleteEpisodeNow(CurrentPlayingEpisodeId);
-    }
-
-    public void ForceCompleteEpisodeNow(string episodeId)
-    {
-        // 기존 구현 유지
+            ClearAttachmentContext();
+        }
+        
+        SetSelectedEpisode(episodeId);
     }
 }

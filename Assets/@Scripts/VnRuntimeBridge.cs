@@ -29,12 +29,6 @@ public sealed class VnRuntimeBridge : MonoBehaviour
     
     public void ForceCompleteEpisodeNow(string episodeId)
     {
-        if (string.IsNullOrEmpty(episodeId))
-        {
-            Debug.LogWarning("[VnRuntimeBridge] ForceCompleteEpisodeNow called with empty episodeId.");
-            return;
-        }
-
         if (_runner.IsDialogueRunning)
             _runner.Stop();
         
