@@ -1,5 +1,4 @@
 using System.Collections;
-using UnityEngine;
 using Yarn.Unity;
 
 
@@ -11,29 +10,27 @@ public sealed class VnRuntimeBridge
         IEnumerator WaitSignal(string key);
     }
     
-    private readonly ICpsSignalBridge _cps;
 
-    // 추가: 강제 종료를 위해 (둘 다 MonoBehaviour면 SerializeField로 넣어도 되고, 생성자 주입도 OK)
     private readonly DialogueRunner _runner;
     private readonly PresentationRouteEntry _cpsRouteEntry;
-
-
+    private readonly ICpsSignalBridge _cpsSignalBridge;
+    
     public VnRuntimeBridge(
-        ICpsSignalBridge cps,
         DialogueRunner runner,
-        PresentationRouteEntry cpsRouteEntry)
+        PresentationRouteEntry cpsRouteEntry,
+        ICpsSignalBridge cpsSignalBridge)
     {
-        _cps = cps;
         _runner = runner;
         _cpsRouteEntry = cpsRouteEntry;
+        _cpsSignalBridge = cpsSignalBridge;
     }
 
     public IEnumerator Beat(string beatKey)
     {
-        if (_cps == null) yield break;
+        if (_cpsSignalBridge == null) yield break;
         
-        yield return _cps.Beat(beatKey);
+        yield return _cpsSignalBridge.Beat(beatKey);
     }
 
-    public IEnumerator WaitSignal(string key) => _cps?.WaitSignal(key);
+    public IEnumerator WaitSignal(string key) => _cpsSignalBridge?.WaitSignal(key);
 }

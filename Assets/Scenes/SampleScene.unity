@@ -10811,7 +10811,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7dd50f871a60b4bbe88a71d308b2613f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  canvasGroup: {fileID: 2958262985601084661}
+  canvasGroup: {fileID: 0}
   lineText: {fileID: 2958262986381887306}
   showCharacterNameInLine: 1
   characterNameText: {fileID: 2958262987068268324}

@@ -3,6 +3,11 @@ using Yarn.Unity;
 
 public class VnAppBootstrap : MonoBehaviour
 {
+    public PlaybackSettings settings = new ();
+    private readonly UnityInputSource _unityInputSource = new();
+    private readonly UnityTimeSource _unityTimeSource = new();
+    private readonly SignalLatch _signalLatch = new();
+    
     [Header("UI")]
     [SerializeField] private EpisodePlayer episodePlayer;
     
@@ -10,27 +15,26 @@ public class VnAppBootstrap : MonoBehaviour
     private EpisodeFlowController _episodeFlowController;
     private VnScreenBindings _screenBindings;
     
-    [Header("Yarn")]
-    [SerializeField] private DialogueRunner dialogueRunner;
-    [SerializeField] private YarnUIBridge yarnUIBridge;
-    
     [Header("Presentation")]
     [SerializeField] private CommandExecutor commandExecutor;
     [SerializeField] private UnitySignalBus unitySignalBus;
     [SerializeField] private PortraitGeneratedDBSO portraitGeneratedDbSo;
     
-    public PlaybackSettings settings = new ();
-    private readonly UnityInputSource _unityInputSource = new();
-    private readonly UnityTimeSource _unityTimeSource = new();
-    private readonly SignalLatch _signalLatch = new();
-    
     public PresentationSession Session { get; private set; }
+
+    private PresentationSessionBridge _presentationSessionBridge;
+    
+    [Header("Yarn")]
+    [SerializeField] private DialogueRunner dialogueRunner;
+    [SerializeField] private YarnUIBridge yarnUIBridge;
+    [SerializeField] private PresentationRouteEntry presentationRouteEntry;
     
     private void Awake()
     {
         UIBootStrap();
-        YarnBootstrap();
         PresentationSessionBootstrap();
+        BuildBridgePresentationSessionToYarn();
+        YarnBootstrap();
     }
 
     private void UIBootStrap()
@@ -39,12 +43,6 @@ public class VnAppBootstrap : MonoBehaviour
         _dialogueUIBindings = new DialogueUIBindings(episodePlayState);
         _episodeFlowController = new EpisodeFlowController(_dialogueUIBindings, episodePlayer, episodePlayState);
         _screenBindings = new VnScreenBindings(_episodeFlowController);
-    }
-
-    private void YarnBootstrap()
-    {
-        YarnCommandRegistry yarnCommandRegistry = new YarnCommandRegistry(dialogueRunner, yarnUIBridge);
-        yarnCommandRegistry.Initialize();
     }
 
     private void PresentationSessionBootstrap()
@@ -61,6 +59,18 @@ public class VnAppBootstrap : MonoBehaviour
         commandExecutor.Initialize(signalFactory, charRigFactory);
         
         Session = new PresentationSession(gatePlanner, gateAdvancer, commandExecutor, settings);
+    }
+
+    private void BuildBridgePresentationSessionToYarn()
+    {
+        _presentationSessionBridge = new(Session, unitySignalBus);
+    }
+    
+    private void YarnBootstrap()
+    {
+        VnRuntimeBridge vnRuntimeBridge = new VnRuntimeBridge(dialogueRunner, presentationRouteEntry, _presentationSessionBridge);
+        YarnCommandRegistry yarnCommandRegistry = new YarnCommandRegistry(dialogueRunner, yarnUIBridge, vnRuntimeBridge);
+        yarnCommandRegistry.Initialize();
     }
     
     private void Start()

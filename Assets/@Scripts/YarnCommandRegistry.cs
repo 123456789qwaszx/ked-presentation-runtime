@@ -1,16 +1,24 @@
+using System;
+using System.Collections;
 using Yarn.Unity;
 
 public sealed class YarnCommandRegistry
 {
+    private const string BeatKey = "beat";
+    
     private readonly DialogueRunner _dialogueRunner;
     private readonly YarnUIBridge _yarnUIBridge;
+    private readonly VnRuntimeBridge _vnRuntimeBridge;
+    
 
     public YarnCommandRegistry(
         DialogueRunner dialogueRunner,
-        YarnUIBridge yarnUIBridge)
+        YarnUIBridge yarnUIBridge,
+        VnRuntimeBridge vnRuntimeBridge)
     {
         _dialogueRunner = dialogueRunner;
         _yarnUIBridge = yarnUIBridge;
+        _vnRuntimeBridge = vnRuntimeBridge;
     }
 
     private bool _init;
@@ -25,6 +33,10 @@ public sealed class YarnCommandRegistry
 
     private void RegisterYarnCommands()
     {
+        
+        _dialogueRunner.AddCommandHandler("beat", (Func<IEnumerator>)(() => _vnRuntimeBridge.Beat(BeatKey)));
+        _dialogueRunner.AddCommandHandler<string>("WaitSignal", key => _vnRuntimeBridge.WaitSignal(key));
+        
         _dialogueRunner.AddCommandHandler("protagobox", _yarnUIBridge.WithProtagonist);
         _dialogueRunner.AddCommandHandler("charbox", _yarnUIBridge.HasCharNameBox);
         _dialogueRunner.AddCommandHandler("letterbox", _yarnUIBridge.LetterBox);
