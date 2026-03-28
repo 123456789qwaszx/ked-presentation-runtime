@@ -19,6 +19,8 @@ public class VnAppBootstrap : MonoBehaviour
     
     [Header("Yarn")]
     [SerializeField] private DialogueRunner dialogueRunner;
+    [SerializeField] private LinePresenter linePresenter;
+    [SerializeField] private DialogueTextRouter dialogueTextRouter;
     [SerializeField] private VnRuntimeBridge vnRuntimeBridge;
     [SerializeField] private YarnUIBridge yarnUIBridge;
     [SerializeField] private InlineEventMarkupHandler inlineEventMarkupHandler;
@@ -80,6 +82,7 @@ public class VnAppBootstrap : MonoBehaviour
     {
         inlineEventMarkupHandler.Initiailze(_presentationSessionBridge);
         vnRuntimeBridge.Initialize(dialogueRunner, presentationSessionEntry, _presentationSessionBridge);
+        yarnUIBridge.Initialize(linePresenter, ellipsisBreathTypewriter, dialogueTextRouter);
         
         YarnCommandRegistry yarnCommandRegistry = new YarnCommandRegistry(dialogueRunner, yarnUIBridge, vnRuntimeBridge);
         yarnCommandRegistry.Initialize();
@@ -102,7 +105,7 @@ public class VnAppBootstrap : MonoBehaviour
 
     private void VnFeatureControllerBootstrap()
     {
-        yarnLineLifecycleBridge.Initialize();
+        yarnLineLifecycleBridge.Initialize(dialogueRunner);
         
         VnFeaturePolicy vnFeaturePolicy = new ();
         BacklogRecorder backlogRecorder = new BacklogRecorder(yarnLineLifecycleBridge, vnFeaturePolicy, _unityTimeSource);

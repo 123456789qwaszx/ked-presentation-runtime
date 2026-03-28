@@ -3,13 +3,13 @@ using UnityEngine;
 public sealed class PresentationSessionEntry : MonoBehaviour
 {
     public PresentationSession PresentationSession { get; private set; }
-    public RouteCatalogSO routeCatalog;
+    private RouteCatalogSO _routeCatalog;
     public PlaybackSettings playbackSettings;
 
     public void Initialize(PresentationSession presentationSession, RouteCatalogSO routeCatalogSo, PlaybackSettings settings)
     {
         PresentationSession = presentationSession;
-        routeCatalog = routeCatalogSo;
+        _routeCatalog = routeCatalogSo;
         playbackSettings = settings;
     }
     
@@ -21,7 +21,7 @@ public sealed class PresentationSessionEntry : MonoBehaviour
     
     public void StartRoute(string routeKey)
     {
-        if (!routeCatalog.TryResolve(routeKey, out Route route, out SequenceSpecSO sequence))
+        if (!_routeCatalog.TryResolve(routeKey, out Route route, out SequenceSpecSO sequence))
         {
             Debug.LogWarning($"[CpsRouteEntry] Failed to resolve routeKey='{routeKey}'");
             return;

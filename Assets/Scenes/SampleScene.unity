@@ -914,6 +914,8 @@ MonoBehaviour:
   routeCatalogSo: {fileID: 11400000, guid: 0a509c33b083b264c8262b318a84b25f, type: 2}
   presentationSessionEntry: {fileID: 1433866633}
   dialogueRunner: {fileID: 8309902628538800288}
+  linePresenter: {fileID: 2958262985601084670}
+  dialogueTextRouter: {fileID: 728559835}
   vnRuntimeBridge: {fileID: 2005113226}
   yarnUIBridge: {fileID: 1874881010}
   inlineEventMarkupHandler: {fileID: 946268260}
@@ -953,7 +955,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 526aefd5f3709cc4bb6b50a917f14e46, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::YarnLineLifecycleBridge
-  dialogueRunner: {fileID: 8309902628538800288}
   autoRegisterPresenter: 1
 --- !u!114 &626587494
 MonoBehaviour:
@@ -980,7 +981,52 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 7985477256358699683}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &728559834
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 728559836}
+  - component: {fileID: 728559835}
+  m_Layer: 0
+  m_Name: DialogueTextRouter
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &728559835
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 728559834}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a984786a3d7d6a64a89f352d7ae86bec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DialogueTextRouter
+  _lineText: {fileID: 0}
+--- !u!4 &728559836
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 728559834}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 156.17036, y: 493.25217, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &775605346
 GameObject:
@@ -1394,7 +1440,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95b338b669d2b774ab39adb42f94550e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CpsRouteEntry
-  routeCatalog: {fileID: 0}
   playbackSettings:
     enableDebugStart: 0
     debugStartStepName: 
@@ -1541,8 +1586,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8defeede9d90141468f8163ca7d6361e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::YarnUIBridge
-  linePresenter: {fileID: 2958262985601084670}
-  typewriter: {fileID: 1658226451}
 --- !u!4 &1874881011
 Transform:
   m_ObjectHideFlags: 0
@@ -31445,7 +31488,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 626587495}
   - {fileID: 2355361765201966761}
   - {fileID: 3859336322740877258}
   - {fileID: 4747703131299368518}
@@ -36851,15 +36893,17 @@ SceneRoots:
   - {fileID: 1257280953}
   - {fileID: 552181529}
   - {fileID: 7985477256358699683}
+  - {fileID: 728559836}
   - {fileID: 2005113227}
   - {fileID: 1874881011}
-  - {fileID: 1433866632}
   - {fileID: 946268261}
   - {fileID: 1658226452}
   - {fileID: 1315566988}
   - {fileID: 1502492436}
-  - {fileID: 1924806293}
+  - {fileID: 626587495}
   - {fileID: 63871903}
   - {fileID: 8103127889455306347}
   - {fileID: 99511076}
+  - {fileID: 1433866632}
+  - {fileID: 1924806293}
   - {fileID: 775605348}

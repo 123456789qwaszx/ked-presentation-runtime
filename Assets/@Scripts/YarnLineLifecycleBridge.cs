@@ -33,7 +33,7 @@ public struct YarnLineMeta
 [RequireComponent(typeof(YarnLineIdPresenter))]
 public sealed class YarnLineLifecycleBridge : ActionMarkupHandler
 {
-    [SerializeField] private DialogueRunner dialogueRunner;
+    private DialogueRunner _dialogueRunner;
     private YarnLineIdPresenter _lineIdPresenter;
     
     [Header("Setup")]
@@ -62,8 +62,9 @@ public sealed class YarnLineLifecycleBridge : ActionMarkupHandler
     
     #region Lifecycle & Bindings
 
-    public void Initialize()
+    public void Initialize(DialogueRunner dialogueRunner)
     {
+        _dialogueRunner = dialogueRunner;
         if (_initialized) return;
         _initialized = true;
         
@@ -81,19 +82,19 @@ public sealed class YarnLineLifecycleBridge : ActionMarkupHandler
 
     private void OnEnable()
     {
-        if (dialogueRunner == null)
+        if (_dialogueRunner == null)
             throw new InvalidOperationException("[YarnLifecycle] DialogueRunner is not assigned!");
 
-        dialogueRunner.onNodeStart?.AddListener(OnNodeStart);
-        dialogueRunner.onNodeComplete?.AddListener(OnNodeComplete);
+        _dialogueRunner.onNodeStart?.AddListener(OnNodeStart);
+        _dialogueRunner.onNodeComplete?.AddListener(OnNodeComplete);
     }
 
     private void OnDisable()
     {
-        if (dialogueRunner == null) return;
+        if (_dialogueRunner == null) return;
 
-        dialogueRunner.onNodeStart?.RemoveListener(OnNodeStart);
-        dialogueRunner.onNodeComplete?.RemoveListener(OnNodeComplete);
+        _dialogueRunner.onNodeStart?.RemoveListener(OnNodeStart);
+        _dialogueRunner.onNodeComplete?.RemoveListener(OnNodeComplete);
     }
     
     private void OnDestroy()
@@ -101,11 +102,11 @@ public sealed class YarnLineLifecycleBridge : ActionMarkupHandler
         if (_lineIdPresenter != null)
             _lineIdPresenter.OnLineIdReceived -= OnLineIdReceived;
 
-        if (dialogueRunner != null && _lineIdPresenter != null)
+        if (_dialogueRunner != null && _lineIdPresenter != null)
         {
-            List<DialoguePresenterBase> presenters = new (dialogueRunner.DialoguePresenters);
+            List<DialoguePresenterBase> presenters = new (_dialogueRunner.DialoguePresenters);
             presenters.Remove(_lineIdPresenter);
-            dialogueRunner.DialoguePresenters = presenters;
+            _dialogueRunner.DialoguePresenters = presenters;
         }
     }
     
@@ -130,7 +131,7 @@ public sealed class YarnLineLifecycleBridge : ActionMarkupHandler
         IsLineDismissing = false;
 
         CurrentMeta = BuildMeta(line, text);
-        Debug.Log($"[YarnLifecycle] Prepare serial={_lineSerial} lineId='{CurrentMeta.lineId}' text='{CurrentMeta.rawText}'");
+        //Debug.Log($"[YarnLifecycle] Prepare serial={_lineSerial} lineId='{CurrentMeta.lineId}' text='{CurrentMeta.rawText}'");
         
         LinePrepared?.Invoke(CurrentMeta);
     }

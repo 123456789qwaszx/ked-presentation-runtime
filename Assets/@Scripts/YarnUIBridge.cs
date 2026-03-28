@@ -3,10 +3,18 @@ using Yarn.Unity;
 
 public sealed class YarnUIBridge : MonoBehaviour
 {
-    [SerializeField] private LinePresenter linePresenter;
-    [SerializeField] private EllipsisBreathTypewriter typewriter;
+    private LinePresenter _linePresenter;
+    private EllipsisBreathTypewriter _ellipsisBreathTypewriter;
+    private DialogueTextRouter _dialogueTextRouter;
     
-    public DialogueTextRouter DialogueTextRouter { get; } = new();
+    public bool IsDialogueBoxReady => _dialogueTextRouter.LineText != null;
+
+    public void Initialize(LinePresenter linePresenter, EllipsisBreathTypewriter ellipsisBreathTypewriter, DialogueTextRouter dialogueTextRouter)
+    {
+        _linePresenter = linePresenter;
+        _ellipsisBreathTypewriter = ellipsisBreathTypewriter;
+        _dialogueTextRouter = dialogueTextRouter;
+    }
     
     public void WithProtagonist() => Show(DialogueUIRoot.DialogueBoxKind.WithPortrait);
     public void HasCharNameBox() => Show(DialogueUIRoot.DialogueBoxKind.NoPortrait);
@@ -22,27 +30,27 @@ public sealed class YarnUIBridge : MonoBehaviour
         dialogueUI.ShowBox(kind);
 
         IDialogueBoxView box = dialogueUI.GetBox(kind);
-        DialogueTextRouter.Bind(box);
+        _dialogueTextRouter.Bind(box);
 
         ApplyRouterTarget();
     }
     
     private void ApplyRouterTarget()
     {
-        linePresenter.lineText = DialogueTextRouter.LineText;
+        _linePresenter.lineText = _dialogueTextRouter.LineText;
 
-        if (!DialogueTextRouter.HasName)
+        if (!_dialogueTextRouter.HasName)
         {
-            linePresenter.showCharacterNameInLine = false;
-            linePresenter.characterNameText = null;
+            _linePresenter.showCharacterNameInLine = false;
+            _linePresenter.characterNameText = null;
         }
         else
         {
-            linePresenter.showCharacterNameInLine = true;
-            linePresenter.characterNameText = DialogueTextRouter.NameText;
+            _linePresenter.showCharacterNameInLine = true;
+            _linePresenter.characterNameText = _dialogueTextRouter.NameText;
         }
         
-        typewriter.SetTextView(DialogueTextRouter.LineText);
+        _ellipsisBreathTypewriter.SetTextView(_dialogueTextRouter.LineText);
     }
     
     
@@ -51,12 +59,12 @@ public sealed class YarnUIBridge : MonoBehaviour
         DialogueUIRoot dialogueUI = UIManager.Instance.GetUI<DialogueUIRoot>();
         dialogueUI.HideAllBoxes();
 
-        DialogueTextRouter.Clear();
+        _dialogueTextRouter.Clear();
 
-        linePresenter.lineText = null;
-        linePresenter.characterNameText = null;
-        linePresenter.showCharacterNameInLine = false;
+        _linePresenter.lineText = null;
+        _linePresenter.characterNameText = null;
+        _linePresenter.showCharacterNameInLine = false;
         
-        typewriter.SetTextView(null);
+        _ellipsisBreathTypewriter.SetTextView(null);
     }
 }

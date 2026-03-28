@@ -1,4 +1,5 @@
 using TMPro;
+using UnityEngine;
 
 public interface IDialogueBoxView
 {
@@ -9,7 +10,7 @@ public interface IDialogueBoxView
     void SetVisible(bool visible);
 }
 
-public sealed class DialogueTextRouter
+public sealed class DialogueTextRouter : MonoBehaviour
 {
     public TMP_Text LineText { get; private set; }
     public TMP_Text NameText { get; private set; }

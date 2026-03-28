@@ -81,7 +81,7 @@ public sealed class EpisodePlayer : MonoBehaviour
 
     private bool IsBoundReady()
     {
-        if (yarnUIBridge.DialogueTextRouter.LineText == null)
+        if (!yarnUIBridge.IsDialogueBoxReady)
             return false;
 
         return true;

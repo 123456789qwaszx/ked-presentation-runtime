@@ -29,7 +29,7 @@ public sealed class DialogueUIBindings : IDisposable
 
     public void Bind(DialogueUIRoot root)
     {
-        _ctx.Dispose();
+        _ctx.Unbind(root);
         
         // StepNext
         _ctx.Bind(root,
