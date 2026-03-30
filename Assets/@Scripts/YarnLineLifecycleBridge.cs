@@ -78,20 +78,19 @@ public sealed class YarnLineLifecycleBridge : ActionMarkupHandler
             presenters.Insert(0, _lineIdPresenter);
             dialogueRunner.DialoguePresenters = presenters;
         }
+
+        RegisterToYarn();
     }
 
-    private void OnEnable()
+    private void RegisterToYarn()
     {
-        if (_dialogueRunner == null)
-            throw new InvalidOperationException("[YarnLifecycle] DialogueRunner is not assigned!");
-
         _dialogueRunner.onNodeStart?.AddListener(OnNodeStart);
         _dialogueRunner.onNodeComplete?.AddListener(OnNodeComplete);
     }
 
     private void OnDisable()
     {
-        if (_dialogueRunner == null) return;
+        if (!_initialized || _dialogueRunner == null) return;
 
         _dialogueRunner.onNodeStart?.RemoveListener(OnNodeStart);
         _dialogueRunner.onNodeComplete?.RemoveListener(OnNodeComplete);

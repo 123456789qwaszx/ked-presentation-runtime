@@ -3,7 +3,6 @@ using System.Collections.Generic;
 public sealed class BacklogRecorder
 {
     private readonly YarnLineLifecycleBridge _yarnLineLifecycleBridge;
-    private readonly UnityTimeSource _unityTimeSource;
     
     private readonly int _maxCount;
     private readonly List<DialogueLogEntry> _entries;
@@ -12,15 +11,13 @@ public sealed class BacklogRecorder
 
     public BacklogRecorder(
         YarnLineLifecycleBridge yarnLineLifecycleBridge,
-        VnFeaturePolicy vnFeaturePolicy,
-        UnityTimeSource unityTimeSource)
+        VnPlaybackSettings vnPlaybackSettings)
     {
         _yarnLineLifecycleBridge = yarnLineLifecycleBridge;
-        _unityTimeSource = unityTimeSource;
         
         _maxCount = 
-            vnFeaturePolicy.maxLogCount <= 0 ?
-                100 : vnFeaturePolicy.maxLogCount;
+            vnPlaybackSettings.maxLogCount <= 0 ?
+                100 : vnPlaybackSettings.maxLogCount;
         _entries = new List<DialogueLogEntry>(_maxCount);
 
         RegisterHandler();
@@ -47,7 +44,7 @@ public sealed class BacklogRecorder
             lineSerial = meta.lineSerial,
             nodeName = meta.nodeName,
             rawText = meta.rawText,
-            timestamp = _unityTimeSource.UnscaledDeltaTime
+            timestamp = meta.frame
         });
     }
     

@@ -36,7 +36,7 @@ public sealed class PresentationSession
         StepGatePlanBuilder gatePlanner,
         StepGateAdvancer gateAdvancer,
         CommandExecutor executor,
-        PlaybackSettings modes
+        PresentationPlaybackSettings modes
     )
     {
         _gatePlanner = gatePlanner;

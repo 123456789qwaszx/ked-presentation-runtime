@@ -1,108 +1,63 @@
 using System;
-using UnityEngine;
-using Yarn.Unity;
 
 public sealed class AutoAdvanceScheduler
 {
     private readonly YarnLineLifecycleBridge _yarnLineLifecycleBridge;
     
     private readonly Action _requestAdvance;
-    private readonly VnUxState _uxState;
-    private readonly VnFeaturePolicy _vnFeaturePolicy;
-    private readonly DialogueAdvanceRouter _dialogueAdvanceRouter;
+    private readonly VnPlaybackSettings _playbackSettings;
+    private readonly DialogueAdvanceDispatcher _dialogueAdvanceDispatcher;
     private readonly Func<double> _getNow;
     
     private double _nextAutoAdvanceAt = double.PositiveInfinity;
-    private bool _isAutoEnabled;
-    private bool _lineFullyShown;
 
     public AutoAdvanceScheduler(
         YarnLineLifecycleBridge yarnLineLifecycleBridge,
-        VnUxState uxState, 
-        VnFeaturePolicy vnFeaturePolicy,
-        DialogueAdvanceRouter dialogueAdvanceRouter,
+        VnPlaybackSettings vnPlaybackSettings,
+        DialogueAdvanceDispatcher dialogueAdvanceDispatcher,
         Func<double> getNow)
     {
         _yarnLineLifecycleBridge = yarnLineLifecycleBridge;
-        _uxState = uxState;
-        _vnFeaturePolicy = vnFeaturePolicy;
-        _dialogueAdvanceRouter = dialogueAdvanceRouter;
+        _playbackSettings = vnPlaybackSettings;
+        _dialogueAdvanceDispatcher = dialogueAdvanceDispatcher;
         _getNow = getNow;
 
-        RegisterHandler();
+        RegisterToYarn();
     }
     
-    private void RegisterHandler()
+    private void RegisterToYarn()
     {
         _yarnLineLifecycleBridge.LineStart -= NotifyLineStart;
         _yarnLineLifecycleBridge.LineStart += NotifyLineStart;
-        _yarnLineLifecycleBridge.LineFinishDisplaying -= NotifyLineFullyShown;
-        _yarnLineLifecycleBridge.LineFinishDisplaying += NotifyLineFullyShown;
+        _yarnLineLifecycleBridge.LineFinishDisplaying -= NotifyLineFinishDisplaying;
+        _yarnLineLifecycleBridge.LineFinishDisplaying += NotifyLineFinishDisplaying;
     }
-
-    private void UnRegisterHandler()
+    
+    private void NotifyLineStart(YarnLineMeta meta) => _nextAutoAdvanceAt = double.PositiveInfinity;
+    private void NotifyLineFinishDisplaying(YarnLineMeta meta) => _nextAutoAdvanceAt = _getNow() + _playbackSettings.autoModeDelaySeconds;
+    
+    
+    public void Tick()
+    {
+        double t = _getNow();
+        
+        if (t >= _nextAutoAdvanceAt)
+        {
+            _nextAutoAdvanceAt = double.PositiveInfinity;
+            _dialogueAdvanceDispatcher.DispatchAdvance();
+        }
+    }
+    
+    public void ResetAutoAdvanceTimer() => _nextAutoAdvanceAt = _getNow() + _playbackSettings.autoModeDelaySeconds;
+    public void NotifyChoicesPresented() => _nextAutoAdvanceAt = double.PositiveInfinity;
+    public void NotifyBacklogOpened() => _nextAutoAdvanceAt = double.PositiveInfinity;
+    
+    
+    private void UnRegisterToYarn()
     {
         if (_yarnLineLifecycleBridge == null) return;
 
         _yarnLineLifecycleBridge.LineStart -= NotifyLineStart;
-        _yarnLineLifecycleBridge.LineFinishDisplaying -= NotifyLineFullyShown;
-    }
-    
-    public void SetEnabled(bool enabled)
-    {
-        if (_isAutoEnabled == enabled)
-            return;
-
-        _isAutoEnabled = enabled;
-
-        if (!_isAutoEnabled)
-        {
-            // Stop scheduling any auto-advance
-            _nextAutoAdvanceAt = double.PositiveInfinity;
-            return;
-        }
-
-        // Enabled: if the current line is already fully shown, schedule auto-advance now
-        if (_lineFullyShown)
-            _nextAutoAdvanceAt = _getNow() + _vnFeaturePolicy.autoDelaySeconds;
-    }
-    
-    private void NotifyLineStart(YarnLineMeta meta)
-    {
-        _lineFullyShown = false;
-        _nextAutoAdvanceAt = double.PositiveInfinity;
-    }
-    
-    private void NotifyLineFullyShown(YarnLineMeta meta)
-    {
-        _lineFullyShown = true;
-
-        if (!_isAutoEnabled)
-            return;
-
-        _nextAutoAdvanceAt = _getNow() + _vnFeaturePolicy.autoDelaySeconds;
-    }
-    
-    public void NotifyChoicesPresented() => _nextAutoAdvanceAt = double.PositiveInfinity;
-    public void NotifyBacklogOpened() => _nextAutoAdvanceAt = double.PositiveInfinity;
-    
-    public void Tick()
-    {
-        if (!_isAutoEnabled) return;
-        if (!_lineFullyShown) return;
-
-        if (_uxState.BacklogVisible) return;
-        if (_uxState.ChoicesVisible) return;
-
-        double t = _getNow();
-        
-        //Debug.Log($"{_getNow()}");
-        if (t >= _nextAutoAdvanceAt)
-        {
-            //Debug.Log("{_getNow()}");
-            _nextAutoAdvanceAt = double.PositiveInfinity;
-            _lineFullyShown = false;
-            _dialogueAdvanceRouter.DispatchAdvance();
-        }
+        _yarnLineLifecycleBridge.LineFinishDisplaying -= NotifyLineFinishDisplaying;
     }
 }

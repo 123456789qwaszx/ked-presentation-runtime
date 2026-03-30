@@ -1,17 +1,14 @@
 using UnityEngine;
 using Yarn.Unity;
 
-public sealed class DialogueAdvanceRouter : MonoBehaviour
+public sealed class DialogueAdvanceDispatcher : MonoBehaviour
 {
     private AdvanceGate _gate;
     private DialogueRunner _dialogueRunner;
     private InlineEventMarkupHandler _inlineMarkupHandler;
 
-    [SerializeField] private float _cooldownAfterHurryUpSec = 0.28f;
-    [SerializeField] private float _cooldownAfterNextLineSec = Mathf.Max(0.12f, 0.1f); // Prevent double-skip: enforce a minimum cooldown
-
     public void Initialize(
-        AdvanceGate gate, 
+        AdvanceGate gate,
         DialogueRunner dialogueRunner,
         InlineEventMarkupHandler inlineMarkupHandler)
     {
@@ -20,7 +17,6 @@ public sealed class DialogueAdvanceRouter : MonoBehaviour
         _inlineMarkupHandler = inlineMarkupHandler;
     }
     
-
     public void DispatchAdvance()
     {
         // Single gate for ALL user advance requests (mouse/space/etc.)
@@ -35,6 +31,7 @@ public sealed class DialogueAdvanceRouter : MonoBehaviour
         _gate.AddCooldownSeconds(0.03f);
     }
 
+    
     private bool TryDispatchToYarn()
     {
         if (_dialogueRunner == null || !_dialogueRunner.IsDialogueRunning) return false;
@@ -44,13 +41,13 @@ public sealed class DialogueAdvanceRouter : MonoBehaviour
             _inlineMarkupHandler.FlushPendingSignals();
             _dialogueRunner.RequestHurryUpLine();
 
-            _gate.AddCooldownSeconds(_cooldownAfterHurryUpSec);
+            _gate.AddCooldownSeconds(_gate.CooldownAfterHurryUpSec);
         }
         else
         {
             _dialogueRunner.RequestNextLine();
 
-            _gate.AddCooldownSeconds(_cooldownAfterNextLineSec);
+            _gate.AddCooldownSeconds(_gate.CooldownAfterNextLineSec);
         }
 
         return true;

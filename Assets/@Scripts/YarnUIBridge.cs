@@ -37,7 +37,7 @@ public sealed class YarnUIBridge : MonoBehaviour
     
     private void ApplyRouterTarget()
     {
-        _linePresenter.lineText = _dialogueTextRouter.LineText;
+        //_linePresenter.lineText = _dialogueTextRouter.LineText;
 
         if (!_dialogueTextRouter.HasName)
         {
@@ -61,7 +61,7 @@ public sealed class YarnUIBridge : MonoBehaviour
 
         _dialogueTextRouter.Clear();
 
-        _linePresenter.lineText = null;
+        //_linePresenter.lineText = null;
         _linePresenter.characterNameText = null;
         _linePresenter.showCharacterNameInLine = false;
         

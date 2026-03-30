@@ -5,15 +5,17 @@ public class VnAppBootstrap : MonoBehaviour
 {
     private readonly UnityInputSource _unityInputSource = new();
     private readonly UnityTimeSource _unityTimeSource = new();
-    private readonly SignalLatch _signalLatch = new();
-    private readonly PlaybackSettings _settings = new ();
+    private readonly PresentationPlaybackSettings _presentationContextSettings = new ();
     private readonly VnUxState _vnUxState = new ();
+    private readonly VnPlaybackSettings _vnPlaybackSettings = new ();
     private readonly EpisodePlayState _episodePlayState = new (); 
     
     [Header("Presentation")]
-    [SerializeField] private CommandExecutor commandExecutor;
-    [SerializeField] private UnitySignalBus unitySignalBus;
     [SerializeField] private PortraitGeneratedDbSo portraitGeneratedDbSo;
+    [SerializeField] private UnitySignalBus unitySignalBus;
+    [SerializeField] private CommandExecutor commandExecutor;
+    
+    [Header("PresentationEntry")]
     [SerializeField] private RouteCatalogSO routeCatalogSo;
     [SerializeField] private PresentationSessionEntry presentationSessionEntry;
     
@@ -27,8 +29,8 @@ public class VnAppBootstrap : MonoBehaviour
     
     [Header("VnAdvanceGate")]
     [SerializeField] private EllipsisBreathTypewriter ellipsisBreathTypewriter;
-    [SerializeField] VnRawInputPoller vnRawInputPoller;
-    [SerializeField] DialogueAdvanceRouter dialogueAdvanceRouter;
+    [SerializeField] VnAdvanceInputPoller vnAdvanceInputPoller;
+    [SerializeField] DialogueAdvanceDispatcher dialogueAdvanceDispatcher;
     
     [Header("YarnVnInputFeature")]
     [SerializeField] YarnLineLifecycleBridge yarnLineLifecycleBridge;
@@ -37,48 +39,55 @@ public class VnAppBootstrap : MonoBehaviour
     [Header("UI")]
     [SerializeField] private EpisodePlayer episodePlayer;
     
+    private PresentationSessionBridge _presentationSessionBridge;
+    
+    private DialogueUIBindings _dialogueUIBindings;
     private EpisodeFlowController _episodeFlowController;
     private VnScreenBindings _screenBindings;
-    private DialogueUIBindings _dialogueUIBindings;
-    
-    private PresentationSessionBridge _presentationSessionBridge;
     
     private void Awake()
     {
-        PresentationSessionBootstrap();
+        BootstrapPresentationSession();
+        ConnectPresentationSessionToYarn();
         
-        BuildBridgePresentationSessionToYarn();
-        YarnBootstrap();
-        VnAdvanceInputBootstrap();
-        UIBootStrap();
-        VnFeatureControllerBootstrap();
+        BootstrapYarn();
+        SetupYarnLifecycleBridge();
+        
+        BootstrapDialogueAdvanceInput();
+        BootstrapPlaybackControls();
+        
+        BootstrapUIBindings();
+        InitializeEpisodePlayer();
     }
     
-    private void PresentationSessionBootstrap()
+    private void BootstrapPresentationSession()
     {
-        StepGatePlanBuilder gatePlanner = new ();
-        unitySignalBus.OnSignal += _signalLatch.Latch;
-        StepGateAdvancer gateAdvancer = new (_unityInputSource, _unityTimeSource, unitySignalBus, _signalLatch);
+        SignalLatch signalLatch = new();
+        unitySignalBus.OnSignal += signalLatch.Latch;
         
-        SignalCommandFactory signalFactory = new(_unityTimeSource, unitySignalBus, _signalLatch);
+        StepGatePlanBuilder gatePlanner = new ();
+        StepGateAdvancer gateAdvancer = new (_unityInputSource, _unityTimeSource, unitySignalBus, signalLatch);
+        
+        SignalCommandFactory signalFactory = new(_unityTimeSource, unitySignalBus, signalLatch);
         CharRigSlotResolver charRigSlotResolver = new();
         CharacterRigAccess charRigAccess = new(charRigSlotResolver);
         PortraitResolver portraitResolver = new (portraitGeneratedDbSo);
         CharRigCommandFactory charRigFactory = new(charRigAccess, portraitResolver);
         commandExecutor.Initialize(signalFactory, charRigFactory);
         
-        PresentationSession presentationSession = new PresentationSession(gatePlanner, gateAdvancer, commandExecutor, _settings);
-        presentationSessionEntry.Initialize(presentationSession, routeCatalogSo, _settings);
+        PresentationSession presentationSession = new PresentationSession(gatePlanner, gateAdvancer, commandExecutor, _presentationContextSettings);
+        
+        presentationSessionEntry.Initialize(presentationSession, routeCatalogSo, _presentationContextSettings);
     }
 
-    private void BuildBridgePresentationSessionToYarn()
+    private void ConnectPresentationSessionToYarn()
     {
         PresentationSession session = presentationSessionEntry.PresentationSession;
         
         _presentationSessionBridge = new(session, unitySignalBus);
     }
     
-    private void YarnBootstrap()
+    private void BootstrapYarn()
     {
         inlineEventMarkupHandler.Initiailze(_presentationSessionBridge);
         vnRuntimeBridge.Initialize(dialogueRunner, presentationSessionEntry, _presentationSessionBridge);
@@ -88,47 +97,46 @@ public class VnAppBootstrap : MonoBehaviour
         yarnCommandRegistry.Initialize();
     }
 
-    private void VnAdvanceInputBootstrap()
+    private void SetupYarnLifecycleBridge()
+    {
+        yarnLineLifecycleBridge.Initialize(dialogueRunner);
+    }
+
+    private void BootstrapDialogueAdvanceInput()
     {
         PresentationSession session = presentationSessionEntry.PresentationSession;
         
         AdvanceGate advanceGategate = new(
             _vnUxState,
-            ellipsisBreathTypewriter,
+            _vnPlaybackSettings,
+            yarnLineLifecycleBridge,
             () => session != null && session.IsNodeBusy()
         );
 
-        dialogueAdvanceRouter.Initialize(advanceGategate, dialogueRunner, inlineEventMarkupHandler);
-        vnRawInputPoller.Initialize(dialogueAdvanceRouter);
-        
+        dialogueAdvanceDispatcher.Initialize(advanceGategate, dialogueRunner, inlineEventMarkupHandler);
+        vnAdvanceInputPoller.Initialize(dialogueAdvanceDispatcher);
     }
 
-    private void VnFeatureControllerBootstrap()
+    private void BootstrapPlaybackControls()
     {
-        yarnLineLifecycleBridge.Initialize(dialogueRunner);
-        
-        VnFeaturePolicy vnFeaturePolicy = new ();
-        BacklogRecorder backlogRecorder = new BacklogRecorder(yarnLineLifecycleBridge, vnFeaturePolicy, _unityTimeSource);
+        BacklogRecorder backlogRecorder = new BacklogRecorder(yarnLineLifecycleBridge, _vnPlaybackSettings);
         AutoAdvanceScheduler autoAdvanceScheduler = new AutoAdvanceScheduler(
             yarnLineLifecycleBridge,
-            _vnUxState, 
-            vnFeaturePolicy,
-            dialogueAdvanceRouter,
+            _vnPlaybackSettings,
+            dialogueAdvanceDispatcher,
             () => Time.unscaledTimeAsDouble);
         
-        vnFeatureController.Initialize(ellipsisBreathTypewriter, _vnUxState, backlogRecorder, autoAdvanceScheduler);
+        vnFeatureController.Initialize(_vnUxState, _vnPlaybackSettings, yarnLineLifecycleBridge, ellipsisBreathTypewriter, backlogRecorder, autoAdvanceScheduler);
     }
     
-    private void UIBootStrap()
+    private void BootstrapUIBindings()
     {
-        _dialogueUIBindings = new DialogueUIBindings(_episodePlayState, vnFeatureController, _vnUxState, vnRuntimeBridge, dialogueAdvanceRouter);
+        _dialogueUIBindings = new DialogueUIBindings(_episodePlayState, vnFeatureController, _vnUxState, vnRuntimeBridge, dialogueAdvanceDispatcher);
         _episodeFlowController = new EpisodeFlowController(_dialogueUIBindings, episodePlayer, _episodePlayState);
         _screenBindings = new VnScreenBindings(_episodeFlowController);
-
-        TestLauncherInitialize();
     }
 
-    private void TestLauncherInitialize()
+    private void InitializeEpisodePlayer()
     {
         episodePlayer.Initialize(_screenBindings, _dialogueUIBindings);
     }

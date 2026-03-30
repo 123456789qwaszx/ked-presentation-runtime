@@ -98,6 +98,4 @@ public sealed class EpisodePlayer : MonoBehaviour
             Debug.Log("Stop Dialogue", this);
         }
     }
-    
-    
 }

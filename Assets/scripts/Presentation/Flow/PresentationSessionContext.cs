@@ -1,7 +1,7 @@
 using System;
 
 [Serializable]
-public sealed class PlaybackSettings
+public sealed class PresentationPlaybackSettings
 {
     public const float DefaultTimeScale        = 1f;
     public const float DefaultAutoAdvanceDelay = 0.6f;
@@ -39,13 +39,13 @@ public sealed class PlaybackSettings
 [Serializable]
 public sealed class PresentationSessionContext
 {
-    private readonly PlaybackSettings _playback;
+    private readonly PresentationPlaybackSettings _playback;
     
     private bool _isNodeBusy;
     private bool _isBlockingInput;
     private bool _closeRequested;
     
-    public PresentationSessionContext(PlaybackSettings playback)
+    public PresentationSessionContext(PresentationPlaybackSettings playback)
     {
         _playback = playback;
     }

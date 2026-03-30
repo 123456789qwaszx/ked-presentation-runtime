@@ -10,49 +10,64 @@ public enum VnPlayMode
 }
 
 [Serializable]
-public class VnFeaturePolicy
+public class VnPlaybackSettings
 {
-    public VnPlayMode vnPlayMode = VnPlayMode.Manual;
     public int maxLogCount = 100;
-    public float speedupMultiplier = 12f;
-    public float autoDelaySeconds = 1.5f;
+    public float speedupModeMultiplier = 12f;
+    public float autoModeDelaySeconds = 1.5f;
+    
+    public float userAdvanceCooldownSec = 0.13f; // 130ms
+    public float autoAdvanceRateLimitSec = 0.13f; // 130ms
+    
+    public float cooldownAfterHurryUpSec = 0.28f;
+    public float cooldownAfterNextLineSec = Mathf.Max(0.12f, 0.1f); // Prevent double-skip: enforce a minimum cooldown
 
+    public VnPlayMode vnPlayMode = VnPlayMode.Manual;
+    
     public void ChangePlayMode(VnPlayMode mode) => vnPlayMode =  mode;
+    
+    public bool IsAuto => vnPlayMode == VnPlayMode.Auto;
+    public bool IsSpeedup => vnPlayMode == VnPlayMode.Speedup;
 }
 
 public sealed class VnFeatureController : MonoBehaviour
 {
+    private VnUxState _vnUxState;
+    [SerializeField] private VnPlaybackSettings _vnPlaybackSettings;
     private EllipsisBreathTypewriter _typewriter;
-    private VnUxState _uxState;
+    private YarnLineLifecycleBridge _yarnLineLifecycleBridge;
+    
     private BacklogRecorder _backlogRecorder;
     private AutoAdvanceScheduler _autoAdvanceScheduler;
     
-    [Header("FeaturePolicy")]
-    [SerializeField] private VnFeaturePolicy vnFeaturePolicy;
-
-    public VnPlayMode Mode => vnFeaturePolicy.vnPlayMode;
-    public bool IsAuto => Mode == VnPlayMode.Auto;
-    public bool IsSpeedup => Mode == VnPlayMode.Speedup;
+    public bool IsAuto => _vnPlaybackSettings.IsAuto;
+    public bool IsSpeedup => _vnPlaybackSettings.IsSpeedup;
+    private bool LineFullyShown => _yarnLineLifecycleBridge.IsLineFullyShown;
+    
     public IReadOnlyList<DialogueLogEntry> Backlogs => _backlogRecorder.Entries;
     
     private bool _init;
 
     public void Initialize(
-        EllipsisBreathTypewriter ellipsisBreathTypewriter,
         VnUxState uxState,
+        VnPlaybackSettings vnPlaybackSettings,
+        YarnLineLifecycleBridge yarnLineLifecycleBridge,
+        EllipsisBreathTypewriter ellipsisBreathTypewriter,
         BacklogRecorder backlogRecorder,
         AutoAdvanceScheduler autoAdvanceScheduler
        )
     {
         if (_init) return;
         
+        _vnUxState = uxState;
+        _vnPlaybackSettings = vnPlaybackSettings;
+        _yarnLineLifecycleBridge = yarnLineLifecycleBridge;
         _typewriter = ellipsisBreathTypewriter;
-        _uxState = uxState;
+        
         _backlogRecorder = backlogRecorder;
         _autoAdvanceScheduler = autoAdvanceScheduler;
         
         _init = true;
-        ApplyModeSideEffects(VnPlayMode.Manual, Mode);
     }
     
     private void Update()
@@ -60,13 +75,13 @@ public sealed class VnFeatureController : MonoBehaviour
         if (!_init)
             return;
         
-        if (_uxState.BacklogVisible)
+        if (_vnUxState.BacklogVisible)
             return;
         
-        if (_uxState.ChoicesVisible)
+        if (_vnUxState.ChoicesVisible)
             return;
 
-        if (Mode == VnPlayMode.Auto)
+        if (IsAuto && LineFullyShown)
         {
             _autoAdvanceScheduler.Tick();
         }
@@ -74,35 +89,30 @@ public sealed class VnFeatureController : MonoBehaviour
 
     public void ToggleAuto()
     {
-        if (Mode == VnPlayMode.Auto) SetMode(VnPlayMode.Manual);
+        if (IsAuto) SetMode(VnPlayMode.Manual);
         else SetMode(VnPlayMode.Auto);
     }
 
     public void ToggleSpeedup()
     {
-        if (Mode == VnPlayMode.Speedup) SetMode(VnPlayMode.Manual);
+        if (IsSpeedup) SetMode(VnPlayMode.Manual);
         else SetMode(VnPlayMode.Speedup);
     }
 
     private void SetMode(VnPlayMode mode)
     {
-        if (Mode == mode)
-            return;
+        _vnPlaybackSettings.ChangePlayMode(mode);
 
-        VnPlayMode prev = Mode;
-        vnFeaturePolicy.ChangePlayMode(mode);
-
-        ApplyModeSideEffects(prev, Mode);
+        ApplyModeSideEffects(mode);
     }
 
-    private void ApplyModeSideEffects(VnPlayMode previous, VnPlayMode current)
+    private void ApplyModeSideEffects(VnPlayMode current)
     {
-        if (current == VnPlayMode.Auto)
-            _autoAdvanceScheduler.SetEnabled(true);
-        else _autoAdvanceScheduler.SetEnabled(false);
+        if (current == VnPlayMode.Auto && LineFullyShown)
+            _autoAdvanceScheduler.ResetAutoAdvanceTimer();
         
         float mul = (current == VnPlayMode.Speedup) ?
-            vnFeaturePolicy.speedupMultiplier 
+            _vnPlaybackSettings.speedupModeMultiplier 
             : 1f;
         _typewriter.SetSpeedMultiplier(mul);
     }

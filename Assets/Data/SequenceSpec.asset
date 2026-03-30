@@ -62,6 +62,7 @@ MonoBehaviour:
         setup:
         - rid: 305542832622927937
         - rid: 305542832622927938
+        - rid: 305542838602170430
         motion:
         - rid: 305542832622927939
         - rid: 305542832622927941
@@ -72,6 +73,7 @@ MonoBehaviour:
       - rid: 305542832622927936
       - rid: 305542832622927937
       - rid: 305542832622927938
+      - rid: 305542838602170430
       - rid: 305542832622927939
       - rid: 305542832622927941
       gate:
@@ -88,6 +90,68 @@ MonoBehaviour:
         fx: []
       compiled:
       - rid: 305542832622927947
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+    - editorName: 
+      tracks:
+        interaction:
+        - rid: 305542845787537471
+        - rid: 305542845787537470
+        setup: []
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 305542845787537471
+      - rid: 305542845787537470
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+    - editorName: 
+      tracks:
+        interaction:
+        - rid: 305542845787537472
+        - rid: 305542845787537473
+        setup: []
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 305542845787537472
+      - rid: 305542845787537473
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+    - editorName: 
+      tracks:
+        interaction:
+        - rid: 305542845787537474
+        - rid: 305542845787537475
+        setup: []
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 305542845787537474
+      - rid: 305542845787537475
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+    - editorName: 
+      tracks:
+        interaction:
+        - rid: 305542845787537468
+        setup: []
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 305542845787537468
       gate:
         type: 3
         seconds: 0
@@ -261,7 +325,7 @@ MonoBehaviour:
         globalTuning: {fileID: 0}
         roleTuningDb: {fileID: 0}
         poseKey: 
-        offset: {x: 0, y: -400}
+        offset: {x: -54, y: -376}
         overrideAnchoredPosition: 0
         anchoredPositionOverride: {x: 0, y: 0}
     - rid: 305542832622927939
@@ -329,4 +393,135 @@ MonoBehaviour:
         damping: 7
         timeEase: 10
         prep: 1.5
+        wait: 1
+    - rid: 305542838602170430
+      type: {class: RotateFromToCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: kuonji
+        _meta:
+          track: 10
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 2
+        toEuler: {x: 0, y: 180, z: -2}
+        overrideFromEuler: 0
+        fromEuler: {x: 0, y: 0, z: 0}
+        duration: -1
+        ease: 9
+        wait: 0
+        killTween: 1
+    - rid: 305542845787537468
+      type: {class: BounceCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: kuonji
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 1
+        ease: 9
+        duration: 1.2
+        waveAmplitude: 12
+        waveLoops: 4
+        waveAxis: 1
+        wait: 0
+    - rid: 305542845787537470
+      type: {class: DipInOutCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: kuonji
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 1
+        dir: 2
+        distance: 24
+        duration: 0.4
+        ease: 8
+        wait: 1
+    - rid: 305542845787537471
+      type: {class: MoveInOutCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: kuonji
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 1
+        offset: {x: 24, y: 0}
+        duration: 0.22
+        holdPortion: 0.08
+        ease: 10
+        wait: 0
+    - rid: 305542845787537472
+      type: {class: MoveInOutCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: kuonji
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 1
+        offset: {x: 24, y: 0}
+        duration: 0.22
+        holdPortion: 0.08
+        ease: 10
+        wait: 0
+    - rid: 305542845787537473
+      type: {class: DipInOutCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: kuonji
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 1
+        dir: 2
+        distance: 24
+        duration: 0.4
+        ease: 8
+        wait: 1
+    - rid: 305542845787537474
+      type: {class: MoveInOutCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: kuonji
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 1
+        offset: {x: 24, y: 0}
+        duration: 0.22
+        holdPortion: 0.08
+        ease: 10
+        wait: 0
+    - rid: 305542845787537475
+      type: {class: DipInOutCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: kuonji
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 1
+        dir: 2
+        distance: 24
+        duration: 0.4
+        ease: 8
         wait: 1

@@ -10,21 +10,21 @@ public sealed class DialogueUIBindings : IDisposable
     private readonly VnFeatureController _vnFeatures;
     private readonly VnUxState _uxState;
     private readonly VnRuntimeBridge _vnRuntimeBridge;
-    private readonly DialogueAdvanceRouter _advanceRouter;
+    private readonly DialogueAdvanceDispatcher _dialogueAdvanceDispatcher;
 
     public DialogueUIBindings(
         EpisodePlayState episodePlayState,
         VnFeatureController vnFeatures,
         VnUxState uxState,
         VnRuntimeBridge vnSignalBridge,
-        DialogueAdvanceRouter advanceRouter
+        DialogueAdvanceDispatcher dialogueAdvanceDispatcher
     )
     {
         _episodePlayState = episodePlayState;
         _vnFeatures = vnFeatures;
         _uxState = uxState;
         _vnRuntimeBridge = vnSignalBridge;
-        _advanceRouter = advanceRouter;
+        _dialogueAdvanceDispatcher = dialogueAdvanceDispatcher;
     }
 
     public void Bind(DialogueUIRoot root)
@@ -80,7 +80,7 @@ public sealed class DialogueUIBindings : IDisposable
             return;
         }
 
-        _advanceRouter.DispatchAdvance();
+        _dialogueAdvanceDispatcher.DispatchAdvance();
     }
 
     private void HandleSkipPressed()
@@ -135,6 +135,7 @@ public sealed class DialogueUIBindings : IDisposable
         
         UIManager.Instance.PopAllPanels();
         UIManager.Instance.SwitchRoot<LobbyUIRoot>();
+        
     }
 
     private void HandleAutoPressed()

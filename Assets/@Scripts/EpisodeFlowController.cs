@@ -7,7 +7,7 @@ public class EpisodeFlowController : IDisposable
     
     private readonly UIBindingContext _ctx = new();
     
-    private readonly DialogueUIBindings _dialogueInput;
+    private readonly DialogueUIBindings _dialogueUIBindings;
     private readonly EpisodePlayer _episodePlayer;
     
     private EpisodePlayState _episodePlayState;
@@ -17,7 +17,7 @@ public class EpisodeFlowController : IDisposable
         EpisodePlayer episodePlayer,
         EpisodePlayState episodePlayState)
     {
-        _dialogueInput = dialogueInput;
+        _dialogueUIBindings = dialogueInput;
         _episodePlayer = episodePlayer;
         _episodePlayState = episodePlayState;
     }
@@ -105,7 +105,7 @@ public class EpisodeFlowController : IDisposable
 
         UIManager.Instance.SwitchRoot<DialogueUIRoot>(root =>
         {
-            _dialogueInput.Bind(root);
+            _dialogueUIBindings.Bind(root);
             _episodePlayer.StartYarnNode(ownerEpisodeId);
         });
     }
@@ -121,7 +121,7 @@ public class EpisodeFlowController : IDisposable
 
         UIManager.Instance.SwitchRoot<DialogueUIRoot>(root =>
         {
-            _dialogueInput.Bind(root);
+            _dialogueUIBindings.Bind(root);
             _episodePlayer.StartYarnNode(targetEpisodeId);
         });
     }

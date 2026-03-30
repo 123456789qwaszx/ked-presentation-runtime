@@ -4,12 +4,15 @@ using UnityEngine;
 public sealed class AdvanceGate
 {
     private readonly VnUxState _vnUxState;
-    private readonly EllipsisBreathTypewriter _typewriter;
+    private readonly VnPlaybackSettings _vnPlaybackSettings;
+    private readonly YarnLineLifecycleBridge _yarnLineLifecycleBridge;
     private readonly Func<bool> _isCpsNodeBusy;
 
     // ---- Rate limiting ----
-    public float UserAdvanceCooldownSec { get; set; } = 0.13f; // 130ms
-    public float AutoPulseCooldownSec { get; set; } = 0.13f; // 130ms
+    private float UserAdvanceCooldownSec => _vnPlaybackSettings.userAdvanceCooldownSec;
+    private float AutoPulseCooldownSec => _vnPlaybackSettings.autoAdvanceRateLimitSec;
+    public float CooldownAfterHurryUpSec => _vnPlaybackSettings.cooldownAfterHurryUpSec;
+    public float CooldownAfterNextLineSec => _vnPlaybackSettings.cooldownAfterNextLineSec;
 
     private double _lastAcceptedUserAdvanceAt = double.NegativeInfinity;
     private double _lastAcceptedAutoPulseAt   = double.NegativeInfinity;
@@ -19,15 +22,17 @@ public sealed class AdvanceGate
 
     public AdvanceGate(
         VnUxState uxState,
-        EllipsisBreathTypewriter typewriter,
+        VnPlaybackSettings vnPlaybackSettings,
+        YarnLineLifecycleBridge yarnLineLifecycleBridge,
         Func<bool> isCpsNodeBusy)
     {
         _vnUxState = uxState;
-        _typewriter = typewriter;
+        _vnPlaybackSettings = vnPlaybackSettings;
+        _yarnLineLifecycleBridge = yarnLineLifecycleBridge;
         _isCpsNodeBusy = isCpsNodeBusy;
     }
     
-    public bool IsLineFullyShown() => _typewriter.IsComplete;
+    public bool IsLineFullyShown() => _yarnLineLifecycleBridge.IsLineFullyShown;
     
     public void AddCooldownSeconds(float seconds)
     {
