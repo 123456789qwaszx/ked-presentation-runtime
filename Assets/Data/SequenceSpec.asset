@@ -359,7 +359,7 @@ MonoBehaviour:
         duration: 0.55
         ease: 9
         punch: 24
-        wait: 1
+        wait: 0
     - rid: 305542832622927945
       type: {class: DipInOutCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:
@@ -393,7 +393,7 @@ MonoBehaviour:
         damping: 7
         timeEase: 10
         prep: 1.5
-        wait: 1
+        wait: 0
     - rid: 305542838602170430
       type: {class: RotateFromToCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:
@@ -444,7 +444,7 @@ MonoBehaviour:
         distance: 24
         duration: 0.4
         ease: 8
-        wait: 1
+        wait: 0
     - rid: 305542845787537471
       type: {class: MoveInOutCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:
@@ -492,7 +492,7 @@ MonoBehaviour:
         distance: 24
         duration: 0.4
         ease: 8
-        wait: 1
+        wait: 0
     - rid: 305542845787537474
       type: {class: MoveInOutCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:
@@ -524,4 +524,4 @@ MonoBehaviour:
         distance: 24
         duration: 0.4
         ease: 8
-        wait: 1
+        wait: 0

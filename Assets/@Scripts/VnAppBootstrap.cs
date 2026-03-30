@@ -89,7 +89,7 @@ public class VnAppBootstrap : MonoBehaviour
     
     private void BootstrapYarn()
     {
-        inlineEventMarkupHandler.Initiailze(_presentationSessionBridge);
+        inlineEventMarkupHandler.Initialize(_presentationSessionBridge);
         vnRuntimeBridge.Initialize(dialogueRunner, presentationSessionEntry, _presentationSessionBridge);
         yarnUIBridge.Initialize(linePresenter, ellipsisBreathTypewriter, dialogueTextRouter);
         
@@ -125,8 +125,21 @@ public class VnAppBootstrap : MonoBehaviour
             _vnPlaybackSettings,
             dialogueAdvanceDispatcher,
             () => Time.unscaledTimeAsDouble);
+        HoldSpeedUpController holdSkipController = new(
+            _vnPlaybackSettings,
+            ellipsisBreathTypewriter,
+            dialogueAdvanceDispatcher,
+            () => yarnLineLifecycleBridge.IsLineFullyShown);
         
-        vnFeatureController.Initialize(_vnUxState, _vnPlaybackSettings, yarnLineLifecycleBridge, ellipsisBreathTypewriter, backlogRecorder, autoAdvanceScheduler);
+        vnFeatureController.Initialize(
+            _vnUxState,
+            _vnPlaybackSettings,
+            yarnLineLifecycleBridge,
+            ellipsisBreathTypewriter,
+            inlineEventMarkupHandler,
+            backlogRecorder,
+            autoAdvanceScheduler,
+            holdSkipController);
     }
     
     private void BootstrapUIBindings()

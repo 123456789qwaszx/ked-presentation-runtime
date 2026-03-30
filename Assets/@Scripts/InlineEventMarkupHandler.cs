@@ -14,7 +14,7 @@ using Yarn.Unity;
 public sealed class InlineEventMarkupHandler : ActionMarkupHandler
 {
     private IInlineSignalHost _inlineSignalHost;
-    public void Initiailze(IInlineSignalHost inlineSignalHost)
+    public void Initialize(IInlineSignalHost inlineSignalHost)
     {
         _inlineSignalHost = inlineSignalHost;
     }
@@ -81,8 +81,14 @@ public sealed class InlineEventMarkupHandler : ActionMarkupHandler
 
     private string _plainText = "";
     private int _lastProcessedCharIndex = 0;
+    
+    private bool _ignorePause;
 
-
+    public void SetPauseIgnored(bool ignored)
+    {
+        _ignorePause = ignored;
+    }
+    
     /// <summary>
     /// Force-fires any pending signals that haven't been triggered yet (e.g. on HurryUp/skip)
     /// pause/move are skipped
@@ -145,7 +151,7 @@ public sealed class InlineEventMarkupHandler : ActionMarkupHandler
 
             switch (attr.Name)
             {
-                case "pause": RegisterPause(attr); break;
+                case "pau": RegisterPause(attr); break;
                 case "signal": RegisterSignal(attr); break;
                 case "move": RegisterMove(attr); break;
             }
@@ -195,6 +201,9 @@ public sealed class InlineEventMarkupHandler : ActionMarkupHandler
         switch (action.type)
         {
             case InlineActionType.Pause:
+                if (_ignorePause)
+                    return;
+                
                 if (action.pauseMs > 0)
                     await YarnTask.Delay(action.pauseMs, ct);
                 return;

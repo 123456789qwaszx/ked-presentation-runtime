@@ -22,6 +22,11 @@ public class UI_EventHandler : MonoBehaviour,
 
     // Settings
     [SerializeField] private float _longPressDuration = 1.0f;
+    public float LongPressDuration
+    {
+        get => _longPressDuration;
+        set => _longPressDuration = value;
+    }
 
     // State
     private bool _isDragging;

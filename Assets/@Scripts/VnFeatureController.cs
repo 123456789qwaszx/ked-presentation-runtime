@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public enum VnPlayMode
 {
@@ -23,6 +24,7 @@ public class VnPlaybackSettings
     public float cooldownAfterNextLineSec = Mathf.Max(0.12f, 0.1f); // Prevent double-skip: enforce a minimum cooldown
 
     public VnPlayMode vnPlayMode = VnPlayMode.Manual;
+    public bool isSpeedUpToggleHeld = false;
     
     public void ChangePlayMode(VnPlayMode mode) => vnPlayMode =  mode;
     
@@ -36,12 +38,16 @@ public sealed class VnFeatureController : MonoBehaviour
     [SerializeField] private VnPlaybackSettings _vnPlaybackSettings;
     private EllipsisBreathTypewriter _typewriter;
     private YarnLineLifecycleBridge _yarnLineLifecycleBridge;
+    private InlineEventMarkupHandler _inlineEventMarkupHandler;
     
     private BacklogRecorder _backlogRecorder;
     private AutoAdvanceScheduler _autoAdvanceScheduler;
+    private HoldSpeedUpController _holdSpeedUpController;
     
     public bool IsAuto => _vnPlaybackSettings.IsAuto;
     public bool IsSpeedup => _vnPlaybackSettings.IsSpeedup;
+    public bool IsSkipHeld => _vnPlaybackSettings.isSpeedUpToggleHeld;
+    
     private bool LineFullyShown => _yarnLineLifecycleBridge.IsLineFullyShown;
     
     public IReadOnlyList<DialogueLogEntry> Backlogs => _backlogRecorder.Entries;
@@ -53,8 +59,10 @@ public sealed class VnFeatureController : MonoBehaviour
         VnPlaybackSettings vnPlaybackSettings,
         YarnLineLifecycleBridge yarnLineLifecycleBridge,
         EllipsisBreathTypewriter ellipsisBreathTypewriter,
+        InlineEventMarkupHandler inlineEventMarkupHandler,
         BacklogRecorder backlogRecorder,
-        AutoAdvanceScheduler autoAdvanceScheduler
+        AutoAdvanceScheduler autoAdvanceScheduler,
+        HoldSpeedUpController holdSpeedUpController
        )
     {
         if (_init) return;
@@ -63,9 +71,11 @@ public sealed class VnFeatureController : MonoBehaviour
         _vnPlaybackSettings = vnPlaybackSettings;
         _yarnLineLifecycleBridge = yarnLineLifecycleBridge;
         _typewriter = ellipsisBreathTypewriter;
+        _inlineEventMarkupHandler = inlineEventMarkupHandler;
         
         _backlogRecorder = backlogRecorder;
         _autoAdvanceScheduler = autoAdvanceScheduler;
+        _holdSpeedUpController = holdSpeedUpController;
         
         _init = true;
     }
@@ -85,6 +95,9 @@ public sealed class VnFeatureController : MonoBehaviour
         {
             _autoAdvanceScheduler.Tick();
         }
+
+        _holdSpeedUpController.Tick();
+        
     }
 
     public void ToggleAuto()
@@ -93,17 +106,51 @@ public sealed class VnFeatureController : MonoBehaviour
         else SetMode(VnPlayMode.Auto);
     }
 
-    public void ToggleSpeedup()
+    public void ToggleSetSpeed()
     {
         if (IsSpeedup) SetMode(VnPlayMode.Manual);
         else SetMode(VnPlayMode.Speedup);
     }
 
+    public void BeginHoldSpeedUp()
+    {
+        if (!_init)
+            return;
+
+        _holdSpeedUpController.SetHeld(true);
+        _inlineEventMarkupHandler.SetPauseIgnored(true);
+        RefreshPlaybackSpeed();
+    }
+
+    public void EndHoldSpeedUp()
+    {
+        if (!_init)
+            return;
+
+        _holdSpeedUpController.SetHeld(false);
+        _inlineEventMarkupHandler.SetPauseIgnored(false);
+        RefreshPlaybackSpeed();
+    }
+
     private void SetMode(VnPlayMode mode)
     {
+        _vnPlaybackSettings.isSpeedUpToggleHeld = true;
         _vnPlaybackSettings.ChangePlayMode(mode);
 
         ApplyModeSideEffects(mode);
+    }
+    
+    private void RefreshPlaybackSpeed()
+    {
+        bool shouldSpeedUp =
+            _vnPlaybackSettings.IsSpeedup ||
+            _vnPlaybackSettings.isSpeedUpToggleHeld;
+
+        float multiplier = shouldSpeedUp
+            ? _vnPlaybackSettings.speedupModeMultiplier
+            : 1f;
+
+        _typewriter.SetSpeedMultiplier(multiplier);
     }
 
     private void ApplyModeSideEffects(VnPlayMode current)

@@ -31,6 +31,14 @@ public sealed class DialogueUIBindings : IDisposable
     {
         _ctx.Unbind(root);
         
+        _ctx.Bind(root,
+            r => r.OnSpeedUpHoldStarted += HandleSpeedUpHoldStarted,
+            r => r.OnSpeedUpHoldStarted -= HandleSpeedUpHoldStarted);
+
+        _ctx.Bind(root,
+            r => r.OnSpeedUpHoldEnded += HandleSpeedUpHoldEnded,
+            r => r.OnSpeedUpHoldEnded -= HandleSpeedUpHoldEnded);
+        
         // StepNext
         _ctx.Bind(root,
             r => r.OnStepNextPressed += HandleStepNextPressed,
@@ -63,13 +71,22 @@ public sealed class DialogueUIBindings : IDisposable
 
         // Speedup
         _ctx.Bind(root,
-            r => r.OnSetSpeedupPressed += HandleSpeedupPressed,
-            r => r.OnSetSpeedupPressed -= HandleSpeedupPressed);
+            r => r.OnSetSpeedupPressed += HandleSetSpeedPressed,
+            r => r.OnSetSpeedupPressed -= HandleSetSpeedPressed);
     }
 
     // =========================================================
     // DialogueUIRoot handlers
     // =========================================================
+    private void HandleSpeedUpHoldStarted()
+    {
+        _vnFeatures.BeginHoldSpeedUp();
+    }
+
+    private void HandleSpeedUpHoldEnded()
+    {
+        _vnFeatures.EndHoldSpeedUp();
+    }
 
     private void HandleStepNextPressed()
     {
@@ -182,9 +199,9 @@ public sealed class DialogueUIBindings : IDisposable
         UIManager.Instance.PopPanel();
     }
 
-    private void HandleSpeedupPressed()
+    private void HandleSetSpeedPressed()
     {
-        _vnFeatures.ToggleSpeedup();
+        _vnFeatures.ToggleSetSpeed();
     }
 
     // =========================================================

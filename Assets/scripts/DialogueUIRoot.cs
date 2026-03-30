@@ -8,6 +8,11 @@ using static UIRefValidation;
 
 public class DialogueUIRoot : UIRoot<DialogueUIRoot.Refs>
 {
+    public event Action OnSpeedUpPressed;
+    public event Action OnSpeedUpHoldStarted;
+    public event Action OnSpeedUpHoldEnded;
+    
+    
     public event Action OnSkipPressed;
     public event Action OnAutoPressed;
     public event Action OnQuickMenuPressed;
@@ -73,6 +78,10 @@ public class DialogueUIRoot : UIRoot<DialogueUIRoot.Refs>
         AutoToggleHotKey_Root,
         AutoToggleHotKey_Text,
         AutoToggleHotKey_Button,
+        
+        SpeedUpToggle_Root,
+        SpeedUpToggleIcon_Image,
+        SpeedUpToggleHotKey_Button,
 
         SkipToggleHotKey_Root,
         SkipToggleHotKey_Text,
@@ -279,6 +288,9 @@ public class DialogueUIRoot : UIRoot<DialogueUIRoot.Refs>
         BindEvent(_quickLogButton, PressLogButton);
         BindEvent(_quickSpeedButton, PressSpeedButton);
         BindEvent(_skipButton, PressSkipButton);
+        
+        BindEvent(View.Button(Refs.SpeedUpToggleHotKey_Button), _ => OnSpeedUpHoldStarted?.Invoke(), ETouchEvent.PointerDown);
+        BindEvent(View.Button(Refs.SpeedUpToggleHotKey_Button), _ => OnSpeedUpHoldEnded?.Invoke(), ETouchEvent.PointerUp);
     }
 
     #region Handler
