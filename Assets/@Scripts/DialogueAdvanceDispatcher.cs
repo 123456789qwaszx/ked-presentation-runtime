@@ -53,18 +53,21 @@ public sealed class DialogueAdvanceDispatcher : MonoBehaviour
         return true;
     }
     
-    public void DispatchSeekAdvance()
+    public void DispatchSeekHurryUp()
     {
-        if (_dialogueRunner == null || !_dialogueRunner.IsDialogueRunning)
-            return;
-
+        if (_dialogueRunner == null || !_dialogueRunner.IsDialogueRunning) return;
+        
         if (!_gate.IsLineFullyShown())
         {
+            _inlineMarkupHandler.FlushPendingSignals();
             _dialogueRunner.RequestHurryUpLine();
         }
-        else
-        {
-            _dialogueRunner.RequestNextLine();
-        }
+        // 이미 완료됐으면 아무것도 안 함 — Next는 OnLineFinishDisplaying이 담당
+    }
+
+    public void DispatchSeekNext()
+    {
+        if (_dialogueRunner == null || !_dialogueRunner.IsDialogueRunning) return;
+        _dialogueRunner.RequestNextLine();
     }
 }

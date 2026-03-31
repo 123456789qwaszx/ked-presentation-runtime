@@ -32,6 +32,10 @@ public sealed class DialogueUIBindings : IDisposable
         _ctx.Unbind(root);
         
         _ctx.Bind(root,
+            r => r.OnRollbackOneStepPressed += HandleRollbackPressed,
+            r => r.OnRollbackOneStepPressed -= HandleRollbackPressed);
+        
+        _ctx.Bind(root,
             r => r.OnSpeedUpHoldStarted += HandleSpeedUpHoldStarted,
             r => r.OnSpeedUpHoldStarted -= HandleSpeedUpHoldStarted);
 
@@ -78,6 +82,11 @@ public sealed class DialogueUIBindings : IDisposable
     // =========================================================
     // DialogueUIRoot handlers
     // =========================================================
+    
+    private void HandleRollbackPressed()
+    {
+        _vnFeatures.RequestRollbackOneStep();
+    }
     private void HandleSpeedUpHoldStarted()
     {
         _vnFeatures.BeginHoldSpeedUp();

@@ -43,6 +43,7 @@ public sealed class VnFeatureController : MonoBehaviour
     private BacklogRecorder _backlogRecorder;
     private AutoAdvanceScheduler _autoAdvanceScheduler;
     private HoldSpeedUpController _holdSpeedUpController;
+    private RollbackController _rollbackController;
     
     public bool IsAuto => _vnPlaybackSettings.IsAuto;
     public bool IsSpeedup => _vnPlaybackSettings.IsSpeedup;
@@ -62,7 +63,8 @@ public sealed class VnFeatureController : MonoBehaviour
         InlineEventMarkupHandler inlineEventMarkupHandler,
         BacklogRecorder backlogRecorder,
         AutoAdvanceScheduler autoAdvanceScheduler,
-        HoldSpeedUpController holdSpeedUpController
+        HoldSpeedUpController holdSpeedUpController,
+        RollbackController rollbackController
        )
     {
         if (_init) return;
@@ -76,6 +78,7 @@ public sealed class VnFeatureController : MonoBehaviour
         _backlogRecorder = backlogRecorder;
         _autoAdvanceScheduler = autoAdvanceScheduler;
         _holdSpeedUpController = holdSpeedUpController;
+        _rollbackController = rollbackController;
         
         _init = true;
     }
@@ -130,6 +133,19 @@ public sealed class VnFeatureController : MonoBehaviour
         _holdSpeedUpController.SetHeld(false);
         _inlineEventMarkupHandler.SetPauseIgnored(false);
         RefreshPlaybackSpeed();
+    }
+
+    public void RequestRollbackOneStep()
+    {
+        // if (!_rollbackController.CanRollback)
+        //     return;
+
+        Debug.Log("RequestRollbackOneStep");
+        
+        SetMode(VnPlayMode.Manual);
+        _autoAdvanceScheduler.ResetAutoAdvanceTimer();
+
+        _rollbackController.RequestRollbackOneStep();
     }
 
     private void SetMode(VnPlayMode mode)

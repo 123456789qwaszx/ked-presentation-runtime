@@ -117,6 +117,9 @@ public class VnAppBootstrap : MonoBehaviour
         vnAdvanceInputPoller.Initialize(dialogueAdvanceDispatcher);
     }
 
+    
+    public RollbackHistoryDebugOverlay overlay;
+    
     private void BootstrapPlaybackControls()
     {
         BacklogRecorder backlogRecorder = new BacklogRecorder(yarnLineLifecycleBridge, _vnPlaybackSettings);
@@ -131,6 +134,24 @@ public class VnAppBootstrap : MonoBehaviour
             dialogueAdvanceDispatcher,
             () => yarnLineLifecycleBridge.IsLineFullyShown);
         
+        RollbackRuntimeState rollbackState = new RollbackRuntimeState();
+        NodeRollbackHistory rollbackHistory = new NodeRollbackHistory(yarnLineLifecycleBridge, rollbackState);
+
+
+        RollbackController rollbackController = new RollbackController(
+            state: rollbackState,
+            history: rollbackHistory,
+            bridge: yarnLineLifecycleBridge,
+            episodePlayer,
+            dispatcher: dialogueAdvanceDispatcher,
+            inlineMarkupHandler: inlineEventMarkupHandler,
+            typewriter: ellipsisBreathTypewriter,
+            playbackSettings: _vnPlaybackSettings
+        );
+        
+        var overlay = gameObject.AddComponent<RollbackHistoryDebugOverlay>();
+        overlay.Initialize(rollbackHistory, rollbackState);
+        
         vnFeatureController.Initialize(
             _vnUxState,
             _vnPlaybackSettings,
@@ -139,7 +160,8 @@ public class VnAppBootstrap : MonoBehaviour
             inlineEventMarkupHandler,
             backlogRecorder,
             autoAdvanceScheduler,
-            holdSkipController);
+            holdSkipController,
+            rollbackController);
     }
     
     private void BootstrapUIBindings()

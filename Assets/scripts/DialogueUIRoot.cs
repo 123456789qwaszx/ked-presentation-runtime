@@ -12,6 +12,8 @@ public class DialogueUIRoot : UIRoot<DialogueUIRoot.Refs>
     public event Action OnSpeedUpHoldStarted;
     public event Action OnSpeedUpHoldEnded;
     
+    public event Action OnRollbackOneStepPressed;
+    
     
     public event Action OnSkipPressed;
     public event Action OnAutoPressed;
@@ -82,6 +84,8 @@ public class DialogueUIRoot : UIRoot<DialogueUIRoot.Refs>
         SpeedUpToggle_Root,
         SpeedUpToggleIcon_Image,
         SpeedUpToggleHotKey_Button,
+        
+        RollbackToggleHotKey_Button,
 
         SkipToggleHotKey_Root,
         SkipToggleHotKey_Text,
@@ -291,6 +295,8 @@ public class DialogueUIRoot : UIRoot<DialogueUIRoot.Refs>
         
         BindEvent(View.Button(Refs.SpeedUpToggleHotKey_Button), _ => OnSpeedUpHoldStarted?.Invoke(), ETouchEvent.PointerDown);
         BindEvent(View.Button(Refs.SpeedUpToggleHotKey_Button), _ => OnSpeedUpHoldEnded?.Invoke(), ETouchEvent.PointerUp);
+        
+        BindEvent(View.Button(Refs.RollbackToggleHotKey_Button), _ => OnRollbackOneStepPressed?.Invoke(), ETouchEvent.PointerDown);
     }
 
     #region Handler
@@ -481,6 +487,18 @@ public class DialogueUIRoot : UIRoot<DialogueUIRoot.Refs>
             var box = _boxBySlot[i];
             if (box != null)
                 box.SetVisible(false);
+        }
+    }
+    
+    public void ShowAllBoxes()
+    {
+        for (int i = 0; i < _slots.Length; i++)
+        {
+            OpenCanvasGroup(_slots[i]);
+
+            var box = _boxBySlot[i];
+            if (box != null)
+                box.SetVisible(true);
         }
     }
 

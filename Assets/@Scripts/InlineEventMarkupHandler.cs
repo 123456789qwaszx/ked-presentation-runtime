@@ -83,18 +83,10 @@ public sealed class InlineEventMarkupHandler : ActionMarkupHandler
     private int _lastProcessedCharIndex = 0;
     
     private bool _ignorePause;
-    private bool _suppressSignals;
-    private bool _suppressMoves;
 
     public void SetPauseIgnored(bool ignored)
     {
         _ignorePause = ignored;
-    }
-    
-    public void SetReplaySuppressed(bool suppressSignals, bool suppressMoves)
-    {
-        _suppressSignals = suppressSignals;
-        _suppressMoves = suppressMoves;
     }
     
     /// <summary>
@@ -217,16 +209,12 @@ public sealed class InlineEventMarkupHandler : ActionMarkupHandler
                 return;
 
             case InlineActionType.Move:
-                if (_suppressMoves)
-                    return;
                 
                 if (!string.IsNullOrWhiteSpace(action.moveName))
                     onMoveRequested?.Invoke(action.moveName);
                 return;
 
             case InlineActionType.Signal:
-                if (_suppressSignals)
-                    return;
                 
                 if (!string.IsNullOrWhiteSpace(action.signalKey))
                     _inlineSignalHost?.RaiseSignal(action.signalKey);

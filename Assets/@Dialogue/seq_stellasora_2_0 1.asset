@@ -19,20 +19,6 @@ MonoBehaviour:
     - editorName: 
       tracks:
         interaction:
-        - rid: 7710742102945562701
-        setup: []
-        motion: []
-        dialogue: []
-        fx: []
-      compiled:
-      - rid: 7710742102945562701
-      gate:
-        type: 3
-        seconds: 0
-        signalKey: beat
-    - editorName: 
-      tracks:
-        interaction:
         - rid: 7710742099588284494
         - rid: 7710742099588284495
         - rid: 7710742099588284496
@@ -126,8 +112,7 @@ MonoBehaviour:
         rigRootName: CharacterRig
         autoRolePrefixFromRoleKey: 1
         addRolePrefix: 1
-        overrideRolePrefix: 0
-        rolePrefixOverride: 
+        destroyExistingRigWithSameName: 1
         strict: 1
     - rid: 7710742099588284495
       type: {class: SetAnchorCommandSpecCharR, ns: , asm: Assembly-CSharp}
@@ -162,8 +147,6 @@ MonoBehaviour:
         sprite: {fileID: -3164809056393425246, guid: aff62d79f9bf1f14386e92f84adc811c, type: 3}
         sizingMode: 1
         horizontalAlign: 1
-        widthScale: 1
-        considerLossyScaleY: 0
         setNativeSize: 0
     - rid: 7710742099588284497
       type: {class: SetOriginSizeCommandSpecCharR, ns: , asm: Assembly-CSharp}
@@ -273,18 +256,3 @@ MonoBehaviour:
         launchEase: 8
         duration: 0.45
         wait: 0
-    - rid: 7710742102945562701
-      type: {class: PrepareDialogueUICommandSpec, ns: , asm: Assembly-CSharp}
-      data:
-        roleKey: seina
-        _meta:
-          track: 0
-          phase: 0
-          blockingHint: 0
-          infiniteHint: 0
-          durationHint: 0
-        boxKind: 0
-        cleanup: 0
-        yieldAfterCleanup: 0
-        yieldAfterShow: 0
-        validateBinding: 0

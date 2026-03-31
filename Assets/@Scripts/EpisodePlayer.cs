@@ -59,6 +59,15 @@ public sealed class EpisodePlayer : MonoBehaviour, IRollbackDialogueRestarter
     
     public void RestartNode(string nodeName)
     {
+        //OpenDialogueUI();
+        StartPresentationRoute(presentationEntryKey);
+        
+        StartCoroutine(StartYarnNextFrame(nodeName));
+    }
+    
+    private IEnumerator StartYarnNextFrame(string nodeName)
+    {
+        yield return null; // 한 프레임 대기 — Session Tick이 한 번 돌고 나서
         StartYarnNode(nodeName);
     }
     
@@ -67,7 +76,6 @@ public sealed class EpisodePlayer : MonoBehaviour, IRollbackDialogueRestarter
         yarnUIBridge.HasCharNameBox();
         dialogueRunner.StartDialogue(episodeId);
     }
-    
     
     private IEnumerator WaitUntilBoundOrTimeout()
     {

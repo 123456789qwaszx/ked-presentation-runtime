@@ -33,7 +33,7 @@ public sealed class RollbackRuntimeState
     public string TargetLineId { get; private set; }
     public int TargetVisitedIndex { get; private set; }
 
-    public void BeginSeek(in RollbackPoint target)
+    public void BeginRollback(in RollbackPoint target)
     {
         IsSeeking = true;
         TargetNodeName = target.nodeName;
@@ -41,7 +41,7 @@ public sealed class RollbackRuntimeState
         TargetVisitedIndex = target.visitedIndex;
     }
 
-    public void EndSeek()
+    public void EndRollback()
     {
         IsSeeking = false;
         TargetNodeName = null;
@@ -80,6 +80,7 @@ public sealed class NodeRollbackHistory : IDisposable
         _bridge.OnNodeStarted += OnNodeStarted;
         _bridge.LineFinishDisplaying += OnLineFinishDisplaying;
     }
+
 
     private void OnNodeStarted(string nodeName)
     {
