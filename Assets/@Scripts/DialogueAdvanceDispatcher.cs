@@ -52,4 +52,19 @@ public sealed class DialogueAdvanceDispatcher : MonoBehaviour
 
         return true;
     }
+    
+    public void DispatchSeekAdvance()
+    {
+        if (_dialogueRunner == null || !_dialogueRunner.IsDialogueRunning)
+            return;
+
+        if (!_gate.IsLineFullyShown())
+        {
+            _dialogueRunner.RequestHurryUpLine();
+        }
+        else
+        {
+            _dialogueRunner.RequestNextLine();
+        }
+    }
 }

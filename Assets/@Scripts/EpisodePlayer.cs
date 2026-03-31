@@ -2,7 +2,12 @@ using System.Collections;
 using UnityEngine;
 using Yarn.Unity;
 
-public sealed class EpisodePlayer : MonoBehaviour
+public interface IRollbackDialogueRestarter
+{
+    void RestartNode(string nodeName);
+}
+
+public sealed class EpisodePlayer : MonoBehaviour, IRollbackDialogueRestarter
 {
     private VnScreenBindings _vnScreenBindings;
     private DialogueUIBindings _dialogueUIBindings;
@@ -50,6 +55,11 @@ public sealed class EpisodePlayer : MonoBehaviour
     public void StartPresentationRoute(string routeKey)
     {
         presentationRouteEntry.StartRoute(routeKey);
+    }
+    
+    public void RestartNode(string nodeName)
+    {
+        StartYarnNode(nodeName);
     }
     
     public void StartYarnNode(string episodeId)

@@ -1,0 +1,2289 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 77efca1a7ac39ca499c3be8e21666640, type: 3}
+  m_Name: seq_stellasora_5_2 1
+  m_EditorClassIdentifier: Assembly-CSharp::SequenceSpecSO
+  sequenceKey: seq_stellasora_5_2
+  nodes:
+  - editorName: 
+    steps:
+    - editorName: 123
+      tracks:
+        interaction: []
+        setup:
+        - rid: 305542896525770829
+        - rid: 305542896525770830
+        - rid: 305542896525770831
+        - rid: 305542896525770832
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 305542896525770829
+      - rid: 305542896525770830
+      - rid: 305542896525770831
+      - rid: 305542896525770832
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+  - editorName: "\uB9C8\uC774\uB098\uB4F1\uC7A5"
+    steps:
+    - editorName: CharBuild
+      tracks:
+        interaction:
+        - rid: 2406591861039300609
+        - rid: 2406591861039300610
+        - rid: 2406591861039300611
+        - rid: 2406591861039300612
+        - rid: 2406591861039300613
+        - rid: 2406591861039300614
+        setup:
+        - rid: 2406591861039300615
+        - rid: 2406591861039300616
+        - rid: 2406591861039300617
+        - rid: 2406591861039300618
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 2406591861039300609
+      - rid: 2406591861039300610
+      - rid: 2406591861039300611
+      - rid: 2406591861039300612
+      - rid: 2406591861039300613
+      - rid: 2406591861039300614
+      - rid: 2406591861039300615
+      - rid: 2406591861039300616
+      - rid: 2406591861039300617
+      - rid: 2406591861039300618
+      gate:
+        type: 0
+        seconds: 0
+        signalKey: 
+    - editorName: HideMain
+      tracks:
+        interaction:
+        - rid: 2406591861039300695
+        setup: []
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 2406591861039300695
+      gate:
+        type: 0
+        seconds: 0
+        signalKey: 
+    - editorName: 
+      tracks:
+        interaction: []
+        setup: []
+        motion:
+        - rid: 2406591861039300697
+        - rid: 2406591861039300696
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 2406591861039300697
+      - rid: 2406591861039300696
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+  - editorName: "Hill\uB4F1\uC7A5"
+    steps:
+    - editorName: 
+      tracks:
+        interaction:
+        - rid: 2406591861039300701
+        - rid: 2406591861039300702
+        - rid: 2406591861039300703
+        - rid: 2406591861039300704
+        - rid: 2406591861039300705
+        - rid: 2406591861039300706
+        setup:
+        - rid: 2406591861039300707
+        - rid: 2406591861039300708
+        - rid: 2406591861039300709
+        - rid: 2406591861039300710
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 2406591861039300701
+      - rid: 2406591861039300702
+      - rid: 2406591861039300703
+      - rid: 2406591861039300704
+      - rid: 2406591861039300705
+      - rid: 2406591861039300706
+      - rid: 2406591861039300707
+      - rid: 2406591861039300708
+      - rid: 2406591861039300709
+      - rid: 2406591861039300710
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+  - editorName: "Hill\uB09C\uAC10\uD55C\uC774\uBAA8\uC158"
+    steps:
+    - editorName: ChangePortrait
+      tracks:
+        interaction: []
+        setup:
+        - rid: 2406591861039300721
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 2406591861039300721
+      gate:
+        type: 0
+        seconds: 0
+        signalKey: 
+    - editorName: setEmotion
+      tracks:
+        interaction:
+        - rid: 2406591861039300723
+        - rid: 2406591861039300724
+        - rid: 2406591861039300725
+        - rid: 2406591861039300726
+        setup: []
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 2406591861039300723
+      - rid: 2406591861039300724
+      - rid: 2406591861039300725
+      - rid: 2406591861039300726
+      gate:
+        type: 0
+        seconds: 0
+        signalKey: 
+    - editorName: sway
+      tracks:
+        interaction: []
+        setup:
+        - rid: 2406591861039300727
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 2406591861039300727
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+  - editorName: "\uB9C8\uC774\uB098\uD1F4\uC7A5"
+    steps:
+    - editorName: 
+      tracks:
+        interaction: []
+        setup: []
+        motion:
+        - rid: 2406591861039300728
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 2406591861039300728
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+  - editorName: "\uC138\uC774\uB098\uB4F1\uC7A5"
+    steps:
+    - editorName: "\uC138\uC774\uB098\uBE4C\uB4DC"
+      tracks:
+        interaction:
+        - rid: 2406591861039300729
+        - rid: 2406591861039300730
+        - rid: 2406591918965522510
+        - rid: 2406591918965522511
+        - rid: 2406591918965522512
+        setup: []
+        motion:
+        - rid: 2406591918965522513
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 2406591861039300729
+      - rid: 2406591861039300730
+      - rid: 2406591918965522510
+      - rid: 2406591918965522511
+      - rid: 2406591918965522512
+      - rid: 2406591918965522513
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+  - editorName: "\uC138\uC774\uB098 \uB2F9\uD669"
+    steps:
+    - editorName: "\uC774\uBAA8\uC158\uBE4C\uB4DC"
+      tracks:
+        interaction:
+        - rid: 2406591861039300751
+        - rid: 2406591861039300752
+        - rid: 2406591861039300753
+        - rid: 2406591861039300754
+        setup: []
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 2406591861039300751
+      - rid: 2406591861039300752
+      - rid: 2406591861039300753
+      - rid: 2406591861039300754
+      gate:
+        type: 0
+        seconds: 0
+        signalKey: 
+    - editorName: "\uD45C\uC815\uC624\uBC84\uB808\uC774"
+      tracks:
+        interaction: []
+        setup:
+        - rid: 2406591861039300771
+        motion:
+        - rid: 2406591861039300757
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 2406591861039300771
+      - rid: 2406591861039300757
+      gate:
+        type: 1
+        seconds: 0
+        signalKey: beat
+    - editorName: 
+      tracks:
+        interaction: []
+        setup: []
+        motion: []
+        dialogue: []
+        fx: []
+      compiled: []
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+  - editorName: "\uC138\uC774\uB098 \uC758\uAE30\uC591\uC591"
+    steps:
+    - editorName: "\uC774\uBAA8\uC158"
+      tracks:
+        interaction: []
+        setup:
+        - rid: 2406591861039300770
+        motion:
+        - rid: 2406591861039300764
+        - rid: 2406591861039300765
+        - rid: 2406591861039300766
+        - rid: 2406591861039300767
+        dialogue: []
+        fx:
+        - rid: 2406591861039300768
+      compiled:
+      - rid: 2406591861039300770
+      - rid: 2406591861039300764
+      - rid: 2406591861039300765
+      - rid: 2406591861039300766
+      - rid: 2406591861039300767
+      - rid: 2406591861039300768
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+  - editorName: "\uC138\uC774\uB098 \uD1F4\uC7A5"
+    steps:
+    - editorName: 
+      tracks:
+        interaction: []
+        setup:
+        - rid: 2406591863483007074
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 2406591863483007074
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+  - editorName: "\uCF54\uD558\uCFE0\uB4F1\uC7A5"
+    steps:
+    - editorName: "\uBE4C\uB4DC"
+      tracks:
+        interaction:
+        - rid: 2406591863483007060
+        - rid: 2406591863483007061
+        - rid: 2406591863483007071
+        - rid: 2406591863483007072
+        - rid: 2406591863483007073
+        setup: []
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 2406591863483007060
+      - rid: 2406591863483007061
+      - rid: 2406591863483007071
+      - rid: 2406591863483007072
+      - rid: 2406591863483007073
+      gate:
+        type: 0
+        seconds: 0
+        signalKey: 
+    - editorName: "\uC774\uBAA8\uC158 \uBE4C\uB4DC"
+      tracks:
+        interaction:
+        - rid: 2406591863483007076
+        - rid: 2406591863483007077
+        - rid: 2406591863483007078
+        setup: []
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 2406591863483007076
+      - rid: 2406591863483007077
+      - rid: 2406591863483007078
+      gate:
+        type: 0
+        seconds: 0
+        signalKey: 
+    - editorName: "\uB4F1\uC7A5"
+      tracks:
+        interaction: []
+        setup:
+        - rid: 2406591863483007075
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 2406591863483007075
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+  - editorName: "\uCF54\uD558\uCFE0 \uB525, \uD45C\uC815"
+    steps:
+    - editorName: dip
+      tracks:
+        interaction: []
+        setup: []
+        motion:
+        - rid: 2406591863483007080
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 2406591863483007080
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+  - editorName: "\uCF54\uD558\uCFE0 \uD1F4\uC7A5"
+    steps:
+    - editorName: 
+      tracks:
+        interaction: []
+        setup: []
+        motion:
+        - rid: 2406591865032278103
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 2406591865032278103
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+  - editorName: "\uD6C4\uC720\uCE74 \uB4F1\uC7A5"
+    steps:
+    - editorName: 
+      tracks:
+        interaction:
+        - rid: 2406591865032278095
+        - rid: 2406591865032278096
+        - rid: 2406591865032278097
+        - rid: 2406591865032278098
+        - rid: 2406591865032278099
+        setup:
+        - rid: 2406591865032278100
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 2406591865032278095
+      - rid: 2406591865032278096
+      - rid: 2406591865032278097
+      - rid: 2406591865032278098
+      - rid: 2406591865032278099
+      - rid: 2406591865032278100
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+  - editorName: "\uD6C4\uC720\uCE74 \uB2F9\uD669"
+    steps:
+    - editorName: 
+      tracks:
+        interaction: []
+        setup: []
+        motion:
+        - rid: 2406591865032278106
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 2406591865032278106
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+  - editorName: "\uD6C4\uC720\uCE74 \uD1F4\uC7A5"
+    steps:
+    - editorName: 
+      tracks:
+        interaction: []
+        setup: []
+        motion:
+        - rid: 2406591865032278107
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 2406591865032278107
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+  - editorName: "\uC544\uC57C\uBA54 \uB4F1\uC7A5"
+    steps:
+    - editorName: 
+      tracks:
+        interaction:
+        - rid: 2406591865032278113
+        - rid: 2406591865032278114
+        - rid: 2406591865032278115
+        setup:
+        - rid: 2406591865032278116
+        - rid: 2406591865032278117
+        motion:
+        - rid: 2406591865032278118
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 2406591865032278113
+      - rid: 2406591865032278114
+      - rid: 2406591865032278115
+      - rid: 2406591865032278116
+      - rid: 2406591865032278117
+      - rid: 2406591865032278118
+      gate:
+        type: 0
+        seconds: 0
+        signalKey: beat
+  - editorName: "\uC544\uC57C\uBA54 \uC6B0\uC6B8, \uC250\uC774\uD06C"
+    steps:
+    - editorName: 
+      tracks:
+        interaction: []
+        setup: []
+        motion:
+        - rid: 2406591865032278119
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 2406591865032278119
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+  - editorName: "\uC544\uC57C\uBA54 \uC90C\uC778, \uD655\uC2E0"
+    steps:
+    - editorName: 
+      tracks:
+        interaction: []
+        setup: []
+        motion:
+        - rid: 2406591865032278120
+        - rid: 2406591865032278121
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 2406591865032278120
+      - rid: 2406591865032278121
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+  - editorName: "\uC544\uC57C\uBA54\uD1F4\uC7A5"
+    steps:
+    - editorName: 
+      tracks:
+        interaction: []
+        setup: []
+        motion:
+        - rid: 2406591886280097874
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 2406591886280097874
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+  - editorName: "4\uBA85 \uB4F1\uC7A5"
+    steps:
+    - editorName: build
+      tracks:
+        interaction:
+        - rid: 2406591886280097885
+        - rid: 2406591886280097886
+        - rid: 2406591886280097887
+        - rid: 2406591886280097888
+        - rid: 2406591886280097889
+        setup: []
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 2406591886280097885
+      - rid: 2406591886280097886
+      - rid: 2406591886280097887
+      - rid: 2406591886280097888
+      - rid: 2406591886280097889
+      gate:
+        type: 0
+        seconds: 0
+        signalKey: beat
+    - editorName: build
+      tracks:
+        interaction:
+        - rid: 2406591886280097890
+        - rid: 2406591886280097891
+        - rid: 2406591886280097892
+        - rid: 2406591886280097893
+        - rid: 2406591886280097894
+        setup: []
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 2406591886280097890
+      - rid: 2406591886280097891
+      - rid: 2406591886280097892
+      - rid: 2406591886280097893
+      - rid: 2406591886280097894
+      gate:
+        type: 0
+        seconds: 0
+        signalKey: beat
+    - editorName: build
+      tracks:
+        interaction:
+        - rid: 2406591886280097895
+        - rid: 2406591886280097896
+        - rid: 2406591886280097897
+        - rid: 2406591886280097898
+        - rid: 2406591886280097899
+        setup: []
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 2406591886280097895
+      - rid: 2406591886280097896
+      - rid: 2406591886280097897
+      - rid: 2406591886280097898
+      - rid: 2406591886280097899
+      gate:
+        type: 0
+        seconds: 0
+        signalKey: beat
+    - editorName: build
+      tracks:
+        interaction:
+        - rid: 2406591886280097900
+        - rid: 2406591886280097901
+        - rid: 2406591886280097902
+        - rid: 2406591886280097903
+        - rid: 2406591886280097904
+        setup: []
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 2406591886280097900
+      - rid: 2406591886280097901
+      - rid: 2406591886280097902
+      - rid: 2406591886280097903
+      - rid: 2406591886280097904
+      gate:
+        type: 0
+        seconds: 0
+        signalKey: beat
+    - editorName: 
+      tracks:
+        interaction: []
+        setup: []
+        motion:
+        - rid: 2406591886280097910
+        - rid: 2406591886280097911
+        - rid: 2406591886280097912
+        - rid: 2406591886280097913
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 2406591886280097910
+      - rid: 2406591886280097911
+      - rid: 2406591886280097912
+      - rid: 2406591886280097913
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+  references:
+    version: 2
+    RefIds:
+    - rid: 305542896525770829
+      type: {class: DestroyCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Chixia
+        _meta:
+          track: 10
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        rigRootName: CharacterRig
+        autoRolePrefixFromRoleKey: 1
+        addRolePrefix: 1
+        rolePrefixOverride: 
+    - rid: 305542896525770830
+      type: {class: DestroyCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Coronis
+        _meta:
+          track: 10
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        rigRootName: CharacterRig
+        autoRolePrefixFromRoleKey: 1
+        addRolePrefix: 1
+        rolePrefixOverride: 
+    - rid: 305542896525770831
+      type: {class: DestroyCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Shimiao
+        _meta:
+          track: 10
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        rigRootName: CharacterRig
+        autoRolePrefixFromRoleKey: 1
+        addRolePrefix: 1
+        rolePrefixOverride: 
+    - rid: 305542896525770832
+      type: {class: DestroyCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Manager
+        _meta:
+          track: 10
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        rigRootName: CharacterRig
+        autoRolePrefixFromRoleKey: 1
+        addRolePrefix: 1
+        rolePrefixOverride: 
+    - rid: 2406591861039300609
+      type: {class: SetCharRigCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Maina
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        rigPrefab: {fileID: 8529412948266249186, guid: 2a755315e2a020646a5c6c8980c3f4df, type: 3}
+        parentSlot: 0
+        rigRootName: CharacterRig
+        autoRolePrefixFromRoleKey: 1
+        addRolePrefix: 1
+        destroyExistingRigWithSameName: 1
+        strict: 1
+    - rid: 2406591861039300610
+      type: {class: ShowRootsCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Maina
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        targetMask: 1
+        enableInteraction: 1
+    - rid: 2406591861039300611
+      type: {class: HideRootsCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Maina
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        targetMask: 6
+        disableInteraction: 1
+    - rid: 2406591861039300612
+      type: {class: SetScaleCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Maina
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 6
+        toScale: {x: 1, y: 1}
+    - rid: 2406591861039300613
+      type: {class: SetPosOffsetCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Maina
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 1
+        offset: {x: 0, y: 0}
+        resetToZero: 1
+    - rid: 2406591861039300614
+      type: {class: SetAnchorCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Maina
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 0
+        preset: 1
+        baseRatioX: 0.33
+        globalTuning: {fileID: 0}
+        roleTuningDb: {fileID: 0}
+        poseKey: 
+        offset: {x: 0, y: 0}
+        overrideAnchoredPosition: 0
+        anchoredPositionOverride: {x: 0, y: 0}
+    - rid: 2406591861039300615
+      type: {class: SetSpriteCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Maina
+        _meta:
+          track: 10
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 7
+        sprite: {fileID: -3164809056393425246, guid: f6a89f0d43b98d547893b8de3cfd4a71, type: 3}
+        sizingMode: 1
+        horizontalAlign: 1
+        setNativeSize: 0
+    - rid: 2406591861039300616
+      type: {class: SetOriginSizeCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Maina
+        _meta:
+          track: 10
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 3
+        toScale: {x: 2, y: 2}
+        toAngle: 0
+        anchorMin: {x: 0, y: 0}
+        anchorMax: {x: 1, y: 1}
+    - rid: 2406591861039300617
+      type: {class: SetScaleCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Maina
+        _meta:
+          track: 10
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 6
+        toScale: {x: 1, y: 1}
+    - rid: 2406591861039300618
+      type: {class: SetAnchorCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Maina
+        _meta:
+          track: 10
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 0
+        preset: 1
+        baseRatioX: 0.33
+        globalTuning: {fileID: 0}
+        roleTuningDb: {fileID: 0}
+        poseKey: 
+        offset: {x: 0, y: -300}
+        overrideAnchoredPosition: 0
+        anchoredPositionOverride: {x: 0, y: 0}
+    - rid: 2406591861039300695
+      type: {class: HideRootsCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Maina
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        targetMask: -1
+        disableInteraction: 1
+    - rid: 2406591861039300696
+      type: {class: RichSlideInCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Maina
+        _meta:
+          track: 20
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 1
+        from: 3
+        distance: 240
+        useAnticipation: 1
+        anticipationDistance: -50
+        anticipationPortion: 0.228
+        anticipationEase: 7
+        useOvershoot: 0
+        overshootDistance: 24
+        overshootPortion: 0.78
+        approachEase: 9
+        settleEase: 12
+        duration: 0.8
+        wait: 0
+    - rid: 2406591861039300697
+      type: {class: FadeInCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Maina
+        _meta:
+          track: 20
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        targetMask: 1
+        duration: 0.8
+        ease: 9
+        EnableInteraction: 1
+        wait: 0
+    - rid: 2406591861039300701
+      type: {class: SetCharRigCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Hill
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        rigPrefab: {fileID: 0}
+        parentSlot: 3
+        rigRootName: CharacterRig
+        autoRolePrefixFromRoleKey: 1
+        addRolePrefix: 1
+        destroyExistingRigWithSameName: 1
+        strict: 1
+    - rid: 2406591861039300702
+      type: {class: ShowRootsCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Hill
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        targetMask: 1
+        enableInteraction: 1
+    - rid: 2406591861039300703
+      type: {class: HideRootsCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Hill
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        targetMask: 6
+        disableInteraction: 1
+    - rid: 2406591861039300704
+      type: {class: SetScaleCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Hill
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 6
+        toScale: {x: 1, y: 1}
+    - rid: 2406591861039300705
+      type: {class: SetPosOffsetCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Hill
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 1
+        offset: {x: 0, y: 0}
+        resetToZero: 1
+    - rid: 2406591861039300706
+      type: {class: SetAnchorCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Hill
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 0
+        preset: 1
+        baseRatioX: 0.33
+        globalTuning: {fileID: 0}
+        roleTuningDb: {fileID: 0}
+        poseKey: 
+        offset: {x: 0, y: 0}
+        overrideAnchoredPosition: 0
+        anchoredPositionOverride: {x: 0, y: 0}
+    - rid: 2406591861039300707
+      type: {class: SetSpriteCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Hill
+        _meta:
+          track: 10
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 7
+        sprite: {fileID: 6937817954938267909, guid: 08b5b65e92bb8a24ca4be46b372fe155, type: 3}
+        sizingMode: 1
+        horizontalAlign: 1
+        setNativeSize: 0
+    - rid: 2406591861039300708
+      type: {class: SetOriginSizeCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Hill
+        _meta:
+          track: 10
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 3
+        toScale: {x: 1, y: 1}
+        toAngle: 0
+        anchorMin: {x: 0, y: 0}
+        anchorMax: {x: 1, y: 1}
+    - rid: 2406591861039300709
+      type: {class: SetScaleCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Hill
+        _meta:
+          track: 10
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 6
+        toScale: {x: 1, y: 1}
+    - rid: 2406591861039300710
+      type: {class: SetAnchorCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Hill
+        _meta:
+          track: 10
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 0
+        preset: 1
+        baseRatioX: 0.33
+        globalTuning: {fileID: 0}
+        roleTuningDb: {fileID: 0}
+        poseKey: 
+        offset: {x: 0, y: 0}
+        overrideAnchoredPosition: 0
+        anchoredPositionOverride: {x: 0, y: 0}
+    - rid: 2406591861039300721
+      type: {class: SetSpriteCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Hill
+        _meta:
+          track: 10
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 7
+        sprite: {fileID: -6470460504253458178, guid: 971e2e2772f8fcc45bdb24d06c83abec, type: 3}
+        sizingMode: 1
+        horizontalAlign: 1
+        setNativeSize: 0
+    - rid: 2406591861039300723
+      type: {class: ShowRootsCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Hill
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        targetMask: 4
+        enableInteraction: 1
+    - rid: 2406591861039300724
+      type: {class: SetSpriteCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Hill
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 16
+        sprite: {fileID: 21300000, guid: 18daa19e5ce4b4d2dbaed75151542b13, type: 3}
+        sizingMode: 1
+        horizontalAlign: 1
+        setNativeSize: 1
+    - rid: 2406591861039300725
+      type: {class: SetOriginSizeCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Hill
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 12
+        toScale: {x: 0.1, y: 0.1}
+        toAngle: 0
+        anchorMin: {x: 0, y: 0}
+        anchorMax: {x: 1, y: 1}
+    - rid: 2406591861039300726
+      type: {class: SetAnchorCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Hill
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 11
+        preset: 1
+        baseRatioX: 0.33
+        globalTuning: {fileID: 0}
+        roleTuningDb: {fileID: 0}
+        poseKey: 
+        offset: {x: 80, y: 70}
+        overrideAnchoredPosition: 0
+        anchoredPositionOverride: {x: 0, y: 0}
+    - rid: 2406591861039300727
+      type: {class: SwayCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Hill
+        _meta:
+          track: 10
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 15
+        swayAngle: 45
+        swayLoops: 3
+        duration: 1.2
+        swayForwardEase: 6
+        swayDecay: 0
+        wait: 0
+    - rid: 2406591861039300728
+      type: {class: FadeOutCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Main
+        _meta:
+          track: 20
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        targetMask: 5
+        duration: 0.6
+        ease: 9
+        disableInteraction: 1
+        wait: 1
+    - rid: 2406591861039300729
+      type: {class: DestroyCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: SubLeft
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        rigRootName: CharacterRig
+        autoRolePrefixFromRoleKey: 1
+        addRolePrefix: 1
+        rolePrefixOverride: 
+    - rid: 2406591861039300730
+      type: {class: SetCharRigCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: SubLeft
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        rigPrefab: {fileID: 8529412948266249186, guid: 2a755315e2a020646a5c6c8980c3f4df, type: 3}
+        parentSlot: 0
+        rigRootName: CharacterRig
+        autoRolePrefixFromRoleKey: 1
+        addRolePrefix: 1
+        destroyExistingRigWithSameName: 1
+        strict: 1
+    - rid: 2406591861039300751
+      type: {class: ShowRootsCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: SubLeft
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        targetMask: 4
+        enableInteraction: 1
+    - rid: 2406591861039300752
+      type: {class: SetSpriteCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: SubLeft
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 16
+        sprite: {fileID: 21300000, guid: 4b53a58a3b10e3c4bb974e217720b58b, type: 3}
+        sizingMode: 1
+        horizontalAlign: 1
+        setNativeSize: 1
+    - rid: 2406591861039300753
+      type: {class: SetOriginSizeCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: SubLeft
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 12
+        toScale: {x: 2, y: 2}
+        toAngle: 0
+        anchorMin: {x: 0, y: 0}
+        anchorMax: {x: 1, y: 1}
+    - rid: 2406591861039300754
+      type: {class: SetAnchorCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: SubLeft
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 11
+        preset: 1
+        baseRatioX: 0.33
+        globalTuning: {fileID: 0}
+        roleTuningDb: {fileID: 0}
+        poseKey: 
+        offset: {x: -140, y: 700}
+        overrideAnchoredPosition: 0
+        anchoredPositionOverride: {x: 0, y: 0}
+    - rid: 2406591861039300757
+      type: {class: WaitCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: SubLeft
+        _meta:
+          track: 20
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        seconds: 0.02
+        respectTimeScale: 1
+    - rid: 2406591861039300764
+      type: {class: ShowRootsCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: SubLeft
+        _meta:
+          track: 20
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        targetMask: 4
+        enableInteraction: 1
+    - rid: 2406591861039300765
+      type: {class: SetSpriteCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: SubLeft
+        _meta:
+          track: 20
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 16
+        sprite: {fileID: 21300000, guid: 3ebfef55c7cc6344f9f8abf33512ce25, type: 3}
+        sizingMode: 1
+        horizontalAlign: 1
+        setNativeSize: 1
+    - rid: 2406591861039300766
+      type: {class: SetOriginSizeCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: SubLeft
+        _meta:
+          track: 20
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 12
+        toScale: {x: 2, y: 2}
+        toAngle: 0
+        anchorMin: {x: 0, y: 0}
+        anchorMax: {x: 1, y: 1}
+    - rid: 2406591861039300767
+      type: {class: SetAnchorCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: SubLeft
+        _meta:
+          track: 20
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 11
+        preset: 1
+        baseRatioX: 0.33
+        globalTuning: {fileID: 0}
+        roleTuningDb: {fileID: 0}
+        poseKey: 
+        offset: {x: 180, y: 700}
+        overrideAnchoredPosition: 0
+        anchoredPositionOverride: {x: 0, y: 0}
+    - rid: 2406591861039300768
+      type: {class: SetSpriteCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: SubLeft
+        _meta:
+          track: 40
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 7
+        sprite: {fileID: -2276259661975475453, guid: c8c137c1b2fa4194686f76043501e503, type: 3}
+        sizingMode: 1
+        horizontalAlign: 1
+        setNativeSize: 1
+    - rid: 2406591861039300770
+      type: {class: BounceCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: SubLeft
+        _meta:
+          track: 10
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 1
+        ease: 9
+        duration: 1.2
+        waveAmplitude: 12
+        waveLoops: 4
+        waveAxis: 1
+        wait: 0
+    - rid: 2406591861039300771
+      type: {class: ShakeCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: SubLeft
+        _meta:
+          track: 10
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 5
+        axis: 0
+        intensity: 28
+        duration: 1.2
+        vibrato: 15
+        randomness: 10
+        shakeFadeout: 1
+        wait: 0
+    - rid: 2406591863483007060
+      type: {class: DestroyCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Main
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        rigRootName: CharacterRig
+        autoRolePrefixFromRoleKey: 1
+        addRolePrefix: 1
+        rolePrefixOverride: 
+    - rid: 2406591863483007061
+      type: {class: SetCharRigCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Main
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        rigPrefab: {fileID: 8529412948266249186, guid: 2a755315e2a020646a5c6c8980c3f4df, type: 3}
+        parentSlot: 0
+        rigRootName: CharacterRig
+        autoRolePrefixFromRoleKey: 1
+        addRolePrefix: 1
+        destroyExistingRigWithSameName: 1
+        strict: 1
+    - rid: 2406591863483007071
+      type: {class: SetSpriteCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Main
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 7
+        sprite: {fileID: -855298285791758126, guid: cbb4a6ae6ca035f459713eece4c9f32a, type: 3}
+        sizingMode: 1
+        horizontalAlign: 1
+        setNativeSize: 1
+    - rid: 2406591863483007072
+      type: {class: SetOriginSizeCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Main
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 3
+        toScale: {x: 0.7, y: 0.7}
+        toAngle: 0
+        anchorMin: {x: 0, y: 0}
+        anchorMax: {x: 1, y: 1}
+    - rid: 2406591863483007073
+      type: {class: SetAnchorCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Main
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 0
+        preset: 1
+        baseRatioX: 0.33
+        globalTuning: {fileID: 0}
+        roleTuningDb: {fileID: 0}
+        poseKey: 
+        offset: {x: 0, y: -300}
+        overrideAnchoredPosition: 0
+        anchoredPositionOverride: {x: 0, y: 0}
+    - rid: 2406591863483007074
+      type: {class: FadeOutCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: SubLeft
+        _meta:
+          track: 10
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        targetMask: -1
+        duration: 0.7
+        ease: 9
+        disableInteraction: 1
+        wait: 0
+    - rid: 2406591863483007075
+      type: {class: FadeInCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Main
+        _meta:
+          track: 10
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        targetMask: 5
+        duration: 0.8
+        ease: 9
+        EnableInteraction: 1
+        wait: 1
+    - rid: 2406591863483007076
+      type: {class: SetSpriteCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Main
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 16
+        sprite: {fileID: 21300000, guid: 805bcba044e4afb48b4380fe9a215140, type: 3}
+        sizingMode: 1
+        horizontalAlign: 1
+        setNativeSize: 0
+    - rid: 2406591863483007077
+      type: {class: SetOriginSizeCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Main
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 12
+        toScale: {x: 2, y: 2}
+        toAngle: 0
+        anchorMin: {x: 0, y: 0}
+        anchorMax: {x: 1, y: 1}
+    - rid: 2406591863483007078
+      type: {class: SetAnchorCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Main
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 11
+        preset: 1
+        baseRatioX: 0.33
+        globalTuning: {fileID: 0}
+        roleTuningDb: {fileID: 0}
+        poseKey: 
+        offset: {x: 140, y: 600}
+        overrideAnchoredPosition: 0
+        anchoredPositionOverride: {x: 0, y: 0}
+    - rid: 2406591863483007080
+      type: {class: DipInOutCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Main
+        _meta:
+          track: 20
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 1
+        dir: 3
+        distance: 32
+        duration: 0.8
+        ease: 8
+        wait: 0
+    - rid: 2406591865032278095
+      type: {class: DestroyCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: SubRight
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        rigRootName: CharacterRig
+        autoRolePrefixFromRoleKey: 1
+        addRolePrefix: 1
+        rolePrefixOverride: 
+    - rid: 2406591865032278096
+      type: {class: SetCharRigCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: SubRight
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        rigPrefab: {fileID: 8529412948266249186, guid: 2a755315e2a020646a5c6c8980c3f4df, type: 3}
+        parentSlot: 0
+        rigRootName: CharacterRig
+        autoRolePrefixFromRoleKey: 1
+        addRolePrefix: 1
+        destroyExistingRigWithSameName: 1
+        strict: 1
+    - rid: 2406591865032278097
+      type: {class: SetAnchorCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: SubRight
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 0
+        preset: 1
+        baseRatioX: 0.33
+        globalTuning: {fileID: 0}
+        roleTuningDb: {fileID: 0}
+        poseKey: 
+        offset: {x: 400, y: -300}
+        overrideAnchoredPosition: 0
+        anchoredPositionOverride: {x: 0, y: 0}
+    - rid: 2406591865032278098
+      type: {class: SetSpriteCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: SubRight
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 7
+        sprite: {fileID: -247037112251525876, guid: e88195201577cd447839df5d32fb1477, type: 3}
+        sizingMode: 1
+        horizontalAlign: 1
+        setNativeSize: 1
+    - rid: 2406591865032278099
+      type: {class: SetOriginSizeCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: SubRight
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 3
+        toScale: {x: 0.7, y: 0.7}
+        toAngle: 0
+        anchorMin: {x: 0, y: 0}
+        anchorMax: {x: 1, y: 1}
+    - rid: 2406591865032278100
+      type: {class: FadeInCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: SubRight
+        _meta:
+          track: 10
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        targetMask: 1
+        duration: 0.47
+        ease: 9
+        EnableInteraction: 1
+        wait: 1
+    - rid: 2406591865032278103
+      type: {class: FadeOutCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Main
+        _meta:
+          track: 20
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        targetMask: 5
+        duration: 0.38
+        ease: 9
+        disableInteraction: 1
+        wait: 0
+    - rid: 2406591865032278106
+      type: {class: NudgeTapCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: SubRight
+        _meta:
+          track: 20
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 1
+        strength: 88
+        duration: 0.28
+        taps: 3
+        damping: 6
+        anticipation: 3
+        wait: 0
+    - rid: 2406591865032278107
+      type: {class: FadeOutCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: SubRight
+        _meta:
+          track: 20
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        targetMask: 5
+        duration: 0.38
+        ease: 9
+        disableInteraction: 1
+        wait: 0
+    - rid: 2406591865032278113
+      type: {class: ShowRootsCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Main
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        targetMask: 1
+        enableInteraction: 1
+    - rid: 2406591865032278114
+      type: {class: SetScaleCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Main
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 6
+        toScale: {x: 1, y: 1}
+    - rid: 2406591865032278115
+      type: {class: SetPosOffsetCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Main
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 1
+        offset: {x: 0, y: 0}
+        resetToZero: 1
+    - rid: 2406591865032278116
+      type: {class: SetSpriteCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Main
+        _meta:
+          track: 10
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 7
+        sprite: {fileID: -3164809056393425246, guid: e142aaea5ef964f4bbedd0c1e54ca8a2, type: 3}
+        sizingMode: 1
+        horizontalAlign: 1
+        setNativeSize: 1
+    - rid: 2406591865032278117
+      type: {class: SetOriginSizeCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Main
+        _meta:
+          track: 10
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 3
+        toScale: {x: 0.7, y: 0.7}
+        toAngle: 0
+        anchorMin: {x: 0, y: 0}
+        anchorMax: {x: 1, y: 1}
+    - rid: 2406591865032278118
+      type: {class: BounceCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Main
+        _meta:
+          track: 20
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 1
+        ease: 9
+        duration: 1.2
+        waveAmplitude: 12
+        waveLoops: 4
+        waveAxis: 1
+        wait: 0
+    - rid: 2406591865032278119
+      type: {class: ShakeCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Main
+        _meta:
+          track: 20
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 5
+        axis: 0
+        intensity: 28
+        duration: 0.6
+        vibrato: 15
+        randomness: 10
+        shakeFadeout: 1
+        wait: 0
+    - rid: 2406591865032278120
+      type: {class: ScaleFromToCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Main
+        _meta:
+          track: 20
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 6
+        toScale: {x: 1.25, y: 1.25}
+        overrideFromScale: 0
+        fromScale: {x: 1, y: 1}
+        duration: 0.7
+        ease: 9
+        wait: 0
+        killTween: 1
+    - rid: 2406591865032278121
+      type: {class: MoveByCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Main
+        _meta:
+          track: 20
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 1
+        delta: {x: 0, y: -200}
+        duration: 0.7
+        ease: 9
+        wait: 0
+        killTween: 1
+    - rid: 2406591886280097874
+      type: {class: FadeOutCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Main
+        _meta:
+          track: 20
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        targetMask: 5
+        duration: 0.38
+        ease: 9
+        disableInteraction: 1
+        wait: 0
+    - rid: 2406591886280097885
+      type: {class: DestroyCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Main
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        rigRootName: CharacterRig
+        autoRolePrefixFromRoleKey: 1
+        addRolePrefix: 1
+        rolePrefixOverride: 
+    - rid: 2406591886280097886
+      type: {class: SetCharRigCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Main
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        rigPrefab: {fileID: 8529412948266249186, guid: 2a755315e2a020646a5c6c8980c3f4df, type: 3}
+        parentSlot: 0
+        rigRootName: CharacterRig
+        autoRolePrefixFromRoleKey: 1
+        addRolePrefix: 1
+        destroyExistingRigWithSameName: 1
+        strict: 1
+    - rid: 2406591886280097887
+      type: {class: SetAnchorCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Main
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 0
+        preset: 1
+        baseRatioX: 0.33
+        globalTuning: {fileID: 0}
+        roleTuningDb: {fileID: 0}
+        poseKey: 
+        offset: {x: -100, y: -300}
+        overrideAnchoredPosition: 0
+        anchoredPositionOverride: {x: 0, y: 0}
+    - rid: 2406591886280097888
+      type: {class: SetSpriteCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Main
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 7
+        sprite: {fileID: -3164809056393425246, guid: dd5d6f3a1e5c57a4f8ee0dca5ab267d4, type: 3}
+        sizingMode: 1
+        horizontalAlign: 1
+        setNativeSize: 1
+    - rid: 2406591886280097889
+      type: {class: SetOriginSizeCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Main
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 3
+        toScale: {x: 0.7, y: 0.7}
+        toAngle: 0
+        anchorMin: {x: 0, y: 0}
+        anchorMax: {x: 1, y: 1}
+    - rid: 2406591886280097890
+      type: {class: DestroyCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: SubLeft
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        rigRootName: CharacterRig
+        autoRolePrefixFromRoleKey: 1
+        addRolePrefix: 1
+        rolePrefixOverride: 
+    - rid: 2406591886280097891
+      type: {class: SetCharRigCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: SubLeft
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        rigPrefab: {fileID: 8529412948266249186, guid: 2a755315e2a020646a5c6c8980c3f4df, type: 3}
+        parentSlot: 0
+        rigRootName: CharacterRig
+        autoRolePrefixFromRoleKey: 1
+        addRolePrefix: 1
+        destroyExistingRigWithSameName: 1
+        strict: 1
+    - rid: 2406591886280097892
+      type: {class: SetAnchorCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: SubLeft
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 0
+        preset: 1
+        baseRatioX: 0.33
+        globalTuning: {fileID: 0}
+        roleTuningDb: {fileID: 0}
+        poseKey: 
+        offset: {x: 650, y: -300}
+        overrideAnchoredPosition: 0
+        anchoredPositionOverride: {x: 0, y: 0}
+    - rid: 2406591886280097893
+      type: {class: SetSpriteCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: SubLeft
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 7
+        sprite: {fileID: -3164809056393425246, guid: e142aaea5ef964f4bbedd0c1e54ca8a2, type: 3}
+        sizingMode: 1
+        horizontalAlign: 1
+        setNativeSize: 1
+    - rid: 2406591886280097894
+      type: {class: SetOriginSizeCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: SubLeft
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 3
+        toScale: {x: 0.7, y: 0.7}
+        toAngle: 0
+        anchorMin: {x: 0, y: 0}
+        anchorMax: {x: 1, y: 1}
+    - rid: 2406591886280097895
+      type: {class: DestroyCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: SubRight
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        rigRootName: CharacterRig
+        autoRolePrefixFromRoleKey: 1
+        addRolePrefix: 1
+        rolePrefixOverride: 
+    - rid: 2406591886280097896
+      type: {class: SetCharRigCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: SubRight
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        rigPrefab: {fileID: 8529412948266249186, guid: 2a755315e2a020646a5c6c8980c3f4df, type: 3}
+        parentSlot: 0
+        rigRootName: CharacterRig
+        autoRolePrefixFromRoleKey: 1
+        addRolePrefix: 1
+        destroyExistingRigWithSameName: 1
+        strict: 1
+    - rid: 2406591886280097897
+      type: {class: SetAnchorCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: SubRight
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 0
+        preset: 1
+        baseRatioX: 0.33
+        globalTuning: {fileID: 0}
+        roleTuningDb: {fileID: 0}
+        poseKey: 
+        offset: {x: 300, y: -300}
+        overrideAnchoredPosition: 0
+        anchoredPositionOverride: {x: 0, y: 0}
+    - rid: 2406591886280097898
+      type: {class: SetSpriteCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: SubRight
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 7
+        sprite: {fileID: -855298285791758126, guid: cbb4a6ae6ca035f459713eece4c9f32a, type: 3}
+        sizingMode: 1
+        horizontalAlign: 1
+        setNativeSize: 1
+    - rid: 2406591886280097899
+      type: {class: SetOriginSizeCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: SubRight
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 3
+        toScale: {x: 0.7, y: 0.7}
+        toAngle: 0
+        anchorMin: {x: 0, y: 0}
+        anchorMax: {x: 1, y: 1}
+    - rid: 2406591886280097900
+      type: {class: DestroyCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: SubFour
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        rigRootName: CharacterRig
+        autoRolePrefixFromRoleKey: 1
+        addRolePrefix: 1
+        rolePrefixOverride: 
+    - rid: 2406591886280097901
+      type: {class: SetCharRigCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: SubFour
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        rigPrefab: {fileID: 8529412948266249186, guid: 2a755315e2a020646a5c6c8980c3f4df, type: 3}
+        parentSlot: 0
+        rigRootName: CharacterRig
+        autoRolePrefixFromRoleKey: 1
+        addRolePrefix: 1
+        destroyExistingRigWithSameName: 1
+        strict: 1
+    - rid: 2406591886280097902
+      type: {class: SetAnchorCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: SubFour
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 0
+        preset: 1
+        baseRatioX: 0.33
+        globalTuning: {fileID: 0}
+        roleTuningDb: {fileID: 0}
+        poseKey: 
+        offset: {x: -500, y: -300}
+        overrideAnchoredPosition: 0
+        anchoredPositionOverride: {x: 0, y: 0}
+    - rid: 2406591886280097903
+      type: {class: SetSpriteCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: SubFour
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 7
+        sprite: {fileID: 2750298860172458669, guid: bd265246bc4044346b5ba3bc2e2a9f66, type: 3}
+        sizingMode: 1
+        horizontalAlign: 1
+        setNativeSize: 1
+    - rid: 2406591886280097904
+      type: {class: SetOriginSizeCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: SubFour
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 3
+        toScale: {x: 0.7, y: 0.7}
+        toAngle: 0
+        anchorMin: {x: 0, y: 0}
+        anchorMax: {x: 1, y: 1}
+    - rid: 2406591886280097910
+      type: {class: FadeInCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Main
+        _meta:
+          track: 20
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        targetMask: 1
+        duration: 0.47
+        ease: 9
+        EnableInteraction: 1
+        wait: 0
+    - rid: 2406591886280097911
+      type: {class: FadeInCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: SubLeft
+        _meta:
+          track: 20
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        targetMask: 1
+        duration: 0.47
+        ease: 9
+        EnableInteraction: 1
+        wait: 0
+    - rid: 2406591886280097912
+      type: {class: FadeInCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: SubRight
+        _meta:
+          track: 20
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        targetMask: 1
+        duration: 0.47
+        ease: 9
+        EnableInteraction: 1
+        wait: 0
+    - rid: 2406591886280097913
+      type: {class: FadeInCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: SubFour
+        _meta:
+          track: 20
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        targetMask: 1
+        duration: 0.47
+        ease: 9
+        EnableInteraction: 1
+        wait: 0
+    - rid: 2406591918965522510
+      type: {class: SetAnchorCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: SubLeft
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 0
+        preset: 1
+        baseRatioX: 0.33
+        globalTuning: {fileID: 0}
+        roleTuningDb: {fileID: 0}
+        poseKey: 
+        offset: {x: 0, y: 0}
+        overrideAnchoredPosition: 0
+        anchoredPositionOverride: {x: 0, y: 0}
+    - rid: 2406591918965522511
+      type: {class: SetSpriteCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: SubLeft
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 7
+        sprite: {fileID: -3164809056393425246, guid: aff62d79f9bf1f14386e92f84adc811c, type: 3}
+        sizingMode: 1
+        horizontalAlign: 1
+        setNativeSize: 0
+    - rid: 2406591918965522512
+      type: {class: SetOriginSizeCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: SubLeft
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 3
+        toScale: {x: 1, y: 1}
+        toAngle: 0
+        anchorMin: {x: 0, y: 0}
+        anchorMax: {x: 1, y: 1}
+    - rid: 2406591918965522513
+      type: {class: FadeInCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: SubLeft
+        _meta:
+          track: 20
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        targetMask: 1
+        duration: 0.47
+        ease: 9
+        EnableInteraction: 1
+        wait: 0

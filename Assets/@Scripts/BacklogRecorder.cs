@@ -25,18 +25,18 @@ public sealed class BacklogRecorder
     
     private void RegisterHandler()
     {
-        _yarnLineLifecycleBridge.LineStart -= OnLineStart;
-        _yarnLineLifecycleBridge.LineStart += OnLineStart;
+        _yarnLineLifecycleBridge.LinePrepared -= OnLinePrepare;
+        _yarnLineLifecycleBridge.LinePrepared += OnLinePrepare;
     }
 
     private void UnRegisterHandler()
     {
         if (_yarnLineLifecycleBridge == null) return;
 
-        _yarnLineLifecycleBridge.LineStart -= OnLineStart;
+        _yarnLineLifecycleBridge.LinePrepared -= OnLinePrepare;
     }
     
-    private void OnLineStart(YarnLineMeta meta)
+    private void OnLinePrepare(YarnLineMeta meta)
     {
         Add(new DialogueLogEntry
         {

@@ -1,0 +1,1786 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 77efca1a7ac39ca499c3be8e21666640, type: 3}
+  m_Name: seq_springseek_030 1
+  m_EditorClassIdentifier: Assembly-CSharp::SequenceSpecSO
+  sequenceKey: seq_springseek_030
+  nodes:
+  - editorName: Prepare Route
+    steps:
+    - editorName: 123
+      tracks:
+        interaction:
+        - rid: 7710742224098558030
+        setup:
+        - rid: 7710742224098558044
+        - rid: 7710742224098558045
+        - rid: 7710742243083812975
+        - rid: 7710742243083812976
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 7710742224098558030
+      - rid: 7710742224098558044
+      - rid: 7710742224098558045
+      - rid: 7710742243083812975
+      - rid: 7710742243083812976
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+  - editorName: "\uC544\uC774\uCC38,"
+    steps:
+    - editorName: "\uCE58\uC2DC\uC544 \uBE4C\uB4DC(\uC228\uAE40)"
+      tracks:
+        interaction:
+        - rid: 7710742224098558025
+        - rid: 7710742224098558026
+        setup:
+        - rid: 7710742224098558034
+        - rid: 7710742224098558035
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 7710742224098558025
+      - rid: 7710742224098558026
+      - rid: 7710742224098558034
+      - rid: 7710742224098558035
+      gate:
+        type: 0
+        seconds: 0
+        signalKey: 
+    - editorName: "\uCE58\uC2DC\uC544 \uB4F1\uC7A5"
+      tracks:
+        interaction:
+        - rid: 7710742224098558028
+        - rid: 7710742224098558029
+        setup: []
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 7710742224098558028
+      - rid: 7710742224098558029
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+  - editorName: "\uB3D9\uCABD \uBCBD\uC774\uB77C..."
+    steps:
+    - editorName: "\uD06C\uB85C\uB2C8\uC2A4 \uBE4C\uB4DC(\uC228\uAE40)"
+      tracks:
+        interaction:
+        - rid: 7710742224098558036
+        - rid: 7710742224098558037
+        setup:
+        - rid: 7710742224098558038
+        - rid: 7710742224098558039
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 7710742224098558036
+      - rid: 7710742224098558037
+      - rid: 7710742224098558038
+      - rid: 7710742224098558039
+      gate:
+        type: 0
+        seconds: 0
+        signalKey: 
+    - editorName: "\uD06C\uB85C\uB2C8\uC2A4 \uB4F1\uC7A5"
+      tracks:
+        interaction:
+        - rid: 7710742224098558040
+        - rid: 7710742224098558041
+        setup: []
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 7710742224098558040
+      - rid: 7710742224098558041
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+    - editorName: 
+      tracks:
+        interaction: []
+        setup: []
+        motion: []
+        dialogue: []
+        fx: []
+      compiled: []
+      gate:
+        type: 0
+        seconds: 0
+        signalKey: 
+  - editorName: "\uADF8\uB798 \uB9DE\uB2E4."
+    steps:
+    - editorName: 
+      tracks:
+        interaction:
+        - rid: 7710742224098558046
+        setup:
+        - rid: 7710742224098558050
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 7710742224098558046
+      - rid: 7710742224098558050
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+  - editorName: "\uB098\uB294 \uADF8 \uB9D0\uC5D0"
+    steps:
+    - editorName: 
+      tracks:
+        interaction:
+        - rid: 7710742224098558048
+        - rid: 7710742224098558049
+        setup: []
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 7710742224098558048
+      - rid: 7710742224098558049
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+  - editorName: "\uC0AC\uC800\uB294 \uADF8\uC800"
+    steps:
+    - editorName: 
+      tracks:
+        interaction:
+        - rid: 7710742224098558053
+        setup: []
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 7710742224098558053
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+  - editorName: "\uB3D9\uCABD \uBCBD\uC5D0"
+    steps:
+    - editorName: 
+      tracks:
+        interaction:
+        - rid: 7710742243083812941
+        setup: []
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 7710742243083812941
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+  - editorName: Hide
+    steps:
+    - editorName: 
+      tracks:
+        interaction:
+        - rid: 7710742243083812942
+        - rid: 7710742243083812943
+        setup: []
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 7710742243083812942
+      - rid: 7710742243083812943
+      gate:
+        type: 0
+        seconds: 0
+        signalKey: 
+  - editorName: "\uC5B4\uB77C? \uC800\uCABD"
+    steps:
+    - editorName: 
+      tracks:
+        interaction:
+        - rid: 7710742235538522189
+        - rid: 7710742235538522191
+        - rid: 7710742235538522190
+        - rid: 7710742235538522192
+        setup:
+        - rid: 7710742243083812937
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 7710742235538522189
+      - rid: 7710742235538522191
+      - rid: 7710742235538522190
+      - rid: 7710742235538522192
+      - rid: 7710742243083812937
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+  - editorName: "\uAD6C\uC778 \uAD11\uACE0?"
+    steps:
+    - editorName: 
+      tracks:
+        interaction:
+        - rid: 7710742243083812944
+        - rid: 7710742243083812946
+        setup: []
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 7710742243083812944
+      - rid: 7710742243083812946
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+  - editorName: "\uC544! \uC544\uB294 \uACF3"
+    steps:
+    - editorName: 
+      tracks:
+        interaction:
+        - rid: 7710742243083812947
+        - rid: 7710742243083812948
+        setup:
+        - rid: 7710742243083812950
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 7710742243083812947
+      - rid: 7710742243083812948
+      - rid: 7710742243083812950
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+  - editorName: "\uAD11\uACE0 \uC885\uC774\uAC00 \uC544\uC9C1"
+    steps:
+    - editorName: 
+      tracks:
+        interaction:
+        - rid: 7710742243083812951
+        - rid: 7710742243083812952
+        setup: []
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 7710742243083812951
+      - rid: 7710742243083812952
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+  - editorName: "\uC5B4\uC81C \uBC1B\uC740 \uBA54\uC2DC\uC9C0\uC5D0\uB3C4"
+    steps:
+    - editorName: 
+      tracks:
+        interaction:
+        - rid: 7710742243083812954
+        setup: []
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 7710742243083812954
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+  - editorName: "\uC774 \uAD11\uACE0\uB97C \uBCF4\uACE0 \uC758\uB8B0"
+    steps:
+    - editorName: 
+      tracks:
+        interaction:
+        - rid: 7710742243083812955
+        setup: []
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 7710742243083812955
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+  - editorName: "\uC774 \uD6E0\uAD88\uC9D1"
+    steps:
+    - editorName: "\uC88C\uC6B0\uB4F1\uC7A5"
+      tracks:
+        interaction:
+        - rid: 7710742243083812956
+        - rid: 7710742243083812957
+        setup: []
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 7710742243083812956
+      - rid: 7710742243083812957
+      gate:
+        type: 0
+        seconds: 0
+        signalKey: 
+    - editorName: "\uB9C8\uC655 \uD45C\uC815\uBCC0"
+      tracks:
+        interaction:
+        - rid: 7710742243083812958
+        setup: []
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 7710742243083812958
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+  - editorName: "\uD06C\uB85C\uB2C8\uC2A4 \uB044\uB355"
+    steps:
+    - editorName: "\uD06C\uB85C\uB2C8\uC2A4 \uB044\uB355"
+      tracks:
+        interaction:
+        - rid: 7710742243083812959
+        setup: []
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 7710742243083812959
+      gate:
+        type: 0
+        seconds: 0
+        signalKey: 
+    - editorName: "\uBAA8\uB450 \uD398\uC774\uB4DC\uC544\uC6C3 "
+      tracks:
+        interaction:
+        - rid: 7710742243083812966
+        setup:
+        - rid: 7710742243083812967
+        motion:
+        - rid: 7710742243083812968
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 7710742243083812966
+      - rid: 7710742243083812967
+      - rid: 7710742243083812968
+      gate:
+        type: 0
+        seconds: 0
+        signalKey: 
+    - editorName: "\uD654\uBA74\uAD50\uCCB4 \uAC70\uB9AC->\uD6E0\uAD88"
+      tracks:
+        interaction:
+        - rid: 7710742255632384076
+        setup: []
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 7710742255632384076
+      gate:
+        type: 0
+        seconds: 0
+        signalKey: 
+    - editorName: "\uC0E4\uB9C8\uC624 \uBC0F \uC0AC\uC7A5 \uBE4C\uB4DC"
+      tracks:
+        interaction:
+        - rid: 7710742243083812960
+        - rid: 7710742243083812961
+        - rid: 7710742243083812971
+        - rid: 7710742243083812972
+        setup:
+        - rid: 7710742243083812962
+        - rid: 7710742243083812963
+        - rid: 7710742243083812973
+        - rid: 7710742243083812974
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 7710742243083812960
+      - rid: 7710742243083812961
+      - rid: 7710742243083812971
+      - rid: 7710742243083812972
+      - rid: 7710742243083812962
+      - rid: 7710742243083812963
+      - rid: 7710742243083812973
+      - rid: 7710742243083812974
+      gate:
+        type: 0
+        seconds: 0
+        signalKey: 
+    - editorName: "\uC0E4\uB9C8\uC624 \uBC0F \uC0AC\uC7A5 \uD398\uC774\uB4DC\uC778"
+      tracks:
+        interaction:
+        - rid: 7710742243083812969
+        setup:
+        - rid: 7710742243083812970
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 7710742243083812969
+      - rid: 7710742243083812970
+      gate:
+        type: 0
+        seconds: 0
+        signalKey: 
+    - editorName: SignalReady
+      tracks:
+        interaction:
+        - rid: 7710742306561982543
+        setup: []
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 7710742306561982543
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+  - editorName: "\uB124. \uC774 \uC77C\uB85C \uB9CE\uC740 \uBD84\uB4E4\uC774"
+    steps:
+    - editorName: 
+      tracks:
+        interaction:
+        - rid: 7710742243083812977
+        setup: []
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 7710742243083812977
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+  - editorName: "\uC2E4\uB840\uC9C0\uB9CC, \uC7A0\uAE50"
+    steps:
+    - editorName: "\uC0AC\uC7A5\uC2DC\uBA00\uC624 \uC544\uC6C3"
+      tracks:
+        interaction:
+        - rid: 7710742243083812982
+        setup:
+        - rid: 7710742243083812983
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 7710742243083812982
+      - rid: 7710742243083812983
+      gate:
+        type: 0
+        seconds: 0
+        signalKey: 
+    - editorName: "\uB9C8\uC655 \uB4F1\uC7A5"
+      tracks:
+        interaction:
+        - rid: 7710742243083812978
+        setup:
+        - rid: 7710742243083812979
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 7710742243083812978
+      - rid: 7710742243083812979
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+  - editorName: "\uC544, \uC5EC\uB7EC\uBD84\uC774\uC5C8\uAD70\uC694."
+    steps:
+    - editorName: "\uC2DC\uBA00\uC624\uD398\uC774\uB4DC\uC778"
+      tracks:
+        interaction:
+        - rid: 7710742243083812984
+        setup: []
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 7710742243083812984
+      gate:
+        type: 0
+        seconds: 0
+        signalKey: 
+    - editorName: "\uC2DC\uBA00\uC624\uC911\uC559\uC774\uB3D9"
+      tracks:
+        interaction:
+        - rid: 7710742243083812980
+        - rid: 7710742243083812981
+        setup: []
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 7710742243083812980
+      - rid: 7710742243083812981
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+  - editorName: "\uC911\uC694\uD55C \uB2E8\uC11C\uB97C"
+    steps:
+    - editorName: 
+      tracks:
+        interaction:
+        - rid: 7710742243083812985
+        setup: []
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 7710742243083812985
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+  - editorName: "\uADF8\uB7F0\uB370 \uB10C \uC65C \uC5EC\uAE30"
+    steps:
+    - editorName: "\uC2DC\uB9C8\uC624 \uC88C\uB85C \uC774\uB3D9"
+      tracks:
+        interaction:
+        - rid: 7710742243083812986
+        setup: []
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 7710742243083812986
+      gate:
+        type: 0
+        seconds: 0
+        signalKey: 
+    - editorName: "\uCE58\uC2DC\uC544 \uD398\uC774\uB4DC\uC778"
+      tracks:
+        interaction:
+        - rid: 7710742243083812987
+        - rid: 7710742243083812989
+        - rid: 7710742243083812988
+        setup: []
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 7710742243083812987
+      - rid: 7710742243083812989
+      - rid: 7710742243083812988
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+  references:
+    version: 2
+    RefIds:
+    - rid: 7710742224098558025
+      type: {class: SetCharRigCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Chixia
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        rigPrefab: {fileID: 8529412948266249186, guid: 2a755315e2a020646a5c6c8980c3f4df, type: 3}
+        parentSlot: 0
+        rigRootName: CharacterRig
+        autoRolePrefixFromRoleKey: 1
+        addRolePrefix: 1
+        destroyExistingRigWithSameName: 1
+        strict: 1
+    - rid: 7710742224098558026
+      type: {class: SetPortraitSpriteCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Chixia
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        portrait:
+          character: Alise
+          emotion: 1
+          variant: c
+        target: 7
+        sizingMode: 1
+        horizontalAlign: 1
+    - rid: 7710742224098558028
+      type: {class: FadeInCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Chixia
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        targetMask: 1
+        duration: 0.47
+        ease: 9
+        EnableInteraction: 1
+        wait: 0
+    - rid: 7710742224098558029
+      type: {class: RichSlideInCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Chixia
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 1
+        from: 0
+        distance: 480
+        useAnticipation: 1
+        anticipationDistance: 18
+        anticipationPortion: 0.12
+        anticipationEase: 6
+        useOvershoot: 1
+        overshootDistance: 24
+        overshootPortion: 0.78
+        approachEase: 9
+        settleEase: 12
+        duration: 0.55
+        wait: 0
+    - rid: 7710742224098558030
+      type: {class: PrepareDialogueUICommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Chixia
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        boxKind: 1
+        cleanup: 0
+        bindTimeoutSeconds: 2
+        skipWaitWhenSkipping: 1
+        validateBinding: 0
+    - rid: 7710742224098558034
+      type: {class: SetOriginSizeCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Chixia
+        _meta:
+          track: 10
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 3
+        toScale: {x: 1.8, y: 1.8}
+        toAngle: 0
+        anchorMin: {x: 0, y: 0}
+        anchorMax: {x: 1, y: 1}
+    - rid: 7710742224098558035
+      type: {class: SetAnchorCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Chixia
+        _meta:
+          track: 10
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 0
+        preset: 1
+        baseRatioX: 0.5
+        globalTuning: {fileID: 0}
+        roleTuningDb: {fileID: 0}
+        poseKey: 
+        offset: {x: 540, y: -260}
+        overrideAnchoredPosition: 0
+        anchoredPositionOverride: {x: 0, y: 0}
+    - rid: 7710742224098558036
+      type: {class: SetCharRigCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Coronis
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        rigPrefab: {fileID: 8529412948266249186, guid: 2a755315e2a020646a5c6c8980c3f4df, type: 3}
+        parentSlot: 0
+        rigRootName: CharacterRig
+        autoRolePrefixFromRoleKey: 1
+        addRolePrefix: 1
+        destroyExistingRigWithSameName: 1
+        strict: 1
+    - rid: 7710742224098558037
+      type: {class: SetPortraitSpriteCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Coronis
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        portrait:
+          character: Kuonji
+          emotion: 7
+          variant: a
+        target: 7
+        sizingMode: 1
+        horizontalAlign: 1
+    - rid: 7710742224098558038
+      type: {class: SetOriginSizeCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Coronis
+        _meta:
+          track: 10
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 3
+        toScale: {x: 2.1, y: 2.1}
+        toAngle: 0
+        anchorMin: {x: 0, y: 0}
+        anchorMax: {x: 1, y: 1}
+    - rid: 7710742224098558039
+      type: {class: SetAnchorCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Coronis
+        _meta:
+          track: 10
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 0
+        preset: 1
+        baseRatioX: 0.5
+        globalTuning: {fileID: 0}
+        roleTuningDb: {fileID: 0}
+        poseKey: 
+        offset: {x: -250, y: -260}
+        overrideAnchoredPosition: 0
+        anchoredPositionOverride: {x: 0, y: 0}
+    - rid: 7710742224098558040
+      type: {class: FadeInCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Coronis
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        targetMask: 1
+        duration: 0.47
+        ease: 9
+        EnableInteraction: 1
+        wait: 0
+    - rid: 7710742224098558041
+      type: {class: RichSlideInCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Coronis
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 1
+        from: 0
+        distance: 480
+        useAnticipation: 1
+        anticipationDistance: 18
+        anticipationPortion: 0.12
+        anticipationEase: 6
+        useOvershoot: 1
+        overshootDistance: 24
+        overshootPortion: 0.78
+        approachEase: 9
+        settleEase: 12
+        duration: 0.55
+        wait: 0
+    - rid: 7710742224098558044
+      type: {class: DestroyCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Chixia
+        _meta:
+          track: 10
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        rigRootName: CharacterRig
+        autoRolePrefixFromRoleKey: 1
+        addRolePrefix: 1
+        rolePrefixOverride: 
+    - rid: 7710742224098558045
+      type: {class: DestroyCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Coronis
+        _meta:
+          track: 10
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        rigRootName: CharacterRig
+        autoRolePrefixFromRoleKey: 1
+        addRolePrefix: 1
+        rolePrefixOverride: 
+    - rid: 7710742224098558046
+      type: {class: SetEmotionPortraitWipeCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Chixia
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        portrait:
+          character: Alise
+          emotion: 1
+          variant: c
+        duration: 0.38
+        ease: 9
+        wait: 0
+        snapOnSkip: 1
+        sizingMode: 1
+        horizontalAlign: 1
+    - rid: 7710742224098558048
+      type: {class: SetEmotionPortraitWipeCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Coronis
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        portrait:
+          character: Springseek_Coronis
+          emotion: 2
+          variant: Springseek_Coronis_a
+        duration: 0.38
+        ease: 9
+        wait: 0
+        snapOnSkip: 1
+        sizingMode: 1
+        horizontalAlign: 1
+    - rid: 7710742224098558049
+      type: {class: DipInOutCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Coronis
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 1
+        dir: 3
+        distance: 24
+        duration: 0.4
+        ease: 8
+        wait: 0
+    - rid: 7710742224098558050
+      type: {class: DipInOutCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Chixia
+        _meta:
+          track: 10
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 1
+        dir: 3
+        distance: 24
+        duration: 0.4
+        ease: 8
+        wait: 0
+    - rid: 7710742224098558053
+      type: {class: SetEmotionPortraitWipeCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Chixia
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        portrait:
+          character: Chixia
+          emotion: 17
+          variant: a
+        duration: 0.38
+        ease: 9
+        wait: 0
+        snapOnSkip: 1
+        sizingMode: 1
+        horizontalAlign: 1
+    - rid: 7710742235538522189
+      type: {class: SetCharRigCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Tyrant
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        rigPrefab: {fileID: 8529412948266249186, guid: 2a755315e2a020646a5c6c8980c3f4df, type: 3}
+        parentSlot: 3
+        rigRootName: CharacterRig
+        autoRolePrefixFromRoleKey: 1
+        addRolePrefix: 1
+        destroyExistingRigWithSameName: 1
+        strict: 1
+    - rid: 7710742235538522190
+      type: {class: SetPortraitSpriteCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Tyrant
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        portrait:
+          character: Tyrant
+          emotion: 24
+          variant: c
+        target: 7
+        sizingMode: 1
+        horizontalAlign: 1
+    - rid: 7710742235538522191
+      type: {class: SetOriginSizeCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Tyrant
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 3
+        toScale: {x: 1.4, y: 1.4}
+        toAngle: 0
+        anchorMin: {x: 0, y: 0}
+        anchorMax: {x: 1, y: 1}
+    - rid: 7710742235538522192
+      type: {class: SetAnchorCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Tyrant
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 0
+        preset: 1
+        baseRatioX: 0.5
+        globalTuning: {fileID: 0}
+        roleTuningDb: {fileID: 0}
+        poseKey: 
+        offset: {x: 0, y: -320}
+        overrideAnchoredPosition: 0
+        anchoredPositionOverride: {x: 0, y: 0}
+    - rid: 7710742243083812937
+      type: {class: FadeInCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Tyrant
+        _meta:
+          track: 10
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        targetMask: 5
+        duration: 0.5
+        ease: 9
+        EnableInteraction: 0
+        wait: 0
+    - rid: 7710742243083812941
+      type: {class: SetEmotionPortraitWipeCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Chixia
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        portrait:
+          character: Chixia
+          emotion: 17
+          variant: a
+        duration: 0.38
+        ease: 9
+        wait: 0
+        snapOnSkip: 1
+        sizingMode: 1
+        horizontalAlign: 1
+    - rid: 7710742243083812942
+      type: {class: HideRootsCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Chixia
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        targetMask: 7
+        disableInteraction: 1
+    - rid: 7710742243083812943
+      type: {class: HideRootsCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Coronis
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        targetMask: 7
+        disableInteraction: 1
+    - rid: 7710742243083812944
+      type: {class: FadeInCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Coronis
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        targetMask: 1
+        duration: 0.47
+        ease: 9
+        EnableInteraction: 1
+        wait: 0
+    - rid: 7710742243083812946
+      type: {class: SetPortraitSpriteCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Coronis
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        portrait:
+          character: Springseek_Coronis
+          emotion: 5
+          variant: Springseek_Coronis_a
+        target: 7
+        sizingMode: 1
+        horizontalAlign: 1
+    - rid: 7710742243083812947
+      type: {class: FadeInCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Chixia
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        targetMask: 1
+        duration: 0.47
+        ease: 9
+        EnableInteraction: 1
+        wait: 0
+    - rid: 7710742243083812948
+      type: {class: SetPortraitSpriteCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Chixia
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        portrait:
+          character: Chixia
+          emotion: 2
+          variant: a
+        target: 7
+        sizingMode: 1
+        horizontalAlign: 1
+    - rid: 7710742243083812950
+      type: {class: ShakeCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Chixia
+        _meta:
+          track: 10
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 5
+        axis: 1
+        intensity: 28
+        duration: 0.55
+        vibrato: 15
+        randomness: 10
+        shakeFadeout: 1
+        wait: 0
+    - rid: 7710742243083812951
+      type: {class: FadeInCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Tyrant
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        targetMask: 1
+        duration: 0.47
+        ease: 9
+        EnableInteraction: 1
+        wait: 0
+    - rid: 7710742243083812952
+      type: {class: SetPortraitSpriteCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Tyrant
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        portrait:
+          character: Tyrant
+          emotion: 2
+          variant: c
+        target: 7
+        sizingMode: 1
+        horizontalAlign: 1
+    - rid: 7710742243083812954
+      type: {class: SetPortraitSpriteCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Tyrant
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        portrait:
+          character: Tyrant
+          emotion: 20
+          variant: c
+        target: 7
+        sizingMode: 1
+        horizontalAlign: 1
+    - rid: 7710742243083812955
+      type: {class: SetPortraitSpriteCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Tyrant
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        portrait:
+          character: Tyrant
+          emotion: 9
+          variant: c
+        target: 7
+        sizingMode: 1
+        horizontalAlign: 1
+    - rid: 7710742243083812956
+      type: {class: FadeInCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Coronis
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        targetMask: 1
+        duration: 0.47
+        ease: 9
+        EnableInteraction: 1
+        wait: 0
+    - rid: 7710742243083812957
+      type: {class: FadeInCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Chixia
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        targetMask: 1
+        duration: 0.47
+        ease: 9
+        EnableInteraction: 1
+        wait: 0
+    - rid: 7710742243083812958
+      type: {class: SetEmotionPortraitWipeCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Tyrant
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        portrait:
+          character: Tyrant
+          emotion: 2
+          variant: c
+        duration: 0.38
+        ease: 9
+        wait: 0
+        snapOnSkip: 1
+        sizingMode: 1
+        horizontalAlign: 1
+    - rid: 7710742243083812959
+      type: {class: DipInOutCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Coronis
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 1
+        dir: 3
+        distance: 32
+        duration: 0.3
+        ease: 8
+        wait: 1
+    - rid: 7710742243083812960
+      type: {class: SetCharRigCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Shimiao
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        rigPrefab: {fileID: 8529412948266249186, guid: 2a755315e2a020646a5c6c8980c3f4df, type: 3}
+        parentSlot: 0
+        rigRootName: CharacterRig
+        autoRolePrefixFromRoleKey: 1
+        addRolePrefix: 1
+        destroyExistingRigWithSameName: 1
+        strict: 1
+    - rid: 7710742243083812961
+      type: {class: SetPortraitSpriteCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Shimiao
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        portrait:
+          character: Shimiao
+          emotion: 2
+          variant: a
+        target: 7
+        sizingMode: 1
+        horizontalAlign: 1
+    - rid: 7710742243083812962
+      type: {class: SetCharRigCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Manager
+        _meta:
+          track: 10
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        rigPrefab: {fileID: 8529412948266249186, guid: 2a755315e2a020646a5c6c8980c3f4df, type: 3}
+        parentSlot: 0
+        rigRootName: CharacterRig
+        autoRolePrefixFromRoleKey: 1
+        addRolePrefix: 1
+        destroyExistingRigWithSameName: 1
+        strict: 1
+    - rid: 7710742243083812963
+      type: {class: SetPortraitSpriteCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Manager
+        _meta:
+          track: 10
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        portrait:
+          character: Eleanor
+          emotion: 2
+          variant: Eleanor_b
+        target: 7
+        sizingMode: 1
+        horizontalAlign: 1
+    - rid: 7710742243083812966
+      type: {class: FadeOutCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Chixia
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        targetMask: 7
+        duration: 0.38
+        ease: 9
+        disableInteraction: 1
+        wait: 0
+    - rid: 7710742243083812967
+      type: {class: FadeOutCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Coronis
+        _meta:
+          track: 10
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        targetMask: 7
+        duration: 0.38
+        ease: 9
+        disableInteraction: 1
+        wait: 0
+    - rid: 7710742243083812968
+      type: {class: FadeOutCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Tyrant
+        _meta:
+          track: 20
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        targetMask: 7
+        duration: 0.38
+        ease: 9
+        disableInteraction: 1
+        wait: 0
+    - rid: 7710742243083812969
+      type: {class: FadeInCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Shimiao
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        targetMask: 1
+        duration: 0.47
+        ease: 9
+        EnableInteraction: 1
+        wait: 0
+    - rid: 7710742243083812970
+      type: {class: FadeInCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Manager
+        _meta:
+          track: 10
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        targetMask: 1
+        duration: 0.47
+        ease: 9
+        EnableInteraction: 1
+        wait: 1
+    - rid: 7710742243083812971
+      type: {class: SetOriginSizeCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Shimiao
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 3
+        toScale: {x: 1.5, y: 1.5}
+        toAngle: 0
+        anchorMin: {x: 0, y: 0}
+        anchorMax: {x: 1, y: 1}
+    - rid: 7710742243083812972
+      type: {class: SetAnchorCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Shimiao
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 0
+        preset: 1
+        baseRatioX: 0.5
+        globalTuning: {fileID: 0}
+        roleTuningDb: {fileID: 0}
+        poseKey: 
+        offset: {x: -250, y: -200}
+        overrideAnchoredPosition: 0
+        anchoredPositionOverride: {x: 0, y: 0}
+    - rid: 7710742243083812973
+      type: {class: SetOriginSizeCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Manager
+        _meta:
+          track: 10
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 3
+        toScale: {x: 1.5, y: 1.5}
+        toAngle: 0
+        anchorMin: {x: 0, y: 0}
+        anchorMax: {x: 1, y: 1}
+    - rid: 7710742243083812974
+      type: {class: SetAnchorCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Manager
+        _meta:
+          track: 10
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 0
+        preset: 1
+        baseRatioX: 0.5
+        globalTuning: {fileID: 0}
+        roleTuningDb: {fileID: 0}
+        poseKey: 
+        offset: {x: 350, y: -210}
+        overrideAnchoredPosition: 0
+        anchoredPositionOverride: {x: 0, y: 0}
+    - rid: 7710742243083812975
+      type: {class: DestroyCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Shimiao
+        _meta:
+          track: 10
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        rigRootName: CharacterRig
+        autoRolePrefixFromRoleKey: 1
+        addRolePrefix: 1
+        rolePrefixOverride: 
+    - rid: 7710742243083812976
+      type: {class: DestroyCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Manager
+        _meta:
+          track: 10
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        rigRootName: CharacterRig
+        autoRolePrefixFromRoleKey: 1
+        addRolePrefix: 1
+        rolePrefixOverride: 
+    - rid: 7710742243083812977
+      type: {class: DipInOutCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Shimiao
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 1
+        dir: 3
+        distance: 32
+        duration: 0.8
+        ease: 8
+        wait: 0
+    - rid: 7710742243083812978
+      type: {class: SetPortraitSpriteCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Tyrant
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        portrait:
+          character: Tyrant
+          emotion: 2
+          variant: c
+        target: 7
+        sizingMode: 1
+        horizontalAlign: 1
+    - rid: 7710742243083812979
+      type: {class: FadeInCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Tyrant
+        _meta:
+          track: 10
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        targetMask: 1
+        duration: 0.47
+        ease: 9
+        EnableInteraction: 1
+        wait: 0
+    - rid: 7710742243083812980
+      type: {class: MoveToCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Shimiao
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 1
+        toAnchoredPos: {x: 300, y: 0}
+        duration: 0.4
+        ease: 9
+        wait: 0
+        killTween: 1
+    - rid: 7710742243083812981
+      type: {class: SetEmotionPortraitWipeCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Shimiao
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        portrait:
+          character: Shimiao
+          emotion: 15
+          variant: a
+        duration: 0.38
+        ease: 9
+        wait: 0
+        snapOnSkip: 1
+        sizingMode: 1
+        horizontalAlign: 1
+    - rid: 7710742243083812982
+      type: {class: FadeOutCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Shimiao
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        targetMask: 7
+        duration: 0.38
+        ease: 9
+        disableInteraction: 1
+        wait: 0
+    - rid: 7710742243083812983
+      type: {class: FadeOutCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Manager
+        _meta:
+          track: 10
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        targetMask: 7
+        duration: 0.38
+        ease: 9
+        disableInteraction: 1
+        wait: 0
+    - rid: 7710742243083812984
+      type: {class: FadeInCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Shimiao
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        targetMask: 1
+        duration: 0.47
+        ease: 9
+        EnableInteraction: 1
+        wait: 0
+    - rid: 7710742243083812985
+      type: {class: SetEmotionPortraitWipeCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Tyrant
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        portrait:
+          character: Tyrant
+          emotion: 17
+          variant: a
+        duration: 0.38
+        ease: 9
+        wait: 0
+        snapOnSkip: 1
+        sizingMode: 1
+        horizontalAlign: 1
+    - rid: 7710742243083812986
+      type: {class: MoveToCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Shimiao
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 1
+        toAnchoredPos: {x: 0, y: 0}
+        duration: 0.4
+        ease: 9
+        wait: 1
+        killTween: 1
+    - rid: 7710742243083812987
+      type: {class: FadeInCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Chixia
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        targetMask: 1
+        duration: 0.47
+        ease: 9
+        EnableInteraction: 1
+        wait: 0
+    - rid: 7710742243083812988
+      type: {class: SetEmotionPortraitWipeCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Chixia
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        portrait:
+          character: Chixia
+          emotion: 2
+          variant: a
+        duration: 0.38
+        ease: 9
+        wait: 0
+        snapOnSkip: 1
+        sizingMode: 1
+        horizontalAlign: 1
+    - rid: 7710742243083812989
+      type: {class: RichSlideInCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Chixia
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 1
+        from: 1
+        distance: 480
+        useAnticipation: 1
+        anticipationDistance: 18
+        anticipationPortion: 0.12
+        anticipationEase: 6
+        useOvershoot: 1
+        overshootDistance: 24
+        overshootPortion: 0.78
+        approachEase: 9
+        settleEase: 12
+        duration: 0.55
+        wait: 0
+    - rid: 7710742255632384076
+      type: {class: TransitionBlackoutCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Chixia
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        coverDuration: 0.2
+        uncoverDuration: 0.2
+        coverEase: 4
+        uncoverEase: 4
+        swapSignalKey: transition.swap
+        swapTiming: 0
+        holdSeconds: 0.2
+        wait: 1
+        killTween: 1
+        blockRaycastsWhileFading: 1
+        autoBlockByAlpha: 1
+        warnIfMissing: 1
+    - rid: 7710742306561982543
+      type: {class: RaiseSignalCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: Shimiao
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        signalKey: ready
+        raiseOnSkip: 1

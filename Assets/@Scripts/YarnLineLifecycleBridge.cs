@@ -40,6 +40,8 @@ public sealed class YarnLineLifecycleBridge : ActionMarkupHandler
     [Tooltip("DialogueRunner의 Dialogue Presenters 리스트에 LineIdPresenter가 자동으로 가장 앞에 추가됨")]
     [SerializeField] private bool autoRegisterPresenter = true;
 
+    public event Action<string> OnNodeStarted;
+    public event Action<string> NodeCompleted;
     public event Action<YarnLineMeta> LinePrepared;
     public event Action<YarnLineMeta> LineStart;
     public event Action<YarnLineMeta> LineFinishDisplaying;
@@ -90,7 +92,7 @@ public sealed class YarnLineLifecycleBridge : ActionMarkupHandler
 
     private void OnDisable()
     {
-        if (!_initialized || _dialogueRunner == null) return;
+        if (_dialogueRunner == null) return;
 
         _dialogueRunner.onNodeStart?.RemoveListener(OnNodeStart);
         _dialogueRunner.onNodeComplete?.RemoveListener(OnNodeComplete);
@@ -110,9 +112,18 @@ public sealed class YarnLineLifecycleBridge : ActionMarkupHandler
     }
     
     #endregion
+
     
-    private void OnNodeStart(string nodeName) => _currentNodeName = nodeName;
-    private void OnNodeComplete(string completedNodeName) => _currentNodeName = "";
+    private void OnNodeStart(string nodeName)
+    {
+        _currentNodeName = nodeName;
+        OnNodeStarted?.Invoke(nodeName);
+    }
+    private void OnNodeComplete(string completedNodeName)
+    {
+        NodeCompleted?.Invoke(completedNodeName);
+        _currentNodeName = "";
+    }
     private void OnLineIdReceived(string lineId) => _currentLineId = lineId;
     
     // =========================================================

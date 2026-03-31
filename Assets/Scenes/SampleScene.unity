@@ -2751,7 +2751,7 @@ MonoBehaviour:
   yarnUIBridge: {fileID: 1874881010}
   presentationRouteEntry: {fileID: 1433866633}
   yarnEntryKey: NewYarnScript
-  presentationEntryKey: seq1
+  presentationEntryKey: seq2
   runYarnKey: 50
   stopKey: 51
 --- !u!4 &1924806293
@@ -16573,7 +16573,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.000017166138, y: 0.00059130316}
+  m_AnchoredPosition: {x: 0.000017166138, y: 0.000041795585}
   m_SizeDelta: {x: 0, y: 300}
   m_Pivot: {x: 0, y: 1}
 --- !u!222 &3549758765554785767
