@@ -544,6 +544,50 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &204524859
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 204524861}
+  - component: {fileID: 204524860}
+  m_Layer: 0
+  m_Name: ImmediateCommandRunner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &204524860
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 204524859}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e80af01544c5acd4b91c85cad8ba269d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ImmediateCommandRunner
+--- !u!4 &204524861
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 204524859}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 925.97705, y: 583.3106, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &223300848
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1310,6 +1354,8 @@ MonoBehaviour:
   yarnLineLifecycleBridge: {fileID: 626587493}
   vnFeatureController: {fileID: 775605347}
   episodePlayer: {fileID: 1924806292}
+  immediateCommandRunner: {fileID: 204524860}
+  yarnCommandBridge: {fileID: 1829026822}
   overlay: {fileID: 165425760}
 --- !u!1 &626587492
 GameObject:
@@ -2720,6 +2766,51 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &1829026821
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1829026823}
+  - component: {fileID: 1829026822}
+  m_Layer: 0
+  m_Name: YarnCommandBridge
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1829026822
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1829026821}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 863d5def562f3e046972b682c5f9560d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::YarnCommandBridge
+  _rigPrefab: {fileID: 8529412948266249186, guid: 01c9b93a77829ef438fc74c4ef4c5004, type: 3}
+--- !u!4 &1829026823
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1829026821}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 925.97705, y: 583.3106, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1874881009
 GameObject:
   m_ObjectHideFlags: 0
@@ -2797,7 +2888,7 @@ MonoBehaviour:
   yarnUIBridge: {fileID: 1874881010}
   presentationRouteEntry: {fileID: 1433866633}
   yarnEntryKey: NewYarnScript
-  presentationEntryKey: seq1
+  presentationEntryKey: qwew
   runYarnKey: 50
   stopKey: 51
 --- !u!4 &1924806293
@@ -38280,3 +38371,5 @@ SceneRoots:
   - {fileID: 2068248508}
   - {fileID: 8103127889455306347}
   - {fileID: 99511076}
+  - {fileID: 204524861}
+  - {fileID: 1829026823}

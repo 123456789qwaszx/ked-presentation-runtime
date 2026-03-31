@@ -43,6 +43,7 @@ public sealed class SetPortraitSpriteCommandCharR : CommandBase
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
+        Debug.Log("실행시작");
         if (!scope.Refs.TryGetCharRigRefs(_spec.roleKey, out CharacterRigRefs rig) || rig == null)
             yield break;
 

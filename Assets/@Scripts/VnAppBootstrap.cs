@@ -29,15 +29,19 @@ public class VnAppBootstrap : MonoBehaviour
     
     [Header("VnAdvanceGate")]
     [SerializeField] private EllipsisBreathTypewriter ellipsisBreathTypewriter;
-    [SerializeField] VnAdvanceInputPoller vnAdvanceInputPoller;
-    [SerializeField] DialogueAdvanceDispatcher dialogueAdvanceDispatcher;
+    [SerializeField] private VnAdvanceInputPoller vnAdvanceInputPoller;
+    [SerializeField] private DialogueAdvanceDispatcher dialogueAdvanceDispatcher;
     
     [Header("YarnVnInputFeature")]
-    [SerializeField] YarnLineLifecycleBridge yarnLineLifecycleBridge;
-    [SerializeField] VnFeatureController vnFeatureController;
+    [SerializeField] private YarnLineLifecycleBridge yarnLineLifecycleBridge;
+    [SerializeField] private VnFeatureController vnFeatureController;
     
     [Header("UI")]
     [SerializeField] private EpisodePlayer episodePlayer;
+    
+    [Header("ImmediateCommandRunner")]
+    [SerializeField] private ImmediateCommandRunner immediateCommandRunner;
+    [SerializeField] private YarnCommandBridge yarnCommandBridge;
     
     private PresentationSessionBridge _presentationSessionBridge;
     
@@ -58,6 +62,18 @@ public class VnAppBootstrap : MonoBehaviour
         
         BootstrapUIBindings();
         InitializeEpisodePlayer();
+        
+        SignalLatch signalLatch = new();
+        unitySignalBus.OnSignal += signalLatch.Latch;
+        
+        SignalCommandFactory signalFactory = new(_unityTimeSource, unitySignalBus, signalLatch);
+        CharRigSlotResolver charRigSlotResolver = new();
+        CharacterRigAccess charRigAccess = new(charRigSlotResolver);
+        PortraitResolver portraitResolver = new (portraitGeneratedDbSo);
+        CharRigCommandFactory charRigFactory = new(charRigAccess, portraitResolver);
+        
+        immediateCommandRunner.Initialize(charRigFactory, signalFactory, _presentationContextSettings);
+        yarnCommandBridge.Initialize(dialogueRunner, immediateCommandRunner);
     }
     
     private void BootstrapPresentationSession()
@@ -118,6 +134,7 @@ public class VnAppBootstrap : MonoBehaviour
     }
 
     
+    [Header("RollbackHistoryDebugOverlay")]
     public RollbackHistoryDebugOverlay overlay;
     private void CreateRollbackHistoryDebugTool(NodeRollbackHistory history, RollbackRuntimeState runtimeState)
     {
