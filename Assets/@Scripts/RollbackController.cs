@@ -58,8 +58,8 @@ public sealed class RollbackController : IDisposable
         if (!_history.TryGetPreviousPoint(out RollbackPoint target))
             return false;
 
-        if (target.presentationNodeIndex < 0 || target.presentationStepIndex < 0)
-            return false;
+        // if (target.presentationNodeIndex < 0 || target.presentationStepIndex < 0)
+        //     return false;
 
         _playbackSettings.ChangePlayMode(VnPlayMode.Manual);
         _inlineMarkupHandler.SetPauseIgnored(false);
