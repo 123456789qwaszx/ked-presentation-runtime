@@ -2,6 +2,7 @@
 // All other components may report state or perform execution,
 // but only Tick() is allowed to advance steps or nodes.
 
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -181,4 +182,45 @@ public sealed class PresentationSession
         PlayStep(_state.NodeIndex, _state.StepGate.Cursor);
     }
     #endregion
+    
+    
+    public bool TryGetCurrentAnchor(out int nodeIndex, out int stepIndex)
+    {
+        nodeIndex = -1;
+        stepIndex = -1;
+
+        if (_sequence == null || _state == null)
+            return false;
+
+        nodeIndex = _state.NodeIndex;
+        stepIndex = _state.StepGate.Cursor;
+        return true;
+    }
+    
+
+    public bool JumpTo(int nodeIndex, int stepIndex)
+    {
+        if (_sequence == null || _state == null)
+            return false;
+
+        if (nodeIndex < 0 || nodeIndex >= _sequence.nodes.Count)
+            return false;
+
+        _executor.Stop();
+
+        _state.NodeIndex = nodeIndex;
+        _gatePlanner.BuildForCurrentNode(_sequence, _state);
+
+        if (_state.StepGate.Tokens == null || _state.StepGate.Tokens.Count == 0)
+            return false;
+
+        _state.StepGate.Cursor = Mathf.Clamp(
+            stepIndex,
+            0,
+            _state.StepGate.Tokens.Count - 1
+        );
+
+        PlayStep(_state.NodeIndex, _state.StepGate.Cursor);
+        return true;
+    }
 }

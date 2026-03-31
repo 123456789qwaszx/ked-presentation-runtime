@@ -140,6 +140,7 @@ public sealed class RollbackHistoryDebugOverlay : MonoBehaviour
                 GUILayout.Label($"{badge}   vi={p.visitedIndex}   frame={p.frame}", labelStyle);
                 GUILayout.Label($"          node = {p.nodeName}",                   _normalStyle);
                 GUILayout.Label($"          id   = {p.lineId}",                     _normalStyle);
+                GUILayout.Label($"          cps  = node[{p.presentationNodeIndex}] step[{p.presentationStepIndex}]", _normalStyle);
                 GUILayout.Label($"          \"{Truncate(p.rawText, 48)}\"",         _normalStyle);
 
                 GUILayout.Space(4f * s);

@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 
 public sealed class RollbackController : IDisposable
 {
@@ -10,6 +11,7 @@ public sealed class RollbackController : IDisposable
     private readonly InlineEventMarkupHandler _inlineMarkupHandler;
     private readonly EllipsisBreathTypewriter _typewriter;
     private readonly VnPlaybackSettings _playbackSettings;
+    private readonly PresentationSessionBridge _presentationSessionBridge;
 
     private VnPlayMode _modeBeforeSeek;
     private bool _wasPauseIgnoredBeforeSeek;
@@ -25,7 +27,8 @@ public sealed class RollbackController : IDisposable
         DialogueAdvanceDispatcher dispatcher,
         InlineEventMarkupHandler inlineMarkupHandler,
         EllipsisBreathTypewriter typewriter,
-        VnPlaybackSettings playbackSettings)
+        VnPlaybackSettings playbackSettings,
+        PresentationSessionBridge presentationSessionBridge)
     {
         _state = state;
         _history = history;
@@ -35,24 +38,55 @@ public sealed class RollbackController : IDisposable
         _inlineMarkupHandler = inlineMarkupHandler;
         _typewriter = typewriter;
         _playbackSettings = playbackSettings;
+        _presentationSessionBridge = presentationSessionBridge;
 
         _bridge.LineStart += OnLineStart;
         _bridge.LineFinishDisplaying += OnLineFinishDisplaying;
         _bridge.NodeCompleted += OnNodeCompleted;
     }
 
-    public void RequestRollbackOneStep()
+    public void RequestRollbackOneSrrtep()
     {
-        if (_state.IsSeeking)
-            return;
-
         if (!_history.TryGetPreviousPoint(out RollbackPoint target))
-            return;
-
+        { }
+            
         BeginSeek(target);
     }
 
-    private void BeginSeek(in RollbackPoint target)
+    public bool RequestRollbackOneStep()
+    {
+        if (!_history.TryGetPreviousPoint(out RollbackPoint target))
+            return false;
+
+        if (target.presentationNodeIndex < 0 || target.presentationStepIndex < 0)
+            return false;
+
+        _playbackSettings.ChangePlayMode(VnPlayMode.Manual);
+        _inlineMarkupHandler.SetPauseIgnored(false);
+        _inlineMarkupHandler.SetReplaySuppressed(
+            suppressSignals: false,
+            suppressMoves: false
+        );
+        _typewriter.SetSpeedMultiplier(1f);
+
+        bool jumped = _presentationSessionBridge.JumpTo(
+            target.presentationNodeIndex,
+            target.presentationStepIndex
+        );
+        
+        _typewriter.SetSpeedMultiplier(20f);
+
+        _state.BeginRollback(target);
+        _restarter.RestartNode(target.nodeName);
+
+        if (!jumped)
+            return false;
+
+        _history.TrimAfterVisitedIndex(target.visitedIndex - 1);
+        return true;
+    }
+
+    private void BeginSeek(RollbackPoint target)
     {
         _modeBeforeSeek = _playbackSettings.vnPlayMode;
 
@@ -63,6 +97,10 @@ public sealed class RollbackController : IDisposable
 
         // seek 중엔 pause / signal / move suppress
         _inlineMarkupHandler.SetPauseIgnored(true);
+        _inlineMarkupHandler.SetReplaySuppressed(
+            suppressSignals: true,
+            suppressMoves: true
+        );
 
         // seek는 아주 빠르게
         //UIManager.Instance.GetUI<DialogueUIRoot>().HideAllBoxes();
@@ -81,6 +119,10 @@ public sealed class RollbackController : IDisposable
         _history.TrimAfterVisitedIndex(targetVisitedIndex - 1);
 
         _inlineMarkupHandler.SetPauseIgnored(false);
+        _inlineMarkupHandler.SetReplaySuppressed(
+            suppressSignals: false,
+            suppressMoves: false
+        );
         
         //UIManager.Instance.GetUI<DialogueUIRoot>().HideAllBoxes();
         _typewriter.SetSpeedMultiplier(1f);
@@ -96,6 +138,10 @@ public sealed class RollbackController : IDisposable
         _history.TrimAfterVisitedIndex(targetVisitedIndex - 1);
 
         _inlineMarkupHandler.SetPauseIgnored(false);
+        _inlineMarkupHandler.SetReplaySuppressed(
+            suppressSignals: false,
+            suppressMoves: false
+        );
         
         //UIManager.Instance.GetUI<DialogueUIRoot>().ShowAllBoxes();
         _typewriter.SetSpeedMultiplier(1f);

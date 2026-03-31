@@ -60,9 +60,10 @@ public sealed class EpisodePlayer : MonoBehaviour, IRollbackDialogueRestarter
     public void RestartNode(string nodeName)
     {
         //OpenDialogueUI();
-        StartPresentationRoute(presentationEntryKey);
+        StartYarnNode(nodeName);
+        //StartPresentationRoute(presentationEntryKey);
         
-        StartCoroutine(StartYarnNextFrame(nodeName));
+        //StartCoroutine(StartYarnNextFrame(nodeName));
     }
     
     private IEnumerator StartYarnNextFrame(string nodeName)

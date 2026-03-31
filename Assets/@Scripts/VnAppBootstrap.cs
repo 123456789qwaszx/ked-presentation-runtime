@@ -119,6 +119,10 @@ public class VnAppBootstrap : MonoBehaviour
 
     
     public RollbackHistoryDebugOverlay overlay;
+    private void CreateRollbackHistoryDebugTool(NodeRollbackHistory history, RollbackRuntimeState runtimeState)
+    {
+        overlay.Initialize(history, runtimeState);
+    }
     
     private void BootstrapPlaybackControls()
     {
@@ -135,9 +139,8 @@ public class VnAppBootstrap : MonoBehaviour
             () => yarnLineLifecycleBridge.IsLineFullyShown);
         
         RollbackRuntimeState rollbackState = new RollbackRuntimeState();
-        NodeRollbackHistory rollbackHistory = new NodeRollbackHistory(yarnLineLifecycleBridge, rollbackState);
-
-
+        NodeRollbackHistory rollbackHistory = new NodeRollbackHistory(yarnLineLifecycleBridge, rollbackState, _presentationSessionBridge);
+        
         RollbackController rollbackController = new RollbackController(
             state: rollbackState,
             history: rollbackHistory,
@@ -146,11 +149,11 @@ public class VnAppBootstrap : MonoBehaviour
             dispatcher: dialogueAdvanceDispatcher,
             inlineMarkupHandler: inlineEventMarkupHandler,
             typewriter: ellipsisBreathTypewriter,
-            playbackSettings: _vnPlaybackSettings
+            playbackSettings: _vnPlaybackSettings,
+            _presentationSessionBridge
         );
         
-        var overlay = gameObject.AddComponent<RollbackHistoryDebugOverlay>();
-        overlay.Initialize(rollbackHistory, rollbackState);
+        CreateRollbackHistoryDebugTool(rollbackHistory, rollbackState);
         
         vnFeatureController.Initialize(
             _vnUxState,

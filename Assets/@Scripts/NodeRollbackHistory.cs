@@ -9,19 +9,26 @@ public struct RollbackPoint
     public string nodeName;
     public string lineId;
     public string rawText;
+    
+    public int presentationNodeIndex;
+    public int presentationStepIndex;
 
     public RollbackPoint(
         int visitedIndex,
         int frame,
         string nodeName,
         string lineId,
-        string rawText)
+        string rawText,
+        int presentationNodeIndex,
+        int presentationStepIndex)
     {
         this.visitedIndex = visitedIndex;
         this.frame = frame;
         this.nodeName = nodeName;
         this.lineId = lineId;
         this.rawText = rawText;
+        this.presentationNodeIndex = presentationNodeIndex;
+        this.presentationStepIndex = presentationStepIndex;
     }
 }
 
@@ -62,6 +69,7 @@ public sealed class NodeRollbackHistory : IDisposable
 {
     private readonly YarnLineLifecycleBridge _bridge;
     private readonly RollbackRuntimeState _state;
+    private readonly PresentationSessionBridge _presentationSessionBridge;
 
     private readonly List<RollbackPoint> _points = new();
     private string _currentNodeName = "";
@@ -72,10 +80,12 @@ public sealed class NodeRollbackHistory : IDisposable
 
     public NodeRollbackHistory(
         YarnLineLifecycleBridge bridge,
-        RollbackRuntimeState state)
+        RollbackRuntimeState state,
+        PresentationSessionBridge presentationSessionBridge)
     {
         _bridge = bridge;
         _state = state;
+        _presentationSessionBridge = presentationSessionBridge;
 
         _bridge.OnNodeStarted += OnNodeStarted;
         _bridge.LineFinishDisplaying += OnLineFinishDisplaying;
@@ -110,12 +120,16 @@ public sealed class NodeRollbackHistory : IDisposable
             _points.Clear();
         }
 
+        _presentationSessionBridge.TryGetCurrentAnchor(out int nodeIndex, out int stepIndex);
+
         _points.Add(new RollbackPoint(
             visitedIndex: _visitedCounter++,
             frame: meta.frame,
             nodeName: meta.nodeName,
             lineId: meta.lineId,
-            rawText: meta.rawText
+            rawText: meta.rawText,
+            presentationNodeIndex: nodeIndex,
+            presentationStepIndex: stepIndex
         ));
     }
 
