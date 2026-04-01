@@ -46,7 +46,9 @@ title: NewYarnScript
 <<beat>>
 <<protagobox>>
 엘리스: ...앗!!! 어딜 만지는거야!
+<<fade_out sub1>>
 
 <<beat>>
 엘리스: 잠깐... 잠깐 멈춰...
+<<fade_in sub1>>
 ===

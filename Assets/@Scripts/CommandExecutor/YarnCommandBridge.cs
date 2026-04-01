@@ -5,6 +5,9 @@ public sealed class YarnCommandBridge : MonoBehaviour
 {
     private DialogueRunner _dialogueRunner;
     private ImmediateCommandRunner _runner;
+    
+    public GameObject _rigPrefab;
+    public CharStageTuningSO globalTuning;
 
     public void Initialize(DialogueRunner dialogueRunner, ImmediateCommandRunner runner)
     {
@@ -32,34 +35,9 @@ public sealed class YarnCommandBridge : MonoBehaviour
         _dialogueRunner.AddCommandHandler<string, string>("cast", SetPortrait);
     }
 
-    public Coroutine DipInOut(string roleKey, string direction = "down")
+    private Coroutine DipInOut(string roleKey, string direction = "down")
     {
-        SlideFromCharR dir = SlideFromCharR.Down;
-
-        switch (direction?.Trim().ToLowerInvariant())
-        {
-            case "left":
-            case "l":
-                dir = SlideFromCharR.Left;
-                break;
-
-            case "right":
-            case "r":
-                dir = SlideFromCharR.Right;
-                break;
-
-            case "up":
-            case "u":
-            case "top":
-                dir = SlideFromCharR.Up;
-                break;
-
-            case "down":
-            case "d":
-            case "bottom":
-                dir = SlideFromCharR.Down;
-                break;
-        }
+        SlideFromCharR dir = ParseSlideDirection(direction, SlideFromCharR.Down);
 
         var spec = new DipInOutCommandSpecCharR
         {
@@ -70,7 +48,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
         return _runner.Run(spec);
     }
 
-    public Coroutine MoveBy(string roleKey, float x, float y)
+    private Coroutine MoveBy(string roleKey, float x, float y)
     {
         var spec = new MoveByCommandSpecCharR
         {
@@ -83,32 +61,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
     
     private Coroutine BouncySlideIn(string roleKey, string direction = "left")
     {
-        SlideFromCharR from = SlideFromCharR.Left;
-
-        switch (direction?.Trim().ToLowerInvariant())
-        {
-            case "left":
-            case "l":
-                from = SlideFromCharR.Left;
-                break;
-
-            case "right":
-            case "r":
-                from = SlideFromCharR.Right;
-                break;
-
-            case "up":
-            case "u":
-            case "top":
-                from = SlideFromCharR.Up;
-                break;
-
-            case "down":
-            case "d":
-            case "bottom":
-                from = SlideFromCharR.Down;
-                break;
-        }
+        SlideFromCharR from = ParseSlideDirection(direction, SlideFromCharR.Left);
 
         var spec = new BouncySlideInCommandSpecCharR
         {
@@ -119,7 +72,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
         return _runner.Run(spec);
     }
     
-    public Coroutine FadeIn(string roleKey)
+    private Coroutine FadeIn(string roleKey)
     {
         var spec = new FadeInCommandSpecCharR
         {
@@ -129,7 +82,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
         return _runner.Run(spec, blocking: true);
     }
     
-    public Coroutine FadeOut(string roleKey)
+    private Coroutine FadeOut(string roleKey)
     {
         var spec = new FadeOutCommandSpecCharR
         {
@@ -138,34 +91,9 @@ public sealed class YarnCommandBridge : MonoBehaviour
         return _runner.Run(spec);
     }
 
-    public Coroutine SlideIn(string roleKey, string direction = "left")
+    private Coroutine SlideIn(string roleKey, string direction = "left")
     {
-        SlideFromCharR from = SlideFromCharR.Left;
-
-        switch (direction?.Trim().ToLowerInvariant())
-        {
-            case "left":
-            case "l":
-                from = SlideFromCharR.Left;
-                break;
-
-            case "right":
-            case "r":
-                from = SlideFromCharR.Right;
-                break;
-
-            case "up":
-            case "u":
-            case "top":
-                from = SlideFromCharR.Up;
-                break;
-
-            case "down":
-            case "d":
-            case "bottom":
-                from = SlideFromCharR.Down;
-                break;
-        }
+        SlideFromCharR from = ParseSlideDirection(direction, SlideFromCharR.Left);
 
         var spec = new JuicySlideInCommandSpecCharR
         {
@@ -176,34 +104,9 @@ public sealed class YarnCommandBridge : MonoBehaviour
         return _runner.Run(spec);
     }
 
-    public Coroutine SlideOut(string roleKey, string direction = "right")
+    private Coroutine SlideOut(string roleKey, string direction = "right")
     {
-        SlideFromCharR to = SlideFromCharR.Right;
-
-        switch (direction?.Trim().ToLowerInvariant())
-        {
-            case "left":
-            case "l":
-                to = SlideFromCharR.Left;
-                break;
-
-            case "right":
-            case "r":
-                to = SlideFromCharR.Right;
-                break;
-
-            case "up":
-            case "u":
-            case "top":
-                to = SlideFromCharR.Up;
-                break;
-
-            case "down":
-            case "d":
-            case "bottom":
-                to = SlideFromCharR.Down;
-                break;
-        }
+        SlideFromCharR to = ParseSlideDirection(direction, SlideFromCharR.Right);
 
         var spec = new JuicySlideOutCommandSpecCharR
         {
@@ -214,8 +117,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
         return _runner.Run(spec, blocking: true);
     }
 
-    public GameObject _rigPrefab;
-    public void SetCharRig(string roleKey)
+    private void SetCharRig(string roleKey)
     {
         if (string.IsNullOrWhiteSpace(roleKey))
         {
@@ -232,9 +134,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
         _runner.Run(spec);
     }
     
-    public CharStageTuningSO globalTuning;
-
-    public void SetAnchorPosition(string roleKey, string positionPreset)
+    private void SetAnchorPosition(string roleKey, string positionPreset)
     {
         if (string.IsNullOrWhiteSpace(roleKey))
         {
@@ -264,11 +164,8 @@ public sealed class YarnCommandBridge : MonoBehaviour
         _runner.Run(spec);
         _runner.Run(spec2);
     }
-    // ──────────────────────────────────────────────────
-    // 포트레이트
-    // ──────────────────────────────────────────────────
 
-    public void SetOriginSize(string roleKey, float xyValue)
+    private void SetOriginSize(string roleKey, float xyValue)
     {
         var spec = new SetOriginSizeCommandSpecCharR
         {
@@ -279,11 +176,8 @@ public sealed class YarnCommandBridge : MonoBehaviour
         _runner.Run(spec);
     }
 
-    // ──────────────────────────────────────────────────
-    // 포트레이트
-    // ──────────────────────────────────────────────────
 
-    public void SetPortrait(string roleKey, string character)
+    private void SetPortrait(string roleKey, string character)
     {
         var portraitIdentity = new PortraitIdentity
         {
@@ -299,5 +193,33 @@ public sealed class YarnCommandBridge : MonoBehaviour
         };
         
         _runner.Run(spec);
+    }
+    
+    
+    private SlideFromCharR ParseSlideDirection(string direction, SlideFromCharR fallback)
+    {
+        switch (direction?.Trim().ToLowerInvariant())
+        {
+            case "left":
+            case "l":
+                return SlideFromCharR.Left;
+
+            case "right":
+            case "r":
+                return SlideFromCharR.Right;
+
+            case "up":
+            case "u":
+            case "top":
+                return SlideFromCharR.Up;
+
+            case "down":
+            case "d":
+            case "bottom":
+                return SlideFromCharR.Down;
+
+            default:
+                return fallback;
+        }
     }
 }
