@@ -61,13 +61,48 @@ public sealed class CharacterRigRefs
 
 public static class RigRegistryExt
 {
+    
+    private static string ToCodePoints(string s)
+    {
+        if (s == null) return "null";
+
+        var chars = new System.Text.StringBuilder();
+        for (int i = 0; i < s.Length; i++)
+        {
+            chars.Append(((int)s[i]).ToString());
+            if (i < s.Length - 1)
+                chars.Append(", ");
+        }
+        return chars.ToString();
+    }
+    
     public static bool TryGetCharRigRefs(this Dictionary<string, object> rigRegistry, string roleKey, out CharacterRigRefs rigRefs)
     {
-        if (rigRegistry.TryGetValue(roleKey, out var obj) && obj is CharacterRigRefs refs)
+        Debug.Log($"{roleKey}");
+        Debug.Log($"[TryGetCharRigRefs] registry count = {rigRegistry?.Count ?? -1}");
+        foreach (var key in rigRegistry.Keys)
         {
-            rigRefs = refs;
-            return true;
+            Debug.Log($"stored key = '{key}' / codes = {ToCodePoints(key)}");
         }
+        
+        foreach (var value in rigRegistry.Values)
+        {
+            Debug.Log($"value={value}, type={value?.GetType().FullName ?? "null"}");
+        }
+
+        if (rigRegistry.TryGetValue(roleKey, out var obj))
+        {
+            Debug.Log($"[TryGetCharRigRefs] key={roleKey}, valueType={obj?.GetType().FullName ?? "null"}");
+
+            if (obj is CharacterRigRefs refs)
+            {
+                rigRefs = refs;
+                return true;
+            }
+
+            Debug.LogWarning($"[TryGetCharRigRefs] key '{roleKey}' exists, but value is not CharacterRigRefs.");
+        }
+        
         rigRefs = null;
         return false;
     }

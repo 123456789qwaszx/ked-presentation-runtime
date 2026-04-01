@@ -18,8 +18,7 @@ MonoBehaviour:
     steps:
     - editorName: 123
       tracks:
-        interaction:
-        - rid: 7710742224098558030
+        interaction: []
         setup:
         - rid: 7710742224098558044
         - rid: 7710742224098558045
@@ -29,7 +28,6 @@ MonoBehaviour:
         dialogue: []
         fx: []
       compiled:
-      - rid: 7710742224098558030
       - rid: 7710742224098558044
       - rid: 7710742224098558045
       - rid: 7710742243083812975
@@ -393,13 +391,12 @@ MonoBehaviour:
     - editorName: "\uD654\uBA74\uAD50\uCCB4 \uAC70\uB9AC->\uD6E0\uAD88"
       tracks:
         interaction:
-        - rid: 7710742255632384076
+        - rid: 7710742224098558030
         setup: []
         motion: []
         dialogue: []
         fx: []
-      compiled:
-      - rid: 7710742255632384076
+      compiled: []
       gate:
         type: 0
         seconds: 0
@@ -597,6 +594,8 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
     - rid: 7710742224098558025
       type: {class: SetCharRigCommandSpec, ns: , asm: Assembly-CSharp}
       data:
@@ -1750,28 +1749,6 @@ MonoBehaviour:
         settleEase: 12
         duration: 0.55
         wait: 0
-    - rid: 7710742255632384076
-      type: {class: TransitionBlackoutCommandSpec, ns: , asm: Assembly-CSharp}
-      data:
-        roleKey: Chixia
-        _meta:
-          track: 0
-          phase: 0
-          blockingHint: 0
-          infiniteHint: 0
-          durationHint: 0
-        coverDuration: 0.2
-        uncoverDuration: 0.2
-        coverEase: 4
-        uncoverEase: 4
-        swapSignalKey: transition.swap
-        swapTiming: 0
-        holdSeconds: 0.2
-        wait: 1
-        killTween: 1
-        blockRaycastsWhileFading: 1
-        autoBlockByAlpha: 1
-        warnIfMissing: 1
     - rid: 7710742306561982543
       type: {class: RaiseSignalCommandSpec, ns: , asm: Assembly-CSharp}
       data:
