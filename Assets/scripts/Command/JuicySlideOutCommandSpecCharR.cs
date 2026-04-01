@@ -11,7 +11,7 @@ public sealed class JuicySlideOutCommandSpecCharR : CharRigCommandSpecBase
     public CharacterRigTarget target = CharacterRigTarget.Character_Track;
 
     [Header("Slide")]
-    public SlideFromCharR to = SlideFromCharR.Left;
+    public SlideFromCharR to = SlideFromCharR.Right;
     public float distance = 480f;
 
     [Header("Tween")]

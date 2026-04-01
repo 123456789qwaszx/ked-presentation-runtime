@@ -15,4 +15,4 @@ MonoBehaviour:
   offsets:
     left: {x: -200, y: -380}
     center: {x: 0, y: -380}
-    right: {x: 200, y: -380}
+    right: {x: 150, y: -380}

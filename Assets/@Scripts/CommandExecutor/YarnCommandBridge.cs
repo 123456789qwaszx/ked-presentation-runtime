@@ -11,26 +11,180 @@ public sealed class YarnCommandBridge : MonoBehaviour
         _dialogueRunner = dialogueRunner;
         _runner = runner;
         
-        _dialogueRunner.AddCommandHandler<string>("char_rig", SetCharRig);
-        _dialogueRunner.AddCommandHandler<string, int>("anchor", SetAnchorPosition);
+        _dialogueRunner.AddCommandHandler<string>("slot", SetCharRig);
+        _dialogueRunner.AddCommandHandler<string, string>("place", SetAnchorPosition);
+        _dialogueRunner.AddCommandHandler<string, float>("scale", SetOriginSize);
         
-        _dialogueRunner.AddCommandHandler<string, float, float>("originsize", SetOriginSize);
         
-        _dialogueRunner.AddCommandHandler<string, string, string, string>("portrait", SetPortrait);
-
         _dialogueRunner.AddCommandHandler<string, string>("slide_in", SlideIn);
-        _dialogueRunner.AddCommandHandler<string>("slide_out", SlideOut);
+        _dialogueRunner.AddCommandHandler<string, string>("slide_out", SlideOut);
+        _dialogueRunner.AddCommandHandler<string, string>("slide_in_bouncy", BouncySlideIn);
 
         _dialogueRunner.AddCommandHandler<string>("fade_in", FadeIn);
-        _dialogueRunner.AddCommandHandler<float>("fade_out", FadeOut);
+        _dialogueRunner.AddCommandHandler<string>("fade_out", FadeOut);
+        
+        _dialogueRunner.AddCommandHandler<string, float, float>("move_by", MoveBy);
+        
+        
+        
 
-        _dialogueRunner.AddCommandHandler<string, float>("shake", Shake);
-        _dialogueRunner.AddCommandHandler<string, string>("emoji", ShowEmoji);
+        _dialogueRunner.AddCommandHandler<string, string>("cast", SetPortrait);
     }
 
-    // ──────────────────────────────────────────────────
-    // 캐릭터 Rig
-    // ──────────────────────────────────────────────────
+    public Coroutine DipInOut(string roleKey, float x, float y)
+    {
+        var spec = new MoveByCommandSpecCharR
+        {
+            roleKey = roleKey,
+            delta = new Vector2(x, y)
+        };
+
+        return _runner.Run(spec);
+    }
+
+    public Coroutine MoveBy(string roleKey, float x, float y)
+    {
+        var spec = new MoveByCommandSpecCharR
+        {
+            roleKey = roleKey,
+            delta = new Vector2(x, y)
+        };
+
+        return _runner.Run(spec);
+    }
+    
+    private Coroutine BouncySlideIn(string roleKey, string direction = "left")
+    {
+        SlideFromCharR from = SlideFromCharR.Left;
+
+        switch (direction?.Trim().ToLowerInvariant())
+        {
+            case "left":
+            case "l":
+                from = SlideFromCharR.Left;
+                break;
+
+            case "right":
+            case "r":
+                from = SlideFromCharR.Right;
+                break;
+
+            case "up":
+            case "u":
+            case "top":
+                from = SlideFromCharR.Up;
+                break;
+
+            case "down":
+            case "d":
+            case "bottom":
+                from = SlideFromCharR.Down;
+                break;
+        }
+
+        var spec = new BouncySlideInCommandSpecCharR
+        {
+            roleKey = roleKey,
+            from = from
+        };
+
+        return _runner.Run(spec);
+    }
+    
+    public Coroutine FadeIn(string roleKey)
+    {
+        var spec = new FadeInCommandSpecCharR
+        {
+            roleKey = roleKey
+        };
+        
+        return _runner.Run(spec, blocking: true);
+    }
+    
+    public Coroutine FadeOut(string roleKey)
+    {
+        var spec = new FadeOutCommandSpecCharR
+        {
+            roleKey = roleKey
+        };
+        return _runner.Run(spec);
+    }
+
+    public Coroutine SlideIn(string roleKey, string direction = "left")
+    {
+        SlideFromCharR from = SlideFromCharR.Left;
+
+        switch (direction?.Trim().ToLowerInvariant())
+        {
+            case "left":
+            case "l":
+                from = SlideFromCharR.Left;
+                break;
+
+            case "right":
+            case "r":
+                from = SlideFromCharR.Right;
+                break;
+
+            case "up":
+            case "u":
+            case "top":
+                from = SlideFromCharR.Up;
+                break;
+
+            case "down":
+            case "d":
+            case "bottom":
+                from = SlideFromCharR.Down;
+                break;
+        }
+
+        var spec = new JuicySlideInCommandSpecCharR
+        {
+            roleKey = roleKey,
+            from = from
+        };
+
+        return _runner.Run(spec);
+    }
+
+    public Coroutine SlideOut(string roleKey, string direction = "right")
+    {
+        SlideFromCharR to = SlideFromCharR.Right;
+
+        switch (direction?.Trim().ToLowerInvariant())
+        {
+            case "left":
+            case "l":
+                to = SlideFromCharR.Left;
+                break;
+
+            case "right":
+            case "r":
+                to = SlideFromCharR.Right;
+                break;
+
+            case "up":
+            case "u":
+            case "top":
+                to = SlideFromCharR.Up;
+                break;
+
+            case "down":
+            case "d":
+            case "bottom":
+                to = SlideFromCharR.Down;
+                break;
+        }
+
+        var spec = new JuicySlideOutCommandSpecCharR
+        {
+            roleKey = roleKey,
+            to = to
+        };
+
+        return _runner.Run(spec, blocking: true);
+    }
 
     public GameObject _rigPrefab;
     public void SetCharRig(string roleKey)
@@ -50,10 +204,9 @@ public sealed class YarnCommandBridge : MonoBehaviour
         _runner.Run(spec);
     }
     
-    
     public CharStageTuningSO globalTuning;
 
-    public void SetAnchorPosition(string roleKey, int positionPreset)
+    public void SetAnchorPosition(string roleKey, string positionPreset)
     {
         if (string.IsNullOrWhiteSpace(roleKey))
         {
@@ -63,31 +216,36 @@ public sealed class YarnCommandBridge : MonoBehaviour
 
         RectAnchorPreset3CharR preset = positionPreset switch
         {
-            1 => RectAnchorPreset3CharR.Left,
-            2 => RectAnchorPreset3CharR.Center,
-            3 => RectAnchorPreset3CharR.Right,
+            "left" => RectAnchorPreset3CharR.Left,
+            "center" => RectAnchorPreset3CharR.Center,
+            "right" => RectAnchorPreset3CharR.Right,
             _ => RectAnchorPreset3CharR.Center
         };
 
         var spec = new SetAnchorCommandSpecCharR
         {
-            roleKey = roleKey.Trim(),
+            roleKey = roleKey,
             preset = preset,
             globalTuning = globalTuning
         };
+        
+        var spec2 = new SetPosOffsetCommandSpecCharR{
+            roleKey = roleKey,
+        };
 
         _runner.Run(spec);
+        _runner.Run(spec2);
     }
     // ──────────────────────────────────────────────────
     // 포트레이트
     // ──────────────────────────────────────────────────
 
-    public void SetOriginSize(string roleKey, float x, float y)
+    public void SetOriginSize(string roleKey, float xyValue)
     {
         var spec = new SetOriginSizeCommandSpecCharR
         {
             roleKey = roleKey,
-            toScale = new Vector2(x,y)
+            toScale = new Vector2(xyValue,xyValue)
         };
         
         _runner.Run(spec);
@@ -97,13 +255,13 @@ public sealed class YarnCommandBridge : MonoBehaviour
     // 포트레이트
     // ──────────────────────────────────────────────────
 
-    public void SetPortrait(string roleKey, string character, string variant, string emotion)
+    public void SetPortrait(string roleKey, string character)
     {
         var portraitIdentity = new PortraitIdentity
         {
             character = character,
-            variant = variant,
-            emotion = emotion
+            variant = "a",
+            emotion = "1"
         };
         
         var spec = new SetPortraitSpriteCommandSpecCharR
@@ -113,64 +271,5 @@ public sealed class YarnCommandBridge : MonoBehaviour
         };
         
         _runner.Run(spec);
-    }
-
-    // ──────────────────────────────────────────────────
-    // 슬라이드 인
-    // ──────────────────────────────────────────────────
-
-    public Coroutine SlideIn(string roleKey, string direction = "left")
-    {
-        var spec = new SlideInCommandSpecCharR
-        {
-            roleKey = roleKey,
-        };
-        
-        return _runner.Run(spec);
-    }
-
-    public Coroutine SlideOut(string rigId)
-    {
-        var spec = new SlideOutCommandSpecCharR {};
-        return _runner.Run(spec, blocking: true);
-    }
-
-    // ──────────────────────────────────────────────────
-    // 페이드
-    // ──────────────────────────────────────────────────
-
-    public Coroutine FadeIn(string roleKey)
-    {
-        var spec = new FadeInCommandSpecCharR
-        {
-            roleKey = roleKey
-        };
-        
-        return _runner.Run(spec, blocking: true);
-    }
-
-    public Coroutine FadeOut(float duration = 0.4f)
-    {
-        var spec = new FadeOutCommandSpecCharR { duration = duration };
-        return _runner.Run(spec, blocking: true);
-    }
-
-    // ──────────────────────────────────────────────────
-    // 감정/이펙트 (non-blocking — 연출과 동시에 진행)
-    // ──────────────────────────────────────────────────
-
-    public void Shake(string rigId, float intensity = 1f)
-    {
-        var spec = new ShakeCommandSpecCharR
-        {
-        };
-        _runner.Run(spec, blocking: false);  // 대사와 동시 실행
-    }
-
-    public void ShowEmoji(string rigId, string emojiId)
-    {
-        var spec = new ShowEmojiCommandSpecCharR
-        { };
-        _runner.Run(spec, blocking: false);
     }
 }
