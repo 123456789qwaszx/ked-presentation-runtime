@@ -12,16 +12,16 @@ public sealed class YarnCommandBridge : MonoBehaviour
         _runner = runner;
         
         _dialogueRunner.AddCommandHandler<string>("char_rig", SetCharRig);
+        _dialogueRunner.AddCommandHandler<string, int>("anchor", SetAnchorPosition);
         
-        _dialogueRunner.AddCommandHandler<string, string, string, string>(
-            "portrait",
-            SetPortrait
-        );
+        _dialogueRunner.AddCommandHandler<string, float, float>("originsize", SetOriginSize);
+        
+        _dialogueRunner.AddCommandHandler<string, string, string, string>("portrait", SetPortrait);
 
         _dialogueRunner.AddCommandHandler<string, string>("slide_in", SlideIn);
         _dialogueRunner.AddCommandHandler<string>("slide_out", SlideOut);
 
-        _dialogueRunner.AddCommandHandler<float>("fade_in", FadeIn);
+        _dialogueRunner.AddCommandHandler<string>("fade_in", FadeIn);
         _dialogueRunner.AddCommandHandler<float>("fade_out", FadeOut);
 
         _dialogueRunner.AddCommandHandler<string, float>("shake", Shake);
@@ -47,6 +47,49 @@ public sealed class YarnCommandBridge : MonoBehaviour
             rigPrefab = _rigPrefab
         };
 
+        _runner.Run(spec);
+    }
+    
+    
+    public CharStageTuningSO globalTuning;
+
+    public void SetAnchorPosition(string roleKey, int positionPreset)
+    {
+        if (string.IsNullOrWhiteSpace(roleKey))
+        {
+            Debug.LogError("[YarnCommandBridge] anchor: roleKey is null or empty.");
+            return;
+        }
+
+        RectAnchorPreset3CharR preset = positionPreset switch
+        {
+            1 => RectAnchorPreset3CharR.Left,
+            2 => RectAnchorPreset3CharR.Center,
+            3 => RectAnchorPreset3CharR.Right,
+            _ => RectAnchorPreset3CharR.Center
+        };
+
+        var spec = new SetAnchorCommandSpecCharR
+        {
+            roleKey = roleKey.Trim(),
+            preset = preset,
+            globalTuning = globalTuning
+        };
+
+        _runner.Run(spec);
+    }
+    // ──────────────────────────────────────────────────
+    // 포트레이트
+    // ──────────────────────────────────────────────────
+
+    public void SetOriginSize(string roleKey, float x, float y)
+    {
+        var spec = new SetOriginSizeCommandSpecCharR
+        {
+            roleKey = roleKey,
+            toScale = new Vector2(x,y)
+        };
+        
         _runner.Run(spec);
     }
 
@@ -76,12 +119,14 @@ public sealed class YarnCommandBridge : MonoBehaviour
     // 슬라이드 인
     // ──────────────────────────────────────────────────
 
-    public Coroutine SlideIn(string rigId, string direction = "left")
+    public Coroutine SlideIn(string roleKey, string direction = "left")
     {
         var spec = new SlideInCommandSpecCharR
         {
+            roleKey = roleKey,
         };
-        return _runner.Run(spec, blocking: true);  // 연출 끝날 때까지 Yarn 대기
+        
+        return _runner.Run(spec);
     }
 
     public Coroutine SlideOut(string rigId)
@@ -94,9 +139,13 @@ public sealed class YarnCommandBridge : MonoBehaviour
     // 페이드
     // ──────────────────────────────────────────────────
 
-    public Coroutine FadeIn(float duration = 0.4f)
+    public Coroutine FadeIn(string roleKey)
     {
-        var spec = new FadeInCommandSpecCharR { duration = duration };
+        var spec = new FadeInCommandSpecCharR
+        {
+            roleKey = roleKey
+        };
+        
         return _runner.Run(spec, blocking: true);
     }
 

@@ -219,12 +219,12 @@ MonoBehaviour:
           infiniteHint: 0
           durationHint: 0
         target: 0
-        preset: 1
+        preset: 0
         baseRatioX: 0.5
-        globalTuning: {fileID: 0}
-        roleTuningDb: {fileID: 0}
+        globalTuning: {fileID: 11400000, guid: db30a92a6d8545a41b703c2585f4013d, type: 2}
+        roleTuningDb: {fileID: 11400000, guid: 5602fbe20dd75c04d884ef620538f079, type: 2}
         poseKey: 
-        offset: {x: -480, y: -385}
+        offset: {x: 0, y: 0}
         overrideAnchoredPosition: 0
         anchoredPositionOverride: {x: 0, y: 0}
     - rid: 305542826026074176

@@ -19,5 +19,8 @@ MonoBehaviour:
   - routeKey: seq2
     sequenceCatalog: {fileID: 11400000, guid: f5c84b12e7c8a2140a5cecd428a8d63a, type: 2}
     startKey: main_5_0
+  - routeKey: test
+    sequenceCatalog: {fileID: 11400000, guid: f5c84b12e7c8a2140a5cecd428a8d63a, type: 2}
+    startKey: test
   fallbackRouteKey: Default
   fallbackStartKey: Default

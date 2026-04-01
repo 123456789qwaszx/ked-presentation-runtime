@@ -1,0 +1,83 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 77efca1a7ac39ca499c3be8e21666640, type: 3}
+  m_Name: test
+  m_EditorClassIdentifier: Assembly-CSharp::SequenceSpecSO
+  sequenceKey: test
+  nodes:
+  - editorName: 
+    steps:
+    - editorName: 
+      tracks:
+        interaction: []
+        setup: []
+        motion: []
+        dialogue: []
+        fx: []
+      compiled: []
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+    - editorName: 
+      tracks:
+        interaction:
+        - rid: 8483490904429035580
+        setup: []
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 8483490904429035580
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+    - editorName: 
+      tracks:
+        interaction: []
+        setup: []
+        motion: []
+        dialogue: []
+        fx: []
+      compiled: []
+      gate:
+        type: 1
+        seconds: 0
+        signalKey: 
+  references:
+    version: 2
+    RefIds:
+    - rid: 8483490904429035580
+      type: {class: RichSlideInCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: main
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 1
+        from: 0
+        distance: 480
+        useAnticipation: 1
+        anticipationDistance: 18
+        anticipationPortion: 0.12
+        anticipationEase: 6
+        useOvershoot: 1
+        overshootDistance: 24
+        overshootPortion: 0.78
+        approachEase: 9
+        settleEase: 12
+        duration: 2
+        wait: 1

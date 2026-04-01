@@ -1,7 +1,21 @@
 title: NewYarnScript
 ---
+
 <<char_rig main>>
-<<portrait main kuonji a 1>>
+<<anchor main 1>>
+
+<<originsize main 2 2>>
+
+<<portrait main momoka a 1>>
+<<fade_in main>>
+
+<<char_rig left>>
+<<originsize left 2.18 2.18>>
+<<anchor left 3>>
+<<portrait left kuonji a 1>>
+<<fade_in left>>
+<<slide_in left>>
+
 
 <<letterbox>>
 ...

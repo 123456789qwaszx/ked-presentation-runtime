@@ -67,7 +67,7 @@ public sealed partial class SequenceSpecEditorWindow
 
         if (e.control || e.command || e.alt) return;
 
-        bool enter = (e.keyCode == KeyCode.Return || e.keyCode == KeyCode.KeypadEnter);
+        bool enter = (e.keyCode == KeyCode.Return || e.keyCode == KeyCode.Space);
 
         if (enter)
         {

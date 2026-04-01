@@ -43,16 +43,13 @@ public sealed class SetPortraitSpriteCommandCharR : CommandBase
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
-        Debug.Log("스프라이트실행시작");
         if (!scope.Refs.TryGetCharRigRefs(_spec.roleKey, out CharacterRigRefs rig) || rig == null)
             yield break;
 
-        Debug.Log("2");
         Image image = rig.GetComponent(_spec.target) as Image;
         if (image == null)
             yield break;
 
-        Debug.Log("3");
         Sprite sprite = ResolveSprite(_spec.portrait);
         if (sprite == null)
         {
@@ -65,7 +62,6 @@ public sealed class SetPortraitSpriteCommandCharR : CommandBase
             yield break;
         }
 
-        Debug.Log("4");
         image.sprite = sprite;
 
         CharRigImageSizingPolicy.Apply(

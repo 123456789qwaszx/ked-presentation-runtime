@@ -105,7 +105,7 @@ public sealed partial class SequenceSpecEditorWindow
         bool mod = e.control || e.command;
 
         // Enter: 커맨드 추가 메뉴 열기
-        if (!mod && (e.keyCode == KeyCode.Return || e.keyCode == KeyCode.KeypadEnter))
+        if (!mod && (e.keyCode == KeyCode.Return || e.keyCode == KeyCode.Space))
         {
             if (_navColumn == NavColumn.Commands)
             {
@@ -120,7 +120,7 @@ public sealed partial class SequenceSpecEditorWindow
         }
 
         // Space: 펼치기/접기 토글
-        if (!mod && e.keyCode == KeyCode.Space)
+        if (!mod && e.keyCode == KeyCode.KeypadEnter)
         {
             string path = commandsProp.propertyPath;
             var map = GetFoldoutMap(path);

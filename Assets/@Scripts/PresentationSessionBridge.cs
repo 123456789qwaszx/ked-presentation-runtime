@@ -39,7 +39,7 @@ public sealed class PresentationSessionBridge : VnRuntimeBridge.IPresentationSig
         if (_unitySignalBus == null) yield break;
 
         bool received = false;
-        float timeoutSeconds = 10f;
+        float timeoutSeconds = 3f;
         float elapsedTime = 0f;
 
         void Handler(string raisedKey)
