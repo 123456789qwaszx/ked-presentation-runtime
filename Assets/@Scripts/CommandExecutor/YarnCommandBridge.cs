@@ -24,6 +24,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
         _dialogueRunner.AddCommandHandler<string>("fade_out", FadeOut);
         
         _dialogueRunner.AddCommandHandler<string, float, float>("move_by", MoveBy);
+        _dialogueRunner.AddCommandHandler<string, string>("dip_inout", DipInOut);
         
         
         
@@ -31,12 +32,39 @@ public sealed class YarnCommandBridge : MonoBehaviour
         _dialogueRunner.AddCommandHandler<string, string>("cast", SetPortrait);
     }
 
-    public Coroutine DipInOut(string roleKey, float x, float y)
+    public Coroutine DipInOut(string roleKey, string direction = "down")
     {
-        var spec = new MoveByCommandSpecCharR
+        SlideFromCharR dir = SlideFromCharR.Down;
+
+        switch (direction?.Trim().ToLowerInvariant())
+        {
+            case "left":
+            case "l":
+                dir = SlideFromCharR.Left;
+                break;
+
+            case "right":
+            case "r":
+                dir = SlideFromCharR.Right;
+                break;
+
+            case "up":
+            case "u":
+            case "top":
+                dir = SlideFromCharR.Up;
+                break;
+
+            case "down":
+            case "d":
+            case "bottom":
+                dir = SlideFromCharR.Down;
+                break;
+        }
+
+        var spec = new DipInOutCommandSpecCharR
         {
             roleKey = roleKey,
-            delta = new Vector2(x, y)
+            dir = dir
         };
 
         return _runner.Run(spec);
