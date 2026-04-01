@@ -15,11 +15,15 @@ title: NewYarnScript
 
 <<cast sub1 kuonji>>
 <<fade_in sub1>>
-<<slide_in_bouncy sub1>>
+//<<hop_in sub1>>
+//<<slide_in_bouncy sub1>>
+<<slide_in sub1>>
 ...
+//<<dip_inout sub1 right>>
+<<t1 sub1>>
 어라? 기시감이...
-<<slide_out sub1>>
-<<fade_out sub1>>
+//<<slide_out sub1>>
+//<<fade_out sub1>>
 
 
 <<letterbox>>

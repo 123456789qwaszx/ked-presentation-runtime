@@ -17,17 +17,17 @@ public sealed class BounceArcInLiteCommandSpecCharR : CharRigCommandSpecBase
 
     [Header("5 knobs")]
     [Tooltip("Total travel distance from offscreen-ish start to dest.")]
-    public float distance = 480f;
+    public float distance = 580f;
 
     [Tooltip("Total time for the whole motion. <= 0 => snap.")]
-    public float duration = 0.75f;
+    public float duration = 0.85f;
 
     [Min(1)]
     [Tooltip("How many hops while moving.")]
-    public int hops = 4;
+    public int hops = 3;
 
     [Tooltip("Arc height (jump diameter/energy).")]
-    public float height = 48f;
+    public float height = 24f;
 
     [Range(0f, 1f)]
     [Tooltip("0=normal last hop. 1=very low last hop + almost no horizontal travel.")]

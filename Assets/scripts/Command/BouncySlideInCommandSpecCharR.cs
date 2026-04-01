@@ -27,7 +27,7 @@ public class BouncySlideInCommandSpecCharR : CharRigCommandSpecBase
 
     [Header("Wave (cute bounce along the path)")]
     [Tooltip("경로를 따라 통통 튀는 진폭(픽셀). 0이면 웨이브 없음.")]
-    public float waveAmplitude = 12f;
+    public float waveAmplitude = 14f;
 
     [Tooltip("웨이브 반복 횟수(피크 기준). 1~5 추천.")]
     public int waveLoops = 4;

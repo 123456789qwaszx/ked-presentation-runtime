@@ -30,10 +30,72 @@ public sealed class YarnCommandBridge : MonoBehaviour
         _dialogueRunner.AddCommandHandler<string, string>("dip_inout", DipInOut);
         
         
+        _dialogueRunner.AddCommandHandler<string, string>("hop_in", HopIn);
+        
+        _dialogueRunner.AddCommandHandler<string>("t1", test1);
+        _dialogueRunner.AddCommandHandler<string>("t2", test2);
+        _dialogueRunner.AddCommandHandler<string>("t3", test3);
+        _dialogueRunner.AddCommandHandler<string>("t4", test4);
+        
         
 
         _dialogueRunner.AddCommandHandler<string, string>("cast", SetPortrait);
     }
+    
+    private Coroutine test1(string roleKey)
+    {
+
+        var spec = new MoveInOutCommandSpecCharR
+        {
+            roleKey = roleKey,
+        };
+
+        return _runner.Run(spec);
+    }
+    private Coroutine test2(string roleKey)
+    {
+
+        var spec = new NudgeTapCommandSpecCharR
+        {
+            roleKey = roleKey,
+        };
+
+        return _runner.Run(spec);
+    }
+    private Coroutine test3(string roleKey)
+    {
+
+        var spec = new RichSlideInCommandSpecCharR
+        {
+            roleKey = roleKey,
+        };
+
+        return _runner.Run(spec);
+    }
+    private Coroutine test4(string roleKey)
+    {
+
+        var spec = new TapEaseCommandSpecCharR
+        {
+            roleKey = roleKey,
+        };
+
+        return _runner.Run(spec);
+    }
+    
+    private Coroutine HopIn(string roleKey, string direction = "left")
+    {
+        SlideFromCharR dir = ParseSlideDirection(direction, SlideFromCharR.Down);
+
+        var spec = new BounceArcInCommandSpecCharR
+        {
+            roleKey = roleKey,
+            from = dir
+        };
+
+        return _runner.Run(spec);
+    }
+    
 
     private Coroutine DipInOut(string roleKey, string direction = "down")
     {

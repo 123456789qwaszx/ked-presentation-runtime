@@ -18,18 +18,18 @@ public sealed class BounceArcInCommandSpecCharR : CharRigCommandSpecBase
     public float distance = 480f;
 
     [Header("Timing")]
-    public float duration = 0.75f;
+    public float duration = 0.85f;
     public Ease ease = Ease.OutCubic;
 
     [Header("Hop (main arcs)")]
-    [Min(1)] public int hopCount = 4;
+    [Min(1)] public int hopCount = 3;
 
     [Tooltip("Arc height in pixels (how high it jumps).")]
-    public float arcHeight = 48f;
+    public float arcHeight = 40f;
 
     [Range(0.05f, 1f)]
     [Tooltip("How much of each hop segment is airborne (arc width). 1=arc spans whole segment, 0.2=short/narrow arc.")]
-    public float airWidth = 0.65f;
+    public float airWidth = 0.75f;
 
     [Header("Jump axis")]
     public BounceJumpAxisCharR jumpAxis = BounceJumpAxisCharR.Y;
