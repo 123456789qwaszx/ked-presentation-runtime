@@ -1,49 +1,23 @@
-title: NewYarnScript
+﻿title: NewYarnScript2
 ---
-
-<<slot main>>
-<<place main left>>
-<<scale main 2.0>>
-<<cast main momoka>>
-
-<<fade_in main>>
 
 <<letterbox>>
 ...
 어라? 기시감이...
-
-<<dip main down>>
+<<beat>>
 
 <<charbox>>
 모모카: 엘리스. 갑자기 왜 그리 뜨겁게 쳐다봐? 하고 싶은 말이라도 있어?
 
-<<slot sub1>>
-<<place sub1 right>>
-<<scale sub1 2.18>>
-<<cast sub1 kuonji>>
-
-<<fade_in sub1>>
-<<slide_in sub1 left>>
-
+<<beat>>
 <<protagobox>>
 엘리스: ...착각도 병이야. 아니면 너는 세상 모든 시선이 뜨겁게 느껴지는거야?
-
-<<dip main down>>
 
 <<charbox>>
 모모카: 너무해... [pau t=0.3/]하지만 엘리스의 시선은 진짜 뜨거웠는걸?
 
 <<protagobox>>
-<<await_for 2>>
-<<jolt sub1 down>>
-<<jolt sub1 down>>
 엘리스: ...앗!!! 어딜 만지는거야!
-
-<<shake sub1 left>>
 엘리스: 잠깐... 잠깐 멈춰...
-
-<<await_for 2>>
-<<jolt sub1 down>>
-<<jolt shake left>>
 엘리스: 읏!
 ===

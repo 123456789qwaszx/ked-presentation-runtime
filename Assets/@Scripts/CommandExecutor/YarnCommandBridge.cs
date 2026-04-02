@@ -4,47 +4,117 @@ using Yarn.Unity;
 public sealed class YarnCommandBridge : MonoBehaviour
 {
     private DialogueRunner _dialogueRunner;
-    private ImmediateCommandRunner _runner;
-    
-    public GameObject _rigPrefab;
+    private ImmediateCommandRunner _commandPlayer;
+
+    public GameObject rigPrefab;
     public CharStageTuningSO globalTuning;
 
-    public void Initialize(DialogueRunner dialogueRunner, ImmediateCommandRunner runner)
+    // 다음 "즉시 커맨드" 몇 개를 wait=true 로 실행할지
+    private int _pendingImmediateWaitCount;
+
+    public void Initialize(DialogueRunner dialogueRunner, ImmediateCommandRunner commandPlayer)
     {
         _dialogueRunner = dialogueRunner;
-        _runner = runner;
-        
+        _commandPlayer = commandPlayer;
+
+        _dialogueRunner.AddCommandHandler<int>("await_for", WaitNextImmediateCommands);
+
         _dialogueRunner.AddCommandHandler<string>("slot", SetCharRig);
         _dialogueRunner.AddCommandHandler<string, string>("place", SetAnchorPosition);
         _dialogueRunner.AddCommandHandler<string, float>("scale", SetOriginSize);
-        
-        
+
         _dialogueRunner.AddCommandHandler<string, string>("slide_in", SlideIn);
         _dialogueRunner.AddCommandHandler<string, string>("slide_out", SlideOut);
         _dialogueRunner.AddCommandHandler<string, string>("slide_in_bouncy", BouncySlideIn);
 
         _dialogueRunner.AddCommandHandler<string>("fade_in", FadeIn);
         _dialogueRunner.AddCommandHandler<string>("fade_out", FadeOut);
-        
+
         _dialogueRunner.AddCommandHandler<string, float, float>("move_by", MoveBy);
         _dialogueRunner.AddCommandHandler<string, string>("dip", DipInOut);
-        
+
         _dialogueRunner.AddCommandHandler<string, string>("hop_in", HopIn);
-        
+
         _dialogueRunner.AddCommandHandler<string, string>("jolt", NudgeJolt);
         _dialogueRunner.AddCommandHandler<string, string>("shake", NudgeShake);
         _dialogueRunner.AddCommandHandler<string, string>("nudge", NudgeTap);
         _dialogueRunner.AddCommandHandler<string, string>("nudge_hard", NudgeTapHard);
 
-        
-
         _dialogueRunner.AddCommandHandler<string, string>("cast", SetPortrait);
     }
+
+
+
+    private void WaitNextImmediateCommands(int count = 1)
+    {
+        _pendingImmediateWaitCount = Mathf.Max(0, count);
+    }
     
-    private Coroutine NudgeJolt(string roleKey, string direction = "right")
+    public void ResetImmediateWaitForNewLine()
+    {
+        _pendingImmediateWaitCount = 0;
+    }
+
+    private void ApplyImmediateWait(CommandSpecBase spec)
+    {
+        if (spec == null)
+            return;
+
+        bool shouldWait = _pendingImmediateWaitCount > 0;
+
+        switch (spec)
+        {
+            case NudgeTapCommandSpecCharR nudgeTap:
+                nudgeTap.wait = shouldWait;
+                break;
+
+            case BounceArcInCommandSpecCharR bounceArcIn:
+                bounceArcIn.wait = shouldWait;
+                break;
+
+            case DipInOutCommandSpecCharR dipInOut:
+                dipInOut.wait = shouldWait;
+                break;
+
+            case MoveByCommandSpecCharR moveBy:
+                moveBy.wait = shouldWait;
+                break;
+
+            case BouncySlideInCommandSpecCharR bouncySlideIn:
+                bouncySlideIn.wait = shouldWait;
+                break;
+
+            case FadeInCommandSpecCharR fadeIn:
+                fadeIn.wait = shouldWait;
+                break;
+
+            case FadeOutCommandSpecCharR fadeOut:
+                fadeOut.wait = shouldWait;
+                break;
+
+            case JuicySlideInCommandSpecCharR slideIn:
+                slideIn.wait = shouldWait;
+                break;
+
+            case JuicySlideOutCommandSpecCharR slideOut:
+                slideOut.wait = shouldWait;
+                break;
+        }
+
+        if (shouldWait)
+            _pendingImmediateWaitCount--;
+    }
+
+    private void RunImmediate(CommandSpecBase spec)
+    {
+        ApplyImmediateWait(spec);
+        _commandPlayer.Run(spec);
+    }
+
+    private void NudgeJolt(string roleKey, string direction = "right")
     {
         SlideFromCharR dir = ParseSlideDirection(direction, SlideFromCharR.Right);
-        
+
         var spec = new NudgeTapCommandSpecCharR
         {
             roleKey = roleKey,
@@ -54,17 +124,16 @@ public sealed class YarnCommandBridge : MonoBehaviour
             duration = 0.6f,
             taps = 3,
             damping = 8,
-            anticipation = -12,
-            wait = true
+            anticipation = -12
         };
 
-        return _runner.Run(spec);
+        RunImmediate(spec);
     }
-    
-    private Coroutine NudgeShake(string roleKey, string direction = "right")
+
+    private void NudgeShake(string roleKey, string direction = "right")
     {
         SlideFromCharR dir = ParseSlideDirection(direction, SlideFromCharR.Right);
-        
+
         var spec = new NudgeTapCommandSpecCharR
         {
             roleKey = roleKey,
@@ -74,13 +143,13 @@ public sealed class YarnCommandBridge : MonoBehaviour
             taps = 4
         };
 
-        return _runner.Run(spec);
+        RunImmediate(spec);
     }
-    
-    private Coroutine NudgeTap(string roleKey, string direction = "right")
+
+    private void NudgeTap(string roleKey, string direction = "right")
     {
         SlideFromCharR dir = ParseSlideDirection(direction, SlideFromCharR.Right);
-        
+
         var spec = new NudgeTapCommandSpecCharR
         {
             roleKey = roleKey,
@@ -93,13 +162,13 @@ public sealed class YarnCommandBridge : MonoBehaviour
             anticipation = -12
         };
 
-        return _runner.Run(spec);
+        RunImmediate(spec);
     }
-    
-    private Coroutine NudgeTapHard(string roleKey, string direction = "down")
+
+    private void NudgeTapHard(string roleKey, string direction = "down")
     {
         SlideFromCharR dir = ParseSlideDirection(direction, SlideFromCharR.Down);
-        
+
         var spec = new NudgeTapCommandSpecCharR
         {
             roleKey = roleKey,
@@ -111,10 +180,10 @@ public sealed class YarnCommandBridge : MonoBehaviour
             anticipation = 4
         };
 
-        return _runner.Run(spec);
+         RunImmediate(spec);
     }
-    
-    private Coroutine HopIn(string roleKey, string direction = "left")
+
+    private void HopIn(string roleKey, string direction = "left")
     {
         SlideFromCharR dir = ParseSlideDirection(direction, SlideFromCharR.Down);
 
@@ -124,11 +193,10 @@ public sealed class YarnCommandBridge : MonoBehaviour
             from = dir
         };
 
-        return _runner.Run(spec);
+         RunImmediate(spec);
     }
-    
 
-    private Coroutine DipInOut(string roleKey, string direction = "down")
+    private void DipInOut(string roleKey, string direction = "down")
     {
         SlideFromCharR dir = ParseSlideDirection(direction, SlideFromCharR.Down);
 
@@ -138,10 +206,10 @@ public sealed class YarnCommandBridge : MonoBehaviour
             dir = dir
         };
 
-        return _runner.Run(spec);
+         RunImmediate(spec);
     }
 
-    private Coroutine MoveBy(string roleKey, float x, float y)
+    private void MoveBy(string roleKey, float x, float y)
     {
         var spec = new MoveByCommandSpecCharR
         {
@@ -149,10 +217,10 @@ public sealed class YarnCommandBridge : MonoBehaviour
             delta = new Vector2(x, y)
         };
 
-        return _runner.Run(spec);
+         RunImmediate(spec);
     }
-    
-    private Coroutine BouncySlideIn(string roleKey, string direction = "left")
+
+    private void BouncySlideIn(string roleKey, string direction = "left")
     {
         SlideFromCharR from = ParseSlideDirection(direction, SlideFromCharR.Left);
 
@@ -162,29 +230,30 @@ public sealed class YarnCommandBridge : MonoBehaviour
             from = from
         };
 
-        return _runner.Run(spec);
+         RunImmediate(spec);
     }
-    
-    private Coroutine FadeIn(string roleKey)
+
+    private void FadeIn(string roleKey)
     {
         var spec = new FadeInCommandSpecCharR
         {
             roleKey = roleKey
         };
-        
-        return _runner.Run(spec, blocking: true);
+
+         RunImmediate(spec);
     }
-    
-    private Coroutine FadeOut(string roleKey)
+
+    private void FadeOut(string roleKey)
     {
         var spec = new FadeOutCommandSpecCharR
         {
             roleKey = roleKey
         };
-        return _runner.Run(spec);
+
+         RunImmediate(spec);
     }
 
-    private Coroutine SlideIn(string roleKey, string direction = "left")
+    private void SlideIn(string roleKey, string direction = "left")
     {
         SlideFromCharR from = ParseSlideDirection(direction, SlideFromCharR.Left);
 
@@ -194,10 +263,10 @@ public sealed class YarnCommandBridge : MonoBehaviour
             direction = from
         };
 
-        return _runner.Run(spec);
+         RunImmediate(spec);
     }
 
-    private Coroutine SlideOut(string roleKey, string direction = "right")
+    private void SlideOut(string roleKey, string direction = "right")
     {
         SlideFromCharR to = ParseSlideDirection(direction, SlideFromCharR.Right);
 
@@ -207,7 +276,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
             to = to
         };
 
-        return _runner.Run(spec, blocking: true);
+         RunImmediate(spec);
     }
 
     private void SetCharRig(string roleKey)
@@ -221,12 +290,12 @@ public sealed class YarnCommandBridge : MonoBehaviour
         var spec = new SetCharRigCommandSpec
         {
             roleKey = roleKey,
-            rigPrefab = _rigPrefab
+            rigPrefab = rigPrefab
         };
 
-        _runner.Run(spec);
+        _commandPlayer.Run(spec);
     }
-    
+
     private void SetAnchorPosition(string roleKey, string positionPreset)
     {
         if (string.IsNullOrWhiteSpace(roleKey))
@@ -249,13 +318,14 @@ public sealed class YarnCommandBridge : MonoBehaviour
             preset = preset,
             globalTuning = globalTuning
         };
-        
-        var spec2 = new SetPosOffsetCommandSpecCharR{
+
+        var spec2 = new SetPosOffsetCommandSpecCharR
+        {
             roleKey = roleKey,
         };
 
-        _runner.Run(spec);
-        _runner.Run(spec2);
+        _commandPlayer.Run(spec);
+        _commandPlayer.Run(spec2);
     }
 
     private void SetOriginSize(string roleKey, float xyValue)
@@ -263,12 +333,11 @@ public sealed class YarnCommandBridge : MonoBehaviour
         var spec = new SetOriginSizeCommandSpecCharR
         {
             roleKey = roleKey,
-            toScale = new Vector2(xyValue,xyValue)
+            toScale = new Vector2(xyValue, xyValue)
         };
-        
-        _runner.Run(spec);
-    }
 
+        _commandPlayer.Run(spec);
+    }
 
     private void SetPortrait(string roleKey, string character)
     {
@@ -278,17 +347,16 @@ public sealed class YarnCommandBridge : MonoBehaviour
             variant = "a",
             emotion = "1"
         };
-        
+
         var spec = new SetPortraitSpriteCommandSpecCharR
         {
             roleKey = roleKey,
             portrait = portraitIdentity
         };
-        
-        _runner.Run(spec);
+
+        _commandPlayer.Run(spec);
     }
-    
-    
+
     private SlideFromCharR ParseSlideDirection(string direction, SlideFromCharR fallback)
     {
         switch (direction?.Trim().ToLowerInvariant())

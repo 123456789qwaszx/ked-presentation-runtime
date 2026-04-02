@@ -1293,6 +1293,50 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 84ab08917ab412640bdfb510ce303367, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UnitySignalBus
+--- !u!1 &587880118
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 587880120}
+  - component: {fileID: 587880119}
+  m_Layer: 0
+  m_Name: YarnLineRuntimePresenter
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &587880119
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 587880118}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3ad28344009b1e24fb712974138bf99c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::YarnLineRuntimePresenter
+--- !u!4 &587880120
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 587880118}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 817.828, y: -97.45085, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &596868908
 GameObject:
   m_ObjectHideFlags: 0
@@ -1342,6 +1386,9 @@ MonoBehaviour:
   commandExecutor: {fileID: 1257280952}
   routeCatalogSo: {fileID: 11400000, guid: 0a509c33b083b264c8262b318a84b25f, type: 2}
   presentationSessionEntry: {fileID: 1433866633}
+  immediateCommandRunner: {fileID: 204524860}
+  yarnCommandBridge: {fileID: 1829026822}
+  yarnLineRuntimePresenter: {fileID: 587880119}
   dialogueRunner: {fileID: 8309902628538800288}
   linePresenter: {fileID: 2958262985601084670}
   dialogueTextRouter: {fileID: 728559835}
@@ -1354,8 +1401,6 @@ MonoBehaviour:
   yarnLineLifecycleBridge: {fileID: 626587493}
   vnFeatureController: {fileID: 775605347}
   episodePlayer: {fileID: 1924806292}
-  immediateCommandRunner: {fileID: 204524860}
-  yarnCommandBridge: {fileID: 1829026822}
   overlay: {fileID: 165425760}
 --- !u!1 &626587492
 GameObject:
@@ -2795,7 +2840,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 863d5def562f3e046972b682c5f9560d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::YarnCommandBridge
-  _rigPrefab: {fileID: 8529412948266249186, guid: 01c9b93a77829ef438fc74c4ef4c5004, type: 3}
+  rigPrefab: {fileID: 8529412948266249186, guid: 01c9b93a77829ef438fc74c4ef4c5004, type: 3}
   globalTuning: {fileID: 11400000, guid: db30a92a6d8545a41b703c2585f4013d, type: 2}
 --- !u!4 &1829026823
 Transform:
@@ -38374,3 +38419,4 @@ SceneRoots:
   - {fileID: 99511076}
   - {fileID: 204524861}
   - {fileID: 1829026823}
+  - {fileID: 587880120}

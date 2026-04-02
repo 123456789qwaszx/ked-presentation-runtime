@@ -19,6 +19,11 @@ public class VnAppBootstrap : MonoBehaviour
     [SerializeField] private RouteCatalogSO routeCatalogSo;
     [SerializeField] private PresentationSessionEntry presentationSessionEntry;
     
+    [Header("ImmediateCommandRunner")]
+    [SerializeField] private ImmediateCommandRunner immediateCommandRunner;
+    [SerializeField] private YarnCommandBridge yarnCommandBridge;
+    [SerializeField] private YarnLineRuntimePresenter yarnLineRuntimePresenter;
+    
     [Header("Yarn")]
     [SerializeField] private DialogueRunner dialogueRunner;
     [SerializeField] private LinePresenter linePresenter;
@@ -39,10 +44,6 @@ public class VnAppBootstrap : MonoBehaviour
     [Header("UI")]
     [SerializeField] private EpisodePlayer episodePlayer;
     
-    [Header("ImmediateCommandRunner")]
-    [SerializeField] private ImmediateCommandRunner immediateCommandRunner;
-    [SerializeField] private YarnCommandBridge yarnCommandBridge;
-    
     private PresentationSessionBridge _presentationSessionBridge;
     
     private DialogueUIBindings _dialogueUIBindings;
@@ -54,6 +55,9 @@ public class VnAppBootstrap : MonoBehaviour
         BootstrapPresentationSession();
         ConnectPresentationSessionToYarn();
         
+        BootstrapImmediateCommandPlayer();
+        ConnectImmediateCommandPlayerToYarn();
+        
         BootstrapYarn();
         SetupYarnLifecycleBridge();
         
@@ -63,17 +67,6 @@ public class VnAppBootstrap : MonoBehaviour
         BootstrapUIBindings();
         InitializeEpisodePlayer();
         
-        SignalLatch signalLatch = new();
-        unitySignalBus.OnSignal += signalLatch.Latch;
-        
-        SignalCommandFactory signalFactory = new(_unityTimeSource, unitySignalBus, signalLatch);
-        CharRigSlotResolver charRigSlotResolver = new();
-        CharacterRigAccess charRigAccess = new(charRigSlotResolver);
-        PortraitResolver portraitResolver = new (portraitGeneratedDbSo);
-        CharRigCommandFactory charRigFactory = new(charRigAccess, portraitResolver);
-        
-        immediateCommandRunner.Initialize(charRigFactory, signalFactory, _presentationContextSettings);
-        yarnCommandBridge.Initialize(dialogueRunner, immediateCommandRunner);
     }
     
     private void BootstrapPresentationSession()
@@ -96,11 +89,32 @@ public class VnAppBootstrap : MonoBehaviour
         presentationSessionEntry.Initialize(presentationSession, routeCatalogSo, _presentationContextSettings);
     }
 
+    
     private void ConnectPresentationSessionToYarn()
     {
         PresentationSession session = presentationSessionEntry.PresentationSession;
         
         _presentationSessionBridge = new(session, unitySignalBus);
+    }
+    
+    private void BootstrapImmediateCommandPlayer()
+    {
+        SignalLatch signalLatch = new();
+        unitySignalBus.OnSignal += signalLatch.Latch;
+        
+        SignalCommandFactory signalFactory = new(_unityTimeSource, unitySignalBus, signalLatch);
+        CharRigSlotResolver charRigSlotResolver = new();
+        CharacterRigAccess charRigAccess = new(charRigSlotResolver);
+        PortraitResolver portraitResolver = new (portraitGeneratedDbSo);
+        CharRigCommandFactory charRigFactory = new(charRigAccess, portraitResolver);
+        
+        immediateCommandRunner.Initialize(charRigFactory, signalFactory, _presentationContextSettings);
+    }
+    
+    private void ConnectImmediateCommandPlayerToYarn()
+    {
+        yarnCommandBridge.Initialize(dialogueRunner, immediateCommandRunner);
+        yarnLineRuntimePresenter.Initialize(dialogueRunner, yarnCommandBridge);
     }
     
     private void BootstrapYarn()

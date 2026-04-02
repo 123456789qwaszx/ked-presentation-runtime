@@ -35,20 +35,6 @@ MonoBehaviour:
       - rid: 305542826026074175
       - rid: 305542826026074176
       gate:
-        type: 0
-        seconds: 0
-        signalKey: 
-    - editorName: 
-      tracks:
-        interaction: []
-        setup: []
-        motion: []
-        dialogue: []
-        fx:
-        - rid: 8483490922132668507
-      compiled:
-      - rid: 8483490922132668507
-      gate:
         type: 3
         seconds: 0
         signalKey: beat
@@ -59,87 +45,15 @@ MonoBehaviour:
         motion: []
         dialogue: []
         fx:
-        - rid: 8483490922132668487
         - rid: 8483490922132668488
         - rid: 8483490922132668504
         - rid: 8483490922132668503
         - rid: 8483490922132668505
       compiled:
-      - rid: 8483490922132668487
       - rid: 8483490922132668488
       - rid: 8483490922132668504
       - rid: 8483490922132668503
       - rid: 8483490922132668505
-      gate:
-        type: 3
-        seconds: 0
-        signalKey: beat
-    - editorName: NudgeShake
-      tracks:
-        interaction: []
-        setup: []
-        motion: []
-        dialogue: []
-        fx:
-        - rid: 8483490911384240207
-      compiled:
-      - rid: 8483490911384240207
-      gate:
-        type: 3
-        seconds: 0
-        signalKey: beat
-    - editorName: ShakeSoft
-      tracks:
-        interaction: []
-        setup: []
-        motion: []
-        dialogue: []
-        fx:
-        - rid: 8483490911384240216
-      compiled:
-      - rid: 8483490911384240216
-      gate:
-        type: 3
-        seconds: 0
-        signalKey: beat
-    - editorName: NudgePolished
-      tracks:
-        interaction: []
-        setup: []
-        motion: []
-        dialogue: []
-        fx:
-        - rid: 8483490911384240201
-      compiled:
-      - rid: 8483490911384240201
-      gate:
-        type: 3
-        seconds: 0
-        signalKey: beat
-    - editorName: 
-      tracks:
-        interaction: []
-        setup: []
-        motion: []
-        dialogue: []
-        fx:
-        - rid: 8483490911384240210
-      compiled:
-      - rid: 8483490911384240210
-      gate:
-        type: 3
-        seconds: 0
-        signalKey: beat
-    - editorName: 
-      tracks:
-        interaction: []
-        setup: []
-        motion: []
-        dialogue: []
-        fx:
-        - rid: 8483490911384240212
-      compiled:
-      - rid: 8483490911384240212
       gate:
         type: 3
         seconds: 0
@@ -157,8 +71,7 @@ MonoBehaviour:
         - rid: 305542832622927939
         - rid: 305542832622927941
         dialogue: []
-        fx:
-        - rid: 8483490911384240190
+        fx: []
       compiled:
       - rid: 305542832622927935
       - rid: 305542832622927936
@@ -167,25 +80,10 @@ MonoBehaviour:
       - rid: 305542838602170430
       - rid: 305542832622927939
       - rid: 305542832622927941
-      - rid: 8483490911384240190
       gate:
-        type: 3
+        type: 0
         seconds: 0
-        signalKey: beat
-    - editorName: 
-      tracks:
-        interaction:
-        - rid: 305542832622927947
-        setup: []
-        motion: []
-        dialogue: []
-        fx: []
-      compiled:
-      - rid: 305542832622927947
-      gate:
-        type: 3
-        seconds: 0
-        signalKey: beat
+        signalKey: 
     - editorName: 
       tracks:
         interaction:
@@ -230,6 +128,48 @@ MonoBehaviour:
       compiled:
       - rid: 305542845787537474
       - rid: 305542845787537475
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+    - editorName: NudgeShake
+      tracks:
+        interaction: []
+        setup: []
+        motion: []
+        dialogue: []
+        fx:
+        - rid: 8483490911384240207
+      compiled:
+      - rid: 8483490911384240207
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+    - editorName: ShakeSoft
+      tracks:
+        interaction: []
+        setup: []
+        motion: []
+        dialogue: []
+        fx:
+        - rid: 8483490911384240216
+      compiled:
+      - rid: 8483490911384240216
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+    - editorName: NudgePolished
+      tracks:
+        interaction: []
+        setup: []
+        motion: []
+        dialogue: []
+        fx:
+        - rid: 8483490911384240201
+      compiled:
+      - rid: 8483490911384240201
       gate:
         type: 3
         seconds: 0
@@ -365,7 +305,7 @@ MonoBehaviour:
           character: kuonji
           emotion: 1
           variant: a
-        target: 7
+        target: 10
         sizingMode: 1
         horizontalAlign: 1
     - rid: 305542832622927937
@@ -434,24 +374,6 @@ MonoBehaviour:
         ease: 9
         punch: 24
         wait: 0
-    - rid: 305542832622927947
-      type: {class: TapEaseCommandSpecCharR, ns: , asm: Assembly-CSharp}
-      data:
-        roleKey: momoka
-        _meta:
-          track: 0
-          phase: 0
-          blockingHint: 0
-          infiniteHint: 0
-          durationHint: 0
-        target: 1
-        strength: 34
-        duration: 2
-        taps: 3
-        damping: 7
-        timeEase: 10
-        prep: 1.5
-        wait: 0
     - rid: 305542838602170430
       type: {class: RotateFromToCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:
@@ -462,7 +384,7 @@ MonoBehaviour:
           blockingHint: 0
           infiniteHint: 0
           durationHint: 0
-        target: 2
+        target: 5
         toEuler: {x: 0, y: 180, z: -2}
         overrideFromEuler: 0
         fromEuler: {x: 0, y: 0, z: 0}
@@ -583,24 +505,6 @@ MonoBehaviour:
         duration: 0.4
         ease: 8
         wait: 0
-    - rid: 8483490911384240190
-      type: {class: NudgeTapCommandSpecCharR, ns: , asm: Assembly-CSharp}
-      data:
-        roleKey: main
-        _meta:
-          track: 40
-          phase: 0
-          blockingHint: 0
-          infiniteHint: 0
-          durationHint: 0
-        target: 1
-        strength: 22
-        direction: 1
-        duration: 0.88
-        taps: 3
-        damping: 6
-        anticipation: 3
-        wait: 0
     - rid: 8483490911384240201
       type: {class: NudgeTapCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:
@@ -637,38 +541,6 @@ MonoBehaviour:
         damping: 6
         anticipation: 3
         wait: 0
-    - rid: 8483490911384240210
-      type: {class: MoveInOutCommandSpecCharR, ns: , asm: Assembly-CSharp}
-      data:
-        roleKey: momoka
-        _meta:
-          track: 40
-          phase: 0
-          blockingHint: 0
-          infiniteHint: 0
-          durationHint: 0
-        target: 1
-        offset: {x: 222, y: 0}
-        duration: 0.22
-        holdPortion: 0.08
-        ease: 10
-        wait: 0
-    - rid: 8483490911384240212
-      type: {class: DipInOutCommandSpecCharR, ns: , asm: Assembly-CSharp}
-      data:
-        roleKey: momoka
-        _meta:
-          track: 40
-          phase: 0
-          blockingHint: 0
-          infiniteHint: 0
-          durationHint: 0
-        target: 1
-        dir: 3
-        distance: 24
-        duration: 0.4
-        ease: 8
-        wait: 0
     - rid: 8483490911384240216
       type: {class: NudgeTapCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:
@@ -686,21 +558,6 @@ MonoBehaviour:
         taps: 4
         damping: 6
         anticipation: 3
-        wait: 0
-    - rid: 8483490922132668487
-      type: {class: FadeOutCommandSpecCharR, ns: , asm: Assembly-CSharp}
-      data:
-        roleKey: momoka
-        _meta:
-          track: 40
-          phase: 0
-          blockingHint: 0
-          infiniteHint: 0
-          durationHint: 0
-        targetMask: 7
-        duration: -1
-        ease: 9
-        disableInteraction: 1
         wait: 0
     - rid: 8483490922132668488
       type: {class: FadeInCommandSpecCharR, ns: , asm: Assembly-CSharp}
@@ -767,22 +624,4 @@ MonoBehaviour:
         taps: 1
         damping: 9
         anticipation: 0
-        wait: 0
-    - rid: 8483490922132668507
-      type: {class: NudgeTapCommandSpecCharR, ns: , asm: Assembly-CSharp}
-      data:
-        roleKey: momoka
-        _meta:
-          track: 40
-          phase: 0
-          blockingHint: 0
-          infiniteHint: 0
-          durationHint: 0
-        target: 3
-        strength: 340
-        direction: 2
-        duration: 0.6
-        taps: 1
-        damping: 8
-        anticipation: -12
         wait: 0
