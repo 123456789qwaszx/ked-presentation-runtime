@@ -1,10 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>
-/// YarnCommandBridge가 수집한 Spec을 CommandExecutor로 넘기는 드라이버.
-/// Bridge는 수집만, Executor는 실행만 — 이 클래스가 둘을 연결.
-/// </summary>
 public sealed class YarnBridgePlaybackDriver : MonoBehaviour
 {
     private YarnCommandBridge _bridge;
@@ -22,16 +18,17 @@ public sealed class YarnBridgePlaybackDriver : MonoBehaviour
         _scope = new CommandRunScope(context);
     }
 
-    /// <summary>
-    /// Bridge 버퍼를 소비해서 즉시 재생.
-    /// Yarn command 처리 직후 또는 line 시작 시점에 호출.
-    /// </summary>
+    // Bridge 버퍼를 소비해서 즉시 재생.
+    // Yarn command 처리 직후 또는 line 시작 시점에 호출.
     public void PlayCollected()
     {
         List<CommandSpecBase> specs = _bridge.ConsumeCollectedSpecs();
-        if (specs == null || specs.Count == 0)
-            return;
 
         _executor.PlaySpecs(specs, _scope, "yarn-bridge");
+    }
+
+    public void ClearCollected()
+    {
+        _bridge.ClearCollectedSpecs();
     }
 }

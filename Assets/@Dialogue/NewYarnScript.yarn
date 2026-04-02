@@ -23,7 +23,7 @@ title: NewYarnScript
 <<cast sub1 kuonji>>
 
 <<fade_in sub1>>
-<<slide_in sub1 left>>
+<<slide_in_nudge sub1 left>>
 
 <<protagobox>>
 엘리스: ...착각도 병이야. 아니면 너는 세상 모든 시선이 뜨겁게 느껴지는거야?

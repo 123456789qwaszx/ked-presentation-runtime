@@ -34,7 +34,7 @@ public sealed class CommandExecutor : MonoBehaviour
     private void OnDisable() => Stop(CleanupPolicy.Cancel);
     private void OnDestroy() => Stop(CleanupPolicy.Cancel);
 
-    // ---- 기존 입구: Step 기반 ----
+    // ---- Step ----
     public void PlayStep(NodeSpec node, int stepIndex, CommandRunScope scope)
     {
         if (!_initialized) return;
@@ -56,7 +56,7 @@ public sealed class CommandExecutor : MonoBehaviour
         StartPlay(step.compiled, scope, $"step={stepIndex}");
     }
 
-    // ---- 새 입구: Bridge Spec 기반 ----
+    // ---- bridge ----
     public void PlaySpecs(IReadOnlyList<CommandSpecBase> specs, CommandRunScope scope, string debugSource = "bridge")
     {
         if (!_initialized) return;
@@ -65,7 +65,6 @@ public sealed class CommandExecutor : MonoBehaviour
         StartPlay(specs, scope, debugSource);
     }
 
-    // ---- 공통 실행 경로 ----
     private void StartPlay(IReadOnlyList<CommandSpecBase> specs, CommandRunScope scope, string debugSource)
     {
         _activeScope = scope;
@@ -195,7 +194,7 @@ public sealed class CommandExecutor : MonoBehaviour
     }
 
     private void ResetToken()
-    {
+    {// Only responsible for creating a new token for the next run.
         _cts?.Dispose();
         _cts = new CancellationTokenSource();
     }
@@ -212,6 +211,11 @@ public sealed class CommandExecutor : MonoBehaviour
     private CleanupPolicy DecideCleanupPolicy(CommandRunScope scope)
     {
         if (scope == null) return CleanupPolicy.Cancel;
+        
+        // Skip means "complete immediately".
+        // if (scope.IsSkipping)
+        //     return CleanupPolicy.Finish;
+
         return CleanupPolicy.Finish;
     }
 

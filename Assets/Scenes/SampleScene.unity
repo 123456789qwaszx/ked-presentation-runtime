@@ -1343,7 +1343,7 @@ MonoBehaviour:
   routeCatalogSo: {fileID: 11400000, guid: 0a509c33b083b264c8262b318a84b25f, type: 2}
   presentationSessionEntry: {fileID: 1433866633}
   yarnBridgePlaybackDriver: {fileID: 720935691}
-  yarnCommandBridge: {fileID: 1829026822}
+  yarnCommandBridge: {fileID: 1829026824}
   yarnLineRuntimePresenter: {fileID: 587880119}
   dialogueRunner: {fileID: 8309902628538800288}
   linePresenter: {fileID: 2958262985601084670}
@@ -2820,7 +2820,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1829026823}
-  - component: {fileID: 1829026822}
+  - component: {fileID: 1829026824}
   m_Layer: 0
   m_Name: YarnCommandBridge
   m_TagString: Untagged
@@ -2828,20 +2828,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1829026822
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1829026821}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 863d5def562f3e046972b682c5f9560d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::YarnCommandBridge
-  rigPrefab: {fileID: 8529412948266249186, guid: 01c9b93a77829ef438fc74c4ef4c5004, type: 3}
-  globalTuning: {fileID: 11400000, guid: db30a92a6d8545a41b703c2585f4013d, type: 2}
 --- !u!4 &1829026823
 Transform:
   m_ObjectHideFlags: 0
@@ -2857,6 +2843,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1829026824
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1829026821}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 28eeb6f96b7d3ea4783a98588e5f27fc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::YarnCommandBridge
+  rigPrefab: {fileID: 8529412948266249186, guid: 01c9b93a77829ef438fc74c4ef4c5004, type: 3}
+  globalTuning: {fileID: 11400000, guid: db30a92a6d8545a41b703c2585f4013d, type: 2}
 --- !u!1 &1874881009
 GameObject:
   m_ObjectHideFlags: 0

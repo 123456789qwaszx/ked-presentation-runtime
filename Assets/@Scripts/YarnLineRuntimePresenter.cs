@@ -1,5 +1,6 @@
 using Yarn.Unity;
 using System.Collections.Generic;
+
 // Line 단위 런타임 훅 계층.
 // DialoguePresenterBase를 상속해 Yarn line lifecycle에 직접 연결.
 // ResetImmediateWaitForNewLine 같은 line 단위 잡일을 처리.
@@ -9,7 +10,10 @@ public sealed class YarnLineRuntimePresenter : DialoguePresenterBase
     private YarnCommandBridge _yarnCommandBridge;
     private YarnBridgePlaybackDriver _yarnBridgePlaybackDriver;
 
-    public void Initialize(DialogueRunner dialogueRunner, YarnCommandBridge yarnCommandBridge, YarnBridgePlaybackDriver yarnBridgePlaybackDriver)
+    public void Initialize(
+        DialogueRunner dialogueRunner,
+        YarnCommandBridge yarnCommandBridge,
+        YarnBridgePlaybackDriver yarnBridgePlaybackDriver)
     {
         _yarnCommandBridge = yarnCommandBridge;
         _yarnBridgePlaybackDriver = yarnBridgePlaybackDriver;

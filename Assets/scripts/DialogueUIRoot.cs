@@ -8,7 +8,6 @@ using static UIRefValidation;
 
 public class DialogueUIRoot : UIRoot<DialogueUIRoot.Refs>
 {
-    public event Action OnSpeedUpPressed;
     public event Action OnSpeedUpHoldStarted;
     public event Action OnSpeedUpHoldEnded;
     

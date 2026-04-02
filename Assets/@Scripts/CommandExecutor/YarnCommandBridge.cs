@@ -1,37 +1,17 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Yarn.Unity;
 
-/// <summary>
-/// Yarn <<command>> 를 즉시 실행하지 않고,
-/// CommandSpecBase 목록으로 수집하는 브리지.
-/// 
-/// 역할:
-/// 1) Yarn command -> Spec 생성
-/// 2) 생성된 Spec을 내부 버퍼에 축적
-/// 3) 외부에서 Flush / Consume 하여 별도 플레이어가 사용
-/// </summary>
 public sealed class YarnCommandBridge : MonoBehaviour
 {
     private DialogueRunner _dialogueRunner;
 
-    [Header("Rig")]
-    public GameObject rigPrefab;
+    [Header("Rig")] public GameObject rigPrefab;
+    [Header("Global Tuning")] public CharStageTuningSO globalTuning;
 
-    [Header("Global Tuning")]
-    public CharStageTuningSO globalTuning;
-
-    // 다음 몇 개의 "즉시 커맨드"에 wait=true 를 부여할지
     private int _pendingImmediateWaitCount;
-
-    // 현재 브리지가 수집한 Spec 버퍼
     private readonly List<CommandSpecBase> _collectedSpecs = new();
 
-    /// <summary>
-    /// 현재까지 수집된 Spec을 읽기 전용으로 확인.
-    /// </summary>
-    public IReadOnlyList<CommandSpecBase> CollectedSpecs => _collectedSpecs;
 
     public void Initialize(DialogueRunner dialogueRunner)
     {
@@ -59,30 +39,17 @@ public sealed class YarnCommandBridge : MonoBehaviour
         _dialogueRunner.AddCommandHandler<string, string>("shake", NudgeShake);
         _dialogueRunner.AddCommandHandler<string, string>("nudge", NudgeTap);
         _dialogueRunner.AddCommandHandler<string, string>("nudge_hard", NudgeTapHard);
+        
+        _dialogueRunner.AddCommandHandler<string, string>("slide_in_nudge", NudgeSlideIn);
 
         _dialogueRunner.AddCommandHandler<string, string>("cast", SetPortrait);
     }
 
-    /// <summary>
-    /// 다음 count개의 즉시성 연출 Spec에 wait 플래그를 부여.
-    /// </summary>
-    private void WaitNextImmediateCommands(int count = 1)
-    {
-        _pendingImmediateWaitCount = Mathf.Max(0, count);
-    }
+    #region collected specs
 
-    /// <summary>
-    /// 라인이 바뀌거나 새 수집 세션 시작 시 호출.
-    /// </summary>
-    public void ResetImmediateWaitForNewLine()
-    {
-        _pendingImmediateWaitCount = 0;
-    }
-
-    /// <summary>
-    /// 현재까지 쌓인 Spec을 복사해서 반환하고 내부 버퍼를 비운다.
-    /// 외부 플레이어/빌더가 이 메서드로 가져가면 된다.
-    /// </summary>
+    private void WaitNextImmediateCommands(int count = 1) => _pendingImmediateWaitCount = Mathf.Max(0, count);
+    public void ResetImmediateWaitForNewLine() => _pendingImmediateWaitCount = 0;
+    
     public List<CommandSpecBase> ConsumeCollectedSpecs()
     {
         var result = new List<CommandSpecBase>(_collectedSpecs);
@@ -90,9 +57,6 @@ public sealed class YarnCommandBridge : MonoBehaviour
         return result;
     }
 
-    /// <summary>
-    /// 현재 버퍼를 비운다.
-    /// </summary>
     public void ClearCollectedSpecs()
     {
         _collectedSpecs.Clear();
@@ -148,16 +112,39 @@ public sealed class YarnCommandBridge : MonoBehaviour
             _pendingImmediateWaitCount--;
     }
 
-    /// <summary>
-    /// 실행 대신 수집.
-    /// </summary>
     private void Collect(CommandSpecBase spec)
     {
-        if (spec == null)
-            return;
+        if (spec == null) return;
 
         ApplyImmediateWait(spec);
         _collectedSpecs.Add(spec);
+    }
+    
+    private void NudgeSlideIn(string roleKey, string direction = "right")
+    {
+        SlideFromCharR dir = ParseSlideDirection(direction, SlideFromCharR.Right);
+
+        var juicySlideIn = new JuicySlideInCommandSpecCharR
+        {
+            roleKey = roleKey,
+            target = CharacterRigTarget.Character_Track_X,
+            direction = dir
+        };
+
+        var spec = new NudgeTapCommandSpecCharR
+        {
+            roleKey = roleKey,
+            target = CharacterRigTarget.Character_Track_Y,
+            direction = SlideFromCharR.Up,
+            strength = 340f,
+            duration = 0.6f,
+            taps = 4,
+            damping = 9,
+            anticipation = -12
+        };
+
+        Collect(spec);
+        Collect(juicySlideIn);
     }
 
     private void NudgeJolt(string roleKey, string direction = "right")
@@ -178,6 +165,8 @@ public sealed class YarnCommandBridge : MonoBehaviour
 
         Collect(spec);
     }
+    
+    #endregion
 
     private void NudgeShake(string roleKey, string direction = "right")
     {

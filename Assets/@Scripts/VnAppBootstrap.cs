@@ -55,9 +55,6 @@ public class VnAppBootstrap : MonoBehaviour
         BootstrapPresentationSession();
         ConnectPresentationSessionToYarn();
         
-        BootstrapImmediateCommandPlayer();
-        ConnectImmediateCommandPlayerToYarn();
-        
         BootstrapYarn();
         SetupYarnLifecycleBridge();
         
@@ -97,29 +94,6 @@ public class VnAppBootstrap : MonoBehaviour
         _presentationSessionBridge = new(session, unitySignalBus);
     }
     
-    private void BootstrapImmediateCommandPlayer()
-    {
-        SignalLatch signalLatch = new();
-        unitySignalBus.OnSignal += signalLatch.Latch;
-        
-        SignalCommandFactory signalFactory = new(_unityTimeSource, unitySignalBus, signalLatch);
-        CharRigSlotResolver charRigSlotResolver = new();
-        CharacterRigAccess charRigAccess = new(charRigSlotResolver);
-        PortraitResolver portraitResolver = new (portraitGeneratedDbSo);
-        CharRigCommandFactory charRigFactory = new(charRigAccess, portraitResolver);
-        
-        //immediateCommandRunner.Initialize(charRigFactory, signalFactory, _presentationContextSettings);
-    }
-    
-    private void ConnectImmediateCommandPlayerToYarn()
-    {
-        yarnCommandBridge.Initialize(dialogueRunner);
-        yarnBridgePlaybackDriver.Initialize(yarnCommandBridge, commandExecutor, _presentationContextSettings);
-        
-        yarnLineRuntimePresenter.Initialize(dialogueRunner, yarnCommandBridge, yarnBridgePlaybackDriver);
-        
-    }
-    
     private void BootstrapYarn()
     {
         inlineEventMarkupHandler.Initialize(_presentationSessionBridge);
@@ -128,6 +102,10 @@ public class VnAppBootstrap : MonoBehaviour
         
         YarnCommandRegistry yarnCommandRegistry = new YarnCommandRegistry(dialogueRunner, yarnUIBridge, vnRuntimeBridge);
         yarnCommandRegistry.Initialize();
+        
+        yarnCommandBridge.Initialize(dialogueRunner);
+        yarnBridgePlaybackDriver.Initialize(yarnCommandBridge, commandExecutor, _presentationContextSettings);
+        yarnLineRuntimePresenter.Initialize(dialogueRunner, yarnCommandBridge, yarnBridgePlaybackDriver);
     }
 
     private void SetupYarnLifecycleBridge()
@@ -184,7 +162,9 @@ public class VnAppBootstrap : MonoBehaviour
             inlineMarkupHandler: inlineEventMarkupHandler,
             typewriter: ellipsisBreathTypewriter,
             playbackSettings: _vnPlaybackSettings,
-            _presentationSessionBridge
+            _presentationSessionBridge,
+            yarnBridgePlaybackDriver,
+            commandExecutor
         );
         
         CreateRollbackHistoryDebugTool(rollbackHistory, rollbackState);
