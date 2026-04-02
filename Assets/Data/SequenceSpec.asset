@@ -28,9 +28,7 @@ MonoBehaviour:
         - rid: 305542826026074176
         - rid: 305542826026074177
         dialogue: []
-        fx:
-        - rid: 8483490911384240188
-        - rid: 8483490911384240189
+        fx: []
       compiled:
       - rid: 305542826026074172
       - rid: 305542826026074173
@@ -38,22 +36,116 @@ MonoBehaviour:
       - rid: 305542826026074175
       - rid: 305542826026074176
       - rid: 305542826026074177
-      - rid: 8483490911384240188
-      - rid: 8483490911384240189
+      gate:
+        type: 0
+        seconds: 0
+        signalKey: 
+    - editorName: Nudge
+      tracks:
+        interaction: []
+        setup: []
+        motion: []
+        dialogue: []
+        fx:
+        - rid: 8483490922132668486
+        - rid: 8483490922132668485
+        - rid: 8483490922132668484
+        - rid: 8483490922132668482
+        - rid: 8483490922132668476
+      compiled:
+      - rid: 8483490922132668486
+      - rid: 8483490922132668485
+      - rid: 8483490922132668484
+      - rid: 8483490922132668482
+      - rid: 8483490922132668476
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+    - editorName: Nudge
+      tracks:
+        interaction: []
+        setup: []
+        motion: []
+        dialogue: []
+        fx:
+        - rid: 8483490922132668478
+        - rid: 8483490922132668479
+        - rid: 8483490922132668480
+      compiled:
+      - rid: 8483490922132668478
+      - rid: 8483490922132668479
+      - rid: 8483490922132668480
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+    - editorName: NudgeShake
+      tracks:
+        interaction: []
+        setup: []
+        motion: []
+        dialogue: []
+        fx:
+        - rid: 8483490911384240207
+      compiled:
+      - rid: 8483490911384240207
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+    - editorName: ShakeSoft
+      tracks:
+        interaction: []
+        setup: []
+        motion: []
+        dialogue: []
+        fx:
+        - rid: 8483490911384240216
+      compiled:
+      - rid: 8483490911384240216
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+    - editorName: NudgePolished
+      tracks:
+        interaction: []
+        setup: []
+        motion: []
+        dialogue: []
+        fx:
+        - rid: 8483490911384240201
+      compiled:
+      - rid: 8483490911384240201
       gate:
         type: 3
         seconds: 0
         signalKey: beat
     - editorName: 
       tracks:
-        interaction:
-        - rid: 305542832622927945
+        interaction: []
         setup: []
         motion: []
         dialogue: []
-        fx: []
+        fx:
+        - rid: 8483490911384240210
       compiled:
-      - rid: 305542832622927945
+      - rid: 8483490911384240210
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+    - editorName: 
+      tracks:
+        interaction: []
+        setup: []
+        motion: []
+        dialogue: []
+        fx:
+        - rid: 8483490911384240212
+      compiled:
+      - rid: 8483490911384240212
       gate:
         type: 3
         seconds: 0
@@ -71,7 +163,8 @@ MonoBehaviour:
         - rid: 305542832622927939
         - rid: 305542832622927941
         dialogue: []
-        fx: []
+        fx:
+        - rid: 8483490911384240190
       compiled:
       - rid: 305542832622927935
       - rid: 305542832622927936
@@ -80,6 +173,7 @@ MonoBehaviour:
       - rid: 305542838602170430
       - rid: 305542832622927939
       - rid: 305542832622927941
+      - rid: 8483490911384240190
       gate:
         type: 3
         seconds: 0
@@ -242,7 +336,7 @@ MonoBehaviour:
           infiniteHint: 0
           durationHint: 0
         targetMask: 1
-        duration: 1.4
+        duration: -1
         ease: 9
         EnableInteraction: 1
         wait: 0
@@ -363,22 +457,6 @@ MonoBehaviour:
         duration: 0.55
         ease: 9
         punch: 24
-        wait: 0
-    - rid: 305542832622927945
-      type: {class: DipInOutCommandSpecCharR, ns: , asm: Assembly-CSharp}
-      data:
-        roleKey: momoka
-        _meta:
-          track: 0
-          phase: 0
-          blockingHint: 0
-          infiniteHint: 0
-          durationHint: 0
-        target: 1
-        dir: 3
-        distance: 24
-        duration: 0.4
-        ease: 8
         wait: 0
     - rid: 305542832622927947
       type: {class: TapEaseCommandSpecCharR, ns: , asm: Assembly-CSharp}
@@ -529,8 +607,184 @@ MonoBehaviour:
         duration: 0.4
         ease: 8
         wait: 0
-    - rid: 8483490911384240188
-      type: {class: BounceArcInCommandSpecCharR, ns: , asm: Assembly-CSharp}
+    - rid: 8483490911384240190
+      type: {class: NudgeTapCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: main
+        _meta:
+          track: 40
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 1
+        strength: 22
+        direction: 1
+        duration: 0.88
+        taps: 3
+        damping: 6
+        anticipation: 3
+        wait: 0
+    - rid: 8483490911384240201
+      type: {class: NudgeTapCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: momoka
+        _meta:
+          track: 40
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 1
+        strength: 2222
+        direction: 1
+        duration: 0.9
+        taps: 1
+        damping: 12
+        anticipation: 2
+        wait: 0
+    - rid: 8483490911384240207
+      type: {class: NudgeTapCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: momoka
+        _meta:
+          track: 40
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 1
+        strength: 22
+        direction: 1
+        duration: 0.88
+        taps: 3
+        damping: 6
+        anticipation: 3
+        wait: 0
+    - rid: 8483490911384240210
+      type: {class: MoveInOutCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: momoka
+        _meta:
+          track: 40
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 1
+        offset: {x: 222, y: 0}
+        duration: 0.22
+        holdPortion: 0.08
+        ease: 10
+        wait: 0
+    - rid: 8483490911384240212
+      type: {class: DipInOutCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: momoka
+        _meta:
+          track: 40
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 1
+        dir: 3
+        distance: 24
+        duration: 0.4
+        ease: 8
+        wait: 0
+    - rid: 8483490911384240216
+      type: {class: NudgeTapCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: momoka
+        _meta:
+          track: 40
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 1
+        strength: 44
+        direction: 1
+        duration: 1.2
+        taps: 4
+        damping: 6
+        anticipation: 3
+        wait: 0
+    - rid: 8483490922132668476
+      type: {class: NudgeTapCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: momoka
+        _meta:
+          track: 40
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 3
+        strength: 340
+        direction: 2
+        duration: 0.6
+        taps: 1
+        damping: 9
+        anticipation: 0
+        wait: 0
+    - rid: 8483490922132668478
+      type: {class: NudgeTapCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: momoka
+        _meta:
+          track: 40
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 1
+        strength: 340
+        direction: 1
+        duration: 0.6
+        taps: 1
+        damping: 9
+        anticipation: 0
+        wait: 0
+    - rid: 8483490922132668479
+      type: {class: NudgeTapCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: momoka
+        _meta:
+          track: 40
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 3
+        strength: 340
+        direction: 2
+        duration: 0.6
+        taps: 1
+        damping: 9
+        anticipation: 0
+        wait: 0
+    - rid: 8483490922132668480
+      type: {class: NudgeTapCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: momoka
+        _meta:
+          track: 40
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 3
+        strength: 340
+        direction: 2
+        duration: 0.6
+        taps: 1
+        damping: 9
+        anticipation: 0
+        wait: 0
+    - rid: 8483490922132668482
+      type: {class: JuicySlideInCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:
         roleKey: momoka
         _meta:
@@ -542,32 +796,53 @@ MonoBehaviour:
         target: 1
         from: 0
         distance: 480
-        duration: 0.75
+        duration: 0.55
         ease: 9
-        hopCount: 4
-        arcHeight: 48
-        airWidth: 0.65
-        jumpAxis: 1
-        lastArcHeight: -1
-        lastAirWidth: -1
-        lastTravelFraction: 0.15
+        punch: 24
         wait: 0
-    - rid: 8483490911384240189
-      type: {class: BounceArcInLiteCommandSpecCharR, ns: , asm: Assembly-CSharp}
+    - rid: 8483490922132668484
+      type: {class: PunchScaleCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:
-        roleKey: kuonji
+        roleKey: momoka
         _meta:
           track: 40
           phase: 0
           blockingHint: 0
           infiniteHint: 0
           durationHint: 0
-        target: 1
-        from: 0
-        distance: 480
-        duration: 0.75
-        hops: 4
-        height: 48
-        landing: 0.35
+        target: 6
+        strength: -0.02
+        duration: 0.22
+        vibrato: 8
+        elasticity: 0.197
+        wait: 0
+    - rid: 8483490922132668485
+      type: {class: FadeInCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: momoka
+        _meta:
+          track: 40
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        targetMask: 1
+        duration: 0.58
         ease: 9
+        EnableInteraction: 1
+        wait: 0
+    - rid: 8483490922132668486
+      type: {class: FadeOutCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: momoka
+        _meta:
+          track: 40
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        targetMask: 7
+        duration: -1
+        ease: 9
+        disableInteraction: 1
         wait: 0

@@ -1,27 +1,28 @@
 title: NewYarnScript
 ---
 
-<<slot main>>
-<<place main left>>
-<<scale main 2.0>>
+// <<slot main>>
+// <<place main left>>
+// <<scale main 2.0>>
 
-<<cast main momoka>>
-<<fade_in main>>
+// <<cast main momoka>>
+// <<fade_in main>>
 
 
-<<slot sub1>>
-<<place sub1 right>>
-<<scale sub1 2.18>>
+// <<slot sub1>>
+// <<place sub1 right>>
+// <<scale sub1 2.18>>
 
-<<cast sub1 kuonji>>
-<<fade_in sub1>>
-//<<hop_in sub1>>
-//<<slide_in_bouncy sub1>>
-<<slide_in sub1>>
+// <<cast sub1 kuonji>>
+// <<fade_in sub1>>
+// //<<hop_in sub1>>
+// //<<slide_in_bouncy sub1>>
+// <<slide_in sub1>>
 ...
 //<<dip_inout sub1 right>>
-<<t1 sub1>>
+//<<t4 sub1>>
 어라? 기시감이...
+//<<nudgeTap1 sub1>>
 //<<slide_out sub1>>
 //<<fade_out sub1>>
 

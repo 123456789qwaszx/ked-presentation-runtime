@@ -32,14 +32,83 @@ public sealed class YarnCommandBridge : MonoBehaviour
         
         _dialogueRunner.AddCommandHandler<string, string>("hop_in", HopIn);
         
+        //_dialogueRunner.AddCommandHandler<string, string>("hop_in", HopIn);
+        
         _dialogueRunner.AddCommandHandler<string>("t1", test1);
         _dialogueRunner.AddCommandHandler<string>("t2", test2);
         _dialogueRunner.AddCommandHandler<string>("t3", test3);
         _dialogueRunner.AddCommandHandler<string>("t4", test4);
         
         
+        _dialogueRunner.AddCommandHandler<string, string>("nudgeTap1", nudgeShake);
+        
+        
 
         _dialogueRunner.AddCommandHandler<string, string>("cast", SetPortrait);
+    }
+    
+    private Coroutine nudgeTap(string roleKey, string direction = "right")
+    {
+        SlideFromCharR dir = ParseSlideDirection(direction, SlideFromCharR.Right);
+        
+        var spec = new NudgeTapCommandSpecCharR
+        {
+            roleKey = roleKey,
+            direction = dir,
+            strength = 44f,
+            duration = 1.2f,
+            taps = 4
+        };
+
+        return _runner.Run(spec);
+    }
+    
+    private Coroutine nudgeShake(string roleKey, string direction = "right")
+    {
+        SlideFromCharR dir = ParseSlideDirection(direction, SlideFromCharR.Right);
+        
+        var spec = new NudgeTapCommandSpecCharR
+        {
+            roleKey = roleKey,
+            direction = dir,
+            strength = 44f,
+            duration = 1.2f,
+            taps = 4
+        };
+
+        return _runner.Run(spec);
+    }
+    
+    private Coroutine nudgePolished(string roleKey, string direction = "right")
+    {
+        SlideFromCharR dir = ParseSlideDirection(direction, SlideFromCharR.Right);
+        
+        var spec = new NudgeTapCommandSpecCharR
+        {
+            roleKey = roleKey,
+            direction = dir,
+            strength = 2200f,
+            duration = 0.9f,
+            taps = 1,
+            damping = 12,
+            anticipation = 2
+        };
+
+        return _runner.Run(spec);
+    }
+    
+    private Coroutine nudgeInOut(string roleKey, string direction = "right")
+    {
+
+        SlideFromCharR dir = ParseSlideDirection(direction, SlideFromCharR.Down);
+
+        var spec = new NudgeTapCommandSpecCharR
+        {
+            roleKey = roleKey,
+            //from = dir
+        };
+
+        return _runner.Run(spec);
     }
     
     private Coroutine test1(string roleKey)

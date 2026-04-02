@@ -46,8 +46,11 @@ public sealed class MoveInOutCommandCharR : CommandBase, IStepScopedCommand
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
-        if (!_resolveAttempted) ResolveRefs(scope);
-        if (_rect == null) yield break;
+        if (!_resolveAttempted)
+            ResolveRefs(scope);
+
+        if (_rect == null)
+            yield break;
 
         _rect.DOKill(false);
 
@@ -64,28 +67,50 @@ public sealed class MoveInOutCommandCharR : CommandBase, IStepScopedCommand
         float holdP = Mathf.Clamp(_spec.holdPortion, 0f, 0.5f);
         float tHold = total * holdP;
 
-        // 남은 시간을 왕복에 배분(기본: out/back = 50/50)
         float tMoveTotal = Mathf.Max(0.0001f, total - tHold);
         float tOut = tMoveTotal * 0.5f;
         float tBack = tMoveTotal - tOut;
 
+        float holdStart = tOut;
+        float backStart = tOut + tHold;
+
         Ease outEase = ToOutEase(_spec.ease);
         Ease inEase = ToInEase(_spec.ease);
 
-        Sequence seq = DOTween.Sequence().SetUpdate(true);
+        Tween tween = DOTween
+            .To(
+                () => 0f,
+                t =>
+                {
+                    if (_rect == null)
+                        return;
 
-        // go (쑥)
-        seq.Append(_rect.DOAnchorPos(target, tOut).SetEase(outEase));
+                    if (t <= holdStart)
+                    {
+                        float localT = tOut <= 0.0001f ? 1f : t / tOut;
+                        float eOut = DOVirtual.EasedValue(0f, 1f, localT, outEase);
+                        _rect.anchoredPosition = Vector2.LerpUnclamped(rest, target, eOut);
+                        return;
+                    }
 
-        // optional hold (멈칫)
-        if (tHold > 0.0001f)
-            seq.AppendInterval(tHold);
+                    if (t <= backStart)
+                    {
+                        _rect.anchoredPosition = target;
+                        return;
+                    }
 
-        // return (착)
-        seq.Append(_rect.DOAnchorPos(rest, tBack).SetEase(inEase));
+                    float localBackT = tBack <= 0.0001f ? 1f : (t - backStart) / tBack;
+                    float eIn = DOVirtual.EasedValue(0f, 1f, localBackT, inEase);
+                    _rect.anchoredPosition = Vector2.LerpUnclamped(target, rest, eIn);
+                },
+                total,
+                total
+            )
+            .SetEase(Ease.Linear)
+            .SetUpdate(true);
 
         if (_spec.wait)
-            yield return seq.WaitForCompletion();
+            yield return tween.WaitForCompletion();
     }
 
     protected override void OnSkip(CommandRunScope scope) => OnCommandCompleted(scope);
