@@ -139,8 +139,6 @@ public sealed class VnFeatureController : MonoBehaviour
     {
         // if (!_rollbackController.CanRollback)
         //     return;
-
-        Debug.Log("RequestRollbackOneStep");
         
         SetMode(VnPlayMode.Manual);
         _autoAdvanceScheduler.ResetAutoAdvanceTimer();

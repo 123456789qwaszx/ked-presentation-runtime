@@ -194,7 +194,7 @@ MonoBehaviour:
     - rid: 305542826026074172
       type: {class: SetCharRigCommandSpec, ns: , asm: Assembly-CSharp}
       data:
-        roleKey: momoka
+        roleKey: main
         _meta:
           track: 0
           phase: 0
@@ -211,7 +211,7 @@ MonoBehaviour:
     - rid: 305542826026074173
       type: {class: SetPortraitSpriteCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:
-        roleKey: momoka
+        roleKey: main
         _meta:
           track: 0
           phase: 0
@@ -228,7 +228,7 @@ MonoBehaviour:
     - rid: 305542826026074174
       type: {class: SetOriginSizeCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:
-        roleKey: momoka
+        roleKey: main
         _meta:
           track: 10
           phase: 0
@@ -243,7 +243,7 @@ MonoBehaviour:
     - rid: 305542826026074175
       type: {class: SetAnchorCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:
-        roleKey: momoka
+        roleKey: main
         _meta:
           track: 10
           phase: 0
@@ -262,7 +262,7 @@ MonoBehaviour:
     - rid: 305542826026074176
       type: {class: FadeInCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:
-        roleKey: momoka
+        roleKey: main
         _meta:
           track: 20
           phase: 0
@@ -277,7 +277,7 @@ MonoBehaviour:
     - rid: 305542832622927935
       type: {class: SetCharRigCommandSpec, ns: , asm: Assembly-CSharp}
       data:
-        roleKey: kuonji
+        roleKey: sub1
         _meta:
           track: 0
           phase: 0
@@ -294,7 +294,7 @@ MonoBehaviour:
     - rid: 305542832622927936
       type: {class: SetPortraitSpriteCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:
-        roleKey: kuonji
+        roleKey: sub1
         _meta:
           track: 0
           phase: 0
@@ -395,7 +395,7 @@ MonoBehaviour:
     - rid: 305542845787537468
       type: {class: BounceCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:
-        roleKey: kuonji
+        roleKey: sub1
         _meta:
           track: 0
           phase: 0
@@ -412,7 +412,7 @@ MonoBehaviour:
     - rid: 305542845787537470
       type: {class: DipInOutCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:
-        roleKey: kuonji
+        roleKey: sub1
         _meta:
           track: 0
           phase: 0
@@ -428,7 +428,7 @@ MonoBehaviour:
     - rid: 305542845787537471
       type: {class: MoveInOutCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:
-        roleKey: kuonji
+        roleKey: sub1
         _meta:
           track: 0
           phase: 0
@@ -444,7 +444,7 @@ MonoBehaviour:
     - rid: 305542845787537472
       type: {class: MoveInOutCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:
-        roleKey: kuonji
+        roleKey: sub1
         _meta:
           track: 0
           phase: 0
@@ -460,7 +460,7 @@ MonoBehaviour:
     - rid: 305542845787537473
       type: {class: DipInOutCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:
-        roleKey: kuonji
+        roleKey: sub1
         _meta:
           track: 0
           phase: 0
@@ -476,7 +476,7 @@ MonoBehaviour:
     - rid: 305542845787537474
       type: {class: MoveInOutCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:
-        roleKey: kuonji
+        roleKey: sub1
         _meta:
           track: 0
           phase: 0
@@ -492,7 +492,7 @@ MonoBehaviour:
     - rid: 305542845787537475
       type: {class: DipInOutCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:
-        roleKey: kuonji
+        roleKey: sub1
         _meta:
           track: 0
           phase: 0
@@ -508,7 +508,7 @@ MonoBehaviour:
     - rid: 8483490911384240201
       type: {class: NudgeTapCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:
-        roleKey: momoka
+        roleKey: main
         _meta:
           track: 40
           phase: 0
@@ -526,7 +526,7 @@ MonoBehaviour:
     - rid: 8483490911384240207
       type: {class: NudgeTapCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:
-        roleKey: momoka
+        roleKey: main
         _meta:
           track: 40
           phase: 0
@@ -544,7 +544,7 @@ MonoBehaviour:
     - rid: 8483490911384240216
       type: {class: NudgeTapCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:
-        roleKey: momoka
+        roleKey: main
         _meta:
           track: 40
           phase: 0
@@ -562,7 +562,7 @@ MonoBehaviour:
     - rid: 8483490922132668488
       type: {class: FadeInCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:
-        roleKey: momoka
+        roleKey: main
         _meta:
           track: 40
           phase: 0
@@ -577,7 +577,7 @@ MonoBehaviour:
     - rid: 8483490922132668503
       type: {class: PunchScaleCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:
-        roleKey: momoka
+        roleKey: main
         _meta:
           track: 40
           phase: 0
@@ -593,7 +593,7 @@ MonoBehaviour:
     - rid: 8483490922132668504
       type: {class: JuicySlideInCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:
-        roleKey: momoka
+        roleKey: main
         _meta:
           track: 40
           phase: 0
@@ -610,7 +610,7 @@ MonoBehaviour:
     - rid: 8483490922132668505
       type: {class: NudgeTapCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:
-        roleKey: momoka
+        roleKey: main
         _meta:
           track: 40
           phase: 0

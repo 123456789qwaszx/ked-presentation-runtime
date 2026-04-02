@@ -36,7 +36,7 @@ public sealed class DialogueAdvanceDispatcher : MonoBehaviour
     {
         if (_dialogueRunner == null || !_dialogueRunner.IsDialogueRunning) return false;
 
-        if (!_gate.IsLineFullyShown())
+        if (!_gate.IsLineFullyShown)
         {
             _inlineMarkupHandler.FlushPendingSignals();
             _dialogueRunner.RequestHurryUpLine();
@@ -57,7 +57,7 @@ public sealed class DialogueAdvanceDispatcher : MonoBehaviour
     {
         if (_dialogueRunner == null || !_dialogueRunner.IsDialogueRunning) return;
         
-        if (!_gate.IsLineFullyShown())
+        if (!_gate.IsLineFullyShown)
         {
             _inlineMarkupHandler.FlushPendingSignals();
             _dialogueRunner.RequestHurryUpLine();
@@ -68,6 +68,13 @@ public sealed class DialogueAdvanceDispatcher : MonoBehaviour
     public void DispatchSeekNext()
     {
         if (_dialogueRunner == null || !_dialogueRunner.IsDialogueRunning) return;
+        
+        if (!_gate.IsLineFullyShown)
+        {
+            _inlineMarkupHandler.FlushPendingSignals();
+            _dialogueRunner.RequestHurryUpLine();
+        }
+        
         _dialogueRunner.RequestNextLine();
     }
 }

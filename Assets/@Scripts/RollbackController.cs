@@ -32,7 +32,8 @@ public sealed class RollbackController : IDisposable
         VnPlaybackSettings playbackSettings,
         PresentationSessionBridge presentationSessionBridge,
         YarnBridgePlaybackDriver yarnBridgePlaybackDriver,
-        CommandExecutor commandExecutor)
+        CommandExecutor commandExecutor
+        )
     {
         _state = state;
         _history = history;
@@ -46,142 +47,132 @@ public sealed class RollbackController : IDisposable
         _yarnBridgePlaybackDriver = yarnBridgePlaybackDriver;
         _commandExecutor = commandExecutor;
 
-        _bridge.LineStart += OnLineStart;
-        _bridge.LineFinishDisplaying += OnLineFinishDisplaying;
-        _bridge.NodeCompleted += OnNodeCompleted;
+        _bridge.LineStart += EndSeekBeforeTargetLineDisplays;
+        _bridge.LineFinishDisplaying += AddRollbackPoint;
     }
 
     public bool RequestRollbackOneStep()
     {
         if (!_history.TryGetPreviousPoint(out RollbackPoint target))
             return false;
-
-        _playbackSettings.ChangePlayMode(VnPlayMode.Manual);
-        _inlineMarkupHandler.SetPauseIgnored(false);
-        _inlineMarkupHandler.SetReplaySuppressed(
-            suppressSignals: false,
-            suppressMoves: false
-        );
-        _typewriter.SetSpeedMultiplier(1f);
-
+    
+        // if (target.presentationNodeIndex < 0 || target.presentationStepIndex < 0)
+        //     return false;
+        //
+        // _playbackSettings.ChangePlayMode(VnPlayMode.Manual);
+        // _inlineMarkupHandler.SetPauseIgnored(true);
+        // _inlineMarkupHandler.SetReplaySuppressed(
+        //     suppressSignals: true,
+        //     suppressMoves: true
+        // );
+        // _typewriter.SetSpeedMultiplier(1f);
+    
         bool jumped = _presentationSessionBridge.JumpTo(
             target.presentationNodeIndex,
             target.presentationStepIndex
         );
-
-        _typewriter.SetSpeedMultiplier(20f);
-
+    
+        _history.TrimAfterVisitedIndex(target.visitedIndex);
+        
+        // _yarnBridgePlaybackDriver.ClearCollected();
+        // _commandExecutor.Stop();
         _state.BeginRollback(target);
-        PrepareForRollbackRestart();
         _restarter.RestartNode(target.nodeName);
-
+    
         if (!jumped)
             return false;
-
-        _history.TrimAfterVisitedIndex(target.visitedIndex - 1);
+    
         return true;
     }
-
-    private void BeginSeek(RollbackPoint target)
+    
+    private void EndSeekBeforeTargetLineDisplays(YarnLineMeta meta)
     {
-        _modeBeforeSeek = _playbackSettings.vnPlayMode;
-
-        _state.BeginRollback(target);
-
-        _playbackSettings.ChangePlayMode(VnPlayMode.Manual);
-
-        _inlineMarkupHandler.SetPauseIgnored(true);
-        _inlineMarkupHandler.SetReplaySuppressed(
-            suppressSignals: true,
-            suppressMoves: true
-        );
-
-        _typewriter.SetSpeedMultiplier(20f);
-
-        PrepareForRollbackRestart();
-        _restarter.RestartNode(target.nodeName);
-    }
-
-    private void PrepareForRollbackRestart()
-    {
-        _yarnBridgePlaybackDriver.ClearCollected();
-        _commandExecutor.Stop();
-    }
-
-    private void EndSeekBeforeTargetLineDisplays()
-    {
-        int targetVisitedIndex = _state.TargetVisitedIndex;
-
-        _state.EndRollback();
-        _history.TrimAfterVisitedIndex(targetVisitedIndex - 1);
-
-        _inlineMarkupHandler.SetPauseIgnored(false);
-        _inlineMarkupHandler.SetReplaySuppressed(
-            suppressSignals: false,
-            suppressMoves: false
-        );
-
-        _typewriter.SetSpeedMultiplier(1f);
-        _playbackSettings.ChangePlayMode(VnPlayMode.Manual);
-    }
-
-    private void CancelSeek()
-    {
-        int targetVisitedIndex = _state.TargetVisitedIndex;
-
-        _state.EndRollback();
-        _history.TrimAfterVisitedIndex(targetVisitedIndex - 1);
-
-        _inlineMarkupHandler.SetPauseIgnored(false);
-        _inlineMarkupHandler.SetReplaySuppressed(
-            suppressSignals: false,
-            suppressMoves: false
-        );
-
-        _typewriter.SetSpeedMultiplier(1f);
-        _playbackSettings.ChangePlayMode(VnPlayMode.Manual);
-    }
-
-    private void OnLineStart(YarnLineMeta meta)
-    {
-        if (!_state.IsSeeking)
+        Debug.Log(_state.IsSeeking);
+        if (!_state.IsSeeking) 
             return;
 
+        Debug.Log($"@@@@@@@@@@@@@@@@{meta.rawText}");
+        
         if (_state.IsTarget(meta.nodeName, meta.lineId))
         {
-            EndSeekBeforeTargetLineDisplays();
+            Debug.Log("EndRollback!");
+            _state.EndRollback();
+            Debug.Log(_state.IsSeeking);
             return;
         }
-
-        _dispatcher.DispatchSeekHurryUp();
-    }
-
-    private void OnLineFinishDisplaying(YarnLineMeta meta)
-    {
-        if (!_state.IsSeeking)
-            return;
-
-        if (_state.IsTarget(meta.nodeName, meta.lineId))
-            return;
-
+        
         _dispatcher.DispatchSeekNext();
     }
 
-    private void OnNodeCompleted(string completedNodeName)
+    private void AddRollbackPoint(YarnLineMeta meta)
     {
-        if (!_state.IsSeeking)
-            return;
-
-        CancelSeek();
+        _history.AddRollbackPoint(meta);
     }
 
+    
     public void Dispose()
     {
         if (_bridge == null)
             return;
 
-        _bridge.LineStart -= OnLineStart;
-        _bridge.LineFinishDisplaying -= OnLineFinishDisplaying;
-        _bridge.NodeCompleted -= OnNodeCompleted;
+        _bridge.LinePrepared -= EndSeekBeforeTargetLineDisplays;
     }
 }
+
+
+
+// private void EndSeekBeforeTargetLineDisplays(YarnLineMeta meta)
+// {
+//     if (!_state.IsSeeking) 
+//         return;
+//
+//     if (_state.IsTarget(meta.nodeName, meta.lineId))
+//     {
+//         int targetVisitedIndex = _state.TargetVisitedIndex;
+//         _state.EndRollback();
+//
+//         _history.TrimAfterVisitedIndex(targetVisitedIndex - 1);
+//
+//         _inlineMarkupHandler.SetPauseIgnored(false);
+//         _inlineMarkupHandler.SetReplaySuppressed(
+//             suppressSignals: false,
+//             suppressMoves: false
+//         );
+//         
+//         _typewriter.SetSpeedMultiplier(1f);
+//
+//         _playbackSettings.ChangePlayMode(VnPlayMode.Manual);
+//         return;
+//     }
+//
+//     // HurryUp만 — Next는 OnLineFinishDisplaying에서
+//     _dispatcher.DispatchSeekHurryUp();
+// }
+
+
+// private void BeginSeek(RollbackPoint target)
+// {
+//     _modeBeforeSeek = _playbackSettings.vnPlayMode;
+//
+//     _state.BeginRollback(target);
+//
+//     // rollback 시작 시엔 무조건 manual로 고정
+//     _playbackSettings.ChangePlayMode(VnPlayMode.Manual);
+//
+//     // seek 중엔 pause / signal / move suppress
+//     _inlineMarkupHandler.SetPauseIgnored(true);
+//     _inlineMarkupHandler.SetReplaySuppressed(
+//         suppressSignals: true,
+//         suppressMoves: true
+//     );
+//
+//     // seek는 아주 빠르게
+//     //UIManager.Instance.GetUI<DialogueUIRoot>().HideAllBoxes();
+//     _typewriter.SetSpeedMultiplier(20f);
+//
+//     _yarnBridgePlaybackDriver.ClearCollected();
+//     _commandExecutor.Stop();
+//     _restarter.RestartNode(target.nodeName);
+//         
+//     _history.TrimAfterVisitedIndex(target.visitedIndex - 1);
+// }

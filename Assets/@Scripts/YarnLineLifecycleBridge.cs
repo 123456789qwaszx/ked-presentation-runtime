@@ -71,6 +71,7 @@ public sealed class YarnLineLifecycleBridge : ActionMarkupHandler
         _initialized = true;
         
         _lineIdPresenter = GetComponent<YarnLineIdPresenter>();
+        _lineIdPresenter.OnLineIdReceived -= OnLineIdReceived;
         _lineIdPresenter.OnLineIdReceived += OnLineIdReceived;
         
         if (autoRegisterPresenter && dialogueRunner != null)
@@ -111,9 +112,6 @@ public sealed class YarnLineLifecycleBridge : ActionMarkupHandler
         }
     }
     
-    #endregion
-
-    
     private void OnNodeStart(string nodeName)
     {
         _currentNodeName = nodeName;
@@ -124,7 +122,9 @@ public sealed class YarnLineLifecycleBridge : ActionMarkupHandler
         NodeCompleted?.Invoke(completedNodeName);
         _currentNodeName = "";
     }
-    private void OnLineIdReceived(string lineId) => _currentLineId = lineId;
+    private void OnLineIdReceived(string lineId) => _currentLineId = lineId
+    ;
+    #endregion
     
     // =========================================================
     // ActionMarkupHandler overrides
@@ -151,12 +151,15 @@ public sealed class YarnLineLifecycleBridge : ActionMarkupHandler
         LineStart?.Invoke(CurrentMeta);
     }
 
+    
+    
     // Per-character hook
     public override YarnTask OnCharacterWillAppear(
         int currentCharacterIndex, // Index of the next character to appear
         MarkupParseResult line,    // Parsed markup result for the current line
         CancellationToken cancellationToken)
     {
+        
         return YarnTask.CompletedTask;
     }
 

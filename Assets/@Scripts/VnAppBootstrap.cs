@@ -49,6 +49,7 @@ public class VnAppBootstrap : MonoBehaviour
     private DialogueUIBindings _dialogueUIBindings;
     private EpisodeFlowController _episodeFlowController;
     private VnScreenBindings _screenBindings;
+    private NodeRollbackHistory _rollbackHistory;
     
     private void Awake()
     {
@@ -121,6 +122,7 @@ public class VnAppBootstrap : MonoBehaviour
             _vnUxState,
             _vnPlaybackSettings,
             yarnLineLifecycleBridge,
+            ellipsisBreathTypewriter,
             () => session != null && session.IsNodeBusy()
         );
 
@@ -151,11 +153,11 @@ public class VnAppBootstrap : MonoBehaviour
             () => yarnLineLifecycleBridge.IsLineFullyShown);
         
         RollbackRuntimeState rollbackState = new RollbackRuntimeState();
-        NodeRollbackHistory rollbackHistory = new NodeRollbackHistory(yarnLineLifecycleBridge, rollbackState, _presentationSessionBridge);
+        _rollbackHistory = new NodeRollbackHistory(yarnLineLifecycleBridge, rollbackState, _presentationSessionBridge);
         
         RollbackController rollbackController = new RollbackController(
             state: rollbackState,
-            history: rollbackHistory,
+            history: _rollbackHistory,
             bridge: yarnLineLifecycleBridge,
             episodePlayer,
             dispatcher: dialogueAdvanceDispatcher,
@@ -167,7 +169,7 @@ public class VnAppBootstrap : MonoBehaviour
             commandExecutor
         );
         
-        CreateRollbackHistoryDebugTool(rollbackHistory, rollbackState);
+        CreateRollbackHistoryDebugTool(_rollbackHistory, rollbackState);
         
         vnFeatureController.Initialize(
             _vnUxState,
@@ -190,7 +192,7 @@ public class VnAppBootstrap : MonoBehaviour
 
     private void InitializeEpisodePlayer()
     {
-        episodePlayer.Initialize(_screenBindings, _dialogueUIBindings);
+        episodePlayer.Initialize(_screenBindings, _dialogueUIBindings, _rollbackHistory);
     }
     
     private void Start()

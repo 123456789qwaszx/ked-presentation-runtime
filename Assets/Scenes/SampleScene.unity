@@ -2933,8 +2933,8 @@ MonoBehaviour:
   dialogueRunner: {fileID: 8309902628538800288}
   yarnUIBridge: {fileID: 1874881010}
   presentationRouteEntry: {fileID: 1433866633}
-  yarnEntryKey: NewYarnScript
-  presentationEntryKey: test
+  yarnEntryKey: NewYarnScript2
+  presentationEntryKey: seq1
   runYarnKey: 50
   stopKey: 51
 --- !u!4 &1924806293

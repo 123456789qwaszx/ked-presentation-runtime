@@ -295,7 +295,7 @@ public class DialogueUIRoot : UIRoot<DialogueUIRoot.Refs>
         BindEvent(View.Button(Refs.SpeedUpToggleHotKey_Button), _ => OnSpeedUpHoldStarted?.Invoke(), ETouchEvent.PointerDown);
         BindEvent(View.Button(Refs.SpeedUpToggleHotKey_Button), _ => OnSpeedUpHoldEnded?.Invoke(), ETouchEvent.PointerUp);
         
-        BindEvent(View.Button(Refs.RollbackToggleHotKey_Button), _ => OnRollbackOneStepPressed?.Invoke(), ETouchEvent.PointerDown);
+        BindEvent(View.Button(Refs.RollbackToggleHotKey_Button), _ => OnRollbackOneStepPressed?.Invoke(), ETouchEvent.Click);
     }
 
     #region Handler

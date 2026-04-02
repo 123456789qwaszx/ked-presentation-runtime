@@ -11,6 +11,7 @@ public sealed class EpisodePlayer : MonoBehaviour, IRollbackDialogueRestarter
 {
     private VnScreenBindings _vnScreenBindings;
     private DialogueUIBindings _dialogueUIBindings;
+    private NodeRollbackHistory  _nodeRollbackHistory;
     
     public DialogueRunner dialogueRunner;
     [SerializeField] private YarnUIBridge yarnUIBridge;
@@ -25,10 +26,11 @@ public sealed class EpisodePlayer : MonoBehaviour, IRollbackDialogueRestarter
     [Tooltip("Stop")]
     [SerializeField] private KeyCode stopKey = KeyCode.Alpha3;
 
-    public void Initialize(VnScreenBindings vnScreenBindings, DialogueUIBindings dialogueUIBindings)
+    public void Initialize(VnScreenBindings vnScreenBindings, DialogueUIBindings dialogueUIBindings, NodeRollbackHistory nodeRollbackHistory)
     {
         _vnScreenBindings = vnScreenBindings;
         _dialogueUIBindings = dialogueUIBindings;
+        _nodeRollbackHistory = nodeRollbackHistory;
     }
     
     private void Update()
@@ -40,9 +42,12 @@ public sealed class EpisodePlayer : MonoBehaviour, IRollbackDialogueRestarter
             StartPresentationRoute(presentationEntryKey);
             StartYarnNode(yarnEntryKey);
         }
-        
+
         if (Input.GetKeyDown(stopKey))
+        {
+            _nodeRollbackHistory.ClearRollbackHistory();
             StopDialogue();
+        }
     }
 
     public void OpenDialogueUI()
@@ -60,6 +65,7 @@ public sealed class EpisodePlayer : MonoBehaviour, IRollbackDialogueRestarter
     public void RestartNode(string nodeName)
     {
         //OpenDialogueUI();
+        //StopDialogue();
         StartYarnNode(nodeName);
         //StartPresentationRoute(presentationEntryKey);
         
@@ -114,7 +120,6 @@ public sealed class EpisodePlayer : MonoBehaviour, IRollbackDialogueRestarter
         if (dialogueRunner.IsDialogueRunning)
         {
             dialogueRunner.Stop();
-            Debug.Log("Stop Dialogue", this);
         }
     }
 }

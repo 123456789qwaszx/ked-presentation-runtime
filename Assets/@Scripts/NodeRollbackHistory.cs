@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 [Serializable]
 public struct RollbackPoint
@@ -40,7 +41,7 @@ public sealed class RollbackRuntimeState
     public string TargetLineId { get; private set; }
     public int TargetVisitedIndex { get; private set; }
 
-    public void BeginRollback(in RollbackPoint target)
+    public void BeginRollback(RollbackPoint target)
     {
         IsSeeking = true;
         TargetNodeName = target.nodeName;
@@ -87,8 +88,10 @@ public sealed class NodeRollbackHistory : IDisposable
         _state = state;
         _presentationSessionBridge = presentationSessionBridge;
 
+        _bridge.OnNodeStarted -= OnNodeStarted;
         _bridge.OnNodeStarted += OnNodeStarted;
-        _bridge.LineFinishDisplaying += OnLineFinishDisplaying;
+        //_bridge.LineWillDismiss -= AddRollbackPoint;
+        //_bridge.LineWillDismiss += AddRollbackPoint;
     }
 
 
@@ -96,7 +99,6 @@ public sealed class NodeRollbackHistory : IDisposable
     {
         if (_state.IsSeeking)
             return;
-
         if (_currentNodeName == nodeName)
             return;
 
@@ -105,14 +107,16 @@ public sealed class NodeRollbackHistory : IDisposable
         _points.Clear();
     }
 
-    private void OnLineFinishDisplaying(YarnLineMeta meta)
+    public void AddRollbackPoint(YarnLineMeta meta)
     {
+        Debug.Log($"Adding rollback point at {meta.rawText}");
         if (_state.IsSeeking)
             return;
 
         if (string.IsNullOrEmpty(meta.nodeName) || string.IsNullOrEmpty(meta.lineId))
             return;
 
+        Debug.Log($"Add??");
         if (_currentNodeName != meta.nodeName)
         {
             _currentNodeName = meta.nodeName;
@@ -161,12 +165,18 @@ public sealed class NodeRollbackHistory : IDisposable
         _visitedCounter = _points.Count;
     }
 
+    public void ClearRollbackHistory()
+    {
+        _visitedCounter = 0;
+        _points.Clear();
+    }
+
     public void Dispose()
     {
         if (_bridge == null)
             return;
 
         _bridge.OnNodeStarted -= OnNodeStarted;
-        _bridge.LineFinishDisplaying -= OnLineFinishDisplaying;
+        _bridge.LinePrepared -= AddRollbackPoint;
     }
 }

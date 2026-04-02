@@ -6,8 +6,7 @@ using UnityEngine;
 
 public sealed class CommandExecutor : MonoBehaviour
 {
-    [Header("Debug")]
-    [SerializeField] private bool enableDebugLog = true;
+    [Header("Debug")] [SerializeField] private bool enableDebugLog = true;
 
     private SequencePlayer _sequencePlayer;
     private INodeCommandFactory _signalCommandFactory;
@@ -34,46 +33,43 @@ public sealed class CommandExecutor : MonoBehaviour
     private void OnDisable() => Stop(CleanupPolicy.Cancel);
     private void OnDestroy() => Stop(CleanupPolicy.Cancel);
 
-    // ---- Step ----
+
     public void PlayStep(NodeSpec node, int stepIndex, CommandRunScope scope)
     {
         if (!_initialized) return;
         if (node == null || scope == null) return;
 
-        if (node.steps == null || stepIndex < 0 || stepIndex >= node.steps.Count)
+        _activeScope = scope;
+
+        CleanupPolicy policy = DecideCleanupPolicy(_activeScope);
+        _activeScope.CleanupStep(policy);
+
+        List<ISequenceCommand> commands = BuildCommandsFromStep(node, stepIndex);
+        if (commands == null || commands.Count == 0)
         {
-            Log($"Invalid stepIndex={stepIndex}");
-            return;
+            Log($"Step has no commands: stepIndex={stepIndex}");
+            return; // CleanupStep은 했지만 token/coroutine은 건드리지 않음
         }
 
-        StepSpec step = node.steps[stepIndex];
-        if (step == null || step.compiled == null || step.compiled.Count == 0)
-        {
-            Log($"Step empty: stepIndex={stepIndex}");
-            return;
-        }
+        ResetToken();
+        _activeScope.Token = _cts.Token;
 
-        StartPlay(step.compiled, scope, $"step={stepIndex}");
+        Log($"Step Play: stepIndex={stepIndex}, commands={commands.Count}");
+        _mainRoutine = StartCoroutine(RunNode(commands, _activeScope, _runId));
     }
 
-    // ---- bridge ----
     public void PlaySpecs(IReadOnlyList<CommandSpecBase> specs, CommandRunScope scope, string debugSource = "bridge")
     {
         if (!_initialized) return;
         if (specs == null || scope == null) return;
 
-        StartPlay(specs, scope, debugSource);
-    }
-
-    private void StartPlay(IReadOnlyList<CommandSpecBase> specs, CommandRunScope scope, string debugSource)
-    {
         _activeScope = scope;
 
         CleanupPolicy policy = DecideCleanupPolicy(_activeScope);
         _activeScope.CleanupStep(policy);
 
         List<ISequenceCommand> commands = BuildCommandsFromSpecs(specs);
-        if (commands.Count == 0)
+        if (commands == null || commands.Count == 0)
         {
             Log($"No commands ({debugSource})");
             return;
@@ -84,6 +80,33 @@ public sealed class CommandExecutor : MonoBehaviour
 
         Log($"Play ({debugSource}), commands={commands.Count}");
         _mainRoutine = StartCoroutine(RunNode(commands, _activeScope, _runId));
+    }
+
+    
+    private List<ISequenceCommand> BuildCommandsFromStep(NodeSpec node, int stepIndex)
+    {
+        var list = new List<ISequenceCommand>();
+
+        if (node.steps == null || node.steps.Count == 0)
+        {
+            Log($"Node Empty (node={node})");
+            return list;
+        }
+
+        if (stepIndex < 0 || stepIndex >= node.steps.Count)
+        {
+            Log($"Invalid stepIndex: {stepIndex} (steps={node.steps.Count})");
+            return list;
+        }
+
+        StepSpec step = node.steps[stepIndex];
+        if (step == null || step.compiled == null || step.compiled.Count == 0)
+        {
+            Log($"Step Empty (step={step})");
+            return list;
+        }
+
+        return BuildCommandsFromSpecs(step.compiled);
     }
 
     private IEnumerator RunNode(List<ISequenceCommand> commands, CommandRunScope scope, int runId)
@@ -177,6 +200,7 @@ public sealed class CommandExecutor : MonoBehaviour
                     Log($"CharRig factory failed: {spec.GetType().Name}");
                     continue;
                 }
+
                 list.Add(cmd);
                 continue;
             }
@@ -194,7 +218,8 @@ public sealed class CommandExecutor : MonoBehaviour
     }
 
     private void ResetToken()
-    {// Only responsible for creating a new token for the next run.
+    {
+        // Only responsible for creating a new token for the next run.
         _cts?.Dispose();
         _cts = new CancellationTokenSource();
     }
@@ -202,8 +227,14 @@ public sealed class CommandExecutor : MonoBehaviour
     private void CancelAndDisposeToken()
     {
         if (_cts == null) return;
-        try { if (!_cts.IsCancellationRequested) _cts.Cancel(); }
-        catch (ObjectDisposedException) { }
+        try
+        {
+            if (!_cts.IsCancellationRequested) _cts.Cancel();
+        }
+        catch (ObjectDisposedException)
+        {
+        }
+
         _cts.Dispose();
         _cts = null;
     }
@@ -211,7 +242,7 @@ public sealed class CommandExecutor : MonoBehaviour
     private CleanupPolicy DecideCleanupPolicy(CommandRunScope scope)
     {
         if (scope == null) return CleanupPolicy.Cancel;
-        
+
         // Skip means "complete immediately".
         // if (scope.IsSkipping)
         //     return CleanupPolicy.Finish;
