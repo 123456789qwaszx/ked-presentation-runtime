@@ -10,7 +10,7 @@ public struct RollbackPoint
     public string nodeName;
     public string lineId;
     public string rawText;
-    
+
     public int presentationNodeIndex;
     public int presentationStepIndex;
 
@@ -90,15 +90,13 @@ public sealed class NodeRollbackHistory : IDisposable
 
         _bridge.OnNodeStarted -= OnNodeStarted;
         _bridge.OnNodeStarted += OnNodeStarted;
-        //_bridge.LineWillDismiss -= AddRollbackPoint;
-        //_bridge.LineWillDismiss += AddRollbackPoint;
     }
-
 
     private void OnNodeStarted(string nodeName)
     {
         if (_state.IsSeeking)
             return;
+
         if (_currentNodeName == nodeName)
             return;
 
@@ -109,19 +107,26 @@ public sealed class NodeRollbackHistory : IDisposable
 
     public void AddRollbackPoint(YarnLineMeta meta)
     {
-        Debug.Log($"Adding rollback point at {meta.rawText}");
         if (_state.IsSeeking)
             return;
 
         if (string.IsNullOrEmpty(meta.nodeName) || string.IsNullOrEmpty(meta.lineId))
             return;
 
-        Debug.Log($"Add??");
         if (_currentNodeName != meta.nodeName)
         {
             _currentNodeName = meta.nodeName;
             _visitedCounter = 0;
             _points.Clear();
+        }
+
+        // 마지막 기록과 완전히 같은 라인이면 중복 추가 방지
+        if (_points.Count > 0)
+        {
+            RollbackPoint last = _points[_points.Count - 1];
+
+            if (last.nodeName == meta.nodeName && last.lineId == meta.lineId)
+                return;
         }
 
         _presentationSessionBridge.TryGetCurrentAnchor(out int nodeIndex, out int stepIndex);
@@ -156,6 +161,7 @@ public sealed class NodeRollbackHistory : IDisposable
     public void TrimAfterVisitedIndex(int visitedIndex)
     {
         int keepCount = visitedIndex + 1;
+
         if (keepCount < 0)
             keepCount = 0;
 
@@ -177,6 +183,5 @@ public sealed class NodeRollbackHistory : IDisposable
             return;
 
         _bridge.OnNodeStarted -= OnNodeStarted;
-        _bridge.LinePrepared -= AddRollbackPoint;
     }
 }

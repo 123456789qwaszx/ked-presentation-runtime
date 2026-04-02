@@ -161,12 +161,7 @@ public class VnAppBootstrap : MonoBehaviour
             bridge: yarnLineLifecycleBridge,
             episodePlayer,
             dispatcher: dialogueAdvanceDispatcher,
-            inlineMarkupHandler: inlineEventMarkupHandler,
-            typewriter: ellipsisBreathTypewriter,
-            playbackSettings: _vnPlaybackSettings,
-            _presentationSessionBridge,
-            yarnBridgePlaybackDriver,
-            commandExecutor
+            _presentationSessionBridge
         );
         
         CreateRollbackHistoryDebugTool(_rollbackHistory, rollbackState);
