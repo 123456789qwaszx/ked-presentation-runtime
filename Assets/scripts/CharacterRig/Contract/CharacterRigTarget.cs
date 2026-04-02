@@ -9,6 +9,10 @@ public enum CharacterRigTarget
     Character_Anchor,
     Character_Track,
     
+    Character_Track_Move,
+    Character_Track_X,
+    Character_Track_Y,
+    
     // Portrait axis
     CharacterPortrait_Root,
     CharacterPortrait_Pad,
@@ -36,6 +40,11 @@ public sealed class CharacterRigRefs
     // Root axis
     public RectTransform Character_Anchor;
     public RectTransform Character_Track;
+    
+    // Translate split layers
+    public RectTransform Character_Track_Move;
+    public RectTransform Character_Track_X;
+    public RectTransform Character_Track_Y;
 
     // Portrait
     public RectTransform CharacterPortrait_Root;
@@ -86,9 +95,12 @@ public static class CharacterRigRefsExtensions
         return target switch
         {
             // Root axis
-            CharacterRigTarget.Character_Anchor => refs.Character_Anchor,
-            CharacterRigTarget.Character_Track  => refs.Character_Track,
-
+            CharacterRigTarget.Character_Anchor     => refs.Character_Anchor,
+            CharacterRigTarget.Character_Track      => refs.Character_Track,
+            CharacterRigTarget.Character_Track_Move => refs.Character_Track_Move,
+            CharacterRigTarget.Character_Track_X    => refs.Character_Track_X,
+            CharacterRigTarget.Character_Track_Y    => refs.Character_Track_Y,
+            
             // Portrait
             CharacterRigTarget.CharacterPortrait_Root      => refs.CharacterPortrait_Root,
             CharacterRigTarget.CharacterPortrait_Pad       => refs.CharacterPortrait_Pad,

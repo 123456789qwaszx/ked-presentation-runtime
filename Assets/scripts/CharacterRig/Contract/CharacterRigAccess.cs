@@ -73,9 +73,13 @@ public sealed class CharacterRigAccess
     {
         EnsureNode(root, rolePrefix, CharacterRig.Refs.Character_Anchor, null);
         EnsureNode(root, rolePrefix, CharacterRig.Refs.Character_Track, CharacterRig.Refs.Character_Anchor);
+        
+        EnsureNode(root, rolePrefix, CharacterRig.Refs.Character_Track_Move, CharacterRig.Refs.Character_Track);
+        EnsureNode(root, rolePrefix, CharacterRig.Refs.Character_Track_X, CharacterRig.Refs.Character_Track_Move);
+        EnsureNode(root, rolePrefix, CharacterRig.Refs.Character_Track_Y, CharacterRig.Refs.Character_Track_X);
 
         // Portrait
-        EnsureNode(root, rolePrefix, CharacterRig.Refs.CharacterPortrait_Root, CharacterRig.Refs.Character_Track);
+        EnsureNode(root, rolePrefix, CharacterRig.Refs.CharacterPortrait_Root, CharacterRig.Refs.Character_Track_Y);
         EnsureNode(root, rolePrefix, CharacterRig.Refs.CharacterPortrait_Pad, CharacterRig.Refs.CharacterPortrait_Root);
         EnsureNode(root, rolePrefix, CharacterRig.Refs.CharacterPortrait_SwayPivot, CharacterRig.Refs.CharacterPortrait_Pad);
         EnsureNode(root, rolePrefix, CharacterRig.Refs.CharacterPortrait_Shake, CharacterRig.Refs.CharacterPortrait_SwayPivot);
@@ -87,7 +91,7 @@ public sealed class CharacterRigAccess
         EnsureImage(root, rolePrefix, CharacterRig.Refs.CharacterPortraitOverlay_Image, CharacterRig.Refs.CharacterPortraitOverlay_Root);
 
         // Emoji
-        EnsureNode(root, rolePrefix, CharacterRig.Refs.CharacterEmoji_Root, CharacterRig.Refs.Character_Track);
+        EnsureNode(root, rolePrefix, CharacterRig.Refs.CharacterEmoji_Root, CharacterRig.Refs.Character_Track_Y);
         EnsureNode(root, rolePrefix, CharacterRig.Refs.CharacterEmoji_Anchor, CharacterRig.Refs.CharacterEmoji_Root);
         EnsureNode(root, rolePrefix, CharacterRig.Refs.CharacterEmoji_Pad, CharacterRig.Refs.CharacterEmoji_Anchor);
         EnsureNode(root, rolePrefix, CharacterRig.Refs.CharacterEmoji_Track, CharacterRig.Refs.CharacterEmoji_Pad);
@@ -154,7 +158,11 @@ public sealed class CharacterRigAccess
 
         // Root axis
         refs.Character_Anchor = GetRt(CharacterRig.Refs.Character_Anchor);
-        refs.Character_Track  = GetRt(CharacterRig.Refs.Character_Track);
+        refs.Character_Track      = GetRt(CharacterRig.Refs.Character_Track);
+        
+        refs.Character_Track_Move = GetRt(CharacterRig.Refs.Character_Track_Move);
+        refs.Character_Track_X    = GetRt(CharacterRig.Refs.Character_Track_X);
+        refs.Character_Track_Y    = GetRt(CharacterRig.Refs.Character_Track_Y);
 
         // Portrait
         refs.CharacterPortrait_Root      = GetRt(CharacterRig.Refs.CharacterPortrait_Root);

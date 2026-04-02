@@ -26,7 +26,6 @@ MonoBehaviour:
         - rid: 305542826026074175
         motion:
         - rid: 305542826026074176
-        - rid: 305542826026074177
         dialogue: []
         fx: []
       compiled:
@@ -35,29 +34,20 @@ MonoBehaviour:
       - rid: 305542826026074174
       - rid: 305542826026074175
       - rid: 305542826026074176
-      - rid: 305542826026074177
       gate:
         type: 0
         seconds: 0
         signalKey: 
-    - editorName: Nudge
+    - editorName: 
       tracks:
         interaction: []
         setup: []
         motion: []
         dialogue: []
         fx:
-        - rid: 8483490922132668486
-        - rid: 8483490922132668485
-        - rid: 8483490922132668484
-        - rid: 8483490922132668482
-        - rid: 8483490922132668476
+        - rid: 8483490922132668507
       compiled:
-      - rid: 8483490922132668486
-      - rid: 8483490922132668485
-      - rid: 8483490922132668484
-      - rid: 8483490922132668482
-      - rid: 8483490922132668476
+      - rid: 8483490922132668507
       gate:
         type: 3
         seconds: 0
@@ -69,13 +59,17 @@ MonoBehaviour:
         motion: []
         dialogue: []
         fx:
-        - rid: 8483490922132668478
-        - rid: 8483490922132668479
-        - rid: 8483490922132668480
+        - rid: 8483490922132668487
+        - rid: 8483490922132668488
+        - rid: 8483490922132668504
+        - rid: 8483490922132668503
+        - rid: 8483490922132668505
       compiled:
-      - rid: 8483490922132668478
-      - rid: 8483490922132668479
-      - rid: 8483490922132668480
+      - rid: 8483490922132668487
+      - rid: 8483490922132668488
+      - rid: 8483490922132668504
+      - rid: 8483490922132668503
+      - rid: 8483490922132668505
       gate:
         type: 3
         seconds: 0
@@ -288,7 +282,7 @@ MonoBehaviour:
           character: momoka
           emotion: 1
           variant: a
-        target: 7
+        target: 10
         sizingMode: 1
         horizontalAlign: 1
     - rid: 305542826026074174
@@ -301,7 +295,7 @@ MonoBehaviour:
           blockingHint: 0
           infiniteHint: 0
           durationHint: 0
-        target: 3
+        target: 6
         toScale: {x: 2, y: 2}
         toAngle: 0
         anchorMin: {x: 0, y: 0}
@@ -339,24 +333,6 @@ MonoBehaviour:
         duration: -1
         ease: 9
         EnableInteraction: 1
-        wait: 0
-    - rid: 305542826026074177
-      type: {class: TapEaseCommandSpecCharR, ns: , asm: Assembly-CSharp}
-      data:
-        roleKey: momoka
-        _meta:
-          track: 20
-          phase: 0
-          blockingHint: 0
-          infiniteHint: 0
-          durationHint: 0
-        target: 1
-        strength: 20
-        duration: 2.6
-        taps: 30
-        damping: 70
-        timeEase: 10
-        prep: 1.5
         wait: 0
     - rid: 305542832622927935
       type: {class: SetCharRigCommandSpec, ns: , asm: Assembly-CSharp}
@@ -452,7 +428,7 @@ MonoBehaviour:
           infiniteHint: 0
           durationHint: 0
         target: 1
-        from: 0
+        direction: 0
         distance: 222
         duration: 0.55
         ease: 9
@@ -711,8 +687,8 @@ MonoBehaviour:
         damping: 6
         anticipation: 3
         wait: 0
-    - rid: 8483490922132668476
-      type: {class: NudgeTapCommandSpecCharR, ns: , asm: Assembly-CSharp}
+    - rid: 8483490922132668487
+      type: {class: FadeOutCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:
         roleKey: momoka
         _meta:
@@ -721,102 +697,12 @@ MonoBehaviour:
           blockingHint: 0
           infiniteHint: 0
           durationHint: 0
-        target: 3
-        strength: 340
-        direction: 2
-        duration: 0.6
-        taps: 1
-        damping: 9
-        anticipation: 0
-        wait: 0
-    - rid: 8483490922132668478
-      type: {class: NudgeTapCommandSpecCharR, ns: , asm: Assembly-CSharp}
-      data:
-        roleKey: momoka
-        _meta:
-          track: 40
-          phase: 0
-          blockingHint: 0
-          infiniteHint: 0
-          durationHint: 0
-        target: 1
-        strength: 340
-        direction: 1
-        duration: 0.6
-        taps: 1
-        damping: 9
-        anticipation: 0
-        wait: 0
-    - rid: 8483490922132668479
-      type: {class: NudgeTapCommandSpecCharR, ns: , asm: Assembly-CSharp}
-      data:
-        roleKey: momoka
-        _meta:
-          track: 40
-          phase: 0
-          blockingHint: 0
-          infiniteHint: 0
-          durationHint: 0
-        target: 3
-        strength: 340
-        direction: 2
-        duration: 0.6
-        taps: 1
-        damping: 9
-        anticipation: 0
-        wait: 0
-    - rid: 8483490922132668480
-      type: {class: NudgeTapCommandSpecCharR, ns: , asm: Assembly-CSharp}
-      data:
-        roleKey: momoka
-        _meta:
-          track: 40
-          phase: 0
-          blockingHint: 0
-          infiniteHint: 0
-          durationHint: 0
-        target: 3
-        strength: 340
-        direction: 2
-        duration: 0.6
-        taps: 1
-        damping: 9
-        anticipation: 0
-        wait: 0
-    - rid: 8483490922132668482
-      type: {class: JuicySlideInCommandSpecCharR, ns: , asm: Assembly-CSharp}
-      data:
-        roleKey: momoka
-        _meta:
-          track: 40
-          phase: 0
-          blockingHint: 0
-          infiniteHint: 0
-          durationHint: 0
-        target: 1
-        from: 0
-        distance: 480
-        duration: 0.55
+        targetMask: 7
+        duration: -1
         ease: 9
-        punch: 24
+        disableInteraction: 1
         wait: 0
-    - rid: 8483490922132668484
-      type: {class: PunchScaleCommandSpecCharR, ns: , asm: Assembly-CSharp}
-      data:
-        roleKey: momoka
-        _meta:
-          track: 40
-          phase: 0
-          blockingHint: 0
-          infiniteHint: 0
-          durationHint: 0
-        target: 6
-        strength: -0.02
-        duration: 0.22
-        vibrato: 8
-        elasticity: 0.197
-        wait: 0
-    - rid: 8483490922132668485
+    - rid: 8483490922132668488
       type: {class: FadeInCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:
         roleKey: momoka
@@ -831,8 +717,8 @@ MonoBehaviour:
         ease: 9
         EnableInteraction: 1
         wait: 0
-    - rid: 8483490922132668486
-      type: {class: FadeOutCommandSpecCharR, ns: , asm: Assembly-CSharp}
+    - rid: 8483490922132668503
+      type: {class: PunchScaleCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:
         roleKey: momoka
         _meta:
@@ -841,8 +727,62 @@ MonoBehaviour:
           blockingHint: 0
           infiniteHint: 0
           durationHint: 0
-        targetMask: 7
-        duration: -1
+        target: 9
+        strength: -0.02
+        duration: 0.22
+        vibrato: 8
+        elasticity: 0.197
+        wait: 0
+    - rid: 8483490922132668504
+      type: {class: JuicySlideInCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: momoka
+        _meta:
+          track: 40
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 3
+        direction: 0
+        distance: 480
+        duration: 0.55
         ease: 9
-        disableInteraction: 1
+        punch: 24
+        wait: 0
+    - rid: 8483490922132668505
+      type: {class: NudgeTapCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: momoka
+        _meta:
+          track: 40
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 4
+        strength: 340
+        direction: 2
+        duration: 0.6
+        taps: 1
+        damping: 9
+        anticipation: 0
+        wait: 0
+    - rid: 8483490922132668507
+      type: {class: NudgeTapCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: momoka
+        _meta:
+          track: 40
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 3
+        strength: 340
+        direction: 2
+        duration: 0.6
+        taps: 1
+        damping: 8
+        anticipation: -12
         wait: 0

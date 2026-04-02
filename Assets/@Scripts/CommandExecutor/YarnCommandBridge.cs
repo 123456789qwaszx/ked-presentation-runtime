@@ -27,27 +27,41 @@ public sealed class YarnCommandBridge : MonoBehaviour
         _dialogueRunner.AddCommandHandler<string>("fade_out", FadeOut);
         
         _dialogueRunner.AddCommandHandler<string, float, float>("move_by", MoveBy);
-        _dialogueRunner.AddCommandHandler<string, string>("dip_inout", DipInOut);
-        
+        _dialogueRunner.AddCommandHandler<string, string>("dip", DipInOut);
         
         _dialogueRunner.AddCommandHandler<string, string>("hop_in", HopIn);
         
-        //_dialogueRunner.AddCommandHandler<string, string>("hop_in", HopIn);
-        
-        _dialogueRunner.AddCommandHandler<string>("t1", test1);
-        _dialogueRunner.AddCommandHandler<string>("t2", test2);
-        _dialogueRunner.AddCommandHandler<string>("t3", test3);
-        _dialogueRunner.AddCommandHandler<string>("t4", test4);
-        
-        
-        _dialogueRunner.AddCommandHandler<string, string>("nudgeTap1", nudgeShake);
-        
+        _dialogueRunner.AddCommandHandler<string, string>("jolt", NudgeJolt);
+        _dialogueRunner.AddCommandHandler<string, string>("shake", NudgeShake);
+        _dialogueRunner.AddCommandHandler<string, string>("nudge", NudgeTap);
+        _dialogueRunner.AddCommandHandler<string, string>("nudge_hard", NudgeTapHard);
+
         
 
         _dialogueRunner.AddCommandHandler<string, string>("cast", SetPortrait);
     }
     
-    private Coroutine nudgeTap(string roleKey, string direction = "right")
+    private Coroutine NudgeJolt(string roleKey, string direction = "right")
+    {
+        SlideFromCharR dir = ParseSlideDirection(direction, SlideFromCharR.Right);
+        
+        var spec = new NudgeTapCommandSpecCharR
+        {
+            roleKey = roleKey,
+            target = CharacterRigTarget.Character_Track_Y,
+            direction = dir,
+            strength = 340f,
+            duration = 0.6f,
+            taps = 3,
+            damping = 8,
+            anticipation = -12,
+            wait = true
+        };
+
+        return _runner.Run(spec);
+    }
+    
+    private Coroutine NudgeShake(string roleKey, string direction = "right")
     {
         SlideFromCharR dir = ParseSlideDirection(direction, SlideFromCharR.Right);
         
@@ -63,90 +77,38 @@ public sealed class YarnCommandBridge : MonoBehaviour
         return _runner.Run(spec);
     }
     
-    private Coroutine nudgeShake(string roleKey, string direction = "right")
+    private Coroutine NudgeTap(string roleKey, string direction = "right")
     {
         SlideFromCharR dir = ParseSlideDirection(direction, SlideFromCharR.Right);
         
         var spec = new NudgeTapCommandSpecCharR
         {
             roleKey = roleKey,
+            target = CharacterRigTarget.Character_Track,
             direction = dir,
-            strength = 44f,
-            duration = 1.2f,
-            taps = 4
-        };
-
-        return _runner.Run(spec);
-    }
-    
-    private Coroutine nudgePolished(string roleKey, string direction = "right")
-    {
-        SlideFromCharR dir = ParseSlideDirection(direction, SlideFromCharR.Right);
-        
-        var spec = new NudgeTapCommandSpecCharR
-        {
-            roleKey = roleKey,
-            direction = dir,
-            strength = 2200f,
-            duration = 0.9f,
+            strength = 340f,
+            duration = 0.6f,
             taps = 1,
-            damping = 12,
-            anticipation = 2
+            damping = 9,
+            anticipation = -12
         };
 
         return _runner.Run(spec);
     }
     
-    private Coroutine nudgeInOut(string roleKey, string direction = "right")
+    private Coroutine NudgeTapHard(string roleKey, string direction = "down")
     {
-
         SlideFromCharR dir = ParseSlideDirection(direction, SlideFromCharR.Down);
-
+        
         var spec = new NudgeTapCommandSpecCharR
         {
             roleKey = roleKey,
-            //from = dir
-        };
-
-        return _runner.Run(spec);
-    }
-    
-    private Coroutine test1(string roleKey)
-    {
-
-        var spec = new MoveInOutCommandSpecCharR
-        {
-            roleKey = roleKey,
-        };
-
-        return _runner.Run(spec);
-    }
-    private Coroutine test2(string roleKey)
-    {
-
-        var spec = new NudgeTapCommandSpecCharR
-        {
-            roleKey = roleKey,
-        };
-
-        return _runner.Run(spec);
-    }
-    private Coroutine test3(string roleKey)
-    {
-
-        var spec = new RichSlideInCommandSpecCharR
-        {
-            roleKey = roleKey,
-        };
-
-        return _runner.Run(spec);
-    }
-    private Coroutine test4(string roleKey)
-    {
-
-        var spec = new TapEaseCommandSpecCharR
-        {
-            roleKey = roleKey,
+            direction = dir,
+            strength = 1400f,
+            duration = 0.7f,
+            taps = 1,
+            damping = 9,
+            anticipation = 4
         };
 
         return _runner.Run(spec);
@@ -229,7 +191,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
         var spec = new JuicySlideInCommandSpecCharR
         {
             roleKey = roleKey,
-            from = from
+            direction = from
         };
 
         return _runner.Run(spec);

@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using DG.Tweening;
 using UnityEngine;
+using UnityEngine.Serialization;
 using RectTransform = UnityEngine.RectTransform;
 
 [Serializable]
@@ -12,7 +13,7 @@ public sealed class JuicySlideInCommandSpecCharR : CharRigCommandSpecBase
     public CharacterRigTarget target = CharacterRigTarget.Character_Track;
 
     [Header("Slide")]
-    public SlideFromCharR from = SlideFromCharR.Left;
+    public SlideFromCharR direction = SlideFromCharR.Left;
     public float distance = 480f;
 
     [Header("Tween")]
@@ -49,7 +50,7 @@ public sealed class JuicySlideInCommandCharR : CommandBase, IStepScopedCommand
         _rect.DOKill(false);
 
         Vector2 dest = _destPos;
-        Vector2 fromDir = GetDir(_spec.from);
+        Vector2 fromDir = GetDir(_spec.direction);
         Vector2 start = dest + fromDir * _spec.distance;
 
         if (_spec.duration <= 0f)

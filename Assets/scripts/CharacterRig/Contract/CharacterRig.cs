@@ -6,6 +6,9 @@ public class CharacterRig
     {
         Character_Anchor,
         Character_Track,
+        Character_Track_Move,
+        Character_Track_X,
+        Character_Track_Y,
             
         CharacterPortrait_Root,
         CharacterPortrait_Pad,
