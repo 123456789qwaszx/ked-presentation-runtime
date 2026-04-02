@@ -7,10 +7,12 @@ using System.Collections.Generic;
 public sealed class YarnLineRuntimePresenter : DialoguePresenterBase
 {
     private YarnCommandBridge _yarnCommandBridge;
+    private YarnBridgePlaybackDriver _yarnBridgePlaybackDriver;
 
-    public void Initialize(DialogueRunner dialogueRunner, YarnCommandBridge yarnCommandBridge)
+    public void Initialize(DialogueRunner dialogueRunner, YarnCommandBridge yarnCommandBridge, YarnBridgePlaybackDriver yarnBridgePlaybackDriver)
     {
         _yarnCommandBridge = yarnCommandBridge;
+        _yarnBridgePlaybackDriver = yarnBridgePlaybackDriver;
 
         List<DialoguePresenterBase> presenters = new(dialogueRunner.DialoguePresenters);
         if (!presenters.Contains(this))
@@ -21,6 +23,8 @@ public sealed class YarnLineRuntimePresenter : DialoguePresenterBase
     public override YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token)
     {
         _yarnCommandBridge?.ResetImmediateWaitForNewLine();
+        _yarnBridgePlaybackDriver.PlayCollected();
+        
         return YarnTask.CompletedTask;
     }
 

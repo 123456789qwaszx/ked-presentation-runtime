@@ -20,7 +20,7 @@ public class VnAppBootstrap : MonoBehaviour
     [SerializeField] private PresentationSessionEntry presentationSessionEntry;
     
     [Header("ImmediateCommandRunner")]
-    [SerializeField] private ImmediateCommandRunner immediateCommandRunner;
+    [SerializeField] private YarnBridgePlaybackDriver yarnBridgePlaybackDriver;
     [SerializeField] private YarnCommandBridge yarnCommandBridge;
     [SerializeField] private YarnLineRuntimePresenter yarnLineRuntimePresenter;
     
@@ -108,13 +108,16 @@ public class VnAppBootstrap : MonoBehaviour
         PortraitResolver portraitResolver = new (portraitGeneratedDbSo);
         CharRigCommandFactory charRigFactory = new(charRigAccess, portraitResolver);
         
-        immediateCommandRunner.Initialize(charRigFactory, signalFactory, _presentationContextSettings);
+        //immediateCommandRunner.Initialize(charRigFactory, signalFactory, _presentationContextSettings);
     }
     
     private void ConnectImmediateCommandPlayerToYarn()
     {
-        yarnCommandBridge.Initialize(dialogueRunner, immediateCommandRunner);
-        yarnLineRuntimePresenter.Initialize(dialogueRunner, yarnCommandBridge);
+        yarnCommandBridge.Initialize(dialogueRunner);
+        yarnBridgePlaybackDriver.Initialize(yarnCommandBridge, commandExecutor, _presentationContextSettings);
+        
+        yarnLineRuntimePresenter.Initialize(dialogueRunner, yarnCommandBridge, yarnBridgePlaybackDriver);
+        
     }
     
     private void BootstrapYarn()

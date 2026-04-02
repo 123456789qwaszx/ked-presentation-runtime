@@ -544,50 +544,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &204524859
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 204524861}
-  - component: {fileID: 204524860}
-  m_Layer: 0
-  m_Name: ImmediateCommandRunner
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &204524860
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 204524859}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e80af01544c5acd4b91c85cad8ba269d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ImmediateCommandRunner
---- !u!4 &204524861
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 204524859}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 925.97705, y: 583.3106, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &223300848
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1386,7 +1342,7 @@ MonoBehaviour:
   commandExecutor: {fileID: 1257280952}
   routeCatalogSo: {fileID: 11400000, guid: 0a509c33b083b264c8262b318a84b25f, type: 2}
   presentationSessionEntry: {fileID: 1433866633}
-  immediateCommandRunner: {fileID: 204524860}
+  yarnBridgePlaybackDriver: {fileID: 720935691}
   yarnCommandBridge: {fileID: 1829026822}
   yarnLineRuntimePresenter: {fileID: 587880119}
   dialogueRunner: {fileID: 8309902628538800288}
@@ -1535,6 +1491,50 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &720935690
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 720935692}
+  - component: {fileID: 720935691}
+  m_Layer: 0
+  m_Name: YarnBridgePlaybackDriver
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &720935691
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 720935690}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 198fdff9603208d49ac312acbafe6a81, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::YarnBridgePlaybackDriver
+--- !u!4 &720935692
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 720935690}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 817.828, y: -97.45085, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &728559834
 GameObject:
   m_ObjectHideFlags: 0
@@ -38417,6 +38417,6 @@ SceneRoots:
   - {fileID: 2068248508}
   - {fileID: 8103127889455306347}
   - {fileID: 99511076}
-  - {fileID: 204524861}
   - {fileID: 1829026823}
   - {fileID: 587880120}
+  - {fileID: 720935692}

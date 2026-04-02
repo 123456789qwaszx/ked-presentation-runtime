@@ -1,21 +1,41 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 using Yarn.Unity;
 
+/// <summary>
+/// Yarn <<command>> 를 즉시 실행하지 않고,
+/// CommandSpecBase 목록으로 수집하는 브리지.
+/// 
+/// 역할:
+/// 1) Yarn command -> Spec 생성
+/// 2) 생성된 Spec을 내부 버퍼에 축적
+/// 3) 외부에서 Flush / Consume 하여 별도 플레이어가 사용
+/// </summary>
 public sealed class YarnCommandBridge : MonoBehaviour
 {
     private DialogueRunner _dialogueRunner;
-    private ImmediateCommandRunner _commandPlayer;
 
+    [Header("Rig")]
     public GameObject rigPrefab;
+
+    [Header("Global Tuning")]
     public CharStageTuningSO globalTuning;
 
-    // 다음 "즉시 커맨드" 몇 개를 wait=true 로 실행할지
+    // 다음 몇 개의 "즉시 커맨드"에 wait=true 를 부여할지
     private int _pendingImmediateWaitCount;
 
-    public void Initialize(DialogueRunner dialogueRunner, ImmediateCommandRunner commandPlayer)
+    // 현재 브리지가 수집한 Spec 버퍼
+    private readonly List<CommandSpecBase> _collectedSpecs = new();
+
+    /// <summary>
+    /// 현재까지 수집된 Spec을 읽기 전용으로 확인.
+    /// </summary>
+    public IReadOnlyList<CommandSpecBase> CollectedSpecs => _collectedSpecs;
+
+    public void Initialize(DialogueRunner dialogueRunner)
     {
         _dialogueRunner = dialogueRunner;
-        _commandPlayer = commandPlayer;
 
         _dialogueRunner.AddCommandHandler<int>("await_for", WaitNextImmediateCommands);
 
@@ -43,16 +63,39 @@ public sealed class YarnCommandBridge : MonoBehaviour
         _dialogueRunner.AddCommandHandler<string, string>("cast", SetPortrait);
     }
 
-
-
+    /// <summary>
+    /// 다음 count개의 즉시성 연출 Spec에 wait 플래그를 부여.
+    /// </summary>
     private void WaitNextImmediateCommands(int count = 1)
     {
         _pendingImmediateWaitCount = Mathf.Max(0, count);
     }
-    
+
+    /// <summary>
+    /// 라인이 바뀌거나 새 수집 세션 시작 시 호출.
+    /// </summary>
     public void ResetImmediateWaitForNewLine()
     {
         _pendingImmediateWaitCount = 0;
+    }
+
+    /// <summary>
+    /// 현재까지 쌓인 Spec을 복사해서 반환하고 내부 버퍼를 비운다.
+    /// 외부 플레이어/빌더가 이 메서드로 가져가면 된다.
+    /// </summary>
+    public List<CommandSpecBase> ConsumeCollectedSpecs()
+    {
+        var result = new List<CommandSpecBase>(_collectedSpecs);
+        _collectedSpecs.Clear();
+        return result;
+    }
+
+    /// <summary>
+    /// 현재 버퍼를 비운다.
+    /// </summary>
+    public void ClearCollectedSpecs()
+    {
+        _collectedSpecs.Clear();
     }
 
     private void ApplyImmediateWait(CommandSpecBase spec)
@@ -105,10 +148,16 @@ public sealed class YarnCommandBridge : MonoBehaviour
             _pendingImmediateWaitCount--;
     }
 
-    private void RunImmediate(CommandSpecBase spec)
+    /// <summary>
+    /// 실행 대신 수집.
+    /// </summary>
+    private void Collect(CommandSpecBase spec)
     {
+        if (spec == null)
+            return;
+
         ApplyImmediateWait(spec);
-        _commandPlayer.Run(spec);
+        _collectedSpecs.Add(spec);
     }
 
     private void NudgeJolt(string roleKey, string direction = "right")
@@ -127,7 +176,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
             anticipation = -12
         };
 
-        RunImmediate(spec);
+        Collect(spec);
     }
 
     private void NudgeShake(string roleKey, string direction = "right")
@@ -143,7 +192,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
             taps = 4
         };
 
-        RunImmediate(spec);
+        Collect(spec);
     }
 
     private void NudgeTap(string roleKey, string direction = "right")
@@ -162,7 +211,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
             anticipation = -12
         };
 
-        RunImmediate(spec);
+        Collect(spec);
     }
 
     private void NudgeTapHard(string roleKey, string direction = "down")
@@ -180,7 +229,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
             anticipation = 4
         };
 
-         RunImmediate(spec);
+        Collect(spec);
     }
 
     private void HopIn(string roleKey, string direction = "left")
@@ -193,7 +242,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
             from = dir
         };
 
-         RunImmediate(spec);
+        Collect(spec);
     }
 
     private void DipInOut(string roleKey, string direction = "down")
@@ -206,7 +255,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
             dir = dir
         };
 
-         RunImmediate(spec);
+        Collect(spec);
     }
 
     private void MoveBy(string roleKey, float x, float y)
@@ -217,7 +266,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
             delta = new Vector2(x, y)
         };
 
-         RunImmediate(spec);
+        Collect(spec);
     }
 
     private void BouncySlideIn(string roleKey, string direction = "left")
@@ -230,7 +279,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
             from = from
         };
 
-         RunImmediate(spec);
+        Collect(spec);
     }
 
     private void FadeIn(string roleKey)
@@ -240,7 +289,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
             roleKey = roleKey
         };
 
-         RunImmediate(spec);
+        Collect(spec);
     }
 
     private void FadeOut(string roleKey)
@@ -250,7 +299,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
             roleKey = roleKey
         };
 
-         RunImmediate(spec);
+        Collect(spec);
     }
 
     private void SlideIn(string roleKey, string direction = "left")
@@ -263,7 +312,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
             direction = from
         };
 
-         RunImmediate(spec);
+        Collect(spec);
     }
 
     private void SlideOut(string roleKey, string direction = "right")
@@ -276,14 +325,14 @@ public sealed class YarnCommandBridge : MonoBehaviour
             to = to
         };
 
-         RunImmediate(spec);
+        Collect(spec);
     }
 
     private void SetCharRig(string roleKey)
     {
         if (string.IsNullOrWhiteSpace(roleKey))
         {
-            Debug.LogError("[YarnCommandBridge] char_rig: roleKey is null or empty.");
+            Debug.LogError("[YarnCommandBridge] slot: roleKey is null or empty.");
             return;
         }
 
@@ -293,14 +342,14 @@ public sealed class YarnCommandBridge : MonoBehaviour
             rigPrefab = rigPrefab
         };
 
-        _commandPlayer.Run(spec);
+        Collect(spec);
     }
 
     private void SetAnchorPosition(string roleKey, string positionPreset)
     {
         if (string.IsNullOrWhiteSpace(roleKey))
         {
-            Debug.LogError("[YarnCommandBridge] anchor: roleKey is null or empty.");
+            Debug.LogError("[YarnCommandBridge] place: roleKey is null or empty.");
             return;
         }
 
@@ -312,20 +361,20 @@ public sealed class YarnCommandBridge : MonoBehaviour
             _ => RectAnchorPreset3CharR.Center
         };
 
-        var spec = new SetAnchorCommandSpecCharR
+        var anchorSpec = new SetAnchorCommandSpecCharR
         {
             roleKey = roleKey,
             preset = preset,
             globalTuning = globalTuning
         };
 
-        var spec2 = new SetPosOffsetCommandSpecCharR
+        var offsetSpec = new SetPosOffsetCommandSpecCharR
         {
-            roleKey = roleKey,
+            roleKey = roleKey
         };
 
-        _commandPlayer.Run(spec);
-        _commandPlayer.Run(spec2);
+        Collect(anchorSpec);
+        Collect(offsetSpec);
     }
 
     private void SetOriginSize(string roleKey, float xyValue)
@@ -336,7 +385,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
             toScale = new Vector2(xyValue, xyValue)
         };
 
-        _commandPlayer.Run(spec);
+        Collect(spec);
     }
 
     private void SetPortrait(string roleKey, string character)
@@ -354,7 +403,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
             portrait = portraitIdentity
         };
 
-        _commandPlayer.Run(spec);
+        Collect(spec);
     }
 
     private SlideFromCharR ParseSlideDirection(string direction, SlideFromCharR fallback)

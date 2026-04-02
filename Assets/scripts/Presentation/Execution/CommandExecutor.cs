@@ -9,22 +9,17 @@ public sealed class CommandExecutor : MonoBehaviour
     [Header("Debug")]
     [SerializeField] private bool enableDebugLog = true;
 
-    // ---- Dependencies (set by Initialize) ----
     private SequencePlayer _sequencePlayer;
     private INodeCommandFactory _signalCommandFactory;
     private INodeCommandFactory _charRigCommandFactory;
 
-    // ---- Runtime state: execution ----
     private CancellationTokenSource _cts;
     private Coroutine _mainRoutine;
     private CommandRunScope _activeScope;
 
-    // ---- Runtime state: control flags ----
     private int _runId;
     private bool _isStopInProgress;
-    
     private bool _initialized;
-
 
     public void Initialize(
         INodeCommandFactory signalCommandFactory,
@@ -38,37 +33,62 @@ public sealed class CommandExecutor : MonoBehaviour
 
     private void OnDisable() => Stop(CleanupPolicy.Cancel);
     private void OnDestroy() => Stop(CleanupPolicy.Cancel);
-    
-    
+
+    // ---- 기존 입구: Step 기반 ----
     public void PlayStep(NodeSpec node, int stepIndex, CommandRunScope scope)
     {
         if (!_initialized) return;
         if (node == null || scope == null) return;
 
+        if (node.steps == null || stepIndex < 0 || stepIndex >= node.steps.Count)
+        {
+            Log($"Invalid stepIndex={stepIndex}");
+            return;
+        }
+
+        StepSpec step = node.steps[stepIndex];
+        if (step == null || step.compiled == null || step.compiled.Count == 0)
+        {
+            Log($"Step empty: stepIndex={stepIndex}");
+            return;
+        }
+
+        StartPlay(step.compiled, scope, $"step={stepIndex}");
+    }
+
+    // ---- 새 입구: Bridge Spec 기반 ----
+    public void PlaySpecs(IReadOnlyList<CommandSpecBase> specs, CommandRunScope scope, string debugSource = "bridge")
+    {
+        if (!_initialized) return;
+        if (specs == null || scope == null) return;
+
+        StartPlay(specs, scope, debugSource);
+    }
+
+    // ---- 공통 실행 경로 ----
+    private void StartPlay(IReadOnlyList<CommandSpecBase> specs, CommandRunScope scope, string debugSource)
+    {
         _activeScope = scope;
-        
+
         CleanupPolicy policy = DecideCleanupPolicy(_activeScope);
         _activeScope.CleanupStep(policy);
-        
-        List<ISequenceCommand> commands = BuildCommandsFromStep(node, stepIndex);
-        if (commands == null || commands.Count == 0)
+
+        List<ISequenceCommand> commands = BuildCommandsFromSpecs(specs);
+        if (commands.Count == 0)
         {
-            {
-                Log($"Step has no commands: stepIndex={stepIndex}");
-                return;
-            }
+            Log($"No commands ({debugSource})");
+            return;
         }
-        
+
         ResetToken();
         _activeScope.Token = _cts.Token;
-        
-        Log($"Step Play: stepIndex={stepIndex}, commands={commands.Count}");
+
+        Log($"Play ({debugSource}), commands={commands.Count}");
         _mainRoutine = StartCoroutine(RunNode(commands, _activeScope, _runId));
     }
-    
+
     private IEnumerator RunNode(List<ISequenceCommand> commands, CommandRunScope scope, int runId)
     {
-        
         if (runId != _runId)
         {
             Log($"RunNode exited early: stale runId={runId}, current={_runId}");
@@ -76,8 +96,8 @@ public sealed class CommandExecutor : MonoBehaviour
         }
 
         scope.SetNodeBusy(true);
-        
         Log($"Node Begin (runId={runId})");
+
         try
         {
             yield return _sequencePlayer.PlayCommands(
@@ -94,9 +114,7 @@ public sealed class CommandExecutor : MonoBehaviour
             {
                 scope.SetNodeBusy(false);
                 scope.Token = CancellationToken.None;
-
                 _mainRoutine = null;
-
                 Log($"Node End (runId={runId})");
             }
         }
@@ -104,17 +122,14 @@ public sealed class CommandExecutor : MonoBehaviour
 
     public void Stop() => Stop(CleanupPolicy.Cancel);
     public void FinishAll() => Stop(CleanupPolicy.Finish);
-    
+
     private void Stop(CleanupPolicy policy)
     {
-        if (_isStopInProgress)
-            return;
-        
+        if (_isStopInProgress) return;
         _isStopInProgress = true;
 
         try
         {
-            // Bump run generation so all in-flight routines from the previous session become invalid.
             _runId++;
             CancelAndDisposeToken();
 
@@ -130,7 +145,6 @@ public sealed class CommandExecutor : MonoBehaviour
             {
                 _activeScope.CleanupStep(policy);
                 _activeScope.CleanupRun(policy);
-                
                 _activeScope.SetNodeBusy(false);
                 _activeScope.Token = CancellationToken.None;
                 _activeScope = null;
@@ -144,95 +158,63 @@ public sealed class CommandExecutor : MonoBehaviour
         }
     }
 
-    private List<ISequenceCommand> BuildCommandsFromStep(NodeSpec node, int stepIndex)
+    private List<ISequenceCommand> BuildCommandsFromSpecs(IReadOnlyList<CommandSpecBase> specs)
     {
         var list = new List<ISequenceCommand>();
 
-        if (node.steps == null || node.steps.Count == 0)
+        for (int i = 0; i < specs.Count; i++)
         {
-            Log($"Node Empty (node={node})");
-            return list;
-        }
-        if (stepIndex < 0 || stepIndex >= node.steps.Count)
-        {
-            Log($"Invalid stepIndex: {stepIndex} (steps={node.steps.Count})");
-            return list;
-        }
-
-        StepSpec step = node.steps[stepIndex];
-        if (step == null || step.compiled == null || step.compiled.Count == 0)
-        {
-            Log($"Step Empty (step={step})");
-            return list;
-        }
-
-        foreach (CommandSpecBase spec in step.compiled)
-        {
+            CommandSpecBase spec = specs[i];
             if (spec == null)
             {
-                Log("Null command spec in step; skipped.");
+                Log($"Null spec at index={i}; skipped.");
                 continue;
             }
 
             if (spec is CharRigCommandSpecBase)
             {
-                if (!_charRigCommandFactory.TryCreate(spec, out ISequenceCommand charRigCommand) || charRigCommand == null)
+                if (!_charRigCommandFactory.TryCreate(spec, out ISequenceCommand cmd) || cmd == null)
                 {
-                    Log($"Failed to create command (specType={spec.GetType().Name})");
+                    Log($"CharRig factory failed: {spec.GetType().Name}");
                     continue;
                 }
-                list.Add(charRigCommand);
+                list.Add(cmd);
                 continue;
             }
-            
-            if (!_signalCommandFactory.TryCreate(spec, out ISequenceCommand cmd) || cmd == null)
+
+            if (!_signalCommandFactory.TryCreate(spec, out ISequenceCommand signalCmd) || signalCmd == null)
             {
-                Debug.LogWarning($"Failed to create command (specType={spec.GetType().Name})");
+                Log($"Signal factory failed: {spec.GetType().Name}");
                 continue;
             }
-            
-            list.Add(cmd);
+
+            list.Add(signalCmd);
         }
 
         return list;
     }
-    
-    
+
     private void ResetToken()
-    { // Only responsible for creating a new token for the next run.
+    {
         _cts?.Dispose();
         _cts = new CancellationTokenSource();
     }
-    
+
     private void CancelAndDisposeToken()
     {
-        if (_cts == null)
-            return;
-
-        try
-        {
-            if (!_cts.IsCancellationRequested)
-                _cts.Cancel();
-        }
+        if (_cts == null) return;
+        try { if (!_cts.IsCancellationRequested) _cts.Cancel(); }
         catch (ObjectDisposedException) { }
-
         _cts.Dispose();
         _cts = null;
     }
-    
+
     private CleanupPolicy DecideCleanupPolicy(CommandRunScope scope)
     {
-        if (scope == null)
-            return CleanupPolicy.Cancel;
-
-        // Skip means "complete immediately".
-        // if (scope.IsSkipping)
-        //     return CleanupPolicy.Finish;
-
+        if (scope == null) return CleanupPolicy.Cancel;
         return CleanupPolicy.Finish;
     }
-    
-    
+
     private void Log(string msg)
     {
         if (!enableDebugLog) return;
