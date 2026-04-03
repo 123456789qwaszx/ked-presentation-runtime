@@ -9,8 +9,7 @@ public sealed class CommandExecutor : MonoBehaviour
     [Header("Debug")] [SerializeField] private bool enableDebugLog = true;
 
     private SequencePlayer _sequencePlayer;
-    private INodeCommandFactory _signalCommandFactory;
-    private INodeCommandFactory _charRigCommandFactory;
+    private CompositeCommandFactory _factory;
 
     private CancellationTokenSource _cts;
     private Coroutine _mainRoutine;
@@ -20,13 +19,10 @@ public sealed class CommandExecutor : MonoBehaviour
     private bool _isStopInProgress;
     private bool _initialized;
 
-    public void Initialize(
-        INodeCommandFactory signalCommandFactory,
-        INodeCommandFactory charRigCommandFactory)
+    public void Initialize(CompositeCommandFactory factory)
     {
         _sequencePlayer = new SequencePlayer(this);
-        _signalCommandFactory = signalCommandFactory;
-        _charRigCommandFactory = charRigCommandFactory;
+        _factory = factory;
         _initialized = true;
     }
 
@@ -81,7 +77,7 @@ public sealed class CommandExecutor : MonoBehaviour
         Log($"Play ({debugSource}), commands={commands.Count}");
         _mainRoutine = StartCoroutine(RunNode(commands, _activeScope, _runId));
     }
-
+    
     
     private List<ISequenceCommand> BuildCommandsFromStep(NodeSpec node, int stepIndex)
     {
@@ -109,6 +105,30 @@ public sealed class CommandExecutor : MonoBehaviour
         return BuildCommandsFromSpecs(step.compiled);
     }
 
+    private List<ISequenceCommand> BuildCommandsFromSpecs(IReadOnlyList<CommandSpecBase> specs)
+    {
+        var list = new List<ISequenceCommand>();
+
+        for (int i = 0; i < specs.Count; i++)
+        {
+            CommandSpecBase spec = specs[i];
+            if (spec == null)
+            {
+                Log($"Null spec at index={i}; skipped.");
+                continue;
+            }
+
+            if (!_factory.TryCreate(spec, out ISequenceCommand command) || command == null)
+            {
+                continue;
+            }
+
+            list.Add(command);
+        }
+
+        return list;
+    }
+    
     private IEnumerator RunNode(List<ISequenceCommand> commands, CommandRunScope scope, int runId)
     {
         if (runId != _runId)
@@ -141,7 +161,7 @@ public sealed class CommandExecutor : MonoBehaviour
             }
         }
     }
-
+    
     public void Stop() => Stop(CleanupPolicy.Cancel);
     public void FinishAll() => Stop(CleanupPolicy.Finish);
 
@@ -178,43 +198,6 @@ public sealed class CommandExecutor : MonoBehaviour
         {
             _isStopInProgress = false;
         }
-    }
-
-    private List<ISequenceCommand> BuildCommandsFromSpecs(IReadOnlyList<CommandSpecBase> specs)
-    {
-        var list = new List<ISequenceCommand>();
-
-        for (int i = 0; i < specs.Count; i++)
-        {
-            CommandSpecBase spec = specs[i];
-            if (spec == null)
-            {
-                Log($"Null spec at index={i}; skipped.");
-                continue;
-            }
-
-            if (spec is CharRigCommandSpecBase)
-            {
-                if (!_charRigCommandFactory.TryCreate(spec, out ISequenceCommand cmd) || cmd == null)
-                {
-                    Log($"CharRig factory failed: {spec.GetType().Name}");
-                    continue;
-                }
-
-                list.Add(cmd);
-                continue;
-            }
-
-            if (!_signalCommandFactory.TryCreate(spec, out ISequenceCommand signalCmd) || signalCmd == null)
-            {
-                Log($"Signal factory failed: {spec.GetType().Name}");
-                continue;
-            }
-
-            list.Add(signalCmd);
-        }
-
-        return list;
     }
 
     private void ResetToken()

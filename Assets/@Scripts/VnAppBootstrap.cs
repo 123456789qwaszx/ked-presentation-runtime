@@ -80,7 +80,9 @@ public class VnAppBootstrap : MonoBehaviour
         CharacterRigAccess charRigAccess = new(charRigSlotResolver);
         PortraitResolver portraitResolver = new (portraitGeneratedDbSo);
         CharRigCommandFactory charRigFactory = new(charRigAccess, portraitResolver);
-        commandExecutor.Initialize(signalFactory, charRigFactory);
+        
+        CompositeCommandFactory factory = new (signalFactory, charRigFactory);
+        commandExecutor.Initialize(factory);
         
         PresentationSession presentationSession = new PresentationSession(gatePlanner, gateAdvancer, commandExecutor, _presentationContextSettings);
         
