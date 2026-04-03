@@ -112,18 +112,6 @@ MonoBehaviour:
         type: 3
         seconds: 0
         signalKey: beat
-    - editorName: 
-      tracks:
-        interaction: []
-        setup: []
-        motion: []
-        dialogue: []
-        fx: []
-      compiled: []
-      gate:
-        type: 0
-        seconds: 0
-        signalKey: 
   - editorName: "\uADF8\uB798 \uB9DE\uB2E4."
     steps:
     - editorName: 
@@ -390,8 +378,7 @@ MonoBehaviour:
         signalKey: 
     - editorName: "\uD654\uBA74\uAD50\uCCB4 \uAC70\uB9AC->\uD6E0\uAD88"
       tracks:
-        interaction:
-        - rid: 7710742224098558030
+        interaction: []
         setup: []
         motion: []
         dialogue: []
@@ -594,8 +581,6 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: -2
-      type: {class: , ns: , asm: }
     - rid: 7710742224098558025
       type: {class: SetCharRigCommandSpec, ns: , asm: Assembly-CSharp}
       data:
@@ -669,21 +654,6 @@ MonoBehaviour:
         settleEase: 12
         duration: 0.55
         wait: 0
-    - rid: 7710742224098558030
-      type: {class: PrepareDialogueUICommandSpec, ns: , asm: Assembly-CSharp}
-      data:
-        roleKey: Chixia
-        _meta:
-          track: 0
-          phase: 0
-          blockingHint: 0
-          infiniteHint: 0
-          durationHint: 0
-        boxKind: 1
-        cleanup: 0
-        bindTimeoutSeconds: 2
-        skipWaitWhenSkipping: 1
-        validateBinding: 0
     - rid: 7710742224098558034
       type: {class: SetOriginSizeCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:

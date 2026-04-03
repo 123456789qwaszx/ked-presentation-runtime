@@ -13,7 +13,6 @@ MonoBehaviour:
   m_Name: PortraitBuildSettings
   m_EditorClassIdentifier: Assembly-CSharp::PortraitBuildSettings
   scanFolders:
-  - Assets/Art/Portraits/Playable
-  - Assets/Art/Portraits/NPC
+  - Assets/Art/Portraits
   generatedDbPath: Assets/Data/Generated/PortraitGeneratedDB.asset
   strictMode: 0

@@ -261,7 +261,6 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
                 }
             }
 
-            Debug.Log("good");
             RevealAllAndComplete(line, totalLineCharacterCount);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
@@ -366,7 +365,6 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
     {
         if (_typewriterText == null) return;
 
-        Debug.Log("RevealAllAndComplete");
         _typewriterText.maxVisibleCharacters = count;
         _totalCharacterCount = Mathf.Max(_totalCharacterCount, count);
 

@@ -1,0 +1,16 @@
+﻿title: maid
+---
+
+<<slot_boxside me>>
+<<place me boxside>>
+<<scale me 1.5>>
+<<cast me momoka>>
+
+<<fade_in me>>
+
+//<<destroy me>>
+
+<<protagobox>>
+여기가 월세 내고 산다는 그 집인가? 엄청 크네......
+
+===

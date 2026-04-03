@@ -17,11 +17,11 @@ MonoBehaviour:
     variantKey: kuonji_a
     emotionKey: 01
     sprite: {fileID: 21300000, guid: 5400a22ba5aa20042897f8eff80d6cfa, type: 3}
-    assetPath: Assets/Art/Portraits/NPC/kuonji/kuonji_a_01.png
+    assetPath: Assets/Art/Portraits/kuonji/kuonji_a_01.png
   - characterId: momoka
     variantKey: momoka_a
     emotionKey: 01
     sprite: {fileID: 21300000, guid: f0006a933c433794787fa34a377bd1b4, type: 3}
-    assetPath: Assets/Art/Portraits/NPC/momoka/momoka_a_01.png
-  generatedTicksUtc: 639103038753225387
-  generatedTimeReadable: 2026-03-28 23:11:15
+    assetPath: Assets/Art/Portraits/momoka/momoka_a_01.png
+  generatedTicksUtc: 639108193824620074
+  generatedTimeReadable: 2026-04-03 22:23:02

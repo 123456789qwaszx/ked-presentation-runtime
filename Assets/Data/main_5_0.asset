@@ -87,7 +87,6 @@ MonoBehaviour:
         - rid: 305542896472555624
         - rid: 305542896472555625
         - rid: 305542896472555626
-        - rid: 305542896472555627
         - rid: 305542896472555628
         setup:
         - rid: 305542896472555729
@@ -102,7 +101,6 @@ MonoBehaviour:
       - rid: 305542896472555624
       - rid: 305542896472555625
       - rid: 305542896472555626
-      - rid: 305542896472555627
       - rid: 305542896472555628
       - rid: 305542896472555729
       - rid: 305542896472555630
@@ -449,7 +447,6 @@ MonoBehaviour:
         interaction:
         - rid: 305542896472555682
         - rid: 305542896472555683
-        - rid: 305542896472555684
         setup:
         - rid: 305542896472555685
         - rid: 305542896472555686
@@ -460,7 +457,6 @@ MonoBehaviour:
       compiled:
       - rid: 305542896472555682
       - rid: 305542896472555683
-      - rid: 305542896472555684
       - rid: 305542896472555685
       - rid: 305542896472555686
       - rid: 305542896472555687
@@ -723,19 +719,6 @@ MonoBehaviour:
           durationHint: 0
         target: 6
         toScale: {x: 1, y: 1}
-    - rid: 305542896472555627
-      type: {class: SetPosOffsetCommandSpecCharR, ns: , asm: Assembly-CSharp}
-      data:
-        roleKey: kuonji
-        _meta:
-          track: 0
-          phase: 0
-          blockingHint: 0
-          infiniteHint: 0
-          durationHint: 0
-        target: 1
-        offset: {x: 0, y: 0}
-        resetToZero: 1
     - rid: 305542896472555628
       type: {class: SetAnchorCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:
@@ -1541,6 +1524,7 @@ MonoBehaviour:
           durationHint: 0
         target: 1
         strength: 88
+        direction: 1
         duration: 0.28
         taps: 3
         damping: 6
@@ -1585,19 +1569,6 @@ MonoBehaviour:
           durationHint: 0
         target: 6
         toScale: {x: 1, y: 1}
-    - rid: 305542896472555684
-      type: {class: SetPosOffsetCommandSpecCharR, ns: , asm: Assembly-CSharp}
-      data:
-        roleKey: Main
-        _meta:
-          track: 0
-          phase: 0
-          blockingHint: 0
-          infiniteHint: 0
-          durationHint: 0
-        target: 1
-        offset: {x: 0, y: 0}
-        resetToZero: 1
     - rid: 305542896472555685
       type: {class: SetSpriteCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:

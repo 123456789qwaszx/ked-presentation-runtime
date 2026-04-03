@@ -23,7 +23,7 @@ public sealed class CharRigCommandFactory : INodeCommandFactory
             MoveToCommandSpecCharR s        => new MoveToCommandCharR(s),
             SetColorCommandSpecCharR s      => new SetColorCommandCharR(s),
             ShakeCommandSpecCharR s         => new ShakeCommandCharR(s),
-            SetPosOffsetCommandSpecCharR s  => new SetPosOffsetCommandCharR(s),
+            ResetTrackOffsetsCommandSpec s  => new ResetTrackOffsetsCommand(s),
             SetRotationCommandSpecCharR s   => new SetRotationCommandCharR(s),
             SetScaleCommandSpecCharR s      => new SetScaleCommandCharR(s),
             MoveByCommandSpecCharR s        => new MoveByCommandCharR(s),

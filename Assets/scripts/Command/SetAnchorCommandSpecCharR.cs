@@ -16,7 +16,7 @@ public sealed class SetAnchorCommandSpecCharR : CharRigCommandSpecBase
     public CharacterRigTarget target = CharacterRigTarget.Character_Anchor;
 
     [Header("Preset")]
-    public RectAnchorPreset3CharR preset = RectAnchorPreset3CharR.Center;
+    public CharAnchorPreset preset = CharAnchorPreset.Center;
 
     [Tooltip("StageSlot 폭 대비 상대 위치. 0.33이면 좌/우가 화면폭의 약 1/3 지점.")]
     [Range(0f, 0.5f)]

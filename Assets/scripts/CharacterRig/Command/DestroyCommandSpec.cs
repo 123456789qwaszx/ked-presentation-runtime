@@ -65,8 +65,6 @@ public sealed class DestroyCommand : CommandBase
         GameObject go = FindTarget();
         if (go == null)
         {
-            // 필요하면 개발 빌드에서만 로그 켜도 됨
-            // Debug.Log($"[DestroyCommand] Target not found: '{_spec.ResolvedTargetName}'");
             yield break;
         }
 

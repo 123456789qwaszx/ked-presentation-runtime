@@ -17,12 +17,15 @@ public sealed class YarnCommandBridge : MonoBehaviour
     {
         _dialogueRunner = dialogueRunner;
 
+        _dialogueRunner.AddCommandHandler<string>("destroy", DestroyCommand);
         _dialogueRunner.AddCommandHandler<int>("await_for", WaitNextImmediateCommands);
-
-        _dialogueRunner.AddCommandHandler<string>("slot", SetCharRig);
+        
+        _dialogueRunner.AddCommandHandler<string>("slot_boxside", SetSpeakerSlot);
+        _dialogueRunner.AddCommandHandler<string>("slot", SetCharSlot);
         _dialogueRunner.AddCommandHandler<string, string>("place", SetAnchorPosition);
+        _dialogueRunner.AddCommandHandler<string, int, int>("place_offset", SetAnchorOffset);
         _dialogueRunner.AddCommandHandler<string, float>("scale", SetOriginSize);
-
+        
         _dialogueRunner.AddCommandHandler<string, string>("slide_in", SlideIn);
         _dialogueRunner.AddCommandHandler<string, string>("slide_out", SlideOut);
         _dialogueRunner.AddCommandHandler<string, string>("slide_in_bouncy", BouncySlideIn);
@@ -168,6 +171,16 @@ public sealed class YarnCommandBridge : MonoBehaviour
     
     #endregion
 
+    private void DestroyCommand(string roleKey)
+    {
+        var spec = new DestroyCommandSpec
+        {
+            roleKey = roleKey
+        };
+
+        Collect(spec);
+    }
+    
     private void NudgeShake(string roleKey, string direction = "right")
     {
         SlideFromCharR dir = ParseSlideDirection(direction, SlideFromCharR.Right);
@@ -317,7 +330,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
         Collect(spec);
     }
 
-    private void SetCharRig(string roleKey)
+    private void SetCharSlot(string roleKey)
     {
         if (string.IsNullOrWhiteSpace(roleKey))
         {
@@ -333,21 +346,54 @@ public sealed class YarnCommandBridge : MonoBehaviour
 
         Collect(spec);
     }
-
-    private void SetAnchorPosition(string roleKey, string positionPreset)
+    
+    private void SetSpeakerSlot(string roleKey)
     {
         if (string.IsNullOrWhiteSpace(roleKey))
         {
-            Debug.LogError("[YarnCommandBridge] place: roleKey is null or empty.");
+            Debug.LogError("[YarnCommandBridge] slot: roleKey is null or empty.");
             return;
         }
 
-        RectAnchorPreset3CharR preset = positionPreset switch
+        var spec = new SetCharRigCommandSpec
         {
-            "left" => RectAnchorPreset3CharR.Left,
-            "center" => RectAnchorPreset3CharR.Center,
-            "right" => RectAnchorPreset3CharR.Right,
-            _ => RectAnchorPreset3CharR.Center
+            roleKey = roleKey,
+            parentSlot = CharRigSlot.ProtagonistSlot,
+            rigPrefab = rigPrefab
+        };
+
+        Collect(spec);
+    }
+    
+    private void SetAnchorOffset(string roleKey, int x, int y)
+    {
+        var anchorSpec = new MoveByCommandSpecCharR
+        {
+            roleKey = roleKey,
+            target = CharacterRigTarget.Character_Anchor,
+            delta = new Vector2(x, y),
+            duration = 0f,
+            killTween = false
+        };
+        
+        var resetTrackSpec = new ResetTrackOffsetsCommandSpec { roleKey = roleKey };
+
+        Collect(anchorSpec);
+        Collect(resetTrackSpec);
+    }
+
+    private void SetAnchorPosition(string roleKey, string positionPreset)
+    {
+        CharAnchorPreset preset = positionPreset switch
+        {
+            "left" => CharAnchorPreset.Left,
+            "center" => CharAnchorPreset.Center,
+            "right" => CharAnchorPreset.Right,
+            "boxside" => CharAnchorPreset.BoxSide,
+            
+            "exp1" => CharAnchorPreset.Exp1,
+            "exp2" => CharAnchorPreset.Exp2,
+            _ => CharAnchorPreset.None
         };
 
         var anchorSpec = new SetAnchorCommandSpecCharR
@@ -357,13 +403,10 @@ public sealed class YarnCommandBridge : MonoBehaviour
             globalTuning = globalTuning
         };
 
-        var offsetSpec = new SetPosOffsetCommandSpecCharR
-        {
-            roleKey = roleKey
-        };
+        var resetTrackSpec = new ResetTrackOffsetsCommandSpec { roleKey = roleKey };
 
         Collect(anchorSpec);
-        Collect(offsetSpec);
+        Collect(resetTrackSpec);
     }
 
     private void SetOriginSize(string roleKey, float xyValue)

@@ -2,17 +2,16 @@ using System;
 using System.Collections;
 using DG.Tweening;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 [Serializable]
 [CommandMenuHint(
-    "Char Rig", "#Offset Position (default = ResetToZero)", Order = -890,
+    "Char Rig", "#ResetTrackOffsets (default = ResetToZero)", Order = -890,
     Sets = new[]
     {
         CommandMenuSets.ResetChar,
     },
     SetOrder = -940)]
-public class SetPosOffsetCommandSpecCharR : CharRigCommandSpecBase
+public class ResetTrackOffsetsCommandSpec : CharRigCommandSpecBase
 {
     [Header("Target")]
     [Tooltip("offset를 실제로 적용할 대상.")]
@@ -39,21 +38,21 @@ public class SetPosOffsetCommandSpecCharR : CharRigCommandSpecBase
     [Tooltip("Char_Track_X 를 (0,0)으로 초기화.")]
     public bool resetCharTrackX = false;
 
-    [FormerlySerializedAs("resetCharacterTrackY")] [Tooltip("Char_Track_Y 를 (0,0)으로 초기화.")]
+    [Tooltip("Char_Track_Y 를 (0,0)으로 초기화.")]
     public bool resetCharTrackY = false;
 }
 
-public sealed class SetPosOffsetCommandCharR : CommandBase
+public sealed class ResetTrackOffsetsCommand : CommandBase
 {
-    private readonly SetPosOffsetCommandSpecCharR _spec;
+    private readonly ResetTrackOffsetsCommandSpec _spec;
 
-    private CharacterRigRefs _rig;
+    private CharacterRigRefs _rigRefs;
     private RectTransform _targetRect;
     private bool _resolveAttempted;
 
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
-    public SetPosOffsetCommandCharR(SetPosOffsetCommandSpecCharR spec)
+    public ResetTrackOffsetsCommand(ResetTrackOffsetsCommandSpec spec)
     {
         _spec = spec;
     }
@@ -63,7 +62,7 @@ public sealed class SetPosOffsetCommandCharR : CommandBase
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (_rig == null)
+        if (_rigRefs == null)
             yield break;
 
         Apply();
@@ -74,7 +73,7 @@ public sealed class SetPosOffsetCommandCharR : CommandBase
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (_rig == null)
+        if (_rigRefs == null)
             return;
 
         Apply();
@@ -82,10 +81,8 @@ public sealed class SetPosOffsetCommandCharR : CommandBase
 
     private void Apply()
     {
-        // 1) 필요하면 트랙 레이어들부터 먼저 초기화
         ResetRequestedTrackLayers();
 
-        // 2) target에 offset 적용
         if (_targetRect == null)
             return;
 
@@ -105,16 +102,16 @@ public sealed class SetPosOffsetCommandCharR : CommandBase
         bool resetY     = _spec.resetAllTrackLayers || _spec.resetCharTrackY;
 
         if (resetTrack)
-            ResetRect(_rig.Character_Track);
+            ResetRect(_rigRefs.Character_Track);
 
         if (resetMove)
-            ResetRect(_rig.Character_Track_Move);
+            ResetRect(_rigRefs.Character_Track_Move);
 
         if (resetX)
-            ResetRect(_rig.Character_Track_X);
+            ResetRect(_rigRefs.Character_Track_X);
 
         if (resetY)
-            ResetRect(_rig.Character_Track_Y);
+            ResetRect(_rigRefs.Character_Track_Y);
     }
 
     private void ResetRect(RectTransform rect)
@@ -130,10 +127,10 @@ public sealed class SetPosOffsetCommandCharR : CommandBase
     {
         _resolveAttempted = true;
 
-        if (!scope.Refs.TryGetCharRigRefs(_spec.roleKey, out CharacterRigRefs rig) || rig == null)
+        if (!scope.Refs.TryGetCharRigRefs(_spec.roleKey, out CharacterRigRefs rigRefs) || rigRefs == null)
             return;
 
-        _rig = rig;
-        _targetRect = rig.GetRect(_spec.target);
+        _rigRefs = rigRefs;
+        _targetRect = rigRefs.GetRect(_spec.target);
     }
 }

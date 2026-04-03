@@ -45,7 +45,6 @@ MonoBehaviour:
         - rid: 2406591861039300610
         - rid: 2406591861039300611
         - rid: 2406591861039300612
-        - rid: 2406591861039300613
         - rid: 2406591861039300614
         setup:
         - rid: 2406591861039300615
@@ -60,7 +59,6 @@ MonoBehaviour:
       - rid: 2406591861039300610
       - rid: 2406591861039300611
       - rid: 2406591861039300612
-      - rid: 2406591861039300613
       - rid: 2406591861039300614
       - rid: 2406591861039300615
       - rid: 2406591861039300616
@@ -109,7 +107,6 @@ MonoBehaviour:
         - rid: 2406591861039300702
         - rid: 2406591861039300703
         - rid: 2406591861039300704
-        - rid: 2406591861039300705
         - rid: 2406591861039300706
         setup:
         - rid: 2406591861039300707
@@ -124,7 +121,6 @@ MonoBehaviour:
       - rid: 2406591861039300702
       - rid: 2406591861039300703
       - rid: 2406591861039300704
-      - rid: 2406591861039300705
       - rid: 2406591861039300706
       - rid: 2406591861039300707
       - rid: 2406591861039300708
@@ -471,7 +467,6 @@ MonoBehaviour:
         interaction:
         - rid: 2406591865032278113
         - rid: 2406591865032278114
-        - rid: 2406591865032278115
         setup:
         - rid: 2406591865032278116
         - rid: 2406591865032278117
@@ -482,7 +477,6 @@ MonoBehaviour:
       compiled:
       - rid: 2406591865032278113
       - rid: 2406591865032278114
-      - rid: 2406591865032278115
       - rid: 2406591865032278116
       - rid: 2406591865032278117
       - rid: 2406591865032278118
@@ -762,19 +756,6 @@ MonoBehaviour:
           durationHint: 0
         target: 6
         toScale: {x: 1, y: 1}
-    - rid: 2406591861039300613
-      type: {class: SetPosOffsetCommandSpecCharR, ns: , asm: Assembly-CSharp}
-      data:
-        roleKey: Maina
-        _meta:
-          track: 0
-          phase: 0
-          blockingHint: 0
-          infiniteHint: 0
-          durationHint: 0
-        target: 1
-        offset: {x: 0, y: 0}
-        resetToZero: 1
     - rid: 2406591861039300614
       type: {class: SetAnchorCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:
@@ -959,19 +940,6 @@ MonoBehaviour:
           durationHint: 0
         target: 6
         toScale: {x: 1, y: 1}
-    - rid: 2406591861039300705
-      type: {class: SetPosOffsetCommandSpecCharR, ns: , asm: Assembly-CSharp}
-      data:
-        roleKey: Hill
-        _meta:
-          track: 0
-          phase: 0
-          blockingHint: 0
-          infiniteHint: 0
-          durationHint: 0
-        target: 1
-        offset: {x: 0, y: 0}
-        resetToZero: 1
     - rid: 2406591861039300706
       type: {class: SetAnchorCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:
@@ -1672,6 +1640,7 @@ MonoBehaviour:
           durationHint: 0
         target: 1
         strength: 88
+        direction: 1
         duration: 0.28
         taps: 3
         damping: 6
@@ -1716,19 +1685,6 @@ MonoBehaviour:
           durationHint: 0
         target: 6
         toScale: {x: 1, y: 1}
-    - rid: 2406591865032278115
-      type: {class: SetPosOffsetCommandSpecCharR, ns: , asm: Assembly-CSharp}
-      data:
-        roleKey: Main
-        _meta:
-          track: 0
-          phase: 0
-          blockingHint: 0
-          infiniteHint: 0
-          durationHint: 0
-        target: 1
-        offset: {x: 0, y: 0}
-        resetToZero: 1
     - rid: 2406591865032278116
       type: {class: SetSpriteCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:
