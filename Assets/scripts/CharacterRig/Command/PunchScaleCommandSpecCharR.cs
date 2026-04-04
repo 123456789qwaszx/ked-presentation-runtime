@@ -86,7 +86,6 @@ public sealed class PunchScaleCommandCharR : CommandBase, IStepScopedCommand
         _rect.DOKill();
 
         _rect.localScale = _originScale;
-        _rect = null;
     }
 
     private void ResolveRefs(CommandRunScope scope)

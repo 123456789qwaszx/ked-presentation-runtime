@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public sealed class TransitionCoordinator
@@ -8,17 +7,21 @@ public sealed class TransitionCoordinator
     {
         bool TryResolve(TransitionTargetKind kind, string customTargetKey, out TransitionTargetHandle handle);
     }
-    
+
     public interface ITransitionTargetPlayer
     {
         void SetInstant(TransitionTargetHandle target, float alpha, bool blockRaycasts);
-        IEnumerator FadeTo(TransitionTargetHandle target, float targetAlpha, float duration, bool blockRaycasts, AnimationCurve ease);
+
+        IEnumerator FadeTo(
+            TransitionTargetHandle target,
+            float targetAlpha,
+            float duration,
+            bool blockRaycasts,
+            AnimationCurve ease);
     }
-    
+
     private readonly ITransitionTargetRouter _transitionTargetRouter;
     private readonly ITransitionTargetPlayer _transitionTargetPlayer;
-
-    private readonly Dictionary<CommandRunScope, TransitionContext> _activeContexts = new();
 
     public TransitionCoordinator(
         ITransitionTargetRouter transitionTargetRouter,
@@ -27,137 +30,119 @@ public sealed class TransitionCoordinator
         _transitionTargetRouter = transitionTargetRouter;
         _transitionTargetPlayer = transitionTargetPlayer;
     }
-    
+
     public IEnumerator Play(TransitionCommandSpec spec, CommandRunScope scope)
     {
-        if (!_transitionTargetRouter.TryResolve(spec.targetKind, spec.customTargetKey, out TransitionTargetHandle target))
+        if (spec == null)
+            yield break;
+
+        if (!_transitionTargetRouter.TryResolve(
+                spec.targetKind,
+                spec.customTargetKey,
+                out TransitionTargetHandle target))
         {
-            Debug.LogWarning($"[TransitionCoordinator] Target not resolved. kind={spec.targetKind}, customKey='{spec.customTargetKey}'");
+            Debug.LogWarning(
+                $"[TransitionCoordinator] Target not resolved. " +
+                $"kind={spec.targetKind}, customKey='{spec.customTargetKey}'");
             yield break;
         }
-        
-        // Start from alpha 0, then cover fades 0 -> 1.
+
+        if (scope != null && scope.IsSkipping)
+        {
+            ApplySkipInstant(spec, target);
+            yield break;
+        }
+
         if (spec.resetToOpenAtStart)
-            _transitionTargetPlayer.SetInstant(target, spec.uncoveredAlpha, false);
-
-        TransitionContext context = new (spec, target, scope);
-        _activeContexts[scope] = context;
-
-        try
         {
-            if (scope.IsSkipping)
-            {
-                // If already skipping, collapse the whole transition into one instant pass:
-                // cover -> swap -> ready -> uncover, with no tween or wait.
-                _transitionTargetPlayer.SetInstant(target, spec.coveredAlpha, spec.blockRaycastsWhileCovered);
-                context.MarkCoverCompleted();
-                context.MarkSwapEntered();
-                context.MarkReadyCompleted();
-                _transitionTargetPlayer.SetInstant(target, spec.uncoveredAlpha, false);
-                context.MarkFinished();
-                yield break;
-            }
-
-            // ---- 1. Cover ----
-            yield return _transitionTargetPlayer.FadeTo(
+            _transitionTargetPlayer.SetInstant(
                 target,
-                spec.coveredAlpha,
-                spec.coverDuration,
-                spec.blockRaycastsWhileCovered,
-                spec.coverEase);
-
-            context.MarkCoverCompleted();
-
-            // ---- 2. Swap 진입 알림 ----
-            context.MarkSwapEntered();
-
-            // ---- 3. Ready 대기 ----
-            yield return WaitForReady(context);
-
-            if (context.CancelRequested)
-            {
-                _transitionTargetPlayer.SetInstant(target, spec.uncoveredAlpha, false);
-                context.MarkFinished();
-                yield break;
-            }
-
-            // ---- 4. Hold ----
-            if (!context.SkipRequested && spec.holdAfterReadySeconds > 0f)
-                yield return WaitUnscaled(spec.holdAfterReadySeconds);
-
-            // ---- 5. Uncover ----
-            if (context.SkipRequested)
-                _transitionTargetPlayer.SetInstant(target, spec.uncoveredAlpha, false);
-            else
-                yield return _transitionTargetPlayer.FadeTo(
-                    target,
-                    spec.uncoveredAlpha,
-                    spec.uncoverDuration,
-                    false,
-                    spec.uncoverEase);
-
-            context.MarkFinished();
+                spec.uncoveredAlpha,
+                false);
         }
-        finally
+
+        yield return _transitionTargetPlayer.FadeTo(
+            target,
+            spec.coveredAlpha,
+            spec.coverDuration,
+            spec.blockRaycastsWhileCovered,
+            spec.coverEase);
+
+        if (spec.holdAfterReadySeconds > 0f)
+            yield return WaitUnscaled(spec.holdAfterReadySeconds);
+
+        yield return _transitionTargetPlayer.FadeTo(
+            target,
+            spec.uncoveredAlpha,
+            spec.uncoverDuration,
+            false,
+            spec.uncoverEase);
+    }
+
+    public void SetCoveredInstant(TransitionCommandSpec spec)
+    {
+        if (spec == null)
+            return;
+
+        if (!_transitionTargetRouter.TryResolve(
+                spec.targetKind,
+                spec.customTargetKey,
+                out TransitionTargetHandle target))
         {
-            _activeContexts.Remove(scope);
+            Debug.LogWarning(
+                $"[TransitionCoordinator] Target not resolved. " +
+                $"kind={spec.targetKind}, customKey='{spec.customTargetKey}'");
+            return;
         }
+
+        _transitionTargetPlayer.SetInstant(
+            target,
+            spec.coveredAlpha,
+            spec.blockRaycastsWhileCovered);
     }
 
-    public void RequestSkip(CommandRunScope scope)
+    public void SetUncoveredInstant(TransitionCommandSpec spec)
     {
-        if (_activeContexts.TryGetValue(scope, out var ctx))
-            ctx.RequestSkip();
-    }
+        if (spec == null)
+            return;
 
-    public void RequestCancel(CommandRunScope scope)
-    {
-        if (_activeContexts.TryGetValue(scope, out var ctx))
-            ctx.RequestCancel();
-    }
-
-    private IEnumerator WaitForReady(TransitionContext context)
-    {
-        while (!context.IsReadyToUncover())
+        if (!_transitionTargetRouter.TryResolve(
+                spec.targetKind,
+                spec.customTargetKey,
+                out TransitionTargetHandle target))
         {
-            if (context.IsTimedOut())
-            {
-                HandleTimeout(context);
-                yield break;
-            }
-            yield return null;
+            Debug.LogWarning(
+                $"[TransitionCoordinator] Target not resolved. " +
+                $"kind={spec.targetKind}, customKey='{spec.customTargetKey}'");
+            return;
         }
 
-        context.MarkReadyCompleted();
+        _transitionTargetPlayer.SetInstant(
+            target,
+            spec.uncoveredAlpha,
+            false);
     }
 
-    private void HandleTimeout(TransitionContext context)
+    private void ApplySkipInstant(TransitionCommandSpec spec, TransitionTargetHandle target)
     {
-        Debug.LogWarning(
-            $"[TransitionCoordinator] Ready timeout. policy={context.Spec.timeoutPolicy}");
+        _transitionTargetPlayer.SetInstant(
+            target,
+            spec.coveredAlpha,
+            spec.blockRaycastsWhileCovered);
 
-        switch (context.Spec.timeoutPolicy)
-        {
-            case TransitionTimeoutPolicy.ForceUncover:
-                context.MarkReadyCompleted();
-                break;
-            case TransitionTimeoutPolicy.KeepCovered:
-                context.RequestSkip();
-                context.MarkReadyCompleted();
-                break;
-            case TransitionTimeoutPolicy.CancelTransition:
-                context.RequestCancel();
-                context.MarkReadyCompleted();
-                break;
-        }
+        _transitionTargetPlayer.SetInstant(
+            target,
+            spec.uncoveredAlpha,
+            false);
     }
 
     private static IEnumerator WaitUnscaled(float seconds)
     {
-        float t = 0f;
-        while (t < seconds)
+        float elapsed = 0f;
+
+        while (elapsed < seconds)
         {
-            t += Time.unscaledDeltaTime;
+            elapsed += Time.unscaledDeltaTime;
             yield return null;
         }
     }

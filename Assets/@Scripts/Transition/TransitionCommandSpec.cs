@@ -65,6 +65,5 @@ public sealed class TransitionCommand : CommandBase
 
     protected override void OnSkip(CommandRunScope scope)
     {
-        _coordinator.RequestSkip(scope);
     }
 }
