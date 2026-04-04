@@ -5,7 +5,6 @@ public sealed class AdvanceGate
 {
     private readonly VnUxState _vnUxState;
     private readonly VnPlaybackSettings _vnPlaybackSettings;
-    private readonly YarnLineLifecycleBridge _yarnLineLifecycleBridge;
     private readonly EllipsisBreathTypewriter _ellipsisBreathTypewriter;
     private readonly Func<bool> _isCpsNodeBusy;
 
@@ -24,13 +23,11 @@ public sealed class AdvanceGate
     public AdvanceGate(
         VnUxState uxState,
         VnPlaybackSettings vnPlaybackSettings,
-        YarnLineLifecycleBridge yarnLineLifecycleBridge,
         EllipsisBreathTypewriter ellipsisBreathTypewriter,
         Func<bool> isCpsNodeBusy)
     {
         _vnUxState = uxState;
         _vnPlaybackSettings = vnPlaybackSettings;
-        _yarnLineLifecycleBridge = yarnLineLifecycleBridge;
         _ellipsisBreathTypewriter = ellipsisBreathTypewriter;
         _isCpsNodeBusy = isCpsNodeBusy;
     }

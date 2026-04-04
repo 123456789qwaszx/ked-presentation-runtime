@@ -106,8 +106,8 @@ public sealed class FadeCommandCharR : CommandBase, IStepScopedCommand
         RectTransform rect = targets;
 
         CanvasGroup group = GetOrAddCanvasGroup(rect);
-        if (group == null)
-            group.DOKill(false);
+        
+        group.DOKill(false);
 
         group.alpha = toAlpha;
     }

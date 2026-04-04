@@ -135,7 +135,6 @@ public class VnAppBootstrap : MonoBehaviour
         AdvanceGate advanceGategate = new(
             _vnUxState,
             _vnPlaybackSettings,
-            yarnLineLifecycleBridge,
             ellipsisBreathTypewriter,
             () => session != null && session.IsNodeBusy()
         );

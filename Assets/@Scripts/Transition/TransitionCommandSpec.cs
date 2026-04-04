@@ -95,6 +95,9 @@ public sealed class TransitionCommand : CommandBase
         {
             case TransitionPlayMode.CoverOnly:
                 yield return PlayFade(cg, _spec.coveredAlpha, _spec.coverDuration, _spec.coverEase, false);
+                
+                if (_spec.holdCoveredSeconds > 0f)
+                    yield return WaitUnscaled(_spec.holdCoveredSeconds);
                 break;
 
             case TransitionPlayMode.UncoverOnly:

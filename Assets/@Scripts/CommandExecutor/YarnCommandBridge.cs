@@ -313,7 +313,8 @@ public sealed class YarnCommandBridge : MonoBehaviour
         var spec = new MoveByCommandSpecCharR
         {
             roleKey = roleKey,
-            delta = new Vector2(x, y)
+            delta = new Vector2(x, y),
+            duration =5f
         };
 
         Collect(spec);

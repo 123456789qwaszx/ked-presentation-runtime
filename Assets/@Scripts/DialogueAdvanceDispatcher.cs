@@ -62,7 +62,6 @@ public sealed class DialogueAdvanceDispatcher : MonoBehaviour
             _inlineMarkupHandler.FlushPendingSignals();
             _dialogueRunner.RequestHurryUpLine();
         }
-        // 이미 완료됐으면 아무것도 안 함 — Next는 OnLineFinishDisplaying이 담당
     }
 
     public void DispatchSeekNext()
