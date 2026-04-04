@@ -12,7 +12,7 @@ public sealed class TransitionTargetHandle
     public bool IsValid => canvasGroup != null;
 }
 
-public sealed class CanvasGroupTransitionPlayer : TransitionCoordinator.ITransitionTargetPlayer
+public sealed class CanvasGroupTransitionPlayer : ITransitionTargetPlayer
 {
     public void SetInstant(TransitionTargetHandle target, float alpha, bool blockRaycasts)
     {

@@ -54,7 +54,6 @@ public class VnAppBootstrap : MonoBehaviour
     private VnScreenBindings _screenBindings;
     private NodeRollbackHistory _rollbackHistory;
     private UIPatchService _uiPatchService;
-    private TransitionCoordinator  _transitionCoordinator;
     
     private void Awake()
     {
@@ -89,13 +88,12 @@ public class VnAppBootstrap : MonoBehaviour
         CharRigCommandFactory charRigFactory = new(charRigAccess, portraitResolver);
         
         // TransitionFactory
-        CanvasGroupTransitionPlayer canvasGroupTransitionPlayer = new();
-        _transitionCoordinator = new TransitionCoordinator(transitionTargetRouter, canvasGroupTransitionPlayer);
-        SpritePortAssignmentBuilder spritePortAssignmentBuilder = new();
-        ResourcesUISpriteLoader resourcesUISpriteLoader = new();
-        UISpritePatcher uiSpritePatcher = new(resourcesUISpriteLoader);
+        CanvasGroupTransitionPlayer canvasGroupTransitionPlayer = new ();
+        SpritePortAssignmentBuilder spritePortAssignmentBuilder = new ();
+        ResourcesUISpriteLoader resourcesUISpriteLoader = new ();
+        UISpritePatcher uiSpritePatcher = new (resourcesUISpriteLoader);
         _uiPatchService = new UIPatchService(spritePortAssignmentBuilder, uiSpritePatcher);
-        TransitionCommandFactory transitionCommandFactory = new(_transitionCoordinator, _uiPatchService);
+        TransitionCommandFactory transitionCommandFactory = new(transitionTargetRouter, canvasGroupTransitionPlayer, _uiPatchService);
         
         CompositeCommandFactory factory = new (signalFactory, charRigFactory, transitionCommandFactory);
         commandExecutor.Initialize(factory);
