@@ -2,11 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public interface ITransitionSwapParticipant
-{
-    void OnTransitionSwapEntered(TransitionContext context);
-}
-
 public sealed class TransitionCoordinator
 {
     public interface ITransitionTargetRouter
@@ -22,18 +17,15 @@ public sealed class TransitionCoordinator
     
     private readonly ITransitionTargetRouter _transitionTargetRouter;
     private readonly ITransitionTargetPlayer _transitionTargetPlayer;
-    private readonly List<ITransitionSwapParticipant> _participants;
 
     private readonly Dictionary<CommandRunScope, TransitionContext> _activeContexts = new();
 
     public TransitionCoordinator(
         ITransitionTargetRouter transitionTargetRouter,
-        ITransitionTargetPlayer transitionTargetPlayer,
-        List<ITransitionSwapParticipant> participants = null)
+        ITransitionTargetPlayer transitionTargetPlayer)
     {
         _transitionTargetRouter = transitionTargetRouter;
         _transitionTargetPlayer = transitionTargetPlayer;
-        _participants = participants ?? new List<ITransitionSwapParticipant>();
     }
     
     public IEnumerator Play(TransitionCommandSpec spec, CommandRunScope scope)
@@ -59,7 +51,6 @@ public sealed class TransitionCoordinator
                 // cover -> swap -> ready -> uncover, with no tween or wait.
                 _transitionTargetPlayer.SetInstant(target, spec.coveredAlpha, spec.blockRaycastsWhileCovered);
                 context.MarkCoverCompleted();
-                NotifyParticipants(context);
                 context.MarkSwapEntered();
                 context.MarkReadyCompleted();
                 _transitionTargetPlayer.SetInstant(target, spec.uncoveredAlpha, false);
@@ -78,7 +69,6 @@ public sealed class TransitionCoordinator
             context.MarkCoverCompleted();
 
             // ---- 2. Swap 진입 알림 ----
-            NotifyParticipants(context);
             context.MarkSwapEntered();
 
             // ---- 3. Ready 대기 ----
@@ -124,27 +114,6 @@ public sealed class TransitionCoordinator
     {
         if (_activeContexts.TryGetValue(scope, out var ctx))
             ctx.RequestCancel();
-    }
-    
-    public void RegisterParticipant(ITransitionSwapParticipant participant)
-    {
-        if (!_participants.Contains(participant))
-            _participants.Add(participant);
-    }
-
-    public void UnregisterParticipant(ITransitionSwapParticipant participant)
-    {
-        _participants.Remove(participant);
-    }
-    
-
-    private void NotifyParticipants(TransitionContext context)
-    {
-        for (int i = 0; i < _participants.Count; i++)
-        {
-            try { _participants[i]?.OnTransitionSwapEntered(context); }
-            catch (System.Exception e) { Debug.LogException(e); }
-        }
     }
 
     private IEnumerator WaitForReady(TransitionContext context)
