@@ -24,10 +24,11 @@ public sealed class UISpritePatcher
         {
             SpritePortAssignment patch = patches[i];
 
-            if (!_loader.TryGetCached(patch.spriteAddress, out Sprite sprite))
+            if (_loader.TryGetCached(patch.spriteAddress, out Sprite cachedSprite))
+            {
+                targetUI.TrySetSprite(patch.portId, cachedSprite);
                 continue;
-
-            targetUI.TrySetSprite(patch.portId, sprite);
+            }
         }
 
         yield break;

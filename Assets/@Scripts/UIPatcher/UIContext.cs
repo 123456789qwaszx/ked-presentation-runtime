@@ -12,5 +12,5 @@ public struct UIContext
     }
 
     public static UIContext Default =>
-        new UIContext("Light", "ko-KR");
+        new UIContext("default", "ko-KR");
 }
