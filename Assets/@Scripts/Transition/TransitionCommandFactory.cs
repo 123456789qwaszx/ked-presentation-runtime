@@ -1,38 +1,23 @@
 using System.Collections;
 using UnityEngine;
 
-public interface ITransitionTargetRouter
-{
-    bool TryResolve(
-        TransitionTargetKind kind,
-        string customTargetKey,
-        out TransitionTargetHandle handle);
-}
 
 public interface ITransitionTargetPlayer
 {
-    void SetInstant(
-        TransitionTargetHandle target,
-        float alpha,
-        bool blockRaycasts);
+    void SetInstant(TransitionTargetHandle target, float alpha, bool blockRaycasts);
 
-    IEnumerator FadeTo(
-        TransitionTargetHandle target,
-        float targetAlpha,
-        float duration,
-        bool blockRaycasts,
-        AnimationCurve ease);
+    IEnumerator FadeTo(TransitionTargetHandle target, float targetAlpha, float duration, bool blockRaycasts, AnimationCurve ease);
 }
 
 
 public sealed class TransitionCommandFactory : INodeCommandFactory
 {
-    private readonly ITransitionTargetRouter _transitionTargetRouter;
+    private readonly TransitionTargetRouter _transitionTargetRouter;
     private readonly ITransitionTargetPlayer _transitionTargetPlayer;
     private readonly UIPatchService _uiPatchService;
 
     public TransitionCommandFactory(
-        ITransitionTargetRouter transitionTargetRouter,
+        TransitionTargetRouter transitionTargetRouter,
         ITransitionTargetPlayer transitionTargetPlayer,
         UIPatchService uiPatchService)
     {

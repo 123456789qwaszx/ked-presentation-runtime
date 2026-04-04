@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public sealed class TransitionTargetRouter : MonoBehaviour, ITransitionTargetRouter
+public sealed class TransitionTargetRouter : MonoBehaviour
 {
     [SerializeField] private TransitionTargetBinding[] transitionTargets;
 

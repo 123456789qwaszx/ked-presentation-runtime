@@ -2,10 +2,20 @@ using System;
 using System.Collections;
 using UnityEngine;
 
+public enum TransitionPlayMode
+{
+    CoverOnly,
+    UncoverOnly,
+    CoverThenUncover,
+}
+
 [Serializable]
 [CommandMenuHint("Transition", "Play Transition", Order = -950)]
 public sealed class TransitionCommandSpec : CommandSpecBase
 {
+    [Header("Mode")]
+    public TransitionPlayMode playMode = TransitionPlayMode.CoverThenUncover;
+
     [Header("Target")]
     public TransitionTargetKind targetKind = TransitionTargetKind.Blackout;
     public string customTargetKey = "";
@@ -24,157 +34,123 @@ public sealed class TransitionCommandSpec : CommandSpecBase
     [Min(0f)]
     public float uncoverDuration = 0.20f;
 
-    [Tooltip("화면이 완전히 덮인 뒤, 다시 열기 전에 유지할 시간.")]
+    [Tooltip("CoverThenUncover 모드에서, 화면이 완전히 닫힌 뒤 유지할 시간.")]
     [Min(0f)]
-    public float holdCoveredSeconds = 0.5f;
+    public float holdCoveredSeconds = 0f;
 
     [Header("Ease")]
     public AnimationCurve coverEase = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
     public AnimationCurve uncoverEase = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
 
     [Header("Playback")]
-    [Tooltip("체크하면 전환이 끝날 때까지 Step 진행을 멈춥니다.")]
+    [Tooltip("체크하면 이 커맨드의 재생이 끝날 때까지 Step 진행을 멈춥니다.")]
     public bool wait = true;
 
-    [Header("Options")]
-    [Tooltip("덮인 동안 Raycast를 막습니다.")]
-    public bool blockRaycastsWhileCovered = true;
-
-    [Tooltip("시작 전에 강제로 열린 상태(uncoveredAlpha)로 초기화합니다.")]
+    [Tooltip("시작 시 uncoveredAlpha 상태로 초기화합니다.")]
     public bool resetToOpenAtStart = true;
 }
 
 public sealed class TransitionCommand : CommandBase
 {
     private readonly TransitionCommandSpec _spec;
-    private readonly ITransitionTargetRouter _targetRouter;
-    private readonly ITransitionTargetPlayer _targetPlayer;
+    private readonly TransitionTargetRouter _targetRouter;
+    private readonly ITransitionTargetPlayer _transitionPlayer;
 
     public override bool WaitForCompletion => _spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
     public TransitionCommand(
-        ITransitionTargetRouter targetRouter,
-        ITransitionTargetPlayer targetPlayer,
+        TransitionTargetRouter targetRouter,
+        ITransitionTargetPlayer transitionPlayer,
         TransitionCommandSpec spec)
     {
         _targetRouter = targetRouter;
-        _targetPlayer = targetPlayer;
+        _transitionPlayer = transitionPlayer;
         _spec = spec;
     }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
-        if (_spec == null)
-            yield break;
+        _targetRouter.TryResolve(_spec.targetKind, _spec.customTargetKey,
+            out TransitionTargetHandle target);
 
-        if (_targetRouter == null || _targetPlayer == null)
-        {
-            Debug.LogWarning("[TransitionCommand] Router or Player is null.");
-            yield break;
-        }
+        if (_spec.resetToOpenAtStart && (_spec.playMode == TransitionPlayMode.CoverOnly || _spec.playMode == TransitionPlayMode.CoverThenUncover))
+            _transitionPlayer.SetInstant(target, _spec.uncoveredAlpha, false);
 
-        if (!_targetRouter.TryResolve(
-                _spec.targetKind,
-                _spec.customTargetKey,
-                out TransitionTargetHandle target))
+        if (scope.IsSkipping)
         {
-            Debug.LogWarning(
-                $"[TransitionCommand] Target not resolved. " +
-                $"kind={_spec.targetKind}, customKey='{_spec.customTargetKey}'");
+            ApplySkipInstant(target, _spec.playMode);
             yield break;
         }
 
-        if (_spec.resetToOpenAtStart)
+        switch (_spec.playMode)
         {
-            _targetPlayer.SetInstant(
-                target,
-                _spec.uncoveredAlpha,
-                false);
+            case TransitionPlayMode.CoverOnly:
+                yield return Cover(target);
+                break;
+
+            case TransitionPlayMode.UncoverOnly:
+                yield return Uncover(target);
+                break;
+
+            case TransitionPlayMode.CoverThenUncover:
+                yield return Cover(target);
+
+                if (_spec.holdCoveredSeconds > 0f)
+                    yield return WaitUnscaled(_spec.holdCoveredSeconds);
+
+                yield return Uncover(target);
+                break;
         }
-
-        if (scope != null && scope.IsSkipping)
-        {
-            ApplySkipInstant(target);
-            yield break;
-        }
-
-        yield return Cover(target);
-
-        if (_spec.holdCoveredSeconds > 0f)
-            yield return WaitUnscaled(_spec.holdCoveredSeconds);
-
-        yield return Uncover(target);
     }
 
     protected override void OnSkip(CommandRunScope scope)
     {
-        if (_spec == null)
-            return;
+        _targetRouter.TryResolve(_spec.targetKind, _spec.customTargetKey, 
+            out TransitionTargetHandle target);
 
-        if (_targetRouter == null || _targetPlayer == null)
-            return;
-
-        if (!_targetRouter.TryResolve(
-                _spec.targetKind,
-                _spec.customTargetKey,
-                out TransitionTargetHandle target))
-        {
-            return;
-        }
-
-        ApplySkipInstant(target);
+        ApplySkipInstant(target, _spec.playMode);
     }
 
     private IEnumerator Cover(TransitionTargetHandle target)
     {
         if (_spec.coverDuration <= 0f)
         {
-            _targetPlayer.SetInstant(
-                target,
-                _spec.coveredAlpha,
-                _spec.blockRaycastsWhileCovered);
+            _transitionPlayer.SetInstant(target, _spec.coveredAlpha, false);
             yield break;
         }
 
-        yield return _targetPlayer.FadeTo(
-            target,
-            _spec.coveredAlpha,
-            _spec.coverDuration,
-            _spec.blockRaycastsWhileCovered,
-            _spec.coverEase);
+        yield return _transitionPlayer.FadeTo(target, _spec.coveredAlpha, _spec.coverDuration, false, _spec.coverEase);
     }
 
     private IEnumerator Uncover(TransitionTargetHandle target)
     {
         if (_spec.uncoverDuration <= 0f)
         {
-            _targetPlayer.SetInstant(
-                target,
-                _spec.uncoveredAlpha,
-                false);
+            _transitionPlayer.SetInstant(target, _spec.uncoveredAlpha, false);
             yield break;
         }
 
-        yield return _targetPlayer.FadeTo(
-            target,
-            _spec.uncoveredAlpha,
-            _spec.uncoverDuration,
-            false,
-            _spec.uncoverEase);
+        yield return _transitionPlayer.FadeTo(target, _spec.uncoveredAlpha, _spec.uncoverDuration, false, _spec.uncoverEase);
     }
 
-    private void ApplySkipInstant(TransitionTargetHandle target)
+    private void ApplySkipInstant(TransitionTargetHandle target, TransitionPlayMode mode)
     {
-        _targetPlayer.SetInstant(
-            target,
-            _spec.coveredAlpha,
-            _spec.blockRaycastsWhileCovered);
+        switch (mode)
+        {
+            case TransitionPlayMode.CoverOnly:
+                _transitionPlayer.SetInstant(target, _spec.coveredAlpha, false);
+                break;
 
-        _targetPlayer.SetInstant(
-            target,
-            _spec.uncoveredAlpha,
-            false);
+            case TransitionPlayMode.UncoverOnly:
+                _transitionPlayer.SetInstant(target, _spec.uncoveredAlpha, false);
+                break;
+
+            case TransitionPlayMode.CoverThenUncover:
+                _transitionPlayer.SetInstant(target, _spec.coveredAlpha, false);
+                _transitionPlayer.SetInstant(target, _spec.uncoveredAlpha, false);
+                break;
+        }
     }
 
     private static IEnumerator WaitUnscaled(float seconds)
