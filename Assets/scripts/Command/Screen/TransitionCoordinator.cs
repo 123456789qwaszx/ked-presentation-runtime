@@ -2,93 +2,75 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+public interface ITransitionSwapParticipant
+{
+    void OnTransitionSwapEntered(TransitionContext context);
+}
+
 public sealed class TransitionCoordinator
 {
-    private readonly ITransitionTargetRouter _router;
-    private readonly ITransitionTargetPlayer _player;
+    public interface ITransitionTargetRouter
+    {
+        bool TryResolve(TransitionTargetKind kind, string customTargetKey, out TransitionTargetHandle handle);
+    }
+    
+    public interface ITransitionTargetPlayer
+    {
+        void SetInstant(TransitionTargetHandle target, float alpha, bool blockRaycasts);
+        IEnumerator FadeTo(TransitionTargetHandle target, float targetAlpha, float duration, bool blockRaycasts, AnimationCurve ease);
+    }
+    
+    private readonly ITransitionTargetRouter _transitionTargetRouter;
+    private readonly ITransitionTargetPlayer _transitionTargetPlayer;
     private readonly List<ITransitionSwapParticipant> _participants;
 
     private readonly Dictionary<CommandRunScope, TransitionContext> _activeContexts = new();
 
     public TransitionCoordinator(
-        ITransitionTargetRouter router,
-        ITransitionTargetPlayer player,
+        ITransitionTargetRouter transitionTargetRouter,
+        ITransitionTargetPlayer transitionTargetPlayer,
         List<ITransitionSwapParticipant> participants = null)
     {
-        _router       = router;
-        _player       = player;
+        _transitionTargetRouter = transitionTargetRouter;
+        _transitionTargetPlayer = transitionTargetPlayer;
         _participants = participants ?? new List<ITransitionSwapParticipant>();
     }
-
-    public void RegisterParticipant(ITransitionSwapParticipant participant)
-    {
-        if (participant != null && !_participants.Contains(participant))
-            _participants.Add(participant);
-    }
-
-    public void UnregisterParticipant(ITransitionSwapParticipant participant)
-    {
-        _participants.Remove(participant);
-    }
-
-    /// <summary>
-    /// CommandBase.ExecuteInner에서 yield return으로 호출.
-    /// wait 여부는 CommandBase.WaitForCompletion이 결정하므로 여기선 항상 전체 흐름을 실행.
-    /// </summary>
+    
     public IEnumerator Play(TransitionCommandSpec spec, CommandRunScope scope)
     {
-        yield return PlayInternal(spec, scope);
-    }
-
-    public void RequestSkip(CommandRunScope scope)
-    {
-        if (_activeContexts.TryGetValue(scope, out var ctx))
-            ctx.RequestSkip();
-    }
-
-    public void RequestCancel(CommandRunScope scope)
-    {
-        if (_activeContexts.TryGetValue(scope, out var ctx))
-            ctx.RequestCancel();
-    }
-
-    private IEnumerator PlayInternal(TransitionCommandSpec spec, CommandRunScope scope)
-    {
-        if (!_router.TryResolve(spec.targetKind, spec.customTargetKey, out var target)
-            || target == null || !target.IsValid)
+        Debug.Log($"Start playing {spec}");
+        if (!_transitionTargetRouter.TryResolve(spec.targetKind, spec.customTargetKey, out TransitionTargetHandle target))
         {
-            if (spec.warnIfTargetMissing)
-                Debug.LogWarning(
-                    $"[TransitionCoordinator] Target not resolved. " +
-                    $"kind={spec.targetKind}, customKey='{spec.customTargetKey}'");
+            Debug.LogWarning($"[TransitionCoordinator] Target not resolved. kind={spec.targetKind}, customKey='{spec.customTargetKey}'");
             yield break;
         }
+        
+        Debug.Log($"Start??");
+        // Start from alpha 0, then cover fades 0 -> 1.
+        if (spec.resetToOpenAtStart)
+            _transitionTargetPlayer.SetInstant(target, spec.uncoveredAlpha, false);
 
-        if (spec.setInitialUncoveredState)
-            _player.SetInstant(target, spec.uncoveredAlpha, false);
-
-        var context = new TransitionContext(spec, target, scope);
-
-        if (scope != null)
-            _activeContexts[scope] = context;
+        TransitionContext context = new (spec, target, scope);
+        _activeContexts[scope] = context;
 
         try
         {
-            // ---- Skip 패스 ----
-            if (scope != null && scope.IsSkipping)
+            if (scope.IsSkipping)
             {
-                _player.SetInstant(target, spec.coveredAlpha, spec.blockRaycastsWhileCovered);
+                // If already skipping, collapse the whole transition into one instant pass:
+                // cover -> swap -> ready -> uncover, with no tween or wait.
+                _transitionTargetPlayer.SetInstant(target, spec.coveredAlpha, spec.blockRaycastsWhileCovered);
                 context.MarkCoverCompleted();
                 NotifyParticipants(context);
                 context.MarkSwapEntered();
                 context.MarkReadyCompleted();
-                _player.SetInstant(target, spec.uncoveredAlpha, false);
+                _transitionTargetPlayer.SetInstant(target, spec.uncoveredAlpha, false);
                 context.MarkFinished();
                 yield break;
             }
 
             // ---- 1. Cover ----
-            yield return _player.FadeTo(
+            yield return _transitionTargetPlayer.FadeTo(
                 target,
                 spec.coveredAlpha,
                 spec.coverDuration,
@@ -106,7 +88,7 @@ public sealed class TransitionCoordinator
 
             if (context.CancelRequested)
             {
-                _player.SetInstant(target, spec.uncoveredAlpha, false);
+                _transitionTargetPlayer.SetInstant(target, spec.uncoveredAlpha, false);
                 context.MarkFinished();
                 yield break;
             }
@@ -117,9 +99,9 @@ public sealed class TransitionCoordinator
 
             // ---- 5. Uncover ----
             if (context.SkipRequested)
-                _player.SetInstant(target, spec.uncoveredAlpha, false);
+                _transitionTargetPlayer.SetInstant(target, spec.uncoveredAlpha, false);
             else
-                yield return _player.FadeTo(
+                yield return _transitionTargetPlayer.FadeTo(
                     target,
                     spec.uncoveredAlpha,
                     spec.uncoverDuration,
@@ -130,10 +112,35 @@ public sealed class TransitionCoordinator
         }
         finally
         {
+            Debug.Log($"Final");
             if (scope != null)
                 _activeContexts.Remove(scope);
         }
     }
+
+    public void RequestSkip(CommandRunScope scope)
+    {
+        if (_activeContexts.TryGetValue(scope, out var ctx))
+            ctx.RequestSkip();
+    }
+
+    public void RequestCancel(CommandRunScope scope)
+    {
+        if (_activeContexts.TryGetValue(scope, out var ctx))
+            ctx.RequestCancel();
+    }
+    
+    public void RegisterParticipant(ITransitionSwapParticipant participant)
+    {
+        if (!_participants.Contains(participant))
+            _participants.Add(participant);
+    }
+
+    public void UnregisterParticipant(ITransitionSwapParticipant participant)
+    {
+        _participants.Remove(participant);
+    }
+    
 
     private void NotifyParticipants(TransitionContext context)
     {

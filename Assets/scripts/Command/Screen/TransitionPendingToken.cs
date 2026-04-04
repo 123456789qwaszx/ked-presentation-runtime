@@ -56,9 +56,7 @@ public sealed class TransitionContext
         StartedRealtime = Time.unscaledTime;
     }
 
-    /// <summary>
-    /// 준비 작업을 등록. 반환된 token을 Release() 하면 pending 해제.
-    /// </summary>
+    // 준비 작업을 등록. 반환된 token을 Release() 하면 pending 해제.
     public TransitionPendingToken RegisterPending(string owner, string reason)
     {
         var token = new TransitionPendingToken(this, owner, reason);

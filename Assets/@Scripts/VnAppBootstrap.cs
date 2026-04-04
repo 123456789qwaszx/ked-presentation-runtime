@@ -44,6 +44,9 @@ public class VnAppBootstrap : MonoBehaviour
     [Header("UI")]
     [SerializeField] private EpisodePlayer episodePlayer;
     
+    [Header("Transition")]
+    [SerializeField] private TransitionTargetRouter transitionTargetRouter;
+    
     private PresentationSessionBridge _presentationSessionBridge;
     
     private DialogueUIBindings _dialogueUIBindings;
@@ -64,7 +67,8 @@ public class VnAppBootstrap : MonoBehaviour
         
         BootstrapUIBindings();
         InitializeEpisodePlayer();
-        
+
+
     }
     
     private void BootstrapPresentationSession()
@@ -75,20 +79,27 @@ public class VnAppBootstrap : MonoBehaviour
         StepGatePlanBuilder gatePlanner = new ();
         StepGateAdvancer gateAdvancer = new (_unityInputSource, _unityTimeSource, unitySignalBus, signalLatch);
         
+        // SignalFactory
         SignalCommandFactory signalFactory = new(_unityTimeSource, unitySignalBus, signalLatch);
+        
+        // CharRigFactory
         CharRigSlotResolver charRigSlotResolver = new();
         CharacterRigAccess charRigAccess = new(charRigSlotResolver);
         PortraitResolver portraitResolver = new (portraitGeneratedDbSo);
         CharRigCommandFactory charRigFactory = new(charRigAccess, portraitResolver);
         
-        CompositeCommandFactory factory = new (signalFactory, charRigFactory);
+        // TransitionFactory
+        CanvasGroupTransitionPlayer canvasGroupTransitionPlayer = new();
+        TransitionCoordinator transitionCoordinator = new(transitionTargetRouter, canvasGroupTransitionPlayer);
+        TransitionCommandFactory transitionCommandFactory = new(transitionCoordinator);
+        
+        CompositeCommandFactory factory = new (signalFactory, charRigFactory, transitionCommandFactory);
         commandExecutor.Initialize(factory);
         
         PresentationSession presentationSession = new PresentationSession(gatePlanner, gateAdvancer, commandExecutor, _presentationContextSettings);
         
         presentationSessionEntry.Initialize(presentationSession, routeCatalogSo, _presentationContextSettings);
     }
-
     
     private void ConnectPresentationSessionToYarn()
     {
@@ -106,7 +117,7 @@ public class VnAppBootstrap : MonoBehaviour
         YarnCommandRegistry yarnCommandRegistry = new YarnCommandRegistry(dialogueRunner, yarnUIBridge, vnRuntimeBridge);
         yarnCommandRegistry.Initialize();
         
-        yarnCommandBridge.Initialize(dialogueRunner);
+        yarnCommandBridge.RegisterYarnCommands(dialogueRunner);
         yarnBridgePlaybackDriver.Initialize(yarnCommandBridge, commandExecutor, _presentationContextSettings);
         yarnLineRuntimePresenter.Initialize(dialogueRunner, yarnCommandBridge, yarnBridgePlaybackDriver);
     }

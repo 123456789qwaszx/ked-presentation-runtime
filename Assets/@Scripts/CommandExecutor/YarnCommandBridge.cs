@@ -11,43 +11,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
 
     private int _pendingImmediateWaitCount;
     private readonly List<CommandSpecBase> _collectedSpecs = new();
-
-
-    public void Initialize(DialogueRunner dialogueRunner)
-    {
-        _dialogueRunner = dialogueRunner;
-
-        _dialogueRunner.AddCommandHandler<string>("destroy", DestroyCommand);
-        _dialogueRunner.AddCommandHandler<int>("await_for", WaitNextImmediateCommands);
-        
-        _dialogueRunner.AddCommandHandler<string>("slot_boxside", SetSpeakerSlot);
-        _dialogueRunner.AddCommandHandler<string>("slot", SetCharSlot);
-        _dialogueRunner.AddCommandHandler<string, string>("place", SetAnchorPosition);
-        _dialogueRunner.AddCommandHandler<string, int, int>("place_offset", SetAnchorOffset);
-        _dialogueRunner.AddCommandHandler<string, float>("scale", SetOriginSize);
-        
-        _dialogueRunner.AddCommandHandler<string, string>("slide_in", SlideIn);
-        _dialogueRunner.AddCommandHandler<string, string>("slide_out", SlideOut);
-        _dialogueRunner.AddCommandHandler<string, string>("slide_in_bouncy", BouncySlideIn);
-
-        _dialogueRunner.AddCommandHandler<string>("fade_in", FadeIn);
-        _dialogueRunner.AddCommandHandler<string>("fade_out", FadeOut);
-
-        _dialogueRunner.AddCommandHandler<string, float, float>("move_by", MoveBy);
-        _dialogueRunner.AddCommandHandler<string, string>("dip", DipInOut);
-
-        _dialogueRunner.AddCommandHandler<string, string>("hop_in", HopIn);
-
-        _dialogueRunner.AddCommandHandler<string, string>("jolt", NudgeJolt);
-        _dialogueRunner.AddCommandHandler<string, string>("shake", NudgeShake);
-        _dialogueRunner.AddCommandHandler<string, string>("nudge", NudgeTap);
-        _dialogueRunner.AddCommandHandler<string, string>("nudge_hard", NudgeTapHard);
-        
-        _dialogueRunner.AddCommandHandler<string, string>("slide_in_nudge", NudgeSlideIn);
-
-        _dialogueRunner.AddCommandHandler<string, string>("cast", SetPortrait);
-    }
-
+    
     #region collected specs
 
     private void WaitNextImmediateCommands(int count = 1) => _pendingImmediateWaitCount = Mathf.Max(0, count);
@@ -170,7 +134,56 @@ public sealed class YarnCommandBridge : MonoBehaviour
     }
     
     #endregion
+    
+    public void RegisterYarnCommands(DialogueRunner dialogueRunner)
+    {
+        _dialogueRunner = dialogueRunner;
 
+        _dialogueRunner.AddCommandHandler<string>("destroy", DestroyCommand);
+        _dialogueRunner.AddCommandHandler<int>("await_for", WaitNextImmediateCommands);
+        
+        _dialogueRunner.AddCommandHandler<string>("slot_boxside", SetSpeakerSlot);
+        _dialogueRunner.AddCommandHandler<string>("slot", SetCharSlot);
+        _dialogueRunner.AddCommandHandler<string, string>("place", SetAnchorPosition);
+        _dialogueRunner.AddCommandHandler<string, int, int>("place_offset", SetAnchorOffset);
+        _dialogueRunner.AddCommandHandler<string, float>("scale", SetOriginSize);
+        
+        _dialogueRunner.AddCommandHandler<string, string>("slide_in", SlideIn);
+        _dialogueRunner.AddCommandHandler<string, string>("slide_out", SlideOut);
+        _dialogueRunner.AddCommandHandler<string, string>("slide_in_bouncy", BouncySlideIn);
+
+        _dialogueRunner.AddCommandHandler<string>("fade_in", FadeIn);
+        _dialogueRunner.AddCommandHandler<string>("fade_out", FadeOut);
+
+        _dialogueRunner.AddCommandHandler<string, float, float>("move_by", MoveBy);
+        _dialogueRunner.AddCommandHandler<string, string>("dip", DipInOut);
+
+        _dialogueRunner.AddCommandHandler<string, string>("hop_in", HopIn);
+
+        _dialogueRunner.AddCommandHandler<string, string>("jolt", NudgeJolt);
+        _dialogueRunner.AddCommandHandler<string, string>("shake", NudgeShake);
+        _dialogueRunner.AddCommandHandler<string, string>("nudge", NudgeTap);
+        _dialogueRunner.AddCommandHandler<string, string>("nudge_hard", NudgeTapHard);
+        
+        _dialogueRunner.AddCommandHandler<string, string>("slide_in_nudge", NudgeSlideIn);
+
+        _dialogueRunner.AddCommandHandler<string, string>("cast", SetPortrait);
+        
+        
+        _dialogueRunner.AddCommandHandler("blackout", ScreedBlackout);
+    }
+    
+    
+    private void ScreedBlackout()
+    {
+        var spec = new TransitionCommandSpec
+        {
+            targetKind = TransitionTargetKind.Blackout
+        };
+
+        Collect(spec);
+    }
+    
     private void DestroyCommand(string roleKey)
     {
         var spec = new DestroyCommandSpec

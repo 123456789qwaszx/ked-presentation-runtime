@@ -2,15 +2,6 @@ using System;
 using UnityEngine;
 using System.Collections;
 
-public enum TransitionTargetKind
-{
-    Blackout,
-    WhiteFlash,
-    BroadcastOverlay,
-    MemoryOverlay,
-    Custom,
-}
-
 public enum TransitionTimeoutPolicy
 {
     ForceUncover,
@@ -33,7 +24,7 @@ public sealed class TransitionCommandSpec : CommandSpecBase
     [Header("Durations")]
     public float coverDuration = 0.20f;
     public float uncoverDuration = 0.20f;
-    public float holdAfterReadySeconds = 0f;
+    public float holdAfterReadySeconds = 0.5f;
 
     [Header("Ease")]
     public AnimationCurve coverEase = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
@@ -42,15 +33,14 @@ public sealed class TransitionCommandSpec : CommandSpecBase
     [Header("Wait")]
     public bool wait = true;
 
-    [Header("Ready Wait")]
+    [Header("Ready Wait [Default:3sec]")]
     [Tooltip("0 이하이면 무한 대기. 0보다 크면 타임아웃 적용.")]
-    public float readyTimeoutSeconds = 0f;
+    public float readyTimeoutSeconds = 3f;
     public TransitionTimeoutPolicy timeoutPolicy = TransitionTimeoutPolicy.ForceUncover;
 
     [Header("Options")]
     public bool blockRaycastsWhileCovered = true;
-    public bool setInitialUncoveredState = true;
-    public bool warnIfTargetMissing = true;
+    public bool resetToOpenAtStart = true;
 }
 
 

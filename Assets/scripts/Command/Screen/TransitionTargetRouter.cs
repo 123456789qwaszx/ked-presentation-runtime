@@ -1,31 +1,17 @@
-using System;
 using UnityEngine;
 
-[Serializable]
-public sealed class TransitionTargetBinding
+public sealed class TransitionTargetRouter : MonoBehaviour, TransitionCoordinator.ITransitionTargetRouter
 {
-    public TransitionTargetKind kind = TransitionTargetKind.Blackout;
-    public string customTargetKey = "";
-    public CanvasGroup canvasGroup;
-}
+    [SerializeField] private TransitionTargetBinding[] transitionTargets;
 
-public sealed class TransitionTargetRouter : MonoBehaviour, ITransitionTargetRouter
-{
-    [SerializeField] private TransitionTargetBinding[] _bindings;
-
-    public bool TryResolve(
-        TransitionTargetKind kind,
-        string customTargetKey,
-        out TransitionTargetHandle handle)
+    public bool TryResolve(TransitionTargetKind kind, string customTargetKey, out TransitionTargetHandle handle)
     {
         handle = null;
 
-        if (_bindings == null || _bindings.Length == 0)
+        if (transitionTargets == null || transitionTargets.Length == 0)
             return false;
 
-        string normalizedCustomKey = Normalize(customTargetKey);
-
-        foreach (var binding in _bindings)
+        foreach (var binding in transitionTargets)
         {
             if (binding == null || binding.canvasGroup == null)
                 continue;
@@ -35,27 +21,28 @@ public sealed class TransitionTargetRouter : MonoBehaviour, ITransitionTargetRou
 
             if (kind == TransitionTargetKind.Custom)
             {
-                if (Normalize(binding.customTargetKey) != normalizedCustomKey)
+                if (binding.customTargetKey != customTargetKey)
                     continue;
             }
 
             handle = new TransitionTargetHandle
             {
-                kind     = kind,
+                kind = kind,
                 routeKey = BuildRouteKey(kind, customTargetKey),
                 canvasGroup = binding.canvasGroup,
             };
             return true;
         }
 
+        Debug.Log($"[TransitionTargetRouter] Resolve failed: kind={kind}, key={customTargetKey}");
         return false;
     }
 
-    private static string Normalize(string value)
-        => string.IsNullOrWhiteSpace(value) ? string.Empty : value.Trim().ToLowerInvariant();
-
-    private static string BuildRouteKey(TransitionTargetKind kind, string customTargetKey)
-        => kind != TransitionTargetKind.Custom
-            ? kind.ToString()
-            : "Custom:" + Normalize(customTargetKey);
+    private string BuildRouteKey(TransitionTargetKind kind, string customTargetKey)
+    {
+        if (kind == TransitionTargetKind.Custom)
+            return customTargetKey;
+            
+        return kind.ToString();
+    }
 }

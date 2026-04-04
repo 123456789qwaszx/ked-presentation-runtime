@@ -1,29 +1,34 @@
+using System;
 using System.Collections;
 using UnityEngine;
 
-public sealed class CanvasGroupTransitionPlayer : ITransitionTargetPlayer
+[Serializable]
+public sealed class TransitionTargetHandle
+{
+    public string routeKey;
+    public TransitionTargetKind kind;
+    public CanvasGroup canvasGroup;
+
+    public bool IsValid => canvasGroup != null;
+}
+
+public sealed class CanvasGroupTransitionPlayer : TransitionCoordinator.ITransitionTargetPlayer
 {
     public void SetInstant(TransitionTargetHandle target, float alpha, bool blockRaycasts)
     {
-        if (target == null || !target.IsValid) return;
-
-        var cg = target.canvasGroup;
+        CanvasGroup cg = target.canvasGroup;
+        
         cg.alpha          = Mathf.Clamp01(alpha);
         cg.blocksRaycasts = blockRaycasts;
         cg.interactable   = false;
     }
 
-    public IEnumerator FadeTo(
-        TransitionTargetHandle target,
-        float targetAlpha,
-        float duration,
-        bool blockRaycasts,
-        AnimationCurve ease)
+    public IEnumerator FadeTo(TransitionTargetHandle target, float targetAlpha, float duration, bool blockRaycasts, AnimationCurve ease)
     {
         if (target == null || !target.IsValid)
             yield break;
 
-        var cg = target.canvasGroup;
+        CanvasGroup cg = target.canvasGroup;
         targetAlpha = Mathf.Clamp01(targetAlpha);
 
         if (duration <= 0.0001f)
