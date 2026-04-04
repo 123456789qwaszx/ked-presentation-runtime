@@ -53,6 +53,8 @@ public class VnAppBootstrap : MonoBehaviour
     private EpisodeFlowController _episodeFlowController;
     private VnScreenBindings _screenBindings;
     private NodeRollbackHistory _rollbackHistory;
+    private UIPatchService _uiPatchService;
+    private TransitionCoordinator  _transitionCoordinator;
     
     private void Awake()
     {
@@ -67,8 +69,6 @@ public class VnAppBootstrap : MonoBehaviour
         
         BootstrapUIBindings();
         InitializeEpisodePlayer();
-
-
     }
     
     private void BootstrapPresentationSession()
@@ -90,8 +90,12 @@ public class VnAppBootstrap : MonoBehaviour
         
         // TransitionFactory
         CanvasGroupTransitionPlayer canvasGroupTransitionPlayer = new();
-        TransitionCoordinator transitionCoordinator = new(transitionTargetRouter, canvasGroupTransitionPlayer);
-        TransitionCommandFactory transitionCommandFactory = new(transitionCoordinator);
+        _transitionCoordinator = new TransitionCoordinator(transitionTargetRouter, canvasGroupTransitionPlayer);
+        SpritePortAssignmentBuilder spritePortAssignmentBuilder = new();
+        ResourcesUISpriteLoader resourcesUISpriteLoader = new();
+        UISpritePatcher uiSpritePatcher = new(resourcesUISpriteLoader);
+        _uiPatchService = new UIPatchService(spritePortAssignmentBuilder, uiSpritePatcher);
+        TransitionCommandFactory transitionCommandFactory = new(_transitionCoordinator, _uiPatchService);
         
         CompositeCommandFactory factory = new (signalFactory, charRigFactory, transitionCommandFactory);
         commandExecutor.Initialize(factory);

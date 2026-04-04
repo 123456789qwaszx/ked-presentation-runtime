@@ -26,6 +26,7 @@ public sealed class UISpritePatcher
 
             if (_loader.TryGetCached(patch.spriteAddress, out Sprite cachedSprite))
             {
+                Debug.Log(patch.spriteAddress);
                 targetUI.TrySetSprite(patch.portId, cachedSprite);
                 continue;
             }

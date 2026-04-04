@@ -11,6 +11,6 @@ public struct UIContext
         LocaleId       = localeId;
     }
 
-    public static UIContext Default =>
-        new UIContext("default", "ko-KR");
+    public static UIContext Default => new UIContext("default", "ko-KR");
+    public static UIContext Theme1 => new UIContext("theme1", "ko-KR");
 }

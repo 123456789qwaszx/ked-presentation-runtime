@@ -171,8 +171,18 @@ public sealed class YarnCommandBridge : MonoBehaviour
         
         
         _dialogueRunner.AddCommandHandler("blackout", ScreedBlackout);
+        _dialogueRunner.AddCommandHandler<string>("uipatch", UIPatch);
     }
     
+    private void UIPatch(string themeId)
+    {
+        var spec = new UIPatchCommandSpec()
+        {
+            themeId = themeId,
+        };
+
+        Collect(spec);
+    }
     
     private void ScreedBlackout()
     {
