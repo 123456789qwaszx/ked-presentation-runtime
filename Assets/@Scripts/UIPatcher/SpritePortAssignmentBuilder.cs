@@ -3,16 +3,16 @@ using System.Collections.Generic;
 public readonly struct SpritePortAssignment
 {
     public readonly string portId;
-    public readonly string imageAddress;
+    public readonly string spriteAddress;
 
     public SpritePortAssignment(string portId, string address)
     {
         this.portId = portId;
-        imageAddress = address;
+        spriteAddress = address;
     }
 }
 
-public sealed class SpriteAssignmentBuilder
+public sealed class SpritePortAssignmentBuilder
 {
     public List<SpritePortAssignment> Build(IUISpritePortProvider ui, in UIContext context)
     {
@@ -22,10 +22,10 @@ public sealed class SpriteAssignmentBuilder
         for (int i = 0; i < targetIds.Count; i++)
         {
             string targetId = targetIds[i];
-            string imagePath = MakeImagePath(targetId, context);
+            string imageAddress = MakeImagePath(targetId, context);
             
-            var assignment = new SpritePortAssignment(targetId, imagePath);
-            patchPlan.Add(assignment);
+            var entry = new SpritePortAssignment(targetId, imageAddress);
+            patchPlan.Add(entry);
         }
 
         return patchPlan;

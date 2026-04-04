@@ -18,19 +18,16 @@ public sealed class UISpritePatcher
         _loader = loader;
     }
 
-    public IEnumerator Apply(IUISpritePortProvider ui, List<SpritePortAssignment> bindings)
+    public IEnumerator Apply(IUISpritePortProvider targetUI, List<SpritePortAssignment> patches)
     {
-        if (ui == null || bindings == null || bindings.Count == 0)
-            yield break;
-
-        for (int i = 0; i < bindings.Count; i++)
+        for (int i = 0; i < patches.Count; i++)
         {
-            var binding = bindings[i];
+            SpritePortAssignment patch = patches[i];
 
-            if (!_loader.TryGetCached(binding.imageAddress, out Sprite sprite))
+            if (!_loader.TryGetCached(patch.spriteAddress, out Sprite sprite))
                 continue;
 
-            ui.TrySetSprite(binding.portId, sprite);
+            targetUI.TrySetSprite(patch.portId, sprite);
         }
 
         yield break;
