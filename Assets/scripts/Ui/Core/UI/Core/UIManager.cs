@@ -70,7 +70,7 @@ public partial class UIManager : MonoBehaviour
         var list = layer.GetComponentsInChildren<UIBase>(includeInactive: true);
         foreach (var ui in list)
         {
-            if (!IsManagedScreen(ui))
+            if (ui is not IManagedUI)
                 continue;
 
             var key = ui.GetType();
@@ -85,11 +85,6 @@ public partial class UIManager : MonoBehaviour
 
             _uiMap.Add(key, ui);
         }
-    }
-
-    private static bool IsManagedScreen(UIBase ui)
-    {
-        return ui is IUIRoot || ui is IUIPanel || ui is IUIOverlay || ui is IUITop || ui is IManagedUI;
     }
 
     // ----------------------------

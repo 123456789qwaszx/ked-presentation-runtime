@@ -14,9 +14,9 @@ public partial class UIManager
         // top은 보통 입력을 막는 로딩/블랙/모달
         ApplyState(top, active: false, interactable: false, blocksRaycasts: false, alpha: 0f);
 
+        ApplyState(top, active: true, interactable: true, blocksRaycasts: true, alpha: 1f);
         // InvokeAfterPatch(top, () =>
         // {
-        //     ApplyState(top, active: true, interactable: true, blocksRaycasts: true, alpha: 1f);
         //     afterPatched?.Invoke(top);
         // });
 

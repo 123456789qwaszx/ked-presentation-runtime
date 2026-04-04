@@ -34,6 +34,7 @@ public interface IUIOverlay { }
 public interface IUITop { }
 public interface IUIRoot { }
 public interface IManagedUI { }
+public interface IUIResetOnAwake { }
 
 public abstract class UIBase : MonoBehaviour
 {
@@ -132,14 +133,22 @@ public abstract partial class UIBase<TRefs> : UIBase
         BindObjects();
         View = new RefView(this);
         
-        if (this is IUIRoot || this is IUIPanel || this is IUIOverlay || this is IUITop)
+        if (this is IUIResetOnAwake)
         {
             transform.localPosition = Vector3.zero;
             transform.localRotation = Quaternion.identity;
             transform.localScale = Vector3.one;
             
-            //gameObject.SetActive(false);
-            CloseByCanvasGroup(gameObject);
+            
+            if (!gameObject.TryGetComponent(out CanvasGroup canvasGroup))
+            {
+                Debug.Log($"[UIBase] CanvasGroup missing on root. Auto-added for safety. root={gameObject.name}" );
+                canvasGroup = gameObject.AddComponent<CanvasGroup>();
+            }
+
+            canvasGroup.alpha = 0f;
+            canvasGroup.interactable = false;
+            canvasGroup.blocksRaycasts = false;
         }
 
         _refsBuilt = true;
@@ -301,22 +310,6 @@ public abstract partial class UIBase<TRefs> : UIBase
         }
 
         return null;
-    }
-    
-    private static void CloseByCanvasGroup(GameObject root)
-    {
-        if (!root) return;
-
-        // 루트에 CanvasGroup이 없으면 추가 (한 번만)
-        if (!root.TryGetComponent(out CanvasGroup cg) || !cg)
-        {
-            Debug.Log($"[UIBase] CanvasGroup missing on root. Auto-added for safety. root={root.name}" );
-            cg = root.AddComponent<CanvasGroup>();
-        }
-
-        cg.alpha = 0f;
-        cg.interactable = false;
-        cg.blocksRaycasts = false;
     }
     
     #endregion

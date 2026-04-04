@@ -116,18 +116,6 @@ public abstract class CommandBase : ISequenceCommand
             });
     }
     
-    public void CompleteNow(CommandRunScope scope)
-    {
-        try
-        {
-            OnCommandCompleted(scope);
-        }
-        catch (System.Exception e)
-        {
-            Debug.LogException(e);
-        }
-    }
-    
     // Completion hook tied to step cleanup (CleanupPolicy.Finish).
     // Called when the step finishes (normal end / finish-all), not on Cancel-only cleanup.
     protected virtual void OnCommandCompleted(CommandRunScope scope) { }
