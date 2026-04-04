@@ -38,14 +38,12 @@ public sealed class TransitionCoordinator
     
     public IEnumerator Play(TransitionCommandSpec spec, CommandRunScope scope)
     {
-        Debug.Log($"Start playing {spec}");
         if (!_transitionTargetRouter.TryResolve(spec.targetKind, spec.customTargetKey, out TransitionTargetHandle target))
         {
             Debug.LogWarning($"[TransitionCoordinator] Target not resolved. kind={spec.targetKind}, customKey='{spec.customTargetKey}'");
             yield break;
         }
         
-        Debug.Log($"Start??");
         // Start from alpha 0, then cover fades 0 -> 1.
         if (spec.resetToOpenAtStart)
             _transitionTargetPlayer.SetInstant(target, spec.uncoveredAlpha, false);
@@ -112,9 +110,7 @@ public sealed class TransitionCoordinator
         }
         finally
         {
-            Debug.Log($"Final");
-            if (scope != null)
-                _activeContexts.Remove(scope);
+            _activeContexts.Remove(scope);
         }
     }
 
