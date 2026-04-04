@@ -18,9 +18,7 @@ public sealed class UISpritePatcher
         _loader = loader;
     }
 
-    public IEnumerator Apply(
-        IUISpritePortProvider ui,
-        List<SpritePortBinding> bindings)
+    public IEnumerator Apply(IUISpritePortProvider ui, List<SpritePortAssignment> bindings)
     {
         if (ui == null || bindings == null || bindings.Count == 0)
             yield break;
@@ -29,10 +27,10 @@ public sealed class UISpritePatcher
         {
             var binding = bindings[i];
 
-            if (!_loader.TryGetCached(binding.Address, out var sprite))
+            if (!_loader.TryGetCached(binding.imageAddress, out Sprite sprite))
                 continue;
 
-            ui.TrySetSprite(binding.PortId, sprite);
+            ui.TrySetSprite(binding.portId, sprite);
         }
 
         yield break;

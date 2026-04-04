@@ -1,41 +1,38 @@
 using System.Collections.Generic;
 
-public readonly struct SpritePortBinding
+public readonly struct SpritePortAssignment
 {
-    public readonly string PortId;
-    public readonly string Address;
+    public readonly string portId;
+    public readonly string imageAddress;
 
-    public SpritePortBinding(string portId, string address)
+    public SpritePortAssignment(string portId, string address)
     {
-        PortId = portId;
-        Address = address;
+        this.portId = portId;
+        imageAddress = address;
     }
 }
 
-public sealed class SpritePatchResolver
+public sealed class SpriteAssignmentBuilder
 {
-    public List<SpritePortBinding> BuildBindings(
-        IUISpritePortProvider ui,
-        in UIContext ctx)
+    public List<SpritePortAssignment> Build(IUISpritePortProvider ui, in UIContext context)
     {
-        var result = new List<SpritePortBinding>();
+        var patchPlan = new List<SpritePortAssignment>();
 
-        var ports = ui.GetSpritePortIds();
-        for (int i = 0; i < ports.Count; i++)
+        IReadOnlyList<string> targetIds = ui.GetSpritePortIds();
+        for (int i = 0; i < targetIds.Count; i++)
         {
-            string portId = ports[i];
-            string address = BuildDefaultAddress(portId, ctx);
-            if (string.IsNullOrEmpty(address))
-                continue;
-
-            result.Add(new SpritePortBinding(portId, address));
+            string targetId = targetIds[i];
+            string imagePath = MakeImagePath(targetId, context);
+            
+            var assignment = new SpritePortAssignment(targetId, imagePath);
+            patchPlan.Add(assignment);
         }
 
-        return result;
+        return patchPlan;
     }
 
-    private static string BuildDefaultAddress(string portId, in UIContext ctx)
+    private static string MakeImagePath(string portId, in UIContext context)
     {
-        return $"ui/{ctx.ThemeId}/{portId}";
+        return $"ui/{context.ThemeId}/{portId}";
     }
 }

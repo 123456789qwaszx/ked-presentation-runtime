@@ -1,34 +1,30 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public sealed class UISpritePatchService
 {
-    private readonly SpritePatchResolver _resolver;
+    private readonly SpriteAssignmentBuilder _assignmentBuilder;
     private readonly UISpritePatcher _patcher;
 
-    public UISpritePatchService(SpritePatchResolver resolver, UISpritePatcher patcher)
+    public UISpritePatchService(SpriteAssignmentBuilder assignmentBuilder, UISpritePatcher uiSpritePatcher)
     {
-        _resolver = resolver;
-        _patcher = patcher;
+        _assignmentBuilder = assignmentBuilder;
+        _patcher = uiSpritePatcher;
     }
 
-    public IEnumerator ApplyInHierarchyIfSupported(Component root, UIContext ctx)
+    public IEnumerator ApplyInHierarchyIfSupported(Component root, UIContext context)
     {
-        if (root == null)
-            yield break;
+        MonoBehaviour[] children = root.GetComponentsInChildren<MonoBehaviour>(includeInactive: true);
 
-        var providers = root.GetComponentsInChildren<MonoBehaviour>(includeInactive: true);
-
-        for (int i = 0; i < providers.Length; i++)
+        for (int i = 0; i < children.Length; i++)
         {
-            if (providers[i] is not IUISpritePortProvider provider)
+            if (children[i] is not IUISpritePortProvider targetUI)
                 continue;
 
-            var bindings = _resolver.BuildBindings(provider, ctx);
-            if (bindings == null || bindings.Count == 0)
-                continue;
+            List<SpritePortAssignment> assignments = _assignmentBuilder.Build(targetUI, context);
 
-            yield return _patcher.Apply(provider, bindings);
+            yield return _patcher.Apply(targetUI, assignments);
         }
     }
 }
