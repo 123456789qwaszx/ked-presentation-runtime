@@ -88,12 +88,11 @@ public class VnAppBootstrap : MonoBehaviour
         CharRigCommandFactory charRigFactory = new(charRigAccess, portraitResolver);
         
         // TransitionFactory
-        CanvasGroupTransitionPlayer canvasGroupTransitionPlayer = new ();
         SpritePortAssignmentBuilder spritePortAssignmentBuilder = new ();
         ResourcesUISpriteLoader resourcesUISpriteLoader = new ();
         UISpritePatcher uiSpritePatcher = new (resourcesUISpriteLoader);
         _uiPatchService = new UIPatchService(spritePortAssignmentBuilder, uiSpritePatcher);
-        TransitionCommandFactory transitionCommandFactory = new(transitionTargetRouter, canvasGroupTransitionPlayer, _uiPatchService);
+        TransitionCommandFactory transitionCommandFactory = new(transitionTargetRouter, _uiPatchService);
         
         CompositeCommandFactory factory = new (signalFactory, charRigFactory, transitionCommandFactory);
         commandExecutor.Initialize(factory);

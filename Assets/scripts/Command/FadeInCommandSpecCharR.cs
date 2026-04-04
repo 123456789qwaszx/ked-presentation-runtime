@@ -52,7 +52,7 @@ public sealed class FadeInCommandCharR : CommandBase, IStepScopedCommand
             yield break;
         }
 
-        // ✅ 리스트를 건드리지 말고 pending만 관리
+        // 리스트를 건드리지 말고 pending만 관리
         for (int i = 0; i < _targets.Count; i++)
         {
             RectTransform rect = _targets[i];
@@ -92,11 +92,11 @@ public sealed class FadeInCommandCharR : CommandBase, IStepScopedCommand
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        // ✅ wait=false로 넘어가도 “스킵/완료”에서 상태를 고정하고 싶다면 여기서 스냅
+        // wait=false로 넘어가도 “스킵/완료”에서 상태를 고정하고 싶다면 여기서 스냅
         if (_targets.Count == 0)
             return;
 
-        // ✅ 진행중 트윈은 끊고 상태 스냅
+        // 진행중 트윈은 끊고 상태 스냅
         for (int i = 0; i < _targets.Count; i++)
         {
             RectTransform rect = _targets[i];

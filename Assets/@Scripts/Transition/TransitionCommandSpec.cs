@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using DG.Tweening;
 using UnityEngine;
 
 public enum TransitionPlayMode
@@ -34,19 +35,16 @@ public sealed class TransitionCommandSpec : CommandSpecBase
     [Min(0f)]
     public float uncoverDuration = 0.20f;
 
-    [Tooltip("CoverThenUncover 모드에서, 화면이 완전히 닫힌 뒤 유지할 시간.")]
+    [Tooltip("CoverThenUncover 모드에서 닫힌 뒤 유지할 시간.")]
     [Min(0f)]
     public float holdCoveredSeconds = 0f;
 
     [Header("Ease")]
-    public AnimationCurve coverEase = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
-    public AnimationCurve uncoverEase = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
+    public Ease coverEase = Ease.OutCubic;
+    public Ease uncoverEase = Ease.OutCubic;
 
     [Header("Playback")]
-    [Tooltip("체크하면 이 커맨드의 재생이 끝날 때까지 Step 진행을 멈춥니다.")]
     public bool wait = true;
-
-    [Tooltip("시작 시 uncoveredAlpha 상태로 초기화합니다.")]
     public bool resetToOpenAtStart = true;
 }
 
@@ -54,103 +52,151 @@ public sealed class TransitionCommand : CommandBase
 {
     private readonly TransitionCommandSpec _spec;
     private readonly TransitionTargetRouter _targetRouter;
-    private readonly ITransitionTargetPlayer _transitionPlayer;
+
+    private TransitionTargetHandle _target;
+    private bool _resolveAttempted;
 
     public override bool WaitForCompletion => _spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
     public TransitionCommand(
         TransitionTargetRouter targetRouter,
-        ITransitionTargetPlayer transitionPlayer,
         TransitionCommandSpec spec)
     {
         _targetRouter = targetRouter;
-        _transitionPlayer = transitionPlayer;
         _spec = spec;
     }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
-        _targetRouter.TryResolve(_spec.targetKind, _spec.customTargetKey,
-            out TransitionTargetHandle target);
+        if (!_resolveAttempted)
+            ResolveTarget();
 
-        if (_spec.resetToOpenAtStart && (_spec.playMode == TransitionPlayMode.CoverOnly || _spec.playMode == TransitionPlayMode.CoverThenUncover))
-            _transitionPlayer.SetInstant(target, _spec.uncoveredAlpha, false);
+        if (_target == null || !_target.IsValid)
+            yield break;
+
+        CanvasGroup cg = _target.canvasGroup;
+        cg.DOKill(false);
+
+        if (_spec.resetToOpenAtStart &&
+            (_spec.playMode == TransitionPlayMode.CoverOnly ||
+             _spec.playMode == TransitionPlayMode.CoverThenUncover))
+        {
+            SnapAlpha(cg, _spec.uncoveredAlpha, false);
+        }
 
         if (scope.IsSkipping)
         {
-            ApplySkipInstant(target, _spec.playMode);
+            ApplySkipInstant(cg, _spec.playMode);
             yield break;
         }
 
         switch (_spec.playMode)
         {
             case TransitionPlayMode.CoverOnly:
-                yield return Cover(target);
+                yield return PlayFade(cg, _spec.coveredAlpha, _spec.coverDuration, _spec.coverEase, false);
                 break;
 
             case TransitionPlayMode.UncoverOnly:
-                yield return Uncover(target);
+                yield return PlayFade(cg, _spec.uncoveredAlpha, _spec.uncoverDuration, _spec.uncoverEase, false);
                 break;
 
             case TransitionPlayMode.CoverThenUncover:
-                yield return Cover(target);
+                yield return PlayFade(cg, _spec.coveredAlpha, _spec.coverDuration, _spec.coverEase, false);
 
                 if (_spec.holdCoveredSeconds > 0f)
                     yield return WaitUnscaled(_spec.holdCoveredSeconds);
 
-                yield return Uncover(target);
+                yield return PlayFade(cg, _spec.uncoveredAlpha, _spec.uncoverDuration, _spec.uncoverEase, false);
                 break;
         }
     }
 
     protected override void OnSkip(CommandRunScope scope)
     {
-        _targetRouter.TryResolve(_spec.targetKind, _spec.customTargetKey, 
-            out TransitionTargetHandle target);
+        if (!_resolveAttempted)
+            ResolveTarget();
 
-        ApplySkipInstant(target, _spec.playMode);
+        if (_target == null || !_target.IsValid)
+            return;
+
+        CanvasGroup cg = _target.canvasGroup;
+        cg.DOKill(false);
+
+        ApplySkipInstant(cg, _spec.playMode);
     }
 
-    private IEnumerator Cover(TransitionTargetHandle target)
+    protected override void OnCommandCompleted(CommandRunScope scope)
     {
-        if (_spec.coverDuration <= 0f)
+        if (!_resolveAttempted)
+            ResolveTarget();
+
+        if (_target == null || !_target.IsValid)
+            return;
+
+        _target.canvasGroup.DOKill(false);
+    }
+
+    private void ResolveTarget()
+    {
+        _resolveAttempted = true;
+
+        _targetRouter.TryResolve(_spec.targetKind, _spec.customTargetKey,
+            out _target);
+    }
+
+    private IEnumerator PlayFade(CanvasGroup cg, float toAlpha, float duration, Ease ease, bool blockRaycasts)
+    {
+        if (cg == null)
+            yield break;
+
+        cg.DOKill(false);
+        cg.blocksRaycasts = blockRaycasts;
+        cg.interactable = false;
+
+        if (duration <= 0f)
         {
-            _transitionPlayer.SetInstant(target, _spec.coveredAlpha, false);
+            cg.alpha = Mathf.Clamp01(toAlpha);
             yield break;
         }
 
-        yield return _transitionPlayer.FadeTo(target, _spec.coveredAlpha, _spec.coverDuration, false, _spec.coverEase);
+        Tween tween = cg
+            .DOFade(Mathf.Clamp01(toAlpha), duration)
+            .SetEase(ease)
+            .SetUpdate(true);
+
+        if (_spec.wait)
+            yield return tween.WaitForCompletion();
     }
 
-    private IEnumerator Uncover(TransitionTargetHandle target)
-    {
-        if (_spec.uncoverDuration <= 0f)
-        {
-            _transitionPlayer.SetInstant(target, _spec.uncoveredAlpha, false);
-            yield break;
-        }
-
-        yield return _transitionPlayer.FadeTo(target, _spec.uncoveredAlpha, _spec.uncoverDuration, false, _spec.uncoverEase);
-    }
-
-    private void ApplySkipInstant(TransitionTargetHandle target, TransitionPlayMode mode)
+    private void ApplySkipInstant(CanvasGroup cg, TransitionPlayMode mode)
     {
         switch (mode)
         {
             case TransitionPlayMode.CoverOnly:
-                _transitionPlayer.SetInstant(target, _spec.coveredAlpha, false);
+                SnapAlpha(cg, _spec.coveredAlpha, false);
                 break;
 
             case TransitionPlayMode.UncoverOnly:
-                _transitionPlayer.SetInstant(target, _spec.uncoveredAlpha, false);
+                SnapAlpha(cg, _spec.uncoveredAlpha, false);
                 break;
 
             case TransitionPlayMode.CoverThenUncover:
-                _transitionPlayer.SetInstant(target, _spec.coveredAlpha, false);
-                _transitionPlayer.SetInstant(target, _spec.uncoveredAlpha, false);
+                SnapAlpha(cg, _spec.coveredAlpha, false);
+                SnapAlpha(cg, _spec.uncoveredAlpha, false);
                 break;
         }
+    }
+
+    private void SnapAlpha(CanvasGroup cg, float alpha, bool blockRaycasts)
+    {
+        if (cg == null)
+            return;
+
+        cg.DOKill(false);
+        cg.alpha = Mathf.Clamp01(alpha);
+        cg.blocksRaycasts = blockRaycasts;
+        cg.interactable = false;
     }
 
     private static IEnumerator WaitUnscaled(float seconds)

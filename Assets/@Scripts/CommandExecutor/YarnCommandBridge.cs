@@ -170,7 +170,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
         _dialogueRunner.AddCommandHandler<string, string>("cast", SetPortrait);
         
         
-        _dialogueRunner.AddCommandHandler("blackout", ScreedBlackout);
+        _dialogueRunner.AddCommandHandler<string>("blackout", ScreedBlackout);
         _dialogueRunner.AddCommandHandler<string>("uipatch", UIPatch);
     }
     
@@ -184,12 +184,37 @@ public sealed class YarnCommandBridge : MonoBehaviour
         Collect(spec);
     }
     
-    private void ScreedBlackout()
+    private void ScreedBlackout(string transitionMode)
     {
         var spec = new TransitionCommandSpec
         {
             targetKind = TransitionTargetKind.Blackout
         };
+
+        switch (transitionMode)
+        {
+            case "cover":
+                spec.playMode = TransitionPlayMode.CoverOnly;
+                spec.holdCoveredSeconds = 0.2f;
+                spec.wait = true;
+                break;
+
+            case "uncover":
+                spec.playMode = TransitionPlayMode.UncoverOnly;
+                spec.wait = true;
+                break;
+
+            case "cover_then_uncover":
+                spec.playMode = TransitionPlayMode.CoverThenUncover;
+                break;
+
+            default:
+                Debug.LogWarning(
+                    $"[ScreedBlackout] Unknown transitionMode '{transitionMode}'. " +
+                    "Fallback to CoverThenUncover.");
+                spec.playMode = TransitionPlayMode.CoverThenUncover;
+                break;
+        }
 
         Collect(spec);
     }
