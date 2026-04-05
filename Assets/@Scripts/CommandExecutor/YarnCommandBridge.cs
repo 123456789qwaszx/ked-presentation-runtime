@@ -40,7 +40,8 @@ public sealed class YarnCommandBridge : MonoBehaviour
         _dialogueRunner.AddCommandHandler<string>("slot", SetCharSlot);
         _dialogueRunner.AddCommandHandler<string, string>("place", SetAnchorPosition);
         _dialogueRunner.AddCommandHandler<string, int, int>("place_offset", SetAnchorOffset);
-        _dialogueRunner.AddCommandHandler<string, float>("scale", SetOriginSize);
+        _dialogueRunner.AddCommandHandler<string, float>("size", SetOriginSize);
+        _dialogueRunner.AddCommandHandler<string, float, float>("to_scale", ScaleFromTo);
 
         _dialogueRunner.AddCommandHandler<string, string>("slide_in", SlideIn);
         _dialogueRunner.AddCommandHandler<string, string>("slide_out", SlideOut);
@@ -59,11 +60,25 @@ public sealed class YarnCommandBridge : MonoBehaviour
         _dialogueRunner.AddCommandHandler<string, string>("nudge", NudgeTap);
         _dialogueRunner.AddCommandHandler<string, string>("nudge_hard", NudgeTapHard);
         _dialogueRunner.AddCommandHandler<string, string>("slide_in_nudge", NudgeSlideIn);
+        
+        
+        _dialogueRunner.AddCommandHandler<string>("sway", Sway);
+        
 
         _dialogueRunner.AddCommandHandler<string, string>("cast", SetPortrait);
 
         _dialogueRunner.AddCommandHandler<string>("blackout", ScreedBlackout);
         _dialogueRunner.AddCommandHandler<string>("uipatch", UIPatch);
+    }
+
+    private void Sway(string roleKey)
+    {
+        var spec = new SwayCommandSpecCharR()
+        {
+            roleKey = roleKey
+        };
+
+        Collect(spec);
     }
 
     private void BeginHold()
@@ -195,6 +210,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
 
         var spec = new NudgeTapCommandSpecCharR
         {
+            target = CharacterRigTarget.CharacterPortrait_Shake,
             roleKey = roleKey,
             direction = dir,
             strength = 44f,
@@ -273,8 +289,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
         var spec = new MoveByCommandSpecCharR
         {
             roleKey = roleKey,
-            delta = new Vector2(x, y),
-            duration = 5f
+            delta = new Vector2(x, y)
         };
 
         Collect(spec);
@@ -417,6 +432,18 @@ public sealed class YarnCommandBridge : MonoBehaviour
         Collect(resetTrackSpec);
     }
 
+    private void ScaleFromTo(string roleKey, float xyValue, float duration = 0.4f)
+    {
+        var spec = new ScaleFromToCommandSpecCharR
+        {
+            roleKey = roleKey,
+            duration = duration,
+            toScale = new Vector2(xyValue, xyValue)
+        };
+
+        Collect(spec);
+    }
+    
     private void SetOriginSize(string roleKey, float xyValue)
     {
         var spec = new SetOriginSizeCommandSpecCharR
@@ -425,7 +452,13 @@ public sealed class YarnCommandBridge : MonoBehaviour
             toScale = new Vector2(xyValue, xyValue)
         };
 
+        // var spec1 = new SetScaleCommandSpecCharR
+        // {
+        //     roleKey = roleKey
+        // };
+
         Collect(spec);
+        //Collect(spec1);
     }
 
     private void SetPortrait(string roleKey, string character)

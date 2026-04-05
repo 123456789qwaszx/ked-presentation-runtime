@@ -26,7 +26,8 @@ public class DialogueUIRoot : UIRoot<DialogueUIRoot.Refs>
     {
         WithPortrait = 0,
         NoPortrait = 1,
-        LetterBox = 2
+        LetterBox = 2,
+        OnlyText = 3
     }
 
     #region Refs
@@ -96,6 +97,7 @@ public class DialogueUIRoot : UIRoot<DialogueUIRoot.Refs>
         DialogueBoxSlot00_Root,
         DialogueBoxSlot01_Root,
         DialogueBoxSlot02_Root,
+        DialogueBoxSlot03_Root,
         
         CharacterStageSlot00,
         CharacterStageSlot01,
@@ -271,6 +273,7 @@ public class DialogueUIRoot : UIRoot<DialogueUIRoot.Refs>
             View.CanvasGroup(Refs.DialogueBoxSlot00_Root),
             View.CanvasGroup(Refs.DialogueBoxSlot01_Root),
             View.CanvasGroup(Refs.DialogueBoxSlot02_Root),
+            View.CanvasGroup(Refs.DialogueBoxSlot03_Root),
         };
 
         _boxBySlot = new IDialogueBoxView[_slots.Length];

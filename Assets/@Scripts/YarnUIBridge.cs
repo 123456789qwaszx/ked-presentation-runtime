@@ -19,6 +19,7 @@ public sealed class YarnUIBridge : MonoBehaviour
     public void WithProtagonist() => Show(DialogueUIRoot.DialogueBoxKind.WithPortrait);
     public void HasCharNameBox() => Show(DialogueUIRoot.DialogueBoxKind.NoPortrait);
     public void LetterBox() => Show(DialogueUIRoot.DialogueBoxKind.LetterBox);
+    public void OnlyText() => Show(DialogueUIRoot.DialogueBoxKind.OnlyText);
 
 
     private void Show(DialogueUIRoot.DialogueBoxKind kind)

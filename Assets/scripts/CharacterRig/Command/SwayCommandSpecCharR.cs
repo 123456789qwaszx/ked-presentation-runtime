@@ -16,11 +16,11 @@ public class SwayCommandSpecCharR : CharRigCommandSpecBase
     
     [Header("Sway (Fan-like)")]
     [Tooltip("아랫변 중앙을 축으로 좌우로 흔들리는 각도 (절대값 기준). 10~25 추천.")]
-    public float swayAngle = 28f;
+    public float swayAngle = 5f;
 
     public int swayLoops = 2;
 
-    public float duration = 1.3f;
+    public float duration = 0.55f;
     
     
     [Header("Sway Easing")]

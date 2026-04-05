@@ -37,9 +37,10 @@ public sealed class YarnCommandRegistry
         _dialogueRunner.AddCommandHandler("beat", (Func<IEnumerator>)(() => _vnRuntimeBridge.Beat(BeatKey)));
         _dialogueRunner.AddCommandHandler<string>("WaitSignal", key => _vnRuntimeBridge.WaitSignal(key));
         
-        _dialogueRunner.AddCommandHandler("protagobox", _yarnUIBridge.WithProtagonist);
-        _dialogueRunner.AddCommandHandler("charbox", _yarnUIBridge.HasCharNameBox);
-        _dialogueRunner.AddCommandHandler("letterbox", _yarnUIBridge.LetterBox);
-        _dialogueRunner.AddCommandHandler("closeallbox", _yarnUIBridge.CloseAllDialogue);
+        _dialogueRunner.AddCommandHandler("box_speaker", _yarnUIBridge.WithProtagonist);
+        _dialogueRunner.AddCommandHandler("box_name", _yarnUIBridge.HasCharNameBox);
+        _dialogueRunner.AddCommandHandler("box_letter", _yarnUIBridge.LetterBox);
+        _dialogueRunner.AddCommandHandler("box_onlytext", _yarnUIBridge.OnlyText);
+        _dialogueRunner.AddCommandHandler("closebox", _yarnUIBridge.CloseAllDialogue);
     }
 }
