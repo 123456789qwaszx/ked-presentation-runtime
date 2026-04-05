@@ -1,92 +1,138 @@
-using System.Collections.Generic;
+using System.Collections;
 using UnityEngine;
 using Yarn.Unity;
 
 public sealed class YarnCommandBridge : MonoBehaviour
 {
     private DialogueRunner _dialogueRunner;
+    private YarnBridgePlaybackDriver _playbackDriver;
 
     [Header("Rig")] public GameObject rigPrefab;
     [Header("Global Tuning")] public CharStageTuningSO globalTuning;
 
-    private int _pendingImmediateWaitCount;
-    private readonly List<CommandSpecBase> _collectedSpecs = new();
-    
-    #region collected specs
-
-    private void WaitNextImmediateCommands(int count = 1) => _pendingImmediateWaitCount = Mathf.Max(0, count);
-    public void ResetImmediateWaitForNewLine() => _pendingImmediateWaitCount = 0;
-    
-    public List<CommandSpecBase> ConsumeCollectedSpecs()
+    public void Initialize(
+        DialogueRunner dialogueRunner,
+        YarnBridgePlaybackDriver playbackDriver)
     {
-        var result = new List<CommandSpecBase>(_collectedSpecs);
-        _collectedSpecs.Clear();
-        return result;
+        _dialogueRunner = dialogueRunner;
+        _playbackDriver = playbackDriver;
+        RegisterYarnCommands();
     }
 
-    public void ClearCollectedSpecs()
+    public void RegisterYarnCommands()
     {
-        _collectedSpecs.Clear();
+        _dialogueRunner.AddCommandHandler<string>("destroy", DestroyCommand);
+        _dialogueRunner.AddCommandHandler<int>("await_for", AwaitFor);
+
+        _dialogueRunner.AddCommandHandler("begin_hold", BeginHold);
+        _dialogueRunner.AddCommandHandler(
+            "end_hold",
+            (System.Func<IEnumerator>)(() => EndHold()));
+
+        _dialogueRunner.AddCommandHandler<string>("slot_boxside", SetSpeakerSlot);
+        _dialogueRunner.AddCommandHandler<string>("slot", SetCharSlot);
+        _dialogueRunner.AddCommandHandler<string, string>("place", SetAnchorPosition);
+        _dialogueRunner.AddCommandHandler<string, int, int>("place_offset", SetAnchorOffset);
+        _dialogueRunner.AddCommandHandler<string, float>("scale", SetOriginSize);
+
+        _dialogueRunner.AddCommandHandler<string, string>("slide_in", SlideIn);
+        _dialogueRunner.AddCommandHandler<string, string>("slide_out", SlideOut);
+        _dialogueRunner.AddCommandHandler<string, string>("slide_in_bouncy", BouncySlideIn);
+
+        _dialogueRunner.AddCommandHandler<string>("fade_in", FadeIn);
+        _dialogueRunner.AddCommandHandler<string>("fade_out", FadeOut);
+
+        _dialogueRunner.AddCommandHandler<string, float, float>("move_by", MoveBy);
+        _dialogueRunner.AddCommandHandler<string, string>("dip", DipInOut);
+
+        _dialogueRunner.AddCommandHandler<string, string>("hop_in", HopIn);
+
+        _dialogueRunner.AddCommandHandler<string, string>("jolt", NudgeJolt);
+        _dialogueRunner.AddCommandHandler<string, string>("shake", NudgeShake);
+        _dialogueRunner.AddCommandHandler<string, string>("nudge", NudgeTap);
+        _dialogueRunner.AddCommandHandler<string, string>("nudge_hard", NudgeTapHard);
+        _dialogueRunner.AddCommandHandler<string, string>("slide_in_nudge", NudgeSlideIn);
+
+        _dialogueRunner.AddCommandHandler<string, string>("cast", SetPortrait);
+
+        _dialogueRunner.AddCommandHandler<string>("blackout", ScreedBlackout);
+        _dialogueRunner.AddCommandHandler<string>("uipatch", UIPatch);
     }
 
-    private void ApplyImmediateWait(CommandSpecBase spec)
+    private void BeginHold()
     {
-        if (spec == null)
-            return;
+        _playbackDriver.BeginHold();
+    }
 
-        bool shouldWait = _pendingImmediateWaitCount > 0;
+    private IEnumerator EndHold()
+    {
+        yield return _playbackDriver.EndHoldBlocking();
+    }
 
-        switch (spec)
-        {
-            case NudgeTapCommandSpecCharR nudgeTap:
-                nudgeTap.wait = shouldWait;
-                break;
-
-            case BounceArcInCommandSpecCharR bounceArcIn:
-                bounceArcIn.wait = shouldWait;
-                break;
-
-            case DipInOutCommandSpecCharR dipInOut:
-                dipInOut.wait = shouldWait;
-                break;
-
-            case MoveByCommandSpecCharR moveBy:
-                moveBy.wait = shouldWait;
-                break;
-
-            case BouncySlideInCommandSpecCharR bouncySlideIn:
-                bouncySlideIn.wait = shouldWait;
-                break;
-
-            case FadeInCommandSpecCharR fadeIn:
-                fadeIn.wait = shouldWait;
-                break;
-
-            case FadeOutCommandSpecCharR fadeOut:
-                fadeOut.wait = shouldWait;
-                break;
-
-            case JuicySlideInCommandSpecCharR slideIn:
-                slideIn.wait = shouldWait;
-                break;
-
-            case JuicySlideOutCommandSpecCharR slideOut:
-                slideOut.wait = shouldWait;
-                break;
-        }
-
-        if (shouldWait)
-            _pendingImmediateWaitCount--;
+    private void AwaitFor(int count = 1)
+    {
+        _playbackDriver.WaitNextImmediateCommands(count);
     }
 
     private void Collect(CommandSpecBase spec)
     {
-        if (spec == null) return;
-
-        ApplyImmediateWait(spec);
-        _collectedSpecs.Add(spec);
+        _playbackDriver.Enqueue(spec);
     }
-    
+
+    private void UIPatch(string themeId)
+    {
+        var spec = new UIPatchCommandSpec
+        {
+            themeId = themeId,
+        };
+
+        Collect(spec);
+    }
+
+    private void ScreedBlackout(string transitionMode)
+    {
+        var spec = new TransitionCommandSpec
+        {
+            targetKind = TransitionTargetKind.Blackout
+        };
+
+        switch (transitionMode)
+        {
+            case "cover":
+                spec.playMode = TransitionPlayMode.CoverOnly;
+                spec.holdCoveredSeconds = 0.2f;
+                spec.wait = true;
+                break;
+
+            case "uncover":
+                spec.playMode = TransitionPlayMode.UncoverOnly;
+                spec.wait = true;
+                break;
+
+            case "cover_then_uncover":
+                spec.playMode = TransitionPlayMode.CoverThenUncover;
+                break;
+
+            default:
+                Debug.LogWarning(
+                    $"[ScreedBlackout] Unknown transitionMode '{transitionMode}'. Fallback to CoverThenUncover.");
+                spec.playMode = TransitionPlayMode.CoverThenUncover;
+                break;
+        }
+
+        Collect(spec);
+    }
+
+    private void DestroyCommand(string roleKey)
+    {
+        var spec = new DestroyCommandSpec
+        {
+            roleKey = roleKey
+        };
+
+        Collect(spec);
+    }
+
     private void NudgeSlideIn(string roleKey, string direction = "right")
     {
         SlideFromCharR dir = ParseSlideDirection(direction, SlideFromCharR.Right);
@@ -132,103 +178,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
 
         Collect(spec);
     }
-    
-    #endregion
-    
-    public void RegisterYarnCommands(DialogueRunner dialogueRunner)
-    {
-        _dialogueRunner = dialogueRunner;
 
-        _dialogueRunner.AddCommandHandler<string>("destroy", DestroyCommand);
-        _dialogueRunner.AddCommandHandler<int>("await_for", WaitNextImmediateCommands);
-        
-        _dialogueRunner.AddCommandHandler<string>("slot_boxside", SetSpeakerSlot);
-        _dialogueRunner.AddCommandHandler<string>("slot", SetCharSlot);
-        _dialogueRunner.AddCommandHandler<string, string>("place", SetAnchorPosition);
-        _dialogueRunner.AddCommandHandler<string, int, int>("place_offset", SetAnchorOffset);
-        _dialogueRunner.AddCommandHandler<string, float>("scale", SetOriginSize);
-        
-        _dialogueRunner.AddCommandHandler<string, string>("slide_in", SlideIn);
-        _dialogueRunner.AddCommandHandler<string, string>("slide_out", SlideOut);
-        _dialogueRunner.AddCommandHandler<string, string>("slide_in_bouncy", BouncySlideIn);
-
-        _dialogueRunner.AddCommandHandler<string>("fade_in", FadeIn);
-        _dialogueRunner.AddCommandHandler<string>("fade_out", FadeOut);
-
-        _dialogueRunner.AddCommandHandler<string, float, float>("move_by", MoveBy);
-        _dialogueRunner.AddCommandHandler<string, string>("dip", DipInOut);
-
-        _dialogueRunner.AddCommandHandler<string, string>("hop_in", HopIn);
-
-        _dialogueRunner.AddCommandHandler<string, string>("jolt", NudgeJolt);
-        _dialogueRunner.AddCommandHandler<string, string>("shake", NudgeShake);
-        _dialogueRunner.AddCommandHandler<string, string>("nudge", NudgeTap);
-        _dialogueRunner.AddCommandHandler<string, string>("nudge_hard", NudgeTapHard);
-        
-        _dialogueRunner.AddCommandHandler<string, string>("slide_in_nudge", NudgeSlideIn);
-
-        _dialogueRunner.AddCommandHandler<string, string>("cast", SetPortrait);
-        
-        
-        _dialogueRunner.AddCommandHandler<string>("blackout", ScreedBlackout);
-        _dialogueRunner.AddCommandHandler<string>("uipatch", UIPatch);
-    }
-    
-    private void UIPatch(string themeId)
-    {
-        var spec = new UIPatchCommandSpec()
-        {
-            themeId = themeId,
-        };
-
-        Collect(spec);
-    }
-    
-    private void ScreedBlackout(string transitionMode)
-    {
-        var spec = new TransitionCommandSpec
-        {
-            targetKind = TransitionTargetKind.Blackout
-        };
-
-        switch (transitionMode)
-        {
-            case "cover":
-                spec.playMode = TransitionPlayMode.CoverOnly;
-                spec.holdCoveredSeconds = 0.2f;
-                spec.wait = true;
-                break;
-
-            case "uncover":
-                spec.playMode = TransitionPlayMode.UncoverOnly;
-                spec.wait = true;
-                break;
-
-            case "cover_then_uncover":
-                spec.playMode = TransitionPlayMode.CoverThenUncover;
-                break;
-
-            default:
-                Debug.LogWarning(
-                    $"[ScreedBlackout] Unknown transitionMode '{transitionMode}'. " +
-                    "Fallback to CoverThenUncover.");
-                spec.playMode = TransitionPlayMode.CoverThenUncover;
-                break;
-        }
-
-        Collect(spec);
-    }
-    
-    private void DestroyCommand(string roleKey)
-    {
-        var spec = new DestroyCommandSpec
-        {
-            roleKey = roleKey
-        };
-
-        Collect(spec);
-    }
-    
     private void NudgeShake(string roleKey, string direction = "right")
     {
         SlideFromCharR dir = ParseSlideDirection(direction, SlideFromCharR.Right);
@@ -314,7 +264,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
         {
             roleKey = roleKey,
             delta = new Vector2(x, y),
-            duration =5f
+            duration = 5f
         };
 
         Collect(spec);
@@ -395,7 +345,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
 
         Collect(spec);
     }
-    
+
     private void SetSpeakerSlot(string roleKey)
     {
         if (string.IsNullOrWhiteSpace(roleKey))
@@ -413,7 +363,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
 
         Collect(spec);
     }
-    
+
     private void SetAnchorOffset(string roleKey, int x, int y)
     {
         var anchorSpec = new MoveByCommandSpecCharR
@@ -424,7 +374,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
             duration = 0f,
             killTween = false
         };
-        
+
         var resetTrackSpec = new ResetTrackOffsetsCommandSpec { roleKey = roleKey };
 
         Collect(anchorSpec);
@@ -439,7 +389,6 @@ public sealed class YarnCommandBridge : MonoBehaviour
             "center" => CharAnchorPreset.Center,
             "right" => CharAnchorPreset.Right,
             "boxside" => CharAnchorPreset.BoxSide,
-            
             "exp1" => CharAnchorPreset.Exp1,
             "exp2" => CharAnchorPreset.Exp2,
             _ => CharAnchorPreset.None

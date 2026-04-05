@@ -78,6 +78,31 @@ public sealed class CommandExecutor : MonoBehaviour
         _mainRoutine = StartCoroutine(RunNode(commands, _activeScope, _runId));
     }
     
+    public IEnumerator PlaySpecsBlocking(IReadOnlyList<CommandSpecBase> specs, CommandRunScope scope, string debugSource = "bridge_blocking")
+    {
+        if (!_initialized) yield break;
+        if (specs == null || scope == null) yield break;
+
+        _activeScope = scope;
+
+        CleanupPolicy policy = DecideCleanupPolicy(_activeScope);
+        _activeScope.CleanupStep(policy);
+
+        List<ISequenceCommand> commands = BuildCommandsFromSpecs(specs);
+        if (commands == null || commands.Count == 0)
+        {
+            Log($"No commands ({debugSource})");
+            yield break;
+        }
+
+        ResetToken();
+        _activeScope.Token = _cts.Token;
+
+        Log($"PlayBlocking ({debugSource}), commands={commands.Count}");
+
+        yield return RunNode(commands, _activeScope, _runId);
+    }
+    
     
     private List<ISequenceCommand> BuildCommandsFromStep(NodeSpec node, int stepIndex)
     {

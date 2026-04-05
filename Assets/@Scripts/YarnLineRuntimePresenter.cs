@@ -7,15 +7,12 @@ using System.Collections.Generic;
 // 나중에 사운드/카메라/세이브 등 line 단위 후처리도 이 층에 추가.
 public sealed class YarnLineRuntimePresenter : DialoguePresenterBase
 {
-    private YarnCommandBridge _yarnCommandBridge;
     private YarnBridgePlaybackDriver _yarnBridgePlaybackDriver;
 
     public void Initialize(
         DialogueRunner dialogueRunner,
-        YarnCommandBridge yarnCommandBridge,
         YarnBridgePlaybackDriver yarnBridgePlaybackDriver)
     {
-        _yarnCommandBridge = yarnCommandBridge;
         _yarnBridgePlaybackDriver = yarnBridgePlaybackDriver;
 
         List<DialoguePresenterBase> presenters = new(dialogueRunner.DialoguePresenters);
@@ -26,8 +23,8 @@ public sealed class YarnLineRuntimePresenter : DialoguePresenterBase
 
     public override YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token)
     {
-        _yarnCommandBridge?.ResetImmediateWaitForNewLine();
-        _yarnBridgePlaybackDriver.PlayCollected();
+        _yarnBridgePlaybackDriver?.ResetImmediateWaitForNewLine();
+        _yarnBridgePlaybackDriver?.PlayCollected();
         
         return YarnTask.CompletedTask;
     }

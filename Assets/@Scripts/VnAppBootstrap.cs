@@ -118,9 +118,10 @@ public class VnAppBootstrap : MonoBehaviour
         YarnCommandRegistry yarnCommandRegistry = new YarnCommandRegistry(dialogueRunner, yarnUIBridge, vnRuntimeBridge);
         yarnCommandRegistry.Initialize();
         
-        yarnCommandBridge.RegisterYarnCommands(dialogueRunner);
-        yarnBridgePlaybackDriver.Initialize(yarnCommandBridge, commandExecutor, _presentationContextSettings);
-        yarnLineRuntimePresenter.Initialize(dialogueRunner, yarnCommandBridge, yarnBridgePlaybackDriver);
+        
+        yarnBridgePlaybackDriver.Initialize(commandExecutor, _presentationContextSettings);
+        yarnCommandBridge.Initialize(dialogueRunner, yarnBridgePlaybackDriver);
+        yarnLineRuntimePresenter.Initialize(dialogueRunner, yarnBridgePlaybackDriver);
     }
 
     private void SetupYarnLifecycleBridge()
