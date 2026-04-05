@@ -45,6 +45,7 @@ public sealed class YarnBridgePlaybackDriver : MonoBehaviour
 
         _isHoldActive = false;
 
+        Debug.Log(_heldSpecs.Count);
         if (_heldSpecs.Count == 0)
             yield break;
 

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using Yarn.Unity;
@@ -22,12 +23,18 @@ public sealed class YarnCommandBridge : MonoBehaviour
     public void RegisterYarnCommands()
     {
         _dialogueRunner.AddCommandHandler<string>("destroy", DestroyCommand);
+        
+        // Marks the next N collected commands as wait=true inside Presentation/Executor.
+        // This affects command playback order, but does NOT block Yarn by itself.
         _dialogueRunner.AddCommandHandler<int>("await_for", AwaitFor);
 
+        // Starts a Yarn-level hold block.
         _dialogueRunner.AddCommandHandler("begin_hold", BeginHold);
-        _dialogueRunner.AddCommandHandler(
-            "end_hold",
-            (System.Func<IEnumerator>)(() => EndHold()));
+        
+        // Blocking Yarn command:
+        // closes the hold block and pauses Yarn until the held commands
+        // marked with wait=true finish inside Presentation/Executor.
+        _dialogueRunner.AddCommandHandler("end_hold", (Func<IEnumerator>)(() => PlayHeldCommands()));
 
         _dialogueRunner.AddCommandHandler<string>("slot_boxside", SetSpeakerSlot);
         _dialogueRunner.AddCommandHandler<string>("slot", SetCharSlot);
@@ -64,11 +71,14 @@ public sealed class YarnCommandBridge : MonoBehaviour
         _playbackDriver.BeginHold();
     }
 
-    private IEnumerator EndHold()
+    // Closes the active hold block and blocks Yarn until held wait=true commands finish.
+    private IEnumerator PlayHeldCommands()
     {
         yield return _playbackDriver.EndHoldBlocking();
     }
 
+    // Marks the next N collected commands as wait=true.
+    // This only affects Presentation/Executor playback.
     private void AwaitFor(int count = 1)
     {
         _playbackDriver.WaitNextImmediateCommands(count);
