@@ -22,7 +22,7 @@ public class VnAppBootstrap : MonoBehaviour
     [Header("ImmediateCommandRunner")]
     [SerializeField] private YarnBridgePlaybackDriver yarnBridgePlaybackDriver;
     [SerializeField] private YarnCommandBridge yarnCommandBridge;
-    [SerializeField] private YarnLineRuntimePresenter yarnLineRuntimePresenter;
+    [SerializeField] private YarnDialogueBoxAutoRouterPresenter yarnLineRuntimePresenter;
     
     [Header("Yarn")]
     [SerializeField] private DialogueRunner dialogueRunner;
@@ -115,13 +115,14 @@ public class VnAppBootstrap : MonoBehaviour
         vnRuntimeBridge.Initialize(dialogueRunner, presentationSessionEntry, _presentationSessionBridge);
         yarnUIBridge.Initialize(linePresenter, ellipsisBreathTypewriter, dialogueTextRouter);
         
-        YarnCommandRegistry yarnCommandRegistry = new YarnCommandRegistry(dialogueRunner, yarnUIBridge, vnRuntimeBridge);
+        DialogueBoxRouteState dialogueBoxRouteState = new();
+        
+        YarnCommandRegistry yarnCommandRegistry = new YarnCommandRegistry(dialogueRunner, yarnUIBridge, vnRuntimeBridge, dialogueBoxRouteState);
         yarnCommandRegistry.Initialize();
-        
-        
+
         yarnBridgePlaybackDriver.Initialize(commandExecutor, _presentationContextSettings);
         yarnCommandBridge.Initialize(dialogueRunner, yarnBridgePlaybackDriver);
-        yarnLineRuntimePresenter.Initialize(dialogueRunner, yarnBridgePlaybackDriver);
+        yarnLineRuntimePresenter.Initialize(dialogueRunner, yarnUIBridge, dialogueBoxRouteState, yarnBridgePlaybackDriver);
     }
 
     private void SetupYarnLifecycleBridge()

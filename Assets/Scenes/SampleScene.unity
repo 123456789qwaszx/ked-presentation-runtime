@@ -1490,26 +1490,14 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 587880120}
-  - component: {fileID: 587880119}
+  - component: {fileID: 587880121}
   m_Layer: 0
-  m_Name: YarnLineRuntimePresenter
+  m_Name: YarnDialogueBoxAutoRouterPresenter
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &587880119
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 587880118}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3ad28344009b1e24fb712974138bf99c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::YarnLineRuntimePresenter
 --- !u!4 &587880120
 Transform:
   m_ObjectHideFlags: 0
@@ -1525,6 +1513,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &587880121
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 587880118}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e3a70de40ff181e48b3ccec112ed9340, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::YarnDialogueBoxAutoRouterPresenter
 --- !u!1 &596868908
 GameObject:
   m_ObjectHideFlags: 0
@@ -1576,7 +1576,7 @@ MonoBehaviour:
   presentationSessionEntry: {fileID: 1433866633}
   yarnBridgePlaybackDriver: {fileID: 720935691}
   yarnCommandBridge: {fileID: 1829026824}
-  yarnLineRuntimePresenter: {fileID: 587880119}
+  yarnLineRuntimePresenter: {fileID: 587880121}
   dialogueRunner: {fileID: 8309902628538800288}
   linePresenter: {fileID: 2958262985601084670}
   dialogueTextRouter: {fileID: 728559835}

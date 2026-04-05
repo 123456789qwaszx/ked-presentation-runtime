@@ -80,7 +80,7 @@ public sealed class EpisodePlayer : MonoBehaviour, IRollbackDialogueRestarter
     
     public void StartYarnNode(string episodeId)
     {
-        yarnUIBridge.HasCharNameBox();
+        //yarnUIBridge.HasCharNameBox();
         dialogueRunner.StartDialogue(episodeId);
     }
     
