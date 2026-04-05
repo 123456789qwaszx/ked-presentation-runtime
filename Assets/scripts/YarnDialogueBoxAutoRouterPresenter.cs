@@ -38,7 +38,7 @@ public sealed class YarnDialogueBoxAutoRouterPresenter : DialoguePresenterBase
         _yarnBridgePlaybackDriver?.PlayCollected();
 
         bool hasCharacterName = string.IsNullOrWhiteSpace(line.CharacterName) == false;
-        DialogueUIRoot.DialogueBoxKind kind = _routeState.Resolve(hasCharacterName);
+        DialogueBoxKind kind = _routeState.Resolve(hasCharacterName);
 
         _yarnUIBridge.BindAuto(kind, hasCharacterName);
         return YarnTask.CompletedTask;

@@ -17,7 +17,7 @@ public sealed class YarnUIBridge : MonoBehaviour
         _dialogueTextRouter = dialogueTextRouter;
     }
     
-    public void BindAuto(DialogueUIRoot.DialogueBoxKind kind, bool hasCharacterName)
+    public void BindAuto(DialogueBoxKind kind, bool hasCharacterName)
     {
         DialogueUIRoot dialogueUI = UIManager.Instance.GetUI<DialogueUIRoot>();
         if (UIManager.Instance.CurSceneRoot != dialogueUI)

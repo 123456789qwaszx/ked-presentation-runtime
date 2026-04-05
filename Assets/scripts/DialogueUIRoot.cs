@@ -5,6 +5,13 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using static UIRefValidation;
 
+public enum DialogueBoxKind
+{
+    WithPortrait = 0,
+    NoPortrait = 1,
+    LetterBox = 2,
+    OnlyText = 3
+}
 
 public class DialogueUIRoot : UIRoot<DialogueUIRoot.Refs>
 {
@@ -22,13 +29,6 @@ public class DialogueUIRoot : UIRoot<DialogueUIRoot.Refs>
     public event Action OnSetSpeedupPressed;
     public event Action OnStepNextPressed;
 
-    public enum DialogueBoxKind
-    {
-        WithPortrait = 0,
-        NoPortrait = 1,
-        LetterBox = 2,
-        OnlyText = 3
-    }
 
     #region Refs
 
