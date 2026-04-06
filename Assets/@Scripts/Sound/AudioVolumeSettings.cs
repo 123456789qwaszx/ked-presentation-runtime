@@ -1,7 +1,3 @@
-// AudioVolumeSettings.cs
-// 책임: BGM/Voice/SFX 볼륨 저장·불러오기·AudioMixer 반영
-// 외부는 이 클래스를 통해서만 볼륨을 읽고 씀
-
 using UnityEngine;
 using UnityEngine.Audio;
 
@@ -24,7 +20,7 @@ public sealed class AudioVolumeSettings
         _mixer = mixer;
     }
 
-    // 저장된 값 불러와서 Mixer에 반영. 초기화 시 한 번 호출.
+    // Restore saved values and apply them to the mixer.
     public void Load()
     {
         BgmVolume   = PlayerPrefs.GetFloat(KeyBgm,   DefaultVolume);

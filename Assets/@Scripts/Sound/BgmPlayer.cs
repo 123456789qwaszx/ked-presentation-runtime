@@ -1,18 +1,15 @@
-// BgmPlayer.cs
-// 책임: BGM 단일 채널 재생, 크로스페이드, skip 시 즉시 스냅
-
 using System.Collections;
 using UnityEngine;
-using UnityEngine.Audio;
 
+// BGM policy: single active track; crossfade on replace; snap while skipping.
 public sealed class BgmPlayer
 {
     private readonly AudioSource _sourceA;
     private readonly AudioSource _sourceB;
     private readonly MonoBehaviour _host;
 
-    private AudioSource _current;  // 지금 재생 중인 소스
-    private AudioSource _next;     // 페이드인 중인 소스
+    private AudioSource _current;
+    private AudioSource _next;
 
     private Coroutine _fadeRoutine;
 
@@ -34,7 +31,9 @@ public sealed class BgmPlayer
         _next    = _sourceB;
     }
 
-    // ── 재생 ─────────────────────────────────────────────────
+    // Replace policy.
+    // If another BGM is already playing, transition to the new clip.
+    // While skipping, apply the final state immediately without fade.
     public void Play(AudioClip clip, float fadeDuration, bool isSkipping)
     {
         if (clip == null)
@@ -43,7 +42,6 @@ public sealed class BgmPlayer
             return;
         }
 
-        // 같은 클립이면 무시
         if (_current.clip == clip && _current.isPlaying)
             return;
 
@@ -73,7 +71,6 @@ public sealed class BgmPlayer
         _fadeRoutine = _host.StartCoroutine(FadeOut(fadeDuration));
     }
 
-    // ── 즉시 스냅 ─────────────────────────────────────────────
     private void SnapTo(AudioClip clip)
     {
         _current.Stop();
@@ -87,10 +84,8 @@ public sealed class BgmPlayer
         _next.clip   = null;
     }
 
-    // ── 크로스페이드 ──────────────────────────────────────────
     private IEnumerator CrossFade(AudioClip clip, float duration)
     {
-        // next 준비
         _next.clip   = clip;
         _next.volume = 0f;
         _next.Play();
@@ -109,12 +104,10 @@ public sealed class BgmPlayer
             yield return null;
         }
 
-        // 페이드 완료 후 정리
         _current.Stop();
         _current.clip   = null;
         _current.volume = 0f;
 
-        // current ↔ next 스왑
         (_current, _next) = (_next, _current);
 
         _fadeRoutine = null;

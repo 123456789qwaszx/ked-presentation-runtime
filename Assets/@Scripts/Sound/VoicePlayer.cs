@@ -1,6 +1,4 @@
-// VoicePlayer.cs
-// 책임: Voice 단일 채널 재생, 새 재생 요청 시 이전 것 중단
-
+// Voice policy: single channel; no overlap; newest request wins.
 using UnityEngine;
 
 public sealed class VoicePlayer
@@ -15,7 +13,9 @@ public sealed class VoicePlayer
         _source      = source;
         _source.loop = false;
     }
-
+    
+    // Interrupt-and-replace policy.
+    // A new voice clip stops the previous one immediately.
     public void Play(AudioClip clip)
     {
         if (clip == null)
