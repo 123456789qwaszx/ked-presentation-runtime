@@ -9,16 +9,16 @@ public partial class UIManager
         if (!TryResolve("Top", out T top))
             return null;
 
-        Mount(top, _layerTop);
+        BumpShowVersion();
 
-        // top은 보통 입력을 막는 로딩/블랙/모달
+        Mount(top, _layerTop);
         ApplyState(top, active: false, interactable: false, blocksRaycasts: false, alpha: 0f);
 
-        ApplyState(top, active: true, interactable: true, blocksRaycasts: true, alpha: 1f);
-        // InvokeAfterPatch(top, () =>
-        // {
-        //     afterPatched?.Invoke(top);
-        // });
+        InvokeAfterPatch(top, () =>
+        {
+            ApplyState(top, active: true, interactable: true, blocksRaycasts: true, alpha: 1f);
+            afterPatched?.Invoke(top);
+        });
 
         return top;
     }
@@ -27,11 +27,16 @@ public partial class UIManager
     {
         T top = GetUI<T>();
         ApplyState(top, active: false, interactable: false, blocksRaycasts: false, alpha: 0f);
+
+        BumpShowVersion();
     }
 
     public void ClearTop()
     {
-        if (_layerTop == null) return;
+        if (_layerTop == null)
+            return;
+
+        BumpShowVersion();
 
         for (int i = _layerTop.childCount - 1; i >= 0; i--)
         {

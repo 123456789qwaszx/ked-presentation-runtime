@@ -10,27 +10,8 @@ public static class UITypeCache<T>
 
 public partial class UIManager : MonoBehaviour
 {
-    #region Singleton
-    public static UIManager Instance { get; private set; }
-
-    [Header("Singleton")]
+    public static UIManager Instance { get; set; }
     [SerializeField] private bool _dontDestroyOnLoad = true;
-    private void Awake()
-    {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-
-        Instance = this;
-
-        if (_dontDestroyOnLoad)
-            DontDestroyOnLoad(gameObject);
-
-        Init();
-    }
-    #endregion
     
     // ---- UI registry / stack
     private readonly Dictionary<Type, UIBase> _uiMap = new();
@@ -54,6 +35,17 @@ public partial class UIManager : MonoBehaviour
     // ----------------------------
     public void Init()
     {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
+
+        if (_dontDestroyOnLoad)
+            DontDestroyOnLoad(gameObject);
+        
         RegisterChildUIs();
     }
 
@@ -86,6 +78,7 @@ public partial class UIManager : MonoBehaviour
             _uiMap.Add(key, ui);
         }
     }
+
 
     // ----------------------------
     // Public API

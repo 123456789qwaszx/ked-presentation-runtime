@@ -9,16 +9,16 @@ public partial class UIManager
         if (!TryResolve("Overlay", out T overlay))
             return null;
 
-        Mount(overlay, _layerOverlay);
+        BumpShowVersion();
 
-        // overlay는 보통 입력 막지 않으니 기본은 interactable=false
+        Mount(overlay, _layerOverlay);
         ApplyState(overlay, active: false, interactable: false, blocksRaycasts: false, alpha: 0f);
 
-        // InvokeAfterPatch(overlay, () =>
-        // {
-        //     ApplyState(overlay, active: true, interactable: false, blocksRaycasts: false, alpha: 1f);
-        //     afterPatched?.Invoke(overlay);
-        // });
+        InvokeAfterPatch(overlay, () =>
+        {
+            ApplyState(overlay, active: true, interactable: false, blocksRaycasts: false, alpha: 1f);
+            afterPatched?.Invoke(overlay);
+        });
 
         return overlay;
     }
@@ -27,11 +27,16 @@ public partial class UIManager
     {
         T overlay = GetUI<T>();
         ApplyState(overlay, active: false, interactable: false, blocksRaycasts: false, alpha: 0f);
+
+        BumpShowVersion();
     }
 
     public void ClearOverlay()
     {
-        if (_layerOverlay == null) return;
+        if (_layerOverlay == null)
+            return;
+
+        BumpShowVersion();
 
         for (int i = _layerOverlay.childCount - 1; i >= 0; i--)
         {

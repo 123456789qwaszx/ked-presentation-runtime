@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using UnityEngine;
 using Yarn.Unity;
 
 public sealed class YarnDialogueBoxAutoRouterPresenter : DialoguePresenterBase

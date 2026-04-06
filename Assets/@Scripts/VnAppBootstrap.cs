@@ -3,6 +3,9 @@ using Yarn.Unity;
 
 public class VnAppBootstrap : MonoBehaviour
 {
+    [Header("Presentation")]
+    [SerializeField] UIManager uiManager;
+    
     private readonly UnityInputSource _unityInputSource = new();
     private readonly UnityTimeSource _unityTimeSource = new();
     private readonly PresentationPlaybackSettings _presentationContextSettings = new ();
@@ -71,6 +74,9 @@ public class VnAppBootstrap : MonoBehaviour
         
         BootstrapUIBindings();
         InitializeEpisodePlayer();
+
+        uiManager.Init();
+        uiManager.AttachUIPatchService(_uiPatchService);
     }
     
     private void BootstrapPresentationSession()

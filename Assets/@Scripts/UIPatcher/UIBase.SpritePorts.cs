@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public interface IUISpritePortProvider
 {
@@ -34,13 +35,43 @@ public abstract partial class UIBase<TRefs> : IUISpritePortProvider
         return _cachedSpritePortIds;
     }
 
-    // portId에 해당하는 Image 컴포넌트에 Sprite 설정.
     public bool TrySetSprite(string portId, Sprite sprite)
     {
-        Enum.TryParse(portId, out TRefs enumKey);
-        
-        View.Image(enumKey).sprite = sprite;
-        
+        if (string.IsNullOrEmpty(portId))
+        {
+            Debug.LogWarning($"[{GetType().Name}] portId is null or empty.", this as UnityEngine.Object);
+            return false;
+        }
+
+        if (!Enum.TryParse(portId, out TRefs enumKey))
+        {
+            Debug.LogWarning($"[{GetType().Name}] Failed to parse portId='{portId}' to enum {typeof(TRefs).Name}.", this as UnityEngine.Object);
+            return false;
+        }
+
+        if (View == null)
+        {
+            Debug.LogWarning($"[{GetType().Name}] View is null. portId='{portId}'", this as UnityEngine.Object);
+            return false;
+        }
+
+        Image image = View.Image(enumKey);
+        if (image == null)
+        {
+            Debug.LogWarning($"[{GetType().Name}] Image ref is missing for portId='{portId}' ({enumKey}).", this as UnityEngine.Object);
+            return false;
+        }
+
+        image.sprite = sprite;
         return true;
     }
+    // portId에 해당하는 Image 컴포넌트에 Sprite 설정.
+    // public bool TrySetSprite(string portId, Sprite sprite)
+    // {
+    //     Enum.TryParse(portId, out TRefs enumKey);
+    //     
+    //     View.Image(enumKey).sprite = sprite;
+    //     
+    //     return true;
+    // }
 }

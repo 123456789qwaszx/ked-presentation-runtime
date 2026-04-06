@@ -1,6 +1,7 @@
 ﻿title: maid
 ---
 
+<<uipatch theme1>>
 <<bgm audio/bgm_idoberg-relaxing-guitar-loop-v5-245859>>
 //<<destroy me>>
 
@@ -43,10 +44,11 @@
 <<fade_in elle>>
 
 열정 넘치는 젊은 여행가: 아, 네! 이렇게 만난 것도 인연이죠!
-<<bgm audio/voice_bgm_uhhknoxpro-piano-loop-432112>>
+<<bgm audio/voice_bgm_uhhknoxpro-piano-loop-432112 3>>
 
 <<to_scale elle 1.2>>
 전 초보 여행가 엘레노어예요. 아직 열심히 배우는 중이죠!
+<<sfx audio/sfx_click_soundreality-ui-pop-up-clear-391155>>
 
 //<<begin_hold>>
 //<<await_for 1>>
@@ -59,8 +61,10 @@
 //<<end_hold>>
 
 그때 처음 만났지. 왠지 한참 전 일처럼 느껴지네. 또 이렇게 만나게 될 줄은 몰랐어.
+<<sfx audio/sfx_click_soundreality-ui-pop-up-clear-391155>>
 
 지명 수당이랑 계약금을 이렇게 많이 받았으니 내가 직접 오긴 왔는데......
+<<sfx audio/sfx_click_soundreality-ui-pop-up-clear-391155>>
 
 <<slot elle>>
 <<place elle center>>
