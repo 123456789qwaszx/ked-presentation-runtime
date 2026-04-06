@@ -1,4 +1,9 @@
+using System;
 using System.Collections;
+
+[Serializable]
+[CommandMenuHint("Sound", "Stop Voice", Order = -897)]
+public sealed class StopVoiceCommandSpec : CommandSpecBase { }
 
 // StopVoiceCommand → ExecuteEvenIfSkipping
 // skip 중에도 반드시 실행돼야 해. 이전 씬의 보이스가 다음 씬까지 흘러나오는 걸 막아야 하기 때문이야.

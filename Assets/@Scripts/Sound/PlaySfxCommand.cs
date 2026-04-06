@@ -1,5 +1,15 @@
+using System;
 using System.Collections;
 using UnityEngine;
+
+[Serializable]
+[CommandMenuHint("Sound", "Play SFX", Order = -896)]
+public sealed class PlaySfxCommandSpec : CommandSpecBase
+{
+    [Header("Source")]
+    public string clipKey;
+    public AudioClip directClip;
+}
 
 // PlaySfxCommand → Ignore
 // skip 중 효과음은 의미가 없음. 연출용 SFX가 skip 구간에서 쏟아지면 오히려 이상함.

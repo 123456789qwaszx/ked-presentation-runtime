@@ -1,4 +1,14 @@
+using System;
 using System.Collections;
+using UnityEngine;
+
+[Serializable]
+[CommandMenuHint("Sound", "Stop BGM", Order = -899)]
+public sealed class StopBgmCommandSpec : CommandSpecBase
+{
+    [Min(0f)]
+    public float fadeDuration = 1f;
+}
 
 public sealed class StopBgmCommand : CommandBase
 {

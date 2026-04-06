@@ -47,6 +47,9 @@ public class VnAppBootstrap : MonoBehaviour
     [Header("Transition")]
     [SerializeField] private TransitionTargetRouter transitionTargetRouter;
     
+    [Header("Sound")]
+    [SerializeField] private AudioSystem audioSystem;
+    
     private PresentationSessionBridge _presentationSessionBridge;
     
     private DialogueUIBindings _dialogueUIBindings;
@@ -94,8 +97,14 @@ public class VnAppBootstrap : MonoBehaviour
         _uiPatchService = new UIPatchService(spritePortAssignmentBuilder, uiSpritePatcher);
         TransitionCommandFactory transitionCommandFactory = new(transitionTargetRouter, _uiPatchService);
         
-        CompositeCommandFactory factory = new (signalFactory, charRigFactory, transitionCommandFactory);
+        // SoundFactory
+        audioSystem.Initialize();
+        ResourcesAudioClipResolver audioClipResolver = new ();
+        SoundCommandFactory soundCommandFactory = new SoundCommandFactory(audioSystem, audioClipResolver);
+        
+        CompositeCommandFactory factory = new (signalFactory, charRigFactory, transitionCommandFactory, soundCommandFactory);
         commandExecutor.Initialize(factory);
+        
         
         PresentationSession presentationSession = new PresentationSession(gatePlanner, gateAdvancer, commandExecutor, _presentationContextSettings);
         
@@ -155,27 +164,29 @@ public class VnAppBootstrap : MonoBehaviour
     
     private void BootstrapPlaybackControls()
     {
-        BacklogRecorder backlogRecorder = new BacklogRecorder(yarnLineLifecycleBridge, _vnPlaybackSettings);
-        AutoAdvanceScheduler autoAdvanceScheduler = new AutoAdvanceScheduler(
+        BacklogRecorder backlogRecorder = new (yarnLineLifecycleBridge, _vnPlaybackSettings);
+        
+        AutoAdvanceScheduler autoAdvanceScheduler = new (
             yarnLineLifecycleBridge,
             _vnPlaybackSettings,
             dialogueAdvanceDispatcher,
             () => Time.unscaledTimeAsDouble);
+        
         HoldSpeedUpController holdSkipController = new(
             _vnPlaybackSettings,
             ellipsisBreathTypewriter,
             dialogueAdvanceDispatcher,
             () => yarnLineLifecycleBridge.IsLineFullyShown);
         
-        RollbackRuntimeState rollbackState = new RollbackRuntimeState();
+        RollbackRuntimeState rollbackState = new ();
         _rollbackHistory = new NodeRollbackHistory(yarnLineLifecycleBridge, rollbackState, _presentationSessionBridge);
         
-        RollbackController rollbackController = new RollbackController(
-            state: rollbackState,
-            history: _rollbackHistory,
-            bridge: yarnLineLifecycleBridge,
+        RollbackController rollbackController = new (
+            rollbackState,
+            _rollbackHistory,
+            yarnLineLifecycleBridge,
             episodePlayer,
-            dispatcher: dialogueAdvanceDispatcher,
+            dialogueAdvanceDispatcher,
             _presentationSessionBridge
         );
         

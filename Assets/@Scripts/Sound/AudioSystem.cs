@@ -1,7 +1,3 @@
-// AudioSystem.cs
-// 책임: BgmPlayer, VoicePlayer, SfxPool의 facade
-//       AudioSource/Mixer 소유, 초기화, PlayerPrefs 저장 시점 관리
-
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
@@ -22,13 +18,11 @@ public sealed class AudioSystem : MonoBehaviour
     [SerializeField] private List<AudioSource> _sfxSources;
     [SerializeField] private int _sfxMaxSize = 10;
 
-    // ── 서브시스템 ────────────────────────────────────────────
     public BgmPlayer           Bgm     { get; private set; }
     public VoicePlayer         Voice   { get; private set; }
     public SfxPool             Sfx     { get; private set; }
     public AudioVolumeSettings Volume  { get; private set; }
 
-    // ── 초기화 ────────────────────────────────────────────────
     public void Initialize()
     {
         Volume = new AudioVolumeSettings(_mixer);
@@ -46,7 +40,6 @@ public sealed class AudioSystem : MonoBehaviour
 
     private void OnApplicationPause(bool pauseStatus)
     {
-        // 모바일: 백그라운드 진입 시 저장
         if (pauseStatus)
             PlayerPrefs.Save();
     }

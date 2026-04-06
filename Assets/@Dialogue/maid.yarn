@@ -1,6 +1,7 @@
 ﻿title: maid
 ---
 
+<<bgm audio/bgm_idoberg-relaxing-guitar-loop-v5-245859>>
 //<<destroy me>>
 
 <<slot_boxside me>>
@@ -12,8 +13,9 @@
 
 
 여기가 월세 내고 산다는 그 집인가? 엄청 크네......
-
+<<sfx audio/sfx_click_soundreality-ui-pop-up-clear-391155>>
 의뢰가...... 나보고 직접 여행가 사회의 상식을 알려달라는 거였지...... 분명 나 말고 더 적합한 사람이 있었을 텐데.
+<<sfx audio/sfx_dragon-studio-notification-sound-effect-372475>>
 //<<closebox>>
 //<<begin_hold>>
 //<<await_for 4>>
@@ -24,6 +26,7 @@
 
 얼마 전, 엘레노어라는 여행가가 마왕 협정으로 메시지를 보내고서는 나를 콕 집어 이 의뢰를 부탁했다.
 
+<<sfx audio/sfx_dragon-studio-sand-transition-451861>>
 //<<closebox>>
 //<<begin_hold>>
 <<await_for 4>>
@@ -40,6 +43,7 @@
 <<fade_in elle>>
 
 열정 넘치는 젊은 여행가: 아, 네! 이렇게 만난 것도 인연이죠!
+<<bgm audio/voice_bgm_uhhknoxpro-piano-loop-432112>>
 
 <<to_scale elle 1.2>>
 전 초보 여행가 엘레노어예요. 아직 열심히 배우는 중이죠!

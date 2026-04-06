@@ -1,5 +1,18 @@
+using System;
 using System.Collections;
 using UnityEngine;
+
+[Serializable]
+[CommandMenuHint("Sound", "Play BGM", Order = -900)]
+public sealed class PlayBgmCommandSpec : CommandSpecBase
+{
+    [Header("Source")]
+    public string clipKey;
+    public AudioClip directClip;
+
+    [Header("Playback")]
+    public float fadeDuration = 1f;
+}
 
 // PlayBgmCommand / StopBgmCommand → CompleteImmediately
 // skip 시 BGM은 즉시 스냅으로 전환. 무시하면 BGM이 안 바뀐 채로 씬이 넘어감.

@@ -69,8 +69,71 @@ public sealed class YarnCommandBridge : MonoBehaviour
 
         _dialogueRunner.AddCommandHandler<string>("blackout", ScreedBlackout);
         _dialogueRunner.AddCommandHandler<string>("uipatch", UIPatch);
+        
+        _dialogueRunner.AddCommandHandler<string, float>("bgm", PlayBgm);
+        _dialogueRunner.AddCommandHandler<float>("stop_bgm", StopBgm);
+
+        _dialogueRunner.AddCommandHandler<string>("voice", PlayVoice);
+        _dialogueRunner.AddCommandHandler("stop_voice", StopVoice);
+
+        _dialogueRunner.AddCommandHandler<string>("sfx", PlaySfx);
+        _dialogueRunner.AddCommandHandler("stop_all_sfx", StopAllSfx);
+    }
+    
+    
+    private void PlayBgm(string clipKey, float fadeDuration = 1f)
+    {
+        var spec = new PlayBgmCommandSpec
+        {
+            clipKey = clipKey,
+            fadeDuration = fadeDuration
+        };
+
+        Collect(spec);
     }
 
+    private void StopBgm(float fadeDuration = 1f)
+    {
+        var spec = new StopBgmCommandSpec
+        {
+            fadeDuration = fadeDuration
+        };
+
+        Collect(spec);
+    }
+
+    private void PlayVoice(string clipKey)
+    {
+        var spec = new PlayVoiceCommandSpec
+        {
+            clipKey = clipKey
+        };
+
+        Collect(spec);
+    }
+
+    private void StopVoice()
+    {
+        var spec = new StopVoiceCommandSpec();
+        Collect(spec);
+    }
+
+    private void PlaySfx(string clipKey)
+    {
+        var spec = new PlaySfxCommandSpec
+        {
+            clipKey = clipKey
+        };
+
+        Collect(spec);
+    }
+
+    private void StopAllSfx()
+    {
+        var spec = new StopAllSfxCommandSpec();
+        Collect(spec);
+    }
+    
     private void Sway(string roleKey)
     {
         var spec = new SwayCommandSpecCharR()
