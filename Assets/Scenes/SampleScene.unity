@@ -1855,7 +1855,7 @@ AudioSource:
   m_GameObject: {fileID: 717906850}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
+  OutputAudioMixerGroup: {fileID: -7226066200534750327, guid: 75bd2ab034bbdae46b44812573c5887b, type: 2}
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
   m_PlayOnAwake: 0
@@ -2468,7 +2468,7 @@ AudioSource:
   m_GameObject: {fileID: 1130977843}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
+  OutputAudioMixerGroup: {fileID: 7010459855959158841, guid: 75bd2ab034bbdae46b44812573c5887b, type: 2}
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
   m_PlayOnAwake: 0
@@ -2597,7 +2597,7 @@ AudioSource:
   m_GameObject: {fileID: 1196936079}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
+  OutputAudioMixerGroup: {fileID: 7010459855959158841, guid: 75bd2ab034bbdae46b44812573c5887b, type: 2}
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
   m_PlayOnAwake: 0
@@ -3362,7 +3362,7 @@ AudioSource:
   m_GameObject: {fileID: 1502228805}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
+  OutputAudioMixerGroup: {fileID: -4553586221933084693, guid: 75bd2ab034bbdae46b44812573c5887b, type: 2}
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
   m_PlayOnAwake: 0
@@ -4094,7 +4094,7 @@ MonoBehaviour:
   dialogueRunner: {fileID: 8309902628538800288}
   yarnUIBridge: {fileID: 1874881010}
   presentationRouteEntry: {fileID: 1433866633}
-  yarnEntryKey: kano
+  yarnEntryKey: maid
   presentationEntryKey: test
   runYarnKey: 50
   stopKey: 51
