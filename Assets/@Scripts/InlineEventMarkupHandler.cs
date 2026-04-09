@@ -120,7 +120,7 @@ public sealed class InlineEventMarkupHandler : ActionMarkupHandler
         if (string.IsNullOrEmpty(_plainText)) return;
 
         int textLength = _plainText.Length;
-        
+
         // Only iterate indices that haven't been processed yet
         foreach (var kvp in _actionsByIndex)
         {
@@ -177,7 +177,8 @@ public sealed class InlineEventMarkupHandler : ActionMarkupHandler
     {
     }
 
-    public override async YarnTask OnCharacterWillAppear(int currentCharacterIndex, MarkupParseResult line, CancellationToken ct)
+    public override async YarnTask OnCharacterWillAppear(int currentCharacterIndex, MarkupParseResult line,
+        CancellationToken ct)
     {
         _lastProcessedCharIndex = currentCharacterIndex;
 
@@ -245,58 +246,69 @@ public sealed class InlineEventMarkupHandler : ActionMarkupHandler
 
     private void RegisterPause(MarkupAttribute attr)
     {
-        // [pause t=0.25/]
+        // [pau t=0.25/] [pau =0.25/]
         float seconds = 0.2f;
-        if (TryGetFloatSmart(attr, "t", out float pauseTime))
+
+        if (TryGetFloatSmart(attr, "t", out float pauseTime) ||
+            TryGetFloatSmart(attr, "pau", out pauseTime)) // shorthand fallback
+        {
             seconds = Mathf.Max(0f, pauseTime);
+        }
 
         int ms = Mathf.RoundToInt(seconds * 1000f);
         int idx = NormalizeIndexFast(attr.Position);
 
-        InlineAction inlineAction = new InlineAction
+        AddAction(idx, new InlineAction
         {
             type = InlineActionType.Pause,
             pauseMs = ms,
-        };
-        AddAction(idx, in inlineAction);
+        });
     }
 
     private void RegisterSignal(MarkupAttribute attr)
     {
-        // [signal key="beat"/]
-        if (!TryGetString(attr, "key", out string key) || string.IsNullOrWhiteSpace(key))
+        // [signal key="beat"/] [signal =beat/]
+        if (!TryGetString(attr, "key", out string key) &&
+            !TryGetString(attr, "signal", out key)) // shorthand fallback
             return;
+
+        if (string.IsNullOrWhiteSpace(key)) return;
 
         int idx = NormalizeIndexFast(attr.Position);
 
-        InlineAction inlineAction = new InlineAction
+        AddAction(idx, new InlineAction
         {
             type = InlineActionType.Signal,
             signalKey = key,
-        };
-        AddAction(idx, in inlineAction);
+        });
     }
 
     private void RegisterMove(MarkupAttribute attr)
     {
-        // [move name="far"/]
-        if (!TryGetString(attr, "name", out string moveName) || string.IsNullOrWhiteSpace(moveName))
+        // [move name="far"/] [move =far/]
+        if (!TryGetString(attr, "name", out string moveName) &&
+            !TryGetString(attr, "move", out moveName)) // shorthand fallback
             return;
+
+        if (string.IsNullOrWhiteSpace(moveName)) return;
 
         int idx = NormalizeIndexFast(attr.Position);
 
-        InlineAction inlineAction = new InlineAction
+        AddAction(idx, new InlineAction
         {
             type = InlineActionType.Move,
             moveName = moveName,
-        };
-        AddAction(idx, in inlineAction);
+        });
     }
 
     private void RegisterSfx(MarkupAttribute attr)
     {
-        if (!TryGetString(attr, "cue", out string cue) || string.IsNullOrWhiteSpace(cue))
+        // [sfx =c3/] [sfx cue=c3] [sfx cue=c3 gain=0.1/]  [sfx =c3 gain=0.1/]
+        if (!TryGetString(attr, "cue", out string cue) &&
+            !TryGetString(attr, "sfx", out cue)) // shorthand fallback
             return;
+
+        if (string.IsNullOrWhiteSpace(cue)) return;
 
         float gain = 1f;
         if (attr.TryGetProperty("gain", out MarkupValue _))
@@ -304,13 +316,12 @@ public sealed class InlineEventMarkupHandler : ActionMarkupHandler
 
         int idx = NormalizeIndexFast(attr.Position);
 
-        InlineAction inlineAction = new InlineAction
+        AddAction(idx, new InlineAction
         {
             type = InlineActionType.Sfx,
             sfxCue = cue,
             sfxGain = Mathf.Max(0f, gain),
-        };
-        AddAction(idx, in inlineAction);
+        });
     }
 
     private void AddAction(int index, in InlineAction action)
@@ -352,11 +363,11 @@ public sealed class InlineEventMarkupHandler : ActionMarkupHandler
             return true;
         }
 
-        // 실패 원인: (1) 타입이 string이 아님 (2) 키가 없음
+        // 실패 원인: (1) 타입이 string이 아님
         if (attr.TryGetProperty(key, out MarkupValue mv))
             Debug.LogError($"[InlineEvent] [{attr.Name}] '{key}' must be string (got {mv.Type}). pos={attr.Position}");
-        else
-            Debug.LogError($"[InlineEvent] [{attr.Name}] missing '{key}'. pos={attr.Position}");
+        // else(2) 키가 없음
+        //     Debug.LogError($"[InlineEvent] [{attr.Name}] missing '{key}'. pos={attr.Position}");
 
         value = null;
         return false;
@@ -389,7 +400,8 @@ public sealed class InlineEventMarkupHandler : ActionMarkupHandler
                 if (!float.TryParse(s, NumberStyles.Float, CultureInfo.InvariantCulture, out value))
                 {
                     // 실패원인: string이지만 파싱실패. e.g) "0.2s","abc", "" 
-                    Debug.LogError($"[InlineEvent] reason=parse_failed tag=[{attr.Name}] prop='{key}' raw='{s}' pos={attr.Position}");
+                    Debug.LogError(
+                        $"[InlineEvent] reason=parse_failed tag=[{attr.Name}] prop='{key}' raw='{s}' pos={attr.Position}");
                     return false;
                 }
 
@@ -397,7 +409,8 @@ public sealed class InlineEventMarkupHandler : ActionMarkupHandler
             }
 
             default:
-                Debug.LogError($"[InlineEvent] reason=unsupported_type tag=[{attr.Name}] prop='{key}' type={markupValue.Type} pos={attr.Position}");
+                Debug.LogError(
+                    $"[InlineEvent] reason=unsupported_type tag=[{attr.Name}] prop='{key}' type={markupValue.Type} pos={attr.Position}");
                 return false;
         }
     }
