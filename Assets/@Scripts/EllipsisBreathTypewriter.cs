@@ -113,6 +113,8 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
         _typewriterText.ForceMeshUpdate();
 
         _totalCharacterCount = _typewriterText.textInfo.characterCount;
+        
+        //Debug.Log($"textInfo.characterCount={_typewriterText.textInfo.characterCount}, text='{line.Text}'");
 
         InvokeHandlers(h => h.OnPrepareForLine(line, _typewriterText));
     }
@@ -126,7 +128,7 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
 
         try
         {
-            Debug.Log(line.Text);
+            //Debug.Log(line.Text);
             float charsPerSecond = Mathf.Max(0f, unitsPerSecond) * Mathf.Max(0.01f, _speedMultiplier);
             double secondPerChar = (charsPerSecond > 0f) ? (1.0 / charsPerSecond) : 0.0;
 
@@ -148,7 +150,7 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
                 {
                     RevealAllAndComplete(line, totalLineCharacterCount);
                     
-                    Debug.Log("IsCancellationRequested1");
+                    //Debug.Log("IsCancellationRequested1");
                     return;
                 }
 

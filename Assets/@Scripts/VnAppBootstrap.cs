@@ -137,7 +137,7 @@ public class VnAppBootstrap : MonoBehaviour
 
         yarnBridgePlaybackDriver.Initialize(commandExecutor, _presentationContextSettings);
         yarnCommandBridge.Initialize(dialogueRunner, yarnBridgePlaybackDriver);
-        yarnLineRuntimePresenter.Initialize(dialogueRunner, yarnUIBridge, dialogueBoxRouteState, yarnBridgePlaybackDriver);
+        yarnLineRuntimePresenter.Initialize(dialogueRunner, yarnUIBridge, dialogueBoxRouteState, yarnBridgePlaybackDriver, audioSystem);
     }
 
     private void SetupYarnLifecycleBridge()

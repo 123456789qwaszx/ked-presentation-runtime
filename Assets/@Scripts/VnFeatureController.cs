@@ -20,8 +20,8 @@ public class VnPlaybackSettings
     public float userAdvanceCooldownSec = 0.13f; // 130ms
     public float autoAdvanceRateLimitSec = 0.13f; // 130ms
     
-    public float cooldownAfterHurryUpSec = 0.28f;
-    public float cooldownAfterNextLineSec = Mathf.Max(0.12f, 0.1f); // Prevent double-skip: enforce a minimum cooldown
+    public float cooldownAfterHurryUpSec = 0.18f;
+    public float cooldownAfterNextLineSec = 0.01f;//Mathf.Max(0.12f, 0.1f); // Prevent double-skip: enforce a minimum cooldown
 
     public VnPlayMode vnPlayMode = VnPlayMode.Manual;
     public bool isSpeedUpToggleHeld = false;

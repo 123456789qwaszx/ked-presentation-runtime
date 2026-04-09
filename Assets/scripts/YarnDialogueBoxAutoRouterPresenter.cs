@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEngine;
 using Yarn.Unity;
 
 public sealed class YarnDialogueBoxAutoRouterPresenter : DialoguePresenterBase
@@ -6,16 +7,19 @@ public sealed class YarnDialogueBoxAutoRouterPresenter : DialoguePresenterBase
     private YarnUIBridge _yarnUIBridge;
     private DialogueBoxRouteState _routeState;
     private YarnBridgePlaybackDriver _yarnBridgePlaybackDriver;
+    private AudioSystem _audioSystem;
 
     public void Initialize(
         DialogueRunner dialogueRunner,
         YarnUIBridge yarnUIBridge,
         DialogueBoxRouteState routeState,
-        YarnBridgePlaybackDriver yarnBridgePlaybackDriver = null)
+        YarnBridgePlaybackDriver yarnBridgePlaybackDriver = null,
+        AudioSystem audioSystem = null)
     {
         _yarnUIBridge = yarnUIBridge;
         _routeState = routeState;
         _yarnBridgePlaybackDriver = yarnBridgePlaybackDriver;
+        _audioSystem = audioSystem;
 
         List<DialoguePresenterBase> presenters = new(dialogueRunner.DialoguePresenters);
         presenters.Remove(this);
@@ -33,6 +37,8 @@ public sealed class YarnDialogueBoxAutoRouterPresenter : DialoguePresenterBase
 
     public override YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token)
     {
+        _audioSystem?.Voice.Stop();
+        
         _yarnBridgePlaybackDriver?.ResetImmediateWaitForNewLine();
         _yarnBridgePlaybackDriver?.PlayCollected();
 

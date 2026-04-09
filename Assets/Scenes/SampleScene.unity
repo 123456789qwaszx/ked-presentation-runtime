@@ -357,7 +357,7 @@ MonoBehaviour:
   mixer: {fileID: 24100000, guid: 75bd2ab034bbdae46b44812573c5887b, type: 2}
   bgmSourceA: {fileID: 1196936080}
   bgmSourceB: {fileID: 1130977844}
-  voiceSource: {fileID: 1502228806}
+  voiceSource: {fileID: 717906851}
   sfxSources:
   - {fileID: 1502228806}
   sfxMaxSize: 10
@@ -2206,7 +2206,7 @@ MonoBehaviour:
     userAdvanceCooldownSec: 0.13
     autoAdvanceRateLimitSec: 0.13
     cooldownAfterHurryUpSec: 0.28
-    cooldownAfterNextLineSec: 0.12
+    cooldownAfterNextLineSec: 0
     vnPlayMode: 0
     isSpeedUpToggleHeld: 0
 --- !u!4 &775605348
@@ -2750,7 +2750,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.54901963}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -4094,7 +4094,7 @@ MonoBehaviour:
   dialogueRunner: {fileID: 8309902628538800288}
   yarnUIBridge: {fileID: 1874881010}
   presentationRouteEntry: {fileID: 1433866633}
-  yarnEntryKey: maid
+  yarnEntryKey: kano
   presentationEntryKey: test
   runYarnKey: 50
   stopKey: 51
@@ -23060,7 +23060,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.54901963}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -24688,7 +24688,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.54901963}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -39808,6 +39808,7 @@ SceneRoots:
   - {fileID: 1315566988}
   - {fileID: 307625744}
   - {fileID: 626587495}
+  - {fileID: 32255927}
   - {fileID: 63871903}
   - {fileID: 165425761}
   - {fileID: 1658226452}
@@ -39818,4 +39819,3 @@ SceneRoots:
   - {fileID: 2068248508}
   - {fileID: 8103127889455306347}
   - {fileID: 99511076}
-  - {fileID: 32255927}
