@@ -1625,6 +1625,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VnAppBootstrap
   uiManager: {fileID: 2860743132734891021}
+  audioSystem: {fileID: 32255926}
+  inlineSfxHost: {fileID: 1571925710}
   portraitGeneratedDbSo: {fileID: 11400000, guid: 9a31d992344284d4f8ff35f5e9be5ae9, type: 2}
   unitySignalBus: {fileID: 552181530}
   commandExecutor: {fileID: 1257280952}
@@ -1646,7 +1648,6 @@ MonoBehaviour:
   vnFeatureController: {fileID: 775605347}
   episodePlayer: {fileID: 1924806292}
   transitionTargetRouter: {fileID: 648162085}
-  audioSystem: {fileID: 32255926}
   overlay: {fileID: 165425760}
 --- !u!1 &626587492
 GameObject:
@@ -3464,6 +3465,57 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 32255927}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1571925709
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1571925711}
+  - component: {fileID: 1571925710}
+  m_Layer: 0
+  m_Name: InlineSfxHost
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1571925710
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1571925709}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e56b3bb9937af84bb4dec1f2e7dd89d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InlineSfxHost
+  cueMap:
+  - cue: c1
+    clipKey: audio/sfx_click_soundreality-ui-pop-up-clear-391155
+  - cue: c2
+    clipKey: audio/sfx_dragon-studio-notification-sound-effect-372475
+  - cue: c3
+    clipKey: audio/sfx_dragon-studio-sand-transition-451861
+--- !u!4 &1571925711
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1571925709}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 3593, y: -4, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1612240309
 GameObject:
@@ -39793,14 +39845,16 @@ SceneRoots:
   - {fileID: 410087041}
   - {fileID: 832575519}
   - {fileID: 396403403}
+  - {fileID: 165425761}
   - {fileID: 26931191}
   - {fileID: 596868909}
+  - {fileID: 32255927}
+  - {fileID: 1829026823}
+  - {fileID: 7985477256358699683}
   - {fileID: 552181529}
   - {fileID: 1257280953}
   - {fileID: 720935692}
-  - {fileID: 1829026823}
   - {fileID: 587880120}
-  - {fileID: 7985477256358699683}
   - {fileID: 728559836}
   - {fileID: 2005113227}
   - {fileID: 1874881011}
@@ -39808,9 +39862,8 @@ SceneRoots:
   - {fileID: 1315566988}
   - {fileID: 307625744}
   - {fileID: 626587495}
-  - {fileID: 32255927}
   - {fileID: 63871903}
-  - {fileID: 165425761}
+  - {fileID: 1571925711}
   - {fileID: 1658226452}
   - {fileID: 1433866632}
   - {fileID: 1924806293}

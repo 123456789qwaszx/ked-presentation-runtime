@@ -15,7 +15,7 @@ public sealed class SfxPool
     
     // Fire-and-forget playback.
     // SFX does not reserve a persistent channel.
-    public void Play(AudioClip clip)
+    public void Play(AudioClip clip, float gain = 1f)
     {
         if (clip == null)
         {
@@ -25,6 +25,7 @@ public sealed class SfxPool
 
         AudioSource source = GetAvailable();
         source.clip = clip;
+        source.volume = Mathf.Max(0f, gain);
         source.Play();
     }
 
@@ -34,6 +35,7 @@ public sealed class SfxPool
         {
             _pool[i].Stop();
             _pool[i].clip = null;
+            _pool[i].volume = 1f;
         }
     }
     
@@ -72,6 +74,7 @@ public sealed class SfxPool
         }
 
         oldest.Stop();
+        oldest.volume = 1f;
         return oldest;
     }
 

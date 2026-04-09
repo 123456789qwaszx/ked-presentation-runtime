@@ -13,6 +13,10 @@ public class VnAppBootstrap : MonoBehaviour
     private readonly VnPlaybackSettings _vnPlaybackSettings = new ();
     private readonly EpisodePlayState _episodePlayState = new (); 
     
+    [Header("Sound")]
+    [SerializeField] private AudioSystem audioSystem;
+    [SerializeField] private InlineSfxHost inlineSfxHost;
+    
     [Header("Presentation")]
     [SerializeField] private PortraitGeneratedDbSo portraitGeneratedDbSo;
     [SerializeField] private UnitySignalBus unitySignalBus;
@@ -50,9 +54,6 @@ public class VnAppBootstrap : MonoBehaviour
     [Header("Transition")]
     [SerializeField] private TransitionTargetRouter transitionTargetRouter;
     
-    [Header("Sound")]
-    [SerializeField] private AudioSystem audioSystem;
-    
     private PresentationSessionBridge _presentationSessionBridge;
     
     private DialogueUIBindings _dialogueUIBindings;
@@ -63,6 +64,9 @@ public class VnAppBootstrap : MonoBehaviour
     
     private void Awake()
     {
+        BootstrapAudioSystem();
+        BootstrapUIManager();
+        
         BootstrapPresentationSession();
         ConnectPresentationSessionToYarn();
         
@@ -75,6 +79,22 @@ public class VnAppBootstrap : MonoBehaviour
         BootstrapUIBindings();
         InitializeEpisodePlayer();
 
+    }
+
+    private void BootstrapAudioSystem()
+    {
+        audioSystem.Initialize();
+        ResourcesAudioClipResolver audioClipResolver = new ();
+        inlineSfxHost.Initialize(audioSystem, audioClipResolver);
+    }
+
+    private void BootstrapUIManager()
+    {
+        SpritePortAssignmentBuilder spritePortAssignmentBuilder = new ();
+        ResourcesUISpriteLoader resourcesUISpriteLoader = new ();
+        UISpritePatcher uiSpritePatcher = new (resourcesUISpriteLoader);
+        _uiPatchService = new UIPatchService(spritePortAssignmentBuilder, uiSpritePatcher);
+        
         uiManager.Init();
         uiManager.AttachUIPatchService(_uiPatchService);
     }
@@ -97,14 +117,9 @@ public class VnAppBootstrap : MonoBehaviour
         CharRigCommandFactory charRigFactory = new(charRigAccess, portraitResolver);
         
         // TransitionFactory
-        SpritePortAssignmentBuilder spritePortAssignmentBuilder = new ();
-        ResourcesUISpriteLoader resourcesUISpriteLoader = new ();
-        UISpritePatcher uiSpritePatcher = new (resourcesUISpriteLoader);
-        _uiPatchService = new UIPatchService(spritePortAssignmentBuilder, uiSpritePatcher);
         TransitionCommandFactory transitionCommandFactory = new(transitionTargetRouter, _uiPatchService);
         
         // SoundFactory
-        audioSystem.Initialize();
         ResourcesAudioClipResolver audioClipResolver = new ();
         SoundCommandFactory soundCommandFactory = new SoundCommandFactory(audioSystem, audioClipResolver);
         
@@ -126,7 +141,7 @@ public class VnAppBootstrap : MonoBehaviour
     
     private void BootstrapYarn()
     {
-        inlineEventMarkupHandler.Initialize(_presentationSessionBridge);
+        inlineEventMarkupHandler.Initialize(_presentationSessionBridge, inlineSfxHost);
         vnRuntimeBridge.Initialize(dialogueRunner, presentationSessionEntry, _presentationSessionBridge);
         yarnUIBridge.Initialize(linePresenter, ellipsisBreathTypewriter, dialogueTextRouter);
         

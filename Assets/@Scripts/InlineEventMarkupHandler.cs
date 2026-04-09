@@ -9,19 +9,27 @@ using Yarn.Markup;
 using Yarn.Unity;
 
 // Inline Action Markup Handler:
-// - Handles only point tags: [pause], [signal], [move]
+// - Handles only point tags: [pause], [signal], [move], [sfx]
 // - Styling (color/size/etc) must be handled by ReplacementMarkupHandler on LineProvider
 public sealed class InlineEventMarkupHandler : ActionMarkupHandler
 {
     private IInlineSignalHost _inlineSignalHost;
-    public void Initialize(IInlineSignalHost inlineSignalHost)
+    private IInlineAudioHost _inlineAudioHost;
+
+    public void Initialize(IInlineSignalHost inlineSignalHost, IInlineAudioHost inlineAudioHost)
     {
         _inlineSignalHost = inlineSignalHost;
+        _inlineAudioHost = inlineAudioHost;
     }
-    
+
     public interface IInlineSignalHost
     {
         void RaiseSignal(string key);
+    }
+
+    public interface IInlineAudioHost
+    {
+        void PlaySfxCue(string cue, float gain = 1f);
     }
 
     [Serializable]
@@ -34,6 +42,7 @@ public sealed class InlineEventMarkupHandler : ActionMarkupHandler
         Pause = 0,
         Signal = 1,
         Move = 2,
+        Sfx = 3,
     }
 
     private struct InlineAction
@@ -42,6 +51,9 @@ public sealed class InlineEventMarkupHandler : ActionMarkupHandler
         public int pauseMs;
         public string signalKey;
         public string moveName;
+
+        public string sfxCue;
+        public float sfxGain;
     }
 
     private struct ActionBucket
@@ -74,39 +86,41 @@ public sealed class InlineEventMarkupHandler : ActionMarkupHandler
         }
     }
 
-    [Header("Callbacks")] public StringEvent onMoveRequested = new();
+    [Header("Callbacks")]
+    public StringEvent onMoveRequested = new();
 
-    // ---- Action table (index -> actions) ----
     private readonly Dictionary<int, ActionBucket> _actionsByIndex = new(64);
 
     private string _plainText = "";
     private int _lastProcessedCharIndex = 0;
-    
+
     private bool _ignorePause;
     private bool _suppressSignals;
     private bool _suppressMoves;
+    private bool _suppressSfx;
 
     public void SetPauseIgnored(bool ignored)
     {
         _ignorePause = ignored;
     }
-    
-    public void SetReplaySuppressed(bool suppressSignals, bool suppressMoves)
+
+    public void SetReplaySuppressed(bool suppressSignals, bool suppressMoves, bool suppressSfx = true)
     {
         _suppressSignals = suppressSignals;
         _suppressMoves = suppressMoves;
+        _suppressSfx = suppressSfx;
     }
-    
+
     /// <summary>
-    /// Force-fires any pending signals that haven't been triggered yet (e.g. on HurryUp/skip)
-    /// pause/move are skipped
+    /// Force-fires any pending signals that haven't been triggered yet (e.g. on HurryUp/skip).
+    /// pause/move/sfx are skipped.
     /// </summary>
     public void FlushPendingSignals()
     {
         if (string.IsNullOrEmpty(_plainText)) return;
 
         int textLength = _plainText.Length;
-
+        
         // Only iterate indices that haven't been processed yet
         foreach (var kvp in _actionsByIndex)
         {
@@ -121,9 +135,7 @@ public sealed class InlineEventMarkupHandler : ActionMarkupHandler
             if (bucket.hasSingle)
             {
                 if (bucket.single.type == InlineActionType.Signal)
-                {
                     _inlineSignalHost?.RaiseSignal(bucket.single.signalKey);
-                }
             }
 
             if (bucket.many != null)
@@ -131,9 +143,7 @@ public sealed class InlineEventMarkupHandler : ActionMarkupHandler
                 foreach (InlineAction action in bucket.many)
                 {
                     if (action.type == InlineActionType.Signal)
-                    {
                         _inlineSignalHost?.RaiseSignal(action.signalKey);
-                    }
                 }
             }
         }
@@ -141,14 +151,10 @@ public sealed class InlineEventMarkupHandler : ActionMarkupHandler
         _lastProcessedCharIndex = textLength;
     }
 
-    // ------------------------------
-    // IActionMarkupHandler
-    // ------------------------------
     public override void OnPrepareForLine(MarkupParseResult line, TMP_Text text)
     {
         _actionsByIndex.Clear();
         _lastProcessedCharIndex = 0;
-
         _plainText = line.Text;
 
         // Point tags only. Range tags (attr.Length > 0) are for styling and are ignored here.
@@ -162,6 +168,7 @@ public sealed class InlineEventMarkupHandler : ActionMarkupHandler
                 case "pau": RegisterPause(attr); break;
                 case "signal": RegisterSignal(attr); break;
                 case "move": RegisterMove(attr); break;
+                case "sfx": RegisterSfx(attr); break;
             }
         }
     }
@@ -170,8 +177,7 @@ public sealed class InlineEventMarkupHandler : ActionMarkupHandler
     {
     }
 
-    public override async YarnTask OnCharacterWillAppear(int currentCharacterIndex, MarkupParseResult line,
-        CancellationToken ct)
+    public override async YarnTask OnCharacterWillAppear(int currentCharacterIndex, MarkupParseResult line, CancellationToken ct)
     {
         _lastProcessedCharIndex = currentCharacterIndex;
 
@@ -186,9 +192,7 @@ public sealed class InlineEventMarkupHandler : ActionMarkupHandler
             if (bucket.many != null)
             {
                 for (int i = 0; i < bucket.many.Count; i++)
-                {
                     await RunAction(bucket.many[i], ct);
-                }
             }
         }
     }
@@ -201,9 +205,6 @@ public sealed class InlineEventMarkupHandler : ActionMarkupHandler
     {
     }
 
-    // ------------------------------
-    // Action execution
-    // ------------------------------
     private async YarnTask RunAction(InlineAction action, CancellationToken ct)
     {
         switch (action.type)
@@ -211,7 +212,7 @@ public sealed class InlineEventMarkupHandler : ActionMarkupHandler
             case InlineActionType.Pause:
                 if (_ignorePause)
                     return;
-                
+
                 if (action.pauseMs > 0)
                     await YarnTask.Delay(action.pauseMs, ct);
                 return;
@@ -219,7 +220,7 @@ public sealed class InlineEventMarkupHandler : ActionMarkupHandler
             case InlineActionType.Move:
                 if (_suppressMoves)
                     return;
-                
+
                 if (!string.IsNullOrWhiteSpace(action.moveName))
                     onMoveRequested?.Invoke(action.moveName);
                 return;
@@ -227,16 +228,20 @@ public sealed class InlineEventMarkupHandler : ActionMarkupHandler
             case InlineActionType.Signal:
                 if (_suppressSignals)
                     return;
-                
+
                 if (!string.IsNullOrWhiteSpace(action.signalKey))
                     _inlineSignalHost?.RaiseSignal(action.signalKey);
                 return;
+
+            case InlineActionType.Sfx:
+                if (_suppressSfx)
+                    return;
+
+                if (!string.IsNullOrWhiteSpace(action.sfxCue))
+                    _inlineAudioHost?.PlaySfxCue(action.sfxCue, action.sfxGain);
+                return;
         }
     }
-
-    // ------------------------------
-    // Action Registration
-    // ------------------------------
 
     private void RegisterPause(MarkupAttribute attr)
     {
@@ -288,6 +293,26 @@ public sealed class InlineEventMarkupHandler : ActionMarkupHandler
         AddAction(idx, in inlineAction);
     }
 
+    private void RegisterSfx(MarkupAttribute attr)
+    {
+        if (!TryGetString(attr, "cue", out string cue) || string.IsNullOrWhiteSpace(cue))
+            return;
+
+        float gain = 1f;
+        if (attr.TryGetProperty("gain", out MarkupValue _))
+            TryGetFloatSmart(attr, "gain", out gain);
+
+        int idx = NormalizeIndexFast(attr.Position);
+
+        InlineAction inlineAction = new InlineAction
+        {
+            type = InlineActionType.Sfx,
+            sfxCue = cue,
+            sfxGain = Mathf.Max(0f, gain),
+        };
+        AddAction(idx, in inlineAction);
+    }
+
     private void AddAction(int index, in InlineAction action)
     {
         _actionsByIndex.TryGetValue(index, out ActionBucket bucket);
@@ -314,10 +339,7 @@ public sealed class InlineEventMarkupHandler : ActionMarkupHandler
         }
 
         if (index >= len)
-        {
-            int clamped = len - 1;
-            return clamped; // 끝/초과 시 마지막 문자에 붙도록 보정
-        }
+            return len - 1; // 끝, 초과 시 마지막 문자에 붙도록 보정
 
         return index;
     }
@@ -367,17 +389,15 @@ public sealed class InlineEventMarkupHandler : ActionMarkupHandler
                 if (!float.TryParse(s, NumberStyles.Float, CultureInfo.InvariantCulture, out value))
                 {
                     // 실패원인: string이지만 파싱실패. e.g) "0.2s","abc", "" 
-                    Debug.LogError(
-                        $"[InlineEvent] reason=parse_failed tag=[{attr.Name}] prop='{key}' raw='{s}' pos={attr.Position}");
+                    Debug.LogError($"[InlineEvent] reason=parse_failed tag=[{attr.Name}] prop='{key}' raw='{s}' pos={attr.Position}");
                     return false;
                 }
 
                 return true;
             }
 
-            default: // 실패원인: 지원하지 않는 타입, bool
-                Debug.LogError(
-                    $"[InlineEvent] reason=unsupported_type tag=[{attr.Name}] prop='{key}' type={markupValue.Type} pos={attr.Position}");
+            default:
+                Debug.LogError($"[InlineEvent] reason=unsupported_type tag=[{attr.Name}] prop='{key}' type={markupValue.Type} pos={attr.Position}");
                 return false;
         }
     }
