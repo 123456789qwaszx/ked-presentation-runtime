@@ -121,7 +121,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
         {
             roleKey = roleKey,
             target = CharacterRigTarget.Character_Track_Y,
-            dir = SlideFromCharR.Right,
+            dir = CharRDirection.Right,
             distance = 22f,
             duration = 0.8f
         };
@@ -139,7 +139,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
         {
             roleKey = roleKey,
             target = CharacterRigTarget.Character_Track_Y,
-            dir = SlideFromCharR.Down,
+            dir = CharRDirection.Down,
             distance = 12f,
             duration = 0.8f
         };
@@ -168,7 +168,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
             roleKey = roleKey,
             target = CharacterRigTarget.Character_Track,
             strength = 45f,
-            direction = SlideFromCharR.Up,
+            direction = CharRDirection.Up,
             duration = 0.55f,
             taps = 3,
             damping = 11,
@@ -412,7 +412,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
 
     private void NudgeSlideIn(string roleKey, string direction = "right")
     {
-        SlideFromCharR dir = ParseSlideDirection(direction, SlideFromCharR.Right);
+        CharRDirection dir = ParseSlideDirection(direction, CharRDirection.Right);
 
         var juicySlideIn = new JuicySlideInCommandSpecCharR
         {
@@ -425,7 +425,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
         {
             roleKey = roleKey,
             target = CharacterRigTarget.Character_Track_Y,
-            direction = SlideFromCharR.Up,
+            direction = CharRDirection.Up,
             strength = 340f,
             duration = 0.6f,
             taps = 4,
@@ -439,7 +439,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
 
     private void NudgeJolt(string roleKey, string direction = "right")
     {
-        SlideFromCharR dir = ParseSlideDirection(direction, SlideFromCharR.Right);
+        CharRDirection dir = ParseSlideDirection(direction, CharRDirection.Right);
 
         var spec = new NudgeTapCommandSpecCharR
         {
@@ -458,7 +458,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
 
     private void NudgeShake(string roleKey, string direction = "right")
     {
-        SlideFromCharR dir = ParseSlideDirection(direction, SlideFromCharR.Right);
+        CharRDirection dir = ParseSlideDirection(direction, CharRDirection.Right);
 
         var spec = new NudgeTapCommandSpecCharR
         {
@@ -475,7 +475,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
 
     private void NudgeTap(string roleKey, string direction = "right")
     {
-        SlideFromCharR dir = ParseSlideDirection(direction, SlideFromCharR.Right);
+        CharRDirection dir = ParseSlideDirection(direction, CharRDirection.Right);
 
         var spec = new NudgeTapCommandSpecCharR
         {
@@ -494,7 +494,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
 
     private void NudgeTapHard(string roleKey, string direction = "down")
     {
-        SlideFromCharR dir = ParseSlideDirection(direction, SlideFromCharR.Down);
+        CharRDirection dir = ParseSlideDirection(direction, CharRDirection.Down);
 
         var spec = new NudgeTapCommandSpecCharR
         {
@@ -512,7 +512,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
 
     private void HopIn(string roleKey, string direction = "left")
     {
-        SlideFromCharR dir = ParseSlideDirection(direction, SlideFromCharR.Down);
+        CharRDirection dir = ParseSlideDirection(direction, CharRDirection.Down);
 
         var spec = new BounceArcInCommandSpecCharR
         {
@@ -525,7 +525,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
 
     private void DipInOut(string roleKey, string direction = "down")
     {
-        SlideFromCharR dir = ParseSlideDirection(direction, SlideFromCharR.Down);
+        CharRDirection dir = ParseSlideDirection(direction, CharRDirection.Down);
 
         var spec = new DipInOutCommandSpecCharR
         {
@@ -569,7 +569,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
 
     private void SlideIn(string roleKey, string direction = "left")
     {
-        SlideFromCharR from = ParseSlideDirection(direction, SlideFromCharR.Left);
+        CharRDirection from = ParseSlideDirection(direction, CharRDirection.Left);
 
         var spec = new JuicySlideInCommandSpecCharR
         {
@@ -582,7 +582,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
 
     private void SlideOut(string roleKey, string direction = "right")
     {
-        SlideFromCharR to = ParseSlideDirection(direction, SlideFromCharR.Right);
+        CharRDirection to = ParseSlideDirection(direction, CharRDirection.Right);
 
         var spec = new JuicySlideOutCommandSpecCharR
         {
@@ -718,27 +718,27 @@ public sealed class YarnCommandBridge : MonoBehaviour
         Collect(spec);
     }
 
-    private SlideFromCharR ParseSlideDirection(string direction, SlideFromCharR fallback)
+    private CharRDirection ParseSlideDirection(string direction, CharRDirection fallback)
     {
         switch (direction?.Trim().ToLowerInvariant())
         {
             case "left":
             case "l":
-                return SlideFromCharR.Left;
+                return CharRDirection.Left;
 
             case "right":
             case "r":
-                return SlideFromCharR.Right;
+                return CharRDirection.Right;
 
             case "up":
             case "u":
             case "top":
-                return SlideFromCharR.Up;
+                return CharRDirection.Up;
 
             case "down":
             case "d":
             case "bottom":
-                return SlideFromCharR.Down;
+                return CharRDirection.Down;
 
             default:
                 return fallback;

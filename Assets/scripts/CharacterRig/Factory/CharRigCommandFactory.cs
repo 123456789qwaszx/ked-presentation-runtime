@@ -1,4 +1,4 @@
-public enum SlideFromCharR
+public enum CharRDirection
 {
     Left = 0,
     Right,

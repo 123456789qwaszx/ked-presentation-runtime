@@ -4,8 +4,6 @@ using DG.Tweening;
 using UnityEngine;
 using RectTransform = UnityEngine.RectTransform;
 
-public enum BounceJumpAxisCharR { X = 0, Y = 1 }
-
 [Serializable]
 [CommandMenuHint("Char Rig Motion", "Bounce Arc In", Order = -760)]
 public sealed class BounceArcInCommandSpecCharR : CommandSpecBase
@@ -14,7 +12,7 @@ public sealed class BounceArcInCommandSpecCharR : CommandSpecBase
     public CharacterRigTarget target = CharacterRigTarget.Character_Track;
 
     [Header("Slide In")]
-    public SlideFromCharR from = SlideFromCharR.Left;
+    public CharRDirection from = CharRDirection.Left;
     public float distance = 480f;
 
     [Header("Timing")]
@@ -30,9 +28,6 @@ public sealed class BounceArcInCommandSpecCharR : CommandSpecBase
     [Range(0.05f, 1f)]
     [Tooltip("How much of each hop segment is airborne (arc width). 1=arc spans whole segment, 0.2=short/narrow arc.")]
     public float airWidth = 0.75f;
-
-    [Header("Jump axis")]
-    public BounceJumpAxisCharR jumpAxis = BounceJumpAxisCharR.Y;
 
     [Header("Last arc override (optional)")]
     [Tooltip("If < 0, uses arcHeight.")]
@@ -83,7 +78,7 @@ public sealed class BounceArcInCommandCharR : CommandBase, IStepScopedCommand
         Vector2 moveDir = (dest - start);
         moveDir = moveDir.sqrMagnitude > 0f ? moveDir.normalized : (-fromDir);
 
-        Vector2 jumpDir = _spec.jumpAxis == BounceJumpAxisCharR.Y ? Vector2.up : Vector2.right;
+        Vector2 jumpDir = Vector2.up;
 
         int hops = Mathf.Max(1, _spec.hopCount);
 
@@ -179,11 +174,11 @@ public sealed class BounceArcInCommandCharR : CommandBase, IStepScopedCommand
         _destPos = _rect.anchoredPosition;
     }
 
-    private static Vector2 GetFromDir(SlideFromCharR from) => from switch
+    private static Vector2 GetFromDir(CharRDirection from) => from switch
     {
-        SlideFromCharR.Right => new Vector2(+1f, 0f),
-        SlideFromCharR.Up    => new Vector2(0f, +1f),
-        SlideFromCharR.Down  => new Vector2(0f, -1f),
+        CharRDirection.Right => new Vector2(+1f, 0f),
+        CharRDirection.Up    => new Vector2(0f, +1f),
+        CharRDirection.Down  => new Vector2(0f, -1f),
         _                    => new Vector2(-1f, 0f), // Left
     };
 

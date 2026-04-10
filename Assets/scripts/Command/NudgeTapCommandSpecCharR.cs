@@ -24,7 +24,7 @@ public sealed class NudgeTapCommandSpecCharR : CommandSpecBase
     public float strength = 22f;
 
     [Tooltip("Direction of the nudge.")]
-    public SlideFromCharR direction = SlideFromCharR.Right;
+    public CharRDirection direction = CharRDirection.Right;
 
     [Tooltip("Total duration for the whole nudge.")]
     public float duration = 0.88f;
@@ -157,14 +157,14 @@ public sealed class NudgeTapCommandCharR : CommandBase, IStepScopedCommand
         _restPos = _rect.anchoredPosition;
     }
 
-    private static Vector2 GetSignedDirection(SlideFromCharR direction)
+    private static Vector2 GetSignedDirection(CharRDirection direction)
     {
         return direction switch
         {
-            SlideFromCharR.Left => Vector2.left,
-            SlideFromCharR.Right => Vector2.right,
-            SlideFromCharR.Up => Vector2.up,
-            SlideFromCharR.Down => Vector2.down,
+            CharRDirection.Left => Vector2.left,
+            CharRDirection.Right => Vector2.right,
+            CharRDirection.Up => Vector2.up,
+            CharRDirection.Down => Vector2.down,
             _ => Vector2.right,
         };
     }

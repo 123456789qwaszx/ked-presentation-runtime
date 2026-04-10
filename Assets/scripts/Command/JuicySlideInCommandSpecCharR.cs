@@ -13,7 +13,7 @@ public sealed class JuicySlideInCommandSpecCharR : CommandSpecBase
     public CharacterRigTarget target = CharacterRigTarget.Character_Track;
 
     [Header("Slide")]
-    public SlideFromCharR direction = SlideFromCharR.Left;
+    public CharRDirection direction = CharRDirection.Left;
     public float distance = 480f;
 
     [Header("Tween")]
@@ -114,11 +114,11 @@ public sealed class JuicySlideInCommandCharR : CommandBase, IStepScopedCommand
         _destPos = _rect.anchoredPosition;
     }
 
-    private static Vector2 GetDir(SlideFromCharR from) => from switch
+    private static Vector2 GetDir(CharRDirection from) => from switch
     {
-        SlideFromCharR.Right => new Vector2(+1f, 0f),
-        SlideFromCharR.Up    => new Vector2(0f, +1f),
-        SlideFromCharR.Down  => new Vector2(0f, -1f),
+        CharRDirection.Right => new Vector2(+1f, 0f),
+        CharRDirection.Up    => new Vector2(0f, +1f),
+        CharRDirection.Down  => new Vector2(0f, -1f),
         _                    => new Vector2(-1f, 0f),
     };
 

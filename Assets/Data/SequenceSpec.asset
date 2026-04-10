@@ -282,24 +282,9 @@ MonoBehaviour:
         type: 3
         seconds: 0
         signalKey: beat
-    - editorName: 
-      tracks:
-        interaction:
-        - rid: 305542845787537471
-        setup: []
-        motion: []
-        dialogue: []
-        fx: []
-      compiled: []
-      gate:
-        type: 3
-        seconds: 0
-        signalKey: beat
   references:
     version: 2
     RefIds:
-    - rid: -2
-      type: {class: , ns: , asm: }
     - rid: 305542826026074172
       type: {class: SetCharRigCommandSpec, ns: , asm: Assembly-CSharp}
       data:
@@ -516,22 +501,6 @@ MonoBehaviour:
         distance: 24
         duration: 0.4
         ease: 8
-        wait: 0
-    - rid: 305542845787537471
-      type: {class: MoveInOutCommandSpecCharR, ns: , asm: Assembly-CSharp}
-      data:
-        roleKey: sub1
-        _meta:
-          track: 0
-          phase: 0
-          blockingHint: 0
-          infiniteHint: 0
-          durationHint: 0
-        target: 1
-        offset: {x: 24, y: 0}
-        duration: 0.22
-        holdPortion: 0.08
-        ease: 10
         wait: 0
     - rid: 305542845787537473
       type: {class: DipInOutCommandSpecCharR, ns: , asm: Assembly-CSharp}

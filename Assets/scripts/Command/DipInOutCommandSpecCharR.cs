@@ -10,7 +10,7 @@ public sealed class DipInOutCommandSpecCharR : CommandSpecBase
 {
     [Header("Target")] public CharacterRigTarget target = CharacterRigTarget.Character_Track;
 
-    [Header("Move")] public SlideFromCharR dir = SlideFromCharR.Down;
+    [Header("Move")] public CharRDirection dir = CharRDirection.Down;
 
     [Tooltip("How far to dip (px).")] public float distance = 24f;
 
@@ -126,11 +126,11 @@ public sealed class DipInOutCommandCharR : CommandBase, IStepScopedCommand
         _restPos = _rect.anchoredPosition;
     }
 
-    private static Vector2 GetOffset(SlideFromCharR dir, float distance) => dir switch
+    private static Vector2 GetOffset(CharRDirection dir, float distance) => dir switch
     {
-        SlideFromCharR.Right => new Vector2(+distance, 0f),
-        SlideFromCharR.Up => new Vector2(0f, +distance),
-        SlideFromCharR.Down => new Vector2(0f, -distance),
+        CharRDirection.Right => new Vector2(+distance, 0f),
+        CharRDirection.Up => new Vector2(0f, +distance),
+        CharRDirection.Down => new Vector2(0f, -distance),
         _ => new Vector2(-distance, 0f),
     };
 
