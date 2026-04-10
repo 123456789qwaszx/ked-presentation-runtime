@@ -47,13 +47,16 @@ public sealed class DestroyCommandSpec : CommandSpecBase
     }
 
     public string ResolvedTargetName => $"{ResolvedRolePrefix}{rigRootName}";
+    
+    
+    public bool wait = true;
 }
 
 public sealed class DestroyCommand : CommandBase
 {
     private readonly DestroyCommandSpec _spec;
 
-    public override bool WaitForCompletion => true;
+    public override bool WaitForCompletion => _spec.wait;
 
     public DestroyCommand(DestroyCommandSpec spec)
     {
@@ -71,10 +74,10 @@ public sealed class DestroyCommand : CommandBase
         Debug.Log($"[DestroyCommand] Destroy '{_spec.ResolvedTargetName}'");
         Object.Destroy(go);
 
-        // roleKey에 매핑된 refs를 비움(네 설계대로)
         scope.Refs[_spec.roleKey] = null;
         yield break;
     }
+    
 
     private GameObject FindTarget()
     {

@@ -47,16 +47,6 @@ public sealed class SetOriginSizeCommandCharR : CommandBase
         yield break;
     }
 
-    protected override void OnSkip(CommandRunScope scope) => OnCommandCompleted(scope);
-
-    protected override void OnCommandCompleted(CommandRunScope scope)
-    {
-        if (!_resolveAttempted)
-            ResolveRefs(scope);
-
-        Apply();
-    }
-
     private void Apply()
     {
         ApplyScale();

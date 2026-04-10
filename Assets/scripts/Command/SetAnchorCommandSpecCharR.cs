@@ -61,16 +61,6 @@ public sealed class SetAnchorCommandCharR : CommandBase
         yield break;
     }
 
-    protected override void OnSkip(CommandRunScope scope) => OnCommandCompleted(scope);
-
-    protected override void OnCommandCompleted(CommandRunScope scope)
-    {
-        if (!_resolveAttempted)
-            ResolveRefs(scope);
-
-        Apply();
-    }
-
     private void Apply()
     {
         if (_spec.overrideAnchoredPosition)

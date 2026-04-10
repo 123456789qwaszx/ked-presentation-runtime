@@ -65,19 +65,19 @@ public sealed class ResetTrackOffsetsCommand : CommandBase
         yield break;
     }
 
-    protected override void OnSkip(CommandRunScope scope) => OnCommandCompleted(scope);
-
-    protected override void OnCommandCompleted(CommandRunScope scope)
-    {
-        if (!_resolveAttempted)
-            ResolveRefs(scope);
-
-        Apply();
-    }
-
     private void Apply()
     {
-        ResetRequestedTrackLayers();
+        if (_spec.resetAllTrackLayers || _spec.resetCharTrack)
+            ResetRect(_rigRefs.Character_Track);
+
+        if (_spec.resetAllTrackLayers || _spec.resetCharTrackMove)
+            ResetRect(_rigRefs.Character_Track_Move);
+
+        if (_spec.resetAllTrackLayers || _spec.resetCharTrackX)
+            ResetRect(_rigRefs.Character_Track_X);
+
+        if (_spec.resetAllTrackLayers || _spec.resetCharTrackY)
+            ResetRect(_rigRefs.Character_Track_Y);
 
         _rect.DOKill(true); // Finish previous motion so this command starts from a committed state.
 
@@ -85,26 +85,6 @@ public sealed class ResetTrackOffsetsCommand : CommandBase
             _rect.anchoredPosition = Vector2.zero;
 
         _rect.anchoredPosition += _spec.offset;
-    }
-
-    private void ResetRequestedTrackLayers()
-    {
-        bool resetTrack = _spec.resetAllTrackLayers || _spec.resetCharTrack;
-        bool resetMove = _spec.resetAllTrackLayers || _spec.resetCharTrackMove;
-        bool resetX = _spec.resetAllTrackLayers || _spec.resetCharTrackX;
-        bool resetY = _spec.resetAllTrackLayers || _spec.resetCharTrackY;
-
-        if (resetTrack)
-            ResetRect(_rigRefs.Character_Track);
-
-        if (resetMove)
-            ResetRect(_rigRefs.Character_Track_Move);
-
-        if (resetX)
-            ResetRect(_rigRefs.Character_Track_X);
-
-        if (resetY)
-            ResetRect(_rigRefs.Character_Track_Y);
     }
 
     private static void ResetRect(RectTransform rect)

@@ -35,44 +35,23 @@ public sealed class ShowRootsCommandCharR : CommandBase, IStepScopedCommand
     {
         if (!_resolveAttempted)
             ResolveRefs(scope);
-
-        if (_targets.Count == 0)
-            yield break;
-
-        SnapOnTargets(_targets);
-        _targets.Clear();
+        
+        Apply();
+        yield break;
     }
 
-    protected override void OnSkip(CommandRunScope scope) => OnCommandCompleted(scope);
-
-    protected override void OnCommandCompleted(CommandRunScope scope)
+    private void Apply()
     {
-        if (!_resolveAttempted)
-            ResolveRefs(scope);
-
         if (_targets.Count == 0)
             return;
-
+        
         SnapOnTargets(_targets);
+        
         _targets.Clear();
     }
-
-    private void ResolveRefs(CommandRunScope scope)
-    {
-        _resolveAttempted = true;
-        _targets.Clear();
-
-        if (_spec.targetMask == CharRigRootLayerMask.None)
-            return;
-
-        CharRigRootLayerMaskMap.CollectRects((CharacterRigRefs)scope.Refs[_spec.roleKey], _spec.targetMask, _targets);
-    }
-
+    
     private void SnapOnTargets(List<RectTransform> targets)
     {
-        if (targets == null || targets.Count == 0)
-            return;
-
         for (int i = 0; i < targets.Count; i++)
         {
             CanvasGroup canvasGroup = GetOrAddCanvasGroup(targets[i]);
@@ -87,6 +66,18 @@ public sealed class ShowRootsCommandCharR : CommandBase, IStepScopedCommand
             }
         }
     }
+
+    private void ResolveRefs(CommandRunScope scope)
+    {
+        _resolveAttempted = true;
+        _targets.Clear();
+
+        if (_spec.targetMask == CharRigRootLayerMask.None)
+            return;
+
+        CharRigRootLayerMaskMap.CollectRects((CharacterRigRefs)scope.Refs[_spec.roleKey], _spec.targetMask, _targets);
+    }
+
 
     private CanvasGroup GetOrAddCanvasGroup(RectTransform rect)
     {
