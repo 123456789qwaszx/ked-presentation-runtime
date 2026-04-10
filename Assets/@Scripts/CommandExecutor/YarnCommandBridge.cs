@@ -60,10 +60,6 @@ public sealed class YarnCommandBridge : MonoBehaviour
         _dialogueRunner.AddCommandHandler<string, string>("nudge", NudgeTap);
         _dialogueRunner.AddCommandHandler<string, string>("nudge_hard", NudgeTapHard);
         _dialogueRunner.AddCommandHandler<string, string>("slide_in_nudge", NudgeSlideIn);
-        
-        
-        _dialogueRunner.AddCommandHandler<string>("sway", Sway);
-        
 
         _dialogueRunner.AddCommandHandler<string, string>("cast", SetPortrait);
 
@@ -81,53 +77,134 @@ public sealed class YarnCommandBridge : MonoBehaviour
         
         _dialogueRunner.AddCommandHandler<string, string, string, string>("emotion_wipe", SetEmotionPortraitWipe);
         
-        _dialogueRunner.AddCommandHandler<string>("sway_soft", SwaySoft);
-        _dialogueRunner.AddCommandHandler<string>("sway_tap", SwayTap);
-        _dialogueRunner.AddCommandHandler<string>("sway_hard", SwayHard);
+        _dialogueRunner.AddCommandHandler<string>("sway", SwayGentle);
+        _dialogueRunner.AddCommandHandler<string>("sway_hard", SwayPendulum);
+        _dialogueRunner.AddCommandHandler<string>("slide_in_sway", SlideInSway);
     }
     
-    private void SwayHard(string roleKey)
+    private void SlideInSway(string roleKey)
     {
-        var spec = new SwayCommandSpecCharR
+        var spec = new HideRootsCommandSpecCharR
+        { 
+                roleKey = roleKey,
+                targetMask = CharRigRootLayerMask.CharacterPortrait_Root
+        };
+        
+        var spec1 = new FadeInCommandSpecCharR()
+        { 
+            roleKey = roleKey,
+            targetMask = CharRigRootLayerMask.CharacterPortrait_Root,
+            duration = 0.28f
+        };
+
+        var spec2 = new JuicySlideInCommandSpecCharR
         {
             roleKey = roleKey,
-            target = CharacterRigTarget.CharacterPortrait_SwayPivot,
+            distance = 550f,
+            duration = 0.45f
+        };
 
-            duration = 0.62f,
+        var spec3 = new DipInOutCommandSpecCharR()
+        {
+            roleKey = roleKey,
+            target = CharacterRigTarget.Character_Track_Y,
+            dir = SlideFromCharR.Right,
+            distance = 22f,
+            duration = 0.8f
+        };
+
+        var spec4 = new PunchScaleCommandSpecCharR()
+        {
+            roleKey = roleKey,
+            strength = -0.03f,
+            duration = 0.55f,
+            vibrato = 3,
+            elasticity = 0.45f
+        };
+
+        var spec5 = new DipInOutCommandSpecCharR()
+        {
+            roleKey = roleKey,
+            target = CharacterRigTarget.Character_Track_Y,
+            dir = SlideFromCharR.Down,
+            distance = 12f,
+            duration = 0.8f
+        };
+        
+        var spec6 = new SwayCommandSpecCharR()
+        {
+            roleKey = roleKey,
+            strength = 11.5f,
+            duration = 1.28f,
             cycles = 1,
-            anticipation = 0.8f,
-            wait = false
+            damping = 26,
+            speed = 1.8f,
+            finalOvershoot = 0.8f,
+            anticipation = -15,
+            startPositive = false
+        };
+
+        var spec7 = new WaitCommandSpec()
+        {
+            roleKey = roleKey,
+            seconds = 0.4f,
+        };
+
+        var spec8 = new NudgeTapCommandSpecCharR()
+        {
+            roleKey = roleKey,
+            target = CharacterRigTarget.Character_Track,
+            strength = 45f,
+            direction = SlideFromCharR.Up,
+            duration = 0.55f,
+            taps = 3,
+            damping = 11,
+            anticipation = 3
         };
 
         Collect(spec);
+        Collect(spec1);
+        Collect(spec2);
+        Collect(spec3);
+        Collect(spec4);
+        Collect(spec5);
+        Collect(spec6);
+        Collect(spec7);
+        Collect(spec8);
     }
     
-    private void SwayTap(string roleKey)
+    
+    private void SwayGentle(string roleKey)
     {
         var spec = new SwayCommandSpecCharR
         {
             roleKey = roleKey,
             target = CharacterRigTarget.CharacterPortrait_SwayPivot,
 
-            duration = 0.52f,
-            cycles = 1,
-            anticipation = 2.4f,
-            wait = false
-        };
-
-        Collect(spec);
-    }
-    
-    private void SwaySoft(string roleKey)
-    {
-        var spec = new SwayCommandSpecCharR
-        {
-            roleKey = roleKey,
-            target = CharacterRigTarget.CharacterPortrait_SwayPivot,
-
-            duration = 1.05f,
+            strength = 12f,
+            duration = 1.15f,
             cycles = 2,
-            anticipation = 1.2f,
+            damping = 1.9f,
+            speed = 1.2f,
+            anticipation = 0.45f,
+            wait = false
+        };
+
+        Collect(spec);
+    }
+    private void SwayPendulum(string roleKey)
+    {
+        var spec = new SwayCommandSpecCharR
+        {
+            roleKey = roleKey,
+            target = CharacterRigTarget.CharacterPortrait_SwayPivot,
+
+            strength = 13f,
+            duration = 1.35f,
+            cycles = 2,
+            damping = 4.2f,
+            speed = 0.88f,
+            anticipation = 0.02f,
             wait = false
         };
 
@@ -204,16 +281,6 @@ public sealed class YarnCommandBridge : MonoBehaviour
     private void StopAllSfx()
     {
         var spec = new StopAllSfxCommandSpec();
-        Collect(spec);
-    }
-    
-    private void Sway(string roleKey)
-    {
-        var spec = new SwayCommandSpecCharR()
-        {
-            roleKey = roleKey
-        };
-
         Collect(spec);
     }
 

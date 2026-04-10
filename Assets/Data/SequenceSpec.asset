@@ -38,30 +38,46 @@ MonoBehaviour:
         type: 3
         seconds: 0
         signalKey: beat
-    - editorName: 
+    - editorName: swayGentle
       tracks:
         interaction:
+        - rid: 8483491092097663053
+        - rid: 8483491092097663051
+        - rid: 8483491092097663048
+        - rid: 8483491092097663049
+        - rid: 8483491092097663050
+        - rid: 8483491092097663054
         - rid: 8483491092097663040
+        - rid: 8483491092097663057
+        - rid: 8483491092097663058
         setup: []
         motion: []
         dialogue: []
         fx: []
       compiled:
+      - rid: 8483491092097663053
+      - rid: 8483491092097663051
+      - rid: 8483491092097663048
+      - rid: 8483491092097663049
+      - rid: 8483491092097663050
+      - rid: 8483491092097663054
       - rid: 8483491092097663040
+      - rid: 8483491092097663057
+      - rid: 8483491092097663058
       gate:
         type: 3
         seconds: 0
         signalKey: beat
-    - editorName: 
+    - editorName: NudgeShake
       tracks:
         interaction: []
         setup: []
         motion: []
         dialogue: []
         fx:
-        - rid: 8483491092097663038
+        - rid: 8483490911384240207
       compiled:
-      - rid: 8483491092097663038
+      - rid: 8483490911384240207
       gate:
         type: 3
         seconds: 0
@@ -82,6 +98,90 @@ MonoBehaviour:
       - rid: 8483490922132668504
       - rid: 8483490922132668503
       - rid: 8483490922132668505
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+    - editorName: swayRotate
+      tracks:
+        interaction:
+        - rid: 8483491092097663046
+        setup: []
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 8483491092097663046
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+    - editorName: swayRotate
+      tracks:
+        interaction:
+        - rid: 8483491092097663047
+        setup: []
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 8483491092097663047
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+    - editorName: swayPendulum
+      tracks:
+        interaction:
+        - rid: 8483491092097663042
+        setup: []
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 8483491092097663042
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+    - editorName: swayNervous
+      tracks:
+        interaction:
+        - rid: 8483491092097663043
+        setup: []
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 8483491092097663043
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+    - editorName: swayFakeOut
+      tracks:
+        interaction:
+        - rid: 8483491092097663044
+        setup: []
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 8483491092097663044
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+    - editorName: 
+      tracks:
+        interaction:
+        - rid: 8483491092097663041
+        setup: []
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 8483491092097663041
       gate:
         type: 3
         seconds: 0
@@ -156,20 +256,6 @@ MonoBehaviour:
       compiled:
       - rid: 305542845787537474
       - rid: 305542845787537475
-      gate:
-        type: 3
-        seconds: 0
-        signalKey: beat
-    - editorName: NudgeShake
-      tracks:
-        interaction: []
-        setup: []
-        motion: []
-        dialogue: []
-        fx:
-        - rid: 8483490911384240207
-      compiled:
-      - rid: 8483490911384240207
       gate:
         type: 3
         seconds: 0
@@ -653,25 +739,6 @@ MonoBehaviour:
         damping: 9
         anticipation: 0
         wait: 0
-    - rid: 8483491092097663038
-      type: {class: SwayCommandSpecCharR, ns: , asm: Assembly-CSharp}
-      data:
-        roleKey: main
-        _meta:
-          track: 40
-          phase: 0
-          blockingHint: 0
-          infiniteHint: 0
-          durationHint: 0
-        target: 7
-        strength: 10
-        duration: 0.9
-        cycles: 2
-        damping: 2.2
-        speed: 1
-        anticipation: 1.5
-        startPositive: 1
-        wait: 0
     - rid: 8483491092097663040
       type: {class: SwayCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:
@@ -683,11 +750,260 @@ MonoBehaviour:
           infiniteHint: 0
           durationHint: 0
         target: 7
+        strength: 11.5
+        duration: 1.28
+        cycles: 1
+        damping: 26
+        speed: 1.8
+        finalOvershoot: 0.8
+        anticipation: -15
+        startPositive: 0
+        wait: 0
+    - rid: 8483491092097663041
+      type: {class: SwayCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: main
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 7
         strength: 10
-        duration: 1
+        duration: 0.9
         cycles: 2
         damping: 2.2
         speed: 1
-        anticipation: 0
+        finalOvershoot: 0.22
+        anticipation: 1.5
         startPositive: 1
+        wait: 0
+    - rid: 8483491092097663042
+      type: {class: SwayCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: main
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 7
+        strength: 8.4
+        duration: 1.9
+        cycles: 2
+        damping: 4.8
+        speed: 2.1
+        finalOvershoot: 1
+        anticipation: 0.25
+        startPositive: 1
+        wait: 0
+    - rid: 8483491092097663043
+      type: {class: SwayCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: main
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 7
+        strength: 6.5
+        duration: 0.92
+        cycles: 3
+        damping: 2.8
+        speed: 1.26
+        finalOvershoot: 1
+        anticipation: -0.4
+        startPositive: 1
+        wait: 0
+    - rid: 8483491092097663044
+      type: {class: SwayCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: main
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 7
+        strength: 15
+        duration: 0.74
+        cycles: 1
+        damping: 4.4
+        speed: 1.12
+        finalOvershoot: 0.22
+        anticipation: -0.4
+        startPositive: 1
+        wait: 0
+    - rid: 8483491092097663046
+      type: {class: SwayRotateToCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: main
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 7
+        targetZ: 24
+        useAnticipation: 1
+        anticipation: 0.4
+        anticipationPortion: 0.06
+        anticipationEase: 6
+        useOvershoot: 1
+        overshoot: 0.4
+        overshootPortion: 0.851
+        approachEase: 9
+        settleEase: 12
+        duration: 0.7
+        wait: 0
+    - rid: 8483491092097663047
+      type: {class: SwayRotateToCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: main
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 7
+        targetZ: -24
+        useAnticipation: 1
+        anticipation: 0.4
+        anticipationPortion: 0.06
+        anticipationEase: 6
+        useOvershoot: 1
+        overshoot: 0.4
+        overshootPortion: 0.851
+        approachEase: 9
+        settleEase: 12
+        duration: 0.7
+        wait: 0
+    - rid: 8483491092097663048
+      type: {class: JuicySlideInCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: main
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 2
+        direction: 0
+        distance: 550
+        duration: 0.45
+        ease: 9
+        punch: 24
+        wait: 0
+    - rid: 8483491092097663049
+      type: {class: DipInOutCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: main
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 4
+        dir: 1
+        distance: 22
+        duration: 0.8
+        ease: 8
+        wait: 0
+    - rid: 8483491092097663050
+      type: {class: PunchScaleCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: main
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 9
+        strength: -0.03
+        duration: 0.55
+        vibrato: 3
+        elasticity: 0.447
+        wait: 0
+    - rid: 8483491092097663051
+      type: {class: FadeInCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: main
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        targetMask: 1
+        duration: 0.28
+        ease: 9
+        EnableInteraction: 1
+        wait: 0
+    - rid: 8483491092097663053
+      type: {class: HideRootsCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: main
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        targetMask: 1
+        disableInteraction: 1
+    - rid: 8483491092097663054
+      type: {class: DipInOutCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: main
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 4
+        dir: 3
+        distance: 12
+        duration: 0.8
+        ease: 8
+        wait: 0
+    - rid: 8483491092097663057
+      type: {class: WaitCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: main
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        seconds: 0.4
+        respectTimeScale: 1
+    - rid: 8483491092097663058
+      type: {class: NudgeTapCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: main
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 1
+        strength: 45
+        direction: 2
+        duration: 0.55
+        taps: 3
+        damping: 11
+        anticipation: 3
         wait: 0
