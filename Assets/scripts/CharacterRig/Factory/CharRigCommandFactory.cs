@@ -6,13 +6,6 @@ public enum SlideFromCharR
     Down,
 }
 
-public enum ShakeAxisCharR
-{
-    X  = 0,
-    Y  = 1,
-    XY = 2,
-}
-
 public sealed class CharRigCommandFactory : INodeCommandFactory
 {
     private readonly CharacterRigAccess _access;
@@ -31,14 +24,9 @@ public sealed class CharRigCommandFactory : INodeCommandFactory
             null => null,
             
             SetCharRigCommandSpec s         => new SetCharRigCommand(_access, s),
-            FadeCommandSpecCharR s          => new FadeCommandCharR(s),
-            SetSpriteCommandSpecCharR s     => new SetSpriteCommandCharR(s),
-            MoveToCommandSpecCharR s        => new MoveToCommandCharR(s),
             SetColorCommandSpecCharR s      => new SetColorCommandCharR(s),
-            ShakeCommandSpecCharR s         => new ShakeCommandCharR(s),
             ResetTrackOffsetsCommandSpec s  => new ResetTrackOffsetsCommand(s),
             SetRotationCommandSpecCharR s   => new SetRotationCommandCharR(s),
-            SetScaleCommandSpecCharR s      => new SetScaleCommandCharR(s),
             MoveByCommandSpecCharR s        => new MoveByCommandCharR(s),
             ScaleFromToCommandSpecCharR s   => new ScaleFromToCommandCharR(s),
             HideRootsCommandSpecCharR s     => new HideRootsCommandCharR(s),
@@ -48,24 +36,16 @@ public sealed class CharRigCommandFactory : INodeCommandFactory
             SetOriginSizeCommandSpecCharR s => new SetOriginSizeCommandCharR(s),
             FadeOutCommandSpecCharR s       => new FadeOutCommandCharR(s),
             FadeInCommandSpecCharR s        => new FadeInCommandCharR(s),
-            SlideInCommandSpecCharR s       => new SlideInCommandCharR(s),
-            BouncySlideInCommandSpecCharR s => new BouncySlideInCommandCharR(s),
-            SlideOutCommandSpecCharR s      => new SlideOutCommandCharR(s),
             SwayCommandSpecCharR s          => new SwayCommandCharR(s),
             PunchScaleCommandSpecCharR s    => new PunchScaleCommandCharR(s),
             RotateFromToCommandSpecCharR s  => new RotateFromToCommandCharR(s),
             
-            RichSlideInCommandSpecCharR s    => new RichSlideInCommandCharR(s),
-            RichSlideOutCommandSpecCharR s    => new RichSlideOutCommandCharR(s),
             BounceArcInCommandSpecCharR s    => new BounceArcInCommandCharR(s),
             
-            BounceArcInLiteCommandSpecCharR s    => new BounceArcInLiteCommandCharR(s),
             DipInOutCommandSpecCharR s    => new DipInOutCommandCharR(s),
             JuicySlideInCommandSpecCharR s    => new JuicySlideInCommandCharR(s),
             JuicySlideOutCommandSpecCharR s    => new JuicySlideOutCommandCharR(s),
-            MoveInOutCommandSpecCharR s    => new MoveInOutCommandCharR(s),
             NudgeTapCommandSpecCharR s    => new NudgeTapCommandCharR(s),
-            TapEaseCommandSpecCharR s    => new TapEaseCommandCharR(s),
             
             SetEmotionPortraitWipeCommandSpecCharR s    => new SetEmotionPortraitWipeCommandCharR(s, _portraitResolver),
             ShowEmojiCommandSpecCharR s    => new ShowEmojiCommandCharR(s),

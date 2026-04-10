@@ -215,14 +215,12 @@ MonoBehaviour:
     - editorName: 
       tracks:
         interaction:
-        - rid: 305542845787537471
         - rid: 305542845787537470
         setup: []
         motion: []
         dialogue: []
         fx: []
       compiled:
-      - rid: 305542845787537471
       - rid: 305542845787537470
       gate:
         type: 3
@@ -231,14 +229,12 @@ MonoBehaviour:
     - editorName: 
       tracks:
         interaction:
-        - rid: 305542845787537472
         - rid: 305542845787537473
         setup: []
         motion: []
         dialogue: []
         fx: []
       compiled:
-      - rid: 305542845787537472
       - rid: 305542845787537473
       gate:
         type: 3
@@ -247,14 +243,12 @@ MonoBehaviour:
     - editorName: 
       tracks:
         interaction:
-        - rid: 305542845787537474
         - rid: 305542845787537475
         setup: []
         motion: []
         dialogue: []
         fx: []
       compiled:
-      - rid: 305542845787537474
       - rid: 305542845787537475
       gate:
         type: 3
@@ -291,13 +285,12 @@ MonoBehaviour:
     - editorName: 
       tracks:
         interaction:
-        - rid: 305542845787537468
+        - rid: 305542845787537471
         setup: []
         motion: []
         dialogue: []
         fx: []
-      compiled:
-      - rid: 305542845787537468
+      compiled: []
       gate:
         type: 3
         seconds: 0
@@ -305,6 +298,8 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
     - rid: 305542826026074172
       type: {class: SetCharRigCommandSpec, ns: , asm: Assembly-CSharp}
       data:
@@ -506,23 +501,6 @@ MonoBehaviour:
         ease: 9
         wait: 0
         killTween: 1
-    - rid: 305542845787537468
-      type: {class: BounceCommandSpecCharR, ns: , asm: Assembly-CSharp}
-      data:
-        roleKey: sub1
-        _meta:
-          track: 0
-          phase: 0
-          blockingHint: 0
-          infiniteHint: 0
-          durationHint: 0
-        target: 1
-        ease: 9
-        duration: 1.2
-        waveAmplitude: 12
-        waveLoops: 4
-        waveAxis: 1
-        wait: 0
     - rid: 305542845787537470
       type: {class: DipInOutCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:
@@ -555,22 +533,6 @@ MonoBehaviour:
         holdPortion: 0.08
         ease: 10
         wait: 0
-    - rid: 305542845787537472
-      type: {class: MoveInOutCommandSpecCharR, ns: , asm: Assembly-CSharp}
-      data:
-        roleKey: sub1
-        _meta:
-          track: 0
-          phase: 0
-          blockingHint: 0
-          infiniteHint: 0
-          durationHint: 0
-        target: 1
-        offset: {x: 24, y: 0}
-        duration: 0.22
-        holdPortion: 0.08
-        ease: 10
-        wait: 0
     - rid: 305542845787537473
       type: {class: DipInOutCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:
@@ -586,22 +548,6 @@ MonoBehaviour:
         distance: 24
         duration: 0.4
         ease: 8
-        wait: 0
-    - rid: 305542845787537474
-      type: {class: MoveInOutCommandSpecCharR, ns: , asm: Assembly-CSharp}
-      data:
-        roleKey: sub1
-        _meta:
-          track: 0
-          phase: 0
-          blockingHint: 0
-          infiniteHint: 0
-          durationHint: 0
-        target: 1
-        offset: {x: 24, y: 0}
-        duration: 0.22
-        holdPortion: 0.08
-        ease: 10
         wait: 0
     - rid: 305542845787537475
       type: {class: DipInOutCommandSpecCharR, ns: , asm: Assembly-CSharp}
@@ -850,7 +796,7 @@ MonoBehaviour:
           infiniteHint: 0
           durationHint: 0
         target: 7
-        targetZ: 24
+        degree: 24
         useAnticipation: 1
         anticipation: 0.4
         anticipationPortion: 0.06
@@ -873,7 +819,7 @@ MonoBehaviour:
           infiniteHint: 0
           durationHint: 0
         target: 7
-        targetZ: -24
+        degree: 24
         useAnticipation: 1
         anticipation: 0.4
         anticipationPortion: 0.06

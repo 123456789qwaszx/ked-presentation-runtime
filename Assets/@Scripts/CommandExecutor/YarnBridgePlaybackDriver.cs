@@ -125,10 +125,6 @@ public sealed class YarnBridgePlaybackDriver : MonoBehaviour
                 moveBy.wait = shouldWait;
                 break;
 
-            case BouncySlideInCommandSpecCharR bouncySlideIn:
-                bouncySlideIn.wait = shouldWait;
-                break;
-
             case FadeInCommandSpecCharR fadeIn:
                 fadeIn.wait = shouldWait;
                 break;

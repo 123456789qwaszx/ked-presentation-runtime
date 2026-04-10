@@ -30,14 +30,12 @@ MonoBehaviour:
         signalKey: beat
     - editorName: 
       tracks:
-        interaction:
-        - rid: 8483490904429035580
+        interaction: []
         setup: []
         motion: []
         dialogue: []
         fx: []
-      compiled:
-      - rid: 8483490904429035580
+      compiled: []
       gate:
         type: 3
         seconds: 0
@@ -56,28 +54,4 @@ MonoBehaviour:
         signalKey: 
   references:
     version: 2
-    RefIds:
-    - rid: 8483490904429035580
-      type: {class: RichSlideInCommandSpecCharR, ns: , asm: Assembly-CSharp}
-      data:
-        roleKey: main
-        _meta:
-          track: 0
-          phase: 0
-          blockingHint: 0
-          infiniteHint: 0
-          durationHint: 0
-        target: 1
-        from: 0
-        distance: 480
-        useAnticipation: 1
-        anticipationDistance: 18
-        anticipationPortion: 0.12
-        anticipationEase: 6
-        useOvershoot: 1
-        overshootDistance: 24
-        overshootPortion: 0.78
-        approachEase: 9
-        settleEase: 12
-        duration: 2
-        wait: 1
+    RefIds: []

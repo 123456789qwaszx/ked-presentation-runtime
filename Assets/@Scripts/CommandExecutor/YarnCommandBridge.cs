@@ -45,7 +45,6 @@ public sealed class YarnCommandBridge : MonoBehaviour
 
         _dialogueRunner.AddCommandHandler<string, string>("slide_in", SlideIn);
         _dialogueRunner.AddCommandHandler<string, string>("slide_out", SlideOut);
-        _dialogueRunner.AddCommandHandler<string, string>("slide_in_bouncy", BouncySlideIn);
 
         _dialogueRunner.AddCommandHandler<string>("fade_in", FadeIn);
         _dialogueRunner.AddCommandHandler<string>("fade_out", FadeOut);
@@ -543,19 +542,6 @@ public sealed class YarnCommandBridge : MonoBehaviour
         {
             roleKey = roleKey,
             delta = new Vector2(x, y)
-        };
-
-        Collect(spec);
-    }
-
-    private void BouncySlideIn(string roleKey, string direction = "left")
-    {
-        SlideFromCharR from = ParseSlideDirection(direction, SlideFromCharR.Left);
-
-        var spec = new BouncySlideInCommandSpecCharR
-        {
-            roleKey = roleKey,
-            from = from
         };
 
         Collect(spec);
