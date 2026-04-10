@@ -61,6 +61,8 @@ public sealed class YarnCommandBridge : MonoBehaviour
         _dialogueRunner.AddCommandHandler<string, string>("slide_in_nudge", NudgeSlideIn);
 
         _dialogueRunner.AddCommandHandler<string, string>("cast", SetPortrait);
+        _dialogueRunner.AddCommandHandler<string, string>("portrait_cross", CrossFadePortrait);
+        _dialogueRunner.AddCommandHandler<string, string>("portrait_swap", SwapPortrait);
 
         _dialogueRunner.AddCommandHandler<string>("blackout", ScreedBlackout);
         _dialogueRunner.AddCommandHandler<string>("uipatch", UIPatch);
@@ -698,6 +700,42 @@ public sealed class YarnCommandBridge : MonoBehaviour
 
         Collect(spec);
         //Collect(spec1);
+    }
+    
+    private void SwapPortrait(string roleKey, string character)
+    {
+        var portraitIdentity = new PortraitIdentity
+        {
+            character = character,
+            variant = "a",
+            emotion = "1"
+        };
+
+        var spec = new SetEmotionPortraitWipeCommandSpecCharR
+        {
+            roleKey = roleKey,
+            portrait = portraitIdentity
+        };
+
+        Collect(spec);
+    }
+    
+    private void CrossFadePortrait(string roleKey, string character)
+    {
+        var portraitIdentity = new PortraitIdentity
+        {
+            character = character,
+            variant = "a",
+            emotion = "1"
+        };
+
+        var spec = new SetPortraitCrossfadeCommandSpecCharR
+        {
+            roleKey = roleKey,
+            portrait = portraitIdentity
+        };
+
+        Collect(spec);
     }
 
     private void SetPortrait(string roleKey, string character)
