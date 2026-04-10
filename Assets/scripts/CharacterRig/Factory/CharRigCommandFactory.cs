@@ -57,6 +57,7 @@ public sealed class CharRigCommandFactory : INodeCommandFactory
             SetEmotionPortraitWipeCommandSpecCharR s    => new SetEmotionPortraitWipeCommandCharR(s, _portraitResolver),
             ShowEmojiCommandSpecCharR s    => new ShowEmojiCommandCharR(s),
             SetPortraitSpriteCommandSpecCharR s    => new SetPortraitSpriteCommandCharR(s, _portraitResolver),
+            SwayRotateToCommandSpecCharR s => new SwayRotateToCommandCharR(s),
             
             
             _ => null
