@@ -8,39 +8,33 @@ using UnityEngine.Serialization;
 [CommandMenuHint("Char Rig Motion", "Sway", Order = 100)]
 public sealed class SwayCommandSpecCharR : CharRigCommandSpecBase
 {
-    [Header("Targets")]
-    [Tooltip("좌우로 흔들릴 피벗(SwayPivot).")]
+    [Header("Targets")] [Tooltip("좌우로 흔들릴 피벗(SwayPivot).")]
     public CharacterRigTarget target = CharacterRigTarget.CharacterPortrait_SwayPivot;
 
-    [Header("Sway")]
-    [FormerlySerializedAs("power")]
-    [Tooltip("최대 회전 세기(도). NudgeTap의 strength와 같은 감각으로 사용.")]
+    [Header("Sway")] [FormerlySerializedAs("power")] [Tooltip("최대 회전 세기(도). NudgeTap의 strength와 같은 감각으로 사용.")]
     public float strength = 10f;
 
-    [Tooltip("총 길이.")]
-    public float duration = 1f;
+    [Tooltip("총 길이.")] public float duration = 1f;
 
-    [Min(1)]
-    [Tooltip("왕복 횟수. 1이면 한 번 갔다가 돌아오고, 2 이상이면 좌우 반복.")]
+    [Min(1)] [Tooltip("왕복 횟수. 1이면 한 번 갔다가 돌아오고, 2 이상이면 좌우 반복.")]
     public int cycles = 2;
 
-    [FormerlySerializedAs("edgeDamping")]
-    [Tooltip("각 half-swing에서 극단 감속/체류감을 만드는 값. 높을수록 더 오래 눌리듯 멈춘다.")]
+    [FormerlySerializedAs("edgeDamping")] [Tooltip("각 half-swing에서 극단 감속/체류감을 만드는 값. 높을수록 더 오래 눌리듯 멈춘다.")]
     public float damping = 2.2f;
 
-    [FormerlySerializedAs("swingSpeed")]
-    [Tooltip("좌↔우 한 번 이동하는 체감 속도. 1=기본, 높을수록 더 날렵하고 낮을수록 더 둔하다.")]
+    [FormerlySerializedAs("swingSpeed")] [Tooltip("좌↔우 한 번 이동하는 체감 속도. 1=기본, 높을수록 더 날렵하고 낮을수록 더 둔하다.")]
     public float speed = 1f;
 
-    [Header("Style")]
-    [Tooltip("시작 전에 반대 방향으로 살짝 당기는 양(도). 0이면 비활성.")]
+    [Tooltip("마지막에 원점으로 복귀할 때 살짝 지나쳤다가 돌아오는 정도. 0이면 비활성.")] [Range(0f, 1f)]
+    public float finalOvershoot = 0.22f;
+
+    [Header("Style")] [Tooltip("시작 전에 반대 방향으로 살짝 당기는 양(도). 0이면 비활성.")]
     public float anticipation = 0f;
 
     [Tooltip("흔들리는 시작 방향. true면 +방향부터, false면 -방향부터.")]
     public bool startPositive = true;
 
-    [Header("Wait")]
-    public bool wait = false;
+    [Header("Wait")] public bool wait = false;
 }
 
 public sealed class SwayCommandCharR : CommandBase, IStepScopedCommand
@@ -84,18 +78,26 @@ public sealed class SwayCommandCharR : CommandBase, IStepScopedCommand
         int cycles = Mathf.Max(1, _spec.cycles);
         float damping = Mathf.Max(0f, _spec.damping);
         float speed = Mathf.Max(0.05f, _spec.speed);
-        float anticipation = Mathf.Abs(_spec.anticipation);
+        float finalOvershoot = Mathf.Clamp01(_spec.finalOvershoot);
+        float anticipationDegrees = _spec.anticipation;
         float directionSign = _spec.startPositive ? 1f : -1f;
 
-        float anticipationPortion = Mathf.Approximately(anticipation, 0f) ? 0f : 0.08f;
-        float swingSpan = Mathf.Max(0.0001f, 1f - anticipationPortion);
+        float anticipationNormalized = Mathf.Approximately(amplitude, 0f)
+            ? 0f
+            : Mathf.Clamp(anticipationDegrees / amplitude, 0f, 1.5f);
 
-        // 연속 포인트 경로
-        // cycles = 1 => [0, +1, 0]
-        // cycles = 2 => [0, +1, -1, +1, 0]
-        // cycles = 3 => [0, +1, -1, +1, -1, +1, 0]
-        int pointCount = cycles * 2 + 1;
+        bool hasAnticipation = anticipationNormalized > 0.0001f;
+
+        // anticipation이 있으면:
+        // 0 -> -a -> +1 -> -1 -> +1 -> ... -> 0
+        // 없으면:
+        // 0 -> +1 -> -1 -> +1 -> ... -> 0
+        int pointCount = hasAnticipation
+            ? (cycles * 2 + 2)
+            : (cycles * 2 + 1);
+
         int segmentCount = pointCount - 1;
+        int lastSegmentIndex = segmentCount - 1;
 
         _tween = DOTween.To(
                 () => 0f,
@@ -106,29 +108,22 @@ public sealed class SwayCommandCharR : CommandBase, IStepScopedCommand
 
                     float u = Mathf.Clamp01(t / totalDuration);
 
-                    float antiTerm = 0f;
-                    if (!Mathf.Approximately(anticipation, 0f))
-                    {
-                        float antiU = Mathf.Clamp01(u / anticipationPortion);
-                        float bump = Mathf.Sin(Mathf.PI * antiU);
-
-                        // 초반에 반대 방향으로 살짝 당겼다가 자연스럽게 원점으로 복귀
-                        antiTerm = -anticipation * bump * (1f - antiU);
-                    }
-
-                    float swingU = Mathf.Clamp01((u - anticipationPortion) / swingSpan);
-
-                    float pathT = swingU * segmentCount;
+                    float pathT = u * segmentCount;
                     int segmentIndex = Mathf.Min(Mathf.FloorToInt(pathT), segmentCount - 1);
                     float localT = pathT - segmentIndex;
 
                     float shapedT = ShapeHalfSwing(localT, damping, speed);
 
-                    float from = GetWavePoint(segmentIndex, pointCount);
-                    float to = GetWavePoint(segmentIndex + 1, pointCount);
+                    if (segmentIndex == lastSegmentIndex && finalOvershoot > 0f)
+                        shapedT = ApplyFinalOvershoot(shapedT, finalOvershoot);
+
+                    float from = GetWavePointWithAnticipation(segmentIndex, pointCount, anticipationNormalized,
+                        hasAnticipation);
+                    float to = GetWavePointWithAnticipation(segmentIndex + 1, pointCount, anticipationNormalized,
+                        hasAnticipation);
 
                     float wave = Mathf.LerpUnclamped(from, to, shapedT);
-                    float angleOffset = directionSign * ((wave * amplitude) + antiTerm);
+                    float angleOffset = directionSign * wave * amplitude;
 
                     _currentSwayRotationZ = _originSwayRotationZ + angleOffset;
                     SetLocalEulerZ(_rect, _currentSwayRotationZ);
@@ -142,6 +137,37 @@ public sealed class SwayCommandCharR : CommandBase, IStepScopedCommand
 
         if (_spec.wait)
             yield return _tween.WaitForCompletion();
+    }
+
+    private static float GetWavePointWithAnticipation(
+        int pointIndex,
+        int pointCount,
+        float anticipationNormalized,
+        bool hasAnticipation)
+    {
+        if (!hasAnticipation)
+            return GetWavePoint(pointIndex, pointCount);
+
+        // hasAnticipation == true
+        // index:
+        // 0 = 0
+        // 1 = -a
+        // 2 = +1
+        // 3 = -1
+        // 4 = +1
+        // ...
+        // last = 0
+
+        if (pointIndex <= 0)
+            return 0f;
+
+        if (pointIndex >= pointCount - 1)
+            return 0f;
+
+        if (pointIndex == 1)
+            return -anticipationNormalized;
+
+        return (pointIndex % 2 == 0) ? 1f : -1f;
     }
 
     protected override void OnSkip(CommandRunScope scope)
@@ -204,33 +230,15 @@ public sealed class SwayCommandCharR : CommandBase, IStepScopedCommand
 
     /// <summary>
     /// 각 half-swing 내부에서만 손맛을 만든다.
-    ///
-    /// speed:
-    /// - 좌↔우를 얼마나 날렵하게 건너가는지
-    ///
-    /// damping:
-    /// - 극단에서 얼마나 천천히 눌리듯 멈추는지
-    ///
-    /// 결과:
-    /// - 양 끝: 느리게 출발/정지
-    /// - 중간: 빠르게 통과
-    /// - 반대 끝: 다시 천천히 감속
+    /// - speed: 좌↔우 이동 체감 속도
+    /// - damping: 극단 감속/체류감
     /// </summary>
     private static float ShapeHalfSwing(float t, float damping, float speed)
     {
         t = Mathf.Clamp01(t);
 
-        // 1) speed: segment 내부 시간 워프
-        // speed > 1 : 더 날렵
-        // speed < 1 : 더 둔함
         float speedT = ApplySymmetricSpeedWarp(t, speed);
-
-        // 2) 항상 명시적인 ease in/out 보장
-        // 극단에서는 천천히, 중앙은 빠르게
         float baseEase = EaseInOutCos(speedT);
-
-        // 3) damping: 극단 체류감을 "완만하게" 추가
-        // 높은 값에서도 세밀 조정 가능하도록 압축
         float damped = ApplyMildEdgeDamping(baseEase, damping);
 
         return Mathf.Clamp01(damped);
@@ -244,8 +252,6 @@ public sealed class SwayCommandCharR : CommandBase, IStepScopedCommand
         if (Mathf.Approximately(speed, 1f))
             return t;
 
-        // 기존처럼 speed가 damping을 뒤집어먹지 않도록
-        // exponent 범위를 완만하게 제한
         float exponent;
 
         if (speed > 1f)
@@ -273,18 +279,32 @@ public sealed class SwayCommandCharR : CommandBase, IStepScopedCommand
         if (damping <= 0.0001f)
             return t;
 
-        // damping이 커질수록 변화량은 점점 완만해지도록 압축
         float compressed = Mathf.Log(1f + damping) / Mathf.Log(2f);
-
-        // 블렌드도 완만하게, 상한도 두어 실무에서 다루기 쉽게
         float blend = 1f - Mathf.Exp(-compressed * 0.22f);
         blend *= 0.72f;
 
-        // 한 번 더 ease를 중첩해서 극단 체류감을 추가
         float holdEase = EaseInOutCos(t);
         holdEase = EaseInOutCos(holdEase);
 
         return Mathf.Lerp(t, holdEase, blend);
+    }
+
+    /// <summary>
+    /// 마지막 원점 복귀에서만 살짝 지나쳤다가 되돌아오게 한다.
+    /// 0 -> 1 진행을 유지하면서 중간에 1을 조금 넘는다.
+    /// </summary>
+    private static float ApplyFinalOvershoot(float t, float overshootAmount)
+    {
+        t = Mathf.Clamp01(t);
+        overshootAmount = Mathf.Clamp01(overshootAmount);
+
+        if (overshootAmount <= 0.0001f)
+            return t;
+
+        float s = Mathf.Lerp(0f, 1.5f, overshootAmount);
+
+        float u = t - 1f;
+        return 1f + ((s + 1f) * u * u * u) + (s * u * u);
     }
 
     private static float EaseInOutCos(float t)
