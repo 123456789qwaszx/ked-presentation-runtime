@@ -63,7 +63,7 @@ public sealed class SwayCommandCharR : CommandBase, IStepScopedCommand
         if (_rect == null)
             yield break;
 
-        _rect.DOKill(false);
+        _rect.DOKill(true);
         _tween?.Kill(false);
         _tween = null;
 
@@ -132,8 +132,14 @@ public sealed class SwayCommandCharR : CommandBase, IStepScopedCommand
                 totalDuration
             )
             .SetEase(Ease.Linear)
+            .SetTarget(_rect)
             .SetUpdate(true)
-            .OnComplete(SnapToOrigin);
+            .OnComplete(() =>
+                {
+                    SnapToOrigin();
+                    _rect = null;
+                }
+            );
 
         if (_spec.wait)
             yield return _tween.WaitForCompletion();
@@ -184,7 +190,7 @@ public sealed class SwayCommandCharR : CommandBase, IStepScopedCommand
             return;
 
         _tween?.Kill(false);
-        _rect.DOKill(false);
+        _rect.DOKill(true);
 
         SnapToOrigin();
 

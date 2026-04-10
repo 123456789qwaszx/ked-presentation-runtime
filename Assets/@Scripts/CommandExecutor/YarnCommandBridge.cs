@@ -79,9 +79,23 @@ public sealed class YarnCommandBridge : MonoBehaviour
         
         _dialogueRunner.AddCommandHandler<string>("sway", SwayGentle);
         _dialogueRunner.AddCommandHandler<string>("sway_hard", SwayPendulum);
+        _dialogueRunner.AddCommandHandler<string>("sway_fast", SwayFast);
+        _dialogueRunner.AddCommandHandler<string>("sway_away", SwayAway);
+        _dialogueRunner.AddCommandHandler<string, int>("sway_to", SwayRotateTo);
         _dialogueRunner.AddCommandHandler<string>("slide_in_sway", SlideInSway);
     }
-    
+
+    private void SwayRotateTo(string roleKey, int angle)
+    {
+        var spec = new SwayRotateToCommandSpecCharR()
+        {
+            roleKey = roleKey,
+            degree = angle
+        };
+        
+        Collect(spec);
+    }
+
     private void SlideInSway(string roleKey)
     {
         var spec = new HideRootsCommandSpecCharR
@@ -206,6 +220,42 @@ public sealed class YarnCommandBridge : MonoBehaviour
             speed = 0.88f,
             anticipation = 0.02f,
             wait = false
+        };
+
+        Collect(spec);
+    }
+    private void SwayFast(string roleKey)
+    {
+        var spec = new SwayCommandSpecCharR
+        {
+            roleKey = roleKey,
+            target = CharacterRigTarget.CharacterPortrait_SwayPivot,
+
+            strength = 6.5f,
+            duration = 0.94f,
+            cycles = 3,
+            damping = 2.8f,
+            speed = 1.26f,
+            finalOvershoot = 0.4f,
+            anticipation = -0.5f,
+        };
+
+        Collect(spec);
+    }
+    private void SwayAway(string roleKey)
+    {
+        var spec = new SwayCommandSpecCharR
+        {
+            roleKey = roleKey,
+            target = CharacterRigTarget.CharacterPortrait_SwayPivot,
+
+            strength = 15f,
+            duration = 0.74f,
+            cycles = 1,
+            damping = 5f,
+            speed = 1.2f,
+            finalOvershoot = 0.2f,
+            anticipation = -0.5f
         };
 
         Collect(spec);

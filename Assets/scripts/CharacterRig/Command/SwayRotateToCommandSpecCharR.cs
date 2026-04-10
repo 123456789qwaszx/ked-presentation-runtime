@@ -14,7 +14,7 @@ public sealed class SwayRotateToCommandSpecCharR : CharRigCommandSpecBase
 
     [Header("Target Rotation")]
     [Tooltip("목표 절대 Z 각도.")]
-    public float targetZ = 24f;
+    public float degree = 24f;
 
     [Header("Anticipation")]
     [Tooltip("시작 전에 반대 방향으로 살짝 당기는 양(도). 0이면 비활성.")]
@@ -62,7 +62,7 @@ public sealed class SwayRotateToCommandCharR : CommandBase, IStepScopedCommand
     private float _currentRotationZ;
     private float _finalRotationZ;
 
-    private Sequence _sequence;
+    private Tween _tween;
 
     public override bool WaitForCompletion => _spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
@@ -80,13 +80,13 @@ public sealed class SwayRotateToCommandCharR : CommandBase, IStepScopedCommand
         if (_rect == null)
             yield break;
 
-        _rect.DOKill(false);
-        _sequence?.Kill(false);
-        _sequence = null;
+        _rect.DOKill(true);
+        _tween?.Kill(false);
+        _tween = null;
 
         _startRotationZ = NormalizeAngle(_rect.localEulerAngles.z);
         _currentRotationZ = _startRotationZ;
-        _finalRotationZ = ResolveNearestEquivalentAngle(_startRotationZ, _spec.targetZ);
+        _finalRotationZ = ResolveNearestEquivalentAngle(_startRotationZ, _spec.degree);
 
         if (_spec.duration <= 0f)
         {
@@ -123,75 +123,63 @@ public sealed class SwayRotateToCommandCharR : CommandBase, IStepScopedCommand
         float anticipationZ = _startRotationZ + (-mainDirection * _spec.anticipation);
         float overshootZ = _finalRotationZ + (mainDirection * _spec.overshoot);
 
-        float tA = total * aP;
-        float tApproach = total * (useO ? Mathf.Max(0.0001f, oP - aP) : Mathf.Max(0.0001f, 1f - aP));
-        float tSettle = useO ? total * Mathf.Max(0.0001f, 1f - oP) : 0f;
+        _tween = DOTween.To(
+                () => 0f,
+                t =>
+                {
+                    if (_rect == null)
+                        return;
 
-        _sequence = DOTween.Sequence().SetUpdate(true);
+                    float u = Mathf.Clamp01(t / total);
+                    float z;
 
-        if (useA)
-        {
-            _sequence.Append(DOTween.To(
-                    () => _currentRotationZ,
-                    z =>
+                    if (useA && u < aP)
                     {
-                        _currentRotationZ = z;
-                        SetLocalEulerZ(_rect, z);
-                    },
-                    anticipationZ,
-                    tA)
-                .SetEase(_spec.anticipationEase));
-        }
-
-        if (useO)
-        {
-            _sequence.Append(DOTween.To(
-                    () => _currentRotationZ,
-                    z =>
+                        float localU = SafeInverseLerp(0f, aP, u);
+                        float eased = DOVirtual.EasedValue(0f, 1f, localU, _spec.anticipationEase);
+                        z = Mathf.LerpUnclamped(_startRotationZ, anticipationZ, eased);
+                    }
+                    else if (useO && u < oP)
                     {
-                        _currentRotationZ = z;
-                        SetLocalEulerZ(_rect, z);
-                    },
-                    overshootZ,
-                    tApproach)
-                .SetEase(_spec.approachEase));
+                        float startU = useA ? aP : 0f;
+                        float fromZ = useA ? anticipationZ : _startRotationZ;
 
-            _sequence.Append(DOTween.To(
-                    () => _currentRotationZ,
-                    z =>
+                        float localU = SafeInverseLerp(startU, oP, u);
+                        float eased = DOVirtual.EasedValue(0f, 1f, localU, _spec.approachEase);
+                        z = Mathf.LerpUnclamped(fromZ, overshootZ, eased);
+                    }
+                    else
                     {
-                        _currentRotationZ = z;
-                        SetLocalEulerZ(_rect, z);
-                    },
-                    _finalRotationZ,
-                    tSettle)
-                .SetEase(_spec.settleEase));
-        }
-        else
-        {
-            _sequence.Append(DOTween.To(
-                    () => _currentRotationZ,
-                    z =>
-                    {
-                        _currentRotationZ = z;
-                        SetLocalEulerZ(_rect, z);
-                    },
-                    _finalRotationZ,
-                    tApproach)
-                .SetEase(_spec.approachEase));
-        }
+                        float startU = useO ? oP : (useA ? aP : 0f);
+                        float fromZ = useO ? overshootZ : (useA ? anticipationZ : _startRotationZ);
+                        Ease ease = useO ? _spec.settleEase : _spec.approachEase;
 
-        _sequence.OnComplete(() =>
-        {
-            if (_rect == null)
-                return;
+                        float localU = SafeInverseLerp(startU, 1f, u);
+                        float eased = DOVirtual.EasedValue(0f, 1f, localU, ease);
+                        z = Mathf.LerpUnclamped(fromZ, _finalRotationZ, eased);
+                    }
 
-            _currentRotationZ = _finalRotationZ;
-            SetLocalEulerZ(_rect, _finalRotationZ);
-        });
+                    _currentRotationZ = z;
+                    SetLocalEulerZ(_rect, z);
+                },
+                total,
+                total
+            )
+            .SetEase(Ease.Linear)
+            .SetTarget(_rect)
+            .SetUpdate(true)
+            .OnComplete(() =>
+            {
+                if (_rect == null)
+                    return;
+
+                _currentRotationZ = _finalRotationZ;
+                SetLocalEulerZ(_rect, _finalRotationZ);
+                _rect = null;
+            });
 
         if (_spec.wait)
-            yield return _sequence.WaitForCompletion();
+            yield return _tween.WaitForCompletion();
     }
 
     protected override void OnSkip(CommandRunScope scope)
@@ -207,16 +195,16 @@ public sealed class SwayRotateToCommandCharR : CommandBase, IStepScopedCommand
         if (_rect == null)
             return;
 
-        _sequence?.Kill(false);
-        _rect.DOKill(false);
+        _tween?.Kill(false);
+        _rect.DOKill(true);
 
         _startRotationZ = NormalizeAngle(_rect.localEulerAngles.z);
-        _finalRotationZ = ResolveNearestEquivalentAngle(_startRotationZ, _spec.targetZ);
+        _finalRotationZ = ResolveNearestEquivalentAngle(_startRotationZ, _spec.degree);
 
         _currentRotationZ = _finalRotationZ;
         SetLocalEulerZ(_rect, _finalRotationZ);
 
-        _sequence = null;
+        _tween = null;
         _rect = null;
     }
 
@@ -241,6 +229,15 @@ public sealed class SwayRotateToCommandCharR : CommandBase, IStepScopedCommand
             target += 360f;
 
         return target;
+    }
+
+    private static float SafeInverseLerp(float a, float b, float value)
+    {
+        float d = b - a;
+        if (Mathf.Abs(d) <= 0.0001f)
+            return 1f;
+
+        return Mathf.Clamp01((value - a) / d);
     }
 
     private static void SetLocalEulerZ(RectTransform rect, float z)
