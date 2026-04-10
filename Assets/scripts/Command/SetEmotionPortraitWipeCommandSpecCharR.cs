@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 [Serializable]
 [CommandMenuHint("Char Rig", "Set Emotion Portrait (Overlay Wipe)", Order = -961)]
-public sealed class SetEmotionPortraitWipeCommandSpecCharR : CharRigCommandSpecBase
+public sealed class SetEmotionPortraitWipeCommandSpecCharR : CommandSpecBase
 {
     [Header("Portrait Identity")]
     public PortraitIdentity portrait;

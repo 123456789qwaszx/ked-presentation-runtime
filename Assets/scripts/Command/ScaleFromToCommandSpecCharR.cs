@@ -9,7 +9,7 @@ using System.Collections;
     "Scale (From → To)",
     Order = -170
 )]
-public class ScaleFromToCommandSpecCharR : CharRigCommandSpecBase
+public class ScaleFromToCommandSpecCharR : CommandSpecBase
 {
     [Header("Target")]
     public CharacterRigTarget target = CharacterRigTarget.CharacterPortrait_Scale;

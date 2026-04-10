@@ -6,7 +6,7 @@ using RectTransform = UnityEngine.RectTransform;
 
 [Serializable]
 [CommandMenuHint("Char Rig Motion", "Move InOut (Normal)", Order = -734)]
-public sealed class MoveInOutCommandSpecCharR : CharRigCommandSpecBase
+public sealed class MoveInOutCommandSpecCharR : CommandSpecBase
 {
     [Header("Target")]
     public CharacterRigTarget target = CharacterRigTarget.Character_Track;

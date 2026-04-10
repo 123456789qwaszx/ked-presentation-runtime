@@ -6,7 +6,7 @@ using Object = UnityEngine.Object;
 [Serializable]
 [CommandMenuHint(
     "Other", "Destroy Rig", Order = 900)]
-public sealed class DestroyCommandSpec : CharRigCommandSpecBase
+public sealed class DestroyCommandSpec : CommandSpecBase
 {
     [Tooltip("자동 생성 시 루트 오브젝트 이름.")]
     public string rigRootName = "CharacterRig";

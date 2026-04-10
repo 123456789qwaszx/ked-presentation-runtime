@@ -11,7 +11,7 @@ using UnityEngine.UI;
         CommandMenuSets.BuildChar,
         CommandMenuSets.SetupEmotion
     }, SetOrder = -964)]
-public sealed class SetPortraitSpriteCommandSpecCharR : CharRigCommandSpecBase
+public sealed class SetPortraitSpriteCommandSpecCharR : CommandSpecBase
 {
     [Header("Portrait Identity")]
     public PortraitIdentity portrait;

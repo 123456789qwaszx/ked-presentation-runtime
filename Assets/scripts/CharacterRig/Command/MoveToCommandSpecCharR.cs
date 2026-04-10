@@ -8,7 +8,7 @@ using DG.Tweening;
     "Char Rig Motion",
     "Move To (XY)",
     Order = -190)]
-public class MoveToCommandSpecCharR : CharRigCommandSpecBase
+public class MoveToCommandSpecCharR : CommandSpecBase
 {
     public CharacterRigTarget target = CharacterRigTarget.Character_Track;
     public Vector2 toAnchoredPos;

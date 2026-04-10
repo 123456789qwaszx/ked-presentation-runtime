@@ -6,7 +6,7 @@ using RectTransform = UnityEngine.RectTransform;
 
 [Serializable]
 [CommandMenuHint("Char Rig Motion", "Dip InOut", Order = -735)]
-public sealed class DipInOutCommandSpecCharR : CharRigCommandSpecBase
+public sealed class DipInOutCommandSpecCharR : CommandSpecBase
 {
     [Header("Target")] public CharacterRigTarget target = CharacterRigTarget.Character_Track;
 

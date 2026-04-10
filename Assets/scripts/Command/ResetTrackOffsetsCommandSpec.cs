@@ -11,7 +11,7 @@ using UnityEngine;
         CommandMenuSets.ResetChar,
     },
     SetOrder = -940)]
-public class ResetTrackOffsetsCommandSpec : CharRigCommandSpecBase
+public class ResetTrackOffsetsCommandSpec : CommandSpecBase
 {
     [Header("Target")]
     [Tooltip("offset를 실제로 적용할 대상.")]

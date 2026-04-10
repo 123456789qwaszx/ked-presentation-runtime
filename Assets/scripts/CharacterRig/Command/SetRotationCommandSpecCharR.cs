@@ -10,7 +10,7 @@ using System.Collections;
     "Set Rotation (Z)",
     Order = 865
 )]
-public class SetRotationCommandSpecCharR : CharRigCommandSpecBase
+public class SetRotationCommandSpecCharR : CommandSpecBase
 {
     [Header("Target")]
     public CharacterRigTarget target = CharacterRigTarget.CharacterPortrait_Root;

@@ -11,7 +11,7 @@ using DG.Tweening;
         CommandMenuSets.SetupChar,
         CommandMenuSets.SetupEmotion
     }, SetOrder = -964)]
-public class SetOriginSizeCommandSpecCharR : CharRigCommandSpecBase
+public class SetOriginSizeCommandSpecCharR : CommandSpecBase
 {
     [Header("Target")]
     public CharacterRigTarget target = CharacterRigTarget.CharacterPortrait_Pad;

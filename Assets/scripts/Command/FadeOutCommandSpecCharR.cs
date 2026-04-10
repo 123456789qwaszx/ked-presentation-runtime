@@ -11,7 +11,7 @@ using UnityEngine;
     "Fade Out",
     Order = -815
 )]
-public class FadeOutCommandSpecCharR : CharRigCommandSpecBase
+public class FadeOutCommandSpecCharR : CommandSpecBase
 {
     public CharRigRootLayerMask targetMask = CharRigRootLayerMask.CharacterPortrait_Root 
                                              | CharRigRootLayerMask.CharacterPortraitOverlay_Root 

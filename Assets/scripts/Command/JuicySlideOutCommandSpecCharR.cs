@@ -5,7 +5,7 @@ using UnityEngine;
 
 [Serializable]
 [CommandMenuHint("Char Rig Motion", "Juicy Slide Out", Order = -772)]
-public sealed class JuicySlideOutCommandSpecCharR : CharRigCommandSpecBase
+public sealed class JuicySlideOutCommandSpecCharR : CommandSpecBase
 {
     [Header("Target (Track)")]
     public CharacterRigTarget target = CharacterRigTarget.Character_Track;

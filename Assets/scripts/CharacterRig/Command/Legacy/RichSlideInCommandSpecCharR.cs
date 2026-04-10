@@ -10,7 +10,7 @@ using RectTransform = UnityEngine.RectTransform;
 /// </summary>
 [Serializable]
 [CommandMenuHint("Char Rig Motion", "Rich Slide In", Order = -768)]
-public sealed class RichSlideInCommandSpecCharR : CharRigCommandSpecBase
+public sealed class RichSlideInCommandSpecCharR : CommandSpecBase
 {
     [Header("Target (Track)")]
     public CharacterRigTarget target = CharacterRigTarget.Character_Track;
@@ -47,13 +47,9 @@ public sealed class RichSlideInCommandSpecCharR : CharRigCommandSpecBase
     public bool wait = false;
 }
 
-/// <summary>
-/// �����ִ¡� �����̵� �ƿ�: (����) Anticipation -> Launch (end offscreen-ish)
-/// Bounce(���̺�) ����.
-/// </summary>
 [Serializable]
 [CommandMenuHint("Char Rig Motion", "Rich Slide Out", Order = -769)]
-public sealed class RichSlideOutCommandSpecCharR : CharRigCommandSpecBase
+public sealed class RichSlideOutCommandSpecCharR : CommandSpecBase
 {
     [Header("Target (Track)")]
     public CharacterRigTarget target = CharacterRigTarget.Character_Track;

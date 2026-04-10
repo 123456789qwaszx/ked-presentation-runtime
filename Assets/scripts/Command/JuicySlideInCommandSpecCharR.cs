@@ -7,7 +7,7 @@ using RectTransform = UnityEngine.RectTransform;
 
 [Serializable]
 [CommandMenuHint("Char Rig Motion", "Juicy Slide In", Order = -771)]
-public sealed class JuicySlideInCommandSpecCharR : CharRigCommandSpecBase
+public sealed class JuicySlideInCommandSpecCharR : CommandSpecBase
 {
     [Header("Target (Track)")]
     public CharacterRigTarget target = CharacterRigTarget.Character_Track;

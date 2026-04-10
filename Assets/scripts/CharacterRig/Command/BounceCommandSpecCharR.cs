@@ -9,7 +9,7 @@ using RectTransform = UnityEngine.RectTransform;
     "Char Rig Motion",
     "Bounce",
     Order = 100)]
-public class BounceCommandSpecCharR : CharRigCommandSpecBase
+public class BounceCommandSpecCharR : CommandSpecBase
 {
     [Header("Target")] public CharacterRigTarget target = CharacterRigTarget.Character_Track;
 

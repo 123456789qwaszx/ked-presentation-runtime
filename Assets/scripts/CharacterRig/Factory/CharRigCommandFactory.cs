@@ -1,5 +1,3 @@
-public class CharRigCommandSpecBase : CommandSpecBase { }
-
 public sealed class CharRigCommandFactory : INodeCommandFactory
 {
     private readonly CharacterRigAccess _access;

@@ -24,7 +24,7 @@ public enum ShakeAxisCharR
     "Char Rig Motion", 
     "Slide In", 
     Order = -770)]
-public class SlideInCommandSpecCharR : CharRigCommandSpecBase
+public class SlideInCommandSpecCharR : CommandSpecBase
 {
     [Header("Target (Track)")]
     public CharacterRigTarget target = CharacterRigTarget.Character_Track;

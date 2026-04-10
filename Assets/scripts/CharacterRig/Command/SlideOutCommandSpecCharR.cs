@@ -16,7 +16,7 @@ public enum SlideToCharR
     "Char Rig Motion", 
     "Slide Out", 
     Order = -760)]
-public class SlideOutCommandSpecCharR : CharRigCommandSpecBase
+public class SlideOutCommandSpecCharR : CommandSpecBase
 {
     [Header("Target (Track)")]
     public CharacterRigTarget target = CharacterRigTarget.Character_Track;

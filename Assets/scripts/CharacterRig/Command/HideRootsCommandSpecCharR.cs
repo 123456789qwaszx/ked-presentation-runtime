@@ -14,7 +14,7 @@ using UnityEngine;
     // }, 
     // SetOrder = -970
     )]
-public sealed class HideRootsCommandSpecCharR : CharRigCommandSpecBase
+public sealed class HideRootsCommandSpecCharR : CommandSpecBase
 {
     public CharRigRootLayerMask targetMask = CharRigRootLayerMask.CharacterPortraitOverlay_Root 
                                              | CharRigRootLayerMask.CharacterEmoji_Root

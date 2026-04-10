@@ -14,7 +14,7 @@ public enum NudgeDirectionCharR
 
 [Serializable]
 [CommandMenuHint("Char Rig Motion", "Nudge (Tap Neighbor)", Order = -740)]
-public sealed class NudgeTapCommandSpecCharR : CharRigCommandSpecBase
+public sealed class NudgeTapCommandSpecCharR : CommandSpecBase
 {
     [Header("Target")]
     public CharacterRigTarget target = CharacterRigTarget.Character_Track;

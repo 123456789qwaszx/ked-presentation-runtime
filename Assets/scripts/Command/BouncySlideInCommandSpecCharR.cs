@@ -9,7 +9,7 @@ using RectTransform = UnityEngine.RectTransform;
     "Char Rig Motion",
     "Bouncy Slide In", 
     Order = -750)]
-public class BouncySlideInCommandSpecCharR : CharRigCommandSpecBase
+public class BouncySlideInCommandSpecCharR : CommandSpecBase
 {
     [Header("Target")]
     public CharacterRigTarget target = CharacterRigTarget.Character_Track;

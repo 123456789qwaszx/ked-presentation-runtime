@@ -10,7 +10,7 @@ using UnityEngine;
         CommandMenuSets.SetupChar,
         CommandMenuSets.SetupEmotion
     }, SetOrder = -930)]
-public sealed class SetAnchorCommandSpecCharR : CharRigCommandSpecBase
+public sealed class SetAnchorCommandSpecCharR : CommandSpecBase
 {
     [Header("Target (Anchor only)")]
     public CharacterRigTarget target = CharacterRigTarget.Character_Anchor;

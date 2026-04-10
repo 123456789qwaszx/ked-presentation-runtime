@@ -8,7 +8,7 @@ public enum BounceJumpAxisCharR { X = 0, Y = 1 }
 
 [Serializable]
 [CommandMenuHint("Char Rig Motion", "Bounce Arc In", Order = -760)]
-public sealed class BounceArcInCommandSpecCharR : CharRigCommandSpecBase
+public sealed class BounceArcInCommandSpecCharR : CommandSpecBase
 {
     [Header("Target")]
     public CharacterRigTarget target = CharacterRigTarget.Character_Track;

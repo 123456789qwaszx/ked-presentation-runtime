@@ -8,7 +8,7 @@ using UnityEngine;
     "Char Rig Motion",
     "Move By (XY)",
     Order = -200)]
-public class MoveByCommandSpecCharR : CharRigCommandSpecBase
+public class MoveByCommandSpecCharR : CommandSpecBase
 {
     [Header("Target (Track or Rig)")]
     public CharacterRigTarget target = CharacterRigTarget.Character_Track;

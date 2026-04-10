@@ -6,7 +6,7 @@ using UnityEngine.UI;
 [Serializable]
 [CommandMenuHint(
     "Char Rig", "Set Sprite (CharRig)", Order = 875, SetOrder = -965)]
-public sealed class SetSpriteCommandSpecCharR : CharRigCommandSpecBase
+public sealed class SetSpriteCommandSpecCharR : CommandSpecBase
 {
     [Header("Target")]
     public CharacterRigTarget target = CharacterRigTarget.CharacterPortrait_Image;

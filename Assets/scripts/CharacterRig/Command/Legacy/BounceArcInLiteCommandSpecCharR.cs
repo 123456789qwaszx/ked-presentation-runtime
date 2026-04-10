@@ -7,7 +7,7 @@ using RectTransform = UnityEngine.RectTransform;
 
 [Serializable]
 [CommandMenuHint("Char Rig Motion", "Bounce Arc In (Lite)", Order = -758)]
-public sealed class BounceArcInLiteCommandSpecCharR : CharRigCommandSpecBase
+public sealed class BounceArcInLiteCommandSpecCharR : CommandSpecBase
 {
     [Header("Target")]
     public CharacterRigTarget target = CharacterRigTarget.Character_Track;

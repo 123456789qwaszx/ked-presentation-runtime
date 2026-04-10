@@ -8,7 +8,7 @@ using DG.Tweening;
     "Char Rig Motion",
     "Punch Scale",
     Order = 100)]
-public class PunchScaleCommandSpecCharR : CharRigCommandSpecBase
+public class PunchScaleCommandSpecCharR : CommandSpecBase
 {
     [Header("Target")] public CharacterRigTarget target = CharacterRigTarget.CharacterPortrait_Scale;
 

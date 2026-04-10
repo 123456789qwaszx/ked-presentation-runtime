@@ -16,7 +16,7 @@ public enum ShakeCommandSpecCharRShakeAxis
     "Shake",
     Order = 100
     )]
-public class ShakeCommandSpecCharR : CharRigCommandSpecBase
+public class ShakeCommandSpecCharR : CommandSpecBase
 {
     [Header("Target")]
     [Tooltip("어느 초상화 세트를 흔들지 선택합니다.")]

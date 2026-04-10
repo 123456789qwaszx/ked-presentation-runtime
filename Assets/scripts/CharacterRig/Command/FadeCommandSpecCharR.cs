@@ -10,7 +10,7 @@ using UnityEngine;
     "Fade",
     Order = 100
 )]
-public sealed class FadeCommandSpecCharR : CharRigCommandSpecBase
+public sealed class FadeCommandSpecCharR : CommandSpecBase
 {
     public CharacterRigTarget target = CharacterRigTarget.CharacterPortrait_Root;
 

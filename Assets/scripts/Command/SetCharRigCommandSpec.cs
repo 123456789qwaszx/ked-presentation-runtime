@@ -9,7 +9,7 @@ using UnityEngine;
     {
         CommandMenuSets.BuildChar,
     }, SetOrder = -980)]
-public sealed class SetCharRigCommandSpec : CharRigCommandSpecBase
+public sealed class SetCharRigCommandSpec : CommandSpecBase
 {
     [Tooltip("있으면 이 프리팹을 인스턴스해서 Rig를 구성합니다. 없으면 자동 생성합니다.")]
     public GameObject rigPrefab;

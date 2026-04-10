@@ -6,7 +6,7 @@ using UnityEngine.Serialization;
 
 [Serializable]
 [CommandMenuHint("Char Rig Motion", "Rotate To", Order = 101)]
-public sealed class SwayRotateToCommandSpecCharR : CharRigCommandSpecBase
+public sealed class SwayRotateToCommandSpecCharR : CommandSpecBase
 {
     [Header("Targets")]
     [Tooltip("회전시킬 피벗. 보통 SwayPivot 축을 사용.")]

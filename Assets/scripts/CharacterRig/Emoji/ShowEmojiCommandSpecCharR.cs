@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 [Serializable]
 [CommandMenuHint("Char Rig", "Show Emoji (Preset)", Order = -960)]
-public sealed class ShowEmojiCommandSpecCharR : CharRigCommandSpecBase
+public sealed class ShowEmojiCommandSpecCharR : CommandSpecBase
 {
     public CharacterEmojiDatabaseSO database;
     public string emojiKey = "sparkle";

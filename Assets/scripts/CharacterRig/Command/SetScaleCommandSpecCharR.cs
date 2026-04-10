@@ -10,7 +10,7 @@ using DG.Tweening;
     {
         CommandMenuSets.ResetChar,
     }, SetOrder = -964)]
-public class SetScaleCommandSpecCharR : CharRigCommandSpecBase
+public class SetScaleCommandSpecCharR : CommandSpecBase
 {
     [Header("Target")]
     public CharacterRigTarget target = CharacterRigTarget.CharacterPortrait_Scale;

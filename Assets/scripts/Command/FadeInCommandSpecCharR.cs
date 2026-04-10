@@ -11,7 +11,7 @@ using UnityEngine;
     "Fade In",
     Order = -820
 )]
-public class FadeInCommandSpecCharR : CharRigCommandSpecBase
+public class FadeInCommandSpecCharR : CommandSpecBase
 {
     public CharRigRootLayerMask targetMask = CharRigRootLayerMask.CharacterPortrait_Root;
 

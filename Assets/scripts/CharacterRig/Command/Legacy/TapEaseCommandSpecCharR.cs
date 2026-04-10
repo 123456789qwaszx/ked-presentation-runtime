@@ -6,7 +6,7 @@ using RectTransform = UnityEngine.RectTransform;
 
 [Serializable]
 [CommandMenuHint("Char Rig Motion", "Tap (Ease InOut)", Order = -739)]
-public sealed class TapEaseCommandSpecCharR : CharRigCommandSpecBase
+public sealed class TapEaseCommandSpecCharR : CommandSpecBase
 {
     [Header("Target")]
     public CharacterRigTarget target = CharacterRigTarget.Character_Track;

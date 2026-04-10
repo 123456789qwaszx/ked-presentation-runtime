@@ -9,7 +9,7 @@ using UnityEngine.UI;
     "Set Color (Z)",
     Order = 870
 )]
-public class SetColorCommandSpecCharR : CharRigCommandSpecBase
+public class SetColorCommandSpecCharR : CommandSpecBase
 {
     [Header("Target")] public CharacterRigTarget target = CharacterRigTarget.CharacterPortrait_Image;
 

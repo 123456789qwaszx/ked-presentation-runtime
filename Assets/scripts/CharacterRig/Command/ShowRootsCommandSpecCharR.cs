@@ -11,7 +11,7 @@ using System.Collections.Generic;
     {
         CommandMenuSets.ResetChar,
     }, SetOrder = -975)]
-public class ShowRootsCommandSpecCharR : CharRigCommandSpecBase
+public class ShowRootsCommandSpecCharR : CommandSpecBase
 {
     public CharRigRootLayerMask targetMask = CharRigRootLayerMask.CharacterPortrait_Root;
 

@@ -6,7 +6,7 @@ using UnityEngine.Serialization;
 
 [Serializable]
 [CommandMenuHint("Char Rig Motion", "Sway", Order = 100)]
-public sealed class SwayCommandSpecCharR : CharRigCommandSpecBase
+public sealed class SwayCommandSpecCharR : CommandSpecBase
 {
     [Header("Targets")] [Tooltip("좌우로 흔들릴 피벗(SwayPivot).")]
     public CharacterRigTarget target = CharacterRigTarget.CharacterPortrait_SwayPivot;

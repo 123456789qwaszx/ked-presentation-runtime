@@ -9,7 +9,7 @@ using System.Collections;
     "Rotate (From → To)",
     Order = -180
 )]
-public class RotateFromToCommandSpecCharR : CharRigCommandSpecBase
+public class RotateFromToCommandSpecCharR : CommandSpecBase
 {
     [Header("Target")]
     public CharacterRigTarget target = CharacterRigTarget.CharacterPortrait_Root;
