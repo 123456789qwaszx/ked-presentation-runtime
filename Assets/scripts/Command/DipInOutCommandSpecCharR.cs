@@ -28,8 +28,10 @@ public sealed class DipInOutCommandCharR : CommandBase, IStepScopedCommand
     private readonly DipInOutCommandSpecCharR _spec;
 
     private RectTransform _rect;
+    private Tween _tween;
     private Vector2 _restPos;
     private bool _resolveAttempted;
+    private bool _ownsTarget;
 
     public override bool WaitForCompletion => _spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
@@ -38,10 +40,14 @@ public sealed class DipInOutCommandCharR : CommandBase, IStepScopedCommand
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
-        if (!_resolveAttempted) ResolveRefs(scope);
-        if (_rect == null) yield break;
+        if (!_resolveAttempted)
+            ResolveRefs(scope);
 
-        _rect.DOKill(false);
+        RectTransform resolved = _rect;
+        ClaimTargetOwnership(resolved);
+
+        if (!HasTargetOwnership())
+            yield break;
 
         float total = _spec.duration;
         float dist = _spec.distance;
@@ -49,6 +55,7 @@ public sealed class DipInOutCommandCharR : CommandBase, IStepScopedCommand
         if (total <= 0f || Mathf.Approximately(dist, 0f))
         {
             _rect.anchoredPosition = _restPos;
+            ReleaseTargetOwnership();
             yield break;
         }
 
@@ -65,12 +72,12 @@ public sealed class DipInOutCommandCharR : CommandBase, IStepScopedCommand
         Ease enterEase = ToOutEase(_spec.ease);
         Ease returnEase = ToInEase(_spec.ease);
 
-        Tween tween = DOTween
+        _tween = DOTween
             .To(
                 () => 0f,
                 t =>
                 {
-                    if (_rect == null)
+                    if (!HasTargetOwnership())
                         return;
 
                     if (t <= holdStart)
@@ -95,43 +102,81 @@ public sealed class DipInOutCommandCharR : CommandBase, IStepScopedCommand
                 total
             )
             .SetEase(Ease.Linear)
-            .SetUpdate(true);
+            .SetUpdate(true)
+            .SetTarget(_rect)
+            .OnComplete(() =>
+            {
+                if (!HasTargetOwnership())
+                    return;
+
+                _rect.anchoredPosition = rest;
+                ReleaseTargetOwnership();
+            });
 
         if (_spec.wait)
-            yield return tween.WaitForCompletion();
+            yield return _tween.WaitForCompletion();
     }
 
     protected override void OnSkip(CommandRunScope scope) => OnCommandCompleted(scope);
 
     protected override void OnCommandCompleted(CommandRunScope scope)
     {
-        if (!_resolveAttempted) ResolveRefs(scope);
-        if (_rect == null) return;
+        if (!_resolveAttempted)
+            ResolveRefs(scope);
 
-        _rect.DOKill();
+        if (!HasTargetOwnership())
+            return;
+
+        _tween?.Kill(false);
+        _rect.DOKill(false);
         _rect.anchoredPosition = _restPos;
 
+        ReleaseTargetOwnership();
+    }
+
+    private void ClaimTargetOwnership(RectTransform incoming)
+    {
+        if (incoming == null)
+        {
+            _rect = null;
+            _ownsTarget = false;
+            return;
+        }
+
+        incoming.DOKill(false);
+        _rect = incoming;
+        _ownsTarget = true;
+    }
+
+    private bool HasTargetOwnership()
+    {
+        return _ownsTarget && _rect != null;
+    }
+
+    private void ReleaseTargetOwnership()
+    {
+        _ownsTarget = false;
         _rect = null;
-        _restPos = default;
+        _tween = null;
     }
 
     private void ResolveRefs(CommandRunScope scope)
     {
         _resolveAttempted = true;
 
-        if (!scope.Refs.TryGetCharRigRefs(_spec.roleKey, out CharacterRigRefs rig) || rig == null)
+        if (!scope.Refs.TryGetCharRigRefs(_spec.roleKey, out CharacterRigRefs rig))
             return;
 
         _rect = rig.GetRect(_spec.target);
-        _restPos = _rect.anchoredPosition;
+        _restPos =  _rect.anchoredPosition;
     }
 
     private static Vector2 GetOffset(CharRDirection dir, float distance) => dir switch
     {
         CharRDirection.Right => new Vector2(+distance, 0f),
-        CharRDirection.Up => new Vector2(0f, +distance),
-        CharRDirection.Down => new Vector2(0f, -distance),
-        _ => new Vector2(-distance, 0f),
+        CharRDirection.Up    => new Vector2(0f, +distance),
+        CharRDirection.Down  => new Vector2(0f, -distance),
+        _                    => new Vector2(-distance, 0f),
     };
 
     private static Ease ToOutEase(Ease baseEase) => baseEase switch
@@ -152,7 +197,7 @@ public sealed class DipInOutCommandCharR : CommandBase, IStepScopedCommand
         Ease.InOutExpo => Ease.OutExpo,
         Ease.InOutCirc => Ease.OutCirc,
         Ease.InOutBack => Ease.OutBack,
-        _ => baseEase, // 이미 Out 계열이거나 특수면 그대로
+        _ => baseEase,
     };
 
     private static Ease ToInEase(Ease baseEase) => baseEase switch
