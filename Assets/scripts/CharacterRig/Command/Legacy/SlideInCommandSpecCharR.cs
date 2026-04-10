@@ -4,20 +4,6 @@ using DG.Tweening;
 using UnityEngine;
 using RectTransform = UnityEngine.RectTransform;
 
-public enum SlideFromCharR
-{
-    Left = 0,
-    Right,
-    Up,
-    Down,
-}
-
-public enum ShakeAxisCharR
-{
-    X  = 0,
-    Y  = 1,
-    XY = 2,
-}
 
 [Serializable]
 [CommandMenuHint(

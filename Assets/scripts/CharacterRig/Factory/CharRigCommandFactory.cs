@@ -1,3 +1,18 @@
+public enum SlideFromCharR
+{
+    Left = 0,
+    Right,
+    Up,
+    Down,
+}
+
+public enum ShakeAxisCharR
+{
+    X  = 0,
+    Y  = 1,
+    XY = 2,
+}
+
 public sealed class CharRigCommandFactory : INodeCommandFactory
 {
     private readonly CharacterRigAccess _access;
