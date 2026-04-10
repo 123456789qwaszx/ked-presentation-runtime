@@ -38,6 +38,34 @@ MonoBehaviour:
         type: 3
         seconds: 0
         signalKey: beat
+    - editorName: 
+      tracks:
+        interaction:
+        - rid: 8483491092097663040
+        setup: []
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 8483491092097663040
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+    - editorName: 
+      tracks:
+        interaction: []
+        setup: []
+        motion: []
+        dialogue: []
+        fx:
+        - rid: 8483491092097663038
+      compiled:
+      - rid: 8483491092097663038
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
     - editorName: Nudge
       tracks:
         interaction: []
@@ -236,7 +264,7 @@ MonoBehaviour:
           infiniteHint: 0
           durationHint: 0
         target: 6
-        toScale: {x: 2, y: 2}
+        toScale: {x: 1.7, y: 1.7}
         toAngle: 0
         anchorMin: {x: 0, y: 0}
         anchorMax: {x: 1, y: 1}
@@ -254,9 +282,9 @@ MonoBehaviour:
         preset: 0
         baseRatioX: 0.5
         globalTuning: {fileID: 11400000, guid: db30a92a6d8545a41b703c2585f4013d, type: 2}
-        roleTuningDb: {fileID: 11400000, guid: 5602fbe20dd75c04d884ef620538f079, type: 2}
+        roleTuningDb: {fileID: 0}
         poseKey: 
-        offset: {x: 0, y: 0}
+        offset: {x: 0, y: -200}
         overrideAnchoredPosition: 0
         anchoredPositionOverride: {x: 0, y: 0}
     - rid: 305542826026074176
@@ -624,4 +652,42 @@ MonoBehaviour:
         taps: 1
         damping: 9
         anticipation: 0
+        wait: 0
+    - rid: 8483491092097663038
+      type: {class: SwayCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: main
+        _meta:
+          track: 40
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 7
+        strength: 10
+        duration: 0.9
+        cycles: 2
+        damping: 2.2
+        speed: 1
+        anticipation: 1.5
+        startPositive: 1
+        wait: 0
+    - rid: 8483491092097663040
+      type: {class: SwayCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: main
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 7
+        strength: 10
+        duration: 1
+        cycles: 2
+        damping: 2.2
+        speed: 1
+        anticipation: 0
+        startPositive: 1
         wait: 0

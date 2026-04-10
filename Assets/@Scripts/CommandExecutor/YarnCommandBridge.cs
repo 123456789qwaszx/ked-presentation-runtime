@@ -78,8 +78,81 @@ public sealed class YarnCommandBridge : MonoBehaviour
 
         _dialogueRunner.AddCommandHandler<string>("sfx", PlaySfx);
         _dialogueRunner.AddCommandHandler("stop_all_sfx", StopAllSfx);
+        
+        _dialogueRunner.AddCommandHandler<string, string, string, string>("emotion_wipe", SetEmotionPortraitWipe);
+        
+        _dialogueRunner.AddCommandHandler<string>("sway_soft", SwaySoft);
+        _dialogueRunner.AddCommandHandler<string>("sway_tap", SwayTap);
+        _dialogueRunner.AddCommandHandler<string>("sway_hard", SwayHard);
     }
     
+    private void SwayHard(string roleKey)
+    {
+        var spec = new SwayCommandSpecCharR
+        {
+            roleKey = roleKey,
+            target = CharacterRigTarget.CharacterPortrait_SwayPivot,
+
+            duration = 0.62f,
+            cycles = 1,
+            anticipation = 0.8f,
+            wait = false
+        };
+
+        Collect(spec);
+    }
+    
+    private void SwayTap(string roleKey)
+    {
+        var spec = new SwayCommandSpecCharR
+        {
+            roleKey = roleKey,
+            target = CharacterRigTarget.CharacterPortrait_SwayPivot,
+
+            duration = 0.52f,
+            cycles = 1,
+            anticipation = 2.4f,
+            wait = false
+        };
+
+        Collect(spec);
+    }
+    
+    private void SwaySoft(string roleKey)
+    {
+        var spec = new SwayCommandSpecCharR
+        {
+            roleKey = roleKey,
+            target = CharacterRigTarget.CharacterPortrait_SwayPivot,
+
+            duration = 1.05f,
+            cycles = 2,
+            anticipation = 1.2f,
+            wait = false
+        };
+
+        Collect(spec);
+    }
+    
+    private void SetEmotionPortraitWipe(
+        string roleKey,
+        string character,
+        string variant,
+        string emotion)
+    {
+        var spec = new SetEmotionPortraitWipeCommandSpecCharR
+        {
+            roleKey = roleKey,
+            portrait = new PortraitIdentity
+            {
+                character = character,
+                variant = variant,
+                emotion = emotion
+            },
+        };
+
+        Collect(spec);
+    }
     
     private void PlayBgm(string clipKey, float fadeDuration = 1f)
     {
