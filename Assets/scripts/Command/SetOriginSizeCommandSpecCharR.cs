@@ -1,6 +1,6 @@
 using System;
-using UnityEngine;
 using System.Collections;
+using UnityEngine;
 using DG.Tweening;
 
 [Serializable]
@@ -18,14 +18,13 @@ public class SetOriginSizeCommandSpecCharR : CommandSpecBase
 
     [Header("Scale")]
     public Vector2 toScale = Vector2.one;
-    
+
     [Header("Rotation (Z axis)")]
     public float toAngle = 0f;
-    
+
     [Header("Anchor (if nativeSize, not work.)")]
     public Vector2 anchorMin = new Vector2(0f, 0f);
     public Vector2 anchorMax = new Vector2(1f, 1f);
-    
 }
 
 public sealed class SetOriginSizeCommandCharR : CommandBase
@@ -37,38 +36,34 @@ public sealed class SetOriginSizeCommandCharR : CommandBase
 
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
-    public SetOriginSizeCommandCharR(SetOriginSizeCommandSpecCharR spec)
-    {
-        _spec = spec;
-    }
+    public SetOriginSizeCommandCharR(SetOriginSizeCommandSpecCharR spec) => _spec = spec;
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (_rect == null)
-            yield break;
-
-        ApplyScale();
-        ApplyRotation();
-        ApplyPad();
+        Apply();
+        yield break;
     }
 
-    protected override void OnSkip(CommandRunScope scope)
+    protected override void OnSkip(CommandRunScope scope) => OnCommandCompleted(scope);
+
+    protected override void OnCommandCompleted(CommandRunScope scope)
     {
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (_rect == null)
-            return;
-        
+        Apply();
+    }
+
+    private void Apply()
+    {
         ApplyScale();
         ApplyRotation();
         ApplyPad();
     }
-    
-    
+
     private void ApplyScale()
     {
         _rect.DOKill(false);
@@ -78,25 +73,25 @@ public sealed class SetOriginSizeCommandCharR : CommandBase
         scale.y = _spec.toScale.y;
         _rect.localScale = scale;
     }
-    
+
     private void ApplyRotation()
     {
         Vector3 euler = _rect.localEulerAngles;
         euler.z = _spec.toAngle;
         _rect.localEulerAngles = euler;
     }
-    
+
     private void ApplyPad()
     {
         _rect.anchorMin = _spec.anchorMin;
         _rect.anchorMax = _spec.anchorMax;
     }
-    
+
     private void ResolveRefs(CommandRunScope scope)
     {
         _resolveAttempted = true;
 
-        if (!scope.Refs.TryGetCharRigRefs(_spec.roleKey, out CharacterRigRefs rig) || rig == null)
+        if (!scope.Refs.TryGetCharRigRefs(_spec.roleKey, out CharacterRigRefs rig))
             return;
 
         _rect = rig.GetRect(_spec.target);

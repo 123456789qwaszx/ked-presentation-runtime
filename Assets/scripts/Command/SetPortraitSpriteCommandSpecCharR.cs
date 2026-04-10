@@ -1,6 +1,6 @@
 using System;
-using UnityEngine;
 using System.Collections;
+using UnityEngine;
 using UnityEngine.UI;
 
 [Serializable]
@@ -27,11 +27,13 @@ public sealed class SetPortraitSpriteCommandSpecCharR : CommandSpecBase
         CharRigImageSizingPolicy.HorizontalAlign.Center;
 }
 
-
 public sealed class SetPortraitSpriteCommandCharR : CommandBase
 {
     private readonly SetPortraitSpriteCommandSpecCharR _spec;
     private readonly PortraitResolver _resolver;
+
+    private Image _image;
+    private bool _resolveAttempted;
 
     public SetPortraitSpriteCommandCharR(
         SetPortraitSpriteCommandSpecCharR spec,
@@ -43,38 +45,62 @@ public sealed class SetPortraitSpriteCommandCharR : CommandBase
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
-        if (!scope.Refs.TryGetCharRigRefs(_spec.roleKey, out CharacterRigRefs rig) || rig == null)
-            yield break;
+        if (!_resolveAttempted)
+            ResolveRefs(scope);
 
-        Image image = rig.GetComponent(_spec.target) as Image;
-        if (image == null)
-            yield break;
+        Apply();
+        yield break;
+    }
+    
+    protected override void OnSkip(CommandRunScope scope) => OnCommandCompleted(scope);
+
+    protected override void OnCommandCompleted(CommandRunScope scope)
+    {
+        if (!_resolveAttempted)
+            ResolveRefs(scope);
+
+        Apply();
+    }
+
+    private void ResolveRefs(CommandRunScope scope)
+    {
+        _resolveAttempted = true;
+
+        if (!scope.Refs.TryGetCharRigRefs(_spec.roleKey, out CharacterRigRefs rig))
+            return;
+
+        _image = rig.GetComponent(_spec.target) as Image;
+    }
+
+    private void Apply()
+    {
+        if (_image == null)
+            return;
 
         Sprite sprite = ResolveSprite(_spec.portrait);
         if (sprite == null)
         {
             Debug.LogWarning(
-                $"[SetPortraitSprite] Failed to resolve portrait:\n" +
+                $"[SetPortraitSpriteCommandCharR] Failed to resolve portrait:\n" +
                 $"  Character: {_spec.portrait?.character}\n" +
                 $"  Variant: {_spec.portrait?.variant}\n" +
-                $"  Emotion: {_spec.portrait?.emotion}"
-            );
-            yield break;
+                $"  Emotion: {_spec.portrait?.emotion}");
+            return;
         }
 
-        image.sprite = sprite;
+        _image.sprite = sprite;
 
         CharRigImageSizingPolicy.Apply(
-            image,
+            _image,
             sprite,
             _spec.sizingMode,
-            _spec.horizontalAlign
-        );
+            _spec.horizontalAlign);
     }
 
     private Sprite ResolveSprite(PortraitIdentity id)
     {
-        if (id == null) return null;
+        if (id == null)
+            return null;
 
         string character = SafeTrim(id.character);
         if (string.IsNullOrEmpty(character))
@@ -98,5 +124,7 @@ public sealed class SetPortraitSpriteCommandCharR : CommandBase
     }
 
     private static string SafeTrim(string s)
-        => string.IsNullOrEmpty(s) ? "" : s.Trim();
+    {
+        return string.IsNullOrEmpty(s) ? "" : s.Trim();
+    }
 }

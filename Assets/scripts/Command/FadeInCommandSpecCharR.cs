@@ -81,6 +81,12 @@ public sealed class FadeInCommandCharR : CommandBase, IStepScopedCommand
                         _canCommitFinalState = false;
                 });
         }
+        
+        if (_pending == 0)
+        {
+            _canCommitFinalState = false;
+            yield break;
+        }
 
         if (!_spec.wait)
             yield break;
@@ -114,6 +120,7 @@ public sealed class FadeInCommandCharR : CommandBase, IStepScopedCommand
         }
 
         SnapOnTargets(_targets);
+        
         _pending = 0;
         _canCommitFinalState = false;
     }

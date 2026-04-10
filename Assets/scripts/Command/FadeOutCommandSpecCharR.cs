@@ -117,6 +117,7 @@ public sealed class FadeOutCommandCharR : CommandBase, IStepScopedCommand
         {
             RectTransform rect = _targets[i];
             CanvasGroup cg = GetOrAddCanvasGroup(rect);
+            
             cg.DOKill(false);
         }
 

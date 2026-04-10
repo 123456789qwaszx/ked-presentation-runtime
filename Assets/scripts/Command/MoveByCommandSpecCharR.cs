@@ -27,18 +27,19 @@ public class MoveByCommandSpecCharR : CommandSpecBase
     public bool wait = false;
 
     [Header("Options")]
-    [Tooltip("체크하면 기존 위치 관련 트윈을 끊고 시작합니다.")]
+    [Tooltip("체크하면 기존 위치 관련 트윈을 끝내고 committed state에서 시작합니다.")]
     public bool killTween = true;
 }
-
 
 public sealed class MoveByCommandCharR : CommandBase, IStepScopedCommand
 {
     private readonly MoveByCommandSpecCharR _spec;
 
     private RectTransform _rect;
+    private Tween _tween;
     private bool _resolveAttempted;
-    
+    private bool _canCommitFinalState;
+
     private bool _hasComputedDest;
     private Vector2 _startPos;
     private Vector2 _destPos;
@@ -46,61 +47,72 @@ public sealed class MoveByCommandCharR : CommandBase, IStepScopedCommand
     public override bool WaitForCompletion => _spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
-    public MoveByCommandCharR(MoveByCommandSpecCharR spec)
-    {
-        _spec = spec;
-    }
+    public MoveByCommandCharR(MoveByCommandSpecCharR spec) => _spec = spec;
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (_rect == null)
-            yield break;
+        _hasComputedDest = false;
 
         if (_spec.killTween)
-            _rect.DOKill(false);
-        
+            _rect.DOKill(true); // Finish previous motion so this command starts from a committed state.
+
+        _canCommitFinalState = true;
+
         ComputeDestIfNeeded();
 
         if (_spec.duration <= 0f)
         {
             _rect.anchoredPosition = _destPos;
+            _canCommitFinalState = false;
+            _rect = null;
+            _tween = null;
             yield break;
         }
 
-        Tween tween = _rect
+        _tween = _rect
             .DOAnchorPos(_destPos, _spec.duration)
             .SetEase(_spec.ease)
-            .SetUpdate(true);
-        
+            .SetUpdate(true)
+            .SetTarget(_rect)
+            .OnComplete(() =>
+            {
+                if (!_canCommitFinalState)
+                    return;
+
+                _rect.anchoredPosition = _destPos;
+                _canCommitFinalState = false;
+                _rect = null;
+                _tween = null;
+            });
+
         if (_spec.wait)
-            yield return tween.WaitForCompletion();
+            yield return _tween.WaitForCompletion();
     }
 
-    protected override void OnSkip(CommandRunScope scope)
-    {
-        OnCommandCompleted(scope);
-    }
+    protected override void OnSkip(CommandRunScope scope) => OnCommandCompleted(scope);
 
     protected override void OnCommandCompleted(CommandRunScope scope)
     {
         if (!_resolveAttempted)
             ResolveRefs(scope);
-        
-        if (_rect == null)
+
+        if (!_canCommitFinalState)
             return;
-        
-        _rect.DOKill();
+
+        _tween?.Kill(false);
+        _rect.DOKill(false);
 
         ComputeDestIfNeeded();
         _rect.anchoredPosition = _destPos;
-        
+
+        _canCommitFinalState = false;
         _rect = null;
+        _tween = null;
     }
-    
-    
+
     private void ComputeDestIfNeeded()
     {
         if (_hasComputedDest)
@@ -115,7 +127,7 @@ public sealed class MoveByCommandCharR : CommandBase, IStepScopedCommand
     {
         _resolveAttempted = true;
 
-        if (!scope.Refs.TryGetCharRigRefs(_spec.roleKey, out CharacterRigRefs rig) || rig == null)
+        if (!scope.Refs.TryGetCharRigRefs(_spec.roleKey, out CharacterRigRefs rig))
             return;
 
         _rect = rig.GetRect(_spec.target);

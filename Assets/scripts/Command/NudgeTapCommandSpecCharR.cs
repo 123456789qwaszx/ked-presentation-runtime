@@ -4,14 +4,6 @@ using DG.Tweening;
 using UnityEngine;
 using RectTransform = UnityEngine.RectTransform;
 
-public enum NudgeDirectionCharR
-{
-    Right = 0,
-    Left = 1,
-    Up = 2,
-    Down = 3,
-}
-
 [Serializable]
 [CommandMenuHint("Char Rig Motion", "Nudge (Tap Neighbor)", Order = -740)]
 public sealed class NudgeTapCommandSpecCharR : CommandSpecBase
@@ -42,6 +34,9 @@ public sealed class NudgeTapCommandSpecCharR : CommandSpecBase
 
     [Header("Wait")]
     public bool wait = false;
+    
+    [Header("Options")]
+    public bool killTween = true;
 }
 
 public sealed class NudgeTapCommandCharR : CommandBase, IStepScopedCommand
@@ -49,8 +44,10 @@ public sealed class NudgeTapCommandCharR : CommandBase, IStepScopedCommand
     private readonly NudgeTapCommandSpecCharR _spec;
 
     private RectTransform _rect;
+    private Tween _tween;
     private Vector2 _restPos;
     private bool _resolveAttempted;
+    private bool _canCommitFinalState;
 
     public override bool WaitForCompletion => _spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
@@ -62,14 +59,17 @@ public sealed class NudgeTapCommandCharR : CommandBase, IStepScopedCommand
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (_rect == null)
-            yield break;
-
-        _rect.DOKill(false);
+        if (_spec.killTween)
+            _rect.DOKill(true); // Finish previous motion so this command starts from a committed state.
+        
+        _canCommitFinalState = true;
 
         if (_spec.duration <= 0f || Mathf.Approximately(_spec.strength, 0f))
         {
             _rect.anchoredPosition = _restPos;
+            _canCommitFinalState = false;
+            _rect = null;
+            _tween = null;
             yield break;
         }
 
@@ -80,40 +80,30 @@ public sealed class NudgeTapCommandCharR : CommandBase, IStepScopedCommand
         float damping = Mathf.Max(0.01f, _spec.damping);
         float anticipation = Mathf.Abs(_spec.anticipation);
 
-        // Signed world/local direction for this nudge.
-        // Right/Up = positive axis, Left/Down = negative axis.
         Vector2 dir = GetSignedDirection(_spec.direction);
 
-        Tween tween = DOTween.To(
+        _tween = DOTween
+            .To(
                 () => 0f,
                 t =>
                 {
+                    if (!_canCommitFinalState)
+                        return;
+
                     float u = Mathf.Clamp01(t);
 
-                    // Tiny anticipation before the first push.
-                    // Briefly pulls opposite, then releases into the main tap.
                     float antiTerm = 0f;
                     if (!Mathf.Approximately(anticipation, 0f))
                     {
                         float s = Mathf.Clamp01(u / 0.15f);
-
-                        // Smooth 0 -> 1 -> 0 bump
                         float bump = Mathf.Sin(Mathf.PI * s);
-
-                        // Negative because anticipation goes opposite to main direction
                         antiTerm = -anticipation * bump * (1f - s);
                     }
 
-                    // Damped oscillation
                     float decay = Mathf.Exp(-damping * u);
-
-                    // Guarantees exact return to rest at start/end
                     float settleEnvelope = Mathf.Sin(Mathf.PI * u);
-
-                    // Back-and-forth tap motion
                     float osc = Mathf.Sin(2f * Mathf.PI * taps * u);
 
-                    // Final scalar amount along selected direction
                     float scalar = antiTerm + (amplitude * decay * osc * settleEnvelope);
 
                     _rect.anchoredPosition = rest + dir * scalar;
@@ -121,12 +111,22 @@ public sealed class NudgeTapCommandCharR : CommandBase, IStepScopedCommand
                 1f,
                 _spec.duration
             )
-            // Raw t stays linear; motion shaping is applied manually above
             .SetEase(Ease.Linear)
-            .SetUpdate(true);
+            .SetUpdate(true)
+            .SetTarget(_rect)
+            .OnComplete(() =>
+            {
+                if (!_canCommitFinalState)
+                    return;
+
+                _rect.anchoredPosition = rest;
+                _canCommitFinalState = false;
+                _rect = null;
+                _tween = null;
+            });
 
         if (_spec.wait)
-            yield return tween.WaitForCompletion();
+            yield return _tween.WaitForCompletion();
     }
 
     protected override void OnSkip(CommandRunScope scope) => OnCommandCompleted(scope);
@@ -136,21 +136,23 @@ public sealed class NudgeTapCommandCharR : CommandBase, IStepScopedCommand
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (_rect == null)
+        if (!_canCommitFinalState)
             return;
 
-        _rect.DOKill();
+        _tween?.Kill(false);
+        _rect.DOKill(false);
         _rect.anchoredPosition = _restPos;
 
+        _canCommitFinalState = false;
         _rect = null;
-        _restPos = default;
+        _tween = null;
     }
 
     private void ResolveRefs(CommandRunScope scope)
     {
         _resolveAttempted = true;
 
-        if (!scope.Refs.TryGetCharRigRefs(_spec.roleKey, out CharacterRigRefs rig) || rig == null)
+        if (!scope.Refs.TryGetCharRigRefs(_spec.roleKey, out CharacterRigRefs rig))
             return;
 
         _rect = rig.GetRect(_spec.target);

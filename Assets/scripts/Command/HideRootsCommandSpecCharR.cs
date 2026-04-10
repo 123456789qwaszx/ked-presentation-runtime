@@ -6,26 +6,22 @@ using UnityEngine;
 
 [Serializable]
 [CommandMenuHint(
-    "Char Rig", "#Hide Root Layers", Order = -940
-    // ,
-    // Sets = new[]
-    // {
-    //     CommandMenuSets.BuildChar,
-    // }, 
-    // SetOrder = -970
-    )]
+    "Char Rig",
+    "#Hide Root Layers",
+    Order = -940
+)]
 public sealed class HideRootsCommandSpecCharR : CommandSpecBase
 {
-    public CharRigRootLayerMask targetMask = CharRigRootLayerMask.CharacterPortraitOverlay_Root 
+    public CharRigRootLayerMask targetMask = CharRigRootLayerMask.CharacterPortraitOverlay_Root
                                              | CharRigRootLayerMask.CharacterEmoji_Root
                                              | CharRigRootLayerMask.CharacterPortrait_Root;
-    
+
     [Header("Interaction")]
     [Tooltip("true면 숨긴 대상의 입력을 완전히 차단(interactable/blocksRaycasts=false)")]
     public bool disableInteraction = true;
 }
 
-public sealed class HideRootsCommandCharR : CommandBase, IStepScopedCommand
+public sealed class HideRootsCommandCharR : CommandBase
 {
     private readonly HideRootsCommandSpecCharR _spec;
 
@@ -34,53 +30,50 @@ public sealed class HideRootsCommandCharR : CommandBase, IStepScopedCommand
 
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
-    public HideRootsCommandCharR(HideRootsCommandSpecCharR spec)
-    {
-        _spec = spec;
-    }
+    public HideRootsCommandCharR(HideRootsCommandSpecCharR spec) => _spec = spec;
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
         if (!_resolveAttempted)
             ResolveRefs(scope);
-        
-        if (_targets.Count == 0)
-            yield break;
-        
-        SnapOffTargets(_targets);
-        
+
+        Apply();
         _targets.Clear();
+        yield break;
     }
 
-    protected override void OnSkip(CommandRunScope scope)
-    {
-        OnCommandCompleted(scope);
-    }
+    protected override void OnSkip(CommandRunScope scope) => OnCommandCompleted(scope);
 
     protected override void OnCommandCompleted(CommandRunScope scope)
     {
         if (!_resolveAttempted)
             ResolveRefs(scope);
-        
+
         if (_targets.Count == 0)
             return;
-        
-        SnapOffTargets(_targets);
-        
+
+        Apply();
         _targets.Clear();
     }
-    
+
     private void ResolveRefs(CommandRunScope scope)
     {
         _resolveAttempted = true;
-        
+        _targets.Clear();
+
         if (_spec.targetMask == CharRigRootLayerMask.None)
             return;
-        
-        CharRigRootLayerMaskMap.CollectRects((CharacterRigRefs)scope.Refs[_spec.roleKey], _spec.targetMask, _targets);
+
+        CharacterRigRefs rig = (CharacterRigRefs)scope.Refs[_spec.roleKey];
+        CharRigRootLayerMaskMap.CollectRects(rig, _spec.targetMask, _targets);
     }
     
     
+    private void Apply()
+    {
+        SnapOffTargets(_targets);
+    }
+
     private void SnapOffTargets(List<RectTransform> targets)
     {
         if (targets == null || targets.Count == 0)
@@ -88,35 +81,25 @@ public sealed class HideRootsCommandCharR : CommandBase, IStepScopedCommand
 
         for (int i = 0; i < targets.Count; i++)
         {
-            RectTransform rect = targets[i];
-            if (rect == null)
-                continue;
+            CanvasGroup canvasGroup = GetOrAddCanvasGroup(targets[i]);
 
-            CanvasGroup canvasGroup = GetOrAddCanvasGroup(rect);
-            if (canvasGroup == null)
-                continue;
-
-            canvasGroup.DOKill(false);
+            canvasGroup.DOKill(true); // Finish previous motion so this command starts from a committed state.
             canvasGroup.alpha = 0f;
 
             if (_spec.disableInteraction)
             {
-                canvasGroup.interactable   = false;
+                canvasGroup.interactable = false;
                 canvasGroup.blocksRaycasts = false;
             }
         }
     }
-    
+
     private CanvasGroup GetOrAddCanvasGroup(RectTransform rect)
     {
-        if (rect == null)
-            return null;
-
-        CanvasGroup canvasGroup = rect.GetComponent<CanvasGroup>();
-        if (canvasGroup != null)
+        if (rect.TryGetComponent<CanvasGroup>(out CanvasGroup canvasGroup))
             return canvasGroup;
 
-        Debug.LogWarning($"[HideCommandSpecCharR] CanvasGroup missing. Added automatically: {rect.name}", rect);
+        Debug.LogWarning($"[HideRootsCommandCharR] CanvasGroup missing. Added automatically: {rect.name}", rect);
         return rect.gameObject.AddComponent<CanvasGroup>();
     }
 }

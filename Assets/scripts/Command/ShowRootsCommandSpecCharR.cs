@@ -29,88 +29,71 @@ public sealed class ShowRootsCommandCharR : CommandBase, IStepScopedCommand
 
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
-    public ShowRootsCommandCharR(ShowRootsCommandSpecCharR spec)
-    {
-        _spec = spec;
-    }
+    public ShowRootsCommandCharR(ShowRootsCommandSpecCharR spec) => _spec = spec;
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
         if (!_resolveAttempted)
             ResolveRefs(scope);
-        
+
         if (_targets.Count == 0)
             yield break;
-        
-        SnapOffTargets(_targets);
+
+        SnapOnTargets(_targets);
         _targets.Clear();
     }
 
-    protected override void OnSkip(CommandRunScope scope)
-    {
-        OnCommandCompleted(scope);
-    }
+    protected override void OnSkip(CommandRunScope scope) => OnCommandCompleted(scope);
 
     protected override void OnCommandCompleted(CommandRunScope scope)
     {
         if (!_resolveAttempted)
             ResolveRefs(scope);
-        
+
         if (_targets.Count == 0)
             return;
-        
-        SnapOffTargets(_targets);
-        
+
+        SnapOnTargets(_targets);
         _targets.Clear();
     }
-    
+
     private void ResolveRefs(CommandRunScope scope)
     {
         _resolveAttempted = true;
-        
+        _targets.Clear();
+
         if (_spec.targetMask == CharRigRootLayerMask.None)
             return;
-        
+
         CharRigRootLayerMaskMap.CollectRects((CharacterRigRefs)scope.Refs[_spec.roleKey], _spec.targetMask, _targets);
     }
-    
-    
-    private void SnapOffTargets(List<RectTransform> targets)
+
+    private void SnapOnTargets(List<RectTransform> targets)
     {
         if (targets == null || targets.Count == 0)
             return;
 
         for (int i = 0; i < targets.Count; i++)
         {
-            RectTransform rect = targets[i];
-            if (rect == null)
-                continue;
-
-            CanvasGroup canvasGroup = GetOrAddCanvasGroup(rect);
-            if (canvasGroup == null)
-                continue;
+            CanvasGroup canvasGroup = GetOrAddCanvasGroup(targets[i]);
 
             canvasGroup.DOKill(false);
             canvasGroup.alpha = 1f;
 
             if (_spec.enableInteraction)
             {
-                canvasGroup.interactable   = true;
+                canvasGroup.interactable = true;
                 canvasGroup.blocksRaycasts = true;
             }
         }
     }
-    
+
     private CanvasGroup GetOrAddCanvasGroup(RectTransform rect)
     {
-        if (rect == null)
-            return null;
-
-        CanvasGroup canvasGroup = rect.GetComponent<CanvasGroup>();
-        if (canvasGroup != null)
+        if (rect.TryGetComponent(out CanvasGroup canvasGroup))
             return canvasGroup;
 
-        Debug.LogWarning($"[HideCommandSpecCharR] CanvasGroup missing. Added automatically: {rect.name}", rect);
+        Debug.LogWarning($"[ShowRootsCommandCharR] CanvasGroup missing. Added automatically: {rect.name}", rect);
         return rect.gameObject.AddComponent<CanvasGroup>();
     }
 }

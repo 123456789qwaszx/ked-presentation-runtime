@@ -11,40 +11,54 @@ using UnityEngine.UI;
 )]
 public class SetColorCommandSpecCharR : CommandSpecBase
 {
-    [Header("Target")] public CharacterRigTarget target = CharacterRigTarget.CharacterPortrait_Image;
+    [Header("Target")]
+    public CharacterRigTarget target = CharacterRigTarget.CharacterPortrait_Image;
 
-    [Header("Color")] public Color color = Color.white;
+    [Header("Color")]
+    public Color color = Color.white;
 
     [Tooltip("체크하면 현재 알파(A)는 그대로 두고 색상(RGB)만 변경합니다.")]
     public bool keepAlpha = true;
 }
 
-public class SetColorCommandCharR : CommandBase
+public sealed class SetColorCommandCharR : CommandBase
 {
     private readonly SetColorCommandSpecCharR _spec;
 
-    public SetColorCommandCharR(SetColorCommandSpecCharR spec)
-    {
-        _spec = spec;
-    }
+    private Image _image;
+    private bool _resolveAttempted;
+
+    public SetColorCommandCharR(SetColorCommandSpecCharR spec) => _spec = spec;
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
-        if (!scope.Refs.TryGetCharRigRefs(_spec.roleKey, out var rig))
-            yield break;
+        if (!_resolveAttempted)
+            ResolveRefs(scope);
 
-        Image image = rig.GetGraphic(_spec.target) as Image;
-        if (image == null)
-            yield break;
+        Apply();
+        yield break;
+    }
+
+    private void ResolveRefs(CommandRunScope scope)
+    {
+        _resolveAttempted = true;
+
+        if (!scope.Refs.TryGetCharRigRefs(_spec.roleKey, out CharacterRigRefs rig))
+            return;
+
+        _image = rig.GetGraphic(_spec.target) as Image;
+    }
+
+    private void Apply()
+    {
+        if (_image == null)
+            return;
 
         Color color = _spec.color;
 
         if (_spec.keepAlpha)
-        {
-            Color curAlpha = image.color;
-            color.a = curAlpha.a;
-        }
+            color.a = _image.color.a;
 
-        image.color = color;
+        _image.color = color;
     }
 }

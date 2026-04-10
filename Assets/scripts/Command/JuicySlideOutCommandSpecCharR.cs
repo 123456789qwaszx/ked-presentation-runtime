@@ -24,6 +24,10 @@ public sealed class JuicySlideOutCommandSpecCharR : CommandSpecBase
 
     [Header("Wait")]
     public bool wait = false;
+    
+    [Header("Options")]
+    [Tooltip("체크하면 기존 위치 관련 트윈을 끝내고 committed state에서 시작합니다.")]
+    public bool killTween = true;
 }
 
 public sealed class JuicySlideOutCommandCharR : CommandBase, IStepScopedCommand
@@ -31,8 +35,10 @@ public sealed class JuicySlideOutCommandCharR : CommandBase, IStepScopedCommand
     private readonly JuicySlideOutCommandSpecCharR _spec;
 
     private RectTransform _rect;
+    private Tween _tween;
     private Vector2 _startPos;
     private bool _resolveAttempted;
+    private bool _canCommitFinalState;
 
     public override bool WaitForCompletion => _spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
@@ -41,10 +47,13 @@ public sealed class JuicySlideOutCommandCharR : CommandBase, IStepScopedCommand
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
-        if (!_resolveAttempted) ResolveRefs(scope);
-        if (_rect == null) yield break;
+        if (!_resolveAttempted)
+            ResolveRefs(scope);
 
-        _rect.DOKill(false);
+        if (_spec.killTween)
+            _rect.DOKill(true); // Finish previous motion so this command starts from a committed state.
+        
+        _canCommitFinalState = true;
 
         Vector2 start = _startPos;
         Vector2 dir = GetDir(_spec.to);
@@ -53,57 +62,75 @@ public sealed class JuicySlideOutCommandCharR : CommandBase, IStepScopedCommand
         if (_spec.duration <= 0f)
         {
             _rect.anchoredPosition = end;
+            _canCommitFinalState = false;
+            _rect = null;
+            _tween = null;
             yield break;
         }
 
-        Vector2 slideDir = (end - start);
-        slideDir = slideDir.sqrMagnitude > 0f ? slideDir.normalized : dir;
+        Vector2 slideDir = end - start;
+        slideDir = slideDir.sqrMagnitude > 0f
+            ? slideDir.normalized
+            : dir;
 
-        Tween tween = DOTween.To(
+        _tween = DOTween
+            .To(
                 () => 0f,
                 t =>
                 {
                     float e = DOVirtual.EasedValue(0f, 1f, t, _spec.ease);
                     Vector2 basePos = Vector2.LerpUnclamped(start, end, e);
 
-                    // SlideOut은 초반에 “발사 킥”이 있으면 맛이 남:
-                    // (1-e)^2로 초반만 살리고, sin(πe)로 0..1..0 유지.
                     float bump = JuicyBump_Start(e);
-
                     Vector2 offset = slideDir * (_spec.punch * bump);
+
                     _rect.anchoredPosition = basePos + offset;
                 },
                 1f,
                 _spec.duration
             )
             .SetEase(Ease.Linear)
-            .SetUpdate(true);
+            .SetUpdate(true)
+            .SetTarget(_rect)
+            .OnComplete(() =>
+            {
+                if (!_canCommitFinalState)
+                    return;
+
+                _rect.anchoredPosition = end;
+                _canCommitFinalState = false;
+                _rect = null;
+                _tween = null;
+            });
 
         if (_spec.wait)
-            yield return tween.WaitForCompletion();
+            yield return _tween.WaitForCompletion();
     }
 
     protected override void OnSkip(CommandRunScope scope) => OnCommandCompleted(scope);
 
     protected override void OnCommandCompleted(CommandRunScope scope)
     {
-        if (!_resolveAttempted) ResolveRefs(scope);
-        if (_rect == null) return;
+        if (!_resolveAttempted)
+            ResolveRefs(scope);
 
-        _rect.DOKill();
+        if (!_canCommitFinalState)
+            return;
 
-        // Out은 end로 고정(원하면 제거 가능)
+        _tween?.Kill(false);
+        _rect.DOKill(false);
         _rect.anchoredPosition = _startPos + GetDir(_spec.to) * _spec.distance;
 
+        _canCommitFinalState = false;
         _rect = null;
-        _startPos = default;
+        _tween = null;
     }
 
     private void ResolveRefs(CommandRunScope scope)
     {
         _resolveAttempted = true;
 
-        if (!scope.Refs.TryGetCharRigRefs(_spec.roleKey, out CharacterRigRefs rig) || rig == null)
+        if (!scope.Refs.TryGetCharRigRefs(_spec.roleKey, out CharacterRigRefs rig))
             return;
 
         _rect = rig.GetRect(_spec.target);
@@ -113,9 +140,9 @@ public sealed class JuicySlideOutCommandCharR : CommandBase, IStepScopedCommand
     private static Vector2 GetDir(CharRDirection from) => from switch
     {
         CharRDirection.Right => new Vector2(+1f, 0f),
-        CharRDirection.Up    => new Vector2(0f, +1f),
-        CharRDirection.Down  => new Vector2(0f, -1f),
-        _                    => new Vector2(-1f, 0f),
+        CharRDirection.Up => new Vector2(0f, +1f),
+        CharRDirection.Down => new Vector2(0f, -1f),
+        _ => new Vector2(-1f, 0f),
     };
 
     private static float JuicyBump_Start(float e)

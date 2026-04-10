@@ -4,12 +4,15 @@ using UnityEngine;
 
 [Serializable]
 [CommandMenuHint(
-    "Char Rig", "Set Anchor", Order = -930,
+    "Char Rig",
+    "Set Anchor",
+    Order = -930,
     Sets = new[]
     {
         CommandMenuSets.SetupChar,
         CommandMenuSets.SetupEmotion
-    }, SetOrder = -930)]
+    },
+    SetOrder = -930)]
 public sealed class SetAnchorCommandSpecCharR : CommandSpecBase
 {
     [Header("Target (Anchor only)")]
@@ -24,7 +27,6 @@ public sealed class SetAnchorCommandSpecCharR : CommandSpecBase
 
     [Header("Tuning (optional)")]
     public CharStageTuningSO globalTuning;
-
     public RoleAnchorTuningDBSO roleTuningDb;
 
     [Tooltip("선택: 같은 캐릭터라도 포즈/의상에 따라 보정을 다르게 하고 싶을 때.\n" +
@@ -55,19 +57,16 @@ public sealed class SetAnchorCommandCharR : CommandBase
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (_rect == null)
-            yield break;
-
         Apply();
+        yield break;
     }
 
-    protected override void OnSkip(CommandRunScope scope)
+    protected override void OnSkip(CommandRunScope scope) => OnCommandCompleted(scope);
+
+    protected override void OnCommandCompleted(CommandRunScope scope)
     {
         if (!_resolveAttempted)
             ResolveRefs(scope);
-
-        if (_rect == null)
-            return;
 
         Apply();
     }
@@ -80,7 +79,7 @@ public sealed class SetAnchorCommandCharR : CommandBase
             return;
         }
 
-        Vector2 pos = CharAnchorPlacementResolver.ResolveAnchoredPosition(
+        Vector2 anchoredPosition = CharAnchorPlacementResolver.ResolveAnchoredPosition(
             _rect,
             _spec.preset,
             _spec.baseRatioX,
@@ -88,17 +87,16 @@ public sealed class SetAnchorCommandCharR : CommandBase
             _spec.roleTuningDb,
             _spec.roleKey,
             _spec.poseKey,
-            _spec.offset
-        );
+            _spec.offset);
 
-        _rect.anchoredPosition = pos;
+        _rect.anchoredPosition = anchoredPosition;
     }
 
     private void ResolveRefs(CommandRunScope scope)
     {
         _resolveAttempted = true;
 
-        if (!scope.Refs.TryGetCharRigRefs(_spec.roleKey, out CharacterRigRefs rig) || rig == null)
+        if (!scope.Refs.TryGetCharRigRefs(_spec.roleKey, out CharacterRigRefs rig))
             return;
 
         _rect = rig.GetRect(_spec.target);

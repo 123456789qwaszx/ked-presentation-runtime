@@ -8,11 +8,14 @@ using RectTransform = UnityEngine.RectTransform;
 [CommandMenuHint("Char Rig Motion", "Dip InOut", Order = -735)]
 public sealed class DipInOutCommandSpecCharR : CommandSpecBase
 {
-    [Header("Target")] public CharacterRigTarget target = CharacterRigTarget.Character_Track;
+    [Header("Target")]
+    public CharacterRigTarget target = CharacterRigTarget.Character_Track;
 
-    [Header("Move")] public CharRDirection dir = CharRDirection.Down;
+    [Header("Move")]
+    public CharRDirection dir = CharRDirection.Down;
 
-    [Tooltip("How far to dip (px).")] public float distance = 24f;
+    [Tooltip("How far to dip (px).")]
+    public float distance = 24f;
 
     [Tooltip("Total duration for enter + tiny hold + return. <=0 => snap.")]
     public float duration = 0.4f;
@@ -20,7 +23,12 @@ public sealed class DipInOutCommandSpecCharR : CommandSpecBase
     [Tooltip("Base ease used as a hint. Enter will use an Out-ish ease, return will use an In-ish ease.")]
     public Ease ease = Ease.InCubic;
 
-    [Header("Wait")] public bool wait = false;
+    [Header("Wait")]
+    public bool wait = false;
+    
+    [Header("Options")]
+    [Tooltip("체크하면 기존 위치 관련 트윈을 끝내고 committed state에서 시작합니다.")]
+    public bool killTween = true;
 }
 
 public sealed class DipInOutCommandCharR : CommandBase, IStepScopedCommand
@@ -31,7 +39,7 @@ public sealed class DipInOutCommandCharR : CommandBase, IStepScopedCommand
     private Tween _tween;
     private Vector2 _restPos;
     private bool _resolveAttempted;
-    private bool _ownsTarget;
+    private bool _canCommitFinalState;
 
     public override bool WaitForCompletion => _spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
@@ -43,11 +51,10 @@ public sealed class DipInOutCommandCharR : CommandBase, IStepScopedCommand
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        RectTransform resolved = _rect;
-        ClaimTargetOwnership(resolved);
-
-        if (!HasTargetOwnership())
-            yield break;
+        if (_spec.killTween)
+            _rect.DOKill(true); // Finish previous motion so this command starts from a committed state.
+        
+        _canCommitFinalState = true;
 
         float total = _spec.duration;
         float dist = _spec.distance;
@@ -55,7 +62,9 @@ public sealed class DipInOutCommandCharR : CommandBase, IStepScopedCommand
         if (total <= 0f || Mathf.Approximately(dist, 0f))
         {
             _rect.anchoredPosition = _restPos;
-            ReleaseTargetOwnership();
+            _canCommitFinalState = false;
+            _rect = null;
+            _tween = null;
             yield break;
         }
 
@@ -77,9 +86,6 @@ public sealed class DipInOutCommandCharR : CommandBase, IStepScopedCommand
                 () => 0f,
                 t =>
                 {
-                    if (!HasTargetOwnership())
-                        return;
-
                     if (t <= holdStart)
                     {
                         float localT = tEnter <= 0.0001f ? 1f : t / tEnter;
@@ -106,11 +112,13 @@ public sealed class DipInOutCommandCharR : CommandBase, IStepScopedCommand
             .SetTarget(_rect)
             .OnComplete(() =>
             {
-                if (!HasTargetOwnership())
+                if (!_canCommitFinalState)
                     return;
 
                 _rect.anchoredPosition = rest;
-                ReleaseTargetOwnership();
+                _canCommitFinalState = false;
+                _rect = null;
+                _tween = null;
             });
 
         if (_spec.wait)
@@ -124,38 +132,14 @@ public sealed class DipInOutCommandCharR : CommandBase, IStepScopedCommand
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (!HasTargetOwnership())
+        if (!_canCommitFinalState)
             return;
 
         _tween?.Kill(false);
         _rect.DOKill(false);
         _rect.anchoredPosition = _restPos;
 
-        ReleaseTargetOwnership();
-    }
-
-    private void ClaimTargetOwnership(RectTransform incoming)
-    {
-        if (incoming == null)
-        {
-            _rect = null;
-            _ownsTarget = false;
-            return;
-        }
-
-        incoming.DOKill(false);
-        _rect = incoming;
-        _ownsTarget = true;
-    }
-
-    private bool HasTargetOwnership()
-    {
-        return _ownsTarget && _rect != null;
-    }
-
-    private void ReleaseTargetOwnership()
-    {
-        _ownsTarget = false;
+        _canCommitFinalState = false;
         _rect = null;
         _tween = null;
     }
@@ -168,15 +152,15 @@ public sealed class DipInOutCommandCharR : CommandBase, IStepScopedCommand
             return;
 
         _rect = rig.GetRect(_spec.target);
-        _restPos =  _rect.anchoredPosition;
+        _restPos = _rect.anchoredPosition;
     }
 
     private static Vector2 GetOffset(CharRDirection dir, float distance) => dir switch
     {
         CharRDirection.Right => new Vector2(+distance, 0f),
-        CharRDirection.Up    => new Vector2(0f, +distance),
-        CharRDirection.Down  => new Vector2(0f, -distance),
-        _                    => new Vector2(-distance, 0f),
+        CharRDirection.Up => new Vector2(0f, +distance),
+        CharRDirection.Down => new Vector2(0f, -distance),
+        _ => new Vector2(-distance, 0f),
     };
 
     private static Ease ToOutEase(Ease baseEase) => baseEase switch

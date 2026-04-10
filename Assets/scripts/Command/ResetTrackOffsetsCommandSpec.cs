@@ -5,7 +5,9 @@ using UnityEngine;
 
 [Serializable]
 [CommandMenuHint(
-    "Char Rig", "#ResetTrackOffsets (default = ResetToZero)", Order = -890,
+    "Char Rig",
+    "#ResetTrackOffsets (default = ResetToZero)",
+    Order = -890,
     Sets = new[]
     {
         CommandMenuSets.ResetChar,
@@ -47,34 +49,28 @@ public sealed class ResetTrackOffsetsCommand : CommandBase
     private readonly ResetTrackOffsetsCommandSpec _spec;
 
     private CharacterRigRefs _rigRefs;
-    private RectTransform _targetRect;
+    private RectTransform _rect;
     private bool _resolveAttempted;
 
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
-    public ResetTrackOffsetsCommand(ResetTrackOffsetsCommandSpec spec)
-    {
-        _spec = spec;
-    }
+    public ResetTrackOffsetsCommand(ResetTrackOffsetsCommandSpec spec) => _spec = spec;
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (_rigRefs == null)
-            yield break;
-
         Apply();
+        yield break;
     }
 
-    protected override void OnSkip(CommandRunScope scope)
+    protected override void OnSkip(CommandRunScope scope) => OnCommandCompleted(scope);
+
+    protected override void OnCommandCompleted(CommandRunScope scope)
     {
         if (!_resolveAttempted)
             ResolveRefs(scope);
-
-        if (_rigRefs == null)
-            return;
 
         Apply();
     }
@@ -83,23 +79,20 @@ public sealed class ResetTrackOffsetsCommand : CommandBase
     {
         ResetRequestedTrackLayers();
 
-        if (_targetRect == null)
-            return;
-
-        _targetRect.DOKill(false);
+        _rect.DOKill(true); // Finish previous motion so this command starts from a committed state.
 
         if (_spec.applyFromZero)
-            _targetRect.anchoredPosition = Vector2.zero;
+            _rect.anchoredPosition = Vector2.zero;
 
-        _targetRect.anchoredPosition += _spec.offset;
+        _rect.anchoredPosition += _spec.offset;
     }
 
     private void ResetRequestedTrackLayers()
     {
         bool resetTrack = _spec.resetAllTrackLayers || _spec.resetCharTrack;
-        bool resetMove  = _spec.resetAllTrackLayers || _spec.resetCharTrackMove;
-        bool resetX     = _spec.resetAllTrackLayers || _spec.resetCharTrackX;
-        bool resetY     = _spec.resetAllTrackLayers || _spec.resetCharTrackY;
+        bool resetMove = _spec.resetAllTrackLayers || _spec.resetCharTrackMove;
+        bool resetX = _spec.resetAllTrackLayers || _spec.resetCharTrackX;
+        bool resetY = _spec.resetAllTrackLayers || _spec.resetCharTrackY;
 
         if (resetTrack)
             ResetRect(_rigRefs.Character_Track);
@@ -114,12 +107,9 @@ public sealed class ResetTrackOffsetsCommand : CommandBase
             ResetRect(_rigRefs.Character_Track_Y);
     }
 
-    private void ResetRect(RectTransform rect)
+    private static void ResetRect(RectTransform rect)
     {
-        if (rect == null)
-            return;
-
-        rect.DOKill(false);
+        rect.DOKill(true);  // Finish previous motion so this command starts from a committed state.
         rect.anchoredPosition = Vector2.zero;
     }
 
@@ -127,10 +117,10 @@ public sealed class ResetTrackOffsetsCommand : CommandBase
     {
         _resolveAttempted = true;
 
-        if (!scope.Refs.TryGetCharRigRefs(_spec.roleKey, out CharacterRigRefs rigRefs) || rigRefs == null)
+        if (!scope.Refs.TryGetCharRigRefs(_spec.roleKey, out CharacterRigRefs rigRefs))
             return;
 
         _rigRefs = rigRefs;
-        _targetRect = rigRefs.GetRect(_spec.target);
+        _rect = rigRefs.GetRect(_spec.target);
     }
 }

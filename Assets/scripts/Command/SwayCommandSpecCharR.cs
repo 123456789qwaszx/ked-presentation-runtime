@@ -8,33 +8,47 @@ using UnityEngine.Serialization;
 [CommandMenuHint("Char Rig Motion", "Sway", Order = 100)]
 public sealed class SwayCommandSpecCharR : CommandSpecBase
 {
-    [Header("Targets")] [Tooltip("좌우로 흔들릴 피벗(SwayPivot).")]
+    [Header("Targets")]
+    [Tooltip("좌우로 흔들릴 피벗(SwayPivot).")]
     public CharacterRigTarget target = CharacterRigTarget.CharacterPortrait_SwayPivot;
 
-    [Header("Sway")] [FormerlySerializedAs("power")] [Tooltip("최대 회전 세기(도). NudgeTap의 strength와 같은 감각으로 사용.")]
+    [Header("Sway")]
+    [FormerlySerializedAs("power")]
+    [Tooltip("최대 회전 세기(도). NudgeTap의 strength와 같은 감각으로 사용.")]
     public float strength = 10f;
 
-    [Tooltip("총 길이.")] public float duration = 1f;
+    [Tooltip("총 길이.")]
+    public float duration = 1f;
 
-    [Min(1)] [Tooltip("왕복 횟수. 1이면 한 번 갔다가 돌아오고, 2 이상이면 좌우 반복.")]
+    [Min(1)]
+    [Tooltip("왕복 횟수. 1이면 한 번 갔다가 돌아오고, 2 이상이면 좌우 반복.")]
     public int cycles = 2;
 
-    [FormerlySerializedAs("edgeDamping")] [Tooltip("각 half-swing에서 극단 감속/체류감을 만드는 값. 높을수록 더 오래 눌리듯 멈춘다.")]
+    [FormerlySerializedAs("edgeDamping")]
+    [Tooltip("각 half-swing에서 극단 감속/체류감을 만드는 값. 높을수록 더 오래 눌리듯 멈춘다.")]
     public float damping = 2.2f;
 
-    [FormerlySerializedAs("swingSpeed")] [Tooltip("좌↔우 한 번 이동하는 체감 속도. 1=기본, 높을수록 더 날렵하고 낮을수록 더 둔하다.")]
+    [FormerlySerializedAs("swingSpeed")]
+    [Tooltip("좌↔우 한 번 이동하는 체감 속도. 1=기본, 높을수록 더 날렵하고 낮을수록 더 둔하다.")]
     public float speed = 1f;
 
-    [Tooltip("마지막에 원점으로 복귀할 때 살짝 지나쳤다가 돌아오는 정도. 0이면 비활성.")] [Range(0f, 1f)]
+    [Tooltip("마지막에 원점으로 복귀할 때 살짝 지나쳤다가 돌아오는 정도. 0이면 비활성.")]
+    [Range(0f, 1f)]
     public float finalOvershoot = 0.22f;
 
-    [Header("Style")] [Tooltip("시작 전에 반대 방향으로 살짝 당기는 양(도). 0이면 비활성.")]
+    [Header("Style")]
+    [Tooltip("시작 전에 반대 방향으로 살짝 당기는 양(도). 0이면 비활성.")]
     public float anticipation = 0f;
 
     [Tooltip("흔들리는 시작 방향. true면 +방향부터, false면 -방향부터.")]
     public bool startPositive = true;
 
-    [Header("Wait")] public bool wait = false;
+    [Header("Wait")]
+    public bool wait = false;
+    
+    [Header("Options")]
+    [Tooltip("체크하면 기존 위치 관련 트윈을 끝내고 committed state에서 시작합니다.")]
+    public bool killTween = true;
 }
 
 public sealed class SwayCommandCharR : CommandBase, IStepScopedCommand
@@ -42,34 +56,35 @@ public sealed class SwayCommandCharR : CommandBase, IStepScopedCommand
     private readonly SwayCommandSpecCharR _spec;
 
     private RectTransform _rect;
+    private Tween _tween;
     private float _originSwayRotationZ;
     private float _currentSwayRotationZ;
     private bool _resolveAttempted;
-    private Tween _tween;
+    private bool _canCommitFinalState;
 
     public override bool WaitForCompletion => _spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
-    public SwayCommandCharR(SwayCommandSpecCharR spec)
-    {
-        _spec = spec;
-    }
+    public SwayCommandCharR(SwayCommandSpecCharR spec) => _spec = spec;
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (_rect == null)
-            yield break;
-
-        _rect.DOKill(true);
+        if (_spec.killTween)
+            _rect.DOKill(true); // Finish previous motion so this command starts from a committed state.
+        
         _tween?.Kill(false);
         _tween = null;
+        _canCommitFinalState = true;
 
         if (_spec.duration <= 0f || Mathf.Approximately(_spec.strength, 0f))
         {
             SnapToOrigin();
+            _canCommitFinalState = false;
+            _rect = null;
+            _tween = null;
             yield break;
         }
 
@@ -88,10 +103,6 @@ public sealed class SwayCommandCharR : CommandBase, IStepScopedCommand
 
         bool hasAnticipation = anticipationNormalized > 0.0001f;
 
-        // anticipation이 있으면:
-        // 0 -> -a -> +1 -> -1 -> +1 -> ... -> 0
-        // 없으면:
-        // 0 -> +1 -> -1 -> +1 -> ... -> 0
         int pointCount = hasAnticipation
             ? (cycles * 2 + 2)
             : (cycles * 2 + 1);
@@ -99,13 +110,11 @@ public sealed class SwayCommandCharR : CommandBase, IStepScopedCommand
         int segmentCount = pointCount - 1;
         int lastSegmentIndex = segmentCount - 1;
 
-        _tween = DOTween.To(
+        _tween = DOTween
+            .To(
                 () => 0f,
                 t =>
                 {
-                    if (_rect == null)
-                        return;
-
                     float u = Mathf.Clamp01(t / totalDuration);
 
                     float pathT = u * segmentCount;
@@ -117,9 +126,16 @@ public sealed class SwayCommandCharR : CommandBase, IStepScopedCommand
                     if (segmentIndex == lastSegmentIndex && finalOvershoot > 0f)
                         shapedT = ApplyFinalOvershoot(shapedT, finalOvershoot);
 
-                    float from = GetWavePointWithAnticipation(segmentIndex, pointCount, anticipationNormalized,
+                    float from = GetWavePointWithAnticipation(
+                        segmentIndex,
+                        pointCount,
+                        anticipationNormalized,
                         hasAnticipation);
-                    float to = GetWavePointWithAnticipation(segmentIndex + 1, pointCount, anticipationNormalized,
+
+                    float to = GetWavePointWithAnticipation(
+                        segmentIndex + 1,
+                        pointCount,
+                        anticipationNormalized,
                         hasAnticipation);
 
                     float wave = Mathf.LerpUnclamped(from, to, shapedT);
@@ -135,14 +151,57 @@ public sealed class SwayCommandCharR : CommandBase, IStepScopedCommand
             .SetTarget(_rect)
             .SetUpdate(true)
             .OnComplete(() =>
-                {
-                    SnapToOrigin();
-                    _rect = null;
-                }
-            );
+            {
+                if (!_canCommitFinalState)
+                    return;
+
+                SnapToOrigin();
+                _canCommitFinalState = false;
+                _rect = null;
+                _tween = null;
+            });
 
         if (_spec.wait)
             yield return _tween.WaitForCompletion();
+    }
+
+    protected override void OnSkip(CommandRunScope scope) => OnCommandCompleted(scope);
+
+    protected override void OnCommandCompleted(CommandRunScope scope)
+    {
+        if (!_resolveAttempted)
+            ResolveRefs(scope);
+
+        if (!_canCommitFinalState)
+            return;
+
+        _tween?.Kill(false);
+        _rect.DOKill(false);
+
+        SnapToOrigin();
+
+        _canCommitFinalState = false;
+        _rect = null;
+        _tween = null;
+    }
+
+    private void ResolveRefs(CommandRunScope scope)
+    {
+        _resolveAttempted = true;
+
+        if (!scope.Refs.TryGetCharRigRefs(_spec.roleKey, out CharacterRigRefs rig))
+            return;
+
+        _rect = rig.GetRect(_spec.target);
+        _originSwayRotationZ = NormalizeAngle(_rect.localEulerAngles.z);
+        _currentSwayRotationZ = _originSwayRotationZ;
+        SetLocalEulerZ(_rect, _currentSwayRotationZ);
+    }
+
+    private void SnapToOrigin()
+    {
+        _currentSwayRotationZ = _originSwayRotationZ;
+        SetLocalEulerZ(_rect, _originSwayRotationZ);
     }
 
     private static float GetWavePointWithAnticipation(
@@ -153,16 +212,6 @@ public sealed class SwayCommandCharR : CommandBase, IStepScopedCommand
     {
         if (!hasAnticipation)
             return GetWavePoint(pointIndex, pointCount);
-
-        // hasAnticipation == true
-        // index:
-        // 0 = 0
-        // 1 = -a
-        // 2 = +1
-        // 3 = -1
-        // 4 = +1
-        // ...
-        // last = 0
 
         if (pointIndex <= 0)
             return 0f;
@@ -176,53 +225,6 @@ public sealed class SwayCommandCharR : CommandBase, IStepScopedCommand
         return (pointIndex % 2 == 0) ? 1f : -1f;
     }
 
-    protected override void OnSkip(CommandRunScope scope)
-    {
-        OnCommandCompleted(scope);
-    }
-
-    protected override void OnCommandCompleted(CommandRunScope scope)
-    {
-        if (!_resolveAttempted)
-            ResolveRefs(scope);
-
-        if (_rect == null)
-            return;
-
-        _tween?.Kill(false);
-        _rect.DOKill(true);
-
-        SnapToOrigin();
-
-        _tween = null;
-        _rect = null;
-    }
-
-    private void ResolveRefs(CommandRunScope scope)
-    {
-        _resolveAttempted = true;
-
-        if (!scope.Refs.TryGetCharRigRefs(_spec.roleKey, out CharacterRigRefs rig) || rig == null)
-            return;
-
-        _rect = rig.GetRect(_spec.target);
-        if (_rect == null)
-            return;
-
-        _originSwayRotationZ = NormalizeAngle(_rect.localEulerAngles.z);
-        _currentSwayRotationZ = _originSwayRotationZ;
-        SetLocalEulerZ(_rect, _currentSwayRotationZ);
-    }
-
-    private void SnapToOrigin()
-    {
-        if (_rect == null)
-            return;
-
-        _currentSwayRotationZ = _originSwayRotationZ;
-        SetLocalEulerZ(_rect, _originSwayRotationZ);
-    }
-
     private static float GetWavePoint(int pointIndex, int pointCount)
     {
         if (pointIndex <= 0)
@@ -234,11 +236,6 @@ public sealed class SwayCommandCharR : CommandBase, IStepScopedCommand
         return (pointIndex % 2 == 1) ? 1f : -1f;
     }
 
-    /// <summary>
-    /// 각 half-swing 내부에서만 손맛을 만든다.
-    /// - speed: 좌↔우 이동 체감 속도
-    /// - damping: 극단 감속/체류감
-    /// </summary>
     private static float ShapeHalfSwing(float t, float damping, float speed)
     {
         t = Mathf.Clamp01(t);
@@ -295,10 +292,6 @@ public sealed class SwayCommandCharR : CommandBase, IStepScopedCommand
         return Mathf.Lerp(t, holdEase, blend);
     }
 
-    /// <summary>
-    /// 마지막 원점 복귀에서만 살짝 지나쳤다가 되돌아오게 한다.
-    /// 0 -> 1 진행을 유지하면서 중간에 1을 조금 넘는다.
-    /// </summary>
     private static float ApplyFinalOvershoot(float t, float overshootAmount)
     {
         t = Mathf.Clamp01(t);
@@ -321,9 +314,6 @@ public sealed class SwayCommandCharR : CommandBase, IStepScopedCommand
 
     private static void SetLocalEulerZ(RectTransform rect, float z)
     {
-        if (rect == null)
-            return;
-
         rect.localRotation = Quaternion.Euler(0f, 0f, z);
     }
 

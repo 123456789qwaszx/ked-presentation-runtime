@@ -20,7 +20,8 @@ public sealed class BounceArcInCommandSpecCharR : CommandSpecBase
     public Ease ease = Ease.OutCubic;
 
     [Header("Hop (main arcs)")]
-    [Min(1)] public int hopCount = 3;
+    [Min(1)]
+    public int hopCount = 3;
 
     [Tooltip("Arc height in pixels (how high it jumps).")]
     public float arcHeight = 40f;
@@ -43,6 +44,10 @@ public sealed class BounceArcInCommandSpecCharR : CommandSpecBase
 
     [Header("Wait")]
     public bool wait = false;
+    
+    [Header("Options")]
+    [Tooltip("체크하면 기존 위치 관련 트윈을 끝내고 committed state에서 시작합니다.")]
+    public bool killTween = true;
 }
 
 public sealed class BounceArcInCommandCharR : CommandBase, IStepScopedCommand
@@ -51,9 +56,9 @@ public sealed class BounceArcInCommandCharR : CommandBase, IStepScopedCommand
 
     private RectTransform _rect;
     private Tween _tween;
-    private bool _ownsTarget;
     private Vector2 _destPos;
     private bool _resolveAttempted;
+    private bool _canCommitFinalState;
 
     public override bool WaitForCompletion => _spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
@@ -65,11 +70,11 @@ public sealed class BounceArcInCommandCharR : CommandBase, IStepScopedCommand
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        RectTransform resolved = _rect;
-        ClaimTargetOwnership(resolved);
-
-        if (!HasTargetOwnership())
-            yield break;
+        
+        if (_spec.killTween)
+            _rect.DOKill(true); // Finish previous motion so this command starts from a committed state.
+        
+        _canCommitFinalState = true;
 
         Vector2 dest = _destPos;
         Vector2 fromDir = GetFromDir(_spec.from);
@@ -78,7 +83,9 @@ public sealed class BounceArcInCommandCharR : CommandBase, IStepScopedCommand
         if (_spec.duration <= 0f || _spec.hopCount <= 0)
         {
             _rect.anchoredPosition = dest;
-            ReleaseTargetOwnership();
+            _canCommitFinalState = false;
+            _rect = null;
+            _tween = null;
             yield break;
         }
 
@@ -97,7 +104,7 @@ public sealed class BounceArcInCommandCharR : CommandBase, IStepScopedCommand
         float mainDist = totalDist - lastDist;
 
         int mainHops = Mathf.Max(0, hops - 1);
-        float mainSegLen = mainHops > 0 ? (mainDist / mainHops) : 0f;
+        float mainSegLen = mainHops > 0 ? mainDist / mainHops : 0f;
 
         float mainH = _spec.arcHeight;
         float mainAirW = Mathf.Clamp(_spec.airWidth, 0.05f, 1f);
@@ -109,13 +116,11 @@ public sealed class BounceArcInCommandCharR : CommandBase, IStepScopedCommand
 
         _rect.anchoredPosition = start;
 
-        _tween = DOTween.To(
+        _tween = DOTween
+            .To(
                 () => 0f,
                 t =>
                 {
-                    if (!HasTargetOwnership())
-                        return;
-
                     float e = DOVirtual.EasedValue(0f, 1f, t, _spec.ease);
 
                     float hf = e * hops;
@@ -159,11 +164,13 @@ public sealed class BounceArcInCommandCharR : CommandBase, IStepScopedCommand
             .SetTarget(_rect)
             .OnComplete(() =>
             {
-                if (!HasTargetOwnership())
+                if (!_canCommitFinalState)
                     return;
 
                 _rect.anchoredPosition = dest;
-                ReleaseTargetOwnership();
+                _canCommitFinalState = false;
+                _rect = null;
+                _tween = null;
             });
 
         if (_spec.wait)
@@ -177,38 +184,14 @@ public sealed class BounceArcInCommandCharR : CommandBase, IStepScopedCommand
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (!HasTargetOwnership())
+        if (!_canCommitFinalState)
             return;
 
         _tween?.Kill(false);
         _rect.DOKill(false);
         _rect.anchoredPosition = _destPos;
 
-        ReleaseTargetOwnership();
-    }
-
-    private void ClaimTargetOwnership(RectTransform incoming)
-    {
-        if (incoming == null)
-        {
-            _rect = null;
-            _ownsTarget = false;
-            return;
-        }
-
-        incoming.DOKill(false);
-        _rect = incoming;
-        _ownsTarget = true;
-    }
-
-    private bool HasTargetOwnership()
-    {
-        return _ownsTarget && _rect != null;
-    }
-
-    private void ReleaseTargetOwnership()
-    {
-        _ownsTarget = false;
+        _canCommitFinalState = false;
         _rect = null;
         _tween = null;
     }
@@ -217,19 +200,19 @@ public sealed class BounceArcInCommandCharR : CommandBase, IStepScopedCommand
     {
         _resolveAttempted = true;
 
-        if (!scope.Refs.TryGetCharRigRefs(_spec.roleKey, out CharacterRigRefs rig) || rig == null)
+        if (!scope.Refs.TryGetCharRigRefs(_spec.roleKey, out CharacterRigRefs rig))
             return;
 
         _rect = rig.GetRect(_spec.target);
-        _destPos = _rect != null ? _rect.anchoredPosition : default;
+        _destPos = _rect.anchoredPosition;
     }
 
     private static Vector2 GetFromDir(CharRDirection from) => from switch
     {
         CharRDirection.Right => new Vector2(+1f, 0f),
-        CharRDirection.Up    => new Vector2(0f, +1f),
-        CharRDirection.Down  => new Vector2(0f, -1f),
-        _                    => new Vector2(-1f, 0f),
+        CharRDirection.Up => new Vector2(0f, +1f),
+        CharRDirection.Down => new Vector2(0f, -1f),
+        _ => new Vector2(-1f, 0f),
     };
 
     private static float HopAdvance(float u, float segLen, float airW)
@@ -243,9 +226,9 @@ public sealed class BounceArcInCommandCharR : CommandBase, IStepScopedCommand
         float preLen = groundLen * 0.5f;
         float postLen = groundLen * 0.5f;
 
-        float preT = groundLen <= 0f ? 0f : (preLen / segLen);
+        float preT = groundLen <= 0f ? 0f : preLen / segLen;
         float airT = airW;
-        float postT = groundLen <= 0f ? 0f : (postLen / segLen);
+        float postT = groundLen <= 0f ? 0f : postLen / segLen;
 
         float uPreEnd = preT;
         float uAirEnd = preT + airT;
@@ -259,13 +242,13 @@ public sealed class BounceArcInCommandCharR : CommandBase, IStepScopedCommand
         if (u < uAirEnd && airT > 0f)
         {
             float k = (u - uPreEnd) / airT;
-            return preLen + (airLen * k);
+            return preLen + airLen * k;
         }
 
         if (postT > 0f)
         {
             float k = (u - uAirEnd) / postT;
-            return preLen + airLen + (postLen * Mathf.Clamp01(k));
+            return preLen + airLen + postLen * Mathf.Clamp01(k);
         }
 
         return segLen;
