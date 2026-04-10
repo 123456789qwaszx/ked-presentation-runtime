@@ -83,8 +83,8 @@ public sealed class YarnBridgePlaybackDriver : MonoBehaviour
 
     public void PlayCollected()
     {
-        if (_collectedSpecs.Count == 0)
-            return;
+        // if (_collectedSpecs.Count == 0)
+        //     return;
 
         var specs = new List<CommandSpecBase>(_collectedSpecs);
         _collectedSpecs.Clear();
@@ -102,6 +102,9 @@ public sealed class YarnBridgePlaybackDriver : MonoBehaviour
         if (spec == null)
             return;
 
+        if (_pendingImmediateWaitCount <= 0)
+            return;
+        
         bool shouldWait = _pendingImmediateWaitCount > 0;
 
         switch (spec)
@@ -144,6 +147,14 @@ public sealed class YarnBridgePlaybackDriver : MonoBehaviour
 
             case TransitionCommandSpec transition:
                 transition.wait = shouldWait;
+                break;
+            
+            case SwayCommandSpecCharR swayCommandSpecCharR:
+                swayCommandSpecCharR.wait = shouldWait;
+                break;
+            
+            default:
+                Debug.LogWarning("[YarnBridgePlaybackDriver] waiting for spec char: " + spec.GetType().Name);
                 break;
         }
 
