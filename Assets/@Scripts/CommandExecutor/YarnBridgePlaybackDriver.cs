@@ -15,11 +15,9 @@ public sealed class YarnBridgePlaybackDriver : MonoBehaviour
 
     public void Initialize(
         CommandExecutor executor,
-        PresentationPlaybackSettings settings)
+        PresentationSessionContext context)
     {
         _executor = executor;
-
-        PresentationSessionContext context = new(settings);
         _scope = new CommandRunScope(context);
     }
 

@@ -29,6 +29,8 @@ public sealed class HideRootLayersCommandCharR : CommandBase
     private bool _resolveAttempted;
 
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
+    
+    //public override bool WaitForCompletion => true;
 
     public HideRootLayersCommandCharR(HideRootLayersCommandSpecCharR spec) => _spec = spec;
 
@@ -71,7 +73,7 @@ public sealed class HideRootLayersCommandCharR : CommandBase
     private void ResolveRefs(CommandRunScope scope)
     {
         _resolveAttempted = true;
-        _targets.Clear();
+        //_targets.Clear();
 
         if (_spec.targetMask == CharRigRootLayerMask.None)
             return;

@@ -58,7 +58,16 @@ public sealed class PresentationSessionContext
     public bool IsSkipping => _playback.IsSkipping;
     public float TimeScale => _playback.TimeScale;
     public float AutoAdvanceDelay => _playback.AutoAdvanceDelay;
-    
+    public bool IsRollbackSeeking { get; private set; }
+    public void EnterRollbackSeek()
+    {
+        IsRollbackSeeking = true;
+    }
+
+    public void ExitRollbackSeek()
+    {
+        IsRollbackSeeking = false;
+    }
     
     /// <summary>
     /// Must be called only by the CommandRunScope to toggle busy state.
@@ -77,7 +86,8 @@ public sealed class PresentationSessionContext
     {
         _isNodeBusy      = false;
         _isBlockingInput = false;
-        _closeRequested  = false;
+        _closeRequested = false;
+        IsRollbackSeeking = false;
     }
 
     public bool IsDebugStartEnabled => _playback.enableDebugStart;

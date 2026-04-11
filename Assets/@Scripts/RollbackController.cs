@@ -1,5 +1,4 @@
 using System;
-using UnityEngine;
 
 public sealed class RollbackController : IDisposable
 {
@@ -9,6 +8,7 @@ public sealed class RollbackController : IDisposable
     private readonly IRollbackDialogueRestarter _restarter;
     private readonly DialogueAdvanceDispatcher _dispatcher;
     private readonly PresentationSessionBridge _presentationSessionBridge;
+    private readonly PresentationSessionContext _presentationSessionContext;
 
     public bool IsSeeking => _state.IsSeeking;
     public bool CanRollback => !_state.IsSeeking && _history.CanRollbackOneStep();
@@ -19,7 +19,8 @@ public sealed class RollbackController : IDisposable
         YarnLineLifecycleBridge bridge,
         IRollbackDialogueRestarter restarter,
         DialogueAdvanceDispatcher dispatcher,
-        PresentationSessionBridge presentationSessionBridge)
+        PresentationSessionBridge presentationSessionBridge,
+        PresentationSessionContext presentationSessionContext)
     {
         _state = state;
         _history = history;
@@ -27,6 +28,7 @@ public sealed class RollbackController : IDisposable
         _restarter = restarter;
         _dispatcher = dispatcher;
         _presentationSessionBridge = presentationSessionBridge;
+        _presentationSessionContext = presentationSessionContext;
 
         _bridge.LineStart -= EndSeekBeforeTargetLineDisplays;
         _bridge.LineStart += EndSeekBeforeTargetLineDisplays;
@@ -45,6 +47,7 @@ public sealed class RollbackController : IDisposable
             target.presentationStepIndex
         );
 
+
         if (!jumped)
             return false;
 
@@ -53,6 +56,7 @@ public sealed class RollbackController : IDisposable
         _history.TrimAfterVisitedIndex(target.visitedIndex - 1);
 
         _state.BeginRollback(target);
+        _presentationSessionContext.EnterRollbackSeek();
         _restarter.RestartNode(target.nodeName);
         return true;
     }
@@ -65,6 +69,7 @@ public sealed class RollbackController : IDisposable
         if (_state.IsTarget(meta.nodeName, meta.lineId))
         {
             _state.EndRollback();
+            _presentationSessionContext.ExitRollbackSeek();
             return;
         }
 

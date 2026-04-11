@@ -11,7 +11,8 @@ public class VnAppBootstrap : MonoBehaviour
     private readonly PresentationPlaybackSettings _presentationContextSettings = new ();
     private readonly VnUxState _vnUxState = new ();
     private readonly VnPlaybackSettings _vnPlaybackSettings = new ();
-    private readonly EpisodePlayState _episodePlayState = new (); 
+    private readonly EpisodePlayState _episodePlayState = new ();
+    private PresentationSessionContext _context;
     
     [Header("Sound")]
     [SerializeField] private AudioSystem audioSystem;
@@ -64,6 +65,8 @@ public class VnAppBootstrap : MonoBehaviour
     
     private void Awake()
     {
+        _context = new PresentationSessionContext( _presentationContextSettings );
+        
         BootstrapAudioSystem();
         BootstrapUIManager();
         
@@ -127,7 +130,7 @@ public class VnAppBootstrap : MonoBehaviour
         commandExecutor.Initialize(factory);
         
         
-        PresentationSession presentationSession = new PresentationSession(gatePlanner, gateAdvancer, commandExecutor, _presentationContextSettings);
+        PresentationSession presentationSession = new PresentationSession(gatePlanner, gateAdvancer, commandExecutor, _context);
         
         presentationSessionEntry.Initialize(presentationSession, routeCatalogSo, _presentationContextSettings);
     }
@@ -150,7 +153,7 @@ public class VnAppBootstrap : MonoBehaviour
         YarnCommandRegistry yarnCommandRegistry = new YarnCommandRegistry(dialogueRunner, yarnUIBridge, vnRuntimeBridge, dialogueBoxRouteState);
         yarnCommandRegistry.Initialize();
 
-        yarnBridgePlaybackDriver.Initialize(commandExecutor, _presentationContextSettings);
+        yarnBridgePlaybackDriver.Initialize(commandExecutor, _context);
         yarnCommandBridge.Initialize(dialogueRunner, yarnBridgePlaybackDriver);
         yarnLineRuntimePresenter.Initialize(dialogueRunner, yarnUIBridge, dialogueBoxRouteState, yarnBridgePlaybackDriver, audioSystem);
     }
@@ -208,7 +211,8 @@ public class VnAppBootstrap : MonoBehaviour
             yarnLineLifecycleBridge,
             episodePlayer,
             dialogueAdvanceDispatcher,
-            _presentationSessionBridge
+            _presentationSessionBridge,
+            _context
         );
         
         CreateRollbackHistoryDebugTool(_rollbackHistory, rollbackState);

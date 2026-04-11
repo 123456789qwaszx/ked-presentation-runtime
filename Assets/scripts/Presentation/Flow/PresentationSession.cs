@@ -37,13 +37,13 @@ public sealed class PresentationSession
         StepGatePlanBuilder gatePlanner,
         StepGateAdvancer gateAdvancer,
         CommandExecutor executor,
-        PresentationPlaybackSettings modes
+        PresentationSessionContext presentationSessionContext
     )
     {
         _gatePlanner = gatePlanner;
         _gateAdvancer = gateAdvancer;
         _executor = executor;
-        _context = new PresentationSessionContext( modes );
+        _context = presentationSessionContext;
     }
 
     

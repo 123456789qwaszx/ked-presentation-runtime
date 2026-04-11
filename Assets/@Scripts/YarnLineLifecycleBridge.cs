@@ -150,8 +150,6 @@ public sealed class YarnLineLifecycleBridge : ActionMarkupHandler
     {
         LineStart?.Invoke(CurrentMeta);
     }
-
-    
     
     // Per-character hook
     public override YarnTask OnCharacterWillAppear(

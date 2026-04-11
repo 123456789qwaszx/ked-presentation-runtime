@@ -30,7 +30,10 @@ public sealed class CommandRunScope
     public bool IsAutoMode => _context != null && _context.IsAutoMode;
     public float TimeScale => _context != null ? _context.TimeScale : 1f;
     public bool IsNodeBusy => _context != null && _context.IsNodeBusy;
-
+    public bool IsRollbackSeeking => _context != null && _context.IsRollbackSeeking;
+    public bool ShouldRespectCommandWait => _context == null || !_context.IsRollbackSeeking;
+    public bool ShouldCompressTime => IsRollbackSeeking;
+    
     /// <summary>
     /// Must be called only by the Executor.
     /// </summary>

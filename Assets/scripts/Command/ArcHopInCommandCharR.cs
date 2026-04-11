@@ -69,7 +69,6 @@ public sealed class ArcHopInCommandCharR : CommandBase, IStepScopedCommand
     {
         if (!_resolveAttempted)
             ResolveRefs(scope);
-
         
         if (_spec.killTween)
             _rect.DOKill(true); // Finish previous motion so this command starts from a committed state.
@@ -186,7 +185,7 @@ public sealed class ArcHopInCommandCharR : CommandBase, IStepScopedCommand
     {
         if (!_resolveAttempted)
             ResolveRefs(scope);
-
+        
         if (!_canCommitFinalState || _rect == null)
             return;
 

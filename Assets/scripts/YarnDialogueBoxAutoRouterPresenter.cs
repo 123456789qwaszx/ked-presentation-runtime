@@ -39,7 +39,7 @@ public sealed class YarnDialogueBoxAutoRouterPresenter : DialoguePresenterBase
     {
         _audioSystem?.Voice.Stop();
         
-        Debug.Log($"[Voice] lineId={line.TextID}, asset={line.Asset}");
+        //Debug.Log($"[Voice] lineId={line.TextID}, asset={line.Asset}");
         if (line.Asset is AudioClip clip)
         {
             _audioSystem?.Voice.Play(clip);

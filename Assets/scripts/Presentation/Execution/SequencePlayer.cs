@@ -12,6 +12,7 @@ public sealed class SequencePlayer
 {
     private readonly MonoBehaviour _host;
     private readonly List<IEnumerator> _activeBackgroundRoutines = new();
+    
 
     public SequencePlayer(MonoBehaviour host)
     {
@@ -66,8 +67,8 @@ public sealed class SequencePlayer
                 Trace($"{tag} Execute() returned null: {name}");
                 continue;
             }
-
-            if (command.WaitForCompletion)
+            
+            if (command.WaitForCompletion && scope.ShouldRespectCommandWait)
             {
                 while (Valid() && !scope.Token.IsCancellationRequested)
                 {

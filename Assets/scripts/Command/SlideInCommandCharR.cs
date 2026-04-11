@@ -55,6 +55,15 @@ public sealed class SlideInCommandCharR : CommandBase, IStepScopedCommand
             _rect.DOKill(true); // Finish previous motion so this command starts from a committed state.
         
         _canCommitFinalState = true;
+        
+        if (scope.IsRollbackSeeking)
+        {
+            _rect.anchoredPosition = _destPos;
+            _canCommitFinalState = false;
+            _rect = null;
+            _tween = null;
+            yield break;
+        }
 
         Vector2 dest = _destPos;
         Vector2 fromDir = GetDir(_spec.direction);

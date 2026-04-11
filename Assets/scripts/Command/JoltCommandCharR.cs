@@ -8,35 +8,28 @@ using RectTransform = UnityEngine.RectTransform;
 [CommandMenuHint("Char Rig Motion", "Jolt", Order = -740)]
 public sealed class JoltCommandSpecCharR : CommandSpecBase
 {
-    [Header("Target")]
-    public CharacterRigTarget target = CharacterRigTarget.Character_Track;
+    [Header("Target")] public CharacterRigTarget target = CharacterRigTarget.Character_Track;
 
-    [Header("Nudge")]
-    [Tooltip("How far the first tap pushes in the selected direction (px).")]
+    [Header("Nudge")] [Tooltip("How far the first tap pushes in the selected direction (px).")]
     public float strength = 22f;
 
-    [Tooltip("Direction of the nudge.")]
-    public CharRDirection direction = CharRDirection.Right;
+    [Tooltip("Direction of the nudge.")] public CharRDirection direction = CharRDirection.Right;
 
     [Tooltip("Total duration for the whole nudge.")]
     public float duration = 0.88f;
 
-    [Min(1)]
-    [Tooltip("How many oscillations (back-and-forth) happen. 2~4 feels 'tap tap'.")]
+    [Min(1)] [Tooltip("How many oscillations (back-and-forth) happen. 2~4 feels 'tap tap'.")]
     public int taps = 3;
 
     [Tooltip("Damping factor. Bigger = dies out faster. (3~9 recommended)")]
     public float damping = 6f;
 
-    [Header("Style")]
-    [Tooltip("Tiny anticipation before the main tap (in px). 0 disables.")]
+    [Header("Style")] [Tooltip("Tiny anticipation before the main tap (in px). 0 disables.")]
     public float anticipation = 3f;
 
-    [Header("Wait")]
-    public bool wait = false;
-    
-    [Header("Options")]
-    public bool killTween = true;
+    [Header("Wait")] public bool wait = false;
+
+    [Header("Options")] public bool killTween = true;
 }
 
 public sealed class JoltCommandCharR : CommandBase, IStepScopedCommand
@@ -59,10 +52,22 @@ public sealed class JoltCommandCharR : CommandBase, IStepScopedCommand
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
+        if (_rect == null)
+            yield break;
+
         if (_spec.killTween)
-            _rect.DOKill(true); // Finish previous motion so this command starts from a committed state.
-        
+            _rect.DOKill(true);  // Finish previous motion so this command starts from a committed state.
+
         _canCommitFinalState = true;
+
+        if (scope.IsRollbackSeeking)
+        {
+            _rect.anchoredPosition = _restPos;
+            _canCommitFinalState = false;
+            _rect = null;
+            _tween = null;
+            yield break;
+        }
 
         if (_spec.duration <= 0f || Mathf.Approximately(_spec.strength, 0f))
         {
@@ -135,7 +140,7 @@ public sealed class JoltCommandCharR : CommandBase, IStepScopedCommand
     {
         if (!_resolveAttempted)
             ResolveRefs(scope);
-        
+
         if (!_canCommitFinalState || _rect == null)
             return;
 

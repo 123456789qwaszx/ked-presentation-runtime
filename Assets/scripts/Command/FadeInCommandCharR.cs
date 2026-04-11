@@ -70,6 +70,7 @@ public sealed class FadeInCommandCharR : CommandBase, IStepScopedCommand
             if (cg == null)
                 continue;
 
+            //rect.DOKill(true);
             cg.DOKill(true);
 
             _pending++;
