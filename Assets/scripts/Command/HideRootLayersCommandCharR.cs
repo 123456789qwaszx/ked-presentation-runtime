@@ -10,7 +10,7 @@ using UnityEngine;
     "#Hide Root Layers",
     Order = -940
 )]
-public sealed class HideRootsCommandSpecCharR : CommandSpecBase
+public sealed class HideRootLayersCommandSpecCharR : CommandSpecBase
 {
     public CharRigRootLayerMask targetMask = CharRigRootLayerMask.CharacterPortraitOverlay_Root
                                              | CharRigRootLayerMask.CharacterEmoji_Root
@@ -21,16 +21,16 @@ public sealed class HideRootsCommandSpecCharR : CommandSpecBase
     public bool disableInteraction = true;
 }
 
-public sealed class HideRootsCommandCharR : CommandBase
+public sealed class HideRootLayersCommandCharR : CommandBase
 {
-    private readonly HideRootsCommandSpecCharR _spec;
+    private readonly HideRootLayersCommandSpecCharR _spec;
 
     private readonly List<RectTransform> _targets = new();
     private bool _resolveAttempted;
 
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
-    public HideRootsCommandCharR(HideRootsCommandSpecCharR spec) => _spec = spec;
+    public HideRootLayersCommandCharR(HideRootLayersCommandSpecCharR spec) => _spec = spec;
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {

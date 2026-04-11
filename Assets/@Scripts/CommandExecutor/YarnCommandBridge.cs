@@ -88,7 +88,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
 
     private void SwayRotateTo(string roleKey, int angle)
     {
-        var spec = new SwayRotateToCommandSpecCharR()
+        var spec = new PivotRotateToCommandSpecCharR()
         {
             roleKey = roleKey,
             degree = angle
@@ -99,7 +99,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
 
     private void SlideInSway(string roleKey)
     {
-        var spec = new HideRootsCommandSpecCharR
+        var spec = new HideRootLayersCommandSpecCharR
         { 
                 roleKey = roleKey,
                 targetMask = CharRigRootLayerMask.CharacterPortrait_Root
@@ -112,7 +112,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
             duration = 0.28f
         };
 
-        var spec2 = new JuicySlideInCommandSpecCharR
+        var spec2 = new SlideInCommandSpecCharR
         {
             roleKey = roleKey,
             distance = 550f,
@@ -165,7 +165,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
             seconds = 0.4f,
         };
 
-        var spec8 = new NudgeTapCommandSpecCharR()
+        var spec8 = new JoltCommandSpecCharR()
         {
             roleKey = roleKey,
             target = CharacterRigTarget.Character_Track,
@@ -416,14 +416,14 @@ public sealed class YarnCommandBridge : MonoBehaviour
     {
         CharRDirection dir = ParseSlideDirection(direction, CharRDirection.Right);
 
-        var juicySlideIn = new JuicySlideInCommandSpecCharR
+        var juicySlideIn = new SlideInCommandSpecCharR
         {
             roleKey = roleKey,
             target = CharacterRigTarget.Character_Track_X,
             direction = dir
         };
 
-        var spec = new NudgeTapCommandSpecCharR
+        var spec = new JoltCommandSpecCharR
         {
             roleKey = roleKey,
             target = CharacterRigTarget.Character_Track_Y,
@@ -443,7 +443,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
     {
         CharRDirection dir = ParseSlideDirection(direction, CharRDirection.Right);
 
-        var spec = new NudgeTapCommandSpecCharR
+        var spec = new JoltCommandSpecCharR
         {
             roleKey = roleKey,
             target = CharacterRigTarget.Character_Track_Y,
@@ -462,7 +462,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
     {
         CharRDirection dir = ParseSlideDirection(direction, CharRDirection.Right);
 
-        var spec = new NudgeTapCommandSpecCharR
+        var spec = new JoltCommandSpecCharR
         {
             target = CharacterRigTarget.CharacterPortrait_Shake,
             roleKey = roleKey,
@@ -479,7 +479,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
     {
         CharRDirection dir = ParseSlideDirection(direction, CharRDirection.Right);
 
-        var spec = new NudgeTapCommandSpecCharR
+        var spec = new JoltCommandSpecCharR
         {
             roleKey = roleKey,
             target = CharacterRigTarget.Character_Track,
@@ -498,7 +498,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
     {
         CharRDirection dir = ParseSlideDirection(direction, CharRDirection.Down);
 
-        var spec = new NudgeTapCommandSpecCharR
+        var spec = new JoltCommandSpecCharR
         {
             roleKey = roleKey,
             direction = dir,
@@ -516,7 +516,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
     {
         CharRDirection dir = ParseSlideDirection(direction, CharRDirection.Down);
 
-        var spec = new BounceArcInCommandSpecCharR
+        var spec = new ArcHopInCommandSpecCharR
         {
             roleKey = roleKey,
             from = dir
@@ -573,7 +573,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
     {
         CharRDirection from = ParseSlideDirection(direction, CharRDirection.Left);
 
-        var spec = new JuicySlideInCommandSpecCharR
+        var spec = new SlideInCommandSpecCharR
         {
             roleKey = roleKey,
             direction = from
@@ -586,7 +586,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
     {
         CharRDirection to = ParseSlideDirection(direction, CharRDirection.Right);
 
-        var spec = new JuicySlideOutCommandSpecCharR
+        var spec = new SlideOutCommandSpecCharR
         {
             roleKey = roleKey,
             to = to
@@ -603,7 +603,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
             return;
         }
 
-        var spec = new SetCharRigCommandSpec
+        var spec = new SetupCharRigCommandSpec
         {
             roleKey = roleKey,
             rigPrefab = rigPrefab
@@ -620,7 +620,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
             return;
         }
 
-        var spec = new SetCharRigCommandSpec
+        var spec = new SetupCharRigCommandSpec
         {
             roleKey = roleKey,
             parentSlot = CharRigSlot.ProtagonistSlot,
@@ -641,7 +641,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
             killTween = false
         };
 
-        var resetTrackSpec = new ResetTrackOffsetsCommandSpec { roleKey = roleKey };
+        var resetTrackSpec = new ApplyTrackOffsetCommandSpecCharR { roleKey = roleKey };
 
         Collect(anchorSpec);
         Collect(resetTrackSpec);
@@ -667,7 +667,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
             globalTuning = globalTuning
         };
 
-        var resetTrackSpec = new ResetTrackOffsetsCommandSpec { roleKey = roleKey };
+        var resetTrackSpec = new ApplyTrackOffsetCommandSpecCharR { roleKey = roleKey };
 
         Collect(anchorSpec);
         Collect(resetTrackSpec);
@@ -675,7 +675,7 @@ public sealed class YarnCommandBridge : MonoBehaviour
 
     private void ScaleFromTo(string roleKey, float xyValue, float duration = 0.4f)
     {
-        var spec = new ScaleFromToCommandSpecCharR
+        var spec = new ScaleToCommandSpecCharR
         {
             roleKey = roleKey,
             duration = duration,

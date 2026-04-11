@@ -5,8 +5,8 @@ using UnityEngine;
 using RectTransform = UnityEngine.RectTransform;
 
 [Serializable]
-[CommandMenuHint("Char Rig Motion", "Bounce Arc In", Order = -760)]
-public sealed class BounceArcInCommandSpecCharR : CommandSpecBase
+[CommandMenuHint("Char Rig Motion", "ArcHop In", Order = -760)]
+public sealed class ArcHopInCommandSpecCharR : CommandSpecBase
 {
     [Header("Target")]
     public CharacterRigTarget target = CharacterRigTarget.Character_Track;
@@ -50,9 +50,9 @@ public sealed class BounceArcInCommandSpecCharR : CommandSpecBase
     public bool killTween = true;
 }
 
-public sealed class BounceArcInCommandCharR : CommandBase, IStepScopedCommand
+public sealed class ArcHopInCommandCharR : CommandBase, IStepScopedCommand
 {
-    private readonly BounceArcInCommandSpecCharR _spec;
+    private readonly ArcHopInCommandSpecCharR _spec;
 
     private RectTransform _rect;
     private Tween _tween;
@@ -63,7 +63,7 @@ public sealed class BounceArcInCommandCharR : CommandBase, IStepScopedCommand
     public override bool WaitForCompletion => _spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
-    public BounceArcInCommandCharR(BounceArcInCommandSpecCharR spec) => _spec = spec;
+    public ArcHopInCommandCharR(ArcHopInCommandSpecCharR spec) => _spec = spec;
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {

@@ -10,7 +10,7 @@ using UnityEngine;
         CommandMenuSets.BuildChar,
     },
     SetOrder = -980)]
-public sealed class SetCharRigCommandSpec : CommandSpecBase
+public sealed class SetupCharRigCommandSpec : CommandSpecBase
 {
     [Tooltip("있으면 이 프리팹을 인스턴스해서 Rig를 구성합니다. 없으면 자동 생성합니다.")]
     public GameObject rigPrefab;
@@ -49,14 +49,14 @@ public sealed class SetCharRigCommandSpec : CommandSpecBase
     }
 }
 
-public sealed class SetCharRigCommand : CommandBase
+public sealed class SetupCharRigCommand : CommandBase
 {
     private readonly CharacterRigAccess _rigAccess;
-    private readonly SetCharRigCommandSpec _spec;
+    private readonly SetupCharRigCommandSpec _spec;
 
     public override bool WaitForCompletion => true;
 
-    public SetCharRigCommand(CharacterRigAccess rigAccess, SetCharRigCommandSpec spec)
+    public SetupCharRigCommand(CharacterRigAccess rigAccess, SetupCharRigCommandSpec spec)
     {
         _rigAccess = rigAccess;
         _spec = spec;

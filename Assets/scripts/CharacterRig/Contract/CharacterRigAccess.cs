@@ -18,7 +18,7 @@ public sealed class CharacterRigAccess
     {
         _slotResolver = slotResolver;
     }
-    public CharacterRigRefs BindAndBuildRefs(SetCharRigCommandSpec spec)
+    public CharacterRigRefs BindAndBuildRefs(SetupCharRigCommandSpec spec)
     {
         RectTransform parent = _slotResolver.Resolve(spec.parentSlot, spec.strict);
 
@@ -35,7 +35,7 @@ public sealed class CharacterRigAccess
 
     #region InstantiatePrefab & BindMap
 
-    private RectTransform CreateRigRoot(Transform parent, SetCharRigCommandSpec spec, string rolePrefix)
+    private RectTransform CreateRigRoot(Transform parent, SetupCharRigCommandSpec spec, string rolePrefix)
     {
         if (spec.rigPrefab != null)
             return InstantiatePrefab(parent, spec, rolePrefix);
@@ -43,7 +43,7 @@ public sealed class CharacterRigAccess
         return AutoCreateRig(parent, spec.rigRootName, rolePrefix);
     }
 
-    private RectTransform InstantiatePrefab(Transform parent, SetCharRigCommandSpec spec, string rolePrefix)
+    private RectTransform InstantiatePrefab(Transform parent, SetupCharRigCommandSpec spec, string rolePrefix)
     {
         GameObject go = Object.Instantiate(spec.rigPrefab, parent, false);
 

@@ -2,26 +2,25 @@ using System;
 using System.Collections;
 using DG.Tweening;
 using UnityEngine;
-using RectTransform = UnityEngine.RectTransform;
 
 [Serializable]
-[CommandMenuHint("Char Rig Motion", "Juicy Slide In", Order = -771)]
-public sealed class JuicySlideInCommandSpecCharR : CommandSpecBase
+[CommandMenuHint("Char Rig Motion", "Slide Out", Order = -772)]
+public sealed class SlideOutCommandSpecCharR : CommandSpecBase
 {
     [Header("Target (Track)")]
     public CharacterRigTarget target = CharacterRigTarget.Character_Track;
 
     [Header("Slide")]
-    public CharRDirection direction = CharRDirection.Left;
+    public CharRDirection to = CharRDirection.Right;
     public float distance = 480f;
 
     [Header("Tween")]
-    public float duration = 0.55f;
-    public Ease ease = Ease.OutCubic;
+    public float duration = 0.45f;
+    public Ease ease = Ease.InCubic;
 
-    [Header("Juice (overshoot that settles back)")]
-    [Tooltip("0이면 일반 SlideIn에 가까워짐.")]
-    public float punch = 24f;
+    [Header("Juice (launch kick at the start)")]
+    [Tooltip("0이면 심심한 SlideOut. 8~20 정도가 예쁘게 튐.")]
+    public float punch = 14f;
 
     [Header("Wait")]
     public bool wait = false;
@@ -31,20 +30,20 @@ public sealed class JuicySlideInCommandSpecCharR : CommandSpecBase
     public bool killTween = true;
 }
 
-public sealed class JuicySlideInCommandCharR : CommandBase, IStepScopedCommand
+public sealed class SlideOutCommandCharR : CommandBase, IStepScopedCommand
 {
-    private readonly JuicySlideInCommandSpecCharR _spec;
+    private readonly SlideOutCommandSpecCharR _spec;
 
     private RectTransform _rect;
     private Tween _tween;
-    private Vector2 _destPos;
+    private Vector2 _startPos;
     private bool _resolveAttempted;
     private bool _canCommitFinalState;
 
     public override bool WaitForCompletion => _spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
-    public JuicySlideInCommandCharR(JuicySlideInCommandSpecCharR spec) => _spec = spec;
+    public SlideOutCommandCharR(SlideOutCommandSpecCharR spec) => _spec = spec;
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
@@ -56,25 +55,23 @@ public sealed class JuicySlideInCommandCharR : CommandBase, IStepScopedCommand
         
         _canCommitFinalState = true;
 
-        Vector2 dest = _destPos;
-        Vector2 fromDir = GetDir(_spec.direction);
-        Vector2 start = dest + fromDir * _spec.distance;
+        Vector2 start = _startPos;
+        Vector2 dir = GetDir(_spec.to);
+        Vector2 end = start + dir * _spec.distance;
 
         if (_spec.duration <= 0f)
         {
-            _rect.anchoredPosition = dest;
+            _rect.anchoredPosition = end;
             _canCommitFinalState = false;
             _rect = null;
             _tween = null;
             yield break;
         }
 
-        Vector2 slideDir = dest - start;
+        Vector2 slideDir = end - start;
         slideDir = slideDir.sqrMagnitude > 0f
             ? slideDir.normalized
-            : -fromDir;
-
-        _rect.anchoredPosition = start;
+            : dir;
 
         _tween = DOTween
             .To(
@@ -82,9 +79,9 @@ public sealed class JuicySlideInCommandCharR : CommandBase, IStepScopedCommand
                 t =>
                 {
                     float e = DOVirtual.EasedValue(0f, 1f, t, _spec.ease);
+                    Vector2 basePos = Vector2.LerpUnclamped(start, end, e);
 
-                    Vector2 basePos = Vector2.LerpUnclamped(start, dest, e);
-                    float bump = JuicyBump_End(e);
+                    float bump = JuicyBump_Start(e);
                     Vector2 offset = slideDir * (_spec.punch * bump);
 
                     _rect.anchoredPosition = basePos + offset;
@@ -100,7 +97,7 @@ public sealed class JuicySlideInCommandCharR : CommandBase, IStepScopedCommand
                 if (!_canCommitFinalState)
                     return;
 
-                _rect.anchoredPosition = dest;
+                _rect.anchoredPosition = end;
                 _canCommitFinalState = false;
                 _rect = null;
                 _tween = null;
@@ -122,7 +119,7 @@ public sealed class JuicySlideInCommandCharR : CommandBase, IStepScopedCommand
 
         _tween?.Kill(false);
         _rect.DOKill(false);
-        _rect.anchoredPosition = _destPos;
+        _rect.anchoredPosition = _startPos + GetDir(_spec.to) * _spec.distance;
 
         _canCommitFinalState = false;
         _rect = null;
@@ -137,7 +134,7 @@ public sealed class JuicySlideInCommandCharR : CommandBase, IStepScopedCommand
             return;
 
         _rect = rig.GetRect(_spec.target);
-        _destPos = _rect.anchoredPosition;
+        _startPos = _rect.anchoredPosition;
     }
 
     private static Vector2 GetDir(CharRDirection from) => from switch
@@ -148,9 +145,10 @@ public sealed class JuicySlideInCommandCharR : CommandBase, IStepScopedCommand
         _ => new Vector2(-1f, 0f),
     };
 
-    private static float JuicyBump_End(float e)
+    private static float JuicyBump_Start(float e)
     {
         e = Mathf.Clamp01(e);
-        return Mathf.Sin(Mathf.PI * e) * (e * e);
+        float oneMinus = 1f - e;
+        return Mathf.Sin(Mathf.PI * e) * (oneMinus * oneMinus);
     }
 }

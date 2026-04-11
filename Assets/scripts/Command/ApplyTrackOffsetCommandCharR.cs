@@ -6,14 +6,14 @@ using UnityEngine;
 [Serializable]
 [CommandMenuHint(
     "Char Rig",
-    "#ResetTrackOffsets (default = ResetToZero)",
+    "#ApplyTrackOffset (default = ResetToZero)",
     Order = -890,
     Sets = new[]
     {
         CommandMenuSets.ResetChar,
     },
     SetOrder = -940)]
-public class ResetTrackOffsetsCommandSpec : CommandSpecBase
+public class ApplyTrackOffsetCommandSpecCharR : CommandSpecBase
 {
     [Header("Target")]
     [Tooltip("offset를 실제로 적용할 대상.")]
@@ -44,9 +44,9 @@ public class ResetTrackOffsetsCommandSpec : CommandSpecBase
     public bool resetCharTrackY = false;
 }
 
-public sealed class ResetTrackOffsetsCommand : CommandBase
+public sealed class ApplyTrackOffsetCommandCharR : CommandBase
 {
-    private readonly ResetTrackOffsetsCommandSpec _spec;
+    private readonly ApplyTrackOffsetCommandSpecCharR _spec;
 
     private CharacterRigRefs _rigRefs;
     private RectTransform _rect;
@@ -54,7 +54,7 @@ public sealed class ResetTrackOffsetsCommand : CommandBase
 
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
-    public ResetTrackOffsetsCommand(ResetTrackOffsetsCommandSpec spec) => _spec = spec;
+    public ApplyTrackOffsetCommandCharR(ApplyTrackOffsetCommandSpecCharR spec) => _spec = spec;
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {

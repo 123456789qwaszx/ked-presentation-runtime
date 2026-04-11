@@ -109,11 +109,11 @@ public sealed class YarnBridgePlaybackDriver : MonoBehaviour
 
         switch (spec)
         {
-            case NudgeTapCommandSpecCharR nudgeTap:
+            case JoltCommandSpecCharR nudgeTap:
                 nudgeTap.wait = shouldWait;
                 break;
 
-            case BounceArcInCommandSpecCharR bounceArcIn:
+            case ArcHopInCommandSpecCharR bounceArcIn:
                 bounceArcIn.wait = shouldWait;
                 break;
 
@@ -133,11 +133,11 @@ public sealed class YarnBridgePlaybackDriver : MonoBehaviour
                 fadeOut.wait = shouldWait;
                 break;
 
-            case JuicySlideInCommandSpecCharR slideIn:
+            case SlideInCommandSpecCharR slideIn:
                 slideIn.wait = shouldWait;
                 break;
 
-            case JuicySlideOutCommandSpecCharR slideOut:
+            case SlideOutCommandSpecCharR slideOut:
                 slideOut.wait = shouldWait;
                 break;
 

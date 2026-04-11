@@ -5,8 +5,8 @@ using UnityEngine;
 using RectTransform = UnityEngine.RectTransform;
 
 [Serializable]
-[CommandMenuHint("Char Rig Motion", "Nudge (Tap Neighbor)", Order = -740)]
-public sealed class NudgeTapCommandSpecCharR : CommandSpecBase
+[CommandMenuHint("Char Rig Motion", "Jolt", Order = -740)]
+public sealed class JoltCommandSpecCharR : CommandSpecBase
 {
     [Header("Target")]
     public CharacterRigTarget target = CharacterRigTarget.Character_Track;
@@ -39,9 +39,9 @@ public sealed class NudgeTapCommandSpecCharR : CommandSpecBase
     public bool killTween = true;
 }
 
-public sealed class NudgeTapCommandCharR : CommandBase, IStepScopedCommand
+public sealed class JoltCommandCharR : CommandBase, IStepScopedCommand
 {
-    private readonly NudgeTapCommandSpecCharR _spec;
+    private readonly JoltCommandSpecCharR _spec;
 
     private RectTransform _rect;
     private Tween _tween;
@@ -52,7 +52,7 @@ public sealed class NudgeTapCommandCharR : CommandBase, IStepScopedCommand
     public override bool WaitForCompletion => _spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
-    public NudgeTapCommandCharR(NudgeTapCommandSpecCharR spec) => _spec = spec;
+    public JoltCommandCharR(JoltCommandSpecCharR spec) => _spec = spec;
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {

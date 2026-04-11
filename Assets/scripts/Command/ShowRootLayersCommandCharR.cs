@@ -11,7 +11,7 @@ using System.Collections.Generic;
     {
         CommandMenuSets.ResetChar,
     }, SetOrder = -975)]
-public class ShowRootsCommandSpecCharR : CommandSpecBase
+public class ShowRootLayersCommandSpecCharR : CommandSpecBase
 {
     public CharRigRootLayerMask targetMask = CharRigRootLayerMask.CharacterPortrait_Root;
 
@@ -20,16 +20,16 @@ public class ShowRootsCommandSpecCharR : CommandSpecBase
     public bool enableInteraction = true;
 }
 
-public sealed class ShowRootsCommandCharR : CommandBase, IStepScopedCommand
+public sealed class ShowRootLayersCommandCharR : CommandBase, IStepScopedCommand
 {
-    private readonly ShowRootsCommandSpecCharR _spec;
+    private readonly ShowRootLayersCommandSpecCharR _spec;
 
     private readonly List<RectTransform> _targets = new();
     private bool _resolveAttempted;
 
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
-    public ShowRootsCommandCharR(ShowRootsCommandSpecCharR spec) => _spec = spec;
+    public ShowRootLayersCommandCharR(ShowRootLayersCommandSpecCharR spec) => _spec = spec;
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {

@@ -6,20 +6,20 @@ using UnityEngine;
 [Serializable]
 [CommandMenuHint(
     "Char Rig Motion",
-    "Rotate (From → To)",
-    Order = -180
+    "Scale (From → To)",
+    Order = -170
 )]
-public class RotateFromToCommandSpecCharR : CommandSpecBase
+public class ScaleToCommandSpecCharR : CommandSpecBase
 {
     [Header("Target")]
-    public CharacterRigTarget target = CharacterRigTarget.CharacterPortrait_Root;
+    public CharacterRigTarget target = CharacterRigTarget.CharacterPortrait_Scale;
 
-    [Header("Rotation (localEulerAngles)")]
-    public Vector3 toEuler = Vector3.zero;
+    [Header("Scale (XY)")]
+    public Vector2 toScale = Vector2.one;
 
     [Header("From")]
-    public bool overrideFromEuler = false;
-    public Vector3 fromEuler = Vector3.zero;
+    public bool overrideFromScale = false;
+    public Vector2 fromScale = Vector2.one;
 
     [Header("Tween")]
     public float duration = 0.4f;
@@ -30,9 +30,9 @@ public class RotateFromToCommandSpecCharR : CommandSpecBase
     public bool killTween = true;
 }
 
-public sealed class RotateFromToCommandCharR : CommandBase, IStepScopedCommand
+public sealed class ScaleToCommandCharR : CommandBase, IStepScopedCommand
 {
-    private readonly RotateFromToCommandSpecCharR _spec;
+    private readonly ScaleToCommandSpecCharR _spec;
 
     private RectTransform _rect;
     private Tween _tween;
@@ -42,7 +42,7 @@ public sealed class RotateFromToCommandCharR : CommandBase, IStepScopedCommand
     public override bool WaitForCompletion => _spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
-    public RotateFromToCommandCharR(RotateFromToCommandSpecCharR spec) => _spec = spec;
+    public ScaleToCommandCharR(ScaleToCommandSpecCharR spec) => _spec = spec;
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
@@ -54,20 +54,24 @@ public sealed class RotateFromToCommandCharR : CommandBase, IStepScopedCommand
 
         _canCommitFinalState = true;
 
-        if (_spec.overrideFromEuler)
-            SetLocalEuler(_rect, _spec.fromEuler);
+        if (_spec.overrideFromScale)
+            ApplyScaleXY(_rect, _spec.fromScale);
 
         if (_spec.duration <= 0f)
         {
-            SetLocalEuler(_rect, _spec.toEuler);
+            ApplyScaleXY(_rect, _spec.toScale);
             _canCommitFinalState = false;
             _rect = null;
             _tween = null;
             yield break;
         }
 
+        Vector3 endScale = _rect.localScale;
+        endScale.x = _spec.toScale.x;
+        endScale.y = _spec.toScale.y;
+
         _tween = _rect
-            .DOLocalRotate(_spec.toEuler, _spec.duration, RotateMode.Fast)
+            .DOScale(endScale, _spec.duration)
             .SetEase(_spec.ease)
             .SetUpdate(true)
             .SetTarget(_rect)
@@ -76,7 +80,7 @@ public sealed class RotateFromToCommandCharR : CommandBase, IStepScopedCommand
                 if (!_canCommitFinalState)
                     return;
 
-                SetLocalEuler(_rect, _spec.toEuler);
+                ApplyScaleXY(_rect, _spec.toScale);
                 _canCommitFinalState = false;
                 _rect = null;
                 _tween = null;
@@ -98,7 +102,7 @@ public sealed class RotateFromToCommandCharR : CommandBase, IStepScopedCommand
 
         _tween?.Kill(false);
         _rect.DOKill(false);
-        SetLocalEuler(_rect, _spec.toEuler);
+        ApplyScaleXY(_rect, _spec.toScale);
 
         _canCommitFinalState = false;
         _rect = null;
@@ -115,8 +119,11 @@ public sealed class RotateFromToCommandCharR : CommandBase, IStepScopedCommand
         _rect = rig.GetRect(_spec.target);
     }
 
-    private static void SetLocalEuler(RectTransform rect, Vector3 euler)
+    private static void ApplyScaleXY(RectTransform rect, Vector2 targetXY)
     {
-        rect.localEulerAngles = euler;
+        Vector3 s = rect.localScale;
+        s.x = targetXY.x;
+        s.y = targetXY.y;
+        rect.localScale = s;
     }
 }

@@ -2,11 +2,10 @@ using System;
 using System.Collections;
 using DG.Tweening;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 [Serializable]
-[CommandMenuHint("Char Rig Motion", "Rotate To", Order = 101)]
-public sealed class SwayRotateToCommandSpecCharR : CommandSpecBase
+[CommandMenuHint("Char Rig Motion", "PivotRotate To", Order = 101)]
+public sealed class PivotRotateToCommandSpecCharR : CommandSpecBase
 {
     [Header("Targets")]
     [Tooltip("회전시킬 피벗. 보통 SwayPivot 축을 사용.")]
@@ -55,9 +54,9 @@ public sealed class SwayRotateToCommandSpecCharR : CommandSpecBase
     public bool killTween = true;
 }
 
-public sealed class SwayRotateToCommandCharR : CommandBase, IStepScopedCommand
+public sealed class PivotRotateToCommandCharR : CommandBase, IStepScopedCommand
 {
-    private readonly SwayRotateToCommandSpecCharR _spec;
+    private readonly PivotRotateToCommandSpecCharR _spec;
 
     private RectTransform _rect;
     private bool _resolveAttempted;
@@ -72,7 +71,7 @@ public sealed class SwayRotateToCommandCharR : CommandBase, IStepScopedCommand
     public override bool WaitForCompletion => _spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
-    public SwayRotateToCommandCharR(SwayRotateToCommandSpecCharR spec) => _spec = spec;
+    public PivotRotateToCommandCharR(PivotRotateToCommandSpecCharR spec) => _spec = spec;
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
