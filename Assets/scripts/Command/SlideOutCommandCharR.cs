@@ -72,12 +72,15 @@ public sealed class SlideOutCommandCharR : CommandBase, IStepScopedCommand
         slideDir = slideDir.sqrMagnitude > 0f
             ? slideDir.normalized
             : dir;
-
+        
         _tween = DOTween
             .To(
                 () => 0f,
                 t =>
                 {
+                    if (!_canCommitFinalState || _rect == null)
+                        return;
+                    
                     float e = DOVirtual.EasedValue(0f, 1f, t, _spec.ease);
                     Vector2 basePos = Vector2.LerpUnclamped(start, end, e);
 
@@ -94,7 +97,7 @@ public sealed class SlideOutCommandCharR : CommandBase, IStepScopedCommand
             .SetTarget(_rect)
             .OnComplete(() =>
             {
-                if (!_canCommitFinalState)
+                if (!_canCommitFinalState || _rect == null)
                     return;
 
                 _rect.anchoredPosition = end;
@@ -114,7 +117,7 @@ public sealed class SlideOutCommandCharR : CommandBase, IStepScopedCommand
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (!_canCommitFinalState)
+        if (!_canCommitFinalState || _rect == null)
             return;
 
         _tween?.Kill(false);

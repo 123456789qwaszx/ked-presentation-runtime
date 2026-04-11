@@ -77,7 +77,7 @@ public sealed class ScaleToCommandCharR : CommandBase, IStepScopedCommand
             .SetTarget(_rect)
             .OnComplete(() =>
             {
-                if (!_canCommitFinalState)
+                if (!_canCommitFinalState || _rect == null)
                     return;
 
                 ApplyScaleXY(_rect, _spec.toScale);
@@ -97,7 +97,7 @@ public sealed class ScaleToCommandCharR : CommandBase, IStepScopedCommand
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (!_canCommitFinalState)
+        if (!_canCommitFinalState || _rect == null)
             return;
 
         _tween?.Kill(false);

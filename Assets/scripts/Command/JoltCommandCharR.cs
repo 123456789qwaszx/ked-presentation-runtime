@@ -87,7 +87,7 @@ public sealed class JoltCommandCharR : CommandBase, IStepScopedCommand
                 () => 0f,
                 t =>
                 {
-                    if (!_canCommitFinalState)
+                    if (!_canCommitFinalState || _rect == null)
                         return;
 
                     float u = Mathf.Clamp01(t);
@@ -116,7 +116,7 @@ public sealed class JoltCommandCharR : CommandBase, IStepScopedCommand
             .SetTarget(_rect)
             .OnComplete(() =>
             {
-                if (!_canCommitFinalState)
+                if (!_canCommitFinalState || _rect == null)
                     return;
 
                 _rect.anchoredPosition = rest;
@@ -135,8 +135,8 @@ public sealed class JoltCommandCharR : CommandBase, IStepScopedCommand
     {
         if (!_resolveAttempted)
             ResolveRefs(scope);
-
-        if (!_canCommitFinalState)
+        
+        if (!_canCommitFinalState || _rect == null)
             return;
 
         _tween?.Kill(false);

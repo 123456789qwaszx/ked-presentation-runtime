@@ -132,6 +132,9 @@ public sealed class PivotRotateToCommandCharR : CommandBase, IStepScopedCommand
                 () => 0f,
                 t =>
                 {
+                    if (!_canCommitFinalState || _rect == null)
+                        return;
+                    
                     float u = Mathf.Clamp01(t / total);
                     float z;
 
@@ -172,7 +175,7 @@ public sealed class PivotRotateToCommandCharR : CommandBase, IStepScopedCommand
             .SetUpdate(true)
             .OnComplete(() =>
             {
-                if (!_canCommitFinalState)
+                if (!_canCommitFinalState || _rect == null)
                     return;
 
                 _currentRotationZ = _finalRotationZ;
@@ -193,7 +196,7 @@ public sealed class PivotRotateToCommandCharR : CommandBase, IStepScopedCommand
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (!_canCommitFinalState)
+        if (!_canCommitFinalState || _rect == null)
             return;
 
         _tween?.Kill(false);

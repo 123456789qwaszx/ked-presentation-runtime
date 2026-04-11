@@ -30,7 +30,7 @@ public class PunchScaleCommandSpecCharR : CommandSpecBase
 
     [Tooltip("체크하면 펀치가 끝날 때까지 Step 진행을 멈춥니다.")]
     public bool wait = false;
-    
+
     [Header("Options")]
     public bool killTween = true;
 }
@@ -55,11 +55,13 @@ public sealed class PunchScaleCommandCharR : CommandBase, IStepScopedCommand
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
+        if (_rect == null)
+            yield break;
+
         if (_spec.killTween)
             _rect.DOKill(true); // Finish previous motion so this command starts from a committed state.
-        
-        _canCommitFinalState = true;
 
+        _canCommitFinalState = true;
         _originScale = _rect.localScale;
 
         if (_spec.duration <= 0f || Mathf.Approximately(_spec.strength, 0f))
@@ -71,17 +73,38 @@ public sealed class PunchScaleCommandCharR : CommandBase, IStepScopedCommand
             yield break;
         }
 
-        _tween = _rect
-            .DOPunchScale(
-                new Vector3(_spec.strength, _spec.strength, 0f),
-                _spec.duration,
-                _spec.vibrato,
-                _spec.elasticity)
+        Vector3 baseScale = _originScale;
+        int vibrato = Mathf.Max(1, _spec.vibrato);
+        float elasticity = Mathf.Clamp01(_spec.elasticity);
+        float strength = _spec.strength;
+
+        _tween = DOTween
+            .To(
+                () => 0f,
+                t =>
+                {
+                    if (!_canCommitFinalState || _rect == null)
+                        return;
+
+                    float u = Mathf.Clamp01(t);
+
+                    float punch = EvaluatePunch(u, vibrato, elasticity);
+                    float scaleOffset = strength * punch;
+
+                    Vector3 s = baseScale;
+                    s.x = baseScale.x + scaleOffset;
+                    s.y = baseScale.y + scaleOffset;
+                    _rect.localScale = s;
+                },
+                1f,
+                _spec.duration
+            )
+            .SetEase(Ease.Linear)
             .SetUpdate(true)
             .SetTarget(_rect)
             .OnComplete(() =>
             {
-                if (!_canCommitFinalState)
+                if (!_canCommitFinalState || _rect == null)
                     return;
 
                 _rect.localScale = _originScale;
@@ -101,7 +124,7 @@ public sealed class PunchScaleCommandCharR : CommandBase, IStepScopedCommand
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (!_canCommitFinalState)
+        if (!_canCommitFinalState || _rect == null)
             return;
 
         _tween?.Kill(false);
@@ -121,6 +144,23 @@ public sealed class PunchScaleCommandCharR : CommandBase, IStepScopedCommand
             return;
 
         _rect = rig.GetRect(_spec.target);
-        _originScale = _rect.localScale;
+        if (_rect != null)
+            _originScale = _rect.localScale;
+    }
+
+    private static float EvaluatePunch(float u, int vibrato, float elasticity)
+    {
+        u = Mathf.Clamp01(u);
+        vibrato = Mathf.Max(1, vibrato);
+        elasticity = Mathf.Clamp01(elasticity);
+
+        float decayPower = Mathf.Lerp(5.5f, 2.2f, elasticity);
+        float envelope = Mathf.Pow(1f - u, decayPower);
+
+        float wave = Mathf.Sin(u * Mathf.PI * (vibrato + 0.5f));
+
+        float attack = 1f - Mathf.Pow(1f - u, 2.2f);
+
+        return wave * envelope * attack;
     }
 }

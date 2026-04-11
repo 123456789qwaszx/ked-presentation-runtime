@@ -86,6 +86,9 @@ public sealed class DipInOutCommandCharR : CommandBase, IStepScopedCommand
                 () => 0f,
                 t =>
                 {
+                    if (!_canCommitFinalState || _rect == null)
+                        return;
+                    
                     if (t <= holdStart)
                     {
                         float localT = tEnter <= 0.0001f ? 1f : t / tEnter;
@@ -112,7 +115,7 @@ public sealed class DipInOutCommandCharR : CommandBase, IStepScopedCommand
             .SetTarget(_rect)
             .OnComplete(() =>
             {
-                if (!_canCommitFinalState)
+                if (!_canCommitFinalState || _rect == null)
                     return;
 
                 _rect.anchoredPosition = rest;
@@ -132,7 +135,7 @@ public sealed class DipInOutCommandCharR : CommandBase, IStepScopedCommand
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (!_canCommitFinalState)
+        if (!_canCommitFinalState || _rect == null)
             return;
 
         _tween?.Kill(false);

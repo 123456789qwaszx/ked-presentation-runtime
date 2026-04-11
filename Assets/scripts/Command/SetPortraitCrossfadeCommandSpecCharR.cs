@@ -119,7 +119,7 @@ public sealed class SetPortraitCrossfadeCommandCharR : CommandBase, IStepScopedC
 
     protected override void OnCommandCompleted(CommandRunScope scope)
     {
-        if (!_canCommitFinalState)
+        if (!_canCommitFinalState || _portraitRoot == null || _overlayRoot == null)
             return;
 
         if (_seq == null)

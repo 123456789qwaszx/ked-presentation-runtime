@@ -121,6 +121,9 @@ public sealed class ArcHopInCommandCharR : CommandBase, IStepScopedCommand
                 () => 0f,
                 t =>
                 {
+                    if (!_canCommitFinalState || _rect == null)
+                        return;
+                    
                     float e = DOVirtual.EasedValue(0f, 1f, t, _spec.ease);
 
                     float hf = e * hops;
@@ -164,7 +167,7 @@ public sealed class ArcHopInCommandCharR : CommandBase, IStepScopedCommand
             .SetTarget(_rect)
             .OnComplete(() =>
             {
-                if (!_canCommitFinalState)
+                if (!_canCommitFinalState || _rect == null)
                     return;
 
                 _rect.anchoredPosition = dest;
@@ -184,7 +187,7 @@ public sealed class ArcHopInCommandCharR : CommandBase, IStepScopedCommand
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (!_canCommitFinalState)
+        if (!_canCommitFinalState || _rect == null)
             return;
 
         _tween?.Kill(false);

@@ -81,6 +81,9 @@ public sealed class SlideInCommandCharR : CommandBase, IStepScopedCommand
                 () => 0f,
                 t =>
                 {
+                    if (!_canCommitFinalState || _rect == null)
+                        return;
+                    
                     float e = DOVirtual.EasedValue(0f, 1f, t, _spec.ease);
 
                     Vector2 basePos = Vector2.LerpUnclamped(start, dest, e);
@@ -97,7 +100,7 @@ public sealed class SlideInCommandCharR : CommandBase, IStepScopedCommand
             .SetTarget(_rect)
             .OnComplete(() =>
             {
-                if (!_canCommitFinalState)
+                if (!_canCommitFinalState || _rect == null)
                     return;
 
                 _rect.anchoredPosition = dest;
@@ -117,7 +120,7 @@ public sealed class SlideInCommandCharR : CommandBase, IStepScopedCommand
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (!_canCommitFinalState)
+        if (!_canCommitFinalState || _rect == null)
             return;
 
         _tween?.Kill(false);

@@ -94,7 +94,7 @@ public sealed class SetEmotionPortraitWipeCommandCharR : CommandBase, IStepScope
             .Append(_overlayCanvasGroup.DOFade(1f, _spec.duration).SetEase(_spec.ease))
             .AppendCallback(() =>
             {
-                if (!_canCommitFinalState)
+                if (!_canCommitFinalState || _portraitRoot == null || _overlayRoot == null)
                     return;
 
                 _portraitImage.sprite = targetSprite;

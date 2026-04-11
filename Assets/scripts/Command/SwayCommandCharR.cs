@@ -115,6 +115,9 @@ public sealed class SwayCommandCharR : CommandBase, IStepScopedCommand
                 () => 0f,
                 t =>
                 {
+                    if (!_canCommitFinalState || _rect == null)
+                        return;
+                    
                     float u = Mathf.Clamp01(t / totalDuration);
 
                     float pathT = u * segmentCount;
@@ -152,7 +155,7 @@ public sealed class SwayCommandCharR : CommandBase, IStepScopedCommand
             .SetUpdate(true)
             .OnComplete(() =>
             {
-                if (!_canCommitFinalState)
+                if (!_canCommitFinalState || _rect == null)
                     return;
 
                 SnapToOrigin();
@@ -164,7 +167,7 @@ public sealed class SwayCommandCharR : CommandBase, IStepScopedCommand
         if (_spec.wait)
             yield return _tween.WaitForCompletion();
     }
-
+    
     protected override void OnSkip(CommandRunScope scope) => OnCommandCompleted(scope);
 
     protected override void OnCommandCompleted(CommandRunScope scope)
@@ -172,7 +175,7 @@ public sealed class SwayCommandCharR : CommandBase, IStepScopedCommand
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (!_canCommitFinalState)
+        if (!_canCommitFinalState || _rect == null)
             return;
 
         _tween?.Kill(false);

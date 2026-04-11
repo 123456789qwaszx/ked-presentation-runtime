@@ -63,13 +63,29 @@ public sealed class FadeInCommandCharR : CommandBase, IStepScopedCommand
         for (int i = 0; i < _targets.Count; i++)
         {
             RectTransform rect = _targets[i];
+            if (rect == null)
+                continue;
+
             CanvasGroup cg = GetOrAddCanvasGroup(rect);
-            
+            if (cg == null)
+                continue;
+
             cg.DOKill(true);
 
             _pending++;
 
-            cg.DOFade(1f, _spec.duration)
+            DOTween.To(
+                    () => cg != null ? cg.alpha : 0f,
+                    x =>
+                    {
+                        if (!_canCommitFinalState || cg == null)
+                            return;
+
+                        cg.alpha = x;
+                    },
+                    1f,
+                    _spec.duration
+                )
                 .SetEase(_spec.ease)
                 .SetUpdate(true)
                 .SetTarget(cg)
@@ -77,11 +93,27 @@ public sealed class FadeInCommandCharR : CommandBase, IStepScopedCommand
                 {
                     _pending = Mathf.Max(0, _pending - 1);
 
+                    if (!_canCommitFinalState)
+                        return;
+
+                    if (cg == null)
+                    {
+                        if (_pending == 0)
+                            _canCommitFinalState = false;
+                        return;
+                    }
+
+                    if (_spec.EnableInteraction)
+                    {
+                        cg.interactable = true;
+                        cg.blocksRaycasts = true;
+                    }
+
                     if (_pending == 0)
                         _canCommitFinalState = false;
                 });
         }
-        
+
         if (_pending == 0)
         {
             _canCommitFinalState = false;
@@ -92,7 +124,17 @@ public sealed class FadeInCommandCharR : CommandBase, IStepScopedCommand
             yield break;
 
         while (_pending > 0)
+        {
+            int aliveCount = CountAliveTargets();
+            if (aliveCount == 0)
+            {
+                _pending = 0;
+                _canCommitFinalState = false;
+                yield break;
+            }
+
             yield return null;
+        }
     }
 
     protected override void OnSkip(CommandRunScope scope) => OnCommandCompleted(scope);
@@ -114,13 +156,18 @@ public sealed class FadeInCommandCharR : CommandBase, IStepScopedCommand
         for (int i = 0; i < _targets.Count; i++)
         {
             RectTransform rect = _targets[i];
+            if (rect == null)
+                continue;
+
             CanvasGroup cg = GetOrAddCanvasGroup(rect);
+            if (cg == null)
+                continue;
 
             cg.DOKill(false);
         }
 
         SnapOnTargets(_targets);
-        
+
         _pending = 0;
         _canCommitFinalState = false;
     }
@@ -144,7 +191,12 @@ public sealed class FadeInCommandCharR : CommandBase, IStepScopedCommand
         for (int i = 0; i < targets.Count; i++)
         {
             RectTransform rect = targets[i];
+            if (rect == null)
+                continue;
+
             CanvasGroup cg = GetOrAddCanvasGroup(rect);
+            if (cg == null)
+                continue;
 
             cg.DOKill(false);
             cg.alpha = 1f;
@@ -157,8 +209,24 @@ public sealed class FadeInCommandCharR : CommandBase, IStepScopedCommand
         }
     }
 
+    private int CountAliveTargets()
+    {
+        int count = 0;
+
+        for (int i = 0; i < _targets.Count; i++)
+        {
+            if (_targets[i] != null)
+                count++;
+        }
+
+        return count;
+    }
+
     private CanvasGroup GetOrAddCanvasGroup(RectTransform rect)
     {
+        if (rect == null)
+            return null;
+
         if (rect.TryGetComponent<CanvasGroup>(out var group))
             return group;
 
