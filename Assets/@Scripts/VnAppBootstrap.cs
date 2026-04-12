@@ -12,7 +12,7 @@ public class VnAppBootstrap : MonoBehaviour
     private readonly VnUxState _vnUxState = new ();
     private readonly VnPlaybackSettings _vnPlaybackSettings = new ();
     private readonly EpisodePlayState _episodePlayState = new ();
-    private PresentationSessionContext _context;
+    private readonly PresentationSessionContext _presentationSessionContext = new();
     
     [Header("Sound")]
     [SerializeField] private AudioSystem audioSystem;
@@ -65,8 +65,6 @@ public class VnAppBootstrap : MonoBehaviour
     
     private void Awake()
     {
-        _context = new PresentationSessionContext( _presentationContextSettings );
-        
         BootstrapAudioSystem();
         BootstrapUIManager();
         
@@ -130,9 +128,9 @@ public class VnAppBootstrap : MonoBehaviour
         commandExecutor.Initialize(factory);
         
         
-        PresentationSession presentationSession = new PresentationSession(gatePlanner, gateAdvancer, commandExecutor, _context);
+        PresentationSession presentationSession = new PresentationSession(gatePlanner, gateAdvancer, commandExecutor, _presentationSessionContext);
         
-        presentationSessionEntry.Initialize(presentationSession, routeCatalogSo, _presentationContextSettings);
+        presentationSessionEntry.Initialize(presentationSession, routeCatalogSo);
     }
     
     private void ConnectPresentationSessionToYarn()
@@ -153,7 +151,7 @@ public class VnAppBootstrap : MonoBehaviour
         YarnCommandRegistry yarnCommandRegistry = new YarnCommandRegistry(dialogueRunner, yarnUIBridge, vnRuntimeBridge, dialogueBoxRouteState);
         yarnCommandRegistry.Initialize();
 
-        yarnBridgePlaybackDriver.Initialize(commandExecutor, _context);
+        yarnBridgePlaybackDriver.Initialize(commandExecutor, _presentationSessionContext);
         yarnCommandBridge.Initialize(dialogueRunner, yarnBridgePlaybackDriver);
         yarnLineRuntimePresenter.Initialize(dialogueRunner, yarnUIBridge, dialogueBoxRouteState, yarnBridgePlaybackDriver, audioSystem);
     }
@@ -212,7 +210,7 @@ public class VnAppBootstrap : MonoBehaviour
             episodePlayer,
             dialogueAdvanceDispatcher,
             _presentationSessionBridge,
-            _context
+            _presentationSessionContext
         );
         
         CreateRollbackHistoryDebugTool(_rollbackHistory, rollbackState);

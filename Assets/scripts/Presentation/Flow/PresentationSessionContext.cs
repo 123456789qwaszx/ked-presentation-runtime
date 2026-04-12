@@ -39,16 +39,11 @@ public sealed class PresentationPlaybackSettings
 [Serializable]
 public sealed class PresentationSessionContext
 {
-    private readonly PresentationPlaybackSettings _playback;
+    private readonly PresentationPlaybackSettings _playback = new();
     
     private bool _isNodeBusy;
     private bool _isBlockingInput;
     private bool _closeRequested;
-    
-    public PresentationSessionContext(PresentationPlaybackSettings playback)
-    {
-        _playback = playback;
-    }
 
     public bool IsNodeBusy => _isNodeBusy;
     public bool IsBlockingInput => _isBlockingInput;

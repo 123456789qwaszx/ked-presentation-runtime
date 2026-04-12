@@ -4146,8 +4146,8 @@ MonoBehaviour:
   dialogueRunner: {fileID: 8309902628538800288}
   yarnUIBridge: {fileID: 1874881010}
   presentationRouteEntry: {fileID: 1433866633}
-  yarnEntryKey: springseek_030
-  presentationEntryKey: seq1
+  yarnEntryKey: reira
+  presentationEntryKey: test
   runYarnKey: 50
   stopKey: 51
 --- !u!4 &1924806293
@@ -39849,7 +39849,6 @@ SceneRoots:
   - {fileID: 26931191}
   - {fileID: 596868909}
   - {fileID: 32255927}
-  - {fileID: 1829026823}
   - {fileID: 7985477256358699683}
   - {fileID: 552181529}
   - {fileID: 1257280953}
@@ -39863,6 +39862,7 @@ SceneRoots:
   - {fileID: 307625744}
   - {fileID: 626587495}
   - {fileID: 63871903}
+  - {fileID: 1829026823}
   - {fileID: 1571925711}
   - {fileID: 1658226452}
   - {fileID: 1433866632}

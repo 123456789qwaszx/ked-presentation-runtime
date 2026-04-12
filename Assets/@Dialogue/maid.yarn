@@ -1,4 +1,13 @@
-﻿title: maid
+title:Start
+cluster: MainTopics
+position: -202,167
+---
+<<jump stellasora_5_010_1>>
+<<jump maid>>
+===
+
+title:maid
+position: 70,335
 ---
 
 <<begin_hold>>
@@ -154,3 +163,17 @@
 // <<await_for 1>>
 // <<blackout uncover>>
 // <<end_hold>>
+title: Node_1775983708506
+cluster: MainTopics
+position: -203,340
+---
+New node
+===
+
+title: Note_1775983715380
+color: orange
+style: note
+position: -404,57
+---
+NOTE:  ㄷㄷ...
+===

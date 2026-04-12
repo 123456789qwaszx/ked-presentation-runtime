@@ -4,13 +4,11 @@ public sealed class PresentationSessionEntry : MonoBehaviour
 {
     public PresentationSession PresentationSession { get; private set; }
     private RouteCatalogSO _routeCatalog;
-    public PresentationPlaybackSettings PresentationContextSettings;
 
-    public void Initialize(PresentationSession presentationSession, RouteCatalogSO routeCatalogSo, PresentationPlaybackSettings presentationSettings)
+    public void Initialize(PresentationSession presentationSession, RouteCatalogSO routeCatalogSo)
     {
         PresentationSession = presentationSession;
         _routeCatalog = routeCatalogSo;
-        PresentationContextSettings = presentationSettings;
     }
     
     private void Update()
