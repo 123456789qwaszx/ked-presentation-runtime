@@ -5,6 +5,7 @@
         "**/*.yarn",
         "maid.yarn"
     ],
+    "excludeFiles": [],
     "localisation": {
         "ko": {
             "assets": "."
@@ -78,6 +79,5 @@
         },
         "allowPreviewFeatures": false
     },
-    "definitionsFiles": [],
-    "excludeFiles": []
+    "definitionsFiles": []
 }

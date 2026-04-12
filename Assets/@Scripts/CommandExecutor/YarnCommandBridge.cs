@@ -34,7 +34,8 @@ public sealed class YarnCommandBridge : MonoBehaviour
         // Blocking Yarn command:
         // closes the hold block and pauses Yarn until the held commands
         // marked with wait=true finish inside Presentation/Executor.
-        _dialogueRunner.AddCommandHandler("end_hold", (Func<IEnumerator>)(() => PlayHeldCommands()));
+        //_dialogueRunner.AddCommandHandler("end_hold", (Func<IEnumerator>)(() => PlayHeldCommands()));
+        _dialogueRunner.AddCommandHandler("end_hold", PlayHeldCommands);
 
         _dialogueRunner.AddCommandHandler<string>("slot_boxside", EnqueueSetupCharRigSpecProtagonistSlot);
         _dialogueRunner.AddCommandHandler<string>("slot", EnqueueSetupCharRigSpec);
