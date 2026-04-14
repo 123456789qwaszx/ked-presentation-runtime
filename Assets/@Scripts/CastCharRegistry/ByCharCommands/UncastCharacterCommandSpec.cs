@@ -34,12 +34,14 @@ public sealed class UncastCharacterCommand : CommandBase
         Apply(scope);
         yield break;
     }
-
-    protected override void OnRollbackSeek(CommandRunScope scope)
+    
+    protected override void OnSkip(CommandRunScope scope)
     {
         Apply(scope);
     }
 
+    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
+    
     private void Apply(CommandRunScope scope)
     {
         if (scope == null)

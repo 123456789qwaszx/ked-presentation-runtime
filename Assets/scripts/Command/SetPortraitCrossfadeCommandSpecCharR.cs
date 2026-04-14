@@ -115,9 +115,7 @@ public sealed class SetPortraitCrossfadeCommandCharR : CommandBase, IStepScopedC
             yield return _seq.WaitForCompletion();
     }
 
-    protected override void OnSkip(CommandRunScope scope) => OnCommandCompleted(scope);
-
-    protected override void OnRollbackSeek(CommandRunScope scope)
+    protected override void OnSkip(CommandRunScope scope)
     {
         if (!_resolveAttempted)
             ResolveRefs(scope);
@@ -130,6 +128,9 @@ public sealed class SetPortraitCrossfadeCommandCharR : CommandBase, IStepScopedC
         _canCommitFinalState = false;
         _seq = null;
     }
+
+    
+    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
     
     protected override void OnCommandCompleted(CommandRunScope scope)
     {

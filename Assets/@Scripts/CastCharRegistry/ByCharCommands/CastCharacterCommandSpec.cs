@@ -40,11 +40,13 @@ public sealed class CastCharacterCommand : CommandBase
         ApplyBinding(scope);
         yield break;
     }
-
-    protected override void OnRollbackSeek(CommandRunScope scope)
+    
+    protected override void OnSkip(CommandRunScope scope)
     {
         ApplyBinding(scope);
     }
+
+    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
 
     private void ApplyBinding(CommandRunScope scope)
     {

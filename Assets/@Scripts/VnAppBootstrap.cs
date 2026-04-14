@@ -8,7 +8,6 @@ public class VnAppBootstrap : MonoBehaviour
     
     private readonly UnityInputSource _unityInputSource = new();
     private readonly UnityTimeSource _unityTimeSource = new();
-    private readonly PresentationPlaybackSettings _presentationContextSettings = new ();
     private readonly VnUxState _vnUxState = new ();
     private readonly VnPlaybackSettings _vnPlaybackSettings = new ();
     private readonly EpisodePlayState _episodePlayState = new ();
@@ -225,6 +224,7 @@ public class VnAppBootstrap : MonoBehaviour
         vnFeatureController.Initialize(
             _vnUxState,
             _vnPlaybackSettings,
+            _presentationSessionContext,
             yarnLineLifecycleBridge,
             ellipsisBreathTypewriter,
             inlineEventMarkupHandler,

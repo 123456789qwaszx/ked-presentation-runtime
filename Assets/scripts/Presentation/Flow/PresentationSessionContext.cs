@@ -1,18 +1,34 @@
 using System;
 
+public enum VnPlayMode
+{
+    Manual = 0,
+    Auto = 1,
+    Speedup = 2
+}
+
 [Serializable]
 public sealed class PresentationPlaybackSettings
 {
-    public const float DefaultTimeScale        = 1f;
+    public const float DefaultTimeScale = 1f;
     public const float DefaultAutoAdvanceDelay = 0.6f;
-    
+
     private float _timeScale = DefaultTimeScale;
     private float _autoAdvanceDelay = DefaultAutoAdvanceDelay;
 
-    public bool IsAutoMode  { get; set; }
-    public bool IsSkipping  { get; set; }
+    private VnPlayMode _playMode = VnPlayMode.Manual;
+
+    public VnPlayMode PlayMode
+    {
+        get => _playMode;
+        set => _playMode = value;
+    }
+
+    public bool IsAutoMode => _playMode == VnPlayMode.Auto;
+    public bool IsSkipping => _playMode == VnPlayMode.Speedup;
+
     public bool IsRollbackSeeking { get; set; }
-    
+
     public float TimeScale
     {
         get => _timeScale;
@@ -27,12 +43,12 @@ public sealed class PresentationPlaybackSettings
 
     public void ResetDefaults()
     {
-        IsAutoMode        = false;
-        IsSkipping        = false;
-        _timeScale        = DefaultTimeScale;
+        _playMode = VnPlayMode.Manual;
+        IsRollbackSeeking = false;
+        _timeScale = DefaultTimeScale;
         _autoAdvanceDelay = DefaultAutoAdvanceDelay;
     }
-    
+
     public bool enableDebugStart;
     public string debugStartStepName;
 }
@@ -41,7 +57,7 @@ public sealed class PresentationPlaybackSettings
 public sealed class PresentationSessionContext
 {
     private readonly PresentationPlaybackSettings _playback = new();
-    
+
     private bool _isNodeBusy;
     private bool _isBlockingInput;
     private bool _closeRequested;
@@ -49,12 +65,43 @@ public sealed class PresentationSessionContext
     public bool IsNodeBusy => _isNodeBusy;
     public bool IsBlockingInput => _isBlockingInput;
     public bool CloseRequested => _closeRequested;
-    
+
+    public VnPlayMode PlayMode => _playback.PlayMode;
+
     public bool IsAutoMode => _playback.IsAutoMode;
     public bool IsSkipping => _playback.IsSkipping;
+    public bool IsRollbackSeeking => _playback.IsRollbackSeeking;
+
     public float TimeScale => _playback.TimeScale;
     public float AutoAdvanceDelay => _playback.AutoAdvanceDelay;
-    public bool IsRollbackSeeking => _playback.IsRollbackSeeking;
+
+    public void SetPlayMode(VnPlayMode mode)
+    {
+        _playback.PlayMode = mode;
+    }
+
+    public void EnterAutoMode()
+    {
+        _playback.PlayMode = VnPlayMode.Auto;
+    }
+
+    public void ExitAutoMode()
+    {
+        if (_playback.PlayMode == VnPlayMode.Auto)
+            _playback.PlayMode = VnPlayMode.Manual;
+    }
+
+    public void EnterSpeedUpHeld()
+    {
+        _playback.PlayMode = VnPlayMode.Speedup;
+    }
+
+    public void ExitSpeedUpHeld()
+    {
+        if (_playback.PlayMode == VnPlayMode.Speedup)
+            _playback.PlayMode = VnPlayMode.Manual;
+    }
+
     public void EnterRollbackSeek()
     {
         _playback.IsRollbackSeeking = true;
@@ -65,16 +112,6 @@ public sealed class PresentationSessionContext
         _playback.IsRollbackSeeking = false;
     }
 
-    public void EnterSpeedUpHeld()
-    {
-        _playback.IsSkipping = true;
-    }
-
-    public void ExitSpeedUpHeld()
-    {
-        _playback.IsSkipping = false;
-    }
-
     /// <summary>
     /// Must be called only by the CommandRunScope to toggle busy state.
     /// </summary>
@@ -82,17 +119,18 @@ public sealed class PresentationSessionContext
     {
         _isNodeBusy = busy;
     }
-    
+
     public void RequestClose()
     {
         _closeRequested = true;
     }
-    
+
     public void ResetSessionFlagsForStart()
     {
-        _isNodeBusy      = false;
+        _isNodeBusy = false;
         _isBlockingInput = false;
         _closeRequested = false;
+        _playback.ResetDefaults();
     }
 
     public bool IsDebugStartEnabled => _playback.enableDebugStart;

@@ -78,7 +78,7 @@ public sealed class DestroyCommand : CommandBase
         yield break;
     }
     
-    protected override void OnRollbackSeek(CommandRunScope scope)
+    protected override void OnSkip(CommandRunScope scope)
     {
         GameObject go = FindTarget();
         if (go == null)
@@ -88,6 +88,9 @@ public sealed class DestroyCommand : CommandBase
 
         scope.Refs[_spec.roleKey] = null;
     }
+    
+    
+    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
 
     private GameObject FindTarget()
     {

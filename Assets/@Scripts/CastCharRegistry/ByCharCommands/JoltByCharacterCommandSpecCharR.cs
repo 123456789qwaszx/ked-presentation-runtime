@@ -140,9 +140,8 @@ public sealed class JoltByCharacterCommand : CommandBase, IStepScopedCommand
             yield return _tween.WaitForCompletion();
     }
 
-    protected override void OnSkip(CommandRunScope scope) => OnCommandCompleted(scope);
 
-    protected override void OnRollbackSeek(CommandRunScope scope)
+    protected override void OnSkip(CommandRunScope scope)
     {
         if (!_resolveAttempted)
             ResolveRefs(scope);
@@ -155,6 +154,8 @@ public sealed class JoltByCharacterCommand : CommandBase, IStepScopedCommand
         _rect = null;
         _tween = null;
     }
+    
+    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
 
     protected override void OnCommandCompleted(CommandRunScope scope)
     {

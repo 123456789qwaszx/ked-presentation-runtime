@@ -39,7 +39,7 @@ public sealed class SetColorCommandCharR : CommandBase
         yield break;
     }
     
-    protected override void OnRollbackSeek(CommandRunScope scope)
+    protected override void OnSkip(CommandRunScope scope)
     {
         if (!_resolveAttempted)
             ResolveRefs(scope);
@@ -49,6 +49,9 @@ public sealed class SetColorCommandCharR : CommandBase
 
         Apply();
     }
+    
+    
+    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
 
     private void ResolveRefs(CommandRunScope scope)
     {

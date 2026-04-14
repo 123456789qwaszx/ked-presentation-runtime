@@ -1,7 +1,7 @@
 using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
-using System.Collections;
 
 [Serializable]
 [CommandMenuHint(
@@ -32,7 +32,6 @@ public sealed class SetSpriteByCharacterCommandSpecCharR : CommandSpecBase
     public bool strict = true;
 }
 
-
 public sealed class SetSpriteByCharacterCommandCharR : CommandBase
 {
     private readonly SetSpriteByCharacterCommandSpecCharR _spec;
@@ -44,65 +43,34 @@ public sealed class SetSpriteByCharacterCommandCharR : CommandBase
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
-        string characterKey = SafeTrim(_spec.characterKey);
-        if (string.IsNullOrEmpty(characterKey))
-        {
-            if (_spec.strict)
-                Debug.LogError("[SetSpriteByCharacterCommandCharR] characterKey is null or empty.");
-            yield break;
-        }
-
-        if (!scope.CastRegistry.TryGetRole(characterKey, out string roleKey) ||
-            string.IsNullOrWhiteSpace(roleKey))
-        {
-            if (_spec.strict)
-                Debug.LogWarning(
-                    $"[SetSpriteByCharacterCommandCharR] No cast role found for character='{characterKey}'.");
-            yield break;
-        }
-
-        if (!scope.Refs.TryGetCharRigRefs(roleKey, out CharacterRigRefs rig) || rig == null)
-        {
-            if (_spec.strict)
-                Debug.LogWarning(
-                    $"[SetSpriteByCharacterCommandCharR] Rig refs not found. character='{characterKey}', roleKey='{roleKey}'.");
-            yield break;
-        }
-
-        Image image = rig.GetComponent(_spec.target) as Image;
-        if (image == null)
-        {
-            if (_spec.strict)
-                Debug.LogWarning(
-                    $"[SetSpriteByCharacterCommandCharR] Target image not found. character='{characterKey}', roleKey='{roleKey}', target='{_spec.target}'.");
-            yield break;
-        }
-
-        image.sprite = _spec.sprite;
-
-        if (_spec.sprite == null)
-            yield break;
-
-        CharRigImageSizingMode mode = _spec.sizingMode;
-        if (_spec.setNativeSize && mode == CharRigImageSizingMode.HeightFitPreserveAspect)
-            mode = CharRigImageSizingMode.NativeSizeNoReanchor;
-
-        CharRigImageSizingPolicy.Apply(
-            image,
-            _spec.sprite,
-            mode,
-            _spec.horizontalAlign);
+        Apply(scope);
+        yield break;
     }
-    
+
+    protected override void OnSkip(CommandRunScope scope)
+    {
+        Apply(scope);
+    }
+
     protected override void OnRollbackSeek(CommandRunScope scope)
     {
-        string characterKey = SafeTrim(_spec.characterKey);
-        if (string.IsNullOrEmpty(characterKey))
+        Apply(scope);
+    }
+
+    private void Apply(CommandRunScope scope)
+    {
+        if (scope == null)
+            return;
+
+        string characterKey = _spec.characterKey;
+        if (string.IsNullOrWhiteSpace(characterKey))
         {
             if (_spec.strict)
                 Debug.LogError("[SetSpriteByCharacterCommandCharR] characterKey is null or empty.");
             return;
         }
+
+        characterKey = characterKey.Trim();
 
         if (!scope.CastRegistry.TryGetRole(characterKey, out string roleKey) ||
             string.IsNullOrWhiteSpace(roleKey))
@@ -144,10 +112,5 @@ public sealed class SetSpriteByCharacterCommandCharR : CommandBase
             _spec.sprite,
             mode,
             _spec.horizontalAlign);
-    }
-
-    private static string SafeTrim(string s)
-    {
-        return string.IsNullOrEmpty(s) ? string.Empty : s.Trim();
     }
 }
