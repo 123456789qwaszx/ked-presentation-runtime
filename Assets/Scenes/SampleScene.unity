@@ -4077,10 +4077,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::YarnCommandBridge
   rigPrefab: {fileID: 8529412948266249186, guid: 01c9b93a77829ef438fc74c4ef4c5004, type: 3}
   globalTuning: {fileID: 11400000, guid: db30a92a6d8545a41b703c2585f4013d, type: 2}
-  emojiHeart: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
-  emojiQuestion: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
-  emojiAngry: {fileID: 10915, guid: 0000000000000000f000000000000000, type: 0}
-  emojiSweat: {fileID: 21300000, guid: 101d7e6888ed25445a2b9c28995eddf1, type: 3}
+  _inlineEmojiHost: {fileID: 0}
+  _emojiResolver: {fileID: 0}
 --- !u!1 &1845565635
 GameObject:
   m_ObjectHideFlags: 0
@@ -4206,8 +4204,8 @@ MonoBehaviour:
   dialogueRunner: {fileID: 8309902628538800288}
   yarnUIBridge: {fileID: 1874881010}
   presentationRouteEntry: {fileID: 1433866633}
-  yarnEntryKey: beatmaid
-  presentationEntryKey: emo
+  yarnEntryKey: maid
+  presentationEntryKey: test
   runYarnKey: 50
   stopKey: 51
 --- !u!4 &1924806293
@@ -6531,7 +6529,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 458.38, y: -24}
-  m_SizeDelta: {x: 916.76, y: 0}
+  m_SizeDelta: {x: 916.76, y: 24}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!1 &666632935594092605
 GameObject:

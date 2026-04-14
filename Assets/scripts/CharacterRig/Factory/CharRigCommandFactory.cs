@@ -53,6 +53,7 @@ public sealed class CharRigCommandFactory : INodeCommandFactory
             SetPortraitCrossfadeCommandSpecCharR s => new SetPortraitCrossfadeCommandCharR(s, _portraitResolver),
             
             SetSpriteCommandSpecCharR s     => new SetSpriteCommandCharR(s),
+            CastCharacterCommandSpec s => new CastCharacterCommand(s),
             
             _ => null
         };

@@ -63,7 +63,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         _dialogueRunner.AddCommandHandler<string, string>("nudge_hard", EnqueueJoltSpecTapHard);
         _dialogueRunner.AddCommandHandler<string, string>("slide_in_nudge", EnqueueSlideInJoltCombo);
 
-        _dialogueRunner.AddCommandHandler<string, string>("cast", EnqueueSetPortraitSpriteSpec);
+        _dialogueRunner.AddCommandHandler<string, string>("cast", EnqueueCastCharAndSetPortraitCommandSpec);
         _dialogueRunner.AddCommandHandler<string, string>("portrait_cross", EnqueueSetPortraitCrossfadeSpec);
         _dialogueRunner.AddCommandHandler<string, string>("portrait_swap", EnqueueSetEmotionPortraitWipeSpec);
 
@@ -737,8 +737,16 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         Collect(spec);
     }
 
-    private void EnqueueSetPortraitSpriteSpec(string roleKey, string character)
+    private void EnqueueCastCharAndSetPortraitCommandSpec(string roleKey, string character)
     {
+        var spec = new CastCharacterCommandSpec
+        {
+            roleKey = roleKey,
+            characterKey = character,
+            requireExistingRig = true,
+            strict = true
+        };
+        
         var portraitIdentity = new PortraitIdentity
         {
             character = character,
@@ -746,13 +754,14 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
             emotion = "1"
         };
 
-        var spec = new SetPortraitSpriteCommandSpecCharR
+        var spec2 = new SetPortraitSpriteCommandSpecCharR
         {
             roleKey = roleKey,
             portrait = portraitIdentity
         };
 
         Collect(spec);
+        Collect(spec2);
     }
 
     private CharRDirection ParseSlideDirection(string direction, CharRDirection fallback)
