@@ -121,6 +121,21 @@ public sealed class SlideOutByCharacterCommandCharR : CommandBase, IStepScopedCo
 
     protected override void OnSkip(CommandRunScope scope) => OnCommandCompleted(scope);
 
+    protected override void OnRollbackSeek(CommandRunScope scope)
+    {
+        if (!_resolveAttempted)
+            ResolveRefs(scope);
+
+        if (_rect == null)
+            return;
+
+        _rect.anchoredPosition = _startPos + GetDir(_spec.to) * _spec.distance;
+
+        _canCommitFinalState = false;
+        _rect = null;
+        _tween = null;
+    }
+    
     protected override void OnCommandCompleted(CommandRunScope scope)
     {
         if (!_resolveAttempted)

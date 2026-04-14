@@ -93,6 +93,58 @@ public sealed class SetSpriteByCharacterCommandCharR : CommandBase
             mode,
             _spec.horizontalAlign);
     }
+    
+    protected override void OnRollbackSeek(CommandRunScope scope)
+    {
+        string characterKey = SafeTrim(_spec.characterKey);
+        if (string.IsNullOrEmpty(characterKey))
+        {
+            if (_spec.strict)
+                Debug.LogError("[SetSpriteByCharacterCommandCharR] characterKey is null or empty.");
+            return;
+        }
+
+        if (!scope.CastRegistry.TryGetRole(characterKey, out string roleKey) ||
+            string.IsNullOrWhiteSpace(roleKey))
+        {
+            if (_spec.strict)
+                Debug.LogWarning(
+                    $"[SetSpriteByCharacterCommandCharR] No cast role found for character='{characterKey}'.");
+            return;
+        }
+
+        if (!scope.Refs.TryGetCharRigRefs(roleKey, out CharacterRigRefs rig) || rig == null)
+        {
+            if (_spec.strict)
+                Debug.LogWarning(
+                    $"[SetSpriteByCharacterCommandCharR] Rig refs not found. character='{characterKey}', roleKey='{roleKey}'.");
+            return;
+        }
+
+        Image image = rig.GetComponent(_spec.target) as Image;
+        if (image == null)
+        {
+            if (_spec.strict)
+                Debug.LogWarning(
+                    $"[SetSpriteByCharacterCommandCharR] Target image not found. character='{characterKey}', roleKey='{roleKey}', target='{_spec.target}'.");
+            return;
+        }
+
+        image.sprite = _spec.sprite;
+
+        if (_spec.sprite == null)
+            return;
+
+        CharRigImageSizingMode mode = _spec.sizingMode;
+        if (_spec.setNativeSize && mode == CharRigImageSizingMode.HeightFitPreserveAspect)
+            mode = CharRigImageSizingMode.NativeSizeNoReanchor;
+
+        CharRigImageSizingPolicy.Apply(
+            image,
+            _spec.sprite,
+            mode,
+            _spec.horizontalAlign);
+    }
 
     private static string SafeTrim(string s)
     {

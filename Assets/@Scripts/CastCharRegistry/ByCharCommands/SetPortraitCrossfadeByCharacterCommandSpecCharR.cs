@@ -129,6 +129,27 @@ public sealed class SetPortraitCrossfadeByCharacterCommand : CommandBase, IStepS
 
     protected override void OnSkip(CommandRunScope scope) => OnCommandCompleted(scope);
 
+    protected override void OnRollbackSeek(CommandRunScope scope)
+    {
+        if (!_resolveAttempted)
+            ResolveRefs(scope);
+
+        if (_portraitRoot == null || _overlayRoot == null ||
+            _portraitImage == null || _overlayImage == null ||
+            _portraitCanvasGroup == null || _overlayCanvasGroup == null)
+        {
+            return;
+        }
+
+        Sprite targetSprite = ResolveSprite(_spec.portrait);
+        if (targetSprite == null)
+            return;
+
+        CommitFinalState(targetSprite);
+        _canCommitFinalState = false;
+        _seq = null;
+    }
+    
     protected override void OnCommandCompleted(CommandRunScope scope)
     {
         if (!_canCommitFinalState || _portraitRoot == null || _overlayRoot == null)

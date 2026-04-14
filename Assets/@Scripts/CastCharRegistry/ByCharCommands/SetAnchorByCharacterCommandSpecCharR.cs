@@ -66,6 +66,14 @@ public sealed class SetAnchorByCharacterCommandCharR : CommandBase
         Apply();
         yield break;
     }
+    
+    protected override void OnRollbackSeek(CommandRunScope scope)
+    {
+        if (!_resolveAttempted)
+            ResolveRefs(scope);
+
+        Apply();
+    }
 
     private void Apply()
     {

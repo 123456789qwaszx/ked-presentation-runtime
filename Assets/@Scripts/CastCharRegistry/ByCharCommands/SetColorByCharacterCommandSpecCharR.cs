@@ -81,6 +81,17 @@ public sealed class SetColorByCharacterCommandCharR : CommandBase
                 $"[SetColorByCharacterCommandCharR] Target image not found. character='{characterKey}', roleKey='{roleKey}', target='{_spec.target}'.");
         }
     }
+    
+    protected override void OnRollbackSeek(CommandRunScope scope)
+    {
+        if (!_resolveAttempted)
+            ResolveRefs(scope);
+
+        if (_image == null)
+            return;
+
+        Apply();
+    }
 
     private void Apply()
     {

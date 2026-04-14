@@ -86,6 +86,17 @@ public sealed class ApplyTrackOffsetCommandCharR : CommandBase
 
         _rect.anchoredPosition += _spec.offset;
     }
+    
+    protected override void OnRollbackSeek(CommandRunScope scope)
+    {
+        if (!_resolveAttempted)
+            ResolveRefs(scope);
+
+        if (_rect == null)
+            return;
+
+        Apply();
+    }
 
     private static void ResetRect(RectTransform rect)
     {

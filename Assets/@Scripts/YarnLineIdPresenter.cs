@@ -30,7 +30,6 @@ public sealed class YarnLineIdPresenter : DialoguePresenterBase
             return string.Empty;
 
         string key = line.CharacterName;
-        Debug.Log($"[YarnLineIdPresenter] CharacterKey='{key}', LineId='{line.TextID}'");
         return key;
     }
 }

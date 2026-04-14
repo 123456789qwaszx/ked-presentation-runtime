@@ -94,6 +94,23 @@ public sealed class MoveByCommandCharR : CommandBase, IStepScopedCommand
 
     protected override void OnSkip(CommandRunScope scope) => OnCommandCompleted(scope);
 
+    protected override void OnRollbackSeek(CommandRunScope scope)
+    {
+        if (!_resolveAttempted)
+            ResolveRefs(scope);
+
+        if (_rect == null)
+            return;
+
+        _hasComputedDest = false;
+        ComputeDestIfNeeded();
+
+        _rect.anchoredPosition = _destPos;
+        _canCommitFinalState = false;
+        _rect = null;
+        _tween = null;
+    }
+    
     protected override void OnCommandCompleted(CommandRunScope scope)
     {
         if (!_resolveAttempted)

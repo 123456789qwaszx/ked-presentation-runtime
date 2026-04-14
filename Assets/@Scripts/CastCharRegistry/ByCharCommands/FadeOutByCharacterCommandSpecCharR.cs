@@ -130,6 +130,24 @@ public sealed class FadeOutByCharacterCommandCharR : CommandBase, IStepScopedCom
 
     protected override void OnSkip(CommandRunScope scope) => OnCommandCompleted(scope);
 
+    protected override void OnRollbackSeek(CommandRunScope scope)
+    {
+        if (!_resolveAttempted)
+            ResolveRefs(scope);
+
+        if (_targets.Count == 0)
+        {
+            _pending = 0;
+            _canCommitFinalState = false;
+            return;
+        }
+
+        SnapOffTargets(_targets);
+
+        _pending = 0;
+        _canCommitFinalState = false;
+    }
+    
     protected override void OnCommandCompleted(CommandRunScope scope)
     {
         if (!_resolveAttempted)

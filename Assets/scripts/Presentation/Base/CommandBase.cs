@@ -14,7 +14,7 @@ public abstract class CommandBase : ISequenceCommand
     // ExecuteEvenIfSkipping: must still run (text/log/signals).
     protected virtual SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
-    // If true, the StepGateRunner waits for this command to finish before moving on.
+    // If true, the SequencePlayer waits for this command to finish before moving on.
     // If false, it runs in the background (fire-and-forget) and should be tracked via SequencePlayer.
     public virtual bool WaitForCompletion => false;
     protected bool IsCanceled(CommandRunScope scope) => scope.Token.IsCancellationRequested;
@@ -70,10 +70,13 @@ public abstract class CommandBase : ISequenceCommand
 
     protected abstract IEnumerator ExecuteInner(CommandRunScope scope);
 
-    protected virtual void OnSkip(CommandRunScope scope) { }
+    protected virtual void OnSkip(CommandRunScope scope)
+    {
+    }
 
     protected virtual void OnRollbackSeek(CommandRunScope scope)
-    { }
+    {
+    }
     
     protected IEnumerator Wait(CommandRunScope scope, float seconds)
     {

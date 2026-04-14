@@ -39,11 +39,17 @@ public sealed class ShowRootLayersCommandCharR : CommandBase, IStepScopedCommand
         Apply();
         yield break;
     }
+    
+    protected override void OnRollbackSeek(CommandRunScope scope)
+    {
+        if (!_resolveAttempted)
+            ResolveRefs(scope);
+
+        Apply();
+    }
 
     private void Apply()
     {
-        Debug.Log("Apply");
-        Debug.Log(_spec.targetMask);
         if (_targets.Count == 0)
             return;
         

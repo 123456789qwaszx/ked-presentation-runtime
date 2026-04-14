@@ -32,7 +32,7 @@ momoka:의뢰가...... [emoji=heart/][sfx=c1/]나보고 직접 여행가 사회�
 <<sfx audio/sfx_dragon-studio-notification-sound-effect-372475>>
 <<closebox>>
 <<begin_hold>>
-<<await_for 3>>
+<<await_for 1>>
 <<blackout cover>>
 <<uipatch black>>
 <<blackout uncover>>
@@ -44,9 +44,10 @@ momoka:의뢰가...... [emoji=heart/][sfx=c1/]나보고 직접 여행가 사회�
 <<sfx audio/sfx_dragon-studio-sand-transition-451861>>
 //<<closebox>>
 //<<begin_hold>>
-<<await_for 4>>
+<<await_for 1>>
 <<blackout cover>>
 <<uipatch theme1>>
+<<await_for 1>>
 <<blackout uncover>>
 //<<end_hold>>
 
@@ -112,7 +113,6 @@ momoka:의뢰가...... [emoji=heart/][sfx=c1/]나보고 직접 여행가 사회�
 
 
 <<shake elle top>>
-<<await_for 1>>
 <<to_scale elle 1.7>>
 <<move_by elle 0 -150>>
 엘레노어: 공백 여단과 하나사키 여단, 거대 여단 둘을 이끌면서 '3대 의뢰'를 해결하시고, 캠프를 구하는 모습을 보고 정말 큰 감동을 받았어요.

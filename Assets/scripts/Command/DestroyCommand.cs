@@ -78,6 +78,16 @@ public sealed class DestroyCommand : CommandBase
         yield break;
     }
     
+    protected override void OnRollbackSeek(CommandRunScope scope)
+    {
+        GameObject go = FindTarget();
+        if (go == null)
+            return;
+
+        Object.Destroy(go);
+
+        scope.Refs[_spec.roleKey] = null;
+    }
 
     private GameObject FindTarget()
     {

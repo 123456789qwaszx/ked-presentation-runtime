@@ -43,6 +43,14 @@ public sealed class HideRootLayersCommandCharR : CommandBase
         yield break;
     }
     
+    protected override void OnRollbackSeek(CommandRunScope scope)
+    {
+        if (!_resolveAttempted)
+            ResolveRefs(scope);
+
+        Apply();
+    }
+    
     private void Apply()
     {
         if (_targets.Count == 0)
@@ -52,6 +60,7 @@ public sealed class HideRootLayersCommandCharR : CommandBase
         
         _targets.Clear();
     }
+    
 
     private void SnapOffTargets(List<RectTransform> targets)
     {

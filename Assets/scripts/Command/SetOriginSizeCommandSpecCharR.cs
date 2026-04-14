@@ -46,6 +46,17 @@ public sealed class SetOriginSizeCommandCharR : CommandBase
         Apply();
         yield break;
     }
+    
+    protected override void OnRollbackSeek(CommandRunScope scope)
+    {
+        if (!_resolveAttempted)
+            ResolveRefs(scope);
+
+        if (_rect == null)
+            return;
+
+        Apply();
+    }
 
     private void Apply()
     {

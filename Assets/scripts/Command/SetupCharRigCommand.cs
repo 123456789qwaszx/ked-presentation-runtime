@@ -72,6 +72,15 @@ public sealed class SetupCharRigCommand : CommandBase
 
         yield break;
     }
+    
+    protected override void OnRollbackSeek(CommandRunScope scope)
+    {
+        if (_spec.destroyExistingRigWithSameName)
+            TryDestroyExistingRig();
+
+        CharacterRigRefs rigRefs = _rigAccess.BindAndBuildRefs(_spec);
+        scope.Refs[_spec.roleKey] = rigRefs;
+    }
 
     private void TryDestroyExistingRig()
     {

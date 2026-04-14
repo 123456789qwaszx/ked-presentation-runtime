@@ -88,6 +88,21 @@ public sealed class RotateToCommandCharR : CommandBase, IStepScopedCommand
 
     protected override void OnSkip(CommandRunScope scope) => OnCommandCompleted(scope);
 
+    protected override void OnRollbackSeek(CommandRunScope scope)
+    {
+        if (!_resolveAttempted)
+            ResolveRefs(scope);
+
+        if (_rect == null)
+            return;
+
+        SetLocalEuler(_rect, _spec.toEuler);
+
+        _canCommitFinalState = false;
+        _rect = null;
+        _tween = null;
+    }
+    
     protected override void OnCommandCompleted(CommandRunScope scope)
     {
         if (!_resolveAttempted)

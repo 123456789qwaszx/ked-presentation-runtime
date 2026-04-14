@@ -76,6 +76,7 @@ public sealed class CharRigCommandFactory : INodeCommandFactory
             SlideInByCharacterCommandSpecCharR s => new SlideInByCharacterCommandCharR(s),
             SlideOutByCharacterCommandSpecCharR s => new SlideOutByCharacterCommandCharR(s),
             SwayByCharacterCommandSpecCharR s => new SwayByCharacterCommandCharR(s),
+            UncastCharacterCommandSpec s => new UncastCharacterCommand(s),
             
             _ => null
         };

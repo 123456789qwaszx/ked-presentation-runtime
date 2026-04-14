@@ -125,6 +125,20 @@ public sealed class PunchScaleByCharacterCommandCharR : CommandBase, IStepScoped
 
     protected override void OnSkip(CommandRunScope scope) => OnCommandCompleted(scope);
 
+    protected override void OnRollbackSeek(CommandRunScope scope)
+    {
+        if (!_resolveAttempted)
+            ResolveRefs(scope);
+
+        if (_rect == null)
+            return;
+
+        _rect.localScale = _originScale;
+        _canCommitFinalState = false;
+        _rect = null;
+        _tween = null;
+    }
+    
     protected override void OnCommandCompleted(CommandRunScope scope)
     {
         if (!_resolveAttempted)
