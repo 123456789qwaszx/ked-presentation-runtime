@@ -58,8 +58,8 @@ public sealed class MessengerDialoguePresenter : DialoguePresenterBase
 
         if (_showTypingIndicators && prefab.HasIndicator)
         {
-            MessengerBubbleView typingBubble = _panel.AppendTypingBubble(prefab, speaker);
-            _panel.ScrollToBottom();
+            MessengerBubbleView typingBubble = _panel?.AppendTypingBubble(prefab, speaker);
+            _panel?.ScrollToBottom();
 
             float typingDelay = Mathf.Clamp(
                 text.Length * _typingDelayPerCharacter,
@@ -70,11 +70,11 @@ public sealed class MessengerDialoguePresenter : DialoguePresenterBase
                 TimeSpan.FromSeconds(typingDelay),
                 token.HurryUpToken).SuppressCancellationThrow();
 
-            _panel.RemoveBubble(typingBubble);
+            _panel?.RemoveBubble(typingBubble);
         }
 
-        _panel.AppendBubble(prefab, speaker, text);
-        _panel.ScrollToBottom();
+        _panel?.AppendBubble(prefab, speaker, text);
+        _panel?.ScrollToBottom();
 
         await YarnTask.Delay(
             TimeSpan.FromSeconds(_delayAfterLine),

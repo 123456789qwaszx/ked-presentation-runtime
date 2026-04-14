@@ -2,14 +2,78 @@ using System;
 using UnityEngine;
 using Yarn.Unity;
 
-public sealed partial class YarnCommandBridge
+public sealed partial class YarnCommandBridge : InlineEventMarkupHandler.IInlineEmojiHost
 {
-    [Header("Emoji Test Sprites")]
-    [SerializeField] private Sprite emojiHeart;
-    [SerializeField] private Sprite emojiQuestion;
-    [SerializeField] private Sprite emojiAngry;
-    [SerializeField] private Sprite emojiSweat;
+    [Header("Emoji")]
+    [SerializeField] private InlineEmojiHost _inlineEmojiHost;
 
+    [Header("Emoji")]
+    [SerializeField] private InlineEmojiResolver _emojiResolver;
+    
+    public void PlayEmojiCue(string cue)
+    {
+        string roleKey = ResolveCurrentSpeakerRoleKey();
+
+        if (string.IsNullOrWhiteSpace(cue))
+        {
+            EnqueueEmojiHideCombo(roleKey);
+            return;
+        }
+
+        EnqueueEmojiCombo(roleKey, cue);
+    }
+    
+    private string _currentSpeakerRoleKey;
+
+    public void SetCurrentSpeakerRoleKey(string roleKey)
+    {
+        _currentSpeakerRoleKey = roleKey ?? string.Empty;
+    }
+
+    private string ResolveCurrentSpeakerRoleKey()
+    {
+        if (string.IsNullOrWhiteSpace(_currentSpeakerRoleKey))
+        {
+            Debug.LogWarning("[YarnCommandBridge/Emoji] Current speaker roleKey is empty.", this);
+            return string.Empty;
+        }
+
+        return _currentSpeakerRoleKey;
+    }
+    
+    private Sprite ResolveEmojiSprite(string emojiKey)
+    {
+        if (_emojiResolver == null)
+        {
+            Debug.LogWarning("[YarnCommandBridge/Emoji] InlineEmojiResolver is null.", this);
+            return null;
+        }
+
+        if (_emojiResolver.TryResolveEmoji(emojiKey, out Sprite sprite))
+            return sprite;
+
+        return null;
+    }
+    // private Sprite ResolveEmojiSprite(string emojiKey)
+    // {
+    //     if (_inlineEmojiHost == null)
+    //     {
+    //         Debug.LogWarning("[YarnCommandBridge/Emoji] InlineEmojiHost is null.", this);
+    //         return null;
+    //     }
+    //
+    //     if (string.IsNullOrWhiteSpace(emojiKey))
+    //     {
+    //         Debug.LogWarning("[YarnCommandBridge/Emoji] emojiKey is null or empty.", this);
+    //         return null;
+    //     }
+    //
+    //     if (_inlineEmojiHost.TryResolveEmoji(emojiKey, out Sprite sprite))
+    //         return sprite;
+    //
+    //     return null;
+    // }
+    
     private void RegisterEmojiCommands()
     {
         _dialogueRunner.AddCommandHandler<string, string>("emoji", EnqueueEmojiCombo);
@@ -25,18 +89,18 @@ public sealed partial class YarnCommandBridge
         }
 
         Sprite sprite = ResolveEmojiSprite(emojiKey);
+
         if (sprite == null)
         {
-            Debug.LogWarning($"[YarnCommandBridge/Emoji] Unknown emojiKey '{emojiKey}'.");
+            Debug.LogWarning($"[YarnCommandBridge/Emoji] Failed to resolve emoji sprite. emojiKey={emojiKey}", this);
             return;
         }
 
         // 1) sprite 교체
-        var setSprite = new SetSpriteCommandSpecCharR()
+        var setSprite = new SetSpriteCommandSpecCharR
         {
-            target = CharacterRigTarget.CharacterEmoji_Image,
-            
             roleKey = roleKey,
+            target = CharacterRigTarget.CharacterEmoji_Image,
             sprite = sprite
         };
 
@@ -51,7 +115,7 @@ public sealed partial class YarnCommandBridge
         };
 
         // 3) 기본 scale
-        var scale = new ScaleToCommandSpecCharR
+        var resetScale = new ScaleToCommandSpecCharR
         {
             roleKey = roleKey,
             target = CharacterRigTarget.CharacterEmoji_Scale,
@@ -70,17 +134,16 @@ public sealed partial class YarnCommandBridge
 
         Collect(setSprite);
         Collect(resetAnchor);
-        Collect(scale);
+        Collect(resetScale);
         Collect(fadeIn);
 
-        switch ((emojiKey ?? "").Trim().ToLowerInvariant())
+        switch (NormalizeEmojiKey(emojiKey))
         {
             case "heart":
                 EnqueueEmojiHeartCombo(roleKey);
                 break;
 
             case "question":
-            case "q":
                 EnqueueEmojiQuestionCombo(roleKey);
                 break;
 
@@ -92,54 +155,14 @@ public sealed partial class YarnCommandBridge
                 EnqueueEmojiSweatCombo(roleKey);
                 break;
 
-            // default:
-            //     // 기본은 그냥 짧게 보여주고 사라짐
-            //     Collect(new WaitCommandSpec
-            //     {
-            //         roleKey = roleKey,
-            //         seconds = 0.55f
-            //     });
-            //
-            //     Collect(new FadeOutCommandSpecCharR
-            //     {
-            //         roleKey = roleKey,
-            //         targetMask = CharRigRootLayerMask.CharacterEmoji_Root,
-            //         duration = 0.14f,
-            //         wait = false
-            //     });
+            default:
+                Debug.LogWarning($"[YarnCommandBridge/Emoji] No combo registered for emojiKey={emojiKey}", this);
                 break;
         }
     }
 
-    private void EnqueueEmojiHideCombo(string roleKey)
-    {
-        if (string.IsNullOrWhiteSpace(roleKey))
-        {
-            Debug.LogError("[YarnCommandBridge/Emoji] roleKey is null or empty.");
-            return;
-        }
-
-        var fadeOut = new FadeOutCommandSpecCharR
-        {
-            roleKey = roleKey,
-            targetMask = CharRigRootLayerMask.CharacterEmoji_Root,
-            duration = 0.12f,
-            wait = false
-        };
-
-        Collect(fadeOut);
-    }
-
     private void EnqueueEmojiHeartCombo(string roleKey)
     {
-        var showEmojiLayer = new FadeInCommandSpecCharR()
-        {
-            roleKey = roleKey,
-            targetMask = CharRigRootLayerMask.CharacterEmoji_Root
-        };
-
-        Collect(showEmojiLayer);
-        
         var moveUp = new MoveByCommandSpecCharR
         {
             roleKey = roleKey,
@@ -194,15 +217,6 @@ public sealed partial class YarnCommandBridge
 
     private void EnqueueEmojiQuestionCombo(string roleKey)
     {
-        
-        var showEmojiLayer = new FadeInCommandSpecCharR()
-        {
-            roleKey = roleKey,
-            targetMask = CharRigRootLayerMask.CharacterEmoji_Root
-        };
-
-        Collect(showEmojiLayer);
-        
         var moveUp = new MoveByCommandSpecCharR
         {
             roleKey = roleKey,
@@ -245,14 +259,6 @@ public sealed partial class YarnCommandBridge
 
     private void EnqueueEmojiAngryCombo(string roleKey)
     {
-        var showEmojiLayer = new FadeInCommandSpecCharR()
-        {
-            roleKey = roleKey,
-            targetMask = CharRigRootLayerMask.CharacterEmoji_Root
-        };
-
-        Collect(showEmojiLayer);
-        
         var moveUp = new MoveByCommandSpecCharR
         {
             roleKey = roleKey,
@@ -304,14 +310,6 @@ public sealed partial class YarnCommandBridge
 
     private void EnqueueEmojiSweatCombo(string roleKey)
     {
-        var showEmojiLayer = new FadeInCommandSpecCharR()
-        {
-            roleKey = roleKey,
-            targetMask = CharRigRootLayerMask.CharacterEmoji_Root
-        };
-
-        Collect(showEmojiLayer);
-        
         var move = new MoveByCommandSpecCharR
         {
             roleKey = roleKey,
@@ -349,25 +347,37 @@ public sealed partial class YarnCommandBridge
         Collect(fadeOut);
     }
 
-    private Sprite ResolveEmojiSprite(string emojiKey)
+    private void EnqueueEmojiHideCombo(string roleKey)
     {
-        switch ((emojiKey ?? "").Trim().ToLowerInvariant())
+        if (string.IsNullOrWhiteSpace(roleKey))
         {
-            case "heart":
-                return emojiHeart;
+            Debug.LogError("[YarnCommandBridge/Emoji] roleKey is null or empty.");
+            return;
+        }
 
-            case "question":
+        var fadeOut = new FadeOutCommandSpecCharR
+        {
+            roleKey = roleKey,
+            targetMask = CharRigRootLayerMask.CharacterEmoji_Root,
+            duration = 0.12f,
+            wait = false
+        };
+
+        Collect(fadeOut);
+    }
+
+
+    private string NormalizeEmojiKey(string emojiKey)
+    {
+        string key = (emojiKey ?? string.Empty).Trim().ToLowerInvariant();
+
+        switch (key)
+        {
             case "q":
-                return emojiQuestion;
-
-            case "angry":
-                return emojiAngry;
-
-            case "sweat":
-                return emojiSweat;
+                return "question";
 
             default:
-                return null;
+                return key;
         }
     }
 }

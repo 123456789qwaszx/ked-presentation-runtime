@@ -15,5 +15,5 @@ MonoBehaviour:
   catalogId: 
   sequences:
   - {fileID: 11400000, guid: d60483aab934d024880c49cfb9dcf377, type: 2}
-  - {fileID: 11400000, guid: 3452749365a72754fae07c02c9c8e6b0, type: 2}
+  - {fileID: 11400000, guid: 19fcb8af81b72a148b951103680b0c85, type: 2}
   - {fileID: 11400000, guid: 7104031c5f800614ea97fc3d82b70c4b, type: 2}

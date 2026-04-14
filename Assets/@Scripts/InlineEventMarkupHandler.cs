@@ -17,7 +17,7 @@ public sealed class InlineEventMarkupHandler : ActionMarkupHandler
     private IInlineAudioHost _inlineAudioHost;
     private IInlineEmojiHost _inlineEmojiHost;
 
-    public void Initialize(IInlineSignalHost inlineSignalHost, IInlineAudioHost inlineAudioHost, IInlineEmojiHost inlineEmojiHost)
+    public void Initialize(IInlineSignalHost inlineSignalHost, IInlineAudioHost inlineAudioHost, IInlineEmojiHost inlineEmojiHost = null)
     {
         _inlineSignalHost = inlineSignalHost;
         _inlineAudioHost = inlineAudioHost;

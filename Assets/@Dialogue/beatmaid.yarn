@@ -10,13 +10,6 @@
 <<bgm audio/bgm_tam_dystopia_snowwind_01>>
 //<<destroy me>>
 
-<<slot_boxside me>>
-<<place me boxside>>
-<<size me 1.5>>
-<<cast me momoka>>
-
-<<fade_in me>>
-
 // <<set_named_box WithPortrait>>
 // <<set_narration_box LetterBox>>
 

@@ -37,7 +37,7 @@ public sealed class EpisodePlayer : MonoBehaviour, IRollbackDialogueRestarter
     {
         if (Input.GetKeyDown(runYarnKey))
         {
-            Debug.Log("TryStartYarnNode", this);
+            //Debug.Log("TryStartYarnNode", this);
             OpenDialogueUI();
             StartPresentationRoute(presentationEntryKey);
             StartYarnNode(yarnEntryKey);

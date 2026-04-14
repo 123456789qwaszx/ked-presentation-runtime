@@ -143,7 +143,7 @@ public class VnAppBootstrap : MonoBehaviour
     
     private void BootstrapYarn()
     {
-        inlineEventMarkupHandler.Initialize(_presentationSessionBridge, inlineSfxHost, inlineEmojiHost);
+        inlineEventMarkupHandler.Initialize(_presentationSessionBridge, inlineSfxHost);
         vnRuntimeBridge.Initialize(dialogueRunner, presentationSessionEntry, _presentationSessionBridge);
         yarnUIBridge.Initialize(linePresenter, ellipsisBreathTypewriter, dialogueTextRouter);
         

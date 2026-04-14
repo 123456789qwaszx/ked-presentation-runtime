@@ -47,7 +47,6 @@ public sealed class YarnDialogueBoxAutoRouterPresenter : DialoguePresenterBase
         {
             _audioSystem?.Voice.Play(clip);
         }
-        _inlineEmojiHost?.SetCurrentSpeaker(line.CharacterName ?? "");
         
         _yarnBridgePlaybackDriver?.ResetImmediateWaitForNewLine();
         _yarnBridgePlaybackDriver?.PlayCollected();

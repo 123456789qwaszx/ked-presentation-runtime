@@ -2,45 +2,12 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-[Serializable]
-public struct EmojiCueMapEntry
-{
-    public string cue;
-    public string spriteKey;
-}
-
-public interface IEmojiSpriteResolver
-{
-    bool TryResolve(string spriteKey, out Sprite sprite);
-}
-
-public sealed class ResourcesEmojiSpriteResolver : IEmojiSpriteResolver
-{
-    public bool TryResolve(string spriteKey, out Sprite sprite)
-    {
-        sprite = null;
-
-        if (string.IsNullOrWhiteSpace(spriteKey))
-            return false;
-
-        sprite = Resources.Load<Sprite>(spriteKey);
-        return sprite != null;
-    }
-}
-
-public sealed class InlineEmojiHost : MonoBehaviour
+public sealed class InlineEmojiResolver : MonoBehaviour
 {
     [Header("Cue -> SpriteKey")]
     [SerializeField] private List<EmojiCueMapEntry> cueMap = new();
 
-    private IEmojiSpriteResolver _spriteResolver;
     private Dictionary<string, string> _cueToSpriteKey;
-
-    public void Initialize(IEmojiSpriteResolver spriteResolver)
-    {
-        _spriteResolver = spriteResolver;
-        RebuildMap();
-    }
 
 #if UNITY_EDITOR
     private void OnValidate()
@@ -48,6 +15,11 @@ public sealed class InlineEmojiHost : MonoBehaviour
         RebuildMap();
     }
 #endif
+
+    private void Awake()
+    {
+        RebuildMap();
+    }
 
     public bool TryResolveEmoji(string cue, out Sprite sprite)
     {
@@ -61,10 +33,8 @@ public sealed class InlineEmojiHost : MonoBehaviour
         if (string.IsNullOrWhiteSpace(spriteKey))
             return false;
 
-        if (_spriteResolver == null)
-            return false;
-
-        return _spriteResolver.TryResolve(spriteKey, out sprite) && sprite != null;
+        sprite = Resources.Load<Sprite>(spriteKey);
+        return sprite != null;
     }
 
     private string ResolveCueToSpriteKey(string cue)
