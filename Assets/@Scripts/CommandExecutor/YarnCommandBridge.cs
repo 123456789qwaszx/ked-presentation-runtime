@@ -23,7 +23,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
     public void RegisterYarnCommands()
     {
         RegisterEmojiCommands();
-        
+
         _dialogueRunner.AddCommandHandler<string>("destroy", EnqueueDestroySpec);
 
         // Marks the next N collected commands as wait=true inside Presentation/Executor.
@@ -63,7 +63,6 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         _dialogueRunner.AddCommandHandler<string, string>("nudge_hard", EnqueueJoltSpecTapHard);
         _dialogueRunner.AddCommandHandler<string, string>("slide_in_nudge", EnqueueSlideInJoltCombo);
 
-        _dialogueRunner.AddCommandHandler<string, string>("cast", EnqueueCastCharAndSetPortraitCommandSpec);
         _dialogueRunner.AddCommandHandler<string, string>("portrait_cross", EnqueueSetPortraitCrossfadeSpec);
         _dialogueRunner.AddCommandHandler<string, string>("portrait_swap", EnqueueSetEmotionPortraitWipeSpec);
 
@@ -79,7 +78,8 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         _dialogueRunner.AddCommandHandler<string>("sfx", EnqueuePlaySfxSpec);
         _dialogueRunner.AddCommandHandler("stop_all_sfx", EnqueueStopAllSfxSpec);
 
-        _dialogueRunner.AddCommandHandler<string, string, string, string>("emotion_wipe", EnqueueSetEmotionPortraitWipeSpec);
+        _dialogueRunner.AddCommandHandler<string, string, string, string>("emotion_wipe",
+            EnqueueSetEmotionPortraitWipeSpec);
 
         _dialogueRunner.AddCommandHandler<string>("sway", EnqueueSwaySpecGentle);
         _dialogueRunner.AddCommandHandler<string>("sway_hard", EnqueueSwaySpecPendulum);
@@ -87,6 +87,21 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         _dialogueRunner.AddCommandHandler<string>("sway_away", EnqueueSwaySpecAway);
         _dialogueRunner.AddCommandHandler<string, int>("sway_to", EnqueuePivotRotateToSpec);
         _dialogueRunner.AddCommandHandler<string>("slide_in_sway", EnqueueSlideInSwayCombo);
+
+
+        // slot <-> character binding
+        _dialogueRunner.AddCommandHandler<string, string>("cast", EnqueueCastCharAndSetPortraitCommandSpec);
+        _dialogueRunner.AddCommandHandler<string>("uncast", EnqueueUncastCharacterSpec);
+
+        // character-target commands
+        _dialogueRunner.AddCommandHandler<string, string>("jolt_char", EnqueueJoltByCharacterSpec);
+        _dialogueRunner.AddCommandHandler<string, string>("shake_char", EnqueueJoltByCharacterSpecShake);
+        _dialogueRunner.AddCommandHandler<string, string>("nudge_char", EnqueueJoltByCharacterSpecTap);
+        _dialogueRunner.AddCommandHandler<string, string>("nudge_hard_char", EnqueueJoltByCharacterSpecTapHard);
+
+        _dialogueRunner.AddCommandHandler<string, string>("portrait_cross_char", EnqueueSetPortraitCrossfadeByCharacterSpec);
+        _dialogueRunner.AddCommandHandler<string, string>("portrait_swap_char", EnqueueSetEmotionPortraitWipeByCharacterSpec);
+        _dialogueRunner.AddCommandHandler<string, string, string, string>("emotion_wipe_char", EnqueueSetEmotionPortraitWipeByCharacterSpec);
     }
 
     private void EnqueuePivotRotateToSpec(string roleKey, int angle)
@@ -746,7 +761,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
             requireExistingRig = true,
             strict = true
         };
-        
+
         var portraitIdentity = new PortraitIdentity
         {
             character = character,
@@ -762,6 +777,30 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 
         Collect(spec);
         Collect(spec2);
+    }
+
+    // private void EnqueueCastCharacterSpec(string roleKey, string characterKey)
+    // {
+    //     var spec = new CastCharacterCommandSpec
+    //     {
+    //         roleKey = roleKey,
+    //         characterKey = characterKey,
+    //         requireExistingRig = true,
+    //         strict = true
+    //     };
+    //
+    //     Collect(spec);
+    // }
+
+    private void EnqueueUncastCharacterSpec(string roleKey)
+    {
+        var spec = new UncastCharacterCommandSpec
+        {
+            roleKey = roleKey,
+            strict = true
+        };
+
+        Collect(spec);
     }
 
     private CharRDirection ParseSlideDirection(string direction, CharRDirection fallback)
@@ -790,4 +829,144 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
                 return fallback;
         }
     }
+
+    #region Character0target Commands
+
+    private void EnqueueJoltByCharacterSpec(string characterKey, string direction = "right")
+    {
+        CharRDirection dir = ParseSlideDirection(direction, CharRDirection.Right);
+
+        var spec = new JoltByCharacterCommandSpec
+        {
+            characterKey = characterKey,
+            target = CharacterRigTarget.Character_Track_Y,
+            direction = dir,
+            strength = 340f,
+            duration = 0.6f,
+            taps = 3,
+            damping = 8,
+            anticipation = -12,
+            strict = true
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueJoltByCharacterSpecShake(string characterKey, string direction = "right")
+    {
+        CharRDirection dir = ParseSlideDirection(direction, CharRDirection.Right);
+
+        var spec = new JoltByCharacterCommandSpec
+        {
+            characterKey = characterKey,
+            target = CharacterRigTarget.CharacterPortrait_Shake,
+            direction = dir,
+            strength = 44f,
+            duration = 1.2f,
+            taps = 4,
+            strict = true
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueJoltByCharacterSpecTap(string characterKey, string direction = "right")
+    {
+        CharRDirection dir = ParseSlideDirection(direction, CharRDirection.Right);
+
+        var spec = new JoltByCharacterCommandSpec
+        {
+            characterKey = characterKey,
+            target = CharacterRigTarget.Character_Track,
+            direction = dir,
+            strength = 340f,
+            duration = 0.6f,
+            taps = 1,
+            damping = 9,
+            anticipation = -12,
+            strict = true
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueJoltByCharacterSpecTapHard(string characterKey, string direction = "down")
+    {
+        CharRDirection dir = ParseSlideDirection(direction, CharRDirection.Down);
+
+        var spec = new JoltByCharacterCommandSpec
+        {
+            characterKey = characterKey,
+            direction = dir,
+            strength = 1400f,
+            duration = 0.7f,
+            taps = 1,
+            damping = 9,
+            anticipation = 4,
+            strict = true
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueSetPortraitCrossfadeByCharacterSpec(string characterKey, string character)
+    {
+        var portraitIdentity = new PortraitIdentity
+        {
+            character = character,
+            variant = "a",
+            emotion = "1"
+        };
+
+        var spec = new SetPortraitCrossfadeByCharacterCommandSpec
+        {
+            characterKey = characterKey,
+            portrait = portraitIdentity,
+            strict = true
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueSetEmotionPortraitWipeByCharacterSpec(string characterKey, string character)
+    {
+        var portraitIdentity = new PortraitIdentity
+        {
+            character = character,
+            variant = "a",
+            emotion = "1"
+        };
+
+        var spec = new SetEmotionPortraitWipeByCharacterCommandSpec
+        {
+            characterKey = characterKey,
+            portrait = portraitIdentity,
+            strict = true
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueSetEmotionPortraitWipeByCharacterSpec(
+        string characterKey,
+        string character,
+        string variant,
+        string emotion)
+    {
+        var spec = new SetEmotionPortraitWipeByCharacterCommandSpec
+        {
+            characterKey = characterKey,
+            portrait = new PortraitIdentity
+            {
+                character = character,
+                variant = variant,
+                emotion = emotion
+            },
+            strict = true
+        };
+
+        Collect(spec);
+    }
+
+    #endregion
 }

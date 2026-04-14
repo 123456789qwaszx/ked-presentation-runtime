@@ -53,7 +53,13 @@ public sealed class CharRigCommandFactory : INodeCommandFactory
             SetPortraitCrossfadeCommandSpecCharR s => new SetPortraitCrossfadeCommandCharR(s, _portraitResolver),
             
             SetSpriteCommandSpecCharR s     => new SetSpriteCommandCharR(s),
+            
+            
             CastCharacterCommandSpec s => new CastCharacterCommand(s),
+            SetPortraitByCharacterCommandSpec s => new SetPortraitByCharacterCommand(s, _portraitResolver),
+            JoltByCharacterCommandSpec s => new JoltByCharacterCommand(s),
+            SetPortraitCrossfadeByCharacterCommandSpec s => new SetPortraitCrossfadeByCharacterCommand(s, _portraitResolver),
+            SetEmotionPortraitWipeByCharacterCommandSpec s => new SetEmotionPortraitWipeByCharacterCommand(s, _portraitResolver),
             
             _ => null
         };

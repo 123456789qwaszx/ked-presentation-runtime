@@ -20,6 +20,7 @@ position: 70,335
 <<place me boxside>>
 <<size me 1.5>>
 <<cast me momoka>>
+//<<portrait me momoka>>
 
 <<fade_in me>>
 
@@ -27,6 +28,13 @@ position: 70,335
 여기가 [sfx =c3 gain=0.1/]월세 내고 산다는 그 집인가? 엄청 크네......
 <<sfx audio/sfx_click_soundreality-ui-pop-up-clear-391155>>
 <<voice audio/102-1>>
+
+// <<jolt_char momoka right>>
+// <<shake_char momoka left>>
+// <<portrait_cross_char momoka momoka>>
+// <<portrait_swap_char momoka momoka>>
+// <<emotion_wipe_char momoka momoka a 3>>
+<<portrait_cross_char momoka kuonji>>
 의뢰가...... 나보고 직접 여행가 사회의 상식을 알려달라는 거였지...... 분명 나 말고 더 적합한 사람이 있었을 텐데.
 
 <<sfx audio/sfx_dragon-studio-notification-sound-effect-372475>>

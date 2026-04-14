@@ -76,7 +76,7 @@ public sealed class CastCharacterCommand : CommandBase
             return;
         }
 
-        scope.CastRegistry.Bind(roleKey, characterKey);
+        scope.CastRegistry.Cast(roleKey, characterKey);
     }
 
     private static string SafeTrim(string s)
