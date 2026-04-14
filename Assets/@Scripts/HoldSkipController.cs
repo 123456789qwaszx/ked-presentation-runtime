@@ -47,7 +47,7 @@ public sealed class HoldSpeedUpController
     private void OnHoldBegin()
     {
         _typewriter.SetSpeedMultiplier(_settings.speedupModeMultiplier);
-        _presentationSessionContext.EnterRollbackSeek();
+        _presentationSessionContext.EnterSpeedUpHeld();
     }
 
     private void OnHolding()
@@ -59,6 +59,6 @@ public sealed class HoldSpeedUpController
     private void OnHoldEnd()
     {
         _typewriter.SetSpeedMultiplier(1f);
-        _presentationSessionContext.ExitRollbackSeek();
+        _presentationSessionContext.ExitSpeedUpHeld();
     }
 }

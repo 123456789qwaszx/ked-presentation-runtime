@@ -14,14 +14,11 @@ position: 70,335
 <<end_hold>>
 
 <<bgm audio/bgm_tam_dystopia_snowwind_01>>
-//<<destroy me>>
 
 <<slot me>>
 <<place me boxside>>
 <<size me 1.5>>
 <<cast me momoka>>
-//<<portrait me momoka>>
-
 <<fade_in me>>
 
 
@@ -29,22 +26,17 @@ position: 70,335
 <<sfx audio/sfx_click_soundreality-ui-pop-up-clear-391155>>
 <<voice audio/102-1>>
 
-// <<jolt_char momoka right>>
-// <<shake_char momoka left>>
-// <<portrait_cross_char momoka momoka>>
-// <<portrait_swap_char momoka momoka>>
-// <<emotion_wipe_char momoka momoka a 3>>
-<<portrait_cross_char momoka kuonji>>
-momoka:의뢰가...... [emoji =heart/]나보고 직접 여행가 사회의 상식을 알려달라는 거였지...... 분명 나 말고 더 적합한 사람이 있었을 텐데.
+<<shake_char momoka left>>
+momoka:의뢰가...... [emoji=heart/][sfx=c1/]나보고 직접 여행가 사회의 상식을 알려달라는 거였지...... 분명 나 말고 더 적합한 사람이 있었을 텐데.
 
 <<sfx audio/sfx_dragon-studio-notification-sound-effect-372475>>
-//<<closebox>>
-//<<begin_hold>>
-//<<await_for 4>>
+<<closebox>>
+<<begin_hold>>
+<<await_for 3>>
 <<blackout cover>>
 <<uipatch black>>
 <<blackout uncover>>
-//<<end_hold>>
+<<end_hold>>
 
 <<voice audio/103-1>>
 얼마 전, 엘레노어라는 여행가가 마왕 협정으로 메시지를 보내고서는 나를 콕 집어 이 의뢰를 부탁했다.
