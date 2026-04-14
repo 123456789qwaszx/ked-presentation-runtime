@@ -199,6 +199,7 @@ public class VnAppBootstrap : MonoBehaviour
             _vnPlaybackSettings,
             ellipsisBreathTypewriter,
             dialogueAdvanceDispatcher,
+            _presentationSessionContext,
             () => yarnLineLifecycleBridge.IsLineFullyShown);
         
         RollbackRuntimeState rollbackState = new ();

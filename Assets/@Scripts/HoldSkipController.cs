@@ -5,6 +5,7 @@ public sealed class HoldSpeedUpController
     private readonly VnPlaybackSettings _settings;
     private readonly EllipsisBreathTypewriter _typewriter;
     private readonly DialogueAdvanceDispatcher _dispatcher;
+    private readonly PresentationSessionContext _presentationSessionContext;
     private readonly Func<bool> _isLineFullyShown;
 
     private bool _isHeld;
@@ -14,11 +15,13 @@ public sealed class HoldSpeedUpController
         VnPlaybackSettings settings,
         EllipsisBreathTypewriter typewriter,
         DialogueAdvanceDispatcher dispatcher,
+        PresentationSessionContext presentationSessionContext,
         Func<bool> isLineFullyShown)
     {
         _settings = settings;
         _typewriter = typewriter;
         _dispatcher = dispatcher;
+        _presentationSessionContext = presentationSessionContext;
         _isLineFullyShown = isLineFullyShown;
     }
 
@@ -44,6 +47,7 @@ public sealed class HoldSpeedUpController
     private void OnHoldBegin()
     {
         _typewriter.SetSpeedMultiplier(_settings.speedupModeMultiplier);
+        _presentationSessionContext.EnterRollbackSeek();
     }
 
     private void OnHolding()
@@ -55,5 +59,6 @@ public sealed class HoldSpeedUpController
     private void OnHoldEnd()
     {
         _typewriter.SetSpeedMultiplier(1f);
+        _presentationSessionContext.ExitRollbackSeek();
     }
 }

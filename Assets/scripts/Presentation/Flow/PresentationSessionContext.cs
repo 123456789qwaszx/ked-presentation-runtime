@@ -63,7 +63,19 @@ public sealed class PresentationSessionContext
     {
         IsRollbackSeeking = false;
     }
-    
+
+    public bool IsSpeedUpHeld { get; private set; }
+
+    public void EnterSpeedUpHeld()
+    {
+        IsSpeedUpHeld = true;
+    }
+
+    public void ExitSpeedUpHeld()
+    {
+        IsSpeedUpHeld = false;
+    }
+
     /// <summary>
     /// Must be called only by the CommandRunScope to toggle busy state.
     /// </summary>

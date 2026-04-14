@@ -48,6 +48,12 @@ public abstract class CommandBase : ISequenceCommand
             }
         }
 
+        if (scope.IsRollbackSeeking)
+        {
+            OnRollbackSeek(scope);
+            yield break;
+        }
+
         IEnumerator inner = null;
         try
         {
@@ -66,6 +72,9 @@ public abstract class CommandBase : ISequenceCommand
 
     protected virtual void OnSkip(CommandRunScope scope) { }
 
+    protected virtual void OnRollbackSeek(CommandRunScope scope)
+    { }
+    
     protected IEnumerator Wait(CommandRunScope scope, float seconds)
     {
         float elapsed = 0f;

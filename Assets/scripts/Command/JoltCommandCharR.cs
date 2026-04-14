@@ -60,14 +60,14 @@ public sealed class JoltCommandCharR : CommandBase, IStepScopedCommand
 
         _canCommitFinalState = true;
 
-        if (scope.IsRollbackSeeking)
-        {
-            _rect.anchoredPosition = _restPos;
-            _canCommitFinalState = false;
-            _rect = null;
-            _tween = null;
-            yield break;
-        }
+        // if (scope.IsRollbackSeeking)
+        // {
+        //     _rect.anchoredPosition = _restPos;
+        //     _canCommitFinalState = false;
+        //     _rect = null;
+        //     _tween = null;
+        //     yield break;
+        // }
 
         if (_spec.duration <= 0f || Mathf.Approximately(_spec.strength, 0f))
         {
@@ -135,6 +135,17 @@ public sealed class JoltCommandCharR : CommandBase, IStepScopedCommand
     }
 
     protected override void OnSkip(CommandRunScope scope) => OnCommandCompleted(scope);
+    
+    protected override void OnRollbackSeek(CommandRunScope scope)
+    {
+        if (!_resolveAttempted)
+            ResolveRefs(scope);
+        
+        _rect.anchoredPosition = _restPos;
+        _canCommitFinalState = false;
+        _rect = null;
+        _tween = null;
+    }
 
     protected override void OnCommandCompleted(CommandRunScope scope)
     {
