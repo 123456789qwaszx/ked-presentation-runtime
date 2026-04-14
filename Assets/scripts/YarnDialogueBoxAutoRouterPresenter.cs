@@ -8,18 +8,21 @@ public sealed class YarnDialogueBoxAutoRouterPresenter : DialoguePresenterBase
     private DialogueBoxRouteState _routeState;
     private YarnBridgePlaybackDriver _yarnBridgePlaybackDriver;
     private AudioSystem _audioSystem;
+    private InlineEmojiHost _inlineEmojiHost;
 
     public void Initialize(
         DialogueRunner dialogueRunner,
         YarnUIBridge yarnUIBridge,
         DialogueBoxRouteState routeState,
         YarnBridgePlaybackDriver yarnBridgePlaybackDriver = null,
-        AudioSystem audioSystem = null)
+        AudioSystem audioSystem = null,
+        InlineEmojiHost inlineEmojiHost = null)
     {
         _yarnUIBridge = yarnUIBridge;
         _routeState = routeState;
         _yarnBridgePlaybackDriver = yarnBridgePlaybackDriver;
         _audioSystem = audioSystem;
+        _inlineEmojiHost = inlineEmojiHost;
 
         List<DialoguePresenterBase> presenters = new(dialogueRunner.DialoguePresenters);
         presenters.Remove(this);
@@ -44,6 +47,7 @@ public sealed class YarnDialogueBoxAutoRouterPresenter : DialoguePresenterBase
         {
             _audioSystem?.Voice.Play(clip);
         }
+        _inlineEmojiHost?.SetCurrentSpeaker(line.CharacterName ?? "");
         
         _yarnBridgePlaybackDriver?.ResetImmediateWaitForNewLine();
         _yarnBridgePlaybackDriver?.PlayCollected();

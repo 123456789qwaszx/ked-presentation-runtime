@@ -92,7 +92,7 @@ public sealed class BubbleSizeFitter : MonoBehaviour, ILayoutElement
         UpdateLayout(targetText != null ? targetText.textInfo : null);
     }
     
-    private static void SetTextWrapping(TMP_Text text, bool enabled)
+    private void SetTextWrapping(TMP_Text text, bool enabled)
     {
 #if UNITY_6000_0_OR_NEWER
         text.textWrappingMode = TextWrappingModes.Normal;

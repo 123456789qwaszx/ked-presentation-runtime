@@ -50,8 +50,17 @@ public sealed class MessengerBubbleView : MonoBehaviour
 
         if (bodyText != null)
         {
-            bodyText.SetTextWrapping(true);
+            SetTextWrapping(bodyText, true);
             bodyText.text = text ?? string.Empty;
         }
+    }
+    
+    private void SetTextWrapping(TMP_Text text, bool enabled)
+    {
+#if UNITY_6000_0_OR_NEWER
+        text.textWrappingMode = TextWrappingModes.Normal;
+#else
+            text.enableWordWrapping = true;
+#endif
     }
 }

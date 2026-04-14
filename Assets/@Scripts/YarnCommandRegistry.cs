@@ -59,6 +59,6 @@ public sealed class YarnCommandRegistry
 
     private bool TryParseKind(string key, out DialogueBoxKind kind)
     {
-        return System.Enum.TryParse(key, true, out kind);
+        return Enum.TryParse(key, true, out kind);
     }
 }

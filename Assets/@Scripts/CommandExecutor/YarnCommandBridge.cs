@@ -3,7 +3,7 @@ using System.Collections;
 using UnityEngine;
 using Yarn.Unity;
 
-public sealed class YarnCommandBridge : MonoBehaviour
+public sealed partial class YarnCommandBridge : MonoBehaviour
 {
     private DialogueRunner _dialogueRunner;
     private YarnBridgePlaybackDriver _playbackDriver;
@@ -22,6 +22,8 @@ public sealed class YarnCommandBridge : MonoBehaviour
 
     public void RegisterYarnCommands()
     {
+        RegisterEmojiCommands();
+        
         _dialogueRunner.AddCommandHandler<string>("destroy", EnqueueDestroySpec);
 
         // Marks the next N collected commands as wait=true inside Presentation/Executor.

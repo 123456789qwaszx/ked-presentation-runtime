@@ -15,11 +15,13 @@ public sealed class InlineEventMarkupHandler : ActionMarkupHandler
 {
     private IInlineSignalHost _inlineSignalHost;
     private IInlineAudioHost _inlineAudioHost;
+    private IInlineEmojiHost _inlineEmojiHost;
 
-    public void Initialize(IInlineSignalHost inlineSignalHost, IInlineAudioHost inlineAudioHost)
+    public void Initialize(IInlineSignalHost inlineSignalHost, IInlineAudioHost inlineAudioHost, IInlineEmojiHost inlineEmojiHost)
     {
         _inlineSignalHost = inlineSignalHost;
         _inlineAudioHost = inlineAudioHost;
+        _inlineEmojiHost = inlineEmojiHost;
     }
 
     public interface IInlineSignalHost
@@ -30,6 +32,11 @@ public sealed class InlineEventMarkupHandler : ActionMarkupHandler
     public interface IInlineAudioHost
     {
         void PlaySfxCue(string cue, float gain = 1f);
+    }
+    
+    public interface IInlineEmojiHost
+    {
+        void PlayEmojiCue(string cue);
     }
 
     [Serializable]
@@ -43,6 +50,7 @@ public sealed class InlineEventMarkupHandler : ActionMarkupHandler
         Signal = 1,
         Move = 2,
         Sfx = 3,
+        Emoji = 4
     }
 
     private struct InlineAction
@@ -54,6 +62,8 @@ public sealed class InlineEventMarkupHandler : ActionMarkupHandler
 
         public string sfxCue;
         public float sfxGain;
+
+        public string emojiCue;
     }
 
     private struct ActionBucket
@@ -98,17 +108,19 @@ public sealed class InlineEventMarkupHandler : ActionMarkupHandler
     private bool _suppressSignals;
     private bool _suppressMoves;
     private bool _suppressSfx;
-
+    private bool _suppressEmoji;
+    
     public void SetPauseIgnored(bool ignored)
     {
         _ignorePause = ignored;
     }
 
-    public void SetReplaySuppressed(bool suppressSignals, bool suppressMoves, bool suppressSfx = true)
+    public void SetReplaySuppressed(bool suppressSignals, bool suppressMoves, bool suppressSfx = true, bool suppressEmoji = false)
     {
         _suppressSignals = suppressSignals;
         _suppressMoves = suppressMoves;
         _suppressSfx = suppressSfx;
+        _suppressEmoji = suppressEmoji;
     }
 
     /// <summary>
@@ -169,6 +181,7 @@ public sealed class InlineEventMarkupHandler : ActionMarkupHandler
                 case "signal": RegisterSignal(attr); break;
                 case "move": RegisterMove(attr); break;
                 case "sfx": RegisterSfx(attr); break;
+                case "emoji": RegisterEmoji(attr); break;
             }
         }
     }
@@ -240,6 +253,14 @@ public sealed class InlineEventMarkupHandler : ActionMarkupHandler
 
                 if (!string.IsNullOrWhiteSpace(action.sfxCue))
                     _inlineAudioHost?.PlaySfxCue(action.sfxCue, action.sfxGain);
+                return;
+            
+            case InlineActionType.Emoji:
+                if (_suppressEmoji)
+                    return;
+
+                if (!string.IsNullOrWhiteSpace(action.emojiCue))
+                    _inlineEmojiHost?.PlayEmojiCue(action.emojiCue);
                 return;
         }
     }
@@ -321,6 +342,27 @@ public sealed class InlineEventMarkupHandler : ActionMarkupHandler
             type = InlineActionType.Sfx,
             sfxCue = cue,
             sfxGain = Mathf.Max(0f, gain),
+        });
+    }
+    
+    private void RegisterEmoji(MarkupAttribute attr)
+    {
+        // [emoji =heart/]
+        // [emoji key=heart/]
+
+        if (!TryGetString(attr, "key", out string cue) &&
+            !TryGetString(attr, "emoji", out cue)) // shorthand fallback
+            return;
+
+        if (string.IsNullOrWhiteSpace(cue))
+            return;
+
+        int idx = NormalizeIndexFast(attr.Position);
+
+        AddAction(idx, new InlineAction
+        {
+            type = InlineActionType.Emoji,
+            emojiCue = cue,
         });
     }
 

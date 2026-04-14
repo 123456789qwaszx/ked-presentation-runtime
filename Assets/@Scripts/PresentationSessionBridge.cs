@@ -1,11 +1,6 @@
 using System.Collections;
 using UnityEngine;
 
-public interface IPresentationRollbackAnchorProvider
-{
-    bool TryGetCurrentAnchor(out int nodeIndex, out int stepIndex);
-}
-
 public sealed class PresentationSessionBridge : VnRuntimeBridge.IPresentationSignalBridge, InlineEventMarkupHandler.IInlineSignalHost
 {
     private readonly PresentationSession _session;

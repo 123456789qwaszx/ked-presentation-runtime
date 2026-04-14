@@ -42,6 +42,52 @@ MonoBehaviour:
         signalKey: beat
     - editorName: 
       tracks:
+        interaction:
+        - rid: 8483491179373002942
+        - rid: 8483491179373002944
+        setup:
+        - rid: 8483491179373002945
+        - rid: 8483491179373002946
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 8483491179373002942
+      - rid: 8483491179373002944
+      - rid: 8483491179373002945
+      - rid: 8483491179373002946
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+    - editorName: 
+      tracks:
+        interaction:
+        - rid: 8483491179373002941
+        setup: []
+        motion: []
+        dialogue: []
+        fx: []
+      compiled:
+      - rid: 8483491179373002941
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+    - editorName: 
+      tracks:
+        interaction: []
+        setup: []
+        motion: []
+        dialogue: []
+        fx: []
+      compiled: []
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+    - editorName: 
+      tracks:
         interaction: []
         setup: []
         motion: []
@@ -54,4 +100,86 @@ MonoBehaviour:
         signalKey: 
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: 8483491179373002941
+      type: {class: ShowEmojiCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: sub
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        database: {fileID: 11400000, guid: 280fe7bcf36b9b149bd70dea397dcffc, type: 2}
+        emojiKey: sparkle
+        hideIfKeyEmpty: 1
+        wait: 0
+        fadeInOverride: -1
+        ease: 9
+        snapOnSkip: 1
+    - rid: 8483491179373002942
+      type: {class: SetupCharRigCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: sub
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        rigPrefab: {fileID: 8529412948266249186, guid: 01c9b93a77829ef438fc74c4ef4c5004, type: 3}
+        parentSlot: 0
+        rigRootName: CharacterRig
+        autoRolePrefixFromRoleKey: 1
+        addRolePrefix: 1
+        destroyExistingRigWithSameName: 1
+        strict: 1
+    - rid: 8483491179373002944
+      type: {class: SetPortraitSpriteCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: sub
+        _meta:
+          track: 0
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        portrait:
+          character: kuonji
+          emotion: 1
+          variant: a
+        target: 10
+        sizingMode: 1
+        horizontalAlign: 1
+    - rid: 8483491179373002945
+      type: {class: FadeInCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: sub
+        _meta:
+          track: 10
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        targetMask: 5
+        duration: 0.47
+        ease: 9
+        EnableInteraction: 1
+        wait: 0
+    - rid: 8483491179373002946
+      type: {class: MoveByCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: sub
+        _meta:
+          track: 10
+          phase: 0
+          blockingHint: 0
+          infiniteHint: 0
+          durationHint: 0
+        target: 1
+        delta: {x: 200, y: 0}
+        duration: 0.4
+        ease: 9
+        wait: 0
+        killTween: 1

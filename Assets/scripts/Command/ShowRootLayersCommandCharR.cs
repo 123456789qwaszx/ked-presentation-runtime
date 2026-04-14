@@ -42,6 +42,8 @@ public sealed class ShowRootLayersCommandCharR : CommandBase, IStepScopedCommand
 
     private void Apply()
     {
+        Debug.Log("Apply");
+        Debug.Log(_spec.targetMask);
         if (_targets.Count == 0)
             return;
         
@@ -64,6 +66,7 @@ public sealed class ShowRootLayersCommandCharR : CommandBase, IStepScopedCommand
                 canvasGroup.interactable = true;
                 canvasGroup.blocksRaycasts = true;
             }
+            Debug.Log(canvasGroup.alpha);
         }
     }
 

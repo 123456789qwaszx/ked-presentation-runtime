@@ -17,6 +17,7 @@ public class VnAppBootstrap : MonoBehaviour
     [Header("Sound")]
     [SerializeField] private AudioSystem audioSystem;
     [SerializeField] private InlineSfxHost inlineSfxHost;
+    [SerializeField] private InlineEmojiHost inlineEmojiHost;
     
     [Header("Presentation")]
     [SerializeField] private PortraitGeneratedDbSo portraitGeneratedDbSo;
@@ -142,7 +143,7 @@ public class VnAppBootstrap : MonoBehaviour
     
     private void BootstrapYarn()
     {
-        inlineEventMarkupHandler.Initialize(_presentationSessionBridge, inlineSfxHost);
+        inlineEventMarkupHandler.Initialize(_presentationSessionBridge, inlineSfxHost, inlineEmojiHost);
         vnRuntimeBridge.Initialize(dialogueRunner, presentationSessionEntry, _presentationSessionBridge);
         yarnUIBridge.Initialize(linePresenter, ellipsisBreathTypewriter, dialogueTextRouter);
         

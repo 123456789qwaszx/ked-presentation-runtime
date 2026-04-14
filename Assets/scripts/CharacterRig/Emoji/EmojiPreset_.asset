@@ -13,16 +13,16 @@ MonoBehaviour:
   m_Name: EmojiPreset_
   m_EditorClassIdentifier: Assembly-CSharp::CharacterEmojiPresetSO
   emojiKey: sparkle
-  sprite: {fileID: 21300000, guid: d3dfd17ab83435848bdd78e38cb4af9e, type: 3}
+  sprite: {fileID: 10915, guid: 0000000000000000f000000000000000, type: 0}
   layout:
-    anchoredPos: {x: 180, y: 700}
+    anchoredPos: {x: 0, y: 0}
     scale: {x: 1, y: 1}
     rotationZ: 0
     anchorMin: {x: 0, y: 0}
     anchorMax: {x: 1, y: 1}
   fadeIn: 0.8
   fadeOut: 0.8
-  effect: 3
+  effect: 1
   effectParams:
     amp: 1
     freq: 1

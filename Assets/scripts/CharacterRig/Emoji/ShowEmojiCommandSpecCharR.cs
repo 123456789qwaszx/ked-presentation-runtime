@@ -35,6 +35,7 @@ public sealed class ShowEmojiCommandCharR : CommandBase, IStepScopedCommand
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
+        Debug.Log("showEmojiCommandCharR");
         if (!scope.Refs.TryGetCharRigRefs(_spec.roleKey, out CharacterRigRefs rig) || rig == null)
             yield break;
 
@@ -48,6 +49,7 @@ public sealed class ShowEmojiCommandCharR : CommandBase, IStepScopedCommand
         if (_spec.database == null || !_spec.database.TryGet(_spec.emojiKey.Trim(), out var preset) || preset == null)
             yield break;
 
+        Debug.Log("showEmojiCommandCharR??");
         // 필수 refs
         RectTransform emojiRoot   = rig.CharacterEmoji_Root;
         RectTransform emojiAnchor = rig.CharacterEmoji_Anchor;
@@ -100,6 +102,7 @@ public sealed class ShowEmojiCommandCharR : CommandBase, IStepScopedCommand
 
         if (!_spec.wait)
             yield break;
+        Debug.Log("showEmojiCommandCharR?@#@#?");
 
         while (_seq != null && _seq.IsActive() && _seq.IsPlaying())
             yield return null;
