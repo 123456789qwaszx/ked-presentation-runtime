@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 
 public sealed class RollbackController : IDisposable
 {
@@ -39,18 +40,21 @@ public sealed class RollbackController : IDisposable
 
     public bool RequestRollbackOneStep()
     {
+        Debug.Log("RequestRollbackOneStep");
         if (!_history.TryGetPreviousPoint(out RollbackPoint target))
             return false;
 
+        Debug.Log("History?");
         bool jumped = _presentationSessionBridge.JumpTo(
             target.presentationNodeIndex,
             target.presentationStepIndex
         );
 
 
-        if (!jumped)
-            return false;
+        // if (!jumped)
+        //     return false;
 
+        Debug.Log("RequestRollbackOneStep!!!!!!!!!!!!!");
         // target 자신은 남기지 않고 잘라야
         // rollback 후 target line이 다시 완료될 때 1번만 정상 기록된다.
         _history.TrimAfterVisitedIndex(target.visitedIndex - 1);
@@ -58,6 +62,8 @@ public sealed class RollbackController : IDisposable
         _state.BeginRollback(target);
         _presentationSessionContext.EnterRollbackSeek();
         _restarter.RestartNode(target.nodeName);
+
+        Debug.Log("Re!!!!!!!!");
         return true;
     }
 
