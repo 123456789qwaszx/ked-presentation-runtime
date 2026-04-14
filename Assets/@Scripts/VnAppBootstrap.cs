@@ -17,7 +17,6 @@ public class VnAppBootstrap : MonoBehaviour
     [Header("Sound")]
     [SerializeField] private AudioSystem audioSystem;
     [SerializeField] private InlineSfxHost inlineSfxHost;
-    [SerializeField] private InlineEmojiHost inlineEmojiHost;
     
     [Header("Presentation")]
     [SerializeField] private PortraitGeneratedDbSo portraitGeneratedDbSo;
@@ -39,8 +38,10 @@ public class VnAppBootstrap : MonoBehaviour
     [SerializeField] private DialogueTextRouter dialogueTextRouter;
     [SerializeField] private VnRuntimeBridge vnRuntimeBridge;
     [SerializeField] private YarnUIBridge yarnUIBridge;
+    [SerializeField] private InlineEmojiHost inlineEmojiHost;
     [SerializeField] private InlineEventMarkupHandler inlineEventMarkupHandler;
     
+
     [Header("VnAdvanceGate")]
     [SerializeField] private EllipsisBreathTypewriter ellipsisBreathTypewriter;
     [SerializeField] private VnAdvanceInputPoller vnAdvanceInputPoller;
@@ -143,7 +144,6 @@ public class VnAppBootstrap : MonoBehaviour
     
     private void BootstrapYarn()
     {
-        inlineEventMarkupHandler.Initialize(_presentationSessionBridge, inlineSfxHost);
         vnRuntimeBridge.Initialize(dialogueRunner, presentationSessionEntry, _presentationSessionBridge);
         yarnUIBridge.Initialize(linePresenter, ellipsisBreathTypewriter, dialogueTextRouter);
         
@@ -155,6 +155,11 @@ public class VnAppBootstrap : MonoBehaviour
         yarnBridgePlaybackDriver.Initialize(commandExecutor, _presentationSessionContext);
         yarnCommandBridge.Initialize(dialogueRunner, yarnBridgePlaybackDriver);
         yarnLineRuntimePresenter.Initialize(dialogueRunner, yarnUIBridge, dialogueBoxRouteState, yarnBridgePlaybackDriver, audioSystem);
+        
+        inlineEmojiHost.Initialize(yarnCommandBridge);
+        inlineEventMarkupHandler.Initialize(yarnLineLifecycleBridge, _presentationSessionBridge, inlineSfxHost, inlineEmojiHost);
+
+        
     }
 
     private void SetupYarnLifecycleBridge()

@@ -28,71 +28,36 @@ public sealed class ResourcesEmojiSpriteResolver : IEmojiSpriteResolver
     }
 }
 
-public sealed class InlineEmojiHost : MonoBehaviour
+
+public sealed class InlineEmojiHost : MonoBehaviour, InlineEventMarkupHandler.IInlineEmojiHost
 {
-    [Header("Cue -> SpriteKey")]
-    [SerializeField] private List<EmojiCueMapEntry> cueMap = new();
+    private YarnCommandBridge _commandBridge;
 
-    private IEmojiSpriteResolver _spriteResolver;
-    private Dictionary<string, string> _cueToSpriteKey;
-
-    public void Initialize(IEmojiSpriteResolver spriteResolver)
+    public void Initialize(YarnCommandBridge commandBridge)
     {
-        _spriteResolver = spriteResolver;
-        RebuildMap();
+        _commandBridge = commandBridge;
     }
 
-#if UNITY_EDITOR
-    private void OnValidate()
+    public void PlayEmojiCue(string characterKey, string cue)
     {
-        RebuildMap();
-    }
-#endif
+        if (_commandBridge == null)
+        {
+            Debug.LogWarning("[InlineEmojiHost] YarnCommandBridge is null.", this);
+            return;
+        }
 
-    public bool TryResolveEmoji(string cue, out Sprite sprite)
-    {
-        sprite = null;
+        if (string.IsNullOrWhiteSpace(characterKey))
+        {
+            Debug.LogWarning("[InlineEmojiHost] characterKey is null or empty.", this);
+            return;
+        }
 
         if (string.IsNullOrWhiteSpace(cue))
-            return false;
-
-        string spriteKey = ResolveCueToSpriteKey(cue);
-
-        if (string.IsNullOrWhiteSpace(spriteKey))
-            return false;
-
-        if (_spriteResolver == null)
-            return false;
-
-        return _spriteResolver.TryResolve(spriteKey, out sprite) && sprite != null;
-    }
-
-    private string ResolveCueToSpriteKey(string cue)
-    {
-        if (_cueToSpriteKey == null)
-            return cue;
-
-        if (_cueToSpriteKey.TryGetValue(cue, out string spriteKey))
-            return spriteKey;
-
-        return cue;
-    }
-
-    private void RebuildMap()
-    {
-        _cueToSpriteKey = new Dictionary<string, string>(StringComparer.Ordinal);
-
-        if (cueMap == null)
-            return;
-
-        for (int i = 0; i < cueMap.Count; i++)
         {
-            EmojiCueMapEntry entry = cueMap[i];
-
-            if (string.IsNullOrWhiteSpace(entry.cue))
-                continue;
-
-            _cueToSpriteKey[entry.cue] = entry.spriteKey;
+            _commandBridge.EnqueueInlineEmojiHideByCharacter(characterKey);
+            return;
         }
+
+        _commandBridge.EnqueueInlineEmojiByCharacter(characterKey, cue);
     }
 }

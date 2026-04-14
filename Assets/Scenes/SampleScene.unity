@@ -1627,7 +1627,6 @@ MonoBehaviour:
   uiManager: {fileID: 2860743132734891021}
   audioSystem: {fileID: 32255926}
   inlineSfxHost: {fileID: 1571925710}
-  inlineEmojiHost: {fileID: 0}
   portraitGeneratedDbSo: {fileID: 11400000, guid: 9a31d992344284d4f8ff35f5e9be5ae9, type: 2}
   unitySignalBus: {fileID: 552181530}
   commandExecutor: {fileID: 1257280952}
@@ -1641,6 +1640,7 @@ MonoBehaviour:
   dialogueTextRouter: {fileID: 728559835}
   vnRuntimeBridge: {fileID: 2005113226}
   yarnUIBridge: {fileID: 1874881010}
+  inlineEmojiHost: {fileID: 1353881878}
   inlineEventMarkupHandler: {fileID: 946268260}
   ellipsisBreathTypewriter: {fileID: 1658226451}
   vnAdvanceInputPoller: {fileID: 1315566987}
@@ -2835,6 +2835,57 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1211717565}
   m_CullTransparentMesh: 1
+--- !u!1 &1222192534
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1222192536}
+  - component: {fileID: 1222192535}
+  m_Layer: 0
+  m_Name: InlineEmojiResolver
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1222192535
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1222192534}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 64c707fc0b940aa4ea4fe8827f627469, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InlineEmojiResolver
+  cueMap:
+  - cue: c1
+    spriteKey: background_02
+  - cue: c2
+    spriteKey: sprites/bubble_blue
+  - cue: c3
+    spriteKey: sprites/bubble_green
+--- !u!4 &1222192536
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1222192534}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 563.58563, y: 589.04553, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1235729642
 GameObject:
   m_ObjectHideFlags: 0
@@ -3087,6 +3138,50 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 536.61694, y: 177.54828, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1353881877
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1353881879}
+  - component: {fileID: 1353881878}
+  m_Layer: 0
+  m_Name: InlineEmojiHost
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1353881878
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1353881877}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: db14143a74372bb48be69537ddb67d86, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InlineEmojiHost
+--- !u!4 &1353881879
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1353881877}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 563.58563, y: 589.04553, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4077,8 +4172,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::YarnCommandBridge
   rigPrefab: {fileID: 8529412948266249186, guid: 01c9b93a77829ef438fc74c4ef4c5004, type: 3}
   globalTuning: {fileID: 11400000, guid: db30a92a6d8545a41b703c2585f4013d, type: 2}
-  _inlineEmojiHost: {fileID: 0}
-  _emojiResolver: {fileID: 0}
+  _emojiResolver: {fileID: 1222192535}
 --- !u!1 &1845565635
 GameObject:
   m_ObjectHideFlags: 0
@@ -6529,7 +6623,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 458.38, y: -24}
-  m_SizeDelta: {x: 916.76, y: 0}
+  m_SizeDelta: {x: 916.76, y: 24}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!1 &666632935594092605
 GameObject:
@@ -40367,6 +40461,7 @@ SceneRoots:
   - {fileID: 728559836}
   - {fileID: 2005113227}
   - {fileID: 1874881011}
+  - {fileID: 1353881879}
   - {fileID: 946268261}
   - {fileID: 1315566988}
   - {fileID: 307625744}
@@ -40374,6 +40469,7 @@ SceneRoots:
   - {fileID: 63871903}
   - {fileID: 1829026823}
   - {fileID: 1571925711}
+  - {fileID: 1222192536}
   - {fileID: 1658226452}
   - {fileID: 1433866632}
   - {fileID: 1924806293}

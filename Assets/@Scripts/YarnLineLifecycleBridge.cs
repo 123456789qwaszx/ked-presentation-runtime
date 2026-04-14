@@ -53,6 +53,11 @@ public sealed class YarnLineLifecycleBridge : ActionMarkupHandler
     private TMP_Text _currentText;
     private string _currentNodeName = "";
     private string _currentLineId = "";
+    
+    private string _currentCharacterKey = "";
+    public string CurrentCharacterKey => _currentCharacterKey;
+    private void OnCharacterKeyReceived(string characterKey) => _currentCharacterKey = characterKey ?? string.Empty;
+    
 
     public int CurrentLineSerial => _lineSerial;
     public bool IsLinePrepared { get; private set; }
@@ -74,6 +79,9 @@ public sealed class YarnLineLifecycleBridge : ActionMarkupHandler
         _lineIdPresenter.OnLineIdReceived -= OnLineIdReceived;
         _lineIdPresenter.OnLineIdReceived += OnLineIdReceived;
         
+        _lineIdPresenter.OnCharacterKeyReceived -= OnCharacterKeyReceived;
+        _lineIdPresenter.OnCharacterKeyReceived += OnCharacterKeyReceived;
+        
         if (autoRegisterPresenter && dialogueRunner != null)
         {
             List<DialoguePresenterBase> presenters = new (dialogueRunner.DialoguePresenters);
@@ -81,6 +89,7 @@ public sealed class YarnLineLifecycleBridge : ActionMarkupHandler
             presenters.Insert(0, _lineIdPresenter);
             dialogueRunner.DialoguePresenters = presenters;
         }
+        
 
         RegisterToYarn();
     }

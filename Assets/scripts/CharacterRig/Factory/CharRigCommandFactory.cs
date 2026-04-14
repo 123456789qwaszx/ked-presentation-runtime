@@ -56,10 +56,26 @@ public sealed class CharRigCommandFactory : INodeCommandFactory
             
             
             CastCharacterCommandSpec s => new CastCharacterCommand(s),
-            SetPortraitByCharacterCommandSpec s => new SetPortraitByCharacterCommand(s, _portraitResolver),
+            ApplyTrackOffsetByCharacterCommandSpecCharR s => new ApplyTrackOffsetByCharacterCommandCharR(s),
+            ArcHopInByCharacterCommandSpecCharR s => new ArcHopInByCharacterCommandCharR(s),
+            DipInOutByCharacterCommandSpecCharR s => new DipInOutByCharacterCommandCharR(s),
+            FadeInByCharacterCommandSpecCharR s => new FadeInByCharacterCommandCharR(s),
+            FadeOutByCharacterCommandSpecCharR s => new FadeOutByCharacterCommandCharR(s),
             JoltByCharacterCommandSpec s => new JoltByCharacterCommand(s),
-            SetPortraitCrossfadeByCharacterCommandSpec s => new SetPortraitCrossfadeByCharacterCommand(s, _portraitResolver),
+            MoveByByCharacterCommandSpecCharR s => new MoveByByCharacterCommandCharR(s),
+            PivotRotateToByCharacterCommandSpecCharR s => new PivotRotateToByCharacterCommandCharR(s),
+            PunchScaleByCharacterCommandSpecCharR s => new PunchScaleByCharacterCommandCharR(s),
+            RotateToByCharacterCommandSpecCharR s => new RotateToByCharacterCommandCharR(s),
+            ScaleToByCharacterCommandSpecCharR s => new ScaleToByCharacterCommandCharR(s),
+            SetAnchorByCharacterCommandSpecCharR s => new SetAnchorByCharacterCommandCharR(s),
+            SetColorByCharacterCommandSpecCharR s => new SetColorByCharacterCommandCharR(s),
             SetEmotionPortraitWipeByCharacterCommandSpec s => new SetEmotionPortraitWipeByCharacterCommand(s, _portraitResolver),
+            SetPortraitByCharacterCommandSpec s => new SetPortraitByCharacterCommand(s, _portraitResolver),
+            SetPortraitCrossfadeByCharacterCommandSpec s => new SetPortraitCrossfadeByCharacterCommand(s, _portraitResolver),
+            SetSpriteByCharacterCommandSpecCharR s => new SetSpriteByCharacterCommandCharR(s),
+            SlideInByCharacterCommandSpecCharR s => new SlideInByCharacterCommandCharR(s),
+            SlideOutByCharacterCommandSpecCharR s => new SlideOutByCharacterCommandCharR(s),
+            SwayByCharacterCommandSpecCharR s => new SwayByCharacterCommandCharR(s),
             
             _ => null
         };

@@ -23,7 +23,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
     public void RegisterYarnCommands()
     {
         RegisterEmojiCommands();
-
+        
         _dialogueRunner.AddCommandHandler<string>("destroy", EnqueueDestroySpec);
 
         // Marks the next N collected commands as wait=true inside Presentation/Executor.

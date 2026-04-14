@@ -7,14 +7,25 @@ using Yarn.Unity;
 public sealed class YarnLineIdPresenter : DialoguePresenterBase
 {
     public event Action<string> OnLineIdReceived;
+    public event Action<string> OnCharacterKeyReceived;
 
     public override YarnTask OnDialogueStartedAsync() => YarnTask.CompletedTask;
     public override YarnTask OnDialogueCompleteAsync() => YarnTask.CompletedTask;
-
+    
     public override YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token)
     {
         string lineId = line.TextID;
         OnLineIdReceived?.Invoke(lineId);
+
+        string characterKey = ResolveCharacterKey(line);
+        OnCharacterKeyReceived?.Invoke(characterKey);
+
         return YarnTask.CompletedTask;
+    }
+
+    private string ResolveCharacterKey(LocalizedLine line)
+    {
+        // TODO: line metadata에서 #CharacterKey / #RoleKey 등 읽기
+        return string.Empty;
     }
 }
