@@ -57,7 +57,6 @@ public sealed class InlineEmojiHost : MonoBehaviour, InlineEventMarkupHandler.II
             _commandBridge.EnqueueInlineEmojiHideByCharacter(characterKey);
             return;
         }
-
-        _commandBridge.EnqueueInlineEmojiByCharacter(characterKey, cue);
+        _commandBridge.PlayInlineEmojiByCharacterNow(characterKey, cue);
     }
 }

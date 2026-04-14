@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 using Yarn.Unity;
 
 // presenter that captures the current line's TextID
@@ -25,7 +26,11 @@ public sealed class YarnLineIdPresenter : DialoguePresenterBase
 
     private string ResolveCharacterKey(LocalizedLine line)
     {
-        // TODO: line metadata에서 #CharacterKey / #RoleKey 등 읽기
-        return string.Empty;
+        if (line == null)
+            return string.Empty;
+
+        string key = line.CharacterName;
+        Debug.Log($"[YarnLineIdPresenter] CharacterKey='{key}', LineId='{line.TextID}'");
+        return key;
     }
 }

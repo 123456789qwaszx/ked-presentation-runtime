@@ -154,4 +154,13 @@ public sealed class YarnBridgePlaybackDriver : MonoBehaviour
         if (shouldWait)
             _pendingImmediateWaitCount--;
     }
+
+    public void PlayImmediate(IReadOnlyList<CommandSpecBase> specs, string debugSource = "yarn-inline")
+    {
+        if (specs == null || specs.Count == 0)
+            return;
+
+        var copied = new List<CommandSpecBase>(specs);
+        _executor.PlaySpecs(copied, _scope, debugSource);
+    }
 }

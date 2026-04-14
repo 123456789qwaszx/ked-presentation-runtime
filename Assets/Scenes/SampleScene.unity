@@ -2865,11 +2865,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InlineEmojiResolver
   cueMap:
-  - cue: c1
+  - cue: heart
     spriteKey: background_02
-  - cue: c2
+  - cue: question
     spriteKey: sprites/bubble_blue
-  - cue: c3
+  - cue: angry
+    spriteKey: sprites/bubble_green
+  - cue: sweat
     spriteKey: sprites/bubble_green
 --- !u!4 &1222192536
 Transform:
@@ -6623,7 +6625,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 458.38, y: -24}
-  m_SizeDelta: {x: 916.76, y: 24}
+  m_SizeDelta: {x: 916.76, y: 0}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!1 &666632935594092605
 GameObject:

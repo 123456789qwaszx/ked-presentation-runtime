@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 using Yarn.Unity;
 
@@ -5,7 +7,7 @@ public sealed partial class YarnCommandBridge
 {
     [Header("Emoji")]
     [SerializeField] private InlineEmojiResolver _emojiResolver;
-    
+
     private Sprite ResolveEmojiSprite(string emojiKey)
     {
         if (_emojiResolver == null)
@@ -19,7 +21,7 @@ public sealed partial class YarnCommandBridge
 
         return null;
     }
-    
+
     private string NormalizeEmojiKey(string emojiKey)
     {
         string key = (emojiKey ?? string.Empty).Trim().ToLowerInvariant();
@@ -33,13 +35,56 @@ public sealed partial class YarnCommandBridge
                 return key;
         }
     }
-    
+
     private void RegisterEmojiCommands()
     {
-        _dialogueRunner.AddCommandHandler<string, string>("emoji", EnqueueInlineEmojiByCharacter);
-        _dialogueRunner.AddCommandHandler<string>("emoji_hide", EnqueueInlineEmojiHideByCharacter);
+        _dialogueRunner.AddCommandHandler(
+            "emoji",
+            (Action<string, string>)EnqueueInlineEmojiByCharacter);
+
+        _dialogueRunner.AddCommandHandler(
+            "emoji_hide",
+            (Action<string>)EnqueueInlineEmojiHideByCharacter);
     }
 
+    // inline markup용: 지금 즉시 재생
+    public void PlayInlineEmojiByCharacterNow(string characterKey, string cue)
+    {
+        if (string.IsNullOrWhiteSpace(characterKey))
+        {
+            Debug.LogWarning("[YarnCommandBridge/Emoji] characterKey is null or empty.", this);
+            return;
+        }
+
+        if (_playbackDriver == null)
+        {
+            Debug.LogWarning("[YarnCommandBridge/Emoji] YarnBridgePlaybackDriver is null.", this);
+            return;
+        }
+
+        string emojiKey = NormalizeEmojiKey(cue);
+
+        if (string.IsNullOrWhiteSpace(emojiKey))
+        {
+            List<CommandSpecBase> hideSpecs = BuildEmojiHideComboByCharacter(characterKey);
+            _playbackDriver.PlayImmediate(hideSpecs, "inline-emoji-hide");
+            return;
+        }
+
+        Sprite sprite = ResolveEmojiSprite(emojiKey);
+        if (sprite == null)
+        {
+            Debug.LogWarning(
+                $"[YarnCommandBridge/Emoji] Failed to resolve emoji sprite. characterKey={characterKey}, emojiKey={emojiKey}",
+                this);
+            return;
+        }
+
+        List<CommandSpecBase> specs = BuildEmojiComboByCharacter(characterKey, emojiKey, sprite);
+        _playbackDriver.PlayImmediate(specs, "inline-emoji");
+    }
+
+    // Yarn command용: 기존처럼 큐에 모아두기
     public void EnqueueInlineEmojiByCharacter(string characterKey, string cue)
     {
         if (string.IsNullOrWhiteSpace(characterKey))
@@ -65,7 +110,8 @@ public sealed partial class YarnCommandBridge
             return;
         }
 
-        EnqueueEmojiComboByCharacter(characterKey, emojiKey, sprite);
+        List<CommandSpecBase> specs = BuildEmojiComboByCharacter(characterKey, emojiKey, sprite);
+        CollectAll(specs);
     }
 
     public void EnqueueInlineEmojiHideByCharacter(string characterKey)
@@ -76,20 +122,32 @@ public sealed partial class YarnCommandBridge
             return;
         }
 
-        EnqueueEmojiHideComboByCharacter(characterKey);
+        List<CommandSpecBase> specs = BuildEmojiHideComboByCharacter(characterKey);
+        CollectAll(specs);
     }
 
-    private void EnqueueEmojiComboByCharacter(string characterKey, string emojiKey, Sprite sprite)
+    private void CollectAll(IReadOnlyList<CommandSpecBase> specs)
     {
-        var setSprite = new SetSpriteByCharacterCommandSpecCharR
+        if (specs == null)
+            return;
+
+        for (int i = 0; i < specs.Count; i++)
+            Collect(specs[i]);
+    }
+
+    private List<CommandSpecBase> BuildEmojiComboByCharacter(string characterKey, string emojiKey, Sprite sprite)
+    {
+        var specs = new List<CommandSpecBase>(8);
+
+        specs.Add(new SetSpriteByCharacterCommandSpecCharR
         {
             characterKey = characterKey,
             target = CharacterRigTarget.CharacterEmoji_Image,
             sprite = sprite,
             strict = true
-        };
+        });
 
-        var resetAnchor = new MoveByByCharacterCommandSpecCharR
+        specs.Add(new MoveByByCharacterCommandSpecCharR
         {
             characterKey = characterKey,
             target = CharacterRigTarget.CharacterEmoji_Anchor,
@@ -97,47 +155,42 @@ public sealed partial class YarnCommandBridge
             duration = 0f,
             killTween = false,
             strict = true
-        };
+        });
 
-        var resetScale = new ScaleToByCharacterCommandSpecCharR
+        specs.Add(new ScaleToByCharacterCommandSpecCharR
         {
             characterKey = characterKey,
             target = CharacterRigTarget.CharacterEmoji_Scale,
             toScale = Vector2.one,
             duration = 0f,
             strict = true
-        };
+        });
 
-        var fadeIn = new FadeInByCharacterCommandSpecCharR
+        specs.Add(new FadeInByCharacterCommandSpecCharR
         {
             characterKey = characterKey,
             targetMask = CharRigRootLayerMask.CharacterEmoji_Root,
             duration = 0.12f,
             wait = false,
             strict = true
-        };
-
-        Collect(setSprite);
-        Collect(resetAnchor);
-        Collect(resetScale);
-        Collect(fadeIn);
+        });
 
         switch (emojiKey)
         {
             case "heart":
-                EnqueueEmojiHeartComboByCharacter(characterKey);
+                AppendEmojiHeartComboByCharacter(specs, characterKey);
                 break;
 
             case "question":
-                EnqueueEmojiQuestionComboByCharacter(characterKey);
+                AppendEmojiQuestionComboByCharacter(specs, characterKey);
                 break;
 
             case "angry":
-                EnqueueEmojiAngryComboByCharacter(characterKey);
+                AppendEmojiAngryComboByCharacter(specs, characterKey);
                 break;
 
             case "sweat":
-                EnqueueEmojiSweatComboByCharacter(characterKey);
+                AppendEmojiSweatComboByCharacter(specs, characterKey);
                 break;
 
             default:
@@ -146,11 +199,29 @@ public sealed partial class YarnCommandBridge
                     this);
                 break;
         }
+
+        return specs;
     }
 
-    private void EnqueueEmojiHeartComboByCharacter(string characterKey)
+    private List<CommandSpecBase> BuildEmojiHideComboByCharacter(string characterKey)
     {
-        var moveUp = new MoveByByCharacterCommandSpecCharR
+        var specs = new List<CommandSpecBase>(1);
+
+        specs.Add(new FadeOutByCharacterCommandSpecCharR
+        {
+            characterKey = characterKey,
+            targetMask = CharRigRootLayerMask.CharacterEmoji_Root,
+            duration = 0.12f,
+            wait = false,
+            strict = true
+        });
+
+        return specs;
+    }
+
+    private void AppendEmojiHeartComboByCharacter(List<CommandSpecBase> specs, string characterKey)
+    {
+        specs.Add(new MoveByByCharacterCommandSpecCharR
         {
             characterKey = characterKey,
             target = CharacterRigTarget.CharacterEmoji_Anchor,
@@ -158,9 +229,9 @@ public sealed partial class YarnCommandBridge
             duration = 0f,
             killTween = false,
             strict = true
-        };
+        });
 
-        var pop = new PunchScaleByCharacterCommandSpecCharR
+        specs.Add(new PunchScaleByCharacterCommandSpecCharR
         {
             characterKey = characterKey,
             target = CharacterRigTarget.CharacterEmoji_Scale,
@@ -169,9 +240,9 @@ public sealed partial class YarnCommandBridge
             vibrato = 3,
             elasticity = 0.55f,
             strict = true
-        };
+        });
 
-        var sway = new SwayByCharacterCommandSpecCharR
+        specs.Add(new SwayByCharacterCommandSpecCharR
         {
             characterKey = characterKey,
             target = CharacterRigTarget.CharacterEmoji_SwayPivot,
@@ -183,32 +254,26 @@ public sealed partial class YarnCommandBridge
             anticipation = 0f,
             wait = false,
             strict = true
-        };
+        });
 
-        var wait = new WaitCommandSpec
+        specs.Add(new WaitCommandSpec
         {
             roleKey = characterKey,
             seconds = 0.48f
-        };
+        });
 
-        var fadeOut = new FadeOutByCharacterCommandSpecCharR
+        specs.Add(new FadeOutByCharacterCommandSpecCharR
         {
             characterKey = characterKey,
             targetMask = CharRigRootLayerMask.CharacterEmoji_Root,
             duration = 0.16f,
             strict = true
-        };
-
-        Collect(moveUp);
-        Collect(pop);
-        Collect(sway);
-        Collect(wait);
-        Collect(fadeOut);
+        });
     }
 
-    private void EnqueueEmojiQuestionComboByCharacter(string characterKey)
+    private void AppendEmojiQuestionComboByCharacter(List<CommandSpecBase> specs, string characterKey)
     {
-        var moveUp = new MoveByByCharacterCommandSpecCharR
+        specs.Add(new MoveByByCharacterCommandSpecCharR
         {
             characterKey = characterKey,
             target = CharacterRigTarget.CharacterEmoji_Anchor,
@@ -216,9 +281,9 @@ public sealed partial class YarnCommandBridge
             duration = 0f,
             killTween = false,
             strict = true
-        };
+        });
 
-        var nudge = new JoltByCharacterCommandSpec
+        specs.Add(new JoltByCharacterCommandSpec
         {
             characterKey = characterKey,
             target = CharacterRigTarget.CharacterEmoji_Track,
@@ -229,31 +294,26 @@ public sealed partial class YarnCommandBridge
             damping = 8,
             anticipation = 0,
             strict = true
-        };
+        });
 
-        var wait = new WaitCommandSpec
+        specs.Add(new WaitCommandSpec
         {
             roleKey = characterKey,
             seconds = 0.52f
-        };
+        });
 
-        var fadeOut = new FadeOutByCharacterCommandSpecCharR
+        specs.Add(new FadeOutByCharacterCommandSpecCharR
         {
             characterKey = characterKey,
             targetMask = CharRigRootLayerMask.CharacterEmoji_Root,
             duration = 0.14f,
             strict = true
-        };
-
-        Collect(moveUp);
-        Collect(nudge);
-        Collect(wait);
-        Collect(fadeOut);
+        });
     }
 
-    private void EnqueueEmojiAngryComboByCharacter(string characterKey)
+    private void AppendEmojiAngryComboByCharacter(List<CommandSpecBase> specs, string characterKey)
     {
-        var moveUp = new MoveByByCharacterCommandSpecCharR
+        specs.Add(new MoveByByCharacterCommandSpecCharR
         {
             characterKey = characterKey,
             target = CharacterRigTarget.CharacterEmoji_Anchor,
@@ -261,9 +321,9 @@ public sealed partial class YarnCommandBridge
             duration = 0f,
             killTween = false,
             strict = true
-        };
+        });
 
-        var shake = new JoltByCharacterCommandSpec
+        specs.Add(new JoltByCharacterCommandSpec
         {
             characterKey = characterKey,
             target = CharacterRigTarget.CharacterEmoji_SwayPivot,
@@ -274,41 +334,35 @@ public sealed partial class YarnCommandBridge
             damping = 10,
             anticipation = -2,
             strict = true
-        };
+        });
 
-        var scale = new ScaleToByCharacterCommandSpecCharR
+        specs.Add(new ScaleToByCharacterCommandSpecCharR
         {
             characterKey = characterKey,
             target = CharacterRigTarget.CharacterEmoji_Scale,
             toScale = new Vector2(1.08f, 1.08f),
             duration = 0.08f,
             strict = true
-        };
+        });
 
-        var wait = new WaitCommandSpec
+        specs.Add(new WaitCommandSpec
         {
             roleKey = characterKey,
             seconds = 0.42f
-        };
+        });
 
-        var fadeOut = new FadeOutByCharacterCommandSpecCharR
+        specs.Add(new FadeOutByCharacterCommandSpecCharR
         {
             characterKey = characterKey,
             targetMask = CharRigRootLayerMask.CharacterEmoji_Root,
             duration = 0.12f,
             strict = true
-        };
-
-        Collect(moveUp);
-        Collect(scale);
-        Collect(shake);
-        Collect(wait);
-        Collect(fadeOut);
+        });
     }
 
-    private void EnqueueEmojiSweatComboByCharacter(string characterKey)
+    private void AppendEmojiSweatComboByCharacter(List<CommandSpecBase> specs, string characterKey)
     {
-        var move = new MoveByByCharacterCommandSpecCharR
+        specs.Add(new MoveByByCharacterCommandSpecCharR
         {
             characterKey = characterKey,
             target = CharacterRigTarget.CharacterEmoji_Anchor,
@@ -316,9 +370,9 @@ public sealed partial class YarnCommandBridge
             duration = 0f,
             killTween = false,
             strict = true
-        };
+        });
 
-        var dip = new DipInOutByCharacterCommandSpecCharR
+        specs.Add(new DipInOutByCharacterCommandSpecCharR
         {
             characterKey = characterKey,
             target = CharacterRigTarget.CharacterEmoji_Track,
@@ -326,40 +380,20 @@ public sealed partial class YarnCommandBridge
             distance = 10f,
             duration = 0.55f,
             strict = true
-        };
+        });
 
-        var wait = new WaitCommandSpec
+        specs.Add(new WaitCommandSpec
         {
             roleKey = characterKey,
             seconds = 0.42f
-        };
+        });
 
-        var fadeOut = new FadeOutByCharacterCommandSpecCharR
+        specs.Add(new FadeOutByCharacterCommandSpecCharR
         {
             characterKey = characterKey,
             targetMask = CharRigRootLayerMask.CharacterEmoji_Root,
             duration = 0.12f,
             strict = true
-        };
-
-        Collect(move);
-        Collect(dip);
-        Collect(wait);
-        Collect(fadeOut);
+        });
     }
-
-    private void EnqueueEmojiHideComboByCharacter(string characterKey)
-    {
-        var fadeOut = new FadeOutByCharacterCommandSpecCharR
-        {
-            characterKey = characterKey,
-            targetMask = CharRigRootLayerMask.CharacterEmoji_Root,
-            duration = 0.12f,
-            wait = false,
-            strict = true
-        };
-
-        Collect(fadeOut);
-    }
-    
 }
