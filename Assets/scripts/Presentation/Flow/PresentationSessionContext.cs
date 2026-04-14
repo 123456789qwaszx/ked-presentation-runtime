@@ -11,6 +11,7 @@ public sealed class PresentationPlaybackSettings
 
     public bool IsAutoMode  { get; set; }
     public bool IsSkipping  { get; set; }
+    public bool IsRollbackSeeking { get; set; }
     
     public float TimeScale
     {
@@ -53,27 +54,25 @@ public sealed class PresentationSessionContext
     public bool IsSkipping => _playback.IsSkipping;
     public float TimeScale => _playback.TimeScale;
     public float AutoAdvanceDelay => _playback.AutoAdvanceDelay;
-    public bool IsRollbackSeeking { get; private set; }
+    public bool IsRollbackSeeking => _playback.IsRollbackSeeking;
     public void EnterRollbackSeek()
     {
-        IsRollbackSeeking = true;
+        _playback.IsRollbackSeeking = true;
     }
 
     public void ExitRollbackSeek()
     {
-        IsRollbackSeeking = false;
+        _playback.IsRollbackSeeking = false;
     }
-
-    public bool IsSpeedUpHeld { get; private set; }
 
     public void EnterSpeedUpHeld()
     {
-        IsSpeedUpHeld = true;
+        _playback.IsSkipping = true;
     }
 
     public void ExitSpeedUpHeld()
     {
-        IsSpeedUpHeld = false;
+        _playback.IsSkipping = false;
     }
 
     /// <summary>
@@ -94,7 +93,6 @@ public sealed class PresentationSessionContext
         _isNodeBusy      = false;
         _isBlockingInput = false;
         _closeRequested = false;
-        IsRollbackSeeking = false;
     }
 
     public bool IsDebugStartEnabled => _playback.enableDebugStart;

@@ -46,8 +46,6 @@ public sealed class SignalCommandFactory : INodeCommandFactory
         );
 
     private CpsWaitCommand Create(WaitCommandSpec s)
-        => new(_time,
-            seconds: s.seconds,
-            respectTimeScale: s.respectTimeScale
+        => new(seconds: s.seconds
         );
 }

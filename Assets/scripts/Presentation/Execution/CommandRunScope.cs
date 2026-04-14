@@ -33,8 +33,8 @@ public sealed class CommandRunScope
     public bool IsNodeBusy => _context != null && _context.IsNodeBusy;
     public bool IsRollbackSeeking => _context != null && _context.IsRollbackSeeking;
 
-    public bool ShouldRespectCommandWait =>
-        _context == null || !_context.IsRollbackSeeking || !_context.IsSpeedUpHeld;
+    public bool ShouldRespectCommandWait => 
+        _context == null || !IsRollbackSeeking || !IsSkipping;
     public bool ShouldCompressTime => IsRollbackSeeking;
     
     /// <summary>
