@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using UnityEngine;
 
 public sealed class SequenceTextImporter
@@ -38,7 +39,7 @@ public sealed class SequenceTextImporter
 
                 try
                 {
-                    if (Dispatch(line, result))
+                    if (Dispatch(line, result, sink))
                         result.importedCommandCount++;
                 }
                 catch (Exception e)
@@ -47,6 +48,9 @@ public sealed class SequenceTextImporter
                         $"Line {line.lineNumber}: {line.rawText}\n{e.Message}");
                 }
             }
+
+            // end_hold를 빼먹은 경우도 마지막에 정리
+            sink.EndHold();
 
             ApplyImportedSteps(target, sink.Steps, replaceCurrentNodes);
         }
@@ -58,10 +62,38 @@ public sealed class SequenceTextImporter
         return result;
     }
 
-    private bool Dispatch(RecipeCommandLine line, ImportResult result)
+    private bool Dispatch(
+        RecipeCommandLine line,
+        ImportResult result,
+        SequenceImportSink sink)
     {
         switch (line.commandName)
         {
+            // ------------------------------------------------------------
+            // meta commands
+            // ------------------------------------------------------------
+
+            case "begin_hold":
+                sink.BeginHold();
+                return false;
+
+            case "end_hold":
+                sink.EndHold();
+                return false;
+
+            case "step_label":
+                RequireArgs(line, 1);
+                sink.SetStepLabel(line.args[0]);
+                return false;
+
+            case "gate":
+                ApplyGate(line, sink);
+                return false;
+
+            // ------------------------------------------------------------
+            // importable commands
+            // ------------------------------------------------------------
+
             case "slot":
                 RequireArgs(line, 1);
                 _bridge.Import_Slot(line.args[0]);
@@ -234,7 +266,11 @@ public sealed class SequenceTextImporter
 
             case "emotion_wipe":
                 RequireArgs(line, 4);
-                _bridge.Import_EmotionWipe(line.args[0], line.args[1], line.args[2], line.args[3]);
+                _bridge.Import_EmotionWipe(
+                    line.args[0],
+                    line.args[1],
+                    line.args[2],
+                    line.args[3]);
                 return true;
 
             case "blackout":
@@ -299,6 +335,49 @@ public sealed class SequenceTextImporter
         }
     }
 
+    private static void ApplyGate(RecipeCommandLine line, SequenceImportSink sink)
+    {
+        RequireArgs(line, 1);
+
+        string mode = line.args[0].ToLowerInvariant();
+
+        switch (mode)
+        {
+            case "immediately":
+            case "none":
+                sink.SetGate(GateToken.Immediately());
+                return;
+
+            case "input":
+                sink.SetGate(GateToken.Input());
+                return;
+
+            case "delay":
+                if (line.args.Count < 2)
+                {
+                    throw new InvalidOperationException(
+                        "Command 'gate delay' requires seconds.");
+                }
+
+                sink.SetGate(GateToken.Delay(ParseFloat(line.args[1], "seconds")));
+                return;
+
+            case "signal":
+                if (line.args.Count < 2)
+                {
+                    throw new InvalidOperationException(
+                        "Command 'gate signal' requires signalKey.");
+                }
+
+                sink.SetGate(GateToken.Signal(line.args[1]));
+                return;
+
+            default:
+                throw new InvalidOperationException(
+                    $"Unsupported gate mode '{mode}'.");
+        }
+    }
+
     private void ApplyImportedSteps(
         SequenceSpecSO target,
         IReadOnlyList<ImportedStepDraft> importedSteps,
@@ -346,16 +425,22 @@ public sealed class SequenceTextImporter
 
     private static float ParseFloat(string raw, string fieldName)
     {
-        if (!float.TryParse(raw, out float value))
-            throw new InvalidOperationException($"Failed to parse float '{raw}' for {fieldName}.");
+        if (!float.TryParse(raw, NumberStyles.Float, CultureInfo.InvariantCulture, out float value))
+        {
+            throw new InvalidOperationException(
+                $"Failed to parse float '{raw}' for {fieldName}.");
+        }
 
         return value;
     }
 
     private static int ParseInt(string raw, string fieldName)
     {
-        if (!int.TryParse(raw, out int value))
-            throw new InvalidOperationException($"Failed to parse int '{raw}' for {fieldName}.");
+        if (!int.TryParse(raw, NumberStyles.Integer, CultureInfo.InvariantCulture, out int value))
+        {
+            throw new InvalidOperationException(
+                $"Failed to parse int '{raw}' for {fieldName}.");
+        }
 
         return value;
     }

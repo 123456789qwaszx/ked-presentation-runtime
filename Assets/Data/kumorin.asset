@@ -14,67 +14,145 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SequenceSpecSO
   sequenceKey: tre
   nodes:
-  - editorName: 
+  - editorName: Imported Node 0
     steps:
-    - editorName: 
+    - editorName: setup_theme
       compiled:
-      - rid: 8483491257811992690
-      - rid: 8483491257811992691
-      - rid: 8483491257811992692
-      - rid: 8483491257811992693
-      - rid: 8483491257811992694
+      - rid: 8483491267213787209
+      gate:
+        type: 0
+        seconds: 0
+        signalKey: 
+    - editorName: bgm_start
+      compiled:
+      - rid: 8483491267213787210
+      gate:
+        type: 0
+        seconds: 0
+        signalKey: 
+    - editorName: momoka_enter
+      compiled:
+      - rid: 8483491267213787211
+      - rid: 8483491267213787212
+      - rid: 8483491267213787213
+      - rid: 8483491267213787214
+      - rid: 8483491267213787215
+      - rid: 8483491267213787216
+      - rid: 8483491267213787217
+      gate:
+        type: 1
+        seconds: 0
+        signalKey: 
+    - editorName: wait_ready
+      compiled:
+      - rid: 8483491267213787218
       gate:
         type: 3
         seconds: 0
-        signalKey: beat
-      editorImportedCompiledOnly: 0
+        signalKey: ready
   references:
     version: 2
     RefIds:
-    - rid: 8483491257811992690
+    - rid: 8483491267213787209
+      type: {class: UIPatchCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: 
+        targetKind: 0
+        themeId: theme1
+        localeId: ko-KR
+        wait: 1
+    - rid: 8483491267213787210
+      type: {class: PlayBgmCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: 
+        clipKey: audio/bgm_tam_dystopia_snowwind_01
+        directClip: {fileID: 0}
+        fadeDuration: 1
+    - rid: 8483491267213787211
       type: {class: SetupCharRigCommandSpec, ns: , asm: Assembly-CSharp}
       data:
-        roleKey: sub
-        rigPrefab: {fileID: 0}
+        roleKey: me
+        rigPrefab: {fileID: 8529412948266249186, guid: 01c9b93a77829ef438fc74c4ef4c5004, type: 3}
         parentSlot: 0
         rigRootName: CharacterRig
         autoRolePrefixFromRoleKey: 1
         addRolePrefix: 1
         destroyExistingRigWithSameName: 1
         strict: 1
-    - rid: 8483491257811992691
+    - rid: 8483491267213787212
+      type: {class: SetAnchorCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: me
+        target: 0
+        preset: 4
+        baseRatioX: 0.5
+        globalTuning: {fileID: 11400000, guid: db30a92a6d8545a41b703c2585f4013d, type: 2}
+        roleTuningDb: {fileID: 0}
+        poseKey: 
+        offset: {x: 0, y: 0}
+        overrideAnchoredPosition: 0
+        anchoredPositionOverride: {x: 0, y: 0}
+    - rid: 8483491267213787213
+      type: {class: ApplyTrackOffsetCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: me
+        target: 1
+        offset: {x: 0, y: 0}
+        applyFromZero: 1
+        resetAllTrackLayers: 1
+        resetCharTrack: 0
+        resetCharTrackMove: 0
+        resetCharTrackX: 0
+        resetCharTrackY: 0
+    - rid: 8483491267213787214
+      type: {class: SetOriginSizeCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: me
+        target: 6
+        toScale: {x: 1.5, y: 1.5}
+        toAngle: 0
+        anchorMin: {x: 0, y: 0}
+        anchorMax: {x: 1, y: 1}
+    - rid: 8483491267213787215
       type: {class: CastCharacterCommandSpec, ns: , asm: Assembly-CSharp}
       data:
-        roleKey: sub
-        characterKey: 
+        roleKey: me
+        characterKey: momoka
         requireExistingRig: 1
         strict: 1
-    - rid: 8483491257811992692
-      type: {class: UncastCharacterCommandSpec, ns: , asm: Assembly-CSharp}
-      data:
-        roleKey: sub
-        strict: 1
-    - rid: 8483491257811992693
+    - rid: 8483491267213787216
       type: {class: SetPortraitSpriteCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:
-        roleKey: sub
+        roleKey: me
         portrait:
-          character: 
-          emotion: 
-          variant: 
+          character: momoka
+          emotion: 1
+          variant: a
         target: 10
         sizingMode: 1
         horizontalAlign: 1
-    - rid: 8483491257811992694
-      type: {class: SetPortraitByCharacterCommandSpec, ns: , asm: Assembly-CSharp}
+    - rid: 8483491267213787217
+      type: {class: FadeInCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:
-        roleKey: sub
-        characterKey: 
-        portrait:
-          character: 
-          emotion: 
-          variant: 
-        target: 10
-        sizingMode: 1
-        horizontalAlign: 1
-        strict: 1
+        roleKey: me
+        targetMask: 1
+        duration: 0.47
+        ease: 9
+        EnableInteraction: 1
+        wait: 0
+    - rid: 8483491267213787218
+      type: {class: TransitionCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: 
+        playMode: 0
+        targetKind: 0
+        customTargetKey: 
+        coveredAlpha: 1
+        uncoveredAlpha: 0
+        coverDuration: 0.2
+        uncoverDuration: 0.2
+        holdCoveredSeconds: 0.2
+        coverEase: 9
+        uncoverEase: 9
+        wait: 1
+        resetToOpenAtStart: 1
