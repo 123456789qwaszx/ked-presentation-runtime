@@ -483,7 +483,7 @@ public sealed partial class SequenceSpecEditorWindow
                 _stepsList = null;
                 _commandsList = null;
 
-                ForceCompileAll();
+                AfterSequenceChanged();
             }, forceRebuild: true);
 
             e.Use();
@@ -514,7 +514,7 @@ public sealed partial class SequenceSpecEditorWindow
                     _stepsList = null;
                     _commandsList = null;
 
-                    ForceCompileAll();
+                    AfterSequenceChanged();
                 }, forceRebuild: true);
 
                 e.Use();
@@ -540,7 +540,7 @@ public sealed partial class SequenceSpecEditorWindow
             _stepsList = null;
             _commandsList = null;
 
-            ForceCompileAll();
+            AfterSequenceChanged();
         });
     }
 
@@ -594,7 +594,7 @@ public sealed partial class SequenceSpecEditorWindow
             _stepsList = null;
             _commandsList = null;
 
-            ForceCompileAll();
+            AfterSequenceChanged();
         }, forceRebuild: true);
 
         return true;
@@ -636,7 +636,7 @@ public sealed partial class SequenceSpecEditorWindow
             _stepsList = null;
             _nodesList = null;
 
-            ForceCompileAll();
+            AfterSequenceChanged();
         }, forceRebuild: true);
 
         return true;

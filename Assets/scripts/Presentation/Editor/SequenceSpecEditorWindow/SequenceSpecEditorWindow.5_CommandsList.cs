@@ -211,7 +211,7 @@ public sealed partial class SequenceSpecEditorWindow
                             {
                                 _commandsList = null;
                                 _commandsPropPath = null;
-                                ForceCompileAll();
+                                AfterSequenceChanged();
                             });
                         });
                     }
@@ -283,7 +283,7 @@ public sealed partial class SequenceSpecEditorWindow
 
             RequestScrollToCommand(newIndex, repaint: false);
 
-            ForceCompileAll();
+            AfterSequenceChanged();
             Repaint();
         };
 

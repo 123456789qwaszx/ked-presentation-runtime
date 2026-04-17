@@ -323,25 +323,16 @@ public sealed partial class SequenceSpecEditorWindow : EditorWindow
         if (changed)
         {
             EditorUtility.SetDirty(targetSequence);
-            ForceCompileAll();
+            AfterSequenceChanged();
         }
     }
 
     // ------------------------------
     // Utility Methods
     // ------------------------------
-    private void ForceCompileAll()
+    private void AfterSequenceChanged()
     {
-        // if (targetSequence == null) return;
-        //
-        // try
-        // {
-        //     targetSequence.CompileAllSteps();
-        // }
-        // catch
-        // {
-        //     // fallback: do nothing
-        // }
+        //편집 후처리 훅
     }
 
     private static void CacheCommandTypes()

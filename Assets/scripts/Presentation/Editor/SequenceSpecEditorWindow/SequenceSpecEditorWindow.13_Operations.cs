@@ -63,7 +63,7 @@ public sealed partial class SequenceSpecEditorWindow
         _so.ApplyModifiedProperties();
         EditorUtility.SetDirty(targetSequence);
 
-        ForceCompileAll();
+        AfterSequenceChanged();
 
         _stepsList = null;
         _commandsList = null;
@@ -89,7 +89,7 @@ public sealed partial class SequenceSpecEditorWindow
             _stepsList = null;
             _commandsList = null;
 
-            ForceCompileAll();
+            AfterSequenceChanged();
         });
     }
 
@@ -246,7 +246,7 @@ public sealed partial class SequenceSpecEditorWindow
             so.ApplyModifiedProperties();
             EditorUtility.SetDirty(targetSequence);
 
-            ForceCompileAll();
+            AfterSequenceChanged();
 
             if (forceRebuild)
                 RebuildIfNeeded(force: true);
