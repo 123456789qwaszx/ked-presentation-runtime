@@ -170,14 +170,6 @@ public sealed partial class SequenceSpecEditorWindow
         if (stepProp == null)
             return null;
 
-        var tracksProp = stepProp.FindPropertyRelative("tracks");
-        if (tracksProp != null)
-        {
-            var commandsProp = tracksProp.FindPropertyRelative("commands");
-            if (commandsProp != null && commandsProp.isArray)
-                return commandsProp;
-        }
-
         var compiledProp = stepProp.FindPropertyRelative("compiled");
         if (compiledProp != null && compiledProp.isArray)
             return compiledProp;

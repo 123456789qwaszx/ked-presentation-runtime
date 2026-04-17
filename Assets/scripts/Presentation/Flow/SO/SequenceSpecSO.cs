@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 [Serializable]
 public sealed class StepSpec
@@ -8,18 +9,11 @@ public sealed class StepSpec
     // Debug/authoring marker
     public string editorName;// BeatResolver.TryResolve()가 이걸 찾아서 (nodeIndex, stepIndex)로 변환
 
-    // 편집 원본: 트랙별 커맨드
-    //public StepTracks tracks = new();
-
     // 실행 입력: 에디터에서 컴파일(flatten)된 결과 (런타임이 읽음)
     [SerializeReference] public List<CommandSpecBase> compiled = new();
 
     // 게이트는 기존 그대로 (원하면 List<GateToken>으로 확장 가능)
     public GateToken gate;
-    
-#if UNITY_EDITOR
-    public bool editorImportedCompiledOnly;
-#endif
 }
 
 [System.Serializable]

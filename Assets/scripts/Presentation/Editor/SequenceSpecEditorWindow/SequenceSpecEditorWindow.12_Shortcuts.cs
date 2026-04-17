@@ -95,7 +95,6 @@ public sealed partial class SequenceSpecEditorWindow
     private void HandleCommandShortcuts(SerializedProperty commandsProp)
     {
         if (commandsProp == null || !commandsProp.isArray) return;
-        if (_commandsList == null) return;
 
         var e = Event.current;
         if (e == null || e.type != EventType.KeyDown) return;
@@ -103,8 +102,8 @@ public sealed partial class SequenceSpecEditorWindow
 
         bool mod = e.control || e.command;
 
-        // Enter/Space: 커맨드 추가 메뉴 열기
-        if (!mod && (e.keyCode == KeyCode.Return || e.keyCode == KeyCode.Space))
+        // Space: 빈 컬럼이어도 Add 허용
+        if (!mod && e.keyCode == KeyCode.Space)
         {
             if (_navColumn == NavColumn.Commands)
             {
@@ -118,9 +117,12 @@ public sealed partial class SequenceSpecEditorWindow
             }
         }
 
-        // KeypadEnter: 펼치기/접기 토글
-        if (!mod && e.keyCode == KeyCode.KeypadEnter)
+        // Enter / KeypadEnter: 선택된 커맨드가 있을 때만 foldout 토글
+        if (!mod && (e.keyCode == KeyCode.Return || e.keyCode == KeyCode.KeypadEnter))
         {
+            if (_commandsList == null)
+                return;
+            
             string path = commandsProp.propertyPath;
             var map = GetFoldoutMap(path);
 

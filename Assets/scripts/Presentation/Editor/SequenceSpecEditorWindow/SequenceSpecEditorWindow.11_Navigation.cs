@@ -44,7 +44,6 @@ using UnityEngine;
 /// - 이 partial은 "입력 해석 → 선택/스크롤 상태 갱신"까지만 책임지고,
 ///   실제 생성/삭제/컴파일은 다른 partial의 유틸에 위임하는 구조를 유지하는 게 디버깅이 쉽다.
 /// </summary>
-
 public sealed partial class SequenceSpecEditorWindow
 {
     private void HandleArrowNavigation()
@@ -398,9 +397,6 @@ public sealed partial class SequenceSpecEditorWindow
             return;
         }
 
-        EnsureCommandsList(commandsProp);
-        if (_commandsList == null) return;
-
         Rect viewport = GUILayoutUtility.GetRect(
             0f, 100000f,
             GUILayout.ExpandWidth(true),
@@ -413,6 +409,73 @@ public sealed partial class SequenceSpecEditorWindow
             _commandsViewportRect = viewport;
             _commandsViewportHeight = viewport.height;
         }
+
+        bool commandsActive = (_navColumn == NavColumn.Commands);
+        bool isEmpty = (commandsProp.arraySize == 0);
+
+        // 좌클릭: Commands 컬럼 활성화
+        if (Event.current.type == EventType.MouseDown &&
+            Event.current.button == 0 &&
+            viewport.Contains(Event.current.mousePosition))
+        {
+            _navColumn = NavColumn.Commands;
+            GUI.FocusControl(null);
+            Repaint();
+        }
+
+        // 우클릭: 비어 있어도 Add Command 메뉴 열기
+        if (Event.current.type == EventType.ContextClick &&
+            viewport.Contains(Event.current.mousePosition))
+        {
+            _navColumn = NavColumn.Commands;
+            GUI.FocusControl(null);
+
+            string commandsPath = commandsProp.propertyPath;
+            int insertAt = commandsProp.arraySize;
+
+            ShowCommandAddMenu(
+                commandsPath,
+                insertAt: insertAt,
+                onSingle: t => InsertSingleAt(commandsPath, insertAt, t, scroll: true),
+                onBatch: types => InsertBatchAt(commandsPath, insertAt, types, scroll: true)
+            );
+
+            Event.current.Use();
+            GUIUtility.ExitGUI();
+            return;
+        }
+
+        // 빈 상태일 때만 컬럼 배경 강조
+        if (commandsActive && isEmpty)
+            DrawNavSelectionBg(viewport, strong: true);
+
+        EnsureCommandsList(commandsProp);
+
+        int count = commandsProp.arraySize;
+
+        // 비어 있어도 Commands 컬럼은 "선택 가능한 surface" 로 유지
+        if (count == 0)
+        {
+            var emptyStyle = new GUIStyle(EditorStyles.centeredGreyMiniLabel)
+            {
+                alignment = TextAnchor.MiddleCenter,
+                wordWrap = true,
+                fontSize = 12
+            };
+
+            string msg = commandsActive
+                ? "No Commands yet.\nPress Space or right-click to add command."
+                : "No Commands yet.";
+
+            GUI.Label(viewport, msg, emptyStyle);
+
+            // 비어 있어도 Commands 컬럼 단축키는 살아 있어야 함
+            HandleCommandShortcuts(commandsProp);
+            return;
+        }
+
+        if (_commandsList == null)
+            return;
 
         float listH = Mathf.Max(1f, _commandsList.GetHeight());
         bool needScroll = listH > viewport.height + 0.5f;

@@ -51,9 +51,6 @@ public sealed partial class SequenceSpecEditorWindow
             editorName = "",
             gate = gate,
             compiled = new List<CommandSpecBase>(),
-#if UNITY_EDITOR
-            editorImportedCompiledOnly = false,
-#endif
         };
     }
 
@@ -88,9 +85,6 @@ public sealed partial class SequenceSpecEditorWindow
             editorName = src.editorName,
             gate = src.gate,
             compiled = new List<CommandSpecBase>(),
-#if UNITY_EDITOR
-            editorImportedCompiledOnly = src.editorImportedCompiledOnly,
-#endif
         };
 
         if (dst.gate.type == GateTokenType.Immediately)

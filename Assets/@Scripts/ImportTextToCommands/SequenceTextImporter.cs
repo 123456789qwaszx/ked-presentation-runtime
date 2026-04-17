@@ -322,10 +322,7 @@ public sealed class SequenceTextImporter
                     ? $"Imported Step {i}"
                     : src.editorName,
                 gate = src.gate,
-                compiled = new List<CommandSpecBase>(src.commands),
-#if UNITY_EDITOR
-                editorImportedCompiledOnly = true
-#endif
+                compiled = new List<CommandSpecBase>(src.commands)
             };
 
             node.steps.Add(step);
