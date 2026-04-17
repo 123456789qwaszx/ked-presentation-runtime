@@ -12,8 +12,69 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 77efca1a7ac39ca499c3be8e21666640, type: 3}
   m_Name: kumorin
   m_EditorClassIdentifier: Assembly-CSharp::SequenceSpecSO
-  sequenceKey: tre?
-  nodes: []
+  sequenceKey: tre
+  nodes:
+  - editorName: 
+    steps:
+    - editorName: 
+      compiled:
+      - rid: 8483491257811992690
+      - rid: 8483491257811992691
+      - rid: 8483491257811992692
+      - rid: 8483491257811992693
+      - rid: 8483491257811992694
+      gate:
+        type: 3
+        seconds: 0
+        signalKey: beat
+      editorImportedCompiledOnly: 0
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: 8483491257811992690
+      type: {class: SetupCharRigCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: sub
+        rigPrefab: {fileID: 0}
+        parentSlot: 0
+        rigRootName: CharacterRig
+        autoRolePrefixFromRoleKey: 1
+        addRolePrefix: 1
+        destroyExistingRigWithSameName: 1
+        strict: 1
+    - rid: 8483491257811992691
+      type: {class: CastCharacterCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: sub
+        characterKey: 
+        requireExistingRig: 1
+        strict: 1
+    - rid: 8483491257811992692
+      type: {class: UncastCharacterCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: sub
+        strict: 1
+    - rid: 8483491257811992693
+      type: {class: SetPortraitSpriteCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: sub
+        portrait:
+          character: 
+          emotion: 
+          variant: 
+        target: 10
+        sizingMode: 1
+        horizontalAlign: 1
+    - rid: 8483491257811992694
+      type: {class: SetPortraitByCharacterCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: sub
+        characterKey: 
+        portrait:
+          character: 
+          emotion: 
+          variant: 
+        target: 10
+        sizingMode: 1
+        horizontalAlign: 1
+        strict: 1
