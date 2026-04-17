@@ -46,10 +46,8 @@ using UnityEngine;
 /// - Role 슬롯 개수/표현(UI 스타일, 버튼 라벨), 자동 채움 로직(어떤 커맨드 필드에 주입하는지)
 /// - 일괄 적용 범위(현재 Step의 "모든 Track" vs "현재 Track만" vs "현재 Node의 모든 Steps")
 /// </summary>
-
 public sealed partial class SequenceSpecEditorWindow
 {
-    // Gate defaults
     [SerializeField] private GateToken _defaultNewStepGate = new GateToken { type = GateTokenType.Immediately };
     [SerializeField] private bool _gateFoldout = false;
     [SerializeField] private GateTokenType _applyGateType = GateTokenType.Immediately;
@@ -63,7 +61,6 @@ public sealed partial class SequenceSpecEditorWindow
     private const string Ctrl_DefaultGateSignalKey = "CPS.SequenceEditor.DefaultGate.SignalKeyField";
     private string _prevFocusedControlName;
 
-    // RoleKey slots
     [SerializeField] private bool _autoFillIdsOnAdd = true;
     [SerializeField] private int _roleSlotCount = RoleSlotBaseCount;
     [SerializeField] private List<string> _roleKeySlots = new();
@@ -73,15 +70,14 @@ public sealed partial class SequenceSpecEditorWindow
     private const string PrefKey_RoleSlotCount = "CPS.SequenceEditor.RoleSlots.Count";
     private const string PrefKey_RoleSlotsJson = "CPS.SequenceEditor.RoleSlots.Json";
     private const string PrefKey_AutoFillRoleSlotIndex = "CPS.SequenceEditor.AutoFillRoleSlotIndex";
-    
+
     private enum RoleKeyApplyScope
     {
-        CurrentTrack = 0,
-        AllTracks = 1,
-        AllStepsInNode = 2,
+        CurrentStep = 0,
+        AllStepsInNode = 1,
     }
 
-    [SerializeField] private RoleKeyApplyScope _roleApplyScope = RoleKeyApplyScope.AllTracks;
+    [SerializeField] private RoleKeyApplyScope _roleApplyScope = RoleKeyApplyScope.CurrentStep;
 
     private const string PrefKey_RoleApplyScope = "CPS.SequenceEditor.RoleApplyScope";
 
@@ -97,7 +93,8 @@ public sealed partial class SequenceSpecEditorWindow
     {
         get
         {
-            if (_roleKeyFieldStyle != null) return _roleKeyFieldStyle;
+            if (_roleKeyFieldStyle != null)
+                return _roleKeyFieldStyle;
 
             _roleKeyFieldStyle = new GUIStyle(EditorStyles.textField)
             {
@@ -106,7 +103,6 @@ public sealed partial class SequenceSpecEditorWindow
             };
 
             _roleKeyFieldStyle.padding = new RectOffset(4, 2, 2, 2);
-
             return _roleKeyFieldStyle;
         }
     }
@@ -246,9 +242,8 @@ public sealed partial class SequenceSpecEditorWindow
                 {
                     string scopeHint = _roleApplyScope switch
                     {
-                        RoleKeyApplyScope.CurrentTrack => "Set this RoleKey on all commands in the current step (current track only).",
-                        RoleKeyApplyScope.AllTracks => "Set this RoleKey on all commands in the current step (all tracks).",
-                        RoleKeyApplyScope.AllStepsInNode => "Set this RoleKey on all commands in all steps of the current node (all tracks).",
+                        RoleKeyApplyScope.CurrentStep => "Set this RoleKey on all commands in the current step.",
+                        RoleKeyApplyScope.AllStepsInNode => "Set this RoleKey on all commands in all steps of the current node.",
                         _ => ""
                     };
 
@@ -319,105 +314,80 @@ public sealed partial class SequenceSpecEditorWindow
 
     private bool CanApplyRoleToCurrentStep(int slotIndex)
     {
-        if (!HasRoleSlot(slotIndex)) return false;
+        if (!HasRoleSlot(slotIndex))
+            return false;
 
-        if (_nodesProp == null) return false;
-        if (_selectedNode < 0 || _selectedNode >= _nodesProp.arraySize) return false;
+        if (_nodesProp == null || !_nodesProp.isArray)
+            return false;
+
+        if (_selectedNode < 0 || _selectedNode >= _nodesProp.arraySize)
+            return false;
 
         var nodeProp = _nodesProp.GetArrayElementAtIndex(_selectedNode);
+        if (nodeProp == null)
+            return false;
+
         var stepsProp = nodeProp.FindPropertyRelative("steps");
-        if (stepsProp == null || !stepsProp.isArray) return false;
+        if (stepsProp == null || !stepsProp.isArray)
+            return false;
 
-        // AllStepsInNode: 노드에 최소 1개 스텝이 있으면 OK
         if (_roleApplyScope == RoleKeyApplyScope.AllStepsInNode)
-        {
             return stepsProp.arraySize > 0;
-        }
 
-        // CurrentTrack / AllTracks: 현재 Step 선택이 유효해야 함
-        if (_selectedStep < 0 || _selectedStep >= stepsProp.arraySize) return false;
+        if (_selectedStep < 0 || _selectedStep >= stepsProp.arraySize)
+            return false;
 
         var stepProp = stepsProp.GetArrayElementAtIndex(_selectedStep);
+        var commandsProp = FindUnifiedCommandsProp(stepProp);
 
-        if (_roleApplyScope == RoleKeyApplyScope.CurrentTrack)
-        {
-            var trackListProp = FindActiveTrackList(stepProp);
-            return trackListProp != null && trackListProp.isArray && trackListProp.arraySize > 0;
-        }
-
-        // AllTracks
-        var tracksProp = stepProp.FindPropertyRelative("tracks");
-        if (tracksProp == null) return false;
-
-        foreach (var name in TrackFieldNames)
-        {
-            var lp = tracksProp.FindPropertyRelative(name);
-            if (lp != null && lp.isArray && lp.arraySize > 0)
-                return true;
-        }
-
-        return false;
+        return commandsProp != null && commandsProp.isArray && commandsProp.arraySize > 0;
     }
 
     private void ApplyRoleToCurrentStep(int slotIndex)
     {
-        if (!HasRoleSlot(slotIndex)) return;
+        if (!HasRoleSlot(slotIndex))
+            return;
 
         int nodeIndex = _selectedNode;
         int stepIndex = _selectedStep;
 
         string roleKey = _roleKeySlots[slotIndex] ?? string.Empty;
-        RoleKeyApplyScope scope = _roleApplyScope; // 캡처
+        RoleKeyApplyScope scope = _roleApplyScope;
 
         DelayModify("Apply RoleKey", so =>
         {
             var nodes = so.FindProperty("nodes");
-            if (nodes == null || !nodes.isArray) return;
-            if (nodeIndex < 0 || nodeIndex >= nodes.arraySize) return;
+            if (nodes == null || !nodes.isArray)
+                return;
+
+            if (nodeIndex < 0 || nodeIndex >= nodes.arraySize)
+                return;
 
             var nodeProp = nodes.GetArrayElementAtIndex(nodeIndex);
+            if (nodeProp == null)
+                return;
+
             var stepsProp = nodeProp.FindPropertyRelative("steps");
-            if (stepsProp == null || !stepsProp.isArray) return;
+            if (stepsProp == null || !stepsProp.isArray)
+                return;
 
             if (scope == RoleKeyApplyScope.AllStepsInNode)
             {
-                // 현재 Node의 모든 Steps에 적용
                 for (int si = 0; si < stepsProp.arraySize; si++)
                 {
                     var stepProp = stepsProp.GetArrayElementAtIndex(si);
-                    var tracksProp = stepProp.FindPropertyRelative("tracks");
-                    if (tracksProp == null) continue;
-
-                    foreach (var name in TrackFieldNames)
-                    {
-                        var lp = tracksProp.FindPropertyRelative(name);
-                        ApplyRoleToList(lp, roleKey);
-                    }
+                    var commandsProp = FindUnifiedCommandsProp(stepProp);
+                    ApplyRoleToList(commandsProp, roleKey);
                 }
                 return;
             }
 
-            // CurrentTrack / AllTracks: 현재 Step만
-            if (stepIndex < 0 || stepIndex >= stepsProp.arraySize) return;
+            if (stepIndex < 0 || stepIndex >= stepsProp.arraySize)
+                return;
 
             var currentStepProp = stepsProp.GetArrayElementAtIndex(stepIndex);
-
-            if (scope == RoleKeyApplyScope.CurrentTrack)
-            {
-                var trackList = FindActiveTrackList(currentStepProp);
-                ApplyRoleToList(trackList, roleKey);
-                return;
-            }
-
-            // AllTracks
-            var tracksInStepProp = currentStepProp.FindPropertyRelative("tracks");
-            if (tracksInStepProp == null) return;
-
-            foreach (var name in TrackFieldNames)
-            {
-                var lp = tracksInStepProp.FindPropertyRelative(name);
-                ApplyRoleToList(lp, roleKey);
-            }
+            var currentCommandsProp = FindUnifiedCommandsProp(currentStepProp);
+            ApplyRoleToList(currentCommandsProp, roleKey);
         });
     }
 
@@ -432,8 +402,11 @@ public sealed partial class SequenceSpecEditorWindow
         for (int i = 0; i < listProp.arraySize; i++)
         {
             var cmdProp = listProp.GetArrayElementAtIndex(i);
-            if (cmdProp == null) continue;
-            if (cmdProp.propertyType != SerializedPropertyType.ManagedReference) continue;
+            if (cmdProp == null)
+                continue;
+
+            if (cmdProp.propertyType != SerializedPropertyType.ManagedReference)
+                continue;
 
             var roleProp = cmdProp.FindPropertyRelative("roleKey");
             if (roleProp != null && roleProp.propertyType == SerializedPropertyType.String)
@@ -446,17 +419,14 @@ public sealed partial class SequenceSpecEditorWindow
         if (_roleKeySlots == null)
             _roleKeySlots = new List<string>();
 
-        // 표시 개수는 유저가 조절 (최소/최대)
         _roleSlotCount = Mathf.Clamp(_roleSlotCount, RoleSlotBaseCount, RoleSlotMaxCount);
 
-        // 실제 저장 리스트는 MaxCount까지 유지
         while (_roleKeySlots.Count < RoleSlotMaxCount)
             _roleKeySlots.Add("");
 
         if (_roleKeySlots.Count > RoleSlotMaxCount)
             _roleKeySlots.RemoveRange(RoleSlotMaxCount, _roleKeySlots.Count - RoleSlotMaxCount);
 
-        // Auto 슬롯도 표시 범위 안으로
         _autoFillRoleSlotIndex = Mathf.Clamp(_autoFillRoleSlotIndex, 0, _roleSlotCount - 1);
     }
 
@@ -495,17 +465,13 @@ public sealed partial class SequenceSpecEditorWindow
         string json = JsonUtility.ToJson(box);
         EditorPrefs.SetString(PrefKey_RoleSlotsJson, json);
 
-        // AutoSave preset (overwrite active preset)
         MaybeAutoSaveActiveRoleSlotsPreset();
     }
-    
+
     private void MaybeAutoSaveActiveRoleSlotsPreset()
     {
         if (!_roleSlotsPresetAutoSave) return;
         if (string.IsNullOrWhiteSpace(_roleSlotsPresetActive)) return;
-
-        // Default는 autosave 허용해도 되고, 싫으면 여기서 막기
-        // if (string.Equals(_roleSlotsPresetActive, "Default", StringComparison.OrdinalIgnoreCase)) return;
 
         SaveRoleSlotsPreset(_roleSlotsPresetActive);
     }
@@ -557,11 +523,7 @@ public sealed partial class SequenceSpecEditorWindow
     {
         using (new EditorGUILayout.HorizontalScope())
         {
-            _gateFoldout = EditorGUILayout.Foldout(
-                _gateFoldout,
-                "Gate",
-                true
-            );
+            _gateFoldout = EditorGUILayout.Foldout(_gateFoldout, "Gate", true);
 
             GUILayout.FlexibleSpace();
 
@@ -618,14 +580,16 @@ public sealed partial class SequenceSpecEditorWindow
 
     private void ApplyDefaultGateToCurrentStep(SerializedProperty stepGateProp)
     {
-        if (stepGateProp == null) return;
+        if (stepGateProp == null)
+            return;
 
         string gatePath = stepGateProp.propertyPath;
 
         DelayModify("Apply Gate Preset", so =>
         {
             var gate = so.FindProperty(gatePath);
-            if (gate == null) return;
+            if (gate == null)
+                return;
 
             var g = _defaultNewStepGate;
             g.type = _applyGateType;
@@ -637,43 +601,41 @@ public sealed partial class SequenceSpecEditorWindow
 
     private static void WriteGateToSerializedProperty(SerializedProperty gateProp, GateToken g)
     {
-        if (gateProp == null) return;
+        if (gateProp == null)
+            return;
 
         var typeProp = gateProp.FindPropertyRelative("type");
         var secProp = gateProp.FindPropertyRelative("seconds");
         var keyProp = gateProp.FindPropertyRelative("signalKey");
 
-        if (typeProp != null) typeProp.enumValueIndex = (int)g.type;
+        if (typeProp != null)
+            typeProp.enumValueIndex = (int)g.type;
 
-        if (secProp != null) secProp.floatValue = g.seconds;
+        if (secProp != null)
+            secProp.floatValue = g.seconds;
 
-        if (keyProp != null) keyProp.stringValue = g.signalKey ?? "";
+        if (keyProp != null)
+            keyProp.stringValue = g.signalKey ?? "";
     }
-    
-    /// <summary>
-    /// ] 키 단축키: 현재 선택된 Step에 Gate Defaults 적용
-    /// </summary>
+
     private void HandleApplyGateDefaultsShortcut()
     {
         var e = Event.current;
         if (e == null || e.type != EventType.KeyDown) return;
         if (EditorGUIUtility.editingTextField) return;
-        
-        // ] 키 체크
         if (e.keyCode != KeyCode.RightBracket) return;
-        
-        // 현재 Step이 선택되어 있는지 확인
+
         if (_nodesProp == null) return;
         if (_selectedNode < 0 || _selectedNode >= _nodesProp.arraySize) return;
-        
+
         var nodeProp = _nodesProp.GetArrayElementAtIndex(_selectedNode);
         var stepsProp = nodeProp.FindPropertyRelative("steps");
         if (stepsProp == null || !stepsProp.isArray) return;
         if (_selectedStep < 0 || _selectedStep >= stepsProp.arraySize) return;
-        
+
         var stepProp = stepsProp.GetArrayElementAtIndex(_selectedStep);
         var gateProp = stepProp.FindPropertyRelative("gate");
-        
+
         if (gateProp != null)
         {
             ApplyDefaultGateToCurrentStep(gateProp);

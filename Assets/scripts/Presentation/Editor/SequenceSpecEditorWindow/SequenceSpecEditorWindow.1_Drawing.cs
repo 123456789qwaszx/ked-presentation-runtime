@@ -24,7 +24,7 @@ using UnityEngine;
 /// 
 /// - 우측 패널(DrawRightPanel / DrawNodeEditor)
 ///   - 선택된 Node의 Steps 리스트 + Step 단축키 처리
-///   - 선택된 Step 상세(게이트, 트랙 탭, 커맨드 리스트)
+///   - 선택된 Step 상세(게이트, 커맨드 리스트)
 ///   - 스크롤 보정(신규 커맨드/특정 커맨드 인덱스 점프)
 ///   - Compiled Preview 출력
 ///   - 하단 커맨드 바(+Command, Node 단위 Expand/Collapse All)
@@ -122,7 +122,6 @@ public sealed partial class SequenceSpecEditorWindow
                 {
                     EditorPrefs.SetBool(PrefKey_RoleSlotsPresetAutoSave, _roleSlotsPresetAutoSave);
 
-                    // 켜는 순간 현재 상태를 한번 저장해주면 UX가 더 좋음
                     if (_roleSlotsPresetAutoSave)
                         MaybeAutoSaveActiveRoleSlotsPreset();
                 }
@@ -148,7 +147,6 @@ public sealed partial class SequenceSpecEditorWindow
                 EditorGUILayout.HelpBox("No nodes. Use 'Add Node'.", MessageType.Warning);
         }
     }
-
 
     private void DrawNodesPanel()
     {
@@ -254,10 +252,8 @@ public sealed partial class SequenceSpecEditorWindow
             {
                 EnsureStepsList(nodeProp, stepsProp);
 
-                // 1) Steps 리스트만 스크롤
                 DrawStepsScrollArea(stepsProp);
 
-                // 2) Step Label + Gate (리스트 아래 고정)
                 SerializedProperty stepProp = null;
                 bool hasStep = stepsProp.arraySize > 0 && _selectedStep >= 0 && _selectedStep < stepsProp.arraySize;
                 if (hasStep)
@@ -272,7 +268,6 @@ public sealed partial class SequenceSpecEditorWindow
                         DrawStepLabelAndGateOnly(stepProp);
                     }
 
-                    // 3) Compiled Preview도 Steps 쪽으로 이동
                     EditorGUILayout.Space(6f);
                     using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
                     {
@@ -284,10 +279,8 @@ public sealed partial class SequenceSpecEditorWindow
                     EditorGUILayout.HelpBox("Select a step to edit label/gate/compiled.", MessageType.Info);
                 }
 
-                // 4) Step shortcuts (키보드)
                 HandleStepShortcuts(stepsProp);
 
-                // 5) +Step : 맨 아래 고정
                 using (new EditorGUILayout.HorizontalScope(EditorStyles.helpBox, GUILayout.Height(34f)))
                 {
                     GUILayout.Space(4f);
@@ -322,13 +315,10 @@ public sealed partial class SequenceSpecEditorWindow
 
                 using (new EditorGUI.DisabledScope(_isDraggingSteps))
                 {
-                    // TrackTabs는 오른쪽(Commands 위) 유지
                     DrawStepHeaderOnly(stepProp);
 
                     EditorGUILayout.Space(4f);
                     DrawCommandsScrollArea(stepProp);
-
-                    // Compiled는 왼쪽으로 옮겼으니 오른쪽에서는 제거
 
                     EditorGUILayout.Space(4f);
                     DrawBottomCommandBar(stepProp);
@@ -336,7 +326,6 @@ public sealed partial class SequenceSpecEditorWindow
             }
         }
     }
-
 
     private void DrawBottomCommandBar(SerializedProperty stepProp)
     {
@@ -348,15 +337,15 @@ public sealed partial class SequenceSpecEditorWindow
             {
                 GUILayout.Space(4f);
 
-                var trackListProp = FindActiveTrackList(stepProp);
-                bool validCommands = (trackListProp != null && trackListProp.isArray);
+                var commandsProp = FindUnifiedCommandsProp(stepProp);
+                bool validCommands = (commandsProp != null && commandsProp.isArray);
 
                 using (new EditorGUI.DisabledScope(!validCommands))
                 {
                     if (GUILayout.Button("+ Command", GUILayout.Width(100), GUILayout.Height(34)))
                     {
-                        string commandsPath = trackListProp.propertyPath;
-                        int insertAt = trackListProp.arraySize;
+                        string commandsPath = commandsProp.propertyPath;
+                        int insertAt = commandsProp.arraySize;
 
                         ShowCommandAddMenu(
                             commandsPath,
@@ -381,12 +370,12 @@ public sealed partial class SequenceSpecEditorWindow
                     {
                         var expandAll = new GUIContent(
                             "Expand All",
-                            "Expand ALL command foldouts in this Node.\n(Affects every Step, every Track)"
+                            "Expand ALL command foldouts in this Node.\n(Affects every Step)"
                         );
 
                         var collapseAll = new GUIContent(
                             "Collapse All",
-                            "Collapse ALL command foldouts in this Node.\n(Affects every Step, every Track)"
+                            "Collapse ALL command foldouts in this Node.\n(Affects every Step)"
                         );
 
                         if (GUILayout.Button(expandAll, GUILayout.Width(96), GUILayout.Height(28)))
@@ -477,7 +466,6 @@ public sealed partial class SequenceSpecEditorWindow
         {
             GUILayout.Space(2f);
 
-            // Row 2: Scope
             using (new EditorGUILayout.HorizontalScope())
             {
                 EditorGUILayout.LabelField("Scope", EditorStyles.miniLabel, GUILayout.Width(labelW));
@@ -498,7 +486,6 @@ public sealed partial class SequenceSpecEditorWindow
                 }
             }
 
-            // Row 1: Slots
             using (new EditorGUILayout.HorizontalScope())
             {
                 EditorGUILayout.LabelField("Slots", EditorStyles.miniLabel, GUILayout.Width(labelW));
@@ -518,18 +505,15 @@ public sealed partial class SequenceSpecEditorWindow
                 }
             }
 
-
-            // Row 3: Auto-fill(Role)
             using (new EditorGUILayout.HorizontalScope())
             {
-                // 라벨을 "Auto" 같은 짧은 걸로 줄여도 되고, 그냥 빈칸 처리해도 됨
                 EditorGUILayout.LabelField("", EditorStyles.miniLabel, GUILayout.Width(labelW));
 
                 EditorGUI.BeginChangeCheck();
                 bool next = EditorGUILayout.ToggleLeft(
                     "Auto-fill(Role)",
                     _autoFillIdsOnAdd,
-                    GUILayout.Width(scopePopupW) // 박스 폭 안에서 대충 맞추기
+                    GUILayout.Width(scopePopupW)
                 );
                 if (EditorGUI.EndChangeCheck())
                 {
@@ -549,13 +533,10 @@ public sealed partial class SequenceSpecEditorWindow
     private void DrawStepHeaderOnly(SerializedProperty stepProp)
     {
         EditorGUILayout.Space(1);
-        DrawTrackTabs();
-        EditorGUILayout.Space(2);
     }
 
     private void DrawStepLabelAndGateOnly(SerializedProperty stepProp)
     {
-        // Step Label
         var stepNameProp = stepProp.FindPropertyRelative("editorName");
         if (stepNameProp != null)
         {
@@ -574,7 +555,6 @@ public sealed partial class SequenceSpecEditorWindow
             }
         }
 
-        // Gate
         var gateProp = stepProp.FindPropertyRelative("gate");
         if (gateProp != null)
         {

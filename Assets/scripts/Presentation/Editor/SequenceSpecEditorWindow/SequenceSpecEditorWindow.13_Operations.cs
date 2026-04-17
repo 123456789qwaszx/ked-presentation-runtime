@@ -287,41 +287,5 @@ public sealed partial class SequenceSpecEditorWindow
         build?.Invoke(menu);
         menu.ShowAsContext();
     }
-
-    private SerializedProperty FindActiveTrackList(SerializedProperty stepProp)
-    {
-        if (stepProp == null) return null;
-
-        var tracksProp = stepProp.FindPropertyRelative("tracks");
-        if (tracksProp == null) return null;
-
-        return _activeTrack switch
-        {
-            CommandTrackType.Interaction => tracksProp.FindPropertyRelative("interaction"),
-            CommandTrackType.Setup => tracksProp.FindPropertyRelative("setup"),
-            CommandTrackType.Motion => tracksProp.FindPropertyRelative("motion"),
-            CommandTrackType.Dialogue => tracksProp.FindPropertyRelative("dialogue"),
-            CommandTrackType.FX => tracksProp.FindPropertyRelative("fx"),
-            _ => tracksProp.FindPropertyRelative("interaction"),
-        };
-    }
-
-    private static SerializedProperty FindTrackListOnStep(SerializedProperty stepProp, CommandTrackType track)
-    {
-        if (stepProp == null) return null;
-
-        var tracksProp = stepProp.FindPropertyRelative("tracks");
-        if (tracksProp == null) return null;
-
-        return track switch
-        {
-            CommandTrackType.Interaction => tracksProp.FindPropertyRelative("interaction"),
-            CommandTrackType.Setup => tracksProp.FindPropertyRelative("setup"),
-            CommandTrackType.Motion => tracksProp.FindPropertyRelative("motion"),
-            CommandTrackType.Dialogue => tracksProp.FindPropertyRelative("dialogue"),
-            CommandTrackType.FX => tracksProp.FindPropertyRelative("fx"),
-            _ => tracksProp.FindPropertyRelative("interaction"),
-        };
-    }
 }
 #endif

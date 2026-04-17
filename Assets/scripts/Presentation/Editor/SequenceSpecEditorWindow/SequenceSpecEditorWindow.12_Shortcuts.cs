@@ -9,22 +9,22 @@ using UnityEngine;
 /// - "마우스 없이도" 편집을 빠르게 하기 위한 단축키/키보드 액션을 한 곳에 모아둔 파셜.
 /// - Commands / Steps 리스트에 대한 공통 키 조작을 처리하고, 그 결과를 실제 CRUD(추가/삭제/복제/붙여넣기)로 연결한다.
 /// - 특히 아래 두 축을 담당한다:
-///   1) 글로벌 키(현재 선택된 스텝/트랙의 커맨드 삭제)
+///   1) 글로벌 키(현재 선택된 스텝의 커맨드 삭제)
 ///   2) 리스트 컨텍스트별 키(Commands/Steps에서 Enter/Space/Delete/Ctrl+C/V/D/X 등)
 /// 
 /// 이 파일을 보면 좋을 때 (무엇을 건드리고 싶을 때)
 /// - Delete 키 동작이 이상하다 / 특정 상황에서 삭제가 안 된다
-///   - HandleGlobalCommandDeleteShortcut(): 모디파이어 없는 Delete로 "현재 트랙/현재 선택 커맨드" 삭제
+///   - HandleGlobalCommandDeleteShortcut(): 모디파이어 없는 Delete로 "현재 Step의 현재 선택 커맨드" 삭제
 ///   - HandleCommandShortcuts(): Commands 리스트 내 Delete 처리 + 다른 단축키
 ///   - DeleteSelectedStep(): Steps 리스트 내 삭제(Undo/리빌드/컴파일 갱신 포함)
 /// 
 /// - Enter(커맨드 생성) / Space(접기/펼치기) / Shift+Space(전체 접기/펼치기) 동작을 바꾸고 싶다
-///   - HandleCommandShortcuts()의 Return/KeypadEnter 분기:
-///     - Enter: +Command 메뉴 열기 (TryClickPlusCommand_ByMenu)
-///   - HandleCommandShortcuts()의 Space 분기:
-///     - Space: 단일 커맨드 foldout 토글
-///     - Shift+Space: "현재 리스트 전체" foldout을 일괄 토글
-///     - foldout 저장/복구는 FoldoutState 파셜(Load/SaveFoldouts, SetAllCommandFoldouts 등)과 연동됨
+///   - HandleCommandShortcuts()의 Return/Space 분기:
+///     - Return/Space: +Command 메뉴 열기 (TryClickPlusCommand_ByMenu)
+///   - HandleCommandShortcuts()의 KeypadEnter 분기:
+///     - KeypadEnter: 단일 커맨드 foldout 토글
+///     - Shift+KeypadEnter: "현재 리스트 전체" foldout을 일괄 토글
+///   - foldout 저장/복구는 FoldoutState 파셜(Load/SaveFoldouts, SetAllCommandFoldouts 등)과 연동됨
 /// 
 /// - 복사/잘라내기/붙여넣기/복제(Ctrl+C/X/V/D) 정책을 바꾸고 싶다
 ///   - Commands:
@@ -32,7 +32,6 @@ using UnityEngine;
 ///     - Ctrl+X: Copy 후 Delete
 ///     - Ctrl+V: 클립보드 JSON → CreateCommandFromJson()로 생성 후 삽입
 ///     - Ctrl+D: Copy→Paste로 "한 칸 아래 복제"
-///     - 삽입 후 메타 보정: SyncMetaAfterInsert(pastedEl, targetTrack: _activeTrack)
 ///   - Steps:
 ///     - Ctrl+C: CopyStepToClipboard(step)
 ///     - Ctrl+V: CreateStepFromJson(json)로 생성 후 해당 노드 steps에 삽입
@@ -74,15 +73,15 @@ public sealed partial class SequenceSpecEditorWindow
         if (_selectedStep < 0 || _selectedStep >= stepsProp.arraySize) return;
 
         var stepProp = stepsProp.GetArrayElementAtIndex(_selectedStep);
-        var trackList = FindActiveTrackList(stepProp);
-        if (trackList == null || !trackList.isArray) return;
+        var commandsProp = FindUnifiedCommandsProp(stepProp);
+        if (commandsProp == null || !commandsProp.isArray) return;
 
         if (_commandsList == null) return;
 
         int idx = _commandsList.index;
-        if (idx < 0 || idx >= trackList.arraySize) return;
+        if (idx < 0 || idx >= commandsProp.arraySize) return;
 
-        string commandsPath = trackList.propertyPath;
+        string commandsPath = commandsProp.propertyPath;
 
         DeleteCommandAt(commandsPath, idx, after: () =>
         {
@@ -104,7 +103,7 @@ public sealed partial class SequenceSpecEditorWindow
 
         bool mod = e.control || e.command;
 
-        // Enter: 커맨드 추가 메뉴 열기
+        // Enter/Space: 커맨드 추가 메뉴 열기
         if (!mod && (e.keyCode == KeyCode.Return || e.keyCode == KeyCode.Space))
         {
             if (_navColumn == NavColumn.Commands)
@@ -119,7 +118,7 @@ public sealed partial class SequenceSpecEditorWindow
             }
         }
 
-        // Space: 펼치기/접기 토글
+        // KeypadEnter: 펼치기/접기 토글
         if (!mod && e.keyCode == KeyCode.KeypadEnter)
         {
             string path = commandsProp.propertyPath;
@@ -128,7 +127,7 @@ public sealed partial class SequenceSpecEditorWindow
             int keepIndex = (_commandsList != null) ? _commandsList.index : -1;
             if (keepIndex >= 0) _pendingCommandIndex = keepIndex;
 
-            // Shift+Space: 전체 펼치기/접기
+            // Shift+KeypadEnter: 전체 펼치기/접기
             if (e.shift)
             {
                 bool anyCollapsed = false;
@@ -168,7 +167,7 @@ public sealed partial class SequenceSpecEditorWindow
                 return;
             }
 
-            // Space: 단일 아이템 펼치기/접기
+            // KeypadEnter: 단일 아이템 펼치기/접기
             int idx = keepIndex;
             if (idx >= 0 && idx < commandsProp.arraySize)
             {
@@ -256,7 +255,8 @@ public sealed partial class SequenceSpecEditorWindow
 
         if (mod && e.keyCode == KeyCode.V)
         {
-            if (!TryGetClipboardJson(out string json)) return;
+            if (!TryGetClipboardJson(out string json))
+                return;
 
             int insertAt = commandsProp.arraySize;
             int sel = _commandsList.index;
@@ -300,8 +300,6 @@ public sealed partial class SequenceSpecEditorWindow
 
                             var pastedEl = fresh.GetArrayElementAtIndex(insertAt);
                             pastedEl.managedReferenceValue = CreateCommandFromJson(json);
-
-                            SyncMetaAfterInsert(pastedEl, targetTrack: _activeTrack);
 
                             _pendingCommandIndex = insertAt;
                             _commandsList = null;
@@ -442,7 +440,6 @@ public sealed partial class SequenceSpecEditorWindow
 
         bool mod = e.control || e.command;
 
-        // Ctrl+C: 노드 복사
         if (mod && e.keyCode == KeyCode.C)
         {
             int idx = _nodesList.index;
@@ -456,7 +453,6 @@ public sealed partial class SequenceSpecEditorWindow
             return;
         }
 
-        // Ctrl+V: 노드 붙여넣기
         if (mod && e.keyCode == KeyCode.V)
         {
             if (!TryGetNodeClipboardJson(out string json))
@@ -492,7 +488,6 @@ public sealed partial class SequenceSpecEditorWindow
             return;
         }
 
-        // Ctrl+D: 노드 복제
         if (mod && e.keyCode == KeyCode.D)
         {
             int idx = _nodesList.index;
@@ -550,7 +545,6 @@ public sealed partial class SequenceSpecEditorWindow
     private bool TryClickPlusCommand_ByMenu(SerializedProperty commandsProp)
     {
         if (commandsProp == null || !commandsProp.isArray) return false;
-
         if (!IsSerializeReferenceCommandList(commandsProp)) return false;
 
         string commandsPath = commandsProp.propertyPath;
@@ -645,25 +639,21 @@ public sealed partial class SequenceSpecEditorWindow
 
         return true;
     }
-    
+
     private void HandleRenameShortcuts()
     {
         var e = Event.current;
         if (e == null || e.type != EventType.KeyDown) return;
         if (EditorGUIUtility.editingTextField) return;
 
-        // F2: rename step label (Step detail header)
         if (e.keyCode == KeyCode.F2)
         {
-            // 스텝이 실제로 선택돼 있을 때만
             if (GetCurrentStepProp() != null)
             {
-                // 보통 Steps/Commands 컬럼에서만 동작시키는 게 깔끔
                 if (_navColumn == NavColumn.Steps || _navColumn == NavColumn.Commands)
                 {
                     _requestFocusStepNameField = true;
 
-                    // right panel이 그려질 때 포커스 주도록
                     GUI.FocusControl(null);
                     e.Use();
                     Repaint();
@@ -671,24 +661,19 @@ public sealed partial class SequenceSpecEditorWindow
             }
         }
     }
-    
+
     private void HandleRoleSlotHotkeys()
     {
         var e = Event.current;
         if (e == null) return;
-
-        // 텍스트 입력 중엔 방해 금지
         if (EditorGUIUtility.editingTextField) return;
-
         if (e.type != EventType.KeyDown) return;
 
         int slotIndex = -1;
 
-        // 1) 숫자키(상단) 1~9
         if (e.keyCode >= KeyCode.Alpha1 && e.keyCode <= KeyCode.Alpha9)
             slotIndex = (int)e.keyCode - (int)KeyCode.Alpha1;
 
-        // 2) 넘버패드 1~9
         if (slotIndex < 0 && e.keyCode >= KeyCode.Keypad1 && e.keyCode <= KeyCode.Keypad9)
             slotIndex = (int)e.keyCode - (int)KeyCode.Keypad1;
 
@@ -696,10 +681,8 @@ public sealed partial class SequenceSpecEditorWindow
 
         EnsureRoleSlotsCapacity();
 
-        // 표시 슬롯 범위 안에서만
         if (slotIndex >= _roleSlotCount) return;
 
-        // Shift+숫자: Apply RoleKey
         if (e.shift)
         {
             if (!CanApplyRoleToCurrentStep(slotIndex)) return;
@@ -710,7 +693,6 @@ public sealed partial class SequenceSpecEditorWindow
             return;
         }
 
-        // 숫자만: Auto 타겟 변경
         if (_autoFillIdsOnAdd)
         {
             if (_autoFillRoleSlotIndex != slotIndex)
@@ -718,7 +700,6 @@ public sealed partial class SequenceSpecEditorWindow
                 _autoFillRoleSlotIndex = slotIndex;
                 EditorPrefs.SetInt(PrefKey_AutoFillRoleSlotIndex, _autoFillRoleSlotIndex);
 
-                // 토글 클릭과 동일하게 포커스 정리
                 GUI.FocusControl(null);
             }
 
@@ -726,8 +707,6 @@ public sealed partial class SequenceSpecEditorWindow
             GUIUtility.ExitGUI();
             return;
         }
-
-        // AutoFill이 꺼져있으면 아무 것도 안 함(원하면 여기서 토스트/로그 가능)
     }
 }
 #endif

@@ -8,12 +8,12 @@ using UnityEditor;
 /// 이 Partial이 하는 일:
 /// - 에디터에서 "새로 추가"되는 Step/Node의 기본 데이터 구조를 만들어준다.
 ///   - CreateBlankNode(): 빈 NodeSpec 생성 (editorName="", steps=빈 리스트)
-///   - CreateBlankStep(): 빈 StepSpec 생성 (editorName="", gate, tracks, compiled 초기화)
+///   - CreateBlankStep(): 빈 StepSpec 생성 (editorName="", gate, compiled 초기화)
 /// - 기본 GateToken을 “안전한 형태”로 정리해준다.
 ///   - SanitizeGate(): 타입에 맞지 않는 필드(seconds/signalKey)를 정리하고 null 방지
 /// - 복제(duplicate) 기능에서 원본을 망가뜨리지 않도록 깊은 복제를 제공한다.
 ///   - CloneNodeDeep(): NodeSpec + 모든 Step/Command를 깊은 복제
-///   - CloneStepDeep(): StepSpec + 모든 Track 리스트의 Command를 깊은 복제
+///   - CloneStepDeep(): StepSpec + compiled 리스트의 Command를 깊은 복제
 ///   - CloneCommandDeep(): CommandSpecBase를 JSON round-trip으로 복제 (SerializeReference 대응)
 /// 
 /// 설계/정책 포인트:
@@ -23,10 +23,9 @@ using UnityEditor;
 /// - Duplicate 시 gate가 Immediately이면 “복제본의 gate를 defaultGate로 교체”하는 규칙:
 ///   - 원본이 즉시 진행(Immediately)인 경우, 복제본은 기본 게이트(_defaultNewStepGate)를 적용해
 ///     편집 흐름에서 일관된 기본값을 유지하도록 한다.
-/// - tracks/compiled:
-///   - tracks는 항상 새 StepTracks()로 초기화(원본 참조 공유 방지)
-///   - compiled는 런타임용 캐시 성격이므로, 복제 시에도 "빈 리스트"로 새로 만들고
-///     실제 내용은 ForceCompileAll() 등 컴파일 경로에서 다시 채우는 것을 기대한다.
+/// - compiled:
+///   - compiled는 Step의 실제 command 원본 리스트로 사용한다.
+///   - 복제 시에는 compiled 리스트를 새로 만들고, 내부 Command들을 깊은 복제한다.
 /// 
 /// 여기부터 보면 좋은 경우(수정 포인트):
 /// - “새 Step/Node 만들 때 기본값을 바꾸고 싶다”
@@ -51,8 +50,10 @@ public sealed partial class SequenceSpecEditorWindow
         {
             editorName = "",
             gate = gate,
-            tracks = new StepTracks(),
             compiled = new List<CommandSpecBase>(),
+#if UNITY_EDITOR
+            editorImportedCompiledOnly = false,
+#endif
         };
     }
 
@@ -86,21 +87,16 @@ public sealed partial class SequenceSpecEditorWindow
         {
             editorName = src.editorName,
             gate = src.gate,
-            tracks = new StepTracks(),
-            compiled = new List<CommandSpecBase>()
+            compiled = new List<CommandSpecBase>(),
+#if UNITY_EDITOR
+            editorImportedCompiledOnly = src.editorImportedCompiledOnly,
+#endif
         };
 
         if (dst.gate.type == GateTokenType.Immediately)
             dst.gate = SanitizeGate(defaultGate);
 
-        if (src.tracks != null)
-        {
-            CloneListInto(src.tracks.interaction, dst.tracks.interaction);
-            CloneListInto(src.tracks.setup, dst.tracks.setup);
-            CloneListInto(src.tracks.motion, dst.tracks.motion);
-            CloneListInto(src.tracks.dialogue, dst.tracks.dialogue);
-            CloneListInto(src.tracks.fx, dst.tracks.fx);
-        }
+        CloneListInto(src.compiled, dst.compiled);
 
         return dst;
     }
@@ -111,6 +107,7 @@ public sealed partial class SequenceSpecEditorWindow
         dst.Clear();
 
         if (src == null) return;
+
         foreach (var c in src)
             dst.Add(CloneCommandDeep(c));
     }

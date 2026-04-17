@@ -44,6 +44,7 @@ using UnityEngine;
 /// - 이 partial은 "입력 해석 → 선택/스크롤 상태 갱신"까지만 책임지고,
 ///   실제 생성/삭제/컴파일은 다른 partial의 유틸에 위임하는 구조를 유지하는 게 디버깅이 쉽다.
 /// </summary>
+
 public sealed partial class SequenceSpecEditorWindow
 {
     private void HandleArrowNavigation()
@@ -51,7 +52,7 @@ public sealed partial class SequenceSpecEditorWindow
         var e = Event.current;
         if (e == null || e.type != EventType.KeyDown) return;
         if (EditorGUIUtility.editingTextField) return;
-        
+
         if (e.keyCode == KeyCode.F2)
         {
             if (_navColumn == NavColumn.Nodes &&
@@ -103,8 +104,7 @@ public sealed partial class SequenceSpecEditorWindow
                 return;
             }
 
-            // Commands 컬럼에서 Enter는 여기서 처리하지 않음:
-            // Commands는 HandleCommandShortcuts()에서 Enter로 +Command 메뉴 열고 있으니까.
+            // Commands 컬럼에서 Enter는 HandleCommandShortcuts()에서 처리
         }
 
         bool left = e.keyCode == KeyCode.LeftArrow;
@@ -127,47 +127,15 @@ public sealed partial class SequenceSpecEditorWindow
                 }
             }
 
-            // Commands + → : 트랙 우측 이동 (기존 그대로)
-            if (_navColumn == NavColumn.Commands && right)
-            {
-                MoveTrack(+1);
-                GUI.FocusControl(null);
-                e.Use();
-                Repaint();
-                return;
-            }
-
-            // 패치: Commands + ← :
-            // - Interaction이 아닐 때는 Steps로 나가지 않고, 트랙 좌측 이동만
-            // - Interaction일 때만 Steps로 나감 (나갈 때는 기존 정책대로 선택 초기화)
-            if (_navColumn == NavColumn.Commands && left)
-            {
-                if (_activeTrack != CommandTrackType.Interaction)
-                {
-                    MoveTrack(-1); // 트랙만 이동, Commands 컬럼 유지
-                    GUI.FocusControl(null);
-                    e.Use();
-                    Repaint();
-                    return;
-                }
-
-                // Interaction일 때만 Steps로 "컬럼 이동" 허용
-                // (기존 동작: 나갈 때 커맨드 선택 초기화)
-                _activeTrack = CommandTrackType.Interaction;
-
-                _commandsList = null;
-                _commandsPropPath = null;
-
-                ClearCommandSelection();
-
-                _scrollToCommandIndex = false;
-                _scrollTargetCommandIndex = -1;
-
-                // 여기서는 return 하지 않고 아래 컬럼 이동 로직으로 진행
-            }
-
             int dir = right ? +1 : -1;
             _navColumn = (NavColumn)Mathf.Clamp((int)_navColumn + dir, 0, 2);
+
+            if (_navColumn == NavColumn.Steps)
+            {
+                ClearCommandSelection();
+                _scrollToCommandIndex = false;
+                _scrollTargetCommandIndex = -1;
+            }
 
             SyncSelectionAfterColumnChange();
 
@@ -204,8 +172,8 @@ public sealed partial class SequenceSpecEditorWindow
         var stepProp = GetCurrentStepProp();
         if (stepProp == null) return false;
 
-        var trackListProp = FindActiveTrackList(stepProp);
-        if (trackListProp == null || !trackListProp.isArray) return false;
+        var commandsProp = FindUnifiedCommandsProp(stepProp);
+        if (commandsProp == null || !commandsProp.isArray) return false;
 
         return true;
     }
@@ -246,6 +214,7 @@ public sealed partial class SequenceSpecEditorWindow
     private void MoveNodeSelection(int delta)
     {
         if (_nodesProp == null || !_nodesProp.isArray) return;
+
         int count = _nodesProp.arraySize;
         if (count <= 0) return;
 
@@ -254,7 +223,8 @@ public sealed partial class SequenceSpecEditorWindow
 
         _selectedNode = next;
 
-        if (_nodesList != null) _nodesList.index = _selectedNode;
+        if (_nodesList != null)
+            _nodesList.index = _selectedNode;
 
         _selectedStep = -1;
         _stepsList = null;
@@ -276,14 +246,15 @@ public sealed partial class SequenceSpecEditorWindow
         int cur = Mathf.Clamp(_selectedStep, 0, count - 1);
         int next = Mathf.Clamp(cur + delta, 0, count - 1);
         if (next == _selectedStep) return;
-        
+
         _selectedStep = next;
 
-        if (_stepsList != null) _stepsList.index = _selectedStep;
-        
+        if (_stepsList != null)
+            _stepsList.index = _selectedStep;
+
         _scrollToStepIndex = true;
         _scrollTargetStepIndex = _selectedStep;
-        
+
         _commandsList = null;
     }
 
@@ -298,21 +269,16 @@ public sealed partial class SequenceSpecEditorWindow
         int next = Mathf.Clamp(cur + delta, 0, count - 1);
         if (next == _commandsList.index) return;
 
-        // 1) 선택 즉시 반영
         _commandsList.index = next;
 
-        // 2) 즉시 스크롤 보정(현재 viewport 기준)
         var stepProp = GetCurrentStepProp();
         if (stepProp != null)
         {
-            var trackListProp = FindActiveTrackList(stepProp);
-            if (trackListProp != null && trackListProp.isArray)
-            {
-                EnsureSelectedCommandVisible(trackListProp, next); // _commandsScroll + _commandsViewportHeight 사용
-            }
+            var commandsProp = FindUnifiedCommandsProp(stepProp);
+            if (commandsProp != null && commandsProp.isArray)
+                EnsureSelectedCommandVisible(commandsProp, next);
         }
 
-        // 3) 예약 보정(다음 Repaint에서 캐시/높이 바뀐 걸 보정)
         _scrollToCommandIndex = true;
         _scrollTargetCommandIndex = next;
 
@@ -331,37 +297,8 @@ public sealed partial class SequenceSpecEditorWindow
         if (stepsProp == null || !stepsProp.isArray) return null;
 
         if (_selectedStep < 0 || _selectedStep >= stepsProp.arraySize) return null;
+
         return stepsProp.GetArrayElementAtIndex(_selectedStep);
-    }
-
-    private void MoveTrack(int delta)
-    {
-        CommandTrackType[] order =
-        {
-            CommandTrackType.Interaction,
-            CommandTrackType.Setup,
-            CommandTrackType.Motion,
-            CommandTrackType.Dialogue,
-            CommandTrackType.FX,
-        };
-
-        int cur = System.Array.IndexOf(order, _activeTrack);
-        if (cur < 0) cur = 0;
-
-        int next = (cur + delta) % order.Length;
-        if (next < 0) next += order.Length;
-
-        _activeTrack = order[next];
-
-        int keepIndex = (_commandsList != null) ? _commandsList.index : -1;
-
-        _commandsList = null;
-        _commandsPropPath = null;
-
-        _pendingCommandIndex = Mathf.Max(0, keepIndex);
-
-        _scrollToCommandIndex = true;
-        _scrollTargetCommandIndex = _pendingCommandIndex;
     }
 
     private void ClearCommandSelection()
@@ -403,15 +340,15 @@ public sealed partial class SequenceSpecEditorWindow
                 var stepProp = GetCurrentStepProp();
                 if (stepProp == null) return false;
 
-                var trackList = FindActiveTrackList(stepProp);
-                if (trackList == null || !trackList.isArray) return false;
+                var commandsProp = FindUnifiedCommandsProp(stepProp);
+                if (commandsProp == null || !commandsProp.isArray) return false;
 
                 if (_commandsList == null) return false;
 
                 int idx = _commandsList.index;
-                if (idx < 0 || idx >= trackList.arraySize) return false;
+                if (idx < 0 || idx >= commandsProp.arraySize) return false;
 
-                DeleteCommandAt(trackList.propertyPath, idx, after: () =>
+                DeleteCommandAt(commandsProp.propertyPath, idx, after: () =>
                 {
                     _commandsList = null;
                     _commandsPropPath = null;
@@ -451,17 +388,17 @@ public sealed partial class SequenceSpecEditorWindow
                 return false;
         }
     }
-    
+
     private void DrawCommandsScrollArea(SerializedProperty stepProp)
     {
-        var commandsProp = FindActiveTrackList(stepProp);
+        var commandsProp = FindUnifiedCommandsProp(stepProp);
         if (commandsProp == null || !commandsProp.isArray)
         {
-            EditorGUILayout.HelpBox("Active track list missing.", MessageType.Error);
+            EditorGUILayout.HelpBox("Commands list missing.", MessageType.Error);
             return;
         }
 
-        EnsureCommandsList(stepProp, commandsProp);
+        EnsureCommandsList(commandsProp);
         if (_commandsList == null) return;
 
         Rect viewport = GUILayoutUtility.GetRect(
@@ -483,7 +420,6 @@ public sealed partial class SequenceSpecEditorWindow
         float contentW = Mathf.Max(0f, viewport.width);
         Rect contentRect = new Rect(0f, 0f, contentW, listH);
 
-        // 중요: BeginScrollView 전에 스크롤 값을 미리 보정해야 함
         if (needScroll && _scrollToCommandIndex && Event.current.type == EventType.Repaint)
         {
             EnsureSelectedCommandVisible(commandsProp, _scrollTargetCommandIndex);
@@ -513,12 +449,11 @@ public sealed partial class SequenceSpecEditorWindow
 
         HandleCommandShortcuts(commandsProp);
     }
-    
+
     private void DrawStepsScrollArea(SerializedProperty stepsProp)
     {
         if (stepsProp == null || !stepsProp.isArray) return;
         if (_stepsList == null) return;
-
 
         Rect viewport = GUILayoutUtility.GetRect(
             0f, 100000f,
@@ -549,7 +484,6 @@ public sealed partial class SequenceSpecEditorWindow
 
         if (!needScroll)
         {
-            // 스크롤 불필요 상태에서는 Repaint에서만 0으로 정리
             if (Event.current.type == EventType.Repaint && _stepsScroll.y != 0f)
                 _stepsScroll.y = 0f;
         }
@@ -561,7 +495,7 @@ public sealed partial class SequenceSpecEditorWindow
             _scrollTargetStepIndex = -1;
         }
     }
-    
+
     private void EnsureSelectedStepVisible(SerializedProperty stepsProp, int index)
     {
         if (stepsProp == null || !stepsProp.isArray) return;
@@ -576,7 +510,6 @@ public sealed partial class SequenceSpecEditorWindow
 
         rowH += 2f;
 
-        // index 행의 yTop 계산
         float yTop = _stepsList.headerHeight + topPad;
         for (int i = 0; i < index; i++)
         {
@@ -608,8 +541,7 @@ public sealed partial class SequenceSpecEditorWindow
         if (Mathf.Abs(_stepsScroll.y - nextY) > 0.5f)
             _stepsScroll.y = nextY;
     }
-    
-    
+
     private void EnsureSelectedCommandVisible(SerializedProperty commandsProp, int index)
     {
         if (commandsProp == null || !commandsProp.isArray) return;
@@ -625,10 +557,9 @@ public sealed partial class SequenceSpecEditorWindow
                 : _commandsList.elementHeight;
 
             if (h <= 0f) return 0f;
-            return h + 2f; // element padding
+            return h + 2f;
         }
 
-        // index 행의 yTop (리스트 내부 좌표)
         float yTop = _commandsList.headerHeight + topPad;
         for (int i = 0; i < index; i++)
             yTop += GetRowHWithPad(i);
@@ -636,14 +567,11 @@ public sealed partial class SequenceSpecEditorWindow
         float rowH = GetRowHWithPad(index);
         float yCenter = yTop + (rowH * 0.5f);
 
-        // viewport height (실측 캐시 우선)
         float viewH = _commandsViewportRect.height > 1f ? _commandsViewportRect.height : _commandsViewportHeight;
         viewH = Mathf.Max(120f, viewH);
 
-        // viewport 중앙을 기준으로 스크롤 계산
         float nextY = yCenter - (viewH * 0.5f);
 
-        // 콘텐츠 범위 클램프
         float contentH = Mathf.Max(1f, _commandsList.GetHeight());
         float maxScroll = Mathf.Max(0f, contentH - viewH);
         nextY = Mathf.Clamp(nextY, 0f, maxScroll);
@@ -653,13 +581,13 @@ public sealed partial class SequenceSpecEditorWindow
             _commandsScroll.y = nextY;
     }
 
-
     private void RequestScrollToCommand(int index, bool repaint = true)
     {
         _scrollToCommandIndex = true;
         _scrollTargetCommandIndex = index;
 
-        if (repaint) Repaint();
+        if (repaint)
+            Repaint();
     }
 }
 #endif
