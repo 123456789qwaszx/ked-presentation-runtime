@@ -16,6 +16,10 @@ public sealed class StepSpec
 
     // 게이트는 기존 그대로 (원하면 List<GateToken>으로 확장 가능)
     public GateToken gate;
+    
+#if UNITY_EDITOR
+    public bool editorImportedCompiledOnly;
+#endif
 }
 
 [System.Serializable]
@@ -36,9 +40,8 @@ public class SequenceSpecSO : ScriptableObject
     public string sequenceKey;
 
     public List<NodeSpec> nodes = new();
-    
+ 
 #if UNITY_EDITOR
-    // 에디터에서만: 변경될 때마다 compiled 갱신(정석)
     private void OnValidate()
     {
         CompileAllSteps();
@@ -46,19 +49,25 @@ public class SequenceSpecSO : ScriptableObject
 
     public void CompileAllSteps()
     {
-        if (nodes == null) return;
+        if (nodes == null)
+            return;
 
         for (int n = 0; n < nodes.Count; n++)
         {
             var node = nodes[n];
-            if (node?.steps == null) continue;
+            if (node?.steps == null)
+                continue;
 
             for (int s = 0; s < node.steps.Count; s++)
             {
                 var step = node.steps[s];
-                if (step == null) continue;
+                if (step == null)
+                    continue;
 
-                StepCompiler.CompileInto(step); // tracks -> compiled
+                if (step.editorImportedCompiledOnly)
+                    continue;
+
+                StepCompiler.CompileInto(step);
             }
         }
     }

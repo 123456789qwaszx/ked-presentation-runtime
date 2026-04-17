@@ -375,6 +375,15 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 
     private void Collect(CommandSpecBase spec)
     {
+        if (spec == null)
+            return;
+
+        if (_importSink != null)
+        {
+            _importSink.Enqueue(spec);
+            return;
+        }
+
         _playbackDriver.Enqueue(spec);
     }
 
