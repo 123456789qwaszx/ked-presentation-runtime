@@ -29,7 +29,7 @@ public sealed class SequenceImportFromTextWindow : EditorWindow
 
     private void OnEnable()
     {
-        minSize = new Vector2(420f, 420f);
+        minSize = new Vector2(430f, 420f);
         ResetRecipeTextHistory(_text ?? string.Empty);
     }
 
@@ -61,7 +61,7 @@ public sealed class SequenceImportFromTextWindow : EditorWindow
 
         Rect textRect = GUILayoutUtility.GetRect(
             10f,
-            Mathf.Max(220f, position.height - 180f),
+            Mathf.Max(200f, position.height - 180f),
             GUILayout.ExpandWidth(true));
 
         float contentWidth = Mathf.Max(0f, textRect.width - 16f);

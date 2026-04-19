@@ -17,40 +17,18 @@ MonoBehaviour:
   - editorName: 
     steps:
     - editorName: 
-      tracks:
-        interaction: []
-        setup: []
-        motion: []
-        dialogue: []
-        fx: []
       compiled: []
       gate:
         type: 3
         seconds: 0
         signalKey: beat
     - editorName: 
-      tracks:
-        interaction: []
-        setup: []
-        motion: []
-        dialogue: []
-        fx: []
       compiled: []
       gate:
         type: 3
         seconds: 0
         signalKey: beat
     - editorName: 
-      tracks:
-        interaction:
-        - rid: 8483491179373002942
-        - rid: 8483491179373002944
-        setup:
-        - rid: 8483491179373002945
-        - rid: 8483491179373002946
-        motion: []
-        dialogue: []
-        fx: []
       compiled:
       - rid: 8483491179373002942
       - rid: 8483491179373002944
@@ -61,13 +39,6 @@ MonoBehaviour:
         seconds: 0
         signalKey: beat
     - editorName: 
-      tracks:
-        interaction:
-        - rid: 8483491179373002941
-        setup: []
-        motion: []
-        dialogue: []
-        fx: []
       compiled:
       - rid: 8483491179373002941
       gate:
@@ -75,27 +46,107 @@ MonoBehaviour:
         seconds: 0
         signalKey: beat
     - editorName: 
-      tracks:
-        interaction: []
-        setup: []
-        motion: []
-        dialogue: []
-        fx: []
       compiled: []
       gate:
         type: 3
         seconds: 0
         signalKey: beat
     - editorName: 
-      tracks:
-        interaction: []
-        setup: []
-        motion: []
-        dialogue: []
-        fx: []
       compiled: []
       gate:
         type: 1
+        seconds: 0
+        signalKey: 
+  - editorName: Imported Node 1
+    steps:
+    - editorName: Imported Step 0
+      compiled:
+      - rid: 8483491315577782332
+      gate:
+        type: 0
+        seconds: 0
+        signalKey: 
+    - editorName: Imported Step 1
+      compiled:
+      - rid: 8483491315577782333
+      gate:
+        type: 0
+        seconds: 0
+        signalKey: 
+  - editorName: Imported Node 2
+    steps:
+    - editorName: Imported Step 0
+      compiled:
+      - rid: 8483491315577782334
+      gate:
+        type: 0
+        seconds: 0
+        signalKey: 
+    - editorName: Imported Step 1
+      compiled:
+      - rid: 8483491315577782335
+      gate:
+        type: 0
+        seconds: 0
+        signalKey: 
+    - editorName: Imported Step 2
+      compiled:
+      - rid: 8483491315577782336
+      gate:
+        type: 0
+        seconds: 0
+        signalKey: 
+    - editorName: Imported Step 3
+      compiled:
+      - rid: 8483491315577782337
+      - rid: 8483491315577782338
+      - rid: 8483491315577782339
+      gate:
+        type: 0
+        seconds: 0
+        signalKey: 
+  - editorName: Imported Node 3
+    steps:
+    - editorName: Imported Step 0
+      compiled:
+      - rid: 8483491315577782340
+      gate:
+        type: 0
+        seconds: 0
+        signalKey: 
+    - editorName: Imported Step 1
+      compiled:
+      - rid: 8483491315577782341
+      gate:
+        type: 0
+        seconds: 0
+        signalKey: 
+    - editorName: Imported Step 2
+      compiled:
+      - rid: 8483491315577782342
+      gate:
+        type: 0
+        seconds: 0
+        signalKey: 
+    - editorName: Imported Step 3
+      compiled:
+      - rid: 8483491315577782343
+      gate:
+        type: 0
+        seconds: 0
+        signalKey: 
+    - editorName: Imported Step 4
+      compiled:
+      - rid: 8483491315577782344
+      gate:
+        type: 0
+        seconds: 0
+        signalKey: 
+    - editorName: Imported Step 5
+      compiled:
+      - rid: 8483491315577782345
+      gate:
+        type: 0
         seconds: 0
         signalKey: 
   references:
@@ -105,12 +156,6 @@ MonoBehaviour:
       type: {class: ShowEmojiCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:
         roleKey: sub
-        _meta:
-          track: 0
-          phase: 0
-          blockingHint: 0
-          infiniteHint: 0
-          durationHint: 0
         database: {fileID: 11400000, guid: 280fe7bcf36b9b149bd70dea397dcffc, type: 2}
         emojiKey: sparkle
         hideIfKeyEmpty: 1
@@ -122,12 +167,6 @@ MonoBehaviour:
       type: {class: SetupCharRigCommandSpec, ns: , asm: Assembly-CSharp}
       data:
         roleKey: sub
-        _meta:
-          track: 0
-          phase: 0
-          blockingHint: 0
-          infiniteHint: 0
-          durationHint: 0
         rigPrefab: {fileID: 8529412948266249186, guid: 01c9b93a77829ef438fc74c4ef4c5004, type: 3}
         parentSlot: 0
         rigRootName: CharacterRig
@@ -139,12 +178,6 @@ MonoBehaviour:
       type: {class: SetPortraitSpriteCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:
         roleKey: sub
-        _meta:
-          track: 0
-          phase: 0
-          blockingHint: 0
-          infiniteHint: 0
-          durationHint: 0
         portrait:
           character: kuonji
           emotion: 1
@@ -156,12 +189,6 @@ MonoBehaviour:
       type: {class: FadeInCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:
         roleKey: sub
-        _meta:
-          track: 10
-          phase: 0
-          blockingHint: 0
-          infiniteHint: 0
-          durationHint: 0
         targetMask: 5
         duration: 0.47
         ease: 9
@@ -171,15 +198,146 @@ MonoBehaviour:
       type: {class: MoveByCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:
         roleKey: sub
-        _meta:
-          track: 10
-          phase: 0
-          blockingHint: 0
-          infiniteHint: 0
-          durationHint: 0
         target: 1
         delta: {x: 200, y: 0}
         duration: 0.4
         ease: 9
         wait: 0
         killTween: 1
+    - rid: 8483491315577782332
+      type: {class: UIPatchCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: 
+        targetKind: 0
+        themeId: theme1
+        localeId: ko-KR
+        wait: 1
+    - rid: 8483491315577782333
+      type: {class: PlayBgmCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: 
+        clipKey: audio/bgm_tam_dystopia_snowwind_01
+        directClip: {fileID: 0}
+        fadeDuration: 1
+    - rid: 8483491315577782334
+      type: {class: UIPatchCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: 
+        targetKind: 0
+        themeId: theme1
+        localeId: ko-KR
+        wait: 1
+    - rid: 8483491315577782335
+      type: {class: PlayBgmCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: 
+        clipKey: audio/bgm_tam_dystopia_snowwind_01
+        directClip: {fileID: 0}
+        fadeDuration: 1
+    - rid: 8483491315577782336
+      type: {class: PlaySfxCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: 
+        clipKey: audio/sfx_dragon-studio-notification-sound-effect-372475
+        directClip: {fileID: 0}
+    - rid: 8483491315577782337
+      type: {class: TransitionCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: 
+        playMode: 0
+        targetKind: 0
+        customTargetKey: 
+        coveredAlpha: 1
+        uncoveredAlpha: 0
+        coverDuration: 0.2
+        uncoverDuration: 0.2
+        holdCoveredSeconds: 0.2
+        coverEase: 9
+        uncoverEase: 9
+        wait: 1
+        resetToOpenAtStart: 1
+    - rid: 8483491315577782338
+      type: {class: UIPatchCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: 
+        targetKind: 0
+        themeId: black
+        localeId: ko-KR
+        wait: 1
+    - rid: 8483491315577782339
+      type: {class: TransitionCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: 
+        playMode: 1
+        targetKind: 0
+        customTargetKey: 
+        coveredAlpha: 1
+        uncoveredAlpha: 0
+        coverDuration: 0.2
+        uncoverDuration: 0.2
+        holdCoveredSeconds: 0
+        coverEase: 9
+        uncoverEase: 9
+        wait: 1
+        resetToOpenAtStart: 1
+    - rid: 8483491315577782340
+      type: {class: UIPatchCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: 
+        targetKind: 0
+        themeId: theme1
+        localeId: ko-KR
+        wait: 1
+    - rid: 8483491315577782341
+      type: {class: PlayBgmCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: 
+        clipKey: audio/bgm_tam_dystopia_snowwind_01
+        directClip: {fileID: 0}
+        fadeDuration: 1
+    - rid: 8483491315577782342
+      type: {class: PlaySfxCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: 
+        clipKey: audio/sfx_dragon-studio-notification-sound-effect-372475
+        directClip: {fileID: 0}
+    - rid: 8483491315577782343
+      type: {class: TransitionCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: 
+        playMode: 0
+        targetKind: 0
+        customTargetKey: 
+        coveredAlpha: 1
+        uncoveredAlpha: 0
+        coverDuration: 0.2
+        uncoverDuration: 0.2
+        holdCoveredSeconds: 0.2
+        coverEase: 9
+        uncoverEase: 9
+        wait: 1
+        resetToOpenAtStart: 1
+    - rid: 8483491315577782344
+      type: {class: UIPatchCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: 
+        targetKind: 0
+        themeId: black
+        localeId: ko-KR
+        wait: 1
+    - rid: 8483491315577782345
+      type: {class: TransitionCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: 
+        playMode: 1
+        targetKind: 0
+        customTargetKey: 
+        coveredAlpha: 1
+        uncoveredAlpha: 0
+        coverDuration: 0.2
+        uncoverDuration: 0.2
+        holdCoveredSeconds: 0
+        coverEase: 9
+        uncoverEase: 9
+        wait: 1
+        resetToOpenAtStart: 1
