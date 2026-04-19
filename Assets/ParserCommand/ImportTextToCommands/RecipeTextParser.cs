@@ -69,11 +69,3 @@ public sealed class RecipeTextParser
         return result;
     }
 }
-
-public sealed class RecipeCommandLine
-{
-    public int lineNumber;
-    public string rawText;
-    public string commandName;
-    public List<string> args = new();
-}
