@@ -62,7 +62,8 @@ public sealed partial class SequenceSpecEditorWindow
         DelayModify("Add Command", so =>
         {
             var fresh = so.FindProperty(commandsPath);
-            if (fresh == null || !fresh.isArray) return;
+            if (fresh == null || !fresh.isArray)
+                return;
 
             var map = GetFoldoutMap(commandsPath);
             var foldouts = SnapshotCommandFoldouts(fresh);
@@ -72,15 +73,14 @@ public sealed partial class SequenceSpecEditorWindow
 
             var el = fresh.GetArrayElementAtIndex(idx);
             el.managedReferenceValue = CreateCommandInstance(t);
-            NormalizeInsertedCommandMeta(el, targetTrack: _activeTrack);
-            SyncMetaAfterInsert(el, targetTrack: _activeTrack);
 
             long newId = el.managedReferenceId;
 
             RestoreCommandFoldouts(fresh, foldouts, newIdToCollapse: -1);
 
             el.isExpanded = false;
-            if (map != null && newId != 0) map[newId] = false;
+            if (map != null && newId != 0)
+                map[newId] = false;
 
             _pendingCommandIndex = idx;
             _commandsList = null;
@@ -89,12 +89,14 @@ public sealed partial class SequenceSpecEditorWindow
 
     private void InsertBatchAt(string commandsPath, int insertAt, IReadOnlyList<Type> types, bool scroll)
     {
-        if (types == null || types.Count == 0) return;
+        if (types == null || types.Count == 0)
+            return;
 
         DelayModify("Add Command Set", so =>
         {
             var fresh = so.FindProperty(commandsPath);
-            if (fresh == null || !fresh.isArray) return;
+            if (fresh == null || !fresh.isArray)
+                return;
 
             var map = GetFoldoutMap(commandsPath);
             var foldouts = SnapshotCommandFoldouts(fresh);
@@ -109,14 +111,11 @@ public sealed partial class SequenceSpecEditorWindow
 
                 var el = fresh.GetArrayElementAtIndex(idx);
                 el.managedReferenceValue = CreateCommandInstance(types[i]);
-
-                NormalizeInsertedCommandMeta(el, targetTrack: _activeTrack);
-                SyncMetaAfterInsert(el, targetTrack: _activeTrack);
-
                 el.isExpanded = false;
 
                 long id = el.managedReferenceId;
-                if (id != 0) newIds.Add(id);
+                if (id != 0)
+                    newIds.Add(id);
             }
 
             RestoreCommandFoldouts(fresh, foldouts, newIdToCollapse: -1);
@@ -142,7 +141,8 @@ public sealed partial class SequenceSpecEditorWindow
         DelayModify("Insert Command", so =>
         {
             var fresh = so.FindProperty(commandsPath);
-            if (fresh == null || !fresh.isArray) return;
+            if (fresh == null || !fresh.isArray)
+                return;
 
             var foldouts = SnapshotCommandFoldouts(fresh);
 
@@ -151,8 +151,6 @@ public sealed partial class SequenceSpecEditorWindow
 
             var el = fresh.GetArrayElementAtIndex(idx);
             el.managedReferenceValue = factory?.Invoke();
-            NormalizeInsertedCommandMeta(el, targetTrack: _activeTrack);
-            SyncMetaAfterInsert(el, targetTrack: _activeTrack);
 
             RestoreCommandFoldouts(fresh, foldouts, newIdToCollapse: -1);
 
@@ -204,15 +202,6 @@ public sealed partial class SequenceSpecEditorWindow
     {
         var inst = (CommandSpecBase)Activator.CreateInstance(t);
 
-        try
-        {
-            inst?.Editor_SetMeta(CommandMetaDefaults.GetDefault(t));
-        }
-        catch
-        {
-            // ignore
-        }
-
         if (_autoFillIdsOnAdd && inst != null)
         {
             string rk = GetAutoFillRoleKey();
@@ -228,32 +217,6 @@ public sealed partial class SequenceSpecEditorWindow
         int idx = Mathf.Clamp(_autoFillRoleSlotIndex, 0, 4);
         string s = _roleKeySlots[idx];
         return s ?? string.Empty;
-    }
-
-    private void NormalizeInsertedCommandMeta(SerializedProperty cmdProp, CommandTrackType targetTrack)
-    {
-        var meta = cmdProp.FindPropertyRelative("_meta") ??
-                   cmdProp.FindPropertyRelative("meta") ??
-                   cmdProp.FindPropertyRelative("Meta");
-        if (meta == null) return;
-
-        var tr = meta.FindPropertyRelative("track");
-        if (tr != null && tr.propertyType == SerializedPropertyType.Enum)
-            tr.intValue = (int)targetTrack;
-    }
-
-    private void SyncMetaAfterInsert(SerializedProperty cmdProp, CommandTrackType targetTrack)
-    {
-        if (cmdProp == null || cmdProp.propertyType != SerializedPropertyType.ManagedReference)
-            return;
-
-        var spec = cmdProp.managedReferenceValue as CommandSpecBase;
-        if (spec == null) return;
-
-        var meta = CommandMetaDefaults.GetDefault(spec.GetType());
-        meta.track = targetTrack;
-
-        spec.Editor_SetMeta(meta);
     }
 }
 #endif

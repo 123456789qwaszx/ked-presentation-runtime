@@ -209,29 +209,20 @@ public sealed partial class SequenceSpecEditorWindow
 
     private void SetAllCommandFoldouts_ForCurrentNode(bool expanded)
     {
-        if (!TryGetCurrentNodeStepsProp(out var stepsProp)) return;
-
-        CommandTrackType[] tracks =
-        {
-            CommandTrackType.Interaction,
-            CommandTrackType.Setup,
-            CommandTrackType.Motion,
-            CommandTrackType.Dialogue,
-            CommandTrackType.FX,
-        };
+        if (!TryGetCurrentNodeStepsProp(out var stepsProp))
+            return;
 
         for (int si = 0; si < stepsProp.arraySize; si++)
         {
             var stepProp = stepsProp.GetArrayElementAtIndex(si);
-            if (stepProp == null) continue;
+            if (stepProp == null)
+                continue;
 
-            for (int ti = 0; ti < tracks.Length; ti++)
-            {
-                var listProp = FindTrackListOnStep(stepProp, tracks[ti]);
-                if (listProp == null || !listProp.isArray) continue;
+            var listProp = FindUnifiedCommandsProp(stepProp);
+            if (listProp == null || !listProp.isArray)
+                continue;
 
-                SetAllCommandFoldouts(listProp, expanded);
-            }
+            SetAllCommandFoldouts(listProp, expanded);
         }
 
         SaveFoldouts();

@@ -15,12 +15,12 @@ position: 70,335
 
 <<bgm audio/bgm_tam_dystopia_snowwind_01>>
 
-<<slot me>>
-<<place me boxside>>
-<<size me 1.5>>
-<<cast me momoka>>
-<<fade_in me>>
-
+// <<slot me>>
+// <<place me boxside>>
+// <<size me 1.5>>
+// <<cast me momoka>>
+// <<fade_in me>>
+<<beat>>
 
 여기가 [sfx =c3 gain=0.1/]월세 내고 산다는 그 집인가? 엄청 크네......
 <<sfx audio/sfx_click_soundreality-ui-pop-up-clear-391155>>

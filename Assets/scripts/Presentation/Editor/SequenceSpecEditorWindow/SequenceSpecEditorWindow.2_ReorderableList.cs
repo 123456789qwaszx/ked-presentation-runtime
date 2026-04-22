@@ -278,7 +278,7 @@ public sealed partial class SequenceSpecEditorWindow
                             _stepsList = null;
                             _commandsList = null;
 
-                            ForceCompileAll();
+                            AfterSequenceChanged();
                         });
                     });
 
@@ -305,7 +305,7 @@ public sealed partial class SequenceSpecEditorWindow
                             _stepsList = null;
                             _commandsList = null;
 
-                            ForceCompileAll();
+                            AfterSequenceChanged();
                         });
                     });
 
@@ -322,7 +322,7 @@ public sealed partial class SequenceSpecEditorWindow
                             _stepsList = null;
                             _commandsList = null;
 
-                            ForceCompileAll();
+                            AfterSequenceChanged();
                         });
                     });
                 });
@@ -446,7 +446,7 @@ public sealed partial class SequenceSpecEditorWindow
                             _stepsList = null;
                             _commandsList = null;
 
-                            ForceCompileAll();
+                            AfterSequenceChanged();
                         });
                     });
 
@@ -474,7 +474,7 @@ public sealed partial class SequenceSpecEditorWindow
                             _stepsList = null;
                             _commandsList = null;
 
-                            ForceCompileAll();
+                            AfterSequenceChanged();
                         });
                     });
 
@@ -488,7 +488,7 @@ public sealed partial class SequenceSpecEditorWindow
                             _stepsList = null;
                             _commandsList = null;
 
-                            ForceCompileAll();
+                            AfterSequenceChanged();
                         });
                     });
                 });
@@ -505,7 +505,7 @@ public sealed partial class SequenceSpecEditorWindow
             _so.ApplyModifiedProperties();
             EditorUtility.SetDirty(targetSequence);
 
-            ForceCompileAll();
+            AfterSequenceChanged();
             Repaint();
         };
 

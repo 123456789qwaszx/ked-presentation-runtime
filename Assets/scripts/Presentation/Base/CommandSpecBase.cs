@@ -8,10 +8,10 @@ public abstract class CommandSpecBase
     public string roleKey;
 
     // ---- Baked meta (runtime reads this; editor writes this) ----
-    [SerializeField, HideInInspector] private CommandMeta _meta;
-    public CommandMeta Meta => _meta;
-
-#if UNITY_EDITOR
-    public void Editor_SetMeta(CommandMeta meta) => _meta = meta;
-#endif
+//     [SerializeField, HideInInspector] private CommandMeta _meta;
+//     public CommandMeta Meta => _meta;
+//
+// #if UNITY_EDITOR
+//     public void Editor_SetMeta(CommandMeta meta) => _meta = meta;
+// #endif
 }

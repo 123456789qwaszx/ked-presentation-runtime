@@ -34,19 +34,18 @@ public sealed partial class SequenceSpecEditorWindow
 {
     private readonly struct Origin
     {
-        public readonly CommandTrackType track;
         public readonly int index;
 
-        public Origin(CommandTrackType t, int i)
+        public Origin(int i)
         {
-            track = t;
             index = i;
         }
     }
 
     private string SummarizeGate(SerializedProperty gateProp)
     {
-        if (gateProp == null) return "(null)";
+        if (gateProp == null)
+            return "(null)";
 
         var typeProp = gateProp.FindPropertyRelative("type");
         if (typeProp != null && typeProp.propertyType == SerializedPropertyType.Enum)
@@ -75,19 +74,20 @@ public sealed partial class SequenceSpecEditorWindow
 
     private string SummarizeCommand(SerializedProperty cmdProp, int index)
     {
-        if (cmdProp == null) return $"#{index} (null)";
+        if (cmdProp == null)
+            return $"#{index} (null)";
 
         if (cmdProp.propertyType != SerializedPropertyType.ManagedReference)
             return $"#{index} (Non-ManagedReference!)";
 
         var typeName = GetManagedRefTypeName(cmdProp);
-        if (string.IsNullOrEmpty(typeName)) typeName = "(null-ref)";
+        if (string.IsNullOrEmpty(typeName))
+            typeName = "(null-ref)";
 
-        string screenId = cmdProp.FindPropertyRelative("screenId")?.stringValue ?? "";
         string roleKey = cmdProp.FindPropertyRelative("roleKey")?.stringValue ?? "";
 
-        if (!string.IsNullOrWhiteSpace(screenId) || !string.IsNullOrWhiteSpace(roleKey))
-            return $"#{index} {typeName}  ({screenId}/{roleKey})";
+        if (!string.IsNullOrWhiteSpace(roleKey))
+            return $"#{index} {typeName} ({roleKey})";
 
         return $"#{index} {typeName}";
     }
@@ -95,13 +95,16 @@ public sealed partial class SequenceSpecEditorWindow
     private static string GetManagedRefTypeName(SerializedProperty managedRefProp)
     {
         string full = managedRefProp.managedReferenceFullTypename;
-        if (string.IsNullOrEmpty(full)) return null;
+        if (string.IsNullOrEmpty(full))
+            return null;
 
         int space = full.IndexOf(' ');
-        if (space < 0 || space + 1 >= full.Length) return null;
+        if (space < 0 || space + 1 >= full.Length)
+            return null;
 
         string className = full.Substring(space + 1);
-        if (string.IsNullOrEmpty(className)) return null;
+        if (string.IsNullOrEmpty(className))
+            return null;
 
         int lastDot = className.LastIndexOf('.');
         return lastDot >= 0 ? className.Substring(lastDot + 1) : className;
@@ -111,32 +114,28 @@ public sealed partial class SequenceSpecEditorWindow
     {
         var map = new Dictionary<long, Origin>();
 
-        var tracksProp = stepProp.FindPropertyRelative("tracks");
-        if (tracksProp == null) return map;
+        if (stepProp == null)
+            return map;
 
-        void ScanList(string name, CommandTrackType track)
+        SerializedProperty commandsProp = FindUnifiedCommandsProp(stepProp);
+        if (commandsProp == null || !commandsProp.isArray)
+            return map;
+
+        for (int i = 0; i < commandsProp.arraySize; i++)
         {
-            var lp = tracksProp.FindPropertyRelative(name);
-            if (lp == null || !lp.isArray) return;
+            var el = commandsProp.GetArrayElementAtIndex(i);
+            if (el == null)
+                continue;
 
-            for (int i = 0; i < lp.arraySize; i++)
-            {
-                var el = lp.GetArrayElementAtIndex(i);
-                if (el == null) continue;
-                if (el.propertyType != SerializedPropertyType.ManagedReference) continue;
+            if (el.propertyType != SerializedPropertyType.ManagedReference)
+                continue;
 
-                long id = el.managedReferenceId;
-                if (id == 0) continue;
+            long id = el.managedReferenceId;
+            if (id == 0)
+                continue;
 
-                if (!map.ContainsKey(id))
-                    map[id] = new Origin(track, i);
-            }
-        }
-
-        int n = UnityEngine.Mathf.Min(TrackFieldNames.Length, TrackTypes.Length);
-        for (int i = 0; i < n; i++)
-        {
-            ScanList(TrackFieldNames[i], TrackTypes[i]);
+            if (!map.ContainsKey(id))
+                map[id] = new Origin(i);
         }
 
         return map;
@@ -150,79 +149,17 @@ public sealed partial class SequenceSpecEditorWindow
             return false;
 
         long id = compiledEl.managedReferenceId;
-        if (id == 0) return false;
-
-        return originMap != null && originMap.TryGetValue(id, out origin);
-    }
-
-    private static string PhaseShort(CommandPhase p) => p switch
-    {
-        CommandPhase.Setup => "S",
-        CommandPhase.Motion => "M",
-        CommandPhase.Dialogue => "D",
-        CommandPhase.FX => "F",
-        CommandPhase.Teardown => "T",
-        _ => "?"
-    };
-
-    private static string TrackShort(CommandTrackType t) => t switch
-    {
-        CommandTrackType.Interaction => "I",
-        CommandTrackType.Setup => "S",
-        CommandTrackType.Motion => "M",
-        CommandTrackType.Dialogue => "D",
-        CommandTrackType.FX => "FX",
-        _ => "?"
-    };
-
-    private static bool TryReadMeta(SerializedProperty cmdProp,
-        out CommandTrackType metaTrack,
-        out CommandPhase metaPhase,
-        out bool blocking,
-        out bool infinite,
-        out float duration)
-    {
-        metaTrack = default;
-        metaPhase = default;
-        blocking = false;
-        infinite = false;
-        duration = 0f;
-
-        if (cmdProp == null || cmdProp.propertyType != SerializedPropertyType.ManagedReference)
+        if (id == 0)
             return false;
 
-        var meta =
-            cmdProp.FindPropertyRelative("_meta") ??
-            cmdProp.FindPropertyRelative("meta") ??
-            cmdProp.FindPropertyRelative("Meta");
-        if (meta == null) return false;
-
-        var tr = meta.FindPropertyRelative("track");
-        var ph = meta.FindPropertyRelative("phase");
-        var bh = meta.FindPropertyRelative("blockingHint");
-        var ih = meta.FindPropertyRelative("infiniteHint");
-        var dh = meta.FindPropertyRelative("durationHint");
-
-        if (tr != null && tr.propertyType == SerializedPropertyType.Enum)
-            metaTrack = (CommandTrackType)tr.intValue;
-
-        if (ph != null && ph.propertyType == SerializedPropertyType.Enum)
-            metaPhase = (CommandPhase)ph.intValue;
-
-        if (bh != null && bh.propertyType == SerializedPropertyType.Boolean)
-            blocking = bh.boolValue;
-        if (ih != null && ih.propertyType == SerializedPropertyType.Boolean)
-            infinite = ih.boolValue;
-        if (dh != null && dh.propertyType == SerializedPropertyType.Float)
-            duration = dh.floatValue;
-
-        return true;
+        return originMap != null && originMap.TryGetValue(id, out origin);
     }
 
     private string SummarizeCompiledLine(
         SerializedProperty cmdProp,
         int compiledIndex,
         Dictionary<long, Origin> originMap,
+        bool importedCompiledOnly,
         out bool hasDrift,
         out bool missingOrigin)
     {
@@ -231,34 +168,20 @@ public sealed partial class SequenceSpecEditorWindow
 
         string baseLine = SummarizeCommand(cmdProp, compiledIndex);
 
-        bool hasMeta = TryReadMeta(cmdProp, out var metaTrack, out var metaPhase, out bool block, out bool inf,
-            out float dur);
-
         bool hasOrigin = TryGetOrigin(cmdProp, originMap, out var origin);
-        if (!hasOrigin)
+
+        if (!hasOrigin && !importedCompiledOnly)
             missingOrigin = true;
 
-        if (hasMeta && hasOrigin)
-        {
-            if (metaTrack != origin.track)
-                hasDrift = true;
-        }
+        string originTag;
+        if (hasOrigin)
+            originTag = $"  -> #{origin.index}";
+        else if (importedCompiledOnly)
+            originTag = "  -> (imported)";
+        else
+            originTag = "  -> (missing)";
 
-        string phaseBadge = hasMeta ? $"P:{PhaseShort(metaPhase)}" : "P:?";
-        string trackBadge = hasMeta ? $"T:{TrackShort(metaTrack)}" : "T:?";
-
-        string time = "";
-        if (hasMeta)
-        {
-            if (block) time += " [B]";
-            if (inf) time += " [INF]";
-            if (dur > 0f) time += $" [{dur:0.###}s]";
-        }
-
-        string originTag = hasOrigin ? $"  -> {TrackShort(origin.track)}#{origin.index}" : "  -> (missing)";
-        string driftTag = hasDrift ? "  !!drift" : "";
-
-        return $"#{compiledIndex} [{phaseBadge}][{trackBadge}]{time} {baseLine}{originTag}{driftTag}";
+        return $"{baseLine}{originTag}";
     }
 }
 #endif

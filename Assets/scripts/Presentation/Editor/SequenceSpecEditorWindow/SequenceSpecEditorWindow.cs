@@ -177,38 +177,6 @@ public sealed partial class SequenceSpecEditorWindow : EditorWindow
     private string _commandsPropPath;
 
     // ------------------------------
-    // Track UI State
-    // ------------------------------
-    private CommandTrackType _activeTrack = CommandTrackType.Interaction;
-
-    private static readonly GUIContent[] TrackTabs =
-    {
-        new GUIContent("Channel A"),
-        new GUIContent("Channel B"),
-        new GUIContent("Channel C"),
-        new GUIContent("Channel D"),
-        new GUIContent("FX"),
-    };
-
-    private static readonly string[] TrackFieldNames =
-    {
-        "interaction",
-        "setup",
-        "motion",
-        "dialogue",
-        "fx",
-    };
-
-    private static readonly CommandTrackType[] TrackTypes =
-    {
-        CommandTrackType.Interaction,
-        CommandTrackType.Setup,
-        CommandTrackType.Motion,
-        CommandTrackType.Dialogue,
-        CommandTrackType.FX,
-    };
-
-    // ------------------------------
     // UI State
     // ------------------------------
     [SerializeField] private bool _shortcutsPopupOpen = false;
@@ -267,9 +235,6 @@ public sealed partial class SequenceSpecEditorWindow : EditorWindow
     // ------------------------------
     private void OnEnable()
     {
-        if (TrackFieldNames.Length != TrackTypes.Length)
-            Debug.LogError("[SequenceSpecEditorWindow] TrackFieldNames and TrackTypes length mismatch.");
-
         minSize = new Vector2(879f, 0f);
         wantsMouseMove = true;
 
@@ -358,25 +323,16 @@ public sealed partial class SequenceSpecEditorWindow : EditorWindow
         if (changed)
         {
             EditorUtility.SetDirty(targetSequence);
-            ForceCompileAll();
+            AfterSequenceChanged();
         }
     }
 
     // ------------------------------
     // Utility Methods
     // ------------------------------
-    private void ForceCompileAll()
+    private void AfterSequenceChanged()
     {
-        if (targetSequence == null) return;
-
-        try
-        {
-            targetSequence.CompileAllSteps();
-        }
-        catch
-        {
-            // fallback: do nothing
-        }
+        //편집 후처리 훅
     }
 
     private static void CacheCommandTypes()
@@ -389,25 +345,5 @@ public sealed partial class SequenceSpecEditorWindow : EditorWindow
             .OrderBy(t => t.Name, StringComparer.OrdinalIgnoreCase)
             .ToList();
     }
-
-    private static int TrackToIndex(CommandTrackType t) => t switch
-    {
-        CommandTrackType.Interaction => 0,
-        CommandTrackType.Setup => 1,
-        CommandTrackType.Motion => 2,
-        CommandTrackType.Dialogue => 3,
-        CommandTrackType.FX => 4,
-        _ => 3
-    };
-
-    private static CommandTrackType IndexToTrack(int i) => i switch
-    {
-        0 => CommandTrackType.Interaction,
-        1 => CommandTrackType.Setup,
-        2 => CommandTrackType.Motion,
-        3 => CommandTrackType.Dialogue,
-        4 => CommandTrackType.FX,
-        _ => CommandTrackType.Dialogue
-    };
 }
 #endif

@@ -49,7 +49,7 @@ public sealed partial class SequenceSpecEditorWindow
     private static readonly Color _cmdLinePro = new Color(0f, 0f, 0f, 0.35f);
     private static readonly Color _cmdLineLight = new Color(0f, 0f, 0f, 0.15f);
 
-    private void EnsureCommandsList(SerializedProperty stepProp, SerializedProperty commandsProp)
+    private void EnsureCommandsList(SerializedProperty commandsProp)
     {
         if (commandsProp == null || !commandsProp.isArray)
             return;
@@ -211,7 +211,7 @@ public sealed partial class SequenceSpecEditorWindow
                             {
                                 _commandsList = null;
                                 _commandsPropPath = null;
-                                ForceCompileAll();
+                                AfterSequenceChanged();
                             });
                         });
                     }
@@ -283,7 +283,7 @@ public sealed partial class SequenceSpecEditorWindow
 
             RequestScrollToCommand(newIndex, repaint: false);
 
-            ForceCompileAll();
+            AfterSequenceChanged();
             Repaint();
         };
 
