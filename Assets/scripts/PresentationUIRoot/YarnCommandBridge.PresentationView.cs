@@ -12,6 +12,8 @@ public sealed partial class YarnCommandBridge
         _dialogueRunner.AddCommandHandler("presentation_setup", EnqueueSetupPresentationViewSpec);
 
         _dialogueRunner.AddCommandHandler<string>("bg_spawn", EnqueueSpawnBackgroundSpec);
+        _dialogueRunner.AddCommandHandler<string, string>("bg_spawn_as", EnqueueSpawnBackgroundSpec);
+
         _dialogueRunner.AddCommandHandler<string, string>("bg_sprite", EnqueueSetBackgroundSpriteSpec);
         _dialogueRunner.AddCommandHandler<string>("bg_destroy", EnqueueDestroyBackgroundSpec);
         _dialogueRunner.AddCommandHandler<string, float, float>("bg_fade", EnqueueFadeBackgroundSpec);
@@ -54,9 +56,15 @@ public sealed partial class YarnCommandBridge
 
     private void EnqueueSpawnBackgroundSpec(string bgKey = "current")
     {
+        EnqueueSpawnBackgroundSpec(bgKey, "default");
+    }
+
+    private void EnqueueSpawnBackgroundSpec(string bgKey, string viewPrefabKey)
+    {
         var spec = new SpawnBackgroundCommandSpec
         {
-            bgKey = string.IsNullOrWhiteSpace(bgKey) ? "current" : bgKey.Trim()
+            bgKey = string.IsNullOrWhiteSpace(bgKey) ? "current" : bgKey.Trim(),
+            viewPrefabKey = string.IsNullOrWhiteSpace(viewPrefabKey) ? "default" : viewPrefabKey.Trim()
         };
 
         Collect(spec);

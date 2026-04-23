@@ -17,6 +17,9 @@ public class VnAppBootstrap : MonoBehaviour
     [SerializeField] private AudioSystem audioSystem;
     [SerializeField] private InlineSfxHost inlineSfxHost;
     
+    [Header("PresentationView")]
+    [SerializeField] private BGHost bgHost;
+    
     [Header("Presentation")]
     [SerializeField] private PortraitGeneratedDbSo portraitGeneratedDbSo;
     [SerializeField] private UnitySignalBus unitySignalBus;
@@ -126,7 +129,7 @@ public class VnAppBootstrap : MonoBehaviour
         SoundCommandFactory soundCommandFactory = new SoundCommandFactory(audioSystem, audioClipResolver);
         
         //PresentationViewCommandFactory
-        PresentationViewCommandFactory presentationViewCommandFactory = new();
+        PresentationViewCommandFactory presentationViewCommandFactory = new(bgHost);
         
         CompositeCommandFactory factory = new (signalFactory, charRigFactory, transitionCommandFactory, soundCommandFactory, presentationViewCommandFactory);
         commandExecutor.Initialize(factory);

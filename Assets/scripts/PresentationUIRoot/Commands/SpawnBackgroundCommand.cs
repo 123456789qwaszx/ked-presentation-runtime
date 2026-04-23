@@ -69,9 +69,9 @@ public sealed class SpawnBackgroundCommandSpec : CommandSpecBase
     [Tooltip("런타임에서 배경 view를 저장/참조할 키")]
     public string bgKey = "current";
 
-    [Header("Prefab")]
-    [Tooltip("BGContent_Root 아래에 생성할 배경 view 프리팹")]
-    public GameObject backgroundPrefab;
+    [Header("View Prefab")]
+    [Tooltip("BGHost에서 조회할 배경 view 프리팹 키")]
+    public string viewPrefabKey = "default";
 
     [Header("Spawn")]
     [Tooltip("동일 bgKey가 이미 있으면 파괴 후 새로 생성")]
@@ -93,12 +93,16 @@ public sealed class SpawnBackgroundCommandSpec : CommandSpecBase
 
 public sealed class SpawnBackgroundCommand : CommandBase
 {
+    private readonly IBGViewPrefabProvider _prefabProvider;
     private readonly SpawnBackgroundCommandSpec _spec;
 
     public override bool WaitForCompletion => true;
 
-    public SpawnBackgroundCommand(SpawnBackgroundCommandSpec spec)
+    public SpawnBackgroundCommand(
+        IBGViewPrefabProvider prefabProvider,
+        SpawnBackgroundCommandSpec spec)
     {
+        _prefabProvider = prefabProvider;
         _spec = spec;
     }
 
@@ -129,10 +133,18 @@ public sealed class SpawnBackgroundCommand : CommandBase
             return;
         }
 
-        if (_spec.backgroundPrefab == null)
+        if (_prefabProvider == null)
         {
             if (_spec.strict)
-                throw new InvalidOperationException("[SpawnBackgroundCommand] backgroundPrefab is null.");
+                throw new InvalidOperationException("[SpawnBackgroundCommand] Background prefab provider is null.");
+            return;
+        }
+
+        if (!_prefabProvider.TryGetBackgroundViewPrefab(_spec.viewPrefabKey, out GameObject prefab) || prefab == null)
+        {
+            if (_spec.strict)
+                throw new InvalidOperationException(
+                    $"[SpawnBackgroundCommand] Background view prefab not found. viewPrefabKey={_spec.viewPrefabKey}");
             return;
         }
 
@@ -141,8 +153,8 @@ public sealed class SpawnBackgroundCommand : CommandBase
         if (_spec.destroyExistingWithSameKey && scope.Refs.TryGetBackgroundView(_spec.bgKey, out PresentationBackgroundView existing))
             DestroyExisting(existing);
 
-        GameObject go = Object.Instantiate(_spec.backgroundPrefab, parent, false);
-        go.name = string.IsNullOrWhiteSpace(_spec.bgKey) ? _spec.backgroundPrefab.name : $"BG_{_spec.bgKey}";
+        GameObject go = Object.Instantiate(prefab, parent, false);
+        go.name = string.IsNullOrWhiteSpace(_spec.bgKey) ? prefab.name : $"BG_{_spec.bgKey}";
 
         if (_spec.setAsLastSibling)
             go.transform.SetAsLastSibling();
@@ -170,10 +182,12 @@ public sealed class SpawnBackgroundCommand : CommandBase
                     if (view == null)
                         return;
 
-                    if (Application.isPlaying)
-                        Object.Destroy(view.gameObject);
-                    else
+#if UNITY_EDITOR
+                    if (!Application.isPlaying)
                         Object.DestroyImmediate(view.gameObject);
+                    else
+#endif
+                        Object.Destroy(view.gameObject);
                 });
         }
     }
@@ -190,9 +204,11 @@ public sealed class SpawnBackgroundCommand : CommandBase
         if (existing.CanvasGroup != null)
             existing.CanvasGroup.DOKill(true);
 
-        if (Application.isPlaying)
-            Object.Destroy(existing.gameObject);
-        else
+#if UNITY_EDITOR
+        if (!Application.isPlaying)
             Object.DestroyImmediate(existing.gameObject);
+        else
+#endif
+            Object.Destroy(existing.gameObject);
     }
 }
