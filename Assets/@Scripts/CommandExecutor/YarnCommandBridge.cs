@@ -18,11 +18,13 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         _dialogueRunner = dialogueRunner;
         _playbackDriver = playbackDriver;
         RegisterYarnCommands();
+        
+        RegisterEmojiCommands();
+        RegisterPresentationCommands();
     }
 
     public void RegisterYarnCommands()
     {
-        RegisterEmojiCommands();
         
         _dialogueRunner.AddCommandHandler<string>("destroy", EnqueueDestroySpec);
 

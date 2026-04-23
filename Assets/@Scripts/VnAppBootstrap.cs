@@ -125,7 +125,10 @@ public class VnAppBootstrap : MonoBehaviour
         ResourcesAudioClipResolver audioClipResolver = new ();
         SoundCommandFactory soundCommandFactory = new SoundCommandFactory(audioSystem, audioClipResolver);
         
-        CompositeCommandFactory factory = new (signalFactory, charRigFactory, transitionCommandFactory, soundCommandFactory);
+        //PresentationViewCommandFactory
+        PresentationViewCommandFactory presentationViewCommandFactory = new();
+        
+        CompositeCommandFactory factory = new (signalFactory, charRigFactory, transitionCommandFactory, soundCommandFactory, presentationViewCommandFactory);
         commandExecutor.Initialize(factory);
         
         
