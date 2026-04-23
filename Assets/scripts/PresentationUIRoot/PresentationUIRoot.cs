@@ -1,3 +1,6 @@
+using UnityEngine;
+using UnityEngine.UI;
+
 public class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
 {
     public enum Refs
@@ -8,7 +11,7 @@ public class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
         ScreenOverlay_Root,
 
         StageShot_Root,
-        ShagePan_Root,
+        StagePan_Root,
         StageZoom_Root,
         Stage_Root,
         BackgroundSystem_Root,
@@ -41,5 +44,19 @@ public class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
         SystemUI_Root
     }
 
+    public RectTransform ResolveRect(Refs key)
+    {
+        return View.Rect(key);
+    }
+
+    public CanvasGroup ResolveCanvasGroup(Refs key)
+    {
+        return View.CanvasGroup(key);
+    }
+
+    public Image ResolveImage(Refs key)
+    {
+        return View.Image(key);
+    }
     
 }
