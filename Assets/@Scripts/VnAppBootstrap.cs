@@ -19,6 +19,7 @@ public class VnAppBootstrap : MonoBehaviour
     
     [Header("PresentationView")]
     [SerializeField] private BGHost bgHost;
+    [SerializeField] private DialogueBoxHost  dialogueBoxHost;
     
     [Header("Presentation")]
     [SerializeField] private PortraitGeneratedDbSo portraitGeneratedDbSo;
@@ -129,7 +130,7 @@ public class VnAppBootstrap : MonoBehaviour
         SoundCommandFactory soundCommandFactory = new SoundCommandFactory(audioSystem, audioClipResolver);
         
         //PresentationViewCommandFactory
-        PresentationViewCommandFactory presentationViewCommandFactory = new(bgHost);
+        PresentationViewCommandFactory presentationViewCommandFactory = new(bgHost, dialogueBoxHost);
         
         CompositeCommandFactory factory = new (signalFactory, charRigFactory, transitionCommandFactory, soundCommandFactory, presentationViewCommandFactory);
         commandExecutor.Initialize(factory);

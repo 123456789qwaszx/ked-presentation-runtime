@@ -13,6 +13,7 @@ position: 70,335
 <<uipatch theme1>>
 <<end_hold>>
 
+
 <<bgm audio/bgm_tam_dystopia_snowwind_01>>
 
 // <<slot me>>

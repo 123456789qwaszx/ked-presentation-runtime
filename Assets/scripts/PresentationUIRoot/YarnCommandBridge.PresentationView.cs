@@ -6,23 +6,104 @@ public sealed partial class YarnCommandBridge
     [Header("Presentation")]
     [Tooltip("SetBackgroundSprite Yarn 명령에서 Resources.Load<Sprite>()로 사용할 기본 prefix. 예: 'ui/bg/'")]
     public string backgroundSpriteResourcesPrefix = "";
-    
+
     public void RegisterPresentationCommands()
     {
         _dialogueRunner.AddCommandHandler("presentation_setup", EnqueueSetupPresentationViewSpec);
 
         _dialogueRunner.AddCommandHandler<string>("bg_spawn", EnqueueSpawnBackgroundSpec);
         _dialogueRunner.AddCommandHandler<string, string>("bg_spawn_as", EnqueueSpawnBackgroundSpec);
-
         _dialogueRunner.AddCommandHandler<string, string>("bg_sprite", EnqueueSetBackgroundSpriteSpec);
         _dialogueRunner.AddCommandHandler<string>("bg_destroy", EnqueueDestroyBackgroundSpec);
         _dialogueRunner.AddCommandHandler<string, float, float>("bg_fade", EnqueueFadeBackgroundSpec);
+
+        _dialogueRunner.AddCommandHandler<string>("dlg_spawn", EnqueueSpawnDialogueBoxSpec);
+        _dialogueRunner.AddCommandHandler<string, string>("dlg_spawn_as", EnqueueSpawnDialogueBoxSpec);
+        _dialogueRunner.AddCommandHandler<string, float, float>("dlg_fade", EnqueueFadeDialogueBoxSpec);
+        _dialogueRunner.AddCommandHandler<string, string>("dlg_text", EnqueueSetDialogueBoxBodyTextSpec);
+        _dialogueRunner.AddCommandHandler<string, string, string>("dlg_text_name",
+            EnqueueSetDialogueBoxTextWithNameSpec);
+        _dialogueRunner.AddCommandHandler<string>("dlg_destroy", EnqueueDestroyDialogueBoxSpec);
 
         _dialogueRunner.AddCommandHandler<string, float, float>("fade_to", EnqueueFadeToPresentationSpec);
         _dialogueRunner.AddCommandHandler<string, float, float, float>("move_by_p", EnqueueMoveByPresentationSpec);
         _dialogueRunner.AddCommandHandler<string, float, float>("scale_to_p", EnqueueScaleToPresentationSpec);
     }
-    
+
+    private void EnqueueSpawnDialogueBoxSpec(string dialogueKey = "main")
+    {
+        EnqueueSpawnDialogueBoxSpec(dialogueKey, "default");
+    }
+
+    private void EnqueueSpawnDialogueBoxSpec(string dialogueKey, string viewPrefabKey)
+    {
+        var spec = new SpawnDialogueBoxCommandSpec
+        {
+            dialogueKey = string.IsNullOrWhiteSpace(dialogueKey) ? "main" : dialogueKey.Trim(),
+            viewPrefabKey = string.IsNullOrWhiteSpace(viewPrefabKey) ? "default" : viewPrefabKey.Trim(),
+            parentTarget = PresentationTarget.DialogueBox_Root,
+            initialAlpha = 1f,
+            strict = true
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueFadeDialogueBoxSpec(string dialogueKey, float alpha, float duration = 0.25f)
+    {
+        var spec = new FadeDialogueBoxCommandSpec
+        {
+            dialogueKey = string.IsNullOrWhiteSpace(dialogueKey) ? "main" : dialogueKey.Trim(),
+            targetAlpha = Mathf.Clamp01(alpha),
+            duration = duration,
+            wait = false,
+            killTween = true,
+            strict = true
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueSetDialogueBoxBodyTextSpec(string dialogueKey, string bodyText)
+    {
+        var spec = new SetDialogueBoxTextCommandSpec
+        {
+            dialogueKey = string.IsNullOrWhiteSpace(dialogueKey) ? "main" : dialogueKey.Trim(),
+            bodyText = bodyText ?? string.Empty,
+            setNameText = false,
+            strict = true
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueSetDialogueBoxTextWithNameSpec(string dialogueKey, string nameText, string bodyText)
+    {
+        var spec = new SetDialogueBoxTextCommandSpec
+        {
+            dialogueKey = string.IsNullOrWhiteSpace(dialogueKey) ? "main" : dialogueKey.Trim(),
+            bodyText = bodyText ?? string.Empty,
+            setNameText = true,
+            nameText = nameText ?? string.Empty,
+            strict = true
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueDestroyDialogueBoxSpec(string dialogueKey = "main")
+    {
+        var spec = new DestroyDialogueBoxCommandSpec
+        {
+            dialogueKey = string.IsNullOrWhiteSpace(dialogueKey) ? "main" : dialogueKey.Trim(),
+            killTween = true,
+            removeRefEntry = true,
+            strict = true
+        };
+
+        Collect(spec);
+    }
+
     private void EnqueueFadeBackgroundSpec(string bgKey, float alpha, float duration = 0.35f)
     {
         if (string.IsNullOrWhiteSpace(bgKey))

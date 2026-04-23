@@ -1,10 +1,14 @@
 public sealed class PresentationViewCommandFactory : INodeCommandFactory
 {
     private readonly IBGViewPrefabProvider _bgViewPrefabProvider;
+    private readonly IDialogueBoxViewPrefabProvider _dialogueBoxViewPrefabProvider;
 
-    public PresentationViewCommandFactory(IBGViewPrefabProvider bgViewPrefabProvider)
+    public PresentationViewCommandFactory(
+        IBGViewPrefabProvider bgViewPrefabProvider,
+        IDialogueBoxViewPrefabProvider dialogueBoxViewPrefabProvider)
     {
         _bgViewPrefabProvider = bgViewPrefabProvider;
+        _dialogueBoxViewPrefabProvider = dialogueBoxViewPrefabProvider;
     }
 
     public bool TryCreate(CommandSpecBase spec, out ISequenceCommand command)
@@ -21,6 +25,11 @@ public sealed class PresentationViewCommandFactory : INodeCommandFactory
             SetBackgroundSpriteCommandSpec s => new SetBackgroundSpriteCommand(s),
             FadeBackgroundCommandSpec s => new FadeBackgroundCommand(s),
             DestroyBackgroundCommandSpec s => new DestroyBackgroundCommand(s),
+
+            SpawnDialogueBoxCommandSpec s => new SpawnDialogueBoxCommand(_dialogueBoxViewPrefabProvider, s),
+            FadeDialogueBoxCommandSpec s => new FadeDialogueBoxCommand(s),
+            SetDialogueBoxTextCommandSpec s => new SetDialogueBoxTextCommand(s),
+            DestroyDialogueBoxCommandSpec s => new DestroyDialogueBoxCommand(s),
 
             _ => null
         };
