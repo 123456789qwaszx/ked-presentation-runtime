@@ -1,12 +1,12 @@
 using UnityEngine;
 using Yarn.Unity;
 
-public sealed partial class YarnCommandBridge : MonoBehaviour
+public sealed partial class YarnCommandBridge
 {
     [Header("Presentation")]
     [Tooltip("SetBackgroundSprite Yarn 명령에서 Resources.Load<Sprite>()로 사용할 기본 prefix. 예: 'ui/bg/'")]
     public string backgroundSpriteResourcesPrefix = "";
-
+    
     public void RegisterPresentationCommands()
     {
         _dialogueRunner.AddCommandHandler("presentation_setup", EnqueueSetupPresentationViewSpec);
@@ -14,10 +14,32 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         _dialogueRunner.AddCommandHandler<string>("bg_spawn", EnqueueSpawnBackgroundSpec);
         _dialogueRunner.AddCommandHandler<string, string>("bg_sprite", EnqueueSetBackgroundSpriteSpec);
         _dialogueRunner.AddCommandHandler<string>("bg_destroy", EnqueueDestroyBackgroundSpec);
+        _dialogueRunner.AddCommandHandler<string, float, float>("bg_fade", EnqueueFadeBackgroundSpec);
 
         _dialogueRunner.AddCommandHandler<string, float, float>("fade_to", EnqueueFadeToPresentationSpec);
         _dialogueRunner.AddCommandHandler<string, float, float, float>("move_by_p", EnqueueMoveByPresentationSpec);
         _dialogueRunner.AddCommandHandler<string, float, float>("scale_to_p", EnqueueScaleToPresentationSpec);
+    }
+    
+    private void EnqueueFadeBackgroundSpec(string bgKey, float alpha, float duration = 0.35f)
+    {
+        if (string.IsNullOrWhiteSpace(bgKey))
+        {
+            Debug.LogError("[YarnCommandBridge] bg_fade: bgKey is null or empty.");
+            return;
+        }
+
+        var spec = new FadeBackgroundCommandSpec
+        {
+            bgKey = bgKey.Trim(),
+            targetAlpha = Mathf.Clamp01(alpha),
+            duration = duration,
+            wait = false,
+            killTween = true,
+            strict = true
+        };
+
+        Collect(spec);
     }
 
     private void EnqueueSetupPresentationViewSpec()

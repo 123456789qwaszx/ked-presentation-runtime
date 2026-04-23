@@ -14,6 +14,9 @@ public sealed class PresentationViewCommandFactory : INodeCommandFactory
             SetBackgroundSpriteCommandSpec s => new SetBackgroundSpriteCommand(s),
             DestroyBackgroundCommandSpec s => new DestroyBackgroundCommand(s),
 
+            
+            FadeBackgroundCommandSpec s => new FadeBackgroundCommand(s),
+            
             _ => null
         };
 
