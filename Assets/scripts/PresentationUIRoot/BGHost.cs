@@ -1,15 +1,15 @@
 using System;
 using UnityEngine;
 
-[Serializable]
-public struct BackgroundViewPrefabMapEntry
-{
-    public string key;
-    public GameObject prefab;
-}
-
 public sealed class BGHost : MonoBehaviour, IBGViewPrefabProvider
 {
+    [Serializable]
+    public struct BackgroundViewPrefabMapEntry
+    {
+        public string key;
+        public GameObject prefab;
+    }
+    
     [SerializeField] private BackgroundViewPrefabMapEntry[] prefabMap;
     [SerializeField] private string defaultKey = "default";
 

@@ -1,3 +1,15 @@
+using UnityEngine;
+
+public interface IBGViewPrefabProvider
+{
+    bool TryGetBackgroundViewPrefab(string key, out GameObject prefab);
+}
+
+public interface IDialogueBoxViewPrefabProvider
+{
+    bool TryGetDialogueBoxViewPrefab(string key, out GameObject prefab);
+}
+
 public sealed class PresentationViewCommandFactory : INodeCommandFactory
 {
     private readonly IBGViewPrefabProvider _bgViewPrefabProvider;

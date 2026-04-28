@@ -50,12 +50,20 @@ public sealed class EpisodePlayer : MonoBehaviour, IRollbackDialogueRestarter
         }
     }
 
+
     public void OpenDialogueUI()
     {
         UIManager.Instance.SwitchRoot<DialogueUIRoot>();
         DialogueUIRoot dialogueUIRoot = UIManager.Instance.GetUI<DialogueUIRoot>();
         _dialogueUIBindings.Bind(dialogueUIRoot);
     }
+    
+    // public void OpenDialogueUI()
+    // {
+    //     UIManager.Instance.SwitchRoot<DialogueUIRoot>();
+    //     DialogueUIRoot dialogueUIRoot = UIManager.Instance.GetUI<DialogueUIRoot>();
+    //     _dialogueUIBindings.Bind(dialogueUIRoot);
+    // }
 
     public void StartPresentationRoute(string routeKey)
     {
