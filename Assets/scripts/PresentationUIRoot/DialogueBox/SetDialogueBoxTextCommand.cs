@@ -53,7 +53,7 @@ public sealed class SetDialogueBoxTextCommand : CommandBase
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        _view.BodyText.text = _spec.bodyText ?? string.Empty;
+        _view.LineText.text = _spec.bodyText;
 
         if (_spec.setNameText)
         {
@@ -64,7 +64,7 @@ public sealed class SetDialogueBoxTextCommand : CommandBase
                 return;
             }
 
-            _view.NameText.text = _spec.nameText ?? string.Empty;
+            _view.NameText.text = _spec.nameText;
         }
     }
 
@@ -80,6 +80,6 @@ public sealed class SetDialogueBoxTextCommand : CommandBase
         }
 
         _view = view;
-        _view.EnsureBound(_spec.strict);
+        _view.Validate();
     }
 }

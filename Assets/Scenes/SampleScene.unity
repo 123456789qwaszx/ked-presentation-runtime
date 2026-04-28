@@ -3935,7 +3935,10 @@ MonoBehaviour:
     prefab: {fileID: 1035769426674456926}
   - key: b4
     prefab: {fileID: 1621118400}
-  defaultKey: default
+  defaultPrefabKey: default
+  routes:
+  - kind: 0
+    dialogueKey: b1
 --- !u!4 &1332040256
 Transform:
   m_ObjectHideFlags: 0
@@ -4961,6 +4964,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c7928914f4690b9439a666b84fe197cf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PresentationUIRoot
+  dialogueBoxHost: {fileID: 0}
 --- !u!114 &1763017169
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7928,7 +7932,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 458.38, y: -24}
-  m_SizeDelta: {x: 916.76, y: 24}
+  m_SizeDelta: {x: 916.76, y: 0}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!1 &666632935594092605
 GameObject:

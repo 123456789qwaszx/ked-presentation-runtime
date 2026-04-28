@@ -1,6 +1,12 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+public interface IDialogueBoxViewResolver
+{
+    IDialogueBoxView Activate(DialogueBoxKind kind);
+    void HideAll();
+}
+
 public class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
 {
     public enum Refs
@@ -43,20 +49,12 @@ public class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
         Choice_Root,
         SystemUI_Root
     }
-
-    public RectTransform ResolveRect(Refs key)
-    {
-        return View.Rect(key);
-    }
-
-    public CanvasGroup ResolveCanvasGroup(Refs key)
-    {
-        return View.CanvasGroup(key);
-    }
-
-    public Image ResolveImage(Refs key)
-    {
-        return View.Image(key);
-    }
+    
+    [SerializeField] private DialogueBoxHost dialogueBoxHost;
+    public IDialogueBoxViewPrefabProvider DialogueBoxPrefabs => dialogueBoxHost;
+    
+    public RectTransform ResolveRect(Refs key) => View.Rect(key);
+    public CanvasGroup ResolveCanvasGroup(Refs key) => View.CanvasGroup(key);
+    public Image ResolveImage(Refs key) => View.Image(key);
     
 }

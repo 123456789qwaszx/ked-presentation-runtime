@@ -6,26 +6,26 @@ public sealed class YarnUIBridge : MonoBehaviour
     private LinePresenter _linePresenter;
     private EllipsisBreathTypewriter _ellipsisBreathTypewriter;
     private DialogueTextRouter _dialogueTextRouter;
+    private IDialogueBoxViewResolver _dialogueBoxResolver;
     
     public bool IsDialogueBoxReady => _dialogueTextRouter.LineText != null;
-    
 
-    public void Initialize(LinePresenter linePresenter, EllipsisBreathTypewriter ellipsisBreathTypewriter, DialogueTextRouter dialogueTextRouter)
+    public void Initialize(
+        LinePresenter linePresenter,
+        EllipsisBreathTypewriter ellipsisBreathTypewriter,
+        DialogueTextRouter dialogueTextRouter,
+        IDialogueBoxViewResolver dialogueBoxResolver)
     {
         _linePresenter = linePresenter;
         _ellipsisBreathTypewriter = ellipsisBreathTypewriter;
         _dialogueTextRouter = dialogueTextRouter;
+        _dialogueBoxResolver = dialogueBoxResolver;
     }
     
     public void BindAuto(DialogueBoxKind kind, bool hasCharacterName)
     {
-        DialogueUIRoot dialogueUI = UIManager.Instance.GetUI<DialogueUIRoot>();
-        if (UIManager.Instance.CurSceneRoot != dialogueUI)
-            UIManager.Instance.SwitchRoot<DialogueUIRoot>();
+        IDialogueBoxView box = _dialogueBoxResolver.Activate(kind);
 
-        dialogueUI.ShowBox(kind);
-
-        IDialogueBoxView box = dialogueUI.GetBox(kind);
         _dialogueTextRouter.Bind(box);
 
         ApplyRouterTarget(hasCharacterName);
@@ -33,8 +33,7 @@ public sealed class YarnUIBridge : MonoBehaviour
     
     public void CloseAllDialogue()
     {
-        DialogueUIRoot dialogueUI = UIManager.Instance.GetUI<DialogueUIRoot>();
-        dialogueUI.HideAllBoxes();
+        _dialogueBoxResolver.HideAll();
 
         _dialogueTextRouter.Clear();
 

@@ -133,7 +133,7 @@ public sealed class FadeDialogueBoxCommand : CommandBase
         }
 
         _view = view;
-        _view.EnsureBound(_spec.strict);
+        _view.Validate();
 
         _rect = _view.Root;
         _group = _view.CanvasGroup;

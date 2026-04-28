@@ -151,7 +151,7 @@ public class VnAppBootstrap : MonoBehaviour
     private void BootstrapYarn()
     {
         vnRuntimeBridge.Initialize(dialogueRunner, presentationSessionEntry, _presentationSessionBridge);
-        yarnUIBridge.Initialize(linePresenter, ellipsisBreathTypewriter, dialogueTextRouter);
+        yarnUIBridge.Initialize(linePresenter, ellipsisBreathTypewriter, dialogueTextRouter, dialogueBoxHost);
         
         DialogueBoxRouteState dialogueBoxRouteState = new();
         

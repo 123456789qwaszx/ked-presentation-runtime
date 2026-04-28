@@ -15,11 +15,11 @@ public sealed class PresentationViewCommandFactory : INodeCommandFactory
     PresentationViewAccess _presentationViewAccess = new ();
     
     private readonly IBGViewPrefabProvider _bgViewPrefabProvider;
-    private readonly IDialogueBoxViewPrefabProvider _dialogueBoxViewPrefabProvider;
+    private readonly IDialogueBoxHost _dialogueBoxViewPrefabProvider;
 
     public PresentationViewCommandFactory(
         IBGViewPrefabProvider bgViewPrefabProvider,
-        IDialogueBoxViewPrefabProvider dialogueBoxViewPrefabProvider)
+        IDialogueBoxHost dialogueBoxViewPrefabProvider)
     {
         _bgViewPrefabProvider = bgViewPrefabProvider;
         _dialogueBoxViewPrefabProvider = dialogueBoxViewPrefabProvider;
