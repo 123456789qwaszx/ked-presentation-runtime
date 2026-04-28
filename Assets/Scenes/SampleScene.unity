@@ -5446,7 +5446,7 @@ MonoBehaviour:
   dialogueRunner: {fileID: 8309902628538800288}
   yarnUIBridge: {fileID: 1874881010}
   presentationRouteEntry: {fileID: 1433866633}
-  yarnEntryKey: maid
+  yarnEntryKey: stella01
   presentationEntryKey: emo
   runYarnKey: 50
   stopKey: 51

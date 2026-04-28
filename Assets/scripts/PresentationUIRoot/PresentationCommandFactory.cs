@@ -12,6 +12,8 @@ public interface IDialogueBoxViewPrefabProvider
 
 public sealed class PresentationViewCommandFactory : INodeCommandFactory
 {
+    PresentationViewAccess _presentationViewAccess = new ();
+    
     private readonly IBGViewPrefabProvider _bgViewPrefabProvider;
     private readonly IDialogueBoxViewPrefabProvider _dialogueBoxViewPrefabProvider;
 
@@ -29,6 +31,8 @@ public sealed class PresentationViewCommandFactory : INodeCommandFactory
         {
             null => null,
 
+            SetupPresentationViewCommandSpec s => new SetupPresentationViewCommand(_presentationViewAccess, s),
+            
             FadeToPresentationCommandSpec s => new FadeToPresentationCommand(s),
             MoveByPresentationCommandSpec s => new MoveByPresentationCommand(s),
             ScaleToPresentationCommandSpec s => new ScaleToPresentationCommand(s),

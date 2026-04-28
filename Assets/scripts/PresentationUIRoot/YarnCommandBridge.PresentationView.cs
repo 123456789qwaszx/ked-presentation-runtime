@@ -17,8 +17,7 @@ public sealed partial class YarnCommandBridge
         _dialogueRunner.AddCommandHandler<string>("bg_destroy", EnqueueDestroyBackgroundSpec);
         _dialogueRunner.AddCommandHandler<string, float, float>("bg_fade", EnqueueFadeBackgroundSpec);
 
-        _dialogueRunner.AddCommandHandler<string>("dlg_spawn", EnqueueSpawnDialogueBoxSpec);
-        _dialogueRunner.AddCommandHandler<string, string>("dlg_spawn_as", EnqueueSpawnDialogueBoxSpec);
+        _dialogueRunner.AddCommandHandler<string, string>("dlg_spawn", EnqueueSpawnDialogueBoxSpec);
         _dialogueRunner.AddCommandHandler<string, float, float>("dlg_fade", EnqueueFadeDialogueBoxSpec);
         _dialogueRunner.AddCommandHandler<string, string>("dlg_text", EnqueueSetDialogueBoxBodyTextSpec);
         _dialogueRunner.AddCommandHandler<string, string, string>("dlg_text_name",
@@ -28,11 +27,6 @@ public sealed partial class YarnCommandBridge
         _dialogueRunner.AddCommandHandler<string, float, float>("fade_to", EnqueueFadeToPresentationSpec);
         _dialogueRunner.AddCommandHandler<string, float, float, float>("move_by_p", EnqueueMoveByPresentationSpec);
         _dialogueRunner.AddCommandHandler<string, float, float>("scale_to_p", EnqueueScaleToPresentationSpec);
-    }
-
-    private void EnqueueSpawnDialogueBoxSpec(string dialogueKey = "main")
-    {
-        EnqueueSpawnDialogueBoxSpec(dialogueKey, "default");
     }
 
     private void EnqueueSpawnDialogueBoxSpec(string dialogueKey, string viewPrefabKey)
