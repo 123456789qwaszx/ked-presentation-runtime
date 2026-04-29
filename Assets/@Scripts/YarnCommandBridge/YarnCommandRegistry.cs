@@ -41,20 +41,20 @@ public sealed class YarnCommandRegistry
         _dialogueRunner.AddCommandHandler<string>("WaitSignal", key => _vnRuntimeBridge.WaitSignal(key));
         
         _dialogueRunner.AddCommandHandler<string>("set_named_box", SetNamedBox);
-        _dialogueRunner.AddCommandHandler<string>("set_narration_box", SetNarrationBox);
+        _dialogueRunner.AddCommandHandler<string>("set_narration_box", SetProtagonistBox);
         _dialogueRunner.AddCommandHandler("closebox", _yarnUIBridge.CloseAllDialogue);
     }
     
     private void SetNamedBox(string key)
     {
         if (TryParseKind(key, out DialogueBoxKind kind))
-            _routeState.SetNamedBox(kind);
+            _routeState.SetNamedLineBoxKind(kind);
     }
 
-    private void SetNarrationBox(string key)
+    private void SetProtagonistBox(string key)
     {
         if (TryParseKind(key, out DialogueBoxKind kind))
-            _routeState.SetNarrationBox(kind);
+            _routeState.SetProtagonistLineBoxKind(kind);
     }
 
     private bool TryParseKind(string key, out DialogueBoxKind kind)

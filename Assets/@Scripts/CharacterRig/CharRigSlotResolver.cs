@@ -4,10 +4,10 @@ using UnityEngine;
 public sealed class CharRigSlotResolver : ICharRigSlotResolver
 {
     private PresentationUIRoot _presentationUIRoot;
-    private DialogueBox00_WithPortrait _withPortraitBox;
+    private DialogueBox00_Portrait _withPortraitBox;
 
     private bool _init;
-    public void Initialize(PresentationUIRoot ui, DialogueBox00_WithPortrait withPortraitBox)
+    public void Initialize(PresentationUIRoot ui, DialogueBox00_Portrait withPortraitBox)
     {
         if (_init)
             return;
@@ -21,7 +21,7 @@ public sealed class CharRigSlotResolver : ICharRigSlotResolver
     public RectTransform Resolve(CharRigSlot slot, bool strict)
     {
         if (!_init)
-            Initialize(UIManager.Instance.GetUI<PresentationUIRoot>(), UIManager.Instance.GetUI<DialogueBox00_WithPortrait>());
+            Initialize(UIManager.Instance.GetUI<PresentationUIRoot>(), UIManager.Instance.GetUI<DialogueBox00_Portrait>());
         
         RectTransform rt = slot switch
         {

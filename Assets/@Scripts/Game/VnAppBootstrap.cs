@@ -158,14 +158,14 @@ public class VnAppBootstrap : MonoBehaviour
         vnRuntimeBridge.Initialize(dialogueRunner, presentationSessionEntry, _presentationSessionBridge);
         yarnUIBridge.Initialize(linePresenter, ellipsisBreathTypewriter, dialogueTextRouter, dialogueBoxHost);
         
-        DialogueBoxLineRoutingPolicy dialogueBoxRouteState = new();
+        DialogueBoxLineRoutingPolicy dialogueBoxRoutePolicy = new();
         
-        YarnCommandRegistry yarnCommandRegistry = new YarnCommandRegistry(dialogueRunner, yarnUIBridge, vnRuntimeBridge, dialogueBoxRouteState);
+        YarnCommandRegistry yarnCommandRegistry = new YarnCommandRegistry(dialogueRunner, yarnUIBridge, vnRuntimeBridge, dialogueBoxRoutePolicy);
         yarnCommandRegistry.Initialize();
 
         yarnBridgePlaybackDriver.Initialize(commandExecutor, _presentationSessionContext);
         yarnCommandBridge.Initialize(dialogueRunner, yarnBridgePlaybackDriver);
-        yarnLineRuntimePresenter.Initialize(dialogueRunner, yarnUIBridge, dialogueBoxRouteState, yarnBridgePlaybackDriver, audioSystem);
+        yarnLineRuntimePresenter.Initialize(dialogueRunner, yarnUIBridge, dialogueBoxRoutePolicy, yarnBridgePlaybackDriver, audioSystem);
         
         inlineEmojiHost.Initialize(yarnCommandBridge);
         inlineEventMarkupHandler.Initialize(yarnLineLifecycleBridge, _presentationSessionBridge, inlineSfxHost, inlineEmojiHost);

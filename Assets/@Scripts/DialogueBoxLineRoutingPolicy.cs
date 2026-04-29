@@ -1,33 +1,49 @@
 using System;
-using UnityEngine;
+using Yarn.Unity;
 
-public enum DialogueBoxSlotKind
+public enum DialogueBoxKind
 {
-    Narration,
-    Named,
+    Portrait = 0,
+    Speaker = 1,
+    LetterBox = 2,
+    OnlyText = 3
 }
 
 [Serializable]
 public sealed class DialogueBoxLineRoutingPolicy
 {
-    [SerializeField] private DialogueBoxKind _narrationBox = DialogueBoxKind.OnlyText;
-    [SerializeField] private DialogueBoxKind _namedBox = DialogueBoxKind.NoPortrait;
+    private const DialogueBoxKind DefaultProtagonistLineBoxKind = DialogueBoxKind.Portrait;
+    private const DialogueBoxKind DefaultNamedLineBoxKind = DialogueBoxKind.Speaker;
 
-    public DialogueBoxKind Resolve(bool hasCharacterName)
+    private DialogueBoxKind _protagonistLineBoxKind = DefaultProtagonistLineBoxKind;
+    private DialogueBoxKind _namedLineBoxKind = DefaultNamedLineBoxKind;
+
+    public DialogueBoxKind ResolveBoxKind(LocalizedLine line, out bool hasCharacterName)
     {
-        return hasCharacterName ? _namedBox : _narrationBox;
+        hasCharacterName = string.IsNullOrWhiteSpace(line.CharacterName) == false;
+        return ResolveBoxKind(hasCharacterName);
     }
 
-    public DialogueBoxKind NarrationBox => _narrationBox;
-    public DialogueBoxKind NamedBox => _namedBox;
-
-    public void SetNarrationBox(DialogueBoxKind kind)
+    public DialogueBoxKind ResolveBoxKind(bool hasCharacterName)
     {
-        _narrationBox = kind;
+        return hasCharacterName
+            ? _namedLineBoxKind
+            : _protagonistLineBoxKind;
     }
 
-    public void SetNamedBox(DialogueBoxKind kind)
+    public void SetProtagonistLineBoxKind(DialogueBoxKind kind)
     {
-        _namedBox = kind;
+        _protagonistLineBoxKind = kind;
+    }
+
+    public void SetNamedLineBoxKind(DialogueBoxKind kind)
+    {
+        _namedLineBoxKind = kind;
+    }
+
+    public void ResetToDefaults()
+    {
+        _protagonistLineBoxKind = DefaultProtagonistLineBoxKind;
+        _namedLineBoxKind = DefaultNamedLineBoxKind;
     }
 }

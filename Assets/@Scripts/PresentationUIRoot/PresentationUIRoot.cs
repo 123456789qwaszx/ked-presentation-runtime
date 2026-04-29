@@ -3,13 +3,6 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public enum DialogueBoxKind
-{
-    WithPortrait = 0,
-    NoPortrait = 1,
-    LetterBox = 2,
-    OnlyText = 3
-}
 
 public class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
 {

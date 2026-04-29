@@ -5,7 +5,7 @@ using Yarn.Unity;
 public sealed class YarnLineSetupPresenter : DialoguePresenterBase
 {
     private YarnUIBridge _yarnUIBridge;
-    private DialogueBoxLineRoutingPolicy _routeState;
+    private DialogueBoxLineRoutingPolicy _lineRoutingPolicy;
     private YarnBridgePlaybackDriver _yarnBridgePlaybackDriver;
     private AudioSystem _audioSystem;
     private InlineEmojiHost _inlineEmojiHost;
@@ -13,13 +13,13 @@ public sealed class YarnLineSetupPresenter : DialoguePresenterBase
     public void Initialize(
         DialogueRunner dialogueRunner,
         YarnUIBridge yarnUIBridge,
-        DialogueBoxLineRoutingPolicy routeState,
+        DialogueBoxLineRoutingPolicy lineRoutingPolicy,
         YarnBridgePlaybackDriver yarnBridgePlaybackDriver = null,
         AudioSystem audioSystem = null,
         InlineEmojiHost inlineEmojiHost = null)
     {
         _yarnUIBridge = yarnUIBridge;
-        _routeState = routeState;
+        _lineRoutingPolicy = lineRoutingPolicy;
         _yarnBridgePlaybackDriver = yarnBridgePlaybackDriver;
         _audioSystem = audioSystem;
         _inlineEmojiHost = inlineEmojiHost;
@@ -51,10 +51,10 @@ public sealed class YarnLineSetupPresenter : DialoguePresenterBase
         _yarnBridgePlaybackDriver?.ResetImmediateWaitForNewLine();
         _yarnBridgePlaybackDriver?.PlayCollected();
 
-        bool hasCharacterName = string.IsNullOrWhiteSpace(line.CharacterName) == false;
-        DialogueBoxKind kind = _routeState.Resolve(hasCharacterName);
+        DialogueBoxKind boxKind = _lineRoutingPolicy.ResolveBoxKind(line, 
+            out bool isNamedLine);
 
-       _yarnUIBridge.BindAuto(kind, hasCharacterName);
+        _yarnUIBridge.BindAuto(boxKind, isNamedLine);
         return YarnTask.CompletedTask;
     }
 }

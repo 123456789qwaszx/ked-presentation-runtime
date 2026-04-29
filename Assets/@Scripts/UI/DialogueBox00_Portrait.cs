@@ -2,8 +2,8 @@ using System;
 using TMPro;
 using UnityEngine;
 
-public sealed class DialogueBox00_WithPortrait
-    : UIBase<DialogueBox00_WithPortrait.Refs>, IManagedUI, IPresentationDialogueBoxView
+public sealed class DialogueBox00_Portrait
+    : UIBase<DialogueBox00_Portrait.Refs>, IManagedUI, IPresentationDialogueBoxView
 {
     public enum Refs
     {
