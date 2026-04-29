@@ -18,13 +18,7 @@ public sealed class DialogueBoxLineRoutingPolicy
     private DialogueBoxKind _protagonistLineBoxKind = DefaultProtagonistLineBoxKind;
     private DialogueBoxKind _namedLineBoxKind = DefaultNamedLineBoxKind;
 
-    public DialogueBoxKind ResolveBoxKind(LocalizedLine line, out bool hasCharacterName)
-    {
-        hasCharacterName = string.IsNullOrWhiteSpace(line.CharacterName) == false;
-        return ResolveBoxKind(hasCharacterName);
-    }
-
-    public DialogueBoxKind ResolveBoxKind(bool hasCharacterName)
+    public DialogueBoxKind Resolve(bool hasCharacterName)
     {
         return hasCharacterName
             ? _namedLineBoxKind

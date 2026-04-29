@@ -51,10 +51,10 @@ public sealed class YarnLineSetupPresenter : DialoguePresenterBase
         _yarnBridgePlaybackDriver?.ResetImmediateWaitForNewLine();
         _yarnBridgePlaybackDriver?.PlayCollected();
 
-        DialogueBoxKind boxKind = _lineRoutingPolicy.ResolveBoxKind(line, 
-            out bool isNamedLine);
+        bool hasCharacterName = string.IsNullOrWhiteSpace(line.CharacterName) == false;
+        DialogueBoxKind boxKind = _lineRoutingPolicy.Resolve(hasCharacterName);
 
-        _yarnUIBridge.BindAuto(boxKind, isNamedLine);
+        _yarnUIBridge.BindAuto(boxKind, hasCharacterName);
         return YarnTask.CompletedTask;
     }
 }
