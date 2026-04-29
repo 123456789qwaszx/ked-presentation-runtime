@@ -37,7 +37,7 @@ public sealed class DialogueBox00_Portrait
 
     protected override void Initialize()
     {
-        gameObject.SetActive(true);
+        //gameObject.SetActive(true);
     }
 
     public void Validate()

@@ -24,7 +24,7 @@ public sealed class DialogueBox02_LetterBox
 
     protected override void Initialize()
     {
-        gameObject.SetActive(true);
+        //gameObject.SetActive(true);
     }
 
     public void Validate()

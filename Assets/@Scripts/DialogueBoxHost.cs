@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 [Serializable]
 public struct DialogueBoxHostEntry
@@ -12,6 +13,9 @@ public struct DialogueBoxHostEntry
 
 public sealed class DialogueBoxHost : MonoBehaviour, IDialogueBoxHost
 {
+    [Header("Root")]
+    [SerializeField] private RectTransform dialogueBoxRoot;
+
     [Header("Dialogue Box Entries")]
     [SerializeField] private DialogueBoxHostEntry[] entries;
 
@@ -39,6 +43,10 @@ public sealed class DialogueBoxHost : MonoBehaviour, IDialogueBoxHost
     public void Register(string dialogueKey, IPresentationDialogueBoxView view)
     {
         EnsureDialogueKey(dialogueKey);
+
+        if (view == null)
+            throw new InvalidOperationException("[DialogueBoxHost] Cannot register null view.");
+
         _views[dialogueKey] = view;
     }
 
@@ -67,15 +75,11 @@ public sealed class DialogueBoxHost : MonoBehaviour, IDialogueBoxHost
         HideAll();
 
         DialogueBoxHostEntry entry = FindEntry(kind);
-
-        if (!TryGetView(entry.dialogueKey, out IPresentationDialogueBoxView view))
-        {
-            throw new InvalidOperationException(
-                $"[DialogueBoxHost] DialogueBox view is not registered. kind={kind}, dialogueKey={entry.dialogueKey}");
-        }
+        IPresentationDialogueBoxView view = GetOrCreateView(entry);
 
         view.Validate();
         view.SetVisible(true);
+
         return view;
     }
 
@@ -88,6 +92,52 @@ public sealed class DialogueBoxHost : MonoBehaviour, IDialogueBoxHost
 
             view.SetVisible(false);
         }
+    }
+
+    private IPresentationDialogueBoxView GetOrCreateView(DialogueBoxHostEntry entry)
+    {
+        EnsureDialogueKey(entry.dialogueKey);
+
+        if (TryGetView(entry.dialogueKey, out IPresentationDialogueBoxView view))
+            return view;
+
+        return CreateAndRegisterView(entry);
+    }
+
+    private IPresentationDialogueBoxView CreateAndRegisterView(DialogueBoxHostEntry entry)
+    {
+        if (dialogueBoxRoot == null)
+            throw new InvalidOperationException("[DialogueBoxHost] dialogueBoxRoot is required.");
+
+        if (entry.prefab == null)
+        {
+            throw new InvalidOperationException(
+                $"[DialogueBoxHost] DialogueBox prefab is missing. kind={entry.kind}, dialogueKey={entry.dialogueKey}");
+        }
+
+        GameObject go = Object.Instantiate(entry.prefab, dialogueBoxRoot, false);
+        go.name = $"DialogueBox_{entry.dialogueKey}";
+
+        IPresentationDialogueBoxView view = FindView(go);
+        view.Validate();
+        view.SetVisible(false);
+
+        Register(entry.dialogueKey, view);
+        return view;
+    }
+
+    private static IPresentationDialogueBoxView FindView(GameObject go)
+    {
+        MonoBehaviour[] behaviours = go.GetComponentsInChildren<MonoBehaviour>(true);
+
+        for (int i = 0; i < behaviours.Length; i++)
+        {
+            if (behaviours[i] is IPresentationDialogueBoxView view)
+                return view;
+        }
+
+        throw new InvalidOperationException(
+            $"[DialogueBoxHost] Prefab must have IPresentationDialogueBoxView. prefab={go.name}");
     }
 
     private DialogueBoxHostEntry FindEntry(DialogueBoxKind kind)

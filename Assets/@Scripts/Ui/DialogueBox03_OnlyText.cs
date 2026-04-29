@@ -38,7 +38,7 @@ public sealed class DialogueBox03_OnlyText
 
     protected override void Initialize()
     {
-        gameObject.SetActive(true);
+        //gameObject.SetActive(true);
     }
 
     public void Validate()

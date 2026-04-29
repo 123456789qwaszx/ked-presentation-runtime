@@ -98,6 +98,8 @@ public sealed class SpawnDialogueBoxCommand : CommandBase
     private IPresentationDialogueBoxView CreateView(GameObject prefab, RectTransform parent)
     {
         GameObject go = Object.Instantiate(prefab, parent, false);
+        
+        go.transform.localPosition = Vector3.zero;
 
         go.name = string.IsNullOrWhiteSpace(_spec.dialogueKey)
             ? prefab.name
