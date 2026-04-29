@@ -54,7 +54,7 @@ public sealed class YarnDialogueBoxAutoRouterPresenter : DialoguePresenterBase
         bool hasCharacterName = string.IsNullOrWhiteSpace(line.CharacterName) == false;
         DialogueBoxKind kind = _routeState.Resolve(hasCharacterName);
 
-        _yarnUIBridge.BindAuto(kind, hasCharacterName);
+       _yarnUIBridge.BindAuto(kind, hasCharacterName);
         return YarnTask.CompletedTask;
     }
 }
