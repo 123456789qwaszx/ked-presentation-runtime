@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Yarn.Unity;
 
-public sealed class YarnDialogueBoxAutoRouterPresenter : DialoguePresenterBase
+public sealed class YarnLineSetupPresenter : DialoguePresenterBase
 {
     private YarnUIBridge _yarnUIBridge;
     private DialogueBoxRouteState _routeState;

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public sealed class DialogueUIBindings : IDisposable
+public sealed class PresentationViewUIBindings : IDisposable
 {
     private readonly UIBindingContext _ctx = new();
 
@@ -14,7 +14,7 @@ public sealed class DialogueUIBindings : IDisposable
 
     private PresentationUIRoot _root;
 
-    public DialogueUIBindings(
+    public PresentationViewUIBindings(
         EpisodePlayState episodePlayState,
         VnFeatureController vnFeatures,
         VnUxState uxState,
