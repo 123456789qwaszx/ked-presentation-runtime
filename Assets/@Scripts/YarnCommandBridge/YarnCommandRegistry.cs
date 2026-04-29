@@ -9,14 +9,14 @@ public sealed class YarnCommandRegistry
     private readonly DialogueRunner _dialogueRunner;
     private readonly YarnUIBridge _yarnUIBridge;
     private readonly VnRuntimeBridge _vnRuntimeBridge;
-    private readonly DialogueBoxRouteState _routeState;
+    private readonly DialogueBoxLineRoutingPolicy _routeState;
     
 
     public YarnCommandRegistry(
         DialogueRunner dialogueRunner,
         YarnUIBridge yarnUIBridge,
         VnRuntimeBridge vnRuntimeBridge,
-        DialogueBoxRouteState routeState)
+        DialogueBoxLineRoutingPolicy routeState)
     {
         _dialogueRunner = dialogueRunner;
         _yarnUIBridge = yarnUIBridge;

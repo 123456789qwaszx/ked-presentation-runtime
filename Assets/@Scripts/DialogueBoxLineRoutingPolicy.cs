@@ -8,7 +8,7 @@ public enum DialogueBoxSlotKind
 }
 
 [Serializable]
-public sealed class DialogueBoxRouteState
+public sealed class DialogueBoxLineRoutingPolicy
 {
     [SerializeField] private DialogueBoxKind _narrationBox = DialogueBoxKind.OnlyText;
     [SerializeField] private DialogueBoxKind _namedBox = DialogueBoxKind.NoPortrait;

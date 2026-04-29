@@ -5,7 +5,7 @@ using Yarn.Unity;
 public sealed class YarnLineSetupPresenter : DialoguePresenterBase
 {
     private YarnUIBridge _yarnUIBridge;
-    private DialogueBoxRouteState _routeState;
+    private DialogueBoxLineRoutingPolicy _routeState;
     private YarnBridgePlaybackDriver _yarnBridgePlaybackDriver;
     private AudioSystem _audioSystem;
     private InlineEmojiHost _inlineEmojiHost;
@@ -13,7 +13,7 @@ public sealed class YarnLineSetupPresenter : DialoguePresenterBase
     public void Initialize(
         DialogueRunner dialogueRunner,
         YarnUIBridge yarnUIBridge,
-        DialogueBoxRouteState routeState,
+        DialogueBoxLineRoutingPolicy routeState,
         YarnBridgePlaybackDriver yarnBridgePlaybackDriver = null,
         AudioSystem audioSystem = null,
         InlineEmojiHost inlineEmojiHost = null)
