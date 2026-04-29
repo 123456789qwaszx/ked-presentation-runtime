@@ -7,13 +7,13 @@ public class EpisodeFlowController : IDisposable
     
     private readonly UIBindingContext _ctx = new();
     
-    private readonly DialogueUIBindings _dialogueUIBindings;
+    private readonly PresentationViewUIBindings _dialogueUIBindings;
     private readonly EpisodePlayer _episodePlayer;
     
     private EpisodePlayState _episodePlayState;
     
     public EpisodeFlowController(
-        DialogueUIBindings dialogueInput,
+        PresentationViewUIBindings dialogueInput,
         EpisodePlayer episodePlayer,
         EpisodePlayState episodePlayState)
     {

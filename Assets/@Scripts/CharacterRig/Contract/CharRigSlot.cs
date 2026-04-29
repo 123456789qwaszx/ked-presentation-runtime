@@ -1,5 +1,3 @@
-using UnityEngine;
-
 public enum CharRigSlot
 {
     CharacterSlotRight = 0,
@@ -8,9 +6,4 @@ public enum CharRigSlot
     ProtagonistSlot = 3,
     LiveChatIdolSlot00 = 100,
     LiveChatIdolSlot01 = 101
-}
-
-public interface ICharRigSlotResolver
-{
-    RectTransform Resolve(CharRigSlot slot, bool strict);
 }

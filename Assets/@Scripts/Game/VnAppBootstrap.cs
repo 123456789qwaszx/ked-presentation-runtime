@@ -33,7 +33,7 @@ public class VnAppBootstrap : MonoBehaviour
     [Header("ImmediateCommandRunner")]
     [SerializeField] private YarnBridgePlaybackDriver yarnBridgePlaybackDriver;
     [SerializeField] private YarnCommandBridge yarnCommandBridge;
-    [SerializeField] private YarnDialogueBoxAutoRouterPresenter yarnLineRuntimePresenter;
+    [SerializeField] private YarnLineSetupPresenter yarnLineRuntimePresenter;
     
     [Header("Yarn")]
     [SerializeField] private DialogueRunner dialogueRunner;
@@ -62,7 +62,7 @@ public class VnAppBootstrap : MonoBehaviour
     
     private PresentationSessionBridge _presentationSessionBridge;
     
-    private DialogueUIBindings _dialogueUIBindings;
+    private PresentationViewUIBindings _dialogueUIBindings;
     private EpisodeFlowController _episodeFlowController;
     private VnScreenBindings _screenBindings;
     private NodeRollbackHistory _rollbackHistory;
@@ -245,7 +245,7 @@ public class VnAppBootstrap : MonoBehaviour
     
     private void BootstrapUIBindings()
     {
-        _dialogueUIBindings = new DialogueUIBindings(_episodePlayState, vnFeatureController, _vnUxState, vnRuntimeBridge, dialogueAdvanceDispatcher);
+        _dialogueUIBindings = new PresentationViewUIBindings(_episodePlayState, vnFeatureController, _vnUxState, vnRuntimeBridge, dialogueAdvanceDispatcher);
         _episodeFlowController = new EpisodeFlowController(_dialogueUIBindings, episodePlayer, _episodePlayState);
         _screenBindings = new VnScreenBindings(_episodeFlowController);
     }

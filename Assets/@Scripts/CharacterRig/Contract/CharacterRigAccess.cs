@@ -4,6 +4,10 @@ using UnityEngine;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
+public interface ICharRigSlotResolver
+{
+    RectTransform Resolve(CharRigSlot slot, bool strict);
+}
 
 // 새로운 Rig 계약서를 만들 때는:
 // 1. Contract 블록을 통째로 복사

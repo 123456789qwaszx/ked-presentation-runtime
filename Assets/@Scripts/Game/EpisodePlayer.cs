@@ -10,7 +10,7 @@ public interface IRollbackDialogueRestarter
 public sealed class EpisodePlayer : MonoBehaviour, IRollbackDialogueRestarter
 {
     private VnScreenBindings _vnScreenBindings;
-    private DialogueUIBindings _dialogueUIBindings;
+    private PresentationViewUIBindings _dialogueUIBindings;
     private NodeRollbackHistory  _nodeRollbackHistory;
     
     public DialogueRunner dialogueRunner;
@@ -26,7 +26,7 @@ public sealed class EpisodePlayer : MonoBehaviour, IRollbackDialogueRestarter
     [Tooltip("Stop")]
     [SerializeField] private KeyCode stopKey = KeyCode.Alpha3;
 
-    public void Initialize(VnScreenBindings vnScreenBindings, DialogueUIBindings dialogueUIBindings, NodeRollbackHistory nodeRollbackHistory)
+    public void Initialize(VnScreenBindings vnScreenBindings, PresentationViewUIBindings dialogueUIBindings, NodeRollbackHistory nodeRollbackHistory)
     {
         _vnScreenBindings = vnScreenBindings;
         _dialogueUIBindings = dialogueUIBindings;
