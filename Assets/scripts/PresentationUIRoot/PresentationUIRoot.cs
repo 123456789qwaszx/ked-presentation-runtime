@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 public interface IDialogueBoxViewResolver
 {
-    IDialogueBoxView Activate(DialogueBoxKind kind);
+    IDialogueTextTarget Activate(DialogueBoxKind kind);
     void HideAll();
 }
 

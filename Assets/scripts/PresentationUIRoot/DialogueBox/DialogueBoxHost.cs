@@ -11,9 +11,9 @@ public struct DialogueBoxViewPrefabMapEntry
 
 public interface IDialogueBoxHost : IDialogueBoxViewPrefabProvider, IDialogueBoxViewResolver
 {
-    void Register(string dialogueKey, PresentationDialogueBoxView view);
-    void Unregister(string dialogueKey, PresentationDialogueBoxView expected = null);
-    bool TryGetView(string dialogueKey, out PresentationDialogueBoxView view);
+    void Register(string dialogueKey, IPresentationDialogueBoxView view);
+    void Unregister(string dialogueKey, IPresentationDialogueBoxView expected = null);
+    bool TryGetView(string dialogueKey, out IPresentationDialogueBoxView view);
 }
 
 public sealed class DialogueBoxHost : MonoBehaviour, IDialogueBoxHost
@@ -25,7 +25,7 @@ public sealed class DialogueBoxHost : MonoBehaviour, IDialogueBoxHost
     [Header("Yarn Auto Route")]
     [SerializeField] private DialogueBoxRouteEntry[] routes;
 
-    private readonly Dictionary<string, PresentationDialogueBoxView> _views = new();
+    private readonly Dictionary<string, IPresentationDialogueBoxView> _views = new();
 
     public bool TryGetDialogueBoxViewPrefab(string key, out GameObject prefab)
     {
@@ -46,32 +46,41 @@ public sealed class DialogueBoxHost : MonoBehaviour, IDialogueBoxHost
         return false;
     }
 
-    public void Register(string dialogueKey, PresentationDialogueBoxView view)
+    public void Register(string dialogueKey, IPresentationDialogueBoxView view)
     {
         _views[Normalize(dialogueKey)] = view;
     }
 
-    public void Unregister(string dialogueKey, PresentationDialogueBoxView expected = null)
+    public void Unregister(string dialogueKey, IPresentationDialogueBoxView expected = null)
     {
         string key = Normalize(dialogueKey);
 
-        if (expected != null && _views.TryGetValue(key, out PresentationDialogueBoxView current) && current != expected)
+        if (expected != null &&
+            _views.TryGetValue(key, out IPresentationDialogueBoxView current) &&
+            !ReferenceEquals(current, expected))
+        {
             return;
+        }
 
         _views.Remove(key);
     }
 
-    public bool TryGetView(string dialogueKey, out PresentationDialogueBoxView view)
+    public bool TryGetView(string dialogueKey, out IPresentationDialogueBoxView view)
     {
         return _views.TryGetValue(Normalize(dialogueKey), out view) && view != null;
     }
 
-    public IDialogueBoxView Activate(DialogueBoxKind kind)
+    public IDialogueTextTarget Activate(DialogueBoxKind kind)
     {
         HideAll();
 
         string dialogueKey = ResolveDialogueKey(kind);
-        PresentationDialogueBoxView view = _views[Normalize(dialogueKey)];
+
+        if (!TryGetView(dialogueKey, out IPresentationDialogueBoxView view))
+        {
+            throw new InvalidOperationException(
+                $"[DialogueBoxHost] DialogueBox view is not registered. kind={kind}, dialogueKey={dialogueKey}");
+        }
 
         view.Validate();
         view.SetVisible(true);
@@ -81,11 +90,8 @@ public sealed class DialogueBoxHost : MonoBehaviour, IDialogueBoxHost
 
     public void HideAll()
     {
-        foreach (PresentationDialogueBoxView view in _views.Values)
-        {
-            if (view != null)
-                view.SetVisible(false);
-        }
+        foreach (IPresentationDialogueBoxView view in _views.Values)
+            view.SetVisible(false);
     }
 
     private string ResolveDialogueKey(DialogueBoxKind kind)

@@ -22,7 +22,7 @@ public sealed class RuntimeDialogueBoxViewResolver : MonoBehaviour, IDialogueBox
         _refs = refs;
     }
 
-    public IDialogueBoxView Activate(DialogueBoxKind kind)
+    public IDialogueTextTarget Activate(DialogueBoxKind kind)
     {
         HideAll();
 

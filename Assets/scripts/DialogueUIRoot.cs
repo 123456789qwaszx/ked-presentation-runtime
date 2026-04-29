@@ -168,7 +168,7 @@ public class DialogueUIRoot : UIRoot<DialogueUIRoot.Refs>
 
     // ---- Slots & views ----
     private CanvasGroup[] _slots;
-    private IDialogueBoxView[] _boxBySlot;
+    private IDialogueTextTarget[] _boxBySlot;
 
     // ---- Valid flag ----
     private bool _valid;
@@ -276,11 +276,11 @@ public class DialogueUIRoot : UIRoot<DialogueUIRoot.Refs>
             View.CanvasGroup(Refs.DialogueBoxSlot03_Root),
         };
 
-        _boxBySlot = new IDialogueBoxView[_slots.Length];
+        _boxBySlot = new IDialogueTextTarget[_slots.Length];
         for (int i = 0; i < _slots.Length; i++)
         {
             _boxBySlot[i] = _slots[i] != null
-                ? _slots[i].GetComponentInChildren<IDialogueBoxView>(includeInactive: true)
+                ? _slots[i].GetComponentInChildren<IDialogueTextTarget>(includeInactive: true)
                 : null;
         }
     }
@@ -458,7 +458,7 @@ public class DialogueUIRoot : UIRoot<DialogueUIRoot.Refs>
     
     
     // Presenter(Yarn)가 사용할: kind에 해당하는 박스 뷰를 얻는다.
-    public IDialogueBoxView GetBox(DialogueBoxKind kind)
+    public IDialogueTextTarget GetBox(DialogueBoxKind kind)
     {
         int slotIndex = (int)kind;
         if (slotIndex < 0 || slotIndex >= _boxBySlot.Length) return null;

@@ -24,7 +24,7 @@ public sealed class YarnUIBridge : MonoBehaviour
     
     public void BindAuto(DialogueBoxKind kind, bool hasCharacterName)
     {
-        IDialogueBoxView box = _dialogueBoxResolver.Activate(kind);
+        IDialogueTextTarget box = _dialogueBoxResolver.Activate(kind);
 
         _dialogueTextRouter.Bind(box);
 

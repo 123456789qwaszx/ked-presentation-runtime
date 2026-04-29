@@ -1,7 +1,7 @@
 using TMPro;
 using UnityEngine;
 
-public interface IDialogueBoxView
+public interface IDialogueTextTarget
 {
     TMP_Text LineText { get; }
     TMP_Text NameText { get; }
@@ -15,7 +15,7 @@ public sealed class DialogueTextRouter : MonoBehaviour
     public bool HasName => NameText != null;
 
 
-    public void Bind(IDialogueBoxView box)
+    public void Bind(IDialogueTextTarget box)
     {
         LineText = box.LineText;
         NameText = box.NameText;

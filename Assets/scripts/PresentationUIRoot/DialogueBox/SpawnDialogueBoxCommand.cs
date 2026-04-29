@@ -27,8 +27,6 @@ public sealed class SpawnDialogueBoxCommandSpec : CommandSpecBase
     [Range(0f, 1f)]
     public float initialAlpha = 1f;
 
-    public bool clearTextOnSpawn = true;
-    public bool trackRunLifetime = true;
     public bool strict = true;
 }
 
@@ -70,19 +68,18 @@ public sealed class SpawnDialogueBoxCommand : CommandBase
 
         string refKey = PresentationDialogueBoxRegistryExt.MakeDialogueBoxRefKey(_spec.dialogueKey);
 
-        if (_spec.destroyExistingWithSameKey && _host.TryGetView(_spec.dialogueKey, out PresentationDialogueBoxView existing))
-            DestroyExisting(scope, refKey, existing);
+        if (_spec.destroyExistingWithSameKey && _host.TryGetView(_spec.dialogueKey, out IPresentationDialogueBoxView existing))
+            DestroyExisting(existing);
 
-        PresentationDialogueBoxView view = CreateView(prefab, parent);
+        IPresentationDialogueBoxView view = CreateView(prefab, parent);
 
-        if (_spec.clearTextOnSpawn)
-            view.ClearText();
-
-        ApplyInitialState(view);
+        view.ClearText();
+        
+        view.CanvasGroup.alpha = Mathf.Clamp01(_spec.initialAlpha);
+        view.CanvasGroup.interactable = false;
+        view.CanvasGroup.blocksRaycasts = false;
+        
         Register(scope, refKey, view);
-
-        if (_spec.trackRunLifetime)
-            TrackLifetime(scope, refKey, view);
     }
 
     private GameObject GetPrefab()
@@ -98,7 +95,7 @@ public sealed class SpawnDialogueBoxCommand : CommandBase
         return prefab;
     }
 
-    private PresentationDialogueBoxView CreateView(GameObject prefab, RectTransform parent)
+    private IPresentationDialogueBoxView CreateView(GameObject prefab, RectTransform parent)
     {
         GameObject go = Object.Instantiate(prefab, parent, false);
 
@@ -109,13 +106,7 @@ public sealed class SpawnDialogueBoxCommand : CommandBase
         if (_spec.setAsLastSibling)
             go.transform.SetAsLastSibling();
 
-        PresentationDialogueBoxView view = go.GetComponent<PresentationDialogueBoxView>();
-
-        if (view == null)
-        {
-            throw new InvalidOperationException(
-                $"[SpawnDialogueBoxCommand] Prefab must have PresentationDialogueBoxView. prefab={prefab.name}");
-        }
+        IPresentationDialogueBoxView view = FindDialogueBoxView(go);
 
         if (_spec.strict)
             view.Validate();
@@ -123,56 +114,37 @@ public sealed class SpawnDialogueBoxCommand : CommandBase
         return view;
     }
 
-    private void ApplyInitialState(PresentationDialogueBoxView view)
+    private static IPresentationDialogueBoxView FindDialogueBoxView(GameObject go)
     {
-        view.CanvasGroup.alpha = Mathf.Clamp01(_spec.initialAlpha);
-        view.CanvasGroup.interactable = false;
-        view.CanvasGroup.blocksRaycasts = false;
+        MonoBehaviour[] behaviours = go.GetComponentsInChildren<MonoBehaviour>(true);
+
+        for (int i = 0; i < behaviours.Length; i++)
+        {
+            if (behaviours[i] is IPresentationDialogueBoxView view)
+                return view;
+        }
+
+        throw new InvalidOperationException(
+            $"[SpawnDialogueBoxCommand] Prefab must have IPresentationDialogueBoxView. prefab={go.name}");
     }
 
     private void Register(
         CommandRunScope scope,
         string refKey,
-        PresentationDialogueBoxView view)
+        IPresentationDialogueBoxView view)
     {
         scope.Refs[refKey] = view;
         _host.Register(_spec.dialogueKey, view);
     }
 
-    private void TrackLifetime(
-        CommandRunScope scope,
-        string refKey,
-        PresentationDialogueBoxView view)
+    private void DestroyExisting(IPresentationDialogueBoxView existing)
     {
-        scope.TrackRun(
-            cancel: () =>
-            {
-                Unregister(scope, refKey, view);
-                Object.Destroy(view.gameObject);
-            });
-    }
-
-    private void DestroyExisting(
-        CommandRunScope scope,
-        string refKey,
-        PresentationDialogueBoxView existing)
-    {
-        Unregister(scope, refKey, existing);
+        _host.Unregister(_spec.dialogueKey, existing);
 
         existing.Root.DOKill(true);
         existing.CanvasGroup.DOKill(true);
 
-        Object.Destroy(existing.gameObject);
-    }
-
-    private void Unregister(
-        CommandRunScope scope,
-        string refKey,
-        PresentationDialogueBoxView view)
-    {
-        _host.Unregister(_spec.dialogueKey, view);
-
-        if (scope.Refs.TryGetValue(refKey, out object current) && ReferenceEquals(current, view))
-            scope.Refs.Remove(refKey);
+        if (existing is MonoBehaviour behaviour)
+            Object.Destroy(behaviour.gameObject);
     }
 }
