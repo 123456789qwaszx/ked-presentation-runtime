@@ -42,7 +42,6 @@ MonoBehaviour:
     - MoreMountains.Tools
     - YarnSpinner.Unity
     - YarnSpinner.Unity.Samples
-    - YarnSpinner.Unity.Samples.OptionsThatTimeout
     showAdvancedSettings: 0
   addMgrToSceneAutomatically: 0
   autoUpdateReferences: 1
