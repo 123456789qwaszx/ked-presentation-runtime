@@ -43,6 +43,7 @@ public class VnAppBootstrap : MonoBehaviour
     [SerializeField] private YarnUIBridge yarnUIBridge;
     [SerializeField] private InlineEmojiHost inlineEmojiHost;
     [SerializeField] private InlineEventMarkupHandler inlineEventMarkupHandler;
+    [SerializeField] private CustomLinePresenter customLinePresenter;
     
 
     [Header("VnAdvanceGate")]
@@ -155,20 +156,51 @@ public class VnAppBootstrap : MonoBehaviour
     
     private void BootstrapYarn()
     {
-        vnRuntimeBridge.Initialize(dialogueRunner, presentationSessionEntry, _presentationSessionBridge);
-        yarnUIBridge.Initialize(linePresenter, ellipsisBreathTypewriter, dialogueTextRouter, dialogueBoxHost);
-        
         DialogueBoxLineRoutingPolicy dialogueBoxRoutePolicy = new();
-        
-        YarnCommandRegistry yarnCommandRegistry = new YarnCommandRegistry(dialogueRunner, yarnUIBridge, vnRuntimeBridge, dialogueBoxRoutePolicy);
+
+        vnRuntimeBridge.Initialize(
+            dialogueRunner,
+            presentationSessionEntry,
+            _presentationSessionBridge);
+
+        yarnUIBridge.Initialize(
+            linePresenter,
+            ellipsisBreathTypewriter,
+            dialogueTextRouter,
+            dialogueBoxHost);
+
+        YarnCommandRegistry yarnCommandRegistry = new YarnCommandRegistry(
+            dialogueRunner,
+            yarnUIBridge,
+            vnRuntimeBridge,
+            dialogueBoxRoutePolicy);
+
         yarnCommandRegistry.Initialize();
 
-        yarnBridgePlaybackDriver.Initialize(commandExecutor, _presentationSessionContext);
-        yarnCommandBridge.Initialize(dialogueRunner, yarnBridgePlaybackDriver);
-        yarnLineRuntimePresenter.Initialize(dialogueRunner, yarnUIBridge, dialogueBoxRoutePolicy, yarnBridgePlaybackDriver, audioSystem);
-        
+        yarnBridgePlaybackDriver.Initialize(
+            commandExecutor,
+            _presentationSessionContext);
+
+        yarnCommandBridge.Initialize(
+            dialogueRunner,
+            yarnBridgePlaybackDriver);
+
+        customLinePresenter.Initialize(
+            dialogueRunner,
+            dialogueBoxRoutePolicy,
+            dialogueBoxHost,
+            dialogueTextRouter,
+            ellipsisBreathTypewriter,
+            yarnBridgePlaybackDriver,
+            audioSystem);
+
         inlineEmojiHost.Initialize(yarnCommandBridge);
-        inlineEventMarkupHandler.Initialize(yarnLineLifecycleBridge, _presentationSessionBridge, inlineSfxHost, inlineEmojiHost);
+
+        inlineEventMarkupHandler.Initialize(
+            yarnLineLifecycleBridge,
+            _presentationSessionBridge,
+            inlineSfxHost,
+            inlineEmojiHost);
     }
 
     private void SetupYarnLifecycleBridge()
