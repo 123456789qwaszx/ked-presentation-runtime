@@ -465,45 +465,6 @@ public class DialogueUIRoot : UIRoot<DialogueUIRoot.Refs>
         return _boxBySlot[slotIndex];
     }
 
-    // kind에 해당하는 슬롯만 보이게 한다.
-    public void ShowBox(DialogueBoxKind kind)
-    {
-        HideAllBoxes();
-
-        int slotIndex = (int)kind;
-        if (slotIndex < 0 || slotIndex >= _slots.Length) return;
-
-        OpenCanvasGroup(_slots[slotIndex]);
-
-        var box = _boxBySlot[slotIndex];
-        if (box != null)
-            box.SetVisible(true);
-    }
-
-    public void HideAllBoxes()
-    {
-        for (int i = 0; i < _slots.Length; i++)
-        {
-            CloseCanvasGroup(_slots[i]);
-
-            var box = _boxBySlot[i];
-            if (box != null)
-                box.SetVisible(false);
-        }
-    }
-    
-    public void ShowAllBoxes()
-    {
-        for (int i = 0; i < _slots.Length; i++)
-        {
-            OpenCanvasGroup(_slots[i]);
-
-            var box = _boxBySlot[i];
-            if (box != null)
-                box.SetVisible(true);
-        }
-    }
-
     private static void OpenCanvasGroup(CanvasGroup cg)
     {
         if (!cg) return;

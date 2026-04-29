@@ -6,8 +6,6 @@ public interface IDialogueBoxView
     TMP_Text LineText { get; }
     TMP_Text NameText { get; }
     bool HasName { get; }
-
-    void SetVisible(bool visible);
 }
 
 public sealed class DialogueTextRouter : MonoBehaviour
