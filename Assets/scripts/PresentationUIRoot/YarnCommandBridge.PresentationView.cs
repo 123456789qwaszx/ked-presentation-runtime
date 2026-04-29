@@ -11,8 +11,7 @@ public sealed partial class YarnCommandBridge
     {
         _dialogueRunner.AddCommandHandler("presentation_setup", EnqueueSetupPresentationViewSpec);
 
-        _dialogueRunner.AddCommandHandler<string>("bg_spawn", EnqueueSpawnBackgroundSpec);
-        _dialogueRunner.AddCommandHandler<string, string>("bg_spawn_as", EnqueueSpawnBackgroundSpec);
+        _dialogueRunner.AddCommandHandler<string, string>("bg_spawn", EnqueueSpawnBackgroundSpec);
         _dialogueRunner.AddCommandHandler<string, string>("bg_sprite", EnqueueSetBackgroundSpriteSpec);
         _dialogueRunner.AddCommandHandler<string>("bg_destroy", EnqueueDestroyBackgroundSpec);
         _dialogueRunner.AddCommandHandler<string, float, float>("bg_fade", EnqueueFadeBackgroundSpec);
@@ -129,17 +128,12 @@ public sealed partial class YarnCommandBridge
         Collect(spec);
     }
 
-    private void EnqueueSpawnBackgroundSpec(string bgKey = "current")
-    {
-        EnqueueSpawnBackgroundSpec(bgKey, "default");
-    }
-
     private void EnqueueSpawnBackgroundSpec(string bgKey, string viewPrefabKey)
     {
         var spec = new SpawnBackgroundCommandSpec
         {
-            bgKey = string.IsNullOrWhiteSpace(bgKey) ? "current" : bgKey.Trim(),
-            viewPrefabKey = string.IsNullOrWhiteSpace(viewPrefabKey) ? "default" : viewPrefabKey.Trim()
+            bgKey = bgKey.Trim(),
+            viewPrefabKey = viewPrefabKey.Trim()
         };
 
         Collect(spec);
@@ -159,12 +153,11 @@ public sealed partial class YarnCommandBridge
             return;
         }
 
-        string resolvedPath = ResolveBackgroundSpritePath(spritePath);
-        Sprite sprite = Resources.Load<Sprite>(resolvedPath);
+        Sprite sprite = Resources.Load<Sprite>(spritePath);
 
         if (sprite == null)
         {
-            Debug.LogError($"[YarnCommandBridge] bg_sprite: Sprite not found. path='{resolvedPath}'");
+            Debug.LogError($"[YarnCommandBridge] bg_sprite: Sprite not found. path='{spritePath}'");
             return;
         }
 
@@ -252,16 +245,6 @@ public sealed partial class YarnCommandBridge
         };
 
         Collect(spec);
-    }
-
-    private string ResolveBackgroundSpritePath(string raw)
-    {
-        string trimmed = raw.Trim();
-
-        if (string.IsNullOrEmpty(backgroundSpriteResourcesPrefix))
-            return trimmed;
-
-        return $"{backgroundSpriteResourcesPrefix}{trimmed}";
     }
 
     private bool TryParsePresentationTarget(string raw, out PresentationTarget target)
