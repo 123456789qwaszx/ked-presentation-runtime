@@ -16,7 +16,7 @@ public sealed class SetupCharRigCommandSpec : CommandSpecBase
     public GameObject rigPrefab;
 
     [Tooltip("Rig를 붙일 Slot")]
-    public CharRigSlot parentSlot = CharRigSlot.CharacterStageSlot00;
+    public CharRigSlot parentSlot = CharRigSlot.CharacterSlotRight;
 
     [Tooltip("자동 생성 시 루트 오브젝트 이름.")]
     public string rigRootName = "CharacterRig";

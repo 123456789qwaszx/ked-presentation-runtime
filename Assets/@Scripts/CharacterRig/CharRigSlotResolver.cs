@@ -3,16 +3,16 @@ using UnityEngine;
 
 public sealed class CharRigSlotResolver : ICharRigSlotResolver
 {
-    private DialogueUIRoot _dialogueUIRoot;
+    private PresentationUIRoot _presentationUIRoot;
     private DialogueBox00_WithPortrait _withPortraitBox;
 
     private bool _init;
-    public void Initialize(DialogueUIRoot ui, DialogueBox00_WithPortrait withPortraitBox)
+    public void Initialize(PresentationUIRoot ui, DialogueBox00_WithPortrait withPortraitBox)
     {
         if (_init)
             return;
         
-        _dialogueUIRoot = ui;
+        _presentationUIRoot = ui;
         _withPortraitBox = withPortraitBox;
         
         _init = true;
@@ -21,13 +21,13 @@ public sealed class CharRigSlotResolver : ICharRigSlotResolver
     public RectTransform Resolve(CharRigSlot slot, bool strict)
     {
         if (!_init)
-            Initialize(UIManager.Instance.GetUI<DialogueUIRoot>(), UIManager.Instance.GetUI<DialogueBox00_WithPortrait>());
+            Initialize(UIManager.Instance.GetUI<PresentationUIRoot>(), UIManager.Instance.GetUI<DialogueBox00_WithPortrait>());
         
         RectTransform rt = slot switch
         {
-            CharRigSlot.CharacterStageSlot00 => _dialogueUIRoot.CharRigSlot,
-            CharRigSlot.CharacterStageSlot01 => _dialogueUIRoot.CharRigSlot1,
-            CharRigSlot.CharacterStageSlot02 => _dialogueUIRoot.CharRigSlot2,
+            CharRigSlot.CharacterSlotRight => _presentationUIRoot.ResolveRect(PresentationUIRoot.Refs.CharSlotRightRig_Root),
+            CharRigSlot.CharacterSlotCenter => _presentationUIRoot.ResolveRect(PresentationUIRoot.Refs.CharSlotCenterRig_Root),
+            CharRigSlot.CharacterSlotLeft => _presentationUIRoot.ResolveRect(PresentationUIRoot.Refs.CharSlotLeftRig_Root),
             CharRigSlot.ProtagonistSlot => _withPortraitBox.ProtagonistRect,
             
             _ => null
