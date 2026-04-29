@@ -10,6 +10,19 @@ public interface IDialogueBoxViewPrefabProvider
     bool TryGetDialogueBoxViewPrefab(string key, out GameObject prefab);
 }
 
+public interface IDialogueBoxViewResolver
+{
+    IDialogueTextTarget Activate(DialogueBoxKind kind);
+    void HideAll();
+}
+
+public interface IDialogueBoxHost : IDialogueBoxViewPrefabProvider, IDialogueBoxViewResolver
+{
+    void Register(string dialogueKey, IPresentationDialogueBoxView view);
+    void Unregister(string dialogueKey, IPresentationDialogueBoxView expected = null);
+    bool TryGetView(string dialogueKey, out IPresentationDialogueBoxView view);
+}
+
 public sealed class PresentationViewCommandFactory : INodeCommandFactory
 {
     PresentationViewAccess _presentationViewAccess = new ();

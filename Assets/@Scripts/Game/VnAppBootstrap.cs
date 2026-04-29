@@ -71,6 +71,8 @@ public class VnAppBootstrap : MonoBehaviour
     private void Awake()
     {
         BootstrapAudioSystem();
+        ConnectAudioSystemToYarn();
+        
         BootstrapUIManager();
         
         BootstrapPresentationSession();
@@ -90,6 +92,10 @@ public class VnAppBootstrap : MonoBehaviour
     private void BootstrapAudioSystem()
     {
         audioSystem.Initialize();
+    }
+    
+    private void ConnectAudioSystemToYarn()
+    {
         ResourcesAudioClipResolver audioClipResolver = new ();
         inlineSfxHost.Initialize(audioSystem, audioClipResolver);
     }
@@ -135,7 +141,6 @@ public class VnAppBootstrap : MonoBehaviour
         CompositeCommandFactory factory = new (signalFactory, charRigFactory, transitionCommandFactory, soundCommandFactory, presentationViewCommandFactory);
         commandExecutor.Initialize(factory);
         
-        
         PresentationSession presentationSession = new PresentationSession(gatePlanner, gateAdvancer, commandExecutor, _presentationSessionContext);
         
         presentationSessionEntry.Initialize(presentationSession, routeCatalogSo);
@@ -164,8 +169,6 @@ public class VnAppBootstrap : MonoBehaviour
         
         inlineEmojiHost.Initialize(yarnCommandBridge);
         inlineEventMarkupHandler.Initialize(yarnLineLifecycleBridge, _presentationSessionBridge, inlineSfxHost, inlineEmojiHost);
-
-        
     }
 
     private void SetupYarnLifecycleBridge()
@@ -187,7 +190,6 @@ public class VnAppBootstrap : MonoBehaviour
         dialogueAdvanceDispatcher.Initialize(advanceGategate, dialogueRunner, inlineEventMarkupHandler);
         vnAdvanceInputPoller.Initialize(dialogueAdvanceDispatcher);
     }
-
     
     [Header("RollbackHistoryDebugOverlay")]
     public RollbackHistoryDebugOverlay overlay;

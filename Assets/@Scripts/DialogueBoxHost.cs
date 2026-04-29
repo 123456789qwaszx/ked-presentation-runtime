@@ -9,13 +9,6 @@ public struct DialogueBoxViewPrefabMapEntry
     public GameObject prefab;
 }
 
-public interface IDialogueBoxHost : IDialogueBoxViewPrefabProvider, IDialogueBoxViewResolver
-{
-    void Register(string dialogueKey, IPresentationDialogueBoxView view);
-    void Unregister(string dialogueKey, IPresentationDialogueBoxView expected = null);
-    bool TryGetView(string dialogueKey, out IPresentationDialogueBoxView view);
-}
-
 public sealed class DialogueBoxHost : MonoBehaviour, IDialogueBoxHost
 {
     [Header("Prefab Catalog")]

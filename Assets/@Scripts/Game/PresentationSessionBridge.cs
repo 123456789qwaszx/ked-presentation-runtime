@@ -6,8 +6,7 @@ public sealed class PresentationSessionBridge : VnRuntimeBridge.IPresentationSig
     private readonly PresentationSession _session;
     private readonly UnitySignalBus _unitySignalBus;
     
-    public PresentationSessionBridge(PresentationSession session,
-        UnitySignalBus unitySignalBus)
+    public PresentationSessionBridge(PresentationSession session, UnitySignalBus unitySignalBus)
     {
         _session = session;
         _unitySignalBus = unitySignalBus;

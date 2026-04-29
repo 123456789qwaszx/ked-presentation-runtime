@@ -3,13 +3,6 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-
-public interface IDialogueBoxViewResolver
-{
-    IDialogueTextTarget Activate(DialogueBoxKind kind);
-    void HideAll();
-}
-
 public class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
 {
     public event Action OnSpeedUpHoldStarted;

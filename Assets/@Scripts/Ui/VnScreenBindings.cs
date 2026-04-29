@@ -1,7 +1,6 @@
 using System;
 using UnityEngine;
 
-
 public sealed class VnScreenBindings : IDisposable
 {
     private readonly UIBindingContext _ctx = new();
