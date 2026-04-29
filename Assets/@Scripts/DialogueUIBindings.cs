@@ -5,12 +5,14 @@ using UnityEngine;
 public sealed class DialogueUIBindings : IDisposable
 {
     private readonly UIBindingContext _ctx = new();
-    
+
     private readonly EpisodePlayState _episodePlayState;
     private readonly VnFeatureController _vnFeatures;
     private readonly VnUxState _uxState;
     private readonly VnRuntimeBridge _vnRuntimeBridge;
     private readonly DialogueAdvanceDispatcher _dialogueAdvanceDispatcher;
+
+    private PresentationUIRoot _root;
 
     public DialogueUIBindings(
         EpisodePlayState episodePlayState,
@@ -27,14 +29,16 @@ public sealed class DialogueUIBindings : IDisposable
         _dialogueAdvanceDispatcher = dialogueAdvanceDispatcher;
     }
 
-    public void Bind(DialogueUIRoot root)
+    public void Bind(PresentationUIRoot root)
     {
         _ctx.Unbind(root);
-        
+
+        _root = root;
+
         _ctx.Bind(root,
             r => r.OnRollbackOneStepPressed += HandleRollbackPressed,
             r => r.OnRollbackOneStepPressed -= HandleRollbackPressed);
-        
+
         _ctx.Bind(root,
             r => r.OnSpeedUpHoldStarted += HandleSpeedUpHoldStarted,
             r => r.OnSpeedUpHoldStarted -= HandleSpeedUpHoldStarted);
@@ -42,51 +46,41 @@ public sealed class DialogueUIBindings : IDisposable
         _ctx.Bind(root,
             r => r.OnSpeedUpHoldEnded += HandleSpeedUpHoldEnded,
             r => r.OnSpeedUpHoldEnded -= HandleSpeedUpHoldEnded);
-        
-        // StepNext
+
         _ctx.Bind(root,
             r => r.OnStepNextPressed += HandleStepNextPressed,
             r => r.OnStepNextPressed -= HandleStepNextPressed);
 
-        // Skip
         _ctx.Bind(root,
             r => r.OnSkipPressed += HandleSkipPressed,
             r => r.OnSkipPressed -= HandleSkipPressed);
 
-        // Auto
         _ctx.Bind(root,
             r => r.OnAutoPressed += HandleAutoPressed,
             r => r.OnAutoPressed -= HandleAutoPressed);
 
-        // QuickMenu
         _ctx.Bind(root,
             r => r.OnQuickMenuPressed += HandleQuickMenuPressed,
             r => r.OnQuickMenuPressed -= HandleQuickMenuPressed);
 
-        // Expand (HUD hide/show)
         _ctx.Bind(root,
             r => r.OnExpandPressed += HandleExpandPressed,
             r => r.OnExpandPressed -= HandleExpandPressed);
 
-        // Previous log
         _ctx.Bind(root,
             r => r.OnShowPreviousLogPressed += HandleShowPreviousLogPressed,
             r => r.OnShowPreviousLogPressed -= HandleShowPreviousLogPressed);
 
-        // Speedup
         _ctx.Bind(root,
             r => r.OnSetSpeedupPressed += HandleSetSpeedPressed,
             r => r.OnSetSpeedupPressed -= HandleSetSpeedPressed);
     }
 
-    // =========================================================
-    // DialogueUIRoot handlers
-    // =========================================================
-    
     private void HandleRollbackPressed()
     {
         _vnFeatures.RequestRollbackOneStep();
     }
+
     private void HandleSpeedUpHoldStarted()
     {
         _vnFeatures.BeginHoldSpeedUp();
@@ -102,7 +96,7 @@ public sealed class DialogueUIBindings : IDisposable
         if (_vnFeatures.IsAuto)
         {
             _vnFeatures.ToggleAuto();
-            UIManager.Instance.GetUI<DialogueUIRoot>().SetAutoModeActive(false);
+            _root.SetAutoModeActive(false);
             return;
         }
 
@@ -111,7 +105,7 @@ public sealed class DialogueUIBindings : IDisposable
 
     private void HandleSkipPressed()
     {
-        if ((_uxState.ChoicesVisible || _uxState.BacklogVisible))
+        if (_uxState.ChoicesVisible || _uxState.BacklogVisible)
             return;
 
         string summary = "현재까지의 스토리(최근):";
@@ -127,7 +121,7 @@ public sealed class DialogueUIBindings : IDisposable
 
             panel.OnConfirmed -= ConfirmSkipEpisode;
             panel.OnCancelled -= CloseSkipConfirm;
-            
+
             panel.OnConfirmed += ConfirmSkipEpisode;
             panel.OnCancelled += CloseSkipConfirm;
         });
@@ -136,10 +130,10 @@ public sealed class DialogueUIBindings : IDisposable
     private void CloseSkipConfirm()
     {
         var panel = UIManager.Instance.GetUI<SkipConfirmPanel>();
-        
+
         panel.OnConfirmed -= ConfirmSkipEpisode;
         panel.OnCancelled -= CloseSkipConfirm;
-        
+
         UIManager.Instance.PopPanel();
     }
 
@@ -151,36 +145,32 @@ public sealed class DialogueUIBindings : IDisposable
         if (string.IsNullOrEmpty(episodeId))
         {
             Debug.LogWarning("[VN] Skip confirmed but current episode id is empty.");
-            
-            //return;
         }
 
-        UIManager.Instance.GetUI<DialogueUIRoot>().SetSkipModeActive(false);
+        _root.SetSkipModeActive(false);
+
         _vnRuntimeBridge.ForceCompleteEpisodeNow(episodeId);
         _episodePlayState.ApplyEpisodeState(episodeId);
-        
+
         UIManager.Instance.PopAllPanels();
         UIManager.Instance.SwitchRoot<LobbyUIRoot>();
-        
     }
 
     private void HandleAutoPressed()
     {
         _vnFeatures.ToggleAuto();
-
-        var root = UIManager.Instance.GetUI<DialogueUIRoot>();
-        if (root != null)
-            root.SetAutoModeActive(_vnFeatures.IsAuto);
+        _root.SetAutoModeActive(_vnFeatures.IsAuto);
     }
 
     private void HandleQuickMenuPressed()
-    { }
+    {
+    }
 
     private void HandleExpandPressed()
     {
         if (_uxState.BacklogVisible)
             CloseBacklogPanel();
-        
+
         if (_uxState.ChoicesVisible)
             CloseChoicePanel();
     }
@@ -213,19 +203,14 @@ public sealed class DialogueUIBindings : IDisposable
         _vnFeatures.ToggleSetSpeed();
     }
 
-    // =========================================================
-    // Choices (YarnUIBridge)
-    // =========================================================
-
     private void HandleChoicesPresented(IReadOnlyList<string> choices)
     {
         _uxState.SetChoicesVisible(true);
 
-        // 선택지 열리면 Auto는 멈춤
         if (_vnFeatures.IsAuto)
         {
             _vnFeatures.ToggleAuto();
-            UIManager.Instance.GetUI<DialogueUIRoot>()?.SetAutoModeActive(false);
+            _root.SetAutoModeActive(false);
         }
 
         var existing = UIManager.Instance.GetUI<ChoicePanel>();
@@ -244,23 +229,25 @@ public sealed class DialogueUIBindings : IDisposable
         });
     }
 
-    private void HandleChoiceSelected(int index) { }
+    private void HandleChoiceSelected(int index)
+    {
+    }
 
     private void CloseChoicePanel()
     {
         _uxState.SetChoicesVisible(false);
-        
+
         var panel = UIManager.Instance.GetUI<ChoicePanel>();
-        
+
         panel.OnChoiceSelected -= HandleChoiceSelected;
         panel.OnCloseRequested -= CloseChoicePanel;
-        
+
         UIManager.Instance.PopPanel();
     }
-    
 
     public void Dispose()
     {
         _ctx.Dispose();
+        _root = null;
     }
 }

@@ -103,7 +103,7 @@ public class EpisodeFlowController : IDisposable
 
         UIManager.Instance.PopAllPanels();
 
-        UIManager.Instance.SwitchRoot<DialogueUIRoot>(root =>
+        UIManager.Instance.SwitchRoot<PresentationUIRoot>(root =>
         {
             _dialogueUIBindings.Bind(root);
             _episodePlayer.StartYarnNode(ownerEpisodeId);
@@ -119,7 +119,7 @@ public class EpisodeFlowController : IDisposable
 
         UIManager.Instance.PopAllPanels();
 
-        UIManager.Instance.SwitchRoot<DialogueUIRoot>(root =>
+        UIManager.Instance.SwitchRoot<PresentationUIRoot>(root =>
         {
             _dialogueUIBindings.Bind(root);
             _episodePlayer.StartYarnNode(targetEpisodeId);

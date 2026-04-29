@@ -55,6 +55,9 @@ public sealed class EpisodePlayer : MonoBehaviour, IRollbackDialogueRestarter
     {
         UIManager.Instance.SwitchRoot<PresentationUIRoot>();
         
+        PresentationUIRoot dialogueUIRoot = UIManager.Instance.GetUI<PresentationUIRoot>();
+        _dialogueUIBindings.Bind(dialogueUIRoot);
+        
         // UIManager.Instance.SwitchRoot<DialogueUIRoot>();
         // DialogueUIRoot dialogueUIRoot = UIManager.Instance.GetUI<DialogueUIRoot>();
         // _dialogueUIBindings.Bind(dialogueUIRoot);
