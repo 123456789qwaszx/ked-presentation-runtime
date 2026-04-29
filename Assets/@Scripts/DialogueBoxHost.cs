@@ -3,36 +3,33 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [Serializable]
-public struct DialogueBoxViewPrefabMapEntry
+public struct DialogueBoxHostEntry
 {
-    public string key;
+    public DialogueBoxKind kind;
+    public string dialogueKey;
     public GameObject prefab;
 }
 
 public sealed class DialogueBoxHost : MonoBehaviour, IDialogueBoxHost
 {
-    [Header("Prefab Catalog")]
-    [SerializeField] private DialogueBoxViewPrefabMapEntry[] prefabMap;
-    [SerializeField] private string defaultPrefabKey = "default";
-
-    [Header("Yarn Auto Route")]
-    [SerializeField] private DialogueBoxRouteEntry[] routes;
+    [Header("Dialogue Box Entries")]
+    [SerializeField] private DialogueBoxHostEntry[] entries;
 
     private readonly Dictionary<string, IPresentationDialogueBoxView> _views = new();
 
     public bool TryGetDialogueBoxViewPrefab(string key, out GameObject prefab)
     {
-        string resolvedKey = Normalize(string.IsNullOrWhiteSpace(key) ? defaultPrefabKey : key);
+        EnsureDialogueKey(key);
 
-        for (int i = 0; i < prefabMap.Length; i++)
+        for (int i = 0; i < entries.Length; i++)
         {
-            DialogueBoxViewPrefabMapEntry entry = prefabMap[i];
+            DialogueBoxHostEntry entry = entries[i];
 
-            if (Normalize(entry.key) != resolvedKey)
+            if (entry.dialogueKey != key)
                 continue;
 
             prefab = entry.prefab;
-            return true;
+            return prefab != null;
         }
 
         prefab = null;
@@ -41,65 +38,77 @@ public sealed class DialogueBoxHost : MonoBehaviour, IDialogueBoxHost
 
     public void Register(string dialogueKey, IPresentationDialogueBoxView view)
     {
-        _views[Normalize(dialogueKey)] = view;
+        EnsureDialogueKey(dialogueKey);
+        _views[dialogueKey] = view;
     }
 
     public void Unregister(string dialogueKey, IPresentationDialogueBoxView expected = null)
     {
-        string key = Normalize(dialogueKey);
+        EnsureDialogueKey(dialogueKey);
 
         if (expected != null &&
-            _views.TryGetValue(key, out IPresentationDialogueBoxView current) &&
+            _views.TryGetValue(dialogueKey, out IPresentationDialogueBoxView current) &&
             !ReferenceEquals(current, expected))
         {
             return;
         }
 
-        _views.Remove(key);
+        _views.Remove(dialogueKey);
     }
 
     public bool TryGetView(string dialogueKey, out IPresentationDialogueBoxView view)
     {
-        return _views.TryGetValue(Normalize(dialogueKey), out view) && view != null;
+        EnsureDialogueKey(dialogueKey);
+        return _views.TryGetValue(dialogueKey, out view) && view != null;
     }
 
     public IDialogueTextTarget Activate(DialogueBoxKind kind)
     {
         HideAll();
 
-        string dialogueKey = ResolveDialogueKey(kind);
+        DialogueBoxHostEntry entry = FindEntry(kind);
 
-        if (!TryGetView(dialogueKey, out IPresentationDialogueBoxView view))
+        if (!TryGetView(entry.dialogueKey, out IPresentationDialogueBoxView view))
         {
             throw new InvalidOperationException(
-                $"[DialogueBoxHost] DialogueBox view is not registered. kind={kind}, dialogueKey={dialogueKey}");
+                $"[DialogueBoxHost] DialogueBox view is not registered. kind={kind}, dialogueKey={entry.dialogueKey}");
         }
 
         view.Validate();
         view.SetVisible(true);
-
         return view;
     }
 
     public void HideAll()
     {
         foreach (IPresentationDialogueBoxView view in _views.Values)
+        {
+            if (view == null)
+                continue;
+
             view.SetVisible(false);
+        }
     }
 
-    private string ResolveDialogueKey(DialogueBoxKind kind)
+    private DialogueBoxHostEntry FindEntry(DialogueBoxKind kind)
     {
-        for (int i = 0; i < routes.Length; i++)
+        for (int i = 0; i < entries.Length; i++)
         {
-            if (routes[i].kind == kind)
-                return routes[i].dialogueKey;
+            DialogueBoxHostEntry entry = entries[i];
+
+            if (entry.kind != kind)
+                continue;
+
+            EnsureDialogueKey(entry.dialogueKey);
+            return entry;
         }
 
-        throw new InvalidOperationException($"[DialogueBoxHost] Route not found. kind={kind}");
+        throw new InvalidOperationException($"[DialogueBoxHost] Entry not found. kind={kind}");
     }
 
-    private static string Normalize(string key)
+    private static void EnsureDialogueKey(string dialogueKey)
     {
-        return string.IsNullOrWhiteSpace(key) ? "main" : key.Trim();
+        if (string.IsNullOrEmpty(dialogueKey))
+            throw new InvalidOperationException("[DialogueBoxHost] dialogueKey is required.");
     }
 }

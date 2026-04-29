@@ -6328,25 +6328,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 83e3b3b115ec4d54eb767a35d1336a3a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DialogueBoxHost
-  prefabMap:
-  - key: b1
-    prefab: {fileID: 8862235612914676223}
-  - key: b2
-    prefab: {fileID: 1305942889043659331}
-  - key: b3
-    prefab: {fileID: 8106412232144883456}
-  - key: b4
-    prefab: {fileID: 1646684806}
-  defaultPrefabKey: default
-  routes:
+  entries:
   - kind: 0
     dialogueKey: b1
-  - kind: 3
-    dialogueKey: b1
-  - kind: 2
-    dialogueKey: b1
+    prefab: {fileID: 8862235612914676223}
   - kind: 1
-    dialogueKey: b1
+    dialogueKey: b2
+    prefab: {fileID: 1305942889043659331}
+  - kind: 2
+    dialogueKey: b3
+    prefab: {fileID: 8106412232144883456}
+  - kind: 3
+    dialogueKey: b4
+    prefab: {fileID: 1646684806}
 --- !u!4 &1332040256
 Transform:
   m_ObjectHideFlags: 0
@@ -11809,7 +11803,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 458.38, y: -24}
-  m_SizeDelta: {x: 916.76, y: 0}
+  m_SizeDelta: {x: 916.76, y: 24}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!1 &666632935594092605
 GameObject:
@@ -14283,7 +14277,7 @@ GameObject:
   - component: {fileID: 399760633224701930}
   - component: {fileID: 1305942889043659332}
   m_Layer: 0
-  m_Name: DialogueBox01(NoPortrait)
+  m_Name: DialogueBox01(Speaker)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -39538,7 +39532,7 @@ GameObject:
   - component: {fileID: 5059308950005494211}
   - component: {fileID: 8862235612914676224}
   m_Layer: 0
-  m_Name: DialogueBox00(WithPortrait)
+  m_Name: DialogueBox00(Portrait)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
