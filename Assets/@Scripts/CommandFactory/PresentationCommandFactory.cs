@@ -12,7 +12,8 @@ public interface IDialogueBoxViewPrefabProvider
 
 public interface IDialogueBoxViewResolver
 {
-    IDialogueTextTarget Activate(DialogueBoxKind kind);
+    IDialogueTextTarget ResolveTarget(DialogueBoxKind kind);
+    void ShowOnly(IDialogueTextTarget target);
     void HideAll();
 }
 

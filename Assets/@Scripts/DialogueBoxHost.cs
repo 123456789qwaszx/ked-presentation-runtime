@@ -77,20 +77,26 @@ public sealed class DialogueBoxHost : MonoBehaviour, IDialogueBoxHost
         return _views.TryGetValue(dialogueKey, out view) && view != null;
     }
 
-    public IDialogueTextTarget Activate(DialogueBoxKind kind)
+    public IDialogueTextTarget ResolveTarget(DialogueBoxKind kind)
     {
         DialogueBoxHostEntry entry = FindEntry(kind);
         IPresentationDialogueBoxView view = GetOrCreateView(entry);
 
         view.Validate();
-
-        if (ShouldSuppressActivation())
-            return view;
-
-        HideAll();
-        view.SetVisible(true);
+        view.SetVisible(false);
 
         return view;
+    }
+
+    public void ShowOnly(IDialogueTextTarget target)
+    {
+        HideAll();
+
+        IPresentationDialogueBoxView view = target as IPresentationDialogueBoxView;
+        if (view == null)
+            return;
+
+        view.SetVisible(true);
     }
 
     private bool ShouldSuppressActivation()

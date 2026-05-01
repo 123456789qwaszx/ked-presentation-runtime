@@ -2641,7 +2641,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &587880120
 Transform:
   m_ObjectHideFlags: 0
@@ -2669,6 +2669,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e3a70de40ff181e48b3ccec112ed9340, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::YarnDialogueBoxAutoRouterPresenter
+  _yarnUIBridge: {fileID: 0}
+  _lineRoutingPolicy:
+    _protagonistLineBoxKind: 0
+    _namedLineBoxKind: 1
+  _yarnBridgePlaybackDriver: {fileID: 0}
+  _audioSystem: {fileID: 0}
+  _inlineEmojiHost: {fileID: 0}
 --- !u!1 &596868908
 GameObject:
   m_ObjectHideFlags: 0
@@ -2725,7 +2732,6 @@ MonoBehaviour:
   presentationSessionEntry: {fileID: 1433866633}
   yarnBridgePlaybackDriver: {fileID: 720935691}
   yarnCommandBridge: {fileID: 1829026824}
-  yarnLineRuntimePresenter: {fileID: 587880121}
   dialogueRunner: {fileID: 8309902628538800288}
   linePresenter: {fileID: 2958262985601084670}
   dialogueTextRouter: {fileID: 728559835}

@@ -6,7 +6,7 @@ public sealed class YarnUIBridge : MonoBehaviour
     private LinePresenter _linePresenter;
     private EllipsisBreathTypewriter _ellipsisBreathTypewriter;
     private DialogueTextRouter _dialogueTextRouter;
-    private IDialogueBoxViewResolver _dialogueBoxResolver;
+    private DialogueBoxHost _dialogueBoxResolver;
     
     public bool IsDialogueBoxReady => _dialogueTextRouter.LineText != null;
 
@@ -14,7 +14,7 @@ public sealed class YarnUIBridge : MonoBehaviour
         LinePresenter linePresenter,
         EllipsisBreathTypewriter ellipsisBreathTypewriter,
         DialogueTextRouter dialogueTextRouter,
-        IDialogueBoxViewResolver dialogueBoxResolver)
+        DialogueBoxHost dialogueBoxResolver)
     {
         _linePresenter = linePresenter;
         _ellipsisBreathTypewriter = ellipsisBreathTypewriter;
@@ -22,14 +22,14 @@ public sealed class YarnUIBridge : MonoBehaviour
         _dialogueBoxResolver = dialogueBoxResolver;
     }
     
-    public void BindAuto(DialogueBoxKind kind, bool hasCharacterName)
-    {
-        IDialogueTextTarget box = _dialogueBoxResolver.Activate(kind);
-
-        _dialogueTextRouter.Bind(box);
-
-        ApplyRouterTarget(hasCharacterName);
-    }
+    // public void BindAuto(DialogueBoxKind kind, bool hasCharacterName)
+    // {
+    //     IDialogueTextTarget box = _dialogueBoxResolver.ResolveTarget(kind);
+    //
+    //     _dialogueTextRouter.Bind(box);
+    //
+    //     ApplyRouterTarget(hasCharacterName);
+    // }
     
     public void CloseAllDialogue()
     {
@@ -45,23 +45,23 @@ public sealed class YarnUIBridge : MonoBehaviour
         _ellipsisBreathTypewriter.SetTextView(null);
     }
 
-    private void ApplyRouterTarget(bool hasCharacterName)
-    {
-        _linePresenter.lineText = _dialogueTextRouter.LineText;
-
-        if (hasCharacterName && _dialogueTextRouter.HasName)
-        {
-            _linePresenter.showCharacterNameInLine = false;
-            _linePresenter.characterNameText = _dialogueTextRouter.NameText;
-            _linePresenter.characterNameContainer = _dialogueTextRouter.NameText.gameObject;
-        }
-        else
-        {
-            _linePresenter.showCharacterNameInLine = false;
-            _linePresenter.characterNameText = null;
-            _linePresenter.characterNameContainer = null;
-        }
-
-        _ellipsisBreathTypewriter.SetTextView(_dialogueTextRouter.LineText);
-    }
+    // private void ApplyRouterTarget(bool hasCharacterName)
+    // {
+    //     _linePresenter.lineText = _dialogueTextRouter.LineText;
+    //
+    //     if (hasCharacterName && _dialogueTextRouter.HasName)
+    //     {
+    //         _linePresenter.showCharacterNameInLine = false;
+    //         _linePresenter.characterNameText = _dialogueTextRouter.NameText;
+    //         _linePresenter.characterNameContainer = _dialogueTextRouter.NameText.gameObject;
+    //     }
+    //     else
+    //     {
+    //         _linePresenter.showCharacterNameInLine = false;
+    //         _linePresenter.characterNameText = null;
+    //         _linePresenter.characterNameContainer = null;
+    //     }
+    //
+    //     _ellipsisBreathTypewriter.SetTextView(_dialogueTextRouter.LineText);
+    // }
 }
