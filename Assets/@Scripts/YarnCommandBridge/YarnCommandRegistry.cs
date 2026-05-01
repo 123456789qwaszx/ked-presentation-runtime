@@ -7,19 +7,16 @@ public sealed class YarnCommandRegistry
     private const string BeatKey = "beat";
     
     private readonly DialogueRunner _dialogueRunner;
-    private readonly YarnUIBridge _yarnUIBridge;
     private readonly VnRuntimeBridge _vnRuntimeBridge;
     private readonly DialogueBoxLineRoutingPolicy _routeState;
     
 
     public YarnCommandRegistry(
         DialogueRunner dialogueRunner,
-        YarnUIBridge yarnUIBridge,
         VnRuntimeBridge vnRuntimeBridge,
         DialogueBoxLineRoutingPolicy routeState)
     {
         _dialogueRunner = dialogueRunner;
-        _yarnUIBridge = yarnUIBridge;
         _vnRuntimeBridge = vnRuntimeBridge;
         _routeState = routeState;
     }
@@ -42,7 +39,7 @@ public sealed class YarnCommandRegistry
         
         _dialogueRunner.AddCommandHandler<string>("set_named_box", SetNamedBox);
         _dialogueRunner.AddCommandHandler<string>("set_narration_box", SetProtagonistBox);
-        _dialogueRunner.AddCommandHandler("closebox", _yarnUIBridge.CloseAllDialogue);
+        //_dialogueRunner.AddCommandHandler("closebox", _yarnUIBridge.CloseAllDialogue);
     }
     
     private void SetNamedBox(string key)

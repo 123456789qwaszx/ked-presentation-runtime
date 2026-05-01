@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Serialization;
 using Yarn.Unity;
 
 public interface IRollbackDialogueRestarter
@@ -14,7 +15,7 @@ public sealed class EpisodePlayer : MonoBehaviour, IRollbackDialogueRestarter
     private NodeRollbackHistory  _nodeRollbackHistory;
     
     public DialogueRunner dialogueRunner;
-    [SerializeField] private YarnUIBridge yarnUIBridge;
+    [SerializeField] private DialogueTextRouter dialogueTextRouter;
     [SerializeField] private PresentationSessionEntry presentationRouteEntry;
     
     [SerializeField] public string yarnEntryKey;
@@ -119,7 +120,7 @@ public sealed class EpisodePlayer : MonoBehaviour, IRollbackDialogueRestarter
 
     private bool IsBoundReady()
     {
-        if (!yarnUIBridge.IsDialogueBoxReady)
+        if (dialogueTextRouter.LineText != null)
             return false;
 
         return true;

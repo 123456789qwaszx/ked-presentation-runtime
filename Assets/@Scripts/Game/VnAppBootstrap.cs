@@ -40,7 +40,6 @@ public class VnAppBootstrap : MonoBehaviour
     [SerializeField] private LinePresenter linePresenter;
     [SerializeField] private DialogueTextRouter dialogueTextRouter;
     [SerializeField] private VnRuntimeBridge vnRuntimeBridge;
-    [SerializeField] private YarnUIBridge yarnUIBridge;
     [SerializeField] private InlineEmojiHost inlineEmojiHost;
     [SerializeField] private InlineEventMarkupHandler inlineEventMarkupHandler;
     [SerializeField] private CustomLinePresenter customLinePresenter;
@@ -164,15 +163,8 @@ public class VnAppBootstrap : MonoBehaviour
             presentationSessionEntry,
             _presentationSessionBridge);
 
-        yarnUIBridge.Initialize(
-            linePresenter,
-            ellipsisBreathTypewriter,
-            dialogueTextRouter,
-            dialogueBoxHost);
-
         YarnCommandRegistry yarnCommandRegistry = new YarnCommandRegistry(
             dialogueRunner,
-            yarnUIBridge,
             vnRuntimeBridge,
             dialogueBoxRoutePolicy);
 

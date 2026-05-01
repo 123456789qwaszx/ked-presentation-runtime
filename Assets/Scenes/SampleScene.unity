@@ -2625,57 +2625,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 586471517}
   m_CullTransparentMesh: 1
---- !u!1 &587880118
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 587880120}
-  - component: {fileID: 587880121}
-  m_Layer: 0
-  m_Name: YarnLineSetupPresenter
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!4 &587880120
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 587880118}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 817.828, y: -97.45085, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &587880121
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 587880118}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e3a70de40ff181e48b3ccec112ed9340, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::YarnDialogueBoxAutoRouterPresenter
-  _yarnUIBridge: {fileID: 0}
-  _lineRoutingPolicy:
-    _protagonistLineBoxKind: 0
-    _namedLineBoxKind: 1
-  _yarnBridgePlaybackDriver: {fileID: 0}
-  _audioSystem: {fileID: 0}
-  _inlineEmojiHost: {fileID: 0}
 --- !u!1 &596868908
 GameObject:
   m_ObjectHideFlags: 0
@@ -2736,7 +2685,6 @@ MonoBehaviour:
   linePresenter: {fileID: 2958262985601084670}
   dialogueTextRouter: {fileID: 728559835}
   vnRuntimeBridge: {fileID: 2005113226}
-  yarnUIBridge: {fileID: 1874881010}
   inlineEmojiHost: {fileID: 1353881878}
   inlineEventMarkupHandler: {fileID: 946268260}
   customLinePresenter: {fileID: 2009713540}
@@ -8948,50 +8896,6 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
---- !u!1 &1874881009
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1874881011}
-  - component: {fileID: 1874881010}
-  m_Layer: 0
-  m_Name: YarnUIBridge
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1874881010
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1874881009}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8defeede9d90141468f8163ca7d6361e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::YarnUIBridge
---- !u!4 &1874881011
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1874881009}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 960, y: 540, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1879016050
 GameObject:
   m_ObjectHideFlags: 0
@@ -9231,7 +9135,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EpisodePlayer
   dialogueRunner: {fileID: 8309902628538800288}
-  yarnUIBridge: {fileID: 1874881010}
+  dialogueTextRouter: {fileID: 728559835}
   presentationRouteEntry: {fileID: 1433866633}
   yarnEntryKey: stella01
   presentationEntryKey: emo
@@ -11857,7 +11761,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 458.38, y: -24}
-  m_SizeDelta: {x: 916.76, y: 0}
+  m_SizeDelta: {x: 916.76, y: 24}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!1 &666632935594092605
 GameObject:
@@ -41051,10 +40955,8 @@ SceneRoots:
   - {fileID: 1257280953}
   - {fileID: 2009713541}
   - {fileID: 720935692}
-  - {fileID: 587880120}
   - {fileID: 728559836}
   - {fileID: 2005113227}
-  - {fileID: 1874881011}
   - {fileID: 1353881879}
   - {fileID: 946268261}
   - {fileID: 1315566988}
