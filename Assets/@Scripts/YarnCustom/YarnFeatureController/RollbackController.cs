@@ -49,15 +49,12 @@ public sealed class RollbackController : IDisposable
         );
 
 
-        // if (!jumped)
-        //     return false;
-
         // target 자신은 남기지 않고 잘라야
         // rollback 후 target line이 다시 완료될 때 1번만 정상 기록된다.
         _history.TrimAfterVisitedIndex(target.visitedIndex - 1);
-
         _state.BeginRollback(target);
         _presentationSessionContext.EnterRollbackSeek();
+
         _restarter.RestartNode(target.nodeName);
 
         return true;

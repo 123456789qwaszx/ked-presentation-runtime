@@ -176,22 +176,17 @@ public sealed class SpawnBackgroundCommand : CommandBase
 
         scope.Refs[refKey] = view;
 
-        if (_spec.trackRunLifetime)
-        {
-            scope.TrackRun(
-                cancel: () =>
-                {
-                    if (view == null)
-                        return;
-
-#if UNITY_EDITOR
-                    if (!Application.isPlaying)
-                        Object.DestroyImmediate(view.gameObject);
-                    else
-#endif
-                        Object.Destroy(view.gameObject);
-                });
-        }
+        // if (_spec.trackRunLifetime)
+        // {
+        //     scope.TrackRun(
+        //         cancel: () =>
+        //         {
+        //             if (view == null)
+        //                 return;
+        //             Object.Destroy(view.gameObject);
+        //             Debug.Log("Destroying view");
+        //         });
+        // }
     }
 
     private void DestroyExisting(PresentationBackgroundView existing)
