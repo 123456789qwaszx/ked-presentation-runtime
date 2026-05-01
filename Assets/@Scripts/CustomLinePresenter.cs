@@ -164,7 +164,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase
         if (_canvasGroup == null)
             return;
 
-        if (!useFadeEffect || ShouldSuppressLineVisualEffects())
+        if (!useFadeEffect || ShouldConsumeLineSilently())
         {
             _canvasGroup.alpha = 1f;
             return;
@@ -178,12 +178,6 @@ public sealed class CustomLinePresenter : DialoguePresenterBase
     }
 
     private bool ShouldConsumeLineSilently()
-    {
-        return _context != null &&
-               _context.IsRollbackSeeking;
-    }
-
-    private bool ShouldSuppressLineVisualEffects()
     {
         if (_context == null)
             return false;

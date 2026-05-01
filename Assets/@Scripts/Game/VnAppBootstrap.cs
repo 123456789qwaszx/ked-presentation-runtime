@@ -19,7 +19,7 @@ public class VnAppBootstrap : MonoBehaviour
     
     [Header("PresentationView")]
     [SerializeField] private BGHost bgHost;
-    [SerializeField] private DialogueBoxHost  dialogueBoxHost;
+    [SerializeField] private DialogueBoxHost dialogueBoxHost;
     
     [Header("Presentation")]
     [SerializeField] private PortraitGeneratedDbSo portraitGeneratedDbSo;
@@ -137,7 +137,6 @@ public class VnAppBootstrap : MonoBehaviour
         
         //PresentationViewCommandFactory
         PresentationViewAccess presentationViewAccess = new ();
-        dialogueBoxHost.Initialize(_presentationSessionContext);
         PresentationViewCommandFactory presentationViewCommandFactory = new(presentationViewAccess, bgHost, bgHost);
         
         CompositeCommandFactory factory = new (signalFactory, charRigFactory, transitionCommandFactory, soundCommandFactory, presentationViewCommandFactory);

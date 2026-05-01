@@ -1,13 +1,6 @@
 using System;
 using Yarn.Unity;
 
-public enum DialogueBoxKind
-{
-    Portrait = 0,
-    Speaker = 1,
-    LetterBox = 2,
-    OnlyText = 3
-}
 
 [Serializable]
 public sealed class DialogueBoxLineRoutingPolicy

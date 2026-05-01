@@ -1,186 +1,175 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine;
-using Object = UnityEngine.Object;
+
+public enum DialogueBoxKind
+{
+    Portrait = 0,
+    Speaker = 1,
+    LetterBox = 2,
+    OnlyText = 3
+}
 
 [Serializable]
 public struct DialogueBoxHostEntry
 {
     public DialogueBoxKind kind;
-    public string dialogueKey;
-    public GameObject prefab;
+
+    [Tooltip("IPresentationDialogueBoxView 구현체")]
+    public MonoBehaviour view;
 }
 
 public sealed class DialogueBoxHost : MonoBehaviour, IDialogueBoxViewResolver
 {
-    private PresentationSessionContext _context;
-
-    public void Initialize(PresentationSessionContext context)
-    {
-        _context = context;
-    }
-    
-    [Header("Root")]
-    [SerializeField] private RectTransform dialogueBoxRoot;
-
     [Header("Dialogue Box Entries")]
     [SerializeField] private DialogueBoxHostEntry[] entries;
-
-    private readonly Dictionary<string, IPresentationDialogueBoxView> _views = new();
-
-    public bool TryGetDialogueBoxViewPrefab(string key, out GameObject prefab)
+    
+    public IDialogueTextTarget ResolveTarget(DialogueBoxKind kind)
     {
-        EnsureDialogueKey(key);
+        if (entries == null || entries.Length == 0)
+        {
+            Debug.LogWarning($"[DialogueBoxHost] No dialogue box entries are assigned. kind={kind}", this);
+            return null;
+        }
 
         for (int i = 0; i < entries.Length; i++)
         {
-            DialogueBoxHostEntry entry = entries[i];
-
-            if (entry.dialogueKey != key)
+            if (entries[i].kind != kind)
                 continue;
 
-            prefab = entry.prefab;
-            return prefab != null;
+            if (entries[i].view == null)
+            {
+                Debug.LogWarning($"[DialogueBoxHost] View is null. kind={entries[i].kind}", this);
+
+                return null;
+            }
+
+            IPresentationDialogueBoxView view = entries[i].view as IPresentationDialogueBoxView;
+            if (view == null)
+            {
+                Debug.LogWarning($"[DialogueBoxHost] View must implement IPresentationDialogueBoxView. kind={entries[i].kind}, go={entries[i].view.name}", entries[i].view);
+
+                return null;
+            }
+
+            view.Validate();
+            return view;
         }
 
-        prefab = null;
-        return false;
-    }
-
-    public void Register(string dialogueKey, IPresentationDialogueBoxView view)
-    {
-        EnsureDialogueKey(dialogueKey);
-
-        if (view == null)
-            throw new InvalidOperationException("[DialogueBoxHost] Cannot register null view.");
-
-        _views[dialogueKey] = view;
-    }
-
-    public void Unregister(string dialogueKey, IPresentationDialogueBoxView expected = null)
-    {
-        EnsureDialogueKey(dialogueKey);
-
-        if (expected != null &&
-            _views.TryGetValue(dialogueKey, out IPresentationDialogueBoxView current) &&
-            !ReferenceEquals(current, expected))
-        {
-            return;
-        }
-
-        _views.Remove(dialogueKey);
-    }
-
-    public bool TryGetView(string dialogueKey, out IPresentationDialogueBoxView view)
-    {
-        EnsureDialogueKey(dialogueKey);
-        return _views.TryGetValue(dialogueKey, out view) && view != null;
-    }
-
-    public IDialogueTextTarget ResolveTarget(DialogueBoxKind kind)
-    {
-        DialogueBoxHostEntry entry = FindEntry(kind);
-        IPresentationDialogueBoxView view = GetOrCreateView(entry);
-
-        view.Validate();
-        view.SetVisible(false);
-
-        return view;
+        Debug.LogWarning($"[DialogueBoxHost] Entry not found. kind={kind}", this);
+        return null;
     }
 
     public void ShowOnly(IDialogueTextTarget target)
     {
-        HideAll();
+        //HideAll();
 
         IPresentationDialogueBoxView view = target as IPresentationDialogueBoxView;
-        if (view == null)
-            return;
-
-        view.SetVisible(true);
-    }
-
-    private bool ShouldSuppressActivation()
-    {
-        return _context != null &&
-               _context.IsRollbackSeeking || _context.IsSkipping;
+        view?.SetVisible(true);
     }
 
     public void HideAll()
     {
-        foreach (IPresentationDialogueBoxView view in _views.Values)
+        for (int i = 0; i < entries.Length; i++)
         {
-            if (view == null)
-                continue;
-
-            view.SetVisible(false);
+            IPresentationDialogueBoxView view = entries[i].view as IPresentationDialogueBoxView;
+            view?.SetVisible(false);
         }
     }
-
-    private IPresentationDialogueBoxView GetOrCreateView(DialogueBoxHostEntry entry)
+    
+    #region Validate
+    
+    private void OnValidate()
     {
-        EnsureDialogueKey(entry.dialogueKey);
-
-        if (TryGetView(entry.dialogueKey, out IPresentationDialogueBoxView view))
-            return view;
-
-        return CreateAndRegisterView(entry);
-    }
-
-    private IPresentationDialogueBoxView CreateAndRegisterView(DialogueBoxHostEntry entry)
-    {
-        if (dialogueBoxRoot == null)
-            throw new InvalidOperationException("[DialogueBoxHost] dialogueBoxRoot is required.");
-
-        if (entry.prefab == null)
+        if (entries == null)
         {
-            throw new InvalidOperationException(
-                $"[DialogueBoxHost] DialogueBox prefab is missing. kind={entry.kind}, dialogueKey={entry.dialogueKey}");
+            Debug.LogWarning(
+                "[DialogueBoxHost] entries is null.",
+                this);
+
+            return;
         }
 
-        GameObject go = Object.Instantiate(entry.prefab, dialogueBoxRoot, false);
-        go.name = $"DialogueBox_{entry.dialogueKey}";
-
-        IPresentationDialogueBoxView view = FindView(go);
-        view.Validate();
-        view.SetVisible(false);
-
-        Register(entry.dialogueKey, view);
-        return view;
-    }
-
-    private static IPresentationDialogueBoxView FindView(GameObject go)
-    {
-        MonoBehaviour[] behaviours = go.GetComponentsInChildren<MonoBehaviour>(true);
-
-        for (int i = 0; i < behaviours.Length; i++)
+        if (entries.Length == 0)
         {
-            if (behaviours[i] is IPresentationDialogueBoxView view)
-                return view;
+            Debug.LogWarning(
+                "[DialogueBoxHost] entries is empty. At least one dialogue box view should be assigned.",
+                this);
+
+            return;
         }
 
-        throw new InvalidOperationException(
-            $"[DialogueBoxHost] Prefab must have IPresentationDialogueBoxView. prefab={go.name}");
+        ValidateAllKindsAssigned();
+        ValidateDuplicateKinds();
+        ValidateEntryViews();
     }
 
-    private DialogueBoxHostEntry FindEntry(DialogueBoxKind kind)
+    private void ValidateAllKindsAssigned()
+    {
+        Array values = Enum.GetValues(typeof(DialogueBoxKind));
+
+        for (int i = 0; i < values.Length; i++)
+        {
+            DialogueBoxKind kind = (DialogueBoxKind)values.GetValue(i);
+
+            bool found = false;
+
+            for (int j = 0; j < entries.Length; j++)
+            {
+                if (entries[j].kind == kind)
+                {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found)
+            {
+                Debug.LogWarning(
+                    $"[DialogueBoxHost] Missing entry for DialogueBoxKind.{kind}.",
+                    this);
+            }
+        }
+    }
+    
+    private void ValidateDuplicateKinds()
     {
         for (int i = 0; i < entries.Length; i++)
         {
-            DialogueBoxHostEntry entry = entries[i];
+            for (int j = i + 1; j < entries.Length; j++)
+            {
+                if (entries[i].kind != entries[j].kind)
+                    continue;
 
-            if (entry.kind != kind)
+                Debug.LogWarning(
+                    $"[DialogueBoxHost] Duplicate entry for DialogueBoxKind.{entries[i].kind}. indices={i}, {j}",
+                    this);
+            }
+        }
+    }
+    
+    private void ValidateEntryViews()
+    {
+        for (int i = 0; i < entries.Length; i++)
+        {
+            MonoBehaviour behaviour = entries[i].view;
+
+            if (behaviour == null)
+            {
+                Debug.LogWarning(
+                    $"[DialogueBoxHost] Entry view is null. index={i}, kind={entries[i].kind}",
+                    this);
+
+                continue;
+            }
+
+            if (behaviour is IPresentationDialogueBoxView)
                 continue;
 
-            EnsureDialogueKey(entry.dialogueKey);
-            return entry;
+            Debug.LogWarning(
+                $"[DialogueBoxHost] Entry view must implement IPresentationDialogueBoxView. index={i}, kind={entries[i].kind}, go={behaviour.name}",
+                behaviour);
         }
-
-        throw new InvalidOperationException($"[DialogueBoxHost] Entry not found. kind={kind}");
     }
-
-    private static void EnsureDialogueKey(string dialogueKey)
-    {
-        if (string.IsNullOrEmpty(dialogueKey))
-            throw new InvalidOperationException("[DialogueBoxHost] dialogueKey is required.");
-    }
+    
+    #endregion
 }
