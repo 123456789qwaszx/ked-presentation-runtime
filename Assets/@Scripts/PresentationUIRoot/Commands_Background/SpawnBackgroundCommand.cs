@@ -94,16 +94,20 @@ public sealed class SpawnBackgroundCommandSpec : CommandSpecBase
 public sealed class SpawnBackgroundCommand : CommandBase
 {
     private readonly IBGViewPrefabProvider _prefabProvider;
+    private readonly IBGRuntimeRegistry _runtimeRegistry;
+    
     private readonly SpawnBackgroundCommandSpec _spec;
 
     public override bool WaitForCompletion => true;
 
     public SpawnBackgroundCommand(
         IBGViewPrefabProvider prefabProvider,
-        SpawnBackgroundCommandSpec spec)
+        SpawnBackgroundCommandSpec spec,
+        IBGRuntimeRegistry runtimeRegistry = null)
     {
         _prefabProvider = prefabProvider;
         _spec = spec;
+        _runtimeRegistry = runtimeRegistry;
     }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
@@ -150,8 +154,13 @@ public sealed class SpawnBackgroundCommand : CommandBase
 
         string refKey = PresentationBackgroundRegistryExt.MakeBackgroundRefKey(_spec.bgKey);
 
-        if (_spec.destroyExistingWithSameKey && scope.Refs.TryGetBackgroundView(_spec.bgKey, out PresentationBackgroundView existing))
-            DestroyExisting(existing);
+        if (_spec.destroyExistingWithSameKey)
+        {
+            _runtimeRegistry?.DestroyRuntimeBackground(_spec.bgKey);
+
+            if (scope.Refs.TryGetBackgroundView(_spec.bgKey, out PresentationBackgroundView existing))
+                DestroyExisting(existing);
+        }
 
         GameObject go = Object.Instantiate(prefab, parent, false);
         go.name = string.IsNullOrWhiteSpace(_spec.bgKey) ? prefab.name : $"BG_{_spec.bgKey}";
@@ -175,7 +184,8 @@ public sealed class SpawnBackgroundCommand : CommandBase
         }
 
         scope.Refs[refKey] = view;
-
+        _runtimeRegistry?.RegisterRuntimeBackground(_spec.bgKey, view);
+        
         // if (_spec.trackRunLifetime)
         // {
         //     scope.TrackRun(

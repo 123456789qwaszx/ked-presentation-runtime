@@ -17,6 +17,7 @@ public sealed class EpisodePlayer : MonoBehaviour, IRollbackDialogueRestarter
     public DialogueRunner dialogueRunner;
     [SerializeField] private DialogueTextRouter dialogueTextRouter;
     [SerializeField] private PresentationSessionEntry presentationRouteEntry;
+    [SerializeField] private BGHost bgHost;
     
     [SerializeField] public string yarnEntryKey;
     [SerializeField] public string presentationEntryKey;
@@ -80,6 +81,7 @@ public sealed class EpisodePlayer : MonoBehaviour, IRollbackDialogueRestarter
     {
         //OpenDialogueUI();
         //StopDialogue();
+        bgHost.ClearRuntimeBackgrounds();
         StartYarnNode(nodeName);
         //StartPresentationRoute(presentationEntryKey);
         
@@ -129,6 +131,8 @@ public sealed class EpisodePlayer : MonoBehaviour, IRollbackDialogueRestarter
     
     public void StopDialogue()
     {
+        bgHost.ClearRuntimeBackgrounds();
+        
         if (dialogueRunner == null) return;
 
         if (dialogueRunner.IsDialogueRunning)

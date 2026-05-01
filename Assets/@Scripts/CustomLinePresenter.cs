@@ -99,6 +99,8 @@ public sealed class CustomLinePresenter : DialoguePresenterBase
             return;
         }
 
+        ResetDialogueBoxTransform(box);
+        
         _dialogueTextRouter.Bind(box);
 
         _lineText = _dialogueTextRouter.LineText;
@@ -227,5 +229,24 @@ public sealed class CustomLinePresenter : DialoguePresenterBase
         _characterNameText = null;
         _characterNameContainer = null;
         _canvasGroup = null;
+    }
+    private static void ResetDialogueBoxTransform(IDialogueTextTarget box)
+    {
+        if (box == null)
+            return;
+
+        MonoBehaviour behaviour = box as MonoBehaviour;
+        if (behaviour == null)
+            return;
+
+        RectTransform rect = behaviour.transform as RectTransform;
+        if (rect != null)
+        {
+            rect.localPosition = Vector3.zero;
+            rect.anchoredPosition = Vector2.zero;
+            return;
+        }
+
+        behaviour.transform.localPosition = Vector3.zero;
     }
 }

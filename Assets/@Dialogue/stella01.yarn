@@ -3,7 +3,6 @@
 <<begin_hold>>
 <<presentation_setup>>
 
-<<dlg_spawn b1 b1>>
 <<bg_spawn test1 bg1>>
 <<end_hold>>
 
@@ -12,7 +11,6 @@
 <<bg_sprite test1 ui/theme1/Background00_Image>>
 <<bg_fade test1 1>>
 <<begin_hold>>
-<<dlg_spawn b1 b1>>
 <<end_hold>>
 주변을 살피는 그림자의 움직임에는 극도의 경계심이 서려 있었다.
 
@@ -22,7 +20,7 @@
 <<bg_sprite test2 ui/theme1/DialogueBox03BG_Image2>>
 <<bg_fade test2 1>>
 
-<<dlg_spawn b1 b2>>
+//<<dlg_spawn b1 b2>>
 <<end_hold>>
 "물건은 가져왔어?"
 
@@ -32,17 +30,14 @@
 <<bg_sprite test3 ui/default/LobbyCharacter_Image>>
 <<bg_fade test3 1>>
 
-<<dlg_spawn b1 b3>>
 <<end_hold>>
 
 어둠 속에서 누군가가 나직한 목소리로 물었다.
 
-<<dlg_spawn b1 b4>>
 상대방인 의심스러운 사람이 품 안에서 소중한 듯 무언가를 꺼내 보이며 대꾸했다.
 
 "물론이지. 제대로 가져왔는지 확인해 볼 거야?"
 
-<<dlg_spawn b1 b3>>
 물건을 건네받은 수상한 사람은 그것을 입으로 가져가 조심스럽게 베어 물었다. 고요한 골목 안에 기괴한 저작음이 울려 퍼졌다.
 
 "쩝쩝쩝 ..... 맞아, 바로 이 맛이야."

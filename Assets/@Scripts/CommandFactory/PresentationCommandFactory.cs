@@ -26,17 +26,20 @@ public interface IDialogueBoxHost : IDialogueBoxViewPrefabProvider, IDialogueBox
 
 public sealed class PresentationViewCommandFactory : INodeCommandFactory
 {
-    PresentationViewAccess _presentationViewAccess = new ();
+    private readonly PresentationViewAccess _presentationViewAccess;
     
     private readonly IBGViewPrefabProvider _bgViewPrefabProvider;
+    private readonly IBGRuntimeRegistry _bgRuntimeRegistry;
     private readonly IDialogueBoxHost _dialogueBoxViewPrefabProvider;
 
     public PresentationViewCommandFactory(
+        PresentationViewAccess presentationViewAccess,
         IBGViewPrefabProvider bgViewPrefabProvider,
-        IDialogueBoxHost dialogueBoxViewPrefabProvider)
+        IBGRuntimeRegistry bgRuntimeRegistry)
     {
+        _presentationViewAccess = presentationViewAccess;
         _bgViewPrefabProvider = bgViewPrefabProvider;
-        _dialogueBoxViewPrefabProvider = dialogueBoxViewPrefabProvider;
+        _bgRuntimeRegistry = bgRuntimeRegistry;
     }
 
     public bool TryCreate(CommandSpecBase spec, out ISequenceCommand command)
@@ -51,15 +54,15 @@ public sealed class PresentationViewCommandFactory : INodeCommandFactory
             MoveByPresentationCommandSpec s => new MoveByPresentationCommand(s),
             ScaleToPresentationCommandSpec s => new ScaleToPresentationCommand(s),
 
-            SpawnBackgroundCommandSpec s => new SpawnBackgroundCommand(_bgViewPrefabProvider, s),
+            SpawnBackgroundCommandSpec s => new SpawnBackgroundCommand(_bgViewPrefabProvider, s, _bgRuntimeRegistry),
             SetBackgroundSpriteCommandSpec s => new SetBackgroundSpriteCommand(s),
             FadeBackgroundCommandSpec s => new FadeBackgroundCommand(s),
             DestroyBackgroundCommandSpec s => new DestroyBackgroundCommand(s),
 
-            SpawnDialogueBoxCommandSpec s => new SpawnDialogueBoxCommand(_dialogueBoxViewPrefabProvider, s),
-            FadeDialogueBoxCommandSpec s => new FadeDialogueBoxCommand(s),
-            SetDialogueBoxTextCommandSpec s => new SetDialogueBoxTextCommand(s),
-            DestroyDialogueBoxCommandSpec s => new DestroyDialogueBoxCommand(s),
+            // SpawnDialogueBoxCommandSpec s => new SpawnDialogueBoxCommand(_dialogueBoxViewPrefabProvider, s),
+            // FadeDialogueBoxCommandSpec s => new FadeDialogueBoxCommand(s),
+            // SetDialogueBoxTextCommandSpec s => new SetDialogueBoxTextCommand(s),
+            // DestroyDialogueBoxCommandSpec s => new DestroyDialogueBoxCommand(s),
 
             _ => null
         };

@@ -9137,6 +9137,7 @@ MonoBehaviour:
   dialogueRunner: {fileID: 8309902628538800288}
   dialogueTextRouter: {fileID: 728559835}
   presentationRouteEntry: {fileID: 1433866633}
+  bgHost: {fileID: 1967129519}
   yarnEntryKey: stella01
   presentationEntryKey: emo
   runYarnKey: 50
@@ -11761,7 +11762,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 458.38, y: -24}
-  m_SizeDelta: {x: 916.76, y: 24}
+  m_SizeDelta: {x: 916.76, y: 0}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!1 &666632935594092605
 GameObject:

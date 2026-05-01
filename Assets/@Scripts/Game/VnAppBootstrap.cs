@@ -136,8 +136,9 @@ public class VnAppBootstrap : MonoBehaviour
         SoundCommandFactory soundCommandFactory = new SoundCommandFactory(audioSystem, audioClipResolver);
         
         //PresentationViewCommandFactory
+        PresentationViewAccess presentationViewAccess = new ();
         dialogueBoxHost.Initialize(_presentationSessionContext);
-        PresentationViewCommandFactory presentationViewCommandFactory = new(bgHost, dialogueBoxHost);
+        PresentationViewCommandFactory presentationViewCommandFactory = new(presentationViewAccess, bgHost, bgHost);
         
         CompositeCommandFactory factory = new (signalFactory, charRigFactory, transitionCommandFactory, soundCommandFactory, presentationViewCommandFactory);
         commandExecutor.Initialize(factory);
