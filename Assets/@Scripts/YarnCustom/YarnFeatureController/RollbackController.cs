@@ -31,11 +31,11 @@ public sealed class RollbackController : IDisposable
         _presentationSessionBridge = presentationSessionBridge;
         _presentationSessionContext = presentationSessionContext;
 
-        _bridge.LineStart -= EndSeekBeforeTargetLineDisplays;
-        _bridge.LineStart += EndSeekBeforeTargetLineDisplays;
+        _bridge.LinePrepared -= EndSeekBeforeTargetLineDisplays;
+        _bridge.LinePrepared += EndSeekBeforeTargetLineDisplays;
 
-        _bridge.LineStart -= AddRollbackPoint;
-        _bridge.LineStart += AddRollbackPoint;
+        _bridge.LinePrepared -= AddRollbackPoint;
+        _bridge.LinePrepared += AddRollbackPoint;
     }
 
     public bool RequestRollbackOneStep()
