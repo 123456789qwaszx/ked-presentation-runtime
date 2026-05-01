@@ -13,6 +13,13 @@ public struct DialogueBoxHostEntry
 
 public sealed class DialogueBoxHost : MonoBehaviour, IDialogueBoxHost
 {
+    private PresentationSessionContext _context;
+
+    public void Initialize(PresentationSessionContext context)
+    {
+        _context = context;
+    }
+    
     [Header("Root")]
     [SerializeField] private RectTransform dialogueBoxRoot;
 
@@ -72,15 +79,24 @@ public sealed class DialogueBoxHost : MonoBehaviour, IDialogueBoxHost
 
     public IDialogueTextTarget Activate(DialogueBoxKind kind)
     {
-        HideAll();
-
         DialogueBoxHostEntry entry = FindEntry(kind);
         IPresentationDialogueBoxView view = GetOrCreateView(entry);
 
         view.Validate();
+
+        if (ShouldSuppressActivation())
+            return view;
+
+        HideAll();
         view.SetVisible(true);
 
         return view;
+    }
+
+    private bool ShouldSuppressActivation()
+    {
+        return _context != null &&
+               _context.IsRollbackSeeking || _context.IsSkipping;
     }
 
     public void HideAll()

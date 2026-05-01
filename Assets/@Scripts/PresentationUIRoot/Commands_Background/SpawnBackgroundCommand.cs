@@ -159,6 +159,8 @@ public sealed class SpawnBackgroundCommand : CommandBase
         if (_spec.setAsLastSibling)
             go.transform.SetAsLastSibling();
 
+        ResetSpawnedRectTransform(go);
+        
         PresentationBackgroundView view = go.GetComponent<PresentationBackgroundView>();
         if (view == null)
             view = go.AddComponent<PresentationBackgroundView>();
@@ -210,5 +212,30 @@ public sealed class SpawnBackgroundCommand : CommandBase
         else
 #endif
             Object.Destroy(existing.gameObject);
+    }
+    
+    private static void ResetSpawnedRectTransform(GameObject go)
+    {
+        if (go == null)
+            return;
+
+        RectTransform rect = go.transform as RectTransform;
+        if (rect == null)
+        {
+            go.transform.localPosition = Vector3.zero;
+            go.transform.localRotation = Quaternion.identity;
+            go.transform.localScale = Vector3.one;
+            return;
+        }
+
+        rect.localPosition = Vector3.zero;
+        rect.localRotation = Quaternion.identity;
+        rect.localScale = Vector3.one;
+
+        rect.anchorMin = Vector2.zero;
+        rect.anchorMax = Vector2.one;
+        rect.pivot = new Vector2(0.5f, 0.5f);
+        rect.anchoredPosition = Vector2.zero;
+        rect.sizeDelta = Vector2.zero;
     }
 }

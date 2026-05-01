@@ -6,7 +6,6 @@ using UnityEngine;
 public interface IPresentationDialogueBoxView : IDialogueTextTarget
 {
     RectTransform Root { get; }
-    CanvasGroup CanvasGroup { get; }
 
     void Validate();
     void SetVisible(bool visible);

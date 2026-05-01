@@ -36,6 +36,7 @@ public sealed class SpawnDialogueBoxCommand : CommandBase
     private readonly SpawnDialogueBoxCommandSpec _spec;
 
     public override bool WaitForCompletion => true;
+    protected override SkipPolicy SkipPolicy => SkipPolicy.Ignore;
 
     public SpawnDialogueBoxCommand(
         IDialogueBoxHost host,
@@ -58,6 +59,9 @@ public sealed class SpawnDialogueBoxCommand : CommandBase
 
     protected override void OnRollbackSeek(CommandRunScope scope)
     {
+        if (scope.IsRollbackSeeking)
+            return;
+        
         Spawn(scope);
     }
 

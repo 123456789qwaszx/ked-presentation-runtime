@@ -2836,7 +2836,7 @@ MonoBehaviour:
     m_values:
     - {fileID: -3644337112613003847, guid: fb8aed24bef8b284fb1d8948c1d3e574, type: 3}
   _defaultBubblePrefab: {fileID: -3644337112613003847, guid: fb8aed24bef8b284fb1d8948c1d3e574, type: 3}
-  _optionsButtonPrefab: {fileID: -6249684825750748157, guid: 38988041f78009844b1e782db6c15c5a, type: 3}
+  _optionsButtonPrefab: {fileID: -6249684825750748157, guid: 163d2d8eae20e3741a1fa9b044988903, type: 3}
   _delayAfterLine: 1
   _minimumTypingDelay: 0.5
   _maximumTypingDelay: 3
@@ -6213,6 +6213,7 @@ RectTransform:
   - {fileID: 399760633224701930}
   - {fileID: 4658844446952062293}
   - {fileID: 1646684807}
+  - {fileID: 2944209281403988745}
   m_Father: {fileID: 8103127889455306347}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -8565,7 +8566,6 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 2944209281403988745}
   - {fileID: 1239989732}
   - {fileID: 144827249}
   - {fileID: 1681412452}
@@ -11851,7 +11851,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 458.38, y: -24}
-  m_SizeDelta: {x: 916.76, y: 24}
+  m_SizeDelta: {x: 916.76, y: 0}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!1 &666632935594092605
 GameObject:
@@ -19643,12 +19643,12 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1739354824}
+  m_Father: {fileID: 1303967609}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 2141, y: -373}
+  m_SizeDelta: {x: 1920, y: 1080}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &2952063287061052029
 GameObject:
