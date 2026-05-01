@@ -120,7 +120,7 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
 
         _typewriterText.maxVisibleCharacters = 0;
         _typewriterText.SetText(line.Text);
-        _typewriterText.ForceMeshUpdate();
+        _typewriterText.ForceMeshUpdate(true, true);
 
         _totalCharacterCount = _typewriterText.textInfo.characterCount;
         
