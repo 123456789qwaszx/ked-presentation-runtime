@@ -120,9 +120,6 @@ public class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
 
     public bool IsExpanded => _isExpanded;
 
-    public IDialogueBoxViewPrefabProvider DialogueBoxPrefabs => dialogueBoxHost;
-    public IDialogueBoxHost DialogueBoxHost => dialogueBoxHost;
-
     protected override void Initialize()
     {
         BindHandlers();

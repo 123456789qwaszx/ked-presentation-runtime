@@ -5,23 +5,11 @@ public interface IBGViewPrefabProvider
     bool TryGetBackgroundViewPrefab(string key, out GameObject prefab);
 }
 
-public interface IDialogueBoxViewPrefabProvider
-{
-    bool TryGetDialogueBoxViewPrefab(string key, out GameObject prefab);
-}
-
 public interface IDialogueBoxViewResolver
 {
     IDialogueTextTarget ResolveTarget(DialogueBoxKind kind);
     void ShowOnly(IDialogueTextTarget target);
     void HideAll();
-}
-
-public interface IDialogueBoxHost : IDialogueBoxViewPrefabProvider, IDialogueBoxViewResolver
-{
-    void Register(string dialogueKey, IPresentationDialogueBoxView view);
-    void Unregister(string dialogueKey, IPresentationDialogueBoxView expected = null);
-    bool TryGetView(string dialogueKey, out IPresentationDialogueBoxView view);
 }
 
 public sealed class PresentationViewCommandFactory : INodeCommandFactory
@@ -30,7 +18,6 @@ public sealed class PresentationViewCommandFactory : INodeCommandFactory
     
     private readonly IBGViewPrefabProvider _bgViewPrefabProvider;
     private readonly IBGRuntimeRegistry _bgRuntimeRegistry;
-    private readonly IDialogueBoxHost _dialogueBoxViewPrefabProvider;
 
     public PresentationViewCommandFactory(
         PresentationViewAccess presentationViewAccess,
@@ -58,11 +45,6 @@ public sealed class PresentationViewCommandFactory : INodeCommandFactory
             SetBackgroundSpriteCommandSpec s => new SetBackgroundSpriteCommand(s),
             FadeBackgroundCommandSpec s => new FadeBackgroundCommand(s),
             DestroyBackgroundCommandSpec s => new DestroyBackgroundCommand(s),
-
-            // SpawnDialogueBoxCommandSpec s => new SpawnDialogueBoxCommand(_dialogueBoxViewPrefabProvider, s),
-            // FadeDialogueBoxCommandSpec s => new FadeDialogueBoxCommand(s),
-            // SetDialogueBoxTextCommandSpec s => new SetDialogueBoxTextCommand(s),
-            // DestroyDialogueBoxCommandSpec s => new DestroyDialogueBoxCommand(s),
 
             _ => null
         };

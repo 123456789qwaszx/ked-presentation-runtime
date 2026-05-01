@@ -11,7 +11,7 @@ public struct DialogueBoxHostEntry
     public GameObject prefab;
 }
 
-public sealed class DialogueBoxHost : MonoBehaviour, IDialogueBoxHost
+public sealed class DialogueBoxHost : MonoBehaviour, IDialogueBoxViewResolver
 {
     private PresentationSessionContext _context;
 
