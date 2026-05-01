@@ -33,7 +33,7 @@ public class VnAppBootstrap : MonoBehaviour
     [Header("ImmediateCommandRunner")]
     [SerializeField] private YarnBridgePlaybackDriver yarnBridgePlaybackDriver;
     [SerializeField] private YarnCommandBridge yarnCommandBridge;
-    [SerializeField] private YarnLineSetupPresenter yarnLineRuntimePresenter;
+    //[SerializeField] private YarnLineSetupPresenter yarnLineRuntimePresenter;
     
     [Header("Yarn")]
     [SerializeField] private DialogueRunner dialogueRunner;
@@ -192,6 +192,7 @@ public class VnAppBootstrap : MonoBehaviour
             dialogueBoxHost,
             dialogueTextRouter,
             ellipsisBreathTypewriter,
+            _presentationSessionContext,
             yarnBridgePlaybackDriver,
             audioSystem);
 

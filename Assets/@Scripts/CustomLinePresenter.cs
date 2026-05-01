@@ -5,16 +5,15 @@ using Yarn.Unity;
 
 public sealed class CustomLinePresenter : DialoguePresenterBase
 {
-    [Header("Fade")]
-    public bool useFadeEffect = true;
+    [Header("Fade")] public bool useFadeEffect = true;
     public float fadeUpDuration = 0.25f;
     public float fadeDownDuration = 0.1f;
-
 
     private DialogueBoxLineRoutingPolicy _lineRoutingPolicy;
     private IDialogueBoxViewResolver _dialogueBoxResolver;
     private DialogueTextRouter _dialogueTextRouter;
     private EllipsisBreathTypewriter _typewriter;
+    private PresentationSessionContext _context;
     private AudioSystem _audioSystem;
     private YarnBridgePlaybackDriver _yarnBridgePlaybackDriver;
 
@@ -29,6 +28,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase
         IDialogueBoxViewResolver dialogueBoxResolver,
         DialogueTextRouter dialogueTextRouter,
         EllipsisBreathTypewriter typewriter,
+        PresentationSessionContext context,
         YarnBridgePlaybackDriver yarnBridgePlaybackDriver = null,
         AudioSystem audioSystem = null)
     {
@@ -36,6 +36,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase
         _dialogueBoxResolver = dialogueBoxResolver;
         _dialogueTextRouter = dialogueTextRouter;
         _typewriter = typewriter;
+        _context = context;
         _yarnBridgePlaybackDriver = yarnBridgePlaybackDriver;
         _audioSystem = audioSystem;
 
@@ -74,23 +75,27 @@ public sealed class CustomLinePresenter : DialoguePresenterBase
             return;
 
         // ── 1. 오디오 ────────────────────────────────────────────────────
-        _audioSystem?.Voice.Stop();
+        if (!ShouldConsumeLineSilently())
+        {
+            _audioSystem?.Voice.Stop();
 
-        if (line.Asset is AudioClip clip)
-            _audioSystem?.Voice.Play(clip);
+            if (line.Asset is AudioClip clip)
+                _audioSystem?.Voice.Play(clip);
+        }
 
         // ── 2. 재생 드라이버 ─────────────────────────────────────────────
         _yarnBridgePlaybackDriver?.ResetImmediateWaitForNewLine();
         _yarnBridgePlaybackDriver?.PlayCollected();
 
-        // ── 3. 박스 바인딩 ───────────────────────────────────────────────
+        // ── 3. 박스 타겟 Resolve / Bind ─────────────────────────────────
         bool hasCharacterName = string.IsNullOrWhiteSpace(line.CharacterName) == false;
         DialogueBoxKind boxKind = _lineRoutingPolicy.Resolve(hasCharacterName);
 
-        IDialogueTextTarget box = _dialogueBoxResolver.Activate(boxKind);
+        IDialogueTextTarget box = _dialogueBoxResolver.ResolveTarget(boxKind);
         if (box == null)
         {
-            Debug.LogError($"{nameof(CustomLinePresenter)}: failed to activate dialogue box {boxKind} for line {line.TextID}.");
+            Debug.LogError(
+                $"{nameof(CustomLinePresenter)}: failed to resolve dialogue box {boxKind} for line {line.TextID}.");
             return;
         }
 
@@ -114,41 +119,27 @@ public sealed class CustomLinePresenter : DialoguePresenterBase
 
         ApplyCharacterName(line);
 
-        // ── 5. 타입라이터 바인딩 ─────────────────────────────────────────
+        // ── 5. 타입라이터 준비 ───────────────────────────────────────────
         _typewriter.SetTextView(_lineText);
         _typewriter.PrepareForContent(text);
 
-        // ── 6. 페이드 인 ─────────────────────────────────────────────────
-        // if (_canvasGroup != null)
-        // {
-        //     if (useFadeEffect)
-        //         await Effects.FadeAlphaAsync(_canvasGroup, 0, 1, fadeUpDuration, token.HurryUpToken).SuppressCancellationThrow();
-        //     else
-        //         _canvasGroup.alpha = 1;
-        // }
+        // ── 6. Rollback 복원 중이면 여기서 종료 ──────────────────────────
+        if (!ShouldConsumeLineSilently())
+        {
+            // ── 7. 이제 실제로 박스를 보여준다 ───────────────────────────────
+            _dialogueBoxResolver.ShowOnly(box);
+            await FadeInAsync(token);
+        }
 
-        // ── 7. 타입라이터 실행 ───────────────────────────────────────────
+        // ── 8. 타입라이터 실행 ───────────────────────────────────────────
         await _typewriter
             .RunTypewriter(text, token.HurryUpToken)
             .SuppressCancellationThrow();
 
-        // ── 8. 자동 진행 or 입력 대기 ────────────────────────────────────
-        // if (autoAdvance)
-        //     await YarnTask.Delay((int)(autoAdvanceDelay * 1000), token.NextContentToken).SuppressCancellationThrow();
-        // else
-            await YarnTask.WaitUntilCanceled(token.NextContentToken).SuppressCancellationThrow();
+        // ── 9. 입력 대기 ─────────────────────────────────────────────────
+        await YarnTask.WaitUntilCanceled(token.NextContentToken).SuppressCancellationThrow();
 
-        // Yarn IAsyncTypewriter 계약상, 실제로 숨기기 직전에 호출한다.
         _typewriter.ContentWillDismiss();
-
-        // ── 9. 페이드 아웃 ───────────────────────────────────────────────
-        // if (_canvasGroup != null)
-        // {
-        //     if (useFadeEffect)
-        //         await Effects.FadeAlphaAsync(_canvasGroup, 1, 0, fadeDownDuration, token.HurryUpToken).SuppressCancellationThrow();
-        //     else
-        //         _canvasGroup.alpha = 0;
-        // }
     }
 
     private bool IsReadyForLine(LocalizedLine line)
@@ -164,6 +155,39 @@ public sealed class CustomLinePresenter : DialoguePresenterBase
         }
 
         return true;
+    }
+
+    private async YarnTask FadeInAsync(LineCancellationToken token)
+    {
+        if (_canvasGroup == null)
+            return;
+
+        if (!useFadeEffect || ShouldSuppressLineVisualEffects())
+        {
+            _canvasGroup.alpha = 1f;
+            return;
+        }
+
+        _canvasGroup.alpha = 0f;
+
+        await Effects
+            .FadeAlphaAsync(_canvasGroup, 0f, 1f, fadeUpDuration, token.HurryUpToken)
+            .SuppressCancellationThrow();
+    }
+
+    private bool ShouldConsumeLineSilently()
+    {
+        return _context != null &&
+               _context.IsRollbackSeeking;
+    }
+
+    private bool ShouldSuppressLineVisualEffects()
+    {
+        if (_context == null)
+            return false;
+
+        return _context.IsRollbackSeeking ||
+               _context.IsSkipping;
     }
 
     private void BindCharacterNameTarget(bool hasCharacterName)
