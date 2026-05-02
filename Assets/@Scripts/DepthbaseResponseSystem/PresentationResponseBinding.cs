@@ -1,9 +1,13 @@
 using System;
 using UnityEngine;
 
-/// <summary>
-/// Response target 하나와 profile을 묶는 단위.
-/// </summary>
+// Solver 결과를 실제 구현체에 적용하는 대상 계약.
+public interface IPresentationResponseTarget
+{
+    void ApplyResponse(in PresentationResponse response);
+}
+
+// Response target 하나와 profile을 묶는 단위.
 [Serializable]
 public sealed class PresentationResponseBinding
 {
@@ -24,10 +28,15 @@ public sealed class PresentationResponseBinding
         }
     }
 
-    public void SetTarget(MonoBehaviour behaviour)
+    public PresentationResponseBinding(
+        string key,
+        PresentationResponseProfile profile,
+        MonoBehaviour targetBehaviour)
     {
-        _targetBehaviour = behaviour;
-        _cachedTarget = behaviour as IPresentationResponseTarget;
+        this.key = key;
+        this.profile = profile ?? new PresentationResponseProfile();
+        _targetBehaviour = targetBehaviour;
+        _cachedTarget = targetBehaviour as IPresentationResponseTarget;
     }
 
     public void Apply(in PresentationIntentState state)
