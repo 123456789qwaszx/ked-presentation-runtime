@@ -2960,6 +2960,7 @@ MonoBehaviour:
   inlineSfxHost: {fileID: 1571925710}
   bgHost: {fileID: 1967129519}
   dialogueBoxHost: {fileID: 1332040255}
+  presentationResponseRig: {fileID: 529556882}
   portraitGeneratedDbSo: {fileID: 11400000, guid: 9a31d992344284d4f8ff35f5e9be5ae9, type: 2}
   unitySignalBus: {fileID: 552181530}
   commandExecutor: {fileID: 1257280952}
@@ -9457,6 +9458,7 @@ GameObject:
   - component: {fileID: 1847590522}
   - component: {fileID: 1847590524}
   - component: {fileID: 1847590523}
+  - component: {fileID: 1847590525}
   m_Layer: 5
   m_Name: Background00_Image
   m_TagString: Untagged
@@ -9521,6 +9523,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1847590521}
   m_CullTransparentMesh: 1
+--- !u!114 &1847590525
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1847590521}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 81ece531ef1bf9448ac31ac7fe1971d9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RectTransformResponseTarget
+  _rect: {fileID: 1847590522}
+  _canvasGroup: {fileID: 1246457709}
 --- !u!1 &1879016050
 GameObject:
   m_ObjectHideFlags: 0
@@ -12435,7 +12451,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 458.38, y: -24}
-  m_SizeDelta: {x: 916.76, y: 0}
+  m_SizeDelta: {x: 916.76, y: 24}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!1 &666632935594092605
 GameObject:

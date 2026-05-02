@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public sealed class PresentationResponseRig
+public sealed class PresentationResponseRig : MonoBehaviour
 {
     [Header("Shot Settings")]
     [SerializeField] private Vector2 _defaultFramingPoint = Vector2.zero;
@@ -15,9 +15,16 @@ public sealed class PresentationResponseRig
 
     public PresentationIntentState CurrentState => _currentState;
 
-    public void ApplyImmediate(PresentationIntentState state, PresentationViewRefs presentation)
+    public void ApplyImmediate(
+        PresentationIntentState state,
+        PresentationViewRefs presentation)
     {
+        Debug.Log(
+            $"[PresentationResponseRig] ApplyImmediate incomingZoom={state.zoom}, " +
+            $"currentZoom={CurrentState.zoom}");
+
         _currentState = state;
+        
         ApplyToAllBindings(in state, presentation);
     }
 
@@ -33,10 +40,26 @@ public sealed class PresentationResponseRig
         PresentationViewRefs presentation)
     {
         if (string.IsNullOrWhiteSpace(key))
+        {
+            Debug.LogWarning("[PresentationResponseRig] RegisterRuntimeBinding failed. key is null or empty.");
             return false;
+        }
 
-        if (target == null || target.Rect == null)
+        if (target == null)
+        {
+            Debug.LogWarning(
+                $"[PresentationResponseRig] RegisterRuntimeBinding failed. target is null. key={key}");
+
             return false;
+        }
+
+        if (target.Rect == null)
+        {
+            Debug.LogWarning(
+                $"[PresentationResponseRig] RegisterRuntimeBinding failed. target.Rect is null. key={key}, target={target}");
+
+            return false;
+        }
 
         PresentationResponseProfile runtimeProfile =
             CreateRuntimeProfile(target, preset, presentation);
@@ -47,6 +70,10 @@ public sealed class PresentationResponseRig
             key,
             runtimeProfile,
             target));
+
+        Debug.Log(
+            $"[PresentationResponseRig] RegisterRuntimeBinding success. " +
+            $"key={key}, target={target.Rect.name}, count={_bindings.Count}");
 
         return true;
     }
@@ -63,7 +90,10 @@ public sealed class PresentationResponseRig
                 continue;
 
             if (string.Equals(binding.Key, key, StringComparison.OrdinalIgnoreCase))
+            {
+                Debug.Log($"[PresentationResponseRig] RemoveBinding key={key}");
                 _bindings.RemoveAt(i);
+            }
         }
     }
 
@@ -72,7 +102,9 @@ public sealed class PresentationResponseRig
         return ComposePanForFocus(focusPoint, _defaultFramingPoint);
     }
 
-    public Vector2 ComposePanForFocus(Vector2 focusPoint, Vector2 desiredFramingPoint)
+    public Vector2 ComposePanForFocus(
+        Vector2 focusPoint,
+        Vector2 desiredFramingPoint)
     {
         return desiredFramingPoint - focusPoint;
     }
@@ -84,10 +116,27 @@ public sealed class PresentationResponseRig
             authoringPanUnits.y * _manualPanPixelsPerUnit.y);
     }
 
-    private void ApplyToAllBindings(in PresentationIntentState state, PresentationViewRefs presentation)
+    private void ApplyToAllBindings(
+        in PresentationIntentState state,
+        PresentationViewRefs presentation)
     {
+        Debug.Log($"[PresentationResponseRig] ApplyToAllBindings count={_bindings.Count}");
+
         for (int i = 0; i < _bindings.Count; i++)
-            _bindings[i]?.Apply(in state, presentation);
+        {
+            PresentationResponseBinding binding = _bindings[i];
+
+            if (binding == null)
+            {
+                Debug.LogWarning($"[PresentationResponseRig] Binding null. index={i}");
+                continue;
+            }
+
+            Debug.Log(
+                $"[PresentationResponseRig] Apply binding index={i}, key={binding.Key}");
+
+            binding.Apply(in state, presentation);
+        }
     }
 
     private static PresentationResponseProfile CreateRuntimeProfile(
@@ -117,7 +166,9 @@ public sealed class PresentationResponseRig
         return profile;
     }
     
-    public static Vector2 WorldToSpacePoint(RectTransform stageRoot, Vector3 worldPoint)
+    public static Vector2 WorldToSpacePoint(
+        RectTransform stageRoot,
+        Vector3 worldPoint)
     {
         if (stageRoot == null)
             return new Vector2(worldPoint.x, worldPoint.y);

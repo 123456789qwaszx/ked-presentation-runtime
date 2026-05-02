@@ -73,6 +73,11 @@ public sealed class ShotZoomCommand : CommandBase
             Debug.LogError("[ShotZoomCommand] PresentationViewRefs is null.");
             yield break;
         }
+        
+        Debug.Log(
+            $"[ShotZoomCommand] Execute. currentZoom={_rig.CurrentState.zoom}, " +
+            $"targetZoom={_spec.zoom}, duration={_spec.duration}, " +
+            $"presentation={scope.Presentation}");
 
         KillTweenIfNeeded();
 
