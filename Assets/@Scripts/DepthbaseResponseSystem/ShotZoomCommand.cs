@@ -8,9 +8,19 @@ using UnityEngine;
 public sealed class ShotZoomCommandSpec : CommandSpecBase
 {
     [Header("Focus")]
-    public string focusKey = "";
-    public string[] groupFocusKeys = Array.Empty<string>();
+    [Tooltip("focus 기준으로 삼을 character roleKey. 비우면 focus 재구성 없이 zoom/pan만 적용.")]
+    public string focusRoleKey = "";
+
+    [Tooltip("roleKey로 찾은 CharacterRigRefs 내부에서 focus 기준으로 쓸 target.")]
+    public CharacterRigTarget focusTarget = CharacterRigTarget.CharacterPortrait_Root;
+
+    [Tooltip("focus target rect의 로컬 오프셋.")]
+    public Vector2 focusLocalOffset = Vector2.zero;
+
+    [Tooltip("focus가 있으면 desiredFramingPoint 쪽으로 pan을 자동 구성한다.")]
     public bool reframeToFocus = true;
+
+    [Tooltip("focus를 가져올 목표 구도점. Rig 공간 기준. (0,0)=중앙")]
     public Vector2 desiredFramingPoint = Vector2.zero;
 
     [Header("Intent")]
@@ -55,7 +65,7 @@ public sealed class ShotZoomCommand : CommandBase
         KillTweenIfNeeded();
 
         _fromState = rig.CurrentState;
-        _toState = BuildTargetState(rig, _fromState, scope.Presentation);
+        _toState = BuildTargetState(rig, _fromState, scope);
 
         if (_spec.duration <= 0f)
         {
@@ -77,7 +87,7 @@ public sealed class ShotZoomCommand : CommandBase
 
         KillTweenIfNeeded();
         _fromState = rig.CurrentState;
-        _toState = BuildTargetState(rig, _fromState, scope.Presentation);
+        _toState = BuildTargetState(rig, _fromState, scope);
         Commit(rig, _toState, scope.Presentation);
     }
 
@@ -94,47 +104,20 @@ public sealed class ShotZoomCommand : CommandBase
     private PresentationIntentState BuildTargetState(
         PresentationResponseRig rig,
         in PresentationIntentState from,
-        PresentationViewRefs presentation)
+        CommandRunScope scope)
     {
         Vector2 focusPoint = from.focusPoint;
         bool hasFocus = false;
 
-        Vector2 sum = Vector2.zero;
-        int count = 0;
-
-        if (_spec.groupFocusKeys != null)
+        if (!string.IsNullOrWhiteSpace(_spec.focusRoleKey) &&
+            TryGetRigFocusPoint(
+                scope,
+                _spec.focusRoleKey,
+                _spec.focusTarget,
+                _spec.focusLocalOffset,
+                out Vector2 rigFocusPoint))
         {
-            for (int i = 0; i < _spec.groupFocusKeys.Length; i++)
-            {
-                string key = _spec.groupFocusKeys[i];
-                if (rig.TryGetFocusPoint(key, presentation, out Vector2 point))
-                {
-                    sum += point;
-                    count++;
-                }
-                else if (!string.IsNullOrWhiteSpace(key))
-                {
-                    Debug.LogWarning($"[ShotZoomCommand] Group focus key not found: {key}");
-                }
-            }
-        }
-
-        if (!string.IsNullOrWhiteSpace(_spec.focusKey))
-        {
-            if (rig.TryGetFocusPoint(_spec.focusKey, presentation, out Vector2 point))
-            {
-                sum += point;
-                count++;
-            }
-            else
-            {
-                Debug.LogWarning($"[ShotZoomCommand] Focus key not found: {_spec.focusKey}");
-            }
-        }
-
-        if (count > 0)
-        {
-            focusPoint = sum / count;
+            focusPoint = rigFocusPoint;
             hasFocus = true;
         }
 
@@ -142,7 +125,8 @@ public sealed class ShotZoomCommand : CommandBase
             ? _spec.zoom
             : from.zoom + _spec.zoom;
 
-        Vector2 manualPanPixels = rig.GetManualPanPixels(new Vector2(_spec.panX, _spec.panY));
+        Vector2 manualPanPixels =
+            rig.GetManualPanPixels(new Vector2(_spec.panX, _spec.panY));
 
         Vector2 targetPan = _spec.absolutePan
             ? manualPanPixels
@@ -150,7 +134,8 @@ public sealed class ShotZoomCommand : CommandBase
 
         if (hasFocus && _spec.reframeToFocus)
         {
-            Vector2 framingPan = rig.ComposePanForFocus(focusPoint, _spec.desiredFramingPoint);
+            Vector2 framingPan =
+                rig.ComposePanForFocus(focusPoint, _spec.desiredFramingPoint);
             targetPan += framingPan;
         }
 
@@ -160,6 +145,37 @@ public sealed class ShotZoomCommand : CommandBase
             pan = targetPan,
             focusPoint = focusPoint,
         };
+    }
+
+    private static bool TryGetRigFocusPoint(
+        CommandRunScope scope,
+        string roleKey,
+        CharacterRigTarget target,
+        Vector2 localOffset,
+        out Vector2 focusPoint)
+    {
+        focusPoint = Vector2.zero;
+
+        if (scope == null || string.IsNullOrWhiteSpace(roleKey))
+            return false;
+
+        if (!scope.Refs.TryGetCharRigRefs(roleKey, out CharacterRigRefs rigRefs))
+            return false;
+
+        RectTransform rect = rigRefs.GetRect(target);
+        if (rect == null)
+            return false;
+
+        RectTransform stageRoot =
+            scope.Presentation != null
+                ? scope.Presentation.GetRect(PresentationTarget.Stage_Root)
+                : null;
+
+        Vector3 world =
+            rect.TransformPoint(new Vector3(localOffset.x, localOffset.y, 0f));
+
+        focusPoint = WorldToSpacePoint(stageRoot, world);
+        return true;
     }
 
     private void PlayTween(
@@ -218,5 +234,14 @@ public sealed class ShotZoomCommand : CommandBase
 
         _tween.Kill(false);
         _tween = null;
+    }
+    
+    public static Vector2 WorldToSpacePoint(RectTransform stageRoot, Vector3 worldPoint)
+    {
+        if (stageRoot == null)
+            return new Vector2(worldPoint.x, worldPoint.y);
+
+        Vector3 local = stageRoot.InverseTransformPoint(worldPoint);
+        return new Vector2(local.x, local.y);
     }
 }

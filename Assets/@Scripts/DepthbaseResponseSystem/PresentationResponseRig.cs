@@ -4,7 +4,8 @@ using UnityEngine;
 
 /// <summary>
 /// runtime binding registry + shot state apply 중심.
-/// Stage_Root는 소유하지 않고, Apply 시점에 PresentationViewRefs를 받는다.
+/// focus lookup은 더 이상 하지 않고,
+/// command가 roleKey 기반으로 직접 focus point를 계산한다.
 /// </summary>
 public sealed class PresentationResponseRig : MonoBehaviour
 {
@@ -14,9 +15,6 @@ public sealed class PresentationResponseRig : MonoBehaviour
 
     [Header("Runtime Bindings")]
     [SerializeField] private List<PresentationResponseBinding> _bindings = new();
-
-    [Header("Focus Providers")]
-    [SerializeField] private List<NamedFocusProvider> _focusProviders = new();
 
     private PresentationIntentState _currentState = PresentationIntentState.Default;
 
@@ -45,7 +43,8 @@ public sealed class PresentationResponseRig : MonoBehaviour
         if (target == null || target.Rect == null)
             return false;
 
-        PresentationResponseProfile runtimeProfile = CreateRuntimeProfile(target, preset, presentation);
+        PresentationResponseProfile runtimeProfile =
+            CreateRuntimeProfile(target, preset, presentation);
 
         RemoveBinding(key);
 
@@ -90,67 +89,6 @@ public sealed class PresentationResponseRig : MonoBehaviour
             authoringPanUnits.y * _manualPanPixelsPerUnit.y);
     }
 
-    public bool TryGetFocusPoint(string key, PresentationViewRefs presentation, out Vector2 focusPoint)
-    {
-        if (string.IsNullOrWhiteSpace(key))
-        {
-            focusPoint = Vector2.zero;
-            return false;
-        }
-
-        for (int i = 0; i < _focusProviders.Count; i++)
-        {
-            NamedFocusProvider named = _focusProviders[i];
-            if (named == null || named.provider == null)
-                continue;
-
-            if (!string.Equals(named.key, key, StringComparison.OrdinalIgnoreCase))
-                continue;
-
-            if (named.provider is not IPresentationFocusProvider provider)
-            {
-                Debug.LogWarning($"[PresentationResponseRig] Focus provider '{named.key}' does not implement IPresentationFocusProvider.");
-                focusPoint = Vector2.zero;
-                return false;
-            }
-
-            Vector3 world = provider.GetFocusWorldPoint();
-            focusPoint = WorldToSpacePoint(presentation.Stage_Root, world);
-
-            return true;
-        }
-
-        focusPoint = Vector2.zero;
-        return false;
-    }
-
-    public bool TryGetGroupFocusPoint(IReadOnlyList<string> keys, PresentationViewRefs presentation, out Vector2 focusPoint)
-    {
-        Vector2 sum = Vector2.zero;
-        int count = 0;
-
-        if (keys != null)
-        {
-            for (int i = 0; i < keys.Count; i++)
-            {
-                if (TryGetFocusPoint(keys[i], presentation, out Vector2 point))
-                {
-                    sum += point;
-                    count++;
-                }
-            }
-        }
-
-        if (count > 0)
-        {
-            focusPoint = sum / count;
-            return true;
-        }
-
-        focusPoint = Vector2.zero;
-        return false;
-    }
-
     private void ApplyToAllBindings(in PresentationIntentState state, PresentationViewRefs presentation)
     {
         for (int i = 0; i < _bindings.Count; i++)
@@ -162,7 +100,9 @@ public sealed class PresentationResponseRig : MonoBehaviour
         PresentationResponseProfile preset,
         PresentationViewRefs presentation)
     {
-        RectTransform stageRoot = presentation != null ? presentation.Stage_Root : null;
+        RectTransform stageRoot = presentation != null
+            ? presentation.GetRect(PresentationTarget.Stage_Root)
+            : null;
 
         PresentationResponseProfile profile = new PresentationResponseProfile
         {
@@ -174,19 +114,13 @@ public sealed class PresentationResponseRig : MonoBehaviour
         Vector3 worldPivot = target.Rect.TransformPoint(Vector3.zero);
 
         profile.basePositionInRigSpace = WorldToSpacePoint(stageRoot, worldPivot);
-        profile.baseScale = new Vector2(target.Rect.localScale.x, target.Rect.localScale.y);
-        profile.baseAlpha = target.CanvasGroup != null ? target.CanvasGroup.alpha : 1f;
+        profile.baseScale =
+            new Vector2(target.Rect.localScale.x, target.Rect.localScale.y);
+        profile.baseAlpha =
+            target.CanvasGroup != null ? target.CanvasGroup.alpha : 1f;
 
         return profile;
     }
-
-    [Serializable]
-    public sealed class NamedFocusProvider
-    {
-        public string key;
-        public MonoBehaviour provider;
-    }
-    
     
     public static Vector2 WorldToSpacePoint(RectTransform stageRoot, Vector3 worldPoint)
     {

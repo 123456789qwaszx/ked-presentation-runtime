@@ -20,11 +20,6 @@ public sealed class RectTransformFocusProvider : MonoBehaviour, IPresentationFoc
     [SerializeField] private RectTransform _focusRect;
     [SerializeField] private Vector2 _localOffset;
 
-    private void Reset()
-    {
-        _focusRect = GetComponent<RectTransform>();
-    }
-
     public Vector3 GetFocusWorldPoint()
     {
         if (_focusRect == null)
