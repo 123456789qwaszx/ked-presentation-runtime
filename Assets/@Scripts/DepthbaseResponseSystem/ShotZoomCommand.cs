@@ -67,15 +67,15 @@ public sealed class ShotZoomCommand : CommandBase
         KillTweenIfNeeded();
 
         _fromState = _rig.CurrentState;
-        _toState = BuildTargetState(_fromState);
+        _toState = BuildTargetState(_fromState, scope.Presentation);
 
         if (_spec.duration <= 0f)
         {
-            Commit(_toState);
+            Commit(_toState, scope.Presentation);
             yield break;
         }
 
-        PlayTween(_fromState, _toState);
+        PlayTween(_fromState, _toState, scope.Presentation);
 
         if (_spec.wait && _tween != null)
             yield return _tween.WaitForCompletion();
@@ -89,8 +89,8 @@ public sealed class ShotZoomCommand : CommandBase
 
         KillTweenIfNeeded();
         _fromState = _rig.CurrentState;
-        _toState = BuildTargetState(_fromState);
-        Commit(_toState);
+        _toState = BuildTargetState(_fromState, scope.Presentation);
+        Commit(_toState, scope.Presentation);
     }
 
     protected override void OnRollbackSeek(CommandRunScope scope)
@@ -112,7 +112,9 @@ public sealed class ShotZoomCommand : CommandBase
         _rig = PresentationResponseRigResolver.Resolve(scope.Presentation);
     }
 
-    private PresentationIntentState BuildTargetState(in PresentationIntentState from)
+    private PresentationIntentState BuildTargetState(
+        in PresentationIntentState from,
+        PresentationViewRefs presentation)
     {
         Vector2 focusPoint = from.focusPoint;
         bool hasFocus = false;
@@ -125,7 +127,7 @@ public sealed class ShotZoomCommand : CommandBase
             for (int i = 0; i < _spec.groupFocusKeys.Length; i++)
             {
                 string key = _spec.groupFocusKeys[i];
-                if (_rig.TryGetFocusPoint(key, out Vector2 point))
+                if (_rig.TryGetFocusPoint(key, presentation, out Vector2 point))
                 {
                     sum += point;
                     count++;
@@ -139,7 +141,7 @@ public sealed class ShotZoomCommand : CommandBase
 
         if (!string.IsNullOrWhiteSpace(_spec.focusKey))
         {
-            if (_rig.TryGetFocusPoint(_spec.focusKey, out Vector2 point))
+            if (_rig.TryGetFocusPoint(_spec.focusKey, presentation, out Vector2 point))
             {
                 sum += point;
                 count++;
@@ -180,7 +182,10 @@ public sealed class ShotZoomCommand : CommandBase
         };
     }
 
-    private void PlayTween(PresentationIntentState from, PresentationIntentState to)
+    private void PlayTween(
+        PresentationIntentState from,
+        PresentationIntentState to,
+        PresentationViewRefs presentation)
     {
         float progress = 0f;
 
@@ -189,23 +194,25 @@ public sealed class ShotZoomCommand : CommandBase
                 value =>
                 {
                     progress = value;
-                    PresentationIntentState state = PresentationResponseSolver.Lerp(from, to, value);
-                    _rig.ApplyImmediate(state);
+                    PresentationIntentState state =
+                        PresentationResponseSolver.Lerp(from, to, value);
+
+                    _rig.ApplyImmediate(state, presentation);
                 },
                 1f,
                 _spec.duration)
             .SetEase(_spec.ease)
             .SetUpdate(true)
             .SetTarget(_rig)
-            .OnComplete(() => Commit(to));
+            .OnComplete(() => Commit(to, presentation));
     }
 
-    private void Commit(in PresentationIntentState state)
+    private void Commit(in PresentationIntentState state, PresentationViewRefs presentation)
     {
         if (_rig == null)
             return;
 
-        _rig.ApplyImmediate(state);
+        _rig.ApplyImmediate(state, presentation);
         _tween = null;
     }
 

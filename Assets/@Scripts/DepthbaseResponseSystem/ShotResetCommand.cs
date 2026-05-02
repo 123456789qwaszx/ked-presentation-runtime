@@ -42,25 +42,29 @@ public sealed class ShotResetCommand : CommandBase
 
         if (_spec.duration <= 0f)
         {
-            Commit(toState);
+            Commit(toState, scope.Presentation);
             yield break;
         }
 
         float progress = 0f;
+        PresentationViewRefs presentation = scope.Presentation;
+
         _tween = DOTween.To(
                 () => progress,
                 value =>
                 {
                     progress = value;
-                    PresentationIntentState state = PresentationResponseSolver.Lerp(_fromState, toState, value);
-                    _rig.ApplyImmediate(state);
+                    PresentationIntentState state =
+                        PresentationResponseSolver.Lerp(_fromState, toState, value);
+
+                    _rig.ApplyImmediate(state, presentation);
                 },
                 1f,
                 _spec.duration)
             .SetEase(_spec.ease)
             .SetUpdate(true)
             .SetTarget(_rig)
-            .OnComplete(() => Commit(toState));
+            .OnComplete(() => Commit(toState, presentation));
 
         if (_spec.wait && _tween != null)
             yield return _tween.WaitForCompletion();
@@ -73,7 +77,7 @@ public sealed class ShotResetCommand : CommandBase
             return;
 
         KillTweenIfNeeded();
-        Commit(PresentationIntentState.Default);
+        Commit(PresentationIntentState.Default, scope.Presentation);
     }
 
     protected override void OnRollbackSeek(CommandRunScope scope)
@@ -95,12 +99,12 @@ public sealed class ShotResetCommand : CommandBase
         _rig = PresentationResponseRigResolver.Resolve(scope.Presentation);
     }
 
-    private void Commit(in PresentationIntentState state)
+    private void Commit(in PresentationIntentState state, PresentationViewRefs presentation)
     {
         if (_rig == null)
             return;
 
-        _rig.ApplyImmediate(state);
+        _rig.ApplyImmediate(state, presentation);
         _tween = null;
     }
 

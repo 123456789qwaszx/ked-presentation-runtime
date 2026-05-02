@@ -12,7 +12,7 @@ public struct PresentationResponse
 {
     // positionInRigSpace는 Rig 공간 기준 좌표,
     // 각 target의 parent 기준 좌표로 다시 바꿔야 함.
-    public Vector2 positionInRigSpace;
+    public Vector2 anchoredPosition;
     public Vector2 scale;
     public float alpha;
 }

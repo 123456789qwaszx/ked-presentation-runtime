@@ -117,7 +117,7 @@ public sealed class SpawnBackgroundCommand : CommandBase
 
     private void Spawn(CommandRunScope scope)
     {
-        RectTransform parent = scope.Presentation.GetRect(PresentationTarget.BGContent_Root);
+        RectTransform parent = scope.Presentation.BGContent_Root;
 
         if (parent == null)
         {
@@ -183,7 +183,8 @@ public sealed class SpawnBackgroundCommand : CommandBase
         rig?.RegisterRuntimeBinding(
             refKey,
             responseTarget,
-            PresentationResponseProfile.Background);
+            PresentationResponseProfile.Background,
+            scope.Presentation);
 
         scope.Refs[refKey] = view;
         _runtimeRegistry?.RegisterRuntimeBackground(_spec.bgKey, view);
@@ -191,8 +192,7 @@ public sealed class SpawnBackgroundCommand : CommandBase
 
     private static PresentationResponseRig ResolveRig(CommandRunScope scope)
     {
-        // TODO: 프로젝트의 실제 Presentation access 경로로 교체
-        return Object.FindAnyObjectByType<PresentationResponseRig>();
+        return PresentationResponseRigResolver.Resolve(scope.Presentation);
     }
 
     private void DestroyExisting(PresentationBackgroundView existing)

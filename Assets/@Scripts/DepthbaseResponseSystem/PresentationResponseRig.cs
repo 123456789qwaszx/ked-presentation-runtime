@@ -2,12 +2,12 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-// 런타임에 spawn된 대상들을 binding으로 등록/제거/적용만 담당한다.
+/// <summary>
+/// runtime binding registry + shot state apply 중심.
+/// Stage_Root는 소유하지 않고, Apply 시점에 PresentationViewRefs를 받는다.
+/// </summary>
 public sealed class PresentationResponseRig : MonoBehaviour
 {
-    [Header("Rig Space")]
-    [SerializeField] private RectTransform _spaceRoot;
-
     [Header("Shot Settings")]
     [SerializeField] private Vector2 _defaultFramingPoint = Vector2.zero;
     [SerializeField] private Vector2 _manualPanPixelsPerUnit = new Vector2(64f, 36f);
@@ -20,19 +20,12 @@ public sealed class PresentationResponseRig : MonoBehaviour
 
     private PresentationIntentState _currentState = PresentationIntentState.Default;
 
-    public RectTransform SpaceRoot => _spaceRoot;
     public PresentationIntentState CurrentState => _currentState;
 
-    private void Reset()
-    {
-        if (_spaceRoot == null)
-            _spaceRoot = transform as RectTransform;
-    }
-
-    public void ApplyImmediate(PresentationIntentState state)
+    public void ApplyImmediate(PresentationIntentState state, PresentationViewRefs presentation)
     {
         _currentState = state;
-        ApplyToAllBindings(in state);
+        ApplyToAllBindings(in state, presentation);
     }
 
     public void SetCurrentStateOnly(PresentationIntentState state)
@@ -42,8 +35,9 @@ public sealed class PresentationResponseRig : MonoBehaviour
 
     public bool RegisterRuntimeBinding(
         string key,
-        RectTransformResponseTarget target,
-        PresentationResponseProfile preset)
+        IRectTransformPresentationResponseTarget target,
+        PresentationResponseProfile preset,
+        PresentationViewRefs presentation)
     {
         if (string.IsNullOrWhiteSpace(key))
             return false;
@@ -51,7 +45,7 @@ public sealed class PresentationResponseRig : MonoBehaviour
         if (target == null || target.Rect == null)
             return false;
 
-        PresentationResponseProfile runtimeProfile = CreateRuntimeProfile(target, preset);
+        PresentationResponseProfile runtimeProfile = CreateRuntimeProfile(target, preset, presentation);
 
         RemoveBinding(key);
 
@@ -96,24 +90,7 @@ public sealed class PresentationResponseRig : MonoBehaviour
             authoringPanUnits.y * _manualPanPixelsPerUnit.y);
     }
 
-    public Vector3 SpaceToWorldPoint(Vector2 pointInRigSpace)
-    {
-        if (_spaceRoot == null)
-            return new Vector3(pointInRigSpace.x, pointInRigSpace.y, 0f);
-
-        return _spaceRoot.TransformPoint(new Vector3(pointInRigSpace.x, pointInRigSpace.y, 0f));
-    }
-
-    public Vector2 WorldToSpacePoint(Vector3 worldPoint)
-    {
-        if (_spaceRoot == null)
-            return new Vector2(worldPoint.x, worldPoint.y);
-
-        Vector3 local = _spaceRoot.InverseTransformPoint(worldPoint);
-        return new Vector2(local.x, local.y);
-    }
-
-    public bool TryGetFocusPoint(string key, out Vector2 focusPoint)
+    public bool TryGetFocusPoint(string key, PresentationViewRefs presentation, out Vector2 focusPoint)
     {
         if (string.IsNullOrWhiteSpace(key))
         {
@@ -137,7 +114,11 @@ public sealed class PresentationResponseRig : MonoBehaviour
                 return false;
             }
 
-            focusPoint = provider.GetFocusPoint();
+            Vector3 world = provider.GetFocusWorldPoint();
+            focusPoint = PresentationSpaceUtil.WorldToSpacePoint(
+                presentation != null ? presentation.Stage_Root : null,
+                world);
+
             return true;
         }
 
@@ -145,7 +126,7 @@ public sealed class PresentationResponseRig : MonoBehaviour
         return false;
     }
 
-    public bool TryGetGroupFocusPoint(IReadOnlyList<string> keys, out Vector2 focusPoint)
+    public bool TryGetGroupFocusPoint(IReadOnlyList<string> keys, PresentationViewRefs presentation, out Vector2 focusPoint)
     {
         Vector2 sum = Vector2.zero;
         int count = 0;
@@ -154,7 +135,7 @@ public sealed class PresentationResponseRig : MonoBehaviour
         {
             for (int i = 0; i < keys.Count; i++)
             {
-                if (TryGetFocusPoint(keys[i], out Vector2 point))
+                if (TryGetFocusPoint(keys[i], presentation, out Vector2 point))
                 {
                     sum += point;
                     count++;
@@ -172,16 +153,19 @@ public sealed class PresentationResponseRig : MonoBehaviour
         return false;
     }
 
-    private void ApplyToAllBindings(in PresentationIntentState state)
+    private void ApplyToAllBindings(in PresentationIntentState state, PresentationViewRefs presentation)
     {
         for (int i = 0; i < _bindings.Count; i++)
-            _bindings[i]?.Apply(in state);
+            _bindings[i]?.Apply(in state, presentation);
     }
 
-    private PresentationResponseProfile CreateRuntimeProfile(
-        RectTransformResponseTarget target,
-        PresentationResponseProfile preset)
+    private static PresentationResponseProfile CreateRuntimeProfile(
+        IRectTransformPresentationResponseTarget target,
+        PresentationResponseProfile preset,
+        PresentationViewRefs presentation)
     {
+        RectTransform stageRoot = presentation != null ? presentation.Stage_Root : null;
+
         PresentationResponseProfile profile = new PresentationResponseProfile
         {
             maxZoomScaleDelta = preset.maxZoomScaleDelta,
@@ -191,7 +175,7 @@ public sealed class PresentationResponseRig : MonoBehaviour
 
         Vector3 worldPivot = target.Rect.TransformPoint(Vector3.zero);
 
-        profile.basePositionInRigSpace = WorldToSpacePoint(worldPivot);
+        profile.basePositionInRigSpace = PresentationSpaceUtil.WorldToSpacePoint(stageRoot, worldPivot);
         profile.baseScale = new Vector2(target.Rect.localScale.x, target.Rect.localScale.y);
         profile.baseAlpha = target.CanvasGroup != null ? target.CanvasGroup.alpha : 1f;
 

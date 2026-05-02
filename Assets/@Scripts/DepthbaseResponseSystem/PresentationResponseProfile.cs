@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-// 기준 상태, 반응 강도, 역할별 preset
+// Root/Slot 하나의 반응 특성.
 // base 값은 모두 Rig 공간(Stage_Root 기준)에서 캡처된다.
 [Serializable]
 public sealed class PresentationResponseProfile
