@@ -1,6 +1,17 @@
 using UnityEngine;
 
 /// <summary>
+/// Shot command가 focus point를 얻어오는 대상 계약.
+/// 반환값은 world 좌표여야 한다.
+/// Rig가 Stage_Root 기준으로 다시 변환한다.
+/// </summary>
+public interface IPresentationFocusProvider
+{
+    Vector3 GetFocusWorldPoint();
+    bool TryGetFocusWorldRect(out Bounds bounds);
+}
+
+/// <summary>
 /// RectTransform 하나를 world focus provider로 노출하는 기본 구현.
 /// CharSlotLeftFocus_Root / Center / Right 같은 노드에 붙여 사용한다.
 /// </summary>

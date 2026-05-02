@@ -117,8 +117,7 @@ public sealed class SpawnBackgroundCommand : CommandBase
 
     private void Spawn(CommandRunScope scope)
     {
-        RectTransform parent = scope.Presentation.BGContent_Root;
-
+        RectTransform parent = scope.Presentation.GetRect(PresentationTarget.BGContent_Root);
         if (parent == null)
         {
             if (_spec.strict)
@@ -142,7 +141,7 @@ public sealed class SpawnBackgroundCommand : CommandBase
         }
 
         string refKey = PresentationBackgroundRegistryExt.MakeBackgroundRefKey(_spec.bgKey);
-        PresentationResponseRig rig = ResolveRig(scope);
+        PresentationResponseRig rig = scope.ResponseRig;
 
         if (_spec.destroyExistingWithSameKey)
         {
@@ -188,11 +187,6 @@ public sealed class SpawnBackgroundCommand : CommandBase
 
         scope.Refs[refKey] = view;
         _runtimeRegistry?.RegisterRuntimeBackground(_spec.bgKey, view);
-    }
-
-    private static PresentationResponseRig ResolveRig(CommandRunScope scope)
-    {
-        return PresentationResponseRigResolver.Resolve(scope.Presentation);
     }
 
     private void DestroyExisting(PresentationBackgroundView existing)

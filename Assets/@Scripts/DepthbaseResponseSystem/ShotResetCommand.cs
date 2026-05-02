@@ -16,10 +16,8 @@ public sealed class ShotResetCommand : CommandBase
 {
     private readonly ShotResetCommandSpec _spec;
 
-    private PresentationResponseRig _rig;
     private PresentationIntentState _fromState;
     private Tween _tween;
-    private bool _resolveAttempted;
 
     public override bool WaitForCompletion => _spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
@@ -31,18 +29,18 @@ public sealed class ShotResetCommand : CommandBase
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
-        Resolve(scope);
-        if (_rig == null)
+        PresentationResponseRig rig = scope.ResponseRig;
+        if (rig == null)
             yield break;
 
         KillTweenIfNeeded();
 
-        _fromState = _rig.CurrentState;
+        _fromState = rig.CurrentState;
         PresentationIntentState toState = PresentationIntentState.Default;
 
         if (_spec.duration <= 0f)
         {
-            Commit(toState, scope.Presentation);
+            Commit(rig, toState, scope.Presentation);
             yield break;
         }
 
@@ -55,17 +53,15 @@ public sealed class ShotResetCommand : CommandBase
                 {
                     progress = value;
 
-                    PresentationIntentState state =
-                        InterpolateState(_fromState, toState, value);
-
-                    _rig.ApplyImmediate(state, presentation);
+                    PresentationIntentState state = InterpolateState(_fromState, toState, value);
+                    rig.ApplyImmediate(state, presentation);
                 },
                 1f,
                 _spec.duration)
             .SetEase(_spec.ease)
             .SetUpdate(true)
-            .SetTarget(_rig)
-            .OnComplete(() => Commit(toState, presentation));
+            .SetTarget(rig)
+            .OnComplete(() => Commit(rig, toState, presentation));
 
         if (_spec.wait && _tween != null)
             yield return _tween.WaitForCompletion();
@@ -73,12 +69,12 @@ public sealed class ShotResetCommand : CommandBase
 
     protected override void OnSkip(CommandRunScope scope)
     {
-        Resolve(scope);
-        if (_rig == null)
+        PresentationResponseRig rig = scope.ResponseRig;
+        if (rig == null)
             return;
 
         KillTweenIfNeeded();
-        Commit(PresentationIntentState.Default, scope.Presentation);
+        Commit(rig, PresentationIntentState.Default, scope.Presentation);
     }
 
     protected override void OnRollbackSeek(CommandRunScope scope)
@@ -88,25 +84,18 @@ public sealed class ShotResetCommand : CommandBase
 
     protected override void OnCommandCompleted(CommandRunScope scope)
     {
-        // wait=false이면 tween을 background로 유지한다.
+        // wait=false이면 tween을 background로 유지
     }
 
-    private void Resolve(CommandRunScope scope)
+    private static void Commit(
+        PresentationResponseRig rig,
+        in PresentationIntentState state,
+        PresentationViewRefs presentation)
     {
-        if (_resolveAttempted)
+        if (rig == null)
             return;
 
-        _resolveAttempted = true;
-        _rig = PresentationResponseRigResolver.Resolve(scope.Presentation);
-    }
-
-    private void Commit(in PresentationIntentState state, PresentationViewRefs presentation)
-    {
-        if (_rig == null)
-            return;
-
-        _rig.ApplyImmediate(state, presentation);
-        _tween = null;
+        rig.ApplyImmediate(state, presentation);
     }
 
     private static PresentationIntentState InterpolateState(
