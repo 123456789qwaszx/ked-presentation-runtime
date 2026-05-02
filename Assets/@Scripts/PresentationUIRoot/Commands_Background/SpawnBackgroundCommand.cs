@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
@@ -41,7 +40,7 @@ public static class PresentationBackgroundRegistryExt
         return $"bg:{bgKey}";
     }
 
-    public static bool TryGetBackgroundView(this Dictionary<string, object> refs, string bgKey, out PresentationBackgroundView view)
+    public static bool TryGetBackgroundView(this System.Collections.Generic.Dictionary<string, object> refs, string bgKey, out PresentationBackgroundView view)
     {
         string key = MakeBackgroundRefKey(bgKey);
 
@@ -66,28 +65,19 @@ public static class PresentationBackgroundRegistryExt
 public sealed class SpawnBackgroundCommandSpec : CommandSpecBase
 {
     [Header("Identity")]
-    [Tooltip("런타임에서 배경 view를 저장/참조할 키")]
     public string bgKey = "current";
 
     [Header("View Prefab")]
-    [Tooltip("BGHost에서 조회할 배경 view 프리팹 키")]
     public string viewPrefabKey = "default";
 
     [Header("Spawn")]
-    [Tooltip("동일 bgKey가 이미 있으면 파괴 후 새로 생성")]
     public bool destroyExistingWithSameKey = true;
-
-    [Tooltip("생성 후 마지막 sibling으로 올림")]
     public bool setAsLastSibling = true;
 
     [Range(0f, 1f)]
-    [Tooltip("생성 직후 CanvasGroup 초기 alpha")]
     public float initialAlpha = 0f;
 
-    [Tooltip("true면 scope.RunLifetime에 등록해서 런 종료 시 정리")]
     public bool trackRunLifetime = true;
-
-    [Tooltip("필수 계약이 없으면 예외를 던질지")]
     public bool strict = true;
 }
 
@@ -95,7 +85,6 @@ public sealed class SpawnBackgroundCommand : CommandBase
 {
     private readonly IBGViewPrefabProvider _prefabProvider;
     private readonly IBGRuntimeRegistry _runtimeRegistry;
-    
     private readonly SpawnBackgroundCommandSpec _spec;
 
     public override bool WaitForCompletion => true;
@@ -153,9 +142,11 @@ public sealed class SpawnBackgroundCommand : CommandBase
         }
 
         string refKey = PresentationBackgroundRegistryExt.MakeBackgroundRefKey(_spec.bgKey);
+        PresentationResponseRig rig = ResolveRig(scope);
 
         if (_spec.destroyExistingWithSameKey)
         {
+            rig?.RemoveBinding(refKey);
             _runtimeRegistry?.DestroyRuntimeBackground(_spec.bgKey);
 
             if (scope.Refs.TryGetBackgroundView(_spec.bgKey, out PresentationBackgroundView existing))
@@ -169,7 +160,7 @@ public sealed class SpawnBackgroundCommand : CommandBase
             go.transform.SetAsLastSibling();
 
         ResetSpawnedRectTransform(go);
-        
+
         PresentationBackgroundView view = go.GetComponent<PresentationBackgroundView>();
         if (view == null)
             view = go.AddComponent<PresentationBackgroundView>();
@@ -183,20 +174,25 @@ public sealed class SpawnBackgroundCommand : CommandBase
             view.CanvasGroup.blocksRaycasts = false;
         }
 
+        RectTransformResponseTarget responseTarget =
+            view.GetComponent<RectTransformResponseTarget>();
+
+        if (responseTarget == null)
+            responseTarget = view.gameObject.AddComponent<RectTransformResponseTarget>();
+
+        rig?.RegisterRuntimeBinding(
+            refKey,
+            responseTarget,
+            PresentationResponseProfile.Background);
+
         scope.Refs[refKey] = view;
         _runtimeRegistry?.RegisterRuntimeBackground(_spec.bgKey, view);
-        
-        // if (_spec.trackRunLifetime)
-        // {
-        //     scope.TrackRun(
-        //         cancel: () =>
-        //         {
-        //             if (view == null)
-        //                 return;
-        //             Object.Destroy(view.gameObject);
-        //             Debug.Log("Destroying view");
-        //         });
-        // }
+    }
+
+    private static PresentationResponseRig ResolveRig(CommandRunScope scope)
+    {
+        // TODO: 프로젝트의 실제 Presentation access 경로로 교체
+        return Object.FindAnyObjectByType<PresentationResponseRig>();
     }
 
     private void DestroyExisting(PresentationBackgroundView existing)
@@ -218,7 +214,7 @@ public sealed class SpawnBackgroundCommand : CommandBase
 #endif
             Object.Destroy(existing.gameObject);
     }
-    
+
     private static void ResetSpawnedRectTransform(GameObject go)
     {
         if (go == null)

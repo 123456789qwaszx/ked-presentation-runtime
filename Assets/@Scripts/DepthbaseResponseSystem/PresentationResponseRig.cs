@@ -2,11 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>
-/// PRS 런타임 중심.
-/// 정적 BG auto-wire는 하지 않고,
-/// 런타임에 spawn된 대상들을 binding으로 등록/제거/적용만 담당한다.
-/// </summary>
+// 런타임에 spawn된 대상들을 binding으로 등록/제거/적용만 담당한다.
 public sealed class PresentationResponseRig : MonoBehaviour
 {
     [Header("Rig Space")]
@@ -78,14 +74,9 @@ public sealed class PresentationResponseRig : MonoBehaviour
             if (binding == null)
                 continue;
 
-            if (string.Equals(binding.key, key, StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(binding.Key, key, StringComparison.OrdinalIgnoreCase))
                 _bindings.RemoveAt(i);
         }
-    }
-
-    public void ClearBindings()
-    {
-        _bindings.Clear();
     }
 
     public Vector2 ComposePanForFocus(Vector2 focusPoint)
