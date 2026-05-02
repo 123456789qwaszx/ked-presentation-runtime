@@ -12,8 +12,6 @@ public sealed class CommandRunScope
     
     public PresentationViewRefs Presentation { get; set; }
     
-    public PresentationResponseRig ResponseRig { get; set; }
-    
     /// <summary>
     /// Lifetime for resources spawned by commands within the current step.
     /// Cleaned up when the step boundary is crossed.

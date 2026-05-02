@@ -951,6 +951,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 187108361}
+  - component: {fileID: 187108362}
   m_Layer: 0
   m_Name: StageShot_Root
   m_TagString: Untagged
@@ -978,6 +979,18 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!225 &187108362
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 187108360}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &193480794
 GameObject:
   m_ObjectHideFlags: 0
@@ -1635,8 +1648,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 81ece531ef1bf9448ac31ac7fe1971d9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RectTransformResponseTarget
-  _rect: {fileID: 0}
-  _canvasGroup: {fileID: 0}
+  _rect: {fileID: 187108361}
+  _canvasGroup: {fileID: 187108362}
 --- !u!4 &323064283
 Transform:
   m_ObjectHideFlags: 0

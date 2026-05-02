@@ -15,16 +15,19 @@ public interface IDialogueBoxViewResolver
 public sealed class PresentationViewCommandFactory : INodeCommandFactory
 {
     private readonly PresentationViewAccess _presentationViewAccess;
+    private readonly PresentationResponseRig _presentationResponseRig;
     
     private readonly IBGViewPrefabProvider _bgViewPrefabProvider;
     private readonly IBGRuntimeRegistry _bgRuntimeRegistry;
 
     public PresentationViewCommandFactory(
         PresentationViewAccess presentationViewAccess,
+        PresentationResponseRig presentationResponseRig,
         IBGViewPrefabProvider bgViewPrefabProvider,
         IBGRuntimeRegistry bgRuntimeRegistry)
     {
         _presentationViewAccess = presentationViewAccess;
+        _presentationResponseRig = presentationResponseRig;
         _bgViewPrefabProvider = bgViewPrefabProvider;
         _bgRuntimeRegistry = bgRuntimeRegistry;
     }
@@ -44,16 +47,16 @@ public sealed class PresentationViewCommandFactory : INodeCommandFactory
             ScaleToPresentationCommandSpec s => new ScaleToPresentationCommand(s),
 
             // Background
-            SpawnBackgroundCommandSpec s => new SpawnBackgroundCommand(_bgViewPrefabProvider, s, _bgRuntimeRegistry),
+            SpawnBackgroundCommandSpec s => new SpawnBackgroundCommand(_bgViewPrefabProvider, s, _bgRuntimeRegistry, _presentationResponseRig),
             SetBackgroundSpriteCommandSpec s => new SetBackgroundSpriteCommand(s),
             FadeBackgroundCommandSpec s => new FadeBackgroundCommand(s),
             DestroyBackgroundCommandSpec s => new DestroyBackgroundCommand(s),
 
             // Presentation Shot / Response Rig
-            ShotResetCommandSpec s => new ShotResetCommand(s),
-            ShotZoomCommandSpec s => new ShotZoomCommand(s),
-            ShotPanToCommandSpec s => new ShotPanToCommand(s),
-            ShotTrackCommandSpec s => new ShotTrackCommand(s),
+            ShotResetCommandSpec s => new ShotResetCommand(_presentationResponseRig, s),
+            ShotZoomCommandSpec s => new ShotZoomCommand(_presentationResponseRig, s),
+            ShotPanToCommandSpec s => new ShotPanToCommand(_presentationResponseRig, s),
+            ShotTrackCommandSpec s => new ShotTrackCommand(_presentationResponseRig, s),
 
             _ => null
         };

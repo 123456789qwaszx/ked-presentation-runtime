@@ -24,6 +24,7 @@ public sealed class ShotPanToCommandSpec : CommandSpecBase
 
 public sealed class ShotPanToCommand : CommandBase
 {
+    private readonly PresentationResponseRig _rig;
     private readonly ShotPanToCommandSpec _spec;
 
     private PresentationIntentState _fromState;
@@ -33,29 +34,40 @@ public sealed class ShotPanToCommand : CommandBase
     public override bool WaitForCompletion => _spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
-    public ShotPanToCommand(ShotPanToCommandSpec spec)
+    public ShotPanToCommand(
+        PresentationResponseRig rig,
+        ShotPanToCommandSpec spec)
     {
+        _rig = rig;
         _spec = spec;
     }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
-        PresentationResponseRig rig = scope.ResponseRig;
-        if (rig == null)
-            yield break;
-
-        KillTweenIfNeeded();
-
-        _fromState = rig.CurrentState;
-        _toState = BuildTargetState(rig, _fromState);
-
-        if (_spec.duration <= 0f)
+        if (_rig == null)
         {
-            Commit(rig, _toState, scope.Presentation);
+            Debug.LogError("[ShotPanToCommand] PresentationResponseRig is null.");
             yield break;
         }
 
-        PlayTween(rig, _fromState, _toState, scope.Presentation);
+        if (scope == null || scope.Presentation == null)
+        {
+            Debug.LogError("[ShotPanToCommand] PresentationViewRefs is null.");
+            yield break;
+        }
+
+        KillTweenIfNeeded();
+
+        _fromState = _rig.CurrentState;
+        _toState = BuildTargetState(_rig, _fromState);
+
+        if (_spec.duration <= 0f)
+        {
+            Commit(_rig, _toState, scope.Presentation);
+            yield break;
+        }
+
+        PlayTween(_rig, _fromState, _toState, scope.Presentation);
 
         if (_spec.wait && _tween != null)
             yield return _tween.WaitForCompletion();
@@ -63,14 +75,18 @@ public sealed class ShotPanToCommand : CommandBase
 
     protected override void OnSkip(CommandRunScope scope)
     {
-        PresentationResponseRig rig = scope.ResponseRig;
-        if (rig == null)
+        if (_rig == null)
+            return;
+
+        if (scope == null || scope.Presentation == null)
             return;
 
         KillTweenIfNeeded();
-        _fromState = rig.CurrentState;
-        _toState = BuildTargetState(rig, _fromState);
-        Commit(rig, _toState, scope.Presentation);
+
+        _fromState = _rig.CurrentState;
+        _toState = BuildTargetState(_rig, _fromState);
+
+        Commit(_rig, _toState, scope.Presentation);
     }
 
     protected override void OnRollbackSeek(CommandRunScope scope)
@@ -87,7 +103,8 @@ public sealed class ShotPanToCommand : CommandBase
         PresentationResponseRig rig,
         in PresentationIntentState from)
     {
-        Vector2 manualPanPixels = rig.GetManualPanPixels(new Vector2(_spec.panX, _spec.panY));
+        Vector2 manualPanPixels =
+            rig.GetManualPanPixels(new Vector2(_spec.panX, _spec.panY));
 
         Vector2 targetPan = _spec.absolutePan
             ? manualPanPixels
@@ -114,7 +131,10 @@ public sealed class ShotPanToCommand : CommandBase
                 value =>
                 {
                     progress = value;
-                    PresentationIntentState state = InterpolateState(from, to, value);
+
+                    PresentationIntentState state =
+                        InterpolateState(from, to, value);
+
                     rig.ApplyImmediate(state, presentation);
                 },
                 1f,
@@ -130,7 +150,7 @@ public sealed class ShotPanToCommand : CommandBase
         in PresentationIntentState state,
         PresentationViewRefs presentation)
     {
-        if (rig == null)
+        if (rig == null || presentation == null)
             return;
 
         rig.ApplyImmediate(state, presentation);

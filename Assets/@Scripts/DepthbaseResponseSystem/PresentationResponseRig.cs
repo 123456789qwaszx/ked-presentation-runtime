@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public sealed class PresentationResponseRig : MonoBehaviour
+public sealed class PresentationResponseRig
 {
     [Header("Shot Settings")]
     [SerializeField] private Vector2 _defaultFramingPoint = Vector2.zero;

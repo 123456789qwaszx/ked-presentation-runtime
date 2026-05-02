@@ -30,6 +30,7 @@ public sealed class ShotTrackCommandSpec : CommandSpecBase
 
 public sealed class ShotTrackCommand : CommandBase
 {
+    private readonly PresentationResponseRig _rig;
     private readonly ShotTrackCommandSpec _spec;
 
     private PresentationIntentState _fromState;
@@ -39,29 +40,40 @@ public sealed class ShotTrackCommand : CommandBase
     public override bool WaitForCompletion => _spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
-    public ShotTrackCommand(ShotTrackCommandSpec spec)
+    public ShotTrackCommand(
+        PresentationResponseRig rig,
+        ShotTrackCommandSpec spec)
     {
+        _rig = rig;
         _spec = spec;
     }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
-        PresentationResponseRig rig = scope.ResponseRig;
-        if (rig == null)
-            yield break;
-
-        KillTweenIfNeeded();
-
-        _fromState = rig.CurrentState;
-        _toState = BuildTargetState(rig, _fromState, scope);
-
-        if (_spec.duration <= 0f)
+        if (_rig == null)
         {
-            Commit(rig, _toState, scope.Presentation);
+            Debug.LogError("[ShotTrackCommand] PresentationResponseRig is null.");
             yield break;
         }
 
-        PlayTween(rig, _fromState, _toState, scope.Presentation);
+        if (scope == null || scope.Presentation == null)
+        {
+            Debug.LogError("[ShotTrackCommand] PresentationViewRefs is null.");
+            yield break;
+        }
+
+        KillTweenIfNeeded();
+
+        _fromState = _rig.CurrentState;
+        _toState = BuildTargetState(_rig, _fromState, scope);
+
+        if (_spec.duration <= 0f)
+        {
+            Commit(_rig, _toState, scope.Presentation);
+            yield break;
+        }
+
+        PlayTween(_rig, _fromState, _toState, scope.Presentation);
 
         if (_spec.wait && _tween != null)
             yield return _tween.WaitForCompletion();
@@ -69,14 +81,18 @@ public sealed class ShotTrackCommand : CommandBase
 
     protected override void OnSkip(CommandRunScope scope)
     {
-        PresentationResponseRig rig = scope.ResponseRig;
-        if (rig == null)
+        if (_rig == null)
+            return;
+
+        if (scope == null || scope.Presentation == null)
             return;
 
         KillTweenIfNeeded();
-        _fromState = rig.CurrentState;
-        _toState = BuildTargetState(rig, _fromState, scope);
-        Commit(rig, _toState, scope.Presentation);
+
+        _fromState = _rig.CurrentState;
+        _toState = BuildTargetState(_rig, _fromState, scope);
+
+        Commit(_rig, _toState, scope.Presentation);
     }
 
     protected override void OnRollbackSeek(CommandRunScope scope)
@@ -94,17 +110,21 @@ public sealed class ShotTrackCommand : CommandBase
         in PresentationIntentState from,
         CommandRunScope scope)
     {
-        Vector2 focusPoint = from.focusPoint;
-
-        if (!TryGetRigFocusPoint(scope, _spec.focusRoleKey, _spec.focusTarget, _spec.focusLocalOffset, out Vector2 rigFocusPoint))
+        if (!TryGetRigFocusPoint(
+                scope,
+                _spec.focusRoleKey,
+                _spec.focusTarget,
+                _spec.focusLocalOffset,
+                out Vector2 focusPoint))
         {
-            Debug.LogWarning($"[ShotTrackCommand] Focus roleKey not found or target missing: {_spec.focusRoleKey}");
+            Debug.LogWarning(
+                $"[ShotTrackCommand] Focus roleKey not found or target missing: {_spec.focusRoleKey}");
+
             return from;
         }
 
-        focusPoint = rigFocusPoint;
-
-        Vector2 targetPan = rig.ComposePanForFocus(focusPoint, _spec.desiredFramingPoint);
+        Vector2 targetPan =
+            rig.ComposePanForFocus(focusPoint, _spec.desiredFramingPoint);
 
         return new PresentationIntentState
         {
@@ -127,7 +147,10 @@ public sealed class ShotTrackCommand : CommandBase
                 value =>
                 {
                     progress = value;
-                    PresentationIntentState state = InterpolateState(from, to, value);
+
+                    PresentationIntentState state =
+                        InterpolateState(from, to, value);
+
                     rig.ApplyImmediate(state, presentation);
                 },
                 1f,
@@ -143,7 +166,7 @@ public sealed class ShotTrackCommand : CommandBase
         in PresentationIntentState state,
         PresentationViewRefs presentation)
     {
-        if (rig == null)
+        if (rig == null || presentation == null)
             return;
 
         rig.ApplyImmediate(state, presentation);
@@ -186,7 +209,9 @@ public sealed class ShotTrackCommand : CommandBase
                 ? scope.Presentation.GetRect(PresentationTarget.Stage_Root)
                 : null;
 
-        Vector3 world = rect.TransformPoint(new Vector3(localOffset.x, localOffset.y, 0f));
+        Vector3 world =
+            rect.TransformPoint(new Vector3(localOffset.x, localOffset.y, 0f));
+
         focusPoint = WorldToSpacePoint(stageRoot, world);
         return true;
     }
@@ -199,8 +224,10 @@ public sealed class ShotTrackCommand : CommandBase
         _tween.Kill(false);
         _tween = null;
     }
-    
-    public static Vector2 WorldToSpacePoint(RectTransform stageRoot, Vector3 worldPoint)
+
+    public static Vector2 WorldToSpacePoint(
+        RectTransform stageRoot,
+        Vector3 worldPoint)
     {
         if (stageRoot == null)
             return new Vector2(worldPoint.x, worldPoint.y);

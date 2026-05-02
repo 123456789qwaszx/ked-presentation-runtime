@@ -42,6 +42,7 @@ public sealed class ShotZoomCommandSpec : CommandSpecBase
 
 public sealed class ShotZoomCommand : CommandBase
 {
+    private readonly PresentationResponseRig _rig;
     private readonly ShotZoomCommandSpec _spec;
 
     private PresentationIntentState _fromState;
@@ -51,29 +52,40 @@ public sealed class ShotZoomCommand : CommandBase
     public override bool WaitForCompletion => _spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
-    public ShotZoomCommand(ShotZoomCommandSpec spec)
+    public ShotZoomCommand(
+        PresentationResponseRig rig,
+        ShotZoomCommandSpec spec)
     {
+        _rig = rig;
         _spec = spec;
     }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
-        PresentationResponseRig rig = scope.ResponseRig;
-        if (rig == null)
-            yield break;
-
-        KillTweenIfNeeded();
-
-        _fromState = rig.CurrentState;
-        _toState = BuildTargetState(rig, _fromState, scope);
-
-        if (_spec.duration <= 0f)
+        if (_rig == null)
         {
-            Commit(rig, _toState, scope.Presentation);
+            Debug.LogError("[ShotZoomCommand] PresentationResponseRig is null.");
             yield break;
         }
 
-        PlayTween(rig, _fromState, _toState, scope.Presentation);
+        if (scope == null || scope.Presentation == null)
+        {
+            Debug.LogError("[ShotZoomCommand] PresentationViewRefs is null.");
+            yield break;
+        }
+
+        KillTweenIfNeeded();
+
+        _fromState = _rig.CurrentState;
+        _toState = BuildTargetState(_rig, _fromState, scope);
+
+        if (_spec.duration <= 0f)
+        {
+            Commit(_rig, _toState, scope.Presentation);
+            yield break;
+        }
+
+        PlayTween(_rig, _fromState, _toState, scope.Presentation);
 
         if (_spec.wait && _tween != null)
             yield return _tween.WaitForCompletion();
@@ -81,14 +93,18 @@ public sealed class ShotZoomCommand : CommandBase
 
     protected override void OnSkip(CommandRunScope scope)
     {
-        PresentationResponseRig rig = scope.ResponseRig;
-        if (rig == null)
+        if (_rig == null)
+            return;
+
+        if (scope == null || scope.Presentation == null)
             return;
 
         KillTweenIfNeeded();
-        _fromState = rig.CurrentState;
-        _toState = BuildTargetState(rig, _fromState, scope);
-        Commit(rig, _toState, scope.Presentation);
+
+        _fromState = _rig.CurrentState;
+        _toState = BuildTargetState(_rig, _fromState, scope);
+
+        Commit(_rig, _toState, scope.Presentation);
     }
 
     protected override void OnRollbackSeek(CommandRunScope scope)
@@ -134,9 +150,12 @@ public sealed class ShotZoomCommand : CommandBase
 
         if (hasFocus && _spec.reframeToFocus)
         {
-            Vector2 framingPan =
-                rig.ComposePanForFocus(focusPoint, _spec.desiredFramingPoint);
-            targetPan += framingPan;
+            targetPan = rig.ComposePanForFocus(
+                focusPoint,
+                _spec.desiredFramingPoint);
+
+            if (!_spec.absolutePan)
+                targetPan += manualPanPixels;
         }
 
         return new PresentationIntentState
@@ -192,7 +211,9 @@ public sealed class ShotZoomCommand : CommandBase
                 {
                     progress = value;
 
-                    PresentationIntentState state = InterpolateState(from, to, value);
+                    PresentationIntentState state =
+                        InterpolateState(from, to, value);
+
                     rig.ApplyImmediate(state, presentation);
                 },
                 1f,
@@ -208,7 +229,7 @@ public sealed class ShotZoomCommand : CommandBase
         in PresentationIntentState state,
         PresentationViewRefs presentation)
     {
-        if (rig == null)
+        if (rig == null || presentation == null)
             return;
 
         rig.ApplyImmediate(state, presentation);
@@ -235,8 +256,10 @@ public sealed class ShotZoomCommand : CommandBase
         _tween.Kill(false);
         _tween = null;
     }
-    
-    public static Vector2 WorldToSpacePoint(RectTransform stageRoot, Vector3 worldPoint)
+
+    public static Vector2 WorldToSpacePoint(
+        RectTransform stageRoot,
+        Vector3 worldPoint)
     {
         if (stageRoot == null)
             return new Vector2(worldPoint.x, worldPoint.y);

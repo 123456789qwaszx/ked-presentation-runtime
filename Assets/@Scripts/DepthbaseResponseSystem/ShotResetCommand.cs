@@ -14,6 +14,7 @@ public sealed class ShotResetCommandSpec : CommandSpecBase
 
 public sealed class ShotResetCommand : CommandBase
 {
+    private readonly PresentationResponseRig _rig;
     private readonly ShotResetCommandSpec _spec;
 
     private PresentationIntentState _fromState;
@@ -22,46 +23,40 @@ public sealed class ShotResetCommand : CommandBase
     public override bool WaitForCompletion => _spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
-    public ShotResetCommand(ShotResetCommandSpec spec)
+    public ShotResetCommand(
+        PresentationResponseRig rig,
+        ShotResetCommandSpec spec)
     {
+        _rig = rig;
         _spec = spec;
     }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
-        PresentationResponseRig rig = scope.ResponseRig;
-        if (rig == null)
+        if (_rig == null)
+        {
+            Debug.LogError("[ShotResetCommand] PresentationResponseRig is null.");
             yield break;
+        }
+
+        if (scope == null || scope.Presentation == null)
+        {
+            Debug.LogError("[ShotResetCommand] PresentationViewRefs is null.");
+            yield break;
+        }
 
         KillTweenIfNeeded();
 
-        _fromState = rig.CurrentState;
+        _fromState = _rig.CurrentState;
         PresentationIntentState toState = PresentationIntentState.Default;
 
         if (_spec.duration <= 0f)
         {
-            Commit(rig, toState, scope.Presentation);
+            Commit(_rig, toState, scope.Presentation);
             yield break;
         }
 
-        float progress = 0f;
-        PresentationViewRefs presentation = scope.Presentation;
-
-        _tween = DOTween.To(
-                () => progress,
-                value =>
-                {
-                    progress = value;
-
-                    PresentationIntentState state = InterpolateState(_fromState, toState, value);
-                    rig.ApplyImmediate(state, presentation);
-                },
-                1f,
-                _spec.duration)
-            .SetEase(_spec.ease)
-            .SetUpdate(true)
-            .SetTarget(rig)
-            .OnComplete(() => Commit(rig, toState, presentation));
+        PlayTween(_rig, _fromState, toState, scope.Presentation);
 
         if (_spec.wait && _tween != null)
             yield return _tween.WaitForCompletion();
@@ -69,12 +64,18 @@ public sealed class ShotResetCommand : CommandBase
 
     protected override void OnSkip(CommandRunScope scope)
     {
-        PresentationResponseRig rig = scope.ResponseRig;
-        if (rig == null)
+        if (_rig == null)
+            return;
+
+        if (scope == null || scope.Presentation == null)
             return;
 
         KillTweenIfNeeded();
-        Commit(rig, PresentationIntentState.Default, scope.Presentation);
+
+        Commit(
+            _rig,
+            PresentationIntentState.Default,
+            scope.Presentation);
     }
 
     protected override void OnRollbackSeek(CommandRunScope scope)
@@ -87,12 +88,39 @@ public sealed class ShotResetCommand : CommandBase
         // wait=false이면 tween을 background로 유지
     }
 
+    private void PlayTween(
+        PresentationResponseRig rig,
+        PresentationIntentState from,
+        PresentationIntentState to,
+        PresentationViewRefs presentation)
+    {
+        float progress = 0f;
+
+        _tween = DOTween.To(
+                () => progress,
+                value =>
+                {
+                    progress = value;
+
+                    PresentationIntentState state =
+                        InterpolateState(from, to, value);
+
+                    rig.ApplyImmediate(state, presentation);
+                },
+                1f,
+                _spec.duration)
+            .SetEase(_spec.ease)
+            .SetUpdate(true)
+            .SetTarget(rig)
+            .OnComplete(() => Commit(rig, to, presentation));
+    }
+
     private static void Commit(
         PresentationResponseRig rig,
         in PresentationIntentState state,
         PresentationViewRefs presentation)
     {
-        if (rig == null)
+        if (rig == null || presentation == null)
             return;
 
         rig.ApplyImmediate(state, presentation);
