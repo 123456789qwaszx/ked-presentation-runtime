@@ -1637,7 +1637,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RectTransformResponseTarget
   _rect: {fileID: 0}
   _canvasGroup: {fileID: 0}
-  _presentationResponseRig: {fileID: 0}
 --- !u!4 &323064283
 Transform:
   m_ObjectHideFlags: 0
@@ -2538,11 +2537,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6fb46a1e1f73dea42a14597e2c27871d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PresentationResponseRig
-  _presentationRoot: {fileID: 1739354825}
-  _spaceRoot: {fileID: 1246457708}
   _defaultFramingPoint: {x: 0, y: 0}
   _manualPanPixelsPerUnit: {x: 64, y: 36}
-  _bindings: []
   _focusProviders: []
 --- !u!4 &529556883
 Transform:
@@ -9078,7 +9074,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RectTransformFocusProvider
   _focusRect: {fileID: 0}
-  _rig: {fileID: 0}
   _localOffset: {x: 0, y: 0}
 --- !u!1 &1739354823
 GameObject:

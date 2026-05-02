@@ -115,9 +115,7 @@ public sealed class PresentationResponseRig : MonoBehaviour
             }
 
             Vector3 world = provider.GetFocusWorldPoint();
-            focusPoint = PresentationSpaceUtil.WorldToSpacePoint(
-                presentation != null ? presentation.Stage_Root : null,
-                world);
+            focusPoint = WorldToSpacePoint(presentation.Stage_Root, world);
 
             return true;
         }
@@ -175,7 +173,7 @@ public sealed class PresentationResponseRig : MonoBehaviour
 
         Vector3 worldPivot = target.Rect.TransformPoint(Vector3.zero);
 
-        profile.basePositionInRigSpace = PresentationSpaceUtil.WorldToSpacePoint(stageRoot, worldPivot);
+        profile.basePositionInRigSpace = WorldToSpacePoint(stageRoot, worldPivot);
         profile.baseScale = new Vector2(target.Rect.localScale.x, target.Rect.localScale.y);
         profile.baseAlpha = target.CanvasGroup != null ? target.CanvasGroup.alpha : 1f;
 
@@ -187,5 +185,15 @@ public sealed class PresentationResponseRig : MonoBehaviour
     {
         public string key;
         public MonoBehaviour provider;
+    }
+    
+    
+    public static Vector2 WorldToSpacePoint(RectTransform stageRoot, Vector3 worldPoint)
+    {
+        if (stageRoot == null)
+            return new Vector2(worldPoint.x, worldPoint.y);
+
+        Vector3 local = stageRoot.InverseTransformPoint(worldPoint);
+        return new Vector2(local.x, local.y);
     }
 }

@@ -54,8 +54,9 @@ public sealed class ShotResetCommand : CommandBase
                 value =>
                 {
                     progress = value;
+
                     PresentationIntentState state =
-                        PresentationResponseSolver.Lerp(_fromState, toState, value);
+                        InterpolateState(_fromState, toState, value);
 
                     _rig.ApplyImmediate(state, presentation);
                 },
@@ -106,6 +107,19 @@ public sealed class ShotResetCommand : CommandBase
 
         _rig.ApplyImmediate(state, presentation);
         _tween = null;
+    }
+
+    private static PresentationIntentState InterpolateState(
+        in PresentationIntentState from,
+        in PresentationIntentState to,
+        float t)
+    {
+        return new PresentationIntentState
+        {
+            zoom = Mathf.Lerp(from.zoom, to.zoom, t),
+            pan = Vector2.Lerp(from.pan, to.pan, t),
+            focusPoint = Vector2.Lerp(from.focusPoint, to.focusPoint, t),
+        };
     }
 
     private void KillTweenIfNeeded()
