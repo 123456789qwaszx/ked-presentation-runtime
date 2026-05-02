@@ -2,11 +2,6 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>
-/// runtime binding registry + shot state apply 중심.
-/// focus lookup은 더 이상 하지 않고,
-/// command가 roleKey 기반으로 직접 focus point를 계산한다.
-/// </summary>
 public sealed class PresentationResponseRig : MonoBehaviour
 {
     [Header("Shot Settings")]

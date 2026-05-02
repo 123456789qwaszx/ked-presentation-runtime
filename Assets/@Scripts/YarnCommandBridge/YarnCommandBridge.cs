@@ -21,6 +21,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         
         RegisterEmojiCommands();
         RegisterPresentationCommands();
+        RegisterShotCommands();
     }
 
     public void RegisterYarnCommands()

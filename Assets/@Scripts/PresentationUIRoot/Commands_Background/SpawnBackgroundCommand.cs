@@ -173,8 +173,7 @@ public sealed class SpawnBackgroundCommand : CommandBase
             view.CanvasGroup.blocksRaycasts = false;
         }
 
-        RectTransformResponseTarget responseTarget =
-            view.GetComponent<RectTransformResponseTarget>();
+        RectTransformResponseTarget responseTarget = view.GetComponent<RectTransformResponseTarget>();
 
         if (responseTarget == null)
             responseTarget = view.gameObject.AddComponent<RectTransformResponseTarget>();

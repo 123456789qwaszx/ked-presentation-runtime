@@ -35,16 +35,25 @@ public sealed class PresentationViewCommandFactory : INodeCommandFactory
         {
             null => null,
 
+            // Presentation View setup
             SetupPresentationViewCommandSpec s => new SetupPresentationViewCommand(_presentationViewAccess, s),
-            
+
+            // Presentation View transform
             FadeToPresentationCommandSpec s => new FadeToPresentationCommand(s),
             MoveByPresentationCommandSpec s => new MoveByPresentationCommand(s),
             ScaleToPresentationCommandSpec s => new ScaleToPresentationCommand(s),
 
+            // Background
             SpawnBackgroundCommandSpec s => new SpawnBackgroundCommand(_bgViewPrefabProvider, s, _bgRuntimeRegistry),
             SetBackgroundSpriteCommandSpec s => new SetBackgroundSpriteCommand(s),
             FadeBackgroundCommandSpec s => new FadeBackgroundCommand(s),
             DestroyBackgroundCommandSpec s => new DestroyBackgroundCommand(s),
+
+            // Presentation Shot / Response Rig
+            ShotResetCommandSpec s => new ShotResetCommand(s),
+            ShotZoomCommandSpec s => new ShotZoomCommand(s),
+            ShotPanToCommandSpec s => new ShotPanToCommand(s),
+            ShotTrackCommandSpec s => new ShotTrackCommand(s),
 
             _ => null
         };
