@@ -251,7 +251,8 @@ public class VnAppBootstrap : MonoBehaviour
             episodePlayer,
             dialogueAdvanceDispatcher,
             _presentationSessionBridge,
-            _presentationSessionContext
+            _presentationSessionContext,
+            UIManager.Instance.GetUI<PresentationUIRoot>()
         );
         
         CreateRollbackHistoryDebugTool(_rollbackHistory, rollbackState);

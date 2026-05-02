@@ -3,7 +3,6 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-
 public class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
 {
     public event Action OnSpeedUpHoldStarted;
@@ -37,7 +36,7 @@ public class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
         BGOverlay_Root,
 
         CharacterSystem_Root,
-        
+
         CharSlotLeft_Root,
         CharSlotLeftFocus_Root,
         CharSlotLeftRig_Root,
@@ -117,18 +116,53 @@ public class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
     [SerializeField] private DialogueBoxHost dialogueBoxHost;
 
     private bool _isExpanded;
+    private bool _isDialogueUiSuppressed;
 
     public bool IsExpanded => _isExpanded;
+    public bool IsDialogueUiSuppressed => _isDialogueUiSuppressed;
 
     protected override void Initialize()
     {
         BindHandlers();
+
         CloseCanvasGroup(View.CanvasGroup(Refs.QuickMenu_Root));
+
+        ApplyDialogueUiVisibility();
+        ApplyToggleVisibility();
     }
 
     public RectTransform ResolveRect(Refs key) => View.Rect(key);
     public CanvasGroup ResolveCanvasGroup(Refs key) => View.CanvasGroup(key);
     public Image ResolveImage(Refs key) => View.Image(key);
+
+    /// <summary>
+    /// DialogueUI_Root를 출력 레이어에서 임시로 숨긴다.
+    /// RollbackSeek / Skip처럼 대사 표시 파이프라인은 돌지만
+    /// 사용자에게는 보여주면 안 되는 상태에서 사용한다.
+    /// </summary>
+    public void SetDialogueUiSuppressed(bool suppressed)
+    {
+        if (_isDialogueUiSuppressed == suppressed)
+            return;
+
+        _isDialogueUiSuppressed = suppressed;
+        ApplyDialogueUiVisibility();
+    }
+
+    /// <summary>
+    /// PresentationSessionContext 기준으로 DialogueUI 표시 억제 상태를 갱신한다.
+    /// 현재 정책: RollbackSeek 또는 Skip 중에는 DialogueUI_Root를 숨긴다.
+    /// </summary>
+    public void RefreshDialogueUiSuppression(PresentationSessionContext context)
+    {
+        if (context == null)
+        {
+            SetDialogueUiSuppressed(false);
+            return;
+        }
+
+        SetDialogueUiSuppressed(context.IsRollbackSeeking || context.IsSkipping);
+    }
 
     private void BindHandlers()
     {
@@ -235,30 +269,47 @@ public class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
 
     public void SetExpanded(bool expanded)
     {
+        if (_isExpanded == expanded)
+            return;
+
         _isExpanded = expanded;
 
-        SetLayerVisible(View.CanvasGroup(Refs.DialogueUI_Root), visible: !expanded);
-        SetLayerVisible(View.CanvasGroup(Refs.ToggleBottomRight), visible: !expanded);
-        SetLayerVisible(View.CanvasGroup(Refs.ToggleTopRight), visible: !expanded);
-        SetLayerVisible(View.CanvasGroup(Refs.ToggleTopLeft), visible: !expanded);
+        ApplyDialogueUiVisibility();
+        ApplyToggleVisibility();
+    }
+
+    private void ApplyDialogueUiVisibility()
+    {
+        bool visible = !_isExpanded && !_isDialogueUiSuppressed;
+        SetLayerVisible(View.CanvasGroup(Refs.DialogueUI_Root), visible);
+        
+        SetLayerVisible(View.CanvasGroup(Refs.Stage_Root), visible);
+    }
+
+    private void ApplyToggleVisibility()
+    {
+        bool visible = !_isExpanded;
+
+        SetLayerVisible(View.CanvasGroup(Refs.ToggleBottomRight), visible);
+        SetLayerVisible(View.CanvasGroup(Refs.ToggleTopRight), visible);
+        SetLayerVisible(View.CanvasGroup(Refs.ToggleTopLeft), visible);
     }
 
     private static void OpenCanvasGroup(CanvasGroup cg)
     {
-        cg.alpha = 1f;
-        cg.interactable = true;
-        cg.blocksRaycasts = true;
+        SetLayerVisible(cg, true);
     }
 
     private static void CloseCanvasGroup(CanvasGroup cg)
     {
-        cg.alpha = 0f;
-        cg.interactable = false;
-        cg.blocksRaycasts = false;
+        SetLayerVisible(cg, false);
     }
 
     private static void SetLayerVisible(CanvasGroup cg, bool visible)
     {
+        if (cg == null)
+            return;
+
         cg.alpha = visible ? 1f : 0f;
         cg.interactable = visible;
         cg.blocksRaycasts = visible;

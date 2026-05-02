@@ -126,12 +126,12 @@ public sealed class CustomLinePresenter : DialoguePresenterBase
         _typewriter.PrepareForContent(text);
 
         // ── 6. Rollback 복원 중이면 여기서 종료 ──────────────────────────
-        if (!ShouldConsumeLineSilently())
-        {
+        // if (!ShouldConsumeLineSilently())
+        // {
             // ── 7. 이제 실제로 박스를 보여준다 ───────────────────────────────
             _dialogueBoxResolver.ShowOnly(box);
             await FadeInAsync(token);
-        }
+        //}
 
         // ── 8. 타입라이터 실행 ───────────────────────────────────────────
         await _typewriter

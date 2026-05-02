@@ -10,9 +10,13 @@ public sealed class RollbackController : IDisposable
     private readonly DialogueAdvanceDispatcher _dispatcher;
     private readonly PresentationSessionBridge _presentationSessionBridge;
     private readonly PresentationSessionContext _presentationSessionContext;
+    private readonly PresentationUIRoot _presentationUIRoot;
 
     public bool IsSeeking => _state.IsSeeking;
-    public bool CanRollback => !_state.IsSeeking && _history.CanRollbackOneStep();
+
+    public bool CanRollback =>
+        !_state.IsSeeking &&
+        _history.CanRollbackOneStep();
 
     public RollbackController(
         RollbackRuntimeState state,
@@ -21,7 +25,8 @@ public sealed class RollbackController : IDisposable
         IRollbackDialogueRestarter restarter,
         DialogueAdvanceDispatcher dispatcher,
         PresentationSessionBridge presentationSessionBridge,
-        PresentationSessionContext presentationSessionContext)
+        PresentationSessionContext presentationSessionContext,
+        PresentationUIRoot presentationUIRoot)
     {
         _state = state;
         _history = history;
@@ -30,16 +35,20 @@ public sealed class RollbackController : IDisposable
         _dispatcher = dispatcher;
         _presentationSessionBridge = presentationSessionBridge;
         _presentationSessionContext = presentationSessionContext;
+        _presentationUIRoot = presentationUIRoot;
 
-        _bridge.LinePrepared -= EndSeekBeforeTargetLineDisplays;
-        _bridge.LinePrepared += EndSeekBeforeTargetLineDisplays;
+        _bridge.LineStart -= EndSeekBeforeTargetLineDisplays;
+        _bridge.LineStart += EndSeekBeforeTargetLineDisplays;
 
-        _bridge.LinePrepared -= AddRollbackPoint;
-        _bridge.LinePrepared += AddRollbackPoint;
+        _bridge.LineStart -= AddRollbackPoint;
+        _bridge.LineStart += AddRollbackPoint;
     }
 
     public bool RequestRollbackOneStep()
     {
+        if (_state.IsSeeking)
+            return false;
+
         if (!_history.TryGetPreviousPoint(out RollbackPoint target))
             return false;
 
@@ -48,12 +57,20 @@ public sealed class RollbackController : IDisposable
             target.presentationStepIndex
         );
 
+        // if (!jumped)
+        // {
+        //     Debug.LogWarning(
+        //         "[RollbackController] Failed to jump presentation session. Rollback will continue with Yarn restart.");
+        // }
 
         // target 자신은 남기지 않고 잘라야
         // rollback 후 target line이 다시 완료될 때 1번만 정상 기록된다.
         _history.TrimAfterVisitedIndex(target.visitedIndex - 1);
+
         _state.BeginRollback(target);
+
         _presentationSessionContext.EnterRollbackSeek();
+        RefreshDialogueUiSuppression();
 
         _restarter.RestartNode(target.nodeName);
 
@@ -68,7 +85,10 @@ public sealed class RollbackController : IDisposable
         if (_state.IsTarget(meta.nodeName, meta.lineId))
         {
             _state.EndRollback();
+
             _presentationSessionContext.ExitRollbackSeek();
+            RefreshDialogueUiSuppression();
+
             return;
         }
 
@@ -78,6 +98,14 @@ public sealed class RollbackController : IDisposable
     private void AddRollbackPoint(YarnLineMeta meta)
     {
         _history.AddRollbackPoint(meta);
+    }
+
+    private void RefreshDialogueUiSuppression()
+    {
+        if (_presentationUIRoot == null)
+            return;
+
+        _presentationUIRoot.RefreshDialogueUiSuppression(_presentationSessionContext);
     }
 
     public void Dispose()
