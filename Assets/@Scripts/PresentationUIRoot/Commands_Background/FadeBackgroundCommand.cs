@@ -7,35 +7,28 @@ using UnityEngine;
 [CommandMenuHint("Presentation Background", "Fade Background", Order = -885)]
 public sealed class FadeBackgroundCommandSpec : CommandSpecBase
 {
-    [Header("Identity")]
-    [Tooltip("대상 배경 view를 찾을 bgKey")]
+    [Header("Identity")] [Tooltip("대상 배경 view를 찾을 bgKey")]
     public string bgKey = "current";
 
-    [Header("Fade")]
-    [Range(0f, 1f)]
-    public float targetAlpha = 1f;
+    [Header("Fade")] [Range(0f, 1f)] public float targetAlpha = 1f;
 
     [Tooltip("페이드 시간(초). 0 이하이면 즉시 스냅합니다.")]
     public float duration = 0.35f;
 
     public Ease ease = Ease.OutCubic;
 
-    [Header("Interaction")]
-    [Tooltip("true면 완료 시 interactable을 targetAlpha 기준으로 설정합니다.")]
+    [Header("Interaction")] [Tooltip("true면 완료 시 interactable을 targetAlpha 기준으로 설정합니다.")]
     public bool controlInteractable = false;
 
     [Tooltip("true면 완료 시 blocksRaycasts를 targetAlpha 기준으로 설정합니다.")]
     public bool controlBlocksRaycasts = false;
 
-    [Header("Wait")]
-    public bool wait = false;
+    [Header("Wait")] public bool wait = false;
 
-    [Header("Options")]
-    [Tooltip("체크하면 기존 CanvasGroup 관련 트윈을 끝내고 committed state에서 시작합니다.")]
+    [Header("Options")] [Tooltip("체크하면 기존 CanvasGroup 관련 트윈을 끝내고 committed state에서 시작합니다.")]
     public bool killTween = true;
 
-    [Tooltip("필수 계약이 없으면 예외를 던질지")]
-    public bool strict = true;
+    [Tooltip("필수 계약이 없으면 예외를 던질지")] public bool strict = true;
 }
 
 public sealed class FadeBackgroundCommand : CommandBase
@@ -62,8 +55,11 @@ public sealed class FadeBackgroundCommand : CommandBase
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
+        if (_view == null || _rect == null || _group == null)
+            yield break;
+
         if (_spec.killTween)
-            _rect.DOKill(true); // Finish previous motion so this command starts from a committed state.
+            _rect.DOKill(true);
 
         _group.DOKill(true);
 
@@ -72,11 +68,7 @@ public sealed class FadeBackgroundCommand : CommandBase
         if (_spec.duration <= 0f)
         {
             ApplyFinalState(_spec.targetAlpha);
-            _canCommitFinalState = false;
-            _view = null;
-            _rect = null;
-            _group = null;
-            _tween = null;
+            ClearResolvedRefs();
             yield break;
         }
 
@@ -102,12 +94,7 @@ public sealed class FadeBackgroundCommand : CommandBase
                     return;
 
                 ApplyFinalState(_spec.targetAlpha);
-
-                _canCommitFinalState = false;
-                _view = null;
-                _rect = null;
-                _group = null;
-                _tween = null;
+                ClearResolvedRefs();
             });
 
         if (_spec.wait)
@@ -119,16 +106,17 @@ public sealed class FadeBackgroundCommand : CommandBase
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        ApplyFinalState(_spec.targetAlpha);
+        if (_view == null || _group == null)
+            return;
 
-        _canCommitFinalState = false;
-        _view = null;
-        _rect = null;
-        _group = null;
-        _tween = null;
+        ApplyFinalState(_spec.targetAlpha);
+        ClearResolvedRefs();
     }
 
-    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
+    protected override void OnRollbackSeek(CommandRunScope scope)
+    {
+        OnSkip(scope);
+    }
 
     protected override void OnCommandCompleted(CommandRunScope scope)
     {
@@ -143,22 +131,26 @@ public sealed class FadeBackgroundCommand : CommandBase
         _group.DOKill(false);
 
         ApplyFinalState(_spec.targetAlpha);
-
-        _canCommitFinalState = false;
-        _view = null;
-        _rect = null;
-        _group = null;
-        _tween = null;
+        ClearResolvedRefs();
     }
 
     private void ResolveRefs(CommandRunScope scope)
     {
         _resolveAttempted = true;
 
-        if (!scope.Refs.TryGetBackgroundView(_spec.bgKey, out PresentationBackgroundView view))
+        if (scope == null || scope.Refs == null)
         {
             if (_spec.strict)
-                throw new InvalidOperationException($"[FadeBackgroundCommand] Background view not found. bgKey={_spec.bgKey}");
+                throw new InvalidOperationException($"[FadeBackgroundCommand] Refs is null. bgKey={_spec.bgKey}");
+            return;
+        }
+
+        if (!scope.Refs.TryGetValue(_spec.bgKey, out object obj) ||
+            obj is not PresentationBackgroundView view)
+        {
+            if (_spec.strict)
+                throw new InvalidOperationException(
+                    $"[FadeBackgroundCommand] Background view not found. bgKey={_spec.bgKey}");
             return;
         }
 
@@ -167,10 +159,17 @@ public sealed class FadeBackgroundCommand : CommandBase
 
         _rect = _view.Root;
         _group = _view.CanvasGroup;
+
+        if ((_rect == null || _group == null) && _spec.strict)
+            throw new InvalidOperationException(
+                $"[FadeBackgroundCommand] Background view binding missing. bgKey={_spec.bgKey}");
     }
 
     private void ApplyFinalState(float alpha)
     {
+        if (_group == null)
+            return;
+
         float clamped = Mathf.Clamp01(alpha);
         _group.alpha = clamped;
 
@@ -179,5 +178,14 @@ public sealed class FadeBackgroundCommand : CommandBase
 
         if (_spec.controlBlocksRaycasts)
             _group.blocksRaycasts = clamped > 0.001f;
+    }
+
+    private void ClearResolvedRefs()
+    {
+        _canCommitFinalState = false;
+        _view = null;
+        _rect = null;
+        _group = null;
+        _tween = null;
     }
 }

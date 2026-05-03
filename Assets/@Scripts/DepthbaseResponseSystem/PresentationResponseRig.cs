@@ -15,13 +15,9 @@ public sealed class PresentationResponseRig : MonoBehaviour
 
     public PresentationIntentState CurrentState => _currentState;
 
-    public void ApplyImmediate(
-        PresentationIntentState state,
-        PresentationViewRefs presentation)
+    public void ApplyImmediate(PresentationIntentState state, PresentationViewRefs presentation)
     {
-        Debug.Log(
-            $"[PresentationResponseRig] ApplyImmediate incomingZoom={state.zoom}, " +
-            $"currentZoom={CurrentState.zoom}");
+        //Debug.Log($"[PresentationResponseRig] ApplyImmediate incomingZoom={state.zoom}, " + $"currentZoom={CurrentState.zoom}");
 
         _currentState = state;
         
@@ -71,9 +67,7 @@ public sealed class PresentationResponseRig : MonoBehaviour
             runtimeProfile,
             target));
 
-        Debug.Log(
-            $"[PresentationResponseRig] RegisterRuntimeBinding success. " +
-            $"key={key}, target={target.Rect.name}, count={_bindings.Count}");
+        Debug.Log($"[PresentationResponseRig] RegisterRuntimeBinding success. " + $"key={key}, target={target.Rect.name}, count={_bindings.Count}");
 
         return true;
     }
@@ -116,11 +110,9 @@ public sealed class PresentationResponseRig : MonoBehaviour
             authoringPanUnits.y * _manualPanPixelsPerUnit.y);
     }
 
-    private void ApplyToAllBindings(
-        in PresentationIntentState state,
-        PresentationViewRefs presentation)
+    private void ApplyToAllBindings(in PresentationIntentState state, PresentationViewRefs presentation)
     {
-        Debug.Log($"[PresentationResponseRig] ApplyToAllBindings count={_bindings.Count}");
+       // Debug.Log($"[PresentationResponseRig] ApplyToAllBindings count={_bindings.Count}");
 
         for (int i = 0; i < _bindings.Count; i++)
         {
@@ -132,8 +124,7 @@ public sealed class PresentationResponseRig : MonoBehaviour
                 continue;
             }
 
-            Debug.Log(
-                $"[PresentationResponseRig] Apply binding index={i}, key={binding.Key}");
+            //Debug.Log($"[PresentationResponseRig] Apply binding index={i}, key={binding.Key}");
 
             binding.Apply(in state, presentation);
         }

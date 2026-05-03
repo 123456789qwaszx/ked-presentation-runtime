@@ -63,6 +63,9 @@ public sealed class SetBackgroundSpriteCommand : CommandBase
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
+        if (_view == null || _view.Image == null)
+            return;
+
         if (_spec.sprite == null)
         {
             if (_spec.strict)
@@ -83,7 +86,15 @@ public sealed class SetBackgroundSpriteCommand : CommandBase
     {
         _resolveAttempted = true;
 
-        if (!scope.Refs.TryGetBackgroundView(_spec.bgKey, out PresentationBackgroundView view))
+        if (scope == null || scope.Refs == null)
+        {
+            if (_spec.strict)
+                throw new InvalidOperationException($"[SetBackgroundSpriteCommand] Refs is null. bgKey={_spec.bgKey}");
+            return;
+        }
+
+        if (!scope.Refs.TryGetValue(_spec.bgKey, out object obj) ||
+            obj is not PresentationBackgroundView view)
         {
             if (_spec.strict)
                 throw new InvalidOperationException($"[SetBackgroundSpriteCommand] Background view not found. bgKey={_spec.bgKey}");
@@ -91,14 +102,6 @@ public sealed class SetBackgroundSpriteCommand : CommandBase
         }
 
         _view = view;
-
-        if (_view == null)
-        {
-            if (_spec.strict)
-                throw new InvalidOperationException($"[SetBackgroundSpriteCommand] Background view is null. bgKey={_spec.bgKey}");
-            return;
-        }
-
         _view.EnsureBound(_spec.strict);
 
         if (_view.Image == null && _spec.strict)

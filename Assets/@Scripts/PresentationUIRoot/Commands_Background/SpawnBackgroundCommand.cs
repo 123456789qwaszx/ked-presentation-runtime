@@ -1,36 +1,9 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
-using UnityEngine.UI;
 using Object = UnityEngine.Object;
-
-public sealed class PresentationBackgroundView : MonoBehaviour
-{
-    public RectTransform Root { get; private set; }
-    public CanvasGroup CanvasGroup { get; private set; }
-    public Image Image { get; private set; }
-
-    public void EnsureBound(bool strict = true)
-    {
-        Root = transform as RectTransform;
-        if (Root == null)
-        {
-            if (strict)
-                throw new InvalidOperationException($"[PresentationBackgroundView] Root must be RectTransform. go={name}");
-            return;
-        }
-
-        if (!TryGetComponent(out CanvasGroup canvasGroup))
-            canvasGroup = gameObject.AddComponent<CanvasGroup>();
-
-        CanvasGroup = canvasGroup;
-
-        Image = GetComponentInChildren<Image>(true);
-        if (Image == null && strict)
-            throw new InvalidOperationException($"[PresentationBackgroundView] Missing Image under '{name}'.");
-    }
-}
 
 public static class PresentationBackgroundRegistryExt
 {
@@ -40,16 +13,12 @@ public static class PresentationBackgroundRegistryExt
         return $"bg:{bgKey}";
     }
 
-    public static bool TryGetBackgroundView(
-        this System.Collections.Generic.Dictionary<string, object> refs,
-        string bgKey,
+    public static bool TryGetBackgroundView(this Dictionary<string, object> refs, string bgKey,
         out PresentationBackgroundView view)
     {
         string key = MakeBackgroundRefKey(bgKey);
 
-        if (refs != null &&
-            refs.TryGetValue(key, out object obj) &&
-            obj is PresentationBackgroundView typed)
+        if (refs != null && refs.TryGetValue(key, out object obj) && obj is PresentationBackgroundView typed)
         {
             view = typed;
             return true;
@@ -124,92 +93,98 @@ public sealed class SpawnBackgroundCommand : CommandBase
     }
 
     private void Spawn(CommandRunScope scope)
+{
+    if (scope == null || scope.Presentation == null)
     {
-        if (scope == null || scope.Presentation == null)
-        {
-            if (_spec.strict)
-                throw new InvalidOperationException("[SpawnBackgroundCommand] PresentationViewRefs is null.");
-            return;
-        }
-
-        RectTransform parent = scope.Presentation.GetRect(PresentationTarget.BGContent_Root);
-        if (parent == null)
-        {
-            if (_spec.strict)
-                throw new InvalidOperationException("[SpawnBackgroundCommand] BGContent_Root not found.");
-            return;
-        }
-
-        if (_prefabProvider == null)
-        {
-            if (_spec.strict)
-                throw new InvalidOperationException("[SpawnBackgroundCommand] Background prefab provider is null.");
-            return;
-        }
-
-        if (!_prefabProvider.TryGetBackgroundViewPrefab(_spec.viewPrefabKey, out GameObject prefab) ||
-            prefab == null)
-        {
-            if (_spec.strict)
-            {
-                throw new InvalidOperationException(
-                    $"[SpawnBackgroundCommand] Background view prefab not found. viewPrefabKey={_spec.viewPrefabKey}");
-            }
-
-            return;
-        }
-
-        string refKey = PresentationBackgroundRegistryExt.MakeBackgroundRefKey(_spec.bgKey);
-
-        if (_spec.destroyExistingWithSameKey)
-        {
-            _responseRig?.RemoveBinding(refKey);
-            _runtimeRegistry?.DestroyRuntimeBackground(_spec.bgKey);
-
-            if (scope.Refs.TryGetBackgroundView(_spec.bgKey, out PresentationBackgroundView existing))
-                DestroyExisting(existing);
-
-            scope.Refs.Remove(refKey);
-        }
-
-        GameObject go = Object.Instantiate(prefab, parent, false);
-        go.name = string.IsNullOrWhiteSpace(_spec.bgKey)
-            ? prefab.name
-            : $"BG_{_spec.bgKey}";
-
-        if (_spec.setAsLastSibling)
-            go.transform.SetAsLastSibling();
-
-        ResetSpawnedRectTransform(go);
-
-        PresentationBackgroundView view = go.GetComponent<PresentationBackgroundView>();
-        if (view == null)
-            view = go.AddComponent<PresentationBackgroundView>();
-
-        view.EnsureBound(_spec.strict);
-
-        if (view.CanvasGroup != null)
-        {
-            view.CanvasGroup.alpha = Mathf.Clamp01(_spec.initialAlpha);
-            view.CanvasGroup.interactable = false;
-            view.CanvasGroup.blocksRaycasts = false;
-        }
-
-        RectTransformResponseTarget responseTarget =
-            view.GetComponent<RectTransformResponseTarget>();
-
-        if (responseTarget == null)
-            responseTarget = view.gameObject.AddComponent<RectTransformResponseTarget>();
-
-        _responseRig?.RegisterRuntimeBinding(
-            refKey,
-            responseTarget,
-            PresentationResponseProfile.Background,
-            scope.Presentation);
-
-        scope.Refs[refKey] = view;
-        _runtimeRegistry?.RegisterRuntimeBackground(_spec.bgKey, view);
+        if (_spec.strict)
+            throw new InvalidOperationException("[SpawnBackgroundCommand] PresentationViewRefs is null.");
+        return;
     }
+
+    RectTransform parent = scope.Presentation.GetRect(PresentationTarget.BGContent_Root);
+    if (parent == null)
+    {
+        if (_spec.strict)
+            throw new InvalidOperationException("[SpawnBackgroundCommand] BGContent_Root not found.");
+        return;
+    }
+
+    if (_prefabProvider == null)
+    {
+        if (_spec.strict)
+            throw new InvalidOperationException("[SpawnBackgroundCommand] Background prefab provider is null.");
+        return;
+    }
+
+    if (!_prefabProvider.TryGetBackgroundViewPrefab(_spec.viewPrefabKey, out GameObject prefab) ||
+        prefab == null)
+    {
+        if (_spec.strict)
+        {
+            throw new InvalidOperationException(
+                $"[SpawnBackgroundCommand] Background view prefab not found. viewPrefabKey={_spec.viewPrefabKey}");
+        }
+
+        return;
+    }
+
+    string bgKey = _spec.bgKey;
+
+    if (_spec.destroyExistingWithSameKey)
+    {
+        _responseRig?.RemoveBinding(bgKey);
+        _runtimeRegistry?.DestroyRuntimeBackground(bgKey);
+
+        if (scope.Refs != null &&
+            scope.Refs.TryGetValue(bgKey, out object obj) &&
+            obj is PresentationBackgroundView existing)
+        {
+            DestroyExisting(existing);
+        }
+
+        scope.Refs?.Remove(bgKey);
+    }
+
+    GameObject go = Object.Instantiate(prefab, parent, false);
+    go.name = string.IsNullOrWhiteSpace(bgKey)
+        ? prefab.name
+        : $"BG_{bgKey}";
+
+    if (_spec.setAsLastSibling)
+        go.transform.SetAsLastSibling();
+
+    ResetSpawnedRectTransform(go);
+
+    PresentationBackgroundView view = go.GetComponent<PresentationBackgroundView>();
+    if (view == null)
+        view = go.AddComponent<PresentationBackgroundView>();
+
+    view.EnsureBound(_spec.strict);
+
+    if (view.CanvasGroup != null)
+    {
+        view.CanvasGroup.alpha = Mathf.Clamp01(_spec.initialAlpha);
+        view.CanvasGroup.interactable = false;
+        view.CanvasGroup.blocksRaycasts = false;
+    }
+
+    RectTransformResponseTarget responseTarget =
+        view.GetComponent<RectTransformResponseTarget>();
+
+    if (responseTarget == null)
+        responseTarget = view.gameObject.AddComponent<RectTransformResponseTarget>();
+
+    _responseRig?.RegisterRuntimeBinding(
+        bgKey,
+        responseTarget,
+        PresentationResponseProfile.Background,
+        scope.Presentation);
+
+    if (scope.Refs != null)
+        scope.Refs[bgKey] = view;
+
+    _runtimeRegistry?.RegisterRuntimeBackground(bgKey, view);
+}
 
     private void DestroyExisting(PresentationBackgroundView existing)
     {

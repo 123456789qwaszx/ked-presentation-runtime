@@ -28,7 +28,6 @@ public sealed class DestroyBackgroundCommand : CommandBase
     private readonly DestroyBackgroundCommandSpec _spec;
 
     private PresentationBackgroundView _view;
-    private string _refKey;
     private bool _resolveAttempted;
 
     public override bool WaitForCompletion => true;
@@ -63,14 +62,15 @@ public sealed class DestroyBackgroundCommand : CommandBase
             return;
 
         RectTransform rect = _view.Root != null ? _view.Root : _view.transform as RectTransform;
+
         if (rect != null && _spec.killTween)
-            rect.DOKill(true); // Finish previous motion so this command starts from a committed state.
+            rect.DOKill(true);
 
         if (_view.CanvasGroup != null)
             _view.CanvasGroup.DOKill(_spec.killTween);
 
-        if (_spec.removeRefEntry && scope != null && scope.Refs != null && !string.IsNullOrEmpty(_refKey))
-            scope.Refs.Remove(_refKey);
+        if (_spec.removeRefEntry && scope != null && scope.Refs != null)
+            scope.Refs.Remove(_spec.bgKey);
 
 #if UNITY_EDITOR
         if (!Application.isPlaying)
@@ -85,9 +85,16 @@ public sealed class DestroyBackgroundCommand : CommandBase
     private void ResolveRefs(CommandRunScope scope)
     {
         _resolveAttempted = true;
-        _refKey = PresentationBackgroundRegistryExt.MakeBackgroundRefKey(_spec.bgKey);
 
-        if (!scope.Refs.TryGetBackgroundView(_spec.bgKey, out PresentationBackgroundView view))
+        if (scope == null || scope.Refs == null)
+        {
+            if (_spec.strict)
+                throw new InvalidOperationException($"[DestroyBackgroundCommand] Refs is null. bgKey={_spec.bgKey}");
+            return;
+        }
+
+        if (!scope.Refs.TryGetValue(_spec.bgKey, out object obj) ||
+            obj is not PresentationBackgroundView view)
         {
             if (_spec.strict)
                 throw new InvalidOperationException($"[DestroyBackgroundCommand] Background view not found. bgKey={_spec.bgKey}");

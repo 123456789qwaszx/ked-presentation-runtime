@@ -20,13 +20,9 @@ public sealed class RectTransformResponseTarget : MonoBehaviour, IRectTransformP
 
     public void ApplyResponse(in PresentationResponse response)
     {
-        Debug.Log(
-            $"[RectTransformResponseTarget] Apply. ??");
         if (_rect == null)
             return;
-        Debug.Log(
-            $"[RectTransformResponseTarget] Apply. " +
-            $"target={name}, scale={response.scale}, pos={response.anchoredPosition}");
+        //Debug.Log($"[RectTransformResponseTarget] Apply. " + $"target={name}, scale={response.scale}, pos={response.anchoredPosition}");
         _rect.anchoredPosition = response.anchoredPosition;
         _rect.localScale = new Vector3(response.scale.x, response.scale.y, 1f);
 
