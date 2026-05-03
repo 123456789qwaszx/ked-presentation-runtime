@@ -55,7 +55,6 @@ public sealed class PresentationViewCommandFactory : INodeCommandFactory
             // Presentation Shot / Response Rig
             ShotResetCommandSpec s => new ShotResetCommand(_presentationResponseRig, s),
             ShotZoomCommandSpec s => new ShotZoomCommand(_presentationResponseRig, s),
-            ShotPanToCommandSpec s => new ShotPanToCommand(_presentationResponseRig, s),
             ShotTrackCommandSpec s => new ShotTrackCommand(_presentationResponseRig, s),
 
             _ => null

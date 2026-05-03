@@ -17,9 +17,6 @@ public sealed class SpawnBackgroundCommandSpec : CommandSpecBase
     [Header("Spawn")]
     public bool destroyExistingWithSameKey = true;
     public bool setAsLastSibling = true;
-
-    [Header("Validation")]
-    public bool strict = true;
 }
 
 public sealed class SpawnBackgroundCommand : CommandBase
@@ -29,7 +26,6 @@ public sealed class SpawnBackgroundCommand : CommandBase
     private readonly PresentationResponseRig _responseRig;
     private readonly SpawnBackgroundCommandSpec _spec;
 
-    private PresentationViewRefs _presentation;
     private RectTransform _parent;
     private RectTransformResponseTarget _prefab;
     private string _bgKey;
@@ -40,8 +36,8 @@ public sealed class SpawnBackgroundCommand : CommandBase
     public SpawnBackgroundCommand(
         IBGViewPrefabProvider prefabProvider,
         SpawnBackgroundCommandSpec spec,
-        IBGRuntimeRegistry runtimeRegistry = null,
-        PresentationResponseRig responseRig = null)
+        IBGRuntimeRegistry runtimeRegistry,
+        PresentationResponseRig responseRig)
     {
         _prefabProvider = prefabProvider;
         _spec = spec;
@@ -54,7 +50,7 @@ public sealed class SpawnBackgroundCommand : CommandBase
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (_presentation == null || _parent == null || _prefab == null || string.IsNullOrEmpty(_bgKey))
+        if (_parent == null || _prefab == null)
             yield break;
 
         Spawn(scope);
@@ -65,7 +61,7 @@ public sealed class SpawnBackgroundCommand : CommandBase
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (_presentation == null || _parent == null || _prefab == null || string.IsNullOrEmpty(_bgKey))
+        if (_parent == null || _prefab == null)
             return;
 
         Spawn(scope);
@@ -73,64 +69,14 @@ public sealed class SpawnBackgroundCommand : CommandBase
 
     protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
 
+    
     private void ResolveRefs(CommandRunScope scope)
     {
         _resolveAttempted = true;
 
-        _bgKey = SafeTrim(_spec.bgKey);
-        if (string.IsNullOrEmpty(_bgKey))
-        {
-            if (_spec.strict)
-                Debug.LogWarning("[SpawnBackgroundCommand] bgKey is null or empty.");
-            return;
-        }
-
-        if (scope == null)
-        {
-            if (_spec.strict)
-                Debug.LogWarning("[SpawnBackgroundCommand] CommandRunScope is null.");
-            return;
-        }
-
-        if (scope.Presentation == null)
-        {
-            if (_spec.strict)
-                Debug.LogWarning("[SpawnBackgroundCommand] PresentationViewRefs is null.");
-            return;
-        }
-
-        _presentation = scope.Presentation;
-
-        _parent = _presentation.GetRect(PresentationTarget.BGContent_Root);
-        if (_parent == null)
-        {
-            if (_spec.strict)
-                Debug.LogWarning("[SpawnBackgroundCommand] BGContent_Root not found.");
-            return;
-        }
-
-        if (_prefabProvider == null)
-        {
-            if (_spec.strict)
-                Debug.LogWarning("[SpawnBackgroundCommand] Background prefab provider is null.");
-            return;
-        }
-
-        string viewPrefabKey = SafeTrim(_spec.viewPrefabKey);
-        if (string.IsNullOrEmpty(viewPrefabKey))
-        {
-            if (_spec.strict)
-                Debug.LogWarning("[SpawnBackgroundCommand] viewPrefabKey is null or empty.");
-            return;
-        }
-
-        if (!_prefabProvider.TryGetBackgroundViewPrefab(viewPrefabKey, out _prefab) || _prefab == null)
-        {
-            if (_spec.strict)
-                Debug.LogWarning(
-                    $"[SpawnBackgroundCommand] Background view prefab not found. viewPrefabKey='{viewPrefabKey}'.");
-            return;
-        }
+        _bgKey = _spec.bgKey;
+        _parent = scope.Presentation.GetRect(PresentationTarget.BGContent_Root);
+        _prefabProvider.TryGetBackgroundViewPrefab(_spec.viewPrefabKey, out _prefab);
     }
 
     private void Spawn(CommandRunScope scope)
@@ -139,10 +85,6 @@ public sealed class SpawnBackgroundCommand : CommandBase
             DestroyExistingForKey(scope, _bgKey);
 
         RectTransformResponseTarget target = Object.Instantiate(_prefab, _parent, false);
-
-        target.name = string.IsNullOrWhiteSpace(_bgKey)
-            ? _prefab.name
-            : $"BG_{_bgKey}";
 
         if (_spec.setAsLastSibling)
             target.transform.SetAsLastSibling();
@@ -155,8 +97,7 @@ public sealed class SpawnBackgroundCommand : CommandBase
             PresentationResponseProfile.Background,
             scope.Presentation.GetRect(PresentationTarget.Stage_Root));
 
-        if (scope != null && scope.Refs != null)
-            scope.Refs[_bgKey] = target;
+        scope.Refs[_bgKey] = target;
 
         _runtimeRegistry?.RegisterRuntimeBackground(_bgKey, target);
     }
@@ -216,10 +157,5 @@ public sealed class SpawnBackgroundCommand : CommandBase
         rect.pivot = new Vector2(0.5f, 0.5f);
         rect.anchoredPosition = Vector2.zero;
         rect.sizeDelta = Vector2.zero;
-    }
-
-    private static string SafeTrim(string s)
-    {
-        return string.IsNullOrEmpty(s) ? string.Empty : s.Trim();
     }
 }
