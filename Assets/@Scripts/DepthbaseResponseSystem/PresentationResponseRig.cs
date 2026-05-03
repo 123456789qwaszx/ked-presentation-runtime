@@ -33,7 +33,7 @@ public sealed class PresentationResponseRig : MonoBehaviour
         string key,
         PresentationResponseBinding.IResponseTarget target,
         PresentationResponseProfile presetProfile,
-        PresentationViewRefs presentation)
+        RectTransform presentationUIRoot)
     {
         if (string.IsNullOrWhiteSpace(key))
             Debug.LogWarning("[PresentationResponseRig] RegisterRuntimeBinding failed. key is null or empty.");
@@ -41,7 +41,7 @@ public sealed class PresentationResponseRig : MonoBehaviour
         if (target?.Rect == null)
             Debug.LogWarning($"[PresentationResponseRig] RegisterRuntimeBinding failed. target?.Rect is null. key={key}, target={target}");
 
-        RectTransform stageRoot = presentation.GetRect(PresentationTarget.Stage_Root);
+        RectTransform stageRoot = presentationUIRoot;
         PresentationResponseProfile runtimeProfile = CreateRuntimeProfile(target, presetProfile, stageRoot);
         PresentationResponseBinding binding = new PresentationResponseBinding(key, runtimeProfile, target, stageRoot);
 

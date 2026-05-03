@@ -9,16 +9,25 @@
 <<bg_sprite test1 ui/theme1/DialogueBox03BG_Image2>>
 <<bg_fade test1 1>>
 
+<<bg_spawn test2 bg1>>
+<<bg_sprite test2 ui/theme1/Background00_Image>>
+<<bg_fade test2 1>>
+
+<<bg_spawn test3 bg1>>
+<<bg_sprite test3 ui/default/LobbyCharacter_Image>>
+<<bg_fade test3 1>>
+
 <<slot me>>
 <<place me right>>
 <<cast me reira>>
-
-
 <<fade_in me>>
+<<slide_in me>>
+
 깊은 밤, 차가운 정적이 내려앉은 도시의 외딴 골목으로 정체를 알 수 없는 수상쩍은 그림자가 도둑고양이처럼 은밀하게 숨어든다.
 
-<<shot_pan -0.5 0 0.25>>
-//<<shot_zoom_focus me 10 10 0 0>>
+<<jolt me>>
+//<<shot_pan -0.5 0 0.25>>
+<<shot_zoom me 10 1.5>>
 
 //<<shot_pan 1500 1000 3.5>>
 
@@ -27,20 +36,18 @@
 // <<begin_hold>>
 // <<end_hold>>
 주변을 살피는 그림자의 움직임에는 극도의 경계심이 서려 있었다.
-<<shot_track_to me 9000 -1000 1.5>>
+<<shot_track me 2000 0 1.5>>
 
 
 // <<begin_hold>>
 // <<bg_spawn test2 bg1>>
-
 // <<bg_sprite test2 ui/theme1/DialogueBox03BG_Image2>>
 // <<bg_fade test2 1>>
 
 //<<dlg_spawn b1 b2>>
 //<<end_hold>>
 "물건은 가져왔어?"
-<<shot_zoom -10.0 1.5>>
-<<shot_zoom 4.0 1.5>>
+<<shot_zoom me -10 1.5>>
 // <<begin_hold>>
 // <<bg_spawn test3 bg1>>
 
@@ -50,29 +57,20 @@
 // <<end_hold>>
 
 어둠 속에서 누군가가 나직한 목소리로 물었다.
-//<<shot_reset 0.35>>
-
-
-
-<<shot_track me 0.35>>
-<<shot_pan 1.5 0 3.5>>
 
 상대방인 의심스러운 사람이 품 안에서 소중한 듯 무언가를 꺼내 보이며 대꾸했다.
 
 "물론이지. 제대로 가져왔는지 확인해 볼 거야?"
 
-<<shot_pan 1.5 0 0.35>>
 물건을 건네받은 수상한 사람은 그것을 입으로 가져가 조심스럽게 베어 물었다. 고요한 골목 안에 기괴한 저작음이 울려 퍼졌다.
 
-<<shot_track me 0.35>>
 "쩝쩝쩝 ..... 맞아, 바로 이 맛이야."
 
-<<shot_zoom_focus me 2.5 0.45>>
+<<shot_zoom me 2.5 0.45>>
 의심스러운 사람은 만족한 듯한 상대의 반응을 확인하고는 본론을 꺼냈다.
 
 "내가 부탁했던 건?"
 
-<<shot_track_to me -120 40 0.35>>
 "빠짐없이 챙겼왔지. 세어 봐."
 
 수상한 사람이 묵직한 서류 뭉치를 내밀었다.

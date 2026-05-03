@@ -156,7 +156,7 @@ public sealed class SpawnBackgroundCommand : CommandBase
             _bgKey,
             responseTarget,
             PresentationResponseProfile.Background,
-            _presentation);
+            scope.Presentation.GetRect(PresentationTarget.Stage_Root));
 
         if (scope != null && scope.Refs != null)
             scope.Refs[_bgKey] = go;

@@ -42,7 +42,6 @@ public sealed class ShotTrackCommand : CommandBase, IStepScopedCommand
     private readonly PresentationResponseRig _rig;
     private readonly ShotTrackCommandSpec _spec;
 
-    private PresentationViewRefs _presentation;
     private PresentationIntentState _fromState;
     private PresentationIntentState _toState;
     private Tween _tween;
@@ -65,7 +64,7 @@ public sealed class ShotTrackCommand : CommandBase, IStepScopedCommand
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (_rig == null || _presentation == null)
+        if (_rig == null)
             yield break;
 
         if (_spec.killTween)
@@ -76,9 +75,9 @@ public sealed class ShotTrackCommand : CommandBase, IStepScopedCommand
 
         _canCommitFinalState = true;
 
-        if (_spec.duration <= 0f || ApproximatelyEqual(_fromState, _toState))
+        if (_spec.duration <= 0f)
         {
-            Commit(_rig, _toState, _presentation);
+            _rig.ApplyToAllBindings(_toState);
             ClearRuntimeState();
             yield break;
         }
@@ -88,7 +87,7 @@ public sealed class ShotTrackCommand : CommandBase, IStepScopedCommand
                 () => 0f,
                 t =>
                 {
-                    if (!_canCommitFinalState || _rig == null || _presentation == null)
+                    if (!_canCommitFinalState || _rig == null)
                         return;
 
                     float u = Mathf.Clamp01(t);
@@ -103,10 +102,10 @@ public sealed class ShotTrackCommand : CommandBase, IStepScopedCommand
             .SetTarget(_rig)
             .OnComplete(() =>
             {
-                if (!_canCommitFinalState || _rig == null || _presentation == null)
+                if (!_canCommitFinalState || _rig == null)
                     return;
 
-                Commit(_rig, _toState, _presentation);
+                _rig.ApplyToAllBindings(_toState);
                 ClearRuntimeState();
             });
 
@@ -119,7 +118,7 @@ public sealed class ShotTrackCommand : CommandBase, IStepScopedCommand
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (_rig == null || _presentation == null)
+        if (_rig == null)
             return;
 
         KillRigTween(false);
@@ -127,7 +126,7 @@ public sealed class ShotTrackCommand : CommandBase, IStepScopedCommand
         _fromState = _rig.CurrentState;
         _toState = BuildTargetState(_fromState, scope);
 
-        Commit(_rig, _toState, _presentation);
+        _rig.ApplyToAllBindings(_toState);
         ClearRuntimeState();
     }
 
@@ -138,41 +137,18 @@ public sealed class ShotTrackCommand : CommandBase, IStepScopedCommand
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (!_canCommitFinalState || _rig == null || _presentation == null)
+        if (!_canCommitFinalState || _rig == null)
             return;
 
         _tween?.Kill(false);
         KillRigTween(false);
-        Commit(_rig, _toState, _presentation);
+        _rig.ApplyToAllBindings(_toState);
         ClearRuntimeState();
     }
 
     private void ResolveRefs(CommandRunScope scope)
     {
         _resolveAttempted = true;
-
-        if (_rig == null)
-        {
-            if (_spec.strict)
-                Debug.LogWarning("[ShotTrackCommand] PresentationResponseRig is null.");
-            return;
-        }
-
-        if (scope == null)
-        {
-            if (_spec.strict)
-                Debug.LogWarning("[ShotTrackCommand] CommandRunScope is null.");
-            return;
-        }
-
-        if (scope.Presentation == null)
-        {
-            if (_spec.strict)
-                Debug.LogWarning("[ShotTrackCommand] PresentationViewRefs is null.");
-            return;
-        }
-
-        _presentation = scope.Presentation;
     }
 
     private PresentationIntentState BuildTargetState(
@@ -230,9 +206,7 @@ public sealed class ShotTrackCommand : CommandBase, IStepScopedCommand
             return false;
         }
 
-        RectTransform stageRoot = _presentation != null
-            ? _presentation.GetRect(PresentationTarget.Stage_Root)
-            : null;
+        RectTransform stageRoot = scope.Presentation.GetRect(PresentationTarget.Stage_Root);
 
         Vector3 world =
             rect.TransformPoint(new Vector3(_spec.focusLocalOffset.x, _spec.focusLocalOffset.y, 0f));
@@ -253,17 +227,9 @@ public sealed class ShotTrackCommand : CommandBase, IStepScopedCommand
     private void ClearRuntimeState()
     {
         _canCommitFinalState = false;
-        _presentation = null;
         _tween = null;
     }
 
-    private static void Commit(
-        PresentationResponseRig rig,
-        in PresentationIntentState state,
-        PresentationViewRefs presentation)
-    {
-        rig.ApplyToAllBindings(state);
-    }
 
     private static PresentationIntentState InterpolateState(
         in PresentationIntentState from,
@@ -276,15 +242,6 @@ public sealed class ShotTrackCommand : CommandBase, IStepScopedCommand
             pan = Vector2.Lerp(from.pan, to.pan, t),
             focusPoint = Vector2.Lerp(from.focusPoint, to.focusPoint, t),
         };
-    }
-
-    private static bool ApproximatelyEqual(
-        in PresentationIntentState a,
-        in PresentationIntentState b)
-    {
-        return Mathf.Abs(a.zoom - b.zoom) <= 0.0001f &&
-               Vector2.SqrMagnitude(a.pan - b.pan) <= 0.0001f &&
-               Vector2.SqrMagnitude(a.focusPoint - b.focusPoint) <= 0.0001f;
     }
 
     private static string SafeTrim(string s)

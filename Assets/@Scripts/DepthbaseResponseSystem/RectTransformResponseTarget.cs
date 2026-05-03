@@ -14,14 +14,8 @@ public sealed class RectTransformResponseTarget : MonoBehaviour, PresentationRes
 
     public void ApplyResponse(in PresentationResponseBinding.Response response)
     {
-        if (_rect == null)
-            return;
-        
-        //Debug.Log($"[RectTransformResponseTarget] Apply. " + $"target={name}, scale={response.scale}, pos={response.anchoredPosition}");
         _rect.anchoredPosition = response.anchoredPosition;
         _rect.localScale = new Vector3(response.scale.x, response.scale.y, 1f);
-
-        if (_canvasGroup != null)
-            _canvasGroup.alpha = response.alpha;
+        _canvasGroup.alpha = response.alpha;
     }
 }

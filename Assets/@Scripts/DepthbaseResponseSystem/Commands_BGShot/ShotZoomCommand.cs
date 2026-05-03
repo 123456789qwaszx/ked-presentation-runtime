@@ -10,8 +10,6 @@ public sealed class ShotZoomCommandSpec : CommandSpecBase
     [Header("Focus")]
     [Tooltip("focus 기준으로 삼을 character roleKey. 비우면 focus 재구성 없이 zoom/pan만 적용.")]
     public string focusRoleKey = "";
-
-    [Tooltip("roleKey로 찾은 CharacterRigRefs 내부에서 focus 기준으로 쓸 target.")]
     public CharacterRigTarget focusTarget = CharacterRigTarget.CharacterPortrait_Root;
 
     [Tooltip("focus target rect의 로컬 오프셋.")]
@@ -207,25 +205,15 @@ public sealed class ShotZoomCommand : CommandBase, IStepScopedCommand
     private bool TryResolveFocusPoint(CommandRunScope scope, out Vector2 focusPoint)
     {
         focusPoint = Vector2.zero;
-
-        string roleKey = _spec.focusRoleKey;
         
-        scope.Refs.TryGetCharRigRefs(roleKey, out CharacterRigRefs rigRefs);
-
+        scope.Refs.TryGetCharRigRefs(_spec.focusRoleKey, out CharacterRigRefs rigRefs);
         RectTransform rect = rigRefs.GetRect(_spec.focusTarget);
         
         RectTransform stageRoot = scope.Presentation.GetRect(PresentationTarget.Stage_Root);
 
-        Vector3 world = rect.TransformPoint(
-            new Vector3(_spec.focusLocalOffset.x, _spec.focusLocalOffset.y, 0f));
-
-        if (stageRoot == null)
-        {
-            focusPoint = new Vector2(world.x, world.y);
-            return true;
-        }
-
+        Vector3 world = rect.TransformPoint(new Vector3(_spec.focusLocalOffset.x, _spec.focusLocalOffset.y, 0f));
         Vector3 local = stageRoot.InverseTransformPoint(world);
+        
         focusPoint = new Vector2(local.x, local.y);
         return true;
     }
