@@ -50,7 +50,7 @@ public sealed class PresentationViewCommandFactory : INodeCommandFactory
             SpawnBackgroundCommandSpec s => new SpawnBackgroundCommand(_bgViewPrefabProvider, s, _bgRuntimeRegistry, _presentationResponseRig),
             SetBackgroundSpriteCommandSpec s => new SetBackgroundSpriteCommand(s),
             FadeBackgroundCommandSpec s => new FadeBackgroundCommand(s),
-            DestroyBackgroundCommandSpec s => new DestroyBackgroundCommand(s),
+            DestroyBackgroundCommandSpec s => new DestroyBackgroundCommand(s, _bgRuntimeRegistry, _presentationResponseRig),
 
             // Presentation Shot / Response Rig
             ShotResetCommandSpec s => new ShotResetCommand(_presentationResponseRig, s),

@@ -7,35 +7,42 @@ using UnityEngine;
 [CommandMenuHint("Presentation Background", "Fade Background", Order = -885)]
 public sealed class FadeBackgroundCommandSpec : CommandSpecBase
 {
-    [Header("Identity")] [Tooltip("대상 배경 view를 찾을 bgKey")]
+    [Header("Identity")]
+    [Tooltip("대상 배경 GameObject를 찾을 bgKey")]
     public string bgKey = "current";
 
-    [Header("Fade")] [Range(0f, 1f)] public float targetAlpha = 1f;
+    [Header("Fade")]
+    [Range(0f, 1f)]
+    public float targetAlpha = 1f;
 
     [Tooltip("페이드 시간(초). 0 이하이면 즉시 스냅합니다.")]
     public float duration = 0.35f;
 
     public Ease ease = Ease.OutCubic;
 
-    [Header("Interaction")] [Tooltip("true면 완료 시 interactable을 targetAlpha 기준으로 설정합니다.")]
+    [Header("Interaction")]
+    [Tooltip("true면 완료 시 interactable을 targetAlpha 기준으로 설정합니다.")]
     public bool controlInteractable = false;
 
     [Tooltip("true면 완료 시 blocksRaycasts를 targetAlpha 기준으로 설정합니다.")]
     public bool controlBlocksRaycasts = false;
 
-    [Header("Wait")] public bool wait = false;
+    [Header("Wait")]
+    public bool wait = false;
 
-    [Header("Options")] [Tooltip("체크하면 기존 CanvasGroup 관련 트윈을 끝내고 committed state에서 시작합니다.")]
+    [Header("Options")]
+    [Tooltip("체크하면 기존 CanvasGroup 관련 트윈을 끝내고 committed state에서 시작합니다.")]
     public bool killTween = true;
 
-    [Tooltip("필수 계약이 없으면 예외를 던질지")] public bool strict = true;
+    [Tooltip("필수 계약이 없으면 예외를 던질지")]
+    public bool strict = true;
 }
 
 public sealed class FadeBackgroundCommand : CommandBase
 {
     private readonly FadeBackgroundCommandSpec _spec;
 
-    private PresentationBackgroundView _view;
+    private GameObject _background;
     private RectTransform _rect;
     private CanvasGroup _group;
     private Tween _tween;
@@ -55,7 +62,7 @@ public sealed class FadeBackgroundCommand : CommandBase
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (_view == null || _rect == null || _group == null)
+        if (_background == null || _rect == null || _group == null)
             yield break;
 
         if (_spec.killTween)
@@ -106,7 +113,7 @@ public sealed class FadeBackgroundCommand : CommandBase
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (_view == null || _group == null)
+        if (_background == null || _group == null)
             return;
 
         ApplyFinalState(_spec.targetAlpha);
@@ -142,27 +149,37 @@ public sealed class FadeBackgroundCommand : CommandBase
         {
             if (_spec.strict)
                 throw new InvalidOperationException($"[FadeBackgroundCommand] Refs is null. bgKey={_spec.bgKey}");
+
             return;
         }
 
         if (!scope.Refs.TryGetValue(_spec.bgKey, out object obj) ||
-            obj is not PresentationBackgroundView view)
+            obj is not GameObject background)
         {
             if (_spec.strict)
                 throw new InvalidOperationException(
-                    $"[FadeBackgroundCommand] Background view not found. bgKey={_spec.bgKey}");
+                    $"[FadeBackgroundCommand] Background GameObject not found. bgKey={_spec.bgKey}");
+
             return;
         }
 
-        _view = view;
-        _view.EnsureBound(_spec.strict);
+        _background = background;
+        _rect = _background.transform as RectTransform;
+        _group = _background.GetComponent<CanvasGroup>();
 
-        _rect = _view.Root;
-        _group = _view.CanvasGroup;
+        if (_group == null)
+        {
+            _group = _background.AddComponent<CanvasGroup>();
+
+            if (_spec.strict)
+                Debug.LogWarning($"[FadeBackgroundCommand] CanvasGroup not found. AutoAdd CanvasGroup. bgKey={_spec.bgKey}");
+        }
 
         if ((_rect == null || _group == null) && _spec.strict)
+        {
             throw new InvalidOperationException(
-                $"[FadeBackgroundCommand] Background view binding missing. bgKey={_spec.bgKey}");
+                $"[FadeBackgroundCommand] Background binding missing. bgKey={_spec.bgKey}, go={_background.name}");
+        }
     }
 
     private void ApplyFinalState(float alpha)
@@ -183,7 +200,7 @@ public sealed class FadeBackgroundCommand : CommandBase
     private void ClearResolvedRefs()
     {
         _canCommitFinalState = false;
-        _view = null;
+        _background = null;
         _rect = null;
         _group = null;
         _tween = null;

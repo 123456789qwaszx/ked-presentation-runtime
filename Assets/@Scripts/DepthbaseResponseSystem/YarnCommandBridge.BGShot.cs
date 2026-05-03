@@ -11,8 +11,6 @@ public sealed partial class YarnCommandBridge
 
         _dialogueRunner.AddCommandHandler("shot_pan", (Action<float, float, float>)EnqueueShotPanToSpec);
 
-        _dialogueRunner.AddCommandHandler("shot_pan_delta", (Action<float, float, float>)EnqueueShotPanDeltaSpec);
-
         _dialogueRunner.AddCommandHandler("shot_zoom", (Action<float, float>)EnqueueShotZoomSpec);
         
         _dialogueRunner.AddCommandHandler("shot_zoom_focus", (Action<string, float, float, float, float>)EnqueueShotZoomFocusSpec);
@@ -35,20 +33,6 @@ public sealed partial class YarnCommandBridge
     }
 
     private void EnqueueShotPanToSpec(float panX, float panY, float duration = 0.35f)
-    {
-        var spec = new ShotPanToCommandSpec
-        {
-            panX = Mathf.Clamp(panX, -10f, 10f),
-            panY = Mathf.Clamp(panY, -10f, 10f),
-            duration = Mathf.Max(0f, duration),
-            ease = Ease.OutCubic,
-            wait = false
-        };
-
-        Collect(spec);
-    }
-
-    private void EnqueueShotPanDeltaSpec(float panX, float panY, float duration = 0.35f)
     {
         var spec = new ShotPanToCommandSpec
         {

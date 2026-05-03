@@ -18,9 +18,6 @@ public sealed class SpawnBackgroundCommandSpec : CommandSpecBase
     public bool destroyExistingWithSameKey = true;
     public bool setAsLastSibling = true;
 
-    [Range(0f, 1f)]
-    public float initialAlpha = 0f;
-
     [Header("Validation")]
     public bool strict = true;
 }
@@ -151,20 +148,7 @@ public sealed class SpawnBackgroundCommand : CommandBase
 
         ResetSpawnedRectTransform(go);
 
-        PresentationBackgroundView view = GetOrAddBackgroundView(go);
-        if (view == null)
-            return;
-
-        view.EnsureBound(_spec.strict);
-
-        if (view.CanvasGroup != null)
-        {
-            view.CanvasGroup.alpha = Mathf.Clamp01(_spec.initialAlpha);
-            view.CanvasGroup.interactable = false;
-            view.CanvasGroup.blocksRaycasts = false;
-        }
-
-        RectTransformResponseTarget responseTarget = GetOrAddResponseTarget(view.gameObject);
+        RectTransformResponseTarget responseTarget = GetOrAddResponseTarget(go);
         if (responseTarget == null)
             return;
 
@@ -175,11 +159,11 @@ public sealed class SpawnBackgroundCommand : CommandBase
             _presentation);
 
         if (scope != null && scope.Refs != null)
-            scope.Refs[_bgKey] = view;
+            scope.Refs[_bgKey] = go;
 
-        _runtimeRegistry?.RegisterRuntimeBackground(_bgKey, view);
+        _runtimeRegistry?.RegisterRuntimeBackground(_bgKey, go);
     }
-
+    
     private void DestroyExistingForKey(CommandRunScope scope, string bgKey)
     {
         _responseRig?.RemoveBinding(bgKey);
@@ -188,7 +172,7 @@ public sealed class SpawnBackgroundCommand : CommandBase
         if (scope != null &&
             scope.Refs != null &&
             scope.Refs.TryGetValue(bgKey, out object obj) &&
-            obj is PresentationBackgroundView existing)
+            obj is GameObject existing)
         {
             DestroyExisting(existing);
         }
@@ -196,21 +180,20 @@ public sealed class SpawnBackgroundCommand : CommandBase
         scope?.Refs?.Remove(bgKey);
     }
 
-    private PresentationBackgroundView GetOrAddBackgroundView(GameObject go)
+    private static void DestroyExisting(GameObject existing)
     {
-        if (go == null)
-            return null;
+        if (existing == null)
+            return;
 
-        PresentationBackgroundView view = go.GetComponent<PresentationBackgroundView>();
-        if (view != null)
-            return view;
+        RectTransform rect = existing.transform as RectTransform;
+        if (rect != null)
+            rect.DOKill(true);
 
-        view = go.AddComponent<PresentationBackgroundView>();
+        CanvasGroup canvasGroup = existing.GetComponent<CanvasGroup>();
+        if (canvasGroup != null)
+            canvasGroup.DOKill(true);
 
-        if (_spec.strict)
-            Debug.LogWarning("[SpawnBackgroundCommand] Background view not found. AutoAdd PresentationBackgroundView.");
-
-        return view;
+        Object.Destroy(existing);
     }
 
     private RectTransformResponseTarget GetOrAddResponseTarget(GameObject go)
@@ -228,29 +211,6 @@ public sealed class SpawnBackgroundCommand : CommandBase
             Debug.LogWarning("[SpawnBackgroundCommand] Response target not found. AutoAdd RectTransformResponseTarget.");
 
         return target;
-    }
-
-    private static void DestroyExisting(PresentationBackgroundView existing)
-    {
-        if (existing == null)
-            return;
-
-        RectTransform rect = existing.Root != null
-            ? existing.Root
-            : existing.transform as RectTransform;
-
-        if (rect != null)
-            rect.DOKill(true);
-
-        if (existing.CanvasGroup != null)
-            existing.CanvasGroup.DOKill(true);
-
-#if UNITY_EDITOR
-        if (!Application.isPlaying)
-            Object.DestroyImmediate(existing.gameObject);
-        else
-#endif
-            Object.Destroy(existing.gameObject);
     }
 
     private static void ResetSpawnedRectTransform(GameObject go)

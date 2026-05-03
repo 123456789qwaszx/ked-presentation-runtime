@@ -9,7 +9,7 @@ using Object = UnityEngine.Object;
 public sealed class DestroyBackgroundCommandSpec : CommandSpecBase
 {
     [Header("Identity")]
-    [Tooltip("파괴할 대상 배경 view를 찾을 bgKey")]
+    [Tooltip("파괴할 대상 배경 GameObject를 찾을 bgKey")]
     public string bgKey = "current";
 
     [Header("Options")]
@@ -26,60 +26,62 @@ public sealed class DestroyBackgroundCommandSpec : CommandSpecBase
 public sealed class DestroyBackgroundCommand : CommandBase
 {
     private readonly DestroyBackgroundCommandSpec _spec;
+    private readonly IBGRuntimeRegistry _runtimeRegistry;
+    private readonly PresentationResponseRig _responseRig;
 
-    private PresentationBackgroundView _view;
+    private GameObject _background;
     private bool _resolveAttempted;
 
     public override bool WaitForCompletion => true;
 
-    public DestroyBackgroundCommand(DestroyBackgroundCommandSpec spec)
+    public DestroyBackgroundCommand(
+        DestroyBackgroundCommandSpec spec,
+        IBGRuntimeRegistry runtimeRegistry = null,
+        PresentationResponseRig responseRig = null)
     {
         _spec = spec;
+        _runtimeRegistry = runtimeRegistry;
+        _responseRig = responseRig;
     }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
-        DestroyView(scope);
+        DestroyBackground(scope);
         yield break;
     }
 
     protected override void OnSkip(CommandRunScope scope)
     {
-        DestroyView(scope);
+        DestroyBackground(scope);
     }
 
     protected override void OnRollbackSeek(CommandRunScope scope)
     {
-        DestroyView(scope);
+        DestroyBackground(scope);
     }
 
-    private void DestroyView(CommandRunScope scope)
+    private void DestroyBackground(CommandRunScope scope)
     {
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (_view == null)
+        if (_background == null)
             return;
 
-        RectTransform rect = _view.Root != null ? _view.Root : _view.transform as RectTransform;
+        if (_spec.killTween)
+            KillTweens(_background);
 
-        if (rect != null && _spec.killTween)
-            rect.DOKill(true);
+        _responseRig?.RemoveBinding(_spec.bgKey);
 
-        if (_view.CanvasGroup != null)
-            _view.CanvasGroup.DOKill(_spec.killTween);
+        if (_runtimeRegistry != null)
+            _runtimeRegistry.DestroyRuntimeBackground(_spec.bgKey);
+        else
+            DestroyGameObject(_background);
 
         if (_spec.removeRefEntry && scope != null && scope.Refs != null)
             scope.Refs.Remove(_spec.bgKey);
 
-#if UNITY_EDITOR
-        if (!Application.isPlaying)
-            Object.DestroyImmediate(_view.gameObject);
-        else
-#endif
-            Object.Destroy(_view.gameObject);
-
-        _view = null;
+        _background = null;
     }
 
     private void ResolveRefs(CommandRunScope scope)
@@ -90,20 +92,48 @@ public sealed class DestroyBackgroundCommand : CommandBase
         {
             if (_spec.strict)
                 throw new InvalidOperationException($"[DestroyBackgroundCommand] Refs is null. bgKey={_spec.bgKey}");
+
             return;
         }
 
         if (!scope.Refs.TryGetValue(_spec.bgKey, out object obj) ||
-            obj is not PresentationBackgroundView view)
+            obj is not GameObject background)
         {
             if (_spec.strict)
-                throw new InvalidOperationException($"[DestroyBackgroundCommand] Background view not found. bgKey={_spec.bgKey}");
+                throw new InvalidOperationException(
+                    $"[DestroyBackgroundCommand] Background GameObject not found. bgKey={_spec.bgKey}");
+
             return;
         }
 
-        _view = view;
+        _background = background;
 
-        if (_view == null && _spec.strict)
-            throw new InvalidOperationException($"[DestroyBackgroundCommand] Background view is null. bgKey={_spec.bgKey}");
+        if (_background == null && _spec.strict)
+        {
+            throw new InvalidOperationException(
+                $"[DestroyBackgroundCommand] Background GameObject is null. bgKey={_spec.bgKey}");
+        }
+    }
+
+    private static void KillTweens(GameObject background)
+    {
+        if (background == null)
+            return;
+
+        RectTransform rect = background.transform as RectTransform;
+        if (rect != null)
+            rect.DOKill(true);
+
+        CanvasGroup canvasGroup = background.GetComponent<CanvasGroup>();
+        if (canvasGroup != null)
+            canvasGroup.DOKill(true);
+    }
+
+    private static void DestroyGameObject(GameObject background)
+    {
+        if (background == null)
+            return;
+
+        Object.Destroy(background);
     }
 }

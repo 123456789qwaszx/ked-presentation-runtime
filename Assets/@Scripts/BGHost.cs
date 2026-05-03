@@ -1,29 +1,80 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 public interface IBGRuntimeRegistry
 {
-    void RegisterRuntimeBackground(string bgKey, PresentationBackgroundView view);
-    void UnregisterRuntimeBackground(string bgKey, PresentationBackgroundView expected = null);
+    void RegisterRuntimeBackground(string bgKey, GameObject go);
+    void UnregisterRuntimeBackground(string bgKey, GameObject expected = null);
     void DestroyRuntimeBackground(string bgKey);
     void ClearRuntimeBackgrounds();
 }
 
-public sealed class BGHost : MonoBehaviour, IBGViewPrefabProvider, IBGRuntimeRegistry
+public sealed class BGHost : MonoBehaviour, IBGRuntimeRegistry, IBGViewPrefabProvider
 {
     [Serializable]
-    public struct BackgroundViewPrefabMapEntry
+    public struct BackgroundPrefabEntry
     {
         public string key;
         public GameObject prefab;
     }
 
-    [SerializeField] private BackgroundViewPrefabMapEntry[] prefabMap;
-    [SerializeField] private string defaultKey = "default";
+    [SerializeField] private BackgroundPrefabEntry[] prefabMap;
 
-    private readonly Dictionary<string, PresentationBackgroundView> _runtimeViews = new();
+    private readonly Dictionary<string, GameObject> _runtimeViews = new();
+
+    public void RegisterRuntimeBackground(string bgKey, GameObject go)
+    {
+        if (go == null)
+        {
+            Debug.LogWarning($"[BGHost] RegisterRuntimeBackground failed. view is null. bgKey={bgKey}", this);
+            return;
+        }
+
+        _runtimeViews[bgKey] = go;
+    }
+    
+    // expected가 지정된 경우, 등록된 view가 바뀌었으면 제거하지 않는다.
+    // (같은 key로 새 배경이 등록된 뒤 이전 배경이 뒤늦게 해제를 시도하는 상황 방어)
+    public void UnregisterRuntimeBackground(string bgKey, GameObject expected = null)
+    {
+        if (!_runtimeViews.TryGetValue(bgKey, out GameObject current))
+            return;
+
+        if (expected != null && !ReferenceEquals(current, expected))
+            return;
+
+        _runtimeViews.Remove(bgKey);
+    }
+
+    public void DestroyRuntimeBackground(string bgKey)
+    {
+        if (!_runtimeViews.TryGetValue(bgKey, out GameObject go))
+            return;
+
+        _runtimeViews.Remove(bgKey);
+
+        if (go == null)
+        {
+            Debug.LogWarning($"[BGHost] DestroyRuntimeBackground skipped. view is already null. bgKey={bgKey}", this);
+            return;
+        }
+
+        Destroy(go);
+    }
+
+    public void ClearRuntimeBackgrounds()
+    {
+        foreach (GameObject go in _runtimeViews.Values)
+        {
+            if (go == null)
+                continue;
+
+            Destroy(go);
+        }
+
+        _runtimeViews.Clear();
+    }
 
     public bool TryGetBackgroundViewPrefab(string key, out GameObject prefab)
     {
@@ -32,93 +83,21 @@ public sealed class BGHost : MonoBehaviour, IBGViewPrefabProvider, IBGRuntimeReg
         if (prefabMap == null || prefabMap.Length == 0)
             return false;
 
-        string resolvedKey = string.IsNullOrWhiteSpace(key) ? defaultKey : key.Trim();
-
         for (int i = 0; i < prefabMap.Length; i++)
         {
-            BackgroundViewPrefabMapEntry entry = prefabMap[i];
+            var entry = prefabMap[i];
 
             if (string.IsNullOrWhiteSpace(entry.key) || entry.prefab == null)
                 continue;
 
-            if (!string.Equals(entry.key.Trim(), resolvedKey, StringComparison.Ordinal))
+            if (!string.Equals(entry.key.Trim(), key, StringComparison.Ordinal))
                 continue;
 
             prefab = entry.prefab;
             return true;
         }
 
-        Debug.LogWarning($"[BGHost] Background view prefab not found. key={resolvedKey}", this);
+        Debug.LogWarning($"[BGHost] Background view prefab not found. key={key}", this);
         return false;
-    }
-
-    public void RegisterRuntimeBackground(string bgKey, PresentationBackgroundView view)
-    {
-        string key = NormalizeRuntimeKey(bgKey);
-
-        if (view == null)
-            return;
-
-        _runtimeViews[key] = view;
-    }
-
-    public void UnregisterRuntimeBackground(string bgKey, PresentationBackgroundView expected = null)
-    {
-        string key = NormalizeRuntimeKey(bgKey);
-
-        if (!_runtimeViews.TryGetValue(key, out PresentationBackgroundView current))
-            return;
-
-        if (expected != null && !ReferenceEquals(current, expected))
-            return;
-
-        _runtimeViews.Remove(key);
-    }
-    
-    public void DestroyRuntimeBackground(string bgKey)
-    {
-        string key = NormalizeRuntimeKey(bgKey);
-
-        if (!_runtimeViews.TryGetValue(key, out PresentationBackgroundView view))
-            return;
-
-        _runtimeViews.Remove(key);
-
-        if (view == null)
-            return;
-
-#if UNITY_EDITOR
-        if (!Application.isPlaying)
-            Object.DestroyImmediate(view.gameObject);
-        else
-#endif
-            Object.Destroy(view.gameObject);
-    }
-    
-    public void ClearRuntimeBackgrounds()
-    {
-        foreach (PresentationBackgroundView view in _runtimeViews.Values)
-        {
-            if (view == null)
-                continue;
-
-#if UNITY_EDITOR
-            if (!Application.isPlaying)
-                Object.DestroyImmediate(view.gameObject);
-            else
-#endif
-                Object.Destroy(view.gameObject);
-        }
-
-        _runtimeViews.Clear();
-    }
-    
-    
-
-    private static string NormalizeRuntimeKey(string bgKey)
-    {
-        return string.IsNullOrWhiteSpace(bgKey)
-            ? "current"
-            : bgKey.Trim();
     }
 }

@@ -135,6 +135,7 @@ public sealed class EpisodePlayer : MonoBehaviour, IRollbackDialogueRestarter
     public void StopDialogue()
     {
         bgHost.ClearRuntimeBackgrounds();
+        presentationResponseRig.ClearRuntimeState();
         
         if (dialogueRunner == null) return;
 

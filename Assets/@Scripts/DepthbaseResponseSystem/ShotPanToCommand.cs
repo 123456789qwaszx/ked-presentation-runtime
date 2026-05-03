@@ -23,9 +23,6 @@ public sealed class ShotPanToCommandSpec : CommandSpecBase
     [Header("Options")]
     [Tooltip("체크하면 기존 shot tween을 끝내고 committed state에서 시작합니다.")]
     public bool killTween = true;
-
-    [Header("Validation")]
-    public bool strict = true;
 }
 
 public sealed class ShotPanToCommand : CommandBase, IStepScopedCommand
@@ -141,33 +138,11 @@ public sealed class ShotPanToCommand : CommandBase, IStepScopedCommand
     private void ResolveRefs(CommandRunScope scope)
     {
         _resolveAttempted = true;
-
-        if (_rig == null)
-        {
-            if (_spec.strict)
-                Debug.LogWarning("[ShotPanToCommand] PresentationResponseRig is null.");
-            return;
-        }
-
-        if (scope == null)
-        {
-            if (_spec.strict)
-                Debug.LogWarning("[ShotPanToCommand] CommandRunScope is null.");
-            return;
-        }
-
-        if (scope.Presentation == null)
-        {
-            if (_spec.strict)
-                Debug.LogWarning("[ShotPanToCommand] PresentationViewRefs is null.");
-            return;
-        }
-
+        
         _presentation = scope.Presentation;
     }
 
-    private PresentationIntentState BuildTargetState(
-        in PresentationIntentState from)
+    private PresentationIntentState BuildTargetState(in PresentationIntentState from)
     {
         Vector2 targetPan = new Vector2(_spec.panX, _spec.panY);
 

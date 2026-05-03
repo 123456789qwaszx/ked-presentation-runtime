@@ -2550,8 +2550,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6fb46a1e1f73dea42a14597e2c27871d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PresentationResponseRig
-  _defaultFramingPoint: {x: 0, y: 0}
-  _manualPanPixelsPerUnit: {x: 64, y: 36}
 --- !u!4 &529556883
 Transform:
   m_ObjectHideFlags: 0
@@ -9537,18 +9535,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RectTransformResponseTarget
   _rect: {fileID: 1847590522}
   _canvasGroup: {fileID: 1246457709}
---- !u!114 &1847590526
-MonoBehaviour:
+--- !u!225 &1847590526
+CanvasGroup:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1847590521}
   m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c05f943d8dcb7a7499c91d1cb105f929, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PresentationBackgroundView
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &1879016050
 GameObject:
   m_ObjectHideFlags: 0
@@ -9941,7 +9939,6 @@ MonoBehaviour:
   prefabMap:
   - key: bg1
     prefab: {fileID: 1847590521}
-  defaultKey: default
 --- !u!4 &1967129520
 Transform:
   m_ObjectHideFlags: 0

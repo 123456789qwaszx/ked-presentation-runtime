@@ -8,7 +8,7 @@ using UnityEngine.UI;
 public sealed class SetBackgroundSpriteCommandSpec : CommandSpecBase
 {
     [Header("Identity")]
-    [Tooltip("대상 배경 view를 찾을 bgKey")]
+    [Tooltip("대상 배경 GameObject를 찾을 bgKey")]
     public string bgKey = "current";
 
     [Header("Sprite")]
@@ -32,7 +32,8 @@ public sealed class SetBackgroundSpriteCommand : CommandBase
 {
     private readonly SetBackgroundSpriteCommandSpec _spec;
 
-    private PresentationBackgroundView _view;
+    private GameObject _background;
+    private Image _image;
     private bool _resolveAttempted;
 
     public override bool WaitForCompletion => true;
@@ -63,23 +64,25 @@ public sealed class SetBackgroundSpriteCommand : CommandBase
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (_view == null || _view.Image == null)
+        if (_background == null || _image == null)
             return;
 
         if (_spec.sprite == null)
         {
             if (_spec.strict)
-                throw new InvalidOperationException($"[SetBackgroundSpriteCommand] sprite is null. bgKey={_spec.bgKey}");
+                throw new InvalidOperationException(
+                    $"[SetBackgroundSpriteCommand] sprite is null. bgKey={_spec.bgKey}");
+
             return;
         }
 
-        _view.Image.sprite = _spec.sprite;
+        _image.sprite = _spec.sprite;
 
         if (_spec.setPreserveAspect)
-            _view.Image.preserveAspect = _spec.preserveAspect;
+            _image.preserveAspect = _spec.preserveAspect;
 
         if (_spec.setNativeSize)
-            _view.Image.SetNativeSize();
+            _image.SetNativeSize();
     }
 
     private void ResolveRefs(CommandRunScope scope)
@@ -89,22 +92,29 @@ public sealed class SetBackgroundSpriteCommand : CommandBase
         if (scope == null || scope.Refs == null)
         {
             if (_spec.strict)
-                throw new InvalidOperationException($"[SetBackgroundSpriteCommand] Refs is null. bgKey={_spec.bgKey}");
+                throw new InvalidOperationException(
+                    $"[SetBackgroundSpriteCommand] Refs is null. bgKey={_spec.bgKey}");
+
             return;
         }
 
         if (!scope.Refs.TryGetValue(_spec.bgKey, out object obj) ||
-            obj is not PresentationBackgroundView view)
+            obj is not GameObject background)
         {
             if (_spec.strict)
-                throw new InvalidOperationException($"[SetBackgroundSpriteCommand] Background view not found. bgKey={_spec.bgKey}");
+                throw new InvalidOperationException(
+                    $"[SetBackgroundSpriteCommand] Background GameObject not found. bgKey={_spec.bgKey}");
+
             return;
         }
 
-        _view = view;
-        _view.EnsureBound(_spec.strict);
+        _background = background;
+        _image = _background.GetComponentInChildren<Image>(true);
 
-        if (_view.Image == null && _spec.strict)
-            throw new InvalidOperationException($"[SetBackgroundSpriteCommand] Background Image missing. bgKey={_spec.bgKey}");
+        if (_image == null && _spec.strict)
+        {
+            throw new InvalidOperationException(
+                $"[SetBackgroundSpriteCommand] Background Image missing. bgKey={_spec.bgKey}, go={_background.name}");
+        }
     }
 }
