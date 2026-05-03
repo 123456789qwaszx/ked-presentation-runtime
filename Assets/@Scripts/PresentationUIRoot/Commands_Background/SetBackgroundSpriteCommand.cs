@@ -8,7 +8,7 @@ using UnityEngine.UI;
 public sealed class SetBackgroundSpriteCommandSpec : CommandSpecBase
 {
     [Header("Identity")]
-    [Tooltip("대상 배경 GameObject를 찾을 bgKey")]
+    [Tooltip("대상 배경 RectTransformResponseTarget을 찾을 bgKey")]
     public string bgKey = "current";
 
     [Header("Sprite")]
@@ -32,7 +32,7 @@ public sealed class SetBackgroundSpriteCommand : CommandBase
 {
     private readonly SetBackgroundSpriteCommandSpec _spec;
 
-    private GameObject _background;
+    private RectTransformResponseTarget _background;
     private Image _image;
     private bool _resolveAttempted;
 
@@ -99,11 +99,11 @@ public sealed class SetBackgroundSpriteCommand : CommandBase
         }
 
         if (!scope.Refs.TryGetValue(_spec.bgKey, out object obj) ||
-            obj is not GameObject background)
+            obj is not RectTransformResponseTarget background)
         {
             if (_spec.strict)
                 throw new InvalidOperationException(
-                    $"[SetBackgroundSpriteCommand] Background GameObject not found. bgKey={_spec.bgKey}");
+                    $"[SetBackgroundSpriteCommand] Background target not found. bgKey={_spec.bgKey}");
 
             return;
         }
@@ -114,7 +114,7 @@ public sealed class SetBackgroundSpriteCommand : CommandBase
         if (_image == null && _spec.strict)
         {
             throw new InvalidOperationException(
-                $"[SetBackgroundSpriteCommand] Background Image missing. bgKey={_spec.bgKey}, go={_background.name}");
+                $"[SetBackgroundSpriteCommand] Background Image missing. bgKey={_spec.bgKey}, target={_background.name}");
         }
     }
 }

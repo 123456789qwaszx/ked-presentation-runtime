@@ -9,7 +9,7 @@ using Object = UnityEngine.Object;
 public sealed class DestroyBackgroundCommandSpec : CommandSpecBase
 {
     [Header("Identity")]
-    [Tooltip("파괴할 대상 배경 GameObject를 찾을 bgKey")]
+    [Tooltip("파괴할 대상 배경 RectTransformResponseTarget을 찾을 bgKey")]
     public string bgKey = "current";
 
     [Header("Options")]
@@ -29,7 +29,7 @@ public sealed class DestroyBackgroundCommand : CommandBase
     private readonly IBGRuntimeRegistry _runtimeRegistry;
     private readonly PresentationResponseRig _responseRig;
 
-    private GameObject _background;
+    private RectTransformResponseTarget _background;
     private bool _resolveAttempted;
 
     public override bool WaitForCompletion => true;
@@ -97,11 +97,11 @@ public sealed class DestroyBackgroundCommand : CommandBase
         }
 
         if (!scope.Refs.TryGetValue(_spec.bgKey, out object obj) ||
-            obj is not GameObject background)
+            obj is not RectTransformResponseTarget background)
         {
             if (_spec.strict)
                 throw new InvalidOperationException(
-                    $"[DestroyBackgroundCommand] Background GameObject not found. bgKey={_spec.bgKey}");
+                    $"[DestroyBackgroundCommand] Background target not found. bgKey={_spec.bgKey}");
 
             return;
         }
@@ -111,11 +111,11 @@ public sealed class DestroyBackgroundCommand : CommandBase
         if (_background == null && _spec.strict)
         {
             throw new InvalidOperationException(
-                $"[DestroyBackgroundCommand] Background GameObject is null. bgKey={_spec.bgKey}");
+                $"[DestroyBackgroundCommand] Background target is null. bgKey={_spec.bgKey}");
         }
     }
 
-    private static void KillTweens(GameObject background)
+    private static void KillTweens(RectTransformResponseTarget background)
     {
         if (background == null)
             return;
@@ -129,11 +129,11 @@ public sealed class DestroyBackgroundCommand : CommandBase
             canvasGroup.DOKill(true);
     }
 
-    private static void DestroyGameObject(GameObject background)
+    private static void DestroyGameObject(RectTransformResponseTarget background)
     {
         if (background == null)
             return;
 
-        Object.Destroy(background);
+        Object.Destroy(background.gameObject);
     }
 }

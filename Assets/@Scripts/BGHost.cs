@@ -4,8 +4,8 @@ using UnityEngine;
 
 public interface IBGRuntimeRegistry
 {
-    void RegisterRuntimeBackground(string bgKey, GameObject go);
-    void UnregisterRuntimeBackground(string bgKey, GameObject expected = null);
+    void RegisterRuntimeBackground(string bgKey, RectTransformResponseTarget go);
+    void UnregisterRuntimeBackground(string bgKey, RectTransformResponseTarget expected = null);
     void DestroyRuntimeBackground(string bgKey);
     void ClearRuntimeBackgrounds();
 }
@@ -16,14 +16,14 @@ public sealed class BGHost : MonoBehaviour, IBGRuntimeRegistry, IBGViewPrefabPro
     public struct BackgroundPrefabEntry
     {
         public string key;
-        public GameObject prefab;
+        public RectTransformResponseTarget prefab;
     }
 
     [SerializeField] private BackgroundPrefabEntry[] prefabMap;
 
-    private readonly Dictionary<string, GameObject> _runtimeViews = new();
+    private readonly Dictionary<string, RectTransformResponseTarget> _runtimeViews = new();
 
-    public void RegisterRuntimeBackground(string bgKey, GameObject go)
+    public void RegisterRuntimeBackground(string bgKey, RectTransformResponseTarget go)
     {
         if (go == null)
         {
@@ -36,9 +36,9 @@ public sealed class BGHost : MonoBehaviour, IBGRuntimeRegistry, IBGViewPrefabPro
     
     // expected가 지정된 경우, 등록된 view가 바뀌었으면 제거하지 않는다.
     // (같은 key로 새 배경이 등록된 뒤 이전 배경이 뒤늦게 해제를 시도하는 상황 방어)
-    public void UnregisterRuntimeBackground(string bgKey, GameObject expected = null)
+    public void UnregisterRuntimeBackground(string bgKey, RectTransformResponseTarget expected = null)
     {
-        if (!_runtimeViews.TryGetValue(bgKey, out GameObject current))
+        if (!_runtimeViews.TryGetValue(bgKey, out RectTransformResponseTarget current))
             return;
 
         if (expected != null && !ReferenceEquals(current, expected))
@@ -49,7 +49,7 @@ public sealed class BGHost : MonoBehaviour, IBGRuntimeRegistry, IBGViewPrefabPro
 
     public void DestroyRuntimeBackground(string bgKey)
     {
-        if (!_runtimeViews.TryGetValue(bgKey, out GameObject go))
+        if (!_runtimeViews.TryGetValue(bgKey, out RectTransformResponseTarget go))
             return;
 
         _runtimeViews.Remove(bgKey);
@@ -65,7 +65,7 @@ public sealed class BGHost : MonoBehaviour, IBGRuntimeRegistry, IBGViewPrefabPro
 
     public void ClearRuntimeBackgrounds()
     {
-        foreach (GameObject go in _runtimeViews.Values)
+        foreach (RectTransformResponseTarget go in _runtimeViews.Values)
         {
             if (go == null)
                 continue;
@@ -76,7 +76,7 @@ public sealed class BGHost : MonoBehaviour, IBGRuntimeRegistry, IBGViewPrefabPro
         _runtimeViews.Clear();
     }
 
-    public bool TryGetBackgroundViewPrefab(string key, out GameObject prefab)
+    public bool TryGetBackgroundViewPrefab(string key, out RectTransformResponseTarget prefab)
     {
         prefab = null;
 

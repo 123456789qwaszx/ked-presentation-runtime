@@ -8,7 +8,7 @@ using UnityEngine;
 public sealed class FadeBackgroundCommandSpec : CommandSpecBase
 {
     [Header("Identity")]
-    [Tooltip("대상 배경 GameObject를 찾을 bgKey")]
+    [Tooltip("대상 배경 RectTransformResponseTarget을 찾을 bgKey")]
     public string bgKey = "current";
 
     [Header("Fade")]
@@ -42,7 +42,7 @@ public sealed class FadeBackgroundCommand : CommandBase
 {
     private readonly FadeBackgroundCommandSpec _spec;
 
-    private GameObject _background;
+    private RectTransformResponseTarget _background;
     private RectTransform _rect;
     private CanvasGroup _group;
     private Tween _tween;
@@ -116,6 +116,10 @@ public sealed class FadeBackgroundCommand : CommandBase
         if (_background == null || _group == null)
             return;
 
+        _tween?.Kill(false);
+        _rect?.DOKill(false);
+        _group.DOKill(false);
+
         ApplyFinalState(_spec.targetAlpha);
         ClearResolvedRefs();
     }
@@ -154,11 +158,11 @@ public sealed class FadeBackgroundCommand : CommandBase
         }
 
         if (!scope.Refs.TryGetValue(_spec.bgKey, out object obj) ||
-            obj is not GameObject background)
+            obj is not RectTransformResponseTarget background)
         {
             if (_spec.strict)
                 throw new InvalidOperationException(
-                    $"[FadeBackgroundCommand] Background GameObject not found. bgKey={_spec.bgKey}");
+                    $"[FadeBackgroundCommand] Background target not found. bgKey={_spec.bgKey}");
 
             return;
         }
@@ -169,7 +173,7 @@ public sealed class FadeBackgroundCommand : CommandBase
 
         if (_group == null)
         {
-            _group = _background.AddComponent<CanvasGroup>();
+            _group = _background.gameObject.AddComponent<CanvasGroup>();
 
             if (_spec.strict)
                 Debug.LogWarning($"[FadeBackgroundCommand] CanvasGroup not found. AutoAdd CanvasGroup. bgKey={_spec.bgKey}");
@@ -178,7 +182,7 @@ public sealed class FadeBackgroundCommand : CommandBase
         if ((_rect == null || _group == null) && _spec.strict)
         {
             throw new InvalidOperationException(
-                $"[FadeBackgroundCommand] Background binding missing. bgKey={_spec.bgKey}, go={_background.name}");
+                $"[FadeBackgroundCommand] Background binding missing. bgKey={_spec.bgKey}, target={_background.name}");
         }
     }
 

@@ -2,7 +2,7 @@ using UnityEngine;
 
 public interface IBGViewPrefabProvider
 {
-    bool TryGetBackgroundViewPrefab(string key, out GameObject prefab);
+    bool TryGetBackgroundViewPrefab(string key, out RectTransformResponseTarget prefab);
 }
 
 public interface IDialogueBoxViewResolver

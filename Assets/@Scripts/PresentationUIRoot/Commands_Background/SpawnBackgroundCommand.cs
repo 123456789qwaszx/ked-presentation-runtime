@@ -31,7 +31,7 @@ public sealed class SpawnBackgroundCommand : CommandBase
 
     private PresentationViewRefs _presentation;
     private RectTransform _parent;
-    private GameObject _prefab;
+    private RectTransformResponseTarget _prefab;
     private string _bgKey;
     private bool _resolveAttempted;
 
@@ -138,32 +138,29 @@ public sealed class SpawnBackgroundCommand : CommandBase
         if (_spec.destroyExistingWithSameKey)
             DestroyExistingForKey(scope, _bgKey);
 
-        GameObject go = Object.Instantiate(_prefab, _parent, false);
-        go.name = string.IsNullOrWhiteSpace(_bgKey)
+        RectTransformResponseTarget target = Object.Instantiate(_prefab, _parent, false);
+
+        target.name = string.IsNullOrWhiteSpace(_bgKey)
             ? _prefab.name
             : $"BG_{_bgKey}";
 
         if (_spec.setAsLastSibling)
-            go.transform.SetAsLastSibling();
+            target.transform.SetAsLastSibling();
 
-        ResetSpawnedRectTransform(go);
-
-        RectTransformResponseTarget responseTarget = GetOrAddResponseTarget(go);
-        if (responseTarget == null)
-            return;
+        ResetSpawnedRectTransform(target);
 
         _responseRig?.RegisterRuntimeBinding(
             _bgKey,
-            responseTarget,
+            target,
             PresentationResponseProfile.Background,
             scope.Presentation.GetRect(PresentationTarget.Stage_Root));
 
         if (scope != null && scope.Refs != null)
-            scope.Refs[_bgKey] = go;
+            scope.Refs[_bgKey] = target;
 
-        _runtimeRegistry?.RegisterRuntimeBackground(_bgKey, go);
+        _runtimeRegistry?.RegisterRuntimeBackground(_bgKey, target);
     }
-    
+
     private void DestroyExistingForKey(CommandRunScope scope, string bgKey)
     {
         _responseRig?.RemoveBinding(bgKey);
@@ -172,7 +169,7 @@ public sealed class SpawnBackgroundCommand : CommandBase
         if (scope != null &&
             scope.Refs != null &&
             scope.Refs.TryGetValue(bgKey, out object obj) &&
-            obj is GameObject existing)
+            obj is RectTransformResponseTarget existing)
         {
             DestroyExisting(existing);
         }
@@ -180,7 +177,7 @@ public sealed class SpawnBackgroundCommand : CommandBase
         scope?.Refs?.Remove(bgKey);
     }
 
-    private static void DestroyExisting(GameObject existing)
+    private static void DestroyExisting(RectTransformResponseTarget existing)
     {
         if (existing == null)
             return;
@@ -193,37 +190,20 @@ public sealed class SpawnBackgroundCommand : CommandBase
         if (canvasGroup != null)
             canvasGroup.DOKill(true);
 
-        Object.Destroy(existing);
+        Object.Destroy(existing.gameObject);
     }
 
-    private RectTransformResponseTarget GetOrAddResponseTarget(GameObject go)
+    private static void ResetSpawnedRectTransform(RectTransformResponseTarget target)
     {
-        if (go == null)
-            return null;
-
-        RectTransformResponseTarget target = go.GetComponent<RectTransformResponseTarget>();
-        if (target != null)
-            return target;
-
-        target = go.AddComponent<RectTransformResponseTarget>();
-
-        if (_spec.strict)
-            Debug.LogWarning("[SpawnBackgroundCommand] Response target not found. AutoAdd RectTransformResponseTarget.");
-
-        return target;
-    }
-
-    private static void ResetSpawnedRectTransform(GameObject go)
-    {
-        if (go == null)
+        if (target == null)
             return;
 
-        RectTransform rect = go.transform as RectTransform;
+        RectTransform rect = target.transform as RectTransform;
         if (rect == null)
         {
-            go.transform.localPosition = Vector3.zero;
-            go.transform.localRotation = Quaternion.identity;
-            go.transform.localScale = Vector3.one;
+            target.transform.localPosition = Vector3.zero;
+            target.transform.localRotation = Quaternion.identity;
+            target.transform.localScale = Vector3.one;
             return;
         }
 
