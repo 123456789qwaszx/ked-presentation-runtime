@@ -1,0 +1,116 @@
+﻿title: sub04laru
+---
+<<destroy Albedo>>
+<<destroy Laru>>
+
+<<begin_hold>>
+<<presentation_setup>>
+
+<<end_hold>>
+
+<<bg_spawn test1 bg1>>
+<<bg_sprite test1 ui/theme1/Background00_Image>>
+<<bg_fade test1 1>>
+
+
+<<slot Albedo>>
+<<place Albedo center>>
+<<size Albedo 2.4>>
+<<place_offset Albedo 0 -200>>
+<<cast Albedo Albedo>>
+<<fade_in Albedo>>
+
+<<begin_hold>>
+<<await 10>>
+<<end_hold>>
+
+
+<<slot Laru>>
+<<place Laru center>>
+<<size Laru 2.3>>
+<<place_offset Laru 0 -180>>
+<<cast Laru Laru>>
+
+<<slot Bastelina>>
+<<place Bastelina center>>
+<<size Bastelina 2.3>>
+<<place_offset Bastelina 0 -180>>
+<<cast Bastelina Bastelina>>
+
+<<emotion_wipe_char Albedo Albedo a 6>>
+알베도: 이 청구서들, 어디 한번 제대로 설명해 보시지!
+
+
+<<emotion_wipe_char Albedo Albedo a 8>>
+알베도: 공급업체 접대라더니, 별의 탑 특제 감자튀김 열 접시는 뭐지?
+
+<<await_for 1>>
+<<fade_out Albedo>>
+
+
+<<slot Laru>>
+<<place Laru center>>
+<<size Laru 2.3>>
+<<place_offset Laru 0 -180>>
+<<cast Laru Laru>>
+<<fade_in Laru>>
+
+<<jolt Laru>>
+<<emotion_wipe_char Laru Laru a 15>>
+
+라루: 그건...... 공급업체와의 비즈니스 식사 자리에서 먹은 건데...... 경비 처리 안 되나?
+
+<<fade_out Laru>>
+
+<<fade_in Albedo>>
+<<nudge Albedo up>>
+
+알베도: 그럼 이건 뭔데! 낚시 마스터 도구 세트? 직접 낚아서 먹기라도 한 거야?
+
+
+<<fade_out Albedo>>
+
+<<emotion_wipe_char Laru Laru a 26>>
+<<fade_in Laru>>
+라루: 그건...... 공급업체에 선물한 건데......
+
+<<fade_out Laru>>
+<<fade_in Albedo>>
+<<size Albedo 1.9>>
+
+<<to_scale Albedo 1.4 2.6>>
+<<move_by Albedo 0 -80>>
+알베도: 내,눈,똑,바,로,쳐,다,보,고 다시 말해봐!
+<<fade_out Albedo>>
+
+<<bg_spawn test2 bg1>>
+<<bg_sprite test2 ui/default/Background00_Image>>
+<<bg_fade test2 1>>
+궁금한 점원: 헉...... 알베도 님이 또 폭발했어
+
+소문을 퍼뜨리는 점원: 그래도 욕먹은 게 라루라면, 뭐 이상할 것도 없지.
+
+<<begin_hold>>
+<<blackout cover_then_uncover>>
+
+<<end_hold>>
+
+<<fade_in Bastelina>>
+
+
+<<emotion_wipe_char Bastelina Bastelina a 10>>
+베스티나: 하하...... 오늘도 라루 선배가 한바탕 깨지는 평화로운 날이군요.
+
+<<shake Bastelina right>>
+<<emotion_wipe_char Bastelina Bastelina a 7>>
+베스티나: 휴, 귀여운 후배인 제가...... 어떻게든 도와줘야겠네요......
+
+<<fade_out Bastelina>>
+<<begin_hold>>
+<<await_for 2>>
+
+<<shot_zoom Bastelina 10 1.5>>
+<<shot_track Bastelina 800 0 1.5>>
+<<end_hold>>
+알베도: 비즈니스 접대랍시고, 감자튀김 먹으러 간 게 이번이 처음은 아닌 것 같은데?
+===

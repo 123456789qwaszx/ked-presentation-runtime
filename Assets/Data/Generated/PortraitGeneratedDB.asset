@@ -13,6 +13,541 @@ MonoBehaviour:
   m_Name: PortraitGeneratedDB
   m_EditorClassIdentifier: Assembly-CSharp::PortraitGeneratedDbSo
   entries:
+  - characterId: Albedo
+    variantKey: Albedo_a
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: 293820fa5cc5daa4a94b1e79c25e1525, type: 3}
+    assetPath: Assets/Art/Portraits/Albedo/Albedo_a_01.png
+  - characterId: Albedo
+    variantKey: Albedo_a
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: 306cb704536511749820424c05be37d7, type: 3}
+    assetPath: Assets/Art/Portraits/Albedo/Albedo_a_03.png
+  - characterId: Albedo
+    variantKey: Albedo_a
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: d11239e2a9c174e48a3af12e79fab424, type: 3}
+    assetPath: Assets/Art/Portraits/Albedo/Albedo_a_04.png
+  - characterId: Albedo
+    variantKey: Albedo_a
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: f5c158ec69a20de429a0f3833d2e8099, type: 3}
+    assetPath: Assets/Art/Portraits/Albedo/Albedo_a_05.png
+  - characterId: Albedo
+    variantKey: Albedo_a
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: 200d90ab494c96944aa51a571f9b06d3, type: 3}
+    assetPath: Assets/Art/Portraits/Albedo/Albedo_a_06.png
+  - characterId: Albedo
+    variantKey: Albedo_a
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: dd0644657f994c941861627e077d2fa6, type: 3}
+    assetPath: Assets/Art/Portraits/Albedo/Albedo_a_07.png
+  - characterId: Albedo
+    variantKey: Albedo_a
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: dc900988e7921ea489b934719ca2226e, type: 3}
+    assetPath: Assets/Art/Portraits/Albedo/Albedo_a_08.png
+  - characterId: Albedo
+    variantKey: Albedo_a
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: 07beb6c2b6d8a3a4e870fa88aa8ac4ca, type: 3}
+    assetPath: Assets/Art/Portraits/Albedo/Albedo_a_09.png
+  - characterId: Albedo
+    variantKey: Albedo_a
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: cdc52b9b3f02e574fa9823eda02a47a2, type: 3}
+    assetPath: Assets/Art/Portraits/Albedo/Albedo_a_10.png
+  - characterId: Albedo
+    variantKey: Albedo_a
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: af67026d9a74e82409bfe191e1203d07, type: 3}
+    assetPath: Assets/Art/Portraits/Albedo/Albedo_a_11.png
+  - characterId: Albedo
+    variantKey: Albedo_a
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: 8905b766cbfa87c4ea7b81ce6404fdff, type: 3}
+    assetPath: Assets/Art/Portraits/Albedo/Albedo_a_12.png
+  - characterId: Albedo
+    variantKey: Albedo_a
+    emotionKey: 13
+    sprite: {fileID: 21300000, guid: 5ed8f023ffdc6b24cbc8a1223a844e7d, type: 3}
+    assetPath: Assets/Art/Portraits/Albedo/Albedo_a_13.png
+  - characterId: Albedo
+    variantKey: Albedo_a
+    emotionKey: 14
+    sprite: {fileID: 21300000, guid: feebc39f0289f814e986f965b0fd277f, type: 3}
+    assetPath: Assets/Art/Portraits/Albedo/Albedo_a_14.png
+  - characterId: Albedo
+    variantKey: Albedo_a
+    emotionKey: 15
+    sprite: {fileID: 21300000, guid: c634e1043fce2974eab185c7056860e5, type: 3}
+    assetPath: Assets/Art/Portraits/Albedo/Albedo_a_15.png
+  - characterId: Albedo
+    variantKey: Albedo_a
+    emotionKey: 16
+    sprite: {fileID: 21300000, guid: b57da3b40b5a53440ad010e685e578e1, type: 3}
+    assetPath: Assets/Art/Portraits/Albedo/Albedo_a_16.png
+  - characterId: Albedo
+    variantKey: Albedo_a
+    emotionKey: 17
+    sprite: {fileID: 21300000, guid: 0672580a27419c944b0a9140c1cf0b95, type: 3}
+    assetPath: Assets/Art/Portraits/Albedo/Albedo_a_17.png
+  - characterId: Albedo
+    variantKey: Albedo_a
+    emotionKey: 18
+    sprite: {fileID: 21300000, guid: a9ea08571b89a624ba4952f3f08816fc, type: 3}
+    assetPath: Assets/Art/Portraits/Albedo/Albedo_a_18.png
+  - characterId: Bastelina
+    variantKey: Bastelina_a
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: 20d46ab39ec459c4cab346e4cc8880a5, type: 3}
+    assetPath: Assets/Art/Portraits/Bastelina/Bastelina_a_01.png
+  - characterId: Bastelina
+    variantKey: Bastelina_a
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: faa0830280761184db982f678e6b6901, type: 3}
+    assetPath: Assets/Art/Portraits/Bastelina/Bastelina_a_03.png
+  - characterId: Bastelina
+    variantKey: Bastelina_a
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: a7e6c3120d03c974badfcb41da638f0b, type: 3}
+    assetPath: Assets/Art/Portraits/Bastelina/Bastelina_a_04.png
+  - characterId: Bastelina
+    variantKey: Bastelina_a
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: 07c7ce2f7bb1b7f43886182e6744475e, type: 3}
+    assetPath: Assets/Art/Portraits/Bastelina/Bastelina_a_05.png
+  - characterId: Bastelina
+    variantKey: Bastelina_a
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: 885d729aa77328149ae07d89f893b04b, type: 3}
+    assetPath: Assets/Art/Portraits/Bastelina/Bastelina_a_06.png
+  - characterId: Bastelina
+    variantKey: Bastelina_a
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: 8b784d4ac26189047840f4cb6072c8f1, type: 3}
+    assetPath: Assets/Art/Portraits/Bastelina/Bastelina_a_07.png
+  - characterId: Bastelina
+    variantKey: Bastelina_a
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: 31a748bbe52059c4187c59053648fc07, type: 3}
+    assetPath: Assets/Art/Portraits/Bastelina/Bastelina_a_08.png
+  - characterId: Bastelina
+    variantKey: Bastelina_a
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: fb8cf854c91d6c741b72668d39f4a8a5, type: 3}
+    assetPath: Assets/Art/Portraits/Bastelina/Bastelina_a_09.png
+  - characterId: Bastelina
+    variantKey: Bastelina_a
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: 0eb71d4cba5673d498b77273077ff616, type: 3}
+    assetPath: Assets/Art/Portraits/Bastelina/Bastelina_a_10.png
+  - characterId: Bastelina
+    variantKey: Bastelina_a
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: d7be99fb3143b5c4c860d12ae6b5cf61, type: 3}
+    assetPath: Assets/Art/Portraits/Bastelina/Bastelina_a_11.png
+  - characterId: Bastelina
+    variantKey: Bastelina_a
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: dcd26c3c6d996244488d7ee0c36e49f4, type: 3}
+    assetPath: Assets/Art/Portraits/Bastelina/Bastelina_a_12.png
+  - characterId: Bastelina
+    variantKey: Bastelina_a
+    emotionKey: 13
+    sprite: {fileID: 21300000, guid: 6d3afcf96f17e3c49baa0b32162a868c, type: 3}
+    assetPath: Assets/Art/Portraits/Bastelina/Bastelina_a_13.png
+  - characterId: Bastelina
+    variantKey: Bastelina_a
+    emotionKey: 14
+    sprite: {fileID: 21300000, guid: c9618a6aebc6b7c429ac40ef11b4910b, type: 3}
+    assetPath: Assets/Art/Portraits/Bastelina/Bastelina_a_14.png
+  - characterId: Bastelina
+    variantKey: Bastelina_a
+    emotionKey: 15
+    sprite: {fileID: 21300000, guid: 9f4e3020a8eb72e4dbf689daea62b8ff, type: 3}
+    assetPath: Assets/Art/Portraits/Bastelina/Bastelina_a_15.png
+  - characterId: Bastelina
+    variantKey: Bastelina_a
+    emotionKey: 16
+    sprite: {fileID: 21300000, guid: aba581d4e9c723c44913ee5527c8bd66, type: 3}
+    assetPath: Assets/Art/Portraits/Bastelina/Bastelina_a_16.png
+  - characterId: Bastelina
+    variantKey: Bastelina_a
+    emotionKey: 17
+    sprite: {fileID: 21300000, guid: e1b18f301c21f09488724c56a64f7976, type: 3}
+    assetPath: Assets/Art/Portraits/Bastelina/Bastelina_a_17.png
+  - characterId: Bastelina
+    variantKey: Bastelina_a
+    emotionKey: 18
+    sprite: {fileID: 21300000, guid: 2a38fc02f8f0d0b4eaaf69b01cd05277, type: 3}
+    assetPath: Assets/Art/Portraits/Bastelina/Bastelina_a_18.png
+  - characterId: Bastelina
+    variantKey: Bastelina_a
+    emotionKey: 19
+    sprite: {fileID: 21300000, guid: e2ee8edeea5336f40851d456525c9665, type: 3}
+    assetPath: Assets/Art/Portraits/Bastelina/Bastelina_a_19.png
+  - characterId: Laru
+    variantKey: Laru_a
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: 369eed8fb8013a341b3fa0bce2f8a2e2, type: 3}
+    assetPath: Assets/Art/Portraits/Laru/Laru_a_01.png
+  - characterId: Laru
+    variantKey: Laru_a
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: a9ba479e45d8eda41867db05dff5a113, type: 3}
+    assetPath: Assets/Art/Portraits/Laru/Laru_a_03.png
+  - characterId: Laru
+    variantKey: Laru_a
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: c3dd1e0037b9807428b3f2f33fa64b0a, type: 3}
+    assetPath: Assets/Art/Portraits/Laru/Laru_a_04.png
+  - characterId: Laru
+    variantKey: Laru_a
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: 12856fc876aeffc49aec07d13a60bba3, type: 3}
+    assetPath: Assets/Art/Portraits/Laru/Laru_a_05.png
+  - characterId: Laru
+    variantKey: Laru_a
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: f74a88b836e3776408b6b1d90a3f501f, type: 3}
+    assetPath: Assets/Art/Portraits/Laru/Laru_a_06.png
+  - characterId: Laru
+    variantKey: Laru_a
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: 419a5ea8b54f17542b34e34884aec8fe, type: 3}
+    assetPath: Assets/Art/Portraits/Laru/Laru_a_07.png
+  - characterId: Laru
+    variantKey: Laru_a
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: b25c2157332d1a04db0c89883725d2b3, type: 3}
+    assetPath: Assets/Art/Portraits/Laru/Laru_a_08.png
+  - characterId: Laru
+    variantKey: Laru_a
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: aeba335cb0c9fb34b8e14f32b7396681, type: 3}
+    assetPath: Assets/Art/Portraits/Laru/Laru_a_09.png
+  - characterId: Laru
+    variantKey: Laru_a
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: c5915eb47ef99d944b40032339855f33, type: 3}
+    assetPath: Assets/Art/Portraits/Laru/Laru_a_10.png
+  - characterId: Laru
+    variantKey: Laru_a
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: bc8be150c0ae7f941bda37d8036a57cb, type: 3}
+    assetPath: Assets/Art/Portraits/Laru/Laru_a_11.png
+  - characterId: Laru
+    variantKey: Laru_a
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: 9ef910002ed197640b03df85f651de8c, type: 3}
+    assetPath: Assets/Art/Portraits/Laru/Laru_a_12.png
+  - characterId: Laru
+    variantKey: Laru_a
+    emotionKey: 13
+    sprite: {fileID: 21300000, guid: 22dcdd52ef5a03a4d8d0035c55457b6d, type: 3}
+    assetPath: Assets/Art/Portraits/Laru/Laru_a_13.png
+  - characterId: Laru
+    variantKey: Laru_a
+    emotionKey: 14
+    sprite: {fileID: 21300000, guid: ca8b1c5d775dc854191da5869c371da5, type: 3}
+    assetPath: Assets/Art/Portraits/Laru/Laru_a_14.png
+  - characterId: Laru
+    variantKey: Laru_a
+    emotionKey: 15
+    sprite: {fileID: 21300000, guid: 4521285b57af9b441890b37698ec4e29, type: 3}
+    assetPath: Assets/Art/Portraits/Laru/Laru_a_15.png
+  - characterId: Laru
+    variantKey: Laru_a
+    emotionKey: 16
+    sprite: {fileID: 21300000, guid: d704f4ef0b8c8624b80e9745c3221e9d, type: 3}
+    assetPath: Assets/Art/Portraits/Laru/Laru_a_16.png
+  - characterId: Laru
+    variantKey: Laru_a
+    emotionKey: 17
+    sprite: {fileID: 21300000, guid: 14861a8d2e8e88f4082f26700d816023, type: 3}
+    assetPath: Assets/Art/Portraits/Laru/Laru_a_17.png
+  - characterId: Laru
+    variantKey: Laru_a
+    emotionKey: 18
+    sprite: {fileID: 21300000, guid: 0a12177ea8e06ba4093d4f8aa39f2745, type: 3}
+    assetPath: Assets/Art/Portraits/Laru/Laru_a_18.png
+  - characterId: Laru
+    variantKey: Laru_a
+    emotionKey: 19
+    sprite: {fileID: 21300000, guid: 03d8aa69a969d7e44abeb1b543e8c99b, type: 3}
+    assetPath: Assets/Art/Portraits/Laru/Laru_a_19.png
+  - characterId: Laru
+    variantKey: Laru_a
+    emotionKey: 20
+    sprite: {fileID: 21300000, guid: fdf5223a8696aea43957e3b9207ed5d6, type: 3}
+    assetPath: Assets/Art/Portraits/Laru/Laru_a_20.png
+  - characterId: Laru
+    variantKey: Laru_a
+    emotionKey: 21
+    sprite: {fileID: 21300000, guid: 2adee41ac9920d74e8f7a3138b74fd3a, type: 3}
+    assetPath: Assets/Art/Portraits/Laru/Laru_a_21.png
+  - characterId: Laru
+    variantKey: Laru_a
+    emotionKey: 22
+    sprite: {fileID: 21300000, guid: dd70083d385675f438747535e066bd9d, type: 3}
+    assetPath: Assets/Art/Portraits/Laru/Laru_a_22.png
+  - characterId: Laru
+    variantKey: Laru_a
+    emotionKey: 23
+    sprite: {fileID: 21300000, guid: 43db70c30b4b80a458c8f038597d80c0, type: 3}
+    assetPath: Assets/Art/Portraits/Laru/Laru_a_23.png
+  - characterId: Laru
+    variantKey: Laru_a
+    emotionKey: 24
+    sprite: {fileID: 21300000, guid: 36d27ae20c54dee43b4065f02015fe4e, type: 3}
+    assetPath: Assets/Art/Portraits/Laru/Laru_a_24.png
+  - characterId: Laru
+    variantKey: Laru_a
+    emotionKey: 25
+    sprite: {fileID: 21300000, guid: c3b6d0eb074ec824db06d0dfce3d9670, type: 3}
+    assetPath: Assets/Art/Portraits/Laru/Laru_a_25.png
+  - characterId: Laru
+    variantKey: Laru_a
+    emotionKey: 26
+    sprite: {fileID: 21300000, guid: c9ba73d0d7fefcc4b85ecd628cffb631, type: 3}
+    assetPath: Assets/Art/Portraits/Laru/Laru_a_26.png
+  - characterId: Laru
+    variantKey: Laru_a
+    emotionKey: 27
+    sprite: {fileID: 21300000, guid: dd333c10ab627c54aabf8309765b23f7, type: 3}
+    assetPath: Assets/Art/Portraits/Laru/Laru_a_27.png
+  - characterId: Laru
+    variantKey: Laru_a
+    emotionKey: 28
+    sprite: {fileID: 21300000, guid: 4bb10ccb162c5824a9a68a278f1c86a0, type: 3}
+    assetPath: Assets/Art/Portraits/Laru/Laru_a_28.png
+  - characterId: Laru
+    variantKey: Laru_a
+    emotionKey: 29
+    sprite: {fileID: 21300000, guid: fab4d90862c9ab24491dc9a6d3079234, type: 3}
+    assetPath: Assets/Art/Portraits/Laru/Laru_a_29.png
+  - characterId: Laru
+    variantKey: Laru_b
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: af858c4632cea6d42a97d535403e6b7c, type: 3}
+    assetPath: Assets/Art/Portraits/Laru/Laru_b_02.png
+  - characterId: Laru
+    variantKey: Laru_b
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: 582660d4e38df254e8a26d6e57e3f45a, type: 3}
+    assetPath: Assets/Art/Portraits/Laru/Laru_b_03.png
+  - characterId: Laru
+    variantKey: Laru_b
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: 09ab6a2719361e84989c27100642ba64, type: 3}
+    assetPath: Assets/Art/Portraits/Laru/Laru_b_04.png
+  - characterId: Laru
+    variantKey: Laru_b
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: 7cef576a42f238048a97a18fa0b8abea, type: 3}
+    assetPath: Assets/Art/Portraits/Laru/Laru_b_05.png
+  - characterId: Laru
+    variantKey: Laru_b
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: b0baf5b6b8d6fcf41aaeb2d74e093830, type: 3}
+    assetPath: Assets/Art/Portraits/Laru/Laru_b_06.png
+  - characterId: Laru
+    variantKey: Laru_b
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: 3ef3723b8feb5ef459de4676a4d2b6e6, type: 3}
+    assetPath: Assets/Art/Portraits/Laru/Laru_b_07.png
+  - characterId: Laru
+    variantKey: Laru_b
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: 02ed2f1f0ea4c0847b2a5ced20988618, type: 3}
+    assetPath: Assets/Art/Portraits/Laru/Laru_b_08.png
+  - characterId: Laru
+    variantKey: Laru_b
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: 15e01909878a1c145b6b5cbb55f193f8, type: 3}
+    assetPath: Assets/Art/Portraits/Laru/Laru_b_09.png
+  - characterId: Laru
+    variantKey: Laru_b
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: c37b0a5bbb63ef4478d0b5db6c109f61, type: 3}
+    assetPath: Assets/Art/Portraits/Laru/Laru_b_10.png
+  - characterId: Laru
+    variantKey: Laru_b
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: 588d520e87149c045aa89ab8a771872f, type: 3}
+    assetPath: Assets/Art/Portraits/Laru/Laru_b_11.png
+  - characterId: Leafia
+    variantKey: Leafia_a
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: 25cb455ae44d5354bbca1d2742d0facc, type: 3}
+    assetPath: Assets/Art/Portraits/Leafia/Leafia_a_01.png
+  - characterId: Leafia
+    variantKey: Leafia_a
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: 7f7b09a0c9107954aa133603fabf7212, type: 3}
+    assetPath: Assets/Art/Portraits/Leafia/Leafia_a_03.png
+  - characterId: Leafia
+    variantKey: Leafia_a
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: b7920fbe6895cc849867dde013cbc6bf, type: 3}
+    assetPath: Assets/Art/Portraits/Leafia/Leafia_a_04.png
+  - characterId: Leafia
+    variantKey: Leafia_a
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: ed3b97771884ca344aa3e9cd6360f106, type: 3}
+    assetPath: Assets/Art/Portraits/Leafia/Leafia_a_05.png
+  - characterId: Leafia
+    variantKey: Leafia_a
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: 8e2b248d501f83f47bffb057cb86e356, type: 3}
+    assetPath: Assets/Art/Portraits/Leafia/Leafia_a_06.png
+  - characterId: Leafia
+    variantKey: Leafia_a
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: e95efee928357e242bf4d0834a23a4a5, type: 3}
+    assetPath: Assets/Art/Portraits/Leafia/Leafia_a_07.png
+  - characterId: Leafia
+    variantKey: Leafia_a
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: 8e156f3e6003a024393d7062c8e42d2b, type: 3}
+    assetPath: Assets/Art/Portraits/Leafia/Leafia_a_08.png
+  - characterId: Leafia
+    variantKey: Leafia_a
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: a4213e295f052484e9cac2e3e84c7228, type: 3}
+    assetPath: Assets/Art/Portraits/Leafia/Leafia_a_09.png
+  - characterId: Leafia
+    variantKey: Leafia_a
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: cd481e9492068ce4189d4f7d739937af, type: 3}
+    assetPath: Assets/Art/Portraits/Leafia/Leafia_a_10.png
+  - characterId: Leafia
+    variantKey: Leafia_a
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: a57cfe6edb851f84f9a795a677ec12be, type: 3}
+    assetPath: Assets/Art/Portraits/Leafia/Leafia_a_11.png
+  - characterId: Willow
+    variantKey: Willow_a
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: e46e01f01017bbe47b4d98308ded1e35, type: 3}
+    assetPath: Assets/Art/Portraits/Willow/Willow_a_01.png
+  - characterId: Willow
+    variantKey: Willow_a
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: aaf6ebb50465a52468345d30df5cdedb, type: 3}
+    assetPath: Assets/Art/Portraits/Willow/Willow_a_03.png
+  - characterId: Willow
+    variantKey: Willow_a
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: 2bced65a53be7224eb8eb36551af003c, type: 3}
+    assetPath: Assets/Art/Portraits/Willow/Willow_a_04.png
+  - characterId: Willow
+    variantKey: Willow_a
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: b18a9c3957f6db546aecf0b35cd05082, type: 3}
+    assetPath: Assets/Art/Portraits/Willow/Willow_a_05.png
+  - characterId: Willow
+    variantKey: Willow_a
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: 56b84f378b3ea16468bfa272281cf276, type: 3}
+    assetPath: Assets/Art/Portraits/Willow/Willow_a_06.png
+  - characterId: Willow
+    variantKey: Willow_a
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: 4a6069a9c5500d247ab7682020cc1064, type: 3}
+    assetPath: Assets/Art/Portraits/Willow/Willow_a_07.png
+  - characterId: Willow
+    variantKey: Willow_a
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: 266e42b27f0f1bd4da41e55a7687d1bb, type: 3}
+    assetPath: Assets/Art/Portraits/Willow/Willow_a_08.png
+  - characterId: Willow
+    variantKey: Willow_a
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: d8aefb95c5cdca644b3c3a39f43b1937, type: 3}
+    assetPath: Assets/Art/Portraits/Willow/Willow_a_09.png
+  - characterId: Willow
+    variantKey: Willow_a
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: 2650b5fecd5223144840e3d0f0182444, type: 3}
+    assetPath: Assets/Art/Portraits/Willow/Willow_a_10.png
+  - characterId: Willow
+    variantKey: Willow_a
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: 6f043a8084dce8145ace860abfa1298b, type: 3}
+    assetPath: Assets/Art/Portraits/Willow/Willow_a_11.png
+  - characterId: Willow
+    variantKey: Willow_a
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: 81d59cb1b3dec624e906b0671a1a42a3, type: 3}
+    assetPath: Assets/Art/Portraits/Willow/Willow_a_12.png
+  - characterId: Willow
+    variantKey: Willow_a
+    emotionKey: 13
+    sprite: {fileID: 21300000, guid: ec643480da6d4eb4cab4ec0aaafb144a, type: 3}
+    assetPath: Assets/Art/Portraits/Willow/Willow_a_13.png
+  - characterId: Willow
+    variantKey: Willow_a
+    emotionKey: 14
+    sprite: {fileID: 21300000, guid: 698e5a3f121ba0a41b4caeb7693e3552, type: 3}
+    assetPath: Assets/Art/Portraits/Willow/Willow_a_14.png
+  - characterId: Willow
+    variantKey: Willow_a
+    emotionKey: 15
+    sprite: {fileID: 21300000, guid: fc613a7e9fddaae4d8560da2a9cc90af, type: 3}
+    assetPath: Assets/Art/Portraits/Willow/Willow_a_15.png
+  - characterId: Willow
+    variantKey: Willow_a
+    emotionKey: 16
+    sprite: {fileID: 21300000, guid: 0ff2f6f6b63eb5041996d8b613d0c743, type: 3}
+    assetPath: Assets/Art/Portraits/Willow/Willow_a_16.png
+  - characterId: Willow
+    variantKey: Willow_a
+    emotionKey: 17
+    sprite: {fileID: 21300000, guid: 7e328de59eccdb8468d61abae03f6c8d, type: 3}
+    assetPath: Assets/Art/Portraits/Willow/Willow_a_17.png
+  - characterId: Willow
+    variantKey: Willow_a
+    emotionKey: 18
+    sprite: {fileID: 21300000, guid: a86b005288bad704ca0667742205c02b, type: 3}
+    assetPath: Assets/Art/Portraits/Willow/Willow_a_18.png
+  - characterId: Willow
+    variantKey: Willow_a
+    emotionKey: 19
+    sprite: {fileID: 21300000, guid: 2e716732279912e48add81db958b2026, type: 3}
+    assetPath: Assets/Art/Portraits/Willow/Willow_a_19.png
+  - characterId: Willow
+    variantKey: Willow_a
+    emotionKey: 20
+    sprite: {fileID: 21300000, guid: efbae8ace5dc3b94c90170a21a0dcbb0, type: 3}
+    assetPath: Assets/Art/Portraits/Willow/Willow_a_20.png
+  - characterId: Willow
+    variantKey: Willow_a
+    emotionKey: 21
+    sprite: {fileID: 21300000, guid: a7ff372e41195df41aa8c339db05da55, type: 3}
+    assetPath: Assets/Art/Portraits/Willow/Willow_a_21.png
+  - characterId: Willow
+    variantKey: Willow_a
+    emotionKey: 22
+    sprite: {fileID: 21300000, guid: 0a1d9291d2fa2a34aaba0bcb805868dc, type: 3}
+    assetPath: Assets/Art/Portraits/Willow/Willow_a_22.png
+  - characterId: Willow
+    variantKey: Willow_a
+    emotionKey: 23
+    sprite: {fileID: 21300000, guid: a85a1d565b6118b4cba7334cb7a1bab2, type: 3}
+    assetPath: Assets/Art/Portraits/Willow/Willow_a_23.png
+  - characterId: Willow
+    variantKey: Willow_a
+    emotionKey: 24
+    sprite: {fileID: 21300000, guid: add027805b14ba344b31bd21f58fb6d9, type: 3}
+    assetPath: Assets/Art/Portraits/Willow/Willow_a_24.png
+  - characterId: Willow
+    variantKey: Willow_a
+    emotionKey: 25
+    sprite: {fileID: 21300000, guid: fa016e6dd45713d4fa93b7db79de3c7c, type: 3}
+    assetPath: Assets/Art/Portraits/Willow/Willow_a_25.png
   - characterId: kuonji
     variantKey: kuonji_a
     emotionKey: 01
@@ -28,5 +563,5 @@ MonoBehaviour:
     emotionKey: 01
     sprite: {fileID: 21300000, guid: 2c5e83a3f43fc544fa622f82902d7d2d, type: 3}
     assetPath: Assets/Art/Portraits/reira/reira_a_01.png
-  generatedTicksUtc: 639114261375301684
-  generatedTimeReadable: 2026-04-10 22:55:37
+  generatedTicksUtc: 639134191886428168
+  generatedTimeReadable: 2026-05-04 00:33:08
