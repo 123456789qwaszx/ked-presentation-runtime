@@ -106,7 +106,7 @@ public sealed class ShotZoomCommand : CommandBase, IStepScopedCommand
 
                     float u = Mathf.Clamp01(t);
                     PresentationIntentState state = InterpolateState(_fromState, _toState, u);
-                    _rig.ApplyImmediate(state, _presentation);
+                    _rig.ApplyToAllBindings(state);
                 },
                 1f,
                 _spec.duration
@@ -297,7 +297,7 @@ public sealed class ShotZoomCommand : CommandBase, IStepScopedCommand
         if (rig == null || presentation == null)
             return;
 
-        rig.ApplyImmediate(state, presentation);
+        rig.ApplyToAllBindings(state);
     }
 
     private static PresentationIntentState InterpolateState(in PresentationIntentState from, in PresentationIntentState to, float t)

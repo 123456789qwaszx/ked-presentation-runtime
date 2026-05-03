@@ -84,7 +84,7 @@ public sealed class EpisodePlayer : MonoBehaviour, IRollbackDialogueRestarter
         //OpenDialogueUI();
         //StopDialogue();
         bgHost.ClearRuntimeBackgrounds();
-        presentationResponseRig.ResetCurrentState();
+        presentationResponseRig.ClearRuntimeState();
         StartYarnNode(nodeName);
         //StartPresentationRoute(presentationEntryKey);
         
