@@ -82,7 +82,7 @@ public sealed class ShotZoomCommand : CommandBase, IStepScopedCommand
             yield break;
 
         if (_spec.killTween)
-            KillRigTween(true); // Finish previous motion so this command starts from a committed state.
+            _tween.Kill(true); // Finish previous motion so this command starts from a committed state.
 
         _fromState = _rig.CurrentState;
         _toState = BuildTargetState(_rig, _fromState, scope);
@@ -306,10 +306,7 @@ public sealed class ShotZoomCommand : CommandBase, IStepScopedCommand
         rig.ApplyImmediate(state, presentation);
     }
 
-    private static PresentationIntentState InterpolateState(
-        in PresentationIntentState from,
-        in PresentationIntentState to,
-        float t)
+    private static PresentationIntentState InterpolateState(in PresentationIntentState from, in PresentationIntentState to, float t)
     {
         return new PresentationIntentState
         {

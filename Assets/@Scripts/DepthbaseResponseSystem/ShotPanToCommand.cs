@@ -60,7 +60,7 @@ public sealed class ShotPanToCommand : CommandBase, IStepScopedCommand
             yield break;
 
         if (_spec.killTween)
-            KillRigTween(true); // Finish previous motion so this command starts from a committed state.
+            _tween.Kill(true); // Finish previous motion so this command starts from a committed state.
 
         _fromState = _rig.CurrentState;
         _toState = BuildTargetState(_rig, _fromState);

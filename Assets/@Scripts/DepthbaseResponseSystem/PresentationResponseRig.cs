@@ -21,6 +21,30 @@ public sealed class PresentationResponseRig : MonoBehaviour
         ApplyToAllBindings(in state);
     }
 
+    private void ApplyToAllBindings(in PresentationIntentState state)
+    {
+        for (int i = _bindings.Count - 1; i >= 0; i--)
+        {
+            PresentationResponseBinding binding = _bindings[i];
+
+            if (binding == null)
+            {
+                Debug.LogWarning($"[PresentationResponseRig] Binding null. index={i}");
+                _bindings.RemoveAt(i);
+                continue;
+            }
+
+            if (!binding.IsAlive)
+            {
+                Debug.LogWarning($"[PresentationResponseRig] Dead binding removed. key={binding.Key}");
+                _bindings.RemoveAt(i);
+                continue;
+            }
+
+            binding.Apply(in state);
+        }
+    }
+    
     public void ResetCurrentState()
     {
         _currentState = PresentationIntentState.Default;
@@ -116,29 +140,6 @@ public sealed class PresentationResponseRig : MonoBehaviour
             authoringPanUnits.y * _manualPanPixelsPerUnit.y);
     }
 
-    private void ApplyToAllBindings(in PresentationIntentState state)
-    {
-        for (int i = _bindings.Count - 1; i >= 0; i--)
-        {
-            PresentationResponseBinding binding = _bindings[i];
-
-            if (binding == null)
-            {
-                Debug.LogWarning($"[PresentationResponseRig] Binding null. index={i}");
-                _bindings.RemoveAt(i);
-                continue;
-            }
-
-            if (!binding.IsAlive)
-            {
-                Debug.LogWarning($"[PresentationResponseRig] Dead binding removed. key={binding.Key}");
-                _bindings.RemoveAt(i);
-                continue;
-            }
-
-            binding.Apply(in state);
-        }
-    }
 
     private static PresentationResponseProfile CreateRuntimeProfile(
         IRectTransformPresentationResponseTarget target,

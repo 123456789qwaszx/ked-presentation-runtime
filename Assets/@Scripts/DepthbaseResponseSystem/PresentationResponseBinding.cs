@@ -18,11 +18,15 @@ public interface IRectTransformPresentationResponseTarget : IPresentationRespons
 /// </summary>
 public sealed class PresentationResponseBinding
 {
-    private const float ZoomIntentScale = 0.1f;
-
-    private readonly RectTransform _stageRoot;
-    private readonly RectTransform _parent;
-    private readonly bool _skipCoordinateTransform;
+    // 모든 연출 계산의 기준 좌표계
+    // "이 캐릭터는 Stage 기준 (300, 0)에 있다"
+    // "이 배경은 Stage 기준 (-200, 0)에 있다"
+    private readonly RectTransform _rigSpaceRoot;
+    
+    // The actual parent of Target.Rect.
+    // RectTransform.anchoredPosition must be expressed in this parent's local space.
+    private readonly RectTransform _targetParent;
+    private readonly bool _needsCoordinateTransform;
 
     public string Key { get; }
     public PresentationResponseProfile Profile { get; }
@@ -38,75 +42,70 @@ public sealed class PresentationResponseBinding
         Profile = profile;
         Target = target;
 
-        _stageRoot = stageRoot;
-        _parent = target != null && target.Rect != null
+        _rigSpaceRoot = stageRoot;
+        _targetParent = target != null && target.Rect != null
             ? target.Rect.parent as RectTransform
             : null;
 
-        _skipCoordinateTransform =
-            _parent == null ||
-            _stageRoot == null ||
-            ReferenceEquals(_parent, _stageRoot);
+        _needsCoordinateTransform =
+            _targetParent != null &&
+            _rigSpaceRoot != null &&
+            !ReferenceEquals(_targetParent, _rigSpaceRoot);
     }
 
-    public bool IsAlive =>
-        Target != null &&
-        Target.Rect != null;
+    public bool IsAlive => Target?.Rect != null;
 
     public void Apply(in PresentationIntentState state)
     {
         if (!IsAlive)
             return;
 
-        PresentationResponse rigResponse = Solve(in state, Profile);
+        PresentationResponse response = Solve(in state, Profile);
 
-        Vector2 localPosition = ToParentLocal(rigResponse.anchoredPosition);
+        if (_needsCoordinateTransform)
+        { // Convert: Stage_Root space -> world space -> target parent local space.
+            Vector2 positionInStageSpace = response.anchoredPosition;
 
-        PresentationResponse response = new PresentationResponse
-        {
-            anchoredPosition = localPosition,
-            scale = rigResponse.scale,
-            alpha = rigResponse.alpha
-        };
+            Vector3 worldPosition = _rigSpaceRoot.TransformPoint(new Vector3(positionInStageSpace.x, positionInStageSpace.y, 0f));
+            Vector3 positionInParentSpace = _targetParent.InverseTransformPoint(worldPosition);
+
+            response.anchoredPosition = new Vector2(positionInParentSpace.x, positionInParentSpace.y);
+        }
 
         Target.ApplyResponse(in response);
     }
 
-    private Vector2 ToParentLocal(Vector2 pointInRigSpace)
+    private static PresentationResponse Solve(in PresentationIntentState state, PresentationResponseProfile profile)
     {
-        if (_skipCoordinateTransform)
-            return pointInRigSpace;
+        float zoomFactor = Mathf.Clamp(state.zoom, -10f, 10f);
 
-        Vector3 worldPoint = _stageRoot.TransformPoint(new Vector3(pointInRigSpace.x, pointInRigSpace.y, 0f));
-        Vector3 parentLocal = _parent.InverseTransformPoint(worldPoint);
-        return new Vector2(parentLocal.x, parentLocal.y);
-    }
+        float scaleMultiplier = 1f + zoomFactor * profile.maxZoomScaleDelta;
+        Vector2 scaledSize = profile.baseScale * Mathf.Max(0.01f, scaleMultiplier);
 
-    public static PresentationResponse Solve(
-        in PresentationIntentState state,
-        PresentationResponseProfile profile)
-    {
-        float zoom01 = Mathf.Clamp(state.zoom * ZoomIntentScale, -1f, 1f);
+        Vector2 focusToTarget = profile.basePositionInRigSpace - state.focusPoint;
+        Vector2 zoomSpreadOffset = CalculateZoomSpreadOffset(focusToTarget, zoomFactor, profile.maxZoomSpreadPixels);
 
-        float scaleMul = 1f + zoom01 * profile.maxZoomScaleDelta;
-        Vector2 finalScale = profile.baseScale * Mathf.Max(0.01f, scaleMul);
-
-        Vector2 spreadOffset = Vector2.zero;
-        Vector2 fromFocus = profile.basePositionInRigSpace - state.focusPoint;
-
-        if (profile.maxZoomSpreadPixels > 0f && fromFocus.sqrMagnitude > 0.0001f)
-            spreadOffset = fromFocus.normalized * (zoom01 * profile.maxZoomSpreadPixels);
-
-        Vector2 finalPosition =
-            profile.basePositionInRigSpace
-            + state.pan * profile.panResponse
-            + spreadOffset;
+        Vector2 finalPosition = profile.basePositionInRigSpace + state.pan * profile.panResponse + zoomSpreadOffset;
 
         return new PresentationResponse
         {
             anchoredPosition = finalPosition,
-            scale = finalScale,
+            scale = scaledSize,
             alpha = profile.baseAlpha,
         };
+    }
+
+    private static Vector2 CalculateZoomSpreadOffset(Vector2 focusToTarget, float zoomFactor, float maxZoomSpreadPixels)
+    {
+        if (maxZoomSpreadPixels <= 0f)
+            return Vector2.zero;
+
+        if (focusToTarget.sqrMagnitude <= 0.0001f)
+            return Vector2.zero;
+
+        Vector2 spreadDirection = focusToTarget.normalized;
+        float spreadDistance = zoomFactor * maxZoomSpreadPixels;
+
+        return spreadDirection * spreadDistance;
     }
 }
