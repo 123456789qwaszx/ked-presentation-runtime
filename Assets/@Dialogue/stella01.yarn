@@ -6,44 +6,46 @@
 <<bg_spawn test1 bg1>>
 <<end_hold>>
 
-깊은 밤, 차가운 정적이 내려앉은 도시의 외딴 골목으로 정체를 알 수 없는 수상쩍은 그림자가 도둑고양이처럼 은밀하게 숨어든다.
 
-<<bg_sprite test1 ui/theme1/Background00_Image>>
-<<bg_fade test1 1>>
-<<begin_hold>>
-<<end_hold>>
-주변을 살피는 그림자의 움직임에는 극도의 경계심이 서려 있었다.
-
-<<begin_hold>>
-<<bg_spawn test2 bg1>>
-
-<<bg_sprite test2 ui/theme1/DialogueBox03BG_Image2>>
-<<bg_fade test2 1>>
-
-//<<dlg_spawn b1 b2>>
-<<end_hold>>
-"물건은 가져왔어?"
-
-<<begin_hold>>
-<<bg_spawn test3 bg1>>
-
-<<bg_sprite test3 ui/default/LobbyCharacter_Image>>
-<<bg_fade test3 1>>
-
-<<end_hold>>
-
-어둠 속에서 누군가가 나직한 목소리로 물었다.
 <<slot me>>
 <<cast me reira>>
 
 <<fade_in me>>
+깊은 밤, 차가운 정적이 내려앉은 도시의 외딴 골목으로 정체를 알 수 없는 수상쩍은 그림자가 도둑고양이처럼 은밀하게 숨어든다.
+
+//<<shot_zoom 4.0 4.5>>
+
+// <<bg_sprite test1 ui/theme1/Background00_Image>>
+// <<bg_fade test1 1>>
+// <<begin_hold>>
+// <<end_hold>>
+주변을 살피는 그림자의 움직임에는 극도의 경계심이 서려 있었다.
+
+// <<begin_hold>>
+// <<bg_spawn test2 bg1>>
+
+// <<bg_sprite test2 ui/theme1/DialogueBox03BG_Image2>>
+// <<bg_fade test2 1>>
+
+//<<dlg_spawn b1 b2>>
+//<<end_hold>>
+"물건은 가져왔어?"
+
+// <<begin_hold>>
+// <<bg_spawn test3 bg1>>
+
+// <<bg_sprite test3 ui/default/LobbyCharacter_Image>>
+// <<bg_fade test3 1>>
+
+// <<end_hold>>
+
+어둠 속에서 누군가가 나직한 목소리로 물었다.
 //<<shot_reset 0.35>>
 
 
 
 상대방인 의심스러운 사람이 품 안에서 소중한 듯 무언가를 꺼내 보이며 대꾸했다.
 
-<<shot_zoom 4.0 4.5>>
 "물론이지. 제대로 가져왔는지 확인해 볼 거야?"
 
 <<shot_pan 1.5 0 0.35>>
