@@ -12,16 +12,11 @@ public sealed class RectTransformResponseTarget : MonoBehaviour, IRectTransformP
     public RectTransform Rect => _rect;
     public CanvasGroup CanvasGroup => _canvasGroup;
 
-    private void Reset()
-    {
-        _rect = GetComponent<RectTransform>();
-        _canvasGroup = GetComponent<CanvasGroup>();
-    }
-
     public void ApplyResponse(in PresentationResponse response)
     {
         if (_rect == null)
             return;
+        
         //Debug.Log($"[RectTransformResponseTarget] Apply. " + $"target={name}, scale={response.scale}, pos={response.anchoredPosition}");
         _rect.anchoredPosition = response.anchoredPosition;
         _rect.localScale = new Vector3(response.scale.x, response.scale.y, 1f);

@@ -17,18 +17,15 @@ public sealed class PresentationResponseRig : MonoBehaviour
 
     public void ApplyImmediate(PresentationIntentState state, PresentationViewRefs presentation)
     {
-        //Debug.Log($"[PresentationResponseRig] ApplyImmediate incomingZoom={state.zoom}, " + $"currentZoom={CurrentState.zoom}");
-
         _currentState = state;
-        
-        ApplyToAllBindings(in state, presentation);
+        ApplyToAllBindings(in state);
     }
 
     public void ResetCurrentState()
     {
         _currentState = PresentationIntentState.Default;
     }
-    
+
     public void SetCurrentStateOnly(PresentationIntentState state)
     {
         _currentState = state;
@@ -50,7 +47,6 @@ public sealed class PresentationResponseRig : MonoBehaviour
         {
             Debug.LogWarning(
                 $"[PresentationResponseRig] RegisterRuntimeBinding failed. target is null. key={key}");
-
             return false;
         }
 
@@ -58,21 +54,26 @@ public sealed class PresentationResponseRig : MonoBehaviour
         {
             Debug.LogWarning(
                 $"[PresentationResponseRig] RegisterRuntimeBinding failed. target.Rect is null. key={key}, target={target}");
-
             return false;
         }
 
+        RectTransform stageRoot = presentation != null
+            ? presentation.GetRect(PresentationTarget.Stage_Root)
+            : null;
+
         PresentationResponseProfile runtimeProfile =
-            CreateRuntimeProfile(target, preset, presentation);
+            CreateRuntimeProfile(target, preset, stageRoot);
 
         RemoveBinding(key);
 
         _bindings.Add(new PresentationResponseBinding(
             key,
             runtimeProfile,
-            target));
+            target,
+            stageRoot));
 
-        Debug.Log($"[PresentationResponseRig] RegisterRuntimeBinding success. " + $"key={key}, target={target.Rect.name}, count={_bindings.Count}");
+        Debug.Log(
+            $"[PresentationResponseRig] RegisterRuntimeBinding success. key={key}, target={target.Rect.name}, count={_bindings.Count}");
 
         return true;
     }
@@ -115,35 +116,35 @@ public sealed class PresentationResponseRig : MonoBehaviour
             authoringPanUnits.y * _manualPanPixelsPerUnit.y);
     }
 
-    private void ApplyToAllBindings(in PresentationIntentState state, PresentationViewRefs presentation)
+    private void ApplyToAllBindings(in PresentationIntentState state)
     {
-       // Debug.Log($"[PresentationResponseRig] ApplyToAllBindings count={_bindings.Count}");
-
-        for (int i = 0; i < _bindings.Count; i++)
+        for (int i = _bindings.Count - 1; i >= 0; i--)
         {
             PresentationResponseBinding binding = _bindings[i];
 
             if (binding == null)
             {
                 Debug.LogWarning($"[PresentationResponseRig] Binding null. index={i}");
+                _bindings.RemoveAt(i);
                 continue;
             }
 
-            //Debug.Log($"[PresentationResponseRig] Apply binding index={i}, key={binding.Key}");
+            if (!binding.IsAlive)
+            {
+                Debug.LogWarning($"[PresentationResponseRig] Dead binding removed. key={binding.Key}");
+                _bindings.RemoveAt(i);
+                continue;
+            }
 
-            binding.Apply(in state, presentation);
+            binding.Apply(in state);
         }
     }
 
     private static PresentationResponseProfile CreateRuntimeProfile(
         IRectTransformPresentationResponseTarget target,
         PresentationResponseProfile preset,
-        PresentationViewRefs presentation)
+        RectTransform stageRoot)
     {
-        RectTransform stageRoot = presentation != null
-            ? presentation.GetRect(PresentationTarget.Stage_Root)
-            : null;
-
         PresentationResponseProfile profile = new PresentationResponseProfile
         {
             maxZoomScaleDelta = preset.maxZoomScaleDelta,
@@ -161,7 +162,7 @@ public sealed class PresentationResponseRig : MonoBehaviour
 
         return profile;
     }
-    
+
     public static Vector2 WorldToSpacePoint(
         RectTransform stageRoot,
         Vector3 worldPoint)

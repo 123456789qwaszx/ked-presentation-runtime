@@ -19,7 +19,7 @@
 
 //<<shot_zoom_focus me 10 1.3 0 0>>
 
-<<shot_track me 3.5>>
+<<shot_track_to me 9000 -1000 1.5>>
 
 // <<bg_sprite test1 ui/theme1/Background00_Image>>
 // <<bg_fade test1 1>>
