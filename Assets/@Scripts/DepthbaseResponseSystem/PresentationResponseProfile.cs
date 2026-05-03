@@ -1,8 +1,6 @@
 using System;
 using UnityEngine;
 
-// Root/Slot 하나의 반응 특성.
-// base 값은 모두 Rig 공간(Stage_Root 기준)에서 캡처된다.
 [Serializable]
 public sealed class PresentationResponseProfile
 {
@@ -21,7 +19,7 @@ public sealed class PresentationResponseProfile
     [Tooltip("pan 픽셀값을 얼마나 따라갈지. CharacterSlot=1, BG는 낮게")]
     public float panResponse = 1f;
 
-    public static PresentationResponseProfile Background => new PresentationResponseProfile
+    public static PresentationResponseProfile Background => new ()
     {
         basePositionInRigSpace = Vector2.zero,
         baseScale = Vector2.one,
@@ -31,7 +29,7 @@ public sealed class PresentationResponseProfile
         panResponse = 0.15f,
     };
 
-    public static PresentationResponseProfile Prop => new PresentationResponseProfile
+    public static PresentationResponseProfile Prop => new ()
     {
         basePositionInRigSpace = Vector2.zero,
         baseScale = Vector2.one,
@@ -41,7 +39,7 @@ public sealed class PresentationResponseProfile
         panResponse = 0.55f,
     };
 
-    public static PresentationResponseProfile CharacterSlot => new PresentationResponseProfile
+    public static PresentationResponseProfile CharacterSlot => new ()
     {
         basePositionInRigSpace = Vector2.zero,
         baseScale = Vector2.one,
@@ -51,7 +49,7 @@ public sealed class PresentationResponseProfile
         panResponse = 1f,
     };
 
-    public static PresentationResponseProfile Foreground => new PresentationResponseProfile
+    public static PresentationResponseProfile Foreground => new ()
     {
         basePositionInRigSpace = Vector2.zero,
         baseScale = Vector2.one,

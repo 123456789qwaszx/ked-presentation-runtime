@@ -4,7 +4,7 @@ using UnityEngine;
 /// 최종 local 적용만 담당하는 기본 어댑터.
 /// rig나 Stage_Root를 알지 않는다.
 /// </summary>
-public sealed class RectTransformResponseTarget : MonoBehaviour, IRectTransformPresentationResponseTarget
+public sealed class RectTransformResponseTarget : MonoBehaviour, IPresentationResponseTarget
 {
     [SerializeField] private RectTransform _rect;
     [SerializeField] private CanvasGroup _canvasGroup;

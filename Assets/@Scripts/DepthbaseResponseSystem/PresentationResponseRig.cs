@@ -31,7 +31,7 @@ public sealed class PresentationResponseRig : MonoBehaviour
 
     public bool RegisterRuntimeBinding(
         string key,
-        IRectTransformPresentationResponseTarget target,
+        IPresentationResponseTarget target,
         PresentationResponseProfile presetProfile,
         PresentationViewRefs presentation)
     {
@@ -77,8 +77,9 @@ public sealed class PresentationResponseRig : MonoBehaviour
         _bindings.Clear();
     }
 
+    
     private static PresentationResponseProfile CreateRuntimeProfile(
-        IRectTransformPresentationResponseTarget target,
+        IPresentationResponseTarget target,
         PresentationResponseProfile presetProfile,
         RectTransform stageRoot)
     {

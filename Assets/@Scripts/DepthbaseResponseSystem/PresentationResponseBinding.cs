@@ -1,21 +1,15 @@
-using System;
 using UnityEngine;
 
 public interface IPresentationResponseTarget
 {
+    RectTransform Rect { get; }
+    CanvasGroup CanvasGroup { get; }
+
     void ApplyResponse(in PresentationResponse response);
 }
 
-public interface IRectTransformPresentationResponseTarget : IPresentationResponseTarget
-{
-    RectTransform Rect { get; }
-    CanvasGroup CanvasGroup { get; }
-}
-
-/// <summary>
-/// target + profile + runtime 좌표계 정보를 묶고,
-/// state를 response로 번역해 target에 적용한다.
-/// </summary>
+// target + profile + runtime 좌표계 정보를 묶고,
+// state를 response로 번역해 target에 적용한다.
 public sealed class PresentationResponseBinding
 {
     // 모든 연출 계산의 기준 좌표계
@@ -30,12 +24,12 @@ public sealed class PresentationResponseBinding
 
     public string Key { get; }
     public PresentationResponseProfile Profile { get; }
-    public IRectTransformPresentationResponseTarget Target { get; }
+    public IPresentationResponseTarget Target { get; }
 
     public PresentationResponseBinding(
         string key,
         PresentationResponseProfile profile,
-        IRectTransformPresentationResponseTarget target,
+        IPresentationResponseTarget target,
         RectTransform stageRoot)
     {
         Key = key;
