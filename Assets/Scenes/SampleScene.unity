@@ -9432,7 +9432,7 @@ MonoBehaviour:
   presentationRouteEntry: {fileID: 1433866633}
   bgHost: {fileID: 1967129519}
   presentationResponseRig: {fileID: 529556882}
-  yarnEntryKey: stella01
+  yarnEntryKey: sub04lalu
   presentationEntryKey: emo
   runYarnKey: 50
   stopKey: 51

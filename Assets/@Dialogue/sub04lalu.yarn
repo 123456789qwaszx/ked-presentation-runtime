@@ -1,0 +1,13 @@
+﻿title: sub04lalu
+---
+<<begin_hold>>
+<<presentation_setup>>
+
+<<end_hold>>
+
+<<bg_spawn test1 bg1>>
+<<bg_sprite test1 ui/theme1/Background00_Image>>
+<<bg_fade test1 1>>
+
+알베도: 이 청구서들, 어디 한번 제대로 설명해 보시지!
+===
