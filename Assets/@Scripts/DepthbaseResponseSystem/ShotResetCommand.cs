@@ -7,18 +7,34 @@ using UnityEngine;
 [CommandMenuHint("Presentation Shot", "Shot Reset", Order = -849)]
 public sealed class ShotResetCommandSpec : CommandSpecBase
 {
+    [Header("Tween")]
+    [Tooltip("0 이하이면 즉시 스냅합니다.")]
     public float duration = 0.35f;
+
     public Ease ease = Ease.OutCubic;
+
+    [Header("Wait")]
     public bool wait = false;
+
+    [Header("Options")]
+    [Tooltip("체크하면 기존 shot tween을 끝내고 committed state에서 시작합니다.")]
+    public bool killTween = true;
+
+    [Header("Validation")]
+    public bool strict = true;
 }
 
-public sealed class ShotResetCommand : CommandBase
+public sealed class ShotResetCommand : CommandBase, IStepScopedCommand
 {
     private readonly PresentationResponseRig _rig;
     private readonly ShotResetCommandSpec _spec;
 
+    private PresentationViewRefs _presentation;
     private PresentationIntentState _fromState;
+    private PresentationIntentState _toState;
     private Tween _tween;
+    private bool _resolveAttempted;
+    private bool _canCommitFinalState;
 
     public override bool WaitForCompletion => _spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
@@ -33,86 +49,133 @@ public sealed class ShotResetCommand : CommandBase
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
-        if (_rig == null)
-        {
-            Debug.LogError("[ShotResetCommand] PresentationResponseRig is null.");
-            yield break;
-        }
+        if (!_resolveAttempted)
+            ResolveRefs(scope);
 
-        if (scope == null || scope.Presentation == null)
-        {
-            Debug.LogError("[ShotResetCommand] PresentationViewRefs is null.");
+        if (_rig == null || _presentation == null)
             yield break;
-        }
 
-        KillTweenIfNeeded();
+        if (_spec.killTween)
+            KillRigTween(true); // Finish previous motion so this command starts from a committed state.
 
         _fromState = _rig.CurrentState;
-        PresentationIntentState toState = PresentationIntentState.Default;
+        _toState = PresentationIntentState.Default;
 
-        if (_spec.duration <= 0f)
+        _canCommitFinalState = true;
+
+        if (_spec.duration <= 0f || ApproximatelyEqual(_fromState, _toState))
         {
-            Commit(_rig, toState, scope.Presentation);
+            Commit(_rig, _toState, _presentation);
+            ClearRuntimeState();
             yield break;
         }
 
-        PlayTween(_rig, _fromState, toState, scope.Presentation);
+        _tween = DOTween
+            .To(
+                () => 0f,
+                t =>
+                {
+                    if (!_canCommitFinalState || _rig == null || _presentation == null)
+                        return;
 
-        if (_spec.wait && _tween != null)
+                    float u = Mathf.Clamp01(t);
+                    PresentationIntentState state = InterpolateState(_fromState, _toState, u);
+                    _rig.ApplyImmediate(state, _presentation);
+                },
+                1f,
+                _spec.duration
+            )
+            .SetEase(_spec.ease)
+            .SetUpdate(true)
+            .SetTarget(_rig)
+            .OnComplete(() =>
+            {
+                if (!_canCommitFinalState || _rig == null || _presentation == null)
+                    return;
+
+                Commit(_rig, _toState, _presentation);
+                ClearRuntimeState();
+            });
+
+        if (_spec.wait)
             yield return _tween.WaitForCompletion();
     }
 
     protected override void OnSkip(CommandRunScope scope)
     {
-        if (_rig == null)
+        if (!_resolveAttempted)
+            ResolveRefs(scope);
+
+        if (_rig == null || _presentation == null)
             return;
 
-        if (scope == null || scope.Presentation == null)
-            return;
+        KillRigTween(false);
 
-        KillTweenIfNeeded();
+        _fromState = _rig.CurrentState;
+        _toState = PresentationIntentState.Default;
 
-        Commit(
-            _rig,
-            PresentationIntentState.Default,
-            scope.Presentation);
+        Commit(_rig, _toState, _presentation);
+        ClearRuntimeState();
     }
 
-    protected override void OnRollbackSeek(CommandRunScope scope)
-    {
-        OnSkip(scope);
-    }
+    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
 
     protected override void OnCommandCompleted(CommandRunScope scope)
     {
-        // wait=false이면 tween을 background로 유지
+        if (!_resolveAttempted)
+            ResolveRefs(scope);
+
+        if (!_canCommitFinalState || _rig == null || _presentation == null)
+            return;
+
+        _tween?.Kill(false);
+        KillRigTween(false);
+        Commit(_rig, _toState, _presentation);
+        ClearRuntimeState();
     }
 
-    private void PlayTween(
-        PresentationResponseRig rig,
-        PresentationIntentState from,
-        PresentationIntentState to,
-        PresentationViewRefs presentation)
+    private void ResolveRefs(CommandRunScope scope)
     {
-        float progress = 0f;
+        _resolveAttempted = true;
 
-        _tween = DOTween.To(
-                () => progress,
-                value =>
-                {
-                    progress = value;
+        if (_rig == null)
+        {
+            if (_spec.strict)
+                Debug.LogWarning("[ShotResetCommand] PresentationResponseRig is null.");
+            return;
+        }
 
-                    PresentationIntentState state =
-                        InterpolateState(from, to, value);
+        if (scope == null)
+        {
+            if (_spec.strict)
+                Debug.LogWarning("[ShotResetCommand] CommandRunScope is null.");
+            return;
+        }
 
-                    rig.ApplyImmediate(state, presentation);
-                },
-                1f,
-                _spec.duration)
-            .SetEase(_spec.ease)
-            .SetUpdate(true)
-            .SetTarget(rig)
-            .OnComplete(() => Commit(rig, to, presentation));
+        if (scope.Presentation == null)
+        {
+            if (_spec.strict)
+                Debug.LogWarning("[ShotResetCommand] PresentationViewRefs is null.");
+            return;
+        }
+
+        _presentation = scope.Presentation;
+    }
+
+    private void KillRigTween(bool complete)
+    {
+        if (_rig == null)
+            return;
+
+        DOTween.Kill(_rig, complete);
+        _tween = null;
+    }
+
+    private void ClearRuntimeState()
+    {
+        _canCommitFinalState = false;
+        _presentation = null;
+        _tween = null;
     }
 
     private static void Commit(
@@ -139,12 +202,12 @@ public sealed class ShotResetCommand : CommandBase
         };
     }
 
-    private void KillTweenIfNeeded()
+    private static bool ApproximatelyEqual(
+        in PresentationIntentState a,
+        in PresentationIntentState b)
     {
-        if (_tween == null)
-            return;
-
-        _tween.Kill(false);
-        _tween = null;
+        return Mathf.Abs(a.zoom - b.zoom) <= 0.0001f &&
+               Vector2.SqrMagnitude(a.pan - b.pan) <= 0.0001f &&
+               Vector2.SqrMagnitude(a.focusPoint - b.focusPoint) <= 0.0001f;
     }
 }

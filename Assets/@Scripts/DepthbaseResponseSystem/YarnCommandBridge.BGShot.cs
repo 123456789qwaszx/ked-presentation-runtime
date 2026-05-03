@@ -40,7 +40,6 @@ public sealed partial class YarnCommandBridge
         {
             panX = Mathf.Clamp(panX, -10f, 10f),
             panY = Mathf.Clamp(panY, -10f, 10f),
-            absolutePan = true,
             duration = Mathf.Max(0f, duration),
             ease = Ease.OutCubic,
             wait = false
@@ -55,7 +54,6 @@ public sealed partial class YarnCommandBridge
         {
             panX = Mathf.Clamp(panX, -10f, 10f),
             panY = Mathf.Clamp(panY, -10f, 10f),
-            absolutePan = false,
             duration = Mathf.Max(0f, duration),
             ease = Ease.OutCubic,
             wait = false

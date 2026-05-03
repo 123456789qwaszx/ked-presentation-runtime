@@ -36,24 +36,33 @@ public sealed class ShotZoomCommandSpec : CommandSpecBase
     [Range(-10f, 10f)] public float panY = 0f;
 
     [Header("Tween")]
+    [Tooltip("0 이하이면 즉시 스냅합니다.")]
     public float duration = 0.45f;
+
     public Ease ease = Ease.OutCubic;
 
     [Header("Wait")]
     public bool wait = false;
 
     [Header("Options")]
+    [Tooltip("체크하면 기존 shot tween을 끝내고 committed state에서 시작합니다.")]
     public bool killTween = true;
+
+    [Header("Validation")]
+    public bool strict = true;
 }
 
-public sealed class ShotZoomCommand : CommandBase
+public sealed class ShotZoomCommand : CommandBase, IStepScopedCommand
 {
     private readonly PresentationResponseRig _rig;
     private readonly ShotZoomCommandSpec _spec;
 
+    private PresentationViewRefs _presentation;
     private PresentationIntentState _fromState;
     private PresentationIntentState _toState;
     private Tween _tween;
+    private bool _resolveAttempted;
+    private bool _canCommitFinalState;
 
     public override bool WaitForCompletion => _spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
@@ -66,66 +75,117 @@ public sealed class ShotZoomCommand : CommandBase
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
-        if (_rig == null)
-            yield break;
+        if (!_resolveAttempted)
+            ResolveRefs(scope);
 
-        if (scope == null || scope.Presentation == null)
+        if (_rig == null || _presentation == null)
             yield break;
 
         if (_spec.killTween)
-            _tween?.Kill(true);
+            KillRigTween(true); // Finish previous motion so this command starts from a committed state.
 
         _fromState = _rig.CurrentState;
-
-        Debug.Log(
-            $"[ShotZoomCommand] Captured fromState | " +
-            $"from.zoom={_fromState.zoom}, " +
-            $"from.pan={_fromState.pan}, " +
-            $"from.focusPoint={_fromState.focusPoint}");
-        
         _toState = BuildTargetState(_rig, _fromState, scope);
-        Debug.Log(
-            $"[ShotZoomCommand] Built toState | " +
-            $"to.zoom={_toState.zoom}, " +
-            $"to.pan={_toState.pan}, " +
-            $"to.focusPoint={_toState.focusPoint}");
 
-        if (_spec.duration <= 0f)
+        _canCommitFinalState = true;
+
+        if (_spec.duration <= 0f || ApproximatelyEqual(_fromState, _toState))
         {
-            Commit(_rig, _toState, scope.Presentation);
+            Commit(_rig, _toState, _presentation);
+            ClearRuntimeState();
             yield break;
         }
 
-        PlayTween(_rig, _fromState, _toState, scope.Presentation);
+        _tween = DOTween
+            .To(
+                () => 0f,
+                t =>
+                {
+                    if (!_canCommitFinalState || _rig == null || _presentation == null)
+                        return;
 
-        if (_spec.wait && _tween != null)
+                    float u = Mathf.Clamp01(t);
+                    PresentationIntentState state = InterpolateState(_fromState, _toState, u);
+                    _rig.ApplyImmediate(state, _presentation);
+                },
+                1f,
+                _spec.duration
+            )
+            .SetEase(_spec.ease)
+            .SetUpdate(true)
+            .SetTarget(_rig)
+            .OnComplete(() =>
+            {
+                if (!_canCommitFinalState || _rig == null || _presentation == null)
+                    return;
+
+                Commit(_rig, _toState, _presentation);
+                ClearRuntimeState();
+            });
+
+        if (_spec.wait)
             yield return _tween.WaitForCompletion();
     }
 
     protected override void OnSkip(CommandRunScope scope)
     {
-        if (_rig == null)
+        if (!_resolveAttempted)
+            ResolveRefs(scope);
+
+        if (_rig == null || _presentation == null)
             return;
 
-        if (scope == null || scope.Presentation == null)
-            return;
+        KillRigTween(false);
 
         _fromState = _rig.CurrentState;
         _toState = BuildTargetState(_rig, _fromState, scope);
 
-        Commit(_rig, _toState, scope.Presentation);
-
-        _tween = null;
+        Commit(_rig, _toState, _presentation);
+        ClearRuntimeState();
     }
 
-    protected override void OnRollbackSeek(CommandRunScope scope)
-    {
-        OnSkip(scope);
-    }
+    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
 
     protected override void OnCommandCompleted(CommandRunScope scope)
     {
-        // wait=false이면 tween을 background로 유지.
+        if (!_resolveAttempted)
+            ResolveRefs(scope);
+
+        if (!_canCommitFinalState || _rig == null || _presentation == null)
+            return;
+
+        _tween?.Kill(false);
+        KillRigTween(false);
+        Commit(_rig, _toState, _presentation);
+        ClearRuntimeState();
+    }
+
+    private void ResolveRefs(CommandRunScope scope)
+    {
+        _resolveAttempted = true;
+
+        if (_rig == null)
+        {
+            if (_spec.strict)
+                Debug.LogWarning("[ShotZoomCommand] PresentationResponseRig is null.");
+            return;
+        }
+
+        if (scope == null)
+        {
+            if (_spec.strict)
+                Debug.LogWarning("[ShotZoomCommand] CommandRunScope is null.");
+            return;
+        }
+
+        if (scope.Presentation == null)
+        {
+            if (_spec.strict)
+                Debug.LogWarning("[ShotZoomCommand] PresentationViewRefs is null.");
+            return;
+        }
+
+        _presentation = scope.Presentation;
     }
 
     private PresentationIntentState BuildTargetState(
@@ -134,29 +194,20 @@ public sealed class ShotZoomCommand : CommandBase
         CommandRunScope scope)
     {
         Vector2 focusPoint = from.focusPoint;
-        bool hasFocus = false;
+        bool hasFocus = TryResolveFocusPoint(scope, out Vector2 resolvedFocusPoint);
 
-        if (!string.IsNullOrWhiteSpace(_spec.focusRoleKey) &&
-            TryGetRigFocusPoint(
-                scope,
-                _spec.focusRoleKey,
-                _spec.focusTarget,
-                _spec.focusLocalOffset,
-                out Vector2 rigFocusPoint))
-        {
-            focusPoint = rigFocusPoint;
-            hasFocus = true;
-        }
+        if (hasFocus)
+            focusPoint = resolvedFocusPoint;
 
         float targetZoom = _spec.applyZoom
-            ? _spec.zoom
+            ? Mathf.Clamp(_spec.zoom, -10f, 10f)
             : from.zoom;
 
         Vector2 manualPanPixels = Vector2.zero;
         if (_spec.applyPan)
         {
-            manualPanPixels =
-                rig.GetManualPanPixels(new Vector2(_spec.panX, _spec.panY));
+            manualPanPixels = rig.GetManualPanPixels(
+                new Vector2(_spec.panX, _spec.panY));
         }
 
         Vector2 targetPan = from.pan;
@@ -177,68 +228,71 @@ public sealed class ShotZoomCommand : CommandBase
 
         return new PresentationIntentState
         {
-            zoom = Mathf.Clamp(targetZoom, -10f, 10f),
+            zoom = targetZoom,
             pan = targetPan,
             focusPoint = focusPoint,
         };
     }
 
-    private static bool TryGetRigFocusPoint(
-        CommandRunScope scope,
-        string roleKey,
-        CharacterRigTarget target,
-        Vector2 localOffset,
-        out Vector2 focusPoint)
+    private bool TryResolveFocusPoint(CommandRunScope scope, out Vector2 focusPoint)
     {
         focusPoint = Vector2.zero;
 
-        if (scope == null || string.IsNullOrWhiteSpace(roleKey))
+        string roleKey = SafeTrim(_spec.focusRoleKey);
+        if (string.IsNullOrEmpty(roleKey))
             return false;
 
-        if (!scope.Refs.TryGetCharRigRefs(roleKey, out CharacterRigRefs rigRefs))
+        if (scope == null)
+        {
+            if (_spec.strict)
+                Debug.LogWarning($"[ShotZoomCommand] Scope is null. focusRoleKey='{roleKey}'.");
             return false;
+        }
 
-        RectTransform rect = rigRefs.GetRect(target);
+        if (!scope.Refs.TryGetCharRigRefs(roleKey, out CharacterRigRefs rigRefs) || rigRefs == null)
+        {
+            if (_spec.strict)
+                Debug.LogWarning($"[ShotZoomCommand] Rig refs not found. roleKey='{roleKey}'.");
+            return false;
+        }
+
+        RectTransform rect = rigRefs.GetRect(_spec.focusTarget);
         if (rect == null)
-            return false;
+        {
+            if (_spec.strict)
+            {
+                Debug.LogWarning(
+                    $"[ShotZoomCommand] Focus target rect not found. roleKey='{roleKey}', target='{_spec.focusTarget}'.");
+            }
 
-        RectTransform stageRoot =
-            scope.Presentation != null
-                ? scope.Presentation.GetRect(PresentationTarget.Stage_Root)
-                : null;
+            return false;
+        }
+
+        RectTransform stageRoot = _presentation != null
+            ? _presentation.GetRect(PresentationTarget.Stage_Root)
+            : null;
 
         Vector3 world =
-            rect.TransformPoint(new Vector3(localOffset.x, localOffset.y, 0f));
+            rect.TransformPoint(new Vector3(_spec.focusLocalOffset.x, _spec.focusLocalOffset.y, 0f));
 
         focusPoint = WorldToSpacePoint(stageRoot, world);
         return true;
     }
 
-    private void PlayTween(
-        PresentationResponseRig rig,
-        PresentationIntentState from,
-        PresentationIntentState to,
-        PresentationViewRefs presentation)
+    private void KillRigTween(bool complete)
     {
-        float progress = 0f;
+        if (_rig == null)
+            return;
 
-        _tween = DOTween.To(
-                () => progress,
-                value =>
-                {
-                    progress = value;
+        DOTween.Kill(_rig, complete);
+        _tween = null;
+    }
 
-                    PresentationIntentState state =
-                        InterpolateState(from, to, value);
-
-                    rig.ApplyImmediate(state, presentation);
-                },
-                1f,
-                _spec.duration)
-            .SetEase(_spec.ease)
-            .SetUpdate(true)
-            .SetTarget(rig)
-            .OnComplete(() => Commit(rig, to, presentation));
+    private void ClearRuntimeState()
+    {
+        _canCommitFinalState = false;
+        _presentation = null;
+        _tween = null;
     }
 
     private static void Commit(
@@ -263,6 +317,20 @@ public sealed class ShotZoomCommand : CommandBase
             pan = Vector2.Lerp(from.pan, to.pan, t),
             focusPoint = Vector2.Lerp(from.focusPoint, to.focusPoint, t),
         };
+    }
+
+    private static bool ApproximatelyEqual(
+        in PresentationIntentState a,
+        in PresentationIntentState b)
+    {
+        return Mathf.Abs(a.zoom - b.zoom) <= 0.0001f &&
+               Vector2.SqrMagnitude(a.pan - b.pan) <= 0.0001f &&
+               Vector2.SqrMagnitude(a.focusPoint - b.focusPoint) <= 0.0001f;
+    }
+
+    private static string SafeTrim(string s)
+    {
+        return string.IsNullOrEmpty(s) ? string.Empty : s.Trim();
     }
 
     public static Vector2 WorldToSpacePoint(
