@@ -1,17 +1,29 @@
 using UnityEngine;
 
-public interface IPresentationResponseTarget
-{
-    RectTransform Rect { get; }
-    CanvasGroup CanvasGroup { get; }
-
-    void ApplyResponse(in PresentationResponse response);
-}
-
 // target + profile + runtime 좌표계 정보를 묶고,
 // state를 response로 번역해 target에 적용한다.
 public sealed class PresentationResponseBinding
 {
+    public interface IResponseTarget
+    {
+        RectTransform Rect { get; }
+        CanvasGroup CanvasGroup { get; }
+
+        void ApplyResponse(in Response response);
+    }
+    
+    // position은 target parent 기준이 아니라 Rig 공간 좌표다.
+    // local position이 아니고 Rig 공간인 이유는 좌표계가 섞이지 않게하기 위함.
+    // 이것을 parent local 공간으로 변환해 적용한다.
+    public struct Response
+    {
+        // positionInRigSpace는 Rig 공간 기준 좌표,
+        // 각 target의 parent 기준 좌표로 다시 바꿔야 함.
+        public Vector2 anchoredPosition;
+        public Vector2 scale;
+        public float alpha;
+    }
+    
     // 모든 연출 계산의 기준 좌표계
     // "이 캐릭터는 Stage 기준 (300, 0)에 있다"
     // "이 배경은 Stage 기준 (-200, 0)에 있다"
@@ -24,12 +36,12 @@ public sealed class PresentationResponseBinding
 
     public string Key { get; }
     public PresentationResponseProfile Profile { get; }
-    public IPresentationResponseTarget Target { get; }
+    public IResponseTarget Target { get; }
 
     public PresentationResponseBinding(
         string key,
         PresentationResponseProfile profile,
-        IPresentationResponseTarget target,
+        IResponseTarget target,
         RectTransform stageRoot)
     {
         Key = key;
@@ -54,7 +66,7 @@ public sealed class PresentationResponseBinding
         if (!IsAlive)
             return;
 
-        PresentationResponse response = Solve(in state, Profile);
+        Response response = Solve(in state, Profile);
 
         if (_needsCoordinateTransform)
         { // Convert: Stage_Root space -> world space -> target parent local space.
@@ -69,7 +81,7 @@ public sealed class PresentationResponseBinding
         Target.ApplyResponse(in response);
     }
 
-    private static PresentationResponse Solve(in PresentationIntentState state, PresentationResponseProfile profile)
+    private static Response Solve(in PresentationIntentState state, PresentationResponseProfile profile)
     {
         float zoomFactor = Mathf.Clamp(state.zoom, -10f, 10f);
 
@@ -81,7 +93,7 @@ public sealed class PresentationResponseBinding
 
         Vector2 finalPosition = profile.basePositionInRigSpace + state.pan * profile.panResponse + zoomSpreadOffset;
 
-        return new PresentationResponse
+        return new Response
         {
             anchoredPosition = finalPosition,
             scale = scaledSize,
