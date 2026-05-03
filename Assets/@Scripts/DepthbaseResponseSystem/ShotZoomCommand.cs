@@ -47,9 +47,6 @@ public sealed class ShotZoomCommandSpec : CommandSpecBase
     [Header("Options")]
     [Tooltip("체크하면 기존 shot tween을 끝내고 committed state에서 시작합니다.")]
     public bool killTween = true;
-
-    [Header("Validation")]
-    public bool strict = true;
 }
 
 public sealed class ShotZoomCommand : CommandBase, IStepScopedCommand
@@ -57,7 +54,6 @@ public sealed class ShotZoomCommand : CommandBase, IStepScopedCommand
     private readonly PresentationResponseRig _rig;
     private readonly ShotZoomCommandSpec _spec;
 
-    private PresentationViewRefs _presentation;
     private PresentationIntentState _fromState;
     private PresentationIntentState _toState;
     private Tween _tween;
@@ -78,7 +74,7 @@ public sealed class ShotZoomCommand : CommandBase, IStepScopedCommand
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (_rig == null || _presentation == null)
+        if (_rig == null)
             yield break;
 
         if (_spec.killTween)
@@ -89,10 +85,12 @@ public sealed class ShotZoomCommand : CommandBase, IStepScopedCommand
 
         _canCommitFinalState = true;
 
-        if (_spec.duration <= 0f || ApproximatelyEqual(_fromState, _toState))
+        if (_spec.duration <= 0f)
         {
-            Commit(_rig, _toState, _presentation);
-            ClearRuntimeState();
+            _rig.ApplyToAllBindings(_toState);
+            
+            _canCommitFinalState = false;
+            _tween = null;
             yield break;
         }
 
@@ -101,9 +99,6 @@ public sealed class ShotZoomCommand : CommandBase, IStepScopedCommand
                 () => 0f,
                 t =>
                 {
-                    if (!_canCommitFinalState || _rig == null || _presentation == null)
-                        return;
-
                     float u = Mathf.Clamp01(t);
                     PresentationIntentState state = InterpolateState(_fromState, _toState, u);
                     _rig.ApplyToAllBindings(state);
@@ -116,11 +111,13 @@ public sealed class ShotZoomCommand : CommandBase, IStepScopedCommand
             .SetTarget(_rig)
             .OnComplete(() =>
             {
-                if (!_canCommitFinalState || _rig == null || _presentation == null)
+                if (!_canCommitFinalState || _rig == null)
                     return;
-
-                Commit(_rig, _toState, _presentation);
-                ClearRuntimeState();
+                
+                _rig.ApplyToAllBindings(_toState);
+                
+                _canCommitFinalState = false;
+                _tween = null;
             });
 
         if (_spec.wait)
@@ -132,16 +129,16 @@ public sealed class ShotZoomCommand : CommandBase, IStepScopedCommand
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (_rig == null || _presentation == null)
+        if (_rig == null)
             return;
-
-        KillRigTween(false);
 
         _fromState = _rig.CurrentState;
         _toState = BuildTargetState(_fromState, scope);
-
-        Commit(_rig, _toState, _presentation);
-        ClearRuntimeState();
+        
+        _rig.ApplyToAllBindings(_toState);
+        
+        _canCommitFinalState = false;
+        _tween = null;
     }
 
     protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
@@ -151,41 +148,20 @@ public sealed class ShotZoomCommand : CommandBase, IStepScopedCommand
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (!_canCommitFinalState || _rig == null || _presentation == null)
+        if (!_canCommitFinalState || _rig == null)
             return;
 
         _tween?.Kill(false);
-        KillRigTween(false);
-        Commit(_rig, _toState, _presentation);
-        ClearRuntimeState();
+        
+        _rig.ApplyToAllBindings(_toState);
+        
+        _canCommitFinalState = false;
+        _tween = null;
     }
 
     private void ResolveRefs(CommandRunScope scope)
     {
         _resolveAttempted = true;
-
-        if (_rig == null)
-        {
-            if (_spec.strict)
-                Debug.LogWarning("[ShotZoomCommand] PresentationResponseRig is null.");
-            return;
-        }
-
-        if (scope == null)
-        {
-            if (_spec.strict)
-                Debug.LogWarning("[ShotZoomCommand] CommandRunScope is null.");
-            return;
-        }
-
-        if (scope.Presentation == null)
-        {
-            if (_spec.strict)
-                Debug.LogWarning("[ShotZoomCommand] PresentationViewRefs is null.");
-            return;
-        }
-
-        _presentation = scope.Presentation;
     }
 
     private PresentationIntentState BuildTargetState(
@@ -227,77 +203,31 @@ public sealed class ShotZoomCommand : CommandBase, IStepScopedCommand
             focusPoint = focusPoint,
         };
     }
-
+    
     private bool TryResolveFocusPoint(CommandRunScope scope, out Vector2 focusPoint)
     {
         focusPoint = Vector2.zero;
 
-        string roleKey = SafeTrim(_spec.focusRoleKey);
-        if (string.IsNullOrEmpty(roleKey))
-            return false;
-
-        if (scope == null)
-        {
-            if (_spec.strict)
-                Debug.LogWarning($"[ShotZoomCommand] Scope is null. focusRoleKey='{roleKey}'.");
-            return false;
-        }
-
-        if (!scope.Refs.TryGetCharRigRefs(roleKey, out CharacterRigRefs rigRefs) || rigRefs == null)
-        {
-            if (_spec.strict)
-                Debug.LogWarning($"[ShotZoomCommand] Rig refs not found. roleKey='{roleKey}'.");
-            return false;
-        }
+        string roleKey = _spec.focusRoleKey;
+        
+        scope.Refs.TryGetCharRigRefs(roleKey, out CharacterRigRefs rigRefs);
 
         RectTransform rect = rigRefs.GetRect(_spec.focusTarget);
-        if (rect == null)
-        {
-            if (_spec.strict)
-            {
-                Debug.LogWarning(
-                    $"[ShotZoomCommand] Focus target rect not found. roleKey='{roleKey}', target='{_spec.focusTarget}'.");
-            }
+        
+        RectTransform stageRoot = scope.Presentation.GetRect(PresentationTarget.Stage_Root);
 
-            return false;
+        Vector3 world = rect.TransformPoint(
+            new Vector3(_spec.focusLocalOffset.x, _spec.focusLocalOffset.y, 0f));
+
+        if (stageRoot == null)
+        {
+            focusPoint = new Vector2(world.x, world.y);
+            return true;
         }
 
-        RectTransform stageRoot = _presentation != null
-            ? _presentation.GetRect(PresentationTarget.Stage_Root)
-            : null;
-
-        Vector3 world =
-            rect.TransformPoint(new Vector3(_spec.focusLocalOffset.x, _spec.focusLocalOffset.y, 0f));
-
-        focusPoint = WorldToSpacePoint(stageRoot, world);
+        Vector3 local = stageRoot.InverseTransformPoint(world);
+        focusPoint = new Vector2(local.x, local.y);
         return true;
-    }
-
-    private void KillRigTween(bool complete)
-    {
-        if (_rig == null)
-            return;
-
-        DOTween.Kill(_rig, complete);
-        _tween = null;
-    }
-
-    private void ClearRuntimeState()
-    {
-        _canCommitFinalState = false;
-        _presentation = null;
-        _tween = null;
-    }
-
-    private static void Commit(
-        PresentationResponseRig rig,
-        in PresentationIntentState state,
-        PresentationViewRefs presentation)
-    {
-        if (rig == null || presentation == null)
-            return;
-
-        rig.ApplyToAllBindings(state);
     }
 
     private static PresentationIntentState InterpolateState(in PresentationIntentState from, in PresentationIntentState to, float t)
@@ -308,30 +238,5 @@ public sealed class ShotZoomCommand : CommandBase, IStepScopedCommand
             pan = Vector2.Lerp(from.pan, to.pan, t),
             focusPoint = Vector2.Lerp(from.focusPoint, to.focusPoint, t),
         };
-    }
-
-    private static bool ApproximatelyEqual(
-        in PresentationIntentState a,
-        in PresentationIntentState b)
-    {
-        return Mathf.Abs(a.zoom - b.zoom) <= 0.0001f &&
-               Vector2.SqrMagnitude(a.pan - b.pan) <= 0.0001f &&
-               Vector2.SqrMagnitude(a.focusPoint - b.focusPoint) <= 0.0001f;
-    }
-
-    private static string SafeTrim(string s)
-    {
-        return string.IsNullOrEmpty(s) ? string.Empty : s.Trim();
-    }
-
-    public static Vector2 WorldToSpacePoint(
-        RectTransform stageRoot,
-        Vector3 worldPoint)
-    {
-        if (stageRoot == null)
-            return new Vector2(worldPoint.x, worldPoint.y);
-
-        Vector3 local = stageRoot.InverseTransformPoint(worldPoint);
-        return new Vector2(local.x, local.y);
     }
 }
