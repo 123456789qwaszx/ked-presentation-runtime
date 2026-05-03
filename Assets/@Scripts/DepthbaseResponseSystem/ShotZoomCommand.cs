@@ -85,7 +85,7 @@ public sealed class ShotZoomCommand : CommandBase, IStepScopedCommand
             _tween.Kill(true); // Finish previous motion so this command starts from a committed state.
 
         _fromState = _rig.CurrentState;
-        _toState = BuildTargetState(_rig, _fromState, scope);
+        _toState = BuildTargetState(_fromState, scope);
 
         _canCommitFinalState = true;
 
@@ -138,7 +138,7 @@ public sealed class ShotZoomCommand : CommandBase, IStepScopedCommand
         KillRigTween(false);
 
         _fromState = _rig.CurrentState;
-        _toState = BuildTargetState(_rig, _fromState, scope);
+        _toState = BuildTargetState(_fromState, scope);
 
         Commit(_rig, _toState, _presentation);
         ClearRuntimeState();
@@ -189,7 +189,6 @@ public sealed class ShotZoomCommand : CommandBase, IStepScopedCommand
     }
 
     private PresentationIntentState BuildTargetState(
-        PresentationResponseRig rig,
         in PresentationIntentState from,
         CommandRunScope scope)
     {
@@ -203,27 +202,22 @@ public sealed class ShotZoomCommand : CommandBase, IStepScopedCommand
             ? Mathf.Clamp(_spec.zoom, -10f, 10f)
             : from.zoom;
 
-        Vector2 manualPanPixels = Vector2.zero;
-        if (_spec.applyPan)
-        {
-            manualPanPixels = rig.GetManualPanPixels(
-                new Vector2(_spec.panX, _spec.panY));
-        }
+        Vector2 panOffset = _spec.applyPan
+            ? new Vector2(_spec.panX, _spec.panY)
+            : Vector2.zero;
 
         Vector2 targetPan = from.pan;
 
         if (hasFocus && _spec.reframeToFocus)
         {
-            targetPan = rig.ComposePanForFocus(
-                focusPoint,
-                _spec.desiredFramingPoint);
+            targetPan = _spec.desiredFramingPoint - focusPoint;
 
             if (_spec.applyPan)
-                targetPan += manualPanPixels;
+                targetPan += panOffset;
         }
         else if (_spec.applyPan)
         {
-            targetPan = manualPanPixels;
+            targetPan = panOffset;
         }
 
         return new PresentationIntentState

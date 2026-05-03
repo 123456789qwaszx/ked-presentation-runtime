@@ -4,10 +4,6 @@ using UnityEngine;
 
 public sealed class PresentationResponseRig : MonoBehaviour
 {
-    [Header("Shot Settings")]
-    [SerializeField] private Vector2 _defaultFramingPoint = Vector2.zero;
-    [SerializeField] private Vector2 _manualPanPixelsPerUnit = new Vector2(64f, 36f);
-
     [Header("Runtime Bindings")]
     [SerializeField] private List<PresentationResponseBinding> _bindings = new();
 
@@ -62,43 +58,28 @@ public sealed class PresentationResponseRig : MonoBehaviour
         PresentationViewRefs presentation)
     {
         if (string.IsNullOrWhiteSpace(key))
-        {
             Debug.LogWarning("[PresentationResponseRig] RegisterRuntimeBinding failed. key is null or empty.");
-            return false;
-        }
-
+        
         if (target == null)
-        {
-            Debug.LogWarning(
-                $"[PresentationResponseRig] RegisterRuntimeBinding failed. target is null. key={key}");
-            return false;
-        }
-
+            Debug.LogWarning($"[PresentationResponseRig] RegisterRuntimeBinding failed. target is null. key={key}");
+        
         if (target.Rect == null)
+            Debug.LogWarning($"[PresentationResponseRig] RegisterRuntimeBinding failed. target.Rect is null. key={key}, target={target}");
+
+        RectTransform stageRoot = presentation.GetRect(PresentationTarget.Stage_Root);
+        PresentationResponseProfile runtimeProfile = CreateRuntimeProfile(target, preset, stageRoot);
+        PresentationResponseBinding binding = new PresentationResponseBinding(key, runtimeProfile, target, stageRoot);
+
+        for (int i = 0; i < _bindings.Count; i++)
         {
-            Debug.LogWarning(
-                $"[PresentationResponseRig] RegisterRuntimeBinding failed. target.Rect is null. key={key}, target={target}");
-            return false;
+            if (_bindings[i] != null && string.Equals(_bindings[i].Key, key, StringComparison.OrdinalIgnoreCase))
+            {
+                _bindings[i] = binding;
+                return true;
+            }
         }
 
-        RectTransform stageRoot = presentation != null
-            ? presentation.GetRect(PresentationTarget.Stage_Root)
-            : null;
-
-        PresentationResponseProfile runtimeProfile =
-            CreateRuntimeProfile(target, preset, stageRoot);
-
-        RemoveBinding(key);
-
-        _bindings.Add(new PresentationResponseBinding(
-            key,
-            runtimeProfile,
-            target,
-            stageRoot));
-
-        Debug.Log(
-            $"[PresentationResponseRig] RegisterRuntimeBinding success. key={key}, target={target.Rect.name}, count={_bindings.Count}");
-
+        _bindings.Add(binding);
         return true;
     }
 
@@ -120,26 +101,6 @@ public sealed class PresentationResponseRig : MonoBehaviour
             }
         }
     }
-
-    public Vector2 ComposePanForFocus(Vector2 focusPoint)
-    {
-        return ComposePanForFocus(focusPoint, _defaultFramingPoint);
-    }
-
-    public Vector2 ComposePanForFocus(
-        Vector2 focusPoint,
-        Vector2 desiredFramingPoint)
-    {
-        return desiredFramingPoint - focusPoint;
-    }
-
-    public Vector2 GetManualPanPixels(Vector2 authoringPanUnits)
-    {
-        return new Vector2(
-            authoringPanUnits.x * _manualPanPixelsPerUnit.x,
-            authoringPanUnits.y * _manualPanPixelsPerUnit.y);
-    }
-
 
     private static PresentationResponseProfile CreateRuntimeProfile(
         IRectTransformPresentationResponseTarget target,

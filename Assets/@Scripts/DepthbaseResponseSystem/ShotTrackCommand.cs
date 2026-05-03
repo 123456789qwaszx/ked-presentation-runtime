@@ -72,7 +72,7 @@ public sealed class ShotTrackCommand : CommandBase, IStepScopedCommand
             _tween.Kill(true); // Finish previous motion so this command starts from a committed state.
 
         _fromState = _rig.CurrentState;
-        _toState = BuildTargetState(_rig, _fromState, scope);
+        _toState = BuildTargetState(_fromState, scope);
 
         _canCommitFinalState = true;
 
@@ -125,7 +125,7 @@ public sealed class ShotTrackCommand : CommandBase, IStepScopedCommand
         KillRigTween(false);
 
         _fromState = _rig.CurrentState;
-        _toState = BuildTargetState(_rig, _fromState, scope);
+        _toState = BuildTargetState(_fromState, scope);
 
         Commit(_rig, _toState, _presentation);
         ClearRuntimeState();
@@ -176,15 +176,13 @@ public sealed class ShotTrackCommand : CommandBase, IStepScopedCommand
     }
 
     private PresentationIntentState BuildTargetState(
-        PresentationResponseRig rig,
         in PresentationIntentState from,
         CommandRunScope scope)
     {
         if (!TryResolveFocusPoint(scope, out Vector2 focusPoint))
             return from;
 
-        Vector2 targetPan =
-            rig.ComposePanForFocus(focusPoint, _spec.desiredFramingPoint);
+        Vector2 targetPan = _spec.desiredFramingPoint - focusPoint;
 
         return new PresentationIntentState
         {
