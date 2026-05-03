@@ -8,6 +8,7 @@ public sealed partial class YarnCommandBridge
         _dialogueRunner.AddCommandHandler("presentation_setup", EnqueueSetupPresentationViewSpec);
 
         _dialogueRunner.AddCommandHandler<string, string>("bg_spawn", EnqueueSpawnBackgroundSpec);
+        _dialogueRunner.AddCommandHandler<string, string, string, string>("bg_spawn_bound", EnqueueSpawnBackgroundBoundSpec);
         _dialogueRunner.AddCommandHandler<string, string>("bg_sprite", EnqueueSetBackgroundSpriteSpec);
         _dialogueRunner.AddCommandHandler<string>("bg_destroy", EnqueueDestroyBackgroundSpec);
         _dialogueRunner.AddCommandHandler<string, float, float>("bg_fade", EnqueueFadeBackgroundSpec);
@@ -16,7 +17,6 @@ public sealed partial class YarnCommandBridge
         _dialogueRunner.AddCommandHandler<string, float, float, float>("move_by_p", EnqueueMoveByPresentationSpec);
         _dialogueRunner.AddCommandHandler<string, float, float>("scale_to_p", EnqueueScaleToPresentationSpec);
     }
-
 
     private void EnqueueFadeBackgroundSpec(string bgKey, float alpha, float duration = 0.35f)
     {
@@ -55,6 +55,47 @@ public sealed partial class YarnCommandBridge
         {
             bgKey = bgKey.Trim(),
             viewPrefabKey = viewPrefabKey.Trim()
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueSpawnBackgroundBoundSpec(
+        string bgKey,
+        string viewPrefabKey,
+        string parentTargetName,
+        string profileName)
+    {
+        if (string.IsNullOrWhiteSpace(bgKey))
+        {
+            Debug.LogError("[YarnCommandBridge] bg_spawn_bound: bgKey is null or empty.");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(viewPrefabKey))
+        {
+            Debug.LogError("[YarnCommandBridge] bg_spawn_bound: viewPrefabKey is null or empty.");
+            return;
+        }
+
+        if (!TryParsePresentationTarget(parentTargetName, out PresentationTarget parentTarget))
+        {
+            Debug.LogError($"[YarnCommandBridge] bg_spawn_bound: Unknown parent target '{parentTargetName}'.");
+            return;
+        }
+
+        if (!TryParsePresentationResponseProfile(profileName, out PresentationResponseProfile responseProfile))
+        {
+            Debug.LogError($"[YarnCommandBridge] bg_spawn_bound: Unknown response profile '{profileName}'.");
+            return;
+        }
+
+        var spec = new SpawnBackgroundCommandSpec
+        {
+            bgKey = bgKey.Trim(),
+            viewPrefabKey = viewPrefabKey.Trim(),
+            parentTarget = parentTarget,
+            responseProfile = responseProfile
         };
 
         Collect(spec);
@@ -166,6 +207,42 @@ public sealed partial class YarnCommandBridge
         };
 
         Collect(spec);
+    }
+
+    private bool TryParsePresentationResponseProfile(string raw, out PresentationResponseProfile profile)
+    {
+        profile = null;
+
+        if (string.IsNullOrWhiteSpace(raw))
+            return false;
+
+        string s = raw.Trim().ToLowerInvariant();
+
+        switch (s)
+        {
+            case "background":
+            case "bg":
+                profile = PresentationResponseProfile.Background;
+                return true;
+
+            case "prop":
+                profile = PresentationResponseProfile.Prop;
+                return true;
+
+            case "characterslot":
+            case "character_slot":
+            case "char":
+            case "slot":
+                profile = PresentationResponseProfile.CharacterSlot;
+                return true;
+
+            case "foreground":
+            case "fg":
+                profile = PresentationResponseProfile.Foreground;
+                return true;
+        }
+
+        return false;
     }
 
     private bool TryParsePresentationTarget(string raw, out PresentationTarget target)

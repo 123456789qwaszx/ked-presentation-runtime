@@ -15,8 +15,13 @@ public sealed class SpawnBackgroundCommandSpec : CommandSpecBase
     public string viewPrefabKey = "default";
 
     [Header("Spawn")]
+    public PresentationTarget parentTarget = PresentationTarget.BGContent_Root;
+
     public bool destroyExistingWithSameKey = true;
     public bool setAsLastSibling = true;
+
+    [Header("Response Binding")]
+    public PresentationResponseProfile responseProfile = PresentationResponseProfile.Background;
 }
 
 public sealed class SpawnBackgroundCommand : CommandBase
@@ -69,13 +74,12 @@ public sealed class SpawnBackgroundCommand : CommandBase
 
     protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
 
-    
     private void ResolveRefs(CommandRunScope scope)
     {
         _resolveAttempted = true;
 
         _bgKey = _spec.bgKey;
-        _parent = scope.Presentation.GetRect(PresentationTarget.BGContent_Root);
+        _parent = scope.Presentation.GetRect(_spec.parentTarget);
         _prefabProvider.TryGetBackgroundViewPrefab(_spec.viewPrefabKey, out _prefab);
     }
 
@@ -94,7 +98,7 @@ public sealed class SpawnBackgroundCommand : CommandBase
         _responseRig?.RegisterRuntimeBinding(
             _bgKey,
             target,
-            PresentationResponseProfile.Background,
+            _spec.responseProfile,
             scope.Presentation.GetRect(PresentationTarget.Stage_Root));
 
         scope.Refs[_bgKey] = target;
