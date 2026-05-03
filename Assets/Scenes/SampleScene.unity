@@ -10030,7 +10030,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b027c9d52d4b56a4a875fd826050361a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CustomLinePresenter
-  useFadeEffect: 1
+  useFadeEffect: 0
   fadeUpDuration: 0.25
   fadeDownDuration: 0.1
 --- !u!4 &2009713541

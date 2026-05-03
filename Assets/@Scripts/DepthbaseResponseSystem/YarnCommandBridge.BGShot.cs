@@ -7,33 +7,19 @@ public sealed partial class YarnCommandBridge
 {
     public void RegisterShotCommands()
     {
-        _dialogueRunner.AddCommandHandler(
-            "shot_reset",
-            (Action<float>)EnqueueShotResetSpec);
+        _dialogueRunner.AddCommandHandler("shot_reset", (Action<float>)EnqueueShotResetSpec);
 
-        _dialogueRunner.AddCommandHandler(
-            "shot_pan",
-            (Action<float, float, float>)EnqueueShotPanToSpec);
+        _dialogueRunner.AddCommandHandler("shot_pan", (Action<float, float, float>)EnqueueShotPanToSpec);
 
-        _dialogueRunner.AddCommandHandler(
-            "shot_pan_delta",
-            (Action<float, float, float>)EnqueueShotPanDeltaSpec);
+        _dialogueRunner.AddCommandHandler("shot_pan_delta", (Action<float, float, float>)EnqueueShotPanDeltaSpec);
 
-        _dialogueRunner.AddCommandHandler(
-            "shot_zoom",
-            (Action<float, float>)EnqueueShotZoomSpec);
+        _dialogueRunner.AddCommandHandler("shot_zoom", (Action<float, float>)EnqueueShotZoomSpec);
 
-        _dialogueRunner.AddCommandHandler(
-            "shot_zoom_focus",
-            (Action<string, float, float>)EnqueueShotZoomFocusSpec);
+        _dialogueRunner.AddCommandHandler("shot_zoom_focus", (Action<string, float, float>)EnqueueShotZoomFocusSpec);
 
-        _dialogueRunner.AddCommandHandler(
-            "shot_track",
-            (Action<string, float>)EnqueueShotTrackSpec);
+        _dialogueRunner.AddCommandHandler("shot_track", (Action<string, float>)EnqueueShotTrackSpec);
 
-        _dialogueRunner.AddCommandHandler(
-            "shot_track_to",
-            (Action<string, float, float, float>)EnqueueShotTrackToSpec);
+        _dialogueRunner.AddCommandHandler("shot_track_to", (Action<string, float, float, float>)EnqueueShotTrackToSpec);
     }
 
     private void EnqueueShotResetSpec(float duration = 0.35f)
