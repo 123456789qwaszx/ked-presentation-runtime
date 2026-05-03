@@ -142,9 +142,6 @@ public class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
     /// </summary>
     public void SetDialogueUiSuppressed(bool suppressed)
     {
-        if (_isDialogueUiSuppressed == suppressed)
-            return;
-
         _isDialogueUiSuppressed = suppressed;
         ApplyDialogueUiVisibility();
     }
@@ -280,11 +277,11 @@ public class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
 
     private void ApplyDialogueUiVisibility()
     {
-        bool visible = !_isExpanded && !_isDialogueUiSuppressed;
-        Debug.Log($"{visible}, {_isExpanded}, {_isDialogueUiSuppressed}");
-        SetLayerVisible(View.CanvasGroup(Refs.DialogueUI_Root), visible);
-        
-        SetLayerVisible(View.CanvasGroup(Refs.Stage_Root), visible);
+        // bool visible = !_isExpanded && !_isDialogueUiSuppressed;
+        // Debug.Log($"{visible}, {_isExpanded}, {_isDialogueUiSuppressed}");
+        // SetLayerVisible(View.CanvasGroup(Refs.DialogueUI_Root), visible);
+        //
+        // SetLayerVisible(View.CanvasGroup(Refs.Stage_Root), visible);
     }
 
     private void ApplyToggleVisibility()

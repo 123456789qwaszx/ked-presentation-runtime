@@ -23,6 +23,13 @@ public sealed class ShotZoomCommandSpec : CommandSpecBase
     [Tooltip("focus를 가져올 목표 구도점. Rig 공간 기준. (0,0)=중앙")]
     public Vector2 desiredFramingPoint = Vector2.zero;
 
+    [Header("Apply")]
+    [Tooltip("체크하면 zoom을 절대 목표값으로 적용합니다. 끄면 현재 zoom을 유지합니다.")]
+    public bool applyZoom = true;
+
+    [Tooltip("체크하면 pan을 절대 목표값으로 적용합니다. 끄면 현재 pan을 유지합니다.")]
+    public bool applyPan = true;
+
     [Header("Intent")]
     [Range(-10f, 10f)] public float zoom = 0f;
     [Range(-10f, 10f)] public float panX = 0f;
@@ -36,8 +43,7 @@ public sealed class ShotZoomCommandSpec : CommandSpecBase
     public bool wait = false;
 
     [Header("Options")]
-    public bool absoluteZoom = true;
-    public bool absolutePan = true;
+    public bool killTween = true;
 }
 
 public sealed class ShotZoomCommand : CommandBase
@@ -52,9 +58,7 @@ public sealed class ShotZoomCommand : CommandBase
     public override bool WaitForCompletion => _spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
-    public ShotZoomCommand(
-        PresentationResponseRig rig,
-        ShotZoomCommandSpec spec)
+    public ShotZoomCommand(PresentationResponseRig rig, ShotZoomCommandSpec spec)
     {
         _rig = rig;
         _spec = spec;
@@ -63,26 +67,28 @@ public sealed class ShotZoomCommand : CommandBase
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
         if (_rig == null)
-        {
-            Debug.LogError("[ShotZoomCommand] PresentationResponseRig is null.");
             yield break;
-        }
 
         if (scope == null || scope.Presentation == null)
-        {
-            Debug.LogError("[ShotZoomCommand] PresentationViewRefs is null.");
             yield break;
-        }
-        
-        Debug.Log(
-            $"[ShotZoomCommand] Execute. currentZoom={_rig.CurrentState.zoom}, " +
-            $"targetZoom={_spec.zoom}, duration={_spec.duration}, " +
-            $"presentation={scope.Presentation}");
 
-        KillTweenIfNeeded();
+        if (_spec.killTween)
+            _tween?.Kill(true);
 
         _fromState = _rig.CurrentState;
+
+        Debug.Log(
+            $"[ShotZoomCommand] Captured fromState | " +
+            $"from.zoom={_fromState.zoom}, " +
+            $"from.pan={_fromState.pan}, " +
+            $"from.focusPoint={_fromState.focusPoint}");
+        
         _toState = BuildTargetState(_rig, _fromState, scope);
+        Debug.Log(
+            $"[ShotZoomCommand] Built toState | " +
+            $"to.zoom={_toState.zoom}, " +
+            $"to.pan={_toState.pan}, " +
+            $"to.focusPoint={_toState.focusPoint}");
 
         if (_spec.duration <= 0f)
         {
@@ -104,12 +110,12 @@ public sealed class ShotZoomCommand : CommandBase
         if (scope == null || scope.Presentation == null)
             return;
 
-        KillTweenIfNeeded();
-
         _fromState = _rig.CurrentState;
         _toState = BuildTargetState(_rig, _fromState, scope);
 
         Commit(_rig, _toState, scope.Presentation);
+
+        _tween = null;
     }
 
     protected override void OnRollbackSeek(CommandRunScope scope)
@@ -119,7 +125,7 @@ public sealed class ShotZoomCommand : CommandBase
 
     protected override void OnCommandCompleted(CommandRunScope scope)
     {
-        // wait=false이면 tween을 background로 유지
+        // wait=false이면 tween을 background로 유지.
     }
 
     private PresentationIntentState BuildTargetState(
@@ -142,16 +148,18 @@ public sealed class ShotZoomCommand : CommandBase
             hasFocus = true;
         }
 
-        float targetZoom = _spec.absoluteZoom
+        float targetZoom = _spec.applyZoom
             ? _spec.zoom
-            : from.zoom + _spec.zoom;
+            : from.zoom;
 
-        Vector2 manualPanPixels =
-            rig.GetManualPanPixels(new Vector2(_spec.panX, _spec.panY));
+        Vector2 manualPanPixels = Vector2.zero;
+        if (_spec.applyPan)
+        {
+            manualPanPixels =
+                rig.GetManualPanPixels(new Vector2(_spec.panX, _spec.panY));
+        }
 
-        Vector2 targetPan = _spec.absolutePan
-            ? manualPanPixels
-            : from.pan + manualPanPixels;
+        Vector2 targetPan = from.pan;
 
         if (hasFocus && _spec.reframeToFocus)
         {
@@ -159,8 +167,12 @@ public sealed class ShotZoomCommand : CommandBase
                 focusPoint,
                 _spec.desiredFramingPoint);
 
-            if (!_spec.absolutePan)
+            if (_spec.applyPan)
                 targetPan += manualPanPixels;
+        }
+        else if (_spec.applyPan)
+        {
+            targetPan = manualPanPixels;
         }
 
         return new PresentationIntentState
@@ -251,15 +263,6 @@ public sealed class ShotZoomCommand : CommandBase
             pan = Vector2.Lerp(from.pan, to.pan, t),
             focusPoint = Vector2.Lerp(from.focusPoint, to.focusPoint, t),
         };
-    }
-
-    private void KillTweenIfNeeded()
-    {
-        if (_tween == null)
-            return;
-
-        _tween.Kill(false);
-        _tween = null;
     }
 
     public static Vector2 WorldToSpacePoint(

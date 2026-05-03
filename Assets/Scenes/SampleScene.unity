@@ -9261,7 +9261,6 @@ MonoBehaviour:
   rigPrefab: {fileID: 8529412948266249186, guid: 01c9b93a77829ef438fc74c4ef4c5004, type: 3}
   globalTuning: {fileID: 11400000, guid: db30a92a6d8545a41b703c2585f4013d, type: 2}
   _emojiResolver: {fileID: 1222192535}
-  backgroundSpriteResourcesPrefix: 
 --- !u!1 &1835797369
 GameObject:
   m_ObjectHideFlags: 0
@@ -9809,6 +9808,7 @@ MonoBehaviour:
   dialogueTextRouter: {fileID: 728559835}
   presentationRouteEntry: {fileID: 1433866633}
   bgHost: {fileID: 1967129519}
+  presentationResponseRig: {fileID: 529556882}
   yarnEntryKey: stella01
   presentationEntryKey: emo
   runYarnKey: 50

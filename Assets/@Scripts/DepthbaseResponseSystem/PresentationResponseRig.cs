@@ -24,6 +24,11 @@ public sealed class PresentationResponseRig : MonoBehaviour
         ApplyToAllBindings(in state, presentation);
     }
 
+    public void ResetCurrentState()
+    {
+        _currentState = PresentationIntentState.Default;
+    }
+    
     public void SetCurrentStateOnly(PresentationIntentState state)
     {
         _currentState = state;

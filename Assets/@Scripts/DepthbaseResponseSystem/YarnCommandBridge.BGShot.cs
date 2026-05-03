@@ -14,8 +14,8 @@ public sealed partial class YarnCommandBridge
         _dialogueRunner.AddCommandHandler("shot_pan_delta", (Action<float, float, float>)EnqueueShotPanDeltaSpec);
 
         _dialogueRunner.AddCommandHandler("shot_zoom", (Action<float, float>)EnqueueShotZoomSpec);
-
-        _dialogueRunner.AddCommandHandler("shot_zoom_focus", (Action<string, float, float>)EnqueueShotZoomFocusSpec);
+        
+        _dialogueRunner.AddCommandHandler("shot_zoom_focus", (Action<string, float, float, float, float>)EnqueueShotZoomFocusSpec);
 
         _dialogueRunner.AddCommandHandler("shot_track", (Action<string, float>)EnqueueShotTrackSpec);
 
@@ -75,9 +75,6 @@ public sealed partial class YarnCommandBridge
             panX = 0f,
             panY = 0f,
 
-            absoluteZoom = true,
-            absolutePan = false,
-
             duration = Mathf.Max(0f, duration),
             ease = Ease.OutCubic,
             wait = false
@@ -86,7 +83,12 @@ public sealed partial class YarnCommandBridge
         Collect(spec);
     }
 
-    private void EnqueueShotZoomFocusSpec(string roleKey, float zoom, float duration = 0.45f)
+    private void EnqueueShotZoomFocusSpec(
+        string roleKey,
+        float zoom,
+        float duration = 0.45f,
+        float panX = 0f,
+        float panY = 0f)
     {
         if (string.IsNullOrWhiteSpace(roleKey))
         {
@@ -103,12 +105,12 @@ public sealed partial class YarnCommandBridge
             reframeToFocus = true,
             desiredFramingPoint = Vector2.zero,
 
-            zoom = Mathf.Clamp(zoom, -10f, 10f),
-            panX = 0f,
-            panY = 0f,
+            applyZoom = true,
+            applyPan = true,
 
-            absoluteZoom = true,
-            absolutePan = false,
+            zoom = Mathf.Clamp(zoom, -10f, 10f),
+            panX = Mathf.Clamp(panX, -10f, 10f),
+            panY = Mathf.Clamp(panY, -10f, 10f),
 
             duration = Mathf.Max(0f, duration),
             ease = Ease.OutCubic,
