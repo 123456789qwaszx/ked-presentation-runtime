@@ -121,7 +121,7 @@ public sealed class SequenceTextImporter
                 RequireArgs(line, 2);
                 _bridge.Import_Size(
                     line.args[0],
-                    ParseFloat(line.args[1], "size"));
+                    line.args[1]);
                 return true;
 
             case "to_scale":

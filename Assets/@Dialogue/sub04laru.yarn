@@ -16,14 +16,10 @@
 
 <<slot Albedo>>
 <<place Albedo duo_right>>
-<<size Albedo 2.4>>
+<<size Albedo normal>>
 <<cast Albedo Albedo>>
 <<fade_in Albedo>>
 
-<<slot Bastelina>>
-<<place Bastelina center>>
-<<size Bastelina 2.3>>
-<<cast Bastelina Bastelina>>
 
 <<emotion_wipe_char Albedo Albedo a 6>>
 알베도: 이 청구서들, 어디 한번 제대로 설명해 보시지!
@@ -38,7 +34,7 @@
 
 <<slot Laru>>
 <<place Laru duo_left>>
-<<size Laru 2.4>>
+<<size Laru normal>>
 <<cast Laru Laru>>
 <<fade_in Laru>>
 
@@ -63,7 +59,6 @@
 
 <<fade_out Laru>>
 <<fade_in Albedo>>
-<<size Albedo 1.9>>
 
 <<to_scale Albedo 1.4 2.6>>
 <<move_by Albedo 0 -80>>
@@ -77,11 +72,10 @@
 
 소문을 퍼뜨리는 점원: 그래도 욕먹은 게 라루라면, 뭐 이상할 것도 없지.
 
-<<begin_hold>>
-<<blackout cover_then_uncover>>
-
-<<end_hold>>
-
+<<slot Bastelina>>
+<<place Bastelina duo_right>>
+<<size Bastelina normal>>
+<<cast Bastelina Bastelina>>
 <<fade_in Bastelina>>
 
 
@@ -100,13 +94,11 @@
 <<fade_in Albedo>>
 
 <<place Albedo right>>
-<<place_offset Albedo -50 0>>
 <<place Laru left>>
-<<place_offset Laru 120 0>>
 
-<<size Albedo 1.8>>
+<<size Albedo small>>
 <<to_scale Albedo 1 -1>>
-<<size Laru 1.8>>
+<<size Laru small>>
 
 
 <<emotion_wipe_char Laru Laru a 5>>

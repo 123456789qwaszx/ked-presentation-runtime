@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Globalization;
 using UnityEngine;
 using Yarn.Unity;
 
@@ -10,6 +11,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 
     [Header("Rig")] public GameObject rigPrefab;
     [Header("Global Tuning")] public CharStageTuningSO globalTuning;
+    [Header("Role Tuning")] public RoleAnchorTuningDBSO roleTuningDb;
 
     public void Initialize(
         DialogueRunner dialogueRunner,
@@ -46,7 +48,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         _dialogueRunner.AddCommandHandler<string>("slot", EnqueueSetupCharRigSpec);
         _dialogueRunner.AddCommandHandler<string, string>("place", EnqueueSetAnchorSpecs);
         _dialogueRunner.AddCommandHandler<string, int, int>("place_offset", EnqueueSetAnchorOffsetSpecs);
-        _dialogueRunner.AddCommandHandler<string, float>("size", EnqueueSetOriginSizeSpec);
+        _dialogueRunner.AddCommandHandler<string, string>("size", EnqueueSetOriginSizeSpec);
         _dialogueRunner.AddCommandHandler<string, float, float>("to_scale", EnqueueScaleToSpec);
 
         _dialogueRunner.AddCommandHandler<string, string>("slide_in", EnqueueSlideInSpec);
@@ -728,6 +730,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         Collect(resetTrackSpec);
     }
 
+    
     private void EnqueueScaleToSpec(string roleKey, float xyValue, float duration = 0.4f)
     {
         var spec = new ScaleToCommandSpecCharR
@@ -740,15 +743,75 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         Collect(spec);
     }
 
-    private void EnqueueSetOriginSizeSpec(string roleKey, float xyValue)
+    private void EnqueueSetOriginSizeSpec(string roleKey, string scaleArg)
+    {
+        scaleArg = (scaleArg ?? "").Trim();
+
+        if (TryParseFloat(scaleArg, out float absoluteScale))
+        {
+            EnqueueSetOriginSizeAbsoluteSpec(roleKey, absoluteScale);
+            return;
+        }
+
+        CharScalePreset preset = ParseCharScalePreset(scaleArg);
+
+        var spec = new SetOriginSizeCommandSpecCharR
+        {
+            roleKey = roleKey,
+            preset = preset,
+            globalTuning = globalTuning,
+            roleTuningDb = roleTuningDb,
+            multiplier = 1f
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueSetOriginSizeAbsoluteSpec(string roleKey, float xyValue)
     {
         var spec = new SetOriginSizeCommandSpecCharR
         {
             roleKey = roleKey,
-            toScale = new Vector2(xyValue, xyValue)
+
+            overrideScale = true,
+            scaleOverride = new Vector3(xyValue, xyValue, xyValue),
+
+            // 아래 값들은 overrideScale=true면 실제 계산에는 사용되지 않지만,
+            // Inspector/debug에서 의도를 보기 좋게 기본값을 넣어둔다.
+            preset = CharScalePreset.None,
+            multiplier = 1f,
+            globalTuning = globalTuning,
+            roleTuningDb = roleTuningDb
         };
 
         Collect(spec);
+    }
+
+    private static CharScalePreset ParseCharScalePreset(string value)
+    {
+        return value switch
+        {
+            "normal" => CharScalePreset.Normal,
+            "small" => CharScalePreset.Small,
+            "large" => CharScalePreset.Large,
+
+            "far" => CharScalePreset.Far,
+            "close" => CharScalePreset.Close,
+
+            "exp1" => CharScalePreset.Exp1,
+            "exp2" => CharScalePreset.Exp2,
+
+            _ => CharScalePreset.Normal
+        };
+    }
+
+    private static bool TryParseFloat(string value, out float result)
+    {
+        return float.TryParse(
+            value,
+            NumberStyles.Float,
+            CultureInfo.InvariantCulture,
+            out result);
     }
 
     private void EnqueueSetEmotionPortraitWipeSpec(string roleKey, string character)

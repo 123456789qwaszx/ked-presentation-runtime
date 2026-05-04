@@ -1,30 +1,53 @@
 using System;
 using System.Collections;
 using UnityEngine;
-using DG.Tweening;
 
 [Serializable]
 [CommandMenuHint(
-    "Char Rig", "Set OriginSize", Order = -915,
+    "Char Rig",
+    "Set Origin Size",
+    Order = -929,
     Sets = new[]
     {
         CommandMenuSets.SetupChar,
         CommandMenuSets.SetupEmotion
-    }, SetOrder = -964)]
-public class SetOriginSizeCommandSpecCharR : CommandSpecBase
+    },
+    SetOrder = -929)]
+public sealed class SetOriginSizeCommandSpecCharR : CommandSpecBase
 {
     [Header("Target")]
-    public CharacterRigTarget target = CharacterRigTarget.CharacterPortrait_Pad;
+    public CharacterRigTarget target = CharacterRigTarget.Character_Anchor;
 
-    [Header("Scale")]
-    public Vector2 toScale = Vector2.one;
+    [Header("Scale Preset")]
+    public CharScalePreset preset = CharScalePreset.Normal;
 
-    [Header("Rotation (Z axis)")]
-    public float toAngle = 0f;
+    [Header("Tuning")]
+    public CharStageTuningSO globalTuning;
+    public RoleAnchorTuningDBSO roleTuningDb;
 
-    [Header("Anchor (if nativeSize, not work.)")]
-    public Vector2 anchorMin = new Vector2(0f, 0f);
-    public Vector2 anchorMax = new Vector2(1f, 1f);
+    [Tooltip("선택: 같은 캐릭터라도 포즈/의상에 따라 크기 보정을 다르게 하고 싶을 때.\n" +
+             "예: roleKey=seina, poseKey=outfit_dressWide => DB key 'seina:outfit_dressWide'")]
+    public string poseKey = "";
+
+    [Header("Command Multiplier")]
+    [Tooltip("최종 스케일에 곱해지는 커맨드 단위 배율. 1이면 그대로.")]
+    public float multiplier = 1f;
+
+    [Header("Override")]
+    [Tooltip("체크하면 Preset/DB 계산을 무시하고 overrideScale을 직접 적용합니다.")]
+    public bool overrideScale = false;
+
+    public Vector3 scaleOverride = Vector3.one;
+
+    [Header("Options")]
+    [Tooltip("true면 X/Y/Z 모두 같은 값으로 적용합니다.")]
+    public bool uniformScale = true;
+
+    [Tooltip("uniformScale=false일 때 Y에 곱할 배율입니다.")]
+    public float yMultiplier = 1f;
+
+    [Tooltip("uniformScale=false일 때 Z에 곱할 배율입니다. UI RectTransform이면 보통 1을 유지합니다.")]
+    public float zMultiplier = 1f;
 }
 
 public sealed class SetOriginSizeCommandCharR : CommandBase
@@ -36,17 +59,22 @@ public sealed class SetOriginSizeCommandCharR : CommandBase
 
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
-    public SetOriginSizeCommandCharR(SetOriginSizeCommandSpecCharR spec) => _spec = spec;
+    public SetOriginSizeCommandCharR(SetOriginSizeCommandSpecCharR spec)
+    {
+        _spec = spec;
+    }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
+        if (_rect == null)
+            yield break;
+
         Apply();
-        yield break;
     }
-    
+
     protected override void OnSkip(CommandRunScope scope)
     {
         if (!_resolveAttempted)
@@ -57,38 +85,46 @@ public sealed class SetOriginSizeCommandCharR : CommandBase
 
         Apply();
     }
-    
-    
-    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
+
+    protected override void OnRollbackSeek(CommandRunScope scope)
+    {
+        OnSkip(scope);
+    }
 
     private void Apply()
     {
-        ApplyScale();
-        ApplyRotation();
-        ApplyPad();
+        if (_rect == null)
+            return;
+
+        if (_spec.overrideScale)
+        {
+            _rect.localScale = _spec.scaleOverride;
+            return;
+        }
+
+        float scale = CharScaleResolver.ResolveScale(
+            _spec.preset,
+            _spec.globalTuning,
+            _spec.roleTuningDb,
+            _spec.roleKey,
+            _spec.poseKey,
+            _spec.multiplier);
+
+        if (_spec.uniformScale)
+        {
+            _rect.localScale = new Vector3(scale, scale, scale);
+            return;
+        }
+
+        _rect.localScale = new Vector3(
+            scale,
+            scale * SafeMultiplier(_spec.yMultiplier),
+            scale * SafeMultiplier(_spec.zMultiplier));
     }
 
-    private void ApplyScale()
+    private static float SafeMultiplier(float value)
     {
-        _rect.DOKill(false);
-
-        Vector3 scale = _rect.localScale;
-        scale.x = _spec.toScale.x;
-        scale.y = _spec.toScale.y;
-        _rect.localScale = scale;
-    }
-
-    private void ApplyRotation()
-    {
-        Vector3 euler = _rect.localEulerAngles;
-        euler.z = _spec.toAngle;
-        _rect.localEulerAngles = euler;
-    }
-
-    private void ApplyPad()
-    {
-        _rect.anchorMin = _spec.anchorMin;
-        _rect.anchorMax = _spec.anchorMax;
+        return value <= 0f ? 1f : value;
     }
 
     private void ResolveRefs(CommandRunScope scope)

@@ -8883,6 +8883,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::YarnCommandBridge
   rigPrefab: {fileID: 8529412948266249186, guid: 01c9b93a77829ef438fc74c4ef4c5004, type: 3}
   globalTuning: {fileID: 11400000, guid: db30a92a6d8545a41b703c2585f4013d, type: 2}
+  roleTuningDb: {fileID: 11400000, guid: c49265a67487bce458b734a0473b75b5, type: 2}
   _emojiResolver: {fileID: 1222192535}
 --- !u!1 &1835797369
 GameObject:
@@ -12086,7 +12087,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 458.38, y: -24}
-  m_SizeDelta: {x: 916.76, y: 0}
+  m_SizeDelta: {x: 916.76, y: 24}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!1 &666632935594092605
 GameObject:

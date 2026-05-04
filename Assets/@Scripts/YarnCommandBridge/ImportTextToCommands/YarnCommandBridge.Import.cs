@@ -52,10 +52,10 @@ public sealed partial class YarnCommandBridge
     {
         EnqueueSetAnchorOffsetSpecs(roleKey, x, y);
     }
-
-    public void Import_Size(string roleKey, float xyValue)
+    
+    public void Import_Size(string roleKey, string scaleArg)
     {
-        EnqueueSetOriginSizeSpec(roleKey, xyValue);
+        EnqueueSetOriginSizeSpec(roleKey, scaleArg);
     }
 
     public void Import_ToScale(string roleKey, float xyValue)
