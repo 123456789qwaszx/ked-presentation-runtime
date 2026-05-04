@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public sealed class PresentationSessionEntry : MonoBehaviour
+public sealed class PresentationSessionEntry : MonoBehaviour, ICommandRunScopeProvider
 {
     public PresentationSession PresentationSession { get; private set; }
     private RouteCatalogSO _routeCatalog;
@@ -10,6 +10,8 @@ public sealed class PresentationSessionEntry : MonoBehaviour
         PresentationSession = presentationSession;
         _routeCatalog = routeCatalogSo;
     }
+
+    public CommandRunScope CurrentScope => PresentationSession?.CurrentScope;
     
     private void Update()
     {

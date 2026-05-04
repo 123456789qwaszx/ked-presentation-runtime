@@ -174,7 +174,7 @@ public class VnAppBootstrap : MonoBehaviour
 
         yarnBridgePlaybackDriver.Initialize(
             commandExecutor,
-            _presentationSessionContext);
+            presentationSessionEntry);
 
         yarnCommandBridge.Initialize(
             dialogueRunner,

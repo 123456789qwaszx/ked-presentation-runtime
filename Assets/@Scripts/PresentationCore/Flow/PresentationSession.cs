@@ -23,6 +23,7 @@ public sealed class PresentationSession
     private SequenceProgressState _state;
     private SequenceSpecSO _sequence;
     
+    public CommandRunScope CurrentScope => _sessionScope;
     public bool IsRunning => _sequence != null && _state != null && _sessionScope != null;
 
     public bool IsNodeBusy()

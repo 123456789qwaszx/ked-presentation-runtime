@@ -2,23 +2,32 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+public interface ICommandRunScopeProvider
+{
+    CommandRunScope CurrentScope { get; }
+}
+
 public sealed class YarnBridgePlaybackDriver : MonoBehaviour
 {
     private CommandExecutor _executor;
-    private CommandRunScope _scope;
 
     private int _pendingImmediateWaitCount;
     private readonly List<CommandSpecBase> _collectedSpecs = new();
 
     private bool _isHoldActive;
     private readonly List<CommandSpecBase> _heldSpecs = new();
+    
+    private ICommandRunScopeProvider _scopeProvider;
+    private CommandRunScope CurrentScope => _scopeProvider != null
+        ? _scopeProvider.CurrentScope
+        : null;
 
     public void Initialize(
         CommandExecutor executor,
-        PresentationSessionContext context)
+        ICommandRunScopeProvider scopeProvider)
     {
         _executor = executor;
-        _scope = new CommandRunScope(context);
+        _scopeProvider = scopeProvider;
     }
 
     public void BeginHold()
@@ -49,7 +58,7 @@ public sealed class YarnBridgePlaybackDriver : MonoBehaviour
         var specs = new List<CommandSpecBase>(_heldSpecs);
         _heldSpecs.Clear();
 
-        yield return _executor.PlaySpecsBlocking(specs, _scope, "yarn-hold");
+        yield return _executor.PlaySpecsBlocking(specs, CurrentScope, "yarn-hold");
     }
 
     public void ResetImmediateWaitForNewLine()
@@ -86,7 +95,7 @@ public sealed class YarnBridgePlaybackDriver : MonoBehaviour
         var specs = new List<CommandSpecBase>(_collectedSpecs);
         _collectedSpecs.Clear();
 
-        _executor.PlaySpecs(specs, _scope, "yarn-bridge");
+        _executor.PlaySpecs(specs, CurrentScope, "yarn-bridge");
     }
 
     public void ClearCollected()
@@ -146,6 +155,10 @@ public sealed class YarnBridgePlaybackDriver : MonoBehaviour
                 swayCommandSpecCharR.wait = shouldWait;
                 break;
             
+            case ShowEmojiCommandSpecCharR showEmojiCoomandSpecCharR:
+                showEmojiCoomandSpecCharR.wait = shouldWait;
+                break;
+            
             default:
                 Debug.LogWarning("[YarnBridgePlaybackDriver] waiting for spec char: " + spec.GetType().Name);
                 break;
@@ -161,6 +174,6 @@ public sealed class YarnBridgePlaybackDriver : MonoBehaviour
             return;
 
         var copied = new List<CommandSpecBase>(specs);
-        _executor.PlaySpecs(copied, _scope, debugSource);
+        _executor.PlaySpecs(copied, CurrentScope, debugSource);
     }
 }

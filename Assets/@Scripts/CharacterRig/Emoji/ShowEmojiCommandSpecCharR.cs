@@ -100,7 +100,6 @@ public sealed class ShowEmojiCommandCharR : CommandBase, IStepScopedCommand
 
         if (!_spec.wait)
             yield break;
-        Debug.Log("showEmojiCommandCharR?@#@#?");
 
         while (_seq != null && _seq.IsActive() && _seq.IsPlaying())
             yield return null;
