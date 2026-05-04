@@ -12,4 +12,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1ea4ed8c8b5ffd6488a2b383329f0465, type: 3}
   m_Name: RoleAnchorTuningDB
   m_EditorClassIdentifier: Assembly-CSharp::RoleAnchorTuningDBSO
-  entries: []
+  entries:
+  - key: 
+    offsets:
+      left: {x: 0, y: 0}
+      center: {x: 0, y: 0}
+      right: {x: 0, y: 0}
+      duoLeft: {x: 0, y: 0}
+      duoRight: {x: 0, y: 0}
+      boxSide: {x: 0, y: 0}
+      exp1: {x: 0, y: 0}
+      exp2: {x: 0, y: 0}
+    defaultScale: 1
+    scales:
+      normal: 1
+      small: 0.9
+      large: 1.1
+      far: 0.85
+      close: 1.2
+      exp1: 1
+      exp2: 1

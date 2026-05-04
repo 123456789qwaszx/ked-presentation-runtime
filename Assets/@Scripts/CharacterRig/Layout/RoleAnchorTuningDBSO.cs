@@ -8,13 +8,22 @@ public sealed class RoleAnchorTuningDBSO : ScriptableObject
     [Serializable]
     public sealed class Entry
     {
-        [Tooltip("예: seina  또는  seina:pose_wide")]
+        [Tooltip("예: seina 또는 seina:pose_wide")]
         public string key;
+
+        [Header("Anchor Offsets")]
         public CharPlacementTuningSet offsets;
+
+        [Header("Scale")]
+        [Tooltip("캐릭터/리소스 정규화용 기본 스케일")]
+        public float defaultScale = 1f;
+
+        [Tooltip("프리셋별 캐릭터 추가 배율")]
+        public CharScaleTuningSet scales = CharScaleTuningSet.Default;
     }
 
     public List<Entry> entries = new();
-    
+
     private Dictionary<string, Entry> _map;
 
     public bool TryGet(string key, out Entry entry)
@@ -41,7 +50,8 @@ public sealed class RoleAnchorTuningDBSO : ScriptableObject
         for (int i = 0; i < entries.Count; i++)
         {
             Entry entry = entries[i];
-            if (entry == null || string.IsNullOrWhiteSpace(entry.key)) continue;
+            if (entry == null || string.IsNullOrWhiteSpace(entry.key))
+                continue;
 
             string key = entry.key.Trim();
 

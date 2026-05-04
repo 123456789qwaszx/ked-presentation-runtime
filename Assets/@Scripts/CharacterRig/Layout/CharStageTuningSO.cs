@@ -5,4 +5,7 @@ public sealed class CharStageTuningSO : ScriptableObject
 {
     [Header("Global Offsets (px)")]
     public CharPlacementTuningSet offsets = default;
+    
+    [Header("Global Scale Multipliers")]
+    public CharScaleTuningSet scales = CharScaleTuningSet.Default;
 }

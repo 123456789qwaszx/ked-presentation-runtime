@@ -17,7 +17,9 @@ MonoBehaviour:
   - editorName: 
     steps:
     - editorName: 
-      compiled: []
+      compiled:
+      - rid: 5301155771391934527
+      - rid: 5301155771391934528
       gate:
         type: 3
         seconds: 0
@@ -152,6 +154,30 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
+    - rid: 5301155771391934527
+      type: {class: SetupCharRigCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: sub
+        rigPrefab: {fileID: 0}
+        parentSlot: 0
+        rigRootName: CharacterRig
+        autoRolePrefixFromRoleKey: 1
+        addRolePrefix: 1
+        destroyExistingRigWithSameName: 1
+        strict: 1
+    - rid: 5301155771391934528
+      type: {class: SetAnchorCommandSpecCharR, ns: , asm: Assembly-CSharp}
+      data:
+        roleKey: sub
+        target: 0
+        preset: 2
+        baseRatioX: 0.5
+        globalTuning: {fileID: 0}
+        roleTuningDb: {fileID: 0}
+        poseKey: 
+        offset: {x: 0, y: 0}
+        overrideAnchoredPosition: 0
+        anchoredPositionOverride: {x: 0, y: 0}
     - rid: 8483491179373002941
       type: {class: ShowEmojiCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:
