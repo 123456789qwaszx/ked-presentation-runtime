@@ -5910,59 +5910,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1215247298}
   m_CullTransparentMesh: 1
---- !u!1 &1222192534
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1222192536}
-  - component: {fileID: 1222192535}
-  m_Layer: 0
-  m_Name: InlineEmojiResolver
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1222192535
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1222192534}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 64c707fc0b940aa4ea4fe8827f627469, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::InlineEmojiResolver
-  cueMap:
-  - cue: heart
-    spriteKey: background_02
-  - cue: question
-    spriteKey: sprites/bubble_blue
-  - cue: angry
-    spriteKey: sprites/bubble_green
-  - cue: sweat
-    spriteKey: sprites/bubble_green
---- !u!4 &1222192536
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1222192534}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 563.58563, y: 589.04553, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1235729642
 GameObject:
   m_ObjectHideFlags: 0
@@ -8885,7 +8832,6 @@ MonoBehaviour:
   globalTuning: {fileID: 11400000, guid: db30a92a6d8545a41b703c2585f4013d, type: 2}
   roleTuningDb: {fileID: 11400000, guid: c49265a67487bce458b734a0473b75b5, type: 2}
   emojiDatabase: {fileID: 11400000, guid: ea84fc3e735e774408e8587c7c691ad5, type: 2}
-  _emojiResolver: {fileID: 1222192535}
 --- !u!1 &1835797369
 GameObject:
   m_ObjectHideFlags: 0
@@ -12088,7 +12034,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 458.38, y: -24}
-  m_SizeDelta: {x: 916.76, y: 24}
+  m_SizeDelta: {x: 916.76, y: 0}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!1 &666632935594092605
 GameObject:
@@ -41221,7 +41167,6 @@ SceneRoots:
   - {fileID: 1571925711}
   - {fileID: 1967129520}
   - {fileID: 1332040256}
-  - {fileID: 1222192536}
   - {fileID: 1658226452}
   - {fileID: 1433866632}
   - {fileID: 1924806293}

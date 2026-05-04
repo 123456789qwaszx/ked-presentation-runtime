@@ -223,13 +223,14 @@ public sealed partial class YarnCommandBridge
         EnqueueDestroySpec(roleKey);
     }
 
-    // public void Import_Emoji(string characterKey, string cue)
-    // {
-    //     EnqueueInlineEmojiByCharacter(characterKey, cue);
-    // }
-    //
-    // public void Import_EmojiHide(string characterKey)
-    // {
-    //     EnqueueInlineEmojiHideByCharacter(characterKey);
-    // }
+    
+    public void Import_Emoji(string roleKey, string emojiKey)
+    {
+        EnqueueShowEmojiSpec(roleKey, emojiKey);
+    }
+
+    public void Import_EmojiHide(string roleKey)
+    {
+        EnqueueHideEmojiSpec(roleKey);
+    }
 }

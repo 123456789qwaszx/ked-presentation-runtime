@@ -1,13 +1,4 @@
-using System;
-using System.Collections.Generic;
 using UnityEngine;
-
-[Serializable]
-public struct EmojiCueMapEntry
-{
-    public string cue;
-    public string spriteKey;
-}
 
 public sealed class InlineEmojiHost : MonoBehaviour, InlineEventMarkupHandler.IInlineEmojiHost
 {
@@ -20,11 +11,15 @@ public sealed class InlineEmojiHost : MonoBehaviour, InlineEventMarkupHandler.II
 
     public void PlayEmojiCue(string characterKey, string cue)
     {
+        if (_commandBridge == null)
+            return;
+
         if (string.IsNullOrWhiteSpace(cue))
         {
-            //_commandBridge.EnqueueInlineEmojiHideByCharacter(characterKey);
+            _commandBridge.HideInlineEmojiByCharacterNow(characterKey);
             return;
         }
-        //_commandBridge.PlayInlineEmojiByCharacterNow(characterKey, cue);
+
+        _commandBridge.PlayInlineEmojiByCharacterNow(characterKey, cue);
     }
 }
