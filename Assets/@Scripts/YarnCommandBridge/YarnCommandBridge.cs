@@ -718,7 +718,8 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         {
             roleKey = roleKey,
             preset = preset,
-            globalTuning = globalTuning
+            globalTuning = globalTuning,
+            roleTuningDb = roleTuningDb
         };
 
         var resetTrackSpec = new ApplyTrackOffsetCommandSpecCharR
