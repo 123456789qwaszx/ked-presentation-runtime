@@ -11,6 +11,10 @@ public sealed class RoleAnchorTuningDBSO : ScriptableObject
         [Tooltip("예: seina 또는 seina:pose_wide")]
         public string key;
 
+        [Header("Default Offset")]
+        [Tooltip("이 캐릭터/포즈에 항상 적용되는 기본 위치 보정값입니다.")]
+        public Vector2 defaultOffset = Vector2.zero;
+        
         [Header("Anchor Offsets")]
         public CharPlacementTuningSet offsets;
 

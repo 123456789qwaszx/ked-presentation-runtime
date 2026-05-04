@@ -124,7 +124,10 @@ public static class CharAnchorPlacementResolver
 
         // 5) Apply role/pose-specific tuning offset.
         if (roleTuningDb != null && roleTuningDb.TryGet(tuneKey, out var entry))
+        {
+            pos += entry.defaultOffset;
             pos += entry.offsets.Get(preset);
+        }
 
         // 6) Apply command-time offset.
         // This is the final per-command adjustment and should be applied last.

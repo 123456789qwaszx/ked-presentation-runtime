@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RoleAnchorTuningDBSO
   entries:
   - key: Albedo
+    defaultOffset: {x: 0, y: 0}
     offsets:
       left: {x: 0, y: 0}
       center: {x: 0, y: 0}
@@ -33,6 +34,7 @@ MonoBehaviour:
       exp1: 0
       exp2: 0
   - key: Laru
+    defaultOffset: {x: 0, y: 0}
     offsets:
       left: {x: 0, y: 0}
       center: {x: 0, y: 0}
@@ -52,12 +54,13 @@ MonoBehaviour:
       exp1: 0
       exp2: 0
   - key: Bastelina
+    defaultOffset: {x: 0, y: 80}
     offsets:
       left: {x: 0, y: 0}
       center: {x: 0, y: 0}
       right: {x: 0, y: 0}
-      duoLeft: {x: 0, y: 80}
-      duoRight: {x: 0, y: 80}
+      duoLeft: {x: 0, y: 0}
+      duoRight: {x: 0, y: 0}
       boxSide: {x: 0, y: 0}
       exp1: {x: 0, y: 0}
       exp2: {x: 0, y: 0}
