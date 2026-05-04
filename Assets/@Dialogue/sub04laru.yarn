@@ -2,6 +2,7 @@
 ---
 <<destroy Albedo>>
 <<destroy Laru>>
+<<destroy npc1>>
 
 <<begin_hold>>
 <<presentation_setup>>
@@ -19,10 +20,6 @@
 <<place_offset Albedo 0 -200>>
 <<cast Albedo Albedo>>
 <<fade_in Albedo>>
-
-<<begin_hold>>
-<<await 10>>
-<<end_hold>>
 
 
 <<slot Laru>>
@@ -106,11 +103,166 @@
 베스티나: 휴, 귀여운 후배인 제가...... 어떻게든 도와줘야겠네요......
 
 <<fade_out Bastelina>>
-<<begin_hold>>
-<<await_for 2>>
-
 <<shot_zoom Bastelina 10 1.5>>
-<<shot_track Bastelina 800 0 1.5>>
-<<end_hold>>
+
+
+<<fade_in Laru>>
+<<fade_in Albedo>>
+
+<<place Albedo right>>
+<<place_offset Albedo -50 0>>
+<<place Laru left>>
+<<place_offset Laru 120 0>>
+
+<<size Albedo 1.8>>
+<<to_scale Albedo 1 -1>>
+<<size Laru 1.8>>
+
+
+<<emotion_wipe_char Laru Laru a 5>>
 알베도: 비즈니스 접대랍시고, 감자튀김 먹으러 간 게 이번이 처음은 아닌 것 같은데?
+
+<<hop_in Albedo 0>>
+알베도: 그리고 식사 끝나고 바로 계약서에 서명하면 되는데, 업체 담당자 데리고 오후 내내 낚시했잖아! 대체 왜 그런 짓을 한 거야?
+
+
+<<shake Laru left>>
+<<emotion_wipe_char Laru Laru a 26>>
+라루: 상대도 낚시에 관심이 많았거든......
+
+
+<<jolt Albedo up>>
+<<emotion_wipe_char Albedo Albedo a 16>>
+알베도: 계약은 오전에 끝내놓고, 오후엔 일하기 싫어서 낚시하러 간 건 아니고?
+
+<<move_by Albedo -200 0>>
+
+<<emotion_wipe_char Albedo Albedo a 1>>
+알베도: 백번 양보해서, 낚시야 어디서든 할 수 있는데, 왜 굳이 황야까지 간 건데? 마물이라도 나타나면 어쩔 뻔했어!
+
+<<emotion_wipe_char Laru Laru a 4>>
+<<sway Laru>>
+라루: 황야에서는 대어를 낚을 수 있잖아. 설령 마물이 나타나도, 난 충분히 상대할 수 있고.
+
+알베도: 그래, 대어 낚시도 그렇다 치자. 그럼 그렇게 하루 종일 바쁘게 보내고, 계약서는 어쨋는데?
+
+라루: 계약서...... 분명 서명은 했는데, 컴퍼니로 돌아오니까 안 보이네......
+
+
+<<emotion_wipe_char Albedo Albedo a 14>>
+알베도: 시킨 일을 제대로 하기는커녕, 한술 더 떠서 계약서까지 잃어버리다니......
+
+<<hop_in Laru 0>>
+<<move_by Laru 200 0>>
+<<move_by Albedo 200 0>>
+<<shot_track Laru 40 -30 0.65>>
+라루: 잃어버린 게 아니야! 그냥 어디에 뒀는지 잠깐 까먹었을 뿐이야!
+
+
+
+<<move_by Laru -200 0>>
+<<hop_in Albedo 0>>
+<<move_by Albedo -200 0>>
+<<shot_track Laru -40 -30 0.65>>
+
+<<emotion_wipe_char Albedo Albedo a 16>>
+알베도: 그게 바로 잃어버린 거야!
+
+<<bg_spawn fire bg1>>
+<<bg_sprite fire sprites/BG-Darkmode>>
+<<bg_fade fire 1>>
+
+<<hop_in Albedo 0>>
+<<move_by Albedo -120 0>>>>
+
+<<place Bastelina right>>
+<<place_offset Bastelina 300 0>>
+<<size Bastelina 1.6>>
+<<slide_in Bastelina right>>
+<<fade_in Bastelina>>>>
+베스티나: 저기! 알베도 님, 방해해서 죄송하지만, 공급업체 담당자께서 급한 용무로 찾아오셨어요.
+
+
+<<move_by Albedo 200 0>>
+<<slide_out Bastelina right>>
+<<fade_out Bastelina>>
+<<emotion_wipe_char Albedo Albedo a 1>>
+알베도: 잘됐네! 바로 들어오시라고 해! 넌 이따가 두고 보자!
+
+
+<<fade_out Albedo>>
+
+
+<<fade_out Laru>>
+..
+<<slot npc1>>
+<<place npc1 left>>
+<<size npc1 1.9>>
+<<cast npc1 Ruby>>
+<<fade_in npc1>>
+
+
+<<place Albedo right>>
+<<size Albedo 1.9>>
+<<fade_in Albedo>>
+
+감격한 공급업체 담당자: 알베도님, 약속도 없이 불쑥 찾아와 죄송합니다.
+
+
+알베도: 별 말씀을요. 어제 제가 접대가 부족했던 것 같아 오히려 제가 직접 사과드리려던 참이었습니다. 어서 앉으시죠.
+
+
+감격한 공급업체 담당자: 부족하다니요? 라루님의 접대는 전혀 부족하지 않았습니다. 오히려 정말 즐거웠죠.
+
+<<nudge Albedo up>>
+알베도: 즐거웠다고요?
+
+감격한 공급업체 담당자: 라루님이 선택하신 점심 식사 장소는 개성이 넘치고, 감자튀김 맛도 아주 훌륭했습니다......
+
+<<shake npc1 up>>
+감격한 공급업체 담당자: 게다가 오후엔 라루님의 가르침 덕분에 제 인생 최대 대어를 낚았지 뭡니까!
+
+<<place Laru left>>
+<<fade_in Laru>>
+<<slide_in Laru>>
+
+<<move_by npc1 600 0>>
+<<move_by Albedo 150 0>>
+
+<<shot_track npc1 400 0 0.5>>
+라루: 별거 아니야! 다음에 또 같이 가자~ 좋은 낚시터를 몇 군데 더 알고 있거든!
+
+
+
+<<shake npc1 left>>
+감격한 공급업체 담당자: 하하! 꼭 데려가 주십시오!
+
+<<fade_out Laru>>
+<<slide_out Laru left>>
+<<shot_track npc1 -400 0 0.5>>
+
+감격한 공급업체 담당자: 참...... 오늘은 계약서를 돌려드리려고 찾아왔습니다. 어제 낚시 끝나고 실수로 귀사의 서류까지 챙겨가 버렸더군요. 이거 참 죄송하게 됐습니다.
+
+<<dip npc1 down>>
+
+감격한 공급업체 담당자: 사과의 뜻으로 최종 납품가에서 10%를 인하할 테니, 부디 성의를 받아주십쇼. 그럼 이만 먼저 일어나보겠습니다.
+
+<<fade_out npc1>>
+<<slide_out npc1 left>>
+
+<<hop_in Albedo 0>>
+<<move_by Albedo -320 0>>>>
+알베도: 아, 그럼 제가 배웅하죠.
+
+<<fade_out Albedo>>
+<<slide_out Albedo left>>
+
+<<place Bastelina center>>
+<<slide_in Bastelina right>>
+<<fade_in Bastelina>>
+베스티나: 안녕히 가세요!
+
+고객을 배웅하고 사무실 문이 닫히자, 실내는 삽시간에 고요해졌다.
+
+<<jump sub04laru2>>
 ===

@@ -103,9 +103,9 @@ public sealed partial class YarnCommandBridge
         EnqueueDipInOutSpec(roleKey, direction);
     }
 
-    public void Import_HopIn(string roleKey, string direction = "left")
+    public void Import_HopIn(string roleKey, float distance, string direction = "left")
     {
-        EnqueueArcHopInSpec(roleKey, direction);
+        EnqueueArcHopInSpec(roleKey, distance, direction);
     }
 
     public void Import_Jolt(string roleKey, string direction = "right")

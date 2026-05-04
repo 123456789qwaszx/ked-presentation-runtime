@@ -9,7 +9,7 @@ using RectTransform = UnityEngine.RectTransform;
 public sealed class ArcHopInCommandSpecCharR : CommandSpecBase
 {
     [Header("Target")]
-    public CharacterRigTarget target = CharacterRigTarget.Character_Track;
+    public CharacterRigTarget target = CharacterRigTarget.Character_Track_Y;
 
     [Header("Slide In")]
     public CharRDirection from = CharRDirection.Left;

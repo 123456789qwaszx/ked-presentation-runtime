@@ -182,11 +182,13 @@ public sealed class SequenceTextImporter
 
             case "hop_in":
                 RequireArgs(line, 1);
+
                 _bridge.Import_HopIn(
                     line.args[0],
-                    line.args.Count >= 2 ? line.args[1] : "left");
-                return true;
+                    line.args.Count >= 2 ? ParseFloat(line.args[1], "distance") : 80f,
+                    line.args.Count >= 3 ? line.args[2] : "left");
 
+                return true;
             case "jolt":
                 RequireArgs(line, 1);
                 _bridge.Import_Jolt(

@@ -188,6 +188,56 @@ MonoBehaviour:
     emotionKey: 19
     sprite: {fileID: 21300000, guid: e2ee8edeea5336f40851d456525c9665, type: 3}
     assetPath: Assets/Art/Portraits/Bastelina/Bastelina_a_19.png
+  - characterId: Caramel
+    variantKey: Caramel_a
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: def2b91f8fa95f246b652b83b4115382, type: 3}
+    assetPath: Assets/Art/Portraits/Caramel/Caramel_a_01.png
+  - characterId: Caramel
+    variantKey: Caramel_a
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: b36a57c26332e884b97e2ee7e799e9fc, type: 3}
+    assetPath: Assets/Art/Portraits/Caramel/Caramel_a_03.png
+  - characterId: Caramel
+    variantKey: Caramel_a
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: a9cfd3cedfd2a454e8b163f08b31a275, type: 3}
+    assetPath: Assets/Art/Portraits/Caramel/Caramel_a_04.png
+  - characterId: Caramel
+    variantKey: Caramel_a
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: 3742aef433380544284c902d2bbc37e3, type: 3}
+    assetPath: Assets/Art/Portraits/Caramel/Caramel_a_05.png
+  - characterId: Caramel
+    variantKey: Caramel_a
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: 12fcc00deeede4f42bb688519c593395, type: 3}
+    assetPath: Assets/Art/Portraits/Caramel/Caramel_a_06.png
+  - characterId: Caramel
+    variantKey: Caramel_a
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: 13bb2665dff20cd46a92799d1f935e02, type: 3}
+    assetPath: Assets/Art/Portraits/Caramel/Caramel_a_07.png
+  - characterId: Caramel
+    variantKey: Caramel_a
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: 779ebc7729cf7444988a1f2658005282, type: 3}
+    assetPath: Assets/Art/Portraits/Caramel/Caramel_a_08.png
+  - characterId: Caramel
+    variantKey: Caramel_a
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: bc6b498b3d556b845bd51d30a53eee6b, type: 3}
+    assetPath: Assets/Art/Portraits/Caramel/Caramel_a_09.png
+  - characterId: Caramel
+    variantKey: Caramel_a
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: 086d55449bc3cbf41a68408f840d3b72, type: 3}
+    assetPath: Assets/Art/Portraits/Caramel/Caramel_a_10.png
+  - characterId: Caramel
+    variantKey: Caramel_a
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: 038ceca16472375478fc248e0739a2d4, type: 3}
+    assetPath: Assets/Art/Portraits/Caramel/Caramel_a_11.png
   - characterId: Laru
     variantKey: Laru_a
     emotionKey: 01
@@ -428,6 +478,251 @@ MonoBehaviour:
     emotionKey: 11
     sprite: {fileID: 21300000, guid: a57cfe6edb851f84f9a795a677ec12be, type: 3}
     assetPath: Assets/Art/Portraits/Leafia/Leafia_a_11.png
+  - characterId: Okra
+    variantKey: Okra_a
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: 8ed1f6cefe5b5504481bb6c11948e59b, type: 3}
+    assetPath: Assets/Art/Portraits/Okra/Okra_a_01.png
+  - characterId: Okra
+    variantKey: Okra_a
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: 3458d2635e2bd6e4e89a17d33a62f7dd, type: 3}
+    assetPath: Assets/Art/Portraits/Okra/Okra_a_03.png
+  - characterId: Okra
+    variantKey: Okra_a
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: 2cf3484b7f6e58449b7fda5fbaedf17c, type: 3}
+    assetPath: Assets/Art/Portraits/Okra/Okra_a_04.png
+  - characterId: Okra
+    variantKey: Okra_a
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: f17a861136a50d54a97eef962242bda5, type: 3}
+    assetPath: Assets/Art/Portraits/Okra/Okra_a_05.png
+  - characterId: Okra
+    variantKey: Okra_a
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: c1b1c10875cd6964ebac625a5bcab083, type: 3}
+    assetPath: Assets/Art/Portraits/Okra/Okra_a_06.png
+  - characterId: Okra
+    variantKey: Okra_a
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: fa09041d58a776146a8abfbd2cc06d8c, type: 3}
+    assetPath: Assets/Art/Portraits/Okra/Okra_a_07.png
+  - characterId: Okra
+    variantKey: Okra_a
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: 48fa4b9fa48478d4495ecdcc14e57e8e, type: 3}
+    assetPath: Assets/Art/Portraits/Okra/Okra_a_08.png
+  - characterId: Okra
+    variantKey: Okra_a
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: bc1ae56279f9a0146b7566cdbb408539, type: 3}
+    assetPath: Assets/Art/Portraits/Okra/Okra_a_09.png
+  - characterId: Okra
+    variantKey: Okra_a
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: c09baf35b0571cf4fa8fa57feb810f47, type: 3}
+    assetPath: Assets/Art/Portraits/Okra/Okra_a_10.png
+  - characterId: Okra
+    variantKey: Okra_a
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: 3c8f95b3aab8c1e4d9fa576903fd3100, type: 3}
+    assetPath: Assets/Art/Portraits/Okra/Okra_a_11.png
+  - characterId: Okra
+    variantKey: Okra_a
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: 1296e86b5a85a0841a5c28bf4e54cc55, type: 3}
+    assetPath: Assets/Art/Portraits/Okra/Okra_a_12.png
+  - characterId: Okra
+    variantKey: Okra_a
+    emotionKey: 13
+    sprite: {fileID: 21300000, guid: c4c9c09e91bd77e4d9a62a47d9dffa3e, type: 3}
+    assetPath: Assets/Art/Portraits/Okra/Okra_a_13.png
+  - characterId: Ophir
+    variantKey: Ophir_a
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: 2ab7bc380113a8b4384cae531417b8d4, type: 3}
+    assetPath: Assets/Art/Portraits/Ophir/Ophir_a_01.png
+  - characterId: Ophir
+    variantKey: Ophir_a
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: fc3da5268f69d024a931ac8394dc91a3, type: 3}
+    assetPath: Assets/Art/Portraits/Ophir/Ophir_a_03.png
+  - characterId: Ophir
+    variantKey: Ophir_a
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: 13eccff9af0b0464c8f193135ee4f91d, type: 3}
+    assetPath: Assets/Art/Portraits/Ophir/Ophir_a_04.png
+  - characterId: Ophir
+    variantKey: Ophir_a
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: de7e6dd5d07b48f4d8bff239abac2bfb, type: 3}
+    assetPath: Assets/Art/Portraits/Ophir/Ophir_a_05.png
+  - characterId: Ophir
+    variantKey: Ophir_a
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: 7640574c9f5c3064592e14ddbb0ed30c, type: 3}
+    assetPath: Assets/Art/Portraits/Ophir/Ophir_a_06.png
+  - characterId: Ophir
+    variantKey: Ophir_a
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: 7c63d1820f5c6dd4ab0712a17190ce6f, type: 3}
+    assetPath: Assets/Art/Portraits/Ophir/Ophir_a_07.png
+  - characterId: Ophir
+    variantKey: Ophir_a
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: 9376aab9a31163945aa5321a2ef3e83b, type: 3}
+    assetPath: Assets/Art/Portraits/Ophir/Ophir_a_08.png
+  - characterId: Ophir
+    variantKey: Ophir_a
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: 8a41d962dcd922843b002dc6337de03f, type: 3}
+    assetPath: Assets/Art/Portraits/Ophir/Ophir_a_09.png
+  - characterId: Ophir
+    variantKey: Ophir_a
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: f90db73d626b3ac4dad0f089f1262194, type: 3}
+    assetPath: Assets/Art/Portraits/Ophir/Ophir_a_10.png
+  - characterId: Ophir
+    variantKey: Ophir_a
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: 57b39a96113516c448393ec48e750dde, type: 3}
+    assetPath: Assets/Art/Portraits/Ophir/Ophir_a_11.png
+  - characterId: Ophir
+    variantKey: Ophir_a
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: 4de3014227c5cf54993cff8e77c947b7, type: 3}
+    assetPath: Assets/Art/Portraits/Ophir/Ophir_a_12.png
+  - characterId: Ophir
+    variantKey: Ophir_a
+    emotionKey: 13
+    sprite: {fileID: 21300000, guid: 281729ef90cf7d5419bb9a4e3743d30a, type: 3}
+    assetPath: Assets/Art/Portraits/Ophir/Ophir_a_13.png
+  - characterId: Ophir
+    variantKey: Ophir_a
+    emotionKey: 14
+    sprite: {fileID: 21300000, guid: 0250c2d9a9db10849b64e91b71b6a5cc, type: 3}
+    assetPath: Assets/Art/Portraits/Ophir/Ophir_a_14.png
+  - characterId: Ruby
+    variantKey: Ruby_a
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: ee7b23bb1ac85f5498a0d84fbccdf42e, type: 3}
+    assetPath: Assets/Art/Portraits/Ruby/Ruby_a_01.png
+  - characterId: Ruby
+    variantKey: Ruby_a
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: 9e5ef4e5eef79504c94a14857983a5ac, type: 3}
+    assetPath: Assets/Art/Portraits/Ruby/Ruby_a_03.png
+  - characterId: Ruby
+    variantKey: Ruby_a
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: 9f9f82af154051b4cb605f6d5c53599a, type: 3}
+    assetPath: Assets/Art/Portraits/Ruby/Ruby_a_04.png
+  - characterId: Ruby
+    variantKey: Ruby_a
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: 6e18d5737d091d943a65bbf20b06eb81, type: 3}
+    assetPath: Assets/Art/Portraits/Ruby/Ruby_a_05.png
+  - characterId: Ruby
+    variantKey: Ruby_a
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: ee398f421490ac2459d5d0a9e1bb9b55, type: 3}
+    assetPath: Assets/Art/Portraits/Ruby/Ruby_a_06.png
+  - characterId: Ruby
+    variantKey: Ruby_a
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: 96d86dfe56d60e64fa3ffd582d886d74, type: 3}
+    assetPath: Assets/Art/Portraits/Ruby/Ruby_a_07.png
+  - characterId: Ruby
+    variantKey: Ruby_a
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: 9ed666b6d5bb69940888e53566c49e02, type: 3}
+    assetPath: Assets/Art/Portraits/Ruby/Ruby_a_08.png
+  - characterId: Ruby
+    variantKey: Ruby_a
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: f221f96a0a01fcb4d9f02ce045105e71, type: 3}
+    assetPath: Assets/Art/Portraits/Ruby/Ruby_a_09.png
+  - characterId: Ruby
+    variantKey: Ruby_a
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: d84ef86ddc937af4d945df2e8be3f7e1, type: 3}
+    assetPath: Assets/Art/Portraits/Ruby/Ruby_a_10.png
+  - characterId: Ruby
+    variantKey: Ruby_a
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: 5d401363ffe7dd841b057b6064e219a2, type: 3}
+    assetPath: Assets/Art/Portraits/Ruby/Ruby_a_11.png
+  - characterId: Ruby
+    variantKey: Ruby_a
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: f057ca71a5e0b93428ef7cdc01da048f, type: 3}
+    assetPath: Assets/Art/Portraits/Ruby/Ruby_a_12.png
+  - characterId: Ruby
+    variantKey: Ruby_a
+    emotionKey: 13
+    sprite: {fileID: 21300000, guid: db5f3dccdf2cc1840bbebf0b03a5ffdc, type: 3}
+    assetPath: Assets/Art/Portraits/Ruby/Ruby_a_13.png
+  - characterId: Sapphire
+    variantKey: Sapphire_a
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: c7b43fe19dfdd444dbf98b25765a6d2b, type: 3}
+    assetPath: Assets/Art/Portraits/Sapphire/Sapphire_a_01.png
+  - characterId: Sapphire
+    variantKey: Sapphire_a
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: 4fee613b07b0bfb43864c0362c52fc9d, type: 3}
+    assetPath: Assets/Art/Portraits/Sapphire/Sapphire_a_03.png
+  - characterId: Sapphire
+    variantKey: Sapphire_a
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: 16f89051a046d7c4b8ec0d124e5e9807, type: 3}
+    assetPath: Assets/Art/Portraits/Sapphire/Sapphire_a_04.png
+  - characterId: Sapphire
+    variantKey: Sapphire_a
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: aa7e3ce99539da241881e6a963f950fc, type: 3}
+    assetPath: Assets/Art/Portraits/Sapphire/Sapphire_a_05.png
+  - characterId: Sapphire
+    variantKey: Sapphire_a
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: bab815f614713a7429c70f3de699b3fd, type: 3}
+    assetPath: Assets/Art/Portraits/Sapphire/Sapphire_a_06.png
+  - characterId: Sapphire
+    variantKey: Sapphire_a
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: 8cf6ead970adbec46ac70b345e81ca9e, type: 3}
+    assetPath: Assets/Art/Portraits/Sapphire/Sapphire_a_07.png
+  - characterId: Sapphire
+    variantKey: Sapphire_a
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: 5bc519e8f11ed7240b9b4560771ef414, type: 3}
+    assetPath: Assets/Art/Portraits/Sapphire/Sapphire_a_08.png
+  - characterId: Sapphire
+    variantKey: Sapphire_a
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: c9bb4fe012a216b4e8e034d461b1210f, type: 3}
+    assetPath: Assets/Art/Portraits/Sapphire/Sapphire_a_09.png
+  - characterId: Sapphire
+    variantKey: Sapphire_a
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: d1bfb0051fccf784db4562bcae6522db, type: 3}
+    assetPath: Assets/Art/Portraits/Sapphire/Sapphire_a_10.png
+  - characterId: Sapphire
+    variantKey: Sapphire_a
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: 22bc49ed5a2059c4ea17a5f3c9ced325, type: 3}
+    assetPath: Assets/Art/Portraits/Sapphire/Sapphire_a_11.png
+  - characterId: Sapphire
+    variantKey: Sapphire_a
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: ba117d2ce739f664da27000e1d063b5e, type: 3}
+    assetPath: Assets/Art/Portraits/Sapphire/Sapphire_a_12.png
+  - characterId: Sapphire
+    variantKey: Sapphire_a
+    emotionKey: 13
+    sprite: {fileID: 21300000, guid: 9f0e629a1577be1489da03205b5ac299, type: 3}
+    assetPath: Assets/Art/Portraits/Sapphire/Sapphire_a_13.png
   - characterId: Willow
     variantKey: Willow_a
     emotionKey: 01
@@ -563,5 +858,5 @@ MonoBehaviour:
     emotionKey: 01
     sprite: {fileID: 21300000, guid: 2c5e83a3f43fc544fa622f82902d7d2d, type: 3}
     assetPath: Assets/Art/Portraits/reira/reira_a_01.png
-  generatedTicksUtc: 639134191886428168
-  generatedTimeReadable: 2026-05-04 00:33:08
+  generatedTicksUtc: 639134549959043051
+  generatedTimeReadable: 2026-05-04 10:29:55
