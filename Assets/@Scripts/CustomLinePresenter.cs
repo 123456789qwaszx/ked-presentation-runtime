@@ -89,7 +89,13 @@ public sealed class CustomLinePresenter : DialoguePresenterBase
 
         // ── 3. 박스 타겟 Resolve / Bind ─────────────────────────────────
         bool hasCharacterName = string.IsNullOrWhiteSpace(line.CharacterName) == false;
-        DialogueBoxKind boxKind = _lineRoutingPolicy.Resolve(hasCharacterName);
+        //DialogueBoxKind boxKind = _lineRoutingPolicy.Resolve(hasCharacterName);
+        
+        DialogueBoxKind boxKind = TryResolveBoxKindFromMetadata(
+            line.Metadata, 
+            out DialogueBoxKind metadataBoxKind)
+            ? metadataBoxKind
+            : _lineRoutingPolicy.Resolve(hasCharacterName);
 
         IDialogueTextTarget box = _dialogueBoxResolver.ResolveTarget(boxKind);
         if (box == null)
@@ -115,9 +121,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase
         BindCharacterNameTarget(hasCharacterName);
 
         // ── 4. 표시할 텍스트 결정 ────────────────────────────────────────
-        var text = _characterNameText != null
-            ? line.TextWithoutCharacterName
-            : line.Text;
+        var text = line.TextWithoutCharacterName;
 
         ApplyCharacterName(line);
 
@@ -242,5 +246,56 @@ public sealed class CustomLinePresenter : DialoguePresenterBase
         }
 
         behaviour.transform.localPosition = Vector3.zero;
+    }
+    
+    private static bool TryResolveBoxKindFromMetadata(
+        string[] metadata,
+        out DialogueBoxKind kind)
+    {
+        kind = default;
+
+        if (metadata == null || metadata.Length == 0)
+            return false;
+
+        for (int i = 0; i < metadata.Length; i++)
+        {
+            string tag = metadata[i];
+
+            if (string.IsNullOrWhiteSpace(tag))
+                continue;
+
+            tag = tag.Trim().ToLowerInvariant();
+
+            switch (tag)
+            {
+                case "portrait":
+                case "box:portrait":
+                case "box=portrait":
+                    kind = DialogueBoxKind.Portrait;
+                    return true;
+
+                case "speaker":
+                case "box:speaker":
+                case "box=speaker":
+                    kind = DialogueBoxKind.Speaker;
+                    return true;
+
+                case "letterbox":
+                case "letter_box":
+                case "box:letterbox":
+                case "box=letterbox":
+                    kind = DialogueBoxKind.LetterBox;
+                    return true;
+
+                case "onlytext":
+                case "only_text":
+                case "box:onlytext":
+                case "box=onlytext":
+                    kind = DialogueBoxKind.OnlyText;
+                    return true;
+            }
+        }
+
+        return false;
     }
 }

@@ -61,7 +61,7 @@ public sealed class DialogueBoxHost : MonoBehaviour, IDialogueBoxViewResolver
 
     public void ShowOnly(IDialogueTextTarget target)
     {
-        //HideAll();
+        HideAll();
 
         IPresentationDialogueBoxView view = target as IPresentationDialogueBoxView;
         view?.SetVisible(true);

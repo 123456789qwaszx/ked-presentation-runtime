@@ -30,7 +30,7 @@ public sealed class DialogueBox00_Portrait
     public CanvasGroup CanvasGroup => Root.GetComponent<CanvasGroup>();
 
     public TMP_Text LineText => View.Text(Refs.DialogueBox00TextArea_Text);
-    public TMP_Text NameText => View.Text(Refs.DialogueBox00TextAreaSpeakerName_Text);
+    public TMP_Text NameText => null;//=> View.Text(Refs.DialogueBox00TextAreaSpeakerName_Text);
     public bool HasName => true;
 
     public RectTransform ProtagonistRect => View.Rect(Refs.DialogueBox00ProtagonistCutinViewport_Mask);

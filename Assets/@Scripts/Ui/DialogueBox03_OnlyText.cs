@@ -33,7 +33,7 @@ public sealed class DialogueBox03_OnlyText
     public CanvasGroup CanvasGroup => View.CanvasGroup(Refs.DialogueBox03_Root);
 
     public TMP_Text LineText => View.Text(Refs.DialogueBox03TextArea_Text);
-    public TMP_Text NameText => View.Text(Refs.DialogueBox03SpeakerNameBoxTextArea_Text);
+    public TMP_Text NameText => null;//View.Text(Refs.DialogueBox03SpeakerNameBoxTextArea_Text);
     public bool HasName => NameText != null;
 
     protected override void Initialize()
