@@ -110,62 +110,9 @@ public sealed class YarnBridgePlaybackDriver : MonoBehaviour
 
         if (_pendingImmediateWaitCount <= 0)
             return;
-        
-        bool shouldWait = _pendingImmediateWaitCount > 0;
 
-        switch (spec)
-        {
-            case JoltCommandSpecCharR nudgeTap:
-                nudgeTap.wait = shouldWait;
-                break;
-
-            case ArcHopInCommandSpecCharR bounceArcIn:
-                bounceArcIn.wait = shouldWait;
-                break;
-
-            case DipInOutCommandSpecCharR dipInOut:
-                dipInOut.wait = shouldWait;
-                break;
-
-            case MoveByCommandSpecCharR moveBy:
-                moveBy.wait = shouldWait;
-                break;
-
-            case FadeInCommandSpecCharR fadeIn:
-                fadeIn.wait = shouldWait;
-                break;
-
-            case FadeOutCommandSpecCharR fadeOut:
-                fadeOut.wait = shouldWait;
-                break;
-
-            case SlideInCommandSpecCharR slideIn:
-                slideIn.wait = shouldWait;
-                break;
-
-            case SlideOutCommandSpecCharR slideOut:
-                slideOut.wait = shouldWait;
-                break;
-
-            case TransitionCommandSpec transition:
-                transition.wait = shouldWait;
-                break;
-            
-            case SwayCommandSpecCharR swayCommandSpecCharR:
-                swayCommandSpecCharR.wait = shouldWait;
-                break;
-            
-            case ShowEmojiCommandSpecCharR showEmojiCoomandSpecCharR:
-                showEmojiCoomandSpecCharR.wait = shouldWait;
-                break;
-            
-            default:
-                Debug.LogWarning("[YarnBridgePlaybackDriver] waiting for spec char: " + spec.GetType().Name);
-                break;
-        }
-
-        if (shouldWait)
-            _pendingImmediateWaitCount--;
+        _pendingImmediateWaitCount--;
+        spec.wait = true;
     }
 
     public void PlayImmediate(IReadOnlyList<CommandSpecBase> specs, string debugSource = "yarn-inline")
