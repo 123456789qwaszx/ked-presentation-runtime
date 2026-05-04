@@ -49,9 +49,6 @@ public sealed class PivotRotateToByCharacterCommandSpecCharR : CommandSpecBase
     [Tooltip("총 길이. <= 0이면 즉시 적용.")]
     public float duration = 0.7f;
 
-    [Header("Wait")]
-    public bool wait = false;
-
     [Header("Options")]
     [Tooltip("체크하면 기존 위치 관련 트윈을 끝내고 committed state에서 시작합니다.")]
     public bool killTween = true;

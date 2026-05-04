@@ -43,9 +43,6 @@ public sealed class SwayCommandSpecCharR : CommandSpecBase
     [Tooltip("흔들리는 시작 방향. true면 +방향부터, false면 -방향부터.")]
     public bool startPositive = true;
 
-    [Header("Wait")]
-    public bool wait = false;
-    
     [Header("Options")]
     [Tooltip("체크하면 기존 위치 관련 트윈을 끝내고 committed state에서 시작합니다.")]
     public bool killTween = true;

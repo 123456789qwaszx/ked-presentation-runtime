@@ -23,8 +23,6 @@ public class FadeOutCommandSpecCharR : CommandSpecBase
 
     [Tooltip("true면 숨긴 대상의 입력을 완전히 차단(interactable/blocksRaycasts=false)")]
     public bool disableInteraction = true;
-
-    public bool wait = false;
 }
 
 public sealed class FadeOutCommandCharR : CommandBase, IStepScopedCommand

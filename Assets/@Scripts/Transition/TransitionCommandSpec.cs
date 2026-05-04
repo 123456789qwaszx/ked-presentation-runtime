@@ -43,8 +43,6 @@ public sealed class TransitionCommandSpec : CommandSpecBase
     public Ease coverEase = Ease.OutCubic;
     public Ease uncoverEase = Ease.OutCubic;
 
-    [Header("Playback")]
-    public bool wait = true;
     public bool resetToOpenAtStart = true;
 }
 

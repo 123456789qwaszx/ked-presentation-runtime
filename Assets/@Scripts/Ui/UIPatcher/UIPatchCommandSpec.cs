@@ -20,10 +20,6 @@ public sealed class UIPatchCommandSpec : CommandSpecBase
     [Header("Context")]
     public string themeId = "default";
     public string localeId = "ko-KR";
-
-    [Header("Playback")]
-    [Tooltip("체크하면 UI 패치가 끝날 때까지 Step 진행을 멈춥니다.")]
-    public bool wait = true;
 }
 
 

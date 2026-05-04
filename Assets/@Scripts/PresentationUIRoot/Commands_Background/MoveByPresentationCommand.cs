@@ -17,9 +17,6 @@ public sealed class MoveByPresentationCommandSpec : CommandSpecBase
     public float duration = 0.35f;
     public Ease ease = Ease.OutCubic;
 
-    [Header("Wait")]
-    public bool wait = false;
-
     [Header("Options")]
     [Tooltip("체크하면 기존 위치 관련 트윈을 끝내고 committed state에서 시작합니다.")]
     public bool killTween = true;

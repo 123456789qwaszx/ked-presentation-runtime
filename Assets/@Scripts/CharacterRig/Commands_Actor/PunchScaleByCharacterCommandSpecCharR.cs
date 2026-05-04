@@ -31,9 +31,6 @@ public sealed class PunchScaleByCharacterCommandSpecCharR : CommandSpecBase
     [Range(0f, 1f)]
     public float elasticity = 0.75f;
 
-    [Tooltip("체크하면 펀치가 끝날 때까지 Step 진행을 멈춥니다.")]
-    public bool wait = false;
-
     [Header("Options")]
     public bool killTween = true;
 

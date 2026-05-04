@@ -22,9 +22,6 @@ public sealed class DipInOutCommandSpecCharR : CommandSpecBase
 
     [Tooltip("Base ease used as a hint. Enter will use an Out-ish ease, return will use an In-ish ease.")]
     public Ease ease = Ease.InCubic;
-
-    [Header("Wait")]
-    public bool wait = false;
     
     [Header("Options")]
     [Tooltip("체크하면 기존 위치 관련 트윈을 끝내고 committed state에서 시작합니다.")]

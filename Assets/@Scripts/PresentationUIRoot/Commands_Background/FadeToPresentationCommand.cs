@@ -26,9 +26,6 @@ public sealed class FadeToPresentationCommandSpec : CommandSpecBase
     [Tooltip("true면 완료 시 blocksRaycasts를 targetAlpha 기준으로 설정합니다.")]
     public bool controlBlocksRaycasts = false;
 
-    [Header("Wait")]
-    public bool wait = false;
-
     [Header("Options")]
     [Tooltip("체크하면 기존 CanvasGroup 관련 트윈을 끝내고 committed state에서 시작합니다.")]
     public bool killTween = true;

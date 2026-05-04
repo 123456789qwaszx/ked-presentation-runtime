@@ -26,9 +26,6 @@ public sealed class ShotTrackCommandSpec : CommandSpecBase
 
     public Ease ease = Ease.OutCubic;
 
-    [Header("Wait")]
-    public bool wait = false;
-
     [Header("Options")]
     [Tooltip("체크하면 기존 shot tween을 끝내고 committed state에서 시작합니다.")]
     public bool killTween = true;

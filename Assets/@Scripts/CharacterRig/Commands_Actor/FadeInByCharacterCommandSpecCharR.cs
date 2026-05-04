@@ -25,8 +25,6 @@ public sealed class FadeInByCharacterCommandSpecCharR : CommandSpecBase
     [Tooltip("true면 대상의 입력 기능 해금(interactable/blocksRaycasts=true)")]
     public bool EnableInteraction = true;
 
-    public bool wait = false;
-
     [Header("Validation")]
     public bool strict = true;
 }

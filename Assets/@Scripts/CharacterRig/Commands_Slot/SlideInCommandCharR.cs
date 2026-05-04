@@ -23,9 +23,6 @@ public sealed class SlideInCommandSpecCharR : CommandSpecBase
     [Tooltip("0이면 일반 SlideIn에 가까워짐.")]
     public float punch = 24f;
 
-    [Header("Wait")]
-    public bool wait = false;
-    
     [Header("Options")]
     [Tooltip("체크하면 기존 위치 관련 트윈을 끝내고 committed state에서 시작합니다.")]
     public bool killTween = true;

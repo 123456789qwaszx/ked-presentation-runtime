@@ -45,9 +45,6 @@ public sealed class ArcHopInByCharacterCommandSpecCharR : CommandSpecBase
     [Tooltip("How much of the total horizontal travel is reserved for the last hop. 0 = last hop in-place.")]
     public float lastTravelFraction = 0.15f;
 
-    [Header("Wait")]
-    public bool wait = false;
-
     [Header("Options")]
     [Tooltip("체크하면 기존 위치 관련 트윈을 끝내고 committed state에서 시작합니다.")]
     public bool killTween = true;

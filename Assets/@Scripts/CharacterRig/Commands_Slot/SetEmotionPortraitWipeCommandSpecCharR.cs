@@ -16,7 +16,6 @@ public sealed class SetEmotionPortraitWipeCommandSpecCharR : CommandSpecBase
     public float duration = 0.38f;
 
     public Ease ease = Ease.OutCubic;
-    public bool wait = false;
     public bool snapOnSkip = true;
 
     [Header("Sizing Policy")]

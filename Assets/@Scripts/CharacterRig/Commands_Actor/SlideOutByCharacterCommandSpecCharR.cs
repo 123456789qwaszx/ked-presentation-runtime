@@ -25,9 +25,6 @@ public sealed class SlideOutByCharacterCommandSpecCharR : CommandSpecBase
     [Tooltip("0이면 심심한 SlideOut. 8~20 정도가 예쁘게 튐.")]
     public float punch = 14f;
 
-    [Header("Wait")]
-    public bool wait = false;
-
     [Header("Options")]
     [Tooltip("체크하면 기존 위치 관련 트윈을 끝내고 committed state에서 시작합니다.")]
     public bool killTween = true;

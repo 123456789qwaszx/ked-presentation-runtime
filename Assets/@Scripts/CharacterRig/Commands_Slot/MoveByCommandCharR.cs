@@ -23,9 +23,6 @@ public class MoveByCommandSpecCharR : CommandSpecBase
 
     public Ease ease = Ease.OutCubic;
 
-    [Tooltip("체크하면 트윈이 끝날 때까지 Step 진행을 멈춥니다.")]
-    public bool wait = false;
-
     [Header("Options")]
     [Tooltip("체크하면 기존 위치 관련 트윈을 끝내고 committed state에서 시작합니다.")]
     public bool killTween = true;

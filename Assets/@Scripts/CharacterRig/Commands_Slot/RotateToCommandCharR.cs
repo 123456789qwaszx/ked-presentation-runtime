@@ -24,7 +24,6 @@ public class RotateToCommandSpecCharR : CommandSpecBase
     [Header("Tween")]
     public float duration = 0.4f;
     public Ease ease = Ease.OutCubic;
-    public bool wait = false;
 
     [Header("Options")]
     public bool killTween = true;

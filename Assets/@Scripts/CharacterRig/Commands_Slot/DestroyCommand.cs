@@ -47,9 +47,6 @@ public sealed class DestroyCommandSpec : CommandSpecBase
     }
 
     public string ResolvedTargetName => $"{ResolvedRolePrefix}{rigRootName}";
-    
-    
-    public bool wait = true;
 }
 
 public sealed class DestroyCommand : CommandBase

@@ -34,9 +34,6 @@ public sealed class JoltByCharacterCommandSpec : CommandSpecBase
     [Tooltip("Tiny anticipation before the main tap (in px). 0 disables.")]
     public float anticipation = 3f;
 
-    [Header("Wait")]
-    public bool wait = false;
-
     [Header("Options")]
     public bool killTween = true;
 

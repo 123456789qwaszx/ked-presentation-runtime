@@ -13,7 +13,6 @@ public sealed class ShowEmojiCommandSpecCharR : CommandSpecBase
 
     [Header("Behavior")]
     public bool hideIfKeyEmpty = true;
-    public bool wait = false;
 
     [Header("Override (optional)")]
     public float fadeInOverride = -1f;  // <0이면 preset 사용
