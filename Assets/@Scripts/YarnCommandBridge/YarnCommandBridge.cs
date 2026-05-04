@@ -108,7 +108,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         _dialogueRunner.AddCommandHandler<string, string>("portrait_swap_char", EnqueueSetEmotionPortraitWipeByCharacterSpec);
         _dialogueRunner.AddCommandHandler<string, string, string, string>("emotion_wipe_char", EnqueueSetEmotionPortraitWipeByCharacterSpec);
         
-        _dialogueRunner.AddCommandHandler<float>("await", EnqueueWaitSpec);
+        _dialogueRunner.AddCommandHandler<float>("pause", EnqueueWaitSpec);
     }
 
     private void EnqueueWaitSpec(float duration)

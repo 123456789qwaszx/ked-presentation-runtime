@@ -26,7 +26,7 @@
 
 //<<begin_hold>>
 <<await_for 1>>
-<<emoji Albedo sparkle>>
+//<<emoji Albedo sparkle>>
 //<<end_hold>>
 <<emotion_wipe_char Albedo Albedo a 8>>
 알베도: 공급업체 접대라더니, 별의 탑 특제 감자튀김 열 접시는 뭐지?
@@ -51,7 +51,7 @@
 <<fade_in Albedo>>
 <<nudge Albedo up>>
 
-알베도: 그럼 이건 뭔데! 낚시 마스터 도구 세트? 직접 낚아서 먹기라도 한 거야?
+Albedo: 그럼 이건 뭔데! [emoji =sparkle/]낚시 마스터 도구 세트? 직접 낚아서 먹기라도 한 거야?
 
 
 <<fade_out Albedo>>
@@ -158,13 +158,13 @@
 <<bg_fade fire 1>>
 
 <<hop_in Albedo 0>>
-<<move_by Albedo -120 0>>>>
+<<move_by Albedo -120 0>>
 
 <<place Bastelina right>>
 <<place_offset Bastelina 300 0>>
 <<size Bastelina 1.6>>
 <<slide_in Bastelina right>>
-<<fade_in Bastelina>>>>
+<<fade_in Bastelina>>
 베스티나: 저기! 알베도 님, 방해해서 죄송하지만, 공급업체 담당자께서 급한 용무로 찾아오셨어요.
 
 
@@ -174,12 +174,13 @@
 <<emotion_wipe_char Albedo Albedo a 1>>
 알베도: 잘됐네! 바로 들어오시라고 해! 넌 이따가 두고 보자!
 
-
+<<begin_hold>>
+<<await_for 3>>
 <<fade_out Albedo>>
 
 
 <<fade_out Laru>>
-..
+<<end_hold>>
 <<slot npc1>>
 <<place npc1 left>>
 <<size npc1 1.9>>
@@ -211,7 +212,7 @@
 <<fade_in Laru>>
 <<slide_in Laru>>
 
-<<move_by npc1 600 0>>
+<<move_by npc1 400 0>>
 <<move_by Albedo 150 0>>
 
 <<shot_track npc1 400 0 0.5>>
@@ -231,15 +232,16 @@
 <<dip npc1 down>>
 
 감격한 공급업체 담당자: 사과의 뜻으로 최종 납품가에서 10%를 인하할 테니, 부디 성의를 받아주십쇼. 그럼 이만 먼저 일어나보겠습니다.
-
+<<await_for 1>>
 <<fade_out npc1>>
 <<slide_out npc1 left>>
 
+<<await_for 1>>
 <<hop_in Albedo 0>>
-<<move_by Albedo -320 0>>>>
+<<move_by Albedo -320 0>>
 알베도: 아, 그럼 제가 배웅하죠.
 
-<<fade_out Albedo>>
+<<fade_out Albedo>><<await_for 1>>
 <<slide_out Albedo left>>
 
 <<place Bastelina center>>
