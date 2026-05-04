@@ -320,15 +320,15 @@ public sealed class SequenceTextImporter
                 _bridge.Import_Destroy(line.args[0]);
                 return true;
 
-            case "emoji":
-                RequireArgs(line, 2);
-                _bridge.Import_Emoji(line.args[0], line.args[1]);
-                return true;
-
-            case "emoji_hide":
-                RequireArgs(line, 1);
-                _bridge.Import_EmojiHide(line.args[0]);
-                return true;
+            // case "emoji":
+            //     RequireArgs(line, 2);
+            //     _bridge.Import_Emoji(line.args[0], line.args[1]);
+            //     return true;
+            //
+            // case "emoji_hide":
+            //     RequireArgs(line, 1);
+            //     _bridge.Import_EmojiHide(line.args[0]);
+            //     return true;
 
             default:
                 result.warnings.Add(

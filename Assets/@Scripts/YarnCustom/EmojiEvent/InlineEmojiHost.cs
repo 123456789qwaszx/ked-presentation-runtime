@@ -22,9 +22,9 @@ public sealed class InlineEmojiHost : MonoBehaviour, InlineEventMarkupHandler.II
     {
         if (string.IsNullOrWhiteSpace(cue))
         {
-            _commandBridge.EnqueueInlineEmojiHideByCharacter(characterKey);
+            //_commandBridge.EnqueueInlineEmojiHideByCharacter(characterKey);
             return;
         }
-        _commandBridge.PlayInlineEmojiByCharacterNow(characterKey, cue);
+        //_commandBridge.PlayInlineEmojiByCharacterNow(characterKey, cue);
     }
 }
