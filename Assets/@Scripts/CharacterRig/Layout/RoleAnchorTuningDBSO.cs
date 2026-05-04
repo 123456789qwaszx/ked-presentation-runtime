@@ -10,7 +10,7 @@ public sealed class RoleAnchorTuningDBSO : ScriptableObject
     {
         [Tooltip("예: seina  또는  seina:pose_wide")]
         public string key;
-        public AnchorOffset3 offsets;
+        public CharPlacementTuningSet offsets;
     }
 
     public List<Entry> entries = new();

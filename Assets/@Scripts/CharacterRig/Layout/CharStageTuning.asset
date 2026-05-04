@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: CharStageTuning
   m_EditorClassIdentifier: Assembly-CSharp::CharStageTuningSO
   offsets:
-    left: {x: -200, y: -580}
-    center: {x: 0, y: -580}
-    right: {x: 150, y: -580}
-    duoLeft: {x: -60, y: -580}
-    duoRight: {x: 60, y: -580}
+    left: {x: 0, y: 0}
+    center: {x: 0, y: 0}
+    right: {x: 0, y: 0}
+    duoLeft: {x: 0, y: 0}
+    duoRight: {x: 0, y: 0}
     boxSide: {x: 0, y: 0}
     exp1: {x: 0, y: 0}
     exp2: {x: 0, y: 0}

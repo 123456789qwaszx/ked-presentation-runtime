@@ -700,9 +700,15 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
             "left" => CharAnchorPreset.Left,
             "center" => CharAnchorPreset.Center,
             "right" => CharAnchorPreset.Right,
+
+            "duo_left" => CharAnchorPreset.DuoLeft,
+            "duo_right" => CharAnchorPreset.DuoRight,
+
             "boxside" => CharAnchorPreset.BoxSide,
+
             "exp1" => CharAnchorPreset.Exp1,
             "exp2" => CharAnchorPreset.Exp2,
+
             _ => CharAnchorPreset.None
         };
 
@@ -713,7 +719,10 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
             globalTuning = globalTuning
         };
 
-        var resetTrackSpec = new ApplyTrackOffsetCommandSpecCharR { roleKey = roleKey };
+        var resetTrackSpec = new ApplyTrackOffsetCommandSpecCharR
+        {
+            roleKey = roleKey
+        };
 
         Collect(anchorSpec);
         Collect(resetTrackSpec);

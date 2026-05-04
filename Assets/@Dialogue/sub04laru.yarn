@@ -15,23 +15,14 @@
 
 
 <<slot Albedo>>
-<<place Albedo center>>
+<<place Albedo duo_right>>
 <<size Albedo 2.4>>
-<<place_offset Albedo 0 -200>>
 <<cast Albedo Albedo>>
 <<fade_in Albedo>>
-
-
-<<slot Laru>>
-<<place Laru center>>
-<<size Laru 2.3>>
-<<place_offset Laru 0 -180>>
-<<cast Laru Laru>>
 
 <<slot Bastelina>>
 <<place Bastelina center>>
 <<size Bastelina 2.3>>
-<<place_offset Bastelina 0 -180>>
 <<cast Bastelina Bastelina>>
 
 <<emotion_wipe_char Albedo Albedo a 6>>
@@ -46,9 +37,8 @@
 
 
 <<slot Laru>>
-<<place Laru center>>
-<<size Laru 2.3>>
-<<place_offset Laru 0 -180>>
+<<place Laru duo_left>>
+<<size Laru 2.4>>
 <<cast Laru Laru>>
 <<fade_in Laru>>
 
@@ -209,7 +199,7 @@
 감격한 공급업체 담당자: 알베도님, 약속도 없이 불쑥 찾아와 죄송합니다.
 
 
-알베도: 별 말씀을요. 어제 제가 접대가 부족했던 것 같아 오히려 제가 직접 사과드리려던 참이었습니다. 어서 앉으시죠.
+알베도: 별말씀을요. 어제 제가 접대가 부족했던 것 같아 오히려 제가 직접 사과드리려던 참이었습니다. 어서 앉으시죠.
 
 
 감격한 공급업체 담당자: 부족하다니요? 라루님의 접대는 전혀 부족하지 않았습니다. 오히려 정말 즐거웠죠.

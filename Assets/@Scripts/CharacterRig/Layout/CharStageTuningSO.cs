@@ -4,5 +4,5 @@ using UnityEngine;
 public sealed class CharStageTuningSO : ScriptableObject
 {
     [Header("Global Offsets (px)")]
-    public AnchorOffset3 offsets = default;
+    public CharPlacementTuningSet offsets = default;
 }
