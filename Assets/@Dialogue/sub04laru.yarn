@@ -24,11 +24,11 @@
 <<emotion_wipe_char Albedo Albedo a 6>>
 알베도: 이 청구서들, 어디 한번 제대로 설명해 보시지!
 
-
+<<emoji_db Albedo sparkle>>
 <<emotion_wipe_char Albedo Albedo a 8>>
 알베도: 공급업체 접대라더니, 별의 탑 특제 감자튀김 열 접시는 뭐지?
 
-<<await_for 1>>
+
 <<fade_out Albedo>>
 
 

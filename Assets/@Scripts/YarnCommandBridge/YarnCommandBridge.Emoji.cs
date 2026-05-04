@@ -6,34 +6,13 @@ using Yarn.Unity;
 public sealed partial class YarnCommandBridge
 {
     [Header("Emoji")]
+    [SerializeField] private CharacterEmojiDatabaseSO emojiDatabase;
     [SerializeField] private InlineEmojiResolver _emojiResolver;
 
     private Sprite ResolveEmojiSprite(string emojiKey)
     {
-        if (_emojiResolver == null)
-        {
-            Debug.LogWarning("[YarnCommandBridge/Emoji] InlineEmojiResolver is null.", this);
-            return null;
-        }
-
-        if (_emojiResolver.TryResolveEmoji(emojiKey, out Sprite sprite))
-            return sprite;
-
-        return null;
-    }
-
-    private string NormalizeEmojiKey(string emojiKey)
-    {
-        string key = (emojiKey ?? string.Empty).Trim().ToLowerInvariant();
-
-        switch (key)
-        {
-            case "q":
-                return "question";
-
-            default:
-                return key;
-        }
+        _emojiResolver.TryResolveEmoji(emojiKey, out Sprite sprite);
+        return sprite;
     }
 
     private void RegisterEmojiCommands()
@@ -45,24 +24,33 @@ public sealed partial class YarnCommandBridge
         _dialogueRunner.AddCommandHandler(
             "emoji_hide",
             (Action<string>)EnqueueInlineEmojiHideByCharacter);
+        
+        _dialogueRunner.AddCommandHandler<string, string>(
+            "emoji_db",
+            EnqueueShowEmojiSpec);
+    }
+    
+    private void EnqueueShowEmojiSpec(string roleKey, string emojiKey)
+    {
+        var spec = new ShowEmojiCommandSpecCharR
+        {
+            roleKey = roleKey,
+            database = emojiDatabase,
+            emojiKey = emojiKey,
+            hideIfKeyEmpty = true,
+            wait = false,
+            fadeInOverride = -1f,
+            ease = DG.Tweening.Ease.OutCubic,
+            snapOnSkip = true
+        };
+
+        Collect(spec);
     }
 
     // inline markup용: 지금 즉시 재생
     public void PlayInlineEmojiByCharacterNow(string characterKey, string cue)
     {
-        if (string.IsNullOrWhiteSpace(characterKey))
-        {
-            Debug.LogWarning("[YarnCommandBridge/Emoji] characterKey is null or empty.", this);
-            return;
-        }
-
-        if (_playbackDriver == null)
-        {
-            Debug.LogWarning("[YarnCommandBridge/Emoji] YarnBridgePlaybackDriver is null.", this);
-            return;
-        }
-
-        string emojiKey = NormalizeEmojiKey(cue);
+        string emojiKey = cue;
 
         if (string.IsNullOrWhiteSpace(emojiKey))
         {
@@ -84,16 +72,9 @@ public sealed partial class YarnCommandBridge
         _playbackDriver.PlayImmediate(specs, "inline-emoji");
     }
 
-    // Yarn command용: 기존처럼 큐에 모아두기
     public void EnqueueInlineEmojiByCharacter(string characterKey, string cue)
     {
-        if (string.IsNullOrWhiteSpace(characterKey))
-        {
-            Debug.LogWarning("[YarnCommandBridge/Emoji] characterKey is null or empty.", this);
-            return;
-        }
-
-        string emojiKey = NormalizeEmojiKey(cue);
+        string emojiKey = cue;
 
         if (string.IsNullOrWhiteSpace(emojiKey))
         {
@@ -102,13 +83,6 @@ public sealed partial class YarnCommandBridge
         }
 
         Sprite sprite = ResolveEmojiSprite(emojiKey);
-        if (sprite == null)
-        {
-            Debug.LogWarning(
-                $"[YarnCommandBridge/Emoji] Failed to resolve emoji sprite. characterKey={characterKey}, emojiKey={emojiKey}",
-                this);
-            return;
-        }
 
         List<CommandSpecBase> specs = BuildEmojiComboByCharacter(characterKey, emojiKey, sprite);
         CollectAll(specs);

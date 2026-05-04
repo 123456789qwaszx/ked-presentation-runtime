@@ -8884,6 +8884,7 @@ MonoBehaviour:
   rigPrefab: {fileID: 8529412948266249186, guid: 01c9b93a77829ef438fc74c4ef4c5004, type: 3}
   globalTuning: {fileID: 11400000, guid: db30a92a6d8545a41b703c2585f4013d, type: 2}
   roleTuningDb: {fileID: 11400000, guid: c49265a67487bce458b734a0473b75b5, type: 2}
+  emojiDatabase: {fileID: 11400000, guid: ea84fc3e735e774408e8587c7c691ad5, type: 2}
   _emojiResolver: {fileID: 1222192535}
 --- !u!1 &1835797369
 GameObject:

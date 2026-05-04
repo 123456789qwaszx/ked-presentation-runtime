@@ -47,10 +47,12 @@ public sealed class CharRigCommandFactory : INodeCommandFactory
             JoltCommandSpecCharR s    => new JoltCommandCharR(s),
             
             SetEmotionPortraitWipeCommandSpecCharR s    => new SetEmotionPortraitWipeCommandCharR(s, _portraitResolver),
-            ShowEmojiCommandSpecCharR s    => new ShowEmojiCommandCharR(s),
             SetPortraitSpriteCommandSpecCharR s    => new SetPortraitSpriteCommandCharR(s, _portraitResolver),
             PivotRotateToCommandSpecCharR s => new PivotRotateToCommandCharR(s),
             SetPortraitCrossfadeCommandSpecCharR s => new SetPortraitCrossfadeCommandCharR(s, _portraitResolver),
+            
+            ShowEmojiCommandSpecCharR s    => new ShowEmojiCommandCharR(s),
+            
             
             SetSpriteCommandSpecCharR s     => new SetSpriteCommandCharR(s),
             

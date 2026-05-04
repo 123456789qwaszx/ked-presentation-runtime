@@ -139,7 +139,7 @@ public sealed class ShowEmojiCommandCharR : CommandBase, IStepScopedCommand
 
     private static void ApplyLayout(RectTransform anchor, CharacterEmojiPresetSO.EmojiLayout layout)
     {
-        // anchorMin/Max를 쓰고 싶으면(네가 Anchor로 조정한다고 했으니)
+        // anchorMin/Max를 쓰고 싶으면
         anchor.anchorMin = layout.anchorMin;
         anchor.anchorMax = layout.anchorMax;
 

@@ -24,16 +24,10 @@ public sealed class InlineEmojiResolver : MonoBehaviour
     public bool TryResolveEmoji(string cue, out Sprite sprite)
     {
         sprite = null;
-
-        if (string.IsNullOrWhiteSpace(cue))
-            return false;
-
+        
         string spriteKey = ResolveCueToSpriteKey(cue);
-
-        if (string.IsNullOrWhiteSpace(spriteKey))
-            return false;
-
         sprite = Resources.Load<Sprite>(spriteKey);
+        
         return sprite != null;
     }
 
