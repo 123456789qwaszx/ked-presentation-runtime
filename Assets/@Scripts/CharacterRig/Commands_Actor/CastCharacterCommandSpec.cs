@@ -16,6 +16,9 @@ public sealed class CastCharacterCommandSpec : CommandSpecBase
     [Tooltip("이 roleKey 슬롯에 바인딩할 캐릭터 키.")]
     public string characterKey;
 
+    [Tooltip("의상/변형 키. 예: a, b. 비우면 emotion command에서 기본 a로 처리합니다.")]
+    public string variantKey = "";
+
     [Header("Validation")]
     [Tooltip("켜면 이 roleKey에 해당하는 Rig가 이미 존재해야 합니다. 보통 <<slot>> 이후에 <<cast>>를 호출할 때 사용합니다.")]
     public bool requireExistingRig = true;
@@ -40,13 +43,16 @@ public sealed class CastCharacterCommand : CommandBase
         ApplyBinding(scope);
         yield break;
     }
-    
+
     protected override void OnSkip(CommandRunScope scope)
     {
         ApplyBinding(scope);
     }
 
-    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
+    protected override void OnRollbackSeek(CommandRunScope scope)
+    {
+        OnSkip(scope);
+    }
 
     private void ApplyBinding(CommandRunScope scope)
     {
@@ -55,6 +61,7 @@ public sealed class CastCharacterCommand : CommandBase
 
         string roleKey = SafeTrim(_spec.roleKey);
         string characterKey = SafeTrim(_spec.characterKey);
+        string variantKey = SafeTrim(_spec.variantKey);
 
         if (string.IsNullOrEmpty(roleKey))
         {
@@ -78,7 +85,7 @@ public sealed class CastCharacterCommand : CommandBase
             return;
         }
 
-        scope.CastRegistry.Cast(roleKey, characterKey);
+        scope.CastRegistry.Cast(roleKey, characterKey, variantKey);
     }
 
     private static string SafeTrim(string s)

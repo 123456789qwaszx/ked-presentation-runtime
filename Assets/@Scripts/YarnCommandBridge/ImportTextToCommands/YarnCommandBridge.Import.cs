@@ -63,9 +63,9 @@ public sealed partial class YarnCommandBridge
         EnqueueScaleToSpec(roleKey, xyValue);
     }
 
-    public void Import_Cast(string roleKey, string character)
+    public void Import_Cast(string roleKey, string characterKey, string variantKey = "")
     {
-        EnqueueCastCharAndSetPortraitCommandSpec(roleKey, character);
+        EnqueueCastCharacterSpec(roleKey, characterKey, variantKey);
     }
 
     public void Import_Uncast(string roleKey)
@@ -173,9 +173,9 @@ public sealed partial class YarnCommandBridge
         EnqueueSetEmotionPortraitWipeSpec(roleKey, character);
     }
 
-    public void Import_EmotionWipe(string roleKey, string character, string variant, string emotion)
+    public void Import_EmotionWipeChar(string roleKey, string emotion)
     {
-        EnqueueSetEmotionPortraitWipeSpec(roleKey, character, variant, emotion);
+        EnqueueSetEmotionPortraitWipeSpec(roleKey, emotion);
     }
 
     public void Import_Blackout(string transitionMode)

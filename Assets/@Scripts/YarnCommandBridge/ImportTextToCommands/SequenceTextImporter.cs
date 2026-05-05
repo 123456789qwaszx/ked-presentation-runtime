@@ -133,7 +133,10 @@ public sealed class SequenceTextImporter
 
             case "cast":
                 RequireArgs(line, 2);
-                _bridge.Import_Cast(line.args[0], line.args[1]);
+                _bridge.Import_Cast(
+                    line.args[0],
+                    line.args[1],
+                    line.args.Count >= 3 ? line.args[2] : "");
                 return true;
 
             case "uncast":
@@ -266,13 +269,11 @@ public sealed class SequenceTextImporter
                 _bridge.Import_PortraitSwap(line.args[0], line.args[1]);
                 return true;
 
-            case "emotion_wipe":
-                RequireArgs(line, 4);
-                _bridge.Import_EmotionWipe(
+            case "emotion_wipe_char":
+                RequireArgs(line, 2);
+                _bridge.Import_EmotionWipeChar(
                     line.args[0],
-                    line.args[1],
-                    line.args[2],
-                    line.args[3]);
+                    line.args[1]);
                 return true;
 
             case "blackout":

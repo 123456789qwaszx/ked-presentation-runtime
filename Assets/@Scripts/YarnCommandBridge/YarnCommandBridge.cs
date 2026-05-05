@@ -83,8 +83,9 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         _dialogueRunner.AddCommandHandler<string>("sfx", EnqueuePlaySfxSpec);
         _dialogueRunner.AddCommandHandler("stop_all_sfx", EnqueueStopAllSfxSpec);
 
-        _dialogueRunner.AddCommandHandler<string, string, string, string>("emotion_wipe",
-            EnqueueSetEmotionPortraitWipeSpec);
+        // _dialogueRunner.AddCommandHandler<string, string, string, string>("emotion_wipe",
+        //     EnqueueSetEmotionPortraitWipeSpec);
+        _dialogueRunner.AddCommandHandler<string, string>("emotion", EnqueueSetEmotionPortraitWipeSpec);
 
         _dialogueRunner.AddCommandHandler<string>("sway", EnqueueSwaySpecGentle);
         _dialogueRunner.AddCommandHandler<string>("sway_hard", EnqueueSwaySpecPendulum);
@@ -95,7 +96,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 
 
         // slot <-> character binding
-        _dialogueRunner.AddCommandHandler<string, string>("cast", EnqueueCastCharAndSetPortraitCommandSpec);
+        _dialogueRunner.AddCommandHandler<string, string, string>("cast", EnqueueCastCharacterSpec);
         _dialogueRunner.AddCommandHandler<string>("uncast", EnqueueUncastCharacterSpec);
 
         // character-target commands
@@ -105,8 +106,8 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         _dialogueRunner.AddCommandHandler<string, string>("nudge_hard_char", EnqueueJoltByCharacterSpecTapHard);
 
         _dialogueRunner.AddCommandHandler<string, string>("portrait_cross_char", EnqueueSetPortraitCrossfadeByCharacterSpec);
-        _dialogueRunner.AddCommandHandler<string, string>("portrait_swap_char", EnqueueSetEmotionPortraitWipeByCharacterSpec);
-        _dialogueRunner.AddCommandHandler<string, string, string, string>("emotion_wipe_char", EnqueueSetEmotionPortraitWipeByCharacterSpec);
+        // _dialogueRunner.AddCommandHandler<string, string>("portrait_swap_char", EnqueueSetEmotionPortraitWipeByCharacterSpec);
+        // _dialogueRunner.AddCommandHandler<string, string, string, string>("emotion_wipe_char", EnqueueSetEmotionPortraitWipeByCharacterSpec);
         
         _dialogueRunner.AddCommandHandler<float>("pause", EnqueueWaitSpec);
     }
@@ -300,25 +301,25 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         Collect(spec);
     }
 
-    private void EnqueueSetEmotionPortraitWipeSpec(
-        string roleKey,
-        string character,
-        string variant,
-        string emotion)
-    {
-        var spec = new SetEmotionPortraitWipeCommandSpecCharR
-        {
-            roleKey = roleKey,
-            portrait = new PortraitIdentity
-            {
-                character = character,
-                variant = variant,
-                emotion = emotion
-            },
-        };
-
-        Collect(spec);
-    }
+    // private void EnqueueSetEmotionPortraitWipeSpec(
+    //     string roleKey,
+    //     string character,
+    //     string variant,
+    //     string emotion)
+    // {
+    //     var spec = new SetEmotionPortraitWipeCommandSpecCharR
+    //     {
+    //         roleKey = roleKey,
+    //         portrait = new PortraitIdentity
+    //         {
+    //             character = character,
+    //             variant = variant,
+    //             emotion = emotion
+    //         },
+    //     };
+    //
+    //     Collect(spec);
+    // }
 
     private void EnqueuePlayBgmSpec(string clipKey, float fadeDuration = 1f)
     {
@@ -815,24 +816,6 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
             out result);
     }
 
-    private void EnqueueSetEmotionPortraitWipeSpec(string roleKey, string character)
-    {
-        var portraitIdentity = new PortraitIdentity
-        {
-            character = character,
-            variant = "a",
-            emotion = "1"
-        };
-
-        var spec = new SetEmotionPortraitWipeCommandSpecCharR
-        {
-            roleKey = roleKey,
-            portrait = portraitIdentity
-        };
-
-        Collect(spec);
-    }
-
     private void EnqueueSetPortraitCrossfadeSpec(string roleKey, string character)
     {
         var portraitIdentity = new PortraitIdentity
@@ -851,31 +834,21 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         Collect(spec);
     }
 
-    private void EnqueueCastCharAndSetPortraitCommandSpec(string roleKey, string character)
+    private void EnqueueCastCharacterSpec(
+        string roleKey,
+        string characterKey,
+        string variantKey = "")
     {
         var spec = new CastCharacterCommandSpec
         {
             roleKey = roleKey,
-            characterKey = character,
+            characterKey = characterKey,
+            variantKey = variantKey,
             requireExistingRig = true,
             strict = true
         };
-
-        var portraitIdentity = new PortraitIdentity
-        {
-            character = character,
-            variant = "a",
-            emotion = "1"
-        };
-
-        var spec2 = new SetPortraitSpriteCommandSpecCharR
-        {
-            roleKey = roleKey,
-            portrait = portraitIdentity
-        };
-
+        
         Collect(spec);
-        Collect(spec2);
     }
 
     // private void EnqueueCastCharacterSpec(string roleKey, string characterKey)
@@ -1026,46 +999,60 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 
         Collect(spec);
     }
-
-    private void EnqueueSetEmotionPortraitWipeByCharacterSpec(string characterKey, string character)
-    {
-        var portraitIdentity = new PortraitIdentity
-        {
-            character = character,
-            variant = "a",
-            emotion = "1"
-        };
-
-        var spec = new SetEmotionPortraitWipeByCharacterCommandSpec
-        {
-            characterKey = characterKey,
-            portrait = portraitIdentity,
-            strict = true
-        };
-
-        Collect(spec);
-    }
-
-    private void EnqueueSetEmotionPortraitWipeByCharacterSpec(
-        string characterKey,
-        string character,
-        string variant,
+    
+    private void EnqueueSetEmotionPortraitWipeSpec(
+        string roleKey,
         string emotion)
     {
-        var spec = new SetEmotionPortraitWipeByCharacterCommandSpec
+        var spec = new SetEmotionPortraitWipeCommandSpec
         {
-            characterKey = characterKey,
-            portrait = new PortraitIdentity
-            {
-                character = character,
-                variant = variant,
-                emotion = emotion
-            },
+            roleKey = roleKey,
+            emotion = emotion,
             strict = true
         };
 
         Collect(spec);
     }
+
+    // private void EnqueueSetEmotionPortraitWipeByCharacterSpec(string characterKey, string character)
+    // {
+    //     var portraitIdentity = new PortraitIdentity
+    //     {
+    //         character = character,
+    //         variant = "a",
+    //         emotion = "1"
+    //     };
+    //
+    //     var spec = new SetEmotionPortraitWipeByCharacterCommandSpec
+    //     {
+    //         characterKey = characterKey,
+    //         portrait = portraitIdentity,
+    //         strict = true
+    //     };
+    //
+    //     Collect(spec);
+    // }
+
+    // private void EnqueueSetEmotionPortraitWipeByCharacterSpec(
+    //     string characterKey,
+    //     string character,
+    //     string variant,
+    //     string emotion)
+    // {
+    //     var spec = new SetEmotionPortraitWipeByCharacterCommandSpec
+    //     {
+    //         characterKey = characterKey,
+    //         portrait = new PortraitIdentity
+    //         {
+    //             character = character,
+    //             variant = variant,
+    //             emotion = emotion
+    //         },
+    //         strict = true
+    //     };
+    //
+    //     Collect(spec);
+    // }
 
     #endregion
 }

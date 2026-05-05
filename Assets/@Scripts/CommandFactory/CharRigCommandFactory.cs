@@ -46,7 +46,7 @@ public sealed class CharRigCommandFactory : INodeCommandFactory
             SlideOutCommandSpecCharR s    => new SlideOutCommandCharR(s),
             JoltCommandSpecCharR s    => new JoltCommandCharR(s),
             
-            SetEmotionPortraitWipeCommandSpecCharR s    => new SetEmotionPortraitWipeCommandCharR(s, _portraitResolver),
+            SetEmotionPortraitWipeCommandSpec s    => new SetEmotionPortraitWipeCommand(s, _portraitResolver),
             SetPortraitSpriteCommandSpecCharR s    => new SetPortraitSpriteCommandCharR(s, _portraitResolver),
             PivotRotateToCommandSpecCharR s => new PivotRotateToCommandCharR(s),
             SetPortraitCrossfadeCommandSpecCharR s => new SetPortraitCrossfadeCommandCharR(s, _portraitResolver),
@@ -71,7 +71,6 @@ public sealed class CharRigCommandFactory : INodeCommandFactory
             ScaleToByCharacterCommandSpecCharR s => new ScaleToByCharacterCommandCharR(s),
             SetAnchorByCharacterCommandSpecCharR s => new SetAnchorByCharacterCommandCharR(s),
             SetColorByCharacterCommandSpecCharR s => new SetColorByCharacterCommandCharR(s),
-            SetEmotionPortraitWipeByCharacterCommandSpec s => new SetEmotionPortraitWipeByCharacterCommand(s, _portraitResolver),
             SetPortraitByCharacterCommandSpec s => new SetPortraitByCharacterCommand(s, _portraitResolver),
             SetPortraitCrossfadeByCharacterCommandSpec s => new SetPortraitCrossfadeByCharacterCommand(s, _portraitResolver),
             SetSpriteByCharacterCommandSpecCharR s => new SetSpriteByCharacterCommandCharR(s),
@@ -79,6 +78,9 @@ public sealed class CharRigCommandFactory : INodeCommandFactory
             SlideOutByCharacterCommandSpecCharR s => new SlideOutByCharacterCommandCharR(s),
             SwayByCharacterCommandSpecCharR s => new SwayByCharacterCommandCharR(s),
             UncastCharacterCommandSpec s => new UncastCharacterCommand(s),
+            
+            
+            //SetEmotionPortraitWipeByCharacterCommandSpec s => new SetEmotionPortraitWipeByCharacterCommand(s, _portraitResolver),
             
             _ => null
         };

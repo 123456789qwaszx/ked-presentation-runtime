@@ -5,11 +5,19 @@ using UnityEngine;
 using UnityEngine.UI;
 
 [Serializable]
-[CommandMenuHint("Char Rig", "Set Emotion Portrait (Overlay Wipe)", Order = -961)]
-public sealed class SetEmotionPortraitWipeCommandSpecCharR : CommandSpecBase
+[CommandMenuHint("Char Rig", "Set Emotion Portrait (Overlay Wipe)", Order = -960)]
+public sealed class SetEmotionPortraitWipeCommandSpec : CommandSpecBase
 {
-    [Header("Portrait Identity")]
-    public PortraitIdentity portrait;
+    [Header("Emotion")]
+    [Tooltip("표정 키. 예: 1, 01, 6, 06")]
+    public string emotion;
+
+    [Header("Override Identity (optional)")]
+    [Tooltip("비우면 CastRegistry의 characterKey를 사용합니다.")]
+    public string characterOverride;
+
+    [Tooltip("비우면 CastRegistry의 variantKey를 사용합니다.")]
+    public string variantOverride;
 
     [Header("Tween")]
     [Range(0f, 2f)]
@@ -20,12 +28,17 @@ public sealed class SetEmotionPortraitWipeCommandSpecCharR : CommandSpecBase
 
     [Header("Sizing Policy")]
     public CharRigImageSizingMode sizingMode = CharRigImageSizingMode.HeightFitPreserveAspect;
-    public CharRigImageSizingPolicy.HorizontalAlign horizontalAlign = CharRigImageSizingPolicy.HorizontalAlign.Center;
+
+    public CharRigImageSizingPolicy.HorizontalAlign horizontalAlign =
+        CharRigImageSizingPolicy.HorizontalAlign.Center;
+
+    [Header("Validation")]
+    public bool strict = true;
 }
 
-public sealed class SetEmotionPortraitWipeCommandCharR : CommandBase, IStepScopedCommand
+public sealed class SetEmotionPortraitWipeCommand : CommandBase, IStepScopedCommand
 {
-    private readonly SetEmotionPortraitWipeCommandSpecCharR _spec;
+    private readonly SetEmotionPortraitWipeCommandSpec _spec;
     private readonly PortraitResolver _resolver;
 
     private RectTransform _portraitRoot;
@@ -42,8 +55,8 @@ public sealed class SetEmotionPortraitWipeCommandCharR : CommandBase, IStepScope
     public override bool WaitForCompletion => _spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
-    public SetEmotionPortraitWipeCommandCharR(
-        SetEmotionPortraitWipeCommandSpecCharR spec,
+    public SetEmotionPortraitWipeCommand(
+        SetEmotionPortraitWipeCommandSpec spec,
         PortraitResolver resolver)
     {
         _spec = spec;
@@ -55,19 +68,24 @@ public sealed class SetEmotionPortraitWipeCommandCharR : CommandBase, IStepScope
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        Sprite targetSprite = ResolveSprite(_spec.portrait);
+        if (!HasRequiredRefs())
+            yield break;
+
+        Sprite targetSprite = ResolveSprite(scope);
         if (targetSprite == null)
         {
-            Debug.LogWarning(
-                $"[SetEmotionPortraitWipeCommandCharR] Failed to resolve portrait:\n" +
-                $"  Character: {SafeTrim(_spec.portrait?.character)}\n" +
-                $"  Variant: {SafeTrim(_spec.portrait?.variant)}\n" +
-                $"  Emotion: {SafeTrim(_spec.portrait?.emotion)}");
+            if (_spec.strict)
+            {
+                Debug.LogWarning(
+                    $"[SetEmotionPortraitWipeCommand] Failed to resolve portrait. " +
+                    $"roleKey={SafeTrim(_spec.roleKey)}, emotion={SafeTrim(_spec.emotion)}");
+            }
+
             yield break;
         }
 
-        _overlayCanvasGroup.DOKill(true); // Finish previous motion so this command starts from a committed state.
-        _portraitCanvasGroup.DOKill(true); // Finish previous motion so this command starts from a committed state.
+        _overlayCanvasGroup.DOKill(true);
+        _portraitCanvasGroup.DOKill(true);
         _seq?.Kill(false);
         _seq = null;
         _canCommitFinalState = true;
@@ -90,17 +108,21 @@ public sealed class SetEmotionPortraitWipeCommandCharR : CommandBase, IStepScope
 
         _seq = DOTween.Sequence()
             .SetUpdate(true)
-            .Append(_overlayCanvasGroup.DOFade(1f, _spec.duration).SetEase(_spec.ease))
+            .Append(_overlayCanvasGroup
+                .DOFade(1f, _spec.duration)
+                .SetEase(_spec.ease))
             .AppendCallback(() =>
             {
-                if (!_canCommitFinalState || _portraitRoot == null || _overlayRoot == null)
+                if (!_canCommitFinalState || !HasRequiredRefs())
                     return;
 
                 _portraitImage.sprite = targetSprite;
                 ApplySizing(_portraitImage, targetSprite);
                 _portraitCanvasGroup.alpha = 1f;
             })
-            .Append(_overlayCanvasGroup.DOFade(0f, _spec.duration).SetEase(_spec.ease))
+            .Append(_overlayCanvasGroup
+                .DOFade(0f, _spec.duration)
+                .SetEase(_spec.ease))
             .OnComplete(() =>
             {
                 if (!_canCommitFinalState)
@@ -120,7 +142,10 @@ public sealed class SetEmotionPortraitWipeCommandCharR : CommandBase, IStepScope
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        Sprite targetSprite = ResolveSprite(_spec.portrait);
+        if (!HasRequiredRefs())
+            return;
+
+        Sprite targetSprite = ResolveSprite(scope);
         if (targetSprite == null)
             return;
 
@@ -129,9 +154,11 @@ public sealed class SetEmotionPortraitWipeCommandCharR : CommandBase, IStepScope
         _seq = null;
     }
 
-    
-    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
-    
+    protected override void OnRollbackSeek(CommandRunScope scope)
+    {
+        OnSkip(scope);
+    }
+
     protected override void OnCommandCompleted(CommandRunScope scope)
     {
         if (!_canCommitFinalState)
@@ -153,28 +180,101 @@ public sealed class SetEmotionPortraitWipeCommandCharR : CommandBase, IStepScope
     {
         _resolveAttempted = true;
 
-        if (!scope.Refs.TryGetCharRigRefs(_spec.roleKey, out CharacterRigRefs rig))
+        if (scope == null)
             return;
+
+        string roleKey = SafeTrim(_spec.roleKey);
+        if (string.IsNullOrEmpty(roleKey))
+        {
+            if (_spec.strict)
+                Debug.LogError("[SetEmotionPortraitWipeCommand] roleKey is null or empty.");
+            return;
+        }
+
+        if (!scope.Refs.TryGetCharRigRefs(roleKey, out CharacterRigRefs rig) || rig == null)
+        {
+            if (_spec.strict)
+                Debug.LogWarning($"[SetEmotionPortraitWipeCommand] Rig refs not found. roleKey='{roleKey}'.");
+            return;
+        }
 
         _portraitRoot = rig.CharacterPortrait_Root;
         _overlayRoot = rig.CharacterPortraitOverlay_Root;
         _portraitImage = rig.CharacterPortrait_Image;
         _overlayImage = rig.CharacterPortraitOverlay_Image;
-        _portraitCanvasGroup = GetRootCanvasGroup(_portraitRoot, "CharacterPortrait_Root");
-        _overlayCanvasGroup = GetRootCanvasGroup(_overlayRoot, "CharacterPortraitOverlay_Root");
+
+        if (_portraitRoot != null)
+            _portraitCanvasGroup = GetRootCanvasGroup(_portraitRoot, "CharacterPortrait_Root");
+
+        if (_overlayRoot != null)
+            _overlayCanvasGroup = GetRootCanvasGroup(_overlayRoot, "CharacterPortraitOverlay_Root");
+    }
+
+    private Sprite ResolveSprite(CommandRunScope scope)
+    {
+        if (scope == null)
+            return null;
+
+        string roleKey = SafeTrim(_spec.roleKey);
+        if (string.IsNullOrEmpty(roleKey))
+            return null;
+
+        if (!scope.CastRegistry.TryGetBinding(roleKey, out CastBinding binding))
+        {
+            if (_spec.strict)
+                Debug.LogWarning($"[SetEmotionPortraitWipeCommand] No cast binding found. roleKey='{roleKey}'.");
+            return null;
+        }
+
+        string character = string.IsNullOrWhiteSpace(_spec.characterOverride)
+            ? binding.CharacterKey
+            : SafeTrim(_spec.characterOverride);
+
+        string variant = string.IsNullOrWhiteSpace(_spec.variantOverride)
+            ? binding.VariantKey
+            : SafeTrim(_spec.variantOverride);
+
+        if (string.IsNullOrWhiteSpace(character))
+        {
+            if (_spec.strict)
+                Debug.LogWarning($"[SetEmotionPortraitWipeCommand] Character is empty. roleKey='{roleKey}'.");
+            return null;
+        }
+
+        if (string.IsNullOrWhiteSpace(variant))
+            variant = "a";
+
+        string resolvedVariant = ResolveVariantKey(character, variant);
+        return _resolver.Resolve(character, resolvedVariant, _spec.emotion);
+    }
+
+    private bool HasRequiredRefs()
+    {
+        return _portraitRoot != null &&
+               _overlayRoot != null &&
+               _portraitImage != null &&
+               _overlayImage != null &&
+               _portraitCanvasGroup != null &&
+               _overlayCanvasGroup != null;
     }
 
     private void EnsureRootsVisible()
     {
-        if (!_portraitRoot.gameObject.activeSelf)
+        if (_portraitRoot != null && !_portraitRoot.gameObject.activeSelf)
             _portraitRoot.gameObject.SetActive(true);
 
-        if (!_overlayRoot.gameObject.activeSelf)
+        if (_overlayRoot != null && !_overlayRoot.gameObject.activeSelf)
             _overlayRoot.gameObject.SetActive(true);
     }
 
     private void CommitFinalState(Sprite targetSprite)
     {
+        if (!HasRequiredRefs())
+            return;
+
+        _seq?.Kill(false);
+        _seq = null;
+
         _portraitImage.sprite = targetSprite;
         ApplySizing(_portraitImage, targetSprite);
 
@@ -182,31 +282,22 @@ public sealed class SetEmotionPortraitWipeCommandCharR : CommandBase, IStepScope
         _portraitCanvasGroup.alpha = 1f;
     }
 
-    private CanvasGroup GetRootCanvasGroup(RectTransform root, string debugName)
+    private static CanvasGroup GetRootCanvasGroup(RectTransform root, string debugName)
     {
         if (root.TryGetComponent(out CanvasGroup canvasGroup))
             return canvasGroup;
 
         throw new InvalidOperationException(
-            $"[SetEmotionPortraitWipeCommandCharR] CanvasGroup missing on Root: {debugName} ({root.name})");
-    }
-
-    private Sprite ResolveSprite(PortraitIdentity id)
-    {
-        if (id == null)
-            return null;
-
-        string character = SafeTrim(id.character);
-        if (string.IsNullOrEmpty(character))
-            return null;
-
-        string variant = ResolveVariantKey(character, id.variant);
-        return _resolver.Resolve(character, variant, id.emotion);
+            $"[SetEmotionPortraitWipeCommand] CanvasGroup missing on Root: {debugName} ({root.name})");
     }
 
     private void ApplySizing(Image image, Sprite sprite)
     {
-        CharRigImageSizingPolicy.Apply(image, sprite, _spec.sizingMode, _spec.horizontalAlign);
+        CharRigImageSizingPolicy.Apply(
+            image,
+            sprite,
+            _spec.sizingMode,
+            _spec.horizontalAlign);
     }
 
     private static string SafeTrim(string s)

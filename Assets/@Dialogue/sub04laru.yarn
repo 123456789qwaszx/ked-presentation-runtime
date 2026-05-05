@@ -17,18 +17,18 @@
 <<slot Albedo>>
 <<place Albedo duo_right>>
 <<size Albedo normal>>
-<<cast Albedo Albedo>>
+<<cast Albedo Albedo a>>
 <<fade_in Albedo>>
 
 
-<<emotion_wipe_char Albedo Albedo a 6>>
+<<emotion Albedo 6>>
 알베도: 이 청구서들, 어디 한번 제대로 설명해 보시지!
 
 //<<begin_hold>>
 <<await_for 1>>
 //<<emoji Albedo sparkle>>
 //<<end_hold>>
-<<emotion_wipe_char Albedo Albedo a 8>>
+<<emotion Albedo 8>>
 알베도: 공급업체 접대라더니, 별의 탑 특제 감자튀김 열 접시는 뭐지? #box=letterbox
 
 
@@ -42,7 +42,7 @@
 <<fade_in Laru>>
 
 <<jolt Laru>>
-<<emotion_wipe_char Laru Laru a 15>>
+<<emotion Laru 15>>
 
 라루: 그건...... 공급업체와의 비즈니스 식사 자리에서 먹은 건데...... 경비 처리 안 되나? #box=onlytext
 
@@ -73,7 +73,7 @@ Albedo: 그럼 이건 뭔데! [emoji =sparkle/]낚시 마스터 도구 세트? �
 
 <<fade_out Albedo>>
 
-<<emotion_wipe_char Laru Laru a 26>>
+<<emotion Laru 26>>
 <<fade_in Laru>>
 라루: 그건...... 공급업체에 선물한 건데......#box=onlytext
 
@@ -99,11 +99,11 @@ Albedo: 그럼 이건 뭔데! [emoji =sparkle/]낚시 마스터 도구 세트? �
 <<fade_in Bastelina>>
 
 
-<<emotion_wipe_char Bastelina Bastelina a 10>>
+<<emotion Bastelina 10>>
 베스티나: 하하...... 오늘도 라루 선배가 한바탕 깨지는 평화로운 날이군요.
 
 <<shake Bastelina right>>
-<<emotion_wipe_char Bastelina Bastelina a 7>>
+<<emotion Bastelina 7>>
 베스티나: 휴, 귀여운 후배인 제가...... 어떻게든 도와줘야겠네요......
 
 <<fade_out Bastelina>>
@@ -121,7 +121,7 @@ Albedo: 그럼 이건 뭔데! [emoji =sparkle/]낚시 마스터 도구 세트? �
 <<size Laru small>>
 
 
-<<emotion_wipe_char Laru Laru a 5>>
+<<emotion Laru 5>>
 알베도: 비즈니스 접대랍시고, 감자튀김 먹으러 간 게 이번이 처음은 아닌 것 같은데?
 
 <<hop_in Albedo 0>>
@@ -129,19 +129,19 @@ Albedo: 그럼 이건 뭔데! [emoji =sparkle/]낚시 마스터 도구 세트? �
 
 
 <<shake Laru left>>
-<<emotion_wipe_char Laru Laru a 26>>
+<<emotion Laru 26>>
 라루: 상대도 낚시에 관심이 많았거든......
 
 <<jolt Albedo up>>
-<<emotion_wipe_char Albedo Albedo a 16>>
+<<emotion Albedo 16>>
 알베도: 계약은 오전에 끝내놓고, 오후엔 일하기 싫어서 낚시하러 간 건 아니고? #box=letterbox
 
 <<move_by Albedo -200 0>>
 
-<<emotion_wipe_char Albedo Albedo a 1>>
+<<emotion Albedo 1>>
 알베도: 백번 양보해서, 낚시야 어디서든 할 수 있는데, 왜 굳이 황야까지 간 건데? 마물이라도 나타나면 어쩔 뻔했어!#box=letterbox
 
-<<emotion_wipe_char Laru Laru a 4>>
+<<emotion Laru 4>>
 <<sway Laru>>
 라루: 황야에서는 대어를 낚을 수 있잖아. 설령 마물이 나타나도, 난 충분히 상대할 수 있고.
 
@@ -150,7 +150,7 @@ Albedo: 그럼 이건 뭔데! [emoji =sparkle/]낚시 마스터 도구 세트? �
 라루: 계약서...... 분명 서명은 했는데, 컴퍼니로 돌아오니까 안 보이네......
 
 
-<<emotion_wipe_char Albedo Albedo a 14>>
+<<emotion Albedo 14>>
 알베도: 시킨 일을 제대로 하기는커녕, 한술 더 떠서 계약서까지 잃어버리다니......
 
 <<hop_in Laru 0>>
@@ -166,7 +166,7 @@ Albedo: 그럼 이건 뭔데! [emoji =sparkle/]낚시 마스터 도구 세트? �
 <<move_by Albedo -200 0>>
 <<shot_track Laru -40 -30 0.65>>
 
-<<emotion_wipe_char Albedo Albedo a 16>>
+<<emotion Albedo 16>>
 알베도: 그게 바로 잃어버린 거야!
 
 <<bg_spawn fire bg1>>
@@ -187,7 +187,7 @@ Albedo: 그럼 이건 뭔데! [emoji =sparkle/]낚시 마스터 도구 세트? �
 <<move_by Albedo 200 0>>
 <<slide_out Bastelina right>>
 <<fade_out Bastelina>>
-<<emotion_wipe_char Albedo Albedo a 1>>
+<<emotion Albedo 1>>
 알베도: 잘됐네! 바로 들어오시라고 해! 넌 이따가 두고 보자!
 
 <<begin_hold>>
@@ -201,6 +201,7 @@ Albedo: 그럼 이건 뭔데! [emoji =sparkle/]낚시 마스터 도구 세트? �
 <<place npc1 left>>
 <<size npc1 1.9>>
 <<cast npc1 Ruby>>
+<<emotion npc1 1>>
 <<fade_in npc1>>
 
 
