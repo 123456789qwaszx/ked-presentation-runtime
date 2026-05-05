@@ -4,7 +4,6 @@ using DG.Tweening;
 using System.Collections;
 using UnityEngine.UI;
 
-
 [Serializable]
 [CommandMenuHint("Char Rig", "Set Portrait (Crossfade)", Order = -960)]
 public sealed class SetPortraitCrossfadeCommandSpecCharR : CharacterRigCommandSpecBase
@@ -20,7 +19,9 @@ public sealed class SetPortraitCrossfadeCommandSpecCharR : CharacterRigCommandSp
     public bool snapOnSkip = true;
 
     [Header("Sizing Policy")]
-    public CharRigImageSizingMode sizingMode = CharRigImageSizingMode.HeightFitPreserveAspect;
+    public CharRigImageSizingMode sizingMode =
+        CharRigImageSizingMode.HeightFitPreserveAspect;
+
     public CharRigImageSizingPolicy.HorizontalAlign horizontalAlign =
         CharRigImageSizingPolicy.HorizontalAlign.Center;
 }
@@ -57,19 +58,16 @@ public sealed class SetPortraitCrossfadeCommandCharR : CommandBase, IStepScopedC
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        Sprite targetSprite = ResolveSprite(_spec.portrait);
-        if (targetSprite == null)
-        {
-            Debug.LogWarning(
-                $"[SetPortraitCrossfadeCommandCharR] Failed to resolve portrait:\n" +
-                $"  Character: {SafeTrim(_spec.portrait?.character)}\n" +
-                $"  Variant: {SafeTrim(_spec.portrait?.variant)}\n" +
-                $"  Emotion: {SafeTrim(_spec.portrait?.emotion)}");
-            yield break;
-        }
+        Sprite targetSprite =
+            PortraitIdentityResolveUtility.ResolveSprite(
+                scope,
+                _resolver,
+                _spec.targetKey,
+                _spec.portrait,
+                nameof(SetPortraitCrossfadeCommandCharR));
 
-        _overlayCanvasGroup.DOKill(true); // Finish previous motion so this command starts from a committed state.
-        _portraitCanvasGroup.DOKill(true); // Finish previous motion so this command starts from a committed state.
+        _overlayCanvasGroup.DOKill(true);
+        _portraitCanvasGroup.DOKill(true);
         _seq?.Kill(false);
         _seq = null;
         _canCommitFinalState = true;
@@ -92,8 +90,12 @@ public sealed class SetPortraitCrossfadeCommandCharR : CommandBase, IStepScopedC
 
         _seq = DOTween.Sequence()
             .SetUpdate(true)
-            .Join(_portraitCanvasGroup.DOFade(0f, _spec.duration).SetEase(_spec.ease))
-            .Join(_overlayCanvasGroup.DOFade(1f, _spec.duration).SetEase(_spec.ease))
+            .Join(_portraitCanvasGroup
+                .DOFade(0f, _spec.duration)
+                .SetEase(_spec.ease))
+            .Join(_overlayCanvasGroup
+                .DOFade(1f, _spec.duration)
+                .SetEase(_spec.ease))
             .AppendCallback(() =>
             {
                 if (!_canCommitFinalState)
@@ -119,18 +121,24 @@ public sealed class SetPortraitCrossfadeCommandCharR : CommandBase, IStepScopedC
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        Sprite targetSprite = ResolveSprite(_spec.portrait);
-        if (targetSprite == null)
-            return;
+        Sprite targetSprite =
+            PortraitIdentityResolveUtility.ResolveSprite(
+                scope,
+                _resolver,
+                _spec.targetKey,
+                _spec.portrait,
+                nameof(SetPortraitCrossfadeCommandCharR));
 
         CommitFinalState(targetSprite);
         _canCommitFinalState = false;
         _seq = null;
     }
 
-    
-    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
-    
+    protected override void OnRollbackSeek(CommandRunScope scope)
+    {
+        OnSkip(scope);
+    }
+
     protected override void OnCommandCompleted(CommandRunScope scope)
     {
         if (!_canCommitFinalState || _portraitRoot == null || _overlayRoot == null)
@@ -155,13 +163,16 @@ public sealed class SetPortraitCrossfadeCommandCharR : CommandBase, IStepScopedC
         CharacterRigRefs rigRefs =
             CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.targetKey);
 
-
         _portraitRoot = rigRefs.CharacterPortrait_Root;
         _overlayRoot = rigRefs.CharacterPortraitOverlay_Root;
         _portraitImage = rigRefs.CharacterPortrait_Image;
         _overlayImage = rigRefs.CharacterPortraitOverlay_Image;
-        _portraitCanvasGroup = GetRootCanvasGroup(_portraitRoot, "CharacterPortrait_Root");
-        _overlayCanvasGroup = GetRootCanvasGroup(_overlayRoot, "CharacterPortraitOverlay_Root");
+
+        _portraitCanvasGroup =
+            GetRootCanvasGroup(_portraitRoot, "CharacterPortrait_Root");
+
+        _overlayCanvasGroup =
+            GetRootCanvasGroup(_overlayRoot, "CharacterPortraitOverlay_Root");
     }
 
     private void EnsureRootsVisible()
@@ -175,6 +186,9 @@ public sealed class SetPortraitCrossfadeCommandCharR : CommandBase, IStepScopedC
 
     private void CommitFinalState(Sprite targetSprite)
     {
+        _seq?.Kill(false);
+        _seq = null;
+
         _portraitImage.sprite = targetSprite;
         ApplySizing(_portraitImage, targetSprite);
 
@@ -182,8 +196,14 @@ public sealed class SetPortraitCrossfadeCommandCharR : CommandBase, IStepScopedC
         _overlayCanvasGroup.alpha = 0f;
     }
 
-    private CanvasGroup GetRootCanvasGroup(RectTransform root, string debugName)
+    private static CanvasGroup GetRootCanvasGroup(RectTransform root, string debugName)
     {
+        if (root == null)
+        {
+            throw new InvalidOperationException(
+                $"[SetPortraitCrossfadeCommandCharR] Root is null: {debugName}");
+        }
+
         if (root.TryGetComponent(out CanvasGroup canvasGroup))
             return canvasGroup;
 
@@ -191,39 +211,12 @@ public sealed class SetPortraitCrossfadeCommandCharR : CommandBase, IStepScopedC
             $"[SetPortraitCrossfadeCommandCharR] CanvasGroup missing on Root: {debugName} ({root.name})");
     }
 
-    private Sprite ResolveSprite(PortraitIdentity id)
-    {
-        if (id == null)
-            return null;
-
-        string character = SafeTrim(id.character);
-        if (string.IsNullOrEmpty(character))
-            return null;
-
-        string variant = ResolveVariantKey(character, id.variant);
-        return _resolver.Resolve(character, variant, id.emotion);
-    }
-
     private void ApplySizing(Image image, Sprite sprite)
     {
-        CharRigImageSizingPolicy.Apply(image, sprite, _spec.sizingMode, _spec.horizontalAlign);
-    }
-
-    private static string SafeTrim(string s)
-    {
-        return string.IsNullOrEmpty(s) ? "" : s.Trim();
-    }
-
-    private static string ResolveVariantKey(string character, string variant)
-    {
-        if (string.IsNullOrEmpty(variant))
-            return "";
-
-        variant = variant.Trim();
-
-        if (variant.StartsWith(character + "_", StringComparison.Ordinal))
-            return variant;
-
-        return $"{character}_{variant}";
+        CharRigImageSizingPolicy.Apply(
+            image,
+            sprite,
+            _spec.sizingMode,
+            _spec.horizontalAlign);
     }
 }

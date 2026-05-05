@@ -57,7 +57,13 @@ public sealed class SetEmotionPortraitWipeCommand : CommandBase, IStepScopedComm
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        Sprite targetSprite = ResolveSprite(scope);
+        Sprite targetSprite =
+            PortraitIdentityResolveUtility.ResolveSprite(
+                scope,
+                _resolver,
+                _spec.targetKey,
+                _spec.portrait,
+                nameof(SetEmotionPortraitWipeCommand));
 
         _overlayCanvasGroup.DOKill(true);
         _portraitCanvasGroup.DOKill(true);
@@ -116,8 +122,14 @@ public sealed class SetEmotionPortraitWipeCommand : CommandBase, IStepScopedComm
     {
         if (!_resolveAttempted)
             ResolveRefs(scope);
-
-        Sprite targetSprite = ResolveSprite(scope);
+        
+        Sprite targetSprite =
+            PortraitIdentityResolveUtility.ResolveSprite(
+                scope,
+                _resolver,
+                _spec.targetKey,
+                _spec.portrait,
+                nameof(SetEmotionPortraitWipeCommand));
 
         CommitFinalState(targetSprite);
         _canCommitFinalState = false;
@@ -162,59 +174,6 @@ public sealed class SetEmotionPortraitWipeCommand : CommandBase, IStepScopedComm
         _overlayCanvasGroup = GetRootCanvasGroup(_overlayRoot, "CharacterPortraitOverlay_Root");
     }
 
-    private Sprite ResolveSprite(CommandRunScope scope)
-    {
-        PortraitIdentity id = _spec.portrait;
-        if (id == null)
-            throw new InvalidOperationException("[SetEmotionPortraitWipeCommand] PortraitIdentity is null.");
-
-        string roleKey =
-            CharacterRigTargetResolver.ResolveRoleKeyFromTargetKey(
-                scope,
-                _spec.targetKey);
-
-        if (!scope.CastRegistry.TryGetBinding(roleKey, out CastBinding binding))
-        {
-            throw new InvalidOperationException(
-                $"[SetEmotionPortraitWipeCommand] No cast binding found. targetKey='{_spec.targetKey}', roleKey='{roleKey}'.");
-        }
-
-        string character = SafeTrim(id.character);
-        if (string.IsNullOrEmpty(character))
-            character = SafeTrim(binding.CharacterKey);
-
-        if (string.IsNullOrEmpty(character))
-        {
-            throw new InvalidOperationException(
-                $"[SetEmotionPortraitWipeCommand] Character is empty. targetKey='{_spec.targetKey}', roleKey='{roleKey}'.");
-        }
-
-        string variant = SafeTrim(id.variant);
-        if (string.IsNullOrEmpty(variant))
-            variant = SafeTrim(binding.VariantKey);
-
-        if (string.IsNullOrEmpty(variant))
-            variant = "a";
-
-        string emotion = SafeTrim(id.emotion);
-        if (string.IsNullOrEmpty(emotion))
-        {
-            throw new InvalidOperationException(
-                $"[SetEmotionPortraitWipeCommand] Emotion is empty. targetKey='{_spec.targetKey}', roleKey='{roleKey}', character='{character}'.");
-        }
-
-        string resolvedVariant = ResolveVariantKey(character, variant);
-        Sprite sprite = _resolver.Resolve(character, resolvedVariant, emotion);
-
-        if (sprite == null)
-        {
-            throw new InvalidOperationException(
-                $"[SetEmotionPortraitWipeCommand] Failed to resolve portrait. character='{character}', variant='{resolvedVariant}', emotion='{emotion}'.");
-        }
-
-        return sprite;
-    }
-
     private void EnsureRootsVisible()
     {
         if (!_portraitRoot.gameObject.activeSelf)
@@ -254,21 +213,4 @@ public sealed class SetEmotionPortraitWipeCommand : CommandBase, IStepScopedComm
             _spec.horizontalAlign);
     }
 
-    private static string SafeTrim(string s)
-    {
-        return string.IsNullOrEmpty(s) ? "" : s.Trim();
-    }
-
-    private static string ResolveVariantKey(string character, string variant)
-    {
-        if (string.IsNullOrEmpty(variant))
-            return "";
-
-        variant = variant.Trim();
-
-        if (variant.StartsWith(character + "_", StringComparison.Ordinal))
-            return variant;
-
-        return $"{character}_{variant}";
-    }
 }

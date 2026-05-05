@@ -49,6 +49,8 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         _dialogueRunner.AddCommandHandler<string, string>("place", EnqueueSetAnchorSpecs);
         _dialogueRunner.AddCommandHandler<string, int, int>("place_offset", EnqueueSetAnchorOffsetSpecs);
         _dialogueRunner.AddCommandHandler<string, string>("size", EnqueueSetOriginSizeSpec);
+        
+        _dialogueRunner.AddCommandHandler<string, float, float>("move_by", EnqueueMoveBySpec);
         _dialogueRunner.AddCommandHandler<string, float, float>("to_scale", EnqueueScaleToSpec);
 
         _dialogueRunner.AddCommandHandler<string, string>("slide_in", EnqueueSlideInSpec);
@@ -57,7 +59,6 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         _dialogueRunner.AddCommandHandler<string>("fade_in", EnqueueFadeInSpec);
         _dialogueRunner.AddCommandHandler<string>("fade_out", EnqueueFadeOutSpec);
 
-        _dialogueRunner.AddCommandHandler<string, float, float>("move_by", EnqueueMoveBySpec);
         _dialogueRunner.AddCommandHandler<string, string>("dip", EnqueueDipInOutSpec);
 
         _dialogueRunner.AddCommandHandler<string, float, string>("hop_in", EnqueueArcHopInSpec);
@@ -807,14 +808,28 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         string characterKey,
         string variantKey = "")
     {
-        var spec = new CastCharacterCommandSpec
+        string resolvedVariantKey = string.IsNullOrWhiteSpace(variantKey)
+            ? "a"
+            : variantKey.Trim();
+
+        var castSpec = new CastCharacterCommandSpec
         {
             slotKey = roleKey,
             characterKey = characterKey,
-            variantKey = variantKey
+            variantKey = resolvedVariantKey
         };
-        
-        Collect(spec);
+
+        var portraitSpec = new SetPortraitSpriteCommandSpecCharR
+        {
+            targetKey = roleKey,
+            portrait = new PortraitIdentity
+            {
+                emotion = "1"
+            }
+        };
+
+        Collect(castSpec);
+        Collect(portraitSpec);
     }
 
     private void EnqueueUncastCharacterSpec(string roleKey)

@@ -35,6 +35,8 @@ public sealed class SetPortraitSpriteCommandCharR : CommandBase
     private Image _image;
     private bool _resolveAttempted;
 
+    protected override SkipPolicy SkipPolicy => SkipPolicy.ExecuteEvenIfSkipping;
+
     public SetPortraitSpriteCommandCharR(
         SetPortraitSpriteCommandSpecCharR spec,
         PortraitResolver resolver)
@@ -48,49 +50,51 @@ public sealed class SetPortraitSpriteCommandCharR : CommandBase
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        Apply();
+        Apply(scope);
         yield break;
     }
-    
+
     protected override void OnSkip(CommandRunScope scope)
     {
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (_image == null)
-            return;
-
-        Apply();
+        Apply(scope);
     }
-    
-    
-    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
-    
+
+    protected override void OnRollbackSeek(CommandRunScope scope)
+    {
+        OnSkip(scope);
+    }
+
     private void ResolveRefs(CommandRunScope scope)
     {
         _resolveAttempted = true;
 
         CharacterRigRefs rigRefs =
             CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.targetKey);
-        
+
         _image = rigRefs.GetComponent(_spec.target) as Image;
+
+        if (_image == null)
+        {
+            throw new InvalidOperationException(
+                $"[SetPortraitSpriteCommandCharR] Image missing. targetKey='{_spec.targetKey}', target='{_spec.target}'.");
+        }
     }
 
-    private void Apply()
+    private void Apply(CommandRunScope scope)
     {
         if (_image == null)
             return;
 
-        Sprite sprite = ResolveSprite(_spec.portrait);
-        if (sprite == null)
-        {
-            Debug.LogWarning(
-                $"[SetPortraitSpriteCommandCharR] Failed to resolve portrait:\n" +
-                $"  Character: {_spec.portrait?.character}\n" +
-                $"  Variant: {_spec.portrait?.variant}\n" +
-                $"  Emotion: {_spec.portrait?.emotion}");
-            return;
-        }
+        Sprite sprite =
+            PortraitIdentityResolveUtility.ResolveSprite(
+                scope,
+                _resolver,
+                _spec.targetKey,
+                _spec.portrait,
+                nameof(SetPortraitSpriteCommandCharR));
 
         _image.sprite = sprite;
 
@@ -99,36 +103,5 @@ public sealed class SetPortraitSpriteCommandCharR : CommandBase
             sprite,
             _spec.sizingMode,
             _spec.horizontalAlign);
-    }
-
-    private Sprite ResolveSprite(PortraitIdentity id)
-    {
-        if (id == null)
-            return null;
-
-        string character = SafeTrim(id.character);
-        if (string.IsNullOrEmpty(character))
-            return null;
-
-        string variant = ResolveVariantKey(character, id.variant);
-        return _resolver.Resolve(character, variant, id.emotion);
-    }
-
-    private static string ResolveVariantKey(string character, string variant)
-    {
-        if (string.IsNullOrEmpty(variant))
-            return "";
-
-        variant = variant.Trim();
-
-        if (variant.StartsWith(character + "_", StringComparison.Ordinal))
-            return variant;
-
-        return $"{character}_{variant}";
-    }
-
-    private static string SafeTrim(string s)
-    {
-        return string.IsNullOrEmpty(s) ? "" : s.Trim();
     }
 }
