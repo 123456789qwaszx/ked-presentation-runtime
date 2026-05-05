@@ -43,6 +43,10 @@ public sealed class EpisodePlayer : MonoBehaviour, IRollbackDialogueRestarter
         {
             //Debug.Log("TryStartYarnNode", this);
             OpenDialogueUI();
+            
+            bgHost.ClearRuntimeBackgrounds();
+            presentationResponseRig.ClearRuntimeState();
+            
             StartPresentationRoute(presentationEntryKey);
             StartYarnNode(yarnEntryKey);
         }

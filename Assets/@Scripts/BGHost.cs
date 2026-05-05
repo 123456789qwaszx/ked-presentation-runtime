@@ -4,7 +4,7 @@ using UnityEngine;
 
 public interface IBGRuntimeRegistry
 {
-    void RegisterRuntimeBackground(string bgKey, RectTransformResponseTarget go);
+    void RegisterRuntimeBackground(string bgKey, RectTransformResponseTarget view);
     void UnregisterRuntimeBackground(string bgKey, RectTransformResponseTarget expected = null);
     void DestroyRuntimeBackground(string bgKey);
     void ClearRuntimeBackgrounds();
@@ -23,15 +23,15 @@ public sealed class BGHost : MonoBehaviour, IBGRuntimeRegistry, IBGViewPrefabPro
 
     private readonly Dictionary<string, RectTransformResponseTarget> _runtimeViews = new();
 
-    public void RegisterRuntimeBackground(string bgKey, RectTransformResponseTarget go)
+    public void RegisterRuntimeBackground(string bgKey, RectTransformResponseTarget view)
     {
-        if (go == null)
+        if (view == null)
         {
             Debug.LogWarning($"[BGHost] RegisterRuntimeBackground failed. view is null. bgKey={bgKey}", this);
             return;
         }
 
-        _runtimeViews[bgKey] = go;
+        _runtimeViews[bgKey] = view;
     }
     
     // expected가 지정된 경우, 등록된 view가 바뀌었으면 제거하지 않는다.
@@ -49,28 +49,28 @@ public sealed class BGHost : MonoBehaviour, IBGRuntimeRegistry, IBGViewPrefabPro
 
     public void DestroyRuntimeBackground(string bgKey)
     {
-        if (!_runtimeViews.TryGetValue(bgKey, out RectTransformResponseTarget go))
+        if (!_runtimeViews.TryGetValue(bgKey, out RectTransformResponseTarget view))
             return;
 
         _runtimeViews.Remove(bgKey);
 
-        if (go == null)
+        if (view == null)
         {
             Debug.LogWarning($"[BGHost] DestroyRuntimeBackground skipped. view is already null. bgKey={bgKey}", this);
             return;
         }
 
-        Destroy(go);
+        Destroy(view.gameObject);
     }
 
     public void ClearRuntimeBackgrounds()
     {
-        foreach (RectTransformResponseTarget go in _runtimeViews.Values)
+        foreach (RectTransformResponseTarget view in _runtimeViews.Values)
         {
-            if (go == null)
+            if (view == null)
                 continue;
-
-            Destroy(go);
+            
+            Destroy(view.gameObject);
         }
 
         _runtimeViews.Clear();

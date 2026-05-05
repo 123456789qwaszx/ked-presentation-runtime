@@ -89,7 +89,8 @@ public sealed class SpawnBackgroundCommand : CommandBase
             DestroyExistingForKey(scope, _bgKey);
 
         RectTransformResponseTarget target = Object.Instantiate(_prefab, _parent, false);
-
+        target.gameObject.name = $"BG_{_bgKey}";
+        
         if (_spec.setAsLastSibling)
             target.transform.SetAsLastSibling();
 
