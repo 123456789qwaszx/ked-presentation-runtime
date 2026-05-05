@@ -6,13 +6,13 @@ using Object = UnityEngine.Object;
 [Serializable]
 [CommandMenuHint(
     "Other", "Destroy Rig", Order = 900)]
-public sealed class DestroyCommandSpec : CommandSpecBase
+public sealed class DestroyCommandSpec : CharacterRigCommandSpecBase
 {
     [Tooltip("자동 생성 시 루트 오브젝트 이름.")]
     public string rigRootName = "CharacterRig";
 
     [Header("Role Prefix")]
-    [Tooltip("켜면 roleKey로부터 자동으로 prefix를 생성합니다. 예: roleKey='seina' -> 'seina_'")]
+    [Tooltip("켜면 targetKey에서 해석된 roleKey로부터 자동으로 prefix를 생성합니다. 예: roleKey='seina' -> 'seina_'")]
     public bool autoRolePrefixFromRoleKey = true;
 
     [Tooltip("켜면 최종 prefix를 실제 타겟 이름에 적용합니다.")]
@@ -21,32 +21,29 @@ public sealed class DestroyCommandSpec : CommandSpecBase
     [Tooltip("수동 prefix. 비워두면 자동/없음 정책을 따릅니다. 예: 'seina_'")]
     public string rolePrefixOverride = "";
 
-    /// <summary>
-    /// 최종 prefix (override > auto > "")
-    /// </summary>
-    public string ResolvedRolePrefix
+    public string GetResolvedRolePrefix(string resolvedRoleKey)
     {
-        get
-        {
-            if (!addRolePrefix)
-                return "";
+        if (!addRolePrefix)
+            return "";
 
-            if (!string.IsNullOrEmpty(rolePrefixOverride))
-                return rolePrefixOverride;
+        if (!string.IsNullOrEmpty(rolePrefixOverride))
+            return rolePrefixOverride;
 
-            if (!autoRolePrefixFromRoleKey)
-                return "";
+        if (!autoRolePrefixFromRoleKey)
+            return "";
 
-            if (string.IsNullOrEmpty(roleKey))
-                return "";
+        if (string.IsNullOrEmpty(resolvedRoleKey))
+            return "";
 
-            return roleKey.EndsWith("_", StringComparison.Ordinal)
-                ? roleKey
-                : $"{roleKey}_";
-        }
+        return resolvedRoleKey.EndsWith("_", StringComparison.Ordinal)
+            ? resolvedRoleKey
+            : $"{resolvedRoleKey}_";
     }
 
-    public string ResolvedTargetName => $"{ResolvedRolePrefix}{rigRootName}";
+    public string GetResolvedTargetName(string resolvedRoleKey)
+    {
+        return $"{GetResolvedRolePrefix(resolvedRoleKey)}{rigRootName}";
+    }
 }
 
 public sealed class DestroyCommand : CommandBase
@@ -62,37 +59,34 @@ public sealed class DestroyCommand : CommandBase
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
-        GameObject go = FindTarget();
-        if (go == null)
-        {
-            yield break;
-        }
-
-        Debug.Log($"[DestroyCommand] Destroy '{_spec.ResolvedTargetName}'");
-        Object.Destroy(go);
-
-        scope.Refs[_spec.roleKey] = null;
+        Apply(scope);
         yield break;
     }
-    
+
     protected override void OnSkip(CommandRunScope scope)
     {
-        GameObject go = FindTarget();
+        Apply(scope);
+    }
+
+    protected override void OnRollbackSeek(CommandRunScope scope)
+    {
+        OnSkip(scope);
+    }
+
+    private void Apply(CommandRunScope scope)
+    {
+        string resolvedRoleKey = CharacterRigTargetResolver.ResolveRoleKeyFromTargetKey(scope, _spec.targetKey);
+        string targetName = _spec.GetResolvedTargetName(resolvedRoleKey);
+
+        GameObject go = GameObject.Find(targetName);
         if (go == null)
             return;
 
+        Debug.Log($"[DestroyCommand] Destroy '{targetName}'");
+
         Object.Destroy(go);
 
-        scope.Refs[_spec.roleKey] = null;
+        scope.Refs[resolvedRoleKey] = null;
     }
-    
-    
-    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
 
-    private GameObject FindTarget()
-    {
-        string targetName = _spec.ResolvedTargetName;
-        var go = GameObject.Find(targetName);
-        return go != null ? go : null;
-    }
 }

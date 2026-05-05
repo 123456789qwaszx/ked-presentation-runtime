@@ -20,7 +20,7 @@ public sealed class CompositeCommandFactory : INodeCommandFactory
         command = null;
         Debug.LogWarning(
             $"[CompositeCommandFactory] No factory handled spec: {spec.GetType().Name} " +
-            $"(roleKey='{spec.roleKey}')");
+            $"(spec='{spec}')");
         return false;
     }
 }

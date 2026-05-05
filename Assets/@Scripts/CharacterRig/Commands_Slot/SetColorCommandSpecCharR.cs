@@ -9,7 +9,7 @@ using UnityEngine.UI;
     "Set Color (Z)",
     Order = 870
 )]
-public class SetColorCommandSpecCharR : CommandSpecBase
+public class SetColorCommandSpecCharR : CharacterRigCommandSpecBase
 {
     [Header("Target")]
     public CharacterRigTarget target = CharacterRigTarget.CharacterPortrait_Image;
@@ -28,7 +28,12 @@ public sealed class SetColorCommandCharR : CommandBase
     private Image _image;
     private bool _resolveAttempted;
 
-    public SetColorCommandCharR(SetColorCommandSpecCharR spec) => _spec = spec;
+    protected override SkipPolicy SkipPolicy => SkipPolicy.ExecuteEvenIfSkipping;
+
+    public SetColorCommandCharR(SetColorCommandSpecCharR spec)
+    {
+        _spec = spec;
+    }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
@@ -38,36 +43,40 @@ public sealed class SetColorCommandCharR : CommandBase
         Apply();
         yield break;
     }
-    
+
     protected override void OnSkip(CommandRunScope scope)
     {
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (_image == null)
-            return;
-
         Apply();
     }
-    
-    
-    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
+
+    protected override void OnRollbackSeek(CommandRunScope scope)
+    {
+        OnSkip(scope);
+    }
 
     private void ResolveRefs(CommandRunScope scope)
     {
         _resolveAttempted = true;
 
-        if (!scope.Refs.TryGetCharRigRefs(_spec.roleKey, out CharacterRigRefs rig))
-            return;
+        CharacterRigRefs rig =
+            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(
+                scope,
+                _spec.targetKey);
 
         _image = rig.GetGraphic(_spec.target) as Image;
+
+        if (_image == null)
+        {
+            throw new InvalidOperationException(
+                $"[SetColorCommandCharR] Target Image not found. targetKey='{_spec.targetKey}', target='{_spec.target}'.");
+        }
     }
 
     private void Apply()
     {
-        if (_image == null)
-            return;
-
         Color color = _spec.color;
 
         if (_spec.keepAlpha)

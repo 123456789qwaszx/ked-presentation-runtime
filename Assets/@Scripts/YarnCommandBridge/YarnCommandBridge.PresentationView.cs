@@ -24,7 +24,6 @@ public sealed partial class YarnCommandBridge
     {
         var spec = new HideDialogueBoxCommandSpec
         {
-            roleKey = "",
             hideAll = true,
             targetKind = DialogueBoxKind.Speaker,
             duration = 0.18f,

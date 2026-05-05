@@ -11,7 +11,7 @@ using System.Collections.Generic;
     {
         CommandMenuSets.ResetChar,
     }, SetOrder = -975)]
-public class ShowRootLayersCommandSpecCharR : CommandSpecBase
+public class ShowRootLayersCommandSpecCharR : CharacterRigCommandSpecBase
 {
     public CharRigRootLayerMask targetMask = CharRigRootLayerMask.CharacterPortrait_Root;
 
@@ -29,17 +29,20 @@ public sealed class ShowRootLayersCommandCharR : CommandBase, IStepScopedCommand
 
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
-    public ShowRootLayersCommandCharR(ShowRootLayersCommandSpecCharR spec) => _spec = spec;
+    public ShowRootLayersCommandCharR(ShowRootLayersCommandSpecCharR spec)
+    {
+        _spec = spec;
+    }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
         if (!_resolveAttempted)
             ResolveRefs(scope);
-        
+
         Apply();
         yield break;
     }
-    
+
     protected override void OnSkip(CommandRunScope scope)
     {
         if (!_resolveAttempted)
@@ -48,18 +51,38 @@ public sealed class ShowRootLayersCommandCharR : CommandBase, IStepScopedCommand
         Apply();
     }
 
-    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
+    protected override void OnRollbackSeek(CommandRunScope scope)
+    {
+        OnSkip(scope);
+    }
+
+    private void ResolveRefs(CommandRunScope scope)
+    {
+        _resolveAttempted = true;
+        _targets.Clear();
+
+        if (_spec.targetMask == CharRigRootLayerMask.None)
+            return;
+
+        CharacterRigRefs rig =
+            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(
+                scope,
+                _spec.targetKey);
+
+        CharRigRootLayerMaskMap.CollectRects(
+            rig,
+            _spec.targetMask,
+            _targets);
+    }
 
     private void Apply()
     {
         if (_targets.Count == 0)
             return;
-        
+
         SnapOnTargets(_targets);
-        
-        _targets.Clear();
     }
-    
+
     private void SnapOnTargets(List<RectTransform> targets)
     {
         for (int i = 0; i < targets.Count; i++)
@@ -74,28 +97,18 @@ public sealed class ShowRootLayersCommandCharR : CommandBase, IStepScopedCommand
                 canvasGroup.interactable = true;
                 canvasGroup.blocksRaycasts = true;
             }
-            Debug.Log(canvasGroup.alpha);
         }
     }
-
-    private void ResolveRefs(CommandRunScope scope)
-    {
-        _resolveAttempted = true;
-        _targets.Clear();
-
-        if (_spec.targetMask == CharRigRootLayerMask.None)
-            return;
-
-        CharRigRootLayerMaskMap.CollectRects((CharacterRigRefs)scope.Refs[_spec.roleKey], _spec.targetMask, _targets);
-    }
-
 
     private CanvasGroup GetOrAddCanvasGroup(RectTransform rect)
     {
         if (rect.TryGetComponent(out CanvasGroup canvasGroup))
             return canvasGroup;
 
-        Debug.LogWarning($"[ShowRootsCommandCharR] CanvasGroup missing. Added automatically: {rect.name}", rect);
+        Debug.LogWarning(
+            $"[ShowRootLayersCommandCharR] CanvasGroup missing. Added automatically: {rect.name}",
+            rect);
+
         return rect.gameObject.AddComponent<CanvasGroup>();
     }
 }

@@ -8,7 +8,7 @@ using UnityEngine;
     "Char Rig Motion",
     "Punch Scale",
     Order = 100)]
-public class PunchScaleCommandSpecCharR : CommandSpecBase
+public class PunchScaleCommandSpecCharR : CharacterRigCommandSpecBase
 {
     [Header("Target")]
     public CharacterRigTarget target = CharacterRigTarget.CharacterPortrait_Scale;
@@ -152,10 +152,11 @@ public sealed class PunchScaleCommandCharR : CommandBase, IStepScopedCommand
     {
         _resolveAttempted = true;
 
-        if (!scope.Refs.TryGetCharRigRefs(_spec.roleKey, out CharacterRigRefs rig))
-            return;
+        CharacterRigRefs rigRefs =
+            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.targetKey);
 
-        _rect = rig.GetRect(_spec.target);
+
+        _rect = rigRefs.GetRect(_spec.target);
         if (_rect != null)
             _originScale = _rect.localScale;
     }

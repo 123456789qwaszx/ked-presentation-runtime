@@ -13,7 +13,7 @@ using UnityEngine;
         CommandMenuSets.SetupEmotion
     },
     SetOrder = -929)]
-public sealed class SetOriginSizeCommandSpecCharR : CommandSpecBase
+public sealed class SetOriginSizeCommandSpecCharR : CharacterRigCommandSpecBase
 {
     [Header("Target")]
     public CharacterRigTarget target = CharacterRigTarget.Character_Anchor;
@@ -106,7 +106,7 @@ public sealed class SetOriginSizeCommandCharR : CommandBase
             _spec.preset,
             _spec.globalTuning,
             _spec.roleTuningDb,
-            _spec.roleKey,
+            _spec.targetKey,
             _spec.poseKey,
             _spec.multiplier);
 
@@ -131,9 +131,9 @@ public sealed class SetOriginSizeCommandCharR : CommandBase
     {
         _resolveAttempted = true;
 
-        if (!scope.Refs.TryGetCharRigRefs(_spec.roleKey, out CharacterRigRefs rig))
-            return;
-
-        _rect = rig.GetRect(_spec.target);
+        CharacterRigRefs rigRefs =
+            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.targetKey);
+        
+        _rect = rigRefs.GetRect(_spec.target);
     }
 }

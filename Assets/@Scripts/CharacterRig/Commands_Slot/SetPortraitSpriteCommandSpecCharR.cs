@@ -11,7 +11,7 @@ using UnityEngine.UI;
         CommandMenuSets.BuildChar,
         CommandMenuSets.SetupEmotion
     }, SetOrder = -964)]
-public sealed class SetPortraitSpriteCommandSpecCharR : CommandSpecBase
+public sealed class SetPortraitSpriteCommandSpecCharR : CharacterRigCommandSpecBase
 {
     [Header("Portrait Identity")]
     public PortraitIdentity portrait;
@@ -70,10 +70,10 @@ public sealed class SetPortraitSpriteCommandCharR : CommandBase
     {
         _resolveAttempted = true;
 
-        if (!scope.Refs.TryGetCharRigRefs(_spec.roleKey, out CharacterRigRefs rig))
-            return;
-
-        _image = rig.GetComponent(_spec.target) as Image;
+        CharacterRigRefs rigRefs =
+            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.targetKey);
+        
+        _image = rigRefs.GetComponent(_spec.target) as Image;
     }
 
     private void Apply()

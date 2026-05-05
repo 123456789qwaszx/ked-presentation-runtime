@@ -13,7 +13,7 @@ using UnityEngine;
         CommandMenuSets.ResetChar,
     },
     SetOrder = -940)]
-public class ApplyTrackOffsetCommandSpecCharR : CommandSpecBase
+public class ApplyTrackOffsetCommandSpecCharR : CharacterRigCommandSpecBase
 {
     [Header("Target")]
     [Tooltip("offset를 실제로 적용할 대상.")]
@@ -97,20 +97,19 @@ public sealed class ApplyTrackOffsetCommandCharR : CommandBase
 
     protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
 
-    private static void ResetRect(RectTransform rect)
-    {
-        rect.DOKill(true);  // Finish previous motion so this command starts from a committed state.
-        rect.anchoredPosition = Vector2.zero;
-    }
 
     private void ResolveRefs(CommandRunScope scope)
     {
         _resolveAttempted = true;
-
-        if (!scope.Refs.TryGetCharRigRefs(_spec.roleKey, out CharacterRigRefs rigRefs))
-            return;
-
-        _rigRefs = rigRefs;
-        _rect = rigRefs.GetRect(_spec.target);
+        
+        _rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.targetKey);
+        
+        _rect = _rigRefs.GetRect(_spec.target);
+    }
+    
+    private static void ResetRect(RectTransform rect)
+    {
+        rect.DOKill(true);  // Finish previous motion so this command starts from a committed state.
+        rect.anchoredPosition = Vector2.zero;
     }
 }

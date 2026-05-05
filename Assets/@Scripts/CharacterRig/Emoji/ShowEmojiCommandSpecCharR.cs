@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 [Serializable]
 [CommandMenuHint("Char Rig", "Show Emoji (Preset)", Order = -960)]
-public sealed class ShowEmojiCommandSpecCharR : CommandSpecBase
+public sealed class ShowEmojiCommandSpecCharR : CharacterRigCommandSpecBase
 {
     public CharacterEmojiDatabaseSO database;
     public string emojiKey = "sparkle";
@@ -25,77 +25,37 @@ public sealed class ShowEmojiCommandCharR : CommandBase, IStepScopedCommand
 {
     private readonly ShowEmojiCommandSpecCharR _spec;
 
+    private RectTransform _emojiRoot;
+    private RectTransform _emojiAnchor;
+    private Image _emojiImage;
+    private CanvasGroup _emojiCanvasGroup;
+
+    private CharacterEmojiPresetSO _preset;
     private Sequence _seq;
+    private bool _resolveAttempted;
 
     public override bool WaitForCompletion => _spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
-    public ShowEmojiCommandCharR(ShowEmojiCommandSpecCharR spec) => _spec = spec;
+    public ShowEmojiCommandCharR(ShowEmojiCommandSpecCharR spec)
+    {
+        _spec = spec;
+    }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
-        if (!scope.Refs.TryGetCharRigRefs(_spec.roleKey, out CharacterRigRefs rig) || rig == null)
-            yield break;
+        if (!_resolveAttempted)
+            ResolveRefs(scope);
 
-        // 빈 키면 hide 처리
         if (_spec.hideIfKeyEmpty && string.IsNullOrWhiteSpace(_spec.emojiKey))
         {
-            HideEmojiImmediate(rig);
+            HideEmojiImmediate();
             yield break;
         }
 
-        if (_spec.database == null || !_spec.database.TryGet(_spec.emojiKey.Trim(), out var preset) || preset == null)
-            yield break;
+        ResolvePreset();
 
-        // 필수 refs
-        RectTransform emojiRoot   = rig.CharacterEmoji_Root;
-        RectTransform emojiAnchor = rig.CharacterEmoji_Anchor;
-        Image emojiImg            = rig.CharacterEmoji_Image;
-
-        if (emojiRoot == null || emojiAnchor == null || emojiImg == null)
-            yield break;
-
-        CanvasGroup cg = GetRootCanvasGroup(emojiRoot, "CharacterEmoji_Root");
-
-        // 항상 켜둠(깜빡임 방지)
-        if (!emojiRoot.gameObject.activeSelf) emojiRoot.gameObject.SetActive(true);
-        if (!emojiAnchor.gameObject.activeSelf) emojiAnchor.gameObject.SetActive(true);
-
-        // 진행 중 페이드 중단
-        cg.DOKill(false);
-        _seq?.Kill(false);
-        _seq = null;
-
-        // 1) Sprite 세팅
-        emojiImg.sprite = preset.sprite;
-
-        // (옵션) preserveAspect 기본 on 추천
-        emojiImg.preserveAspect = true;
-
-        // 2) Layout 적용(Anchor에 “한 번에”)
-        ApplyLayout(emojiAnchor, preset.layout);
-
-        // 3) Persistent 효과 교체
-        // - 기존 지속 효과가 이미 돌아가고 있을 수 있으니 정리
-        KillPersistentOn(emojiAnchor);
-
-        // 4) FadeIn
-        float fadeIn = (_spec.fadeInOverride >= 0f) ? _spec.fadeInOverride : preset.fadeIn;
-
-        if (fadeIn <= 0f)
-        {
-            cg.alpha = 1f;
-            ApplyPersistent(preset, emojiAnchor);
-            yield break;
-        }
-
-        _seq = DOTween.Sequence().SetUpdate(true);
-        _seq.Append(cg.DOFade(1f, fadeIn).SetEase(_spec.ease));
-        _seq.AppendCallback(() =>
-        {
-            // Fade 끝난 후 지속 효과 시작(원하면 Fade 시작 전에 해도 됨)
-            ApplyPersistent(preset, emojiAnchor);
-        });
+        Apply();
 
         if (!_spec.wait)
             yield break;
@@ -104,7 +64,32 @@ public sealed class ShowEmojiCommandCharR : CommandBase, IStepScopedCommand
             yield return null;
     }
 
-    protected override void OnSkip(CommandRunScope scope) => OnCommandCompleted(scope);
+    protected override void OnSkip(CommandRunScope scope)
+    {
+        if (!_resolveAttempted)
+            ResolveRefs(scope);
+
+        if (_spec.hideIfKeyEmpty && string.IsNullOrWhiteSpace(_spec.emojiKey))
+        {
+            HideEmojiImmediate();
+            return;
+        }
+
+        ResolvePreset();
+
+        if (_spec.snapOnSkip)
+        {
+            ApplyImmediate();
+            return;
+        }
+
+        OnCommandCompleted(scope);
+    }
+
+    protected override void OnRollbackSeek(CommandRunScope scope)
+    {
+        OnSkip(scope);
+    }
 
     protected override void OnCommandCompleted(CommandRunScope scope)
     {
@@ -116,52 +101,154 @@ public sealed class ShowEmojiCommandCharR : CommandBase, IStepScopedCommand
         _seq = null;
     }
 
-    private static CanvasGroup GetRootCanvasGroup(RectTransform root, string debugName)
+    private void ResolveRefs(CommandRunScope scope)
     {
-        var cg = root.GetComponent<CanvasGroup>();
-        if (cg != null) return cg;
-        throw new InvalidOperationException($"[ShowEmoji] CanvasGroup missing on Root: {debugName} ({root.name})");
+        _resolveAttempted = true;
+
+        CharacterRigRefs rig =
+            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(
+                scope,
+                _spec.targetKey);
+
+        _emojiRoot = rig.CharacterEmoji_Root;
+        _emojiAnchor = rig.CharacterEmoji_Anchor;
+        _emojiImage = rig.CharacterEmoji_Image;
+
+        if (_emojiRoot == null || _emojiAnchor == null || _emojiImage == null)
+        {
+            throw new InvalidOperationException(
+                $"[ShowEmojiCommandCharR] Emoji refs are missing. targetKey='{_spec.targetKey}'.");
+        }
+
+        _emojiCanvasGroup = GetRootCanvasGroup(_emojiRoot, "CharacterEmoji_Root");
     }
 
-    private static void HideEmojiImmediate(CharacterRigRefs rig)
+    private void ResolvePreset()
     {
-        if (rig.CharacterEmoji_Root == null) return;
-        var cg = rig.CharacterEmoji_Root.GetComponent<CanvasGroup>();
-        if (cg != null) cg.alpha = 0f;
+        if (_spec.database == null)
+        {
+            throw new InvalidOperationException(
+                $"[ShowEmojiCommandCharR] Database is null. targetKey='{_spec.targetKey}', emojiKey='{_spec.emojiKey}'.");
+        }
 
-        if (rig.CharacterEmoji_Anchor != null)
-            KillPersistentOn(rig.CharacterEmoji_Anchor);
+        string emojiKey = _spec.emojiKey.Trim();
+
+        if (!_spec.database.TryGet(emojiKey, out _preset) || _preset == null)
+        {
+            throw new InvalidOperationException(
+                $"[ShowEmojiCommandCharR] Emoji preset not found. targetKey='{_spec.targetKey}', emojiKey='{emojiKey}'.");
+        }
+    }
+
+    private void Apply()
+    {
+        KillCurrentTween();
+
+        EnsureRootsVisible();
+
+        _emojiImage.sprite = _preset.sprite;
+        _emojiImage.preserveAspect = true;
+
+        ApplyLayout(_emojiAnchor, _preset.layout);
+        KillPersistentOn(_emojiAnchor);
+
+        float fadeIn = _spec.fadeInOverride >= 0f
+            ? _spec.fadeInOverride
+            : _preset.fadeIn;
+
+        if (fadeIn <= 0f)
+        {
+            ApplyImmediate();
+            return;
+        }
+
+        _emojiCanvasGroup.alpha = 0f;
+
+        _seq = DOTween.Sequence()
+            .SetUpdate(true)
+            .Append(_emojiCanvasGroup
+                .DOFade(1f, fadeIn)
+                .SetEase(_spec.ease))
+            .AppendCallback(() =>
+            {
+                ApplyPersistent(_preset, _emojiAnchor);
+            });
+    }
+
+    private void ApplyImmediate()
+    {
+        KillCurrentTween();
+
+        EnsureRootsVisible();
+
+        _emojiImage.sprite = _preset.sprite;
+        _emojiImage.preserveAspect = true;
+
+        ApplyLayout(_emojiAnchor, _preset.layout);
+
+        _emojiCanvasGroup.alpha = 1f;
+
+        KillPersistentOn(_emojiAnchor);
+        ApplyPersistent(_preset, _emojiAnchor);
+    }
+
+    private void HideEmojiImmediate()
+    {
+        KillCurrentTween();
+
+        _emojiCanvasGroup.alpha = 0f;
+        KillPersistentOn(_emojiAnchor);
+    }
+
+    private void EnsureRootsVisible()
+    {
+        if (!_emojiRoot.gameObject.activeSelf)
+            _emojiRoot.gameObject.SetActive(true);
+
+        if (!_emojiAnchor.gameObject.activeSelf)
+            _emojiAnchor.gameObject.SetActive(true);
+    }
+
+    private void KillCurrentTween()
+    {
+        _emojiCanvasGroup.DOKill(false);
+        _seq?.Kill(false);
+        _seq = null;
+    }
+
+    private static CanvasGroup GetRootCanvasGroup(RectTransform root, string debugName)
+    {
+        CanvasGroup canvasGroup = root.GetComponent<CanvasGroup>();
+        if (canvasGroup != null)
+            return canvasGroup;
+
+        throw new InvalidOperationException(
+            $"[ShowEmojiCommandCharR] CanvasGroup missing on Root: {debugName} ({root.name})");
     }
 
     private static void ApplyLayout(RectTransform anchor, CharacterEmojiPresetSO.EmojiLayout layout)
     {
-        // anchorMin/Max를 쓰고 싶으면
         anchor.anchorMin = layout.anchorMin;
         anchor.anchorMax = layout.anchorMax;
-
         anchor.anchoredPosition = layout.anchoredPos;
 
-        var s = anchor.localScale;
-        s.x = layout.scale.x;
-        s.y = layout.scale.y;
-        anchor.localScale = s;
+        Vector3 scale = anchor.localScale;
+        scale.x = layout.scale.x;
+        scale.y = layout.scale.y;
+        anchor.localScale = scale;
 
-        var e = anchor.localEulerAngles;
-        e.z = layout.rotationZ;
-        anchor.localEulerAngles = e;
+        Vector3 euler = anchor.localEulerAngles;
+        euler.z = layout.rotationZ;
+        anchor.localEulerAngles = euler;
     }
 
-    // 지속 효과는 “Anchor”에 건다고 가정 (Sway/Shake/Pulse 등을 anchor 아래로 전파)
     private static void KillPersistentOn(RectTransform anchor)
     {
-        if (anchor == null) return;
         anchor.DOKill(false);
     }
 
     private static void ApplyPersistent(CharacterEmojiPresetSO preset, RectTransform anchor)
     {
-        if (preset == null || anchor == null) return;
-
         var p = preset.effectParams;
 
         switch (preset.effect)
@@ -170,7 +257,6 @@ public sealed class ShowEmojiCommandCharR : CommandBase, IStepScopedCommand
                 break;
 
             case CharacterEmojiPresetSO.EmojiPersistentEffect.Sway:
-                // 좌우 회전 흔들림
                 anchor.DOLocalRotate(
                         new Vector3(0f, 0f, preset.layout.rotationZ + 8f * p.amp),
                         0.6f / Mathf.Max(0.0001f, p.freq)

@@ -155,7 +155,7 @@ public sealed class JoltCommand : CommandBase, IStepScopedCommand
     {
         _resolveAttempted = true;
 
-        CharacterRigRefs rig = CharacterRigTargetResolver.ResolveCharRig(scope, _spec.roleKey);
+        CharacterRigRefs rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.targetKey);
 
         _rect = rig.GetRect(_spec.target);
         _restPos = _rect.anchoredPosition;

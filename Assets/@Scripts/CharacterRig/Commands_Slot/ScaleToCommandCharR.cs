@@ -9,7 +9,7 @@ using UnityEngine;
     "Scale (From → To)",
     Order = -170
 )]
-public class ScaleToCommandSpecCharR : CommandSpecBase
+public class ScaleToCommandSpecCharR : CharacterRigCommandSpecBase
 {
     [Header("Target")]
     public CharacterRigTarget target = CharacterRigTarget.CharacterPortrait_Scale;
@@ -128,10 +128,11 @@ public sealed class ScaleToCommandCharR : CommandBase, IStepScopedCommand
     {
         _resolveAttempted = true;
 
-        if (!scope.Refs.TryGetCharRigRefs(_spec.roleKey, out CharacterRigRefs rig))
-            return;
+        CharacterRigRefs rigRefs =
+            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.targetKey);
 
-        _rect = rig.GetRect(_spec.target);
+
+        _rect = rigRefs.GetRect(_spec.target);
     }
 
     private static void ApplyScaleXY(RectTransform rect, Vector2 targetXY)

@@ -2,7 +2,7 @@ using System;
 
 public static class CharacterRigTargetResolver
 {
-    public static CharacterRigRefs ResolveCharRig(CommandRunScope scope, string targetKey)
+    public static CharacterRigRefs ResolveCharRigFromTargetKey(CommandRunScope scope, string targetKey)
     {
         // targetKey policy:
         // 1. If targetKey is a cast characterKey, use its bound roleKey.
@@ -19,5 +19,13 @@ public static class CharacterRigTargetResolver
         }
 
         return rig;
+    }
+    
+    public static string ResolveRoleKeyFromTargetKey(CommandRunScope scope, string targetKey)
+    {
+        if (scope.CastRegistry.TryGetRole(targetKey, out string boundRoleKey))
+            return boundRoleKey;
+
+        return targetKey;
     }
 }

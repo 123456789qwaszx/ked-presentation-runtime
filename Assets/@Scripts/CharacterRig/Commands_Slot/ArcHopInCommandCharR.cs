@@ -6,7 +6,7 @@ using RectTransform = UnityEngine.RectTransform;
 
 [Serializable]
 [CommandMenuHint("Char Rig Motion", "ArcHop In", Order = -760)]
-public sealed class ArcHopInCommandSpecCharR : CommandSpecBase
+public sealed class ArcHopInCommandSpecCharR : CharacterRigCommandSpecBase
 {
     [Header("Target")]
     public CharacterRigTarget target = CharacterRigTarget.Character_Track_Y;
@@ -213,10 +213,9 @@ public sealed class ArcHopInCommandCharR : CommandBase, IStepScopedCommand
     {
         _resolveAttempted = true;
 
-        if (!scope.Refs.TryGetCharRigRefs(_spec.roleKey, out CharacterRigRefs rig))
-            return;
-
-        _rect = rig.GetRect(_spec.target);
+        CharacterRigRefs rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.targetKey);
+        
+        _rect = rigRefs.GetRect(_spec.target);
         _destPos = _rect.anchoredPosition;
     }
 

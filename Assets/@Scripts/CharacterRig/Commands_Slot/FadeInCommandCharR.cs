@@ -10,7 +10,7 @@ using UnityEngine;
     "Fade In",
     Order = -820
 )]
-public class FadeInCommandSpecCharR : CommandSpecBase
+public class FadeInCommandSpecCharR : CharacterRigCommandSpecBase
 {
     public CharRigRootLayerMask targetMask = CharRigRootLayerMask.CharacterPortrait_Root;
 
@@ -195,10 +195,11 @@ public sealed class FadeInCommandCharR : CommandBase, IStepScopedCommand
         _resolveAttempted = true;
         _targets.Clear();
 
-        if (!scope.Refs.TryGetCharRigRefs(_spec.roleKey, out CharacterRigRefs rig))
-            return;
+        CharacterRigRefs rigRefs = 
+            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.targetKey);
 
-        CharRigRootLayerMaskMap.CollectRects(rig, _spec.targetMask, _targets);
+
+        CharRigRootLayerMaskMap.CollectRects(rigRefs, _spec.targetMask, _targets);
     }
 
     private void SnapOnTargets(List<RectTransform> targets)

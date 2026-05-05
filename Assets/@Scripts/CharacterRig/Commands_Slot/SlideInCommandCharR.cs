@@ -6,7 +6,7 @@ using RectTransform = UnityEngine.RectTransform;
 
 [Serializable]
 [CommandMenuHint("Char Rig Motion", "Slide In", Order = -771)]
-public sealed class SlideInCommandSpecCharR : CommandSpecBase
+public sealed class SlideInCommandSpecCharR : CharacterRigCommandSpecBase
 {
     [Header("Target (Track)")]
     public CharacterRigTarget target = CharacterRigTarget.Character_Track;
@@ -156,10 +156,10 @@ public sealed class SlideInCommandCharR : CommandBase, IStepScopedCommand
     {
         _resolveAttempted = true;
 
-        if (!scope.Refs.TryGetCharRigRefs(_spec.roleKey, out CharacterRigRefs rig))
-            return;
-
-        _rect = rig.GetRect(_spec.target);
+        CharacterRigRefs rigRefs =
+            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.targetKey);
+        
+        _rect = rigRefs.GetRect(_spec.target);
         _destPos = _rect.anchoredPosition;
     }
 

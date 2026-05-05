@@ -10,7 +10,7 @@ using UnityEngine;
     "#Hide Root Layers",
     Order = -940
 )]
-public sealed class HideRootLayersCommandSpecCharR : CommandSpecBase
+public sealed class HideRootLayersCommandSpecCharR : CharacterRigCommandSpecBase
 {
     public CharRigRootLayerMask targetMask = CharRigRootLayerMask.CharacterPortraitOverlay_Root
                                              | CharRigRootLayerMask.CharacterEmoji_Root
@@ -29,10 +29,11 @@ public sealed class HideRootLayersCommandCharR : CommandBase
     private bool _resolveAttempted;
 
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
-    
-    //public override bool WaitForCompletion => true;
 
-    public HideRootLayersCommandCharR(HideRootLayersCommandSpecCharR spec) => _spec = spec;
+    public HideRootLayersCommandCharR(HideRootLayersCommandSpecCharR spec)
+    {
+        _spec = spec;
+    }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
@@ -42,7 +43,7 @@ public sealed class HideRootLayersCommandCharR : CommandBase
         Apply();
         yield break;
     }
-    
+
     protected override void OnSkip(CommandRunScope scope)
     {
         if (!_resolveAttempted)
@@ -50,20 +51,38 @@ public sealed class HideRootLayersCommandCharR : CommandBase
 
         Apply();
     }
-    
-    
-    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
-    
+
+    protected override void OnRollbackSeek(CommandRunScope scope)
+    {
+        OnSkip(scope);
+    }
+
+    private void ResolveRefs(CommandRunScope scope)
+    {
+        _resolveAttempted = true;
+        _targets.Clear();
+
+        if (_spec.targetMask == CharRigRootLayerMask.None)
+            return;
+
+        CharacterRigRefs rig =
+            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(
+                scope,
+                _spec.targetKey);
+
+        CharRigRootLayerMaskMap.CollectRects(
+            rig,
+            _spec.targetMask,
+            _targets);
+    }
+
     private void Apply()
     {
         if (_targets.Count == 0)
             return;
-        
+
         SnapOffTargets(_targets);
-        
-        _targets.Clear();
     }
-    
 
     private void SnapOffTargets(List<RectTransform> targets)
     {
@@ -71,7 +90,7 @@ public sealed class HideRootLayersCommandCharR : CommandBase
         {
             CanvasGroup canvasGroup = GetOrAddCanvasGroup(targets[i]);
 
-            canvasGroup.DOKill(true); // Finish previous motion so this command starts from a committed state.
+            canvasGroup.DOKill(true);
             canvasGroup.alpha = 0f;
 
             if (_spec.disableInteraction)
@@ -81,25 +100,16 @@ public sealed class HideRootLayersCommandCharR : CommandBase
             }
         }
     }
-    
-    private void ResolveRefs(CommandRunScope scope)
-    {
-        _resolveAttempted = true;
-        //_targets.Clear();
-
-        if (_spec.targetMask == CharRigRootLayerMask.None)
-            return;
-
-        CharacterRigRefs rig = (CharacterRigRefs)scope.Refs[_spec.roleKey];
-        CharRigRootLayerMaskMap.CollectRects(rig, _spec.targetMask, _targets);
-    }
 
     private CanvasGroup GetOrAddCanvasGroup(RectTransform rect)
     {
-        if (rect.TryGetComponent<CanvasGroup>(out CanvasGroup canvasGroup))
+        if (rect.TryGetComponent(out CanvasGroup canvasGroup))
             return canvasGroup;
 
-        Debug.LogWarning($"[HideRootsCommandCharR] CanvasGroup missing. Added automatically: {rect.name}", rect);
+        Debug.LogWarning(
+            $"[HideRootLayersCommandCharR] CanvasGroup missing. Added automatically: {rect.name}",
+            rect);
+
         return rect.gameObject.AddComponent<CanvasGroup>();
     }
 }

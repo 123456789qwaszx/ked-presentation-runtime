@@ -6,7 +6,7 @@ using UnityEngine.Serialization;
 
 [Serializable]
 [CommandMenuHint("Char Rig Motion", "Sway", Order = 100)]
-public sealed class SwayCommandSpecCharR : CommandSpecBase
+public sealed class SwayCommandSpecCharR : CharacterRigCommandSpecBase
 {
     [Header("Targets")]
     [Tooltip("좌우로 흔들릴 피벗(SwayPivot).")]
@@ -204,10 +204,11 @@ public sealed class SwayCommandCharR : CommandBase, IStepScopedCommand
     {
         _resolveAttempted = true;
 
-        if (!scope.Refs.TryGetCharRigRefs(_spec.roleKey, out CharacterRigRefs rig))
-            return;
+        CharacterRigRefs rigRefs =
+            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.targetKey);
 
-        _rect = rig.GetRect(_spec.target);
+
+        _rect = rigRefs.GetRect(_spec.target);
         _originSwayRotationZ = NormalizeAngle(_rect.localEulerAngles.z);
         _currentSwayRotationZ = _originSwayRotationZ;
         SetLocalEulerZ(_rect, _currentSwayRotationZ);

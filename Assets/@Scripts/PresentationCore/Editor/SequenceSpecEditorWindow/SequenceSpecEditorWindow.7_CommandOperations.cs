@@ -204,12 +204,30 @@ public sealed partial class SequenceSpecEditorWindow
 
         if (_autoFillIdsOnAdd && inst != null)
         {
-            string rk = GetAutoFillRoleKey();
-            if (!string.IsNullOrWhiteSpace(rk))
-                inst.roleKey = rk;
+            string key = GetAutoFillRoleKey();
+            if (!string.IsNullOrWhiteSpace(key))
+                ApplyAutoFillRoleSlotKey(inst, key);
         }
 
         return inst;
+    }
+
+    private static void ApplyAutoFillRoleSlotKey(CommandSpecBase inst, string key)
+    {
+        switch (inst)
+        {
+            case CharacterRigCommandSpecBase charRigSpec:
+                charRigSpec.targetKey = key;
+                break;
+
+            case SetupCharRigCommandSpec setupSpec:
+                setupSpec.roleKey = key;
+                break;
+
+            case CastCharacterCommandSpec castSpec:
+                castSpec.slotKey = key;
+                break;
+        }
     }
 
     private string GetAutoFillRoleKey()

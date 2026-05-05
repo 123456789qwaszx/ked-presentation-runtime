@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 [Serializable]
 [CommandMenuHint("Char Rig", "Set Portrait (Crossfade)", Order = -960)]
-public sealed class SetPortraitCrossfadeCommandSpecCharR : CommandSpecBase
+public sealed class SetPortraitCrossfadeCommandSpecCharR : CharacterRigCommandSpecBase
 {
     [Header("Portrait Identity")]
     public PortraitIdentity portrait;
@@ -152,13 +152,14 @@ public sealed class SetPortraitCrossfadeCommandCharR : CommandBase, IStepScopedC
     {
         _resolveAttempted = true;
 
-        if (!scope.Refs.TryGetCharRigRefs(_spec.roleKey, out CharacterRigRefs rig))
-            return;
+        CharacterRigRefs rigRefs =
+            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.targetKey);
 
-        _portraitRoot = rig.CharacterPortrait_Root;
-        _overlayRoot = rig.CharacterPortraitOverlay_Root;
-        _portraitImage = rig.CharacterPortrait_Image;
-        _overlayImage = rig.CharacterPortraitOverlay_Image;
+
+        _portraitRoot = rigRefs.CharacterPortrait_Root;
+        _overlayRoot = rigRefs.CharacterPortraitOverlay_Root;
+        _portraitImage = rigRefs.CharacterPortrait_Image;
+        _overlayImage = rigRefs.CharacterPortraitOverlay_Image;
         _portraitCanvasGroup = GetRootCanvasGroup(_portraitRoot, "CharacterPortrait_Root");
         _overlayCanvasGroup = GetRootCanvasGroup(_overlayRoot, "CharacterPortraitOverlay_Root");
     }

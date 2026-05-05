@@ -13,7 +13,7 @@ using UnityEngine;
         CommandMenuSets.SetupEmotion
     },
     SetOrder = -930)]
-public sealed class SetAnchorCommandSpecCharR : CommandSpecBase
+public sealed class SetAnchorCommandSpecCharR : CharacterRigCommandSpecBase
 {
     [Header("Target (Anchor only)")]
     public CharacterRigTarget target = CharacterRigTarget.Character_Anchor;
@@ -91,7 +91,7 @@ public sealed class SetAnchorCommandCharR : CommandBase
             _spec.baseRatioX,
             _spec.globalTuning,
             _spec.roleTuningDb,
-            _spec.roleKey,
+            _spec.targetKey,
             _spec.poseKey,
             _spec.offset);
 
@@ -102,9 +102,10 @@ public sealed class SetAnchorCommandCharR : CommandBase
     {
         _resolveAttempted = true;
 
-        if (!scope.Refs.TryGetCharRigRefs(_spec.roleKey, out CharacterRigRefs rig))
-            return;
+        CharacterRigRefs rigRefs =
+            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.targetKey);
 
-        _rect = rig.GetRect(_spec.target);
+
+        _rect = rigRefs.GetRect(_spec.target);
     }
 }

@@ -10,7 +10,7 @@ using UnityEngine;
     "Fade Out",
     Order = -815
 )]
-public class FadeOutCommandSpecCharR : CommandSpecBase
+public class FadeOutCommandSpecCharR : CharacterRigCommandSpecBase
 {
     public CharRigRootLayerMask targetMask = CharRigRootLayerMask.CharacterPortrait_Root
                                              | CharRigRootLayerMask.CharacterPortraitOverlay_Root
@@ -84,13 +84,6 @@ public sealed class FadeOutCommandCharR : CommandBase, IStepScopedCommand
 
                     if (!_canCommitFinalState)
                         return;
-
-                    if (cg == null)
-                    {
-                        if (_pending == 0)
-                            _canCommitFinalState = false;
-                        return;
-                    }
 
                     if (_pending == 0)
                         _canCommitFinalState = false;
@@ -220,10 +213,9 @@ public sealed class FadeOutCommandCharR : CommandBase, IStepScopedCommand
         _resolveAttempted = true;
         _targets.Clear();
 
-        if (!scope.Refs.TryGetCharRigRefs(_spec.roleKey, out CharacterRigRefs rig))
-            return;
-
-        CharRigRootLayerMaskMap.CollectRects(rig, _spec.targetMask, _targets);
+        CharacterRigRefs rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.targetKey);
+        
+        CharRigRootLayerMaskMap.CollectRects(rigRefs, _spec.targetMask, _targets);
     }
 
     private void SnapOffTargets(List<RectTransform> targets)

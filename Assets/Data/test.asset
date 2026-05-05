@@ -30,7 +30,6 @@ MonoBehaviour:
       - rid: 5301155771391934530
       - rid: 5301155771391934531
       - rid: 5301155771391934532
-      - rid: 5301155771391934533
       gate:
         type: 3
         seconds: 0
@@ -162,8 +161,8 @@ MonoBehaviour:
     - rid: 5301155771391934527
       type: {class: SetupCharRigCommandSpec, ns: , asm: Assembly-CSharp}
       data:
-        roleKey: sub
         wait: 0
+        roleKey: sub
         rigPrefab: {fileID: 0}
         parentSlot: 0
         rigRootName: CharacterRig
@@ -174,8 +173,8 @@ MonoBehaviour:
     - rid: 5301155771391934528
       type: {class: SetAnchorCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:
-        roleKey: sub
         wait: 0
+        targetKey: 
         target: 0
         preset: 2
         baseRatioX: 0.5
@@ -188,8 +187,8 @@ MonoBehaviour:
     - rid: 5301155771391934529
       type: {class: SetupCharRigCommandSpec, ns: , asm: Assembly-CSharp}
       data:
-        roleKey: sub
         wait: 0
+        roleKey: sub
         rigPrefab: {fileID: 0}
         parentSlot: 0
         rigRootName: CharacterRig
@@ -200,22 +199,20 @@ MonoBehaviour:
     - rid: 5301155771391934530
       type: {class: CastCharacterCommandSpec, ns: , asm: Assembly-CSharp}
       data:
-        roleKey: sub
         wait: 0
+        slotKey: 
         characterKey: 
-        requireExistingRig: 1
-        strict: 1
+        variantKey: 
     - rid: 5301155771391934531
       type: {class: UncastCharacterCommandSpec, ns: , asm: Assembly-CSharp}
       data:
-        roleKey: sub
         wait: 0
-        strict: 1
+        targetKey: 
     - rid: 5301155771391934532
       type: {class: SetPortraitSpriteCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:
-        roleKey: sub
         wait: 0
+        targetKey: 
         portrait:
           character: 
           emotion: 
@@ -223,25 +220,11 @@ MonoBehaviour:
         target: 10
         sizingMode: 1
         horizontalAlign: 1
-    - rid: 5301155771391934533
-      type: {class: SetPortraitByCharacterCommandSpec, ns: , asm: Assembly-CSharp}
-      data:
-        roleKey: sub
-        wait: 0
-        characterKey: 
-        portrait:
-          character: 
-          emotion: 
-          variant: 
-        target: 10
-        sizingMode: 1
-        horizontalAlign: 1
-        strict: 1
     - rid: 8483491179373002941
       type: {class: ShowEmojiCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:
-        roleKey: sub
         wait: 0
+        targetKey: 
         database: {fileID: 0}
         emojiKey: sparkle
         hideIfKeyEmpty: 1
@@ -251,8 +234,8 @@ MonoBehaviour:
     - rid: 8483491179373002942
       type: {class: SetupCharRigCommandSpec, ns: , asm: Assembly-CSharp}
       data:
-        roleKey: sub
         wait: 0
+        roleKey: sub
         rigPrefab: {fileID: 8529412948266249186, guid: 01c9b93a77829ef438fc74c4ef4c5004, type: 3}
         parentSlot: 0
         rigRootName: CharacterRig
@@ -263,8 +246,8 @@ MonoBehaviour:
     - rid: 8483491179373002944
       type: {class: SetPortraitSpriteCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:
-        roleKey: sub
         wait: 0
+        targetKey: 
         portrait:
           character: kuonji
           emotion: 1
@@ -275,8 +258,8 @@ MonoBehaviour:
     - rid: 8483491179373002945
       type: {class: FadeInCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:
-        roleKey: sub
         wait: 0
+        targetKey: 
         targetMask: 5
         duration: 0.47
         ease: 9
@@ -284,8 +267,8 @@ MonoBehaviour:
     - rid: 8483491179373002946
       type: {class: MoveByCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:
-        roleKey: sub
         wait: 0
+        targetKey: 
         target: 1
         delta: {x: 200, y: 0}
         duration: 0.4
@@ -294,7 +277,6 @@ MonoBehaviour:
     - rid: 8483491315577782332
       type: {class: UIPatchCommandSpec, ns: , asm: Assembly-CSharp}
       data:
-        roleKey: 
         wait: 1
         targetKind: 0
         themeId: theme1
@@ -302,7 +284,6 @@ MonoBehaviour:
     - rid: 8483491315577782333
       type: {class: PlayBgmCommandSpec, ns: , asm: Assembly-CSharp}
       data:
-        roleKey: 
         wait: 0
         clipKey: audio/bgm_tam_dystopia_snowwind_01
         directClip: {fileID: 0}
@@ -310,7 +291,6 @@ MonoBehaviour:
     - rid: 8483491315577782334
       type: {class: UIPatchCommandSpec, ns: , asm: Assembly-CSharp}
       data:
-        roleKey: 
         wait: 1
         targetKind: 0
         themeId: theme1
@@ -318,7 +298,6 @@ MonoBehaviour:
     - rid: 8483491315577782335
       type: {class: PlayBgmCommandSpec, ns: , asm: Assembly-CSharp}
       data:
-        roleKey: 
         wait: 0
         clipKey: audio/bgm_tam_dystopia_snowwind_01
         directClip: {fileID: 0}
@@ -326,14 +305,12 @@ MonoBehaviour:
     - rid: 8483491315577782336
       type: {class: PlaySfxCommandSpec, ns: , asm: Assembly-CSharp}
       data:
-        roleKey: 
         wait: 0
         clipKey: audio/sfx_dragon-studio-notification-sound-effect-372475
         directClip: {fileID: 0}
     - rid: 8483491315577782337
       type: {class: TransitionCommandSpec, ns: , asm: Assembly-CSharp}
       data:
-        roleKey: 
         wait: 1
         playMode: 0
         targetKind: 0
@@ -349,7 +326,6 @@ MonoBehaviour:
     - rid: 8483491315577782338
       type: {class: UIPatchCommandSpec, ns: , asm: Assembly-CSharp}
       data:
-        roleKey: 
         wait: 1
         targetKind: 0
         themeId: black
@@ -357,7 +333,6 @@ MonoBehaviour:
     - rid: 8483491315577782339
       type: {class: TransitionCommandSpec, ns: , asm: Assembly-CSharp}
       data:
-        roleKey: 
         wait: 1
         playMode: 1
         targetKind: 0
@@ -373,7 +348,6 @@ MonoBehaviour:
     - rid: 8483491315577782340
       type: {class: UIPatchCommandSpec, ns: , asm: Assembly-CSharp}
       data:
-        roleKey: 
         wait: 1
         targetKind: 0
         themeId: theme1
@@ -381,7 +355,6 @@ MonoBehaviour:
     - rid: 8483491315577782341
       type: {class: PlayBgmCommandSpec, ns: , asm: Assembly-CSharp}
       data:
-        roleKey: 
         wait: 0
         clipKey: audio/bgm_tam_dystopia_snowwind_01
         directClip: {fileID: 0}
@@ -389,14 +362,12 @@ MonoBehaviour:
     - rid: 8483491315577782342
       type: {class: PlaySfxCommandSpec, ns: , asm: Assembly-CSharp}
       data:
-        roleKey: 
         wait: 0
         clipKey: audio/sfx_dragon-studio-notification-sound-effect-372475
         directClip: {fileID: 0}
     - rid: 8483491315577782343
       type: {class: TransitionCommandSpec, ns: , asm: Assembly-CSharp}
       data:
-        roleKey: 
         wait: 1
         playMode: 0
         targetKind: 0
@@ -412,7 +383,6 @@ MonoBehaviour:
     - rid: 8483491315577782344
       type: {class: UIPatchCommandSpec, ns: , asm: Assembly-CSharp}
       data:
-        roleKey: 
         wait: 1
         targetKind: 0
         themeId: black
@@ -420,7 +390,6 @@ MonoBehaviour:
     - rid: 8483491315577782345
       type: {class: TransitionCommandSpec, ns: , asm: Assembly-CSharp}
       data:
-        roleKey: 
         wait: 1
         playMode: 1
         targetKind: 0

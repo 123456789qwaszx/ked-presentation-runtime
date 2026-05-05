@@ -8,7 +8,7 @@ using UnityEngine;
     "Char Rig Motion",
     "Move By (XY)",
     Order = -200)]
-public class MoveByCommandSpecCharR : CommandSpecBase
+public class MoveByCommandSpecCharR : CharacterRigCommandSpecBase
 {
     [Header("Target (Track or Rig)")]
     public CharacterRigTarget target = CharacterRigTarget.Character_Track;
@@ -142,9 +142,9 @@ public sealed class MoveByCommandCharR : CommandBase, IStepScopedCommand
     {
         _resolveAttempted = true;
 
-        if (!scope.Refs.TryGetCharRigRefs(_spec.roleKey, out CharacterRigRefs rig))
-            return;
-
-        _rect = rig.GetRect(_spec.target);
+        CharacterRigRefs rigRefs =
+            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.targetKey);
+        
+        _rect = rigRefs.GetRect(_spec.target);
     }
 }

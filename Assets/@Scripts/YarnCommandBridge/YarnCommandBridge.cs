@@ -106,7 +106,6 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
     {
         var spec = new WaitCommandSpec()
         {
-            roleKey = "",
             seconds = duration,
         };
         
@@ -117,7 +116,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
     {
         var spec = new PivotRotateToCommandSpecCharR()
         {
-            roleKey = roleKey,
+            targetKey = roleKey,
             degree = angle
         };
 
@@ -128,27 +127,27 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
     {
         var spec = new HideRootLayersCommandSpecCharR
         {
-            roleKey = roleKey,
+            targetKey = roleKey,
             targetMask = CharRigRootLayerMask.CharacterPortrait_Root
         };
 
         var spec1 = new FadeInCommandSpecCharR()
         {
-            roleKey = roleKey,
+            targetKey = roleKey,
             targetMask = CharRigRootLayerMask.CharacterPortrait_Root,
             duration = 0.28f
         };
 
         var spec2 = new SlideInCommandSpecCharR
         {
-            roleKey = roleKey,
+            targetKey = roleKey,
             distance = 550f,
             duration = 0.45f
         };
 
         var spec3 = new DipInOutCommandSpecCharR()
         {
-            roleKey = roleKey,
+            targetKey = roleKey,
             target = CharacterRigTarget.Character_Track_Y,
             dir = CharRDirection.Right,
             distance = 22f,
@@ -157,7 +156,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 
         var spec4 = new PunchScaleCommandSpecCharR()
         {
-            roleKey = roleKey,
+            targetKey = roleKey,
             strength = -0.03f,
             duration = 0.55f,
             vibrato = 3,
@@ -166,7 +165,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 
         var spec5 = new DipInOutCommandSpecCharR()
         {
-            roleKey = roleKey,
+            targetKey = roleKey,
             target = CharacterRigTarget.Character_Track_Y,
             dir = CharRDirection.Down,
             distance = 12f,
@@ -175,7 +174,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 
         var spec6 = new SwayCommandSpecCharR()
         {
-            roleKey = roleKey,
+            targetKey = roleKey,
             strength = 11.5f,
             duration = 1.28f,
             cycles = 1,
@@ -188,13 +187,12 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 
         var spec7 = new WaitCommandSpec()
         {
-            roleKey = roleKey,
             seconds = 0.4f,
         };
 
         var spec8 = new JoltCommandSpec()
         {
-            roleKey = roleKey,
+            targetKey = roleKey,
             target = CharacterRigTarget.Character_Track,
             strength = 45f,
             direction = CharRDirection.Up,
@@ -219,7 +217,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
     {
         var spec = new SwayCommandSpecCharR
         {
-            roleKey = roleKey,
+            targetKey = roleKey,
             target = CharacterRigTarget.CharacterPortrait_SwayPivot,
 
             strength = 12f,
@@ -238,7 +236,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
     {
         var spec = new SwayCommandSpecCharR
         {
-            roleKey = roleKey,
+            targetKey = roleKey,
             target = CharacterRigTarget.CharacterPortrait_SwayPivot,
 
             strength = 13f,
@@ -257,7 +255,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
     {
         var spec = new SwayCommandSpecCharR
         {
-            roleKey = roleKey,
+            targetKey = roleKey,
             target = CharacterRigTarget.CharacterPortrait_SwayPivot,
 
             strength = 6.5f,
@@ -276,7 +274,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
     {
         var spec = new SwayCommandSpecCharR
         {
-            roleKey = roleKey,
+            targetKey = roleKey,
             target = CharacterRigTarget.CharacterPortrait_SwayPivot,
 
             strength = 15f,
@@ -424,7 +422,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
     {
         var spec = new DestroyCommandSpec
         {
-            roleKey = roleKey
+            targetKey = roleKey
         };
 
         Collect(spec);
@@ -436,14 +434,14 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 
         var juicySlideIn = new SlideInCommandSpecCharR
         {
-            roleKey = roleKey,
+            targetKey = roleKey,
             target = CharacterRigTarget.Character_Track_X,
             direction = dir
         };
 
         var spec = new JoltCommandSpec
         {
-            roleKey = roleKey,
+            targetKey = roleKey,
             target = CharacterRigTarget.Character_Track_Y,
             direction = CharRDirection.Up,
             strength = 340f,
@@ -463,7 +461,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 
         var spec = new JoltCommandSpec
         {
-            roleKey = roleKey,
+            targetKey = roleKey,
             target = CharacterRigTarget.Character_Track_Y,
             direction = dir,
             strength = 340f,
@@ -483,7 +481,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         var spec = new JoltCommandSpec
         {
             target = CharacterRigTarget.CharacterPortrait_Shake,
-            roleKey = roleKey,
+            targetKey = roleKey,
             direction = dir,
             strength = 44f,
             duration = 1.2f,
@@ -499,7 +497,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 
         var spec = new JoltCommandSpec
         {
-            roleKey = roleKey,
+            targetKey = roleKey,
             target = CharacterRigTarget.Character_Track,
             direction = dir,
             strength = 340f,
@@ -518,7 +516,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 
         var spec = new JoltCommandSpec
         {
-            roleKey = roleKey,
+            targetKey = roleKey,
             direction = dir,
             strength = 1400f,
             duration = 0.7f,
@@ -536,7 +534,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 
         var spec = new ArcHopInCommandSpecCharR
         {
-            roleKey = roleKey,
+            targetKey = roleKey,
             distance = distance,
             from = dir
         };
@@ -550,7 +548,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 
         var spec = new DipInOutCommandSpecCharR
         {
-            roleKey = roleKey,
+            targetKey = roleKey,
             dir = dir
         };
 
@@ -561,7 +559,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
     {
         var spec = new MoveByCommandSpecCharR
         {
-            roleKey = roleKey,
+            targetKey = roleKey,
             delta = new Vector2(x, y)
         };
 
@@ -572,7 +570,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
     {
         var spec = new FadeInCommandSpecCharR
         {
-            roleKey = roleKey
+            targetKey = roleKey
         };
 
         Collect(spec);
@@ -582,7 +580,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
     {
         var spec = new FadeOutCommandSpecCharR
         {
-            roleKey = roleKey
+            targetKey = roleKey
         };
 
         Collect(spec);
@@ -594,7 +592,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 
         var spec = new SlideInCommandSpecCharR
         {
-            roleKey = roleKey,
+            targetKey = roleKey,
             direction = from
         };
 
@@ -607,7 +605,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 
         var spec = new SlideOutCommandSpecCharR
         {
-            roleKey = roleKey,
+            targetKey = roleKey,
             to = to
         };
 
@@ -653,14 +651,14 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
     {
         var anchorSpec = new MoveByCommandSpecCharR
         {
-            roleKey = roleKey,
+            targetKey = roleKey,
             target = CharacterRigTarget.Character_Anchor,
             delta = new Vector2(x, y),
             duration = 0f,
             killTween = false
         };
 
-        var resetTrackSpec = new ApplyTrackOffsetCommandSpecCharR { roleKey = roleKey };
+        var resetTrackSpec = new ApplyTrackOffsetCommandSpecCharR { targetKey = roleKey };
 
         Collect(anchorSpec);
         Collect(resetTrackSpec);
@@ -687,7 +685,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 
         var anchorSpec = new SetAnchorCommandSpecCharR
         {
-            roleKey = roleKey,
+            targetKey = roleKey,
             preset = preset,
             globalTuning = globalTuning,
             roleTuningDb = roleTuningDb
@@ -695,7 +693,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 
         var resetTrackSpec = new ApplyTrackOffsetCommandSpecCharR
         {
-            roleKey = roleKey
+            targetKey = roleKey
         };
 
         Collect(anchorSpec);
@@ -707,7 +705,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
     {
         var spec = new ScaleToCommandSpecCharR
         {
-            roleKey = roleKey,
+            targetKey = roleKey,
             duration = duration,
             toScale = new Vector2(xyValue, xyValue)
         };
@@ -729,7 +727,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 
         var spec = new SetOriginSizeCommandSpecCharR
         {
-            roleKey = roleKey,
+            targetKey = roleKey,
             preset = preset,
             globalTuning = globalTuning,
             roleTuningDb = roleTuningDb,
@@ -743,7 +741,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
     {
         var spec = new SetOriginSizeCommandSpecCharR
         {
-            roleKey = roleKey,
+            targetKey = roleKey,
 
             overrideScale = true,
             scaleOverride = new Vector3(xyValue, xyValue, xyValue),
@@ -797,7 +795,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 
         var spec = new SetPortraitCrossfadeCommandSpecCharR
         {
-            roleKey = roleKey,
+            targetKey = roleKey,
             portrait = portraitIdentity
         };
 
@@ -811,11 +809,9 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
     {
         var spec = new CastCharacterCommandSpec
         {
-            roleKey = roleKey,
+            slotKey = roleKey,
             characterKey = characterKey,
-            variantKey = variantKey,
-            requireExistingRig = true,
-            strict = true
+            variantKey = variantKey
         };
         
         Collect(spec);
@@ -825,8 +821,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
     {
         var spec = new UncastCharacterCommandSpec
         {
-            roleKey = roleKey,
-            strict = true
+            targetKey = roleKey
         };
 
         Collect(spec);
@@ -860,14 +855,16 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
     }
 
     private void EnqueueSetEmotionPortraitWipeSpec(
-        string roleKey,
+        string targetKey,
         string emotion)
     {
         var spec = new SetEmotionPortraitWipeCommandSpec
         {
-            roleKey = roleKey,
-            emotion = emotion,
-            strict = true
+            targetKey = targetKey,
+            portrait = new PortraitIdentity
+            {
+                emotion = emotion
+            }
         };
 
         Collect(spec);

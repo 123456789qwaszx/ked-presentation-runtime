@@ -23,7 +23,7 @@ public sealed partial class YarnCommandBridge
     {
         return new ShowEmojiCommandSpecCharR
         {
-            roleKey = roleKey,
+            targetKey = roleKey,
             database = emojiDatabase,
             emojiKey = emojiKey,
             hideIfKeyEmpty = true,

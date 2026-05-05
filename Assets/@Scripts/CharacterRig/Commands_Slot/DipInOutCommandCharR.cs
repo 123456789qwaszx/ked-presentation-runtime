@@ -6,7 +6,7 @@ using RectTransform = UnityEngine.RectTransform;
 
 [Serializable]
 [CommandMenuHint("Char Rig Motion", "Dip InOut", Order = -735)]
-public sealed class DipInOutCommandSpecCharR : CommandSpecBase
+public sealed class DipInOutCommandSpecCharR : CharacterRigCommandSpecBase
 {
     [Header("Target")]
     public CharacterRigTarget target = CharacterRigTarget.Character_Track;
@@ -163,10 +163,10 @@ public sealed class DipInOutCommandCharR : CommandBase, IStepScopedCommand
     {
         _resolveAttempted = true;
 
-        if (!scope.Refs.TryGetCharRigRefs(_spec.roleKey, out CharacterRigRefs rig))
-            return;
-
-        _rect = rig.GetRect(_spec.target);
+        CharacterRigRefs rigRefs =
+            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.targetKey);
+        
+        _rect = rigRefs.GetRect(_spec.target);
         _restPos = _rect.anchoredPosition;
     }
 

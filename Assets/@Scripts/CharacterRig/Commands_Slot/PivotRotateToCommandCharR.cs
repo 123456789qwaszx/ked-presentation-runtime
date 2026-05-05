@@ -5,7 +5,7 @@ using UnityEngine;
 
 [Serializable]
 [CommandMenuHint("Char Rig Motion", "PivotRotate To", Order = 101)]
-public sealed class PivotRotateToCommandSpecCharR : CommandSpecBase
+public sealed class PivotRotateToCommandSpecCharR : CharacterRigCommandSpecBase
 {
     [Header("Targets")]
     [Tooltip("회전시킬 피벗. 보통 SwayPivot 축을 사용.")]
@@ -233,10 +233,11 @@ public sealed class PivotRotateToCommandCharR : CommandBase, IStepScopedCommand
     {
         _resolveAttempted = true;
 
-        if (!scope.Refs.TryGetCharRigRefs(_spec.roleKey, out CharacterRigRefs rig))
-            return;
+        CharacterRigRefs rigRefs =
+            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.targetKey);
 
-        _rect = rig.GetRect(_spec.target);
+
+        _rect = rigRefs.GetRect(_spec.target);
     }
 
     private static float ResolveNearestEquivalentAngle(float reference, float target)

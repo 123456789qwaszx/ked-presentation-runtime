@@ -12,6 +12,11 @@ using UnityEngine;
     SetOrder = -980)]
 public sealed class SetupCharRigCommandSpec : CommandSpecBase
 {
+    [Header("Role / Slot")]
+    [Tooltip("생성할 CharacterRig의 roleKey/slotKey. 예: slot1, me, right")]
+    public string roleKey;
+
+    [Header("Rig")]
     [Tooltip("있으면 이 프리팹을 인스턴스해서 Rig를 구성합니다. 없으면 자동 생성합니다.")]
     public GameObject rigPrefab;
 
@@ -21,9 +26,11 @@ public sealed class SetupCharRigCommandSpec : CommandSpecBase
     [Tooltip("자동 생성 시 루트 오브젝트 이름.")]
     public string rigRootName = "CharacterRig";
 
+    [Header("Role Prefix")]
     [Tooltip("켜면 roleKey로부터 자동으로 prefix를 생성합니다. 예: roleKey='seina' -> 'seina_'")]
     public bool autoRolePrefixFromRoleKey = true;
 
+    [Tooltip("켜면 최종 prefix를 실제 Rig 이름에 적용합니다.")]
     public bool addRolePrefix = true;
 
     [Tooltip("Parent Slot에 동일한 이름의 Rig가 이미 있으면 파괴 후 새로 생성합니다.")]
@@ -36,6 +43,9 @@ public sealed class SetupCharRigCommandSpec : CommandSpecBase
     {
         get
         {
+            if (!addRolePrefix)
+                return "";
+
             if (!autoRolePrefixFromRoleKey)
                 return "";
 
@@ -47,6 +57,8 @@ public sealed class SetupCharRigCommandSpec : CommandSpecBase
                 : $"{roleKey}_";
         }
     }
+
+    public string ResolvedRigName => $"{ResolvedRolePrefix}{rigRootName}";
 }
 
 public sealed class SetupCharRigCommand : CommandBase
@@ -64,25 +76,33 @@ public sealed class SetupCharRigCommand : CommandBase
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
-        if (_spec.destroyExistingRigWithSameName)
-            TryDestroyExistingRig();
-
-        CharacterRigRefs rigRefs = _rigAccess.BindAndBuildRefs(_spec);
-        scope.Refs[_spec.roleKey] = rigRefs;
-
+        Apply(scope);
         yield break;
     }
-    
+
     protected override void OnSkip(CommandRunScope scope)
     {
+        Apply(scope);
+    }
+
+    protected override void OnRollbackSeek(CommandRunScope scope)
+    {
+        OnSkip(scope);
+    }
+
+    private void Apply(CommandRunScope scope)
+    {
+        string roleKey = SafeTrim(_spec.roleKey);
+
+        if (string.IsNullOrEmpty(roleKey))
+            throw new InvalidOperationException("[SetupCharRigCommand] roleKey is empty.");
+
         if (_spec.destroyExistingRigWithSameName)
             TryDestroyExistingRig();
 
         CharacterRigRefs rigRefs = _rigAccess.BindAndBuildRefs(_spec);
-        scope.Refs[_spec.roleKey] = rigRefs;
+        scope.Refs[roleKey] = rigRefs;
     }
-
-    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
 
     private void TryDestroyExistingRig()
     {
@@ -90,9 +110,7 @@ public sealed class SetupCharRigCommand : CommandBase
         if (parent == null)
             return;
 
-        string rigName = _spec.addRolePrefix
-            ? _spec.ResolvedRolePrefix + _spec.rigRootName
-            : _spec.rigRootName;
+        string rigName = _spec.ResolvedRigName;
 
         for (int i = parent.childCount - 1; i >= 0; i--)
         {
@@ -107,5 +125,10 @@ public sealed class SetupCharRigCommand : CommandBase
 #endif
                 UnityEngine.Object.Destroy(child.gameObject);
         }
+    }
+
+    private static string SafeTrim(string s)
+    {
+        return string.IsNullOrEmpty(s) ? "" : s.Trim();
     }
 }
