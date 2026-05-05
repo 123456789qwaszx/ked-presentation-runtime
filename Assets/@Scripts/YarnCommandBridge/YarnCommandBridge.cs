@@ -98,16 +98,6 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         // slot <-> character binding
         _dialogueRunner.AddCommandHandler<string, string, string>("cast", EnqueueCastCharacterSpec);
         _dialogueRunner.AddCommandHandler<string>("uncast", EnqueueUncastCharacterSpec);
-
-        // character-target commands
-        _dialogueRunner.AddCommandHandler<string, string>("jolt_char", EnqueueJoltByCharacterSpec);
-        _dialogueRunner.AddCommandHandler<string, string>("shake_char", EnqueueJoltByCharacterSpecShake);
-        _dialogueRunner.AddCommandHandler<string, string>("nudge_char", EnqueueJoltByCharacterSpecTap);
-        _dialogueRunner.AddCommandHandler<string, string>("nudge_hard_char", EnqueueJoltByCharacterSpecTapHard);
-
-        _dialogueRunner.AddCommandHandler<string, string>("portrait_cross_char", EnqueueSetPortraitCrossfadeByCharacterSpec);
-        // _dialogueRunner.AddCommandHandler<string, string>("portrait_swap_char", EnqueueSetEmotionPortraitWipeByCharacterSpec);
-        // _dialogueRunner.AddCommandHandler<string, string, string, string>("emotion_wipe_char", EnqueueSetEmotionPortraitWipeByCharacterSpec);
         
         _dialogueRunner.AddCommandHandler<float>("pause", EnqueueWaitSpec);
     }
@@ -202,7 +192,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
             seconds = 0.4f,
         };
 
-        var spec8 = new JoltCommandSpecCharR()
+        var spec8 = new JoltCommandSpec()
         {
             roleKey = roleKey,
             target = CharacterRigTarget.Character_Track,
@@ -300,26 +290,6 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 
         Collect(spec);
     }
-
-    // private void EnqueueSetEmotionPortraitWipeSpec(
-    //     string roleKey,
-    //     string character,
-    //     string variant,
-    //     string emotion)
-    // {
-    //     var spec = new SetEmotionPortraitWipeCommandSpecCharR
-    //     {
-    //         roleKey = roleKey,
-    //         portrait = new PortraitIdentity
-    //         {
-    //             character = character,
-    //             variant = variant,
-    //             emotion = emotion
-    //         },
-    //     };
-    //
-    //     Collect(spec);
-    // }
 
     private void EnqueuePlayBgmSpec(string clipKey, float fadeDuration = 1f)
     {
@@ -471,7 +441,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
             direction = dir
         };
 
-        var spec = new JoltCommandSpecCharR
+        var spec = new JoltCommandSpec
         {
             roleKey = roleKey,
             target = CharacterRigTarget.Character_Track_Y,
@@ -491,7 +461,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
     {
         CharRDirection dir = ParseSlideDirection(direction, CharRDirection.Right);
 
-        var spec = new JoltCommandSpecCharR
+        var spec = new JoltCommandSpec
         {
             roleKey = roleKey,
             target = CharacterRigTarget.Character_Track_Y,
@@ -510,7 +480,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
     {
         CharRDirection dir = ParseSlideDirection(direction, CharRDirection.Right);
 
-        var spec = new JoltCommandSpecCharR
+        var spec = new JoltCommandSpec
         {
             target = CharacterRigTarget.CharacterPortrait_Shake,
             roleKey = roleKey,
@@ -527,7 +497,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
     {
         CharRDirection dir = ParseSlideDirection(direction, CharRDirection.Right);
 
-        var spec = new JoltCommandSpecCharR
+        var spec = new JoltCommandSpec
         {
             roleKey = roleKey,
             target = CharacterRigTarget.Character_Track,
@@ -546,7 +516,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
     {
         CharRDirection dir = ParseSlideDirection(direction, CharRDirection.Down);
 
-        var spec = new JoltCommandSpecCharR
+        var spec = new JoltCommandSpec
         {
             roleKey = roleKey,
             direction = dir,
@@ -851,19 +821,6 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         Collect(spec);
     }
 
-    // private void EnqueueCastCharacterSpec(string roleKey, string characterKey)
-    // {
-    //     var spec = new CastCharacterCommandSpec
-    //     {
-    //         roleKey = roleKey,
-    //         characterKey = characterKey,
-    //         requireExistingRig = true,
-    //         strict = true
-    //     };
-    //
-    //     Collect(spec);
-    // }
-
     private void EnqueueUncastCharacterSpec(string roleKey)
     {
         var spec = new UncastCharacterCommandSpec
@@ -902,104 +859,6 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         }
     }
 
-    #region Character0target Commands
-
-    private void EnqueueJoltByCharacterSpec(string characterKey, string direction = "right")
-    {
-        CharRDirection dir = ParseSlideDirection(direction, CharRDirection.Right);
-
-        var spec = new JoltByCharacterCommandSpec
-        {
-            characterKey = characterKey,
-            target = CharacterRigTarget.Character_Track_Y,
-            direction = dir,
-            strength = 340f,
-            duration = 0.6f,
-            taps = 3,
-            damping = 8,
-            anticipation = -12,
-            strict = true
-        };
-
-        Collect(spec);
-    }
-
-    private void EnqueueJoltByCharacterSpecShake(string characterKey, string direction = "right")
-    {
-        CharRDirection dir = ParseSlideDirection(direction, CharRDirection.Right);
-
-        var spec = new JoltByCharacterCommandSpec
-        {
-            characterKey = characterKey,
-            target = CharacterRigTarget.CharacterPortrait_Shake,
-            direction = dir,
-            strength = 44f,
-            duration = 1.2f,
-            taps = 4,
-            strict = true
-        };
-
-        Collect(spec);
-    }
-
-    private void EnqueueJoltByCharacterSpecTap(string characterKey, string direction = "right")
-    {
-        CharRDirection dir = ParseSlideDirection(direction, CharRDirection.Right);
-
-        var spec = new JoltByCharacterCommandSpec
-        {
-            characterKey = characterKey,
-            target = CharacterRigTarget.Character_Track,
-            direction = dir,
-            strength = 340f,
-            duration = 0.6f,
-            taps = 1,
-            damping = 9,
-            anticipation = -12,
-            strict = true
-        };
-
-        Collect(spec);
-    }
-
-    private void EnqueueJoltByCharacterSpecTapHard(string characterKey, string direction = "down")
-    {
-        CharRDirection dir = ParseSlideDirection(direction, CharRDirection.Down);
-
-        var spec = new JoltByCharacterCommandSpec
-        {
-            characterKey = characterKey,
-            direction = dir,
-            strength = 1400f,
-            duration = 0.7f,
-            taps = 1,
-            damping = 9,
-            anticipation = 4,
-            strict = true
-        };
-
-        Collect(spec);
-    }
-
-    private void EnqueueSetPortraitCrossfadeByCharacterSpec(string characterKey, string character)
-    {
-        var portraitIdentity = new PortraitIdentity
-        {
-            character = character,
-            variant = "a",
-            emotion = "1"
-        };
-
-        var spec = new SetPortraitCrossfadeByCharacterCommandSpec
-        {
-            characterKey = characterKey,
-            portrait = portraitIdentity,
-            strict = true
-        };
-
-        Collect(spec);
-    }
-    
     private void EnqueueSetEmotionPortraitWipeSpec(
         string roleKey,
         string emotion)
@@ -1013,46 +872,4 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 
         Collect(spec);
     }
-
-    // private void EnqueueSetEmotionPortraitWipeByCharacterSpec(string characterKey, string character)
-    // {
-    //     var portraitIdentity = new PortraitIdentity
-    //     {
-    //         character = character,
-    //         variant = "a",
-    //         emotion = "1"
-    //     };
-    //
-    //     var spec = new SetEmotionPortraitWipeByCharacterCommandSpec
-    //     {
-    //         characterKey = characterKey,
-    //         portrait = portraitIdentity,
-    //         strict = true
-    //     };
-    //
-    //     Collect(spec);
-    // }
-
-    // private void EnqueueSetEmotionPortraitWipeByCharacterSpec(
-    //     string characterKey,
-    //     string character,
-    //     string variant,
-    //     string emotion)
-    // {
-    //     var spec = new SetEmotionPortraitWipeByCharacterCommandSpec
-    //     {
-    //         characterKey = characterKey,
-    //         portrait = new PortraitIdentity
-    //         {
-    //             character = character,
-    //             variant = variant,
-    //             emotion = emotion
-    //         },
-    //         strict = true
-    //     };
-    //
-    //     Collect(spec);
-    // }
-
-    #endregion
 }

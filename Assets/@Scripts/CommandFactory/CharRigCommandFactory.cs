@@ -52,35 +52,10 @@ public sealed class CharRigCommandFactory : INodeCommandFactory
             SetPortraitCrossfadeCommandSpecCharR s => new SetPortraitCrossfadeCommandCharR(s, _portraitResolver),
             
             ShowEmojiCommandSpecCharR s    => new ShowEmojiCommandCharR(s),
-            
-            
             SetSpriteCommandSpecCharR s     => new SetSpriteCommandCharR(s),
             
-            
             CastCharacterCommandSpec s => new CastCharacterCommand(s),
-            ApplyTrackOffsetByCharacterCommandSpecCharR s => new ApplyTrackOffsetByCharacterCommandCharR(s),
-            ArcHopInByCharacterCommandSpecCharR s => new ArcHopInByCharacterCommandCharR(s),
-            DipInOutByCharacterCommandSpecCharR s => new DipInOutByCharacterCommandCharR(s),
-            FadeInByCharacterCommandSpecCharR s => new FadeInByCharacterCommandCharR(s),
-            FadeOutByCharacterCommandSpecCharR s => new FadeOutByCharacterCommandCharR(s),
-            JoltByCharacterCommandSpec s => new JoltByCharacterCommand(s),
-            MoveByByCharacterCommandSpecCharR s => new MoveByByCharacterCommandCharR(s),
-            PivotRotateToByCharacterCommandSpecCharR s => new PivotRotateToByCharacterCommandCharR(s),
-            PunchScaleByCharacterCommandSpecCharR s => new PunchScaleByCharacterCommandCharR(s),
-            RotateToByCharacterCommandSpecCharR s => new RotateToByCharacterCommandCharR(s),
-            ScaleToByCharacterCommandSpecCharR s => new ScaleToByCharacterCommandCharR(s),
-            SetAnchorByCharacterCommandSpecCharR s => new SetAnchorByCharacterCommandCharR(s),
-            SetColorByCharacterCommandSpecCharR s => new SetColorByCharacterCommandCharR(s),
-            SetPortraitByCharacterCommandSpec s => new SetPortraitByCharacterCommand(s, _portraitResolver),
-            SetPortraitCrossfadeByCharacterCommandSpec s => new SetPortraitCrossfadeByCharacterCommand(s, _portraitResolver),
-            SetSpriteByCharacterCommandSpecCharR s => new SetSpriteByCharacterCommandCharR(s),
-            SlideInByCharacterCommandSpecCharR s => new SlideInByCharacterCommandCharR(s),
-            SlideOutByCharacterCommandSpecCharR s => new SlideOutByCharacterCommandCharR(s),
-            SwayByCharacterCommandSpecCharR s => new SwayByCharacterCommandCharR(s),
             UncastCharacterCommandSpec s => new UncastCharacterCommand(s),
-            
-            
-            //SetEmotionPortraitWipeByCharacterCommandSpec s => new SetEmotionPortraitWipeByCharacterCommand(s, _portraitResolver),
             
             _ => null
         };

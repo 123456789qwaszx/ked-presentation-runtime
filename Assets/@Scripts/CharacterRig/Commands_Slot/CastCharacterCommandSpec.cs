@@ -10,7 +10,7 @@ using UnityEngine;
         CommandMenuSets.BuildChar,
     },
     SetOrder = -979)]
-public sealed class CastCharacterCommandSpec : CommandSpecBase
+public sealed class CastCharacterCommandSpec : CharacterRigCommandSpecBase
 {
     [Header("Character Identity")]
     [Tooltip("이 roleKey 슬롯에 바인딩할 캐릭터 키.")]
