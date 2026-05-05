@@ -44,7 +44,7 @@ public sealed class CharRigCommandFactory : INodeCommandFactory
             DipInOutCommandSpecCharR s    => new DipInOutCommandCharR(s),
             SlideInCommandSpecCharR s    => new SlideInCommandCharR(s),
             SlideOutCommandSpecCharR s    => new SlideOutCommandCharR(s),
-            JoltCommandSpecCharR s    => new JoltCommandCharR(s),
+            JoltCommandSpec s    => new JoltCommand(s),
             
             SetEmotionPortraitWipeCommandSpec s    => new SetEmotionPortraitWipeCommand(s, _portraitResolver),
             SetPortraitSpriteCommandSpecCharR s    => new SetPortraitSpriteCommandCharR(s, _portraitResolver),
