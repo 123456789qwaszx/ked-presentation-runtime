@@ -2,24 +2,24 @@ using System;
 using UnityEngine;
 using Yarn.Unity;
 
-// presenter that captures the current line's TextID
-// Used by YarnLineLifecycleBridge, and (when autoRegisterPresenter is enabled)
-// automatically inserted at the front of DialogueRunner.DialoguePresenters.
 public sealed class YarnLineIdPresenter : DialoguePresenterBase
 {
     public event Action<string> OnLineIdReceived;
     public event Action<string> OnCharacterKeyReceived;
+    public event Action<LocalizedLine> LineEntered;
 
     public override YarnTask OnDialogueStartedAsync() => YarnTask.CompletedTask;
     public override YarnTask OnDialogueCompleteAsync() => YarnTask.CompletedTask;
-    
+
     public override YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token)
     {
-        string lineId = line.TextID;
+        string lineId = line != null ? line.TextID : string.Empty;
         OnLineIdReceived?.Invoke(lineId);
 
         string characterKey = ResolveCharacterKey(line);
         OnCharacterKeyReceived?.Invoke(characterKey);
+
+        LineEntered?.Invoke(line);
 
         return YarnTask.CompletedTask;
     }
@@ -29,7 +29,6 @@ public sealed class YarnLineIdPresenter : DialoguePresenterBase
         if (line == null)
             return string.Empty;
 
-        string key = line.CharacterName;
-        return key;
+        return line.CharacterName ?? string.Empty;
     }
 }

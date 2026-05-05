@@ -142,19 +142,17 @@ public sealed class NodeRollbackHistory : IDisposable
         ));
     }
 
-    public bool CanRollbackOneStep()
-    {
-        return _points.Count >= 2;
-    }
+    public bool CanRollbackOneStep => _points.Count >= 2;
+    
 
     public bool TryGetPreviousPoint(out RollbackPoint point)
     {
         point = default;
 
-        if (_points.Count < 2)
+        if (!CanRollbackOneStep)
             return false;
 
-        point = _points[_points.Count - 2];
+        point = _points[^2];
         return true;
     }
 

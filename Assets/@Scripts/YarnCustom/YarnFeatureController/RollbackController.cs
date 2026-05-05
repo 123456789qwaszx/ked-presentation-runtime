@@ -12,12 +12,6 @@ public sealed class RollbackController : IDisposable
     private readonly PresentationSessionContext _presentationSessionContext;
     private readonly PresentationUIRoot _presentationUIRoot;
 
-    public bool IsSeeking => _state.IsSeeking;
-
-    public bool CanRollback =>
-        !_state.IsSeeking &&
-        _history.CanRollbackOneStep();
-
     public RollbackController(
         RollbackRuntimeState state,
         NodeRollbackHistory history,
@@ -37,11 +31,11 @@ public sealed class RollbackController : IDisposable
         _presentationSessionContext = presentationSessionContext;
         _presentationUIRoot = presentationUIRoot;
 
-        _bridge.LineStart -= EndSeekBeforeTargetLineDisplays;
-        _bridge.LineStart += EndSeekBeforeTargetLineDisplays;
+        _bridge.LineEntered  -= EndSeekBeforeTargetLineDisplays;
+        _bridge.LineEntered  += EndSeekBeforeTargetLineDisplays;
 
-        _bridge.LineStart -= AddRollbackPoint;
-        _bridge.LineStart += AddRollbackPoint;
+        _bridge.LineEntered  -= AddRollbackPoint;
+        _bridge.LineEntered  += AddRollbackPoint;
     }
 
     public bool RequestRollbackOneStep()
@@ -52,16 +46,10 @@ public sealed class RollbackController : IDisposable
         if (!_history.TryGetPreviousPoint(out RollbackPoint target))
             return false;
 
-        bool jumped = _presentationSessionBridge.JumpTo(
-            target.presentationNodeIndex,
-            target.presentationStepIndex
-        );
-
-        // if (!jumped)
-        // {
-        //     Debug.LogWarning(
-        //         "[RollbackController] Failed to jump presentation session. Rollback will continue with Yarn restart.");
-        // }
+        // bool jumped = _presentationSessionBridge.JumpTo(
+        //     target.presentationNodeIndex,
+        //     target.presentationStepIndex
+        // );
 
         // target 자신은 남기지 않고 잘라야
         // rollback 후 target line이 다시 완료될 때 1번만 정상 기록된다.
@@ -113,7 +101,7 @@ public sealed class RollbackController : IDisposable
         if (_bridge == null)
             return;
 
-        _bridge.LineStart -= EndSeekBeforeTargetLineDisplays;
-        _bridge.LineStart -= AddRollbackPoint;
+        _bridge.LineEntered  -= EndSeekBeforeTargetLineDisplays;
+        _bridge.LineEntered  -= AddRollbackPoint;
     }
 }

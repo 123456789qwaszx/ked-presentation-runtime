@@ -50,16 +50,11 @@
 <<box_hide>>
 <<fade_out Laru>>
 
-<<await_for 5>>
-<<pause 0.7>>
-<<blackout cover>>
 
 <<bg_spawn test3 bg1>>
 <<bg_sprite test3 background_02>>
 <<bg_fade test3 1>>
 
-
-<<blackout uncover>>
 
 
 
