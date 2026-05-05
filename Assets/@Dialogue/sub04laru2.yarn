@@ -15,29 +15,29 @@
 
 <<slot Albedo>>
 <<place Albedo center>>
-<<size Albedo 2.4>>
-<<place_offset Albedo 0 -200>>
+<<size Albedo normal>>
 <<cast Albedo Albedo>>
 <<fade_in Albedo>>
+<<emotion Albedo 4>>
 
 알베도: 이번엔 운이 좋았네.
 
 <<slot Laru>>
 <<place Laru left>>
-<<size Laru 2.3>>
-<<place_offset Laru 0 -180>>
+<<size Laru normal>>
 <<cast Laru Laru>>
+<<emotion Laru 4>>
 
 <<fade_in Laru>>
 <<slide_in Laru>>
 <<move_by Albedo 300 0>>
 라루: 그럼, 내 경비 청구서는 승인된 거야?
 
-<<emotion_wipe_char Albedo Albedo a 13>>
+<<emotion Albedo 13>>
 알베도: 좀 이따 재무부로 가서 직접 처리해.
 
 <<shake Laru up>>
-<<emotion_wipe_char Laru Laru a 23>>
+<<emotion Laru 23>>
 라루: 잘됐다! 그럼 더는 방해하지 않고, 이만 나가볼게!
 
 <<fade_out Laru>>
@@ -45,15 +45,14 @@
 
 <<hop_in Albedo 0>>
 <<move_by Albedo -300 0>>
-<<emotion_wipe_char Albedo Albedo a 1>>
+<<emotion Albedo  1>>
 알베도: 잠깐! 내 말 아직 다 안 끝났어! 네 근무 태도 문제도 남았거든!
 
 <<fade_out Albedo>>
 <<slide_out Albedo left>>
 
 <<place Laru right>>
-<<place_offset Laru 0 -180>>
-<<emotion_wipe_char Laru Laru a 1>>
+<<emotion Laru 1>>
 
 <<fade_in Laru>>
 <<slide_in Laru right>>
@@ -61,24 +60,23 @@
 
 <<slot Bastelina>>
 <<place Bastelina left>>
-<<size Bastelina 1.9>>
-<<place_offset Bastelina 0 -100>>
+<<size Bastelina normal>>
 <<cast Bastelina Bastelina>>
 <<fade_in Bastelina>>
-<<emotion_wipe_char Bastelina Bastelina a 4>>
+<<emotion Bastelina 4>>
 
 <<move_by Laru -180 0>>
-<<emotion_wipe_char Laru Laru a 7>>
+<<emotion Laru 7>>
 라루: 베스티나! 정규직으로 전환된 뒤에 지리 협회와의 구매 업무는 내가 아직 안 알려 줬지!?
 
 
-<<emotion_wipe_char Bastelina Bastelina a 5>>
+<<emotion Bastelina 5>>
 베스티나: 네? 아, 그런 것 같아요......
 
 라루: 마침 오늘이 지리 협회랑 정기 업무 미팅하는 날이네! 얼른 가자!
 
 <<jolt Bastelina right>>
-<<emotion_wipe_char Bastelina Bastelina a 14>>
+<<emotion Bastelina 14>>
 베스티나: 그치만, 알베도님 표정이 안 좋으신데요......
 
 
@@ -86,13 +84,13 @@
 라루: 괜찮아, 괜찮아~ 이제 너도 정규직이니까 업무를 빨리 익혀야지! 농땡이는 절대 안 돼!
 
 <<place Albedo right>>
-<<size Albedo 2.4>>
+<<size Albedo large>>
 <<place_offset Albedo 0 -200>>
 
 <<fade_in Albedo>>
 <<slide_in Albedo right>>
 
-<<emotion_wipe_char Albedo Albedo a 11>>
+<<emotion Albedo 11>>
 
 <<shot_track Albedo 800 0 3>>
 <<move_by Laru -400 0>>
@@ -100,11 +98,11 @@
 알베도: 사돈 남 말 하시네? 너나 잘하세요.
 
 
-<<emotion_wipe_char Laru Laru a 14>>
+<<emotion Laru 14>>
 라루: 그래? 하지만 난 베스티나가 아닌걸......
 
 <<shake Albedo left>>
-<<emotion_wipe_char Albedo Albedo a 6>>
+<<emotion Albedo 6>>
 알베도: 휴...... 됐다, 됐어. 그냥 나가 봐. 이런 부하 직원을 두다니. 대체 전생에 무슨 죄를 지은 거람......
 
 <<fade_out Albedo>>
@@ -117,11 +115,11 @@
 
 
 <<place Bastelina left>>
-<<size Bastelina 2.4>>
+<<size Bastelina large>>
 <<place_offset Bastelina 0 -200>>
 
 <<place Laru right>>
-<<size Laru 2.4>>
+<<size Laru large>>
 <<place_offset Laru 0 -200>>
 
 <<fade_in Laru>>
@@ -132,24 +130,24 @@
 라루: 탈출 성공!
 
 
-<<emotion_wipe_char Bastelina Bastelina a 1>>
+<<emotion Bastelina 1>>
 베스티나: 그래서 지리 협회와의 구매 업무는......
 
 라루: 아, 우리가 연구랑 업무에 쓸 신기들을 종종 지리 협회에 의뢰해서 대량 구매하거든. 그리고는 나중에 일괄 정산하는 방식이지.
 
 <<nudge Bastelina up>>
-<<emotion_wipe_char Bastelina Bastelina a 5>>
+<<emotion Bastelina 5>>
 베스티나: 그런거군요! 메모해야겠네요......
 
 <<shake Bastelina left>>
 
 <<nudge Laru up>>
-<<emotion_wipe_char Laru Laru a 1>>
+<<emotion Laru 1>>
 라루: 그럴 필요 없어......
 
 <<nudge Laru up>>
-<<emotion_wipe_char Laru Laru a 8>>
-<<emotion_wipe_char Bastelina Bastelina a 4>>
+<<emotion Laru 8>>
+<<emotion Bastelina 4>>
 라루: 아까 한 말들은 전부 사무실에서 빠져나오려던 핑계였거든.
 
 라루: 지리 협회와의 미팅이 표면적으로 정기적이긴 한데, 사실은 아무 때나 가도 돼. 난 며칠 전에도 다녀왔어.
@@ -158,20 +156,20 @@
 
 
 <<dip Laru down>>
-<<emotion_wipe_char Laru Laru a 14>>
+<<emotion Laru 14>>
 라루: 이미 간다고 말했으니, 형식상이라도 한 번 들러야지. 괜히 들통나면 곤란하잖아.
 
 
-<<emotion_wipe_char Laru Laru a 1>>
+<<emotion Laru 1>>
 라루: 마침 잘 됐다! 베스티나는 아직 윌로를 본 적 없지?
 
-<<emotion_wipe_char Bastelina Bastelina a 17>>
+<<emotion Bastelina 17>>
 베스티나: 윌로요? 우리 협력 인원 명단에서 본 적 있는 이름 같아요.
 
 
-<<emotion_wipe_char Laru Laru a 24>>
+<<emotion Laru 24>>
 라루: 지리 협회 천 탑 지부의 책임자인데, 내 오랜 친구야!
 
-<<emotion_wipe_char Laru Laru a 1>>
+<<emotion Laru 1>>
 라루: 그럼 오늘은 윌로랑 안면도 트고, 우리가 지리 협회와 어떻게 일하는지도 익혀두자.
 ===
