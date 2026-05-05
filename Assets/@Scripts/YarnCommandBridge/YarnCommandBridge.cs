@@ -426,7 +426,6 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         {
             case "cover":
                 spec.playMode = TransitionPlayMode.CoverOnly;
-                spec.holdCoveredSeconds = 0.2f;
                 spec.wait = true;
                 break;
 
@@ -437,6 +436,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 
             case "cover_then_uncover":
                 spec.playMode = TransitionPlayMode.CoverThenUncover;
+                spec.holdCoveredSeconds = 1.5f;
                 break;
 
             default:

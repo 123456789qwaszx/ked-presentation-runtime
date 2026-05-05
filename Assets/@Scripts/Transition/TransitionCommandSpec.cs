@@ -74,7 +74,7 @@ public sealed class TransitionCommand : CommandBase
             yield break;
 
         CanvasGroup cg = _target.canvasGroup;
-        cg.DOKill(false);
+        cg.DOKill(true);
 
         if (_spec.resetToOpenAtStart &&
             (_spec.playMode == TransitionPlayMode.CoverOnly ||
@@ -151,7 +151,7 @@ public sealed class TransitionCommand : CommandBase
         if (cg == null)
             yield break;
 
-        cg.DOKill(false);
+        cg.DOKill(true);
         cg.blocksRaycasts = blockRaycasts;
         cg.interactable = false;
 
@@ -164,7 +164,16 @@ public sealed class TransitionCommand : CommandBase
         Tween tween = cg
             .DOFade(Mathf.Clamp01(toAlpha), duration)
             .SetEase(ease)
-            .SetUpdate(true);
+            .SetUpdate(true)
+            .OnComplete(() =>
+        {
+            if (cg == null)
+                return;
+
+            cg.alpha = toAlpha;
+            cg = null;
+            tween = null;
+        });
 
         if (_spec.wait)
             yield return tween.WaitForCompletion();

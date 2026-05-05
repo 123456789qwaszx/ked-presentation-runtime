@@ -47,15 +47,21 @@
 라루: 그건...... 공급업체와의 비즈니스 식사 자리에서 먹은 건데...... 경비 처리 안 되나? #box=onlytext
 
 <<begin_hold>>
-<<await_for 1>>
 <<box_hide>>
+<<fade_out Laru>>
+
+<<await_for 5>>
+<<pause 0.7>>
+<<blackout cover>>
 
 <<bg_spawn test3 bg1>>
 <<bg_sprite test3 background_02>>
 <<bg_fade test3 1>>
 
-<<fade_out Laru>>
-<<pause 1.2>>
+
+<<blackout uncover>>
+
+
 
 <<fade_in Albedo>>
 
