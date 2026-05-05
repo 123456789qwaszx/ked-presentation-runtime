@@ -5,7 +5,8 @@ using Yarn.Unity;
 
 public sealed class CustomLinePresenter : DialoguePresenterBase
 {
-    [Header("Fade")] public bool useFadeEffect = true;
+    [Header("Fade")]
+    public bool useFadeEffect = true;
     public float fadeUpDuration = 0.25f;
     public float fadeDownDuration = 0.1f;
 
@@ -17,10 +18,16 @@ public sealed class CustomLinePresenter : DialoguePresenterBase
     private AudioSystem _audioSystem;
     private YarnBridgePlaybackDriver _yarnBridgePlaybackDriver;
 
+    private readonly DialogueBoxTransitionPolicy _boxTransitionPolicy = new();
+
     private TMP_Text _lineText;
     private TMP_Text _characterNameText;
     private GameObject _characterNameContainer;
     private CanvasGroup _canvasGroup;
+
+    private DialogueBoxKind? _currentBoxKind;
+    private IDialogueTextTarget _currentBox;
+    private bool _isBoxVisible;
 
     public void Initialize(
         DialogueRunner dialogueRunner,
@@ -87,30 +94,40 @@ public sealed class CustomLinePresenter : DialoguePresenterBase
         _yarnBridgePlaybackDriver?.ResetImmediateWaitForNewLine();
         _yarnBridgePlaybackDriver?.PlayCollected();
 
-        // ── 3. 박스 타겟 Resolve / Bind ─────────────────────────────────
+        // ── 3. 박스 종류 결정 ─────────────────────────────────────────────
         bool hasCharacterName = string.IsNullOrWhiteSpace(line.CharacterName) == false;
-        //DialogueBoxKind boxKind = _lineRoutingPolicy.Resolve(hasCharacterName);
-        
-        DialogueBoxKind boxKind = TryResolveBoxKindFromMetadata(
-            line.Metadata, 
-            out DialogueBoxKind metadataBoxKind)
-            ? metadataBoxKind
-            : _lineRoutingPolicy.Resolve(hasCharacterName);
 
-        IDialogueTextTarget box = _dialogueBoxResolver.ResolveTarget(boxKind);
-        if (box == null)
+        DialogueBoxKind nextBoxKind = TryResolveBoxKindFromMetadata(
+            line.Metadata,
+            out DialogueBoxKind metadataBoxKind)
+                ? metadataBoxKind
+                : _lineRoutingPolicy.Resolve(hasCharacterName);
+
+        DialogueBoxTransitionKind transitionKind = _boxTransitionPolicy.Resolve(
+            _currentBoxKind,
+            _isBoxVisible,
+            nextBoxKind,
+            line.Metadata,
+            ShouldConsumeLineSilently());
+
+        IDialogueTextTarget nextBox = _dialogueBoxResolver.ResolveTarget(nextBoxKind);
+        if (nextBox == null)
         {
             Debug.LogError(
-                $"{nameof(CustomLinePresenter)}: failed to resolve dialogue box {boxKind} for line {line.TextID}.");
+                $"{nameof(CustomLinePresenter)}: failed to resolve dialogue box {nextBoxKind} for line {line.TextID}.");
             return;
         }
 
-        ResetDialogueBoxTransform(box);
-        
-        _dialogueTextRouter.Bind(box);
+        ResetDialogueBoxTransform(nextBox);
+
+        // ── 4. Transition 준비 ───────────────────────────────────────────
+        PrepareBoxForTransition(nextBox, transitionKind);
+
+        // ── 5. 박스 Bind ─────────────────────────────────────────────────
+        _dialogueTextRouter.Bind(nextBox);
 
         _lineText = _dialogueTextRouter.LineText;
-        _canvasGroup = box.CanvasGroup;
+        _canvasGroup = nextBox.CanvasGroup;
 
         if (_lineText == null)
         {
@@ -120,32 +137,255 @@ public sealed class CustomLinePresenter : DialoguePresenterBase
 
         BindCharacterNameTarget(hasCharacterName);
 
-        // ── 4. 표시할 텍스트 결정 ────────────────────────────────────────
+        // ── 6. 표시할 텍스트 결정 ────────────────────────────────────────
         var text = line.TextWithoutCharacterName;
 
         ApplyCharacterName(line);
 
-        // ── 5. 타입라이터 준비 ───────────────────────────────────────────
+        // ── 7. 타입라이터 준비 ───────────────────────────────────────────
         _typewriter.SetTextView(_lineText);
         _typewriter.PrepareForContent(text);
 
-        // ── 6. Rollback 복원 중이면 여기서 종료 ──────────────────────────
-        // if (!ShouldConsumeLineSilently())
-        // {
-            // ── 7. 이제 실제로 박스를 보여준다 ───────────────────────────────
-            _dialogueBoxResolver.ShowOnly(box);
-            await FadeInAsync(token);
-        //}
+        // ── 8. DialogueBox 전환 실행 ─────────────────────────────────────
+        await ApplyBoxTransitionAsync(
+            _currentBox,
+            nextBox,
+            transitionKind,
+            token);
 
-        // ── 8. 타입라이터 실행 ───────────────────────────────────────────
+        _currentBoxKind = nextBoxKind;
+        _currentBox = nextBox;
+        _isBoxVisible = transitionKind != DialogueBoxTransitionKind.Hide;
+
+        // ── 9. 타입라이터 실행 ───────────────────────────────────────────
         await _typewriter
             .RunTypewriter(text, token.HurryUpToken)
             .SuppressCancellationThrow();
 
-        // ── 9. 입력 대기 ─────────────────────────────────────────────────
+        // ── 10. 입력 대기 ────────────────────────────────────────────────
         await YarnTask.WaitUntilCanceled(token.NextContentToken).SuppressCancellationThrow();
 
         _typewriter.ContentWillDismiss();
+    }
+
+    private void PrepareBoxForTransition(
+        IDialogueTextTarget nextBox,
+        DialogueBoxTransitionKind transitionKind)
+    {
+        DialogueBoxHost host = _dialogueBoxResolver as DialogueBoxHost;
+
+        switch (transitionKind)
+        {
+            case DialogueBoxTransitionKind.Keep:
+                // 같은 박스 유지. 아무것도 숨기지 않는다.
+                break;
+
+            case DialogueBoxTransitionKind.Cut:
+                if (host != null)
+                {
+                    host.HideAllExcept(nextBox);
+                    host.ShowImmediate(nextBox);
+                }
+                else
+                {
+                    _dialogueBoxResolver.HideAll();
+                    SetBoxVisibleImmediate(nextBox, true);
+                }
+                break;
+
+            case DialogueBoxTransitionKind.FadeIn:
+                if (host != null)
+                {
+                    host.HideAllExcept(nextBox);
+                    host.PrepareHidden(nextBox);
+                }
+                else
+                {
+                    _dialogueBoxResolver.HideAll();
+                    PrepareBoxHidden(nextBox);
+                }
+                break;
+
+            case DialogueBoxTransitionKind.FadeOutIn:
+                // 이전 박스는 ApplyBoxTransitionAsync에서 FadeOut한다.
+                // 여기서는 새 박스를 아직 보이지 않게 준비만 한다.
+                PrepareBoxHidden(nextBox);
+                break;
+
+            case DialogueBoxTransitionKind.Hide:
+                // 이 라인을 숨김 처리하는 것은 특수 케이스.
+                // line 표시 흐름에서는 거의 쓰지 않는 것을 권장.
+                break;
+        }
+    }
+
+    private async YarnTask ApplyBoxTransitionAsync(
+        IDialogueTextTarget previousBox,
+        IDialogueTextTarget nextBox,
+        DialogueBoxTransitionKind transitionKind,
+        LineCancellationToken token)
+    {
+        if (!useFadeEffect || ShouldConsumeLineSilently())
+        {
+            ApplyBoxTransitionImmediate(previousBox, nextBox, transitionKind);
+            return;
+        }
+
+        switch (transitionKind)
+        {
+            case DialogueBoxTransitionKind.Keep:
+                SetBoxVisibleImmediate(nextBox, true);
+                break;
+
+            case DialogueBoxTransitionKind.Cut:
+                ApplyBoxTransitionImmediate(previousBox, nextBox, transitionKind);
+                break;
+
+            case DialogueBoxTransitionKind.FadeIn:
+                await FadeInBoxAsync(nextBox, token);
+                break;
+
+            case DialogueBoxTransitionKind.FadeOutIn:
+                if (previousBox != null && !ReferenceEquals(previousBox, nextBox))
+                    await FadeOutBoxAsync(previousBox, token);
+
+                SetBoxVisibleImmediate(previousBox, false);
+
+                PrepareBoxHidden(nextBox);
+                await FadeInBoxAsync(nextBox, token);
+                break;
+
+            case DialogueBoxTransitionKind.Hide:
+                if (nextBox != null)
+                    await FadeOutBoxAsync(nextBox, token);
+
+                SetBoxVisibleImmediate(nextBox, false);
+                break;
+        }
+    }
+
+    private void ApplyBoxTransitionImmediate(
+        IDialogueTextTarget previousBox,
+        IDialogueTextTarget nextBox,
+        DialogueBoxTransitionKind transitionKind)
+    {
+        switch (transitionKind)
+        {
+            case DialogueBoxTransitionKind.Keep:
+                SetBoxVisibleImmediate(nextBox, true);
+                break;
+
+            case DialogueBoxTransitionKind.Cut:
+            case DialogueBoxTransitionKind.FadeIn:
+                HideAllExcept(nextBox);
+                SetBoxVisibleImmediate(nextBox, true);
+                break;
+
+            case DialogueBoxTransitionKind.FadeOutIn:
+                if (previousBox != null && !ReferenceEquals(previousBox, nextBox))
+                    SetBoxVisibleImmediate(previousBox, false);
+
+                HideAllExcept(nextBox);
+                SetBoxVisibleImmediate(nextBox, true);
+                break;
+
+            case DialogueBoxTransitionKind.Hide:
+                SetBoxVisibleImmediate(nextBox, false);
+                break;
+        }
+    }
+
+    private async YarnTask FadeInBoxAsync(
+        IDialogueTextTarget box,
+        LineCancellationToken token)
+    {
+        if (box == null || box.CanvasGroup == null)
+            return;
+
+        CanvasGroup cg = box.CanvasGroup;
+
+        SetBoxVisibleImmediate(box, true);
+        cg.alpha = 0f;
+
+        await Effects
+            .FadeAlphaAsync(cg, 0f, 1f, fadeUpDuration, token.HurryUpToken)
+            .SuppressCancellationThrow();
+
+        cg.alpha = 1f;
+        cg.interactable = true;
+        cg.blocksRaycasts = true;
+    }
+
+    private async YarnTask FadeOutBoxAsync(
+        IDialogueTextTarget box,
+        LineCancellationToken token)
+    {
+        if (box == null || box.CanvasGroup == null)
+            return;
+
+        CanvasGroup cg = box.CanvasGroup;
+
+        await Effects
+            .FadeAlphaAsync(cg, cg.alpha, 0f, fadeDownDuration, token.HurryUpToken)
+            .SuppressCancellationThrow();
+
+        cg.alpha = 0f;
+        cg.interactable = false;
+        cg.blocksRaycasts = false;
+    }
+
+    private void PrepareBoxHidden(IDialogueTextTarget box)
+    {
+        if (box == null)
+            return;
+
+        IPresentationDialogueBoxView view = box as IPresentationDialogueBoxView;
+        if (view != null)
+            view.SetVisible(true);
+
+        if (box.CanvasGroup != null)
+        {
+            box.CanvasGroup.alpha = 0f;
+            box.CanvasGroup.interactable = false;
+            box.CanvasGroup.blocksRaycasts = false;
+        }
+    }
+
+    private void SetBoxVisibleImmediate(IDialogueTextTarget box, bool visible)
+    {
+        if (box == null)
+            return;
+
+        IPresentationDialogueBoxView view = box as IPresentationDialogueBoxView;
+        if (view != null)
+        {
+            view.SetVisible(visible);
+            return;
+        }
+
+        if (box.CanvasGroup != null)
+        {
+            box.CanvasGroup.alpha = visible ? 1f : 0f;
+            box.CanvasGroup.interactable = visible;
+            box.CanvasGroup.blocksRaycasts = visible;
+        }
+    }
+
+    private void HideAllExcept(IDialogueTextTarget keep)
+    {
+        DialogueBoxHost host = _dialogueBoxResolver as DialogueBoxHost;
+        if (host != null)
+        {
+            host.HideAllExcept(keep);
+            return;
+        }
+
+        // Fallback.
+        // 현재 resolver가 Host가 아니면 전체 Hide 후 keep만 다시 켜는 식으로 처리.
+        _dialogueBoxResolver.HideAll();
+
+        if (keep != null)
+            SetBoxVisibleImmediate(keep, true);
     }
 
     private bool IsReadyForLine(LocalizedLine line)
@@ -161,24 +401,6 @@ public sealed class CustomLinePresenter : DialoguePresenterBase
         }
 
         return true;
-    }
-
-    private async YarnTask FadeInAsync(LineCancellationToken token)
-    {
-        if (_canvasGroup == null)
-            return;
-
-        if (!useFadeEffect || ShouldConsumeLineSilently())
-        {
-            _canvasGroup.alpha = 1f;
-            return;
-        }
-
-        _canvasGroup.alpha = 0f;
-
-        await Effects
-            .FadeAlphaAsync(_canvasGroup, 0f, 1f, fadeUpDuration, token.HurryUpToken)
-            .SuppressCancellationThrow();
     }
 
     private bool ShouldConsumeLineSilently()
@@ -227,7 +449,12 @@ public sealed class CustomLinePresenter : DialoguePresenterBase
         _characterNameText = null;
         _characterNameContainer = null;
         _canvasGroup = null;
+
+        _currentBoxKind = null;
+        _currentBox = null;
+        _isBoxVisible = false;
     }
+
     private static void ResetDialogueBoxTransform(IDialogueTextTarget box)
     {
         if (box == null)
@@ -247,7 +474,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase
 
         behaviour.transform.localPosition = Vector3.zero;
     }
-    
+
     private static bool TryResolveBoxKindFromMetadata(
         string[] metadata,
         out DialogueBoxKind kind)

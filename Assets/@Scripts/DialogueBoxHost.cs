@@ -67,12 +67,76 @@ public sealed class DialogueBoxHost : MonoBehaviour, IDialogueBoxViewResolver
         view?.SetVisible(true);
     }
 
+    
     public void HideAll()
     {
         for (int i = 0; i < entries.Length; i++)
         {
             IPresentationDialogueBoxView view = entries[i].view as IPresentationDialogueBoxView;
             view?.SetVisible(false);
+        }
+    }
+    
+    public IPresentationDialogueBoxView AsView(IDialogueTextTarget target)
+    {
+        return target as IPresentationDialogueBoxView;
+    }
+
+    public void ShowImmediate(IDialogueTextTarget target)
+    {
+        IPresentationDialogueBoxView view = target as IPresentationDialogueBoxView;
+        if (view == null)
+            return;
+
+        view.SetVisible(true);
+
+        if (view.CanvasGroup != null)
+            view.CanvasGroup.alpha = 1f;
+    }
+
+    public void HideImmediate(IDialogueTextTarget target)
+    {
+        IPresentationDialogueBoxView view = target as IPresentationDialogueBoxView;
+        if (view == null)
+            return;
+
+        view.SetVisible(false);
+
+        if (view.CanvasGroup != null)
+            view.CanvasGroup.alpha = 0f;
+    }
+
+    public void PrepareHidden(IDialogueTextTarget target)
+    {
+        IPresentationDialogueBoxView view = target as IPresentationDialogueBoxView;
+        if (view == null)
+            return;
+
+        view.SetVisible(true);
+
+        if (view.CanvasGroup != null)
+        {
+            view.CanvasGroup.alpha = 0f;
+            view.CanvasGroup.interactable = false;
+            view.CanvasGroup.blocksRaycasts = false;
+        }
+    }
+
+    public void HideAllExcept(IDialogueTextTarget target)
+    {
+        if (entries == null)
+            return;
+
+        for (int i = 0; i < entries.Length; i++)
+        {
+            IPresentationDialogueBoxView view = entries[i].view as IPresentationDialogueBoxView;
+            if (view == null)
+                continue;
+
+            if (ReferenceEquals(view, target))
+                continue;
+
+            view.SetVisible(false);
         }
     }
     
