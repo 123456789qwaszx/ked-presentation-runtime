@@ -332,6 +332,11 @@ public sealed class SequenceTextImporter
                 _bridge.Import_EmojiHide(line.args[0]);
                 return true;
             
+            case "box_hide":
+                _bridge.Import_BoxHide();
+                return true;
+            
+            
             default:
                 result.warnings.Add(
                     $"Line {line.lineNumber}: unsupported command '{line.commandName}'");

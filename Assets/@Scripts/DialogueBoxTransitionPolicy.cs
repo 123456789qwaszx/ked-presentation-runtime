@@ -9,6 +9,11 @@ public enum DialogueBoxTransitionKind
     Hide = 4
 }
 
+// Keep:아무 fade 없음. 기존 box 유지. Bind만 갱신.
+// Cut:HideAll immediate 후 next box alpha=1 visible.
+// FadeIn:next box alpha=0 visible → bind/prepare → fade to 1.
+// FadeOutIn:current box fade to 0 → hide current, next box alpha=0 visible → bind/prepare → fade to 1.
+// Hide:별도 box_hide 커맨드에서 처리.
 [Serializable]
 public sealed class DialogueBoxTransitionPolicy
 {

@@ -46,10 +46,20 @@
 
 라루: 그건...... 공급업체와의 비즈니스 식사 자리에서 먹은 건데...... 경비 처리 안 되나? #box=onlytext
 
+<<begin_hold>>
+<<await_for 1>>
+<<box_hide>>
+
+<<bg_spawn test3 bg1>>
+<<bg_sprite test3 background_02>>
+<<bg_fade test3 1>>
 
 <<fade_out Laru>>
+<<pause 1.2>>
 
 <<fade_in Albedo>>
+
+<<end_hold>>
 <<nudge Albedo up>>
 
 Albedo: 그럼 이건 뭔데! [emoji =sparkle/]낚시 마스터 도구 세트? 직접 낚아서 먹기라도 한 거야?
@@ -115,7 +125,6 @@ Albedo: 그럼 이건 뭔데! [emoji =sparkle/]낚시 마스터 도구 세트? �
 <<shake Laru left>>
 <<emotion_wipe_char Laru Laru a 26>>
 라루: 상대도 낚시에 관심이 많았거든......
-
 
 <<jolt Albedo up>>
 <<emotion_wipe_char Albedo Albedo a 16>>

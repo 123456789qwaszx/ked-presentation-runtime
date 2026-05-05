@@ -19,17 +19,21 @@ public sealed class PresentationViewCommandFactory : INodeCommandFactory
     
     private readonly IBGViewPrefabProvider _bgViewPrefabProvider;
     private readonly IBGRuntimeRegistry _bgRuntimeRegistry;
+    
+    private readonly IDialogueBoxViewResolver _dialogueBoxResolver;
 
     public PresentationViewCommandFactory(
         PresentationViewAccess presentationViewAccess,
         PresentationResponseRig presentationResponseRig,
         IBGViewPrefabProvider bgViewPrefabProvider,
-        IBGRuntimeRegistry bgRuntimeRegistry)
+        IBGRuntimeRegistry bgRuntimeRegistry,
+        IDialogueBoxViewResolver dialogueBoxViewResolver)
     {
         _presentationViewAccess = presentationViewAccess;
         _presentationResponseRig = presentationResponseRig;
         _bgViewPrefabProvider = bgViewPrefabProvider;
         _bgRuntimeRegistry = bgRuntimeRegistry;
+        _dialogueBoxResolver = dialogueBoxViewResolver;
     }
 
     public bool TryCreate(CommandSpecBase spec, out ISequenceCommand command)
@@ -56,6 +60,8 @@ public sealed class PresentationViewCommandFactory : INodeCommandFactory
             ShotResetCommandSpec s => new ShotResetCommand(_presentationResponseRig, s),
             ShotZoomCommandSpec s => new ShotZoomCommand(_presentationResponseRig, s),
             ShotTrackCommandSpec s => new ShotTrackCommand(_presentationResponseRig, s),
+            
+            HideDialogueBoxCommandSpec s => new HideDialogueBoxCommand(s, _dialogueBoxResolver),
 
             _ => null
         };

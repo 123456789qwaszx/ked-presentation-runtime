@@ -16,6 +16,22 @@ public sealed partial class YarnCommandBridge
         _dialogueRunner.AddCommandHandler<string, float, float>("fade_to", EnqueueFadeToPresentationSpec);
         _dialogueRunner.AddCommandHandler<string, float, float, float>("move_by_p", EnqueueMoveByPresentationSpec);
         _dialogueRunner.AddCommandHandler<string, float, float>("scale_to_p", EnqueueScaleToPresentationSpec);
+        
+        _dialogueRunner.AddCommandHandler("box_hide", EnqueueHideDialogueBoxSpec);
+    }
+    
+    private void EnqueueHideDialogueBoxSpec()
+    {
+        var spec = new HideDialogueBoxCommandSpec
+        {
+            roleKey = "",
+            hideAll = true,
+            targetKind = DialogueBoxKind.Speaker,
+            duration = 0.18f,
+            wait = false
+        };
+
+        Collect(spec);
     }
 
     private void EnqueueFadeBackgroundSpec(string bgKey, float alpha, float duration = 0.35f)

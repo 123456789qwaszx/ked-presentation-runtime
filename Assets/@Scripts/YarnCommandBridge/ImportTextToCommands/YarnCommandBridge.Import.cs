@@ -233,4 +233,9 @@ public sealed partial class YarnCommandBridge
     {
         EnqueueHideEmojiSpec(roleKey);
     }
+    
+    public void Import_BoxHide()
+    {
+        EnqueueHideDialogueBoxSpec();
+    }
 }

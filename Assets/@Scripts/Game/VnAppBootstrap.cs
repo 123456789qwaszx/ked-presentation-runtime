@@ -139,7 +139,7 @@ public class VnAppBootstrap : MonoBehaviour
         
         //PresentationViewCommandFactory
         PresentationViewAccess presentationViewAccess = new ();
-        PresentationViewCommandFactory presentationViewCommandFactory = new(presentationViewAccess, presentationResponseRig, bgHost, bgHost);
+        PresentationViewCommandFactory presentationViewCommandFactory = new(presentationViewAccess, presentationResponseRig, bgHost, bgHost, dialogueBoxHost);
         
         CompositeCommandFactory factory = new (signalFactory, charRigFactory, transitionCommandFactory, soundCommandFactory, presentationViewCommandFactory);
         commandExecutor.Initialize(factory);
