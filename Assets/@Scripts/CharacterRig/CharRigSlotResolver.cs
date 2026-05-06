@@ -7,6 +7,7 @@ public sealed class CharRigSlotResolver : ICharRigSlotResolver
     private DialogueBox00_Portrait _withPortraitBox;
 
     private bool _init;
+    
     public void Initialize(PresentationUIRoot ui, DialogueBox00_Portrait withPortraitBox)
     {
         if (_init)

@@ -15,10 +15,8 @@ public sealed class CustomLinePresenter : DialoguePresenterBase
     private DialogueTextRouter _dialogueTextRouter;
     private EllipsisBreathTypewriter _typewriter;
     private PresentationSessionContext _context;
-    private AudioSystem _audioSystem;
-    private YarnBridgePlaybackDriver _yarnBridgePlaybackDriver;
 
-    private readonly DialogueBoxTransitionPolicy _boxTransitionPolicy = new();
+    private readonly DialogueBoxTransitionPolicy _boxTransitionPolicy = new DialogueBoxTransitionPolicy();
 
     private TMP_Text _lineText;
     private TMP_Text _characterNameText;
@@ -35,17 +33,13 @@ public sealed class CustomLinePresenter : DialoguePresenterBase
         IDialogueBoxViewResolver dialogueBoxResolver,
         DialogueTextRouter dialogueTextRouter,
         EllipsisBreathTypewriter typewriter,
-        PresentationSessionContext context,
-        YarnBridgePlaybackDriver yarnBridgePlaybackDriver = null,
-        AudioSystem audioSystem = null)
+        PresentationSessionContext context)
     {
         _lineRoutingPolicy = lineRoutingPolicy;
         _dialogueBoxResolver = dialogueBoxResolver;
         _dialogueTextRouter = dialogueTextRouter;
         _typewriter = typewriter;
         _context = context;
-        _yarnBridgePlaybackDriver = yarnBridgePlaybackDriver;
-        _audioSystem = audioSystem;
 
         if (dialogueRunner == null)
         {
@@ -53,15 +47,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase
             return;
         }
 
-        List<DialoguePresenterBase> presenters = new(dialogueRunner.DialoguePresenters);
-        presenters.Remove(this);
-
-        int insertIndex = presenters.FindIndex(x => x is LinePresenter);
-        if (insertIndex < 0)
-            insertIndex = presenters.Count;
-
-        presenters.Insert(insertIndex, this);
-        dialogueRunner.DialoguePresenters = presenters;
+        RegisterBeforeDefaultLinePresenter(dialogueRunner);
     }
 
     public override YarnTask OnDialogueStartedAsync()
@@ -78,52 +64,76 @@ public sealed class CustomLinePresenter : DialoguePresenterBase
 
     public override async YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token)
     {
-        if (IsReadyForLine(line) == false)
-            return;
+        DialogueBoxKind nextBoxKind = ResolveNextBoxKind(line);
+        IDialogueTextTarget nextBox = ResolveNextBox(line, nextBoxKind);
 
-        // ── 1. 오디오 ────────────────────────────────────────────────────
-        if (!ShouldConsumeLineSilently())
-        {
-            _audioSystem?.Voice.Stop();
+        DialogueBoxTransitionKind transitionKind = ResolveTransitionKind(line, nextBoxKind);
 
-            if (line.Asset is AudioClip clip)
-                _audioSystem?.Voice.Play(clip);
-        }
+        ResetDialogueBoxTransform(nextBox);
+        PrepareBoxForTransition(nextBox, transitionKind);
 
-        // ── 2. 재생 드라이버 ─────────────────────────────────────────────
-        _yarnBridgePlaybackDriver?.ResetImmediateWaitForNewLine();
-        _yarnBridgePlaybackDriver?.PlayCollected();
+        BindTextTargets(nextBox, line);
 
-        // ── 3. 박스 종류 결정 ─────────────────────────────────────────────
+        var text = line.TextWithoutCharacterName;
+
+        PrepareTypewriter(text);
+
+        await ApplyBoxTransitionAsync(
+            _currentBox,
+            nextBox,
+            transitionKind,
+            token);
+
+        CommitCurrentBox(nextBoxKind, nextBox, transitionKind);
+
+        await _typewriter
+            .RunTypewriter(text, token.HurryUpToken)
+            .SuppressCancellationThrow();
+
+        await YarnTask
+            .WaitUntilCanceled(token.NextContentToken)
+            .SuppressCancellationThrow();
+
+        _typewriter.ContentWillDismiss();
+    }
+
+    private DialogueBoxKind ResolveNextBoxKind(LocalizedLine line)
+    {
         bool hasCharacterName = string.IsNullOrWhiteSpace(line.CharacterName) == false;
 
-        DialogueBoxKind nextBoxKind = TryResolveBoxKindFromMetadata(
-            line.Metadata,
-            out DialogueBoxKind metadataBoxKind)
-                ? metadataBoxKind
-                : _lineRoutingPolicy.Resolve(hasCharacterName);
+        if (TryResolveBoxKindFromMetadata(line.Metadata, out DialogueBoxKind metadataBoxKind))
+            return metadataBoxKind;
 
-        DialogueBoxTransitionKind transitionKind = _boxTransitionPolicy.Resolve(
+        return _lineRoutingPolicy.Resolve(hasCharacterName);
+    }
+
+    private IDialogueTextTarget ResolveNextBox(LocalizedLine line, DialogueBoxKind nextBoxKind)
+    {
+        IDialogueTextTarget nextBox = _dialogueBoxResolver.ResolveTarget(nextBoxKind);
+
+        if (nextBox == null)
+        {
+            Debug.LogError(
+                $"{nameof(CustomLinePresenter)}: failed to resolve dialogue box {nextBoxKind} for line {line.TextID}.");
+        }
+
+        return nextBox;
+    }
+
+    private DialogueBoxTransitionKind ResolveTransitionKind(
+        LocalizedLine line,
+        DialogueBoxKind nextBoxKind)
+    {
+        return _boxTransitionPolicy.Resolve(
             _currentBoxKind,
             _isBoxVisible,
             nextBoxKind,
             line.Metadata,
             ShouldConsumeLineSilently());
+    }
 
-        IDialogueTextTarget nextBox = _dialogueBoxResolver.ResolveTarget(nextBoxKind);
-        if (nextBox == null)
-        {
-            Debug.LogError(
-                $"{nameof(CustomLinePresenter)}: failed to resolve dialogue box {nextBoxKind} for line {line.TextID}.");
-            return;
-        }
-
-        ResetDialogueBoxTransform(nextBox);
-
-        // ── 4. Transition 준비 ───────────────────────────────────────────
-        PrepareBoxForTransition(nextBox, transitionKind);
-
-        // ── 5. 박스 Bind ─────────────────────────────────────────────────
+    private void BindTextTargets(IDialogueTextTarget nextBox, LocalizedLine line)
+    {
         _dialogueTextRouter.Bind(nextBox);
 
         _lineText = _dialogueTextRouter.LineText;
@@ -135,37 +145,26 @@ public sealed class CustomLinePresenter : DialoguePresenterBase
             return;
         }
 
+        bool hasCharacterName = string.IsNullOrWhiteSpace(line.CharacterName) == false;
+
         BindCharacterNameTarget(hasCharacterName);
-
-        // ── 6. 표시할 텍스트 결정 ────────────────────────────────────────
-        var text = line.TextWithoutCharacterName;
-
         ApplyCharacterName(line);
+    }
 
-        // ── 7. 타입라이터 준비 ───────────────────────────────────────────
+    private void PrepareTypewriter(Yarn.Markup.MarkupParseResult text)
+    {
         _typewriter.SetTextView(_lineText);
         _typewriter.PrepareForContent(text);
+    }
 
-        // ── 8. DialogueBox 전환 실행 ─────────────────────────────────────
-        await ApplyBoxTransitionAsync(
-            _currentBox,
-            nextBox,
-            transitionKind,
-            token);
-
+    private void CommitCurrentBox(
+        DialogueBoxKind nextBoxKind,
+        IDialogueTextTarget nextBox,
+        DialogueBoxTransitionKind transitionKind)
+    {
         _currentBoxKind = nextBoxKind;
         _currentBox = nextBox;
         _isBoxVisible = transitionKind != DialogueBoxTransitionKind.Hide;
-
-        // ── 9. 타입라이터 실행 ───────────────────────────────────────────
-        await _typewriter
-            .RunTypewriter(text, token.HurryUpToken)
-            .SuppressCancellationThrow();
-
-        // ── 10. 입력 대기 ────────────────────────────────────────────────
-        await YarnTask.WaitUntilCanceled(token.NextContentToken).SuppressCancellationThrow();
-
-        _typewriter.ContentWillDismiss();
     }
 
     private void PrepareBoxForTransition(
@@ -177,7 +176,6 @@ public sealed class CustomLinePresenter : DialoguePresenterBase
         switch (transitionKind)
         {
             case DialogueBoxTransitionKind.Keep:
-                // 같은 박스 유지. 아무것도 숨기지 않는다.
                 break;
 
             case DialogueBoxTransitionKind.Cut:
@@ -207,14 +205,10 @@ public sealed class CustomLinePresenter : DialoguePresenterBase
                 break;
 
             case DialogueBoxTransitionKind.FadeOutIn:
-                // 이전 박스는 ApplyBoxTransitionAsync에서 FadeOut한다.
-                // 여기서는 새 박스를 아직 보이지 않게 준비만 한다.
                 PrepareBoxHidden(nextBox);
                 break;
 
             case DialogueBoxTransitionKind.Hide:
-                // 이 라인을 숨김 처리하는 것은 특수 케이스.
-                // line 표시 흐름에서는 거의 쓰지 않는 것을 권장.
                 break;
         }
     }
@@ -380,27 +374,10 @@ public sealed class CustomLinePresenter : DialoguePresenterBase
             return;
         }
 
-        // Fallback.
-        // 현재 resolver가 Host가 아니면 전체 Hide 후 keep만 다시 켜는 식으로 처리.
         _dialogueBoxResolver.HideAll();
 
         if (keep != null)
             SetBoxVisibleImmediate(keep, true);
-    }
-
-    private bool IsReadyForLine(LocalizedLine line)
-    {
-        if (_lineRoutingPolicy == null ||
-            _dialogueBoxResolver == null ||
-            _dialogueTextRouter == null ||
-            _typewriter == null)
-        {
-            string lineId = line != null ? line.TextID : "(null line)";
-            Debug.LogError($"{nameof(CustomLinePresenter)} is not initialized correctly. Skipping {lineId}.");
-            return false;
-        }
-
-        return true;
     }
 
     private bool ShouldConsumeLineSilently()
@@ -455,6 +432,19 @@ public sealed class CustomLinePresenter : DialoguePresenterBase
         _isBoxVisible = false;
     }
 
+    private void RegisterBeforeDefaultLinePresenter(DialogueRunner dialogueRunner)
+    {
+        List<DialoguePresenterBase> presenters = new List<DialoguePresenterBase>(dialogueRunner.DialoguePresenters);
+        presenters.Remove(this);
+
+        int insertIndex = presenters.FindIndex(x => x is LinePresenter);
+        if (insertIndex < 0)
+            insertIndex = presenters.Count;
+
+        presenters.Insert(insertIndex, this);
+        dialogueRunner.DialoguePresenters = presenters;
+    }
+
     private static void ResetDialogueBoxTransform(IDialogueTextTarget box)
     {
         if (box == null)
@@ -479,7 +469,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase
         string[] metadata,
         out DialogueBoxKind kind)
     {
-        kind = default;
+        kind = default(DialogueBoxKind);
 
         if (metadata == null || metadata.Length == 0)
             return false;

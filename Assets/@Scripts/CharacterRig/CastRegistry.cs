@@ -56,11 +56,6 @@ public sealed class CastRegistry
         return _characterToRole.TryGetValue(characterKey, out roleKey);
     }
 
-    public void Cast(string roleKey, string characterKey)
-    {
-        Cast(roleKey, characterKey, "");
-    }
-
     public void Cast(string roleKey, string characterKey, string variantKey)
     {
         roleKey = SafeTrim(roleKey);

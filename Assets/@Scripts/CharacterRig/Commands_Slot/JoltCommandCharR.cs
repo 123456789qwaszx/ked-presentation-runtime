@@ -33,7 +33,7 @@ public sealed class JoltCommand : CommandBase, IStepScopedCommand
 
     private RectTransform _rect;
     private Tween _tween;
-    private Vector2 _restPos;
+    private Vector2 _destPos;
     private bool _resolveAttempted;
     private bool _canCommitFinalState;
 
@@ -60,12 +60,12 @@ public sealed class JoltCommand : CommandBase, IStepScopedCommand
 
         if (_spec.duration <= 0f || Mathf.Approximately(_spec.strength, 0f))
         {
-            _rect.anchoredPosition = _restPos;
+            _rect.anchoredPosition = _destPos;
             ClearRuntimeRefs();
             yield break;
         }
 
-        Vector2 rest = _restPos;
+        Vector2 rect = _destPos;
 
         float amplitude = Mathf.Abs(_spec.strength);
         int taps = Mathf.Max(1, _spec.taps);
@@ -98,7 +98,7 @@ public sealed class JoltCommand : CommandBase, IStepScopedCommand
 
                     float scalar = antiTerm + (amplitude * decay * osc * settleEnvelope);
 
-                    _rect.anchoredPosition = rest + dir * scalar;
+                    _rect.anchoredPosition = rect + dir * scalar;
                 },
                 1f,
                 _spec.duration
@@ -111,7 +111,7 @@ public sealed class JoltCommand : CommandBase, IStepScopedCommand
                 if (!_canCommitFinalState || _rect == null)
                     return;
 
-                _rect.anchoredPosition = rest;
+                _rect.anchoredPosition = rect;
                 ClearRuntimeRefs();
             });
 
@@ -127,7 +127,7 @@ public sealed class JoltCommand : CommandBase, IStepScopedCommand
         if (_rect == null)
             return;
 
-        _rect.anchoredPosition = _restPos;
+        _rect.anchoredPosition = _destPos;
         ClearRuntimeRefs();
     }
 
@@ -146,7 +146,7 @@ public sealed class JoltCommand : CommandBase, IStepScopedCommand
 
         _tween?.Kill(false);
         _rect.DOKill(false);
-        _rect.anchoredPosition = _restPos;
+        _rect.anchoredPosition = _destPos;
 
         ClearRuntimeRefs();
     }
@@ -158,7 +158,7 @@ public sealed class JoltCommand : CommandBase, IStepScopedCommand
         CharacterRigRefs rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.targetKey);
 
         _rect = rig.GetRect(_spec.target);
-        _restPos = _rect.anchoredPosition;
+        _destPos = _rect.anchoredPosition;
     }
 
     private void ClearRuntimeRefs()

@@ -34,7 +34,7 @@ public sealed class DipInOutCommandCharR : CommandBase, IStepScopedCommand
 
     private RectTransform _rect;
     private Tween _tween;
-    private Vector2 _restPos;
+    private Vector2 _destPos;
     private bool _resolveAttempted;
     private bool _canCommitFinalState;
 
@@ -58,15 +58,15 @@ public sealed class DipInOutCommandCharR : CommandBase, IStepScopedCommand
 
         if (total <= 0f || Mathf.Approximately(dist, 0f))
         {
-            _rect.anchoredPosition = _restPos;
+            _rect.anchoredPosition = _destPos;
             _canCommitFinalState = false;
             _rect = null;
             _tween = null;
             yield break;
         }
 
-        Vector2 rest = _restPos;
-        Vector2 dipped = rest + GetOffset(_spec.dir, dist);
+        Vector2 rect = _destPos;
+        Vector2 dipped = rect + GetOffset(_spec.dir, dist);
 
         float tEnter = total * 0.32f;
         float tHold = total * 0.24f;
@@ -90,7 +90,7 @@ public sealed class DipInOutCommandCharR : CommandBase, IStepScopedCommand
                     {
                         float localT = tEnter <= 0.0001f ? 1f : t / tEnter;
                         float e = DOVirtual.EasedValue(0f, 1f, localT, enterEase);
-                        _rect.anchoredPosition = Vector2.LerpUnclamped(rest, dipped, e);
+                        _rect.anchoredPosition = Vector2.LerpUnclamped(rect, dipped, e);
                         return;
                     }
 
@@ -102,7 +102,7 @@ public sealed class DipInOutCommandCharR : CommandBase, IStepScopedCommand
 
                     float localReturnT = tReturn <= 0.0001f ? 1f : (t - returnStart) / tReturn;
                     float eReturn = DOVirtual.EasedValue(0f, 1f, localReturnT, returnEase);
-                    _rect.anchoredPosition = Vector2.LerpUnclamped(dipped, rest, eReturn);
+                    _rect.anchoredPosition = Vector2.LerpUnclamped(dipped, rect, eReturn);
                 },
                 total,
                 total
@@ -115,7 +115,7 @@ public sealed class DipInOutCommandCharR : CommandBase, IStepScopedCommand
                 if (!_canCommitFinalState || _rect == null)
                     return;
 
-                _rect.anchoredPosition = rest;
+                _rect.anchoredPosition = rect;
                 _canCommitFinalState = false;
                 _rect = null;
                 _tween = null;
@@ -133,7 +133,7 @@ public sealed class DipInOutCommandCharR : CommandBase, IStepScopedCommand
         if (_rect == null)
             return;
 
-        _rect.anchoredPosition = _restPos;
+        _rect.anchoredPosition = _destPos;
         _canCommitFinalState = false;
         _rect = null;
         _tween = null;
@@ -152,7 +152,7 @@ public sealed class DipInOutCommandCharR : CommandBase, IStepScopedCommand
 
         _tween?.Kill(false);
         _rect.DOKill(false);
-        _rect.anchoredPosition = _restPos;
+        _rect.anchoredPosition = _destPos;
 
         _canCommitFinalState = false;
         _rect = null;
@@ -167,7 +167,7 @@ public sealed class DipInOutCommandCharR : CommandBase, IStepScopedCommand
             CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.targetKey);
         
         _rect = rigRefs.GetRect(_spec.target);
-        _restPos = _rect.anchoredPosition;
+        _destPos = _rect.anchoredPosition;
     }
 
     private static Vector2 GetOffset(CharRDirection dir, float distance) => dir switch

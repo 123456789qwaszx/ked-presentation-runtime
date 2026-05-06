@@ -45,6 +45,8 @@ public class VnAppBootstrap : MonoBehaviour
     [SerializeField] private InlineEmojiHost inlineEmojiHost;
     [SerializeField] private InlineEventMarkupHandler inlineEventMarkupHandler;
     [SerializeField] private CustomLinePresenter customLinePresenter;
+    [SerializeField] private YarnLineSideEffectPresenter yarnLineSideEffectPresenter;
+    
     
 
     [Header("VnAdvanceGate")]
@@ -186,6 +188,10 @@ public class VnAppBootstrap : MonoBehaviour
             dialogueBoxHost,
             dialogueTextRouter,
             ellipsisBreathTypewriter,
+            _presentationSessionContext);
+        
+        yarnLineSideEffectPresenter.Initialize(
+            dialogueRunner,
             _presentationSessionContext,
             yarnBridgePlaybackDriver,
             audioSystem);

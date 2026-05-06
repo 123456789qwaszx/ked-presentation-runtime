@@ -92,7 +92,7 @@ public sealed class SetupCharRigCommand : CommandBase
 
     private void Apply(CommandRunScope scope)
     {
-        string roleKey = SafeTrim(_spec.roleKey);
+        string roleKey = _spec.roleKey;
 
         if (string.IsNullOrEmpty(roleKey))
             throw new InvalidOperationException("[SetupCharRigCommand] roleKey is empty.");
