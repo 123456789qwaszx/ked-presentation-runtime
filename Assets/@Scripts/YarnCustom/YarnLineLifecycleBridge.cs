@@ -58,7 +58,6 @@ public sealed class YarnLineLifecycleBridge : ActionMarkupHandler
     /// 기존 RollbackController 마이그레이션 전까지 호환용으로 유지.
     /// 새 코드는 LineEntered 또는 LineDisplayBegin을 직접 구독하는 것을 권장.
     /// </summary>
-    public event Action<YarnLineMeta> LineStart;
 
     public event Action<YarnLineMeta> LineDisplayBegin;
     public event Action<YarnLineMeta> LineFinishDisplaying;
@@ -237,9 +236,6 @@ public sealed class YarnLineLifecycleBridge : ActionMarkupHandler
         CurrentMeta = BuildMeta(line, text);
 
         LineDisplayBegin?.Invoke(CurrentMeta);
-
-        // Legacy compatibility.
-        LineStart?.Invoke(CurrentMeta);
     }
 
     public override YarnTask OnCharacterWillAppear(

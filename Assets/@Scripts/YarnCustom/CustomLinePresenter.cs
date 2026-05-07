@@ -65,18 +65,24 @@ public sealed class CustomLinePresenter : DialoguePresenterBase
     public override async YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token)
     {
         DialogueBoxKind nextBoxKind = ResolveNextBoxKind(line);
-        IDialogueTextTarget nextBox = ResolveNextBox(line, nextBoxKind);
+        IDialogueTextTarget nextBox = _dialogueBoxResolver.ResolveTarget(nextBoxKind);
 
         DialogueBoxTransitionKind transitionKind = ResolveTransitionKind(line, nextBoxKind);
-
-        ResetDialogueBoxTransform(nextBox);
+// transition이 있는지 없는지를 확인한다.
+// 롤백버튼을 누를 시, transition을 무시하고, _typewriter까지 진행 한 후, rollback이 일어난다.
+// 롤백버튼이 눌러진 중에는, ApplyBoxTransitionAsync에서 transition을 Immediate로만 적용한다.
+        
+// 그리고... rollback이나 skip이 가능한지를 여기서 플래그로 걸어야 할까?
+        
+        ResetDialogueBoxTransform(nextBox); // resetDialogueBox는 여기 있으면 안되고, Box의 주인이 직접 다뤄야해.
         PrepareBoxForTransition(nextBox, transitionKind);
 
         BindTextTargets(nextBox, line);
 
         var text = line.TextWithoutCharacterName;
 
-        PrepareTypewriter(text);
+        _typewriter.SetTextView(_lineText);
+        _typewriter.PrepareForContent(text);
 
         await ApplyBoxTransitionAsync(
             _currentBox,
@@ -101,23 +107,10 @@ public sealed class CustomLinePresenter : DialoguePresenterBase
     {
         bool hasCharacterName = string.IsNullOrWhiteSpace(line.CharacterName) == false;
 
-        if (TryResolveBoxKindFromMetadata(line.Metadata, out DialogueBoxKind metadataBoxKind))
+        if (_lineRoutingPolicy.TryResolveBoxKindFromMetadata(line.Metadata, out DialogueBoxKind metadataBoxKind))
             return metadataBoxKind;
 
         return _lineRoutingPolicy.Resolve(hasCharacterName);
-    }
-
-    private IDialogueTextTarget ResolveNextBox(LocalizedLine line, DialogueBoxKind nextBoxKind)
-    {
-        IDialogueTextTarget nextBox = _dialogueBoxResolver.ResolveTarget(nextBoxKind);
-
-        if (nextBox == null)
-        {
-            Debug.LogError(
-                $"{nameof(CustomLinePresenter)}: failed to resolve dialogue box {nextBoxKind} for line {line.TextID}.");
-        }
-
-        return nextBox;
     }
 
     private DialogueBoxTransitionKind ResolveTransitionKind(
@@ -148,13 +141,15 @@ public sealed class CustomLinePresenter : DialoguePresenterBase
         bool hasCharacterName = string.IsNullOrWhiteSpace(line.CharacterName) == false;
 
         BindCharacterNameTarget(hasCharacterName);
-        ApplyCharacterName(line);
-    }
+        
+        if (_characterNameContainer == null)
+            return;
 
-    private void PrepareTypewriter(Yarn.Markup.MarkupParseResult text)
-    {
-        _typewriter.SetTextView(_lineText);
-        _typewriter.PrepareForContent(text);
+        bool showName = string.IsNullOrWhiteSpace(line.CharacterName) == false;
+        _characterNameContainer.SetActive(showName);
+
+        if (showName && _characterNameText != null)
+            _characterNameText.text = line.CharacterName;
     }
 
     private void CommitCurrentBox(
@@ -403,18 +398,6 @@ public sealed class CustomLinePresenter : DialoguePresenterBase
         }
     }
 
-    private void ApplyCharacterName(LocalizedLine line)
-    {
-        if (_characterNameContainer == null)
-            return;
-
-        bool showName = string.IsNullOrWhiteSpace(line.CharacterName) == false;
-        _characterNameContainer.SetActive(showName);
-
-        if (showName && _characterNameText != null)
-            _characterNameText.text = line.CharacterName;
-    }
-
     private void CloseAll()
     {
         _dialogueBoxResolver?.HideAll();
@@ -465,54 +448,4 @@ public sealed class CustomLinePresenter : DialoguePresenterBase
         behaviour.transform.localPosition = Vector3.zero;
     }
 
-    private static bool TryResolveBoxKindFromMetadata(
-        string[] metadata,
-        out DialogueBoxKind kind)
-    {
-        kind = default(DialogueBoxKind);
-
-        if (metadata == null || metadata.Length == 0)
-            return false;
-
-        for (int i = 0; i < metadata.Length; i++)
-        {
-            string tag = metadata[i];
-
-            if (string.IsNullOrWhiteSpace(tag))
-                continue;
-
-            tag = tag.Trim().ToLowerInvariant();
-
-            switch (tag)
-            {
-                case "portrait":
-                case "box:portrait":
-                case "box=portrait":
-                    kind = DialogueBoxKind.Portrait;
-                    return true;
-
-                case "speaker":
-                case "box:speaker":
-                case "box=speaker":
-                    kind = DialogueBoxKind.Speaker;
-                    return true;
-
-                case "letterbox":
-                case "letter_box":
-                case "box:letterbox":
-                case "box=letterbox":
-                    kind = DialogueBoxKind.LetterBox;
-                    return true;
-
-                case "onlytext":
-                case "only_text":
-                case "box:onlytext":
-                case "box=onlytext":
-                    kind = DialogueBoxKind.OnlyText;
-                    return true;
-            }
-        }
-
-        return false;
-    }
 }

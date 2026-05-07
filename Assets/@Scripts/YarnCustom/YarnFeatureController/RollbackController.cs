@@ -85,6 +85,12 @@ public sealed class RollbackController : IDisposable
 
     private void AddRollbackPoint(YarnLineMeta meta)
     {
+        if (_state.IsSeeking)
+            return;
+
+        if (string.IsNullOrEmpty(meta.nodeName) || string.IsNullOrEmpty(meta.lineId))
+            return;
+        
         _history.AddRollbackPoint(meta);
     }
 

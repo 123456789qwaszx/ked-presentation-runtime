@@ -27,8 +27,8 @@ public sealed class AutoAdvanceScheduler
     
     private void RegisterToYarn()
     {
-        _yarnLineLifecycleBridge.LineStart -= NotifyLineStart;
-        _yarnLineLifecycleBridge.LineStart += NotifyLineStart;
+        _yarnLineLifecycleBridge.LineDisplayBegin -= NotifyLineStart;
+        _yarnLineLifecycleBridge.LineDisplayBegin += NotifyLineStart;
         _yarnLineLifecycleBridge.LineFinishDisplaying -= NotifyLineFinishDisplaying;
         _yarnLineLifecycleBridge.LineFinishDisplaying += NotifyLineFinishDisplaying;
     }
@@ -57,7 +57,7 @@ public sealed class AutoAdvanceScheduler
     {
         if (_yarnLineLifecycleBridge == null) return;
 
-        _yarnLineLifecycleBridge.LineStart -= NotifyLineStart;
+        _yarnLineLifecycleBridge.LineDisplayBegin -= NotifyLineStart;
         _yarnLineLifecycleBridge.LineFinishDisplaying -= NotifyLineFinishDisplaying;
     }
 }

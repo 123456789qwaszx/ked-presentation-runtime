@@ -250,7 +250,7 @@ public class VnAppBootstrap : MonoBehaviour
             () => yarnLineLifecycleBridge.IsLineFullyShown);
         
         RollbackRuntimeState rollbackState = new ();
-        _rollbackHistory = new NodeRollbackHistory(yarnLineLifecycleBridge, rollbackState, _presentationSessionBridge);
+        _rollbackHistory = new NodeRollbackHistory(yarnLineLifecycleBridge, rollbackState);
         
         RollbackController rollbackController = new (
             rollbackState,

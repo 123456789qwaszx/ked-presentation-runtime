@@ -90,6 +90,7 @@ public sealed class EpisodePlayer : MonoBehaviour, IRollbackDialogueRestarter
         bgHost.ClearRuntimeBackgrounds();
         presentationResponseRig.ClearRuntimeState();
         StartYarnNode(nodeName);
+        Debug.Log(nodeName + " started");
         //StartPresentationRoute(presentationEntryKey);
         
         //StartCoroutine(StartYarnNextFrame(nodeName));

@@ -11,25 +11,18 @@ public struct RollbackPoint
     public string lineId;
     public string rawText;
 
-    public int presentationNodeIndex;
-    public int presentationStepIndex;
-
     public RollbackPoint(
         int visitedIndex,
         int frame,
         string nodeName,
         string lineId,
-        string rawText,
-        int presentationNodeIndex,
-        int presentationStepIndex)
+        string rawText)
     {
         this.visitedIndex = visitedIndex;
         this.frame = frame;
         this.nodeName = nodeName;
         this.lineId = lineId;
         this.rawText = rawText;
-        this.presentationNodeIndex = presentationNodeIndex;
-        this.presentationStepIndex = presentationStepIndex;
     }
 }
 
@@ -70,7 +63,6 @@ public sealed class NodeRollbackHistory : IDisposable
 {
     private readonly YarnLineLifecycleBridge _bridge;
     private readonly RollbackRuntimeState _state;
-    private readonly PresentationSessionBridge _presentationSessionBridge;
 
     private readonly List<RollbackPoint> _points = new();
     private string _currentNodeName = "";
@@ -81,12 +73,10 @@ public sealed class NodeRollbackHistory : IDisposable
 
     public NodeRollbackHistory(
         YarnLineLifecycleBridge bridge,
-        RollbackRuntimeState state,
-        PresentationSessionBridge presentationSessionBridge)
+        RollbackRuntimeState state)
     {
         _bridge = bridge;
         _state = state;
-        _presentationSessionBridge = presentationSessionBridge;
 
         _bridge.OnNodeStarted -= OnNodeStarted;
         _bridge.OnNodeStarted += OnNodeStarted;
@@ -107,12 +97,6 @@ public sealed class NodeRollbackHistory : IDisposable
 
     public void AddRollbackPoint(YarnLineMeta meta)
     {
-        if (_state.IsSeeking)
-            return;
-
-        if (string.IsNullOrEmpty(meta.nodeName) || string.IsNullOrEmpty(meta.lineId))
-            return;
-
         if (_currentNodeName != meta.nodeName)
         {
             _currentNodeName = meta.nodeName;
@@ -123,22 +107,18 @@ public sealed class NodeRollbackHistory : IDisposable
         // 마지막 기록과 완전히 같은 라인이면 중복 추가 방지
         if (_points.Count > 0)
         {
-            RollbackPoint last = _points[_points.Count - 1];
+            RollbackPoint last = _points[^1];
 
             if (last.nodeName == meta.nodeName && last.lineId == meta.lineId)
                 return;
         }
-
-        _presentationSessionBridge.TryGetCurrentAnchor(out int nodeIndex, out int stepIndex);
 
         _points.Add(new RollbackPoint(
             visitedIndex: _visitedCounter++,
             frame: meta.frame,
             nodeName: meta.nodeName,
             lineId: meta.lineId,
-            rawText: meta.rawText,
-            presentationNodeIndex: nodeIndex,
-            presentationStepIndex: stepIndex
+            rawText: meta.rawText
         ));
     }
 
