@@ -138,4 +138,34 @@ public sealed class PresentationSessionContext
 
     public bool IsDebugStartEnabled => _playback.enableDebugStart;
     public string DebugStartStepName => _playback.debugStartStepName;
+    
+    
+    private string _rollbackTargetLineId;
+    private bool _isRollbackTargetLineReady;
+
+    public void EnterRollbackSeek(string targetLineId)
+    {
+        _playback.IsRollbackSeeking = true;
+        _rollbackTargetLineId = targetLineId;
+        _isRollbackTargetLineReady = false;
+    }
+
+    public void MarkRollbackTargetLineReady()
+    {
+        _playback.IsRollbackSeeking = false;
+        _isRollbackTargetLineReady = true;
+    }
+
+    public bool ConsumeRollbackTargetLine(string lineId)
+    {
+        if (!_isRollbackTargetLineReady)
+            return false;
+
+        if (_rollbackTargetLineId != lineId)
+            return false;
+
+        _isRollbackTargetLineReady = false;
+        _rollbackTargetLineId = null;
+        return true;
+    }
 }

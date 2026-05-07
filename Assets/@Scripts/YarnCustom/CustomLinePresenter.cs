@@ -67,6 +67,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
         if (_typewriter != null)
             _typewriter.SetTextView(null);
         
+        CloseAll();
     }
 
     public override YarnTask OnDialogueStartedAsync()
@@ -85,6 +86,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
     public override async YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token)
     {
         _lineAdvanceState?.EnterLine();
+        
         
         int myGeneration = _presenterGeneration;
 
@@ -115,6 +117,9 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
 
         // Typewriter 시작 전에 TMP에 실제 텍스트를 미리 넣어둔다. 단, maxVisibleCharacters = 0으로 숨겨둠
         PrimeTextTarget(nextBox, line);
+        
+        
+        bool isRollbackTargetLine = _context.ConsumeRollbackTargetLine(line.TextID);
 
         if (_context.IsRollbackSeeking)
         {
@@ -123,16 +128,23 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
         }
         else
         {
-            // 일반 재생에서는 전환 시작 전의 박스 상태를 준비한 뒤,
-            // Fade/Cut/Keep/Hide 같은 실제 전환을 실행한다.
             PrepareBoxForTransition(nextBox, transitionKind);
 
-            await ApplyBoxTransitionAsync(
-                previousBox,
-                nextBox,
-                transitionKind,
-                token,
-                IsStale);
+            if (isRollbackTargetLine)
+            {
+                // Rollback target line은 일반 fade를 타지 않고,
+                // 확정된 target box를 즉시 표시한다.
+                ApplyBoxTransitionImmediate(previousBox, nextBox, transitionKind);
+            }
+            else
+            {
+                await ApplyBoxTransitionAsync(
+                    previousBox,
+                    nextBox,
+                    transitionKind,
+                    token,
+                    IsStale);
+            }
         }
 
         if (IsStale())
