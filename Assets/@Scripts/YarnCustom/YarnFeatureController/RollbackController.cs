@@ -51,7 +51,7 @@ public sealed class RollbackController : IDisposable
 
         if (!_history.TryPrepareRollbackOneStep(out RollbackPoint target))
             return false;
-
+        //presentationUIRoot.
         BeginRollbackToTarget(target);
         return true;
     }

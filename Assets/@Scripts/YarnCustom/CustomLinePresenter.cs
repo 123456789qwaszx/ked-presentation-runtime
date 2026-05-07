@@ -95,6 +95,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
         IDialogueTextTarget previousBox = _boxState.Box;
 
         ResetDialogueBoxTransform(nextBox);
+        PrepareIncomingTextTarget(nextBox, line);
         PrepareBoxForTransition(nextBox, transitionKind);
 
         await ApplyBoxTransitionAsync(
@@ -131,6 +132,36 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
         }
 
         await WaitForLineAdvanceAsync(token);
+    }
+    
+    private void PrepareIncomingTextTarget(
+        IDialogueTextTarget nextBox,
+        LocalizedLine line)
+    {
+        if (nextBox == null)
+            return;
+
+        TMP_Text lineText = nextBox.LineText;
+        if (lineText != null)
+        {
+            string bodyText = line != null
+                ? line.TextWithoutCharacterName.Text
+                : string.Empty;
+
+            lineText.text = bodyText;
+            lineText.maxVisibleCharacters = 0;
+            lineText.ForceMeshUpdate();
+        }
+
+        TMP_Text nameText = nextBox.NameText;
+        if (nameText != null)
+        {
+            bool showName = line != null &&
+                            string.IsNullOrWhiteSpace(line.CharacterName) == false;
+
+            nameText.text = showName ? line.CharacterName : string.Empty;
+            nameText.gameObject.SetActive(showName);
+        }
     }
 
     private async YarnTask WaitForLineAdvanceAsync(LineCancellationToken token)
