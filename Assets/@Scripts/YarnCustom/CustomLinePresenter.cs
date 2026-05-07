@@ -94,36 +94,37 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
         {
             return myGeneration != _presenterGeneration;
         }
-
         bool hasCharacterName = !string.IsNullOrWhiteSpace(line.CharacterName);
+
         DialogueBoxKind nextBoxKind =
             _lineRoutingPolicy.TryResolveBoxKindFromMetadata(line.Metadata, out DialogueBoxKind metadataBoxKind)
                 ? metadataBoxKind
                 : _lineRoutingPolicy.Resolve(hasCharacterName);
+
         IDialogueTextTarget nextBox = _dialogueBoxResolver.ResolveTarget(nextBoxKind);
         ResetBoxTransform(nextBox);
 
-        // 현재 박스 상태, 다음 박스 종류, 라인 메타데이터, 스킵/롤백 상태를 기준으로 박스 전환 방식을 결정.
+        bool isRollbackTargetLine =
+            _context != null &&
+            _context.IsRollbackTargetLine(line.TextID);
+
+        bool shouldFastForwardLine =
+            !isRollbackTargetLine && ShouldFastForwardLine();
+
         DialogueBoxTransitionKind transitionKind =
             _boxTransitionPolicy.Resolve(
                 _boxState.BoxKind,
                 _boxState.IsVisible,
                 nextBoxKind,
                 line.Metadata,
-                ShouldFastForwardLine());
+                shouldFastForwardLine);
 
-        // FadeOutIn 같은 전환에서 previousBox와 nextBox를 비교하는 데 사용된다.
         IDialogueTextTarget previousBox = _boxState.Box;
 
-        // Typewriter 시작 전에 TMP에 실제 텍스트를 미리 넣어둔다. 단, maxVisibleCharacters = 0으로 숨겨둠
         PrimeTextTarget(nextBox, line);
-        
-        
-        bool isRollbackTargetLine = _context.ConsumeRollbackTargetLine(line.TextID);
 
-        if (_context.IsRollbackSeeking)
+        if (_context != null && _context.IsRollbackSeeking)
         {
-            // Rollback seek 중에는 관객용 전환 연출을 재생하지 않는다. 목표 상태 복원만.
             ApplyRollbackBoxState(nextBox, transitionKind);
         }
         else
@@ -132,8 +133,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
 
             if (isRollbackTargetLine)
             {
-                // Rollback target line은 일반 fade를 타지 않고,
-                // 확정된 target box를 즉시 표시한다.
+                _context.ConsumeRollbackTargetLine(line.TextID);
                 ApplyBoxTransitionImmediate(previousBox, nextBox, transitionKind);
             }
             else
@@ -146,7 +146,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
                     IsStale);
             }
         }
-
+        
         if (IsStale())
         {
             // 전환 도중 Rollback/Abort 등으로 이 실행본이 낡았다면,

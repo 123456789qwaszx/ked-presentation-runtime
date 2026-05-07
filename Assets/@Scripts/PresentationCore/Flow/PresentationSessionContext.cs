@@ -52,7 +52,6 @@ public sealed class PresentationPlaybackSettings
     public bool enableDebugStart;
     public string debugStartStepName;
 }
-
 [Serializable]
 public sealed class PresentationSessionContext
 {
@@ -61,6 +60,9 @@ public sealed class PresentationSessionContext
     private bool _isNodeBusy;
     private bool _isBlockingInput;
     private bool _closeRequested;
+
+    private string _rollbackTargetLineId;
+    private bool _isRollbackTargetLineReady;
 
     public bool IsNodeBusy => _isNodeBusy;
     public bool IsBlockingInput => _isBlockingInput;
@@ -74,9 +76,9 @@ public sealed class PresentationSessionContext
 
     public float TimeScale => _playback.TimeScale;
     public float AutoAdvanceDelay => _playback.AutoAdvanceDelay;
-    
-    private bool _suppressImmediateLineTransition;
-    private string _suppressImmediateLineTransitionLineId;
+
+    public bool IsDebugStartEnabled => _playback.enableDebugStart;
+    public string DebugStartStepName => _playback.debugStartStepName;
 
     public void SetPlayMode(VnPlayMode mode)
     {
@@ -105,14 +107,41 @@ public sealed class PresentationSessionContext
             _playback.PlayMode = VnPlayMode.Manual;
     }
 
-    public void EnterRollbackSeek()
+    public void EnterRollbackSeek(string targetLineId)
     {
         _playback.IsRollbackSeeking = true;
+        _rollbackTargetLineId = targetLineId;
+        _isRollbackTargetLineReady = false;
+    }
+
+    public void MarkRollbackTargetLineReady()
+    {
+        _playback.IsRollbackSeeking = false;
+        _isRollbackTargetLineReady = true;
+    }
+
+    public bool IsRollbackTargetLine(string lineId)
+    {
+        return _isRollbackTargetLineReady &&
+               !string.IsNullOrWhiteSpace(_rollbackTargetLineId) &&
+               _rollbackTargetLineId == lineId;
+    }
+
+    public bool ConsumeRollbackTargetLine(string lineId)
+    {
+        if (!IsRollbackTargetLine(lineId))
+            return false;
+
+        _isRollbackTargetLineReady = false;
+        _rollbackTargetLineId = null;
+        return true;
     }
 
     public void ExitRollbackSeek()
     {
         _playback.IsRollbackSeeking = false;
+        _rollbackTargetLineId = null;
+        _isRollbackTargetLineReady = false;
     }
 
     /// <summary>
@@ -133,39 +162,10 @@ public sealed class PresentationSessionContext
         _isNodeBusy = false;
         _isBlockingInput = false;
         _closeRequested = false;
-        _playback.ResetDefaults();
-    }
 
-    public bool IsDebugStartEnabled => _playback.enableDebugStart;
-    public string DebugStartStepName => _playback.debugStartStepName;
-    
-    
-    private string _rollbackTargetLineId;
-    private bool _isRollbackTargetLineReady;
-
-    public void EnterRollbackSeek(string targetLineId)
-    {
-        _playback.IsRollbackSeeking = true;
-        _rollbackTargetLineId = targetLineId;
-        _isRollbackTargetLineReady = false;
-    }
-
-    public void MarkRollbackTargetLineReady()
-    {
-        _playback.IsRollbackSeeking = false;
-        _isRollbackTargetLineReady = true;
-    }
-
-    public bool ConsumeRollbackTargetLine(string lineId)
-    {
-        if (!_isRollbackTargetLineReady)
-            return false;
-
-        if (_rollbackTargetLineId != lineId)
-            return false;
-
-        _isRollbackTargetLineReady = false;
         _rollbackTargetLineId = null;
-        return true;
+        _isRollbackTargetLineReady = false;
+
+        _playback.ResetDefaults();
     }
 }
