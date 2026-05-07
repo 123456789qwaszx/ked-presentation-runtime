@@ -252,7 +252,8 @@ public class VnAppBootstrap : MonoBehaviour
             dialogueAdvanceDispatcher,
             _presentationSessionBridge,
             _presentationSessionContext,
-            UIManager.Instance.GetUI<PresentationUIRoot>()
+            UIManager.Instance.GetUI<PresentationUIRoot>(),
+            customLinePresenter
         );
         
         vnFeatureController.Initialize(

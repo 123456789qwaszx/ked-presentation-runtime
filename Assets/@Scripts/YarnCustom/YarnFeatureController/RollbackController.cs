@@ -10,6 +10,7 @@ public sealed class RollbackController : IDisposable
     private readonly PresentationSessionBridge _presentationSessionBridge;
     private readonly PresentationSessionContext _presentationSessionContext;
     private readonly PresentationUIRoot _presentationUIRoot;
+    private readonly ILinePresentationAborter _linePresentationAborter;
 
     private RollbackPoint _target;
     private bool _hasTarget;
@@ -24,7 +25,8 @@ public sealed class RollbackController : IDisposable
         DialogueAdvanceDispatcher dispatcher,
         PresentationSessionBridge presentationSessionBridge,
         PresentationSessionContext presentationSessionContext,
-        PresentationUIRoot presentationUIRoot)
+        PresentationUIRoot presentationUIRoot,
+        ILinePresentationAborter linePresentationAborter)
     {
         _history = history;
         _bridge = bridge;
@@ -33,6 +35,7 @@ public sealed class RollbackController : IDisposable
         _presentationSessionBridge = presentationSessionBridge;
         _presentationSessionContext = presentationSessionContext;
         _presentationUIRoot = presentationUIRoot;
+        _linePresentationAborter = linePresentationAborter;
 
         _bridge.LineEntered -= EndSeekBeforeTargetLineDisplays;
         _bridge.LineEntered += EndSeekBeforeTargetLineDisplays;
@@ -70,9 +73,16 @@ public sealed class RollbackController : IDisposable
         _target = target;
         _hasTarget = true;
 
+        // 1. 먼저 현재 Presenter 실행본을 구세대로 만든다.
+        //    이전 RunLineAsync가 await 이후 깨어나도 visual commit/typewriter를 하지 못하게 한다.
+        _linePresentationAborter?.AbortCurrentLinePresentationForRollback();
+
+        // 2. 그 다음 rollback seek 모드로 진입한다.
         _presentationSessionContext.EnterRollbackSeek();
         RefreshDialogueUiSuppression();
 
+        // 3. Yarn node를 다시 시작한다.
+        //    DialogueRunner.Stop()은 rollback seek 중 호출하지 않는다.
         _restarter.RestartNode(target.nodeName);
     }
 
@@ -89,6 +99,12 @@ public sealed class RollbackController : IDisposable
     {
         if (!IsSeeking)
             return;
+
+        if (!_hasTarget)
+        {
+            EndRollbackSeek();
+            return;
+        }
 
         if (IsTarget(meta))
         {

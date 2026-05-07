@@ -1,9 +1,16 @@
+using System;
 using System.Collections.Generic;
+using System.Threading;
 using TMPro;
 using UnityEngine;
 using Yarn.Unity;
 
-public sealed class CustomLinePresenter : DialoguePresenterBase
+public interface ILinePresentationAborter
+{
+    void AbortCurrentLinePresentationForRollback();
+}
+
+public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentationAborter
 {
     [Header("Fade")]
     public bool useFadeEffect = true;
@@ -26,6 +33,9 @@ public sealed class CustomLinePresenter : DialoguePresenterBase
     private DialogueBoxKind? _currentBoxKind;
     private IDialogueTextTarget _currentBox;
     private bool _isBoxVisible;
+
+    private int _presenterGeneration;
+    private CancellationTokenSource _presenterLifetimeCts = new CancellationTokenSource();
 
     public void Initialize(
         DialogueRunner dialogueRunner,
@@ -50,6 +60,17 @@ public sealed class CustomLinePresenter : DialoguePresenterBase
         RegisterBeforeDefaultLinePresenter(dialogueRunner);
     }
 
+    public void AbortCurrentLinePresentationForRollback()
+    {
+        // 현재 RunLineAsync 실행본을 구세대로 만든다.
+        // 단, 여기서 presenter lifetime token을 cancel하지는 않는다.
+        // stale 실행본도 RunLineAsync 계약상 WaitUntilCanceled까지 내려가야 하기 때문이다.
+        _presenterGeneration++;
+
+        if (_typewriter != null)
+            _typewriter.SetTextView(null);
+    }
+
     public override YarnTask OnDialogueStartedAsync()
     {
         CloseAll();
@@ -58,49 +79,90 @@ public sealed class CustomLinePresenter : DialoguePresenterBase
 
     public override YarnTask OnDialogueCompleteAsync()
     {
+        CancelPresenterLifetimeWaiters();
         CloseAll();
         return YarnTask.CompletedTask;
     }
 
     public override async YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token)
     {
+        int myGeneration = _presenterGeneration;
+
+        bool IsStale()
+        {
+            return myGeneration != _presenterGeneration;
+        }
+
         DialogueBoxKind nextBoxKind = ResolveNextBoxKind(line);
         IDialogueTextTarget nextBox = _dialogueBoxResolver.ResolveTarget(nextBoxKind);
 
         DialogueBoxTransitionKind transitionKind = ResolveTransitionKind(line, nextBoxKind);
-// transition이 있는지 없는지를 확인한다.
-// 롤백버튼을 누를 시, transition을 무시하고, _typewriter까지 진행 한 후, rollback이 일어난다.
-// 롤백버튼이 눌러진 중에는, ApplyBoxTransitionAsync에서 transition을 Immediate로만 적용한다.
-        
-// 그리고... rollback이나 skip이 가능한지를 여기서 플래그로 걸어야 할까?
-        
-        ResetDialogueBoxTransform(nextBox); // resetDialogueBox는 여기 있으면 안되고, Box의 주인이 직접 다뤄야해.
+
+        ResetDialogueBoxTransform(nextBox);
         PrepareBoxForTransition(nextBox, transitionKind);
-
-        BindTextTargets(nextBox, line);
-
-        var text = line.TextWithoutCharacterName;
-
-        _typewriter.SetTextView(_lineText);
-        _typewriter.PrepareForContent(text);
 
         await ApplyBoxTransitionAsync(
             _currentBox,
             nextBox,
             transitionKind,
-            token);
+            token,
+            IsStale);
 
-        CommitCurrentBox(nextBoxKind, nextBox, transitionKind);
+        if (!IsStale())
+        {
+            CommitCurrentBox(nextBoxKind, nextBox, transitionKind);
 
-        await _typewriter
-            .RunTypewriter(text, token.HurryUpToken)
-            .SuppressCancellationThrow();
+            BindTextTargets(nextBox, line);
 
-        await YarnTask
-            .WaitUntilCanceled(token.NextContentToken)
-            .SuppressCancellationThrow();
+            if (_lineText != null)
+            {
+                var text = line.TextWithoutCharacterName;
 
-        _typewriter.ContentWillDismiss();
+                _typewriter.SetTextView(_lineText);
+                _typewriter.PrepareForContent(text);
+
+                await _typewriter
+                    .RunTypewriter(text, token.HurryUpToken)
+                    .SuppressCancellationThrow();
+
+                if (!IsStale())
+                    _typewriter.ContentWillDismiss();
+            }
+        }
+
+        await WaitForLineAdvanceAsync(token);
+    }
+
+    private async YarnTask WaitForLineAdvanceAsync(LineCancellationToken token)
+    {
+        CancellationTokenSource linkedCts = null;
+
+        try
+        {
+            linkedCts = CancellationTokenSource.CreateLinkedTokenSource(
+                token.NextContentToken,
+                _presenterLifetimeCts.Token);
+
+            await YarnTask
+                .WaitUntilCanceled(linkedCts.Token)
+                .SuppressCancellationThrow();
+        }
+        finally
+        {
+            if (linkedCts != null)
+                linkedCts.Dispose();
+        }
+    }
+
+    private void CancelPresenterLifetimeWaiters()
+    {
+        if (_presenterLifetimeCts != null)
+        {
+            _presenterLifetimeCts.Cancel();
+            _presenterLifetimeCts.Dispose();
+        }
+
+        _presenterLifetimeCts = new CancellationTokenSource();
     }
 
     private DialogueBoxKind ResolveNextBoxKind(LocalizedLine line)
@@ -130,7 +192,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase
         _dialogueTextRouter.Bind(nextBox);
 
         _lineText = _dialogueTextRouter.LineText;
-        _canvasGroup = nextBox.CanvasGroup;
+        _canvasGroup = nextBox != null ? nextBox.CanvasGroup : null;
 
         if (_lineText == null)
         {
@@ -141,7 +203,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase
         bool hasCharacterName = string.IsNullOrWhiteSpace(line.CharacterName) == false;
 
         BindCharacterNameTarget(hasCharacterName);
-        
+
         if (_characterNameContainer == null)
             return;
 
@@ -212,43 +274,53 @@ public sealed class CustomLinePresenter : DialoguePresenterBase
         IDialogueTextTarget previousBox,
         IDialogueTextTarget nextBox,
         DialogueBoxTransitionKind transitionKind,
-        LineCancellationToken token)
+        LineCancellationToken token,
+        Func<bool> isStale)
     {
         if (!useFadeEffect || ShouldConsumeLineSilently())
         {
-            ApplyBoxTransitionImmediate(previousBox, nextBox, transitionKind);
+            if (!isStale())
+                ApplyBoxTransitionImmediate(previousBox, nextBox, transitionKind);
+
             return;
         }
 
         switch (transitionKind)
         {
             case DialogueBoxTransitionKind.Keep:
-                SetBoxVisibleImmediate(nextBox, true);
+                if (!isStale())
+                    SetBoxVisibleImmediate(nextBox, true);
                 break;
 
             case DialogueBoxTransitionKind.Cut:
-                ApplyBoxTransitionImmediate(previousBox, nextBox, transitionKind);
+                if (!isStale())
+                    ApplyBoxTransitionImmediate(previousBox, nextBox, transitionKind);
                 break;
 
             case DialogueBoxTransitionKind.FadeIn:
-                await FadeInBoxAsync(nextBox, token);
+                await FadeInBoxAsync(nextBox, token, isStale);
                 break;
 
             case DialogueBoxTransitionKind.FadeOutIn:
                 if (previousBox != null && !ReferenceEquals(previousBox, nextBox))
-                    await FadeOutBoxAsync(previousBox, token);
+                    await FadeOutBoxAsync(previousBox, token, isStale);
+
+                if (isStale())
+                    break;
 
                 SetBoxVisibleImmediate(previousBox, false);
 
                 PrepareBoxHidden(nextBox);
-                await FadeInBoxAsync(nextBox, token);
+
+                await FadeInBoxAsync(nextBox, token, isStale);
                 break;
 
             case DialogueBoxTransitionKind.Hide:
                 if (nextBox != null)
-                    await FadeOutBoxAsync(nextBox, token);
+                    await FadeOutBoxAsync(nextBox, token, isStale);
 
-                SetBoxVisibleImmediate(nextBox, false);
+                if (!isStale())
+                    SetBoxVisibleImmediate(nextBox, false);
                 break;
         }
     }
@@ -286,19 +358,26 @@ public sealed class CustomLinePresenter : DialoguePresenterBase
 
     private async YarnTask FadeInBoxAsync(
         IDialogueTextTarget box,
-        LineCancellationToken token)
+        LineCancellationToken token,
+        Func<bool> isStale)
     {
         if (box == null || box.CanvasGroup == null)
             return;
 
         CanvasGroup cg = box.CanvasGroup;
 
-        SetBoxVisibleImmediate(box, true);
-        cg.alpha = 0f;
+        if (!isStale())
+        {
+            SetBoxVisibleImmediate(box, true);
+            cg.alpha = 0f;
+        }
 
         await Effects
             .FadeAlphaAsync(cg, 0f, 1f, fadeUpDuration, token.HurryUpToken)
             .SuppressCancellationThrow();
+
+        if (isStale())
+            return;
 
         cg.alpha = 1f;
         cg.interactable = true;
@@ -307,16 +386,22 @@ public sealed class CustomLinePresenter : DialoguePresenterBase
 
     private async YarnTask FadeOutBoxAsync(
         IDialogueTextTarget box,
-        LineCancellationToken token)
+        LineCancellationToken token,
+        Func<bool> isStale)
     {
         if (box == null || box.CanvasGroup == null)
             return;
 
         CanvasGroup cg = box.CanvasGroup;
 
+        float fromAlpha = cg.alpha;
+
         await Effects
-            .FadeAlphaAsync(cg, cg.alpha, 0f, fadeDownDuration, token.HurryUpToken)
+            .FadeAlphaAsync(cg, fromAlpha, 0f, fadeDownDuration, token.HurryUpToken)
             .SuppressCancellationThrow();
+
+        if (isStale())
+            return;
 
         cg.alpha = 0f;
         cg.interactable = false;
@@ -448,4 +533,13 @@ public sealed class CustomLinePresenter : DialoguePresenterBase
         behaviour.transform.localPosition = Vector3.zero;
     }
 
+    private void OnDestroy()
+    {
+        if (_presenterLifetimeCts != null)
+        {
+            _presenterLifetimeCts.Cancel();
+            _presenterLifetimeCts.Dispose();
+            _presenterLifetimeCts = null;
+        }
+    }
 }
