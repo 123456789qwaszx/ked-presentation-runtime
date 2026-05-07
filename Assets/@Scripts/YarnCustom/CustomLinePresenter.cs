@@ -12,8 +12,7 @@ public interface ILinePresentationAborter
 
 public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentationAborter
 {
-    [Header("Fade")]
-    public bool useFadeEffect = true;
+    [Header("Fade")] public bool useFadeEffect = true;
     public float fadeUpDuration = 0.25f;
     public float fadeDownDuration = 0.1f;
 
@@ -24,9 +23,9 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
     private PresentationSessionContext _context;
     private LinePresentationAdvanceState _lineAdvanceState;
 
-    private readonly DialogueBoxTransitionPolicy _boxTransitionPolicy = new DialogueBoxTransitionPolicy();
-    private readonly DialogueBoxCurrentState _boxState = new DialogueBoxCurrentState();
-    
+    private readonly DialogueBoxTransitionPolicy _boxTransitionPolicy = new ();
+    private readonly DialogueBoxCurrentState _boxState = new ();
+
 
     private TMP_Text _lineText;
     private TMP_Text _characterNameText;
@@ -67,6 +66,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
 
         if (_typewriter != null)
             _typewriter.SetTextView(null);
+        
     }
 
     public override YarnTask OnDialogueStartedAsync()
@@ -93,25 +93,38 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
             return myGeneration != _presenterGeneration;
         }
 
-        DialogueBoxKind nextBoxKind = ResolveNextBoxKind(line);
+        bool hasCharacterName = !string.IsNullOrWhiteSpace(line.CharacterName);
+        DialogueBoxKind nextBoxKind =
+            _lineRoutingPolicy.TryResolveBoxKindFromMetadata(line.Metadata, out DialogueBoxKind metadataBoxKind)
+                ? metadataBoxKind
+                : _lineRoutingPolicy.Resolve(hasCharacterName);
         IDialogueTextTarget nextBox = _dialogueBoxResolver.ResolveTarget(nextBoxKind);
+        ResetBoxTransform(nextBox);
 
-        DialogueBoxTransitionKind transitionKind = ResolveTransitionKind(line, nextBoxKind);
+        // 현재 박스 상태, 다음 박스 종류, 라인 메타데이터, 스킵/롤백 상태를 기준으로 박스 전환 방식을 결정.
+        DialogueBoxTransitionKind transitionKind =
+            _boxTransitionPolicy.Resolve(
+                _boxState.BoxKind,
+                _boxState.IsVisible,
+                nextBoxKind,
+                line.Metadata,
+                ShouldFastForwardLine());
 
+        // FadeOutIn 같은 전환에서 previousBox와 nextBox를 비교하는 데 사용된다.
         IDialogueTextTarget previousBox = _boxState.Box;
 
-        ResetDialogueBoxTransform(nextBox);
-        PrepareIncomingTextTarget(nextBox, line);
+        // Typewriter 시작 전에 TMP에 실제 텍스트를 미리 넣어둔다. 단, maxVisibleCharacters = 0으로 숨겨둠
+        PrimeTextTarget(nextBox, line);
 
-        if (ShouldSuppressLineVisuals())
+        if (_context.IsRollbackSeeking)
         {
-            ApplySilentRollbackBoxState(
-                previousBox,
-                nextBox,
-                transitionKind);
+            // Rollback seek 중에는 관객용 전환 연출을 재생하지 않는다. 목표 상태 복원만.
+            ApplyRollbackBoxState(nextBox, transitionKind);
         }
         else
         {
+            // 일반 재생에서는 전환 시작 전의 박스 상태를 준비한 뒤,
+            // Fade/Cut/Keep/Hide 같은 실제 전환을 실행한다.
             PrepareBoxForTransition(nextBox, transitionKind);
 
             await ApplyBoxTransitionAsync(
@@ -124,24 +137,33 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
 
         if (IsStale())
         {
+            // 전환 도중 Rollback/Abort 등으로 이 실행본이 낡았다면,
+            // 이 라인은 더 이상 화면 상태를 확정하지 않는다.
+            // 임시로 건드린 박스/텍스트 바인딩만 정리하고 입력 대기로 빠진다.
             CleanupStaleLinePresentation(previousBox, nextBox);
             await WaitForLineAdvanceAsync(token);
             return;
         }
-        
+
+        // 여기까지 왔으면 박스 전환은 최신 실행본에서 정상 완료된 상태다.
         _lineAdvanceState?.EndTransition();
 
+        // 이번 라인의 박스를 공식 현재 상태로 확정한다.
         _boxState.Commit(nextBoxKind, nextBox, transitionKind);
 
+        // 실제 Typewriter가 사용할 TMP_Text와 이름 표시 대상을 연결한다.
         BindTextTargets(nextBox, line);
 
         if (_lineText != null)
         {
             var text = line.TextWithoutCharacterName;
 
+            // Typewriter에 현재 라인의 출력 대상을 연결하고,
+            // 텍스트 출력 전 준비 상태를 구성한다.
             _typewriter.SetTextView(_lineText);
             _typewriter.PrepareForContent(text);
 
+            // 외부 상태에 "이제 글자 출력 단계"임을 알린다.
             _lineAdvanceState?.BeginTypewriter();
 
             await _typewriter
@@ -150,22 +172,30 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
 
             if (!IsStale())
             {
+                // Typewriter가 최신 실행본에서 끝났을 때만
+                // 라인 표시 완료 상태를 확정한다.
                 _lineAdvanceState?.CompleteLineDisplay();
                 _typewriter.ContentWillDismiss();
             }
         }
         else
         {
+            // 출력할 본문 TMP가 없더라도,
+            // 진행 상태는 막히지 않도록 라인 표시 완료로 처리한다.
             _lineAdvanceState?.CompleteLineDisplay();
         }
 
+        // Rollback seek가 target line에 도달했을 때 AdvanceGate 잠금을 해제한다.
+        // 단, "seek 종료"와 "라인 표시 완료"는 같은 개념이 아니다.
+        // target line의 실제 표시 시작/완료는 이 Presenter의 생명주기가 계속 소유한다.
+        _lineAdvanceState?.ExitRollbackSeek();
+
+        // Yarn의 다음 컨텐츠 요청이 들어올 때까지 대기한다.
+        // 이 대기까지 포함해서 하나의 RunLineAsync 생명주기가 완성된다.
         await WaitForLineAdvanceAsync(token);
     }
-    
-    private void ApplySilentRollbackBoxState(
-        IDialogueTextTarget previousBox,
-        IDialogueTextTarget nextBox,
-        DialogueBoxTransitionKind transitionKind)
+
+    private void ApplyRollbackBoxState(IDialogueTextTarget nextBox, DialogueBoxTransitionKind transitionKind)
     {
         switch (transitionKind)
         {
@@ -182,15 +212,8 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
                 break;
         }
     }
-    
-    private bool ShouldSuppressLineVisuals()
-    {
-        return _context != null && _context.IsRollbackSeeking;
-    }
-    
-    private void PrepareIncomingTextTarget(
-        IDialogueTextTarget nextBox,
-        LocalizedLine line)
+
+    private void PrimeTextTarget(IDialogueTextTarget nextBox, LocalizedLine line)
     {
         if (nextBox == null)
             return;
@@ -198,11 +221,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
         TMP_Text lineText = nextBox.LineText;
         if (lineText != null)
         {
-            string bodyText = line != null
-                ? line.TextWithoutCharacterName.Text
-                : string.Empty;
-
-            lineText.text = bodyText;
+            lineText.text = line.TextWithoutCharacterName.Text;
             lineText.maxVisibleCharacters = 0;
             lineText.ForceMeshUpdate();
         }
@@ -210,10 +229,12 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
         TMP_Text nameText = nextBox.NameText;
         if (nameText != null)
         {
-            bool showName = line != null &&
-                            string.IsNullOrWhiteSpace(line.CharacterName) == false;
+            bool showName = !string.IsNullOrWhiteSpace(line.CharacterName);
 
-            nameText.text = showName ? line.CharacterName : string.Empty;
+            nameText.text = showName 
+                ? line.CharacterName 
+                : string.Empty;
+            
             nameText.gameObject.SetActive(showName);
         }
     }
@@ -248,28 +269,6 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
         }
 
         _presenterLifetimeCts = new CancellationTokenSource();
-    }
-
-    private DialogueBoxKind ResolveNextBoxKind(LocalizedLine line)
-    {
-        bool hasCharacterName = string.IsNullOrWhiteSpace(line.CharacterName) == false;
-
-        if (_lineRoutingPolicy.TryResolveBoxKindFromMetadata(line.Metadata, out DialogueBoxKind metadataBoxKind))
-            return metadataBoxKind;
-
-        return _lineRoutingPolicy.Resolve(hasCharacterName);
-    }
-
-    private DialogueBoxTransitionKind ResolveTransitionKind(
-        LocalizedLine line,
-        DialogueBoxKind nextBoxKind)
-    {
-        return _boxTransitionPolicy.Resolve(
-            _boxState.BoxKind,
-            _boxState.IsVisible,
-            nextBoxKind,
-            line.Metadata,
-            ShouldConsumeLineSilently());
     }
 
     private void BindTextTargets(IDialogueTextTarget nextBox, LocalizedLine line)
@@ -327,6 +326,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
                     _dialogueBoxResolver.HideAll();
                     SetBoxVisibleImmediate(nextBox, true);
                 }
+
                 break;
 
             case DialogueBoxTransitionKind.FadeIn:
@@ -340,6 +340,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
                     _dialogueBoxResolver.HideAll();
                     PrepareBoxHidden(nextBox);
                 }
+
                 break;
 
             case DialogueBoxTransitionKind.FadeOutIn:
@@ -358,7 +359,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
         LineCancellationToken token,
         Func<bool> isStale)
     {
-        if (!useFadeEffect || ShouldConsumeLineSilently())
+        if (!useFadeEffect || ShouldFastForwardLine())
         {
             if (!isStale())
                 ApplyBoxTransitionImmediate(previousBox, nextBox, transitionKind);
@@ -576,13 +577,12 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
             SetBoxVisibleImmediate(keep, true);
     }
 
-    private bool ShouldConsumeLineSilently()
+    private bool ShouldFastForwardLine()
     {
         if (_context == null)
             return false;
 
-        return _context.IsRollbackSeeking ||
-               _context.IsSkipping;
+        return _context.IsRollbackSeeking || _context.IsSkipping;
     }
 
     private void BindCharacterNameTarget(bool hasCharacterName)
@@ -627,7 +627,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
         dialogueRunner.DialoguePresenters = presenters;
     }
 
-    private static void ResetDialogueBoxTransform(IDialogueTextTarget box)
+    private static void ResetBoxTransform(IDialogueTextTarget box)
     {
         if (box == null)
             return;

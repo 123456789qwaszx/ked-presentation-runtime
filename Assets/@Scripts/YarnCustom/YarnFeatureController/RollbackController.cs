@@ -108,11 +108,6 @@ public sealed class RollbackController : IDisposable
         // 1. Presentation rollback seek 종료.
         _presentationSessionContext.ExitRollbackSeek();
 
-        // 2. AdvanceGate rollback lock 해제.
-        //    단, 여기서 "line fully shown"으로 만들지는 않는다.
-        //    target line의 실제 표시 시작/완료는 CustomLinePresenter가 다시 소유한다.
-        _lineAdvanceState?.ExitRollbackSeek();
-
         // 3. Dialogue UI suppression 해제.
         RefreshDialogueUiSuppression();
     }
