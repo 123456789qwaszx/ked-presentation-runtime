@@ -12,8 +12,7 @@ public interface ILinePresentationAborter
 
 public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentationAborter
 {
-    [Header("Fade")]
-    public bool useFadeEffect = true;
+    [Header("Fade")] public bool useFadeEffect = true;
     public float fadeUpDuration = 0.25f;
     public float fadeDownDuration = 0.1f;
 
@@ -26,6 +25,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
 
     private readonly DialogueBoxTransitionPolicy _boxTransitionPolicy = new();
     private readonly DialogueBoxCurrentState _boxState = new();
+
 
     private TMP_Text _lineText;
     private TMP_Text _characterNameText;
@@ -89,12 +89,20 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
             return myGeneration != _presenterGeneration;
         }
 
-        bool isRollbackTargetLine = IsRollbackTargetLine(line);
-        bool isRollbackSeekLine = IsRollbackSeekLine(isRollbackTargetLine);
+        bool isRollbackTargetLine =
+            _context != null &&
+            _context.IsRollbackTargetLine(line.TextID);
 
-        if (isRollbackSeekLine)
+        bool isRollbackSeekingLine =
+            _context != null &&
+            _context.IsRollbackSeeking &&
+            !isRollbackTargetLine;
+
+        if (isRollbackSeekingLine)
         {
-            ConsumeRollbackSeekLine();
+            // Rollback seek 중 지나가는 line은 관객에게 보여주지 않는다.
+            // 이 경로에서는 PrimeTextTarget / Transition / Typewriter를 절대 타지 않는다.
+            HideBoxDuringRollbackSeek();
 
             _lineAdvanceState?.EndTransition();
             _lineAdvanceState?.CompleteLineDisplay();
@@ -103,8 +111,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
             return;
         }
 
-        bool hasCharacterName = line != null &&
-                                !string.IsNullOrWhiteSpace(line.CharacterName);
+        bool hasCharacterName = !string.IsNullOrWhiteSpace(line.CharacterName);
 
         DialogueBoxKind nextBoxKind =
             _lineRoutingPolicy.TryResolveBoxKindFromMetadata(line.Metadata, out DialogueBoxKind metadataBoxKind)
@@ -112,8 +119,6 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
                 : _lineRoutingPolicy.Resolve(hasCharacterName);
 
         IDialogueTextTarget nextBox = _dialogueBoxResolver.ResolveTarget(nextBoxKind);
-        IDialogueTextTarget previousBox = _boxState.Box;
-
         ResetBoxTransform(nextBox);
 
         bool shouldFastForwardLine =
@@ -127,245 +132,81 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
                 line.Metadata,
                 shouldFastForwardLine);
 
-        if (isRollbackTargetLine)
-        {
-            await RunRollbackTargetLineAsync(
-                line,
-                token,
-                previousBox,
-                nextBoxKind,
-                nextBox,
-                transitionKind,
-                IsStale);
+        IDialogueTextTarget previousBox = _boxState.Box;
 
-            return;
-        }
-
-        await RunNormalLineAsync(
-            line,
-            token,
-            previousBox,
-            nextBoxKind,
-            nextBox,
-            transitionKind,
-            IsStale);
-    }
-
-    private async YarnTask RunNormalLineAsync(
-        LocalizedLine line,
-        LineCancellationToken token,
-        IDialogueTextTarget previousBox,
-        DialogueBoxKind nextBoxKind,
-        IDialogueTextTarget nextBox,
-        DialogueBoxTransitionKind transitionKind,
-        Func<bool> isStale)
-    {
         PrimeTextTarget(nextBox, line);
+
         PrepareBoxForTransition(nextBox, transitionKind);
 
-        await ApplyBoxTransitionAsync(
-            previousBox,
-            nextBox,
-            transitionKind,
-            token,
-            isStale);
+        if (isRollbackTargetLine)
+        {
+            // Target line은 다시 화면에 보여줄 현재 line이다.
+            // Transition만 즉시 적용하고, Typewriter는 아래에서 정상 실행한다.
+            _context.ConsumeRollbackTargetLine(line.TextID);
+            ApplyBoxTransitionImmediate(previousBox, nextBox, transitionKind);
+        }
+        else
+        {
+            await ApplyBoxTransitionAsync(
+                previousBox,
+                nextBox,
+                transitionKind,
+                token,
+                IsStale);
+        }
 
-        if (isStale())
+        if (IsStale())
         {
             CleanupStaleLinePresentation(previousBox, nextBox);
             await WaitForLineAdvanceAsync(token);
             return;
         }
 
-        CommitBoxTransition(nextBoxKind, nextBox, transitionKind);
+        _lineAdvanceState?.EndTransition();
+
+        _boxState.Commit(nextBoxKind, nextBox, transitionKind);
 
         BindTextTargets(nextBox, line);
 
-        await RunTypewriterAsync(line, token, isStale);
-
-        if (!isStale())
-            _lineAdvanceState?.ExitRollbackSeek();
-
-        await WaitForLineAdvanceAsync(token);
-    }
-
-    private async YarnTask RunRollbackTargetLineAsync(
-        LocalizedLine line,
-        LineCancellationToken token,
-        IDialogueTextTarget previousBox,
-        DialogueBoxKind nextBoxKind,
-        IDialogueTextTarget nextBox,
-        DialogueBoxTransitionKind transitionKind,
-        Func<bool> isStale)
-    {
-        _context?.ConsumeRollbackTargetLine(line.TextID);
-
-        HideAllExceptNothing();
-        PrepareBoxHidden(nextBox);
-
-        BindTextTargets(nextBox, line);
-
-        if (_lineText == null)
+        if (_lineText != null)
         {
-            if (!isStale())
+            var text = line.TextWithoutCharacterName;
+
+            _typewriter.SetTextView(_lineText);
+            _typewriter.PrepareForContent(text);
+
+            _lineAdvanceState?.BeginTypewriter();
+
+            await _typewriter
+                .RunTypewriter(text, token.HurryUpToken)
+                .SuppressCancellationThrow();
+
+            if (!IsStale())
             {
-                ApplyBoxTransitionImmediate(previousBox, nextBox, transitionKind);
-                CommitBoxTransition(nextBoxKind, nextBox, transitionKind);
                 _lineAdvanceState?.CompleteLineDisplay();
-                _lineAdvanceState?.ExitRollbackSeek();
+                _typewriter.ContentWillDismiss();
             }
-
-            await WaitForLineAdvanceAsync(token);
-            return;
+        }
+        else
+        {
+            if (!IsStale())
+                _lineAdvanceState?.CompleteLineDisplay();
         }
 
-        var text = line.TextWithoutCharacterName;
-
-        _typewriter.SetTextView(_lineText);
-        _typewriter.PrepareForContent(text);
-
-        _lineAdvanceState?.BeginTypewriter();
-
-        YarnTask<bool> typewriterTask = _typewriter
-            .RunTypewriter(text, token.HurryUpToken)
-            .SuppressCancellationThrow();
-
-        await WaitUntilLineTextActuallyVisibleAsync(_lineText, isStale);
-
-        if (isStale())
-        {
-            CleanupStaleLinePresentation(previousBox, nextBox);
-            await WaitForLineAdvanceAsync(token);
-            return;
-        }
-
-        ApplyBoxTransitionImmediate(previousBox, nextBox, transitionKind);
-        CommitBoxTransition(nextBoxKind, nextBox, transitionKind);
-
-        await typewriterTask;
-
-        if (!isStale())
-        {
-            _lineAdvanceState?.CompleteLineDisplay();
-            _typewriter.ContentWillDismiss();
+        if (!IsStale())
             _lineAdvanceState?.ExitRollbackSeek();
-        }
 
         await WaitForLineAdvanceAsync(token);
     }
-
-    private async YarnTask RunTypewriterAsync(
-        LocalizedLine line,
-        LineCancellationToken token,
-        Func<bool> isStale)
-    {
-        if (_lineText == null)
-        {
-            if (!isStale())
-                _lineAdvanceState?.CompleteLineDisplay();
-
-            return;
-        }
-
-        var text = line.TextWithoutCharacterName;
-
-        _typewriter.SetTextView(_lineText);
-        _typewriter.PrepareForContent(text);
-
-        _lineAdvanceState?.BeginTypewriter();
-
-        await _typewriter
-            .RunTypewriter(text, token.HurryUpToken)
-            .SuppressCancellationThrow();
-
-        if (!isStale())
-        {
-            _lineAdvanceState?.CompleteLineDisplay();
-            _typewriter.ContentWillDismiss();
-        }
-    }
-
-    private async YarnTask WaitUntilLineTextActuallyVisibleAsync(
-        TMP_Text lineText,
-        Func<bool> isStale)
-    {
-        if (lineText == null)
-            return;
-
-        while (!isStale())
-        {
-            if (HasVisibleLineText(lineText))
-                return;
-
-            if (_typewriter == null || _typewriter.IsComplete)
-                return;
-
-            await YarnTask.Yield();
-        }
-    }
-
-    private static bool HasVisibleLineText(TMP_Text text)
-    {
-        if (text == null)
-            return false;
-
-        TMP_TextInfo textInfo = text.textInfo;
-        if (textInfo == null)
-            return false;
-
-        int characterCount = textInfo.characterCount;
-        int visibleCount = Mathf.Min(text.maxVisibleCharacters, characterCount);
-
-        if (visibleCount <= 0)
-            return false;
-
-        for (int i = 0; i < visibleCount; i++)
-        {
-            TMP_CharacterInfo ch = textInfo.characterInfo[i];
-
-            if (ch.isVisible)
-                return true;
-        }
-
-        return false;
-    }
-
-    private bool IsRollbackTargetLine(LocalizedLine line)
-    {
-        return _context != null &&
-               line != null &&
-               _context.IsRollbackTargetLine(line.TextID);
-    }
-
-    private bool IsRollbackSeekLine(bool isRollbackTargetLine)
-    {
-        return _context != null &&
-               _context.IsRollbackSeeking &&
-               !isRollbackTargetLine;
-    }
-
-    private void ConsumeRollbackSeekLine()
+    
+    private void HideBoxDuringRollbackSeek()
     {
         CloseAll();
     }
 
-    private void HideAllExceptNothing()
-    {
-        _dialogueBoxResolver?.HideAll();
-    }
-
-    private void CommitBoxTransition(
-        DialogueBoxKind nextBoxKind,
-        IDialogueTextTarget nextBox,
-        DialogueBoxTransitionKind transitionKind)
-    {
-        _lineAdvanceState?.EndTransition();
-        _boxState.Commit(nextBoxKind, nextBox, transitionKind);
-    }
-
     private void PrimeTextTarget(IDialogueTextTarget nextBox, LocalizedLine line)
     {
-        if (nextBox == null || line == null)
+        if (nextBox == null)
             return;
 
         TMP_Text lineText = nextBox.LineText;
@@ -439,17 +280,17 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
             return;
         }
 
-        bool hasCharacterName = line != null &&
-                                !string.IsNullOrWhiteSpace(line.CharacterName);
+        bool hasCharacterName = string.IsNullOrWhiteSpace(line.CharacterName) == false;
 
         BindCharacterNameTarget(hasCharacterName);
 
         if (_characterNameContainer == null)
             return;
 
-        _characterNameContainer.SetActive(hasCharacterName);
+        bool showName = string.IsNullOrWhiteSpace(line.CharacterName) == false;
+        _characterNameContainer.SetActive(showName);
 
-        if (hasCharacterName && _characterNameText != null)
+        if (showName && _characterNameText != null)
             _characterNameText.text = line.CharacterName;
     }
 
@@ -636,16 +477,15 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
         cg.interactable = false;
         cg.blocksRaycasts = false;
     }
-
     private void CleanupStaleLinePresentation(
         IDialogueTextTarget previousBox,
         IDialogueTextTarget nextBox)
     {
-        // Important:
-        // A stale RunLineAsync no longer owns the current text router or typewriter.
-        // Do not call _typewriter.SetTextView(null) here.
-        // Do not call _dialogueTextRouter.Clear() here.
-        // Those are global/current bindings and may already belong to a newer rollback target line.
+        // Stale 실행본은 더 이상 현재 TextRouter/Typewriter의 주인이 아니다.
+        // 여기서 _typewriter.SetTextView(null) 또는 _dialogueTextRouter.Clear()를 호출하면,
+        // 새 rollback target line이 이미 바인딩한 TMP_Text를 뒤늦게 비워버릴 수 있다.
+        //
+        // 따라서 stale cleanup은 "이 실행본이 transition 중 임시로 건드렸을 수 있는 box"만 정리한다.
 
         if (nextBox != null && !ReferenceEquals(nextBox, _boxState.Box))
             SetBoxVisibleImmediate(nextBox, false);
