@@ -52,6 +52,7 @@ public sealed class PresentationPlaybackSettings
     public bool enableDebugStart;
     public string debugStartStepName;
 }
+
 [Serializable]
 public sealed class PresentationSessionContext
 {
@@ -73,6 +74,16 @@ public sealed class PresentationSessionContext
     public bool IsAutoMode => _playback.IsAutoMode;
     public bool IsSkipping => _playback.IsSkipping;
     public bool IsRollbackSeeking => _playback.IsRollbackSeeking;
+
+    // Rollback seek 자체는 끝났지만,
+    // 다음 RunLineAsync에서 target line을 one-shot으로 처리해야 하는 상태.
+    public bool HasRollbackTargetLineReady => _isRollbackTargetLineReady;
+
+    // Controller 입장에서는 seek 중이거나 target line 처리 대기 중이면
+    // 아직 rollback 흐름이 끝난 게 아니다.
+    public bool IsRollbackActive =>
+        _playback.IsRollbackSeeking ||
+        _isRollbackTargetLineReady;
 
     public float TimeScale => _playback.TimeScale;
     public float AutoAdvanceDelay => _playback.AutoAdvanceDelay;
@@ -107,7 +118,7 @@ public sealed class PresentationSessionContext
             _playback.PlayMode = VnPlayMode.Manual;
     }
 
-    public void EnterRollbackSeek(string targetLineId)
+    public void BeginRollbackSeek(string targetLineId)
     {
         _playback.IsRollbackSeeking = true;
         _rollbackTargetLineId = targetLineId;
@@ -116,6 +127,12 @@ public sealed class PresentationSessionContext
 
     public void MarkRollbackTargetLineReady()
     {
+        if (string.IsNullOrWhiteSpace(_rollbackTargetLineId))
+        {
+            ClearRollbackState();
+            return;
+        }
+
         _playback.IsRollbackSeeking = false;
         _isRollbackTargetLineReady = true;
     }
@@ -138,6 +155,11 @@ public sealed class PresentationSessionContext
     }
 
     public void ExitRollbackSeek()
+    {
+        ClearRollbackState();
+    }
+
+    public void ClearRollbackState()
     {
         _playback.IsRollbackSeeking = false;
         _rollbackTargetLineId = null;
@@ -163,8 +185,7 @@ public sealed class PresentationSessionContext
         _isBlockingInput = false;
         _closeRequested = false;
 
-        _rollbackTargetLineId = null;
-        _isRollbackTargetLineReady = false;
+        ClearRollbackState();
 
         _playback.ResetDefaults();
     }

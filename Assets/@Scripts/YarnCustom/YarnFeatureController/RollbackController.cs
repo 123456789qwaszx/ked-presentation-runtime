@@ -16,8 +16,13 @@ public sealed class RollbackController : IDisposable
     private RollbackPoint _target;
     private bool _hasTarget;
 
-    public bool IsSeeking => _presentationSessionContext != null &&
-                             _presentationSessionContext.IsRollbackSeeking;
+    public bool IsRollbackActive =>
+        _presentationSessionContext != null &&
+        _presentationSessionContext.IsRollbackActive;
+
+    public bool IsSeeking =>
+        _presentationSessionContext != null &&
+        _presentationSessionContext.IsRollbackSeeking;
 
     public RollbackController(
         RollbackHistory history,
@@ -49,7 +54,7 @@ public sealed class RollbackController : IDisposable
 
     public bool RequestRollbackOneStep()
     {
-        if (IsSeeking)
+        if (IsRollbackActive)
             return false;
 
         if (!_history.TryPrepareRollbackOneStep(out RollbackPoint target))
@@ -61,7 +66,7 @@ public sealed class RollbackController : IDisposable
 
     public bool RequestRollbackToHistoryIndex(int historyIndex)
     {
-        if (IsSeeking)
+        if (IsRollbackActive)
             return false;
 
         if (!_history.TryPrepareRollbackToHistoryIndex(historyIndex, out RollbackPoint target))
@@ -70,73 +75,46 @@ public sealed class RollbackController : IDisposable
         BeginRollbackToTarget(target);
         return true;
     }
-    
+
     private void BeginRollbackToTarget(RollbackPoint target)
     {
         _target = target;
         _hasTarget = true;
 
-        // 현재 Presenter 실행본과 현재 DialogueBox를 실제로 닫는다.
-        _linePresentationAborter?.AbortCurrentLinePresentationForRollback();
+        // Rollback 상태를 먼저 세운다.
+        // 이후 abort/close 과정에서 다른 시스템이 context를 읽어도 이미 seek 상태여야 한다.
+        _presentationSessionContext.BeginRollbackSeek(target.lineId);
 
+        // AdvanceGate가 기존 typewriter 상태를 보고 현재 line을 완료로 오판하지 않게 잠근다.
         _lineAdvanceState?.EnterRollbackSeek();
 
-        // target line id를 Context에 저장한다.
-        _presentationSessionContext.EnterRollbackSeek(target.lineId);
+        // 현재 Presenter 실행본과 현재 DialogueBox를 실제로 닫는다.
+        _linePresentationAborter?.AbortCurrentLinePresentationForRollback();
 
         RefreshDialogueUiSuppression();
 
         _restarter.RestartNode(target.nodeName);
     }
-    
+
     private void EndRollbackSeekAtTarget()
     {
         _hasTarget = false;
         _target = default;
 
-        // 여기서 단순히 rollback seek를 false로만 만드는 게 아니라,
-        // "다음 RunLineAsync는 rollback target line이다"라는 one-shot 상태를 세운다.
+        // 아직 target line을 표시한 것은 아니다.
+        // 다음 CustomLinePresenter.RunLineAsync가 이 line을 one-shot target으로 소비한다.
         _presentationSessionContext.MarkRollbackTargetLineReady();
 
         RefreshDialogueUiSuppression();
     }
 
-    // private void BeginRollbackToTarget(RollbackPoint target)
-    // {
-    //     _target = target;
-    //     _hasTarget = true;
-    //     
-    //     // 1. 현재 LinePresenter 실행본을 먼저 무효화한다.
-    //     //    이전 RunLineAsync가 await 이후 깨어나도 visual commit/typewriter를 하지 못하게 한다.
-    //     _linePresentationAborter?.AbortCurrentLinePresentationForRollback();
-    //
-    //     // 2. AdvanceGate가 typewriter.IsComplete 같은 낡은 상태를 보고
-    //     //    "현재 라인이 이미 다 표시됐다"고 오판하지 못하게 막는다.
-    //     _lineAdvanceState?.EnterRollbackSeek();
-    //
-    //     // 3. Presentation 전체를 rollback seek 모드로 전환한다.
-    //     //    이 상태에서는 FadeIn/FadeOut/Typewriter 같은 관객용 연출이 생략되어야 한다.
-    //     _presentationSessionContext.EnterRollbackSeek();
-    //
-    //     // 4. Dialogue UI suppression을 갱신한다.
-    //     RefreshDialogueUiSuppression();
-    //
-    //     // 5. Yarn node를 다시 시작한다.
-    //     //    DialogueRunner.Stop()은 rollback seek 중 호출하지 않는다.
-    //     _restarter.RestartNode(target.nodeName);
-    // }
-
     private void EndRollbackSeek()
     {
         _hasTarget = false;
         _target = default;
-        
-        //_presentationUIRoot.ShowDialogueBoxUI(true);
 
-        // 1. Presentation rollback seek 종료.
-        _presentationSessionContext.ExitRollbackSeek();
+        _presentationSessionContext.ClearRollbackState();
 
-        // 3. Dialogue UI suppression 해제.
         RefreshDialogueUiSuppression();
     }
 
@@ -184,8 +162,6 @@ public sealed class RollbackController : IDisposable
 
         _presentationUIRoot.RefreshDialogueUiSuppression(_presentationSessionContext);
     }
-    
-    
 
     public void Dispose()
     {

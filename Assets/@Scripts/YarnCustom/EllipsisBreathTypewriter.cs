@@ -52,6 +52,7 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
     {
         if (_typewriterText == null)
             return;
+        Debug.Log($"[Typewriter.ClearCurrentTextView] frame={Time.frameCount}, target={_typewriterText?.name}, textBefore='{_typewriterText?.text}'");
 
         _typewriterText.maxVisibleCharacters = 0;
         _typewriterText.SetText(string.Empty);
