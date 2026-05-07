@@ -12,7 +12,7 @@ public sealed class EpisodePlayer : MonoBehaviour, IRollbackDialogueRestarter
 {
     private VnScreenBindings _vnScreenBindings;
     private PresentationViewUIBindings _dialogueUIBindings;
-    private NodeRollbackHistory  _nodeRollbackHistory;
+    private RollbackHistory  _nodeRollbackHistory;
     
     public DialogueRunner dialogueRunner;
     [SerializeField] private DialogueTextRouter dialogueTextRouter;
@@ -30,7 +30,7 @@ public sealed class EpisodePlayer : MonoBehaviour, IRollbackDialogueRestarter
     [Tooltip("Stop")]
     [SerializeField] private KeyCode stopKey = KeyCode.Alpha3;
 
-    public void Initialize(VnScreenBindings vnScreenBindings, PresentationViewUIBindings dialogueUIBindings, NodeRollbackHistory nodeRollbackHistory)
+    public void Initialize(VnScreenBindings vnScreenBindings, PresentationViewUIBindings dialogueUIBindings, RollbackHistory nodeRollbackHistory)
     {
         _vnScreenBindings = vnScreenBindings;
         _dialogueUIBindings = dialogueUIBindings;
@@ -90,7 +90,6 @@ public sealed class EpisodePlayer : MonoBehaviour, IRollbackDialogueRestarter
         bgHost.ClearRuntimeBackgrounds();
         presentationResponseRig.ClearRuntimeState();
         StartYarnNode(nodeName);
-        Debug.Log(nodeName + " started");
         //StartPresentationRoute(presentationEntryKey);
         
         //StartCoroutine(StartYarnNextFrame(nodeName));

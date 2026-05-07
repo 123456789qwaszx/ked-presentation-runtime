@@ -69,7 +69,7 @@ public class VnAppBootstrap : MonoBehaviour
     private PresentationViewUIBindings _dialogueUIBindings;
     private EpisodeFlowController _episodeFlowController;
     private VnScreenBindings _screenBindings;
-    private NodeRollbackHistory _rollbackHistory;
+    private RollbackHistory _rollbackHistory;
     private UIPatchService _uiPatchService;
     
     private void Awake()
@@ -225,12 +225,6 @@ public class VnAppBootstrap : MonoBehaviour
         vnAdvanceInputPoller.Initialize(dialogueAdvanceDispatcher);
     }
     
-    [Header("RollbackHistoryDebugOverlay")]
-    public RollbackHistoryDebugOverlay overlay;
-    private void CreateRollbackHistoryDebugTool(NodeRollbackHistory history, RollbackRuntimeState runtimeState)
-    {
-        overlay.Initialize(history, runtimeState);
-    }
     
     private void BootstrapPlaybackControls()
     {
@@ -249,11 +243,9 @@ public class VnAppBootstrap : MonoBehaviour
             _presentationSessionContext,
             () => yarnLineLifecycleBridge.IsLineFullyShown);
         
-        RollbackRuntimeState rollbackState = new ();
-        _rollbackHistory = new NodeRollbackHistory(yarnLineLifecycleBridge, rollbackState);
+        _rollbackHistory = new RollbackHistory();
         
         RollbackController rollbackController = new (
-            rollbackState,
             _rollbackHistory,
             yarnLineLifecycleBridge,
             episodePlayer,
@@ -262,8 +254,6 @@ public class VnAppBootstrap : MonoBehaviour
             _presentationSessionContext,
             UIManager.Instance.GetUI<PresentationUIRoot>()
         );
-        
-        CreateRollbackHistoryDebugTool(_rollbackHistory, rollbackState);
         
         vnFeatureController.Initialize(
             _vnUxState,

@@ -3,8 +3,7 @@ using UnityEngine;
 
 public sealed class RollbackController : IDisposable
 {
-    private readonly RollbackRuntimeState _state;
-    private readonly NodeRollbackHistory _history;
+    private readonly RollbackHistory _history;
     private readonly YarnLineLifecycleBridge _bridge;
     private readonly IRollbackDialogueRestarter _restarter;
     private readonly DialogueAdvanceDispatcher _dispatcher;
@@ -12,9 +11,14 @@ public sealed class RollbackController : IDisposable
     private readonly PresentationSessionContext _presentationSessionContext;
     private readonly PresentationUIRoot _presentationUIRoot;
 
+    private RollbackPoint _target;
+    private bool _hasTarget;
+
+    public bool IsSeeking => _presentationSessionContext != null &&
+                             _presentationSessionContext.IsRollbackSeeking;
+
     public RollbackController(
-        RollbackRuntimeState state,
-        NodeRollbackHistory history,
+        RollbackHistory history,
         YarnLineLifecycleBridge bridge,
         IRollbackDialogueRestarter restarter,
         DialogueAdvanceDispatcher dispatcher,
@@ -22,7 +26,6 @@ public sealed class RollbackController : IDisposable
         PresentationSessionContext presentationSessionContext,
         PresentationUIRoot presentationUIRoot)
     {
-        _state = state;
         _history = history;
         _bridge = bridge;
         _restarter = restarter;
@@ -31,66 +34,85 @@ public sealed class RollbackController : IDisposable
         _presentationSessionContext = presentationSessionContext;
         _presentationUIRoot = presentationUIRoot;
 
-        _bridge.LineEntered  -= EndSeekBeforeTargetLineDisplays;
-        _bridge.LineEntered  += EndSeekBeforeTargetLineDisplays;
+        _bridge.LineEntered -= EndSeekBeforeTargetLineDisplays;
+        _bridge.LineEntered += EndSeekBeforeTargetLineDisplays;
 
-        _bridge.LineEntered  -= AddRollbackPoint;
-        _bridge.LineEntered  += AddRollbackPoint;
+        _bridge.LineEntered -= AddRollbackPoint;
+        _bridge.LineEntered += AddRollbackPoint;
     }
 
     public bool RequestRollbackOneStep()
     {
-        if (_state.IsSeeking)
+        if (IsSeeking)
             return false;
 
-        if (!_history.TryGetPreviousPoint(out RollbackPoint target))
+        if (!_history.TryPrepareRollbackOneStep(out RollbackPoint target))
             return false;
 
-        // bool jumped = _presentationSessionBridge.JumpTo(
-        //     target.presentationNodeIndex,
-        //     target.presentationStepIndex
-        // );
+        BeginRollbackToTarget(target);
+        return true;
+    }
 
-        // target 자신은 남기지 않고 잘라야
-        // rollback 후 target line이 다시 완료될 때 1번만 정상 기록된다.
-        _history.TrimAfterVisitedIndex(target.visitedIndex - 1);
+    public bool RequestRollbackToHistoryIndex(int historyIndex)
+    {
+        if (IsSeeking)
+            return false;
 
-        _state.BeginRollback(target);
+        if (!_history.TryPrepareRollbackToHistoryIndex(historyIndex, out RollbackPoint target))
+            return false;
+
+        BeginRollbackToTarget(target);
+        return true;
+    }
+
+    private void BeginRollbackToTarget(RollbackPoint target)
+    {
+        _target = target;
+        _hasTarget = true;
 
         _presentationSessionContext.EnterRollbackSeek();
         RefreshDialogueUiSuppression();
 
         _restarter.RestartNode(target.nodeName);
+    }
 
-        return true;
+    private void EndRollbackSeek()
+    {
+        _hasTarget = false;
+        _target = default;
+
+        _presentationSessionContext.ExitRollbackSeek();
+        RefreshDialogueUiSuppression();
     }
 
     private void EndSeekBeforeTargetLineDisplays(YarnLineMeta meta)
     {
-        if (!_state.IsSeeking)
+        if (!IsSeeking)
             return;
 
-        if (_state.IsTarget(meta.nodeName, meta.lineId))
+        if (IsTarget(meta))
         {
-            _state.EndRollback();
-
-            _presentationSessionContext.ExitRollbackSeek();
-            RefreshDialogueUiSuppression();
-
+            EndRollbackSeek();
             return;
         }
 
         _dispatcher.DispatchSeekNext();
     }
 
+    private bool IsTarget(YarnLineMeta meta)
+    {
+        if (!_hasTarget)
+            return false;
+
+        return _target.nodeName == meta.nodeName &&
+               _target.lineId == meta.lineId;
+    }
+
     private void AddRollbackPoint(YarnLineMeta meta)
     {
-        if (_state.IsSeeking)
+        if (IsSeeking)
             return;
 
-        if (string.IsNullOrEmpty(meta.nodeName) || string.IsNullOrEmpty(meta.lineId))
-            return;
-        
         _history.AddRollbackPoint(meta);
     }
 
@@ -107,7 +129,7 @@ public sealed class RollbackController : IDisposable
         if (_bridge == null)
             return;
 
-        _bridge.LineEntered  -= EndSeekBeforeTargetLineDisplays;
-        _bridge.LineEntered  -= AddRollbackPoint;
+        _bridge.LineEntered -= EndSeekBeforeTargetLineDisplays;
+        _bridge.LineEntered -= AddRollbackPoint;
     }
 }

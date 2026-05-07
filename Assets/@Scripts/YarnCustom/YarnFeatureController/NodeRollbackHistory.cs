@@ -1,165 +1,174 @@
 using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 [Serializable]
 public struct RollbackPoint
 {
-    public int visitedIndex;
-    public int frame;
+    public int historyIndex;
+
     public string nodeName;
     public string lineId;
     public string rawText;
 
     public RollbackPoint(
-        int visitedIndex,
-        int frame,
+        int historyIndex,
         string nodeName,
         string lineId,
         string rawText)
     {
-        this.visitedIndex = visitedIndex;
-        this.frame = frame;
+        this.historyIndex = historyIndex;
         this.nodeName = nodeName;
         this.lineId = lineId;
         this.rawText = rawText;
     }
 }
 
-public sealed class RollbackRuntimeState
+public sealed class RollbackHistory
 {
-    public bool IsSeeking { get; private set; }
-
-    public string TargetNodeName { get; private set; }
-    public string TargetLineId { get; private set; }
-    public int TargetVisitedIndex { get; private set; }
-
-    public void BeginRollback(RollbackPoint target)
-    {
-        IsSeeking = true;
-        TargetNodeName = target.nodeName;
-        TargetLineId = target.lineId;
-        TargetVisitedIndex = target.visitedIndex;
-    }
-
-    public void EndRollback()
-    {
-        IsSeeking = false;
-        TargetNodeName = null;
-        TargetLineId = null;
-        TargetVisitedIndex = -1;
-    }
-
-    public bool IsTarget(string nodeName, string lineId)
-    {
-        if (!IsSeeking)
-            return false;
-
-        return TargetNodeName == nodeName && TargetLineId == lineId;
-    }
-}
-
-public sealed class NodeRollbackHistory : IDisposable
-{
-    private readonly YarnLineLifecycleBridge _bridge;
-    private readonly RollbackRuntimeState _state;
-
     private readonly List<RollbackPoint> _points = new();
-    private string _currentNodeName = "";
-    private int _visitedCounter = 0;
+
+    private int _nextHistoryIndex = 0;
 
     public IReadOnlyList<RollbackPoint> Points => _points;
-    public string CurrentNodeName => _currentNodeName;
 
-    public NodeRollbackHistory(
-        YarnLineLifecycleBridge bridge,
-        RollbackRuntimeState state)
-    {
-        _bridge = bridge;
-        _state = state;
-
-        _bridge.OnNodeStarted -= OnNodeStarted;
-        _bridge.OnNodeStarted += OnNodeStarted;
-    }
-
-    private void OnNodeStarted(string nodeName)
-    {
-        if (_state.IsSeeking)
-            return;
-
-        if (_currentNodeName == nodeName)
-            return;
-
-        _currentNodeName = nodeName;
-        _visitedCounter = 0;
-        _points.Clear();
-    }
+    public bool CanRollbackOneStep => _points.Count >= 2;
 
     public void AddRollbackPoint(YarnLineMeta meta)
     {
-        if (_currentNodeName != meta.nodeName)
-        {
-            _currentNodeName = meta.nodeName;
-            _visitedCounter = 0;
-            _points.Clear();
-        }
-
-        // 마지막 기록과 완전히 같은 라인이면 중복 추가 방지
-        if (_points.Count > 0)
-        {
-            RollbackPoint last = _points[^1];
-
-            if (last.nodeName == meta.nodeName && last.lineId == meta.lineId)
-                return;
-        }
+        if (IsDuplicateOfLastPoint(meta))
+            return;
 
         _points.Add(new RollbackPoint(
-            visitedIndex: _visitedCounter++,
-            frame: meta.frame,
+            historyIndex: _nextHistoryIndex++,
             nodeName: meta.nodeName,
             lineId: meta.lineId,
             rawText: meta.rawText
         ));
     }
 
-    public bool CanRollbackOneStep => _points.Count >= 2;
-    
-
-    public bool TryGetPreviousPoint(out RollbackPoint point)
+    public bool TryPrepareRollbackOneStep(out RollbackPoint target)
     {
-        point = default;
+        target = default;
 
         if (!CanRollbackOneStep)
             return false;
 
-        point = _points[^2];
+        int targetListIndex = _points.Count - 2;
+        target = _points[targetListIndex];
+
+        RemoveFromListIndex(targetListIndex);
+
         return true;
     }
 
-    public void TrimAfterVisitedIndex(int visitedIndex)
+    public bool TryPrepareRollbackToHistoryIndex(
+        int historyIndex,
+        out RollbackPoint target)
     {
-        int keepCount = visitedIndex + 1;
+        target = default;
 
-        if (keepCount < 0)
-            keepCount = 0;
+        int targetListIndex = FindListIndexByHistoryIndex(historyIndex);
+        if (targetListIndex < 0)
+            return false;
 
-        if (_points.Count > keepCount)
-            _points.RemoveRange(keepCount, _points.Count - keepCount);
+        // 마지막 지점은 현재 위치에 가까우므로 rollback target으로는 의미가 없다.
+        // UI에서 현재 라인을 선택한 경우 no-op 처리.
+        if (targetListIndex >= _points.Count - 1)
+            return false;
 
-        _visitedCounter = _points.Count;
+        target = _points[targetListIndex];
+
+        RemoveFromListIndex(targetListIndex);
+
+        return true;
+    }
+
+    public bool TryGetPointByHistoryIndex(
+        int historyIndex,
+        out RollbackPoint point)
+    {
+        int index = FindListIndexByHistoryIndex(historyIndex);
+        if (index < 0)
+        {
+            point = default;
+            return false;
+        }
+
+        point = _points[index];
+        return true;
+    }
+
+    public bool IsDuplicateOfLastPoint(YarnLineMeta meta)
+    {
+        if (_points.Count == 0)
+            return false;
+
+        RollbackPoint last = _points[^1];
+
+        return last.nodeName == meta.nodeName &&
+               last.lineId == meta.lineId;
     }
 
     public void ClearRollbackHistory()
     {
-        _visitedCounter = 0;
         _points.Clear();
+        _nextHistoryIndex = 0;
     }
 
-    public void Dispose()
+    public List<RollbackPoint> CreateSnapshot()
     {
-        if (_bridge == null)
+        return new List<RollbackPoint>(_points);
+    }
+
+    public void RestoreSnapshot(
+        IReadOnlyList<RollbackPoint> points,
+        int nextHistoryIndex = -1)
+    {
+        _points.Clear();
+
+        if (points != null)
+            _points.AddRange(points);
+
+        if (nextHistoryIndex >= 0)
+        {
+            _nextHistoryIndex = nextHistoryIndex;
+            return;
+        }
+
+        _nextHistoryIndex = CalculateNextHistoryIndex();
+    }
+
+    private int FindListIndexByHistoryIndex(int historyIndex)
+    {
+        for (int i = 0; i < _points.Count; i++)
+        {
+            if (_points[i].historyIndex == historyIndex)
+                return i;
+        }
+
+        return -1;
+    }
+
+    private void RemoveFromListIndex(int listIndex)
+    {
+        if (listIndex < 0 || listIndex >= _points.Count)
             return;
 
-        _bridge.OnNodeStarted -= OnNodeStarted;
+        // target 자신도 제거한다.
+        // rollback seek가 target line에 도달하고 정상 표시될 때 다시 기록된다.
+        _points.RemoveRange(listIndex, _points.Count - listIndex);
+    }
+
+    private int CalculateNextHistoryIndex()
+    {
+        int max = -1;
+
+        for (int i = 0; i < _points.Count; i++)
+        {
+            if (_points[i].historyIndex > max)
+                max = _points[i].historyIndex;
+        }
+
+        return max + 1;
     }
 }
