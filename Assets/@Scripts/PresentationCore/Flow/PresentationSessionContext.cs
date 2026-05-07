@@ -74,6 +74,9 @@ public sealed class PresentationSessionContext
 
     public float TimeScale => _playback.TimeScale;
     public float AutoAdvanceDelay => _playback.AutoAdvanceDelay;
+    
+    private bool _suppressImmediateLineTransition;
+    private string _suppressImmediateLineTransitionLineId;
 
     public void SetPlayMode(VnPlayMode mode)
     {

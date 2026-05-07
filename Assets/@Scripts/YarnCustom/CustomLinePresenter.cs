@@ -22,9 +22,11 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
     private DialogueTextRouter _dialogueTextRouter;
     private EllipsisBreathTypewriter _typewriter;
     private PresentationSessionContext _context;
+    private LinePresentationAdvanceState _lineAdvanceState;
 
     private readonly DialogueBoxTransitionPolicy _boxTransitionPolicy = new DialogueBoxTransitionPolicy();
     private readonly DialogueBoxCurrentState _boxState = new DialogueBoxCurrentState();
+    
 
     private TMP_Text _lineText;
     private TMP_Text _characterNameText;
@@ -40,13 +42,15 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
         IDialogueBoxViewResolver dialogueBoxResolver,
         DialogueTextRouter dialogueTextRouter,
         EllipsisBreathTypewriter typewriter,
-        PresentationSessionContext context)
+        PresentationSessionContext context,
+        LinePresentationAdvanceState lineAdvanceState)
     {
         _lineRoutingPolicy = lineRoutingPolicy;
         _dialogueBoxResolver = dialogueBoxResolver;
         _dialogueTextRouter = dialogueTextRouter;
         _typewriter = typewriter;
         _context = context;
+        _lineAdvanceState = lineAdvanceState;
 
         if (dialogueRunner == null)
         {
@@ -80,6 +84,8 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
 
     public override async YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token)
     {
+        _lineAdvanceState?.EnterLine();
+        
         int myGeneration = _presenterGeneration;
 
         bool IsStale()
@@ -96,14 +102,25 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
 
         ResetDialogueBoxTransform(nextBox);
         PrepareIncomingTextTarget(nextBox, line);
-        PrepareBoxForTransition(nextBox, transitionKind);
 
-        await ApplyBoxTransitionAsync(
-            previousBox,
-            nextBox,
-            transitionKind,
-            token,
-            IsStale);
+        if (ShouldSuppressLineVisuals())
+        {
+            ApplySilentRollbackBoxState(
+                previousBox,
+                nextBox,
+                transitionKind);
+        }
+        else
+        {
+            PrepareBoxForTransition(nextBox, transitionKind);
+
+            await ApplyBoxTransitionAsync(
+                previousBox,
+                nextBox,
+                transitionKind,
+                token,
+                IsStale);
+        }
 
         if (IsStale())
         {
@@ -111,6 +128,8 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
             await WaitForLineAdvanceAsync(token);
             return;
         }
+        
+        _lineAdvanceState?.EndTransition();
 
         _boxState.Commit(nextBoxKind, nextBox, transitionKind);
 
@@ -123,15 +142,50 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
             _typewriter.SetTextView(_lineText);
             _typewriter.PrepareForContent(text);
 
+            _lineAdvanceState?.BeginTypewriter();
+
             await _typewriter
                 .RunTypewriter(text, token.HurryUpToken)
                 .SuppressCancellationThrow();
 
             if (!IsStale())
+            {
+                _lineAdvanceState?.CompleteLineDisplay();
                 _typewriter.ContentWillDismiss();
+            }
+        }
+        else
+        {
+            _lineAdvanceState?.CompleteLineDisplay();
         }
 
         await WaitForLineAdvanceAsync(token);
+    }
+    
+    private void ApplySilentRollbackBoxState(
+        IDialogueTextTarget previousBox,
+        IDialogueTextTarget nextBox,
+        DialogueBoxTransitionKind transitionKind)
+    {
+        switch (transitionKind)
+        {
+            case DialogueBoxTransitionKind.Keep:
+            case DialogueBoxTransitionKind.Cut:
+            case DialogueBoxTransitionKind.FadeIn:
+            case DialogueBoxTransitionKind.FadeOutIn:
+                HideAllExcept(nextBox);
+                SetBoxVisibleImmediate(nextBox, true);
+                break;
+
+            case DialogueBoxTransitionKind.Hide:
+                SetBoxVisibleImmediate(nextBox, false);
+                break;
+        }
+    }
+    
+    private bool ShouldSuppressLineVisuals()
+    {
+        return _context != null && _context.IsRollbackSeeking;
     }
     
     private void PrepareIncomingTextTarget(

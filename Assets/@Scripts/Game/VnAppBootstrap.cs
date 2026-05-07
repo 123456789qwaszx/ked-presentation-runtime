@@ -12,6 +12,7 @@ public class VnAppBootstrap : MonoBehaviour
     private readonly VnPlaybackSettings _vnPlaybackSettings = new ();
     private readonly EpisodePlayState _episodePlayState = new ();
     private readonly PresentationSessionContext _presentationSessionContext = new();
+    private readonly LinePresentationAdvanceState  _linePresentationAdvanceState = new();
     
     [Header("Sound")]
     [SerializeField] private AudioSystem audioSystem;
@@ -188,7 +189,8 @@ public class VnAppBootstrap : MonoBehaviour
             dialogueBoxHost,
             dialogueTextRouter,
             ellipsisBreathTypewriter,
-            _presentationSessionContext);
+            _presentationSessionContext,
+            _linePresentationAdvanceState);
         
         yarnLineSideEffectPresenter.Initialize(
             dialogueRunner,
@@ -217,7 +219,7 @@ public class VnAppBootstrap : MonoBehaviour
         AdvanceGate advanceGategate = new(
             _vnUxState,
             _vnPlaybackSettings,
-            ellipsisBreathTypewriter,
+            _linePresentationAdvanceState,
             () => session != null && session.IsNodeBusy()
         );
 
@@ -253,7 +255,9 @@ public class VnAppBootstrap : MonoBehaviour
             _presentationSessionBridge,
             _presentationSessionContext,
             UIManager.Instance.GetUI<PresentationUIRoot>(),
-            customLinePresenter
+            customLinePresenter,
+            _linePresentationAdvanceState
+            
         );
         
         vnFeatureController.Initialize(
