@@ -40,10 +40,10 @@
 <<place Laru duo_left>>
 <<size Laru normal>>
 <<cast Laru Laru a>>
-//<<fade_in Laru>>
+<<fade_in Laru>>
 
-//<<jolt Laru>>
-//<<emotion Laru 15>>
+<<jolt Laru>>
+<<emotion Laru 15>>
 
 라루: 그건...... 공급업체와의 비즈니스 식사 자리에서 먹은 건데...... 경비 처리 안 되나? #box=onlytext
 

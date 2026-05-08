@@ -52,7 +52,7 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
     {
         if (_typewriterText == null)
             return;
-        Debug.Log($"[Typewriter.ClearCurrentTextView] frame={Time.frameCount}, target={_typewriterText?.name}, textBefore='{_typewriterText?.text}'");
+        //Debug.Log($"[Typewriter.ClearCurrentTextView] frame={Time.frameCount}, target={_typewriterText?.name}, textBefore='{_typewriterText?.text}'");
 
         _typewriterText.maxVisibleCharacters = 0;
         _typewriterText.SetText(string.Empty);
@@ -174,7 +174,7 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
                     if (cancellationToken.IsCancellationRequested)
                     {
                         RevealAllAndComplete(line, totalLineCharacterCount);
-                        Debug.Log("IsCancellationRequested2");
+                        //Debug.Log("IsCancellationRequested2");
                         return;
                     }
 
@@ -282,7 +282,7 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
-            Debug.Log("IsCancellationRequested4");
+            //Debug.Log("IsCancellationRequested4");
             RevealAllAndComplete(line, _totalCharacterCount);
         }
         catch (Exception ex)

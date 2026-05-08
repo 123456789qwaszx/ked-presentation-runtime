@@ -1,6 +1,9 @@
 using System;
 using System.Collections;
+using DG.Tweening;
 using UnityEngine;
+using UnityEngine.UI;
+using Object = UnityEngine.Object;
 
 [Serializable]
 [CommandMenuHint(
@@ -98,13 +101,13 @@ public sealed class SetupCharRigCommand : CommandBase
             throw new InvalidOperationException("[SetupCharRigCommand] roleKey is empty.");
 
         if (_spec.destroyExistingRigWithSameName)
-            TryDestroyExistingRig();
+            TryDestroyExistingRig(roleKey);
 
         CharacterRigRefs rigRefs = _rigAccess.BindAndBuildRefs(_spec);
         scope.Refs[roleKey] = rigRefs;
     }
 
-    private void TryDestroyExistingRig()
+    private void TryDestroyExistingRig(string roleKey)
     {
         RectTransform parent = _rigAccess.ResolveParentSlot(_spec.parentSlot, _spec.strict);
         if (parent == null)
@@ -118,17 +121,48 @@ public sealed class SetupCharRigCommand : CommandBase
             if (child.name != rigName)
                 continue;
 
-#if UNITY_EDITOR
-            if (!Application.isPlaying)
-                UnityEngine.Object.DestroyImmediate(child.gameObject);
-            else
-#endif
-                UnityEngine.Object.Destroy(child.gameObject);
+            KillTweenBeforeDestroy(child, roleKey);
+
+            Object.Destroy(child.gameObject);
         }
     }
 
-    private static string SafeTrim(string s)
+    private static void KillTweenBeforeDestroy(Transform root, string roleKey)
     {
-        return string.IsNullOrEmpty(s) ? "" : s.Trim();
+        if (root == null)
+            return;
+
+        DOTween.Kill($"CharPortraitWipe:{roleKey}", false);
+        KillTweenOnHierarchy(root);
+    }
+
+    private static void KillTweenOnHierarchy(Transform root)
+    {
+        if (root == null)
+            return;
+
+        RectTransform[] rects = root.GetComponentsInChildren<RectTransform>(true);
+        for (int i = 0; i < rects.Length; i++)
+        {
+            if (rects[i] != null)
+                rects[i].DOKill(false);
+        }
+
+        CanvasGroup[] canvasGroups = root.GetComponentsInChildren<CanvasGroup>(true);
+        for (int i = 0; i < canvasGroups.Length; i++)
+        {
+            if (canvasGroups[i] != null)
+                canvasGroups[i].DOKill(false);
+        }
+
+        Graphic[] graphics = root.GetComponentsInChildren<Graphic>(true);
+        for (int i = 0; i < graphics.Length; i++)
+        {
+            if (graphics[i] != null)
+                graphics[i].DOKill(false);
+        }
+
+        DOTween.Kill(root, false);
+        DOTween.Kill(root.gameObject, false);
     }
 }

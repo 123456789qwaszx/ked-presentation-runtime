@@ -1,6 +1,9 @@
 using System;
 using System.Collections;
+using DG.Tweening;
 using UnityEngine;
+using UnityEngine.Serialization;
+using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
 [Serializable]
@@ -20,6 +23,10 @@ public sealed class DestroyCommandSpec : CharacterRigCommandSpecBase
 
     [Tooltip("수동 prefix. 비워두면 자동/없음 정책을 따릅니다. 예: 'seina_'")]
     public string rolePrefixOverride = "";
+
+    [Header("Destroy")]
+    [Tooltip("Destroy 전에 대상 Rig 하위 Tween을 정리합니다.")]
+    public bool killTween = true;
 
     public string GetResolvedRolePrefix(string resolvedRoleKey)
     {
@@ -75,18 +82,62 @@ public sealed class DestroyCommand : CommandBase
 
     private void Apply(CommandRunScope scope)
     {
-        string resolvedRoleKey = CharacterRigTargetResolver.ResolveRoleKeyFromTargetKey(scope, _spec.targetKey);
+        string resolvedRoleKey =
+            CharacterRigTargetResolver.ResolveRoleKeyFromTargetKey(scope, _spec.targetKey);
+
         string targetName = _spec.GetResolvedTargetName(resolvedRoleKey);
 
         GameObject go = GameObject.Find(targetName);
         if (go == null)
             return;
 
-        Debug.Log($"[DestroyCommand] Destroy '{targetName}'");
+        //Debug.Log($"[DestroyCommand] Destroy '{targetName}'");
+
+        if (_spec.killTween)
+            KillTweenBeforeDestroy(go.transform, resolvedRoleKey);
 
         Object.Destroy(go);
 
-        scope.Refs[resolvedRoleKey] = null;
+        if (!string.IsNullOrEmpty(resolvedRoleKey))
+            scope.Refs[resolvedRoleKey] = null;
     }
 
+    private static void KillTweenBeforeDestroy(Transform root, string resolvedRoleKey)
+    {
+        if (root == null)
+            return;
+        
+        DOTween.Kill($"CharPortraitWipe:{resolvedRoleKey}", false);
+        KillTweenOnHierarchy(root);
+    }
+
+    private static void KillTweenOnHierarchy(Transform root)
+    {
+        if (root == null)
+            return;
+
+        RectTransform[] rects = root.GetComponentsInChildren<RectTransform>(true);
+        for (int i = 0; i < rects.Length; i++)
+        {
+            if (rects[i] != null)
+                rects[i].DOKill(false);
+        }
+
+        CanvasGroup[] canvasGroups = root.GetComponentsInChildren<CanvasGroup>(true);
+        for (int i = 0; i < canvasGroups.Length; i++)
+        {
+            if (canvasGroups[i] != null)
+                canvasGroups[i].DOKill(false);
+        }
+
+        Graphic[] graphics = root.GetComponentsInChildren<Graphic>(true);
+        for (int i = 0; i < graphics.Length; i++)
+        {
+            if (graphics[i] != null)
+                graphics[i].DOKill(false);
+        }
+
+        DOTween.Kill(root, false);
+        DOTween.Kill(root.gameObject, false);
+    }
 }
