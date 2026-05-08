@@ -1,8 +1,6 @@
 ﻿title: sub04laru
 ---
-<<destroy Albedo>>
-<<destroy Laru>>
-<<destroy npc1>>
+<<clearall_rigs>>
 
 <<begin_hold>>
 <<presentation_setup>>

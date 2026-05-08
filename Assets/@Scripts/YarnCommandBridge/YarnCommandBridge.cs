@@ -30,6 +30,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
     {
         
         _dialogueRunner.AddCommandHandler<string>("destroy", EnqueueDestroySpec);
+        
 
         // Marks the next N collected commands as wait=true inside Presentation/Executor.
         // This affects command playback order, but does NOT block Yarn by itself.
@@ -101,8 +102,38 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         _dialogueRunner.AddCommandHandler<string>("uncast", EnqueueUncastCharacterSpec);
         
         _dialogueRunner.AddCommandHandler<float>("pause", EnqueueWaitSpec);
+        
+        // clear character rigs
+        _dialogueRunner.AddCommandHandler("clearall_rigs", EnqueueClearAllCharRigRefsSpec);
+        _dialogueRunner.AddCommandHandler<string>("clear_rig", EnqueueClearCharRigRefSpec);
     }
 
+    private void EnqueueClearAllCharRigRefsSpec()
+    {
+        var spec = new ClearCharRigRefsCommandSpec
+        {
+            removeKeys = true,
+            destroyRigObjects = true,
+            killTweensBeforeDestroy = true,
+            onlyRoleKeys = null
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueClearCharRigRefSpec(string roleKey)
+    {
+        var spec = new ClearCharRigRefsCommandSpec
+        {
+            removeKeys = true,
+            destroyRigObjects = true,
+            killTweensBeforeDestroy = true,
+            onlyRoleKeys = new[] { roleKey }
+        };
+
+        Collect(spec);
+    }
+    
     private void EnqueueWaitSpec(float duration)
     {
         var spec = new WaitCommandSpec()

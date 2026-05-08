@@ -287,6 +287,6 @@ public class VnAppBootstrap : MonoBehaviour
     
     private void Start()
     {
-        //_screenBindings.GoToTitle();
+        _screenBindings.GoToTitle();
     }
 }

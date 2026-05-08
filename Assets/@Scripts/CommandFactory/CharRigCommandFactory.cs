@@ -24,6 +24,9 @@ public sealed class CharRigCommandFactory : INodeCommandFactory
             null => null,
             
             SetupCharRigCommandSpec s         => new SetupCharRigCommand(_access, s),
+            DestroyCommandSpec s            => new DestroyCommand(s),
+            ClearCharRigRefsCommandSpec s => new ClearCharRigRefsCommand(s),
+            
             SetColorCommandSpecCharR s      => new SetColorCommandCharR(s),
             ApplyTrackOffsetCommandSpecCharR s  => new ApplyTrackOffsetCommandCharR(s),
             MoveByCommandSpecCharR s        => new MoveByCommandCharR(s),
@@ -31,7 +34,6 @@ public sealed class CharRigCommandFactory : INodeCommandFactory
             HideRootLayersCommandSpecCharR s     => new HideRootLayersCommandCharR(s),
             SetAnchorCommandSpecCharR s     => new SetAnchorCommandCharR(s),
             ShowRootLayersCommandSpecCharR s     => new ShowRootLayersCommandCharR(s),
-            DestroyCommandSpec s            => new DestroyCommand(s),
             SetOriginSizeCommandSpecCharR s => new SetOriginSizeCommandCharR(s),
             FadeOutCommandSpecCharR s       => new FadeOutCommandCharR(s),
             FadeInCommandSpecCharR s        => new FadeInCommandCharR(s),

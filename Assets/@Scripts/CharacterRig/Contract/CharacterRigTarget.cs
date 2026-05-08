@@ -37,6 +37,8 @@ public enum CharacterRigTarget
 
 public sealed class CharacterRigRefs
 {
+    public RectTransform Root;
+    
     // Root axis
     public RectTransform Character_Anchor;
     public RectTransform Character_Track;

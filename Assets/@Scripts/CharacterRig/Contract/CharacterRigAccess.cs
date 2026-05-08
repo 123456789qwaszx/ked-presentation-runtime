@@ -30,9 +30,9 @@ public sealed class CharacterRigAccess
         string rolePrefix = spec.ResolvedRolePrefix;
 
         RectTransform rigRoot = CreateRigRoot(parent, spec, rolePrefix);
-
+        
         var map = BindMap(rigRoot, rolePrefix, spec.strict);
-        CharacterRigRefs refs = BuildRefs(map, spec.strict);
+        CharacterRigRefs refs = BuildRefs(rigRoot, map, spec.strict);
 
         return refs;
     }
@@ -127,10 +127,11 @@ public sealed class CharacterRigAccess
     }
 
     #endregion
-
-    private CharacterRigRefs BuildRefs(Dictionary<CharacterRig.Refs, RectTransform> map, bool strict)
+    private CharacterRigRefs BuildRefs(RectTransform rigRoot, Dictionary<CharacterRig.Refs, RectTransform> map, bool strict)
     {
         CharacterRigRefs refs = new();
+        
+        refs.Root = rigRoot;
 
         RectTransform GetRt(CharacterRig.Refs key)
         {

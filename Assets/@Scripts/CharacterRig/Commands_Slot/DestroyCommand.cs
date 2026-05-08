@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using DG.Tweening;
 using UnityEngine;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
@@ -11,46 +10,12 @@ using Object = UnityEngine.Object;
     "Other", "Destroy Rig", Order = 900)]
 public sealed class DestroyCommandSpec : CharacterRigCommandSpecBase
 {
-    [Tooltip("자동 생성 시 루트 오브젝트 이름.")]
-    public string rigRootName = "CharacterRig";
-
-    [Header("Role Prefix")]
-    [Tooltip("켜면 targetKey에서 해석된 roleKey로부터 자동으로 prefix를 생성합니다. 예: roleKey='seina' -> 'seina_'")]
-    public bool autoRolePrefixFromRoleKey = true;
-
-    [Tooltip("켜면 최종 prefix를 실제 타겟 이름에 적용합니다.")]
-    public bool addRolePrefix = true;
-
-    [Tooltip("수동 prefix. 비워두면 자동/없음 정책을 따릅니다. 예: 'seina_'")]
-    public string rolePrefixOverride = "";
-
     [Header("Destroy")]
     [Tooltip("Destroy 전에 대상 Rig 하위 Tween을 정리합니다.")]
     public bool killTween = true;
 
-    public string GetResolvedRolePrefix(string resolvedRoleKey)
-    {
-        if (!addRolePrefix)
-            return "";
-
-        if (!string.IsNullOrEmpty(rolePrefixOverride))
-            return rolePrefixOverride;
-
-        if (!autoRolePrefixFromRoleKey)
-            return "";
-
-        if (string.IsNullOrEmpty(resolvedRoleKey))
-            return "";
-
-        return resolvedRoleKey.EndsWith("_", StringComparison.Ordinal)
-            ? resolvedRoleKey
-            : $"{resolvedRoleKey}_";
-    }
-
-    public string GetResolvedTargetName(string resolvedRoleKey)
-    {
-        return $"{GetResolvedRolePrefix(resolvedRoleKey)}{rigRootName}";
-    }
+    [Tooltip("Destroy 후 scope.Refs에서 roleKey 항목을 제거합니다. 끄면 null로만 세팅합니다.")]
+    public bool removeRefKey = false;
 }
 
 public sealed class DestroyCommand : CommandBase
@@ -82,32 +47,63 @@ public sealed class DestroyCommand : CommandBase
 
     private void Apply(CommandRunScope scope)
     {
+        if (scope == null || scope.Refs == null)
+            return;
+
         string resolvedRoleKey =
             CharacterRigTargetResolver.ResolveRoleKeyFromTargetKey(scope, _spec.targetKey);
 
-        string targetName = _spec.GetResolvedTargetName(resolvedRoleKey);
-
-        GameObject go = GameObject.Find(targetName);
-        if (go == null)
+        if (string.IsNullOrEmpty(resolvedRoleKey))
             return;
 
-        //Debug.Log($"[DestroyCommand] Destroy '{targetName}'");
+        if (!scope.Refs.TryGetCharRigRefs(resolvedRoleKey, out CharacterRigRefs rigRefs))
+            return;
+
+        RectTransform root = ResolveRoot(rigRefs);
+        if (root == null)
+        {
+            ClearRef(scope, resolvedRoleKey);
+            return;
+        }
 
         if (_spec.killTween)
-            KillTweenBeforeDestroy(go.transform, resolvedRoleKey);
+            KillTweenBeforeDestroy(root, resolvedRoleKey);
 
-        Object.Destroy(go);
+        Object.Destroy(root.gameObject);
 
-        if (!string.IsNullOrEmpty(resolvedRoleKey))
-            scope.Refs[resolvedRoleKey] = null;
+        ClearRef(scope, resolvedRoleKey);
     }
 
-    private static void KillTweenBeforeDestroy(Transform root, string resolvedRoleKey)
+    private void ClearRef(CommandRunScope scope, string roleKey)
+    {
+        if (scope == null || scope.Refs == null)
+            return;
+
+        if (string.IsNullOrEmpty(roleKey))
+            return;
+
+        if (_spec.removeRefKey)
+            scope.Refs.Remove(roleKey);
+        else
+            scope.Refs[roleKey] = null;
+    }
+
+    private static RectTransform ResolveRoot(CharacterRigRefs rigRefs)
+    {
+        if (rigRefs == null)
+            return null;
+
+        return rigRefs.Root;
+    }
+
+    private static void KillTweenBeforeDestroy(RectTransform root, string roleKey)
     {
         if (root == null)
             return;
-        
-        DOTween.Kill($"CharPortraitWipe:{resolvedRoleKey}", false);
+
+        if (!string.IsNullOrEmpty(roleKey))
+            DOTween.Kill($"CharPortraitWipe:{roleKey}", false);
+
         KillTweenOnHierarchy(root);
     }
 
