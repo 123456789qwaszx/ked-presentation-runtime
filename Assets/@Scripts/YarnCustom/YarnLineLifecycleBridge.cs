@@ -70,10 +70,14 @@ public sealed class YarnLineLifecycleBridge : ActionMarkupHandler
     private LocalizedLine _currentLocalizedLine;
 
     private string _currentNodeName = "";
-    public string CurrentNodeName => _currentNodeName;
     private string _currentLineId = "";
     private string _currentCharacterKey = "";
 
+    public string CurrentNodeName => _currentNodeName;
+    public string CurrentLineId => _currentLineId;
+    
+    
+    
     public string CurrentCharacterKey => _currentCharacterKey;
     public int CurrentLineSerial => _lineSerial;
 
