@@ -177,6 +177,9 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
 
             _lineAdvanceState?.BeginTypewriter();
 
+            if (!IsStale())
+                _lineAdvanceState?.ExitRollbackSeek();
+            
             await _typewriter
                 .RunTypewriter(text, token.HurryUpToken)
                 .SuppressCancellationThrow();
@@ -193,8 +196,6 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
                 _lineAdvanceState?.CompleteLineDisplay();
         }
 
-        if (!IsStale())
-            _lineAdvanceState?.ExitRollbackSeek();
 
         await WaitForLineAdvanceAsync(token);
     }

@@ -56,8 +56,8 @@ public sealed class LinePresentationAdvanceState
 {
     private bool _isRollbackSeeking;
     private bool _hasActiveLine;
-    private bool _isTransitioning;
-    private bool _isTypewriterRunning;
+    //private bool _isTransitioning;
+    //private bool _isTypewriterRunning;
     private bool _isLineFullyShown = true;
     
     public bool IsRollbackSeeking => _isRollbackSeeking;
@@ -71,8 +71,8 @@ public sealed class LinePresentationAdvanceState
     public void EnterLine()
     {
         _hasActiveLine = true;
-        _isTransitioning = true;
-        _isTypewriterRunning = false;
+        //_isTransitioning = true;
+        //_isTypewriterRunning = false;
         _isLineFullyShown = false;
     }
 
@@ -81,7 +81,7 @@ public sealed class LinePresentationAdvanceState
         if (!_hasActiveLine)
             return;
 
-        _isTransitioning = false;
+        //_isTransitioning = false;
     }
 
     public void BeginTypewriter()
@@ -89,7 +89,7 @@ public sealed class LinePresentationAdvanceState
         if (!_hasActiveLine)
             return;
 
-        _isTypewriterRunning = true;
+        //_isTypewriterRunning = true;
         _isLineFullyShown = false;
     }
 
@@ -98,8 +98,8 @@ public sealed class LinePresentationAdvanceState
         if (!_hasActiveLine)
             return;
 
-        _isTransitioning = false;
-        _isTypewriterRunning = false;
+        //_isTransitioning = false;
+        //_isTypewriterRunning = false;
         _isLineFullyShown = true;
     }
 
@@ -117,16 +117,16 @@ public sealed class LinePresentationAdvanceState
     public void DismissLine()
     {
         _hasActiveLine = false;
-        _isTransitioning = false;
-        _isTypewriterRunning = false;
+        //_isTransitioning = false;
+        //_isTypewriterRunning = false;
         _isLineFullyShown = true;
     }
 
     public void Reset()
     {
         _hasActiveLine = false;
-        _isTransitioning = false;
-        _isTypewriterRunning = false;
+        //_isTransitioning = false;
+        //_isTypewriterRunning = false;
         _isLineFullyShown = true;
     }
 }

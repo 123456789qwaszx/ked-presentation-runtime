@@ -52,7 +52,7 @@ public sealed class HoldSpeedUpController
 
     private void OnHolding()
     {
-        if(_isLineFullyShown())
+        //if(_isLineFullyShown())
             _dispatcher.DispatchAdvance();
     }
 
