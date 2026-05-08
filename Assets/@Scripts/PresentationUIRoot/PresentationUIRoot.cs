@@ -17,6 +17,9 @@ public class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
     public event Action OnShowPreviousLogPressed;
     public event Action OnSetSpeedupPressed;
     public event Action OnStepNextPressed;
+    
+    public event Action OnSaveMenuPressed;
+    public event Action OnLoadMenuPressed;
 
     public enum Refs
     {
@@ -74,9 +77,19 @@ public class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
         QuickMenuToggle_Image,
         QuickMenuToggleKey_Text,
         QuickMenuToggle_Button,
-
+        
+        
         QuickMenu_Root,
         QuickMenuBG_Image,
+
+        QuickSaveMenu_Root,
+        QuickSaveMenu_Text,
+        QuickSaveMenu_Button,
+
+        QuickLoadMenu_Root,
+        QuickLoadMenu_Text,
+        QuickLoadMenu_Button,
+        
 
         QuickExpandToggle_Root,
         QuickExpandToggle_Image,
@@ -170,6 +183,9 @@ public class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
         BindEvent(View.Button(Refs.QuickDialogueLog_Button), PressLogButton);
         BindEvent(View.Button(Refs.QuickSpeedToggle_Button), PressSpeedButton);
         BindEvent(View.Button(Refs.SkipToggle_Button), PressSkipButton);
+        
+        BindEvent(View.Button(Refs.QuickSaveMenu_Button), PressSaveMenuButton);
+        BindEvent(View.Button(Refs.QuickLoadMenu_Button), PressLoadMenuButton);
 
         BindEvent(
             View.Button(Refs.SpeedUpToggleHotKey_Button),
@@ -202,17 +218,24 @@ public class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
 
         OnStepNextPressed?.Invoke();
     }
-
+    
     private void PressQuickMenuToggleButton(PointerEventData _)
     {
         OnQuickMenuPressed?.Invoke();
 
-        CanvasGroup quickMenu = View.CanvasGroup(Refs.QuickMenu_Root);
-        bool isOpen = quickMenu.alpha > 0.5f;
-
-        if (isOpen) CloseCanvasGroup(quickMenu);
-        else OpenCanvasGroup(quickMenu);
+        SetQuickMenuOpen(!IsQuickMenuOpen());
     }
+
+    // private void PressQuickMenuToggleButton(PointerEventData _)
+    // {
+    //     OnQuickMenuPressed?.Invoke();
+    //
+    //     CanvasGroup quickMenu = View.CanvasGroup(Refs.QuickMenu_Root);
+    //     bool isOpen = quickMenu.alpha > 0.5f;
+    //
+    //     if (isOpen) CloseCanvasGroup(quickMenu);
+    //     else OpenCanvasGroup(quickMenu);
+    // }
 
     private void PressExpandButton(PointerEventData _)
     {
@@ -233,6 +256,34 @@ public class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
     private void PressSkipButton(PointerEventData _)
     {
         OnSkipPressed?.Invoke();
+    }
+    
+    private void PressSaveMenuButton(PointerEventData _)
+    {
+        SetQuickMenuOpen(false);
+        OnSaveMenuPressed?.Invoke();
+    }
+
+    private void PressLoadMenuButton(PointerEventData _)
+    {
+        SetQuickMenuOpen(false);
+        OnLoadMenuPressed?.Invoke();
+    }
+    
+    public void SetQuickMenuOpen(bool open)
+    {
+        CanvasGroup quickMenu = View.CanvasGroup(Refs.QuickMenu_Root);
+
+        if (open)
+            OpenCanvasGroup(quickMenu);
+        else
+            CloseCanvasGroup(quickMenu);
+    }
+
+    public bool IsQuickMenuOpen()
+    {
+        CanvasGroup quickMenu = View.CanvasGroup(Refs.QuickMenu_Root);
+        return quickMenu != null && quickMenu.alpha > 0.5f;
     }
 
     public void SetAutoModeActive(bool active)

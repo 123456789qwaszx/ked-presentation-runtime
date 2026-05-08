@@ -9,7 +9,7 @@ public enum SaveLoadMenuMode
     Load = 1
 }
 
-public sealed class SaveLoadMenuUIRoot : UIRoot<SaveLoadMenuUIRoot.Refs>
+public sealed class SaveLoadMenuUIPanel : UIPanel<SaveLoadMenuUIPanel.Refs>
 {
     public event Action<int> OnSlotSelected;
     public event Action OnCloseRequested;

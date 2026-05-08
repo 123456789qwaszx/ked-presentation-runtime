@@ -193,13 +193,13 @@ public sealed class VnScreenBindings : IDisposable
 
         _currentSaveLoadMode = mode;
 
-        UI.SwitchRoot<SaveLoadMenuUIRoot>(root =>
+        UI.PushPanel<SaveLoadMenuUIPanel>(root =>
         {
             RebindRoot(root, BindSaveLoadRoot);
         });
     }
 
-    private void BindSaveLoadRoot(SaveLoadMenuUIRoot saveLoadRoot)
+    private void BindSaveLoadRoot(SaveLoadMenuUIPanel saveLoadRoot)
     {
         _ctx.Bind(
             saveLoadRoot,
@@ -214,7 +214,7 @@ public sealed class VnScreenBindings : IDisposable
         RefreshSaveLoadRoot(saveLoadRoot);
     }
 
-    private void RefreshSaveLoadRoot(SaveLoadMenuUIRoot saveLoadRoot)
+    private void RefreshSaveLoadRoot(SaveLoadMenuUIPanel saveLoadRoot)
     {
         if (saveLoadRoot == null)
             return;
@@ -262,7 +262,7 @@ public sealed class VnScreenBindings : IDisposable
 
         UIBase currentRoot = _boundRoot;
 
-        if (currentRoot is SaveLoadMenuUIRoot saveLoadRoot)
+        if (currentRoot is SaveLoadMenuUIPanel saveLoadRoot)
             RefreshSaveLoadRoot(saveLoadRoot);
     }
 

@@ -13,6 +13,8 @@ public sealed class PresentationViewUIBindings : IDisposable
     private readonly DialogueAdvanceDispatcher _dialogueAdvanceDispatcher;
 
     private PresentationUIRoot _root;
+    private SaveLoadMenuUIPanel _saveLoadPanel;
+    private SaveLoadMenuMode _saveLoadMode;
 
     public PresentationViewUIBindings(
         EpisodePlayState episodePlayState,
@@ -74,6 +76,14 @@ public sealed class PresentationViewUIBindings : IDisposable
         _ctx.Bind(root,
             r => r.OnSetSpeedupPressed += HandleSetSpeedPressed,
             r => r.OnSetSpeedupPressed -= HandleSetSpeedPressed);
+
+        _ctx.Bind(root,
+            r => r.OnSaveMenuPressed += HandleSaveMenuPressed,
+            r => r.OnSaveMenuPressed -= HandleSaveMenuPressed);
+
+        _ctx.Bind(root,
+            r => r.OnLoadMenuPressed += HandleLoadMenuPressed,
+            r => r.OnLoadMenuPressed -= HandleLoadMenuPressed);
     }
 
     private void HandleRollbackPressed()
@@ -102,6 +112,147 @@ public sealed class PresentationViewUIBindings : IDisposable
 
         _dialogueAdvanceDispatcher.DispatchAdvance();
     }
+
+
+    private void HandleSaveMenuPressed()
+    {
+        OpenSaveLoadMenu(SaveLoadMenuMode.Save);
+    }
+
+    private void HandleLoadMenuPressed()
+    {
+        OpenSaveLoadMenu(SaveLoadMenuMode.Load);
+    }
+
+    private void OpenSaveLoadMenu(SaveLoadMenuMode mode)
+    {
+        Debug.Log("1");
+        if (_uxState.ChoicesVisible || _uxState.BacklogVisible)
+            return;
+        Debug.Log("2");
+
+        VNServiceContainer svc = VNServiceContainer.Instance;
+
+        VNSaveSlotMeta[] metas = svc.SaveRepository.GetAllMetas();
+
+        // var existing = UIManager.Instance.GetUI<SaveLoadMenuUIPanel>();
+        // if (existing != null)
+        // {
+        //     PresentSaveLoadPanel(existing, mode, metas);
+        //     return;
+        // }
+
+        Debug.Log("3");
+        UIManager.Instance.PushPanel<SaveLoadMenuUIPanel>(panel => { PresentSaveLoadPanel(panel, mode, metas); });
+    }
+
+    private void PresentSaveLoadPanel(
+        SaveLoadMenuUIPanel panel,
+        SaveLoadMenuMode mode,
+        VNSaveSlotMeta[] metas)
+    {
+        if (panel == null)
+            return;
+
+        BindSaveLoadPanel(panel);
+
+        _saveLoadMode = mode;
+        panel.Rebuild(mode, metas);
+    }
+
+    private void BindSaveLoadPanel(SaveLoadMenuUIPanel panel)
+    {
+        if (_saveLoadPanel != null)
+            _ctx.Unbind(_saveLoadPanel);
+
+        _saveLoadPanel = panel;
+
+        _ctx.Bind(panel,
+            p => p.OnSlotSelected += HandleSaveLoadSlotSelected,
+            p => p.OnSlotSelected -= HandleSaveLoadSlotSelected);
+
+        _ctx.Bind(panel,
+            p => p.OnCloseRequested += CloseSaveLoadPanel,
+            p => p.OnCloseRequested -= CloseSaveLoadPanel);
+    }
+
+    private void HandleSaveLoadSlotSelected(int slotIndex)
+    {
+        VNServiceContainer svc = VNServiceContainer.Instance;
+
+        if (svc == null)
+        {
+            Debug.LogWarning("[VN] SaveLoad slot selected, but VNServiceContainer is missing.");
+            return;
+        }
+
+        if (_saveLoadMode == SaveLoadMenuMode.Save)
+        {
+            SaveSlot(svc, slotIndex);
+            Debug.Log("Save");
+            return;
+        }
+
+        LoadSlot(svc, slotIndex);
+    }
+
+    private void SaveSlot(VNServiceContainer svc, int slotIndex)
+    {
+        if (!svc.IsRuntimeBound || svc.SaveService == null)
+        {
+            Debug.LogWarning("[VN] Cannot save. Runtime services are not bound.");
+            return;
+        }
+
+        bool saved = svc.SaveService.SaveManual(slotIndex);
+
+        if (!saved)
+            return;
+
+        RefreshSaveLoadPanel();
+    }
+
+    private void LoadSlot(VNServiceContainer svc, int slotIndex)
+    {
+        if (!svc.IsRuntimeBound || svc.LoadService == null)
+        {
+            Debug.LogWarning("[VN] Cannot load. Runtime services are not bound.");
+            return;
+        }
+
+        bool loadStarted = svc.LoadService.Load(slotIndex);
+
+        if (!loadStarted)
+            return;
+
+        CloseSaveLoadPanel();
+    }
+
+    private void RefreshSaveLoadPanel()
+    {
+        if (_saveLoadPanel == null)
+            return;
+
+        VNServiceContainer svc = VNServiceContainer.Instance;
+
+        if (svc == null || !svc.IsPersistentInitialized)
+            return;
+
+        VNSaveSlotMeta[] metas = svc.SaveRepository.GetAllMetas();
+        _saveLoadPanel.Rebuild(_saveLoadMode, metas);
+    }
+
+    private void CloseSaveLoadPanel()
+    {
+        if (_saveLoadPanel != null)
+        {
+            _ctx.Unbind(_saveLoadPanel);
+            _saveLoadPanel = null;
+        }
+
+        UIManager.Instance.PopPanel();
+    }
+
 
     private void HandleSkipPressed()
     {
