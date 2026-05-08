@@ -63,10 +63,6 @@ public class VnAppBootstrap : MonoBehaviour
     [SerializeField] private YarnLineLifecycleBridge yarnLineLifecycleBridge;
 
     [SerializeField] private VnFeatureController vnFeatureController;
-
-    [Header("VN Menu Panels")]
-    [SerializeField] private SaveLoadMenuController saveLoadMenuController;
-    [SerializeField] private AlbumMenuController albumMenuController;
     
     [Header("UI")] 
     [SerializeField] private EpisodePlayer episodePlayer;
@@ -308,8 +304,6 @@ public class VnAppBootstrap : MonoBehaviour
             _episodePlayState);
         
         _screenBindings = new VnScreenBindings(_episodeFlowController);
-        
-        _screenBindings.AttachSaveLoadMenu(saveLoadMenuController);
     }
 
     private void InitializeEpisodePlayer()

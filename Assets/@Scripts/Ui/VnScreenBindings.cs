@@ -11,7 +11,7 @@ public sealed class VnScreenBindings : IDisposable
     private EpisodePlayer _episodePlayer;
     private VNServiceContainer _vnServiceContainer;
 
-    private SaveLoadMenuController _saveLoadMenu;
+    private SaveLoadMenuMode _currentSaveLoadMode;
 
     private UIBase _boundRoot;
 
@@ -28,11 +28,6 @@ public sealed class VnScreenBindings : IDisposable
     public void AttachVNServiceContainer(VNServiceContainer serviceContainer)
     {
         _vnServiceContainer = serviceContainer;
-    }
-
-    public void AttachSaveLoadMenu(SaveLoadMenuController saveLoadMenu)
-    {
-        _saveLoadMenu = saveLoadMenu;
     }
 
     #region Title
@@ -146,19 +141,7 @@ public sealed class VnScreenBindings : IDisposable
 
     private void OnOpenLoadPressed()
     {
-        if (_vnServiceContainer == null || !_vnServiceContainer.IsPersistentInitialized)
-        {
-            Debug.LogWarning("[VnScreenBindings] Cannot open Load menu. VN services are not ready.");
-            return;
-        }
-
-        if (_saveLoadMenu == null)
-        {
-            Debug.LogWarning("[VnScreenBindings] SaveLoadMenuController is null.");
-            return;
-        }
-
-        _saveLoadMenu.OpenAsLoadMenu();
+        GoToLoadMenu();
     }
 
     private void OnOpenAlbumPressed()
@@ -178,6 +161,129 @@ public sealed class VnScreenBindings : IDisposable
 #else
         Application.Quit();
 #endif
+    }
+
+    #endregion
+
+    #region SaveLoad
+
+    public void GoToSaveMenu()
+    {
+        OpenSaveLoadMenu(SaveLoadMenuMode.Save);
+    }
+
+    public void GoToLoadMenu()
+    {
+        OpenSaveLoadMenu(SaveLoadMenuMode.Load);
+    }
+
+    private void OpenSaveLoadMenu(SaveLoadMenuMode mode)
+    {
+        if (_vnServiceContainer == null || !_vnServiceContainer.IsPersistentInitialized)
+        {
+            Debug.LogWarning("[VnScreenBindings] Cannot open Save/Load menu. VN services are not ready.");
+            return;
+        }
+
+        if (_vnServiceContainer.SaveRepository == null)
+        {
+            Debug.LogWarning("[VnScreenBindings] SaveRepository is null.");
+            return;
+        }
+
+        _currentSaveLoadMode = mode;
+
+        UI.SwitchRoot<SaveLoadMenuUIRoot>(root =>
+        {
+            RebindRoot(root, BindSaveLoadRoot);
+        });
+    }
+
+    private void BindSaveLoadRoot(SaveLoadMenuUIRoot saveLoadRoot)
+    {
+        _ctx.Bind(
+            saveLoadRoot,
+            r => r.OnSlotSelected += OnSaveLoadSlotSelected,
+            r => r.OnSlotSelected -= OnSaveLoadSlotSelected);
+
+        _ctx.Bind(
+            saveLoadRoot,
+            r => r.OnCloseRequested += OnSaveLoadCloseRequested,
+            r => r.OnCloseRequested -= OnSaveLoadCloseRequested);
+
+        RefreshSaveLoadRoot(saveLoadRoot);
+    }
+
+    private void RefreshSaveLoadRoot(SaveLoadMenuUIRoot saveLoadRoot)
+    {
+        if (saveLoadRoot == null)
+            return;
+
+        if (_vnServiceContainer == null || _vnServiceContainer.SaveRepository == null)
+            return;
+
+        VNSaveSlotMeta[] metas = _vnServiceContainer.SaveRepository.GetAllMetas();
+
+        saveLoadRoot.Rebuild(
+            _currentSaveLoadMode,
+            metas);
+    }
+
+    private void OnSaveLoadSlotSelected(int slotIndex)
+    {
+        if (_vnServiceContainer == null)
+        {
+            Debug.LogWarning("[VnScreenBindings] VNServiceContainer is null.");
+            return;
+        }
+
+        if (_currentSaveLoadMode == SaveLoadMenuMode.Save)
+        {
+            HandleSaveSlotSelected(slotIndex);
+            return;
+        }
+
+        HandleLoadSlotSelected(slotIndex);
+    }
+
+    private void HandleSaveSlotSelected(int slotIndex)
+    {
+        if (!_vnServiceContainer.IsRuntimeBound || _vnServiceContainer.SaveService == null)
+        {
+            Debug.LogWarning("[VnScreenBindings] Runtime is not bound. Cannot save.");
+            return;
+        }
+
+        if (!_vnServiceContainer.SaveService.SaveManual(slotIndex))
+        {
+            Debug.LogWarning($"[VnScreenBindings] Save failed. slotIndex={slotIndex}");
+            return;
+        }
+
+        UIBase currentRoot = _boundRoot;
+
+        if (currentRoot is SaveLoadMenuUIRoot saveLoadRoot)
+            RefreshSaveLoadRoot(saveLoadRoot);
+    }
+
+    private void HandleLoadSlotSelected(int slotIndex)
+    {
+        if (!_vnServiceContainer.IsRuntimeBound || _vnServiceContainer.LoadService == null)
+        {
+            Debug.LogWarning("[VnScreenBindings] Runtime is not bound. Cannot load.");
+            return;
+        }
+
+        if (!_vnServiceContainer.LoadService.Load(slotIndex))
+        {
+            Debug.LogWarning($"[VnScreenBindings] Load failed. slotIndex={slotIndex}");
+            return;
+        }
+    }
+
+    private void OnSaveLoadCloseRequested()
+    {
+        GoToTitle();
     }
 
     #endregion
