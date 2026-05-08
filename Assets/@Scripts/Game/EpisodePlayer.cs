@@ -77,17 +77,7 @@ public sealed class EpisodePlayer : MonoBehaviour, IRollbackDialogueRestarter, I
         PresentationUIRoot dialogueUIRoot = UIManager.Instance.GetUI<PresentationUIRoot>();
         _dialogueUIBindings.Bind(dialogueUIRoot);
         
-        // UIManager.Instance.SwitchRoot<DialogueUIRoot>();
-        // DialogueUIRoot dialogueUIRoot = UIManager.Instance.GetUI<DialogueUIRoot>();
-        // _dialogueUIBindings.Bind(dialogueUIRoot);
     }
-    
-    // public void OpenDialogueUI()
-    // {
-    //     UIManager.Instance.SwitchRoot<DialogueUIRoot>();
-    //     DialogueUIRoot dialogueUIRoot = UIManager.Instance.GetUI<DialogueUIRoot>();
-    //     _dialogueUIBindings.Bind(dialogueUIRoot);
-    // }
 
     public void StartPresentationRoute(string routeKey)
     {
@@ -96,25 +86,13 @@ public sealed class EpisodePlayer : MonoBehaviour, IRollbackDialogueRestarter, I
     
     public void RestartNode(string nodeName)
     {
-        //OpenDialogueUI();
-        //StopDialogue();
         bgHost.ClearRuntimeBackgrounds();
         presentationResponseRig.ClearRuntimeState();
-        StartYarnNode(nodeName);
-        //StartPresentationRoute(presentationEntryKey);
-        
-        //StartCoroutine(StartYarnNextFrame(nodeName));
-    }
-    
-    private IEnumerator StartYarnNextFrame(string nodeName)
-    {
-        yield return null; // 한 프레임 대기 — Session Tick이 한 번 돌고 나서
         StartYarnNode(nodeName);
     }
     
     public void StartYarnNode(string episodeId)
     {
-        //yarnUIBridge.HasCharNameBox();
         dialogueRunner.StartDialogue(episodeId);
     }
     
@@ -127,6 +105,17 @@ public sealed class EpisodePlayer : MonoBehaviour, IRollbackDialogueRestarter, I
 
         StartPresentationRoute(presentationEntryKey);
         StartYarnNode(nodeName);
+    }
+    
+    
+    private void StopDialogue()
+    {
+        if (dialogueRunner == null) 
+            return;
+
+        if (dialogueRunner.IsDialogueRunning)
+            dialogueRunner.Stop();
+        
     }
     
     private IEnumerator WaitUntilBoundOrTimeout()
@@ -155,19 +144,5 @@ public sealed class EpisodePlayer : MonoBehaviour, IRollbackDialogueRestarter, I
             return false;
 
         return true;
-    }
-    
-    
-    public void StopDialogue()
-    {
-        bgHost.ClearRuntimeBackgrounds();
-        presentationResponseRig.ClearRuntimeState();
-        
-        if (dialogueRunner == null) return;
-
-        if (dialogueRunner.IsDialogueRunning)
-        {
-            dialogueRunner.Stop();
-        }
     }
 }

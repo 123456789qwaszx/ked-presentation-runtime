@@ -64,6 +64,10 @@ public class VnAppBootstrap : MonoBehaviour
 
     [SerializeField] private VnFeatureController vnFeatureController;
 
+    [Header("VN Menu Panels")]
+    [SerializeField] private SaveLoadMenuController saveLoadMenuController;
+    [SerializeField] private AlbumMenuController albumMenuController;
+    
     [Header("UI")] 
     [SerializeField] private EpisodePlayer episodePlayer;
 
@@ -73,6 +77,7 @@ public class VnAppBootstrap : MonoBehaviour
     [Header("VN Save / Load")]
     [SerializeField] private VNServiceContainer vnServiceContainer;
     [SerializeField] private VNPlaytimeTracker vnPlaytimeTracker;
+    
 
 
     private PresentationSessionBridge _presentationSessionBridge;
@@ -82,6 +87,8 @@ public class VnAppBootstrap : MonoBehaviour
     private VnScreenBindings _screenBindings;
     private RollbackHistory _rollbackHistory;
     private UIPatchService _uiPatchService;
+    
+    
 
     private void Awake()
     {
@@ -288,10 +295,23 @@ public class VnAppBootstrap : MonoBehaviour
 
     private void BootstrapUIBindings()
     {
-        _dialogueUIBindings = new PresentationViewUIBindings(_episodePlayState, vnFeatureController, _vnUxState,
-            vnRuntimeBridge, dialogueAdvanceDispatcher);
-        _episodeFlowController = new EpisodeFlowController(_dialogueUIBindings, episodePlayer, _episodePlayState);
+        _dialogueUIBindings = new PresentationViewUIBindings(
+            _episodePlayState, 
+            vnFeatureController,
+            _vnUxState,
+            vnRuntimeBridge, 
+            dialogueAdvanceDispatcher);
+        
+        _episodeFlowController = new EpisodeFlowController(
+            _dialogueUIBindings,
+            episodePlayer,
+            _episodePlayState);
+        
         _screenBindings = new VnScreenBindings(_episodeFlowController);
+        
+        _screenBindings.AttachTitlePanels(
+            saveLoadMenuController,
+            albumMenuController);
     }
 
     private void InitializeEpisodePlayer()
@@ -337,6 +357,8 @@ public class VnAppBootstrap : MonoBehaviour
             vnLoadSeekDriver,
             vnFlagStore,
             vnSaveSafetyPolicy);
+        
+        _screenBindings.AttachVNServiceContainer(vnServiceContainer);
     }
 
     private void Start()

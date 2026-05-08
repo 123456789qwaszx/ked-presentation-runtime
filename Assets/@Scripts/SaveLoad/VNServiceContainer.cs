@@ -36,9 +36,6 @@ public sealed class VNServiceContainer : MonoBehaviour
     private IVNFlagStore _flagStore;
     private IVNSaveSafetyPolicy _safetyPolicy;
 
-    private void Awake()
-    {
-    }
 
     private void OnDestroy()
     {

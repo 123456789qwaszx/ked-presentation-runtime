@@ -7,11 +7,13 @@ public sealed class TitleUIRoot : UIRoot<TitleUIRoot.Refs>
 {
     public event Action OnStart;
     public event Action OnContinue;
+    public event Action OnOpenLoad;
+    public event Action OnOpenAlbum;
     public event Action OnOpenSettings;
     public event Action OnQuit;
-    
+
     #region Refs
-    
+
     public enum Refs
     {
         TitleBG_Image,
@@ -19,19 +21,22 @@ public sealed class TitleUIRoot : UIRoot<TitleUIRoot.Refs>
 
         StartButton_BWidget,
         ContinueButton_BWidget,
+        LoadButton_BWidget,
+        AlbumButton_BWidget,
         SettingsButton_BWidget,
         QuitButton_BWidget,
     }
-
 
     private Image _titleBg;
     private Image _titleLogo;
 
     private ButtonWidget _start;
     private ButtonWidget _continue;
+    private ButtonWidget _load;
+    private ButtonWidget _album;
     private ButtonWidget _settings;
     private ButtonWidget _quit;
-    
+
     #endregion
 
     private bool _valid;
@@ -43,6 +48,8 @@ public sealed class TitleUIRoot : UIRoot<TitleUIRoot.Refs>
 
         _start    = View.Widget<ButtonWidget>(Refs.StartButton_BWidget);
         _continue = View.Widget<ButtonWidget>(Refs.ContinueButton_BWidget);
+        _load     = View.Widget<ButtonWidget>(Refs.LoadButton_BWidget);
+        _album    = View.Widget<ButtonWidget>(Refs.AlbumButton_BWidget);
         _settings = View.Widget<ButtonWidget>(Refs.SettingsButton_BWidget);
         _quit     = View.Widget<ButtonWidget>(Refs.QuitButton_BWidget);
 
@@ -55,41 +62,66 @@ public sealed class TitleUIRoot : UIRoot<TitleUIRoot.Refs>
 
         _start.SetLabel("시작하기");
         _continue.SetLabel("이어하기");
+        _load.SetLabel("불러오기");
+        _album.SetLabel("앨범");
         _settings.SetLabel("설정");
         _quit.SetLabel("종료");
 
         _start.OnClicked += HandleStart;
         _continue.OnClicked += HandleContinue;
+        _load.OnClicked += HandleLoad;
+        _album.OnClicked += HandleAlbum;
         _settings.OnClicked += HandleSettings;
         _quit.OnClicked += HandleQuit;
     }
 
     #region Event Handlers
-    
+
     private void HandleStart()    => OnStart?.Invoke();
     private void HandleContinue() => OnContinue?.Invoke();
+    private void HandleLoad()     => OnOpenLoad?.Invoke();
+    private void HandleAlbum()    => OnOpenAlbum?.Invoke();
     private void HandleSettings() => OnOpenSettings?.Invoke();
     private void HandleQuit()     => OnQuit?.Invoke();
-    
+
     protected override void OnDestroy()
     {
         base.OnDestroy();
-        
+
         if (!_valid) return;
 
         _start.OnClicked -= HandleStart;
         _continue.OnClicked -= HandleContinue;
+        _load.OnClicked -= HandleLoad;
+        _album.OnClicked -= HandleAlbum;
         _settings.OnClicked -= HandleSettings;
         _quit.OnClicked -= HandleQuit;
     }
-    
+
     #endregion
-    
+
     public void SetContinueEnabled(bool enabled)
     {
         if (!_valid) return;
+
         if (_continue != null)
             _continue.SetInteractable(enabled);
+    }
+
+    public void SetLoadEnabled(bool enabled)
+    {
+        if (!_valid) return;
+
+        if (_load != null)
+            _load.SetInteractable(enabled);
+    }
+
+    public void SetAlbumEnabled(bool enabled)
+    {
+        if (!_valid) return;
+
+        if (_album != null)
+            _album.SetInteractable(enabled);
     }
 
     private bool ValidateRefs()
@@ -101,6 +133,8 @@ public sealed class TitleUIRoot : UIRoot<TitleUIRoot.Refs>
 
         AppendMissing(ref missing, _start,    Refs.StartButton_BWidget);
         AppendMissing(ref missing, _continue, Refs.ContinueButton_BWidget);
+        AppendMissing(ref missing, _load,     Refs.LoadButton_BWidget);
+        AppendMissing(ref missing, _album,    Refs.AlbumButton_BWidget);
         AppendMissing(ref missing, _settings, Refs.SettingsButton_BWidget);
         AppendMissing(ref missing, _quit,     Refs.QuitButton_BWidget);
 
