@@ -2784,6 +2784,8 @@ MonoBehaviour:
   vnFeatureController: {fileID: 775605347}
   episodePlayer: {fileID: 1924806292}
   transitionTargetRouter: {fileID: 648162085}
+  vnServiceContainer: {fileID: 1644046476}
+  vnPlaytimeTracker: {fileID: 451477690}
 --- !u!1 &626587492
 GameObject:
   m_ObjectHideFlags: 0
@@ -41235,8 +41237,8 @@ SceneRoots:
   - {fileID: 832575519}
   - {fileID: 396403403}
   - {fileID: 405574962}
-  - {fileID: 451477691}
   - {fileID: 1644046477}
+  - {fileID: 451477691}
   - {fileID: 26931191}
   - {fileID: 596868909}
   - {fileID: 32255927}
