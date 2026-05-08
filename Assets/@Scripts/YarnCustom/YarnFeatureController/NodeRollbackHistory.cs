@@ -82,6 +82,24 @@ public sealed class RollbackHistory
 
         return true;
     }
+    
+    public bool TryGetLatestPoint(out RollbackPoint point)
+    {
+        if (_points.Count <= 0)
+        {
+            point = default;
+            return false;
+        }
+
+        point = _points[^1];
+        return true;
+    }
+    
+    public void ClearRollbackHistory()
+    {
+        _points.Clear();
+        _nextHistoryIndex = 0;
+    }
 
     public bool TryGetPointByHistoryIndex(
         int historyIndex,
@@ -109,11 +127,6 @@ public sealed class RollbackHistory
                last.lineId == meta.lineId;
     }
 
-    public void ClearRollbackHistory()
-    {
-        _points.Clear();
-        _nextHistoryIndex = 0;
-    }
 
     public List<RollbackPoint> CreateSnapshot()
     {

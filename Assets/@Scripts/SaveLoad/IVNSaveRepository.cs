@@ -26,8 +26,6 @@ public interface IVNGlobalProgressRepository
 
 public interface IVNRuntimeStateProvider
 {
-    bool IsInDialogue { get; }
-
     string CurrentNodeName { get; }
     string CurrentLineId { get; }
 
