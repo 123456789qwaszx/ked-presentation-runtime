@@ -2,20 +2,31 @@ using System;
 
 public partial class UIManager
 {
-    public void SwitchRoot<T>(Action<T> afterPatched = null)
+    public void SwitchRoot<T>(
+        Action<T> afterPatched = null,
+        bool forceRefresh = false)
         where T : UIBase, IUIRoot
     {
         if (!TryResolve("Root", out T root))
             return;
 
-        if (CurSceneRoot != null)
+        bool sameRoot = CurSceneRoot == root;
+
+        if (sameRoot && !forceRefresh)
+        {
+            afterPatched?.Invoke(root);
+            return;
+        }
+
+        if (CurSceneRoot != null && !sameRoot)
             CurSceneRoot.gameObject.SetActive(false);
 
         CurSceneRoot = root;
 
         Mount(root, _layerUIRoot);
 
-        ApplyState(root, active: false, interactable: false, blocksRaycasts: false, alpha: 0f);
+        if (!sameRoot)
+            ApplyState(root, active: false, interactable: false, blocksRaycasts: false, alpha: 0f);
 
         InvokeAfterPatch(root, () =>
         {
