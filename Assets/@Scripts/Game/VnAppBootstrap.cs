@@ -101,6 +101,8 @@ public class VnAppBootstrap : MonoBehaviour
 
         BootstrapUIBindings();
         InitializeEpisodePlayer();
+        
+        BootstrapVNSaveLoadRuntime();
     }
 
     private void BootstrapAudioSystem()
@@ -301,7 +303,7 @@ public class VnAppBootstrap : MonoBehaviour
 
     private void BootstrapVNSaveLoadRuntime()
     {
-        VNServiceContainer container = vnServiceContainer;
+        vnServiceContainer.Initialize();
 
         PresentationUIRoot presentationUIRoot = UIManager.Instance.GetUI<PresentationUIRoot>();
 
@@ -330,7 +332,7 @@ public class VnAppBootstrap : MonoBehaviour
 
         AlwaysAllowVNSaveSafetyPolicy vnSaveSafetyPolicy = new ();
 
-        container.BindRuntime(
+        vnServiceContainer.BindRuntime(
             vnRuntimeStateProvider,
             vnLoadSeekDriver,
             vnFlagStore,
@@ -339,8 +341,6 @@ public class VnAppBootstrap : MonoBehaviour
 
     private void Start()
     {
-        BootstrapVNSaveLoadRuntime();
-
         _screenBindings.GoToTitle();
     }
 }

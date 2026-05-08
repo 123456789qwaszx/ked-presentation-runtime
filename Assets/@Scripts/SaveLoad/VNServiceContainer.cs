@@ -38,16 +38,6 @@ public sealed class VNServiceContainer : MonoBehaviour
 
     private void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-
-        Instance = this;
-        DontDestroyOnLoad(gameObject);
-
-        InitializePersistentServices();
     }
 
     private void OnDestroy()
@@ -58,22 +48,44 @@ public sealed class VNServiceContainer : MonoBehaviour
             Instance = null;
     }
 
-    public void InitializePersistentServices()
+    public void Initialize()
     {
-        if (IsPersistentInitialized)
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
             return;
+        }
+
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+        
+        if (IsPersistentInitialized)
+        {
+            Debug.LogWarning("[VNServiceContainer] Already initialized. Skipping.");
+            return;
+        }
 
         SaveRepository = new JsonVNSaveRepository(_slotCount);
         GlobalRepository = new JsonVNGlobalProgressRepository();
+
         GlobalData = GlobalRepository.LoadOrCreate();
+
+        if (GlobalData == null)
+            GlobalData = new VNGlobalProgressData();
+
         GlobalData.Normalize();
 
-        AlbumService = new VNAlbumUnlockService(GlobalData, GlobalRepository, _albumDatabase);
-        ReadLineService = new VNReadLineService(GlobalData, GlobalRepository);
+        AlbumService = new VNAlbumUnlockService(
+            GlobalData,
+            GlobalRepository,
+            _albumDatabase);
+
+        ReadLineService = new VNReadLineService(
+            GlobalData,
+            GlobalRepository);
 
         IsPersistentInitialized = true;
 
-        Debug.Log("[VNServiceContainer] Persistent services initialized.");
         PersistentInitialized?.Invoke();
     }
 
@@ -84,7 +96,10 @@ public sealed class VNServiceContainer : MonoBehaviour
         IVNSaveSafetyPolicy safetyPolicy)
     {
         if (!IsPersistentInitialized)
-            InitializePersistentServices();
+        {
+            Debug.LogError("[VNServiceContainer] BindRuntime called before Initialize(). Runtime bind aborted.");
+            return;
+        }
 
         if (stateProvider == null)
         {
@@ -98,10 +113,17 @@ public sealed class VNServiceContainer : MonoBehaviour
             return;
         }
 
+        if (IsRuntimeBound)
+        {
+            Debug.LogWarning("[VNServiceContainer] Runtime is already bound. Rebinding after cleanup.");
+            UnbindRuntime();
+        }
+
         _stateProvider = stateProvider;
         _seekDriver = seekDriver;
 
         _flagStore = flagStore;
+
         if (_flagStore == null)
         {
             Debug.LogWarning("[VNServiceContainer] flagStore is null. Using EmptyVNFlagStore.");
@@ -109,6 +131,7 @@ public sealed class VNServiceContainer : MonoBehaviour
         }
 
         _safetyPolicy = safetyPolicy;
+
         if (_safetyPolicy == null)
         {
             Debug.LogWarning("[VNServiceContainer] safetyPolicy is null. Using AlwaysAllowVNSaveSafetyPolicy.");
@@ -140,7 +163,6 @@ public sealed class VNServiceContainer : MonoBehaviour
 
         IsRuntimeBound = true;
 
-        Debug.Log("[VNServiceContainer] Runtime services bound.");
         RuntimeBound?.Invoke();
     }
 
