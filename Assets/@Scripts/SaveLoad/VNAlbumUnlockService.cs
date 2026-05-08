@@ -132,4 +132,33 @@ public sealed class VNAlbumUnlockService
         _unlockedCgSet = new HashSet<string>(_globalData.unlockedCgKeys);
         _unlockedEndingSet = new HashSet<string>(_globalData.unlockedEndingKeys);
     }
+    
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+    public bool LockCgForDebug(string key)
+    {
+        if (string.IsNullOrWhiteSpace(key))
+            return false;
+
+        bool removedFromSet = _unlockedCgSet.Remove(key);
+        int removedFromList = _globalData.unlockedCgKeys.RemoveAll(k => k == key);
+
+        if (!removedFromSet && removedFromList <= 0)
+            return false;
+
+        _globalRepo.Save(_globalData);
+
+        Debug.Log($"[VNAlbumUnlockService] Locked CG for debug: '{key}'");
+        return true;
+    }
+
+    public void ClearAllCgUnlocksForDebug()
+    {
+        _unlockedCgSet.Clear();
+        _globalData.unlockedCgKeys.Clear();
+
+        _globalRepo.Save(_globalData);
+
+        Debug.Log("[VNAlbumUnlockService] Cleared all CG unlocks for debug.");
+    }
+#endif
 }

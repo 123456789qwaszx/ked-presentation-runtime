@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9959a1e222f44eb8a70fd1e2d85f6644, type: 3}
   m_Name: AlbumItem_New 1
   m_EditorClassIdentifier: Assembly-CSharp::VNAlbumItemSO
-  key: 1
+  key: cg_test_02
   cgSprite: {fileID: 21300006, guid: bad6c0f0bf6c3aa4690d400a757fa284, type: 3}
   thumbnailSprite: {fileID: 21300022, guid: bad6c0f0bf6c3aa4690d400a757fa284, type: 3}
   title: title1

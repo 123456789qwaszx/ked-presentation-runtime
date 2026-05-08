@@ -5,6 +5,7 @@ using UnityEngine;
 public sealed class PresentationViewUIBindings : IDisposable
 {
     private readonly UIBindingContext _ctx = new();
+    private static UIManager UI => UIManager.Instance;
 
     private readonly EpisodePlayState _episodePlayState;
     private readonly VnFeatureController _vnFeatures;
@@ -13,8 +14,11 @@ public sealed class PresentationViewUIBindings : IDisposable
     private readonly DialogueAdvanceDispatcher _dialogueAdvanceDispatcher;
 
     private PresentationUIRoot _root;
-    private SaveLoadMenuUIPanel _saveLoadPanel;
-    private SaveLoadMenuMode _saveLoadMode;
+
+    private VNServiceContainer _vnServiceContainer;
+
+    private SaveLoadMenuMode _currentSaveLoadMode;
+    private SaveLoadMenuUIPanel _saveLoadRoot;
 
     public PresentationViewUIBindings(
         EpisodePlayState episodePlayState,
@@ -31,8 +35,16 @@ public sealed class PresentationViewUIBindings : IDisposable
         _dialogueAdvanceDispatcher = dialogueAdvanceDispatcher;
     }
 
+    public void AttachVNServiceContainer(VNServiceContainer serviceContainer)
+    {
+        _vnServiceContainer = serviceContainer;
+    }
+
     public void Bind(PresentationUIRoot root)
     {
+        if (root == null)
+            return;
+
         _ctx.Unbind(root);
 
         _root = root;
@@ -86,6 +98,8 @@ public sealed class PresentationViewUIBindings : IDisposable
             r => r.OnLoadMenuPressed -= HandleLoadMenuPressed);
     }
 
+    #region Presentation Root Events
+
     private void HandleRollbackPressed()
     {
         _vnFeatures.RequestRollbackOneStep();
@@ -113,7 +127,6 @@ public sealed class PresentationViewUIBindings : IDisposable
         _dialogueAdvanceDispatcher.DispatchAdvance();
     }
 
-
     private void HandleSaveMenuPressed()
     {
         OpenSaveLoadMenu(SaveLoadMenuMode.Save);
@@ -124,136 +137,6 @@ public sealed class PresentationViewUIBindings : IDisposable
         OpenSaveLoadMenu(SaveLoadMenuMode.Load);
     }
 
-    private void OpenSaveLoadMenu(SaveLoadMenuMode mode)
-    {
-        Debug.Log("1");
-        if (_uxState.ChoicesVisible || _uxState.BacklogVisible)
-            return;
-        Debug.Log("2");
-
-        VNServiceContainer svc = VNServiceContainer.Instance;
-
-        VNSaveSlotMeta[] metas = svc.SaveRepository.GetAllMetas();
-
-        // var existing = UIManager.Instance.GetUI<SaveLoadMenuUIPanel>();
-        // if (existing != null)
-        // {
-        //     PresentSaveLoadPanel(existing, mode, metas);
-        //     return;
-        // }
-
-        Debug.Log("3");
-        UIManager.Instance.PushPanel<SaveLoadMenuUIPanel>(panel => { PresentSaveLoadPanel(panel, mode, metas); });
-    }
-
-    private void PresentSaveLoadPanel(
-        SaveLoadMenuUIPanel panel,
-        SaveLoadMenuMode mode,
-        VNSaveSlotMeta[] metas)
-    {
-        if (panel == null)
-            return;
-
-        BindSaveLoadPanel(panel);
-
-        _saveLoadMode = mode;
-        panel.Rebuild(mode, metas);
-    }
-
-    private void BindSaveLoadPanel(SaveLoadMenuUIPanel panel)
-    {
-        if (_saveLoadPanel != null)
-            _ctx.Unbind(_saveLoadPanel);
-
-        _saveLoadPanel = panel;
-
-        _ctx.Bind(panel,
-            p => p.OnSlotSelected += HandleSaveLoadSlotSelected,
-            p => p.OnSlotSelected -= HandleSaveLoadSlotSelected);
-
-        _ctx.Bind(panel,
-            p => p.OnCloseRequested += CloseSaveLoadPanel,
-            p => p.OnCloseRequested -= CloseSaveLoadPanel);
-    }
-
-    private void HandleSaveLoadSlotSelected(int slotIndex)
-    {
-        VNServiceContainer svc = VNServiceContainer.Instance;
-
-        if (svc == null)
-        {
-            Debug.LogWarning("[VN] SaveLoad slot selected, but VNServiceContainer is missing.");
-            return;
-        }
-
-        if (_saveLoadMode == SaveLoadMenuMode.Save)
-        {
-            SaveSlot(svc, slotIndex);
-            Debug.Log("Save");
-            return;
-        }
-
-        LoadSlot(svc, slotIndex);
-    }
-
-    private void SaveSlot(VNServiceContainer svc, int slotIndex)
-    {
-        if (!svc.IsRuntimeBound || svc.SaveService == null)
-        {
-            Debug.LogWarning("[VN] Cannot save. Runtime services are not bound.");
-            return;
-        }
-
-        bool saved = svc.SaveService.SaveManual(slotIndex);
-
-        if (!saved)
-            return;
-
-        RefreshSaveLoadPanel();
-    }
-
-    private void LoadSlot(VNServiceContainer svc, int slotIndex)
-    {
-        if (!svc.IsRuntimeBound || svc.LoadService == null)
-        {
-            Debug.LogWarning("[VN] Cannot load. Runtime services are not bound.");
-            return;
-        }
-
-        bool loadStarted = svc.LoadService.Load(slotIndex);
-
-        if (!loadStarted)
-            return;
-
-        CloseSaveLoadPanel();
-    }
-
-    private void RefreshSaveLoadPanel()
-    {
-        if (_saveLoadPanel == null)
-            return;
-
-        VNServiceContainer svc = VNServiceContainer.Instance;
-
-        if (svc == null || !svc.IsPersistentInitialized)
-            return;
-
-        VNSaveSlotMeta[] metas = svc.SaveRepository.GetAllMetas();
-        _saveLoadPanel.Rebuild(_saveLoadMode, metas);
-    }
-
-    private void CloseSaveLoadPanel()
-    {
-        if (_saveLoadPanel != null)
-        {
-            _ctx.Unbind(_saveLoadPanel);
-            _saveLoadPanel = null;
-        }
-
-        UIManager.Instance.PopPanel();
-    }
-
-
     private void HandleSkipPressed()
     {
         if (_uxState.ChoicesVisible || _uxState.BacklogVisible)
@@ -261,7 +144,7 @@ public sealed class PresentationViewUIBindings : IDisposable
 
         string summary = "현재까지의 스토리(최근):";
 
-        UIManager.Instance.PushPanel<SkipConfirmPanel>(panel =>
+        UI.PushPanel<SkipConfirmPanel>(panel =>
         {
             panel.Present(
                 title: "에피소드를 스킵할까요?",
@@ -276,36 +159,6 @@ public sealed class PresentationViewUIBindings : IDisposable
             panel.OnConfirmed += ConfirmSkipEpisode;
             panel.OnCancelled += CloseSkipConfirm;
         });
-    }
-
-    private void CloseSkipConfirm()
-    {
-        var panel = UIManager.Instance.GetUI<SkipConfirmPanel>();
-
-        panel.OnConfirmed -= ConfirmSkipEpisode;
-        panel.OnCancelled -= CloseSkipConfirm;
-
-        UIManager.Instance.PopPanel();
-    }
-
-    private void ConfirmSkipEpisode()
-    {
-        CloseSkipConfirm();
-
-        string episodeId = _episodePlayState.SelectedEpisodeId;
-        if (string.IsNullOrEmpty(episodeId))
-        {
-            Debug.LogWarning("[VN] Skip confirmed but current episode id is empty.");
-        }
-
-        _root.SetSkipModeActive(false);
-
-        _vnRuntimeBridge.ForceCompleteEpisodeNow(episodeId);
-        _episodePlayState.ApplyEpisodeState(episodeId);
-
-        UIManager.Instance.PopAllPanels();
-        //UIManager.Instance.SwitchRoot<LobbyUIRoot>();
-        UIManager.Instance.SwitchRoot<TitleUIRoot>();
     }
 
     private void HandleAutoPressed()
@@ -334,7 +187,7 @@ public sealed class PresentationViewUIBindings : IDisposable
 
         _uxState.SetBacklogVisible(true);
 
-        UIManager.Instance.PushPanel<BacklogPanel>(panel =>
+        UI.PushPanel<BacklogPanel>(panel =>
         {
             _ctx.Bind(panel,
                 p => p.OnCloseRequested += CloseBacklogPanel,
@@ -344,16 +197,189 @@ public sealed class PresentationViewUIBindings : IDisposable
         });
     }
 
-    private void CloseBacklogPanel()
-    {
-        _uxState.SetBacklogVisible(false);
-        UIManager.Instance.PopPanel();
-    }
-
     private void HandleSetSpeedPressed()
     {
         _vnFeatures.ToggleSetSpeed();
     }
+
+    #endregion
+
+    #region SaveLoad
+
+    private void OpenSaveLoadMenu(SaveLoadMenuMode mode)
+    {
+        if (_uxState.ChoicesVisible || _uxState.BacklogVisible)
+            return;
+
+        if (_vnServiceContainer == null || !_vnServiceContainer.IsPersistentInitialized)
+        {
+            Debug.LogWarning("[PresentationViewUIBindings] Cannot open Save/Load menu. VN services are not ready.");
+            return;
+        }
+
+        if (_vnServiceContainer.SaveRepository == null)
+        {
+            Debug.LogWarning("[PresentationViewUIBindings] SaveRepository is null.");
+            return;
+        }
+
+        if (_vnFeatures.IsAuto)
+        {
+            _vnFeatures.ToggleAuto();
+            _root.SetAutoModeActive(false);
+        }
+
+        _root.SetExpanded(false);
+        _root.SetQuickMenuOpen(false);
+
+        _currentSaveLoadMode = mode;
+
+        UI.PushPanel<SaveLoadMenuUIPanel>(root =>
+        {
+            BindSaveLoadRoot(root);
+        });
+    }
+
+    private void BindSaveLoadRoot(SaveLoadMenuUIPanel saveLoadRoot)
+    {
+        if (saveLoadRoot == null)
+            return;
+
+        if (_saveLoadRoot != null && _saveLoadRoot != saveLoadRoot)
+            _ctx.Unbind(_saveLoadRoot);
+
+        _ctx.Unbind(saveLoadRoot);
+
+        _saveLoadRoot = saveLoadRoot;
+
+        _ctx.Bind(
+            saveLoadRoot,
+            r => r.OnSlotSelected += OnSaveLoadSlotSelected,
+            r => r.OnSlotSelected -= OnSaveLoadSlotSelected);
+
+        _ctx.Bind(
+            saveLoadRoot,
+            r => r.OnCloseRequested += OnSaveLoadCloseRequested,
+            r => r.OnCloseRequested -= OnSaveLoadCloseRequested);
+
+        RefreshSaveLoadRoot(saveLoadRoot);
+    }
+
+    private void RefreshSaveLoadRoot(SaveLoadMenuUIPanel saveLoadRoot)
+    {
+        if (saveLoadRoot == null)
+            return;
+
+        if (_vnServiceContainer == null || _vnServiceContainer.SaveRepository == null)
+            return;
+
+        VNSaveSlotMeta[] metas = _vnServiceContainer.SaveRepository.GetAllMetas();
+
+        saveLoadRoot.Rebuild(
+            _currentSaveLoadMode,
+            metas);
+    }
+
+    private void OnSaveLoadSlotSelected(int slotIndex)
+    {
+        if (_currentSaveLoadMode == SaveLoadMenuMode.Save)
+        {
+            HandleSaveSlotSelected(slotIndex);
+            return;
+        }
+
+        HandleLoadSlotSelected(slotIndex);
+    }
+
+    private void HandleSaveSlotSelected(int slotIndex)
+    {
+        if (!_vnServiceContainer.SaveService.SaveManual(slotIndex))
+
+        RefreshSaveLoadRoot(_saveLoadRoot);
+    }
+
+    private void HandleLoadSlotSelected(int slotIndex)
+    {
+        if (!_vnServiceContainer.IsRuntimeBound || _vnServiceContainer.LoadService == null)
+        {
+            Debug.LogWarning("[PresentationViewUIBindings] Runtime is not bound. Cannot load.");
+            return;
+        }
+
+        if (!_vnServiceContainer.LoadService.Load(slotIndex))
+        {
+            Debug.LogWarning($"[PresentationViewUIBindings] Load failed. slotIndex={slotIndex}");
+            return;
+        }
+
+        CloseSaveLoadRoot();
+    }
+
+    private void OnSaveLoadCloseRequested()
+    {
+        CloseSaveLoadRoot();
+    }
+
+    private void CloseSaveLoadRoot()
+    {
+        if (_saveLoadRoot != null)
+        {
+            _ctx.Unbind(_saveLoadRoot);
+            _saveLoadRoot = null;
+        }
+
+        UI.PopPanel();
+    }
+
+    #endregion
+
+    #region Skip
+
+    private void CloseSkipConfirm()
+    {
+        var panel = UI.GetUI<SkipConfirmPanel>();
+
+        if (panel != null)
+        {
+            panel.OnConfirmed -= ConfirmSkipEpisode;
+            panel.OnCancelled -= CloseSkipConfirm;
+        }
+
+        UI.PopPanel();
+    }
+
+    private void ConfirmSkipEpisode()
+    {
+        CloseSkipConfirm();
+
+        string episodeId = _episodePlayState.SelectedEpisodeId;
+        if (string.IsNullOrEmpty(episodeId))
+        {
+            Debug.LogWarning("[VN] Skip confirmed but current episode id is empty.");
+        }
+
+        _root.SetSkipModeActive(false);
+
+        _vnRuntimeBridge.ForceCompleteEpisodeNow(episodeId);
+        _episodePlayState.ApplyEpisodeState(episodeId);
+
+        UI.PopAllPanels();
+        UI.SwitchRoot<TitleUIRoot>();
+    }
+
+    #endregion
+
+    #region Backlog
+
+    private void CloseBacklogPanel()
+    {
+        _uxState.SetBacklogVisible(false);
+        UI.PopPanel();
+    }
+
+    #endregion
+
+    #region Choices
 
     private void HandleChoicesPresented(IReadOnlyList<string> choices)
     {
@@ -365,14 +391,14 @@ public sealed class PresentationViewUIBindings : IDisposable
             _root.SetAutoModeActive(false);
         }
 
-        var existing = UIManager.Instance.GetUI<ChoicePanel>();
+        var existing = UI.GetUI<ChoicePanel>();
         if (existing != null)
         {
             existing.Present(choices);
             return;
         }
 
-        UIManager.Instance.PushPanel<ChoicePanel>(panel =>
+        UI.PushPanel<ChoicePanel>(panel =>
         {
             panel.Present(choices);
 
@@ -389,17 +415,29 @@ public sealed class PresentationViewUIBindings : IDisposable
     {
         _uxState.SetChoicesVisible(false);
 
-        var panel = UIManager.Instance.GetUI<ChoicePanel>();
+        var panel = UI.GetUI<ChoicePanel>();
 
-        panel.OnChoiceSelected -= HandleChoiceSelected;
-        panel.OnCloseRequested -= CloseChoicePanel;
+        if (panel != null)
+        {
+            panel.OnChoiceSelected -= HandleChoiceSelected;
+            panel.OnCloseRequested -= CloseChoicePanel;
+        }
 
-        UIManager.Instance.PopPanel();
+        UI.PopPanel();
     }
+
+    #endregion
 
     public void Dispose()
     {
+        if (_saveLoadRoot != null)
+        {
+            _ctx.Unbind(_saveLoadRoot);
+            _saveLoadRoot = null;
+        }
+
         _ctx.Dispose();
         _root = null;
+        _vnServiceContainer = null;
     }
 }

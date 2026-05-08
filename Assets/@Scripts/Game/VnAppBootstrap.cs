@@ -304,6 +304,7 @@ public class VnAppBootstrap : MonoBehaviour
             _episodePlayState);
         
         _screenBindings = new VnScreenBindings(_episodeFlowController);
+        
     }
 
     private void InitializeEpisodePlayer()
@@ -351,6 +352,8 @@ public class VnAppBootstrap : MonoBehaviour
             vnSaveSafetyPolicy);
         
         _screenBindings.AttachVNServiceContainer(vnServiceContainer);
+
+        _dialogueUIBindings.AttachVNServiceContainer(vnServiceContainer);
     }
 
     private void Start()
