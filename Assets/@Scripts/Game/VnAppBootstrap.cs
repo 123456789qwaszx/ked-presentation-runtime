@@ -309,9 +309,7 @@ public class VnAppBootstrap : MonoBehaviour
         
         _screenBindings = new VnScreenBindings(_episodeFlowController);
         
-        _screenBindings.AttachTitlePanels(
-            saveLoadMenuController,
-            albumMenuController);
+        _screenBindings.AttachSaveLoadMenu(saveLoadMenuController);
     }
 
     private void InitializeEpisodePlayer()

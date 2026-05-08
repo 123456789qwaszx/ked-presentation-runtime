@@ -12,7 +12,6 @@ public sealed class VnScreenBindings : IDisposable
     private VNServiceContainer _vnServiceContainer;
 
     private SaveLoadMenuController _saveLoadMenu;
-    private AlbumMenuController _albumMenu;
 
     private UIBase _boundRoot;
 
@@ -31,12 +30,9 @@ public sealed class VnScreenBindings : IDisposable
         _vnServiceContainer = serviceContainer;
     }
 
-    public void AttachTitlePanels(
-        SaveLoadMenuController saveLoadMenu,
-        AlbumMenuController albumMenu)
+    public void AttachSaveLoadMenu(SaveLoadMenuController saveLoadMenu)
     {
         _saveLoadMenu = saveLoadMenu;
-        _albumMenu = albumMenu;
     }
 
     #region Title
@@ -167,26 +163,12 @@ public sealed class VnScreenBindings : IDisposable
 
     private void OnOpenAlbumPressed()
     {
-        if (_vnServiceContainer == null || !_vnServiceContainer.IsPersistentInitialized)
-        {
-            Debug.LogWarning("[VnScreenBindings] Cannot open Album menu. VN services are not ready.");
-            return;
-        }
-
-        if (_albumMenu == null)
-        {
-            Debug.LogWarning("[VnScreenBindings] AlbumMenuController is null.");
-            return;
-        }
-
-        _albumMenu.Open();
+        GoToAlbum();
     }
 
     private void OnOpenSettingsPressed()
     {
         Debug.Log("[VnScreenBindings] Settings requested.");
-        // TODO:
-        // SettingsPanel 또는 Config UI 연결.
     }
 
     private void OnQuitPressed()
@@ -196,6 +178,60 @@ public sealed class VnScreenBindings : IDisposable
 #else
         Application.Quit();
 #endif
+    }
+
+    #endregion
+
+    #region Album
+
+    public void GoToAlbum()
+    {
+        if (_vnServiceContainer == null || !_vnServiceContainer.IsPersistentInitialized)
+        {
+            Debug.LogWarning("[VnScreenBindings] Cannot open Album. VN services are not ready.");
+            return;
+        }
+
+        if (_vnServiceContainer.AlbumService == null)
+        {
+            Debug.LogWarning("[VnScreenBindings] AlbumService is null.");
+            return;
+        }
+
+        UI.SwitchRoot<AlbumUIRoot>(root =>
+        {
+            RebindRoot(root, BindAlbumRoot);
+        });
+    }
+
+    private void BindAlbumRoot(AlbumUIRoot albumRoot)
+    {
+        _ctx.Bind(
+            albumRoot,
+            a => a.OnCloseRequested += OnAlbumCloseRequested,
+            a => a.OnCloseRequested -= OnAlbumCloseRequested);
+
+        RefreshAlbumRoot(albumRoot);
+    }
+
+    private void RefreshAlbumRoot(AlbumUIRoot albumRoot)
+    {
+        if (albumRoot == null)
+            return;
+
+        if (_vnServiceContainer == null || _vnServiceContainer.AlbumService == null)
+            return;
+
+        VNAlbumUnlockService albumService = _vnServiceContainer.AlbumService;
+
+        albumRoot.Rebuild(
+            albumService.GetAllItems(),
+            albumService.IsUnlocked);
+    }
+
+    private void OnAlbumCloseRequested()
+    {
+        GoToTitle();
     }
 
     #endregion

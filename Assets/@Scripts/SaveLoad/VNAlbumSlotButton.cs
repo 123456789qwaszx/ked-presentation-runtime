@@ -30,8 +30,10 @@ public sealed class VNAlbumSlotButton : MonoBehaviour
 
         if (_thumbnailImage != null)
         {
-            _thumbnailImage.sprite = unlocked && item != null ? item.GetThumbnail() : null;
-            _thumbnailImage.enabled = unlocked && item != null && item.GetThumbnail() != null;
+            Sprite thumbnail = unlocked && item != null ? item.GetThumbnail() : null;
+
+            _thumbnailImage.sprite = thumbnail;
+            _thumbnailImage.enabled = thumbnail != null;
         }
 
         if (_titleLabel != null)
@@ -54,5 +56,11 @@ public sealed class VNAlbumSlotButton : MonoBehaviour
             return;
 
         _onClick?.Invoke(_item);
+    }
+
+    private void OnDestroy()
+    {
+        if (_button != null)
+            _button.onClick.RemoveListener(HandleClick);
     }
 }
