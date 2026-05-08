@@ -8,7 +8,7 @@ public interface IRollbackDialogueRestarter
     void RestartNode(string nodeName);
 }
 
-public sealed class EpisodePlayer : MonoBehaviour, IRollbackDialogueRestarter
+public sealed class EpisodePlayer : MonoBehaviour, IRollbackDialogueRestarter, IVNLoadDialogueRestarter
 {
     private VnScreenBindings _vnScreenBindings;
     private PresentationViewUIBindings _dialogueUIBindings;
@@ -116,6 +116,17 @@ public sealed class EpisodePlayer : MonoBehaviour, IRollbackDialogueRestarter
     {
         //yarnUIBridge.HasCharNameBox();
         dialogueRunner.StartDialogue(episodeId);
+    }
+    
+    public void RestartNodeForLoad(string nodeName)
+    {
+        OpenDialogueUI();
+
+        bgHost.ClearRuntimeBackgrounds();
+        presentationResponseRig.ClearRuntimeState();
+
+        StartPresentationRoute(presentationEntryKey);
+        StartYarnNode(nodeName);
     }
     
     private IEnumerator WaitUntilBoundOrTimeout()
