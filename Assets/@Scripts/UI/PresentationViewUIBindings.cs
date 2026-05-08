@@ -153,7 +153,8 @@ public sealed class PresentationViewUIBindings : IDisposable
         _episodePlayState.ApplyEpisodeState(episodeId);
 
         UIManager.Instance.PopAllPanels();
-        UIManager.Instance.SwitchRoot<LobbyUIRoot>();
+        //UIManager.Instance.SwitchRoot<LobbyUIRoot>();
+        UIManager.Instance.SwitchRoot<TitleUIRoot>();
     }
 
     private void HandleAutoPressed()

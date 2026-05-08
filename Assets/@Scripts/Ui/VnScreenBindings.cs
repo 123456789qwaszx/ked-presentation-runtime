@@ -7,12 +7,19 @@ public sealed class VnScreenBindings : IDisposable
     private static UIManager UI => UIManager.Instance;
     
     private EpisodeFlowController _episodeFlowController;
+    
+    private EpisodePlayer _episodePlayer;
 
     private UIBase _boundRoot;
 
     public VnScreenBindings(EpisodeFlowController episodeFlowController)
     {
         _episodeFlowController = episodeFlowController;
+    }
+
+    public void AttachEpisodePlayer(EpisodePlayer episodePlayer)
+    {
+        _episodePlayer = episodePlayer;
     }
     
     #region Title
@@ -32,7 +39,8 @@ public sealed class VnScreenBindings : IDisposable
     
     private void OnNewGamePressed()
     {
-        GoToLobby();
+        _episodePlayer.StartGame();
+        //GoToLobby();
     }
     
     private void OnContinuePressed()

@@ -41,7 +41,6 @@ MonoBehaviour:
     - Lofelt.NiceVibrations.Demo
     - MoreMountains.Tools
     - YarnSpinner.Unity
-    - YarnSpinner.Unity.Samples
     showAdvancedSettings: 0
   addMgrToSceneAutomatically: 0
   autoUpdateReferences: 1

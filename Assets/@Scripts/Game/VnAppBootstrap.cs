@@ -283,6 +283,8 @@ public class VnAppBootstrap : MonoBehaviour
     private void InitializeEpisodePlayer()
     {
         episodePlayer.Initialize(_screenBindings, _dialogueUIBindings, _rollbackHistory);
+        
+        _screenBindings.AttachEpisodePlayer(episodePlayer);
     }
     
     private void Start()

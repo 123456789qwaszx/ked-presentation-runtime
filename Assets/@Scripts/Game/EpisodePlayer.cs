@@ -58,6 +58,17 @@ public sealed class EpisodePlayer : MonoBehaviour, IRollbackDialogueRestarter
         }
     }
 
+    public void StartGame()
+    {
+        OpenDialogueUI();
+            
+        bgHost.ClearRuntimeBackgrounds();
+        presentationResponseRig.ClearRuntimeState();
+            
+        StartPresentationRoute(presentationEntryKey);
+        StartYarnNode(yarnEntryKey);
+    }
+
 
     public void OpenDialogueUI()
     {
