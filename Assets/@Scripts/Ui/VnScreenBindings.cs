@@ -179,18 +179,6 @@ public sealed class VnScreenBindings : IDisposable
 
     private void OpenSaveLoadMenu(SaveLoadMenuMode mode)
     {
-        if (_vnServiceContainer == null || !_vnServiceContainer.IsInitialized)
-        {
-            Debug.LogWarning("[VnScreenBindings] Cannot open Save/Load menu. VN services are not ready.");
-            return;
-        }
-
-        if (_vnServiceContainer.SaveRepository == null)
-        {
-            Debug.LogWarning("[VnScreenBindings] SaveRepository is null.");
-            return;
-        }
-
         _currentSaveLoadMode = mode;
 
         UI.PushPanel<SaveLoadMenuUIPanel>(root =>

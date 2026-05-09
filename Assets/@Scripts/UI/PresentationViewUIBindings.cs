@@ -211,18 +211,6 @@ public sealed class PresentationViewUIBindings : IDisposable
         if (_uxState.ChoicesVisible || _uxState.BacklogVisible)
             return;
 
-        if (_vnServiceContainer == null || !_vnServiceContainer.IsInitialized)
-        {
-            Debug.LogWarning("[PresentationViewUIBindings] Cannot open Save/Load menu. VN services are not ready.");
-            return;
-        }
-
-        if (_vnServiceContainer.SaveRepository == null)
-        {
-            Debug.LogWarning("[PresentationViewUIBindings] SaveRepository is null.");
-            return;
-        }
-
         if (_vnFeatures.IsAuto)
         {
             _vnFeatures.ToggleAuto();
