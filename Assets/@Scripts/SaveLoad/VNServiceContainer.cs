@@ -16,7 +16,6 @@ public sealed class VNServiceContainer : MonoBehaviour
 
     public VNSaveService SaveService { get; private set; }
     public VNLoadService LoadService { get; private set; }
-    public VNAutoSaveService AutoSaveService { get; private set; }
     public VNAlbumUnlockService AlbumService { get; private set; }
 
     private IVNRuntimeStateProvider _stateProvider;
@@ -50,7 +49,6 @@ public sealed class VNServiceContainer : MonoBehaviour
         LoadService = new VNLoadService(SaveRepository, _seekDriver, _flagStore, _safetyPolicy);
         
         SaveService = new VNSaveService(SaveRepository, GlobalRepository, GlobalData, _stateProvider, _flagStore, _safetyPolicy);
-        AutoSaveService = new VNAutoSaveService(SaveService);
     }
 
     public bool CanContinue()
