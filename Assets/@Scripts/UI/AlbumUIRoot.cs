@@ -51,6 +51,7 @@ public sealed class AlbumUIRoot : UIRoot<AlbumUIRoot.Refs>
 #endif
 
         _close.SetLabel("돌아가기");
+        _close.OnClicked -= HandleClose;
         _close.OnClicked += HandleClose;
 
         ClearPreview();
@@ -74,9 +75,7 @@ public sealed class AlbumUIRoot : UIRoot<AlbumUIRoot.Refs>
 
     #endregion
 
-    public void Rebuild(
-        IReadOnlyList<VNAlbumItemSO> items,
-        Func<string, bool> isUnlocked)
+    public void Rebuild(IReadOnlyList<VNAlbumItemSO> items, Func<string, bool> isUnlocked)
     {
         if (!_valid) return;
 

@@ -2,6 +2,58 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public interface IVNSaveRepository
+{
+    int SlotCount { get; }
+    string AutoSlot { get; }
+
+    string GetSlotId(int slotIndex);
+
+    bool TryLoad(string slotId, out VNSaveData data);
+    bool Save(VNSaveData data);
+    bool Delete(string slotId);
+    bool Exists(string slotId);
+
+    VNSaveSlotMeta GetMeta(int slotIndex);
+    VNSaveSlotMeta GetMeta(string slotId);
+    VNSaveSlotMeta[] GetAllMetas();
+}
+
+public interface IVNGlobalProgressRepository
+{
+    VNGlobalProgressData LoadOrCreate();
+    bool Save(VNGlobalProgressData data);
+}
+
+public interface IVNRuntimeStateProvider
+{
+    string CurrentNodeName { get; }
+    string CurrentLineId { get; }
+
+    int CurrentVisitedIndex { get; }
+    int CurrentLineVisitCountInNode { get; }
+
+    string CurrentChapterLabel { get; }
+    string CurrentLinePreview { get; }
+
+    int CurrentPlaytimeSeconds { get; }
+}
+
+public interface IVNFlagStore
+{
+    List<VNFlagEntry> Capture();
+    void Restore(List<VNFlagEntry> flags);
+}
+
+
+public interface IVNSaveSafetyPolicy
+{
+    bool CanManualSaveNow(out string reason);
+    bool CanAutoSaveNow(out string reason);
+    bool CanLoadNow(out string reason);
+}
+
+
 public sealed class VNSaveService
 {
     private readonly IVNSaveRepository _saveRepo;
@@ -101,14 +153,14 @@ public sealed class VNSaveService
         {
             slotId = slotId,
 
-            nodeName = SafeString(_stateProvider.CurrentNodeName),
-            lineId = SafeString(_stateProvider.CurrentLineId),
+            nodeName = _stateProvider.CurrentNodeName,
+            lineId = _stateProvider.CurrentLineId,
 
             visitedIndex = _stateProvider.CurrentVisitedIndex,
             lineVisitCountInNode = _stateProvider.CurrentLineVisitCountInNode,
 
-            chapterLabel = SafeString(_stateProvider.CurrentChapterLabel),
-            linePreview = TrimPreview(SafeString(_stateProvider.CurrentLinePreview), 80),
+            chapterLabel = _stateProvider.CurrentChapterLabel,
+            linePreview = TrimPreview(_stateProvider.CurrentLinePreview, 80),
 
             savedAt = now.ToString("yyyy-MM-dd HH:mm"),
             savedAtTicks = now.Ticks,
@@ -142,11 +194,6 @@ public sealed class VNSaveService
         }
 
         _globalRepo.Save(_globalData);
-    }
-
-    private string SafeString(string value)
-    {
-        return value ?? "";
     }
 
     private string TrimPreview(string value, int maxLength)

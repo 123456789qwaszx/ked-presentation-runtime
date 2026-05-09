@@ -267,17 +267,8 @@ public sealed class PresentationViewUIBindings : IDisposable
 
     private void RefreshSaveLoadRoot(SaveLoadMenuUIPanel saveLoadRoot)
     {
-        if (saveLoadRoot == null)
-            return;
-
-        if (_vnServiceContainer == null || _vnServiceContainer.SaveRepository == null)
-            return;
-
         VNSaveSlotMeta[] metas = _vnServiceContainer.SaveRepository.GetAllMetas();
-
-        saveLoadRoot.Rebuild(
-            _currentSaveLoadMode,
-            metas);
+        saveLoadRoot.Rebuild(_currentSaveLoadMode, metas);
     }
 
     private void OnSaveLoadSlotSelected(int slotIndex)

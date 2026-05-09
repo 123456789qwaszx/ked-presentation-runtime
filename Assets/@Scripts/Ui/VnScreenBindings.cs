@@ -322,12 +322,6 @@ public sealed class VnScreenBindings : IDisposable
 
     private void RefreshAlbumRoot(AlbumUIRoot albumRoot)
     {
-        if (albumRoot == null)
-            return;
-
-        if (_vnServiceContainer == null || _vnServiceContainer.AlbumService == null)
-            return;
-
         VNAlbumUnlockService albumService = _vnServiceContainer.AlbumService;
 
         albumRoot.Rebuild(

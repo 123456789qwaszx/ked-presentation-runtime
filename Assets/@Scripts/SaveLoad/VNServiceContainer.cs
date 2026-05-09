@@ -21,6 +21,7 @@ public sealed class VNServiceContainer : MonoBehaviour
     public event Action RuntimeBound;
 
     public IVNSaveRepository SaveRepository { get; private set; }
+    
     public IVNGlobalProgressRepository GlobalRepository { get; private set; }
     public VNGlobalProgressData GlobalData { get; private set; }
 

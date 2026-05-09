@@ -127,6 +127,7 @@ public sealed class JsonVNSaveRepository : IVNSaveRepository
 
     public VNSaveSlotMeta GetMeta(int slotIndex)
     {
+        Debug.Log($"{GetSlotId(slotIndex)}");
         return GetMeta(GetSlotId(slotIndex));
     }
 

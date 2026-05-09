@@ -1,4 +1,17 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
+
+public interface IVNLoadSeekDriver
+{
+    void PrepareForLoad();
+
+    void BeginSeek(
+        VNSaveData saveData,
+        Action onComplete,
+        Action onFail);
+
+    void OnLoadComplete(VNSaveData saveData);
+}
 
 public sealed class VNLoadService
 {

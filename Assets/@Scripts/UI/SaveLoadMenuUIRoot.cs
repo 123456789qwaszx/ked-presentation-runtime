@@ -78,18 +78,12 @@ public sealed class SaveLoadMenuUIPanel : UIPanel<SaveLoadMenuUIPanel.Refs>
 
     #endregion
 
-    public void Rebuild(
-        SaveLoadMenuMode mode,
-        VNSaveSlotMeta[] metas)
+    public void Rebuild(SaveLoadMenuMode mode, VNSaveSlotMeta[] metas)
     {
         if (!_valid) return;
 
         _mode = mode;
-
         ClearSlots();
-
-        if (metas == null)
-            return;
 
         bool isSaveMode = _mode == SaveLoadMenuMode.Save;
 

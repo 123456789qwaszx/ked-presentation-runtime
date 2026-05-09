@@ -22,11 +22,7 @@ public sealed class VNSaveSlotButton : MonoBehaviour
         _button = GetComponent<Button>();
     }
 
-    public void Bind(
-        int slotIndex,
-        VNSaveSlotMeta meta,
-        bool isSaveMode,
-        Action<int> onClick)
+    public void Bind(int slotIndex, VNSaveSlotMeta meta, bool isSaveMode, Action<int> onClick)
     {
         _slotIndex = slotIndex;
         _onClick = onClick;
