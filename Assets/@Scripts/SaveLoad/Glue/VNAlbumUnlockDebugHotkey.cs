@@ -2,6 +2,17 @@ using UnityEngine;
 
 public sealed class VNAlbumUnlockDebugList : MonoBehaviour
 {
+    private VNServiceContainer _vnServiceContainer;
+    
+    public void Initialize (VNServiceContainer vnServiceContainer)
+    {
+        _vnServiceContainer  = vnServiceContainer;
+
+        _initialized = true;
+    }
+    
+    private bool _initialized;
+    
     [SerializeField] private string[] _cgKeys =
     {
         "cg_test_01",
@@ -17,6 +28,9 @@ public sealed class VNAlbumUnlockDebugList : MonoBehaviour
 
     private void Update()
     {
+        if (!_initialized)
+            return;
+        
         if (Input.GetKeyDown(_unlockNextKey))
         {
             UnlockNext();
@@ -37,10 +51,7 @@ public sealed class VNAlbumUnlockDebugList : MonoBehaviour
 
     private void UnlockNext()
     {
-        VNAlbumUnlockService album = ResolveAlbumService();
-
-        if (album == null)
-            return;
+        VNAlbumUnlockService album = _vnServiceContainer.AlbumService;
 
         while (_nextUnlockIndex < _cgKeys.Length)
         {
@@ -64,10 +75,7 @@ public sealed class VNAlbumUnlockDebugList : MonoBehaviour
 
     private void UnlockAll()
     {
-        VNAlbumUnlockService album = ResolveAlbumService();
-
-        if (album == null)
-            return;
+        VNAlbumUnlockService album = _vnServiceContainer.AlbumService;
 
         for (int i = 0; i < _cgKeys.Length; i++)
         {
@@ -86,31 +94,11 @@ public sealed class VNAlbumUnlockDebugList : MonoBehaviour
 
     private void LockAll()
     {
-        VNAlbumUnlockService album = ResolveAlbumService();
-
-        if (album == null)
-            return;
-
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        VNAlbumUnlockService album = _vnServiceContainer.AlbumService;
+        
         album.ClearAllCgUnlocksForDebug();
         _nextUnlockIndex = 0;
 
         Debug.Log("[VNAlbumUnlockDebugList] Locked all test CGs.");
-#else
-        Debug.LogWarning("[VNAlbumUnlockDebugList] LockAll is only available in Editor or Development Build.");
-#endif
-    }
-
-    private VNAlbumUnlockService ResolveAlbumService()
-    {
-        VNServiceContainer svc = VNServiceContainer.Instance;
-
-        if (svc == null || !svc.IsPersistentInitialized || svc.AlbumService == null)
-        {
-            Debug.LogWarning("[VNAlbumUnlockDebugList] Album service is not ready.");
-            return null;
-        }
-
-        return svc.AlbumService;
     }
 }

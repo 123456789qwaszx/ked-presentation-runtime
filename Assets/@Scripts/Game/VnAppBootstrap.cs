@@ -74,7 +74,7 @@ public class VnAppBootstrap : MonoBehaviour
     [SerializeField] private VNServiceContainer vnServiceContainer;
     [SerializeField] private VNPlaytimeTracker vnPlaytimeTracker;
     
-
+    [SerializeField] private VNAlbumUnlockDebugList vnAlbumUnlockDebugList;
 
     private PresentationSessionBridge _presentationSessionBridge;
 
@@ -106,6 +106,8 @@ public class VnAppBootstrap : MonoBehaviour
         InitializeEpisodePlayer();
         
         BootstrapVNSaveLoadRuntime();
+        
+        vnAlbumUnlockDebugList.Initialize(vnServiceContainer);
     }
 
     private void BootstrapAudioSystem()

@@ -9,16 +9,7 @@ public sealed class VNServiceContainer : MonoBehaviour
     [Header("Album")]
     [SerializeField] private VNAlbumDatabaseSO _albumDatabase;
 
-    [Header("Continue Policy")]
-    [SerializeField] private bool _updateContinueOnAutoSave = true;
-
-    public static VNServiceContainer Instance { get; private set; }
-
-    public bool IsPersistentInitialized { get; private set; }
-    public bool IsRuntimeBound { get; private set; }
-
-    public event Action PersistentInitialized;
-    public event Action RuntimeBound;
+    public bool IsInitialized { get; private set; }
 
     public IVNSaveRepository SaveRepository { get; private set; }
     
@@ -36,25 +27,9 @@ public sealed class VNServiceContainer : MonoBehaviour
     private IVNFlagStore _flagStore;
     private IVNSaveSafetyPolicy _safetyPolicy;
 
-
-    private void OnDestroy()
-    {
-        if (Instance == this)
-            Instance = null;
-    }
-
     public void Initialize()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-
-        Instance = this;
-        DontDestroyOnLoad(gameObject);
-        
-        if (IsPersistentInitialized)
+        if (IsInitialized)
         {
             Debug.LogWarning("[VNServiceContainer] Already initialized. Skipping.");
             return;
@@ -70,14 +45,9 @@ public sealed class VNServiceContainer : MonoBehaviour
 
         GlobalData.Normalize();
 
-        AlbumService = new VNAlbumUnlockService(
-            GlobalData,
-            GlobalRepository,
-            _albumDatabase);
+        AlbumService = new VNAlbumUnlockService(GlobalData, GlobalRepository, _albumDatabase);
 
-        IsPersistentInitialized = true;
-
-        PersistentInitialized?.Invoke();
+        IsInitialized = true;
     }
 
     public void BindRuntime(
@@ -86,97 +56,26 @@ public sealed class VNServiceContainer : MonoBehaviour
         IVNFlagStore flagStore,
         IVNSaveSafetyPolicy safetyPolicy)
     {
-        if (!IsPersistentInitialized)
+        if (!IsInitialized)
         {
             Debug.LogError("[VNServiceContainer] BindRuntime called before Initialize(). Runtime bind aborted.");
             return;
         }
 
-        if (stateProvider == null)
-        {
-            Debug.LogError("[VNServiceContainer] stateProvider is null. Runtime bind aborted.");
-            return;
-        }
-
-        if (seekDriver == null)
-        {
-            Debug.LogError("[VNServiceContainer] seekDriver is null. Runtime bind aborted.");
-            return;
-        }
-
-        if (IsRuntimeBound)
-        {
-            Debug.LogWarning("[VNServiceContainer] Runtime is already bound. Rebinding after cleanup.");
-            UnbindRuntime();
-        }
-
         _stateProvider = stateProvider;
         _seekDriver = seekDriver;
-
         _flagStore = flagStore;
-
-        if (_flagStore == null)
-        {
-            Debug.LogWarning("[VNServiceContainer] flagStore is null. Using EmptyVNFlagStore.");
-            _flagStore = new EmptyVNFlagStore();
-        }
-
         _safetyPolicy = safetyPolicy;
-
-        if (_safetyPolicy == null)
-        {
-            Debug.LogWarning("[VNServiceContainer] safetyPolicy is null. Using AlwaysAllowVNSaveSafetyPolicy.");
-            _safetyPolicy = new AlwaysAllowVNSaveSafetyPolicy();
-        }
-
-        SaveService = new VNSaveService(
-            SaveRepository,
-            GlobalRepository,
-            GlobalData,
-            _stateProvider,
-            _flagStore,
-            _safetyPolicy);
-
-        SaveService.UpdateContinueOnAutoSave = _updateContinueOnAutoSave;
-
-        LoadService = new VNLoadService(
-            SaveRepository,
-            _seekDriver,
-            _flagStore,
-            _safetyPolicy);
-
-        ContinueService = new VNContinueService(
-            GlobalData,
-            LoadService,
-            SaveRepository);
-
+        
+        LoadService = new VNLoadService(SaveRepository, _seekDriver, _flagStore, _safetyPolicy);
+        ContinueService = new VNContinueService(GlobalData, LoadService, SaveRepository);
+        SaveService = new VNSaveService(SaveRepository, GlobalRepository, GlobalData, _stateProvider, _flagStore, _safetyPolicy);
         AutoSaveService = new VNAutoSaveService(SaveService);
-
-        IsRuntimeBound = true;
-
-        RuntimeBound?.Invoke();
-    }
-
-    public void UnbindRuntime()
-    {
-        SaveService = null;
-        LoadService = null;
-        ContinueService = null;
-        AutoSaveService = null;
-
-        _stateProvider = null;
-        _seekDriver = null;
-        _flagStore = null;
-        _safetyPolicy = null;
-
-        IsRuntimeBound = false;
-
-        Debug.Log("[VNServiceContainer] Runtime services unbound.");
     }
 
     public bool CanContinue()
     {
-        if (!IsPersistentInitialized || GlobalData == null || SaveRepository == null)
+        if (!IsInitialized || GlobalData == null || SaveRepository == null)
             return false;
 
         GlobalData.Normalize();
@@ -189,7 +88,7 @@ public sealed class VNServiceContainer : MonoBehaviour
 
     public bool TryContinue()
     {
-        if (!IsRuntimeBound || ContinueService == null)
+        if (!IsInitialized || ContinueService == null)
         {
             Debug.LogWarning("[VNServiceContainer] Runtime is not bound. Cannot continue yet.");
             return false;

@@ -74,23 +74,23 @@ public sealed class VnScreenBindings : IDisposable
 
         RefreshTitleState(titleRoot);
 
-        if (_vnServiceContainer != null)
-        {
-            Action refresh = () => RefreshTitleState(titleRoot);
-
-            _ctx.Assign(
-                titleRoot,
-                _ =>
-                {
-                    _vnServiceContainer.PersistentInitialized += refresh;
-                    _vnServiceContainer.RuntimeBound += refresh;
-                },
-                _ =>
-                {
-                    _vnServiceContainer.PersistentInitialized -= refresh;
-                    _vnServiceContainer.RuntimeBound -= refresh;
-                });
-        }
+        // if (_vnServiceContainer != null)
+        // {
+        //     Action refresh = () => RefreshTitleState(titleRoot);
+        //
+        //     _ctx.Assign(
+        //         titleRoot,
+        //         _ =>
+        //         {
+        //             _vnServiceContainer.PersistentInitialized += refresh;
+        //             _vnServiceContainer.RuntimeBound += refresh;
+        //         },
+        //         _ =>
+        //         {
+        //             _vnServiceContainer.PersistentInitialized -= refresh;
+        //             _vnServiceContainer.RuntimeBound -= refresh;
+        //         });
+        // }
     }
 
     private void RefreshTitleState(TitleUIRoot titleRoot)
@@ -99,7 +99,7 @@ public sealed class VnScreenBindings : IDisposable
             return;
 
         bool hasContainer = _vnServiceContainer != null;
-        bool persistentReady = hasContainer && _vnServiceContainer.IsPersistentInitialized;
+        bool persistentReady = hasContainer && _vnServiceContainer.IsInitialized;
 
         bool canContinue =
             hasContainer &&
@@ -179,7 +179,7 @@ public sealed class VnScreenBindings : IDisposable
 
     private void OpenSaveLoadMenu(SaveLoadMenuMode mode)
     {
-        if (_vnServiceContainer == null || !_vnServiceContainer.IsPersistentInitialized)
+        if (_vnServiceContainer == null || !_vnServiceContainer.IsInitialized)
         {
             Debug.LogWarning("[VnScreenBindings] Cannot open Save/Load menu. VN services are not ready.");
             return;
@@ -248,7 +248,7 @@ public sealed class VnScreenBindings : IDisposable
 
     private void HandleSaveSlotSelected(int slotIndex)
     {
-        if (!_vnServiceContainer.IsRuntimeBound || _vnServiceContainer.SaveService == null)
+        if (!_vnServiceContainer.IsInitialized || _vnServiceContainer.SaveService == null)
         {
             Debug.LogWarning("[VnScreenBindings] Runtime is not bound. Cannot save.");
             return;
@@ -268,7 +268,7 @@ public sealed class VnScreenBindings : IDisposable
 
     private void HandleLoadSlotSelected(int slotIndex)
     {
-        if (!_vnServiceContainer.IsRuntimeBound || _vnServiceContainer.LoadService == null)
+        if (!_vnServiceContainer.IsInitialized || _vnServiceContainer.LoadService == null)
         {
             Debug.LogWarning("[VnScreenBindings] Runtime is not bound. Cannot load.");
             return;
@@ -292,7 +292,7 @@ public sealed class VnScreenBindings : IDisposable
 
     public void GoToAlbum()
     {
-        if (_vnServiceContainer == null || !_vnServiceContainer.IsPersistentInitialized)
+        if (_vnServiceContainer == null || !_vnServiceContainer.IsInitialized)
         {
             Debug.LogWarning("[VnScreenBindings] Cannot open Album. VN services are not ready.");
             return;

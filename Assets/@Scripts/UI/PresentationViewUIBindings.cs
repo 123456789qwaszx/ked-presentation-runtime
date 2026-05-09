@@ -211,7 +211,7 @@ public sealed class PresentationViewUIBindings : IDisposable
         if (_uxState.ChoicesVisible || _uxState.BacklogVisible)
             return;
 
-        if (_vnServiceContainer == null || !_vnServiceContainer.IsPersistentInitialized)
+        if (_vnServiceContainer == null || !_vnServiceContainer.IsInitialized)
         {
             Debug.LogWarning("[PresentationViewUIBindings] Cannot open Save/Load menu. VN services are not ready.");
             return;
@@ -291,7 +291,7 @@ public sealed class PresentationViewUIBindings : IDisposable
 
     private void HandleLoadSlotSelected(int slotIndex)
     {
-        if (!_vnServiceContainer.IsRuntimeBound || _vnServiceContainer.LoadService == null)
+        if (!_vnServiceContainer.IsInitialized || _vnServiceContainer.LoadService == null)
         {
             Debug.LogWarning("[PresentationViewUIBindings] Runtime is not bound. Cannot load.");
             return;
