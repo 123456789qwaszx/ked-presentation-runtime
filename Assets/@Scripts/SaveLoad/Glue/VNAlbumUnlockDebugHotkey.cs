@@ -2,9 +2,9 @@ using UnityEngine;
 
 public sealed class VNAlbumUnlockDebugList : MonoBehaviour
 {
-    private VNServiceContainer _vnServiceContainer;
+    private VNSaveLoadSystem _vnServiceContainer;
     
-    public void Initialize (VNServiceContainer vnServiceContainer)
+    public void Initialize (VNSaveLoadSystem vnServiceContainer)
     {
         _vnServiceContainer  = vnServiceContainer;
 

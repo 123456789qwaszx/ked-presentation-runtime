@@ -15,7 +15,7 @@ public sealed class PresentationViewUIBindings : IDisposable
 
     private PresentationUIRoot _root;
 
-    private VNServiceContainer _vnServiceContainer;
+    private VNSaveLoadSystem _vnServiceContainer;
 
     private SaveLoadMenuMode _currentSaveLoadMode;
     private SaveLoadMenuUIPanel _saveLoadRoot;
@@ -35,7 +35,7 @@ public sealed class PresentationViewUIBindings : IDisposable
         _dialogueAdvanceDispatcher = dialogueAdvanceDispatcher;
     }
 
-    public void AttachVNServiceContainer(VNServiceContainer serviceContainer)
+    public void AttachVNServiceContainer(VNSaveLoadSystem serviceContainer)
     {
         _vnServiceContainer = serviceContainer;
     }

@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public sealed class VNServiceContainer : MonoBehaviour
+public sealed class VNSaveLoadSystem : MonoBehaviour
 {
     [Header("Repository")]
     [SerializeField] private int _slotCount = 10;

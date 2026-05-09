@@ -71,7 +71,7 @@ public class VnAppBootstrap : MonoBehaviour
     [SerializeField] private TransitionTargetRouter transitionTargetRouter;
 
     [Header("VN Save / Load")]
-    [SerializeField] private VNServiceContainer vnServiceContainer;
+    [SerializeField] private VNSaveLoadSystem vnServiceContainer;
     [SerializeField] private VNPlaytimeTracker vnPlaytimeTracker;
     
     [SerializeField] private VNAlbumUnlockDebugList vnAlbumUnlockDebugList;

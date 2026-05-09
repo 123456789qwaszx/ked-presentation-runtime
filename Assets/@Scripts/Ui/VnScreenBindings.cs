@@ -9,7 +9,7 @@ public sealed class VnScreenBindings : IDisposable
     private readonly EpisodeFlowController _episodeFlowController;
 
     private EpisodePlayer _episodePlayer;
-    private VNServiceContainer _vnServiceContainer;
+    private VNSaveLoadSystem _vnServiceContainer;
 
     private SaveLoadMenuMode _currentSaveLoadMode;
 
@@ -25,7 +25,7 @@ public sealed class VnScreenBindings : IDisposable
         _episodePlayer = episodePlayer;
     }
 
-    public void AttachVNServiceContainer(VNServiceContainer serviceContainer)
+    public void AttachVNServiceContainer(VNSaveLoadSystem serviceContainer)
     {
         _vnServiceContainer = serviceContainer;
     }
