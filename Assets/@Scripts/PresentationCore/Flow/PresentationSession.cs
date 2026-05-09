@@ -15,6 +15,7 @@ public sealed class PresentationSession
     
     // ---- Session-owned context ----
     private readonly PresentationSessionContext _context;
+    private readonly LinePresentationAdvanceState _linePresentationAdvanceState;
     
     // ---- Active run (per-Session) ----
     private CommandRunScope _sessionScope;
@@ -38,13 +39,15 @@ public sealed class PresentationSession
         StepGatePlanBuilder gatePlanner,
         StepGateAdvancer gateAdvancer,
         CommandExecutor executor,
-        PresentationSessionContext presentationSessionContext
+        PresentationSessionContext presentationSessionContext,
+        LinePresentationAdvanceState linePresentationAdvanceState
     )
     {
         _gatePlanner = gatePlanner;
         _gateAdvancer = gateAdvancer;
         _executor = executor;
         _context = presentationSessionContext;
+        _linePresentationAdvanceState = linePresentationAdvanceState;
     }
 
     
@@ -56,7 +59,7 @@ public sealed class PresentationSession
         
         _state = new SequenceProgressState(route);
         _sequence = sequence;
-        _sessionScope = new CommandRunScope(_context);
+        _sessionScope = new CommandRunScope(_context, _linePresentationAdvanceState);
         
         _context.ResetSessionFlagsForStart();
         

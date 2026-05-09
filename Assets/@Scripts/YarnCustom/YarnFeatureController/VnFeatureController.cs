@@ -33,7 +33,7 @@ public sealed class VnFeatureController : MonoBehaviour
     private RollbackController _rollbackController;
 
     public bool IsAuto => _sessionContext != null && _sessionContext.IsAutoMode;
-    public bool IsSpeedup => _sessionContext != null && _sessionContext.IsSkipping;
+    public bool IsSpeedup => _sessionContext != null && _sessionContext.IsSpeedUpMode;
 
     private bool LineFullyShown => _yarnLineLifecycleBridge.IsLineFullyShown;
 
@@ -140,7 +140,7 @@ public sealed class VnFeatureController : MonoBehaviour
 
     private void RefreshPlaybackSpeed()
     {
-        bool shouldSpeedUp = _sessionContext.IsSkipping;
+        bool shouldSpeedUp = _sessionContext.IsSpeedUpMode;
 
         float multiplier = shouldSpeedUp
             ? _vnPlaybackSettings.speedupModeMultiplier

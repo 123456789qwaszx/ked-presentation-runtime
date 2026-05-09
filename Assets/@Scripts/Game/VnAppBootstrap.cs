@@ -168,7 +168,7 @@ public class VnAppBootstrap : MonoBehaviour
         commandExecutor.Initialize(factory);
 
         PresentationSession presentationSession =
-            new PresentationSession(gatePlanner, gateAdvancer, commandExecutor, _presentationSessionContext);
+            new PresentationSession(gatePlanner, gateAdvancer, commandExecutor, _presentationSessionContext, _linePresentationAdvanceState);
 
         presentationSessionEntry.Initialize(presentationSession, routeCatalogSo);
     }
@@ -216,6 +216,7 @@ public class VnAppBootstrap : MonoBehaviour
         yarnLineSideEffectPresenter.Initialize(
             dialogueRunner,
             _presentationSessionContext,
+            _linePresentationAdvanceState,
             yarnBridgePlaybackDriver,
             audioSystem);
 
@@ -273,8 +274,6 @@ public class VnAppBootstrap : MonoBehaviour
             yarnLineLifecycleBridge,
             episodePlayer,
             dialogueAdvanceDispatcher,
-            _presentationSessionBridge,
-            _presentationSessionContext,
             UIManager.Instance.GetUI<PresentationUIRoot>(),
             customLinePresenter,
             _linePresentationAdvanceState
@@ -302,7 +301,6 @@ public class VnAppBootstrap : MonoBehaviour
             yarnLineLifecycleBridge,
             episodePlayer,
             dialogueAdvanceDispatcher,
-            _presentationSessionContext,
             presentationUIRoot,
             customLinePresenter,
             _linePresentationAdvanceState,

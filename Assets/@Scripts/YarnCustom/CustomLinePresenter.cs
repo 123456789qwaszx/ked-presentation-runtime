@@ -90,12 +90,12 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
         }
 
         bool isRollbackTargetLine =
-            _context != null &&
-            _context.IsRollbackTargetLine(line.TextID);
+            _lineAdvanceState != null &&
+            _lineAdvanceState.IsRollbackTargetLine(line.TextID);
 
         bool isRollbackSeekingLine =
-            _context != null &&
-            _context.IsRollbackSeeking &&
+            _lineAdvanceState != null &&
+            _lineAdvanceState.IsRollbackSeeking &&
             !isRollbackTargetLine;
 
         if (isRollbackSeekingLine)
@@ -142,7 +142,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
         {
             // Target line은 다시 화면에 보여줄 현재 line이다.
             // Transition만 즉시 적용하고, Typewriter는 아래에서 정상 실행한다.
-            _context.ConsumeRollbackTargetLine(line.TextID);
+            _lineAdvanceState.ConsumeRollbackTargetLine(line.TextID);
             ApplyBoxTransitionImmediate(previousBox, nextBox, transitionKind);
         }
         else
@@ -567,7 +567,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
         if (_context == null)
             return false;
 
-        return _context.IsRollbackSeeking || _context.IsSkipping;
+        return _lineAdvanceState.IsRollbackSeeking || _context.IsSpeedUpMode;
     }
 
     private void BindCharacterNameTarget(bool hasCharacterName)

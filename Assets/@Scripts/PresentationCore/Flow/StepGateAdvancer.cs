@@ -44,11 +44,11 @@ public class StepGateAdvancer : IDisposable
             return false;
 
         // If the node is still "busy" (typing/animations/commands running), do not consume any token.
-        if (ctx.IsNodeBusy && !ctx.IsSkipping)
+        if (ctx.IsNodeBusy && !ctx.IsSpeedUpMode)
             return false;
 
         // Skip: jump the gate cursor to the end (skip all remaining tokens).
-        if (ctx.IsSkipping)
+        if (ctx.IsSpeedUpMode)
         {
             state.StepGate.Cursor = state.StepGate.Tokens.Count;
             state.StepGate.InFlight = default;

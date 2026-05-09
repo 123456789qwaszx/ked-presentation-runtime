@@ -5,6 +5,7 @@ using System.Threading;
 public sealed class CommandRunScope
 {
     private readonly PresentationSessionContext _context;
+    private readonly LinePresentationAdvanceState _linePresentationAdvanceState;
     public CancellationToken Token { get; set; }
     
     public readonly Dictionary<string, object> Refs = new(); //roleKey 기반 런타임 참조 저장소
@@ -24,17 +25,18 @@ public sealed class CommandRunScope
     /// </summary>
     internal LifetimeScope RunLifetime { get; } = new();
 
-    public CommandRunScope(PresentationSessionContext context)
+    public CommandRunScope(PresentationSessionContext context, LinePresentationAdvanceState linePresentationAdvanceState)
     {
         _context = context;
+        _linePresentationAdvanceState = linePresentationAdvanceState;
         Token = CancellationToken.None;
     }
 
-    public bool IsSkipping => _context != null && _context.IsSkipping;
+    public bool IsSkipping => _context != null && _context.IsSpeedUpMode;
     public bool IsAutoMode => _context != null && _context.IsAutoMode;
     public float TimeScale => _context != null ? _context.TimeScale : 1f;
     public bool IsNodeBusy => _context != null && _context.IsNodeBusy;
-    public bool IsRollbackSeeking => _context != null && _context.IsRollbackSeeking;
+    public bool IsRollbackSeeking => _linePresentationAdvanceState != null && _linePresentationAdvanceState.IsRollbackSeeking;
 
     public bool ShouldRespectCommandWait => 
         _context == null || !IsRollbackSeeking || !IsSkipping;

@@ -6,16 +6,19 @@ using Yarn.Unity;
 public sealed class YarnLineSideEffectPresenter : DialoguePresenterBase
 {
     private PresentationSessionContext _context;
+    private LinePresentationAdvanceState _linePresentationAdvanceState;
     private AudioSystem _audioSystem;
     private YarnBridgePlaybackDriver _yarnBridgePlaybackDriver;
 
     public void Initialize(
         DialogueRunner dialogueRunner,
         PresentationSessionContext context,
+        LinePresentationAdvanceState linePresentationAdvanceState,
         YarnBridgePlaybackDriver yarnBridgePlaybackDriver = null,
         AudioSystem audioSystem = null)
     {
         _context = context;
+        _linePresentationAdvanceState = linePresentationAdvanceState;
         _yarnBridgePlaybackDriver = yarnBridgePlaybackDriver;
         _audioSystem = audioSystem;
 
@@ -73,8 +76,8 @@ public sealed class YarnLineSideEffectPresenter : DialoguePresenterBase
         if (_context == null)
             return false;
 
-        return _context.IsRollbackSeeking ||
-               _context.IsSkipping;
+        return _linePresentationAdvanceState.IsRollbackSeeking ||
+               _context.IsSpeedUpMode;
     }
 
     private void RegisterBeforeVisualLinePresenter(DialogueRunner dialogueRunner)

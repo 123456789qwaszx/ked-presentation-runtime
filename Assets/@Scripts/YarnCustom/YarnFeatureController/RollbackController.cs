@@ -7,30 +7,19 @@ public sealed class RollbackController : IDisposable
     private readonly YarnLineLifecycleBridge _bridge;
     private readonly IRollbackDialogueRestarter _restarter;
     private readonly DialogueAdvanceDispatcher _dispatcher;
-    private readonly PresentationSessionBridge _presentationSessionBridge;
-    private readonly PresentationSessionContext _presentationSessionContext;
     private readonly PresentationUIRoot _presentationUIRoot;
     private readonly ILinePresentationAborter _linePresentationAborter;
     private readonly LinePresentationAdvanceState _lineAdvanceState;
 
     private RollbackPoint _target;
     private bool _hasTarget;
-
-    public bool IsRollbackActive =>
-        _presentationSessionContext != null &&
-        _presentationSessionContext.IsRollbackActive;
-
-    public bool IsSeeking =>
-        _presentationSessionContext != null &&
-        _presentationSessionContext.IsRollbackSeeking;
+    
 
     public RollbackController(
         RollbackHistory history,
         YarnLineLifecycleBridge bridge,
         IRollbackDialogueRestarter restarter,
         DialogueAdvanceDispatcher dispatcher,
-        PresentationSessionBridge presentationSessionBridge,
-        PresentationSessionContext presentationSessionContext,
         PresentationUIRoot presentationUIRoot,
         ILinePresentationAborter linePresentationAborter,
         LinePresentationAdvanceState lineAdvanceState)
@@ -39,8 +28,6 @@ public sealed class RollbackController : IDisposable
         _bridge = bridge;
         _restarter = restarter;
         _dispatcher = dispatcher;
-        _presentationSessionBridge = presentationSessionBridge;
-        _presentationSessionContext = presentationSessionContext;
         _presentationUIRoot = presentationUIRoot;
         _linePresentationAborter = linePresentationAborter;
         _lineAdvanceState = lineAdvanceState;
@@ -54,7 +41,7 @@ public sealed class RollbackController : IDisposable
 
     public bool RequestRollbackOneStep()
     {
-        if (IsRollbackActive)
+        if (_lineAdvanceState.IsRollbackActive)
             return false;
 
         if (!_history.TryPrepareRollbackOneStep(out RollbackPoint target))
@@ -66,7 +53,7 @@ public sealed class RollbackController : IDisposable
 
     public bool RequestRollbackToHistoryIndex(int historyIndex)
     {
-        if (IsRollbackActive)
+        if (_lineAdvanceState.IsRollbackActive)
             return false;
 
         if (!_history.TryPrepareRollbackToHistoryIndex(historyIndex, out RollbackPoint target))
@@ -83,7 +70,7 @@ public sealed class RollbackController : IDisposable
 
         // Rollback 상태를 먼저 세운다.
         // 이후 abort/close 과정에서 다른 시스템이 context를 읽어도 이미 seek 상태여야 한다.
-        _presentationSessionContext.BeginRollbackSeek(target.lineId);
+        _lineAdvanceState.BeginRollbackSeek(target.lineId);
 
         // AdvanceGate가 기존 typewriter 상태를 보고 현재 line을 완료로 오판하지 않게 잠근다.
         _lineAdvanceState?.EnterRollbackSeek();
@@ -103,7 +90,7 @@ public sealed class RollbackController : IDisposable
 
         // 아직 target line을 표시한 것은 아니다.
         // 다음 CustomLinePresenter.RunLineAsync가 이 line을 one-shot target으로 소비한다.
-        _presentationSessionContext.MarkRollbackTargetLineReady();
+        _lineAdvanceState.MarkRollbackTargetLineReady();
 
         RefreshDialogueUiSuppression();
     }
@@ -113,14 +100,14 @@ public sealed class RollbackController : IDisposable
         _hasTarget = false;
         _target = default;
 
-        _presentationSessionContext.ClearRollbackState();
+        _lineAdvanceState.ExitRollbackSeek();
 
         RefreshDialogueUiSuppression();
     }
 
     private void EndSeekBeforeTargetLineDisplays(YarnLineMeta meta)
     {
-        if (!IsSeeking)
+        if (!_lineAdvanceState.IsRollbackSeeking)
             return;
 
         if (!_hasTarget)
@@ -149,7 +136,7 @@ public sealed class RollbackController : IDisposable
 
     private void AddRollbackPoint(YarnLineMeta meta)
     {
-        if (IsSeeking)
+        if (_lineAdvanceState.IsRollbackSeeking)
             return;
 
         _history.AddRollbackPoint(meta);
@@ -160,7 +147,7 @@ public sealed class RollbackController : IDisposable
         if (_presentationUIRoot == null)
             return;
 
-        _presentationUIRoot.RefreshDialogueUiSuppression(_presentationSessionContext);
+        _presentationUIRoot.RefreshDialogueUiSuppression(_lineAdvanceState);
     }
 
     public void Dispose()

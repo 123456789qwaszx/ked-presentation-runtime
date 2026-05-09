@@ -163,7 +163,7 @@ public class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
     /// PresentationSessionContext 기준으로 DialogueUI 표시 억제 상태를 갱신한다.
     /// 현재 정책: RollbackSeek 또는 Skip 중에는 DialogueUI_Root를 숨긴다.
     /// </summary>
-    public void RefreshDialogueUiSuppression(PresentationSessionContext context)
+    public void RefreshDialogueUiSuppression(LinePresentationAdvanceState context)
     {
         if (context == null)
         {
@@ -171,7 +171,7 @@ public class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
             return;
         }
 
-        SetDialogueUiSuppressed(context.IsRollbackSeeking || context.IsSkipping);
+        SetDialogueUiSuppressed(context.IsRollbackSeeking);
     }
 
     private void BindHandlers()
