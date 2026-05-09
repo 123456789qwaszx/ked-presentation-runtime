@@ -30,7 +30,6 @@ public sealed class VNServiceContainer : MonoBehaviour
     public VNContinueService ContinueService { get; private set; }
     public VNAutoSaveService AutoSaveService { get; private set; }
     public VNAlbumUnlockService AlbumService { get; private set; }
-    public VNReadLineService ReadLineService { get; private set; }
 
     private IVNRuntimeStateProvider _stateProvider;
     private IVNLoadSeekDriver _seekDriver;
@@ -40,8 +39,6 @@ public sealed class VNServiceContainer : MonoBehaviour
 
     private void OnDestroy()
     {
-        ReadLineService?.Flush();
-
         if (Instance == this)
             Instance = null;
     }
@@ -77,10 +74,6 @@ public sealed class VNServiceContainer : MonoBehaviour
             GlobalData,
             GlobalRepository,
             _albumDatabase);
-
-        ReadLineService = new VNReadLineService(
-            GlobalData,
-            GlobalRepository);
 
         IsPersistentInitialized = true;
 
@@ -166,8 +159,6 @@ public sealed class VNServiceContainer : MonoBehaviour
 
     public void UnbindRuntime()
     {
-        ReadLineService?.Flush();
-
         SaveService = null;
         LoadService = null;
         ContinueService = null;
