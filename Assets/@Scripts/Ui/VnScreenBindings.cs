@@ -7,27 +7,23 @@ public sealed class VnScreenBindings : IDisposable
     private static UIManager UI => UIManager.Instance;
 
     private readonly EpisodeFlowController _episodeFlowController;
+    private readonly VNSaveLoadSystem _vnSaveLoadSystem;
 
     private EpisodePlayer _episodePlayer;
-    private VNSaveLoadSystem _vnServiceContainer;
 
     private SaveLoadMenuMode _currentSaveLoadMode;
 
     private UIBase _boundRoot;
 
-    public VnScreenBindings(EpisodeFlowController episodeFlowController)
+    public VnScreenBindings(EpisodeFlowController episodeFlowController, VNSaveLoadSystem vnSaveLoadSystem)
     {
         _episodeFlowController = episodeFlowController;
+        _vnSaveLoadSystem = vnSaveLoadSystem;
     }
 
     public void AttachEpisodePlayer(EpisodePlayer episodePlayer)
     {
         _episodePlayer = episodePlayer;
-    }
-
-    public void AttachVNServiceContainer(VNSaveLoadSystem serviceContainer)
-    {
-        _vnServiceContainer = serviceContainer;
     }
 
     #region Title
@@ -98,12 +94,12 @@ public sealed class VnScreenBindings : IDisposable
         if (titleRoot == null)
             return;
 
-        bool hasContainer = _vnServiceContainer != null;
-        bool persistentReady = hasContainer && _vnServiceContainer.IsInitialized;
+        bool hasContainer = _vnSaveLoadSystem != null;
+        bool persistentReady = hasContainer && _vnSaveLoadSystem.IsInitialized;
 
         bool canContinue =
             hasContainer &&
-            _vnServiceContainer.CanContinue();
+            _vnSaveLoadSystem.CanContinue();
 
         titleRoot.SetContinueEnabled(canContinue);
         titleRoot.SetLoadEnabled(persistentReady);
@@ -112,30 +108,12 @@ public sealed class VnScreenBindings : IDisposable
 
     private void OnNewGamePressed()
     {
-        if (_episodePlayer == null)
-        {
-            Debug.LogError("[VnScreenBindings] EpisodePlayer is null. Cannot start new game.");
-            return;
-        }
-
         _episodePlayer.StartGame();
     }
 
     private void OnContinuePressed()
     {
-        if (_vnServiceContainer == null)
-        {
-            Debug.LogWarning("[VnScreenBindings] VNServiceContainer is null. Cannot continue.");
-            return;
-        }
-
-        if (!_vnServiceContainer.CanContinue())
-        {
-            Debug.LogWarning("[VnScreenBindings] Continue requested, but no continue data exists.");
-            return;
-        }
-
-        if (!_vnServiceContainer.TryContinue())
+        if (!_vnSaveLoadSystem.TryContinue())
             Debug.LogWarning("[VnScreenBindings] Continue failed.");
     }
 
@@ -204,10 +182,7 @@ public sealed class VnScreenBindings : IDisposable
 
     private void RefreshSaveLoadRoot(SaveLoadMenuUIPanel saveLoadRoot)
     {
-        if (saveLoadRoot == null)
-            return;
-
-        VNSaveSlotMeta[] metas = _vnServiceContainer.GetAllSaveSlotMetas();
+        VNSaveSlotMeta[] metas = _vnSaveLoadSystem.GetAllSaveSlotMetas();
 
         saveLoadRoot.Rebuild(
             _currentSaveLoadMode,
@@ -216,12 +191,6 @@ public sealed class VnScreenBindings : IDisposable
 
     private void OnSaveLoadSlotSelected(int slotIndex)
     {
-        if (_vnServiceContainer == null)
-        {
-            Debug.LogWarning("[VnScreenBindings] VNServiceContainer is null.");
-            return;
-        }
-
         if (_currentSaveLoadMode == SaveLoadMenuMode.Save)
         {
             HandleSaveSlotSelected(slotIndex);
@@ -233,13 +202,7 @@ public sealed class VnScreenBindings : IDisposable
 
     private void HandleSaveSlotSelected(int slotIndex)
     {
-        if (!_vnServiceContainer.IsInitialized || _vnServiceContainer.SaveService == null)
-        {
-            Debug.LogWarning("[VnScreenBindings] Runtime is not bound. Cannot save.");
-            return;
-        }
-
-        if (!_vnServiceContainer.SaveService.SaveManual(slotIndex))
+        if (!_vnSaveLoadSystem.SaveService.SaveManual(slotIndex))
         {
             Debug.LogWarning($"[VnScreenBindings] Save failed. slotIndex={slotIndex}");
             return;
@@ -253,13 +216,7 @@ public sealed class VnScreenBindings : IDisposable
 
     private void HandleLoadSlotSelected(int slotIndex)
     {
-        if (!_vnServiceContainer.IsInitialized || _vnServiceContainer.LoadService == null)
-        {
-            Debug.LogWarning("[VnScreenBindings] Runtime is not bound. Cannot load.");
-            return;
-        }
-
-        if (!_vnServiceContainer.LoadService.Load(slotIndex))
+        if (!_vnSaveLoadSystem.LoadService.Load(slotIndex))
         {
             Debug.LogWarning($"[VnScreenBindings] Load failed. slotIndex={slotIndex}");
             return;
@@ -277,18 +234,6 @@ public sealed class VnScreenBindings : IDisposable
 
     public void GoToAlbum()
     {
-        if (_vnServiceContainer == null || !_vnServiceContainer.IsInitialized)
-        {
-            Debug.LogWarning("[VnScreenBindings] Cannot open Album. VN services are not ready.");
-            return;
-        }
-
-        if (_vnServiceContainer.AlbumService == null)
-        {
-            Debug.LogWarning("[VnScreenBindings] AlbumService is null.");
-            return;
-        }
-
         UI.SwitchRoot<AlbumUIRoot>(root =>
         {
             RebindRoot(root, BindAlbumRoot);
@@ -307,7 +252,7 @@ public sealed class VnScreenBindings : IDisposable
 
     private void RefreshAlbumRoot(AlbumUIRoot albumRoot)
     {
-        VNAlbumUnlockService albumService = _vnServiceContainer.AlbumService;
+        VNAlbumUnlockService albumService = _vnSaveLoadSystem.AlbumService;
 
         albumRoot.Rebuild(
             albumService.GetAllItems(),

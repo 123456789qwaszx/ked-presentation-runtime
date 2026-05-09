@@ -1,53 +1,44 @@
-﻿using UnityEngine;
-
-public sealed class VNSaveLoadSystem : MonoBehaviour
+﻿public sealed class VNSaveLoadSystem
 {
-    [Header("Repository")]
-    [SerializeField] private int _slotCount = 10;
-
-    [Header("Album")]
-    [SerializeField] private VNAlbumDatabaseSO _albumDatabase;
-    
-    private IVNSaveRepository _saveRepository;
-    private IVNGlobalProgressRepository _globalRepository;
-    private VNGlobalProgressData _globalData;
-
-    public VNSaveService SaveService { get; private set; }
-    public VNLoadService LoadService { get; private set; }
-    public VNAlbumUnlockService AlbumService { get; private set; }
+    private readonly IVNSaveRepository _saveRepository;
+    private readonly IVNGlobalProgressRepository _globalRepository;
+    private readonly VNGlobalProgressData _globalData;
 
     private IVNRuntimeStateProvider _stateProvider;
     private IVNLoadSeekDriver _seekDriver;
     private IVNFlagStore _flagStore;
     private IVNSaveSafetyPolicy _safetyPolicy;
     
+    public VNSaveService SaveService { get; private set; }
+    public VNLoadService LoadService { get; private set; }
+    public VNAlbumUnlockService AlbumService { get; private set; }
+    
     public bool IsInitialized { get; private set; }
 
-    public void Initialize()
+    public VNSaveLoadSystem(int saveSlotCount)
     {
-        _saveRepository = new JsonVNSaveRepository(_slotCount);
-        
+        _saveRepository = new JsonVNSaveRepository(saveSlotCount);
         _globalRepository = new JsonVNGlobalProgressRepository();
         _globalData = _globalRepository.LoadOrCreate();
-        
-
-        IsInitialized = true;
     }
 
-    public void BindRuntime(
+    public void AttachRuntime(
         IVNRuntimeStateProvider stateProvider,
         IVNLoadSeekDriver seekDriver,
         IVNFlagStore flagStore,
-        IVNSaveSafetyPolicy safetyPolicy)
+        IVNSaveSafetyPolicy safetyPolicy,
+        VNAlbumDatabaseSO albumDatabase)
     {
         _stateProvider = stateProvider;
         _seekDriver = seekDriver;
         _flagStore = flagStore;
         _safetyPolicy = safetyPolicy;
         
-        AlbumService = new VNAlbumUnlockService(_globalData, _globalRepository, _albumDatabase);
+        AlbumService = new VNAlbumUnlockService(_globalData, _globalRepository, albumDatabase);
         LoadService = new VNLoadService(_saveRepository, _seekDriver, _flagStore, _safetyPolicy);
         SaveService = new VNSaveService(_saveRepository, _globalRepository, _globalData, _stateProvider, _flagStore, _safetyPolicy);
+        
+        IsInitialized = true;
     }
 
     public bool CanContinue()
@@ -62,11 +53,9 @@ public sealed class VNSaveLoadSystem : MonoBehaviour
     {
         if (!CanContinue())
         {
-            Debug.LogWarning("[VNContinueService] No continue target available.");
             return false;
         }
 
-        Debug.Log($"[VNContinueService] Continue → slot='{_globalData.continueSlotId}'");
         return LoadService.Load(_globalData.continueSlotId);
     }
     

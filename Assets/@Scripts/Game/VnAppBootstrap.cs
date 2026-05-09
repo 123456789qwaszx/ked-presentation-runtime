@@ -13,6 +13,7 @@ public class VnAppBootstrap : MonoBehaviour
     private readonly EpisodePlayState _episodePlayState = new();
     private readonly PresentationSessionContext _presentationSessionContext = new();
     private readonly LinePresentationAdvanceState _linePresentationAdvanceState = new();
+    private readonly VNSaveRuntimeState _vnSaveRuntimeState = new ();
 
     [Header("Sound")] 
     [SerializeField] private AudioSystem audioSystem;
@@ -64,17 +65,17 @@ public class VnAppBootstrap : MonoBehaviour
 
     [SerializeField] private VnFeatureController vnFeatureController;
     
+    [Header("VN Save / Load")]
+    [SerializeField] private int saveSlotCount = 10;
+    [SerializeField] private VNAlbumDatabaseSO albumDatabase;
+    [SerializeField] private VNPlaytimeTracker vnPlaytimeTracker;
+    [SerializeField] private VNAlbumUnlockDebugList vnAlbumUnlockDebugList;
+
     [Header("UI")] 
     [SerializeField] private EpisodePlayer episodePlayer;
 
     [Header("Transition")] 
     [SerializeField] private TransitionTargetRouter transitionTargetRouter;
-
-    [Header("VN Save / Load")]
-    [SerializeField] private VNSaveLoadSystem vnServiceContainer;
-    [SerializeField] private VNPlaytimeTracker vnPlaytimeTracker;
-    
-    [SerializeField] private VNAlbumUnlockDebugList vnAlbumUnlockDebugList;
 
     private PresentationSessionBridge _presentationSessionBridge;
 
@@ -83,6 +84,8 @@ public class VnAppBootstrap : MonoBehaviour
     private VnScreenBindings _screenBindings;
     private RollbackHistory _rollbackHistory;
     private UIPatchService _uiPatchService;
+    
+    private VNSaveLoadSystem _vnSaveLoadSystem;
     
     
 
@@ -102,12 +105,11 @@ public class VnAppBootstrap : MonoBehaviour
         BootstrapDialogueAdvanceInput();
         BootstrapPlaybackControls();
 
+        BootstrapVnSaveLoadRuntime();
+        
         BootstrapUIBindings();
         InitializeEpisodePlayer();
         
-        BootstrapVNSaveLoadRuntime();
-        
-        vnAlbumUnlockDebugList.Initialize(vnServiceContainer);
     }
 
     private void BootstrapAudioSystem()
@@ -290,45 +292,12 @@ public class VnAppBootstrap : MonoBehaviour
             holdSkipController,
             rollbackController);
     }
-
-    private void BootstrapUIBindings()
+    
+    private void BootstrapVnSaveLoadRuntime()
     {
-        _dialogueUIBindings = new PresentationViewUIBindings(
-            _episodePlayState, 
-            vnFeatureController,
-            _vnUxState,
-            vnRuntimeBridge, 
-            dialogueAdvanceDispatcher);
-        
-        _episodeFlowController = new EpisodeFlowController(
-            _dialogueUIBindings,
-            episodePlayer,
-            _episodePlayState);
-        
-        _screenBindings = new VnScreenBindings(_episodeFlowController);
-        
-    }
-
-    private void InitializeEpisodePlayer()
-    {
-        episodePlayer.Initialize(_screenBindings, _dialogueUIBindings, _rollbackHistory);
-
-        _screenBindings.AttachEpisodePlayer(episodePlayer);
-    }
-
-    private void BootstrapVNSaveLoadRuntime()
-    {
-        vnServiceContainer.Initialize();
-
         PresentationUIRoot presentationUIRoot = UIManager.Instance.GetUI<PresentationUIRoot>();
 
-        VNRuntimeStateProvider vnRuntimeStateProvider = new (
-            yarnLineLifecycleBridge,
-            _rollbackHistory,
-            vnPlaytimeTracker);
-
-        VNSaveRuntimeState vnSaveRuntimeState = new VNSaveRuntimeState();
-
+        VNRuntimeStateProvider vnRuntimeStateProvider = new (yarnLineLifecycleBridge, _rollbackHistory, vnPlaytimeTracker);
         VNLoadSeekDriver vnLoadSeekDriver = new (
             yarnLineLifecycleBridge,
             episodePlayer,
@@ -338,24 +307,49 @@ public class VnAppBootstrap : MonoBehaviour
             customLinePresenter,
             _linePresentationAdvanceState,
             _rollbackHistory,
-            vnSaveRuntimeState,
+            _vnSaveRuntimeState,
             vnPlaytimeTracker);
 
         // 아직 게임 플래그 저장/복원이 없기에 임시로 Empty 사용.
         // 선택지/분기가 들어가면 실제 구현체로 교체.
         EmptyVNFlagStore vnFlagStore = new ();
-
         AlwaysAllowVNSaveSafetyPolicy vnSaveSafetyPolicy = new ();
 
-        vnServiceContainer.BindRuntime(
+        _vnSaveLoadSystem = new (saveSlotCount);
+        _vnSaveLoadSystem.AttachRuntime(
             vnRuntimeStateProvider,
             vnLoadSeekDriver,
             vnFlagStore,
-            vnSaveSafetyPolicy);
+            vnSaveSafetyPolicy,
+            albumDatabase);
         
-        _screenBindings.AttachVNServiceContainer(vnServiceContainer);
+        vnAlbumUnlockDebugList.Initialize(_vnSaveLoadSystem);
+    }
+    
+    private void BootstrapUIBindings()
+    {
+        _dialogueUIBindings = new PresentationViewUIBindings(
+            _episodePlayState, 
+            vnFeatureController,
+            _vnUxState,
+            vnRuntimeBridge, 
+            dialogueAdvanceDispatcher,
+            _vnSaveLoadSystem);
+        
+        _episodeFlowController = new EpisodeFlowController(
+            _dialogueUIBindings,
+            episodePlayer,
+            _episodePlayState);
+        
+        _screenBindings = new VnScreenBindings(_episodeFlowController, _vnSaveLoadSystem);
+        
+    }
 
-        _dialogueUIBindings.AttachVNServiceContainer(vnServiceContainer);
+    private void InitializeEpisodePlayer()
+    {
+        episodePlayer.Initialize(_screenBindings, _dialogueUIBindings, _rollbackHistory);
+
+        _screenBindings.AttachEpisodePlayer(episodePlayer);
     }
 
     private void Start()

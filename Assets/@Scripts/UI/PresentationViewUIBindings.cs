@@ -12,10 +12,9 @@ public sealed class PresentationViewUIBindings : IDisposable
     private readonly VnUxState _uxState;
     private readonly VnRuntimeBridge _vnRuntimeBridge;
     private readonly DialogueAdvanceDispatcher _dialogueAdvanceDispatcher;
-
+    private readonly VNSaveLoadSystem _vnSaveLoadSystem;
+    
     private PresentationUIRoot _root;
-
-    private VNSaveLoadSystem _vnServiceContainer;
 
     private SaveLoadMenuMode _currentSaveLoadMode;
     private SaveLoadMenuUIPanel _saveLoadRoot;
@@ -25,7 +24,8 @@ public sealed class PresentationViewUIBindings : IDisposable
         VnFeatureController vnFeatures,
         VnUxState uxState,
         VnRuntimeBridge vnSignalBridge,
-        DialogueAdvanceDispatcher dialogueAdvanceDispatcher
+        DialogueAdvanceDispatcher dialogueAdvanceDispatcher,
+        VNSaveLoadSystem vnSaveLoadSystem
     )
     {
         _episodePlayState = episodePlayState;
@@ -33,11 +33,7 @@ public sealed class PresentationViewUIBindings : IDisposable
         _uxState = uxState;
         _vnRuntimeBridge = vnSignalBridge;
         _dialogueAdvanceDispatcher = dialogueAdvanceDispatcher;
-    }
-
-    public void AttachVNServiceContainer(VNSaveLoadSystem serviceContainer)
-    {
-        _vnServiceContainer = serviceContainer;
+        _vnSaveLoadSystem = vnSaveLoadSystem;
     }
 
     public void Bind(PresentationUIRoot root)
@@ -255,7 +251,7 @@ public sealed class PresentationViewUIBindings : IDisposable
 
     private void RefreshSaveLoadRoot(SaveLoadMenuUIPanel saveLoadRoot)
     {
-        VNSaveSlotMeta[] metas = _vnServiceContainer.GetAllSaveSlotMetas();
+        VNSaveSlotMeta[] metas = _vnSaveLoadSystem.GetAllSaveSlotMetas();
         saveLoadRoot.Rebuild(_currentSaveLoadMode, metas);
     }
 
@@ -272,20 +268,19 @@ public sealed class PresentationViewUIBindings : IDisposable
 
     private void HandleSaveSlotSelected(int slotIndex)
     {
-        if (!_vnServiceContainer.SaveService.SaveManual(slotIndex))
-
-        RefreshSaveLoadRoot(_saveLoadRoot);
+        if (!_vnSaveLoadSystem.SaveService.SaveManual(slotIndex))
+            RefreshSaveLoadRoot(_saveLoadRoot);
     }
 
     private void HandleLoadSlotSelected(int slotIndex)
     {
-        if (!_vnServiceContainer.IsInitialized || _vnServiceContainer.LoadService == null)
+        if (!_vnSaveLoadSystem.IsInitialized || _vnSaveLoadSystem.LoadService == null)
         {
             Debug.LogWarning("[PresentationViewUIBindings] Runtime is not bound. Cannot load.");
             return;
         }
 
-        if (!_vnServiceContainer.LoadService.Load(slotIndex))
+        if (!_vnSaveLoadSystem.LoadService.Load(slotIndex))
         {
             Debug.LogWarning($"[PresentationViewUIBindings] Load failed. slotIndex={slotIndex}");
             return;
@@ -417,6 +412,5 @@ public sealed class PresentationViewUIBindings : IDisposable
 
         _ctx.Dispose();
         _root = null;
-        _vnServiceContainer = null;
     }
 }
