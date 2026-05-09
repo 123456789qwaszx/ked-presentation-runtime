@@ -7,8 +7,8 @@ public sealed class VNAlbumUnlockService
     private readonly IVNGlobalProgressRepository _globalRepo;
     private readonly VNAlbumDatabaseSO _database;
 
-    private HashSet<string> _unlockedCgSet;
-    private HashSet<string> _unlockedEndingSet;
+    private readonly HashSet<string> _unlockedCgSet;
+    private readonly HashSet<string> _unlockedEndingSet;
 
     public VNAlbumUnlockService(
         VNGlobalProgressData globalData,
@@ -18,9 +18,9 @@ public sealed class VNAlbumUnlockService
         _globalData = globalData;
         _globalRepo = globalRepo;
         _database = database;
-
-        _globalData.Normalize();
-        RebuildCache();
+        
+        _unlockedCgSet = new HashSet<string>(_globalData.unlockedCgKeys);
+        _unlockedEndingSet = new HashSet<string>(_globalData.unlockedEndingKeys);
     }
 
     public bool IsUnlocked(string key)
@@ -79,29 +79,6 @@ public sealed class VNAlbumUnlockService
         return true;
     }
 
-    public int GetTotalCount()
-    {
-        return _database != null ? _database.Items.Count : 0;
-    }
-
-    public int GetUnlockedCount()
-    {
-        if (_database == null)
-            return _globalData.unlockedCgKeys.Count;
-
-        int count = 0;
-
-        for (int i = 0; i < _database.Items.Count; i++)
-        {
-            VNAlbumItemSO item = _database.Items[i];
-
-            if (item != null && _unlockedCgSet.Contains(item.key))
-                count++;
-        }
-
-        return count;
-    }
-
     public List<VNAlbumItemSO> GetUnlockedItems()
     {
         var result = new List<VNAlbumItemSO>();
@@ -123,14 +100,6 @@ public sealed class VNAlbumUnlockService
     public IReadOnlyList<VNAlbumItemSO> GetAllItems()
     {
         return _database != null ? _database.Items : new List<VNAlbumItemSO>();
-    }
-
-    public void RebuildCache()
-    {
-        _globalData.Normalize();
-
-        _unlockedCgSet = new HashSet<string>(_globalData.unlockedCgKeys);
-        _unlockedEndingSet = new HashSet<string>(_globalData.unlockedEndingKeys);
     }
     
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
