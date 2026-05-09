@@ -7,12 +7,10 @@ public sealed class VNServiceContainer : MonoBehaviour
 
     [Header("Album")]
     [SerializeField] private VNAlbumDatabaseSO _albumDatabase;
-
-    public bool IsInitialized { get; private set; }
-
-    public IVNSaveRepository SaveRepository { get; private set; }
-    public IVNGlobalProgressRepository GlobalRepository { get; private set; }
-    public VNGlobalProgressData GlobalData { get; private set; }
+    
+    private IVNSaveRepository _saveRepository;
+    private IVNGlobalProgressRepository _globalRepository;
+    private VNGlobalProgressData _globalData;
 
     public VNSaveService SaveService { get; private set; }
     public VNLoadService LoadService { get; private set; }
@@ -22,15 +20,16 @@ public sealed class VNServiceContainer : MonoBehaviour
     private IVNLoadSeekDriver _seekDriver;
     private IVNFlagStore _flagStore;
     private IVNSaveSafetyPolicy _safetyPolicy;
+    
+    public bool IsInitialized { get; private set; }
 
     public void Initialize()
     {
-        SaveRepository = new JsonVNSaveRepository(_slotCount);
+        _saveRepository = new JsonVNSaveRepository(_slotCount);
         
-        GlobalRepository = new JsonVNGlobalProgressRepository();
-        GlobalData = GlobalRepository.LoadOrCreate();
+        _globalRepository = new JsonVNGlobalProgressRepository();
+        _globalData = _globalRepository.LoadOrCreate();
         
-        AlbumService = new VNAlbumUnlockService(GlobalData, GlobalRepository, _albumDatabase);
 
         IsInitialized = true;
     }
@@ -46,17 +45,17 @@ public sealed class VNServiceContainer : MonoBehaviour
         _flagStore = flagStore;
         _safetyPolicy = safetyPolicy;
         
-        LoadService = new VNLoadService(SaveRepository, _seekDriver, _flagStore, _safetyPolicy);
-        
-        SaveService = new VNSaveService(SaveRepository, GlobalRepository, GlobalData, _stateProvider, _flagStore, _safetyPolicy);
+        AlbumService = new VNAlbumUnlockService(_globalData, _globalRepository, _albumDatabase);
+        LoadService = new VNLoadService(_saveRepository, _seekDriver, _flagStore, _safetyPolicy);
+        SaveService = new VNSaveService(_saveRepository, _globalRepository, _globalData, _stateProvider, _flagStore, _safetyPolicy);
     }
 
     public bool CanContinue()
     {
-        if (GlobalData == null || string.IsNullOrWhiteSpace(GlobalData.continueSlotId))
+        if (_globalData == null || string.IsNullOrWhiteSpace(_globalData.continueSlotId))
             return false;
         
-        return SaveRepository.Exists(GlobalData.continueSlotId);
+        return _saveRepository.Exists(_globalData.continueSlotId);
     }
 
     public bool TryContinue()
@@ -67,7 +66,12 @@ public sealed class VNServiceContainer : MonoBehaviour
             return false;
         }
 
-        Debug.Log($"[VNContinueService] Continue → slot='{GlobalData.continueSlotId}'");
-        return LoadService.Load(GlobalData.continueSlotId);
+        Debug.Log($"[VNContinueService] Continue → slot='{_globalData.continueSlotId}'");
+        return LoadService.Load(_globalData.continueSlotId);
+    }
+    
+    public VNSaveSlotMeta[] GetAllSaveSlotMetas()
+    {
+        return _saveRepository.GetAllMetas();
     }
 }

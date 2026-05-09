@@ -207,10 +207,7 @@ public sealed class VnScreenBindings : IDisposable
         if (saveLoadRoot == null)
             return;
 
-        if (_vnServiceContainer == null || _vnServiceContainer.SaveRepository == null)
-            return;
-
-        VNSaveSlotMeta[] metas = _vnServiceContainer.SaveRepository.GetAllMetas();
+        VNSaveSlotMeta[] metas = _vnServiceContainer.GetAllSaveSlotMetas();
 
         saveLoadRoot.Rebuild(
             _currentSaveLoadMode,
