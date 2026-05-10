@@ -26,8 +26,6 @@ public sealed class VNLoadSeekDriver : IVNLoadSeekDriver, IDisposable
 
     private int _matchedLineCountInNode;
 
-    public bool IsSeeking => _isSeeking;
-
     public VNLoadSeekDriver(
         YarnLineLifecycleBridge bridge,
         IVNLoadDialogueRestarter restarter,
@@ -67,7 +65,7 @@ public sealed class VNLoadSeekDriver : IVNLoadSeekDriver, IDisposable
 
         // AdvanceGate가 기존 typewriter/line 상태를 보고 현재 line을 완료로 오판하지 않게 한다.
         // 이름은 RollbackSeek지만 기능적으로는 "seek 중 advance 잠금"이다.
-        _lineAdvanceState?.MarkLoadSeekLineEntered();
+        //_lineAdvanceState?.MarkLoadSeekLineEntered();
 
         // 현재 Presenter 실행본과 현재 DialogueBox를 닫는다.
         _linePresentationAborter?.AbortCurrentLinePresentationForRollback();
@@ -104,7 +102,7 @@ public sealed class VNLoadSeekDriver : IVNLoadSeekDriver, IDisposable
 
         // 여기서부터 CustomLinePresenter / UI suppression / command policy가
         // "지금은 load seek 중"임을 알 수 있어야 한다.
-        _lineAdvanceState?.MarkLoadSeekStarted(saveData.lineId);
+        //_lineAdvanceState?.MarkLoadSeekStarted(saveData.lineId);
 
         Debug.Log(
             $"[VNLoadSeekDriver] Begin seek. " +
@@ -123,7 +121,7 @@ public sealed class VNLoadSeekDriver : IVNLoadSeekDriver, IDisposable
         // target line은 이제 정상 표시되어야 한다.
         // 다만 실제 Clear는 Presenter가 target line을 소비한 뒤 하는 구조가 더 안전할 수 있다.
         // MVP에서는 여기서 Clear해도 된다.
-        _lineAdvanceState?.ClearLoadSeek();
+        //_lineAdvanceState?.ClearLoadSeek();
 
         Debug.Log($"[VNLoadSeekDriver] OnLoadComplete. slot='{saveData?.slotId}'");
     }
@@ -177,7 +175,7 @@ public sealed class VNLoadSeekDriver : IVNLoadSeekDriver, IDisposable
     {
         // 아직 target line을 "끝까지 출력한 것"이 아니다.
         // 다음 CustomLinePresenter.RunLineAsync가 이 target line을 정상 표시해야 한다.
-        _lineAdvanceState?.MarkLoadTargetLineReady();
+       // _lineAdvanceState?.MarkLoadTargetLineReady();
     }
 
     private void Complete()
@@ -213,8 +211,8 @@ public sealed class VNLoadSeekDriver : IVNLoadSeekDriver, IDisposable
 
         _saveRuntimeState?.SetLoadSeeking(false);
 
-        if (!keepContextForTargetDisplay)
-            _lineAdvanceState?.ClearLoadSeek();
+        // if (!keepContextForTargetDisplay)
+        //     _lineAdvanceState?.ClearLoadSeek();
     }
 
     private void Subscribe()

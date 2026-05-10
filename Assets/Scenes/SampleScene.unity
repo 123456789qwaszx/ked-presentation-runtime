@@ -4471,7 +4471,6 @@ GameObject:
   m_Component:
   - component: {fileID: 626587495}
   - component: {fileID: 626587493}
-  - component: {fileID: 626587496}
   m_Layer: 0
   m_Name: YarnLineLifecycleBridge
   m_TagString: Untagged
@@ -4491,7 +4490,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 526aefd5f3709cc4bb6b50a917f14e46, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::YarnLineLifecycleBridge
-  autoRegisterPresenter: 1
 --- !u!4 &626587495
 Transform:
   m_ObjectHideFlags: 0
@@ -4507,18 +4505,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &626587496
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 626587492}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 553f0b898a66e33439ddd1f476f043ef, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::YarnLineIdPresenter
 --- !u!1 &634365937
 GameObject:
   m_ObjectHideFlags: 0

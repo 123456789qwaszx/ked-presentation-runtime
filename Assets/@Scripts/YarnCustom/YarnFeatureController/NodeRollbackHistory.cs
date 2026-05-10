@@ -56,7 +56,8 @@ public sealed class RollbackHistory
         int targetListIndex = _points.Count - 2;
         target = _points[targetListIndex];
 
-        RemoveFromListIndex(targetListIndex);
+        // target은 남기고, target 이후의 미래 기록만 제거한다.
+        RemoveAfterListIndex(targetListIndex);
 
         return true;
     }
@@ -78,7 +79,8 @@ public sealed class RollbackHistory
 
         target = _points[targetListIndex];
 
-        RemoveFromListIndex(targetListIndex);
+        // target은 남기고, target 이후의 미래 기록만 제거한다.
+        RemoveAfterListIndex(targetListIndex);
 
         return true;
     }
@@ -162,14 +164,16 @@ public sealed class RollbackHistory
         return -1;
     }
 
-    private void RemoveFromListIndex(int listIndex)
+    private void RemoveAfterListIndex(int listIndex)
     {
         if (listIndex < 0 || listIndex >= _points.Count)
             return;
 
-        // target 자신도 제거한다.
-        // rollback seek가 target line에 도달하고 정상 표시될 때 다시 기록된다.
-        _points.RemoveRange(listIndex, _points.Count - listIndex);
+        int removeStart = listIndex + 1;
+        if (removeStart >= _points.Count)
+            return;
+
+        _points.RemoveRange(removeStart, _points.Count - removeStart);
     }
 
     private int CalculateNextHistoryIndex()
