@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Yarn.Unity;
@@ -44,8 +43,7 @@ public sealed class YarnLineSideEffectPresenter : DialoguePresenterBase
 
     public override YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token)
     {
-        Debug.Log($"[YarnLineSideEffectPresenter] RollbackSeeking={_linePresentationAdvanceState != null && _linePresentationAdvanceState.IsRollbackSeeking}");
-
+        //Debug.Log($"[YarnLineSideEffectPresenter] RollbackSeeking={_linePresentationAdvanceState != null && _linePresentationAdvanceState.IsRollbackSeeking}");
         
         PlayVoice(line);
         

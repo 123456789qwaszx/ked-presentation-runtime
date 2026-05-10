@@ -10,26 +10,59 @@ public interface ICommandRunScopeProvider
 public sealed class YarnBridgePlaybackDriver : MonoBehaviour
 {
     private CommandExecutor _executor;
-
-    private int _pendingImmediateWaitCount;
-    private readonly List<CommandSpecBase> _collectedSpecs = new();
-
-    private bool _isHoldActive;
-    private readonly List<CommandSpecBase> _heldSpecs = new();
-    
     private ICommandRunScopeProvider _scopeProvider;
-    private CommandRunScope CurrentScope => _scopeProvider != null
-        ? _scopeProvider.CurrentScope
-        : null;
 
-    public void Initialize(
-        CommandExecutor executor,
-        ICommandRunScopeProvider scopeProvider)
+    private readonly List<CommandSpecBase> _collectedSpecs = new();
+    private int _pendingImmediateWaitCount;
+
+    private readonly List<CommandSpecBase> _heldSpecs = new();
+    private bool _isHoldActive;
+    
+    private CommandRunScope CurrentScope => _scopeProvider?.CurrentScope;
+    
+    public void Initialize(CommandExecutor executor, ICommandRunScopeProvider scopeProvider)
     {
         _executor = executor;
         _scopeProvider = scopeProvider;
     }
 
+    public void Enqueue(CommandSpecBase spec)
+    {
+        if (_pendingImmediateWaitCount > 0)
+        {
+            _pendingImmediateWaitCount--;
+            spec.wait = true;
+        }
+        
+        if (_isHoldActive)
+        {
+            _heldSpecs.Add(spec);
+            return;
+        }
+
+        _collectedSpecs.Add(spec);
+    }
+
+    public void PlayCollected()
+    {
+        // if (_collectedSpecs.Count == 0)
+        //     return;
+
+        var specs = new List<CommandSpecBase>(_collectedSpecs);
+        _collectedSpecs.Clear();
+
+        _executor.PlaySpecs(specs, CurrentScope, "yarn-bridge");
+    }
+
+    public void PlayImmediate(IReadOnlyList<CommandSpecBase> specs, string debugSource = "yarn-inline")
+    {
+        if (specs == null || specs.Count == 0)
+            return;
+
+        var copied = new List<CommandSpecBase>(specs);
+        _executor.PlaySpecs(copied, CurrentScope, debugSource);
+    }
+    
     public void BeginHold()
     {
         if (_isHoldActive)
@@ -71,56 +104,9 @@ public sealed class YarnBridgePlaybackDriver : MonoBehaviour
         _pendingImmediateWaitCount = Mathf.Max(0, count);
     }
 
-    public void Enqueue(CommandSpecBase spec)
-    {
-        if (spec == null)
-            return;
-
-        ApplyImmediateWait(spec);
-
-        if (_isHoldActive)
-        {
-            _heldSpecs.Add(spec);
-            return;
-        }
-
-        _collectedSpecs.Add(spec);
-    }
-
-    public void PlayCollected()
-    {
-        // if (_collectedSpecs.Count == 0)
-        //     return;
-
-        var specs = new List<CommandSpecBase>(_collectedSpecs);
-        _collectedSpecs.Clear();
-
-        _executor.PlaySpecs(specs, CurrentScope, "yarn-bridge");
-    }
-
     public void ClearCollected()
     {
         _collectedSpecs.Clear();
     }
 
-    private void ApplyImmediateWait(CommandSpecBase spec)
-    {
-        if (spec == null)
-            return;
-
-        if (_pendingImmediateWaitCount <= 0)
-            return;
-
-        _pendingImmediateWaitCount--;
-        spec.wait = true;
-    }
-
-    public void PlayImmediate(IReadOnlyList<CommandSpecBase> specs, string debugSource = "yarn-inline")
-    {
-        if (specs == null || specs.Count == 0)
-            return;
-
-        var copied = new List<CommandSpecBase>(specs);
-        _executor.PlaySpecs(copied, CurrentScope, debugSource);
-    }
 }

@@ -2,14 +2,14 @@
 ---
 <<clearall_rigs>>
 
-<<begin_hold>>
+// <<begin_hold>>
 <<presentation_setup>>
 
-<<end_hold>>
+// <<end_hold>>
 
-<<bg_spawn test1 bg1>>
-<<bg_sprite test1 ui/theme1/Background00_Image>>
-<<bg_fade test1 1>>
+// <<bg_spawn test1 bg1>>
+// <<bg_sprite test1 ui/theme1/Background00_Image>>
+// <<bg_fade test1 1>>
 
 
 <<slot Albedo>>
@@ -23,7 +23,7 @@
 알베도: 이 청구서들, 어디 한번 제대로 설명해 보시지!
 
 //<<begin_hold>>
-<<await_for 1>>
+//<<await_for 1>>
 //<<emoji Albedo sparkle>>
 //<<end_hold>>
 <<emotion Albedo 8>>
@@ -31,9 +31,9 @@
 
 
 <<fade_out Albedo>>
+<<move_by Albedo 100 0>>
 
-
-<<await_for 1>>
+//<<await_for 1>>
 <<slot Laru>>
 <<place Laru duo_left>>
 <<size Laru normal>>
