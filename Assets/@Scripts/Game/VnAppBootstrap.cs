@@ -274,7 +274,6 @@ public class VnAppBootstrap : MonoBehaviour
             yarnLineLifecycleBridge,
             episodePlayer,
             dialogueAdvanceDispatcher,
-            UIManager.Instance.GetUI<PresentationUIRoot>(),
             customLinePresenter,
             _linePresentationAdvanceState
         );
@@ -294,14 +293,12 @@ public class VnAppBootstrap : MonoBehaviour
     
     private void BootstrapVnSaveLoadRuntime()
     {
-        PresentationUIRoot presentationUIRoot = UIManager.Instance.GetUI<PresentationUIRoot>();
 
         VNRuntimeStateProvider vnRuntimeStateProvider = new (yarnLineLifecycleBridge, _rollbackHistory, vnPlaytimeTracker);
         VNLoadSeekDriver vnLoadSeekDriver = new (
             yarnLineLifecycleBridge,
             episodePlayer,
             dialogueAdvanceDispatcher,
-            presentationUIRoot,
             customLinePresenter,
             _linePresentationAdvanceState,
             _rollbackHistory,

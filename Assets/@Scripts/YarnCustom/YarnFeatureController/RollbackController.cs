@@ -1,5 +1,4 @@
 using System;
-using UnityEngine;
 
 public sealed class RollbackController : IDisposable
 {
@@ -7,7 +6,6 @@ public sealed class RollbackController : IDisposable
     private readonly YarnLineLifecycleBridge _bridge;
     private readonly IRollbackDialogueRestarter _restarter;
     private readonly DialogueAdvanceDispatcher _dispatcher;
-    private readonly PresentationUIRoot _presentationUIRoot;
     private readonly ILinePresentationAborter _linePresentationAborter;
     private readonly LinePresentationAdvanceState _lineAdvanceState;
 
@@ -20,7 +18,6 @@ public sealed class RollbackController : IDisposable
         YarnLineLifecycleBridge bridge,
         IRollbackDialogueRestarter restarter,
         DialogueAdvanceDispatcher dispatcher,
-        PresentationUIRoot presentationUIRoot,
         ILinePresentationAborter linePresentationAborter,
         LinePresentationAdvanceState lineAdvanceState)
     {
@@ -28,7 +25,6 @@ public sealed class RollbackController : IDisposable
         _bridge = bridge;
         _restarter = restarter;
         _dispatcher = dispatcher;
-        _presentationUIRoot = presentationUIRoot;
         _linePresentationAborter = linePresentationAborter;
         _lineAdvanceState = lineAdvanceState;
 
@@ -78,8 +74,6 @@ public sealed class RollbackController : IDisposable
         // 현재 Presenter 실행본과 현재 DialogueBox를 실제로 닫는다.
         _linePresentationAborter?.AbortCurrentLinePresentationForRollback();
 
-        RefreshDialogueUiSuppression();
-
         _restarter.RestartNode(target.nodeName);
     }
 
@@ -91,8 +85,6 @@ public sealed class RollbackController : IDisposable
         // 아직 target line을 표시한 것은 아니다.
         // 다음 CustomLinePresenter.RunLineAsync가 이 line을 one-shot target으로 소비한다.
         _lineAdvanceState.MarkRollbackTargetLineReady();
-
-        RefreshDialogueUiSuppression();
     }
 
     private void EndRollbackSeek()
@@ -101,8 +93,6 @@ public sealed class RollbackController : IDisposable
         _target = default;
 
         _lineAdvanceState.ClearRollbackSeek();
-
-        RefreshDialogueUiSuppression();
     }
 
     private void EndSeekBeforeTargetLineDisplays(YarnLineMeta meta)
@@ -140,14 +130,6 @@ public sealed class RollbackController : IDisposable
             return;
 
         _history.AddRollbackPoint(meta);
-    }
-
-    private void RefreshDialogueUiSuppression()
-    {
-        if (_presentationUIRoot == null)
-            return;
-
-        _presentationUIRoot.RefreshDialogueUiSuppression(_lineAdvanceState);
     }
 
     public void Dispose()

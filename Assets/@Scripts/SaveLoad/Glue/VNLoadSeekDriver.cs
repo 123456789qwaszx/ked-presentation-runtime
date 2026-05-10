@@ -11,7 +11,6 @@ public sealed class VNLoadSeekDriver : IVNLoadSeekDriver, IDisposable
     private readonly YarnLineLifecycleBridge _bridge;
     private readonly IVNLoadDialogueRestarter _restarter;
     private readonly DialogueAdvanceDispatcher _dispatcher;
-    private readonly PresentationUIRoot _presentationUIRoot;
     private readonly ILinePresentationAborter _linePresentationAborter;
     private readonly LinePresentationAdvanceState _lineAdvanceState;
     private readonly RollbackHistory _rollbackHistory;
@@ -33,7 +32,6 @@ public sealed class VNLoadSeekDriver : IVNLoadSeekDriver, IDisposable
         YarnLineLifecycleBridge bridge,
         IVNLoadDialogueRestarter restarter,
         DialogueAdvanceDispatcher dispatcher,
-        PresentationUIRoot presentationUIRoot,
         ILinePresentationAborter linePresentationAborter,
         LinePresentationAdvanceState lineAdvanceState,
         RollbackHistory rollbackHistory,
@@ -43,7 +41,6 @@ public sealed class VNLoadSeekDriver : IVNLoadSeekDriver, IDisposable
         _bridge = bridge;
         _restarter = restarter;
         _dispatcher = dispatcher;
-        _presentationUIRoot = presentationUIRoot;
         _linePresentationAborter = linePresentationAborter;
         _lineAdvanceState = lineAdvanceState;
         _rollbackHistory = rollbackHistory;
@@ -74,8 +71,6 @@ public sealed class VNLoadSeekDriver : IVNLoadSeekDriver, IDisposable
 
         // 현재 Presenter 실행본과 현재 DialogueBox를 닫는다.
         _linePresentationAborter?.AbortCurrentLinePresentationForRollback();
-
-        RefreshDialogueUiSuppression();
     }
 
     public void BeginSeek(
@@ -111,8 +106,6 @@ public sealed class VNLoadSeekDriver : IVNLoadSeekDriver, IDisposable
         // "지금은 load seek 중"임을 알 수 있어야 한다.
         _lineAdvanceState?.MarkRollbackSeekStarted(saveData.lineId);
 
-        RefreshDialogueUiSuppression();
-
         Debug.Log(
             $"[VNLoadSeekDriver] Begin seek. " +
             $"slot='{saveData.slotId}', node='{saveData.nodeName}', line='{saveData.lineId}', visitedIndex={saveData.visitedIndex}");
@@ -131,8 +124,6 @@ public sealed class VNLoadSeekDriver : IVNLoadSeekDriver, IDisposable
         // 다만 실제 Clear는 Presenter가 target line을 소비한 뒤 하는 구조가 더 안전할 수 있다.
         // MVP에서는 여기서 Clear해도 된다.
         _lineAdvanceState?.ClearRollbackSeek();
-
-        RefreshDialogueUiSuppression();
 
         Debug.Log($"[VNLoadSeekDriver] OnLoadComplete. slot='{saveData?.slotId}'");
     }
@@ -187,8 +178,6 @@ public sealed class VNLoadSeekDriver : IVNLoadSeekDriver, IDisposable
         // 아직 target line을 "끝까지 출력한 것"이 아니다.
         // 다음 CustomLinePresenter.RunLineAsync가 이 target line을 정상 표시해야 한다.
         _lineAdvanceState?.MarkRollbackTargetLineReady();
-
-        RefreshDialogueUiSuppression();
     }
 
     private void Complete()
@@ -226,8 +215,6 @@ public sealed class VNLoadSeekDriver : IVNLoadSeekDriver, IDisposable
 
         if (!keepContextForTargetDisplay)
             _lineAdvanceState?.ClearRollbackSeek();
-
-        RefreshDialogueUiSuppression();
     }
 
     private void Subscribe()
@@ -247,13 +234,6 @@ public sealed class VNLoadSeekDriver : IVNLoadSeekDriver, IDisposable
         _bridge.LineEntered -= HandleLineEntered;
     }
 
-    private void RefreshDialogueUiSuppression()
-    {
-        if (_presentationUIRoot == null || _lineAdvanceState == null)
-            return;
-
-        _presentationUIRoot.RefreshDialogueUiSuppression(_lineAdvanceState);
-    }
 
     public void Dispose()
     {
