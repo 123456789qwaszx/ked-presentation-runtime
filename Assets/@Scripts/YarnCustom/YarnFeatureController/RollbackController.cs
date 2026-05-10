@@ -9,10 +9,6 @@ public sealed class RollbackController : IDisposable
     private readonly ILinePresentationAborter _linePresentationAborter;
     private readonly LinePresentationAdvanceState _lineAdvanceState;
 
-    private RollbackPoint _target;
-    private bool _hasTarget;
-    
-
     public RollbackController(
         RollbackHistory history,
         YarnLineLifecycleBridge bridge,
@@ -37,12 +33,15 @@ public sealed class RollbackController : IDisposable
 
     public bool RequestRollbackOneStep()
     {
-        if (_lineAdvanceState.IsRollbackActive)
+        if (_lineAdvanceState.RollbackPointRecording || _lineAdvanceState.RollbackTargetLinePending)
             return false;
 
         if (!_history.TryPrepareRollbackOneStep(out RollbackPoint target))
             return false;
 
+        _lineAdvanceState.RollbackTargetLineId = target.lineId;
+        _lineAdvanceState.RollbackPointBlocked = true;
+        
         BeginRollbackToTarget(target);
         return true;
     }
@@ -61,72 +60,34 @@ public sealed class RollbackController : IDisposable
 
     private void BeginRollbackToTarget(RollbackPoint target)
     {
-        _target = target;
-        _hasTarget = true;
-
-        // Rollback 상태를 먼저 세운다.
-        // 이후 abort/close 과정에서 다른 시스템이 context를 읽어도 이미 seek 상태여야 한다.
-        _lineAdvanceState.MarkRollbackSeekStarted(target.lineId);
-
-        // AdvanceGate가 기존 typewriter 상태를 보고 현재 line을 완료로 오판하지 않게 잠근다.
-        _lineAdvanceState?.MarkRollbackSeekLineEntered();
-
-        // 현재 Presenter 실행본과 현재 DialogueBox를 실제로 닫는다.
         _linePresentationAborter?.AbortCurrentLinePresentationForRollback();
-
         _restarter.RestartNode(target.nodeName);
-    }
-
-    private void EndRollbackSeekAtTarget()
-    {
-        _hasTarget = false;
-        _target = default;
-
-        // 아직 target line을 표시한 것은 아니다.
-        // 다음 CustomLinePresenter.RunLineAsync가 이 line을 one-shot target으로 소비한다.
-        _lineAdvanceState.MarkRollbackTargetLineReady();
-    }
-
-    private void EndRollbackSeek()
-    {
-        _hasTarget = false;
-        _target = default;
-
-        _lineAdvanceState.ClearRollbackSeek();
     }
 
     private void EndSeekBeforeTargetLineDisplays(YarnLineMeta meta)
     {
-        if (!_lineAdvanceState.IsRollbackSeeking)
+        if (_lineAdvanceState.RollbackPointRecording)
             return;
 
-        if (!_hasTarget)
+        if (!_lineAdvanceState.IsRollback)
         {
-            EndRollbackSeek();
+            _lineAdvanceState.ResumeRollbackPointRecording();
             return;
         }
 
-        if (IsTarget(meta))
-        {
-            EndRollbackSeekAtTarget();
+        if (_lineAdvanceState.RollbackTargetLineId == meta.lineId)
+        { // 다음 CustomLinePresenter.RunLineAsync가 이 line을 one-shot target으로 소비.
+            _lineAdvanceState.RollbackTargetLinePending = true;
             return;
         }
 
         _dispatcher.DispatchSeekNext();
     }
-
-    private bool IsTarget(YarnLineMeta meta)
-    {
-        if (!_hasTarget)
-            return false;
-
-        return _target.nodeName == meta.nodeName &&
-               _target.lineId == meta.lineId;
-    }
+    
 
     private void AddRollbackPoint(YarnLineMeta meta)
     {
-        if (_lineAdvanceState.IsRollbackSeeking)
+        if (_lineAdvanceState.RollbackPointBlocked)
             return;
 
         _history.AddRollbackPoint(meta);

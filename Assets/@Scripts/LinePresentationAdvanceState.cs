@@ -1,7 +1,24 @@
 
 public sealed class LinePresentationAdvanceState
 {
-    private string _rollbackTargetLineId;
+    public bool RollbackPointBlocked { get; set; }
+    public string RollbackTargetLineId { get; set; }
+    public bool RollbackTargetLinePending { get; set; }
+
+    public bool RollbackPointRecording => !RollbackPointBlocked;
+    
+    public void ResumeRollbackPointRecording()
+    {
+        RollbackPointBlocked = false;
+        RollbackTargetLineId = null;
+        RollbackTargetLinePending = false;
+    }
+
+    public bool IsRollback;
+
+
+    
+    
     private bool _isRollbackTargetLineReady;
     
     private bool _isRollbackSeeking;
@@ -14,30 +31,22 @@ public sealed class LinePresentationAdvanceState
 
     public bool IsLineFullyShown => _hasActiveLine && _isLineFullyShown;
 
-    public bool CanRequestNextLine => _hasActiveLine && _isLineFullyShown;
-
-    public bool CanRequestHurryUp => _hasActiveLine && !_isLineFullyShown;
-    
-    // Rollback seek 자체는 끝났지만,
-    // 다음 RunLineAsync에서 target line을 one-shot으로 처리해야 하는 상태.
-    public bool HasRollbackTargetLineReady => _isRollbackTargetLineReady;
-
     // Controller 입장에서는 seek 중이거나 target line 처리 대기 중이면
     // 아직 rollback 흐름이 끝난 게 아니다.
     public bool IsRollbackActive =>
-        _isRollbackSeeking ||
+        !RollbackPointBlocked ||
         _isRollbackTargetLineReady;
     
     public void MarkRollbackSeekStarted(string targetLineId)
     {
         _isRollbackSeeking = true;
-        _rollbackTargetLineId = targetLineId;
+        RollbackTargetLineId = targetLineId;
         _isRollbackTargetLineReady = false;
     }
 
     public void MarkRollbackTargetLineReady()
     {
-        if (string.IsNullOrWhiteSpace(_rollbackTargetLineId))
+        if (string.IsNullOrWhiteSpace(RollbackTargetLineId))
         {
             ClearRollbackSeek();
             return;
@@ -50,8 +59,8 @@ public sealed class LinePresentationAdvanceState
     public bool IsRollbackTargetLine(string lineId)
     {
         return _isRollbackTargetLineReady &&
-               !string.IsNullOrWhiteSpace(_rollbackTargetLineId) &&
-               _rollbackTargetLineId == lineId;
+               !string.IsNullOrWhiteSpace(RollbackTargetLineId) &&
+               RollbackTargetLineId == lineId;
     }
 
     public bool ConsumeRollbackTargetLine(string lineId)
@@ -60,7 +69,7 @@ public sealed class LinePresentationAdvanceState
             return false;
 
         _isRollbackTargetLineReady = false;
-        _rollbackTargetLineId = null;
+        RollbackTargetLineId = null;
         return true;
     }
 
@@ -109,7 +118,7 @@ public sealed class LinePresentationAdvanceState
     public void ClearRollbackSeek()
     {
         _isRollbackSeeking = false;
-        _rollbackTargetLineId = null;
+        RollbackTargetLineId = null;
         _isRollbackTargetLineReady = false;
     }
     
