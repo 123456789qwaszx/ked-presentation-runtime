@@ -272,9 +272,7 @@ public class VnAppBootstrap : MonoBehaviour
         RollbackController rollbackController = new(
             _rollbackHistory,
             yarnLineLifecycleBridge,
-            episodePlayer,
             dialogueAdvanceDispatcher,
-            customLinePresenter,
             _linePresentationAdvanceState
         );
 
@@ -329,7 +327,10 @@ public class VnAppBootstrap : MonoBehaviour
             _vnUxState,
             vnRuntimeBridge, 
             dialogueAdvanceDispatcher,
-            _vnSaveLoadSystem);
+            _vnSaveLoadSystem,
+            episodePlayer,
+            _linePresentationAdvanceState
+            );
         
         _episodeFlowController = new EpisodeFlowController(
             _dialogueUIBindings,
@@ -342,7 +343,7 @@ public class VnAppBootstrap : MonoBehaviour
 
     private void InitializeEpisodePlayer()
     {
-        episodePlayer.Initialize(_screenBindings, _dialogueUIBindings, _rollbackHistory);
+        episodePlayer.Initialize(_screenBindings, _dialogueUIBindings, _rollbackHistory, customLinePresenter);
 
         _screenBindings.AttachEpisodePlayer(episodePlayer);
     }

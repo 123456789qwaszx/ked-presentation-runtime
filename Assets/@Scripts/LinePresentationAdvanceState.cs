@@ -3,6 +3,7 @@ public sealed class LinePresentationAdvanceState
 {
     public bool RollbackPointBlocked { get; set; }
     public string RollbackTargetLineId { get; set; }
+    public string RollbackTargetNodeName { get; set; }
     public bool RollbackTargetLinePending { get; set; }
 
     public bool RollbackPointRecording => !RollbackPointBlocked;
@@ -11,6 +12,7 @@ public sealed class LinePresentationAdvanceState
     {
         RollbackPointBlocked = false;
         RollbackTargetLineId = null;
+        RollbackTargetNodeName = null;
         RollbackTargetLinePending = false;
     }
 

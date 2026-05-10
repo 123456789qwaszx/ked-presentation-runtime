@@ -124,12 +124,12 @@ public sealed class VnFeatureController : MonoBehaviour
         RefreshPlaybackSpeed();
     }
 
-    public void RequestRollbackOneStep()
+    public bool RequestRollbackOneStep()
     {
         SetMode(VnPlayMode.Manual);
         _autoAdvanceScheduler.ResetAutoAdvanceTimer();
 
-        _rollbackController.RequestRollbackOneStep();
+        return _rollbackController.RequestRollbackOneStep();
     }
 
     private void SetMode(VnPlayMode mode)

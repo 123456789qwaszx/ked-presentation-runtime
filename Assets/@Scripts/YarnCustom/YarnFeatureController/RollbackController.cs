@@ -4,24 +4,18 @@ public sealed class RollbackController : IDisposable
 {
     private readonly RollbackHistory _history;
     private readonly YarnLineLifecycleBridge _bridge;
-    private readonly IRollbackDialogueRestarter _restarter;
     private readonly DialogueAdvanceDispatcher _dispatcher;
-    private readonly ILinePresentationAborter _linePresentationAborter;
     private readonly LinePresentationAdvanceState _lineAdvanceState;
 
     public RollbackController(
         RollbackHistory history,
         YarnLineLifecycleBridge bridge,
-        IRollbackDialogueRestarter restarter,
         DialogueAdvanceDispatcher dispatcher,
-        ILinePresentationAborter linePresentationAborter,
         LinePresentationAdvanceState lineAdvanceState)
     {
         _history = history;
         _bridge = bridge;
-        _restarter = restarter;
         _dispatcher = dispatcher;
-        _linePresentationAborter = linePresentationAborter;
         _lineAdvanceState = lineAdvanceState;
 
         _bridge.LineEntered -= EndSeekBeforeTargetLineDisplays;
@@ -40,9 +34,8 @@ public sealed class RollbackController : IDisposable
             return false;
 
         _lineAdvanceState.RollbackTargetLineId = target.lineId;
+        _lineAdvanceState.RollbackTargetNodeName = target.nodeName;
         _lineAdvanceState.RollbackPointBlocked = true;
-        
-        BeginRollbackToTarget(target);
         return true;
     }
 
@@ -53,15 +46,7 @@ public sealed class RollbackController : IDisposable
 
         if (!_history.TryPrepareRollbackToHistoryIndex(historyIndex, out RollbackPoint target))
             return false;
-
-        BeginRollbackToTarget(target);
         return true;
-    }
-
-    private void BeginRollbackToTarget(RollbackPoint target)
-    {
-        _linePresentationAborter?.AbortCurrentLinePresentationForRollback();
-        _restarter.RestartNode(target.nodeName);
     }
 
     private void EndSeekBeforeTargetLineDisplays(YarnLineMeta meta)
@@ -75,8 +60,8 @@ public sealed class RollbackController : IDisposable
             return;
         }
 
-        if (_lineAdvanceState.RollbackTargetLineId == meta.lineId)
-        { // 다음 CustomLinePresenter.RunLineAsync가 이 line을 one-shot target으로 소비.
+        if (_lineAdvanceState.RollbackTargetLineId == meta.lineId || _lineAdvanceState.RollbackTargetNodeName == meta.nodeName)
+        {
             _lineAdvanceState.RollbackTargetLinePending = true;
             return;
         }
