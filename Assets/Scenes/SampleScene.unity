@@ -8903,7 +8903,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5a3f81eaca50f144ab19e60b4c29c1c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CommandExecutor
-  enableDebugLog: 0
+  enableTrace: 1
+  logTraceStreaming: 0
+  logTraceDumpOnRunEnd: 1
+  tracePreview: 
 --- !u!4 &1257280953
 Transform:
   m_ObjectHideFlags: 0
@@ -12015,7 +12018,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EllipsisBreathTypewriter
   unitsPerSecond: 28
-  _speedMultiplier: 1
   multWhitespace: 0.35
   multComma: 0
   multColonSemicolon: 2
@@ -12026,6 +12028,8 @@ MonoBehaviour:
   jitterRatio: 0.06
   startRampUnits: 8
   startSlowdownMultiplier: 1.404
+  normalDelayCap: 0.35
+  speedupDelayCap: 0.08
 --- !u!4 &1658226452
 Transform:
   m_ObjectHideFlags: 0

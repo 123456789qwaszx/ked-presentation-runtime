@@ -30,11 +30,12 @@ public sealed class CommandExecutor : MonoBehaviour
 
     public void Initialize(CompositeCommandFactory factory)
     {
+        if(_initialized) return;
+        
         _sequencePlayer = new SequencePlayer(this);
         _factory = factory;
+        
         _initialized = true;
-
-        Trace("Initialize()");
     }
 
     private void OnDisable() => Stop(CleanupPolicy.Cancel);
@@ -42,26 +43,11 @@ public sealed class CommandExecutor : MonoBehaviour
 
     public void PlayStep(NodeSpec node, int stepIndex, CommandRunScope scope)
     {
-        if (!_initialized)
-        {
-            Trace("PlayStep ignored: not initialized.");
-            return;
-        }
-
-        if (node == null)
-        {
-            Trace("PlayStep ignored: node is null.");
-            return;
-        }
-
-        if (scope == null)
-        {
-            Trace("PlayStep ignored: scope is null.");
-            return;
-        }
-
         ClearTrace();
-        Trace($"PlayStep requested: stepIndex={stepIndex}, runId={_runId}");
+
+        int runId = NextRunId("PlayStep");
+
+        Trace($"PlayStep requested: stepIndex={stepIndex}, runId={runId}");
 
         _activeScope = scope;
 
@@ -72,42 +58,24 @@ public sealed class CommandExecutor : MonoBehaviour
         List<ISequenceCommand> commands = BuildCommandsFromStep(node, stepIndex);
         if (commands == null || commands.Count == 0)
         {
-            Trace($"PlayStep skipped: stepIndex={stepIndex}, no commands.");
+            Trace($"PlayStep skipped: stepIndex={stepIndex}, no commands. runId={runId}");
             return;
         }
 
         ResetToken();
         _activeScope.Token = _cts.Token;
 
-        Trace($"PlayStep begin: stepIndex={stepIndex}, commands={commands.Count}, runId={_runId}");
-        _mainRoutine = StartCoroutine(RunNode(commands, _activeScope, _runId));
-    }
-
-    public void PlaySpecs(
-        IReadOnlyList<CommandSpecBase> specs,
-        CommandRunScope scope,
-        string debugSource = "bridge")
+        Trace($"PlayStep begin: stepIndex={stepIndex}, commands={commands.Count}, runId={runId}");
+        _mainRoutine = StartCoroutine(RunNode(commands, _activeScope, runId));
+    } 
+    
+    public void PlaySpecs(IReadOnlyList<CommandSpecBase> specs, CommandRunScope scope, string debugSource = "bridge")
     {
-        if (!_initialized)
-        {
-            Trace($"PlaySpecs ignored: not initialized. source={debugSource}");
-            return;
-        }
-
-        if (specs == null)
-        {
-            Trace($"PlaySpecs ignored: specs is null. source={debugSource}");
-            return;
-        }
-
-        if (scope == null)
-        {
-            Trace($"PlaySpecs ignored: scope is null. source={debugSource}");
-            return;
-        }
-
         ClearTrace();
-        Trace($"PlaySpecs requested: source={debugSource}, specs={specs.Count}, runId={_runId}");
+        
+        int runId = NextRunId($"PlaySpecs/{debugSource}");
+
+        Trace($"PlaySpecs requested: source={debugSource}, specs={specs.Count}, runId={runId}");
 
         _activeScope = scope;
 
@@ -118,42 +86,24 @@ public sealed class CommandExecutor : MonoBehaviour
         List<ISequenceCommand> commands = BuildCommandsFromSpecs(specs);
         if (commands == null || commands.Count == 0)
         {
-            Trace($"PlaySpecs skipped: source={debugSource}, no commands.");
+            Trace($"PlaySpecs skipped: source={debugSource}, no commands. runId={runId}");
             return;
         }
 
         ResetToken();
         _activeScope.Token = _cts.Token;
 
-        Trace($"PlaySpecs begin: source={debugSource}, commands={commands.Count}, runId={_runId}");
-        _mainRoutine = StartCoroutine(RunNode(commands, _activeScope, _runId));
+        Trace($"PlaySpecs begin: source={debugSource}, commands={commands.Count}, runId={runId}");
+        _mainRoutine = StartCoroutine(RunNode(commands, _activeScope, runId));
     }
 
-    public IEnumerator PlaySpecsBlocking(
-        IReadOnlyList<CommandSpecBase> specs,
-        CommandRunScope scope,
-        string debugSource = "bridge_blocking")
+    public IEnumerator PlaySpecsBlocking(IReadOnlyList<CommandSpecBase> specs, CommandRunScope scope, string debugSource = "bridge_blocking")
     {
-        if (!_initialized)
-        {
-            Trace($"PlaySpecsBlocking ignored: not initialized. source={debugSource}");
-            yield break;
-        }
-
-        if (specs == null)
-        {
-            Trace($"PlaySpecsBlocking ignored: specs is null. source={debugSource}");
-            yield break;
-        }
-
-        if (scope == null)
-        {
-            Trace($"PlaySpecsBlocking ignored: scope is null. source={debugSource}");
-            yield break;
-        }
-
         ClearTrace();
-        Trace($"PlaySpecsBlocking requested: source={debugSource}, specs={specs.Count}, runId={_runId}");
+
+        int runId = NextRunId($"PlaySpecsBlocking/{debugSource}");
+
+        Trace($"PlaySpecsBlocking requested: source={debugSource}, specs={specs.Count}, runId={runId}");
 
         _activeScope = scope;
 
@@ -164,16 +114,16 @@ public sealed class CommandExecutor : MonoBehaviour
         List<ISequenceCommand> commands = BuildCommandsFromSpecs(specs);
         if (commands == null || commands.Count == 0)
         {
-            Trace($"PlaySpecsBlocking skipped: source={debugSource}, no commands.");
+            Trace($"PlaySpecsBlocking skipped: source={debugSource}, no commands. runId={runId}");
             yield break;
         }
 
         ResetToken();
         _activeScope.Token = _cts.Token;
 
-        Trace($"PlaySpecsBlocking begin: source={debugSource}, commands={commands.Count}, runId={_runId}");
+        Trace($"PlaySpecsBlocking begin: source={debugSource}, commands={commands.Count}, runId={runId}");
 
-        yield return RunNode(commands, _activeScope, _runId);
+        yield return RunNode(commands, _activeScope, runId);
     }
 
     private List<ISequenceCommand> BuildCommandsFromStep(NodeSpec node, int stepIndex)
@@ -426,7 +376,18 @@ public sealed class CommandExecutor : MonoBehaviour
 
     public void ClearTrace()
     {
-        _trace.Clear();
-        tracePreview = string.Empty;
+        
+        //_trace.Clear();
+        //tracePreview = string.Empty;
+    }
+    
+    private int NextRunId(string reason)
+    {
+        int previous = _runId;
+        _runId++;
+
+        Trace($"RunId advanced: {previous} -> {_runId}, reason={reason}");
+
+        return _runId;
     }
 }

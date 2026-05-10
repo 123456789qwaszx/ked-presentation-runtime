@@ -24,7 +24,8 @@ public sealed class LifetimeScope
             var (cancel, finish) = _items[i];
             try
             {
-                if (policy == CleanupPolicy.Finish) (finish ?? cancel)?.Invoke();
+                if (policy == CleanupPolicy.Finish) 
+                    (finish ?? cancel)?.Invoke();
                 else cancel?.Invoke();
             }
             catch { }
