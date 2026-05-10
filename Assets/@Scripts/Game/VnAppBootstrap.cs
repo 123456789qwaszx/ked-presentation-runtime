@@ -231,7 +231,7 @@ public class VnAppBootstrap : MonoBehaviour
 
     private void SetupYarnLifecycleBridge()
     {
-        yarnLineLifecycleBridge.Initialize(dialogueRunner);
+        yarnLineLifecycleBridge.Initialize(dialogueRunner, customLinePresenter);
     }
 
     private void BootstrapDialogueAdvanceInput()
@@ -265,7 +265,7 @@ public class VnAppBootstrap : MonoBehaviour
             ellipsisBreathTypewriter,
             dialogueAdvanceDispatcher,
             _presentationSessionContext,
-            () => yarnLineLifecycleBridge.IsLineFullyShown);
+            () => _linePresentationAdvanceState.IsLineFullyShown);
 
         _rollbackHistory = new RollbackHistory();
 
@@ -280,7 +280,7 @@ public class VnAppBootstrap : MonoBehaviour
             _vnUxState,
             _vnPlaybackSettings,
             _presentationSessionContext,
-            yarnLineLifecycleBridge,
+            _linePresentationAdvanceState,
             ellipsisBreathTypewriter,
             inlineEventMarkupHandler,
             backlogRecorder,
