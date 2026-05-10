@@ -1,7 +1,6 @@
 using System;
 using Yarn.Unity;
 
-
 [Serializable]
 public sealed class DialogueBoxLineRoutingPolicy
 {
@@ -10,6 +9,14 @@ public sealed class DialogueBoxLineRoutingPolicy
 
     private DialogueBoxKind _protagonistLineBoxKind = DefaultProtagonistLineBoxKind;
     private DialogueBoxKind _namedLineBoxKind = DefaultNamedLineBoxKind;
+
+    public DialogueBoxKind Resolve(string[] metadata, bool hasCharacterName)
+    {
+        if (TryResolveBoxKindFromMetadata(metadata, out DialogueBoxKind metadataBoxKind))
+            return metadataBoxKind;
+
+        return Resolve(hasCharacterName);
+    }
 
     public DialogueBoxKind Resolve(bool hasCharacterName)
     {
@@ -33,9 +40,8 @@ public sealed class DialogueBoxLineRoutingPolicy
         _protagonistLineBoxKind = DefaultProtagonistLineBoxKind;
         _namedLineBoxKind = DefaultNamedLineBoxKind;
     }
-    
-    
-    public bool TryResolveBoxKindFromMetadata(
+
+    private bool TryResolveBoxKindFromMetadata(
         string[] metadata,
         out DialogueBoxKind kind)
     {

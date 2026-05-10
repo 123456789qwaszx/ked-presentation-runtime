@@ -44,6 +44,9 @@ public sealed class YarnLineSideEffectPresenter : DialoguePresenterBase
 
     public override YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token)
     {
+        Debug.Log($"[YarnLineSideEffectPresenter] RollbackSeeking={_linePresentationAdvanceState != null && _linePresentationAdvanceState.IsRollbackSeeking}");
+
+        
         PlayVoice(line);
         
         _yarnBridgePlaybackDriver?.ResetImmediateWaitForNewLine();
