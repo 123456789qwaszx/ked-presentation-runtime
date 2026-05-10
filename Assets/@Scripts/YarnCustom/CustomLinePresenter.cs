@@ -26,10 +26,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
 
     private readonly DialogueBoxTransitionPolicy _boxTransitionPolicy = new();
     private readonly DialogueBoxCurrentState _boxState = new();
-
-
-    private TMP_Text _lineText;
-    private TMP_Text _characterNameText;
+    
 
     private int _presenterGeneration;
     private CancellationTokenSource _presenterLifetimeCts = new CancellationTokenSource(); // 외부 시스템이 이 Presenter의 실행을 무효화하는 신호
@@ -98,33 +95,38 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
         {
             HideBoxDuringRollbackSeek();
 
-            _lineAdvanceState?.EndTransition();
-            _lineAdvanceState?.CompleteLineDisplay();
+            _lineAdvanceState.EndTransition();
+            _lineAdvanceState.CompleteLineDisplay();
 
             await WaitForLineAdvanceAsync(token);
             return;
         }
 
         bool hasCharacterName = !string.IsNullOrWhiteSpace(line.CharacterName);
+        bool shouldFastForwardLine = !isRollbackTargetLine && ShouldFastForwardLine();
 
+
+        IDialogueTextTarget currentBox = _boxState.Box;
+        DialogueBoxKind? currentBoxKind = _boxState.BoxKind;
+        bool currentBoxIsVisible = _boxState.IsVisible;
+        
+        DialogueBoxCurrentState currentBoxState = _boxState;
+        
         DialogueBoxKind nextBoxKind = _lineRoutingPolicy.Resolve(line.Metadata, hasCharacterName);
         IDialogueTextTarget nextBox = _dialogueBoxResolver.ResolveTarget(nextBoxKind);
         ResetBoxTransform(nextBox);
-
-        bool shouldFastForwardLine = !isRollbackTargetLine && ShouldFastForwardLine();
-
+        
         DialogueBoxTransitionKind transitionKind =
             _boxTransitionPolicy.Resolve(
-                _boxState.BoxKind,
-                _boxState.IsVisible,
+                currentBoxKind,
+                currentBoxIsVisible,
                 nextBoxKind,
                 line.Metadata,
                 shouldFastForwardLine);
 
-        IDialogueTextTarget previousBox = _boxState.Box;
-
         PrimeTextTarget(nextBox, line);
 
+        
         PrepareBoxForTransition(nextBox, transitionKind);
 
         if (isRollbackTargetLine)
@@ -132,12 +134,12 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
             // Target line은 다시 화면에 보여줄 현재 line이다.
             // Transition만 즉시 적용하고, Typewriter는 아래에서 정상 실행한다.
             _lineAdvanceState.ConsumeRollbackTargetLine(line.TextID);
-            ApplyBoxTransitionImmediate(previousBox, nextBox, transitionKind);
+            ApplyBoxTransitionImmediate(currentBox, nextBox, transitionKind);
         }
         else
         {
             await ApplyBoxTransitionAsync(
-                previousBox,
+                currentBox,
                 nextBox,
                 transitionKind,
                 token,
@@ -146,36 +148,29 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
 
         if (IsStale())
         {
-            CleanupStaleLinePresentation(previousBox, nextBox);
+            CleanupStaleLinePresentation(currentBox, nextBox);
             await WaitForLineAdvanceAsync(token);
             return;
         }
 
-        _lineAdvanceState?.EndTransition();
+        _lineAdvanceState.EndTransition();
         
-        _boxState.Commit(nextBoxKind, nextBox, transitionKind);
+        _boxState.Commit(nextBoxKind, nextBox, transitionKind); // 여기서 부터 nextBox가 _boxState로 커밋.
+        _dialogueTextRouter.Bind(_boxState);
         
+        if (hasCharacterName && _dialogueTextRouter.HasName)
+            _dialogueTextRouter.NameText.text = line.CharacterName;
         
-        _dialogueTextRouter.Bind(nextBox);
-        _lineText = _dialogueTextRouter.LineText;
-        
-        if (hasCharacterName && _dialogueTextRouter.HasName && _dialogueTextRouter.NameText != null)
+        if (_dialogueTextRouter.LineText != null)
         {
-            _characterNameText = _dialogueTextRouter.NameText;
-            _characterNameText.text = line.CharacterName;
-        }
-
-        if (_lineText != null)
-        {
+            _typewriter.SetTextView(_dialogueTextRouter.LineText);
             MarkupParseResult text = line.TextWithoutCharacterName;
 
-            _typewriter.SetTextView(_lineText);
             _typewriter.PrepareForContent(text);
-
-            _lineAdvanceState?.BeginTypewriter();
+            _lineAdvanceState.BeginTypewriter();
 
             if (!IsStale())
-                _lineAdvanceState?.ExitRollbackSeek();
+                _lineAdvanceState.ExitRollbackSeek();
             
             await _typewriter
                 .RunTypewriter(text, token.HurryUpToken)
@@ -183,14 +178,14 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
 
             if (!IsStale())
             {
-                _lineAdvanceState?.CompleteLineDisplay();
+                _lineAdvanceState.CompleteLineDisplay();
                 _typewriter.ContentWillDismiss();
             }
         }
         else
         {
             if (!IsStale())
-                _lineAdvanceState?.CompleteLineDisplay();
+                _lineAdvanceState.CompleteLineDisplay();
         }
 
 
@@ -540,9 +535,6 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
         _dialogueTextRouter?.Clear();
 
         _typewriter?.SetTextView(null);
-
-        _lineText = null;
-        _characterNameText = null;
 
         _boxState.Reset();
     }

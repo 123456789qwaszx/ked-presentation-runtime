@@ -7,10 +7,10 @@ public sealed class DialogueTextRouter : MonoBehaviour
     public TMP_Text NameText { get; private set; }
     public bool HasName => NameText != null;
 
-    public void Bind(IDialogueTextTarget box)
+    public void Bind(DialogueBoxCurrentState boxCurrentState)
     {
-        LineText = box.LineText;
-        NameText = box.NameText;
+        LineText = boxCurrentState.Box.LineText;
+        NameText = boxCurrentState.Box.NameText;
     }
 
     public void Clear()
