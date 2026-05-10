@@ -112,6 +112,7 @@ public sealed class LinePresentationAdvanceState
         _rollbackTargetLineId = null;
         _isRollbackTargetLineReady = false;
     }
+    
     public void ClearActiveLine()
     {
         _hasActiveLine = false;

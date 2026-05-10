@@ -7,64 +7,18 @@ using Yarn.Markup;
 using Yarn.Unity;
 using Random = UnityEngine.Random;
 
-// Replacement markup (palette/styles) is processed by the LineProvider.
-// This handler only processes action markup (pause/signal/move, etc.) via ActionMarkupHandler,
-// and the typewriter only controls TMP's maxVisibleCharacters.
+// typewriter only controls TMP's maxVisibleCharacters.
 public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
 {
-    // ===== Yarn Commands / Public API =====
-    [YarnCommand("SetSpeedPerSec")]
-    public void SetTypeSpeed(float speed) => unitsPerSecond = Mathf.Max(0f, speed);
+    // ---- Yarn Commands ----
+    [YarnCommand("SetSpeedPerSec")] public void SetTypeSpeed(float speed) => unitsPerSecond = Mathf.Max(0f, speed);
+    [YarnCommand("SetSpeedMul")] public void SetSpeedMultiplierCommand(float multiplier) => SetSpeedMultiplier(multiplier);
     
-    [YarnCommand("SetSpeedMul")]
-    public void SetSpeedMultiplierCommand(float multiplier) => SetSpeedMultiplier(multiplier);
-
-    public void SetSpeedMultiplier(float multiplier)
-    {
-        _speedMultiplier = Mathf.Clamp(multiplier, 0.05f, 20f);
-    }
     
-    public void SetTextView(TMP_Text textView)
-    {
-        if (_typewriterText == textView)
-            return;
-
-        if (_isRunning)
-            AbortRun();
-
-        ClearCurrentTextView();
-
-        _typewriterText = textView;
-
-        ClearCurrentTextView();
-    }
-
-    [YarnCommand("ClearTextView")]
-    public void ClearTextView()
-    {
-        if (_isRunning)
-            AbortRun();
-
-        ClearCurrentTextView();
-    }
-
-    private void ClearCurrentTextView()
-    {
-        if (_typewriterText == null)
-            return;
-        //Debug.Log($"[Typewriter.ClearCurrentTextView] frame={Time.frameCount}, target={_typewriterText?.name}, textBefore='{_typewriterText?.text}'");
-
-        _typewriterText.maxVisibleCharacters = 0;
-        _typewriterText.SetText(string.Empty);
-        _typewriterText.ForceMeshUpdate();
-    }
-
     // ---- Inspector / Tuning ----
     [Header("Speed")]
     [Min(0f)] public float unitsPerSecond = 30f;
     
-    [Header("Speedup")]
-    [Min(0.05f)] [SerializeField] private float _speedMultiplier = 1f;
 
     [Header("Breath Multipliers")] 
     [Min(0f)] public float multWhitespace      = 0.35f;
@@ -84,46 +38,33 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
     [Tooltip("Extra delay multiplier at the beginning (1 = no extra delay). Higher = slower start.")]
     [Range(1f, 2f)] public float startSlowdownMultiplier = 1.25f;
     
-    // ---- Runtime Binding ----
-    private TMP_Text _typewriterText;
-    
-    // ---- Runtime State ----
-    private bool _hasActiveLine = false;
-    private bool _isRunning = false;
-    private int _totalCharacterCount = 0;
-    private int _runId = 0;
+    [Header("Delay Cap")]
+    [Min(0f)] [SerializeField] private float normalDelayCap = 0.35f;
+    [Min(0f)] [SerializeField] private float speedupDelayCap = 0.08f;
     
     public List<IActionMarkupHandler> ActionMarkupHandlers { get; } = new();
     
-    public bool IsComplete
-    {
-        get
-        {
-            if (_typewriterText == null) return true;
-            if (_isRunning) return false;
-            if (!_hasActiveLine) return true;
-
-            return _typewriterText.maxVisibleCharacters >= _totalCharacterCount;
-        }
-    }
-
+    // ---- Runtime Binding ----
+    private TMP_Text _typewriterText;
+    
+    private float _speedMultiplier = 1f;
+    private int _runId;
+    
+    public void SetSpeedMultiplier(float multiplier) => _speedMultiplier = Mathf.Clamp(multiplier, 0.05f, 20f);
+    public void SetTextView(TMP_Text textView) => _typewriterText = textView;
+    public void AbortRun() => _runId++;
+    
     public void PrepareForContent(MarkupParseResult line)
     {
         if (_typewriterText == null)
         {
-            Debug.LogError(
-                "[Typewriter] PrepareForContent: no text view is available. Run the Prepare command first, then call Yarn StartDialogue.");
+            Debug.LogError("[Typewriter] PrepareForContent: no text view is available.");
             return;
         }
-
-        _hasActiveLine = true;
-        _isRunning = false;
 
         _typewriterText.maxVisibleCharacters = 0;
         _typewriterText.SetText(line.Text);
         _typewriterText.ForceMeshUpdate(true, true);
-
-        _totalCharacterCount = _typewriterText.textInfo.characterCount;
         
         //Debug.Log($"textInfo.characterCount={_typewriterText.textInfo.characterCount}, text='{line.Text}'");
 
@@ -135,7 +76,7 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
         if (_typewriterText == null) return;
 
         int myRunId = ++_runId;
-        _isRunning = true;
+        int totalLineCharacterCount = 0;
 
         try
         {
@@ -145,7 +86,7 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
             InvokeHandlers(h => h.OnLineDisplayBegin(line, _typewriterText));
 
             TMP_TextInfo textInfo = _typewriterText.textInfo;
-            int totalLineCharacterCount = _totalCharacterCount;
+            totalLineCharacterCount = textInfo.characterCount;
 
             List<int> revealCounts = BuildRevealCountsFromTMP(textInfo, totalLineCharacterCount);
 
@@ -158,8 +99,7 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
 
                 if (cancellationToken.IsCancellationRequested)
                 {
-                    RevealAllAndComplete(line, totalLineCharacterCount);
-                    
+                    RevealAllAndComplete(line, totalLineCharacterCount, myRunId);
                     //Debug.Log("IsCancellationRequested1");
                     return;
                 }
@@ -173,7 +113,7 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
 
                     if (cancellationToken.IsCancellationRequested)
                     {
-                        RevealAllAndComplete(line, totalLineCharacterCount);
+                        RevealAllAndComplete(line, totalLineCharacterCount, myRunId);
                         //Debug.Log("IsCancellationRequested2");
                         return;
                     }
@@ -191,7 +131,7 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
                         }
                         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
                         {
-                            RevealAllAndComplete(line, totalLineCharacterCount);
+                            RevealAllAndComplete(line, totalLineCharacterCount, myRunId);
                             return;
                         }
                         catch (Exception ex)
@@ -216,74 +156,35 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
 
                 if (secondPerChar > 0)
                 {
-                    double delay = secondPerChar;
-
-                    if (targetVisibleCount > 0)
-                    {
-                        // How many chars were visible at the end of the previous unit
-                        int prevUnitTargetCount = (unit > 0)
-                            ? Mathf.Clamp(revealCounts[unit - 1], 0, totalLineCharacterCount)
-                            : 0;
-
-                        // Number of chars revealed in this unit (e.g. 3 for "...")
-                        int tokenLength = Mathf.Clamp(targetVisibleCount - prevUnitTargetCount, 1, 8);
-
-                        // Last character revealed in this unit
-                        char lastChar = '\0';
-                        int lastIndex = targetVisibleCount - 1;
-                        if ((uint)lastIndex < (uint)textInfo.characterCount)
-                            lastChar = textInfo.characterInfo[lastIndex].character;
-
-                        double multiplier = GetDelayMultiplier(lastChar);
-
-                        if (tokenLength == 3 && lastChar == '.')
-                            multiplier = Mathf.Max((float)multiplier, multTripleDotToken);
-
-                        if (startRampUnits > 0 && startSlowdownMultiplier > 1f && unit < startRampUnits)
-                        {
-                            float rampProgress = (startRampUnits <= 1) 
-                                ? 1f 
-                                : (unit / (float)(startRampUnits - 1));
-                            float ramp = Mathf.Lerp(startSlowdownMultiplier, 1f, rampProgress);
-                            multiplier *= ramp;
-                        }
-                        
-                        if (_speedMultiplier > 1.01f)
-                        {
-                            multiplier = 1.0 + (multiplier - 1.0) * 0.2;
-                        }
-                        
-                        delay *= multiplier;
-
-                        if (jitterRatio > 0f)
-                        {
-                            float jitter = Random.Range(-jitterRatio, jitterRatio);
-                            delay *= (1.0 + jitter);
-                        }
-
-                        double cap = (_speedMultiplier > 1.01f) 
-                            ? 0.08 
-                            : 0.35;
-                        delay = Math.Max(0.0, Math.Min(delay, cap));
-                    }
+                    double delay = CalculateDelayForRevealUnit(
+                        unit,
+                        targetVisibleCount,
+                        revealCounts,
+                        textInfo,
+                        totalLineCharacterCount,
+                        secondPerChar);
+                    
+                    double cap = GetCurrentDelayCap();
+                    delay = Math.Max(0.0, Math.Min(delay, cap));
                     
                     double waited = 0;
+                    
                     while (myRunId == _runId && !cancellationToken.IsCancellationRequested && waited < delay)
                     {
                         double t0 = Time.timeAsDouble;
                         await YarnTask.Yield();
                         double t1 = Time.timeAsDouble;
+                        
                         waited += (t1 - t0); // Accumulate actual elapsed time
                     }
                 }
             }
 
-            RevealAllAndComplete(line, totalLineCharacterCount);
+            RevealAllAndComplete(line, totalLineCharacterCount, myRunId);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
-            //Debug.Log("IsCancellationRequested4");
-            RevealAllAndComplete(line, _totalCharacterCount);
+            RevealAllAndComplete(line, totalLineCharacterCount, myRunId);
         }
         catch (Exception ex)
         {
@@ -292,25 +193,106 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
             if (_typewriterText != null)
             {
                 _typewriterText.maxVisibleCharacters = int.MaxValue;
-
                 InvokeHandlers(h => h.OnLineDisplayComplete());
             }
-        }
-        finally
-        {
-            if (myRunId == _runId)
-                _isRunning = false;
         }
     }
     
     public void ContentWillDismiss()
     {
-        _hasActiveLine = false;
-        _isRunning = false;
-
         InvokeHandlers(h => h.OnLineWillDismiss());
     }
+    
+    
+    private void InvokeHandlers(Action<IActionMarkupHandler> action)
+    {
+        for (int i = 0; i < ActionMarkupHandlers.Count; i++)
+        {
+            try
+            {
+                action(ActionMarkupHandlers[i]);
+            }
+            catch (Exception ex)
+            {
+                Debug.LogException(ex);
+            }
+        }
+    }
+    
+    private void RevealAllAndComplete(MarkupParseResult line, int count, int runId)
+    {
+        if (runId != _runId || _typewriterText == null)
+            return;
 
+        _typewriterText.maxVisibleCharacters = count;
+
+        InvokeHandlers(h => h.OnLineDisplayComplete());
+    }
+    
+    private double CalculateDelayForRevealUnit(
+        int unit,
+        int targetVisibleCount,
+        List<int> revealCounts,
+        TMP_TextInfo textInfo,
+        int totalLineCharacterCount,
+        double secondPerChar)
+    {
+        double delay = secondPerChar;
+
+        if (targetVisibleCount <= 0)
+            return delay;
+
+        // How many chars were visible at the end of the previous unit
+        int prevUnitTargetCount = (unit > 0) ?
+            Mathf.Clamp(revealCounts[unit - 1], 0, totalLineCharacterCount)
+            : 0;
+
+        // Number of chars revealed in this unit (e.g. 3 for "...")
+        int tokenLength = Mathf.Clamp(targetVisibleCount - prevUnitTargetCount, 1, 8);
+
+        // Last character revealed in this unit
+        char lastChar = '\0';
+        int lastIndex = targetVisibleCount - 1;
+
+        if ((uint)lastIndex < (uint)textInfo.characterCount)
+            lastChar = textInfo.characterInfo[lastIndex].character;
+
+        double multiplier = GetDelayMultiplier(lastChar);
+
+        if (tokenLength == 3 && lastChar == '.')
+            multiplier = Mathf.Max((float)multiplier, multTripleDotToken);
+
+        if (startRampUnits > 0 && startSlowdownMultiplier > 1f && unit < startRampUnits)
+        {
+            float rampProgress = (startRampUnits <= 1)
+                ? 1f
+                : unit / (float)(startRampUnits - 1);
+
+            float ramp = Mathf.Lerp(startSlowdownMultiplier, 1f, rampProgress);
+
+            multiplier *= ramp;
+        }
+
+        if (_speedMultiplier > 1.01f)
+            multiplier = 1.0 + (multiplier - 1.0) * 0.2;
+        
+        delay *= multiplier;
+
+        if (jitterRatio > 0f)
+        {
+            float jitter = Random.Range(-jitterRatio, jitterRatio);
+            delay *= 1.0 + jitter;
+        }
+
+        return delay;
+    }
+    
+    private double GetCurrentDelayCap()
+    {
+        return _speedMultiplier > 1.01f
+            ? Mathf.Max(0f, speedupDelayCap)
+            : Mathf.Max(0f, normalDelayCap);
+    }
 
     // ===== Breath Timing Rules =====
     private double GetDelayMultiplier(char c)
@@ -377,43 +359,7 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
 
         return result;
     }
-
-    private void RevealAllAndComplete(MarkupParseResult line, int count)
-    {
-        if (_typewriterText == null) return;
-
-        _typewriterText.maxVisibleCharacters = count;
-        _totalCharacterCount = Mathf.Max(_totalCharacterCount, count);
-
-        InvokeHandlers(h => h.OnLineDisplayComplete());
-
-        _isRunning = false;
-    }
-
-    private void InvokeHandlers(Action<IActionMarkupHandler> action)
-    {
-        for (int i = 0; i < ActionMarkupHandlers.Count; i++)
-        {
-            try
-            {
-                action(ActionMarkupHandlers[i]);
-            }
-            catch (Exception ex)
-            {
-                Debug.LogException(ex);
-            }
-        }
-    }
-
-    private void AbortRun()
-    {
-        _runId++;
-        _hasActiveLine = false;
-        _isRunning = false;
-        _totalCharacterCount = 0;
-    }
-
-
+    
     #region ResetSettings
 
     // ===== Default tuning values =====
@@ -430,6 +376,9 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
     private const float DefaultJitterRatio = 0.08f;
     private const int   DefaultStartRampUnits = 10;
     private const float DefaultStartSlowdownMultiplier = 1.25f;
+    
+    private const float DefaultNormalDelayCap = 0.35f;
+    private const float DefaultSpeedupDelayCap = 0.08f;
 
     [ContextMenu("Typewriter/Reset Rhythm Settings To Defaults")]
     public void ResetRhythmSettingsToDefaults()
@@ -447,6 +396,9 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
         jitterRatio             = DefaultJitterRatio;
         startRampUnits          = DefaultStartRampUnits;
         startSlowdownMultiplier = DefaultStartSlowdownMultiplier;
+        
+        normalDelayCap = DefaultNormalDelayCap;
+        speedupDelayCap = DefaultSpeedupDelayCap;
 
 #if UNITY_EDITOR
         UnityEditor.EditorUtility.SetDirty(this);
