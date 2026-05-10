@@ -23,7 +23,7 @@
 알베도: 이 청구서들, 어디 한번 제대로 설명해 보시지!
 
 //<<begin_hold>>
-//<<await_for 1>>
+<<await_for 1>>
 //<<emoji Albedo sparkle>>
 //<<end_hold>>
 <<emotion Albedo 8>>

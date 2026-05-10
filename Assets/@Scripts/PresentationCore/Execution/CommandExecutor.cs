@@ -1,12 +1,21 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading;
 using UnityEngine;
 
 public sealed class CommandExecutor : MonoBehaviour
 {
-    [Header("Debug")] [SerializeField] private bool enableDebugLog = true;
+    [Header("Trace")]
+    [SerializeField] private bool enableTrace = true;
+    [SerializeField] private bool logTraceStreaming = false;
+    [SerializeField] private bool logTraceDumpOnRunEnd = true;
+
+    [SerializeField, TextArea(3, 20)] private string tracePreview;
+
+    private readonly StringBuilder _trace = new StringBuilder(4096);
+    private const int MaxTraceChars = 20000;
 
     private SequencePlayer _sequencePlayer;
     private CompositeCommandFactory _factory;
@@ -24,109 +33,179 @@ public sealed class CommandExecutor : MonoBehaviour
         _sequencePlayer = new SequencePlayer(this);
         _factory = factory;
         _initialized = true;
+
+        Trace("Initialize()");
     }
 
     private void OnDisable() => Stop(CleanupPolicy.Cancel);
     private void OnDestroy() => Stop(CleanupPolicy.Cancel);
 
-
     public void PlayStep(NodeSpec node, int stepIndex, CommandRunScope scope)
     {
-        if (!_initialized) return;
-        if (node == null || scope == null) return;
+        if (!_initialized)
+        {
+            Trace("PlayStep ignored: not initialized.");
+            return;
+        }
+
+        if (node == null)
+        {
+            Trace("PlayStep ignored: node is null.");
+            return;
+        }
+
+        if (scope == null)
+        {
+            Trace("PlayStep ignored: scope is null.");
+            return;
+        }
+
+        ClearTrace();
+        Trace($"PlayStep requested: stepIndex={stepIndex}, runId={_runId}");
 
         _activeScope = scope;
 
         CleanupPolicy policy = DecideCleanupPolicy(_activeScope);
+        Trace($"CleanupStep(policy={policy})");
         _activeScope.CleanupStep(policy);
 
         List<ISequenceCommand> commands = BuildCommandsFromStep(node, stepIndex);
         if (commands == null || commands.Count == 0)
         {
-            Log($"Step has no commands: stepIndex={stepIndex}");
-            return; // CleanupStep은 했지만 token/coroutine은 건드리지 않음
-        }
-
-        ResetToken();
-        _activeScope.Token = _cts.Token;
-
-        Log($"Step Play: stepIndex={stepIndex}, commands={commands.Count}");
-        _mainRoutine = StartCoroutine(RunNode(commands, _activeScope, _runId));
-    }
-
-    public void PlaySpecs(IReadOnlyList<CommandSpecBase> specs, CommandRunScope scope, string debugSource = "bridge")
-    {
-        if (!_initialized) return;
-        if (specs == null || scope == null) return;
-
-        _activeScope = scope;
-
-        CleanupPolicy policy = DecideCleanupPolicy(_activeScope);
-        _activeScope.CleanupStep(policy);
-
-        List<ISequenceCommand> commands = BuildCommandsFromSpecs(specs);
-        if (commands == null || commands.Count == 0)
-        {
-            Log($"No commands ({debugSource})");
+            Trace($"PlayStep skipped: stepIndex={stepIndex}, no commands.");
             return;
         }
 
         ResetToken();
         _activeScope.Token = _cts.Token;
 
-        Log($"Play ({debugSource}), commands={commands.Count}");
+        Trace($"PlayStep begin: stepIndex={stepIndex}, commands={commands.Count}, runId={_runId}");
         _mainRoutine = StartCoroutine(RunNode(commands, _activeScope, _runId));
     }
-    
-    public IEnumerator PlaySpecsBlocking(IReadOnlyList<CommandSpecBase> specs, CommandRunScope scope, string debugSource = "bridge_blocking")
+
+    public void PlaySpecs(
+        IReadOnlyList<CommandSpecBase> specs,
+        CommandRunScope scope,
+        string debugSource = "bridge")
     {
-        if (!_initialized) yield break;
-        if (specs == null || scope == null) yield break;
+        if (!_initialized)
+        {
+            Trace($"PlaySpecs ignored: not initialized. source={debugSource}");
+            return;
+        }
+
+        if (specs == null)
+        {
+            Trace($"PlaySpecs ignored: specs is null. source={debugSource}");
+            return;
+        }
+
+        if (scope == null)
+        {
+            Trace($"PlaySpecs ignored: scope is null. source={debugSource}");
+            return;
+        }
+
+        ClearTrace();
+        Trace($"PlaySpecs requested: source={debugSource}, specs={specs.Count}, runId={_runId}");
 
         _activeScope = scope;
 
         CleanupPolicy policy = DecideCleanupPolicy(_activeScope);
+        Trace($"CleanupStep(policy={policy})");
         _activeScope.CleanupStep(policy);
 
         List<ISequenceCommand> commands = BuildCommandsFromSpecs(specs);
         if (commands == null || commands.Count == 0)
         {
-            Log($"No commands ({debugSource})");
+            Trace($"PlaySpecs skipped: source={debugSource}, no commands.");
+            return;
+        }
+
+        ResetToken();
+        _activeScope.Token = _cts.Token;
+
+        Trace($"PlaySpecs begin: source={debugSource}, commands={commands.Count}, runId={_runId}");
+        _mainRoutine = StartCoroutine(RunNode(commands, _activeScope, _runId));
+    }
+
+    public IEnumerator PlaySpecsBlocking(
+        IReadOnlyList<CommandSpecBase> specs,
+        CommandRunScope scope,
+        string debugSource = "bridge_blocking")
+    {
+        if (!_initialized)
+        {
+            Trace($"PlaySpecsBlocking ignored: not initialized. source={debugSource}");
+            yield break;
+        }
+
+        if (specs == null)
+        {
+            Trace($"PlaySpecsBlocking ignored: specs is null. source={debugSource}");
+            yield break;
+        }
+
+        if (scope == null)
+        {
+            Trace($"PlaySpecsBlocking ignored: scope is null. source={debugSource}");
+            yield break;
+        }
+
+        ClearTrace();
+        Trace($"PlaySpecsBlocking requested: source={debugSource}, specs={specs.Count}, runId={_runId}");
+
+        _activeScope = scope;
+
+        CleanupPolicy policy = DecideCleanupPolicy(_activeScope);
+        Trace($"CleanupStep(policy={policy})");
+        _activeScope.CleanupStep(policy);
+
+        List<ISequenceCommand> commands = BuildCommandsFromSpecs(specs);
+        if (commands == null || commands.Count == 0)
+        {
+            Trace($"PlaySpecsBlocking skipped: source={debugSource}, no commands.");
             yield break;
         }
 
         ResetToken();
         _activeScope.Token = _cts.Token;
 
-        Log($"PlayBlocking ({debugSource}), commands={commands.Count}");
+        Trace($"PlaySpecsBlocking begin: source={debugSource}, commands={commands.Count}, runId={_runId}");
 
         yield return RunNode(commands, _activeScope, _runId);
     }
-    
-    
+
     private List<ISequenceCommand> BuildCommandsFromStep(NodeSpec node, int stepIndex)
     {
         var list = new List<ISequenceCommand>();
 
         if (node.steps == null || node.steps.Count == 0)
         {
-            Log($"Node Empty (node={node})");
+            Trace($"BuildCommandsFromStep skipped: node has no steps. node={node}");
             return list;
         }
 
         if (stepIndex < 0 || stepIndex >= node.steps.Count)
         {
-            Log($"Invalid stepIndex: {stepIndex} (steps={node.steps.Count})");
+            Trace($"BuildCommandsFromStep skipped: invalid stepIndex={stepIndex}, steps={node.steps.Count}");
             return list;
         }
 
         StepSpec step = node.steps[stepIndex];
-        if (step == null || step.compiled == null || step.compiled.Count == 0)
+        if (step == null)
         {
-            Log($"Step Empty (step={step})");
+            Trace($"BuildCommandsFromStep skipped: step is null. stepIndex={stepIndex}");
             return list;
         }
 
+        if (step.compiled == null || step.compiled.Count == 0)
+        {
+            Trace($"BuildCommandsFromStep skipped: step has no compiled specs. stepIndex={stepIndex}");
+            return list;
+        }
+
+        Trace($"BuildCommandsFromStep: stepIndex={stepIndex}, specs={step.compiled.Count}");
         return BuildCommandsFromSpecs(step.compiled);
     }
 
@@ -134,36 +213,65 @@ public sealed class CommandExecutor : MonoBehaviour
     {
         var list = new List<ISequenceCommand>();
 
+        if (specs == null)
+        {
+            Trace("BuildCommandsFromSpecs skipped: specs is null.");
+            return list;
+        }
+
         for (int i = 0; i < specs.Count; i++)
         {
             CommandSpecBase spec = specs[i];
             if (spec == null)
             {
-                Log($"Null spec at index={i}; skipped.");
+                Trace($"Spec[{i}] null; skipped.");
+                continue;
+            }
+
+            string specType = spec.GetType().Name;
+
+            if (_factory == null)
+            {
+                Trace($"Spec[{i}] {specType} failed: factory is null.");
                 continue;
             }
 
             if (!_factory.TryCreate(spec, out ISequenceCommand command) || command == null)
             {
+                Trace($"Spec[{i}] {specType} failed: factory could not create command.");
                 continue;
             }
 
+            Trace($"Spec[{i}] {specType} -> {command.GetType().Name}");
             list.Add(command);
         }
 
+        Trace($"BuildCommandsFromSpecs complete: specs={specs.Count}, commands={list.Count}");
         return list;
     }
-    
+
     private IEnumerator RunNode(List<ISequenceCommand> commands, CommandRunScope scope, int runId)
     {
         if (runId != _runId)
         {
-            Log($"RunNode exited early: stale runId={runId}, current={_runId}");
+            Trace($"RunNode exited early: stale runId={runId}, current={_runId}");
+            yield break;
+        }
+
+        if (commands == null)
+        {
+            Trace($"RunNode exited early: commands is null. runId={runId}");
+            yield break;
+        }
+
+        if (scope == null)
+        {
+            Trace($"RunNode exited early: scope is null. runId={runId}");
             yield break;
         }
 
         scope.SetNodeBusy(true);
-        Log($"Node Begin (runId={runId})");
+        Trace($"Node Begin: runId={runId}, commands={commands.Count}");
 
         try
         {
@@ -172,7 +280,7 @@ public sealed class CommandExecutor : MonoBehaviour
                 scope,
                 runId: runId,
                 isValid: () => runId == _runId,
-                trace: msg => Log(msg)
+                trace: Trace
             );
         }
         finally
@@ -182,34 +290,54 @@ public sealed class CommandExecutor : MonoBehaviour
                 scope.SetNodeBusy(false);
                 scope.Token = CancellationToken.None;
                 _mainRoutine = null;
-                Log($"Node End (runId={runId})");
+
+                Trace($"Node End: runId={runId}");
+
+                if (logTraceDumpOnRunEnd)
+                    DumpTraceToConsole("[CommandExecutor] Trace dump (Run End)");
+            }
+            else
+            {
+                Trace($"Node End skipped cleanup: stale runId={runId}, current={_runId}");
             }
         }
     }
-    
+
     public void Stop() => Stop(CleanupPolicy.Cancel);
     public void FinishAll() => Stop(CleanupPolicy.Finish);
 
     private void Stop(CleanupPolicy policy)
     {
-        if (_isStopInProgress) return;
+        if (_isStopInProgress)
+        {
+            Trace($"Stop ignored: already in progress. policy={policy}");
+            return;
+        }
+
         _isStopInProgress = true;
 
         try
         {
+            int previousRunId = _runId;
             _runId++;
+
+            Trace($"Stop begin: policy={policy}, runId {previousRunId} -> {_runId}");
+
             CancelAndDisposeToken();
 
             if (_mainRoutine != null)
             {
                 StopCoroutine(_mainRoutine);
                 _mainRoutine = null;
+                Trace("Main routine stopped.");
             }
 
             _sequencePlayer?.Stop();
 
             if (_activeScope != null)
             {
+                Trace($"Cleanup active scope: policy={policy}");
+
                 _activeScope.CleanupStep(policy);
                 _activeScope.CleanupRun(policy);
                 _activeScope.SetNodeBusy(false);
@@ -217,7 +345,10 @@ public sealed class CommandExecutor : MonoBehaviour
                 _activeScope = null;
             }
 
-            Log($"Stop(policy={policy})");
+            Trace($"Stop complete: policy={policy}");
+
+            if (logTraceDumpOnRunEnd)
+                DumpTraceToConsole("[CommandExecutor] Trace dump (Stop)");
         }
         finally
         {
@@ -227,40 +358,75 @@ public sealed class CommandExecutor : MonoBehaviour
 
     private void ResetToken()
     {
-        // Only responsible for creating a new token for the next run.
         _cts?.Dispose();
         _cts = new CancellationTokenSource();
+
+        Trace("Token reset.");
     }
 
     private void CancelAndDisposeToken()
     {
-        if (_cts == null) return;
+        if (_cts == null)
+        {
+            Trace("CancelAndDisposeToken skipped: token is null.");
+            return;
+        }
+
         try
         {
-            if (!_cts.IsCancellationRequested) _cts.Cancel();
+            if (!_cts.IsCancellationRequested)
+            {
+                _cts.Cancel();
+                Trace("Token canceled.");
+            }
         }
         catch (ObjectDisposedException)
         {
+            Trace("Token cancel skipped: already disposed.");
         }
 
         _cts.Dispose();
         _cts = null;
+
+        Trace("Token disposed.");
     }
 
     private CleanupPolicy DecideCleanupPolicy(CommandRunScope scope)
     {
-        if (scope == null) return CleanupPolicy.Cancel;
-
-        // Skip means "complete immediately".
-        // if (scope.IsSkipping)
-        //     return CleanupPolicy.Finish;
+        if (scope == null)
+            return CleanupPolicy.Cancel;
 
         return CleanupPolicy.Finish;
     }
 
-    private void Log(string msg)
+    private void Trace(string msg)
     {
-        if (!enableDebugLog) return;
-        Debug.Log($"[CommandExecutor] {msg}", this);
+        if (!enableTrace)
+            return;
+
+        if (_trace.Length > MaxTraceChars)
+            _trace.Remove(0, _trace.Length - (MaxTraceChars / 2));
+
+        string line = $"[{Time.frameCount}] {msg}";
+
+        _trace.AppendLine(line);
+        tracePreview = _trace.ToString();
+
+        if (logTraceStreaming)
+            Debug.Log($"[CommandExecutor] {line}", this);
+    }
+
+    private void DumpTraceToConsole(string header)
+    {
+        if (!enableTrace)
+            return;
+
+        Debug.Log($"{header}\n{_trace}", this);
+    }
+
+    public void ClearTrace()
+    {
+        _trace.Clear();
+        tracePreview = string.Empty;
     }
 }
