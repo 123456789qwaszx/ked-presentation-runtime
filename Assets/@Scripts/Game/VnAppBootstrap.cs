@@ -245,7 +245,7 @@ public class VnAppBootstrap : MonoBehaviour
             () => session != null && session.IsNodeBusy()
         );
 
-        dialogueAdvanceDispatcher.Initialize(advanceGategate, dialogueRunner, inlineEventMarkupHandler);
+        dialogueAdvanceDispatcher.Initialize(advanceGategate, dialogueRunner, inlineEventMarkupHandler, _linePresentationAdvanceState);
         vnAdvanceInputPoller.Initialize(dialogueAdvanceDispatcher);
     }
 

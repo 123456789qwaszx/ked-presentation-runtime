@@ -27,49 +27,46 @@ public sealed class RollbackController : IDisposable
 
     public bool RequestRollbackOneStep()
     {
-        if (_lineAdvanceState.RollbackPointRecording || _lineAdvanceState.RollbackTargetLinePending)
+        if (_lineAdvanceState.RollbackTargetLinePending)
             return false;
 
         if (!_history.TryPrepareRollbackOneStep(out RollbackPoint target))
             return false;
-
+        
+        _lineAdvanceState.IsRollbackSeeking = true;
+        
+        _lineAdvanceState.RollbackPointBlocked = true;
         _lineAdvanceState.RollbackTargetLineId = target.lineId;
         _lineAdvanceState.RollbackTargetNodeName = target.nodeName;
-        _lineAdvanceState.RollbackPointBlocked = true;
+        
         return true;
     }
-
-    public bool RequestRollbackToHistoryIndex(int historyIndex)
-    {
-        if (_lineAdvanceState.IsRollbackActive)
-            return false;
-
-        if (!_history.TryPrepareRollbackToHistoryIndex(historyIndex, out RollbackPoint target))
-            return false;
-        return true;
-    }
-
+    
     private void EndSeekBeforeTargetLineDisplays(YarnLineMeta meta)
     {
-        if (_lineAdvanceState.RollbackPointRecording)
+        if (!_lineAdvanceState.RollbackPointBlocked)
             return;
 
-        if (!_lineAdvanceState.IsRollback)
+        if (!_lineAdvanceState.IsRollbackSeeking && !_lineAdvanceState.RollbackTargetLinePending)
         {
-            _lineAdvanceState.ResumeRollbackPointRecording();
+            _lineAdvanceState.RollbackPointBlocked = false;
+            _lineAdvanceState.RollbackTargetLineId = null;
+            _lineAdvanceState.RollbackTargetNodeName = null;
+            
             return;
         }
 
         if (_lineAdvanceState.RollbackTargetLineId == meta.lineId || _lineAdvanceState.RollbackTargetNodeName == meta.nodeName)
         {
+            _lineAdvanceState.IsRollbackSeeking = false;
             _lineAdvanceState.RollbackTargetLinePending = true;
+            
             return;
         }
 
         _dispatcher.DispatchSeekNext();
     }
     
-
     private void AddRollbackPoint(YarnLineMeta meta)
     {
         if (_lineAdvanceState.RollbackPointBlocked)
@@ -87,3 +84,13 @@ public sealed class RollbackController : IDisposable
         _bridge.LineEntered -= AddRollbackPoint;
     }
 }
+
+// public bool RequestRollbackToHistoryIndex(int historyIndex)
+// {
+//     if (!_lineAdvanceState.IsRollbackSeeking && _lineAdvanceState.RollbackTargetLinePending)
+//         return false;
+//
+//     if (!_history.TryPrepareRollbackToHistoryIndex(historyIndex, out RollbackPoint target))
+//         return false;
+//     return true;
+// }

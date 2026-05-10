@@ -18,11 +18,7 @@ public sealed class AdvanceGate
 
     private double _cooldownUntilUnscaled = double.NegativeInfinity;
 
-    public AdvanceGate(
-        VnUxState uxState,
-        VnPlaybackSettings vnPlaybackSettings,
-        LinePresentationAdvanceState lineState,
-        Func<bool> isCpsNodeBusy)
+    public AdvanceGate(VnUxState uxState, VnPlaybackSettings vnPlaybackSettings, LinePresentationAdvanceState lineState, Func<bool> isCpsNodeBusy)
     {
         _vnUxState = uxState;
         _vnPlaybackSettings = vnPlaybackSettings;

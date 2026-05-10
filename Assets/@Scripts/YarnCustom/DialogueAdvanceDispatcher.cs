@@ -6,15 +6,18 @@ public sealed class DialogueAdvanceDispatcher : MonoBehaviour
     private AdvanceGate _gate;
     private DialogueRunner _dialogueRunner;
     private InlineEventMarkupHandler _inlineMarkupHandler;
+    private LinePresentationAdvanceState _linePresentationAdvanceState;
 
     public void Initialize(
-        AdvanceGate gate,
+        AdvanceGate gate, 
         DialogueRunner dialogueRunner,
-        InlineEventMarkupHandler inlineMarkupHandler)
+        InlineEventMarkupHandler inlineMarkupHandler, 
+        LinePresentationAdvanceState  linePresentationAdvanceState)
     {
         _gate = gate;
         _dialogueRunner = dialogueRunner;
         _inlineMarkupHandler = inlineMarkupHandler;
+        _linePresentationAdvanceState = linePresentationAdvanceState;
     }
     
     public void DispatchAdvance()
@@ -30,13 +33,27 @@ public sealed class DialogueAdvanceDispatcher : MonoBehaviour
         // Dialogue is not running — apply a small cooldown to prevent rapid re-triggering
         _gate.AddCooldownSeconds(0.03f);
     }
-
+    
+    public void DispatchSeekNext()
+    {
+        if (_dialogueRunner == null || !_dialogueRunner.IsDialogueRunning)
+            return;
+        
+        if (!_linePresentationAdvanceState.IsLineFullyShown)
+        {
+            _inlineMarkupHandler.FlushPendingSignals();
+            _dialogueRunner.RequestHurryUpLine();
+        }
+        
+        _dialogueRunner.RequestNextLine();
+    }
     
     private bool TryDispatchToYarn()
     {
-        if (_dialogueRunner == null || !_dialogueRunner.IsDialogueRunning) return false;
+        if (_dialogueRunner == null || !_dialogueRunner.IsDialogueRunning)
+            return false;
 
-        if (!_gate.IsLineFullyShown)
+        if (!_linePresentationAdvanceState.IsLineFullyShown)
         {
             _inlineMarkupHandler.FlushPendingSignals();
             _dialogueRunner.RequestHurryUpLine();
@@ -52,28 +69,17 @@ public sealed class DialogueAdvanceDispatcher : MonoBehaviour
 
         return true;
     }
-    
-    public void DispatchSeekHurryUp()
-    {
-        if (_dialogueRunner == null || !_dialogueRunner.IsDialogueRunning) return;
-        
-        if (!_gate.IsLineFullyShown)
-        {
-            _inlineMarkupHandler.FlushPendingSignals();
-            _dialogueRunner.RequestHurryUpLine();
-        }
-    }
 
-    public void DispatchSeekNext()
-    {
-        if (_dialogueRunner == null || !_dialogueRunner.IsDialogueRunning) return;
-        
-        if (!_gate.IsLineFullyShown)
-        {
-            _inlineMarkupHandler.FlushPendingSignals();
-            _dialogueRunner.RequestHurryUpLine();
-        }
-        
-        _dialogueRunner.RequestNextLine();
-    }
 }
+
+// public void DispatchSeekHurryUp()
+// {
+//     if (_dialogueRunner == null || !_dialogueRunner.IsDialogueRunning)
+//         return;
+//         
+//     if (!_linePresentationAdvanceState.IsLineFullyShown)
+//     {
+//         _inlineMarkupHandler.FlushPendingSignals();
+//         _dialogueRunner.RequestHurryUpLine();
+//     }
+// }

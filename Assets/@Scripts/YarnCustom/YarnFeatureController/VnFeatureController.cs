@@ -24,7 +24,7 @@ public sealed class VnFeatureController : MonoBehaviour
     private PresentationSessionContext _sessionContext;
 
     private EllipsisBreathTypewriter _typewriter;
-    private YarnLineLifecycleBridge _yarnLineLifecycleBridge;
+    private LinePresentationAdvanceState _linePresentationAdvanceState;
     private InlineEventMarkupHandler _inlineEventMarkupHandler;
 
     private BacklogRecorder _backlogRecorder;
@@ -35,7 +35,7 @@ public sealed class VnFeatureController : MonoBehaviour
     public bool IsAuto => _sessionContext != null && _sessionContext.IsAutoMode;
     public bool IsSpeedup => _sessionContext != null && _sessionContext.IsSpeedUpMode;
 
-    private bool LineFullyShown => _yarnLineLifecycleBridge.IsLineFullyShown;
+    private bool LineFullyShown => _linePresentationAdvanceState.IsLineFullyShown;
 
     public IReadOnlyList<DialogueLogEntry> Backlogs => _backlogRecorder.Entries;
 
@@ -45,7 +45,7 @@ public sealed class VnFeatureController : MonoBehaviour
         VnUxState uxState,
         VnPlaybackSettings vnPlaybackSettings,
         PresentationSessionContext sessionContext,
-        YarnLineLifecycleBridge yarnLineLifecycleBridge,
+        LinePresentationAdvanceState yarnLineLifecycleBridge,
         EllipsisBreathTypewriter ellipsisBreathTypewriter,
         InlineEventMarkupHandler inlineEventMarkupHandler,
         BacklogRecorder backlogRecorder,
@@ -59,7 +59,7 @@ public sealed class VnFeatureController : MonoBehaviour
         _vnUxState = uxState;
         _vnPlaybackSettings = vnPlaybackSettings;
         _sessionContext = sessionContext;
-        _yarnLineLifecycleBridge = yarnLineLifecycleBridge;
+        _linePresentationAdvanceState = yarnLineLifecycleBridge;
         _typewriter = ellipsisBreathTypewriter;
         _inlineEventMarkupHandler = inlineEventMarkupHandler;
 

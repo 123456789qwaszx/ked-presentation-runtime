@@ -41,10 +41,8 @@ public sealed class BacklogRecorder
         Add(new DialogueLogEntry
         {
             lineId = meta.lineId,
-            lineSerial = meta.lineSerial,
             nodeName = meta.nodeName,
             rawText = meta.rawText,
-            timestamp = meta.frame
         });
     }
     

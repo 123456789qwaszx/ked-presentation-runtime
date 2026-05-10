@@ -75,8 +75,12 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
         return YarnTask.CompletedTask;
     }
 
+    public event Action<LocalizedLine> LineEntered;
+    
     public override async YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token)
     {
+        LineEntered?.Invoke(line);
+        
         _lineAdvanceState.MarkLineEntered();
 
         int myGeneration = _presenterGeneration;
@@ -85,34 +89,24 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
         {
             return myGeneration != _presenterGeneration;
         }
-
-        bool isRollbackTargetLine = _lineAdvanceState.IsRollbackTargetLine(line.TextID);
-        bool isRollbackSeekingLine = _lineAdvanceState.IsRollbackSeeking && !isRollbackTargetLine;
         
         // Skip visual presentation for lines passed during rollback seek.
         // Keep the Yarn line lifecycle alive until the runner requests next content.
-        if (isRollbackSeekingLine)
+        if (_lineAdvanceState.IsRollbackSeeking && !_lineAdvanceState.IsRollbackTargetLine(line.TextID))
         {
             HideBoxDuringRollbackSeek();
 
-            _lineAdvanceState.MarkTransitionFinished();
             _lineAdvanceState.MarkLineDisplayCompleted();
 
             await WaitForLineAdvanceAsync(token);
             return;
         }
-
-        bool hasCharacterName = !string.IsNullOrWhiteSpace(line.CharacterName);
-        bool shouldFastForwardLine = !isRollbackTargetLine && ShouldFastForwardLine();
-
-
+        
         IDialogueTextTarget currentBox = _boxState.Box;
         DialogueBoxKind? currentBoxKind = _boxState.BoxKind;
         bool currentBoxIsVisible = _boxState.IsVisible;
         
-        DialogueBoxCurrentState currentBoxState = _boxState;
-        
-        DialogueBoxKind nextBoxKind = _lineRoutingPolicy.Resolve(line.Metadata, hasCharacterName);
+        DialogueBoxKind nextBoxKind = _lineRoutingPolicy.Resolve(line.Metadata, !string.IsNullOrWhiteSpace(line.CharacterName));
         IDialogueTextTarget nextBox = _dialogueBoxResolver.ResolveTarget(nextBoxKind);
         ResetBoxTransform(nextBox);
         
@@ -122,18 +116,16 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
                 currentBoxIsVisible,
                 nextBoxKind,
                 line.Metadata,
-                shouldFastForwardLine);
+                !_lineAdvanceState.IsRollbackTargetLine(line.TextID) && ShouldFastForwardLine());
 
         PrimeTextTarget(nextBox, line);
 
         
         PrepareBoxForTransition(nextBox, transitionKind);
 
-        if (isRollbackTargetLine)
+        if (_lineAdvanceState.IsRollbackTargetLine(line.TextID))
         {
-            // Target line은 다시 화면에 보여줄 현재 line이다.
-            // Transition만 즉시 적용하고, Typewriter는 아래에서 정상 실행한다.
-            _lineAdvanceState.ConsumeRollbackTargetLine(line.TextID);
+            _lineAdvanceState.ConsumeRollbackTargetLine();
             ApplyBoxTransitionImmediate(currentBox, nextBox, transitionKind);
         }
         else
@@ -152,13 +144,11 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
             await WaitForLineAdvanceAsync(token);
             return;
         }
-
-        _lineAdvanceState.MarkTransitionFinished();
         
         _boxState.Commit(nextBoxKind, nextBox, transitionKind); // 여기서 부터 nextBox가 _boxState로 커밋.
         _dialogueTextRouter.Bind(_boxState);
         
-        if (hasCharacterName && _dialogueTextRouter.HasName)
+        if (!string.IsNullOrWhiteSpace(line.CharacterName) && _dialogueTextRouter.HasName)
             _dialogueTextRouter.NameText.text = line.CharacterName;
         
         if (_dialogueTextRouter.LineText != null)
