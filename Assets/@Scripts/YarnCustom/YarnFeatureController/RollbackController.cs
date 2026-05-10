@@ -70,10 +70,10 @@ public sealed class RollbackController : IDisposable
 
         // Rollback 상태를 먼저 세운다.
         // 이후 abort/close 과정에서 다른 시스템이 context를 읽어도 이미 seek 상태여야 한다.
-        _lineAdvanceState.BeginRollbackSeek(target.lineId);
+        _lineAdvanceState.MarkRollbackSeekStarted(target.lineId);
 
         // AdvanceGate가 기존 typewriter 상태를 보고 현재 line을 완료로 오판하지 않게 잠근다.
-        _lineAdvanceState?.EnterRollbackSeek();
+        _lineAdvanceState?.MarkRollbackSeekLineEntered();
 
         // 현재 Presenter 실행본과 현재 DialogueBox를 실제로 닫는다.
         _linePresentationAborter?.AbortCurrentLinePresentationForRollback();
@@ -100,7 +100,7 @@ public sealed class RollbackController : IDisposable
         _hasTarget = false;
         _target = default;
 
-        _lineAdvanceState.ExitRollbackSeek();
+        _lineAdvanceState.ClearRollbackSeek();
 
         RefreshDialogueUiSuppression();
     }

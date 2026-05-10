@@ -3,7 +3,21 @@ public sealed class LinePresentationAdvanceState
 {
     private string _rollbackTargetLineId;
     private bool _isRollbackTargetLineReady;
+    
+    private bool _isRollbackSeeking;
+    private bool _hasActiveLine;
+    //private bool _isTransitioning;
+    //private bool _isTypewriterRunning;
+    private bool _isLineFullyShown = true;
+    
+    public bool IsRollbackSeeking => _isRollbackSeeking;
 
+    public bool IsLineFullyShown => _hasActiveLine && _isLineFullyShown;
+
+    public bool CanRequestNextLine => _hasActiveLine && _isLineFullyShown;
+
+    public bool CanRequestHurryUp => _hasActiveLine && !_isLineFullyShown;
+    
     // Rollback seek 자체는 끝났지만,
     // 다음 RunLineAsync에서 target line을 one-shot으로 처리해야 하는 상태.
     public bool HasRollbackTargetLineReady => _isRollbackTargetLineReady;
@@ -14,7 +28,7 @@ public sealed class LinePresentationAdvanceState
         _isRollbackSeeking ||
         _isRollbackTargetLineReady;
     
-    public void BeginRollbackSeek(string targetLineId)
+    public void MarkRollbackSeekStarted(string targetLineId)
     {
         _isRollbackSeeking = true;
         _rollbackTargetLineId = targetLineId;
@@ -25,7 +39,7 @@ public sealed class LinePresentationAdvanceState
     {
         if (string.IsNullOrWhiteSpace(_rollbackTargetLineId))
         {
-            ExitRollbackSeek();
+            ClearRollbackSeek();
             return;
         }
 
@@ -49,23 +63,8 @@ public sealed class LinePresentationAdvanceState
         _rollbackTargetLineId = null;
         return true;
     }
-    
-    
-    private bool _isRollbackSeeking;
-    private bool _hasActiveLine;
-    //private bool _isTransitioning;
-    //private bool _isTypewriterRunning;
-    private bool _isLineFullyShown = true;
-    
-    public bool IsRollbackSeeking => _isRollbackSeeking;
 
-    public bool IsLineFullyShown => _hasActiveLine && _isLineFullyShown;
-
-    public bool CanRequestNextLine => _hasActiveLine && _isLineFullyShown;
-
-    public bool CanRequestHurryUp => _hasActiveLine && !_isLineFullyShown;
-
-    public void EnterLine()
+    public void MarkLineEntered()
     {
         _hasActiveLine = true;
         //_isTransitioning = true;
@@ -73,7 +72,7 @@ public sealed class LinePresentationAdvanceState
         _isLineFullyShown = false;
     }
 
-    public void EndTransition()
+    public void MarkTransitionFinished()
     {
         if (!_hasActiveLine)
             return;
@@ -81,7 +80,7 @@ public sealed class LinePresentationAdvanceState
         //_isTransitioning = false;
     }
 
-    public void BeginTypewriter()
+    public void MarkTypewriterStarted()
     {
         if (!_hasActiveLine)
             return;
@@ -90,7 +89,7 @@ public sealed class LinePresentationAdvanceState
         _isLineFullyShown = false;
     }
 
-    public void CompleteLineDisplay()
+    public void MarkLineDisplayCompleted()
     {
         if (!_hasActiveLine)
             return;
@@ -100,20 +99,20 @@ public sealed class LinePresentationAdvanceState
         _isLineFullyShown = true;
     }
 
-    public void EnterRollbackSeek()
+    public void MarkRollbackSeekLineEntered()
     {
         _isRollbackSeeking = true;
         _hasActiveLine = true;
         _isLineFullyShown = false;
     }
 
-    public void ExitRollbackSeek()
+    public void ClearRollbackSeek()
     {
         _isRollbackSeeking = false;
         _rollbackTargetLineId = null;
         _isRollbackTargetLineReady = false;
     }
-    public void DismissLine()
+    public void ClearActiveLine()
     {
         _hasActiveLine = false;
         //_isTransitioning = false;

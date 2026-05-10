@@ -77,7 +77,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
 
     public override async YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token)
     {
-        _lineAdvanceState.EnterLine();
+        _lineAdvanceState.MarkLineEntered();
 
         int myGeneration = _presenterGeneration;
 
@@ -95,8 +95,8 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
         {
             HideBoxDuringRollbackSeek();
 
-            _lineAdvanceState.EndTransition();
-            _lineAdvanceState.CompleteLineDisplay();
+            _lineAdvanceState.MarkTransitionFinished();
+            _lineAdvanceState.MarkLineDisplayCompleted();
 
             await WaitForLineAdvanceAsync(token);
             return;
@@ -153,7 +153,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
             return;
         }
 
-        _lineAdvanceState.EndTransition();
+        _lineAdvanceState.MarkTransitionFinished();
         
         _boxState.Commit(nextBoxKind, nextBox, transitionKind); // 여기서 부터 nextBox가 _boxState로 커밋.
         _dialogueTextRouter.Bind(_boxState);
@@ -167,10 +167,10 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
             MarkupParseResult text = line.TextWithoutCharacterName;
 
             _typewriter.PrepareForContent(text);
-            _lineAdvanceState.BeginTypewriter();
+            _lineAdvanceState.MarkTypewriterStarted();
 
             if (!IsStale())
-                _lineAdvanceState.ExitRollbackSeek();
+                _lineAdvanceState.ClearRollbackSeek();
             
             await _typewriter
                 .RunTypewriter(text, token.HurryUpToken)
@@ -178,14 +178,14 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
 
             if (!IsStale())
             {
-                _lineAdvanceState.CompleteLineDisplay();
+                _lineAdvanceState.MarkLineDisplayCompleted();
                 _typewriter.ContentWillDismiss();
             }
         }
         else
         {
             if (!IsStale())
-                _lineAdvanceState.CompleteLineDisplay();
+                _lineAdvanceState.MarkLineDisplayCompleted();
         }
 
 
