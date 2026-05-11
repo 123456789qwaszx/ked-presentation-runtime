@@ -7,9 +7,9 @@
 
 // <<end_hold>>
 
-// <<bg_spawn test1 bg1>>
-// <<bg_sprite test1 ui/theme1/Background00_Image>>
-// <<bg_fade test1 1>>
+<<bg_spawn test1 bg1>>
+<<bg_sprite test1 ui/theme1/Background00_Image>>
+<<bg_fade test1 1>>
 
 
 <<slot Albedo>>
@@ -21,11 +21,6 @@
 
 <<emotion Albedo 6>>
 알베도: 이 청구서들, 어디 한번 제대로 설명해 보시지!
-
-//<<begin_hold>>
-<<await_for 1>>
-//<<emoji Albedo sparkle>>
-//<<end_hold>>
 <<emotion Albedo 8>>
 알베도: 공급업체 접대라더니, 별의 탑 특제 감자튀김 열 접시는 뭐지? #box=letterbox
 
@@ -33,7 +28,6 @@
 <<fade_out Albedo>>
 <<move_by Albedo 100 0>>
 
-//<<await_for 1>>
 <<slot Laru>>
 <<place Laru duo_left>>
 <<size Laru normal>>
