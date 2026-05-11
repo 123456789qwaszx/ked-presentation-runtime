@@ -235,7 +235,7 @@ public sealed class CommandExecutor : MonoBehaviour
         }
         finally
         {
-            if (runId == _runId && scope != null)
+            if (runId == _runId)
             {
                 scope.SetNodeBusy(false);
                 scope.Token = CancellationToken.None;
@@ -248,6 +248,7 @@ public sealed class CommandExecutor : MonoBehaviour
             }
             else
             {
+                scope.SetNodeBusy(false);
                 Trace($"Node End skipped cleanup: stale runId={runId}, current={_runId}");
             }
         }
