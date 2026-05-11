@@ -21,7 +21,7 @@ public sealed class VNLoadService
     private readonly IVNSaveSafetyPolicy _safetyPolicy;
 
     private bool _isLoading;
-
+    
     public bool IsLoading => _isLoading;
 
     public VNLoadService(
@@ -77,13 +77,10 @@ public sealed class VNLoadService
     {
         _isLoading = true;
 
-        Debug.Log($"[VNLoadService] Begin load. slot='{data.slotId}', node='{data.nodeName}', line='{data.lineId}', visitedIndex={data.visitedIndex}");
-
         try
         {
             _seekDriver.PrepareForLoad();
 
-            // 핵심:
             // Yarn/CPS seek를 시작하기 전에 저장 당시 flags를 먼저 복원한다.
             // 이 순서가 틀리면 분기 있는 VN에서 다른 경로로 seek될 수 있다.
             _flagStore.Restore(data.flags);
@@ -93,7 +90,7 @@ public sealed class VNLoadService
                 onComplete: () => OnSeekComplete(data),
                 onFail: () => OnSeekFailed(data));
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
             _isLoading = false;
             Debug.LogError($"[VNLoadService] BeginLoad exception. slot='{data.slotId}', error='{e.Message}'");
@@ -107,9 +104,8 @@ public sealed class VNLoadService
         try
         {
             _seekDriver.OnLoadComplete(data);
-            Debug.Log($"[VNLoadService] Load complete. slot='{data.slotId}'");
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
             Debug.LogError($"[VNLoadService] OnLoadComplete exception. slot='{data.slotId}', error='{e.Message}'");
         }

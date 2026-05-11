@@ -10,7 +10,7 @@ public sealed class EmptyVNFlagStore : IVNFlagStore
 
     public void Restore(List<VNFlagEntry> flags)
     {
-        Debug.LogWarning("[EmptyVNFlagStore] Restore called, but no real flag store is bound.");
+        //Debug.LogWarning("[EmptyVNFlagStore] Restore called, but no real flag store is bound.");
     }
 }
 

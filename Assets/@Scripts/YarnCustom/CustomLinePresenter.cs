@@ -157,7 +157,6 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
             MarkupParseResult text = line.TextWithoutCharacterName;
 
             _typewriter.PrepareForContent(text);
-            _lineAdvanceState.MarkTypewriterStarted();
 
             if (!IsStale())
                 _lineAdvanceState.ClearRollbackSeek();

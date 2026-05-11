@@ -103,9 +103,7 @@ public sealed class RollbackHistory
         _nextHistoryIndex = 0;
     }
 
-    public bool TryGetPointByHistoryIndex(
-        int historyIndex,
-        out RollbackPoint point)
+    public bool TryGetPointByHistoryIndex(int historyIndex, out RollbackPoint point)
     {
         int index = FindListIndexByHistoryIndex(historyIndex);
         if (index < 0)

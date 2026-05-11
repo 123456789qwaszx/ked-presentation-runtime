@@ -13,7 +13,6 @@ public class VnAppBootstrap : MonoBehaviour
     private readonly EpisodePlayState _episodePlayState = new();
     private readonly PresentationSessionContext _presentationSessionContext = new();
     private readonly LinePresentationAdvanceState _linePresentationAdvanceState = new();
-    private readonly VNSaveRuntimeState _vnSaveRuntimeState = new ();
 
     [Header("Sound")] 
     [SerializeField] private AudioSystem audioSystem;
@@ -300,7 +299,6 @@ public class VnAppBootstrap : MonoBehaviour
             customLinePresenter,
             _linePresentationAdvanceState,
             _rollbackHistory,
-            _vnSaveRuntimeState,
             vnPlaytimeTracker);
 
         // 아직 게임 플래그 저장/복원이 없기에 임시로 Empty 사용.
@@ -338,7 +336,6 @@ public class VnAppBootstrap : MonoBehaviour
             _episodePlayState);
         
         _screenBindings = new VnScreenBindings(_episodeFlowController, _vnSaveLoadSystem);
-        
     }
 
     private void InitializeEpisodePlayer()

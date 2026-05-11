@@ -8889,9 +8889,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5a3f81eaca50f144ab19e60b4c29c1c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CommandExecutor
-  enableTrace: 1
+  enableTrace: 0
   logTraceStreaming: 0
-  logTraceDumpOnRunEnd: 1
+  logTraceDumpOnRunEnd: 0
   tracePreview: 
 --- !u!4 &1257280953
 Transform:
