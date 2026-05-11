@@ -30,6 +30,18 @@ public sealed class LinePresentationAdvanceState
         _isLineFullyShown = false;
     }
 
+    public void MarkLoadSeek(string nodeName, string lineId)
+    {
+        _isRollbackSeeking = true;
+        
+        _rollbackTargetLinePending = false;
+        _isLineFullyShown = false;
+        
+        
+        _rollbackTargetNodeName = nodeName;
+        _rollbackTargetLineId = lineId;
+    }
+
     public bool IsRollbackSeekTarget(YarnLineMeta meta)
     {
         return _rollbackTargetNodeName == meta.nodeName &&

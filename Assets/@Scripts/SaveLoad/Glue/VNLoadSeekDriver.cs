@@ -1,4 +1,5 @@
 using System;
+using System.Drawing;
 using UnityEngine;
 
 public interface IVNLoadDialogueRestarter
@@ -34,7 +35,7 @@ public sealed class VNLoadSeekDriver : IVNLoadSeekDriver, IDisposable
         LinePresentationAdvanceState lineAdvanceState,
         RollbackHistory rollbackHistory,
         VNSaveRuntimeState saveRuntimeState,
-        VNPlaytimeTracker playtimeTracker = null)
+        VNPlaytimeTracker playtimeTracker)
     {
         _bridge = bridge;
         _restarter = restarter;
@@ -62,10 +63,10 @@ public sealed class VNLoadSeekDriver : IVNLoadSeekDriver, IDisposable
         // 현재 세션의 rollback history는 이전 실행의 것이므로 버린다.
         // Load seek 중 새로 지나가는 라인들이 다시 history를 구성하게 하는 편이 자연스럽다.
         _rollbackHistory?.ClearRollbackHistory();
+        
 
         // AdvanceGate가 기존 typewriter/line 상태를 보고 현재 line을 완료로 오판하지 않게 한다.
         // 이름은 RollbackSeek지만 기능적으로는 "seek 중 advance 잠금"이다.
-        //_lineAdvanceState?.MarkLoadSeekLineEntered();
 
         // 현재 Presenter 실행본과 현재 DialogueBox를 닫는다.
         _linePresentationAborter?.AbortCurrentLinePresentationForRollback();
@@ -91,7 +92,9 @@ public sealed class VNLoadSeekDriver : IVNLoadSeekDriver, IDisposable
             Fail(onFail);
             return;
         }
-
+        
+        _lineAdvanceState?.MarkLoadSeek(saveData.nodeName, saveData.lineId);
+        
         _target = saveData;
         _hasTarget = true;
         _onComplete = onComplete;
