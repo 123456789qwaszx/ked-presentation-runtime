@@ -203,7 +203,7 @@ public sealed class ShotTrackCommand : CommandBase, IStepScopedCommand
             return false;
         }
 
-        RectTransform stageRoot = scope.Presentation.GetRect(PresentationTarget.Stage_Root);
+        RectTransform stageRoot = scope.Presentation.GetRect(PresentationTarget.Stage00_Root);
 
         Vector3 world =
             rect.TransformPoint(new Vector3(_spec.focusLocalOffset.x, _spec.focusLocalOffset.y, 0f));

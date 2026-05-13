@@ -27,6 +27,8 @@ public sealed class CharRigSlotResolver : ICharRigSlotResolver
         RectTransform rt = slot switch
         {
             CharRigSlot.Stage00CharacterSlot => _presentationUIRoot.ResolveRect(PresentationUIRoot.Refs.Stage00CharSlotRig_Root),
+            CharRigSlot.Stage01CharacterSlot => _presentationUIRoot.ResolveRect(PresentationUIRoot.Refs.Stage01CharSlotRig_Root),
+            CharRigSlot.Stage02CharacterSlot => _presentationUIRoot.ResolveRect(PresentationUIRoot.Refs.Stage02CharSlotRig_Root),
             CharRigSlot.ProtagonistSlot => _withPortraitBox.ProtagonistRect,
             
             _ => null

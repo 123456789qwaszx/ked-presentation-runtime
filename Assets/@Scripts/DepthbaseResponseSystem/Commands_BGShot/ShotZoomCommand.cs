@@ -206,7 +206,7 @@ public sealed class ShotZoomCommand : CommandBase, IStepScopedCommand
         scope.Refs.TryGetCharRigRefs(_spec.focusRoleKey, out CharacterRigRefs rigRefs);
         RectTransform rect = rigRefs.GetRect(_spec.focusTarget);
         
-        RectTransform stageRoot = scope.Presentation.GetRect(PresentationTarget.Stage_Root);
+        RectTransform stageRoot = scope.Presentation.GetRect(PresentationTarget.Stage00_Root);
 
         Vector3 world = rect.TransformPoint(new Vector3(_spec.focusLocalOffset.x, _spec.focusLocalOffset.y, 0f));
         Vector3 local = stageRoot.InverseTransformPoint(world);

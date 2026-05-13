@@ -8,7 +8,7 @@ using System.Collections;
 public sealed class FadeToPresentationCommandSpec : CommandSpecBase
 {
     [Header("Target")]
-    public PresentationTarget target = PresentationTarget.BGOverlay_Root;
+    public PresentationTarget target = PresentationTarget.Stage00BGOverlay_Root;
 
     [Header("Fade")]
     [Range(0f, 1f)]

@@ -313,38 +313,38 @@ public sealed partial class YarnCommandBridge
 
             case "stage":
             case "stage_root":
-                target = PresentationTarget.Stage_Root;
+                target = PresentationTarget.Stage00_Root;
                 return true;
 
             case "backgroundsystem":
             case "backgroundsystem_root":
-                target = PresentationTarget.BackgroundSystem_Root;
+                target = PresentationTarget.Stage00BackgroundSystem_Root;
                 return true;
 
             case "bgshot":
             case "bgshot_root":
             case "bg":
-                target = PresentationTarget.BGShot_Root;
+                target = PresentationTarget.Stage00BGShot_Root;
                 return true;
 
             case "bgcontent":
             case "bgcontent_root":
-                target = PresentationTarget.BGContent_Root;
+                target = PresentationTarget.Stage00BGContent_Root;
                 return true;
 
             case "bgoverlay":
             case "bgoverlay_root":
-                target = PresentationTarget.BGOverlay_Root;
+                target = PresentationTarget.Stage00BGOverlay_Root;
                 return true;
 
             case "charactersystem":
             case "charactersystem_root":
-                target = PresentationTarget.CharacterSystem_Root;
+                target = PresentationTarget.Stage00CharacterSystem_Root;
                 return true;
 
             case "foreground":
             case "foreground_root":
-                target = PresentationTarget.Foreground_Root;
+                target = PresentationTarget.Stage00Foreground_Root;
                 return true;
 
             case "dialogueui":

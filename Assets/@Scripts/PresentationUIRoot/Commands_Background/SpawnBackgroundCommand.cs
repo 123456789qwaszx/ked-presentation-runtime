@@ -15,7 +15,7 @@ public sealed class SpawnBackgroundCommandSpec : CommandSpecBase
     public string viewPrefabKey = "default";
 
     [Header("Spawn")]
-    public PresentationTarget parentTarget = PresentationTarget.BGContent_Root;
+    public PresentationTarget parentTarget = PresentationTarget.Stage00BGContent_Root;
 
     public bool destroyExistingWithSameKey = true;
     public bool setAsLastSibling = true;
@@ -100,7 +100,7 @@ public sealed class SpawnBackgroundCommand : CommandBase
             _bgKey,
             target,
             _spec.responseProfile,
-            scope.Presentation.GetRect(PresentationTarget.Stage_Root));
+            scope.Presentation.GetRect(PresentationTarget.Stage00_Root));
 
         scope.Refs[_bgKey] = target;
 
