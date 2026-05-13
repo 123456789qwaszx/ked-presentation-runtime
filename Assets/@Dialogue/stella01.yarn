@@ -1,6 +1,47 @@
 ﻿title: stella01
 ---
 
+<<clearall_rigs>>
+
+
+<<bgm audio/bgm_tam_dystopia_snowwind_01>>
+<<presentation_setup>>
+
+<<bg_spawn bg1 a>>
+<<bg_sprite bg1 ui/theme1/Background00_Image>>
+<<bg_fade bg1 1>>
+
+<<bg_spawn bg2 a>>
+<<bg_sprite bg2 bg05>>
+<<bg_fade bg2 0.4>>
+
+<<bg_spawn bg3 b>>
+<<bg_sprite bg3 momoka_a_01>>
+<<bg_fade bg3 1>>
+
+//<<blackout cover>>
+
+
+... #box=letterbox
+<<slot Mercurio>>
+<<place Mercurio center>>
+<<size Mercurio normal>>
+<<cast Mercurio Mercurio>>
+
+<<pause 0.5>>
+<<nudge Mercurio down>>
+<<fade_in Mercurio>>
+
+<<emotion Mercurio 10>>
+메르쿠리아: 이번에 저희 컴퍼니를 선택해 주셔서 감사합니다. 저는 천궁보험 필리에 영업부 매니저 메르쿠리아라고 합니다.
+
+
+<<emotion Mercurio 3>>
+메르쿠리아: 이전에 작성해 주신 설문을 보니, 고객님께서는 실속 있는 생명보험을 고려 중이신 것으로 보입니다만.
+
+
+rrr #box=letterbox
+55 #box=letterbox
 <<bgm audio/bgm_tam_dystopia_snowwind_01>>
 
 <<begin_hold>>
@@ -8,11 +49,11 @@
 
 <<end_hold>>
 
-<<bg_spawn test1 bg1>>
+<<bg_spawn test1 a>>
 <<bg_sprite test1 ui/theme1/DialogueBox03BG_Image2>>
 <<bg_fade test1 1>>
 
-<<bg_spawn test2 bg1>>
+<<bg_spawn test2 a>>
 <<bg_sprite test2 ui/theme1/Background00_Image>>
 <<bg_fade test2 1>>
 
@@ -21,7 +62,7 @@
 // <<bg_fade test3 1>>
 
 
-<<bg_spawn_bound char1 bg1 bgcontent characterslot>>
+<<bg_spawn_bound char1 a bgcontent characterslot>>
 <<bg_sprite char1 ui/default/LobbyCharacter_Image>>
 <<bg_fade char1 1>>
 
@@ -45,7 +86,7 @@
 // <<begin_hold>>
 // <<end_hold>>
 주변을 살피는 그림자의 움직임에는 극도의 경계심이 서려 있었다.
-<<shot_track me 2000 0 1.5>>
+//<<shot_track me 2000 0 1.5>>
 
 
 // <<begin_hold>>
@@ -56,7 +97,7 @@
 //<<dlg_spawn b1 b2>>
 //<<end_hold>>
 "물건은 가져왔어?"
-<<shot_zoom me -10 1.5>>
+<<shot_zoom me 1 1.5>>
 // <<begin_hold>>
 // <<bg_spawn test3 bg1>>
 
@@ -66,6 +107,7 @@
 // <<end_hold>>
 
 어둠 속에서 누군가가 나직한 목소리로 물었다.
+<<shot_track me 0 -440 1.5>>
 
 상대방인 의심스러운 사람이 품 안에서 소중한 듯 무언가를 꺼내 보이며 대꾸했다.
 

@@ -238,6 +238,96 @@ MonoBehaviour:
     emotionKey: 11
     sprite: {fileID: 21300000, guid: 038ceca16472375478fc248e0739a2d4, type: 3}
     assetPath: Assets/Art/Portraits/Caramel/Caramel_a_11.png
+  - characterId: Gang_Girl
+    variantKey: Gang_Girl_a
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: 7e4e64f7713b4484ab01267922914c63, type: 3}
+    assetPath: Assets/Art/Portraits/Gang_Girl/Gang_Girl_a_01.png
+  - characterId: Gang_Girl
+    variantKey: Gang_Girl_a
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: 0ab61197411e67244a64d8675733f5e5, type: 3}
+    assetPath: Assets/Art/Portraits/Gang_Girl/Gang_Girl_a_03.png
+  - characterId: Gang_Girl
+    variantKey: Gang_Girl_a
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: 40c055845618e0248a22b938f49ea335, type: 3}
+    assetPath: Assets/Art/Portraits/Gang_Girl/Gang_Girl_a_04.png
+  - characterId: Gang_Girl
+    variantKey: Gang_Girl_a
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: 6e41905b2501dda46afcd8a8f85dd4f0, type: 3}
+    assetPath: Assets/Art/Portraits/Gang_Girl/Gang_Girl_a_05.png
+  - characterId: Gang_Girl
+    variantKey: Gang_Girl_a
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: a45f732fc0321804593bcf5427992a83, type: 3}
+    assetPath: Assets/Art/Portraits/Gang_Girl/Gang_Girl_a_06.png
+  - characterId: Gang_Girl
+    variantKey: Gang_Girl_a
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: cab423d9cf77510498d78b38afc3ce2d, type: 3}
+    assetPath: Assets/Art/Portraits/Gang_Girl/Gang_Girl_a_07.png
+  - characterId: Gang_Girl
+    variantKey: Gang_Girl_a
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: f082b0f501a69694b951b15e154568e3, type: 3}
+    assetPath: Assets/Art/Portraits/Gang_Girl/Gang_Girl_a_08.png
+  - characterId: Gang_Girl
+    variantKey: Gang_Girl_a
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: adfbe51ec0d1be142a0505fdfdafe53f, type: 3}
+    assetPath: Assets/Art/Portraits/Gang_Girl/Gang_Girl_a_09.png
+  - characterId: Gang_Girl
+    variantKey: Gang_Girl_a
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: b8b4148acacc5694982327dcb13e4b00, type: 3}
+    assetPath: Assets/Art/Portraits/Gang_Girl/Gang_Girl_a_10.png
+  - characterId: Gang_Girl
+    variantKey: Gang_Girl_b
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: 1dde7880787dbf0428fd2555068d5da1, type: 3}
+    assetPath: Assets/Art/Portraits/Gang_Girl/Gang_Girl_b_01.png
+  - characterId: Gang_Girl
+    variantKey: Gang_Girl_b
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: bae22915275e3524591897c8a82342d5, type: 3}
+    assetPath: Assets/Art/Portraits/Gang_Girl/Gang_Girl_b_03.png
+  - characterId: Gang_Girl
+    variantKey: Gang_Girl_b
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: fe8ca81f28dddde4ab120ae8de3fa8ff, type: 3}
+    assetPath: Assets/Art/Portraits/Gang_Girl/Gang_Girl_b_04.png
+  - characterId: Gang_Girl
+    variantKey: Gang_Girl_b
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: f6c3613517b2a934d82e622ce781bdfd, type: 3}
+    assetPath: Assets/Art/Portraits/Gang_Girl/Gang_Girl_b_05.png
+  - characterId: Gang_Girl
+    variantKey: Gang_Girl_b
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: 4cf6bb849c1b2d546848747729311f2c, type: 3}
+    assetPath: Assets/Art/Portraits/Gang_Girl/Gang_Girl_b_06.png
+  - characterId: Gang_Girl
+    variantKey: Gang_Girl_b
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: 9951659bbc0ba5449a7f2b1eb8bdadf2, type: 3}
+    assetPath: Assets/Art/Portraits/Gang_Girl/Gang_Girl_b_07.png
+  - characterId: Gang_Girl
+    variantKey: Gang_Girl_b
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: 238615191cd64e3469b2944cb373a960, type: 3}
+    assetPath: Assets/Art/Portraits/Gang_Girl/Gang_Girl_b_08.png
+  - characterId: Gang_Girl
+    variantKey: Gang_Girl_b
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: 34dc625adfef245418ace55f9bb1e53a, type: 3}
+    assetPath: Assets/Art/Portraits/Gang_Girl/Gang_Girl_b_09.png
+  - characterId: Gang_Girl
+    variantKey: Gang_Girl_b
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: 03f3bc9fe1b92cc439a5fd58d2a63e03, type: 3}
+    assetPath: Assets/Art/Portraits/Gang_Girl/Gang_Girl_b_10.png
   - characterId: Laru
     variantKey: Laru_a
     emotionKey: 01
@@ -478,6 +568,116 @@ MonoBehaviour:
     emotionKey: 11
     sprite: {fileID: 21300000, guid: a57cfe6edb851f84f9a795a677ec12be, type: 3}
     assetPath: Assets/Art/Portraits/Leafia/Leafia_a_11.png
+  - characterId: Matilda
+    variantKey: Matilda_a
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: 34305b2b39ab86449bb65e0413b709b6, type: 3}
+    assetPath: Assets/Art/Portraits/Matilda/Matilda_a_01.png
+  - characterId: Matilda
+    variantKey: Matilda_a
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: 75e8772feaf79dc4c8e3238aa7ee345a, type: 3}
+    assetPath: Assets/Art/Portraits/Matilda/Matilda_a_03.png
+  - characterId: Matilda
+    variantKey: Matilda_a
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: 44e9628f0d96ada49aef15a840dac274, type: 3}
+    assetPath: Assets/Art/Portraits/Matilda/Matilda_a_04.png
+  - characterId: Matilda
+    variantKey: Matilda_a
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: 05ca5398d2d215945982c2b7eaa96447, type: 3}
+    assetPath: Assets/Art/Portraits/Matilda/Matilda_a_05.png
+  - characterId: Matilda
+    variantKey: Matilda_a
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: be930d6c94c3dd34abaeaedccbb1f81e, type: 3}
+    assetPath: Assets/Art/Portraits/Matilda/Matilda_a_06.png
+  - characterId: Matilda
+    variantKey: Matilda_a
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: f63c2f885985b5f48b7fc36334d5802e, type: 3}
+    assetPath: Assets/Art/Portraits/Matilda/Matilda_a_07.png
+  - characterId: Matilda
+    variantKey: Matilda_a
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: 4de06de4f685bfb409b5ae3310b7400c, type: 3}
+    assetPath: Assets/Art/Portraits/Matilda/Matilda_a_08.png
+  - characterId: Matilda
+    variantKey: Matilda_a
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: a5d0fefda92178a408e2f19e776a9427, type: 3}
+    assetPath: Assets/Art/Portraits/Matilda/Matilda_a_09.png
+  - characterId: Matilda
+    variantKey: Matilda_a
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: e81dff9527035b946bd4fe010a65aa8b, type: 3}
+    assetPath: Assets/Art/Portraits/Matilda/Matilda_a_10.png
+  - characterId: Matilda
+    variantKey: Matilda_a
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: f14674e9e98d09e46973f9e7a372920d, type: 3}
+    assetPath: Assets/Art/Portraits/Matilda/Matilda_a_11.png
+  - characterId: Matilda
+    variantKey: Matilda_a
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: 588a84a29a6fd284b8e3d523d63f4aa9, type: 3}
+    assetPath: Assets/Art/Portraits/Matilda/Matilda_a_12.png
+  - characterId: Mercurio
+    variantKey: Mercurio_a
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: af83fbabe6a02f84eb165096dd539101, type: 3}
+    assetPath: Assets/Art/Portraits/Mercurio/Mercurio_a_01.png
+  - characterId: Mercurio
+    variantKey: Mercurio_a
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: eab96e6608a14254784969b65136a417, type: 3}
+    assetPath: Assets/Art/Portraits/Mercurio/Mercurio_a_03.png
+  - characterId: Mercurio
+    variantKey: Mercurio_a
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: e58f8f3d43972d04b83fcebb600e3bcb, type: 3}
+    assetPath: Assets/Art/Portraits/Mercurio/Mercurio_a_04.png
+  - characterId: Mercurio
+    variantKey: Mercurio_a
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: f8057f487f742b0448652be80941fcf7, type: 3}
+    assetPath: Assets/Art/Portraits/Mercurio/Mercurio_a_05.png
+  - characterId: Mercurio
+    variantKey: Mercurio_a
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: 8d3f945b101050e439856b78b389bf14, type: 3}
+    assetPath: Assets/Art/Portraits/Mercurio/Mercurio_a_06.png
+  - characterId: Mercurio
+    variantKey: Mercurio_a
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: 9bed628717ee15349bd68cdeeb7bf0f0, type: 3}
+    assetPath: Assets/Art/Portraits/Mercurio/Mercurio_a_07.png
+  - characterId: Mercurio
+    variantKey: Mercurio_a
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: 3786b2e5669a04241b8e41cd192a8a92, type: 3}
+    assetPath: Assets/Art/Portraits/Mercurio/Mercurio_a_08.png
+  - characterId: Mercurio
+    variantKey: Mercurio_a
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: c959b33698bbaa5439473fd8a0e8383c, type: 3}
+    assetPath: Assets/Art/Portraits/Mercurio/Mercurio_a_09.png
+  - characterId: Mercurio
+    variantKey: Mercurio_a
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: 0a32416a7c13a8044ab83066845a899b, type: 3}
+    assetPath: Assets/Art/Portraits/Mercurio/Mercurio_a_10.png
+  - characterId: Mercurio
+    variantKey: Mercurio_a
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: b0affc364d23ec843abc34c6421fc520, type: 3}
+    assetPath: Assets/Art/Portraits/Mercurio/Mercurio_a_11.png
+  - characterId: Mercurio
+    variantKey: Mercurio_a
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: 7b56f4adf77f8ff48b8cc2bd3228a2e0, type: 3}
+    assetPath: Assets/Art/Portraits/Mercurio/Mercurio_a_12.png
   - characterId: Okra
     variantKey: Okra_a
     emotionKey: 01
@@ -858,5 +1058,5 @@ MonoBehaviour:
     emotionKey: 01
     sprite: {fileID: 21300000, guid: 2c5e83a3f43fc544fa622f82902d7d2d, type: 3}
     assetPath: Assets/Art/Portraits/reira/reira_a_01.png
-  generatedTicksUtc: 639134549959043051
-  generatedTimeReadable: 2026-05-04 10:29:55
+  generatedTicksUtc: 639142672974015789
+  generatedTimeReadable: 2026-05-13 20:08:17
