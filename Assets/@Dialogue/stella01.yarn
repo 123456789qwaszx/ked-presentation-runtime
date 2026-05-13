@@ -7,23 +7,20 @@
 <<bgm audio/bgm_tam_dystopia_snowwind_01>>
 <<presentation_setup>>
 
-<<bg_spawn bg1 a>>
-<<bg_sprite bg1 ui/theme1/Background00_Image>>
-<<bg_fade bg1 1>>
 
-<<bg_spawn bg2 a>>
+<<bg_spawn bg2 a 0>>
 <<bg_sprite bg2 bg05>>
 <<bg_fade bg2 0.4>>
 
-<<bg_spawn bg3 b>>
+<<bg_spawn bg3 b 0>>
 <<bg_sprite bg3 momoka_a_01>>
 <<bg_fade bg3 1>>
 
+
 //<<blackout cover>>
 
-
 ... #box=letterbox
-<<slot Mercurio>>
+<<slot Mercurio 0>>
 <<place Mercurio center>>
 <<size Mercurio normal>>
 <<cast Mercurio Mercurio>>
@@ -35,11 +32,22 @@
 <<emotion Mercurio 10>>
 메르쿠리아: 이번에 저희 컴퍼니를 선택해 주셔서 감사합니다. 저는 천궁보험 필리에 영업부 매니저 메르쿠리아라고 합니다.
 
+<<bg_spawn bg1 a 1>>
+<<bg_sprite bg1 ui/theme1/Background00_Image>>
+<<bg_fade bg1 1>>
+
+
+<<slot Albedo 1>>
+<<place Albedo center>>
+<<size Albedo normal>>
+<<cast Albedo Albedo>>
+<<fade_in Albedo>>
 
 <<emotion Mercurio 3>>
 메르쿠리아: 이전에 작성해 주신 설문을 보니, 고객님께서는 실속 있는 생명보험을 고려 중이신 것으로 보입니다만.
 
 
+<<move_by_p s1 600 0 0>>
 rrr #box=letterbox
 55 #box=letterbox
 <<bgm audio/bgm_tam_dystopia_snowwind_01>>
@@ -49,11 +57,11 @@ rrr #box=letterbox
 
 <<end_hold>>
 
-<<bg_spawn test1 a>>
+<<bg_spawn test1 a 0>>
 <<bg_sprite test1 ui/theme1/DialogueBox03BG_Image2>>
 <<bg_fade test1 1>>
 
-<<bg_spawn test2 a>>
+<<bg_spawn test2 a 0>>
 <<bg_sprite test2 ui/theme1/Background00_Image>>
 <<bg_fade test2 1>>
 
@@ -66,7 +74,7 @@ rrr #box=letterbox
 <<bg_sprite char1 ui/default/LobbyCharacter_Image>>
 <<bg_fade char1 1>>
 
-<<slot me>>
+<<slot me 0>>
 <<place me center>>
 <<place_offset me 0 700>>
 // <<cast me reira>>

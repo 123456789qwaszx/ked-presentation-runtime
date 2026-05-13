@@ -95,13 +95,8 @@ public sealed class SequenceTextImporter
             // ------------------------------------------------------------
 
             case "slot":
-                RequireArgs(line, 1);
-                _bridge.Import_Slot(line.args[0]);
-                return true;
-
-            case "slot_boxside":
-                RequireArgs(line, 1);
-                _bridge.Import_SlotBoxside(line.args[0]);
+                RequireArgs(line, 2);
+                _bridge.Import_Slot(line.args[0], line.args[1]);
                 return true;
 
             case "place":
@@ -185,13 +180,12 @@ public sealed class SequenceTextImporter
 
             case "hop_in":
                 RequireArgs(line, 1);
-
                 _bridge.Import_HopIn(
                     line.args[0],
                     line.args.Count >= 2 ? ParseFloat(line.args[1], "distance") : 80f,
                     line.args.Count >= 3 ? line.args[2] : "left");
-
                 return true;
+
             case "jolt":
                 RequireArgs(line, 1);
                 _bridge.Import_Jolt(
@@ -332,12 +326,11 @@ public sealed class SequenceTextImporter
                 RequireArgs(line, 1);
                 _bridge.Import_EmojiHide(line.args[0]);
                 return true;
-            
+
             case "box_hide":
                 _bridge.Import_BoxHide();
                 return true;
-            
-            
+
             default:
                 result.warnings.Add(
                     $"Line {line.lineNumber}: unsupported command '{line.commandName}'");

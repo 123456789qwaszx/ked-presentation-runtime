@@ -44,9 +44,8 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         // marked with wait=true finish inside Presentation/Executor.
         //_dialogueRunner.AddCommandHandler("end_hold", (Func<IEnumerator>)(() => PlayHeldCommands()));
         _dialogueRunner.AddCommandHandler("end_hold", PlayHeldCommands);
-
-        _dialogueRunner.AddCommandHandler<string>("slot_boxside", EnqueueSetupCharRigSpecProtagonistSlot);
-        _dialogueRunner.AddCommandHandler<string>("slot", EnqueueSetupCharRigSpec);
+        
+        _dialogueRunner.AddCommandHandler<string, string>("slot", EnqueueSetupCharRigSpec);
         _dialogueRunner.AddCommandHandler<string, string>("place", EnqueueSetAnchorSpecs);
         _dialogueRunner.AddCommandHandler<string, int, int>("place_offset", EnqueueSetAnchorOffsetSpecs);
         _dialogueRunner.AddCommandHandler<string, string>("size", EnqueueSetOriginSizeSpec);
@@ -643,8 +642,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 
         Collect(spec);
     }
-
-    private void EnqueueSetupCharRigSpec(string roleKey)
+    private void EnqueueSetupCharRigSpec(string roleKey, string slotKey)
     {
         if (string.IsNullOrWhiteSpace(roleKey))
         {
@@ -652,31 +650,62 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
             return;
         }
 
+        if (!TryParseCharRigSlot(slotKey, out CharRigSlot parentSlot))
+        {
+            Debug.LogError($"[YarnCommandBridge] slot: Unknown slot key '{slotKey}'. Use 'a', 'b', 'c', or 'd'.");
+            return;
+        }
+
         var spec = new SetupCharRigCommandSpec
         {
-            roleKey = roleKey,
+            roleKey = roleKey.Trim(),
+            parentSlot = parentSlot,
             rigPrefab = rigPrefab
         };
 
         Collect(spec);
     }
-
-    private void EnqueueSetupCharRigSpecProtagonistSlot(string roleKey)
+    
+    private bool TryParseCharRigSlot(string raw, out CharRigSlot slot)
     {
-        if (string.IsNullOrWhiteSpace(roleKey))
+        slot = default;
+
+        if (string.IsNullOrWhiteSpace(raw))
+            return false;
+
+        string s = raw.Trim().ToLowerInvariant();
+
+        switch (s)
         {
-            Debug.LogError("[YarnCommandBridge] slot: roleKey is null or empty.");
-            return;
+            case "s0":
+            case "0":
+            case "stage00":
+                slot = CharRigSlot.Stage00CharacterSlot;
+                return true;
+
+            case "s1":
+            case "1":
+            case "stage01":
+                slot = CharRigSlot.Stage01CharacterSlot;
+                return true;
+
+            case "s2":
+            case "2":
+            case "stage02":
+                slot = CharRigSlot.Stage02CharacterSlot;
+                return true;
+
+            case "s3":
+            case "me":
+            case "protagonist":
+            case "protagonistslot":
+            case "protagonist_slot":
+            case "boxside":
+                slot = CharRigSlot.ProtagonistSlot;
+                return true;
         }
 
-        var spec = new SetupCharRigCommandSpec
-        {
-            roleKey = roleKey,
-            parentSlot = CharRigSlot.ProtagonistSlot,
-            rigPrefab = rigPrefab
-        };
-
-        Collect(spec);
+        return Enum.TryParse(s, true, out slot);
     }
 
     private void EnqueueSetAnchorOffsetSpecs(string roleKey, int x, int y)

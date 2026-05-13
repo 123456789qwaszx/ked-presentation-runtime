@@ -33,14 +33,9 @@ public sealed partial class YarnCommandBridge
 
     // ---- import wrappers ------------------------------------------------
 
-    public void Import_Slot(string roleKey)
+    public void Import_Slot(string roleKey, string slotKey)
     {
-        EnqueueSetupCharRigSpec(roleKey);
-    }
-
-    public void Import_SlotBoxside(string roleKey)
-    {
-        EnqueueSetupCharRigSpecProtagonistSlot(roleKey);
+        EnqueueSetupCharRigSpec(roleKey, slotKey);
     }
 
     public void Import_Place(string roleKey, string positionPreset)
@@ -52,7 +47,7 @@ public sealed partial class YarnCommandBridge
     {
         EnqueueSetAnchorOffsetSpecs(roleKey, x, y);
     }
-    
+
     public void Import_Size(string roleKey, string scaleArg)
     {
         EnqueueSetOriginSizeSpec(roleKey, scaleArg);

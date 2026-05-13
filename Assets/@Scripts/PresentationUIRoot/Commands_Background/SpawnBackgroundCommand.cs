@@ -95,12 +95,15 @@ public sealed class SpawnBackgroundCommand : CommandBase
             target.transform.SetAsLastSibling();
 
         ResetSpawnedRectTransform(target);
+        
+        PresentationTarget stageRootTarget = ResolveStageRootTarget(_spec.parentTarget);
+        RectTransform presentationRoot = scope.Presentation.GetRect(stageRootTarget);
 
         _responseRig?.RegisterRuntimeBinding(
             _bgKey,
             target,
             _spec.responseProfile,
-            scope.Presentation.GetRect(PresentationTarget.Stage00_Root));
+            presentationRoot);
 
         scope.Refs[_bgKey] = target;
 
@@ -163,4 +166,48 @@ public sealed class SpawnBackgroundCommand : CommandBase
         rect.anchoredPosition = Vector2.zero;
         rect.sizeDelta = Vector2.zero;
     }
+    
+    private static PresentationTarget ResolveStageRootTarget(PresentationTarget parentTarget)
+{
+    switch (parentTarget)
+    {
+        case PresentationTarget.Stage00_Root:
+        case PresentationTarget.Stage00BackgroundSystem_Root:
+        case PresentationTarget.Stage00BGShot_Root:
+        case PresentationTarget.Stage00BGContent_Root:
+        case PresentationTarget.Stage00BGOverlay_Root:
+        case PresentationTarget.Stage00CharacterSystem_Root:
+        case PresentationTarget.Stage00CharSlot_Root:
+        case PresentationTarget.Stage00CharSlotFocus_Root:
+        case PresentationTarget.Stage00CharSlotRig_Root:
+        case PresentationTarget.Stage00Foreground_Root:
+            return PresentationTarget.Stage00_Root;
+
+        case PresentationTarget.Stage01_Root:
+        case PresentationTarget.Stage01BackgroundSystem_Root:
+        case PresentationTarget.Stage01BGShot_Root:
+        case PresentationTarget.Stage01BGContent_Root:
+        case PresentationTarget.Stage01BGOverlay_Root:
+        case PresentationTarget.Stage01CharacterSystem_Root:
+        case PresentationTarget.Stage01CharSlot_Root:
+        case PresentationTarget.Stage01CharSlotFocus_Root:
+        case PresentationTarget.Stage01CharSlotRig_Root:
+        case PresentationTarget.Stage01Foreground_Root:
+            return PresentationTarget.Stage01_Root;
+
+        case PresentationTarget.Stage02_Root:
+        case PresentationTarget.Stage02BackgroundSystem_Root:
+        case PresentationTarget.Stage02BGShot_Root:
+        case PresentationTarget.Stage02BGContent_Root:
+        case PresentationTarget.Stage02BGOverlay_Root:
+        case PresentationTarget.Stage02CharacterSystem_Root:
+        case PresentationTarget.Stage02CharSlot_Root:
+        case PresentationTarget.Stage02CharSlotFocus_Root:
+        case PresentationTarget.Stage02CharSlotRig_Root:
+        case PresentationTarget.Stage02Foreground_Root:
+            return PresentationTarget.Stage02_Root;
+    }
+
+    return PresentationTarget.Stage00_Root;
+}
 }
