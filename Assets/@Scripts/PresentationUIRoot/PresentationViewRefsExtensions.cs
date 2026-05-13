@@ -45,15 +45,15 @@ public static class PresentationViewRefsExtensions
             PresentationTarget.StageShot_Root => refs.StageShot_Root,
             PresentationTarget.StagePan_Root => refs.StagePan_Root,
             PresentationTarget.StageZoom_Root => refs.StageZoom_Root,
-            PresentationTarget.Stage_Root => refs.Stage_Root,
+            PresentationTarget.Stage_Root => refs.Stage00_Root,
 
-            PresentationTarget.BackgroundSystem_Root => refs.BackgroundSystem_Root,
-            PresentationTarget.BGShot_Root => refs.BGShot_Root,
-            PresentationTarget.BGContent_Root => refs.BGContent_Root,
-            PresentationTarget.BGOverlay_Root => refs.BGOverlay_Root,
+            PresentationTarget.BackgroundSystem_Root => refs.Stage00BackgroundSystem_Root,
+            PresentationTarget.BGShot_Root => refs.Stage00BGShot_Root,
+            PresentationTarget.BGContent_Root => refs.Stage00BGContent_Root,
+            PresentationTarget.BGOverlay_Root => refs.Stage00BGOverlay_Root,
 
-            PresentationTarget.CharacterSystem_Root => refs.CharacterSystem_Root,
-            PresentationTarget.Foreground_Root => refs.Foreground_Root,
+            PresentationTarget.CharacterSystem_Root => refs.Stage00CharacterSystem_Root,
+            PresentationTarget.Foreground_Root => refs.Stage00Foreground_Root,
 
             PresentationTarget.DialogueUI_Root => refs.DialogueUI_Root,
             PresentationTarget.DialogueBox_Root => refs.DialogueBox_Root,

@@ -18,28 +18,20 @@ public sealed class PresentationViewAccess
             StageShot_Root = root.ResolveRect(PresentationUIRoot.Refs.StageShot_Root),
             StagePan_Root = root.ResolveRect(PresentationUIRoot.Refs.StagePan_Root),
             StageZoom_Root = root.ResolveRect(PresentationUIRoot.Refs.StageZoom_Root),
-            Stage_Root = root.ResolveRect(PresentationUIRoot.Refs.Stage_Root),
+            Stage00_Root = root.ResolveRect(PresentationUIRoot.Refs.Stage00_Root),
 
-            BackgroundSystem_Root = root.ResolveRect(PresentationUIRoot.Refs.BackgroundSystem_Root),
-            BGShot_Root = root.ResolveRect(PresentationUIRoot.Refs.BGShot_Root),
-            BGContent_Root = root.ResolveRect(PresentationUIRoot.Refs.BGContent_Root),
-            BGOverlay_Root = root.ResolveRect(PresentationUIRoot.Refs.BGOverlay_Root),
+            Stage00BackgroundSystem_Root = root.ResolveRect(PresentationUIRoot.Refs.Stage00BackgroundSystem_Root),
+            Stage00BGShot_Root = root.ResolveRect(PresentationUIRoot.Refs.Stage00BGShot_Root),
+            Stage00BGContent_Root = root.ResolveRect(PresentationUIRoot.Refs.Stage00BGContent_Root),
+            Stage00BGOverlay_Root = root.ResolveRect(PresentationUIRoot.Refs.Stage00BGOverlay_Root),
 
-            CharacterSystem_Root = root.ResolveRect(PresentationUIRoot.Refs.CharacterSystem_Root),
+            Stage00CharacterSystem_Root = root.ResolveRect(PresentationUIRoot.Refs.Stage00CharacterSystem_Root),
 
-            CharSlotLeft_Root = root.ResolveRect(PresentationUIRoot.Refs.CharSlotLeft_Root),
-            CharSlotLeftFocus_Root = root.ResolveRect(PresentationUIRoot.Refs.CharSlotLeftFocus_Root),
-            CharSlotLeftRig_Root = root.ResolveRect(PresentationUIRoot.Refs.CharSlotLeftRig_Root),
+            Stage00CharSlot_Root = root.ResolveRect(PresentationUIRoot.Refs.Stage00CharSlot_Root),
+            Stage00CharSlotFocus_Root = root.ResolveRect(PresentationUIRoot.Refs.Stage00CharSlotFocus_Root),
+            Stage00CharSlotRig_Root = root.ResolveRect(PresentationUIRoot.Refs.Stage00CharSlotRig_Root),
 
-            CharSlotCenter_Root = root.ResolveRect(PresentationUIRoot.Refs.CharSlotCenter_Root),
-            CharSlotCenterFocus_Root = root.ResolveRect(PresentationUIRoot.Refs.CharSlotCenterFocus_Root),
-            CharSlotCenterRig_Root = root.ResolveRect(PresentationUIRoot.Refs.CharSlotCenterRig_Root),
-
-            CharSlotRight_Root = root.ResolveRect(PresentationUIRoot.Refs.CharSlotRight_Root),
-            CharSlotRightFocus_Root = root.ResolveRect(PresentationUIRoot.Refs.CharSlotRightFocus_Root),
-            CharSlotRightRig_Root = root.ResolveRect(PresentationUIRoot.Refs.CharSlotRightRig_Root),
-
-            Foreground_Root = root.ResolveRect(PresentationUIRoot.Refs.Foreground_Root),
+            Stage00Foreground_Root = root.ResolveRect(PresentationUIRoot.Refs.Stage00Foreground_Root),
 
             DialogueUI_Root = root.ResolveRect(PresentationUIRoot.Refs.DialogueUI_Root),
             DialogueBox_Root = root.ResolveRect(PresentationUIRoot.Refs.DialogueBox_Root),
@@ -69,28 +61,20 @@ public sealed class PresentationViewAccess
         Require(refs.StageShot_Root, nameof(refs.StageShot_Root), context);
         Require(refs.StagePan_Root, nameof(refs.StagePan_Root), context);
         Require(refs.StageZoom_Root, nameof(refs.StageZoom_Root), context);
-        Require(refs.Stage_Root, nameof(refs.Stage_Root), context);
+        Require(refs.Stage00_Root, nameof(refs.Stage00_Root), context);
 
-        Require(refs.BackgroundSystem_Root, nameof(refs.BackgroundSystem_Root), context);
-        Require(refs.BGShot_Root, nameof(refs.BGShot_Root), context);
-        Require(refs.BGContent_Root, nameof(refs.BGContent_Root), context);
-        Require(refs.BGOverlay_Root, nameof(refs.BGOverlay_Root), context);
+        Require(refs.Stage00BackgroundSystem_Root, nameof(refs.Stage00BackgroundSystem_Root), context);
+        Require(refs.Stage00BGShot_Root, nameof(refs.Stage00BGShot_Root), context);
+        Require(refs.Stage00BGContent_Root, nameof(refs.Stage00BGContent_Root), context);
+        Require(refs.Stage00BGOverlay_Root, nameof(refs.Stage00BGOverlay_Root), context);
 
-        Require(refs.CharacterSystem_Root, nameof(refs.CharacterSystem_Root), context);
+        Require(refs.Stage00CharacterSystem_Root, nameof(refs.Stage00CharacterSystem_Root), context);
 
-        Require(refs.CharSlotLeft_Root, nameof(refs.CharSlotLeft_Root), context);
-        Require(refs.CharSlotLeftFocus_Root, nameof(refs.CharSlotLeftFocus_Root), context);
-        Require(refs.CharSlotLeftRig_Root, nameof(refs.CharSlotLeftRig_Root), context);
+        Require(refs.Stage00CharSlot_Root, nameof(refs.Stage00CharSlot_Root), context);
+        Require(refs.Stage00CharSlotFocus_Root, nameof(refs.Stage00CharSlotFocus_Root), context);
+        Require(refs.Stage00CharSlotRig_Root, nameof(refs.Stage00CharSlotRig_Root), context);
 
-        Require(refs.CharSlotCenter_Root, nameof(refs.CharSlotCenter_Root), context);
-        Require(refs.CharSlotCenterFocus_Root, nameof(refs.CharSlotCenterFocus_Root), context);
-        Require(refs.CharSlotCenterRig_Root, nameof(refs.CharSlotCenterRig_Root), context);
-
-        Require(refs.CharSlotRight_Root, nameof(refs.CharSlotRight_Root), context);
-        Require(refs.CharSlotRightFocus_Root, nameof(refs.CharSlotRightFocus_Root), context);
-        Require(refs.CharSlotRightRig_Root, nameof(refs.CharSlotRightRig_Root), context);
-
-        Require(refs.Foreground_Root, nameof(refs.Foreground_Root), context);
+        Require(refs.Stage00Foreground_Root, nameof(refs.Stage00Foreground_Root), context);
 
         Require(refs.DialogueUI_Root, nameof(refs.DialogueUI_Root), context);
         Require(refs.DialogueBox_Root, nameof(refs.DialogueBox_Root), context);
@@ -107,23 +91,15 @@ public sealed class PresentationViewAccess
     {
         RequireChildOf(refs.StagePan_Root, refs.StageShot_Root, nameof(refs.StagePan_Root), nameof(refs.StageShot_Root), context);
         RequireChildOf(refs.StageZoom_Root, refs.StagePan_Root, nameof(refs.StageZoom_Root), nameof(refs.StagePan_Root), context);
-        RequireChildOf(refs.Stage_Root, refs.StageZoom_Root, nameof(refs.Stage_Root), nameof(refs.StageZoom_Root), context);
+        RequireChildOf(refs.Stage00_Root, refs.StageZoom_Root, nameof(refs.Stage00_Root), nameof(refs.StageZoom_Root), context);
 
-        RequireChildOf(refs.BGShot_Root, refs.BackgroundSystem_Root, nameof(refs.BGShot_Root), nameof(refs.BackgroundSystem_Root), context);
-        RequireChildOf(refs.BGContent_Root, refs.BGShot_Root, nameof(refs.BGContent_Root), nameof(refs.BGShot_Root), context);
-        RequireChildOf(refs.BGOverlay_Root, refs.BackgroundSystem_Root, nameof(refs.BGOverlay_Root), nameof(refs.BackgroundSystem_Root), context);
+        RequireChildOf(refs.Stage00BGShot_Root, refs.Stage00BackgroundSystem_Root, nameof(refs.Stage00BGShot_Root), nameof(refs.Stage00BackgroundSystem_Root), context);
+        RequireChildOf(refs.Stage00BGContent_Root, refs.Stage00BGShot_Root, nameof(refs.Stage00BGContent_Root), nameof(refs.Stage00BGShot_Root), context);
+        RequireChildOf(refs.Stage00BGOverlay_Root, refs.Stage00BackgroundSystem_Root, nameof(refs.Stage00BGOverlay_Root), nameof(refs.Stage00BackgroundSystem_Root), context);
 
-        RequireChildOf(refs.CharSlotLeft_Root, refs.CharacterSystem_Root, nameof(refs.CharSlotLeft_Root), nameof(refs.CharacterSystem_Root), context);
-        RequireChildOf(refs.CharSlotLeftFocus_Root, refs.CharSlotLeft_Root, nameof(refs.CharSlotLeftFocus_Root), nameof(refs.CharSlotLeft_Root), context);
-        RequireChildOf(refs.CharSlotLeftRig_Root, refs.CharSlotLeftFocus_Root, nameof(refs.CharSlotLeftRig_Root), nameof(refs.CharSlotLeftFocus_Root), context);
-
-        RequireChildOf(refs.CharSlotCenter_Root, refs.CharacterSystem_Root, nameof(refs.CharSlotCenter_Root), nameof(refs.CharacterSystem_Root), context);
-        RequireChildOf(refs.CharSlotCenterFocus_Root, refs.CharSlotCenter_Root, nameof(refs.CharSlotCenterFocus_Root), nameof(refs.CharSlotCenter_Root), context);
-        RequireChildOf(refs.CharSlotCenterRig_Root, refs.CharSlotCenterFocus_Root, nameof(refs.CharSlotCenterRig_Root), nameof(refs.CharSlotCenterFocus_Root), context);
-
-        RequireChildOf(refs.CharSlotRight_Root, refs.CharacterSystem_Root, nameof(refs.CharSlotRight_Root), nameof(refs.CharacterSystem_Root), context);
-        RequireChildOf(refs.CharSlotRightFocus_Root, refs.CharSlotRight_Root, nameof(refs.CharSlotRightFocus_Root), nameof(refs.CharSlotRight_Root), context);
-        RequireChildOf(refs.CharSlotRightRig_Root, refs.CharSlotRightFocus_Root, nameof(refs.CharSlotRightRig_Root), nameof(refs.CharSlotRightFocus_Root), context);
+        RequireChildOf(refs.Stage00CharSlot_Root, refs.Stage00CharacterSystem_Root, nameof(refs.Stage00CharSlot_Root), nameof(refs.Stage00CharacterSystem_Root), context);
+        RequireChildOf(refs.Stage00CharSlotFocus_Root, refs.Stage00CharSlot_Root, nameof(refs.Stage00CharSlotFocus_Root), nameof(refs.Stage00CharSlot_Root), context);
+        RequireChildOf(refs.Stage00CharSlotRig_Root, refs.Stage00CharSlotFocus_Root, nameof(refs.Stage00CharSlotRig_Root), nameof(refs.Stage00CharSlotFocus_Root), context);
     }
 
     private static void Require(UnityEngine.Object obj, string name, UnityEngine.Object context)
