@@ -61,7 +61,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 
         _dialogueRunner.AddCommandHandler<string, string>("dip", EnqueueDipInOutSpec);
 
-        _dialogueRunner.AddCommandHandler<string, float, string>("hop_in", EnqueueArcHopInSpec);
+        _dialogueRunner.AddCommandHandler<string, int, float, float>("hop_in", EnqueueArcHopInSpec);
 
         _dialogueRunner.AddCommandHandler<string, string>("jolt", EnqueueJoltSpec);
         _dialogueRunner.AddCommandHandler<string, string>("shake", EnqueueJoltSpecShake);
@@ -559,15 +559,18 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         Collect(spec);
     }
 
-    private void EnqueueArcHopInSpec(string roleKey, float distance, string direction = "left")
+    private void EnqueueArcHopInSpec(
+        string roleKey,
+        int hopCount = 2,
+        float arcHeight = 48f,
+        float airWidth = 0.85f)
     {
-        CharRDirection dir = ParseSlideDirection(direction, CharRDirection.Down);
-
         var spec = new ArcHopInCommandSpecCharR
         {
             targetKey = roleKey,
-            distance = distance,
-            from = dir
+            hopCount = hopCount,
+            arcHeight = arcHeight,
+            airWidth = airWidth
         };
 
         Collect(spec);

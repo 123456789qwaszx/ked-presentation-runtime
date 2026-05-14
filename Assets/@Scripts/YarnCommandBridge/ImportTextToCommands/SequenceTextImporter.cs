@@ -179,12 +179,17 @@ public sealed class SequenceTextImporter
                 return true;
 
             case "hop_in":
+            {
                 RequireArgs(line, 1);
+
                 _bridge.Import_HopIn(
                     line.args[0],
-                    line.args.Count >= 2 ? ParseFloat(line.args[1], "distance") : 80f,
-                    line.args.Count >= 3 ? line.args[2] : "left");
+                    line.args.Count >= 2 ? ParseInt(line.args[1], "hopCount") : 1,
+                    line.args.Count >= 3 ? ParseFloat(line.args[2], "arcHeight") : 48f,
+                    line.args.Count >= 4 ? ParseFloat(line.args[3], "airWidth") : 0.85f);
+
                 return true;
+            }
 
             case "jolt":
                 RequireArgs(line, 1);
