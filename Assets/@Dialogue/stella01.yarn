@@ -22,17 +22,30 @@
 <<slot Mercurio 0>>
 <<place Mercurio center>>
 <<size Mercurio normal>>
-<<cast Mercurio Mercurio>>
+<<cast Mercurio Albedo>>
 
 <<pause 0.5>>
-<<nudge Mercurio down>>
-<<fade_in Mercurio>>
+<<nudge Albedo down>>
+<<fade_in Albedo>>
 
-<<emotion Mercurio 10>>
+<<shot_zoom_focus Mercurio bust center 0 0.01>>
+<<emotion Albedo 10>>
 메르쿠리아: 이번에 저희 컴퍼니를 선택해 주셔서 감사합니다. 저는 천궁보험 필리에 영업부 매니저 메르쿠리아라고 합니다.
 
+<<shot_zoom_focus Mercurio face center 3 0.8>>
+...1
+<<shot_zoom_focus Mercurio face top 5 3>>
+...2
+<<shot_zoom_focus Mercurio bust center 7 4>>
+...3
 
-<<shot_zoom Mercurio 6 3.5>>
+<<shot_zoom_focus Mercurio bust top 7 4>>
+...4
+<<shot_zoom_focus Mercurio body top 7 8>>
+...5
+<<shot_zoom_focus Mercurio body center 1 0.1>>
+...6
+//<<shot_zoom Mercurio 6 3.5>>
 
 // <<bg_spawn bg1 a 1>>
 // <<bg_sprite bg1 ui/theme1/Background00_Image>>

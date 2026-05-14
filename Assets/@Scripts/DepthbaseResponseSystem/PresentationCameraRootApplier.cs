@@ -5,24 +5,18 @@ public sealed class PresentationCameraRootApplier
     private readonly RectTransform _stagePanRoot;
     private readonly RectTransform _stageZoomRoot;
 
-    private readonly float _zoomToScale;
-    private readonly float _minScale;
     private readonly float _maxScale;
     private readonly float _panMultiplier;
 
     public PresentationCameraRootApplier(
         RectTransform stagePanRoot,
         RectTransform stageZoomRoot,
-        float zoomToScale = 0.05f,
-        float minScale = 0.25f,
-        float maxScale = 3.0f,
+        float maxScale = 5.0f,
         float panMultiplier = 1.0f)
     {
         _stagePanRoot = stagePanRoot;
         _stageZoomRoot = stageZoomRoot;
-        _zoomToScale = zoomToScale;
-        _minScale = minScale;
-        _maxScale = maxScale;
+        _maxScale = Mathf.Max(1.0001f, maxScale);
         _panMultiplier = panMultiplier;
     }
 
@@ -40,8 +34,7 @@ public sealed class PresentationCameraRootApplier
 
     public float EvaluateScale(float zoom)
     {
-        float zoomFactor = Mathf.Clamp(zoom, -10f, 10f);
-        float scale = 1f + zoomFactor * _zoomToScale;
-        return Mathf.Clamp(scale, _minScale, _maxScale);
+        float t = Mathf.Clamp(zoom, -10f, 10f) / 10f;
+        return Mathf.Pow(_maxScale, t);
     }
 }

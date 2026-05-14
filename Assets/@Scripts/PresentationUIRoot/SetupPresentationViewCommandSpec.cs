@@ -45,6 +45,6 @@ public sealed class SetupPresentationViewCommand : CommandBase
 
         scope.Presentation = _access.BuildRefs(root, _spec.strict);
         
-        _responseRig.BindCameraRoots(scope.Presentation.StagePan_Root, scope.Presentation.StageZoom_Root, 0.05f);
+        _responseRig.BindCameraRoots(scope.Presentation.StagePan_Root, scope.Presentation.StageZoom_Root);
     }
 }

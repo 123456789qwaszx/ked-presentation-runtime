@@ -13,13 +13,11 @@ public sealed class PresentationResponseRig : MonoBehaviour
     
     public void BindCameraRoots(
         RectTransform stagePanRoot,
-        RectTransform stageZoomRoot,
-        float zoomToScale = 0.05f)
+        RectTransform stageZoomRoot)
     {
         _cameraRootApplier = new PresentationCameraRootApplier(
             stagePanRoot,
-            stageZoomRoot,
-            zoomToScale);
+            stageZoomRoot);
     }
     
     public float EvaluateCameraScale(float zoom)
@@ -38,7 +36,6 @@ public sealed class PresentationResponseRig : MonoBehaviour
         
         for (int i = _bindings.Count - 1; i >= 0; i--)
         {
-            return;
             PresentationResponseBinding binding = _bindings[i];
 
             if (binding == null || !binding.IsAlive)

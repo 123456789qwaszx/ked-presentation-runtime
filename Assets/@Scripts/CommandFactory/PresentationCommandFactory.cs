@@ -69,8 +69,10 @@ public sealed class PresentationViewCommandFactory : INodeCommandFactory
                 s,
                 _bgRuntimeRegistry,
                 _presentationResponseRig),
-
+            
             // Presentation Shot / Response Rig
+            ShotZoomFocusCommandSpec s => new ShotZoomFocusCommand(_presentationResponseRig, s),
+            
             ShotResetCommandSpec s => new ShotResetCommand(_presentationResponseRig, s),
             ShotZoomCommandSpec s => new ShotZoomCommand(_presentationResponseRig, s),
             ShotTrackCommandSpec s => new ShotTrackCommand(_presentationResponseRig, s),
