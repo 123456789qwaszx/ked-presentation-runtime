@@ -106,6 +106,16 @@ public sealed partial class YarnCommandBridge
     {
         EnqueueArcHopInSpec(roleKey, hopCount, arcHeight, airWidth);
     }
+    
+    public void Import_WalkInPlace(
+        string roleKey,
+        float duration = 1.2f,
+        float stepsPerSecond = 2.5f,
+        float arcHeight = 24f,
+        float airWidth = 0.75f)
+    {
+        EnqueueWalkInPlaceSpec(roleKey, duration, stepsPerSecond, arcHeight, airWidth);
+    }
 
     public void Import_Jolt(string roleKey, string direction = "right")
     {

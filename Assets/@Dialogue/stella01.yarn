@@ -37,7 +37,8 @@
 <<emotion Mercurio 10>>
 메르쿠리아: 이번에 저희 컴퍼니를 선택해 주셔서 감사합니다. 저는 천궁보험 필리에 영업부 매니저 메르쿠리아라고 합니다.
 
-<<hop_in Mercurio 2>>
+//<<walk_in_place Mercurio 99 2.2 28 0.9>>
+<<walk_in_place Mercurio>>
 <<shot_zoom_focus MySlot face center 3 0.8>>
 ...1
 <<hop_in Mercurio 2>>
@@ -47,6 +48,7 @@
 <<shot_zoom_focus MySlot bust center 7 4>>
 ...3
 
+<<walk_in_place Mercurio>>
 <<shot_zoom_focus MySlot bust top 7 4>>
 ...4
 <<shot_zoom_focus MySlot body top 7 8>>

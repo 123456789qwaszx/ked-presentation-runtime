@@ -190,6 +190,20 @@ public sealed class SequenceTextImporter
 
                 return true;
             }
+            
+            case "walk_in_place":
+            {
+                RequireArgs(line, 1);
+
+                _bridge.Import_WalkInPlace(
+                    line.args[0],
+                    line.args.Count >= 2 ? ParseFloat(line.args[1], "duration") : 1.2f,
+                    line.args.Count >= 3 ? ParseFloat(line.args[2], "stepsPerSecond") : 2.5f,
+                    line.args.Count >= 4 ? ParseFloat(line.args[3], "arcHeight") : 24f,
+                    line.args.Count >= 5 ? ParseFloat(line.args[4], "airWidth") : 0.75f);
+
+                return true;
+            }
 
             case "jolt":
                 RequireArgs(line, 1);

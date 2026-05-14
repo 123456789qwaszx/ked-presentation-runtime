@@ -62,6 +62,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         _dialogueRunner.AddCommandHandler<string, string>("dip", EnqueueDipInOutSpec);
 
         _dialogueRunner.AddCommandHandler<string, int, float, float>("hop_in", EnqueueArcHopInSpec);
+        _dialogueRunner.AddCommandHandler<string, float, float, float, float>("walk_in_place", EnqueueWalkInPlaceSpec);
 
         _dialogueRunner.AddCommandHandler<string, string>("jolt", EnqueueJoltSpec);
         _dialogueRunner.AddCommandHandler<string, string>("shake", EnqueueJoltSpecShake);
@@ -571,6 +572,40 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
             hopCount = hopCount,
             arcHeight = arcHeight,
             airWidth = airWidth
+        };
+
+        Collect(spec);
+    }
+    
+    
+    
+    //<<walk_in_place Mercurio 99 2.2 28 0.9>> 터벅터벅
+    //<<walk_in_place Mercurio 99 4.0 21 0.7>> 종종걸음
+    private void EnqueueWalkInPlaceSpec(
+        string roleKey,
+        float duration = 99f,
+        float stepsPerSecond = 1.9f,
+        float arcHeight = 18f,
+        float airWidth = 0.95f)
+    {
+        if (string.IsNullOrWhiteSpace(roleKey))
+        {
+            Debug.LogError("[YarnCommandBridge] walk_in_place: roleKey is null or empty.");
+            return;
+        }
+
+        var spec = new WalkInPlaceCommandSpecCharR
+        {
+            targetKey = roleKey.Trim(),
+            duration = duration,
+            stepsPerSecond = stepsPerSecond,
+            arcHeight = arcHeight,
+            airWidth = Mathf.Clamp(airWidth, 0.05f, 1f),
+            sideSway = 0.3f,
+            blendIn = 0.08f,
+            blendOut = 0.08f,
+            wait = false,
+            killTween = true
         };
 
         Collect(spec);

@@ -42,6 +42,7 @@ public sealed class CharRigCommandFactory : INodeCommandFactory
             RotateToCommandSpecCharR s  => new RotateToCommandCharR(s),
             
             ArcHopInCommandSpecCharR s    => new ArcHopInCommandCharR(s),
+            WalkInPlaceCommandSpecCharR s => new WalkInPlaceCommandCharR(s),
             
             DipInOutCommandSpecCharR s    => new DipInOutCommandCharR(s),
             SlideInCommandSpecCharR s    => new SlideInCommandCharR(s),
