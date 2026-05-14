@@ -52,7 +52,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         _dialogueRunner.AddCommandHandler<string, string>("size", EnqueueSetOriginSizeSpec);
         
         _dialogueRunner.AddCommandHandler<string, float, float>("move_by", EnqueueMoveBySpec);
-        _dialogueRunner.AddCommandHandler<string, float, float>("to_scale", EnqueueScaleToSpec);
+        _dialogueRunner.AddCommandHandler<string, float, float>("scale_to", EnqueueScaleToSpec);
 
         _dialogueRunner.AddCommandHandler<string, string>("slide_in", EnqueueSlideInSpec);
         _dialogueRunner.AddCommandHandler<string, string>("slide_out", EnqueueSlideOutSpec);
