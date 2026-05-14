@@ -60,4 +60,6 @@ public sealed class PresentationViewRefs
 
     public RectTransform Choice_Root;
     public RectTransform SystemUI_Root;
+
+    public RectTransform VerticalStripWipe;
 }

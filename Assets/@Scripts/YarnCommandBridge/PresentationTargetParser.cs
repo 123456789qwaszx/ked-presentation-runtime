@@ -145,6 +145,12 @@ public static class PresentationTargetParser
 
         switch (s)
         {
+            case "transition":
+            case "screen_transition":
+            case "screen":
+                target = PresentationTarget.VerticalStripWipe;
+                return true;
+            
             case "fullscreenfade":
             case "fullscreenfade_root":
             case "fullscreen_fade":

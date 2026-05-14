@@ -81,6 +81,9 @@ public class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
 
         Choice_Root,
         SystemUI_Root,
+        
+        VerticalStripWipe,
+        
 
         ToggleBottomRight,
         ToggleTopRight,

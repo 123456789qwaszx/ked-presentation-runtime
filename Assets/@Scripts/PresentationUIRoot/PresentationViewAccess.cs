@@ -59,6 +59,8 @@ public sealed class PresentationViewAccess
 
             Choice_Root = root.ResolveRect(PresentationUIRoot.Refs.Choice_Root),
             SystemUI_Root = root.ResolveRect(PresentationUIRoot.Refs.SystemUI_Root),
+            
+            VerticalStripWipe = root.ResolveRect(PresentationUIRoot.Refs.VerticalStripWipe)
         };
 
         if (strict)

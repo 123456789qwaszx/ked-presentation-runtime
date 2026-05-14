@@ -50,7 +50,9 @@ public enum PresentationTarget
     NarrationBox_Root,
 
     Choice_Root,
-    SystemUI_Root
+    SystemUI_Root,
+    
+    VerticalStripWipe,
 }
 
 public static class PresentationViewRefsExtensions
@@ -111,6 +113,8 @@ public static class PresentationViewRefsExtensions
 
             PresentationTarget.Choice_Root => refs.Choice_Root,
             PresentationTarget.SystemUI_Root => refs.SystemUI_Root,
+            
+            PresentationTarget.VerticalStripWipe => refs.VerticalStripWipe,
 
             _ => null
         };

@@ -33,8 +33,81 @@ public sealed partial class YarnCommandBridge
         
         _dialogueRunner.AddCommandHandler<string, float>("p_slant_cut_in", EnqueueSlantedMaskCutInSpec);
         _dialogueRunner.AddCommandHandler<string, float>("p_slant_cut_out", EnqueueSlantedMaskCutOutSpec);
+        
+        _dialogueRunner.AddCommandHandler<string, float>("p_strip_cover", EnqueueVerticalStripCoverSpec);
+        _dialogueRunner.AddCommandHandler<string, float>("p_strip_clear", EnqueueVerticalStripClearSpec);
 
         _dialogueRunner.AddCommandHandler("box_hide", EnqueueHideDialogueBoxSpec);
+    }
+    
+    private void EnqueueVerticalStripCoverSpec(
+        string targetName,
+        float duration = 0f)
+    {
+        if (!PresentationTargetParser.TryParse(targetName, out PresentationTarget target))
+        {
+            Debug.LogError($"[YarnCommandBridge] p_strip_cover: Unknown target '{targetName}'.");
+            return;
+        }
+
+        var spec = new VerticalStripWipeCommandSpec
+        {
+            target = target,
+
+            mode = VerticalStripWipeMode.Cover,
+            order = VerticalStripWipeOrder.LeftToRight,
+
+            stripCount = 20,
+            stripDelay = 0.02f,
+            stripFillDuration = 0.08f,
+
+            color = Color.black,
+
+            duration = duration,
+            ease = Ease.Linear,
+
+            wait = true,
+            killTween = true,
+            disableWhenClear = true,
+            strict = true
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueVerticalStripClearSpec(
+        string targetName,
+        float duration = 0f)
+    {
+        if (!PresentationTargetParser.TryParse(targetName, out PresentationTarget target))
+        {
+            Debug.LogError($"[YarnCommandBridge] p_strip_clear: Unknown target '{targetName}'.");
+            return;
+        }
+
+        var spec = new VerticalStripWipeCommandSpec
+        {
+            target = target,
+
+            mode = VerticalStripWipeMode.Clear,
+            order = VerticalStripWipeOrder.LeftToRight,
+
+            stripCount = 20,
+            stripDelay = 0.02f,
+            stripFillDuration = 0.08f,
+
+            color = Color.black,
+
+            duration = duration,
+            ease = Ease.Linear,
+
+            wait = true,
+            killTween = true,
+            disableWhenClear = true,
+            strict = true
+        };
+
+        Collect(spec);
     }
 
     private void EnqueueSetupPresentationViewSpec()
