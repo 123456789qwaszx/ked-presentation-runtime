@@ -65,6 +65,6 @@ public sealed class PresentationViewRefs
     public RectTransform SlantedShutter;
     public RectTransform FocusBlurFade;
     public RectTransform FocusBlurCurtain;
-    
+    public RectTransform LightSweep;
     
 }

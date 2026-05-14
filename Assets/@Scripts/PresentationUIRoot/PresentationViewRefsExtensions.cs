@@ -55,7 +55,8 @@ public enum PresentationTarget
     VerticalStripWipe,
     SlantedShutter,
     FocusBlurFade,
-    FocusBlurCurtain
+    FocusBlurCurtain,
+    LightSweep
 }
 
 public static class PresentationViewRefsExtensions
@@ -121,6 +122,7 @@ public static class PresentationViewRefsExtensions
             PresentationTarget.SlantedShutter => refs.SlantedShutter,
             PresentationTarget.FocusBlurFade => refs.FocusBlurFade,
             PresentationTarget.FocusBlurCurtain => refs.FocusBlurCurtain,
+            PresentationTarget.LightSweep => refs.LightSweep,
 
             _ => null
         };

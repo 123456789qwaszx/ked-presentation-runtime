@@ -86,6 +86,7 @@ public class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
         SlantedShutter,
         FocusBlurFade,
         FocusBlurCurtain,
+        LightSweep,
         
 
         ToggleBottomRight,

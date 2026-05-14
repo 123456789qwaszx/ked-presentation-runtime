@@ -145,6 +145,12 @@ public static class PresentationTargetParser
 
         switch (s)
         {
+            case "lightsweep":
+            case "LightSweep":
+            case "ls":
+                target = PresentationTarget.LightSweep;
+                return true;
+            
             case "focusblurcurtain":
             case "FocusBlurCurtain":
             case "fbc":
