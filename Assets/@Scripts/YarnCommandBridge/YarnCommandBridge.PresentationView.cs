@@ -36,8 +36,89 @@ public sealed partial class YarnCommandBridge
         
         _dialogueRunner.AddCommandHandler<string, float>("p_strip_cover", EnqueueVerticalStripCoverSpec);
         _dialogueRunner.AddCommandHandler<string, float>("p_strip_clear", EnqueueVerticalStripClearSpec);
+        
+        _dialogueRunner.AddCommandHandler<string, float>("p_shutter_close", EnqueueSlantedShutterCloseSpec);
+        _dialogueRunner.AddCommandHandler<string, float>("p_shutter_open", EnqueueSlantedShutterOpenSpec);
 
         _dialogueRunner.AddCommandHandler("box_hide", EnqueueHideDialogueBoxSpec);
+    }
+    
+    private void EnqueueSlantedShutterCloseSpec(
+        string targetName,
+        float duration = 0.38f)
+    {
+        if (!PresentationTargetParser.TryParse(targetName, out PresentationTarget target))
+        {
+            Debug.LogError($"[YarnCommandBridge] p_shutter_close: Unknown target '{targetName}'.");
+            return;
+        }
+
+        var spec = new SlantedShutterCommandSpec
+        {
+            target = target,
+
+            mode = SlantedShutterMode.Close,
+
+            slantPixels = 140f,
+            openGapHeight = 460f,
+            finalGapHeight = 0f,
+
+            centerBandHeight = 280f,
+            centerStartAlpha = 0.25f,
+            centerEndAlpha = 1f,
+
+            color = Color.black,
+
+            duration = duration,
+            ease = Ease.OutCubic,
+
+            wait = true,
+            killTween = true,
+            disableWhenOpen = true,
+            blockRaycastWhileClosed = false,
+            strict = true
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueSlantedShutterOpenSpec(
+        string targetName,
+        float duration = 0.32f)
+    {
+        if (!PresentationTargetParser.TryParse(targetName, out PresentationTarget target))
+        {
+            Debug.LogError($"[YarnCommandBridge] p_shutter_open: Unknown target '{targetName}'.");
+            return;
+        }
+
+        var spec = new SlantedShutterCommandSpec
+        {
+            target = target,
+
+            mode = SlantedShutterMode.Open,
+
+            slantPixels = 140f,
+            openGapHeight = 460f,
+            finalGapHeight = 0f,
+
+            centerBandHeight = 280f,
+            centerStartAlpha = 0.25f,
+            centerEndAlpha = 1f,
+
+            color = Color.black,
+
+            duration = duration,
+            ease = Ease.InCubic,
+
+            wait = true,
+            killTween = true,
+            disableWhenOpen = true,
+            blockRaycastWhileClosed = false,
+            strict = true
+        };
+
+        Collect(spec);
     }
     
     private void EnqueueVerticalStripCoverSpec(

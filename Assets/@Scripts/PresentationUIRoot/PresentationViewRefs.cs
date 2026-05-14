@@ -62,4 +62,5 @@ public sealed class PresentationViewRefs
     public RectTransform SystemUI_Root;
 
     public RectTransform VerticalStripWipe;
+    public RectTransform SlantedShutter;
 }

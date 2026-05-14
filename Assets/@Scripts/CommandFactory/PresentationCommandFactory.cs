@@ -58,6 +58,7 @@ public sealed class PresentationViewCommandFactory : INodeCommandFactory
             SlantedMaskSlideOutCommandSpec s => new SlantedMaskSlideOutCommand(s),
             
             VerticalStripWipeCommandSpec s => new VerticalStripWipeCommand(s),
+            SlantedShutterCommandSpec s => new SlantedShutterCommand(s),
             
             
             ResetPresentationTargetTransformCommandSpec s => new ResetPresentationTargetTransformCommand(s),

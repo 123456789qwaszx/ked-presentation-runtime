@@ -53,6 +53,7 @@ public enum PresentationTarget
     SystemUI_Root,
     
     VerticalStripWipe,
+    SlantedShutter
 }
 
 public static class PresentationViewRefsExtensions
@@ -115,6 +116,7 @@ public static class PresentationViewRefsExtensions
             PresentationTarget.SystemUI_Root => refs.SystemUI_Root,
             
             PresentationTarget.VerticalStripWipe => refs.VerticalStripWipe,
+            PresentationTarget.SlantedShutter => refs.SlantedShutter,
 
             _ => null
         };

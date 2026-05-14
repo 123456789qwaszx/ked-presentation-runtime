@@ -83,6 +83,7 @@ public class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
         SystemUI_Root,
         
         VerticalStripWipe,
+        SlantedShutter,
         
 
         ToggleBottomRight,

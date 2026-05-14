@@ -145,9 +145,15 @@ public static class PresentationTargetParser
 
         switch (s)
         {
-            case "transition":
-            case "screen_transition":
-            case "screen":
+            case "SlantedShutter":
+            case "slantedshutter":
+            case "ss":
+                target = PresentationTarget.SlantedShutter;
+                return true;
+            
+            case "VerticalStripWipe":
+            case "verticalstripwipe":
+            case "vsw":
                 target = PresentationTarget.VerticalStripWipe;
                 return true;
             
