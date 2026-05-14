@@ -50,9 +50,11 @@
 ...7
 <<shot_track_to -200 200 0.5>>
 ...8
-<<shot_track_to 0 0 0.5>>
 <<shot_zoom 6 0.4>>
 ...9
+<<shot_to 0 0 3 0.5>>
+...10
+
 //<<shot_zoom Mercurio 6 3.5>>
 
 // <<bg_spawn bg1 a 1>>

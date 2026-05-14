@@ -7,12 +7,30 @@ public sealed partial class YarnCommandBridge
 {
     public void RegisterShotCommands()
     {
+        _dialogueRunner.AddCommandHandler("shot_reset", (Action<float>)EnqueueShotResetSpec);
+        
         _dialogueRunner.AddCommandHandler<string, string, string, float, float>("shot_zoom_focus", EnqueueShotZoomFocusSpec);
         
-        _dialogueRunner.AddCommandHandler("shot_reset", (Action<float>)EnqueueShotResetSpec);
+        _dialogueRunner.AddCommandHandler<float, float, float, float>("shot_to", EnqueueShotToSpec);
+        
         _dialogueRunner.AddCommandHandler<float, float>("shot_zoom", EnqueueShotZoomSpec);
         _dialogueRunner.AddCommandHandler<float, float, float>("shot_track", EnqueueShotTrackSpec);
         _dialogueRunner.AddCommandHandler<float, float, float>("shot_track_to", EnqueueShotTrackToSpec);
+    }
+    
+    private void EnqueueShotToSpec(float x, float y, float zoom, float duration = 0.45f)
+    {
+        var spec = new ShotToCommandSpec
+        {
+            pan = new Vector2(x, y),
+            zoom = Mathf.Clamp(zoom, -10f, 10f),
+            duration = duration,
+            ease = Ease.OutCubic,
+            wait = false,
+            killTween = true
+        };
+
+        Collect(spec);
     }
     
     private void EnqueueShotZoomFocusSpec(
