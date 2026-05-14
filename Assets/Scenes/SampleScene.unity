@@ -3604,8 +3604,8 @@ MonoBehaviour:
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  _slantPixels: 220
-  _slantToRight: 1
+  _slantPixels: 350
+  _slantToRight: 0
   _flipVertical: 1
   _hideMaskGraphic: 1
 --- !u!114 &458124124

@@ -1,3 +1,4 @@
+using DG.Tweening;
 using UnityEngine;
 using Yarn.Unity;
 
@@ -8,7 +9,10 @@ public sealed partial class YarnCommandBridge
         _dialogueRunner.AddCommandHandler("presentation_setup", EnqueueSetupPresentationViewSpec);
 
         _dialogueRunner.AddCommandHandler<string, string, string>("bg_spawn", EnqueueSpawnBackgroundSpec);
-        _dialogueRunner.AddCommandHandler<string, string, string, string>("bg_spawn_bound", EnqueueSpawnBackgroundBoundSpec);
+        _dialogueRunner.AddCommandHandler<string, string, string, string>(
+            "bg_spawn_bound",
+            EnqueueSpawnBackgroundBoundSpec);
+
         _dialogueRunner.AddCommandHandler<string, string>("bg_sprite", EnqueueSetBackgroundSpriteSpec);
         _dialogueRunner.AddCommandHandler<string>("bg_destroy", EnqueueDestroyBackgroundSpec);
         _dialogueRunner.AddCommandHandler<string, float, float>("bg_fade", EnqueueFadeBackgroundSpec);
@@ -17,9 +21,29 @@ public sealed partial class YarnCommandBridge
         _dialogueRunner.AddCommandHandler<string, float, float, float>("move_by_p", EnqueueMoveByPresentationSpec);
         _dialogueRunner.AddCommandHandler<string, float, float>("scale_to_p", EnqueueScaleToPresentationSpec);
 
+        // PresentationTarget direct transform
+        _dialogueRunner.AddCommandHandler<string>("p_reset", EnqueueResetPresentationTargetSpec);
+        _dialogueRunner.AddCommandHandler<string, float, float>("p_offset", EnqueueApplyPresentationTargetOffsetSpec);
+        _dialogueRunner.AddCommandHandler<string, float, float, float>("p_move_by", EnqueueMoveByPresentationTargetSpec);
+        _dialogueRunner.AddCommandHandler<string, float, float, float>("p_move_to", EnqueueMoveToPresentationTargetSpec);
+        _dialogueRunner.AddCommandHandler<string, float, float>("p_scale_to", EnqueueScaleToPresentationTargetUniformSpec);
+        _dialogueRunner.AddCommandHandler<string, float, float, float, float>("p_scale_to_xyz", EnqueueScaleToPresentationTargetXYZSpec);
+        _dialogueRunner.AddCommandHandler<string, float, float, float, float>("p_rotate_to", EnqueueRotateToPresentationTargetSpec);
+        _dialogueRunner.AddCommandHandler<string, string, float, float>("p_slide_in", EnqueueSlideInPresentationTargetSpec);
+
         _dialogueRunner.AddCommandHandler("box_hide", EnqueueHideDialogueBoxSpec);
     }
-    
+
+    private void EnqueueSetupPresentationViewSpec()
+    {
+        var spec = new SetupPresentationViewCommandSpec
+        {
+            strict = true
+        };
+
+        Collect(spec);
+    }
+
     private void EnqueueHideDialogueBoxSpec()
     {
         var spec = new HideDialogueBoxCommandSpec
@@ -28,37 +52,6 @@ public sealed partial class YarnCommandBridge
             targetKind = DialogueBoxKind.Speaker,
             duration = 0.18f,
             wait = false
-        };
-
-        Collect(spec);
-    }
-
-    private void EnqueueFadeBackgroundSpec(string bgKey, float alpha, float duration = 0.35f)
-    {
-        if (string.IsNullOrWhiteSpace(bgKey))
-        {
-            Debug.LogError("[YarnCommandBridge] bg_fade: bgKey is null or empty.");
-            return;
-        }
-
-        var spec = new FadeBackgroundCommandSpec
-        {
-            bgKey = bgKey.Trim(),
-            targetAlpha = Mathf.Clamp01(alpha),
-            duration = duration,
-            wait = false,
-            killTween = true,
-            strict = true
-        };
-
-        Collect(spec);
-    }
-
-    private void EnqueueSetupPresentationViewSpec()
-    {
-        var spec = new SetupPresentationViewCommandSpec
-        {
-            strict = true
         };
 
         Collect(spec);
@@ -78,9 +71,9 @@ public sealed partial class YarnCommandBridge
             return;
         }
 
-        if (!TryParseBackgroundStageTarget(stageKey, out PresentationTarget parentTarget))
+        if (!PresentationTargetParser.TryParseBackgroundStageContent(stageKey, out PresentationTarget parentTarget))
         {
-            Debug.LogError($"[YarnCommandBridge] bg_spawn: Unknown stage key '{stageKey}'. Use 'a', 'b', or 'c'.");
+            Debug.LogError($"[YarnCommandBridge] bg_spawn: Unknown stage key '{stageKey}'. Use 's0', 's1', or 's2'.");
             return;
         }
 
@@ -112,8 +105,8 @@ public sealed partial class YarnCommandBridge
             return;
         }
 
-        if (!TryParseBackgroundStageTarget(parentTargetName, out PresentationTarget parentTarget) &&
-            !TryParsePresentationTarget(parentTargetName, out parentTarget))
+        if (!PresentationTargetParser.TryParseBackgroundStageContent(parentTargetName, out PresentationTarget parentTarget) &&
+            !PresentationTargetParser.TryParse(parentTargetName, out parentTarget))
         {
             Debug.LogError($"[YarnCommandBridge] bg_spawn_bound: Unknown parent target '{parentTargetName}'.");
             return;
@@ -134,39 +127,6 @@ public sealed partial class YarnCommandBridge
         };
 
         Collect(spec);
-    }
-    
-    private bool TryParseBackgroundStageTarget(string raw, out PresentationTarget target)
-    {
-        target = default;
-
-        if (string.IsNullOrWhiteSpace(raw))
-            return false;
-
-        string s = raw.Trim().ToLowerInvariant();
-
-        switch (s)
-        {
-            case "s0":
-            case "0":
-            case "stage00":
-                target = PresentationTarget.Stage00BGContent_Root;
-                return true;
-
-            case "s1":
-            case "1":
-            case "stage01":
-                target = PresentationTarget.Stage01BGContent_Root;
-                return true;
-
-            case "s2":
-            case "2":
-            case "stage02":
-                target = PresentationTarget.Stage02BGContent_Root;
-                return true;
-        }
-
-        return false;
     }
 
     private void EnqueueSetBackgroundSpriteSpec(string bgKey, string spritePath)
@@ -204,6 +164,27 @@ public sealed partial class YarnCommandBridge
         Collect(spec);
     }
 
+    private void EnqueueFadeBackgroundSpec(string bgKey, float alpha, float duration = 0.35f)
+    {
+        if (string.IsNullOrWhiteSpace(bgKey))
+        {
+            Debug.LogError("[YarnCommandBridge] bg_fade: bgKey is null or empty.");
+            return;
+        }
+
+        var spec = new FadeBackgroundCommandSpec
+        {
+            bgKey = bgKey.Trim(),
+            targetAlpha = Mathf.Clamp01(alpha),
+            duration = duration,
+            wait = false,
+            killTween = true,
+            strict = true
+        };
+
+        Collect(spec);
+    }
+
     private void EnqueueDestroyBackgroundSpec(string bgKey = "current")
     {
         var spec = new DestroyBackgroundCommandSpec
@@ -219,7 +200,7 @@ public sealed partial class YarnCommandBridge
 
     private void EnqueueFadeToPresentationSpec(string targetName, float alpha, float duration = 0.35f)
     {
-        if (!TryParsePresentationTarget(targetName, out PresentationTarget target))
+        if (!PresentationTargetParser.TryParse(targetName, out PresentationTarget target))
         {
             Debug.LogError($"[YarnCommandBridge] fade_to: Unknown target '{targetName}'.");
             return;
@@ -239,7 +220,7 @@ public sealed partial class YarnCommandBridge
 
     private void EnqueueMoveByPresentationSpec(string stageKey, float x, float y, float duration = 0.35f)
     {
-        if (!TryParseStageRootTarget(stageKey, out PresentationTarget target))
+        if (!PresentationTargetParser.TryParseStageRoot(stageKey, out PresentationTarget target))
         {
             Debug.LogError($"[YarnCommandBridge] move_by_p: Unknown stage key '{stageKey}'. Use 's0', 's1', or 's2'.");
             return;
@@ -256,49 +237,10 @@ public sealed partial class YarnCommandBridge
 
         Collect(spec);
     }
-    
-    private bool TryParseStageRootTarget(string raw, out PresentationTarget target)
-    {
-        target = default;
-
-        if (string.IsNullOrWhiteSpace(raw))
-            return false;
-
-        string s = raw.Trim().ToLowerInvariant();
-
-        switch (s)
-        {
-            case "s0":
-            case "0":
-            case "stage00":
-            case "stage00_root":
-            case "stage00root":
-                target = PresentationTarget.Stage00_Root;
-                return true;
-
-            case "s1":
-            case "1":
-            case "stage01":
-            case "stage01_root":
-            case "stage01root":
-                target = PresentationTarget.Stage01_Root;
-                return true;
-
-            case "s2":
-            case "2":
-            case "stage02":
-            case "stage02_root":
-            case "stage02root":
-                target = PresentationTarget.Stage02_Root;
-                return true;
-        }
-
-        return false;
-    }
 
     private void EnqueueScaleToPresentationSpec(string targetName, float xyValue, float duration = 0.35f)
     {
-        if (!TryParsePresentationTarget(targetName, out PresentationTarget target))
+        if (!PresentationTargetParser.TryParse(targetName, out PresentationTarget target))
         {
             Debug.LogError($"[YarnCommandBridge] scale_to_p: Unknown target '{targetName}'.");
             return;
@@ -311,6 +253,205 @@ public sealed partial class YarnCommandBridge
             duration = duration,
             wait = false,
             killTween = true
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueResetPresentationTargetSpec(string targetName)
+    {
+        if (!PresentationTargetParser.TryParse(targetName, out PresentationTarget target))
+        {
+            Debug.LogError($"[YarnCommandBridge] p_reset: Unknown target '{targetName}'.");
+            return;
+        }
+
+        var spec = new ResetPresentationTargetTransformCommandSpec
+        {
+            target = target,
+            resetAnchoredPosition = true,
+            anchoredPosition = Vector2.zero,
+            resetRotation = true,
+            localEulerAngles = Vector3.zero,
+            resetScale = true,
+            localScale = Vector3.one,
+            resetSizeDelta = false,
+            killTween = true,
+            strict = true
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueApplyPresentationTargetOffsetSpec(string targetName, float x, float y)
+    {
+        if (!PresentationTargetParser.TryParse(targetName, out PresentationTarget target))
+        {
+            Debug.LogError($"[YarnCommandBridge] p_offset: Unknown target '{targetName}'.");
+            return;
+        }
+
+        var spec = new ApplyPresentationTargetOffsetCommandSpec
+        {
+            target = target,
+            offset = new Vector2(x, y),
+            applyFromZero = true,
+            killTween = true,
+            strict = true
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueMoveByPresentationTargetSpec(string targetName, float x, float y, float duration = 0.35f)
+    {
+        if (!PresentationTargetParser.TryParse(targetName, out PresentationTarget target))
+        {
+            Debug.LogError($"[YarnCommandBridge] p_move_by: Unknown target '{targetName}'.");
+            return;
+        }
+
+        var spec = new MoveByPresentationTargetCommandSpec
+        {
+            target = target,
+            delta = new Vector2(x, y),
+            duration = duration,
+            wait = false,
+            killTween = true,
+            strict = true
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueMoveToPresentationTargetSpec(string targetName, float x, float y, float duration = 0.35f)
+    {
+        if (!PresentationTargetParser.TryParse(targetName, out PresentationTarget target))
+        {
+            Debug.LogError($"[YarnCommandBridge] p_move_to: Unknown target '{targetName}'.");
+            return;
+        }
+
+        var spec = new MoveToPresentationTargetCommandSpec
+        {
+            target = target,
+            to = new Vector2(x, y),
+            overrideFrom = false,
+            duration = duration,
+            wait = false,
+            killTween = true,
+            strict = true
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueScaleToPresentationTargetUniformSpec(string targetName, float scale, float duration = 0.35f)
+    {
+        if (!PresentationTargetParser.TryParse(targetName, out PresentationTarget target))
+        {
+            Debug.LogError($"[YarnCommandBridge] p_scale_to: Unknown target '{targetName}'.");
+            return;
+        }
+
+        var spec = new ScaleToPresentationTargetCommandSpec
+        {
+            target = target,
+            toScale = new Vector3(scale, scale, 1f),
+            overrideFromScale = false,
+            duration = duration,
+            wait = false,
+            killTween = true,
+            strict = true
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueScaleToPresentationTargetXYZSpec(
+        string targetName,
+        float x,
+        float y,
+        float z,
+        float duration = 0.35f)
+    {
+        if (!PresentationTargetParser.TryParse(targetName, out PresentationTarget target))
+        {
+            Debug.LogError($"[YarnCommandBridge] p_scale_to_xyz: Unknown target '{targetName}'.");
+            return;
+        }
+
+        var spec = new ScaleToPresentationTargetCommandSpec
+        {
+            target = target,
+            toScale = new Vector3(x, y, z),
+            overrideFromScale = false,
+            duration = duration,
+            wait = false,
+            killTween = true,
+            strict = true
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueRotateToPresentationTargetSpec(
+        string targetName,
+        float x,
+        float y,
+        float z,
+        float duration = 0.35f)
+    {
+        if (!PresentationTargetParser.TryParse(targetName, out PresentationTarget target))
+        {
+            Debug.LogError($"[YarnCommandBridge] p_rotate_to: Unknown target '{targetName}'.");
+            return;
+        }
+
+        var spec = new RotateToPresentationTargetCommandSpec
+        {
+            target = target,
+            toEuler = new Vector3(x, y, z),
+            overrideFromEuler = false,
+            duration = duration,
+            wait = false,
+            killTween = true,
+            strict = true
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueSlideInPresentationTargetSpec(
+        string targetName,
+        string directionName,
+        float distance,
+        float duration = 0.55f)
+    {
+        if (!PresentationTargetParser.TryParse(targetName, out PresentationTarget target))
+        {
+            Debug.LogError($"[YarnCommandBridge] p_slide_in: Unknown target '{targetName}'.");
+            return;
+        }
+
+        if (!PresentationDirectionParser.TryParse(directionName, out PresentationDirection direction))
+        {
+            Debug.LogError(
+                $"[YarnCommandBridge] p_slide_in: Unknown direction '{directionName}'. Use 'left', 'right', 'up', or 'down'.");
+            return;
+        }
+
+        var spec = new SlideInPresentationTargetCommandSpec
+        {
+            target = target,
+            direction = direction,
+            distance = distance,
+            duration = duration,
+            ease = Ease.OutCubic,
+            punch = 24f,
+            wait = false,
+            killTween = true,
+            strict = true
         };
 
         Collect(spec);
@@ -350,126 +491,5 @@ public sealed partial class YarnCommandBridge
         }
 
         return false;
-    }
-
-    private bool TryParsePresentationTarget(string raw, out PresentationTarget target)
-    {
-        target = default;
-
-        if (string.IsNullOrWhiteSpace(raw))
-            return false;
-
-        string s = raw.Trim();
-
-        switch (s.ToLowerInvariant())
-        {
-            case "fullscreenfade":
-            case "fullscreenfade_root":
-            case "fade":
-            case "black":
-                target = PresentationTarget.FullscreenFade_Root;
-                return true;
-
-            case "letterbox":
-            case "letterbox_root":
-                target = PresentationTarget.Letterbox_Root;
-                return true;
-
-            case "flash":
-            case "flash_root":
-                target = PresentationTarget.Flash_Root;
-                return true;
-
-            case "screenoverlay":
-            case "screenoverlay_root":
-            case "overlay":
-                target = PresentationTarget.ScreenOverlay_Root;
-                return true;
-
-            case "stageshot":
-            case "stageshot_root":
-                target = PresentationTarget.StageShot_Root;
-                return true;
-
-            case "stagepan":
-            case "stagepan_root":
-            case "pan":
-                target = PresentationTarget.StagePan_Root;
-                return true;
-
-            case "stagezoom":
-            case "stagezoom_root":
-            case "zoom":
-                target = PresentationTarget.StageZoom_Root;
-                return true;
-
-            case "stage":
-            case "stage_root":
-                target = PresentationTarget.Stage00_Root;
-                return true;
-
-            case "backgroundsystem":
-            case "backgroundsystem_root":
-                target = PresentationTarget.Stage00BackgroundSystem_Root;
-                return true;
-
-            case "bgshot":
-            case "bgshot_root":
-            case "bg":
-                target = PresentationTarget.Stage00BGShot_Root;
-                return true;
-
-            case "bgcontent":
-            case "bgcontent_root":
-                target = PresentationTarget.Stage00BGContent_Root;
-                return true;
-
-            case "bgoverlay":
-            case "bgoverlay_root":
-                target = PresentationTarget.Stage00BGOverlay_Root;
-                return true;
-
-            case "charactersystem":
-            case "charactersystem_root":
-                target = PresentationTarget.Stage00CharacterSystem_Root;
-                return true;
-
-            case "foreground":
-            case "foreground_root":
-                target = PresentationTarget.Stage00Foreground_Root;
-                return true;
-
-            case "dialogueui":
-            case "dialogueui_root":
-                target = PresentationTarget.DialogueUI_Root;
-                return true;
-
-            case "dialoguebox":
-            case "dialoguebox_root":
-                target = PresentationTarget.DialogueBox_Root;
-                return true;
-
-            case "namebox":
-            case "namebox_root":
-                target = PresentationTarget.NameBox_Root;
-                return true;
-
-            case "narrationbox":
-            case "narrationbox_root":
-                target = PresentationTarget.NarrationBox_Root;
-                return true;
-
-            case "choice":
-            case "choice_root":
-                target = PresentationTarget.Choice_Root;
-                return true;
-
-            case "systemui":
-            case "systemui_root":
-                target = PresentationTarget.SystemUI_Root;
-                return true;
-        }
-
-        return System.Enum.TryParse(s, true, out target);
     }
 }
