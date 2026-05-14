@@ -204,6 +204,34 @@ public sealed class SequenceTextImporter
 
                 return true;
             }
+            
+            case "tremble":
+            {
+                RequireArgs(line, 1);
+
+                _bridge.Import_Tremble(
+                    line.args[0],
+                    line.args.Count >= 2 ? ParseFloat(line.args[1], "duration") : 1.2f,
+                    line.args.Count >= 3 ? ParseFloat(line.args[2], "strength") : 8f,
+                    line.args.Count >= 4 ? ParseFloat(line.args[3], "frequency") : 24f,
+                    line.args.Count >= 5 ? line.args[4] : "right");
+
+                return true;
+            }
+            
+            case "bounce_in_place":
+            {
+                RequireArgs(line, 1);
+
+                _bridge.Import_BounceInPlace(
+                    line.args[0],
+                    line.args.Count >= 2 ? ParseFloat(line.args[1], "duration") : 1.2f,
+                    line.args.Count >= 3 ? ParseFloat(line.args[2], "bouncesPerSecond") : 2.5f,
+                    line.args.Count >= 4 ? ParseFloat(line.args[3], "height") : 32f,
+                    line.args.Count >= 5 ? ParseFloat(line.args[4], "riseRatio") : 0.18f);
+
+                return true;
+            }
 
             case "jolt":
                 RequireArgs(line, 1);

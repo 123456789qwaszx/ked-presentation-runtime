@@ -11,45 +11,69 @@
 <<bg_sprite bg2 bg05>>
 <<bg_fade bg2 0.4>>
 
-<<bg_spawn bg3 b 0>>
-<<bg_sprite bg3 momoka_a_01>>
-<<bg_fade bg3 1>>
+// <<bg_spawn bg3 b 0>>
+// <<bg_sprite bg3 momoka_a_01>>
+// <<bg_fade bg3 1>>
 
 
 //<<blackout cover>>
 
 ... #box=letterbox
 <<slot MySlot 0>>
-<<cast MySlot Mercurio>>
+<<cast MySlot Leafia>>
 
-<<place Mercurio center>>
-<<size Mercurio normal>>
+<<place Leafia center>>
+<<size Leafia normal>>
 
 <<pause 0.5>>
-<<nudge Mercurio down>>
-<<fade_in Mercurio>>
+<<nudge Leafia down>>
+<<fade_in Leafia>>
 
-<<focus_offset MySlot 0 10>>
-<<focus_offset_by MySlot -120 0>>
+// <<focus_offset MySlot 0 10>>
+// <<focus_offset_by MySlot 80 -120>>
 
+<<walk_in_place Leafia>>
 <<shot_reset>>
 //<<shot_zoom_focus Mercurio bust center 0 0.01>>
-<<emotion Mercurio 10>>
+<<emotion Leafia 1>>
 메르쿠리아: 이번에 저희 컴퍼니를 선택해 주셔서 감사합니다. 저는 천궁보험 필리에 영업부 매니저 메르쿠리아라고 합니다.
 
-//<<walk_in_place Mercurio 99 2.2 28 0.9>>
-<<walk_in_place Mercurio>>
-<<shot_zoom_focus MySlot face center 3 0.8>>
+//<<walk_in_place Matilda 99 2.2 28 0.9>>
+//<<walk_in_place Matilda>>
+
+//<<bounce_in_place Matilda>>
+//<<bounce_in_place Matilda 2.0 2.4 32 0.16>>
+<<emotion Leafia 7>>
+<<tremble_pulse Leafia 99 4 8 0.6 0.12 right>>
+//<<tremble Leafia 99 4 8 right>>
+//<<shake Leafia right 44 1.8 14>>
+<<bounce_in_place Leafia 99 2.4 32 0.16>>
+<<shot_zoom_focus MySlot bust center 3 8>>
 ...1
-<<hop_in Mercurio 2>>
-<<shot_zoom_focus MySlot face top 5 3>>
+<<emotion Leafia 9>>
+<<tremble Leafia 99 1 12 right>>
+<<bounce_in_place Leafia 99 5 24 0.12>>
+//<<hop_in Mercurio 2>>
+//<<shot_zoom_focus MySlot face top 5 3>>
+//<<shot_zoom_focus MySlot face bottom 0 0.8>>
+<<shot_zoom_focus MySlot bust top 3.5 22>>
 ...2
-<<hop_in Mercurio 2>>
-<<shot_zoom_focus MySlot bust center 7 4>>
+//<<hop_in Mercurio 2>>
+//<<shot_zoom_focus MySlot bust center 7 4>>
+<<shake Leafia right 11 1.8 14>>
+<<bounce_in_place Leafia 99 1.1 72 0.15>>
+<<pause 0.25>>
+<<tremble_pulse Leafia 99 5 9 0.9 0.25 up>>
+//<<shot_zoom_focus MySlot face bottom 0 0.8>>
+<<shot_zoom_focus MySlot bust center 5.5 22>>
 ...3
 
-<<walk_in_place Mercurio>>
-<<shot_zoom_focus MySlot bust top 7 4>>
+//<<hop_in Leafia 1>>
+<<await_for 3>>
+<<shake Leafia right 44 1.8 14>>
+<<shake Leafia right 44 1.8 14>>
+//<<walk_in_place Leafia>>
+<<shot_zoom_focus MySlot face top 7 1>>
 ...4
 <<shot_zoom_focus MySlot body top 7 8>>
 ...5

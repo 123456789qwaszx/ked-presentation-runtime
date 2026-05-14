@@ -116,6 +116,16 @@ public sealed partial class YarnCommandBridge
     {
         EnqueueWalkInPlaceSpec(roleKey, duration, stepsPerSecond, arcHeight, airWidth);
     }
+    
+    public void Import_BounceInPlace(
+        string roleKey,
+        float duration = 1.2f,
+        float bouncesPerSecond = 2.5f,
+        float height = 32f,
+        float riseRatio = 0.18f)
+    {
+        EnqueueBounceInPlaceSpec(roleKey, duration, bouncesPerSecond, height, riseRatio);
+    }
 
     public void Import_Jolt(string roleKey, string direction = "right")
     {
@@ -170,6 +180,16 @@ public sealed partial class YarnCommandBridge
     public void Import_SlideInSway(string roleKey)
     {
         EnqueueSlideInSwayCombo(roleKey);
+    }
+    
+    public void Import_Tremble(
+        string roleKey,
+        float duration = 1.2f,
+        float strength = 8f,
+        float frequency = 24f,
+        string direction = "right")
+    {
+        EnqueueTrembleSpec(roleKey, duration, strength, frequency, direction);
     }
 
     public void Import_PortraitCross(string roleKey, string character)

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Globalization;
+using DG.Tweening;
 using UnityEngine;
 using Yarn.Unity;
 
@@ -60,12 +61,16 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         _dialogueRunner.AddCommandHandler<string>("fade_out", EnqueueFadeOutSpec);
 
         _dialogueRunner.AddCommandHandler<string, string>("dip", EnqueueDipInOutSpec);
-
+        
+        _dialogueRunner.AddCommandHandler<string, float, float, float, string>("tremble", EnqueueTrembleSpec);
+        _dialogueRunner.AddCommandHandler<string, float, float, float, float, float, string>("tremble_pulse", EnqueueTremblePulseSpec);
+        
         _dialogueRunner.AddCommandHandler<string, int, float, float>("hop_in", EnqueueArcHopInSpec);
         _dialogueRunner.AddCommandHandler<string, float, float, float, float>("walk_in_place", EnqueueWalkInPlaceSpec);
+        _dialogueRunner.AddCommandHandler<string, float, float, float, float>("bounce_in_place", EnqueueBounceInPlaceSpec);
 
         _dialogueRunner.AddCommandHandler<string, string>("jolt", EnqueueJoltSpec);
-        _dialogueRunner.AddCommandHandler<string, string>("shake", EnqueueJoltSpecShake);
+        _dialogueRunner.AddCommandHandler<string, string, float, float, int>("shake", EnqueueJoltSpecShake);
         _dialogueRunner.AddCommandHandler<string, string>("nudge", EnqueueJoltSpecTap);
         _dialogueRunner.AddCommandHandler<string, string>("nudge_hard", EnqueueJoltSpecTapHard);
         _dialogueRunner.AddCommandHandler<string, string>("slide_in_nudge", EnqueueSlideInJoltCombo);
@@ -506,7 +511,12 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         Collect(spec);
     }
 
-    private void EnqueueJoltSpecShake(string roleKey, string direction = "right")
+    private void EnqueueJoltSpecShake(
+        string roleKey,
+        string direction = "right",
+        float strength = 44f,
+        float duration = 1.2f,
+        int taps = 4)
     {
         CharRDirection dir = ParseSlideDirection(direction, CharRDirection.Right);
 
@@ -515,9 +525,9 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
             target = CharacterRigTarget.CharacterPortrait_Shake,
             targetKey = roleKey,
             direction = dir,
-            strength = 44f,
-            duration = 1.2f,
-            taps = 4
+            strength = strength,
+            duration = duration,
+            taps = taps
         };
 
         Collect(spec);
@@ -555,6 +565,79 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
             taps = 1,
             damping = 9,
             anticipation = 4
+        };
+
+        Collect(spec);
+    }
+    
+    private void EnqueueTrembleSpec(
+        string roleKey,
+        float duration = 1.2f,
+        float strength = 8f,
+        float frequency = 24f,
+        string direction = "right")
+    {
+        if (string.IsNullOrWhiteSpace(roleKey))
+        {
+            Debug.LogError("[YarnCommandBridge] tremble: roleKey is null or empty.");
+            return;
+        }
+
+        CharRDirection dir = ParseSlideDirection(direction, CharRDirection.Right);
+
+        var spec = new TrembleCommandSpecCharR
+        {
+            targetKey = roleKey.Trim(),
+            target = CharacterRigTarget.CharacterPortrait_Shake,
+            direction = dir,
+            duration = duration,
+            strength = strength,
+            frequency = frequency,
+            crossAxisRatio = 0.35f,
+            noiseRatio = 0.25f,
+            blendIn = 0.04f,
+            blendOut = 0.08f,
+            wait = false,
+            killTween = true
+        };
+
+        Collect(spec);
+    }
+    
+    private void EnqueueTremblePulseSpec(
+        string roleKey,
+        float duration = 5.0f,
+        float strength = 5f,
+        float frequency = 28f,
+        float pulseInterval = 1.0f,
+        float pulseDuration = 0.16f,
+        string direction = "right")
+    {
+        if (string.IsNullOrWhiteSpace(roleKey))
+        {
+            Debug.LogError("[YarnCommandBridge] tremble_pulse: roleKey is null or empty.");
+            return;
+        }
+
+        CharRDirection dir = ParseSlideDirection(direction, CharRDirection.Right);
+
+        var spec = new TrembleCommandSpecCharR
+        {
+            targetKey = roleKey.Trim(),
+            target = CharacterRigTarget.CharacterPortrait_Shake,
+            direction = dir,
+            duration = duration,
+            strength = strength,
+            frequency = frequency,
+            crossAxisRatio = 0.25f,
+            noiseRatio = 0.25f,
+            blendIn = 0.025f,
+            blendOut = 0.06f,
+            usePulse = true,
+            pulseInterval = pulseInterval,
+            pulseDuration = pulseDuration,
+            wait = false,
+            killTween = true
         };
 
         Collect(spec);
@@ -603,6 +686,68 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
             airWidth = Mathf.Clamp(airWidth, 0.05f, 1f),
             sideSway = 0.3f,
             blendIn = 0.08f,
+            blendOut = 0.08f,
+            wait = false,
+            killTween = true
+        };
+
+        Collect(spec);
+    }
+    
+    private void EnqueueBounceInPlaceSpec(
+        string roleKey,
+        float duration = 99f,
+        float bouncesPerSecond = 2.5f,
+        float height = 32f,
+        float riseRatio = 0.18f)
+    {
+        // Ease.InQuad 
+        // 초반: 천천히 내려옴
+        // 후반: 점점 빨라짐
+        // 착지: 탁 떨어지는 느낌
+        // 자주 쓸 만한 fallEase 감각
+        // Ease.Linear
+        //     = 일정한 속도로 내려옴.
+        //     = 기계적이고 단순함.
+        //
+        //         Ease.InSine
+        //     = 위에서 살짝 머물다가 자연스럽게 내려옴.
+        //     = 부드러운 낙하.
+        //
+        //         Ease.InQuad
+        //     = 위에서 천천히 내려오다가 후반에 빨라짐.
+        //     = 지금 기본값. "톡 튀고 착지"에 적당함.
+        //
+        //         Ease.InCubic
+        //     = InQuad보다 더 오래 위에 있다가 더 빠르게 떨어짐.
+        //     = 더 만화적인 "탁!" 느낌.
+        //
+        //         Ease.InQuart / Ease.InQuint
+        //     = 거의 공중에 멈춘 듯하다가 급하게 떨어짐.
+        //     = 과장된 코믹/카툰 느낌.
+        //
+        //         Ease.OutQuad
+        //     = 처음에 빨리 내려오고, 바닥에 가까워질수록 천천히 착지.
+        //     = 부드럽게 내려앉는 느낌.
+        //
+        //         Ease.OutSine
+        //     = 아주 부드러운 착지.
+        //     = 말랑하고 가벼운 느낌.
+        //
+        //         Ease.InOutSine
+        //     = 초반/후반 모두 부드럽고 중간이 빠름.
+        //     = 자연스럽지만 "탁" 느낌은 약함.
+        var spec = new BounceInPlaceCommandSpecCharR
+        {
+            targetKey = roleKey.Trim(),
+            duration = duration,
+            bouncesPerSecond = bouncesPerSecond,
+            height = height,
+            riseRatio = Mathf.Clamp(riseRatio, 0.05f, 0.8f),
+            sideSway = 0.2f,
+            riseEase = Ease.InQuart,
+            fallEase = Ease.InOutSine,
+            blendIn = 0.04f,
             blendOut = 0.08f,
             wait = false,
             killTween = true
