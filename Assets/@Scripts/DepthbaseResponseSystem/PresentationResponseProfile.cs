@@ -18,44 +18,44 @@ public sealed class PresentationResponseProfile
 
     [Tooltip("pan 픽셀값을 얼마나 따라갈지. CharacterSlot=1, BG는 낮게")]
     public float panResponse = 1f;
-
-    public static PresentationResponseProfile Background => new ()
+    
+    public static PresentationResponseProfile Background => new()
     {
         basePositionInRigSpace = Vector2.zero,
         baseScale = Vector2.one,
         baseAlpha = 1f,
-        maxZoomScaleDelta = 0.06f,
+        maxZoomScaleDelta = 0.015f,
         maxZoomSpreadPixels = 0f,
-        panResponse = 0.15f,
+        panResponse = 0.03f,
     };
 
-    public static PresentationResponseProfile Prop => new ()
+    public static PresentationResponseProfile Prop => new()
     {
         basePositionInRigSpace = Vector2.zero,
         baseScale = Vector2.one,
         baseAlpha = 1f,
-        maxZoomScaleDelta = 0.14f,
-        maxZoomSpreadPixels = 18f,
-        panResponse = 0.55f,
+        maxZoomScaleDelta = 0.035f,
+        maxZoomSpreadPixels = 6f,
+        panResponse = 0.08f,
     };
 
-    public static PresentationResponseProfile CharacterSlot => new ()
+    public static PresentationResponseProfile CharacterSlot => new()
     {
         basePositionInRigSpace = Vector2.zero,
         baseScale = Vector2.one,
         baseAlpha = 1f,
-        maxZoomScaleDelta = 0.25f,
-        maxZoomSpreadPixels = 40f,
-        panResponse = 1f,
+        maxZoomScaleDelta = 0.05f,
+        maxZoomSpreadPixels = 10f,
+        panResponse = 0.10f,
     };
 
-    public static PresentationResponseProfile Foreground => new ()
+    public static PresentationResponseProfile Foreground => new()
     {
         basePositionInRigSpace = Vector2.zero,
         baseScale = Vector2.one,
         baseAlpha = 1f,
-        maxZoomScaleDelta = 0.33f,
-        maxZoomSpreadPixels = 64f,
-        panResponse = 1.2f,
+        maxZoomScaleDelta = 0.07f,
+        maxZoomSpreadPixels = 16f,
+        panResponse = 0.16f,
     };
 }

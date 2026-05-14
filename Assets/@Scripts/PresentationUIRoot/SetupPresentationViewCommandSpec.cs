@@ -12,15 +12,15 @@ public sealed class SetupPresentationViewCommandSpec : CommandSpecBase
 public sealed class SetupPresentationViewCommand : CommandBase
 {
     private readonly PresentationViewAccess _access;
+    private readonly PresentationResponseRig _responseRig;
     private readonly SetupPresentationViewCommandSpec _spec;
 
     public override bool WaitForCompletion => true;
 
-    public SetupPresentationViewCommand(
-        PresentationViewAccess access,
-        SetupPresentationViewCommandSpec spec)
+    public SetupPresentationViewCommand(PresentationViewAccess access, PresentationResponseRig responseRig, SetupPresentationViewCommandSpec spec)
     {
         _access = access;
+        _responseRig = responseRig;
         _spec = spec;
     }
 
@@ -39,10 +39,12 @@ public sealed class SetupPresentationViewCommand : CommandBase
         if (root == null)
         {
             if (_spec.strict)
-                throw new System.InvalidOperationException("[SetupPresentationView] PresentationUIRoot not found.");
+                throw new InvalidOperationException("[SetupPresentationView] PresentationUIRoot not found.");
             return;
         }
 
         scope.Presentation = _access.BuildRefs(root, _spec.strict);
+        
+        _responseRig.BindCameraRoots(scope.Presentation.StagePan_Root, scope.Presentation.StageZoom_Root, 0.05f);
     }
 }

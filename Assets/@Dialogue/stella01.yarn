@@ -32,25 +32,28 @@
 메르쿠리아: 이번에 저희 컴퍼니를 선택해 주셔서 감사합니다. 저는 천궁보험 필리에 영업부 매니저 메르쿠리아라고 합니다.
 
 
+<<shot_zoom Mercurio 6 3.5>>
 
-<<bg_spawn bg1 a 1>>
-<<bg_sprite bg1 ui/theme1/Background00_Image>>
-<<bg_fade bg1 1>>
+// <<bg_spawn bg1 a 1>>
+// <<bg_sprite bg1 ui/theme1/Background00_Image>>
+// <<bg_fade bg1 1>>
 
-<<p_reset s1>>
-<<p_offset s1 -600 0>>
-<<p_slide_in s1 left 1000 2>>
-//----
+// <<p_reset s1>>
+// <<p_offset s1 -600 0>>
+// <<p_slide_in s1 left 1000 2>>
+// //----
 
-<<slot Albedo 1>>
-<<place Albedo center>>
-<<size Albedo normal>>
-<<cast Albedo Albedo>>
-<<fade_in Albedo>>
+// <<slot Albedo 1>>
+// <<place Albedo center>>
+// <<size Albedo normal>>
+// <<cast Albedo Albedo>>
+// <<fade_in Albedo>>
+
 //----
 
 메르쿠리아: 이전에 작성해 주신 설문을 보니, 고객님께서는 실속 있는 생명보험을 고려 중이신 것으로 보입니다만.
 
+//<<shot_track "" 0 -440 1.5>>
 
 //<<move_by_p s1 600 0 3>>
 rrr #box=letterbox

@@ -8,15 +8,38 @@ public sealed class PresentationResponseRig : MonoBehaviour
 
     private readonly List<PresentationResponseBinding> _bindings = new();
 
+    private PresentationCameraRootApplier _cameraRootApplier;
     public PresentationIntentState CurrentState => _currentState;
     
+    public void BindCameraRoots(
+        RectTransform stagePanRoot,
+        RectTransform stageZoomRoot,
+        float zoomToScale = 0.05f)
+    {
+        _cameraRootApplier = new PresentationCameraRootApplier(
+            stagePanRoot,
+            stageZoomRoot,
+            zoomToScale);
+    }
+    
+    public float EvaluateCameraScale(float zoom)
+    {
+        if (_cameraRootApplier == null)
+            return 1f + Mathf.Clamp(zoom, -10f, 10f) * 0.05f;
+
+        return _cameraRootApplier.EvaluateScale(zoom);
+    }
+
     public void ApplyToAllBindings(in PresentationIntentState state)
     {
         _currentState = state;
 
+        _cameraRootApplier?.Apply(in state);
+        
         for (int i = _bindings.Count - 1; i >= 0; i--)
         {
-            var binding = _bindings[i];
+            return;
+            PresentationResponseBinding binding = _bindings[i];
 
             if (binding == null || !binding.IsAlive)
             {

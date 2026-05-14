@@ -40,7 +40,7 @@ public sealed class PresentationViewCommandFactory : INodeCommandFactory
             null => null,
 
             // Presentation View setup
-            SetupPresentationViewCommandSpec s => new SetupPresentationViewCommand(_presentationViewAccess, s),
+            SetupPresentationViewCommandSpec s => new SetupPresentationViewCommand(_presentationViewAccess, _presentationResponseRig, s),
 
             // Legacy / existing Presentation View transform
             FadeToPresentationCommandSpec s => new FadeToPresentationCommand(s),

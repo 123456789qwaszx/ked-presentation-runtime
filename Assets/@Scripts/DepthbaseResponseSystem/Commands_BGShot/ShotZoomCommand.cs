@@ -73,7 +73,7 @@ public sealed class ShotZoomCommand : CommandBase, IStepScopedCommand
             yield break;
 
         if (_spec.killTween)
-            _tween.Kill(true); // Finish previous motion so this command starts from a committed state.
+            _tween?.Kill(true); // Finish previous motion so this command starts from a committed state.
 
         _fromState = _rig.CurrentState;
         _toState = BuildTargetState(_fromState, scope);
@@ -173,6 +173,10 @@ public sealed class ShotZoomCommand : CommandBase, IStepScopedCommand
             ? Mathf.Clamp(_spec.zoom, -10f, 10f)
             : from.zoom;
 
+        float targetCameraScale = _rig != null
+            ? _rig.EvaluateCameraScale(targetZoom)
+            : 1f + Mathf.Clamp(targetZoom, -10f, 10f) * 0.05f;
+
         Vector2 panOffset = _spec.applyPan
             ? new Vector2(_spec.panX, _spec.panY)
             : Vector2.zero;
@@ -181,7 +185,7 @@ public sealed class ShotZoomCommand : CommandBase, IStepScopedCommand
 
         if (hasFocus && _spec.reframeToFocus)
         {
-            targetPan = _spec.desiredFramingPoint - focusPoint;
+            targetPan = _spec.desiredFramingPoint - focusPoint * targetCameraScale;
 
             if (_spec.applyPan)
                 targetPan += panOffset;
@@ -202,15 +206,27 @@ public sealed class ShotZoomCommand : CommandBase, IStepScopedCommand
     private bool TryResolveFocusPoint(CommandRunScope scope, out Vector2 focusPoint)
     {
         focusPoint = Vector2.zero;
-        
-        scope.Refs.TryGetCharRigRefs(_spec.focusRoleKey, out CharacterRigRefs rigRefs);
+
+        if (string.IsNullOrWhiteSpace(_spec.focusRoleKey))
+            return false;
+
+        if (scope == null || scope.Refs == null || scope.Presentation == null)
+            return false;
+
+        if (!scope.Refs.TryGetCharRigRefs(_spec.focusRoleKey, out CharacterRigRefs rigRefs) || rigRefs == null)
+            return false;
+
         RectTransform rect = rigRefs.GetRect(_spec.focusTarget);
-        
-        RectTransform stageRoot = scope.Presentation.GetRect(PresentationTarget.Stage00_Root);
+        if (rect == null)
+            return false;
+
+        RectTransform stageRoot = ResolveStageRootForRect(scope, rect);
+        if (stageRoot == null)
+            return false;
 
         Vector3 world = rect.TransformPoint(new Vector3(_spec.focusLocalOffset.x, _spec.focusLocalOffset.y, 0f));
         Vector3 local = stageRoot.InverseTransformPoint(world);
-        
+
         focusPoint = new Vector2(local.x, local.y);
         return true;
     }
@@ -223,5 +239,43 @@ public sealed class ShotZoomCommand : CommandBase, IStepScopedCommand
             pan = Vector2.Lerp(from.pan, to.pan, t),
             focusPoint = Vector2.Lerp(from.focusPoint, to.focusPoint, t),
         };
+    }
+    
+    private static RectTransform ResolveStageRootForRect(CommandRunScope scope, RectTransform rect)
+    {
+        if (scope == null || scope.Presentation == null || rect == null)
+            return null;
+
+        RectTransform s0 = scope.Presentation.GetRect(PresentationTarget.Stage00_Root);
+        RectTransform s1 = scope.Presentation.GetRect(PresentationTarget.Stage01_Root);
+        RectTransform s2 = scope.Presentation.GetRect(PresentationTarget.Stage02_Root);
+
+        if (IsChildOf(rect, s0))
+            return s0;
+
+        if (IsChildOf(rect, s1))
+            return s1;
+
+        if (IsChildOf(rect, s2))
+            return s2;
+
+        return s0;
+    }
+
+    private static bool IsChildOf(Transform child, Transform parent)
+    {
+        if (child == null || parent == null)
+            return false;
+
+        Transform t = child;
+        while (t != null)
+        {
+            if (ReferenceEquals(t, parent))
+                return true;
+
+            t = t.parent;
+        }
+
+        return false;
     }
 }

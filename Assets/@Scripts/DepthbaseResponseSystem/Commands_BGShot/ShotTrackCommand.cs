@@ -65,7 +65,7 @@ public sealed class ShotTrackCommand : CommandBase, IStepScopedCommand
             yield break;
 
         if (_spec.killTween)
-            _tween.Kill(true); // Finish previous motion so this command starts from a committed state.
+            _tween?.Kill(true); // Finish previous motion so this command starts from a committed state.
 
         _fromState = _rig.CurrentState;
         _toState = BuildTargetState(_fromState, scope);
@@ -118,8 +118,6 @@ public sealed class ShotTrackCommand : CommandBase, IStepScopedCommand
         if (_rig == null)
             return;
 
-        KillRigTween(false);
-
         _fromState = _rig.CurrentState;
         _toState = BuildTargetState(_fromState, scope);
 
@@ -127,7 +125,10 @@ public sealed class ShotTrackCommand : CommandBase, IStepScopedCommand
         ClearRuntimeState();
     }
 
-    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
+    protected override void OnRollbackSeek(CommandRunScope scope)
+    {
+        OnSkip(scope);
+    }
 
     protected override void OnCommandCompleted(CommandRunScope scope)
     {
@@ -138,7 +139,6 @@ public sealed class ShotTrackCommand : CommandBase, IStepScopedCommand
             return;
 
         _tween?.Kill(false);
-        KillRigTween(false);
         _rig.ApplyToAllBindings(_toState);
         ClearRuntimeState();
     }
@@ -155,7 +155,11 @@ public sealed class ShotTrackCommand : CommandBase, IStepScopedCommand
         if (!TryResolveFocusPoint(scope, out Vector2 focusPoint))
             return from;
 
-        Vector2 targetPan = _spec.desiredFramingPoint - focusPoint;
+        float cameraScale = _rig != null
+            ? _rig.EvaluateCameraScale(from.zoom)
+            : 1f + Mathf.Clamp(from.zoom, -10f, 10f) * 0.05f;
+
+        Vector2 targetPan = _spec.desiredFramingPoint - focusPoint * cameraScale;
 
         return new PresentationIntentState
         {
@@ -174,6 +178,7 @@ public sealed class ShotTrackCommand : CommandBase, IStepScopedCommand
         {
             if (_spec.strict)
                 Debug.LogWarning("[ShotTrackCommand] focusRoleKey is null or empty.");
+
             return false;
         }
 
@@ -181,6 +186,23 @@ public sealed class ShotTrackCommand : CommandBase, IStepScopedCommand
         {
             if (_spec.strict)
                 Debug.LogWarning($"[ShotTrackCommand] Scope is null. focusRoleKey='{roleKey}'.");
+
+            return false;
+        }
+
+        if (scope.Refs == null)
+        {
+            if (_spec.strict)
+                Debug.LogWarning($"[ShotTrackCommand] Scope refs are null. focusRoleKey='{roleKey}'.");
+
+            return false;
+        }
+
+        if (scope.Presentation == null)
+        {
+            if (_spec.strict)
+                Debug.LogWarning($"[ShotTrackCommand] Presentation refs are null. focusRoleKey='{roleKey}'.");
+
             return false;
         }
 
@@ -188,6 +210,7 @@ public sealed class ShotTrackCommand : CommandBase, IStepScopedCommand
         {
             if (_spec.strict)
                 Debug.LogWarning($"[ShotTrackCommand] Rig refs not found. roleKey='{roleKey}'.");
+
             return false;
         }
 
@@ -203,22 +226,23 @@ public sealed class ShotTrackCommand : CommandBase, IStepScopedCommand
             return false;
         }
 
-        RectTransform stageRoot = scope.Presentation.GetRect(PresentationTarget.Stage00_Root);
+        RectTransform stageRoot = ResolveStageRootForRect(scope, rect);
+        if (stageRoot == null)
+        {
+            if (_spec.strict)
+            {
+                Debug.LogWarning(
+                    $"[ShotTrackCommand] Stage root not found for focus target. roleKey='{roleKey}', target='{_spec.focusTarget}'.");
+            }
 
-        Vector3 world =
-            rect.TransformPoint(new Vector3(_spec.focusLocalOffset.x, _spec.focusLocalOffset.y, 0f));
+            return false;
+        }
 
-        focusPoint = WorldToSpacePoint(stageRoot, world);
+        Vector3 world = rect.TransformPoint(new Vector3(_spec.focusLocalOffset.x, _spec.focusLocalOffset.y, 0f));
+        Vector3 local = stageRoot.InverseTransformPoint(world);
+
+        focusPoint = new Vector2(local.x, local.y);
         return true;
-    }
-
-    private void KillRigTween(bool complete)
-    {
-        if (_rig == null)
-            return;
-
-        DOTween.Kill(_rig, complete);
-        _tween = null;
     }
 
     private void ClearRuntimeState()
@@ -227,6 +251,43 @@ public sealed class ShotTrackCommand : CommandBase, IStepScopedCommand
         _tween = null;
     }
 
+    private static RectTransform ResolveStageRootForRect(CommandRunScope scope, RectTransform rect)
+    {
+        if (scope == null || scope.Presentation == null || rect == null)
+            return null;
+
+        RectTransform stage00 = scope.Presentation.GetRect(PresentationTarget.Stage00_Root);
+        RectTransform stage01 = scope.Presentation.GetRect(PresentationTarget.Stage01_Root);
+        RectTransform stage02 = scope.Presentation.GetRect(PresentationTarget.Stage02_Root);
+
+        if (IsChildOf(rect, stage00))
+            return stage00;
+
+        if (IsChildOf(rect, stage01))
+            return stage01;
+
+        if (IsChildOf(rect, stage02))
+            return stage02;
+
+        return stage00;
+    }
+
+    private static bool IsChildOf(Transform child, Transform parent)
+    {
+        if (child == null || parent == null)
+            return false;
+
+        Transform t = child;
+        while (t != null)
+        {
+            if (ReferenceEquals(t, parent))
+                return true;
+
+            t = t.parent;
+        }
+
+        return false;
+    }
 
     private static PresentationIntentState InterpolateState(
         in PresentationIntentState from,
@@ -244,16 +305,5 @@ public sealed class ShotTrackCommand : CommandBase, IStepScopedCommand
     private static string SafeTrim(string s)
     {
         return string.IsNullOrEmpty(s) ? string.Empty : s.Trim();
-    }
-
-    public static Vector2 WorldToSpacePoint(
-        RectTransform stageRoot,
-        Vector3 worldPoint)
-    {
-        if (stageRoot == null)
-            return new Vector2(worldPoint.x, worldPoint.y);
-
-        Vector3 local = stageRoot.InverseTransformPoint(worldPoint);
-        return new Vector2(local.x, local.y);
     }
 }
