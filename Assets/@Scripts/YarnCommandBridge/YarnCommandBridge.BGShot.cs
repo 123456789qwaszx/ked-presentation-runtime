@@ -10,10 +10,9 @@ public sealed partial class YarnCommandBridge
         _dialogueRunner.AddCommandHandler<string, string, string, float, float>("shot_zoom_focus", EnqueueShotZoomFocusSpec);
         
         _dialogueRunner.AddCommandHandler("shot_reset", (Action<float>)EnqueueShotResetSpec);
-        
-        _dialogueRunner.AddCommandHandler("shot_zoom", (Action<string, float, float>)EnqueueShotZoomFocusSpec);
-        
-        _dialogueRunner.AddCommandHandler("shot_track", (Action<string, float, float, float>)EnqueueShotTrackToSpec);
+        _dialogueRunner.AddCommandHandler<float, float>("shot_zoom", EnqueueShotZoomSpec);
+        _dialogueRunner.AddCommandHandler<float, float, float>("shot_track", EnqueueShotTrackSpec);
+        _dialogueRunner.AddCommandHandler<float, float, float>("shot_track_to", EnqueueShotTrackToSpec);
     }
     
     private void EnqueueShotZoomFocusSpec(
@@ -71,29 +70,45 @@ public sealed partial class YarnCommandBridge
 
         Collect(spec);
     }
-
-    private void EnqueueShotZoomFocusSpec(
-        string roleKey,
-        float zoom,
-        float duration = 0.45f)
+    private void EnqueueShotZoomSpec(float zoom, float duration = 0.45f)
     {
         var spec = new ShotZoomCommandSpec
         {
-            focusRoleKey = roleKey,
             zoom = Mathf.Clamp(zoom, -10f, 10f),
-            duration = Mathf.Max(0f, duration),
+            duration = duration,
+            ease = Ease.OutCubic,
+            wait = false,
+            killTween = true
         };
 
         Collect(spec);
     }
 
-    private void EnqueueShotTrackToSpec(string roleKey, float frameX, float frameY, float duration = 0.35f)
+    private void EnqueueShotTrackSpec(float x, float y, float duration = 0.35f)
     {
         var spec = new ShotTrackCommandSpec
         {
-            focusRoleKey = roleKey,
-            desiredFramingPoint = new Vector2(frameX, frameY),
-            duration = Mathf.Max(0f, duration),
+            pan = new Vector2(x, y),
+            relative = true,
+            duration = duration,
+            ease = Ease.OutCubic,
+            wait = false,
+            killTween = true
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueShotTrackToSpec(float x, float y, float duration = 0.35f)
+    {
+        var spec = new ShotTrackCommandSpec
+        {
+            pan = new Vector2(x, y),
+            relative = false,
+            duration = duration,
+            ease = Ease.OutCubic,
+            wait = false,
+            killTween = true
         };
 
         Collect(spec);

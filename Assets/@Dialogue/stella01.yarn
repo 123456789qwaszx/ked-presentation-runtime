@@ -43,8 +43,16 @@
 ...4
 <<shot_zoom_focus Mercurio body top 7 8>>
 ...5
-<<shot_zoom_focus Mercurio body center 1 0.1>>
+<<shot_zoom_focus Mercurio face center 1 1>>
 ...6
+
+<<shot_track 200 0 0.5>>
+...7
+<<shot_track_to -200 200 0.5>>
+...8
+<<shot_track_to 0 0 0.5>>
+<<shot_zoom 6 0.4>>
+...9
 //<<shot_zoom Mercurio 6 3.5>>
 
 // <<bg_spawn bg1 a 1>>

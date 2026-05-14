@@ -7,31 +7,10 @@ using UnityEngine;
 [CommandMenuHint("Presentation Shot", "Shot Zoom", Order = -850)]
 public sealed class ShotZoomCommandSpec : CommandSpecBase
 {
-    [Header("Focus")]
-    [Tooltip("focus 기준으로 삼을 character roleKey. 비우면 focus 재구성 없이 zoom/pan만 적용.")]
-    public string focusRoleKey = "";
-    public CharacterRigTarget focusTarget = CharacterRigTarget.CharacterPortrait_Root;
-
-    [Tooltip("focus target rect의 로컬 오프셋.")]
-    public Vector2 focusLocalOffset = Vector2.zero;
-
-    [Tooltip("focus가 있으면 desiredFramingPoint 쪽으로 pan을 자동 구성한다.")]
-    public bool reframeToFocus = true;
-
-    [Tooltip("focus를 가져올 목표 구도점. Rig 공간 기준. (0,0)=중앙")]
-    public Vector2 desiredFramingPoint = Vector2.zero;
-
-    [Header("Apply")]
-    [Tooltip("체크하면 zoom을 절대 목표값으로 적용합니다. 끄면 현재 zoom을 유지합니다.")]
-    public bool applyZoom = true;
-
-    [Tooltip("체크하면 pan을 절대 목표값으로 적용합니다. 끄면 현재 pan을 유지합니다.")]
-    public bool applyPan = true;
-
-    [Header("Intent")]
-    [Range(-10f, 10f)] public float zoom = 0f;
-    [Range(-10f, 10f)] public float panX = 0f;
-    [Range(-10f, 10f)] public float panY = 0f;
+    [Header("Zoom")]
+    [Tooltip("목표 zoom intent 값. 현재 pan/focusPoint는 유지합니다.")]
+    [Range(-10f, 10f)]
+    public float zoom = 0f;
 
     [Header("Tween")]
     [Tooltip("0 이하이면 즉시 스냅합니다.")]
@@ -58,7 +37,9 @@ public sealed class ShotZoomCommand : CommandBase, IStepScopedCommand
     public override bool WaitForCompletion => _spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
-    public ShotZoomCommand(PresentationResponseRig rig, ShotZoomCommandSpec spec)
+    public ShotZoomCommand(
+        PresentationResponseRig rig,
+        ShotZoomCommandSpec spec)
     {
         _rig = rig;
         _spec = spec;
@@ -76,16 +57,14 @@ public sealed class ShotZoomCommand : CommandBase, IStepScopedCommand
             _tween?.Kill(true); // Finish previous motion so this command starts from a committed state.
 
         _fromState = _rig.CurrentState;
-        _toState = BuildTargetState(_fromState, scope);
+        _toState = BuildTargetState(_fromState);
 
         _canCommitFinalState = true;
 
         if (_spec.duration <= 0f)
         {
             _rig.ApplyToAllBindings(_toState);
-            
-            _canCommitFinalState = false;
-            _tween = null;
+            ClearRuntimeState();
             yield break;
         }
 
@@ -94,13 +73,15 @@ public sealed class ShotZoomCommand : CommandBase, IStepScopedCommand
                 () => 0f,
                 t =>
                 {
+                    if (!_canCommitFinalState || _rig == null)
+                        return;
+
                     float u = Mathf.Clamp01(t);
                     PresentationIntentState state = InterpolateState(_fromState, _toState, u);
                     _rig.ApplyToAllBindings(state);
                 },
                 1f,
-                _spec.duration
-            )
+                _spec.duration)
             .SetEase(_spec.ease)
             .SetUpdate(true)
             .SetTarget(_rig)
@@ -108,11 +89,9 @@ public sealed class ShotZoomCommand : CommandBase, IStepScopedCommand
             {
                 if (!_canCommitFinalState || _rig == null)
                     return;
-                
+
                 _rig.ApplyToAllBindings(_toState);
-                
-                _canCommitFinalState = false;
-                _tween = null;
+                ClearRuntimeState();
             });
 
         if (_spec.wait)
@@ -128,15 +107,16 @@ public sealed class ShotZoomCommand : CommandBase, IStepScopedCommand
             return;
 
         _fromState = _rig.CurrentState;
-        _toState = BuildTargetState(_fromState, scope);
-        
+        _toState = BuildTargetState(_fromState);
+
         _rig.ApplyToAllBindings(_toState);
-        
-        _canCommitFinalState = false;
-        _tween = null;
+        ClearRuntimeState();
     }
 
-    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
+    protected override void OnRollbackSeek(CommandRunScope scope)
+    {
+        OnSkip(scope);
+    }
 
     protected override void OnCommandCompleted(CommandRunScope scope)
     {
@@ -147,11 +127,8 @@ public sealed class ShotZoomCommand : CommandBase, IStepScopedCommand
             return;
 
         _tween?.Kill(false);
-        
         _rig.ApplyToAllBindings(_toState);
-        
-        _canCommitFinalState = false;
-        _tween = null;
+        ClearRuntimeState();
     }
 
     private void ResolveRefs(CommandRunScope scope)
@@ -159,79 +136,26 @@ public sealed class ShotZoomCommand : CommandBase, IStepScopedCommand
         _resolveAttempted = true;
     }
 
-    private PresentationIntentState BuildTargetState(
-        in PresentationIntentState from,
-        CommandRunScope scope)
+    private PresentationIntentState BuildTargetState(in PresentationIntentState from)
     {
-        Vector2 focusPoint = from.focusPoint;
-        bool hasFocus = TryResolveFocusPoint(scope, out Vector2 resolvedFocusPoint);
-
-        if (hasFocus)
-            focusPoint = resolvedFocusPoint;
-
-        float targetZoom = _spec.applyZoom
-            ? Mathf.Clamp(_spec.zoom, -10f, 10f)
-            : from.zoom;
-
-        float targetCameraScale = _rig != null
-            ? _rig.EvaluateCameraScale(targetZoom)
-            : 1f + Mathf.Clamp(targetZoom, -10f, 10f) * 0.05f;
-
-        Vector2 panOffset = _spec.applyPan
-            ? new Vector2(_spec.panX, _spec.panY)
-            : Vector2.zero;
-
-        Vector2 targetPan = from.pan;
-
-        if (hasFocus && _spec.reframeToFocus)
-        {
-            targetPan = _spec.desiredFramingPoint - focusPoint * targetCameraScale;
-
-            if (_spec.applyPan)
-                targetPan += panOffset;
-        }
-        else if (_spec.applyPan)
-        {
-            targetPan = panOffset;
-        }
-
         return new PresentationIntentState
         {
-            zoom = targetZoom,
-            pan = targetPan,
-            focusPoint = focusPoint,
+            zoom = Mathf.Clamp(_spec.zoom, -10f, 10f),
+            pan = from.pan,
+            focusPoint = from.focusPoint,
         };
     }
-    
-    private bool TryResolveFocusPoint(CommandRunScope scope, out Vector2 focusPoint)
+
+    private void ClearRuntimeState()
     {
-        focusPoint = Vector2.zero;
-
-        if (string.IsNullOrWhiteSpace(_spec.focusRoleKey))
-            return false;
-
-        if (scope == null || scope.Refs == null || scope.Presentation == null)
-            return false;
-
-        if (!scope.Refs.TryGetCharRigRefs(_spec.focusRoleKey, out CharacterRigRefs rigRefs) || rigRefs == null)
-            return false;
-
-        RectTransform rect = rigRefs.GetRect(_spec.focusTarget);
-        if (rect == null)
-            return false;
-
-        RectTransform stageRoot = ResolveStageRootForRect(scope, rect);
-        if (stageRoot == null)
-            return false;
-
-        Vector3 world = rect.TransformPoint(new Vector3(_spec.focusLocalOffset.x, _spec.focusLocalOffset.y, 0f));
-        Vector3 local = stageRoot.InverseTransformPoint(world);
-
-        focusPoint = new Vector2(local.x, local.y);
-        return true;
+        _canCommitFinalState = false;
+        _tween = null;
     }
 
-    private static PresentationIntentState InterpolateState(in PresentationIntentState from, in PresentationIntentState to, float t)
+    private static PresentationIntentState InterpolateState(
+        in PresentationIntentState from,
+        in PresentationIntentState to,
+        float t)
     {
         return new PresentationIntentState
         {
@@ -239,43 +163,5 @@ public sealed class ShotZoomCommand : CommandBase, IStepScopedCommand
             pan = Vector2.Lerp(from.pan, to.pan, t),
             focusPoint = Vector2.Lerp(from.focusPoint, to.focusPoint, t),
         };
-    }
-    
-    private static RectTransform ResolveStageRootForRect(CommandRunScope scope, RectTransform rect)
-    {
-        if (scope == null || scope.Presentation == null || rect == null)
-            return null;
-
-        RectTransform s0 = scope.Presentation.GetRect(PresentationTarget.Stage00_Root);
-        RectTransform s1 = scope.Presentation.GetRect(PresentationTarget.Stage01_Root);
-        RectTransform s2 = scope.Presentation.GetRect(PresentationTarget.Stage02_Root);
-
-        if (IsChildOf(rect, s0))
-            return s0;
-
-        if (IsChildOf(rect, s1))
-            return s1;
-
-        if (IsChildOf(rect, s2))
-            return s2;
-
-        return s0;
-    }
-
-    private static bool IsChildOf(Transform child, Transform parent)
-    {
-        if (child == null || parent == null)
-            return false;
-
-        Transform t = child;
-        while (t != null)
-        {
-            if (ReferenceEquals(t, parent))
-                return true;
-
-            t = t.parent;
-        }
-
-        return false;
     }
 }
