@@ -145,6 +145,19 @@ public static class PresentationTargetParser
 
         switch (s)
         {
+            case "focusblurcurtain":
+            case "FocusBlurCurtain":
+            case "fbc":
+                target = PresentationTarget.FocusBlurCurtain;
+                return true;
+            
+            case "focusblurfade":
+            case "FocusBlurFade":
+            case "fbf":
+                target = PresentationTarget.FocusBlurFade;
+                return true;
+            
+            case "transition":
             case "SlantedShutter":
             case "slantedshutter":
             case "ss":

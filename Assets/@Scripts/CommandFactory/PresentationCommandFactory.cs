@@ -59,6 +59,8 @@ public sealed class PresentationViewCommandFactory : INodeCommandFactory
             
             VerticalStripWipeCommandSpec s => new VerticalStripWipeCommand(s),
             SlantedShutterCommandSpec s => new SlantedShutterCommand(s),
+            FocusBlurFadeCommandSpec s => new FocusBlurFadeCommand(s),
+            FocusBlurCurtainCommandSpec s => new FocusBlurCurtainCommand(s),
             
             
             ResetPresentationTargetTransformCommandSpec s => new ResetPresentationTargetTransformCommand(s),

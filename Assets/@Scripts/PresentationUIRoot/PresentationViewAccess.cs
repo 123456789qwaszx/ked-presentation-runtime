@@ -61,7 +61,9 @@ public sealed class PresentationViewAccess
             SystemUI_Root = root.ResolveRect(PresentationUIRoot.Refs.SystemUI_Root),
             
             VerticalStripWipe = root.ResolveRect(PresentationUIRoot.Refs.VerticalStripWipe),
-            SlantedShutter  = root.ResolveRect(PresentationUIRoot.Refs.SlantedShutter)
+            SlantedShutter  = root.ResolveRect(PresentationUIRoot.Refs.SlantedShutter),
+            FocusBlurFade = root.ResolveRect(PresentationUIRoot.Refs.FocusBlurFade),
+            FocusBlurCurtain = root.ResolveRect(PresentationUIRoot.Refs.FocusBlurCurtain)
         };
 
         if (strict)

@@ -39,8 +39,263 @@ public sealed partial class YarnCommandBridge
         
         _dialogueRunner.AddCommandHandler<string, float>("p_shutter_close", EnqueueSlantedShutterCloseSpec);
         _dialogueRunner.AddCommandHandler<string, float>("p_shutter_open", EnqueueSlantedShutterOpenSpec);
+        
+        _dialogueRunner.AddCommandHandler<string, float>("p_focus_fade_out", EnqueueFocusBlurFadeOutSpec);
+        _dialogueRunner.AddCommandHandler<string, float>("p_focus_fade_in", EnqueueFocusBlurFadeInSpec);
+        
+        _dialogueRunner.AddCommandHandler<string, float>("p_focus_curtain_close", EnqueueFocusBlurCurtainCloseSpec);
+        _dialogueRunner.AddCommandHandler<string, float>("p_focus_curtain_open", EnqueueFocusBlurCurtainOpenSpec);
+        
+        _dialogueRunner.AddCommandHandler<string, float>("p_daze_fade_close", EnqueueDazeFadeCloseSpec);
+
+        _dialogueRunner.AddCommandHandler<string, float>("p_daze_fade_open", EnqueueDazeFadeOpenSpec);
 
         _dialogueRunner.AddCommandHandler("box_hide", EnqueueHideDialogueBoxSpec);
+    }
+    
+    private void EnqueueDazeFadeCloseSpec(
+    string targetName,
+    float duration = 0.85f)
+{
+    if (!PresentationTargetParser.TryParse(targetName, out PresentationTarget target))
+    {
+        Debug.LogError($"[YarnCommandBridge] p_daze_fade_close: Unknown target '{targetName}'.");
+        return;
+    }
+
+    var spec = new FocusBlurCurtainCommandSpec
+    {
+        target = target,
+
+        mode = FocusBlurCurtainMode.Close,
+
+        // 화면 중앙이 오래 남도록 gap을 크게 둔다.
+        openGapHeight = 680f,
+        finalGapHeight = 0f,
+
+        // 셔터 느낌을 줄이기 위해 사선은 약하게.
+        slantPixels = 36f,
+
+        // 위아래 경계가 딱 잘리는 느낌보다, 부드럽게 번지는 느낌.
+        edgeFeatherHeight = 240f,
+        edgeFeatherAlpha = 0.42f,
+
+        // 중앙 흐림 영역을 넓게 잡아서 "멍해지는" 느낌을 만든다.
+        centerBlurHeight = 520f,
+        centerStartAlpha = 0.08f,
+        centerEndAlpha = 0.72f,
+        centerBlurSlices = 28,
+
+        color = Color.black,
+
+        // 천천히 멍해지는 전환.
+        duration = duration,
+        ease = Ease.InOutSine,
+
+        wait = true,
+        killTween = true,
+        disableWhenOpen = true,
+        blockRaycastWhenClosed = false,
+        strict = true
+    };
+
+    Collect(spec);
+}
+
+private void EnqueueDazeFadeOpenSpec(
+    string targetName,
+    float duration = 0.65f)
+{
+    if (!PresentationTargetParser.TryParse(targetName, out PresentationTarget target))
+    {
+        Debug.LogError($"[YarnCommandBridge] p_daze_fade_open: Unknown target '{targetName}'.");
+        return;
+    }
+
+    var spec = new FocusBlurCurtainCommandSpec
+    {
+        target = target,
+
+        mode = FocusBlurCurtainMode.Open,
+
+        openGapHeight = 680f,
+        finalGapHeight = 0f,
+        slantPixels = 36f,
+
+        edgeFeatherHeight = 240f,
+        edgeFeatherAlpha = 0.42f,
+
+        centerBlurHeight = 520f,
+        centerStartAlpha = 0.08f,
+        centerEndAlpha = 0.72f,
+        centerBlurSlices = 28,
+
+        color = Color.black,
+
+        duration = duration,
+        ease = Ease.InOutSine,
+
+        wait = true,
+        killTween = true,
+        disableWhenOpen = true,
+        blockRaycastWhenClosed = false,
+        strict = true
+    };
+
+    Collect(spec);
+}
+    
+    private void EnqueueFocusBlurCurtainCloseSpec(
+        string targetName,
+        float duration = 0.55f)
+    {
+        if (!PresentationTargetParser.TryParse(targetName, out PresentationTarget target))
+        {
+            Debug.LogError($"[YarnCommandBridge] p_focus_curtain_close: Unknown target '{targetName}'.");
+            return;
+        }
+
+        var spec = new FocusBlurCurtainCommandSpec
+        {
+            target = target,
+
+            mode = FocusBlurCurtainMode.Close,
+
+            openGapHeight = 520f,
+            finalGapHeight = 0f,
+            slantPixels = 90f,
+
+            edgeFeatherHeight = 140f,
+            edgeFeatherAlpha = 0.55f,
+
+            centerBlurHeight = 320f,
+            centerStartAlpha = 0.12f,
+            centerEndAlpha = 0.82f,
+            centerBlurSlices = 18,
+
+            color = Color.black,
+
+            duration = duration,
+            ease = Ease.InOutCubic,
+
+            wait = true,
+            killTween = true,
+            disableWhenOpen = true,
+            blockRaycastWhenClosed = false,
+            strict = true
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueFocusBlurCurtainOpenSpec(
+        string targetName,
+        float duration = 0.42f)
+    {
+        if (!PresentationTargetParser.TryParse(targetName, out PresentationTarget target))
+        {
+            Debug.LogError($"[YarnCommandBridge] p_focus_curtain_open: Unknown target '{targetName}'.");
+            return;
+        }
+
+        var spec = new FocusBlurCurtainCommandSpec
+        {
+            target = target,
+
+            mode = FocusBlurCurtainMode.Open,
+
+            openGapHeight = 520f,
+            finalGapHeight = 0f,
+            slantPixels = 90f,
+
+            edgeFeatherHeight = 140f,
+            edgeFeatherAlpha = 0.55f,
+
+            centerBlurHeight = 320f,
+            centerStartAlpha = 0.12f,
+            centerEndAlpha = 0.82f,
+            centerBlurSlices = 18,
+
+            color = Color.black,
+
+            duration = duration,
+            ease = Ease.InOutCubic,
+
+            wait = true,
+            killTween = true,
+            disableWhenOpen = true,
+            blockRaycastWhenClosed = false,
+            strict = true
+        };
+
+        Collect(spec);
+    }
+    
+    
+    private void EnqueueFocusBlurFadeOutSpec(
+        string targetName,
+        float duration = 0.45f)
+    {
+        if (!PresentationTargetParser.TryParse(targetName, out PresentationTarget target))
+        {
+            Debug.LogError($"[YarnCommandBridge] p_focus_fade_out: Unknown target '{targetName}'.");
+            return;
+        }
+
+        var spec = new FocusBlurFadeCommandSpec
+        {
+            target = target,
+
+            mode = FocusBlurFadeMode.FadeOut,
+
+            color = Color.black,
+            maxAlpha = 1f,
+            zoomAmount = 0.035f,
+
+            duration = duration,
+            ease = Ease.InOutCubic,
+
+            wait = true,
+            killTween = true,
+            disableWhenClear = true,
+            blockRaycastWhenVisible = false,
+            strict = true
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueFocusBlurFadeInSpec(
+        string targetName,
+        float duration = 0.35f)
+    {
+        if (!PresentationTargetParser.TryParse(targetName, out PresentationTarget target))
+        {
+            Debug.LogError($"[YarnCommandBridge] p_focus_fade_in: Unknown target '{targetName}'.");
+            return;
+        }
+
+        var spec = new FocusBlurFadeCommandSpec
+        {
+            target = target,
+
+            mode = FocusBlurFadeMode.FadeIn,
+
+            color = Color.black,
+            maxAlpha = 1f,
+            zoomAmount = 0.035f,
+
+            duration = duration,
+            ease = Ease.InOutCubic,
+
+            wait = true,
+            killTween = true,
+            disableWhenClear = true,
+            blockRaycastWhenVisible = false,
+            strict = true
+        };
+
+        Collect(spec);
     }
     
     private void EnqueueSlantedShutterCloseSpec(
