@@ -46,5 +46,17 @@ public sealed class SetupPresentationViewCommand : CommandBase
         scope.Presentation = _access.BuildRefs(root, _spec.strict);
         
         _responseRig.BindCameraRoots(scope.Presentation.StagePan_Root, scope.Presentation.StageZoom_Root);
+        
+        ResetSlantedMasks(root);
     }
+    
+    #region slantedMaskGroup
+    
+    private void ResetSlantedMasks(PresentationUIRoot root)
+    {
+        SlantedMaskResetGroup resetGroup = root.GetComponentInChildren<SlantedMaskResetGroup>(true);
+        resetGroup?.ResetAllToHiddenOffset();
+    }
+    
+    #endregion
 }

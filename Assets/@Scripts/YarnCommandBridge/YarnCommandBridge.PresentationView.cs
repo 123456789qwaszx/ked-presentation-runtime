@@ -30,6 +30,9 @@ public sealed partial class YarnCommandBridge
         _dialogueRunner.AddCommandHandler<string, float, float, float, float>("p_scale_to_xyz", EnqueueScaleToPresentationTargetXYZSpec);
         _dialogueRunner.AddCommandHandler<string, float, float, float, float>("p_rotate_to", EnqueueRotateToPresentationTargetSpec);
         _dialogueRunner.AddCommandHandler<string, string, float, float>("p_slide_in", EnqueueSlideInPresentationTargetSpec);
+        
+        _dialogueRunner.AddCommandHandler<string, float>("p_slant_cut_in", EnqueueSlantedMaskCutInSpec);
+        _dialogueRunner.AddCommandHandler<string, float>("p_slant_cut_out", EnqueueSlantedMaskCutOutSpec);
 
         _dialogueRunner.AddCommandHandler("box_hide", EnqueueHideDialogueBoxSpec);
     }
@@ -449,6 +452,74 @@ public sealed partial class YarnCommandBridge
             duration = duration,
             ease = Ease.OutCubic,
             punch = 24f,
+            wait = false,
+            killTween = true,
+            strict = true
+        };
+
+        Collect(spec);
+    }
+    
+    private void EnqueueSlantedMaskCutInSpec(
+        string targetName,
+        float duration = 0.65f)
+    {
+        if (!PresentationTargetParser.TryParse(targetName, out PresentationTarget target))
+        {
+            Debug.LogError($"[YarnCommandBridge] p_slant_mask_in: Unknown target '{targetName}'.");
+            return;
+        }
+
+        var spec = new SlantedMaskSlideInCommandSpec
+        {
+            target = target,
+
+            fromOffset = new Vector2(-2200f, 0f),
+            toOffset = new Vector2(-770f, 0f),
+
+            slantToRight = false,
+            flipVertical = true,
+
+            duration = duration,
+            ease = Ease.OutCubic,
+
+            overshootPixels = 72f,
+            overshootStart = 0.72f,
+
+            wait = false,
+            killTween = true,
+            strict = true
+        };
+
+        Collect(spec);
+    }
+    
+    private void EnqueueSlantedMaskCutOutSpec(
+        string targetName,
+        float duration = 0.45f)
+    {
+        if (!PresentationTargetParser.TryParse(targetName, out PresentationTarget target))
+        {
+            Debug.LogError($"[YarnCommandBridge] p_slant_cut_out: Unknown target '{targetName}'.");
+            return;
+        }
+
+        var spec = new SlantedMaskSlideOutCommandSpec
+        {
+            target = target,
+
+            fromOffset = new Vector2(-770f, 0f),
+            toOffset = new Vector2(-2200f, 0f),
+
+            slantToRight = false,
+            flipVertical = true,
+
+            duration = duration,
+            ease = Ease.InCubic,
+
+            pullPixels = 0f,
+            pullEnd = 0.28f,
+
             wait = false,
             killTween = true,
             strict = true

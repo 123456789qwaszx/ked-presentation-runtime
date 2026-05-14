@@ -6,6 +6,8 @@ using UnityEngine.UI;
 public sealed class SlantedMaskGraphic : Graphic
 {
     [SerializeField] private float _slantPixels = 220f;
+    [SerializeField] private Vector2 _shapeOffsetPixels;
+    [SerializeField] private Vector2 _hiddenOffsetPixels = new Vector2(-2200f, 0f);
     [SerializeField] private bool _slantToRight = true;
     [SerializeField] private bool _flipVertical;
     [SerializeField] private bool _hideMaskGraphic = true;
@@ -17,6 +19,25 @@ public sealed class SlantedMaskGraphic : Graphic
         {
             _slantPixels = Mathf.Max(0f, value);
             SetVerticesDirty();
+        }
+    }
+
+    public Vector2 ShapeOffsetPixels
+    {
+        get => _shapeOffsetPixels;
+        set
+        {
+            _shapeOffsetPixels = value;
+            SetVerticesDirty();
+        }
+    }
+
+    public Vector2 HiddenOffsetPixels
+    {
+        get => _hiddenOffsetPixels;
+        set
+        {
+            _hiddenOffsetPixels = value;
         }
     }
 
@@ -68,6 +89,16 @@ public sealed class SlantedMaskGraphic : Graphic
     }
 #endif
 
+    public void ResetToHiddenOffset()
+    {
+        ShapeOffsetPixels = _hiddenOffsetPixels;
+    }
+
+    public void SetShapeOffsetImmediate(Vector2 offset)
+    {
+        ShapeOffsetPixels = offset;
+    }
+
     protected override void OnPopulateMesh(VertexHelper vh)
     {
         vh.Clear();
@@ -88,12 +119,6 @@ public sealed class SlantedMaskGraphic : Graphic
         {
             if (!_flipVertical)
             {
-                // 왼쪽 경계가 / 형태
-                //
-                //      /────────
-                //     /
-                //    /
-                //   /──────────
                 p0 = new Vector2(left, bottom);
                 p1 = new Vector2(left + _slantPixels, top);
                 p2 = new Vector2(right, top);
@@ -101,12 +126,6 @@ public sealed class SlantedMaskGraphic : Graphic
             }
             else
             {
-                // 왼쪽 경계가 \ 형태
-                //
-                //   \──────────
-                //    \
-                //     \
-                //      \────────
                 p0 = new Vector2(left + _slantPixels, bottom);
                 p1 = new Vector2(left, top);
                 p2 = new Vector2(right, top);
@@ -117,12 +136,6 @@ public sealed class SlantedMaskGraphic : Graphic
         {
             if (!_flipVertical)
             {
-                // 오른쪽 경계가 \ 형태
-                //
-                // ────────\
-                //          \
-                //           \
-                // ───────────\
                 p0 = new Vector2(left, bottom);
                 p1 = new Vector2(left, top);
                 p2 = new Vector2(right - _slantPixels, top);
@@ -130,18 +143,17 @@ public sealed class SlantedMaskGraphic : Graphic
             }
             else
             {
-                // 오른쪽 경계가 / 형태
-                //
-                // ───────────/
-                //           /
-                //          /
-                // ────────/
                 p0 = new Vector2(left, bottom);
                 p1 = new Vector2(left, top);
                 p2 = new Vector2(right, top);
                 p3 = new Vector2(right - _slantPixels, bottom);
             }
         }
+
+        p0 += _shapeOffsetPixels;
+        p1 += _shapeOffsetPixels;
+        p2 += _shapeOffsetPixels;
+        p3 += _shapeOffsetPixels;
 
         AddQuad(vh, p0, p1, p2, p3);
     }
@@ -158,6 +170,8 @@ public sealed class SlantedMaskGraphic : Graphic
 
     private void AddQuad(VertexHelper vh, Vector2 p0, Vector2 p1, Vector2 p2, Vector2 p3)
     {
+        int startIndex = vh.currentVertCount;
+
         UIVertex v = UIVertex.simpleVert;
         v.color = color;
 
@@ -173,7 +187,7 @@ public sealed class SlantedMaskGraphic : Graphic
         v.position = p3;
         vh.AddVert(v);
 
-        vh.AddTriangle(0, 1, 2);
-        vh.AddTriangle(0, 2, 3);
+        vh.AddTriangle(startIndex + 0, startIndex + 1, startIndex + 2);
+        vh.AddTriangle(startIndex + 0, startIndex + 2, startIndex + 3);
     }
 }

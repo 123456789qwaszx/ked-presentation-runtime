@@ -205,6 +205,19 @@ public sealed class SequenceTextImporter
                 return true;
             }
             
+            case "breathe":
+            {
+                RequireArgs(line, 1);
+
+                _bridge.Import_Breathe(
+                    line.args[0],
+                    line.args.Count >= 2 ? ParseFloat(line.args[1], "duration") : 2.4f,
+                    line.args.Count >= 3 ? ParseFloat(line.args[2], "height") : 8f,
+                    line.args.Count >= 4 ? ParseFloat(line.args[3], "breathsPerSecond") : 0.35f);
+
+                return true;
+            }
+            
             case "tremble":
             {
                 RequireArgs(line, 1);

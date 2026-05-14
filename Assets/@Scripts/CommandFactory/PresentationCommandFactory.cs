@@ -54,6 +54,9 @@ public sealed class PresentationViewCommandFactory : INodeCommandFactory
             ScaleToPresentationTargetCommandSpec s => new ScaleToPresentationTargetCommand(s),
             RotateToPresentationTargetCommandSpec s => new RotateToPresentationTargetCommand(s),
             SlideInPresentationTargetCommandSpec s => new SlideInPresentationTargetCommand(s),
+            SlantedMaskSlideInCommandSpec s => new SlantedMaskSlideInCommand(s),
+            SlantedMaskSlideOutCommandSpec s => new SlantedMaskSlideOutCommand(s),
+            
             ResetPresentationTargetTransformCommandSpec s => new ResetPresentationTargetTransformCommand(s),
 
             // Background

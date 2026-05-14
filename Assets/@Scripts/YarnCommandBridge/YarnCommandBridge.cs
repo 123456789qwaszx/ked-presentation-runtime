@@ -60,20 +60,23 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         _dialogueRunner.AddCommandHandler<string>("fade_in", EnqueueFadeInSpec);
         _dialogueRunner.AddCommandHandler<string>("fade_out", EnqueueFadeOutSpec);
 
-        _dialogueRunner.AddCommandHandler<string, string>("dip", EnqueueDipInOutSpec);
-        
-        _dialogueRunner.AddCommandHandler<string, float, float, float, string>("tremble", EnqueueTrembleSpec);
-        _dialogueRunner.AddCommandHandler<string, float, float, float, float, float, string>("tremble_pulse", EnqueueTremblePulseSpec);
         
         _dialogueRunner.AddCommandHandler<string, int, float, float>("hop_in", EnqueueArcHopInSpec);
         _dialogueRunner.AddCommandHandler<string, float, float, float, float>("walk_in_place", EnqueueWalkInPlaceSpec);
         _dialogueRunner.AddCommandHandler<string, float, float, float, float>("bounce_in_place", EnqueueBounceInPlaceSpec);
+        _dialogueRunner.AddCommandHandler<string, float, float, float>("breathe", EnqueueBreathInPlaceSpec);
+        
 
         _dialogueRunner.AddCommandHandler<string, string>("jolt", EnqueueJoltSpec);
         _dialogueRunner.AddCommandHandler<string, string, float, float, int>("shake", EnqueueJoltSpecShake);
         _dialogueRunner.AddCommandHandler<string, string>("nudge", EnqueueJoltSpecTap);
         _dialogueRunner.AddCommandHandler<string, string>("nudge_hard", EnqueueJoltSpecTapHard);
         _dialogueRunner.AddCommandHandler<string, string>("slide_in_nudge", EnqueueSlideInJoltCombo);
+        
+        _dialogueRunner.AddCommandHandler<string, string>("dip", EnqueueDipInOutSpec);
+        
+        _dialogueRunner.AddCommandHandler<string, float, float, float, string>("tremble", EnqueueTrembleSpec);
+        _dialogueRunner.AddCommandHandler<string, float, float, float, float, float, string>("tremble_pulse", EnqueueTremblePulseSpec);
 
         _dialogueRunner.AddCommandHandler<string, string>("portrait_cross", EnqueueSetPortraitCrossfadeSpec);
         _dialogueRunner.AddCommandHandler<string, string>("portrait_swap", EnqueueSetEmotionPortraitWipeSpec);
@@ -749,6 +752,39 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
             fallEase = Ease.InOutSine,
             blendIn = 0.04f,
             blendOut = 0.08f,
+            wait = false,
+            killTween = true
+        };
+
+        Collect(spec);
+    }
+    
+    private void EnqueueBreathInPlaceSpec(
+        string roleKey,
+        float duration = 2.4f,
+        float height = 8f,
+        float breathsPerSecond = 0.35f)
+    {
+        if (string.IsNullOrWhiteSpace(roleKey))
+        {
+            Debug.LogError("[YarnCommandBridge] breathe: roleKey is null or empty.");
+            return;
+        }
+
+        var spec = new BreathInPlaceCommandSpecCharR
+        {
+            targetKey = roleKey.Trim(),
+            target = CharacterRigTarget.Character_Track_Y,
+            duration = duration,
+            breathsPerSecond = breathsPerSecond,
+            height = height,
+            sideSway = 0f,
+            useScalePulse = false,
+            scaleAmount = 0.015f,
+            ease = Ease.InOutSine,
+            phaseOffset = 0f,
+            blendIn = 0.25f,
+            blendOut = 0.25f,
             wait = false,
             killTween = true
         };

@@ -126,6 +126,14 @@ public sealed partial class YarnCommandBridge
     {
         EnqueueBounceInPlaceSpec(roleKey, duration, bouncesPerSecond, height, riseRatio);
     }
+    public void Import_Breathe(
+        string roleKey,
+        float duration = 2.4f,
+        float height = 8f,
+        float breathsPerSecond = 0.35f)
+    {
+        EnqueueBreathInPlaceSpec(roleKey, duration, height, breathsPerSecond);
+    }
 
     public void Import_Jolt(string roleKey, string direction = "right")
     {
