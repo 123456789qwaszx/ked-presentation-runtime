@@ -19,31 +19,36 @@
 //<<blackout cover>>
 
 ... #box=letterbox
-<<slot Mercurio 0>>
+<<slot MySlot 0>>
+<<cast MySlot Mercurio>>
+
 <<place Mercurio center>>
 <<size Mercurio normal>>
-<<cast Mercurio Albedo>>
 
 <<pause 0.5>>
-<<nudge Albedo down>>
-<<fade_in Albedo>>
+<<nudge Mercurio down>>
+<<fade_in Mercurio>>
 
-<<shot_zoom_focus Mercurio bust center 0 0.01>>
-<<emotion Albedo 10>>
+<<focus_offset MySlot 0 10>>
+<<focus_offset_by MySlot -120 0>>
+
+<<shot_reset>>
+//<<shot_zoom_focus Mercurio bust center 0 0.01>>
+<<emotion Mercurio 10>>
 메르쿠리아: 이번에 저희 컴퍼니를 선택해 주셔서 감사합니다. 저는 천궁보험 필리에 영업부 매니저 메르쿠리아라고 합니다.
 
-<<shot_zoom_focus Mercurio face center 3 0.8>>
+<<shot_zoom_focus MySlot face center 3 0.8>>
 ...1
-<<shot_zoom_focus Mercurio face top 5 3>>
+<<shot_zoom_focus MySlot face top 5 3>>
 ...2
-<<shot_zoom_focus Mercurio bust center 7 4>>
+<<shot_zoom_focus MySlot bust center 7 4>>
 ...3
 
-<<shot_zoom_focus Mercurio bust top 7 4>>
+<<shot_zoom_focus MySlot bust top 7 4>>
 ...4
-<<shot_zoom_focus Mercurio body top 7 8>>
+<<shot_zoom_focus MySlot body top 7 8>>
 ...5
-<<shot_zoom_focus Mercurio face center 1 1>>
+<<shot_zoom_focus MySlot face center 1 1>>
 ...6
 
 <<shot_track 200 0 0.5>>
@@ -55,32 +60,49 @@
 <<shot_to 0 0 3 0.5>>
 ...10
 
-//<<shot_zoom Mercurio 6 3.5>>
+//<<shot_zoom 6 3.5>>
 
-// <<bg_spawn bg1 a 1>>
-// <<bg_sprite bg1 ui/theme1/Background00_Image>>
-// <<bg_fade bg1 1>>
+<<shot_reset>>
+<<move_by Mercurio 200 0>>
 
-// <<p_reset s1>>
-// <<p_offset s1 -600 0>>
-// <<p_slide_in s1 left 1000 2>>
-// //----
+<<bg_spawn bg1 a 1>>
+<<bg_sprite bg1 ui/theme1/Background00_Image>>
+<<bg_fade bg1 1>>
 
-// <<slot Albedo 1>>
-// <<place Albedo center>>
-// <<size Albedo normal>>
-// <<cast Albedo Albedo>>
-// <<fade_in Albedo>>
+<<p_reset s1>>
+<<p_offset s1 -840 0>>
+<<p_slide_in s1 left 1000 0.5>>
+
+<<slot Albedo 1>>
+<<place Albedo right>>
+<<place_offset Albedo -80 0>>
+<<size Albedo small>>
+<<cast Albedo Albedo>>
+<<fade_in Albedo>>
 
 //----
 
 메르쿠리아: 이전에 작성해 주신 설문을 보니, 고객님께서는 실속 있는 생명보험을 고려 중이신 것으로 보입니다만.
 
-//<<shot_track "" 0 -440 1.5>>
-
-//<<move_by_p s1 600 0 3>>
+<<shot_zoom_focus MySlot face right 2 0.5>>
 rrr #box=letterbox
+
+<<shot_track 400 0 0.5>>
+//<<shot_zoom_focus MySlot face right 4 0.5>>
+
+rrr #box=letterbox
+
+<<shot_track -400 0 0.5>>
+rrr #box=letterbox
+
+<<shot_reset>>
+<<p_reset s1>>
+
 55 #box=letterbox
+
+<<shot_zoom_focus Albedo face top 4 0.5>>
+rrr #box=letterbox
+
 <<bg_spawn test1 a 0>>
 <<bg_sprite test1 ui/theme1/DialogueBox03BG_Image2>>
 <<bg_fade test1 1>>
@@ -89,9 +111,9 @@ rrr #box=letterbox
 <<bg_sprite test2 ui/theme1/Background00_Image>>
 <<bg_fade test2 1>>
 
-// <<bg_spawn test3 bg1>>
-// <<bg_sprite test3 ui/default/LobbyCharacter_Image>>
-// <<bg_fade test3 1>>
+<<bg_spawn test3 a 1>>
+<<bg_sprite test3 ui/default/LobbyCharacter_Image>>
+<<bg_fade test3 1>>
 
 
 <<bg_spawn_bound char1 a bgcontent characterslot>>
@@ -108,8 +130,6 @@ rrr #box=letterbox
 깊은 밤, 차가운 정적이 내려앉은 도시의 외딴 골목으로 정체를 알 수 없는 수상쩍은 그림자가 도둑고양이처럼 은밀하게 숨어든다.
 
 <<jolt me>>
-//<<shot_pan -0.5 0 0.25>>
-<<shot_zoom me 4 1.5>>
 
 //<<shot_pan 1500 1000 3.5>>
 
@@ -129,7 +149,6 @@ rrr #box=letterbox
 //<<dlg_spawn b1 b2>>
 //<<end_hold>>
 "물건은 가져왔어?"
-<<shot_zoom me 1 1.5>>
 // <<begin_hold>>
 // <<bg_spawn test3 bg1>>
 
@@ -139,7 +158,6 @@ rrr #box=letterbox
 // <<end_hold>>
 
 어둠 속에서 누군가가 나직한 목소리로 물었다.
-<<shot_track me 0 -440 1.5>>
 
 상대방인 의심스러운 사람이 품 안에서 소중한 듯 무언가를 꺼내 보이며 대꾸했다.
 
@@ -149,7 +167,6 @@ rrr #box=letterbox
 
 "쩝쩝쩝 ..... 맞아, 바로 이 맛이야."
 
-<<shot_zoom me 2.5 0.45>>
 의심스러운 사람은 만족한 듯한 상대의 반응을 확인하고는 본론을 꺼냈다.
 
 "내가 부탁했던 건?"

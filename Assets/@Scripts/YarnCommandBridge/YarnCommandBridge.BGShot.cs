@@ -16,6 +16,14 @@ public sealed partial class YarnCommandBridge
         _dialogueRunner.AddCommandHandler<float, float>("shot_zoom", EnqueueShotZoomSpec);
         _dialogueRunner.AddCommandHandler<float, float, float>("shot_track", EnqueueShotTrackSpec);
         _dialogueRunner.AddCommandHandler<float, float, float>("shot_track_to", EnqueueShotTrackToSpec);
+        
+        _dialogueRunner.AddCommandHandler<string, float, float>(
+            "focus_offset",
+            EnqueueSetCharRigCamFocusSpec);
+
+        _dialogueRunner.AddCommandHandler<string, float, float>(
+            "focus_offset_by",
+            EnqueueAddCharRigCamFocusSpec);
     }
     
     private void EnqueueShotToSpec(float x, float y, float zoom, float duration = 0.45f)
@@ -127,6 +135,42 @@ public sealed partial class YarnCommandBridge
             ease = Ease.OutCubic,
             wait = false,
             killTween = true
+        };
+
+        Collect(spec);
+    }
+    
+    private void EnqueueSetCharRigCamFocusSpec(string roleKey, float x, float y)
+    {
+        if (string.IsNullOrWhiteSpace(roleKey))
+        {
+            Debug.LogError("[YarnCommandBridge] cam_focus: roleKey is null or empty.");
+            return;
+        }
+
+        var spec = new SetCharRigCamFocusCommandSpec
+        {
+            targetKey = roleKey.Trim(),
+            mode = CharRigCamFocusMoveMode.Set,
+            position = new Vector2(x, y),
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueAddCharRigCamFocusSpec(string roleKey, float x, float y)
+    {
+        if (string.IsNullOrWhiteSpace(roleKey))
+        {
+            Debug.LogError("[YarnCommandBridge] cam_focus_add: roleKey is null or empty.");
+            return;
+        }
+
+        var spec = new SetCharRigCamFocusCommandSpec
+        {
+            targetKey = roleKey.Trim(),
+            mode = CharRigCamFocusMoveMode.Add,
+            position = new Vector2(x, y),
         };
 
         Collect(spec);
