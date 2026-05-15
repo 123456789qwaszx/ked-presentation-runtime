@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-[CreateAssetMenu(menuName = "CPS/CharRig/Emoji Preset", fileName = "EmojiPreset_")]
+[CreateAssetMenu(menuName = "CharRig/Emoji Preset", fileName = "EmojiPreset_")]
 public sealed class CharacterEmojiPresetSO : ScriptableObject
 {
     public string emojiKey = "sparkle";

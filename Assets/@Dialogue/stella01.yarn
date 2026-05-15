@@ -1,6 +1,6 @@
 ﻿title: stella01
 ---
-<<clearall_rigs>>
+//<<clearall_rigs>>
 <<presentation_setup>>
 <<shot_reset>>
 <<p_strip_cover vsw 0.3>>
