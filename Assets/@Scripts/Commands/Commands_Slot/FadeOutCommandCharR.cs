@@ -12,9 +12,9 @@ using UnityEngine;
 )]
 public class FadeOutCommandSpecCharR : CharacterRigCommandSpecBase
 {
-    public CharRigRootLayerMask targetMask = CharRigRootLayerMask.CharacterPortrait_Root
-                                             | CharRigRootLayerMask.CharacterPortraitOverlay_Root
-                                             | CharRigRootLayerMask.CharacterEmoji_Root;
+    public CharRigRootMask targetMask = CharRigRootMask.CharacterPortrait_Root
+                                             | CharRigRootMask.CharacterPortraitOverlay_Root
+                                             | CharRigRootMask.CharacterEmoji_Root;
 
     [Tooltip("페이드 시간(초). 0 이하이면 즉시 스냅합니다.")]
     public float duration = 0.38f;
@@ -215,7 +215,7 @@ public sealed class FadeOutCommandCharR : CommandBase, IStepScopedCommand
 
         CharacterRigRefs rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.targetKey);
         
-        CharRigRootLayerMaskMap.CollectRects(rigRefs, _spec.targetMask, _targets);
+        CharRigRootSelector.CollectRootRects(rigRefs, _spec.targetMask, _targets);
     }
 
     private void SnapOffTargets(List<RectTransform> targets)

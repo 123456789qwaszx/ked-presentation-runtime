@@ -168,13 +168,13 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         var spec = new HideRootLayersCommandSpecCharR
         {
             targetKey = roleKey,
-            targetMask = CharRigRootLayerMask.CharacterPortrait_Root
+            targetMask = CharRigRootMask.CharacterPortrait_Root
         };
 
         var spec1 = new FadeInCommandSpecCharR()
         {
             targetKey = roleKey,
-            targetMask = CharRigRootLayerMask.CharacterPortrait_Root,
+            targetMask = CharRigRootMask.CharacterPortrait_Root,
             duration = 0.28f
         };
 

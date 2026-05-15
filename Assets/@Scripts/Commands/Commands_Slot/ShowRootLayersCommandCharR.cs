@@ -13,7 +13,7 @@ using System.Collections.Generic;
     }, SetOrder = -975)]
 public class ShowRootLayersCommandSpecCharR : CharacterRigCommandSpecBase
 {
-    public CharRigRootLayerMask targetMask = CharRigRootLayerMask.CharacterPortrait_Root;
+    public CharRigRootMask targetMask = CharRigRootMask.CharacterPortrait_Root;
 
     [Header("Interaction")]
     [Tooltip("상호작용을 켤지 여부")]
@@ -61,7 +61,7 @@ public sealed class ShowRootLayersCommandCharR : CommandBase, IStepScopedCommand
         _resolveAttempted = true;
         _targets.Clear();
 
-        if (_spec.targetMask == CharRigRootLayerMask.None)
+        if (_spec.targetMask == CharRigRootMask.None)
             return;
 
         CharacterRigRefs rig =
@@ -69,7 +69,7 @@ public sealed class ShowRootLayersCommandCharR : CommandBase, IStepScopedCommand
                 scope,
                 _spec.targetKey);
 
-        CharRigRootLayerMaskMap.CollectRects(
+        CharRigRootSelector.CollectRootRects(
             rig,
             _spec.targetMask,
             _targets);

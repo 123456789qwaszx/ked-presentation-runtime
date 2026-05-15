@@ -12,7 +12,7 @@ using UnityEngine;
 )]
 public class FadeInCommandSpecCharR : CharacterRigCommandSpecBase
 {
-    public CharRigRootLayerMask targetMask = CharRigRootLayerMask.CharacterPortrait_Root;
+    public CharRigRootMask targetMask = CharRigRootMask.CharacterPortrait_Root;
 
     [Tooltip("페이드 시간(초). 0 이하이면 즉시 스냅합니다.")]
     public float duration = 0.47f;
@@ -198,7 +198,7 @@ public sealed class FadeInCommandCharR : CommandBase, IStepScopedCommand
             CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.targetKey);
 
 
-        CharRigRootLayerMaskMap.CollectRects(rigRefs, _spec.targetMask, _targets);
+        CharRigRootSelector.CollectRootRects(rigRefs, _spec.targetMask, _targets);
     }
 
     private void SnapOnTargets(List<RectTransform> targets)

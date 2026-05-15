@@ -12,9 +12,9 @@ using UnityEngine;
 )]
 public sealed class HideRootLayersCommandSpecCharR : CharacterRigCommandSpecBase
 {
-    public CharRigRootLayerMask targetMask = CharRigRootLayerMask.CharacterPortraitOverlay_Root
-                                             | CharRigRootLayerMask.CharacterEmoji_Root
-                                             | CharRigRootLayerMask.CharacterPortrait_Root;
+    public CharRigRootMask targetMask = CharRigRootMask.CharacterPortraitOverlay_Root
+                                             | CharRigRootMask.CharacterEmoji_Root
+                                             | CharRigRootMask.CharacterPortrait_Root;
 
     [Header("Interaction")]
     [Tooltip("true면 숨긴 대상의 입력을 완전히 차단(interactable/blocksRaycasts=false)")]
@@ -62,7 +62,7 @@ public sealed class HideRootLayersCommandCharR : CommandBase
         _resolveAttempted = true;
         _targets.Clear();
 
-        if (_spec.targetMask == CharRigRootLayerMask.None)
+        if (_spec.targetMask == CharRigRootMask.None)
             return;
 
         CharacterRigRefs rig =
@@ -70,7 +70,7 @@ public sealed class HideRootLayersCommandCharR : CommandBase
                 scope,
                 _spec.targetKey);
 
-        CharRigRootLayerMaskMap.CollectRects(
+        CharRigRootSelector.CollectRootRects(
             rig,
             _spec.targetMask,
             _targets);
