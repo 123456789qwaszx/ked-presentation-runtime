@@ -15,16 +15,18 @@ using Object = UnityEngine.Object;
     SetOrder = -980)]
 public sealed class SetupCharRigCommandSpec : CommandSpecBase
 {
-    [Header("Role / Slot")] [Tooltip("생성할 CharacterRig의 roleKey/slotKey. 예: slot1, me, right")]
+    [Header("Role / Slot")]
+    [Tooltip("Rig registration key. Also used as prefix: 'hill' -> 'hill_'.")]
     public string roleKey;
 
-    [Header("Rig")] [Tooltip("있으면 이 프리팹을 인스턴스해서 Rig를 구성합니다. 없으면 자동 생성합니다.")]
+    [Header("Rig")]
+    [Tooltip("Optional rig prefab. If empty, the schema generates the rig graph.")]
     public RectTransform rigPrefab;
 
-    [Tooltip("Rig를 붙일 Slot")] 
+    [Tooltip("Slot to attach this rig to.")]
     public CharRigSlot parentSlot = CharRigSlot.Stage00CharacterSlot;
 
-    [Tooltip("자동 생성 시 루트 오브젝트 이름.")]
+    [Tooltip("Base root name. Final name is '{rolePrefix}_{rigRootName}'.")]
     public string rigRootName = "CharacterRig";
 
     public string ResolvedRolePrefix

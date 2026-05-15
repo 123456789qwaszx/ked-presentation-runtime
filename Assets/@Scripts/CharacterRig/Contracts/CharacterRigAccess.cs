@@ -34,6 +34,42 @@ public static class CharacterRigSchema
         CharacterEmoji_SwayPivot,
         CharacterEmoji_Image
     }
+    
+    public sealed class NodeDef
+    {
+        public Refs  Id;
+        public Refs? Parent;
+        public bool  NeedsImage;
+        public bool  NeedsCanvasGroup;
+        public bool  NeedsBottomPivot;
+    }
+
+    public static readonly NodeDef[] Nodes =
+    {
+        new() { Id = Refs.Character_Anchor,    Parent = null },
+        new() { Id = Refs.Character_Track,     Parent = Refs.Character_Anchor },
+        new() { Id = Refs.Character_Track_Move,Parent = Refs.Character_Track },
+        new() { Id = Refs.Character_Track_X,   Parent = Refs.Character_Track_Move },
+        new() { Id = Refs.Character_Track_Y,   Parent = Refs.Character_Track_X },
+
+        new() { Id = Refs.CharacterPortrait_Root,      Parent = Refs.Character_Track_Y,        NeedsCanvasGroup = true },
+        new() { Id = Refs.CharacterPortrait_Pad,       Parent = Refs.CharacterPortrait_Root },
+        new() { Id = Refs.CharacterPortrait_SwayPivot, Parent = Refs.CharacterPortrait_Pad,    NeedsBottomPivot = true },
+        new() { Id = Refs.CharacterPortrait_Shake,     Parent = Refs.CharacterPortrait_SwayPivot },
+        new() { Id = Refs.CharacterPortrait_Scale,     Parent = Refs.CharacterPortrait_Shake },
+        new() { Id = Refs.CharacterPortrait_Image,     Parent = Refs.CharacterPortrait_Scale,  NeedsImage = true },
+
+        new() { Id = Refs.CharacterPortraitOverlay_Root,  Parent = Refs.CharacterPortrait_Scale, NeedsCanvasGroup = true },
+        new() { Id = Refs.CharacterPortraitOverlay_Image, Parent = Refs.CharacterPortraitOverlay_Root, NeedsImage = true },
+
+        new() { Id = Refs.CharacterEmoji_Root,      Parent = Refs.Character_Track_Y,       NeedsCanvasGroup = true },
+        new() { Id = Refs.CharacterEmoji_Anchor,    Parent = Refs.CharacterEmoji_Root },
+        new() { Id = Refs.CharacterEmoji_Pad,       Parent = Refs.CharacterEmoji_Anchor },
+        new() { Id = Refs.CharacterEmoji_Track,     Parent = Refs.CharacterEmoji_Pad },
+        new() { Id = Refs.CharacterEmoji_Scale,     Parent = Refs.CharacterEmoji_Track },
+        new() { Id = Refs.CharacterEmoji_SwayPivot, Parent = Refs.CharacterEmoji_Scale,   NeedsBottomPivot = true },
+        new() { Id = Refs.CharacterEmoji_Image,     Parent = Refs.CharacterEmoji_SwayPivot, NeedsImage = true },
+    };
 }
 
 public enum CharacterRigTarget

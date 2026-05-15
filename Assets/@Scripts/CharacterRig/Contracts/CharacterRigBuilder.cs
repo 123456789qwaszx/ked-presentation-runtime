@@ -46,11 +46,11 @@ public sealed class CharacterRigBuilder
         if (map.Count >= expectedCount)
             return;
         
-        Debug.LogWarning($"[CharacterRigBuilder] Invalid rig graph. Rebuilding from 'CharacterRigSchema'. rigRoot='{rigRoot.name}'.");
         for (int i = rigRoot.childCount - 1; i >= 0; i--)
             Object.Destroy(rigRoot.GetChild(i).gameObject);
         
         EnsureGraph(rigRoot, rolePrefix);
+        Debug.LogWarning($"[CharacterRigBuilder] Invalid rig graph. Rebuilding from 'CharacterRigSchema'. rigRoot='{rigRoot.name}'.");
         
         map = CreateRefMap(rigRoot, rolePrefix);
     }
@@ -58,62 +58,26 @@ public sealed class CharacterRigBuilder
     #region Auto Create Graph
     private void EnsureGraph(RectTransform root, string rolePrefix)
     {
-        EnsureNode(root, rolePrefix, CharacterRigSchema.Refs.Character_Anchor, null);
-        EnsureNode(root, rolePrefix, CharacterRigSchema.Refs.Character_Track, CharacterRigSchema.Refs.Character_Anchor);
-
-        EnsureNode(root, rolePrefix, CharacterRigSchema.Refs.Character_Track_Move, CharacterRigSchema.Refs.Character_Track);
-        EnsureNode(root, rolePrefix, CharacterRigSchema.Refs.Character_Track_X, CharacterRigSchema.Refs.Character_Track_Move);
-        EnsureNode(root, rolePrefix, CharacterRigSchema.Refs.Character_Track_Y, CharacterRigSchema.Refs.Character_Track_X);
-
-        // Portrait
-        EnsureNode(root, rolePrefix, CharacterRigSchema.Refs.CharacterPortrait_Root, CharacterRigSchema.Refs.Character_Track_Y);
-        EnsureNode(root, rolePrefix, CharacterRigSchema.Refs.CharacterPortrait_Pad, CharacterRigSchema.Refs.CharacterPortrait_Root);
-        EnsureNode(root, rolePrefix, CharacterRigSchema.Refs.CharacterPortrait_SwayPivot, CharacterRigSchema.Refs.CharacterPortrait_Pad);
-        EnsureNode(root, rolePrefix, CharacterRigSchema.Refs.CharacterPortrait_Shake, CharacterRigSchema.Refs.CharacterPortrait_SwayPivot);
-        EnsureNode(root, rolePrefix, CharacterRigSchema.Refs.CharacterPortrait_Scale, CharacterRigSchema.Refs.CharacterPortrait_Shake);
-        EnsureImage(root, rolePrefix, CharacterRigSchema.Refs.CharacterPortrait_Image, CharacterRigSchema.Refs.CharacterPortrait_Scale);
-
-        // Portrait overlays
-        EnsureNode(root, rolePrefix, CharacterRigSchema.Refs.CharacterPortraitOverlay_Root, CharacterRigSchema.Refs.CharacterPortrait_Scale);
-        EnsureImage(root, rolePrefix, CharacterRigSchema.Refs.CharacterPortraitOverlay_Image, CharacterRigSchema.Refs.CharacterPortraitOverlay_Root);
-
-        // Emoji
-        EnsureNode(root, rolePrefix, CharacterRigSchema.Refs.CharacterEmoji_Root, CharacterRigSchema.Refs.Character_Track_Y);
-        EnsureNode(root, rolePrefix, CharacterRigSchema.Refs.CharacterEmoji_Anchor, CharacterRigSchema.Refs.CharacterEmoji_Root);
-        EnsureNode(root, rolePrefix, CharacterRigSchema.Refs.CharacterEmoji_Pad, CharacterRigSchema.Refs.CharacterEmoji_Anchor);
-        EnsureNode(root, rolePrefix, CharacterRigSchema.Refs.CharacterEmoji_Track, CharacterRigSchema.Refs.CharacterEmoji_Pad);
-        EnsureNode(root, rolePrefix, CharacterRigSchema.Refs.CharacterEmoji_Scale, CharacterRigSchema.Refs.CharacterEmoji_Track);
-        EnsureNode(root, rolePrefix, CharacterRigSchema.Refs.CharacterEmoji_SwayPivot, CharacterRigSchema.Refs.CharacterEmoji_Scale);
-        EnsureImage(root, rolePrefix, CharacterRigSchema.Refs.CharacterEmoji_Image, CharacterRigSchema.Refs.CharacterEmoji_SwayPivot);
+        foreach (CharacterRigSchema.NodeDef node in CharacterRigSchema.Nodes)
+            EnsureNode(root, rolePrefix, node);
     }
 
-    private void EnsureNode(RectTransform rigRoot, string rolePrefix, CharacterRigSchema.Refs id, CharacterRigSchema.Refs? parent)
+    private void EnsureNode(RectTransform root, string rolePrefix, CharacterRigSchema.NodeDef node)
     {
-        RectTransform parentRt = parent.HasValue
-            ? FindByName(rigRoot, WithRole(rolePrefix, parent.Value.ToString())) as RectTransform
-            : rigRoot;
+        RectTransform parentRt = node.Parent.HasValue
+            ? FindByName(root, WithRole(rolePrefix, node.Parent.Value.ToString())) as RectTransform
+            : root;
 
-        RectTransform rt = EnsureRect(parentRt, WithRole(rolePrefix, id.ToString()));
+        RectTransform rt = EnsureRect(parentRt, WithRole(rolePrefix, node.Id.ToString()));
 
-        if (NeedsBottomPivot(id))
+        if (node.NeedsBottomPivot)
             rt.pivot = new Vector2(0.5f, 0f);
 
-        if (NeedsCanvasGroup(id) && !rt.TryGetComponent<CanvasGroup>(out _))
+        if (node.NeedsCanvasGroup && !rt.TryGetComponent<CanvasGroup>(out _))
             rt.gameObject.AddComponent<CanvasGroup>();
-    }
 
-    private bool NeedsBottomPivot(CharacterRigSchema.Refs id)
-    {
-        return id == CharacterRigSchema.Refs.CharacterPortrait_SwayPivot ||
-               id == CharacterRigSchema.Refs.CharacterEmoji_SwayPivot;
-    }
-
-    private bool NeedsCanvasGroup(CharacterRigSchema.Refs id)
-    {
-        return id == CharacterRigSchema.Refs.CharacterPortrait_Root ||
-               id == CharacterRigSchema.Refs.CharacterPortraitOverlay_Root ||
-               id == CharacterRigSchema.Refs.CharacterEmoji_Root;
-        //return id.ToString().EndsWith("_Root", StringComparison.Ordinal);
+        if (node.NeedsImage && !rt.TryGetComponent<Image>(out _))
+            rt.gameObject.AddComponent<Image>();
     }
     
     private RectTransform EnsureRect(RectTransform parent, string name)
@@ -128,15 +92,6 @@ public sealed class CharacterRigBuilder
         StretchFull(rt);
 
         return rt;
-    }
-
-    private void EnsureImage(RectTransform rigRoot, string rolePrefix, CharacterRigSchema.Refs id, CharacterRigSchema.Refs parent)
-    {
-        var parentRt = FindByName(rigRoot, WithRole(rolePrefix, parent.ToString())) as RectTransform;
-        var rt = EnsureRect(parentRt, WithRole(rolePrefix, id.ToString()));
-
-        if (!rt.TryGetComponent<Image>(out _))
-            rt.gameObject.AddComponent<Image>();
     }
     #endregion
     
