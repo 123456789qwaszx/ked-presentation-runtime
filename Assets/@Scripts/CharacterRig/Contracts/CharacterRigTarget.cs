@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -37,7 +36,8 @@ public enum CharacterRigTarget
 
 public sealed class CharacterRigRefs
 {
-    public RectTransform Root;
+    // RitRoot
+    public RectTransform CharacterRig;
     
     // Root axis
     public RectTransform Character_Anchor;

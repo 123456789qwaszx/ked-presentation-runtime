@@ -145,10 +145,10 @@ public class VnAppBootstrap : MonoBehaviour
         SignalCommandFactory signalFactory = new(_unityTimeSource, unitySignalBus, signalLatch);
 
         // CharRigFactory
-        CharRigSlotResolver charRigSlotResolver = new();
-        CharacterRigAccess charRigAccess = new(charRigSlotResolver);
+        ICharRigSlotResolver charRigSlotResolver = new CharRigSlotResolver();
+        CharacterRigAccess charRigAccess = new();
         PortraitResolver portraitResolver = new(portraitGeneratedDbSo);
-        CharRigCommandFactory charRigFactory = new(charRigAccess, portraitResolver);
+        CharRigCommandFactory charRigFactory = new(charRigSlotResolver, charRigAccess, portraitResolver);
 
         // TransitionFactory
         TransitionCommandFactory transitionCommandFactory = new(transitionTargetRouter, _uiPatchService);

@@ -10,7 +10,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
     private DialogueRunner _dialogueRunner;
     private YarnBridgePlaybackDriver _playbackDriver;
 
-    [Header("Rig")] public GameObject rigPrefab;
+    [Header("Rig")] public RectTransform rigPrefab;
     [Header("Global Tuning")] public CharStageTuningSO globalTuning;
     [Header("Role Tuning")] public RoleAnchorTuningDBSO roleTuningDb;
 

@@ -4,75 +4,45 @@ using UnityEngine;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
-public interface ICharRigSlotResolver
-{
-    RectTransform Resolve(CharRigSlot slot, bool strict);
-}
-
 public sealed class CharacterRigAccess
 {
-    private readonly ICharRigSlotResolver _slotResolver;
-
-    public CharacterRigAccess(ICharRigSlotResolver slotResolver)
+    public RectTransform CreateCharacterRig(RectTransform rigPrefab = null, string rolePrefix = "", string rigRootName = "CharacterRig")
     {
-        _slotResolver = slotResolver;
-    }
-    public CharacterRigRefs BindAndBuildRefs(SetupCharRigCommandSpec spec)
-    {
-        RectTransform parent = _slotResolver.Resolve(spec.parentSlot, spec.strict);
+        RectTransform rigRoot;
 
-        // rolePrefix는 spec에서 자동/override 반영된 값을 사용
-        string rolePrefix = spec.ResolvedRolePrefix;
+        if (rigPrefab != null)
+        {
+            rigRoot = Object.Instantiate(rigPrefab);
+            rigRoot.name = WithRole(rolePrefix, rigRootName);
 
-        RectTransform rigRoot = CreateRigRoot(parent, spec, rolePrefix);
+            if (!string.IsNullOrEmpty(rolePrefix))
+                PrefixAllChildren(rigRoot.transform, rolePrefix);
+        }
+        else
+        {
+            GameObject rootGo = new(WithRole(rolePrefix, rigRootName), typeof(RectTransform));
+            rigRoot = (RectTransform)rootGo.transform;
         
-        var map = BindMap(rigRoot, rolePrefix, spec.strict);
-        CharacterRigRefs refs = BuildRefs(rigRoot, map, spec.strict);
-
-        return refs;
+            StretchFull(rigRoot);
+            EnsureGraph(rigRoot, rolePrefix);
+        }
+        
+        return rigRoot;
     }
-
-    #region InstantiatePrefab & BindMap
-
-    private RectTransform CreateRigRoot(Transform parent, SetupCharRigCommandSpec spec, string rolePrefix)
+    
+    public CharacterRigRefs BuildRefsFromRoot(RectTransform rigRoot, string rolePrefix)
     {
-        if (spec.rigPrefab != null)
-            return InstantiatePrefab(parent, spec, rolePrefix);
-
-        return AutoCreateRig(parent, spec.rigRootName, rolePrefix);
+        var map = BindMap(rigRoot, rolePrefix);
+        return BuildRefs(rigRoot, map);
     }
-
-    private RectTransform InstantiatePrefab(Transform parent, SetupCharRigCommandSpec spec, string rolePrefix)
-    {
-        GameObject go = Object.Instantiate(spec.rigPrefab, parent, false);
-
-        go.name = WithRole(rolePrefix, spec.rigRootName);
-
-        if (spec.addRolePrefix && !string.IsNullOrEmpty(rolePrefix))
-            PrefixAllChildren(go.transform, rolePrefix);
-
-        return go.GetComponent<RectTransform>() ?? go.AddComponent<RectTransform>();
-    }
-
-    private RectTransform AutoCreateRig(Transform parent, string rootName, string rolePrefix)
-    {
-        string rootGoName = WithRole(rolePrefix, rootName);
-
-        GameObject rootGo = new(rootGoName, typeof(RectTransform));
-        RectTransform root = (RectTransform)rootGo.transform;
-        root.SetParent(parent, false);
-        StretchFull(root);
-
-        EnsureGraph(root, rolePrefix);
-
-        return root;
-    }
-
+    
+    
+    #region Auto Create Graph
     private void EnsureGraph(RectTransform root, string rolePrefix)
     {
         EnsureNode(root, rolePrefix, CharacterRig.Refs.Character_Anchor, null);
         EnsureNode(root, rolePrefix, CharacterRig.Refs.Character_Track, CharacterRig.Refs.Character_Anchor);
-        
+
         EnsureNode(root, rolePrefix, CharacterRig.Refs.Character_Track_Move, CharacterRig.Refs.Character_Track);
         EnsureNode(root, rolePrefix, CharacterRig.Refs.Character_Track_X, CharacterRig.Refs.Character_Track_Move);
         EnsureNode(root, rolePrefix, CharacterRig.Refs.Character_Track_Y, CharacterRig.Refs.Character_Track_X);
@@ -99,118 +69,35 @@ public sealed class CharacterRigAccess
         EnsureImage(root, rolePrefix, CharacterRig.Refs.CharacterEmoji_Image, CharacterRig.Refs.CharacterEmoji_SwayPivot);
     }
 
-    private Dictionary<CharacterRig.Refs, RectTransform> BindMap(RectTransform rigRoot, string rolePrefix, bool strict)
+    private void EnsureNode(RectTransform rigRoot, string rolePrefix, CharacterRig.Refs id, CharacterRig.Refs? parent)
     {
-        Dictionary<CharacterRig.Refs, RectTransform> map = new();
+        RectTransform parentRt = parent.HasValue
+            ? FindByName(rigRoot, WithRole(rolePrefix, parent.Value.ToString())) as RectTransform
+            : rigRoot;
 
-        foreach (CharacterRig.Refs id in Enum.GetValues(typeof(CharacterRig.Refs)))
-        {
-            string nodeName = WithRole(rolePrefix, id.ToString());
+        RectTransform rt = EnsureRect(parentRt, WithRole(rolePrefix, id.ToString()));
 
-            RectTransform t = FindByName(rigRoot, nodeName) as RectTransform;
-            if (t == null)
-            {
-                if (strict)
-                    throw new InvalidOperationException($"[SetRig] Missing node '{nodeName}' under '{rigRoot.name}'.");
-                continue;
-            }
+        if (NeedsBottomPivot(id))
+            rt.pivot = new Vector2(0.5f, 0f);
 
-            map[id] = t;
-        }
-
-        return map;
+        if (NeedsCanvasGroup(id) && !rt.TryGetComponent<CanvasGroup>(out _))
+            rt.gameObject.AddComponent<CanvasGroup>();
     }
 
-    #endregion
-    private CharacterRigRefs BuildRefs(RectTransform rigRoot, Dictionary<CharacterRig.Refs, RectTransform> map, bool strict)
+    private bool NeedsBottomPivot(CharacterRig.Refs id)
     {
-        CharacterRigRefs refs = new();
-        
-        refs.Root = rigRoot;
-
-        RectTransform GetRt(CharacterRig.Refs key)
-        {
-            if (!map.TryGetValue(key, out RectTransform targetRect) || targetRect == null)
-            {
-                if (strict) throw new InvalidOperationException($"[SetRig] Missing bound ref '{key}'.");
-                return null;
-            }
-
-            return targetRect;
-        }
-
-        Image GetImg(CharacterRig.Refs key)
-        {
-            var rt = GetRt(key);
-            if (rt == null) return null;
-
-            var img = rt.GetComponent<Image>();
-            if (img == null)
-            {
-                if (strict)
-                    throw new InvalidOperationException($"[SetRig] Missing Image on '{rt.name}'.");
-                // strict=false면 그냥 null 반환 (자동 추가를 원하면 AddComponent로 바꿔도 됨)
-                return null;
-            }
-
-            return img;
-        }
-
-        // Root axis
-        refs.Character_Anchor = GetRt(CharacterRig.Refs.Character_Anchor);
-        refs.Character_Track      = GetRt(CharacterRig.Refs.Character_Track);
-        
-        refs.Character_Track_Move = GetRt(CharacterRig.Refs.Character_Track_Move);
-        refs.Character_Track_X    = GetRt(CharacterRig.Refs.Character_Track_X);
-        refs.Character_Track_Y    = GetRt(CharacterRig.Refs.Character_Track_Y);
-
-        // Portrait
-        refs.CharacterPortrait_Root      = GetRt(CharacterRig.Refs.CharacterPortrait_Root);
-        refs.CharacterPortrait_Pad       = GetRt(CharacterRig.Refs.CharacterPortrait_Pad);
-        refs.CharacterPortrait_SwayPivot = GetRt(CharacterRig.Refs.CharacterPortrait_SwayPivot);
-        refs.CharacterPortrait_Shake     = GetRt(CharacterRig.Refs.CharacterPortrait_Shake);
-        refs.CharacterPortrait_Scale     = GetRt(CharacterRig.Refs.CharacterPortrait_Scale);
-        refs.CharacterPortrait_Image     = GetImg(CharacterRig.Refs.CharacterPortrait_Image);
-
-        // Portrait overlays
-        refs.CharacterPortraitOverlay_Root  = GetRt(CharacterRig.Refs.CharacterPortraitOverlay_Root);
-        refs.CharacterPortraitOverlay_Image = GetImg(CharacterRig.Refs.CharacterPortraitOverlay_Image);
-
-        // Emoji
-        refs.CharacterEmoji_Root      = GetRt(CharacterRig.Refs.CharacterEmoji_Root);
-        refs.CharacterEmoji_Anchor    = GetRt(CharacterRig.Refs.CharacterEmoji_Anchor);
-        refs.CharacterEmoji_Pad       = GetRt(CharacterRig.Refs.CharacterEmoji_Pad);
-        refs.CharacterEmoji_Track     = GetRt(CharacterRig.Refs.CharacterEmoji_Track);
-        refs.CharacterEmoji_Scale     = GetRt(CharacterRig.Refs.CharacterEmoji_Scale);
-        refs.CharacterEmoji_SwayPivot = GetRt(CharacterRig.Refs.CharacterEmoji_SwayPivot);
-        refs.CharacterEmoji_Image     = GetImg(CharacterRig.Refs.CharacterEmoji_Image);
-
-        return refs;
+        return id == CharacterRig.Refs.CharacterPortrait_SwayPivot ||
+               id == CharacterRig.Refs.CharacterEmoji_SwayPivot;
     }
 
-    #region Helper
-
-    private string WithRole(string rolePrefix, string baseName)
+    private bool NeedsCanvasGroup(CharacterRig.Refs id)
     {
-        if (string.IsNullOrEmpty(rolePrefix)) return baseName;
-        if (baseName.StartsWith(rolePrefix, StringComparison.Ordinal)) return baseName;
-        return $"{rolePrefix}{baseName}";
+        return id == CharacterRig.Refs.CharacterPortrait_Root ||
+               id == CharacterRig.Refs.CharacterPortraitOverlay_Root ||
+               id == CharacterRig.Refs.CharacterEmoji_Root;
+        //return id.ToString().EndsWith("_Root", StringComparison.Ordinal);
     }
-
-    private void PrefixAllChildren(Transform root, string rolePrefix)
-    {
-        if (root == null || string.IsNullOrEmpty(rolePrefix)) return;
-
-        void Walk(Transform t)
-        {
-            t.name = WithRole(rolePrefix, t.name);
-            for (int i = 0; i < t.childCount; i++)
-                Walk(t.GetChild(i));
-        }
-
-        Walk(root);
-    }
-
+    
     private RectTransform EnsureRect(RectTransform parent, string name)
     {
         RectTransform existing = FindByName(parent, name) as RectTransform;
@@ -225,38 +112,106 @@ public sealed class CharacterRigAccess
         return rt;
     }
 
-    private void EnsureNode(RectTransform rigRoot, string rolePrefix, CharacterRig.Refs id, CharacterRig.Refs? parent)
-    {
-        RectTransform parentRt = parent.HasValue
-            ? (FindByName(rigRoot, WithRole(rolePrefix, parent.Value.ToString())) as RectTransform)
-            : rigRoot;
-
-        RectTransform rt = EnsureRect(parentRt, WithRole(rolePrefix, id.ToString()));
-        EnsureCanvasGroupIfRoot(rt, id);
-    }
-
-    private void EnsureCanvasGroupIfRoot(RectTransform rt, CharacterRig.Refs id)
-    {
-        if (rt == null)
-            return;
-
-        if (!IsRootNode(id))
-            return;
-
-        if (!rt.TryGetComponent<CanvasGroup>(out _))
-            rt.gameObject.AddComponent<CanvasGroup>();
-    }
-
-    private bool IsRootNode(CharacterRig.Refs id) => id.ToString().EndsWith("_Root", StringComparison.Ordinal);
-
     private void EnsureImage(RectTransform rigRoot, string rolePrefix, CharacterRig.Refs id, CharacterRig.Refs parent)
     {
         var parentRt = FindByName(rigRoot, WithRole(rolePrefix, parent.ToString())) as RectTransform;
         var rt = EnsureRect(parentRt, WithRole(rolePrefix, id.ToString()));
+
         if (!rt.TryGetComponent<Image>(out _))
             rt.gameObject.AddComponent<Image>();
     }
+    #endregion
+    
+    #region Binding / Refs
+    private Dictionary<CharacterRig.Refs, RectTransform> BindMap(RectTransform rigRoot, string rolePrefix)
+    {
+        Dictionary<CharacterRig.Refs, RectTransform> map = new();
 
+        foreach (CharacterRig.Refs id in Enum.GetValues(typeof(CharacterRig.Refs)))
+        {
+            string nodeName = WithRole(rolePrefix, id.ToString());
+
+            RectTransform t = FindByName(rigRoot, nodeName) as RectTransform;
+            if (t == null)
+            {
+                Debug.LogWarning($"[SetRig] Missing node '{nodeName}' under '{rigRoot.name}'.");
+                continue;
+            }
+
+            map[id] = t;
+        }
+
+        return map;
+    }
+    
+    private CharacterRigRefs BuildRefs(RectTransform rigRoot, Dictionary<CharacterRig.Refs, RectTransform> map)
+    {
+        CharacterRigRefs refs = new();
+
+        refs.CharacterRig = rigRoot;
+
+        RectTransform GetRt(CharacterRig.Refs key)
+        {
+            if (!map.TryGetValue(key, out RectTransform targetRect) || targetRect == null)
+            {
+                Debug.LogWarning($"[SetRig] Missing bound ref '{key}'.");
+
+                return null;
+            }
+
+            return targetRect;
+        }
+
+        Image GetImg(CharacterRig.Refs key)
+        {
+            RectTransform rt = GetRt(key);
+            if (rt == null)
+                return null;
+
+            Image img = rt.GetComponent<Image>();
+            if (img == null)
+            {
+                Debug.LogWarning($"[SetRig] Missing Image on '{rt.name}'.");
+                return null;
+            }
+
+            return img;
+        }
+
+        // Root axis
+        refs.Character_Anchor = GetRt(CharacterRig.Refs.Character_Anchor);
+        refs.Character_Track = GetRt(CharacterRig.Refs.Character_Track);
+
+        refs.Character_Track_Move = GetRt(CharacterRig.Refs.Character_Track_Move);
+        refs.Character_Track_X = GetRt(CharacterRig.Refs.Character_Track_X);
+        refs.Character_Track_Y = GetRt(CharacterRig.Refs.Character_Track_Y);
+
+        // Portrait
+        refs.CharacterPortrait_Root = GetRt(CharacterRig.Refs.CharacterPortrait_Root);
+        refs.CharacterPortrait_Pad = GetRt(CharacterRig.Refs.CharacterPortrait_Pad);
+        refs.CharacterPortrait_SwayPivot = GetRt(CharacterRig.Refs.CharacterPortrait_SwayPivot);
+        refs.CharacterPortrait_Shake = GetRt(CharacterRig.Refs.CharacterPortrait_Shake);
+        refs.CharacterPortrait_Scale = GetRt(CharacterRig.Refs.CharacterPortrait_Scale);
+        refs.CharacterPortrait_Image = GetImg(CharacterRig.Refs.CharacterPortrait_Image);
+
+        // Portrait overlays
+        refs.CharacterPortraitOverlay_Root = GetRt(CharacterRig.Refs.CharacterPortraitOverlay_Root);
+        refs.CharacterPortraitOverlay_Image = GetImg(CharacterRig.Refs.CharacterPortraitOverlay_Image);
+
+        // Emoji
+        refs.CharacterEmoji_Root = GetRt(CharacterRig.Refs.CharacterEmoji_Root);
+        refs.CharacterEmoji_Anchor = GetRt(CharacterRig.Refs.CharacterEmoji_Anchor);
+        refs.CharacterEmoji_Pad = GetRt(CharacterRig.Refs.CharacterEmoji_Pad);
+        refs.CharacterEmoji_Track = GetRt(CharacterRig.Refs.CharacterEmoji_Track);
+        refs.CharacterEmoji_Scale = GetRt(CharacterRig.Refs.CharacterEmoji_Scale);
+        refs.CharacterEmoji_SwayPivot = GetRt(CharacterRig.Refs.CharacterEmoji_SwayPivot);
+        refs.CharacterEmoji_Image = GetImg(CharacterRig.Refs.CharacterEmoji_Image);
+
+        return refs;
+    }
+    #endregion
+    
+    #region Helper
     private Transform FindByName(Transform root, string name)
     {
         if (root == null)
@@ -276,6 +231,22 @@ public sealed class CharacterRigAccess
 
         return null;
     }
+    
+    private void PrefixAllChildren(Transform root, string rolePrefix)
+    {
+        if (root == null || string.IsNullOrEmpty(rolePrefix))
+            return;
+
+        void Walk(Transform t)
+        {
+            t.name = WithRole(rolePrefix, t.name);
+
+            for (int i = 0; i < t.childCount; i++)
+                Walk(t.GetChild(i));
+        }
+
+        Walk(root);
+    }
 
     private void StretchFull(RectTransform rt)
     {
@@ -286,10 +257,15 @@ public sealed class CharacterRigAccess
         rt.offsetMax = Vector2.zero;
     }
     
-    public RectTransform ResolveParentSlot(CharRigSlot slot, bool strict)
+    private string WithRole(string rolePrefix, string baseName)
     {
-        return _slotResolver.Resolve(slot, strict);
-    }
+        if (string.IsNullOrEmpty(rolePrefix))
+            return baseName;
 
+        if (baseName.StartsWith(rolePrefix, StringComparison.Ordinal))
+            return baseName;
+
+        return $"{rolePrefix}{baseName}";
+    }
     #endregion
 }

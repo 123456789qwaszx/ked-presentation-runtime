@@ -21,7 +21,7 @@ public sealed class SetupCharRigCommandSpec : CommandSpecBase
 
     [Header("Rig")]
     [Tooltip("있으면 이 프리팹을 인스턴스해서 Rig를 구성합니다. 없으면 자동 생성합니다.")]
-    public GameObject rigPrefab;
+    public RectTransform rigPrefab;
 
     [Tooltip("Rig를 붙일 Slot")]
     public CharRigSlot parentSlot = CharRigSlot.Stage00CharacterSlot;
@@ -33,9 +33,6 @@ public sealed class SetupCharRigCommandSpec : CommandSpecBase
     [Tooltip("켜면 roleKey로부터 자동으로 prefix를 생성합니다. 예: roleKey='seina' -> 'seina_'")]
     public bool autoRolePrefixFromRoleKey = true;
 
-    [Tooltip("켜면 최종 prefix를 실제 Rig 이름에 적용합니다.")]
-    public bool addRolePrefix = true;
-
     [Tooltip("Parent Slot에 동일한 이름의 Rig가 이미 있으면 파괴 후 새로 생성합니다.")]
     public bool destroyExistingRigWithSameName = true;
 
@@ -46,9 +43,6 @@ public sealed class SetupCharRigCommandSpec : CommandSpecBase
     {
         get
         {
-            if (!addRolePrefix)
-                return "";
-
             if (!autoRolePrefixFromRoleKey)
                 return "";
 
@@ -66,13 +60,18 @@ public sealed class SetupCharRigCommandSpec : CommandSpecBase
 
 public sealed class SetupCharRigCommand : CommandBase
 {
+    private readonly ICharRigSlotResolver _slotResolver;
     private readonly CharacterRigAccess _rigAccess;
     private readonly SetupCharRigCommandSpec _spec;
 
     public override bool WaitForCompletion => true;
 
-    public SetupCharRigCommand(CharacterRigAccess rigAccess, SetupCharRigCommandSpec spec)
+    public SetupCharRigCommand(
+        ICharRigSlotResolver slotResolver,
+        CharacterRigAccess rigAccess,
+        SetupCharRigCommandSpec spec)
     {
+        _slotResolver = slotResolver;
         _rigAccess = rigAccess;
         _spec = spec;
     }
@@ -100,16 +99,31 @@ public sealed class SetupCharRigCommand : CommandBase
         if (string.IsNullOrEmpty(roleKey))
             throw new InvalidOperationException("[SetupCharRigCommand] roleKey is empty.");
 
-        if (_spec.destroyExistingRigWithSameName)
-            TryDestroyExistingRig(roleKey);
+        RectTransform parent = _slotResolver.Resolve(_spec.parentSlot, _spec.strict);
+        if (parent == null)
+        {
+            if (_spec.strict)
+                throw new InvalidOperationException($"[SetupCharRigCommand] Parent slot '{_spec.parentSlot}' could not be resolved.");
 
-        CharacterRigRefs rigRefs = _rigAccess.BindAndBuildRefs(_spec);
-        scope.Refs[roleKey] = rigRefs;
+            return;
+        }
+
+        if (_spec.destroyExistingRigWithSameName)
+            TryDestroyExistingRig(parent, roleKey);
+        
+        RectTransform rigPrefab = _spec.rigPrefab;
+        string rolePrefix = _spec.ResolvedRolePrefix;
+        
+        RectTransform rigRoot = _rigAccess.CreateCharacterRig(rigPrefab, rolePrefix, _spec.rigRootName);
+        rigRoot.SetParent(parent, false);
+        
+        CharacterRigRefs refs = _rigAccess.BuildRefsFromRoot(rigRoot, rolePrefix);
+        
+        scope.Refs[roleKey] = refs;
     }
 
-    private void TryDestroyExistingRig(string roleKey)
+    private void TryDestroyExistingRig(RectTransform parent, string roleKey)
     {
-        RectTransform parent = _rigAccess.ResolveParentSlot(_spec.parentSlot, _spec.strict);
         if (parent == null)
             return;
 
@@ -164,5 +178,14 @@ public sealed class SetupCharRigCommand : CommandBase
 
         DOTween.Kill(root, false);
         DOTween.Kill(root.gameObject, false);
+    }
+    
+    private void StretchFull(RectTransform rt)
+    {
+        rt.anchorMin = Vector2.zero;
+        rt.anchorMax = Vector2.one;
+        rt.pivot = new Vector2(0.5f, 0.5f);
+        rt.offsetMin = Vector2.zero;
+        rt.offsetMax = Vector2.zero;
     }
 }

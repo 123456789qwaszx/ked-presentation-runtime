@@ -142,8 +142,8 @@ public sealed class ClearCharRigRefsCommand : CommandBase
         if (rigRefs == null)
             return null;
 
-        if (rigRefs.Root != null)
-            return rigRefs.Root.gameObject;
+        if (rigRefs.CharacterRig != null)
+            return rigRefs.CharacterRig.gameObject;
 
         if (rigRefs.CharacterPortrait_Root != null)
             return rigRefs.CharacterPortrait_Root.root.gameObject;
