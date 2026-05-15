@@ -19,8 +19,9 @@ public sealed class SetupCharRigCommandSpec : CommandSpecBase
     [Tooltip("Rig registration key. Also used as prefix: 'hill' -> 'hill_'.")]
     public string roleKey;
 
-    [Header("Rig")]
-    [Tooltip("Optional rig prefab. If empty, the schema generates the rig graph.")]
+    [Tooltip("CharacterRig prefab used for command presentation. " +
+             "Empty fields bake a complete rig from CharacterRigSchema at runtime. " +
+             "Prefab the baked result when you need performance setup, external systems, response targets, or shot helpers.")]
     public RectTransform rigPrefab;
 
     [Tooltip("Slot to attach this rig to.")]

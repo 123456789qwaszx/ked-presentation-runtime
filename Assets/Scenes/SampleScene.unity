@@ -25354,10 +25354,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIManager
   _dontDestroyOnLoad: 1
-  _layerUIRoot: {fileID: 0}
-  _layerPanels: {fileID: 0}
-  _layerOverlay: {fileID: 0}
-  _layerTop: {fileID: 0}
+  _layerUIRoot: {fileID: 87668845}
+  _layerPanels: {fileID: 240595999}
+  _layerOverlay: {fileID: 1849447420}
+  _layerTop: {fileID: 1292458936}
   _keepAliveDepth: 2
   _coveredAlpha: 0
 --- !u!222 &2865701852706092235

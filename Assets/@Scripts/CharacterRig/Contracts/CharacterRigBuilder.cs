@@ -42,16 +42,30 @@ public sealed class CharacterRigBuilder
     private void EnsureValidGraphMap(RectTransform rigRoot, string rolePrefix, ref Dictionary<CharacterRigSchema.Refs, RectTransform> map)
     {
         int expectedCount = Enum.GetValues(typeof(CharacterRigSchema.Refs)).Length;
-        
+
         if (map.Count >= expectedCount)
             return;
         
+        Debug.LogWarning(
+            $"[CharacterRigBuilder] Invalid rig graph. " +
+            $"Rebuilding from CharacterRigSchema. " +
+            $"The assigned CharacterRig prefab may be broken or missing required nodes. " +
+            $"Check the baked result and replace the prefab with a newly baked one if needed. " +
+            $"rigRoot='{rigRoot.name}'.");
+
         for (int i = rigRoot.childCount - 1; i >= 0; i--)
-            Object.Destroy(rigRoot.GetChild(i).gameObject);
-        
+        {
+            Transform child = rigRoot.GetChild(i);
+
+            // Destroy() is delayed until the end of the frame.
+            // Detach first so EnsureGraph() cannot find soon-to-be-destroyed nodes.
+            child.SetParent(null, false);
+
+            Object.Destroy(child.gameObject);
+        }
+
         EnsureGraph(rigRoot, rolePrefix);
-        Debug.LogWarning($"[CharacterRigBuilder] Invalid rig graph. Rebuilding from 'CharacterRigSchema'. rigRoot='{rigRoot.name}'.");
-        
+
         map = CreateRefMap(rigRoot, rolePrefix);
     }
     
@@ -73,8 +87,13 @@ public sealed class CharacterRigBuilder
         if (node.NeedsBottomPivot)
             rt.pivot = new Vector2(0.5f, 0f);
 
-        if (node.NeedsCanvasGroup && !rt.TryGetComponent<CanvasGroup>(out _))
-            rt.gameObject.AddComponent<CanvasGroup>();
+        if (node.NeedsCanvasGroup)
+        {
+            if (!rt.TryGetComponent<CanvasGroup>(out CanvasGroup canvasGroup))
+                canvasGroup = rt.gameObject.AddComponent<CanvasGroup>();
+
+            canvasGroup.alpha = node.InitialCanvasGroupAlpha;
+        }
 
         if (node.NeedsImage && !rt.TryGetComponent<Image>(out _))
             rt.gameObject.AddComponent<Image>();
