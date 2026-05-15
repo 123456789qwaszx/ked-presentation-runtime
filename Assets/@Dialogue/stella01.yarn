@@ -5,7 +5,7 @@
 <<shot_reset>>
 <<p_strip_cover vsw 0.3>>
 
-<<bgm audio/bgm_tam_dystopia_snowwind_01>>
+//<<bgm audio/bgm_tam_dystopia_snowwind_01>>
 
 <<bg_spawn bg2 a 0>>
 <<bg_sprite bg2 bg05>>

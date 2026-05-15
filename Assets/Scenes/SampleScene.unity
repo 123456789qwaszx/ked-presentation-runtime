@@ -9043,16 +9043,20 @@ MonoBehaviour:
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  _progress01: 0
-  _bandWidth: 260
+  _broadGlow01: 0
+  _coreSweep01: 0
+  _trailGlow01: 0
+  _flash01: 0
+  _broadGlowWidth: 960
   _coreWidth: 64
+  _trailGlowWidth: 680
   _slantPixels: 220
   _extraTravel: 420
   _direction: 0
+  _broadGlowAlpha: 0.34
   _coreAlpha: 0.95
-  _sideAlpha: 0.28
+  _trailGlowAlpha: 0.24
   _flashAlpha: 0.32
-  _flashWidth: 0.28
   _raycastBlocking: 0
 --- !u!222 &1228087796
 CanvasRenderer:
@@ -17603,7 +17607,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 458.38, y: -24}
-  m_SizeDelta: {x: 916.76, y: 0}
+  m_SizeDelta: {x: 916.76, y: 24}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!1 &666632935594092605
 GameObject:
