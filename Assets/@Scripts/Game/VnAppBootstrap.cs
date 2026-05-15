@@ -16,7 +16,7 @@ public class VnAppBootstrap : MonoBehaviour
 
     [Header("Sound")] 
     [SerializeField] private AudioSystem audioSystem;
-    [SerializeField] private InlineSfxHost inlineSfxHost;
+    [SerializeField] private InlineSfxPlaybackHost inlineSfxHost;
 
     [Header("PresentationView")]
     [SerializeField] private BGHost bgHost;
