@@ -5,7 +5,7 @@ using UnityEngine;
 public partial class UIManager
 {
     private UIPatchService _uiPatchService;
-    
+
     private UIContext _uiContext = new("default", "ko-KR");
     private int _showVersion;
 
@@ -13,7 +13,7 @@ public partial class UIManager
     {
         _uiPatchService = uiPatchService;
     }
-    
+
     public void SetUIContext(UIContext context)
     {
         _uiContext = context;
@@ -74,6 +74,7 @@ public partial class UIManager
             return;
 
         BumpShowVersion();
+
         int ticket = _showVersion;
         StartCoroutine(CoRepatchVisible(ticket));
     }
@@ -117,6 +118,7 @@ public partial class UIManager
             for (int i = 0; i < _layerOverlay.childCount; i++)
             {
                 UIBase ui = _layerOverlay.GetChild(i).GetComponent<UIBase>();
+
                 if (ui != null && ui.gameObject.activeInHierarchy)
                 {
                     yield return _uiPatchService.PatchUIInHierarchy(ui, _uiContext);
@@ -132,6 +134,7 @@ public partial class UIManager
             for (int i = 0; i < _layerTop.childCount; i++)
             {
                 UIBase ui = _layerTop.GetChild(i).GetComponent<UIBase>();
+
                 if (ui != null && ui.gameObject.activeInHierarchy)
                 {
                     yield return _uiPatchService.PatchUIInHierarchy(ui, _uiContext);

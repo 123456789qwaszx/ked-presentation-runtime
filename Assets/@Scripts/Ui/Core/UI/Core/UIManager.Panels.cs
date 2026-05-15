@@ -11,7 +11,13 @@ public partial class UIManager
         BumpShowVersion();
 
         Mount(panel, _layerPanels);
-        ApplyState(panel, active: false, interactable: false, blocksRaycasts: false, alpha: 0f);
+
+        ApplyState(
+            panel,
+            active: false,
+            interactable: false,
+            blocksRaycasts: false,
+            alpha: 0f);
 
         if (_panelStack.Contains(panel))
             PopUntil(panel);
@@ -33,7 +39,8 @@ public partial class UIManager
             return;
 
         UIBase top = _panelStack.Pop();
-        ApplyState(top, active: false, interactable: false, blocksRaycasts: false, alpha: 0f);
+
+        HideManagedUI(top);
 
         BumpShowVersion();
         ApplyPanelStackState();
@@ -61,7 +68,7 @@ public partial class UIManager
         while (_panelStack.Count > 0 && _panelStack.Peek() != target)
         {
             UIBase popped = _panelStack.Pop();
-            ApplyState(popped, active: false, interactable: false, blocksRaycasts: false, alpha: 0f);
+            HideManagedUI(popped);
         }
     }
 
@@ -73,6 +80,7 @@ public partial class UIManager
         int keep = UnityEngine.Mathf.Max(1, _keepAliveDepth);
 
         int index = 0;
+
         foreach (UIBase panel in _panelStack)
         {
             bool keepAlive = index < keep;
@@ -80,7 +88,14 @@ public partial class UIManager
             if (!keepAlive)
             {
                 if (panel.gameObject.activeSelf)
-                    ApplyState(panel, active: false, interactable: false, blocksRaycasts: false, alpha: 0f);
+                {
+                    ApplyState(
+                        panel,
+                        active: false,
+                        interactable: false,
+                        blocksRaycasts: false,
+                        alpha: 0f);
+                }
 
                 index++;
                 continue;
@@ -89,11 +104,22 @@ public partial class UIManager
             if (index == 0)
             {
                 panel.transform.SetAsLastSibling();
-                ApplyState(panel, active: true, interactable: true, blocksRaycasts: true, alpha: 1f);
+
+                ApplyState(
+                    panel,
+                    active: true,
+                    interactable: true,
+                    blocksRaycasts: true,
+                    alpha: 1f);
             }
             else
             {
-                ApplyState(panel, active: true, interactable: false, blocksRaycasts: false, alpha: _coveredAlpha);
+                ApplyState(
+                    panel,
+                    active: true,
+                    interactable: false,
+                    blocksRaycasts: false,
+                    alpha: _coveredAlpha);
             }
 
             index++;

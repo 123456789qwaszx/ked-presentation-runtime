@@ -12,11 +12,23 @@ public partial class UIManager
         BumpShowVersion();
 
         Mount(top, _layerTop);
-        ApplyState(top, active: false, interactable: false, blocksRaycasts: false, alpha: 0f);
+
+        ApplyState(
+            top,
+            active: false,
+            interactable: false,
+            blocksRaycasts: false,
+            alpha: 0f);
 
         InvokeAfterPatch(top, () =>
         {
-            ApplyState(top, active: true, interactable: true, blocksRaycasts: true, alpha: 1f);
+            ApplyState(
+                top,
+                active: true,
+                interactable: true,
+                blocksRaycasts: true,
+                alpha: 1f);
+
             afterPatched?.Invoke(top);
         });
 
@@ -26,7 +38,8 @@ public partial class UIManager
     public void HideTop<T>() where T : UIBase
     {
         T top = GetUI<T>();
-        ApplyState(top, active: false, interactable: false, blocksRaycasts: false, alpha: 0f);
+
+        HideManagedUI(top);
 
         BumpShowVersion();
     }
@@ -44,7 +57,7 @@ public partial class UIManager
             UIBase uiBase = go.GetComponent<UIBase>();
 
             if (uiBase != null)
-                ApplyState(uiBase, active: false, interactable: false, blocksRaycasts: false, alpha: 0f);
+                HideManagedUI(uiBase);
             else
                 go.SetActive(false);
         }

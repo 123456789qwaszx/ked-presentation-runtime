@@ -19,18 +19,31 @@ public partial class UIManager
         }
 
         if (CurSceneRoot != null && !sameRoot)
-            CurSceneRoot.gameObject.SetActive(false);
+            HideManagedUI(CurSceneRoot);
 
         CurSceneRoot = root;
 
         Mount(root, _layerUIRoot);
 
         if (!sameRoot)
-            ApplyState(root, active: false, interactable: false, blocksRaycasts: false, alpha: 0f);
+        {
+            ApplyState(
+                root,
+                active: false,
+                interactable: false,
+                blocksRaycasts: false,
+                alpha: 0f);
+        }
 
         InvokeAfterPatch(root, () =>
         {
-            ApplyState(root, active: true, interactable: true, blocksRaycasts: true, alpha: 1f);
+            ApplyState(
+                root,
+                active: true,
+                interactable: true,
+                blocksRaycasts: true,
+                alpha: 1f);
+
             afterPatched?.Invoke(root);
         });
     }

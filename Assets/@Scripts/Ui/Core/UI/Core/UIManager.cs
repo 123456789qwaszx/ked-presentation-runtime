@@ -11,8 +11,9 @@ public static class UITypeCache<T>
 public partial class UIManager : MonoBehaviour
 {
     public static UIManager Instance { get; set; }
+
     [SerializeField] private bool _dontDestroyOnLoad = true;
-    
+
     // ---- UI registry / stack
     private readonly Dictionary<Type, UIBase> _uiMap = new();
     private readonly Stack<UIBase> _panelStack = new();
@@ -45,29 +46,34 @@ public partial class UIManager : MonoBehaviour
 
         if (_dontDestroyOnLoad)
             DontDestroyOnLoad(gameObject);
-        
+
         RegisterChildUIs();
     }
 
     private void RegisterChildUIs()
     {
         _uiMap.Clear();
+        ClearPlacementCacheForEditor();
+
         RegisterLayer(transform);
     }
 
     private void RegisterLayer(Transform layer)
     {
-        if (layer == null) return;
+        if (layer == null)
+            return;
 
-        var list = layer.GetComponentsInChildren<UIBase>(includeInactive: true);
-        foreach (var ui in list)
+        UIBase[] list = layer.GetComponentsInChildren<UIBase>(includeInactive: true);
+
+        foreach (UIBase ui in list)
         {
             if (ui is not IManagedUI)
                 continue;
 
-            var key = ui.GetType();
+            Type key = ui.GetType();
 
             EnsureCanvasGroup(ui);
+            CaptureInitialPositionForEditor(ui);
 
             if (_uiMap.ContainsKey(key))
             {
@@ -79,28 +85,24 @@ public partial class UIManager : MonoBehaviour
         }
     }
 
-
     // ----------------------------
     // Public API
     // ----------------------------
     public T GetUI<T>() where T : UIBase
     {
-        var key = UITypeCache<T>.Type;
+        Type key = UITypeCache<T>.Type;
 
         if (!_uiMap.TryGetValue(key, out UIBase ui))
-        {
-            //Debug.LogWarning($"[UIManager] Missing UI: {UITypeCache<T>.Name}", this);
             return null;
-        }
 
         return (T)ui;
     }
 
     private bool TryResolve<T>(string kind, out T typed) where T : UIBase
     {
-        var key = UITypeCache<T>.Type;
+        Type key = UITypeCache<T>.Type;
 
-        if (!_uiMap.TryGetValue(key, out var raw))
+        if (!_uiMap.TryGetValue(key, out UIBase raw))
         {
             Debug.LogError($"[UIManager] {kind} not registered: {UITypeCache<T>.Name}", this);
             typed = null;
@@ -111,22 +113,49 @@ public partial class UIManager : MonoBehaviour
         return true;
     }
 
-    private static void Mount(UIBase ui, Transform slot)
+    private void Mount(UIBase ui, Transform slot)
     {
+        if (ui == null)
+            return;
+
         if (slot != null)
             ui.transform.SetParent(slot, worldPositionStays: false);
+
+        ApplyMountPlacement(ui);
 
         ui.transform.SetAsLastSibling();
     }
 
-    private static void ApplyState(UIBase ui, bool active, bool interactable, bool blocksRaycasts, float alpha)
+    private void HideManagedUI(UIBase ui)
     {
-        if (ui == null) return;
+        if (ui == null)
+            return;
+
+        ApplyState(
+            ui,
+            active: false,
+            interactable: false,
+            blocksRaycasts: false,
+            alpha: 0f);
+
+        RestoreInitialPositionForEditor(ui);
+    }
+
+    private static void ApplyState(
+        UIBase ui,
+        bool active,
+        bool interactable,
+        bool blocksRaycasts,
+        float alpha)
+    {
+        if (ui == null)
+            return;
 
         ui.gameObject.SetActive(active);
 
-        var canvasGroup = ui.GetComponent<CanvasGroup>();
-        if (canvasGroup == null) return;
+        CanvasGroup canvasGroup = ui.GetComponent<CanvasGroup>();
+        if (canvasGroup == null)
+            return;
 
         canvasGroup.alpha = active ? alpha : 0f;
         canvasGroup.interactable = interactable;
@@ -135,8 +164,10 @@ public partial class UIManager : MonoBehaviour
 
     private static void EnsureCanvasGroup(UIBase ui)
     {
-        if (ui == null) return;
-        var canvasGroup = ui.GetComponent<CanvasGroup>();
+        if (ui == null)
+            return;
+
+        CanvasGroup canvasGroup = ui.GetComponent<CanvasGroup>();
         if (canvasGroup == null)
             ui.gameObject.AddComponent<CanvasGroup>();
     }

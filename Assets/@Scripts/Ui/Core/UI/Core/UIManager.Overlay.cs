@@ -12,11 +12,23 @@ public partial class UIManager
         BumpShowVersion();
 
         Mount(overlay, _layerOverlay);
-        ApplyState(overlay, active: false, interactable: false, blocksRaycasts: false, alpha: 0f);
+
+        ApplyState(
+            overlay,
+            active: false,
+            interactable: false,
+            blocksRaycasts: false,
+            alpha: 0f);
 
         InvokeAfterPatch(overlay, () =>
         {
-            ApplyState(overlay, active: true, interactable: false, blocksRaycasts: false, alpha: 1f);
+            ApplyState(
+                overlay,
+                active: true,
+                interactable: false,
+                blocksRaycasts: false,
+                alpha: 1f);
+
             afterPatched?.Invoke(overlay);
         });
 
@@ -26,7 +38,8 @@ public partial class UIManager
     public void HideOverlay<T>() where T : UIBase
     {
         T overlay = GetUI<T>();
-        ApplyState(overlay, active: false, interactable: false, blocksRaycasts: false, alpha: 0f);
+
+        HideManagedUI(overlay);
 
         BumpShowVersion();
     }
@@ -44,7 +57,7 @@ public partial class UIManager
             UIBase uiBase = go.GetComponent<UIBase>();
 
             if (uiBase != null)
-                ApplyState(uiBase, active: false, interactable: false, blocksRaycasts: false, alpha: 0f);
+                HideManagedUI(uiBase);
             else
                 go.SetActive(false);
         }

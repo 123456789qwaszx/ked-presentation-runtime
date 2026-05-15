@@ -151,10 +151,6 @@ public abstract partial class UIBase<TRefs> : UIBase
         
         if (this is IUIResetOnAwake)
         {
-            transform.localPosition = Vector3.zero;
-            transform.localRotation = Quaternion.identity;
-            transform.localScale = Vector3.one;
-            
             if (!gameObject.TryGetComponent(out CanvasGroup canvasGroup))
             {
                 Debug.Log($"[UIBase] CanvasGroup missing on root. Auto-added for safety. root={gameObject.name}" );
