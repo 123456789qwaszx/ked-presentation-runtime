@@ -9,11 +9,6 @@ public interface ICharRigSlotResolver
     RectTransform Resolve(CharRigSlot slot, bool strict);
 }
 
-// 새로운 Rig 계약서를 만들 때는:
-// 1. Contract 블록을 통째로 복사
-// 2. EnsureGraph()에서 레시피 수정
-// 3. BindMap()의 enum 타입 변경
-// 4. BuildRefs()에서 최종 refs 타입에 꽂는 부분만 수정
 public sealed class CharacterRigAccess
 {
     private readonly ICharRigSlotResolver _slotResolver;
