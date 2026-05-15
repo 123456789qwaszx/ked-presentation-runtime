@@ -58,18 +58,18 @@ public sealed class SetupCharRigCommandSpec : CommandSpecBase
 public sealed class SetupCharRigCommand : CommandBase
 {
     private readonly ICharRigSlotResolver _slotResolver;
-    private readonly CharacterRigAccess _rigAccess;
+    private readonly CharacterRigBuilder _rigBuilder;
     private readonly SetupCharRigCommandSpec _spec;
 
     public override bool WaitForCompletion => true;
 
     public SetupCharRigCommand(
         ICharRigSlotResolver slotResolver,
-        CharacterRigAccess rigAccess,
+        CharacterRigBuilder rigBuilder,
         SetupCharRigCommandSpec spec)
     {
         _slotResolver = slotResolver;
-        _rigAccess = rigAccess;
+        _rigBuilder = rigBuilder;
         _spec = spec;
     }
 
@@ -109,10 +109,10 @@ public sealed class SetupCharRigCommand : CommandBase
         RectTransform rigPrefab = _spec.rigPrefab;
         string rolePrefix = _spec.ResolvedRolePrefix;
         
-        RectTransform rigRoot = _rigAccess.CreateCharacterRig(rigPrefab, rolePrefix, _spec.rigRootName);
+        RectTransform rigRoot = _rigBuilder.CreateCharacterRig(rigPrefab, rolePrefix, _spec.rigRootName);
         rigRoot.SetParent(parent, false);
         
-        CharacterRigRefs refs = _rigAccess.BuildRefsFromRoot(rigRoot, rolePrefix);
+        CharacterRigRefs refs = _rigBuilder.BuildRefsFromRoot(rigRoot, rolePrefix);
         
         scope.Refs[roleKey] = refs;
     }

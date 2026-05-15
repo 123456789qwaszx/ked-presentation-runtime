@@ -189,7 +189,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         {
             targetKey = roleKey,
             target = CharacterRigTarget.Character_Track_Y,
-            dir = CharRDirection.Right,
+            dir = CharRigDirection.Right,
             distance = 22f,
             duration = 0.8f
         };
@@ -207,7 +207,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         {
             targetKey = roleKey,
             target = CharacterRigTarget.Character_Track_Y,
-            dir = CharRDirection.Down,
+            dir = CharRigDirection.Down,
             distance = 12f,
             duration = 0.8f
         };
@@ -235,7 +235,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
             targetKey = roleKey,
             target = CharacterRigTarget.Character_Track,
             strength = 45f,
-            direction = CharRDirection.Up,
+            direction = CharRigDirection.Up,
             duration = 0.55f,
             taps = 3,
             damping = 11,
@@ -470,7 +470,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 
     private void EnqueueSlideInJoltCombo(string roleKey, string direction = "right")
     {
-        CharRDirection dir = ParseSlideDirection(direction, CharRDirection.Right);
+        CharRigDirection dir = ParseSlideDirection(direction, CharRigDirection.Right);
 
         var juicySlideIn = new SlideInCommandSpecCharR
         {
@@ -483,7 +483,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         {
             targetKey = roleKey,
             target = CharacterRigTarget.Character_Track_Y,
-            direction = CharRDirection.Up,
+            direction = CharRigDirection.Up,
             strength = 340f,
             duration = 0.6f,
             taps = 4,
@@ -497,7 +497,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 
     private void EnqueueJoltSpec(string roleKey, string direction = "right")
     {
-        CharRDirection dir = ParseSlideDirection(direction, CharRDirection.Right);
+        CharRigDirection dir = ParseSlideDirection(direction, CharRigDirection.Right);
 
         var spec = new JoltCommandSpec
         {
@@ -521,7 +521,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         float duration = 1.2f,
         int taps = 4)
     {
-        CharRDirection dir = ParseSlideDirection(direction, CharRDirection.Right);
+        CharRigDirection dir = ParseSlideDirection(direction, CharRigDirection.Right);
 
         var spec = new JoltCommandSpec
         {
@@ -538,7 +538,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 
     private void EnqueueJoltSpecTap(string roleKey, string direction = "right")
     {
-        CharRDirection dir = ParseSlideDirection(direction, CharRDirection.Right);
+        CharRigDirection dir = ParseSlideDirection(direction, CharRigDirection.Right);
 
         var spec = new JoltCommandSpec
         {
@@ -557,7 +557,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 
     private void EnqueueJoltSpecTapHard(string roleKey, string direction = "down")
     {
-        CharRDirection dir = ParseSlideDirection(direction, CharRDirection.Down);
+        CharRigDirection dir = ParseSlideDirection(direction, CharRigDirection.Down);
 
         var spec = new JoltCommandSpec
         {
@@ -586,7 +586,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
             return;
         }
 
-        CharRDirection dir = ParseSlideDirection(direction, CharRDirection.Right);
+        CharRigDirection dir = ParseSlideDirection(direction, CharRigDirection.Right);
 
         var spec = new TrembleCommandSpecCharR
         {
@@ -622,7 +622,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
             return;
         }
 
-        CharRDirection dir = ParseSlideDirection(direction, CharRDirection.Right);
+        CharRigDirection dir = ParseSlideDirection(direction, CharRigDirection.Right);
 
         var spec = new TrembleCommandSpecCharR
         {
@@ -794,7 +794,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 
     private void EnqueueDipInOutSpec(string roleKey, string direction = "down")
     {
-        CharRDirection dir = ParseSlideDirection(direction, CharRDirection.Down);
+        CharRigDirection dir = ParseSlideDirection(direction, CharRigDirection.Down);
 
         var spec = new DipInOutCommandSpecCharR
         {
@@ -838,7 +838,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 
     private void EnqueueSlideInSpec(string roleKey, string direction = "left")
     {
-        CharRDirection from = ParseSlideDirection(direction, CharRDirection.Left);
+        CharRigDirection from = ParseSlideDirection(direction, CharRigDirection.Left);
 
         var spec = new SlideInCommandSpecCharR
         {
@@ -851,7 +851,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 
     private void EnqueueSlideOutSpec(string roleKey, string direction = "right")
     {
-        CharRDirection to = ParseSlideDirection(direction, CharRDirection.Right);
+        CharRigDirection to = ParseSlideDirection(direction, CharRigDirection.Right);
 
         var spec = new SlideOutCommandSpecCharR
         {
@@ -1121,27 +1121,27 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         Collect(spec);
     }
 
-    private CharRDirection ParseSlideDirection(string direction, CharRDirection fallback)
+    private CharRigDirection ParseSlideDirection(string direction, CharRigDirection fallback)
     {
         switch (direction?.Trim().ToLowerInvariant())
         {
             case "left":
             case "l":
-                return CharRDirection.Left;
+                return CharRigDirection.Left;
 
             case "right":
             case "r":
-                return CharRDirection.Right;
+                return CharRigDirection.Right;
 
             case "up":
             case "u":
             case "top":
-                return CharRDirection.Up;
+                return CharRigDirection.Up;
 
             case "down":
             case "d":
             case "bottom":
-                return CharRDirection.Down;
+                return CharRigDirection.Down;
 
             default:
                 return fallback;

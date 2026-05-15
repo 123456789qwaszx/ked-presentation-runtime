@@ -1,4 +1,4 @@
-public enum CharRDirection
+public enum CharRigDirection
 {
     Left = 0,
     Right,
@@ -8,14 +8,14 @@ public enum CharRDirection
 
 public sealed class CharRigCommandFactory : INodeCommandFactory
 {
-    private readonly ICharRigSlotResolver _charRigSlotResolver;
-    private readonly CharacterRigAccess _access;
+    private readonly ICharRigSlotResolver _rigSlotResolver;
+    private readonly CharacterRigBuilder _rigBuilder;
     private readonly PortraitResolver _portraitResolver;
 
-    public CharRigCommandFactory(ICharRigSlotResolver charRigSlotResolver,CharacterRigAccess access,  PortraitResolver portraitResolver)
+    public CharRigCommandFactory(ICharRigSlotResolver charRigSlotResolver,CharacterRigBuilder charRigBuilder, PortraitResolver portraitResolver)
     {
-        _charRigSlotResolver = charRigSlotResolver;
-        _access = access;
+        _rigSlotResolver = charRigSlotResolver;
+        _rigBuilder = charRigBuilder;
         _portraitResolver = portraitResolver;
     }
 
@@ -25,7 +25,7 @@ public sealed class CharRigCommandFactory : INodeCommandFactory
         {
             null => null,
             
-            SetupCharRigCommandSpec s         => new SetupCharRigCommand(_charRigSlotResolver, _access, s),
+            SetupCharRigCommandSpec s         => new SetupCharRigCommand(_rigSlotResolver, _rigBuilder, s),
             DestroyCommandSpec s            => new DestroyCommand(s),
             ClearCharRigRefsCommandSpec s => new ClearCharRigRefsCommand(s),
             

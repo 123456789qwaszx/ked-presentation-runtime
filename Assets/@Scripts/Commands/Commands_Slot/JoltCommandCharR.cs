@@ -12,7 +12,7 @@ public sealed class JoltCommandSpec : CharacterRigCommandSpecBase
 
     [Header("Nudge")]
     public float strength = 22f;
-    public CharRDirection direction = CharRDirection.Right;
+    public CharRigDirection direction = CharRigDirection.Right;
     public float duration = 0.88f;
 
     [Min(1)]
@@ -168,14 +168,14 @@ public sealed class JoltCommand : CommandBase, IStepScopedCommand
         _tween = null;
     }
 
-    private static Vector2 GetSignedDirection(CharRDirection direction)
+    private static Vector2 GetSignedDirection(CharRigDirection direction)
     {
         return direction switch
         {
-            CharRDirection.Left => Vector2.left,
-            CharRDirection.Right => Vector2.right,
-            CharRDirection.Up => Vector2.up,
-            CharRDirection.Down => Vector2.down,
+            CharRigDirection.Left => Vector2.left,
+            CharRigDirection.Right => Vector2.right,
+            CharRigDirection.Up => Vector2.up,
+            CharRigDirection.Down => Vector2.down,
             _ => Vector2.right,
         };
     }

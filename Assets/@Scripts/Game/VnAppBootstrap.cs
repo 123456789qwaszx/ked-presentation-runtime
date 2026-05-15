@@ -146,7 +146,7 @@ public class VnAppBootstrap : MonoBehaviour
         
         // CharRigFactory
         ICharRigSlotResolver charRigSlotResolver = new CharRigSlotResolver(UIManager.Instance.GetUI<PresentationUIRoot>(), UIManager.Instance.GetUI<DialogueBox00_Portrait>());
-        CharacterRigAccess charRigAccess = new();
+        CharacterRigBuilder charRigAccess = new();
         PortraitResolver portraitResolver = new(portraitGeneratedDbSo);
         CharRigCommandFactory charRigFactory = new(charRigSlotResolver, charRigAccess, portraitResolver);
 

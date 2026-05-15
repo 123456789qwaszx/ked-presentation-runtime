@@ -15,7 +15,7 @@ public sealed class TrembleCommandSpecCharR : CharacterRigCommandSpecBase
     public float strength = 8f;
 
     [Tooltip("주 흔들림 방향.")]
-    public CharRDirection direction = CharRDirection.Right;
+    public CharRigDirection direction = CharRigDirection.Right;
 
     [Tooltip("전체 지속 시간.")]
     public float duration = 1.2f;
@@ -262,14 +262,14 @@ public sealed class TrembleCommandCharR : CommandBase, IStepScopedCommand
         return Mathf.SmoothStep(0f, 1f, factor);
     }
 
-    private static Vector2 GetSignedDirection(CharRDirection direction)
+    private static Vector2 GetSignedDirection(CharRigDirection direction)
     {
         return direction switch
         {
-            CharRDirection.Left => Vector2.left,
-            CharRDirection.Right => Vector2.right,
-            CharRDirection.Up => Vector2.up,
-            CharRDirection.Down => Vector2.down,
+            CharRigDirection.Left => Vector2.left,
+            CharRigDirection.Right => Vector2.right,
+            CharRigDirection.Up => Vector2.up,
+            CharRigDirection.Down => Vector2.down,
             _ => Vector2.right,
         };
     }

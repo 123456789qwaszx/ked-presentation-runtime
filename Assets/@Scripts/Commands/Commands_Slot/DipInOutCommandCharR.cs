@@ -12,7 +12,7 @@ public sealed class DipInOutCommandSpecCharR : CharacterRigCommandSpecBase
     public CharacterRigTarget target = CharacterRigTarget.Character_Track;
 
     [Header("Move")]
-    public CharRDirection dir = CharRDirection.Down;
+    public CharRigDirection dir = CharRigDirection.Down;
 
     [Tooltip("How far to dip (px).")]
     public float distance = 24f;
@@ -170,11 +170,11 @@ public sealed class DipInOutCommandCharR : CommandBase, IStepScopedCommand
         _destPos = _rect.anchoredPosition;
     }
 
-    private static Vector2 GetOffset(CharRDirection dir, float distance) => dir switch
+    private static Vector2 GetOffset(CharRigDirection dir, float distance) => dir switch
     {
-        CharRDirection.Right => new Vector2(+distance, 0f),
-        CharRDirection.Up => new Vector2(0f, +distance),
-        CharRDirection.Down => new Vector2(0f, -distance),
+        CharRigDirection.Right => new Vector2(+distance, 0f),
+        CharRigDirection.Up => new Vector2(0f, +distance),
+        CharRigDirection.Down => new Vector2(0f, -distance),
         _ => new Vector2(-distance, 0f),
     };
 

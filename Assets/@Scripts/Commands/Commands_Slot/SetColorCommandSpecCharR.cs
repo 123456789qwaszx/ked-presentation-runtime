@@ -66,13 +66,11 @@ public sealed class SetColorCommandCharR : CommandBase
                 scope,
                 _spec.targetKey);
 
-        _image = rig.GetGraphic(_spec.target) as Image;
+        RectTransform rect = rig.GetRect(_spec.target);
 
-        if (_image == null)
-        {
-            throw new InvalidOperationException(
-                $"[SetColorCommandCharR] Target Image not found. targetKey='{_spec.targetKey}', target='{_spec.target}'.");
-        }
+        if (!rect.TryGetComponent(out _image))
+            Debug.LogWarning($"[SetColorCommandCharR] Target Image not found. targetKey='{_spec.targetKey}', target='{_spec.target}'");
+        
     }
 
     private void Apply()

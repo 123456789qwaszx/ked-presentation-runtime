@@ -12,7 +12,7 @@ public sealed class SlideInCommandSpecCharR : CharacterRigCommandSpecBase
     public CharacterRigTarget target = CharacterRigTarget.Character_Track;
 
     [Header("Slide")]
-    public CharRDirection direction = CharRDirection.Left;
+    public CharRigDirection direction = CharRigDirection.Left;
     public float distance = 480f;
 
     [Header("Tween")]
@@ -163,11 +163,11 @@ public sealed class SlideInCommandCharR : CommandBase, IStepScopedCommand
         _destPos = _rect.anchoredPosition;
     }
 
-    private static Vector2 GetDir(CharRDirection from) => from switch
+    private static Vector2 GetDir(CharRigDirection from) => from switch
     {
-        CharRDirection.Right => new Vector2(+1f, 0f),
-        CharRDirection.Up => new Vector2(0f, +1f),
-        CharRDirection.Down => new Vector2(0f, -1f),
+        CharRigDirection.Right => new Vector2(+1f, 0f),
+        CharRigDirection.Up => new Vector2(0f, +1f),
+        CharRigDirection.Down => new Vector2(0f, -1f),
         _ => new Vector2(-1f, 0f),
     };
 
