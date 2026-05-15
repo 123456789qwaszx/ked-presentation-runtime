@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public static class UITypeCache<T>
 {
@@ -47,6 +48,7 @@ public partial class UIManager : MonoBehaviour
         if (_dontDestroyOnLoad)
             DontDestroyOnLoad(gameObject);
 
+        DisableLayerSelfRaycasts();
         RegisterChildUIs();
     }
 
@@ -170,5 +172,25 @@ public partial class UIManager : MonoBehaviour
         CanvasGroup canvasGroup = ui.GetComponent<CanvasGroup>();
         if (canvasGroup == null)
             ui.gameObject.AddComponent<CanvasGroup>();
+    }
+    
+    
+    private void DisableLayerSelfRaycasts()
+    {
+        DisableLayerSelfRaycast(transform);
+        DisableLayerSelfRaycast(_layerUIRoot);
+        DisableLayerSelfRaycast(_layerPanels);
+        DisableLayerSelfRaycast(_layerOverlay);
+        DisableLayerSelfRaycast(_layerTop);
+    }
+
+    private static void DisableLayerSelfRaycast(Transform layer)
+    {
+        if (layer == null)
+            return;
+
+        Graphic graphic = layer.GetComponent<Graphic>();
+        if (graphic != null)
+            graphic.raycastTarget = false;
     }
 }
