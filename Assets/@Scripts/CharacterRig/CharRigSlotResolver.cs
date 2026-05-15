@@ -13,17 +13,15 @@ public sealed class CharRigSlotResolver : ICharRigSlotResolver
     private readonly PresentationUIRoot _presentationUIRoot;
     private readonly DialogueBox00_Portrait _withPortraitBox;
 
-    private bool _init;
-
     public CharRigSlotResolver(PresentationUIRoot ui, DialogueBox00_Portrait withPortraitBox)
     {
         _presentationUIRoot = ui;
         _withPortraitBox = withPortraitBox;
     }
     
-    public RectTransform Resolve(CharRigSlot slot)
+    public bool TryResolve(CharRigSlot slot, out RectTransform rect)
     {
-        RectTransform rt = slot switch
+        rect = slot switch
         {
             CharRigSlot.Stage00CharacterSlot => _presentationUIRoot.ResolveRect(PresentationUIRoot.Refs.Stage00CharSlotRig_Root),
             CharRigSlot.Stage01CharacterSlot => _presentationUIRoot.ResolveRect(PresentationUIRoot.Refs.Stage01CharSlotRig_Root),
@@ -33,9 +31,12 @@ public sealed class CharRigSlotResolver : ICharRigSlotResolver
             _ => null
         };
 
-        if (rt == null)
-            Debug.LogWarning($"[CharRigSlot] Missing slot '{slot}'.");
+        if (rect == null)
+        {
+            Debug.LogWarning($"[CharRigSlotResolver] Missing slot '{slot}'.");
+            return false;
+        }
 
-        return rt;
+        return true;
     }
 }

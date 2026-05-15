@@ -15,34 +15,22 @@ using Object = UnityEngine.Object;
     SetOrder = -980)]
 public sealed class SetupCharRigCommandSpec : CommandSpecBase
 {
-    [Header("Role / Slot")]
-    [Tooltip("생성할 CharacterRig의 roleKey/slotKey. 예: slot1, me, right")]
+    [Header("Role / Slot")] [Tooltip("생성할 CharacterRig의 roleKey/slotKey. 예: slot1, me, right")]
     public string roleKey;
 
-    [Header("Rig")]
-    [Tooltip("있으면 이 프리팹을 인스턴스해서 Rig를 구성합니다. 없으면 자동 생성합니다.")]
+    [Header("Rig")] [Tooltip("있으면 이 프리팹을 인스턴스해서 Rig를 구성합니다. 없으면 자동 생성합니다.")]
     public RectTransform rigPrefab;
 
-    [Tooltip("Rig를 붙일 Slot")]
+    [Tooltip("Rig를 붙일 Slot")] 
     public CharRigSlot parentSlot = CharRigSlot.Stage00CharacterSlot;
 
     [Tooltip("자동 생성 시 루트 오브젝트 이름.")]
     public string rigRootName = "CharacterRig";
 
-    [Header("Role Prefix")]
-    [Tooltip("켜면 roleKey로부터 자동으로 prefix를 생성합니다. 예: roleKey='seina' -> 'seina_'")]
-    public bool autoRolePrefixFromRoleKey = true;
-
-    [Tooltip("Parent Slot에 동일한 이름의 Rig가 이미 있으면 파괴 후 새로 생성합니다.")]
-    public bool destroyExistingRigWithSameName = true;
-
     public string ResolvedRolePrefix
     {
         get
         {
-            if (!autoRolePrefixFromRoleKey)
-                return "";
-
             if (string.IsNullOrEmpty(roleKey))
                 return "";
 
@@ -51,8 +39,6 @@ public sealed class SetupCharRigCommandSpec : CommandSpecBase
                 : $"{roleKey}_";
         }
     }
-
-    public string ResolvedRigName => $"{ResolvedRolePrefix}{rigRootName}";
 }
 
 public sealed class SetupCharRigCommand : CommandBase
@@ -63,10 +49,7 @@ public sealed class SetupCharRigCommand : CommandBase
 
     public override bool WaitForCompletion => true;
 
-    public SetupCharRigCommand(
-        ICharRigSlotResolver slotResolver,
-        CharacterRigBuilder rigBuilder,
-        SetupCharRigCommandSpec spec)
+    public SetupCharRigCommand(ICharRigSlotResolver slotResolver, CharacterRigBuilder rigBuilder, SetupCharRigCommandSpec spec)
     {
         _slotResolver = slotResolver;
         _rigBuilder = rigBuilder;
@@ -79,72 +62,44 @@ public sealed class SetupCharRigCommand : CommandBase
         yield break;
     }
 
-    protected override void OnSkip(CommandRunScope scope)
-    {
-        Apply(scope);
-    }
-
-    protected override void OnRollbackSeek(CommandRunScope scope)
-    {
-        OnSkip(scope);
-    }
-
+    protected override void OnSkip(CommandRunScope scope) => Apply(scope);
+    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
+    
     private void Apply(CommandRunScope scope)
     {
-        string roleKey = _spec.roleKey;
+        SetupCharRigCommandSpec spec = _spec;
 
-        if (string.IsNullOrEmpty(roleKey))
-            Debug.LogWarning("[SetupCharRigCommand] roleKey is empty.");
-
-        RectTransform parent = _slotResolver.Resolve(_spec.parentSlot);
-        if (parent == null)
+        string roleKey = spec.roleKey;
+        string rolePrefix = spec.ResolvedRolePrefix;
+        RectTransform rigRoot = _rigBuilder.BuildCharacterRigRoot(spec.rigPrefab, rolePrefix, spec.rigRootName);
+        
+        if (_slotResolver.TryResolve(spec.parentSlot, out RectTransform parent))
+            rigRoot.SetParent(parent, false);
+        
+        _rigBuilder.BindRefsFromRoot(rigRoot, rolePrefix, out CharacterRigRefs refs);
+        
+        if (!scope.Refs.TryAdd(roleKey, refs))
         {
-            Debug.LogWarning($"[SetupCharRigCommand] Parent slot '{_spec.parentSlot}' could not be resolved.");
-            return;
-        }
-
-        if (_spec.destroyExistingRigWithSameName)
-            TryDestroyExistingRig(parent, roleKey);
-        
-        RectTransform rigPrefab = _spec.rigPrefab;
-        string rolePrefix = _spec.ResolvedRolePrefix;
-        
-        RectTransform rigRoot = _rigBuilder.CreateCharacterRig(rigPrefab, rolePrefix, _spec.rigRootName);
-        rigRoot.SetParent(parent, false);
-        
-        CharacterRigRefs refs = _rigBuilder.BuildRefsFromRoot(rigRoot, rolePrefix);
-        
-        scope.Refs[roleKey] = refs;
-    }
-
-    private void TryDestroyExistingRig(RectTransform parent, string roleKey)
-    {
-        if (parent == null)
-            return;
-
-        string rigName = _spec.ResolvedRigName;
-
-        for (int i = parent.childCount - 1; i >= 0; i--)
-        {
-            Transform child = parent.GetChild(i);
-            if (child.name != rigName)
-                continue;
-
-            KillTweenBeforeDestroy(child, roleKey);
-
-            Object.Destroy(child.gameObject);
+            RemoveRegisteredRig(scope, roleKey);
+            
+            scope.Refs[roleKey] = refs;
+            Debug.LogWarning($"[SetupCharRigCommand] Rebound rig refs. roleKey='{roleKey}'.");
         }
     }
-
-    private static void KillTweenBeforeDestroy(Transform root, string roleKey)
+    
+    
+    #region Helpers
+    private static void RemoveRegisteredRig(CommandRunScope scope, string roleKey)
     {
-        if (root == null)
+        if (!scope.Refs.TryGetCharRigRefs(roleKey, out CharacterRigRefs existingRig) || existingRig?.RigRoot == null)
             return;
 
-        DOTween.Kill($"CharPortraitWipe:{roleKey}", false);
-        KillTweenOnHierarchy(root);
-    }
+        KillTweenOnHierarchy(existingRig.RigRoot);
+        Object.Destroy(existingRig.RigRoot.gameObject);
 
+        Debug.LogWarning($"[SetupCharRigCommand] Removing leftover rig. roleKey='{roleKey}'.");
+    }
+    
     private static void KillTweenOnHierarchy(Transform root)
     {
         if (root == null)
@@ -174,13 +129,5 @@ public sealed class SetupCharRigCommand : CommandBase
         DOTween.Kill(root, false);
         DOTween.Kill(root.gameObject, false);
     }
-    
-    private void StretchFull(RectTransform rt)
-    {
-        rt.anchorMin = Vector2.zero;
-        rt.anchorMax = Vector2.one;
-        rt.pivot = new Vector2(0.5f, 0.5f);
-        rt.offsetMin = Vector2.zero;
-        rt.offsetMax = Vector2.zero;
-    }
+    #endregion
 }

@@ -93,7 +93,7 @@ public sealed class DestroyCommand : CommandBase
         if (rigRefs == null)
             return null;
 
-        return rigRefs.CharacterRig;
+        return rigRefs.RigRoot;
     }
 
     private static void KillTweenBeforeDestroy(RectTransform root, string roleKey)

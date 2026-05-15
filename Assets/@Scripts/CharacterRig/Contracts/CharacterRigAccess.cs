@@ -65,7 +65,7 @@ public enum CharacterRigTarget
 
 public sealed class CharacterRigRefs
 {
-    public RectTransform CharacterRig; // RigRoot
+    public RectTransform RigRoot;
     
     public RectTransform Character_Anchor;
     public RectTransform Character_Track;

@@ -6,7 +6,7 @@ using Object = UnityEngine.Object;
 
 public sealed class CharacterRigBuilder
 {
-    public RectTransform CreateCharacterRig(RectTransform rigPrefab = null, string rolePrefix = "", string rigRootName = "CharacterRig")
+    public RectTransform BuildCharacterRigRoot(RectTransform rigPrefab = null, string rolePrefix = "", string rigRootName = "CharacterRig")
     {
         RectTransform rigRoot;
 
@@ -30,12 +30,30 @@ public sealed class CharacterRigBuilder
         return rigRoot;
     }
     
-    public CharacterRigRefs BuildRefsFromRoot(RectTransform rigRoot, string rolePrefix)
+    public void BindRefsFromRoot(RectTransform rigRoot, string rolePrefix, out CharacterRigRefs refs)
     {
-        var map = BindMap(rigRoot, rolePrefix);
-        return BuildRefs(rigRoot, map);
+        Dictionary<CharacterRigSchema.Refs, RectTransform> map = CreateRefMap(rigRoot, rolePrefix);
+        EnsureValidGraphMap(rigRoot, rolePrefix, ref map);
+        
+        refs = BindRefs(rigRoot, map);
     }
     
+    
+    private void EnsureValidGraphMap(RectTransform rigRoot, string rolePrefix, ref Dictionary<CharacterRigSchema.Refs, RectTransform> map)
+    {
+        int expectedCount = Enum.GetValues(typeof(CharacterRigSchema.Refs)).Length;
+        
+        if (map.Count >= expectedCount)
+            return;
+        
+        Debug.LogWarning($"[CharacterRigBuilder] Invalid rig graph. Rebuilding from 'CharacterRigSchema'. rigRoot='{rigRoot.name}'.");
+        for (int i = rigRoot.childCount - 1; i >= 0; i--)
+            Object.Destroy(rigRoot.GetChild(i).gameObject);
+        
+        EnsureGraph(rigRoot, rolePrefix);
+        
+        map = CreateRefMap(rigRoot, rolePrefix);
+    }
     
     #region Auto Create Graph
     private void EnsureGraph(RectTransform root, string rolePrefix)
@@ -123,32 +141,27 @@ public sealed class CharacterRigBuilder
     #endregion
     
     #region Binding / Refs
-    private Dictionary<CharacterRigSchema.Refs, RectTransform> BindMap(RectTransform rigRoot, string rolePrefix)
+    private Dictionary<CharacterRigSchema.Refs, RectTransform> CreateRefMap(RectTransform rigRoot, string rolePrefix)
     {
         Dictionary<CharacterRigSchema.Refs, RectTransform> map = new();
 
         foreach (CharacterRigSchema.Refs id in Enum.GetValues(typeof(CharacterRigSchema.Refs)))
         {
             string nodeName = WithRole(rolePrefix, id.ToString());
-
             RectTransform t = FindByName(rigRoot, nodeName) as RectTransform;
-            if (t == null)
-            {
-                Debug.LogWarning($"[SetRig] Missing node '{nodeName}' under '{rigRoot.name}'.");
-                continue;
-            }
 
-            map[id] = t;
+            if (t != null)
+                map[id] = t;
         }
 
         return map;
     }
     
-    private CharacterRigRefs BuildRefs(RectTransform rigRoot, Dictionary<CharacterRigSchema.Refs, RectTransform> map)
+    private CharacterRigRefs BindRefs(RectTransform rigRoot, Dictionary<CharacterRigSchema.Refs, RectTransform> map)
     {
         CharacterRigRefs refs = new();
 
-        refs.CharacterRig = rigRoot;
+        refs.RigRoot = rigRoot;
 
         RectTransform GetRt(CharacterRigSchema.Refs key)
         {
