@@ -43,7 +43,7 @@ public sealed class BacklogPanel : UIPanel<BacklogPanel.Refs>, IManagedUI
     
     private bool _valid;
     
-    protected override void Initialize()
+    protected override void OnInitialize()
     {
         _bgImage       = View.Image(Refs.BacklogBG_Image);
         _headerTitle   = View.Text(Refs.HeaderTitle_Text);

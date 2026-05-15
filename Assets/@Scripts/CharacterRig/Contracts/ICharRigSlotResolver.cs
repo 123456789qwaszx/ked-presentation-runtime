@@ -2,5 +2,5 @@ using UnityEngine;
 
 public interface ICharRigSlotResolver
 {
-    RectTransform Resolve(CharRigSlot slot, bool strict);
+    RectTransform Resolve(CharRigSlot slot);
 }

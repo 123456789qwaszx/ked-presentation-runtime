@@ -22,7 +22,7 @@ public sealed class DialogueBox02_LetterBox
     public TMP_Text NameText => null;
     public bool HasName => false;
 
-    protected override void Initialize()
+    protected override void OnInitialize()
     {
         //gameObject.SetActive(true);
     }

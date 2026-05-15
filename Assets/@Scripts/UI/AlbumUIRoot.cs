@@ -34,7 +34,7 @@ public sealed class AlbumUIRoot : UIRoot<AlbumUIRoot.Refs>
 
     private bool _valid;
 
-    protected override void Initialize()
+    protected override void OnInitialize()
     {
         _albumBg = View.Image(Refs.AlbumBG_Image);
         _previewImage = View.Image(Refs.Preview_Image);

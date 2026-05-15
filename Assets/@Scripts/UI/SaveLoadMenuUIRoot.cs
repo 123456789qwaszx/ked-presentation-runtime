@@ -39,7 +39,7 @@ public sealed class SaveLoadMenuUIPanel : UIPanel<SaveLoadMenuUIPanel.Refs>
     private bool _valid;
     private SaveLoadMenuMode _mode;
 
-    protected override void Initialize()
+    protected override void OnInitialize()
     {
         _saveLoadBg = View.Image(Refs.SaveLoadBG_Image);
 

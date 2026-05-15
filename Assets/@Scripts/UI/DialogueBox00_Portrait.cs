@@ -35,7 +35,7 @@ public sealed class DialogueBox00_Portrait
 
     public RectTransform ProtagonistRect => View.Rect(Refs.DialogueBox00ProtagonistCutinViewport_Mask);
 
-    protected override void Initialize()
+    protected override void OnInitialize()
     {
         //gameObject.SetActive(true);
     }

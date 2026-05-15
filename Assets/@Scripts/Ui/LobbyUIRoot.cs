@@ -52,7 +52,7 @@ public sealed class LobbyUIRoot : UIRoot<LobbyUIRoot.Refs>
 
     private bool _valid;
 
-    protected override void Initialize()
+    protected override void OnInitialize()
     {
         _lobbyBg        = View.Image(Refs.LobbyBG_Image);
         _lobbyCharacter = View.Image(Refs.LobbyCharacter_Image);

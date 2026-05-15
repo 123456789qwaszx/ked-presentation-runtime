@@ -109,7 +109,7 @@ public sealed class EpisodeSelectionPanel : UIBase<EpisodeSelectionPanel.Refs>, 
     
     private bool _valid;
 
-    protected override void Initialize()
+    protected override void OnInitialize()
     {
         _chapterIndex         = View.Text(Refs.ChapterIndex_Text);
         _chapterEra           = View.Text(Refs.ChapterEra_Text);

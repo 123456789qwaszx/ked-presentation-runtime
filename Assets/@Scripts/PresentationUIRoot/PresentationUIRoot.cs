@@ -1,7 +1,6 @@
 using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.UI;
 
 public class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
 {
@@ -154,49 +153,12 @@ public class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
     [SerializeField] private DialogueBoxHost dialogueBoxHost;
 
     private bool _isExpanded;
-    private bool _isDialogueUiSuppressed;
 
-    public bool IsExpanded => _isExpanded;
-    public bool IsDialogueUiSuppressed => _isDialogueUiSuppressed;
-
-    protected override void Initialize()
+    protected override void OnInitialize()
     {
         BindHandlers();
-
         CloseCanvasGroup(View.CanvasGroup(Refs.QuickMenu_Root));
-
-        ApplyDialogueUiVisibility();
         ApplyToggleVisibility();
-    }
-
-    public RectTransform ResolveRect(Refs key) => View.Rect(key);
-    public CanvasGroup ResolveCanvasGroup(Refs key) => View.CanvasGroup(key);
-    public Image ResolveImage(Refs key) => View.Image(key);
-
-    /// <summary>
-    /// DialogueUI_Root를 출력 레이어에서 임시로 숨긴다.
-    /// RollbackSeek / Skip처럼 대사 표시 파이프라인은 돌지만
-    /// 사용자에게는 보여주면 안 되는 상태에서 사용한다.
-    /// </summary>
-    public void SetDialogueUiSuppressed(bool suppressed)
-    {
-        _isDialogueUiSuppressed = suppressed;
-        ApplyDialogueUiVisibility();
-    }
-
-    /// <summary>
-    /// PresentationSessionContext 기준으로 DialogueUI 표시 억제 상태를 갱신한다.
-    /// 현재 정책: RollbackSeek 또는 Skip 중에는 DialogueUI_Root를 숨긴다.
-    /// </summary>
-    public void RefreshDialogueUiSuppression(LinePresentationAdvanceState context)
-    {
-        if (context == null)
-        {
-            SetDialogueUiSuppressed(false);
-            return;
-        }
-
-        SetDialogueUiSuppressed(context.IsRollbackSeeking);
     }
 
     private void BindHandlers()
@@ -208,24 +170,11 @@ public class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
         BindEvent(View.Button(Refs.QuickDialogueLog_Button), PressLogButton);
         BindEvent(View.Button(Refs.QuickSpeedToggle_Button), PressSpeedButton);
         BindEvent(View.Button(Refs.SkipToggle_Button), PressSkipButton);
-
         BindEvent(View.Button(Refs.QuickSaveMenu_Button), PressSaveMenuButton);
         BindEvent(View.Button(Refs.QuickLoadMenu_Button), PressLoadMenuButton);
-
-        BindEvent(
-            View.Button(Refs.SpeedUpToggleHotKey_Button),
-            _ => OnSpeedUpHoldStarted?.Invoke(),
-            ETouchEvent.PointerDown);
-
-        BindEvent(
-            View.Button(Refs.SpeedUpToggleHotKey_Button),
-            _ => OnSpeedUpHoldEnded?.Invoke(),
-            ETouchEvent.PointerUp);
-
-        BindEvent(
-            View.Button(Refs.RollbackToggleHotKey_Button),
-            _ => OnRollbackOneStepPressed?.Invoke(),
-            ETouchEvent.Click);
+        BindEvent(View.Button(Refs.SpeedUpToggleHotKey_Button), _ => OnSpeedUpHoldStarted?.Invoke(), ETouchEvent.PointerDown);
+        BindEvent(View.Button(Refs.SpeedUpToggleHotKey_Button), _ => OnSpeedUpHoldEnded?.Invoke(), ETouchEvent.PointerUp);
+        BindEvent(View.Button(Refs.RollbackToggleHotKey_Button), _ => OnRollbackOneStepPressed?.Invoke(), ETouchEvent.Click);
     }
 
     private void PressAutoButton(PointerEventData _)
@@ -250,17 +199,6 @@ public class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
 
         SetQuickMenuOpen(!IsQuickMenuOpen());
     }
-
-    // private void PressQuickMenuToggleButton(PointerEventData _)
-    // {
-    //     OnQuickMenuPressed?.Invoke();
-    //
-    //     CanvasGroup quickMenu = View.CanvasGroup(Refs.QuickMenu_Root);
-    //     bool isOpen = quickMenu.alpha > 0.5f;
-    //
-    //     if (isOpen) CloseCanvasGroup(quickMenu);
-    //     else OpenCanvasGroup(quickMenu);
-    // }
 
     private void PressExpandButton(PointerEventData _)
     {
@@ -347,17 +285,7 @@ public class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
 
         _isExpanded = expanded;
 
-        ApplyDialogueUiVisibility();
         ApplyToggleVisibility();
-    }
-
-    private void ApplyDialogueUiVisibility()
-    {
-        // bool visible = !_isExpanded && !_isDialogueUiSuppressed;
-        // Debug.Log($"{visible}, {_isExpanded}, {_isDialogueUiSuppressed}");
-        // SetLayerVisible(View.CanvasGroup(Refs.DialogueUI_Root), visible);
-        //
-        // SetLayerVisible(View.CanvasGroup(Refs.Stage_Root), visible);
     }
 
     private void ApplyToggleVisibility()

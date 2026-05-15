@@ -40,12 +40,28 @@ public abstract class UIBase : MonoBehaviour
 {
     private void Awake()
     {
-        PreInitialize(); // optional, mostly for derived base classes
-        Initialize();    // main hook for per-UI
+        PreInitialize();
+        OnInitialize();
     }
-
+    
+    /// <summary>
+    /// Base setup phase. Called first from Awake.
+    /// UIBase<TRefs> uses this to bind enum refs, build View, and apply
+    /// IUIResetOnAwake reset/hide state.
+    /// 
+    /// The GameObject and its parents must be active for Awake to run.
+    /// If a child UIBase is under an inactive parent UIBase, its refs will not be built.
+    /// Managed UI should be created under UIManager and hidden with CanvasGroup, not SetActive(false).
+    /// </summary>
     protected virtual void PreInitialize() { }
-    protected virtual void Initialize() { }
+    
+    /// <summary>
+    /// Per-UI setup phase. Called after PreInitialize from Awake.
+    /// Bind events, set default state, and read prepared refs here.
+    /// 
+    /// Requires this GameObject and its parents to be active.
+    /// </summary>
+    protected virtual void OnInitialize() { }
 
     protected static void BindEvent(Button btn, Action<PointerEventData> action, ETouchEvent type = ETouchEvent.Click)
     {
@@ -53,7 +69,7 @@ public abstract class UIBase : MonoBehaviour
         BindEvent(btn.gameObject, action, type);
     }
 
-    public static void BindEvent(GameObject go, Action<PointerEventData> action, ETouchEvent type = ETouchEvent.Click)
+    private static void BindEvent(GameObject go, Action<PointerEventData> action, ETouchEvent type = ETouchEvent.Click)
     {
         UI_EventHandler evt = GetOrAddComponent<UI_EventHandler>(go);
 
@@ -102,7 +118,7 @@ public abstract class UIBase : MonoBehaviour
 public abstract partial class UIBase<TRefs> : UIBase
     where TRefs : struct, Enum
 {
-    public sealed class RefView
+    protected sealed class RefView
     {
         private readonly UIBase<TRefs> _ui;
         internal RefView(UIBase<TRefs> ui) => _ui = ui;
@@ -138,7 +154,6 @@ public abstract partial class UIBase<TRefs> : UIBase
             transform.localPosition = Vector3.zero;
             transform.localRotation = Quaternion.identity;
             transform.localScale = Vector3.one;
-            
             
             if (!gameObject.TryGetComponent(out CanvasGroup canvasGroup))
             {

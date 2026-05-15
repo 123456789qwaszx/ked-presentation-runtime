@@ -115,7 +115,7 @@ public sealed class ChapterButtonCard : UIBase<ChapterButtonCard.Refs>
 
     public int ChapterId { get; private set; } = -1;
 
-    protected override void Initialize()
+    protected override void OnInitialize()
     {
         _hit       = View.Button(Refs.Hit_Button);
         _bg        = View.Image(Refs.Bg_Image);

@@ -18,7 +18,7 @@ public sealed class ButtonWidget : UIBase<ButtonWidget.Refs>
     private TMP_Text _label;
     private Button _hit;
 
-    protected override void Initialize()
+    protected override void OnInitialize()
     {
         _label = View.Text(Refs.BWidgetLabel_Text);
         _hit   = View.Button(Refs.BWidgetHit_Button);

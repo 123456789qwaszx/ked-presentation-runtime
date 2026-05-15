@@ -36,9 +36,6 @@ public sealed class SetupCharRigCommandSpec : CommandSpecBase
     [Tooltip("Parent Slot에 동일한 이름의 Rig가 이미 있으면 파괴 후 새로 생성합니다.")]
     public bool destroyExistingRigWithSameName = true;
 
-    [Tooltip("필수 노드가 없으면 예외를 던질지.")]
-    public bool strict = true;
-
     public string ResolvedRolePrefix
     {
         get
@@ -97,14 +94,12 @@ public sealed class SetupCharRigCommand : CommandBase
         string roleKey = _spec.roleKey;
 
         if (string.IsNullOrEmpty(roleKey))
-            throw new InvalidOperationException("[SetupCharRigCommand] roleKey is empty.");
+            Debug.LogWarning("[SetupCharRigCommand] roleKey is empty.");
 
-        RectTransform parent = _slotResolver.Resolve(_spec.parentSlot, _spec.strict);
+        RectTransform parent = _slotResolver.Resolve(_spec.parentSlot);
         if (parent == null)
         {
-            if (_spec.strict)
-                throw new InvalidOperationException($"[SetupCharRigCommand] Parent slot '{_spec.parentSlot}' could not be resolved.");
-
+            Debug.LogWarning($"[SetupCharRigCommand] Parent slot '{_spec.parentSlot}' could not be resolved.");
             return;
         }
 

@@ -70,7 +70,7 @@ public sealed class EpisodeNodeView : UIBase<EpisodeNodeView.Refs>
     
     private bool _valid;
     
-    protected override void Initialize()
+    protected override void OnInitialize()
     {
         _mainHit  = View.Button(Refs.MainCardHit_Button);
         _upperHit = View.Button(Refs.UpperAttachmentHit_Button);

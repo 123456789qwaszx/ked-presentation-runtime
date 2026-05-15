@@ -32,7 +32,7 @@ public sealed class ChoiceBoxView : UIBase<ChoiceBoxView.Refs>
 
     private int _index;
 
-    protected override void Initialize()
+    protected override void OnInitialize()
     {
         _rootCg   = View.CanvasGroup(Refs.ChoiceBox_Root);
         _labelText = View.Text(Refs.ChoiceBoxTextArea00_Text);

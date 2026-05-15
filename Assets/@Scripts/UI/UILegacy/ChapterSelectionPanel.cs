@@ -68,7 +68,7 @@ public sealed class ChapterSelectionPanel : UIPanel<ChapterSelectionPanel.Refs>
 
     private int _selectedChapterId = -1;
 
-    protected override void Initialize()
+    protected override void OnInitialize()
     {
         // Cards resolve
         _cards[0] = ResolveCard(Refs.ChapterCard01);

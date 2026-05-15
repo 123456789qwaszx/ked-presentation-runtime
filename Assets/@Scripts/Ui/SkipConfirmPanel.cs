@@ -47,7 +47,7 @@ public sealed class SkipConfirmPanel : UIPanel<SkipConfirmPanel.Refs>, IManagedU
     private bool _valid;
     #endregion
 
-    protected override void Initialize()
+    protected override void OnInitialize()
     {
         _bgRoot        = View.Rect(Refs.SkipConfirmBG_Root);
         _bgImage       = View.Image(Refs.SkipConfirmBG_Image);

@@ -37,7 +37,7 @@ public sealed class BacklogEntryView : UIBase<BacklogEntryView.Refs>
 
     private bool _valid;
 
-    protected override void Initialize()
+    protected override void OnInitialize()
     {
         _speakerText = View.Text(Refs.Speaker_Text);
         _bodyText    = View.Text(Refs.Body_Text);

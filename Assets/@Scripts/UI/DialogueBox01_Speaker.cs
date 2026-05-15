@@ -36,7 +36,7 @@ public sealed class DialogueBox01_Speaker
     public TMP_Text NameText => View.Text(Refs.DialogueBox01SpeakerNameBoxTextArea_Text);
     public bool HasName => NameText != null;
 
-    protected override void Initialize()
+    protected override void OnInitialize()
     {
         //gameObject.SetActive(true);
     }

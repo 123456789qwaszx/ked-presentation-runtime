@@ -21,7 +21,7 @@ public sealed class DmThreadPanel : UIPanel<DmThreadPanel.Refs>
     private RectTransform _bubbleContent;
     private RectTransform _optionsContent;
 
-    protected override void Initialize()
+    protected override void OnInitialize()
     {
         _rootCg = View.CanvasGroup(Refs.Pnl_DmThread);
 

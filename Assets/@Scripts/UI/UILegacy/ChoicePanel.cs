@@ -45,7 +45,7 @@ public sealed class ChoicePanel : UIPanel<ChoicePanel.Refs>, IManagedUI
     private bool _valid;
     #endregion
 
-    protected override void Initialize()
+    protected override void OnInitialize()
     {
         _bgImage   = View.Image(Refs.ChoiceBG_Image);
         _titleText = View.Text(Refs.Title_Text);

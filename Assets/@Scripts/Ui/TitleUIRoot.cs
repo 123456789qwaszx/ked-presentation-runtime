@@ -41,7 +41,7 @@ public sealed class TitleUIRoot : UIRoot<TitleUIRoot.Refs>
 
     private bool _valid;
 
-    protected override void Initialize()
+    protected override void OnInitialize()
     {
         _titleBg   = View.Image(Refs.TitleBG_Image);
         _titleLogo = View.Image(Refs.TitleLogo_Image);
