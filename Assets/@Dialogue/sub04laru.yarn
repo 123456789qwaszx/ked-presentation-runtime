@@ -7,12 +7,12 @@
 
 // <<end_hold>>
 
-<<bg_spawn test1 bg1>>
+<<bg_spawn test1 a 1>>
 <<bg_sprite test1 ui/theme1/Background00_Image>>
 <<bg_fade test1 1>>
 
 
-<<slot Albedo>>
+<<slot Albedo 0>>
 <<place Albedo duo_right>>
 <<size Albedo normal>>
 <<cast Albedo Albedo a>>
@@ -28,7 +28,7 @@
 <<fade_out Albedo>>
 <<move_by Albedo 100 0>>
 
-<<slot Laru>>
+<<slot Laru 0>>
 <<place Laru duo_left>>
 <<size Laru normal>>
 <<cast Laru Laru a>>
@@ -44,7 +44,7 @@
 <<fade_out Laru>>
 
 
-<<bg_spawn test3 bg1>>
+<<bg_spawn test3 a 1>>
 <<bg_sprite test3 background_02>>
 <<bg_fade test3 1>>
 
@@ -68,19 +68,19 @@ Albedo: 그럼 이건 뭔데! [emoji =sparkle/]낚시 마스터 도구 세트? �
 <<fade_out Laru>>
 <<fade_in Albedo>>
 
-<<to_scale Albedo 1.4 2.6>>
+//<<to_scale Albedo 1.4 2.6>>
 <<move_by Albedo 0 -80>>
 알베도: 내,눈,똑,바,로,쳐,다,보,고 다시 말해봐!
 <<fade_out Albedo>>
 
-<<bg_spawn test2 bg1>>
+<<bg_spawn test2 a 0>>
 <<bg_sprite test2 ui/default/Background00_Image>>
 <<bg_fade test2 1>>
 궁금한 점원: 헉...... 알베도 님이 또 폭발했어
 
 소문을 퍼뜨리는 점원: 그래도 욕먹은 게 라루라면, 뭐 이상할 것도 없지.
 
-<<slot Bastelina>>
+<<slot Bastelina 1>>
 <<place Bastelina duo_right>>
 <<size Bastelina normal>>
 <<cast Bastelina Bastelina>>
@@ -95,7 +95,7 @@ Albedo: 그럼 이건 뭔데! [emoji =sparkle/]낚시 마스터 도구 세트? �
 베스티나: 휴, 귀여운 후배인 제가...... 어떻게든 도와줘야겠네요......
 
 <<fade_out Bastelina>>
-<<shot_zoom Bastelina 10 1.5>>
+//<<shot_zoom Bastelina 10 1.5>>
 
 
 <<fade_in Laru>>
@@ -105,7 +105,7 @@ Albedo: 그럼 이건 뭔데! [emoji =sparkle/]낚시 마스터 도구 세트? �
 <<place Laru left>>
 
 <<size Albedo small>>
-<<to_scale Albedo 1 -1>>
+//<<to_scale Albedo 1 -1>>
 <<size Laru small>>
 
 
@@ -144,7 +144,7 @@ Albedo: 그럼 이건 뭔데! [emoji =sparkle/]낚시 마스터 도구 세트? �
 <<hop_in Laru 0>>
 <<move_by Laru 200 0>>
 <<move_by Albedo 200 0>>
-<<shot_track Laru 40 -30 0.65>>
+//<<shot_track Laru 40 -30 0.65>>
 라루: 잃어버린 게 아니야! 그냥 어디에 뒀는지 잠깐 까먹었을 뿐이야!
 
 
@@ -152,12 +152,12 @@ Albedo: 그럼 이건 뭔데! [emoji =sparkle/]낚시 마스터 도구 세트? �
 <<move_by Laru -200 0>>
 <<hop_in Albedo 0>>
 <<move_by Albedo -200 0>>
-<<shot_track Laru -40 -30 0.65>>
+//<<shot_track Laru -40 -30 0.65>>
 
 <<emotion Albedo 16>>
 알베도: 그게 바로 잃어버린 거야!
 
-<<bg_spawn fire bg1>>
+<<bg_spawn fire a 0>>
 <<bg_sprite fire sprites/BG-Darkmode>>
 <<bg_fade fire 1>>
 
@@ -184,13 +184,13 @@ Albedo: 그럼 이건 뭔데! [emoji =sparkle/]낚시 마스터 도구 세트? �
 
 
 <<fade_out Laru>>
-<<end_hold>>
-<<slot npc1>>
-<<place npc1 left>>
-<<size npc1 1.9>>
-<<cast npc1 Ruby>>
-<<emotion npc1 1>>
-<<fade_in npc1>>
+// <<end_hold>>
+// <<slot npc1 0>>
+// <<place npc1 left>>
+// <<size npc1 1.9>>
+// <<cast npc1 Ruby>>
+// <<emotion npc1 1>>
+// <<fade_in npc1>>
 
 
 <<place Albedo right>>
@@ -220,7 +220,7 @@ Albedo: 그럼 이건 뭔데! [emoji =sparkle/]낚시 마스터 도구 세트? �
 <<move_by npc1 400 0>>
 <<move_by Albedo 150 0>>
 
-<<shot_track npc1 400 0 0.5>>
+//<<shot_track npc1 400 0 0.5>>
 라루: 별거 아니야! 다음에 또 같이 가자~ 좋은 낚시터를 몇 군데 더 알고 있거든!
 
 
@@ -230,7 +230,7 @@ Albedo: 그럼 이건 뭔데! [emoji =sparkle/]낚시 마스터 도구 세트? �
 
 <<fade_out Laru>>
 <<slide_out Laru left>>
-<<shot_track npc1 -400 0 0.5>>
+//<<shot_track npc1 -400 0 0.5>>
 
 감격한 공급업체 담당자: 참...... 오늘은 계약서를 돌려드리려고 찾아왔습니다. 어제 낚시 끝나고 실수로 귀사의 서류까지 챙겨가 버렸더군요. 이거 참 죄송하게 됐습니다.
 
@@ -255,5 +255,5 @@ Albedo: 그럼 이건 뭔데! [emoji =sparkle/]낚시 마스터 도구 세트? �
 베스티나: 안녕히 가세요! 
 고객을 배웅하고 사무실 문이 닫히자, 실내는 삽시간에 고요해졌다.
 
-<<jump sub04laru2>>
+//<<jump sub04laru2>>
 ===

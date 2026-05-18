@@ -17,11 +17,15 @@
 <<place Leafia center>>
 <<size Leafia normal>>
 
+<<scale_to Leafia 0.2>>
 <<breathe Leafia 99 5 0.25>>
+
+
 <<emotion Leafia 1>>
 
 <<p_strip_clear vsw 0>>
 
+<<shot_zoom_focus MySlot bust center 5 1>>
 
 메르쿠리아: 이번에 저희 컴퍼니를 선택해 주셔서 감사합니다. 저는 천궁보험 필리에 영업부 매니저 메르쿠리아라고 합니다.
 
