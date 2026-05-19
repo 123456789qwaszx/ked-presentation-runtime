@@ -21,7 +21,31 @@ MonoBehaviour:
       rotationZ: 42
       preserveAspect: 1
       setNativeSize: 0
-  - emojiKey: 
+  - emojiKey: 01
+    sprite: {fileID: 21300000, guid: ebb2f99d1ddd7ca448dffaccb1d97ae4, type: 3}
+    layout:
+      anchoredPosition: {x: -130, y: 550}
+      localScale: {x: 0.15, y: 0.15, z: 0.15}
+      rotationZ: 42
+      preserveAspect: 1
+      setNativeSize: 0
+  - emojiKey: 02
+    sprite: {fileID: 21300000, guid: 4eafd43794974654c927b3df54ad3dc7, type: 3}
+    layout:
+      anchoredPosition: {x: 130, y: 550}
+      localScale: {x: 0.15, y: 0.15, z: 0.15}
+      rotationZ: 0
+      preserveAspect: 1
+      setNativeSize: 0
+  - emojiKey: 02-3
+    sprite: {fileID: 21300000, guid: 528ef768b2dbf2b4c86964fa169ff443, type: 3}
+    layout:
+      anchoredPosition: {x: 130, y: 550}
+      localScale: {x: 0.15, y: 0.15, z: 0.15}
+      rotationZ: 0
+      preserveAspect: 1
+      setNativeSize: 0
+  - emojiKey: "\u3142\u3148\u3137"
     sprite: {fileID: 0}
     layout:
       anchoredPosition: {x: 0, y: 0}
@@ -47,8 +71,8 @@ MonoBehaviour:
       setNativeSize: 0
   - label: Layout 2
     layout:
-      anchoredPosition: {x: 0, y: 0}
-      localScale: {x: 1, y: 1, z: 1}
+      anchoredPosition: {x: 130, y: 550}
+      localScale: {x: 0.15, y: 0.15, z: 0.15}
       rotationZ: 0
       preserveAspect: 1
       setNativeSize: 0

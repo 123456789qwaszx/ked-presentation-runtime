@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEditor;
+using UnityEditorInternal;
 using UnityEngine;
 
 [CustomEditor(typeof(CharacterEmojiLibrarySO))]
@@ -10,6 +11,9 @@ public sealed class CharacterEmojiLibrarySOEditor : Editor
 
     private Vector2 _scroll;
     private bool _showSavedLayouts = true;
+    private bool _showEntryList;
+
+    private ReorderableList _entryQuickList;
 
     private readonly Dictionary<string, bool> _entrySavedLayoutFoldouts = new();
 
@@ -19,6 +23,8 @@ public sealed class CharacterEmojiLibrarySOEditor : Editor
     {
         _entries = serializedObject.FindProperty("entries");
         _savedLayouts = serializedObject.FindProperty("savedLayouts");
+
+        BuildEntryQuickList();
     }
 
     public override void OnInspectorGUI()
@@ -40,11 +46,67 @@ public sealed class CharacterEmojiLibrarySOEditor : Editor
         serializedObject.ApplyModifiedProperties();
     }
 
+    private void BuildEntryQuickList()
+    {
+        if (_entries == null)
+            return;
+
+        _entryQuickList = new ReorderableList(
+            serializedObject,
+            _entries,
+            true,
+            false,
+            false,
+            false);
+
+        _entryQuickList.elementHeight = EditorGUIUtility.singleLineHeight + 4f;
+        _entryQuickList.drawElementCallback = DrawEntryQuickListElement;
+
+        _entryQuickList.onReorderCallback = list =>
+        {
+            serializedObject.ApplyModifiedProperties();
+            EditorUtility.SetDirty(target);
+            Repaint();
+        };
+
+        _entryQuickList.onSelectCallback = list =>
+        {
+            if (list.index < 0 || list.index >= _entries.arraySize)
+                return;
+
+            SerializedProperty entry = _entries.GetArrayElementAtIndex(list.index);
+            entry.isExpanded = true;
+
+            GUI.FocusControl(null);
+            Repaint();
+        };
+    }
+
     private void DrawHeaderTools()
     {
         using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
         {
-            EditorGUILayout.LabelField("Character Emoji Library", EditorStyles.boldLabel);
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                EditorGUILayout.LabelField(
+                    $"Character Emoji Library ({_entries.arraySize})",
+                    EditorStyles.boldLabel);
+
+                GUILayout.FlexibleSpace();
+
+                string listLabel = _showEntryList ? "Entry List ▼" : "Entry List ▶";
+
+                if (GUILayout.Button(listLabel, GUILayout.Width(110f)))
+                {
+                    _showEntryList = !_showEntryList;
+                }
+            }
+
+            if (_showEntryList)
+            {
+                DrawEntryQuickList();
+                EditorGUILayout.Space(4);
+            }
 
             using (new EditorGUILayout.HorizontalScope())
             {
@@ -68,6 +130,87 @@ public sealed class CharacterEmojiLibrarySOEditor : Editor
                     SortByKey();
                 }
             }
+        }
+    }
+
+    private void DrawEntryQuickList()
+    {
+        if (_entries == null || _entries.arraySize == 0)
+        {
+            EditorGUILayout.HelpBox("No emoji entries registered.", MessageType.Info);
+            return;
+        }
+
+        if (_entryQuickList == null)
+            BuildEntryQuickList();
+
+        using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
+        {
+            EditorGUILayout.LabelField("Registered Emoji Keys", EditorStyles.miniBoldLabel);
+
+            EditorGUILayout.HelpBox(
+                "Drag items here to reorder the actual emoji entries.",
+                MessageType.None);
+
+            _entryQuickList.DoLayoutList();
+        }
+    }
+
+    private void DrawEntryQuickListElement(
+        Rect rect,
+        int index,
+        bool isActive,
+        bool isFocused)
+    {
+        if (_entries == null)
+            return;
+
+        if (index < 0 || index >= _entries.arraySize)
+            return;
+
+        SerializedProperty entry = _entries.GetArrayElementAtIndex(index);
+        SerializedProperty emojiKey = entry.FindPropertyRelative("emojiKey");
+        SerializedProperty sprite = entry.FindPropertyRelative("sprite");
+
+        string key = string.IsNullOrEmpty(emojiKey.stringValue)
+            ? "(empty key)"
+            : emojiKey.stringValue;
+
+        rect.y += 2f;
+        rect.height = EditorGUIUtility.singleLineHeight;
+
+        Rect indexRect = rect;
+        indexRect.width = 34f;
+
+        Rect keyRect = rect;
+        keyRect.xMin = indexRect.xMax + 4f;
+        keyRect.xMax -= 74f;
+
+        Rect openRect = rect;
+        openRect.xMin = rect.xMax - 64f;
+
+        EditorGUI.LabelField(indexRect, $"{index + 1:00}.", EditorStyles.miniLabel);
+        EditorGUI.LabelField(keyRect, key, EditorStyles.label);
+
+        if (sprite.objectReferenceValue == null)
+        {
+            Rect warningRect = keyRect;
+            warningRect.xMin = Mathf.Max(keyRect.xMin, keyRect.xMax - 72f);
+
+            EditorGUI.LabelField(
+                warningRect,
+                "No Sprite",
+                EditorStyles.miniLabel);
+        }
+
+        string buttonLabel = entry.isExpanded ? "Close" : "Open";
+
+        if (GUI.Button(openRect, buttonLabel, EditorStyles.miniButton))
+        {
+            entry.isExpanded = !entry.isExpanded;
+
+            GUI.FocusControl(null);
+            Repaint();
         }
     }
 
@@ -232,20 +375,6 @@ public sealed class CharacterEmojiLibrarySOEditor : Editor
                 title,
                 entryTitleStyle);
 
-            GUI.enabled = index > 0;
-            if (GUILayout.Button("▲", GUILayout.Width(28f)))
-            {
-                _entries.MoveArrayElement(index, index - 1);
-            }
-
-            GUI.enabled = index < _entries.arraySize - 1;
-            if (GUILayout.Button("▼", GUILayout.Width(28f)))
-            {
-                _entries.MoveArrayElement(index, index + 1);
-            }
-
-            GUI.enabled = true;
-
             if (GUILayout.Button("Remove", GUILayout.Width(70f)))
             {
                 removeIndex = index;
@@ -297,15 +426,21 @@ public sealed class CharacterEmojiLibrarySOEditor : Editor
             if (GUILayout.Button("Default"))
                 ApplyLayoutToEntry(entry, CharacterEmojiLayout.Default);
 
-            if (GUILayout.Button("Head Right"))
-                ApplyLayoutToEntry(entry, CharacterEmojiLayout.HeadRight);
-
             if (GUILayout.Button("Head Left"))
                 ApplyLayoutToEntry(entry, CharacterEmojiLayout.HeadLeft);
+            
+            if (GUILayout.Button("Head Right"))
+                ApplyLayoutToEntry(entry, CharacterEmojiLayout.HeadRight);
 
             if (GUILayout.Button("Above Head"))
                 ApplyLayoutToEntry(entry, CharacterEmojiLayout.AboveHead);
         }
+        
+        // using (new EditorGUILayout.HorizontalScope())
+        // {
+        //     if (GUILayout.Button("Default"))
+        //         ApplyLayoutToEntry(entry, CharacterEmojiLayout.Default);
+        // }
     }
 
     private void DrawSavedLayoutActions(SerializedProperty entry)
@@ -435,10 +570,9 @@ public sealed class CharacterEmojiLibrarySOEditor : Editor
     {
         Undo.RecordObject(target, "Add Emoji Entry");
 
-        int index = _entries.arraySize;
-        _entries.InsertArrayElementAtIndex(index);
+        _entries.InsertArrayElementAtIndex(0);
 
-        SerializedProperty entry = _entries.GetArrayElementAtIndex(index);
+        SerializedProperty entry = _entries.GetArrayElementAtIndex(0);
 
         entry.isExpanded = true;
 
@@ -446,6 +580,8 @@ public sealed class CharacterEmojiLibrarySOEditor : Editor
         entry.FindPropertyRelative("sprite").objectReferenceValue = null;
 
         WriteLayout(entry.FindPropertyRelative("layout"), CharacterEmojiLayout.Default);
+
+        _scroll = Vector2.zero;
 
         EditorUtility.SetDirty(target);
     }
@@ -591,13 +727,6 @@ public sealed class CharacterEmojiLibrarySOEditor : Editor
         layout.FindPropertyRelative("setNativeSize").boolValue = value.setNativeSize;
     }
 
-    private sealed class EntrySnapshot
-    {
-        public string emojiKey;
-        public Sprite sprite;
-        public CharacterEmojiLayout layout;
-    }
-    
     private bool DrawWideFoldoutInRect(
         Rect rect,
         bool isExpanded,
@@ -623,5 +752,12 @@ public sealed class CharacterEmojiLibrarySOEditor : Editor
         EditorGUI.LabelField(labelRect, prefix + label, style);
 
         return isExpanded;
+    }
+
+    private sealed class EntrySnapshot
+    {
+        public string emojiKey;
+        public Sprite sprite;
+        public CharacterEmojiLayout layout;
     }
 }
