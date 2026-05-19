@@ -32,10 +32,10 @@ public sealed class CharacterRigBuilder
     
     public void BindRefsFromRoot(RectTransform rigRoot, string rolePrefix, out CharacterRigRefs refs)
     {
-        Dictionary<CharacterRigSchema.Refs, RectTransform> map = CreateRefMap(rigRoot, rolePrefix);
+        Dictionary<CharacterRigSchema.Refs, RectTransform> map = CollectRefMap(rigRoot, rolePrefix);
         EnsureValidGraphMap(rigRoot, rolePrefix, ref map);
         
-        refs = BindRefs(rigRoot, map);
+        refs = BuildRefs(rigRoot, map);
     }
     
     
@@ -60,13 +60,12 @@ public sealed class CharacterRigBuilder
             // Destroy() is delayed until the end of the frame.
             // Detach first so EnsureGraph() cannot find soon-to-be-destroyed nodes.
             child.SetParent(null, false);
-
             Object.Destroy(child.gameObject);
         }
 
         EnsureGraph(rigRoot, rolePrefix);
 
-        map = CreateRefMap(rigRoot, rolePrefix);
+        map = CollectRefMap(rigRoot, rolePrefix);
     }
     
     #region Auto Create Graph
@@ -115,7 +114,7 @@ public sealed class CharacterRigBuilder
     #endregion
     
     #region Binding / Refs
-    private Dictionary<CharacterRigSchema.Refs, RectTransform> CreateRefMap(RectTransform rigRoot, string rolePrefix)
+    private Dictionary<CharacterRigSchema.Refs, RectTransform> CollectRefMap(RectTransform rigRoot, string rolePrefix)
     {
         Dictionary<CharacterRigSchema.Refs, RectTransform> map = new();
 
@@ -131,7 +130,7 @@ public sealed class CharacterRigBuilder
         return map;
     }
     
-    private CharacterRigRefs BindRefs(RectTransform rigRoot, Dictionary<CharacterRigSchema.Refs, RectTransform> map)
+    private CharacterRigRefs BuildRefs(RectTransform rigRoot, Dictionary<CharacterRigSchema.Refs, RectTransform> map)
     {
         CharacterRigRefs refs = new();
 

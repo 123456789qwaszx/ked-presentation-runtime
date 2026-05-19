@@ -6,33 +6,94 @@ public static class CharacterRigSchema
 {
     public enum Refs
     {
-        // Root axis
-        Character_Anchor,
-        Character_Track,
-        Character_Track_Move,
-        Character_Track_X,
-        Character_Track_Y,
-            
-        // Portrait axis
-        CharacterPortrait_Root,
-        CharacterPortrait_Pad,
+        // Slot axis - stage placement
+        CharSlot_Anchor,
+        CharSlot_Track,
+        CharSlot_Track_Move,
+        CharSlot_Track_X,
+        CharSlot_Track_Y,
+        CharSlot_Rotation,
+        CharSlot_Scale,
+        
+        // Framing axis - pseudo camera / focus response
+        CharSlot_FramingTransform,
+        CharSlot_FramingScale,
+        CharSlot_FramingScale_X,
+        CharSlot_FramingScale_Y,
+        
+        // Character casting axis - per-character defaults
+        Character_Root, 
+        Character_CastLocation, 
+        Character_CastSize,
+        Character_CastAngle,
+        
+        // Portrait acting axis
+        CharacterPortrait_Track,
+        CharacterPortrait_Track_Move,
+        CharacterPortrait_Track_X,
+        CharacterPortrait_Track_Y,
+        CharacterPortrait_Rotation,
         CharacterPortrait_SwayPivot,
         CharacterPortrait_Shake,
-        CharacterPortrait_Scale,
-        CharacterPortrait_Image,
-            
-        // PortraitOverlay
-        CharacterPortraitOverlay_Root,
-        CharacterPortraitOverlay_Image,
+        CharacterPortrait_ActingScale,
+        CharacterPortrait_ActingScale_X,
+        CharacterPortrait_ActingScale_Y,
         
-        // Emoji axis
-        CharacterEmoji_Root,
-        CharacterEmoji_Anchor,
-        CharacterEmoji_Pad,
-        CharacterEmoji_Track,
-        CharacterEmoji_Scale,
-        CharacterEmoji_SwayPivot,
-        CharacterEmoji_Image
+        // Portrait sprite
+        CharacterPortraitSprite_Root,
+        CharacterPortraitSprite_Image,
+        
+        CharacterPortraitSpriteOverlay_Root,
+        CharacterPortraitSpriteOverlay_Image,
+        
+        // Portrait extension / preserved systems
+        Character_ExtensionsRoot,
+        
+        // Emoji00 casting/effect axis
+        CharacterEmojiSlot00_Root,
+        CharacterEmojiSlot00_Location,
+        CharacterEmojiSlot00_Size,
+        CharacterEmojiSlot00_Angle,
+        CharacterEmojiSlot00_Effect,
+        
+        // Emoji00 sprite motion axis
+        EmojiSlot00_Track,
+        EmojiSlot00_Track_Move,
+        EmojiSlot00_Track_X,
+        EmojiSlot00_Track_Y,
+        EmojiSlot00_Scale,
+        EmojiSlot00_Rotation,
+        EmojiSlot00_Image,
+        
+        // Emoji01
+        CharacterEmojiSlot01_Root,
+        CharacterEmojiSlot01_Location,
+        CharacterEmojiSlot01_Size,
+        CharacterEmojiSlot01_Angle,
+        CharacterEmojiSlot01_Effect,
+        
+        EmojiSlot01_Track,
+        EmojiSlot01_Track_Move,
+        EmojiSlot01_Track_X,
+        EmojiSlot01_Track_Y,
+        EmojiSlot01_Scale,
+        EmojiSlot01_Rotation,
+        EmojiSlot01_Image,
+        
+        // Emoji02
+        CharacterEmojiSlot02_Root,
+        CharacterEmojiSlot02_Location,
+        CharacterEmojiSlot02_Size,
+        CharacterEmojiSlot02_Angle,
+        CharacterEmojiSlot02_Effect,
+        
+        EmojiSlot02_Track,
+        EmojiSlot02_Track_Move,
+        EmojiSlot02_Track_X,
+        EmojiSlot02_Track_Y,
+        EmojiSlot02_Scale,
+        EmojiSlot02_Rotation,
+        EmojiSlot02_Image
     }
     
     public sealed class NodeDef
@@ -60,7 +121,7 @@ public static class CharacterRigSchema
             new() { Id = Refs.CharacterPortrait_SwayPivot, Parent = Refs.CharacterPortrait_Pad,         NeedsBottomPivot = true },
             new() { Id = Refs.CharacterPortrait_Shake,     Parent = Refs.CharacterPortrait_SwayPivot },
             new() { Id = Refs.CharacterPortrait_Scale,     Parent = Refs.CharacterPortrait_Shake },
-            new() { Id = Refs.CharacterPortrait_Image,     Parent = Refs.CharacterPortrait_Scale,       NeedsImage = true },
+                new() { Id = Refs.CharacterPortrait_Image,     Parent = Refs.CharacterPortrait_Scale,       NeedsImage = true },
 
                 new() { Id = Refs.CharacterPortraitOverlay_Root,  Parent = Refs.CharacterPortrait_Scale,       NeedsCanvasGroup = true },
                 new() { Id = Refs.CharacterPortraitOverlay_Image, Parent = Refs.CharacterPortraitOverlay_Root, NeedsImage = true },
