@@ -131,70 +131,132 @@ public sealed class CharacterRigBuilder
     }
     
     private CharacterRigRefs BuildRefs(RectTransform rigRoot, Dictionary<CharacterRigSchema.Refs, RectTransform> map)
+{
+    CharacterRigRefs refs = new();
+
+    refs.RigRoot = rigRoot;
+
+    RectTransform GetRt(CharacterRigSchema.Refs key)
     {
-        CharacterRigRefs refs = new();
-
-        refs.RigRoot = rigRoot;
-
-        RectTransform GetRt(CharacterRigSchema.Refs key)
+        if (!map.TryGetValue(key, out RectTransform targetRect) || targetRect == null)
         {
-            if (!map.TryGetValue(key, out RectTransform targetRect) || targetRect == null)
-            {
-                Debug.LogWarning($"[SetRig] Missing bound ref '{key}'.");
-
-                return null;
-            }
-
-            return targetRect;
+            Debug.LogWarning($"[CharacterRigBuilder] Missing bound ref '{key}'.");
+            return null;
         }
 
-        Image GetImg(CharacterRigSchema.Refs key)
-        {
-            RectTransform rt = GetRt(key);
-            if (rt == null)
-                return null;
-
-            Image img = rt.GetComponent<Image>();
-            if (img == null)
-            {
-                Debug.LogWarning($"[SetRig] Missing Image on '{rt.name}'.");
-                return null;
-            }
-
-            return img;
-        }
-
-        // Root axis
-        refs.Character_Anchor = GetRt(CharacterRigSchema.Refs.Character_Anchor);
-        refs.Character_Track = GetRt(CharacterRigSchema.Refs.Character_Track);
-
-        refs.Character_Track_Move = GetRt(CharacterRigSchema.Refs.Character_Track_Move);
-        refs.Character_Track_X = GetRt(CharacterRigSchema.Refs.Character_Track_X);
-        refs.Character_Track_Y = GetRt(CharacterRigSchema.Refs.Character_Track_Y);
-
-        // Portrait
-        refs.CharacterPortrait_Root = GetRt(CharacterRigSchema.Refs.CharacterPortrait_Root);
-        refs.CharacterPortrait_Pad = GetRt(CharacterRigSchema.Refs.CharacterPortrait_Pad);
-        refs.CharacterPortrait_SwayPivot = GetRt(CharacterRigSchema.Refs.CharacterPortrait_SwayPivot);
-        refs.CharacterPortrait_Shake = GetRt(CharacterRigSchema.Refs.CharacterPortrait_Shake);
-        refs.CharacterPortrait_Scale = GetRt(CharacterRigSchema.Refs.CharacterPortrait_Scale);
-        refs.CharacterPortrait_Image = GetImg(CharacterRigSchema.Refs.CharacterPortrait_Image);
-
-        // Portrait overlays
-        refs.CharacterPortraitOverlay_Root = GetRt(CharacterRigSchema.Refs.CharacterPortraitOverlay_Root);
-        refs.CharacterPortraitOverlay_Image = GetImg(CharacterRigSchema.Refs.CharacterPortraitOverlay_Image);
-
-        // Emoji
-        refs.CharacterEmoji_Root = GetRt(CharacterRigSchema.Refs.CharacterEmoji_Root);
-        refs.CharacterEmoji_Anchor = GetRt(CharacterRigSchema.Refs.CharacterEmoji_Anchor);
-        refs.CharacterEmoji_Pad = GetRt(CharacterRigSchema.Refs.CharacterEmoji_Pad);
-        refs.CharacterEmoji_Track = GetRt(CharacterRigSchema.Refs.CharacterEmoji_Track);
-        refs.CharacterEmoji_Scale = GetRt(CharacterRigSchema.Refs.CharacterEmoji_Scale);
-        refs.CharacterEmoji_SwayPivot = GetRt(CharacterRigSchema.Refs.CharacterEmoji_SwayPivot);
-        refs.CharacterEmoji_Image = GetImg(CharacterRigSchema.Refs.CharacterEmoji_Image);
-
-        return refs;
+        return targetRect;
     }
+
+    Image GetImg(CharacterRigSchema.Refs key)
+    {
+        RectTransform rt = GetRt(key);
+        if (rt == null)
+            return null;
+
+        Image img = rt.GetComponent<Image>();
+        if (img == null)
+        {
+            Debug.LogWarning($"[CharacterRigBuilder] Missing Image on '{rt.name}'.");
+            return null;
+        }
+
+        return img;
+    }
+
+    // Slot axis - stage placement
+    refs.CharSlot_Anchor = GetRt(CharacterRigSchema.Refs.CharSlot_Anchor);
+    refs.CharSlot_Track = GetRt(CharacterRigSchema.Refs.CharSlot_Track);
+    refs.CharSlot_Track_Move = GetRt(CharacterRigSchema.Refs.CharSlot_Track_Move);
+    refs.CharSlot_Track_X = GetRt(CharacterRigSchema.Refs.CharSlot_Track_X);
+    refs.CharSlot_Track_Y = GetRt(CharacterRigSchema.Refs.CharSlot_Track_Y);
+    refs.CharSlot_Rotation = GetRt(CharacterRigSchema.Refs.CharSlot_Rotation);
+    refs.CharSlot_Scale = GetRt(CharacterRigSchema.Refs.CharSlot_Scale);
+
+    // Framing axis - pseudo camera / focus response
+    refs.CharSlot_FramingTransform = GetRt(CharacterRigSchema.Refs.CharSlot_FramingTransform);
+    refs.CharSlot_FramingScale = GetRt(CharacterRigSchema.Refs.CharSlot_FramingScale);
+    refs.CharSlot_FramingScale_X = GetRt(CharacterRigSchema.Refs.CharSlot_FramingScale_X);
+    refs.CharSlot_FramingScale_Y = GetRt(CharacterRigSchema.Refs.CharSlot_FramingScale_Y);
+
+    // Character casting axis - per-character defaults
+    refs.Character_Root = GetRt(CharacterRigSchema.Refs.Character_Root);
+    refs.Character_CastLocation = GetRt(CharacterRigSchema.Refs.Character_CastLocation);
+    refs.Character_CastSize = GetRt(CharacterRigSchema.Refs.Character_CastSize);
+    refs.Character_CastAngle = GetRt(CharacterRigSchema.Refs.Character_CastAngle);
+
+    // Portrait acting axis
+    refs.CharacterPortrait_Track = GetRt(CharacterRigSchema.Refs.CharacterPortrait_Track);
+    refs.CharacterPortrait_Track_Move = GetRt(CharacterRigSchema.Refs.CharacterPortrait_Track_Move);
+    refs.CharacterPortrait_Track_X = GetRt(CharacterRigSchema.Refs.CharacterPortrait_Track_X);
+    refs.CharacterPortrait_Track_Y = GetRt(CharacterRigSchema.Refs.CharacterPortrait_Track_Y);
+    refs.CharacterPortrait_Rotation = GetRt(CharacterRigSchema.Refs.CharacterPortrait_Rotation);
+    refs.CharacterPortrait_SwayPivot = GetRt(CharacterRigSchema.Refs.CharacterPortrait_SwayPivot);
+    refs.CharacterPortrait_Shake = GetRt(CharacterRigSchema.Refs.CharacterPortrait_Shake);
+    refs.CharacterPortrait_ActingScale = GetRt(CharacterRigSchema.Refs.CharacterPortrait_ActingScale);
+    refs.CharacterPortrait_ActingScale_X = GetRt(CharacterRigSchema.Refs.CharacterPortrait_ActingScale_X);
+    refs.CharacterPortrait_ActingScale_Y = GetRt(CharacterRigSchema.Refs.CharacterPortrait_ActingScale_Y);
+
+    // Portrait sprite
+    refs.CharacterPortraitSprite_Root = GetRt(CharacterRigSchema.Refs.CharacterPortraitSprite_Root);
+    refs.CharacterPortraitSprite_Image = GetImg(CharacterRigSchema.Refs.CharacterPortraitSprite_Image);
+
+    // Portrait sprite overlay
+    refs.CharacterPortraitSpriteOverlay_Root = GetRt(CharacterRigSchema.Refs.CharacterPortraitSpriteOverlay_Root);
+    refs.CharacterPortraitSpriteOverlay_Image = GetImg(CharacterRigSchema.Refs.CharacterPortraitSpriteOverlay_Image);
+
+    // Portrait extension / preserved systems
+    refs.Character_ExtensionsRoot = GetRt(CharacterRigSchema.Refs.Character_ExtensionsRoot);
+
+    // Emoji00 casting/effect axis
+    refs.CharacterEmojiSlot00_Root = GetRt(CharacterRigSchema.Refs.CharacterEmojiSlot00_Root);
+    refs.CharacterEmojiSlot00_Location = GetRt(CharacterRigSchema.Refs.CharacterEmojiSlot00_Location);
+    refs.CharacterEmojiSlot00_Size = GetRt(CharacterRigSchema.Refs.CharacterEmojiSlot00_Size);
+    refs.CharacterEmojiSlot00_Angle = GetRt(CharacterRigSchema.Refs.CharacterEmojiSlot00_Angle);
+    refs.CharacterEmojiSlot00_Effect = GetRt(CharacterRigSchema.Refs.CharacterEmojiSlot00_Effect);
+
+    // Emoji00 sprite motion axis
+    refs.EmojiSlot00_Track = GetRt(CharacterRigSchema.Refs.EmojiSlot00_Track);
+    refs.EmojiSlot00_Track_Move = GetRt(CharacterRigSchema.Refs.EmojiSlot00_Track_Move);
+    refs.EmojiSlot00_Track_X = GetRt(CharacterRigSchema.Refs.EmojiSlot00_Track_X);
+    refs.EmojiSlot00_Track_Y = GetRt(CharacterRigSchema.Refs.EmojiSlot00_Track_Y);
+    refs.EmojiSlot00_Scale = GetRt(CharacterRigSchema.Refs.EmojiSlot00_Scale);
+    refs.EmojiSlot00_Rotation = GetRt(CharacterRigSchema.Refs.EmojiSlot00_Rotation);
+    refs.EmojiSlot00_Image = GetImg(CharacterRigSchema.Refs.EmojiSlot00_Image);
+
+    // Emoji01 casting/effect axis
+    refs.CharacterEmojiSlot01_Root = GetRt(CharacterRigSchema.Refs.CharacterEmojiSlot01_Root);
+    refs.CharacterEmojiSlot01_Location = GetRt(CharacterRigSchema.Refs.CharacterEmojiSlot01_Location);
+    refs.CharacterEmojiSlot01_Size = GetRt(CharacterRigSchema.Refs.CharacterEmojiSlot01_Size);
+    refs.CharacterEmojiSlot01_Angle = GetRt(CharacterRigSchema.Refs.CharacterEmojiSlot01_Angle);
+    refs.CharacterEmojiSlot01_Effect = GetRt(CharacterRigSchema.Refs.CharacterEmojiSlot01_Effect);
+
+    // Emoji01 sprite motion axis
+    refs.EmojiSlot01_Track = GetRt(CharacterRigSchema.Refs.EmojiSlot01_Track);
+    refs.EmojiSlot01_Track_Move = GetRt(CharacterRigSchema.Refs.EmojiSlot01_Track_Move);
+    refs.EmojiSlot01_Track_X = GetRt(CharacterRigSchema.Refs.EmojiSlot01_Track_X);
+    refs.EmojiSlot01_Track_Y = GetRt(CharacterRigSchema.Refs.EmojiSlot01_Track_Y);
+    refs.EmojiSlot01_Scale = GetRt(CharacterRigSchema.Refs.EmojiSlot01_Scale);
+    refs.EmojiSlot01_Rotation = GetRt(CharacterRigSchema.Refs.EmojiSlot01_Rotation);
+    refs.EmojiSlot01_Image = GetImg(CharacterRigSchema.Refs.EmojiSlot01_Image);
+
+    // Emoji02 casting/effect axis
+    refs.CharacterEmojiSlot02_Root = GetRt(CharacterRigSchema.Refs.CharacterEmojiSlot02_Root);
+    refs.CharacterEmojiSlot02_Location = GetRt(CharacterRigSchema.Refs.CharacterEmojiSlot02_Location);
+    refs.CharacterEmojiSlot02_Size = GetRt(CharacterRigSchema.Refs.CharacterEmojiSlot02_Size);
+    refs.CharacterEmojiSlot02_Angle = GetRt(CharacterRigSchema.Refs.CharacterEmojiSlot02_Angle);
+    refs.CharacterEmojiSlot02_Effect = GetRt(CharacterRigSchema.Refs.CharacterEmojiSlot02_Effect);
+
+    // Emoji02 sprite motion axis
+    refs.EmojiSlot02_Track = GetRt(CharacterRigSchema.Refs.EmojiSlot02_Track);
+    refs.EmojiSlot02_Track_Move = GetRt(CharacterRigSchema.Refs.EmojiSlot02_Track_Move);
+    refs.EmojiSlot02_Track_X = GetRt(CharacterRigSchema.Refs.EmojiSlot02_Track_X);
+    refs.EmojiSlot02_Track_Y = GetRt(CharacterRigSchema.Refs.EmojiSlot02_Track_Y);
+    refs.EmojiSlot02_Scale = GetRt(CharacterRigSchema.Refs.EmojiSlot02_Scale);
+    refs.EmojiSlot02_Rotation = GetRt(CharacterRigSchema.Refs.EmojiSlot02_Rotation);
+    refs.EmojiSlot02_Image = GetImg(CharacterRigSchema.Refs.EmojiSlot02_Image);
+
+    return refs;
+}
     #endregion
     
     #region Helper

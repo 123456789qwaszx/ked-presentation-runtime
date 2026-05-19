@@ -70,7 +70,7 @@ public sealed partial class YarnCommandBridge
         {
             focusRoleKey = roleKey.Trim(),
             focusAnchor = anchor,
-            fallbackTarget = CharacterRigTarget.CharacterPortrait_Root,
+            fallbackTarget = CharacterRigTarget.CharSlot_FramingTransform,
             focusLocalOffset = Vector2.zero,
             screenPoint = point,
             screenOffset = Vector2.zero,

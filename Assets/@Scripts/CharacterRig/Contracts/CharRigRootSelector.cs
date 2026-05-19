@@ -15,9 +15,9 @@ public static class CharRigRootSelector
 {
     private static readonly (CharRigRootMask flag, Func<CharacterRigRefs, RectTransform> get)[] Map =
     {
-        (CharRigRootMask.CharacterPortrait_Root,        r => r.CharacterPortrait_Root),
-        (CharRigRootMask.CharacterPortraitOverlay_Root, r => r.CharacterPortraitOverlay_Root),
-        (CharRigRootMask.CharacterEmoji_Root,           r => r.CharacterEmoji_Root),
+        (CharRigRootMask.CharacterPortrait_Root,        r => r.CharacterPortraitSprite_Root),
+        (CharRigRootMask.CharacterPortraitOverlay_Root, r => r.CharacterPortraitSpriteOverlay_Root),
+        (CharRigRootMask.CharacterEmoji_Root,           r => r.CharacterEmojiSlot00_Root),
     };
 
     public static void CollectRootRects(CharacterRigRefs refs, CharRigRootMask mask, List<RectTransform> outRects)
