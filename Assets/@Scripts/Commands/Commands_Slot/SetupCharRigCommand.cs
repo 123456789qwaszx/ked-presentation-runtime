@@ -27,7 +27,7 @@ public sealed class SetupCharRigCommandSpec : CommandSpecBase
     [Tooltip("Slot to attach this rig to.")]
     public CharRigSlot parentSlot = CharRigSlot.Stage00CharacterSlot;
 
-    [Tooltip("Base root name. Final name is '{rolePrefix}_{rigRootName}'.")]
+    [Tooltip("Base root name. Final name is '{rolePrefix}{rigRootName}'.")]
     public string rigRootName = "CharacterRig";
 
     public string ResolvedRolePrefix
@@ -86,8 +86,11 @@ public sealed class SetupCharRigCommand : CommandBase
             RemoveRegisteredRig(scope, roleKey);
             
             scope.Refs[roleKey] = refs;
-            Debug.LogWarning($"[SetupCharRigCommand] Rebound rig refs. roleKey='{roleKey}'.");
         }
+        
+        // Optional bake helper:
+        // Enable after refs registration when saving the generated rig as a reusable prefab.
+        //StripRolePrefixForBake(rigRoot, rolePrefix, spec.rigRootName);
     }
     
     
@@ -99,8 +102,6 @@ public sealed class SetupCharRigCommand : CommandBase
 
         KillTweenOnHierarchy(existingRig.RigRoot);
         Object.Destroy(existingRig.RigRoot.gameObject);
-
-        Debug.LogWarning($"[SetupCharRigCommand] Removing leftover rig. roleKey='{roleKey}'.");
     }
     
     private static void KillTweenOnHierarchy(Transform root)
@@ -131,6 +132,31 @@ public sealed class SetupCharRigCommand : CommandBase
 
         DOTween.Kill(root, false);
         DOTween.Kill(root.gameObject, false);
+    }
+
+    // For prefab baking: turns 'Caramel_CharSlot_Anchor' back into 'CharSlot_Anchor'.
+    // Safe only after refs are already bound.
+    // Do not call before BuildRefMap/BindRefs.
+    private static void StripRolePrefixForBake(RectTransform rigRoot, string rolePrefix, string rigRootName)
+    {
+        if (rigRoot == null)
+            return;
+
+        if (string.IsNullOrEmpty(rolePrefix))
+            return;
+
+        StripPrefixRecursive(rigRoot, rolePrefix);
+        
+        rigRoot.name = rigRootName;
+    }
+
+    private static void StripPrefixRecursive(Transform root, string rolePrefix)
+    {
+        if (root.name.StartsWith(rolePrefix, StringComparison.Ordinal))
+            root.name = root.name.Substring(rolePrefix.Length);
+
+        for (int i = 0; i < root.childCount; i++)
+            StripPrefixRecursive(root.GetChild(i), rolePrefix);
     }
     #endregion
 }

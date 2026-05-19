@@ -118,11 +118,11 @@ public static readonly NodeDef[] Nodes =
     new() { Id = Refs.CharSlot_FramingScale_Y,   Parent = Refs.CharSlot_FramingScale_X },
 
     // Character casting axis - per-character defaults
-    new() { Id = Refs.Character_Root,          Parent = Refs.CharSlot_FramingScale_Y },
-    new() { Id = Refs.Character_CastTransform, Parent = Refs.Character_Root },
+    new() { Id = Refs.Character_Root,          Parent = Refs.CharSlot_FramingScale_Y, NeedsCanvasGroup = true },
+    new() { Id = Refs.Character_CastTransform, Parent = Refs.Character_Root, NeedsBottomPivot = true },
 
     // Portrait acting axis
-    new() { Id = Refs.CharacterPortrait_Track,          Parent = Refs.Character_CastTransform, NeedsCanvasGroup = true },
+    new() { Id = Refs.CharacterPortrait_Track,          Parent = Refs.Character_CastTransform,},
     new() { Id = Refs.CharacterPortrait_Track_Move,     Parent = Refs.CharacterPortrait_Track },
     new() { Id = Refs.CharacterPortrait_Track_X,        Parent = Refs.CharacterPortrait_Track_Move },
     new() { Id = Refs.CharacterPortrait_Track_Y,        Parent = Refs.CharacterPortrait_Track_X },
@@ -134,11 +134,11 @@ public static readonly NodeDef[] Nodes =
     new() { Id = Refs.CharacterPortrait_ActingScale_Y,  Parent = Refs.CharacterPortrait_ActingScale_X },
 
     // Portrait sprite
-    new() { Id = Refs.CharacterPortraitSprite_Root,  Parent = Refs.CharacterPortrait_ActingScale_Y },
+    new() { Id = Refs.CharacterPortraitSprite_Root,  Parent = Refs.CharacterPortrait_ActingScale_Y, NeedsCanvasGroup = true },
     new() { Id = Refs.CharacterPortraitSprite_Image, Parent = Refs.CharacterPortraitSprite_Root, NeedsImage = true },
 
     // Portrait sprite overlay
-    new() { Id = Refs.CharacterPortraitSpriteOverlay_Root,  Parent = Refs.CharacterPortrait_ActingScale_Y, NeedsCanvasGroup = true },
+    new() { Id = Refs.CharacterPortraitSpriteOverlay_Root,  Parent = Refs.CharacterPortrait_ActingScale_Y, NeedsCanvasGroup = true, InitialCanvasGroupAlpha = 0f },
     new() { Id = Refs.CharacterPortraitSpriteOverlay_Image, Parent = Refs.CharacterPortraitSpriteOverlay_Root, NeedsImage = true },
 
     // Portrait extension / preserved systems

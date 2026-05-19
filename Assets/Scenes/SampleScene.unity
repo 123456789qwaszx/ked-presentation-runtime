@@ -13698,7 +13698,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 28eeb6f96b7d3ea4783a98588e5f27fc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::YarnCommandBridge
-  rigPrefab: {fileID: 8807571617950997044, guid: 01c9b93a77829ef438fc74c4ef4c5004, type: 3}
+  rigPrefab: {fileID: 3566932515573781366, guid: 5085b338905ec1c45a432195fff9df51, type: 3}
   globalTuning: {fileID: 11400000, guid: db30a92a6d8545a41b703c2585f4013d, type: 2}
   roleTuningDb: {fileID: 11400000, guid: c49265a67487bce458b734a0473b75b5, type: 2}
   emojiDatabase: {fileID: 11400000, guid: ea84fc3e735e774408e8587c7c691ad5, type: 2}
