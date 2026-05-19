@@ -334,7 +334,7 @@ public sealed class CharacterEmojiLibrarySOEditor : Editor
 
                     EditorGUILayout.Space(4);
 
-                    EditorGUILayout.PropertyField(layout, true);
+                    DrawLayoutProperty(layout);
                 }
             }
 
@@ -343,6 +343,61 @@ public sealed class CharacterEmojiLibrarySOEditor : Editor
 
         if (removeIndex >= 0)
             RemoveEntry(removeIndex);
+    }
+    
+    private void DrawLayoutProperty(SerializedProperty layout)
+    {
+        if (layout == null)
+            return;
+
+        using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
+        {
+            GUIStyle layoutTitleStyle = new(EditorStyles.label)
+            {
+                fontSize = 13,
+                fontStyle = FontStyle.Bold,
+            };
+
+            Rect headerRect = EditorGUILayout.GetControlRect(
+                false,
+                EditorGUIUtility.singleLineHeight + 4f);
+
+            Rect foldoutRect = headerRect;
+            foldoutRect.xMin += 2f;
+            foldoutRect.xMax -= 2f;
+
+            layout.isExpanded = DrawWideFoldoutInRect(
+                foldoutRect,
+                layout.isExpanded,
+                "Layout",
+                layoutTitleStyle);
+
+            if (!layout.isExpanded)
+                return;
+
+            using (new EditorGUI.IndentLevelScope())
+            {
+                EditorGUILayout.PropertyField(
+                    layout.FindPropertyRelative("anchoredPosition"),
+                    new GUIContent("Anchored Position"));
+
+                EditorGUILayout.PropertyField(
+                    layout.FindPropertyRelative("localScale"),
+                    new GUIContent("Local Scale"));
+
+                EditorGUILayout.PropertyField(
+                    layout.FindPropertyRelative("rotationZ"),
+                    new GUIContent("Rotation Z"));
+
+                EditorGUILayout.PropertyField(
+                    layout.FindPropertyRelative("preserveAspect"),
+                    new GUIContent("Preserve Aspect"));
+
+                EditorGUILayout.PropertyField(
+                    layout.FindPropertyRelative("setNativeSize"),
+                    new GUIContent("Set Native Size"));
+            }
+        }
     }
 
     private void DrawEntryHeader(
@@ -504,15 +559,21 @@ public sealed class CharacterEmojiLibrarySOEditor : Editor
                 {
                     EditorGUILayout.LabelField(labelText);
 
+                    Color previousColor = GUI.backgroundColor;
+                    
+                    GUI.backgroundColor = new Color(0.55f, 0.85f, 1f);
+                    if (GUILayout.Button("Load", GUILayout.Width(64f)))
+                    {
+                        LoadSlotLayoutToEntry(entry, slotLayout, i);
+                    }
+
+                    GUI.backgroundColor = new Color(1f, 0.78f, 0.45f);
                     if (GUILayout.Button("Save", GUILayout.Width(64f)))
                     {
                         SaveEntryLayoutToSlot(entry, slotLayout, i);
                     }
 
-                    if (GUILayout.Button("Load", GUILayout.Width(64f)))
-                    {
-                        LoadSlotLayoutToEntry(entry, slotLayout, i);
-                    }
+                    GUI.backgroundColor = previousColor;
                 }
             }
         }
@@ -533,6 +594,29 @@ public sealed class CharacterEmojiLibrarySOEditor : Editor
         SerializedProperty slotLayout,
         int slotIndex)
     {
+        string entryKey = "(empty key)";
+
+        SerializedProperty emojiKey = entry.FindPropertyRelative("emojiKey");
+        if (emojiKey != null && !string.IsNullOrEmpty(emojiKey.stringValue))
+            entryKey = emojiKey.stringValue;
+
+        SerializedProperty slot = _savedLayouts.GetArrayElementAtIndex(slotIndex);
+        SerializedProperty label = slot.FindPropertyRelative("label");
+
+        string slotLabel = label != null && !string.IsNullOrEmpty(label.stringValue)
+            ? label.stringValue
+            : $"Layout {slotIndex + 1}";
+
+        bool confirmed = EditorUtility.DisplayDialog(
+            "Save Emoji Layout",
+            $"Save current layout of '{entryKey}' into slot {slotIndex + 1}: '{slotLabel}'?\n\n" +
+            "This will overwrite the saved layout currently stored in that slot.",
+            "Save",
+            "Cancel");
+
+        if (!confirmed)
+            return;
+
         Undo.RecordObject(target, "Save Emoji Layout Slot");
 
         SerializedProperty entryLayout = entry.FindPropertyRelative("layout");
@@ -543,7 +627,7 @@ public sealed class CharacterEmojiLibrarySOEditor : Editor
         EditorUtility.SetDirty(target);
 
         Debug.Log(
-            $"[CharacterEmojiLibrarySOEditor] Saved current entry layout to slot {slotIndex + 1}.",
+            $"[CharacterEmojiLibrarySOEditor] Saved entry '{entryKey}' layout to slot {slotIndex + 1} '{slotLabel}'.",
             target);
     }
 
