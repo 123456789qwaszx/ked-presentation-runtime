@@ -75,6 +75,9 @@ public class VnAppBootstrap : MonoBehaviour
 
     [Header("Transition")] 
     [SerializeField] private TransitionTargetRouter transitionTargetRouter;
+    
+    [Header("Emoji")] 
+    [SerializeField] private CharacterEmojiLibrarySO characterEmojiLibrarySO;
 
     private PresentationSessionBridge _presentationSessionBridge;
 
@@ -148,7 +151,8 @@ public class VnAppBootstrap : MonoBehaviour
         ICharRigSlotResolver charRigSlotResolver = new CharRigSlotResolver(UIManager.Instance.GetUI<PresentationUIRoot>(), UIManager.Instance.GetUI<DialogueBox00_Portrait>());
         CharacterRigBuilder charRigAccess = new();
         PortraitResolver portraitResolver = new(portraitGeneratedDbSo);
-        CharRigCommandFactory charRigFactory = new(charRigSlotResolver, charRigAccess, portraitResolver);
+        CharacterEmojiResolver emojiResolver = new(characterEmojiLibrarySO);
+        CharRigCommandFactory charRigFactory = new(charRigSlotResolver, charRigAccess, portraitResolver, emojiResolver);
 
         // TransitionFactory
         TransitionCommandFactory transitionCommandFactory = new(transitionTargetRouter, _uiPatchService);

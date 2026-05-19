@@ -9,7 +9,7 @@ using RectTransform = UnityEngine.RectTransform;
 public sealed class BreathInPlaceCommandSpecCharR : CharacterRigCommandSpecBase
 {
     [Header("Target")]
-    public CharacterRigTarget target = CharacterRigTarget.CharacterPortrait_Track_Y;
+    public CharacterRigTarget target = CharacterRigTarget.CharSlot_Track;
 
     [Header("Timing")]
     [Tooltip("전체 숨쉬기 지속 시간.")]

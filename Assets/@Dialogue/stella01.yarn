@@ -1,11 +1,10 @@
 ﻿title: stella01
 ---
-//<<clearall_rigs>>
+<<clearall_rigs>>
 <<presentation_setup>>
 <<shot_reset>>
 <<p_strip_cover vsw 0.3>>
 
-//<<bgm audio/bgm_tam_dystopia_snowwind_01>>
 
 <<bg_spawn bg2 a 0>>
 <<bg_sprite bg2 bg05>>
@@ -29,6 +28,7 @@
 
 메르쿠리아: 이번에 저희 컴퍼니를 선택해 주셔서 감사합니다. 저는 천궁보험 필리에 영업부 매니저 메르쿠리아라고 합니다.
 
+<<emoji_slot Leafia 00 0>>
 <<walk_in_place Leafia>>
 메르쿠리아: 안내하겠습니다
 

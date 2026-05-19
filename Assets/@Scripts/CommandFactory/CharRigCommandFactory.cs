@@ -11,12 +11,18 @@ public sealed class CharRigCommandFactory : INodeCommandFactory
     private readonly ICharRigSlotResolver _rigSlotResolver;
     private readonly CharacterRigBuilder _rigBuilder;
     private readonly PortraitResolver _portraitResolver;
+    private readonly CharacterEmojiResolver _emojiResolver;
 
-    public CharRigCommandFactory(ICharRigSlotResolver charRigSlotResolver,CharacterRigBuilder charRigBuilder, PortraitResolver portraitResolver)
+    public CharRigCommandFactory(
+        ICharRigSlotResolver charRigSlotResolver,
+        CharacterRigBuilder charRigBuilder,
+        PortraitResolver portraitResolver,
+        CharacterEmojiResolver emojiResolver)
     {
         _rigSlotResolver = charRigSlotResolver;
         _rigBuilder = charRigBuilder;
         _portraitResolver = portraitResolver;
+        _emojiResolver = emojiResolver;
     }
 
     public bool TryCreate(CommandSpecBase spec, out ISequenceCommand command)
@@ -65,6 +71,11 @@ public sealed class CharRigCommandFactory : INodeCommandFactory
             
             CastCharacterCommandSpec s => new CastCharacterCommand(s),
             UncastCharacterCommandSpec s => new UncastCharacterCommand(s),
+            
+            
+            // 새 커맨드
+            SetCharacterEmojiCommandSpecCharR s => new SetCharacterEmojiCommandCharR(s, _emojiResolver),
+
             
             _ => null
         };
