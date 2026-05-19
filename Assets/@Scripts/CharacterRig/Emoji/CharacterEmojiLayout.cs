@@ -21,4 +21,31 @@ public struct CharacterEmojiLayout
         preserveAspect = true,
         setNativeSize = false,
     };
+    
+    public static CharacterEmojiLayout HeadRight => new()
+    {
+        anchoredPosition = new Vector2(130f, 550f),
+        localScale = new Vector3(0.15f, 0.15f, 0.15f),
+        rotationZ = 0f,
+        preserveAspect = true,
+        setNativeSize = false,
+    };
+
+    public static CharacterEmojiLayout HeadLeft => new()
+    {
+        anchoredPosition = new Vector2(-130f, 550f),
+        localScale = new Vector3(0.15f, 0.15f, 0.15f),
+        rotationZ = 0f,
+        preserveAspect = true,
+        setNativeSize = false,
+    };
+
+    public static CharacterEmojiLayout AboveHead => new()
+    {
+        anchoredPosition = new Vector2(0f, 650f),
+        localScale = new Vector3(0.15f, 0.15f, 0.15f),
+        rotationZ = 0f,
+        preserveAspect = true,
+        setNativeSize = false,
+    };
 }

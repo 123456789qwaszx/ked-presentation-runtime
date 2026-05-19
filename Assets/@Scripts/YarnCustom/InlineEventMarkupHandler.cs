@@ -433,8 +433,10 @@ public sealed class InlineEventMarkupHandler : ActionMarkupHandler
 
         if (!attr.TryGetProperty(key, out MarkupValue markupValue))
         {
-            // 실패원인: 태그에 존재하지 않는 프로퍼티
-            Debug.LogError($"[InlineEvent] reason=missing_prop tag=[{attr.Name}] prop='{key}' pos={attr.Position}");
+            // 태그에 존재하지 않는 프로퍼티
+            // fallback 탐색시작 :
+            // e.g) [pau =0.85/] 처리 시 먼저 "t"를 찾고, 없으면 "pau"를 찾는다.
+            // 만약 잘못된 값을 입력 시, Default값이 들어감 "[pau error= 0.85/] 이경우 default 0.2f"
             return false;
         }
 

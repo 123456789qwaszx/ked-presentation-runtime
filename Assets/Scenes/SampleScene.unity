@@ -13702,7 +13702,6 @@ MonoBehaviour:
   rigPrefab: {fileID: 3566932515573781366, guid: 5085b338905ec1c45a432195fff9df51, type: 3}
   globalTuning: {fileID: 11400000, guid: db30a92a6d8545a41b703c2585f4013d, type: 2}
   roleTuningDb: {fileID: 11400000, guid: c49265a67487bce458b734a0473b75b5, type: 2}
-  emojiDatabase: {fileID: 11400000, guid: ea84fc3e735e774408e8587c7c691ad5, type: 2}
 --- !u!1 &1835797369
 GameObject:
   m_ObjectHideFlags: 0
@@ -17872,7 +17871,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 458.38, y: -24}
-  m_SizeDelta: {x: 916.76, y: 24}
+  m_SizeDelta: {x: 916.76, y: 0}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!1 &666632935594092605
 GameObject:

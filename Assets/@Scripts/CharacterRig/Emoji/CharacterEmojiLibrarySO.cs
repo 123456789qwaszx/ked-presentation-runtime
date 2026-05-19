@@ -10,12 +10,22 @@ public sealed class CharacterEmojiEntry
     public CharacterEmojiLayout layout = CharacterEmojiLayout.Default;
 }
 
+[Serializable]
+public sealed class CharacterEmojiSavedLayoutSlot
+{
+    public string label = "New Layout";
+    public CharacterEmojiLayout layout = CharacterEmojiLayout.Default;
+}
+
 [CreateAssetMenu(
     menuName = "CPS/CharRig/Emoji Library",
     fileName = "CharacterEmojiLibrary")]
 public sealed class CharacterEmojiLibrarySO : ScriptableObject
 {
     [SerializeField] private List<CharacterEmojiEntry> entries = new();
+
+    [Header("Editor Layout Slots")]
+    [SerializeField] private List<CharacterEmojiSavedLayoutSlot> savedLayouts = new();
 
     private Dictionary<string, CharacterEmojiEntry> _lookup;
 
@@ -52,4 +62,11 @@ public sealed class CharacterEmojiLibrarySO : ScriptableObject
             _lookup[entry.emojiKey] = entry;
         }
     }
+
+#if UNITY_EDITOR
+    private void OnValidate()
+    {
+        _lookup = null;
+    }
+#endif
 }
