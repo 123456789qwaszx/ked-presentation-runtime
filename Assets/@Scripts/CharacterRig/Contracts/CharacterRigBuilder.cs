@@ -180,9 +180,7 @@ public sealed class CharacterRigBuilder
 
     // Character casting axis - per-character defaults
     refs.Character_Root = GetRt(CharacterRigSchema.Refs.Character_Root);
-    refs.Character_CastLocation = GetRt(CharacterRigSchema.Refs.Character_CastLocation);
-    refs.Character_CastSize = GetRt(CharacterRigSchema.Refs.Character_CastSize);
-    refs.Character_CastAngle = GetRt(CharacterRigSchema.Refs.Character_CastAngle);
+    refs.Character_CastTransform = GetRt(CharacterRigSchema.Refs.Character_CastTransform);
 
     // Portrait acting axis
     refs.CharacterPortrait_Track = GetRt(CharacterRigSchema.Refs.CharacterPortrait_Track);
@@ -209,9 +207,7 @@ public sealed class CharacterRigBuilder
 
     // Emoji00 casting/effect axis
     refs.CharacterEmojiSlot00_Root = GetRt(CharacterRigSchema.Refs.CharacterEmojiSlot00_Root);
-    refs.CharacterEmojiSlot00_Location = GetRt(CharacterRigSchema.Refs.CharacterEmojiSlot00_Location);
-    refs.CharacterEmojiSlot00_Size = GetRt(CharacterRigSchema.Refs.CharacterEmojiSlot00_Size);
-    refs.CharacterEmojiSlot00_Angle = GetRt(CharacterRigSchema.Refs.CharacterEmojiSlot00_Angle);
+    refs.CharacterEmojiSlot00_CastTransform = GetRt(CharacterRigSchema.Refs.CharacterEmojiSlot00_CastTransform);
     refs.CharacterEmojiSlot00_Effect = GetRt(CharacterRigSchema.Refs.CharacterEmojiSlot00_Effect);
 
     // Emoji00 sprite motion axis
@@ -225,9 +221,7 @@ public sealed class CharacterRigBuilder
 
     // Emoji01 casting/effect axis
     refs.CharacterEmojiSlot01_Root = GetRt(CharacterRigSchema.Refs.CharacterEmojiSlot01_Root);
-    refs.CharacterEmojiSlot01_Location = GetRt(CharacterRigSchema.Refs.CharacterEmojiSlot01_Location);
-    refs.CharacterEmojiSlot01_Size = GetRt(CharacterRigSchema.Refs.CharacterEmojiSlot01_Size);
-    refs.CharacterEmojiSlot01_Angle = GetRt(CharacterRigSchema.Refs.CharacterEmojiSlot01_Angle);
+    refs.CharacterEmojiSlot01_CastTransform = GetRt(CharacterRigSchema.Refs.CharacterEmojiSlot01_CastTransform);
     refs.CharacterEmojiSlot01_Effect = GetRt(CharacterRigSchema.Refs.CharacterEmojiSlot01_Effect);
 
     // Emoji01 sprite motion axis
@@ -241,9 +235,7 @@ public sealed class CharacterRigBuilder
 
     // Emoji02 casting/effect axis
     refs.CharacterEmojiSlot02_Root = GetRt(CharacterRigSchema.Refs.CharacterEmojiSlot02_Root);
-    refs.CharacterEmojiSlot02_Location = GetRt(CharacterRigSchema.Refs.CharacterEmojiSlot02_Location);
-    refs.CharacterEmojiSlot02_Size = GetRt(CharacterRigSchema.Refs.CharacterEmojiSlot02_Size);
-    refs.CharacterEmojiSlot02_Angle = GetRt(CharacterRigSchema.Refs.CharacterEmojiSlot02_Angle);
+    refs.CharacterEmojiSlot02_CastTransform = GetRt(CharacterRigSchema.Refs.CharacterEmojiSlot02_CastTransform);
     refs.CharacterEmojiSlot02_Effect = GetRt(CharacterRigSchema.Refs.CharacterEmojiSlot02_Effect);
 
     // Emoji02 sprite motion axis

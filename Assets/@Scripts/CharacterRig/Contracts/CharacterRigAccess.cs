@@ -23,9 +23,7 @@ public static class CharacterRigSchema
         
         // Character casting axis - per-character defaults
         Character_Root, 
-        Character_CastLocation, 
-        Character_CastSize,
-        Character_CastAngle,
+        Character_CastTransform,
         
         // Portrait acting axis
         CharacterPortrait_Track,
@@ -51,9 +49,7 @@ public static class CharacterRigSchema
         
         // Emoji00 casting/effect axis
         CharacterEmojiSlot00_Root,
-        CharacterEmojiSlot00_Location,
-        CharacterEmojiSlot00_Size,
-        CharacterEmojiSlot00_Angle,
+        CharacterEmojiSlot00_CastTransform,
         CharacterEmojiSlot00_Effect,
         
         // Emoji00 sprite motion axis
@@ -67,9 +63,7 @@ public static class CharacterRigSchema
         
         // Emoji01
         CharacterEmojiSlot01_Root,
-        CharacterEmojiSlot01_Location,
-        CharacterEmojiSlot01_Size,
-        CharacterEmojiSlot01_Angle,
+        CharacterEmojiSlot01_CastTransform,
         CharacterEmojiSlot01_Effect,
         
         EmojiSlot01_Track,
@@ -82,9 +76,7 @@ public static class CharacterRigSchema
         
         // Emoji02
         CharacterEmojiSlot02_Root,
-        CharacterEmojiSlot02_Location,
-        CharacterEmojiSlot02_Size,
-        CharacterEmojiSlot02_Angle,
+        CharacterEmojiSlot02_CastTransform,
         CharacterEmojiSlot02_Effect,
         
         EmojiSlot02_Track,
@@ -126,13 +118,11 @@ public static readonly NodeDef[] Nodes =
     new() { Id = Refs.CharSlot_FramingScale_Y,   Parent = Refs.CharSlot_FramingScale_X },
 
     // Character casting axis - per-character defaults
-    new() { Id = Refs.Character_Root,         Parent = Refs.CharSlot_FramingScale_Y },
-    new() { Id = Refs.Character_CastLocation, Parent = Refs.Character_Root },
-    new() { Id = Refs.Character_CastSize,     Parent = Refs.Character_CastLocation },
-    new() { Id = Refs.Character_CastAngle,    Parent = Refs.Character_CastSize },
+    new() { Id = Refs.Character_Root,          Parent = Refs.CharSlot_FramingScale_Y },
+    new() { Id = Refs.Character_CastTransform, Parent = Refs.Character_Root },
 
     // Portrait acting axis
-    new() { Id = Refs.CharacterPortrait_Track,          Parent = Refs.Character_CastAngle, NeedsCanvasGroup = true },
+    new() { Id = Refs.CharacterPortrait_Track,          Parent = Refs.Character_CastTransform, NeedsCanvasGroup = true },
     new() { Id = Refs.CharacterPortrait_Track_Move,     Parent = Refs.CharacterPortrait_Track },
     new() { Id = Refs.CharacterPortrait_Track_X,        Parent = Refs.CharacterPortrait_Track_Move },
     new() { Id = Refs.CharacterPortrait_Track_Y,        Parent = Refs.CharacterPortrait_Track_X },
@@ -155,11 +145,9 @@ public static readonly NodeDef[] Nodes =
     new() { Id = Refs.Character_ExtensionsRoot, Parent = Refs.CharacterPortrait_ActingScale_Y },
 
     // Emoji00 casting/effect axis
-    new() { Id = Refs.CharacterEmojiSlot00_Root,     Parent = Refs.Character_CastAngle, NeedsCanvasGroup = true, InitialCanvasGroupAlpha = 0f },
-    new() { Id = Refs.CharacterEmojiSlot00_Location, Parent = Refs.CharacterEmojiSlot00_Root },
-    new() { Id = Refs.CharacterEmojiSlot00_Size,     Parent = Refs.CharacterEmojiSlot00_Location },
-    new() { Id = Refs.CharacterEmojiSlot00_Angle,    Parent = Refs.CharacterEmojiSlot00_Size },
-    new() { Id = Refs.CharacterEmojiSlot00_Effect,   Parent = Refs.CharacterEmojiSlot00_Angle },
+    new() { Id = Refs.CharacterEmojiSlot00_Root,          Parent = Refs.Character_CastTransform, NeedsCanvasGroup = true, InitialCanvasGroupAlpha = 0f },
+    new() { Id = Refs.CharacterEmojiSlot00_CastTransform, Parent = Refs.CharacterEmojiSlot00_Root },
+    new() { Id = Refs.CharacterEmojiSlot00_Effect,        Parent = Refs.CharacterEmojiSlot00_CastTransform },
 
     // Emoji00 sprite motion axis
     new() { Id = Refs.EmojiSlot00_Track,      Parent = Refs.CharacterEmojiSlot00_Effect },
@@ -171,11 +159,9 @@ public static readonly NodeDef[] Nodes =
     new() { Id = Refs.EmojiSlot00_Image,      Parent = Refs.EmojiSlot00_Rotation, NeedsImage = true },
 
     // Emoji01 casting/effect axis
-    new() { Id = Refs.CharacterEmojiSlot01_Root,     Parent = Refs.Character_CastAngle, NeedsCanvasGroup = true, InitialCanvasGroupAlpha = 0f },
-    new() { Id = Refs.CharacterEmojiSlot01_Location, Parent = Refs.CharacterEmojiSlot01_Root },
-    new() { Id = Refs.CharacterEmojiSlot01_Size,     Parent = Refs.CharacterEmojiSlot01_Location },
-    new() { Id = Refs.CharacterEmojiSlot01_Angle,    Parent = Refs.CharacterEmojiSlot01_Size },
-    new() { Id = Refs.CharacterEmojiSlot01_Effect,   Parent = Refs.CharacterEmojiSlot01_Angle },
+    new() { Id = Refs.CharacterEmojiSlot01_Root,          Parent = Refs.Character_CastTransform, NeedsCanvasGroup = true, InitialCanvasGroupAlpha = 0f },
+    new() { Id = Refs.CharacterEmojiSlot01_CastTransform, Parent = Refs.CharacterEmojiSlot01_Root },
+    new() { Id = Refs.CharacterEmojiSlot01_Effect,        Parent = Refs.CharacterEmojiSlot01_CastTransform },
 
     // Emoji01 sprite motion axis
     new() { Id = Refs.EmojiSlot01_Track,      Parent = Refs.CharacterEmojiSlot01_Effect },
@@ -187,11 +173,9 @@ public static readonly NodeDef[] Nodes =
     new() { Id = Refs.EmojiSlot01_Image,      Parent = Refs.EmojiSlot01_Rotation, NeedsImage = true },
 
     // Emoji02 casting/effect axis
-    new() { Id = Refs.CharacterEmojiSlot02_Root,     Parent = Refs.Character_CastAngle, NeedsCanvasGroup = true, InitialCanvasGroupAlpha = 0f },
-    new() { Id = Refs.CharacterEmojiSlot02_Location, Parent = Refs.CharacterEmojiSlot02_Root },
-    new() { Id = Refs.CharacterEmojiSlot02_Size,     Parent = Refs.CharacterEmojiSlot02_Location },
-    new() { Id = Refs.CharacterEmojiSlot02_Angle,    Parent = Refs.CharacterEmojiSlot02_Size },
-    new() { Id = Refs.CharacterEmojiSlot02_Effect,   Parent = Refs.CharacterEmojiSlot02_Angle },
+    new() { Id = Refs.CharacterEmojiSlot02_Root,          Parent = Refs.Character_CastTransform, NeedsCanvasGroup = true, InitialCanvasGroupAlpha = 0f },
+    new() { Id = Refs.CharacterEmojiSlot02_CastTransform, Parent = Refs.CharacterEmojiSlot02_Root },
+    new() { Id = Refs.CharacterEmojiSlot02_Effect,        Parent = Refs.CharacterEmojiSlot02_CastTransform },
 
     // Emoji02 sprite motion axis
     new() { Id = Refs.EmojiSlot02_Track,      Parent = Refs.CharacterEmojiSlot02_Effect },
@@ -223,9 +207,7 @@ public enum CharacterRigTarget
 
     // Character casting axis - per-character defaults
     Character_Root,
-    Character_CastLocation,
-    Character_CastSize,
-    Character_CastAngle,
+    Character_CastTransform,
 
     // Portrait acting axis
     CharacterPortrait_Track,
@@ -251,9 +233,7 @@ public enum CharacterRigTarget
 
     // Emoji00 casting/effect axis
     CharacterEmojiSlot00_Root,
-    CharacterEmojiSlot00_Location,
-    CharacterEmojiSlot00_Size,
-    CharacterEmojiSlot00_Angle,
+    CharacterEmojiSlot00_CastTransform,
     CharacterEmojiSlot00_Effect,
 
     // Emoji00 sprite motion axis
@@ -267,9 +247,7 @@ public enum CharacterRigTarget
 
     // Emoji01
     CharacterEmojiSlot01_Root,
-    CharacterEmojiSlot01_Location,
-    CharacterEmojiSlot01_Size,
-    CharacterEmojiSlot01_Angle,
+    CharacterEmojiSlot01_CastTransform,
     CharacterEmojiSlot01_Effect,
 
     EmojiSlot01_Track,
@@ -282,9 +260,7 @@ public enum CharacterRigTarget
 
     // Emoji02
     CharacterEmojiSlot02_Root,
-    CharacterEmojiSlot02_Location,
-    CharacterEmojiSlot02_Size,
-    CharacterEmojiSlot02_Angle,
+    CharacterEmojiSlot02_CastTransform,
     CharacterEmojiSlot02_Effect,
 
     EmojiSlot02_Track,
@@ -317,9 +293,7 @@ public sealed class CharacterRigRefs
 
     // Character casting axis - per-character defaults
     public RectTransform Character_Root;
-    public RectTransform Character_CastLocation;
-    public RectTransform Character_CastSize;
-    public RectTransform Character_CastAngle;
+    public RectTransform Character_CastTransform;
 
     // Portrait acting axis
     public RectTransform CharacterPortrait_Track;
@@ -345,9 +319,7 @@ public sealed class CharacterRigRefs
 
     // Emoji00 casting/effect axis
     public RectTransform CharacterEmojiSlot00_Root;
-    public RectTransform CharacterEmojiSlot00_Location;
-    public RectTransform CharacterEmojiSlot00_Size;
-    public RectTransform CharacterEmojiSlot00_Angle;
+    public RectTransform CharacterEmojiSlot00_CastTransform;
     public RectTransform CharacterEmojiSlot00_Effect;
 
     // Emoji00 sprite motion axis
@@ -361,9 +333,7 @@ public sealed class CharacterRigRefs
 
     // Emoji01 casting/effect axis
     public RectTransform CharacterEmojiSlot01_Root;
-    public RectTransform CharacterEmojiSlot01_Location;
-    public RectTransform CharacterEmojiSlot01_Size;
-    public RectTransform CharacterEmojiSlot01_Angle;
+    public RectTransform CharacterEmojiSlot01_CastTransform;
     public RectTransform CharacterEmojiSlot01_Effect;
 
     // Emoji01 sprite motion axis
@@ -377,9 +347,7 @@ public sealed class CharacterRigRefs
 
     // Emoji02 casting/effect axis
     public RectTransform CharacterEmojiSlot02_Root;
-    public RectTransform CharacterEmojiSlot02_Location;
-    public RectTransform CharacterEmojiSlot02_Size;
-    public RectTransform CharacterEmojiSlot02_Angle;
+    public RectTransform CharacterEmojiSlot02_CastTransform;
     public RectTransform CharacterEmojiSlot02_Effect;
 
     // Emoji02 sprite motion axis
@@ -435,10 +403,8 @@ public static class CharacterRigRefsExtensions
             CharacterRigTarget.CharSlot_FramingScale_Y   => refs.CharSlot_FramingScale_Y,
 
             // Character casting axis - per-character defaults
-            CharacterRigTarget.Character_Root         => refs.Character_Root,
-            CharacterRigTarget.Character_CastLocation => refs.Character_CastLocation,
-            CharacterRigTarget.Character_CastSize     => refs.Character_CastSize,
-            CharacterRigTarget.Character_CastAngle    => refs.Character_CastAngle,
+            CharacterRigTarget.Character_Root          => refs.Character_Root,
+            CharacterRigTarget.Character_CastTransform => refs.Character_CastTransform,
 
             // Portrait acting axis
             CharacterRigTarget.CharacterPortrait_Track          => refs.CharacterPortrait_Track,
@@ -463,11 +429,9 @@ public static class CharacterRigRefsExtensions
             CharacterRigTarget.Character_ExtensionsRoot => refs.Character_ExtensionsRoot,
 
             // Emoji00 casting/effect axis
-            CharacterRigTarget.CharacterEmojiSlot00_Root     => refs.CharacterEmojiSlot00_Root,
-            CharacterRigTarget.CharacterEmojiSlot00_Location => refs.CharacterEmojiSlot00_Location,
-            CharacterRigTarget.CharacterEmojiSlot00_Size     => refs.CharacterEmojiSlot00_Size,
-            CharacterRigTarget.CharacterEmojiSlot00_Angle    => refs.CharacterEmojiSlot00_Angle,
-            CharacterRigTarget.CharacterEmojiSlot00_Effect   => refs.CharacterEmojiSlot00_Effect,
+            CharacterRigTarget.CharacterEmojiSlot00_Root          => refs.CharacterEmojiSlot00_Root,
+            CharacterRigTarget.CharacterEmojiSlot00_CastTransform => refs.CharacterEmojiSlot00_CastTransform,
+            CharacterRigTarget.CharacterEmojiSlot00_Effect        => refs.CharacterEmojiSlot00_Effect,
 
             // Emoji00 sprite motion axis
             CharacterRigTarget.EmojiSlot00_Track      => refs.EmojiSlot00_Track,
@@ -479,11 +443,9 @@ public static class CharacterRigRefsExtensions
             CharacterRigTarget.EmojiSlot00_Image      => refs.EmojiSlot00_Image,
 
             // Emoji01 casting/effect axis
-            CharacterRigTarget.CharacterEmojiSlot01_Root     => refs.CharacterEmojiSlot01_Root,
-            CharacterRigTarget.CharacterEmojiSlot01_Location => refs.CharacterEmojiSlot01_Location,
-            CharacterRigTarget.CharacterEmojiSlot01_Size     => refs.CharacterEmojiSlot01_Size,
-            CharacterRigTarget.CharacterEmojiSlot01_Angle    => refs.CharacterEmojiSlot01_Angle,
-            CharacterRigTarget.CharacterEmojiSlot01_Effect   => refs.CharacterEmojiSlot01_Effect,
+            CharacterRigTarget.CharacterEmojiSlot01_Root          => refs.CharacterEmojiSlot01_Root,
+            CharacterRigTarget.CharacterEmojiSlot01_CastTransform => refs.CharacterEmojiSlot01_CastTransform,
+            CharacterRigTarget.CharacterEmojiSlot01_Effect        => refs.CharacterEmojiSlot01_Effect,
 
             // Emoji01 sprite motion axis
             CharacterRigTarget.EmojiSlot01_Track      => refs.EmojiSlot01_Track,
@@ -495,11 +457,9 @@ public static class CharacterRigRefsExtensions
             CharacterRigTarget.EmojiSlot01_Image      => refs.EmojiSlot01_Image,
 
             // Emoji02 casting/effect axis
-            CharacterRigTarget.CharacterEmojiSlot02_Root     => refs.CharacterEmojiSlot02_Root,
-            CharacterRigTarget.CharacterEmojiSlot02_Location => refs.CharacterEmojiSlot02_Location,
-            CharacterRigTarget.CharacterEmojiSlot02_Size     => refs.CharacterEmojiSlot02_Size,
-            CharacterRigTarget.CharacterEmojiSlot02_Angle    => refs.CharacterEmojiSlot02_Angle,
-            CharacterRigTarget.CharacterEmojiSlot02_Effect   => refs.CharacterEmojiSlot02_Effect,
+            CharacterRigTarget.CharacterEmojiSlot02_Root          => refs.CharacterEmojiSlot02_Root,
+            CharacterRigTarget.CharacterEmojiSlot02_CastTransform => refs.CharacterEmojiSlot02_CastTransform,
+            CharacterRigTarget.CharacterEmojiSlot02_Effect        => refs.CharacterEmojiSlot02_Effect,
 
             // Emoji02 sprite motion axis
             CharacterRigTarget.EmojiSlot02_Track      => refs.EmojiSlot02_Track,
