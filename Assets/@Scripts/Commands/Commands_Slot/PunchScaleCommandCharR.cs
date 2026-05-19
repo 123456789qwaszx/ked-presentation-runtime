@@ -11,7 +11,7 @@ using UnityEngine;
 public class PunchScaleCommandSpecCharR : CharacterRigCommandSpecBase
 {
     [Header("Target")]
-    public CharacterRigTarget target = CharacterRigTarget.CharacterPortrait_Scale;
+    public CharacterRigTarget target = CharacterRigTarget.CharacterPortrait_ActingScale;
 
     [Header("Punch")]
     [Tooltip("펀치 강도. 0.15 ~ 0.35 정도가 UI에서 예쁘게 보입니다.")]

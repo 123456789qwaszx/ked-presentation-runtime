@@ -9,7 +9,7 @@ using UnityEngine.UI;
 public sealed class SetSpriteCommandSpecCharR : CharacterRigCommandSpecBase
 {
     [Header("Target")]
-    public CharacterRigTarget target = CharacterRigTarget.CharacterPortrait_Image;
+    public CharacterRigTarget target = CharacterRigTarget.CharacterPortraitSprite_Image;
 
     [Header("Sprite")]
     public Sprite sprite;

@@ -17,7 +17,7 @@ public sealed class SetPortraitSpriteCommandSpecCharR : CharacterRigCommandSpecB
     public PortraitIdentity portrait;
 
     [Header("Target")]
-    public CharacterRigTarget target = CharacterRigTarget.CharacterPortrait_Image;
+    public CharacterRigTarget target = CharacterRigTarget.CharacterPortraitSprite_Image;
 
     [Header("Sizing Policy")]
     public CharRigImageSizingMode sizingMode =

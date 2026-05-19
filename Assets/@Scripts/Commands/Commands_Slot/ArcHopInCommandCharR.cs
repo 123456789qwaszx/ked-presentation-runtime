@@ -9,7 +9,7 @@ using RectTransform = UnityEngine.RectTransform;
 public sealed class ArcHopInCommandSpecCharR : CharacterRigCommandSpecBase
 {
     [Header("Target")]
-    public CharacterRigTarget target = CharacterRigTarget.Character_Track_Y;
+    public CharacterRigTarget target = CharacterRigTarget.CharacterPortrait_Track_Y;
 
     [Header("Timing")]
     public float duration = 0.95f;

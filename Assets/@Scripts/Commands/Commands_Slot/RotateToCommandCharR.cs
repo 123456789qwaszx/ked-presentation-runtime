@@ -12,7 +12,7 @@ using UnityEngine;
 public class RotateToCommandSpecCharR : CharacterRigCommandSpecBase
 {
     [Header("Target")]
-    public CharacterRigTarget target = CharacterRigTarget.CharacterPortrait_Root;
+    public CharacterRigTarget target = CharacterRigTarget.CharSlot_Rotation;
 
     [Header("Rotation (localEulerAngles)")]
     public Vector3 toEuler = Vector3.zero;

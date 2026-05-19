@@ -188,7 +188,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         var spec3 = new DipInOutCommandSpecCharR()
         {
             targetKey = roleKey,
-            target = CharacterRigTarget.Character_Track_Y,
+            target = CharacterRigTarget.CharacterPortrait_Track_Y,
             dir = CharRigDirection.Right,
             distance = 22f,
             duration = 0.8f
@@ -206,7 +206,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         var spec5 = new DipInOutCommandSpecCharR()
         {
             targetKey = roleKey,
-            target = CharacterRigTarget.Character_Track_Y,
+            target = CharacterRigTarget.CharacterPortrait_Track_Y,
             dir = CharRigDirection.Down,
             distance = 12f,
             duration = 0.8f
@@ -233,7 +233,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         var spec8 = new JoltCommandSpec()
         {
             targetKey = roleKey,
-            target = CharacterRigTarget.Character_Track,
+            target = CharacterRigTarget.CharacterPortrait_Track,
             strength = 45f,
             direction = CharRigDirection.Up,
             duration = 0.55f,
@@ -475,14 +475,14 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         var juicySlideIn = new SlideInCommandSpecCharR
         {
             targetKey = roleKey,
-            target = CharacterRigTarget.Character_Track_X,
+            target = CharacterRigTarget.CharacterPortrait_Track_X,
             direction = dir
         };
 
         var spec = new JoltCommandSpec
         {
             targetKey = roleKey,
-            target = CharacterRigTarget.Character_Track_Y,
+            target = CharacterRigTarget.CharacterPortrait_Track_Y,
             direction = CharRigDirection.Up,
             strength = 340f,
             duration = 0.6f,
@@ -502,7 +502,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         var spec = new JoltCommandSpec
         {
             targetKey = roleKey,
-            target = CharacterRigTarget.Character_Track_Y,
+            target = CharacterRigTarget.CharacterPortrait_Track_Y,
             direction = dir,
             strength = 340f,
             duration = 0.6f,
@@ -543,7 +543,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         var spec = new JoltCommandSpec
         {
             targetKey = roleKey,
-            target = CharacterRigTarget.Character_Track,
+            target = CharacterRigTarget.CharacterPortrait_Track,
             direction = dir,
             strength = 340f,
             duration = 0.6f,
@@ -774,7 +774,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         var spec = new BreathInPlaceCommandSpecCharR
         {
             targetKey = roleKey.Trim(),
-            target = CharacterRigTarget.Character_Track_Y,
+            target = CharacterRigTarget.CharacterPortrait_Track_Y,
             duration = duration,
             breathsPerSecond = breathsPerSecond,
             height = height,
@@ -932,7 +932,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         var anchorSpec = new MoveByCommandSpecCharR
         {
             targetKey = roleKey,
-            target = CharacterRigTarget.Character_Anchor,
+            target = CharacterRigTarget.CharSlot_Anchor,
             delta = new Vector2(x, y),
             duration = 0f,
             killTween = false

@@ -17,7 +17,7 @@ public sealed class SetCharRigCamFocusCommandSpec : CharacterRigCommandSpecBase
 {
     [Header("Search")]
     [Tooltip("camFocus를 찾기 시작할 CharacterRig 내부 기준 루트.")]
-    public CharacterRigTarget searchRoot = CharacterRigTarget.CharacterPortrait_Scale;
+    public CharacterRigTarget searchRoot = CharacterRigTarget.Character_Root;
 
     [Tooltip("역할 prefix 뒤에 붙을 focus 오브젝트 이름. 예: camFocus => Mercurio_camFocus")]
     public string focusObjectName = "camFocus";

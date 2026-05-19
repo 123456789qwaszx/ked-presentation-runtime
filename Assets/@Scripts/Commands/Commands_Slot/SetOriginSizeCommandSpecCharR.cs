@@ -16,7 +16,7 @@ using UnityEngine;
 public sealed class SetOriginSizeCommandSpecCharR : CharacterRigCommandSpecBase
 {
     [Header("Target")]
-    public CharacterRigTarget target = CharacterRigTarget.Character_Anchor;
+    public CharacterRigTarget target = CharacterRigTarget.Character_CastTransform;
 
     [Header("Scale Preset")]
     public CharScalePreset preset = CharScalePreset.Normal;

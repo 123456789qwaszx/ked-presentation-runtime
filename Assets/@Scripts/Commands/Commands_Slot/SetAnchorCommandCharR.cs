@@ -16,7 +16,7 @@ using UnityEngine;
 public sealed class SetAnchorCommandSpecCharR : CharacterRigCommandSpecBase
 {
     [Header("Target (Anchor only)")]
-    public CharacterRigTarget target = CharacterRigTarget.Character_Anchor;
+    public CharacterRigTarget target = CharacterRigTarget.CharSlot_Anchor;
 
     [Header("Preset")]
     public CharAnchorPreset preset = CharAnchorPreset.Center;

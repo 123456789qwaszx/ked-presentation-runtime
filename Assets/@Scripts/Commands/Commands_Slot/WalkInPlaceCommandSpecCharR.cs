@@ -9,7 +9,7 @@ using RectTransform = UnityEngine.RectTransform;
 public sealed class WalkInPlaceCommandSpecCharR : CharacterRigCommandSpecBase
 {
     [Header("Target")]
-    public CharacterRigTarget target = CharacterRigTarget.Character_Track_Y;
+    public CharacterRigTarget target = CharacterRigTarget.CharacterPortrait_Track;
 
     [Header("Timing")]
     [Tooltip("전체 걷기 지속 시간.")]

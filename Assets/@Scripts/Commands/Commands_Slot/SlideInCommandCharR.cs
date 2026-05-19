@@ -9,7 +9,7 @@ using RectTransform = UnityEngine.RectTransform;
 public sealed class SlideInCommandSpecCharR : CharacterRigCommandSpecBase
 {
     [Header("Target (Track)")]
-    public CharacterRigTarget target = CharacterRigTarget.Character_Track;
+    public CharacterRigTarget target = CharacterRigTarget.CharacterPortrait_Track;
 
     [Header("Slide")]
     public CharRigDirection direction = CharRigDirection.Left;

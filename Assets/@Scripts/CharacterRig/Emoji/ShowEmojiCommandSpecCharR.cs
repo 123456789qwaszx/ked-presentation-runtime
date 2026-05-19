@@ -110,8 +110,8 @@ public sealed class ShowEmojiCommandCharR : CommandBase, IStepScopedCommand
                 scope,
                 _spec.targetKey);
 
-        _emojiRoot = rig.CharacterEmoji_Root;
-        _emojiAnchor = rig.CharacterEmojiSlot00_Location;
+        _emojiRoot = rig.CharacterEmojiSlot00_Root;
+        _emojiAnchor = rig.CharacterEmojiSlot00_CastTransform;
         _emojiImage = rig.EmojiSlot00_Image;
 
         if (_emojiRoot == null || _emojiAnchor == null || _emojiImage == null)

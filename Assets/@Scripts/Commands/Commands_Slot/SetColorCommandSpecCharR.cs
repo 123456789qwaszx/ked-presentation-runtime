@@ -12,7 +12,7 @@ using UnityEngine.UI;
 public class SetColorCommandSpecCharR : CharacterRigCommandSpecBase
 {
     [Header("Target")]
-    public CharacterRigTarget target = CharacterRigTarget.CharacterPortrait_Image;
+    public CharacterRigTarget target = CharacterRigTarget.CharacterPortraitSprite_Image;
 
     [Header("Color")]
     public Color color = Color.white;

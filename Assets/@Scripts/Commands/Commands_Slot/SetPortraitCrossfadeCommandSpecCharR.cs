@@ -163,10 +163,10 @@ public sealed class SetPortraitCrossfadeCommandCharR : CommandBase, IStepScopedC
         CharacterRigRefs rigRefs =
             CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.targetKey);
 
-        _portraitRoot = rigRefs.CharacterPortrait_Root;
-        _overlayRoot = rigRefs.CharacterPortraitOverlay_Root;
-        _portraitImage = rigRefs.CharacterPortrait_Image;
-        _overlayImage = rigRefs.CharacterPortraitOverlay_Image;
+        _portraitRoot = rigRefs.CharacterPortraitSprite_Root;
+        _overlayRoot = rigRefs.CharacterPortraitSpriteOverlay_Root;
+        _portraitImage = rigRefs.CharacterPortraitSprite_Image;
+        _overlayImage = rigRefs.CharacterPortraitSpriteOverlay_Image;
 
         _portraitCanvasGroup =
             GetRootCanvasGroup(_portraitRoot, "CharacterPortrait_Root");

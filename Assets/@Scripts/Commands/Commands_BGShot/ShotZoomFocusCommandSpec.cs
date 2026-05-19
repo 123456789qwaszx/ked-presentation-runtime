@@ -12,7 +12,7 @@ public sealed class ShotZoomFocusCommandSpec : CommandSpecBase
     public CharacterFocusAnchor focusAnchor = CharacterFocusAnchor.Face;
 
     [Tooltip("anchor가 없을 때 fallback으로 사용할 CharacterRig target")]
-    public CharacterRigTarget fallbackTarget = CharacterRigTarget.CharacterPortrait_Root;
+    public CharacterRigTarget fallbackTarget = CharacterRigTarget.Character_Root;
 
     [Tooltip("선택한 focus anchor의 로컬 오프셋")]
     public Vector2 focusLocalOffset = Vector2.zero;

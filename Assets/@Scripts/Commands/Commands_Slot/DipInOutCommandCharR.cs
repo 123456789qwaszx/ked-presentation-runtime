@@ -9,7 +9,7 @@ using RectTransform = UnityEngine.RectTransform;
 public sealed class DipInOutCommandSpecCharR : CharacterRigCommandSpecBase
 {
     [Header("Target")]
-    public CharacterRigTarget target = CharacterRigTarget.Character_Track;
+    public CharacterRigTarget target = CharacterRigTarget.CharacterPortrait_Track_Y;
 
     [Header("Move")]
     public CharRigDirection dir = CharRigDirection.Down;

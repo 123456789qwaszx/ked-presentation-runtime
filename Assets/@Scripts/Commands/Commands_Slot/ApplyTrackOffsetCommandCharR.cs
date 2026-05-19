@@ -17,7 +17,7 @@ public class ApplyTrackOffsetCommandSpecCharR : CharacterRigCommandSpecBase
 {
     [Header("Target")]
     [Tooltip("offset를 실제로 적용할 대상.")]
-    public CharacterRigTarget target = CharacterRigTarget.Character_Track;
+    public CharacterRigTarget target = CharacterRigTarget.CharacterPortrait_Track;
 
     [Header("Offset")]
     [Tooltip("현재 anchoredPosition 기준으로 더해질 오프셋(픽셀 단위).")]
@@ -68,16 +68,16 @@ public sealed class ApplyTrackOffsetCommandCharR : CommandBase
     private void Apply()
     {
         if (_spec.resetAllTrackLayers || _spec.resetCharTrack)
-            ResetRect(_rigRefs.Character_Track);
+            ResetRect(_rigRefs.CharSlot_Track);
 
         if (_spec.resetAllTrackLayers || _spec.resetCharTrackMove)
-            ResetRect(_rigRefs.Character_Track_Move);
+            ResetRect(_rigRefs.CharSlot_Track_Move);
 
         if (_spec.resetAllTrackLayers || _spec.resetCharTrackX)
-            ResetRect(_rigRefs.Character_Track_X);
+            ResetRect(_rigRefs.CharSlot_Track_X);
 
         if (_spec.resetAllTrackLayers || _spec.resetCharTrackY)
-            ResetRect(_rigRefs.Character_Track_Y);
+            ResetRect(_rigRefs.CharSlot_Track_Y);
 
         _rect.DOKill(true); // Finish previous motion so this command starts from a committed state.
 
