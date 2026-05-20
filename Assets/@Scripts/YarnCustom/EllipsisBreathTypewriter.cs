@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading;
 using TMPro;
 using UnityEngine;
-using Yarn.Markup;
 using Yarn.Unity;
 using Random = UnityEngine.Random;
 
@@ -45,7 +44,22 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
     public List<IActionMarkupHandler> ActionMarkupHandlers { get; } = new();
     
     // ---- Runtime Binding ----
+    public TMP_Text TextElement
+    {
+        get => _typewriterText;
+        set => _typewriterText = value;
+    }
     private TMP_Text _typewriterText;
+    
+    public void ContentDidDismiss()
+    {
+        AbortRun();
+
+        if (_typewriterText == null)
+            return;
+
+        _typewriterText.maxVisibleCharacters = 0;
+    }
     
     private float _speedMultiplier = 1f;
     private int _runId;
@@ -54,7 +68,7 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
     public void SetTextView(TMP_Text textView) => _typewriterText = textView;
     public void AbortRun() => _runId++;
     
-    public void PrepareForContent(MarkupParseResult line)
+    public void PrepareForContent(Yarn.Markup.MarkupParseResult line)
     {
         if (_typewriterText == null)
         {
@@ -71,7 +85,7 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
         InvokeHandlers(h => h.OnPrepareForLine(line, _typewriterText));
     }
 
-    public async YarnTask RunTypewriter(MarkupParseResult line, CancellationToken cancellationToken)
+    public async YarnTask RunTypewriter(Yarn.Markup.MarkupParseResult line, CancellationToken cancellationToken)
     {
         if (_typewriterText == null) return;
 
@@ -219,7 +233,7 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
         }
     }
     
-    private void RevealAllAndComplete(MarkupParseResult line, int count, int runId)
+    private void RevealAllAndComplete(Yarn.Markup.MarkupParseResult line, int count, int runId)
     {
         if (runId != _runId || _typewriterText == null)
             return;

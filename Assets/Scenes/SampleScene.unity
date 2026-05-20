@@ -17871,7 +17871,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 458.38, y: -24}
-  m_SizeDelta: {x: 916.76, y: 24}
+  m_SizeDelta: {x: 916.76, y: 0}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!1 &666632935594092605
 GameObject:
@@ -25782,7 +25782,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &2958262985601084657
 RectTransform:
   m_ObjectHideFlags: 0
@@ -25804,7 +25804,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 0}
   m_AnchoredPosition: {x: 0, y: 80}
-  m_SizeDelta: {x: -400, y: 0}
+  m_SizeDelta: {x: -400, y: 160.45}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!225 &2958262985601084661
 CanvasGroup:
@@ -25883,11 +25883,12 @@ MonoBehaviour:
   typewriterStyle: 3
   lettersPerSecond: 60
   wordsPerSecond: 10
-  customTypewriter: {fileID: 1658226451}
+  customTypewriter:
+    targetObject: {fileID: 0}
   eventHandlers:
   - {fileID: 8877867826724996613}
-  - {fileID: 946268260}
-  - {fileID: 626587493}
+  - {fileID: 0}
+  - {fileID: 0}
 --- !u!1 &2958262986271658192
 GameObject:
   m_ObjectHideFlags: 0
@@ -26148,10 +26149,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 2958262985601084657}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 760, y: -106.104996}
+  m_SizeDelta: {x: 1440, y: 44.69}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2958262986381887306
 MonoBehaviour:
@@ -26383,10 +26384,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 2958262985601084657}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 760, y: -41.879997}
+  m_SizeDelta: {x: 1440, y: 35.76}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &2975304435345852380
 RectTransform:
@@ -43847,13 +43848,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4bec29c0a230741bdac901dba8da47ee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  yarnProject: {fileID: 7545569452688597077, guid: 006ee1b3c6d26914aa28c83d703f5500, type: 3}
+  yarnProject: {fileID: 7545569452688597077, guid: b400e7f300cc0d94f95d3d9a0c3d6a32, type: 3}
   variableStorage: {fileID: 8635081094591633591}
   lineProvider: {fileID: 0}
   saliencyStrategy: 0
   dialoguePresenters:
-  - {fileID: 634365938}
-  - {fileID: 2009713540}
+  - {fileID: 0}
+  - {fileID: 0}
   - {fileID: 8020628925246216474}
   verboseLogging: 0
   autoStart: 0

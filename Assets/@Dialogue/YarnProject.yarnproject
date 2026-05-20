@@ -1,0 +1,58 @@
+{
+    "projectFileVersion": 4,
+    "sourceFiles": [
+        "**/*.yarn"
+    ],
+    "excludeFiles": [
+        "**/*~/*",
+        "./Samples/Yarn Spinner*/*"
+    ],
+    "localisation": {},
+    "baseLanguage": "ko",
+    "compilerOptions": {},
+    "editorOptions": {
+        "yarnScriptEditor": {
+            "characters": [
+                {
+                    "name": "???",
+                    "colour": "#d5d750"
+                },
+                {
+                    "name": "Leafia",
+                    "colour": "#ca2b3b"
+                },
+                {
+                    "name": "momoka",
+                    "colour": "#c1531f"
+                },
+                {
+                    "name": "라루",
+                    "colour": "#df662a"
+                },
+                {
+                    "name": "메르쿠리아",
+                    "colour": "#43b163"
+                },
+                {
+                    "name": "베스티나",
+                    "colour": "#21b7c4"
+                },
+                {
+                    "name": "알베도",
+                    "colour": "#da5282"
+                },
+                {
+                    "name": "엘레노어",
+                    "colour": "#4caccd"
+                },
+                {
+                    "name": "열정 넘치는 젊은 여행가",
+                    "colour": "#2e63cc"
+                }
+            ]
+        }
+    },
+    "definitions": [
+        "..\\..\\ProjectSettings\\Packages\\dev.yarnspinner\\Assembly-CSharp-generated.ysls.json"
+    ]
+}

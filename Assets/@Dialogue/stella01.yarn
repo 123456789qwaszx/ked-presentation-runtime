@@ -26,7 +26,7 @@
 
 <<shot_zoom_focus MySlot bust center 5 1>>
 
-Leafia: 이번에 저희 컴퍼니를 선택해 주셔서 감사합니다. 저는 천궁보험 필리에 영업부매니저 메르쿠리아라고 합니다.
+Leafia: 이번에 저희 컴퍼니를 선택해 주셔서 감사합니다. [br/]저는 천궁보험 필리에 영업부매니저 메르쿠리아라고 합니다.
 
 <<emoji Leafia 20>>
 <<walk_in_place Leafia>>
