@@ -44,25 +44,6 @@ MonoBehaviour:
         type: 3
         seconds: 0
         signalKey: beat
-    - editorName: 
-      compiled:
-      - rid: 8483491179373002941
-      gate:
-        type: 3
-        seconds: 0
-        signalKey: beat
-    - editorName: 
-      compiled: []
-      gate:
-        type: 3
-        seconds: 0
-        signalKey: beat
-    - editorName: 
-      compiled: []
-      gate:
-        type: 1
-        seconds: 0
-        signalKey: 
   - editorName: Imported Node 1
     steps:
     - editorName: Imported Step 0
@@ -166,10 +147,6 @@ MonoBehaviour:
         rigPrefab: {fileID: 0}
         parentSlot: 0
         rigRootName: CharacterRig
-        autoRolePrefixFromRoleKey: 1
-        addRolePrefix: 1
-        destroyExistingRigWithSameName: 1
-        strict: 1
     - rid: 5301155771391934528
       type: {class: SetAnchorCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:
@@ -192,10 +169,6 @@ MonoBehaviour:
         rigPrefab: {fileID: 0}
         parentSlot: 0
         rigRootName: CharacterRig
-        autoRolePrefixFromRoleKey: 1
-        addRolePrefix: 1
-        destroyExistingRigWithSameName: 1
-        strict: 1
     - rid: 5301155771391934530
       type: {class: CastCharacterCommandSpec, ns: , asm: Assembly-CSharp}
       data:
@@ -220,17 +193,6 @@ MonoBehaviour:
         target: 10
         sizingMode: 1
         horizontalAlign: 1
-    - rid: 8483491179373002941
-      type: {class: ShowEmojiCommandSpecCharR, ns: , asm: Assembly-CSharp}
-      data:
-        wait: 0
-        targetKey: 
-        database: {fileID: 0}
-        emojiKey: sparkle
-        hideIfKeyEmpty: 1
-        fadeInOverride: -1
-        ease: 9
-        snapOnSkip: 1
     - rid: 8483491179373002942
       type: {class: SetupCharRigCommandSpec, ns: , asm: Assembly-CSharp}
       data:
@@ -239,10 +201,6 @@ MonoBehaviour:
         rigPrefab: {fileID: 8529412948266249186, guid: 01c9b93a77829ef438fc74c4ef4c5004, type: 3}
         parentSlot: 0
         rigRootName: CharacterRig
-        autoRolePrefixFromRoleKey: 1
-        addRolePrefix: 1
-        destroyExistingRigWithSameName: 1
-        strict: 1
     - rid: 8483491179373002944
       type: {class: SetPortraitSpriteCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:

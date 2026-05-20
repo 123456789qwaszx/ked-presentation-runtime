@@ -13,6 +13,14 @@ MonoBehaviour:
   m_Name: CharacterEmojiLibrary
   m_EditorClassIdentifier: Assembly-CSharp::CharacterEmojiLibrarySO
   entries:
+  - emojiKey: 04-2
+    sprite: {fileID: 21300000, guid: 754fa8bfd664bb64ca52c8dacb20b988, type: 3}
+    layout:
+      anchoredPosition: {x: 85, y: 350}
+      localScale: {x: 0.1, y: 0.1, z: 0.1}
+      rotationZ: 150
+      preserveAspect: 1
+      setNativeSize: 0
   - emojiKey: 21
     sprite: {fileID: 21300000, guid: 0b3bb3c2671e4e048931e79cf9008894, type: 3}
     layout:
@@ -147,14 +155,6 @@ MonoBehaviour:
       anchoredPosition: {x: 130, y: 350}
       localScale: {x: 0.05, y: 0.05, z: 0.05}
       rotationZ: 0
-      preserveAspect: 1
-      setNativeSize: 0
-  - emojiKey: 04-2
-    sprite: {fileID: 21300000, guid: 754fa8bfd664bb64ca52c8dacb20b988, type: 3}
-    layout:
-      anchoredPosition: {x: 130, y: 350}
-      localScale: {x: 0.1, y: 0.1, z: 0.1}
-      rotationZ: 150
       preserveAspect: 1
       setNativeSize: 0
   - emojiKey: 04
