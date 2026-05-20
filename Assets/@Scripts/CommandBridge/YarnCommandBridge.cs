@@ -12,26 +12,22 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
     {
         _dialogueRunner = dialogueRunner;
         _playbackDriver = playbackDriver;
-        RegisterYarnCommands();
+        
+        RegisterCharSlotSetCommands();
+        RegisterPlaybackOrderCommands();
+        RegisterAudioCommands();
+        RegisterCharRigCommands();
+        RegisterCharRigActingCommands();
         
         RegisterEmojiCommands();
         RegisterPresentationCommands();
         RegisterShotCommands();
     }
 
-    public void RegisterYarnCommands()
+    private void RegisterPlaybackOrderCommands()
     {
-        _dialogueRunner.AddCommandHandler<string, string>("slot", EnqueueSetupCharRigSpec);
-        _dialogueRunner.AddCommandHandler<string, string,  string, string, bool, string, string>("cast", EnqueueCastCharacterSpec);
-        _dialogueRunner.AddCommandHandler<string, string, bool, bool>("place", EnqueueSetAnchorSpecs);
-        _dialogueRunner.AddCommandHandler<string, string>("size", EnqueueSetOriginSizeSpec);
-        
-        _dialogueRunner.AddCommandHandler<string, int, int>("place_offset", EnqueueSetAnchorOffsetSpecs);
-        _dialogueRunner.AddCommandHandler<string>("uncast", EnqueueUncastCharacterSpec);
-        
         _dialogueRunner.AddCommandHandler<string>("destroy", EnqueueDestroySpec);
         
-
         // Marks the next N collected commands as wait=true inside Presentation/Executor.
         // This affects command playback order, but does NOT block Yarn by itself.
         _dialogueRunner.AddCommandHandler<int>("await_for", AwaitFor);
@@ -46,39 +42,32 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         _dialogueRunner.AddCommandHandler("end_hold", PlayHeldCommands);
         
         
-        _dialogueRunner.AddCommandHandler<string, float, float>("move_by", EnqueueMoveBySpec);
-        _dialogueRunner.AddCommandHandler<string, float, float>("scale_to", EnqueueScaleToSpec);
-
-        _dialogueRunner.AddCommandHandler<string, string>("slide_in", EnqueueSlideInSpec);
-        _dialogueRunner.AddCommandHandler<string, string>("slide_out", EnqueueSlideOutSpec);
-
-        _dialogueRunner.AddCommandHandler<string>("fade_in", EnqueueFadeInSpec);
-        _dialogueRunner.AddCommandHandler<string>("fade_out", EnqueueFadeOutSpec);
-
-        
-        _dialogueRunner.AddCommandHandler<string, int, float, float>("hop_in", EnqueueArcHopInSpec);
-        _dialogueRunner.AddCommandHandler<string, float, float, float, float>("walk_in_place", EnqueueWalkInPlaceSpec);
-        _dialogueRunner.AddCommandHandler<string, float, float, float, float>("bounce_in_place", EnqueueBounceInPlaceSpec);
-        _dialogueRunner.AddCommandHandler<string, float, float, float>("breathe", EnqueueBreathInPlaceSpec);
-        
-
-        _dialogueRunner.AddCommandHandler<string, string>("jolt", EnqueueJoltSpec);
-        _dialogueRunner.AddCommandHandler<string, string, float, float, int>("shake", EnqueueJoltSpecShake);
-        _dialogueRunner.AddCommandHandler<string, string>("nudge", EnqueueJoltSpecTap);
-        _dialogueRunner.AddCommandHandler<string, string>("nudge_hard", EnqueueJoltSpecTapHard);
-        _dialogueRunner.AddCommandHandler<string, string>("slide_in_nudge", EnqueueSlideInJoltCombo);
-        
-        _dialogueRunner.AddCommandHandler<string, string>("dip", EnqueueDipInOutSpec);
-        
-        _dialogueRunner.AddCommandHandler<string, float, float, float, string>("tremble", EnqueueTrembleSpec);
-        _dialogueRunner.AddCommandHandler<string, float, float, float, float, float, string>("tremble_pulse", EnqueueTremblePulseSpec);
-
-        _dialogueRunner.AddCommandHandler<string, string>("portrait_cross", EnqueueSetPortraitCrossfadeSpec);
-        _dialogueRunner.AddCommandHandler<string, string>("portrait_swap", EnqueueSetEmotionPortraitWipeSpec);
-
         _dialogueRunner.AddCommandHandler<string>("blackout", EnqueueBlackoutTransitionSpec);
         _dialogueRunner.AddCommandHandler<string>("uipatch", EnqueueUIPatchSpec);
+        
+        _dialogueRunner.AddCommandHandler<float>("pause", EnqueueWaitSpec);
+        
+        // clear character rigs
+        _dialogueRunner.AddCommandHandler("clearall_rigs", EnqueueClearAllCharRigRefsSpec);
+        _dialogueRunner.AddCommandHandler<string>("clear_rig", EnqueueClearCharRigRefSpec);
+    }
 
+    private void RegisterCharSlotSetCommands()
+    {
+        _dialogueRunner.AddCommandHandler<string, string>("slot", EnqueueSetupCharRigSpec);
+        _dialogueRunner.AddCommandHandler<string, string,  string, string, bool, string, string>("cast", EnqueueCastCharacterSpec);
+        
+        _dialogueRunner.AddCommandHandler<string, string, string, string>("face", EnqueueSetPortraitSpriteSpec);
+        _dialogueRunner.AddCommandHandler<string, string, bool, bool>("place", EnqueueSetAnchorSpecs);
+        _dialogueRunner.AddCommandHandler<string, string>("size", EnqueueSetOriginSizeSpec);
+        
+        _dialogueRunner.AddCommandHandler<string, int, int>("place_offset", EnqueueSetAnchorOffsetSpecs);
+        
+        _dialogueRunner.AddCommandHandler<string>("uncast", EnqueueUncastCharacterSpec);
+    }
+
+    private void RegisterAudioCommands()
+    {
         _dialogueRunner.AddCommandHandler<string, float>("bgm", EnqueuePlayBgmSpec);
         _dialogueRunner.AddCommandHandler<float>("stop_bgm", EnqueueStopBgmSpec);
 
@@ -87,27 +76,51 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 
         _dialogueRunner.AddCommandHandler<string>("sfx", EnqueuePlaySfxSpec);
         _dialogueRunner.AddCommandHandler("stop_all_sfx", EnqueueStopAllSfxSpec);
+    }
 
-        // _dialogueRunner.AddCommandHandler<string, string, string, string>("emotion_wipe",
-        //     EnqueueSetEmotionPortraitWipeSpec);
+    private void RegisterCharRigCommands()
+    {
+        _dialogueRunner.AddCommandHandler<string>("fade_in", EnqueueFadeInSpec);
+        _dialogueRunner.AddCommandHandler<string, float>("fade_out", EnqueueFadeOutSpec);
+        
         _dialogueRunner.AddCommandHandler<string, string>("emotion", EnqueueSetEmotionPortraitWipeSpec);
+        _dialogueRunner.AddCommandHandler<string, string>("emotion_crossfade", EnqueueSetPortraitCrossfadeSpec);
+        
+        _dialogueRunner.AddCommandHandler<string, string>("slide_in", EnqueueSlideInSpec);
+        _dialogueRunner.AddCommandHandler<string, string>("slide_out", EnqueueSlideOutSpec);
+        
+        _dialogueRunner.AddCommandHandler<string, float, float>("move_by", EnqueueMoveBySpec);
+        _dialogueRunner.AddCommandHandler<string, float, float>("scale_to", EnqueueScaleToSpec);
+        
+        _dialogueRunner.AddCommandHandler<string, string>("slide_in_nudge", EnqueueSlideInJoltCombo);
+        _dialogueRunner.AddCommandHandler<string>("slide_in_sway", EnqueueSlideInSwayCombo);
+    }
 
+    private void RegisterCharRigActingCommands()
+    {
+        _dialogueRunner.AddCommandHandler<string, float, float, float>("breathe", EnqueueBreathInPlaceSpec);
+        _dialogueRunner.AddCommandHandler<string, float, float, float, float>("walk_in_place", EnqueueWalkInPlaceSpec);
+        _dialogueRunner.AddCommandHandler<string, float, float, float, float>("bounce_in_place", EnqueueBounceInPlaceSpec);
+        
+        _dialogueRunner.AddCommandHandler<string, float, float, float, float, float, string>("tremble_pulse", EnqueueTremblePulseSpec);
+        
+        _dialogueRunner.AddCommandHandler<string, int, float, float>("hop", EnqueueHopSpec);
+        _dialogueRunner.AddCommandHandler<string, string>("jolt", EnqueueJoltSpec);
+        _dialogueRunner.AddCommandHandler<string, string>("nudge", EnqueueJoltSpecTap);
+        _dialogueRunner.AddCommandHandler<string, string>("nudge_hard", EnqueueJoltSpecTapHard);
+        _dialogueRunner.AddCommandHandler<string, string>("dip", EnqueueDipInOutSpec);
+        
+        _dialogueRunner.AddCommandHandler<string, string, float, float, int>("shake", EnqueueJoltSpecShake);
+        _dialogueRunner.AddCommandHandler<string, float, float, float, string>("tremble", EnqueueTrembleSpec);
+        
         _dialogueRunner.AddCommandHandler<string>("sway", EnqueueSwaySpecGentle);
         _dialogueRunner.AddCommandHandler<string>("sway_hard", EnqueueSwaySpecPendulum);
         _dialogueRunner.AddCommandHandler<string>("sway_fast", EnqueueSwaySpecFast);
         _dialogueRunner.AddCommandHandler<string>("sway_away", EnqueueSwaySpecAway);
         _dialogueRunner.AddCommandHandler<string, int>("sway_to", EnqueuePivotRotateToSpec);
-        _dialogueRunner.AddCommandHandler<string>("slide_in_sway", EnqueueSlideInSwayCombo);
-
-
         
-        _dialogueRunner.AddCommandHandler<float>("pause", EnqueueWaitSpec);
         
-        // clear character rigs
-        _dialogueRunner.AddCommandHandler("clearall_rigs", EnqueueClearAllCharRigRefsSpec);
-        _dialogueRunner.AddCommandHandler<string>("clear_rig", EnqueueClearCharRigRefSpec);
     }
-    
     
     private void EnqueueSetupCharRigSpec(string slotKey, string parentKey)
     {
@@ -575,7 +588,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 
     private void EnqueueSlideInJoltCombo(string roleKey, string direction = "right")
     {
-        CharRigDirection dir = ParseSlideDirection(direction, CharRigDirection.Right);
+        CharRigDirection dir = CharRigDirectionParser.ParseSlideDirection(direction, CharRigDirection.Right);
 
         var juicySlideIn = new SlideInCommandSpecCharR
         {
@@ -602,7 +615,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 
     private void EnqueueJoltSpec(string roleKey, string direction = "right")
     {
-        CharRigDirection dir = ParseSlideDirection(direction, CharRigDirection.Right);
+        CharRigDirection dir = CharRigDirectionParser.ParseSlideDirection(direction, CharRigDirection.Right);
 
         var spec = new JoltCommandSpec
         {
@@ -626,7 +639,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         float duration = 1.2f,
         int taps = 4)
     {
-        CharRigDirection dir = ParseSlideDirection(direction, CharRigDirection.Right);
+        CharRigDirection dir = CharRigDirectionParser.ParseSlideDirection(direction, CharRigDirection.Right);
 
         var spec = new JoltCommandSpec
         {
@@ -643,7 +656,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 
     private void EnqueueJoltSpecTap(string roleKey, string direction = "right")
     {
-        CharRigDirection dir = ParseSlideDirection(direction, CharRigDirection.Right);
+        CharRigDirection dir = CharRigDirectionParser.ParseSlideDirection(direction, CharRigDirection.Right);
 
         var spec = new JoltCommandSpec
         {
@@ -662,7 +675,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 
     private void EnqueueJoltSpecTapHard(string roleKey, string direction = "down")
     {
-        CharRigDirection dir = ParseSlideDirection(direction, CharRigDirection.Down);
+        CharRigDirection dir = CharRigDirectionParser.ParseSlideDirection(direction, CharRigDirection.Down);
 
         var spec = new JoltCommandSpec
         {
@@ -691,7 +704,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
             return;
         }
 
-        CharRigDirection dir = ParseSlideDirection(direction, CharRigDirection.Right);
+        CharRigDirection dir = CharRigDirectionParser.ParseSlideDirection(direction, CharRigDirection.Right);
 
         var spec = new TrembleCommandSpecCharR
         {
@@ -714,7 +727,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
     
     private void EnqueueTremblePulseSpec(
         string roleKey,
-        float duration = 5.0f,
+        float duration = 99.0f,
         float strength = 5f,
         float frequency = 28f,
         float pulseInterval = 1.0f,
@@ -727,7 +740,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
             return;
         }
 
-        CharRigDirection dir = ParseSlideDirection(direction, CharRigDirection.Right);
+        CharRigDirection dir = CharRigDirectionParser.ParseSlideDirection(direction, CharRigDirection.Right);
 
         var spec = new TrembleCommandSpecCharR
         {
@@ -751,17 +764,17 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         Collect(spec);
     }
 
-    private void EnqueueArcHopInSpec(
+    private void EnqueueHopSpec(
         string roleKey,
         int hopCount = 2,
-        float arcHeight = 48f,
+        float height = 48f,
         float airWidth = 0.85f)
     {
-        var spec = new ArcHopInCommandSpecCharR
+        var spec = new HopCommandSpecCharR
         {
             slotKey = roleKey,
             hopCount = hopCount,
-            arcHeight = arcHeight,
+            height = height,
             airWidth = airWidth
         };
 
@@ -899,7 +912,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 
     private void EnqueueDipInOutSpec(string roleKey, string direction = "down")
     {
-        CharRigDirection dir = ParseSlideDirection(direction, CharRigDirection.Down);
+        CharRigDirection dir = CharRigDirectionParser.ParseSlideDirection(direction, CharRigDirection.Down);
 
         var spec = new DipInOutCommandSpecCharR
         {
@@ -915,6 +928,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         var spec = new MoveByCommandSpecCharR
         {
             slotKey = roleKey,
+            target = CharacterRigTarget.CharSlot_Track_Move,
             delta = new Vector2(x, y)
         };
 
@@ -931,11 +945,12 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         Collect(spec);
     }
 
-    private void EnqueueFadeOutSpec(string roleKey)
+    private void EnqueueFadeOutSpec(string roleKey, float duration= 0f)
     {
         var spec = new FadeOutCommandSpecCharR
         {
-            slotKey = roleKey
+            slotKey = roleKey,
+            duration = duration
         };
 
         Collect(spec);
@@ -943,7 +958,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 
     private void EnqueueSlideInSpec(string roleKey, string direction = "left")
     {
-        CharRigDirection from = ParseSlideDirection(direction, CharRigDirection.Left);
+        CharRigDirection from = CharRigDirectionParser.ParseSlideDirection(direction, CharRigDirection.Left);
 
         var spec = new SlideInCommandSpecCharR
         {
@@ -956,7 +971,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 
     private void EnqueueSlideOutSpec(string roleKey, string direction = "right")
     {
-        CharRigDirection to = ParseSlideDirection(direction, CharRigDirection.Right);
+        CharRigDirection to = CharRigDirectionParser.ParseSlideDirection(direction, CharRigDirection.Right);
 
         var spec = new SlideOutCommandSpecCharR
         {
@@ -973,6 +988,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         var spec = new ScaleToCommandSpecCharR
         {
             slotKey = roleKey,
+            target = CharacterRigTarget.CharacterPortrait_ActingScale,
             duration = duration,
             toScale = new Vector2(xyValue, xyValue)
         };
@@ -1008,36 +1024,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         Collect(spec);
     }
 
-    private CharRigDirection ParseSlideDirection(string direction, CharRigDirection fallback)
-    {
-        switch (direction?.Trim().ToLowerInvariant())
-        {
-            case "left":
-            case "l":
-                return CharRigDirection.Left;
-
-            case "right":
-            case "r":
-                return CharRigDirection.Right;
-
-            case "up":
-            case "u":
-            case "top":
-                return CharRigDirection.Up;
-
-            case "down":
-            case "d":
-            case "bottom":
-                return CharRigDirection.Down;
-
-            default:
-                return fallback;
-        }
-    }
-
-    private void EnqueueSetEmotionPortraitWipeSpec(
-        string targetKey,
-        string emotion)
+    private void EnqueueSetEmotionPortraitWipeSpec(string targetKey, string emotion)
     {
         var spec = new SetEmotionPortraitWipeCommandSpec
         {

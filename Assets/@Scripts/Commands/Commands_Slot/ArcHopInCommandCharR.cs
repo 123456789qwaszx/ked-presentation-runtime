@@ -2,11 +2,12 @@ using System;
 using System.Collections;
 using DG.Tweening;
 using UnityEngine;
+using UnityEngine.Serialization;
 using RectTransform = UnityEngine.RectTransform;
 
 [Serializable]
 [CommandMenuHint("Char Rig Motion", "Hop", Order = -760)]
-public sealed class ArcHopInCommandSpecCharR : CharacterRigCommandSpecBase
+public sealed class HopCommandSpecCharR : CharacterRigCommandSpecBase
 {
     [Header("Target")]
     public CharacterRigTarget target = CharacterRigTarget.CharacterPortrait_Track_Y;
@@ -20,7 +21,7 @@ public sealed class ArcHopInCommandSpecCharR : CharacterRigCommandSpecBase
     public int hopCount = 1;
 
     [Tooltip("Arc height in pixels. Positive value hops upward.")]
-    public float arcHeight = 48f;
+    public float height = 48f;
 
     [Range(0.05f, 1f)]
     [Tooltip("How much of each hop segment is airborne. 1=arc spans whole segment, 0.2=short/narrow arc.")]
@@ -39,9 +40,9 @@ public sealed class ArcHopInCommandSpecCharR : CharacterRigCommandSpecBase
     public bool killTween = true;
 }
 
-public sealed class ArcHopInCommandCharR : CommandBase, IStepScopedCommand
+public sealed class HopCommandCharR : CommandBase, IStepScopedCommand
 {
-    private readonly ArcHopInCommandSpecCharR _spec;
+    private readonly HopCommandSpecCharR _spec;
 
     private RectTransform _rect;
     private Tween _tween;
@@ -52,7 +53,7 @@ public sealed class ArcHopInCommandCharR : CommandBase, IStepScopedCommand
     public override bool WaitForCompletion => _spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
-    public ArcHopInCommandCharR(ArcHopInCommandSpecCharR spec)
+    public HopCommandCharR(HopCommandSpecCharR spec)
     {
         _spec = spec;
     }
@@ -79,7 +80,7 @@ public sealed class ArcHopInCommandCharR : CommandBase, IStepScopedCommand
             yield break;
         }
 
-        float mainH = _spec.arcHeight;
+        float mainH = _spec.height;
         float mainAirW = Mathf.Clamp(_spec.airWidth, 0.05f, 1f);
 
         float lastH = _spec.lastArcHeight >= 0f ? _spec.lastArcHeight : mainH;
