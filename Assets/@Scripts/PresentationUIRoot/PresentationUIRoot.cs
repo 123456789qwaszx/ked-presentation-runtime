@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
+public partial class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
 {
     public event Action OnSpeedUpHoldStarted;
     public event Action OnSpeedUpHoldEnded;
@@ -160,6 +160,7 @@ public class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
         CloseCanvasGroup(View.CanvasGroup(Refs.QuickMenu_Root));
         ApplyToggleVisibility();
     }
+    
 
     private void BindHandlers()
     {

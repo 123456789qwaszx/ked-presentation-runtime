@@ -1,6 +1,12 @@
 using System;
 using UnityEngine;
 
+
+public partial class PresentationUIRoot
+{
+    public RectTransform ResolveRect(Refs key) => View.Rect(key);
+}
+
 public sealed class PresentationViewAccess
 {
     public PresentationViewRefs BuildRefs(PresentationUIRoot root, bool strict = true)

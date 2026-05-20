@@ -2,7 +2,7 @@ using System;
 using TMPro;
 using UnityEngine;
 
-public sealed class DialogueBox00_Portrait
+public sealed partial class DialogueBox00_Portrait
     : UIBase<DialogueBox00_Portrait.Refs>, IManagedUI, IPresentationDialogueBoxView
 {
     public enum Refs
@@ -33,7 +33,7 @@ public sealed class DialogueBox00_Portrait
     public TMP_Text NameText => null;//=> View.Text(Refs.DialogueBox00TextAreaSpeakerName_Text);
     public bool HasName => true;
 
-    public RectTransform ProtagonistRect => View.Rect(Refs.DialogueBox00ProtagonistCutinViewport_Mask);
+    //public RectTransform ProtagonistRect => View.Rect(Refs.DialogueBox00ProtagonistCutinViewport_Mask);
 
     protected override void OnInitialize()
     {

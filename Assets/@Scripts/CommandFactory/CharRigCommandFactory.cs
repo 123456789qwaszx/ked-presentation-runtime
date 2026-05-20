@@ -8,13 +8,13 @@ public enum CharRigDirection
 
 public sealed class CharRigCommandFactory : INodeCommandFactory
 {
-    private readonly ICharRigSlotResolver _rigSlotResolver;
+    private readonly CharRigSlotResolver _rigSlotResolver;
     private readonly CharacterRigBuilder _rigBuilder;
     private readonly PortraitResolver _portraitResolver;
     private readonly CharacterEmojiResolver _emojiResolver;
 
     public CharRigCommandFactory(
-        ICharRigSlotResolver charRigSlotResolver,
+        CharRigSlotResolver charRigSlotResolver,
         CharacterRigBuilder charRigBuilder,
         PortraitResolver portraitResolver,
         CharacterEmojiResolver emojiResolver)

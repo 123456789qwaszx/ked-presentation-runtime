@@ -148,7 +148,7 @@ public class VnAppBootstrap : MonoBehaviour
         SignalCommandFactory signalFactory = new(_unityTimeSource, unitySignalBus, signalLatch);
         
         // CharRigFactory
-        ICharRigSlotResolver charRigSlotResolver = new CharRigSlotResolver(UIManager.Instance.GetUI<PresentationUIRoot>(), UIManager.Instance.GetUI<DialogueBox00_Portrait>());
+        CharRigSlotResolver charRigSlotResolver = new ();
         CharacterRigBuilder charRigAccess = new();
         PortraitResolver portraitResolver = new(portraitGeneratedDbSo);
         CharacterEmojiResolver emojiResolver = new(characterEmojiLibrarySO);
