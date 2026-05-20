@@ -51,7 +51,7 @@ public sealed class DestroyCommand : CommandBase
             return;
 
         string resolvedRoleKey =
-            CharacterRigTargetResolver.ResolveRoleKeyFromTargetKey(scope, _spec.targetKey);
+            CharacterRigTargetResolver.ResolveSlotKeyFromTargetKey(scope, _spec.targetKey);
 
         if (string.IsNullOrEmpty(resolvedRoleKey))
             return;

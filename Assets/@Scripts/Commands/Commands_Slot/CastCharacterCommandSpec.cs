@@ -62,6 +62,6 @@ public sealed class CastCharacterCommand : CommandBase
                 $"[CastCharacterCommand] Rig is not bound for slotKey='{slotKey}'. Call <<slot>> before <<cast>>.");
         }
 
-        scope.CastRegistry.Cast(slotKey, characterKey, variantKey);
+        scope.CastRegistry.CastCharRig(slotKey, characterKey, variantKey);
     }
 }

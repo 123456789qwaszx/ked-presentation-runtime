@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -10,167 +9,72 @@ public sealed class PortraitResolver
 
     public PortraitResolver(PortraitGeneratedDbSo db)
     {
-        if (db == null) throw new ArgumentNullException(nameof(db));
-        if (db.entries == null) throw new InvalidOperationException("PortraitGeneratedDbSo.entries is null.");
-
+        BuildPortraitMap(db);
+    }
+    
+    private void BuildPortraitMap(PortraitGeneratedDbSo db)
+    {
         var entries = db.entries;
+        
         for (int i = 0; i < entries.Count; i++)
         {
-            var e = entries[i];
-
-            string characterId = (e.characterId ?? "").Trim();
-            string variantKey = (e.variantKey ?? "").Trim();
-            string emotionKey = NormalizeEmotionCode(e.emotionKey);
-
-            if (string.IsNullOrEmpty(characterId) ||
-                string.IsNullOrEmpty(variantKey) ||
-                string.IsNullOrEmpty(emotionKey))
-            {
-#if UNITY_EDITOR
-                Debug.LogWarning(
-                    $"[PortraitResolver] Invalid portrait entry ignored. " +
-                    $"character='{e.characterId}', variant='{e.variantKey}', emotion='{e.emotionKey}'.");
-#endif
-                continue;
-            }
-
-            var key = MakeKey(characterId, variantKey, emotionKey);
+            PortraitGeneratedDbSo.Entry e = entries[i];
+            
+            var key = MakeKey(e.characterId, e.variantKey, e.emotionKey);
 
             if (!_map.TryAdd(key, e.sprite))
-            {
-#if UNITY_EDITOR
-                Debug.LogWarning(
-                    $"[PortraitResolver] Duplicate portrait key ignored. " +
-                    $"{characterId}|{variantKey}|{emotionKey}");
-#endif
-            }
+                Debug.LogWarning($"[PortraitResolver] Duplicate portrait key ignored. index={i}, key='{key}'");
         }
     }
 
-    public Sprite Resolve(
-        CommandRunScope scope,
-        string targetKey,
-        PortraitIdentity portrait,
-        string debugName)
+    public Sprite Resolve(CommandRunScope scope, string targetKey, PortraitIdentity portrait, string debugName)
     {
-        string roleKey = CharacterRigTargetResolver.ResolveRoleKeyFromTargetKey(scope, targetKey);
+        string roleKey = CharacterRigTargetResolver.ResolveSlotKeyFromTargetKey(scope, targetKey);
 
         string character = portrait.character;
         string variant = portrait.variant;
         string emotion = portrait.emotion;
-
-        ApplyCastBindingContextIfNeeded(scope, roleKey, ref character, ref variant);
-
-        NormalizeAndValidateIdentity(
-            targetKey,
-            roleKey,
-            debugName,
-            ref character,
-            ref variant,
-            ref emotion);
-
-        Sprite sprite = ResolveSpriteByKeys(character, variant, emotion);
-
-        if (sprite == null)
+        
+        // Empty character/variant are resolved from the character cast to this slot.
+        if (string.IsNullOrEmpty(character) || string.IsNullOrEmpty(variant))
         {
-            string normalizedEmotion = NormalizeEmotionCode(emotion);
+            scope.CastRegistry.TryGetCharacter(roleKey, out string characterKey);
+                character = characterKey;
+                
+            scope.CastRegistry.TryGetVariant(roleKey, out string variantKey);
+                variant = variantKey;
+        }
+        
+        // Character-only portrait calls fall back to the default variant.
+        if (string.IsNullOrEmpty(variant))
+            variant = DefaultVariant;
 
-            throw new InvalidOperationException(
+        var key = MakeKey(character, variant, emotion);
+
+        if (!_map.TryGetValue(key, out Sprite sprite) || sprite == null)
+        {
+            Debug.LogWarning(
                 $"[{debugName}] Failed to resolve portrait. " +
                 $"targetKey='{targetKey}', roleKey='{roleKey}', " +
                 $"character='{character}', variant='{variant}', " +
-                $"emotion='{emotion}', normalizedEmotion='{normalizedEmotion}'.");
+                $"emotion='{emotion}'.");
+
+            return null;
         }
 
         return sprite;
     }
 
-    private static void ApplyCastBindingContextIfNeeded(
-        CommandRunScope scope,
-        string roleKey,
-        ref string character,
-        ref string variant)
-    {
-        if (!string.IsNullOrEmpty(character) && !string.IsNullOrEmpty(variant))
-            return;
-
-        ApplyCastBindingContext(scope, roleKey, ref character, ref variant);
-    }
-
-    private static void ApplyCastBindingContext(
-        CommandRunScope scope,
-        string roleKey,
-        ref string character,
-        ref string variant)
-    {
-        if (scope == null)
-            return;
-
-        if (scope.CastRegistry == null)
-            return;
-
-        if (!scope.CastRegistry.TryGetBinding(roleKey, out CastBinding binding))
-            return;
-
-        if (string.IsNullOrEmpty(character))
-            character = binding.CharacterKey;
-
-        if (string.IsNullOrEmpty(variant))
-            variant = binding.VariantKey;
-    }
-
-    private static void NormalizeAndValidateIdentity(
-        string targetKey,
-        string roleKey,
-        string debugName,
-        ref string character,
-        ref string variant,
-        ref string emotion)
-    {
-        character = (character ?? "").Trim();
-        variant = (variant ?? "").Trim();
-        emotion = (emotion ?? "").Trim();
-
-        if (string.IsNullOrEmpty(character))
-        {
-            throw new InvalidOperationException(
-                $"[{debugName}] Character is empty. " +
-                $"targetKey='{targetKey}', roleKey='{roleKey}'.");
-        }
-
-        if (string.IsNullOrEmpty(variant))
-            variant = DefaultVariant;
-
-        if (string.IsNullOrEmpty(emotion))
-        {
-            throw new InvalidOperationException(
-                $"[{debugName}] Emotion is empty. " +
-                $"targetKey='{targetKey}', roleKey='{roleKey}', " +
-                $"character='{character}', variant='{variant}'.");
-        }
-    }
-
-    private Sprite ResolveSpriteByKeys(string characterId, string variantKey, string emotionKey)
+    private static (string characterId, char variantSuffix, string emotionKey) MakeKey(string characterId, string variantKey, string emotionKey)
     {
         characterId = (characterId ?? "").Trim();
         variantKey = (variantKey ?? "").Trim();
         emotionKey = NormalizeEmotionCode(emotionKey);
 
-        if (characterId.Length == 0 || variantKey.Length == 0 || emotionKey.Length == 0)
-            return null;
-
-        var key = MakeKey(characterId, variantKey, emotionKey);
-        return _map.TryGetValue(key, out Sprite sprite) && sprite ? sprite : null;
-    }
-
-    private static (string characterId, char variantSuffix, string emotionKey)
-        MakeKey(string characterId, string variantKey, string emotionKey)
-    {
-        characterId = (characterId ?? "").Trim();
-        variantKey = (variantKey ?? "").Trim();
-        emotionKey = (emotionKey ?? "").Trim();
-
-        char suffix = variantKey.Length > 0 ? variantKey[variantKey.Length - 1] : '\0';
+        char suffix = (variantKey.Length > 0) 
+            ? variantKey[^1]
+            : '\0';
+        
         return (characterId, suffix, emotionKey);
     }
 

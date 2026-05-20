@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-[CreateAssetMenu(menuName = "CPS/Portraits/Generated Db", fileName = "PortraitGeneratedDb")]
+//[CreateAssetMenu(menuName = "CPS/Portraits/Generated Db", fileName = "PortraitGeneratedDb")]
 public sealed class PortraitGeneratedDbSo : ScriptableObject
 {
     [Serializable]

@@ -1,106 +1,96 @@
 using System;
 using System.Collections.Generic;
-
-public readonly struct CastBinding
-{
-    public readonly string RoleKey;
-    public readonly string CharacterKey;
-    public readonly string VariantKey;
-
-    public CastBinding(string roleKey, string characterKey, string variantKey)
-    {
-        RoleKey = roleKey;
-        CharacterKey = characterKey;
-        VariantKey = variantKey;
-    }
-}
+using UnityEngine;
 
 public sealed class CastRegistry
 {
-    private readonly Dictionary<string, CastBinding> _roleToBinding = new(StringComparer.Ordinal);
-    private readonly Dictionary<string, string> _characterToRole = new(StringComparer.Ordinal);
-
-    public bool TryGetBinding(string roleKey, out CastBinding binding)
+    private readonly struct CastBinding
     {
-        return _roleToBinding.TryGetValue(roleKey, out binding);
-    }
+        public readonly string slot;
+        public readonly string character;
+        public readonly string variant;
 
-    public bool TryGetCharacter(string roleKey, out string characterKey)
-    {
-        if (TryGetBinding(roleKey, out CastBinding binding))
+        public CastBinding(string slot, string character, string variant)
         {
-            characterKey = binding.CharacterKey;
-            return true;
+            this.slot = slot;
+            this.character = character;
+            this.variant = variant;
         }
-
-        characterKey = null;
-        return false;
     }
-
-    public bool TryGetVariant(string roleKey, out string variantKey)
+    
+    private readonly Dictionary<string, CastBinding> _slotToBinding = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, string> _characterToSlot = new(StringComparer.Ordinal);
+    
+    public void CastCharRig(string slotKey, string characterKey, string variantKey)
     {
-        if (TryGetBinding(roleKey, out CastBinding binding))
-        {
-            variantKey = binding.VariantKey;
-            return true;
-        }
-
-        variantKey = null;
-        return false;
-    }
-
-    public bool TryGetRole(string characterKey, out string roleKey)
-    {
-        return _characterToRole.TryGetValue(characterKey, out roleKey);
-    }
-
-    public void Cast(string roleKey, string characterKey, string variantKey)
-    {
-        if (string.IsNullOrEmpty(roleKey) || string.IsNullOrEmpty(characterKey))
+        if (string.IsNullOrEmpty(slotKey) || string.IsNullOrEmpty(characterKey))
             return;
+        
+        if(IsCast(slotKey))
+            UncastCharRig(slotKey);
 
-        UncastRole(roleKey);
-        UncastCharacterInternal(characterKey);
-
-        _roleToBinding[roleKey] = new CastBinding(roleKey, characterKey, variantKey);
-        _characterToRole[characterKey] = roleKey;
+        _slotToBinding[slotKey] = new CastBinding(slotKey, characterKey, variantKey);
+        _characterToSlot[characterKey] = slotKey;
     }
 
-    public bool UncastRole(string roleKey)
+    public bool UncastCharRig(string slotKey)
     {
-        if (string.IsNullOrEmpty(roleKey))
+        if (!_slotToBinding.Remove(slotKey, out CastBinding binding))
+        {
+            Debug.LogWarning($"[CastRegistry] Uncast failed. Binding not found. slotKey='{slotKey}'.");
             return false;
+        }
 
-        if (!_roleToBinding.TryGetValue(roleKey, out CastBinding binding))
-            return false;
-
-        _roleToBinding.Remove(roleKey);
-
-        if (!string.IsNullOrEmpty(binding.CharacterKey))
-            _characterToRole.Remove(binding.CharacterKey);
-
+        _characterToSlot.Remove(binding.character);
         return true;
     }
 
+    public bool TryGetCharacter(string slotKey, out string characterKey)
+    {
+        if (!_slotToBinding.TryGetValue(slotKey, out CastBinding binding))
+        {
+            Debug.LogWarning($"[CastRegistry] Binding not found. slotKey='{slotKey}'." +
+                             $" Expected order: SetupCommand -> CastCommand -> PortraitCommand.");
+            
+            characterKey = null;
+            return false;
+        }
+        
+        characterKey = binding.character;
+        return true;
+    }
+
+    public bool TryGetVariant(string slotKey, out string variantKey)
+    {
+        if (!_slotToBinding.TryGetValue(slotKey, out CastBinding binding))
+        {
+            Debug.LogWarning($"[CastRegistry] Binding not found. slotKey='{slotKey}'." +
+                             $" Expected order: SetupCommand -> CastCommand -> PortraitCommand.");
+            
+            variantKey = null;
+            return false;
+        }
+
+        variantKey = binding.variant;
+        return true;
+    }
+    
+    public bool TryGetSlotKey(string characterKey, out string slotKey)
+    {
+        return _characterToSlot.TryGetValue(characterKey, out slotKey);
+    }
+    
+    private bool IsCast(string targetKey)
+    {
+        if (_characterToSlot.ContainsKey(targetKey))
+            return true;
+
+        return _slotToBinding.ContainsKey(targetKey);
+    }
+    
     public void Clear()
     {
-        _roleToBinding.Clear();
-        _characterToRole.Clear();
-    }
-
-    private bool UncastCharacterInternal(string characterKey)
-    {
-        if (string.IsNullOrEmpty(characterKey))
-            return false;
-
-        if (!_characterToRole.TryGetValue(characterKey, out string roleKey))
-            return false;
-
-        _characterToRole.Remove(characterKey);
-
-        if (!string.IsNullOrEmpty(roleKey))
-            _roleToBinding.Remove(roleKey);
-
-        return true;
+        _slotToBinding.Clear();
+        _characterToSlot.Clear();
     }
 }

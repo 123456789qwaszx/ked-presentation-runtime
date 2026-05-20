@@ -43,8 +43,8 @@ public sealed class UncastCharacterCommand : CommandBase
     private void Apply(CommandRunScope scope)
     {
         string roleKey = 
-            CharacterRigTargetResolver.ResolveRoleKeyFromTargetKey(scope, _spec.targetKey);
+            CharacterRigTargetResolver.ResolveSlotKeyFromTargetKey(scope, _spec.targetKey);
 
-        scope.CastRegistry.UncastRole(roleKey);
+        scope.CastRegistry.UncastCharRig(roleKey);
     }
 }

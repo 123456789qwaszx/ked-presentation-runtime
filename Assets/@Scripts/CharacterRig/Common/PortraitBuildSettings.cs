@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(menuName = "CPS/Portraits/Build Settings", fileName = "PortraitBuildSettings")]
+//[CreateAssetMenu(menuName = "CPS/Portraits/Build Settings", fileName = "PortraitBuildSettings")]
 public sealed class PortraitBuildSettings : ScriptableObject
 {
     [Header("Scan Folders")]
