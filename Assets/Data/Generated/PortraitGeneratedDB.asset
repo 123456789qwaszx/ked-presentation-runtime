@@ -15,9 +15,9 @@ MonoBehaviour:
   entries:
   - characterId: Albedo
     variantKey: Albedo_a
-    emotionKey: 01
+    emotionKey: 02
     sprite: {fileID: 21300000, guid: 293820fa5cc5daa4a94b1e79c25e1525, type: 3}
-    assetPath: Assets/Art/Portraits/Albedo/Albedo_a_01.png
+    assetPath: Assets/Art/Portraits/Albedo/Albedo_a_02.png
   - characterId: Albedo
     variantKey: Albedo_a
     emotionKey: 03
@@ -100,9 +100,9 @@ MonoBehaviour:
     assetPath: Assets/Art/Portraits/Albedo/Albedo_a_18.png
   - characterId: Bastelina
     variantKey: Bastelina_a
-    emotionKey: 01
+    emotionKey: 02
     sprite: {fileID: 21300000, guid: 20d46ab39ec459c4cab346e4cc8880a5, type: 3}
-    assetPath: Assets/Art/Portraits/Bastelina/Bastelina_a_01.png
+    assetPath: Assets/Art/Portraits/Bastelina/Bastelina_a_02.png
   - characterId: Bastelina
     variantKey: Bastelina_a
     emotionKey: 03
@@ -190,9 +190,9 @@ MonoBehaviour:
     assetPath: Assets/Art/Portraits/Bastelina/Bastelina_a_19.png
   - characterId: Caramel
     variantKey: Caramel_a
-    emotionKey: 01
+    emotionKey: 02
     sprite: {fileID: 21300000, guid: def2b91f8fa95f246b652b83b4115382, type: 3}
-    assetPath: Assets/Art/Portraits/Caramel/Caramel_a_01.png
+    assetPath: Assets/Art/Portraits/Caramel/Caramel_a_02.png
   - characterId: Caramel
     variantKey: Caramel_a
     emotionKey: 03
@@ -240,9 +240,9 @@ MonoBehaviour:
     assetPath: Assets/Art/Portraits/Caramel/Caramel_a_11.png
   - characterId: Gang_Girl
     variantKey: Gang_Girl_a
-    emotionKey: 01
+    emotionKey: 02
     sprite: {fileID: 21300000, guid: 7e4e64f7713b4484ab01267922914c63, type: 3}
-    assetPath: Assets/Art/Portraits/Gang_Girl/Gang_Girl_a_01.png
+    assetPath: Assets/Art/Portraits/Gang_Girl/Gang_Girl_a_02.png
   - characterId: Gang_Girl
     variantKey: Gang_Girl_a
     emotionKey: 03
@@ -330,9 +330,9 @@ MonoBehaviour:
     assetPath: Assets/Art/Portraits/Gang_Girl/Gang_Girl_b_10.png
   - characterId: Laru
     variantKey: Laru_a
-    emotionKey: 01
+    emotionKey: 02
     sprite: {fileID: 21300000, guid: 369eed8fb8013a341b3fa0bce2f8a2e2, type: 3}
-    assetPath: Assets/Art/Portraits/Laru/Laru_a_01.png
+    assetPath: Assets/Art/Portraits/Laru/Laru_a_02.png
   - characterId: Laru
     variantKey: Laru_a
     emotionKey: 03
@@ -520,9 +520,9 @@ MonoBehaviour:
     assetPath: Assets/Art/Portraits/Laru/Laru_b_11.png
   - characterId: Leafia
     variantKey: Leafia_a
-    emotionKey: 01
+    emotionKey: 02
     sprite: {fileID: 21300000, guid: 25cb455ae44d5354bbca1d2742d0facc, type: 3}
-    assetPath: Assets/Art/Portraits/Leafia/Leafia_a_01.png
+    assetPath: Assets/Art/Portraits/Leafia/Leafia_a_02.png
   - characterId: Leafia
     variantKey: Leafia_a
     emotionKey: 03
@@ -570,9 +570,9 @@ MonoBehaviour:
     assetPath: Assets/Art/Portraits/Leafia/Leafia_a_11.png
   - characterId: Matilda
     variantKey: Matilda_a
-    emotionKey: 01
+    emotionKey: 02
     sprite: {fileID: 21300000, guid: 34305b2b39ab86449bb65e0413b709b6, type: 3}
-    assetPath: Assets/Art/Portraits/Matilda/Matilda_a_01.png
+    assetPath: Assets/Art/Portraits/Matilda/Matilda_a_02.png
   - characterId: Matilda
     variantKey: Matilda_a
     emotionKey: 03
@@ -625,9 +625,9 @@ MonoBehaviour:
     assetPath: Assets/Art/Portraits/Matilda/Matilda_a_12.png
   - characterId: Mercurio
     variantKey: Mercurio_a
-    emotionKey: 01
+    emotionKey: 02
     sprite: {fileID: 21300000, guid: af83fbabe6a02f84eb165096dd539101, type: 3}
-    assetPath: Assets/Art/Portraits/Mercurio/Mercurio_a_01.png
+    assetPath: Assets/Art/Portraits/Mercurio/Mercurio_a_02.png
   - characterId: Mercurio
     variantKey: Mercurio_a
     emotionKey: 03
@@ -680,9 +680,9 @@ MonoBehaviour:
     assetPath: Assets/Art/Portraits/Mercurio/Mercurio_a_12.png
   - characterId: Okra
     variantKey: Okra_a
-    emotionKey: 01
+    emotionKey: 02
     sprite: {fileID: 21300000, guid: 8ed1f6cefe5b5504481bb6c11948e59b, type: 3}
-    assetPath: Assets/Art/Portraits/Okra/Okra_a_01.png
+    assetPath: Assets/Art/Portraits/Okra/Okra_a_02.png
   - characterId: Okra
     variantKey: Okra_a
     emotionKey: 03
@@ -740,9 +740,9 @@ MonoBehaviour:
     assetPath: Assets/Art/Portraits/Okra/Okra_a_13.png
   - characterId: Ophir
     variantKey: Ophir_a
-    emotionKey: 01
+    emotionKey: 02
     sprite: {fileID: 21300000, guid: 2ab7bc380113a8b4384cae531417b8d4, type: 3}
-    assetPath: Assets/Art/Portraits/Ophir/Ophir_a_01.png
+    assetPath: Assets/Art/Portraits/Ophir/Ophir_a_02.png
   - characterId: Ophir
     variantKey: Ophir_a
     emotionKey: 03
@@ -805,9 +805,9 @@ MonoBehaviour:
     assetPath: Assets/Art/Portraits/Ophir/Ophir_a_14.png
   - characterId: Ruby
     variantKey: Ruby_a
-    emotionKey: 01
+    emotionKey: 02
     sprite: {fileID: 21300000, guid: ee7b23bb1ac85f5498a0d84fbccdf42e, type: 3}
-    assetPath: Assets/Art/Portraits/Ruby/Ruby_a_01.png
+    assetPath: Assets/Art/Portraits/Ruby/Ruby_a_02.png
   - characterId: Ruby
     variantKey: Ruby_a
     emotionKey: 03
@@ -865,9 +865,9 @@ MonoBehaviour:
     assetPath: Assets/Art/Portraits/Ruby/Ruby_a_13.png
   - characterId: Sapphire
     variantKey: Sapphire_a
-    emotionKey: 01
+    emotionKey: 02
     sprite: {fileID: 21300000, guid: c7b43fe19dfdd444dbf98b25765a6d2b, type: 3}
-    assetPath: Assets/Art/Portraits/Sapphire/Sapphire_a_01.png
+    assetPath: Assets/Art/Portraits/Sapphire/Sapphire_a_02.png
   - characterId: Sapphire
     variantKey: Sapphire_a
     emotionKey: 03
@@ -925,9 +925,9 @@ MonoBehaviour:
     assetPath: Assets/Art/Portraits/Sapphire/Sapphire_a_13.png
   - characterId: Willow
     variantKey: Willow_a
-    emotionKey: 01
+    emotionKey: 02
     sprite: {fileID: 21300000, guid: e46e01f01017bbe47b4d98308ded1e35, type: 3}
-    assetPath: Assets/Art/Portraits/Willow/Willow_a_01.png
+    assetPath: Assets/Art/Portraits/Willow/Willow_a_02.png
   - characterId: Willow
     variantKey: Willow_a
     emotionKey: 03
@@ -1045,18 +1045,18 @@ MonoBehaviour:
     assetPath: Assets/Art/Portraits/Willow/Willow_a_25.png
   - characterId: kuonji
     variantKey: kuonji_a
-    emotionKey: 01
+    emotionKey: 02
     sprite: {fileID: 21300000, guid: 5400a22ba5aa20042897f8eff80d6cfa, type: 3}
-    assetPath: Assets/Art/Portraits/kuonji/kuonji_a_01.png
+    assetPath: Assets/Art/Portraits/kuonji/kuonji_a_02.png
   - characterId: momoka
     variantKey: momoka_a
-    emotionKey: 01
+    emotionKey: 02
     sprite: {fileID: 21300000, guid: f0006a933c433794787fa34a377bd1b4, type: 3}
-    assetPath: Assets/Art/Portraits/momoka/momoka_a_01.png
+    assetPath: Assets/Art/Portraits/momoka/momoka_a_02.png
   - characterId: reira
     variantKey: reira_a
-    emotionKey: 01
+    emotionKey: 02
     sprite: {fileID: 21300000, guid: 2c5e83a3f43fc544fa622f82902d7d2d, type: 3}
-    assetPath: Assets/Art/Portraits/reira/reira_a_01.png
-  generatedTicksUtc: 639148618787859129
-  generatedTimeReadable: 2026-05-20 17:17:58
+    assetPath: Assets/Art/Portraits/reira/reira_a_02.png
+  generatedTicksUtc: 639148661388416712
+  generatedTimeReadable: 2026-05-20 18:28:58

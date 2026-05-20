@@ -1068,9 +1068,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
     {
         var portraitIdentity = new PortraitIdentity
         {
-            character = character,
-            variant = "a",
-            emotion = "1"
+            character = character
         };
 
         var spec = new SetPortraitCrossfadeCommandSpecCharR
@@ -1102,9 +1100,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         {
             targetKey = roleKey,
             portrait = new PortraitIdentity
-            {
-                emotion = "1"
-            }
+            { }
         };
 
         Collect(castSpec);
@@ -1155,10 +1151,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         var spec = new SetEmotionPortraitWipeCommandSpec
         {
             targetKey = targetKey,
-            portrait = new PortraitIdentity
-            {
-                emotion = emotion
-            }
+            portrait = new PortraitIdentity { }
         };
 
         Collect(spec);

@@ -80,6 +80,13 @@ public sealed class CastRegistry
         return _characterToSlot.TryGetValue(characterKey, out slotKey);
     }
     
+    public void Clear()
+    {
+        _slotToBinding.Clear();
+        _characterToSlot.Clear();
+    }
+    
+    
     private bool IsCast(string targetKey)
     {
         if (_characterToSlot.ContainsKey(targetKey))
@@ -88,9 +95,4 @@ public sealed class CastRegistry
         return _slotToBinding.ContainsKey(targetKey);
     }
     
-    public void Clear()
-    {
-        _slotToBinding.Clear();
-        _characterToSlot.Clear();
-    }
 }

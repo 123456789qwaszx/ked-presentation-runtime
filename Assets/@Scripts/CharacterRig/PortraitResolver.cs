@@ -4,6 +4,8 @@ using UnityEngine;
 public sealed class PortraitResolver
 {
     private const string DefaultVariant = "a";
+    private const string DefaultEmotion = "02";
+    private const string FallbackEmotion = "01";
 
     private readonly Dictionary<(string characterId, char variantSuffix, string emotionKey), Sprite> _map = new();
 
@@ -48,6 +50,9 @@ public sealed class PortraitResolver
         // Character-only portrait calls fall back to the default variant.
         if (string.IsNullOrEmpty(variant))
             variant = DefaultVariant;
+        
+        if (string.IsNullOrEmpty(emotion))
+            emotion = DefaultEmotion;
 
         var key = MakeKey(character, variant, emotion);
 
@@ -59,6 +64,9 @@ public sealed class PortraitResolver
                 $"character='{character}', variant='{variant}', " +
                 $"emotion='{emotion}'.");
 
+            if (_map.TryGetValue(MakeKey(character, DefaultVariant, FallbackEmotion), out sprite))
+                return sprite;
+            
             return null;
         }
 
