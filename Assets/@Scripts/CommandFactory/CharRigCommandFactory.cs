@@ -1,3 +1,5 @@
+using UnityEngine;
+
 public enum CharRigDirection
 {
     Left = 0,
@@ -12,17 +14,28 @@ public sealed class CharRigCommandFactory : INodeCommandFactory
     private readonly CharacterRigBuilder _rigBuilder;
     private readonly PortraitResolver _portraitResolver;
     private readonly CharacterEmojiResolver _emojiResolver;
+    
+    private readonly  RectTransform _rigPrefab;
+    private readonly  CharStageTuningSO _globalTuning;
+    private readonly  RoleAnchorTuningDBSO _roleTuningDb;
 
     public CharRigCommandFactory(
         CharRigSlotResolver charRigSlotResolver,
         CharacterRigBuilder charRigBuilder,
         PortraitResolver portraitResolver,
-        CharacterEmojiResolver emojiResolver)
+        CharacterEmojiResolver emojiResolver,
+        RectTransform rigPrefab,
+        CharStageTuningSO globalTuning,
+        RoleAnchorTuningDBSO roleTuningDb
+        )
     {
         _rigSlotResolver = charRigSlotResolver;
         _rigBuilder = charRigBuilder;
         _portraitResolver = portraitResolver;
         _emojiResolver = emojiResolver;
+        _rigPrefab = rigPrefab;
+        _globalTuning = globalTuning;
+        _roleTuningDb = roleTuningDb;
     }
 
     public bool TryCreate(CommandSpecBase spec, out ISequenceCommand command)
@@ -31,7 +44,14 @@ public sealed class CharRigCommandFactory : INodeCommandFactory
         {
             null => null,
             
-            SetupCharRigCommandSpec s         => new SetupCharRigCommand(_rigSlotResolver, _rigBuilder, s),
+            SetupCharRigCommandSpec s         => new SetupCharRigCommand(_rigPrefab, _rigSlotResolver, _rigBuilder, s),
+            
+            CastCharacterCommandSpec s => new CastCharacterCommand(s),
+            UncastCharacterCommandSpec s => new UncastCharacterCommand(s),
+            
+            SetAnchorCommandSpecCharR s     => new SetAnchorCommandCharR(s, _globalTuning, _roleTuningDb),
+            
+            
             DestroyCommandSpec s            => new DestroyCommand(s),
             ClearCharRigRefsCommandSpec s => new ClearCharRigRefsCommand(s),
             
@@ -40,9 +60,8 @@ public sealed class CharRigCommandFactory : INodeCommandFactory
             MoveByCommandSpecCharR s        => new MoveByCommandCharR(s),
             ScaleToCommandSpecCharR s   => new ScaleToCommandCharR(s),
             HideRootLayersCommandSpecCharR s     => new HideRootLayersCommandCharR(s),
-            SetAnchorCommandSpecCharR s     => new SetAnchorCommandCharR(s),
             ShowRootLayersCommandSpecCharR s     => new ShowRootLayersCommandCharR(s),
-            SetOriginSizeCommandSpecCharR s => new SetOriginSizeCommandCharR(s),
+            SetOriginSizeCommandSpecCharR s => new SetOriginSizeCommandCharR(s, _globalTuning, _roleTuningDb),
             FadeOutCommandSpecCharR s       => new FadeOutCommandCharR(s),
             FadeInCommandSpecCharR s        => new FadeInCommandCharR(s),
             SwayCommandSpecCharR s          => new SwayCommandCharR(s),
@@ -69,8 +88,6 @@ public sealed class CharRigCommandFactory : INodeCommandFactory
             //ShowEmojiCommandSpecCharR s    => new ShowEmojiCommandCharR(s),
             SetSpriteCommandSpecCharR s     => new SetSpriteCommandCharR(s),
             
-            CastCharacterCommandSpec s => new CastCharacterCommand(s),
-            UncastCharacterCommandSpec s => new UncastCharacterCommand(s),
             
             
             // 새 커맨드

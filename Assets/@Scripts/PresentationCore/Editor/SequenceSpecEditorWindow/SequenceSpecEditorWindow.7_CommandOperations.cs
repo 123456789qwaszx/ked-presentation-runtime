@@ -217,7 +217,7 @@ public sealed partial class SequenceSpecEditorWindow
         switch (inst)
         {
             case CharacterRigCommandSpecBase charRigSpec:
-                charRigSpec.targetKey = key;
+                charRigSpec.slotKey = key;
                 break;
 
             case SetupCharRigCommandSpec setupSpec:

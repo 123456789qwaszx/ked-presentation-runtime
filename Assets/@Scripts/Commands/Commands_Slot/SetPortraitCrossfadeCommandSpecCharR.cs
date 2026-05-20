@@ -61,7 +61,7 @@ public sealed class SetPortraitCrossfadeCommandCharR : CommandBase, IStepScopedC
         Sprite targetSprite =
             _resolver.Resolve(
                 scope,
-                _spec.targetKey,
+                _spec.slotKey,
                 _spec.portrait,
                 nameof(SetPortraitCrossfadeCommandCharR));
 
@@ -123,7 +123,7 @@ public sealed class SetPortraitCrossfadeCommandCharR : CommandBase, IStepScopedC
         Sprite targetSprite =
             _resolver.Resolve(
                 scope,
-                _spec.targetKey,
+                _spec.slotKey,
                 _spec.portrait,
                 nameof(SetPortraitCrossfadeCommandCharR));
 
@@ -159,7 +159,7 @@ public sealed class SetPortraitCrossfadeCommandCharR : CommandBase, IStepScopedC
         _resolveAttempted = true;
 
         CharacterRigRefs rigRefs =
-            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.targetKey);
+            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
 
         _portraitRoot = rigRefs.CharacterPortraitSprite_Root;
         _overlayRoot = rigRefs.CharacterPortraitSpriteOverlay_Root;

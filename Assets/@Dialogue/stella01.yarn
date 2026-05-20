@@ -13,10 +13,15 @@
 <<slot MySlot 0>>
 <<cast MySlot Leafia>>
 
-<<place Leafia center>>
+<<slot Alb 0>>
+<<cast Alb Albedo a 02 true right normal>>
+
+<<slot Mercurio 0>>
+<<cast Mercurio Mercurio a 02 true center normal>>
+
+<<place Leafia left>>
 <<size Leafia normal>>
 
-<<scale_to Leafia 0.2>>
 <<breathe Leafia 99 5 0.25>>
 
 
@@ -24,7 +29,7 @@
 
 <<p_strip_clear vsw 0>>
 
-<<shot_zoom_focus MySlot bust center 5 1>>
+//<<shot_zoom_focus MySlot bust center 5 1>>
 
 Leafia: 이번에 저희 컴퍼니를 선택해 주셔서 감사합니다. [br/]저는 천궁보험 필리에 영업부매니저 메르쿠리아라고 합니다.
 

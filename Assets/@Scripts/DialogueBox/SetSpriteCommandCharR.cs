@@ -65,14 +65,14 @@ public sealed class SetSpriteCommandCharR : CommandBase
         CharacterRigRefs rig =
             CharacterRigTargetResolver.ResolveCharRigFromTargetKey(
                 scope,
-                _spec.targetKey);
+                _spec.slotKey);
 
         _image = rig.GetComponent(_spec.target) as Image;
 
         if (_image == null)
         {
             throw new InvalidOperationException(
-                $"[SetSpriteCommandCharR] Target Image not found. targetKey='{_spec.targetKey}', target='{_spec.target}'.");
+                $"[SetSpriteCommandCharR] Target Image not found. targetKey='{_spec.slotKey}', target='{_spec.target}'.");
         }
     }
 

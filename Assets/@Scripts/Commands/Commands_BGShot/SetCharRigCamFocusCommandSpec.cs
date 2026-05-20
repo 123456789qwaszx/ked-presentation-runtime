@@ -92,7 +92,7 @@ public sealed class SetCharRigCamFocusCommand : CommandBase
     {
         _resolveAttempted = true;
 
-        string roleKey = SafeTrim(_spec.targetKey);
+        string roleKey = SafeTrim(_spec.slotKey);
 
         if (string.IsNullOrEmpty(roleKey))
         {

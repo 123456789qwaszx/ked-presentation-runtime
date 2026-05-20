@@ -1,6 +1,4 @@
-using System;
 using System.Collections;
-using System.Globalization;
 using DG.Tweening;
 using UnityEngine;
 using Yarn.Unity;
@@ -9,14 +7,8 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 {
     private DialogueRunner _dialogueRunner;
     private YarnBridgePlaybackDriver _playbackDriver;
-
-    [Header("Rig")] public RectTransform rigPrefab;
-    [Header("Global Tuning")] public CharStageTuningSO globalTuning;
-    [Header("Role Tuning")] public RoleAnchorTuningDBSO roleTuningDb;
-
-    public void Initialize(
-        DialogueRunner dialogueRunner,
-        YarnBridgePlaybackDriver playbackDriver)
+    
+    public void Initialize(DialogueRunner dialogueRunner, YarnBridgePlaybackDriver playbackDriver)
     {
         _dialogueRunner = dialogueRunner;
         _playbackDriver = playbackDriver;
@@ -29,6 +21,13 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 
     public void RegisterYarnCommands()
     {
+        _dialogueRunner.AddCommandHandler<string, string>("slot", EnqueueSetupCharRigSpec);
+        _dialogueRunner.AddCommandHandler<string, string,  string, string, bool, string, string>("cast", EnqueueCastCharacterSpec);
+        _dialogueRunner.AddCommandHandler<string, string, bool, bool>("place", EnqueueSetAnchorSpecs);
+        _dialogueRunner.AddCommandHandler<string, string>("size", EnqueueSetOriginSizeSpec);
+        
+        _dialogueRunner.AddCommandHandler<string, int, int>("place_offset", EnqueueSetAnchorOffsetSpecs);
+        _dialogueRunner.AddCommandHandler<string>("uncast", EnqueueUncastCharacterSpec);
         
         _dialogueRunner.AddCommandHandler<string>("destroy", EnqueueDestroySpec);
         
@@ -46,10 +45,6 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         //_dialogueRunner.AddCommandHandler("end_hold", (Func<IEnumerator>)(() => PlayHeldCommands()));
         _dialogueRunner.AddCommandHandler("end_hold", PlayHeldCommands);
         
-        _dialogueRunner.AddCommandHandler<string, string>("slot", EnqueueSetupCharRigSpec);
-        _dialogueRunner.AddCommandHandler<string, string>("place", EnqueueSetAnchorSpecs);
-        _dialogueRunner.AddCommandHandler<string, int, int>("place_offset", EnqueueSetAnchorOffsetSpecs);
-        _dialogueRunner.AddCommandHandler<string, string>("size", EnqueueSetOriginSizeSpec);
         
         _dialogueRunner.AddCommandHandler<string, float, float>("move_by", EnqueueMoveBySpec);
         _dialogueRunner.AddCommandHandler<string, float, float>("scale_to", EnqueueScaleToSpec);
@@ -105,15 +100,131 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         _dialogueRunner.AddCommandHandler<string>("slide_in_sway", EnqueueSlideInSwayCombo);
 
 
-        // slot <-> character binding
-        _dialogueRunner.AddCommandHandler<string, string, string>("cast", EnqueueCastCharacterSpec);
-        _dialogueRunner.AddCommandHandler<string>("uncast", EnqueueUncastCharacterSpec);
         
         _dialogueRunner.AddCommandHandler<float>("pause", EnqueueWaitSpec);
         
         // clear character rigs
         _dialogueRunner.AddCommandHandler("clearall_rigs", EnqueueClearAllCharRigRefsSpec);
         _dialogueRunner.AddCommandHandler<string>("clear_rig", EnqueueClearCharRigRefSpec);
+    }
+    
+    
+    private void EnqueueSetupCharRigSpec(string slotKey, string parentKey)
+    {
+        var spec = new SetupCharRigCommandSpec { roleKey = slotKey, };
+        
+        if (CharRigSlotParser.TryParse(parentKey, out CharRigSlot parentSlot))
+            spec.parentSlot = parentSlot;
+        
+        Collect(spec);
+    }
+    
+    private void EnqueueCastCharacterSpec(string slotKey, string characterKey, 
+        string variantKey = "a", string emotionKey = "02",
+        bool applySetup = true,
+        string positionPreset = "center",
+        string scaleArg = "normal"
+        )
+    {
+        var castSpec = new CastCharacterCommandSpec
+        {
+            slotKey = slotKey,
+            characterKey = characterKey,
+            variantKey = variantKey
+        };
+        
+        Collect(castSpec);
+
+        EnqueueSetPortraitSpriteSpec(slotKey, characterKey, variantKey, emotionKey);
+        
+        if (!applySetup)
+            return;
+
+        EnqueueSetAnchorSpecs(slotKey, positionPreset);
+        EnqueueSetOriginSizeSpec(slotKey, scaleArg);
+    }
+    
+    private void EnqueueSetPortraitSpriteSpec(string slotKey, 
+        string characterKey, string variantKey, string emotionKey)
+    {
+        var spec = new SetPortraitSpriteCommandSpecCharR
+        {
+            slotKey = slotKey,
+            portrait = new PortraitIdentity
+            {
+                character = characterKey,
+                variant = variantKey,
+                emotion = emotionKey
+            }
+        };
+
+        Collect(spec);
+    }
+    
+    private void EnqueueSetAnchorSpecs(string slotKey, string positionPreset, bool resetSlotPos = true, bool resetCharPos = true)
+    {
+        CharAnchorPreset preset = CharAnchorPresetParser.Parse(positionPreset);
+
+        var anchorSpec = new SetAnchorCommandSpecCharR
+        {
+            slotKey = slotKey,
+            target = CharacterRigTarget.Character_CastTransform,
+            preset = preset,
+            resetSlotPos = resetSlotPos,
+            resetCharacterPos =  resetCharPos
+        };
+
+        Collect(anchorSpec);
+    }
+    
+    private void EnqueueSetOriginSizeSpec(string roleKey, string scaleArg)
+    {
+        if (YarnNumberParser.TryParseFloat(scaleArg, out float absoluteScale))
+        {
+            var absoluteScaleSpec = new SetOriginSizeCommandSpecCharR
+            {
+                slotKey = roleKey,
+
+                overrideScale = true,
+                scaleOverride = new Vector3(absoluteScale, absoluteScale, absoluteScale),
+
+                preset = CharScalePreset.None,
+            };
+
+            Collect(absoluteScaleSpec);
+            return;
+        }
+        
+        if (!CharScalePresetParser.TryParse(scaleArg, out CharScalePreset preset))
+            Debug.LogWarning($"[YarnCommandBridge] Unknown scale preset '{scaleArg}'. Fallback to '{CharScalePreset.Normal}' roleKey='{roleKey}'.");
+        
+        var spec = new SetOriginSizeCommandSpecCharR
+        {
+            slotKey = roleKey, preset = preset,
+        };
+
+        Collect(spec);
+    }
+    
+    private void EnqueueSetAnchorOffsetSpecs(string slotKey, int x = 0, int y = 0)
+    {
+        var slotOffsetSpec = new MoveByCommandSpecCharR
+        {
+            slotKey = slotKey,
+            target = CharacterRigTarget.CharSlot_Anchor,
+            delta = new Vector2(x, y),
+            duration = 0f
+        };
+        
+        Collect(slotOffsetSpec);
+    }
+
+    
+    // Marks the next N collected commands as wait=true.
+    // This only affects Presentation/Executor playback.
+    private void AwaitFor(int count = 1)
+    {
+        _playbackDriver.WaitNextImmediateCommands(count);
     }
 
     private void EnqueueClearAllCharRigRefsSpec()
@@ -156,7 +267,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
     {
         var spec = new PivotRotateToCommandSpecCharR()
         {
-            targetKey = roleKey,
+            slotKey = roleKey,
             degree = angle
         };
 
@@ -167,27 +278,27 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
     {
         var spec = new HideRootLayersCommandSpecCharR
         {
-            targetKey = roleKey,
+            slotKey = roleKey,
             targetMask = CharRigRootMask.CharacterPortrait_Root
         };
 
         var spec1 = new FadeInCommandSpecCharR()
         {
-            targetKey = roleKey,
+            slotKey = roleKey,
             targetMask = CharRigRootMask.CharacterPortrait_Root,
             duration = 0.28f
         };
 
         var spec2 = new SlideInCommandSpecCharR
         {
-            targetKey = roleKey,
+            slotKey = roleKey,
             distance = 550f,
             duration = 0.45f
         };
 
         var spec3 = new DipInOutCommandSpecCharR()
         {
-            targetKey = roleKey,
+            slotKey = roleKey,
             target = CharacterRigTarget.CharacterPortrait_Track_Y,
             dir = CharRigDirection.Right,
             distance = 22f,
@@ -196,7 +307,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 
         var spec4 = new PunchScaleCommandSpecCharR()
         {
-            targetKey = roleKey,
+            slotKey = roleKey,
             strength = -0.03f,
             duration = 0.55f,
             vibrato = 3,
@@ -205,7 +316,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 
         var spec5 = new DipInOutCommandSpecCharR()
         {
-            targetKey = roleKey,
+            slotKey = roleKey,
             target = CharacterRigTarget.CharacterPortrait_Track_Y,
             dir = CharRigDirection.Down,
             distance = 12f,
@@ -214,7 +325,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 
         var spec6 = new SwayCommandSpecCharR()
         {
-            targetKey = roleKey,
+            slotKey = roleKey,
             strength = 11.5f,
             duration = 1.28f,
             cycles = 1,
@@ -232,7 +343,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 
         var spec8 = new JoltCommandSpec()
         {
-            targetKey = roleKey,
+            slotKey = roleKey,
             target = CharacterRigTarget.CharacterPortrait_Track,
             strength = 45f,
             direction = CharRigDirection.Up,
@@ -257,7 +368,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
     {
         var spec = new SwayCommandSpecCharR
         {
-            targetKey = roleKey,
+            slotKey = roleKey,
             target = CharacterRigTarget.CharacterPortrait_SwayPivot,
 
             strength = 12f,
@@ -276,7 +387,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
     {
         var spec = new SwayCommandSpecCharR
         {
-            targetKey = roleKey,
+            slotKey = roleKey,
             target = CharacterRigTarget.CharacterPortrait_SwayPivot,
 
             strength = 13f,
@@ -295,7 +406,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
     {
         var spec = new SwayCommandSpecCharR
         {
-            targetKey = roleKey,
+            slotKey = roleKey,
             target = CharacterRigTarget.CharacterPortrait_SwayPivot,
 
             strength = 6.5f,
@@ -314,7 +425,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
     {
         var spec = new SwayCommandSpecCharR
         {
-            targetKey = roleKey,
+            slotKey = roleKey,
             target = CharacterRigTarget.CharacterPortrait_SwayPivot,
 
             strength = 15f,
@@ -393,23 +504,17 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         yield return _playbackDriver.EndHoldBlocking();
     }
 
-    // Marks the next N collected commands as wait=true.
-    // This only affects Presentation/Executor playback.
-    private void AwaitFor(int count = 1)
-    {
-        _playbackDriver.WaitNextImmediateCommands(count);
-    }
 
     private void Collect(CommandSpecBase spec)
     {
         if (spec == null)
             return;
 
-        if (_importSink != null)
-        {
-            _importSink.Enqueue(spec);
-            return;
-        }
+        // if (_importSink != null)
+        // {
+        //     _importSink.Enqueue(spec);
+        //     return;
+        // }
 
         _playbackDriver.Enqueue(spec);
     }
@@ -462,7 +567,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
     {
         var spec = new DestroyCommandSpec
         {
-            targetKey = roleKey
+            slotKey = roleKey
         };
 
         Collect(spec);
@@ -474,14 +579,14 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 
         var juicySlideIn = new SlideInCommandSpecCharR
         {
-            targetKey = roleKey,
+            slotKey = roleKey,
             target = CharacterRigTarget.CharacterPortrait_Track_X,
             direction = dir
         };
 
         var spec = new JoltCommandSpec
         {
-            targetKey = roleKey,
+            slotKey = roleKey,
             target = CharacterRigTarget.CharacterPortrait_Track_Y,
             direction = CharRigDirection.Up,
             strength = 340f,
@@ -501,7 +606,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 
         var spec = new JoltCommandSpec
         {
-            targetKey = roleKey,
+            slotKey = roleKey,
             target = CharacterRigTarget.CharacterPortrait_Track_Y,
             direction = dir,
             strength = 340f,
@@ -526,7 +631,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         var spec = new JoltCommandSpec
         {
             target = CharacterRigTarget.CharacterPortrait_Shake,
-            targetKey = roleKey,
+            slotKey = roleKey,
             direction = dir,
             strength = strength,
             duration = duration,
@@ -542,7 +647,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 
         var spec = new JoltCommandSpec
         {
-            targetKey = roleKey,
+            slotKey = roleKey,
             target = CharacterRigTarget.CharacterPortrait_Track,
             direction = dir,
             strength = 340f,
@@ -561,7 +666,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 
         var spec = new JoltCommandSpec
         {
-            targetKey = roleKey,
+            slotKey = roleKey,
             direction = dir,
             strength = 1400f,
             duration = 0.7f,
@@ -590,7 +695,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 
         var spec = new TrembleCommandSpecCharR
         {
-            targetKey = roleKey.Trim(),
+            slotKey = roleKey.Trim(),
             target = CharacterRigTarget.CharacterPortrait_Shake,
             direction = dir,
             duration = duration,
@@ -626,7 +731,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 
         var spec = new TrembleCommandSpecCharR
         {
-            targetKey = roleKey.Trim(),
+            slotKey = roleKey.Trim(),
             target = CharacterRigTarget.CharacterPortrait_Shake,
             direction = dir,
             duration = duration,
@@ -654,7 +759,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
     {
         var spec = new ArcHopInCommandSpecCharR
         {
-            targetKey = roleKey,
+            slotKey = roleKey,
             hopCount = hopCount,
             arcHeight = arcHeight,
             airWidth = airWidth
@@ -682,7 +787,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 
         var spec = new WalkInPlaceCommandSpecCharR
         {
-            targetKey = roleKey.Trim(),
+            slotKey = roleKey.Trim(),
             duration = duration,
             stepsPerSecond = stepsPerSecond,
             arcHeight = arcHeight,
@@ -742,7 +847,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         //     = 자연스럽지만 "탁" 느낌은 약함.
         var spec = new BounceInPlaceCommandSpecCharR
         {
-            targetKey = roleKey.Trim(),
+            slotKey = roleKey.Trim(),
             duration = duration,
             bouncesPerSecond = bouncesPerSecond,
             height = height,
@@ -773,7 +878,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 
         var spec = new BreathInPlaceCommandSpecCharR
         {
-            targetKey = roleKey.Trim(),
+            slotKey = roleKey.Trim(),
             target = CharacterRigTarget.CharacterPortrait_Track_Y,
             duration = duration,
             breathsPerSecond = breathsPerSecond,
@@ -798,7 +903,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 
         var spec = new DipInOutCommandSpecCharR
         {
-            targetKey = roleKey,
+            slotKey = roleKey,
             dir = dir
         };
 
@@ -809,7 +914,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
     {
         var spec = new MoveByCommandSpecCharR
         {
-            targetKey = roleKey,
+            slotKey = roleKey,
             delta = new Vector2(x, y)
         };
 
@@ -820,7 +925,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
     {
         var spec = new FadeInCommandSpecCharR
         {
-            targetKey = roleKey
+            slotKey = roleKey
         };
 
         Collect(spec);
@@ -830,7 +935,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
     {
         var spec = new FadeOutCommandSpecCharR
         {
-            targetKey = roleKey
+            slotKey = roleKey
         };
 
         Collect(spec);
@@ -842,7 +947,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 
         var spec = new SlideInCommandSpecCharR
         {
-            targetKey = roleKey,
+            slotKey = roleKey,
             direction = from
         };
 
@@ -855,129 +960,11 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 
         var spec = new SlideOutCommandSpecCharR
         {
-            targetKey = roleKey,
+            slotKey = roleKey,
             to = to
         };
 
         Collect(spec);
-    }
-    private void EnqueueSetupCharRigSpec(string roleKey, string slotKey)
-    {
-        if (string.IsNullOrWhiteSpace(roleKey))
-        {
-            Debug.LogError("[YarnCommandBridge] slot: roleKey is null or empty.");
-            return;
-        }
-
-        if (!TryParseCharRigSlot(slotKey, out CharRigSlot parentSlot))
-        {
-            Debug.LogError($"[YarnCommandBridge] slot: Unknown slot key '{slotKey}'. Use 'a', 'b', 'c', or 'd'.");
-            return;
-        }
-
-        var spec = new SetupCharRigCommandSpec
-        {
-            roleKey = roleKey.Trim(),
-            parentSlot = parentSlot,
-            rigPrefab = rigPrefab
-        };
-
-        Collect(spec);
-    }
-    
-    private bool TryParseCharRigSlot(string raw, out CharRigSlot slot)
-    {
-        slot = default;
-
-        if (string.IsNullOrWhiteSpace(raw))
-            return false;
-
-        string s = raw.Trim().ToLowerInvariant();
-
-        switch (s)
-        {
-            case "s0":
-            case "0":
-            case "stage00":
-                slot = CharRigSlot.Stage00CharacterSlot;
-                return true;
-
-            case "s1":
-            case "1":
-            case "stage01":
-                slot = CharRigSlot.Stage01CharacterSlot;
-                return true;
-
-            case "s2":
-            case "2":
-            case "stage02":
-                slot = CharRigSlot.Stage02CharacterSlot;
-                return true;
-
-            case "s3":
-            case "me":
-            case "protagonist":
-            case "protagonistslot":
-            case "protagonist_slot":
-            case "boxside":
-                slot = CharRigSlot.ProtagonistSlot;
-                return true;
-        }
-
-        return Enum.TryParse(s, true, out slot);
-    }
-
-    private void EnqueueSetAnchorOffsetSpecs(string roleKey, int x, int y)
-    {
-        var anchorSpec = new MoveByCommandSpecCharR
-        {
-            targetKey = roleKey,
-            target = CharacterRigTarget.CharSlot_Anchor,
-            delta = new Vector2(x, y),
-            duration = 0f,
-            killTween = false
-        };
-
-        var resetTrackSpec = new ApplyTrackOffsetCommandSpecCharR { targetKey = roleKey };
-
-        Collect(anchorSpec);
-        Collect(resetTrackSpec);
-    }
-
-    private void EnqueueSetAnchorSpecs(string roleKey, string positionPreset)
-    {
-        CharAnchorPreset preset = positionPreset switch
-        {
-            "left" => CharAnchorPreset.Left,
-            "center" => CharAnchorPreset.Center,
-            "right" => CharAnchorPreset.Right,
-
-            "duo_left" => CharAnchorPreset.DuoLeft,
-            "duo_right" => CharAnchorPreset.DuoRight,
-
-            "boxside" => CharAnchorPreset.BoxSide,
-
-            "exp1" => CharAnchorPreset.Exp1,
-            "exp2" => CharAnchorPreset.Exp2,
-
-            _ => CharAnchorPreset.None
-        };
-
-        var anchorSpec = new SetAnchorCommandSpecCharR
-        {
-            targetKey = roleKey,
-            preset = preset,
-            globalTuning = globalTuning,
-            roleTuningDb = roleTuningDb
-        };
-
-        var resetTrackSpec = new ApplyTrackOffsetCommandSpecCharR
-        {
-            targetKey = roleKey
-        };
-
-        Collect(anchorSpec);
-        Collect(resetTrackSpec);
     }
 
     
@@ -985,7 +972,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
     {
         var spec = new ScaleToCommandSpecCharR
         {
-            targetKey = roleKey,
+            slotKey = roleKey,
             duration = duration,
             toScale = new Vector2(xyValue, xyValue)
         };
@@ -993,76 +980,6 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         Collect(spec);
     }
 
-    private void EnqueueSetOriginSizeSpec(string roleKey, string scaleArg)
-    {
-        scaleArg = (scaleArg ?? "").Trim();
-
-        if (TryParseFloat(scaleArg, out float absoluteScale))
-        {
-            EnqueueSetOriginSizeAbsoluteSpec(roleKey, absoluteScale);
-            return;
-        }
-
-        CharScalePreset preset = ParseCharScalePreset(scaleArg);
-
-        var spec = new SetOriginSizeCommandSpecCharR
-        {
-            targetKey = roleKey,
-            preset = preset,
-            globalTuning = globalTuning,
-            roleTuningDb = roleTuningDb,
-            multiplier = 1f
-        };
-
-        Collect(spec);
-    }
-
-    private void EnqueueSetOriginSizeAbsoluteSpec(string roleKey, float xyValue)
-    {
-        var spec = new SetOriginSizeCommandSpecCharR
-        {
-            targetKey = roleKey,
-
-            overrideScale = true,
-            scaleOverride = new Vector3(xyValue, xyValue, xyValue),
-
-            // 아래 값들은 overrideScale=true면 실제 계산에는 사용되지 않지만,
-            // Inspector/debug에서 의도를 보기 좋게 기본값을 넣어둔다.
-            preset = CharScalePreset.None,
-            multiplier = 1f,
-            globalTuning = globalTuning,
-            roleTuningDb = roleTuningDb
-        };
-
-        Collect(spec);
-    }
-
-    private static CharScalePreset ParseCharScalePreset(string value)
-    {
-        return value switch
-        {
-            "normal" => CharScalePreset.Normal,
-            "small" => CharScalePreset.Small,
-            "large" => CharScalePreset.Large,
-
-            "far" => CharScalePreset.Far,
-            "close" => CharScalePreset.Close,
-
-            "exp1" => CharScalePreset.Exp1,
-            "exp2" => CharScalePreset.Exp2,
-
-            _ => CharScalePreset.Normal
-        };
-    }
-
-    private static bool TryParseFloat(string value, out float result)
-    {
-        return float.TryParse(
-            value,
-            NumberStyles.Float,
-            CultureInfo.InvariantCulture,
-            out result);
-    }
 
     private void EnqueueSetPortraitCrossfadeSpec(string roleKey, string character)
     {
@@ -1073,45 +990,19 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 
         var spec = new SetPortraitCrossfadeCommandSpecCharR
         {
-            targetKey = roleKey,
+            slotKey = roleKey,
             portrait = portraitIdentity
         };
 
         Collect(spec);
     }
 
-    private void EnqueueCastCharacterSpec(
-        string roleKey,
-        string characterKey,
-        string variantKey = "")
-    {
-        string resolvedVariantKey = string.IsNullOrWhiteSpace(variantKey)
-            ? "a"
-            : variantKey.Trim();
-
-        var castSpec = new CastCharacterCommandSpec
-        {
-            slotKey = roleKey,
-            characterKey = characterKey,
-            variantKey = resolvedVariantKey
-        };
-
-        var portraitSpec = new SetPortraitSpriteCommandSpecCharR
-        {
-            targetKey = roleKey,
-            portrait = new PortraitIdentity
-            { }
-        };
-
-        Collect(castSpec);
-        Collect(portraitSpec);
-    }
 
     private void EnqueueUncastCharacterSpec(string roleKey)
     {
         var spec = new UncastCharacterCommandSpec
         {
-            targetKey = roleKey
+            slotKey = roleKey
         };
 
         Collect(spec);
@@ -1150,8 +1041,11 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
     {
         var spec = new SetEmotionPortraitWipeCommandSpec
         {
-            targetKey = targetKey,
-            portrait = new PortraitIdentity { }
+            slotKey = targetKey,
+            portrait = new PortraitIdentity
+            {
+                emotion = emotion
+            }
         };
 
         Collect(spec);

@@ -195,7 +195,7 @@ public sealed class FadeInCommandCharR : CommandBase, IStepScopedCommand
         _targets.Clear();
 
         CharacterRigRefs rigRefs = 
-            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.targetKey);
+            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
 
 
         CharRigRootSelector.CollectRootRects(rigRefs, _spec.targetMask, _targets);

@@ -53,7 +53,7 @@ public sealed partial class YarnCommandBridge
 
         return new SetCharacterEmojiCommandSpecCharR
         {
-            targetKey = roleKey.Trim(),
+            slotKey = roleKey.Trim(),
 
             emojiKey = emojiKey ?? "",
 

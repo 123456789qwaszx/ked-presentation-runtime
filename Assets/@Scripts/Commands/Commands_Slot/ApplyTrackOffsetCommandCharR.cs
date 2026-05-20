@@ -27,6 +27,9 @@ public class ApplyTrackOffsetCommandSpecCharR : CharacterRigCommandSpecBase
     [Tooltip("체크하면 target의 위치를 먼저 (0,0)으로 맞춘 뒤 offset을 적용합니다. 상위 Anchor의 위치는 유지됩니다.")]
     public bool applyFromZero = true;
 
+    public bool resetSlot = false;
+    public bool resetCharacter = false;
+    
     [Header("Track Layer Reset")]
     [Tooltip("체크하면 Character_Track / Move / X / Y 를 전부 (0,0)으로 초기화합니다.")]
     public bool resetAllTrackLayers = true;
@@ -102,7 +105,7 @@ public sealed class ApplyTrackOffsetCommandCharR : CommandBase
     {
         _resolveAttempted = true;
         
-        _rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.targetKey);
+        _rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
         
         _rect = _rigRefs.GetRect(_spec.target);
     }

@@ -213,7 +213,7 @@ public sealed class FadeOutCommandCharR : CommandBase, IStepScopedCommand
         _resolveAttempted = true;
         _targets.Clear();
 
-        CharacterRigRefs rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.targetKey);
+        CharacterRigRefs rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
         
         CharRigRootSelector.CollectRootRects(rigRefs, _spec.targetMask, _targets);
     }

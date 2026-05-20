@@ -5,15 +5,41 @@ public sealed class VoicePlayer
 {
     private readonly AudioSource _source;
 
-    public AudioClip CurrentClip => _source.clip;
-    public bool IsPlaying => _source.isPlaying;
+    public AudioClip CurrentClip
+    {
+        get
+        {
+            if (_source == null)
+                return null;
+
+            return _source.clip;
+        }
+    }
+
+    public bool IsPlaying
+    {
+        get
+        {
+            if (_source == null)
+                return false;
+
+            return _source.isPlaying;
+        }
+    }
 
     public VoicePlayer(AudioSource source)
     {
-        _source      = source;
+        _source = source;
+
+        if (_source == null)
+        {
+            Debug.LogWarning("[VoicePlayer] source is null.");
+            return;
+        }
+
         _source.loop = false;
     }
-    
+
     // Interrupt-and-replace policy.
     // A new voice clip stops the previous one immediately.
     public void Play(AudioClip clip)
@@ -24,6 +50,9 @@ public sealed class VoicePlayer
             return;
         }
 
+        if (_source == null)
+            return;
+
         _source.Stop();
         _source.clip = clip;
         _source.Play();
@@ -31,6 +60,9 @@ public sealed class VoicePlayer
 
     public void Stop()
     {
+        if (_source == null)
+            return;
+
         _source.Stop();
         _source.clip = null;
     }

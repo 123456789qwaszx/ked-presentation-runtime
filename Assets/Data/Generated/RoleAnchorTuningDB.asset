@@ -24,7 +24,7 @@ MonoBehaviour:
       boxSide: {x: 0, y: 0}
       exp1: {x: 0, y: 0}
       exp2: {x: 0, y: 0}
-    defaultScale: 1.2
+    defaultScale: 1
     scales:
       normal: 0
       small: 0

@@ -193,7 +193,7 @@ public sealed class TrembleCommandCharR : CommandBase, IStepScopedCommand
         _resolveAttempted = true;
 
         CharacterRigRefs rig =
-            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.targetKey);
+            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
 
         _rect = rig.GetRect(_spec.target);
 

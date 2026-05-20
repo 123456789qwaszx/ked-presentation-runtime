@@ -26,6 +26,10 @@ public class VnAppBootstrap : MonoBehaviour
     [SerializeField] private PresentationResponseRig presentationResponseRig;
 
     [Header("Presentation")] 
+    [SerializeField] private RectTransform rigPrefab;
+    [SerializeField] private CharStageTuningSO globalTuning;
+    [SerializeField] private RoleAnchorTuningDBSO roleTuningDb;
+    
     [SerializeField] private PortraitGeneratedDbSo portraitGeneratedDbSo;
 
     [SerializeField] private UnitySignalBus unitySignalBus;
@@ -152,7 +156,7 @@ public class VnAppBootstrap : MonoBehaviour
         CharacterRigBuilder charRigAccess = new();
         PortraitResolver portraitResolver = new(portraitGeneratedDbSo);
         CharacterEmojiResolver emojiResolver = new(characterEmojiLibrarySO);
-        CharRigCommandFactory charRigFactory = new(charRigSlotResolver, charRigAccess, portraitResolver, emojiResolver);
+        CharRigCommandFactory charRigFactory = new(charRigSlotResolver, charRigAccess, portraitResolver, emojiResolver, rigPrefab, globalTuning, roleTuningDb);
 
         // TransitionFactory
         TransitionCommandFactory transitionCommandFactory = new(transitionTargetRouter, _uiPatchService);

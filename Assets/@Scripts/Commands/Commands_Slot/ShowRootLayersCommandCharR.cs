@@ -67,7 +67,7 @@ public sealed class ShowRootLayersCommandCharR : CommandBase, IStepScopedCommand
         CharacterRigRefs rig =
             CharacterRigTargetResolver.ResolveCharRigFromTargetKey(
                 scope,
-                _spec.targetKey);
+                _spec.slotKey);
 
         CharRigRootSelector.CollectRootRects(
             rig,

@@ -21,10 +21,6 @@ public sealed class SetOriginSizeCommandSpecCharR : CharacterRigCommandSpecBase
     [Header("Scale Preset")]
     public CharScalePreset preset = CharScalePreset.Normal;
 
-    [Header("Tuning")]
-    public CharStageTuningSO globalTuning;
-    public RoleAnchorTuningDBSO roleTuningDb;
-
     [Tooltip("선택: 같은 캐릭터라도 포즈/의상에 따라 크기 보정을 다르게 하고 싶을 때.\n" +
              "예: roleKey=seina, poseKey=outfit_dressWide => DB key 'seina:outfit_dressWide'")]
     public string poseKey = "";
@@ -53,15 +49,19 @@ public sealed class SetOriginSizeCommandSpecCharR : CharacterRigCommandSpecBase
 public sealed class SetOriginSizeCommandCharR : CommandBase
 {
     private readonly SetOriginSizeCommandSpecCharR _spec;
+    private readonly  CharStageTuningSO _globalTuning;
+    private readonly  RoleAnchorTuningDBSO _roleTuningDb;
 
     private RectTransform _rect;
     private bool _resolveAttempted;
 
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
-    public SetOriginSizeCommandCharR(SetOriginSizeCommandSpecCharR spec)
+    public SetOriginSizeCommandCharR(SetOriginSizeCommandSpecCharR spec, CharStageTuningSO globalTuning, RoleAnchorTuningDBSO roleTuningDb)
     {
         _spec = spec;
+        _globalTuning = globalTuning;
+        _roleTuningDb = roleTuningDb;
     }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
@@ -104,9 +104,9 @@ public sealed class SetOriginSizeCommandCharR : CommandBase
 
         float scale = CharScaleResolver.ResolveScale(
             _spec.preset,
-            _spec.globalTuning,
-            _spec.roleTuningDb,
-            _spec.targetKey,
+            _globalTuning,
+            _roleTuningDb,
+            _spec.slotKey,
             _spec.poseKey,
             _spec.multiplier);
 
@@ -132,7 +132,7 @@ public sealed class SetOriginSizeCommandCharR : CommandBase
         _resolveAttempted = true;
 
         CharacterRigRefs rigRefs =
-            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.targetKey);
+            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
         
         _rect = rigRefs.GetRect(_spec.target);
     }

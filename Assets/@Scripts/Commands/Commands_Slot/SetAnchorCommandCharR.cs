@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
+using DG.Tweening;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 [Serializable]
 [CommandMenuHint(
@@ -23,34 +25,37 @@ public sealed class SetAnchorCommandSpecCharR : CharacterRigCommandSpecBase
 
     [Tooltip("StageSlot 폭 대비 상대 위치. 0.33이면 좌/우가 화면폭의 약 1/3 지점.")]
     [Range(0f, 0.5f)]
-    public float baseRatioX = 0.5f;
-
-    [Header("Tuning (optional)")]
-    public CharStageTuningSO globalTuning;
-    public RoleAnchorTuningDBSO roleTuningDb;
-
-    [Tooltip("선택: 같은 캐릭터라도 포즈/의상에 따라 보정을 다르게 하고 싶을 때.\n" +
-             "예: roleKey=seina, poseKey=outfit_dressWide => DB key 'seina:outfit_dressWide'")]
-    public string poseKey = "";
+    public float baseRatioX = 0.33f;
 
     [Header("Offset (after tuning)")]
     public Vector2 offset = Vector2.zero;
-
-    [Header("Override")]
-    public bool overrideAnchoredPosition = false;
-    public Vector2 anchoredPositionOverride = Vector2.zero;
+    
+    [Header("Reset")]
+    [Tooltip("체크하면 Anchor 설정 후 CharSlot_Track / Move / X / Y / Rotation / Scale 축을 기본값으로 초기화합니다.")]
+    public bool resetSlotPos = true;
+    
+    [Tooltip("체크하면 Anchor 설정 후 CharacterPortrait_Track / Move / X / Y / Rotation / SwayPivot / Shake / ActingScale 축을 기본값으로 초기화합니다.")]
+    public bool resetCharacterPos = true;
 }
 
 public sealed class SetAnchorCommandCharR : CommandBase
 {
     private readonly SetAnchorCommandSpecCharR _spec;
-
+    private readonly CharStageTuningSO _globalTuning;
+    private readonly RoleAnchorTuningDBSO _roleTuningDb;
+    
+    private CharacterRigRefs _rigRefs;
     private RectTransform _rect;
     private bool _resolveAttempted;
 
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
-    public SetAnchorCommandCharR(SetAnchorCommandSpecCharR spec) => _spec = spec;
+    public SetAnchorCommandCharR(SetAnchorCommandSpecCharR spec, CharStageTuningSO globalTuning, RoleAnchorTuningDBSO roleTuningDb)
+    {
+        _spec = spec;
+        _globalTuning = globalTuning;
+        _roleTuningDb = roleTuningDb;
+    }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
@@ -60,7 +65,7 @@ public sealed class SetAnchorCommandCharR : CommandBase
         if (_rect == null)
             yield break;
         
-        Apply();
+        Apply(scope);
     }
     
     protected override void OnSkip(CommandRunScope scope)
@@ -71,41 +76,73 @@ public sealed class SetAnchorCommandCharR : CommandBase
         if (_rect == null)
             return;
 
-        Apply();
+        Apply(scope);
     }
-    
     
     protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
     
-    private void Apply()
+    private void Apply(CommandRunScope scope)
     {
-        if (_spec.overrideAnchoredPosition)
-        {
-            _rect.anchoredPosition = _spec.anchoredPositionOverride;
-            return;
-        }
-
+        string characterKey = CharacterRigTargetResolver.ResolveSlotKeyFromTargetKey(scope, _spec.slotKey);
+        //scope.CastRegistry.TryGetCharacter(_spec.slotKey, out string characterKey);
+        
         Vector2 anchoredPosition = CharAnchorPlacementResolver.ResolveAnchoredPosition(
             _rect,
             _spec.preset,
             _spec.baseRatioX,
-            _spec.globalTuning,
-            _spec.roleTuningDb,
-            _spec.targetKey,
-            _spec.poseKey,
+            _globalTuning,
+            _roleTuningDb,
+            characterKey,
             _spec.offset);
 
         _rect.anchoredPosition = anchoredPosition;
+        
+        if (_spec.resetSlotPos)
+            ResetSlotLayers();
+        
+        if (_spec.resetCharacterPos)
+            ResetCharacterLayers();
+    }
+    
+    private void ResetSlotLayers()
+    {
+        _rigRefs.CharSlot_Track.anchoredPosition = Vector2.zero;
+        _rigRefs.CharSlot_Track_Move.anchoredPosition = Vector2.zero;
+        _rigRefs.CharSlot_Track_X.anchoredPosition = Vector2.zero;
+        _rigRefs.CharSlot_Track_Y.anchoredPosition = Vector2.zero;
+        
+        _rigRefs.CharSlot_Rotation.localEulerAngles= Vector3.zero;
+        
+        _rigRefs.CharSlot_Scale.localScale = Vector3.one;
+    }
+    
+    private void ResetCharacterLayers()
+    {
+        _rigRefs.CharacterPortrait_Track.anchoredPosition = Vector2.zero;
+        _rigRefs.CharacterPortrait_Track_Move.anchoredPosition = Vector2.zero;
+        _rigRefs.CharacterPortrait_Track_X.anchoredPosition = Vector2.zero;
+        _rigRefs.CharacterPortrait_Track_Y.anchoredPosition = Vector2.zero;
+
+        _rigRefs.CharacterPortrait_Rotation.localEulerAngles = Vector3.zero;
+
+        _rigRefs.CharacterPortrait_SwayPivot.anchoredPosition = Vector2.zero;
+        _rigRefs.CharacterPortrait_SwayPivot.localEulerAngles = Vector3.zero;
+        _rigRefs.CharacterPortrait_SwayPivot.localScale = Vector3.one;
+
+        _rigRefs.CharacterPortrait_Shake.anchoredPosition = Vector2.zero;
+        _rigRefs.CharacterPortrait_Shake.localEulerAngles = Vector3.zero;
+        _rigRefs.CharacterPortrait_Shake.localScale = Vector3.one;
+
+        _rigRefs.CharacterPortrait_ActingScale.localScale = Vector3.one;
+        _rigRefs.CharacterPortrait_ActingScale_X.localScale = Vector3.one;
+        _rigRefs.CharacterPortrait_ActingScale_Y.localScale = Vector3.one;
     }
 
     private void ResolveRefs(CommandRunScope scope)
     {
         _resolveAttempted = true;
 
-        CharacterRigRefs rigRefs =
-            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.targetKey);
-
-
-        _rect = rigRefs.GetRect(_spec.target);
+        _rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
+        _rect = _rigRefs.GetRect(_spec.target);
     }
 }

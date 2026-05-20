@@ -151,13 +151,13 @@ public sealed class SetCharacterEmojiCommandCharR : CommandBase, IStepScopedComm
         CharacterRigRefs rigRefs =
             CharacterRigTargetResolver.ResolveCharRigFromTargetKey(
                 scope,
-                _spec.targetKey);
+                _spec.slotKey);
 
         if (rigRefs == null)
         {
             Debug.LogWarning(
                 $"[SetCharacterEmojiCommandCharR] Failed to resolve CharacterRigRefs. " +
-                $"targetKey='{_spec.targetKey}', emojiKey='{_spec.emojiKey}'.");
+                $"targetKey='{_spec.slotKey}', emojiKey='{_spec.emojiKey}'.");
             return;
         }
 
@@ -206,7 +206,7 @@ public sealed class SetCharacterEmojiCommandCharR : CommandBase, IStepScopedComm
 
         Debug.LogWarning(
             $"[SetCharacterEmojiCommandCharR] Failed to resolve emoji sprite. " +
-            $"emojiKey='{_spec.emojiKey}', targetKey='{_spec.targetKey}'.");
+            $"emojiKey='{_spec.emojiKey}', targetKey='{_spec.slotKey}'.");
     }
 
     private void ApplySpriteAndLayout()

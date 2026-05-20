@@ -15,16 +15,14 @@ public sealed class SetPortraitSpriteCommandSpecCharR : CharacterRigCommandSpecB
 {
     [Header("Portrait Identity")]
     public PortraitIdentity portrait;
-
-    [Header("Target")]
+    
+    [Header("Target")] 
     public CharacterRigTarget target = CharacterRigTarget.CharacterPortraitSprite_Image;
-
-    [Header("Sizing Policy")]
-    public CharRigImageSizingMode sizingMode =
-        CharRigImageSizingMode.HeightFitPreserveAspect;
-
-    public CharRigImageSizingPolicy.HorizontalAlign horizontalAlign =
-        CharRigImageSizingPolicy.HorizontalAlign.Center;
+    
+    [Header("Sizing Policy")] 
+    public CharRigImageSizingMode sizingMode = CharRigImageSizingMode.HeightFitPreserveAspect;
+    
+    public CharRigImageSizingPolicy.HorizontalAlign horizontalAlign = CharRigImageSizingPolicy.HorizontalAlign.Center;
 }
 
 public sealed class SetPortraitSpriteCommandCharR : CommandBase
@@ -37,9 +35,7 @@ public sealed class SetPortraitSpriteCommandCharR : CommandBase
 
     protected override SkipPolicy SkipPolicy => SkipPolicy.ExecuteEvenIfSkipping;
 
-    public SetPortraitSpriteCommandCharR(
-        SetPortraitSpriteCommandSpecCharR spec,
-        PortraitResolver resolver)
+    public SetPortraitSpriteCommandCharR(SetPortraitSpriteCommandSpecCharR spec, PortraitResolver resolver)
     {
         _spec = spec;
         _resolver = resolver;
@@ -62,45 +58,20 @@ public sealed class SetPortraitSpriteCommandCharR : CommandBase
         Apply(scope);
     }
 
-    protected override void OnRollbackSeek(CommandRunScope scope)
-    {
-        OnSkip(scope);
-    }
+    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
 
+    private void Apply(CommandRunScope scope)
+    {
+        Sprite sprite = _resolver.Resolve(scope, _spec.slotKey, _spec.portrait, nameof(SetPortraitSpriteCommandCharR));
+        _image.sprite = sprite;
+        CharRigImageSizingPolicy.Apply(_image, sprite, _spec.sizingMode, _spec.horizontalAlign);
+    }
+    
     private void ResolveRefs(CommandRunScope scope)
     {
         _resolveAttempted = true;
 
-        CharacterRigRefs rigRefs =
-            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.targetKey);
-
+        CharacterRigRefs rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
         _image = rigRefs.GetComponent(_spec.target) as Image;
-
-        if (_image == null)
-        {
-            throw new InvalidOperationException(
-                $"[SetPortraitSpriteCommandCharR] Image missing. targetKey='{_spec.targetKey}', target='{_spec.target}'.");
-        }
-    }
-
-    private void Apply(CommandRunScope scope)
-    {
-        if (_image == null)
-            return;
-        
-        Sprite sprite =
-            _resolver.Resolve(
-                scope,
-                _spec.targetKey,
-                _spec.portrait,
-                nameof(SetPortraitSpriteCommandCharR));
-
-        _image.sprite = sprite;
-
-        CharRigImageSizingPolicy.Apply(
-            _image,
-            sprite,
-            _spec.sizingMode,
-            _spec.horizontalAlign);
     }
 }

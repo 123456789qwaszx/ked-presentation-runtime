@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 
 [Serializable]
-public sealed class PortraitIdentity
+public struct PortraitIdentity
 {
     [Tooltip("캐릭터 ID (Amber)")]
     public string character;

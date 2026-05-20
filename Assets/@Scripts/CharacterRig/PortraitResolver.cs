@@ -3,9 +3,9 @@ using UnityEngine;
 
 public sealed class PortraitResolver
 {
-    private const string DefaultVariant = "a";
-    private const string DefaultEmotion = "02";
-    private const string FallbackEmotion = "01";
+    public const string DefaultVariant = "a";
+    public const string DefaultEmotion = "02";
+    public const string FallbackEmotion = "01";
 
     private readonly Dictionary<(string characterId, char variantSuffix, string emotionKey), Sprite> _map = new();
 

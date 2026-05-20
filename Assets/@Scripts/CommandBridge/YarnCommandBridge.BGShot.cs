@@ -150,7 +150,7 @@ public sealed partial class YarnCommandBridge
 
         var spec = new SetCharRigCamFocusCommandSpec
         {
-            targetKey = roleKey.Trim(),
+            slotKey = roleKey.Trim(),
             mode = CharRigCamFocusMoveMode.Set,
             position = new Vector2(x, y),
         };
@@ -168,7 +168,7 @@ public sealed partial class YarnCommandBridge
 
         var spec = new SetCharRigCamFocusCommandSpec
         {
-            targetKey = roleKey.Trim(),
+            slotKey = roleKey.Trim(),
             mode = CharRigCamFocusMoveMode.Add,
             position = new Vector2(x, y),
         };

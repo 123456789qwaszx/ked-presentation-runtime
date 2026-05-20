@@ -64,12 +64,12 @@ public sealed class YarnLineSideEffectPresenter : DialoguePresenterBase
         if (clip == null)
             return;
 
-        _audioSystem?.Voice.Play(clip);
+        _audioSystem?.Voice?.Play(clip);
     }
 
     private void StopVoice()
     {
-        _audioSystem?.Voice.Stop();
+        _audioSystem?.Voice?.Stop();
     }
 
     private bool ShouldConsumeLineSilently()

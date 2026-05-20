@@ -68,7 +68,7 @@ public sealed class HideRootLayersCommandCharR : CommandBase
         CharacterRigRefs rig =
             CharacterRigTargetResolver.ResolveCharRigFromTargetKey(
                 scope,
-                _spec.targetKey);
+                _spec.slotKey);
 
         CharRigRootSelector.CollectRootRects(
             rig,

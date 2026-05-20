@@ -64,12 +64,12 @@ public sealed class SetColorCommandCharR : CommandBase
         CharacterRigRefs rig =
             CharacterRigTargetResolver.ResolveCharRigFromTargetKey(
                 scope,
-                _spec.targetKey);
+                _spec.slotKey);
 
         RectTransform rect = rig.GetRect(_spec.target);
 
         if (!rect.TryGetComponent(out _image))
-            Debug.LogWarning($"[SetColorCommandCharR] Target Image not found. targetKey='{_spec.targetKey}', target='{_spec.target}'");
+            Debug.LogWarning($"[SetColorCommandCharR] Target Image not found. targetKey='{_spec.slotKey}', target='{_spec.target}'");
         
     }
 

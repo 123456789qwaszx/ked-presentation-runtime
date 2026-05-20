@@ -97,12 +97,8 @@ public static class CharAnchorPlacementResolver
         CharStageTuningSO globalTuning,
         RoleAnchorTuningDBSO roleTuningDb,
         string roleKey,
-        string poseKey,
         Vector2 commandOffset)
     {
-        // 0) Build the lookup key.
-        string tuneKey = BuildTuneKey(roleKey, poseKey);
-
         // 1) Find the parent RectTransform.
         RectTransform parentRect = null;
         if (anchorRect != null)
@@ -123,7 +119,7 @@ public static class CharAnchorPlacementResolver
             pos += globalTuning.offsets.Get(preset);
 
         // 5) Apply role/pose-specific tuning offset.
-        if (roleTuningDb != null && roleTuningDb.TryGet(tuneKey, out var entry))
+        if (roleTuningDb != null && roleTuningDb.TryGet(roleKey, out var entry))
         {
             pos += entry.defaultOffset;
             pos += entry.offsets.Get(preset);
@@ -135,17 +131,5 @@ public static class CharAnchorPlacementResolver
 
         // 7) Return the final anchored position.
         return pos;
-    }
-
-    private static string BuildTuneKey(string roleKey, string poseKey)
-    {
-        roleKey = roleKey ?? "";
-        poseKey = poseKey ?? "";
-
-        if (string.IsNullOrWhiteSpace(poseKey))
-            return roleKey.Trim();
-
-        // DB key rule: "role:pose"
-        return $"{roleKey.Trim()}:{poseKey.Trim()}";
     }
 }

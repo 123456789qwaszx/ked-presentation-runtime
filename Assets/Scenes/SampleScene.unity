@@ -5036,6 +5036,9 @@ MonoBehaviour:
   bgHost: {fileID: 1967129519}
   dialogueBoxHost: {fileID: 1332040255}
   presentationResponseRig: {fileID: 529556882}
+  rigPrefab: {fileID: 3566932515573781366, guid: 5085b338905ec1c45a432195fff9df51, type: 3}
+  globalTuning: {fileID: 11400000, guid: db30a92a6d8545a41b703c2585f4013d, type: 2}
+  roleTuningDb: {fileID: 11400000, guid: c49265a67487bce458b734a0473b75b5, type: 2}
   portraitGeneratedDbSo: {fileID: 11400000, guid: 9a31d992344284d4f8ff35f5e9be5ae9, type: 2}
   unitySignalBus: {fileID: 552181530}
   commandExecutor: {fileID: 1257280952}
@@ -13699,9 +13702,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 28eeb6f96b7d3ea4783a98588e5f27fc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::YarnCommandBridge
-  rigPrefab: {fileID: 3566932515573781366, guid: 5085b338905ec1c45a432195fff9df51, type: 3}
-  globalTuning: {fileID: 11400000, guid: db30a92a6d8545a41b703c2585f4013d, type: 2}
-  roleTuningDb: {fileID: 11400000, guid: c49265a67487bce458b734a0473b75b5, type: 2}
 --- !u!1 &1835797369
 GameObject:
   m_ObjectHideFlags: 0
@@ -43853,9 +43853,9 @@ MonoBehaviour:
   lineProvider: {fileID: 0}
   saliencyStrategy: 0
   dialoguePresenters:
-  - {fileID: 0}
-  - {fileID: 0}
   - {fileID: 8020628925246216474}
+  - {fileID: 0}
+  - {fileID: 0}
   verboseLogging: 0
   autoStart: 0
   startNode: NewYarnScript

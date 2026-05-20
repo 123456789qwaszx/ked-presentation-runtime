@@ -153,7 +153,7 @@ public sealed class PunchScaleCommandCharR : CommandBase, IStepScopedCommand
         _resolveAttempted = true;
 
         CharacterRigRefs rigRefs =
-            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.targetKey);
+            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
 
 
         _rect = rigRefs.GetRect(_spec.target);
