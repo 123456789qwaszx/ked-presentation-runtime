@@ -22,7 +22,6 @@ public sealed class CastRegistry
 
     public bool TryGetBinding(string roleKey, out CastBinding binding)
     {
-        roleKey = SafeTrim(roleKey);
         return _roleToBinding.TryGetValue(roleKey, out binding);
     }
 
@@ -52,16 +51,11 @@ public sealed class CastRegistry
 
     public bool TryGetRole(string characterKey, out string roleKey)
     {
-        characterKey = SafeTrim(characterKey);
         return _characterToRole.TryGetValue(characterKey, out roleKey);
     }
 
     public void Cast(string roleKey, string characterKey, string variantKey)
     {
-        roleKey = SafeTrim(roleKey);
-        characterKey = SafeTrim(characterKey);
-        variantKey = SafeTrim(variantKey);
-
         if (string.IsNullOrEmpty(roleKey) || string.IsNullOrEmpty(characterKey))
             return;
 
@@ -74,8 +68,6 @@ public sealed class CastRegistry
 
     public bool UncastRole(string roleKey)
     {
-        roleKey = SafeTrim(roleKey);
-
         if (string.IsNullOrEmpty(roleKey))
             return false;
 
@@ -98,8 +90,6 @@ public sealed class CastRegistry
 
     private bool UncastCharacterInternal(string characterKey)
     {
-        characterKey = SafeTrim(characterKey);
-
         if (string.IsNullOrEmpty(characterKey))
             return false;
 
@@ -112,10 +102,5 @@ public sealed class CastRegistry
             _roleToBinding.Remove(roleKey);
 
         return true;
-    }
-
-    private static string SafeTrim(string s)
-    {
-        return string.IsNullOrEmpty(s) ? string.Empty : s.Trim();
     }
 }

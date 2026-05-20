@@ -87,11 +87,10 @@ public sealed class SetPortraitSpriteCommandCharR : CommandBase
     {
         if (_image == null)
             return;
-
+        
         Sprite sprite =
-            PortraitIdentityResolveUtility.ResolveSprite(
+            _resolver.Resolve(
                 scope,
-                _resolver,
                 _spec.targetKey,
                 _spec.portrait,
                 nameof(SetPortraitSpriteCommandCharR));

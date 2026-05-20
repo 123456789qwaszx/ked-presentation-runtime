@@ -57,11 +57,10 @@ public sealed class SetPortraitCrossfadeCommandCharR : CommandBase, IStepScopedC
     {
         if (!_resolveAttempted)
             ResolveRefs(scope);
-
+        
         Sprite targetSprite =
-            PortraitIdentityResolveUtility.ResolveSprite(
+            _resolver.Resolve(
                 scope,
-                _resolver,
                 _spec.targetKey,
                 _spec.portrait,
                 nameof(SetPortraitCrossfadeCommandCharR));
@@ -122,9 +121,8 @@ public sealed class SetPortraitCrossfadeCommandCharR : CommandBase, IStepScopedC
             ResolveRefs(scope);
 
         Sprite targetSprite =
-            PortraitIdentityResolveUtility.ResolveSprite(
+            _resolver.Resolve(
                 scope,
-                _resolver,
                 _spec.targetKey,
                 _spec.portrait,
                 nameof(SetPortraitCrossfadeCommandCharR));

@@ -183,14 +183,12 @@ public sealed class SetEmotionPortraitWipeCommand : CommandBase, IStepScopedComm
         if (_hasResolvedTargetSprite)
             return;
 
-        _targetSprite =
-            PortraitIdentityResolveUtility.ResolveSprite(
+        _targetSprite = _resolver.Resolve(
                 scope,
-                _resolver,
                 _spec.targetKey,
                 _spec.portrait,
                 nameof(SetEmotionPortraitWipeCommand));
-
+        
         _hasResolvedTargetSprite = true;
     }
 
