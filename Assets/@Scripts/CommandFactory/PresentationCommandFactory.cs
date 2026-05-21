@@ -42,18 +42,6 @@ public sealed class PresentationViewCommandFactory : INodeCommandFactory
             // Presentation View setup
             SetupPresentationViewCommandSpec s => new SetupPresentationViewCommand(_presentationViewAccess, _presentationResponseRig, s),
 
-            // Legacy / existing Presentation View transform
-            FadeToPresentationCommandSpec s => new FadeToPresentationCommand(s),
-            MoveByPresentationCommandSpec s => new MoveByPresentationCommand(s),
-            ScaleToPresentationCommandSpec s => new ScaleToPresentationCommand(s),
-
-            // PresentationTarget direct transform
-            ApplyPresentationTargetOffsetCommandSpec s => new ApplyPresentationTargetOffsetCommand(s),
-            MoveByPresentationTargetCommandSpec s => new MoveByPresentationTargetCommand(s),
-            MoveToPresentationTargetCommandSpec s => new MoveToPresentationTargetCommand(s),
-            ScaleToPresentationTargetCommandSpec s => new ScaleToPresentationTargetCommand(s),
-            RotateToPresentationTargetCommandSpec s => new RotateToPresentationTargetCommand(s),
-            SlideInPresentationTargetCommandSpec s => new SlideInPresentationTargetCommand(s),
             SlantedMaskSlideInCommandSpec s => new SlantedMaskSlideInCommand(s),
             SlantedMaskSlideOutCommandSpec s => new SlantedMaskSlideOutCommand(s),
             
