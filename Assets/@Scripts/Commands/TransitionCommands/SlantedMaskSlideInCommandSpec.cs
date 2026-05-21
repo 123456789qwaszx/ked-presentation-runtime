@@ -168,11 +168,16 @@ public sealed class SlantedMaskSlideInCommand : CommandBase, IStepScopedCommand
     {
         _resolveAttempted = true;
 
-        RectTransform rect = PresentationTargetResolver.ResolveRect(
-            scope,
-            _spec.target,
-            _spec.strict,
-            nameof(SlantedMaskSlideInCommand));
+        //***
+        // RectTransform rect = PresentationTargetResolver.ResolveRect(
+        //     scope,
+        //     _spec.target,
+        //     _spec.strict,
+        //     nameof(FocusBlurCurtainCommand));
+
+        RectTransform rect =   UIManager.Instance.GetUI<PresentationUIRoot>().Stage00BackgroundSlot;
+        if (rect == null)
+            return;
 
         if (rect == null)
             return;

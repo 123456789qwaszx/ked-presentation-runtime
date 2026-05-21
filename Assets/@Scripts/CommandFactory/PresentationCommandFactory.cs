@@ -11,7 +11,6 @@ public interface IDialogueBoxViewResolver
 }
 public sealed class PresentationViewCommandFactory : INodeCommandFactory
 {
-    private readonly PresentationViewAccess _presentationViewAccess;
     private readonly PresentationResponseRig _presentationResponseRig;
 
     private readonly IBGViewPrefabProvider _bgViewPrefabProvider;
@@ -20,13 +19,11 @@ public sealed class PresentationViewCommandFactory : INodeCommandFactory
     private readonly IDialogueBoxViewResolver _dialogueBoxResolver;
 
     public PresentationViewCommandFactory(
-        PresentationViewAccess presentationViewAccess,
         PresentationResponseRig presentationResponseRig,
         IBGViewPrefabProvider bgViewPrefabProvider,
         IBGRuntimeRegistry bgRuntimeRegistry,
         IDialogueBoxViewResolver dialogueBoxViewResolver)
     {
-        _presentationViewAccess = presentationViewAccess;
         _presentationResponseRig = presentationResponseRig;
         _bgViewPrefabProvider = bgViewPrefabProvider;
         _bgRuntimeRegistry = bgRuntimeRegistry;
@@ -40,7 +37,7 @@ public sealed class PresentationViewCommandFactory : INodeCommandFactory
             null => null,
 
             // Presentation View setup
-            SetupPresentationViewCommandSpec s => new SetupPresentationViewCommand(_presentationViewAccess, _presentationResponseRig, s),
+            SetupPresentationViewCommandSpec s => new SetupPresentationViewCommand(_presentationResponseRig, s),
 
             SlantedMaskSlideInCommandSpec s => new SlantedMaskSlideInCommand(s),
             SlantedMaskSlideOutCommandSpec s => new SlantedMaskSlideOutCommand(s),
@@ -49,7 +46,7 @@ public sealed class PresentationViewCommandFactory : INodeCommandFactory
             SlantedShutterCommandSpec s => new SlantedShutterCommand(s),
             FocusBlurFadeCommandSpec s => new FocusBlurFadeCommand(s),
             FocusBlurCurtainCommandSpec s => new FocusBlurCurtainCommand(s),
-            LightSweepCommandSpec s => new LightSweepCommand(s),
+          
             
             
             ResetPresentationTargetTransformCommandSpec s => new ResetPresentationTargetTransformCommand(s),

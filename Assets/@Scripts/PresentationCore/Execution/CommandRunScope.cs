@@ -13,8 +13,6 @@ public sealed class CommandRunScope
     public readonly BackgroundRigRegistry backgroundRigs = new();
     public readonly CastRegistry castRegistry = new(); // 정체성 바인딩 저장소
     
-    public PresentationViewRefs Presentation { get; set; }
-    
     /// <summary>
     /// Lifetime for resources spawned by commands within the current step.
     /// Cleaned up when the step boundary is crossed.

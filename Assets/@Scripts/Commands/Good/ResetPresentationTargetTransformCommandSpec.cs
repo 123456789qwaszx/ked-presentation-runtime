@@ -91,11 +91,13 @@ public sealed class ResetPresentationTargetTransformCommand : CommandBase
     private void ResolveRefs(CommandRunScope scope)
     {
         _resolveAttempted = true;
+        //***
+        // RectTransform rect = PresentationTargetResolver.ResolveRect(
+        //     scope,
+        //     _spec.target,
+        //     _spec.strict,
+        //     nameof(FocusBlurCurtainCommand));
 
-        _rect = PresentationTargetResolver.ResolveRect(
-            scope,
-            _spec.target,
-            _spec.strict,
-            nameof(ResetPresentationTargetTransformCommand));
+        _rect =   UIManager.Instance.GetUI<PresentationUIRoot>().Stage00BackgroundSlot;
     }
 }

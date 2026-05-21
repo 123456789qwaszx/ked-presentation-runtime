@@ -26,7 +26,6 @@ public sealed class ShotResetCommand : CommandBase, IStepScopedCommand
     private readonly PresentationResponseRig _rig;
     private readonly ShotResetCommandSpec _spec;
 
-    private PresentationViewRefs _presentation;
     private PresentationIntentState _fromState;
     private PresentationIntentState _toState;
     private Tween _tween;
@@ -49,7 +48,7 @@ public sealed class ShotResetCommand : CommandBase, IStepScopedCommand
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (_rig == null || _presentation == null)
+        if (_rig == null)
             yield break;
 
         if (_spec.killTween)
@@ -62,7 +61,7 @@ public sealed class ShotResetCommand : CommandBase, IStepScopedCommand
 
         if (_spec.duration <= 0f || ApproximatelyEqual(_fromState, _toState))
         {
-            Commit(_rig, _toState, _presentation);
+            Commit(_rig, _toState);
             ClearRuntimeState();
             yield break;
         }
@@ -72,7 +71,7 @@ public sealed class ShotResetCommand : CommandBase, IStepScopedCommand
                 () => 0f,
                 t =>
                 {
-                    if (!_canCommitFinalState || _rig == null || _presentation == null)
+                    if (!_canCommitFinalState || _rig == null)
                         return;
 
                     float u = Mathf.Clamp01(t);
@@ -87,10 +86,10 @@ public sealed class ShotResetCommand : CommandBase, IStepScopedCommand
             .SetTarget(_rig)
             .OnComplete(() =>
             {
-                if (!_canCommitFinalState || _rig == null || _presentation == null)
+                if (!_canCommitFinalState || _rig == null)
                     return;
 
-                Commit(_rig, _toState, _presentation);
+                Commit(_rig, _toState);
                 ClearRuntimeState();
             });
 
@@ -103,7 +102,7 @@ public sealed class ShotResetCommand : CommandBase, IStepScopedCommand
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (_rig == null || _presentation == null)
+        if (_rig == null)
             return;
 
         KillRigTween(false);
@@ -111,7 +110,7 @@ public sealed class ShotResetCommand : CommandBase, IStepScopedCommand
         _fromState = _rig.CurrentState;
         _toState = PresentationIntentState.Default;
 
-        Commit(_rig, _toState, _presentation);
+        Commit(_rig, _toState);
         ClearRuntimeState();
     }
 
@@ -122,41 +121,18 @@ public sealed class ShotResetCommand : CommandBase, IStepScopedCommand
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (!_canCommitFinalState || _rig == null || _presentation == null)
+        if (!_canCommitFinalState || _rig == null)
             return;
 
         _tween?.Kill(false);
         KillRigTween(false);
-        Commit(_rig, _toState, _presentation);
+        Commit(_rig, _toState);
         ClearRuntimeState();
     }
 
     private void ResolveRefs(CommandRunScope scope)
     {
         _resolveAttempted = true;
-
-        if (_rig == null)
-        {
-            if (_spec.strict)
-                Debug.LogWarning("[ShotResetCommand] PresentationResponseRig is null.");
-            return;
-        }
-
-        if (scope == null)
-        {
-            if (_spec.strict)
-                Debug.LogWarning("[ShotResetCommand] CommandRunScope is null.");
-            return;
-        }
-
-        if (scope.Presentation == null)
-        {
-            if (_spec.strict)
-                Debug.LogWarning("[ShotResetCommand] PresentationViewRefs is null.");
-            return;
-        }
-
-        _presentation = scope.Presentation;
     }
 
     private void KillRigTween(bool complete)
@@ -171,16 +147,14 @@ public sealed class ShotResetCommand : CommandBase, IStepScopedCommand
     private void ClearRuntimeState()
     {
         _canCommitFinalState = false;
-        _presentation = null;
         _tween = null;
     }
 
     private static void Commit(
         PresentationResponseRig rig,
-        in PresentationIntentState state,
-        PresentationViewRefs presentation)
+        in PresentationIntentState state)
     {
-        if (rig == null || presentation == null)
+        if (rig == null)
             return;
 
         rig.ApplyToAllBindings(state);

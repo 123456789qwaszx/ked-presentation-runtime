@@ -11,9 +11,9 @@ public enum PresentationDirection
 
 [Serializable]
 public abstract class PresentationTargetCommandSpecBase : CommandSpecBase
-{
+{//***
     [Header("Presentation Target")]
-    public PresentationTarget target = PresentationTarget.Stage00_Root;
+    public RectTransform target = UIManager.Instance.GetUI<PresentationUIRoot>().Stage00BackgroundSlot;
 
     [Header("Resolve")]
     public bool strict = true;

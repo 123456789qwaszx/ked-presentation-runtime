@@ -169,9 +169,7 @@ public class VnAppBootstrap : MonoBehaviour
         SoundCommandFactory soundCommandFactory = new SoundCommandFactory(audioSystem, audioClipResolver);
 
         //PresentationViewCommandFactory
-        PresentationViewAccess presentationViewAccess = new();
-        PresentationViewCommandFactory presentationViewCommandFactory = new(presentationViewAccess,
-            presentationResponseRig, bgHost, bgHost, dialogueBoxHost);
+        PresentationViewCommandFactory presentationViewCommandFactory = new(presentationResponseRig, bgHost, bgHost, dialogueBoxHost);
         
         BackgroundRigSlotResolver backgroundRigSlotResolver = new();
         BackgroundRigBuilder backgroundRigBuilder = new();

@@ -191,22 +191,21 @@ public sealed class FocusBlurCurtainCommand : CommandBase, IStepScopedCommand
     {
         _resolveAttempted = true;
 
-        RectTransform rect = PresentationTargetResolver.ResolveRect(
-            scope,
-            _spec.target,
-            _spec.strict,
-            nameof(FocusBlurCurtainCommand));
+        //***
+        // RectTransform rect = PresentationTargetResolver.ResolveRect(
+        //     scope,
+        //     _spec.target,
+        //     _spec.strict,
+        //     nameof(FocusBlurCurtainCommand));
 
+        RectTransform rect =   UIManager.Instance.GetUI<PresentationUIRoot>().Stage00BackgroundSlot;
         if (rect == null)
             return;
 
         _graphic = rect.GetComponent<FocusBlurCurtainGraphic>();
 
         if (_graphic == null && _spec.strict)
-        {
-            Debug.LogWarning(
-                $"[FocusBlurCurtainCommand] Target '{_spec.target}' does not have FocusBlurCurtainGraphic.");
-        }
+        { }
     }
 
     private void ApplyConfig()

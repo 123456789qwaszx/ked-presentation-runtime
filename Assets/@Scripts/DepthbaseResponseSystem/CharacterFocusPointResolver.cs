@@ -22,7 +22,7 @@ public static class CharacterFocusPointResolver
         if (string.IsNullOrWhiteSpace(roleKey))
             return false;
 
-        if (scope == null || scope.characterRigs == null || scope.Presentation == null)
+        if (scope == null || scope.characterRigs == null)
             return false;
 
         if (!scope.characterRigs.TryGetRig(roleKey.Trim(), out CharacterRigRefs rigRefs) || rigRefs == null)
@@ -71,12 +71,13 @@ public static class CharacterFocusPointResolver
 
     private static RectTransform ResolveStageRootForRect(CommandRunScope scope, RectTransform rect)
     {
-        if (scope == null || scope.Presentation == null || rect == null)
+        if (scope == null || rect == null)
             return null;
 
-        RectTransform stage00 = scope.Presentation.GetRect(PresentationTarget.Stage00_Root);
-        RectTransform stage01 = scope.Presentation.GetRect(PresentationTarget.Stage01_Root);
-        RectTransform stage02 = scope.Presentation.GetRect(PresentationTarget.Stage02_Root);
+        //***
+        RectTransform stage00 =  UIManager.Instance.GetUI<PresentationUIRoot>().Stage00BackgroundSlot;
+        RectTransform stage01 =  UIManager.Instance.GetUI<PresentationUIRoot>().Stage00BackgroundSlot;
+        RectTransform stage02 =  UIManager.Instance.GetUI<PresentationUIRoot>().Stage00BackgroundSlot;
 
         if (IsChildOf(rect, stage00))
             return stage00;

@@ -3,6 +3,8 @@ using System.Collections;
 using DG.Tweening;
 using UnityEngine;
 
+
+
 public enum VerticalStripWipeMode
 {
     Cover = 0,
@@ -171,12 +173,14 @@ public sealed class VerticalStripWipeCommand : CommandBase, IStepScopedCommand
     {
         _resolveAttempted = true;
 
-        RectTransform rect = PresentationTargetResolver.ResolveRect(
-            scope,
-            _spec.target,
-            _spec.strict,
-            nameof(VerticalStripWipeCommand));
+        //***
+        // RectTransform rect = PresentationTargetResolver.ResolveRect(
+        //     scope,
+        //     _spec.target,
+        //     _spec.strict,
+        //     nameof(FocusBlurCurtainCommand));
 
+        RectTransform rect =   UIManager.Instance.GetUI<PresentationUIRoot>().Stage00BackgroundSlot;
         if (rect == null)
             return;
 
