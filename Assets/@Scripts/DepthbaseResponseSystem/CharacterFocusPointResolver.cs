@@ -1,5 +1,19 @@
 using UnityEngine;
 
+public interface ICameraFocusStageRootProvider
+{
+    RectTransform Stage00Root { get; }
+    RectTransform Stage01Root { get; }
+    RectTransform Stage02Root { get; }
+}
+
+public sealed partial class PresentationUIRoot : ICameraFocusStageRootProvider
+{
+    public RectTransform Stage00Root => View.Rect(Refs.Stage00_Root);
+    public RectTransform Stage01Root => View.Rect(Refs.Stage01_Root);
+    public RectTransform Stage02Root => View.Rect(Refs.Stage02_Root);
+}
+
 public struct CharacterFocusPointResult
 {
     public RectTransform StageRoot;
@@ -71,13 +85,14 @@ public static class CharacterFocusPointResolver
 
     private static RectTransform ResolveStageRootForRect(CommandRunScope scope, RectTransform rect)
     {
-        if (scope == null || rect == null)
+        if (rect == null)
             return null;
 
-        //***
-        RectTransform stage00 =  UIManager.Instance.GetUI<PresentationUIRoot>().Stage00BackgroundSlot;
-        RectTransform stage01 =  UIManager.Instance.GetUI<PresentationUIRoot>().Stage00BackgroundSlot;
-        RectTransform stage02 =  UIManager.Instance.GetUI<PresentationUIRoot>().Stage00BackgroundSlot;
+        ICameraFocusStageRootProvider cameraFocusStageRootProvider = UIManager.Instance.GetUI<PresentationUIRoot>();
+        
+        RectTransform stage00 = cameraFocusStageRootProvider.Stage00Root ;
+        RectTransform stage01 = cameraFocusStageRootProvider.Stage01Root ;
+        RectTransform stage02 = cameraFocusStageRootProvider.Stage02Root ;
 
         if (IsChildOf(rect, stage00))
             return stage00;
