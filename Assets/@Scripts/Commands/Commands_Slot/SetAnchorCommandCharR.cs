@@ -83,7 +83,7 @@ public sealed class SetAnchorCommandCharR : CommandBase
     
     private void Apply(CommandRunScope scope)
     {
-        string characterKey = CharacterRigTargetResolver.ResolveSlotKeyFromTargetKey(scope, _spec.slotKey);
+        string characterKey = CharacterRigTargetResolver.ResolveRigKeyByPolicy(scope, _spec.slotKey);
         //scope.CastRegistry.TryGetCharacter(_spec.slotKey, out string characterKey);
         
         Vector2 anchoredPosition = CharAnchorPlacementResolver.ResolveAnchoredPosition(

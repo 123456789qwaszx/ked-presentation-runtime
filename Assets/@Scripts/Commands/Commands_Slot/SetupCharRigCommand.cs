@@ -83,7 +83,7 @@ public sealed class SetupCharRigCommand : CommandBase
         
         if (!scope.Refs.TryAdd(roleKey, refs))
         {
-            RemoveRegisteredRig(scope, roleKey);
+            DestroyRegisteredRig(scope, roleKey);
             
             scope.Refs[roleKey] = refs;
         }
@@ -95,7 +95,7 @@ public sealed class SetupCharRigCommand : CommandBase
     
     
     #region Helpers
-    private static void RemoveRegisteredRig(CommandRunScope scope, string roleKey)
+    private static void DestroyRegisteredRig(CommandRunScope scope, string roleKey)
     {
         if (!scope.Refs.TryGetCharRigRefs(roleKey, out CharacterRigRefs existingRig) || existingRig?.RigRoot == null)
             return;

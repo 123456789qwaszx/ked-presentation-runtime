@@ -72,6 +72,6 @@ public sealed class SetPortraitSpriteCommandCharR : CommandBase
         _resolveAttempted = true;
 
         CharacterRigRefs rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
-        _image = rigRefs.GetComponent(_spec.target) as Image;
+        _image = rigRefs.GetImage(_spec.target);
     }
 }

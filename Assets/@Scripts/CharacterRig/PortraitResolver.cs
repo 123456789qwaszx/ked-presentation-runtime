@@ -31,7 +31,7 @@ public sealed class PortraitResolver
 
     public Sprite Resolve(CommandRunScope scope, string targetKey, PortraitIdentity portrait, string debugName)
     {
-        string roleKey = CharacterRigTargetResolver.ResolveSlotKeyFromTargetKey(scope, targetKey);
+        string roleKey = CharacterRigTargetResolver.ResolveRigKeyByPolicy(scope, targetKey);
 
         string character = portrait.character;
         string variant = portrait.variant;

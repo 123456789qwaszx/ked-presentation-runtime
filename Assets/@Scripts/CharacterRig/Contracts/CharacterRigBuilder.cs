@@ -190,9 +190,7 @@ public sealed class CharacterRigBuilder
 
     private CharacterRigRefs BuildRefs(RectTransform rigRoot, Dictionary<CharacterRigSchema.Refs, RectTransform> map)
     {
-        CharacterRigRefs refs = new();
-
-        refs.RigRoot = rigRoot;
+        CharacterRigRefs refs = new(rigRoot);
 
         RectTransform GetRt(CharacterRigSchema.Refs key)
         {

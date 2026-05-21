@@ -67,7 +67,7 @@ public sealed class SetSpriteCommandCharR : CommandBase
                 scope,
                 _spec.slotKey);
 
-        _image = rig.GetComponent(_spec.target) as Image;
+        _image = rig.GetImage(_spec.target);
 
         if (_image == null)
         {

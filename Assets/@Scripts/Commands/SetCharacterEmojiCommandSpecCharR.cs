@@ -163,7 +163,7 @@ public sealed class SetCharacterEmojiCommandCharR : CommandBase, IStepScopedComm
 
         _root = rigRefs.GetRect(_spec.rootTarget);
         _castTransform = rigRefs.GetRect(_spec.castTarget);
-        _image = rigRefs.GetComponent(_spec.imageTarget) as Image;
+        _image = rigRefs.GetImage(_spec.imageTarget);
 
         if (_root != null)
             _root.TryGetComponent(out _rootCanvasGroup);

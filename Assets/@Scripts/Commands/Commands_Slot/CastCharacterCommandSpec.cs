@@ -56,12 +56,6 @@ public sealed class CastCharacterCommand : CommandBase
         string characterKey = _spec.characterKey;
         string variantKey = _spec.variantKey;
 
-        if (!scope.Refs.TryGetCharRigRefs(slotKey, out CharacterRigRefs rig) || rig == null)
-        {
-            throw new InvalidOperationException(
-                $"[CastCharacterCommand] Rig is not bound for slotKey='{slotKey}'. Call <<slot>> before <<cast>>.");
-        }
-
         scope.CastRegistry.CastCharRig(slotKey, characterKey, variantKey);
     }
 }

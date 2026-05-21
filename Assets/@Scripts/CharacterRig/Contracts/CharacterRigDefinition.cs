@@ -271,7 +271,8 @@ public enum CharacterRigTarget
 
 public sealed class CharacterRigRefs
 {
-    public RectTransform RigRoot;
+    public RectTransform RigRoot { get; private set; }
+    public CharacterRigRefs(RectTransform rigRoot) => RigRoot = rigRoot;
 
     // Slot axis - stage placement
     public RectTransform CharSlot_Anchor;
@@ -372,11 +373,29 @@ public static class RigRegistryExtensions
         rigRefs = null;
         return false;
     }
+    
+    public static bool HasCharRigRefs(this Dictionary<string, object> rigRegistry, string roleKey)
+    {
+        if (!rigRegistry.TryGetValue(roleKey, out object obj))
+            return false;
+
+        return obj is CharacterRigRefs;
+    }
 }
 
 public static class CharacterRigRefsExtensions
 {
-    public static Component GetComponent(this CharacterRigRefs refs, CharacterRigTarget target)
+    public static RectTransform GetRect(this CharacterRigRefs refs, CharacterRigTarget target)
+    {
+        return refs.GetComponent(target).transform as RectTransform;
+    }
+    
+    public static Image GetImage(this CharacterRigRefs refs, CharacterRigTarget target)
+    {
+        return refs.GetComponent(target) as Image;
+    }
+    
+    private static Component GetComponent(this CharacterRigRefs refs, CharacterRigTarget target)
     {
         if (refs == null)
             return null;
@@ -467,21 +486,5 @@ public static class CharacterRigRefsExtensions
 
             _ => null
         };
-    }
-
-    public static RectTransform GetRect(this CharacterRigRefs refs, CharacterRigTarget target)
-    {
-        Component c = refs.GetComponent(target);
-        
-        if (c == null)
-            return null;
-
-        if (c is RectTransform rect)
-            return rect;
-        
-        if (c is Graphic graphic)
-            return graphic.rectTransform;
-        
-        return c.transform as RectTransform;
     }
 }
