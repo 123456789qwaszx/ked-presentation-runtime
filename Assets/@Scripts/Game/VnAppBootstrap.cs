@@ -80,8 +80,6 @@ public class VnAppBootstrap : MonoBehaviour
     [Header("UI")] 
     [SerializeField] private EpisodePlayer episodePlayer;
 
-    [Header("Transition")] 
-    [SerializeField] private TransitionTargetRouter transitionTargetRouter;
     
     [Header("Emoji")] 
     [SerializeField] private CharacterEmojiLibrarySO characterEmojiLibrarySO;
@@ -162,7 +160,7 @@ public class VnAppBootstrap : MonoBehaviour
         CharRigCommandFactory charRigFactory = new(charRigSlotResolver, charRigAccess, portraitResolver, emojiResolver, globalTuning, roleTuningDb);
 
         // TransitionFactory
-        TransitionCommandFactory transitionCommandFactory = new(transitionTargetRouter, _uiPatchService);
+        TransitionCommandFactory transitionCommandFactory = new(_uiPatchService);
 
         // SoundFactory
         ResourcesAudioClipResolver audioClipResolver = new();

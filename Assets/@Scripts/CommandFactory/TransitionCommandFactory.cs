@@ -1,13 +1,10 @@
 public sealed class TransitionCommandFactory : INodeCommandFactory
 {
-    private readonly TransitionTargetRouter _transitionTargetRouter;
     private readonly UIPatchService _uiPatchService;
 
     public TransitionCommandFactory(
-        TransitionTargetRouter transitionTargetRouter,
         UIPatchService uiPatchService)
     {
-        _transitionTargetRouter = transitionTargetRouter;
         _uiPatchService = uiPatchService;
     }
 
@@ -15,7 +12,6 @@ public sealed class TransitionCommandFactory : INodeCommandFactory
     {
         command = spec switch
         {
-            TransitionCommandSpec s => new TransitionCommand(_transitionTargetRouter, s),
             UIPatchCommandSpec s => new UIPatchCommand(_uiPatchService, s),
 
             _ => null

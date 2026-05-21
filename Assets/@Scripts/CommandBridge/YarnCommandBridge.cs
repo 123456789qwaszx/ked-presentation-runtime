@@ -44,8 +44,6 @@ public sealed partial class YarnCommandBridge
         //_dialogueRunner.AddCommandHandler("end_hold", (Func<IEnumerator>)(() => PlayHeldCommands()));
         _dialogueRunner.AddCommandHandler("end_hold", PlayHeldCommands);
         
-        
-        _dialogueRunner.AddCommandHandler<string>("blackout", EnqueueBlackoutTransitionSpec);
         _dialogueRunner.AddCommandHandler<string>("uipatch", EnqueueUIPatchSpec);
         
         _dialogueRunner.AddCommandHandler<float>("pause", EnqueueWaitSpec);
@@ -535,33 +533,7 @@ public sealed partial class YarnCommandBridge
 
         Collect(spec);
     }
-
-    private void EnqueueBlackoutTransitionSpec(string transitionMode)
-    {
-        bool parsed = TransitionPlayModeParser.TryParseBlackoutMode(
-            transitionMode,
-            out TransitionPlayMode playMode,
-            out bool forceWait,
-            out float holdCoveredSeconds);
-
-        if (!parsed)
-        {
-            Debug.LogWarning(
-                $"[YarnCommandBridge] blackout: Unknown transitionMode '{transitionMode}'. " +
-                $"Fallback to '{TransitionPlayMode.CoverThenUncover}'.");
-        }
-
-        var spec = new TransitionCommandSpec
-        {
-            targetKind = TransitionTargetKind.Blackout,
-            playMode = playMode,
-            wait = forceWait,
-            holdCoveredSeconds = holdCoveredSeconds
-        };
-
-        Collect(spec);
-    }
-
+    
     private void EnqueueSlideInJoltCombo(string roleKey, string direction = "right")
     {
         CharRigDirection dir = CharRigDirectionParser.ParseSlideDirection(direction, CharRigDirection.Right);

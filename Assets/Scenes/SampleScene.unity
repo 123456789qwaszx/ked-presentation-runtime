@@ -5063,7 +5063,6 @@ MonoBehaviour:
   vnPlaytimeTracker: {fileID: 451477690}
   vnAlbumUnlockDebugList: {fileID: 739385218}
   episodePlayer: {fileID: 1924806292}
-  transitionTargetRouter: {fileID: 648162085}
   characterEmojiLibrarySO: {fileID: 11400000, guid: 50cc0df71f2e038468df66d0c632ebdd, type: 2}
 --- !u!1 &626587492
 GameObject:
@@ -5243,54 +5242,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 639795080}
   m_CullTransparentMesh: 1
---- !u!1 &648162084
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 648162086}
-  - component: {fileID: 648162085}
-  m_Layer: 0
-  m_Name: TransitionTargetRouter
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &648162085
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 648162084}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 110f72329c080a2478c6065210c77a5c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TransitionTargetRouter
-  transitionTargets:
-  - kind: 0
-    customTargetKey: 
-    canvasGroup: {fileID: 8995933710552289877}
---- !u!4 &648162086
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 648162084}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3558.9248, y: -413.16864, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &650341720
 GameObject:
   m_ObjectHideFlags: 0
@@ -17749,7 +17700,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 458.38, y: -24}
-  m_SizeDelta: {x: 916.76, y: 0}
+  m_SizeDelta: {x: 916.76, y: 24}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!1 &666632935594092605
 GameObject:
@@ -47234,7 +47185,6 @@ SceneRoots:
   - {fileID: 1658226452}
   - {fileID: 1924806293}
   - {fileID: 775605348}
-  - {fileID: 648162086}
   - {fileID: 2068248508}
   - {fileID: 739385217}
   - {fileID: 1928200880}

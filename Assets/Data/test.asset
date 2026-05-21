@@ -85,9 +85,7 @@ MonoBehaviour:
         signalKey: 
     - editorName: Imported Step 3
       compiled:
-      - rid: 8483491315577782337
       - rid: 8483491315577782338
-      - rid: 8483491315577782339
       gate:
         type: 0
         seconds: 0
@@ -115,23 +113,9 @@ MonoBehaviour:
         type: 0
         seconds: 0
         signalKey: 
-    - editorName: Imported Step 3
-      compiled:
-      - rid: 8483491315577782343
-      gate:
-        type: 0
-        seconds: 0
-        signalKey: 
     - editorName: Imported Step 4
       compiled:
       - rid: 8483491315577782344
-      gate:
-        type: 0
-        seconds: 0
-        signalKey: 
-    - editorName: Imported Step 5
-      compiled:
-      - rid: 8483491315577782345
       gate:
         type: 0
         seconds: 0
@@ -151,16 +135,13 @@ MonoBehaviour:
       type: {class: SetAnchorCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:
         wait: 0
-        targetKey: 
+        slotKey: 
         target: 0
         preset: 2
         baseRatioX: 0.5
-        globalTuning: {fileID: 0}
-        roleTuningDb: {fileID: 0}
-        poseKey: 
         offset: {x: 0, y: 0}
-        overrideAnchoredPosition: 0
-        anchoredPositionOverride: {x: 0, y: 0}
+        resetSlotPos: 1
+        resetCharacterPos: 1
     - rid: 5301155771391934529
       type: {class: SetupCharRigCommandSpec, ns: , asm: Assembly-CSharp}
       data:
@@ -180,12 +161,12 @@ MonoBehaviour:
       type: {class: UncastCharacterCommandSpec, ns: , asm: Assembly-CSharp}
       data:
         wait: 0
-        targetKey: 
+        slotKey: 
     - rid: 5301155771391934532
       type: {class: SetPortraitSpriteCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:
         wait: 0
-        targetKey: 
+        slotKey: 
         portrait:
           character: 
           emotion: 
@@ -205,7 +186,7 @@ MonoBehaviour:
       type: {class: SetPortraitSpriteCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:
         wait: 0
-        targetKey: 
+        slotKey: 
         portrait:
           character: kuonji
           emotion: 1
@@ -217,7 +198,7 @@ MonoBehaviour:
       type: {class: FadeInCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:
         wait: 0
-        targetKey: 
+        slotKey: 
         targetMask: 5
         duration: 0.47
         ease: 9
@@ -226,7 +207,7 @@ MonoBehaviour:
       type: {class: MoveByCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:
         wait: 0
-        targetKey: 
+        slotKey: 
         target: 1
         delta: {x: 200, y: 0}
         duration: 0.4
@@ -266,21 +247,6 @@ MonoBehaviour:
         wait: 0
         clipKey: audio/sfx_dragon-studio-notification-sound-effect-372475
         directClip: {fileID: 0}
-    - rid: 8483491315577782337
-      type: {class: TransitionCommandSpec, ns: , asm: Assembly-CSharp}
-      data:
-        wait: 1
-        playMode: 0
-        targetKind: 0
-        customTargetKey: 
-        coveredAlpha: 1
-        uncoveredAlpha: 0
-        coverDuration: 0.2
-        uncoverDuration: 0.2
-        holdCoveredSeconds: 0.2
-        coverEase: 9
-        uncoverEase: 9
-        resetToOpenAtStart: 1
     - rid: 8483491315577782338
       type: {class: UIPatchCommandSpec, ns: , asm: Assembly-CSharp}
       data:
@@ -288,21 +254,6 @@ MonoBehaviour:
         targetKind: 0
         themeId: black
         localeId: ko-KR
-    - rid: 8483491315577782339
-      type: {class: TransitionCommandSpec, ns: , asm: Assembly-CSharp}
-      data:
-        wait: 1
-        playMode: 1
-        targetKind: 0
-        customTargetKey: 
-        coveredAlpha: 1
-        uncoveredAlpha: 0
-        coverDuration: 0.2
-        uncoverDuration: 0.2
-        holdCoveredSeconds: 0
-        coverEase: 9
-        uncoverEase: 9
-        resetToOpenAtStart: 1
     - rid: 8483491315577782340
       type: {class: UIPatchCommandSpec, ns: , asm: Assembly-CSharp}
       data:
@@ -323,21 +274,6 @@ MonoBehaviour:
         wait: 0
         clipKey: audio/sfx_dragon-studio-notification-sound-effect-372475
         directClip: {fileID: 0}
-    - rid: 8483491315577782343
-      type: {class: TransitionCommandSpec, ns: , asm: Assembly-CSharp}
-      data:
-        wait: 1
-        playMode: 0
-        targetKind: 0
-        customTargetKey: 
-        coveredAlpha: 1
-        uncoveredAlpha: 0
-        coverDuration: 0.2
-        uncoverDuration: 0.2
-        holdCoveredSeconds: 0.2
-        coverEase: 9
-        uncoverEase: 9
-        resetToOpenAtStart: 1
     - rid: 8483491315577782344
       type: {class: UIPatchCommandSpec, ns: , asm: Assembly-CSharp}
       data:
@@ -345,18 +281,3 @@ MonoBehaviour:
         targetKind: 0
         themeId: black
         localeId: ko-KR
-    - rid: 8483491315577782345
-      type: {class: TransitionCommandSpec, ns: , asm: Assembly-CSharp}
-      data:
-        wait: 1
-        playMode: 1
-        targetKind: 0
-        customTargetKey: 
-        coveredAlpha: 1
-        uncoveredAlpha: 0
-        coverDuration: 0.2
-        uncoverDuration: 0.2
-        holdCoveredSeconds: 0
-        coverEase: 9
-        uncoverEase: 9
-        resetToOpenAtStart: 1
