@@ -175,7 +175,8 @@ public class VnAppBootstrap : MonoBehaviour
         
         BackgroundRigSlotResolver backgroundRigSlotResolver = new();
         BackgroundRigBuilder backgroundRigBuilder = new();
-        BackgroundRigCommandFactory backgroundRigCommandFactory = new(backgroundRigSlotResolver, backgroundRigBuilder);
+        BackgroundSpriteResolver backgroundSpriteResolver = new();
+        BackgroundRigCommandFactory backgroundRigCommandFactory = new(backgroundRigSlotResolver, backgroundRigBuilder, backgroundSpriteResolver);
 
         CompositeCommandFactory factory = new(
             signalFactory, 
