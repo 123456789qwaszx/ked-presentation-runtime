@@ -14,7 +14,7 @@ public enum FocusBlurFadeMode
     "Presentation Transition",
     "Focus Blur Fade",
     Order = -848)]
-public sealed class FocusBlurFadeCommandSpec : PresentationTargetCommandSpecBase
+public sealed class FocusBlurFadeCommandSpec : CommandSpecBase
 {
     [Header("Mode")]
     public FocusBlurFadeMode mode = FocusBlurFadeMode.FadeOut;
@@ -199,11 +199,6 @@ public sealed class FocusBlurFadeCommand : CommandBase, IStepScopedCommand
 
         _overlay = rect.GetComponent<FocusBlurFadeOverlay>();
 
-        if (_overlay == null && _spec.strict)
-        {
-            Debug.LogWarning(
-                $"[FocusBlurFadeCommand] Target '{_spec.target}' does not have FocusBlurFadeOverlay.");
-        }
     }
 
     private void ApplyConfig()

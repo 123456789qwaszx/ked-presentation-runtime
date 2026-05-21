@@ -3,6 +3,14 @@ using System.Collections;
 using DG.Tweening;
 using UnityEngine;
 
+public enum PresentationDirection
+{
+    Left,
+    Right,
+    Up,
+    Down
+}
+
 public interface IPresentationTransitionSlotProvider
 {
     RectTransform VerticalStripWipe { get; }
@@ -33,7 +41,7 @@ public enum VerticalStripWipeMode
     "Presentation Transition",
     "Vertical Strip Wipe",
     Order = -850)]
-public sealed class VerticalStripWipeCommandSpec : PresentationTargetCommandSpecBase
+public sealed class VerticalStripWipeCommandSpec : CommandSpecBase
 {
     [Header("Wipe")]
     public VerticalStripWipeMode mode = VerticalStripWipeMode.Cover;
@@ -196,12 +204,6 @@ public sealed class VerticalStripWipeCommand : CommandBase, IStepScopedCommand
             return;
 
         _graphic = rect.GetComponent<VerticalStripWipeGraphic>();
-
-        if (_graphic == null && _spec.strict)
-        {
-            Debug.LogWarning(
-                $"[VerticalStripWipeCommand] Target '{_spec.target}' does not have VerticalStripWipeGraphic.");
-        }
     }
 
     private void ApplyConfig()

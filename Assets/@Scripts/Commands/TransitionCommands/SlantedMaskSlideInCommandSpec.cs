@@ -8,7 +8,7 @@ using UnityEngine;
     "Presentation Motion",
     "Slanted Mask Slide In",
     Order = -899)]
-public sealed class SlantedMaskSlideInCommandSpec : PresentationTargetCommandSpecBase
+public sealed class SlantedMaskSlideInCommandSpec : CommandSpecBase
 {
     [Header("Shape")]
     public Vector2 fromOffset = new Vector2(-2200f, 0f);
@@ -172,12 +172,6 @@ public sealed class SlantedMaskSlideInCommand : CommandBase, IStepScopedCommand
         RectTransform rect = transitionSlotProvider.SlantedMaskEdgeGraphic;
         
         _maskGraphic = rect.GetComponent<SlantedMaskGraphic>();
-
-        if (_maskGraphic == null && _spec.strict)
-        {
-            Debug.LogWarning(
-                $"[SlantedMaskSlideInCommand] Target '{_spec.target}' does not have SlantedMaskGraphic.");
-        }
     }
 
     private void ApplyFixedMaskOptions()

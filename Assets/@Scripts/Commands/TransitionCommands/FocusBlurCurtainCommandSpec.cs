@@ -14,7 +14,7 @@ public enum FocusBlurCurtainMode
     "Presentation Transition",
     "Focus Blur Curtain",
     Order = -848)]
-public sealed class FocusBlurCurtainCommandSpec : PresentationTargetCommandSpecBase
+public sealed class FocusBlurCurtainCommandSpec : CommandSpecBase
 {
     [Header("Mode")]
     public FocusBlurCurtainMode mode = FocusBlurCurtainMode.Close;
@@ -195,9 +195,6 @@ public sealed class FocusBlurCurtainCommand : CommandBase, IStepScopedCommand
         RectTransform rect = transitionSlotProvider.FocusBlurCurtain;
 
         _graphic = rect.GetComponent<FocusBlurCurtainGraphic>();
-
-        if (_graphic == null && _spec.strict)
-        { }
     }
 
     private void ApplyConfig()

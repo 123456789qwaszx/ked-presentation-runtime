@@ -14,7 +14,7 @@ public enum SlantedShutterMode
     "Presentation Transition",
     "Slanted Shutter",
     Order = -849)]
-public sealed class SlantedShutterCommandSpec : PresentationTargetCommandSpecBase
+public sealed class SlantedShutterCommandSpec : CommandSpecBase
 {
     [Header("Mode")]
     public SlantedShutterMode mode = SlantedShutterMode.Close;
@@ -187,12 +187,6 @@ public sealed class SlantedShutterCommand : CommandBase, IStepScopedCommand
         RectTransform rect = transitionSlotProvider.SlantedShutter;
         
         _graphic = rect.GetComponent<SlantedShutterGraphic>();
-
-        if (_graphic == null && _spec.strict)
-        {
-            Debug.LogWarning(
-                $"[SlantedShutterCommand] Target '{_spec.target}' does not have SlantedShutterGraphic.");
-        }
     }
 
     private void ApplyConfig()

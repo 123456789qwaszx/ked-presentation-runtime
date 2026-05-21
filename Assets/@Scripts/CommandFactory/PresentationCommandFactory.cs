@@ -49,7 +49,7 @@ public sealed class PresentationViewCommandFactory : INodeCommandFactory
           
             
             
-            ResetPresentationTargetTransformCommandSpec s => new ResetPresentationTargetTransformCommand(s),
+            //ResetPresentationTargetTransformCommandSpec s => new ResetPresentationTargetTransformCommand(s),
 
             // Background
             SpawnBackgroundCommandSpec s => new SpawnBackgroundCommand(

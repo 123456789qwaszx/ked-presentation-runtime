@@ -79,7 +79,6 @@ public sealed partial class YarnCommandBridge
             killTween = true,
             disableWhenOpen = true,
             blockRaycastWhenClosed = false,
-            strict = true
         };
 
         Collect(spec);
@@ -116,7 +115,6 @@ public sealed partial class YarnCommandBridge
             killTween = true,
             disableWhenOpen = true,
             blockRaycastWhenClosed = false,
-            strict = true
         };
 
         Collect(spec);
@@ -151,7 +149,6 @@ public sealed partial class YarnCommandBridge
             killTween = true,
             disableWhenOpen = true,
             blockRaycastWhenClosed = false,
-            strict = true
         };
 
         Collect(spec);
@@ -187,7 +184,6 @@ public sealed partial class YarnCommandBridge
             killTween = true,
             disableWhenOpen = true,
             blockRaycastWhenClosed = false,
-            strict = true
         };
 
         Collect(spec);
@@ -213,7 +209,6 @@ public sealed partial class YarnCommandBridge
             killTween = true,
             disableWhenClear = true,
             blockRaycastWhenVisible = false,
-            strict = true
         };
 
         Collect(spec);
@@ -240,7 +235,6 @@ public sealed partial class YarnCommandBridge
             killTween = true,
             disableWhenClear = true,
             blockRaycastWhenVisible = false,
-            strict = true
         };
 
         Collect(spec);
@@ -273,7 +267,6 @@ public sealed partial class YarnCommandBridge
             killTween = true,
             disableWhenOpen = true,
             blockRaycastWhileClosed = false,
-            strict = true
         };
 
         Collect(spec);
@@ -305,7 +298,6 @@ public sealed partial class YarnCommandBridge
             killTween = true,
             disableWhenOpen = true,
             blockRaycastWhileClosed = false,
-            strict = true
         };
 
         Collect(spec);
@@ -334,7 +326,6 @@ public sealed partial class YarnCommandBridge
             wait = true,
             killTween = true,
             disableWhenClear = true,
-            strict = true
         };
 
         Collect(spec);
@@ -363,7 +354,6 @@ public sealed partial class YarnCommandBridge
             wait = true,
             killTween = true,
             disableWhenClear = true,
-            strict = true
         };
 
         Collect(spec);
@@ -521,20 +511,19 @@ public sealed partial class YarnCommandBridge
     private void EnqueueResetPresentationTargetSpec(string targetName)
     {
 
-        var spec = new ResetPresentationTargetTransformCommandSpec
-        {
-            resetAnchoredPosition = true,
-            anchoredPosition = Vector2.zero,
-            resetRotation = true,
-            localEulerAngles = Vector3.zero,
-            resetScale = true,
-            localScale = Vector3.one,
-            resetSizeDelta = false,
-            killTween = true,
-            strict = true
-        };
+        // var spec = new ResetPresentationTargetTransformCommandSpec
+        // {
+        //     resetAnchoredPosition = true,
+        //     anchoredPosition = Vector2.zero,
+        //     resetRotation = true,
+        //     localEulerAngles = Vector3.zero,
+        //     resetScale = true,
+        //     localScale = Vector3.one,
+        //     resetSizeDelta = false,
+        //     killTween = true,
+        // };
 
-        Collect(spec);
+        //Collect(spec);
     }
 
     private void EnqueueSlantedMaskCutInSpec(
@@ -558,7 +547,6 @@ public sealed partial class YarnCommandBridge
 
             wait = false,
             killTween = true,
-            strict = true
         };
 
         Collect(spec);
@@ -585,7 +573,6 @@ public sealed partial class YarnCommandBridge
 
             wait = false,
             killTween = true,
-            strict = true
         };
 
         Collect(spec);
