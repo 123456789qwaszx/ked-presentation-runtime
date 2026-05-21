@@ -25,8 +25,12 @@ public class VnAppBootstrap : MonoBehaviour
 
     [SerializeField] private PresentationResponseRig presentationResponseRig;
 
-    [Header("Presentation")] 
+    [Tooltip("CharacterRig prefab used for command presentation. " +
+             "Empty fields bake a complete rig from CharacterRigSchema at runtime. " +
+             "Prefab the baked result when you need performance setup, external systems, response targets, or shot helpers.")]
     [SerializeField] private RectTransform rigPrefab;
+    
+    [Header("Presentation")] 
     [SerializeField] private CharStageTuningSO globalTuning;
     [SerializeField] private RoleAnchorTuningDBSO roleTuningDb;
     
@@ -42,8 +46,7 @@ public class VnAppBootstrap : MonoBehaviour
 
     [Header("ImmediateCommandRunner")] 
     [SerializeField] private YarnBridgePlaybackDriver yarnBridgePlaybackDriver;
-
-    [SerializeField] private YarnCommandBridge yarnCommandBridge;
+    
     //[SerializeField] private YarnLineSetupPresenter yarnLineRuntimePresenter;
 
     [Header("Yarn")] 
@@ -156,7 +159,7 @@ public class VnAppBootstrap : MonoBehaviour
         CharacterRigBuilder charRigAccess = new();
         PortraitResolver portraitResolver = new(portraitGeneratedDbSo);
         CharacterEmojiResolver emojiResolver = new(characterEmojiLibrarySO);
-        CharRigCommandFactory charRigFactory = new(charRigSlotResolver, charRigAccess, portraitResolver, emojiResolver, rigPrefab, globalTuning, roleTuningDb);
+        CharRigCommandFactory charRigFactory = new(charRigSlotResolver, charRigAccess, portraitResolver, emojiResolver, globalTuning, roleTuningDb);
 
         // TransitionFactory
         TransitionCommandFactory transitionCommandFactory = new(transitionTargetRouter, _uiPatchService);
@@ -207,9 +210,10 @@ public class VnAppBootstrap : MonoBehaviour
             commandExecutor,
             presentationSessionEntry);
 
-        yarnCommandBridge.Initialize(
+        YarnCommandBridge yarnCommandBridge = new(
             dialogueRunner,
-            yarnBridgePlaybackDriver);
+            yarnBridgePlaybackDriver,
+            rigPrefab);
 
         customLinePresenter.Initialize(
             dialogueRunner,

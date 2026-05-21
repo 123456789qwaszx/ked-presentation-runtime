@@ -11,7 +11,7 @@ using UnityEngine;
 public class MoveByCommandSpecCharR : CharacterRigCommandSpecBase
 {
     [Header("Target (Track or Rig)")]
-    public CharacterRigTarget target = CharacterRigTarget.CharSlot_Track_Move;
+    public CharacterRigTarget target = CharacterRigTarget.CharSlot_Track;
 
     [Header("Delta (relative offset)")]
     [Tooltip("현재 anchoredPosition 기준으로 더해질 오프셋(픽셀 단위).")]

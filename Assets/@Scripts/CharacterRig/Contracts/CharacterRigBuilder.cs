@@ -38,7 +38,7 @@ public sealed class CharacterRigBuilder
         refs = BuildRefs(rigRoot, map);
     }
 
-
+    #region Graph Recovery
     private void EnsureValidGraphMap(RectTransform rigRoot, string rolePrefix,
         ref Dictionary<CharacterRigSchema.Refs, RectTransform> map)
     {
@@ -50,7 +50,7 @@ public sealed class CharacterRigBuilder
         Debug.LogWarning(
             $"[CharacterRigBuilder] Invalid rig graph. " +
             $"Rebuilding from CharacterRigSchema. " +
-            $"Prefab may be broken, outdated, or saved with another role prefix. " +
+            $"Prefab may be broken, or saved with another role prefix. " +
             $"For reusable prefab baking, call StripRolePrefixForBake after refs registration before saving. " +
             $"rigRoot='{rigRoot.name}', rolePrefix='{rolePrefix}'.",
             rigRoot);
@@ -73,9 +73,60 @@ public sealed class CharacterRigBuilder
 
         map = CollectRefMap(rigRoot, rolePrefix);
     }
+    
+    private RectTransform DetachPreservedExtensionsRoot(RectTransform rigRoot, string rolePrefix)
+    {
+        string extensionRootName = WithRole(rolePrefix, nameof(CharacterRigSchema.Refs.Character_ExtensionsRoot));
+
+        RectTransform extensionsRoot = FindByName(rigRoot, extensionRootName) as RectTransform;
+
+        if (extensionsRoot == null)
+            return null;
+
+        extensionsRoot.SetParent(null, false);
+
+        return extensionsRoot;
+    }
+
+    private void ReattachPreservedExtensionsRoot(RectTransform rigRoot, string rolePrefix, RectTransform preservedExtensionsRoot)
+    {
+        string extensionRootName = WithRole(rolePrefix, nameof(CharacterRigSchema.Refs.Character_ExtensionsRoot));
+        string extensionParentName = WithRole(rolePrefix, nameof(CharacterRigSchema.Refs.CharacterPortrait_ActingScale_Y));
+
+        RectTransform newExtensionsRoot = FindByName(rigRoot, extensionRootName) as RectTransform;
+        RectTransform extensionParent = FindByName(rigRoot, extensionParentName) as RectTransform;
+
+        if (extensionParent == null)
+        {
+            Debug.LogWarning(
+                $"[CharacterRigBuilder] Failed to find extension parent '{extensionParentName}'. " +
+                $"Reattaching preserved extensions root under rigRoot. " +
+                $"rigRoot='{rigRoot.name}'.", rigRoot);
+
+            extensionParent = rigRoot;
+        }
+
+        int siblingIndex = -1;
+
+        if (newExtensionsRoot != null && newExtensionsRoot != preservedExtensionsRoot)
+        {
+            siblingIndex = newExtensionsRoot.GetSiblingIndex();
+
+            newExtensionsRoot.SetParent(null, false);
+            Object.Destroy(newExtensionsRoot.gameObject);
+        }
+
+        preservedExtensionsRoot.name = extensionRootName;
+        preservedExtensionsRoot.SetParent(extensionParent, false);
+
+        if (siblingIndex >= 0)
+            preservedExtensionsRoot.SetSiblingIndex(siblingIndex);
+
+        StretchFull(preservedExtensionsRoot);
+    }
+    #endregion
 
     #region Auto Create Graph
-
     private void EnsureGraph(RectTransform root, string rolePrefix)
     {
         foreach (CharacterRigSchema.NodeDef node in CharacterRigSchema.Nodes)
@@ -118,11 +169,9 @@ public sealed class CharacterRigBuilder
 
         return rt;
     }
-
     #endregion
 
     #region Binding / Refs
-
     private Dictionary<CharacterRigSchema.Refs, RectTransform> CollectRefMap(RectTransform rigRoot, string rolePrefix)
     {
         Dictionary<CharacterRigSchema.Refs, RectTransform> map = new();
@@ -175,7 +224,6 @@ public sealed class CharacterRigBuilder
         // Slot axis - stage placement
         refs.CharSlot_Anchor = GetRt(CharacterRigSchema.Refs.CharSlot_Anchor);
         refs.CharSlot_Track = GetRt(CharacterRigSchema.Refs.CharSlot_Track);
-        refs.CharSlot_Track_Move = GetRt(CharacterRigSchema.Refs.CharSlot_Track_Move);
         refs.CharSlot_Track_X = GetRt(CharacterRigSchema.Refs.CharSlot_Track_X);
         refs.CharSlot_Track_Y = GetRt(CharacterRigSchema.Refs.CharSlot_Track_Y);
         refs.CharSlot_Rotation = GetRt(CharacterRigSchema.Refs.CharSlot_Rotation);
@@ -258,11 +306,9 @@ public sealed class CharacterRigBuilder
 
         return refs;
     }
-
     #endregion
 
     #region Helper
-
     private Transform FindByName(Transform root, string name)
     {
         if (root == null)
@@ -318,62 +364,5 @@ public sealed class CharacterRigBuilder
 
         return $"{rolePrefix}{baseName}";
     }
-
-    private RectTransform DetachPreservedExtensionsRoot(RectTransform rigRoot, string rolePrefix)
-    {
-        string extensionRootName = WithRole(rolePrefix, nameof(CharacterRigSchema.Refs.Character_ExtensionsRoot));
-
-        RectTransform extensionsRoot = FindByName(rigRoot, extensionRootName) as RectTransform;
-
-        if (extensionsRoot == null)
-            return null;
-
-        extensionsRoot.SetParent(null, false);
-
-        return extensionsRoot;
-    }
-
-    private void ReattachPreservedExtensionsRoot(RectTransform rigRoot, string rolePrefix, RectTransform preservedExtensionsRoot)
-    {
-        if (preservedExtensionsRoot == null)
-            return;
-
-        string extensionRootName = WithRole(rolePrefix, nameof(CharacterRigSchema.Refs.Character_ExtensionsRoot));
-
-        string extensionParentName = WithRole(rolePrefix, nameof(CharacterRigSchema.Refs.CharacterPortrait_ActingScale_Y));
-
-        RectTransform newExtensionsRoot = FindByName(rigRoot, extensionRootName) as RectTransform;
-
-        RectTransform extensionParent = FindByName(rigRoot, extensionParentName) as RectTransform;
-
-        if (extensionParent == null)
-        {
-            Debug.LogWarning(
-                $"[CharacterRigBuilder] Failed to find extension parent '{extensionParentName}'. " +
-                $"Reattaching preserved extensions root under rigRoot. " +
-                $"rigRoot='{rigRoot.name}'.", rigRoot);
-
-            extensionParent = rigRoot;
-        }
-
-        int siblingIndex = -1;
-
-        if (newExtensionsRoot != null && newExtensionsRoot != preservedExtensionsRoot)
-        {
-            siblingIndex = newExtensionsRoot.GetSiblingIndex();
-
-            newExtensionsRoot.SetParent(null, false);
-            Object.Destroy(newExtensionsRoot.gameObject);
-        }
-
-        preservedExtensionsRoot.name = extensionRootName;
-        preservedExtensionsRoot.SetParent(extensionParent, false);
-
-        if (siblingIndex >= 0)
-            preservedExtensionsRoot.SetSiblingIndex(siblingIndex);
-
-        StretchFull(preservedExtensionsRoot);
-    }
-
     #endregion
 }

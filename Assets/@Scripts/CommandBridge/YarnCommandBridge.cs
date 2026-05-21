@@ -3,15 +3,18 @@ using DG.Tweening;
 using UnityEngine;
 using Yarn.Unity;
 
-public sealed partial class YarnCommandBridge : MonoBehaviour
+public sealed partial class YarnCommandBridge
 {
-    private DialogueRunner _dialogueRunner;
-    private YarnBridgePlaybackDriver _playbackDriver;
+    private readonly DialogueRunner _dialogueRunner;
+    private readonly YarnBridgePlaybackDriver _playbackDriver;
+    private readonly RectTransform _charRigPrefab;
     
-    public void Initialize(DialogueRunner dialogueRunner, YarnBridgePlaybackDriver playbackDriver)
+    
+    public YarnCommandBridge(DialogueRunner dialogueRunner, YarnBridgePlaybackDriver playbackDriver, RectTransform charRigPrefab)
     {
         _dialogueRunner = dialogueRunner;
         _playbackDriver = playbackDriver;
+        _charRigPrefab = charRigPrefab;
         
         RegisterCharSlotSetCommands();
         RegisterPlaybackOrderCommands();
@@ -124,7 +127,11 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
     
     private void EnqueueSetupCharRigSpec(string slotKey, string parentKey)
     {
-        var spec = new SetupCharRigCommandSpec { roleKey = slotKey, };
+        var spec = new SetupCharRigCommandSpec
+        {
+            roleKey = slotKey,
+            rigPrefab =_charRigPrefab
+        };
         
         if (CharRigSlotParser.TryParse(parentKey, out CharRigSlot parentSlot))
             spec.parentSlot = parentSlot;
@@ -544,34 +551,26 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
 
     private void EnqueueBlackoutTransitionSpec(string transitionMode)
     {
+        bool parsed = TransitionPlayModeParser.TryParseBlackoutMode(
+            transitionMode,
+            out TransitionPlayMode playMode,
+            out bool forceWait,
+            out float holdCoveredSeconds);
+
+        if (!parsed)
+        {
+            Debug.LogWarning(
+                $"[YarnCommandBridge] blackout: Unknown transitionMode '{transitionMode}'. " +
+                $"Fallback to '{TransitionPlayMode.CoverThenUncover}'.");
+        }
+
         var spec = new TransitionCommandSpec
         {
-            targetKind = TransitionTargetKind.Blackout
+            targetKind = TransitionTargetKind.Blackout,
+            playMode = playMode,
+            wait = forceWait,
+            holdCoveredSeconds = holdCoveredSeconds
         };
-
-        switch (transitionMode)
-        {
-            case "cover":
-                spec.playMode = TransitionPlayMode.CoverOnly;
-                spec.wait = true;
-                break;
-
-            case "uncover":
-                spec.playMode = TransitionPlayMode.UncoverOnly;
-                spec.wait = true;
-                break;
-
-            case "cover_then_uncover":
-                spec.playMode = TransitionPlayMode.CoverThenUncover;
-                spec.holdCoveredSeconds = 1.5f;
-                break;
-
-            default:
-                Debug.LogWarning(
-                    $"[EnqueueBlackoutTransitionSpec] Unknown transitionMode '{transitionMode}'. Fallback to CoverThenUncover.");
-                spec.playMode = TransitionPlayMode.CoverThenUncover;
-                break;
-        }
 
         Collect(spec);
     }
@@ -928,7 +927,7 @@ public sealed partial class YarnCommandBridge : MonoBehaviour
         var spec = new MoveByCommandSpecCharR
         {
             slotKey = roleKey,
-            target = CharacterRigTarget.CharSlot_Track_Move,
+            target = CharacterRigTarget.CharSlot_Track,
             delta = new Vector2(x, y)
         };
 

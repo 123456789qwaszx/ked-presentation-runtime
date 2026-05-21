@@ -46,16 +46,14 @@ public sealed class SetupCharRigCommandSpec : CommandSpecBase
 
 public sealed class SetupCharRigCommand : CommandBase
 {
-    private readonly RectTransform _rigPrefab;
     private readonly CharRigSlotResolver _slotResolver;
     private readonly CharacterRigBuilder _rigBuilder;
     private readonly SetupCharRigCommandSpec _spec;
 
     public override bool WaitForCompletion => true;
 
-    public SetupCharRigCommand(RectTransform rigPrefab, CharRigSlotResolver slotResolver, CharacterRigBuilder rigBuilder, SetupCharRigCommandSpec spec)
+    public SetupCharRigCommand(CharRigSlotResolver slotResolver, CharacterRigBuilder rigBuilder, SetupCharRigCommandSpec spec)
     {
-        _rigPrefab = rigPrefab;
         _slotResolver = slotResolver;
         _rigBuilder = rigBuilder;
         _spec = spec;

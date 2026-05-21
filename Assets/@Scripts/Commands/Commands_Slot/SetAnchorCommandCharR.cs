@@ -107,7 +107,6 @@ public sealed class SetAnchorCommandCharR : CommandBase
     private void ResetSlotLayers()
     {
         _rigRefs.CharSlot_Track.anchoredPosition = Vector2.zero;
-        _rigRefs.CharSlot_Track_Move.anchoredPosition = Vector2.zero;
         _rigRefs.CharSlot_Track_X.anchoredPosition = Vector2.zero;
         _rigRefs.CharSlot_Track_Y.anchoredPosition = Vector2.zero;
         

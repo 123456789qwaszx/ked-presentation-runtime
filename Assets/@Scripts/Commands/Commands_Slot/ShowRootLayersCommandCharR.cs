@@ -69,7 +69,7 @@ public sealed class ShowRootLayersCommandCharR : CommandBase, IStepScopedCommand
                 scope,
                 _spec.slotKey);
 
-        CharRigRootSelector.CollectRootRects(
+        CharRigRootSelector.CollectRects(
             rig,
             _spec.targetMask,
             _targets);

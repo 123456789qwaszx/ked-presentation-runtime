@@ -15,7 +15,6 @@ public sealed class CharRigCommandFactory : INodeCommandFactory
     private readonly PortraitResolver _portraitResolver;
     private readonly CharacterEmojiResolver _emojiResolver;
     
-    private readonly  RectTransform _rigPrefab;
     private readonly  CharStageTuningSO _globalTuning;
     private readonly  RoleAnchorTuningDBSO _roleTuningDb;
 
@@ -24,7 +23,6 @@ public sealed class CharRigCommandFactory : INodeCommandFactory
         CharacterRigBuilder charRigBuilder,
         PortraitResolver portraitResolver,
         CharacterEmojiResolver emojiResolver,
-        RectTransform rigPrefab,
         CharStageTuningSO globalTuning,
         RoleAnchorTuningDBSO roleTuningDb
         )
@@ -33,7 +31,6 @@ public sealed class CharRigCommandFactory : INodeCommandFactory
         _rigBuilder = charRigBuilder;
         _portraitResolver = portraitResolver;
         _emojiResolver = emojiResolver;
-        _rigPrefab = rigPrefab;
         _globalTuning = globalTuning;
         _roleTuningDb = roleTuningDb;
     }
@@ -44,7 +41,7 @@ public sealed class CharRigCommandFactory : INodeCommandFactory
         {
             null => null,
             
-            SetupCharRigCommandSpec s         => new SetupCharRigCommand(_rigPrefab, _rigSlotResolver, _rigBuilder, s),
+            SetupCharRigCommandSpec s         => new SetupCharRigCommand(_rigSlotResolver, _rigBuilder, s),
             
             CastCharacterCommandSpec s => new CastCharacterCommand(s),
             UncastCharacterCommandSpec s => new UncastCharacterCommand(s),

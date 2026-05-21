@@ -215,7 +215,7 @@ public sealed class FadeOutCommandCharR : CommandBase, IStepScopedCommand
 
         CharacterRigRefs rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
         
-        CharRigRootSelector.CollectRootRects(rigRefs, _spec.targetMask, _targets);
+        CharRigRootSelector.CollectRects(rigRefs, _spec.targetMask, _targets);
     }
 
     private void SnapOffTargets(List<RectTransform> targets)

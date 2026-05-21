@@ -198,7 +198,7 @@ public sealed class FadeInCommandCharR : CommandBase, IStepScopedCommand
             CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
 
 
-        CharRigRootSelector.CollectRootRects(rigRefs, _spec.targetMask, _targets);
+        CharRigRootSelector.CollectRects(rigRefs, _spec.targetMask, _targets);
     }
 
     private void SnapOnTargets(List<RectTransform> targets)

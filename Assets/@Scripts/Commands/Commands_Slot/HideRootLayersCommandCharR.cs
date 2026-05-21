@@ -70,7 +70,7 @@ public sealed class HideRootLayersCommandCharR : CommandBase
                 scope,
                 _spec.slotKey);
 
-        CharRigRootSelector.CollectRootRects(
+        CharRigRootSelector.CollectRects(
             rig,
             _spec.targetMask,
             _targets);

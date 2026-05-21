@@ -41,7 +41,7 @@ public sealed partial class YarnCommandBridge
     {
         if (string.IsNullOrWhiteSpace(roleKey))
         {
-            Debug.LogWarning("[YarnCommandBridge/Emoji] roleKey is null or empty.", this);
+            Debug.LogWarning("[YarnCommandBridge/Emoji] roleKey is null or empty.");
             return null;
         }
 
@@ -103,7 +103,7 @@ public sealed partial class YarnCommandBridge
     {
         if (string.IsNullOrWhiteSpace(roleKey))
         {
-            Debug.LogWarning("[YarnCommandBridge/Emoji] roleKey is null or empty.", this);
+            Debug.LogWarning("[YarnCommandBridge/Emoji] roleKey is null or empty.");
             return;
         }
 
@@ -127,7 +127,7 @@ public sealed partial class YarnCommandBridge
     {
         if (string.IsNullOrWhiteSpace(roleKey))
         {
-            Debug.LogWarning("[YarnCommandBridge/Emoji] roleKey is null or empty.", this);
+            Debug.LogWarning("[YarnCommandBridge/Emoji] roleKey is null or empty.");
             return;
         }
 

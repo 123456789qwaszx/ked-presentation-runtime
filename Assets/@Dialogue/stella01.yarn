@@ -5,7 +5,6 @@
 <<shot_reset>>
 <<p_strip_cover vsw 0.3>>
 
-
 <<bg_spawn bg2 a 0>>
 <<bg_sprite bg2 bg05>>
 <<bg_fade bg2 1>>
@@ -23,7 +22,6 @@
 <<size Leafia normal>>
 
 <<breathe Leafia 99 5 0.25>>
-
 
 //<<emotion Leafia 7>>
 

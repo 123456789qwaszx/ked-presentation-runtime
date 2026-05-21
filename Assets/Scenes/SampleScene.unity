@@ -5045,7 +5045,6 @@ MonoBehaviour:
   routeCatalogSo: {fileID: 11400000, guid: 0a509c33b083b264c8262b318a84b25f, type: 2}
   presentationSessionEntry: {fileID: 1433866633}
   yarnBridgePlaybackDriver: {fileID: 720935691}
-  yarnCommandBridge: {fileID: 1829026824}
   dialogueRunner: {fileID: 8309902628538800288}
   linePresenter: {fileID: 2958262985601084670}
   dialogueTextRouter: {fileID: 728559835}
@@ -13658,50 +13657,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1827769853}
   m_CullTransparentMesh: 1
---- !u!1 &1829026821
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1829026823}
-  - component: {fileID: 1829026824}
-  m_Layer: 0
-  m_Name: YarnCommandBridge
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1829026823
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1829026821}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 925.97705, y: 583.3106, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1829026824
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1829026821}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 28eeb6f96b7d3ea4783a98588e5f27fc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::YarnCommandBridge
 --- !u!1 &1835797369
 GameObject:
   m_ObjectHideFlags: 0
@@ -47337,6 +47292,7 @@ SceneRoots:
   - {fileID: 529556883}
   - {fileID: 552181529}
   - {fileID: 1257280953}
+  - {fileID: 1433866632}
   - {fileID: 2009713541}
   - {fileID: 780646545}
   - {fileID: 720935692}
@@ -47349,12 +47305,10 @@ SceneRoots:
   - {fileID: 626587495}
   - {fileID: 451477691}
   - {fileID: 63871903}
-  - {fileID: 1829026823}
   - {fileID: 1571925711}
   - {fileID: 1967129520}
   - {fileID: 1332040256}
   - {fileID: 1658226452}
-  - {fileID: 1433866632}
   - {fileID: 1924806293}
   - {fileID: 775605348}
   - {fileID: 648162086}

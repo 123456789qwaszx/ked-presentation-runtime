@@ -20,7 +20,7 @@ public static class CharRigRootSelector
         (CharRigRootMask.CharacterEmoji_Root,           r => r.CharacterEmojiSlot00_Root),
     };
 
-    public static void CollectRootRects(CharacterRigRefs refs, CharRigRootMask mask, List<RectTransform> outRects)
+    public static void CollectRects(CharacterRigRefs refs, CharRigRootMask mask, List<RectTransform> outRects)
     {
         if (outRects == null)
         {

@@ -37,9 +37,6 @@ public class ApplyTrackOffsetCommandSpecCharR : CharacterRigCommandSpecBase
     [Tooltip("Char_Track 을 (0,0)으로 초기화.")]
     public bool resetCharTrack = false;
 
-    [Tooltip("Char_Track_Move 를 (0,0)으로 초기화.")]
-    public bool resetCharTrackMove = false;
-
     [Tooltip("Char_Track_X 를 (0,0)으로 초기화.")]
     public bool resetCharTrackX = false;
 
@@ -72,9 +69,6 @@ public sealed class ApplyTrackOffsetCommandCharR : CommandBase
     {
         if (_spec.resetAllTrackLayers || _spec.resetCharTrack)
             ResetRect(_rigRefs.CharSlot_Track);
-
-        if (_spec.resetAllTrackLayers || _spec.resetCharTrackMove)
-            ResetRect(_rigRefs.CharSlot_Track_Move);
 
         if (_spec.resetAllTrackLayers || _spec.resetCharTrackX)
             ResetRect(_rigRefs.CharSlot_Track_X);

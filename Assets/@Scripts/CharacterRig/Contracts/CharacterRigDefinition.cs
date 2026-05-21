@@ -9,7 +9,6 @@ public static class CharacterRigSchema
         // Slot axis - stage placement
         CharSlot_Anchor,
         CharSlot_Track,
-        CharSlot_Track_Move,
         CharSlot_Track_X,
         CharSlot_Track_Y,
         CharSlot_Rotation,
@@ -105,8 +104,7 @@ public static readonly NodeDef[] Nodes =
     // Slot axis - stage placement
     new() { Id = Refs.CharSlot_Anchor,      Parent = null },
     new() { Id = Refs.CharSlot_Track,       Parent = Refs.CharSlot_Anchor },
-    new() { Id = Refs.CharSlot_Track_Move,  Parent = Refs.CharSlot_Track },
-    new() { Id = Refs.CharSlot_Track_X,     Parent = Refs.CharSlot_Track_Move },
+    new() { Id = Refs.CharSlot_Track_X,     Parent = Refs.CharSlot_Track },
     new() { Id = Refs.CharSlot_Track_Y,     Parent = Refs.CharSlot_Track_X },
     new() { Id = Refs.CharSlot_Rotation,    Parent = Refs.CharSlot_Track_Y },
     new() { Id = Refs.CharSlot_Scale,       Parent = Refs.CharSlot_Rotation },
@@ -193,7 +191,6 @@ public enum CharacterRigTarget
     // Slot axis - stage placement
     CharSlot_Anchor,
     CharSlot_Track,
-    CharSlot_Track_Move,
     CharSlot_Track_X,
     CharSlot_Track_Y,
     CharSlot_Rotation,
@@ -279,7 +276,6 @@ public sealed class CharacterRigRefs
     // Slot axis - stage placement
     public RectTransform CharSlot_Anchor;
     public RectTransform CharSlot_Track;
-    public RectTransform CharSlot_Track_Move;
     public RectTransform CharSlot_Track_X;
     public RectTransform CharSlot_Track_Y;
     public RectTransform CharSlot_Rotation;
@@ -390,7 +386,6 @@ public static class CharacterRigRefsExtensions
             // Slot axis - stage placement
             CharacterRigTarget.CharSlot_Anchor     => refs.CharSlot_Anchor,
             CharacterRigTarget.CharSlot_Track      => refs.CharSlot_Track,
-            CharacterRigTarget.CharSlot_Track_Move => refs.CharSlot_Track_Move,
             CharacterRigTarget.CharSlot_Track_X    => refs.CharSlot_Track_X,
             CharacterRigTarget.CharSlot_Track_Y    => refs.CharSlot_Track_Y,
             CharacterRigTarget.CharSlot_Rotation   => refs.CharSlot_Rotation,
