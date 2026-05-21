@@ -6,6 +6,7 @@ public interface IPresentationCameraRootProvider
 {
     RectTransform StagePanRoot { get; }
     RectTransform StageZoomRoot { get; }
+    
 }
 
 public sealed partial class PresentationUIRoot : IPresentationCameraRootProvider
@@ -58,8 +59,17 @@ public sealed class SetupPresentationViewCommand : CommandBase
     
     private void ResetSlantedMasks(PresentationUIRoot root)
     {
-        SlantedMaskResetGroup resetGroup = root.GetComponentInChildren<SlantedMaskResetGroup>(true);
-        resetGroup?.ResetAllToHiddenOffset();
+        IPresentationTransitionSlotProvider provider = UIManager.Instance.GetUI<PresentationUIRoot>();
+        RectTransform[] roots =
+        { 
+            provider.SlantedMaskEdgeGraphic
+        };
+        
+        for (int i = 0; i < roots.Length; i++)
+        {
+            SlantedMaskGraphic mask = roots[i].GetComponent<SlantedMaskGraphic>();
+            mask?.ResetToHiddenOffset();
+        }
     }
     
     #endregion

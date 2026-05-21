@@ -13009,7 +13009,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1739354824}
   - component: {fileID: 1739354825}
-  - component: {fileID: 1739354826}
   m_Layer: 0
   m_Name: PresentataionUIRoot
   m_TagString: Untagged
@@ -13053,20 +13052,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PresentationUIRoot
   dialogueBoxHost: {fileID: 1332040255}
---- !u!114 &1739354826
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1739354823}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 031a27268b9514a4fa48463a2d7bd8ce, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SlantedMaskResetGroup
-  _masks:
-  - {fileID: 458124123}
 --- !u!1 &1752259780
 GameObject:
   m_ObjectHideFlags: 0
