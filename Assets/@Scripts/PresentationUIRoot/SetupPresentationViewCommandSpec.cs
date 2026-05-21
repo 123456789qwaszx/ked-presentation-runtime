@@ -1,6 +1,20 @@
 using System;
 using System.Collections;
 
+using UnityEngine;
+
+public interface IPresentationCameraRootProvider
+{
+    RectTransform StagePanRoot { get; }
+    RectTransform StageZoomRoot { get; }
+}
+
+public sealed partial class PresentationUIRoot : IPresentationCameraRootProvider
+{
+    public RectTransform StagePanRoot => View.Rect(Refs.StagePan_Root);
+    public RectTransform StageZoomRoot => View.Rect(Refs.StageZoom_Root);
+}
+
 [Serializable]
 [CommandMenuHint(
     "Presentation", "@Setup Presentation View", Order = -995)]
@@ -33,11 +47,10 @@ public sealed class SetupPresentationViewCommand : CommandBase
     {
         PresentationUIRoot root = UIManager.Instance.GetUI<PresentationUIRoot>();
         if (root == null)
-        {
             return;
-        }
-        //***
-        //_responseRig.BindCameraRoots(scope.Presentation.StagePan_Root, scope.Presentation.StageZoom_Root);
+        
+        IPresentationCameraRootProvider presentationCameraRootProvider = UIManager.Instance.GetUI<PresentationUIRoot>();
+        _responseRig.BindCameraRoots(presentationCameraRootProvider.StagePanRoot, presentationCameraRootProvider.StageZoomRoot);
         
         ResetSlantedMasks(root);
     }

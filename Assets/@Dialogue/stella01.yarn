@@ -1,13 +1,12 @@
 ﻿title: stella01
 ---
-//<<presentation_setup>>
+<<presentation_reset>>
 <<shot_reset>>
 <<p_strip_cover vsw 0.3>>
 
 // <<bg_spawn bg2 a 0>>
 // <<bg_sprite bg2 bg05>>
 // <<bg_fade bg2 1>>
-//<<spawn_bg city>>
 
 <<slot MySlot 0>>
 <<cast MySlot Leafia>>
@@ -61,26 +60,10 @@ Leafia: 이번에 저희 컴퍼니를 선택해 주셔서 감사합니다. [br/]
 어둠 속에서 누군가가 나직한 목소리로 물었다.
 
 <<shot_reset>>
-<<p_reset s1>>
-
+<<spawn_bg bg1>>
+<<spawn_bg rigKey 1 white>>
 <<p_slant_cut_in stage01 0.65>>
 
-<<bg_spawn bg1 a 1>>
-<<bg_sprite bg1 ui/theme1/Background00_Image>>
-<<bg_fade bg1 1>>
-
-<<slot Albedo 1>>
-<<cast Albedo Albedo>>
-
-<<place Albedo left>>
-<<size Albedo small>>
-
-<<fade_in Albedo>>
-
-<<move_by Leafia 200 0>>
-
-<<walk_in_place Leafia>>
-<<emotion Albedo 11>>
 상대방인 의심스러운 사람이 품 안에서 소중한 듯 무언가를 꺼내 보이며 대꾸했다.
 
 <<shot_reset>>
@@ -89,24 +72,11 @@ Leafia: 이번에 저희 컴퍼니를 선택해 주셔서 감사합니다. [br/]
 
 <<p_slant_cut_out stage01 0.65>>
 
-
-
 "물론이지. 제대로 가져왔는지 확인해 볼 거야?"
 
-//<<scale_to Leafia 1.4 1.4>>
-//<<move_by Leafia -200 0>>
-
-//<<shot_track_to 0 -200 0.5>>
-<<shot_to -600 -150 3.5 0.5>>
-
-<<bg_spawn_bound char1 a bgcontent characterslot>>
-<<bg_sprite char1 ui/theme1/Background00_Image>>
-<<bg_fade char1 1>>
 
 물건을 건네받은 수상한 사람은 그것을 입으로 가져가 조심스럽게 베어 물었다. 고요한 골목 안에 기괴한 저작음이 울려 퍼졌다.
 
-<<jolt Leafia>>
-<<emotion Leafia 9>>
 "쩝쩝쩝 ..... 맞아, 바로 이 맛이야."
 
 의심스러운 사람은 만족한 듯한 상대의 반응을 확인하고는 본론을 꺼냈다.

@@ -6,7 +6,7 @@ public sealed partial class YarnCommandBridge
 {
     public void RegisterPresentationCommands()
     {
-        _dialogueRunner.AddCommandHandler("presentation_setup", EnqueueSetupPresentationViewSpec);
+        _dialogueRunner.AddCommandHandler("presentation_reset", EnqueueSetupPresentationViewSpec);
 
         _dialogueRunner.AddCommandHandler<string, string, string>("bg_spawn", EnqueueSpawnBackgroundSpec);
         _dialogueRunner.AddCommandHandler<string, string, string, string>(
@@ -19,8 +19,6 @@ public sealed partial class YarnCommandBridge
 
 
         // PresentationTarget direct transform
-        _dialogueRunner.AddCommandHandler<string>("p_reset", EnqueueResetPresentationTargetSpec);
-
         _dialogueRunner.AddCommandHandler<string, float>("p_slant_cut_in", EnqueueSlantedMaskCutInSpec);
         _dialogueRunner.AddCommandHandler<string, float>("p_slant_cut_out", EnqueueSlantedMaskCutOutSpec);
 
@@ -361,9 +359,7 @@ public sealed partial class YarnCommandBridge
 
     private void EnqueueSetupPresentationViewSpec()
     {
-        var spec = new SetupPresentationViewCommandSpec
-        {
-        };
+        var spec = new SetupPresentationViewCommandSpec();
 
         Collect(spec);
     }
@@ -506,24 +502,6 @@ public sealed partial class YarnCommandBridge
         };
 
         Collect(spec);
-    }
-
-    private void EnqueueResetPresentationTargetSpec(string targetName)
-    {
-
-        // var spec = new ResetPresentationTargetTransformCommandSpec
-        // {
-        //     resetAnchoredPosition = true,
-        //     anchoredPosition = Vector2.zero,
-        //     resetRotation = true,
-        //     localEulerAngles = Vector3.zero,
-        //     resetScale = true,
-        //     localScale = Vector3.one,
-        //     resetSizeDelta = false,
-        //     killTween = true,
-        // };
-
-        //Collect(spec);
     }
 
     private void EnqueueSlantedMaskCutInSpec(
