@@ -28,6 +28,14 @@ public sealed partial class YarnCommandBridge
         _dialogueRunner.AddCommandHandler<string, string, float>(
             "bg_fade_out",
             EnqueueFadeOutBackgroundSpec);
+        
+        _dialogueRunner.AddCommandHandler<string, float, float, float>(
+            "bg_move",
+            EnqueueMoveBackgroundSpec);
+
+        _dialogueRunner.AddCommandHandler<string, float, float>(
+            "bg_scale",
+            EnqueueScaleBackgroundSpec);
     }
 
     private void EnqueueSpawnBackgroundRigSpec(
@@ -170,6 +178,43 @@ public sealed partial class YarnCommandBridge
             duration = duration,
             ease = DG.Tweening.Ease.OutCubic,
             disableInteraction = true
+        };
+
+        Collect(spec);
+    }
+    
+    private void EnqueueMoveBackgroundSpec(
+        string rigKey,
+        float x,
+        float y,
+        float duration = 0.4f)
+    {
+        var spec = new MoveByCommandSpecBgR
+        {
+            rigKey = rigKey,
+            target = BackgroundRigTarget.Background_Track,
+            delta = new Vector2(x, y),
+            duration = duration,
+            ease = DG.Tweening.Ease.OutCubic,
+            killTween = true
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueScaleBackgroundSpec(
+        string rigKey,
+        float scale,
+        float duration = 0.4f)
+    {
+        var spec = new ScaleToCommandSpecBgR
+        {
+            rigKey = rigKey,
+            target = BackgroundRigTarget.Background_ActingScale,
+            toScale = new Vector2(scale, scale),
+            duration = duration,
+            ease = DG.Tweening.Ease.OutCubic,
+            killTween = true
         };
 
         Collect(spec);

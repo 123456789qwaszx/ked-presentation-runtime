@@ -35,6 +35,9 @@ public sealed class BackgroundRigCommandFactory : INodeCommandFactory
 
             FadeInCommandSpecBgR s => new FadeInCommandBgR(s),
             FadeOutCommandSpecBgR s => new FadeOutCommandBgR(s),
+            
+            MoveByCommandSpecBgR s => new MoveByCommandBgR(s),
+            ScaleToCommandSpecBgR s => new ScaleToCommandBgR(s),
 
             _ => null
         };
