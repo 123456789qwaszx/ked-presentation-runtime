@@ -1,13 +1,13 @@
-using Yarn.Unity;
 using UnityEngine;
+using Yarn.Unity;
 
 public sealed partial class YarnCommandBridge
 {
     public void RegisterBackgroundRigCommands()
     {
-        _dialogueRunner.AddCommandHandler<string, string>(
+        _dialogueRunner.AddCommandHandler<string, string, string, string, float, float, string, float>(
             "spawn_bg",
-            EnqueueSetupBackgroundRigSpec);
+            EnqueueSpawnBackgroundRigSpec);
 
         _dialogueRunner.AddCommandHandler<string, float, float, float, float, float>(
             "bg_place",
@@ -17,9 +17,38 @@ public sealed partial class YarnCommandBridge
             "bg_sprite",
             EnqueueSetBackgroundSpriteSpec);
 
-        _dialogueRunner.AddCommandHandler<string, float>(
+        _dialogueRunner.AddCommandHandler<string, string>(
             "bg_size",
             EnqueueSetBackgroundOriginSizeSpec);
+        
+        _dialogueRunner.AddCommandHandler<string, string, float>(
+            "bg_fade_in",
+            EnqueueFadeInBackgroundSpec);
+
+        _dialogueRunner.AddCommandHandler<string, string, float>(
+            "bg_fade_out",
+            EnqueueFadeOutBackgroundSpec);
+    }
+
+    private void EnqueueSpawnBackgroundRigSpec(
+        string rigKey, string parentSlotKey = "stage00",
+        string spriteKey = "green", string layerKey = "back",
+        float x = 0f, float y = 0f, string scaleArg = "1.3", float rotationZ = 0f)
+    {
+        EnqueueSetupBackgroundRigSpec(rigKey, parentSlotKey);
+
+        if (!IsEmptySpriteKey(spriteKey))
+            EnqueueSetBackgroundSpriteSpec(rigKey, spriteKey, layerKey);
+
+        EnqueueSetBackgroundAnchorSpec(
+            rigKey,
+            x,
+            y,
+            1f,
+            1f,
+            rotationZ);
+
+        EnqueueSetBackgroundOriginSizeSpec(rigKey, scaleArg);
     }
 
     private void EnqueueSetupBackgroundRigSpec(string rigKey, string parentSlotKey)
@@ -62,6 +91,9 @@ public sealed partial class YarnCommandBridge
         string spriteKey,
         string layerKey = "back")
     {
+        if (IsEmptySpriteKey(spriteKey))
+            return;
+
         var spec = new SetBackgroundSpriteCommandSpecBgR
         {
             rigKey = rigKey,
@@ -78,17 +110,78 @@ public sealed partial class YarnCommandBridge
 
     private void EnqueueSetBackgroundOriginSizeSpec(
         string rigKey,
-        float scale = 1f)
+        string scaleArg = "1")
     {
+        if (!YarnNumberParser.TryParseFloat(scaleArg, out float absoluteScale))
+        {
+            Debug.LogWarning(
+                $"[YarnCommandBridge] Unknown background scale '{scaleArg}'. " +
+                $"Fallback to '1'. rigKey='{rigKey}'.");
+
+            absoluteScale = 1f;
+        }
+
         var spec = new SetOriginSizeCommandSpecBgR
         {
             rigKey = rigKey,
             target = BackgroundRigTarget.Background_CastTransform,
-            scale = scale,
-            uniformScale = true,
-            overrideScale = false
+
+            overrideScale = true,
+            scaleOverride = new Vector3(absoluteScale, absoluteScale, absoluteScale),
+
+            scale = absoluteScale,
+            uniformScale = true
         };
 
         Collect(spec);
+    }
+    
+    
+    private void EnqueueFadeInBackgroundSpec(
+        string rigKey,
+        string targetKey = "root",
+        float duration = 0.47f)
+    {
+        var spec = new FadeInCommandSpecBgR
+        {
+            rigKey = rigKey,
+            target = BackgroundRigTargetParser.ParseFadeTarget(
+                targetKey,
+                BackgroundRigTarget.Background_Root),
+            duration = duration,
+            ease = DG.Tweening.Ease.OutCubic,
+            enableInteraction = false
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueFadeOutBackgroundSpec(
+        string rigKey,
+        string targetKey = "root",
+        float duration = 0.38f)
+    {
+        var spec = new FadeOutCommandSpecBgR
+        {
+            rigKey = rigKey,
+            target = BackgroundRigTargetParser.ParseFadeTarget(
+                targetKey,
+                BackgroundRigTarget.Background_Root),
+            duration = duration,
+            ease = DG.Tweening.Ease.OutCubic,
+            disableInteraction = true
+        };
+
+        Collect(spec);
+    }
+
+    private static bool IsEmptySpriteKey(string spriteKey)
+    {
+        string normalized = (spriteKey ?? "").Trim().ToLowerInvariant();
+
+        return string.IsNullOrEmpty(normalized)
+               || normalized == "-"
+               || normalized == "none"
+               || normalized == "null";
     }
 }

@@ -13,7 +13,7 @@ public sealed partial class YarnCommandBridge
             "bg_spawn_bound",
             EnqueueSpawnBackgroundBoundSpec);
 
-        _dialogueRunner.AddCommandHandler<string, string>("bg_sprite", EnqueueSetBackgroundSpriteSpec);
+        _dialogueRunner.AddCommandHandler<string, string>("bgsprite", EnqueueSetBackgroundSpriteSpec);
         _dialogueRunner.AddCommandHandler<string>("bg_destroy", EnqueueDestroyBackgroundSpec);
         _dialogueRunner.AddCommandHandler<string, float, float>("bg_fade", EnqueueFadeBackgroundSpec);
 

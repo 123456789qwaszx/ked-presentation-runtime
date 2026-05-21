@@ -94,7 +94,7 @@ public static class BackgroundRigSchema
         new() { Id = Refs.Background_ObjectSlot02, Parent = Refs.Background_ObjectSlotRoot },
 
         // Front layer
-        new() { Id = Refs.Background_FrontLayer_Root, Parent = Refs.Background_LayerRoot, NeedsCanvasGroup = true, InitialCanvasGroupAlpha = 1f },
+        new() { Id = Refs.Background_FrontLayer_Root, Parent = Refs.Background_LayerRoot, NeedsCanvasGroup = true, InitialCanvasGroupAlpha = 0f },
         new() { Id = Refs.Background_FrontLayer_Image, Parent = Refs.Background_FrontLayer_Root, NeedsImage = true },
 
         // Extension / preserved systems

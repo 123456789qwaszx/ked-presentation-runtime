@@ -33,6 +33,9 @@ public sealed class BackgroundRigCommandFactory : INodeCommandFactory
 
             SetOriginSizeCommandSpecBgR s => new SetOriginSizeCommandBgR(s),
 
+            FadeInCommandSpecBgR s => new FadeInCommandBgR(s),
+            FadeOutCommandSpecBgR s => new FadeOutCommandBgR(s),
+
             _ => null
         };
 
