@@ -20,7 +20,7 @@ public sealed partial class YarnCommandBridge
         _dialogueRunner.AddCommandHandler<string, string>(
             "bg_size",
             EnqueueSetBackgroundOriginSizeSpec);
-        
+
         _dialogueRunner.AddCommandHandler<string, string, float>(
             "bg_fade_in",
             EnqueueFadeInBackgroundSpec);
@@ -28,7 +28,7 @@ public sealed partial class YarnCommandBridge
         _dialogueRunner.AddCommandHandler<string, string, float>(
             "bg_fade_out",
             EnqueueFadeOutBackgroundSpec);
-        
+
         _dialogueRunner.AddCommandHandler<string, float, float, float>(
             "bg_move",
             EnqueueMoveBackgroundSpec);
@@ -36,6 +36,26 @@ public sealed partial class YarnCommandBridge
         _dialogueRunner.AddCommandHandler<string, float, float>(
             "bg_scale",
             EnqueueScaleBackgroundSpec);
+
+        _dialogueRunner.AddCommandHandler<string, string, float, float>(
+            "bg_slide_in",
+            EnqueueSlideInBackgroundSpec);
+
+        _dialogueRunner.AddCommandHandler<string, string, float, float>(
+            "bg_slide_out",
+            EnqueueSlideOutBackgroundSpec);
+
+        _dialogueRunner.AddCommandHandler<string, string, float, float>(
+            "bg_jolt",
+            EnqueueJoltBackgroundSpec);
+
+        _dialogueRunner.AddCommandHandler<string, string, float, float>(
+            "bg_tremble",
+            EnqueueTrembleBackgroundSpec);
+
+        _dialogueRunner.AddCommandHandler<string, float, float, float>(
+            "bg_breath",
+            EnqueueBreathBackgroundSpec);
     }
 
     private void EnqueueSpawnBackgroundRigSpec(
@@ -143,8 +163,8 @@ public sealed partial class YarnCommandBridge
 
         Collect(spec);
     }
-    
-    
+
+
     private void EnqueueFadeInBackgroundSpec(
         string rigKey,
         string targetKey = "root",
@@ -182,7 +202,7 @@ public sealed partial class YarnCommandBridge
 
         Collect(spec);
     }
-    
+
     private void EnqueueMoveBackgroundSpec(
         string rigKey,
         float x,
@@ -214,6 +234,123 @@ public sealed partial class YarnCommandBridge
             toScale = new Vector2(scale, scale),
             duration = duration,
             ease = DG.Tweening.Ease.OutCubic,
+            killTween = true
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueSlideInBackgroundSpec(
+        string rigKey,
+        string directionKey = "left",
+        float distance = 480f,
+        float duration = 0.55f)
+    {
+        var spec = new SlideInCommandSpecBgR
+        {
+            rigKey = rigKey,
+            target = BackgroundRigTarget.Background_Track,
+            direction = BgRigDirectionParser.Parse(directionKey, CharRigDirection.Left),
+            distance = distance,
+            duration = duration,
+            ease = DG.Tweening.Ease.OutCubic,
+            punch = 24f,
+            killTween = true
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueSlideOutBackgroundSpec(
+        string rigKey,
+        string directionKey = "right",
+        float distance = 480f,
+        float duration = 0.45f)
+    {
+        var spec = new SlideOutCommandSpecBgR
+        {
+            rigKey = rigKey,
+            target = BackgroundRigTarget.Background_Track,
+            to = BgRigDirectionParser.Parse(directionKey, CharRigDirection.Right),
+            distance = distance,
+            duration = duration,
+            ease = DG.Tweening.Ease.InCubic,
+            punch = 14f,
+            killTween = true
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueJoltBackgroundSpec(
+        string rigKey,
+        string directionKey = "right",
+        float strength = 22f,
+        float duration = 0.88f)
+    {
+        var spec = new JoltCommandSpecBgR
+        {
+            rigKey = rigKey,
+            target = BackgroundRigTarget.Background_Track_Y,
+            direction = BgRigDirectionParser.Parse(directionKey, CharRigDirection.Right),
+            strength = strength,
+            duration = duration,
+            taps = 3,
+            damping = 6f,
+            anticipation = 3f,
+            killTween = true
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueTrembleBackgroundSpec(
+        string rigKey,
+        string directionKey = "right",
+        float strength = 8f,
+        float duration = 1.2f)
+    {
+        var spec = new TrembleCommandSpecBgR
+        {
+            rigKey = rigKey,
+            target = BackgroundRigTarget.Background_Shake,
+            direction = BgRigDirectionParser.Parse(directionKey, CharRigDirection.Right),
+            strength = strength,
+            duration = duration,
+            frequency = 24f,
+            crossAxisRatio = 0.35f,
+            noiseRatio = 0.25f,
+            usePulse = false,
+            pulseInterval = 1.0f,
+            pulseDuration = 0.16f,
+            blendIn = 0.04f,
+            blendOut = 0.08f,
+            killTween = true
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueBreathBackgroundSpec(
+        string rigKey,
+        float duration = 99f,
+        float height = 6f,
+        float breathsPerSecond = 0.2f)
+    {
+        var spec = new BreathInPlaceCommandSpecBgR
+        {
+            rigKey = rigKey,
+            target = BackgroundRigTarget.Background_Track,
+            duration = duration,
+            breathsPerSecond = breathsPerSecond,
+            height = height,
+            sideSway = 0f,
+            useScalePulse = false,
+            scaleAmount = 0.005f,
+            ease = DG.Tweening.Ease.InOutSine,
+            phaseOffset = 0f,
+            blendIn = 0.25f,
+            blendOut = 0.25f,
             killTween = true
         };
 

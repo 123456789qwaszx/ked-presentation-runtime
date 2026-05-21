@@ -38,6 +38,12 @@ public sealed class BackgroundRigCommandFactory : INodeCommandFactory
             
             MoveByCommandSpecBgR s => new MoveByCommandBgR(s),
             ScaleToCommandSpecBgR s => new ScaleToCommandBgR(s),
+            
+            SlideInCommandSpecBgR s => new SlideInCommandBgR(s),
+            SlideOutCommandSpecBgR s => new SlideOutCommandBgR(s),
+            JoltCommandSpecBgR s => new JoltCommandBgR(s),
+            TrembleCommandSpecBgR s => new TrembleCommandBgR(s),
+            BreathInPlaceCommandSpecBgR s => new BreathInPlaceCommandBgR(s),
 
             _ => null
         };
