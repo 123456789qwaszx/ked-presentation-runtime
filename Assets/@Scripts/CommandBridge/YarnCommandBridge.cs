@@ -9,7 +9,6 @@ public sealed partial class YarnCommandBridge
     private readonly YarnBridgePlaybackDriver _playbackDriver;
     private readonly RectTransform _charRigPrefab;
     
-    
     public YarnCommandBridge(DialogueRunner dialogueRunner, YarnBridgePlaybackDriver playbackDriver, RectTransform charRigPrefab)
     {
         _dialogueRunner = dialogueRunner;
@@ -25,6 +24,9 @@ public sealed partial class YarnCommandBridge
         RegisterEmojiCommands();
         RegisterPresentationCommands();
         RegisterShotCommands();
+
+
+        RegisterBackgroundRigCommands();
     }
 
     private void RegisterPlaybackOrderCommands()

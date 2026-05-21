@@ -1,13 +1,13 @@
 ﻿title: stella01
 ---
-<<clearall_rigs>>
 <<presentation_setup>>
 <<shot_reset>>
 <<p_strip_cover vsw 0.3>>
 
-<<bg_spawn bg2 a 0>>
-<<bg_sprite bg2 bg05>>
-<<bg_fade bg2 1>>
+// <<bg_spawn bg2 a 0>>
+// <<bg_sprite bg2 bg05>>
+// <<bg_fade bg2 1>>
+<<setup_bg_rig city stage00>>
 
 <<slot MySlot 0>>
 <<cast MySlot Leafia>>

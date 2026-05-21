@@ -172,10 +172,21 @@ public class VnAppBootstrap : MonoBehaviour
         PresentationViewAccess presentationViewAccess = new();
         PresentationViewCommandFactory presentationViewCommandFactory = new(presentationViewAccess,
             presentationResponseRig, bgHost, bgHost, dialogueBoxHost);
+        
+        BackgroundRigSlotResolver backgroundRigSlotResolver = new();
+        BackgroundRigBuilder backgroundRigBuilder = new();
+        BackgroundRigCommandFactory backgroundRigCommandFactory = new(backgroundRigSlotResolver, backgroundRigBuilder);
 
-        CompositeCommandFactory factory = new(signalFactory, charRigFactory, transitionCommandFactory,
-            soundCommandFactory, presentationViewCommandFactory);
+        CompositeCommandFactory factory = new(
+            signalFactory, 
+            charRigFactory,
+            transitionCommandFactory,
+            soundCommandFactory,
+            presentationViewCommandFactory,
+            backgroundRigCommandFactory);
+        
         commandExecutor.Initialize(factory);
+        
 
         PresentationSession presentationSession =
             new PresentationSession(gatePlanner, gateAdvancer, commandExecutor, _presentationSessionContext, _linePresentationAdvanceState);
