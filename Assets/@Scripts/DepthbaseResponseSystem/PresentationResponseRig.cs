@@ -120,4 +120,31 @@ public sealed class PresentationResponseRig : MonoBehaviour
 
         return profile;
     }
+    
+    private static PresentationResponseProfile BakeRuntimeProfile(
+        IResponseTarget target,
+        PresentationResponseProfile presetProfile,
+        RectTransform stageRoot)
+    {
+        PresentationResponseProfile profile = presetProfile;
+
+        Vector3 worldPivot = target.MeasureRect.TransformPoint(Vector3.zero);
+        Vector3 localPivot = stageRoot.InverseTransformPoint(worldPivot);
+
+        profile.basePositionInRigSpace = new Vector2(localPivot.x, localPivot.y);
+
+        RectTransform scaleRect = target.ScaleRect != null
+            ? target.ScaleRect
+            : target.PositionRect;
+
+        profile.baseScale = scaleRect != null
+            ? new Vector2(scaleRect.localScale.x, scaleRect.localScale.y)
+            : Vector2.one;
+
+        profile.baseAlpha = target.CanvasGroup != null
+            ? target.CanvasGroup.alpha
+            : 1f;
+
+        return profile;
+    }
 }
