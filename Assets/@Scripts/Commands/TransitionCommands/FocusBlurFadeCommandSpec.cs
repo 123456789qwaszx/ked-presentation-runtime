@@ -194,16 +194,8 @@ public sealed class FocusBlurFadeCommand : CommandBase, IStepScopedCommand
     {
         _resolveAttempted = true;
 
-        //***
-        // RectTransform rect = PresentationTargetResolver.ResolveRect(
-        //     scope,
-        //     _spec.target,
-        //     _spec.strict,
-        //     nameof(FocusBlurCurtainCommand));
-
-        RectTransform rect =   UIManager.Instance.GetUI<PresentationUIRoot>().Stage00BackgroundSlot;
-        if (rect == null)
-            return;
+        IPresentationTransitionSlotProvider transitionSlotProvider = UIManager.Instance.GetUI<PresentationUIRoot>();
+        RectTransform rect = transitionSlotProvider.FocusBlurFade;
 
         _overlay = rect.GetComponent<FocusBlurFadeOverlay>();
 

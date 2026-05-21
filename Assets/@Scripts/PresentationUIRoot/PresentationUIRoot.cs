@@ -49,6 +49,8 @@ public partial class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
         Stage01BackgroundSystem_Root,
         Stage01BGShot_Root,
         Stage01BGContent_Root,
+        
+        SlantedMaskEdgeGraphic,
 
         Stage01BGOverlay_Root,
 
@@ -85,8 +87,6 @@ public partial class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
         SlantedShutter,
         FocusBlurFade,
         FocusBlurCurtain,
-        LightSweep,
-        
 
         ToggleBottomRight,
         ToggleTopRight,

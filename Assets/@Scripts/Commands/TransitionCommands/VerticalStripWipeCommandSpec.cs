@@ -3,7 +3,24 @@ using System.Collections;
 using DG.Tweening;
 using UnityEngine;
 
+public interface IPresentationTransitionSlotProvider
+{
+    RectTransform VerticalStripWipe { get; }
+    RectTransform SlantedShutter { get; }
+    RectTransform FocusBlurFade { get; }
+    RectTransform FocusBlurCurtain { get; }
+    RectTransform SlantedMaskEdgeGraphic { get; }
+}
 
+public sealed partial class PresentationUIRoot : IPresentationTransitionSlotProvider
+{
+    public RectTransform VerticalStripWipe => View.Rect(Refs.VerticalStripWipe);
+    public RectTransform SlantedShutter => View.Rect(Refs.SlantedShutter);
+    public RectTransform FocusBlurFade => View.Rect(Refs.FocusBlurFade);
+    public RectTransform FocusBlurCurtain => View.Rect(Refs.FocusBlurCurtain);
+    public RectTransform SlantedMaskEdgeGraphic => View.Rect(Refs.Stage01_Root);
+
+}
 
 public enum VerticalStripWipeMode
 {
@@ -173,14 +190,8 @@ public sealed class VerticalStripWipeCommand : CommandBase, IStepScopedCommand
     {
         _resolveAttempted = true;
 
-        //***
-        // RectTransform rect = PresentationTargetResolver.ResolveRect(
-        //     scope,
-        //     _spec.target,
-        //     _spec.strict,
-        //     nameof(FocusBlurCurtainCommand));
-
-        RectTransform rect =   UIManager.Instance.GetUI<PresentationUIRoot>().Stage00BackgroundSlot;
+        IPresentationTransitionSlotProvider transitionSlotProvider = UIManager.Instance.GetUI<PresentationUIRoot>();
+        RectTransform rect = transitionSlotProvider.VerticalStripWipe;
         if (rect == null)
             return;
 
