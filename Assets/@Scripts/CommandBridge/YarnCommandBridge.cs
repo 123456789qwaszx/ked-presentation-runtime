@@ -29,8 +29,6 @@ public sealed partial class YarnCommandBridge
 
     private void RegisterPlaybackOrderCommands()
     {
-        _dialogueRunner.AddCommandHandler<string>("destroy", EnqueueDestroySpec);
-        
         // Marks the next N collected commands as wait=true inside Presentation/Executor.
         // This affects command playback order, but does NOT block Yarn by itself.
         _dialogueRunner.AddCommandHandler<int>("await_for", AwaitFor);
@@ -51,8 +49,7 @@ public sealed partial class YarnCommandBridge
         _dialogueRunner.AddCommandHandler<float>("pause", EnqueueWaitSpec);
         
         // clear character rigs
-        _dialogueRunner.AddCommandHandler("clearall_rigs", EnqueueClearAllCharRigRefsSpec);
-        _dialogueRunner.AddCommandHandler<string>("clear_rig", EnqueueClearCharRigRefSpec);
+        _dialogueRunner.AddCommandHandler("clearall", EnqueueClearAllCharRigRefsSpec);
     }
 
     private void RegisterCharSlotSetCommands()
@@ -123,6 +120,20 @@ public sealed partial class YarnCommandBridge
         _dialogueRunner.AddCommandHandler<string, int>("sway_to", EnqueuePivotRotateToSpec);
         
         
+    }
+    
+    
+    private void EnqueueClearAllCharRigRefsSpec()
+    {
+        // var spec = new ClearCharRigRefsCommandSpec
+        // {
+        //     removeKeys = true,
+        //     destroyRigObjects = true,
+        //     killTweensBeforeDestroy = true,
+        //     onlyRoleKeys = null
+        // };
+        //
+        // Collect(spec);
     }
     
     private void EnqueueSetupCharRigSpec(string slotKey, string parentKey)
@@ -245,32 +256,6 @@ public sealed partial class YarnCommandBridge
     private void AwaitFor(int count = 1)
     {
         _playbackDriver.WaitNextImmediateCommands(count);
-    }
-
-    private void EnqueueClearAllCharRigRefsSpec()
-    {
-        var spec = new ClearCharRigRefsCommandSpec
-        {
-            removeKeys = true,
-            destroyRigObjects = true,
-            killTweensBeforeDestroy = true,
-            onlyRoleKeys = null
-        };
-
-        Collect(spec);
-    }
-
-    private void EnqueueClearCharRigRefSpec(string roleKey)
-    {
-        var spec = new ClearCharRigRefsCommandSpec
-        {
-            removeKeys = true,
-            destroyRigObjects = true,
-            killTweensBeforeDestroy = true,
-            onlyRoleKeys = new[] { roleKey }
-        };
-
-        Collect(spec);
     }
     
     private void EnqueueWaitSpec(float duration)
@@ -570,16 +555,6 @@ public sealed partial class YarnCommandBridge
             playMode = playMode,
             wait = forceWait,
             holdCoveredSeconds = holdCoveredSeconds
-        };
-
-        Collect(spec);
-    }
-
-    private void EnqueueDestroySpec(string roleKey)
-    {
-        var spec = new DestroyCommandSpec
-        {
-            slotKey = roleKey
         };
 
         Collect(spec);

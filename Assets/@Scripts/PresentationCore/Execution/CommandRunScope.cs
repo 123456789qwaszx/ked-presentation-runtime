@@ -9,6 +9,7 @@ public sealed class CommandRunScope
     public CancellationToken Token { get; set; }
     
     public readonly Dictionary<string, object> Refs = new(); //roleKey 기반 런타임 참조 저장소
+    public readonly CharacterRigRegistry CharacterRigs = new();
     public CastRegistry CastRegistry { get; } = new(); // 정체성 바인딩 저장소
     
     public PresentationViewRefs Presentation { get; set; }

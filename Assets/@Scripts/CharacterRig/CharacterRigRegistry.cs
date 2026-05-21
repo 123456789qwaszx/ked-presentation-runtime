@@ -11,9 +11,6 @@ public sealed class CharacterRigRegistry
 
     public void Register(string rigKey, CharacterRigRefs rigRefs)
     {
-        if (string.IsNullOrEmpty(rigKey) || rigRefs == null)
-            return;
-
         if (_rigs.TryGetValue(rigKey, out CharacterRigRefs existingRig))
             DestroyRig(existingRig);
 
@@ -35,23 +32,20 @@ public sealed class CharacterRigRegistry
     public bool HasRig(string rigKey)
     {
         return _rigs.TryGetValue(rigKey, out CharacterRigRefs rigRefs)
-               && rigRefs != null
-               && rigRefs.RigRoot != null;
+               && rigRefs?.RigRoot != null;
     }
 
     public bool TryGetRig(string rigKey, out CharacterRigRefs rigRefs)
     {
         if (!_rigs.TryGetValue(rigKey, out rigRefs))
         {
-            Debug.LogWarning(
-                $"[CharacterRigRegistry] Rig not found. rigKey='{rigKey}'.");
+            Debug.LogWarning($"[CharacterRigRegistry] Rig not found. rigKey='{rigKey}'.");
             return false;
         }
 
-        if (rigRefs == null || rigRefs.RigRoot == null)
+        if (rigRefs?.RigRoot == null)
         {
-            Debug.LogWarning(
-                $"[CharacterRigRegistry] Rig is registered but invalid or destroyed. rigKey='{rigKey}'.");
+            Debug.LogWarning($"[CharacterRigRegistry] Rig is registered but invalid or destroyed. rigKey='{rigKey}'.");
             rigRefs = null;
             return false;
         }

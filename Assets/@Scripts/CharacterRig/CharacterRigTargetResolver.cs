@@ -1,5 +1,4 @@
 using System;
-using UnityEngine;
 
 public static class CharacterRigTargetResolver
 {
@@ -7,7 +6,7 @@ public static class CharacterRigTargetResolver
     {
         string resolvedRigKey = ResolveRigKeyByPolicy(scope, targetKey);
         
-        if (!TryGetRigRefsByKey(scope, resolvedRigKey, out CharacterRigRefs rig))
+        if (!scope.CharacterRigs.TryGetRig(resolvedRigKey, out CharacterRigRefs rig))
         {
             throw new InvalidOperationException(
                 $"[CharacterRigTargetResolver] Failed to resolve CharacterRigRefs. " +
@@ -26,35 +25,5 @@ public static class CharacterRigTargetResolver
             return characterSlotKey;
 
         return targetKey;
-    }
-    
-    
-    public static bool TryGetRigRefsByKey(CommandRunScope scope, string rigKey, out CharacterRigRefs rigRefs)
-    {
-        if (!scope.Refs.TryGetValue(rigKey, out object obj))
-        {
-            Debug.LogWarning(
-                $"[CharacterRigTargetResolver] CharacterRigRefs not found. " +
-                $"rigKey='{rigKey}'.");
-        
-            rigRefs = null;
-            return false;
-        }
-
-        if (obj is not CharacterRigRefs refs)
-        {
-            string actualType = obj != null ? obj.GetType().Name : "null";
-
-            Debug.LogWarning(
-                $"[CharacterRigTargetResolver] Invalid refs type. " +
-                $"Expected CharacterRigRefs. " +
-                $"rigKey='{rigKey}', actualType='{actualType}'.");
-
-            rigRefs = null;
-            return false;
-        }
-
-        rigRefs = refs;
-        return true;
     }
 }
