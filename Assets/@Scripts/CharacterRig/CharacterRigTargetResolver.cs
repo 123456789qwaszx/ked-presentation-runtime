@@ -6,7 +6,7 @@ public static class CharacterRigTargetResolver
     {
         string resolvedRigKey = ResolveRigKeyByPolicy(scope, targetKey);
         
-        if (!scope.CharacterRigs.TryGetRig(resolvedRigKey, out CharacterRigRefs rig))
+        if (!scope.characterRigs.TryGetRig(resolvedRigKey, out CharacterRigRefs rig))
         {
             throw new InvalidOperationException(
                 $"[CharacterRigTargetResolver] Failed to resolve CharacterRigRefs. " +
@@ -21,7 +21,7 @@ public static class CharacterRigTargetResolver
         // targetKey policy:
         // 1. If targetKey is a characterKey, resolve it to that character's current slotKey.
         // 2. Otherwise, use targetKey itself as a direct slotKey.
-        if (scope.CastRegistry.TryGetSlotKey(targetKey, out string characterSlotKey))
+        if (scope.castRegistry.TryGetSlotKey(targetKey, out string characterSlotKey))
             return characterSlotKey;
 
         return targetKey;

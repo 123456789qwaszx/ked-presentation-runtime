@@ -85,7 +85,7 @@ public sealed class SetupCharRigCommand : CommandBase
         
         _rigBuilder.BindRefsFromRoot(rigRoot, rolePrefix, out CharacterRigRefs refs);
 
-        scope.CharacterRigs.Register(rigKey, refs);
+        scope.characterRigs.Register(rigKey, refs);
         
         // Optional bake helper:
         // Enable after refs registration when saving the generated rig as a reusable prefab.

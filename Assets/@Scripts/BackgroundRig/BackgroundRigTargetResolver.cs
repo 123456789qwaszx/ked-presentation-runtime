@@ -4,7 +4,7 @@ public static class BackgroundRigTargetResolver
 {
     public static BackgroundRigRefs ResolveBackgroundRigFromTargetKey(CommandRunScope scope, string rigKey)
     {
-        if (!scope.BackgroundRigs.TryGetRig(rigKey, out BackgroundRigRefs rig))
+        if (!scope.backgroundRigs.TryGetRig(rigKey, out BackgroundRigRefs rig))
         {
             throw new InvalidOperationException(
                 $"[BackgroundRigTargetResolver] Failed to resolve BackgroundRigRefs. " +

@@ -40,10 +40,10 @@ public sealed class PortraitResolver
         // Empty character/variant are resolved from the character cast to this slot.
         if (string.IsNullOrEmpty(character) || string.IsNullOrEmpty(variant))
         {
-            scope.CastRegistry.TryGetCharacter(roleKey, out string characterKey);
+            scope.castRegistry.TryGetCharacter(roleKey, out string characterKey);
                 character = characterKey;
                 
-            scope.CastRegistry.TryGetVariant(roleKey, out string variantKey);
+            scope.castRegistry.TryGetVariant(roleKey, out string variantKey);
                 variant = variantKey;
         }
         

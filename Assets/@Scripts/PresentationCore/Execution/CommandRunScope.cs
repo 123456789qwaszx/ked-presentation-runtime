@@ -9,9 +9,9 @@ public sealed class CommandRunScope
     public CancellationToken Token { get; set; }
     
     public readonly Dictionary<string, object> Refs = new(); //roleKey 기반 런타임 참조 저장소
-    public readonly CharacterRigRegistry CharacterRigs = new();
-    public readonly BackgroundRigRegistry BackgroundRigs = new();
-    public CastRegistry CastRegistry { get; } = new(); // 정체성 바인딩 저장소
+    public readonly CharacterRigRegistry characterRigs = new();
+    public readonly BackgroundRigRegistry backgroundRigs = new();
+    public readonly CastRegistry castRegistry = new(); // 정체성 바인딩 저장소
     
     public PresentationViewRefs Presentation { get; set; }
     
@@ -19,13 +19,13 @@ public sealed class CommandRunScope
     /// Lifetime for resources spawned by commands within the current step.
     /// Cleaned up when the step boundary is crossed.
     /// </summary>
-    internal LifetimeScope StepLifetime { get; } = new();
+    private LifetimeScope StepLifetime { get; } = new();
 
     /// <summary>
     /// Lifetime for resources that must outlive a single step (e.g., BGM).
     /// Cleaned up when the run/session ends.
     /// </summary>
-    internal LifetimeScope RunLifetime { get; } = new();
+    private LifetimeScope RunLifetime { get; } = new();
 
     public CommandRunScope(PresentationSessionContext context, LinePresentationAdvanceState linePresentationAdvanceState)
     {

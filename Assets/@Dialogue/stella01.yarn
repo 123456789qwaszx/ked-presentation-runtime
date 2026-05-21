@@ -29,12 +29,15 @@
 
 //<<shot_zoom_focus MySlot bust center 5 1>>
 
+<<spawn_bg bg0 stage00 black back 0 0 0.7 0>>
+<<spawn_bg rigKey stage00 green back 0 0 0.5 30>>
+<<bg_breath rigKey 99 33 9>>
+<<bg_breath bg0 99 33 4>>
 Leafia: 이번에 저희 컴퍼니를 선택해 주셔서 감사합니다. [br/]저는 천궁보험 필리에 영업부매니저 메르쿠리아라고 합니다.
 
--> bgTest
-<<jump bgTest>>
+//-> bgTest
+//<<jump bgTest>>
 
--> 계속
 <<slide_in_sway Leafia>>
 //<<fade_in Leafia>>
 <<emoji Leafia 20>>

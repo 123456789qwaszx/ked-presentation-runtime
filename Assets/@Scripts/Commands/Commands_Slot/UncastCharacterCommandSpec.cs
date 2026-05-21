@@ -45,6 +45,6 @@ public sealed class UncastCharacterCommand : CommandBase
         string roleKey = 
             CharacterRigTargetResolver.ResolveRigKeyByPolicy(scope, _spec.slotKey);
 
-        scope.CastRegistry.UncastCharRig(roleKey);
+        scope.castRegistry.UncastCharRig(roleKey);
     }
 }

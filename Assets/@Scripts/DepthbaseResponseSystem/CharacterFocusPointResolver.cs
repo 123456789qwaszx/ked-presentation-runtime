@@ -22,10 +22,10 @@ public static class CharacterFocusPointResolver
         if (string.IsNullOrWhiteSpace(roleKey))
             return false;
 
-        if (scope == null || scope.Refs == null || scope.Presentation == null)
+        if (scope == null || scope.characterRigs == null || scope.Presentation == null)
             return false;
 
-        if (!scope.Refs.TryGetCharRigRefs(roleKey.Trim(), out CharacterRigRefs rigRefs) || rigRefs == null)
+        if (!scope.characterRigs.TryGetRig(roleKey.Trim(), out CharacterRigRefs rigRefs) || rigRefs == null)
             return false;
 
         RectTransform fallbackRect = rigRefs.GetRect(fallbackTarget);
