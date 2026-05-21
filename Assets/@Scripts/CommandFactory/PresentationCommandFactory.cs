@@ -1,8 +1,3 @@
-public interface IBGViewPrefabProvider
-{
-    bool TryGetBackgroundViewPrefab(string key, out RectTransformResponseTarget prefab);
-}
-
 public interface IDialogueBoxViewResolver
 {
     IDialogueTextTarget ResolveTarget(DialogueBoxKind kind);
@@ -12,21 +7,13 @@ public interface IDialogueBoxViewResolver
 public sealed class PresentationViewCommandFactory : INodeCommandFactory
 {
     private readonly PresentationResponseRig _presentationResponseRig;
-
-    private readonly IBGViewPrefabProvider _bgViewPrefabProvider;
-    private readonly IBGRuntimeRegistry _bgRuntimeRegistry;
-
     private readonly IDialogueBoxViewResolver _dialogueBoxResolver;
 
     public PresentationViewCommandFactory(
         PresentationResponseRig presentationResponseRig,
-        IBGViewPrefabProvider bgViewPrefabProvider,
-        IBGRuntimeRegistry bgRuntimeRegistry,
         IDialogueBoxViewResolver dialogueBoxViewResolver)
     {
         _presentationResponseRig = presentationResponseRig;
-        _bgViewPrefabProvider = bgViewPrefabProvider;
-        _bgRuntimeRegistry = bgRuntimeRegistry;
         _dialogueBoxResolver = dialogueBoxViewResolver;
     }
 
@@ -38,6 +25,10 @@ public sealed class PresentationViewCommandFactory : INodeCommandFactory
 
             // Presentation View setup
             SetupPresentationViewCommandSpec s => new SetupPresentationViewCommand(_presentationResponseRig, s),
+            
+            RegisterBackgroundResponseBindingCommandSpec s => new RegisterBackgroundResponseBindingCommand(_presentationResponseRig, s),
+            RegisterCharacterResponseBindingCommandSpec s => new RegisterCharacterResponseBindingCommand(_presentationResponseRig, s),
+            
 
             SlantedMaskSlideInCommandSpec s => new SlantedMaskSlideInCommand(s),
             SlantedMaskSlideOutCommandSpec s => new SlantedMaskSlideOutCommand(s),
@@ -46,24 +37,6 @@ public sealed class PresentationViewCommandFactory : INodeCommandFactory
             SlantedShutterCommandSpec s => new SlantedShutterCommand(s),
             FocusBlurFadeCommandSpec s => new FocusBlurFadeCommand(s),
             FocusBlurCurtainCommandSpec s => new FocusBlurCurtainCommand(s),
-          
-            
-            
-            //ResetPresentationTargetTransformCommandSpec s => new ResetPresentationTargetTransformCommand(s),
-
-            // Background
-            SpawnBackgroundCommandSpec s => new SpawnBackgroundCommand(
-                _bgViewPrefabProvider,
-                s,
-                _bgRuntimeRegistry,
-                _presentationResponseRig),
-
-            SetBackgroundSpriteCommandSpec s => new SetBackgroundSpriteCommand(s),
-            FadeBackgroundCommandSpec s => new FadeBackgroundCommand(s),
-            DestroyBackgroundCommandSpec s => new DestroyBackgroundCommand(
-                s,
-                _bgRuntimeRegistry,
-                _presentationResponseRig),
             
             // Presentation Shot / Response Rig
             ShotResetCommandSpec s => new ShotResetCommand(_presentationResponseRig, s),

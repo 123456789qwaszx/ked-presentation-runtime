@@ -7,17 +7,10 @@ public sealed partial class YarnCommandBridge
     public void RegisterPresentationCommands()
     {
         _dialogueRunner.AddCommandHandler("presentation_reset", EnqueueSetupPresentationViewSpec);
-
-        _dialogueRunner.AddCommandHandler<string, string, string>("bg_spawn", EnqueueSpawnBackgroundSpec);
-        _dialogueRunner.AddCommandHandler<string, string, string, string>(
-            "bg_spawn_bound",
-            EnqueueSpawnBackgroundBoundSpec);
-
-        _dialogueRunner.AddCommandHandler<string, string>("bgsprite", EnqueueSetBackgroundSpriteSpec);
-        _dialogueRunner.AddCommandHandler<string>("bg_destroy", EnqueueDestroyBackgroundSpec);
-        _dialogueRunner.AddCommandHandler<string, float, float>("bg_fade", EnqueueFadeBackgroundSpec);
-
-
+        
+        _dialogueRunner.AddCommandHandler<string, string>("p_bind_bg_response", EnqueueRegisterBackgroundResponseBindingSpec);
+        _dialogueRunner.AddCommandHandler<string, string>("p_bind_char_response", EnqueueRegisterCharacterResponseBindingSpec);
+        
         // PresentationTarget direct transform
         _dialogueRunner.AddCommandHandler<string, float>("p_slant_cut_in", EnqueueSlantedMaskCutInSpec);
         _dialogueRunner.AddCommandHandler<string, float>("p_slant_cut_out", EnqueueSlantedMaskCutOutSpec);
@@ -39,6 +32,37 @@ public sealed partial class YarnCommandBridge
 
 
         _dialogueRunner.AddCommandHandler("box_hide", EnqueueHideDialogueBoxSpec);
+    }
+    private void EnqueueRegisterBackgroundResponseBindingSpec(
+        string rigKey,
+        string stageKey = "0")
+    {
+        var spec = new RegisterBackgroundResponseBindingCommandSpec
+        {
+            rigKey = rigKey,
+            stage = PresentationResponseStageParser.Parse(stageKey),
+            bindingKey = "",
+            responseProfile = PresentationResponseProfile.Background,
+            wait = true
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueRegisterCharacterResponseBindingSpec(
+        string targetKey,
+        string stageKey = "0")
+    {
+        var spec = new RegisterCharacterResponseBindingCommandSpec
+        {
+            targetKey = targetKey,
+            stage = PresentationResponseStageParser.Parse(stageKey),
+            bindingKey = "",
+            responseProfile = PresentationResponseProfile.CharacterSlot,
+            wait = true
+        };
+
+        Collect(spec);
     }
 
     private void EnqueueDazeFadeCloseSpec(
@@ -376,134 +400,7 @@ public sealed partial class YarnCommandBridge
 
         Collect(spec);
     }
-
-    private void EnqueueSpawnBackgroundSpec(string bgKey, string viewPrefabKey, string stageKey)
-    {
-        if (string.IsNullOrWhiteSpace(bgKey))
-        {
-            Debug.LogError("[YarnCommandBridge] bg_spawn: bgKey is null or empty.");
-            return;
-        }
-
-        if (string.IsNullOrWhiteSpace(viewPrefabKey))
-        {
-            Debug.LogError("[YarnCommandBridge] bg_spawn: viewPrefabKey is null or empty.");
-            return;
-        }
-
-
-        var spec = new SpawnBackgroundCommandSpec
-        {
-            bgKey = bgKey.Trim(),
-            viewPrefabKey = viewPrefabKey.Trim(),
-        };
-
-        Collect(spec);
-    }
-
-    private void EnqueueSpawnBackgroundBoundSpec(
-        string bgKey,
-        string viewPrefabKey,
-        string parentTargetName,
-        string profileName)
-    {
-        if (string.IsNullOrWhiteSpace(bgKey))
-        {
-            Debug.LogError("[YarnCommandBridge] bg_spawn_bound: bgKey is null or empty.");
-            return;
-        }
-
-        if (string.IsNullOrWhiteSpace(viewPrefabKey))
-        {
-            Debug.LogError("[YarnCommandBridge] bg_spawn_bound: viewPrefabKey is null or empty.");
-            return;
-        }
-        
-        if (!TryParsePresentationResponseProfile(profileName, out PresentationResponseProfile responseProfile))
-        {
-            Debug.LogError($"[YarnCommandBridge] bg_spawn_bound: Unknown response profile '{profileName}'.");
-            return;
-        }
-
-        var spec = new SpawnBackgroundCommandSpec
-        {
-            bgKey = bgKey.Trim(),
-            viewPrefabKey = viewPrefabKey.Trim(),
-            responseProfile = responseProfile
-        };
-
-        Collect(spec);
-    }
-
-    private void EnqueueSetBackgroundSpriteSpec(string bgKey, string spritePath)
-    {
-        if (string.IsNullOrWhiteSpace(bgKey))
-        {
-            Debug.LogError("[YarnCommandBridge] bg_sprite: bgKey is null or empty.");
-            return;
-        }
-
-        if (string.IsNullOrWhiteSpace(spritePath))
-        {
-            Debug.LogError("[YarnCommandBridge] bg_sprite: spritePath is null or empty.");
-            return;
-        }
-
-        Sprite sprite = Resources.Load<Sprite>(spritePath);
-
-        if (sprite == null)
-        {
-            Debug.LogError($"[YarnCommandBridge] bg_sprite: Sprite not found. path='{spritePath}'");
-            return;
-        }
-
-        var spec = new SetBackgroundSpriteCommandSpec
-        {
-            bgKey = bgKey.Trim(),
-            sprite = sprite,
-            setPreserveAspect = true,
-            preserveAspect = true,
-            setNativeSize = false,
-            strict = true
-        };
-
-        Collect(spec);
-    }
-
-    private void EnqueueFadeBackgroundSpec(string bgKey, float alpha, float duration = 0.35f)
-    {
-        if (string.IsNullOrWhiteSpace(bgKey))
-        {
-            Debug.LogError("[YarnCommandBridge] bg_fade: bgKey is null or empty.");
-            return;
-        }
-
-        var spec = new FadeBackgroundCommandSpec
-        {
-            bgKey = bgKey.Trim(),
-            targetAlpha = Mathf.Clamp01(alpha),
-            duration = duration,
-            wait = false,
-            killTween = true,
-            strict = true
-        };
-
-        Collect(spec);
-    }
-
-    private void EnqueueDestroyBackgroundSpec(string bgKey = "current")
-    {
-        var spec = new DestroyBackgroundCommandSpec
-        {
-            bgKey = string.IsNullOrWhiteSpace(bgKey) ? "current" : bgKey.Trim(),
-            killTween = true,
-            removeRefEntry = true,
-            strict = true
-        };
-
-        Collect(spec);
-    }
-
+    
     private void EnqueueSlantedMaskCutInSpec(
         string targetName,
         float duration = 0.65f)

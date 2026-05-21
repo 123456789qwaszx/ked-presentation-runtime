@@ -4,10 +4,6 @@
 <<shot_reset>>
 <<p_strip_cover vsw 0.3>>
 
-// <<bg_spawn bg2 a 0>>
-// <<bg_sprite bg2 bg05>>
-// <<bg_fade bg2 1>>
-
 <<slot MySlot 0>>
 <<cast MySlot Leafia>>
 
@@ -26,13 +22,39 @@
 
 <<p_strip_clear vsw 0>>
 
-//<<shot_zoom_focus MySlot bust center 5 1>>
 
 <<spawn_bg bg0 stage00 black back 0 0 0.7 0>>
 <<spawn_bg rigKey stage00 green back 0 0 0.5 30>>
 <<bg_breath rigKey 99 33 9>>
 <<bg_breath bg0 99 33 4>>
+
+<<p_bind_bg_response bg0 1>>
+<<p_bind_bg_response rigKey 0>>
+<<p_bind_char_response Leafia 0>>
+<<p_bind_char_response Mercurio 0>>
+<<p_bind_char_response Alb 0>>
+
 Leafia: 이번에 저희 컴퍼니를 선택해 주셔서 감사합니다. [br/]저는 천궁보험 필리에 영업부매니저 메르쿠리아라고 합니다.
+
+<<shot_zoom_focus MySlot bust center 5 1>>
+메르쿠리아: 테스트 하겠습니다.
+
+<<shot_zoom_focus Alb bust center 1 3>>
+메르쿠리아: 반복합니다.
+
+<<shot_track 200 0 5>>
+메르쿠리아: 반복합니다.
+
+<<shot_zoom 6 4>>
+메르쿠리아: 반복합니다.
+
+<<shot_reset>>
+메르쿠리아: 반복합니다.
+
+<<shot_to 200 500 -5 9>>
+메르쿠리아: 반복합니다.
+
+
 
 //-> bgTest
 //<<jump bgTest>>

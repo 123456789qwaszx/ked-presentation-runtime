@@ -18,9 +18,6 @@ public class VnAppBootstrap : MonoBehaviour
     [SerializeField] private AudioSystem audioSystem;
     [SerializeField] private InlineSfxPlaybackHost inlineSfxHost;
 
-    [Header("PresentationView")]
-    [SerializeField] private BGHost bgHost;
-
     [SerializeField] private DialogueBoxHost dialogueBoxHost;
 
     [SerializeField] private PresentationResponseRig presentationResponseRig;
@@ -167,7 +164,7 @@ public class VnAppBootstrap : MonoBehaviour
         SoundCommandFactory soundCommandFactory = new SoundCommandFactory(audioSystem, audioClipResolver);
 
         //PresentationViewCommandFactory
-        PresentationViewCommandFactory presentationViewCommandFactory = new(presentationResponseRig, bgHost, bgHost, dialogueBoxHost);
+        PresentationViewCommandFactory presentationViewCommandFactory = new(presentationResponseRig, dialogueBoxHost);
         
         BackgroundRigSlotResolver backgroundRigSlotResolver = new();
         BackgroundRigBuilder backgroundRigBuilder = new();

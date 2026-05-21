@@ -4,33 +4,26 @@ using UnityEngine;
 // state를 response로 번역해 target에 적용한다.
 public sealed class PresentationResponseBinding
 {
-    public interface IResponseTarget
-    {
-        RectTransform Rect { get; }
-        CanvasGroup CanvasGroup { get; }
-
-        void ApplyResponse(in Response response);
-    }
-    
     // position은 target parent 기준이 아니라 Rig 공간 좌표다.
-    // local position이 아니고 Rig 공간인 이유는 좌표계가 섞이지 않게하기 위함.
-    // 이것을 parent local 공간으로 변환해 적용한다.
+    // local position이 아니고 Rig 공간인 이유는 좌표계가 섞이지 않게 하기 위함.
+    // 이것을 PositionRect parent local 공간으로 변환해 적용한다.
     public struct Response
     {
-        // positionInRigSpace는 Rig 공간 기준 좌표,
-        // 각 target의 parent 기준 좌표로 다시 바꿔야 함.
+        // anchoredPosition은 Rig/Stage 공간 기준 좌표로 계산된다.
+        // Apply 직전에 PositionRect.parent 기준 좌표로 변환된다.
         public Vector2 anchoredPosition;
         public Vector2 scale;
         public float alpha;
     }
-    
-    // 모든 연출 계산의 기준 좌표계
-    // "이 캐릭터는 Stage 기준 (300, 0)에 있다"
-    // "이 배경은 Stage 기준 (-200, 0)에 있다"
+
+    // 모든 연출 계산의 기준 좌표계.
+    // 예:
+    // "이 캐릭터 슬롯은 Stage 기준 (300, 0)에 있다"
+    // "이 배경판은 Stage 기준 (-200, 0)에 있다"
     private readonly RectTransform _rigSpaceRoot;
-    
-    // The actual parent of Target.Rect.
-    // RectTransform.anchoredPosition must be expressed in this parent's local space.
+
+    // PositionRect의 실제 parent.
+    // RectTransform.anchoredPosition은 이 parent 기준 local 좌표로 써야 한다.
     private readonly RectTransform _targetParent;
     private readonly bool _needsCoordinateTransform;
 
@@ -49,8 +42,9 @@ public sealed class PresentationResponseBinding
         Target = target;
 
         _rigSpaceRoot = stageRoot;
-        _targetParent = target != null && target.Rect != null
-            ? target.Rect.parent as RectTransform
+
+        _targetParent = target != null && target.PositionRect != null
+            ? target.PositionRect.parent as RectTransform
             : null;
 
         _needsCoordinateTransform =
@@ -59,7 +53,10 @@ public sealed class PresentationResponseBinding
             !ReferenceEquals(_targetParent, _rigSpaceRoot);
     }
 
-    public bool IsAlive => Target?.Rect != null;
+    public bool IsAlive =>
+        Target != null &&
+        Target.MeasureRect != null &&
+        Target.PositionRect != null;
 
     public void Apply(in PresentationIntentState state)
     {
@@ -69,19 +66,29 @@ public sealed class PresentationResponseBinding
         Response response = Solve(in state, Profile);
 
         if (_needsCoordinateTransform)
-        { // Convert: Stage_Root space -> world space -> target parent local space.
+        {
+            // Convert:
+            // Stage_Root local space
+            // -> world space
+            // -> PositionRect.parent local space.
             Vector2 positionInStageSpace = response.anchoredPosition;
 
-            Vector3 worldPosition = _rigSpaceRoot.TransformPoint(new Vector3(positionInStageSpace.x, positionInStageSpace.y, 0f));
+            Vector3 worldPosition = _rigSpaceRoot.TransformPoint(
+                new Vector3(positionInStageSpace.x, positionInStageSpace.y, 0f));
+
             Vector3 positionInParentSpace = _targetParent.InverseTransformPoint(worldPosition);
 
-            response.anchoredPosition = new Vector2(positionInParentSpace.x, positionInParentSpace.y);
+            response.anchoredPosition = new Vector2(
+                positionInParentSpace.x,
+                positionInParentSpace.y);
         }
 
         Target.ApplyResponse(in response);
     }
 
-    private static Response Solve(in PresentationIntentState state, PresentationResponseProfile profile)
+    private static Response Solve(
+        in PresentationIntentState state,
+        PresentationResponseProfile profile)
     {
         float zoomFactor = Mathf.Clamp(state.zoom, -10f, 10f);
 
@@ -89,9 +96,16 @@ public sealed class PresentationResponseBinding
         Vector2 scaledSize = profile.baseScale * Mathf.Max(0.01f, scaleMultiplier);
 
         Vector2 focusToTarget = profile.basePositionInRigSpace - state.focusPoint;
-        Vector2 zoomSpreadOffset = CalculateZoomSpreadOffset(focusToTarget, zoomFactor, profile.maxZoomSpreadPixels);
 
-        Vector2 finalPosition = profile.basePositionInRigSpace + state.pan * profile.panResponse + zoomSpreadOffset;
+        Vector2 zoomSpreadOffset = CalculateZoomSpreadOffset(
+            focusToTarget,
+            zoomFactor,
+            profile.maxZoomSpreadPixels);
+
+        Vector2 finalPosition =
+            profile.basePositionInRigSpace +
+            state.pan * profile.panResponse +
+            zoomSpreadOffset;
 
         return new Response
         {
@@ -101,7 +115,10 @@ public sealed class PresentationResponseBinding
         };
     }
 
-    private static Vector2 CalculateZoomSpreadOffset(Vector2 focusToTarget, float zoomFactor, float maxZoomSpreadPixels)
+    private static Vector2 CalculateZoomSpreadOffset(
+        Vector2 focusToTarget,
+        float zoomFactor,
+        float maxZoomSpreadPixels)
     {
         if (maxZoomSpreadPixels <= 0f)
             return Vector2.zero;
