@@ -3,7 +3,9 @@ public sealed class BackgroundRigCommandFactory : INodeCommandFactory
     private readonly BackgroundRigSlotResolver _rigSlotResolver;
     private readonly BackgroundRigBuilder _rigBuilder;
 
-    public BackgroundRigCommandFactory(BackgroundRigSlotResolver backgroundRigSlotResolver, BackgroundRigBuilder backgroundRigBuilder)
+    public BackgroundRigCommandFactory(
+        BackgroundRigSlotResolver backgroundRigSlotResolver,
+        BackgroundRigBuilder backgroundRigBuilder)
     {
         _rigSlotResolver = backgroundRigSlotResolver;
         _rigBuilder = backgroundRigBuilder;
@@ -15,10 +17,9 @@ public sealed class BackgroundRigCommandFactory : INodeCommandFactory
         {
             null => null,
 
-            SetupBackgroundRigCommandSpec s => new SetupBackgroundRigCommand(
-                _rigSlotResolver,
-                _rigBuilder,
-                s),
+            SetupBackgroundRigCommandSpec s => new SetupBackgroundRigCommand(_rigSlotResolver, _rigBuilder, s),
+
+            SetAnchorCommandSpecBgR s => new SetAnchorCommandBgR(s),
 
             _ => null
         };

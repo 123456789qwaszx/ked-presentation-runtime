@@ -7,7 +7,8 @@
 // <<bg_spawn bg2 a 0>>
 // <<bg_sprite bg2 bg05>>
 // <<bg_fade bg2 1>>
-<<setup_bg_rig city stage00>>
+<<spawn_bg city stage00>>
+<<bg_place city>>
 
 <<slot MySlot 0>>
 <<cast MySlot Leafia>>

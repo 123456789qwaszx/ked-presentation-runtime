@@ -5,6 +5,10 @@ using UnityEngine;
 [Serializable]
 [CommandMenuHint(
     "Background Rig", "@Set Background Rig", Order = -998,
+    Sets = new[]
+    {
+        CommandMenuSets.SetupBackground,
+    },
     SetOrder = -980)]
 public sealed class SetupBackgroundRigCommandSpec : CommandSpecBase
 {
