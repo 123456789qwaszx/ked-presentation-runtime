@@ -22,8 +22,8 @@ public sealed class RegisterCharacterResponseBindingCommandSpec : CommandSpecBas
 
 public sealed class RegisterCharacterResponseBindingCommand : CommandBase
 {
-    private readonly PresentationResponseRig _responseRig;
     private readonly RegisterCharacterResponseBindingCommandSpec _spec;
+    private readonly PresentationResponseRig _responseRig;
     private readonly ICameraFocusStageRootProvider _stageRootProvider;
 
     public override bool WaitForCompletion => true;
@@ -33,8 +33,8 @@ public sealed class RegisterCharacterResponseBindingCommand : CommandBase
         PresentationResponseRig responseRig,
         ICameraFocusStageRootProvider cameraFocusStageRootProvider)
     {
-        _responseRig = responseRig;
         _spec = spec;
+        _responseRig = responseRig;
         _stageRootProvider = cameraFocusStageRootProvider;
     }
 

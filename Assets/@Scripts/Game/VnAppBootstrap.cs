@@ -165,8 +165,9 @@ public class VnAppBootstrap : MonoBehaviour
         SoundCommandFactory soundCommandFactory = new SoundCommandFactory(audioSystem, audioClipResolver);
 
         //PresentationViewCommandFactory
-        ICameraFocusStageRootProvider cameraFocusStageRootProvider = UIManager.Instance.GetUI<PresentationUIRoot>();
-        PresentationViewCommandFactory presentationViewCommandFactory = new(presentationResponseRig, dialogueBoxHost, cameraFocusStageRootProvider);
+        PresentationCameraRootApplier cameraRootApplier = new();
+        presentationResponseRig.Initialize(cameraRootApplier);
+        PresentationViewCommandFactory presentationViewCommandFactory = new(presentationResponseRig, dialogueBoxHost);
         
         BackgroundRigSlotResolver backgroundRigSlotResolver = new();
         BackgroundRigBuilder backgroundRigBuilder = new();

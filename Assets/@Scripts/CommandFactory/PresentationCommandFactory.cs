@@ -1,4 +1,3 @@
-
 using UnityEngine;
 
 public interface ICameraFocusStageRootProvider
@@ -17,20 +16,21 @@ public interface IDialogueBoxViewResolver
     void ShowOnly(IDialogueTextTarget target);
     void HideAll();
 }
+
 public sealed class PresentationViewCommandFactory : INodeCommandFactory
 {
     private readonly PresentationResponseRig _presentationResponseRig;
     private readonly IDialogueBoxViewResolver _dialogueBoxResolver;
-    private readonly ICameraFocusStageRootProvider _stageRootProvider;
+
+    private ICameraFocusStageRootProvider _stageRootProvider;
+    private bool _stageRootProviderInit;
 
     public PresentationViewCommandFactory(
         PresentationResponseRig presentationResponseRig,
-        IDialogueBoxViewResolver dialogueBoxViewResolver,
-        ICameraFocusStageRootProvider stageRootProvider)
+        IDialogueBoxViewResolver dialogueBoxViewResolver)
     {
         _presentationResponseRig = presentationResponseRig;
         _dialogueBoxResolver = dialogueBoxViewResolver;
-        _stageRootProvider = stageRootProvider;
     }
 
     public bool TryCreate(CommandSpecBase spec, out ISequenceCommand command)
@@ -39,29 +39,28 @@ public sealed class PresentationViewCommandFactory : INodeCommandFactory
         {
             null => null,
 
-            // Presentation View setup
-            
-            RegisterBackgroundResponseBindingCommandSpec s => new RegisterBackgroundResponseBindingCommand(s, _presentationResponseRig, _stageRootProvider),
-            RegisterCharacterResponseBindingCommandSpec s => new RegisterCharacterResponseBindingCommand(s, _presentationResponseRig, _stageRootProvider),
-            
+            // Presentation Response Binding
+            RegisterBackgroundResponseBindingCommandSpec s => new RegisterBackgroundResponseBindingCommand(s, _presentationResponseRig, StageRootProvider),
+            RegisterCharacterResponseBindingCommandSpec s => new RegisterCharacterResponseBindingCommand(s, _presentationResponseRig, StageRootProvider),
 
+            // Transition
             SlantedMaskSlideInCommandSpec s => new SlantedMaskSlideInCommand(s),
             SlantedMaskSlideOutCommandSpec s => new SlantedMaskSlideOutCommand(s),
-            
+
             VerticalStripWipeCommandSpec s => new VerticalStripWipeCommand(s),
             SlantedShutterCommandSpec s => new SlantedShutterCommand(s),
             FocusBlurFadeCommandSpec s => new FocusBlurFadeCommand(s),
             FocusBlurCurtainCommandSpec s => new FocusBlurCurtainCommand(s),
-            
+
             // Presentation Shot / Response Rig
             ShotResetCommandSpec s => new ShotResetCommand(_presentationResponseRig, s),
-            
+
             ShotZoomFocusCommandSpec s => new ShotZoomFocusCommand(_presentationResponseRig, s),
             ShotToCommandSpec s => new ShotToCommand(_presentationResponseRig, s),
-            
+
             ShotZoomCommandSpec s => new ShotZoomCommand(_presentationResponseRig, s),
             ShotTrackCommandSpec s => new ShotTrackCommand(_presentationResponseRig, s),
-            
+
             SetCharRigCamFocusCommandSpec s => new SetCharRigCamFocusCommand(s),
 
             // Dialogue Box
@@ -71,5 +70,24 @@ public sealed class PresentationViewCommandFactory : INodeCommandFactory
         };
 
         return command != null;
+    }
+
+    private ICameraFocusStageRootProvider StageRootProvider
+    {
+        get
+        {
+            if (!_stageRootProviderInit)
+                EnsureStageRootProvider();
+
+            return _stageRootProvider;
+        }
+    }
+
+    private void EnsureStageRootProvider()
+    {
+        _stageRootProvider = UIManager.Instance.GetUI<PresentationUIRoot>();
+
+        if (_stageRootProvider != null)
+            _stageRootProviderInit = true;
     }
 }

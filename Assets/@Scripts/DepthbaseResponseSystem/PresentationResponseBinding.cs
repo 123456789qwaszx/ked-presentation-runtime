@@ -13,7 +13,6 @@ public sealed class PresentationResponseBinding
         // Apply 직전에 PositionRect.parent 기준 좌표로 변환된다.
         public Vector2 anchoredPosition;
         public Vector2 scale;
-        public float alpha;
     }
 
     // 모든 연출 계산의 기준 좌표계.
@@ -111,7 +110,6 @@ public sealed class PresentationResponseBinding
         {
             anchoredPosition = finalPosition,
             scale = scaledSize,
-            alpha = profile.baseAlpha,
         };
     }
 

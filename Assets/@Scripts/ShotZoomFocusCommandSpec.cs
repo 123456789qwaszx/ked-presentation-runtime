@@ -164,9 +164,7 @@ public sealed class ShotZoomFocusCommand : CommandBase, IStepScopedCommand
 
         float targetZoom = Mathf.Clamp(_spec.zoom, -10f, 10f);
 
-        float cameraScale = _rig != null
-            ? _rig.EvaluateCameraScale(targetZoom)
-            : 1f + targetZoom * 0.05f;
+        float cameraScale = 1f + targetZoom * 0.05f;
 
         Vector2 desiredPoint =
             ScreenFocusPointResolver.Resolve(focus.StageRoot, _spec.screenPoint) +

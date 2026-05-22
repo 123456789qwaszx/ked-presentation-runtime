@@ -199,7 +199,7 @@ public sealed partial class YarnCommandBridge
         var anchorSpec = new SetAnchorCommandSpecCharR
         {
             slotKey = slotKey,
-            target = CharacterRigTarget.Character_CastTransform,
+            target = CharacterRigTarget.CharSlot_Anchor,
             preset = preset,
             resetSlotPos = resetSlotPos,
             resetCharacterPos =  resetCharPos
