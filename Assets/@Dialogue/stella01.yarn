@@ -4,39 +4,30 @@
 <<shot_reset>>
 <<p_strip_cover vsw 0.3>>
 
-<<slot MySlot 0>>
-<<cast MySlot Leafia>>
+<<slot Leafia 0>>
+<<cast Leafia Leafia a 02 true left normal>>
 
 <<slot Alb 0>>
 <<cast Alb Albedo a 02 true right normal>>
 
-<<slot Mercurio 0>>
-<<cast Mercurio Mercurio a 02 true center normal>>
 
-<<place Leafia left>>
-<<size Leafia normal>>
 
 <<breathe Leafia 99 5 0.25>>
-
-//<<emotion Leafia 7>>
 
 <<p_strip_clear vsw 0>>
 
 
 <<spawn_bg bg0 stage00 black back 0 0 0.7 0>>
 <<spawn_bg rigKey stage00 green back 0 0 0.5 30>>
-<<bg_breath rigKey 99 33 9>>
-<<bg_breath bg0 99 33 4>>
 
 <<p_bind_bg_response bg0 1>>
 <<p_bind_bg_response rigKey 0>>
 <<p_bind_char_response Leafia 0>>
-<<p_bind_char_response Mercurio 0>>
 <<p_bind_char_response Alb 0>>
 
 Leafia: 이번에 저희 컴퍼니를 선택해 주셔서 감사합니다. [br/]저는 천궁보험 필리에 영업부매니저 메르쿠리아라고 합니다.
 
-<<shot_zoom_focus MySlot bust center 5 1>>
+<<shot_zoom_focus Leafia bust center 0 3>>
 메르쿠리아: 테스트 하겠습니다.
 
 <<shot_zoom_focus Alb bust center 1 3>>
@@ -65,20 +56,20 @@ Leafia: 이번에 저희 컴퍼니를 선택해 주셔서 감사합니다. [br/]
 <<tremble_pulse Leafia>>
 메르쿠리아: 안내하겠습니다
 
-<<walk_in_place Leafia>>
 <<emotion Leafia 7>>
-<<shot_zoom_focus MySlot face center 1 1>>
+<<shot_zoom_focus Leafia bust center 1 1>>
 메르쿠리아: 이전에 작성해 주신 설문을 보니, 고객님께서는 실속 있는 생명보험을 고려 중이신 것으로 보입니다만.
 
 <<shot_track 200 0 0.5>>
 깊은 밤, 차가운 정적이 내려앉은 도시의 외딴 골목으로 정체를 알 수 없는 수상쩍은 그림자가 도둑고양이처럼 은밀하게 숨어든다. #box=letterbox
-<<shot_track_to -200 200 0.5>>
+<<shot_track_to -500 00 0.5>>
 
+//<<shot_reset>>
 주변을 살피는 그림자의 움직임에는 극도의 경계심이 서려 있었다.
 <<shot_zoom 6 0.4>>
 
 "물건은 가져왔어?"
-<<shot_zoom_focus MySlot face right 2 0.5>>
+<<shot_zoom_focus Leafia face right 2 0.5>>
 어둠 속에서 누군가가 나직한 목소리로 물었다.
 
 <<shot_reset>>

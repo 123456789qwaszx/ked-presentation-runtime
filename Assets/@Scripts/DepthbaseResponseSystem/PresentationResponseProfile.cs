@@ -24,7 +24,7 @@ public sealed class PresentationResponseProfile
         basePositionInRigSpace = Vector2.zero,
         baseScale = Vector2.one,
         baseAlpha = 1f,
-        maxZoomScaleDelta = 0.015f,
+        maxZoomScaleDelta = 0.012f,
         maxZoomSpreadPixels = 0f,
         panResponse = 0.03f,
     };
@@ -34,7 +34,7 @@ public sealed class PresentationResponseProfile
         basePositionInRigSpace = Vector2.zero,
         baseScale = Vector2.one,
         baseAlpha = 1f,
-        maxZoomScaleDelta = 0.035f,
+        maxZoomScaleDelta = 0.03f,
         maxZoomSpreadPixels = 6f,
         panResponse = 0.08f,
     };
@@ -44,9 +44,9 @@ public sealed class PresentationResponseProfile
         basePositionInRigSpace = Vector2.zero,
         baseScale = Vector2.one,
         baseAlpha = 1f,
-        maxZoomScaleDelta = 0.05f,
+        maxZoomScaleDelta = 0.15f,
         maxZoomSpreadPixels = 10f,
-        panResponse = 0.10f,
+        panResponse = 0.15f,
     };
 
     public static PresentationResponseProfile Foreground => new()
@@ -56,6 +56,6 @@ public sealed class PresentationResponseProfile
         baseAlpha = 1f,
         maxZoomScaleDelta = 0.07f,
         maxZoomSpreadPixels = 16f,
-        panResponse = 0.16f,
+        panResponse = 0.25f,
     };
 }
