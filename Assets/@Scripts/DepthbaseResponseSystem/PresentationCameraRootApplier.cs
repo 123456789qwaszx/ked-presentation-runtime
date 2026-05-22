@@ -46,11 +46,11 @@ public sealed class PresentationCameraRootApplier
         if (stagePanRoot != null)
             stagePanRoot.anchoredPosition = state.pan * _panMultiplier;
     }
-
+    
     private float EvaluateScale(float zoom)
     {
-        float t = Mathf.Clamp(zoom, -10f, 10f) / 10f;
-        return Mathf.Pow(_maxScale, t);
+        float z = Mathf.Clamp(zoom, -10f, 10f);
+        return Mathf.Max(0.0001f, 1f + z * 0.05f);
     }
 
     private void EnsureProvider()

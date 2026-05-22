@@ -40,9 +40,9 @@ public sealed class PresentationResponseProfile
     {
         basePositionInRigSpace = Vector2.zero,
         baseScale = Vector2.one,
-        maxZoomScaleDelta = 0.15f,
-        maxZoomSpreadPixels = 10f,
-        panResponse = 0.15f,
+        maxZoomScaleDelta = 0.015f,
+        maxZoomSpreadPixels = 3f,
+        panResponse = 0.8f,
     };
 
     public static PresentationResponseProfile Foreground => new()

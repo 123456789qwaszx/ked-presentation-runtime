@@ -18,7 +18,9 @@ public static class CharacterFocusPointResolver
         result = default;
 
         scope.characterRigs.TryGetRig(roleKey, out CharacterRigRefs rigRefs);
-        RectTransform focusRect = rigRefs.RigRoot;
+        
+        //***
+        RectTransform focusRect = rigRefs.Character_CastTransform;
 
         ICameraFocusStageRootProvider cameraFocusStageRootProvider = UIManager.Instance.GetUI<PresentationUIRoot>();
         RectTransform stageRoot = cameraFocusStageRootProvider.StageRoot ;
