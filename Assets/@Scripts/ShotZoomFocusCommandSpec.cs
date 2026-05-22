@@ -164,20 +164,30 @@ public sealed class ShotZoomFocusCommand : CommandBase, IStepScopedCommand
 
         float targetZoom = Mathf.Clamp(_spec.zoom, -10f, 10f);
 
-        float cameraScale = 1f + targetZoom * 0.05f;
+        float fromScale = EvaluateScale(from.zoom);
+        float targetScale = EvaluateScale(targetZoom);
+
+        // 현재 카메라 상태가 섞인 focus 좌표를 논리 좌표로 되돌림
+        Vector2 logicalFocusPoint = (focus.FocusPointInStageSpace - from.pan) / fromScale;
 
         Vector2 desiredPoint =
             ScreenFocusPointResolver.Resolve(focus.StageRoot, _spec.screenPoint) +
             _spec.screenOffset;
 
-        Vector2 targetPan = desiredPoint - focus.FocusPointInStageSpace * cameraScale;
+        Vector2 targetPan = desiredPoint - logicalFocusPoint * targetScale;
 
         return new PresentationIntentState
         {
             zoom = targetZoom,
             pan = targetPan,
-            focusPoint = focus.FocusPointInStageSpace,
+            focusPoint = logicalFocusPoint,
         };
+    }
+    
+    private static float EvaluateScale(float zoom)
+    {
+        float z = Mathf.Clamp(zoom, -10f, 10f);
+        return Mathf.Max(0.0001f, 1f + z * 0.05f);
     }
 
     private void ClearRuntimeState()

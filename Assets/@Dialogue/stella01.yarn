@@ -1,6 +1,6 @@
 ﻿title: stella01
 ---
-//<<shot_reset>>
+<<shot_reset>>
 <<p_strip_cover vsw 0.3>>
 
 <<slot Leafia 0>>
@@ -18,15 +18,15 @@
 <<spawn_bg bg0 stage00 black back 0 0 0.7 0>>
 <<spawn_bg rigKey stage00 green back 0 0 0.5 30>>
 
-//<<p_bind_char_response Leafia 0>>
-//<<p_bind_char_response Alb 0>>
+<<p_bind_char_response Leafia 0>>
+<<p_bind_char_response Alb 0>>
 
 Leafia: 이번에 저희 컴퍼니를 선택해 주셔서 감사합니다. [br/]저는 천궁보험 필리에 영업부매니저 메르쿠리아라고 합니다.
 
-<<shot_zoom_focus Alb bust center 2 3>>
+<<shot_zoom_focus Leafia bust bottom 3 3>>
 메르쿠리아: 테스트 하겠습니다.
 
-<<shot_zoom_focus Leafia bust bottom 3 3>>
+<<shot_zoom_focus Alb bust center 2 3>>
 메르쿠리아: 반복합니다.
 
 <<shot_track 800 0 1>>
