@@ -46,12 +46,11 @@ public sealed class EpisodePlayer : MonoBehaviour, IRollbackDialogueRestarter, I
     {
         if (Input.GetKeyDown(runYarnKey))
         {
-            //Debug.Log("TryStartYarnNode", this);
+            presentationResponseRig.Clear();
+            StartPresentationRoute(presentationEntryKey);
+            
             OpenDialogueUI();
             
-            presentationResponseRig.Clear();
-            
-            StartPresentationRoute(presentationEntryKey);
             StartYarnNode(yarnEntryKey);
         }
 
@@ -64,11 +63,10 @@ public sealed class EpisodePlayer : MonoBehaviour, IRollbackDialogueRestarter, I
 
     public void StartGame()
     {
+        StartPresentationRoute(presentationEntryKey);
+        
         OpenDialogueUI();
             
-        presentationResponseRig.Clear();
-            
-        StartPresentationRoute(presentationEntryKey);
         StartYarnNode(yarnEntryKey);
     }
 
@@ -97,20 +95,17 @@ public sealed class EpisodePlayer : MonoBehaviour, IRollbackDialogueRestarter, I
     
     public void StartYarnNode(string episodeId)
     {
-        ClearRuntimeState();
-        
         dialogueRunner.StartDialogue(episodeId);
     }
     
     public void RestartNodeForLoad(string nodeName)
     {
-        OpenDialogueUI();
-
-
+        ClearRuntimeState();
         StartPresentationRoute(presentationEntryKey);
+        
+        OpenDialogueUI();
         StartYarnNode(nodeName);
     }
-    
     
     private void StopDialogue()
     {
@@ -119,11 +114,12 @@ public sealed class EpisodePlayer : MonoBehaviour, IRollbackDialogueRestarter, I
 
         if (dialogueRunner.IsDialogueRunning)
             dialogueRunner.Stop();
-        
     }
     
     private void ClearRuntimeState()
     {
+        _linePresentationAborter?.AbortCurrentLinePresentationForRollback();
+        presentationRouteEntry.RequestEnd();
         presentationResponseRig.Clear();
         ResetSlantedMasks();
     }

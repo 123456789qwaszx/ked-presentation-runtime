@@ -55,7 +55,7 @@ public sealed class PresentationSession
     {
         if (sequence == null) return;
         _gateAdvancer.ClearLatchedSignals();
-        _executor.Stop();
+        //_executor.Stop();
         
         _state = new SequenceProgressState(route);
         _sequence = sequence;
@@ -95,9 +95,14 @@ public sealed class PresentationSession
                 _state.NodeIndex++;
                 int nextNodeIndex = _state.NodeIndex;
 
-                if (_state.NodeIndex >= _sequence.nodes.Count)
+                // if (_state.NodeIndex >= _sequence.nodes.Count)
+                // {
+                //     End();
+                //     return;
+                // }
+
+                if (_context == null || _context.CloseRequested)
                 {
-                    _gateAdvancer.ClearLatchedSignals();
                     End();
                     return;
                 }

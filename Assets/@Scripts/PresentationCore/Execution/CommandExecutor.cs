@@ -38,7 +38,7 @@ public sealed class CommandExecutor : MonoBehaviour
         _initialized = true;
     }
 
-    private void OnDisable() => Stop(CleanupPolicy.Cancel);
+    //private void OnDisable() => Stop(CleanupPolicy.Cancel);
     private void OnDestroy() => Stop(CleanupPolicy.Cancel);
 
     public void PlayStep(NodeSpec node, int stepIndex, CommandRunScope scope)
@@ -259,6 +259,7 @@ public sealed class CommandExecutor : MonoBehaviour
 
     private void Stop(CleanupPolicy policy)
     {
+        //Debug.Log($"ExecutorStop policy:{policy}");
         if (_isStopInProgress)
         {
             Trace($"Stop ignored: already in progress. policy={policy}");
@@ -289,10 +290,7 @@ public sealed class CommandExecutor : MonoBehaviour
             {
                 Trace($"Cleanup active scope: policy={policy}");
 
-                _activeScope.CleanupStep(policy);
-                _activeScope.CleanupRun(policy);
-                _activeScope.SetNodeBusy(false);
-                _activeScope.Token = CancellationToken.None;
+                _activeScope.ClearRuntimeState();
                 _activeScope = null;
             }
 

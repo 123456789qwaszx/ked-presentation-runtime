@@ -87,6 +87,8 @@ public sealed class PresentationResponseRig : MonoBehaviour
     {
         _currentState = PresentationIntentState.Default;
         _bindings.Clear();
+        
+        _cameraRootApplier?.Apply(in _currentState);
     }
     
 

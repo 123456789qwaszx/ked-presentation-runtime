@@ -22,9 +22,9 @@ public sealed class PresentationResponseProfile
     {
         basePositionInRigSpace = Vector2.zero,
         baseScale = Vector2.one,
-        maxZoomScaleDelta = 0.012f,
+        maxZoomScaleDelta = 0.0001f,
         maxZoomSpreadPixels = 0f,
-        panResponse = 0.03f,
+        panResponse = 0.1f,
     };
 
     public static PresentationResponseProfile Prop => new()
