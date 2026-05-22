@@ -4,6 +4,8 @@ public sealed class PresentationSessionEntry : MonoBehaviour, ICommandRunScopePr
 {
     public PresentationSession PresentationSession { get; private set; }
     private RouteCatalogSO _routeCatalog;
+    
+    public bool IsRunning => PresentationSession.IsRunning;
 
     public void Initialize(PresentationSession presentationSession, RouteCatalogSO routeCatalogSo)
     {

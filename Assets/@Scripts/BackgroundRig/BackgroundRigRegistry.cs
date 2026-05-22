@@ -31,8 +31,7 @@ public sealed class BackgroundRigRegistry
 
     public bool HasRig(string rigKey)
     {
-        return _rigs.TryGetValue(rigKey, out BackgroundRigRefs rigRefs)
-               && rigRefs?.RigRoot != null;
+        return _rigs.TryGetValue(rigKey, out BackgroundRigRefs rigRefs) && rigRefs?.RigRoot != null;
     }
 
     public bool TryGetRig(string rigKey, out BackgroundRigRefs rigRefs)

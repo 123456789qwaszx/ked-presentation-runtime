@@ -13,7 +13,7 @@ public sealed class PresentationViewUIBindings : IDisposable
     private readonly VnRuntimeBridge _vnRuntimeBridge;
     private readonly DialogueAdvanceDispatcher _dialogueAdvanceDispatcher;
     private readonly VNSaveLoadSystem _vnSaveLoadSystem;
-    private readonly IRollbackDialogueRestarter _restarter;
+    private readonly EpisodePlayer _restarter;
     private readonly LinePresentationAdvanceState  _linePresentationAdvanceState;
     
     private PresentationUIRoot _root;
@@ -28,7 +28,7 @@ public sealed class PresentationViewUIBindings : IDisposable
         VnRuntimeBridge vnSignalBridge,
         DialogueAdvanceDispatcher dialogueAdvanceDispatcher,
         VNSaveLoadSystem vnSaveLoadSystem,
-        IRollbackDialogueRestarter restarter,
+        EpisodePlayer restarter,
         LinePresentationAdvanceState  linePresentationAdvanceState
     )
     {
@@ -105,7 +105,10 @@ public sealed class PresentationViewUIBindings : IDisposable
     private void HandleRollbackPressed()
     {
         if (_vnFeatures.RequestRollbackOneStep())
-            _restarter.RestartNode(_linePresentationAdvanceState.RollbackTargetNodeName);
+        {
+            //_restarter.StopDialogue();
+            _restarter.StartGame(_linePresentationAdvanceState.RollbackTargetNodeName);
+        }
     }
 
     private void HandleSpeedUpHoldStarted()

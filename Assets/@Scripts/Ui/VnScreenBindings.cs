@@ -108,7 +108,7 @@ public sealed class VnScreenBindings : IDisposable
 
     private void OnNewGamePressed()
     {
-        _episodePlayer.StartGame();
+        _episodePlayer.StartGame(_episodePlayer.YarnEntryKey);
     }
 
     private void OnContinuePressed()

@@ -25,15 +25,15 @@ public sealed class BacklogRecorder
     
     private void RegisterHandler()
     {
-        _yarnLineLifecycleBridge.LinePrepared -= OnLinePrepare;
-        _yarnLineLifecycleBridge.LinePrepared += OnLinePrepare;
+        _yarnLineLifecycleBridge.LineEntered -= OnLinePrepare;
+        _yarnLineLifecycleBridge.LineEntered += OnLinePrepare;
     }
 
     private void UnRegisterHandler()
     {
         if (_yarnLineLifecycleBridge == null) return;
 
-        _yarnLineLifecycleBridge.LinePrepared -= OnLinePrepare;
+        _yarnLineLifecycleBridge.LineEntered -= OnLinePrepare;
     }
     
     private void OnLinePrepare(YarnLineMeta meta)
@@ -46,7 +46,7 @@ public sealed class BacklogRecorder
         });
     }
     
-    private void ClearBacklog() => _entries.Clear();
+    public void ClearBacklog() => _entries.Clear();
 
     private void Add(in DialogueLogEntry entry)
     {

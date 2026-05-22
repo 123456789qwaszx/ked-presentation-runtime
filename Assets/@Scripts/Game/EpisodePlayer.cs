@@ -1,20 +1,12 @@
-using System.Collections;
 using UnityEngine;
 using Yarn.Unity;
 
-public interface IRollbackDialogueRestarter
+public sealed class EpisodePlayer : MonoBehaviour
 {
-    void RestartNode(string nodeName);
-}
-
-public sealed class EpisodePlayer : MonoBehaviour, IRollbackDialogueRestarter, IVNLoadDialogueRestarter
-{
-    private VnScreenBindings _vnScreenBindings;
     private PresentationViewUIBindings _dialogueUIBindings;
     private RollbackHistory  _nodeRollbackHistory;
     private ILinePresentationAborter _linePresentationAborter;
-    
-    
+    private BacklogRecorder _backlogRecorder;
     
     public DialogueRunner dialogueRunner;
     [SerializeField] private DialogueTextRouter dialogueTextRouter;
@@ -22,6 +14,7 @@ public sealed class EpisodePlayer : MonoBehaviour, IRollbackDialogueRestarter, I
     [SerializeField] private PresentationResponseRig presentationResponseRig;
     
     [SerializeField] public string yarnEntryKey;
+    public string YarnEntryKey => yarnEntryKey;
     [SerializeField] public string presentationEntryKey;
     
     
@@ -31,93 +24,55 @@ public sealed class EpisodePlayer : MonoBehaviour, IRollbackDialogueRestarter, I
     [Tooltip("Stop")]
     [SerializeField] private KeyCode stopKey = KeyCode.Alpha3;
 
-    public void Initialize(VnScreenBindings vnScreenBindings,
+    public void Initialize(
         PresentationViewUIBindings dialogueUIBindings,
         RollbackHistory nodeRollbackHistory,
-        ILinePresentationAborter linePresentationAborter)
+        ILinePresentationAborter linePresentationAborter,
+        BacklogRecorder backlogRecorder)
     {
-        _vnScreenBindings = vnScreenBindings;
         _dialogueUIBindings = dialogueUIBindings;
         _nodeRollbackHistory = nodeRollbackHistory;
         _linePresentationAborter = linePresentationAborter;
+        _backlogRecorder = backlogRecorder;
     }
     
     private void Update()
     {
         if (Input.GetKeyDown(runYarnKey))
         {
-            presentationResponseRig.Clear();
-            StartPresentationRoute(presentationEntryKey);
-            
-            OpenDialogueUI();
-            
-            StartYarnNode(yarnEntryKey);
+            StopDialogue();
+            StartGame(yarnEntryKey);
         }
 
         if (Input.GetKeyDown(stopKey))
         {
-            _nodeRollbackHistory.ClearRollbackHistory();
             StopDialogue();
         }
     }
 
-    public void StartGame()
+    public void StartGame(string nodeName)
     {
-        StartPresentationRoute(presentationEntryKey);
+        _backlogRecorder.ClearBacklog();
         
-        OpenDialogueUI();
-            
-        StartYarnNode(yarnEntryKey);
-    }
-
-
-    public void OpenDialogueUI()
-    {
+        if(!presentationRouteEntry.IsRunning)
+            presentationRouteEntry.StartRoute(presentationEntryKey);
+        
         UIManager.Instance.SwitchRoot<PresentationUIRoot>();
         
         PresentationUIRoot dialogueUIRoot = UIManager.Instance.GetUI<PresentationUIRoot>();
         _dialogueUIBindings.Bind(dialogueUIRoot);
         
-    }
-
-    public void StartPresentationRoute(string routeKey)
-    {
-        presentationRouteEntry.StartRoute(routeKey);
+        dialogueRunner.StartDialogue(nodeName);
     }
     
-    public void RestartNode(string nodeName)
+    public void StopDialogue()
     {
-        _linePresentationAborter?.AbortCurrentLinePresentationForRollback();
-        //StopDialogue();
-        presentationResponseRig.Clear();
-        StartYarnNode(nodeName);
-    }
-    
-    public void StartYarnNode(string episodeId)
-    {
-        dialogueRunner.StartDialogue(episodeId);
-    }
-    
-    public void RestartNodeForLoad(string nodeName)
-    {
-        ClearRuntimeState();
-        StartPresentationRoute(presentationEntryKey);
+        _nodeRollbackHistory.ClearRollbackHistory();
+        _backlogRecorder.ClearBacklog();
         
-        OpenDialogueUI();
-        StartYarnNode(nodeName);
-    }
-    
-    private void StopDialogue()
-    {
-        if (dialogueRunner == null) 
-            return;
-
         if (dialogueRunner.IsDialogueRunning)
             dialogueRunner.Stop();
-    }
-    
-    private void ClearRuntimeState()
-    {
+
         _linePresentationAborter?.AbortCurrentLinePresentationForRollback();
         presentationRouteEntry.RequestEnd();
         presentationResponseRig.Clear();

@@ -1,15 +1,10 @@
 using System;
 using UnityEngine;
 
-public interface IVNLoadDialogueRestarter
-{
-    void RestartNodeForLoad(string nodeName);
-}
-
 public sealed class VNLoadSeekDriver : IVNLoadSeekDriver, IDisposable
 {
     private readonly YarnLineLifecycleBridge _bridge;
-    private readonly IVNLoadDialogueRestarter _restarter;
+    private readonly EpisodePlayer _restarter;
     private readonly DialogueAdvanceDispatcher _dispatcher;
     private readonly ILinePresentationAborter _linePresentationAborter;
     private readonly LinePresentationAdvanceState _lineAdvanceState;
@@ -25,7 +20,7 @@ public sealed class VNLoadSeekDriver : IVNLoadSeekDriver, IDisposable
 
     public VNLoadSeekDriver(
         YarnLineLifecycleBridge bridge,
-        IVNLoadDialogueRestarter restarter,
+        EpisodePlayer restarter,
         DialogueAdvanceDispatcher dispatcher,
         ILinePresentationAborter linePresentationAborter,
         LinePresentationAdvanceState lineAdvanceState,
@@ -81,7 +76,8 @@ public sealed class VNLoadSeekDriver : IVNLoadSeekDriver, IDisposable
 
         Subscribe();
 
-        _restarter.RestartNodeForLoad(saveData.nodeName);
+        _restarter.StopDialogue();
+        _restarter.StartGame(saveData.nodeName);
     }
 
     public void OnLoadComplete(VNSaveData saveData)

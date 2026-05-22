@@ -87,6 +87,7 @@ public class VnAppBootstrap : MonoBehaviour
     private EpisodeFlowController _episodeFlowController;
     private VnScreenBindings _screenBindings;
     private RollbackHistory _rollbackHistory;
+    private BacklogRecorder _backlogRecorder;
     private UIPatchService _uiPatchService;
     
     private VNSaveLoadSystem _vnSaveLoadSystem;
@@ -271,7 +272,7 @@ public class VnAppBootstrap : MonoBehaviour
 
     private void BootstrapPlaybackControls()
     {
-        BacklogRecorder backlogRecorder = new(yarnLineLifecycleBridge, _vnPlaybackSettings);
+        _backlogRecorder = new(yarnLineLifecycleBridge, _vnPlaybackSettings);
 
         AutoAdvanceScheduler autoAdvanceScheduler = new(
             yarnLineLifecycleBridge,
@@ -302,7 +303,7 @@ public class VnAppBootstrap : MonoBehaviour
             _linePresentationAdvanceState,
             ellipsisBreathTypewriter,
             inlineEventMarkupHandler,
-            backlogRecorder,
+            _backlogRecorder,
             autoAdvanceScheduler,
             holdSkipController,
             rollbackController);
@@ -360,7 +361,7 @@ public class VnAppBootstrap : MonoBehaviour
 
     private void InitializeEpisodePlayer()
     {
-        episodePlayer.Initialize(_screenBindings, _dialogueUIBindings, _rollbackHistory, customLinePresenter);
+        episodePlayer.Initialize(_dialogueUIBindings, _rollbackHistory, customLinePresenter, _backlogRecorder);
 
         _screenBindings.AttachEpisodePlayer(episodePlayer);
     }
