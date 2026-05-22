@@ -56,13 +56,10 @@ public sealed class PresentationResponseRig : MonoBehaviour
         RectTransform stageRoot,
         string bindingKey = null)
     {
-        CharacterRigRefs rigRefs =
-            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, targetKey);
-
-        CanvasGroup canvasGroup = GetOrAddCanvasGroup(rigRefs.RigRoot);
+        CharacterRigRefs rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, targetKey);
 
         CharacterRigResponseTarget target =
-            new CharacterRigResponseTarget(rigRefs, canvasGroup);
+            new CharacterRigResponseTarget(rigRefs);
 
         string key = string.IsNullOrWhiteSpace(bindingKey)
             ? BuildCharacterBindingKey(targetKey)
@@ -85,20 +82,13 @@ public sealed class PresentationResponseRig : MonoBehaviour
         BackgroundRigRefs rigRefs =
             BackgroundRigTargetResolver.ResolveBackgroundRigFromTargetKey(scope, bgKey);
 
-        CanvasGroup canvasGroup = GetOrAddCanvasGroup(rigRefs.RigRoot);
-
-        BackgroundRigResponseTarget target =
-            new BackgroundRigResponseTarget(rigRefs, canvasGroup);
+        BackgroundRigResponseTarget target = new BackgroundRigResponseTarget(rigRefs);
 
         string key = string.IsNullOrWhiteSpace(bindingKey)
             ? BuildBackgroundBindingKey(bgKey)
             : bindingKey;
 
-        return RegisterRuntimeBinding(
-            key,
-            target,
-            presetProfile,
-            stageRoot);
+        return RegisterRuntimeBinding(key, target, presetProfile, stageRoot);
     }
 
     public bool RegisterRuntimeBinding(
@@ -107,51 +97,10 @@ public sealed class PresentationResponseRig : MonoBehaviour
         PresentationResponseProfile presetProfile,
         RectTransform stageRoot)
     {
-        if (string.IsNullOrWhiteSpace(key))
-        {
-            Debug.LogWarning("[PresentationResponseRig] RegisterRuntimeBinding failed. key is null or empty.", this);
-            return false;
-        }
-
-        if (target == null)
-        {
-            Debug.LogWarning($"[PresentationResponseRig] RegisterRuntimeBinding failed. target is null. key='{key}'.", this);
-            return false;
-        }
-
-        if (target.MeasureRect == null)
-        {
-            Debug.LogWarning($"[PresentationResponseRig] RegisterRuntimeBinding failed. target.MeasureRect is null. key='{key}'.", this);
-            return false;
-        }
-
-        if (target.PositionRect == null)
-        {
-            Debug.LogWarning($"[PresentationResponseRig] RegisterRuntimeBinding failed. target.PositionRect is null. key='{key}'.", this);
-            return false;
-        }
-
-        if (presetProfile == null)
-        {
-            Debug.LogWarning($"[PresentationResponseRig] RegisterRuntimeBinding failed. presetProfile is null. key='{key}'.", this);
-            return false;
-        }
-
-        if (stageRoot == null)
-        {
-            Debug.LogWarning($"[PresentationResponseRig] RegisterRuntimeBinding failed. stageRoot is null. key='{key}'.", this);
-            return false;
-        }
-
         PresentationResponseProfile runtimeProfile =
             BakeRuntimeProfile(target, presetProfile, stageRoot);
 
-        PresentationResponseBinding binding =
-            new PresentationResponseBinding(
-                key,
-                runtimeProfile,
-                target,
-                stageRoot);
+        PresentationResponseBinding binding = new PresentationResponseBinding(key, runtimeProfile, target, stageRoot);
 
         ReplaceBinding(key, binding);
 
@@ -245,10 +194,6 @@ public sealed class PresentationResponseRig : MonoBehaviour
         profile.baseScale = scaleRect != null
             ? new Vector2(scaleRect.localScale.x, scaleRect.localScale.y)
             : Vector2.one;
-
-        profile.baseAlpha = target.CanvasGroup != null
-            ? target.CanvasGroup.alpha
-            : 1f;
 
         return profile;
     }

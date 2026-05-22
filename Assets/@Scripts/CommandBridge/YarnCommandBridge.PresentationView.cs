@@ -41,7 +41,6 @@ public sealed partial class YarnCommandBridge
         {
             rigKey = rigKey,
             stage = PresentationResponseStageParser.Parse(stageKey),
-            bindingKey = "",
             responseProfile = PresentationResponseProfile.Background,
             wait = true
         };
@@ -57,7 +56,6 @@ public sealed partial class YarnCommandBridge
         {
             targetKey = targetKey,
             stage = PresentationResponseStageParser.Parse(stageKey),
-            bindingKey = "",
             responseProfile = PresentationResponseProfile.CharacterSlot,
             wait = true
         };

@@ -7,12 +7,10 @@ public sealed class CharacterRigResponseTarget : IResponseTarget
     public RectTransform MeasureRect => _refs.CharSlot_Scale;
     public RectTransform PositionRect => _refs.CharSlot_FramingTransform;
     public RectTransform ScaleRect => _refs.CharSlot_FramingScale;
-    public CanvasGroup CanvasGroup { get; }
 
-    public CharacterRigResponseTarget(CharacterRigRefs refs, CanvasGroup canvasGroup)
+    public CharacterRigResponseTarget(CharacterRigRefs refs)
     {
         _refs = refs;
-        CanvasGroup = canvasGroup;
     }
 
     public void ApplyResponse(in PresentationResponseBinding.Response response)
@@ -22,8 +20,5 @@ public sealed class CharacterRigResponseTarget : IResponseTarget
 
         if (ScaleRect != null)
             ScaleRect.localScale = new Vector3(response.scale.x, response.scale.y, 1f);
-
-        if (CanvasGroup != null)
-            CanvasGroup.alpha = response.alpha;
     }
 }

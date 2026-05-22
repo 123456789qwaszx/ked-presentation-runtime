@@ -27,10 +27,6 @@ public sealed class RegisterBackgroundResponseBindingCommandSpec : CommandSpecBa
     [Tooltip("basePositionInRigSpace와 focusPoint 계산 기준이 되는 StageRoot입니다.")]
     public PresentationResponseStage stage = PresentationResponseStage.Stage00;
 
-    [Header("Binding")]
-    [Tooltip("비워두면 'bg:{rigKey}'를 사용합니다.")]
-    public string bindingKey = "";
-
     [Tooltip("BackgroundRig가 shot / pseudo camera intent에 반응하는 방식입니다.")]
     public PresentationResponseProfile responseProfile = PresentationResponseProfile.Background;
 }
@@ -61,43 +57,17 @@ public sealed class RegisterBackgroundResponseBindingCommand : CommandBase
 
     private void Apply(CommandRunScope scope)
     {
-        if (_responseRig == null)
-            return;
-
-        if (scope == null)
-            return;
-
         string rigKey = _spec.rigKey;
-
-        if (string.IsNullOrWhiteSpace(rigKey))
-        {
-            Debug.LogWarning("[RegisterBackgroundResponseBindingCommand] rigKey is null or empty.");
-            return;
-        }
-
+        
         if (!scope.backgroundRigs.TryGetRig(rigKey, out BackgroundRigRefs rigRefs))
             return;
 
         RectTransform stageRoot = ResolveStageRoot(_spec.stage);
-        if (stageRoot == null)
-        {
-            Debug.LogWarning(
-                $"[RegisterBackgroundResponseBindingCommand] Failed to resolve stageRoot. " +
-                $"rigKey='{rigKey}', stage='{_spec.stage}'.");
-            return;
-        }
 
-        CanvasGroup canvasGroup = GetOrAddCanvasGroup(rigRefs.RigRoot);
-
-        BackgroundRigResponseTarget target =
-            new BackgroundRigResponseTarget(rigRefs, canvasGroup);
-
-        string bindingKey = string.IsNullOrWhiteSpace(_spec.bindingKey)
-            ? BuildBackgroundBindingKey(rigKey)
-            : _spec.bindingKey;
+        BackgroundRigResponseTarget target = new BackgroundRigResponseTarget(rigRefs);
 
         _responseRig.RegisterRuntimeBinding(
-            bindingKey,
+            _spec.rigKey,
             target,
             _spec.responseProfile,
             stageRoot);
@@ -125,23 +95,5 @@ public sealed class RegisterBackgroundResponseBindingCommand : CommandBase
             default:
                 return provider.Stage00Root;
         }
-    }
-
-    private static CanvasGroup GetOrAddCanvasGroup(RectTransform root)
-    {
-        if (root == null)
-            return null;
-
-        CanvasGroup canvasGroup = root.GetComponent<CanvasGroup>();
-
-        if (canvasGroup == null)
-            canvasGroup = root.gameObject.AddComponent<CanvasGroup>();
-
-        return canvasGroup;
-    }
-
-    private static string BuildBackgroundBindingKey(string rigKey)
-    {
-        return $"bg:{rigKey}";
     }
 }
