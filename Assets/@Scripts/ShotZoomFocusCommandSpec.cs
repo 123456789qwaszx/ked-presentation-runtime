@@ -11,9 +11,6 @@ public sealed class ShotZoomFocusCommandSpec : CommandSpecBase
     public string focusRoleKey = "";
     public CharacterFocusAnchor focusAnchor = CharacterFocusAnchor.Face;
 
-    [Tooltip("anchor가 없을 때 fallback으로 사용할 CharacterRig target")]
-    public CharacterRigTarget fallbackTarget = CharacterRigTarget.Character_Root;
-
     [Tooltip("선택한 focus anchor의 로컬 오프셋")]
     public Vector2 focusLocalOffset = Vector2.zero;
 
@@ -156,8 +153,6 @@ public sealed class ShotZoomFocusCommand : CommandBase, IStepScopedCommand
         if (!CharacterFocusPointResolver.TryResolve(
                 scope,
                 _spec.focusRoleKey,
-                _spec.focusAnchor,
-                _spec.fallbackTarget,
                 _spec.focusLocalOffset,
                 out CharacterFocusPointResult focus))
         {

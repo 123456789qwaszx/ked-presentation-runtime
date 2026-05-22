@@ -4,22 +4,12 @@ using UnityEngine;
 
 public sealed class PresentationResponseRig : MonoBehaviour
 {
+    private readonly PresentationCameraRootApplier _cameraRootApplier = new();
+    
+    private readonly List<PresentationResponseBinding> _bindings = new();
     private PresentationIntentState _currentState = PresentationIntentState.Default;
 
-    private readonly List<PresentationResponseBinding> _bindings = new();
-
-    private PresentationCameraRootApplier _cameraRootApplier;
-
     public PresentationIntentState CurrentState => _currentState;
-
-    public void BindCameraRoots(
-        RectTransform stagePanRoot,
-        RectTransform stageZoomRoot)
-    {
-        _cameraRootApplier = new PresentationCameraRootApplier(
-            stagePanRoot,
-            stageZoomRoot);
-    }
 
     public float EvaluateCameraScale(float zoom)
     {
@@ -61,9 +51,7 @@ public sealed class PresentationResponseRig : MonoBehaviour
         CharacterRigResponseTarget target =
             new CharacterRigResponseTarget(rigRefs);
 
-        string key = string.IsNullOrWhiteSpace(bindingKey)
-            ? BuildCharacterBindingKey(targetKey)
-            : bindingKey;
+        string key = bindingKey;
 
         return RegisterRuntimeBinding(
             key,
@@ -84,9 +72,7 @@ public sealed class PresentationResponseRig : MonoBehaviour
 
         BackgroundRigResponseTarget target = new BackgroundRigResponseTarget(rigRefs);
 
-        string key = string.IsNullOrWhiteSpace(bindingKey)
-            ? BuildBackgroundBindingKey(bgKey)
-            : bindingKey;
+        string key = bindingKey;
 
         return RegisterRuntimeBinding(key, target, presetProfile, stageRoot);
     }
@@ -133,19 +119,20 @@ public sealed class PresentationResponseRig : MonoBehaviour
 
     public bool RemoveCharacterRigBinding(string targetKey)
     {
-        return RemoveBinding(BuildCharacterBindingKey(targetKey));
+        return RemoveBinding(targetKey);
     }
 
     public bool RemoveBackgroundRigBinding(string bgKey)
     {
-        return RemoveBinding(BuildBackgroundBindingKey(bgKey));
+        return RemoveBinding(bgKey);
     }
 
-    public void ClearRuntimeState()
+    public void Clear()
     {
         _currentState = PresentationIntentState.Default;
         _bindings.Clear();
     }
+    
 
     private void ReplaceBinding(
         string key,
@@ -196,28 +183,5 @@ public sealed class PresentationResponseRig : MonoBehaviour
             : Vector2.one;
 
         return profile;
-    }
-
-    private static CanvasGroup GetOrAddCanvasGroup(RectTransform root)
-    {
-        if (root == null)
-            return null;
-
-        CanvasGroup canvasGroup = root.GetComponent<CanvasGroup>();
-
-        if (canvasGroup == null)
-            canvasGroup = root.gameObject.AddComponent<CanvasGroup>();
-
-        return canvasGroup;
-    }
-
-    private static string BuildCharacterBindingKey(string targetKey)
-    {
-        return $"char:{targetKey}";
-    }
-
-    private static string BuildBackgroundBindingKey(string bgKey)
-    {
-        return $"bg:{bgKey}";
     }
 }

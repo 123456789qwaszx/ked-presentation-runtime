@@ -6,8 +6,6 @@ public sealed partial class YarnCommandBridge
 {
     public void RegisterPresentationCommands()
     {
-        _dialogueRunner.AddCommandHandler("presentation_reset", EnqueueSetupPresentationViewSpec);
-        
         _dialogueRunner.AddCommandHandler<string, string>("p_bind_bg_response", EnqueueRegisterBackgroundResponseBindingSpec);
         _dialogueRunner.AddCommandHandler<string, string>("p_bind_char_response", EnqueueRegisterCharacterResponseBindingSpec);
         
@@ -40,7 +38,6 @@ public sealed partial class YarnCommandBridge
         var spec = new RegisterBackgroundResponseBindingCommandSpec
         {
             rigKey = rigKey,
-            stage = PresentationResponseStageParser.Parse(stageKey),
             responseProfile = PresentationResponseProfile.Background,
             wait = true
         };
@@ -55,7 +52,6 @@ public sealed partial class YarnCommandBridge
         var spec = new RegisterCharacterResponseBindingCommandSpec
         {
             targetKey = targetKey,
-            stage = PresentationResponseStageParser.Parse(stageKey),
             responseProfile = PresentationResponseProfile.CharacterSlot,
             wait = true
         };
@@ -375,13 +371,6 @@ public sealed partial class YarnCommandBridge
             killTween = true,
             disableWhenClear = true,
         };
-
-        Collect(spec);
-    }
-
-    private void EnqueueSetupPresentationViewSpec()
-    {
-        var spec = new SetupPresentationViewCommandSpec();
 
         Collect(spec);
     }

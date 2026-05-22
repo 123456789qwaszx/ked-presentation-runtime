@@ -1,6 +1,5 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.Serialization;
 using Yarn.Unity;
 
 public interface IRollbackDialogueRestarter
@@ -14,6 +13,8 @@ public sealed class EpisodePlayer : MonoBehaviour, IRollbackDialogueRestarter, I
     private PresentationViewUIBindings _dialogueUIBindings;
     private RollbackHistory  _nodeRollbackHistory;
     private ILinePresentationAborter _linePresentationAborter;
+    
+    
     
     public DialogueRunner dialogueRunner;
     [SerializeField] private DialogueTextRouter dialogueTextRouter;
@@ -30,7 +31,10 @@ public sealed class EpisodePlayer : MonoBehaviour, IRollbackDialogueRestarter, I
     [Tooltip("Stop")]
     [SerializeField] private KeyCode stopKey = KeyCode.Alpha3;
 
-    public void Initialize(VnScreenBindings vnScreenBindings, PresentationViewUIBindings dialogueUIBindings, RollbackHistory nodeRollbackHistory, ILinePresentationAborter  linePresentationAborter)
+    public void Initialize(VnScreenBindings vnScreenBindings,
+        PresentationViewUIBindings dialogueUIBindings,
+        RollbackHistory nodeRollbackHistory,
+        ILinePresentationAborter linePresentationAborter)
     {
         _vnScreenBindings = vnScreenBindings;
         _dialogueUIBindings = dialogueUIBindings;
@@ -45,7 +49,7 @@ public sealed class EpisodePlayer : MonoBehaviour, IRollbackDialogueRestarter, I
             //Debug.Log("TryStartYarnNode", this);
             OpenDialogueUI();
             
-            presentationResponseRig.ClearRuntimeState();
+            presentationResponseRig.Clear();
             
             StartPresentationRoute(presentationEntryKey);
             StartYarnNode(yarnEntryKey);
@@ -62,7 +66,7 @@ public sealed class EpisodePlayer : MonoBehaviour, IRollbackDialogueRestarter, I
     {
         OpenDialogueUI();
             
-        presentationResponseRig.ClearRuntimeState();
+        presentationResponseRig.Clear();
             
         StartPresentationRoute(presentationEntryKey);
         StartYarnNode(yarnEntryKey);
@@ -87,12 +91,14 @@ public sealed class EpisodePlayer : MonoBehaviour, IRollbackDialogueRestarter, I
     {
         _linePresentationAborter?.AbortCurrentLinePresentationForRollback();
         //StopDialogue();
-        presentationResponseRig.ClearRuntimeState();
+        presentationResponseRig.Clear();
         StartYarnNode(nodeName);
     }
     
     public void StartYarnNode(string episodeId)
     {
+        ClearRuntimeState();
+        
         dialogueRunner.StartDialogue(episodeId);
     }
     
@@ -100,7 +106,6 @@ public sealed class EpisodePlayer : MonoBehaviour, IRollbackDialogueRestarter, I
     {
         OpenDialogueUI();
 
-        presentationResponseRig.ClearRuntimeState();
 
         StartPresentationRoute(presentationEntryKey);
         StartYarnNode(nodeName);
@@ -117,31 +122,24 @@ public sealed class EpisodePlayer : MonoBehaviour, IRollbackDialogueRestarter, I
         
     }
     
-    private IEnumerator WaitUntilBoundOrTimeout()
+    private void ClearRuntimeState()
     {
-        float start = Time.unscaledTime;
-        float timeout = 10;
-
-        if (IsBoundReady())
-            yield break;
-
-        while (!IsBoundReady())
-        {
-            if (timeout > 0f && (Time.unscaledTime - start) >= timeout)
-            {
-                Debug.LogError($"Bind timeout ({timeout:0.00}s)");
-                yield break;
-            }
-
-            yield return null;
-        }
+        presentationResponseRig.Clear();
+        ResetSlantedMasks();
     }
-
-    private bool IsBoundReady()
+    
+    private void ResetSlantedMasks()
     {
-        if (dialogueTextRouter.LineText != null)
-            return false;
-
-        return true;
+        IPresentationTransitionSlotProvider provider = UIManager.Instance.GetUI<PresentationUIRoot>();
+        RectTransform[] roots =
+        { 
+            provider.SlantedMaskEdgeGraphic
+        };
+        
+        for (int i = 0; i < roots.Length; i++)
+        {
+            SlantedMaskGraphic mask = roots[i].GetComponent<SlantedMaskGraphic>();
+            mask?.ResetToHiddenOffset();
+        }
     }
 }

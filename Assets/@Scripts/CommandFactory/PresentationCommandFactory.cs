@@ -1,3 +1,16 @@
+
+using UnityEngine;
+
+public interface ICameraFocusStageRootProvider
+{
+    RectTransform StageRoot { get; }
+}
+
+public sealed partial class PresentationUIRoot : ICameraFocusStageRootProvider
+{
+    public RectTransform StageRoot => View.Rect(Refs.StageShot_Root);
+}
+
 public interface IDialogueBoxViewResolver
 {
     IDialogueTextTarget ResolveTarget(DialogueBoxKind kind);
@@ -8,13 +21,16 @@ public sealed class PresentationViewCommandFactory : INodeCommandFactory
 {
     private readonly PresentationResponseRig _presentationResponseRig;
     private readonly IDialogueBoxViewResolver _dialogueBoxResolver;
+    private readonly ICameraFocusStageRootProvider _stageRootProvider;
 
     public PresentationViewCommandFactory(
         PresentationResponseRig presentationResponseRig,
-        IDialogueBoxViewResolver dialogueBoxViewResolver)
+        IDialogueBoxViewResolver dialogueBoxViewResolver,
+        ICameraFocusStageRootProvider stageRootProvider)
     {
         _presentationResponseRig = presentationResponseRig;
         _dialogueBoxResolver = dialogueBoxViewResolver;
+        _stageRootProvider = stageRootProvider;
     }
 
     public bool TryCreate(CommandSpecBase spec, out ISequenceCommand command)
@@ -24,10 +40,9 @@ public sealed class PresentationViewCommandFactory : INodeCommandFactory
             null => null,
 
             // Presentation View setup
-            SetupPresentationViewCommandSpec s => new SetupPresentationViewCommand(_presentationResponseRig, s),
             
-            RegisterBackgroundResponseBindingCommandSpec s => new RegisterBackgroundResponseBindingCommand(_presentationResponseRig, s),
-            RegisterCharacterResponseBindingCommandSpec s => new RegisterCharacterResponseBindingCommand(_presentationResponseRig, s),
+            RegisterBackgroundResponseBindingCommandSpec s => new RegisterBackgroundResponseBindingCommand(s, _presentationResponseRig, _stageRootProvider),
+            RegisterCharacterResponseBindingCommandSpec s => new RegisterCharacterResponseBindingCommand(s, _presentationResponseRig, _stageRootProvider),
             
 
             SlantedMaskSlideInCommandSpec s => new SlantedMaskSlideInCommand(s),

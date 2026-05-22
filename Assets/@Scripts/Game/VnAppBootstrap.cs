@@ -111,6 +111,7 @@ public class VnAppBootstrap : MonoBehaviour
 
         BootstrapVnSaveLoadRuntime();
         
+        
         BootstrapUIBindings();
         InitializeEpisodePlayer();
         
@@ -164,7 +165,8 @@ public class VnAppBootstrap : MonoBehaviour
         SoundCommandFactory soundCommandFactory = new SoundCommandFactory(audioSystem, audioClipResolver);
 
         //PresentationViewCommandFactory
-        PresentationViewCommandFactory presentationViewCommandFactory = new(presentationResponseRig, dialogueBoxHost);
+        ICameraFocusStageRootProvider cameraFocusStageRootProvider = UIManager.Instance.GetUI<PresentationUIRoot>();
+        PresentationViewCommandFactory presentationViewCommandFactory = new(presentationResponseRig, dialogueBoxHost, cameraFocusStageRootProvider);
         
         BackgroundRigSlotResolver backgroundRigSlotResolver = new();
         BackgroundRigBuilder backgroundRigBuilder = new();

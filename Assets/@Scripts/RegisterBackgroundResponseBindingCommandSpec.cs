@@ -2,12 +2,6 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-public enum PresentationResponseStage
-{
-    Stage00 = 0,
-    Stage01 = 1,
-    Stage02 = 2
-}
 
 [Serializable]
 [CommandMenuHint(
@@ -23,10 +17,6 @@ public sealed class RegisterBackgroundResponseBindingCommandSpec : CommandSpecBa
     [Tooltip("BackgroundRigRegistry에 등록된 rigKey입니다.")]
     public string rigKey;
 
-    [Header("Stage Root")]
-    [Tooltip("basePositionInRigSpace와 focusPoint 계산 기준이 되는 StageRoot입니다.")]
-    public PresentationResponseStage stage = PresentationResponseStage.Stage00;
-
     [Tooltip("BackgroundRig가 shot / pseudo camera intent에 반응하는 방식입니다.")]
     public PresentationResponseProfile responseProfile = PresentationResponseProfile.Background;
 }
@@ -35,15 +25,18 @@ public sealed class RegisterBackgroundResponseBindingCommand : CommandBase
 {
     private readonly PresentationResponseRig _responseRig;
     private readonly RegisterBackgroundResponseBindingCommandSpec _spec;
+    private readonly ICameraFocusStageRootProvider _stageRootProvider;
 
     public override bool WaitForCompletion => true;
 
     public RegisterBackgroundResponseBindingCommand(
+        RegisterBackgroundResponseBindingCommandSpec spec,
         PresentationResponseRig responseRig,
-        RegisterBackgroundResponseBindingCommandSpec spec)
+        ICameraFocusStageRootProvider cameraFocusStageRootProvider)
     {
         _responseRig = responseRig;
         _spec = spec;
+        _stageRootProvider = cameraFocusStageRootProvider;
     }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
@@ -57,43 +50,15 @@ public sealed class RegisterBackgroundResponseBindingCommand : CommandBase
 
     private void Apply(CommandRunScope scope)
     {
-        string rigKey = _spec.rigKey;
-        
-        if (!scope.backgroundRigs.TryGetRig(rigKey, out BackgroundRigRefs rigRefs))
+        if (!scope.backgroundRigs.TryGetRig(_spec.rigKey, out BackgroundRigRefs rigRefs))
             return;
 
-        RectTransform stageRoot = ResolveStageRoot(_spec.stage);
-
-        BackgroundRigResponseTarget target = new BackgroundRigResponseTarget(rigRefs);
+        BackgroundRigResponseTarget target = new (rigRefs);
 
         _responseRig.RegisterRuntimeBinding(
             _spec.rigKey,
             target,
             _spec.responseProfile,
-            stageRoot);
-    }
-
-    private static RectTransform ResolveStageRoot(PresentationResponseStage stage)
-    {
-        ICameraFocusStageRootProvider provider =
-            UIManager.Instance.GetUI<PresentationUIRoot>();
-
-        if (provider == null)
-            return null;
-
-        switch (stage)
-        {
-            case PresentationResponseStage.Stage00:
-                return provider.Stage00Root;
-
-            case PresentationResponseStage.Stage01:
-                return provider.Stage01Root;
-
-            case PresentationResponseStage.Stage02:
-                return provider.Stage02Root;
-
-            default:
-                return provider.Stage00Root;
-        }
+            _stageRootProvider.StageRoot);
     }
 }
