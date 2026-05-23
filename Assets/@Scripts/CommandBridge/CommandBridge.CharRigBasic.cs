@@ -49,13 +49,14 @@ public sealed partial class YarnCommandBridge
         Collect(spec);
     }
     
-    private void EnqueueMoveBySpec(string roleKey, float x, float y)
+    private void EnqueueMoveByCharSpec(string roleKey, float x, float y, float duration = 1.2f)
     {
         var spec = new MoveByCommandSpecCharR
         {
             slotKey = roleKey,
-            target = CharacterRigTarget.CharSlot_Track,
-            delta = new Vector2(x, y)
+            target = CharacterRigTarget.CharacterPortrait_Track,
+            delta = new Vector2(x, y),
+            duration = duration
         };
 
         Collect(spec);

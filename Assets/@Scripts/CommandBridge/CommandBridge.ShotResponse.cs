@@ -50,7 +50,8 @@ public sealed partial class YarnCommandBridge
             customFocusKey = customFocusKey,
             screenPoint = screenPoint,
             zoom = zoom,
-            duration = duration
+            duration = duration,
+            wait = false
         };
 
         Collect(spec);
@@ -74,7 +75,8 @@ public sealed partial class YarnCommandBridge
         {
             pan = new Vector2(x, y),
             zoom = zoom,
-            duration = duration
+            duration = duration,
+            wait = false
         };
         
         Collect(spec);

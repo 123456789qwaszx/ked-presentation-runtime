@@ -25,17 +25,22 @@ public static class CharacterFocusPointResolver
         if (rigRefs == null || rigRefs.Character_CastTransform == null)
             return false;
 
-        RectTransform focusRect = rigRefs.Character_CastTransform;
-
-        ICameraFocusStageRootProvider cameraFocusStageRootProvider =
+        ICameraFocusStageRootProvider stageRootProvider =
             UIManager.Instance.GetUI<PresentationUIRoot>();
 
-        if (cameraFocusStageRootProvider == null || cameraFocusStageRootProvider.StageRoot == null)
+        if (stageRootProvider == null || stageRootProvider.StageRoot == null)
             return false;
 
-        RectTransform stageRoot = cameraFocusStageRootProvider.StageRoot;
+        RectTransform focusRect = rigRefs.Character_CastTransform;
+        RectTransform previewRoot = rigRefs.Character_ExtensionsRoot != null
+            ? rigRefs.Character_ExtensionsRoot
+            : rigRefs.Character_CastTransform;
 
-        string tuningKey = CharacterFocusTuningResolver.BuildTuningKey(roleKey, poseKey);
+        RectTransform stageRoot = stageRootProvider.StageRoot;
+
+        string tuningKey = CharacterFocusTuningResolver.BuildTuningKey(
+            roleKey,
+            poseKey);
 
         Vector2 focusOffset =
             CharacterFocusTuningResolver.ResolveOffset(
@@ -45,17 +50,18 @@ public static class CharacterFocusPointResolver
                 customPointKey,
                 commandOffset);
 
-        Vector3 world = focusRect.TransformPoint(
+        Vector3 focusWorld = focusRect.TransformPoint(
             new Vector3(focusOffset.x, focusOffset.y, 0f));
 
-        Vector3 local = stageRoot.InverseTransformPoint(world);
+        Vector3 focusInStage = stageRoot.InverseTransformPoint(focusWorld);
 
         result = new CharacterFocusPointResult
         {
             StageRoot = stageRoot,
             FocusRect = focusRect,
+            PreviewRoot = previewRoot,
             FocusOffsetInFocusRectSpace = focusOffset,
-            FocusPointInStageSpace = new Vector2(local.x, local.y)
+            FocusPointInStageSpace = new Vector2(focusInStage.x, focusInStage.y)
         };
 
         return true;

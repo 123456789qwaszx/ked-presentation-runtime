@@ -6,8 +6,8 @@
 <<slot Leafia 0>>
 <<cast Leafia Leafia a 02 true left normal>>
 
-<<slot Alb 0>>
-<<cast Alb Albedo a 02 true right normal>>
+<<slot Albedo 0>>
+<<cast Albedo Albedo a 02 true right normal>>
 
 
 <<idle_breathe Leafia 99 5 0.25>>
@@ -19,7 +19,7 @@
 <<spawn_bg bg2 stage00 white back 0.5 0 -250 0>>
 
 //<<shot_bind_char_response Leafia 0>>
-<<shot_bind_char_response Alb 0>>
+//<<shot_bind_char_response Albedo 0>>
 
 <<shot_bind_bg_response rigKey>>
 <<shot_bind_bg_response bg0>>
@@ -27,14 +27,12 @@
 
 <<rotate_to Leafia 3>>
 Leafia: 이번에 저희 컴퍼니를 선택해 주셔서 감사합니다. [br/]저는 천궁보험 필리에 영업부매니저 메르쿠리아라고 합니다.
-//<<shot_zoom_focus roleKey [focusName] [screenPointName] [zoom] [duration]>>>>
-<<shot_zoom_focus Leafia face bottom>>
-<<shot_zoom_focus Leafia face>>
+<<shot_zoom_focus Leafia bust center 3 0.8>>
 //<<shot_zoom_focus Leafia bust bottom -5 3>>
 메르쿠리아: 테스트 하겠습니다.
 
-<<shot_zoom_focus Alb bust center 2 3>>
-<<move_by Alb -200 80>>
+//<<move_by Albedo -120 -80 0.8>>
+<<shot_zoom_focus Albedo bust center 10 0.8>>
 메르쿠리아: 반복합니다.
 
 <<shot_track 800 0 1>>
