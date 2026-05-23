@@ -4,7 +4,7 @@ using UnityEngine;
 
 [Serializable]
 [CommandMenuHint("Presentation Shot", "Shot Zoom Focus", Order = -849)]
-public sealed class ShotZoomFocusCommandSpec : CommandSpecBase
+public sealed class ShotZoomFocusCommandSpec : ShotIntentCommandSpecBase
 {
     [Header("Character Focus")]
     public string focusRoleKey = "";
@@ -24,21 +24,10 @@ public sealed class ShotZoomFocusCommandSpec : CommandSpecBase
     [Header("Intent")]
     [Range(-10f, 10f)]
     public float zoom = 0f;
-
-    [Header("Tween")]
-    public float duration = 0.45f;
-    public Ease ease = Ease.OutCubic;
-
-    [Header("Options")]
-    public bool killTween = true;
 }
 
 public sealed class ShotZoomFocusCommand : ShotIntentCommandBase<ShotZoomFocusCommandSpec>
 {
-    protected override float Duration => Spec.duration;
-    protected override Ease Ease => Spec.ease;
-    protected override bool KillTween => Spec.killTween;
-
     public ShotZoomFocusCommand(
         PresentationResponseRig rig,
         ShotZoomFocusCommandSpec spec)
