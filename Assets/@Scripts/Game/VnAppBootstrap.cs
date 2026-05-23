@@ -32,6 +32,7 @@ public class VnAppBootstrap : MonoBehaviour
     [SerializeField] private RoleAnchorTuningDBSO roleTuningDb;
     
     [SerializeField] private PortraitGeneratedDbSo portraitGeneratedDbSo;
+    [SerializeField] private CharacterFocusTuningDBSO characterFocusTuningDb;
 
     [SerializeField] private UnitySignalBus unitySignalBus;
     [SerializeField] private CommandExecutor commandExecutor;
@@ -187,7 +188,7 @@ public class VnAppBootstrap : MonoBehaviour
         presentationResponseRig.Initialize(cameraRootApplier);
 
         ShotResponseCommandFactory presentationShotFactory = new(
-            presentationResponseRig);
+            presentationResponseRig, characterFocusTuningDb);
 
         // Presentation Transition
         PresentationTransitionCommandFactory presentationTransitionFactory = new();

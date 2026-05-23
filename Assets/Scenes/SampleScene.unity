@@ -5039,6 +5039,7 @@ MonoBehaviour:
   globalTuning: {fileID: 11400000, guid: db30a92a6d8545a41b703c2585f4013d, type: 2}
   roleTuningDb: {fileID: 11400000, guid: c49265a67487bce458b734a0473b75b5, type: 2}
   portraitGeneratedDbSo: {fileID: 11400000, guid: 9a31d992344284d4f8ff35f5e9be5ae9, type: 2}
+  characterFocusTuningDb: {fileID: 11400000, guid: b77af4e295606b446ae4f74dad106f5f, type: 2}
   unitySignalBus: {fileID: 552181530}
   commandExecutor: {fileID: 1257280952}
   routeCatalogSo: {fileID: 11400000, guid: 0a509c33b083b264c8262b318a84b25f, type: 2}

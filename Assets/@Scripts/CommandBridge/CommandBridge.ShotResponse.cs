@@ -25,20 +25,34 @@ public sealed partial class YarnCommandBridge
         Collect(spec);
     }
     
-    private void EnqueueShotZoomFocusSpec(string roleKey, string anchorName, string screenPointName, float zoom, float duration)
+    private void EnqueueShotZoomFocusSpec(string roleKey, string focusName = "body", string screenPointName = "center", float zoom = 2.5f, float duration = 1.2f)
     {
-        CharacterFocusAnchorParser.TryParse(anchorName, out CharacterFocusAnchor anchor);
-        ScreenFocusPointParser.TryParse(screenPointName, out ScreenFocusPoint point);
+        CharacterFocusPreset focusPreset;
+        string customFocusKey = "";
+
+        if (CharacterFocusPresetParser.TryParse(focusName, out CharacterFocusPreset parsedPreset))
+        {
+            focusPreset = parsedPreset;
+        }
+        else
+        {
+            focusPreset = CharacterFocusPreset.Custom;
+            customFocusKey = focusName;
+        }
+
+        if (!ScreenFocusPointParser.TryParse(screenPointName, out ScreenFocusPoint screenPoint))
+            screenPoint = ScreenFocusPoint.Center;
 
         var spec = new ShotZoomFocusCommandSpec
         {
             focusRoleKey = roleKey,
-            focusAnchor = anchor,
-            screenPoint = point,
+            focusPreset = focusPreset,
+            customFocusKey = customFocusKey,
+            screenPoint = screenPoint,
             zoom = zoom,
             duration = duration
         };
-        
+
         Collect(spec);
     }
     

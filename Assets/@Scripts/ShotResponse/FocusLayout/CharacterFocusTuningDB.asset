@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cf272319b6e14395ab2f88b1ba74d03b, type: 3}
+  m_Name: CharacterFocusTuningDB
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterFocusTuningDBSO
+  baseOffsets:
+    feet: {x: 0, y: 0}
+    body: {x: 0, y: 400}
+    bust: {x: 0, y: 600}
+    face: {x: 0, y: 850}
+    handLeft: {x: -220, y: 520}
+    handRight: {x: 220, y: 520}
+  entries:
+  - key: 
+    defaultOffset: {x: 0, y: 0}
+    offsets:
+      feet: {x: 0, y: 0}
+      body: {x: 0, y: 0}
+      bust: {x: 0, y: 0}
+      face: {x: 0, y: 0}
+      handLeft: {x: 0, y: 0}
+      handRight: {x: 0, y: 0}
+    customPoints: []

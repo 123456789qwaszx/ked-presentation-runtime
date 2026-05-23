@@ -6,13 +6,24 @@ using UnityEngine;
 public sealed class ShotZoomFocusCommandSpec : ShotIntentCommandSpecBase
 {
     [Header("Character Focus")]
+    [Tooltip("캐릭터 key 또는 slot key입니다.")]
     public string focusRoleKey = "";
 
-    [Tooltip("Legacy field. 현재 ShotZoomFocusCommand에서는 사용하지 않습니다. focusLocalOffset으로 보정합니다.")]
-    public CharacterFocusAnchor focusAnchor = CharacterFocusAnchor.Face;
+    [Tooltip("캐릭터 focus 예상 프리셋입니다. Transform anchor가 아니라 Character_CastTransform 기준 offset입니다.")]
+    public CharacterFocusPreset focusPreset = CharacterFocusPreset.Face;
 
-    [Tooltip("선택한 focus 기준점에 추가로 더할 오프셋입니다.")]
-    public Vector2 focusLocalOffset = Vector2.zero;
+    [Tooltip("focusPreset이 Custom일 때 사용할 custom point key입니다. 예: hand_left, weapon, phone")]
+    public string customFocusKey = "";
+
+    //[Tooltip("캐릭터/포즈별 focus 보정 DB입니다.")]
+    //public CharacterFocusTuningDBSO focusTuningDb;
+
+    [Tooltip("선택한 focus preset에 추가로 더할 최종 command-time offset입니다.")]
+    public Vector2 focusOffset = Vector2.zero;
+
+    [Header("Optional Pose Tuning")]
+    [Tooltip("비워두면 focusRoleKey만 tuning key로 사용합니다. 입력하면 roleKey:poseKey로 DB를 찾습니다.")]
+    public string poseKey = "";
 
     [Header("Screen Focus")]
     public ScreenFocusPoint screenPoint = ScreenFocusPoint.Center;
@@ -27,11 +38,15 @@ public sealed class ShotZoomFocusCommandSpec : ShotIntentCommandSpecBase
 
 public sealed class ShotZoomFocusCommand : ShotIntentCommandBase<ShotZoomFocusCommandSpec>
 {
+    CharacterFocusTuningDBSO _focusTuningDB;
+    
     public ShotZoomFocusCommand(
         PresentationResponseRig rig,
-        ShotZoomFocusCommandSpec spec)
+        ShotZoomFocusCommandSpec spec,
+        CharacterFocusTuningDBSO focusTuningDB)
         : base(rig, spec)
     {
+        _focusTuningDB = focusTuningDB;
     }
 
     protected override PresentationIntentState BuildTargetState(
@@ -41,7 +56,11 @@ public sealed class ShotZoomFocusCommand : ShotIntentCommandBase<ShotZoomFocusCo
         if (!CharacterFocusPointResolver.TryResolve(
                 scope,
                 spec.focusRoleKey,
-                spec.focusLocalOffset,
+                spec.focusPreset,
+                spec.poseKey,
+                spec.customFocusKey,
+                spec.focusOffset,
+                _focusTuningDB,
                 out CharacterFocusPointResult focus))
         {
             return from;
