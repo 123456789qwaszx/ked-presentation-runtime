@@ -18,8 +18,8 @@
 <<spawn_bg bg0 stage00 black back 0.9 0 -90 0>>
 <<spawn_bg bg2 stage00 white back 0.5 0 -250 0>>
 
-//<<shot_bind_char_response Leafia 0>>
-//<<shot_bind_char_response Albedo 0>>
+<<shot_bind_char_response Leafia 0>>
+<<shot_bind_char_response Albedo 0>>
 
 <<shot_bind_bg_response rigKey>>
 <<shot_bind_bg_response bg0>>

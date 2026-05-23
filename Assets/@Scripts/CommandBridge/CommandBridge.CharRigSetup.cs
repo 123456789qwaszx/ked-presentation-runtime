@@ -39,6 +39,7 @@ public sealed partial class YarnCommandBridge
 
         EnqueueSetAnchorSpecs(slotKey, positionPreset);
         EnqueueSetOriginSizeSpec(slotKey, scaleArg);
+        EnqueueFadeInSpec(slotKey);
     }
     
     private void EnqueueSetPortraitSpriteSpec(string slotKey, 

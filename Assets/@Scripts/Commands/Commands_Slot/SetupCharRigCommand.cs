@@ -74,6 +74,10 @@ public sealed class SetupCharRigCommand : CommandBase
 
         string rigKey = spec.roleKey;
         string rolePrefix = spec.ResolvedRolePrefix;
+        
+        // 임시코드. Rollback등에서 재사용은 되나, 캐릭터 초기화를 별도로 해야하고, Parent도 교체가 안됨.
+        if (scope.characterRigs.HasRig(rigKey))
+            return;
 
         RectTransform rigRoot = _rigBuilder.BuildCharacterRigRoot(
             spec.rigPrefab,

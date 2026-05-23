@@ -2,7 +2,7 @@ using UnityEngine;
 
 public sealed partial class YarnCommandBridge
 {
-    private void EnqueueFadeInSpec(string roleKey)
+    private void EnqueueFadeInSpec(string roleKey, float duration = 0f)
     {
         var spec = new FadeInCommandSpecCharR
         {

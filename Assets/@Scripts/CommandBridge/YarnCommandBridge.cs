@@ -70,7 +70,7 @@ public sealed partial class YarnCommandBridge
 
     private void BindCharRigBasic()
     {
-        _dialogueRunner.AddCommandHandler<string>("fade_in", EnqueueFadeInSpec);
+        _dialogueRunner.AddCommandHandler<string, float>("fade_in", EnqueueFadeInSpec);
         _dialogueRunner.AddCommandHandler<string, float>("fade_out", EnqueueFadeOutSpec);
         
         _dialogueRunner.AddCommandHandler<string, string>("expression", EnqueueSetEmotionPortraitWipeSpec);
