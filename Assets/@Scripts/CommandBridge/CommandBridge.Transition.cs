@@ -1,64 +1,8 @@
 using DG.Tweening;
 using UnityEngine;
-using Yarn.Unity;
 
 public sealed partial class YarnCommandBridge
 {
-    public void RegisterPresentationCommands()
-    {
-        _dialogueRunner.AddCommandHandler<string, string>("p_bind_bg_response", EnqueueRegisterBackgroundResponseBindingSpec);
-        _dialogueRunner.AddCommandHandler<string, string>("p_bind_char_response", EnqueueRegisterCharacterResponseBindingSpec);
-        
-        // PresentationTarget direct transform
-        _dialogueRunner.AddCommandHandler<string, float>("p_slant_cut_in", EnqueueSlantedMaskCutInSpec);
-        _dialogueRunner.AddCommandHandler<string, float>("p_slant_cut_out", EnqueueSlantedMaskCutOutSpec);
-
-        _dialogueRunner.AddCommandHandler<string, float>("p_strip_cover", EnqueueVerticalStripCoverSpec);
-        _dialogueRunner.AddCommandHandler<string, float>("p_strip_clear", EnqueueVerticalStripClearSpec);
-
-        _dialogueRunner.AddCommandHandler<string, float>("p_shutter_close", EnqueueSlantedShutterCloseSpec);
-        _dialogueRunner.AddCommandHandler<string, float>("p_shutter_open", EnqueueSlantedShutterOpenSpec);
-
-        _dialogueRunner.AddCommandHandler<string, float>("p_focus_fade_out", EnqueueFocusBlurFadeOutSpec);
-        _dialogueRunner.AddCommandHandler<string, float>("p_focus_fade_in", EnqueueFocusBlurFadeInSpec);
-
-        _dialogueRunner.AddCommandHandler<string, float>("p_focus_curtain_close", EnqueueFocusBlurCurtainCloseSpec);
-        _dialogueRunner.AddCommandHandler<string, float>("p_focus_curtain_open", EnqueueFocusBlurCurtainOpenSpec);
-
-        _dialogueRunner.AddCommandHandler<string, float>("p_daze_fade_close", EnqueueDazeFadeCloseSpec);
-        _dialogueRunner.AddCommandHandler<string, float>("p_daze_fade_open", EnqueueDazeFadeOpenSpec);
-
-
-        _dialogueRunner.AddCommandHandler("box_hide", EnqueueHideDialogueBoxSpec);
-    }
-    private void EnqueueRegisterBackgroundResponseBindingSpec(
-        string rigKey,
-        string stageKey = "0")
-    {
-        var spec = new RegisterBackgroundResponseBindingCommandSpec
-        {
-            rigKey = rigKey,
-            responseProfile = PresentationResponseProfile.Background,
-            wait = true
-        };
-
-        Collect(spec);
-    }
-
-    private void EnqueueRegisterCharacterResponseBindingSpec(
-        string targetKey,
-        string stageKey = "0")
-    {
-        var spec = new RegisterCharacterResponseBindingCommandSpec
-        {
-            targetKey = targetKey,
-            responseProfile = PresentationResponseProfile.CharacterSlot,
-            wait = true
-        };
-
-        Collect(spec);
-    }
-
     private void EnqueueDazeFadeCloseSpec(
         string targetName,
         float duration = 0.85f)
@@ -354,7 +298,6 @@ public sealed partial class YarnCommandBridge
 
         var spec = new VerticalStripWipeCommandSpec
         {
-
             mode = VerticalStripWipeMode.Clear,
             order = VerticalStripWipeOrder.RightToLeft,
 
@@ -370,19 +313,6 @@ public sealed partial class YarnCommandBridge
             wait = true,
             killTween = true,
             disableWhenClear = true,
-        };
-
-        Collect(spec);
-    }
-
-    private void EnqueueHideDialogueBoxSpec()
-    {
-        var spec = new HideDialogueBoxCommandSpec
-        {
-            hideAll = true,
-            targetKind = DialogueBoxKind.Speaker,
-            duration = 0.18f,
-            wait = false
         };
 
         Collect(spec);
@@ -438,41 +368,5 @@ public sealed partial class YarnCommandBridge
         };
 
         Collect(spec);
-    }
-
-    private bool TryParsePresentationResponseProfile(string raw, out PresentationResponseProfile profile)
-    {
-        profile = null;
-
-        if (string.IsNullOrWhiteSpace(raw))
-            return false;
-
-        string s = raw.Trim().ToLowerInvariant();
-
-        switch (s)
-        {
-            case "background":
-            case "bg":
-                profile = PresentationResponseProfile.Background;
-                return true;
-
-            case "prop":
-                profile = PresentationResponseProfile.Prop;
-                return true;
-
-            case "characterslot":
-            case "character_slot":
-            case "char":
-            case "slot":
-                profile = PresentationResponseProfile.CharacterSlot;
-                return true;
-
-            case "foreground":
-            case "fg":
-                profile = PresentationResponseProfile.Foreground;
-                return true;
-        }
-
-        return false;
     }
 }

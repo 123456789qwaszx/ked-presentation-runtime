@@ -2,7 +2,7 @@ using UnityEngine;
 
 public static class BackgroundRigTargetParser
 {
-    public static BackgroundRigTarget ParseFadeTarget(string value, BackgroundRigTarget fallback)
+    public static BackgroundRigTarget ParseFadeTarget(string value)
     {
         string normalized = (value ?? "").Trim().ToLowerInvariant();
 
@@ -36,8 +36,8 @@ public static class BackgroundRigTargetParser
             default:
                 Debug.LogWarning(
                     $"[BackgroundRigTargetParser] Unknown fade target '{value}'. " +
-                    $"Fallback to '{fallback}'.");
-                return fallback;
+                    $"Fallback to '{BackgroundRigTarget.Background_Root}'.");
+                return BackgroundRigTarget.Background_Root;
         }
     }
 }

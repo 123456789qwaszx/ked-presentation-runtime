@@ -61,8 +61,6 @@ public sealed class PresentationViewCommandFactory : INodeCommandFactory
             ShotZoomCommandSpec s => new ShotZoomCommand(_presentationResponseRig, s),
             ShotTrackCommandSpec s => new ShotTrackCommand(_presentationResponseRig, s),
 
-            SetCharRigCamFocusCommandSpec s => new SetCharRigCamFocusCommand(s),
-
             // Dialogue Box
             HideDialogueBoxCommandSpec s => new HideDialogueBoxCommand(s, _dialogueBoxResolver),
 

@@ -1,7 +1,7 @@
 ﻿title: stella01
 ---
 <<shot_reset>>
-<<p_strip_cover vsw 0.3>>
+<<tx_strip_cover vsw 0.3>>
 
 <<slot Leafia 0>>
 <<cast Leafia Leafia a 02 true left normal>>
@@ -10,22 +10,22 @@
 <<cast Alb Albedo a 02 true right normal>>
 
 
+<<idle_breathe Leafia 99 5 0.25>>
 
-<<breathe Leafia 99 5 0.25>>
+<<tx_strip_clear vsw 0>>
 
-<<p_strip_clear vsw 0>>
+<<spawn_bg rigKey stage00 green back 5 0 0 30>>
+<<spawn_bg bg0 stage00 black back 0.9 0 -90 0>>
+<<spawn_bg bg2 stage00 white back 0.5 0 -250 0>>
 
-<<spawn_bg rigKey stage00 green back 0 0 5 30>>
-<<spawn_bg bg0 stage00 black back 0 -90 0.9 0>>
-<<spawn_bg bg2 stage00 white back 0 -250 0.5 0>>
+// <<shot_bind_char_response Leafia 0>>
+// <<shot_bind_char_response Alb 0>>
 
-// <<p_bind_char_response Leafia 0>>
-// <<p_bind_char_response Alb 0>>
+// <<shot_bind_bg_response rigKey>>
+// <<shot_bind_bg_response bg0>>
+// <<shot_bind_bg_response bg2>>
 
-// <<p_bind_bg_response rigKey>>
-// <<p_bind_bg_response bg0>>
-// <<p_bind_bg_response bg2>>
-
+<<rotate_to Leafia 3>>
 Leafia: 이번에 저희 컴퍼니를 선택해 주셔서 감사합니다. [br/]저는 천궁보험 필리에 영업부매니저 메르쿠리아라고 합니다.
 
 <<shot_zoom_focus Leafia bust bottom -5 3>>
@@ -43,24 +43,24 @@ Leafia: 이번에 저희 컴퍼니를 선택해 주셔서 감사합니다. [br/]
 <<shot_reset>>
 
 <<slide_out Leafia left>>
-<<char_fade_out Leafia 0.5>>
+<<fade_out Leafia 0.5>>
 메르쿠리아: 리셋.페이드아웃.
 
 //-> bgTest
 //<<jump bgTest>>
 
-<<emoji Leafia 17>>
+<<emote Leafia 17>>
 <<place Leafia left>>
 <<slide_in_sway Leafia>>
 메르쿠리아: 안내하겠습니다
 
-<<emotion Leafia 7>>
+<<expression Leafia 7>>
 <<shot_zoom_focus Leafia bust center 1 1>>
 메르쿠리아: 이전에 작성해 주신 설문을 보니, 고객님께서는 실속 있는 생명보험을 고려 중이신 것으로 보입니다만.
 
 <<shot_track 200 0 0.5>>
 깊은 밤, 차가운 정적이 내려앉은 도시의 외딴 골목으로 정체를 알 수 없는 수상쩍은 그림자가 도둑고양이처럼 은밀하게 숨어든다. #box=letterbox
-<<shot_track_to -500 00 0.5>>
+<<shot_to -500 00 2 1.5>>
 
 //<<shot_reset>>
 주변을 살피는 그림자의 움직임에는 극도의 경계심이 서려 있었다.
@@ -73,15 +73,15 @@ Leafia: 이번에 저희 컴퍼니를 선택해 주셔서 감사합니다. [br/]
 <<shot_reset>>
 <<spawn_bg bg1>>
 <<spawn_bg rigKey 1 white>>
-<<p_slant_cut_in stage01 0.65>>
+<<tx_slant_in stage01 0.65>>
 
 상대방인 의심스러운 사람이 품 안에서 소중한 듯 무언가를 꺼내 보이며 대꾸했다.
 
 <<shot_reset>>
-<<tremble_pulse Leafia 99 2.2 12 1.8 0.22 right>>
-<<breathe Leafia 99 18 0.3>>
+<<idle_flinch Leafia 99 2.2 12 1.8 0.22 right>>
+<<idle_breathe Leafia 99 18 0.3>>
 
-<<p_slant_cut_out stage01 0.65>>
+<<tx_slant_out stage01 0.65>>
 
 "물론이지. 제대로 가져왔는지 확인해 볼 거야?"
 

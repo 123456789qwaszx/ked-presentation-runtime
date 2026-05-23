@@ -2,7 +2,7 @@ using UnityEngine;
 
 public static class BackgroundRigLayerParser
 {
-    public static BackgroundRigTarget ParseImageTarget(string value, BackgroundRigTarget fallback)
+    public static BackgroundRigTarget ParseImageTarget(string value)
     {
         string normalized = (value ?? "").Trim().ToLowerInvariant();
 
@@ -24,8 +24,8 @@ public static class BackgroundRigLayerParser
             default:
                 Debug.LogWarning(
                     $"[BackgroundRigLayerParser] Unknown background image layer '{value}'. " +
-                    $"Fallback to '{fallback}'.");
-                return fallback;
+                    $"Fallback to '{BackgroundRigTarget.Background_BackLayer_Image}'.");
+                return BackgroundRigTarget.Background_BackLayer_Image;
         }
     }
 }

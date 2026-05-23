@@ -30,7 +30,6 @@ public sealed class ShotZoomFocusCommandSpec : CommandSpecBase
 
     [Header("Options")]
     public bool killTween = true;
-    public bool strict = true;
 }
 
 public sealed class ShotZoomFocusCommand : CommandBase, IStepScopedCommand
@@ -156,9 +155,6 @@ public sealed class ShotZoomFocusCommand : CommandBase, IStepScopedCommand
                 _spec.focusLocalOffset,
                 out CharacterFocusPointResult focus))
         {
-            if (_spec.strict)
-                Debug.LogWarning($"[ShotZoomFocusCommand] Focus point not found. roleKey='{_spec.focusRoleKey}', anchor='{_spec.focusAnchor}'.");
-
             return from;
         }
 

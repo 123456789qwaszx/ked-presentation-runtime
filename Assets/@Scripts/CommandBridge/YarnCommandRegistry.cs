@@ -33,13 +33,11 @@ public sealed class YarnCommandRegistry
 
     private void RegisterYarnCommands()
     {
-        
         _dialogueRunner.AddCommandHandler("beat", (Func<IEnumerator>)(() => _vnRuntimeBridge.Beat(BeatKey)));
         _dialogueRunner.AddCommandHandler<string>("WaitSignal", key => _vnRuntimeBridge.WaitSignal(key));
         
         _dialogueRunner.AddCommandHandler<string>("set_named_box", SetNamedBox);
         _dialogueRunner.AddCommandHandler<string>("set_narration_box", SetProtagonistBox);
-        //_dialogueRunner.AddCommandHandler("closebox", _yarnUIBridge.CloseAllDialogue);
     }
     
     private void SetNamedBox(string key)

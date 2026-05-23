@@ -15,18 +15,15 @@ public sealed class SetCharacterEmojiCommandSpecCharR : CharacterRigCommandSpecB
     public Sprite directSprite;
 
     [Header("Rig Targets")]
-    public CharacterRigTarget rootTarget =
-        CharacterRigTarget.CharacterEmojiSlot00_Root;
+    public CharacterRigTarget rootTarget = CharacterRigTarget.CharacterEmojiSlot00_Root;
 
-    public CharacterRigTarget castTarget =
-        CharacterRigTarget.CharacterEmojiSlot00_CastTransform;
+    public CharacterRigTarget castTarget = CharacterRigTarget.CharacterEmojiSlot00_CastTransform;
 
-    public CharacterRigTarget imageTarget =
-        CharacterRigTarget.EmojiSlot00_Image;
+    public CharacterRigTarget imageTarget = CharacterRigTarget.EmojiSlot00_Image;
 
     [Header("Layout")]
     public bool useResolvedLayout = true;
-    public bool overrideLayout;
+    public bool overrideLayout = false;
     public CharacterEmojiLayout layout = CharacterEmojiLayout.Default;
 
     [Header("Visibility")]
