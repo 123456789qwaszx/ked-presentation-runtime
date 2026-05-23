@@ -1,5 +1,4 @@
 using System;
-using DG.Tweening;
 using UnityEngine;
 
 [Serializable]
@@ -29,8 +28,8 @@ public sealed class ShotToCommand : ShotIntentCommandBase<ShotToCommandSpec>
     {
         return new PresentationIntentState
         {
-            zoom = PresentationShotIntentMath.ClampZoom(Spec.zoom),
-            pan = Spec.pan,
+            zoom = PresentationShotIntentMath.ClampZoom(spec.zoom),
+            pan = spec.pan,
             focusPoint = from.focusPoint,
         };
     }

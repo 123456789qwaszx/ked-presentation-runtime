@@ -1,5 +1,4 @@
 using System;
-using DG.Tweening;
 using UnityEngine;
 
 [Serializable]
@@ -41,17 +40,17 @@ public sealed class ShotZoomFocusCommand : ShotIntentCommandBase<ShotZoomFocusCo
     {
         if (!CharacterFocusPointResolver.TryResolve(
                 scope,
-                Spec.focusRoleKey,
-                Spec.focusLocalOffset,
+                spec.focusRoleKey,
+                spec.focusLocalOffset,
                 out CharacterFocusPointResult focus))
         {
             return from;
         }
 
-        float targetZoom = PresentationShotIntentMath.ClampZoom(Spec.zoom);
+        float targetZoom = PresentationShotIntentMath.ClampZoom(spec.zoom);
 
-        float fromScale = PresentationShotIntentMath.EvaluateScale(from.zoom);
-        float targetScale = PresentationShotIntentMath.EvaluateScale(targetZoom);
+        float fromScale = PresentationShotIntentMath.EvaluateCameraScale(from.zoom);
+        float targetScale = PresentationShotIntentMath.EvaluateCameraScale(targetZoom);
 
         Vector2 logicalFocusPoint =
             PresentationShotIntentMath.ToLogicalFocusPoint(
@@ -60,8 +59,8 @@ public sealed class ShotZoomFocusCommand : ShotIntentCommandBase<ShotZoomFocusCo
                 fromScale);
 
         Vector2 desiredPoint =
-            ScreenFocusPointResolver.Resolve(focus.StageRoot, Spec.screenPoint) +
-            Spec.screenOffset;
+            ScreenFocusPointResolver.Resolve(focus.StageRoot, spec.screenPoint) +
+            spec.screenOffset;
 
         Vector2 targetPan =
             PresentationShotIntentMath.CalculatePanForFocus(

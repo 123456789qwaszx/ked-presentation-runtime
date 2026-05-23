@@ -39,23 +39,19 @@ public sealed class PresentationCameraRootApplier
 
         if (stageZoomRoot != null)
         {
-            float scale = EvaluateScale(state.zoom);
+            float scale = PresentationShotIntentMath.EvaluateCameraScale(state.zoom, _maxScale);
+            
             stageZoomRoot.localScale = new Vector3(scale, scale, 1f);
         }
 
         if (stagePanRoot != null)
             stagePanRoot.anchoredPosition = state.pan * _panMultiplier;
     }
-    
-    private float EvaluateScale(float zoom)
-    {
-        float z = Mathf.Clamp(zoom, -10f, 10f);
-        return Mathf.Max(0.0001f, 1f + z * 0.05f);
-    }
 
     private void EnsureProvider()
     {
         _cameraRootProvider = UIManager.Instance.GetUI<PresentationUIRoot>();
+
         if (_cameraRootProvider != null)
             _init = true;
     }

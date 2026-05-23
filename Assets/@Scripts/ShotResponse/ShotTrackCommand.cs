@@ -1,5 +1,4 @@
 using System;
-using DG.Tweening;
 using UnityEngine;
 
 [Serializable]
@@ -27,9 +26,9 @@ public sealed class ShotTrackCommand : ShotIntentCommandBase<ShotTrackCommandSpe
         in PresentationIntentState from,
         CommandRunScope scope)
     {
-        Vector2 targetPan = Spec.relative
-            ? from.pan + Spec.pan
-            : Spec.pan;
+        Vector2 targetPan = spec.relative
+            ? from.pan + spec.pan
+            : spec.pan;
 
         return new PresentationIntentState
         {

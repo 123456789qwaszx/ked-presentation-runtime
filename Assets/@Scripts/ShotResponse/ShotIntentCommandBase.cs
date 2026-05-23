@@ -20,37 +20,37 @@ public abstract class ShotIntentCommandSpecBase : CommandSpecBase
 public abstract class ShotIntentCommandBase<TSpec> : CommandBase, IStepScopedCommand
     where TSpec : ShotIntentCommandSpecBase
 {
-    protected readonly PresentationResponseRig Rig;
-    protected readonly TSpec Spec;
+    protected readonly PresentationResponseRig rig;
+    protected readonly TSpec spec;
 
     private PresentationIntentState _fromState;
     private PresentationIntentState _toState;
     private Tween _tween;
     private bool _canCommitFinalState;
 
-    public override bool WaitForCompletion => Spec.wait;
+    public override bool WaitForCompletion => spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
     protected ShotIntentCommandBase(PresentationResponseRig rig, TSpec spec)
     {
-        Rig = rig;
-        Spec = spec;
+        this.rig = rig;
+        this.spec = spec;
     }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
-        if (Rig == null)
+        if (rig == null)
             yield break;
 
-        if (Spec.killTween)
+        if (spec.killTween)
             KillRigTween(true);
 
-        _fromState = Rig.CurrentState;
+        _fromState = rig.CurrentState;
         _toState = BuildTargetState(_fromState, scope);
 
         _canCommitFinalState = true;
 
-        if (Spec.duration <= 0f ||
+        if (spec.duration <= 0f ||
             PresentationShotIntentMath.ApproximatelyEqual(_fromState, _toState))
         {
             Commit(_toState);
@@ -63,40 +63,40 @@ public abstract class ShotIntentCommandBase<TSpec> : CommandBase, IStepScopedCom
                 () => 0f,
                 t =>
                 {
-                    if (!_canCommitFinalState || Rig == null)
+                    if (!_canCommitFinalState || rig == null)
                         return;
 
                     PresentationIntentState state =
                         PresentationShotIntentMath.Interpolate(_fromState, _toState, t);
 
-                    Rig.ApplyToAllBindings(state);
+                    rig.ApplyToAllBindings(state);
                 },
                 1f,
-                Spec.duration)
-            .SetEase(Spec.ease)
+                spec.duration)
+            .SetEase(spec.ease)
             .SetUpdate(true)
-            .SetTarget(Rig)
+            .SetTarget(rig)
             .OnComplete(() =>
             {
-                if (!_canCommitFinalState || Rig == null)
+                if (!_canCommitFinalState || rig == null)
                     return;
 
                 Commit(_toState);
                 ClearRuntimeState();
             });
 
-        if (Spec.wait)
+        if (spec.wait)
             yield return _tween.WaitForCompletion();
     }
 
     protected override void OnSkip(CommandRunScope scope)
     {
-        if (Rig == null)
+        if (rig == null)
             return;
 
         KillRigTween(false);
 
-        _fromState = Rig.CurrentState;
+        _fromState = rig.CurrentState;
         _toState = BuildTargetState(_fromState, scope);
 
         Commit(_toState);
@@ -110,7 +110,7 @@ public abstract class ShotIntentCommandBase<TSpec> : CommandBase, IStepScopedCom
 
     protected override void OnCommandCompleted(CommandRunScope scope)
     {
-        if (!_canCommitFinalState || Rig == null)
+        if (!_canCommitFinalState || rig == null)
             return;
 
         KillRigTween(false);
@@ -124,18 +124,18 @@ public abstract class ShotIntentCommandBase<TSpec> : CommandBase, IStepScopedCom
 
     private void Commit(in PresentationIntentState state)
     {
-        if (Rig == null)
+        if (rig == null)
             return;
 
-        Rig.ApplyToAllBindings(state);
+        rig.ApplyToAllBindings(state);
     }
 
     private void KillRigTween(bool complete)
     {
-        if (Rig == null)
+        if (rig == null)
             return;
 
-        DOTween.Kill(Rig, complete);
+        DOTween.Kill(rig, complete);
         _tween = null;
     }
 
