@@ -38,31 +38,42 @@ public sealed class PresentationResponseRig : MonoBehaviour
 
     public bool RegisterCharacterRigBinding(CommandRunScope scope, string targetKey, PresentationResponseProfile presetProfile, RectTransform stageRoot)
     {
-        CharacterRigRefs rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, targetKey);
+        string resolvedSlotKey = ResponseBindingKeys.CharacterRig(scope, targetKey);
+        if (!scope.characterRigs.TryGetRig(resolvedSlotKey, out CharacterRigRefs rigRefs))
+            return false;
+
+        string bindingKey = ResponseBindingKeys.CharacterRigFromSlotKey(resolvedSlotKey);
         CharacterRigResponseTarget target = new CharacterRigResponseTarget(rigRefs);
-        return RegisterRuntimeBinding(targetKey, target, presetProfile, stageRoot);
+
+        return RegisterRuntimeBinding(bindingKey, target, presetProfile, stageRoot);
     }
 
     public bool RegisterBackgroundRigBinding(CommandRunScope scope, string bgKey, PresentationResponseProfile presetProfile, RectTransform stageRoot)
     {
-        BackgroundRigRefs rigRefs = BackgroundRigTargetResolver.ResolveBackgroundRigFromTargetKey(scope, bgKey);
+        string resolvedBgKey = ResponseBindingKeys.BackgroundRig(scope, bgKey);
+        if (!scope.backgroundRigs.TryGetRig(resolvedBgKey, out BackgroundRigRefs rigRefs))
+            return false;
+
+        string bindingKey = ResponseBindingKeys.BackgroundRigFromRigKey(resolvedBgKey);
         BackgroundRigResponseTarget target = new BackgroundRigResponseTarget(rigRefs);
-        return RegisterRuntimeBinding(bgKey, target, presetProfile, stageRoot);
+
+        return RegisterRuntimeBinding(bindingKey, target, presetProfile, stageRoot);
     }
 
-    public bool RegisterRuntimeBinding(string key, IResponseTarget target, PresentationResponseProfile presetProfile, RectTransform stageRoot)
+    public bool RegisterRuntimeBinding(string bindingKey, IResponseTarget target, PresentationResponseProfile presetProfile, RectTransform stageRoot)
     {
         PresentationResponseProfile runtimeProfile = BakeRuntimeProfile(target, presetProfile, stageRoot);
-        PresentationResponseBinding binding = new PresentationResponseBinding(key, runtimeProfile, target, stageRoot);
-        
-        // Runtime 중 새로 등록된 target도 현재 shot state에 즉시 맞춘다.
-        ReplaceBinding(key, binding);
+
+        PresentationResponseBinding binding = new PresentationResponseBinding(bindingKey, runtimeProfile, target, stageRoot);
+
+        // Immediately sync newly registered runtime targets to the current shot state.
+        ReplaceBinding(bindingKey, binding);
         binding.Apply(in _currentState);
 
         return true;
     }
 
-    public bool RemoveBinding(string key)
+    public bool RemoveBinding(string bindingKey)
     {
         bool removed = false;
 
@@ -73,7 +84,7 @@ public sealed class PresentationResponseRig : MonoBehaviour
             if (binding == null)
                 continue;
 
-            if (string.Equals(binding.Key, key, StringComparison.Ordinal))
+            if (string.Equals(binding.Key, bindingKey, StringComparison.Ordinal))
             {
                 _bindings.RemoveAt(i);
                 removed = true;

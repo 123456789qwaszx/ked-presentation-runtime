@@ -13,10 +13,10 @@ using UnityEngine;
 public sealed class RegisterCharacterResponseBindingCommandSpec : CommandSpecBase
 {
     [Header("Rig")]
-    [Tooltip("CharacterRigRegistry에 등록된 slotKey이거나, CastRegistry를 통해 slotKey로 해석 가능한 characterKey입니다.")]
+    [Tooltip("CharacterRigRegistry에 등록된 slotKey / characterKey.")]
     public string targetKey;
 
-    [Tooltip("CharacterRig가 shot / pseudo camera intent에 반응하는 방식입니다.")]
+    [Tooltip("CharacterRig가 shot intent에 반응하는 방식.")]
     public PresentationResponseProfile responseProfile = PresentationResponseProfile.CharacterSlot;
 }
 
@@ -49,15 +49,15 @@ public sealed class RegisterCharacterResponseBindingCommand : CommandBase
 
     private void Apply(CommandRunScope scope)
     {
-        string resolvedRigKey = CharacterRigTargetResolver.ResolveRigKeyByPolicy(scope, _spec.targetKey);
-
-        if (!scope.characterRigs.TryGetRig(resolvedRigKey, out CharacterRigRefs rigRefs))
+        string resolvedSlotKey = ResponseBindingKeys.CharacterRig(scope, _spec.targetKey);
+        if (!scope.characterRigs.TryGetRig(resolvedSlotKey, out CharacterRigRefs rigRefs))
             return;
-        
+
+        string bindingKey = ResponseBindingKeys.CharacterRigFromSlotKey(resolvedSlotKey);
         CharacterRigResponseTarget target = new CharacterRigResponseTarget(rigRefs);
 
         _responseRig.RegisterRuntimeBinding(
-            _spec.targetKey,
+            bindingKey,
             target,
             _spec.responseProfile,
             _stageRootProvider.StageRoot);

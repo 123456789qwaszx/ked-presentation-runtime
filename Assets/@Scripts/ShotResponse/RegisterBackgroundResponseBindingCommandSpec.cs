@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-
 [Serializable]
 [CommandMenuHint(
     "Background Rig", "Register Background Response Binding", Order = -997,
@@ -14,10 +13,10 @@ using UnityEngine;
 public sealed class RegisterBackgroundResponseBindingCommandSpec : CommandSpecBase
 {
     [Header("Rig")]
-    [Tooltip("BackgroundRigRegistry에 등록된 rigKey입니다.")]
+    [Tooltip("BackgroundRigRegistry에 등록된 rigKey.")]
     public string rigKey;
 
-    [Tooltip("BackgroundRig가 shot / pseudo camera intent에 반응하는 방식입니다.")]
+    [Tooltip("BackgroundRig가 shot intent에 반응하는 방식.")]
     public PresentationResponseProfile responseProfile = PresentationResponseProfile.Background;
 }
 
@@ -50,15 +49,13 @@ public sealed class RegisterBackgroundResponseBindingCommand : CommandBase
 
     private void Apply(CommandRunScope scope)
     {
-        if (!scope.backgroundRigs.TryGetRig(_spec.rigKey, out BackgroundRigRefs rigRefs))
+        string resolvedBgKey = ResponseBindingKeys.BackgroundRig(scope, _spec.rigKey);
+        if (!scope.backgroundRigs.TryGetRig(resolvedBgKey, out BackgroundRigRefs rigRefs))
             return;
 
-        BackgroundRigResponseTarget target = new (rigRefs);
+        string bindingKey = ResponseBindingKeys.BackgroundRigFromRigKey(resolvedBgKey);
+        BackgroundRigResponseTarget target = new BackgroundRigResponseTarget(rigRefs);
 
-        _responseRig.RegisterRuntimeBinding(
-            _spec.rigKey,
-            target,
-            _spec.responseProfile,
-            _stageRootProvider.StageRoot);
+        _responseRig.RegisterRuntimeBinding(bindingKey, target, _spec.responseProfile, _stageRootProvider.StageRoot);
     }
 }
