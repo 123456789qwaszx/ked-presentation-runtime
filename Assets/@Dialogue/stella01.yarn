@@ -19,12 +19,12 @@
 <<spawn_bg bg0 stage00 black back 0 -90 0.9 0>>
 <<spawn_bg bg2 stage00 white back 0 -250 0.5 0>>
 
-<<p_bind_char_response Leafia 0>>
-<<p_bind_char_response Alb 0>>
+// <<p_bind_char_response Leafia 0>>
+// <<p_bind_char_response Alb 0>>
 
-<<p_bind_bg_response rigKey>>
-<<p_bind_bg_response bg0>>
-<<p_bind_bg_response bg2>>
+// <<p_bind_bg_response rigKey>>
+// <<p_bind_bg_response bg0>>
+// <<p_bind_bg_response bg2>>
 
 Leafia: 이번에 저희 컴퍼니를 선택해 주셔서 감사합니다. [br/]저는 천궁보험 필리에 영업부매니저 메르쿠리아라고 합니다.
 
@@ -41,20 +41,17 @@ Leafia: 이번에 저희 컴퍼니를 선택해 주셔서 감사합니다. [br/]
 메르쿠리아: 반복합니다.
 
 <<shot_reset>>
-메르쿠리아: 반복합니다.
 
-<<shot_to 200 500 -5 9>>
-메르쿠리아: 반복합니다.
-
-
+<<slide_out Leafia left>>
+<<char_fade_out Leafia 0.5>>
+메르쿠리아: 리셋.페이드아웃.
 
 //-> bgTest
 //<<jump bgTest>>
 
+<<emoji Leafia 17>>
+<<place Leafia left>>
 <<slide_in_sway Leafia>>
-//<<fade_in Leafia>>
-<<emoji Leafia 20>>
-<<tremble_pulse Leafia>>
 메르쿠리아: 안내하겠습니다
 
 <<emotion Leafia 7>>

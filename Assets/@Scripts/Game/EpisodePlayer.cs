@@ -78,6 +78,20 @@ public sealed class EpisodePlayer : MonoBehaviour
         presentationResponseRig.Clear();
         ResetSlantedMasks();
     }
+
+    public void LoadGame(string nodeName)
+    {
+        StopDialogue();
+        
+        presentationRouteEntry.StartRoute(presentationEntryKey);
+        
+        UIManager.Instance.SwitchRoot<PresentationUIRoot>();
+        
+        PresentationUIRoot dialogueUIRoot = UIManager.Instance.GetUI<PresentationUIRoot>();
+        _dialogueUIBindings.Bind(dialogueUIRoot);
+        
+        dialogueRunner.StartDialogue(nodeName);
+    }
     
     private void ResetSlantedMasks()
     {

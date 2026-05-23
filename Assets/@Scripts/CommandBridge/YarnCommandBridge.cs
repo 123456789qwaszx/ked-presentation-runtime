@@ -47,9 +47,6 @@ public sealed partial class YarnCommandBridge
         _dialogueRunner.AddCommandHandler<string>("uipatch", EnqueueUIPatchSpec);
         
         _dialogueRunner.AddCommandHandler<float>("pause", EnqueueWaitSpec);
-        
-        // clear character rigs
-        _dialogueRunner.AddCommandHandler("clearall", EnqueueClearAllCharRigRefsSpec);
     }
 
     private void RegisterCharSlotSetCommands()
@@ -80,8 +77,8 @@ public sealed partial class YarnCommandBridge
 
     private void RegisterCharRigCommands()
     {
-        _dialogueRunner.AddCommandHandler<string>("fade_in", EnqueueFadeInSpec);
-        _dialogueRunner.AddCommandHandler<string, float>("fade_out", EnqueueFadeOutSpec);
+        _dialogueRunner.AddCommandHandler<string>("char_fade_in", EnqueueFadeInSpec);
+        _dialogueRunner.AddCommandHandler<string, float>("char_fade_out", EnqueueFadeOutSpec);
         
         _dialogueRunner.AddCommandHandler<string, string>("emotion", EnqueueSetEmotionPortraitWipeSpec);
         _dialogueRunner.AddCommandHandler<string, string>("emotion_crossfade", EnqueueSetPortraitCrossfadeSpec);
@@ -120,20 +117,6 @@ public sealed partial class YarnCommandBridge
         _dialogueRunner.AddCommandHandler<string, int>("sway_to", EnqueuePivotRotateToSpec);
         
         
-    }
-    
-    
-    private void EnqueueClearAllCharRigRefsSpec()
-    {
-        // var spec = new ClearCharRigRefsCommandSpec
-        // {
-        //     removeKeys = true,
-        //     destroyRigObjects = true,
-        //     killTweensBeforeDestroy = true,
-        //     onlyRoleKeys = null
-        // };
-        //
-        // Collect(spec);
     }
     
     private void EnqueueSetupCharRigSpec(string slotKey, string parentKey)
@@ -297,14 +280,14 @@ public sealed partial class YarnCommandBridge
         var spec2 = new SlideInCommandSpecCharR
         {
             slotKey = roleKey,
+            target = CharacterRigTarget.CharSlot_Track,
             distance = 550f,
             duration = 0.45f
         };
-
         var spec3 = new DipInOutCommandSpecCharR()
         {
             slotKey = roleKey,
-            target = CharacterRigTarget.CharacterPortrait_Track_Y,
+            target = CharacterRigTarget.CharSlot_Track_X,
             dir = CharRigDirection.Right,
             distance = 22f,
             duration = 0.8f
@@ -313,6 +296,7 @@ public sealed partial class YarnCommandBridge
         var spec4 = new PunchScaleCommandSpecCharR()
         {
             slotKey = roleKey,
+            target = CharacterRigTarget.CharSlot_Scale,
             strength = -0.03f,
             duration = 0.55f,
             vibrato = 3,
@@ -322,7 +306,7 @@ public sealed partial class YarnCommandBridge
         var spec5 = new DipInOutCommandSpecCharR()
         {
             slotKey = roleKey,
-            target = CharacterRigTarget.CharacterPortrait_Track_Y,
+            target = CharacterRigTarget.CharSlot_Track_Y,
             dir = CharRigDirection.Down,
             distance = 12f,
             duration = 0.8f
@@ -331,6 +315,7 @@ public sealed partial class YarnCommandBridge
         var spec6 = new SwayCommandSpecCharR()
         {
             slotKey = roleKey,
+            target = CharacterRigTarget.CharSlot_SwayPivot,
             strength = 11.5f,
             duration = 1.28f,
             cycles = 1,
