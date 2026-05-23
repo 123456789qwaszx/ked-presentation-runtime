@@ -186,7 +186,7 @@ public class VnAppBootstrap : MonoBehaviour
         PresentationCameraRootApplier cameraRootApplier = new();
         presentationResponseRig.Initialize(cameraRootApplier);
 
-        PresentationShotCommandFactory presentationShotFactory = new(
+        ShotResponseCommandFactory presentationShotFactory = new(
             presentationResponseRig);
 
         // Presentation Transition

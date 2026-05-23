@@ -10,14 +10,14 @@ public sealed partial class PresentationUIRoot : ICameraFocusStageRootProvider
     public RectTransform StageRoot => View.Rect(Refs.StageShot_Root);
 }
 
-public sealed class PresentationShotCommandFactory : INodeCommandFactory
+public sealed class ShotResponseCommandFactory : INodeCommandFactory
 {
     private readonly PresentationResponseRig _presentationResponseRig;
 
     private ICameraFocusStageRootProvider _stageRootProvider;
     private bool _stageRootProviderInit;
 
-    public PresentationShotCommandFactory(
+    public ShotResponseCommandFactory(
         PresentationResponseRig presentationResponseRig)
     {
         _presentationResponseRig = presentationResponseRig;

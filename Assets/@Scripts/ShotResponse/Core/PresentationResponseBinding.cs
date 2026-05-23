@@ -92,7 +92,7 @@ public sealed class PresentationResponseBinding
         float zoomFactor = Mathf.Clamp(state.zoom, -10f, 10f);
 
         float scaleMultiplier = 1f + zoomFactor * profile.maxZoomScaleDelta;
-        Vector2 scaledSize = profile.baseScale * Mathf.Max(0.01f, scaleMultiplier);
+        Vector2 scaledSize = profile.baseLocalScale * Mathf.Max(0.01f, scaleMultiplier);
 
         Vector2 focusToTarget = profile.basePositionInRigSpace - state.focusPoint;
 

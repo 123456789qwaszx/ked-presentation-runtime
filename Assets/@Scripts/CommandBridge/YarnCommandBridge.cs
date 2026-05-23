@@ -25,7 +25,7 @@ public sealed partial class YarnCommandBridge
         BindCharRigEmote();
         
         BindBackgroundRig();
-        BindCameraShot();
+        BindShotResponse();
         
         BindTransition();
         BindAudio();
@@ -149,7 +149,7 @@ public sealed partial class YarnCommandBridge
         _dialogueRunner.AddCommandHandler<string, float, float, float>("bg_idle_breath", EnqueueBreathBackgroundSpec);
     }
     
-    private void BindCameraShot()
+    private void BindShotResponse()
     {
         _dialogueRunner.AddCommandHandler<string, string>("shot_bind_bg_response", EnqueueRegisterBackgroundResponseBindingSpec);
         _dialogueRunner.AddCommandHandler<string, string>("shot_bind_char_response", EnqueueRegisterCharacterResponseBindingSpec);

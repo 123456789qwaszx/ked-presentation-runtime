@@ -6,7 +6,7 @@ public sealed class PresentationResponseProfile
 {
     [Header("Base Pose (captured in rig space)")]
     public Vector2 basePositionInRigSpace = Vector2.zero;
-    public Vector2 baseScale = Vector2.one;
+    public Vector2 baseLocalScale = Vector2.one;
 
     [Header("Response")]
     [Tooltip("zoom +10 일 때 최대 scale delta. 0.25 = 최대 25% 확대")]
@@ -21,7 +21,7 @@ public sealed class PresentationResponseProfile
     public static PresentationResponseProfile Background => new()
     {
         basePositionInRigSpace = Vector2.zero,
-        baseScale = Vector2.one,
+        baseLocalScale = Vector2.one,
         maxZoomScaleDelta = 0.0001f,
         maxZoomSpreadPixels = 0f,
         panResponse = 0.1f,
@@ -30,7 +30,7 @@ public sealed class PresentationResponseProfile
     public static PresentationResponseProfile Prop => new()
     {
         basePositionInRigSpace = Vector2.zero,
-        baseScale = Vector2.one,
+        baseLocalScale = Vector2.one,
         maxZoomScaleDelta = 0.03f,
         maxZoomSpreadPixels = 6f,
         panResponse = 0.08f,
@@ -39,7 +39,7 @@ public sealed class PresentationResponseProfile
     public static PresentationResponseProfile CharacterSlot => new()
     {
         basePositionInRigSpace = Vector2.zero,
-        baseScale = Vector2.one,
+        baseLocalScale = Vector2.one,
         maxZoomScaleDelta = 0.015f,
         maxZoomSpreadPixels = 3f,
         panResponse = 0.8f,
@@ -48,7 +48,7 @@ public sealed class PresentationResponseProfile
     public static PresentationResponseProfile Foreground => new()
     {
         basePositionInRigSpace = Vector2.zero,
-        baseScale = Vector2.one,
+        baseLocalScale = Vector2.one,
         maxZoomScaleDelta = 0.07f,
         maxZoomSpreadPixels = 16f,
         panResponse = 0.25f,

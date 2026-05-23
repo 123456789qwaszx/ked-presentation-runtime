@@ -152,7 +152,7 @@ public sealed class PresentationResponseRig : MonoBehaviour
         };
 
         profile.basePositionInRigSpace = new Vector2(localPivot.x, localPivot.y);
-        profile.baseScale = new Vector2(target.ScaleRect.localScale.x, target.ScaleRect.localScale.y);
+        profile.baseLocalScale = new Vector2(target.ScaleRect.localScale.x, target.ScaleRect.localScale.y);
 
         // Debug.Log(
         //     $"[PresentationResponseRig] BakeRuntimeProfile " +
