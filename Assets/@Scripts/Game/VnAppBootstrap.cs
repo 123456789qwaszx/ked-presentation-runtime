@@ -146,50 +146,85 @@ public class VnAppBootstrap : MonoBehaviour
         unitySignalBus.OnSignal += signalLatch.Latch;
 
         StepGatePlanBuilder gatePlanner = new();
-        StepGateAdvancer gateAdvancer = new(_unityInputSource, _unityTimeSource, unitySignalBus, signalLatch);
+        StepGateAdvancer gateAdvancer = new(
+            _unityInputSource,
+            _unityTimeSource,
+            unitySignalBus,
+            signalLatch);
 
-        // SignalFactory
-        SignalCommandFactory signalFactory = new(_unityTimeSource, unitySignalBus, signalLatch);
-        
-        // CharRigFactory
-        CharRigSlotResolver charRigSlotResolver = new ();
-        CharacterRigBuilder charRigAccess = new();
+        // Signal / Timing
+        SignalCommandFactory signalFactory = new(
+            _unityTimeSource,
+            unitySignalBus,
+            signalLatch);
+
+        // Character Rig
+        CharRigSlotResolver charRigSlotResolver = new();
+        CharacterRigBuilder characterRigBuilder = new();
         PortraitResolver portraitResolver = new(portraitGeneratedDbSo);
         CharacterEmojiResolver emojiResolver = new(characterEmojiLibrarySO);
-        CharRigCommandFactory charRigFactory = new(charRigSlotResolver, charRigAccess, portraitResolver, emojiResolver, globalTuning, roleTuningDb);
 
-        // TransitionFactory
-        TransitionCommandFactory transitionCommandFactory = new(_uiPatchService);
+        CharRigCommandFactory charRigFactory = new(
+            charRigSlotResolver,
+            characterRigBuilder,
+            portraitResolver,
+            emojiResolver,
+            globalTuning,
+            roleTuningDb);
 
-        // SoundFactory
-        ResourcesAudioClipResolver audioClipResolver = new();
-        SoundCommandFactory soundCommandFactory = new SoundCommandFactory(audioSystem, audioClipResolver);
-
-        //PresentationViewCommandFactory
-        PresentationCameraRootApplier cameraRootApplier = new();
-        presentationResponseRig.Initialize(cameraRootApplier);
-        PresentationViewCommandFactory presentationViewCommandFactory = new(presentationResponseRig, dialogueBoxHost);
-        
+        // Background Rig
         BackgroundRigSlotResolver backgroundRigSlotResolver = new();
         BackgroundRigBuilder backgroundRigBuilder = new();
         BackgroundSpriteResolver backgroundSpriteResolver = new();
-        BackgroundRigCommandFactory backgroundRigCommandFactory = new(backgroundRigSlotResolver, backgroundRigBuilder, backgroundSpriteResolver);
+
+        BackgroundRigCommandFactory backgroundRigFactory = new(
+            backgroundRigSlotResolver,
+            backgroundRigBuilder,
+            backgroundSpriteResolver);
+
+        // Presentation Shot / Response Rig
+        PresentationCameraRootApplier cameraRootApplier = new();
+        presentationResponseRig.Initialize(cameraRootApplier);
+
+        PresentationShotCommandFactory presentationShotFactory = new(
+            presentationResponseRig);
+
+        // Presentation Transition
+        PresentationTransitionCommandFactory presentationTransitionFactory = new();
+
+        // Presentation Control
+        PresentationControlCommandFactory presentationControlFactory = new(
+            _uiPatchService,
+            dialogueBoxHost);
+
+        // Audio
+        ResourcesAudioClipResolver audioClipResolver = new();
+
+        AudioCommandFactory audioFactory = new(
+            audioSystem,
+            audioClipResolver);
 
         CompositeCommandFactory factory = new(
-            signalFactory, 
             charRigFactory,
-            transitionCommandFactory,
-            soundCommandFactory,
-            presentationViewCommandFactory,
-            backgroundRigCommandFactory);
-        
+            backgroundRigFactory,
+            presentationShotFactory,
+            presentationTransitionFactory,
+            presentationControlFactory,
+            audioFactory,
+            signalFactory);
+
         commandExecutor.Initialize(factory);
-        
 
-        PresentationSession presentationSession =
-            new PresentationSession(gatePlanner, gateAdvancer, commandExecutor, _presentationSessionContext, _linePresentationAdvanceState);
+        PresentationSession presentationSession = new(
+            gatePlanner,
+            gateAdvancer,
+            commandExecutor,
+            _presentationSessionContext,
+            _linePresentationAdvanceState);
 
-        presentationSessionEntry.Initialize(presentationSession, routeCatalogSo);
+        presentationSessionEntry.Initialize(
+            presentationSession,
+            routeCatalogSo);
     }
 
     private void ConnectPresentationSessionToYarn()

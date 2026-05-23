@@ -1,6 +1,13 @@
 using System;
 using UnityEngine;
-using UnityEngine.Serialization;
+
+public enum CharRigDirection
+{
+    Left = 0,
+    Right,
+    Up,
+    Down,
+}
 
 [Serializable]
 public abstract class CharacterRigCommandSpecBase : CommandSpecBase

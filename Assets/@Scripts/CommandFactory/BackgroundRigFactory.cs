@@ -20,25 +20,23 @@ public sealed class BackgroundRigCommandFactory : INodeCommandFactory
         {
             null => null,
 
-            SetupBackgroundRigCommandSpec s => new SetupBackgroundRigCommand(
-                _rigSlotResolver,
-                _rigBuilder,
-                s),
+            // Setup
+            SetupBackgroundRigCommandSpec s => new SetupBackgroundRigCommand(_rigSlotResolver, _rigBuilder, s),
 
+            // Basic State
             SetAnchorCommandSpecBgR s => new SetAnchorCommandBgR(s),
-
-            SetBackgroundSpriteCommandSpecBgR s => new SetBackgroundSpriteCommandBgR(
-                s,
-                _spriteResolver),
-
+            SetBackgroundSpriteCommandSpecBgR s => new SetBackgroundSpriteCommandBgR(s, _spriteResolver),
             SetOriginSizeCommandSpecBgR s => new SetOriginSizeCommandBgR(s),
 
+            // Visibility
             FadeInCommandSpecBgR s => new FadeInCommandBgR(s),
             FadeOutCommandSpecBgR s => new FadeOutCommandBgR(s),
-            
+
+            // Transform
             MoveByCommandSpecBgR s => new MoveByCommandBgR(s),
             ScaleToCommandSpecBgR s => new ScaleToCommandBgR(s),
-            
+
+            // Motion / Acting
             SlideInCommandSpecBgR s => new SlideInCommandBgR(s),
             SlideOutCommandSpecBgR s => new SlideOutCommandBgR(s),
             JoltCommandSpecBgR s => new JoltCommandBgR(s),

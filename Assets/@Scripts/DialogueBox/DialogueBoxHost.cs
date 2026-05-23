@@ -1,6 +1,13 @@
 using System;
 using UnityEngine;
 
+public interface IDialogueBoxViewResolver
+{
+    IDialogueTextTarget ResolveTarget(DialogueBoxKind kind);
+    void ShowOnly(IDialogueTextTarget target);
+    void HideAll();
+}
+
 public enum DialogueBoxKind
 {
     Portrait = 0,
