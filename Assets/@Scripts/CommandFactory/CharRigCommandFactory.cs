@@ -34,7 +34,6 @@ public sealed class CharRigCommandFactory : INodeCommandFactory
             SetupCharRigCommandSpec s => new SetupCharRigCommand(_rigSlotResolver, _rigBuilder, s),
 
             CastCharacterCommandSpec s => new CastCharacterCommand(s),
-            UncastCharacterCommandSpec s => new UncastCharacterCommand(s),
 
             // Layout / Base State
             SetAnchorCommandSpecCharR s => new SetAnchorCommandCharR(s, _globalTuning, _roleTuningDb),

@@ -2251,7 +2251,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5409551162114272258}
-  - component: {fileID: 2692710920033085521}
   m_Layer: 0
   m_Name: CharacterRig
   m_TagString: Untagged
@@ -2279,24 +2278,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &2692710920033085521
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7365325881718939087}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c59a17d90efa0cf4a8a941aa424dd52f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CharacterFocusAnchorView
-  _face: {fileID: 0}
-  _bust: {fileID: 0}
-  _body: {fileID: 0}
-  _feet: {fileID: 0}
-  _custom1: {fileID: 0}
-  _custom2: {fileID: 0}
 --- !u!1 &7437360109724072282
 GameObject:
   m_ObjectHideFlags: 0

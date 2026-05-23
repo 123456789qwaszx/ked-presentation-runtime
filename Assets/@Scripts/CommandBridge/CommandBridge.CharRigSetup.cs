@@ -116,14 +116,4 @@ public sealed partial class YarnCommandBridge
         
         Collect(slotOffsetSpec);
     }
-    
-    private void EnqueueUncastCharacterSpec(string roleKey)
-    {
-        var spec = new UncastCharacterCommandSpec
-        {
-            slotKey = roleKey
-        };
-
-        Collect(spec);
-    }
 }

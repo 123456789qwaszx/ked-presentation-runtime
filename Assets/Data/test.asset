@@ -28,7 +28,6 @@ MonoBehaviour:
       compiled:
       - rid: 5301155771391934529
       - rid: 5301155771391934530
-      - rid: 5301155771391934531
       - rid: 5301155771391934532
       gate:
         type: 3
@@ -157,11 +156,6 @@ MonoBehaviour:
         slotKey: 
         characterKey: 
         variantKey: 
-    - rid: 5301155771391934531
-      type: {class: UncastCharacterCommandSpec, ns: , asm: Assembly-CSharp}
-      data:
-        wait: 0
-        slotKey: 
     - rid: 5301155771391934532
       type: {class: SetPortraitSpriteCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:

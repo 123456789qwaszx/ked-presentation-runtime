@@ -58,7 +58,6 @@ public sealed partial class YarnCommandBridge
         _dialogueRunner.AddCommandHandler<string, string>("slot", EnqueueSetupCharRigSpec);
         
         _dialogueRunner.AddCommandHandler<string, string,  string, string, bool, string, string>("cast", EnqueueCastCharacterSpec);
-        _dialogueRunner.AddCommandHandler<string>("uncast", EnqueueUncastCharacterSpec);
         
         _dialogueRunner.AddCommandHandler<string, string, string, string>("pose", EnqueueSetPortraitSpriteSpec);
         _dialogueRunner.AddCommandHandler<string, string, bool, bool>("place", EnqueueSetAnchorSpecs);
