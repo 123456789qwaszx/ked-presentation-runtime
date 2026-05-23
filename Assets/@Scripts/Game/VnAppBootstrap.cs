@@ -52,7 +52,6 @@ public class VnAppBootstrap : MonoBehaviour
     [SerializeField] private LinePresenter linePresenter;
     [SerializeField] private DialogueTextRouter dialogueTextRouter;
     [SerializeField] private VnRuntimeBridge vnRuntimeBridge;
-    [SerializeField] private InlineEmojiHost inlineEmojiHost;
     [SerializeField] private InlineEventMarkupHandler inlineEventMarkupHandler;
     [SerializeField] private CustomLinePresenter customLinePresenter;
     [SerializeField] private YarnLineSideEffectPresenter yarnLineSideEffectPresenter;
@@ -276,13 +275,11 @@ public class VnAppBootstrap : MonoBehaviour
             yarnBridgePlaybackDriver,
             audioSystem);
 
-        inlineEmojiHost.Initialize(yarnCommandBridge);
-
         inlineEventMarkupHandler.Initialize(
             yarnLineLifecycleBridge,
             _presentationSessionBridge,
             inlineSfxHost,
-            inlineEmojiHost);
+            yarnCommandBridge);
     }
 
     private void SetupYarnLifecycleBridge()

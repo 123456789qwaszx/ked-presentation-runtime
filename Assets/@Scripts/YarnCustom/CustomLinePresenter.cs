@@ -30,6 +30,23 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
 
     private int _presenterGeneration;
     private CancellationTokenSource _presenterLifetimeCts = new CancellationTokenSource(); // 외부 시스템이 이 Presenter의 실행을 무효화하는 신호
+    
+    
+    [UnityEngine.Serialization.FormerlySerializedAs("actionMarkupHandlers")]
+    [SerializeField] List<ActionMarkupHandler> eventHandlers = new List<ActionMarkupHandler>();
+    private List<IActionMarkupHandler> ActionMarkupHandlers
+    {
+        get
+        {
+            var pauser = new PauseEventProcessor();
+            List<IActionMarkupHandler> ActionMarkupHandlers = new()
+            {
+                pauser,
+            };
+            ActionMarkupHandlers.AddRange(eventHandlers);
+            return ActionMarkupHandlers;
+        }
+    }
 
     public void Initialize(
         DialogueRunner dialogueRunner,
@@ -44,6 +61,8 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
         _dialogueBoxResolver = dialogueBoxResolver;
         _dialogueTextRouter = dialogueTextRouter;
         _typewriter = typewriter;
+        
+        _typewriter.ActionMarkupHandlers = ActionMarkupHandlers;
         _context = context;
         _lineAdvanceState = lineAdvanceState;
 

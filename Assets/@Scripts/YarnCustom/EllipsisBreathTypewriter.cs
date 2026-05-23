@@ -41,7 +41,7 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
     [Min(0f)] [SerializeField] private float normalDelayCap = 0.35f;
     [Min(0f)] [SerializeField] private float speedupDelayCap = 0.08f;
     
-    public List<IActionMarkupHandler> ActionMarkupHandlers { get; } = new();
+    public List<IActionMarkupHandler> ActionMarkupHandlers { get; set; } = new();
     
     // ---- Runtime Binding ----
     public TMP_Text TextElement

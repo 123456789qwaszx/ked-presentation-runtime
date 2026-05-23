@@ -1,8 +1,19 @@
-public sealed partial class YarnCommandBridge
+public sealed partial class YarnCommandBridge : InlineEventMarkupHandler.IInlineEmojiHost
 {
     private const string EmojiSlot00 = "0";
     private const string EmojiSlot01 = "1";
     private const string EmojiSlot02 = "2";
+    
+    public void PlayEmojiCue(string characterKey, string cue)
+    {
+        if (string.IsNullOrWhiteSpace(cue))
+        {
+            HideInlineEmojiByCharacterNow(characterKey);
+            return;
+        }
+
+        PlayInlineEmojiByCharacterNow(characterKey, cue);
+    }
     
     private SetCharacterEmojiCommandSpecCharR BuildSetCharacterEmojiSpec(string roleKey, string emojiKey, string slotName = EmojiSlot00)
     {
