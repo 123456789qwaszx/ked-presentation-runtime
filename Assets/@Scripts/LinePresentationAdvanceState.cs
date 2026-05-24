@@ -28,12 +28,6 @@ public sealed class LinePresentationAdvanceState
     public bool IsSeekingActive => IsSeekActive;
     public bool IsRollbackActive => IsRollbackSeekActive;
     public string TargetNodeName => _seek.TargetNodeName;
-    public string RollbackTargetNodeName => _seek.TargetNodeName;
-
-    public LinePresentationAdvanceState()
-        : this(null)
-    {
-    }
 
     public LinePresentationAdvanceState(VNTraceStream trace)
     {

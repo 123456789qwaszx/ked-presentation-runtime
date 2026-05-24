@@ -2,7 +2,7 @@ using UnityEngine;
 
 public sealed partial class YarnCommandBridge
 {
-    private void EnqueueSetupCharRigSpec(string slotKey, string parentKey)
+    private void EnqueueSetupCharRigSpec(string slotKey, string parentKey = "0")
     {
         var spec = new SetupCharRigCommandSpec
         {

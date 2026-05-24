@@ -13,8 +13,8 @@ public sealed class DialogueBox02_LetterBox
         DialogueBox02BottomTextAreaSpeakerName_Text,
     }
 
-    public RectTransform Root => View.Rect(Refs.DialogueBox02_Root);
-    public CanvasGroup CanvasGroup => View.CanvasGroup(Refs.DialogueBox02_Root);
+    public RectTransform Root => View?.Rect(Refs.DialogueBox02_Root);
+    public CanvasGroup CanvasGroup => View?.CanvasGroup(Refs.DialogueBox02_Root);
 
     public TMP_Text LineText => View.Text(Refs.DialogueBox02BottomTextArea_Text);
 

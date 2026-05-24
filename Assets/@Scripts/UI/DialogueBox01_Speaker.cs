@@ -29,8 +29,8 @@ public sealed class DialogueBox01_Speaker
         DialogueBox01SpeakerNameBoxTextArea_Text
     }
 
-    public RectTransform Root => View.Rect(Refs.DialogueBox01_Root);
-    public CanvasGroup CanvasGroup => View.CanvasGroup(Refs.DialogueBox01_Root);
+    public RectTransform Root => View?.Rect(Refs.DialogueBox01_Root);
+    public CanvasGroup CanvasGroup => View?.CanvasGroup(Refs.DialogueBox01_Root);
 
     public TMP_Text LineText => View.Text(Refs.DialogueBox01TextArea_Text);
     public TMP_Text NameText => View.Text(Refs.DialogueBox01SpeakerNameBoxTextArea_Text);

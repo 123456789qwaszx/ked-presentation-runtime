@@ -13,8 +13,6 @@ public sealed class VNLoadSeekDriver : IVNLoadSeekDriver, IDisposable
     private readonly VNTraceStream _trace;
 
     private VNSaveData _target;
-    private bool _hasTarget;
-    private bool _isSeeking;
 
     private Action _onComplete;
     private Action _onFail;
@@ -41,15 +39,6 @@ public sealed class VNLoadSeekDriver : IVNLoadSeekDriver, IDisposable
 
     public void PrepareForLoad()
     {
-        if (_isSeeking)
-        {
-            Debug.LogWarning("[VNLoadSeekDriver] PrepareForLoad ignored. Already seeking.");
-            Trace("PrepareForLoadIgnored", "reason=AlreadySeeking");
-            return;
-        }
-
-        _isSeeking = true;
-
         Trace("PrepareForLoad");
 
         _rollbackHistory?.ClearRollbackHistory();
@@ -79,7 +68,6 @@ public sealed class VNLoadSeekDriver : IVNLoadSeekDriver, IDisposable
         }
 
         _target = saveData;
-        _hasTarget = true;
         _onComplete = onComplete;
         _onFail = onFail;
 
@@ -107,12 +95,6 @@ public sealed class VNLoadSeekDriver : IVNLoadSeekDriver, IDisposable
 
     private void HandleLineEntered(YarnLineMeta meta)
     {
-        if (!_isSeeking)
-        {
-            Trace("LineEnteredIgnored", $"meta={FormatMeta(meta)}, reason=DriverNotSeeking");
-            return;
-        }
-
         if (_lineAdvanceState != null && !_lineAdvanceState.IsLoadSeeking)
         {
             Trace(
@@ -122,13 +104,6 @@ public sealed class VNLoadSeekDriver : IVNLoadSeekDriver, IDisposable
         }
 
         Trace("LineEnteredDuringLoadSeek", $"meta={FormatMeta(meta)}");
-
-        if (!_hasTarget)
-        {
-            Trace("CompleteNoTarget", $"meta={FormatMeta(meta)}");
-            Complete();
-            return;
-        }
 
         bool isTarget = IsTarget(meta);
         Trace("CheckTarget", $"meta={FormatMeta(meta)}, result={isTarget}");
@@ -151,9 +126,6 @@ public sealed class VNLoadSeekDriver : IVNLoadSeekDriver, IDisposable
 
     private bool IsTarget(YarnLineMeta meta)
     {
-        if (!_hasTarget || _target == null)
-            return false;
-
         if (!string.Equals(meta.nodeName, _target.nodeName, StringComparison.Ordinal))
             return false;
 
@@ -199,8 +171,6 @@ public sealed class VNLoadSeekDriver : IVNLoadSeekDriver, IDisposable
 
         Unsubscribe();
 
-        _isSeeking = false;
-        _hasTarget = false;
         _target = null;
 
         _onComplete = null;
@@ -213,12 +183,6 @@ public sealed class VNLoadSeekDriver : IVNLoadSeekDriver, IDisposable
 
     private void Subscribe()
     {
-        if (_bridge == null)
-        {
-            Trace("SubscribeSkipped", "reason=BridgeNull");
-            return;
-        }
-
         _bridge.LineEntered -= HandleLineEntered;
         _bridge.LineEntered += HandleLineEntered;
 
@@ -227,9 +191,6 @@ public sealed class VNLoadSeekDriver : IVNLoadSeekDriver, IDisposable
 
     private void Unsubscribe()
     {
-        if (_bridge == null)
-            return;
-
         _bridge.LineEntered -= HandleLineEntered;
 
         Trace("Unsubscribed");
@@ -259,7 +220,7 @@ public sealed class VNLoadSeekDriver : IVNLoadSeekDriver, IDisposable
             ? "lineState=null"
             : _lineAdvanceState.Snapshot();
 
-        return $"driverSeeking={_isSeeking}, hasTarget={_hasTarget}, {target}, lineState=[{lineState}]";
+        return $"{target}, lineState=[{lineState}]";
     }
 
     private static string FormatMeta(YarnLineMeta meta)

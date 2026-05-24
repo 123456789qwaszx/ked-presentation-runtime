@@ -26,10 +26,10 @@ public sealed partial class DialogueBox00_Portrait
         DialogueBox00TextAreaSpeakerName_Text,
     }
 
-    public RectTransform Root => View.Rect(Refs.DialogueBox00_Root);
-    public CanvasGroup CanvasGroup => Root.GetComponent<CanvasGroup>();
+    public RectTransform Root => View?.Rect(Refs.DialogueBox00_Root);
+    public CanvasGroup CanvasGroup => View?.CanvasGroup(Refs.DialogueBox00_Root);
 
-    public TMP_Text LineText => View.Text(Refs.DialogueBox00TextArea_Text);
+    public TMP_Text LineText => View?.Text(Refs.DialogueBox00TextArea_Text);
     public TMP_Text NameText => null;//=> View.Text(Refs.DialogueBox00TextAreaSpeakerName_Text);
     public bool HasName => true;
 

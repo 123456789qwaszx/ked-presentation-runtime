@@ -8,74 +8,42 @@ position: -202,167
 title:maid
 position: 70,335
 ---
-
-<<begin_hold>>
-<<uipatch theme1>>
-<<end_hold>>
-
+<<ui_patch theme1>>
 
 <<bgm audio/bgm_tam_dystopia_snowwind_01>>
 
-// <<slot me>>
-// <<place me boxside>>
-// <<size me 1.5>>
-// <<cast me momoka>>
-// <<fade_in me>>
-<<beat>>
+<<slot me>>
+<<cast me momoka>>
 
 여기가 [sfx =c3 gain=0.1/]월세 내고 산다는 그 집인가? 엄청 크네......
 <<sfx audio/sfx_click_soundreality-ui-pop-up-clear-391155>>
 <<voice audio/102-1>>
 
-<<shake_char momoka left>>
-momoka:의뢰가...... [emoji=heart/][sfx=c1/]나보고 직접 여행가 사회의 상식을 알려달라는 거였지...... 분명 나 말고 더 적합한 사람이 있었을 텐데.
+<<shake momoka >>
+momoka:의뢰가...... [sfx=c1/]나보고 직접 여행가 사회의 상식을 알려달라는 거였지...... 분명 나 말고 더 적합한 사람이 있었을 텐데.
 
 <<sfx audio/sfx_dragon-studio-notification-sound-effect-372475>>
-<<closebox>>
-<<begin_hold>>
-<<await_for 1>>
-<<blackout cover>>
-<<uipatch black>>
-<<blackout uncover>>
-<<end_hold>>
+<<box_hide>>
+<<ui_patch black>>
 
 <<voice audio/103-1>>
 얼마 전, 엘레노어라는 여행가가 마왕 협정으로 메시지를 보내고서는 나를 콕 집어 이 의뢰를 부탁했다.
 
 <<sfx audio/sfx_dragon-studio-sand-transition-451861>>
-//<<closebox>>
-//<<begin_hold>>
-<<await_for 1>>
-<<blackout cover>>
-<<uipatch theme1>>
-<<await_for 1>>
-<<blackout uncover>>
-//<<end_hold>>
 
 <<slot elle>>
-<<place elle center>>
-<<size elle 1.8>>
 <<cast elle kuonji>>
-
-<<fade_in elle>>
 
 <<voice audio/104-1>>
 열정 넘치는 젊은 여행가: 아, 네! 이렇게 만난 것도 인연이죠!
 //<<bgm audio/voice_bgm_uhhknoxpro-piano-loop-432112 3>>
 
-<<to_scale elle 1.2>>
+<<scale_to elle 1.2>>
 전 초보 여행가 엘레노어예요. 아직 열심히 배우는 중이죠!
 <<sfx audio/sfx_click_soundreality-ui-pop-up-clear-391155>>
 
-//<<begin_hold>>
-//<<await_for 1>>
 <<fade_out elle>>
-<<closebox>>
-//<<await_for 4>>
-<<blackout cover>>
-<<uipatch theme2>>
-<<blackout uncover>>
-//<<end_hold>>
+<<box_hide>>
 
 그때 처음 만났지. 왠지 한참 전 일처럼 느껴지네. 또 이렇게 만나게 될 줄은 몰랐어.
 <<sfx audio/sfx_click_soundreality-ui-pop-up-clear-391155>>
@@ -85,20 +53,15 @@ momoka:의뢰가...... [emoji=heart/][sfx=c1/]나보고 직접 여행가 사회�
 
 <<slot elle>>
 <<place elle center>>
-//<<size elle 1.4>>
 <<cast elle kuonji>>
 
 <<jolt elle>>
 <<fade_in elle>>
-<<uipatch theme1>>
-<<to_scale elle 1.6>>
+<<scale_to elle 1.6>>
 
 ???: 기다리고 있었습니다, 선배님! 어서 오세요!
 
-//<<begin_hold>>
-//<<await_for 1>>
 <<fade_out elle>>
-//<<end_hold>>
 
 선배님......?!
 
@@ -114,7 +77,7 @@ momoka:의뢰가...... [emoji=heart/][sfx=c1/]나보고 직접 여행가 사회�
 
 
 <<shake elle top>>
-<<to_scale elle 1.7>>
+<<scale_to elle 1.7>>
 <<move_by elle 0 -150>>
 엘레노어: 공백 여단과 하나사키 여단, 거대 여단 둘을 이끌면서 '3대 의뢰'를 해결하시고, 캠프를 구하는 모습을 보고 정말 큰 감동을 받았어요.
 엘레노어: 제가 알기로는...... 하나사키 여단의 현 단장인 후유카 단장님도 마왕님이 키워내셨다던데, 맞죠?
@@ -123,7 +86,7 @@ momoka:의뢰가...... [emoji=heart/][sfx=c1/]나보고 직접 여행가 사회�
 과찬이야. 난 그렇게 대단한 사람이 아니야.
 '3대 의뢰'도 다 같이 힘을 모아서 해결한 거고, 여행가 사회의 상식을 배우고 싶은 거라면 더 잘 가르쳐 줄 사람도 있어......
 
-<<closebox>>
+<<box_hide>>
 엘레노어: 정말 대단해요!
 
 <<sway elle>>
@@ -138,7 +101,7 @@ momoka:의뢰가...... [emoji=heart/][sfx=c1/]나보고 직접 여행가 사회�
 <<shake elle top>>
 엘레노어: 정말 감사합니다! 최선을 다할게요.
 
-<<to_scale elle 1>>
+<<scale_to elle 1>>
 <<move_by elle 0 0>>
 엘레노어: 그럼, 뭐부터 시작하면 될까요......?
 

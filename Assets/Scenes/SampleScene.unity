@@ -5032,9 +5032,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::VnAppBootstrap
   uiManager: {fileID: 2860743132734891021}
   vnTrace:
-    enableTrace: 1
+    enableTrace: 0
     logTraceStreaming: 0
-    logDumpToConsole: 1
+    logDumpToConsole: 0
     tracePreview: 
   audioSystem: {fileID: 32255926}
   inlineSfxHost: {fileID: 1571925710}
