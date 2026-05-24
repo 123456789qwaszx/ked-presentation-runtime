@@ -5035,6 +5035,10 @@ MonoBehaviour:
     enableTrace: 1
     logTraceStreaming: 0
     logDumpToConsole: 1
+    trimOldTrace: 0
+    maxTraceChars: 200000
+    trimKeepRatio: 0.5
+    clearAfterDump: 0
     tracePreview: 
   audioSystem: {fileID: 32255926}
   inlineSfxHost: {fileID: 1571925710}

@@ -36,13 +36,13 @@ public sealed class RollbackController : IDisposable
 
         if (_lineAdvanceState.IsSeekingActive)
         {
-            Trace("RequestRollbackOneStepRejected", "seek already active");
+            Trace("RequestRollbackOneStepRejected", "reason=SeekActive");
             return false;
         }
 
         if (!_history.TryPrepareRollbackOneStep(out RollbackPoint target))
         {
-            Trace("RequestRollbackOneStepRejected", "history has no rollback target");
+            Trace("RequestRollbackOneStepRejected", "reason=NoRollbackTarget");
             return false;
         }
 
