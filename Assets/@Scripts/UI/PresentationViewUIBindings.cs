@@ -107,7 +107,7 @@ public sealed class PresentationViewUIBindings : IDisposable
         if (_vnFeatures.RequestRollbackOneStep())
         {
             //_restarter.StopDialogue();
-            _restarter.StartGame(_linePresentationAdvanceState.TargetNodeName);
+            _restarter.RestartForRollback(_linePresentationAdvanceState.TargetNodeName);
         }
     }
 

@@ -53,7 +53,12 @@ public sealed class PresentationSession
     
     public void Start(Route route, SequenceSpecSO sequence)
     {
-        if (sequence == null) return;
+        if (sequence == null)
+            return;
+
+        if (IsRunning)
+            EndImmediately();
+
         _gateAdvancer.ClearLatchedSignals();
         //_executor.Stop();
         
@@ -125,6 +130,11 @@ public sealed class PresentationSession
     public void RequestEnd()
     {
         _context.RequestClose();
+    }
+
+    public void EndImmediately()
+    {
+        End();
     }
     
     

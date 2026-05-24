@@ -4,25 +4,47 @@ using Yarn.Unity;
 public sealed class EpisodePlayer : MonoBehaviour
 {
     private PresentationViewUIBindings _dialogueUIBindings;
-    private RollbackHistory  _nodeRollbackHistory;
+    private RollbackHistory _nodeRollbackHistory;
     private ILinePresentationAborter _linePresentationAborter;
     private BacklogRecorder _backlogRecorder;
-    
-    public DialogueRunner dialogueRunner;
+
+    [Header("Yarn")]
+    [SerializeField] private DialogueRunner dialogueRunner;
+
+    [Header("Presentation")]
     [SerializeField] private DialogueTextRouter dialogueTextRouter;
     [SerializeField] private PresentationSessionEntry presentationRouteEntry;
     [SerializeField] private PresentationResponseRig presentationResponseRig;
-    
-    [SerializeField] public string yarnEntryKey;
-    public string YarnEntryKey => yarnEntryKey;
-    [SerializeField] public string presentationEntryKey;
-    
-    
+
+    [Header("Entry Keys")]
+    [SerializeField] private string yarnEntryKey;
+    [SerializeField] private string presentationEntryKey;
+
+    [Header("Debug Input")]
     [Tooltip("Yarn 실행")]
     [SerializeField] private KeyCode runYarnKey = KeyCode.Alpha2;
-    
+
     [Tooltip("Stop")]
     [SerializeField] private KeyCode stopKey = KeyCode.Alpha3;
+
+    public string YarnEntryKey => yarnEntryKey;
+    public string PresentationEntryKey => presentationEntryKey;
+
+    public bool IsDialogueRunning
+    {
+        get
+        {
+            return dialogueRunner != null && dialogueRunner.IsDialogueRunning;
+        }
+    }
+
+    public bool IsPresentationRunning
+    {
+        get
+        {
+            return presentationRouteEntry != null && presentationRouteEntry.IsRunning;
+        }
+    }
 
     public void Initialize(
         PresentationViewUIBindings dialogueUIBindings,
@@ -35,76 +57,203 @@ public sealed class EpisodePlayer : MonoBehaviour
         _linePresentationAborter = linePresentationAborter;
         _backlogRecorder = backlogRecorder;
     }
-    
+
     private void Update()
     {
         if (Input.GetKeyDown(runYarnKey))
-        {
-            StopDialogue();
-            StartGame(yarnEntryKey);
-        }
+            RestartGame(yarnEntryKey);
 
         if (Input.GetKeyDown(stopKey))
-        {
             StopDialogue();
-        }
     }
 
+    /// <summary>
+    /// Public legacy entry point.
+    /// Treat this as a fresh restart, not as "start only if idle".
+    /// </summary>
     public void StartGame(string nodeName)
     {
-        _backlogRecorder.ClearBacklog();
-        
-        if(!presentationRouteEntry.IsRunning)
-            presentationRouteEntry.StartRoute(presentationEntryKey);
-        
-        UIManager.Instance.SwitchRoot<PresentationUIRoot>();
-        
-        PresentationUIRoot dialogueUIRoot = UIManager.Instance.GetUI<PresentationUIRoot>();
-        _dialogueUIBindings.Bind(dialogueUIRoot);
-        
-        dialogueRunner.StartDialogue(nodeName);
+        RestartGame(nodeName);
+    }
+
+    /// <summary>
+    /// Public load entry point.
+    /// This intentionally uses the same restart path as StartGame.
+    /// Load seek needs a fresh Presentation route before Yarn starts replaying.
+    /// </summary>
+    public void LoadGame(string nodeName)
+    {
+        RestartGame(nodeName);
+    }
+
+    /// <summary>
+    /// Fully restarts Yarn + Presentation for a node.
+    /// This is the safe path for Load, Continue, Debug restart, and manual restart.
+    /// </summary>
+    public void RestartGame(string nodeName)
+    {
+        if (string.IsNullOrWhiteSpace(nodeName))
+        {
+            Debug.LogWarning("[EpisodePlayer] RestartGame ignored. nodeName is null or empty.", this);
+            return;
+        }
+
+        StopDialogueInternal(
+            clearHistory: true,
+            clearBacklog: true,
+            stopYarnRunner: true,
+            endPresentationNow: true,
+            clearPresentationVisuals: true);
+
+        PreparePresentationView();
+
+        StartPresentationRouteFresh();
+
+        StartYarn(nodeName);
     }
     
+    public void RestartForRollback(string nodeName)
+    {
+        if (string.IsNullOrWhiteSpace(nodeName))
+        {
+            Debug.LogWarning("[EpisodePlayer] RestartForRollback ignored. nodeName is null or empty.", this);
+            return;
+        }
+
+        StopDialogueInternal(
+            clearHistory: false,
+            clearBacklog: true,
+            stopYarnRunner: true,
+            endPresentationNow: true,
+            clearPresentationVisuals: true);
+
+        PreparePresentationView();
+
+        StartPresentationRouteFresh();
+
+        StartYarn(nodeName);
+    }
+
+    /// <summary>
+    /// Stops both Yarn and Presentation immediately.
+    /// Unlike the old implementation, this does not merely request presentation end.
+    /// </summary>
     public void StopDialogue()
     {
-        _nodeRollbackHistory.ClearRollbackHistory();
-        _backlogRecorder.ClearBacklog();
-        
-        // if (dialogueRunner.IsDialogueRunning)
-        //     dialogueRunner.Stop();
+        StopDialogueInternal(
+            clearHistory: true,
+            clearBacklog: true,
+            stopYarnRunner: true,
+            endPresentationNow: true,
+            clearPresentationVisuals: true);
+    }
+
+    private void StopDialogueInternal(
+        bool clearHistory,
+        bool clearBacklog,
+        bool stopYarnRunner,
+        bool endPresentationNow,
+        bool clearPresentationVisuals)
+    {
+        if (clearHistory)
+            _nodeRollbackHistory?.ClearRollbackHistory();
+
+        if (clearBacklog)
+            _backlogRecorder?.ClearBacklog();
+
+        if (stopYarnRunner)
+            StopYarnRunnerNow();
 
         _linePresentationAborter?.AbortCurrentLinePresentationForRollback();
-        presentationRouteEntry.RequestEnd();
-        presentationResponseRig.Clear();
+
+        if (endPresentationNow)
+            EndPresentationRouteNow();
+
+        if (clearPresentationVisuals)
+            ClearPresentationVisualState();
+    }
+
+    private void StopYarnRunnerNow()
+    {
+        if (dialogueRunner == null)
+            return;
+
+        if (!dialogueRunner.IsDialogueRunning)
+            return;
+
+        //dialogueRunner.Stop();
+    }
+
+    private void EndPresentationRouteNow()
+    {
+        if (presentationRouteEntry == null)
+            return;
+
+        presentationRouteEntry.EndRouteNow();
+    }
+
+    private void ClearPresentationVisualState()
+    {
+        if (presentationResponseRig != null)
+            presentationResponseRig.Clear();
+
         ResetSlantedMasks();
     }
 
-    public void LoadGame(string nodeName)
+    private void PreparePresentationView()
     {
-        StopDialogue();
-        
-        presentationRouteEntry.StartRoute(presentationEntryKey);
-        
         UIManager.Instance.SwitchRoot<PresentationUIRoot>();
-        
-        PresentationUIRoot dialogueUIRoot = UIManager.Instance.GetUI<PresentationUIRoot>();
-        _dialogueUIBindings.Bind(dialogueUIRoot);
-        
+
+        PresentationUIRoot presentationUIRoot = UIManager.Instance.GetUI<PresentationUIRoot>();
+        if (presentationUIRoot == null)
+        {
+            Debug.LogWarning("[EpisodePlayer] PresentationUIRoot is null after SwitchRoot.", this);
+            return;
+        }
+
+        if (_dialogueUIBindings != null)
+            _dialogueUIBindings.Bind(presentationUIRoot);
+    }
+
+    private void StartPresentationRouteFresh()
+    {
+        if (presentationRouteEntry == null)
+        {
+            Debug.LogWarning("[EpisodePlayer] Cannot start presentation route. presentationRouteEntry is null.", this);
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(presentationEntryKey))
+        {
+            Debug.LogWarning("[EpisodePlayer] Cannot start presentation route. presentationEntryKey is null or empty.", this);
+            return;
+        }
+
+        presentationRouteEntry.RestartRoute(presentationEntryKey);
+    }
+
+    private void StartYarn(string nodeName)
+    {
+        if (dialogueRunner == null)
+        {
+            Debug.LogWarning("[EpisodePlayer] Cannot start Yarn. dialogueRunner is null.", this);
+            return;
+        }
+
         dialogueRunner.StartDialogue(nodeName);
     }
-    
+
     private void ResetSlantedMasks()
     {
-        IPresentationTransitionSlotProvider provider = UIManager.Instance.GetUI<PresentationUIRoot>();
-        RectTransform[] roots =
-        { 
-            provider.SlantedMaskEdgeGraphic
-        };
-        
-        for (int i = 0; i < roots.Length; i++)
-        {
-            SlantedMaskGraphic mask = roots[i].GetComponent<SlantedMaskGraphic>();
-            mask?.ResetToHiddenOffset();
-        }
+        PresentationUIRoot root = UIManager.Instance.GetUI<PresentationUIRoot>();
+        if (root == null)
+            return;
+
+        IPresentationTransitionSlotProvider provider = root;
+        if (provider == null || provider.SlantedMaskEdgeGraphic == null)
+            return;
+
+        SlantedMaskGraphic mask = provider.SlantedMaskEdgeGraphic.GetComponent<SlantedMaskGraphic>();
+        mask?.ResetToHiddenOffset();
     }
 }
