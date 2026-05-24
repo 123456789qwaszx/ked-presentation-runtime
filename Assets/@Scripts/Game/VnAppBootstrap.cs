@@ -8,11 +8,16 @@ public class VnAppBootstrap : MonoBehaviour
 
     private readonly UnityInputSource _unityInputSource = new();
     private readonly UnityTimeSource _unityTimeSource = new();
+    
+    [Header("VN Trace")]
+    [SerializeField] private VNTraceStream vnTrace = new VNTraceStream();
+
     private readonly VnUxState _vnUxState = new();
     private readonly VnPlaybackSettings _vnPlaybackSettings = new();
     private readonly EpisodePlayState _episodePlayState = new();
     private readonly PresentationSessionContext _presentationSessionContext = new();
-    private readonly LinePresentationAdvanceState _linePresentationAdvanceState = new();
+
+    private LinePresentationAdvanceState _linePresentationAdvanceState;
 
     [Header("Sound")] 
     [SerializeField] private AudioSystem audioSystem;
@@ -96,6 +101,11 @@ public class VnAppBootstrap : MonoBehaviour
 
     private void Awake()
     {
+        _linePresentationAdvanceState = new LinePresentationAdvanceState(vnTrace);
+        vnTrace.Clear(this);
+        vnTrace.Trace(nameof(VnAppBootstrap), "AwakeBegin", note: "VN bootstrap started", context: this);
+
+        
         BootstrapAudioSystem();
         ConnectAudioSystemToYarn();
 
@@ -266,7 +276,8 @@ public class VnAppBootstrap : MonoBehaviour
             dialogueTextRouter,
             ellipsisBreathTypewriter,
             _presentationSessionContext,
-            _linePresentationAdvanceState);
+            _linePresentationAdvanceState,
+            vnTrace);
 
         yarnLineSideEffectPresenter.Initialize(
             dialogueRunner,
@@ -284,28 +295,33 @@ public class VnAppBootstrap : MonoBehaviour
 
     private void SetupYarnLifecycleBridge()
     {
-        yarnLineLifecycleBridge.Initialize(dialogueRunner, customLinePresenter);
+        yarnLineLifecycleBridge.Initialize(dialogueRunner, customLinePresenter, vnTrace);
     }
 
     private void BootstrapDialogueAdvanceInput()
     {
         PresentationSession session = presentationSessionEntry.PresentationSession;
 
-        AdvanceGate advanceGategate = new(
+        AdvanceGate advanceGate = new(
             _vnUxState,
             _vnPlaybackSettings,
             _linePresentationAdvanceState,
-            () => session != null && session.IsNodeBusy()
+            () => session != null && session.IsNodeBusy(),
+            vnTrace
         );
 
-        dialogueAdvanceDispatcher.Initialize(advanceGategate, dialogueRunner, inlineEventMarkupHandler, _linePresentationAdvanceState);
+        dialogueAdvanceDispatcher.Initialize(advanceGate, dialogueRunner, inlineEventMarkupHandler, _linePresentationAdvanceState);
         vnAdvanceInputPoller.Initialize(dialogueAdvanceDispatcher);
     }
 
 
     private void BootstrapPlaybackControls()
     {
-        _backlogRecorder = new(yarnLineLifecycleBridge, _vnPlaybackSettings);
+        _backlogRecorder = new(
+            yarnLineLifecycleBridge,
+            _vnPlaybackSettings,
+            _linePresentationAdvanceState,
+            vnTrace);
 
         AutoAdvanceScheduler autoAdvanceScheduler = new(
             yarnLineLifecycleBridge,
@@ -326,7 +342,8 @@ public class VnAppBootstrap : MonoBehaviour
             _rollbackHistory,
             yarnLineLifecycleBridge,
             dialogueAdvanceDispatcher,
-            _linePresentationAdvanceState
+            _linePresentationAdvanceState,
+            vnTrace
         );
 
         vnFeatureController.Initialize(
@@ -344,16 +361,16 @@ public class VnAppBootstrap : MonoBehaviour
     
     private void BootstrapVnSaveLoadRuntime()
     {
-
         VNRuntimeStateProvider vnRuntimeStateProvider = new (yarnLineLifecycleBridge, _rollbackHistory, vnPlaytimeTracker);
-        VNLoadSeekDriver vnLoadSeekDriver = new (
+        VNLoadSeekDriver vnLoadSeekDriver = new(
             yarnLineLifecycleBridge,
             episodePlayer,
             dialogueAdvanceDispatcher,
             customLinePresenter,
             _linePresentationAdvanceState,
             _rollbackHistory,
-            vnPlaytimeTracker);
+            vnPlaytimeTracker,
+            vnTrace);
 
         // 아직 게임 플래그 저장/복원이 없기에 임시로 Empty 사용.
         // 선택지/분기가 들어가면 실제 구현체로 교체.
@@ -402,5 +419,41 @@ public class VnAppBootstrap : MonoBehaviour
     private void Start()
     {
         _screenBindings.GoToTitle();
+    }
+    
+    [ContextMenu("VN Trace/Dump To Console")]
+    public void DumpVNTraceToConsole()
+    {
+        if (vnTrace == null)
+            return;
+
+        vnTrace.DumpToConsole("VN TRACE MANUAL DUMP", this);
+    }
+
+    [ContextMenu("VN Trace/Dump Preview To Console")]
+    public void DumpVNTracePreviewToConsole()
+    {
+        if (vnTrace == null)
+            return;
+
+        vnTrace.DumpPreviewToConsole("VN TRACE PREVIEW MANUAL DUMP", this);
+    }
+
+    [ContextMenu("VN Trace/Clear")]
+    public void ClearVNTrace()
+    {
+        if (vnTrace == null)
+            return;
+
+        vnTrace.Clear(this);
+    }
+
+    [ContextMenu("VN Trace/Dump And Clear")]
+    public void DumpAndClearVNTrace()
+    {
+        if (vnTrace == null)
+            return;
+
+        vnTrace.DumpAndClear("VN TRACE MANUAL DUMP AND CLEAR", this);
     }
 }

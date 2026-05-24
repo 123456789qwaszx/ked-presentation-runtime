@@ -40,27 +40,53 @@ public sealed class YarnLineLifecycleBridge : ActionMarkupHandler
     public string CurrentLineId { get; set; }
     public string CurrentCharacterKey { get; set; }
     
-    public void Initialize(DialogueRunner dialogueRunner, CustomLinePresenter customLinePresenter)
+    private VNTraceStream _trace;
+
+    public void Initialize(
+        DialogueRunner dialogueRunner,
+        CustomLinePresenter customLinePresenter,
+        VNTraceStream trace = null)
     {
         _dialogueRunner = dialogueRunner;
         _customLinePresenter = customLinePresenter;
+        _trace = trace;
 
         _dialogueRunner.onNodeStart?.RemoveListener(OnNodeStart);
         _dialogueRunner.onNodeStart?.AddListener(OnNodeStart);
-        
+
         _customLinePresenter.LineEntered -= OnLineEntered;
         _customLinePresenter.LineEntered += OnLineEntered;
     }
-    
-    private void OnNodeStart(string nodeName) => CurrentNodeName = nodeName;
-    
+
+    private void OnNodeStart(string nodeName)
+    {
+        CurrentNodeName = nodeName;
+        Trace("NodeStart", $"node={nodeName}");
+    }
+
     private void OnLineEntered(LocalizedLine line)
     {
         CurrentLineId = line.TextID;
         CurrentCharacterKey = line.CharacterName ?? string.Empty;
-        
+
         _currentMeta = BuildMeta(line);
+
+        Trace("LineEntered", $"meta={FormatMeta(_currentMeta)}, char={_currentMeta.charName}");
+
         LineEntered?.Invoke(_currentMeta);
+    }
+
+    private void Trace(string evt, string note = null)
+    {
+        if (_trace == null)
+            return;
+
+        _trace.Trace(nameof(YarnLineLifecycleBridge), evt, "", note);
+    }
+
+    private static string FormatMeta(YarnLineMeta meta)
+    {
+        return $"{meta.nodeName}/{meta.lineId}";
     }
     
     public override void OnPrepareForLine(MarkupParseResult line, TMP_Text text) => LinePrepared?.Invoke(_currentMeta);

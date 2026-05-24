@@ -23,6 +23,8 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
     private EllipsisBreathTypewriter _typewriter;
     private PresentationSessionContext _context;
     private LinePresentationAdvanceState _lineAdvanceState;
+    
+    private VNTraceStream _trace;
 
     private readonly DialogueBoxTransitionPolicy _boxTransitionPolicy = new();
     private readonly DialogueBoxCurrentState _boxState = new();
@@ -55,7 +57,8 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
         DialogueTextRouter dialogueTextRouter,
         EllipsisBreathTypewriter typewriter,
         PresentationSessionContext context,
-        LinePresentationAdvanceState lineAdvanceState)
+        LinePresentationAdvanceState lineAdvanceState,
+        VNTraceStream trace = null)
     {
         _lineRoutingPolicy = lineRoutingPolicy;
         _dialogueBoxResolver = dialogueBoxResolver;
@@ -65,6 +68,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
         _typewriter.ActionMarkupHandlers = ActionMarkupHandlers;
         _context = context;
         _lineAdvanceState = lineAdvanceState;
+        _trace = trace;
 
         if (dialogueRunner == null)
         {
@@ -93,15 +97,38 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
         CloseAll();
         return YarnTask.CompletedTask;
     }
+    
+    private void Trace(string evt, LocalizedLine line = null, string note = null)
+    {
+        if (_trace == null)
+            return;
+
+        string lineInfo = line == null
+            ? ""
+            : $"line={line.TextID}, char={line.CharacterName ?? ""}";
+
+        string state = _lineAdvanceState == null
+            ? "lineState=null"
+            : _lineAdvanceState.Snapshot();
+
+        string finalNote = string.IsNullOrWhiteSpace(note)
+            ? lineInfo
+            : $"{lineInfo}, {note}";
+
+        _trace.Trace(nameof(CustomLinePresenter), evt, state, finalNote, this);
+    }
 
     public event Action<LocalizedLine> LineEntered;
     
     public override async YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token)
     {
+        Trace("RunLineStart", line);
         LineEntered?.Invoke(line);
         
         _lineAdvanceState.MarkLineEntered();
 
+        Trace("AfterLineEnteredEvent", line);
+        
         int myGeneration = _presenterGeneration;
 
         bool IsStale()
@@ -109,10 +136,18 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
             return myGeneration != _presenterGeneration;
         }
         
+        bool isPendingSeekTargetLine = _lineAdvanceState.IsRollbackTargetLine(line.TextID);
+        Trace(
+            "SeekCheck",
+            line,
+            $"isSeeking={_lineAdvanceState.IsSeeking}, isPendingTarget={isPendingSeekTargetLine}");
+
         // Skip visual presentation for lines passed during rollback seek.
         // Keep the Yarn line lifecycle alive until the runner requests next content.
         if (_lineAdvanceState.IsSeeking && !_lineAdvanceState.IsRollbackTargetLine(line.TextID))
         {
+            Trace("SilentSeekPassThrough", line);
+            
             HideBoxDuringRollbackSeek();
 
             _lineAdvanceState.MarkLineDisplayCompleted();
@@ -120,6 +155,9 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
             await WaitForLineAdvanceAsync(token);
             return;
         }
+        
+        if (isPendingSeekTargetLine)
+            Trace("SeekTargetLineAccepted", line);
         
         IDialogueTextTarget currentBox = _boxState.Box;
         DialogueBoxKind? currentBoxKind = _boxState.BoxKind;
@@ -144,7 +182,11 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
 
         if (_lineAdvanceState.IsRollbackTargetLine(line.TextID))
         {
-            _lineAdvanceState.ConsumeRollbackTargetLine();
+            
+            bool consumed = _lineAdvanceState.ConsumeRollbackTargetLine(line.TextID);
+            
+            Trace("ConsumeSeekTargetLine", line, $"consumed={consumed}");
+            
             ApplyBoxTransitionImmediate(currentBox, nextBox, transitionKind);
         }
         else
