@@ -26,8 +26,6 @@ public sealed class RollbackController : IDisposable
 
         _bridge.LineEntered -= AddRollbackPoint;
         _bridge.LineEntered += AddRollbackPoint;
-
-        Trace("Initialized");
     }
 
     public bool RequestRollbackOneStep()

@@ -48,7 +48,8 @@ public sealed class YarnLineLifecycleBridge : ActionMarkupHandler
     {
         _dialogueRunner = dialogueRunner;
         _customLinePresenter = customLinePresenter;
-        _trace = trace;
+        //***
+        //_trace = trace;
 
         if (_dialogueRunner != null)
         {

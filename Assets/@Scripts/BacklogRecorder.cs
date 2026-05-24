@@ -27,7 +27,8 @@ public sealed class BacklogRecorder
         _entries = new List<DialogueLogEntry>(_maxCount);
 
         _vnLinePresentationState = vnLinePresentationState;
-        _vnTraceStream = trace;
+        //***
+        //_vnTraceStream = trace;
 
         RegisterHandler();
     }

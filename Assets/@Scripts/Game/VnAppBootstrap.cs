@@ -97,6 +97,8 @@ public class VnAppBootstrap : MonoBehaviour
     
     private VNSaveLoadSystem _vnSaveLoadSystem;
     
+    [SerializeField] private RollbackHistoryDebugView rollbackHistoryDebugView;
+
     
 
     private void Awake()
@@ -337,6 +339,9 @@ public class VnAppBootstrap : MonoBehaviour
             () => _linePresentationAdvanceState.IsLineFullyShown);
 
         _rollbackHistory = new RollbackHistory();
+        
+        if (rollbackHistoryDebugView != null)
+            rollbackHistoryDebugView.Bind(_rollbackHistory);
 
         RollbackController rollbackController = new(
             _rollbackHistory,
