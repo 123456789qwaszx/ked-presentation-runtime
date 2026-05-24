@@ -13,45 +13,38 @@ public interface ILinePresentationAborter
 
 public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentationAborter
 {
-    [Header("Fade")] public bool useFadeEffect = true;
-    public float fadeUpDuration = 0.25f;
-    public float fadeDownDuration = 0.1f;
-
-    private DialogueBoxLineRoutingPolicy _lineRoutingPolicy;
-    private IDialogueBoxViewResolver _dialogueBoxResolver;
-    private DialogueTextRouter _dialogueTextRouter;
+    private DialogueBoxPresentationController _boxPresentation;
     private EllipsisBreathTypewriter _typewriter;
     private PresentationSessionContext _context;
     private LinePresentationAdvanceState _lineAdvanceState;
-
     private VNTraceStream _trace;
-
-    private readonly DialogueBoxTransitionPolicy _boxTransitionPolicy = new();
-    private readonly DialogueBoxCurrentState _boxState = new();
-
 
     private int _presenterGeneration;
 
-    private CancellationTokenSource
-        _presenterLifetimeCts = new CancellationTokenSource(); // 외부 시스템이 이 Presenter의 실행을 무효화하는 신호
+    private CancellationTokenSource _presenterLifetimeCts = new ();
 
+    private CancellationTokenSource _lineVisualCts;
 
-    [UnityEngine.Serialization.FormerlySerializedAs("actionMarkupHandlers")] [SerializeField]
-    List<ActionMarkupHandler> eventHandlers = new List<ActionMarkupHandler>();
+    [SerializeField]
+    private List<ActionMarkupHandler> eventHandlers = new ();
 
     private List<IActionMarkupHandler> ActionMarkupHandlers
     {
         get
         {
-            var pauser = new PauseEventProcessor();
-            List<IActionMarkupHandler> ActionMarkupHandlers = new()
+            PauseEventProcessor pauser = new PauseEventProcessor();
+
+            List<IActionMarkupHandler> actionMarkupHandlers = new List<IActionMarkupHandler>
             {
                 pauser,
             };
-            ActionMarkupHandlers.AddRange(eventHandlers);
-            return ActionMarkupHandlers;
+
+            actionMarkupHandlers.AddRange(eventHandlers);
+            return actionMarkupHandlers;
         }
     }
+
+    public event Action<LocalizedLine> LineEntered;
 
     public void Initialize(
         DialogueRunner dialogueRunner,
@@ -63,29 +56,36 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
         LinePresentationAdvanceState lineAdvanceState,
         VNTraceStream trace = null)
     {
-        _lineRoutingPolicy = lineRoutingPolicy;
-        _dialogueBoxResolver = dialogueBoxResolver;
-        _dialogueTextRouter = dialogueTextRouter;
         _typewriter = typewriter;
-
         _typewriter.ActionMarkupHandlers = ActionMarkupHandlers;
+
         _context = context;
         _lineAdvanceState = lineAdvanceState;
         _trace = trace;
 
-        if (dialogueRunner == null)
-        {
-            Debug.LogError($"{nameof(CustomLinePresenter)}: dialogueRunner is null.");
-            return;
-        }
+        DialogueBoxTransitionPolicy transitionPolicy = new ();
+        DialogueBoxTextPrimer textPrimer = new ();
+        DialogueBoxTransitionRunner transitionRunner = new (dialogueBoxResolver, trace);
 
+        _boxPresentation = new DialogueBoxPresentationController(
+            lineRoutingPolicy,
+            dialogueBoxResolver,
+            transitionPolicy,
+            dialogueTextRouter,
+            textPrimer,
+            transitionRunner,
+            trace);
+        
         RegisterBeforeDefaultLinePresenter(dialogueRunner);
     }
 
     public void AbortCurrentLinePresentationForRollback()
     {
         _presenterGeneration++;
+        CancelLineVisualToken();
         CloseAll();
+
+        Trace("AbortCurrentLinePresentationForRollback");
     }
 
     public override YarnTask OnDialogueStartedAsync()
@@ -96,38 +96,30 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
 
     public override YarnTask OnDialogueCompleteAsync()
     {
+        CancelLineVisualToken();
         CancelPresenterLifetimeWaiters();
         CloseAll();
+
         return YarnTask.CompletedTask;
     }
 
-    public event Action<LocalizedLine> LineEntered;
-
     public override async YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token)
     {
-        Trace("---RunLineStart---");
+        Trace("RunLineStart", line);
         LineEntered?.Invoke(line);
 
         _lineAdvanceState.MarkLineEntered();
 
-        int myGeneration = _presenterGeneration;
-
-        bool IsStale()
-        {
-            return myGeneration != _presenterGeneration;
-        }
+        LinePresentationRun run = BeginLinePresentationRun();
 
         bool isPendingSeekTargetLine = _lineAdvanceState.IsPendingSeekTargetLine(line.TextID);
         bool shouldPassThroughSeekLine = _lineAdvanceState.IsSeeking && !isPendingSeekTargetLine;
-
-        Trace($"SeekCheck /isPendingTarget={isPendingSeekTargetLine}");
+        Trace("SeekCheck", line, $"isPendingTarget={isPendingSeekTargetLine}");
 
         if (shouldPassThroughSeekLine)
         {
-            Trace("********)SilentSeekPassThrough");
-
-            HideBoxDuringSeek();
-
+            Trace("SilentSeekPassThrough", line);
+            _boxPresentation.HideAllForSeek();
             _lineAdvanceState.MarkLineDisplayCompleted();
 
             await WaitForLineAdvanceAsync(token);
@@ -135,115 +127,69 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
         }
 
         if (isPendingSeekTargetLine)
-            Trace("********(->SeekTargetLineAccepted");
-
-        IDialogueTextTarget currentBox = _boxState.Box;
-        DialogueBoxKind? currentBoxKind = _boxState.BoxKind;
-        bool currentBoxIsVisible = _boxState.IsVisible;
-
-        DialogueBoxKind nextBoxKind = _lineRoutingPolicy.Resolve(
-            line.Metadata,
-            !string.IsNullOrWhiteSpace(line.CharacterName));
-
-        IDialogueTextTarget nextBox = _dialogueBoxResolver.ResolveTarget(nextBoxKind);
-        ResetBoxTransform(nextBox);
-
-        DialogueBoxTransitionKind transitionKind =
-            _boxTransitionPolicy.Resolve(
-                currentBoxKind,
-                currentBoxIsVisible,
-                nextBoxKind,
-                line.Metadata,
-                !isPendingSeekTargetLine && ShouldFastForwardLine());
-
-        PrimeTextTarget(nextBox, line);
-        PrepareBoxForTransition(nextBox, transitionKind);
-
-        if (isPendingSeekTargetLine)
         {
-            bool consumed = _lineAdvanceState.ConsumeSeekTargetLine(line.TextID);
-            Trace("ConsumeSeekTargetLine", line, $"consumed={consumed}");
-
-            ApplyBoxTransitionImmediate(currentBox, nextBox, transitionKind);
-        }
-        else
-        {
-            await ApplyBoxTransitionAsync(
-                currentBox,
-                nextBox,
-                transitionKind,
-                token,
-                IsStale);
+            Trace("SeekTargetLineAccepted", line);
+            _lineAdvanceState.ConsumeSeekTargetLine(line.TextID);
         }
 
-        if (IsStale())
+        DialogueBoxPresentationResult boxResult = await _boxPresentation.ShowLineAsync(
+            VNDialogueLineFactory.FromLocalizedLine(line),
+            new DialogueBoxPresentationOptions
+            {
+                IsSeekTargetLine = isPendingSeekTargetLine,
+                UseImmediateTransition = isPendingSeekTargetLine || ShouldFastForwardLine(),
+                Run = run,
+            });
+        
+
+        if (!run.IsValid)
         {
-            CleanupStaleLinePresentation(currentBox, nextBox);
+            Trace("RunBecameStaleAfterBoxPresentation", line);
+            _boxPresentation.CleanupStale(boxResult);
+
             await WaitForLineAdvanceAsync(token);
             return;
         }
 
-        _boxState.Commit(nextBoxKind, nextBox, transitionKind);
-        _dialogueTextRouter.Bind(_boxState);
+        TMP_Text lineText = boxResult?.LineText;
+        _typewriter.SetTextView(lineText);
 
-        if (!string.IsNullOrWhiteSpace(line.CharacterName) && _dialogueTextRouter.HasName)
-            _dialogueTextRouter.NameText.text = line.CharacterName;
+        MarkupParseResult text = line.TextWithoutCharacterName;
+        _typewriter.PrepareForContent(text);
 
-        if (_dialogueTextRouter.LineText != null)
-        {
-            _typewriter.SetTextView(_dialogueTextRouter.LineText);
-            MarkupParseResult text = line.TextWithoutCharacterName;
+        await _typewriter.RunTypewriter(text, token.HurryUpToken).SuppressCancellationThrow();
 
-            _typewriter.PrepareForContent(text);
-
-            await _typewriter
-                .RunTypewriter(text, token.HurryUpToken)
-                .SuppressCancellationThrow();
-
-            if (!IsStale())
-            {
-                _lineAdvanceState.MarkLineDisplayCompleted();
-                _typewriter.ContentWillDismiss();
-            }
-        }
+        if (!run.IsValid)
+            Trace("SkipDisplayCompletedBecauseRunInvalid", line);
         else
         {
-            if (!IsStale())
-                _lineAdvanceState.MarkLineDisplayCompleted();
+            _lineAdvanceState.MarkLineDisplayCompleted();
+            _typewriter.ContentWillDismiss();
         }
 
         await WaitForLineAdvanceAsync(token);
     }
 
-    private void HideBoxDuringSeek()
+    private LinePresentationRun BeginLinePresentationRun()
     {
-        CloseAll();
+        CancelLineVisualToken();
+
+        _lineVisualCts = CancellationTokenSource.CreateLinkedTokenSource(_presenterLifetimeCts.Token);
+
+        return new LinePresentationRun(
+            _presenterGeneration,
+            () => _presenterGeneration,
+            _lineVisualCts.Token);
     }
 
-    private void PrimeTextTarget(IDialogueTextTarget nextBox, LocalizedLine line)
+    private void CancelLineVisualToken()
     {
-        if (nextBox == null)
+        if (_lineVisualCts == null)
             return;
 
-        TMP_Text lineText = nextBox.LineText;
-        if (lineText != null)
-        {
-            lineText.text = line.TextWithoutCharacterName.Text;
-            lineText.maxVisibleCharacters = 0;
-            lineText.ForceMeshUpdate();
-        }
-
-        TMP_Text nameText = nextBox.NameText;
-        if (nameText != null)
-        {
-            bool showName = !string.IsNullOrWhiteSpace(line.CharacterName);
-
-            nameText.text = showName
-                ? line.CharacterName
-                : string.Empty;
-
-            nameText.gameObject.SetActive(showName);
-        }
+        _lineVisualCts.Cancel();
+        _lineVisualCts.Dispose();
+        _lineVisualCts = null;
     }
 
     private async YarnTask WaitForLineAdvanceAsync(LineCancellationToken token)
@@ -278,293 +224,21 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
         _presenterLifetimeCts = new CancellationTokenSource();
     }
 
-    private void PrepareBoxForTransition(
-        IDialogueTextTarget nextBox,
-        DialogueBoxTransitionKind transitionKind)
-    {
-        DialogueBoxHost host = _dialogueBoxResolver as DialogueBoxHost;
-
-        switch (transitionKind)
-        {
-            case DialogueBoxTransitionKind.Keep:
-                break;
-
-            case DialogueBoxTransitionKind.Cut:
-                if (host != null)
-                {
-                    host.HideAllExcept(nextBox);
-                    host.ShowImmediate(nextBox);
-                }
-                else
-                {
-                    _dialogueBoxResolver.HideAll();
-                    SetBoxVisibleImmediate(nextBox, true);
-                }
-
-                break;
-
-            case DialogueBoxTransitionKind.FadeIn:
-                if (host != null)
-                {
-                    host.HideAllExcept(nextBox);
-                    host.PrepareHidden(nextBox);
-                }
-                else
-                {
-                    _dialogueBoxResolver.HideAll();
-                    PrepareBoxHidden(nextBox);
-                }
-
-                break;
-
-            case DialogueBoxTransitionKind.FadeOutIn:
-                PrepareBoxHidden(nextBox);
-                break;
-
-            case DialogueBoxTransitionKind.Hide:
-                break;
-        }
-    }
-
-    private async YarnTask ApplyBoxTransitionAsync(
-        IDialogueTextTarget previousBox,
-        IDialogueTextTarget nextBox,
-        DialogueBoxTransitionKind transitionKind,
-        LineCancellationToken token,
-        Func<bool> isStale)
-    {
-        if (!useFadeEffect || ShouldFastForwardLine())
-        {
-            if (!isStale())
-                ApplyBoxTransitionImmediate(previousBox, nextBox, transitionKind);
-
-            return;
-        }
-
-        switch (transitionKind)
-        {
-            case DialogueBoxTransitionKind.Keep:
-                if (!isStale())
-                    SetBoxVisibleImmediate(nextBox, true);
-                break;
-
-            case DialogueBoxTransitionKind.Cut:
-                if (!isStale())
-                    ApplyBoxTransitionImmediate(previousBox, nextBox, transitionKind);
-                break;
-
-            case DialogueBoxTransitionKind.FadeIn:
-                await FadeInBoxAsync(nextBox, token, isStale);
-                break;
-
-            case DialogueBoxTransitionKind.FadeOutIn:
-                if (previousBox != null && !ReferenceEquals(previousBox, nextBox))
-                    await FadeOutBoxAsync(previousBox, token, isStale);
-
-                if (isStale())
-                    break;
-
-                SetBoxVisibleImmediate(previousBox, false);
-                PrepareBoxHidden(nextBox);
-
-                await FadeInBoxAsync(nextBox, token, isStale);
-                break;
-
-            case DialogueBoxTransitionKind.Hide:
-                if (nextBox != null)
-                    await FadeOutBoxAsync(nextBox, token, isStale);
-
-                if (!isStale())
-                    SetBoxVisibleImmediate(nextBox, false);
-                break;
-        }
-    }
-
-    private void ApplyBoxTransitionImmediate(
-        IDialogueTextTarget previousBox,
-        IDialogueTextTarget nextBox,
-        DialogueBoxTransitionKind transitionKind)
-    {
-        switch (transitionKind)
-        {
-            case DialogueBoxTransitionKind.Keep:
-                SetBoxVisibleImmediate(nextBox, true);
-                break;
-
-            case DialogueBoxTransitionKind.Cut:
-            case DialogueBoxTransitionKind.FadeIn:
-                HideAllExcept(nextBox);
-                SetBoxVisibleImmediate(nextBox, true);
-                break;
-
-            case DialogueBoxTransitionKind.FadeOutIn:
-                if (previousBox != null && !ReferenceEquals(previousBox, nextBox))
-                    SetBoxVisibleImmediate(previousBox, false);
-
-                HideAllExcept(nextBox);
-                SetBoxVisibleImmediate(nextBox, true);
-                break;
-
-            case DialogueBoxTransitionKind.Hide:
-                SetBoxVisibleImmediate(nextBox, false);
-                break;
-        }
-    }
-
-    private async YarnTask FadeInBoxAsync(
-        IDialogueTextTarget box,
-        LineCancellationToken token,
-        Func<bool> isStale)
-    {
-        if (box == null || box.CanvasGroup == null)
-            return;
-
-        CanvasGroup cg = box.CanvasGroup;
-
-        if (!isStale())
-        {
-            SetBoxVisibleImmediate(box, true);
-            cg.alpha = 0f;
-        }
-
-        await Effects
-            .FadeAlphaAsync(cg, 0f, 1f, fadeUpDuration, token.HurryUpToken)
-            .SuppressCancellationThrow();
-
-        if (isStale())
-            return;
-
-        cg.alpha = 1f;
-        cg.interactable = true;
-        cg.blocksRaycasts = true;
-    }
-
-    private async YarnTask FadeOutBoxAsync(
-        IDialogueTextTarget box,
-        LineCancellationToken token,
-        Func<bool> isStale)
-    {
-        if (box == null || box.CanvasGroup == null)
-            return;
-
-        CanvasGroup cg = box.CanvasGroup;
-        float fromAlpha = cg.alpha;
-
-        await Effects
-            .FadeAlphaAsync(cg, fromAlpha, 0f, fadeDownDuration, token.HurryUpToken)
-            .SuppressCancellationThrow();
-
-        if (isStale())
-            return;
-
-        cg.alpha = 0f;
-        cg.interactable = false;
-        cg.blocksRaycasts = false;
-    }
-
-    private void CleanupStaleLinePresentation(IDialogueTextTarget previousBox, IDialogueTextTarget nextBox)
-    {
-        // Stale 실행본은 더 이상 현재 TextRouter/Typewriter의 주인이 아니다.
-        // 여기서 _typewriter.SetTextView(null) 또는 _dialogueTextRouter.Clear()를 호출하면,
-        // 새 rollback target line이 이미 바인딩한 TMP_Text를 뒤늦게 비워버릴 수 있다.
-        //
-        // 따라서 stale cleanup은 "이 실행본이 transition 중 임시로 건드렸을 수 있는 box"만 정리한다.
-
-        if (nextBox != null && !ReferenceEquals(nextBox, _boxState.Box))
-            SetBoxVisibleImmediate(nextBox, false);
-
-        if (previousBox != null &&
-            !ReferenceEquals(previousBox, _boxState.Box) &&
-            !ReferenceEquals(previousBox, nextBox))
-        {
-            SetBoxVisibleImmediate(previousBox, false);
-        }
-
-        if (_boxState.IsVisible && _boxState.Box != null)
-            SetBoxVisibleImmediate(_boxState.Box, true);
-    }
-
-    private void PrepareBoxHidden(IDialogueTextTarget box)
-    {
-        if (box == null)
-            return;
-
-        IPresentationDialogueBoxView view = box as IPresentationDialogueBoxView;
-        if (view != null)
-            view.SetVisible(true);
-
-        if (box.CanvasGroup != null)
-        {
-            box.CanvasGroup.alpha = 0f;
-            box.CanvasGroup.interactable = false;
-            box.CanvasGroup.blocksRaycasts = false;
-        }
-    }
-
-    private void SetBoxVisibleImmediate(IDialogueTextTarget box, bool visible)
-    {
-        if (box == null)
-            return;
-
-        IPresentationDialogueBoxView view = box as IPresentationDialogueBoxView;
-        if (view != null)
-        {
-            view.SetVisible(visible);
-
-            if (view.CanvasGroup != null)
-            {
-                view.CanvasGroup.alpha = visible ? 1f : 0f;
-                view.CanvasGroup.interactable = visible;
-                view.CanvasGroup.blocksRaycasts = visible;
-            }
-
-            return;
-        }
-
-        if (box.CanvasGroup != null)
-        {
-            box.CanvasGroup.alpha = visible ? 1f : 0f;
-            box.CanvasGroup.interactable = visible;
-            box.CanvasGroup.blocksRaycasts = visible;
-        }
-    }
-
-    private void HideAllExcept(IDialogueTextTarget keep)
-    {
-        DialogueBoxHost host = _dialogueBoxResolver as DialogueBoxHost;
-        if (host != null)
-        {
-            host.HideAllExcept(keep);
-            return;
-        }
-
-        _dialogueBoxResolver.HideAll();
-
-        if (keep != null)
-            SetBoxVisibleImmediate(keep, true);
-    }
-
     private bool ShouldFastForwardLine()
     {
-        if (_context == null)
-            return false;
-
         return _lineAdvanceState.IsSeeking || _context.IsSpeedUpMode;
     }
 
     private void CloseAll()
     {
-        _dialogueBoxResolver?.HideAll();
-        _dialogueTextRouter?.Clear();
-
-        _typewriter?.SetTextView(null);
-
-        _boxState.Reset();
+        _boxPresentation.CloseAll();
+        _typewriter.SetTextView(null);
     }
 
     private void RegisterBeforeDefaultLinePresenter(DialogueRunner dialogueRunner)
     {
         List<DialoguePresenterBase> presenters = new List<DialoguePresenterBase>(dialogueRunner.DialoguePresenters);
+
         presenters.Remove(this);
 
         int insertIndex = presenters.FindIndex(x => x is LinePresenter);
@@ -575,28 +249,10 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
         dialogueRunner.DialoguePresenters = presenters;
     }
 
-    private static void ResetBoxTransform(IDialogueTextTarget box)
-    {
-        if (box == null)
-            return;
-
-        MonoBehaviour behaviour = box as MonoBehaviour;
-        if (behaviour == null)
-            return;
-
-        RectTransform rect = behaviour.transform as RectTransform;
-        if (rect != null)
-        {
-            rect.localPosition = Vector3.zero;
-            rect.anchoredPosition = Vector2.zero;
-            return;
-        }
-
-        behaviour.transform.localPosition = Vector3.zero;
-    }
-
     private void OnDestroy()
     {
+        CancelLineVisualToken();
+
         if (_presenterLifetimeCts != null)
         {
             _presenterLifetimeCts.Cancel();
@@ -604,24 +260,34 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
             _presenterLifetimeCts = null;
         }
     }
-    
+
     private void Trace(string evt, LocalizedLine line = null, string note = null)
     {
         if (_trace == null)
             return;
 
         string lineInfo = line == null
-            ? ""
-            : $"line={line.TextID}, char={line.CharacterName ?? ""}";
+            ? string.Empty
+            : $"line={line.TextID}, char={line.CharacterName ?? string.Empty}";
 
         string state = _lineAdvanceState == null
             ? "lineState=null"
             : _lineAdvanceState.Snapshot();
 
-        string finalNote = string.IsNullOrWhiteSpace(note)
-            ? lineInfo
-            : $"{lineInfo}, {note}";
+        string finalNote;
 
-        _trace.Trace("###CustomLinePresenter", evt, state, finalNote, this);
+        if (string.IsNullOrWhiteSpace(note))
+            finalNote = lineInfo;
+        else if (string.IsNullOrWhiteSpace(lineInfo))
+            finalNote = note;
+        else
+            finalNote = $"{lineInfo}, {note}";
+
+        _trace.Trace(
+            "CustomLinePresenter",
+            evt,
+            state,
+            finalNote,
+            this);
     }
 }
