@@ -290,7 +290,7 @@ public sealed class CommandExecutor : MonoBehaviour
             {
                 Trace($"Cleanup active scope: policy={policy}");
 
-                _activeScope.ClearRuntimeState();
+                _activeScope.ClearRuntimeState(policy);
                 _activeScope = null;
             }
 
