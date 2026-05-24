@@ -36,18 +36,15 @@ public sealed class VNSeekState
         _trace = trace;
     }
 
-    public void BeginRollbackSeek(string nodeName, string lineId)
+    public void Begin(VNSeekKind kind, string nodeName, string lineId)
     {
-        BeginSeek(VNSeekKind.Rollback, nodeName, lineId);
-    }
+        if (kind == VNSeekKind.None)
+        {
+            UnityEngine.Debug.LogWarning("[VNSeekState] Begin ignored. kind=None is not a valid seek kind.");
+            Trace("BeginIgnored", $"reason=KindNone, target={nodeName}/{lineId}");
+            return;
+        }
 
-    public void BeginLoadSeek(string nodeName, string lineId)
-    {
-        BeginSeek(VNSeekKind.Load, nodeName, lineId);
-    }
-
-    private void BeginSeek(VNSeekKind kind, string nodeName, string lineId)
-    {
         Kind = kind;
         Phase = VNSeekPhase.Seeking;
 
@@ -57,10 +54,20 @@ public sealed class VNSeekState
         PendingNodeName = null;
         PendingLineId = null;
 
-        Trace("BeginSeek", $"kind={kind}, target={nodeName}/{lineId}");
+        Trace("Begin", $"kind={kind}, target={nodeName}/{lineId}");
     }
 
-    public bool IsTarget(YarnLineMeta meta)
+    public bool IsSeekingKind(VNSeekKind kind)
+    {
+        return Kind == kind && Phase == VNSeekPhase.Seeking;
+    }
+
+    public bool IsActiveKind(VNSeekKind kind)
+    {
+        return Kind == kind && Phase != VNSeekPhase.None;
+    }
+
+    public bool IsCurrentTarget(YarnLineMeta meta)
     {
         if (Phase != VNSeekPhase.Seeking)
             return false;
@@ -68,6 +75,7 @@ public sealed class VNSeekState
         if (!string.Equals(meta.nodeName, TargetNodeName, StringComparison.Ordinal))
             return false;
 
+        // Empty lineId means "restore to the first line that enters this node".
         if (string.IsNullOrWhiteSpace(TargetLineId))
             return true;
 
@@ -78,18 +86,17 @@ public sealed class VNSeekState
     {
         if (Phase != VNSeekPhase.Seeking)
         {
-            Trace("MarkTargetReachedIgnored", $"meta={FormatMeta(meta)}, reason=phase_not_seeking");
+            Trace("MarkTargetReachedIgnored", $"meta={FormatMeta(meta)}, reason=PhaseNotSeeking");
             return false;
         }
 
-        if (!IsTarget(meta))
+        if (!IsCurrentTarget(meta))
         {
-            Trace("MarkTargetReachedIgnored", $"meta={FormatMeta(meta)}, reason=not_target");
+            Trace("MarkTargetReachedIgnored", $"meta={FormatMeta(meta)}, reason=NotTarget");
             return false;
         }
 
         Phase = VNSeekPhase.TargetLinePending;
-
         PendingNodeName = meta.nodeName;
         PendingLineId = meta.lineId;
 
@@ -108,33 +115,39 @@ public sealed class VNSeekState
         return string.Equals(PendingLineId, lineId, StringComparison.Ordinal);
     }
 
-    public bool ConsumeTargetLine(string lineId)
+    public bool ConsumePendingTargetLine(string lineId)
     {
         if (Phase != VNSeekPhase.TargetLinePending)
         {
-            Trace("ConsumeTargetLineIgnored", $"line={lineId}, reason=phase_not_pending");
+            Trace("ConsumePendingTargetLineIgnored", $"line={lineId}, reason=PhaseNotPending");
             return false;
         }
 
         if (string.IsNullOrWhiteSpace(PendingLineId))
         {
-            Trace("ConsumeTargetLineIgnored", $"line={lineId}, reason=pending_line_empty");
+            Trace("ConsumePendingTargetLineIgnored", $"line={lineId}, reason=PendingLineEmpty");
             return false;
         }
 
         if (!string.Equals(PendingLineId, lineId, StringComparison.Ordinal))
         {
-            Trace("ConsumeTargetLineIgnored", $"line={lineId}, pending={PendingLineId}, reason=line_mismatch");
+            Trace("ConsumePendingTargetLineIgnored", $"line={lineId}, pending={PendingLineId}, reason=LineMismatch");
             return false;
         }
 
-        Trace("ConsumeTargetLine", $"line={lineId}");
-        Clear("ConsumeTargetLine");
+        Trace("ConsumePendingTargetLine", $"line={lineId}");
+        Clear("ConsumePendingTargetLine");
         return true;
     }
 
     public void Clear(string reason = "Clear")
     {
+        if (Phase == VNSeekPhase.None && Kind == VNSeekKind.None)
+        {
+            Trace("ClearIgnored", $"reason={reason}, alreadyClear=True");
+            return;
+        }
+
         Trace("ClearRequested", $"reason={reason}");
 
         Kind = VNSeekKind.None;

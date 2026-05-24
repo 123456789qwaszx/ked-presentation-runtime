@@ -4,22 +4,31 @@ public sealed class LinePresentationAdvanceState
     private readonly VNLinePresentationState _line;
     private readonly VNTraceStream _trace;
 
-    // seek.IsActive가 이미 커버하지만, 전환 기간 안전망으로 유지.
-    // VNSeekState 단독으로 충분히 안정화되면 제거 예정.
     private bool _rollbackPointBlocked;
 
-    public bool CanRecordRollbackPoint => !_rollbackPointBlocked && !_seek.IsActive;
+    public VNSeekKind SeekKind => _seek.Kind;
+    public VNSeekPhase SeekPhase => _seek.Phase;
 
-    public string TargetNodeName => _seek.TargetNodeName;
-
+    public bool IsSeekActive => _seek.IsActive;
     public bool IsSeeking => _seek.IsSeeking;
-    public bool IsSeekingActive => _seek.IsActive;
+    public bool IsTargetLinePending => _seek.IsTargetLinePending;
+
+    public bool IsRollbackSeeking => _seek.IsSeekingKind(VNSeekKind.Rollback);
+    public bool IsRollbackSeekActive => _seek.IsActiveKind(VNSeekKind.Rollback);
+
+    public bool IsLoadSeeking => _seek.IsSeekingKind(VNSeekKind.Load);
+    public bool IsLoadSeekActive => _seek.IsActiveKind(VNSeekKind.Load);
+
     public bool IsLineFullyShown => _line.IsFullyShown;
 
-    // Legacy compatibility aliases.
-    public string RollbackTargetNodeName => TargetNodeName;
-    public bool IsRollbackSeeking => IsSeeking;
-    public bool IsRollbackActive => IsSeekingActive;
+    // Kept because rollback history is a separate concept from seek ownership.
+    public bool CanRecordRollbackPoint => !_rollbackPointBlocked && !_seek.IsActive;
+
+    // These aliases keep the rest of the current code compiling while the call sites migrate.
+    public bool IsSeekingActive => IsSeekActive;
+    public bool IsRollbackActive => IsRollbackSeekActive;
+    public string TargetNodeName => _seek.TargetNodeName;
+    public string RollbackTargetNodeName => _seek.TargetNodeName;
 
     public LinePresentationAdvanceState()
         : this(null)
@@ -33,100 +42,63 @@ public sealed class LinePresentationAdvanceState
         _line = new VNLinePresentationState(trace);
     }
 
-    public bool IsRollbackSeekTarget(YarnLineMeta meta)
+    public void StartRollbackSeek(string nodeName, string lineId)
     {
-        bool result = _seek.IsTarget(meta);
-        Trace("IsRollbackSeekTarget", $"meta={FormatMeta(meta)}, result={result}");
+        StartSeek(VNSeekKind.Rollback, nodeName, lineId);
+    }
+
+    public void StartLoadSeek(string nodeName, string lineId)
+    {
+        StartSeek(VNSeekKind.Load, nodeName, lineId);
+    }
+
+    private void StartSeek(VNSeekKind kind, string nodeName, string lineId)
+    {
+        _rollbackPointBlocked = true;
+        _line.MarkLineEntered();
+        _seek.Begin(kind, nodeName, lineId);
+
+        Trace("StartSeek", $"kind={kind}, target={nodeName}/{lineId}");
+    }
+
+    public bool IsSeekTarget(YarnLineMeta meta)
+    {
+        bool result = _seek.IsCurrentTarget(meta);
+        Trace("IsSeekTarget", $"meta={FormatMeta(meta)}, result={result}");
         return result;
     }
 
-    public bool IsRollbackTargetLine(string lineId)
+    public bool IsPendingSeekTargetLine(string lineId)
     {
         bool result = _seek.IsPendingTargetLine(lineId);
-        Trace("IsRollbackTargetLine", $"line={lineId}, result={result}");
+        Trace("IsPendingSeekTargetLine", $"line={lineId}, result={result}");
         return result;
     }
 
-    public void BeginRollbackSeek(string nodeName, string lineId)
-    {
-        _rollbackPointBlocked = true;
-        _line.MarkLineEntered();
-        _seek.BeginRollbackSeek(nodeName, lineId);
-
-        Trace("BeginRollbackSeek", $"target={nodeName}/{lineId}");
-    }
-
-    public void MarkLoadSeek(string nodeName, string lineId)
-    {
-        _rollbackPointBlocked = true;
-        _line.MarkLineEntered();
-        _seek.BeginLoadSeek(nodeName, lineId);
-
-        Trace("MarkLoadSeek", $"target={nodeName}/{lineId}");
-    }
-
-    public void PrepareRollbackTargetLine(YarnLineMeta meta)
+    public bool MarkSeekTargetReached(YarnLineMeta meta)
     {
         bool reached = _seek.MarkTargetReached(meta);
-        Trace("PrepareRollbackTargetLine(meta)", $"meta={FormatMeta(meta)}, reached={reached}");
+        Trace("MarkSeekTargetReached", $"meta={FormatMeta(meta)}, reached={reached}");
+        return reached;
     }
 
-    public void PrepareRollbackTargetLine()
+    public bool ConsumeSeekTargetLine(string lineId)
     {
-        if (string.IsNullOrWhiteSpace(_seek.TargetLineId))
-        {
-            Trace("PrepareRollbackTargetLineIgnored", "reason=no_meta_and_empty_target_line");
-
-            UnityEngine.Debug.LogWarning(
-                "[LinePresentationAdvanceState] PrepareRollbackTargetLine() was called without meta, " +
-                "but TargetLineId is empty. Node-start seek must call PrepareRollbackTargetLine(YarnLineMeta).");
-
-            return;
-        }
-
-        YarnLineMeta fallback = new YarnLineMeta(
-            _seek.TargetNodeName,
-            _seek.TargetLineId,
-            rawText: "",
-            charName: "");
-
-        bool reached = _seek.MarkTargetReached(fallback);
-        Trace("PrepareRollbackTargetLine()", $"fallback={FormatMeta(fallback)}, reached={reached}");
-    }
-
-    public bool ConsumeRollbackTargetLine(string lineId)
-    {
-        bool consumed = _seek.ConsumeTargetLine(lineId);
+        bool consumed = _seek.ConsumePendingTargetLine(lineId);
 
         if (consumed)
             _rollbackPointBlocked = false;
 
-        Trace("ConsumeRollbackTargetLine(lineId)", $"line={lineId}, consumed={consumed}");
-
+        Trace("ConsumeSeekTargetLine", $"line={lineId}, consumed={consumed}");
         return consumed;
     }
 
-    public bool ConsumeRollbackTargetLine()
+    public void ClearSeek(string reason = "ClearSeek")
     {
-        if (string.IsNullOrWhiteSpace(_seek.PendingLineId))
-        {
-            Trace("ConsumeRollbackTargetLineIgnored", "reason=pending_line_empty");
-
-            UnityEngine.Debug.LogWarning(
-                "[LinePresentationAdvanceState] ConsumeRollbackTargetLine() ignored. PendingLineId is empty.");
-
-            return false;
-        }
-
-        return ConsumeRollbackTargetLine(_seek.PendingLineId);
-    }
-
-    public void ClearRollbackSeek()
-    {
-        _seek.Clear("ClearRollbackSeek");
+        _seek.Clear(reason);
         _rollbackPointBlocked = false;
 
-        Trace("ClearRollbackSeek");
+        Trace("ClearSeek", $"reason={reason}");
     }
 
     public void MarkLineEntered()
@@ -143,8 +115,7 @@ public sealed class LinePresentationAdvanceState
 
     public void Reset()
     {
-        _seek.Clear("Reset");
-        _rollbackPointBlocked = false;
+        ClearSeek("Reset");
         _line.Reset();
 
         Trace("Reset");

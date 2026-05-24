@@ -71,10 +71,10 @@ Leafia: 이번에 저희[emoji key="08"/] 컴퍼니를 선택[emoji ="18"/]해 �
 <<shot_zoom_focus Leafia face right 2 0.5>>
 어둠 속에서 누군가가 나직한 목소리로 물었다.
 
-<<shot_reset>>
-<<spawn_bg bg1>>
-<<spawn_bg rigKey 1 white>>
-<<tx_slant_in stage01 0.65>>
+// <<shot_reset>>
+// <<spawn_bg bg1>>
+// <<spawn_bg rigKey 1 white>>
+// <<tx_slant_in stage01 0.65>>
 
 상대방인 의심스러운 사람이 품 안에서 소중한 듯 무언가를 꺼내 보이며 대꾸했다.
 

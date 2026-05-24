@@ -34,7 +34,7 @@ public sealed class RollbackController : IDisposable
     {
         Trace("RequestRollbackOneStep");
 
-        if (_lineAdvanceState.IsSeekingActive)
+        if (_lineAdvanceState.IsSeekActive)
         {
             Trace("RequestRollbackOneStepRejected", "reason=SeekActive");
             return false;
@@ -48,8 +48,7 @@ public sealed class RollbackController : IDisposable
 
         Trace("RequestRollbackOneStepAccepted", $"target={target.nodeName}/{target.lineId}, historyIndex={target.historyIndex}");
 
-        _lineAdvanceState.BeginRollbackSeek(target.nodeName, target.lineId);
-
+        _lineAdvanceState.StartRollbackSeek(target.nodeName, target.lineId);
         return true;
     }
 
@@ -57,9 +56,9 @@ public sealed class RollbackController : IDisposable
     {
         Trace("RequestRollbackToHistoryIndex", $"historyIndex={historyIndex}");
 
-        if (_lineAdvanceState.IsSeekingActive)
+        if (_lineAdvanceState.IsSeekActive)
         {
-            Trace("RequestRollbackToHistoryIndexRejected", "seek already active");
+            Trace("RequestRollbackToHistoryIndexRejected", "reason=SeekActive");
             return false;
         }
 
@@ -71,31 +70,24 @@ public sealed class RollbackController : IDisposable
 
         Trace("RequestRollbackToHistoryIndexAccepted", $"target={target.nodeName}/{target.lineId}, historyIndex={target.historyIndex}");
 
-        _lineAdvanceState.BeginRollbackSeek(
-            target.nodeName,
-            target.lineId);
-
+        _lineAdvanceState.StartRollbackSeek(target.nodeName, target.lineId);
         return true;
     }
 
     private void HandleLineEnteredDuringRollbackSeek(YarnLineMeta meta)
     {
-        if (!_lineAdvanceState.IsSeeking)
+        if (!_lineAdvanceState.IsRollbackSeeking)
             return;
 
         Trace("LineEnteredDuringRollbackSeek", $"meta={FormatMeta(meta)}");
 
-        bool isTarget = _lineAdvanceState.IsRollbackSeekTarget(meta);
+        bool isTarget = _lineAdvanceState.IsSeekTarget(meta);
         Trace("CheckRollbackTarget", $"meta={FormatMeta(meta)}, result={isTarget}");
 
         if (isTarget)
         {
             Trace("RollbackTargetReached", $"meta={FormatMeta(meta)}");
-
-            // Logging current behavior:
-            // This no-arg version is safe only if target line id is known.
-            _lineAdvanceState.PrepareRollbackTargetLine();
-
+            _lineAdvanceState.MarkSeekTargetReached(meta);
             return;
         }
 

@@ -44,7 +44,7 @@ public sealed class VNLoadSeekDriver : IVNLoadSeekDriver, IDisposable
         if (_isSeeking)
         {
             Debug.LogWarning("[VNLoadSeekDriver] PrepareForLoad ignored. Already seeking.");
-            Trace("PrepareForLoadIgnored", "already seeking");
+            Trace("PrepareForLoadIgnored", "reason=AlreadySeeking");
             return;
         }
 
@@ -63,7 +63,7 @@ public sealed class VNLoadSeekDriver : IVNLoadSeekDriver, IDisposable
         if (saveData == null)
         {
             Debug.LogError("[VNLoadSeekDriver] BeginSeek failed. saveData is null.");
-            Trace("BeginSeekFailed", "saveData=null");
+            Trace("BeginSeekFailed", "reason=SaveDataNull");
             Fail(onFail);
             return;
         }
@@ -72,22 +72,22 @@ public sealed class VNLoadSeekDriver : IVNLoadSeekDriver, IDisposable
 
         if (!saveData.HasValidTarget())
         {
-            Debug.LogError("[VNLoadSeekDriver] BeginSeek failed. saveData has no nodeName.");
-            Trace("BeginSeekFailed", $"invalid target slot={saveData.slotId}");
+            Debug.LogError("[VNLoadSeekDriver] BeginSeek failed. saveData has no valid target.");
+            Trace("BeginSeekFailed", $"reason=InvalidTarget, slot={saveData.slotId}");
             Fail(onFail);
             return;
         }
-
-        Trace("BeginSeekBeforeMarkLoadSeek", $"target={saveData.nodeName}/{saveData.lineId}");
-
-        _lineAdvanceState?.MarkLoadSeek(saveData.nodeName, saveData.lineId);
 
         _target = saveData;
         _hasTarget = true;
         _onComplete = onComplete;
         _onFail = onFail;
 
-        Trace("BeginSeekAfterMarkLoadSeek", $"target={saveData.nodeName}/{saveData.lineId}");
+        Trace("BeginSeekBeforeStartLoadSeek", $"target={saveData.nodeName}/{saveData.lineId}");
+
+        _lineAdvanceState?.StartLoadSeek(saveData.nodeName, saveData.lineId);
+
+        Trace("BeginSeekAfterStartLoadSeek", $"target={saveData.nodeName}/{saveData.lineId}");
 
         Subscribe();
 
@@ -109,7 +109,15 @@ public sealed class VNLoadSeekDriver : IVNLoadSeekDriver, IDisposable
     {
         if (!_isSeeking)
         {
-            Trace("LineEnteredIgnored", $"meta={FormatMeta(meta)}, reason=driver_not_seeking");
+            Trace("LineEnteredIgnored", $"meta={FormatMeta(meta)}, reason=DriverNotSeeking");
+            return;
+        }
+
+        if (_lineAdvanceState != null && !_lineAdvanceState.IsLoadSeeking)
+        {
+            Trace(
+                "LineEnteredIgnored",
+                $"meta={FormatMeta(meta)}, reason=LineStateNotLoadSeeking, seekKind={_lineAdvanceState.SeekKind}, seekPhase={_lineAdvanceState.SeekPhase}");
             return;
         }
 
@@ -129,10 +137,9 @@ public sealed class VNLoadSeekDriver : IVNLoadSeekDriver, IDisposable
         {
             Trace("TargetReached", $"meta={FormatMeta(meta)}");
 
-            // Logging pass only:
-            // Do not change behavior yet.
-            // Next patch will likely call:
-            // _lineAdvanceState?.PrepareRollbackTargetLine(meta);
+            // Do not clear line seek state in Complete(). The pending target must survive
+            // until CustomLinePresenter consumes this exact line.
+            _lineAdvanceState?.MarkSeekTargetReached(meta);
 
             Complete();
             return;
@@ -144,16 +151,16 @@ public sealed class VNLoadSeekDriver : IVNLoadSeekDriver, IDisposable
 
     private bool IsTarget(YarnLineMeta meta)
     {
-        if (!_hasTarget)
+        if (!_hasTarget || _target == null)
             return false;
 
-        if (meta.nodeName != _target.nodeName)
+        if (!string.Equals(meta.nodeName, _target.nodeName, StringComparison.Ordinal))
             return false;
 
         if (string.IsNullOrWhiteSpace(_target.lineId))
             return true;
 
-        return meta.lineId == _target.lineId;
+        return string.Equals(meta.lineId, _target.lineId, StringComparison.Ordinal);
     }
 
     private void Complete()
@@ -199,6 +206,8 @@ public sealed class VNLoadSeekDriver : IVNLoadSeekDriver, IDisposable
         _onComplete = null;
         _onFail = null;
 
+        // Intentionally do not call _lineAdvanceState.ClearSeek() here.
+        // TargetLinePending belongs to CustomLinePresenter until ConsumeSeekTargetLine().
         Trace("CleanupInternalStateAfter");
     }
 
@@ -206,7 +215,7 @@ public sealed class VNLoadSeekDriver : IVNLoadSeekDriver, IDisposable
     {
         if (_bridge == null)
         {
-            Trace("SubscribeSkipped", "bridge=null");
+            Trace("SubscribeSkipped", "reason=BridgeNull");
             return;
         }
 
@@ -237,11 +246,7 @@ public sealed class VNLoadSeekDriver : IVNLoadSeekDriver, IDisposable
         if (_trace == null)
             return;
 
-        _trace.Trace(
-            nameof(VNLoadSeekDriver),
-            evt,
-            StateSnapshot(),
-            note);
+        _trace.Trace(nameof(VNLoadSeekDriver), evt, StateSnapshot(), note);
     }
 
     private string StateSnapshot()

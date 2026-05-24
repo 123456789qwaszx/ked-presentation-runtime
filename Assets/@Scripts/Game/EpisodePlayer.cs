@@ -70,8 +70,8 @@ public sealed class EpisodePlayer : MonoBehaviour
         _nodeRollbackHistory.ClearRollbackHistory();
         _backlogRecorder.ClearBacklog();
         
-        if (dialogueRunner.IsDialogueRunning)
-            dialogueRunner.Stop();
+        // if (dialogueRunner.IsDialogueRunning)
+        //     dialogueRunner.Stop();
 
         _linePresentationAborter?.AbortCurrentLinePresentationForRollback();
         presentationRouteEntry.RequestEnd();

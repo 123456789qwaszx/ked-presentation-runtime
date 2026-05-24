@@ -23,19 +23,22 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
     private EllipsisBreathTypewriter _typewriter;
     private PresentationSessionContext _context;
     private LinePresentationAdvanceState _lineAdvanceState;
-    
+
     private VNTraceStream _trace;
 
     private readonly DialogueBoxTransitionPolicy _boxTransitionPolicy = new();
     private readonly DialogueBoxCurrentState _boxState = new();
-    
+
 
     private int _presenterGeneration;
-    private CancellationTokenSource _presenterLifetimeCts = new CancellationTokenSource(); // 외부 시스템이 이 Presenter의 실행을 무효화하는 신호
-    
-    
-    [UnityEngine.Serialization.FormerlySerializedAs("actionMarkupHandlers")]
-    [SerializeField] List<ActionMarkupHandler> eventHandlers = new List<ActionMarkupHandler>();
+
+    private CancellationTokenSource
+        _presenterLifetimeCts = new CancellationTokenSource(); // 외부 시스템이 이 Presenter의 실행을 무효화하는 신호
+
+
+    [UnityEngine.Serialization.FormerlySerializedAs("actionMarkupHandlers")] [SerializeField]
+    List<ActionMarkupHandler> eventHandlers = new List<ActionMarkupHandler>();
+
     private List<IActionMarkupHandler> ActionMarkupHandlers
     {
         get
@@ -64,7 +67,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
         _dialogueBoxResolver = dialogueBoxResolver;
         _dialogueTextRouter = dialogueTextRouter;
         _typewriter = typewriter;
-        
+
         _typewriter.ActionMarkupHandlers = ActionMarkupHandlers;
         _context = context;
         _lineAdvanceState = lineAdvanceState;
@@ -97,7 +100,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
         CloseAll();
         return YarnTask.CompletedTask;
     }
-    
+
     private void Trace(string evt, LocalizedLine line = null, string note = null)
     {
         if (_trace == null)
@@ -119,74 +122,73 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
     }
 
     public event Action<LocalizedLine> LineEntered;
-    
+
     public override async YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token)
     {
         Trace("RunLineStart", line);
         LineEntered?.Invoke(line);
-        
+
         _lineAdvanceState.MarkLineEntered();
 
         Trace("AfterLineEnteredEvent", line);
-        
+
         int myGeneration = _presenterGeneration;
 
         bool IsStale()
         {
             return myGeneration != _presenterGeneration;
         }
-        
-        bool isPendingSeekTargetLine = _lineAdvanceState.IsRollbackTargetLine(line.TextID);
+
+        bool isPendingSeekTargetLine = _lineAdvanceState.IsPendingSeekTargetLine(line.TextID);
+        bool shouldPassThroughSeekLine = _lineAdvanceState.IsSeeking && !isPendingSeekTargetLine;
+
         Trace(
             "SeekCheck",
             line,
             $"isSeeking={_lineAdvanceState.IsSeeking}, isPendingTarget={isPendingSeekTargetLine}");
 
-        // Skip visual presentation for lines passed during rollback seek.
-        // Keep the Yarn line lifecycle alive until the runner requests next content.
-        if (_lineAdvanceState.IsSeeking && !_lineAdvanceState.IsRollbackTargetLine(line.TextID))
+        if (shouldPassThroughSeekLine)
         {
             Trace("SilentSeekPassThrough", line);
-            
-            HideBoxDuringRollbackSeek();
+
+            HideBoxDuringSeek();
 
             _lineAdvanceState.MarkLineDisplayCompleted();
 
             await WaitForLineAdvanceAsync(token);
             return;
         }
-        
+
         if (isPendingSeekTargetLine)
             Trace("SeekTargetLineAccepted", line);
-        
+
         IDialogueTextTarget currentBox = _boxState.Box;
         DialogueBoxKind? currentBoxKind = _boxState.BoxKind;
         bool currentBoxIsVisible = _boxState.IsVisible;
-        
-        DialogueBoxKind nextBoxKind = _lineRoutingPolicy.Resolve(line.Metadata, !string.IsNullOrWhiteSpace(line.CharacterName));
+
+        DialogueBoxKind nextBoxKind = _lineRoutingPolicy.Resolve(
+            line.Metadata,
+            !string.IsNullOrWhiteSpace(line.CharacterName));
+
         IDialogueTextTarget nextBox = _dialogueBoxResolver.ResolveTarget(nextBoxKind);
         ResetBoxTransform(nextBox);
-        
+
         DialogueBoxTransitionKind transitionKind =
             _boxTransitionPolicy.Resolve(
                 currentBoxKind,
                 currentBoxIsVisible,
                 nextBoxKind,
                 line.Metadata,
-                !_lineAdvanceState.IsRollbackTargetLine(line.TextID) && ShouldFastForwardLine());
+                !isPendingSeekTargetLine && ShouldFastForwardLine());
 
         PrimeTextTarget(nextBox, line);
-
-        
         PrepareBoxForTransition(nextBox, transitionKind);
 
-        if (_lineAdvanceState.IsRollbackTargetLine(line.TextID))
+        if (isPendingSeekTargetLine)
         {
-            
-            bool consumed = _lineAdvanceState.ConsumeRollbackTargetLine(line.TextID);
-            
+            bool consumed = _lineAdvanceState.ConsumeSeekTargetLine(line.TextID);
             Trace("ConsumeSeekTargetLine", line, $"consumed={consumed}");
-            
+
             ApplyBoxTransitionImmediate(currentBox, nextBox, transitionKind);
         }
         else
@@ -205,13 +207,13 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
             await WaitForLineAdvanceAsync(token);
             return;
         }
-        
-        _boxState.Commit(nextBoxKind, nextBox, transitionKind); // 여기서 부터 nextBox가 _boxState로 커밋.
+
+        _boxState.Commit(nextBoxKind, nextBox, transitionKind);
         _dialogueTextRouter.Bind(_boxState);
-        
+
         if (!string.IsNullOrWhiteSpace(line.CharacterName) && _dialogueTextRouter.HasName)
             _dialogueTextRouter.NameText.text = line.CharacterName;
-        
+
         if (_dialogueTextRouter.LineText != null)
         {
             _typewriter.SetTextView(_dialogueTextRouter.LineText);
@@ -219,9 +221,6 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
 
             _typewriter.PrepareForContent(text);
 
-            if (!IsStale())
-                _lineAdvanceState.ClearRollbackSeek();
-            
             await _typewriter
                 .RunTypewriter(text, token.HurryUpToken)
                 .SuppressCancellationThrow();
@@ -238,11 +237,10 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
                 _lineAdvanceState.MarkLineDisplayCompleted();
         }
 
-
         await WaitForLineAdvanceAsync(token);
     }
-    
-    private void HideBoxDuringRollbackSeek()
+
+    private void HideBoxDuringSeek()
     {
         CloseAll();
     }
@@ -488,7 +486,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
         cg.interactable = false;
         cg.blocksRaycasts = false;
     }
-    
+
     private void CleanupStaleLinePresentation(IDialogueTextTarget previousBox, IDialogueTextTarget nextBox)
     {
         // Stale 실행본은 더 이상 현재 TextRouter/Typewriter의 주인이 아니다.
