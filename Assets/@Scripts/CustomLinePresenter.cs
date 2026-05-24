@@ -101,36 +101,14 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
         return YarnTask.CompletedTask;
     }
 
-    private void Trace(string evt, LocalizedLine line = null, string note = null)
-    {
-        if (_trace == null)
-            return;
-
-        string lineInfo = line == null
-            ? ""
-            : $"line={line.TextID}, char={line.CharacterName ?? ""}";
-
-        string state = _lineAdvanceState == null
-            ? "lineState=null"
-            : _lineAdvanceState.Snapshot();
-
-        string finalNote = string.IsNullOrWhiteSpace(note)
-            ? lineInfo
-            : $"{lineInfo}, {note}";
-
-        _trace.Trace(nameof(CustomLinePresenter), evt, state, finalNote, this);
-    }
-
     public event Action<LocalizedLine> LineEntered;
 
     public override async YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token)
     {
-        Trace("RunLineStart", line);
+        Trace("---RunLineStart---");
         LineEntered?.Invoke(line);
 
         _lineAdvanceState.MarkLineEntered();
-
-        Trace("AfterLineEnteredEvent", line);
 
         int myGeneration = _presenterGeneration;
 
@@ -142,14 +120,11 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
         bool isPendingSeekTargetLine = _lineAdvanceState.IsPendingSeekTargetLine(line.TextID);
         bool shouldPassThroughSeekLine = _lineAdvanceState.IsSeeking && !isPendingSeekTargetLine;
 
-        Trace(
-            "SeekCheck",
-            line,
-            $"isSeeking={_lineAdvanceState.IsSeeking}, isPendingTarget={isPendingSeekTargetLine}");
+        Trace($"SeekCheck /isPendingTarget={isPendingSeekTargetLine}");
 
         if (shouldPassThroughSeekLine)
         {
-            Trace("SilentSeekPassThrough", line);
+            Trace("********)SilentSeekPassThrough");
 
             HideBoxDuringSeek();
 
@@ -160,7 +135,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
         }
 
         if (isPendingSeekTargetLine)
-            Trace("SeekTargetLineAccepted", line);
+            Trace("********(->SeekTargetLineAccepted");
 
         IDialogueTextTarget currentBox = _boxState.Box;
         DialogueBoxKind? currentBoxKind = _boxState.BoxKind;
@@ -628,5 +603,25 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
             _presenterLifetimeCts.Dispose();
             _presenterLifetimeCts = null;
         }
+    }
+    
+    private void Trace(string evt, LocalizedLine line = null, string note = null)
+    {
+        if (_trace == null)
+            return;
+
+        string lineInfo = line == null
+            ? ""
+            : $"line={line.TextID}, char={line.CharacterName ?? ""}";
+
+        string state = _lineAdvanceState == null
+            ? "lineState=null"
+            : _lineAdvanceState.Snapshot();
+
+        string finalNote = string.IsNullOrWhiteSpace(note)
+            ? lineInfo
+            : $"{lineInfo}, {note}";
+
+        _trace.Trace("###CustomLinePresenter", evt, state, finalNote, this);
     }
 }

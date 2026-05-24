@@ -39,11 +39,7 @@ public sealed class VNSeekState
     public void Begin(VNSeekKind kind, string nodeName, string lineId)
     {
         if (kind == VNSeekKind.None)
-        {
-            UnityEngine.Debug.LogWarning("[VNSeekState] Begin ignored. kind=None is not a valid seek kind.");
-            Trace("BeginIgnored", $"reason=KindNone, target={nodeName}/{lineId}");
             return;
-        }
 
         Kind = kind;
         Phase = VNSeekPhase.Seeking;
@@ -172,7 +168,7 @@ public sealed class VNSeekState
         if (_trace == null)
             return;
 
-        _trace.Trace(nameof(VNSeekState), evt, Snapshot(), note);
+        _trace.Trace("-----VNSeekState", evt, Snapshot(), note);
     }
 
     private static string FormatMeta(YarnLineMeta meta)

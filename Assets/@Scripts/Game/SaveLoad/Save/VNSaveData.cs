@@ -42,6 +42,7 @@ public sealed class VNSaveData
         if (flags == null) flags = new List<VNFlagEntry>();
     }
 
+    // 나중엔 Project에서 해당 노드가 있는지 검사하게 해야함.
     public bool HasValidTarget()
     {
         return !string.IsNullOrWhiteSpace(nodeName);

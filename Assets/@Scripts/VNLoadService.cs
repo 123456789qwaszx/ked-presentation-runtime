@@ -46,8 +46,6 @@ public sealed class VNLoadService
 
     public bool Load(string slotId)
     {
-        Trace("LoadRequested", $"slotId={slotId}, isLoading={_isLoading}");
-
         if (_isLoading)
         {
             Debug.LogWarning("[VNLoadService] Already loading. Request ignored.");
@@ -77,8 +75,6 @@ public sealed class VNLoadService
             Trace("LoadRejected", $"invalid target slotId={slotId}");
             return false;
         }
-
-        Trace("LoadAccepted", $"slot={slotId}, target={data.nodeName}/{data.lineId}");
 
         BeginLoad(data);
         return true;

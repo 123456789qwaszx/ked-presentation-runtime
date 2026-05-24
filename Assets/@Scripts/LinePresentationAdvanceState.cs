@@ -33,7 +33,7 @@ public sealed class LinePresentationAdvanceState
     {
         _trace = trace;
         _seek = new VNSeekState(trace);
-        _line = new VNLinePresentationState(trace);
+        _line = new VNLinePresentationState();
     }
 
     public void StartRollbackSeek(string nodeName, string lineId)
@@ -104,7 +104,7 @@ public sealed class LinePresentationAdvanceState
     public void MarkLineDisplayCompleted()
     {
         _line.MarkLineDisplayCompleted();
-        Trace("MarkLineDisplayCompleted");
+        Trace("-=-=-=-MarkLineDisplayCompleted-=-=-=-");
     }
 
     public void Reset()
@@ -117,7 +117,7 @@ public sealed class LinePresentationAdvanceState
 
     public string Snapshot()
     {
-        return $"{_seek.Snapshot()}, {_line.Snapshot()}, rollbackPointBlocked={_rollbackPointBlocked}, canRecord={CanRecordRollbackPoint}";
+        return $"{_seek.Snapshot()}, rollbackPointBlocked={_rollbackPointBlocked}, canRecord={CanRecordRollbackPoint}";
     }
 
     private void Trace(string evt, string note = null)
@@ -125,7 +125,7 @@ public sealed class LinePresentationAdvanceState
         if (_trace == null)
             return;
 
-        _trace.Trace(nameof(LinePresentationAdvanceState), evt, Snapshot(), note);
+        _trace.Trace("@LinePresentationAdvanceState", evt, Snapshot(), note);
     }
 
     private static string FormatMeta(YarnLineMeta meta)
