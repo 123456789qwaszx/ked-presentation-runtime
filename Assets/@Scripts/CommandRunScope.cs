@@ -34,7 +34,7 @@ public sealed class CommandRunScope
     public bool IsAutoMode => _context != null && _context.IsAutoMode;
     public float TimeScale => _context != null ? _context.TimeScale : 1f;
     public bool IsNodeBusy => _context != null && _context.IsNodeBusy;
-    public bool IsRollbackSeeking => _linePresentationAdvanceState != null && _linePresentationAdvanceState.IsRollbackSeeking;
+    public bool IsRollbackSeeking => _linePresentationAdvanceState != null && _linePresentationAdvanceState.IsSeeking;
 
     public bool ShouldRespectCommandWait => 
         _context == null || !IsRollbackSeeking || !IsSkipping;

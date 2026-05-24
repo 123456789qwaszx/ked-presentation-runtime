@@ -27,7 +27,7 @@ public sealed class RollbackController : IDisposable
 
     public bool RequestRollbackOneStep()
     {
-        if (_lineAdvanceState.IsRollbackActive)
+        if (_lineAdvanceState.IsSeekingActive)
             return false;
         
         if (!_history.TryPrepareRollbackOneStep(out RollbackPoint target))
@@ -40,7 +40,7 @@ public sealed class RollbackController : IDisposable
 
     public bool RequestRollbackToHistoryIndex(int historyIndex)
     {
-        if (_lineAdvanceState.IsRollbackActive)
+        if (_lineAdvanceState.IsSeekingActive)
             return false;
         
         if (!_history.TryPrepareRollbackToHistoryIndex(historyIndex, out RollbackPoint target))
@@ -55,7 +55,7 @@ public sealed class RollbackController : IDisposable
 
     private void HandleLineEnteredDuringRollbackSeek(YarnLineMeta meta)
     {
-        if (!_lineAdvanceState.IsRollbackSeeking)
+        if (!_lineAdvanceState.IsSeeking)
             return;
 
         if (_lineAdvanceState.IsRollbackSeekTarget(meta))

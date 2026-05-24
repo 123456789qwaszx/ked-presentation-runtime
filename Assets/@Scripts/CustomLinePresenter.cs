@@ -111,7 +111,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
         
         // Skip visual presentation for lines passed during rollback seek.
         // Keep the Yarn line lifecycle alive until the runner requests next content.
-        if (_lineAdvanceState.IsRollbackSeeking && !_lineAdvanceState.IsRollbackTargetLine(line.TextID))
+        if (_lineAdvanceState.IsSeeking && !_lineAdvanceState.IsRollbackTargetLine(line.TextID))
         {
             HideBoxDuringRollbackSeek();
 
@@ -534,7 +534,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
         if (_context == null)
             return false;
 
-        return _lineAdvanceState.IsRollbackSeeking || _context.IsSpeedUpMode;
+        return _lineAdvanceState.IsSeeking || _context.IsSpeedUpMode;
     }
 
     private void CloseAll()

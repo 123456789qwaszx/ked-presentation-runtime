@@ -59,7 +59,7 @@ public sealed class AdvanceGate
 
     private bool TryEnter(bool isUser)
     {
-        if (_lineState != null && _lineState.IsRollbackSeeking)
+        if (_lineState != null && _lineState.IsSeeking)
             return false;
 
         if (_vnUxState.BacklogVisible)

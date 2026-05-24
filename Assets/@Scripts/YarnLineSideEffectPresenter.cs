@@ -77,7 +77,7 @@ public sealed class YarnLineSideEffectPresenter : DialoguePresenterBase
         if (_context == null)
             return false;
 
-        return _linePresentationAdvanceState.IsRollbackSeeking ||
+        return _linePresentationAdvanceState.IsSeeking ||
                _context.IsSpeedUpMode;
     }
 

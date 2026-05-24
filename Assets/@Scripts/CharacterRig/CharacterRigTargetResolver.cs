@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 
 public static class CharacterRigTargetResolver
 {
@@ -8,7 +9,7 @@ public static class CharacterRigTargetResolver
         
         if (!scope.characterRigs.TryGetRig(resolvedRigKey, out CharacterRigRefs rig))
         {
-            throw new InvalidOperationException(
+            Debug.LogWarning(
                 $"[CharacterRigTargetResolver] Failed to resolve CharacterRigRefs. " +
                 $"targetKey='{targetKey}', resolvedRigKey='{resolvedRigKey}'.");
         }

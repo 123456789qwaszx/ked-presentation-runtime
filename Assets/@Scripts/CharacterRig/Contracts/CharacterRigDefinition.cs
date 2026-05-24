@@ -391,12 +391,12 @@ public static class CharacterRigRefsExtensions
 {
     public static RectTransform GetRect(this CharacterRigRefs refs, CharacterRigTarget target)
     {
-        return refs.GetComponent(target).transform as RectTransform;
+        return refs?.GetComponent(target).transform as RectTransform;
     }
     
     public static Image GetImage(this CharacterRigRefs refs, CharacterRigTarget target)
     {
-        return refs.GetComponent(target) as Image;
+        return refs?.GetComponent(target) as Image;
     }
     
     private static Component GetComponent(this CharacterRigRefs refs, CharacterRigTarget target)

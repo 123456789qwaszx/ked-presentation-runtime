@@ -85,15 +85,19 @@ public sealed class VNSeekState
         return PendingLineId == lineId;
     }
 
-    public void ConsumeTargetLine(string lineId)
+    public bool ConsumeTargetLine(string lineId)
     {
         if (Phase != VNSeekPhase.TargetLinePending)
-            return;
+            return false;
 
-        if (!string.IsNullOrWhiteSpace(PendingLineId) && PendingLineId != lineId)
-            return;
+        if (string.IsNullOrWhiteSpace(PendingLineId))
+            return false;
+
+        if (PendingLineId != lineId)
+            return false;
 
         Clear();
+        return true;
     }
 
     public void Clear()

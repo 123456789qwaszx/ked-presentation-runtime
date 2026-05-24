@@ -9,10 +9,10 @@ public sealed class LinePresentationAdvanceState
     
     // 기존 호출부 호환 프로퍼티(임시)
     public bool CanRecordRollbackPoint => !_rollbackPointBlocked && !_seek.IsActive;
-    public string RollbackTargetNodeName => _seek.TargetNodeName;
-    public bool IsRollbackSeeking => _seek.IsSeeking;
+    public string TargetNodeName => _seek.TargetNodeName;
+    public bool IsSeeking => _seek.IsSeeking;
     public bool IsLineFullyShown => _line.IsFullyShown;
-    public bool IsRollbackActive => _seek.IsActive;
+    public bool IsSeekingActive => _seek.IsActive;
     
     // seek target 판정
     public bool IsRollbackSeekTarget(YarnLineMeta meta) => _seek.IsTarget(meta);
@@ -47,6 +47,15 @@ public sealed class LinePresentationAdvanceState
     // 항상 false를 반환해 consume이 되지 않을 수 있음.
     public void PrepareRollbackTargetLine()
     {
+        if (string.IsNullOrWhiteSpace(_seek.TargetLineId))
+        {
+            UnityEngine.Debug.LogWarning(
+                "[LinePresentationAdvanceState] PrepareRollbackTargetLine() was called without meta, " +
+                "but TargetLineId is empty. Node-start seek must call PrepareRollbackTargetLine(YarnLineMeta).");
+
+            return;
+        }
+        
         // VNSeekState에 no-arg MarkTargetReached가 없으므로
         // TargetLineId로 임시 YarnLineMeta를 만들어 위임.
         YarnLineMeta fallback = new YarnLineMeta(
@@ -58,20 +67,28 @@ public sealed class LinePresentationAdvanceState
         _seek.MarkTargetReached(fallback);
     }
     
-    // target line 소비 
-    public void ConsumeRollbackTargetLine(string lineId)
+    // target line 소비
+    public bool ConsumeRollbackTargetLine(string lineId)
     {
-        _seek.ConsumeTargetLine(lineId);
+        bool consumed = _seek.ConsumeTargetLine(lineId);
 
-        if (!_seek.IsActive)
+        if (consumed)
             _rollbackPointBlocked = false;
+
+        return consumed;
     }
-    
     // 기존 호환용. PendingLineId를 그대로 넘긴다.
-    // PendingLineId가 null이면 ConsumeTargetLine 내부에서 whitespace 체크 후 무시된다.
-    public void ConsumeRollbackTargetLine()
+    public bool ConsumeRollbackTargetLine()
     {
-        ConsumeRollbackTargetLine(_seek.PendingLineId ?? string.Empty);
+        if (string.IsNullOrWhiteSpace(_seek.PendingLineId))
+        {
+            UnityEngine.Debug.LogWarning(
+                "[LinePresentationAdvanceState] ConsumeRollbackTargetLine() ignored. PendingLineId is empty.");
+
+            return false;
+        }
+
+        return ConsumeRollbackTargetLine(_seek.PendingLineId);
     }
 
     // seek 강제 종료
