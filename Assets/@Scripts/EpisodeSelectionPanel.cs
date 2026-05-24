@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using static UIRefValidation;
 
-public sealed class EpisodeSelectionPanel : UIBase<EpisodeSelectionPanel.Refs>, IUIPanel
+public sealed class EpisodeSelectionPanel : UIRoot<EpisodeSelectionPanel.Refs>, IUIPanel
 {
     public event Action OnCloseRequested;
     
@@ -210,7 +210,7 @@ public sealed class EpisodeSelectionPanel : UIBase<EpisodeSelectionPanel.Refs>, 
         AppendMissing(ref missing, _analysisIconImage,    Refs.AnalysisIcon_Image);
         AppendMissing(ref missing, _chaosIconImage,       Refs.ChaosIcon_Image);
         
-        AppendMissing(ref missing, episodeGraphView, Refs.EpisodeButtons);
+        //AppendMissing(ref missing, episodeGraphView, Refs.EpisodeButtons);
         AppendMissing(ref missing, _return, Refs.ReturnButton_BWidget);
 
 

@@ -1496,7 +1496,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 9101024951247822461}
-  - component: {fileID: 3947265623528352571}
   m_Layer: 5
   m_Name: EpisodeNode_Root
   m_TagString: Untagged
@@ -1526,18 +1525,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 380, y: 700}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &3947265623528352571
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5952843696438999041}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: db01a8dd6f926244cb17caf86b2139d8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EpisodeNodeView
 --- !u!1 &6402001369324549561
 GameObject:
   m_ObjectHideFlags: 0

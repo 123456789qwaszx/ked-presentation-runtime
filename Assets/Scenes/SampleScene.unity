@@ -29389,7 +29389,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1869918307938699976}
   - component: {fileID: 5772835753326739693}
-  - component: {fileID: 5772835753326739694}
   m_Layer: 0
   m_Name: Pnl_ChapterSelection
   m_TagString: Untagged
@@ -34938,18 +34937,6 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
---- !u!114 &5772835753326739694
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4054888549657169010}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 64b29af02588bdc4784e1dd313077714, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ChapterSelectionPanel
 --- !u!224 &5774600381215920157
 RectTransform:
   m_ObjectHideFlags: 0
@@ -40540,7 +40527,6 @@ GameObject:
   - component: {fileID: 8003520071731884138}
   - component: {fileID: 8154198120394370474}
   - component: {fileID: 8154198120394370476}
-  - component: {fileID: 8154198120394370475}
   m_Layer: 0
   m_Name: Pnl_EpisodeSelection
   m_TagString: Untagged
@@ -42755,13 +42741,13 @@ RectTransform:
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 8003520071731884138}
   - {fileID: 1339791917}
   - {fileID: 7346813386339230190}
   - {fileID: 1697183187}
   - {fileID: 1653450868}
   - {fileID: 5277133922476264799}
   - {fileID: 1869918307938699976}
-  - {fileID: 8003520071731884138}
   - {fileID: 3519844056629364735}
   - {fileID: 9068895088179417620}
   - {fileID: 8748736295419882132}
@@ -42971,21 +42957,6 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
---- !u!114 &8154198120394370475
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7495276885229282670}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c9e0063b3a5fdda46b8b6129f474ad29, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EpisodeGraphView
-  content: {fileID: 3064378968837295783}
-  nodePrefab: {fileID: 3947265623528352571, guid: c5902e094b086314da71be64350a0797, type: 3}
-  sizer: {fileID: 3599846330335752488}
 --- !u!114 &8154198120394370476
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -42998,7 +42969,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e5ffeee99321d1547af6b120e403f6cb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EpisodeSelectionPanel
-  episodeGraphView: {fileID: 8154198120394370475}
+  episodeGraphView: {fileID: 0}
 --- !u!222 &8158630177445489388
 CanvasRenderer:
   m_ObjectHideFlags: 0

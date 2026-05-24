@@ -1,7 +1,7 @@
 ﻿title: stella01
 ---
 <<shot_reset>>
-<<tx_strip_cover vsw 0.3>>
+//<<tx_strip_cover vsw 0.3>>
 
 <<slot Leafia 0>>
 <<cast Leafia Leafia a 02 true left normal>>
@@ -16,7 +16,7 @@
 
 <<idle_breathe Leafia 99 5 0.25>>
 
-<<tx_strip_clear vsw 0>>
+//<<tx_strip_clear vsw 0>>
 
 
 <<shot_bind_char_response Leafia 0>>

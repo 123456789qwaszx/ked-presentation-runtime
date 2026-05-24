@@ -138,6 +138,7 @@ public class EpisodeFlowController : IDisposable
         {
             new EpisodeNodeModel(
                 episodeId: "main05.01",
+                kind: EpisodeNodeKind.Main,
                 indexText: "01",
                 title: "첫 만남",
                 anchoredPos: new Vector2(0f, 0f),
@@ -149,8 +150,10 @@ public class EpisodeFlowController : IDisposable
                 upperAttachment: null,
                 lowerAttachment: null
             ),
+
             new EpisodeNodeModel(
                 episodeId: "main05.02",
+                kind: EpisodeNodeKind.Main,
                 indexText: "02",
                 title: "방송 준비",
                 anchoredPos: new Vector2(400f, 0f),
@@ -161,9 +164,9 @@ public class EpisodeFlowController : IDisposable
                 completed: false,
                 upperAttachment: null,
                 lowerAttachment: new EpisodeAttachmentModel(
-                    targetEpisodeId: "sub05.02A",
-                    title: "개인 메시지",
-                    interactable: true
+                    hostEpisodeId: "sub05.02A",
+                    displayTitle: "개인 메시지",
+                    isInteractable: true
                 )
             ),
         };
