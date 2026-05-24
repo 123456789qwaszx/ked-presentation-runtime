@@ -13,12 +13,12 @@ public struct YarnLineMeta
     public string charName;
     public string rawText;
 
-    public YarnLineMeta(string nodeName, string lineId, string rawText, string charName)
+    public YarnLineMeta(string nodeName, string lineId,  string charName, string rawText)
     {
         this.nodeName = nodeName;
         this.lineId = lineId;
-        this.rawText = rawText;
         this.charName = charName;
+        this.rawText = rawText;
     }
 }
 

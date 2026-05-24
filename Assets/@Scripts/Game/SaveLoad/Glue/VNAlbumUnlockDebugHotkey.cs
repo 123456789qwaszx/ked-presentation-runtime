@@ -95,8 +95,10 @@ public sealed class VNAlbumUnlockDebugList : MonoBehaviour
     private void LockAll()
     {
         VNAlbumUnlockService album = _vnServiceContainer.AlbumService;
-        
+     
+#if UNITY_EDITOR || DEVELOPMENT_BUILD   
         album.ClearAllCgUnlocksForDebug();
+#endif
         _nextUnlockIndex = 0;
 
         Debug.Log("[VNAlbumUnlockDebugList] Locked all test CGs.");

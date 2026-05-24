@@ -14,18 +14,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CharacterFocusTuningDBSO
   baseOffsets:
     feet: {x: 0, y: 200}
-    body: {x: 0, y: 700}
+    body: {x: 0, y: 750}
     bust: {x: 0, y: 900}
     face: {x: 0, y: 1000}
     handLeft: {x: -220, y: 520}
     handRight: {x: 220, y: 520}
   entries:
   - key: Leafia
-    defaultOffset: {x: -80, y: -80}
+    defaultOffset: {x: 0, y: -80}
     offsets:
       feet: {x: 0, y: 0}
-      body: {x: 70, y: 0}
-      bust: {x: 70, y: 0}
+      body: {x: 0, y: 0}
+      bust: {x: 0, y: 0}
       face: {x: 0, y: 0}
       handLeft: {x: 0, y: 0}
       handRight: {x: 0, y: 0}

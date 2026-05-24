@@ -31,6 +31,7 @@ public sealed class LinePresentationAdvanceState
     public void MarkLoadSeek(string nodeName, string lineId)
     {
         _isRollbackSeeking = true;
+        _rollbackPointBlocked = true;
         
         _rollbackTargetLinePending = false;
         _isLineFullyShown = false;
