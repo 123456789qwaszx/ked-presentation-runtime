@@ -66,8 +66,7 @@ public sealed class VNLoadSeekDriver : IVNLoadSeekDriver, IDisposable
 
         Subscribe();
 
-        _restarter.StopDialogue();
-        _restarter.StartGame(saveData.nodeName);
+        _restarter.RestartGame(saveData.nodeName);
     }
 
     public void OnLoadComplete(VNSaveData saveData)

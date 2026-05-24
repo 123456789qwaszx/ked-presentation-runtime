@@ -1,7 +1,6 @@
 using System;
 using System.Threading;
 using TMPro;
-using UnityEngine;
 using Yarn.Markup;
 using Yarn.Unity;
 
