@@ -1,0 +1,154 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8b31465a6cbe324797ed2dafdd7ba9b, type: 3}
+  m_Name: VNStoryGraphViewData 1
+  m_EditorClassIdentifier: Assembly-CSharp::VNStoryGraphViewDataSO
+  mainNodeSize: {x: 350, y: 136}
+  attachmentNodeSize: {x: 300, y: 110}
+  horizontalStep: 400
+  branchVerticalStep: 200
+  attachmentVerticalStep: 220
+  attachmentHorizontalStep: 360
+  defaultMainSprite: {fileID: 0}
+  defaultAttachmentSprite: {fileID: 0}
+  defaultMainColor: {r: 0.18, g: 0.28, b: 0.48, a: 1}
+  defaultAttachmentColor: {r: 0.38, g: 0.18, b: 0.42, a: 1}
+  defaultTerminalColor: {r: 0.42, g: 0.32, b: 0.15, a: 1}
+  defaultLockedColor: {r: 0.18, g: 0.18, b: 0.2, a: 0.85}
+  defaultNextLineColor: {r: 0.75, g: 0.9, b: 1, a: 0.9}
+  defaultAttachmentLineColor: {r: 1, g: 0.68, b: 0.9, a: 0.9}
+  defaultLockedLineColor: {r: 0.35, g: 0.35, b: 0.38, a: 0.75}
+  defaultNextLineThickness: 6
+  defaultAttachmentLineThickness: 4
+  nodePatches:
+  - nodeId: ch02.floor01.ep01
+    position: {x: -800, y: 0}
+    size: {x: 0, y: 0}
+    sprite: {fileID: 0}
+    overrideColor: 0
+    color: {r: 1, g: 1, b: 1, a: 1}
+    labelKey: label.ch02.floor01.ep01
+    actionKey: action.ch02.floor01.ep01
+  - nodeId: ch02.floor02.ep02
+    position: {x: -400, y: 0}
+    size: {x: 0, y: 0}
+    sprite: {fileID: 0}
+    overrideColor: 0
+    color: {r: 1, g: 1, b: 1, a: 1}
+    labelKey: label.ch02.floor02.ep02
+    actionKey: action.ch02.floor02.ep02
+  - nodeId: ch02.floor03.ep03
+    position: {x: 0, y: 0}
+    size: {x: 0, y: 0}
+    sprite: {fileID: 0}
+    overrideColor: 0
+    color: {r: 1, g: 1, b: 1, a: 1}
+    labelKey: label.ch02.floor03.ep03
+    actionKey: action.ch02.floor03.ep03
+  - nodeId: ch02.floor04.upper_ep04
+    position: {x: 400, y: 100}
+    size: {x: 0, y: 0}
+    sprite: {fileID: 0}
+    overrideColor: 0
+    color: {r: 1, g: 1, b: 1, a: 1}
+    labelKey: label.ch02.floor04.upper_ep04
+    actionKey: action.ch02.floor04.upper_ep04
+  - nodeId: ch02.floor04.lower_ep04
+    position: {x: 400, y: -100}
+    size: {x: 0, y: 0}
+    sprite: {fileID: 0}
+    overrideColor: 0
+    color: {r: 1, g: 1, b: 1, a: 1}
+    labelKey: label.ch02.floor04.lower_ep04
+    actionKey: action.ch02.floor04.lower_ep04
+  - nodeId: ch02.attach.lower.up
+    position: {x: 400, y: 120}
+    size: {x: 0, y: 0}
+    sprite: {fileID: 0}
+    overrideColor: 0
+    color: {r: 1, g: 1, b: 1, a: 1}
+    labelKey: label.ch02.attach.lower.up
+    actionKey: action.ch02.attach.lower.up
+  - nodeId: ch02.attach.lower.right
+    position: {x: 760, y: -100}
+    size: {x: 0, y: 0}
+    sprite: {fileID: 0}
+    overrideColor: 0
+    color: {r: 1, g: 1, b: 1, a: 1}
+    labelKey: label.ch02.attach.lower.right
+    actionKey: action.ch02.attach.lower.right
+  - nodeId: ch02.attach.lower.down
+    position: {x: 400, y: -320}
+    size: {x: 0, y: 0}
+    sprite: {fileID: 0}
+    overrideColor: 0
+    color: {r: 1, g: 1, b: 1, a: 1}
+    labelKey: label.ch02.attach.lower.down
+    actionKey: action.ch02.attach.lower.down
+  - nodeId: ch02.floor06.upper_ending
+    position: {x: 1200, y: 200}
+    size: {x: 0, y: 0}
+    sprite: {fileID: 0}
+    overrideColor: 0
+    color: {r: 1, g: 1, b: 1, a: 1}
+    labelKey: label.ch02.floor06.upper_ending
+    actionKey: action.ch02.floor06.upper_ending
+  - nodeId: ch02.floor05.center_ep05
+    position: {x: 800, y: 100}
+    size: {x: 0, y: 0}
+    sprite: {fileID: 0}
+    overrideColor: 0
+    color: {r: 1, g: 1, b: 1, a: 1}
+    labelKey: label.ch02.floor05.center_ep05
+    actionKey: action.ch02.floor05.center_ep05
+  - nodeId: ch02.floor06.clear_ending
+    position: {x: 1200, y: 100}
+    size: {x: 0, y: 0}
+    sprite: {fileID: 0}
+    overrideColor: 0
+    color: {r: 1, g: 1, b: 1, a: 1}
+    labelKey: label.ch02.floor06.clear_ending
+    actionKey: action.ch02.floor06.clear_ending
+  - nodeId: ch02.floor05.locked_lower
+    position: {x: 800, y: -100}
+    size: {x: 0, y: 0}
+    sprite: {fileID: 0}
+    overrideColor: 0
+    color: {r: 1, g: 1, b: 1, a: 1}
+    labelKey: label.ch02.floor05.locked_lower
+    actionKey: action.ch02.floor05.locked_lower
+  linkPatches: []
+  textEntries:
+  - key: label.ch02.floor01.ep01
+    text: "01\n\uCCAB \uBC88\uC9F8 \uCE35"
+  - key: label.ch02.floor02.ep02
+    text: "02\n\uB450 \uBC88\uC9F8 \uCE35"
+  - key: label.ch02.floor03.ep03
+    text: "03\n\uBD84\uAE30\uC810"
+  - key: label.ch02.floor04.upper_ep04
+    text: "04A\n\uC704\uCABD \uB8E8\uD2B8"
+  - key: label.ch02.floor04.lower_ep04
+    text: "04B\n\uC544\uB798\uCABD \uB8E8\uD2B8"
+  - key: label.ch02.attach.lower.up
+    text: "IF\n\uC704\uCABD \uC794\uD5A5"
+  - key: label.ch02.attach.lower.right
+    text: "IF\n\uB9C9\uD78C \uC624\uB978\uCABD"
+  - key: label.ch02.attach.lower.down
+    text: "IF\n\uC544\uB798\uCABD \uACB0\uB9D0"
+  - key: label.ch02.floor06.upper_ending
+    text: "06A\n\uAC74\uB108\uB6F4 \uC5D4\uB529"
+  - key: label.ch02.floor05.center_ep05
+    text: "05\n\uC911\uC559 \uB8E8\uD2B8"
+  - key: label.ch02.floor06.clear_ending
+    text: "06\n\uD074\uB9AC\uC5B4 \uC5D4\uB529"
+  - key: label.ch02.floor05.locked_lower
+    text: "05?\n\uC7A0\uAE34 \uC120\uD0DD\uC9C0"

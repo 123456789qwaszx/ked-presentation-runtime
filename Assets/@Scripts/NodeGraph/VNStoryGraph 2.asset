@@ -12,7 +12,359 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2f5bca7628b64750b77d0051763fab1c, type: 3}
   m_Name: VNStoryGraph 2
   m_EditorClassIdentifier: Assembly-CSharp::VNStoryGraphSO
-  graphId: 
-  chapterKey: 
-  startNodeId: 
-  nodes: []
+  graphId: graph.chapter02.sample
+  chapterKey: chapter.02
+  startNodeId: ch02.floor01.ep01
+  nodes:
+  - nodeId: ch02.floor01.ep01
+    payloadKey: episode.ch02.floor01.ep01
+    nodeKind: 0
+    nextLinks:
+    - linkKey: ch02.f01.to.f02
+      toNodeId: ch02.floor02.ep02
+      labelKey: choice.ch02.f01.to.f02
+      visibleConditionKey: 
+      unlockConditionKey: 
+    attachments:
+      up:
+        linkKey: 
+        toNodeId: 
+        labelKey: 
+        visibleConditionKey: 
+        unlockConditionKey: 
+      right:
+        linkKey: 
+        toNodeId: 
+        labelKey: 
+        visibleConditionKey: 
+        unlockConditionKey: 
+      down:
+        linkKey: 
+        toNodeId: 
+        labelKey: 
+        visibleConditionKey: 
+        unlockConditionKey: 
+    endingKey: 
+    opensNextChapter: 0
+    nextChapterKey: 
+  - nodeId: ch02.floor02.ep02
+    payloadKey: episode.ch02.floor02.ep02
+    nodeKind: 0
+    nextLinks:
+    - linkKey: ch02.f02.to.f03
+      toNodeId: ch02.floor03.ep03
+      labelKey: choice.ch02.f02.to.f03
+      visibleConditionKey: 
+      unlockConditionKey: 
+    attachments:
+      up:
+        linkKey: 
+        toNodeId: 
+        labelKey: 
+        visibleConditionKey: 
+        unlockConditionKey: 
+      right:
+        linkKey: 
+        toNodeId: 
+        labelKey: 
+        visibleConditionKey: 
+        unlockConditionKey: 
+      down:
+        linkKey: 
+        toNodeId: 
+        labelKey: 
+        visibleConditionKey: 
+        unlockConditionKey: 
+    endingKey: 
+    opensNextChapter: 0
+    nextChapterKey: 
+  - nodeId: ch02.floor03.ep03
+    payloadKey: episode.ch02.floor03.ep03
+    nodeKind: 0
+    nextLinks:
+    - linkKey: ch02.f03.choice.upper
+      toNodeId: ch02.floor04.upper_ep04
+      labelKey: choice.ch02.f03.upper
+      visibleConditionKey: 
+      unlockConditionKey: 
+    - linkKey: ch02.f03.choice.lower
+      toNodeId: ch02.floor04.lower_ep04
+      labelKey: choice.ch02.f03.lower
+      visibleConditionKey: 
+      unlockConditionKey: 
+    attachments:
+      up:
+        linkKey: 
+        toNodeId: 
+        labelKey: 
+        visibleConditionKey: 
+        unlockConditionKey: 
+      right:
+        linkKey: 
+        toNodeId: 
+        labelKey: 
+        visibleConditionKey: 
+        unlockConditionKey: 
+      down:
+        linkKey: 
+        toNodeId: 
+        labelKey: 
+        visibleConditionKey: 
+        unlockConditionKey: 
+    endingKey: 
+    opensNextChapter: 0
+    nextChapterKey: 
+  - nodeId: ch02.floor04.lower_ep04
+    payloadKey: episode.ch02.floor04.lower_ep04
+    nodeKind: 0
+    nextLinks: []
+    attachments:
+      up:
+        linkKey: ch02.lower.attach.up
+        toNodeId: ch02.attach.lower.up
+        labelKey: attach_label.ch02.lower.up
+        visibleConditionKey: 
+        unlockConditionKey: 
+      right:
+        linkKey: ch02.lower.attach.right
+        toNodeId: ch02.attach.lower.right
+        labelKey: attach_label.ch02.lower.right
+        visibleConditionKey: 
+        unlockConditionKey: 
+      down:
+        linkKey: ch02.lower.attach.down
+        toNodeId: ch02.attach.lower.down
+        labelKey: attach_label.ch02.lower.down
+        visibleConditionKey: 
+        unlockConditionKey: 
+    endingKey: 
+    opensNextChapter: 0
+    nextChapterKey: 
+  - nodeId: ch02.attach.lower.up
+    payloadKey: ending.ch02.lower.up
+    nodeKind: 1
+    nextLinks: []
+    attachments:
+      up:
+        linkKey: 
+        toNodeId: 
+        labelKey: 
+        visibleConditionKey: 
+        unlockConditionKey: 
+      right:
+        linkKey: 
+        toNodeId: 
+        labelKey: 
+        visibleConditionKey: 
+        unlockConditionKey: 
+      down:
+        linkKey: 
+        toNodeId: 
+        labelKey: 
+        visibleConditionKey: 
+        unlockConditionKey: 
+    endingKey: ending.ch02.lower.up
+    opensNextChapter: 0
+    nextChapterKey: 
+  - nodeId: ch02.attach.lower.right
+    payloadKey: ending.ch02.lower.right
+    nodeKind: 1
+    nextLinks: []
+    attachments:
+      up:
+        linkKey: 
+        toNodeId: 
+        labelKey: 
+        visibleConditionKey: 
+        unlockConditionKey: 
+      right:
+        linkKey: 
+        toNodeId: 
+        labelKey: 
+        visibleConditionKey: 
+        unlockConditionKey: 
+      down:
+        linkKey: 
+        toNodeId: 
+        labelKey: 
+        visibleConditionKey: 
+        unlockConditionKey: 
+    endingKey: ending.ch02.lower.right
+    opensNextChapter: 0
+    nextChapterKey: 
+  - nodeId: ch02.attach.lower.down
+    payloadKey: ending.ch02.lower.down
+    nodeKind: 1
+    nextLinks: []
+    attachments:
+      up:
+        linkKey: 
+        toNodeId: 
+        labelKey: 
+        visibleConditionKey: 
+        unlockConditionKey: 
+      right:
+        linkKey: 
+        toNodeId: 
+        labelKey: 
+        visibleConditionKey: 
+        unlockConditionKey: 
+      down:
+        linkKey: 
+        toNodeId: 
+        labelKey: 
+        visibleConditionKey: 
+        unlockConditionKey: 
+    endingKey: ending.ch02.lower.down
+    opensNextChapter: 0
+    nextChapterKey: 
+  - nodeId: ch02.floor04.upper_ep04
+    payloadKey: episode.ch02.floor04.upper_ep04
+    nodeKind: 0
+    nextLinks:
+    - linkKey: ch02.upper.choice.skip_to_f06
+      toNodeId: ch02.floor06.upper_ending
+      labelKey: choice.ch02.upper.skip_to_f06
+      visibleConditionKey: 
+      unlockConditionKey: 
+    - linkKey: ch02.upper.choice.center_to_f05
+      toNodeId: ch02.floor05.center_ep05
+      labelKey: choice.ch02.upper.center_to_f05
+      visibleConditionKey: 
+      unlockConditionKey: 
+    - linkKey: ch02.upper.choice.locked_lower
+      toNodeId: ch02.floor05.locked_lower
+      labelKey: choice.ch02.upper.locked_lower
+      visibleConditionKey: 
+      unlockConditionKey: locked:ch02.upper.lower_choice
+    attachments:
+      up:
+        linkKey: 
+        toNodeId: 
+        labelKey: 
+        visibleConditionKey: 
+        unlockConditionKey: 
+      right:
+        linkKey: 
+        toNodeId: 
+        labelKey: 
+        visibleConditionKey: 
+        unlockConditionKey: 
+      down:
+        linkKey: 
+        toNodeId: 
+        labelKey: 
+        visibleConditionKey: 
+        unlockConditionKey: 
+    endingKey: 
+    opensNextChapter: 0
+    nextChapterKey: 
+  - nodeId: ch02.floor06.upper_ending
+    payloadKey: episode.ch02.floor06.upper_ending
+    nodeKind: 0
+    nextLinks: []
+    attachments:
+      up:
+        linkKey: 
+        toNodeId: 
+        labelKey: 
+        visibleConditionKey: 
+        unlockConditionKey: 
+      right:
+        linkKey: 
+        toNodeId: 
+        labelKey: 
+        visibleConditionKey: 
+        unlockConditionKey: 
+      down:
+        linkKey: 
+        toNodeId: 
+        labelKey: 
+        visibleConditionKey: 
+        unlockConditionKey: 
+    endingKey: ending.ch02.upper_skip
+    opensNextChapter: 0
+    nextChapterKey: 
+  - nodeId: ch02.floor05.center_ep05
+    payloadKey: episode.ch02.floor05.center_ep05
+    nodeKind: 0
+    nextLinks:
+    - linkKey: ch02.f05.to.f06.clear
+      toNodeId: ch02.floor06.clear_ending
+      labelKey: choice.ch02.f05.to_f06_clear
+      visibleConditionKey: 
+      unlockConditionKey: 
+    attachments:
+      up:
+        linkKey: 
+        toNodeId: 
+        labelKey: 
+        visibleConditionKey: 
+        unlockConditionKey: 
+      right:
+        linkKey: 
+        toNodeId: 
+        labelKey: 
+        visibleConditionKey: 
+        unlockConditionKey: 
+      down:
+        linkKey: 
+        toNodeId: 
+        labelKey: 
+        visibleConditionKey: 
+        unlockConditionKey: 
+    endingKey: 
+    opensNextChapter: 0
+    nextChapterKey: 
+  - nodeId: ch02.floor06.clear_ending
+    payloadKey: episode.ch02.floor06.clear_ending
+    nodeKind: 0
+    nextLinks: []
+    attachments:
+      up:
+        linkKey: 
+        toNodeId: 
+        labelKey: 
+        visibleConditionKey: 
+        unlockConditionKey: 
+      right:
+        linkKey: 
+        toNodeId: 
+        labelKey: 
+        visibleConditionKey: 
+        unlockConditionKey: 
+      down:
+        linkKey: 
+        toNodeId: 
+        labelKey: 
+        visibleConditionKey: 
+        unlockConditionKey: 
+    endingKey: ending.ch02.clear
+    opensNextChapter: 0
+    nextChapterKey: 
+  - nodeId: ch02.floor05.locked_lower
+    payloadKey: episode.ch02.floor05.locked_lower
+    nodeKind: 0
+    nextLinks: []
+    attachments:
+      up:
+        linkKey: 
+        toNodeId: 
+        labelKey: 
+        visibleConditionKey: 
+        unlockConditionKey: 
+      right:
+        linkKey: 
+        toNodeId: 
+        labelKey: 
+        visibleConditionKey: 
+        unlockConditionKey: 
+      down:
+        linkKey: 
+        toNodeId: 
+        labelKey: 
+        visibleConditionKey: 
+        unlockConditionKey: 
+    endingKey: ending.ch02.locked_lower
+    opensNextChapter: 0
+    nextChapterKey: 

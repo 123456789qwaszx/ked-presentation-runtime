@@ -1,0 +1,124 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8b31465a6cbe324797ed2dafdd7ba9b, type: 3}
+  m_Name: VNStoryGraphViewData
+  m_EditorClassIdentifier: Assembly-CSharp::VNStoryGraphViewDataSO
+  mainNodeSize: {x: 350, y: 136}
+  attachmentNodeSize: {x: 300, y: 110}
+  horizontalStep: 400
+  branchVerticalStep: 200
+  attachmentVerticalStep: 220
+  attachmentHorizontalStep: 360
+  defaultMainSprite: {fileID: 0}
+  defaultAttachmentSprite: {fileID: 0}
+  defaultMainColor: {r: 0.18, g: 0.28, b: 0.48, a: 1}
+  defaultAttachmentColor: {r: 0.38, g: 0.18, b: 0.42, a: 1}
+  defaultTerminalColor: {r: 0.42, g: 0.32, b: 0.15, a: 1}
+  defaultLockedColor: {r: 0.18, g: 0.18, b: 0.2, a: 0.85}
+  defaultNextLineColor: {r: 0.75, g: 0.9, b: 1, a: 0.9}
+  defaultAttachmentLineColor: {r: 1, g: 0.68, b: 0.9, a: 0.9}
+  defaultLockedLineColor: {r: 0.35, g: 0.35, b: 0.38, a: 0.75}
+  defaultNextLineThickness: 6
+  defaultAttachmentLineThickness: 4
+  nodePatches:
+  - nodeId: ch01.ep01
+    position: {x: -600, y: 0}
+    size: {x: 0, y: 0}
+    sprite: {fileID: 0}
+    overrideColor: 0
+    color: {r: 1, g: 1, b: 1, a: 1}
+    labelKey: label.ch01.ep01
+    actionKey: action.ch01.ep01
+  - nodeId: ch01.ep02
+    position: {x: -200, y: 0}
+    size: {x: 0, y: 0}
+    sprite: {fileID: 0}
+    overrideColor: 0
+    color: {r: 1, g: 1, b: 1, a: 1}
+    labelKey: label.ch01.ep02
+    actionKey: action.ch01.ep02
+  - nodeId: ch01.attach.if_after_ep02
+    position: {x: -200, y: 220}
+    size: {x: 0, y: 0}
+    sprite: {fileID: 0}
+    overrideColor: 0
+    color: {r: 1, g: 1, b: 1, a: 1}
+    labelKey: label.ch01.attach.if_after_ep02
+    actionKey: action.ch01.attach.if_after_ep02
+  - nodeId: ch01.ep03
+    position: {x: 200, y: 0}
+    size: {x: 0, y: 0}
+    sprite: {fileID: 0}
+    overrideColor: 0
+    color: {r: 1, g: 1, b: 1, a: 1}
+    labelKey: label.ch01.ep03
+    actionKey: action.ch01.ep03
+  - nodeId: ch01.ep04
+    position: {x: 600, y: 0}
+    size: {x: 0, y: 0}
+    sprite: {fileID: 0}
+    overrideColor: 0
+    color: {r: 1, g: 1, b: 1, a: 1}
+    labelKey: label.ch01.ep04
+    actionKey: action.ch01.ep04
+  - nodeId: ch01.route_a.ep05
+    position: {x: 1000, y: 100}
+    size: {x: 0, y: 0}
+    sprite: {fileID: 0}
+    overrideColor: 0
+    color: {r: 1, g: 1, b: 1, a: 1}
+    labelKey: label.ch01.route_a.ep05
+    actionKey: action.ch01.route_a.ep05
+  - nodeId: ch01.route_a.end
+    position: {x: 1400, y: 100}
+    size: {x: 0, y: 0}
+    sprite: {fileID: 0}
+    overrideColor: 0
+    color: {r: 1, g: 1, b: 1, a: 1}
+    labelKey: label.ch01.route_a.end
+    actionKey: action.ch01.route_a.end
+  - nodeId: ch01.route_b.ep05
+    position: {x: 1000, y: -100}
+    size: {x: 0, y: 0}
+    sprite: {fileID: 0}
+    overrideColor: 0
+    color: {r: 1, g: 1, b: 1, a: 1}
+    labelKey: label.ch01.route_b.ep05
+    actionKey: action.ch01.route_b.ep05
+  - nodeId: ch01.route_b.end
+    position: {x: 1400, y: -100}
+    size: {x: 0, y: 0}
+    sprite: {fileID: 0}
+    overrideColor: 0
+    color: {r: 1, g: 1, b: 1, a: 1}
+    labelKey: label.ch01.route_b.end
+    actionKey: action.ch01.route_b.end
+  linkPatches: []
+  textEntries:
+  - key: label.ch01.ep01
+    text: "01\n\uCEF4\uD37C\uB2C8\uC640 \uC624\uC544\uC2DC\uC2A4"
+  - key: label.ch01.ep02
+    text: "02\n\uC2DC\uCCAD \uD6C4 \uBCC0\uD654"
+  - key: label.ch01.ep03
+    text: "03\n\uB0AF\uC120 \uC2DC\uC120"
+  - key: label.ch01.ep04
+    text: "04\n\uAC08\uB9BC\uAE38"
+  - key: label.ch01.route_a.ep05
+    text: "05A\n\uC2EC\uC57C\uC7A0\uC785"
+  - key: label.ch01.route_a.end
+    text: "END A\n\uB2E4\uC74C \uC7A5\uC73C\uB85C"
+  - key: label.ch01.route_b.ep05
+    text: "05B\n\uBCC0\uC7A5 \uC218\uC0AC"
+  - key: label.ch01.route_b.end
+    text: "END B\n\uB2EB\uD78C \uACB0\uB9D0"
+  - key: label.ch01.attach.if_after_ep02
+    text: "IF\n\uBCF4\uC774\uC9C0 \uC54A\uB358 \uAE38"

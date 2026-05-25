@@ -12,7 +12,276 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2f5bca7628b64750b77d0051763fab1c, type: 3}
   m_Name: VNStoryGraph 1
   m_EditorClassIdentifier: Assembly-CSharp::VNStoryGraphSO
-  graphId: 
-  chapterKey: 
-  startNodeId: 
-  nodes: []
+  graphId: graph.chapter01.sample
+  chapterKey: chapter.01
+  startNodeId: ch01.ep01
+  nodes:
+  - nodeId: ch01.ep01
+    payloadKey: episode.ch01.ep01
+    nodeKind: 0
+    nextLinks:
+    - linkKey: ch01.ep01.to.ep02
+      toNodeId: ch01.ep02
+      labelKey: choice.ch01.ep01.to.ep02
+      visibleConditionKey: 
+      unlockConditionKey: 
+    attachments:
+      up:
+        linkKey: 
+        toNodeId: 
+        labelKey: 
+        visibleConditionKey: 
+        unlockConditionKey: 
+      right:
+        linkKey: 
+        toNodeId: 
+        labelKey: 
+        visibleConditionKey: 
+        unlockConditionKey: 
+      down:
+        linkKey: 
+        toNodeId: 
+        labelKey: 
+        visibleConditionKey: 
+        unlockConditionKey: 
+    endingKey: 
+    opensNextChapter: 0
+    nextChapterKey: 
+  - nodeId: ch01.ep02
+    payloadKey: episode.ch01.ep02
+    nodeKind: 0
+    nextLinks:
+    - linkKey: ch01.ep02.to.ep03
+      toNodeId: ch01.ep03
+      labelKey: choice.ch01.ep02.to.ep03
+      visibleConditionKey: 
+      unlockConditionKey: 
+    attachments:
+      up:
+        linkKey: 
+        toNodeId: 
+        labelKey: 
+        visibleConditionKey: 
+        unlockConditionKey: 
+      right:
+        linkKey: ch01.ep02.attach.hidden_if
+        toNodeId: ch01.attach.if_after_ep02
+        labelKey: attach_label.ch01.if_after_ep02
+        visibleConditionKey: viewed:ch01.ep02
+        unlockConditionKey: 
+      down:
+        linkKey: 
+        toNodeId: 
+        labelKey: 
+        visibleConditionKey: 
+        unlockConditionKey: 
+    endingKey: 
+    opensNextChapter: 0
+    nextChapterKey: 
+  - nodeId: ch01.attach.if_after_ep02
+    payloadKey: ifroute.ch01.after_ep02
+    nodeKind: 1
+    nextLinks: []
+    attachments:
+      up:
+        linkKey: 
+        toNodeId: 
+        labelKey: 
+        visibleConditionKey: 
+        unlockConditionKey: 
+      right:
+        linkKey: 
+        toNodeId: 
+        labelKey: 
+        visibleConditionKey: 
+        unlockConditionKey: 
+      down:
+        linkKey: 
+        toNodeId: 
+        labelKey: 
+        visibleConditionKey: 
+        unlockConditionKey: 
+    endingKey: ending.ch01.if_after_ep02
+    opensNextChapter: 0
+    nextChapterKey: 
+  - nodeId: ch01.ep03
+    payloadKey: episode.ch01.ep03
+    nodeKind: 0
+    nextLinks:
+    - linkKey: ch01.ep03.to.ep04
+      toNodeId: ch01.ep04
+      labelKey: choice.ch01.ep03.to.ep04
+      visibleConditionKey: 
+      unlockConditionKey: 
+    attachments:
+      up:
+        linkKey: 
+        toNodeId: 
+        labelKey: 
+        visibleConditionKey: 
+        unlockConditionKey: 
+      right:
+        linkKey: 
+        toNodeId: 
+        labelKey: 
+        visibleConditionKey: 
+        unlockConditionKey: 
+      down:
+        linkKey: 
+        toNodeId: 
+        labelKey: 
+        visibleConditionKey: 
+        unlockConditionKey: 
+    endingKey: 
+    opensNextChapter: 0
+    nextChapterKey: 
+  - nodeId: ch01.ep04
+    payloadKey: episode.ch01.ep04
+    nodeKind: 0
+    nextLinks:
+    - linkKey: ch01.ep04.choice.a
+      toNodeId: ch01.route_a.ep05
+      labelKey: choice.ch01.ep04.a
+      visibleConditionKey: 
+      unlockConditionKey: 
+    - linkKey: ch01.ep04.choice.b
+      toNodeId: ch01.route_b.ep05
+      labelKey: choice.ch01.ep04.b
+      visibleConditionKey: 
+      unlockConditionKey: 
+    attachments:
+      up:
+        linkKey: 
+        toNodeId: 
+        labelKey: 
+        visibleConditionKey: 
+        unlockConditionKey: 
+      right:
+        linkKey: 
+        toNodeId: 
+        labelKey: 
+        visibleConditionKey: 
+        unlockConditionKey: 
+      down:
+        linkKey: 
+        toNodeId: 
+        labelKey: 
+        visibleConditionKey: 
+        unlockConditionKey: 
+    endingKey: 
+    opensNextChapter: 0
+    nextChapterKey: 
+  - nodeId: ch01.route_a.ep05
+    payloadKey: episode.ch01.route_a.ep05
+    nodeKind: 0
+    nextLinks:
+    - linkKey: ch01.route_a.ep05.to.end
+      toNodeId: ch01.route_a.end
+      labelKey: choice.ch01.route_a.ep05.to.end
+      visibleConditionKey: 
+      unlockConditionKey: 
+    attachments:
+      up:
+        linkKey: 
+        toNodeId: 
+        labelKey: 
+        visibleConditionKey: 
+        unlockConditionKey: 
+      right:
+        linkKey: 
+        toNodeId: 
+        labelKey: 
+        visibleConditionKey: 
+        unlockConditionKey: 
+      down:
+        linkKey: 
+        toNodeId: 
+        labelKey: 
+        visibleConditionKey: 
+        unlockConditionKey: 
+    endingKey: 
+    opensNextChapter: 0
+    nextChapterKey: 
+  - nodeId: ch01.route_a.end
+    payloadKey: episode.ch01.route_a.end
+    nodeKind: 0
+    nextLinks: []
+    attachments:
+      up:
+        linkKey: 
+        toNodeId: 
+        labelKey: 
+        visibleConditionKey: 
+        unlockConditionKey: 
+      right:
+        linkKey: 
+        toNodeId: 
+        labelKey: 
+        visibleConditionKey: 
+        unlockConditionKey: 
+      down:
+        linkKey: 
+        toNodeId: 
+        labelKey: 
+        visibleConditionKey: 
+        unlockConditionKey: 
+    endingKey: ending.ch01.route_a
+    opensNextChapter: 1
+    nextChapterKey: chapter.02
+  - nodeId: ch01.route_b.ep05
+    payloadKey: episode.ch01.route_b.ep05
+    nodeKind: 0
+    nextLinks:
+    - linkKey: ch01.route_b.ep05.to.end
+      toNodeId: ch01.route_b.end
+      labelKey: choice.ch01.route_b.ep05.to.end
+      visibleConditionKey: 
+      unlockConditionKey: 
+    attachments:
+      up:
+        linkKey: 
+        toNodeId: 
+        labelKey: 
+        visibleConditionKey: 
+        unlockConditionKey: 
+      right:
+        linkKey: 
+        toNodeId: 
+        labelKey: 
+        visibleConditionKey: 
+        unlockConditionKey: 
+      down:
+        linkKey: 
+        toNodeId: 
+        labelKey: 
+        visibleConditionKey: 
+        unlockConditionKey: 
+    endingKey: 
+    opensNextChapter: 0
+    nextChapterKey: 
+  - nodeId: ch01.route_b.end
+    payloadKey: episode.ch01.route_b.end
+    nodeKind: 0
+    nextLinks: []
+    attachments:
+      up:
+        linkKey: 
+        toNodeId: 
+        labelKey: 
+        visibleConditionKey: 
+        unlockConditionKey: 
+      right:
+        linkKey: 
+        toNodeId: 
+        labelKey: 
+        visibleConditionKey: 
+        unlockConditionKey: 
+      down:
+        linkKey: 
+        toNodeId: 
+        labelKey: 
+        visibleConditionKey: 
+        unlockConditionKey: 
+    endingKey: ending.ch01.route_b
+    opensNextChapter: 0
+    nextChapterKey: 

@@ -10,3 +10,17 @@ public enum VNStoryAttachmentSlot
     Right,
     Down
 }
+
+public enum VNStoryGraphLinkKind
+{
+    Next,
+    Attachment
+}
+
+public enum VNStoryGraphNodeViewState
+{
+    Normal,
+    Locked,
+    Terminal,
+    Hidden
+}
