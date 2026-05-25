@@ -1,12 +1,10 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
 public sealed class ChapterSelectionPanel : UIPanel<ChapterSelectionPanel.Refs>
 {
-    public event Action<int> OnChapterRequested;
-    public event Action OnBackRequested;
-    
     public enum Refs
     {
         SafeArea,
@@ -15,12 +13,6 @@ public sealed class ChapterSelectionPanel : UIPanel<ChapterSelectionPanel.Refs>
 
         ButtonViewport,
         ChapterButtons,
-        ChapterCard01,
-        ChapterCard02,
-        ChapterCard03,
-        ChapterCard04,
-        ChapterCard05,
-        ChapterCard06,
 
         ReturnBlock_Root,
         CurrentScreenLabel_Root,
@@ -55,67 +47,59 @@ public sealed class ChapterSelectionPanel : UIPanel<ChapterSelectionPanel.Refs>
         ChangePortraitButton_Text,
     }
 
-    private static readonly Refs[] ChapterCardRefs =
-    {
-        Refs.ChapterCard01,
-        Refs.ChapterCard02,
-        Refs.ChapterCard03,
-        Refs.ChapterCard04,
-        Refs.ChapterCard05,
-        Refs.ChapterCard06,
-    };
+    public event Action<int> OnChapterRequested;
+    public event Action OnBackRequested;
 
-
-    private readonly ChapterButtonCard[] _cards = new ChapterButtonCard[ChapterCardRefs.Length];
+    private readonly List<ChapterButtonCard> _cards = new();
 
     private int _selectedChapterId = -1;
 
+    public RectTransform CardContainer => View.Rect(Refs.ChapterButtons);
+
     protected override void OnInitialize()
     {
-        for (int i = 0; i < ChapterCardRefs.Length; i++)
-        {
-            _cards[i] = ResolveCard(ChapterCardRefs[i]);
-        }
+        BindEvent(View.Button(Refs.ReturnButton), OnReturn);
+    }
 
-        for (int i = 0; i < _cards.Length; i++)
+    public void RegisterCards(IReadOnlyList<ChapterButtonCard> cards)
+    {
+        UnregisterCards();
+
+        if (cards == null)
+            return;
+
+        for (int i = 0; i < cards.Count; i++)
+        {
+            ChapterButtonCard card = cards[i];
+
+            if (card == null)
+                continue;
+
+            card.Clicked += HandleCardClicked;
+            _cards.Add(card);
+        }
+    }
+
+    public void UnregisterCards()
+    {
+        for (int i = 0; i < _cards.Count; i++)
         {
             ChapterButtonCard card = _cards[i];
 
             if (card == null)
                 continue;
 
-            card.Clicked += HandleCardClicked;
+            card.Clicked -= HandleCardClicked;
         }
 
-        BindEvent(View.Button(Refs.ReturnButton), OnReturn);
-    }
-
-    private ChapterButtonCard ResolveCard(Refs r)
-    {
-        RectTransform rect = View.Rect(r);
-
-        if (rect == null)
-        {
-            Debug.LogWarning($"[ChapterSelectionPanel] Missing {r} ref.", this);
-            return null;
-        }
-
-        ChapterButtonCard card = rect.GetComponent<ChapterButtonCard>();
-
-        if (card == null)
-        {
-            Debug.LogWarning($"[ChapterSelectionPanel] {r} has no ChapterButtonCard component.", this);
-            return null;
-        }
-
-        return card;
+        _cards.Clear();
     }
 
     public void PresentChapters(ChapterButtonCardModel[] models, int selectedChapterId = -1)
     {
         _selectedChapterId = selectedChapterId;
 
-        for (int i = 0; i < _cards.Length; i++)
+        for (int i = 0; i < _cards.Count; i++)
         {
             ChapterButtonCard card = _cards[i];
 
@@ -145,7 +129,7 @@ public sealed class ChapterSelectionPanel : UIPanel<ChapterSelectionPanel.Refs>
     {
         _selectedChapterId = chapterId;
 
-        for (int i = 0; i < _cards.Length; i++)
+        for (int i = 0; i < _cards.Count; i++)
         {
             ChapterButtonCard card = _cards[i];
 
@@ -165,5 +149,10 @@ public sealed class ChapterSelectionPanel : UIPanel<ChapterSelectionPanel.Refs>
     private void OnReturn(PointerEventData _)
     {
         OnBackRequested?.Invoke();
+    }
+
+    private void OnDestroy()
+    {
+        UnregisterCards();
     }
 }
