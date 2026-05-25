@@ -419,12 +419,69 @@ public class VnAppBootstrap : MonoBehaviour
         _screenBindings.AttachEpisodePlayer(episodePlayer);
     }
 
+    [SerializeField] private RectTransform chapterCardPrefab;
+    [SerializeField] private ChapterButtonCardBuildOptions chapterCardBuildOptions = new ChapterButtonCardBuildOptions();
+
+    private int _selectedChapterId = 0;
+
     private void Start()
     {
-        _screenBindings.ConfigureChapterSelection();
+        _screenBindings.ConfigureChapterSelection(
+            ResolveChapterModels,
+            ResolveSelectedChapterId,
+            chapterCardPrefab,
+            chapterCardCount: 6,
+            chapterCardBuildOptions,
+            HandleChapterRequested);
+
         _screenBindings.GoToChapterSelection();
-        //_screenBindings.GoToTitle();
     }
+
+    private ChapterButtonCardModel[] ResolveChapterModels()
+    {
+        return new[]
+        {
+            new ChapterButtonCardModel(
+                chapterId: 0,
+                indexText: "01",
+                chapterIndexLabel: "CHAPTER 01",
+                chapterTitle: "Stella Sora",
+                episodeHeading: "01 First Broadcast",
+                interactable: true,
+                locked: false),
+
+            new ChapterButtonCardModel(
+                chapterId: 1,
+                indexText: "02",
+                chapterIndexLabel: "CHAPTER 02",
+                chapterTitle: "Signal Noise",
+                episodeHeading: "02 Unread Message",
+                interactable: true,
+                locked: false),
+
+            new ChapterButtonCardModel(
+                chapterId: 2,
+                indexText: "03",
+                chapterIndexLabel: "CHAPTER 03",
+                chapterTitle: "Broadcast Fever",
+                episodeHeading: "03 Locked Route",
+                interactable: false,
+                locked: true),
+        };
+    }
+
+    private int ResolveSelectedChapterId()
+    {
+        return _selectedChapterId;
+    }
+
+    private void HandleChapterRequested(int chapterId)
+    {
+        _selectedChapterId = chapterId;
+        Debug.Log($"[Bootstrap] Chapter selected: {chapterId}");
+    }
+    
+    
     
     #region Helper
     [ContextMenu("VN Trace/Dump To Console")]

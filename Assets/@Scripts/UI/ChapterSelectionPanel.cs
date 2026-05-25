@@ -150,9 +150,4 @@ public sealed class ChapterSelectionPanel : UIPanel<ChapterSelectionPanel.Refs>
     {
         OnBackRequested?.Invoke();
     }
-
-    private void OnDestroy()
-    {
-        UnregisterCards();
-    }
 }

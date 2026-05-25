@@ -3,141 +3,209 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public sealed class ChapterButtonCard : UIBase<ChapterButtonCard.Refs>
+public sealed class ChapterButtonCard : MonoBehaviour
 {
-    public enum Refs
+    [Serializable]
+    public struct References
     {
-        Bg_Root,
-        Bg_Pad,
-        Bg_Image,
+        [Header("Root / Motion")]
+        public RectTransform cardRoot;
+        public CanvasGroup cardCanvasGroup;
 
-        BgOverlay_Root,
-        BgOverlay_Pad,
-        BgOverlay_Image,
+        public RectTransform layoutRoot;
+        public RectTransform motionRoot;
+        public RectTransform shakeRoot;
+        public RectTransform scaleRoot;
 
-        Index_Root,
-        Index_Anchor,
-        Index_Text,
+        [Header("Background")]
+        public RectTransform bgRoot;
+        public RectTransform bgPad;
+        public Image bgImage;
 
-        HeadingBlock_Root,
+        public RectTransform bgOverlayRoot;
+        public RectTransform bgOverlayPad;
+        public Image bgOverlayImage;
 
-        ChapterIndexLabel_Root,
-        ChapterIndexLabel_Image,
-        ChapterIndexLabel_Text,
+        [Header("Index")]
+        public RectTransform indexRoot;
+        public RectTransform indexAnchor;
+        public TMP_Text indexText;
 
-        ChapterTitleLabel_Root,
-        ChapterTitleLabelBG_Image,
-        ChapterTitleLabelIcon_Image,
-        ChapterTitleLabel_Text,
+        [Header("Heading")]
+        public RectTransform headingBlockRoot;
 
-        EpisodeHeadingLabel_Root,
-        EpisodeHeadingLabel_Image,
-        EpisodeHeadingLabel_Text,
+        public RectTransform chapterIndexLabelRoot;
+        public Image chapterIndexLabelImage;
+        public TMP_Text chapterIndexLabelText;
 
-        Hit_Button,
-        Selected_Root,
-        // Lock_Root,
+        public RectTransform chapterTitleLabelRoot;
+        public Image chapterTitleLabelBgImage;
+        public Image chapterTitleLabelIconImage;
+        public TMP_Text chapterTitleLabelText;
+
+        public RectTransform episodeHeadingLabelRoot;
+        public Image episodeHeadingLabelImage;
+        public TMP_Text episodeHeadingLabelText;
+
+        [Header("Input")]
+        public RectTransform hitRoot;
+        public Button hitButton;
+
+        [Header("State")]
+        public RectTransform selectedRoot;
+        public CanvasGroup selectedCanvasGroup;
+
+        public RectTransform lockedRoot;
+        public CanvasGroup lockedCanvasGroup;
+
+        [Header("Extension")]
+        public RectTransform extensionsRoot;
+
+        public bool HasRequired()
+        {
+            return
+                cardRoot != null &&
+                cardCanvasGroup != null &&
+
+                layoutRoot != null &&
+                motionRoot != null &&
+                shakeRoot != null &&
+                scaleRoot != null &&
+
+                bgRoot != null &&
+                bgPad != null &&
+                bgImage != null &&
+
+                bgOverlayRoot != null &&
+                bgOverlayPad != null &&
+                bgOverlayImage != null &&
+
+                indexRoot != null &&
+                indexAnchor != null &&
+                indexText != null &&
+
+                headingBlockRoot != null &&
+
+                chapterIndexLabelRoot != null &&
+                chapterIndexLabelImage != null &&
+                chapterIndexLabelText != null &&
+
+                chapterTitleLabelRoot != null &&
+                chapterTitleLabelBgImage != null &&
+                chapterTitleLabelIconImage != null &&
+                chapterTitleLabelText != null &&
+
+                episodeHeadingLabelRoot != null &&
+                episodeHeadingLabelImage != null &&
+                episodeHeadingLabelText != null &&
+
+                hitRoot != null &&
+                hitButton != null &&
+
+                selectedRoot != null &&
+                selectedCanvasGroup != null &&
+
+                lockedRoot != null &&
+                lockedCanvasGroup != null &&
+
+                extensionsRoot != null;
+        }
     }
 
     public event Action<int> Clicked;
 
-    private Button _hit;
-    private Image _bg;
-    private Image _bgOverlay;
+    [SerializeField] private References refs;
 
-    private TMP_Text _indexText;
-    private TMP_Text _chapterIndexLabelText;
-    private TMP_Text _chapterTitleText;
-    private TMP_Text _episodeHeadingText;
-
-    private Image _chapterIndexLabelImage;
-    private Image _episodeHeadingLabelImage;
-    private Image _titleIconImage;
-
-    private CanvasGroup _selectedRoot;
-    private CanvasGroup _lockRoot;
+    private Button _boundHitButton;
 
     public int ChapterId { get; private set; } = -1;
 
-    protected override void OnInitialize()
+    public RectTransform CardRoot => refs.cardRoot;
+    public CanvasGroup CardCanvasGroup => refs.cardCanvasGroup;
+
+    public RectTransform LayoutRoot => refs.layoutRoot;
+    public RectTransform MotionRoot => refs.motionRoot;
+    public RectTransform ShakeRoot => refs.shakeRoot;
+    public RectTransform ScaleRoot => refs.scaleRoot;
+
+    public CanvasGroup SelectedCanvasGroup => refs.selectedCanvasGroup;
+    public CanvasGroup LockedCanvasGroup => refs.lockedCanvasGroup;
+
+    public RectTransform ExtensionsRoot => refs.extensionsRoot;
+
+    private void Awake()
     {
-        _hit = View.Button(Refs.Hit_Button);
-        _bg = View.Image(Refs.Bg_Image);
-        _bgOverlay = View.Image(Refs.BgOverlay_Image);
-
-        _indexText = View.Text(Refs.Index_Text);
-        _chapterIndexLabelText = View.Text(Refs.ChapterIndexLabel_Text);
-        _chapterTitleText = View.Text(Refs.ChapterTitleLabel_Text);
-        _episodeHeadingText = View.Text(Refs.EpisodeHeadingLabel_Text);
-
-        _chapterIndexLabelImage = View.Image(Refs.ChapterIndexLabel_Image);
-        _episodeHeadingLabelImage = View.Image(Refs.EpisodeHeadingLabel_Image);
-        _titleIconImage = View.Image(Refs.ChapterTitleLabelIcon_Image);
-
-        _selectedRoot = View.CanvasGroup(Refs.Selected_Root);
-        //_lockRoot = View.CanvasGroup(Refs.Lock_Root);
-
-        if (_hit != null)
-            _hit.onClick.AddListener(HandleClicked);
-
-        gameObject.SetActive(true);
+        RebindHitButton();
     }
 
-    public void Present(in ChapterButtonCardModel m)
+    private void OnDestroy()
     {
-        ChapterId = m.ChapterId;
+        UnbindHitButton();
+    }
 
-        if (_indexText != null)
-            _indexText.text = m.IndexText;
+    public void Present(in ChapterButtonCardModel model)
+    {
+        ChapterId = model.ChapterId;
 
-        if (_chapterIndexLabelText != null)
-            _chapterIndexLabelText.text = m.ChapterIndexLabel;
+        if (refs.indexText != null)
+            refs.indexText.text = model.IndexText;
 
-        if (_chapterTitleText != null)
-            _chapterTitleText.text = m.ChapterTitle;
+        if (refs.chapterIndexLabelText != null)
+            refs.chapterIndexLabelText.text = model.ChapterIndexLabel;
 
-        if (_episodeHeadingText != null)
-            _episodeHeadingText.text = m.EpisodeHeading;
+        if (refs.chapterTitleLabelText != null)
+            refs.chapterTitleLabelText.text = model.ChapterTitle;
 
-        if (_bg != null)
-            _bg.sprite = m.Bg;
+        if (refs.episodeHeadingLabelText != null)
+            refs.episodeHeadingLabelText.text = model.EpisodeHeading;
 
-        if (_bgOverlay != null)
-            _bgOverlay.sprite = m.BgOverlay;
+        if (refs.bgImage != null && model.Bg != null)
+            refs.bgImage.sprite = model.Bg;
 
-        if (_chapterIndexLabelImage != null)
-            _chapterIndexLabelImage.sprite = m.ChapterIndexLabelSprite;
+        if (refs.bgOverlayImage != null && model.BgOverlay != null)
+            refs.bgOverlayImage.sprite = model.BgOverlay;
 
-        if (_episodeHeadingLabelImage != null)
-            _episodeHeadingLabelImage.sprite = m.EpisodeHeadingLabelSprite;
+        if (refs.chapterIndexLabelImage != null && model.ChapterIndexLabelSprite != null)
+            refs.chapterIndexLabelImage.sprite = model.ChapterIndexLabelSprite;
 
-        if (_titleIconImage != null)
-            _titleIconImage.sprite = m.TitleIcon;
+        if (refs.episodeHeadingLabelImage != null && model.EpisodeHeadingLabelSprite != null)
+            refs.episodeHeadingLabelImage.sprite = model.EpisodeHeadingLabelSprite;
 
-        SetInteractable(m.Interactable && !m.Locked);
-        SetLocked(m.Locked);
+        if (refs.chapterTitleLabelIconImage != null && model.TitleIcon != null)
+            refs.chapterTitleLabelIconImage.sprite = model.TitleIcon;
+
+        SetInteractable(model.Interactable && !model.Locked);
+        SetLocked(model.Locked);
     }
 
     public void SetSelected(bool selected)
     {
-        if (_selectedRoot != null)
-            _selectedRoot.SetVisible(selected, blockRaycasts: false);
+        SetVisible(refs.selectedCanvasGroup, selected, blockRaycasts: false);
     }
 
     public void SetLocked(bool locked)
     {
-        if (_lockRoot == null)
-            return;
-
-        _lockRoot.alpha = locked ? 1f : 0f;
-        _lockRoot.interactable = locked;
-        _lockRoot.blocksRaycasts = locked;
+        SetVisible(refs.lockedCanvasGroup, locked, blockRaycasts: locked);
     }
 
     public void SetInteractable(bool interactable)
     {
-        if (_hit != null)
-            _hit.interactable = interactable;
+        if (refs.hitButton != null)
+            refs.hitButton.interactable = interactable;
+    }
+
+    internal bool HasRequiredReferences()
+    {
+        return refs.HasRequired();
+    }
+
+    internal void AssignGeneratedReferences(References generatedRefs)
+    {
+        UnbindHitButton();
+
+        refs = generatedRefs;
+
+        RebindHitButton();
     }
 
     private void HandleClicked()
@@ -146,5 +214,38 @@ public sealed class ChapterButtonCard : UIBase<ChapterButtonCard.Refs>
             return;
 
         Clicked?.Invoke(ChapterId);
+    }
+
+    private void RebindHitButton()
+    {
+        if (_boundHitButton == refs.hitButton)
+            return;
+
+        UnbindHitButton();
+
+        if (refs.hitButton == null)
+            return;
+
+        _boundHitButton = refs.hitButton;
+        _boundHitButton.onClick.AddListener(HandleClicked);
+    }
+
+    private void UnbindHitButton()
+    {
+        if (_boundHitButton == null)
+            return;
+
+        _boundHitButton.onClick.RemoveListener(HandleClicked);
+        _boundHitButton = null;
+    }
+
+    private static void SetVisible(CanvasGroup group, bool visible, bool blockRaycasts)
+    {
+        if (group == null)
+            return;
+
+        group.alpha = visible ? 1f : 0f;
+        group.interactable = visible;
+        group.blocksRaycasts = blockRaycasts;
     }
 }

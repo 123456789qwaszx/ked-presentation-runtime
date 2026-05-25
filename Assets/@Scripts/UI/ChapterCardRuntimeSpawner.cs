@@ -9,27 +9,17 @@ public sealed class ChapterCardRuntimeSpawner
         RectTransform parent,
         RectTransform prefab,
         string rolePrefix,
-        string rootName)
+        string rootName,
+        ChapterButtonCardBuildOptions options = null)
     {
-        RectTransform root = _builder.BuildCardRigRoot(
-            prefab,
-            rolePrefix,
-            rootName);
-
-        root.SetParent(parent, false);
-
-        ChapterButtonCard card = root.GetComponent<ChapterButtonCard>();
-
-        if (card == null)
-            card = root.gameObject.AddComponent<ChapterButtonCard>();
-
-        return card;
+        return _builder.BuildCard(parent, prefab, rolePrefix, rootName, options);
     }
 
     public List<ChapterButtonCard> CreateCards(
         RectTransform parent,
         RectTransform prefab,
-        int count)
+        int count,
+        ChapterButtonCardBuildOptions options = null)
     {
         List<ChapterButtonCard> cards = new List<ChapterButtonCard>();
 
@@ -38,7 +28,7 @@ public sealed class ChapterCardRuntimeSpawner
             string prefix = $"card{i:00}_";
             string rootName = "ChapterButtonCard";
 
-            ChapterButtonCard card = CreateCard(parent, prefab, prefix, rootName);
+            ChapterButtonCard card = CreateCard(parent, prefab, prefix, rootName, options);
 
             if (card != null)
                 cards.Add(card);
