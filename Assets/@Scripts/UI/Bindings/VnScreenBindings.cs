@@ -6,7 +6,6 @@ public sealed partial class VnScreenBindings : IDisposable
     private readonly UIBindingContext _ctx = new();
     private static UIManager UI => UIManager.Instance;
 
-    private readonly EpisodeFlowController _episodeFlowController;
     private readonly VNSaveLoadSystem _vnSaveLoadSystem;
 
     private EpisodePlayer _episodePlayer;
@@ -15,9 +14,8 @@ public sealed partial class VnScreenBindings : IDisposable
 
     private UIBase _boundRoot;
 
-    public VnScreenBindings(EpisodeFlowController episodeFlowController, VNSaveLoadSystem vnSaveLoadSystem)
+    public VnScreenBindings( VNSaveLoadSystem vnSaveLoadSystem)
     {
-        _episodeFlowController = episodeFlowController;
         _vnSaveLoadSystem = vnSaveLoadSystem;
     }
 
@@ -295,7 +293,6 @@ public sealed partial class VnScreenBindings : IDisposable
 
     private void OpenStorySelectFlow()
     {
-        _episodeFlowController.OpenSelectChapterPanel();
     }
 
     #endregion

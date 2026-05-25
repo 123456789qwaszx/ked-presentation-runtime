@@ -88,7 +88,6 @@ public class VnAppBootstrap : MonoBehaviour
     private PresentationSessionBridge _presentationSessionBridge;
 
     private PresentationViewUIBindings _dialogueUIBindings;
-    private EpisodeFlowController _episodeFlowController;
     private VnScreenBindings _screenBindings;
     private RollbackHistory _rollbackHistory;
     private BacklogRecorder _backlogRecorder;
@@ -404,12 +403,8 @@ public class VnAppBootstrap : MonoBehaviour
             _linePresentationAdvanceState
             );
         
-        _episodeFlowController = new EpisodeFlowController(
-            _dialogueUIBindings,
-            episodePlayer,
-            _episodePlayState);
         
-        _screenBindings = new VnScreenBindings(_episodeFlowController, _vnSaveLoadSystem);
+        _screenBindings = new VnScreenBindings(_vnSaveLoadSystem);
     }
 
     private void InitializeEpisodePlayer()
@@ -420,19 +415,16 @@ public class VnAppBootstrap : MonoBehaviour
     }
 
     [SerializeField] private RectTransform chapterCardPrefab;
-    [SerializeField] private ChapterButtonCardBuildOptions chapterCardBuildOptions = new ChapterButtonCardBuildOptions();
 
     private int _selectedChapterId = 0;
 
     private void Start()
     {
         _screenBindings.ConfigureChapterSelection(
-            ResolveChapterModels,
-            ResolveSelectedChapterId,
-            chapterCardPrefab,
+            resolveChapterModels: ResolveChapterModels,
+            chapterCardPrefab: chapterCardPrefab,
             chapterCardCount: 6,
-            chapterCardBuildOptions,
-            HandleChapterRequested);
+            onChapterRequested: HandleChapterRequested);
 
         _screenBindings.GoToChapterSelection();
     }
@@ -468,11 +460,6 @@ public class VnAppBootstrap : MonoBehaviour
                 interactable: false,
                 locked: true),
         };
-    }
-
-    private int ResolveSelectedChapterId()
-    {
-        return _selectedChapterId;
     }
 
     private void HandleChapterRequested(int chapterId)

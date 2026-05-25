@@ -73,6 +73,7 @@ public class UI_EventHandler : MonoBehaviour,
     public void OnBeginDrag(PointerEventData eventData)
     {
         _isDragging = true;
+        _isClickAllowed = false;
         _cachedEventData = eventData;
         
         StopLongPressCheck(); // 드래그 시작하면 롱프레스 취소

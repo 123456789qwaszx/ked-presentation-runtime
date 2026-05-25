@@ -5069,20 +5069,7 @@ MonoBehaviour:
   episodePlayer: {fileID: 1924806292}
   characterEmojiLibrarySO: {fileID: 11400000, guid: 50cc0df71f2e038468df66d0c632ebdd, type: 2}
   rollbackHistoryDebugView: {fileID: 969122867}
-  chapterCardPrefab: {fileID: 0}
-  chapterCardBuildOptions:
-    defaultCardSize: {x: 400, y: 700}
-    defaultBgSprite: {fileID: 0}
-    defaultBgOverlaySprite: {fileID: 0}
-    defaultChapterIndexLabelSprite: {fileID: 0}
-    defaultEpisodeHeadingLabelSprite: {fileID: 0}
-    defaultTitleIconSprite: {fileID: 0}
-    indexFontSize: 36
-    chapterIndexFontSize: 18
-    titleFontSize: 24
-    episodeHeadingFontSize: 18
-    hideSelectedByDefault: 1
-    hideLockedByDefault: 1
+  chapterCardPrefab: {fileID: 2410623267660482620, guid: 60640956e3866b44e9e8c9df1a45dbd3, type: 3}
 --- !u!1 &626587492
 GameObject:
   m_ObjectHideFlags: 0
@@ -17641,7 +17628,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 458.38, y: -24}
-  m_SizeDelta: {x: 916.76, y: 0}
+  m_SizeDelta: {x: 916.76, y: 24}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!1 &666632935594092605
 GameObject:
@@ -26956,40 +26943,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 358a6f7761a06f248982cc4e6e73abf2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ChapterButtonCard
-  refs:
-    cardRoot: {fileID: 0}
-    cardCanvasGroup: {fileID: 0}
-    layoutRoot: {fileID: 0}
-    motionRoot: {fileID: 0}
-    shakeRoot: {fileID: 0}
-    scaleRoot: {fileID: 0}
-    bgRoot: {fileID: 0}
-    bgPad: {fileID: 0}
-    bgImage: {fileID: 0}
-    bgOverlayRoot: {fileID: 0}
-    bgOverlayPad: {fileID: 0}
-    bgOverlayImage: {fileID: 0}
-    indexRoot: {fileID: 0}
-    indexAnchor: {fileID: 0}
-    indexText: {fileID: 0}
-    headingBlockRoot: {fileID: 0}
-    chapterIndexLabelRoot: {fileID: 0}
-    chapterIndexLabelImage: {fileID: 0}
-    chapterIndexLabelText: {fileID: 0}
-    chapterTitleLabelRoot: {fileID: 0}
-    chapterTitleLabelBgImage: {fileID: 0}
-    chapterTitleLabelIconImage: {fileID: 0}
-    chapterTitleLabelText: {fileID: 0}
-    episodeHeadingLabelRoot: {fileID: 0}
-    episodeHeadingLabelImage: {fileID: 0}
-    episodeHeadingLabelText: {fileID: 0}
-    hitRoot: {fileID: 0}
-    hitButton: {fileID: 0}
-    selectedRoot: {fileID: 0}
-    selectedCanvasGroup: {fileID: 0}
-    lockedRoot: {fileID: 0}
-    lockedCanvasGroup: {fileID: 0}
-    extensionsRoot: {fileID: 0}
 --- !u!114 &3232941291859352563
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -31439,40 +31392,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 358a6f7761a06f248982cc4e6e73abf2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ChapterButtonCard
-  refs:
-    cardRoot: {fileID: 0}
-    cardCanvasGroup: {fileID: 0}
-    layoutRoot: {fileID: 0}
-    motionRoot: {fileID: 0}
-    shakeRoot: {fileID: 0}
-    scaleRoot: {fileID: 0}
-    bgRoot: {fileID: 0}
-    bgPad: {fileID: 0}
-    bgImage: {fileID: 0}
-    bgOverlayRoot: {fileID: 0}
-    bgOverlayPad: {fileID: 0}
-    bgOverlayImage: {fileID: 0}
-    indexRoot: {fileID: 0}
-    indexAnchor: {fileID: 0}
-    indexText: {fileID: 0}
-    headingBlockRoot: {fileID: 0}
-    chapterIndexLabelRoot: {fileID: 0}
-    chapterIndexLabelImage: {fileID: 0}
-    chapterIndexLabelText: {fileID: 0}
-    chapterTitleLabelRoot: {fileID: 0}
-    chapterTitleLabelBgImage: {fileID: 0}
-    chapterTitleLabelIconImage: {fileID: 0}
-    chapterTitleLabelText: {fileID: 0}
-    episodeHeadingLabelRoot: {fileID: 0}
-    episodeHeadingLabelImage: {fileID: 0}
-    episodeHeadingLabelText: {fileID: 0}
-    hitRoot: {fileID: 0}
-    hitButton: {fileID: 0}
-    selectedRoot: {fileID: 0}
-    selectedCanvasGroup: {fileID: 0}
-    lockedRoot: {fileID: 0}
-    lockedCanvasGroup: {fileID: 0}
-    extensionsRoot: {fileID: 0}
 --- !u!222 &4653022858805769233
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -33756,40 +33675,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 358a6f7761a06f248982cc4e6e73abf2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ChapterButtonCard
-  refs:
-    cardRoot: {fileID: 0}
-    cardCanvasGroup: {fileID: 0}
-    layoutRoot: {fileID: 0}
-    motionRoot: {fileID: 0}
-    shakeRoot: {fileID: 0}
-    scaleRoot: {fileID: 0}
-    bgRoot: {fileID: 0}
-    bgPad: {fileID: 0}
-    bgImage: {fileID: 0}
-    bgOverlayRoot: {fileID: 0}
-    bgOverlayPad: {fileID: 0}
-    bgOverlayImage: {fileID: 0}
-    indexRoot: {fileID: 0}
-    indexAnchor: {fileID: 0}
-    indexText: {fileID: 0}
-    headingBlockRoot: {fileID: 0}
-    chapterIndexLabelRoot: {fileID: 0}
-    chapterIndexLabelImage: {fileID: 0}
-    chapterIndexLabelText: {fileID: 0}
-    chapterTitleLabelRoot: {fileID: 0}
-    chapterTitleLabelBgImage: {fileID: 0}
-    chapterTitleLabelIconImage: {fileID: 0}
-    chapterTitleLabelText: {fileID: 0}
-    episodeHeadingLabelRoot: {fileID: 0}
-    episodeHeadingLabelImage: {fileID: 0}
-    episodeHeadingLabelText: {fileID: 0}
-    hitRoot: {fileID: 0}
-    hitButton: {fileID: 0}
-    selectedRoot: {fileID: 0}
-    selectedCanvasGroup: {fileID: 0}
-    lockedRoot: {fileID: 0}
-    lockedCanvasGroup: {fileID: 0}
-    extensionsRoot: {fileID: 0}
 --- !u!224 &5472001283682464885
 RectTransform:
   m_ObjectHideFlags: 0
@@ -39803,7 +39688,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.000030517578, y: 0}
+  m_AnchoredPosition: {x: 0.000061035156, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &7289458921116999256
@@ -42905,40 +42790,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 358a6f7761a06f248982cc4e6e73abf2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ChapterButtonCard
-  refs:
-    cardRoot: {fileID: 0}
-    cardCanvasGroup: {fileID: 0}
-    layoutRoot: {fileID: 0}
-    motionRoot: {fileID: 0}
-    shakeRoot: {fileID: 0}
-    scaleRoot: {fileID: 0}
-    bgRoot: {fileID: 0}
-    bgPad: {fileID: 0}
-    bgImage: {fileID: 0}
-    bgOverlayRoot: {fileID: 0}
-    bgOverlayPad: {fileID: 0}
-    bgOverlayImage: {fileID: 0}
-    indexRoot: {fileID: 0}
-    indexAnchor: {fileID: 0}
-    indexText: {fileID: 0}
-    headingBlockRoot: {fileID: 0}
-    chapterIndexLabelRoot: {fileID: 0}
-    chapterIndexLabelImage: {fileID: 0}
-    chapterIndexLabelText: {fileID: 0}
-    chapterTitleLabelRoot: {fileID: 0}
-    chapterTitleLabelBgImage: {fileID: 0}
-    chapterTitleLabelIconImage: {fileID: 0}
-    chapterTitleLabelText: {fileID: 0}
-    episodeHeadingLabelRoot: {fileID: 0}
-    episodeHeadingLabelImage: {fileID: 0}
-    episodeHeadingLabelText: {fileID: 0}
-    hitRoot: {fileID: 0}
-    hitButton: {fileID: 0}
-    selectedRoot: {fileID: 0}
-    selectedCanvasGroup: {fileID: 0}
-    lockedRoot: {fileID: 0}
-    lockedCanvasGroup: {fileID: 0}
-    extensionsRoot: {fileID: 0}
 --- !u!224 &8118642583136209053
 RectTransform:
   m_ObjectHideFlags: 0
@@ -43079,40 +42930,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 358a6f7761a06f248982cc4e6e73abf2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ChapterButtonCard
-  refs:
-    cardRoot: {fileID: 0}
-    cardCanvasGroup: {fileID: 0}
-    layoutRoot: {fileID: 0}
-    motionRoot: {fileID: 0}
-    shakeRoot: {fileID: 0}
-    scaleRoot: {fileID: 0}
-    bgRoot: {fileID: 0}
-    bgPad: {fileID: 0}
-    bgImage: {fileID: 0}
-    bgOverlayRoot: {fileID: 0}
-    bgOverlayPad: {fileID: 0}
-    bgOverlayImage: {fileID: 0}
-    indexRoot: {fileID: 0}
-    indexAnchor: {fileID: 0}
-    indexText: {fileID: 0}
-    headingBlockRoot: {fileID: 0}
-    chapterIndexLabelRoot: {fileID: 0}
-    chapterIndexLabelImage: {fileID: 0}
-    chapterIndexLabelText: {fileID: 0}
-    chapterTitleLabelRoot: {fileID: 0}
-    chapterTitleLabelBgImage: {fileID: 0}
-    chapterTitleLabelIconImage: {fileID: 0}
-    chapterTitleLabelText: {fileID: 0}
-    episodeHeadingLabelRoot: {fileID: 0}
-    episodeHeadingLabelImage: {fileID: 0}
-    episodeHeadingLabelText: {fileID: 0}
-    hitRoot: {fileID: 0}
-    hitButton: {fileID: 0}
-    selectedRoot: {fileID: 0}
-    selectedCanvasGroup: {fileID: 0}
-    lockedRoot: {fileID: 0}
-    lockedCanvasGroup: {fileID: 0}
-    extensionsRoot: {fileID: 0}
 --- !u!114 &8184415646648762066
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -45147,40 +44964,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 358a6f7761a06f248982cc4e6e73abf2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ChapterButtonCard
-  refs:
-    cardRoot: {fileID: 0}
-    cardCanvasGroup: {fileID: 0}
-    layoutRoot: {fileID: 0}
-    motionRoot: {fileID: 0}
-    shakeRoot: {fileID: 0}
-    scaleRoot: {fileID: 0}
-    bgRoot: {fileID: 0}
-    bgPad: {fileID: 0}
-    bgImage: {fileID: 0}
-    bgOverlayRoot: {fileID: 0}
-    bgOverlayPad: {fileID: 0}
-    bgOverlayImage: {fileID: 0}
-    indexRoot: {fileID: 0}
-    indexAnchor: {fileID: 0}
-    indexText: {fileID: 0}
-    headingBlockRoot: {fileID: 0}
-    chapterIndexLabelRoot: {fileID: 0}
-    chapterIndexLabelImage: {fileID: 0}
-    chapterIndexLabelText: {fileID: 0}
-    chapterTitleLabelRoot: {fileID: 0}
-    chapterTitleLabelBgImage: {fileID: 0}
-    chapterTitleLabelIconImage: {fileID: 0}
-    chapterTitleLabelText: {fileID: 0}
-    episodeHeadingLabelRoot: {fileID: 0}
-    episodeHeadingLabelImage: {fileID: 0}
-    episodeHeadingLabelText: {fileID: 0}
-    hitRoot: {fileID: 0}
-    hitButton: {fileID: 0}
-    selectedRoot: {fileID: 0}
-    selectedCanvasGroup: {fileID: 0}
-    lockedRoot: {fileID: 0}
-    lockedCanvasGroup: {fileID: 0}
-    extensionsRoot: {fileID: 0}
 --- !u!222 &8658939194118089950
 CanvasRenderer:
   m_ObjectHideFlags: 0

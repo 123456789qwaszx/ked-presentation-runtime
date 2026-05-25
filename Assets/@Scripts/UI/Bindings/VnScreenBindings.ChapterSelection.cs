@@ -5,30 +5,24 @@ using UnityEngine;
 public sealed partial class VnScreenBindings
 {
     private Func<ChapterButtonCardModel[]> _resolveChapterModels;
-    private Func<int> _resolveSelectedChapterId;
     private Action<int> _onChapterRequested;
 
-    private readonly ChapterCardRuntimeSpawner _chapterCardSpawner = new ChapterCardRuntimeSpawner();
+    private readonly ChapterCardRuntimeSpawner _chapterCardSpawner = new ();
 
     private RectTransform _chapterCardPrefab;
     private int _chapterCardCount = 6;
-    private ChapterButtonCardBuildOptions _chapterCardBuildOptions;
 
     public void ConfigureChapterSelection(
         Func<ChapterButtonCardModel[]> resolveChapterModels = null,
-        Func<int> resolveSelectedChapterId = null,
         RectTransform chapterCardPrefab = null,
         int chapterCardCount = 6,
-        ChapterButtonCardBuildOptions chapterCardBuildOptions = null,
         Action<int> onChapterRequested = null)
     {
         _resolveChapterModels = resolveChapterModels;
-        _resolveSelectedChapterId = resolveSelectedChapterId;
         _onChapterRequested = onChapterRequested;
 
         _chapterCardPrefab = chapterCardPrefab;
         _chapterCardCount = Mathf.Max(0, chapterCardCount);
-        _chapterCardBuildOptions = chapterCardBuildOptions;
     }
 
     public void GoToChapterSelection()
@@ -41,15 +35,17 @@ public sealed partial class VnScreenBindings
 
     private void BindChapterSelectionPanel(ChapterSelectionPanel panel)
     {
-        _ctx.Bind(
-            panel,
-            p => p.OnChapterRequested += OnChapterRequested,
-            p => p.OnChapterRequested -= OnChapterRequested);
+        if (panel == null)
+            return;
 
-        _ctx.Bind(
-            panel,
+        _ctx.Bind(panel,
             p => p.OnBackRequested += OnChapterBackRequested,
             p => p.OnBackRequested -= OnChapterBackRequested);
+
+        panel.SetChapterCardHandlers(
+            onPressed: OnChapterCardPressed,
+            onReleased: OnChapterCardReleased,
+            onClicked: OnChapterCardClicked);
 
         BuildChapterCards(panel);
         RefreshChapterSelectionPanel(panel);
@@ -73,10 +69,52 @@ public sealed partial class VnScreenBindings
         List<ChapterButtonCard> cards = _chapterCardSpawner.CreateCards(
             container,
             _chapterCardPrefab,
-            _chapterCardCount,
-            _chapterCardBuildOptions);
+            _chapterCardCount);
 
         panel.RegisterCards(cards);
+    }
+
+    private void RefreshChapterSelectionPanel(ChapterSelectionPanel panel)
+    {
+        if (panel == null)
+            return;
+
+        ChapterButtonCardModel[] models = null;
+
+        if (_resolveChapterModels != null)
+            models = _resolveChapterModels.Invoke();
+
+        panel.PresentChapters(models);
+    }
+
+    private void OnChapterCardPressed(ChapterButtonCard card)
+    {
+        if (card == null)
+            return;
+    }
+
+    private void OnChapterCardReleased(ChapterButtonCard card)
+    {
+        if (card == null)
+            return;
+    }
+
+    private void OnChapterCardClicked(ChapterButtonCard card)
+    {
+        if (card == null)
+            return;
+
+        int chapterId = card.ChapterId;
+
+        if (chapterId < 0)
+            return;
+
+        _onChapterRequested?.Invoke(chapterId);
+    }
+
+    private void OnChapterBackRequested()
+    {
+        GoToLobby();
     }
 
     private void ClearChildren(RectTransform parent)
@@ -94,32 +132,5 @@ public sealed partial class VnScreenBindings
             child.SetParent(null, false);
             UnityEngine.Object.Destroy(child.gameObject);
         }
-    }
-
-    private void RefreshChapterSelectionPanel(ChapterSelectionPanel panel)
-    {
-        if (panel == null)
-            return;
-
-        ChapterButtonCardModel[] models = null;
-        int selectedChapterId = -1;
-
-        if (_resolveChapterModels != null)
-            models = _resolveChapterModels.Invoke();
-
-        if (_resolveSelectedChapterId != null)
-            selectedChapterId = _resolveSelectedChapterId.Invoke();
-
-        panel.PresentChapters(models, selectedChapterId);
-    }
-
-    private void OnChapterRequested(int chapterId)
-    {
-        _onChapterRequested?.Invoke(chapterId);
-    }
-
-    private void OnChapterBackRequested()
-    {
-        GoToLobby();
     }
 }
