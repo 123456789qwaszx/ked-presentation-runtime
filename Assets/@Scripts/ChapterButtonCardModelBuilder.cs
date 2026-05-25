@@ -2,9 +2,7 @@
 
 public sealed class ChapterButtonCardModelBuilder
 {
-    public ChapterButtonCardModel[] Build(
-        IEpisodePlayLookup lookup,
-        IEpisodeProgress progress)
+    public ChapterButtonCardModel[] Build(IEpisodePlayLookup lookup, IEpisodeProgress progress)
     {
         if (lookup == null)
             return new ChapterButtonCardModel[0];

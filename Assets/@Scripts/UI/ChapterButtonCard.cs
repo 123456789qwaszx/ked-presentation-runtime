@@ -35,9 +35,11 @@ public sealed class ChapterButtonCard : UIBase<ChapterButtonCard.Refs>
         EpisodeHeadingLabel_Text,
 
         Hit_Button,
-        Selected_Root, // 선택 하이라이트가 있다면(없으면 제거)
-        //Lock_Root,     // 잠금 표시(없으면 제거)
+        Selected_Root,
+        // Lock_Root,
     }
+
+    public event Action<int> Clicked;
 
     private Button _hit;
     private Image _bg;
@@ -75,47 +77,58 @@ public sealed class ChapterButtonCard : UIBase<ChapterButtonCard.Refs>
         _selectedRoot = View.CanvasGroup(Refs.Selected_Root);
         //_lockRoot = View.CanvasGroup(Refs.Lock_Root);
 
+        if (_hit != null)
+            _hit.onClick.AddListener(HandleClicked);
+
         gameObject.SetActive(true);
-    }
-
-    public void BindClick(Action onClick)
-    {
-        if (_hit == null) return;
-
-        _hit.onClick.RemoveAllListeners();
-        _hit.onClick.AddListener(() => onClick());
     }
 
     public void Present(in ChapterButtonCardModel m)
     {
         ChapterId = m.ChapterId;
 
-        if (_indexText != null) _indexText.text = m.IndexText;
-        if (_chapterIndexLabelText != null) _chapterIndexLabelText.text = m.ChapterIndexLabel;
-        if (_chapterTitleText != null) _chapterTitleText.text = m.ChapterTitle;
-        if (_episodeHeadingText != null) _episodeHeadingText.text = m.EpisodeHeading;
+        if (_indexText != null)
+            _indexText.text = m.IndexText;
 
-        if (_bg != null && m.Bg != null) _bg.sprite = m.Bg;
-        if (_bgOverlay != null && m.BgOverlay != null) _bgOverlay.sprite = m.BgOverlay;
+        if (_chapterIndexLabelText != null)
+            _chapterIndexLabelText.text = m.ChapterIndexLabel;
 
-        if (_chapterIndexLabelImage != null && m.ChapterIndexLabelSprite != null)
+        if (_chapterTitleText != null)
+            _chapterTitleText.text = m.ChapterTitle;
+
+        if (_episodeHeadingText != null)
+            _episodeHeadingText.text = m.EpisodeHeading;
+
+        if (_bg != null)
+            _bg.sprite = m.Bg;
+
+        if (_bgOverlay != null)
+            _bgOverlay.sprite = m.BgOverlay;
+
+        if (_chapterIndexLabelImage != null)
             _chapterIndexLabelImage.sprite = m.ChapterIndexLabelSprite;
-        if (_episodeHeadingLabelImage != null && m.EpisodeHeadingLabelSprite != null)
-            _episodeHeadingLabelImage.sprite = m.EpisodeHeadingLabelSprite;
-        if (_titleIconImage != null && m.TitleIcon != null) _titleIconImage.sprite = m.TitleIcon;
 
-        SetInteractable(true);
-        //SetInteractable(m.Interactable && !m.Locked);
-        //SetLocked(m.Locked);
+        if (_episodeHeadingLabelImage != null)
+            _episodeHeadingLabelImage.sprite = m.EpisodeHeadingLabelSprite;
+
+        if (_titleIconImage != null)
+            _titleIconImage.sprite = m.TitleIcon;
+
+        SetInteractable(m.Interactable && !m.Locked);
+        SetLocked(m.Locked);
     }
 
     public void SetSelected(bool selected)
     {
-        _selectedRoot?.SetVisible(selected, blockRaycasts: false);
+        if (_selectedRoot != null)
+            _selectedRoot.SetVisible(selected, blockRaycasts: false);
     }
 
     public void SetLocked(bool locked)
     {
+        if (_lockRoot == null)
+            return;
+
         _lockRoot.alpha = locked ? 1f : 0f;
         _lockRoot.interactable = locked;
         _lockRoot.blocksRaycasts = locked;
@@ -123,6 +136,15 @@ public sealed class ChapterButtonCard : UIBase<ChapterButtonCard.Refs>
 
     public void SetInteractable(bool interactable)
     {
-        if (_hit != null) _hit.interactable = interactable;
+        if (_hit != null)
+            _hit.interactable = interactable;
+    }
+
+    private void HandleClicked()
+    {
+        if (ChapterId < 0)
+            return;
+
+        Clicked?.Invoke(ChapterId);
     }
 }

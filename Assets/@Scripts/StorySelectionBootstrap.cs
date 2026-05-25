@@ -77,26 +77,15 @@ public sealed class StorySelectionBootstrap : MonoBehaviour
             return;
         }
 
-        ChapterSelectionPanelView view =
-            panelRoot.GetComponentInChildren<ChapterSelectionPanelView>(true);
-
-        if (view == null)
-        {
-            Debug.LogWarning(
-                "[StorySelectionBootstrap] ChapterSelectionPanelView not found under ChapterSelectionPanel.",
-                panelRoot);
-            return;
-        }
-
         ChapterButtonCardModel[] models = _chapterCardBuilder.Build(_lookup, _progress);
 
-        view.ChapterRequested -= HandleChapterRequested;
-        view.BackRequested -= HandleChapterBackRequested;
+        panelRoot.OnChapterRequested -= HandleChapterRequested;
+        panelRoot.OnBackRequested -= HandleChapterBackRequested;
 
-        view.ChapterRequested += HandleChapterRequested;
-        view.BackRequested += HandleChapterBackRequested;
+        panelRoot.OnChapterRequested += HandleChapterRequested;
+        panelRoot.OnBackRequested += HandleChapterBackRequested;
 
-        view.PresentChapters(models, selectedChapterId);
+        panelRoot.PresentChapters(models, selectedChapterId);
     }
 
     public void OpenEpisodeSelection(int chapterId, string selectedEpisodeId = "")
