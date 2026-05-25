@@ -3,15 +3,14 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class UI_EventHandler : MonoBehaviour, 
-    IPointerClickHandler, 
-    IPointerDownHandler, 
-    IPointerUpHandler, 
-    IDragHandler, 
-    IBeginDragHandler, 
+public class UI_EventHandler : MonoBehaviour,
+    IPointerClickHandler,
+    IPointerDownHandler,
+    IPointerUpHandler,
+    IDragHandler,
+    IBeginDragHandler,
     IEndDragHandler
 {
-    
     public Action<PointerEventData> OnClickHandler;
     public Action<PointerEventData> OnPointerDownHandler;
     public Action<PointerEventData> OnPointerUpHandler;
@@ -20,95 +19,118 @@ public class UI_EventHandler : MonoBehaviour,
     public Action<PointerEventData> OnEndDragHandler;
     public Action<PointerEventData> OnLongPressHandler;
 
-    // Settings
+    [Header("Long Press")]
     [SerializeField] private float _longPressDuration = 1.0f;
-    public float LongPressDuration
-    {
-        get => _longPressDuration;
-        set => _longPressDuration = value;
-    }
 
-    // State
+    [Header("Drag / Click Feel")]
+    [SerializeField] private float _dragClickLockDelay = 0.04f;
+    [SerializeField] private float _minDragDistance = 3.8f;
+    
     private bool _isDragging;
+    private bool _isDragConfirmed;
     private bool _isLongPressTriggered;
     private bool _isClickAllowed = true;
-    private PointerEventData _cachedEventData;
-    
-    // Coroutine tracking
-    private Coroutine _longPressCoroutine;
 
-    // Pointer Events
+    private Vector2 _pointerDownPosition;
+    private PointerEventData _cachedEventData;
+
+    private Coroutine _longPressCoroutine;
+    private Coroutine _dragClickLockCoroutine;
+
     public void OnPointerClick(PointerEventData eventData)
     {
         if (_isClickAllowed)
-        {
             OnClickHandler?.Invoke(eventData);
-        }
     }
 
     public void OnPointerDown(PointerEventData eventData)
     {
+        StopLongPressCheck();
+        StopDragClickLockCheck();
+
+        _isDragging = false;
+        _isDragConfirmed = false;
         _isLongPressTriggered = false;
         _isClickAllowed = true;
+
+        _pointerDownPosition = eventData.position;
         _cachedEventData = eventData;
-        
+
         OnPointerDownHandler?.Invoke(eventData);
-        
-        // 롱프레스 체크 시작 (필요할 때만)
+
         if (OnLongPressHandler != null)
-        {
-            StopLongPressCheck(); // 기존 코루틴 정리
             _longPressCoroutine = StartCoroutine(CheckLongPress());
-        }
     }
 
     public void OnPointerUp(PointerEventData eventData)
     {
-        StopLongPressCheck(); // 롱프레스 체크 중단
-        
+        StopLongPressCheck();
+        StopDragClickLockCheck();
+
         _cachedEventData = null;
+
         OnPointerUpHandler?.Invoke(eventData);
     }
 
     public void OnBeginDrag(PointerEventData eventData)
     {
         _isDragging = true;
-        _isClickAllowed = false;
         _cachedEventData = eventData;
-        
-        StopLongPressCheck(); // 드래그 시작하면 롱프레스 취소
-        
-        OnBeginDragHandler?.Invoke(eventData);
+
+        StopLongPressCheck();
+
+        TryConfirmDrag(eventData);
     }
 
     public void OnDrag(PointerEventData eventData)
     {
         _cachedEventData = eventData;
-        
-        // 드래그 핸들러가 등록된 경우에만 호출
-        if (_isDragging)
-        {
+
+        if (!_isDragging)
+            return;
+
+        if (!_isDragConfirmed)
+            TryConfirmDrag(eventData);
+
+        if (_isDragConfirmed)
             OnDragHandler?.Invoke(eventData);
-        }
     }
 
     public void OnEndDrag(PointerEventData eventData)
     {
+        if (_isDragConfirmed)
+            OnEndDragHandler?.Invoke(eventData);
+
+        StopDragClickLockCheck();
+
         _isDragging = false;
+        _isDragConfirmed = false;
         _isLongPressTriggered = false;
-        
-        OnEndDragHandler?.Invoke(eventData);
     }
 
-    // ────────────────────────────────────────────────────────────
-    // Long Press Logic
-    // ────────────────────────────────────────────────────────────
+    private void TryConfirmDrag(PointerEventData eventData)
+    {
+        if (_isDragConfirmed)
+            return;
+
+        float distance = Vector2.Distance(_pointerDownPosition, eventData.position);
+
+        if (distance < _minDragDistance)
+            return;
+
+        _isDragConfirmed = true;
+
+        OnBeginDragHandler?.Invoke(eventData);
+
+        StopDragClickLockCheck();
+        _dragClickLockCoroutine = StartCoroutine(LockClickAfterDragDelay());
+    }
 
     private IEnumerator CheckLongPress()
     {
         yield return new WaitForSecondsRealtime(_longPressDuration);
 
-        if (_cachedEventData != null && !_isLongPressTriggered)
+        if (_cachedEventData != null && !_isLongPressTriggered && !_isDragConfirmed)
         {
             _isLongPressTriggered = true;
             _isClickAllowed = false;
@@ -118,23 +140,43 @@ public class UI_EventHandler : MonoBehaviour,
         _longPressCoroutine = null;
     }
 
-    private void StopLongPressCheck()
+    private IEnumerator LockClickAfterDragDelay()
     {
-        if (_longPressCoroutine != null)
-        {
-            StopCoroutine(_longPressCoroutine);
-            _longPressCoroutine = null;
-        }
+        yield return new WaitForSecondsRealtime(_dragClickLockDelay);
+
+        if (_isDragConfirmed)
+            _isClickAllowed = false;
+
+        _dragClickLockCoroutine = null;
     }
 
-    // ────────────────────────────────────────────────────────────
-    // Cleanup
-    // ────────────────────────────────────────────────────────────
+    private void StopLongPressCheck()
+    {
+        if (_longPressCoroutine == null)
+            return;
+
+        StopCoroutine(_longPressCoroutine);
+        _longPressCoroutine = null;
+    }
+
+    private void StopDragClickLockCheck()
+    {
+        if (_dragClickLockCoroutine == null)
+            return;
+
+        StopCoroutine(_dragClickLockCoroutine);
+        _dragClickLockCoroutine = null;
+    }
 
     private void OnDisable()
     {
         StopLongPressCheck();
+        StopDragClickLockCheck();
+
         _isDragging = false;
+        _isDragConfirmed = false;
+        _isLongPressTriggered = false;
+        _isClickAllowed = true;
         _cachedEventData = null;
     }
 }
