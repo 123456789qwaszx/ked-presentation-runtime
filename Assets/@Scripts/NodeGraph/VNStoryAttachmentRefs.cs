@@ -4,62 +4,89 @@ using System.Collections.Generic;
 [Serializable]
 public sealed class VNStoryAttachmentRefs
 {
-    public string upNodeId;
-    public string rightNodeId;
-    public string downNodeId;
+    public VNStoryAttachmentLink up = new VNStoryAttachmentLink();
+    public VNStoryAttachmentLink right = new VNStoryAttachmentLink();
+    public VNStoryAttachmentLink down = new VNStoryAttachmentLink();
 
-    public string Get(VNStoryAttachmentSlot slot)
+    public VNStoryAttachmentLink Get(VNStoryAttachmentSlot slot)
     {
         switch (slot)
         {
             case VNStoryAttachmentSlot.Up:
-                return upNodeId;
+                return up;
 
             case VNStoryAttachmentSlot.Right:
-                return rightNodeId;
+                return right;
 
             case VNStoryAttachmentSlot.Down:
-                return downNodeId;
+                return down;
 
             default:
                 return null;
         }
     }
 
-    public void Set(VNStoryAttachmentSlot slot, string nodeId)
+    public void Set(VNStoryAttachmentSlot slot, VNStoryAttachmentLink link)
     {
+        if (link == null)
+            link = new VNStoryAttachmentLink();
+
         switch (slot)
         {
             case VNStoryAttachmentSlot.Up:
-                upNodeId = nodeId;
+                up = link;
                 break;
 
             case VNStoryAttachmentSlot.Right:
-                rightNodeId = nodeId;
+                right = link;
                 break;
 
             case VNStoryAttachmentSlot.Down:
-                downNodeId = nodeId;
+                down = link;
                 break;
         }
     }
 
+    public string GetNodeId(VNStoryAttachmentSlot slot)
+    {
+        VNStoryAttachmentLink link = Get(slot);
+        if (link == null)
+            return null;
+
+        return link.toNodeId;
+    }
+
     public bool HasAny()
     {
-        return !string.IsNullOrWhiteSpace(upNodeId)
-               || !string.IsNullOrWhiteSpace(rightNodeId)
-               || !string.IsNullOrWhiteSpace(downNodeId);
+        return HasLink(up) || HasLink(right) || HasLink(down);
+    }
+
+    public IEnumerable<VNStoryAttachmentLink> EnumerateLinks()
+    {
+        if (HasLink(up))
+            yield return up;
+
+        if (HasLink(right))
+            yield return right;
+
+        if (HasLink(down))
+            yield return down;
     }
 
     public IEnumerable<string> EnumerateNodeIds()
     {
-        if (!string.IsNullOrWhiteSpace(upNodeId))
-            yield return upNodeId;
+        if (HasLink(up))
+            yield return up.toNodeId;
 
-        if (!string.IsNullOrWhiteSpace(rightNodeId))
-            yield return rightNodeId;
+        if (HasLink(right))
+            yield return right.toNodeId;
 
-        if (!string.IsNullOrWhiteSpace(downNodeId))
-            yield return downNodeId;
+        if (HasLink(down))
+            yield return down.toNodeId;
+    }
+
+    private static bool HasLink(VNStoryAttachmentLink link)
+    {
+        return link != null && link.HasTarget;
     }
 }

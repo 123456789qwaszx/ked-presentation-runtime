@@ -1,29 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 [Serializable]
 public sealed class VNStoryGraphNode
 {
-    [Header("Identity")]
+    public const int MaxNextLinkCount = 3;
+
     public string nodeId;
     public string payloadKey;
 
-
-    [Header("Kind")]
     public VNStoryNodeKind nodeKind = VNStoryNodeKind.Main;
 
-    [Header("Layout")]
-    public Vector2 position;
+    public List<VNStoryNextLink> nextLinks = new List<VNStoryNextLink>(MaxNextLinkCount);
 
-    [Header("Main Route")]
-    public List<string> nextNodeIds = new(3);
+    public VNStoryAttachmentRefs attachments = new VNStoryAttachmentRefs();
 
-    [Header("Attachment Slots")]
-    public VNStoryAttachmentRefs attachments = new();
-
-    [Header("Ending / Terminal")]
-    public VNStoryTerminalResult ending = new();
+    public string endingKey;
+    public bool opensNextChapter;
+    public string nextChapterKey;
 
     public bool IsMainNode
     {
@@ -35,6 +29,20 @@ public sealed class VNStoryGraphNode
         get { return nodeKind == VNStoryNodeKind.Attachment; }
     }
 
+    public bool HasEnding
+    {
+        get { return !string.IsNullOrWhiteSpace(endingKey); }
+    }
+
+    public bool HasNextChapterUnlock
+    {
+        get
+        {
+            return opensNextChapter &&
+                   !string.IsNullOrWhiteSpace(nextChapterKey);
+        }
+    }
+
     public bool IsTerminal
     {
         get
@@ -42,12 +50,42 @@ public sealed class VNStoryGraphNode
             if (IsAttachmentNode)
                 return true;
 
-            return nextNodeIds == null || nextNodeIds.Count == 0;
+            return CountValidNextLinks() == 0;
         }
     }
 
     public bool HasAnyAttachment()
     {
-        return attachments.HasAny();
+        return attachments != null && attachments.HasAny();
+    }
+
+    public int CountValidNextLinks()
+    {
+        if (nextLinks == null)
+            return 0;
+
+        int count = 0;
+
+        for (int i = 0; i < nextLinks.Count; i++)
+        {
+            VNStoryNextLink link = nextLinks[i];
+            if (link != null && link.HasTarget)
+                count++;
+        }
+
+        return count;
+    }
+
+    public IEnumerable<VNStoryNextLink> EnumerateValidNextLinks()
+    {
+        if (nextLinks == null)
+            yield break;
+
+        for (int i = 0; i < nextLinks.Count; i++)
+        {
+            VNStoryNextLink link = nextLinks[i];
+            if (link != null && link.HasTarget)
+                yield return link;
+        }
     }
 }
