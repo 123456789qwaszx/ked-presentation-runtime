@@ -426,6 +426,7 @@ public class VnAppBootstrap : MonoBehaviour
         //_screenBindings.GoToTitle();
     }
     
+    #region Helper
     [ContextMenu("VN Trace/Dump To Console")]
     public void DumpVNTraceToConsole()
     {
@@ -461,4 +462,5 @@ public class VnAppBootstrap : MonoBehaviour
 
         vnTrace.DumpAndClear("VN TRACE MANUAL DUMP AND CLEAR", this);
     }
+    #endregion
 }

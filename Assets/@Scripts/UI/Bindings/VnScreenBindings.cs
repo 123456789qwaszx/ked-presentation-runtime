@@ -32,7 +32,7 @@ public sealed partial class VnScreenBindings : IDisposable
     {
         UI.SwitchRoot<TitleUIRoot>(root =>
         {
-            RebindRoot(root, BindTitleRoot);
+            BindRoot(root, BindTitleRoot);
         });
     }
 
@@ -161,7 +161,7 @@ public sealed partial class VnScreenBindings : IDisposable
 
         UI.PushPanel<SaveLoadMenuUIPanel>(root =>
         {
-            RebindRoot(root, BindSaveLoadRoot);
+            BindRoot(root, BindSaveLoadRoot);
         });
     }
 
@@ -236,7 +236,7 @@ public sealed partial class VnScreenBindings : IDisposable
     {
         UI.SwitchRoot<AlbumUIRoot>(root =>
         {
-            RebindRoot(root, BindAlbumRoot);
+            BindRoot(root, BindAlbumRoot);
         });
     }
 
@@ -272,7 +272,7 @@ public sealed partial class VnScreenBindings : IDisposable
     {
         UI.SwitchRoot<LobbyUIRoot>(root =>
         {
-            RebindRoot(root, BindLobbyRoot);
+            BindRoot(root, BindLobbyRoot);
         });
     }
 
@@ -300,7 +300,7 @@ public sealed partial class VnScreenBindings : IDisposable
 
     #endregion
 
-    private void RebindRoot<T>(T root, Action<T> bind)
+    private void BindRoot<T>(T root, Action<T> bind)
         where T : UIBase
     {
         if (!root)

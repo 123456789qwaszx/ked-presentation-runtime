@@ -17,7 +17,7 @@ public sealed partial class VnScreenBindings
     {
         UI.PushPanel<ChapterSelectionPanel>(panel =>
         {
-            RebindRoot(panel, BindChapterSelectionPanel);
+            BindRoot(panel, BindChapterSelectionPanel);
         });
     }
 

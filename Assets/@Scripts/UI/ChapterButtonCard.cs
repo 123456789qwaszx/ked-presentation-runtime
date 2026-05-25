@@ -35,7 +35,7 @@ public sealed class ChapterButtonCard : UIBase<ChapterButtonCard.Refs>
         EpisodeHeadingLabel_Text,
 
         Hit_Button,
-        //Selected_Root, // 선택 하이라이트가 있다면(없으면 제거)
+        Selected_Root, // 선택 하이라이트가 있다면(없으면 제거)
         //Lock_Root,     // 잠금 표시(없으면 제거)
     }
 
@@ -72,7 +72,7 @@ public sealed class ChapterButtonCard : UIBase<ChapterButtonCard.Refs>
         _episodeHeadingLabelImage = View.Image(Refs.EpisodeHeadingLabel_Image);
         _titleIconImage = View.Image(Refs.ChapterTitleLabelIcon_Image);
 
-        //_selectedRoot = View.CanvasGroup(Refs.Selected_Root);
+        _selectedRoot = View.CanvasGroup(Refs.Selected_Root);
         //_lockRoot = View.CanvasGroup(Refs.Lock_Root);
 
         gameObject.SetActive(true);
@@ -111,9 +111,7 @@ public sealed class ChapterButtonCard : UIBase<ChapterButtonCard.Refs>
 
     public void SetSelected(bool selected)
     {
-        _selectedRoot.alpha = selected ? 1f : 0f;
-        _selectedRoot.interactable = false;
-        _selectedRoot.blocksRaycasts = false;
+        _selectedRoot?.SetVisible(selected, blockRaycasts: false);
     }
 
     public void SetLocked(bool locked)
