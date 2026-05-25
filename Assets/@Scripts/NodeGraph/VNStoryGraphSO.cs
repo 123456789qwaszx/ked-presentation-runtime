@@ -15,23 +15,11 @@ public sealed class VNStoryGraphSO : ScriptableObject
     public float gridSize = 40f;
 
     [Header("Nodes")]
-    public List<VNStoryGraphNode> nodes = new List<VNStoryGraphNode>();
+    public List<VNStoryGraphNode> nodes = new();
 
     public IReadOnlyList<VNStoryGraphNode> Nodes
     {
         get { return nodes; }
-    }
-
-    public void Ensure()
-    {
-        if (nodes == null)
-            nodes = new List<VNStoryGraphNode>();
-
-        for (int i = 0; i < nodes.Count; i++)
-        {
-            if (nodes[i] != null)
-                nodes[i].EnsureLists();
-        }
     }
 
     public VNStoryGraphNode FindNode(string nodeId)
@@ -90,13 +78,8 @@ public sealed class VNStoryGraphSO : ScriptableObject
         return node != null && node.IsTerminal;
     }
 
-    public VNStoryGraphNode CreateNode(
-        string nodeId,
-        VNStoryNodeKind kind,
-        Vector2 position)
+    public VNStoryGraphNode CreateNode(string nodeId, VNStoryNodeKind kind, Vector2 position)
     {
-        Ensure();
-
         VNStoryGraphNode node = new VNStoryGraphNode
         {
             nodeId = nodeId,
@@ -140,8 +123,6 @@ public sealed class VNStoryGraphSO : ScriptableObject
             VNStoryGraphNode node = nodes[i];
             if (node == null)
                 continue;
-
-            node.EnsureLists();
 
             for (int n = node.nextNodeIds.Count - 1; n >= 0; n--)
             {

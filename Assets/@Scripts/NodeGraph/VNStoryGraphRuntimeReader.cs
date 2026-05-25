@@ -7,24 +7,16 @@ public sealed class VNStoryGraphRuntimeReader
     public VNStoryGraphRuntimeReader(VNStoryGraphSO graph)
     {
         _graph = graph;
-        if (_graph != null)
-            _graph.Ensure();
     }
 
     public VNStoryGraphNode GetNode(string nodeId)
     {
-        if (_graph == null)
-            return null;
-
         return _graph.FindNode(nodeId);
     }
 
     public bool TryGetNode(string nodeId, out VNStoryGraphNode node)
     {
         node = null;
-
-        if (_graph == null)
-            return false;
 
         return _graph.TryFindNode(nodeId, out node);
     }
@@ -53,9 +45,7 @@ public sealed class VNStoryGraphRuntimeReader
         return node != null && node.IsTerminal;
     }
 
-    public VNStoryGraphNode GetAttachment(
-        string ownerNodeId,
-        VNStoryAttachmentSlot slot)
+    public VNStoryGraphNode GetAttachment(string ownerNodeId, VNStoryAttachmentSlot slot)
     {
         VNStoryGraphNode owner = GetNode(ownerNodeId);
         if (owner == null || owner.attachments == null)

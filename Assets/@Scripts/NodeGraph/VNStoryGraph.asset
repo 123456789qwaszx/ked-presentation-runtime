@@ -16,4 +16,42 @@ MonoBehaviour:
   chapterKey: 
   canvasSize: {x: 2600, y: 1200}
   gridSize: 40
-  nodes: []
+  nodes:
+  - nodeId: main.01
+    payloadKey: 
+    title: Main
+    memo: 
+    nodeKind: 0
+    attachmentKind: 0
+    position: {x: 0, y: 0}
+    nextNodeIds: []
+    attachments:
+      upNodeId: 
+      rightNodeId: 
+      downNodeId: 
+    ending:
+      endingKind: 0
+      endingKey: 
+      opensNextChapter: 0
+      nextChapterKey: 
+      countsAsClear: 0
+      isReplayable: 1
+  - nodeId: attach.02
+    payloadKey: 
+    title: Attachment
+    memo: 
+    nodeKind: 1
+    attachmentKind: 2
+    position: {x: 0, y: 0}
+    nextNodeIds: []
+    attachments:
+      upNodeId: 
+      rightNodeId: 
+      downNodeId: 
+    ending:
+      endingKind: 0
+      endingKey: 
+      opensNextChapter: 0
+      nextChapterKey: 
+      countsAsClear: 0
+      isReplayable: 1
