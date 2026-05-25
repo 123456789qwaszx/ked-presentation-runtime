@@ -47,55 +47,58 @@ public sealed class PresentationViewUIBindings : IDisposable
         if (root == null)
             return;
 
+        if (_root != null && _root != root)
+            _ctx.Unbind(_root);
+
         _ctx.Unbind(root);
 
         _root = root;
 
-        _ctx.Bind(root,
+        _ctx.AddBinding(root,
             r => r.OnRollbackOneStepPressed += HandleRollbackPressed,
             r => r.OnRollbackOneStepPressed -= HandleRollbackPressed);
 
-        _ctx.Bind(root,
+        _ctx.AddBinding(root,
             r => r.OnSpeedUpHoldStarted += HandleSpeedUpHoldStarted,
             r => r.OnSpeedUpHoldStarted -= HandleSpeedUpHoldStarted);
 
-        _ctx.Bind(root,
+        _ctx.AddBinding(root,
             r => r.OnSpeedUpHoldEnded += HandleSpeedUpHoldEnded,
             r => r.OnSpeedUpHoldEnded -= HandleSpeedUpHoldEnded);
 
-        _ctx.Bind(root,
+        _ctx.AddBinding(root,
             r => r.OnStepNextPressed += HandleStepNextPressed,
             r => r.OnStepNextPressed -= HandleStepNextPressed);
 
-        _ctx.Bind(root,
+        _ctx.AddBinding(root,
             r => r.OnSkipPressed += HandleSkipPressed,
             r => r.OnSkipPressed -= HandleSkipPressed);
 
-        _ctx.Bind(root,
+        _ctx.AddBinding(root,
             r => r.OnAutoPressed += HandleAutoPressed,
             r => r.OnAutoPressed -= HandleAutoPressed);
 
-        _ctx.Bind(root,
+        _ctx.AddBinding(root,
             r => r.OnQuickMenuPressed += HandleQuickMenuPressed,
             r => r.OnQuickMenuPressed -= HandleQuickMenuPressed);
 
-        _ctx.Bind(root,
+        _ctx.AddBinding(root,
             r => r.OnExpandPressed += HandleExpandPressed,
             r => r.OnExpandPressed -= HandleExpandPressed);
 
-        _ctx.Bind(root,
+        _ctx.AddBinding(root,
             r => r.OnShowPreviousLogPressed += HandleShowPreviousLogPressed,
             r => r.OnShowPreviousLogPressed -= HandleShowPreviousLogPressed);
 
-        _ctx.Bind(root,
+        _ctx.AddBinding(root,
             r => r.OnSetSpeedupPressed += HandleSetSpeedPressed,
             r => r.OnSetSpeedupPressed -= HandleSetSpeedPressed);
 
-        _ctx.Bind(root,
+        _ctx.AddBinding(root,
             r => r.OnSaveMenuPressed += HandleSaveMenuPressed,
             r => r.OnSaveMenuPressed -= HandleSaveMenuPressed);
 
-        _ctx.Bind(root,
+        _ctx.AddBinding(root,
             r => r.OnLoadMenuPressed += HandleLoadMenuPressed,
             r => r.OnLoadMenuPressed -= HandleLoadMenuPressed);
     }
@@ -195,7 +198,7 @@ public sealed class PresentationViewUIBindings : IDisposable
 
         UI.PushPanel<BacklogPanel>(panel =>
         {
-            _ctx.Bind(panel,
+            _ctx.AddBinding(panel,
                 p => p.OnCloseRequested += CloseBacklogPanel,
                 p => p.OnCloseRequested -= CloseBacklogPanel);
 
@@ -246,12 +249,12 @@ public sealed class PresentationViewUIBindings : IDisposable
 
         _saveLoadRoot = saveLoadRoot;
 
-        _ctx.Bind(
+        _ctx.AddBinding(
             saveLoadRoot,
             r => r.OnSlotSelected += OnSaveLoadSlotSelected,
             r => r.OnSlotSelected -= OnSaveLoadSlotSelected);
 
-        _ctx.Bind(
+        _ctx.AddBinding(
             saveLoadRoot,
             r => r.OnCloseRequested += OnSaveLoadCloseRequested,
             r => r.OnCloseRequested -= OnSaveLoadCloseRequested);

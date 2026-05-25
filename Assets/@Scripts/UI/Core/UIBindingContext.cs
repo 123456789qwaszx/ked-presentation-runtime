@@ -6,57 +6,32 @@ public sealed class UIBindingContext : IDisposable
 {
     private readonly Dictionary<UIBase, List<Action>> _cleanupByOwner = new();
     
-    public void Assign<T>(T owner, Action<T> apply, Action<T> reset)
+    public void AddBinding<T>(T owner, Action<T> bind, Action<T> unbind)
         where T : UIBase
     {
-        apply(owner);
-
-        if (!_cleanupByOwner.TryGetValue(owner!, out var list))
-        {
-            list = new List<Action>();
-            _cleanupByOwner[owner!] = list;
-        }
-
-        list.Add(() => reset(owner));
+        bind(owner);
+        AddCleanup(owner, () => unbind(owner));
     }
     
-    public void BindScreen<T>(Func<T> resolve, Action<T> bind)
-        where T : UIBase
+    private void AddCleanup(UIBase owner, Action cleanup)
     {
-        var ui = resolve();
-        if (ui == null)
+        if (!_cleanupByOwner.TryGetValue(owner, out var cleanups))
         {
-            Debug.LogError($"[VnFlow] EnterScreen<{typeof(T).Name}>: ui is null.");
-            return;
+            cleanups = new List<Action>();
+            _cleanupByOwner[owner] = cleanups;
         }
 
-        Unbind(ui);
-
-        bind(ui);
-    }
-
-    public void Bind<T>(T owner, Action<T> add, Action<T> remove)
-        where T : UIBase
-    {
-        add(owner);
-
-        if (!_cleanupByOwner.TryGetValue(owner!, out var list))
-        {
-            list = new List<Action>();
-            _cleanupByOwner[owner!] = list;
-        }
-
-        list.Add(() => remove(owner));
+        cleanups.Add(cleanup);
     }
 
     public void Unbind(UIBase owner)
     {
-        if (!_cleanupByOwner.TryGetValue(owner, out var list))
+        if (!_cleanupByOwner.TryGetValue(owner, out var cleanups))
             return;
 
-        for (int i = list.Count - 1; i >= 0; i--)
+        for (int i = cleanups.Count - 1; i >= 0; i--)
         {
-            try { list[i]?.Invoke(); }
+            try { cleanups[i]?.Invoke(); }
             catch (Exception e) { Debug.LogException(e); }
         }
 

@@ -1,4 +1,3 @@
-#nullable enable
 using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -58,8 +57,8 @@ public sealed class ChapterSelectionPanel : UIPanel<ChapterSelectionPanel.Refs>
         ChangePortraitButton_Text,
     }
 
-    public event Action<int>? OnChapterRequested; // 이제 0..N 가능
-    public event Action? OnBackRequested;
+    public event Action<int> OnChapterRequested; // 이제 0..N 가능
+    public event Action OnBackRequested;
 
     private readonly ChapterButtonCard[] _cards = new ChapterButtonCard[6];
 

@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-public sealed class VnScreenBindings : IDisposable
+public sealed partial class VnScreenBindings : IDisposable
 {
     private readonly UIBindingContext _ctx = new();
     private static UIManager UI => UIManager.Instance;
@@ -38,32 +38,32 @@ public sealed class VnScreenBindings : IDisposable
 
     private void BindTitleRoot(TitleUIRoot titleRoot)
     {
-        _ctx.Bind(
+        _ctx.AddBinding(
             titleRoot,
             t => t.OnStart += OnNewGamePressed,
             t => t.OnStart -= OnNewGamePressed);
 
-        _ctx.Bind(
+        _ctx.AddBinding(
             titleRoot,
             t => t.OnContinue += OnContinuePressed,
             t => t.OnContinue -= OnContinuePressed);
 
-        _ctx.Bind(
+        _ctx.AddBinding(
             titleRoot,
             t => t.OnOpenLoad += OnOpenLoadPressed,
             t => t.OnOpenLoad -= OnOpenLoadPressed);
 
-        _ctx.Bind(
+        _ctx.AddBinding(
             titleRoot,
             t => t.OnOpenAlbum += OnOpenAlbumPressed,
             t => t.OnOpenAlbum -= OnOpenAlbumPressed);
 
-        _ctx.Bind(
+        _ctx.AddBinding(
             titleRoot,
             t => t.OnOpenSettings += OnOpenSettingsPressed,
             t => t.OnOpenSettings -= OnOpenSettingsPressed);
 
-        _ctx.Bind(
+        _ctx.AddBinding(
             titleRoot,
             t => t.OnQuit += OnQuitPressed,
             t => t.OnQuit -= OnQuitPressed);
@@ -167,12 +167,12 @@ public sealed class VnScreenBindings : IDisposable
 
     private void BindSaveLoadRoot(SaveLoadMenuUIPanel saveLoadRoot)
     {
-        _ctx.Bind(
+        _ctx.AddBinding(
             saveLoadRoot,
             r => r.OnSlotSelected += OnSaveLoadSlotSelected,
             r => r.OnSlotSelected -= OnSaveLoadSlotSelected);
 
-        _ctx.Bind(
+        _ctx.AddBinding(
             saveLoadRoot,
             r => r.OnCloseRequested += OnSaveLoadCloseRequested,
             r => r.OnCloseRequested -= OnSaveLoadCloseRequested);
@@ -242,7 +242,7 @@ public sealed class VnScreenBindings : IDisposable
 
     private void BindAlbumRoot(AlbumUIRoot albumRoot)
     {
-        _ctx.Bind(
+        _ctx.AddBinding(
             albumRoot,
             a => a.OnCloseRequested += OnAlbumCloseRequested,
             a => a.OnCloseRequested -= OnAlbumCloseRequested);
@@ -278,12 +278,12 @@ public sealed class VnScreenBindings : IDisposable
 
     private void BindLobbyRoot(LobbyUIRoot lobbyRoot)
     {
-        _ctx.Bind(
+        _ctx.AddBinding(
             lobbyRoot,
             l => l.OnOpenStory += OpenStorySelectFlow,
             l => l.OnOpenStory -= OpenStorySelectFlow);
 
-        _ctx.Bind(
+        _ctx.AddBinding(
             lobbyRoot,
             l => l.OnNextBroadcastRequested += OnNextBroadcastRequested,
             l => l.OnNextBroadcastRequested -= OnNextBroadcastRequested);

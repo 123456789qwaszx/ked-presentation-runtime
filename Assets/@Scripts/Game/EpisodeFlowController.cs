@@ -22,22 +22,39 @@ public class EpisodeFlowController : IDisposable
         _episodePlayState = episodePlayState;
     }
     
+    private ChapterSelectionPanel _chapterSelectionPanel;
+
     public void OpenSelectChapterPanel()
     {
         UIManager.Instance.PushPanel<ChapterSelectionPanel>(panel =>
         {
-            _ctx.BindScreen(() => panel, BindChapterSelectPanelEvents);
+            BindChapterSelectPanel(panel);
             RebuildAndPresentChapterPanel(panel);
         });
     }
-    
+
+    private void BindChapterSelectPanel(ChapterSelectionPanel panel)
+    {
+        if (panel == null)
+            return;
+
+        if (_chapterSelectionPanel != null && _chapterSelectionPanel != panel)
+            _ctx.Unbind(_chapterSelectionPanel);
+
+        _ctx.Unbind(panel);
+
+        _chapterSelectionPanel = panel;
+
+        BindChapterSelectPanelEvents(panel);
+    }
+
     private void BindChapterSelectPanelEvents(ChapterSelectionPanel panel)
     {
-        _ctx.Bind(panel,
+        _ctx.AddBinding(panel,
             p => p.OnChapterRequested += OnChapterRequested,
             p => p.OnChapterRequested -= OnChapterRequested);
 
-        _ctx.Bind(panel,
+        _ctx.AddBinding(panel,
             p => p.OnBackRequested += CloseTopPanel,
             p => p.OnBackRequested -= CloseTopPanel);
     }
@@ -63,33 +80,75 @@ public class EpisodeFlowController : IDisposable
         panel.PresentChapters(models, selectedChapterId: _episodePlayState.CurrentChapterId);
     }
     
+    private void CloseChapterSelectPanel()
+    {
+        if (_chapterSelectionPanel != null)
+        {
+            _ctx.Unbind(_chapterSelectionPanel);
+            _chapterSelectionPanel = null;
+        }
+
+        CloseTopPanel();
+    }
+    
     private void OnChapterRequested(int chapterId) => OpenEpisodeSelectPanel(chapterId);
     
-    private void CloseTopPanel() => UIManager.Instance.PopPanel();
+    private EpisodeSelectionPanel _episodeSelectionPanel;
+    
     
     private void OpenEpisodeSelectPanel(int chapterId)
     {
         _episodePlayState.SetCurrentChapter(chapterId);
-        string _selectedEpisodeId = "main05.02";
-        _episodePlayState.SetSelectedEpisode(_selectedEpisodeId);
+
+        string selectedEpisodeId = "main05.02";
+        _episodePlayState.SetSelectedEpisode(selectedEpisodeId);
 
         UIManager.Instance.PushPanel<EpisodeSelectionPanel>(panel =>
         {
-            _ctx.BindScreen(() => panel, BindEpisodeSelectPanelEvents);
+            BindEpisodeSelectPanel(panel);
             RebuildAndPresentEpisodeSelectionPanel(panel);
         });
     }
-    
+
+    private void BindEpisodeSelectPanel(EpisodeSelectionPanel panel)
+    {
+        if (panel == null)
+            return;
+
+        if (_episodeSelectionPanel != null && _episodeSelectionPanel != panel)
+            _ctx.Unbind(_episodeSelectionPanel);
+
+        _ctx.Unbind(panel);
+
+        _episodeSelectionPanel = panel;
+
+        BindEpisodeSelectPanelEvents(panel);
+    }
+
     private void BindEpisodeSelectPanelEvents(EpisodeSelectionPanel panel)
     {
-        _ctx.Bind(panel,
-            p => p.OnCloseRequested += CloseTopPanel,
-            p => p.OnCloseRequested -= CloseTopPanel);
+        _ctx.AddBinding(panel,
+            p => p.OnCloseRequested += CloseEpisodeSelectPanel,
+            p => p.OnCloseRequested -= CloseEpisodeSelectPanel);
 
-        _ctx.Assign(panel,
-            p => p.SetHandlers(onMain: StartEpisodeImmediately, onBranch: HandleAttachmentRequested),
-            p => p.SetHandlers(onMain: null, onBranch: null)
-        );
+        _ctx.AddBinding(panel,
+            p => p.SetHandlers(
+                onMain: StartEpisodeImmediately,
+                onBranch: HandleAttachmentRequested),
+            p => p.SetHandlers(
+                onMain: null,
+                onBranch: null));
+    }
+
+    private void CloseEpisodeSelectPanel()
+    {
+        if (_episodeSelectionPanel != null)
+        {
+            _ctx.Unbind(_episodeSelectionPanel);
+            _episodeSelectionPanel = null;
+        }
+
+        CloseTopPanel();
     }
     
     private void StartEpisodeImmediately(string ownerEpisodeId)
@@ -189,6 +248,7 @@ public class EpisodeFlowController : IDisposable
         RebuildAndPresentEpisodeSelectionPanel(panel);
     }
     
+    private void CloseTopPanel() => UIManager.Instance.PopPanel();
     
     public void Dispose()
     {
