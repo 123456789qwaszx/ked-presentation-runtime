@@ -12,17 +12,6 @@ public sealed class VNStoryGraphRuntimeReader
         BuildIndex();
     }
 
-    public VNStoryGraphNode StartNode
-    {
-        get
-        {
-            if (_graph == null)
-                return null;
-
-            return GetNode(_graph.startNodeId);
-        }
-    }
-
     public VNStoryGraphNode GetNode(string nodeId)
     {
         if (string.IsNullOrWhiteSpace(nodeId))
@@ -35,28 +24,12 @@ public sealed class VNStoryGraphRuntimeReader
         return null;
     }
 
-    public bool TryGetNode(string nodeId, out VNStoryGraphNode node)
+    public VNStoryGraphNode GetStartNode()
     {
-        node = GetNode(nodeId);
-        return node != null;
-    }
+        if (_graph == null)
+            return null;
 
-    public List<VNStoryGraphNode> GetNextNodes(string nodeId)
-    {
-        List<VNStoryGraphNode> result = new List<VNStoryGraphNode>();
-
-        VNStoryGraphNode node = GetNode(nodeId);
-        if (node == null)
-            return result;
-
-        foreach (VNStoryNextLink link in node.EnumerateValidNextLinks())
-        {
-            VNStoryGraphNode next = GetNode(link.toNodeId);
-            if (next != null)
-                result.Add(next);
-        }
-
-        return result;
+        return GetNode(_graph.startNodeId);
     }
 
     public List<VNStoryNextLink> GetNextLinks(string nodeId)
@@ -73,15 +46,19 @@ public sealed class VNStoryGraphRuntimeReader
         return result;
     }
 
-    public VNStoryGraphNode GetAttachmentNode(
-        string ownerNodeId,
-        VNStoryAttachmentSlot slot)
+    public List<VNStoryGraphNode> GetNextNodes(string nodeId)
     {
-        VNStoryAttachmentLink link = GetAttachmentLink(ownerNodeId, slot);
-        if (link == null || !link.HasTarget)
-            return null;
+        List<VNStoryGraphNode> result = new List<VNStoryGraphNode>();
 
-        return GetNode(link.toNodeId);
+        List<VNStoryNextLink> links = GetNextLinks(nodeId);
+        for (int i = 0; i < links.Count; i++)
+        {
+            VNStoryGraphNode next = GetNode(links[i].toNodeId);
+            if (next != null)
+                result.Add(next);
+        }
+
+        return result;
     }
 
     public VNStoryAttachmentLink GetAttachmentLink(
@@ -93,6 +70,17 @@ public sealed class VNStoryGraphRuntimeReader
             return null;
 
         return owner.attachments.Get(slot);
+    }
+
+    public VNStoryGraphNode GetAttachmentNode(
+        string ownerNodeId,
+        VNStoryAttachmentSlot slot)
+    {
+        VNStoryAttachmentLink link = GetAttachmentLink(ownerNodeId, slot);
+        if (link == null || !link.HasTarget)
+            return null;
+
+        return GetNode(link.toNodeId);
     }
 
     public bool IsTerminal(string nodeId)
@@ -121,10 +109,7 @@ public sealed class VNStoryGraphRuntimeReader
         endingKey = null;
 
         VNStoryGraphNode node = GetNode(nodeId);
-        if (node == null)
-            return false;
-
-        if (!node.HasEnding)
+        if (node == null || !node.HasEnding)
             return false;
 
         endingKey = node.endingKey;

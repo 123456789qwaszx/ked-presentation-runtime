@@ -16,6 +16,7 @@ public sealed class VNStoryGraphNode
     public VNStoryAttachmentRefs attachments = new VNStoryAttachmentRefs();
 
     public string endingKey;
+
     public bool opensNextChapter;
     public string nextChapterKey;
 

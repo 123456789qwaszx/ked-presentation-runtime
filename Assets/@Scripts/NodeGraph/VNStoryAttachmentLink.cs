@@ -7,7 +7,8 @@ public sealed class VNStoryAttachmentLink
     public string toNodeId;
 
     public string labelKey;
-    public string conditionKey;
+
+    public string visibleConditionKey;
     public string unlockConditionKey;
 
     public bool HasTarget
