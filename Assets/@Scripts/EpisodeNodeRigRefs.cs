@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 public sealed class EpisodeNodeRigRefs
 {
-    public RectTransform RigRoot { get; private set; }
+    public RectTransform RigRoot { get; }
 
     public EpisodeNodeRigRefs(RectTransform rigRoot)
     {
@@ -30,17 +30,17 @@ public sealed class EpisodeNodeRigRefs
     public TMP_Text MainCardTitle_Text;
     public Button MainCardHit_Button;
 
-    public RectTransform UpperAttachment_Root;
-    public Image UpperAttachmentBG_Image;
-    public RectTransform UpperAttachmentTitle_Root;
-    public TMP_Text UpperAttachmentTitle_Text;
-    public Button UpperAttachmentHit_Button;
+    public RectTransform UpperLink_Root;
+    public Image UpperLinkBG_Image;
+    public RectTransform UpperLinkTitle_Root;
+    public TMP_Text UpperLinkTitle_Text;
+    public Button UpperLinkHit_Button;
 
-    public RectTransform LowerAttachment_Root;
-    public Image LowerAttachmentBG_Image;
-    public RectTransform LowerAttachmentTitle_Root;
-    public TMP_Text LowerAttachmentTitle_Text;
-    public Button LowerAttachmentHit_Button;
+    public RectTransform LowerLink_Root;
+    public Image LowerLinkBG_Image;
+    public RectTransform LowerLinkTitle_Root;
+    public TMP_Text LowerLinkTitle_Text;
+    public Button LowerLinkHit_Button;
 
     public CanvasGroup StateRoot_Selected;
     public CanvasGroup StateRoot_Current;

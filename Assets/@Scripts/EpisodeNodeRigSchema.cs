@@ -21,17 +21,17 @@
         MainCardTitle_Text,
         MainCardHit_Button,
 
-        UpperAttachment_Root,
-        UpperAttachmentBG_Image,
-        UpperAttachmentTitle_Root,
-        UpperAttachmentTitle_Text,
-        UpperAttachmentHit_Button,
+        UpperLink_Root,
+        UpperLinkBG_Image,
+        UpperLinkTitle_Root,
+        UpperLinkTitle_Text,
+        UpperLinkHit_Button,
 
-        LowerAttachment_Root,
-        LowerAttachmentBG_Image,
-        LowerAttachmentTitle_Root,
-        LowerAttachmentTitle_Text,
-        LowerAttachmentHit_Button,
+        LowerLink_Root,
+        LowerLinkBG_Image,
+        LowerLinkTitle_Root,
+        LowerLinkTitle_Text,
+        LowerLinkHit_Button,
 
         StateRoot_Selected,
         StateRoot_Current,
@@ -51,7 +51,6 @@
         public bool NeedsButton;
         public bool NeedsText;
         public bool NeedsCanvasGroup;
-        public bool NeedsBottomPivot;
 
         public float InitialCanvasGroupAlpha = 1f;
     }
@@ -80,17 +79,17 @@
 
         new() { Id = Refs.MainCardHit_Button, Parent = Refs.MainCard_Root, NeedsButton = true },
 
-        new() { Id = Refs.UpperAttachment_Root, Parent = Refs.NodeRoot, NeedsCanvasGroup = true, InitialCanvasGroupAlpha = 0f },
-        new() { Id = Refs.UpperAttachmentBG_Image, Parent = Refs.UpperAttachment_Root, NeedsImage = true },
-        new() { Id = Refs.UpperAttachmentTitle_Root, Parent = Refs.UpperAttachment_Root },
-        new() { Id = Refs.UpperAttachmentTitle_Text, Parent = Refs.UpperAttachmentTitle_Root, NeedsText = true },
-        new() { Id = Refs.UpperAttachmentHit_Button, Parent = Refs.UpperAttachment_Root, NeedsButton = true },
+        new() { Id = Refs.UpperLink_Root, Parent = Refs.NodeRoot, NeedsCanvasGroup = true, InitialCanvasGroupAlpha = 0f },
+        new() { Id = Refs.UpperLinkBG_Image, Parent = Refs.UpperLink_Root, NeedsImage = true },
+        new() { Id = Refs.UpperLinkTitle_Root, Parent = Refs.UpperLink_Root },
+        new() { Id = Refs.UpperLinkTitle_Text, Parent = Refs.UpperLinkTitle_Root, NeedsText = true },
+        new() { Id = Refs.UpperLinkHit_Button, Parent = Refs.UpperLink_Root, NeedsButton = true },
 
-        new() { Id = Refs.LowerAttachment_Root, Parent = Refs.NodeRoot, NeedsCanvasGroup = true, InitialCanvasGroupAlpha = 0f },
-        new() { Id = Refs.LowerAttachmentBG_Image, Parent = Refs.LowerAttachment_Root, NeedsImage = true },
-        new() { Id = Refs.LowerAttachmentTitle_Root, Parent = Refs.LowerAttachment_Root },
-        new() { Id = Refs.LowerAttachmentTitle_Text, Parent = Refs.LowerAttachmentTitle_Root, NeedsText = true },
-        new() { Id = Refs.LowerAttachmentHit_Button, Parent = Refs.LowerAttachment_Root, NeedsButton = true },
+        new() { Id = Refs.LowerLink_Root, Parent = Refs.NodeRoot, NeedsCanvasGroup = true, InitialCanvasGroupAlpha = 0f },
+        new() { Id = Refs.LowerLinkBG_Image, Parent = Refs.LowerLink_Root, NeedsImage = true },
+        new() { Id = Refs.LowerLinkTitle_Root, Parent = Refs.LowerLink_Root },
+        new() { Id = Refs.LowerLinkTitle_Text, Parent = Refs.LowerLinkTitle_Root, NeedsText = true },
+        new() { Id = Refs.LowerLinkHit_Button, Parent = Refs.LowerLink_Root, NeedsButton = true },
 
         new() { Id = Refs.StateRoot_Selected, Parent = Refs.NodeRoot, NeedsCanvasGroup = true, InitialCanvasGroupAlpha = 0f },
         new() { Id = Refs.StateRoot_Current, Parent = Refs.NodeRoot, NeedsCanvasGroup = true, InitialCanvasGroupAlpha = 0f },

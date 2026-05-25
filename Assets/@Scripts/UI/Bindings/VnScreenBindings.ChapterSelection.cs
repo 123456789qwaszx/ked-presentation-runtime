@@ -110,6 +110,8 @@ public sealed partial class VnScreenBindings
             return;
 
         _onChapterRequested?.Invoke(chapterId);
+
+        GoToEpisodeSelection(chapterId);
     }
 
     private void OnChapterBackRequested()

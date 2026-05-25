@@ -26,11 +26,9 @@ public sealed class EpisodeNodeRigBuilder
         {
             GameObject rootGo = new GameObject(
                 WithPrefix(nodePrefix, rigRootName),
-                typeof(RectTransform)
-            );
+                typeof(RectTransform));
 
             rigRoot = (RectTransform)rootGo.transform;
-
             StretchFull(rigRoot);
             EnsureGraph(rigRoot, nodePrefix);
         }
@@ -62,18 +60,14 @@ public sealed class EpisodeNodeRigBuilder
             return;
 
         Debug.LogWarning(
-            $"[EpisodeNodeRigBuilder] Invalid episode node rig. " +
-            $"Rebuilding from EpisodeNodeRigSchema. " +
+            $"[EpisodeNodeRigBuilder] Invalid episode node rig. Rebuilding from schema. " +
             $"rigRoot='{rigRoot.name}', prefix='{nodePrefix}'.",
-            rigRoot
-        );
+            rigRoot);
 
         for (int i = rigRoot.childCount - 1; i >= 0; i--)
         {
             Transform child = rigRoot.GetChild(i);
 
-            // Destroy() is delayed until the end of the frame.
-            // Detach first so EnsureGraph() cannot find soon-to-be-destroyed nodes.
             child.SetParent(null, false);
             Object.Destroy(child.gameObject);
         }
@@ -97,10 +91,15 @@ public sealed class EpisodeNodeRigBuilder
             ? FindByName(root, WithPrefix(nodePrefix, node.Parent.Value.ToString())) as RectTransform
             : root;
 
-        RectTransform rt = EnsureRect(parent, WithPrefix(nodePrefix, node.Id.ToString()));
+        if (parent == null)
+        {
+            Debug.LogWarning(
+                $"[EpisodeNodeRigBuilder] Parent not found. node='{node.Id}', parent='{node.Parent}'.",
+                root);
+            return;
+        }
 
-        if (node.NeedsBottomPivot)
-            rt.pivot = new Vector2(0.5f, 0f);
+        RectTransform rt = EnsureRect(parent, WithPrefix(nodePrefix, node.Id.ToString()));
 
         if (node.NeedsCanvasGroup)
         {
@@ -168,14 +167,74 @@ public sealed class EpisodeNodeRigBuilder
 
         foreach (EpisodeNodeRigSchema.Refs id in Enum.GetValues(typeof(EpisodeNodeRigSchema.Refs)))
         {
-            string nodeName = WithPrefix(nodePrefix, id.ToString());
-            RectTransform target = FindByName(rigRoot, nodeName) as RectTransform;
+            RectTransform target = FindBySchemaOrLegacyName(rigRoot, nodePrefix, id);
 
             if (target != null)
                 map[id] = target;
         }
 
         return map;
+    }
+
+    private RectTransform FindBySchemaOrLegacyName(
+        RectTransform rigRoot,
+        string nodePrefix,
+        EpisodeNodeRigSchema.Refs id)
+    {
+        string currentName = WithPrefix(nodePrefix, id.ToString());
+        Transform found = FindByName(rigRoot, currentName);
+
+        if (found != null)
+            return found as RectTransform;
+
+        string legacyName = GetLegacyName(id);
+
+        if (string.IsNullOrEmpty(legacyName))
+            return null;
+
+        string prefixedLegacyName = WithPrefix(nodePrefix, legacyName);
+        found = FindByName(rigRoot, prefixedLegacyName);
+
+        return found as RectTransform;
+    }
+
+    private static string GetLegacyName(EpisodeNodeRigSchema.Refs id)
+    {
+        switch (id)
+        {
+            case EpisodeNodeRigSchema.Refs.UpperLink_Root:
+                return "UpperAttachment_Root";
+
+            case EpisodeNodeRigSchema.Refs.UpperLinkBG_Image:
+                return "UpperAttachmentBG_Image";
+
+            case EpisodeNodeRigSchema.Refs.UpperLinkTitle_Root:
+                return "UpperAttachmentTitle_Root";
+
+            case EpisodeNodeRigSchema.Refs.UpperLinkTitle_Text:
+                return "UpperAttachmentTitle_Text";
+
+            case EpisodeNodeRigSchema.Refs.UpperLinkHit_Button:
+                return "UpperAttachmentHit_Button";
+
+            case EpisodeNodeRigSchema.Refs.LowerLink_Root:
+                return "LowerAttachment_Root";
+
+            case EpisodeNodeRigSchema.Refs.LowerLinkBG_Image:
+                return "LowerAttachmentBG_Image";
+
+            case EpisodeNodeRigSchema.Refs.LowerLinkTitle_Root:
+                return "LowerAttachmentTitle_Root";
+
+            case EpisodeNodeRigSchema.Refs.LowerLinkTitle_Text:
+                return "LowerAttachmentTitle_Text";
+
+            case EpisodeNodeRigSchema.Refs.LowerLinkHit_Button:
+                return "LowerAttachmentHit_Button";
+
+            default:
+                return "";
+        }
     }
 
     private EpisodeNodeRigRefs BuildRefs(
@@ -203,17 +262,17 @@ public sealed class EpisodeNodeRigBuilder
         refs.MainCardTitle_Text = GetText(map, EpisodeNodeRigSchema.Refs.MainCardTitle_Text, rigRoot);
         refs.MainCardHit_Button = GetButton(map, EpisodeNodeRigSchema.Refs.MainCardHit_Button, rigRoot);
 
-        refs.UpperAttachment_Root = GetRt(map, EpisodeNodeRigSchema.Refs.UpperAttachment_Root, rigRoot);
-        refs.UpperAttachmentBG_Image = GetImage(map, EpisodeNodeRigSchema.Refs.UpperAttachmentBG_Image, rigRoot);
-        refs.UpperAttachmentTitle_Root = GetRt(map, EpisodeNodeRigSchema.Refs.UpperAttachmentTitle_Root, rigRoot);
-        refs.UpperAttachmentTitle_Text = GetText(map, EpisodeNodeRigSchema.Refs.UpperAttachmentTitle_Text, rigRoot);
-        refs.UpperAttachmentHit_Button = GetButton(map, EpisodeNodeRigSchema.Refs.UpperAttachmentHit_Button, rigRoot);
+        refs.UpperLink_Root = GetRt(map, EpisodeNodeRigSchema.Refs.UpperLink_Root, rigRoot);
+        refs.UpperLinkBG_Image = GetImage(map, EpisodeNodeRigSchema.Refs.UpperLinkBG_Image, rigRoot);
+        refs.UpperLinkTitle_Root = GetRt(map, EpisodeNodeRigSchema.Refs.UpperLinkTitle_Root, rigRoot);
+        refs.UpperLinkTitle_Text = GetText(map, EpisodeNodeRigSchema.Refs.UpperLinkTitle_Text, rigRoot);
+        refs.UpperLinkHit_Button = GetButton(map, EpisodeNodeRigSchema.Refs.UpperLinkHit_Button, rigRoot);
 
-        refs.LowerAttachment_Root = GetRt(map, EpisodeNodeRigSchema.Refs.LowerAttachment_Root, rigRoot);
-        refs.LowerAttachmentBG_Image = GetImage(map, EpisodeNodeRigSchema.Refs.LowerAttachmentBG_Image, rigRoot);
-        refs.LowerAttachmentTitle_Root = GetRt(map, EpisodeNodeRigSchema.Refs.LowerAttachmentTitle_Root, rigRoot);
-        refs.LowerAttachmentTitle_Text = GetText(map, EpisodeNodeRigSchema.Refs.LowerAttachmentTitle_Text, rigRoot);
-        refs.LowerAttachmentHit_Button = GetButton(map, EpisodeNodeRigSchema.Refs.LowerAttachmentHit_Button, rigRoot);
+        refs.LowerLink_Root = GetRt(map, EpisodeNodeRigSchema.Refs.LowerLink_Root, rigRoot);
+        refs.LowerLinkBG_Image = GetImage(map, EpisodeNodeRigSchema.Refs.LowerLinkBG_Image, rigRoot);
+        refs.LowerLinkTitle_Root = GetRt(map, EpisodeNodeRigSchema.Refs.LowerLinkTitle_Root, rigRoot);
+        refs.LowerLinkTitle_Text = GetText(map, EpisodeNodeRigSchema.Refs.LowerLinkTitle_Text, rigRoot);
+        refs.LowerLinkHit_Button = GetButton(map, EpisodeNodeRigSchema.Refs.LowerLinkHit_Button, rigRoot);
 
         refs.StateRoot_Selected = GetCanvasGroup(map, EpisodeNodeRigSchema.Refs.StateRoot_Selected, rigRoot);
         refs.StateRoot_Current = GetCanvasGroup(map, EpisodeNodeRigSchema.Refs.StateRoot_Current, rigRoot);
@@ -350,6 +409,9 @@ public sealed class EpisodeNodeRigBuilder
 
     private void StretchFull(RectTransform rt)
     {
+        if (rt == null)
+            return;
+
         rt.anchorMin = Vector2.zero;
         rt.anchorMax = Vector2.one;
         rt.pivot = new Vector2(0.5f, 0.5f);

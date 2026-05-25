@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 public sealed class EpisodeGraphView : MonoBehaviour
 {
@@ -14,13 +13,16 @@ public sealed class EpisodeGraphView : MonoBehaviour
     [Header("Sizing")]
     [SerializeField] private HorizontalScrollContentFitter sizer;
 
+    [Header("Options")]
+    [SerializeField] private string rigRootName = "EpisodeNodeRig";
+
     private readonly EpisodeNodeRigBuilder _builder = new();
 
-    private readonly Dictionary<string, RuntimeNode> _byId = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, RuntimeNode> _activeById = new(StringComparer.Ordinal);
     private readonly List<RuntimeNode> _pool = new();
 
     private Action<string> _onMainClicked;
-    private Action<string, LinkKind, string> _onBranchClicked;
+    private Action<string, EpisodeNodeLinkSlot, EpisodeNodeLinkModel> _onLinkClicked;
 
     private void OnDestroy()
     {
@@ -29,53 +31,50 @@ public sealed class EpisodeGraphView : MonoBehaviour
 
     public void SetHandlers(
         Action<string> onMainClicked,
-        Action<string, LinkKind, string> onBranchClicked)
+        Action<string, EpisodeNodeLinkSlot, EpisodeNodeLinkModel> onLinkClicked)
     {
         _onMainClicked = onMainClicked;
-        _onBranchClicked = onBranchClicked;
+        _onLinkClicked = onLinkClicked;
     }
 
     public void Render(in EpisodeGraphModel graph)
     {
+        
         if (content == null)
+        {
+            Debug.LogWarning("[EpisodeGraphView] Content is null.", this);
             return;
+        }
 
-        if (graph.Nodes == null)
-            return;
+        int count = graph.Nodes != null ? graph.Nodes.Count : 0;
+        Debug.Log($"[EpisodeGraphView] Render nodes={count}", this);
 
         HashSet<string> used = new HashSet<string>(StringComparer.Ordinal);
 
-        for (int i = 0; i < graph.Nodes.Count; i++)
+        if (graph.Nodes != null)
         {
-            EpisodeNodeModel model = graph.Nodes[i];
+            for (int i = 0; i < graph.Nodes.Count; i++)
+            {
+                EpisodeNodeModel model = graph.Nodes[i];
 
-            if (string.IsNullOrEmpty(model.EpisodeId))
-                continue;
+                if (string.IsNullOrEmpty(model.EpisodeId))
+                    continue;
 
-            used.Add(model.EpisodeId);
+                used.Add(model.EpisodeId);
 
-            RuntimeNode node = GetOrCreateNode(model.EpisodeId);
+                RuntimeNode node = GetOrCreateNode(model.EpisodeId);
 
-            if (node.Root == null)
-                continue;
+                if (node == null || node.Root == null || node.View == null)
+                    continue;
 
-            if (!node.Root.gameObject.activeSelf)
-                node.Root.gameObject.SetActive(true);
+                if (!node.Root.gameObject.activeSelf)
+                    node.Root.gameObject.SetActive(true);
 
-            node.Root.anchoredPosition = model.AnchoredPos;
-            node.View.Present(model);
+                node.View.Present(model);
+            }
         }
 
-        foreach (KeyValuePair<string, RuntimeNode> kv in _byId)
-        {
-            RuntimeNode node = kv.Value;
-
-            if (node == null || node.Root == null)
-                continue;
-
-            if (!used.Contains(kv.Key) && node.Root.gameObject.activeSelf)
-                node.Root.gameObject.SetActive(false);
-        }
+        DeactivateUnused(used);
 
         if (sizer != null)
             sizer.RebuildSize();
@@ -83,7 +82,7 @@ public sealed class EpisodeGraphView : MonoBehaviour
 
     public void ClearAll()
     {
-        foreach (KeyValuePair<string, RuntimeNode> kv in _byId)
+        foreach (KeyValuePair<string, RuntimeNode> kv in _activeById)
         {
             RuntimeNode node = kv.Value;
 
@@ -97,15 +96,20 @@ public sealed class EpisodeGraphView : MonoBehaviour
                 _pool.Add(node);
         }
 
-        _byId.Clear();
+        _activeById.Clear();
+
+        if (sizer != null)
+            sizer.RebuildSize();
     }
 
     public void DisposeAll()
     {
-        foreach (KeyValuePair<string, RuntimeNode> kv in _byId)
+        foreach (KeyValuePair<string, RuntimeNode> kv in _activeById)
         {
-            if (kv.Value != null)
-                kv.Value.Dispose();
+            RuntimeNode node = kv.Value;
+
+            if (node != null)
+                node.Dispose();
         }
 
         for (int i = 0; i < _pool.Count; i++)
@@ -116,28 +120,26 @@ public sealed class EpisodeGraphView : MonoBehaviour
                 node.Dispose();
         }
 
-        _byId.Clear();
+        _activeById.Clear();
         _pool.Clear();
     }
 
     private RuntimeNode GetOrCreateNode(string episodeId)
     {
-        if (_byId.TryGetValue(episodeId, out RuntimeNode existing) && existing != null)
+        if (_activeById.TryGetValue(episodeId, out RuntimeNode existing) && existing != null)
             return existing;
 
         RuntimeNode pooled = TakeFromPool();
 
         if (pooled != null)
         {
-            if (pooled.Root != null)
-                pooled.Root.name = BuildNodePrefix(episodeId) + "EpisodeNodeRig";
-
-            _byId[episodeId] = pooled;
+            pooled.RebindEpisodeId(episodeId);
+            _activeById[episodeId] = pooled;
             return pooled;
         }
 
         RuntimeNode created = CreateNode(episodeId);
-        _byId[episodeId] = created;
+        _activeById[episodeId] = created;
         return created;
     }
 
@@ -146,10 +148,9 @@ public sealed class EpisodeGraphView : MonoBehaviour
         for (int i = 0; i < _pool.Count; i++)
         {
             RuntimeNode candidate = _pool[i];
-
             _pool.RemoveAt(i);
 
-            if (candidate != null && candidate.Root != null)
+            if (candidate != null && candidate.Root != null && candidate.View != null)
                 return candidate;
 
             if (candidate != null)
@@ -163,13 +164,16 @@ public sealed class EpisodeGraphView : MonoBehaviour
 
     private RuntimeNode CreateNode(string episodeId)
     {
+        Debug.Log($"[EpisodeGraphView] CreateNode episodeId='{episodeId}'", this);
         string prefix = BuildNodePrefix(episodeId);
 
         RectTransform root = _builder.BuildNodeRigRoot(
             nodeRigPrefab,
             prefix,
-            "EpisodeNodeRig"
-        );
+            rigRootName);
+
+        if (root == null)
+            return null;
 
         root.SetParent(content, false);
         root.gameObject.SetActive(false);
@@ -177,10 +181,43 @@ public sealed class EpisodeGraphView : MonoBehaviour
         _builder.BindRefsFromRoot(root, prefix, out EpisodeNodeRigRefs refs);
 
         EpisodeNodeView view = new EpisodeNodeView(refs);
-        view.MainClicked += HandleMainClicked;
-        view.BranchClicked += HandleBranchClicked;
 
-        return new RuntimeNode(root, view);
+        view.MainClicked += HandleMainClicked;
+        view.LinkClicked += HandleLinkClicked;
+
+        return new RuntimeNode(
+            episodeId,
+            prefix,
+            root,
+            view);
+    }
+
+    private void DeactivateUnused(HashSet<string> used)
+    {
+        List<string> removeKeys = null;
+
+        foreach (KeyValuePair<string, RuntimeNode> kv in _activeById)
+        {
+            if (used.Contains(kv.Key))
+                continue;
+
+            RuntimeNode node = kv.Value;
+
+            if (node != null && node.Root != null)
+                node.Root.gameObject.SetActive(false);
+
+            if (node != null && !_pool.Contains(node))
+                _pool.Add(node);
+
+            removeKeys ??= new List<string>();
+            removeKeys.Add(kv.Key);
+        }
+
+        if (removeKeys == null)
+            return;
+
+        for (int i = 0; i < removeKeys.Count; i++)
+            _activeById.Remove(removeKeys[i]);
     }
 
     private void HandleMainClicked(string episodeId)
@@ -188,12 +225,12 @@ public sealed class EpisodeGraphView : MonoBehaviour
         _onMainClicked?.Invoke(episodeId);
     }
 
-    private void HandleBranchClicked(
-        string ownerId,
-        LinkKind kind,
-        string targetId)
+    private void HandleLinkClicked(
+        string ownerEpisodeId,
+        EpisodeNodeLinkSlot slot,
+        EpisodeNodeLinkModel link)
     {
-        _onBranchClicked?.Invoke(ownerId, kind, targetId);
+        _onLinkClicked?.Invoke(ownerEpisodeId, slot, link);
     }
 
     private static string BuildNodePrefix(string episodeId)
@@ -218,8 +255,7 @@ public sealed class EpisodeGraphView : MonoBehaviour
             bool valid =
                 (c >= 'a' && c <= 'z') ||
                 (c >= 'A' && c <= 'Z') ||
-                (c >= '0' && c <= '9') ||
-                c == '_';
+                (c >= '0' && c <= '9');
 
             if (!valid)
                 chars[i] = '_';
@@ -228,17 +264,34 @@ public sealed class EpisodeGraphView : MonoBehaviour
         return new string(chars);
     }
 
-    private sealed class RuntimeNode
+    private sealed class RuntimeNode : IDisposable
     {
-        public readonly RectTransform Root;
-        public readonly EpisodeNodeView View;
+        public string EpisodeId { get; private set; }
+        public string Prefix { get; private set; }
+
+        public RectTransform Root { get; }
+        public EpisodeNodeView View { get; }
 
         public RuntimeNode(
+            string episodeId,
+            string prefix,
             RectTransform root,
             EpisodeNodeView view)
         {
+            EpisodeId = episodeId ?? "";
+            Prefix = prefix ?? "";
+
             Root = root;
             View = view;
+        }
+
+        public void RebindEpisodeId(string episodeId)
+        {
+            EpisodeId = episodeId ?? "";
+            Prefix = BuildNodePrefix(EpisodeId);
+
+            if (Root != null)
+                Root.name = Prefix + "EpisodeNodeRig";
         }
 
         public void Dispose()
@@ -247,7 +300,10 @@ public sealed class EpisodeGraphView : MonoBehaviour
                 View.Dispose();
 
             if (Root != null)
-                Object.Destroy(Root.gameObject);
+            {
+                Root.SetParent(null, false);
+                Destroy(Root.gameObject);
+            }
         }
     }
 }

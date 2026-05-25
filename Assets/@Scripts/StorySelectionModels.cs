@@ -1,19 +1,25 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-public enum LinkKind
-{
-    BranchUpper,
-    BranchMiddle,
-    BranchLower,
-    AttachmentLower
-}
-
-public enum EpisodeNodeKind
+public enum EpisodeNodeRole
 {
     Main,
     Branch,
-    BranchChain,
+    Attachment,
+    Ending
+}
+
+public enum EpisodeNodeLinkSlot
+{
+    Main,
+    Upper,
+    Middle,
+    Lower
+}
+
+public enum EpisodeLinkRole
+{
+    Branch,
     Attachment,
     Ending
 }
@@ -26,16 +32,28 @@ public readonly struct EpisodeGraphModel
     {
         Nodes = nodes;
     }
+
+    public static EpisodeGraphModel Empty()
+    {
+        return new EpisodeGraphModel(System.Array.Empty<EpisodeNodeModel>());
+    }
 }
 
 public readonly struct EpisodeNodeModel
 {
     public readonly string EpisodeId;
-    public readonly EpisodeNodeKind Kind;
+    public readonly EpisodeNodeRole Role;
 
     public readonly string IndexText;
     public readonly string Title;
+
     public readonly Vector2 AnchoredPos;
+    public readonly Vector2 Size;
+
+    public readonly Sprite MainBg;
+    public readonly Sprite MainIcon;
+    public readonly Sprite UpperLinkBg;
+    public readonly Sprite LowerLinkBg;
 
     public readonly bool Locked;
     public readonly bool Interactable;
@@ -43,29 +61,41 @@ public readonly struct EpisodeNodeModel
     public readonly bool IsCurrent;
     public readonly bool Completed;
 
-    public readonly EpisodeAttachmentModel? UpperAttachment;
-    public readonly EpisodeAttachmentModel? LowerAttachment;
+    public readonly EpisodeNodeLinkModel? UpperLink;
+    public readonly EpisodeNodeLinkModel? LowerLink;
 
     public EpisodeNodeModel(
         string episodeId,
-        EpisodeNodeKind kind,
+        EpisodeNodeRole role,
         string indexText,
         string title,
         Vector2 anchoredPos,
+        Vector2 size,
+        Sprite mainBg = null,
+        Sprite mainIcon = null,
+        Sprite upperLinkBg = null,
+        Sprite lowerLinkBg = null,
         bool locked = false,
         bool interactable = true,
         bool selected = false,
         bool isCurrent = false,
         bool completed = false,
-        EpisodeAttachmentModel? upperAttachment = null,
-        EpisodeAttachmentModel? lowerAttachment = null)
+        EpisodeNodeLinkModel? upperLink = null,
+        EpisodeNodeLinkModel? lowerLink = null)
     {
-        EpisodeId = episodeId;
-        Kind = kind;
+        EpisodeId = episodeId ?? "";
+        Role = role;
 
-        IndexText = indexText;
-        Title = title;
+        IndexText = indexText ?? "";
+        Title = title ?? "";
+
         AnchoredPos = anchoredPos;
+        Size = size;
+
+        MainBg = mainBg;
+        MainIcon = mainIcon;
+        UpperLinkBg = upperLinkBg;
+        LowerLinkBg = lowerLinkBg;
 
         Locked = locked;
         Interactable = interactable;
@@ -73,25 +103,28 @@ public readonly struct EpisodeNodeModel
         IsCurrent = isCurrent;
         Completed = completed;
 
-        UpperAttachment = upperAttachment;
-        LowerAttachment = lowerAttachment;
+        UpperLink = upperLink;
+        LowerLink = lowerLink;
     }
 }
 
-public readonly struct EpisodeAttachmentModel
+public readonly struct EpisodeNodeLinkModel
 {
-    public readonly string HostEpisodeId;
+    public readonly EpisodeLinkRole Role;
+    public readonly string TargetEpisodeId;
     public readonly string DisplayTitle;
-    public readonly bool IsInteractable;
+    public readonly bool Interactable;
 
-    public EpisodeAttachmentModel(
-        string hostEpisodeId,
+    public EpisodeNodeLinkModel(
+        EpisodeLinkRole role,
+        string targetEpisodeId,
         string displayTitle,
-        bool isInteractable = true)
+        bool interactable = true)
     {
-        HostEpisodeId = hostEpisodeId;
-        DisplayTitle = displayTitle;
-        IsInteractable = isInteractable;
+        Role = role;
+        TargetEpisodeId = targetEpisodeId ?? "";
+        DisplayTitle = displayTitle ?? "";
+        Interactable = interactable;
     }
 }
 
@@ -111,7 +144,7 @@ public readonly struct EpisodeSelectionPanelModel
         ChapterId = chapterId;
         ChapterMeta = chapterMeta;
         Graph = graph;
-        SelectedEpisodeId = selectedEpisodeId;
+        SelectedEpisodeId = selectedEpisodeId ?? "";
     }
 }
 
@@ -126,8 +159,8 @@ public readonly struct ChapterMetaModel
         string eraText,
         string chapterTitle)
     {
-        ChapterIndex = chapterIndex;
-        EraText = eraText;
-        ChapterTitle = chapterTitle;
+        ChapterIndex = chapterIndex ?? "";
+        EraText = eraText ?? "";
+        ChapterTitle = chapterTitle ?? "";
     }
 }

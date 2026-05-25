@@ -9,6 +9,20 @@ public static class EpisodeSelectionModelBuilder
     private const float BranchOffsetY = 220f;
     private const float NextOffsetX = 400f;
 
+    private static readonly Vector2 DefaultMainNodeSize = new Vector2(320f, 140f);
+    private static readonly Vector2 DefaultBranchNodeSize = new Vector2(300f, 120f);
+    private static readonly Vector2 DefaultAttachmentNodeSize = new Vector2(280f, 110f);
+    private static readonly Vector2 DefaultEndingNodeSize = new Vector2(340f, 150f);
+
+    private enum VisibleNodeType
+    {
+        Main,
+        Branch,
+        BranchChain,
+        Attachment,
+        Ending
+    }
+
     public static EpisodeSelectionPanelModel Build(
         int chapterId,
         string selectedEpisodeId,
@@ -26,9 +40,8 @@ public static class EpisodeSelectionModelBuilder
             return new EpisodeSelectionPanelModel(
                 chapterId,
                 chapterMeta,
-                new EpisodeGraphModel(Array.Empty<EpisodeNodeModel>()),
-                ""
-            );
+                EpisodeGraphModel.Empty(),
+                "");
         }
 
         VisibleSet visible = BuildVisibleSet(chapter, progress, lookup);
@@ -38,65 +51,140 @@ public static class EpisodeSelectionModelBuilder
             return new EpisodeSelectionPanelModel(
                 chapterId,
                 chapterMeta,
-                new EpisodeGraphModel(Array.Empty<EpisodeNodeModel>()),
-                ""
-            );
+                EpisodeGraphModel.Empty(),
+                "");
         }
 
         PositionMap positions = CalculatePositions(visible, lookup);
+
+        string effectiveSelected = ResolveSelectedEpisodeId(
+            visible.MainIds,
+            selectedEpisodeId,
+            progress);
+
+        string currentEpisodeId = ResolveCurrentEpisodeId(
+            visible.MainIds,
+            progress);
 
         List<EpisodeNodeModel> nodes = MaterializeNodes(
             visible,
             positions,
             progress,
             lookup,
-            selectedEpisodeId
-        );
-
-        string effectiveSelected = ResolveSelectedEpisodeId(
-            visible.MainIds,
-            selectedEpisodeId,
-            progress
-        );
+            effectiveSelected,
+            currentEpisodeId);
 
         return new EpisodeSelectionPanelModel(
             chapterId,
             chapterMeta,
             new EpisodeGraphModel(nodes),
-            effectiveSelected
-        );
+            effectiveSelected);
     }
 
     private sealed class VisibleSet
     {
         public readonly List<string> MainIds = new();
         public readonly HashSet<string> AllVisible = new(StringComparer.Ordinal);
-        public readonly Dictionary<string, EpisodeNodeKind> Types = new(StringComparer.Ordinal);
+        public readonly Dictionary<string, VisibleNodeType> Types = new(StringComparer.Ordinal);
 
         public void AddMain(string id)
         {
-            MainIds.Add(id);
+            if (string.IsNullOrEmpty(id))
+                return;
+
+            if (!MainIds.Contains(id))
+                MainIds.Add(id);
+
             AllVisible.Add(id);
-            Types[id] = EpisodeNodeKind.Main;
+            Types[id] = VisibleNodeType.Main;
         }
 
         public void AddBranch(string id)
         {
+            if (string.IsNullOrEmpty(id))
+                return;
+
             AllVisible.Add(id);
-            Types[id] = EpisodeNodeKind.Branch;
+            Types[id] = VisibleNodeType.Branch;
         }
 
         public void AddBranchChain(string id)
         {
+            if (string.IsNullOrEmpty(id))
+                return;
+
             AllVisible.Add(id);
-            Types[id] = EpisodeNodeKind.BranchChain;
+            Types[id] = VisibleNodeType.BranchChain;
+        }
+
+        public void AddAttachment(string id)
+        {
+            if (string.IsNullOrEmpty(id))
+                return;
+
+            AllVisible.Add(id);
+            Types[id] = VisibleNodeType.Attachment;
         }
 
         public void AddEnding(string id)
         {
+            if (string.IsNullOrEmpty(id))
+                return;
+
             AllVisible.Add(id);
-            Types[id] = EpisodeNodeKind.Ending;
+            Types[id] = VisibleNodeType.Ending;
         }
+    }
+
+    private sealed class PositionMap
+    {
+        private readonly Dictionary<string, Vector2> _positions = new(StringComparer.Ordinal);
+
+        public void Set(string id, Vector2 pos)
+        {
+            if (string.IsNullOrEmpty(id))
+                return;
+
+            _positions[id] = pos;
+        }
+
+        public bool TryGet(string id, out Vector2 pos)
+        {
+            if (string.IsNullOrEmpty(id))
+            {
+                pos = Vector2.zero;
+                return false;
+            }
+
+            return _positions.TryGetValue(id, out pos);
+        }
+
+        public Vector2 Get(string id)
+        {
+            return TryGet(id, out Vector2 pos)
+                ? pos
+                : Vector2.zero;
+        }
+    }
+
+    private static ChapterMetaModel BuildChapterMeta(
+        int chapterId,
+        IEpisodePlayLookup lookup)
+    {
+        if (lookup != null &&
+            lookup.TryGetChapter(chapterId, out ChapterSpec chapter) &&
+            chapter != null)
+        {
+            return new ChapterMetaModel(
+                chapterIndex: $"CHAPTER {chapter.chapterId:00}",
+                eraText: chapter.eraText,
+                chapterTitle: chapter.displayName);
+        }
+
+        return new ChapterMetaModel(
+            chapterIndex: $"CHAPTER {chapterId:00}",
+            eraText: "",
+            chapterTitle: "");
     }
 
     private static VisibleSet BuildVisibleSet(
@@ -106,7 +194,7 @@ public static class EpisodeSelectionModelBuilder
     {
         VisibleSet visible = new VisibleSet();
 
-        if (progress == null || lookup == null)
+        if (chapter == null || progress == null || lookup == null)
             return visible;
 
         List<string> mainLine = BuildMainLineIds(chapter, lookup);
@@ -154,30 +242,7 @@ public static class EpisodeSelectionModelBuilder
         for (int i = 0; i < branchStarts.Count; i++)
             ExpandBranchChain(branchStarts[i], visible, progress, lookup);
 
-        List<string> allIds = new List<string>(visible.AllVisible);
-
-        for (int i = 0; i < allIds.Count; i++)
-        {
-            string id = allIds[i];
-
-            if (!lookup.TryGetEpisode(id, out EpisodeSpec episode) || episode == null)
-                continue;
-
-            if (string.IsNullOrEmpty(episode.next))
-                continue;
-
-            if (!progress.IsEpisodeUnlocked(episode.next))
-                continue;
-
-            if (visible.AllVisible.Contains(episode.next))
-                continue;
-
-            if (!lookup.TryGetEpisode(episode.next, out EpisodeSpec nextEpisode) || nextEpisode == null)
-                continue;
-
-            if (nextEpisode.isEnding)
-                visible.AddEnding(episode.next);
-        }
+        AddVisibleEndings(visible, progress, lookup);
 
         return visible;
     }
@@ -217,25 +282,36 @@ public static class EpisodeSelectionModelBuilder
         }
     }
 
-    private sealed class PositionMap
+    private static void AddVisibleEndings(
+        VisibleSet visible,
+        IEpisodeProgress progress,
+        IEpisodePlayLookup lookup)
     {
-        private readonly Dictionary<string, Vector2> _positions = new(StringComparer.Ordinal);
+        List<string> allIds = new List<string>(visible.AllVisible);
 
-        public void Set(string id, Vector2 pos)
+        for (int i = 0; i < allIds.Count; i++)
         {
-            _positions[id] = pos;
-        }
+            string id = allIds[i];
 
-        public bool TryGet(string id, out Vector2 pos)
-        {
-            return _positions.TryGetValue(id, out pos);
-        }
+            if (!lookup.TryGetEpisode(id, out EpisodeSpec episode) || episode == null)
+                continue;
 
-        public Vector2 Get(string id)
-        {
-            return _positions.TryGetValue(id, out Vector2 pos)
-                ? pos
-                : Vector2.zero;
+            if (string.IsNullOrEmpty(episode.next))
+                continue;
+
+            string nextId = episode.next;
+
+            if (!progress.IsEpisodeUnlocked(nextId))
+                continue;
+
+            if (visible.AllVisible.Contains(nextId))
+                continue;
+
+            if (!lookup.TryGetEpisode(nextId, out EpisodeSpec nextEpisode) || nextEpisode == null)
+                continue;
+
+            if (nextEpisode.isEnding)
+                visible.AddEnding(nextId);
         }
     }
 
@@ -244,6 +320,7 @@ public static class EpisodeSelectionModelBuilder
         IEpisodePlayLookup lookup)
     {
         PositionMap positions = new PositionMap();
+
         float extraX = 0f;
 
         for (int i = 0; i < visible.MainIds.Count; i++)
@@ -278,10 +355,10 @@ public static class EpisodeSelectionModelBuilder
 
         foreach (string id in visible.AllVisible)
         {
-            if (!visible.Types.TryGetValue(id, out EpisodeNodeKind type))
+            if (!visible.Types.TryGetValue(id, out VisibleNodeType type))
                 continue;
 
-            if (type != EpisodeNodeKind.Branch)
+            if (type != VisibleNodeType.Branch)
                 continue;
 
             PositionBranchChain(id, positions, visible, lookup);
@@ -289,13 +366,14 @@ public static class EpisodeSelectionModelBuilder
 
         foreach (string id in visible.AllVisible)
         {
-            if (!visible.Types.TryGetValue(id, out EpisodeNodeKind type))
+            if (!visible.Types.TryGetValue(id, out VisibleNodeType type))
                 continue;
 
-            if (type != EpisodeNodeKind.Ending)
+            if (type != VisibleNodeType.Ending)
                 continue;
 
             string ownerId = FindEndingOwner(id, visible, lookup);
+
             if (string.IsNullOrEmpty(ownerId))
                 continue;
 
@@ -318,21 +396,15 @@ public static class EpisodeSelectionModelBuilder
 
         if (!string.IsNullOrEmpty(hubEpisode.branchUpperTo) &&
             visible.AllVisible.Contains(hubEpisode.branchUpperTo))
-        {
             branches.Add(hubEpisode.branchUpperTo);
-        }
 
         if (!string.IsNullOrEmpty(hubEpisode.branchMiddleTo) &&
             visible.AllVisible.Contains(hubEpisode.branchMiddleTo))
-        {
             branches.Add(hubEpisode.branchMiddleTo);
-        }
 
         if (!string.IsNullOrEmpty(hubEpisode.branchLowerTo) &&
             visible.AllVisible.Contains(hubEpisode.branchLowerTo))
-        {
             branches.Add(hubEpisode.branchLowerTo);
-        }
 
         if (branches.Count == 0)
             return;
@@ -386,10 +458,10 @@ public static class EpisodeSelectionModelBuilder
             if (!visible.AllVisible.Contains(nextId))
                 break;
 
-            if (!visible.Types.TryGetValue(nextId, out EpisodeNodeKind nextType))
+            if (!visible.Types.TryGetValue(nextId, out VisibleNodeType nextType))
                 break;
 
-            if (nextType != EpisodeNodeKind.BranchChain)
+            if (nextType != VisibleNodeType.BranchChain)
                 break;
 
             Vector2 nextPos = currentPos + new Vector2(MainStepX, 0f);
@@ -400,91 +472,164 @@ public static class EpisodeSelectionModelBuilder
         }
     }
 
-    private static string FindEndingOwner(
-        string endingId,
-        VisibleSet visible,
-        IEpisodePlayLookup lookup)
-    {
-        foreach (string id in visible.AllVisible)
-        {
-            if (!lookup.TryGetEpisode(id, out EpisodeSpec episode) || episode == null)
-                continue;
-
-            if (episode.next == endingId)
-                return id;
-        }
-
-        return "";
-    }
-
     private static List<EpisodeNodeModel> MaterializeNodes(
         VisibleSet visible,
         PositionMap positions,
         IEpisodeProgress progress,
         IEpisodePlayLookup lookup,
-        string selectedEpisodeId)
+        string selectedEpisodeId,
+        string currentEpisodeId)
     {
         List<EpisodeNodeModel> nodes = new List<EpisodeNodeModel>(visible.AllVisible.Count);
-
-        string effectiveSelected = ResolveSelectedEpisodeId(
-            visible.MainIds,
-            selectedEpisodeId,
-            progress
-        );
-
-        string currentEpisodeId = ResolveCurrentEpisodeId(visible.MainIds, progress);
 
         foreach (string id in visible.AllVisible)
         {
             if (!lookup.TryGetEpisode(id, out EpisodeSpec episode) || episode == null)
                 continue;
 
+            visible.Types.TryGetValue(id, out VisibleNodeType visibleType);
+
+            EpisodeNodeRole role = ToRole(visibleType);
+
             Vector2 pos = positions.Get(id);
+            Vector2 size = ResolveNodeSize(role);
 
             bool completed = progress != null && progress.IsEpisodeCompleted(id);
-            bool selected = !string.IsNullOrEmpty(effectiveSelected) && id == effectiveSelected;
+            bool selected = !string.IsNullOrEmpty(selectedEpisodeId) && id == selectedEpisodeId;
             bool isCurrent = !string.IsNullOrEmpty(currentEpisodeId) && id == currentEpisodeId;
 
             string indexText = BuildIndexTextFromIdOrOrder(episode);
             string title = ResolveEpisodeTitle(episode);
 
-            visible.Types.TryGetValue(id, out EpisodeNodeKind kind);
+            EpisodeNodeLinkModel? upperLink = null;
+            EpisodeNodeLinkModel? lowerLink = null;
 
-            EpisodeAttachmentModel? lower = null;
-
-            if (kind == EpisodeNodeKind.Main)
-                lower = BuildAttachmentUnlockedOnly(lookup, progress, episode.attachmentLowerTo);
+            if (role == EpisodeNodeRole.Main)
+            {
+                lowerLink = BuildLinkUnlockedOnly(
+                    lookup,
+                    progress,
+                    EpisodeLinkRole.Attachment,
+                    episode.attachmentLowerTo);
+            }
 
             nodes.Add(new EpisodeNodeModel(
                 episodeId: id,
-                kind: kind,
+                role: role,
                 indexText: indexText,
                 title: title,
                 anchoredPos: pos,
+                size: size,
                 locked: false,
                 interactable: true,
                 selected: selected,
                 isCurrent: isCurrent,
                 completed: completed,
-                upperAttachment: null,
-                lowerAttachment: lower
-            ));
+                upperLink: upperLink,
+                lowerLink: lowerLink));
         }
 
         return nodes;
     }
 
-    private static bool IsHub(EpisodeSpec episode)
+    private static EpisodeNodeRole ToRole(VisibleNodeType type)
     {
-        if (episode == null)
-            return false;
+        switch (type)
+        {
+            case VisibleNodeType.Main:
+                return EpisodeNodeRole.Main;
 
-        bool hasBranch =
-            !string.IsNullOrEmpty(episode.branchUpperTo) ||
-            !string.IsNullOrEmpty(episode.branchMiddleTo) ||
-            !string.IsNullOrEmpty(episode.branchLowerTo);
+            case VisibleNodeType.Branch:
+            case VisibleNodeType.BranchChain:
+                return EpisodeNodeRole.Branch;
 
-        return hasBranch && string.IsNullOrEmpty(episode.next);
+            case VisibleNodeType.Attachment:
+                return EpisodeNodeRole.Attachment;
+
+            case VisibleNodeType.Ending:
+                return EpisodeNodeRole.Ending;
+
+            default:
+                return EpisodeNodeRole.Main;
+        }
+    }
+
+    private static Vector2 ResolveNodeSize(EpisodeNodeRole role)
+    {
+        switch (role)
+        {
+            case EpisodeNodeRole.Main:
+                return DefaultMainNodeSize;
+
+            case EpisodeNodeRole.Branch:
+                return DefaultBranchNodeSize;
+
+            case EpisodeNodeRole.Attachment:
+                return DefaultAttachmentNodeSize;
+
+            case EpisodeNodeRole.Ending:
+                return DefaultEndingNodeSize;
+
+            default:
+                return DefaultMainNodeSize;
+        }
+    }
+
+    private static EpisodeNodeLinkModel? BuildLinkUnlockedOnly(
+        IEpisodePlayLookup lookup,
+        IEpisodeProgress progress,
+        EpisodeLinkRole role,
+        string targetEpisodeId)
+    {
+        if (lookup == null || progress == null)
+            return null;
+
+        if (string.IsNullOrEmpty(targetEpisodeId))
+            return null;
+
+        if (!progress.IsEpisodeUnlocked(targetEpisodeId))
+            return null;
+
+        if (!lookup.TryGetEpisode(targetEpisodeId, out EpisodeSpec target) || target == null)
+            return null;
+
+        return new EpisodeNodeLinkModel(
+            role,
+            target.episodeId,
+            ResolveEpisodeTitle(target),
+            true);
+    }
+
+    private static string ResolveSelectedEpisodeId(
+        List<string> mainIds,
+        string selectedEpisodeId,
+        IEpisodeProgress progress)
+    {
+        if (!string.IsNullOrEmpty(selectedEpisodeId))
+            return selectedEpisodeId;
+
+        return ResolveCurrentEpisodeId(mainIds, progress);
+    }
+
+    private static string ResolveCurrentEpisodeId(
+        List<string> mainIds,
+        IEpisodeProgress progress)
+    {
+        if (mainIds == null || mainIds.Count == 0)
+            return "";
+
+        if (progress == null)
+            return mainIds[0];
+
+        for (int i = 0; i < mainIds.Count; i++)
+        {
+            string id = mainIds[i];
+
+            if (!progress.IsEpisodeCompleted(id))
+                return id;
+        }
+
+        return mainIds[mainIds.Count - 1];
     }
 
     private static List<string> BuildMainLineIds(
@@ -498,8 +643,7 @@ public static class EpisodeSelectionModelBuilder
 
         Array.Sort(
             episodes,
-            (a, b) => (a?.order ?? 0).CompareTo(b?.order ?? 0))
-        ;
+            (a, b) => (a?.order ?? 0).CompareTo(b?.order ?? 0));
 
         string startId = "";
 
@@ -554,8 +698,7 @@ public static class EpisodeSelectionModelBuilder
                 lookup,
                 episode.branchUpperTo,
                 episode.branchLowerTo,
-                episode.branchMiddleTo
-            );
+                episode.branchMiddleTo);
 
             if (!string.IsNullOrEmpty(merge) && merge != current)
             {
@@ -569,6 +712,19 @@ public static class EpisodeSelectionModelBuilder
         return result;
     }
 
+    private static bool IsHub(EpisodeSpec episode)
+    {
+        if (episode == null)
+            return false;
+
+        bool hasBranch =
+            !string.IsNullOrEmpty(episode.branchUpperTo) ||
+            !string.IsNullOrEmpty(episode.branchMiddleTo) ||
+            !string.IsNullOrEmpty(episode.branchLowerTo);
+
+        return hasBranch && string.IsNullOrEmpty(episode.next);
+    }
+
     private static string FindMergeFromBranches(
         IEpisodePlayLookup lookup,
         string branchUpper,
@@ -580,11 +736,11 @@ public static class EpisodeSelectionModelBuilder
         if (!string.IsNullOrEmpty(branchUpper))
             starts.Add(branchUpper);
 
-        if (!string.IsNullOrEmpty(branchLower))
-            starts.Add(branchLower);
-
         if (!string.IsNullOrEmpty(branchMiddle))
             starts.Add(branchMiddle);
+
+        if (!string.IsNullOrEmpty(branchLower))
+            starts.Add(branchLower);
 
         if (starts.Count < 2)
             return "";
@@ -639,7 +795,7 @@ public static class EpisodeSelectionModelBuilder
     {
         HashSet<string> set = new HashSet<string>(StringComparer.Ordinal);
 
-        if (string.IsNullOrEmpty(startId))
+        if (lookup == null || string.IsNullOrEmpty(startId))
             return set;
 
         string current = startId;
@@ -692,8 +848,7 @@ public static class EpisodeSelectionModelBuilder
             lookup,
             hubEpisode.branchUpperTo,
             hubEpisode.branchLowerTo,
-            hubEpisode.branchMiddleTo
-        );
+            hubEpisode.branchMiddleTo);
 
         int best = 1;
 
@@ -703,8 +858,7 @@ public static class EpisodeSelectionModelBuilder
                 lookup,
                 starts[i],
                 merge,
-                64
-            );
+                64);
 
             if (depth > best)
                 best = depth;
@@ -758,28 +912,21 @@ public static class EpisodeSelectionModelBuilder
         return depth < 1 ? 1 : depth;
     }
 
-    private static EpisodeAttachmentModel? BuildAttachmentUnlockedOnly(
-        IEpisodePlayLookup lookup,
-        IEpisodeProgress progress,
-        string targetEpisodeId)
+    private static string FindEndingOwner(
+        string endingId,
+        VisibleSet visible,
+        IEpisodePlayLookup lookup)
     {
-        if (lookup == null || progress == null)
-            return null;
+        foreach (string id in visible.AllVisible)
+        {
+            if (!lookup.TryGetEpisode(id, out EpisodeSpec episode) || episode == null)
+                continue;
 
-        if (string.IsNullOrEmpty(targetEpisodeId))
-            return null;
+            if (episode.next == endingId)
+                return id;
+        }
 
-        if (!progress.IsEpisodeUnlocked(targetEpisodeId))
-            return null;
-
-        if (!lookup.TryGetEpisode(targetEpisodeId, out EpisodeSpec target) || target == null)
-            return null;
-
-        return new EpisodeAttachmentModel(
-            hostEpisodeId: target.episodeId,
-            displayTitle: ResolveEpisodeTitle(target),
-            isInteractable: true
-        );
+        return "";
     }
 
     private static string ResolveEpisodeTitle(EpisodeSpec episode)
@@ -793,155 +940,24 @@ public static class EpisodeSelectionModelBuilder
         if (!string.IsNullOrEmpty(episode.displayName))
             return episode.displayName;
 
-        return episode.episodeId;
-    }
-
-    private static string ResolveSelectedEpisodeId(
-        List<string> mainIds,
-        string requestedSelectedEpisodeId,
-        IEpisodeProgress progress)
-    {
-        if (!string.IsNullOrEmpty(requestedSelectedEpisodeId) &&
-            Contains(mainIds, requestedSelectedEpisodeId))
-        {
-            return requestedSelectedEpisodeId;
-        }
-
-        string current = ResolveCurrentEpisodeId(mainIds, progress);
-        if (!string.IsNullOrEmpty(current))
-            return current;
-
-        if (progress != null)
-        {
-            for (int i = 0; i < mainIds.Count; i++)
-            {
-                string id = mainIds[i];
-
-                if (progress.IsEpisodeUnlocked(id))
-                    return id;
-            }
-        }
-
-        return mainIds.Count > 0 ? mainIds[0] : "";
-    }
-
-    private static string ResolveCurrentEpisodeId(
-        List<string> mainIds,
-        IEpisodeProgress progress)
-    {
-        if (progress == null)
-            return "";
-
-        for (int i = 0; i < mainIds.Count; i++)
-        {
-            string id = mainIds[i];
-
-            if (progress.IsEpisodeUnlocked(id) &&
-                !progress.IsEpisodeCompleted(id))
-            {
-                return id;
-            }
-        }
-
-        return "";
-    }
-
-    private static bool Contains(List<string> list, string id)
-    {
-        if (list == null)
-            return false;
-
-        for (int i = 0; i < list.Count; i++)
-        {
-            if (list[i] == id)
-                return true;
-        }
-
-        return false;
-    }
-
-    private static ChapterMetaModel BuildChapterMeta(
-        int chapterId,
-        IEpisodePlayLookup lookup)
-    {
-        string chapterTitle = $"챕터 {chapterId}";
-        string eraText = "성력 996년";
-
-        if (lookup != null &&
-            lookup.TryGetChapter(chapterId, out ChapterSpec chapter) &&
-            chapter != null)
-        {
-            if (!string.IsNullOrEmpty(chapter.displayName))
-                chapterTitle = chapter.displayName;
-
-            if (!string.IsNullOrEmpty(chapter.eraText))
-                eraText = chapter.eraText;
-        }
-
-        return new ChapterMetaModel(
-            chapterIndex: $"챕터 {chapterId}",
-            eraText: eraText,
-            chapterTitle: chapterTitle
-        );
+        return episode.episodeId ?? "";
     }
 
     private static string BuildIndexTextFromIdOrOrder(EpisodeSpec episode)
     {
         if (episode == null)
-            return "??";
-
-        string fromId = ExtractEpisodeIndexFromId(episode.episodeId);
-        if (!string.IsNullOrEmpty(fromId))
-            return fromId;
-
-        return episode.order.ToString("00");
-    }
-
-    private static string ExtractEpisodeIndexFromId(string episodeId)
-    {
-        if (string.IsNullOrEmpty(episodeId))
             return "";
 
-        int epPos = -1;
+        if (episode.order > 0)
+            return episode.order.ToString("00");
 
-        for (int i = 0; i < episodeId.Length - 1; i++)
-        {
-            if (episodeId[i] == 'E' && episodeId[i + 1] == 'p')
-            {
-                epPos = i + 2;
-                break;
-            }
-        }
+        string id = episode.episodeId ?? "";
 
-        if (epPos < 0 || epPos >= episodeId.Length)
-            return "";
+        int dot = id.LastIndexOf('.');
 
-        int start = epPos;
-        int digitEnd = start;
+        if (dot >= 0 && dot + 1 < id.Length)
+            return id.Substring(dot + 1);
 
-        while (digitEnd < episodeId.Length)
-        {
-            char c = episodeId[digitEnd];
-
-            if (c < '0' || c > '9')
-                break;
-
-            digitEnd++;
-        }
-
-        if (digitEnd == start)
-            return "";
-
-        int end = digitEnd;
-
-        if (end < episodeId.Length)
-        {
-            char c = episodeId[end];
-
-            if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'))
-                end++;
-        }
-
-        return episodeId.Substring(start, end - start);
+        return id;
     }
 }
