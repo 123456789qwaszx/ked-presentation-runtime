@@ -23,12 +23,12 @@ public sealed partial class VnScreenBindings
 
     private void BindChapterSelectionPanel(ChapterSelectionPanel panel)
     {
-        _ctx.AddBinding(
+        _ctx.Bind(
             panel,
             p => p.OnChapterRequested += OnChapterRequested,
             p => p.OnChapterRequested -= OnChapterRequested);
 
-        _ctx.AddBinding(
+        _ctx.Bind(
             panel,
             p => p.OnBackRequested += OnChapterBackRequested,
             p => p.OnBackRequested -= OnChapterBackRequested);

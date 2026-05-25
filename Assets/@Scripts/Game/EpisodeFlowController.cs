@@ -50,11 +50,11 @@ public class EpisodeFlowController : IDisposable
 
     private void BindChapterSelectPanelEvents(ChapterSelectionPanel panel)
     {
-        _ctx.AddBinding(panel,
+        _ctx.Bind(panel,
             p => p.OnChapterRequested += OnChapterRequested,
             p => p.OnChapterRequested -= OnChapterRequested);
 
-        _ctx.AddBinding(panel,
+        _ctx.Bind(panel,
             p => p.OnBackRequested += CloseTopPanel,
             p => p.OnBackRequested -= CloseTopPanel);
     }
@@ -127,11 +127,11 @@ public class EpisodeFlowController : IDisposable
 
     private void BindEpisodeSelectPanelEvents(EpisodeSelectionPanel panel)
     {
-        _ctx.AddBinding(panel,
+        _ctx.Bind(panel,
             p => p.OnCloseRequested += CloseEpisodeSelectPanel,
             p => p.OnCloseRequested -= CloseEpisodeSelectPanel);
 
-        _ctx.AddBinding(panel,
+        _ctx.Bind(panel,
             p => p.SetHandlers(
                 onMain: StartEpisodeImmediately,
                 onBranch: HandleAttachmentRequested),
