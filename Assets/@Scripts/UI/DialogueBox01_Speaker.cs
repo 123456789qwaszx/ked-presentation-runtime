@@ -55,6 +55,9 @@ public sealed class DialogueBox01_Speaker
 
     public void SetVisible(bool visible)
     {
+        if (CanvasGroup == null)
+            return;
+        
         CanvasGroup.alpha = visible ? 1f : 0f;
         CanvasGroup.interactable = visible;
         CanvasGroup.blocksRaycasts = visible;

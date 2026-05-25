@@ -55,6 +55,9 @@ public sealed class DialogueBox03_OnlyText
 
     public void SetVisible(bool visible)
     {
+        if (CanvasGroup == null)
+            return;
+        
         CanvasGroup.alpha = visible ? 1f : 0f;
         CanvasGroup.interactable = visible;
         CanvasGroup.blocksRaycasts = visible;

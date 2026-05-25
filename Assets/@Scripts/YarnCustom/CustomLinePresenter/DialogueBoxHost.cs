@@ -77,10 +77,21 @@ public sealed class DialogueBoxHost : MonoBehaviour, IDialogueBoxViewResolver
     
     public void HideAll()
     {
+        if (entries == null)
+            return;
+        
         for (int i = 0; i < entries.Length; i++)
         {
-            IPresentationDialogueBoxView view = entries[i].view as IPresentationDialogueBoxView;
-            view?.SetVisible(false);
+            // Unity-destroyed views can remain as C# references.
+            // Check as MonoBehaviour before casting to an interface.
+            MonoBehaviour behaviour = entries[i].view;
+            if (!behaviour) continue;
+
+            IPresentationDialogueBoxView view = behaviour as IPresentationDialogueBoxView;
+            if (view == null) 
+                continue;
+
+            view.SetVisible(false);
         }
     }
     
@@ -136,7 +147,12 @@ public sealed class DialogueBoxHost : MonoBehaviour, IDialogueBoxViewResolver
 
         for (int i = 0; i < entries.Length; i++)
         {
-            IPresentationDialogueBoxView view = entries[i].view as IPresentationDialogueBoxView;
+            // Unity-destroyed views can remain as C# references.
+            // Check as MonoBehaviour before casting to an interface.
+            MonoBehaviour behaviour = entries[i].view;
+            if (!behaviour) continue;
+
+            IPresentationDialogueBoxView view = behaviour as IPresentationDialogueBoxView;
             if (view == null)
                 continue;
 
