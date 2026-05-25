@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using static UIRefValidation;
 
-public sealed class EpisodeSelectionPanel : UIRoot<EpisodeSelectionPanel.Refs>, IUIPanel
+public sealed class EpisodeSelectionPanel : UIPanel<EpisodeSelectionPanel.Refs>, IUIPanel
 {
     public event Action OnCloseRequested;
     

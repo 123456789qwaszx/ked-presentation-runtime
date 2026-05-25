@@ -468,8 +468,6 @@ public class VnAppBootstrap : MonoBehaviour
         Debug.Log($"[Bootstrap] Chapter selected: {chapterId}");
     }
     
-    
-    
     #region Helper
     [ContextMenu("VN Trace/Dump To Console")]
     public void DumpVNTraceToConsole()
