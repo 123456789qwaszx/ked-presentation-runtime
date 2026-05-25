@@ -3,7 +3,6 @@ using Yarn.Unity;
 
 public class VnAppBootstrap : MonoBehaviour
 {
-    [Header("Presentation")]
     [SerializeField] UIManager uiManager;
 
     private readonly UnityInputSource _unityInputSource = new();
@@ -422,7 +421,8 @@ public class VnAppBootstrap : MonoBehaviour
 
     private void Start()
     {
-        UIManager.Instance.PushPanel<ChapterSelectionPanel>();
+        _screenBindings.ConfigureChapterSelection();
+        _screenBindings.GoToChapterSelection();
         //_screenBindings.GoToTitle();
     }
     
