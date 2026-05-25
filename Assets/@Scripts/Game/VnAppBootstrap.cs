@@ -422,12 +422,8 @@ public class VnAppBootstrap : MonoBehaviour
 
     private void Start()
     {
-        _screenBindings.GoToTitle();
-        // UIManager.Instance.SwitchRoot<EpisodeSelectionPanel>();
-        // EpisodeSelectionPanel go = UIManager.Instance.GetUI<EpisodeSelectionPanel>();
-        // EpisodeGraphView egv = go.GetComponent<EpisodeGraphView>();
-
-        //egv.Render(graph);
+        UIManager.Instance.PushPanel<ChapterSelectionPanel>();
+        //_screenBindings.GoToTitle();
     }
     
     [ContextMenu("VN Trace/Dump To Console")]

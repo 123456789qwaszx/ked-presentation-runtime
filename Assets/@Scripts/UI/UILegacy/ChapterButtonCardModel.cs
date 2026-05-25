@@ -1,0 +1,59 @@
+// using UnityEngine;
+//
+// public readonly struct ChapterButtonCardModel
+// {
+//     public readonly int ChapterId;
+//
+//     public readonly string IndexText;         // 예: "1" or "챕터 5"
+//     public readonly string ChapterIndexLabel;  // 예: "챕터5"
+//     public readonly string ChapterTitle;       // 예: "짙은 밤에 드리운 불빛"
+//     public readonly string EpisodeHeading;     // 예: "02 그녀의 선택"
+//
+//     public readonly Sprite Bg;
+//     public readonly Sprite BgOverlay;
+//     public readonly Sprite ChapterIndexLabelSprite;
+//     public readonly Sprite EpisodeHeadingLabelSprite;
+//     public readonly Sprite TitleIcon;
+//
+//     public readonly bool Interactable;
+//     public readonly bool Locked;
+//
+//     public ChapterButtonCardModel(
+//         int chapterId,
+//         string indexText,
+//         string chapterIndexLabel,
+//         string chapterTitle,
+//         string episodeHeading,
+//         Sprite bg = null,
+//         Sprite bgOverlay = null,
+//         Sprite chapterIndexLabelSprite = null,
+//         Sprite episodeHeadingLabelSprite = null,
+//         Sprite titleIcon = null,
+//         bool interactable = true,
+//         bool locked = false)
+//     {
+//         ChapterId = chapterId;
+//         IndexText = indexText;
+//         ChapterIndexLabel = chapterIndexLabel;
+//         ChapterTitle = chapterTitle;
+//         EpisodeHeading = episodeHeading;
+//         Bg = bg;
+//         BgOverlay = bgOverlay;
+//         ChapterIndexLabelSprite = chapterIndexLabelSprite;
+//         EpisodeHeadingLabelSprite = episodeHeadingLabelSprite;
+//         TitleIcon = titleIcon;
+//         Interactable = interactable;
+//         Locked = locked;
+//     }
+//
+//     public static ChapterButtonCardModel Empty()
+//         => new (
+//             chapterId: -1,
+//             indexText: "",
+//             chapterIndexLabel: "",
+//             chapterTitle: "",
+//             episodeHeading: "",
+//             interactable: false,
+//             locked: true
+//         );
+// }
