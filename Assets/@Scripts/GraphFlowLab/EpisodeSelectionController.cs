@@ -1,3 +1,5 @@
+using UnityEngine;
+
 public sealed class EpisodeSelectionController
 {
     private readonly EpisodeSelectionRepository _repository;
@@ -16,13 +18,14 @@ public sealed class EpisodeSelectionController
         _view = view;
         _layoutOptions = layoutOptions;
 
-        _view.SetHandlers(
-            RequestSelectEpisode,
-            RequestOpenLink);
+        // _view.SetHandlers(
+        //     RequestSelectEpisode,
+        //     RequestOpenLink);
     }
 
     public void RequestRender()
     {
+        Debug.Log("RequestRender");
         EpisodeSelectionSnapshot snapshot = _repository.ReadSnapshot();
         RenderSnapshot(snapshot);
     }
@@ -40,7 +43,7 @@ public sealed class EpisodeSelectionController
         RenderSnapshot(after);
     }
 
-    private void RequestOpenLink(
+    public void RequestOpenLink(
         string ownerEpisodeId,
         EpisodeNodeLinkSlot slot,
         EpisodeNodeLinkViewData link)

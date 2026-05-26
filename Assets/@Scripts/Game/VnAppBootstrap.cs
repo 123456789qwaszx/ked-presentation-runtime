@@ -418,17 +418,29 @@ public class VnAppBootstrap : MonoBehaviour
 
     private int _selectedChapterId = 0;
 
+    [SerializeField] private EpisodeGraphView _episodeGraphView;
     private void Start()
     {
+        EpisodeGraphData episodeGraphData = new();
+        EpisodeSelectionRuntimeState episodeSelectionRuntimeState = new();
+        EpisodeSelectionRepository episodeSelectionRepository = new(episodeGraphData, episodeSelectionRuntimeState);
+
+        EpisodeGraphViewModelBuilder episodeGraphViewModelBuilder = new();
+        EpisodeGraphLayoutOptions episodeGraphLayoutOptions = EpisodeGraphLayoutOptions.Compact();
+        
+        EpisodeSelectionController episodeSelectionController = new(episodeSelectionRepository, episodeGraphViewModelBuilder, _episodeGraphView, episodeGraphLayoutOptions);
+
+        _screenBindings.ConfigureEpisodeSelection(episodeSelectionController);
+        
         _screenBindings.ConfigureChapterSelection(
             resolveChapterModels: ResolveChapterModels,
             chapterCardPrefab: chapterCardPrefab,
             chapterCardCount: 6,
             onChapterRequested: HandleChapterRequested);
 
-        //_screenBindings.GoToChapterSelection();
+        _screenBindings.GoToChapterSelection();
         
-        _screenBindings.GoToTitle();
+        //_screenBindings.GoToTitle();
     }
 
     private ChapterButtonCardModel[] ResolveChapterModels()

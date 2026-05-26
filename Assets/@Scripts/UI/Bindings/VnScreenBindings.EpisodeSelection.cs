@@ -4,17 +4,13 @@ using UnityEngine;
 
 public sealed partial class VnScreenBindings
 {
+    private EpisodeSelectionController _episodeSelectionController;
+    
     private int _currentChapterId = -1;
 
-    private Action<string> _onEpisodeRequested;
-    private Action<string, EpisodeNodeLinkSlot, EpisodeNodeLinkViewData> _onEpisodeLinkRequested;
-
-    public void ConfigureEpisodeSelection(
-        Action<string> onEpisodeRequested = null,
-        Action<string, EpisodeNodeLinkSlot, EpisodeNodeLinkViewData> onEpisodeLinkRequested = null)
+    public void ConfigureEpisodeSelection(EpisodeSelectionController episodeSelectionController)
     {
-        _onEpisodeRequested = onEpisodeRequested;
-        _onEpisodeLinkRequested = onEpisodeLinkRequested;
+        _episodeSelectionController = episodeSelectionController;
     }
 
     public void GoToEpisodeSelection(int chapterId)
@@ -22,6 +18,8 @@ public sealed partial class VnScreenBindings
         _currentChapterId = chapterId;
 
         UI.PushPanel<EpisodeSelectionPanel>(panel => { BindRoot(panel, BindEpisodeSelectionPanel); });
+        
+        _episodeSelectionController.RequestRender();
     }
 
     private void BindEpisodeSelectionPanel(EpisodeSelectionPanel panel)
@@ -58,8 +56,7 @@ public sealed partial class VnScreenBindings
             return;
 
         Debug.Log($"[VnScreenBindings] Episode main clicked: {episodeId}");
-
-        _onEpisodeRequested?.Invoke(episodeId);
+        _episodeSelectionController.RequestSelectEpisode(episodeId);
     }
 
     private void OnEpisodeLinkRequested(
@@ -73,7 +70,7 @@ public sealed partial class VnScreenBindings
         if (string.IsNullOrEmpty(link.TargetEpisodeId))
             return;
 
-        _onEpisodeLinkRequested?.Invoke(ownerEpisodeId, slot, link);
+        _episodeSelectionController.RequestOpenLink(ownerEpisodeId, slot, link);
     }
 
     private void OnEpisodeSelectionBackRequested()
