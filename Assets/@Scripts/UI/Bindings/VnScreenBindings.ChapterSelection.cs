@@ -5,7 +5,6 @@ using UnityEngine;
 public sealed partial class VnScreenBindings
 {
     private Func<ChapterButtonCardModel[]> _resolveChapterModels;
-    private Action<int> _onChapterRequested;
 
     private readonly ChapterCardRuntimeSpawner _chapterCardSpawner = new ();
 
@@ -15,11 +14,9 @@ public sealed partial class VnScreenBindings
     public void ConfigureChapterSelection(
         Func<ChapterButtonCardModel[]> resolveChapterModels = null,
         RectTransform chapterCardPrefab = null,
-        int chapterCardCount = 6,
-        Action<int> onChapterRequested = null)
+        int chapterCardCount = 6)
     {
         _resolveChapterModels = resolveChapterModels;
-        _onChapterRequested = onChapterRequested;
 
         _chapterCardPrefab = chapterCardPrefab;
         _chapterCardCount = Mathf.Max(0, chapterCardCount);
@@ -108,8 +105,6 @@ public sealed partial class VnScreenBindings
 
         if (chapterId < 0)
             return;
-
-        _onChapterRequested?.Invoke(chapterId);
 
         GoToEpisodeSelection(chapterId);
     }

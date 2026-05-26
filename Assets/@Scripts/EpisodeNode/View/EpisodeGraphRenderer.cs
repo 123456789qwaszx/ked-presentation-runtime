@@ -6,7 +6,7 @@ public sealed class EpisodeGraphRenderer
 {
     private readonly RectTransform _content;
     private readonly RectTransform _nodeRigPrefab;
-    private readonly HorizontalScrollContentFitter _sizer;
+    //private readonly HorizontalScrollContentFitter _sizer;
     private readonly string _rigRootName;
 
     private readonly EpisodeNodeBuilder _builder = new();
@@ -17,11 +17,10 @@ public sealed class EpisodeGraphRenderer
 
     private Action<string> _onMainClicked;
 
-    public EpisodeGraphRenderer(RectTransform content, RectTransform nodeRigPrefab, HorizontalScrollContentFitter sizer, string rigRootName = "EpisodeNodeRig")
+    public EpisodeGraphRenderer(RectTransform content, RectTransform nodeRigPrefab,  string rigRootName = "EpisodeNodeRig")
     {
         _content = content;
         _nodeRigPrefab = nodeRigPrefab;
-        _sizer = sizer;
         _rigRootName = rigRootName;
     }
     
@@ -32,7 +31,6 @@ public sealed class EpisodeGraphRenderer
         RenderNodes(viewData, used);
         DeactivateUnused(used);
         _content.sizeDelta = viewData.ContentSize;
-        _sizer.RebuildSize();
     }
 
     public void ClearAll()
@@ -52,7 +50,6 @@ public sealed class EpisodeGraphRenderer
         }
 
         _activeById.Clear();
-        _sizer.RebuildSize();
     }
     
     public void DisposeAll()

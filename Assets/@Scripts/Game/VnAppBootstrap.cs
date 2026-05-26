@@ -415,14 +415,10 @@ public class VnAppBootstrap : MonoBehaviour
     }
 
     [SerializeField] private RectTransform chapterCardPrefab;
-
-    private int _selectedChapterId = 0;
     
     [SerializeField] private RectTransform episodeNodeContent;
     [SerializeField] private RectTransform nodeRigPrefab;
-    [SerializeField] private HorizontalScrollContentFitter sizer;
     
-    //[SerializeField] private EpisodeGraphView _episodeGraphView;
     private void Start()
     {
         IEpisodeGraphDataProvider episodeGraphDataProvider = new SampleEpisodeGraphDataProvider();
@@ -433,7 +429,7 @@ public class VnAppBootstrap : MonoBehaviour
 
         EpisodeGraphViewModelBuilder episodeGraphViewModelBuilder = new();
 
-        EpisodeGraphRenderer episodeGraphRenderer = new(episodeNodeContent, nodeRigPrefab, sizer);
+        EpisodeGraphRenderer episodeGraphRenderer = new(episodeNodeContent, nodeRigPrefab);
         
         EpisodeGraphLayoutOptions episodeGraphLayoutOptions = EpisodeGraphLayoutOptions.Compact();
         
@@ -444,8 +440,7 @@ public class VnAppBootstrap : MonoBehaviour
         _screenBindings.ConfigureChapterSelection(
             resolveChapterModels: ResolveChapterModels,
             chapterCardPrefab: chapterCardPrefab,
-            chapterCardCount: 6,
-            onChapterRequested: HandleChapterRequested);
+            chapterCardCount: 6);
 
         _screenBindings.GoToChapterSelection();
         
@@ -483,12 +478,6 @@ public class VnAppBootstrap : MonoBehaviour
                 interactable: false,
                 locked: true),
         };
-    }
-
-    private void HandleChapterRequested(int chapterId)
-    {
-        _selectedChapterId = chapterId;
-        Debug.Log($"[Bootstrap] Chapter selected: {chapterId}");
     }
     
     #region Helper

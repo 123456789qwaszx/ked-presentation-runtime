@@ -5072,7 +5072,6 @@ MonoBehaviour:
   chapterCardPrefab: {fileID: 2410623267660482620, guid: 60640956e3866b44e9e8c9df1a45dbd3, type: 3}
   episodeNodeContent: {fileID: 3064378968837295783}
   nodeRigPrefab: {fileID: 8432584506347833489, guid: 5a92676ae0261c54188d2a64469a3787, type: 3}
-  sizer: {fileID: 3599846330335752488}
 --- !u!1 &626587492
 GameObject:
   m_ObjectHideFlags: 0
@@ -26389,7 +26388,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: -799.999, y: 0}
+  m_AnchoredPosition: {x: -799.9888, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!1 &3068787516776583353
@@ -27972,7 +27971,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3064378968837295783}
-  - component: {fileID: 3599846330335752488}
   m_Layer: 5
   m_Name: EpisodeButtons
   m_TagString: Untagged
@@ -27980,27 +27978,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &3599846330335752488
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3599846330335752487}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5edec94baac1f674bac6e38dd8a56811, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::HorizontalScrollContentFitter
-  content: {fileID: 3064378968837295783}
-  viewport: {fileID: 788907716558699978}
-  scrollRect: {fileID: 7211210827341263876}
-  paddingLeft: 300
-  paddingRight: 200
-  includeInactive: 0
-  forceLeftAnchoredContent: 1
-  shiftChildrenToMakeMinXAtPaddingLeft: 1
-  alignLeftAfterRebuild: 1
 --- !u!114 &3602630540882324742
 MonoBehaviour:
   m_ObjectHideFlags: 0
