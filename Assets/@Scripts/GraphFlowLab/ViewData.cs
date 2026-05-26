@@ -11,6 +11,7 @@ public sealed class EpisodeNodeViewData
 {
     public string EpisodeId;
     public string Title;
+    public string IndexText;
 
     public Vector2 AnchoredPosition;
     public Vector2 Size;

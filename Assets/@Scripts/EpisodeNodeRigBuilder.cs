@@ -30,36 +30,45 @@ public sealed class EpisodeNodeRigBuilder
 
             rigRoot = (RectTransform)rootGo.transform;
             StretchFull(rigRoot);
+
             EnsureGraph(rigRoot, nodePrefix);
         }
 
         return rigRoot;
     }
 
-    public void BindRefsFromRoot(RectTransform rigRoot, string nodePrefix, out EpisodeNodeRigRefs refs)
+    public void BindRefsFromRoot(
+        RectTransform rigRoot,
+        string nodePrefix,
+        out EpisodeNodeRigRefs refs)
     {
-        Dictionary<EpisodeNodeRigSchema.Refs, RectTransform> map = CollectRefMap(rigRoot, nodePrefix);
+        Dictionary<EpisodeNodeRigSchema.Refs, RectTransform> map =
+            CollectRefMap(rigRoot, nodePrefix);
+
         EnsureValidGraphMap(rigRoot, nodePrefix, ref map);
 
         refs = BuildRefs(rigRoot, map);
     }
 
-    private void EnsureValidGraphMap(RectTransform rigRoot, string nodePrefix, ref Dictionary<EpisodeNodeRigSchema.Refs, RectTransform> map)
+    private void EnsureValidGraphMap(
+        RectTransform rigRoot,
+        string nodePrefix,
+        ref Dictionary<EpisodeNodeRigSchema.Refs, RectTransform> map)
     {
         int expectedCount = Enum.GetValues(typeof(EpisodeNodeRigSchema.Refs)).Length;
-
+Debug.Log(map.Count);
+        
         if (map.Count >= expectedCount)
             return;
 
         Debug.LogWarning(
             $"[EpisodeNodeRigBuilder] Invalid episode node rig. Rebuilding from schema. " +
-            $"rigRoot='{rigRoot.name}', prefix='{nodePrefix}'.",
+            $"rigRoot='{rigRoot.name}', prefix='{nodePrefix}', found={map.Count}, expected={expectedCount}.",
             rigRoot);
 
         for (int i = rigRoot.childCount - 1; i >= 0; i--)
         {
             Transform child = rigRoot.GetChild(i);
-
             child.SetParent(null, false);
             Object.Destroy(child.gameObject);
         }
@@ -94,45 +103,16 @@ public sealed class EpisodeNodeRigBuilder
         RectTransform rt = EnsureRect(parent, WithPrefix(nodePrefix, node.Id.ToString()));
 
         if (node.NeedsCanvasGroup)
-        {
-            if (!rt.TryGetComponent(out CanvasGroup group))
-                group = rt.gameObject.AddComponent<CanvasGroup>();
-
-            group.alpha = node.InitialCanvasGroupAlpha;
-            group.interactable = node.InitialCanvasGroupAlpha > 0f;
-            group.blocksRaycasts = node.InitialCanvasGroupAlpha > 0f;
-        }
+            EnsureCanvasGroup(rt, node.InitialCanvasGroupAlpha);
 
         if (node.NeedsImage)
-        {
-            if (!rt.TryGetComponent<Image>(out _))
-                rt.gameObject.AddComponent<Image>();
-        }
+            EnsureImage(rt);
 
         if (node.NeedsButton)
-        {
-            Image raycastImage = rt.GetComponent<Image>();
-
-            if (raycastImage == null)
-            {
-                raycastImage = rt.gameObject.AddComponent<Image>();
-                raycastImage.color = new Color(1f, 1f, 1f, 0f);
-            }
-
-            raycastImage.raycastTarget = true;
-
-            if (!rt.TryGetComponent<Button>(out Button button))
-                button = rt.gameObject.AddComponent<Button>();
-
-            if (button.targetGraphic == null)
-                button.targetGraphic = raycastImage;
-        }
+            EnsureButton(rt);
 
         if (node.NeedsText)
-        {
-            if (!rt.TryGetComponent<TMP_Text>(out _))
-                rt.gameObject.AddComponent<TextMeshProUGUI>();
-        }
+            EnsureText(rt);
     }
 
     private RectTransform EnsureRect(RectTransform parent, string name)
@@ -151,82 +131,76 @@ public sealed class EpisodeNodeRigBuilder
         return rt;
     }
 
+    private void EnsureCanvasGroup(RectTransform rt, float initialAlpha)
+    {
+        if (rt == null)
+            return;
+
+        if (!rt.TryGetComponent(out CanvasGroup group))
+            group = rt.gameObject.AddComponent<CanvasGroup>();
+
+        group.alpha = initialAlpha;
+        group.interactable = initialAlpha > 0f;
+        group.blocksRaycasts = initialAlpha > 0f;
+    }
+
+    private void EnsureImage(RectTransform rt)
+    {
+        if (rt == null)
+            return;
+
+        if (!rt.TryGetComponent<Image>(out _))
+            rt.gameObject.AddComponent<Image>();
+    }
+
+    private void EnsureButton(RectTransform rt)
+    {
+        if (rt == null)
+            return;
+
+        Image raycastImage = rt.GetComponent<Image>();
+
+        if (raycastImage == null)
+        {
+            raycastImage = rt.gameObject.AddComponent<Image>();
+            raycastImage.color = new Color(1f, 1f, 1f, 0f);
+        }
+
+        raycastImage.raycastTarget = true;
+
+        if (!rt.TryGetComponent<Button>(out Button button))
+            button = rt.gameObject.AddComponent<Button>();
+
+        if (button.targetGraphic == null)
+            button.targetGraphic = raycastImage;
+    }
+
+    private void EnsureText(RectTransform rt)
+    {
+        if (rt == null)
+            return;
+
+        if (!rt.TryGetComponent<TMP_Text>(out _))
+            rt.gameObject.AddComponent<TextMeshProUGUI>();
+    }
+
     private Dictionary<EpisodeNodeRigSchema.Refs, RectTransform> CollectRefMap(
         RectTransform rigRoot,
         string nodePrefix)
     {
-        Dictionary<EpisodeNodeRigSchema.Refs, RectTransform> map = new();
+        Dictionary<EpisodeNodeRigSchema.Refs, RectTransform> map =
+            new Dictionary<EpisodeNodeRigSchema.Refs, RectTransform>();
 
         foreach (EpisodeNodeRigSchema.Refs id in Enum.GetValues(typeof(EpisodeNodeRigSchema.Refs)))
         {
-            RectTransform target = FindBySchemaOrLegacyName(rigRoot, nodePrefix, id);
+            string targetName = WithPrefix(nodePrefix, id.ToString());
+            Transform found = FindByName(rigRoot, targetName);
 
-            if (target != null)
-                map[id] = target;
+            if (found != null)
+                map[id] = found as RectTransform;
         }
 
         return map;
-    }
-
-    private RectTransform FindBySchemaOrLegacyName(
-        RectTransform rigRoot,
-        string nodePrefix,
-        EpisodeNodeRigSchema.Refs id)
-    {
-        string currentName = WithPrefix(nodePrefix, id.ToString());
-        Transform found = FindByName(rigRoot, currentName);
-
-        if (found != null)
-            return found as RectTransform;
-
-        string legacyName = GetLegacyName(id);
-
-        if (string.IsNullOrEmpty(legacyName))
-            return null;
-
-        string prefixedLegacyName = WithPrefix(nodePrefix, legacyName);
-        found = FindByName(rigRoot, prefixedLegacyName);
-
-        return found as RectTransform;
-    }
-
-    private static string GetLegacyName(EpisodeNodeRigSchema.Refs id)
-    {
-        switch (id)
-        {
-            case EpisodeNodeRigSchema.Refs.UpperLink_Root:
-                return "UpperAttachment_Root";
-
-            case EpisodeNodeRigSchema.Refs.UpperLinkBG_Image:
-                return "UpperAttachmentBG_Image";
-
-            case EpisodeNodeRigSchema.Refs.UpperLinkTitle_Root:
-                return "UpperAttachmentTitle_Root";
-
-            case EpisodeNodeRigSchema.Refs.UpperLinkTitle_Text:
-                return "UpperAttachmentTitle_Text";
-
-            case EpisodeNodeRigSchema.Refs.UpperLinkHit_Button:
-                return "UpperAttachmentHit_Button";
-
-            case EpisodeNodeRigSchema.Refs.LowerLink_Root:
-                return "LowerAttachment_Root";
-
-            case EpisodeNodeRigSchema.Refs.LowerLinkBG_Image:
-                return "LowerAttachmentBG_Image";
-
-            case EpisodeNodeRigSchema.Refs.LowerLinkTitle_Root:
-                return "LowerAttachmentTitle_Root";
-
-            case EpisodeNodeRigSchema.Refs.LowerLinkTitle_Text:
-                return "LowerAttachmentTitle_Text";
-
-            case EpisodeNodeRigSchema.Refs.LowerLinkHit_Button:
-                return "LowerAttachmentHit_Button";
-
-            default:
-                return "";
-        }
     }
 
     private EpisodeNodeRigRefs BuildRefs(
@@ -235,44 +209,17 @@ public sealed class EpisodeNodeRigBuilder
     {
         EpisodeNodeRigRefs refs = new EpisodeNodeRigRefs(rigRoot);
 
-        refs.NodeRoot = GetRt(map, EpisodeNodeRigSchema.Refs.NodeRoot, rigRoot);
-
-        refs.Timeline_Root = GetRt(map, EpisodeNodeRigSchema.Refs.Timeline_Root, rigRoot);
-        refs.TimelineBG_Image = GetImage(map, EpisodeNodeRigSchema.Refs.TimelineBG_Image, rigRoot);
-        refs.TimelineEra_Text = GetText(map, EpisodeNodeRigSchema.Refs.TimelineEra_Text, rigRoot);
-        refs.TimelineCursorIcon_Image = GetImage(map, EpisodeNodeRigSchema.Refs.TimelineCursorIcon_Image, rigRoot);
-
-        refs.SelectZone_Root = GetRt(map, EpisodeNodeRigSchema.Refs.SelectZone_Root, rigRoot);
-        refs.SelectZoneBG_Image = GetImage(map, EpisodeNodeRigSchema.Refs.SelectZoneBG_Image, rigRoot);
-
         refs.MainCard_Root = GetRt(map, EpisodeNodeRigSchema.Refs.MainCard_Root, rigRoot);
         refs.MainCardBG_Image = GetImage(map, EpisodeNodeRigSchema.Refs.MainCardBG_Image, rigRoot);
+
         refs.MainCardIndex_Root = GetRt(map, EpisodeNodeRigSchema.Refs.MainCardIndex_Root, rigRoot);
         refs.MainCardIndexText_Text = GetText(map, EpisodeNodeRigSchema.Refs.MainCardIndexText_Text, rigRoot);
         refs.MainCardIndexIcon_Image = GetImage(map, EpisodeNodeRigSchema.Refs.MainCardIndexIcon_Image, rigRoot);
+
         refs.MainCardTitle_Root = GetRt(map, EpisodeNodeRigSchema.Refs.MainCardTitle_Root, rigRoot);
         refs.MainCardTitle_Text = GetText(map, EpisodeNodeRigSchema.Refs.MainCardTitle_Text, rigRoot);
+
         refs.MainCardHit_Button = GetButton(map, EpisodeNodeRigSchema.Refs.MainCardHit_Button, rigRoot);
-
-        refs.UpperLink_Root = GetRt(map, EpisodeNodeRigSchema.Refs.UpperLink_Root, rigRoot);
-        refs.UpperLinkBG_Image = GetImage(map, EpisodeNodeRigSchema.Refs.UpperLinkBG_Image, rigRoot);
-        refs.UpperLinkTitle_Root = GetRt(map, EpisodeNodeRigSchema.Refs.UpperLinkTitle_Root, rigRoot);
-        refs.UpperLinkTitle_Text = GetText(map, EpisodeNodeRigSchema.Refs.UpperLinkTitle_Text, rigRoot);
-        refs.UpperLinkHit_Button = GetButton(map, EpisodeNodeRigSchema.Refs.UpperLinkHit_Button, rigRoot);
-
-        refs.LowerLink_Root = GetRt(map, EpisodeNodeRigSchema.Refs.LowerLink_Root, rigRoot);
-        refs.LowerLinkBG_Image = GetImage(map, EpisodeNodeRigSchema.Refs.LowerLinkBG_Image, rigRoot);
-        refs.LowerLinkTitle_Root = GetRt(map, EpisodeNodeRigSchema.Refs.LowerLinkTitle_Root, rigRoot);
-        refs.LowerLinkTitle_Text = GetText(map, EpisodeNodeRigSchema.Refs.LowerLinkTitle_Text, rigRoot);
-        refs.LowerLinkHit_Button = GetButton(map, EpisodeNodeRigSchema.Refs.LowerLinkHit_Button, rigRoot);
-
-        refs.StateRoot_Selected = GetCanvasGroup(map, EpisodeNodeRigSchema.Refs.StateRoot_Selected, rigRoot);
-        refs.StateRoot_Current = GetCanvasGroup(map, EpisodeNodeRigSchema.Refs.StateRoot_Current, rigRoot);
-        refs.StateRoot_Completed = GetCanvasGroup(map, EpisodeNodeRigSchema.Refs.StateRoot_Completed, rigRoot);
-        refs.StateRoot_Locked = GetCanvasGroup(map, EpisodeNodeRigSchema.Refs.StateRoot_Locked, rigRoot);
-
-        refs.EndingBadge_Root = GetCanvasGroup(map, EpisodeNodeRigSchema.Refs.EndingBadge_Root, rigRoot);
-        refs.EndingBadge_Text = GetText(map, EpisodeNodeRigSchema.Refs.EndingBadge_Text, rigRoot);
 
         return refs;
     }
@@ -343,24 +290,6 @@ public sealed class EpisodeNodeRigBuilder
             Debug.LogWarning($"[EpisodeNodeRigBuilder] Missing TMP_Text on '{rt.name}'.", rt);
 
         return text;
-    }
-
-    private CanvasGroup GetCanvasGroup(
-        Dictionary<EpisodeNodeRigSchema.Refs, RectTransform> map,
-        EpisodeNodeRigSchema.Refs key,
-        Object context)
-    {
-        RectTransform rt = GetRt(map, key, context);
-
-        if (rt == null)
-            return null;
-
-        CanvasGroup group = rt.GetComponent<CanvasGroup>();
-
-        if (group == null)
-            Debug.LogWarning($"[EpisodeNodeRigBuilder] Missing CanvasGroup on '{rt.name}'.", rt);
-
-        return group;
     }
 
     private Transform FindByName(Transform root, string name)

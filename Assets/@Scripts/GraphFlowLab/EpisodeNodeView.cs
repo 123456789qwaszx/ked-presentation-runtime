@@ -1,10 +1,10 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.UI;
 
 public sealed class EpisodeNodeView : IDisposable
 {
     public event Action<string> MainClicked;
-    public event Action<string, EpisodeNodeLinkSlot, EpisodeNodeLinkViewData> LinkClicked;
 
     private readonly EpisodeNodeRigRefs _refs;
     private string _episodeId;
@@ -17,33 +17,48 @@ public sealed class EpisodeNodeView : IDisposable
 
     public void Present(EpisodeNodeViewData viewData)
     {
-        _episodeId = viewData.EpisodeId;
+        if (viewData == null)
+            return;
+
+        _episodeId = viewData.EpisodeId ?? "";
 
         SetText(_refs.MainCardTitle_Text, viewData.Title);
-        ApplyVisualState(viewData.VisualState);
+        SetText(_refs.MainCardIndexText_Text, viewData.IndexText);
 
-        PresentLink(EpisodeNodeLinkSlot.Upper, viewData.UpperLink);
-        PresentLink(EpisodeNodeLinkSlot.Lower, viewData.LowerLink);
+        ApplyVisualState(viewData.VisualState);
     }
 
     private void ApplyVisualState(EpisodeNodeVisualState state)
     {
-        SetGroup(_refs.StateRoot_Selected, state == EpisodeNodeVisualState.Selected);
-        SetGroup(_refs.StateRoot_Current, state == EpisodeNodeVisualState.Current);
-        SetGroup(_refs.StateRoot_Completed, state == EpisodeNodeVisualState.Completed);
-        SetGroup(_refs.StateRoot_Locked, state == EpisodeNodeVisualState.Locked);
-    }
+        bool locked = state == EpisodeNodeVisualState.Locked;
 
-    private void PresentLink(EpisodeNodeLinkSlot slot, EpisodeNodeLinkViewData link)
-    {
-        LinkClicked?.Invoke("LinkClick", slot, link);
-        // Upper/Lower refs 선택 후 visible/text 반영
+        SetButtonInteractable(_refs.MainCardHit_Button, !locked);
+
+        if (_refs.MainCard_Root != null)
+        {
+            CanvasGroup group = _refs.MainCard_Root.GetComponent<CanvasGroup>();
+
+            if (group != null)
+            {
+                group.alpha = locked ? 0.55f : 1f;
+                group.interactable = !locked;
+                group.blocksRaycasts = !locked;
+            }
+        }
     }
 
     private void BindButtons()
     {
         if (_refs.MainCardHit_Button != null)
-            _refs.MainCardHit_Button.onClick.AddListener(() => MainClicked?.Invoke(_episodeId));
+            _refs.MainCardHit_Button.onClick.AddListener(HandleMainClicked);
+    }
+
+    private void HandleMainClicked()
+    {
+        if (string.IsNullOrEmpty(_episodeId))
+            return;
+
+        MainClicked?.Invoke(_episodeId);
     }
 
     private static void SetText(TMPro.TMP_Text text, string value)
@@ -52,19 +67,17 @@ public sealed class EpisodeNodeView : IDisposable
             text.text = value ?? "";
     }
 
-    private static void SetGroup(CanvasGroup group, bool visible)
+    private static void SetButtonInteractable(Button button, bool interactable)
     {
-        if (group == null)
-            return;
-
-        group.alpha = visible ? 1f : 0f;
-        group.interactable = visible;
-        group.blocksRaycasts = visible;
+        if (button != null)
+            button.interactable = interactable;
     }
 
     public void Dispose()
     {
         if (_refs.MainCardHit_Button != null)
-            _refs.MainCardHit_Button.onClick.RemoveAllListeners();
+            _refs.MainCardHit_Button.onClick.RemoveListener(HandleMainClicked);
+
+        MainClicked = null;
     }
 }

@@ -159,7 +159,7 @@ public sealed class EpisodeGraphRenderer
         EpisodeNodeView view = new EpisodeNodeView(refs);
 
         view.MainClicked += HandleMainClicked;
-        view.LinkClicked += HandleLinkClicked;
+        //view.LinkClicked += HandleLinkClicked;
 
         return new RuntimeNode(
             episodeId,
