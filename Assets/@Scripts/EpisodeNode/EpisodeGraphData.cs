@@ -1,15 +1,28 @@
 using System.Collections.Generic;
 using System;
 
+public enum EpisodeNodeKind
+{
+    Main,
+    Attachment
+}
+
+public sealed class EpisodeGraphNodeData
+{
+    public EpisodeNodeKind Kind;
+    public string Id;
+}
+
+public sealed class EpisodeGraphEdgeData
+{
+    public string FromEpisodeId;
+    public string ToEpisodeId;
+}
+
 public sealed class EpisodeGraphData
 {
     public List<EpisodeGraphNodeData> Nodes = new();
     public List<EpisodeGraphEdgeData> Edges = new();
-
-    public bool ContainsEpisode(string episodeId)
-    {
-        return FindNode(episodeId) != null;
-    }
 
     public EpisodeGraphNodeData FindNode(string episodeId)
     {
@@ -20,7 +33,7 @@ public sealed class EpisodeGraphData
         {
             EpisodeGraphNodeData node = Nodes[i];
 
-            if (node != null && string.Equals(node.EpisodeId, episodeId, StringComparison.Ordinal))
+            if (node != null && string.Equals(node.Id, episodeId, StringComparison.Ordinal))
                 return node;
         }
 
@@ -34,11 +47,11 @@ public sealed class EpisodeGraphData
             EpisodeGraphNodeData node = Nodes[i];
 
             if (node != null && node.Kind == EpisodeNodeKind.Main)
-                return node.EpisodeId;
+                return node.Id;
         }
 
         if (Nodes.Count > 0 && Nodes[0] != null)
-            return Nodes[0].EpisodeId;
+            return Nodes[0].Id;
 
         return "";
     }
@@ -61,29 +74,9 @@ public sealed class EpisodeGraphData
             EpisodeGraphNodeData toNode = FindNode(edge.ToEpisodeId);
 
             if (toNode != null && toNode.Kind == EpisodeNodeKind.Main)
-                return toNode.EpisodeId;
+                return toNode.Id;
         }
 
         return "";
     }
-}
-
-public sealed class EpisodeGraphNodeData
-{
-    public string EpisodeId;
-    public EpisodeNodeKind Kind;
-    public string LayoutParentEpisodeId;
-}
-
-public sealed class EpisodeGraphEdgeData
-{
-    public string FromEpisodeId;
-    public string ToEpisodeId;
-    public bool IsAttachment;
-}
-
-public enum EpisodeNodeKind
-{
-    Main,
-    Attachment
 }

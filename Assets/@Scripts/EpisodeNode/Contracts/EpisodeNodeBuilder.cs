@@ -5,9 +5,9 @@ using UnityEngine;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
-public sealed class EpisodeNodeRigBuilder
+public sealed class EpisodeNodeBuilder
 {
-    public RectTransform BuildNodeRigRoot(
+    public RectTransform BuildNodeRoot(
         RectTransform rigPrefab = null,
         string nodePrefix = "",
         string rigRootName = "EpisodeNodeRig")
@@ -40,7 +40,7 @@ public sealed class EpisodeNodeRigBuilder
     public void BindRefsFromRoot(
         RectTransform rigRoot,
         string nodePrefix,
-        out EpisodeNodeRigRefs refs)
+        out EpisodeNodeRefs refs)
     {
         Dictionary<EpisodeNodeRigSchema.Refs, RectTransform> map =
             CollectRefMap(rigRoot, nodePrefix);
@@ -203,11 +203,11 @@ Debug.Log(map.Count);
         return map;
     }
 
-    private EpisodeNodeRigRefs BuildRefs(
+    private EpisodeNodeRefs BuildRefs(
         RectTransform rigRoot,
         Dictionary<EpisodeNodeRigSchema.Refs, RectTransform> map)
     {
-        EpisodeNodeRigRefs refs = new EpisodeNodeRigRefs(rigRoot);
+        EpisodeNodeRefs refs = new EpisodeNodeRefs(rigRoot);
 
         refs.MainCard_Root = GetRt(map, EpisodeNodeRigSchema.Refs.MainCard_Root, rigRoot);
         refs.MainCardBG_Image = GetImage(map, EpisodeNodeRigSchema.Refs.MainCardBG_Image, rigRoot);

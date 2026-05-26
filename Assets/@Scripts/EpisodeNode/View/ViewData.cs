@@ -17,17 +17,6 @@ public sealed class EpisodeNodeViewData
     public Vector2 Size;
 
     public EpisodeNodeVisualState VisualState;
-
-    public EpisodeNodeLinkViewData UpperLink;
-    public EpisodeNodeLinkViewData LowerLink;
-}
-
-public sealed class EpisodeNodeLinkViewData
-{
-    public bool Visible;
-    public string TargetEpisodeId;
-    public string Title;
-    public EpisodeNodeLinkSlot Slot;
 }
 
 public enum EpisodeNodeVisualState

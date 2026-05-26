@@ -9,14 +9,13 @@ public sealed class EpisodeGraphRenderer
     private readonly HorizontalScrollContentFitter _sizer;
     private readonly string _rigRootName;
 
-    private readonly EpisodeNodeRigBuilder _builder = new();
+    private readonly EpisodeNodeBuilder _builder = new();
 
     private readonly Dictionary<string, RuntimeNode> _activeById = new(StringComparer.Ordinal);
 
     private readonly List<RuntimeNode> _pool = new();
 
     private Action<string> _onMainClicked;
-    private Action<string, EpisodeNodeLinkSlot, EpisodeNodeLinkViewData> _onLinkClicked;
 
     public EpisodeGraphRenderer(RectTransform content, RectTransform nodeRigPrefab, HorizontalScrollContentFitter sizer, string rigRootName = "EpisodeNodeRig")
     {
@@ -149,12 +148,12 @@ public sealed class EpisodeGraphRenderer
 
         string prefix = BuildNodePrefix(episodeId);
 
-        RectTransform root = _builder.BuildNodeRigRoot(_nodeRigPrefab, prefix, _rigRootName);
+        RectTransform root = _builder.BuildNodeRoot(_nodeRigPrefab, prefix, _rigRootName);
 
         root.SetParent(_content, false);
         root.gameObject.SetActive(false);
 
-        _builder.BindRefsFromRoot(root, prefix, out EpisodeNodeRigRefs refs);
+        _builder.BindRefsFromRoot(root, prefix, out EpisodeNodeRefs refs);
 
         EpisodeNodeView view = new EpisodeNodeView(refs);
 
@@ -199,23 +198,14 @@ public sealed class EpisodeGraphRenderer
     }
     
     #region Handlers
-    public void SetHandlers(Action<string> onMainClicked, Action<string, EpisodeNodeLinkSlot, EpisodeNodeLinkViewData> onLinkClicked)
+    public void SetHandlers(Action<string> onMainClicked)
     {
         _onMainClicked = onMainClicked;
-        _onLinkClicked = onLinkClicked;
     }
 
     private void HandleMainClicked(string episodeId)
     {
         _onMainClicked?.Invoke(episodeId);
-    }
-
-    private void HandleLinkClicked(
-        string ownerEpisodeId,
-        EpisodeNodeLinkSlot slot,
-        EpisodeNodeLinkViewData link)
-    {
-        _onLinkClicked?.Invoke(ownerEpisodeId, slot, link);
     }
     #endregion
 

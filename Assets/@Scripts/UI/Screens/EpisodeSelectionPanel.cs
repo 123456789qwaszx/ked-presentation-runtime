@@ -4,7 +4,24 @@ using UnityEngine;
 using UnityEngine.UI;
 using static UIRefValidation;
 
-public sealed class EpisodeSelectionPanel : UIPanel<EpisodeSelectionPanel.Refs>, IUIPanel
+public readonly struct ChapterMetaModel
+{
+    public readonly string ChapterIndex;
+    public readonly string EraText;
+    public readonly string ChapterTitle;
+
+    public ChapterMetaModel(
+        string chapterIndex,
+        string eraText,
+        string chapterTitle)
+    {
+        ChapterIndex = chapterIndex ?? "";
+        EraText = eraText ?? "";
+        ChapterTitle = chapterTitle ?? "";
+    }
+}
+
+public sealed class EpisodeSelectionPanel : UIPanel<EpisodeSelectionPanel.Refs>
 {
     public event Action OnBackRequested;
 
@@ -117,6 +134,8 @@ public sealed class EpisodeSelectionPanel : UIPanel<EpisodeSelectionPanel.Refs>,
         _chaosIconImage = View.Image(Refs.ChaosIcon_Image);
 
         _return = View.Widget<ButtonWidget>(Refs.ReturnButton_BWidget);
+        
+        View.Image(Refs.EpisodeSelectionBG_Image).sprite = Resources.Load<Sprite>("background_02");
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         _valid = ValidateRefs();
@@ -140,13 +159,13 @@ public sealed class EpisodeSelectionPanel : UIPanel<EpisodeSelectionPanel.Refs>,
     }
 
     public void Present(
-        in EpisodeSelectionPanelModel panel,
+        in ChapterMetaModel panel,
         in PlayerStateSnapshot state)
     {
         if (!_valid)
             return;
 
-        PresentHeader(panel.ChapterMeta);
+        PresentHeader(panel);
         PresentOutcome(state);
     }
 

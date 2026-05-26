@@ -1,19 +1,20 @@
 ﻿using System;
 using UnityEngine;
-using UnityEngine.UI;
 
 public sealed class EpisodeNodeView : IDisposable
 {
     public event Action<string> MainClicked;
 
-    private readonly EpisodeNodeRigRefs _refs;
+    private readonly EpisodeNodeRefs _refs;
     private string _episodeId;
 
-    public EpisodeNodeView(EpisodeNodeRigRefs refs)
+    public EpisodeNodeView(EpisodeNodeRefs refs)
     {
         _refs = refs;
-        BindButtons();
+        _refs.MainCardHit_Button.onClick.AddListener(HandleMainClicked);
     }
+    
+    private void HandleMainClicked() => MainClicked?.Invoke(_episodeId);
 
     public void Present(EpisodeNodeViewData viewData)
     {
@@ -21,9 +22,8 @@ public sealed class EpisodeNodeView : IDisposable
             return;
 
         _episodeId = viewData.EpisodeId ?? "";
-
-        SetText(_refs.MainCardTitle_Text, viewData.Title);
-        SetText(_refs.MainCardIndexText_Text, viewData.IndexText);
+        _refs.MainCardTitle_Text.text = viewData.Title ?? "";
+        _refs.MainCardIndexText_Text.text = viewData.IndexText ?? "";
 
         ApplyVisualState(viewData.VisualState);
     }
@@ -32,7 +32,7 @@ public sealed class EpisodeNodeView : IDisposable
     {
         bool locked = state == EpisodeNodeVisualState.Locked;
 
-        SetButtonInteractable(_refs.MainCardHit_Button, !locked);
+        _refs.MainCardHit_Button.interactable = !locked;
 
         if (_refs.MainCard_Root != null)
         {
@@ -46,33 +46,7 @@ public sealed class EpisodeNodeView : IDisposable
             }
         }
     }
-
-    private void BindButtons()
-    {
-        if (_refs.MainCardHit_Button != null)
-            _refs.MainCardHit_Button.onClick.AddListener(HandleMainClicked);
-    }
-
-    private void HandleMainClicked()
-    {
-        if (string.IsNullOrEmpty(_episodeId))
-            return;
-
-        MainClicked?.Invoke(_episodeId);
-    }
-
-    private static void SetText(TMPro.TMP_Text text, string value)
-    {
-        if (text != null)
-            text.text = value ?? "";
-    }
-
-    private static void SetButtonInteractable(Button button, bool interactable)
-    {
-        if (button != null)
-            button.interactable = interactable;
-    }
-
+    
     public void Dispose()
     {
         if (_refs.MainCardHit_Button != null)

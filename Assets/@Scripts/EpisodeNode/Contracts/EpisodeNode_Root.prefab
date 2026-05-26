@@ -417,7 +417,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8432584506347833489}
   m_Layer: 5
-  m_Name: EpisodeNode_Root(Clone)
+  m_Name: EpisodeNode_Root
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
