@@ -426,7 +426,9 @@ public class VnAppBootstrap : MonoBehaviour
             chapterCardCount: 6,
             onChapterRequested: HandleChapterRequested);
 
-        _screenBindings.GoToChapterSelection();
+        //_screenBindings.GoToChapterSelection();
+        
+        _screenBindings.GoToTitle();
     }
 
     private ChapterButtonCardModel[] ResolveChapterModels()

@@ -1317,7 +1317,6 @@ GameObject:
   - component: {fileID: 151021558}
   - component: {fileID: 151021557}
   - component: {fileID: 151021556}
-  - component: {fileID: 151021555}
   m_Layer: 0
   m_Name: Node_ch01.ep01
   m_TagString: Untagged
@@ -1345,22 +1344,6 @@ RectTransform:
   m_AnchoredPosition: {x: -600, y: 0}
   m_SizeDelta: {x: 350, y: 136}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &151021555
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 151021553}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0b0cd27acc2f00641a61814e318617d4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::VNStoryRuntimeNodeView
-  rectTransform: {fileID: 151021554}
-  backgroundImage: {fileID: 151021557}
-  labelText: {fileID: 594277876}
-  button: {fileID: 151021556}
 --- !u!114 &151021556
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2733,7 +2716,6 @@ GameObject:
   - component: {fileID: 284094929}
   - component: {fileID: 284094928}
   - component: {fileID: 284094927}
-  - component: {fileID: 284094926}
   m_Layer: 0
   m_Name: Node_ch01.ep02
   m_TagString: Untagged
@@ -2761,22 +2743,6 @@ RectTransform:
   m_AnchoredPosition: {x: -200, y: 0}
   m_SizeDelta: {x: 350, y: 136}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &284094926
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 284094924}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0b0cd27acc2f00641a61814e318617d4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::VNStoryRuntimeNodeView
-  rectTransform: {fileID: 284094925}
-  backgroundImage: {fileID: 284094928}
-  labelText: {fileID: 672196481}
-  button: {fileID: 284094927}
 --- !u!114 &284094927
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5745,7 +5711,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 612661499}
-  - component: {fileID: 612661500}
   m_Layer: 0
   m_Name: StoryGraphRoot
   m_TagString: Untagged
@@ -5774,29 +5739,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &612661500
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 612661498}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b52496e10e4d5c54ba6964d590a2e744, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::VNStoryGraphRuntimeUIBuilder
-  graph: {fileID: 11400000, guid: 04769d8c6fc7c364bba7b3868eaece19, type: 2}
-  viewData: {fileID: 11400000, guid: 96370cf478595db43ac48ebd834bf91e, type: 2}
-  conditionSet:
-    trueConditionKeys: []
-  contentRoot: {fileID: 612661499}
-  lineLayer: {fileID: 545523510}
-  nodeLayer: {fileID: 637813426}
-  nodePrefab: {fileID: 0}
-  onNodeClicked:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1 &617155937
 GameObject:
   m_ObjectHideFlags: 0
@@ -5809,7 +5751,6 @@ GameObject:
   - component: {fileID: 617155942}
   - component: {fileID: 617155941}
   - component: {fileID: 617155940}
-  - component: {fileID: 617155939}
   m_Layer: 0
   m_Name: Node_ch01.route_a.ep05
   m_TagString: Untagged
@@ -5837,22 +5778,6 @@ RectTransform:
   m_AnchoredPosition: {x: 1000, y: 100}
   m_SizeDelta: {x: 350, y: 136}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &617155939
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 617155937}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0b0cd27acc2f00641a61814e318617d4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::VNStoryRuntimeNodeView
-  rectTransform: {fileID: 617155938}
-  backgroundImage: {fileID: 617155941}
-  labelText: {fileID: 1147315481}
-  button: {fileID: 617155940}
 --- !u!114 &617155940
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12032,7 +11957,6 @@ GameObject:
   - component: {fileID: 1408066937}
   - component: {fileID: 1408066936}
   - component: {fileID: 1408066935}
-  - component: {fileID: 1408066934}
   m_Layer: 0
   m_Name: Node_ch01.ep04
   m_TagString: Untagged
@@ -12060,22 +11984,6 @@ RectTransform:
   m_AnchoredPosition: {x: 600, y: 0}
   m_SizeDelta: {x: 350, y: 136}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1408066934
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1408066932}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0b0cd27acc2f00641a61814e318617d4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::VNStoryRuntimeNodeView
-  rectTransform: {fileID: 1408066933}
-  backgroundImage: {fileID: 1408066936}
-  labelText: {fileID: 1958103836}
-  button: {fileID: 1408066935}
 --- !u!114 &1408066935
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14364,7 +14272,6 @@ GameObject:
   - component: {fileID: 1607984022}
   - component: {fileID: 1607984021}
   - component: {fileID: 1607984020}
-  - component: {fileID: 1607984019}
   m_Layer: 0
   m_Name: Node_ch01.route_b.ep05
   m_TagString: Untagged
@@ -14392,22 +14299,6 @@ RectTransform:
   m_AnchoredPosition: {x: 1000, y: -100}
   m_SizeDelta: {x: 350, y: 136}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1607984019
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1607984017}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0b0cd27acc2f00641a61814e318617d4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::VNStoryRuntimeNodeView
-  rectTransform: {fileID: 1607984018}
-  backgroundImage: {fileID: 1607984021}
-  labelText: {fileID: 1496199097}
-  button: {fileID: 1607984020}
 --- !u!114 &1607984020
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15601,7 +15492,6 @@ GameObject:
   - component: {fileID: 1795815146}
   - component: {fileID: 1795815145}
   - component: {fileID: 1795815144}
-  - component: {fileID: 1795815143}
   m_Layer: 0
   m_Name: Node_ch01.route_b.end
   m_TagString: Untagged
@@ -15629,22 +15519,6 @@ RectTransform:
   m_AnchoredPosition: {x: 1400, y: -100}
   m_SizeDelta: {x: 350, y: 136}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1795815143
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1795815141}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0b0cd27acc2f00641a61814e318617d4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::VNStoryRuntimeNodeView
-  rectTransform: {fileID: 1795815142}
-  backgroundImage: {fileID: 1795815145}
-  labelText: {fileID: 1010138828}
-  button: {fileID: 1795815144}
 --- !u!114 &1795815144
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15811,7 +15685,6 @@ GameObject:
   - component: {fileID: 1821998249}
   - component: {fileID: 1821998248}
   - component: {fileID: 1821998247}
-  - component: {fileID: 1821998246}
   m_Layer: 0
   m_Name: Node_ch01.route_a.end
   m_TagString: Untagged
@@ -15839,22 +15712,6 @@ RectTransform:
   m_AnchoredPosition: {x: 1400, y: 100}
   m_SizeDelta: {x: 350, y: 136}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1821998246
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1821998244}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0b0cd27acc2f00641a61814e318617d4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::VNStoryRuntimeNodeView
-  rectTransform: {fileID: 1821998245}
-  backgroundImage: {fileID: 1821998248}
-  labelText: {fileID: 1216550289}
-  button: {fileID: 1821998247}
 --- !u!114 &1821998247
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -16342,7 +16199,6 @@ GameObject:
   - component: {fileID: 1849204542}
   - component: {fileID: 1849204541}
   - component: {fileID: 1849204540}
-  - component: {fileID: 1849204539}
   m_Layer: 0
   m_Name: Node_ch01.ep03
   m_TagString: Untagged
@@ -16370,22 +16226,6 @@ RectTransform:
   m_AnchoredPosition: {x: 200, y: 0}
   m_SizeDelta: {x: 350, y: 136}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1849204539
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1849204537}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0b0cd27acc2f00641a61814e318617d4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::VNStoryRuntimeNodeView
-  rectTransform: {fileID: 1849204538}
-  backgroundImage: {fileID: 1849204541}
-  labelText: {fileID: 49690629}
-  button: {fileID: 1849204540}
 --- !u!114 &1849204540
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -20492,7 +20332,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 458.38, y: -24}
-  m_SizeDelta: {x: 916.76, y: 24}
+  m_SizeDelta: {x: 916.76, y: 0}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!1 &666632935594092605
 GameObject:
