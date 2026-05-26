@@ -21,7 +21,7 @@ public readonly struct ChapterMetaModel
     }
 }
 
-public sealed class EpisodeSelectionPanel : UIPanel<EpisodeSelectionPanel.Refs>
+public sealed partial class EpisodeSelectionPanel : UIPanel<EpisodeSelectionPanel.Refs>
 {
     public event Action OnBackRequested;
 

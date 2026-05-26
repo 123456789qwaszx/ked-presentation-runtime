@@ -432,8 +432,15 @@ public class VnAppBootstrap : MonoBehaviour
         EpisodeGraphRenderer episodeGraphRenderer = new(episodeNodeContent, nodeRigPrefab);
         
         EpisodeGraphLayoutOptions episodeGraphLayoutOptions = EpisodeGraphLayoutOptions.Compact();
+
+        EpisodeGraphScrollController episodeGraphScrollController = new ();
         
-        EpisodeSelectionController episodeSelectionController = new(episodeSelectionRepository, episodeGraphViewModelBuilder, episodeGraphRenderer, episodeGraphLayoutOptions);
+        EpisodeSelectionController episodeSelectionController = new(
+            episodeSelectionRepository, 
+            episodeGraphViewModelBuilder, 
+            episodeGraphRenderer, 
+            episodeGraphLayoutOptions,
+            episodeGraphScrollController);
 
         _screenBindings.ConfigureEpisodeSelection(episodeSelectionController);
         

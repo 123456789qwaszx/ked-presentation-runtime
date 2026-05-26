@@ -141,8 +141,6 @@ public sealed class EpisodeGraphRenderer
 
     private RuntimeNode CreateNode(string episodeId)
     {
-        Debug.Log($"[EpisodeGraphRenderer] CreateNode episodeId='{episodeId}'");
-
         string prefix = BuildNodePrefix(episodeId);
 
         RectTransform root = _builder.BuildNodeRoot(_nodeRigPrefab, prefix, _rigRootName);

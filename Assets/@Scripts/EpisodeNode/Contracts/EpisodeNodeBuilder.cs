@@ -56,7 +56,6 @@ public sealed class EpisodeNodeBuilder
         ref Dictionary<EpisodeNodeRigSchema.Refs, RectTransform> map)
     {
         int expectedCount = Enum.GetValues(typeof(EpisodeNodeRigSchema.Refs)).Length;
-Debug.Log(map.Count);
         
         if (map.Count >= expectedCount)
             return;
