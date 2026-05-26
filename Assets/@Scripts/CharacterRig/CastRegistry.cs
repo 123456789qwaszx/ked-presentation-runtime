@@ -94,5 +94,4 @@ public sealed class CastRegistry
 
         return _slotToBinding.ContainsKey(targetKey);
     }
-    
 }

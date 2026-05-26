@@ -15,16 +15,15 @@ public sealed partial class VnScreenBindings
     {
         _currentChapterId = chapterId;
 
-        UI.PushPanel<EpisodeSelectionPanel>(panel => { BindRoot(panel, BindEpisodeSelectionPanel); });
-        
-        _episodeSelectionController.RequestRender();
+        UI.PushPanel<EpisodeSelectionPanel>(panel =>
+        {
+            BindRoot(panel, BindEpisodeSelectionPanel);
+            _episodeSelectionController.RequestRender();
+        });
     }
 
     private void BindEpisodeSelectionPanel(EpisodeSelectionPanel panel)
     {
-        if (panel == null)
-            return;
-
         _ctx.Bind(panel,
             p => p.OnBackRequested += OnEpisodeSelectionBackRequested,
             p => p.OnBackRequested -= OnEpisodeSelectionBackRequested);
@@ -34,11 +33,7 @@ public sealed partial class VnScreenBindings
 
     private void RefreshEpisodeSelectionPanel(EpisodeSelectionPanel panel)
     {
-        if (panel == null)
-            return;
-
         ChapterMetaModel model = CreateDebugEpisodeSelectionPanelModel(_currentChapterId);
-
         PlayerStateSnapshot state = CreateDebugPlayerStateSnapshot();
 
         panel.Present(model, state);

@@ -20,8 +20,7 @@ public sealed partial class YarnCommandBridge
         string variantKey = "a", string emotionKey = "02",
         bool applySetup = true,
         string positionPreset = "center",
-        string scaleArg = "normal"
-        )
+        string scaleArg = "normal")
     {
         var castSpec = new CastCharacterCommandSpec
         {

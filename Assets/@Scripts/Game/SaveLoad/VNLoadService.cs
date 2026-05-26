@@ -4,12 +4,7 @@ using UnityEngine;
 public interface IVNLoadSeekDriver
 {
     void PrepareForLoad();
-
-    void BeginSeek(
-        VNSaveData saveData,
-        Action onComplete,
-        Action onFail);
-
+    void BeginSeek(VNSaveData saveData, Action onComplete, Action onFail);
     void OnLoadComplete(VNSaveData saveData);
 }
 public sealed class VNLoadService
@@ -21,7 +16,7 @@ public sealed class VNLoadService
     private readonly VNTraceStream _trace;
 
     private bool _isLoading;
-
+    
     public bool IsLoading => _isLoading;
 
     public VNLoadService(
@@ -88,13 +83,10 @@ public sealed class VNLoadService
 
         try
         {
-            Trace("PrepareForLoad");
             _seekDriver.PrepareForLoad();
-
-            Trace("RestoreFlags");
+            
             _flagStore.Restore(data.flags);
-
-            Trace("BeginSeek");
+            
             _seekDriver.BeginSeek(
                 data,
                 onComplete: () => OnSeekComplete(data),

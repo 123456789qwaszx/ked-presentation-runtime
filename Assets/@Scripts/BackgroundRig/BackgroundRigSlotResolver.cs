@@ -70,7 +70,6 @@ public sealed class BackgroundRigSlotResolver
         if (_stageSlots != null)
             return;
 
-        UIManager ui = UIManager.Instance;
-        _stageSlots = ui?.GetUI<PresentationUIRoot>();
+        _stageSlots = UIManager.Instance?.GetUI<PresentationUIRoot>();
     }
 }

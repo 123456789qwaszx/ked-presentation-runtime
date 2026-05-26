@@ -27,17 +27,17 @@ public sealed class SampleEpisodeGraphDataProvider : IEpisodeGraphDataProvider
             Kind = EpisodeNodeKind.Main,
         });
 
-        data.Nodes.Add(new EpisodeGraphNodeData
-        {
-            Id = "upper05.02",
-            Kind = EpisodeNodeKind.Main,
-        });
-
-        data.Nodes.Add(new EpisodeGraphNodeData
-        {
-            Id = "lower05.02",
-            Kind = EpisodeNodeKind.Main,
-        });
+        // data.Nodes.Add(new EpisodeGraphNodeData
+        // {
+        //     Id = "upper05.02",
+        //     Kind = EpisodeNodeKind.Main,
+        // });
+        //
+        // data.Nodes.Add(new EpisodeGraphNodeData
+        // {
+        //     Id = "lower05.02",
+        //     Kind = EpisodeNodeKind.Main,
+        // });
 
         data.Edges.Add(new EpisodeGraphEdgeData
         {

@@ -1,13 +1,31 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+
+public interface IEpisodeGraphScrollRootProvider
+{
+    ScrollRect GraphScrollRect { get; }
+    RectTransform GraphContent { get; }
+    RectTransform GraphViewport { get; }
+}
+
+public sealed partial class EpisodeSelectionPanel : IEpisodeGraphScrollRootProvider
+{
+    public ScrollRect GraphScrollRect => View?.Rect(Refs.ButtonViewport)?.GetComponent<ScrollRect>();
+    public RectTransform GraphContent => View?.Rect(Refs.EpisodeButtons);
+    public RectTransform GraphViewport => View?.Rect(Refs.ButtonViewport);
+}
 
 public sealed class EpisodeGraphRenderer
 {
+    private IEpisodeGraphScrollRootProvider _rootProvider;
+    private IEpisodeGraphScrollRootProvider RootProvider => _rootProvider ??= ResolveRootProvider();
+    private IEpisodeGraphScrollRootProvider ResolveRootProvider() => UIManager.Instance.GetUI<EpisodeSelectionPanel>();
+    
+    
     private readonly RectTransform _content;
     private readonly RectTransform _nodeRigPrefab;
-    //private readonly HorizontalScrollContentFitter _sizer;
-    private readonly string _rigRootName;
 
     private readonly EpisodeNodeBuilder _builder = new();
 
@@ -17,11 +35,10 @@ public sealed class EpisodeGraphRenderer
 
     private Action<string> _onMainClicked;
 
-    public EpisodeGraphRenderer(RectTransform content, RectTransform nodeRigPrefab,  string rigRootName = "EpisodeNodeRig")
+    public EpisodeGraphRenderer(RectTransform nodeRigPrefab)
     {
-        _content = content;
         _nodeRigPrefab = nodeRigPrefab;
-        _rigRootName = rigRootName;
+        _content = RootProvider.GraphContent;
     }
     
     public void Render(EpisodeGraphViewData viewData)
@@ -143,7 +160,7 @@ public sealed class EpisodeGraphRenderer
     {
         string prefix = BuildNodePrefix(episodeId);
 
-        RectTransform root = _builder.BuildNodeRoot(_nodeRigPrefab, prefix, _rigRootName);
+        RectTransform root = _builder.BuildNodeRoot(_nodeRigPrefab, prefix);
 
         root.SetParent(_content, false);
         root.gameObject.SetActive(false);

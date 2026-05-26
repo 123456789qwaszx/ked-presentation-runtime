@@ -49,7 +49,6 @@ public sealed class PresentationSession
         _context = presentationSessionContext;
         _linePresentationAdvanceState = linePresentationAdvanceState;
     }
-
     
     public void Start(Route route, SequenceSpecSO sequence)
     {

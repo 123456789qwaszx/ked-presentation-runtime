@@ -1,20 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public interface IEpisodeGraphScrollRootProvider
-{
-    ScrollRect GraphScrollRect { get; }
-    RectTransform GraphContent { get; }
-    RectTransform GraphViewport { get; }
-}
-
-public sealed partial class EpisodeSelectionPanel : IEpisodeGraphScrollRootProvider
-{
-    public ScrollRect GraphScrollRect => View?.Rect(Refs.ButtonViewport)?.GetComponent<ScrollRect>();
-    public RectTransform GraphContent => View?.Rect(Refs.EpisodeButtons);
-    public RectTransform GraphViewport => View?.Rect(Refs.ButtonViewport);
-}
-
 public sealed class EpisodeGraphScrollController
 {
     private IEpisodeGraphScrollRootProvider _rootProvider;

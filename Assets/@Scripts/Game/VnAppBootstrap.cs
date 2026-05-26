@@ -25,11 +25,6 @@ public class VnAppBootstrap : MonoBehaviour
     [SerializeField] private DialogueBoxHost dialogueBoxHost;
 
     [SerializeField] private PresentationResponseRig presentationResponseRig;
-
-    [Tooltip("CharacterRig prefab used for command presentation. " +
-             "Empty fields bake a complete rig from CharacterRigSchema at runtime. " +
-             "Prefab the baked result when you need performance setup, external systems, response targets, or shot helpers.")]
-    [SerializeField] private RectTransform rigPrefab;
     
     [Header("Presentation")] 
     [SerializeField] private CharStageTuningSO globalTuning;
@@ -80,10 +75,17 @@ public class VnAppBootstrap : MonoBehaviour
 
     [Header("UI")] 
     [SerializeField] private EpisodePlayer episodePlayer;
-
     
     [Header("Emoji")] 
     [SerializeField] private CharacterEmojiLibrarySO characterEmojiLibrarySO;
+    
+    [Header("RigPrefab")] 
+    [Tooltip("CharacterRig prefab used for command presentation. " +
+             "Empty fields bake a complete rig from CharacterRigSchema at runtime. " +
+             "Prefab the baked result when you need performance setup, external systems, response targets, or shot helpers.")]
+    [SerializeField] private RectTransform rigPrefab;
+    [SerializeField] private RectTransform chapterCardPrefab;
+    [SerializeField] private RectTransform nodeRigPrefab;
 
     private PresentationSessionBridge _presentationSessionBridge;
 
@@ -400,9 +402,7 @@ public class VnAppBootstrap : MonoBehaviour
             dialogueAdvanceDispatcher,
             _vnSaveLoadSystem,
             episodePlayer,
-            _linePresentationAdvanceState
-            );
-        
+            _linePresentationAdvanceState);
         
         _screenBindings = new VnScreenBindings(_vnSaveLoadSystem);
     }
@@ -413,11 +413,6 @@ public class VnAppBootstrap : MonoBehaviour
 
         _screenBindings.AttachEpisodePlayer(episodePlayer);
     }
-
-    [SerializeField] private RectTransform chapterCardPrefab;
-    
-    [SerializeField] private RectTransform episodeNodeContent;
-    [SerializeField] private RectTransform nodeRigPrefab;
     
     private void Start()
     {
@@ -428,11 +423,8 @@ public class VnAppBootstrap : MonoBehaviour
         EpisodeSelectionRepository episodeSelectionRepository = new(episodeGraphData, episodeSelectionRuntimeState);
 
         EpisodeGraphViewModelBuilder episodeGraphViewModelBuilder = new();
-
-        EpisodeGraphRenderer episodeGraphRenderer = new(episodeNodeContent, nodeRigPrefab);
-        
+        EpisodeGraphRenderer episodeGraphRenderer = new(nodeRigPrefab);
         EpisodeGraphLayoutOptions episodeGraphLayoutOptions = EpisodeGraphLayoutOptions.Compact();
-
         EpisodeGraphScrollController episodeGraphScrollController = new ();
         
         EpisodeSelectionController episodeSelectionController = new(

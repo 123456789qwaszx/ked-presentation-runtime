@@ -34,6 +34,7 @@ public sealed partial class YarnCommandBridge
     private void EnqueueStopAllSfxSpec()
     {
         var spec = new StopAllSfxCommandSpec();
+        
         Collect(spec);
     }
     
@@ -50,6 +51,7 @@ public sealed partial class YarnCommandBridge
     private void EnqueueStopVoiceSpec()
     {
         var spec = new StopVoiceCommandSpec();
+        
         Collect(spec);
     }
 }

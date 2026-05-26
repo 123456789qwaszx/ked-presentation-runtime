@@ -64,7 +64,6 @@ public sealed partial class YarnCommandBridge
         _dialogueRunner.AddCommandHandler<string, string>("size", EnqueueSetOriginSizeSpec);
         
         _dialogueRunner.AddCommandHandler<string, int, int>("place_offset", EnqueueSetAnchorOffsetSpecs);
-        
     }
 
     private void BindCharRigBasic()
@@ -79,7 +78,6 @@ public sealed partial class YarnCommandBridge
         _dialogueRunner.AddCommandHandler<string, string>("slide_out", EnqueueSlideOutSpec);
         
         _dialogueRunner.AddCommandHandler<string, float, float, float>("move_by", EnqueueMoveByCharSpec);
-        //_dialogueRunner.AddCommandHandler<string, float, float, float>("char_move_by", EnqueueMoveByCharSpec);
         _dialogueRunner.AddCommandHandler<string, float, float>("scale_to", EnqueueScaleToSpec);
         _dialogueRunner.AddCommandHandler<string, int>("rotate_to", EnqueuePivotRotateToSpec);
     }
@@ -193,7 +191,6 @@ public sealed partial class YarnCommandBridge
         
         _dialogueRunner.AddCommandHandler<string>("voice", EnqueuePlayVoiceSpec);
         _dialogueRunner.AddCommandHandler("stop_voice", EnqueueStopVoiceSpec);
-
     }
 
     private void Collect(CommandSpecBase spec)

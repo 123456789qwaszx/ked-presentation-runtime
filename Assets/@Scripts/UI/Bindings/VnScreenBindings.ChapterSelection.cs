@@ -27,6 +27,9 @@ public sealed partial class VnScreenBindings
         UI.PushPanel<ChapterSelectionPanel>(panel =>
         {
             BindRoot(panel, BindChapterSelectionPanel);
+            
+            BuildChapterCards(panel);
+            RefreshChapterSelectionPanel(panel);
         });
     }
 
@@ -44,8 +47,6 @@ public sealed partial class VnScreenBindings
             onReleased: OnChapterCardReleased,
             onClicked: OnChapterCardClicked);
 
-        BuildChapterCards(panel);
-        RefreshChapterSelectionPanel(panel);
     }
 
     private void BuildChapterCards(ChapterSelectionPanel panel)
@@ -63,10 +64,7 @@ public sealed partial class VnScreenBindings
 
         ClearChildren(container);
 
-        List<ChapterButtonCard> cards = _chapterCardSpawner.CreateCards(
-            container,
-            _chapterCardPrefab,
-            _chapterCardCount);
+        List<ChapterButtonCard> cards = _chapterCardSpawner.CreateCards(container, _chapterCardPrefab, _chapterCardCount);
 
         panel.RegisterCards(cards);
     }

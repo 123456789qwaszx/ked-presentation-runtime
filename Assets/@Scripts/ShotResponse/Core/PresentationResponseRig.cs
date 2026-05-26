@@ -164,19 +164,6 @@ public sealed class PresentationResponseRig : MonoBehaviour
 
         profile.basePositionInRigSpace = new Vector2(localPivot.x, localPivot.y);
         profile.baseLocalScale = new Vector2(target.ScaleRect.localScale.x, target.ScaleRect.localScale.y);
-
-        // Debug.Log(
-        //     $"[PresentationResponseRig] BakeRuntimeProfile " +
-        //     $"measure={target.MeasureRect?.name}, " +
-        //     $"scale={target.ScaleRect?.name}, " +
-        //     $"stage={stageRoot?.name}, " +
-        //     $"localPivot={localPivot}, " +
-        //     $"basePos={profile.basePositionInRigSpace}, " +
-        //     $"baseScale={profile.baseScale}, " +
-        //     $"zoomDelta={profile.maxZoomScaleDelta}, " +
-        //     $"zoomSpread={profile.maxZoomSpreadPixels}, " +
-        //     $"pan={profile.panResponse}",
-        //     target.MeasureRect);
         
         return profile;
     }

@@ -88,104 +88,104 @@ public static class CharacterRigSchema
         EmojiSlot02_Image
     }
     
-    public sealed class NodeDef
-{
-    public Refs  Id;
-    public Refs? Parent;
-        
-    public bool  NeedsImage;
-    public bool  NeedsCanvasGroup;
-    public bool  NeedsBottomPivot;
-        
-    public float InitialCanvasGroupAlpha = 1f;
-}
+    public sealed class NodeDef 
+    {
+        public Refs  Id;
+        public Refs? Parent;
+            
+        public bool  NeedsImage;
+        public bool  NeedsCanvasGroup;
+        public bool  NeedsBottomPivot;
+            
+        public float InitialCanvasGroupAlpha = 1f;
+    }
 
-public static readonly NodeDef[] Nodes =
-{
-    // Slot axis - stage placement
-    new() { Id = Refs.CharSlot_Anchor,      Parent = null },
-    new() { Id = Refs.CharSlot_Track,       Parent = Refs.CharSlot_Anchor },
-    new() { Id = Refs.CharSlot_Track_X,     Parent = Refs.CharSlot_Track },
-    new() { Id = Refs.CharSlot_Track_Y,     Parent = Refs.CharSlot_Track_X },
-    new() { Id = Refs.CharSlot_Rotation,    Parent = Refs.CharSlot_Track_Y },
-    new() { Id = Refs.CharSlot_SwayPivot,    Parent = Refs.CharSlot_Rotation },
-    new() { Id = Refs.CharSlot_Scale,       Parent = Refs.CharSlot_SwayPivot, NeedsBottomPivot = true },
-
-    // Framing axis - pseudo camera / focus response
-    new() { Id = Refs.CharSlot_FramingTransform, Parent = Refs.CharSlot_Scale },
-    new() { Id = Refs.CharSlot_FramingScale,     Parent = Refs.CharSlot_FramingTransform },
-    new() { Id = Refs.CharSlot_FramingScale_X,   Parent = Refs.CharSlot_FramingScale },
-    new() { Id = Refs.CharSlot_FramingScale_Y,   Parent = Refs.CharSlot_FramingScale_X },
-
-    // Character casting axis - per-character defaults
-    new() { Id = Refs.Character_Root,          Parent = Refs.CharSlot_FramingScale_Y, NeedsCanvasGroup = true },
-    new() { Id = Refs.Character_CastTransform, Parent = Refs.Character_Root, NeedsBottomPivot = true },
-
-    // Portrait acting axis
-    new() { Id = Refs.CharacterPortrait_Track,          Parent = Refs.Character_CastTransform,},
-    new() { Id = Refs.CharacterPortrait_Track_Move,     Parent = Refs.CharacterPortrait_Track },
-    new() { Id = Refs.CharacterPortrait_Track_X,        Parent = Refs.CharacterPortrait_Track_Move },
-    new() { Id = Refs.CharacterPortrait_Track_Y,        Parent = Refs.CharacterPortrait_Track_X },
-    new() { Id = Refs.CharacterPortrait_Rotation,       Parent = Refs.CharacterPortrait_Track_Y },
-    new() { Id = Refs.CharacterPortrait_SwayPivot,      Parent = Refs.CharacterPortrait_Rotation, NeedsBottomPivot = true },
-    new() { Id = Refs.CharacterPortrait_Shake,          Parent = Refs.CharacterPortrait_SwayPivot },
-    new() { Id = Refs.CharacterPortrait_ActingScale,    Parent = Refs.CharacterPortrait_Shake },
-    new() { Id = Refs.CharacterPortrait_ActingScale_X,  Parent = Refs.CharacterPortrait_ActingScale },
-    new() { Id = Refs.CharacterPortrait_ActingScale_Y,  Parent = Refs.CharacterPortrait_ActingScale_X },
-
-    // Portrait sprite
-    new() { Id = Refs.CharacterPortraitSprite_Root,  Parent = Refs.CharacterPortrait_ActingScale_Y, NeedsCanvasGroup = true },
-    new() { Id = Refs.CharacterPortraitSprite_Image, Parent = Refs.CharacterPortraitSprite_Root, NeedsImage = true },
-
-    // Portrait sprite overlay
-    new() { Id = Refs.CharacterPortraitSpriteOverlay_Root,  Parent = Refs.CharacterPortrait_ActingScale_Y, NeedsCanvasGroup = true, InitialCanvasGroupAlpha = 0f },
-    new() { Id = Refs.CharacterPortraitSpriteOverlay_Image, Parent = Refs.CharacterPortraitSpriteOverlay_Root, NeedsImage = true },
-
-    // Portrait extension / preserved systems
-    new() { Id = Refs.Character_ExtensionsRoot, Parent = Refs.CharacterPortrait_ActingScale_Y },
-
-    // Emoji00 casting/effect axis
-    new() { Id = Refs.CharacterEmojiSlot00_Root,          Parent = Refs.Character_CastTransform, NeedsCanvasGroup = true, InitialCanvasGroupAlpha = 0f },
-    new() { Id = Refs.CharacterEmojiSlot00_CastTransform, Parent = Refs.CharacterEmojiSlot00_Root },
-    new() { Id = Refs.CharacterEmojiSlot00_Effect,        Parent = Refs.CharacterEmojiSlot00_CastTransform },
-
-    // Emoji00 sprite motion axis
-    new() { Id = Refs.EmojiSlot00_Track,      Parent = Refs.CharacterEmojiSlot00_Effect },
-    new() { Id = Refs.EmojiSlot00_Track_Move, Parent = Refs.EmojiSlot00_Track },
-    new() { Id = Refs.EmojiSlot00_Track_X,    Parent = Refs.EmojiSlot00_Track_Move },
-    new() { Id = Refs.EmojiSlot00_Track_Y,    Parent = Refs.EmojiSlot00_Track_X },
-    new() { Id = Refs.EmojiSlot00_Scale,      Parent = Refs.EmojiSlot00_Track_Y },
-    new() { Id = Refs.EmojiSlot00_Rotation,   Parent = Refs.EmojiSlot00_Scale },
-    new() { Id = Refs.EmojiSlot00_Image,      Parent = Refs.EmojiSlot00_Rotation, NeedsImage = true },
-
-    // Emoji01 casting/effect axis
-    new() { Id = Refs.CharacterEmojiSlot01_Root,          Parent = Refs.Character_CastTransform, NeedsCanvasGroup = true, InitialCanvasGroupAlpha = 0f },
-    new() { Id = Refs.CharacterEmojiSlot01_CastTransform, Parent = Refs.CharacterEmojiSlot01_Root },
-    new() { Id = Refs.CharacterEmojiSlot01_Effect,        Parent = Refs.CharacterEmojiSlot01_CastTransform },
-
-    // Emoji01 sprite motion axis
-    new() { Id = Refs.EmojiSlot01_Track,      Parent = Refs.CharacterEmojiSlot01_Effect },
-    new() { Id = Refs.EmojiSlot01_Track_Move, Parent = Refs.EmojiSlot01_Track },
-    new() { Id = Refs.EmojiSlot01_Track_X,    Parent = Refs.EmojiSlot01_Track_Move },
-    new() { Id = Refs.EmojiSlot01_Track_Y,    Parent = Refs.EmojiSlot01_Track_X },
-    new() { Id = Refs.EmojiSlot01_Scale,      Parent = Refs.EmojiSlot01_Track_Y },
-    new() { Id = Refs.EmojiSlot01_Rotation,   Parent = Refs.EmojiSlot01_Scale },
-    new() { Id = Refs.EmojiSlot01_Image,      Parent = Refs.EmojiSlot01_Rotation, NeedsImage = true },
-
-    // Emoji02 casting/effect axis
-    new() { Id = Refs.CharacterEmojiSlot02_Root,          Parent = Refs.Character_CastTransform, NeedsCanvasGroup = true, InitialCanvasGroupAlpha = 0f },
-    new() { Id = Refs.CharacterEmojiSlot02_CastTransform, Parent = Refs.CharacterEmojiSlot02_Root },
-    new() { Id = Refs.CharacterEmojiSlot02_Effect,        Parent = Refs.CharacterEmojiSlot02_CastTransform },
-
-    // Emoji02 sprite motion axis
-    new() { Id = Refs.EmojiSlot02_Track,      Parent = Refs.CharacterEmojiSlot02_Effect },
-    new() { Id = Refs.EmojiSlot02_Track_Move, Parent = Refs.EmojiSlot02_Track },
-    new() { Id = Refs.EmojiSlot02_Track_X,    Parent = Refs.EmojiSlot02_Track_Move },
-    new() { Id = Refs.EmojiSlot02_Track_Y,    Parent = Refs.EmojiSlot02_Track_X },
-    new() { Id = Refs.EmojiSlot02_Scale,      Parent = Refs.EmojiSlot02_Track_Y },
-    new() { Id = Refs.EmojiSlot02_Rotation,   Parent = Refs.EmojiSlot02_Scale },
-    new() { Id = Refs.EmojiSlot02_Image,      Parent = Refs.EmojiSlot02_Rotation, NeedsImage = true },
-};
+    public static readonly NodeDef[] Nodes =
+    {
+        // Slot axis - stage placement
+        new() { Id = Refs.CharSlot_Anchor,      Parent = null },
+        new() { Id = Refs.CharSlot_Track,       Parent = Refs.CharSlot_Anchor },
+        new() { Id = Refs.CharSlot_Track_X,     Parent = Refs.CharSlot_Track },
+        new() { Id = Refs.CharSlot_Track_Y,     Parent = Refs.CharSlot_Track_X },
+        new() { Id = Refs.CharSlot_Rotation,    Parent = Refs.CharSlot_Track_Y },
+        new() { Id = Refs.CharSlot_SwayPivot,    Parent = Refs.CharSlot_Rotation },
+        new() { Id = Refs.CharSlot_Scale,       Parent = Refs.CharSlot_SwayPivot, NeedsBottomPivot = true },
+    
+        // Framing axis - pseudo camera / focus response
+        new() { Id = Refs.CharSlot_FramingTransform, Parent = Refs.CharSlot_Scale },
+        new() { Id = Refs.CharSlot_FramingScale,     Parent = Refs.CharSlot_FramingTransform },
+        new() { Id = Refs.CharSlot_FramingScale_X,   Parent = Refs.CharSlot_FramingScale },
+        new() { Id = Refs.CharSlot_FramingScale_Y,   Parent = Refs.CharSlot_FramingScale_X },
+    
+        // Character casting axis - per-character defaults
+        new() { Id = Refs.Character_Root,          Parent = Refs.CharSlot_FramingScale_Y, NeedsCanvasGroup = true },
+        new() { Id = Refs.Character_CastTransform, Parent = Refs.Character_Root, NeedsBottomPivot = true },
+    
+        // Portrait acting axis
+        new() { Id = Refs.CharacterPortrait_Track,          Parent = Refs.Character_CastTransform,},
+        new() { Id = Refs.CharacterPortrait_Track_Move,     Parent = Refs.CharacterPortrait_Track },
+        new() { Id = Refs.CharacterPortrait_Track_X,        Parent = Refs.CharacterPortrait_Track_Move },
+        new() { Id = Refs.CharacterPortrait_Track_Y,        Parent = Refs.CharacterPortrait_Track_X },
+        new() { Id = Refs.CharacterPortrait_Rotation,       Parent = Refs.CharacterPortrait_Track_Y },
+        new() { Id = Refs.CharacterPortrait_SwayPivot,      Parent = Refs.CharacterPortrait_Rotation, NeedsBottomPivot = true },
+        new() { Id = Refs.CharacterPortrait_Shake,          Parent = Refs.CharacterPortrait_SwayPivot },
+        new() { Id = Refs.CharacterPortrait_ActingScale,    Parent = Refs.CharacterPortrait_Shake },
+        new() { Id = Refs.CharacterPortrait_ActingScale_X,  Parent = Refs.CharacterPortrait_ActingScale },
+        new() { Id = Refs.CharacterPortrait_ActingScale_Y,  Parent = Refs.CharacterPortrait_ActingScale_X },
+    
+        // Portrait sprite
+        new() { Id = Refs.CharacterPortraitSprite_Root,  Parent = Refs.CharacterPortrait_ActingScale_Y, NeedsCanvasGroup = true },
+        new() { Id = Refs.CharacterPortraitSprite_Image, Parent = Refs.CharacterPortraitSprite_Root, NeedsImage = true },
+    
+        // Portrait sprite overlay
+        new() { Id = Refs.CharacterPortraitSpriteOverlay_Root,  Parent = Refs.CharacterPortrait_ActingScale_Y, NeedsCanvasGroup = true, InitialCanvasGroupAlpha = 0f },
+        new() { Id = Refs.CharacterPortraitSpriteOverlay_Image, Parent = Refs.CharacterPortraitSpriteOverlay_Root, NeedsImage = true },
+    
+        // Portrait extension / preserved systems
+        new() { Id = Refs.Character_ExtensionsRoot, Parent = Refs.CharacterPortrait_ActingScale_Y },
+    
+        // Emoji00 casting/effect axis
+        new() { Id = Refs.CharacterEmojiSlot00_Root,          Parent = Refs.Character_CastTransform, NeedsCanvasGroup = true, InitialCanvasGroupAlpha = 0f },
+        new() { Id = Refs.CharacterEmojiSlot00_CastTransform, Parent = Refs.CharacterEmojiSlot00_Root },
+        new() { Id = Refs.CharacterEmojiSlot00_Effect,        Parent = Refs.CharacterEmojiSlot00_CastTransform },
+    
+        // Emoji00 sprite motion axis
+        new() { Id = Refs.EmojiSlot00_Track,      Parent = Refs.CharacterEmojiSlot00_Effect },
+        new() { Id = Refs.EmojiSlot00_Track_Move, Parent = Refs.EmojiSlot00_Track },
+        new() { Id = Refs.EmojiSlot00_Track_X,    Parent = Refs.EmojiSlot00_Track_Move },
+        new() { Id = Refs.EmojiSlot00_Track_Y,    Parent = Refs.EmojiSlot00_Track_X },
+        new() { Id = Refs.EmojiSlot00_Scale,      Parent = Refs.EmojiSlot00_Track_Y },
+        new() { Id = Refs.EmojiSlot00_Rotation,   Parent = Refs.EmojiSlot00_Scale },
+        new() { Id = Refs.EmojiSlot00_Image,      Parent = Refs.EmojiSlot00_Rotation, NeedsImage = true },
+    
+        // Emoji01 casting/effect axis
+        new() { Id = Refs.CharacterEmojiSlot01_Root,          Parent = Refs.Character_CastTransform, NeedsCanvasGroup = true, InitialCanvasGroupAlpha = 0f },
+        new() { Id = Refs.CharacterEmojiSlot01_CastTransform, Parent = Refs.CharacterEmojiSlot01_Root },
+        new() { Id = Refs.CharacterEmojiSlot01_Effect,        Parent = Refs.CharacterEmojiSlot01_CastTransform },
+    
+        // Emoji01 sprite motion axis
+        new() { Id = Refs.EmojiSlot01_Track,      Parent = Refs.CharacterEmojiSlot01_Effect },
+        new() { Id = Refs.EmojiSlot01_Track_Move, Parent = Refs.EmojiSlot01_Track },
+        new() { Id = Refs.EmojiSlot01_Track_X,    Parent = Refs.EmojiSlot01_Track_Move },
+        new() { Id = Refs.EmojiSlot01_Track_Y,    Parent = Refs.EmojiSlot01_Track_X },
+        new() { Id = Refs.EmojiSlot01_Scale,      Parent = Refs.EmojiSlot01_Track_Y },
+        new() { Id = Refs.EmojiSlot01_Rotation,   Parent = Refs.EmojiSlot01_Scale },
+        new() { Id = Refs.EmojiSlot01_Image,      Parent = Refs.EmojiSlot01_Rotation, NeedsImage = true },
+    
+        // Emoji02 casting/effect axis
+        new() { Id = Refs.CharacterEmojiSlot02_Root,          Parent = Refs.Character_CastTransform, NeedsCanvasGroup = true, InitialCanvasGroupAlpha = 0f },
+        new() { Id = Refs.CharacterEmojiSlot02_CastTransform, Parent = Refs.CharacterEmojiSlot02_Root },
+        new() { Id = Refs.CharacterEmojiSlot02_Effect,        Parent = Refs.CharacterEmojiSlot02_CastTransform },
+    
+        // Emoji02 sprite motion axis
+        new() { Id = Refs.EmojiSlot02_Track,      Parent = Refs.CharacterEmojiSlot02_Effect },
+        new() { Id = Refs.EmojiSlot02_Track_Move, Parent = Refs.EmojiSlot02_Track },
+        new() { Id = Refs.EmojiSlot02_Track_X,    Parent = Refs.EmojiSlot02_Track_Move },
+        new() { Id = Refs.EmojiSlot02_Track_Y,    Parent = Refs.EmojiSlot02_Track_X },
+        new() { Id = Refs.EmojiSlot02_Scale,      Parent = Refs.EmojiSlot02_Track_Y },
+        new() { Id = Refs.EmojiSlot02_Rotation,   Parent = Refs.EmojiSlot02_Scale },
+        new() { Id = Refs.EmojiSlot02_Image,      Parent = Refs.EmojiSlot02_Rotation, NeedsImage = true },
+    };
 }
 
 public enum CharacterRigTarget
@@ -359,32 +359,6 @@ public sealed class CharacterRigRefs
     public RectTransform EmojiSlot02_Scale;
     public RectTransform EmojiSlot02_Rotation;
     public Image         EmojiSlot02_Image;
-}
-
-public static class RigRegistryExtensions
-{
-    public static bool TryGetCharRigRefs(this Dictionary<string, object> rigRegistry, string roleKey, out CharacterRigRefs rigRefs)
-    {
-        if (rigRegistry.TryGetValue(roleKey, out var obj))
-        {
-            if (obj is CharacterRigRefs refs)
-            {
-                rigRefs = refs;
-                return true;
-            }
-        }
-        
-        rigRefs = null;
-        return false;
-    }
-    
-    public static bool HasCharRigRefs(this Dictionary<string, object> rigRegistry, string roleKey)
-    {
-        if (!rigRegistry.TryGetValue(roleKey, out object obj))
-            return false;
-
-        return obj is CharacterRigRefs;
-    }
 }
 
 public static class CharacterRigRefsExtensions
