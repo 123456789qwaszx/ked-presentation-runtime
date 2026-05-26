@@ -102,7 +102,7 @@ public sealed class GraphFlowLab : MonoBehaviour
 
     private void EnsureEventSystem()
     {
-        EventSystem existing = FindObjectOfType<EventSystem>();
+        EventSystem existing = FindFirstObjectByType<EventSystem>();
         if (existing != null)
             return;
 

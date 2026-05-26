@@ -22,59 +22,59 @@ public sealed class EpisodeGraphView : MonoBehaviour
     private readonly List<RuntimeNode> _pool = new();
 
     private Action<string> _onMainClicked;
-    private Action<string, EpisodeNodeLinkSlot, EpisodeNodeLinkModel> _onLinkClicked;
-
-    private void OnDestroy()
-    {
-        DisposeAll();
-    }
+    private Action<string, EpisodeNodeLinkSlot, EpisodeNodeLinkViewData> _onLinkClicked;
 
     public void SetHandlers(
         Action<string> onMainClicked,
-        Action<string, EpisodeNodeLinkSlot, EpisodeNodeLinkModel> onLinkClicked)
+        Action<string, EpisodeNodeLinkSlot, EpisodeNodeLinkViewData> onLinkClicked)
     {
         _onMainClicked = onMainClicked;
         _onLinkClicked = onLinkClicked;
     }
 
-    public void Render(in EpisodeGraphModel graph)
+    public void Render(EpisodeGraphViewData viewData)
     {
-        
         if (content == null)
         {
             Debug.LogWarning("[EpisodeGraphView] Content is null.", this);
             return;
         }
 
-        int count = graph.Nodes != null ? graph.Nodes.Count : 0;
+        int count = viewData?.Nodes != null ? viewData.Nodes.Count : 0;
         Debug.Log($"[EpisodeGraphView] Render nodes={count}", this);
 
         HashSet<string> used = new HashSet<string>(StringComparer.Ordinal);
 
-        if (graph.Nodes != null)
+        if (viewData?.Nodes != null)
         {
-            for (int i = 0; i < graph.Nodes.Count; i++)
+            for (int i = 0; i < viewData.Nodes.Count; i++)
             {
-                EpisodeNodeModel model = graph.Nodes[i];
+                EpisodeNodeViewData nodeViewData = viewData.Nodes[i];
 
-                if (string.IsNullOrEmpty(model.EpisodeId))
+                if (string.IsNullOrEmpty(nodeViewData.EpisodeId))
                     continue;
 
-                used.Add(model.EpisodeId);
+                used.Add(nodeViewData.EpisodeId);
 
-                RuntimeNode node = GetOrCreateNode(model.EpisodeId);
+                RuntimeNode node = GetOrCreateNode(nodeViewData.EpisodeId);
 
                 if (node == null || node.Root == null || node.View == null)
                     continue;
 
+                node.Root.anchoredPosition = nodeViewData.AnchoredPosition;
+                node.Root.sizeDelta = nodeViewData.Size;
+
                 if (!node.Root.gameObject.activeSelf)
                     node.Root.gameObject.SetActive(true);
 
-                node.View.Present(model);
+                node.View.Present(nodeViewData);
             }
         }
 
         DeactivateUnused(used);
+
+        if (viewData != null && viewData.ContentSize != Vector2.zero)
+            content.sizeDelta = viewData.ContentSize;
 
         if (sizer != null)
             sizer.RebuildSize();
@@ -228,7 +228,7 @@ public sealed class EpisodeGraphView : MonoBehaviour
     private void HandleLinkClicked(
         string ownerEpisodeId,
         EpisodeNodeLinkSlot slot,
-        EpisodeNodeLinkModel link)
+        EpisodeNodeLinkViewData link)
     {
         _onLinkClicked?.Invoke(ownerEpisodeId, slot, link);
     }

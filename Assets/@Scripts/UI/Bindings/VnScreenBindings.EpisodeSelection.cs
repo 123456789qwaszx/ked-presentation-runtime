@@ -7,11 +7,11 @@ public sealed partial class VnScreenBindings
     private int _currentChapterId = -1;
 
     private Action<string> _onEpisodeRequested;
-    private Action<string, EpisodeNodeLinkSlot, EpisodeNodeLinkModel> _onEpisodeLinkRequested;
+    private Action<string, EpisodeNodeLinkSlot, EpisodeNodeLinkViewData> _onEpisodeLinkRequested;
 
     public void ConfigureEpisodeSelection(
         Action<string> onEpisodeRequested = null,
-        Action<string, EpisodeNodeLinkSlot, EpisodeNodeLinkModel> onEpisodeLinkRequested = null)
+        Action<string, EpisodeNodeLinkSlot, EpisodeNodeLinkViewData> onEpisodeLinkRequested = null)
     {
         _onEpisodeRequested = onEpisodeRequested;
         _onEpisodeLinkRequested = onEpisodeLinkRequested;
@@ -65,16 +65,13 @@ public sealed partial class VnScreenBindings
     private void OnEpisodeLinkRequested(
         string ownerEpisodeId,
         EpisodeNodeLinkSlot slot,
-        EpisodeNodeLinkModel link)
+        EpisodeNodeLinkViewData link)
     {
         if (string.IsNullOrEmpty(ownerEpisodeId))
             return;
 
         if (string.IsNullOrEmpty(link.TargetEpisodeId))
             return;
-
-        Debug.Log(
-            $"[VnScreenBindings] Episode link clicked: owner={ownerEpisodeId}, slot={slot}, role={link.Role}, target={link.TargetEpisodeId}");
 
         _onEpisodeLinkRequested?.Invoke(ownerEpisodeId, slot, link);
     }

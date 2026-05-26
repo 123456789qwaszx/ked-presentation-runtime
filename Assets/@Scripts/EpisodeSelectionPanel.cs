@@ -143,7 +143,7 @@ public sealed class EpisodeSelectionPanel : UIPanel<EpisodeSelectionPanel.Refs>,
 
     public void SetHandlers(
         Action<string> onMain,
-        Action<string, EpisodeNodeLinkSlot, EpisodeNodeLinkModel> onLink)
+        Action<string, EpisodeNodeLinkSlot, EpisodeNodeLinkViewData> onLink)
     {
         if (episodeGraphView != null)
             episodeGraphView.SetHandlers(onMain, onLink);
@@ -170,8 +170,8 @@ public sealed class EpisodeSelectionPanel : UIPanel<EpisodeSelectionPanel.Refs>,
 
     private void PresentGraph(in EpisodeGraphModel graph)
     {
-        if (episodeGraphView != null)
-            episodeGraphView.Render(graph);
+        // if (episodeGraphView != null)
+        //     episodeGraphView.Render(graph);
     }
 
     private void PresentOutcome(in PlayerStateSnapshot state)
