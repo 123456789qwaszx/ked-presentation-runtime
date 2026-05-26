@@ -36,6 +36,7 @@ public sealed class EpisodeNodeView : IDisposable
 
     private void PresentLink(EpisodeNodeLinkSlot slot, EpisodeNodeLinkViewData link)
     {
+        LinkClicked?.Invoke("LinkClick", slot, link);
         // Upper/Lower refs 선택 후 visible/text 반영
     }
 

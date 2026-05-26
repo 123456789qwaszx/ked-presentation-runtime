@@ -36,23 +36,15 @@ public sealed class EpisodeNodeRigBuilder
         return rigRoot;
     }
 
-    public void BindRefsFromRoot(
-        RectTransform rigRoot,
-        string nodePrefix,
-        out EpisodeNodeRigRefs refs)
+    public void BindRefsFromRoot(RectTransform rigRoot, string nodePrefix, out EpisodeNodeRigRefs refs)
     {
-        Dictionary<EpisodeNodeRigSchema.Refs, RectTransform> map =
-            CollectRefMap(rigRoot, nodePrefix);
-
+        Dictionary<EpisodeNodeRigSchema.Refs, RectTransform> map = CollectRefMap(rigRoot, nodePrefix);
         EnsureValidGraphMap(rigRoot, nodePrefix, ref map);
 
         refs = BuildRefs(rigRoot, map);
     }
 
-    private void EnsureValidGraphMap(
-        RectTransform rigRoot,
-        string nodePrefix,
-        ref Dictionary<EpisodeNodeRigSchema.Refs, RectTransform> map)
+    private void EnsureValidGraphMap(RectTransform rigRoot, string nodePrefix, ref Dictionary<EpisodeNodeRigSchema.Refs, RectTransform> map)
     {
         int expectedCount = Enum.GetValues(typeof(EpisodeNodeRigSchema.Refs)).Length;
 
