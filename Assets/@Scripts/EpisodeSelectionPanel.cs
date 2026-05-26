@@ -8,8 +8,6 @@ public sealed class EpisodeSelectionPanel : UIPanel<EpisodeSelectionPanel.Refs>,
 {
     public event Action OnBackRequested;
 
-    [SerializeField] private EpisodeGraphView episodeGraphView;
-
     private TMP_Text _chapterIndex;
     private TMP_Text _chapterEra;
     private TMP_Text _chapterTitle;
@@ -141,14 +139,6 @@ public sealed class EpisodeSelectionPanel : UIPanel<EpisodeSelectionPanel.Refs>,
             _return.OnClicked -= HandleReturn;
     }
 
-    public void SetHandlers(
-        Action<string> onMain,
-        Action<string, EpisodeNodeLinkSlot, EpisodeNodeLinkViewData> onLink)
-    {
-        if (episodeGraphView != null)
-            episodeGraphView.SetHandlers(onMain, onLink);
-    }
-
     public void Present(
         in EpisodeSelectionPanelModel panel,
         in PlayerStateSnapshot state)
@@ -157,7 +147,6 @@ public sealed class EpisodeSelectionPanel : UIPanel<EpisodeSelectionPanel.Refs>,
             return;
 
         PresentHeader(panel.ChapterMeta);
-        PresentGraph(panel.Graph);
         PresentOutcome(state);
     }
 
@@ -168,11 +157,6 @@ public sealed class EpisodeSelectionPanel : UIPanel<EpisodeSelectionPanel.Refs>,
         SetText(_chapterTitle, meta.ChapterTitle);
     }
 
-    private void PresentGraph(in EpisodeGraphModel graph)
-    {
-        // if (episodeGraphView != null)
-        //     episodeGraphView.Render(graph);
-    }
 
     private void PresentOutcome(in PlayerStateSnapshot state)
     {
@@ -207,9 +191,6 @@ public sealed class EpisodeSelectionPanel : UIPanel<EpisodeSelectionPanel.Refs>,
         AppendMissing(ref missing, _chaosIconImage, Refs.ChaosIcon_Image);
 
         AppendMissing(ref missing, _return, Refs.ReturnButton_BWidget);
-
-        if (episodeGraphView == null)
-            missing += $"- {nameof(episodeGraphView)}\n";
 
         if (missing.Length > 0)
         {

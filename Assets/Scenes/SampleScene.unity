@@ -5702,7 +5702,9 @@ MonoBehaviour:
   characterEmojiLibrarySO: {fileID: 11400000, guid: 50cc0df71f2e038468df66d0c632ebdd, type: 2}
   rollbackHistoryDebugView: {fileID: 969122867}
   chapterCardPrefab: {fileID: 2410623267660482620, guid: 60640956e3866b44e9e8c9df1a45dbd3, type: 3}
-  _episodeGraphView: {fileID: 8154198120394370477}
+  episodeNodeContent: {fileID: 3064378968837295783}
+  nodeRigPrefab: {fileID: 8432584506347833489, guid: 5a92676ae0261c54188d2a64469a3787, type: 3}
+  sizer: {fileID: 3599846330335752488}
 --- !u!1 &612661498
 GameObject:
   m_ObjectHideFlags: 0
@@ -20390,7 +20392,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 458.38, y: -24}
-  m_SizeDelta: {x: 916.76, y: 0}
+  m_SizeDelta: {x: 916.76, y: 24}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!1 &666632935594092605
 GameObject:
@@ -43199,7 +43201,6 @@ GameObject:
   - component: {fileID: 8003520071731884138}
   - component: {fileID: 8154198120394370474}
   - component: {fileID: 8154198120394370476}
-  - component: {fileID: 8154198120394370477}
   m_Layer: 0
   m_Name: Pnl_EpisodeSelection
   m_TagString: Untagged
@@ -45641,22 +45642,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e5ffeee99321d1547af6b120e403f6cb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EpisodeSelectionPanel
-  episodeGraphView: {fileID: 8154198120394370477}
---- !u!114 &8154198120394370477
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7495276885229282670}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fd785a36cb4e439abf583c34267b5e3e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EpisodeGraphView
-  content: {fileID: 3064378968837295783}
-  nodeRigPrefab: {fileID: 0}
-  sizer: {fileID: 3599846330335752488}
 --- !u!222 &8158630177445489388
 CanvasRenderer:
   m_ObjectHideFlags: 0

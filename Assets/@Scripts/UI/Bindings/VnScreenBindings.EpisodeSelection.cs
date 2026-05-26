@@ -31,10 +31,6 @@ public sealed partial class VnScreenBindings
             p => p.OnBackRequested += OnEpisodeSelectionBackRequested,
             p => p.OnBackRequested -= OnEpisodeSelectionBackRequested);
 
-        panel.SetHandlers(
-            onMain: OnEpisodeMainRequested,
-            onLink: OnEpisodeLinkRequested);
-
         RefreshEpisodeSelectionPanel(panel);
     }
 

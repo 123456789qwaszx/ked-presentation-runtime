@@ -1,31 +1,28 @@
-using UnityEngine;
-
 public sealed class EpisodeSelectionController
 {
     private readonly EpisodeSelectionRepository _repository;
     private readonly EpisodeGraphViewModelBuilder _viewModelBuilder;
-    private readonly EpisodeGraphView _view;
+    private readonly EpisodeGraphRenderer _episodeGraphRenderer;
     private readonly EpisodeGraphLayoutOptions _layoutOptions;
 
     public EpisodeSelectionController(
         EpisodeSelectionRepository repository,
         EpisodeGraphViewModelBuilder viewModelBuilder,
-        EpisodeGraphView view,
+        EpisodeGraphRenderer episodeGraphRenderer,
         EpisodeGraphLayoutOptions layoutOptions)
     {
         _repository = repository;
         _viewModelBuilder = viewModelBuilder;
-        _view = view;
+        _episodeGraphRenderer = episodeGraphRenderer;
         _layoutOptions = layoutOptions;
-
-        // _view.SetHandlers(
-        //     RequestSelectEpisode,
-        //     RequestOpenLink);
+        
+        _episodeGraphRenderer.SetHandlers(
+            RequestSelectEpisode,
+            RequestOpenLink);
     }
 
     public void RequestRender()
     {
-        Debug.Log("RequestRender");
         EpisodeSelectionSnapshot snapshot = _repository.ReadSnapshot();
         RenderSnapshot(snapshot);
     }
@@ -33,6 +30,8 @@ public sealed class EpisodeSelectionController
     public void RequestSelectEpisode(string episodeId)
     {
         EpisodeSelectionSnapshot before = _repository.ReadSnapshot();
+        if (before.GraphData == null || !before.GraphData.ContainsEpisode(episodeId))
+            return;
 
         EpisodeSelectionRuntimeState next = before.RuntimeState.Clone();
         next.SelectedEpisodeId = episodeId;
@@ -58,6 +57,6 @@ public sealed class EpisodeSelectionController
     {
         EpisodeGraphViewData viewData = _viewModelBuilder.Build(snapshot.GraphData, snapshot.RuntimeState, _layoutOptions);
 
-        _view.Render(viewData);
+        _episodeGraphRenderer.Render(viewData);
     }
 }

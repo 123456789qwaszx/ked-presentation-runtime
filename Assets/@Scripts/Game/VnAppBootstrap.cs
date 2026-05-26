@@ -417,18 +417,27 @@ public class VnAppBootstrap : MonoBehaviour
     [SerializeField] private RectTransform chapterCardPrefab;
 
     private int _selectedChapterId = 0;
-
-    [SerializeField] private EpisodeGraphView _episodeGraphView;
+    
+    [SerializeField] private RectTransform episodeNodeContent;
+    [SerializeField] private RectTransform nodeRigPrefab;
+    [SerializeField] private HorizontalScrollContentFitter sizer;
+    
+    //[SerializeField] private EpisodeGraphView _episodeGraphView;
     private void Start()
     {
-        EpisodeGraphData episodeGraphData = new();
+        IEpisodeGraphDataProvider episodeGraphDataProvider = new SampleEpisodeGraphDataProvider();
+        
+        EpisodeGraphData episodeGraphData = episodeGraphDataProvider.GetGraphData();
         EpisodeSelectionRuntimeState episodeSelectionRuntimeState = new();
         EpisodeSelectionRepository episodeSelectionRepository = new(episodeGraphData, episodeSelectionRuntimeState);
 
         EpisodeGraphViewModelBuilder episodeGraphViewModelBuilder = new();
+
+        EpisodeGraphRenderer episodeGraphRenderer = new(episodeNodeContent, nodeRigPrefab, sizer);
+        
         EpisodeGraphLayoutOptions episodeGraphLayoutOptions = EpisodeGraphLayoutOptions.Compact();
         
-        EpisodeSelectionController episodeSelectionController = new(episodeSelectionRepository, episodeGraphViewModelBuilder, _episodeGraphView, episodeGraphLayoutOptions);
+        EpisodeSelectionController episodeSelectionController = new(episodeSelectionRepository, episodeGraphViewModelBuilder, episodeGraphRenderer, episodeGraphLayoutOptions);
 
         _screenBindings.ConfigureEpisodeSelection(episodeSelectionController);
         
