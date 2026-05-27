@@ -1,3 +1,5 @@
+using System;
+
 public sealed class EpisodeSelectionController
 {
     private readonly EpisodeSelectionRepository _repository;
@@ -18,8 +20,11 @@ public sealed class EpisodeSelectionController
         _episodeGraphRenderer = episodeGraphRenderer;
         _layoutOptions = layoutOptions;
         _scrollController = scrollController;
-        
-        _episodeGraphRenderer.SetHandlers(RequestSelectEpisode);
+    }
+    
+    public void SetHandlers(Action<string> onMainClicked)
+    {
+        _episodeGraphRenderer.SetHandlers(onMainClicked);
     }
 
     public void RequestRender()

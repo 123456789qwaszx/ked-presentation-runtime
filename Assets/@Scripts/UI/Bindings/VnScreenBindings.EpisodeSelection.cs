@@ -17,14 +17,14 @@ public sealed partial class VnScreenBindings
 
         UI.PushPanel<EpisodeSelectionPanel>(panel =>
         {
-            BindRoot(panel, BindEpisodeSelectionPanel);
+            BindMain(panel, BindEpisodeSelectionPanel);
             _episodeSelectionController.RequestRender();
         });
     }
 
     private void BindEpisodeSelectionPanel(EpisodeSelectionPanel panel)
     {
-        _ctx.Bind(panel,
+        BindEvent(panel,
             p => p.OnBackRequested += OnEpisodeSelectionBackRequested,
             p => p.OnBackRequested -= OnEpisodeSelectionBackRequested);
 

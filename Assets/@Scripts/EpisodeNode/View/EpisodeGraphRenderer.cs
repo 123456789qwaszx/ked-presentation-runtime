@@ -170,13 +170,13 @@ public sealed class EpisodeGraphRenderer
         EpisodeNodeView view = new EpisodeNodeView(refs);
 
         view.MainClicked += HandleMainClicked;
-        //view.LinkClicked += HandleLinkClicked;
 
         return new RuntimeNode(
             episodeId,
             prefix,
             root,
-            view);
+            view,
+            HandleMainClicked);
     }
 
     private void DeactivateUnused(HashSet<string> used)
@@ -256,19 +256,27 @@ public sealed class EpisodeGraphRenderer
 
     private sealed class RuntimeNode : IDisposable
     {
+        private readonly Action<string> _mainClickedHandler;
+
         public string EpisodeId { get; private set; }
         public string Prefix { get; private set; }
 
         public RectTransform Root { get; }
         public EpisodeNodeView View { get; }
 
-        public RuntimeNode(string episodeId, string prefix, RectTransform root, EpisodeNodeView view)
+        public RuntimeNode(
+            string episodeId,
+            string prefix,
+            RectTransform root,
+            EpisodeNodeView view,
+            Action<string> mainClickedHandler)
         {
             EpisodeId = episodeId ?? "";
             Prefix = prefix ?? "";
 
             Root = root;
             View = view;
+            _mainClickedHandler = mainClickedHandler;
         }
 
         public void RebindEpisodeId(string episodeId)
@@ -283,7 +291,10 @@ public sealed class EpisodeGraphRenderer
         public void Dispose()
         {
             if (View != null)
+            {
+                View.MainClicked -= _mainClickedHandler;
                 View.Dispose();
+            }
 
             if (Root != null)
             {

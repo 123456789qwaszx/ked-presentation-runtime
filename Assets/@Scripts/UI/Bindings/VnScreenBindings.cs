@@ -1,20 +1,20 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public sealed partial class VnScreenBindings : IDisposable
 {
-    private readonly UIBindingContext _ctx = new();
     private static UIManager UI => UIManager.Instance;
+
+    private readonly Dictionary<UIBase, List<Action>> _cleanupByOwner = new();
 
     private readonly VNSaveLoadSystem _vnSaveLoadSystem;
 
+    private UIBase _boundMain;
+
     private EpisodePlayer _episodePlayer;
 
-    private SaveLoadMenuMode _currentSaveLoadMode;
-
-    private UIBase _boundRoot;
-
-    public VnScreenBindings( VNSaveLoadSystem vnSaveLoadSystem)
+    public VnScreenBindings(VNSaveLoadSystem vnSaveLoadSystem)
     {
         _vnSaveLoadSystem = vnSaveLoadSystem;
     }
@@ -24,296 +24,105 @@ public sealed partial class VnScreenBindings : IDisposable
         _episodePlayer = episodePlayer;
     }
 
-    #region Title
-
-    public void GoToTitle()
-    {
-        UI.SwitchRoot<TitleUIRoot>(root =>
-        {
-            BindRoot(root, BindTitleRoot);
-        });
-    }
-
-    private void BindTitleRoot(TitleUIRoot titleRoot)
-    {
-        _ctx.Bind(
-            titleRoot,
-            t => t.OnStart += OnNewGamePressed,
-            t => t.OnStart -= OnNewGamePressed);
-
-        _ctx.Bind(
-            titleRoot,
-            t => t.OnContinue += OnContinuePressed,
-            t => t.OnContinue -= OnContinuePressed);
-
-        _ctx.Bind(
-            titleRoot,
-            t => t.OnOpenLoad += OnOpenLoadPressed,
-            t => t.OnOpenLoad -= OnOpenLoadPressed);
-
-        _ctx.Bind(
-            titleRoot,
-            t => t.OnOpenAlbum += OnOpenAlbumPressed,
-            t => t.OnOpenAlbum -= OnOpenAlbumPressed);
-
-        _ctx.Bind(
-            titleRoot,
-            t => t.OnOpenSettings += OnOpenSettingsPressed,
-            t => t.OnOpenSettings -= OnOpenSettingsPressed);
-
-        _ctx.Bind(
-            titleRoot,
-            t => t.OnQuit += OnQuitPressed,
-            t => t.OnQuit -= OnQuitPressed);
-
-        RefreshTitleState(titleRoot);
-
-        // if (_vnServiceContainer != null)
-        // {
-        //     Action refresh = () => RefreshTitleState(titleRoot);
-        //
-        //     _ctx.Assign(
-        //         titleRoot,
-        //         _ =>
-        //         {
-        //             _vnServiceContainer.PersistentInitialized += refresh;
-        //             _vnServiceContainer.RuntimeBound += refresh;
-        //         },
-        //         _ =>
-        //         {
-        //             _vnServiceContainer.PersistentInitialized -= refresh;
-        //             _vnServiceContainer.RuntimeBound -= refresh;
-        //         });
-        // }
-    }
-
-    private void RefreshTitleState(TitleUIRoot titleRoot)
-    {
-        if (titleRoot == null)
-            return;
-
-        bool hasContainer = _vnSaveLoadSystem != null;
-        bool persistentReady = hasContainer && _vnSaveLoadSystem.IsInitialized;
-
-        bool canContinue =
-            hasContainer &&
-            _vnSaveLoadSystem.CanContinue();
-
-        titleRoot.SetContinueEnabled(canContinue);
-        titleRoot.SetLoadEnabled(persistentReady);
-        titleRoot.SetAlbumEnabled(persistentReady);
-    }
-
-    private void OnNewGamePressed()
-    {
-        _episodePlayer.StartGame(_episodePlayer.YarnEntryKey);
-    }
-
-    private void OnContinuePressed()
-    {
-        if (!_vnSaveLoadSystem.TryContinue())
-            Debug.LogWarning("[VnScreenBindings] Continue failed.");
-    }
-
-    private void OnOpenLoadPressed()
-    {
-        GoToLoadMenu();
-    }
-
-    private void OnOpenAlbumPressed()
-    {
-        GoToAlbum();
-    }
-
-    private void OnOpenSettingsPressed()
-    {
-        Debug.Log("[VnScreenBindings] Settings requested.");
-    }
-
-    private void OnQuitPressed()
-    {
-#if UNITY_EDITOR
-        UnityEditor.EditorApplication.isPlaying = false;
-#else
-        Application.Quit();
-#endif
-    }
-
-    #endregion
-
-    #region SaveLoad
-
-    public void GoToSaveMenu()
-    {
-        OpenSaveLoadMenu(SaveLoadMenuMode.Save);
-    }
-
-    public void GoToLoadMenu()
-    {
-        OpenSaveLoadMenu(SaveLoadMenuMode.Load);
-    }
-
-    private void OpenSaveLoadMenu(SaveLoadMenuMode mode)
-    {
-        _currentSaveLoadMode = mode;
-
-        UI.PushPanel<SaveLoadMenuUIPanel>(root =>
-        {
-            BindRoot(root, BindSaveLoadRoot);
-        });
-    }
-
-    private void BindSaveLoadRoot(SaveLoadMenuUIPanel saveLoadRoot)
-    {
-        _ctx.Bind(
-            saveLoadRoot,
-            r => r.OnSlotSelected += OnSaveLoadSlotSelected,
-            r => r.OnSlotSelected -= OnSaveLoadSlotSelected);
-
-        _ctx.Bind(
-            saveLoadRoot,
-            r => r.OnCloseRequested += OnSaveLoadCloseRequested,
-            r => r.OnCloseRequested -= OnSaveLoadCloseRequested);
-
-        RefreshSaveLoadRoot(saveLoadRoot);
-    }
-
-    private void RefreshSaveLoadRoot(SaveLoadMenuUIPanel saveLoadRoot)
-    {
-        VNSaveSlotMeta[] metas = _vnSaveLoadSystem.GetAllSaveSlotMetas();
-
-        saveLoadRoot.Rebuild(
-            _currentSaveLoadMode,
-            metas);
-    }
-
-    private void OnSaveLoadSlotSelected(int slotIndex)
-    {
-        if (_currentSaveLoadMode == SaveLoadMenuMode.Save)
-        {
-            HandleSaveSlotSelected(slotIndex);
-            return;
-        }
-
-        HandleLoadSlotSelected(slotIndex);
-    }
-
-    private void HandleSaveSlotSelected(int slotIndex)
-    {
-        if (!_vnSaveLoadSystem.SaveService.SaveManual(slotIndex))
-        {
-            Debug.LogWarning($"[VnScreenBindings] Save failed. slotIndex={slotIndex}");
-            return;
-        }
-
-        UIBase currentRoot = _boundRoot;
-
-        if (currentRoot is SaveLoadMenuUIPanel saveLoadRoot)
-            RefreshSaveLoadRoot(saveLoadRoot);
-    }
-
-    private void HandleLoadSlotSelected(int slotIndex)
-    {
-        if (!_vnSaveLoadSystem.LoadService.Load(slotIndex))
-        {
-            Debug.LogWarning($"[VnScreenBindings] Load failed. slotIndex={slotIndex}");
-            return;
-        }
-    }
-
-    private void OnSaveLoadCloseRequested()
-    {
-        GoToTitle();
-    }
-
-    #endregion
-
-    #region Album
-
-    public void GoToAlbum()
-    {
-        UI.SwitchRoot<AlbumUIRoot>(root =>
-        {
-            BindRoot(root, BindAlbumRoot);
-        });
-    }
-
-    private void BindAlbumRoot(AlbumUIRoot albumRoot)
-    {
-        _ctx.Bind(
-            albumRoot,
-            a => a.OnCloseRequested += OnAlbumCloseRequested,
-            a => a.OnCloseRequested -= OnAlbumCloseRequested);
-
-        RefreshAlbumRoot(albumRoot);
-    }
-
-    private void RefreshAlbumRoot(AlbumUIRoot albumRoot)
-    {
-        VNAlbumUnlockService albumService = _vnSaveLoadSystem.AlbumService;
-
-        albumRoot.Rebuild(
-            albumService.GetAllItems(),
-            albumService.IsUnlocked);
-    }
-
-    private void OnAlbumCloseRequested()
-    {
-        GoToTitle();
-    }
-
-    #endregion
-
-    #region Lobby
-
-    public void GoToLobby()
-    {
-        UI.SwitchRoot<LobbyUIRoot>(root =>
-        {
-            BindRoot(root, BindLobbyRoot);
-        });
-    }
-
-    private void BindLobbyRoot(LobbyUIRoot lobbyRoot)
-    {
-        _ctx.Bind(
-            lobbyRoot,
-            l => l.OnOpenStory += OpenStorySelectFlow,
-            l => l.OnOpenStory -= OpenStorySelectFlow);
-
-        _ctx.Bind(
-            lobbyRoot,
-            l => l.OnNextBroadcastRequested += OnNextBroadcastRequested,
-            l => l.OnNextBroadcastRequested -= OnNextBroadcastRequested);
-    }
-
-    private void OnNextBroadcastRequested()
-    {
-    }
-
-    private void OpenStorySelectFlow()
-    {
-    }
-
-    #endregion
-
-    private void BindRoot<T>(T root, Action<T> bind)
+    private void BindMain<T>(T owner, Action<T> bind)
         where T : UIBase
     {
-        if (!root)
+        if (!owner)
             return;
 
-        if (_boundRoot != null && _boundRoot != root)
-            _ctx.Unbind(_boundRoot);
+        if (_boundMain != null && _boundMain != owner)
+            Unbind(_boundMain);
 
-        _ctx.Unbind(root);
+        Unbind(owner);
 
-        _boundRoot = root;
-        bind(root);
+        _boundMain = owner;
+        bind(owner);
+    }
+
+    private void Bind<T>(T owner, Action<T> bind)
+        where T : UIBase
+    {
+        if (!owner)
+            return;
+
+        Unbind(owner);
+        bind(owner);
+    }
+
+    private void BindEvent<T>(T owner, Action<T> bind, Action<T> unbind)
+        where T : UIBase
+    {
+        if (!owner || bind == null || unbind == null)
+            return;
+
+        bind(owner);
+        AddCleanup(owner, () => unbind(owner));
+    }
+
+    private void AddCleanup(UIBase owner, Action cleanup)
+    {
+        if (!owner || cleanup == null)
+            return;
+
+        if (!_cleanupByOwner.TryGetValue(owner, out List<Action> cleanups))
+        {
+            cleanups = new List<Action>();
+            _cleanupByOwner[owner] = cleanups;
+        }
+
+        cleanups.Add(cleanup);
+    }
+
+    private void Unbind(UIBase owner)
+    {
+        if (!owner)
+            return;
+
+        if (!_cleanupByOwner.TryGetValue(owner, out List<Action> cleanups))
+            return;
+
+        RunCleanups(cleanups);
+        _cleanupByOwner.Remove(owner);
+
+        if (_boundMain == owner)
+            _boundMain = null;
+    }
+
+    private void UnbindMain()
+    {
+        if (_boundMain == null)
+            return;
+
+        Unbind(_boundMain);
+        _boundMain = null;
+    }
+
+    private void UnbindAll()
+    {
+        foreach (var kv in _cleanupByOwner)
+            RunCleanups(kv.Value);
+
+        _cleanupByOwner.Clear();
+        _boundMain = null;
+    }
+
+    private static void RunCleanups(List<Action> cleanups)
+    {
+        for (int i = cleanups.Count - 1; i >= 0; i--)
+        {
+            try
+            {
+                cleanups[i]?.Invoke();
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
+        }
     }
 
     public void Dispose()
     {
-        _ctx.Dispose();
+        UnbindAll();
     }
 }

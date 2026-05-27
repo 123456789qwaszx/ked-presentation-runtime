@@ -3,7 +3,7 @@ using Yarn.Unity;
 
 public sealed class EpisodePlayer : MonoBehaviour
 {
-    private PresentationViewUIBindings _dialogueUIBindings;
+    private VnScreenBindings _vnScreenBindings;
     private RollbackHistory _nodeRollbackHistory;
     private ILinePresentationAborter _linePresentationAborter;
     private BacklogRecorder _backlogRecorder;
@@ -47,12 +47,12 @@ public sealed class EpisodePlayer : MonoBehaviour
     }
 
     public void Initialize(
-        PresentationViewUIBindings dialogueUIBindings,
+        VnScreenBindings vnScreenBindings,
         RollbackHistory nodeRollbackHistory,
         ILinePresentationAborter linePresentationAborter,
         BacklogRecorder backlogRecorder)
     {
-        _dialogueUIBindings = dialogueUIBindings;
+        _vnScreenBindings = vnScreenBindings;
         _nodeRollbackHistory = nodeRollbackHistory;
         _linePresentationAborter = linePresentationAborter;
         _backlogRecorder = backlogRecorder;
@@ -202,17 +202,7 @@ public sealed class EpisodePlayer : MonoBehaviour
 
     private void PreparePresentationView()
     {
-        UIManager.Instance.SwitchRoot<PresentationUIRoot>();
-
-        PresentationUIRoot presentationUIRoot = UIManager.Instance.GetUI<PresentationUIRoot>();
-        if (presentationUIRoot == null)
-        {
-            Debug.LogWarning("[EpisodePlayer] PresentationUIRoot is null after SwitchRoot.", this);
-            return;
-        }
-
-        if (_dialogueUIBindings != null)
-            _dialogueUIBindings.Bind(presentationUIRoot);
+        _vnScreenBindings.GoToPresentationView();
     }
 
     private void StartPresentationRouteFresh()

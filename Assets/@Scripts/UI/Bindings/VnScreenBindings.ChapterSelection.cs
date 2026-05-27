@@ -26,7 +26,7 @@ public sealed partial class VnScreenBindings
     {
         UI.PushPanel<ChapterSelectionPanel>(panel =>
         {
-            BindRoot(panel, BindChapterSelectionPanel);
+            BindMain(panel, BindChapterSelectionPanel);
             
             BuildChapterCards(panel);
             RefreshChapterSelectionPanel(panel);
@@ -38,7 +38,7 @@ public sealed partial class VnScreenBindings
         if (panel == null)
             return;
 
-        _ctx.Bind(panel,
+        BindEvent(panel,
             p => p.OnBackRequested += OnChapterBackRequested,
             p => p.OnBackRequested -= OnChapterBackRequested);
 

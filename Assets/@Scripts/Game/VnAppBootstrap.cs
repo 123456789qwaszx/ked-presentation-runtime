@@ -89,7 +89,6 @@ public class VnAppBootstrap : MonoBehaviour
 
     private PresentationSessionBridge _presentationSessionBridge;
 
-    private PresentationViewUIBindings _dialogueUIBindings;
     private VnScreenBindings _screenBindings;
     private RollbackHistory _rollbackHistory;
     private BacklogRecorder _backlogRecorder;
@@ -394,22 +393,20 @@ public class VnAppBootstrap : MonoBehaviour
     
     private void BootstrapUIBindings()
     {
-        _dialogueUIBindings = new PresentationViewUIBindings(
-            _episodePlayState, 
+        _screenBindings = new VnScreenBindings(_vnSaveLoadSystem);
+        
+        _screenBindings.ConfigurePresentationView(
+            _episodePlayState,
             vnFeatureController,
             _vnUxState,
-            vnRuntimeBridge, 
+            vnRuntimeBridge,
             dialogueAdvanceDispatcher,
-            _vnSaveLoadSystem,
-            episodePlayer,
             _linePresentationAdvanceState);
-        
-        _screenBindings = new VnScreenBindings(_vnSaveLoadSystem);
     }
 
     private void InitializeEpisodePlayer()
     {
-        episodePlayer.Initialize(_dialogueUIBindings, _rollbackHistory, customLinePresenter, _backlogRecorder);
+        episodePlayer.Initialize(_screenBindings, _rollbackHistory, customLinePresenter, _backlogRecorder);
 
         _screenBindings.AttachEpisodePlayer(episodePlayer);
     }
@@ -443,7 +440,7 @@ public class VnAppBootstrap : MonoBehaviour
 
         _screenBindings.GoToChapterSelection();
         
-        //_screenBindings.GoToTitle();
+        _screenBindings.GoToTitle();
     }
 
     private ChapterButtonCardModel[] ResolveChapterModels()

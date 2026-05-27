@@ -10,8 +10,8 @@ public partial class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
     public event Action OnRollbackOneStepPressed;
 
     public event Action OnSkipPressed;
-    public event Action OnAutoPressed;
-    public event Action OnQuickMenuPressed;
+    public event Action AutoClicked;
+    public event Action QuickMenuClicked;
     public event Action OnExpandPressed;
     public event Action OnShowPreviousLogPressed;
     public event Action OnSetSpeedupPressed;
@@ -180,7 +180,7 @@ public partial class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
 
     private void PressAutoButton(PointerEventData _)
     {
-        OnAutoPressed?.Invoke();
+        AutoClicked?.Invoke();
     }
 
     private void PressStepNextButton(PointerEventData _)
@@ -196,7 +196,7 @@ public partial class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
 
     private void PressQuickMenuToggleButton(PointerEventData _)
     {
-        OnQuickMenuPressed?.Invoke();
+        QuickMenuClicked?.Invoke();
 
         SetQuickMenuOpen(!IsQuickMenuOpen());
     }
