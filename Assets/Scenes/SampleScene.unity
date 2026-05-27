@@ -6486,7 +6486,7 @@ MonoBehaviour:
     chapterIndexLabel: "\uCC55\uD130 01"
     chapterTitle: Stella Sora
     episodeHeading: 01 First Broadcast
-    bg: {fileID: 21300000, guid: 754fa8bfd664bb64ca52c8dacb20b988, type: 3}
+    bg: {fileID: 21300000, guid: 931d46fcfea51d94b87ac2d209277add, type: 3}
     bgOverlay: {fileID: 21300000, guid: a4213e295f052484e9cac2e3e84c7228, type: 3}
     chapterIndexLabelSprite: {fileID: 21300000, guid: bcdfa9bf761b70e499fcabdfdeefedb5, type: 3}
     episodeHeadingLabelSprite: {fileID: 21300000, guid: ebb2f99d1ddd7ca448dffaccb1d97ae4, type: 3}
@@ -6498,7 +6498,7 @@ MonoBehaviour:
     chapterIndexLabel: "\uCC55\uD130 02"
     chapterTitle: Signal Noise
     episodeHeading: 02 Unread Message
-    bg: {fileID: 21300000, guid: 2fba80d8de8347b4eaf9110bfc19c1fd, type: 3}
+    bg: {fileID: 21300000, guid: 931d46fcfea51d94b87ac2d209277add, type: 3}
     bgOverlay: {fileID: 21300000, guid: 885d729aa77328149ae07d89f893b04b, type: 3}
     chapterIndexLabelSprite: {fileID: 21300000, guid: c8c8547b6ca57454785ff4ef655da61d, type: 3}
     episodeHeadingLabelSprite: {fileID: 21300000, guid: 59c604fd995e9e14fb9f663fc1523ffc, type: 3}
@@ -6510,13 +6510,25 @@ MonoBehaviour:
     chapterIndexLabel: "\uCC55\uD130 03"
     chapterTitle: Broadcast Fever
     episodeHeading: 03 Locked Route
-    bg: {fileID: 21300000, guid: 790a933a0f6b5224da4d7c56d966f137, type: 3}
+    bg: {fileID: 21300000, guid: 931d46fcfea51d94b87ac2d209277add, type: 3}
     bgOverlay: {fileID: 21300000, guid: 43db70c30b4b80a458c8f038597d80c0, type: 3}
     chapterIndexLabelSprite: {fileID: 21300000, guid: bcdfa9bf761b70e499fcabdfdeefedb5, type: 3}
     episodeHeadingLabelSprite: {fileID: 21300000, guid: 9cb37221d55af5a46a5a4c06d8537a9e, type: 3}
     titleIcon: {fileID: 21300000, guid: b6b1efbab66e0fd4c8feba43da04fcc3, type: 3}
-    interactable: 0
-    locked: 1
+    interactable: 1
+    locked: 0
+  - chapterId: 3
+    indexText: 04
+    chapterIndexLabel: "\uCC55\uD130 04"
+    chapterTitle: "\uD55C \uC5EC\uB984\uB0A0\uC758 \uAE30\uBB18\uD55C \uC77C"
+    episodeHeading: "04 \uB3CC\uC544\uAC00\uB294 \uD558\uB8E8"
+    bg: {fileID: 21300000, guid: 931d46fcfea51d94b87ac2d209277add, type: 3}
+    bgOverlay: {fileID: 21300000, guid: b0affc364d23ec843abc34c6421fc520, type: 3}
+    chapterIndexLabelSprite: {fileID: 21300000, guid: ebb2f99d1ddd7ca448dffaccb1d97ae4, type: 3}
+    episodeHeadingLabelSprite: {fileID: 21300000, guid: 8ea26f8bd3e1fdc49bdcaea7b9259e03, type: 3}
+    titleIcon: {fileID: 21300000, guid: 2fba80d8de8347b4eaf9110bfc19c1fd, type: 3}
+    interactable: 1
+    locked: 0
 --- !u!4 &767435431
 Transform:
   m_ObjectHideFlags: 0
@@ -8557,6 +8569,46 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1cba62d4376bddf4abfef882af0ed3bb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ButtonWidget
+--- !u!1 &1113564361
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1113564362}
+  m_Layer: 0
+  m_Name: Legacy
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1113564362
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1113564361}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 6977336184296412191}
+  - {fileID: 9060058469175479376}
+  - {fileID: 9036239784209296927}
+  - {fileID: 6018984848932493345}
+  - {fileID: 2494933288391345150}
+  m_Father: {fileID: 8103127889455306347}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1130977843
 GameObject:
   m_ObjectHideFlags: 0
@@ -17090,7 +17142,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 458.38, y: -24}
-  m_SizeDelta: {x: 916.76, y: 0}
+  m_SizeDelta: {x: 916.76, y: 24}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!1 &666632935594092605
 GameObject:
@@ -21099,11 +21151,11 @@ RectTransform:
   - {fileID: 3796118639612258090}
   - {fileID: 2164099832130202913}
   - {fileID: 1028754901500647040}
-  m_Father: {fileID: 3355309611346709583}
+  m_Father: {fileID: 1113564362}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: -1733.1606, y: -1472.3091}
+  m_AnchoredPosition: {x: -443.16064, y: -92.30908}
   m_SizeDelta: {x: 400, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &2502440454373615517
@@ -23844,12 +23896,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 6977336184296412191}
   - {fileID: 7412309402269697717}
-  - {fileID: 9060058469175479376}
-  - {fileID: 9036239784209296927}
-  - {fileID: 6018984848932493345}
-  - {fileID: 2494933288391345150}
   - {fileID: 4120260749950947222}
   m_Father: {fileID: 5277133922476264799}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -29715,11 +29762,11 @@ RectTransform:
   - {fileID: 6404479275719494218}
   - {fileID: 3078024772079668555}
   - {fileID: 6045786785916850598}
-  m_Father: {fileID: 3355309611346709583}
+  m_Father: {fileID: 1113564362}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: -1733.1606, y: -1472.3091}
+  m_AnchoredPosition: {x: -443.16064, y: -92.30908}
   m_SizeDelta: {x: 400, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &6025905261283361468
@@ -31931,11 +31978,11 @@ RectTransform:
   - {fileID: 7294274932352510392}
   - {fileID: 492076627590870439}
   - {fileID: 4845013219179056304}
-  m_Father: {fileID: 3355309611346709583}
+  m_Father: {fileID: 1113564362}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: -1733.1606, y: -1472.3091}
+  m_AnchoredPosition: {x: -443.16064, y: -92.30908}
   m_SizeDelta: {x: 400, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6993098740215726437
@@ -34751,6 +34798,7 @@ RectTransform:
   - {fileID: 8748736295419882132}
   - {fileID: 8366775941665592767}
   - {fileID: 1739354824}
+  - {fileID: 1113564362}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -37142,11 +37190,11 @@ RectTransform:
   - {fileID: 5298895597038895069}
   - {fileID: 3717307265113608584}
   - {fileID: 3906322065370923752}
-  m_Father: {fileID: 3355309611346709583}
+  m_Father: {fileID: 1113564362}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: -1733.1606, y: -1472.3091}
+  m_AnchoredPosition: {x: -443.16064, y: -92.30908}
   m_SizeDelta: {x: 400, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &9038776435006179087
@@ -37213,11 +37261,11 @@ RectTransform:
   - {fileID: 1184975228688364610}
   - {fileID: 7043409808683387589}
   - {fileID: 5378739769070589606}
-  m_Father: {fileID: 3355309611346709583}
+  m_Father: {fileID: 1113564362}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: -1733.1606, y: -1472.3091}
+  m_AnchoredPosition: {x: -443.16064, y: -92.30908}
   m_SizeDelta: {x: 400, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &9068895088179417620

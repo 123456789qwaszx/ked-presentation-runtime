@@ -9,6 +9,13 @@
 //   좌측 패널 : Node 목록 (Add / Duplicate / Delete)
 //   중앙 패널 : 선택된 Node 상세 편집
 //   우측 패널 : EndingRules / Validation 결과
+//
+// 안정화 버전:
+//   - SerializedProperty arraySize 방어
+//   - 선택 index 보정
+//   - GUILayout Begin/End 불일치 방지
+//   - null SerializedProperty 방어
+//   - 리스트 삭제 지연 처리
 // ============================================================
 
 #if UNITY_EDITOR
@@ -21,20 +28,21 @@ public sealed class EpisodeProgressionEditorWindow : EditorWindow
 {
     // ─── 상수 ───────────────────────────────────────────────
 
-    private const float LEFT_PANEL_WIDTH   = 220f;
-    private const float RIGHT_PANEL_WIDTH  = 280f;
-    private const float TOOLBAR_HEIGHT     = 36f;
-    private const float SECTION_GAP        = 6f;
-    private const float NODE_ROW_HEIGHT    = 28f;
-    private const float CONDITION_ROW_H    = 22f;
-    private const float LABEL_W            = 140f;
+    private const float LEFT_PANEL_WIDTH  = 220f;
+    private const float RIGHT_PANEL_WIDTH = 280f;
+    private const float TOOLBAR_HEIGHT    = 36f;
+    private const float SECTION_GAP       = 6f;
+    private const float NODE_ROW_HEIGHT   = 28f;
+    private const float LABEL_W           = 140f;
+
+    private const string NONE_LABEL = "(none)";
 
     // ─── 상태 ───────────────────────────────────────────────
 
     private ChapterEpisodeProgressionSO _target;
-    private SerializedObject            _serializedObject;
+    private SerializedObject _serializedObject;
 
-    private int _selectedNodeIndex  = -1;
+    private int _selectedNodeIndex = -1;
     private int _selectedEndingIndex = -1;
 
     private Vector2 _leftScroll;
@@ -43,7 +51,7 @@ public sealed class EpisodeProgressionEditorWindow : EditorWindow
     private Vector2 _validationScroll;
 
     private EpisodeProgressionValidationResult _lastValidationResult;
-    private bool _validationDirty = false;
+    private bool _validationDirty;
 
     // 조건 편집 펼침 상태
     private bool _foldVisible;
@@ -51,7 +59,7 @@ public sealed class EpisodeProgressionEditorWindow : EditorWindow
     private bool _foldNext;
     private bool _foldAttachments;
 
-    // ─── GUI 스타일 (지연 초기화) ────────────────────────────
+    // ─── GUI 스타일 ─────────────────────────────────────────
 
     private GUIStyle _headerStyle;
     private GUIStyle _sectionStyle;
@@ -69,11 +77,12 @@ public sealed class EpisodeProgressionEditorWindow : EditorWindow
     {
         EpisodeProgressionEditorWindow window =
             GetWindow<EpisodeProgressionEditorWindow>("Episode Progression");
+
         window.minSize = new Vector2(900f, 580f);
         window.Show();
     }
 
-    // ─── Unity 이벤트 ────────────────────────────────────────
+    // ─── Unity 이벤트 ───────────────────────────────────────
 
     private void OnGUI()
     {
@@ -87,7 +96,13 @@ public sealed class EpisodeProgressionEditorWindow : EditorWindow
             return;
         }
 
+        EnsureTargetLists();
+
+        if (_serializedObject == null || _serializedObject.targetObject != _target)
+            _serializedObject = new SerializedObject(_target);
+
         _serializedObject.Update();
+        ClampSelectionIndices();
 
         Rect body = new Rect(0f, TOOLBAR_HEIGHT, position.width, position.height - TOOLBAR_HEIGHT);
         DrawBody(body);
@@ -98,7 +113,6 @@ public sealed class EpisodeProgressionEditorWindow : EditorWindow
         {
             _validationDirty = false;
             RunValidation();
-            Repaint();
         }
     }
 
@@ -118,32 +132,39 @@ public sealed class EpisodeProgressionEditorWindow : EditorWindow
         Rect toolbarRect = new Rect(0f, 0f, position.width, TOOLBAR_HEIGHT);
         EditorGUI.DrawRect(toolbarRect, new Color(0.18f, 0.18f, 0.18f, 1f));
 
-        GUILayout.BeginArea(new Rect(8f, 6f, position.width - 16f, TOOLBAR_HEIGHT - 12f));
-        GUILayout.BeginHorizontal();
-
-        EditorGUI.BeginChangeCheck();
-        ChapterEpisodeProgressionSO picked =
-            (ChapterEpisodeProgressionSO)EditorGUILayout.ObjectField(
-                _target, typeof(ChapterEpisodeProgressionSO), false,
-                GUILayout.Width(280f));
-
-        if (EditorGUI.EndChangeCheck())
-            SetTarget(picked);
-
-        if (GUILayout.Button("Create New", GUILayout.Width(90f)))
-            CreateNewAsset();
-
-        GUILayout.FlexibleSpace();
-
-        if (_target != null)
+        using (new GUILayout.AreaScope(new Rect(8f, 6f, position.width - 16f, TOOLBAR_HEIGHT - 12f)))
+        using (new GUILayout.HorizontalScope())
         {
+            EditorGUI.BeginChangeCheck();
+
+            ChapterEpisodeProgressionSO picked =
+                (ChapterEpisodeProgressionSO)EditorGUILayout.ObjectField(
+                    _target,
+                    typeof(ChapterEpisodeProgressionSO),
+                    false,
+                    GUILayout.Width(280f));
+
+            if (EditorGUI.EndChangeCheck())
+                SetTarget(picked);
+
+            if (GUILayout.Button("Create New", GUILayout.Width(90f)))
+                CreateNewAsset();
+
+            GUILayout.FlexibleSpace();
+
+            if (_target == null)
+                return;
+
             if (GUILayout.Button("Auto-Fill Parents", GUILayout.Width(120f)))
             {
                 Undo.RecordObject(_target, "Auto-Fill Attachment Parents");
                 EpisodeProgressionValidator.AutoFillAttachmentParents(_target);
                 EditorUtility.SetDirty(_target);
+                SyncSerializedObject();
                 RunValidation();
             }
+
+            Color oldBackground = GUI.backgroundColor;
 
             GUI.backgroundColor = _lastValidationResult != null && _lastValidationResult.HasErrors
                 ? new Color(1f, 0.4f, 0.4f)
@@ -152,49 +173,63 @@ public sealed class EpisodeProgressionEditorWindow : EditorWindow
             if (GUILayout.Button("Validate", GUILayout.Width(80f)))
                 RunValidation();
 
-            GUI.backgroundColor = Color.white;
+            GUI.backgroundColor = oldBackground;
 
-            // 검증 요약 표시
-            if (_lastValidationResult != null)
-            {
-                int errors   = _lastValidationResult.ErrorCount;
-                int warnings = _lastValidationResult.WarningCount;
+            if (_lastValidationResult == null)
+                return;
 
-                string summary = errors > 0
-                    ? $"  ✕ {errors} error(s)"
-                    : warnings > 0
-                        ? $"  ⚠ {warnings} warning(s)"
-                        : "  ✓ OK";
+            int errors = _lastValidationResult.ErrorCount;
+            int warnings = _lastValidationResult.WarningCount;
 
-                Color prevColor = GUI.contentColor;
-                GUI.contentColor = errors > 0
-                    ? new Color(1f, 0.45f, 0.45f)
-                    : warnings > 0
-                        ? new Color(1f, 0.85f, 0.3f)
-                        : new Color(0.5f, 1f, 0.5f);
+            string summary = errors > 0
+                ? $"  ✕ {errors} error(s)"
+                : warnings > 0
+                    ? $"  ⚠ {warnings} warning(s)"
+                    : "  ✓ OK";
 
-                GUILayout.Label(summary, GUILayout.Width(140f));
-                GUI.contentColor = prevColor;
-            }
+            Color prevColor = GUI.contentColor;
+
+            GUI.contentColor = errors > 0
+                ? new Color(1f, 0.45f, 0.45f)
+                : warnings > 0
+                    ? new Color(1f, 0.85f, 0.3f)
+                    : new Color(0.5f, 1f, 0.5f);
+
+            GUILayout.Label(summary, GUILayout.Width(140f));
+
+            GUI.contentColor = prevColor;
         }
-
-        GUILayout.EndHorizontal();
-        GUILayout.EndArea();
     }
 
-    // ─── 본문 ────────────────────────────────────────────────
+    // ─── 본문 ───────────────────────────────────────────────
 
     private void DrawBody(Rect body)
     {
         float centerW = body.width - LEFT_PANEL_WIDTH - RIGHT_PANEL_WIDTH;
 
-        Rect leftRect   = new Rect(body.x,                          body.y, LEFT_PANEL_WIDTH,  body.height);
-        Rect centerRect = new Rect(body.x + LEFT_PANEL_WIDTH,       body.y, centerW,           body.height);
-        Rect rightRect  = new Rect(body.x + LEFT_PANEL_WIDTH + centerW, body.y, RIGHT_PANEL_WIDTH, body.height);
+        if (centerW < 200f)
+            centerW = 200f;
 
-        // 구분선
-        EditorGUI.DrawRect(new Rect(leftRect.xMax,  body.y, 1f, body.height), new Color(0.1f, 0.1f, 0.1f));
-        EditorGUI.DrawRect(new Rect(rightRect.x,    body.y, 1f, body.height), new Color(0.1f, 0.1f, 0.1f));
+        Rect leftRect = new Rect(
+            body.x,
+            body.y,
+            LEFT_PANEL_WIDTH,
+            body.height);
+
+        Rect centerRect = new Rect(
+            body.x + LEFT_PANEL_WIDTH,
+            body.y,
+            centerW,
+            body.height);
+
+        Rect rightRect = new Rect(
+            body.x + LEFT_PANEL_WIDTH + centerW,
+            body.y,
+            RIGHT_PANEL_WIDTH,
+            body.height);
+
+        EditorGUI.DrawRect(new Rect(leftRect.xMax, body.y, 1f, body.height), new Color(0.1f, 0.1f, 0.1f));
+        EditorGUI.DrawRect(new Rect(rightRect.x, body.y, 1f, body.height), new Color(0.1f, 0.1f, 0.1f));
 
         DrawLeftPanel(leftRect);
         DrawCenterPanel(centerRect);
@@ -207,66 +242,89 @@ public sealed class EpisodeProgressionEditorWindow : EditorWindow
 
     private void DrawLeftPanel(Rect rect)
     {
-        GUILayout.BeginArea(rect);
-        GUILayout.BeginVertical();
-
-        // 헤더
-        EditorGUILayout.LabelField(
-            $"Episode Nodes  ({_target.Nodes.Count})",
-            _headerStyle, GUILayout.Height(22f));
-
-        // Add / Duplicate / Delete 버튼
-        GUILayout.BeginHorizontal();
-
-        if (GUILayout.Button("+", GUILayout.Width(28f)))
-            AddNode();
-
-        GUI.enabled = _selectedNodeIndex >= 0 && _selectedNodeIndex < _target.Nodes.Count;
-
-        if (GUILayout.Button("Dup", GUILayout.Width(40f)))
-            DuplicateNode(_selectedNodeIndex);
-
-        GUI.backgroundColor = new Color(1f, 0.5f, 0.5f);
-
-        if (GUILayout.Button("Del", GUILayout.Width(36f)))
+        using (new GUILayout.AreaScope(rect))
+        using (new GUILayout.VerticalScope())
         {
-            if (EditorUtility.DisplayDialog("Delete Node",
-                $"Delete '{_target.Nodes[_selectedNodeIndex].EpisodeId}'?", "Delete", "Cancel"))
-                DeleteNode(_selectedNodeIndex);
+            int nodeCount = GetNodeCount();
+
+            EditorGUILayout.LabelField(
+                $"Episode Nodes  ({nodeCount})",
+                _headerStyle,
+                GUILayout.Height(22f));
+
+            using (new GUILayout.HorizontalScope())
+            {
+                if (GUILayout.Button("+", GUILayout.Width(28f)))
+                    AddNode();
+
+                bool hasSelectedNode =
+                    _selectedNodeIndex >= 0 &&
+                    _selectedNodeIndex < GetNodeCount();
+
+                GUI.enabled = hasSelectedNode;
+
+                if (GUILayout.Button("Dup", GUILayout.Width(40f)))
+                    DuplicateNode(_selectedNodeIndex);
+
+                Color oldBackground = GUI.backgroundColor;
+                GUI.backgroundColor = new Color(1f, 0.5f, 0.5f);
+
+                if (GUILayout.Button("Del", GUILayout.Width(36f)))
+                {
+                    EpisodeNodeDefinition selected = GetSelectedNode();
+
+                    string id = selected != null ? selected.EpisodeId : "";
+                    if (EditorUtility.DisplayDialog("Delete Node", $"Delete '{id}'?", "Delete", "Cancel"))
+                        DeleteNode(_selectedNodeIndex);
+                }
+
+                GUI.backgroundColor = oldBackground;
+                GUI.enabled = true;
+            }
+
+            using (GUILayout.ScrollViewScope scroll = new GUILayout.ScrollViewScope(_leftScroll, GUILayout.ExpandHeight(true)))
+            {
+                _leftScroll = scroll.scrollPosition;
+
+                if (_target == null || _target.Nodes == null)
+                    return;
+
+                for (int i = 0; i < _target.Nodes.Count; i++)
+                {
+                    EpisodeNodeDefinition node = _target.Nodes[i];
+
+                    if (node == null)
+                    {
+                        DrawNodeRow(i, $"[{i}] (null)", false);
+                        continue;
+                    }
+
+                    bool selected = i == _selectedNodeIndex;
+
+                    string label = string.IsNullOrWhiteSpace(node.EpisodeId)
+                        ? $"[{i}] (empty id)"
+                        : $"[{i}] {node.EpisodeId}";
+
+                    if (node.IsChapterEndingCandidate)
+                        label += " ★";
+
+                    DrawNodeRow(i, label, selected);
+                }
+            }
         }
+    }
 
-        GUI.backgroundColor = Color.white;
-        GUI.enabled = true;
+    private void DrawNodeRow(int index, string label, bool selected)
+    {
+        GUIStyle rowStyle = selected ? _nodeRowSelectedStyle : _nodeRowStyle;
 
-        GUILayout.EndHorizontal();
+        Rect rowRect = GUILayoutUtility.GetRect(
+            GUIContent.none,
+            rowStyle,
+            GUILayout.Height(NODE_ROW_HEIGHT));
 
-        // 목록
-        _leftScroll = GUILayout.BeginScrollView(_leftScroll, GUILayout.ExpandHeight(true));
-
-        for (int i = 0; i < _target.Nodes.Count; i++)
-        {
-            EpisodeNodeDefinition node = _target.Nodes[i];
-            bool selected = i == _selectedNodeIndex;
-
-            GUIStyle rowStyle = selected ? _nodeRowSelectedStyle : _nodeRowStyle;
-
-            string label = string.IsNullOrWhiteSpace(node.EpisodeId)
-                ? $"[{i}] (empty id)"
-                : $"[{i}] {node.EpisodeId}";
-
-            if (node.IsChapterEndingCandidate)
-                label += " ★";
-
-            Rect rowRect = GUILayoutUtility.GetRect(
-                GUIContent.none, rowStyle, GUILayout.Height(NODE_ROW_HEIGHT));
-
-            if (GUI.Button(rowRect, label, rowStyle))
-                SelectNode(i);
-        }
-
-        GUILayout.EndScrollView();
-        GUILayout.EndVertical();
-        GUILayout.EndArea();
+        if (GUI.Button(rowRect, label, rowStyle))
+            SelectNode(index);
     }
 
     // ─────────────────────────────────────────────────────────
@@ -275,105 +333,145 @@ public sealed class EpisodeProgressionEditorWindow : EditorWindow
 
     private void DrawCenterPanel(Rect rect)
     {
-        GUILayout.BeginArea(rect);
-        GUILayout.BeginVertical();
-
-        if (_selectedNodeIndex < 0 || _selectedNodeIndex >= _target.Nodes.Count)
+        using (new GUILayout.AreaScope(rect))
+        using (new GUILayout.VerticalScope())
         {
-            EditorGUILayout.HelpBox("← Select a node to edit.", MessageType.None);
-            GUILayout.EndVertical();
-            GUILayout.EndArea();
-            return;
+            if (_target == null || _serializedObject == null)
+            {
+                EditorGUILayout.HelpBox("No target selected.", MessageType.Info);
+                return;
+            }
+
+            SerializedProperty nodesProp = _serializedObject.FindProperty("Nodes");
+
+            if (nodesProp == null || !nodesProp.isArray)
+            {
+                EditorGUILayout.HelpBox("Serialized property 'Nodes' was not found or is not an array.", MessageType.Error);
+                return;
+            }
+
+            if (_selectedNodeIndex < 0 || _selectedNodeIndex >= _target.Nodes.Count)
+            {
+                EditorGUILayout.HelpBox("← Select a node to edit.", MessageType.None);
+                return;
+            }
+
+            if (_selectedNodeIndex >= nodesProp.arraySize)
+            {
+                _selectedNodeIndex = Mathf.Clamp(_selectedNodeIndex, -1, nodesProp.arraySize - 1);
+                EditorGUILayout.HelpBox("Selected node index was out of sync. Select a node again.", MessageType.Warning);
+                return;
+            }
+
+            SerializedProperty nodeProp = nodesProp.GetArrayElementAtIndex(_selectedNodeIndex);
+
+            if (nodeProp == null)
+            {
+                EditorGUILayout.HelpBox("Selected node property is null.", MessageType.Warning);
+                return;
+            }
+
+            EpisodeNodeDefinition node = _target.Nodes[_selectedNodeIndex];
+
+            if (node == null)
+            {
+                EditorGUILayout.HelpBox("Selected node data is null.", MessageType.Warning);
+                return;
+            }
+
+            EnsureNodeLists(node);
+
+            EditorGUILayout.LabelField("Node Detail", _headerStyle, GUILayout.Height(22f));
+
+            using (GUILayout.ScrollViewScope scroll = new GUILayout.ScrollViewScope(_centerScroll, GUILayout.ExpandHeight(true)))
+            {
+                _centerScroll = scroll.scrollPosition;
+
+                EditorGUI.BeginChangeCheck();
+
+                DrawSectionLabel("Identity");
+
+                DrawPropField(nodeProp, "EpisodeId", "Episode ID");
+                DrawPropField(nodeProp, "Title", "Title");
+                DrawPropField(nodeProp, "IndexText", "Index Text");
+                DrawPropField(nodeProp, "Kind", "Kind");
+                DrawPropField(nodeProp, "DialogueEntryId", "Dialogue Entry ID");
+                DrawPropField(nodeProp, "DesignerNote", "Designer Note");
+
+                EditorGUILayout.Space(SECTION_GAP);
+
+                DrawSectionLabel("Ending");
+
+                DrawPropField(nodeProp, "IsChapterEndingCandidate", "Is Chapter Ending Candidate");
+
+                if (node.IsChapterEndingCandidate)
+                    DrawEndingKeyPopup(nodeProp, node);
+
+                EditorGUILayout.Space(SECTION_GAP);
+
+                _foldVisible = EditorGUILayout.Foldout(
+                    _foldVisible,
+                    $"Visible Conditions  ({node.VisibleConditions.Count})",
+                    true);
+
+                if (_foldVisible)
+                {
+                    DrawConditionList(
+                        nodeProp.FindPropertyRelative("VisibleConditions"),
+                        node.VisibleConditions,
+                        "VisibleConditions");
+                }
+
+                _foldUnlock = EditorGUILayout.Foldout(
+                    _foldUnlock,
+                    $"Unlock Conditions  ({node.UnlockConditions.Count})",
+                    true);
+
+                if (_foldUnlock)
+                {
+                    DrawConditionList(
+                        nodeProp.FindPropertyRelative("UnlockConditions"),
+                        node.UnlockConditions,
+                        "UnlockConditions");
+                }
+
+                EditorGUILayout.Space(SECTION_GAP);
+
+                _foldNext = EditorGUILayout.Foldout(
+                    _foldNext,
+                    $"Next Options  ({node.NextOptions.Count})",
+                    true);
+
+                if (_foldNext)
+                {
+                    DrawNextOptionList(
+                        nodeProp.FindPropertyRelative("NextOptions"),
+                        node.NextOptions,
+                        node.EpisodeId);
+                }
+
+                EditorGUILayout.Space(SECTION_GAP);
+
+                _foldAttachments = EditorGUILayout.Foldout(
+                    _foldAttachments,
+                    $"Attachments  ({node.Attachments.Count})",
+                    true);
+
+                if (_foldAttachments)
+                {
+                    DrawAttachmentList(
+                        nodeProp.FindPropertyRelative("Attachments"),
+                        node.Attachments,
+                        node.EpisodeId);
+                }
+
+                if (EditorGUI.EndChangeCheck())
+                {
+                    EditorUtility.SetDirty(_target);
+                    _validationDirty = true;
+                }
+            }
         }
-
-        SerializedProperty nodesProp = _serializedObject.FindProperty("Nodes");
-        SerializedProperty nodeProp  = nodesProp.GetArrayElementAtIndex(_selectedNodeIndex);
-
-        if (nodeProp == null)
-        {
-            GUILayout.EndVertical();
-            GUILayout.EndArea();
-            return;
-        }
-
-        EpisodeNodeDefinition node = _target.Nodes[_selectedNodeIndex];
-
-        EditorGUILayout.LabelField("Node Detail", _headerStyle, GUILayout.Height(22f));
-
-        _centerScroll = GUILayout.BeginScrollView(_centerScroll, GUILayout.ExpandHeight(true));
-
-        // ── 기본 정보 ──
-        DrawSectionLabel("Identity");
-
-        DrawPropField(nodeProp, "EpisodeId",       "Episode ID");
-        DrawPropField(nodeProp, "Title",            "Title");
-        DrawPropField(nodeProp, "IndexText",        "Index Text");
-        DrawPropField(nodeProp, "Kind",             "Kind");
-        DrawPropField(nodeProp, "DialogueEntryId",  "Dialogue Entry ID");
-        DrawPropField(nodeProp, "DesignerNote",     "Designer Note");
-
-        EditorGUILayout.Space(SECTION_GAP);
-
-        // ── 엔딩 정보 ──
-        DrawSectionLabel("Ending");
-
-        DrawPropField(nodeProp, "IsChapterEndingCandidate", "Is Chapter Ending Candidate");
-
-        if (node.IsChapterEndingCandidate)
-        {
-            // EndingKey를 EndingRules 목록에서 Popup으로 선택
-            DrawEndingKeyPopup(nodeProp, node);
-        }
-
-        EditorGUILayout.Space(SECTION_GAP);
-
-        // ── Visible 조건 ──
-        _foldVisible = EditorGUILayout.Foldout(_foldVisible,
-            $"Visible Conditions  ({node.VisibleConditions.Count})", true);
-
-        if (_foldVisible)
-        {
-            DrawConditionList(nodeProp.FindPropertyRelative("VisibleConditions"),
-                node.VisibleConditions, "VisibleConditions");
-        }
-
-        // ── Unlock 조건 ──
-        _foldUnlock = EditorGUILayout.Foldout(_foldUnlock,
-            $"Unlock Conditions  ({node.UnlockConditions.Count})", true);
-
-        if (_foldUnlock)
-        {
-            DrawConditionList(nodeProp.FindPropertyRelative("UnlockConditions"),
-                node.UnlockConditions, "UnlockConditions");
-        }
-
-        EditorGUILayout.Space(SECTION_GAP);
-
-        // ── Next Options ──
-        _foldNext = EditorGUILayout.Foldout(_foldNext,
-            $"Next Options  ({node.NextOptions.Count})", true);
-
-        if (_foldNext)
-        {
-            DrawNextOptionList(nodeProp.FindPropertyRelative("NextOptions"),
-                node.NextOptions, node.EpisodeId);
-        }
-
-        EditorGUILayout.Space(SECTION_GAP);
-
-        // ── Attachments ──
-        _foldAttachments = EditorGUILayout.Foldout(_foldAttachments,
-            $"Attachments  ({node.Attachments.Count})", true);
-
-        if (_foldAttachments)
-        {
-            DrawAttachmentList(nodeProp.FindPropertyRelative("Attachments"),
-                node.Attachments, node.EpisodeId);
-        }
-
-        GUILayout.EndScrollView();
-        GUILayout.EndVertical();
-        GUILayout.EndArea();
     }
 
     // ─────────────────────────────────────────────────────────
@@ -382,118 +480,178 @@ public sealed class EpisodeProgressionEditorWindow : EditorWindow
 
     private void DrawRightPanel(Rect rect)
     {
-        GUILayout.BeginArea(rect);
-        GUILayout.BeginVertical();
-
-        float halfH = rect.height * 0.45f;
-
-        // ── Ending Rules ──
-        EditorGUILayout.LabelField("Ending Rules", _headerStyle, GUILayout.Height(22f));
-
-        GUILayout.BeginHorizontal();
-
-        if (GUILayout.Button("+ Add Ending Rule", GUILayout.ExpandWidth(true)))
-            AddEndingRule();
-
-        GUI.enabled = _selectedEndingIndex >= 0 && _selectedEndingIndex < _target.EndingRules.Count;
-        GUI.backgroundColor = new Color(1f, 0.5f, 0.5f);
-
-        if (GUILayout.Button("Del", GUILayout.Width(36f)))
+        using (new GUILayout.AreaScope(rect))
+        using (new GUILayout.VerticalScope())
         {
-            if (EditorUtility.DisplayDialog("Delete Ending Rule",
-                $"Delete '{_target.EndingRules[_selectedEndingIndex].EndingKey}'?", "Delete", "Cancel"))
-                DeleteEndingRule(_selectedEndingIndex);
+            float halfH = rect.height * 0.45f;
+
+            EditorGUILayout.LabelField("Ending Rules", _headerStyle, GUILayout.Height(22f));
+
+            using (new GUILayout.HorizontalScope())
+            {
+                if (GUILayout.Button("+ Add Ending Rule", GUILayout.ExpandWidth(true)))
+                    AddEndingRule();
+
+                bool hasSelectedEnding =
+                    _selectedEndingIndex >= 0 &&
+                    _selectedEndingIndex < GetEndingCount();
+
+                GUI.enabled = hasSelectedEnding;
+
+                Color oldBackground = GUI.backgroundColor;
+                GUI.backgroundColor = new Color(1f, 0.5f, 0.5f);
+
+                if (GUILayout.Button("Del", GUILayout.Width(36f)))
+                {
+                    ChapterEndingRule selected = GetSelectedEndingRule();
+
+                    string key = selected != null ? selected.EndingKey : "";
+                    if (EditorUtility.DisplayDialog("Delete Ending Rule", $"Delete '{key}'?", "Delete", "Cancel"))
+                        DeleteEndingRule(_selectedEndingIndex);
+                }
+
+                GUI.backgroundColor = oldBackground;
+                GUI.enabled = true;
+            }
+
+            SerializedProperty endingsProp = _serializedObject != null
+                ? _serializedObject.FindProperty("EndingRules")
+                : null;
+
+            using (GUILayout.ScrollViewScope scroll = new GUILayout.ScrollViewScope(_rightScroll, GUILayout.Height(halfH)))
+            {
+                _rightScroll = scroll.scrollPosition;
+
+                if (_target != null && _target.EndingRules != null)
+                {
+                    for (int i = 0; i < _target.EndingRules.Count; i++)
+                    {
+                        ChapterEndingRule rule = _target.EndingRules[i];
+
+                        bool selected = i == _selectedEndingIndex;
+                        GUIStyle rowStyle = selected ? _nodeRowSelectedStyle : _nodeRowStyle;
+
+                        string label = rule == null || string.IsNullOrWhiteSpace(rule.EndingKey)
+                            ? $"[{i}] (empty)"
+                            : $"[{i}] {rule.EndingKey}";
+
+                        Rect rowRect = GUILayoutUtility.GetRect(
+                            GUIContent.none,
+                            rowStyle,
+                            GUILayout.Height(NODE_ROW_HEIGHT));
+
+                        if (GUI.Button(rowRect, label, rowStyle))
+                            _selectedEndingIndex = i;
+                    }
+                }
+            }
+
+            DrawSelectedEndingRule(endingsProp);
+
+            EditorGUILayout.Space(SECTION_GAP);
+
+            EditorGUILayout.LabelField("Validation", _headerStyle, GUILayout.Height(22f));
+
+            using (GUILayout.ScrollViewScope scroll = new GUILayout.ScrollViewScope(_validationScroll, GUILayout.ExpandHeight(true)))
+            {
+                _validationScroll = scroll.scrollPosition;
+                DrawValidationResult();
+            }
+        }
+    }
+
+    private void DrawSelectedEndingRule(SerializedProperty endingsProp)
+    {
+        if (_target == null || _target.EndingRules == null)
+            return;
+
+        if (endingsProp == null || !endingsProp.isArray)
+            return;
+
+        if (_selectedEndingIndex < 0)
+            return;
+
+        if (_selectedEndingIndex >= _target.EndingRules.Count || _selectedEndingIndex >= endingsProp.arraySize)
+        {
+            _selectedEndingIndex = -1;
+            return;
         }
 
-        GUI.backgroundColor = Color.white;
-        GUI.enabled = true;
-        GUILayout.EndHorizontal();
+        ChapterEndingRule rule = _target.EndingRules[_selectedEndingIndex];
 
-        _rightScroll = GUILayout.BeginScrollView(_rightScroll, GUILayout.Height(halfH));
-
-        SerializedProperty endingsProp = _serializedObject.FindProperty("EndingRules");
-
-        for (int i = 0; i < _target.EndingRules.Count; i++)
+        if (rule == null)
         {
-            bool selected = i == _selectedEndingIndex;
-            GUIStyle rowStyle = selected ? _nodeRowSelectedStyle : _nodeRowStyle;
-
-            ChapterEndingRule rule = _target.EndingRules[i];
-            string label = string.IsNullOrWhiteSpace(rule.EndingKey) ? $"[{i}] (empty)" : $"[{i}] {rule.EndingKey}";
-
-            Rect rowRect = GUILayoutUtility.GetRect(
-                GUIContent.none, rowStyle, GUILayout.Height(NODE_ROW_HEIGHT));
-
-            if (GUI.Button(rowRect, label, rowStyle))
-                _selectedEndingIndex = i;
+            EditorGUILayout.HelpBox("Selected EndingRule is null.", MessageType.Warning);
+            return;
         }
 
-        GUILayout.EndScrollView();
+        if (rule.Conditions == null)
+            rule.Conditions = new List<EpisodeCondition>();
 
-        // 선택된 EndingRule 인라인 편집
-        if (_selectedEndingIndex >= 0 && _selectedEndingIndex < _target.EndingRules.Count)
+        SerializedProperty ruleProp = endingsProp.GetArrayElementAtIndex(_selectedEndingIndex);
+
+        if (ruleProp == null)
+            return;
+
+        EditorGUI.BeginChangeCheck();
+
+        DrawPropField(ruleProp, "EndingKey", "Ending Key");
+        DrawPropField(ruleProp, "DisplayName", "Display Name");
+        DrawPropField(ruleProp, "UnlockNextChapter", "Unlock Next Chapter");
+
+        if (rule.UnlockNextChapter)
+            DrawPropField(ruleProp, "NextChapterId", "Next Chapter ID");
+
+        DrawPropField(ruleProp, "DesignerNote", "Designer Note");
+
+        EditorGUILayout.Space(4f);
+
+        SerializedProperty condProp = ruleProp.FindPropertyRelative("Conditions");
+        DrawConditionList(condProp, rule.Conditions, "EndingConditions");
+
+        if (EditorGUI.EndChangeCheck())
         {
-            SerializedProperty ruleProp =
-                endingsProp.GetArrayElementAtIndex(_selectedEndingIndex);
-
-            DrawPropField(ruleProp, "EndingKey",       "Ending Key");
-            DrawPropField(ruleProp, "DisplayName",     "Display Name");
-            DrawPropField(ruleProp, "UnlockNextChapter", "Unlock Next Chapter");
-
-            if (_target.EndingRules[_selectedEndingIndex].UnlockNextChapter)
-                DrawPropField(ruleProp, "NextChapterId", "Next Chapter ID");
-
-            DrawPropField(ruleProp, "DesignerNote", "Designer Note");
-
-            EditorGUILayout.Space(4f);
-            SerializedProperty condProp = ruleProp.FindPropertyRelative("Conditions");
-            DrawConditionList(condProp, _target.EndingRules[_selectedEndingIndex].Conditions,
-                "EndingConditions");
+            EditorUtility.SetDirty(_target);
+            _validationDirty = true;
         }
+    }
 
-        EditorGUILayout.Space(SECTION_GAP);
-
-        // ── Validation 결과 ──
-        EditorGUILayout.LabelField("Validation", _headerStyle, GUILayout.Height(22f));
-
-        _validationScroll = GUILayout.BeginScrollView(_validationScroll, GUILayout.ExpandHeight(true));
-
+    private void DrawValidationResult()
+    {
         if (_lastValidationResult == null)
         {
             EditorGUILayout.LabelField("Press 'Validate' to check.", EditorStyles.miniLabel);
+            return;
         }
-        else if (_lastValidationResult.Issues.Count == 0)
+
+        if (_lastValidationResult.Issues.Count == 0)
         {
             GUILayout.Label("✓ No issues found.", _infoStyle);
+            return;
         }
-        else
+
+        for (int i = 0; i < _lastValidationResult.Issues.Count; i++)
         {
-            for (int i = 0; i < _lastValidationResult.Issues.Count; i++)
-            {
-                EpisodeProgressionValidationIssue issue = _lastValidationResult.Issues[i];
+            EpisodeProgressionValidationIssue issue = _lastValidationResult.Issues[i];
 
-                GUIStyle style = issue.Severity == EpisodeProgressionIssueSeverity.Error
-                    ? _errorStyle
-                    : issue.Severity == EpisodeProgressionIssueSeverity.Warning
-                        ? _warningStyle
-                        : _infoStyle;
+            GUIStyle style = issue.Severity == EpisodeProgressionIssueSeverity.Error
+                ? _errorStyle
+                : issue.Severity == EpisodeProgressionIssueSeverity.Warning
+                    ? _warningStyle
+                    : _infoStyle;
 
-                string prefix = issue.Severity == EpisodeProgressionIssueSeverity.Error
-                    ? "✕" : issue.Severity == EpisodeProgressionIssueSeverity.Warning
-                        ? "⚠" : "ℹ";
+            string prefix = issue.Severity == EpisodeProgressionIssueSeverity.Error
+                ? "✕"
+                : issue.Severity == EpisodeProgressionIssueSeverity.Warning
+                    ? "⚠"
+                    : "ℹ";
 
-                string text = string.IsNullOrEmpty(issue.ContextId)
-                    ? $"{prefix} {issue.Message}"
-                    : $"{prefix} [{issue.ContextId}] {issue.Message}";
+            string text = string.IsNullOrEmpty(issue.ContextId)
+                ? $"{prefix} {issue.Message}"
+                : $"{prefix} [{issue.ContextId}] {issue.Message}";
 
-                GUILayout.Label(text, style);
-            }
+            GUILayout.Label(text, style);
         }
-
-        GUILayout.EndScrollView();
-
-        GUILayout.EndVertical();
-        GUILayout.EndArea();
     }
 
     // ─────────────────────────────────────────────────────────
@@ -505,62 +663,98 @@ public sealed class EpisodeProgressionEditorWindow : EditorWindow
         List<EpisodeCondition> list,
         string context)
     {
-        if (listProp == null)
+        if (listProp == null || list == null)
             return;
 
-        GUILayout.BeginVertical(EditorStyles.helpBox);
-
-        for (int i = 0; i < list.Count; i++)
+        using (new GUILayout.VerticalScope(EditorStyles.helpBox))
         {
-            SerializedProperty cond = listProp.GetArrayElementAtIndex(i);
+            int removeIndex = -1;
+            int count = Mathf.Min(list.Count, listProp.arraySize);
 
-            GUILayout.BeginHorizontal();
-
-            DrawEnumField(cond, "Kind", 70f);
-            DrawTextField(cond, "Key", 90f);
-            DrawEnumField(cond, "Op", 80f);
-
-            EpisodeConditionKind kind = (EpisodeConditionKind)cond.FindPropertyRelative("Kind").enumValueIndex;
-            EpisodeCompareOp     op   = (EpisodeCompareOp)cond.FindPropertyRelative("Op").enumValueIndex;
-
-            if (op != EpisodeCompareOp.Exists && op != EpisodeCompareOp.NotExists)
+            for (int i = 0; i < count; i++)
             {
-                if (kind == EpisodeConditionKind.Stat)
-                    EditorGUILayout.PropertyField(
-                        cond.FindPropertyRelative("IntValue"),
-                        GUIContent.none, GUILayout.Width(48f));
-                else if (kind == EpisodeConditionKind.Flag)
-                    EditorGUILayout.PropertyField(
-                        cond.FindPropertyRelative("BoolValue"),
-                        GUIContent.none, GUILayout.Width(18f));
-                else
-                    DrawTextField(cond, "StringValue", 70f);
+                if (list[i] == null)
+                {
+                    Undo.RecordObject(_target, "Repair Null Condition");
+                    list[i] = new EpisodeCondition();
+                    EditorUtility.SetDirty(_target);
+                    SyncSerializedObject();
+                }
+
+                SerializedProperty cond = listProp.GetArrayElementAtIndex(i);
+
+                using (new GUILayout.HorizontalScope())
+                {
+                    DrawEnumField(cond, "Kind", 70f);
+                    DrawTextField(cond, "Key", 90f);
+                    DrawEnumField(cond, "Op", 80f);
+
+                    SerializedProperty kindProp = cond != null ? cond.FindPropertyRelative("Kind") : null;
+                    SerializedProperty opProp = cond != null ? cond.FindPropertyRelative("Op") : null;
+
+                    if (kindProp != null && opProp != null)
+                    {
+                        EpisodeConditionKind kind = (EpisodeConditionKind)kindProp.enumValueIndex;
+                        EpisodeCompareOp op = (EpisodeCompareOp)opProp.enumValueIndex;
+
+                        if (op != EpisodeCompareOp.Exists && op != EpisodeCompareOp.NotExists)
+                        {
+                            if (kind == EpisodeConditionKind.Stat)
+                            {
+                                SerializedProperty intProp = cond.FindPropertyRelative("IntValue");
+
+                                if (intProp != null)
+                                    EditorGUILayout.PropertyField(intProp, GUIContent.none, GUILayout.Width(48f));
+                            }
+                            else if (kind == EpisodeConditionKind.Flag)
+                            {
+                                SerializedProperty boolProp = cond.FindPropertyRelative("BoolValue");
+
+                                if (boolProp != null)
+                                    EditorGUILayout.PropertyField(boolProp, GUIContent.none, GUILayout.Width(18f));
+                            }
+                            else
+                            {
+                                DrawTextField(cond, "StringValue", 70f);
+                            }
+                        }
+                    }
+
+                    Color oldBackground = GUI.backgroundColor;
+                    GUI.backgroundColor = new Color(1f, 0.5f, 0.5f);
+
+                    if (GUILayout.Button("×", GUILayout.Width(20f)))
+                        removeIndex = i;
+
+                    GUI.backgroundColor = oldBackground;
+                }
             }
 
-            GUI.backgroundColor = new Color(1f, 0.5f, 0.5f);
+            if (list.Count != listProp.arraySize)
+            {
+                EditorGUILayout.HelpBox(
+                    $"List and SerializedProperty size are out of sync. list={list.Count}, prop={listProp.arraySize}",
+                    MessageType.Warning);
+            }
 
-            if (GUILayout.Button("×", GUILayout.Width(20f)))
+            if (removeIndex >= 0 && removeIndex < list.Count)
             {
                 Undo.RecordObject(_target, "Remove Condition");
-                list.RemoveAt(i);
+                list.RemoveAt(removeIndex);
                 EditorUtility.SetDirty(_target);
+                SyncSerializedObject();
                 _validationDirty = true;
-                break;
             }
 
-            GUI.backgroundColor = Color.white;
-            GUILayout.EndHorizontal();
+            if (GUILayout.Button($"+ Add Condition ({context})", GUILayout.ExpandWidth(true)))
+            {
+                Undo.RecordObject(_target, "Add Condition");
+                list.Add(new EpisodeCondition());
+                EditorUtility.SetDirty(_target);
+                SyncSerializedObject();
+                _validationDirty = true;
+            }
         }
-
-        if (GUILayout.Button($"+ Add Condition ({context})", GUILayout.ExpandWidth(true)))
-        {
-            Undo.RecordObject(_target, "Add Condition");
-            list.Add(new EpisodeCondition());
-            EditorUtility.SetDirty(_target);
-            _validationDirty = true;
-        }
-
-        GUILayout.EndVertical();
     }
 
     // ─────────────────────────────────────────────────────────
@@ -572,93 +766,132 @@ public sealed class EpisodeProgressionEditorWindow : EditorWindow
         List<EpisodeNextOption> list,
         string ownerEpisodeId)
     {
-        if (listProp == null)
+        if (listProp == null || list == null)
             return;
 
         string[] allIds = CollectAllEpisodeIds();
 
-        GUILayout.BeginVertical(EditorStyles.helpBox);
-
-        for (int i = 0; i < list.Count; i++)
+        using (new GUILayout.VerticalScope(EditorStyles.helpBox))
         {
-            SerializedProperty optProp = listProp.GetArrayElementAtIndex(i);
-            EpisodeNextOption  opt     = list[i];
+            int removeIndex = -1;
+            int count = Mathf.Min(list.Count, listProp.arraySize);
 
-            GUILayout.BeginVertical(EditorStyles.helpBox);
+            for (int i = 0; i < count; i++)
+            {
+                if (list[i] == null)
+                {
+                    Undo.RecordObject(_target, "Repair Null NextOption");
+                    list[i] = new EpisodeNextOption();
+                    EditorUtility.SetDirty(_target);
+                    SyncSerializedObject();
+                }
 
-            // 헤더 행
-            GUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField($"Option [{i}]", EditorStyles.boldLabel, GUILayout.Width(80f));
-            GUILayout.FlexibleSpace();
+                SerializedProperty optProp = listProp.GetArrayElementAtIndex(i);
+                EpisodeNextOption opt = list[i];
 
-            GUI.backgroundColor = new Color(1f, 0.5f, 0.5f);
+                using (new GUILayout.VerticalScope(EditorStyles.helpBox))
+                {
+                    using (new GUILayout.HorizontalScope())
+                    {
+                        EditorGUILayout.LabelField($"Option [{i}]", EditorStyles.boldLabel, GUILayout.Width(80f));
+                        GUILayout.FlexibleSpace();
 
-            if (GUILayout.Button("Remove", GUILayout.Width(60f)))
+                        Color oldBackground = GUI.backgroundColor;
+                        GUI.backgroundColor = new Color(1f, 0.5f, 0.5f);
+
+                        if (GUILayout.Button("Remove", GUILayout.Width(60f)))
+                            removeIndex = i;
+
+                        GUI.backgroundColor = oldBackground;
+                    }
+
+                    using (new GUILayout.HorizontalScope())
+                    {
+                        EditorGUILayout.LabelField("Target Episode", GUILayout.Width(LABEL_W));
+
+                        int currentIdx = Array.IndexOf(allIds, opt.TargetEpisodeId);
+                        int popupIndex = Mathf.Max(0, currentIdx);
+
+                        int newIdx = EditorGUILayout.Popup(popupIndex, allIds);
+
+                        if (newIdx >= 0 && newIdx < allIds.Length)
+                        {
+                            string selected = allIds[newIdx] == NONE_LABEL ? "" : allIds[newIdx];
+
+                            if (selected != opt.TargetEpisodeId)
+                            {
+                                Undo.RecordObject(_target, "Set NextOption Target");
+
+                                SerializedProperty targetProp = optProp.FindPropertyRelative("TargetEpisodeId");
+
+                                if (targetProp != null)
+                                    targetProp.stringValue = selected;
+
+                                opt.TargetEpisodeId = selected;
+
+                                EditorUtility.SetDirty(_target);
+                                _validationDirty = true;
+                            }
+                        }
+
+                        SerializedProperty directTargetProp = optProp.FindPropertyRelative("TargetEpisodeId");
+
+                        if (directTargetProp != null)
+                        {
+                            string typed = EditorGUILayout.TextField(directTargetProp.stringValue, GUILayout.Width(100f));
+
+                            if (typed != directTargetProp.stringValue)
+                            {
+                                Undo.RecordObject(_target, "Set NextOption Target");
+                                directTargetProp.stringValue = typed;
+                                opt.TargetEpisodeId = typed;
+                                EditorUtility.SetDirty(_target);
+                                _validationDirty = true;
+                            }
+                        }
+                    }
+
+                    DrawPropField(optProp, "ChoiceLabel", "Choice Label");
+                    DrawPropField(optProp, "HideWhenLocked", "Hide When Locked");
+
+                    if (!opt.HideWhenLocked)
+                        DrawPropField(optProp, "LockedReasonText", "Locked Reason Text");
+
+                    if (opt.Conditions == null)
+                        opt.Conditions = new List<EpisodeCondition>();
+
+                    SerializedProperty condProp = optProp.FindPropertyRelative("Conditions");
+                    DrawConditionList(condProp, opt.Conditions, $"NextOption[{i}]");
+                }
+
+                GUILayout.Space(2f);
+            }
+
+            if (list.Count != listProp.arraySize)
+            {
+                EditorGUILayout.HelpBox(
+                    $"NextOptions list and SerializedProperty size are out of sync. list={list.Count}, prop={listProp.arraySize}",
+                    MessageType.Warning);
+            }
+
+            if (removeIndex >= 0 && removeIndex < list.Count)
             {
                 Undo.RecordObject(_target, "Remove NextOption");
-                list.RemoveAt(i);
+                list.RemoveAt(removeIndex);
                 EditorUtility.SetDirty(_target);
+                SyncSerializedObject();
                 _validationDirty = true;
-                GUILayout.EndHorizontal();
-                GUILayout.EndVertical();
-                break;
             }
 
-            GUI.backgroundColor = Color.white;
-            GUILayout.EndHorizontal();
-
-            // TargetEpisodeId — Popup 선택
-            GUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField("Target Episode", GUILayout.Width(LABEL_W));
-
-            int currentIdx = Array.IndexOf(allIds, opt.TargetEpisodeId);
-            int newIdx     = EditorGUILayout.Popup(Mathf.Max(0, currentIdx), allIds);
-
-            if (newIdx >= 0 && newIdx < allIds.Length && allIds[newIdx] != opt.TargetEpisodeId)
+            if (GUILayout.Button("+ Add Next Option", GUILayout.ExpandWidth(true)))
             {
-                Undo.RecordObject(_target, "Set NextOption Target");
-                optProp.FindPropertyRelative("TargetEpisodeId").stringValue = allIds[newIdx];
-                opt.TargetEpisodeId = allIds[newIdx];
+                Undo.RecordObject(_target, "Add NextOption");
+                list.Add(new EpisodeNextOption());
                 EditorUtility.SetDirty(_target);
+                SyncSerializedObject();
                 _validationDirty = true;
             }
-
-            // 직접 입력도 허용
-            string typed = EditorGUILayout.TextField(opt.TargetEpisodeId, GUILayout.Width(100f));
-
-            if (typed != opt.TargetEpisodeId)
-            {
-                Undo.RecordObject(_target, "Set NextOption Target");
-                optProp.FindPropertyRelative("TargetEpisodeId").stringValue = typed;
-                EditorUtility.SetDirty(_target);
-                _validationDirty = true;
-            }
-
-            GUILayout.EndHorizontal();
-
-            DrawPropField(optProp, "ChoiceLabel",     "Choice Label");
-            DrawPropField(optProp, "HideWhenLocked",  "Hide When Locked");
-
-            if (!opt.HideWhenLocked)
-                DrawPropField(optProp, "LockedReasonText", "Locked Reason Text");
-
-            // 조건
-            SerializedProperty condProp = optProp.FindPropertyRelative("Conditions");
-            DrawConditionList(condProp, opt.Conditions, $"NextOption[{i}]");
-
-            GUILayout.EndVertical();
-            GUILayout.Space(2f);
         }
-
-        if (GUILayout.Button("+ Add Next Option", GUILayout.ExpandWidth(true)))
-        {
-            Undo.RecordObject(_target, "Add NextOption");
-            list.Add(new EpisodeNextOption());
-            EditorUtility.SetDirty(_target);
-            _validationDirty = true;
-        }
-
-        GUILayout.EndVertical();
     }
 
     // ─────────────────────────────────────────────────────────
@@ -670,72 +903,98 @@ public sealed class EpisodeProgressionEditorWindow : EditorWindow
         List<EpisodeAttachmentDefinition> list,
         string ownerEpisodeId)
     {
-        if (listProp == null)
+        if (listProp == null || list == null)
             return;
 
-        GUILayout.BeginVertical(EditorStyles.helpBox);
-
-        for (int i = 0; i < list.Count; i++)
+        using (new GUILayout.VerticalScope(EditorStyles.helpBox))
         {
-            SerializedProperty attProp = listProp.GetArrayElementAtIndex(i);
+            int removeIndex = -1;
+            int count = Mathf.Min(list.Count, listProp.arraySize);
 
-            GUILayout.BeginVertical(EditorStyles.helpBox);
-
-            GUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField($"Attachment [{i}]", EditorStyles.boldLabel, GUILayout.Width(120f));
-            GUILayout.FlexibleSpace();
-
-            GUI.backgroundColor = new Color(1f, 0.5f, 0.5f);
-
-            if (GUILayout.Button("Remove", GUILayout.Width(60f)))
+            for (int i = 0; i < count; i++)
             {
-                Undo.RecordObject(_target, "Remove Attachment");
-                list.RemoveAt(i);
-                EditorUtility.SetDirty(_target);
-                _validationDirty = true;
-                GUILayout.EndHorizontal();
-                GUILayout.EndVertical();
-                break;
+                if (list[i] == null)
+                {
+                    Undo.RecordObject(_target, "Repair Null Attachment");
+                    list[i] = new EpisodeAttachmentDefinition
+                    {
+                        ParentEpisodeId = ownerEpisodeId
+                    };
+
+                    EditorUtility.SetDirty(_target);
+                    SyncSerializedObject();
+                }
+
+                SerializedProperty attProp = listProp.GetArrayElementAtIndex(i);
+                EpisodeAttachmentDefinition att = list[i];
+
+                EnsureAttachmentLists(att);
+
+                using (new GUILayout.VerticalScope(EditorStyles.helpBox))
+                {
+                    using (new GUILayout.HorizontalScope())
+                    {
+                        EditorGUILayout.LabelField($"Attachment [{i}]", EditorStyles.boldLabel, GUILayout.Width(120f));
+                        GUILayout.FlexibleSpace();
+
+                        Color oldBackground = GUI.backgroundColor;
+                        GUI.backgroundColor = new Color(1f, 0.5f, 0.5f);
+
+                        if (GUILayout.Button("Remove", GUILayout.Width(60f)))
+                            removeIndex = i;
+
+                        GUI.backgroundColor = oldBackground;
+                    }
+
+                    DrawPropField(attProp, "AttachmentId", "Attachment ID");
+                    DrawPropField(attProp, "ParentEpisodeId", "Parent Episode ID");
+                    DrawPropField(attProp, "Title", "Title");
+                    DrawPropField(attProp, "IndexText", "Index Text");
+                    DrawPropField(attProp, "Kind", "Kind");
+                    DrawPropField(attProp, "DialogueEntryId", "Dialogue Entry ID");
+                    DrawPropField(attProp, "IsRepeatable", "Is Repeatable");
+                    DrawPropField(attProp, "DesignerNote", "Designer Note");
+
+                    SerializedProperty visibleProp = attProp.FindPropertyRelative("VisibleConditions");
+                    SerializedProperty unlockProp = attProp.FindPropertyRelative("UnlockConditions");
+
+                    DrawConditionList(visibleProp, att.VisibleConditions, $"Att[{i}].Visible");
+                    DrawConditionList(unlockProp, att.UnlockConditions, $"Att[{i}].Unlock");
+                }
+
+                GUILayout.Space(2f);
             }
 
-            GUI.backgroundColor = Color.white;
-            GUILayout.EndHorizontal();
-
-            DrawPropField(attProp, "AttachmentId",    "Attachment ID");
-            DrawPropField(attProp, "ParentEpisodeId", "Parent Episode ID");
-            DrawPropField(attProp, "Title",           "Title");
-            DrawPropField(attProp, "IndexText",       "Index Text");
-            DrawPropField(attProp, "Kind",            "Kind");
-            DrawPropField(attProp, "DialogueEntryId", "Dialogue Entry ID");
-            DrawPropField(attProp, "IsRepeatable",    "Is Repeatable");
-            DrawPropField(attProp, "DesignerNote",    "Designer Note");
-
-            // 조건
-            SerializedProperty visibleProp = attProp.FindPropertyRelative("VisibleConditions");
-            SerializedProperty unlockProp  = attProp.FindPropertyRelative("UnlockConditions");
-
-            DrawConditionList(visibleProp, list[i].VisibleConditions, $"Att[{i}].Visible");
-            DrawConditionList(unlockProp,  list[i].UnlockConditions,  $"Att[{i}].Unlock");
-
-            GUILayout.EndVertical();
-            GUILayout.Space(2f);
-        }
-
-        if (GUILayout.Button("+ Add Attachment", GUILayout.ExpandWidth(true)))
-        {
-            Undo.RecordObject(_target, "Add Attachment");
-
-            list.Add(new EpisodeAttachmentDefinition
+            if (list.Count != listProp.arraySize)
             {
-                // 현재 선택된 EpisodeId를 ParentEpisodeId로 자동 입력
-                ParentEpisodeId = ownerEpisodeId
-            });
+                EditorGUILayout.HelpBox(
+                    $"Attachments list and SerializedProperty size are out of sync. list={list.Count}, prop={listProp.arraySize}",
+                    MessageType.Warning);
+            }
 
-            EditorUtility.SetDirty(_target);
-            _validationDirty = true;
+            if (removeIndex >= 0 && removeIndex < list.Count)
+            {
+                Undo.RecordObject(_target, "Remove Attachment");
+                list.RemoveAt(removeIndex);
+                EditorUtility.SetDirty(_target);
+                SyncSerializedObject();
+                _validationDirty = true;
+            }
+
+            if (GUILayout.Button("+ Add Attachment", GUILayout.ExpandWidth(true)))
+            {
+                Undo.RecordObject(_target, "Add Attachment");
+
+                list.Add(new EpisodeAttachmentDefinition
+                {
+                    ParentEpisodeId = ownerEpisodeId
+                });
+
+                EditorUtility.SetDirty(_target);
+                SyncSerializedObject();
+                _validationDirty = true;
+            }
         }
-
-        GUILayout.EndVertical();
     }
 
     // ─────────────────────────────────────────────────────────
@@ -744,38 +1003,56 @@ public sealed class EpisodeProgressionEditorWindow : EditorWindow
 
     private void DrawEndingKeyPopup(SerializedProperty nodeProp, EpisodeNodeDefinition node)
     {
+        if (nodeProp == null || node == null)
+            return;
+
         string[] endingKeys = CollectEndingKeys();
 
-        GUILayout.BeginHorizontal();
-        EditorGUILayout.LabelField("Ending Key", GUILayout.Width(LABEL_W));
-
-        int currentIdx = Array.IndexOf(endingKeys, node.EndingKey);
-        int newIdx     = EditorGUILayout.Popup(Mathf.Max(0, currentIdx), endingKeys);
-
-        if (newIdx >= 0 && newIdx < endingKeys.Length)
+        using (new GUILayout.HorizontalScope())
         {
-            string selected = endingKeys[newIdx];
+            EditorGUILayout.LabelField("Ending Key", GUILayout.Width(LABEL_W));
 
-            if (selected != node.EndingKey && selected != "(none)")
+            int currentIdx = Array.IndexOf(endingKeys, node.EndingKey);
+            int popupIndex = Mathf.Max(0, currentIdx);
+
+            int newIdx = EditorGUILayout.Popup(popupIndex, endingKeys);
+
+            if (newIdx >= 0 && newIdx < endingKeys.Length)
             {
-                Undo.RecordObject(_target, "Set EndingKey");
-                nodeProp.FindPropertyRelative("EndingKey").stringValue = selected;
-                EditorUtility.SetDirty(_target);
-                _validationDirty = true;
+                string selected = endingKeys[newIdx] == NONE_LABEL ? "" : endingKeys[newIdx];
+
+                if (selected != node.EndingKey)
+                {
+                    Undo.RecordObject(_target, "Set EndingKey");
+
+                    SerializedProperty endingKeyProp = nodeProp.FindPropertyRelative("EndingKey");
+
+                    if (endingKeyProp != null)
+                        endingKeyProp.stringValue = selected;
+
+                    node.EndingKey = selected;
+
+                    EditorUtility.SetDirty(_target);
+                    _validationDirty = true;
+                }
+            }
+
+            SerializedProperty directEndingKeyProp = nodeProp.FindPropertyRelative("EndingKey");
+
+            if (directEndingKeyProp != null)
+            {
+                string typed = EditorGUILayout.TextField(directEndingKeyProp.stringValue, GUILayout.Width(100f));
+
+                if (typed != directEndingKeyProp.stringValue)
+                {
+                    Undo.RecordObject(_target, "Set EndingKey");
+                    directEndingKeyProp.stringValue = typed;
+                    node.EndingKey = typed;
+                    EditorUtility.SetDirty(_target);
+                    _validationDirty = true;
+                }
             }
         }
-
-        string typed = EditorGUILayout.TextField(node.EndingKey, GUILayout.Width(100f));
-
-        if (typed != node.EndingKey)
-        {
-            Undo.RecordObject(_target, "Set EndingKey");
-            nodeProp.FindPropertyRelative("EndingKey").stringValue = typed;
-            EditorUtility.SetDirty(_target);
-            _validationDirty = true;
-        }
-
-        GUILayout.EndHorizontal();
     }
 
     // ─────────────────────────────────────────────────────────
@@ -784,81 +1061,124 @@ public sealed class EpisodeProgressionEditorWindow : EditorWindow
 
     private void AddNode()
     {
+        if (_target == null)
+            return;
+
+        EnsureTargetLists();
+
         Undo.RecordObject(_target, "Add Episode Node");
 
         _target.Nodes.Add(new EpisodeNodeDefinition
         {
-            EpisodeId      = GenerateUniqueEpisodeId("new_episode"),
-            Title          = "New Episode",
+            EpisodeId = GenerateUniqueEpisodeId("new_episode"),
+            Title = "New Episode",
             DialogueEntryId = ""
         });
 
         EditorUtility.SetDirty(_target);
+        SyncSerializedObject();
+
         SelectNode(_target.Nodes.Count - 1);
         _validationDirty = true;
     }
 
     private void DuplicateNode(int index)
     {
+        if (_target == null || _target.Nodes == null)
+            return;
+
         if (index < 0 || index >= _target.Nodes.Count)
             return;
 
-        Undo.RecordObject(_target, "Duplicate Episode Node");
-
         EpisodeNodeDefinition original = _target.Nodes[index];
+
+        if (original == null)
+            return;
+
+        EnsureNodeLists(original);
+
+        Undo.RecordObject(_target, "Duplicate Episode Node");
 
         EpisodeNodeDefinition copy = new EpisodeNodeDefinition
         {
-            EpisodeId               = GenerateUniqueEpisodeId(original.EpisodeId + "_copy"),
-            Title                   = original.Title,
-            IndexText               = original.IndexText,
-            Kind                    = original.Kind,
-            DialogueEntryId         = original.DialogueEntryId,
+            EpisodeId = GenerateUniqueEpisodeId(original.EpisodeId + "_copy"),
+            Title = original.Title,
+            IndexText = original.IndexText,
+            Kind = original.Kind,
+            DialogueEntryId = original.DialogueEntryId,
             IsChapterEndingCandidate = original.IsChapterEndingCandidate,
-            EndingKey               = original.EndingKey,
-            DesignerNote            = original.DesignerNote,
+            EndingKey = original.EndingKey,
+            DesignerNote = original.DesignerNote
         };
 
-        // 리스트 딥 카피
         foreach (EpisodeCondition c in original.VisibleConditions)
-            copy.VisibleConditions.Add(CloneCondition(c));
+        {
+            if (c != null)
+                copy.VisibleConditions.Add(CloneCondition(c));
+        }
 
         foreach (EpisodeCondition c in original.UnlockConditions)
-            copy.UnlockConditions.Add(CloneCondition(c));
+        {
+            if (c != null)
+                copy.UnlockConditions.Add(CloneCondition(c));
+        }
 
         foreach (EpisodeNextOption o in original.NextOptions)
-            copy.NextOptions.Add(CloneNextOption(o));
+        {
+            if (o != null)
+                copy.NextOptions.Add(CloneNextOption(o));
+        }
 
-        // Attachment는 AttachmentId가 unique 해야 하므로 suffix 추가
         foreach (EpisodeAttachmentDefinition a in original.Attachments)
-            copy.Attachments.Add(CloneAttachment(a, copy.EpisodeId));
+        {
+            if (a != null)
+                copy.Attachments.Add(CloneAttachment(a, copy.EpisodeId));
+        }
 
         _target.Nodes.Insert(index + 1, copy);
+
         EditorUtility.SetDirty(_target);
+        SyncSerializedObject();
+
         SelectNode(index + 1);
         _validationDirty = true;
     }
 
     private void DeleteNode(int index)
     {
+        if (_target == null || _target.Nodes == null)
+            return;
+
         if (index < 0 || index >= _target.Nodes.Count)
             return;
 
         Undo.RecordObject(_target, "Delete Episode Node");
-        _target.Nodes.RemoveAt(index);
-        EditorUtility.SetDirty(_target);
 
-        _selectedNodeIndex = Mathf.Clamp(index - 1, -1, _target.Nodes.Count - 1);
+        _target.Nodes.RemoveAt(index);
+
+        EditorUtility.SetDirty(_target);
+        SyncSerializedObject();
+
+        int count = GetNodeCount();
+        _selectedNodeIndex = count > 0 ? Mathf.Clamp(index - 1, 0, count - 1) : -1;
+
         _validationDirty = true;
     }
 
     private void SelectNode(int index)
     {
-        _selectedNodeIndex = index;
-        _foldVisible    = true;
-        _foldUnlock     = true;
-        _foldNext       = true;
+        int count = GetNodeCount();
+
+        if (count <= 0)
+            _selectedNodeIndex = -1;
+        else
+            _selectedNodeIndex = Mathf.Clamp(index, 0, count - 1);
+
+        _foldVisible = true;
+        _foldUnlock = true;
+        _foldNext = true;
         _foldAttachments = true;
+
         Repaint();
     }
 
@@ -868,28 +1188,44 @@ public sealed class EpisodeProgressionEditorWindow : EditorWindow
 
     private void AddEndingRule()
     {
+        if (_target == null)
+            return;
+
+        EnsureTargetLists();
+
         Undo.RecordObject(_target, "Add Ending Rule");
 
         _target.EndingRules.Add(new ChapterEndingRule
         {
-            EndingKey   = GenerateUniqueEndingKey("new_ending"),
+            EndingKey = GenerateUniqueEndingKey("new_ending"),
             DisplayName = "New Ending"
         });
 
         EditorUtility.SetDirty(_target);
+        SyncSerializedObject();
+
         _selectedEndingIndex = _target.EndingRules.Count - 1;
         _validationDirty = true;
     }
 
     private void DeleteEndingRule(int index)
     {
+        if (_target == null || _target.EndingRules == null)
+            return;
+
         if (index < 0 || index >= _target.EndingRules.Count)
             return;
 
         Undo.RecordObject(_target, "Delete Ending Rule");
+
         _target.EndingRules.RemoveAt(index);
+
         EditorUtility.SetDirty(_target);
-        _selectedEndingIndex = Mathf.Clamp(index - 1, -1, _target.EndingRules.Count - 1);
+        SyncSerializedObject();
+
+        int count = GetEndingCount();
+        _selectedEndingIndex = count > 0 ? Mathf.Clamp(index - 1, 0, count - 1) : -1;
+
         _validationDirty = true;
     }
 
@@ -899,8 +1235,14 @@ public sealed class EpisodeProgressionEditorWindow : EditorWindow
 
     private void RunValidation()
     {
-        _serializedObject.ApplyModifiedProperties();
+        if (_target == null)
+            return;
+
+        if (_serializedObject != null)
+            _serializedObject.ApplyModifiedProperties();
+
         _lastValidationResult = EpisodeProgressionValidator.Validate(_target);
+
         Repaint();
     }
 
@@ -910,13 +1252,17 @@ public sealed class EpisodeProgressionEditorWindow : EditorWindow
 
     private void SetTarget(ChapterEpisodeProgressionSO target)
     {
-        _target              = target;
-        _serializedObject    = target != null ? new SerializedObject(target) : null;
-        _selectedNodeIndex   = -1;
+        _target = target;
+        _serializedObject = target != null ? new SerializedObject(target) : null;
+
+        if (_target != null)
+            EnsureTargetLists();
+
+        _selectedNodeIndex = -1;
         _selectedEndingIndex = -1;
         _lastValidationResult = null;
 
-        if (_target != null && _target.Nodes.Count > 0)
+        if (_target != null && _target.Nodes != null && _target.Nodes.Count > 0)
             SelectNode(0);
 
         Repaint();
@@ -937,15 +1283,150 @@ public sealed class EpisodeProgressionEditorWindow : EditorWindow
         ChapterEpisodeProgressionSO asset =
             CreateInstance<ChapterEpisodeProgressionSO>();
 
-        asset.ChapterId   = "ch_new";
+        asset.ChapterId = "ch_new";
         asset.DisplayName = "New Chapter";
 
         AssetDatabase.CreateAsset(asset, path);
         AssetDatabase.SaveAssets();
 
         SetTarget(asset);
+
         EditorUtility.FocusProjectWindow();
         Selection.activeObject = asset;
+    }
+
+    // ─────────────────────────────────────────────────────────
+    // 상태 보정 / 동기화
+    // ─────────────────────────────────────────────────────────
+
+    private void EnsureTargetLists()
+    {
+        if (_target == null)
+            return;
+
+        bool dirty = false;
+
+        if (_target.Nodes == null)
+        {
+            _target.Nodes = new List<EpisodeNodeDefinition>();
+            dirty = true;
+        }
+
+        if (_target.EndingRules == null)
+        {
+            _target.EndingRules = new List<ChapterEndingRule>();
+            dirty = true;
+        }
+
+        if (dirty)
+            EditorUtility.SetDirty(_target);
+    }
+
+    private static void EnsureNodeLists(EpisodeNodeDefinition node)
+    {
+        if (node == null)
+            return;
+
+        if (node.VisibleConditions == null)
+            node.VisibleConditions = new List<EpisodeCondition>();
+
+        if (node.UnlockConditions == null)
+            node.UnlockConditions = new List<EpisodeCondition>();
+
+        if (node.NextOptions == null)
+            node.NextOptions = new List<EpisodeNextOption>();
+
+        if (node.Attachments == null)
+            node.Attachments = new List<EpisodeAttachmentDefinition>();
+    }
+
+    private static void EnsureAttachmentLists(EpisodeAttachmentDefinition attachment)
+    {
+        if (attachment == null)
+            return;
+
+        if (attachment.VisibleConditions == null)
+            attachment.VisibleConditions = new List<EpisodeCondition>();
+
+        if (attachment.UnlockConditions == null)
+            attachment.UnlockConditions = new List<EpisodeCondition>();
+    }
+
+    private void SyncSerializedObject()
+    {
+        if (_target == null)
+            return;
+
+        if (_serializedObject == null || _serializedObject.targetObject != _target)
+            _serializedObject = new SerializedObject(_target);
+
+        _serializedObject.Update();
+        ClampSelectionIndices();
+        Repaint();
+    }
+
+    private void ClampSelectionIndices()
+    {
+        if (_target == null)
+        {
+            _selectedNodeIndex = -1;
+            _selectedEndingIndex = -1;
+            return;
+        }
+
+        int nodeCount = GetNodeCount();
+
+        if (nodeCount <= 0)
+            _selectedNodeIndex = -1;
+        else if (_selectedNodeIndex >= nodeCount)
+            _selectedNodeIndex = nodeCount - 1;
+        else if (_selectedNodeIndex < -1)
+            _selectedNodeIndex = -1;
+
+        int endingCount = GetEndingCount();
+
+        if (endingCount <= 0)
+            _selectedEndingIndex = -1;
+        else if (_selectedEndingIndex >= endingCount)
+            _selectedEndingIndex = endingCount - 1;
+        else if (_selectedEndingIndex < -1)
+            _selectedEndingIndex = -1;
+    }
+
+    private int GetNodeCount()
+    {
+        return _target != null && _target.Nodes != null
+            ? _target.Nodes.Count
+            : 0;
+    }
+
+    private int GetEndingCount()
+    {
+        return _target != null && _target.EndingRules != null
+            ? _target.EndingRules.Count
+            : 0;
+    }
+
+    private EpisodeNodeDefinition GetSelectedNode()
+    {
+        if (_target == null || _target.Nodes == null)
+            return null;
+
+        if (_selectedNodeIndex < 0 || _selectedNodeIndex >= _target.Nodes.Count)
+            return null;
+
+        return _target.Nodes[_selectedNodeIndex];
+    }
+
+    private ChapterEndingRule GetSelectedEndingRule()
+    {
+        if (_target == null || _target.EndingRules == null)
+            return null;
+
+        if (_selectedEndingIndex < 0 || _selectedEndingIndex >= _target.EndingRules.Count)
+            return null;
+
+        return _target.EndingRules[_selectedEndingIndex];
     }
 
     // ─────────────────────────────────────────────────────────
@@ -954,6 +1435,9 @@ public sealed class EpisodeProgressionEditorWindow : EditorWindow
 
     private string GenerateUniqueEpisodeId(string seed)
     {
+        if (string.IsNullOrWhiteSpace(seed))
+            seed = "episode";
+
         if (!EpisodeIdExists(seed))
             return seed;
 
@@ -986,44 +1470,40 @@ public sealed class EpisodeProgressionEditorWindow : EditorWindow
 
     private string GenerateUniqueEndingKey(string seed)
     {
+        if (string.IsNullOrWhiteSpace(seed))
+            seed = "ending";
+
         if (_target == null || _target.EndingRules == null)
             return seed;
 
-        bool exists = false;
-
-        for (int i = 0; i < _target.EndingRules.Count; i++)
-        {
-            if (_target.EndingRules[i] != null
-                && string.Equals(_target.EndingRules[i].EndingKey, seed, StringComparison.Ordinal))
-            {
-                exists = true;
-                break;
-            }
-        }
-
-        if (!exists)
+        if (!EndingKeyExists(seed))
             return seed;
 
         for (int i = 2; i < 100; i++)
         {
             string candidate = $"{seed}_{i}";
-            bool dup = false;
 
-            for (int j = 0; j < _target.EndingRules.Count; j++)
-            {
-                if (_target.EndingRules[j] != null
-                    && string.Equals(_target.EndingRules[j].EndingKey, candidate, StringComparison.Ordinal))
-                {
-                    dup = true;
-                    break;
-                }
-            }
-
-            if (!dup)
+            if (!EndingKeyExists(candidate))
                 return candidate;
         }
 
         return seed + "_" + Guid.NewGuid().ToString("N").Substring(0, 6);
+    }
+
+    private bool EndingKeyExists(string key)
+    {
+        if (_target == null || _target.EndingRules == null)
+            return false;
+
+        for (int i = 0; i < _target.EndingRules.Count; i++)
+        {
+            ChapterEndingRule rule = _target.EndingRules[i];
+
+            if (rule != null && string.Equals(rule.EndingKey, key, StringComparison.Ordinal))
+                return true;
+        }
+
+        return false;
     }
 
     // ─────────────────────────────────────────────────────────
@@ -1033,9 +1513,9 @@ public sealed class EpisodeProgressionEditorWindow : EditorWindow
     private string[] CollectAllEpisodeIds()
     {
         if (_target == null || _target.Nodes == null)
-            return new[] { "(none)" };
+            return new[] { NONE_LABEL };
 
-        List<string> ids = new List<string> { "(none)" };
+        List<string> ids = new List<string> { NONE_LABEL };
 
         for (int i = 0; i < _target.Nodes.Count; i++)
         {
@@ -1051,9 +1531,9 @@ public sealed class EpisodeProgressionEditorWindow : EditorWindow
     private string[] CollectEndingKeys()
     {
         if (_target == null || _target.EndingRules == null)
-            return new[] { "(none)" };
+            return new[] { NONE_LABEL };
 
-        List<string> keys = new List<string> { "(none)" };
+        List<string> keys = new List<string> { NONE_LABEL };
 
         for (int i = 0; i < _target.EndingRules.Count; i++)
         {
@@ -1072,29 +1552,40 @@ public sealed class EpisodeProgressionEditorWindow : EditorWindow
 
     private static EpisodeCondition CloneCondition(EpisodeCondition src)
     {
+        if (src == null)
+            return new EpisodeCondition();
+
         return new EpisodeCondition
         {
-            Kind        = src.Kind,
-            Key         = src.Key,
-            Op          = src.Op,
-            IntValue    = src.IntValue,
-            BoolValue   = src.BoolValue,
+            Kind = src.Kind,
+            Key = src.Key,
+            Op = src.Op,
+            IntValue = src.IntValue,
+            BoolValue = src.BoolValue,
             StringValue = src.StringValue
         };
     }
 
     private static EpisodeNextOption CloneNextOption(EpisodeNextOption src)
     {
-        EpisodeNextOption copy = new EpisodeNextOption
-        {
-            TargetEpisodeId = src.TargetEpisodeId,
-            ChoiceLabel     = src.ChoiceLabel,
-            HideWhenLocked  = src.HideWhenLocked,
-            LockedReasonText = src.LockedReasonText
-        };
+        EpisodeNextOption copy = new EpisodeNextOption();
 
-        foreach (EpisodeCondition c in src.Conditions)
-            copy.Conditions.Add(CloneCondition(c));
+        if (src == null)
+            return copy;
+
+        copy.TargetEpisodeId = src.TargetEpisodeId;
+        copy.ChoiceLabel = src.ChoiceLabel;
+        copy.HideWhenLocked = src.HideWhenLocked;
+        copy.LockedReasonText = src.LockedReasonText;
+
+        if (src.Conditions != null)
+        {
+            foreach (EpisodeCondition c in src.Conditions)
+            {
+                if (c != null)
+                    copy.Conditions.Add(CloneCondition(c));
+            }
+        }
 
         return copy;
     }
@@ -1105,21 +1596,37 @@ public sealed class EpisodeProgressionEditorWindow : EditorWindow
     {
         EpisodeAttachmentDefinition copy = new EpisodeAttachmentDefinition
         {
-            AttachmentId    = src.AttachmentId + "_copy",
-            ParentEpisodeId = newParentEpisodeId,
-            Title           = src.Title,
-            IndexText       = src.IndexText,
-            Kind            = src.Kind,
-            DialogueEntryId = src.DialogueEntryId,
-            IsRepeatable    = src.IsRepeatable,
-            DesignerNote    = src.DesignerNote
+            ParentEpisodeId = newParentEpisodeId
         };
 
-        foreach (EpisodeCondition c in src.VisibleConditions)
-            copy.VisibleConditions.Add(CloneCondition(c));
+        if (src == null)
+            return copy;
 
-        foreach (EpisodeCondition c in src.UnlockConditions)
-            copy.UnlockConditions.Add(CloneCondition(c));
+        copy.AttachmentId = src.AttachmentId + "_copy";
+        copy.Title = src.Title;
+        copy.IndexText = src.IndexText;
+        copy.Kind = src.Kind;
+        copy.DialogueEntryId = src.DialogueEntryId;
+        copy.IsRepeatable = src.IsRepeatable;
+        copy.DesignerNote = src.DesignerNote;
+
+        if (src.VisibleConditions != null)
+        {
+            foreach (EpisodeCondition c in src.VisibleConditions)
+            {
+                if (c != null)
+                    copy.VisibleConditions.Add(CloneCondition(c));
+            }
+        }
+
+        if (src.UnlockConditions != null)
+        {
+            foreach (EpisodeCondition c in src.UnlockConditions)
+            {
+                if (c != null)
+                    copy.UnlockConditions.Add(CloneCondition(c));
+            }
+        }
 
         return copy;
     }
@@ -1130,6 +1637,12 @@ public sealed class EpisodeProgressionEditorWindow : EditorWindow
 
     private static void DrawPropField(SerializedProperty parent, string propName, string label)
     {
+        if (parent == null)
+        {
+            EditorGUILayout.LabelField($"[Missing parent: {propName}]", EditorStyles.miniLabel);
+            return;
+        }
+
         SerializedProperty prop = parent.FindPropertyRelative(propName);
 
         if (prop == null)
@@ -1143,6 +1656,9 @@ public sealed class EpisodeProgressionEditorWindow : EditorWindow
 
     private static void DrawTextField(SerializedProperty parent, string propName, float width)
     {
+        if (parent == null)
+            return;
+
         SerializedProperty prop = parent.FindPropertyRelative(propName);
 
         if (prop == null)
@@ -1153,6 +1669,9 @@ public sealed class EpisodeProgressionEditorWindow : EditorWindow
 
     private static void DrawEnumField(SerializedProperty parent, string propName, float width)
     {
+        if (parent == null)
+            return;
+
         SerializedProperty prop = parent.FindPropertyRelative(propName);
 
         if (prop == null)
@@ -1162,7 +1681,7 @@ public sealed class EpisodeProgressionEditorWindow : EditorWindow
     }
 
     // ─────────────────────────────────────────────────────────
-    // 스타일 초기화 (OnGUI에서 지연 호출)
+    // 스타일 초기화
     // ─────────────────────────────────────────────────────────
 
     private void EnsureStyles()
@@ -1174,14 +1693,14 @@ public sealed class EpisodeProgressionEditorWindow : EditorWindow
 
         _headerStyle = new GUIStyle(EditorStyles.boldLabel)
         {
-            fontSize  = 12,
+            fontSize = 12,
             alignment = TextAnchor.MiddleLeft
         };
         _headerStyle.normal.textColor = new Color(0.85f, 0.85f, 0.85f);
 
         _sectionStyle = new GUIStyle(EditorStyles.label)
         {
-            fontSize  = 11,
+            fontSize = 11,
             fontStyle = FontStyle.Italic
         };
         _sectionStyle.normal.textColor = new Color(0.6f, 0.8f, 1f);
@@ -1189,13 +1708,13 @@ public sealed class EpisodeProgressionEditorWindow : EditorWindow
         _nodeRowStyle = new GUIStyle(EditorStyles.label)
         {
             alignment = TextAnchor.MiddleLeft,
-            padding   = new RectOffset(8, 4, 0, 0)
+            padding = new RectOffset(8, 4, 0, 0)
         };
         _nodeRowStyle.normal.textColor = new Color(0.8f, 0.8f, 0.8f);
 
         _nodeRowSelectedStyle = new GUIStyle(_nodeRowStyle);
         _nodeRowSelectedStyle.normal.background = MakeTex(1, 1, new Color(0.22f, 0.45f, 0.7f, 0.6f));
-        _nodeRowSelectedStyle.normal.textColor  = Color.white;
+        _nodeRowSelectedStyle.normal.textColor = Color.white;
 
         _errorStyle = new GUIStyle(EditorStyles.wordWrappedLabel);
         _errorStyle.normal.textColor = new Color(1f, 0.4f, 0.4f);
@@ -1225,6 +1744,7 @@ public sealed class EpisodeProgressionEditorWindow : EditorWindow
         Texture2D result = new Texture2D(width, height);
         result.SetPixels(pix);
         result.Apply();
+
         return result;
     }
 }

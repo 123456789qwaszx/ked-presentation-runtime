@@ -81,13 +81,13 @@ public sealed class LobbyUIRoot : UIRoot<LobbyUIRoot.Refs>
 
     private void Present()
     {
-        _story.SetLabel("스토리");
-        _load.SetLabel("불러오기");
-        _settings.SetLabel("설정");
-
-        _recruit.SetLabel("모집");
-        _roster.SetLabel("여행가");
-        _shop.SetLabel("상점");
+        _story?.SetLabel("스토리");
+        // _load?.SetLabel("불러오기");
+        // _settings?.SetLabel("설정");
+        //
+        // _recruit?.SetLabel("모집");
+        // _roster?.SetLabel("여행가");
+        // _shop?.SetLabel("상점");
 
         // Hub 기본 placeholder (런타임 값은 PresentHub가 덮어씀)
         if (_timestampText) _timestampText.text = "--.--.-- --:--";
@@ -102,12 +102,12 @@ public sealed class LobbyUIRoot : UIRoot<LobbyUIRoot.Refs>
     private void BindHandlers()
     {
         _story.OnClicked += HandleStory;
-        _load.OnClicked += HandleLoad;
-        _settings.OnClicked += HandleSettings;
-
-        _recruit.OnClicked += HandleRecruit;
-        _roster.OnClicked += HandleRoster;
-        _shop.OnClicked += HandleShop;
+        // _load.OnClicked += HandleLoad;
+        // _settings.OnClicked += HandleSettings;
+        //
+        // _recruit.OnClicked += HandleRecruit;
+        // _roster.OnClicked += HandleRoster;
+        // _shop.OnClicked += HandleShop;
 
         if (_nextBroadcast != null)
             _nextBroadcast.OnClicked += HandleNextBroadcast;
@@ -167,12 +167,12 @@ public sealed class LobbyUIRoot : UIRoot<LobbyUIRoot.Refs>
         if (!_valid) return;
 
         _story.OnClicked -= HandleStory;
-        _load.OnClicked -= HandleLoad;
-        _settings.OnClicked -= HandleSettings;
-
-        _recruit.OnClicked -= HandleRecruit;
-        _roster.OnClicked -= HandleRoster;
-        _shop.OnClicked -= HandleShop;
+        // _load.OnClicked -= HandleLoad;
+        // _settings.OnClicked -= HandleSettings;
+        //
+        // _recruit.OnClicked -= HandleRecruit;
+        // _roster.OnClicked -= HandleRoster;
+        // _shop.OnClicked -= HandleShop;
 
         if (_nextBroadcast != null)
             _nextBroadcast.OnClicked -= HandleNextBroadcast;
@@ -189,12 +189,12 @@ public sealed class LobbyUIRoot : UIRoot<LobbyUIRoot.Refs>
         AppendMissing(ref missing, _nextBroadcast, Refs.NextBroadcastButton_BWidget);
 
         AppendMissing(ref missing, _story, Refs.StoryButton_BWidget);
-        AppendMissing(ref missing, _load, Refs.LoadButton_BWidget);
-        AppendMissing(ref missing, _settings, Refs.SettingsButton_BWidget);
+        //AppendMissing(ref missing, _load, Refs.LoadButton_BWidget);
+        //AppendMissing(ref missing, _settings, Refs.SettingsButton_BWidget);
 
-        AppendMissing(ref missing, _recruit, Refs.RecruitButton_BWidget);
-        AppendMissing(ref missing, _roster, Refs.RosterButton_BWidget); // <- (주의) 네가 복붙하다 실수하기 쉬운 부분
-        AppendMissing(ref missing, _shop, Refs.ShopButton_BWidget);
+        //AppendMissing(ref missing, _recruit, Refs.RecruitButton_BWidget);
+        //AppendMissing(ref missing, _roster, Refs.RosterButton_BWidget);
+        //AppendMissing(ref missing, _shop, Refs.ShopButton_BWidget);
 
         if (missing.Length > 0)
         {

@@ -28,8 +28,17 @@ public static class ChapterCardEntryDefaults
                 chapterIndexLabel: "챕터 03",
                 chapterTitle: "Broadcast Fever",
                 episodeHeading: "03 Locked Route",
-                interactable: false,
-                locked: true),
+                interactable: true,
+                locked: false),
+            
+            new ChapterCardEntry(
+                chapterId: 4,
+                indexText: "04",
+                chapterIndexLabel: "챕터 04",
+                chapterTitle: "한 여름날의 기묘한 일",
+                episodeHeading: "04 돌아가는 하루",
+                interactable: true,
+                locked: false),
         };
     }
 }

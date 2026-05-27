@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
@@ -59,8 +60,12 @@ public sealed partial class ChapterSelectionPanel : UIPanel<ChapterSelectionPane
     protected override void OnInitialize()
     {
         _scrollRect = View.Rect(Refs.ButtonViewport).GetComponent<ScrollRect>();
-        
+
         BindEvent(View.Button(Refs.ReturnButton), HandleOnBackRequested);
+
+        View.Image(Refs.SelectChapterBG_Image).sprite = Resources.Load<Sprite>("sprites/BG-Darkmode");
+        View.Image(Refs.Character_Image).sprite = Resources.Load<Sprite>("sprites/Shadow-LightMode");
+        
     }
 
     public void SetChapterCardHandlers(
