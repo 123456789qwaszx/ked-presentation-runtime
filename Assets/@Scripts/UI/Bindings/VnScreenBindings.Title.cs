@@ -11,39 +11,38 @@ public sealed partial class VnScreenBindings
     
     private void GoToTitle()
     {
-        UI.SwitchRoot<TitleUIRoot>(titleRoot =>
+        UI.SwitchRoot<TitleUIRoot>(root =>
         {
-            BindMain(titleRoot, ApplyBindings);
-            RefreshTitleState(titleRoot);
+            BindMain(root, ApplyBindings);
+            Refresh(root);
         });
     }
     
-    private void ApplyBindings(TitleUIRoot titleRoot)
+    private void ApplyBindings(TitleUIRoot root)
     {
-        AddBinding(titleRoot, 
-            t => t.StartClicked += HandleStartClicked,
-            t => t.StartClicked -= HandleStartClicked);
+        AddBinding(root, 
+            r => r.StartClicked += HandleStartClicked,
+            r => r.StartClicked -= HandleStartClicked);
 
-        AddBinding(titleRoot,
-            t => t.ContinueClicked += HandleContinueClicked,
-            t => t.ContinueClicked -= HandleContinueClicked);
+        AddBinding(root,
+            r => r.ContinueClicked += HandleContinueClicked,
+            r => r.ContinueClicked -= HandleContinueClicked);
 
-        AddBinding(titleRoot,
-            t => t.LoadClicked += HandleLoadClicked,
-            t => t.LoadClicked -= HandleLoadClicked);
+        AddBinding(root,
+            r => r.LoadClicked += HandleLoadClicked,
+            r => r.LoadClicked -= HandleLoadClicked);
 
-        AddBinding(titleRoot,
-            t => t.AlbumClicked += HandleAlbumClicked,
-            t => t.AlbumClicked -= HandleAlbumClicked);
+        AddBinding(root,
+            r => r.AlbumClicked += HandleAlbumClicked,
+            r => r.AlbumClicked -= HandleAlbumClicked);
 
-        AddBinding(titleRoot,
-            t => t.SettingsClicked += HandleSettingsClicked,
-            t => t.SettingsClicked -= HandleSettingsClicked);
+        AddBinding(root,
+            r => r.SettingsClicked += HandleSettingsClicked,
+            r => r.SettingsClicked -= HandleSettingsClicked);
 
-        AddBinding(titleRoot,
-            t => t.QuitClicked += OnQuitPressed,
-            t => t.QuitClicked -= OnQuitPressed);
-
+        AddBinding(root,
+            r => r.QuitClicked += OnQuitPressed,
+            r => r.QuitClicked -= OnQuitPressed);
     }
     
     private void HandleStartClicked()
@@ -81,7 +80,7 @@ public sealed partial class VnScreenBindings
 #endif
     }
     
-    private void RefreshTitleState(TitleUIRoot titleRoot)
+    private void Refresh(TitleUIRoot titleRoot)
     {
         bool canContinue = _vnSaveLoadSystem.CanContinue();
 

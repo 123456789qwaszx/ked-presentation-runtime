@@ -8,7 +8,7 @@ public sealed partial class VnScreenBindings
 
         UI.PushPanel<SkipConfirmPanel>(panel =>
         {
-            BindPanel(panel, BindEpisodeSkipConfirmPanel);
+            BindPanel(panel, ApplyBindings);
 
             panel.Present(
                 title: "에피소드를 스킵할까요?",
@@ -18,7 +18,7 @@ public sealed partial class VnScreenBindings
         });
     }
 
-    private void BindEpisodeSkipConfirmPanel(SkipConfirmPanel panel)
+    private void ApplyBindings(SkipConfirmPanel panel)
     {
         AddBinding(panel,
             p => p.ConfirmClicked += HandleEpisodeSkipConfirmed,

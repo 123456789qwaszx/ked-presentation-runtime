@@ -16,37 +16,23 @@ public sealed partial class VnScreenBindings
 
         UI.PushPanel<ChoicePanel>(panel =>
         {
-            BindPanel(panel, BindChoicePanel);
+            BindPanel(panel, ApplyBindings);
             panel.Present(choices);
         });
     }
 
-    private void BindChoicePanel(ChoicePanel panel)
+    private void ApplyBindings(ChoicePanel panel)
     {
-        AddBinding(
-            panel,
+        AddBinding(panel,
             p => p.OnChoiceSelected += HandleChoiceSelected,
             p => p.OnChoiceSelected -= HandleChoiceSelected);
 
-        AddBinding(
-            panel,
-            p => p.OnCloseRequested += CloseChoicePanel,
-            p => p.OnCloseRequested -= CloseChoicePanel);
+        AddBinding(panel,
+            p => p.OnCloseRequested += ClosePanel,
+            p => p.OnCloseRequested -= ClosePanel);
     }
 
     private void HandleChoiceSelected(int index)
     {
-    }
-
-    private void CloseChoicePanel()
-    {
-        _uxState.SetChoicesVisible(false);
-
-        ChoicePanel panel = UI.GetUI<ChoicePanel>();
-
-        if (panel != null)
-            Unbind(panel);
-
-        UI.PopPanel();
     }
 }

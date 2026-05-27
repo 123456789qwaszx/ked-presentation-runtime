@@ -39,18 +39,11 @@ public sealed class EpisodeSelectionSystem
         _episodeGraphRenderer.SetHandlers(RequestSelectEpisode);
     }
 
-    public bool RequestOpenChapter(int chapterId)
+    public bool DrawEpisodeNodes(int chapterId)
     {
-        if (_progressionCatalog == null)
+        if (!_progressionCatalog.TryGetProgression(chapterId, out ChapterEpisodeProgressionSO progression))
             return false;
-
-        if (!_progressionCatalog.TryGetProgression(
-                chapterId,
-                out ChapterEpisodeProgressionSO progression))
-        {
-            return false;
-        }
-
+        
         _currentProgression = progression;
         _currentGraphData = _graphDataBuilder.Build(progression);
 
@@ -60,29 +53,18 @@ public sealed class EpisodeSelectionSystem
         return true;
     }
 
-    public void RequestRender()
+    private void RequestRender()
     {
-        if (_currentGraphData == null)
-            return;
-
-        EpisodeGraphViewData viewData = _viewModelBuilder.Build(
-            _currentGraphData,
-            _runtimeState,
-            _layoutOptions);
+        EpisodeGraphViewData viewData = _viewModelBuilder.Build(_currentGraphData, _runtimeState, _layoutOptions);
 
         _episodeGraphRenderer.Render(viewData);
 
         string selected = _runtimeState.SelectedEpisodeId;
 
-        if (!string.IsNullOrEmpty(selected) &&
-            viewData.TryGetNode(selected, out EpisodeNodeViewData node))
-        {
+        if (!string.IsNullOrEmpty(selected) && viewData.TryGetNode(selected, out EpisodeNodeViewData node))
             _scrollController.ScrollToPositionX(node.AnchoredPosition.x, 0.5f);
-        }
         else
-        {
             _scrollController.ScrollToLeft();
-        }
     }
 
     public bool TryGetSelectedEpisodeId(out string episodeId)
@@ -106,16 +88,11 @@ public sealed class EpisodeSelectionSystem
         RequestRender();
     }
 
-    public bool TryGetDialogueEntryId(
-        string episodeId,
-        out string dialogueEntryId)
+    public bool TryGetDialogueEntryId(string episodeId, out string dialogueEntryId)
     {
         dialogueEntryId = "";
 
         if (string.IsNullOrEmpty(episodeId))
-            return false;
-
-        if (_currentGraphData == null)
             return false;
 
         EpisodeGraphNodeData node = _currentGraphData.FindNode(episodeId);
@@ -145,9 +122,7 @@ public sealed class EpisodeSelectionSystem
         EpisodeRequested?.Invoke(episodeId);
     }
 
-    private void InitializeRuntimeStateForChapter(
-        int chapterId,
-        ChapterEpisodeProgressionSO progression)
+    private void InitializeRuntimeStateForChapter(int chapterId, ChapterEpisodeProgressionSO progression)
     {
         _runtimeState.CurrentChapterId = chapterId;
 

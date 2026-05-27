@@ -4,11 +4,11 @@ public sealed partial class VnScreenBindings
     {
         UI.SwitchRoot<LobbyUIRoot>(root =>
         {
-            BindMain(root, BindLobbyRoot);
+            BindMain(root, ApplyBindings);
         });
     }
 
-    private void BindLobbyRoot(LobbyUIRoot root)
+    private void ApplyBindings(LobbyUIRoot root)
     {
         AddBinding(
             root,

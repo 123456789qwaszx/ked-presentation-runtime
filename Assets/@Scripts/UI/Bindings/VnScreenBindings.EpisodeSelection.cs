@@ -21,10 +21,7 @@ public sealed partial class VnScreenBindings
 
             Refresh(panel);
 
-            if (_episodeSelectionSystem != null)
-                _episodeSelectionSystem.RequestOpenChapter(chapterId);
-            else
-                Debug.LogWarning("[VnScreenBindings] EpisodeSelectionSystem is null.");
+            _episodeSelectionSystem.DrawEpisodeNodes(chapterId);
         });
     }
 

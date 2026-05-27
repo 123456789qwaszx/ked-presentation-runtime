@@ -11,7 +11,7 @@ public sealed partial class VnScreenBindings
         UI.PushPanel<SaveLoadMenuUIPanel>(panel =>
         {
             BindPanel(panel, ApplyBindings);
-            RefreshSaveLoadPanel(panel);
+            Refresh(panel);
         });
     }
 
@@ -48,10 +48,10 @@ public sealed partial class VnScreenBindings
             CloseAllPanels();
         }
 
-        RefreshSaveLoadPanel(UIManager.Instance.GetUI<SaveLoadMenuUIPanel>());
+        Refresh(UIManager.Instance.GetUI<SaveLoadMenuUIPanel>());
     }
     
-    private void RefreshSaveLoadPanel(SaveLoadMenuUIPanel saveLoadPanel)
+    private void Refresh(SaveLoadMenuUIPanel saveLoadPanel)
     {
         VNSaveSlotMeta[] metas = _vnSaveLoadSystem.GetAllSaveSlotMetas();
 
