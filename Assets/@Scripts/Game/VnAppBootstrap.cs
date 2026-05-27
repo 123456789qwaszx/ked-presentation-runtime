@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.Serialization;
 using Yarn.Unity;
@@ -85,7 +86,13 @@ public class VnAppBootstrap : MonoBehaviour
              "Empty fields bake a complete rig from CharacterRigSchema at runtime. " +
              "Prefab the baked result when you need performance setup, external systems, response targets, or shot helpers.")]
     [SerializeField] private RectTransform rigPrefab;
+    
+    
+    [Header("ChapterButtonCard")] 
     [SerializeField] private RectTransform chapterCardPrefab;
+    [SerializeField] private ChapterCardFactory chapterCardFactory;
+    
+    
     [SerializeField] private RectTransform nodeRigPrefab;
 
     private PresentationSessionBridge _presentationSessionBridge;
@@ -118,7 +125,11 @@ public class VnAppBootstrap : MonoBehaviour
         BootstrapPlaybackControls();
 
         BootstrapVnSaveLoadRuntime();
+        
+        
+        
         BootstrapEpisodeSelectionRuntime();
+        
 
         InitializeEpisodePlayer();
         BootstrapScreenBindings();
@@ -433,14 +444,8 @@ public class VnAppBootstrap : MonoBehaviour
             _linePresentationAdvanceState);
 
         _screenBindings.ConfigureEpisodeSelection(_episodeSelectionController);
-
-        _screenBindings.ConfigureChapterSelection(
-            resolveChapterModels: ResolveChapterModels,
-            chapterCardPrefab: chapterCardPrefab,
-            chapterCardCount: 6);
-
+        _screenBindings.ConfigureChapterSelection(chapterCardFactory, chapterCardPrefab);
         _screenBindings.ConfigureAlbumView(_vnSaveLoadSystem);
-
         _screenBindings.ConfigureTitleView(episodePlayer);
     }
     
@@ -452,39 +457,6 @@ public class VnAppBootstrap : MonoBehaviour
     private void OpenInitialScreen()
     {
         _screenBindings.OpenTitleMenu();
-    }
-
-    private ChapterButtonCardModel[] ResolveChapterModels()
-    {
-        return new[]
-        {
-            new ChapterButtonCardModel(
-                chapterId: 0,
-                indexText: "01",
-                chapterIndexLabel: "CHAPTER 01",
-                chapterTitle: "Stella Sora",
-                episodeHeading: "01 First Broadcast",
-                interactable: true,
-                locked: false),
-
-            new ChapterButtonCardModel(
-                chapterId: 1,
-                indexText: "02",
-                chapterIndexLabel: "CHAPTER 02",
-                chapterTitle: "Signal Noise",
-                episodeHeading: "02 Unread Message",
-                interactable: true,
-                locked: false),
-
-            new ChapterButtonCardModel(
-                chapterId: 2,
-                indexText: "03",
-                chapterIndexLabel: "CHAPTER 03",
-                chapterTitle: "Broadcast Fever",
-                episodeHeading: "03 Locked Route",
-                interactable: false,
-                locked: true),
-        };
     }
     
     #region Helper

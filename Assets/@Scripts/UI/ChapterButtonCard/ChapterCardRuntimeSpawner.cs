@@ -2,60 +2,41 @@ using System.Collections.Generic;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
+public interface IChapterCardRootProvider
+{
+    RectTransform ChapterCardRoot { get; }
+}
+public sealed partial class ChapterSelectionPanel : IChapterCardRootProvider
+{
+    public RectTransform ChapterCardRoot => View?.Rect(Refs.ChapterButtons);
+}
+
 public sealed class ChapterCardRuntimeSpawner
 {
-    public ChapterButtonCard CreateCard(
-        RectTransform parent,
-        RectTransform prefab,
-        string rolePrefix,
-        string rootName)
+    private IChapterCardRootProvider _rootProvider;
+    private IChapterCardRootProvider ResolveRootProvider()
     {
+        _rootProvider = UIManager.Instance.GetUI<ChapterSelectionPanel>();
+        return _rootProvider;
+    }
+    
+    private IChapterCardRootProvider RootProvider => _rootProvider ??= ResolveRootProvider();
+    
+    public List<ChapterButtonCard> CreateCards(RectTransform prefab, int count)
+    {
+        List<ChapterButtonCard> cards = new List<ChapterButtonCard>();
+        
         if (prefab == null)
         {
             Debug.LogWarning("[ChapterCardRuntimeSpawner] Prefab is null.");
-            return null;
+            return cards;
         }
 
-        RectTransform instance = Object.Instantiate(prefab);
-
-        if (!string.IsNullOrWhiteSpace(rootName))
-            instance.name = WithRole(rolePrefix, rootName);
-
-        if (parent != null)
-            instance.SetParent(parent, false);
-        else
-            Debug.LogWarning("[ChapterCardRuntimeSpawner] Parent is null.", instance);
-
-        ChapterButtonCard card = instance.GetComponent<ChapterButtonCard>();
-
-        if (card == null)
-        {
-            Debug.LogWarning(
-                "[ChapterCardRuntimeSpawner] Prefab does not have ChapterButtonCard component.",
-                instance);
-
-            return null;
-        }
-
-        return card;
-    }
-
-    public List<ChapterButtonCard> CreateCards(
-        RectTransform parent,
-        RectTransform prefab,
-        int count)
-    {
-        List<ChapterButtonCard> cards = new List<ChapterButtonCard>();
+        RectTransform parent = RootProvider?.ChapterCardRoot;
 
         for (int i = 0; i < count; i++)
         {
-            string prefix = $"card{i:00}_";
-
-            ChapterButtonCard card = CreateCard(
-                parent,
-                prefab,
-                prefix,
-                "ChapterButtonCard");
+            ChapterButtonCard card = CreateCard(parent, prefab);
 
             if (card != null)
                 cards.Add(card);
@@ -63,15 +44,19 @@ public sealed class ChapterCardRuntimeSpawner
 
         return cards;
     }
-
-    private static string WithRole(string rolePrefix, string baseName)
+    
+    private ChapterButtonCard CreateCard(RectTransform parent, RectTransform prefab)
     {
-        if (string.IsNullOrEmpty(rolePrefix))
-            return baseName;
+        RectTransform instance = Object.Instantiate(prefab, parent, false);
 
-        if (baseName.StartsWith(rolePrefix, System.StringComparison.Ordinal))
-            return baseName;
+        ChapterButtonCard card = instance.GetComponent<ChapterButtonCard>();
 
-        return $"{rolePrefix}{baseName}";
+        if (card == null)
+        {
+            Debug.LogWarning("[ChapterCardRuntimeSpawner] Prefab does not have ChapterButtonCard component.", instance);
+            return null;
+        }
+
+        return card;
     }
 }

@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Generic;
-using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public sealed class ChapterSelectionPanel : UIPanel<ChapterSelectionPanel.Refs>
+public sealed partial class ChapterSelectionPanel : UIPanel<ChapterSelectionPanel.Refs>
 {
     public event Action CloseClicked;
     
@@ -55,11 +54,12 @@ public sealed class ChapterSelectionPanel : UIPanel<ChapterSelectionPanel.Refs>
     }
 
     private readonly List<ChapterButtonCard> _cards = new();
-    
-    public RectTransform CardContainer => View.Rect(Refs.ChapterButtons);
+    private ScrollRect _scrollRect;
 
     protected override void OnInitialize()
     {
+        _scrollRect = View.Rect(Refs.ButtonViewport).GetComponent<ScrollRect>();
+        
         BindEvent(View.Button(Refs.ReturnButton), HandleOnBackRequested);
     }
 
@@ -71,8 +71,6 @@ public sealed class ChapterSelectionPanel : UIPanel<ChapterSelectionPanel.Refs>
         _onChapterCardPressed = onPressed;
         _onChapterCardReleased = onReleased;
         _onChapterCardClicked = onClicked;
-
-        ApplyCardHandlers();
     }
 
     public void RegisterCards(IReadOnlyList<ChapterButtonCard> cards)
@@ -82,8 +80,6 @@ public sealed class ChapterSelectionPanel : UIPanel<ChapterSelectionPanel.Refs>
         if (cards == null)
             return;
 
-        ScrollRect scrollRect = FindChapterScrollRect();
-
         for (int i = 0; i < cards.Count; i++)
         {
             ChapterButtonCard card = cards[i];
@@ -92,10 +88,12 @@ public sealed class ChapterSelectionPanel : UIPanel<ChapterSelectionPanel.Refs>
                 continue;
 
             _cards.Add(card);
-            card.SetDragScrollRect(scrollRect);
+            card.SetDragScrollRect(_scrollRect);
+            card.SetHandlers(
+                _onChapterCardPressed,
+                _onChapterCardReleased,
+                _onChapterCardClicked);
         }
-
-        ApplyCardHandlers();
     }
 
     public void PresentChapters(ChapterButtonCardModel[] models)
@@ -120,36 +118,10 @@ public sealed class ChapterSelectionPanel : UIPanel<ChapterSelectionPanel.Refs>
             card.Present(model);
         }
     }
-
-    private void ApplyCardHandlers()
+    
+    private void HandleOnBackRequested(PointerEventData _)
     {
-        for (int i = 0; i < _cards.Count; i++)
-        {
-            ChapterButtonCard card = _cards[i];
-
-            if (card == null)
-                continue;
-
-            card.SetHandlers(
-                _onChapterCardPressed,
-                _onChapterCardReleased,
-                _onChapterCardClicked);
-        }
-    }
-
-    private ScrollRect FindChapterScrollRect()
-    {
-        RectTransform viewport = View.Rect(Refs.ButtonViewport);
-
-        if (viewport == null)
-            return null;
-
-        ScrollRect scrollRect = viewport.GetComponent<ScrollRect>();
-
-        if (scrollRect != null)
-            return scrollRect;
-
-        return viewport.GetComponentInParent<ScrollRect>();
+        CloseClicked?.Invoke();
     }
 
     private void ClearCards()
@@ -157,18 +129,14 @@ public sealed class ChapterSelectionPanel : UIPanel<ChapterSelectionPanel.Refs>
         for (int i = 0; i < _cards.Count; i++)
         {
             ChapterButtonCard card = _cards[i];
-
+            
             if (card == null)
                 continue;
-
+            
             card.ClearHandlers();
+            Destroy(card.gameObject);
         }
 
         _cards.Clear();
-    }
-
-    private void HandleOnBackRequested(PointerEventData _)
-    {
-        CloseClicked?.Invoke();
     }
 }

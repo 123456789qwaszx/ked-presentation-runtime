@@ -1,5 +1,3 @@
-using UnityEngine;
-
 public sealed partial class VnScreenBindings
 {
     private void OpenBacklogPanel()

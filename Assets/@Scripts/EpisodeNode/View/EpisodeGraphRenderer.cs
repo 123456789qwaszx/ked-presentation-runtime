@@ -21,7 +21,12 @@ public sealed class EpisodeGraphRenderer
 {
     private IEpisodeGraphScrollRootProvider _rootProvider;
     private IEpisodeGraphScrollRootProvider RootProvider => _rootProvider ??= ResolveRootProvider();
-    private IEpisodeGraphScrollRootProvider ResolveRootProvider() => UIManager.Instance.GetUI<EpisodeSelectionPanel>();
+
+    private IEpisodeGraphScrollRootProvider ResolveRootProvider()
+    {
+        _rootProvider = UIManager.Instance.GetUI<EpisodeSelectionPanel>();
+        return _rootProvider;
+    }
     
     private readonly RectTransform _nodeRigPrefab;
 

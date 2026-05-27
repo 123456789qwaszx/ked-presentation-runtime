@@ -1,34 +1,33 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public sealed partial class VnScreenBindings
 {
-    private Func<ChapterButtonCardModel[]> _resolveChapterModels;
+    private readonly ChapterCardRuntimeSpawner _chapterCardSpawner = new();
 
-    private readonly ChapterCardRuntimeSpawner _chapterCardSpawner = new ();
-
+    private ChapterCardFactory _chapterCardFactory;
     private RectTransform _chapterCardPrefab;
-    private int _chapterCardCount = 6;
 
     public void ConfigureChapterSelection(
-        Func<ChapterButtonCardModel[]> resolveChapterModels = null,
-        RectTransform chapterCardPrefab = null,
-        int chapterCardCount = 6)
+        ChapterCardFactory chapterCardFactory,
+        RectTransform chapterCardPrefab = null)
     {
-        _resolveChapterModels = resolveChapterModels;
-
+        _chapterCardFactory = chapterCardFactory;
         _chapterCardPrefab = chapterCardPrefab;
-        _chapterCardCount = Mathf.Max(0, chapterCardCount);
     }
 
-    public void OpenChapterSelectionPanel()
+    private void OpenChapterSelectionPanel()
     {
         UI.PushPanel<ChapterSelectionPanel>(panel =>
         {
             BindPanel(panel, ApplyBindings);
-            BuildChapterCards(panel);
-            Refresh(panel);
+
+            ChapterButtonCardModel[] models = _chapterCardFactory.CreateModels();
+            
+            List<ChapterButtonCard> cards = _chapterCardSpawner.CreateCards(_chapterCardPrefab, models.Length);
+            panel.RegisterCards(cards);
+            
+            panel.PresentChapters(models);
         });
     }
 
@@ -38,68 +37,27 @@ public sealed partial class VnScreenBindings
             p => p.CloseClicked += ClosePanel,
             p => p.CloseClicked -= ClosePanel);
 
-        panel.SetChapterCardHandlers(
-            onPressed: OnChapterCardPressed,
-            onReleased: OnChapterCardReleased,
-            onClicked: OnChapterCardClicked);
+        AddBinding(panel,
+            p => p.SetChapterCardHandlers(
+                onPressed: OnChapterCardPressed,
+                onReleased: OnChapterCardReleased,
+                onClicked: OnChapterCardClicked),
+            p => p.SetChapterCardHandlers(
+                onPressed: null,
+                onReleased: null,
+                onClicked: null));
     }
-    
+
     private void OnChapterCardPressed(ChapterButtonCard card)
     {
-        if (card == null)
-            return;
     }
 
     private void OnChapterCardReleased(ChapterButtonCard card)
     {
-        if (card == null)
-            return;
     }
 
     private void OnChapterCardClicked(ChapterButtonCard card)
     {
-        if (card == null)
-            return;
-
-        int chapterId = card.ChapterId;
-
-        if (chapterId < 0)
-            return;
-
-        OpenEpisodeSelectionPanel(chapterId);
-    }
-    
-    private void BuildChapterCards(ChapterSelectionPanel panel)
-    {
-        RectTransform container = panel.CardContainer;
-        ClearChildren(container);
-
-        List<ChapterButtonCard> cards = _chapterCardSpawner.CreateCards(container, _chapterCardPrefab, _chapterCardCount);
-
-        panel.RegisterCards(cards);
-    }
-
-    private void Refresh(ChapterSelectionPanel panel)
-    {
-        ChapterButtonCardModel[] models = null;
-
-        if (_resolveChapterModels != null)
-            models = _resolveChapterModels.Invoke();
-
-        panel.PresentChapters(models);
-    }
-    
-    private void ClearChildren(RectTransform parent)
-    {
-        for (int i = parent.childCount - 1; i >= 0; i--)
-        {
-            Transform child = parent.GetChild(i);
-
-            if (child == null)
-                continue;
-
-            child.SetParent(null, false);
-            UnityEngine.Object.Destroy(child.gameObject);
-        }
+        OpenEpisodeSelectionPanel(card.ChapterId);
     }
 }
