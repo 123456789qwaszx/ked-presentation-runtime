@@ -19,8 +19,7 @@ public sealed partial class VnScreenBindings
 
             Refresh(panel);
 
-            if (_episodeSelectionController != null)
-                _episodeSelectionController.RequestRender();
+            _episodeSelectionController.RequestRender();
         });
     }
 
@@ -29,6 +28,23 @@ public sealed partial class VnScreenBindings
         AddBinding(panel,
             p => p.CloseClicked += ClosePanel,
             p => p.CloseClicked -= ClosePanel);
+
+        _episodeSelectionController.EpisodeRequested += OnEpisodeRequested;
+
+        AddCleanup(panel, () =>
+        {
+            _episodeSelectionController.EpisodeRequested -= OnEpisodeRequested;
+        });
+    }
+
+    private void OnEpisodeRequested(string episodeId)
+    {
+        if (!_episodeSelectionController.TryGetDialogueEntryId(episodeId, out string dialogueEntryId))
+            return;
+        
+        CloseAllPanels();
+
+        _episodePlayer.StartGame(dialogueEntryId);
     }
 
     private void Refresh(EpisodeSelectionPanel panel)

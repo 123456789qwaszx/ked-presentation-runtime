@@ -88,4 +88,30 @@ public sealed class EpisodeSelectionController
 
         EpisodeRequested?.Invoke(episodeId);
     }
+    
+    public bool TryGetDialogueEntryId(
+        string episodeId,
+        out string dialogueEntryId)
+    {
+        dialogueEntryId = "";
+
+        if (string.IsNullOrEmpty(episodeId))
+            return false;
+
+        EpisodeSelectionSnapshot snapshot = _repository.ReadSnapshot();
+
+        if (snapshot.GraphData == null)
+            return false;
+
+        EpisodeGraphNodeData node = snapshot.GraphData.FindNode(episodeId);
+
+        if (node == null)
+            return false;
+
+        if (string.IsNullOrWhiteSpace(node.DialogueEntryId))
+            return false;
+
+        dialogueEntryId = node.DialogueEntryId;
+        return true;
+    }
 }

@@ -104,6 +104,12 @@ public class VnAppBootstrap : MonoBehaviour
     private VNSaveLoadSystem _vnSaveLoadSystem;
     private EpisodeSelectionController _episodeSelectionController;
     
+    private readonly EpisodeSelectionFactory _episodeSelectionFactory = new();
+
+    private EpisodeSelectionRepository _episodeSelectionRepository;
+    [SerializeField] private ChapterEpisodeProgressionSO episodeProgressionSo;
+    
+    
     [SerializeField] private RollbackHistoryDebugView rollbackHistoryDebugView;
     
     private void Awake()
@@ -405,31 +411,10 @@ public class VnAppBootstrap : MonoBehaviour
         vnAlbumUnlockDebugList.Initialize(_vnSaveLoadSystem);
         _screenBindings.ConfigureAlbumView(_vnSaveLoadSystem);
     }
-    private readonly EpisodeSelectionFactory _episodeSelectionFactory = new();
 
-    private ChapterEpisodeProgressionSO _currentEpisodeProgression;
-    private EpisodeSelectionRepository _episodeSelectionRepository;
-    [SerializeField] private ChapterEpisodeProgressionSO episodeProgressionSo;
     private void BootstrapEpisodeSelectionRuntime()
     {
-        if (episodeProgressionSo == null)
-        {
-            Debug.LogWarning("[VnAppBootstrap] Episode progression SO is null.", this);
-            return;
-        }
-
-        RebuildEpisodeSelectionRuntime(episodeProgressionSo);
-    }
-    private void RebuildEpisodeSelectionRuntime(ChapterEpisodeProgressionSO progression)
-    {
-        if (_episodeSelectionController != null)
-            _episodeSelectionController.EpisodeRequested -= HandleEpisodeRequested;
-
-        _currentEpisodeProgression = progression;
-
-        _episodeSelectionRepository = _episodeSelectionFactory.CreateRepository(
-            progression,
-            null);
+        _episodeSelectionRepository = _episodeSelectionFactory.CreateRepository(episodeProgressionSo, null);
 
         EpisodeGraphViewModelBuilder episodeGraphViewModelBuilder = new();
         EpisodeGraphRenderer episodeGraphRenderer = new(nodeRigPrefab);
@@ -442,59 +427,14 @@ public class VnAppBootstrap : MonoBehaviour
             episodeGraphRenderer,
             episodeGraphLayoutOptions,
             episodeGraphScrollController);
-
-        _episodeSelectionController.EpisodeRequested += HandleEpisodeRequested;
     }
 
-    private EpisodeSelectionRuntimeState LoadEpisodeSelectionStateOrNull(
-        ChapterEpisodeProgressionSO progression)
-    {
-        return null;
-    }
     private void HandleEpisodeRequested(string episodeId)
     {
         UIManager.Instance.PopAllPanels();
-        if (string.IsNullOrEmpty(episodeId))
-            return;
-
-        if (_episodeSelectionRepository == null)
-        {
-            Debug.LogWarning("[VnAppBootstrap] EpisodeSelectionRepository is null.", this);
-            return;
-        }
-
         EpisodeSelectionSnapshot snapshot = _episodeSelectionRepository.ReadSnapshot();
-
-        if (snapshot.GraphData == null)
-        {
-            Debug.LogWarning("[VnAppBootstrap] EpisodeGraphData is null.", this);
-            return;
-        }
-
         EpisodeGraphNodeData node = snapshot.GraphData.FindNode(episodeId);
-
-        if (node == null)
-        {
-            Debug.LogWarning($"[VnAppBootstrap] Episode node not found. episodeId={episodeId}", this);
-            return;
-        }
-
-        if (string.IsNullOrWhiteSpace(node.DialogueEntryId))
-        {
-            Debug.LogWarning(
-                $"[VnAppBootstrap] DialogueEntryId is null or empty. episodeId={episodeId}",
-                this);
-            return;
-        }
-
-        if (episodePlayer == null)
-        {
-            Debug.LogWarning("[VnAppBootstrap] EpisodePlayer is null.", this);
-            return;
-        }
-
         episodePlayer.StartGame(node.DialogueEntryId);
-        
     }
 
     private void InitializeEpisodePlayer()
