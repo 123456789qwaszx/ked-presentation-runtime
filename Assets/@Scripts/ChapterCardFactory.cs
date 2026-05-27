@@ -27,6 +27,30 @@ public sealed class ChapterCardFactory : MonoBehaviour
 
         return models;
     }
+    
+    public bool TryGetProgression(int chapterId, out ChapterEpisodeProgressionSO progression)
+    {
+        progression = null;
+
+        if (entries == null)
+            return false;
+
+        for (int i = 0; i < entries.Length; i++)
+        {
+            ChapterCardEntry entry = entries[i];
+
+            if (entry == null)
+                continue;
+
+            if (entry.ChapterId != chapterId)
+                continue;
+
+            progression = entry.EpisodeProgression;
+            return progression != null;
+        }
+
+        return false;
+    }
 
 #if UNITY_EDITOR
     [ContextMenu("Set Default Chapter Entries")]

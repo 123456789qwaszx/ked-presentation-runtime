@@ -16,8 +16,11 @@ public sealed partial class VnScreenBindings
         UI.PushPanel<EpisodeSelectionPanel>(panel =>
         {
             BindPanel(panel, ApplyBindings);
-            _episodeSelectionController.RequestRender();
+
             Refresh(panel);
+
+            if (_episodeSelectionController != null)
+                _episodeSelectionController.RequestRender();
         });
     }
 

@@ -10,7 +10,7 @@ position: 70,335
 ---
 <<ui_patch theme1>>
 
-<<bgm audio/bgm_tam_dystopia_snowwind_01>>
+//<<bgm audio/bgm_tam_dystopia_snowwind_01>>
 
 <<slot me>>
 <<cast me momoka>>

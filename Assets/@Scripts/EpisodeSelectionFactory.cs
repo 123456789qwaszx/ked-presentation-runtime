@@ -1,6 +1,7 @@
 public sealed class EpisodeSelectionFactory
 {
     private readonly EpisodeProgressionGraphDataBuilder _graphDataBuilder = new();
+    private readonly EpisodeProgressionRuntimeStateApplier _stateApplier = new();
 
     public EpisodeSelectionRepository CreateRepository(
         ChapterEpisodeProgressionSO progression,
@@ -13,7 +14,16 @@ public sealed class EpisodeSelectionFactory
 
         InitializeState(progression, state);
 
+        _stateApplier.Apply(progression, state);
+
         return new EpisodeSelectionRepository(graphData, state);
+    }
+
+    public void ReapplyState(
+        ChapterEpisodeProgressionSO progression,
+        EpisodeSelectionRuntimeState state)
+    {
+        _stateApplier.Apply(progression, state);
     }
 
     private void InitializeState(

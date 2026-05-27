@@ -5072,6 +5072,7 @@ MonoBehaviour:
   chapterCardFactory: {fileID: 767435430}
   nodeRigPrefab: {fileID: 8432584506347833489, guid: 5a92676ae0261c54188d2a64469a3787, type: 3}
   rollbackHistoryDebugView: {fileID: 969122867}
+  episodeProgressionSo: {fileID: 11400000, guid: 6b6dcda1ce02f5141a876245e3c88c7e, type: 2}
 --- !u!1 &626587492
 GameObject:
   m_ObjectHideFlags: 0
@@ -6493,6 +6494,7 @@ MonoBehaviour:
     titleIcon: {fileID: 21300000, guid: 55ade53086ff81a4498330e2eb14d12c, type: 3}
     interactable: 1
     locked: 0
+    EpisodeProgression: {fileID: 0}
   - chapterId: 1
     indexText: 02
     chapterIndexLabel: "\uCC55\uD130 02"
@@ -6505,6 +6507,7 @@ MonoBehaviour:
     titleIcon: {fileID: 21300000, guid: 95546c8eb8dc0dc4d96d0dcfbab8248b, type: 3}
     interactable: 1
     locked: 0
+    EpisodeProgression: {fileID: 0}
   - chapterId: 2
     indexText: 03
     chapterIndexLabel: "\uCC55\uD130 03"
@@ -6517,6 +6520,7 @@ MonoBehaviour:
     titleIcon: {fileID: 21300000, guid: b6b1efbab66e0fd4c8feba43da04fcc3, type: 3}
     interactable: 1
     locked: 0
+    EpisodeProgression: {fileID: 0}
   - chapterId: 3
     indexText: 04
     chapterIndexLabel: "\uCC55\uD130 04"
@@ -6529,6 +6533,7 @@ MonoBehaviour:
     titleIcon: {fileID: 21300000, guid: 2fba80d8de8347b4eaf9110bfc19c1fd, type: 3}
     interactable: 1
     locked: 0
+    EpisodeProgression: {fileID: 0}
 --- !u!4 &767435431
 Transform:
   m_ObjectHideFlags: 0
@@ -17142,7 +17147,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 458.38, y: -24}
-  m_SizeDelta: {x: 916.76, y: 24}
+  m_SizeDelta: {x: 916.76, y: 0}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!1 &666632935594092605
 GameObject:
