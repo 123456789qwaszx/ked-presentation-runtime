@@ -6,6 +6,10 @@ using UnityEngine.UI;
 
 public sealed class ChapterButtonCard : UIBase<ChapterButtonCard.Refs>
 {
+    private Action<ChapterButtonCard> _onPressed;
+    private Action<ChapterButtonCard> _onReleased;
+    private Action<ChapterButtonCard> _onClicked;
+    
     public enum Refs
     {
         Card_Root,
@@ -42,10 +46,6 @@ public sealed class ChapterButtonCard : UIBase<ChapterButtonCard.Refs>
 
         Hit_Button,
     }
-
-    private Action<ChapterButtonCard> _onPressed;
-    private Action<ChapterButtonCard> _onReleased;
-    private Action<ChapterButtonCard> _onClicked;
 
     private ScrollRect _dragScrollRect;
     private bool _isPressed;

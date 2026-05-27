@@ -7,8 +7,8 @@ using static UIRefValidation;
 
 public sealed class SkipConfirmPanel : UIPanel<SkipConfirmPanel.Refs>, IManagedUI
 {
-    public event Action OnConfirmed;
-    public event Action OnCancelled;
+    public event Action ConfirmClicked;
+    public event Action CloseClicked;
 
     #region Refs
     public enum Refs
@@ -84,8 +84,8 @@ public sealed class SkipConfirmPanel : UIPanel<SkipConfirmPanel.Refs>, IManagedU
     #endregion
 
     #region Event Handlers
-    private void HandleConfirm(PointerEventData eventData) => OnConfirmed?.Invoke();
-    private void HandleCancel(PointerEventData eventData) => OnCancelled?.Invoke();
+    private void HandleConfirm(PointerEventData eventData) => ConfirmClicked?.Invoke();
+    private void HandleCancel(PointerEventData eventData) => CloseClicked?.Invoke();
     #endregion
     
     private bool ValidateRefs()

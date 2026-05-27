@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using static UIRefValidation;
 
-public sealed class BacklogPanel : UIPanel<BacklogPanel.Refs>, IManagedUI
+public sealed class BacklogPanel : UIPanel<BacklogPanel.Refs>
 {
     public event Action OnCloseRequested;
 

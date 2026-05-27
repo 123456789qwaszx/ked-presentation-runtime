@@ -394,13 +394,6 @@ public class VnAppBootstrap : MonoBehaviour
     
     private void BootstrapUIBindings()
     {
-        _screenBindings.ConfigurePresentationView(
-            _episodePlayState,
-            vnFeatureController,
-            _vnUxState,
-            vnRuntimeBridge,
-            dialogueAdvanceDispatcher,
-            _linePresentationAdvanceState);
     }
 
     private void InitializeEpisodePlayer()
@@ -429,6 +422,13 @@ public class VnAppBootstrap : MonoBehaviour
             episodeGraphRenderer, 
             episodeGraphLayoutOptions,
             episodeGraphScrollController);
+        
+        _screenBindings.ConfigurePresentationView(
+            vnFeatureController,
+            _vnUxState,
+            vnRuntimeBridge,
+            dialogueAdvanceDispatcher,
+            _linePresentationAdvanceState);
 
         _screenBindings.ConfigureEpisodeSelection(episodeSelectionController);
         
@@ -437,9 +437,9 @@ public class VnAppBootstrap : MonoBehaviour
             chapterCardPrefab: chapterCardPrefab,
             chapterCardCount: 6);
 
-        _screenBindings.GoToChapterSelection();
+        _screenBindings.OpenChapterSelectionPanel();
         
-        _screenBindings.GoToTitle();
+        _screenBindings.OpenTitleMenu();
     }
 
     private ChapterButtonCardModel[] ResolveChapterModels()

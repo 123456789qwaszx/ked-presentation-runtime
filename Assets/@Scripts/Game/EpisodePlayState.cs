@@ -2,6 +2,7 @@ using System;
 
 public sealed class EpisodePlayState
 {
+    
     public int CurrentChapterId { get; private set; } = 1;
     public string SelectedEpisodeId { get; private set; }
     public string CurrentPlayingEpisodeId { get; private set; }

@@ -27,6 +27,6 @@ public sealed partial class VnScreenBindings
 
     private void OpenStorySelectFlow()
     {
-        GoToChapterSelection();
+        OpenChapterSelectionPanel();
     }
 }

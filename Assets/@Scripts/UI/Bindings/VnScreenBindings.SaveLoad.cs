@@ -3,40 +3,27 @@ using UnityEngine;
 public sealed partial class VnScreenBindings
 {
     private SaveLoadMenuMode _currentSaveLoadMode;
-    private bool IsSaveMode => _currentSaveLoadMode == SaveLoadMenuMode.Save;
-    private bool IsLoadMode => _currentSaveLoadMode == SaveLoadMenuMode.Load;
     
-
-    private void GoToSaveMenu()
-    {
-        OpenSaveLoadMenu(SaveLoadMenuMode.Save);
-    }
-
-    private void GoToLoadMenu()
-    {
-        OpenSaveLoadMenu(SaveLoadMenuMode.Load);
-    }
-
     private void OpenSaveLoadMenu(SaveLoadMenuMode mode)
     {
         _currentSaveLoadMode = mode;
 
-        UI.PushPanel<SaveLoadMenuUIPanel>(saveLoadRoot =>
+        UI.PushPanel<SaveLoadMenuUIPanel>(panel =>
         {
-            BindPanel(saveLoadRoot, ApplyBindings);
-            RefreshSaveLoadPanel(saveLoadRoot);
+            BindPanel(panel, ApplyBindings);
+            RefreshSaveLoadPanel(panel);
         });
     }
 
-    private void ApplyBindings(SaveLoadMenuUIPanel saveLoadRoot)
+    private void ApplyBindings(SaveLoadMenuUIPanel panel)
     {
-        AddBinding(saveLoadRoot,
-            r => r.SlotClicked += HandleSlotClicked,
-            r => r.SlotClicked -= HandleSlotClicked);
+        AddBinding(panel,
+            p => p.SlotClicked += HandleSlotClicked,
+            p => p.SlotClicked -= HandleSlotClicked);
 
-        AddBinding(saveLoadRoot,
-            r => r.CloseClicked += OnSaveLoadCloseClicked,
-            r => r.CloseClicked -= OnSaveLoadCloseClicked);
+        AddBinding(panel,
+            p => p.CloseClicked += ClosePanel,
+            p => p.CloseClicked -= ClosePanel);
     }
     
     
@@ -57,14 +44,11 @@ public sealed partial class VnScreenBindings
                 Debug.LogWarning($"[VnScreenBindings] Load failed. slotIndex={slotIndex}");
                 return;
             }
+            
+            CloseAllPanels();
         }
 
         RefreshSaveLoadPanel(UIManager.Instance.GetUI<SaveLoadMenuUIPanel>());
-    }
-    
-    private void OnSaveLoadCloseClicked()
-    {
-        CloseTopPanel();
     }
     
     private void RefreshSaveLoadPanel(SaveLoadMenuUIPanel saveLoadPanel)

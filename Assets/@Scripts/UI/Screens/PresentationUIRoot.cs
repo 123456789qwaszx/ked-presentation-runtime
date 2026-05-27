@@ -6,19 +6,17 @@ public partial class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
 {
     public event Action FastForwardDown;
     public event Action FastForwardUp;
-
     public event Action RollbackClicked;
-
     public event Action SkipMenuClicked;
     public event Action AutoClicked;
     public event Action QuickMenuClicked;
     public event Action ExpandClicked;
     public event Action BackLogClicked;
     public event Action PlaybackSpeedClicked;
-    public event Action StepNextClicked;
-
     public event Action SaveMenuClicked;
     public event Action LoadMenuClicked;
+    
+    public event Action HurryUpClicked;
 
     public enum Refs
     {
@@ -191,7 +189,7 @@ public partial class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
             return;
         }
 
-        StepNextClicked?.Invoke();
+        HurryUpClicked?.Invoke();
     }
 
     private void PressQuickMenuToggleButton(PointerEventData _)

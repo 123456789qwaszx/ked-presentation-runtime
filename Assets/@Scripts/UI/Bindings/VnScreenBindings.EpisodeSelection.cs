@@ -9,7 +9,7 @@ public sealed partial class VnScreenBindings
         _episodeSelectionController = episodeSelectionController;
     }
 
-    private void GoToEpisodeSelection(int chapterId)
+    private void OpenEpisodeSelectionPanel(int chapterId)
     {
         _currentChapterId = chapterId;
 
@@ -24,8 +24,8 @@ public sealed partial class VnScreenBindings
     private void ApplyBindings(EpisodeSelectionPanel panel)
     {
         AddBinding(panel,
-            p => p.CloseClicked += CloseTopPanel,
-            p => p.CloseClicked -= CloseTopPanel);
+            p => p.CloseClicked += ClosePanel,
+            p => p.CloseClicked -= ClosePanel);
     }
 
     private void Refresh(EpisodeSelectionPanel panel)

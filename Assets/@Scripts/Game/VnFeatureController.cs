@@ -96,7 +96,7 @@ public sealed class VnFeatureController : MonoBehaviour
             SetMode(VnPlayMode.Auto);
     }
 
-    public void ToggleSetSpeed()
+    public void TogglePlaybackSpeed()
     {
         if (IsSpeedup)
             SetMode(VnPlayMode.Manual);
@@ -104,7 +104,7 @@ public sealed class VnFeatureController : MonoBehaviour
             SetMode(VnPlayMode.Speedup);
     }
 
-    public void BeginHoldSpeedUp()
+    public void BeginFastForward()
     {
         if (!_init)
             return;
@@ -114,7 +114,7 @@ public sealed class VnFeatureController : MonoBehaviour
         RefreshPlaybackSpeed();
     }
 
-    public void EndHoldSpeedUp()
+    public void EndFastForward()
     {
         if (!_init)
             return;

@@ -10,10 +10,16 @@ public sealed partial class VnScreenBindings : IDisposable
     
     private UIBase _boundMain;
 
+    public void OpenTitleMenu()
+    {
+        GoToTitle();
+    }
+
+    
     /// <summary>
     /// Closes the top panel and releases its VnScreenBindings cleanup entries.
     /// </summary>
-    private void CloseTopPanel()
+    private void ClosePanel()
     {
         UI.PopPanel(Unbind);
     }

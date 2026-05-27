@@ -22,7 +22,7 @@ public sealed partial class VnScreenBindings
         _chapterCardCount = Mathf.Max(0, chapterCardCount);
     }
 
-    public void GoToChapterSelection()
+    public void OpenChapterSelectionPanel()
     {
         UI.PushPanel<ChapterSelectionPanel>(panel =>
         {
@@ -35,8 +35,8 @@ public sealed partial class VnScreenBindings
     private void ApplyBindings(ChapterSelectionPanel panel)
     {
         AddBinding(panel,
-            p => p.CloseClicked += CloseTopPanel,
-            p => p.CloseClicked -= CloseTopPanel);
+            p => p.CloseClicked += ClosePanel,
+            p => p.CloseClicked -= ClosePanel);
 
         panel.SetChapterCardHandlers(
             onPressed: OnChapterCardPressed,
@@ -66,7 +66,7 @@ public sealed partial class VnScreenBindings
         if (chapterId < 0)
             return;
 
-        GoToEpisodeSelection(chapterId);
+        OpenEpisodeSelectionPanel(chapterId);
     }
     
     private void BuildChapterCards(ChapterSelectionPanel panel)

@@ -9,7 +9,7 @@ public sealed partial class VnScreenBindings
         _episodePlayer = episodePlayer;
     }
     
-    public void GoToTitle()
+    private void GoToTitle()
     {
         UI.SwitchRoot<TitleUIRoot>(titleRoot =>
         {
@@ -17,7 +17,6 @@ public sealed partial class VnScreenBindings
             RefreshTitleState(titleRoot);
         });
     }
-
     
     private void ApplyBindings(TitleUIRoot titleRoot)
     {
@@ -60,7 +59,7 @@ public sealed partial class VnScreenBindings
 
     private void HandleLoadClicked()
     {
-        GoToLoadMenu();
+        OpenSaveLoadMenu(SaveLoadMenuMode.Load);
     }
 
     private void HandleAlbumClicked()
