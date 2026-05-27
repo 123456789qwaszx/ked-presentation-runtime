@@ -58,6 +58,7 @@ public sealed partial class VnScreenBindings
 
     private void OnChapterCardClicked(ChapterButtonCard card)
     {
+        Debug.Log(card.ChapterId);
         OpenEpisodeSelectionPanel(card.ChapterId);
     }
 }

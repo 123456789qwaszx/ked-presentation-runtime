@@ -33,13 +33,13 @@ public sealed partial class VnScreenBindings
     {
         CloseAllPanels();
         
-        if (!_episodeSelectionController.TryGetSelectedEpisodeId(out string episodeId))
+        if (!_episodeSelectionSystem.TryGetSelectedEpisodeId(out string episodeId))
         {
             Debug.LogWarning("[VN] Episode skip confirmed but selected episode id is empty.");
         }
 
         _vnRuntimeBridge.ForceCompleteEpisodeNow(episodeId);
-        _episodeSelectionController.RequestCompleteEpisode(episodeId);
+        _episodeSelectionSystem.RequestCompleteEpisode(episodeId);
 
         // 임시
         GoToLobby();

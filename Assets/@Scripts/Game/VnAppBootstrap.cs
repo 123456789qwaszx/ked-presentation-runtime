@@ -102,11 +102,13 @@ public class VnAppBootstrap : MonoBehaviour
     private UIPatchService _uiPatchService;
     
     private VNSaveLoadSystem _vnSaveLoadSystem;
-    private EpisodeSelectionController _episodeSelectionController;
     
+    [Header("Episode Selection")]
     private readonly EpisodeSelectionFactory _episodeSelectionFactory = new();
-
+    private EpisodeSelectionSystem _episodeSelectionSystem;
     private EpisodeSelectionRepository _episodeSelectionRepository;
+    [SerializeField] private ChapterEpisodeProgressionCatalogSO chapterEpisodeProgressionCatalog;
+
     [SerializeField] private ChapterEpisodeProgressionSO episodeProgressionSo;
     
     
@@ -414,19 +416,22 @@ public class VnAppBootstrap : MonoBehaviour
 
     private void BootstrapEpisodeSelectionRuntime()
     {
-        _episodeSelectionRepository = _episodeSelectionFactory.CreateRepository(episodeProgressionSo, null);
+        EpisodeProgressionGraphDataBuilder graphDataBuilder = new();
+        EpisodeProgressionRuntimeStateApplier stateApplier = new();
 
-        EpisodeGraphViewModelBuilder episodeGraphViewModelBuilder = new();
+        EpisodeGraphViewModelBuilder viewModelBuilder = new();
         EpisodeGraphRenderer episodeGraphRenderer = new(nodeRigPrefab);
-        EpisodeGraphLayoutOptions episodeGraphLayoutOptions = EpisodeGraphLayoutOptions.Compact();
-        EpisodeGraphScrollController episodeGraphScrollController = new();
+        EpisodeGraphLayoutOptions layoutOptions = EpisodeGraphLayoutOptions.Compact();
+        EpisodeGraphScrollController scrollController = new();
 
-        _episodeSelectionController = new EpisodeSelectionController(
-            _episodeSelectionRepository,
-            episodeGraphViewModelBuilder,
+        _episodeSelectionSystem = new EpisodeSelectionSystem(
+            chapterEpisodeProgressionCatalog,
+            graphDataBuilder,
+            stateApplier,
+            viewModelBuilder,
             episodeGraphRenderer,
-            episodeGraphLayoutOptions,
-            episodeGraphScrollController);
+            layoutOptions,
+            scrollController);
     }
 
     private void HandleEpisodeRequested(string episodeId)
@@ -451,7 +456,7 @@ public class VnAppBootstrap : MonoBehaviour
             dialogueAdvanceDispatcher,
             _linePresentationAdvanceState);
 
-        _screenBindings.ConfigureEpisodeSelection(_episodeSelectionController);
+        _screenBindings.ConfigureEpisodeSelection(_episodeSelectionSystem);
         _screenBindings.ConfigureChapterSelection(chapterCardFactory, chapterCardPrefab);
         _screenBindings.ConfigureAlbumView(_vnSaveLoadSystem);
         _screenBindings.ConfigureTitleView(episodePlayer);

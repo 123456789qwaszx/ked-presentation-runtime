@@ -5071,8 +5071,9 @@ MonoBehaviour:
   chapterCardPrefab: {fileID: 2410623267660482620, guid: 60640956e3866b44e9e8c9df1a45dbd3, type: 3}
   chapterCardFactory: {fileID: 767435430}
   nodeRigPrefab: {fileID: 8432584506347833489, guid: 5a92676ae0261c54188d2a64469a3787, type: 3}
-  rollbackHistoryDebugView: {fileID: 969122867}
+  chapterEpisodeProgressionCatalog: {fileID: 0}
   episodeProgressionSo: {fileID: 11400000, guid: 6b6dcda1ce02f5141a876245e3c88c7e, type: 2}
+  rollbackHistoryDebugView: {fileID: 969122867}
 --- !u!1 &626587492
 GameObject:
   m_ObjectHideFlags: 0
@@ -17147,7 +17148,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 458.38, y: -24}
-  m_SizeDelta: {x: 916.76, y: 0}
+  m_SizeDelta: {x: 916.76, y: 24}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!1 &666632935594092605
 GameObject:

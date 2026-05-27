@@ -1,12 +1,14 @@
+using UnityEngine;
+
 public sealed partial class VnScreenBindings
 {
-    private EpisodeSelectionController _episodeSelectionController;
+    private EpisodeSelectionSystem _episodeSelectionSystem;
     
     private int _currentChapterId = -1;
 
-    public void ConfigureEpisodeSelection(EpisodeSelectionController episodeSelectionController)
+    public void ConfigureEpisodeSelection(EpisodeSelectionSystem episodeSelectionSystem)
     {
-        _episodeSelectionController = episodeSelectionController;
+        _episodeSelectionSystem = episodeSelectionSystem;
     }
 
     private void OpenEpisodeSelectionPanel(int chapterId)
@@ -19,7 +21,10 @@ public sealed partial class VnScreenBindings
 
             Refresh(panel);
 
-            _episodeSelectionController.RequestRender();
+            if (_episodeSelectionSystem != null)
+                _episodeSelectionSystem.RequestOpenChapter(chapterId);
+            else
+                Debug.LogWarning("[VnScreenBindings] EpisodeSelectionSystem is null.");
         });
     }
 
@@ -29,18 +34,32 @@ public sealed partial class VnScreenBindings
             p => p.CloseClicked += ClosePanel,
             p => p.CloseClicked -= ClosePanel);
 
-        _episodeSelectionController.EpisodeRequested += OnEpisodeRequested;
+        if (_episodeSelectionSystem == null)
+            return;
+
+        EpisodeSelectionSystem system = _episodeSelectionSystem;
+
+        system.EpisodeRequested += OnEpisodeRequested;
 
         AddCleanup(panel, () =>
         {
-            _episodeSelectionController.EpisodeRequested -= OnEpisodeRequested;
+            system.EpisodeRequested -= OnEpisodeRequested;
         });
     }
 
     private void OnEpisodeRequested(string episodeId)
     {
-        if (!_episodeSelectionController.TryGetDialogueEntryId(episodeId, out string dialogueEntryId))
+        Debug.Log(episodeId);
+
+        if (_episodeSelectionSystem == null)
             return;
+
+        if (!_episodeSelectionSystem.TryGetDialogueEntryId(
+                episodeId,
+                out string dialogueEntryId))
+        {
+            return;
+        }
         
         CloseAllPanels();
 

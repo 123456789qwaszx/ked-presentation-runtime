@@ -3,6 +3,8 @@ using System.Collections.Generic;
 
 public sealed class EpisodeSelectionRuntimeState
 {
+    public int CurrentChapterId = -1;
+
     public string SelectedEpisodeId;
     public string CurrentEpisodeId;
 
@@ -21,6 +23,8 @@ public sealed class EpisodeSelectionRuntimeState
     {
         return new EpisodeSelectionRuntimeState
         {
+            CurrentChapterId = CurrentChapterId,
+
             SelectedEpisodeId = SelectedEpisodeId,
             CurrentEpisodeId = CurrentEpisodeId,
 

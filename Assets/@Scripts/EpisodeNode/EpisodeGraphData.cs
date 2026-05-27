@@ -1,5 +1,5 @@
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
 
 public enum EpisodeNodeKind
 {
@@ -7,6 +7,7 @@ public enum EpisodeNodeKind
     Attachment
 }
 
+[Serializable]
 public sealed class EpisodeGraphNodeData
 {
     public EpisodeNodeKind Kind;
@@ -20,12 +21,14 @@ public sealed class EpisodeGraphNodeData
     public string ParentEpisodeId;
 }
 
+[Serializable]
 public sealed class EpisodeGraphEdgeData
 {
     public string FromEpisodeId;
     public string ToEpisodeId;
 }
 
+[Serializable]
 public sealed class EpisodeGraphData
 {
     public List<EpisodeGraphNodeData> Nodes = new();
