@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 using Yarn.Unity;
 
 public class VnAppBootstrap : MonoBehaviour
@@ -77,7 +78,7 @@ public class VnAppBootstrap : MonoBehaviour
     [SerializeField] private EpisodePlayer episodePlayer;
     
     [Header("Emoji")] 
-    [SerializeField] private CharacterEmojiLibrarySO characterEmojiLibrarySO;
+    [SerializeField] private CharacterEmojiLibrarySO characterEmojiLibrarySo;
     
     [Header("RigPrefab")] 
     [Tooltip("CharacterRig prefab used for command presentation. " +
@@ -94,18 +95,14 @@ public class VnAppBootstrap : MonoBehaviour
     private UIPatchService _uiPatchService;
     
     private VNSaveLoadSystem _vnSaveLoadSystem;
+    private EpisodeSelectionController _episodeSelectionController;
     
     [SerializeField] private RollbackHistoryDebugView rollbackHistoryDebugView;
-
     
-
     private void Awake()
     {
-        _linePresentationAdvanceState = new LinePresentationAdvanceState(vnTrace);
-        vnTrace.Clear(this);
-        vnTrace.Trace(nameof(VnAppBootstrap), "AwakeBegin", note: "VN bootstrap started", context: this);
+        InitializeTrace();
 
-        
         BootstrapAudioSystem();
         ConnectAudioSystemToYarn();
 
@@ -121,11 +118,18 @@ public class VnAppBootstrap : MonoBehaviour
         BootstrapPlaybackControls();
 
         BootstrapVnSaveLoadRuntime();
-        
-        
-        BootstrapUIBindings();
+        BootstrapEpisodeSelectionRuntime();
+
         InitializeEpisodePlayer();
-        
+        BootstrapScreenBindings();
+    }
+    
+    private void InitializeTrace()
+    {
+        _linePresentationAdvanceState = new LinePresentationAdvanceState(vnTrace);
+
+        vnTrace.Clear(this);
+        vnTrace.Trace(nameof(VnAppBootstrap), "AwakeBegin", note: "VN bootstrap started", context: this);
     }
 
     private void BootstrapAudioSystem()
@@ -172,7 +176,7 @@ public class VnAppBootstrap : MonoBehaviour
         CharRigSlotResolver charRigSlotResolver = new();
         CharacterRigBuilder characterRigBuilder = new();
         PortraitResolver portraitResolver = new(portraitGeneratedDbSo);
-        CharacterEmojiResolver emojiResolver = new(characterEmojiLibrarySO);
+        CharacterEmojiResolver emojiResolver = new(characterEmojiLibrarySo);
 
         CharRigCommandFactory charRigFactory = new(
             charRigSlotResolver,
@@ -391,37 +395,36 @@ public class VnAppBootstrap : MonoBehaviour
         _screenBindings.ConfigureAlbumView(_vnSaveLoadSystem);
     }
     
-    private void BootstrapUIBindings()
+    private void BootstrapEpisodeSelectionRuntime()
     {
+        IEpisodeGraphDataProvider episodeGraphDataProvider = new SampleEpisodeGraphDataProvider();
+
+        EpisodeGraphData episodeGraphData = episodeGraphDataProvider.GetGraphData();
+        EpisodeSelectionRuntimeState episodeSelectionRuntimeState = new();
+        EpisodeSelectionRepository episodeSelectionRepository = new(
+            episodeGraphData,
+            episodeSelectionRuntimeState);
+
+        EpisodeGraphViewModelBuilder episodeGraphViewModelBuilder = new();
+        EpisodeGraphRenderer episodeGraphRenderer = new(nodeRigPrefab);
+        EpisodeGraphLayoutOptions episodeGraphLayoutOptions = EpisodeGraphLayoutOptions.Compact();
+        EpisodeGraphScrollController episodeGraphScrollController = new();
+
+        _episodeSelectionController = new EpisodeSelectionController(
+            episodeSelectionRepository,
+            episodeGraphViewModelBuilder,
+            episodeGraphRenderer,
+            episodeGraphLayoutOptions,
+            episodeGraphScrollController);
     }
 
     private void InitializeEpisodePlayer()
     {
         episodePlayer.Initialize(_screenBindings, _rollbackHistory, customLinePresenter, _backlogRecorder);
-
-        _screenBindings.ConfigureTitleView(episodePlayer);
     }
     
-    private void Start()
+    private void BootstrapScreenBindings()
     {
-        IEpisodeGraphDataProvider episodeGraphDataProvider = new SampleEpisodeGraphDataProvider();
-        
-        EpisodeGraphData episodeGraphData = episodeGraphDataProvider.GetGraphData();
-        EpisodeSelectionRuntimeState episodeSelectionRuntimeState = new();
-        EpisodeSelectionRepository episodeSelectionRepository = new(episodeGraphData, episodeSelectionRuntimeState);
-
-        EpisodeGraphViewModelBuilder episodeGraphViewModelBuilder = new();
-        EpisodeGraphRenderer episodeGraphRenderer = new(nodeRigPrefab);
-        EpisodeGraphLayoutOptions episodeGraphLayoutOptions = EpisodeGraphLayoutOptions.Compact();
-        EpisodeGraphScrollController episodeGraphScrollController = new ();
-        
-        EpisodeSelectionController episodeSelectionController = new(
-            episodeSelectionRepository, 
-            episodeGraphViewModelBuilder, 
-            episodeGraphRenderer, 
-            episodeGraphLayoutOptions,
-            episodeGraphScrollController);
-        
         _screenBindings.ConfigurePresentationView(
             vnFeatureController,
             _vnUxState,
@@ -429,15 +432,25 @@ public class VnAppBootstrap : MonoBehaviour
             dialogueAdvanceDispatcher,
             _linePresentationAdvanceState);
 
-        _screenBindings.ConfigureEpisodeSelection(episodeSelectionController);
-        
+        _screenBindings.ConfigureEpisodeSelection(_episodeSelectionController);
+
         _screenBindings.ConfigureChapterSelection(
             resolveChapterModels: ResolveChapterModels,
             chapterCardPrefab: chapterCardPrefab,
             chapterCardCount: 6);
 
-        _screenBindings.OpenChapterSelectionPanel();
-        
+        _screenBindings.ConfigureAlbumView(_vnSaveLoadSystem);
+
+        _screenBindings.ConfigureTitleView(episodePlayer);
+    }
+    
+    private void Start()
+    {
+        OpenInitialScreen();
+    }
+    
+    private void OpenInitialScreen()
+    {
         _screenBindings.OpenTitleMenu();
     }
 

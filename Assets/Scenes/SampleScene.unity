@@ -5066,7 +5066,7 @@ MonoBehaviour:
   vnPlaytimeTracker: {fileID: 451477690}
   vnAlbumUnlockDebugList: {fileID: 739385218}
   episodePlayer: {fileID: 1924806292}
-  characterEmojiLibrarySO: {fileID: 11400000, guid: 50cc0df71f2e038468df66d0c632ebdd, type: 2}
+  characterEmojiLibrarySo: {fileID: 11400000, guid: 50cc0df71f2e038468df66d0c632ebdd, type: 2}
   rigPrefab: {fileID: 5409551162114272258, guid: a8a089dede6a6084d8eac1369e77b04c, type: 3}
   chapterCardPrefab: {fileID: 2410623267660482620, guid: 60640956e3866b44e9e8c9df1a45dbd3, type: 3}
   nodeRigPrefab: {fileID: 8432584506347833489, guid: 5a92676ae0261c54188d2a64469a3787, type: 3}

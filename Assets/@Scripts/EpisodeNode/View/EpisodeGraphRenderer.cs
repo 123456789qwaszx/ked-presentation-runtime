@@ -23,8 +23,6 @@ public sealed class EpisodeGraphRenderer
     private IEpisodeGraphScrollRootProvider RootProvider => _rootProvider ??= ResolveRootProvider();
     private IEpisodeGraphScrollRootProvider ResolveRootProvider() => UIManager.Instance.GetUI<EpisodeSelectionPanel>();
     
-    
-    private readonly RectTransform _content;
     private readonly RectTransform _nodeRigPrefab;
 
     private readonly EpisodeNodeBuilder _builder = new();
@@ -38,7 +36,6 @@ public sealed class EpisodeGraphRenderer
     public EpisodeGraphRenderer(RectTransform nodeRigPrefab)
     {
         _nodeRigPrefab = nodeRigPrefab;
-        _content = RootProvider.GraphContent;
     }
     
     public void Render(EpisodeGraphViewData viewData)
@@ -47,7 +44,7 @@ public sealed class EpisodeGraphRenderer
 
         RenderNodes(viewData, used);
         DeactivateUnused(used);
-        _content.sizeDelta = viewData.ContentSize;
+        RootProvider.GraphContent.sizeDelta = viewData.ContentSize;
     }
 
     public void ClearAll()
@@ -162,7 +159,7 @@ public sealed class EpisodeGraphRenderer
 
         RectTransform root = _builder.BuildNodeRoot(_nodeRigPrefab, prefix);
 
-        root.SetParent(_content, false);
+        root.SetParent(RootProvider.GraphContent, false);
         root.gameObject.SetActive(false);
 
         _builder.BindRefsFromRoot(root, prefix, out EpisodeNodeRefs refs);
