@@ -15,6 +15,7 @@ public class VnAppBootstrap : MonoBehaviour
     private readonly VnPlaybackSettings _vnPlaybackSettings = new();
     private readonly EpisodePlayState _episodePlayState = new();
     private readonly PresentationSessionContext _presentationSessionContext = new();
+    private readonly VnScreenBindings _screenBindings = new();
 
     private LinePresentationAdvanceState _linePresentationAdvanceState;
 
@@ -89,7 +90,6 @@ public class VnAppBootstrap : MonoBehaviour
 
     private PresentationSessionBridge _presentationSessionBridge;
 
-    private VnScreenBindings _screenBindings;
     private RollbackHistory _rollbackHistory;
     private BacklogRecorder _backlogRecorder;
     private UIPatchService _uiPatchService;
@@ -389,12 +389,11 @@ public class VnAppBootstrap : MonoBehaviour
             albumDatabase);
         
         vnAlbumUnlockDebugList.Initialize(_vnSaveLoadSystem);
+        _screenBindings.ConfigureAlbumView(_vnSaveLoadSystem);
     }
     
     private void BootstrapUIBindings()
     {
-        _screenBindings = new VnScreenBindings(_vnSaveLoadSystem);
-        
         _screenBindings.ConfigurePresentationView(
             _episodePlayState,
             vnFeatureController,
@@ -408,7 +407,7 @@ public class VnAppBootstrap : MonoBehaviour
     {
         episodePlayer.Initialize(_screenBindings, _rollbackHistory, customLinePresenter, _backlogRecorder);
 
-        _screenBindings.AttachEpisodePlayer(episodePlayer);
+        _screenBindings.ConfigureTitleView(episodePlayer);
     }
     
     private void Start()

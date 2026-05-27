@@ -5,65 +5,54 @@ using UnityEngine;
 public sealed partial class VnScreenBindings : IDisposable
 {
     private static UIManager UI => UIManager.Instance;
-
+    
     private readonly Dictionary<UIBase, List<Action>> _cleanupByOwner = new();
-
-    private readonly VNSaveLoadSystem _vnSaveLoadSystem;
-
+    
     private UIBase _boundMain;
 
-    private EpisodePlayer _episodePlayer;
-
-    public VnScreenBindings(VNSaveLoadSystem vnSaveLoadSystem)
+    /// <summary>
+    /// Closes the top panel and releases its VnScreenBindings cleanup entries.
+    /// </summary>
+    private void CloseTopPanel()
     {
-        _vnSaveLoadSystem = vnSaveLoadSystem;
+        UI.PopPanel(Unbind);
     }
 
-    public void AttachEpisodePlayer(EpisodePlayer episodePlayer)
+    private void CloseAllPanels()
     {
-        _episodePlayer = episodePlayer;
+        UI.PopAllPanels(Unbind);
     }
+    
+    private bool HasPanel => UI.HasPanel;
 
-    private void BindMain<T>(T owner, Action<T> bind)
+    private void BindMain<T>(T owner, Action<T> apply)
         where T : UIBase
     {
-        if (!owner)
-            return;
-
         if (_boundMain != null && _boundMain != owner)
             Unbind(_boundMain);
 
         Unbind(owner);
 
         _boundMain = owner;
-        bind(owner);
+        apply(owner);
     }
 
-    private void Bind<T>(T owner, Action<T> bind)
+    private void BindPanel<T>(T owner, Action<T> apply)
         where T : UIBase
     {
-        if (!owner)
-            return;
-
         Unbind(owner);
-        bind(owner);
+        apply(owner);
     }
 
-    private void BindEvent<T>(T owner, Action<T> bind, Action<T> unbind)
+    private void AddBinding<T>(T owner, Action<T> attach, Action<T> detach)
         where T : UIBase
     {
-        if (!owner || bind == null || unbind == null)
-            return;
-
-        bind(owner);
-        AddCleanup(owner, () => unbind(owner));
+        attach(owner);
+        AddCleanup(owner, () => detach(owner));
     }
 
     private void AddCleanup(UIBase owner, Action cleanup)
     {
-        if (!owner || cleanup == null)
-            return;
-
         if (!_cleanupByOwner.TryGetValue(owner, out List<Action> cleanups))
         {
             cleanups = new List<Action>();
@@ -75,26 +64,11 @@ public sealed partial class VnScreenBindings : IDisposable
 
     private void Unbind(UIBase owner)
     {
-        if (!owner)
-            return;
-
         if (!_cleanupByOwner.TryGetValue(owner, out List<Action> cleanups))
             return;
 
         RunCleanups(cleanups);
         _cleanupByOwner.Remove(owner);
-
-        if (_boundMain == owner)
-            _boundMain = null;
-    }
-
-    private void UnbindMain()
-    {
-        if (_boundMain == null)
-            return;
-
-        Unbind(_boundMain);
-        _boundMain = null;
     }
 
     private void UnbindAll()

@@ -32,43 +32,37 @@ public partial class UIManager
 
         return panel;
     }
-
-    public void PopPanel()
+    
+    public void PopPanel(Action<UIBase> afterPopped = null)
     {
         if (_panelStack.Count == 0)
             return;
 
-        UIBase top = _panelStack.Pop();
+        UIBase popped = _panelStack.Pop();
 
-        HideManagedUI(top);
+        HideManagedUI(popped);
 
         BumpShowVersion();
+        afterPopped?.Invoke(popped);
+
         ApplyPanelStackState();
     }
-
-    public void PopAllPanels()
+    
+    public void PopAllPanels(Action<UIBase> afterEachPatched = null)
     {
         while (_panelStack.Count > 0)
-            PopPanel();
+            PopPanel(afterEachPatched);
     }
 
-    public UIBase PeekPanel()
-    {
-        if (_panelStack.Count == 0)
-        {
-            UnityEngine.Debug.Log("[UIManager] Panel stack is empty.", this);
-            return null;
-        }
-
-        return _panelStack.Peek();
-    }
-
-    private void PopUntil(UIBase target)
+    
+    private void PopUntil(UIBase target, Action<UIBase> afterPopped = null)
     {
         while (_panelStack.Count > 0 && _panelStack.Peek() != target)
         {
             UIBase popped = _panelStack.Pop();
+
             HideManagedUI(popped);
+            afterPopped?.Invoke(popped);
         }
     }
 

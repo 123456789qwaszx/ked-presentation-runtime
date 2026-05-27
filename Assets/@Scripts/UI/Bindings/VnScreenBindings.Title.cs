@@ -2,100 +2,73 @@ using UnityEngine;
 
 public sealed partial class VnScreenBindings
 {
+    private EpisodePlayer _episodePlayer;
+    
+    public void ConfigureTitleView(EpisodePlayer episodePlayer)
+    {
+        _episodePlayer = episodePlayer;
+    }
+    
     public void GoToTitle()
     {
-        UI.SwitchRoot<TitleUIRoot>(root =>
+        UI.SwitchRoot<TitleUIRoot>(titleRoot =>
         {
-            BindMain(root, BindTitleRoot);
+            BindMain(titleRoot, ApplyBindings);
+            RefreshTitleState(titleRoot);
         });
     }
 
-    private void BindTitleRoot(TitleUIRoot titleRoot)
+    
+    private void ApplyBindings(TitleUIRoot titleRoot)
     {
-        BindEvent(
-            titleRoot,
-            t => t.OnStart += OnNewGamePressed,
-            t => t.OnStart -= OnNewGamePressed);
+        AddBinding(titleRoot, 
+            t => t.StartClicked += HandleStartClicked,
+            t => t.StartClicked -= HandleStartClicked);
 
-        BindEvent(
-            titleRoot,
-            t => t.OnContinue += OnContinuePressed,
-            t => t.OnContinue -= OnContinuePressed);
+        AddBinding(titleRoot,
+            t => t.ContinueClicked += HandleContinueClicked,
+            t => t.ContinueClicked -= HandleContinueClicked);
 
-        BindEvent(
-            titleRoot,
-            t => t.OnOpenLoad += OnOpenLoadPressed,
-            t => t.OnOpenLoad -= OnOpenLoadPressed);
+        AddBinding(titleRoot,
+            t => t.LoadClicked += HandleLoadClicked,
+            t => t.LoadClicked -= HandleLoadClicked);
 
-        BindEvent(
-            titleRoot,
-            t => t.OnOpenAlbum += OnOpenAlbumPressed,
-            t => t.OnOpenAlbum -= OnOpenAlbumPressed);
+        AddBinding(titleRoot,
+            t => t.AlbumClicked += HandleAlbumClicked,
+            t => t.AlbumClicked -= HandleAlbumClicked);
 
-        BindEvent(
-            titleRoot,
-            t => t.OnOpenSettings += OnOpenSettingsPressed,
-            t => t.OnOpenSettings -= OnOpenSettingsPressed);
+        AddBinding(titleRoot,
+            t => t.SettingsClicked += HandleSettingsClicked,
+            t => t.SettingsClicked -= HandleSettingsClicked);
 
-        BindEvent(
-            titleRoot,
-            t => t.OnQuit += OnQuitPressed,
-            t => t.OnQuit -= OnQuitPressed);
+        AddBinding(titleRoot,
+            t => t.QuitClicked += OnQuitPressed,
+            t => t.QuitClicked -= OnQuitPressed);
 
-        RefreshTitleState(titleRoot);
     }
-
-    private void RefreshTitleState(TitleUIRoot titleRoot)
+    
+    private void HandleStartClicked()
     {
-        if (titleRoot == null)
-            return;
-
-        bool hasSystem = _vnSaveLoadSystem != null;
-        bool persistentReady = hasSystem && _vnSaveLoadSystem.IsInitialized;
-
-        bool canContinue =
-            hasSystem &&
-            _vnSaveLoadSystem.CanContinue();
-
-        titleRoot.SetContinueEnabled(canContinue);
-        titleRoot.SetLoadEnabled(persistentReady);
-        titleRoot.SetAlbumEnabled(persistentReady);
-    }
-
-    private void OnNewGamePressed()
-    {
-        if (_episodePlayer == null)
-        {
-            Debug.LogWarning("[VnScreenBindings] EpisodePlayer is null.");
-            return;
-        }
-
         _episodePlayer.StartGame(_episodePlayer.YarnEntryKey);
     }
 
-    private void OnContinuePressed()
+    private void HandleContinueClicked()
     {
-        if (_vnSaveLoadSystem == null)
-        {
-            Debug.LogWarning("[VnScreenBindings] VNSaveLoadSystem is null.");
-            return;
-        }
-
         if (!_vnSaveLoadSystem.TryContinue())
             Debug.LogWarning("[VnScreenBindings] Continue failed.");
     }
 
-    private void OnOpenLoadPressed()
+    private void HandleLoadClicked()
     {
         GoToLoadMenu();
     }
 
-    private void OnOpenAlbumPressed()
+    private void HandleAlbumClicked()
     {
-        GoToAlbum();
+        OpenAlbumMenuPanel();
     }
 
-    private void OnOpenSettingsPressed()
+    private void HandleSettingsClicked()
     {
         Debug.Log("[VnScreenBindings] Settings requested.");
     }
@@ -107,5 +80,14 @@ public sealed partial class VnScreenBindings
 #else
         Application.Quit();
 #endif
+    }
+    
+    private void RefreshTitleState(TitleUIRoot titleRoot)
+    {
+        bool canContinue = _vnSaveLoadSystem.CanContinue();
+
+        titleRoot.SetContinueEnabled(canContinue);
+        titleRoot.SetLoadEnabled(true);
+        titleRoot.SetAlbumEnabled(true);
     }
 }

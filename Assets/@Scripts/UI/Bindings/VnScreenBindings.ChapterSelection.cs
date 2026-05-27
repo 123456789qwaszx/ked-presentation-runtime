@@ -26,62 +26,24 @@ public sealed partial class VnScreenBindings
     {
         UI.PushPanel<ChapterSelectionPanel>(panel =>
         {
-            BindMain(panel, BindChapterSelectionPanel);
-            
+            BindPanel(panel, ApplyBindings);
             BuildChapterCards(panel);
-            RefreshChapterSelectionPanel(panel);
+            Refresh(panel);
         });
     }
 
-    private void BindChapterSelectionPanel(ChapterSelectionPanel panel)
+    private void ApplyBindings(ChapterSelectionPanel panel)
     {
-        if (panel == null)
-            return;
-
-        BindEvent(panel,
-            p => p.OnBackRequested += OnChapterBackRequested,
-            p => p.OnBackRequested -= OnChapterBackRequested);
+        AddBinding(panel,
+            p => p.CloseClicked += CloseTopPanel,
+            p => p.CloseClicked -= CloseTopPanel);
 
         panel.SetChapterCardHandlers(
             onPressed: OnChapterCardPressed,
             onReleased: OnChapterCardReleased,
             onClicked: OnChapterCardClicked);
-
     }
-
-    private void BuildChapterCards(ChapterSelectionPanel panel)
-    {
-        if (panel == null)
-            return;
-
-        RectTransform container = panel.CardContainer;
-
-        if (container == null)
-        {
-            Debug.LogWarning("[VnScreenBindings] Chapter card container is null.");
-            return;
-        }
-
-        ClearChildren(container);
-
-        List<ChapterButtonCard> cards = _chapterCardSpawner.CreateCards(container, _chapterCardPrefab, _chapterCardCount);
-
-        panel.RegisterCards(cards);
-    }
-
-    private void RefreshChapterSelectionPanel(ChapterSelectionPanel panel)
-    {
-        if (panel == null)
-            return;
-
-        ChapterButtonCardModel[] models = null;
-
-        if (_resolveChapterModels != null)
-            models = _resolveChapterModels.Invoke();
-
-        panel.PresentChapters(models);
-    }
-
+    
     private void OnChapterCardPressed(ChapterButtonCard card)
     {
         if (card == null)
@@ -106,17 +68,29 @@ public sealed partial class VnScreenBindings
 
         GoToEpisodeSelection(chapterId);
     }
-
-    private void OnChapterBackRequested()
+    
+    private void BuildChapterCards(ChapterSelectionPanel panel)
     {
-        GoToLobby();
+        RectTransform container = panel.CardContainer;
+        ClearChildren(container);
+
+        List<ChapterButtonCard> cards = _chapterCardSpawner.CreateCards(container, _chapterCardPrefab, _chapterCardCount);
+
+        panel.RegisterCards(cards);
     }
 
+    private void Refresh(ChapterSelectionPanel panel)
+    {
+        ChapterButtonCardModel[] models = null;
+
+        if (_resolveChapterModels != null)
+            models = _resolveChapterModels.Invoke();
+
+        panel.PresentChapters(models);
+    }
+    
     private void ClearChildren(RectTransform parent)
     {
-        if (parent == null)
-            return;
-
         for (int i = parent.childCount - 1; i >= 0; i--)
         {
             Transform child = parent.GetChild(i);

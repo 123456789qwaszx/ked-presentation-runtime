@@ -23,7 +23,7 @@ public readonly struct ChapterMetaModel
 
 public sealed partial class EpisodeSelectionPanel : UIPanel<EpisodeSelectionPanel.Refs>
 {
-    public event Action OnBackRequested;
+    public event Action CloseClicked;
 
     private TMP_Text _chapterIndex;
     private TMP_Text _chapterEra;
@@ -186,7 +186,7 @@ public sealed partial class EpisodeSelectionPanel : UIPanel<EpisodeSelectionPane
 
     private void HandleReturn()
     {
-        OnBackRequested?.Invoke();
+        CloseClicked?.Invoke();
     }
 
     private bool ValidateRefs()

@@ -10,8 +10,6 @@ public sealed partial class VnScreenBindings
     private DialogueAdvanceDispatcher _dialogueAdvanceDispatcher;
     private LinePresentationAdvanceState _linePresentationAdvanceState;
 
-    private PresentationUIRoot _presentationRoot;
-
     public void ConfigurePresentationView(
         EpisodePlayState episodePlayState,
         VnFeatureController vnFeatures,
@@ -32,54 +30,62 @@ public sealed partial class VnScreenBindings
     {
         UI.SwitchRoot<PresentationUIRoot>(root =>
         {
-            BindMain(root, BindPresentationRootEvents);
+            BindMain(root, ApplyBindings);
         });
     }
 
-    private void BindPresentationRootEvents(PresentationUIRoot root)
+    private void ApplyBindings(PresentationUIRoot root)
     {
-        _presentationRoot = root;
-        AddCleanup(root, () => { _presentationRoot = null; });
-
-        BindEvent(root, r =>
-                r.OnRollbackOneStepPressed += HandleRollbackPressed, 
-            r => r.OnRollbackOneStepPressed -= HandleRollbackPressed);
-        BindEvent(root,
-            r => r.OnSpeedUpHoldStarted += HandleSpeedUpHoldStarted,
-            r => r.OnSpeedUpHoldStarted -= HandleSpeedUpHoldStarted);
-        BindEvent(root,
-            r => r.OnSpeedUpHoldEnded += HandleSpeedUpHoldEnded,
-            r => r.OnSpeedUpHoldEnded -= HandleSpeedUpHoldEnded);
-        BindEvent(root,
-            r => r.OnStepNextPressed += HandleStepNextPressed,
-            r => r.OnStepNextPressed -= HandleStepNextPressed);
-        BindEvent(root,
-            r => r.OnSkipPressed += HandleSkipPressed,
-            r => r.OnSkipPressed -= HandleSkipPressed);
-        BindEvent(root,
-            r => r.AutoClicked += HandleAutoPressed,
-            r => r.AutoClicked -= HandleAutoPressed);
-        BindEvent(root,
-            r => r.QuickMenuClicked += HandleQuickMenuPressed,
-            r => r.QuickMenuClicked -= HandleQuickMenuPressed);
-        BindEvent(root,
-            r => r.OnExpandPressed += HandleExpandPressed,
-            r => r.OnExpandPressed -= HandleExpandPressed);
-        BindEvent(root,
-            r => r.OnShowPreviousLogPressed += HandleShowPreviousLogPressed,
-            r => r.OnShowPreviousLogPressed -= HandleShowPreviousLogPressed);
-        BindEvent(root,
-            r => r.OnSetSpeedupPressed += HandleSetSpeedPressed,
-            r => r.OnSetSpeedupPressed -= HandleSetSpeedPressed);
-        BindEvent(root,
-            r => r.OnSaveMenuPressed += HandlePresentationSaveMenuPressed,
-            r => r.OnSaveMenuPressed -= HandlePresentationSaveMenuPressed);
-        BindEvent(root,
-            r => r.OnLoadMenuPressed += HandlePresentationLoadMenuPressed,
-            r => r.OnLoadMenuPressed -= HandlePresentationLoadMenuPressed);
+        AddBinding(root, 
+            r => r.RollbackClicked += HandleRollbackClicked, 
+            r => r.RollbackClicked -= HandleRollbackClicked);
+        
+        AddBinding(root, 
+            r => r.FastForwardDown += HandleFastForwardDown,
+            r => r.FastForwardDown -= HandleFastForwardDown);
+        
+        AddBinding(root,
+            r => r.FastForwardUp += HandleFastForwardUp,
+            r => r.FastForwardUp -= HandleFastForwardUp);
+        
+        AddBinding(root,
+            r => r.StepNextClicked += HandleStepNextClicked,
+            r => r.StepNextClicked -= HandleStepNextClicked);
+        
+        AddBinding(root,
+            r => r.SkipMenuClicked += HandleSkipMenuClicked,
+            r => r.SkipMenuClicked -= HandleSkipMenuClicked);
+        
+        AddBinding(root,
+            r => r.AutoClicked += HandleAutoClicked,
+            r => r.AutoClicked -= HandleAutoClicked);
+        
+        AddBinding(root,
+            r => r.QuickMenuClicked += HandleQuickMenuClicked,
+            r => r.QuickMenuClicked -= HandleQuickMenuClicked);
+        
+        AddBinding(root,
+            r => r.ExpandClicked += HandleExpandClicked,
+            r => r.ExpandClicked -= HandleExpandClicked);
+        
+        AddBinding(root,
+            r => r.BackLogClicked += HandleBackLogClicked,
+            r => r.BackLogClicked -= HandleBackLogClicked);
+        
+        AddBinding(root,
+            r => r.PlaybackSpeedClicked += HandlePlaybackSpeedClicked,
+            r => r.PlaybackSpeedClicked -= HandlePlaybackSpeedClicked);
+        
+        AddBinding(root,
+            r => r.SaveMenuClicked += HandleSaveMenuClicked,
+            r => r.SaveMenuClicked -= HandleSaveMenuClicked);
+        
+        AddBinding(root,
+            r => r.LoadMenuClicked += HandleLoadMenuClicked,
+            r => r.LoadMenuClicked -= HandleLoadMenuClicked);
     }
 
-    private void HandleRollbackPressed()
+    private void HandleRollbackClicked()
     {
         if (!_vnFeatures.RequestRollbackOneStep())
             return;
@@ -87,24 +93,24 @@ public sealed partial class VnScreenBindings
         _episodePlayer.RestartForRollback(_linePresentationAdvanceState.TargetNodeName);
     }
 
-    private void HandleSpeedUpHoldStarted()
+    private void HandleFastForwardDown()
     {
         _vnFeatures.BeginHoldSpeedUp();
     }
 
-    private void HandleSpeedUpHoldEnded()
+    private void HandleFastForwardUp()
     {
         _vnFeatures.EndHoldSpeedUp();
     }
 
-    private void HandleStepNextPressed()
+    private void HandleStepNextClicked()
     {
         if (_vnFeatures != null && _vnFeatures.IsAuto)
         {
             _vnFeatures.ToggleAuto();
 
-            if (_presentationRoot != null)
-                _presentationRoot.SetAutoModeActive(false);
+            if (UIManager.Instance.GetUI<PresentationUIRoot>() != null)
+                UIManager.Instance.GetUI<PresentationUIRoot>().SetAutoModeActive(false);
 
             return;
         }
@@ -112,17 +118,43 @@ public sealed partial class VnScreenBindings
         _dialogueAdvanceDispatcher.DispatchAdvance();
     }
 
-    private void HandlePresentationSaveMenuPressed()
+    private void HandleSaveMenuClicked()
     {
-        OpenPresentationSaveLoadMenu(SaveLoadMenuMode.Save);
+        if (HasPanel)
+            return;
+        
+        if (_vnFeatures.IsAuto)
+        {
+            _vnFeatures.ToggleAuto();
+
+            UIManager.Instance.GetUI<PresentationUIRoot>().SetAutoModeActive(false);
+        }
+
+        UIManager.Instance.GetUI<PresentationUIRoot>().SetExpanded(false);
+        UIManager.Instance.GetUI<PresentationUIRoot>().SetQuickMenuOpen(false);
+
+        OpenSaveLoadMenu(SaveLoadMenuMode.Save);
     }
 
-    private void HandlePresentationLoadMenuPressed()
+    private void HandleLoadMenuClicked()
     {
-        OpenPresentationSaveLoadMenu(SaveLoadMenuMode.Load);
+        if (HasPanel)
+            return;
+        
+        if (_vnFeatures.IsAuto)
+        {
+            _vnFeatures.ToggleAuto();
+
+            UIManager.Instance.GetUI<PresentationUIRoot>().SetAutoModeActive(false);
+        }
+
+        UIManager.Instance.GetUI<PresentationUIRoot>().SetExpanded(false);
+        UIManager.Instance.GetUI<PresentationUIRoot>().SetQuickMenuOpen(false);
+
+        OpenSaveLoadMenu(SaveLoadMenuMode.Load);
     }
 
-    private void HandleSkipPressed()
+    private void HandleSkipMenuClicked()
     {
         if (_uxState.ChoicesVisible || _uxState.BacklogVisible)
             return;
@@ -131,7 +163,7 @@ public sealed partial class VnScreenBindings
 
         UI.PushPanel<SkipConfirmPanel>(panel =>
         {
-            Bind(panel, BindSkipConfirmPanel);
+            BindPanel(panel, BindSkipConfirmPanel);
 
             panel.Present(
                 title: "에피소드를 스킵할까요?",
@@ -143,28 +175,28 @@ public sealed partial class VnScreenBindings
 
     private void BindSkipConfirmPanel(SkipConfirmPanel panel)
     {
-        BindEvent(
+        AddBinding(
             panel,
             p => p.OnConfirmed += ConfirmSkipEpisode,
             p => p.OnConfirmed -= ConfirmSkipEpisode);
 
-        BindEvent(
+        AddBinding(
             panel,
             p => p.OnCancelled += CloseSkipConfirm,
             p => p.OnCancelled -= CloseSkipConfirm);
     }
 
-    private void HandleAutoPressed()
+    private void HandleAutoClicked()
     {
         _vnFeatures.ToggleAuto();
-        _presentationRoot.SetAutoModeActive(_vnFeatures.IsAuto);
+        UIManager.Instance.GetUI<PresentationUIRoot>().SetAutoModeActive(_vnFeatures.IsAuto);
     }
 
-    private void HandleQuickMenuPressed()
+    private void HandleQuickMenuClicked()
     {
     }
 
-    private void HandleExpandPressed()
+    private void HandleExpandClicked()
     {
         if (_uxState.BacklogVisible)
             CloseBacklogPanel();
@@ -173,7 +205,7 @@ public sealed partial class VnScreenBindings
             CloseChoicePanel();
     }
 
-    private void HandleShowPreviousLogPressed()
+    private void HandleBackLogClicked()
     {
         if (_uxState.BacklogVisible)
             return;
@@ -182,109 +214,21 @@ public sealed partial class VnScreenBindings
 
         UI.PushPanel<BacklogPanel>(panel =>
         {
-            Bind(panel, BindBacklogPanel);
+            BindPanel(panel, BindBacklogPanel);
             panel.Present(_vnFeatures.Backlogs);
         });
     }
 
     private void BindBacklogPanel(BacklogPanel panel)
     {
-        BindEvent(panel,
+        AddBinding(panel,
             p => p.OnCloseRequested += CloseBacklogPanel,
             p => p.OnCloseRequested -= CloseBacklogPanel);
     }
 
-    private void HandleSetSpeedPressed()
+    private void HandlePlaybackSpeedClicked()
     {
         _vnFeatures.ToggleSetSpeed();
-    }
-
-    private void OpenPresentationSaveLoadMenu(SaveLoadMenuMode mode)
-    {
-        if (_uxState.ChoicesVisible || _uxState.BacklogVisible)
-            return;
-        
-        if (_vnFeatures.IsAuto)
-        {
-            _vnFeatures.ToggleAuto();
-
-            _presentationRoot.SetAutoModeActive(false);
-        }
-
-        _presentationRoot.SetExpanded(false);
-        _presentationRoot.SetQuickMenuOpen(false);
-
-        _currentSaveLoadMode = mode;
-
-        UI.SwitchRoot<SaveLoadMenuUIPanel>(root =>
-        {
-            BindMain(root, BindPresentationSaveLoadRoot);
-        });
-    }
-
-    private void BindPresentationSaveLoadRoot(SaveLoadMenuUIPanel saveLoadRoot)
-    {
-        BindEvent(saveLoadRoot,
-            r => r.OnSlotSelected += OnPresentationSaveLoadSlotSelected,
-            r => r.OnSlotSelected -= OnPresentationSaveLoadSlotSelected);
-        BindEvent(saveLoadRoot,
-            r => r.OnCloseRequested += OnPresentationSaveLoadCloseRequested,
-            r => r.OnCloseRequested -= OnPresentationSaveLoadCloseRequested);
-
-        RefreshPresentationSaveLoadRoot(saveLoadRoot);
-    }
-
-    private void RefreshPresentationSaveLoadRoot(SaveLoadMenuUIPanel saveLoadRoot)
-    {
-        VNSaveSlotMeta[] metas = _vnSaveLoadSystem.GetAllSaveSlotMetas();
-
-        saveLoadRoot.Rebuild(_currentSaveLoadMode, metas);
-    }
-
-    private void OnPresentationSaveLoadSlotSelected(int slotIndex)
-    {
-        if (_currentSaveLoadMode == SaveLoadMenuMode.Save)
-        {
-            HandlePresentationSaveSlotSelected(slotIndex);
-            return;
-        }
-
-        HandlePresentationLoadSlotSelected(slotIndex);
-    }
-
-    private void HandlePresentationSaveSlotSelected(int slotIndex)
-    {
-        if (!_vnSaveLoadSystem.SaveService.SaveManual(slotIndex))
-        {
-            if (_boundMain is SaveLoadMenuUIPanel saveLoadRoot)
-                RefreshPresentationSaveLoadRoot(saveLoadRoot);
-
-            return;
-        }
-
-        if (_boundMain is SaveLoadMenuUIPanel refreshedRoot)
-            RefreshPresentationSaveLoadRoot(refreshedRoot);
-    }
-
-    private void HandlePresentationLoadSlotSelected(int slotIndex)
-    {
-        if (!_vnSaveLoadSystem.LoadService.Load(slotIndex))
-        {
-            Debug.LogWarning($"[VnScreenBindings] Load failed. slotIndex={slotIndex}");
-            return;
-        }
-
-        ClosePresentationSaveLoadRoot();
-    }
-
-    private void OnPresentationSaveLoadCloseRequested()
-    {
-        ClosePresentationSaveLoadRoot();
-    }
-
-    private void ClosePresentationSaveLoadRoot()
-    {
-        UI.PopPanel();
     }
 
     private void CloseSkipConfirm()
@@ -306,8 +250,8 @@ public sealed partial class VnScreenBindings
         if (string.IsNullOrEmpty(episodeId))
             Debug.LogWarning("[VN] Skip confirmed but current episode id is empty.");
 
-        if (_presentationRoot != null)
-            _presentationRoot.SetSkipModeActive(false);
+        if (UIManager.Instance.GetUI<PresentationUIRoot>() != null)
+            UIManager.Instance.GetUI<PresentationUIRoot>().SetSkipModeActive(false);
 
         _vnRuntimeBridge.ForceCompleteEpisodeNow(episodeId);
         _episodePlayState.ApplyEpisodeState(episodeId);
@@ -336,8 +280,8 @@ public sealed partial class VnScreenBindings
         {
             _vnFeatures.ToggleAuto();
 
-            if (_presentationRoot != null)
-                _presentationRoot.SetAutoModeActive(false);
+            if (UIManager.Instance.GetUI<PresentationUIRoot>() != null)
+                UIManager.Instance.GetUI<PresentationUIRoot>().SetAutoModeActive(false);
         }
 
         ChoicePanel existing = UI.GetUI<ChoicePanel>();
@@ -350,15 +294,15 @@ public sealed partial class VnScreenBindings
 
         UI.PushPanel<ChoicePanel>(panel =>
         {
-            Bind(panel, BindChoicePanel);
+            BindPanel(panel, BindChoicePanel);
             panel.Present(choices);
         });
     }
 
     private void BindChoicePanel(ChoicePanel panel)
     {
-        BindEvent(panel, p => p.OnChoiceSelected += HandleChoiceSelected, p => p.OnChoiceSelected -= HandleChoiceSelected);
-        BindEvent(panel, p => p.OnCloseRequested += CloseChoicePanel, p => p.OnCloseRequested -= CloseChoicePanel);
+        AddBinding(panel, p => p.OnChoiceSelected += HandleChoiceSelected, p => p.OnChoiceSelected -= HandleChoiceSelected);
+        AddBinding(panel, p => p.OnCloseRequested += CloseChoicePanel, p => p.OnCloseRequested -= CloseChoicePanel);
     }
 
     private void HandleChoiceSelected(int index)

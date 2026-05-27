@@ -95,18 +95,6 @@ public sealed class VNSaveService
 
     public bool SaveToSlot(string slotId, bool isAutoSave)
     {
-        if (_stateProvider == null)
-        {
-            Debug.LogError("[VNSaveService] StateProvider is null.");
-            return false;
-        }
-
-        if (_flagStore == null)
-        {
-            Debug.LogError("[VNSaveService] FlagStore is null.");
-            return false;
-        }
-
         if (!CanSaveNow(isAutoSave, out string reason))
         {
             Debug.LogWarning($"[VNSaveService] Save blocked. slot='{slotId}', reason='{reason}'");

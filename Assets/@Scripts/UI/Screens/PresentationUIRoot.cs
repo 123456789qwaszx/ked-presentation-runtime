@@ -4,21 +4,21 @@ using UnityEngine.EventSystems;
 
 public partial class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
 {
-    public event Action OnSpeedUpHoldStarted;
-    public event Action OnSpeedUpHoldEnded;
+    public event Action FastForwardDown;
+    public event Action FastForwardUp;
 
-    public event Action OnRollbackOneStepPressed;
+    public event Action RollbackClicked;
 
-    public event Action OnSkipPressed;
+    public event Action SkipMenuClicked;
     public event Action AutoClicked;
     public event Action QuickMenuClicked;
-    public event Action OnExpandPressed;
-    public event Action OnShowPreviousLogPressed;
-    public event Action OnSetSpeedupPressed;
-    public event Action OnStepNextPressed;
+    public event Action ExpandClicked;
+    public event Action BackLogClicked;
+    public event Action PlaybackSpeedClicked;
+    public event Action StepNextClicked;
 
-    public event Action OnSaveMenuPressed;
-    public event Action OnLoadMenuPressed;
+    public event Action SaveMenuClicked;
+    public event Action LoadMenuClicked;
 
     public enum Refs
     {
@@ -173,9 +173,9 @@ public partial class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
         BindEvent(View.Button(Refs.SkipToggle_Button), PressSkipButton);
         BindEvent(View.Button(Refs.QuickSaveMenu_Button), PressSaveMenuButton);
         BindEvent(View.Button(Refs.QuickLoadMenu_Button), PressLoadMenuButton);
-        BindEvent(View.Button(Refs.SpeedUpToggleHotKey_Button), _ => OnSpeedUpHoldStarted?.Invoke(), ETouchEvent.PointerDown);
-        BindEvent(View.Button(Refs.SpeedUpToggleHotKey_Button), _ => OnSpeedUpHoldEnded?.Invoke(), ETouchEvent.PointerUp);
-        BindEvent(View.Button(Refs.RollbackToggleHotKey_Button), _ => OnRollbackOneStepPressed?.Invoke(), ETouchEvent.Click);
+        BindEvent(View.Button(Refs.SpeedUpToggleHotKey_Button), _ => FastForwardDown?.Invoke(), ETouchEvent.PointerDown);
+        BindEvent(View.Button(Refs.SpeedUpToggleHotKey_Button), _ => FastForwardUp?.Invoke(), ETouchEvent.PointerUp);
+        BindEvent(View.Button(Refs.RollbackToggleHotKey_Button), _ => RollbackClicked?.Invoke(), ETouchEvent.Click);
     }
 
     private void PressAutoButton(PointerEventData _)
@@ -191,7 +191,7 @@ public partial class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
             return;
         }
 
-        OnStepNextPressed?.Invoke();
+        StepNextClicked?.Invoke();
     }
 
     private void PressQuickMenuToggleButton(PointerEventData _)
@@ -204,34 +204,34 @@ public partial class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
     private void PressExpandButton(PointerEventData _)
     {
         ToggleExpand();
-        OnExpandPressed?.Invoke();
+        ExpandClicked?.Invoke();
     }
 
     private void PressLogButton(PointerEventData _)
     {
-        OnShowPreviousLogPressed?.Invoke();
+        BackLogClicked?.Invoke();
     }
 
     private void PressSpeedButton(PointerEventData _)
     {
-        OnSetSpeedupPressed?.Invoke();
+        PlaybackSpeedClicked?.Invoke();
     }
 
     private void PressSkipButton(PointerEventData _)
     {
-        OnSkipPressed?.Invoke();
+        SkipMenuClicked?.Invoke();
     }
 
     private void PressSaveMenuButton(PointerEventData _)
     {
         SetQuickMenuOpen(false);
-        OnSaveMenuPressed?.Invoke();
+        SaveMenuClicked?.Invoke();
     }
 
     private void PressLoadMenuButton(PointerEventData _)
     {
         SetQuickMenuOpen(false);
-        OnLoadMenuPressed?.Invoke();
+        LoadMenuClicked?.Invoke();
     }
 
     public void SetQuickMenuOpen(bool open)

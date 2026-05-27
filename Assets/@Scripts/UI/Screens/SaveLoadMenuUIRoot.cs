@@ -9,10 +9,10 @@ public enum SaveLoadMenuMode
     Load = 1
 }
 
-public sealed class SaveLoadMenuUIPanel : UIRoot<SaveLoadMenuUIPanel.Refs>
+public sealed class SaveLoadMenuUIPanel : UIPanel<SaveLoadMenuUIPanel.Refs>
 {
-    public event Action<int> OnSlotSelected;
-    public event Action OnCloseRequested;
+    public event Action<int> SlotClicked;
+    public event Action CloseClicked;
 
     #region Refs
 
@@ -64,7 +64,7 @@ public sealed class SaveLoadMenuUIPanel : UIRoot<SaveLoadMenuUIPanel.Refs>
 
     private void HandleClose()
     {
-        OnCloseRequested?.Invoke();
+        CloseClicked?.Invoke();
     }
 
     protected override void OnDestroy()
@@ -99,7 +99,7 @@ public sealed class SaveLoadMenuUIPanel : UIRoot<SaveLoadMenuUIPanel.Refs>
 
     private void HandleSlotClicked(int slotIndex)
     {
-        OnSlotSelected?.Invoke(slotIndex);
+        SlotClicked?.Invoke(slotIndex);
     }
 
     private void ClearSlots()

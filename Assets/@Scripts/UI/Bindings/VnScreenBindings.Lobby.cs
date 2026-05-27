@@ -8,17 +8,17 @@ public sealed partial class VnScreenBindings
         });
     }
 
-    private void BindLobbyRoot(LobbyUIRoot lobbyRoot)
+    private void BindLobbyRoot(LobbyUIRoot root)
     {
-        BindEvent(
-            lobbyRoot,
-            l => l.OnOpenStory += OpenStorySelectFlow,
-            l => l.OnOpenStory -= OpenStorySelectFlow);
+        AddBinding(
+            root,
+            r => r.OnOpenStory += OpenStorySelectFlow,
+            r => r.OnOpenStory -= OpenStorySelectFlow);
 
-        BindEvent(
-            lobbyRoot,
-            l => l.OnNextBroadcastRequested += OnNextBroadcastRequested,
-            l => l.OnNextBroadcastRequested -= OnNextBroadcastRequested);
+        AddBinding(
+            root,
+            r => r.OnNextBroadcastRequested += OnNextBroadcastRequested,
+            r => r.OnNextBroadcastRequested -= OnNextBroadcastRequested);
     }
 
     private void OnNextBroadcastRequested()

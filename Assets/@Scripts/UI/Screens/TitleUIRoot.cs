@@ -5,12 +5,12 @@ using static UIRefValidation;
 
 public sealed class TitleUIRoot : UIRoot<TitleUIRoot.Refs>
 {
-    public event Action OnStart;
-    public event Action OnContinue;
-    public event Action OnOpenLoad;
-    public event Action OnOpenAlbum;
-    public event Action OnOpenSettings;
-    public event Action OnQuit;
+    public event Action StartClicked;
+    public event Action ContinueClicked;
+    public event Action LoadClicked;
+    public event Action AlbumClicked;
+    public event Action SettingsClicked;
+    public event Action QuitClicked;
 
     #region Refs
 
@@ -77,12 +77,12 @@ public sealed class TitleUIRoot : UIRoot<TitleUIRoot.Refs>
 
     #region Event Handlers
 
-    private void HandleStart()    => OnStart?.Invoke();
-    private void HandleContinue() => OnContinue?.Invoke();
-    private void HandleLoad()     => OnOpenLoad?.Invoke();
-    private void HandleAlbum()    => OnOpenAlbum?.Invoke();
-    private void HandleSettings() => OnOpenSettings?.Invoke();
-    private void HandleQuit()     => OnQuit?.Invoke();
+    private void HandleStart()    => StartClicked?.Invoke();
+    private void HandleContinue() => ContinueClicked?.Invoke();
+    private void HandleLoad()     => LoadClicked?.Invoke();
+    private void HandleAlbum()    => AlbumClicked?.Invoke();
+    private void HandleSettings() => SettingsClicked?.Invoke();
+    private void HandleQuit()     => QuitClicked?.Invoke();
 
     protected override void OnDestroy()
     {

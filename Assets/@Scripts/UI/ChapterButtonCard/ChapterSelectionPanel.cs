@@ -6,6 +6,12 @@ using UnityEngine.UI;
 
 public sealed class ChapterSelectionPanel : UIPanel<ChapterSelectionPanel.Refs>
 {
+    public event Action CloseClicked;
+    
+    private Action<ChapterButtonCard> _onChapterCardPressed;
+    private Action<ChapterButtonCard> _onChapterCardReleased;
+    private Action<ChapterButtonCard> _onChapterCardClicked;
+    
     public enum Refs
     {
         SafeArea,
@@ -49,13 +55,7 @@ public sealed class ChapterSelectionPanel : UIPanel<ChapterSelectionPanel.Refs>
     }
 
     private readonly List<ChapterButtonCard> _cards = new();
-
-    private Action<ChapterButtonCard> _onChapterCardPressed;
-    private Action<ChapterButtonCard> _onChapterCardReleased;
-    private Action<ChapterButtonCard> _onChapterCardClicked;
-
-    public event Action OnBackRequested;
-
+    
     public RectTransform CardContainer => View.Rect(Refs.ChapterButtons);
 
     protected override void OnInitialize()
@@ -169,6 +169,6 @@ public sealed class ChapterSelectionPanel : UIPanel<ChapterSelectionPanel.Refs>
 
     private void HandleOnBackRequested(PointerEventData _)
     {
-        OnBackRequested?.Invoke();
+        CloseClicked?.Invoke();
     }
 }

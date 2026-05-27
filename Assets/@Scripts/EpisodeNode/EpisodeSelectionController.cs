@@ -1,5 +1,3 @@
-using System;
-
 public sealed class EpisodeSelectionController
 {
     private readonly EpisodeSelectionRepository _repository;
@@ -20,20 +18,27 @@ public sealed class EpisodeSelectionController
         _episodeGraphRenderer = episodeGraphRenderer;
         _layoutOptions = layoutOptions;
         _scrollController = scrollController;
+        
+        _episodeGraphRenderer.SetHandlers(RequestSelectEpisode);
     }
     
-    public void SetHandlers(Action<string> onMainClicked)
-    {
-        _episodeGraphRenderer.SetHandlers(onMainClicked);
-    }
-
     public void RequestRender()
     {
         EpisodeSelectionSnapshot snapshot = _repository.ReadSnapshot();
-        RenderSnapshot(snapshot);
+        
+        EpisodeGraphViewData viewData = _viewModelBuilder.Build(snapshot.GraphData, snapshot.RuntimeState, _layoutOptions);
+        _episodeGraphRenderer.Render(viewData);
+        
+        string selected = snapshot.RuntimeState.SelectedEpisodeId;
+
+        if (!string.IsNullOrEmpty(selected) && viewData.TryGetNode(selected, out EpisodeNodeViewData node))
+            _scrollController.ScrollToPositionX(node.AnchoredPosition.x, 0.5f);
+        else
+            _scrollController.ScrollToLeft();
     }
 
-    public void RequestSelectEpisode(string episodeId)
+    
+    private void RequestSelectEpisode(string episodeId)
     {
         EpisodeSelectionSnapshot before = _repository.ReadSnapshot();
 
@@ -43,25 +48,8 @@ public sealed class EpisodeSelectionController
         _repository.CommitRuntimeState(next);
 
         EpisodeSelectionSnapshot after = _repository.ReadSnapshot();
-        RenderSnapshot(after);
-    }
-    
-    
-    private void RenderSnapshot(EpisodeSelectionSnapshot snapshot)
-    {
-        EpisodeGraphViewData viewData = _viewModelBuilder.Build(snapshot.GraphData, snapshot.RuntimeState, _layoutOptions);
+        EpisodeGraphViewData viewData = _viewModelBuilder.Build(after.GraphData, after.RuntimeState, _layoutOptions);
         
         _episodeGraphRenderer.Render(viewData);
-
-        string selected = snapshot.RuntimeState.SelectedEpisodeId;
-
-        if (!string.IsNullOrEmpty(selected) && viewData.TryGetNode(selected, out EpisodeNodeViewData node))
-        {
-            _scrollController.ScrollToPositionX(node.AnchoredPosition.x, 0.5f);
-        }
-        else
-        {
-            _scrollController.ScrollToLeft();
-        }
     }
 }

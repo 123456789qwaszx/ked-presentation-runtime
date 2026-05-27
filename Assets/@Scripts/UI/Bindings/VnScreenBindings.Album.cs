@@ -1,51 +1,34 @@
-using UnityEngine;
-
 public sealed partial class VnScreenBindings
 {
-    public void GoToAlbum()
+    private VNSaveLoadSystem _vnSaveLoadSystem;
+    
+    public void ConfigureAlbumView(VNSaveLoadSystem vnSaveLoadSystem)
     {
-        UI.SwitchRoot<AlbumUIRoot>(root =>
+        _vnSaveLoadSystem = vnSaveLoadSystem;
+    }
+    
+    private void OpenAlbumMenuPanel()
+    {
+        UI.PushPanel<AlbumMenuPanel>(panel =>
         {
-            BindMain(root, BindAlbumRoot);
+            BindPanel(panel, ApplyBindings);
+            Refresh(panel);
         });
     }
 
-    private void BindAlbumRoot(AlbumUIRoot albumRoot)
+    private void ApplyBindings(AlbumMenuPanel panel)
     {
-        BindEvent(
-            albumRoot,
-            a => a.OnCloseRequested += OnAlbumCloseRequested,
-            a => a.OnCloseRequested -= OnAlbumCloseRequested);
-
-        RefreshAlbumRoot(albumRoot);
+        AddBinding(panel,
+            p => p.CloseClicked += CloseTopPanel,
+            p => p.CloseClicked -= CloseTopPanel);
     }
 
-    private void RefreshAlbumRoot(AlbumUIRoot albumRoot)
+    private void Refresh(AlbumMenuPanel panel)
     {
-        if (albumRoot == null)
-            return;
-
-        if (_vnSaveLoadSystem == null)
-        {
-            Debug.LogWarning("[VnScreenBindings] VNSaveLoadSystem is null.");
-            return;
-        }
-
         VNAlbumUnlockService albumService = _vnSaveLoadSystem.AlbumService;
 
-        if (albumService == null)
-        {
-            Debug.LogWarning("[VnScreenBindings] AlbumService is null.");
-            return;
-        }
-
-        albumRoot.Rebuild(
+        panel.Rebuild(
             albumService.GetAllItems(),
             albumService.IsUnlocked);
-    }
-
-    private void OnAlbumCloseRequested()
-    {
-        GoToTitle();
     }
 }

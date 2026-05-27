@@ -4,9 +4,9 @@ using UnityEngine;
 using UnityEngine.UI;
 using static UIRefValidation;
 
-public sealed class AlbumUIRoot : UIRoot<AlbumUIRoot.Refs>
+public sealed class AlbumMenuPanel : UIPanel<AlbumMenuPanel.Refs>
 {
-    public event Action OnCloseRequested;
+    public event Action CloseClicked;
 
     #region Refs
 
@@ -61,7 +61,7 @@ public sealed class AlbumUIRoot : UIRoot<AlbumUIRoot.Refs>
 
     private void HandleClose()
     {
-        OnCloseRequested?.Invoke();
+        CloseClicked?.Invoke();
     }
 
     protected override void OnDestroy()

@@ -1,5 +1,3 @@
-using UnityEngine;
-
 public sealed partial class VnScreenBindings
 {
     private EpisodeSelectionController _episodeSelectionController;
@@ -11,46 +9,31 @@ public sealed partial class VnScreenBindings
         _episodeSelectionController = episodeSelectionController;
     }
 
-    public void GoToEpisodeSelection(int chapterId)
+    private void GoToEpisodeSelection(int chapterId)
     {
         _currentChapterId = chapterId;
 
         UI.PushPanel<EpisodeSelectionPanel>(panel =>
         {
-            BindMain(panel, BindEpisodeSelectionPanel);
+            BindPanel(panel, ApplyBindings);
             _episodeSelectionController.RequestRender();
+            Refresh(panel);
         });
     }
 
-    private void BindEpisodeSelectionPanel(EpisodeSelectionPanel panel)
+    private void ApplyBindings(EpisodeSelectionPanel panel)
     {
-        BindEvent(panel,
-            p => p.OnBackRequested += OnEpisodeSelectionBackRequested,
-            p => p.OnBackRequested -= OnEpisodeSelectionBackRequested);
-
-        RefreshEpisodeSelectionPanel(panel);
+        AddBinding(panel,
+            p => p.CloseClicked += CloseTopPanel,
+            p => p.CloseClicked -= CloseTopPanel);
     }
 
-    private void RefreshEpisodeSelectionPanel(EpisodeSelectionPanel panel)
+    private void Refresh(EpisodeSelectionPanel panel)
     {
         ChapterMetaModel model = CreateDebugEpisodeSelectionPanelModel(_currentChapterId);
         PlayerStateSnapshot state = CreateDebugPlayerStateSnapshot();
 
         panel.Present(model, state);
-    }
-
-    private void OnEpisodeMainRequested(string episodeId)
-    {
-        if (string.IsNullOrEmpty(episodeId))
-            return;
-
-        Debug.Log($"[VnScreenBindings] Episode main clicked: {episodeId}");
-        _episodeSelectionController.RequestSelectEpisode(episodeId);
-    }
-
-    private void OnEpisodeSelectionBackRequested()
-    {
-        GoToChapterSelection();
     }
 
     private ChapterMetaModel CreateDebugEpisodeSelectionPanelModel(int chapterId)

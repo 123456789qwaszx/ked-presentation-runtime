@@ -30,7 +30,10 @@ public partial class UIManager : MonoBehaviour
 
     [SerializeField, Range(0f, 1f)] private float _coveredAlpha = 0f;
 
+    public bool HasPanel => _panelStack.Count > 0;
+    
     public UIBase CurSceneRoot { get; private set; }
+    
 
     // ----------------------------
     // Initialize
