@@ -1,5 +1,9 @@
+using System;
+
 public sealed class EpisodeSelectionController
 {
+    public event Action<string> EpisodeRequested;
+
     private readonly EpisodeSelectionRepository _repository;
     private readonly EpisodeGraphViewModelBuilder _viewModelBuilder;
     private readonly EpisodeGraphRenderer _episodeGraphRenderer;
@@ -35,10 +39,15 @@ public sealed class EpisodeSelectionController
 
         string selected = snapshot.RuntimeState.SelectedEpisodeId;
 
-        if (!string.IsNullOrEmpty(selected) && viewData.TryGetNode(selected, out EpisodeNodeViewData node))
+        if (!string.IsNullOrEmpty(selected) &&
+            viewData.TryGetNode(selected, out EpisodeNodeViewData node))
+        {
             _scrollController.ScrollToPositionX(node.AnchoredPosition.x, 0.5f);
+        }
         else
+        {
             _scrollController.ScrollToLeft();
+        }
     }
 
     public bool TryGetSelectedEpisodeId(out string episodeId)
@@ -59,24 +68,24 @@ public sealed class EpisodeSelectionController
         next.ClearedEpisodeIds.Add(episodeId);
 
         _repository.CommitRuntimeState(next);
+
+        RequestRender();
     }
 
     private void RequestSelectEpisode(string episodeId)
     {
         EpisodeSelectionSnapshot before = _repository.ReadSnapshot();
 
+        if (before.RuntimeState.LockedEpisodeIds.Contains(episodeId))
+            return;
+
         EpisodeSelectionRuntimeState next = before.RuntimeState.Clone();
         next.SelectedEpisodeId = episodeId;
 
         _repository.CommitRuntimeState(next);
 
-        EpisodeSelectionSnapshot after = _repository.ReadSnapshot();
+        RequestRender();
 
-        EpisodeGraphViewData viewData = _viewModelBuilder.Build(
-            after.GraphData,
-            after.RuntimeState,
-            _layoutOptions);
-
-        _episodeGraphRenderer.Render(viewData);
+        EpisodeRequested?.Invoke(episodeId);
     }
 }

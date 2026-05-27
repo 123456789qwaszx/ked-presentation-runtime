@@ -11,6 +11,13 @@ public sealed class EpisodeGraphNodeData
 {
     public EpisodeNodeKind Kind;
     public string Id;
+    
+    public string Title;
+    public string IndexText;
+
+    public string DialogueEntryId;
+
+    public string ParentEpisodeId;
 }
 
 public sealed class EpisodeGraphEdgeData
