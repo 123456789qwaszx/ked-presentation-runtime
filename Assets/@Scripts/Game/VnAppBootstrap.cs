@@ -13,7 +13,6 @@ public class VnAppBootstrap : MonoBehaviour
 
     private readonly VnUxState _vnUxState = new();
     private readonly VnPlaybackSettings _vnPlaybackSettings = new();
-    private readonly EpisodePlayState _episodePlayState = new();
     private readonly PresentationSessionContext _presentationSessionContext = new();
     private readonly VnScreenBindings _screenBindings = new();
 
