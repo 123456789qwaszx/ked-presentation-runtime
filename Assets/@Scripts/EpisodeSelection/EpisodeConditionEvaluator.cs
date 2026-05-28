@@ -3,23 +3,19 @@ using System.Collections.Generic;
 public sealed class EpisodeConditionEvaluator
 {
     private readonly EpisodeSelectionStateData _runtimeModel;
-    private readonly EpisodeProgressionRuleData _ruleData;
 
-    public EpisodeConditionEvaluator(
-        EpisodeSelectionStateData runtimeModel,
-        EpisodeProgressionRuleData ruleData)
+    public EpisodeConditionEvaluator(EpisodeSelectionStateData runtimeModel)
     {
         _runtimeModel = runtimeModel;
-        _ruleData = ruleData;
     }
 
-    public void RebuildAvailabilityState()
+    public void RebuildAvailabilityState(EpisodeProgressionRuleData ruleData)
     {
         _runtimeModel.VisibleEpisodeIds.Clear();
         _runtimeModel.LockedEpisodeIds.Clear();
 
-        ApplyNodeAvailability();
-        ApplyAttachmentAvailability();
+        ApplyNodeAvailability(ruleData);
+        ApplyAttachmentAvailability(ruleData);
     }
 
     public bool AreMet(List<EpisodeCondition> conditions)
@@ -36,9 +32,9 @@ public sealed class EpisodeConditionEvaluator
         return true;
     }
 
-    private void ApplyNodeAvailability()
+    private void ApplyNodeAvailability(EpisodeProgressionRuleData ruleData)
     {
-        List<EpisodeNodeRuleData> nodeRules = _ruleData.NodeRules;
+        List<EpisodeNodeRuleData> nodeRules = ruleData.NodeRules;
 
         for (int i = 0; i < nodeRules.Count; i++)
         {
@@ -51,9 +47,9 @@ public sealed class EpisodeConditionEvaluator
         }
     }
 
-    private void ApplyAttachmentAvailability()
+    private void ApplyAttachmentAvailability(EpisodeProgressionRuleData ruleData)
     {
-        List<EpisodeNodeRuleData> nodeRules = _ruleData.NodeRules;
+        List<EpisodeNodeRuleData> nodeRules = ruleData.NodeRules;
 
         for (int i = 0; i < nodeRules.Count; i++)
         {

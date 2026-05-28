@@ -11,23 +11,38 @@ public sealed class ChapterEpisodeProgressionCatalogSO : ScriptableObject
     private sealed class Entry
     {
         [Tooltip("ChapterButtonCard.ChapterId와 매칭되는 값")]
-        public int ChapterButtonId;
+        public string ChapterButtonId;
 
         [Tooltip("이 버튼이 열어야 하는 챕터 진행 데이터")]
         public ChapterEpisodeProgressionSO Progression;
     }
-    
+
     [SerializeField] private Entry[] entries = Array.Empty<Entry>();
 
-    private Dictionary<int, ChapterEpisodeProgressionSO> _cachedMap;
+    private Dictionary<string, ChapterEpisodeProgressionSO> _cachedMap;
     private bool _cacheBuilt;
 
-    public bool TryGetProgression(int chapterButtonId, out ChapterEpisodeProgressionSO progression)
+    public bool TryGetProgression(
+        string chapterButtonId,
+        out ChapterEpisodeProgressionSO progression)
     {
         EnsureCache();
 
         return _cachedMap.TryGetValue(chapterButtonId, out progression) &&
                progression != null;
+    }
+
+    public IEnumerable<KeyValuePair<string, ChapterEpisodeProgressionSO>> EnumerateProgressions()
+    {
+        EnsureCache();
+
+        foreach (KeyValuePair<string, ChapterEpisodeProgressionSO> pair in _cachedMap)
+        {
+            if (pair.Value == null)
+                continue;
+
+            yield return pair;
+        }
     }
 
     private void EnsureCache()
@@ -37,10 +52,10 @@ public sealed class ChapterEpisodeProgressionCatalogSO : ScriptableObject
 
         RebuildCache();
     }
-    
+
     private void RebuildCache()
     {
-        _cachedMap = new Dictionary<int, ChapterEpisodeProgressionSO>();
+        _cachedMap = new Dictionary<string, ChapterEpisodeProgressionSO>();
         _cacheBuilt = true;
 
         if (entries == null)
@@ -59,12 +74,11 @@ public sealed class ChapterEpisodeProgressionCatalogSO : ScriptableObject
             _cachedMap[entry.ChapterButtonId] = entry.Progression;
         }
     }
-    
+
 #if UNITY_EDITOR
     private void OnValidate()
     {
         _cacheBuilt = false;
     }
 #endif
-
 }

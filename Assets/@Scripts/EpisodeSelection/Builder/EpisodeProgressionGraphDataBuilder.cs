@@ -1,16 +1,41 @@
+using System.Collections.Generic;
+
 public sealed class EpisodeProgressionGraphDataBuilder
 {
-    public EpisodeGraphData Build(
-        ChapterEpisodeProgressionCatalogSO catalog,
-        int chapterId)
+    public Dictionary<string, EpisodeGraphData> Build(
+        ChapterEpisodeProgressionCatalogSO catalog)
     {
-        EpisodeGraphData graphData = new EpisodeGraphData();
+        Dictionary<string, EpisodeGraphData> result =
+            new Dictionary<string, EpisodeGraphData>();
 
         if (catalog == null)
-            return graphData;
+            return result;
 
-        if (!catalog.TryGetProgression(chapterId, out ChapterEpisodeProgressionSO progression))
-            return graphData;
+        AddChapterGraphData(catalog, result);
+
+        return result;
+    }
+
+    private void AddChapterGraphData(
+        ChapterEpisodeProgressionCatalogSO catalog,
+        Dictionary<string, EpisodeGraphData> result)
+    {
+        foreach (KeyValuePair<string, ChapterEpisodeProgressionSO> pair in catalog.EnumerateProgressions())
+        {
+            string chapterId = pair.Key;
+            ChapterEpisodeProgressionSO progression = pair.Value;
+
+            if (progression == null)
+                continue;
+
+            result[chapterId] = BuildChapterGraphData(progression);
+        }
+    }
+
+    private EpisodeGraphData BuildChapterGraphData(
+        ChapterEpisodeProgressionSO progression)
+    {
+        EpisodeGraphData graphData = new EpisodeGraphData();
 
         if (progression == null)
             return graphData;

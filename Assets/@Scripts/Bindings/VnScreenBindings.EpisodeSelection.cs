@@ -12,7 +12,7 @@ public sealed partial class VnScreenBindings
     
     private void HandleEpisodeSelected(string episodeId)
     {
-        if (!_episodeSelectionSystem.TrySetSelectedEpisode(episodeId))
+        if (!_episodeSelectionSystem.MarkEpisodeSelected(episodeId))
             return;
         
         OpenEpisodeConfirmPanel();
@@ -21,16 +21,12 @@ public sealed partial class VnScreenBindings
     
     #region EpisodeSelectionPanel
     
-    private void OpenEpisodeSelectionPanel(int chapterId)
+    private void OpenEpisodeSelectionPanel()
     {
         UI.PushPanel<EpisodeSelectionPanel>(panel =>
         {
             BindPanel(panel, ApplyBindings);
-
             Refresh(panel);
-
-            _episodeSelectionSystem.SetChapterId(chapterId);
-            _episodeSelectionSystem.DrawEpisodeNodes();
         });
     }
 

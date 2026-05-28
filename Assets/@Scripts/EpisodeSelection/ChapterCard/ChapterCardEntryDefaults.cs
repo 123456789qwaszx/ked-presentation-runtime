@@ -5,7 +5,7 @@ public static class ChapterCardEntryDefaults
         return new[]
         {
             new ChapterCardEntry(
-                chapterId: 0,
+                chapterId: "0",
                 indexText: "01",
                 chapterIndexLabel: "챕터 01",
                 chapterTitle: "Stella Sora",
@@ -14,7 +14,7 @@ public static class ChapterCardEntryDefaults
                 locked: false),
 
             new ChapterCardEntry(
-                chapterId: 1,
+                chapterId: "1",
                 indexText: "02",
                 chapterIndexLabel: "챕터 02",
                 chapterTitle: "Signal Noise",
@@ -23,7 +23,7 @@ public static class ChapterCardEntryDefaults
                 locked: false),
 
             new ChapterCardEntry(
-                chapterId: 2,
+                chapterId: "2",
                 indexText: "03",
                 chapterIndexLabel: "챕터 03",
                 chapterTitle: "Broadcast Fever",
@@ -32,7 +32,7 @@ public static class ChapterCardEntryDefaults
                 locked: false),
             
             new ChapterCardEntry(
-                chapterId: 4,
+                chapterId: "4",
                 indexText: "04",
                 chapterIndexLabel: "챕터 04",
                 chapterTitle: "한 여름날의 기묘한 일",

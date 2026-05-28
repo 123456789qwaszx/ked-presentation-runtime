@@ -1,21 +1,17 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 public sealed class EpisodeSelectionSystem
 {
-    private readonly ChapterEpisodeProgressionCatalogSO _progressionCatalog;
-    private readonly EpisodeGraphLayoutOptions _layoutOptions;
-
-    private readonly EpisodeYarnEntryMapBuilder _yarnEntryMapBuilder;
-    private readonly EpisodeProgressionGraphDataBuilder _graphDataBuilder;
-    private readonly EpisodeProgressionRuleDataBuilder _ruleDataBuilder;
+    private readonly Dictionary<string, Dictionary<string, EpisodeYarnEntryData>> _yarnEntriesByChapterId;
+    private readonly Dictionary<string, EpisodeGraphData> _graphDataByChapterId;
+    private readonly Dictionary<string, EpisodeProgressionRuleData> _ruleDataByChapterId;
 
     private readonly EpisodeGraphRenderer _episodeGraphRenderer;
 
-    private EpisodeConditionEvaluator _conditionEvaluator;
-    private EpisodeGraphViewModelBuilder _viewModelBuilder;
-
-    public EpisodeSelectionStateData _selectionState;
+    private readonly EpisodeConditionEvaluator _conditionEvaluator;
+    private readonly EpisodeGraphViewModelBuilder _viewModelBuilder;
 
     public EpisodeSelectionSystem(
         ChapterEpisodeProgressionCatalogSO progressionCatalog,
@@ -26,39 +22,27 @@ public sealed class EpisodeSelectionSystem
         EpisodeSelectionStateData selectionState,
         EpisodeGraphRenderer episodeGraphRenderer)
     {
-        _progressionCatalog = progressionCatalog;
-        _layoutOptions = layoutOptions;
-
-        _yarnEntryMapBuilder = yarnEntryMapBuilder;
-        _graphDataBuilder = graphDataBuilder;
-        _ruleDataBuilder = ruleDataBuilder;
-
-        _selectionState = selectionState ?? new EpisodeSelectionStateData();
+        SelectionState = selectionState;
         _episodeGraphRenderer = episodeGraphRenderer;
-        
-        
 
-        SetChapterId(1);
+        _yarnEntriesByChapterId = yarnEntryMapBuilder.Build(progressionCatalog);
+        _graphDataByChapterId = graphDataBuilder.Build(progressionCatalog);
+        _ruleDataByChapterId = ruleDataBuilder.Build(progressionCatalog);
+
+        _conditionEvaluator = new EpisodeConditionEvaluator(SelectionState);
+        _viewModelBuilder = new EpisodeGraphViewModelBuilder(SelectionState, layoutOptions);
     }
 
     public Dictionary<string, EpisodeYarnEntryData> YarnEntryByEpisodeId { get; private set; }
     public EpisodeGraphData CurrentGraphData { get; private set; }
     public EpisodeProgressionRuleData ProgressionRules { get; private set; }
-
-    public string CurrentStartEpisodeId => _selectionState.CurrentStartEpisodeId ?? string.Empty;
-    public string SelectedEpisodeId => _selectionState.SelectedEpisodeId ?? string.Empty;
-
-    public string GetYarnNodeName()
+    public EpisodeSelectionStateData SelectionState { get; private set; }
+    
+    public string GetYarnNodeName(string episodeId)
     {
         const string fallback = "yarnNodeFallback";
 
-        if (string.IsNullOrEmpty(SelectedEpisodeId))
-            return fallback;
-
-        if (!YarnEntryByEpisodeId.TryGetValue(SelectedEpisodeId, out EpisodeYarnEntryData entry))
-            return fallback;
-
-        if (string.IsNullOrEmpty(entry.YarnNodeName))
+        if (!YarnEntryByEpisodeId.TryGetValue(episodeId, out EpisodeYarnEntryData entry))
             return fallback;
 
         return entry.YarnNodeName;
@@ -66,44 +50,58 @@ public sealed class EpisodeSelectionSystem
 
     public void SetEpisodeSelectedHandler(Action<string> handler)
     {
-        if (_episodeGraphRenderer == null)
-            return;
-
         _episodeGraphRenderer.SetHandlers(handler);
     }
 
-    public bool SetChapterId(int chapterId)
+    public bool EnterChapter(string chapterId)
     {
-        if (_progressionCatalog == null)
+        if (string.IsNullOrEmpty(chapterId))
+        {
+            Debug.LogWarning(
+                "[EpisodeSelectionSystem] EnterChapter failed. chapterId is null or empty. " +
+                "Check ChapterCardFactory and make sure each ChapterButtonCardModel has a valid ChapterId.");
             return false;
+        }
 
-        if (!_progressionCatalog.TryGetProgression(chapterId, out ChapterEpisodeProgressionSO progression))
-            return false;
+        if (!_yarnEntriesByChapterId.TryGetValue(chapterId, out Dictionary<string, EpisodeYarnEntryData> yarnEntries))
+        {
+            string availableKeys = _yarnEntriesByChapterId.Count > 0
+                ? string.Join(", ", _yarnEntriesByChapterId.Keys)
+                : "<empty>";
 
-        ApplyChapterProgression(chapterId, progression);
+            Debug.LogWarning(
+                $"[EpisodeSelectionSystem] Yarn entries not found. " +
+                $"requestedChapterId='{chapterId}', " +
+                $"availableChapterIds=[{availableKeys}]. " +
+                $"Empty map will be used.");
+            
+            yarnEntries = new Dictionary<string, EpisodeYarnEntryData>(StringComparer.Ordinal);
+        }
+
+        if (!_graphDataByChapterId.TryGetValue(chapterId, out EpisodeGraphData graphData))
+        {
+            //Debug.LogWarning($"[EpisodeSelectionSystem] Graph data not found. chapterId='{chapterId}'. Empty graph data will be used.");
+            graphData = new EpisodeGraphData();
+        }
+
+        if (!_ruleDataByChapterId.TryGetValue(chapterId, out EpisodeProgressionRuleData ruleData))
+        {
+            //Debug.LogWarning($"[EpisodeSelectionSystem] Progression rule data not found. chapterId='{chapterId}'. Empty rule data will be used.");
+            ruleData = new EpisodeProgressionRuleData();
+        }
+        
+        YarnEntryByEpisodeId = yarnEntries;
+        CurrentGraphData = graphData;
+        ProgressionRules = ruleData;
+
         return true;
     }
 
-    private void ApplyChapterProgression(
-        int chapterId,
-        ChapterEpisodeProgressionSO progression)
+    public bool PresentCurrentChapterEpisodes()
     {
-        string chapterIdText = progression.ChapterId ?? chapterId.ToString();
-        string displayName = progression.DisplayName ?? string.Empty;
-        string startEpisodeId = progression.StartEpisodeId ?? string.Empty;
+        SelectionState.ResetForChapter();
 
-        _selectionState.CurrentChapterId = chapterIdText;
-        _selectionState.CurrentChapterDisplayName = displayName;
-        _selectionState.CurrentStartEpisodeId = startEpisodeId;
-    }
-
-    public bool DrawEpisodeNodes()
-    {
-        if (_conditionEvaluator == null || _viewModelBuilder == null)
-            return false;
-
-        _selectionState.ResetForChapter(CurrentStartEpisodeId);
-        _conditionEvaluator.RebuildAvailabilityState();
+        _conditionEvaluator.RebuildAvailabilityState(ProgressionRules);
 
         RefreshGraphView();
         return true;
@@ -114,23 +112,18 @@ public sealed class EpisodeSelectionSystem
         if (string.IsNullOrEmpty(episodeId))
             return;
 
-        _selectionState.MarkEpisodeCleared(episodeId);
-
-        if (_conditionEvaluator != null)
-            _conditionEvaluator.RebuildAvailabilityState();
-
-        RefreshGraphView();
+        SelectionState.MarkEpisodeCleared(episodeId);
+        
+        //_conditionEvaluator.RebuildAvailabilityState(ProgressionRules);
+        //RefreshGraphView();
     }
 
-    public bool TrySetSelectedEpisode(string episodeId)
+    public bool MarkEpisodeSelected(string episodeId)
     {
-        if (string.IsNullOrEmpty(episodeId))
+        if (SelectionState.IsEpisodeLocked(episodeId))
             return false;
 
-        if (_selectionState.IsEpisodeLocked(episodeId))
-            return false;
-
-        _selectionState.SetSelectedEpisodeId(episodeId);
+        SelectionState.SetSelectedEpisodeId(episodeId);
         RefreshGraphView();
 
         return true;
@@ -138,10 +131,7 @@ public sealed class EpisodeSelectionSystem
 
     private void RefreshGraphView()
     {
-        if (_viewModelBuilder == null || _episodeGraphRenderer == null)
-            return;
-
-        EpisodeGraphViewData viewData = _viewModelBuilder.Build();
+        EpisodeGraphViewData viewData = _viewModelBuilder.Build(CurrentGraphData);
         _episodeGraphRenderer.Render(viewData);
     }
 }

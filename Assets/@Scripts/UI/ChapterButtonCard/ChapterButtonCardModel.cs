@@ -2,7 +2,7 @@ using UnityEngine;
 
 public readonly struct ChapterButtonCardModel
 {
-    public readonly int ChapterId;
+    public readonly string ChapterId;
 
     public readonly string IndexText;
     public readonly string ChapterIndexLabel;
@@ -19,7 +19,7 @@ public readonly struct ChapterButtonCardModel
     public readonly bool Locked;
 
     public ChapterButtonCardModel(
-        int chapterId,
+        string chapterId,
         string indexText,
         string chapterIndexLabel,
         string chapterTitle,
@@ -49,7 +49,7 @@ public readonly struct ChapterButtonCardModel
     public static ChapterButtonCardModel Empty()
     {
         return new ChapterButtonCardModel(
-            chapterId: -1,
+            chapterId: "",
             indexText: "",
             chapterIndexLabel: "",
             chapterTitle: "",

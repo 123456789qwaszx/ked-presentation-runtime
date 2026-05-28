@@ -5,8 +5,8 @@ using UnityEngine;
 public sealed class ChapterCardEntry
 {
     [Header("Identity")]
-    [SerializeField] private int chapterId;
-    public int ChapterId => chapterId;
+    [SerializeField] private string chapterId;
+    public string ChapterId => chapterId;
     
     [Header("Text")]
     [SerializeField] private string indexText = "01";
@@ -25,13 +25,12 @@ public sealed class ChapterCardEntry
     [SerializeField] private bool interactable = true;
     [SerializeField] private bool locked;
 
-    public ChapterEpisodeProgressionSO EpisodeProgression;
     public ChapterCardEntry()
     {
     }
 
     public ChapterCardEntry(
-        int chapterId,
+        string chapterId,
         string indexText,
         string chapterIndexLabel,
         string chapterTitle,

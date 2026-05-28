@@ -4,10 +4,6 @@ using System.Collections.Generic;
 [Serializable]
 public sealed class EpisodeSelectionStateData
 {
-    public string CurrentChapterId = "";
-    public string CurrentChapterDisplayName = "";
-    public string CurrentStartEpisodeId = "";
-    
     public string SelectedEpisodeId = "";
     public string CurrentEpisodeId = "";
 
@@ -26,7 +22,7 @@ public sealed class EpisodeSelectionStateData
     {
     }
 
-    public void ResetForChapter(string startEpisodeId)
+    public void ResetForChapter()
     {
         SelectedEpisodeId = "";
         CurrentEpisodeId = "";
@@ -34,13 +30,6 @@ public sealed class EpisodeSelectionStateData
         VisibleEpisodeIds.Clear();
         LockedEpisodeIds.Clear();
         ReachableEpisodeIds.Clear();
-
-        if (string.IsNullOrEmpty(startEpisodeId))
-            return;
-
-        SelectedEpisodeId = startEpisodeId;
-        CurrentEpisodeId = startEpisodeId;
-        ReachableEpisodeIds.Add(startEpisodeId);
     }
 
     public void SetSelectedEpisodeId(string episodeId)

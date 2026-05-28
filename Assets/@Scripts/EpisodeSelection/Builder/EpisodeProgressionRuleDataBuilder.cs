@@ -2,17 +2,40 @@ using System.Collections.Generic;
 
 public sealed class EpisodeProgressionRuleDataBuilder
 {
-    public EpisodeProgressionRuleData Build(
-        ChapterEpisodeProgressionCatalogSO catalog,
-        int chapterId)
+    public Dictionary<string, EpisodeProgressionRuleData> Build(
+        ChapterEpisodeProgressionCatalogSO catalog)
     {
-        EpisodeProgressionRuleData data = new EpisodeProgressionRuleData();
+        Dictionary<string, EpisodeProgressionRuleData> result =
+            new Dictionary<string, EpisodeProgressionRuleData>();
 
         if (catalog == null)
-            return data;
+            return result;
 
-        if (!catalog.TryGetProgression(chapterId, out ChapterEpisodeProgressionSO progression))
-            return data;
+        AddChapterRuleData(catalog, result);
+
+        return result;
+    }
+
+    private void AddChapterRuleData(
+        ChapterEpisodeProgressionCatalogSO catalog,
+        Dictionary<string, EpisodeProgressionRuleData> result)
+    {
+        foreach (KeyValuePair<string, ChapterEpisodeProgressionSO> pair in catalog.EnumerateProgressions())
+        {
+            string chapterId = pair.Key;
+            ChapterEpisodeProgressionSO progression = pair.Value;
+
+            if (progression == null)
+                continue;
+
+            result[chapterId] = BuildChapterRuleData(progression);
+        }
+    }
+
+    private EpisodeProgressionRuleData BuildChapterRuleData(
+        ChapterEpisodeProgressionSO progression)
+    {
+        EpisodeProgressionRuleData data = new EpisodeProgressionRuleData();
 
         if (progression == null)
             return data;

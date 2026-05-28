@@ -51,7 +51,9 @@ public sealed class ChapterButtonCard : UIBase<ChapterButtonCard.Refs>
     private bool _isPressed;
     private bool _isDragging;
 
-    public int ChapterId { get; private set; } = -1;
+    public string ChapterId { get; private set; } = "-1";
+    public string ChapterName { get; private set; }
+    public string StartYarnEpisodeId { get; private set; }
 
     protected override void OnInitialize()
     {
@@ -84,6 +86,8 @@ public sealed class ChapterButtonCard : UIBase<ChapterButtonCard.Refs>
     public void Present(in ChapterButtonCardModel model)
     {
         ChapterId = model.ChapterId;
+        ChapterName = model.ChapterTitle;
+        StartYarnEpisodeId = model.EpisodeHeading;
 
         SetText(View.Text(Refs.Index_Text), model.IndexText);
         SetText(View.Text(Refs.ChapterIndexLabel_Text), model.ChapterIndexLabel);
@@ -184,9 +188,6 @@ public sealed class ChapterButtonCard : UIBase<ChapterButtonCard.Refs>
 
     private bool CanInteract()
     {
-        if (ChapterId < 0)
-            return false;
-
         Button hit = View.Button(Refs.Hit_Button);
 
         if (hit == null)

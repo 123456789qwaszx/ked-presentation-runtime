@@ -3,18 +3,41 @@ using System.Collections.Generic;
 
 public sealed class EpisodeYarnEntryMapBuilder
 {
-    public Dictionary<string, EpisodeYarnEntryData> Build(
-        ChapterEpisodeProgressionCatalogSO catalog,
-        int chapterId)
+    public Dictionary<string, Dictionary<string, EpisodeYarnEntryData>> Build(
+        ChapterEpisodeProgressionCatalogSO catalog)
     {
-        Dictionary<string, EpisodeYarnEntryData> result =
-            new Dictionary<string, EpisodeYarnEntryData>(StringComparer.Ordinal);
+        Dictionary<string, Dictionary<string, EpisodeYarnEntryData>> result =
+            new Dictionary<string, Dictionary<string, EpisodeYarnEntryData>>();
 
         if (catalog == null)
             return result;
 
-        if (!catalog.TryGetProgression(chapterId, out ChapterEpisodeProgressionSO progression))
-            return result;
+        AddChapterEntries(catalog, result);
+
+        return result;
+    }
+
+    private void AddChapterEntries(
+        ChapterEpisodeProgressionCatalogSO catalog,
+        Dictionary<string, Dictionary<string, EpisodeYarnEntryData>> result)
+    {
+        foreach (KeyValuePair<string, ChapterEpisodeProgressionSO> pair in catalog.EnumerateProgressions())
+        {
+            string chapterId = pair.Key;
+            ChapterEpisodeProgressionSO progression = pair.Value;
+
+            if (progression == null)
+                continue;
+
+            result[chapterId] = BuildChapterEntries(progression);
+        }
+    }
+
+    private Dictionary<string, EpisodeYarnEntryData> BuildChapterEntries(
+        ChapterEpisodeProgressionSO progression)
+    {
+        Dictionary<string, EpisodeYarnEntryData> result =
+            new Dictionary<string, EpisodeYarnEntryData>(StringComparer.Ordinal);
 
         if (progression == null || progression.Nodes == null)
             return result;

@@ -4,8 +4,8 @@ public sealed partial class VnScreenBindings
     
     private void OpenEpisodeConfirmPanel()
     {
-        string episodeId = _episodeSelectionSystem._selectionState.SelectedEpisodeId;
-        string dialogueEntryId = _episodeSelectionSystem.GetYarnNodeName();
+        string episodeId = _episodeSelectionSystem.SelectionState.SelectedEpisodeId;
+        string dialogueEntryId = _episodeSelectionSystem.GetYarnNodeName(episodeId);
         string summary = $"현재 에피소드: {episodeId}\n" +
                          $"실행 엔트리: {dialogueEntryId}";
 
@@ -32,7 +32,8 @@ public sealed partial class VnScreenBindings
 
     private void HandleEpisodeStartConfirmed()
     {
-        string dialogueEntryId = _episodeSelectionSystem.GetYarnNodeName();
+        string episodeId = _episodeSelectionSystem.SelectionState.SelectedEpisodeId;
+        string dialogueEntryId = _episodeSelectionSystem.GetYarnNodeName(episodeId);
         if (string.IsNullOrEmpty(dialogueEntryId))
             return;
         

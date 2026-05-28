@@ -6858,7 +6858,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ChapterCardFactory
   entries:
-  - chapterId: 0
+  - chapterId: 3
     indexText: 01
     chapterIndexLabel: "\uCC55\uD130 01"
     chapterTitle: Stella Sora
@@ -6870,7 +6870,6 @@ MonoBehaviour:
     titleIcon: {fileID: 21300000, guid: 55ade53086ff81a4498330e2eb14d12c, type: 3}
     interactable: 1
     locked: 0
-    EpisodeProgression: {fileID: 0}
   - chapterId: 1
     indexText: 02
     chapterIndexLabel: "\uCC55\uD130 02"
@@ -6883,8 +6882,7 @@ MonoBehaviour:
     titleIcon: {fileID: 21300000, guid: 95546c8eb8dc0dc4d96d0dcfbab8248b, type: 3}
     interactable: 1
     locked: 0
-    EpisodeProgression: {fileID: 0}
-  - chapterId: 2
+  - chapterId: 0
     indexText: 03
     chapterIndexLabel: "\uCC55\uD130 03"
     chapterTitle: Broadcast Fever
@@ -6896,8 +6894,7 @@ MonoBehaviour:
     titleIcon: {fileID: 21300000, guid: b6b1efbab66e0fd4c8feba43da04fcc3, type: 3}
     interactable: 1
     locked: 0
-    EpisodeProgression: {fileID: 0}
-  - chapterId: 3
+  - chapterId: 1
     indexText: 04
     chapterIndexLabel: "\uCC55\uD130 04"
     chapterTitle: "\uD55C \uC5EC\uB984\uB0A0\uC758 \uAE30\uBB18\uD55C \uC77C"
@@ -6909,7 +6906,6 @@ MonoBehaviour:
     titleIcon: {fileID: 21300000, guid: 2fba80d8de8347b4eaf9110bfc19c1fd, type: 3}
     interactable: 1
     locked: 0
-    EpisodeProgression: {fileID: 0}
 --- !u!4 &767435431
 Transform:
   m_ObjectHideFlags: 0
@@ -18259,7 +18255,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 458.38, y: -24}
-  m_SizeDelta: {x: 916.76, y: 24}
+  m_SizeDelta: {x: 916.76, y: 0}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!1 &666632935594092605
 GameObject:
