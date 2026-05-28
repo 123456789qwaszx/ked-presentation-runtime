@@ -33,9 +33,6 @@ public sealed class EpisodeSelectionSystem
 
     public bool DrawEpisodeNodes(int chapterId)
     {
-        if (_runtimeModel == null)
-            return false;
-
         if (!_runtimeModel.OpenChapter(chapterId))
             return false;
 
@@ -52,9 +49,7 @@ public sealed class EpisodeSelectionSystem
         if (_runtimeModel.CurrentGraphData == null)
             return;
 
-        EpisodeGraphViewData viewData = _viewModelBuilder.Build(
-            _runtimeModel.CurrentGraphData,
-            _layoutOptions);
+        EpisodeGraphViewData viewData = _viewModelBuilder.Build();
 
         _episodeGraphRenderer.Render(viewData);
 
@@ -73,12 +68,8 @@ public sealed class EpisodeSelectionSystem
 
     public bool TryGetSelectedEpisodeId(out string episodeId)
     {
-        episodeId = "";
-
-        if (_runtimeModel == null)
-            return false;
-
-        return _runtimeModel.TryGetSelectedEpisodeId(out episodeId);
+        episodeId = _runtimeModel.State.SelectedEpisodeId;;
+        return episodeId != null;
     }
 
     public void RequestCompleteEpisode(string episodeId)
@@ -86,28 +77,17 @@ public sealed class EpisodeSelectionSystem
         if (string.IsNullOrEmpty(episodeId))
             return;
 
-        if (_runtimeModel == null)
-            return;
-
-        _runtimeModel.CompleteEpisode(episodeId);
+        _runtimeModel.State.CompleteEpisode(episodeId);
 
         _conditionEvaluator.RebuildAvailabilityState();
 
         RenderCurrentState();
     }
 
-    public bool TryGetDialogueEntryId(
-        string episodeId,
-        out string dialogueEntryId)
+    public bool TryGetDialogueEntryId(string episodeId, out string dialogueEntryId)
     {
-        dialogueEntryId = "";
-
-        if (_runtimeModel == null)
-            return false;
-
-        return _runtimeModel.TryGetDialogueEntryId(
-            episodeId,
-            out dialogueEntryId);
+        dialogueEntryId = _runtimeModel.CurrentChapter.GetDialogueEntryId(episodeId);
+        return dialogueEntryId != null;
     }
 
     private void RequestSelectEpisode(string episodeId)
@@ -118,10 +98,10 @@ public sealed class EpisodeSelectionSystem
         if (_runtimeModel == null)
             return;
 
-        if (_runtimeModel.IsEpisodeLocked(episodeId))
+        if (_runtimeModel.State.IsEpisodeLocked(episodeId))
             return;
 
-        _runtimeModel.SelectEpisode(episodeId);
+        _runtimeModel.State.SelectEpisode(episodeId);
 
         RenderCurrentState();
 

@@ -11,15 +11,6 @@ public sealed class EpisodeConditionEvaluator
 
     public void RebuildAvailabilityState()
     {
-        if (_runtimeModel == null)
-            return;
-
-        if (_runtimeModel.State == null)
-            return;
-
-        if (_runtimeModel.ProgressionRules == null)
-            return;
-
         _runtimeModel.State.VisibleEpisodeIds.Clear();
         _runtimeModel.State.LockedEpisodeIds.Clear();
 
@@ -43,20 +34,13 @@ public sealed class EpisodeConditionEvaluator
 
     private void ApplyNodeAvailability()
     {
-        List<EpisodeNodeRuleData> nodeRules =
-            _runtimeModel.ProgressionRules.NodeRules;
-
-        if (nodeRules == null)
-            return;
+        List<EpisodeNodeRuleData> nodeRules = _runtimeModel.ProgressionRules.NodeRules;
 
         for (int i = 0; i < nodeRules.Count; i++)
         {
             EpisodeNodeRuleData rule = nodeRules[i];
 
-            if (rule == null)
-                continue;
-
-            if (rule.Kind != EpisodeNodeKind.Main)
+            if (rule?.Kind != EpisodeNodeKind.Main)
                 continue;
 
             ApplyAvailability(rule.EpisodeId, rule.VisibleConditions, rule.UnlockConditions);
@@ -65,17 +49,13 @@ public sealed class EpisodeConditionEvaluator
 
     private void ApplyAttachmentAvailability()
     {
-        List<EpisodeNodeRuleData> nodeRules =
-            _runtimeModel.ProgressionRules.NodeRules;
-
-        if (nodeRules == null)
-            return;
+        List<EpisodeNodeRuleData> nodeRules = _runtimeModel.ProgressionRules.NodeRules;
 
         for (int i = 0; i < nodeRules.Count; i++)
         {
             EpisodeNodeRuleData rule = nodeRules[i];
 
-            if (rule == null || rule.Attachments == null)
+            if (rule?.Attachments == null)
                 continue;
 
             for (int j = 0; j < rule.Attachments.Count; j++)
@@ -98,8 +78,6 @@ public sealed class EpisodeConditionEvaluator
         List<EpisodeCondition> visibleConditions,
         List<EpisodeCondition> unlockConditions)
     {
-        if (string.IsNullOrEmpty(episodeId))
-            return;
 
         bool visible = AreMet(visibleConditions);
 
@@ -152,9 +130,7 @@ public sealed class EpisodeConditionEvaluator
 
     private bool EvaluateFlag(EpisodeCondition condition)
     {
-        bool exists = _runtimeModel.State.Flags.TryGetValue(
-            condition.Key,
-            out bool value);
+        bool exists = _runtimeModel.State.Flags.TryGetValue(condition.Key, out bool value);
 
         switch (condition.Op)
         {
@@ -177,9 +153,7 @@ public sealed class EpisodeConditionEvaluator
 
     private bool EvaluateStat(EpisodeCondition condition)
     {
-        bool exists = _runtimeModel.State.Stats.TryGetValue(
-            condition.Key,
-            out int value);
+        bool exists = _runtimeModel.State.Stats.TryGetValue(condition.Key, out int value);
 
         switch (condition.Op)
         {

@@ -1,4 +1,3 @@
-
 using System;
 using System.Collections.Generic;
 
@@ -8,16 +7,16 @@ public sealed class EpisodeSelectionStateData
     public string SelectedEpisodeId;
     public string CurrentEpisodeId;
 
-    public HashSet<string> ClearedEpisodeIds = new HashSet<string>(StringComparer.Ordinal);
-    public HashSet<string> ClearedChapterIds = new HashSet<string>(StringComparer.Ordinal);
+    public HashSet<string> ClearedEpisodeIds = new(StringComparer.Ordinal);
+    public HashSet<string> ClearedChapterIds = new(StringComparer.Ordinal);
 
-    public HashSet<string> LockedEpisodeIds = new HashSet<string>(StringComparer.Ordinal);
-    public HashSet<string> VisibleEpisodeIds = new HashSet<string>(StringComparer.Ordinal);
-    public HashSet<string> ReachableEpisodeIds = new HashSet<string>(StringComparer.Ordinal);
-    public HashSet<string> Tokens = new HashSet<string>(StringComparer.Ordinal);
+    public HashSet<string> LockedEpisodeIds = new(StringComparer.Ordinal);
+    public HashSet<string> VisibleEpisodeIds = new(StringComparer.Ordinal);
+    public HashSet<string> ReachableEpisodeIds = new(StringComparer.Ordinal);
+    public HashSet<string> Tokens = new(StringComparer.Ordinal);
 
-    public Dictionary<string, bool> Flags = new Dictionary<string, bool>(StringComparer.Ordinal);
-    public Dictionary<string, int> Stats = new Dictionary<string, int>(StringComparer.Ordinal);
+    public Dictionary<string, bool> Flags = new(StringComparer.Ordinal);
+    public Dictionary<string, int> Stats = new(StringComparer.Ordinal);
 
     public void ResetForChapter(string startEpisodeId)
     {
@@ -38,17 +37,11 @@ public sealed class EpisodeSelectionStateData
 
     public void SelectEpisode(string episodeId)
     {
-        if (string.IsNullOrEmpty(episodeId))
-            return;
-
         SelectedEpisodeId = episodeId;
     }
 
     public void CompleteEpisode(string episodeId)
     {
-        if (string.IsNullOrEmpty(episodeId))
-            return;
-
         CurrentEpisodeId = episodeId;
         SelectedEpisodeId = episodeId;
         ClearedEpisodeIds.Add(episodeId);
@@ -60,6 +53,14 @@ public sealed class EpisodeSelectionStateData
             return true;
 
         return LockedEpisodeIds.Contains(episodeId);
+    }
+    
+    public bool ShouldShowEpisode(string episodeId)
+    {
+        if (VisibleEpisodeIds.Count != 0)
+            return true;
+
+        return VisibleEpisodeIds.Contains(episodeId);
     }
 
     public EpisodeSelectionStateData Clone()

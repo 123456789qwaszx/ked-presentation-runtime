@@ -5,44 +5,28 @@ using UnityEngine;
 public sealed class EpisodeGraphViewModelBuilder
 {
     private readonly EpisodeSelectionRuntimeModel _runtimeModel;
+    private readonly EpisodeGraphLayoutOptions _layoutOptions;
 
-    public EpisodeGraphViewModelBuilder(EpisodeSelectionRuntimeModel runtimeModel)
+    public EpisodeGraphViewModelBuilder(EpisodeSelectionRuntimeModel runtimeModel, EpisodeGraphLayoutOptions layoutOptions)
     {
         _runtimeModel = runtimeModel;
+        _layoutOptions = layoutOptions;
     }
 
-    public EpisodeGraphViewData Build(
-        EpisodeGraphData graphData,
-        EpisodeGraphLayoutOptions options)
+    public EpisodeGraphViewData Build()
     {
         EpisodeGraphViewData viewData = new();
-
-        if (graphData == null)
-            return viewData;
-
-        if (_runtimeModel == null)
-            return viewData;
-
-        if (_runtimeModel.State == null)
-            return viewData;
-
-        if (options == null)
-            options = EpisodeGraphLayoutOptions.Compact();
-
+        
+        EpisodeGraphData graphData = _runtimeModel.CurrentGraphData;
+        EpisodeGraphLayoutOptions options = _layoutOptions;
         Dictionary<string, Vector2> positions = CalculatePositions(graphData, options);
 
         for (int i = 0; i < graphData.Nodes.Count; i++)
         {
             EpisodeGraphNodeData node = graphData.Nodes[i];
 
-            if (node == null || string.IsNullOrEmpty(node.Id))
+            if (!_runtimeModel.State.ShouldShowEpisode(node.Id))
                 continue;
-
-            if (_runtimeModel.State.VisibleEpisodeIds.Count > 0 &&
-                !_runtimeModel.State.VisibleEpisodeIds.Contains(node.Id))
-            {
-                continue;
-            }
 
             EpisodeNodeViewData nodeViewData = new EpisodeNodeViewData
             {
@@ -62,7 +46,7 @@ public sealed class EpisodeGraphViewModelBuilder
         viewData.ContentSize = CalculateContentSize(viewData.Nodes, options);
         return viewData;
     }
-
+    
     private EpisodeNodeVisualState ResolveVisualState(string episodeId)
     {
         EpisodeSelectionStateData state = _runtimeModel.State;
@@ -86,8 +70,7 @@ public sealed class EpisodeGraphViewModelBuilder
         EpisodeGraphData graphData,
         EpisodeGraphLayoutOptions options)
     {
-        Dictionary<string, Vector2> result =
-            new Dictionary<string, Vector2>(StringComparer.Ordinal);
+        Dictionary<string, Vector2> result = new(StringComparer.Ordinal);
 
         int mainIndex = 0;
 
@@ -111,50 +94,40 @@ public sealed class EpisodeGraphViewModelBuilder
     }
 
     private void PositionAttachments(
-        EpisodeGraphData graphData,
+        EpisodeGraphData graphData, 
         EpisodeGraphLayoutOptions options,
         Dictionary<string, Vector2> result)
     {
-        Dictionary<string, int> attachmentCountByParent =
-            new Dictionary<string, int>(StringComparer.Ordinal);
+        Dictionary<string, int> attachmentCountByParent = new(StringComparer.Ordinal);
 
         for (int i = 0; i < graphData.Nodes.Count; i++)
         {
             EpisodeGraphNodeData node = graphData.Nodes[i];
 
-            if (node == null)
-                continue;
+            if (node == null) continue;
+            if (node.Kind != EpisodeNodeKind.Attachment) continue;
+            if (string.IsNullOrEmpty(node.ParentEpisodeId)) continue;
 
-            if (node.Kind != EpisodeNodeKind.Attachment)
-                continue;
-
-            if (string.IsNullOrEmpty(node.ParentEpisodeId))
-                continue;
-
-            if (!result.TryGetValue(node.ParentEpisodeId, out Vector2 parentPos))
-                continue;
-
-            if (!attachmentCountByParent.TryGetValue(node.ParentEpisodeId, out int count))
-                count = 0;
+            int count = attachmentCountByParent.GetValueOrDefault(node.ParentEpisodeId);
+            Vector2 parentPos = result[node.ParentEpisodeId];
 
             float y = count % 2 == 0
                 ? options.BranchOffsetY
                 : -options.BranchOffsetY;
-
-            float x = parentPos.x + options.MainGapX * 0.45f;
+            
+            float x = parentPos.x;
+            //float x = parentPos.x + options.MainGapX * 0.45f;
 
             result[node.Id] = new Vector2(x, y);
 
             attachmentCountByParent[node.ParentEpisodeId] = count + 1;
         }
     }
-
-    private Vector2 CalculateContentSize(
-        List<EpisodeNodeViewData> nodes,
-        EpisodeGraphLayoutOptions options)
+    
+    private Vector2 CalculateContentSize(List<EpisodeNodeViewData> nodes, EpisodeGraphLayoutOptions options)
     {
         return new Vector2(
-            Mathf.Max(800f, nodes.Count * options.MainGapX + options.Padding.x * 2f),
-            Mathf.Max(400f, options.BranchOffsetY * 2f + options.Padding.y * 2f));
+            nodes.Count * options.MainGapX + options.Padding.x * 2f,
+            options.BranchOffsetY * 2f + options.Padding.y * 2f);
     }
 }

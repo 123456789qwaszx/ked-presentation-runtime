@@ -9,15 +9,13 @@ public sealed class EpisodeDialogueEntryData
     public string DialogueEntryId;
 }
 
-[Serializable]
-public sealed class EpisodeChapterRuntimeData
+[Serializable]public sealed class EpisodeChapterRuntimeData
 {
     public string ChapterId;
     public string DisplayName;
     public string StartEpisodeId;
 
-    private readonly Dictionary<string, EpisodeDialogueEntryData> _dialogueByEpisodeId =
-        new Dictionary<string, EpisodeDialogueEntryData>(StringComparer.Ordinal);
+    private readonly Dictionary<string, EpisodeDialogueEntryData> _dialogueByEpisodeId = new(StringComparer.Ordinal);
 
     public void AddDialogueEntry(EpisodeDialogueEntryData entry)
     {
@@ -30,31 +28,14 @@ public sealed class EpisodeChapterRuntimeData
         _dialogueByEpisodeId[entry.EpisodeId] = entry;
     }
 
-    public bool TryGetDialogueEntry(
-        string episodeId,
-        out EpisodeDialogueEntryData entry)
+    public string GetDialogueEntryId(string episodeId)
     {
-        entry = null;
-
-        if (string.IsNullOrEmpty(episodeId))
-            return false;
-
-        return _dialogueByEpisodeId.TryGetValue(episodeId, out entry);
+        EpisodeDialogueEntryData entry = _dialogueByEpisodeId[episodeId];
+        return entry.DialogueEntryId;
     }
 
-    public bool TryGetDialogueEntryId(
-        string episodeId,
-        out string dialogueEntryId)
+    public EpisodeDialogueEntryData GetDialogueEntry(string episodeId)
     {
-        dialogueEntryId = "";
-
-        if (!TryGetDialogueEntry(episodeId, out EpisodeDialogueEntryData entry))
-            return false;
-
-        if (string.IsNullOrWhiteSpace(entry.DialogueEntryId))
-            return false;
-
-        dialogueEntryId = entry.DialogueEntryId;
-        return true;
+        return _dialogueByEpisodeId[episodeId];
     }
 }

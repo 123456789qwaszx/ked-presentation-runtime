@@ -1,8 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-[Serializable]
-public sealed class EpisodeProgressionRuleData
+[Serializable]public sealed class EpisodeProgressionRuleData
 {
     private readonly Dictionary<string, EpisodeNodeRuleData> _nodeRules = new(StringComparer.Ordinal);
 
@@ -23,16 +22,9 @@ public sealed class EpisodeProgressionRuleData
         NodeRules.Add(rule);
     }
 
-    public bool TryGetNodeRule(
-        string episodeId,
-        out EpisodeNodeRuleData rule)
+    public EpisodeNodeRuleData GetNodeRule(string episodeId)
     {
-        rule = null;
-
-        if (string.IsNullOrEmpty(episodeId))
-            return false;
-
-        return _nodeRules.TryGetValue(episodeId, out rule);
+        return _nodeRules[episodeId];
     }
 
     public void AddEndingRule(EpisodeEndingRuleData rule)
@@ -47,16 +39,9 @@ public sealed class EpisodeProgressionRuleData
         EndingRules.Add(rule);
     }
 
-    public bool TryGetEndingRule(
-        string endingKey,
-        out EpisodeEndingRuleData rule)
+    public EpisodeEndingRuleData GetEndingRule(string endingKey)
     {
-        rule = null;
-
-        if (string.IsNullOrEmpty(endingKey))
-            return false;
-
-        return _endingRules.TryGetValue(endingKey, out rule);
+        return _endingRules[endingKey];
     }
 }
 

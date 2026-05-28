@@ -414,17 +414,21 @@ public class VnAppBootstrap : MonoBehaviour
 
     private void BootstrapEpisodeSelectionRuntime()
     {
+        EpisodeChapterRuntimeDataBuilder chapterDataBuilder = new();
         EpisodeProgressionGraphDataBuilder graphDataBuilder = new();
+        EpisodeProgressionRuleDataBuilder ruleDataBuilder = new();
 
         EpisodeSelectionRuntimeModel runtimeModel = new(
             chapterEpisodeProgressionCatalog,
-            graphDataBuilder);
+            chapterDataBuilder,
+            graphDataBuilder,
+            ruleDataBuilder);
 
         EpisodeConditionEvaluator conditionEvaluator = new(runtimeModel);
 
-        EpisodeGraphViewModelBuilder viewModelBuilder = new(runtimeModel);
-        EpisodeGraphRenderer episodeGraphRenderer = new(nodeRigPrefab);
         EpisodeGraphLayoutOptions layoutOptions = EpisodeGraphLayoutOptions.Compact();
+        EpisodeGraphViewModelBuilder viewModelBuilder = new(runtimeModel, layoutOptions);
+        EpisodeGraphRenderer episodeGraphRenderer = new(nodeRigPrefab);
         EpisodeGraphScrollController scrollController = new();
 
         _episodeSelectionSystem = new EpisodeSelectionSystem(
@@ -435,7 +439,6 @@ public class VnAppBootstrap : MonoBehaviour
             layoutOptions,
             scrollController);
     }
-
     private void InitializeEpisodePlayer()
     {
         episodePlayer.Initialize(_screenBindings, _rollbackHistory, customLinePresenter, _backlogRecorder);
