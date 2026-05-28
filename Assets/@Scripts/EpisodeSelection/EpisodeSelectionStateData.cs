@@ -35,12 +35,12 @@ public sealed class EpisodeSelectionStateData
         ReachableEpisodeIds.Add(startEpisodeId);
     }
 
-    public void SelectEpisode(string episodeId)
+    public void SetSelectedEpisodeId(string episodeId)
     {
         SelectedEpisodeId = episodeId;
     }
 
-    public void CompleteEpisode(string episodeId)
+    public void MarkEpisodeCleared(string episodeId)
     {
         CurrentEpisodeId = episodeId;
         SelectedEpisodeId = episodeId;

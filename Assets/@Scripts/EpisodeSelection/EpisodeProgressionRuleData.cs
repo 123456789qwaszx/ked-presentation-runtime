@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 
-[Serializable]public sealed class EpisodeProgressionRuleData
+[Serializable]
+public sealed class EpisodeProgressionRuleData
 {
     private readonly Dictionary<string, EpisodeNodeRuleData> _nodeRules = new(StringComparer.Ordinal);
-
     private readonly Dictionary<string, EpisodeEndingRuleData> _endingRules = new(StringComparer.Ordinal);
 
     public List<EpisodeNodeRuleData> NodeRules = new();

@@ -1,24 +1,40 @@
+using System;
+using System.Collections.Generic;
+
+[Serializable]
+public sealed class EpisodeYarnEntryData
+{
+    public string EpisodeId;
+    public EpisodeNodeKind Kind;
+    public string YarnNodeName;
+}
+
 public sealed class EpisodeSelectionRuntimeContext
 {
     private readonly ChapterEpisodeProgressionCatalogSO _progressionCatalog;
 
-    private readonly EpisodeChapterRuntimeDataBuilder _chapterDataBuilder;
+    private readonly EpisodeYarnEntryMapBuilder _yarnEntryMapBuilder;
     private readonly EpisodeProgressionGraphDataBuilder _graphDataBuilder;
     private readonly EpisodeProgressionRuleDataBuilder _ruleDataBuilder;
 
-    public EpisodeChapterRuntimeData CurrentChapter { get; private set; }
+    public string CurrentChapterId { get; private set; } = "";
+    public string CurrentChapterDisplayName { get; private set; } = "";
+    public string CurrentStartEpisodeId { get; private set; } = "";
+
+    public Dictionary<string, EpisodeYarnEntryData> YarnEntryByEpisodeId { get; private set; } = new(StringComparer.Ordinal);
+
     public EpisodeGraphData CurrentGraphData { get; private set; }
     public EpisodeProgressionRuleData ProgressionRules { get; private set; }
     public EpisodeSelectionStateData State { get; private set; } = new();
 
     public EpisodeSelectionRuntimeContext(
         ChapterEpisodeProgressionCatalogSO progressionCatalog,
-        EpisodeChapterRuntimeDataBuilder chapterDataBuilder,
+        EpisodeYarnEntryMapBuilder yarnEntryMapBuilder,
         EpisodeProgressionGraphDataBuilder graphDataBuilder,
         EpisodeProgressionRuleDataBuilder ruleDataBuilder)
     {
         _progressionCatalog = progressionCatalog;
-        _chapterDataBuilder = chapterDataBuilder;
+        _yarnEntryMapBuilder = yarnEntryMapBuilder;
         _graphDataBuilder = graphDataBuilder;
         _ruleDataBuilder = ruleDataBuilder;
     }
@@ -28,11 +44,15 @@ public sealed class EpisodeSelectionRuntimeContext
         if (!_progressionCatalog.TryGetProgression(chapterId, out ChapterEpisodeProgressionSO progression))
             return false;
 
-        CurrentChapter = _chapterDataBuilder.Build(progression);
+        CurrentChapterId = progression.ChapterId ?? "";
+        CurrentChapterDisplayName = progression.DisplayName ?? "";
+        CurrentStartEpisodeId = progression.StartEpisodeId ?? "";
+
+        YarnEntryByEpisodeId = _yarnEntryMapBuilder.Build(progression);
         CurrentGraphData = _graphDataBuilder.Build(progression);
         ProgressionRules = _ruleDataBuilder.Build(progression);
 
-        State.ResetForChapter(CurrentChapter.StartEpisodeId);
+        State.ResetForChapter(CurrentStartEpisodeId);
         return true;
     }
 
@@ -50,11 +70,16 @@ public sealed class EpisodeSelectionRuntimeContext
     {
         EpisodeSelectionRuntimeContext clone = new EpisodeSelectionRuntimeContext(
             _progressionCatalog,
-            _chapterDataBuilder,
+            _yarnEntryMapBuilder,
             _graphDataBuilder,
             _ruleDataBuilder)
         {
-            CurrentChapter = CurrentChapter,
+            CurrentChapterId = CurrentChapterId,
+            CurrentChapterDisplayName = CurrentChapterDisplayName,
+            CurrentStartEpisodeId = CurrentStartEpisodeId,
+            YarnEntryByEpisodeId = new Dictionary<string, EpisodeYarnEntryData>(
+                YarnEntryByEpisodeId,
+                StringComparer.Ordinal),
             CurrentGraphData = CurrentGraphData,
             ProgressionRules = ProgressionRules,
             State = State.Clone()

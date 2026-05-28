@@ -2,7 +2,7 @@ using System;
 
 public sealed class EpisodeSelectionSystem
 {
-    private readonly EpisodeSelectionRuntimeContext _runtimeModel;
+    private readonly EpisodeSelectionRuntimeContext _runtimeContext;
     private readonly EpisodeConditionEvaluator _conditionEvaluator;
 
     private readonly EpisodeGraphViewModelBuilder _viewModelBuilder;
@@ -14,58 +14,69 @@ public sealed class EpisodeSelectionSystem
         EpisodeGraphViewModelBuilder viewModelBuilder,
         EpisodeGraphRenderer episodeGraphRenderer)
     {
-        _runtimeModel = runtimeModel;
+        _runtimeContext = runtimeModel;
         _conditionEvaluator = conditionEvaluator;
 
         _viewModelBuilder = viewModelBuilder;
         _episodeGraphRenderer = episodeGraphRenderer;
     }
 
-    public EpisodeSelectionStateData SelectionState => _runtimeModel.State;
-    public EpisodeChapterRuntimeData CurrentChapter => _runtimeModel.CurrentChapter;
-    public EpisodeGraphData CurrentGraphData => _runtimeModel.CurrentGraphData;
-    public EpisodeProgressionRuleData ProgressionRules => _runtimeModel.ProgressionRules;
+    public EpisodeSelectionStateData SelectionState => _runtimeContext.State;
+    public EpisodeGraphData CurrentGraphData => _runtimeContext.CurrentGraphData;
+    public EpisodeProgressionRuleData ProgressionRules => _runtimeContext.ProgressionRules;
+
+    public String SelectedEpisodeId => SelectionState.SelectedEpisodeId ?? String.Empty;
     
-    public string GetSelectedDialogueEntryId() => CurrentChapter.GetDialogueEntryId(SelectionState.SelectedEpisodeId);
+    public string GetYarnNodeName()
+    {
+        string yarnNodeName = "yarnNodeFallback";
+
+        if (!_runtimeContext.YarnEntryByEpisodeId.TryGetValue(SelectedEpisodeId, out EpisodeYarnEntryData entry))
+            return yarnNodeName;
+
+        yarnNodeName = entry.YarnNodeName;
+        return yarnNodeName;
+    }
+    
     public void SetEpisodeSelectedHandler(Action<string> handler) => _episodeGraphRenderer.SetHandlers(handler);
     
     public bool DrawEpisodeNodes(int chapterId)
     {
-        if (!_runtimeModel.OpenChapter(chapterId))
+        if (!_runtimeContext.OpenChapter(chapterId))
             return false;
 
         _conditionEvaluator.RebuildAvailabilityState();
 
-        RenderCurrentState();
+        RefreshGraphView();
         return true;
     }
 
-    public void RequestCompleteEpisode(string episodeId)
+    public void MarkEpisodeCompleted(string episodeId)
     {
         if (string.IsNullOrEmpty(episodeId))
             return;
 
-        SelectionState.CompleteEpisode(episodeId);
+        SelectionState.MarkEpisodeCleared(episodeId);
 
         _conditionEvaluator.RebuildAvailabilityState();
 
-        RenderCurrentState();
-    }
-
-    private void RenderCurrentState()
-    {
-        EpisodeGraphViewData viewData = _viewModelBuilder.Build();
-        _episodeGraphRenderer.Render(viewData);
+        RefreshGraphView();
     }
     
-    public bool TrySelectEpisode(string episodeId)
+    public bool TrySetSelectedEpisode(string episodeId)
     {
         if (SelectionState.IsEpisodeLocked(episodeId))
             return false;
 
-        SelectionState.SelectEpisode(episodeId);
-        RenderCurrentState();
+        SelectionState.SetSelectedEpisodeId(episodeId);
+        RefreshGraphView();
 
         return true;
+    }
+    
+    private void RefreshGraphView()
+    {
+        EpisodeGraphViewData viewData = _viewModelBuilder.Build();
+        _episodeGraphRenderer.Render(viewData);
     }
 }

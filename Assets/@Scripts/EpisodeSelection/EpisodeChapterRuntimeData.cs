@@ -2,23 +2,23 @@ using System;
 using System.Collections.Generic;
 
 [Serializable]
-public sealed class EpisodeDialogueEntryData
+public sealed class EpisodeChapterYarnMap
 {
-    public string EpisodeId;
-    public EpisodeNodeKind Kind;
-    public string DialogueEntryId;
-}
-
-[Serializable]
-public sealed class EpisodeChapterRuntimeData
-{
+    [Serializable]
+    public sealed class Entry
+    {
+        public string EpisodeId;
+        public EpisodeNodeKind Kind;
+        public string YarnNodeName;
+    }
+    
     public string ChapterId;
     public string DisplayName;
     public string StartEpisodeId;
 
-    private readonly Dictionary<string, EpisodeDialogueEntryData> _dialogueByEpisodeId = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, Entry> _entryByEpisodeId = new(StringComparer.Ordinal);
 
-    public void AddDialogueEntry(EpisodeDialogueEntryData entry)
+    public void AddEntry(Entry entry)
     {
         if (entry == null)
             return;
@@ -26,17 +26,17 @@ public sealed class EpisodeChapterRuntimeData
         if (string.IsNullOrEmpty(entry.EpisodeId))
             return;
 
-        _dialogueByEpisodeId[entry.EpisodeId] = entry;
+        _entryByEpisodeId[entry.EpisodeId] = entry;
     }
 
-    public string GetDialogueEntryId(string episodeId)
+    public string GetYarnNodeName(string episodeId)
     {
-        EpisodeDialogueEntryData entry = _dialogueByEpisodeId[episodeId];
-        return entry.DialogueEntryId;
+        Entry entry = _entryByEpisodeId[episodeId];
+        return entry.YarnNodeName;
     }
 
-    public EpisodeDialogueEntryData GetDialogueEntry(string episodeId)
+    public Entry GetEntry(string episodeId)
     {
-        return _dialogueByEpisodeId[episodeId];
+        return _entryByEpisodeId[episodeId];
     }
 }

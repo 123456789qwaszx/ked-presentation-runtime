@@ -1,29 +1,25 @@
-public sealed class EpisodeChapterRuntimeDataBuilder
+using System;
+using System.Collections.Generic;
+
+public sealed class EpisodeYarnEntryMapBuilder
 {
-    public EpisodeChapterRuntimeData Build(ChapterEpisodeProgressionSO progression)
+    public Dictionary<string, EpisodeYarnEntryData> Build(ChapterEpisodeProgressionSO progression)
     {
-        EpisodeChapterRuntimeData data = new EpisodeChapterRuntimeData();
+        Dictionary<string, EpisodeYarnEntryData> result = new(StringComparer.Ordinal);
 
-        if (progression == null)
-            return data;
+        if (progression == null || progression.Nodes == null)
+            return result;
 
-        data.ChapterId = progression.ChapterId ?? "";
-        data.DisplayName = progression.DisplayName ?? "";
-        data.StartEpisodeId = progression.StartEpisodeId ?? "";
+        AddNodeEntries(progression, result);
+        AddAttachmentEntries(progression, result);
 
-        AddNodeDialogueEntries(progression, data);
-        AddAttachmentDialogueEntries(progression, data);
-
-        return data;
+        return result;
     }
 
-    private void AddNodeDialogueEntries(
+    private void AddNodeEntries(
         ChapterEpisodeProgressionSO progression,
-        EpisodeChapterRuntimeData data)
+        Dictionary<string, EpisodeYarnEntryData> result)
     {
-        if (progression.Nodes == null)
-            return;
-
         for (int i = 0; i < progression.Nodes.Count; i++)
         {
             EpisodeNodeDefinition node = progression.Nodes[i];
@@ -31,22 +27,18 @@ public sealed class EpisodeChapterRuntimeDataBuilder
             if (node == null)
                 continue;
 
-            data.AddDialogueEntry(new EpisodeDialogueEntryData
-            {
-                EpisodeId = node.EpisodeId ?? "",
-                Kind = node.Kind,
-                DialogueEntryId = node.DialogueEntryId ?? ""
-            });
+            AddEntry(
+                result,
+                node.EpisodeId,
+                node.Kind,
+                node.DialogueEntryId);
         }
     }
 
-    private void AddAttachmentDialogueEntries(
+    private void AddAttachmentEntries(
         ChapterEpisodeProgressionSO progression,
-        EpisodeChapterRuntimeData data)
+        Dictionary<string, EpisodeYarnEntryData> result)
     {
-        if (progression.Nodes == null)
-            return;
-
         for (int i = 0; i < progression.Nodes.Count; i++)
         {
             EpisodeNodeDefinition node = progression.Nodes[i];
@@ -61,13 +53,29 @@ public sealed class EpisodeChapterRuntimeDataBuilder
                 if (attachment == null)
                     continue;
 
-                data.AddDialogueEntry(new EpisodeDialogueEntryData
-                {
-                    EpisodeId = attachment.AttachmentId ?? "",
-                    Kind = EpisodeNodeKind.Attachment,
-                    DialogueEntryId = attachment.DialogueEntryId ?? ""
-                });
+                AddEntry(
+                    result,
+                    attachment.AttachmentId,
+                    EpisodeNodeKind.Attachment,
+                    attachment.DialogueEntryId);
             }
         }
+    }
+
+    private void AddEntry(
+        Dictionary<string, EpisodeYarnEntryData> result,
+        string episodeId,
+        EpisodeNodeKind kind,
+        string yarnNodeName)
+    {
+        if (string.IsNullOrEmpty(episodeId))
+            return;
+
+        result[episodeId] = new EpisodeYarnEntryData
+        {
+            EpisodeId = episodeId,
+            Kind = kind,
+            YarnNodeName = yarnNodeName ?? ""
+        };
     }
 }

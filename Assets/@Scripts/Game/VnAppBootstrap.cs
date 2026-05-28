@@ -1,6 +1,4 @@
-using System;
 using UnityEngine;
-using UnityEngine.Serialization;
 using Yarn.Unity;
 
 public class VnAppBootstrap : MonoBehaviour
@@ -414,13 +412,13 @@ public class VnAppBootstrap : MonoBehaviour
 
     private void BootstrapEpisodeSelectionRuntime()
     {
-        EpisodeChapterRuntimeDataBuilder chapterDataBuilder = new();
+        EpisodeYarnEntryMapBuilder yarnMapBuilder = new();
         EpisodeProgressionGraphDataBuilder graphDataBuilder = new();
         EpisodeProgressionRuleDataBuilder ruleDataBuilder = new();
 
         EpisodeSelectionRuntimeContext runtimeModel = new(
             chapterEpisodeProgressionCatalog,
-            chapterDataBuilder,
+            yarnMapBuilder,
             graphDataBuilder,
             ruleDataBuilder);
 
