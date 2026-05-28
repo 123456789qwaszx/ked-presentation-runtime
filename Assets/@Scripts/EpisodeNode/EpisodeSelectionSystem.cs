@@ -2,35 +2,33 @@ using System;
 
 public sealed class EpisodeSelectionSystem
 {
-    public event Action<string> EpisodeRequested;
-
     private readonly EpisodeSelectionRuntimeModel _runtimeModel;
     private readonly EpisodeConditionEvaluator _conditionEvaluator;
 
     private readonly EpisodeGraphViewModelBuilder _viewModelBuilder;
     private readonly EpisodeGraphRenderer _episodeGraphRenderer;
-    private readonly EpisodeGraphLayoutOptions _layoutOptions;
-    private readonly EpisodeGraphScrollController _scrollController;
 
     public EpisodeSelectionSystem(
         EpisodeSelectionRuntimeModel runtimeModel,
         EpisodeConditionEvaluator conditionEvaluator,
         EpisodeGraphViewModelBuilder viewModelBuilder,
-        EpisodeGraphRenderer episodeGraphRenderer,
-        EpisodeGraphLayoutOptions layoutOptions,
-        EpisodeGraphScrollController scrollController)
+        EpisodeGraphRenderer episodeGraphRenderer)
     {
         _runtimeModel = runtimeModel;
         _conditionEvaluator = conditionEvaluator;
 
         _viewModelBuilder = viewModelBuilder;
         _episodeGraphRenderer = episodeGraphRenderer;
-        _layoutOptions = layoutOptions;
-        _scrollController = scrollController;
-
-        _episodeGraphRenderer.SetHandlers(RequestSelectEpisode);
     }
 
+    public EpisodeSelectionStateData SelectionState => _runtimeModel.State;
+    public EpisodeChapterRuntimeData CurrentChapter => _runtimeModel.CurrentChapter;
+    public EpisodeGraphData CurrentGraphData => _runtimeModel.CurrentGraphData;
+    public EpisodeProgressionRuleData ProgressionRules => _runtimeModel.ProgressionRules;
+    
+    public string GetSelectedDialogueEntryId() => CurrentChapter.GetDialogueEntryId(SelectionState.SelectedEpisodeId);
+    public void SetEpisodeSelectedHandler(Action<string> handler) => _episodeGraphRenderer.SetHandlers(handler);
+    
     public bool DrawEpisodeNodes(int chapterId)
     {
         if (!_runtimeModel.OpenChapter(chapterId))
@@ -41,70 +39,22 @@ public sealed class EpisodeSelectionSystem
         RenderCurrentState();
         return true;
     }
-    private void RenderCurrentState()
-    {
-        if (_runtimeModel == null)
-            return;
-
-        if (_runtimeModel.CurrentGraphData == null)
-            return;
-
-        EpisodeGraphViewData viewData = _viewModelBuilder.Build();
-
-        _episodeGraphRenderer.Render(viewData);
-
-        string selected = _runtimeModel.State.SelectedEpisodeId;
-
-        if (!string.IsNullOrEmpty(selected) &&
-            viewData.TryGetNode(selected, out EpisodeNodeViewData node))
-        {
-            _scrollController.ScrollToPositionX(node.AnchoredPosition.x, 0.5f);
-        }
-        else
-        {
-            _scrollController.ScrollToLeft();
-        }
-    }
-
-    public bool TryGetSelectedEpisodeId(out string episodeId)
-    {
-        episodeId = _runtimeModel.State.SelectedEpisodeId;;
-        return episodeId != null;
-    }
 
     public void RequestCompleteEpisode(string episodeId)
     {
         if (string.IsNullOrEmpty(episodeId))
             return;
 
-        _runtimeModel.State.CompleteEpisode(episodeId);
+        SelectionState.CompleteEpisode(episodeId);
 
         _conditionEvaluator.RebuildAvailabilityState();
 
         RenderCurrentState();
     }
 
-    public bool TryGetDialogueEntryId(string episodeId, out string dialogueEntryId)
+    public void RenderCurrentState()
     {
-        dialogueEntryId = _runtimeModel.CurrentChapter.GetDialogueEntryId(episodeId);
-        return dialogueEntryId != null;
-    }
-
-    private void RequestSelectEpisode(string episodeId)
-    {
-        if (string.IsNullOrEmpty(episodeId))
-            return;
-
-        if (_runtimeModel == null)
-            return;
-
-        if (_runtimeModel.State.IsEpisodeLocked(episodeId))
-            return;
-
-        _runtimeModel.State.SelectEpisode(episodeId);
-
-        RenderCurrentState();
-
-        EpisodeRequested?.Invoke(episodeId);
+        EpisodeGraphViewData viewData = _viewModelBuilder.Build();
+        _episodeGraphRenderer.Render(viewData);
     }
 }

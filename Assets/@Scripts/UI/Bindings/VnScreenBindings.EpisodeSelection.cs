@@ -1,20 +1,31 @@
-using UnityEngine;
-
 public sealed partial class VnScreenBindings
 {
     private EpisodeSelectionSystem _episodeSelectionSystem;
-    
-    private int _currentChapterId = -1;
 
     public void ConfigureEpisodeSelection(EpisodeSelectionSystem episodeSelectionSystem)
     {
         _episodeSelectionSystem = episodeSelectionSystem;
+        _episodeSelectionSystem.SetEpisodeSelectedHandler(HandleEpisodeSelected);
     }
+    
+    #region EpisodeNode
+    
+    private void HandleEpisodeSelected(string episodeId)
+    {
+        if (_episodeSelectionSystem.SelectionState.IsEpisodeLocked(episodeId))
+            return;
 
+        _episodeSelectionSystem.SelectionState.SelectEpisode(episodeId);
+        _episodeSelectionSystem.RenderCurrentState();
+
+        OpenEpisodeConfirmPanel();
+    }
+    #endregion
+    
+    #region EpisodeSelectionPanel
+    
     private void OpenEpisodeSelectionPanel(int chapterId)
     {
-        _currentChapterId = chapterId;
-
         UI.PushPanel<EpisodeSelectionPanel>(panel =>
         {
             BindPanel(panel, ApplyBindings);
@@ -30,51 +41,21 @@ public sealed partial class VnScreenBindings
         AddBinding(panel,
             p => p.CloseClicked += ClosePanel,
             p => p.CloseClicked -= ClosePanel);
-
-        if (_episodeSelectionSystem == null)
-            return;
-
-        EpisodeSelectionSystem system = _episodeSelectionSystem;
-
-        system.EpisodeRequested += OnEpisodeRequested;
-
-        AddCleanup(panel, () =>
-        {
-            system.EpisodeRequested -= OnEpisodeRequested;
-        });
     }
-
-    private void OnEpisodeRequested(string episodeId)
-    {
-        Debug.Log(episodeId);
-
-        if (_episodeSelectionSystem == null)
-            return;
-
-        if (!_episodeSelectionSystem.TryGetDialogueEntryId(
-                episodeId,
-                out string dialogueEntryId))
-        {
-            return;
-        }
-        
-        CloseAllPanels();
-
-        _episodePlayer.StartGame(dialogueEntryId);
-    }
-
+    
     private void Refresh(EpisodeSelectionPanel panel)
     {
-        ChapterMetaModel model = CreateDebugEpisodeSelectionPanelModel(_currentChapterId);
+        ChapterMetaModel model = CreateDebugEpisodeSelectionPanelModel();
         PlayerStateSnapshot state = CreateDebugPlayerStateSnapshot();
 
         panel.Present(model, state);
     }
+    #endregion
 
-    private ChapterMetaModel CreateDebugEpisodeSelectionPanelModel(int chapterId)
+    private ChapterMetaModel CreateDebugEpisodeSelectionPanelModel()
     {
         return new ChapterMetaModel(
-            chapterIndex: $"CHAPTER {chapterId:00}",
+            chapterIndex: $"CHAPTER 00",
             eraText: "STELLA ERA",
             chapterTitle: "테스트 에피소드 그래프");
     }

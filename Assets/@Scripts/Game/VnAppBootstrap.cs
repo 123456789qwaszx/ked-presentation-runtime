@@ -435,9 +435,7 @@ public class VnAppBootstrap : MonoBehaviour
             runtimeModel,
             conditionEvaluator,
             viewModelBuilder,
-            episodeGraphRenderer,
-            layoutOptions,
-            scrollController);
+            episodeGraphRenderer);
     }
     private void InitializeEpisodePlayer()
     {

@@ -26,9 +26,9 @@ public partial class UIManager : MonoBehaviour
     [SerializeField] private Transform _layerTop;
 
     [Header("Panel Stack Visual Policy")]
-    [SerializeField, Min(1)] private int _keepAliveDepth = 2;
+    [SerializeField, Min(1)] private int _keepAliveDepth = 3;
 
-    [SerializeField, Range(0f, 1f)] private float _coveredAlpha = 0f;
+    [SerializeField, Range(0f, 1f)] private float _coveredAlpha = 0.9f;
 
     public bool HasPanel => _panelStack.Count > 0;
     

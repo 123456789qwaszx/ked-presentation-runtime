@@ -5,7 +5,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using static UIRefValidation;
 
-public sealed class SkipConfirmPanel : UIPanel<SkipConfirmPanel.Refs>
+public class ConfirmPanel : UIPanel<ConfirmPanel.Refs>
 {
     public event Action ConfirmClicked;
     public event Action CloseClicked;
@@ -14,8 +14,8 @@ public sealed class SkipConfirmPanel : UIPanel<SkipConfirmPanel.Refs>
     public enum Refs
     {
         // Root / BG
-        SkipConfirmBG_Root,
-        SkipConfirmBG_Image,
+        ConfirmBG_Root,
+        ConfirmBG_Image,
 
         // Header
         Title_Root,
@@ -49,8 +49,8 @@ public sealed class SkipConfirmPanel : UIPanel<SkipConfirmPanel.Refs>
 
     protected override void OnInitialize()
     {
-        _bgRoot        = View.Rect(Refs.SkipConfirmBG_Root);
-        _bgImage       = View.Image(Refs.SkipConfirmBG_Image);
+        _bgRoot        = View.Rect(Refs.ConfirmBG_Root);
+        _bgImage       = View.Image(Refs.ConfirmBG_Image);
         _titleText     = View.Text(Refs.Title_Text);
         _summaryText   = View.Text(Refs.SummaryText_Text);
         _confirmButton = View.Button(Refs.ConfirmButton_Button);
@@ -92,8 +92,8 @@ public sealed class SkipConfirmPanel : UIPanel<SkipConfirmPanel.Refs>
     {
         string missing = "";
 
-        AppendMissing(ref missing, _bgRoot,        Refs.SkipConfirmBG_Root);
-        AppendMissing(ref missing, _bgImage,       Refs.SkipConfirmBG_Image);
+        AppendMissing(ref missing, _bgRoot,        Refs.ConfirmBG_Root);
+        AppendMissing(ref missing, _bgImage,       Refs.ConfirmBG_Image);
         AppendMissing(ref missing, _titleText,     Refs.Title_Text);
         AppendMissing(ref missing, _summaryText,   Refs.SummaryText_Text);
         AppendMissing(ref missing, _confirmButton, Refs.ConfirmButton_Button);
@@ -103,7 +103,7 @@ public sealed class SkipConfirmPanel : UIPanel<SkipConfirmPanel.Refs>
 
         if (missing.Length > 0)
         {
-            Debug.LogWarning($"[SkipConfirmPanel] Missing refs:\n{missing}", this);
+            Debug.LogWarning($"[ConfirmPanel] Missing refs:\n{missing}", this);
             return false;
         }
 

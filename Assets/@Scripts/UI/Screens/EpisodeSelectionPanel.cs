@@ -135,7 +135,7 @@ public sealed partial class EpisodeSelectionPanel : UIPanel<EpisodeSelectionPane
 
         _return = View.Widget<ButtonWidget>(Refs.ReturnButton_BWidget);
         
-        View.Image(Refs.EpisodeSelectionBG_Image).sprite = Resources.Load<Sprite>("background_02");
+        View.Image(Refs.EpisodeSelectionBG_Image).sprite = Resources.Load<Sprite>("bg05");
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         _valid = ValidateRefs();

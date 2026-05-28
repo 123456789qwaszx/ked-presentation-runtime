@@ -32,11 +32,11 @@ public sealed partial class VnScreenBindings
     private void HandleEpisodeSkipConfirmed()
     {
         CloseAllPanels();
+
+        string episodeId = _episodeSelectionSystem.SelectionState.SelectedEpisodeId;
         
-        if (!_episodeSelectionSystem.TryGetSelectedEpisodeId(out string episodeId))
-        {
+        if(episodeId == null)
             Debug.LogWarning("[VN] Episode skip confirmed but selected episode id is empty.");
-        }
 
         _vnRuntimeBridge.ForceCompleteEpisodeNow(episodeId);
         _episodeSelectionSystem.RequestCompleteEpisode(episodeId);
