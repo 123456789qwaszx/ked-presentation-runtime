@@ -29,7 +29,8 @@ public sealed partial class VnScreenBindings
 
             Refresh(panel);
 
-            _episodeSelectionSystem.DrawEpisodeNodes(chapterId);
+            _episodeSelectionSystem.SetChapterId(chapterId);
+            _episodeSelectionSystem.DrawEpisodeNodes();
         });
     }
 

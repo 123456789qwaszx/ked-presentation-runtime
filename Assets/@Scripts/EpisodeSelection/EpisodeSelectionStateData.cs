@@ -4,8 +4,12 @@ using System.Collections.Generic;
 [Serializable]
 public sealed class EpisodeSelectionStateData
 {
-    public string SelectedEpisodeId;
-    public string CurrentEpisodeId;
+    public string CurrentChapterId = "";
+    public string CurrentChapterDisplayName = "";
+    public string CurrentStartEpisodeId = "";
+    
+    public string SelectedEpisodeId = "";
+    public string CurrentEpisodeId = "";
 
     public HashSet<string> ClearedEpisodeIds = new(StringComparer.Ordinal);
     public HashSet<string> ClearedChapterIds = new(StringComparer.Ordinal);
@@ -17,6 +21,10 @@ public sealed class EpisodeSelectionStateData
 
     public Dictionary<string, bool> Flags = new(StringComparer.Ordinal);
     public Dictionary<string, int> Stats = new(StringComparer.Ordinal);
+
+    public EpisodeSelectionStateData()
+    {
+    }
 
     public void ResetForChapter(string startEpisodeId)
     {

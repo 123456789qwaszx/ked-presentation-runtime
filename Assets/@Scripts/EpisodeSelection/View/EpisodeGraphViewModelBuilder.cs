@@ -4,12 +4,17 @@ using UnityEngine;
 
 public sealed class EpisodeGraphViewModelBuilder
 {
-    private readonly EpisodeSelectionRuntimeContext _runtimeModel;
+    private readonly EpisodeGraphData _runtimeModel;
+    private readonly EpisodeSelectionStateData _episodeSelectionStateData;
     private readonly EpisodeGraphLayoutOptions _layoutOptions;
 
-    public EpisodeGraphViewModelBuilder(EpisodeSelectionRuntimeContext runtimeModel, EpisodeGraphLayoutOptions layoutOptions)
+    public EpisodeGraphViewModelBuilder(
+        EpisodeGraphData runtimeModel, 
+        EpisodeSelectionStateData stateData, 
+        EpisodeGraphLayoutOptions layoutOptions)
     {
         _runtimeModel = runtimeModel;
+        _episodeSelectionStateData = stateData;
         _layoutOptions = layoutOptions;
     }
 
@@ -17,16 +22,15 @@ public sealed class EpisodeGraphViewModelBuilder
     {
         EpisodeGraphViewData viewData = new();
         
-        EpisodeGraphData graphData = _runtimeModel.CurrentGraphData;
         EpisodeGraphLayoutOptions options = _layoutOptions;
-        Dictionary<string, Vector2> positions = CalculatePositions(graphData, options);
+        Dictionary<string, Vector2> positions = CalculatePositions(_runtimeModel, options);
 
-        for (int i = 0; i < graphData.Nodes.Count; i++)
+        for (int i = 0; i < _runtimeModel.Nodes.Count; i++)
         {
-            EpisodeGraphNodeData node = graphData.Nodes[i];
+            EpisodeGraphNodeData node = _runtimeModel.Nodes[i];
 
-            if (!_runtimeModel.State.ShouldShowEpisode(node.Id))
-                continue;
+            // if (!_runtimeModel.ShouldShowEpisode(node.Id))
+            //     continue;
 
             EpisodeNodeViewData nodeViewData = new EpisodeNodeViewData
             {
@@ -49,18 +53,16 @@ public sealed class EpisodeGraphViewModelBuilder
     
     private EpisodeNodeVisualState ResolveVisualState(string episodeId)
     {
-        EpisodeSelectionStateData state = _runtimeModel.State;
-
-        if (state.LockedEpisodeIds.Contains(episodeId))
+        if (_episodeSelectionStateData.LockedEpisodeIds.Contains(episodeId))
             return EpisodeNodeVisualState.Locked;
 
-        if (string.Equals(state.SelectedEpisodeId, episodeId, StringComparison.Ordinal))
+        if (string.Equals(_episodeSelectionStateData.SelectedEpisodeId, episodeId, StringComparison.Ordinal))
             return EpisodeNodeVisualState.Selected;
 
-        if (string.Equals(state.CurrentEpisodeId, episodeId, StringComparison.Ordinal))
+        if (string.Equals(_episodeSelectionStateData.CurrentEpisodeId, episodeId, StringComparison.Ordinal))
             return EpisodeNodeVisualState.Current;
 
-        if (state.ClearedEpisodeIds.Contains(episodeId))
+        if (_episodeSelectionStateData.ClearedEpisodeIds.Contains(episodeId))
             return EpisodeNodeVisualState.Completed;
 
         return EpisodeNodeVisualState.Normal;

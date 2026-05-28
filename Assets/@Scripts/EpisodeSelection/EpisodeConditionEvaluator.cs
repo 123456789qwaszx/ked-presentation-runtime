@@ -2,17 +2,21 @@ using System.Collections.Generic;
 
 public sealed class EpisodeConditionEvaluator
 {
-    private readonly EpisodeSelectionRuntimeContext _runtimeModel;
+    private readonly EpisodeSelectionStateData _runtimeModel;
+    private readonly EpisodeProgressionRuleData _ruleData;
 
-    public EpisodeConditionEvaluator(EpisodeSelectionRuntimeContext runtimeModel)
+    public EpisodeConditionEvaluator(
+        EpisodeSelectionStateData runtimeModel,
+        EpisodeProgressionRuleData ruleData)
     {
         _runtimeModel = runtimeModel;
+        _ruleData = ruleData;
     }
 
     public void RebuildAvailabilityState()
     {
-        _runtimeModel.State.VisibleEpisodeIds.Clear();
-        _runtimeModel.State.LockedEpisodeIds.Clear();
+        _runtimeModel.VisibleEpisodeIds.Clear();
+        _runtimeModel.LockedEpisodeIds.Clear();
 
         ApplyNodeAvailability();
         ApplyAttachmentAvailability();
@@ -34,7 +38,7 @@ public sealed class EpisodeConditionEvaluator
 
     private void ApplyNodeAvailability()
     {
-        List<EpisodeNodeRuleData> nodeRules = _runtimeModel.ProgressionRules.NodeRules;
+        List<EpisodeNodeRuleData> nodeRules = _ruleData.NodeRules;
 
         for (int i = 0; i < nodeRules.Count; i++)
         {
@@ -49,7 +53,7 @@ public sealed class EpisodeConditionEvaluator
 
     private void ApplyAttachmentAvailability()
     {
-        List<EpisodeNodeRuleData> nodeRules = _runtimeModel.ProgressionRules.NodeRules;
+        List<EpisodeNodeRuleData> nodeRules = _ruleData.NodeRules;
 
         for (int i = 0; i < nodeRules.Count; i++)
         {
@@ -84,15 +88,15 @@ public sealed class EpisodeConditionEvaluator
         if (!visible)
             return;
 
-        _runtimeModel.State.VisibleEpisodeIds.Add(episodeId);
+        _runtimeModel.VisibleEpisodeIds.Add(episodeId);
 
-        bool reachable = _runtimeModel.State.ReachableEpisodeIds.Count == 0 ||
-                         _runtimeModel.State.ReachableEpisodeIds.Contains(episodeId);
+        bool reachable = _runtimeModel.ReachableEpisodeIds.Count == 0 ||
+                         _runtimeModel.ReachableEpisodeIds.Contains(episodeId);
 
         bool unlocked = AreMet(unlockConditions);
 
         if (!reachable || !unlocked)
-            _runtimeModel.State.LockedEpisodeIds.Add(episodeId);
+            _runtimeModel.LockedEpisodeIds.Add(episodeId);
     }
 
     private bool IsMet(EpisodeCondition condition)
@@ -110,17 +114,17 @@ public sealed class EpisodeConditionEvaluator
 
             case EpisodeConditionKind.EpisodeCleared:
                 return EvaluateExists(
-                    _runtimeModel.State.ClearedEpisodeIds.Contains(condition.Key),
+                    _runtimeModel.ClearedEpisodeIds.Contains(condition.Key),
                     condition.Op);
 
             case EpisodeConditionKind.ChapterCleared:
                 return EvaluateExists(
-                    _runtimeModel.State.ClearedChapterIds.Contains(condition.Key),
+                    _runtimeModel.ClearedChapterIds.Contains(condition.Key),
                     condition.Op);
 
             case EpisodeConditionKind.Token:
                 return EvaluateExists(
-                    _runtimeModel.State.Tokens.Contains(condition.Key),
+                    _runtimeModel.Tokens.Contains(condition.Key),
                     condition.Op);
 
             default:
@@ -130,7 +134,7 @@ public sealed class EpisodeConditionEvaluator
 
     private bool EvaluateFlag(EpisodeCondition condition)
     {
-        bool exists = _runtimeModel.State.Flags.TryGetValue(condition.Key, out bool value);
+        bool exists = _runtimeModel.Flags.TryGetValue(condition.Key, out bool value);
 
         switch (condition.Op)
         {
@@ -153,7 +157,7 @@ public sealed class EpisodeConditionEvaluator
 
     private bool EvaluateStat(EpisodeCondition condition)
     {
-        bool exists = _runtimeModel.State.Stats.TryGetValue(condition.Key, out int value);
+        bool exists = _runtimeModel.Stats.TryGetValue(condition.Key, out int value);
 
         switch (condition.Op)
         {

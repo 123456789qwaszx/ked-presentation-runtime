@@ -33,7 +33,7 @@ public sealed partial class VnScreenBindings
     {
         CloseAllPanels();
 
-        string episodeId = _episodeSelectionSystem.SelectionState.SelectedEpisodeId;
+        string episodeId = _episodeSelectionSystem._selectionState.SelectedEpisodeId;
         
         if(episodeId == null)
             Debug.LogWarning("[VN] Episode skip confirmed but selected episode id is empty.");

@@ -3,9 +3,18 @@ using System.Collections.Generic;
 
 public sealed class EpisodeYarnEntryMapBuilder
 {
-    public Dictionary<string, EpisodeYarnEntryData> Build(ChapterEpisodeProgressionSO progression)
+    public Dictionary<string, EpisodeYarnEntryData> Build(
+        ChapterEpisodeProgressionCatalogSO catalog,
+        int chapterId)
     {
-        Dictionary<string, EpisodeYarnEntryData> result = new(StringComparer.Ordinal);
+        Dictionary<string, EpisodeYarnEntryData> result =
+            new Dictionary<string, EpisodeYarnEntryData>(StringComparer.Ordinal);
+
+        if (catalog == null)
+            return result;
+
+        if (!catalog.TryGetProgression(chapterId, out ChapterEpisodeProgressionSO progression))
+            return result;
 
         if (progression == null || progression.Nodes == null)
             return result;
@@ -75,7 +84,7 @@ public sealed class EpisodeYarnEntryMapBuilder
         {
             EpisodeId = episodeId,
             Kind = kind,
-            YarnNodeName = yarnNodeName ?? ""
+            YarnNodeName = yarnNodeName ?? string.Empty
         };
     }
 }

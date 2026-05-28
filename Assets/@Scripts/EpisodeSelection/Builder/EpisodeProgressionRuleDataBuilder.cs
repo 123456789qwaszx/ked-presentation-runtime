@@ -2,9 +2,17 @@ using System.Collections.Generic;
 
 public sealed class EpisodeProgressionRuleDataBuilder
 {
-    public EpisodeProgressionRuleData Build(ChapterEpisodeProgressionSO progression)
+    public EpisodeProgressionRuleData Build(
+        ChapterEpisodeProgressionCatalogSO catalog,
+        int chapterId)
     {
         EpisodeProgressionRuleData data = new EpisodeProgressionRuleData();
+
+        if (catalog == null)
+            return data;
+
+        if (!catalog.TryGetProgression(chapterId, out ChapterEpisodeProgressionSO progression))
+            return data;
 
         if (progression == null)
             return data;
@@ -29,14 +37,17 @@ public sealed class EpisodeProgressionRuleDataBuilder
             if (node == null)
                 continue;
 
+            if (string.IsNullOrEmpty(node.EpisodeId))
+                continue;
+
             EpisodeNodeRuleData rule = new EpisodeNodeRuleData
             {
-                EpisodeId = node.EpisodeId ?? "",
+                EpisodeId = node.EpisodeId,
                 Kind = node.Kind,
                 VisibleConditions = CopyConditions(node.VisibleConditions),
                 UnlockConditions = CopyConditions(node.UnlockConditions),
                 IsChapterEndingCandidate = node.IsChapterEndingCandidate,
-                EndingKey = node.EndingKey ?? ""
+                EndingKey = node.EndingKey ?? string.Empty
             };
 
             AddNextOptions(node, rule);
@@ -62,11 +73,11 @@ public sealed class EpisodeProgressionRuleDataBuilder
 
             rule.NextOptions.Add(new EpisodeNextOptionData
             {
-                TargetEpisodeId = option.TargetEpisodeId ?? "",
-                ChoiceLabel = option.ChoiceLabel ?? "",
+                TargetEpisodeId = option.TargetEpisodeId ?? string.Empty,
+                ChoiceLabel = option.ChoiceLabel ?? string.Empty,
                 Conditions = CopyConditions(option.Conditions),
                 HideWhenLocked = option.HideWhenLocked,
-                LockedReasonText = option.LockedReasonText ?? ""
+                LockedReasonText = option.LockedReasonText ?? string.Empty
             });
         }
     }
@@ -85,14 +96,17 @@ public sealed class EpisodeProgressionRuleDataBuilder
             if (attachment == null)
                 continue;
 
+            if (string.IsNullOrEmpty(attachment.AttachmentId))
+                continue;
+
             rule.Attachments.Add(new EpisodeAttachmentRuleData
             {
-                AttachmentId = attachment.AttachmentId ?? "",
-                ParentEpisodeId = attachment.ParentEpisodeId ?? "",
-                Title = attachment.Title ?? "",
-                IndexText = attachment.IndexText ?? "",
+                AttachmentId = attachment.AttachmentId,
+                ParentEpisodeId = attachment.ParentEpisodeId ?? string.Empty,
+                Title = attachment.Title ?? string.Empty,
+                IndexText = attachment.IndexText ?? string.Empty,
                 Kind = attachment.Kind,
-                DialogueEntryId = attachment.DialogueEntryId ?? "",
+                DialogueEntryId = attachment.DialogueEntryId ?? string.Empty,
                 VisibleConditions = CopyConditions(attachment.VisibleConditions),
                 UnlockConditions = CopyConditions(attachment.UnlockConditions),
                 IsRepeatable = attachment.IsRepeatable
@@ -114,13 +128,16 @@ public sealed class EpisodeProgressionRuleDataBuilder
             if (endingRule == null)
                 continue;
 
+            if (string.IsNullOrEmpty(endingRule.EndingKey))
+                continue;
+
             data.AddEndingRule(new EpisodeEndingRuleData
             {
-                EndingKey = endingRule.EndingKey ?? "",
-                DisplayName = endingRule.DisplayName ?? "",
+                EndingKey = endingRule.EndingKey,
+                DisplayName = endingRule.DisplayName ?? string.Empty,
                 Conditions = CopyConditions(endingRule.Conditions),
                 UnlockNextChapter = endingRule.UnlockNextChapter,
-                NextChapterId = endingRule.NextChapterId ?? ""
+                NextChapterId = endingRule.NextChapterId ?? string.Empty
             });
         }
     }
@@ -143,11 +160,11 @@ public sealed class EpisodeProgressionRuleDataBuilder
             result.Add(new EpisodeCondition
             {
                 Kind = condition.Kind,
-                Key = condition.Key ?? "",
+                Key = condition.Key ?? string.Empty,
                 Op = condition.Op,
                 IntValue = condition.IntValue,
                 BoolValue = condition.BoolValue,
-                StringValue = condition.StringValue ?? ""
+                StringValue = condition.StringValue ?? string.Empty
             });
         }
 

@@ -1,5 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 
 [Serializable]
 public sealed class EpisodeYarnEntryData
@@ -9,82 +13,79 @@ public sealed class EpisodeYarnEntryData
     public string YarnNodeName;
 }
 
-public sealed class EpisodeSelectionRuntimeContext
+[Serializable]
+public sealed class EpisodeYarnEntryMapData
 {
-    private readonly ChapterEpisodeProgressionCatalogSO _progressionCatalog;
+    private readonly Dictionary<int, Dictionary<string, EpisodeYarnEntryData>> _entryByChapterId
+        = new Dictionary<int, Dictionary<string, EpisodeYarnEntryData>>();
 
-    private readonly EpisodeYarnEntryMapBuilder _yarnEntryMapBuilder;
-    private readonly EpisodeProgressionGraphDataBuilder _graphDataBuilder;
-    private readonly EpisodeProgressionRuleDataBuilder _ruleDataBuilder;
-
-    public string CurrentChapterId { get; private set; } = "";
-    public string CurrentChapterDisplayName { get; private set; } = "";
-    public string CurrentStartEpisodeId { get; private set; } = "";
-
-    public Dictionary<string, EpisodeYarnEntryData> YarnEntryByEpisodeId { get; private set; } = new(StringComparer.Ordinal);
-
-    public EpisodeGraphData CurrentGraphData { get; private set; }
-    public EpisodeProgressionRuleData ProgressionRules { get; private set; }
-    public EpisodeSelectionStateData State { get; private set; } = new();
-
-    public EpisodeSelectionRuntimeContext(
-        ChapterEpisodeProgressionCatalogSO progressionCatalog,
-        EpisodeYarnEntryMapBuilder yarnEntryMapBuilder,
-        EpisodeProgressionGraphDataBuilder graphDataBuilder,
-        EpisodeProgressionRuleDataBuilder ruleDataBuilder)
+    public void AddChapterEntries(
+        int chapterId,
+        Dictionary<string, EpisodeYarnEntryData> entries)
     {
-        _progressionCatalog = progressionCatalog;
-        _yarnEntryMapBuilder = yarnEntryMapBuilder;
-        _graphDataBuilder = graphDataBuilder;
-        _ruleDataBuilder = ruleDataBuilder;
+        if (entries == null)
+            entries = new Dictionary<string, EpisodeYarnEntryData>(StringComparer.Ordinal);
+
+        _entryByChapterId[chapterId] = entries;
     }
 
-    public bool OpenChapter(int chapterId)
+    public Dictionary<string, EpisodeYarnEntryData> GetChapterEntries(int chapterId)
     {
-        if (!_progressionCatalog.TryGetProgression(chapterId, out ChapterEpisodeProgressionSO progression))
-            return false;
+        if (_entryByChapterId.TryGetValue(chapterId, out Dictionary<string, EpisodeYarnEntryData> entries))
+            return entries;
 
-        CurrentChapterId = progression.ChapterId ?? "";
-        CurrentChapterDisplayName = progression.DisplayName ?? "";
-        CurrentStartEpisodeId = progression.StartEpisodeId ?? "";
+        return new Dictionary<string, EpisodeYarnEntryData>(StringComparer.Ordinal);
+    }
+}
 
-        YarnEntryByEpisodeId = _yarnEntryMapBuilder.Build(progression);
-        CurrentGraphData = _graphDataBuilder.Build(progression);
-        ProgressionRules = _ruleDataBuilder.Build(progression);
 
-        State.ResetForChapter(CurrentStartEpisodeId);
-        return true;
+[Serializable]
+public sealed class EpisodeGraphCatalogData
+{
+    private readonly Dictionary<int, EpisodeGraphData> _graphDataByChapterId
+        = new Dictionary<int, EpisodeGraphData>();
+
+    public void AddChapterGraphData(
+        int chapterId,
+        EpisodeGraphData graphData)
+    {
+        if (graphData == null)
+            graphData = new EpisodeGraphData();
+
+        _graphDataByChapterId[chapterId] = graphData;
     }
 
-    public EpisodeGraphNodeData GetNode(string episodeId)
+    public EpisodeGraphData GetChapterGraphData(int chapterId)
     {
-        return CurrentGraphData.FindNode(episodeId);
+        if (_graphDataByChapterId.TryGetValue(chapterId, out EpisodeGraphData graphData))
+            return graphData;
+
+        return new EpisodeGraphData();
+    }
+}
+
+
+[Serializable]
+public sealed class EpisodeProgressionRuleCatalogData
+{
+    private readonly Dictionary<int, EpisodeProgressionRuleData> _ruleDataByChapterId
+        = new Dictionary<int, EpisodeProgressionRuleData>();
+
+    public void AddChapterRuleData(
+        int chapterId,
+        EpisodeProgressionRuleData ruleData)
+    {
+        if (ruleData == null)
+            ruleData = new EpisodeProgressionRuleData();
+
+        _ruleDataByChapterId[chapterId] = ruleData;
     }
 
-    public EpisodeNodeRuleData GetNodeRule(string episodeId)
+    public EpisodeProgressionRuleData GetChapterRuleData(int chapterId)
     {
-        return ProgressionRules.GetNodeRule(episodeId);
-    }
+        if (_ruleDataByChapterId.TryGetValue(chapterId, out EpisodeProgressionRuleData ruleData))
+            return ruleData;
 
-    public EpisodeSelectionRuntimeContext CloneRuntimeValuesOnly()
-    {
-        EpisodeSelectionRuntimeContext clone = new EpisodeSelectionRuntimeContext(
-            _progressionCatalog,
-            _yarnEntryMapBuilder,
-            _graphDataBuilder,
-            _ruleDataBuilder)
-        {
-            CurrentChapterId = CurrentChapterId,
-            CurrentChapterDisplayName = CurrentChapterDisplayName,
-            CurrentStartEpisodeId = CurrentStartEpisodeId,
-            YarnEntryByEpisodeId = new Dictionary<string, EpisodeYarnEntryData>(
-                YarnEntryByEpisodeId,
-                StringComparer.Ordinal),
-            CurrentGraphData = CurrentGraphData,
-            ProgressionRules = ProgressionRules,
-            State = State.Clone()
-        };
-
-        return clone;
+        return new EpisodeProgressionRuleData();
     }
 }

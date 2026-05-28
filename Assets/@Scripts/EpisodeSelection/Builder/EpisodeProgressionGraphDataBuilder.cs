@@ -1,8 +1,16 @@
 public sealed class EpisodeProgressionGraphDataBuilder
 {
-    public EpisodeGraphData Build(ChapterEpisodeProgressionSO progression)
+    public EpisodeGraphData Build(
+        ChapterEpisodeProgressionCatalogSO catalog,
+        int chapterId)
     {
         EpisodeGraphData graphData = new EpisodeGraphData();
+
+        if (catalog == null)
+            return graphData;
+
+        if (!catalog.TryGetProgression(chapterId, out ChapterEpisodeProgressionSO progression))
+            return graphData;
 
         if (progression == null)
             return graphData;
@@ -14,7 +22,9 @@ public sealed class EpisodeProgressionGraphDataBuilder
         return graphData;
     }
 
-    private void AddMainNodes(ChapterEpisodeProgressionSO progression, EpisodeGraphData graphData)
+    private void AddMainNodes(
+        ChapterEpisodeProgressionSO progression,
+        EpisodeGraphData graphData)
     {
         if (progression.Nodes == null)
             return;
@@ -40,7 +50,9 @@ public sealed class EpisodeProgressionGraphDataBuilder
         }
     }
 
-    private void AddMainEdges(ChapterEpisodeProgressionSO progression, EpisodeGraphData graphData)
+    private void AddMainEdges(
+        ChapterEpisodeProgressionSO progression,
+        EpisodeGraphData graphData)
     {
         if (progression.Nodes == null)
             return;
@@ -52,14 +64,14 @@ public sealed class EpisodeProgressionGraphDataBuilder
             if (node == null || node.NextOptions == null)
                 continue;
 
+            if (string.IsNullOrEmpty(node.EpisodeId))
+                continue;
+
             for (int j = 0; j < node.NextOptions.Count; j++)
             {
                 EpisodeNextOption option = node.NextOptions[j];
 
                 if (option == null)
-                    continue;
-
-                if (string.IsNullOrEmpty(node.EpisodeId))
                     continue;
 
                 if (string.IsNullOrEmpty(option.TargetEpisodeId))
@@ -108,14 +120,14 @@ public sealed class EpisodeProgressionGraphDataBuilder
                     ParentEpisodeId = attachment.ParentEpisodeId
                 });
 
-                if (!string.IsNullOrEmpty(attachment.ParentEpisodeId))
+                if (string.IsNullOrEmpty(attachment.ParentEpisodeId))
+                    continue;
+
+                graphData.Edges.Add(new EpisodeGraphEdgeData
                 {
-                    graphData.Edges.Add(new EpisodeGraphEdgeData
-                    {
-                        FromEpisodeId = attachment.ParentEpisodeId,
-                        ToEpisodeId = attachment.AttachmentId
-                    });
-                }
+                    FromEpisodeId = attachment.ParentEpisodeId,
+                    ToEpisodeId = attachment.AttachmentId
+                });
             }
         }
     }

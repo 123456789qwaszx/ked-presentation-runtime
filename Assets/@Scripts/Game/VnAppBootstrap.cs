@@ -16,7 +16,10 @@ public class VnAppBootstrap : MonoBehaviour
     private readonly PresentationSessionContext _presentationSessionContext = new();
     private readonly VnScreenBindings _screenBindings = new();
 
+    private EpisodeSelectionStateData _episodeSelectionStateData = new ();
+    
     private LinePresentationAdvanceState _linePresentationAdvanceState;
+    
 
     [Header("Sound")] 
     [SerializeField] private AudioSystem audioSystem;
@@ -415,24 +418,18 @@ public class VnAppBootstrap : MonoBehaviour
         EpisodeYarnEntryMapBuilder yarnMapBuilder = new();
         EpisodeProgressionGraphDataBuilder graphDataBuilder = new();
         EpisodeProgressionRuleDataBuilder ruleDataBuilder = new();
-
-        EpisodeSelectionRuntimeContext runtimeModel = new(
-            chapterEpisodeProgressionCatalog,
-            yarnMapBuilder,
-            graphDataBuilder,
-            ruleDataBuilder);
-
-        EpisodeConditionEvaluator conditionEvaluator = new(runtimeModel);
-
         EpisodeGraphLayoutOptions layoutOptions = EpisodeGraphLayoutOptions.Compact();
-        EpisodeGraphViewModelBuilder viewModelBuilder = new(runtimeModel, layoutOptions);
         EpisodeGraphRenderer episodeGraphRenderer = new(nodeRigPrefab);
+        
         EpisodeGraphScrollController scrollController = new();
 
         _episodeSelectionSystem = new EpisodeSelectionSystem(
-            runtimeModel,
-            conditionEvaluator,
-            viewModelBuilder,
+            chapterEpisodeProgressionCatalog,
+            layoutOptions,
+            yarnMapBuilder,
+            graphDataBuilder,
+            ruleDataBuilder,
+            _episodeSelectionStateData,
             episodeGraphRenderer);
     }
     
