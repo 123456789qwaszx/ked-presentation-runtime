@@ -1,4 +1,4 @@
-public sealed class EpisodeSelectionRuntimeModel
+public sealed class EpisodeSelectionRuntimeContext
 {
     private readonly ChapterEpisodeProgressionCatalogSO _progressionCatalog;
 
@@ -11,7 +11,7 @@ public sealed class EpisodeSelectionRuntimeModel
     public EpisodeProgressionRuleData ProgressionRules { get; private set; }
     public EpisodeSelectionStateData State { get; private set; } = new();
 
-    public EpisodeSelectionRuntimeModel(
+    public EpisodeSelectionRuntimeContext(
         ChapterEpisodeProgressionCatalogSO progressionCatalog,
         EpisodeChapterRuntimeDataBuilder chapterDataBuilder,
         EpisodeProgressionGraphDataBuilder graphDataBuilder,
@@ -46,9 +46,9 @@ public sealed class EpisodeSelectionRuntimeModel
         return ProgressionRules.GetNodeRule(episodeId);
     }
 
-    public EpisodeSelectionRuntimeModel CloneRuntimeValuesOnly()
+    public EpisodeSelectionRuntimeContext CloneRuntimeValuesOnly()
     {
-        EpisodeSelectionRuntimeModel clone = new EpisodeSelectionRuntimeModel(
+        EpisodeSelectionRuntimeContext clone = new EpisodeSelectionRuntimeContext(
             _progressionCatalog,
             _chapterDataBuilder,
             _graphDataBuilder,

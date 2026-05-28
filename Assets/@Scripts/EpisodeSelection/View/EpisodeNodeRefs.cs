@@ -2,7 +2,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public static class EpisodeNodeRigSchema
+public static class EpisodeNodeSchema
 {
     public enum Refs
     {

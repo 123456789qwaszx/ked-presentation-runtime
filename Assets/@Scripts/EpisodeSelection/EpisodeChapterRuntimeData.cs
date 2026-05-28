@@ -9,7 +9,8 @@ public sealed class EpisodeDialogueEntryData
     public string DialogueEntryId;
 }
 
-[Serializable]public sealed class EpisodeChapterRuntimeData
+[Serializable]
+public sealed class EpisodeChapterRuntimeData
 {
     public string ChapterId;
     public string DisplayName;

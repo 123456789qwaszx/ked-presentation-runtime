@@ -85,9 +85,8 @@ public abstract class ShotIntentCommandBase<TSpec> : CommandBase, IStepScopedCom
                 ClearRuntimeState();
             });
 
-        // if (spec.wait)
-        //     yield return _tween.WaitForCompletion();
-        yield return null;
+        if (spec.wait)
+            yield return _tween.WaitForCompletion();
     }
 
     protected override void OnSkip(CommandRunScope scope)

@@ -42,7 +42,7 @@ public sealed class EpisodeNodeBuilder
         string nodePrefix,
         out EpisodeNodeRefs refs)
     {
-        Dictionary<EpisodeNodeRigSchema.Refs, RectTransform> map =
+        Dictionary<EpisodeNodeSchema.Refs, RectTransform> map =
             CollectRefMap(rigRoot, nodePrefix);
 
         EnsureValidGraphMap(rigRoot, nodePrefix, ref map);
@@ -53,9 +53,9 @@ public sealed class EpisodeNodeBuilder
     private void EnsureValidGraphMap(
         RectTransform rigRoot,
         string nodePrefix,
-        ref Dictionary<EpisodeNodeRigSchema.Refs, RectTransform> map)
+        ref Dictionary<EpisodeNodeSchema.Refs, RectTransform> map)
     {
-        int expectedCount = Enum.GetValues(typeof(EpisodeNodeRigSchema.Refs)).Length;
+        int expectedCount = Enum.GetValues(typeof(EpisodeNodeSchema.Refs)).Length;
         
         if (map.Count >= expectedCount)
             return;
@@ -78,14 +78,14 @@ public sealed class EpisodeNodeBuilder
 
     private void EnsureGraph(RectTransform root, string nodePrefix)
     {
-        foreach (EpisodeNodeRigSchema.NodeDef node in EpisodeNodeRigSchema.Nodes)
+        foreach (EpisodeNodeSchema.NodeDef node in EpisodeNodeSchema.Nodes)
             EnsureNode(root, nodePrefix, node);
     }
 
     private void EnsureNode(
         RectTransform root,
         string nodePrefix,
-        EpisodeNodeRigSchema.NodeDef node)
+        EpisodeNodeSchema.NodeDef node)
     {
         RectTransform parent = node.Parent.HasValue
             ? FindByName(root, WithPrefix(nodePrefix, node.Parent.Value.ToString())) as RectTransform
@@ -183,14 +183,14 @@ public sealed class EpisodeNodeBuilder
             rt.gameObject.AddComponent<TextMeshProUGUI>();
     }
 
-    private Dictionary<EpisodeNodeRigSchema.Refs, RectTransform> CollectRefMap(
+    private Dictionary<EpisodeNodeSchema.Refs, RectTransform> CollectRefMap(
         RectTransform rigRoot,
         string nodePrefix)
     {
-        Dictionary<EpisodeNodeRigSchema.Refs, RectTransform> map =
-            new Dictionary<EpisodeNodeRigSchema.Refs, RectTransform>();
+        Dictionary<EpisodeNodeSchema.Refs, RectTransform> map =
+            new Dictionary<EpisodeNodeSchema.Refs, RectTransform>();
 
-        foreach (EpisodeNodeRigSchema.Refs id in Enum.GetValues(typeof(EpisodeNodeRigSchema.Refs)))
+        foreach (EpisodeNodeSchema.Refs id in Enum.GetValues(typeof(EpisodeNodeSchema.Refs)))
         {
             string targetName = WithPrefix(nodePrefix, id.ToString());
             Transform found = FindByName(rigRoot, targetName);
@@ -204,28 +204,28 @@ public sealed class EpisodeNodeBuilder
 
     private EpisodeNodeRefs BuildRefs(
         RectTransform rigRoot,
-        Dictionary<EpisodeNodeRigSchema.Refs, RectTransform> map)
+        Dictionary<EpisodeNodeSchema.Refs, RectTransform> map)
     {
         EpisodeNodeRefs refs = new EpisodeNodeRefs(rigRoot);
 
-        refs.MainCard_Root = GetRt(map, EpisodeNodeRigSchema.Refs.MainCard_Root, rigRoot);
-        refs.MainCardBG_Image = GetImage(map, EpisodeNodeRigSchema.Refs.MainCardBG_Image, rigRoot);
+        refs.MainCard_Root = GetRt(map, EpisodeNodeSchema.Refs.MainCard_Root, rigRoot);
+        refs.MainCardBG_Image = GetImage(map, EpisodeNodeSchema.Refs.MainCardBG_Image, rigRoot);
 
-        refs.MainCardIndex_Root = GetRt(map, EpisodeNodeRigSchema.Refs.MainCardIndex_Root, rigRoot);
-        refs.MainCardIndexText_Text = GetText(map, EpisodeNodeRigSchema.Refs.MainCardIndexText_Text, rigRoot);
-        refs.MainCardIndexIcon_Image = GetImage(map, EpisodeNodeRigSchema.Refs.MainCardIndexIcon_Image, rigRoot);
+        refs.MainCardIndex_Root = GetRt(map, EpisodeNodeSchema.Refs.MainCardIndex_Root, rigRoot);
+        refs.MainCardIndexText_Text = GetText(map, EpisodeNodeSchema.Refs.MainCardIndexText_Text, rigRoot);
+        refs.MainCardIndexIcon_Image = GetImage(map, EpisodeNodeSchema.Refs.MainCardIndexIcon_Image, rigRoot);
 
-        refs.MainCardTitle_Root = GetRt(map, EpisodeNodeRigSchema.Refs.MainCardTitle_Root, rigRoot);
-        refs.MainCardTitle_Text = GetText(map, EpisodeNodeRigSchema.Refs.MainCardTitle_Text, rigRoot);
+        refs.MainCardTitle_Root = GetRt(map, EpisodeNodeSchema.Refs.MainCardTitle_Root, rigRoot);
+        refs.MainCardTitle_Text = GetText(map, EpisodeNodeSchema.Refs.MainCardTitle_Text, rigRoot);
 
-        refs.MainCardHit_Button = GetButton(map, EpisodeNodeRigSchema.Refs.MainCardHit_Button, rigRoot);
+        refs.MainCardHit_Button = GetButton(map, EpisodeNodeSchema.Refs.MainCardHit_Button, rigRoot);
 
         return refs;
     }
 
     private RectTransform GetRt(
-        Dictionary<EpisodeNodeRigSchema.Refs, RectTransform> map,
-        EpisodeNodeRigSchema.Refs key,
+        Dictionary<EpisodeNodeSchema.Refs, RectTransform> map,
+        EpisodeNodeSchema.Refs key,
         Object context)
     {
         if (!map.TryGetValue(key, out RectTransform rt) || rt == null)
@@ -238,8 +238,8 @@ public sealed class EpisodeNodeBuilder
     }
 
     private Image GetImage(
-        Dictionary<EpisodeNodeRigSchema.Refs, RectTransform> map,
-        EpisodeNodeRigSchema.Refs key,
+        Dictionary<EpisodeNodeSchema.Refs, RectTransform> map,
+        EpisodeNodeSchema.Refs key,
         Object context)
     {
         RectTransform rt = GetRt(map, key, context);
@@ -256,8 +256,8 @@ public sealed class EpisodeNodeBuilder
     }
 
     private Button GetButton(
-        Dictionary<EpisodeNodeRigSchema.Refs, RectTransform> map,
-        EpisodeNodeRigSchema.Refs key,
+        Dictionary<EpisodeNodeSchema.Refs, RectTransform> map,
+        EpisodeNodeSchema.Refs key,
         Object context)
     {
         RectTransform rt = GetRt(map, key, context);
@@ -274,8 +274,8 @@ public sealed class EpisodeNodeBuilder
     }
 
     private TMP_Text GetText(
-        Dictionary<EpisodeNodeRigSchema.Refs, RectTransform> map,
-        EpisodeNodeRigSchema.Refs key,
+        Dictionary<EpisodeNodeSchema.Refs, RectTransform> map,
+        EpisodeNodeSchema.Refs key,
         Object context)
     {
         RectTransform rt = GetRt(map, key, context);

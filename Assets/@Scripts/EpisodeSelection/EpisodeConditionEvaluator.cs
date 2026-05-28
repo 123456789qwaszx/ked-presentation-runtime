@@ -2,9 +2,9 @@ using System.Collections.Generic;
 
 public sealed class EpisodeConditionEvaluator
 {
-    private readonly EpisodeSelectionRuntimeModel _runtimeModel;
+    private readonly EpisodeSelectionRuntimeContext _runtimeModel;
 
-    public EpisodeConditionEvaluator(EpisodeSelectionRuntimeModel runtimeModel)
+    public EpisodeConditionEvaluator(EpisodeSelectionRuntimeContext runtimeModel)
     {
         _runtimeModel = runtimeModel;
     }

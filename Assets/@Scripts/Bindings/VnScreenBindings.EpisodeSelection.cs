@@ -12,12 +12,9 @@ public sealed partial class VnScreenBindings
     
     private void HandleEpisodeSelected(string episodeId)
     {
-        if (_episodeSelectionSystem.SelectionState.IsEpisodeLocked(episodeId))
+        if (!_episodeSelectionSystem.TrySelectEpisode(episodeId))
             return;
-
-        _episodeSelectionSystem.SelectionState.SelectEpisode(episodeId);
-        _episodeSelectionSystem.RenderCurrentState();
-
+        
         OpenEpisodeConfirmPanel();
     }
     #endregion

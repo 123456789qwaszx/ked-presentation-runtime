@@ -2,14 +2,14 @@ using System;
 
 public sealed class EpisodeSelectionSystem
 {
-    private readonly EpisodeSelectionRuntimeModel _runtimeModel;
+    private readonly EpisodeSelectionRuntimeContext _runtimeModel;
     private readonly EpisodeConditionEvaluator _conditionEvaluator;
 
     private readonly EpisodeGraphViewModelBuilder _viewModelBuilder;
     private readonly EpisodeGraphRenderer _episodeGraphRenderer;
 
     public EpisodeSelectionSystem(
-        EpisodeSelectionRuntimeModel runtimeModel,
+        EpisodeSelectionRuntimeContext runtimeModel,
         EpisodeConditionEvaluator conditionEvaluator,
         EpisodeGraphViewModelBuilder viewModelBuilder,
         EpisodeGraphRenderer episodeGraphRenderer)
@@ -52,9 +52,20 @@ public sealed class EpisodeSelectionSystem
         RenderCurrentState();
     }
 
-    public void RenderCurrentState()
+    private void RenderCurrentState()
     {
         EpisodeGraphViewData viewData = _viewModelBuilder.Build();
         _episodeGraphRenderer.Render(viewData);
+    }
+    
+    public bool TrySelectEpisode(string episodeId)
+    {
+        if (SelectionState.IsEpisodeLocked(episodeId))
+            return false;
+
+        SelectionState.SelectEpisode(episodeId);
+        RenderCurrentState();
+
+        return true;
     }
 }

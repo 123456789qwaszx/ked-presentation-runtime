@@ -4,10 +4,10 @@ using UnityEngine;
 
 public sealed class EpisodeGraphViewModelBuilder
 {
-    private readonly EpisodeSelectionRuntimeModel _runtimeModel;
+    private readonly EpisodeSelectionRuntimeContext _runtimeModel;
     private readonly EpisodeGraphLayoutOptions _layoutOptions;
 
-    public EpisodeGraphViewModelBuilder(EpisodeSelectionRuntimeModel runtimeModel, EpisodeGraphLayoutOptions layoutOptions)
+    public EpisodeGraphViewModelBuilder(EpisodeSelectionRuntimeContext runtimeModel, EpisodeGraphLayoutOptions layoutOptions)
     {
         _runtimeModel = runtimeModel;
         _layoutOptions = layoutOptions;

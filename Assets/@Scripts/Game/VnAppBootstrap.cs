@@ -418,7 +418,7 @@ public class VnAppBootstrap : MonoBehaviour
         EpisodeProgressionGraphDataBuilder graphDataBuilder = new();
         EpisodeProgressionRuleDataBuilder ruleDataBuilder = new();
 
-        EpisodeSelectionRuntimeModel runtimeModel = new(
+        EpisodeSelectionRuntimeContext runtimeModel = new(
             chapterEpisodeProgressionCatalog,
             chapterDataBuilder,
             graphDataBuilder,
@@ -437,6 +437,7 @@ public class VnAppBootstrap : MonoBehaviour
             viewModelBuilder,
             episodeGraphRenderer);
     }
+    
     private void InitializeEpisodePlayer()
     {
         episodePlayer.Initialize(_screenBindings, _rollbackHistory, customLinePresenter, _backlogRecorder);
