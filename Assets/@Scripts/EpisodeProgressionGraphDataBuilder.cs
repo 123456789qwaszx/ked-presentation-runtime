@@ -14,9 +14,7 @@ public sealed class EpisodeProgressionGraphDataBuilder
         return graphData;
     }
 
-    private void AddMainNodes(
-        ChapterEpisodeProgressionSO progression,
-        EpisodeGraphData graphData)
+    private void AddMainNodes(ChapterEpisodeProgressionSO progression, EpisodeGraphData graphData)
     {
         if (progression.Nodes == null)
             return;
@@ -42,9 +40,7 @@ public sealed class EpisodeProgressionGraphDataBuilder
         }
     }
 
-    private void AddMainEdges(
-        ChapterEpisodeProgressionSO progression,
-        EpisodeGraphData graphData)
+    private void AddMainEdges(ChapterEpisodeProgressionSO progression, EpisodeGraphData graphData)
     {
         if (progression.Nodes == null)
             return;

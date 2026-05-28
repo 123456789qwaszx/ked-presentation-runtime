@@ -6,13 +6,14 @@ public sealed class EpisodeSelectionSystem
 
     private readonly ChapterEpisodeProgressionCatalogSO _progressionCatalog;
     private readonly EpisodeProgressionGraphDataBuilder _graphDataBuilder;
+    private readonly EpisodeConditionEvaluator _conditionEvaluator;
 
     private readonly EpisodeGraphViewModelBuilder _viewModelBuilder;
     private readonly EpisodeGraphRenderer _episodeGraphRenderer;
     private readonly EpisodeGraphLayoutOptions _layoutOptions;
     private readonly EpisodeGraphScrollController _scrollController;
 
-    private readonly EpisodeSelectionRuntimeState _runtimeState = new();
+    private readonly EpisodeSelectionRuntimeState _runtimeState;
 
     private ChapterEpisodeProgressionSO _currentProgression;
     private EpisodeGraphData _currentGraphData;
@@ -20,6 +21,8 @@ public sealed class EpisodeSelectionSystem
     public EpisodeSelectionSystem(
         ChapterEpisodeProgressionCatalogSO progressionCatalog,
         EpisodeProgressionGraphDataBuilder graphDataBuilder,
+        EpisodeConditionEvaluator conditionEvaluator,
+        EpisodeSelectionRuntimeState runtimeState,
         EpisodeGraphViewModelBuilder viewModelBuilder,
         EpisodeGraphRenderer episodeGraphRenderer,
         EpisodeGraphLayoutOptions layoutOptions,
@@ -27,6 +30,8 @@ public sealed class EpisodeSelectionSystem
     {
         _progressionCatalog = progressionCatalog;
         _graphDataBuilder = graphDataBuilder;
+        _conditionEvaluator = conditionEvaluator;
+        _runtimeState = runtimeState;
 
         _viewModelBuilder = viewModelBuilder;
         _episodeGraphRenderer = episodeGraphRenderer;
@@ -50,6 +55,8 @@ public sealed class EpisodeSelectionSystem
 
         _currentProgression = progression;
         _currentGraphData = _graphDataBuilder.Build(progression);
+
+        _conditionEvaluator.BindProgression(progression);
 
         InitializeRuntimeStateForChapter(chapterId, progression);
 
@@ -97,7 +104,7 @@ public sealed class EpisodeSelectionSystem
         _runtimeState.SelectedEpisodeId = episodeId;
         _runtimeState.ClearedEpisodeIds.Add(episodeId);
 
-        RebuildAvailabilityState();
+        _conditionEvaluator.RebuildAvailabilityState();
 
         RequestRender();
     }
@@ -155,80 +162,6 @@ public sealed class EpisodeSelectionSystem
         if (!string.IsNullOrEmpty(progression.StartEpisodeId))
             _runtimeState.ReachableEpisodeIds.Add(progression.StartEpisodeId);
 
-        RebuildAvailabilityState();
-    }
-
-    private void RebuildAvailabilityState()
-    {
-        if (_currentProgression == null)
-            return;
-
-        _runtimeState.VisibleEpisodeIds.Clear();
-        _runtimeState.LockedEpisodeIds.Clear();
-
-        EpisodeConditionEvaluator evaluator = new EpisodeConditionEvaluator(_runtimeState);
-
-        ApplyNodeAvailability(evaluator);
-        ApplyAttachmentAvailability(evaluator);
-    }
-
-    private void ApplyNodeAvailability(EpisodeConditionEvaluator evaluator)
-    {
-        if (_currentProgression == null || _currentProgression.Nodes == null)
-            return;
-
-        for (int i = 0; i < _currentProgression.Nodes.Count; i++)
-        {
-            EpisodeNodeDefinition node = _currentProgression.Nodes[i];
-
-            if (node == null || string.IsNullOrEmpty(node.EpisodeId))
-                continue;
-
-            bool visible = evaluator.AreMet(node.VisibleConditions);
-
-            if (!visible)
-                continue;
-
-            _runtimeState.VisibleEpisodeIds.Add(node.EpisodeId);
-
-            bool unlocked = evaluator.AreMet(node.UnlockConditions);
-
-            if (!unlocked)
-                _runtimeState.LockedEpisodeIds.Add(node.EpisodeId);
-        }
-    }
-
-    private void ApplyAttachmentAvailability(EpisodeConditionEvaluator evaluator)
-    {
-        if (_currentProgression == null || _currentProgression.Nodes == null)
-            return;
-
-        for (int i = 0; i < _currentProgression.Nodes.Count; i++)
-        {
-            EpisodeNodeDefinition node = _currentProgression.Nodes[i];
-
-            if (node == null || node.Attachments == null)
-                continue;
-
-            for (int j = 0; j < node.Attachments.Count; j++)
-            {
-                EpisodeAttachmentDefinition attachment = node.Attachments[j];
-
-                if (attachment == null || string.IsNullOrEmpty(attachment.AttachmentId))
-                    continue;
-
-                bool visible = evaluator.AreMet(attachment.VisibleConditions);
-
-                if (!visible)
-                    continue;
-
-                _runtimeState.VisibleEpisodeIds.Add(attachment.AttachmentId);
-
-                bool unlocked = evaluator.AreMet(attachment.UnlockConditions);
-
-                if (!unlocked)
-                    _runtimeState.LockedEpisodeIds.Add(attachment.AttachmentId);
-            }
-        }
+        _conditionEvaluator.RebuildAvailabilityState();
     }
 }
