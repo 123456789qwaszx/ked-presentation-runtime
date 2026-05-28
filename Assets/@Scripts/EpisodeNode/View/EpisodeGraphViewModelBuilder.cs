@@ -4,15 +4,30 @@ using UnityEngine;
 
 public sealed class EpisodeGraphViewModelBuilder
 {
+    private readonly EpisodeSelectionRuntimeModel _runtimeModel;
+
+    public EpisodeGraphViewModelBuilder(EpisodeSelectionRuntimeModel runtimeModel)
+    {
+        _runtimeModel = runtimeModel;
+    }
+
     public EpisodeGraphViewData Build(
         EpisodeGraphData graphData,
-        EpisodeSelectionRuntimeModel runtimeState,
         EpisodeGraphLayoutOptions options)
     {
         EpisodeGraphViewData viewData = new();
 
         if (graphData == null)
             return viewData;
+
+        if (_runtimeModel == null)
+            return viewData;
+
+        if (_runtimeModel.State == null)
+            return viewData;
+
+        if (options == null)
+            options = EpisodeGraphLayoutOptions.Compact();
 
         Dictionary<string, Vector2> positions = CalculatePositions(graphData, options);
 
@@ -23,8 +38,8 @@ public sealed class EpisodeGraphViewModelBuilder
             if (node == null || string.IsNullOrEmpty(node.Id))
                 continue;
 
-            if (runtimeState.VisibleEpisodeIds.Count > 0 &&
-                !runtimeState.VisibleEpisodeIds.Contains(node.Id))
+            if (_runtimeModel.State.VisibleEpisodeIds.Count > 0 &&
+                !_runtimeModel.State.VisibleEpisodeIds.Contains(node.Id))
             {
                 continue;
             }
@@ -38,7 +53,7 @@ public sealed class EpisodeGraphViewModelBuilder
                     ? pos
                     : Vector2.zero,
                 Size = options.NodeSize,
-                VisualState = ResolveVisualState(node.Id, runtimeState),
+                VisualState = ResolveVisualState(node.Id),
             };
 
             viewData.Nodes.Add(nodeViewData);
@@ -48,17 +63,17 @@ public sealed class EpisodeGraphViewModelBuilder
         return viewData;
     }
 
-    private EpisodeNodeVisualState ResolveVisualState(
-        string episodeId,
-        EpisodeSelectionRuntimeModel state)
+    private EpisodeNodeVisualState ResolveVisualState(string episodeId)
     {
+        EpisodeSelectionStateData state = _runtimeModel.State;
+
         if (state.LockedEpisodeIds.Contains(episodeId))
             return EpisodeNodeVisualState.Locked;
 
-        if (state.SelectedEpisodeId == episodeId)
+        if (string.Equals(state.SelectedEpisodeId, episodeId, StringComparison.Ordinal))
             return EpisodeNodeVisualState.Selected;
 
-        if (state.CurrentEpisodeId == episodeId)
+        if (string.Equals(state.CurrentEpisodeId, episodeId, StringComparison.Ordinal))
             return EpisodeNodeVisualState.Current;
 
         if (state.ClearedEpisodeIds.Contains(episodeId))

@@ -44,7 +44,6 @@ public sealed class EpisodeSelectionSystem
         RenderCurrentState();
         return true;
     }
-
     private void RenderCurrentState()
     {
         if (_runtimeModel == null)
@@ -55,12 +54,11 @@ public sealed class EpisodeSelectionSystem
 
         EpisodeGraphViewData viewData = _viewModelBuilder.Build(
             _runtimeModel.CurrentGraphData,
-            _runtimeModel,
             _layoutOptions);
 
         _episodeGraphRenderer.Render(viewData);
 
-        string selected = _runtimeModel.SelectedEpisodeId;
+        string selected = _runtimeModel.State.SelectedEpisodeId;
 
         if (!string.IsNullOrEmpty(selected) &&
             viewData.TryGetNode(selected, out EpisodeNodeViewData node))

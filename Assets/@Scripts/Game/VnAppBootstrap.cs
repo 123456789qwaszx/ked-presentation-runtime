@@ -422,7 +422,7 @@ public class VnAppBootstrap : MonoBehaviour
 
         EpisodeConditionEvaluator conditionEvaluator = new(runtimeModel);
 
-        EpisodeGraphViewModelBuilder viewModelBuilder = new();
+        EpisodeGraphViewModelBuilder viewModelBuilder = new(runtimeModel);
         EpisodeGraphRenderer episodeGraphRenderer = new(nodeRigPrefab);
         EpisodeGraphLayoutOptions layoutOptions = EpisodeGraphLayoutOptions.Compact();
         EpisodeGraphScrollController scrollController = new();

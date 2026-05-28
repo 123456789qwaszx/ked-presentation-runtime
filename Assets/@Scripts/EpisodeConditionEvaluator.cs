@@ -14,16 +14,17 @@ public sealed class EpisodeConditionEvaluator
         if (_runtimeModel == null)
             return;
 
-        ChapterEpisodeProgressionSO progression = _runtimeModel.CurrentProgression;
-
-        if (progression == null)
+        if (_runtimeModel.State == null)
             return;
 
-        _runtimeModel.VisibleEpisodeIds.Clear();
-        _runtimeModel.LockedEpisodeIds.Clear();
+        if (_runtimeModel.ProgressionRules == null)
+            return;
 
-        ApplyNodeAvailability(progression);
-        ApplyAttachmentAvailability(progression);
+        _runtimeModel.State.VisibleEpisodeIds.Clear();
+        _runtimeModel.State.LockedEpisodeIds.Clear();
+
+        ApplyNodeAvailability();
+        ApplyAttachmentAvailability();
     }
 
     public bool AreMet(List<EpisodeCondition> conditions)
@@ -40,73 +41,86 @@ public sealed class EpisodeConditionEvaluator
         return true;
     }
 
-    private void ApplyNodeAvailability(ChapterEpisodeProgressionSO progression)
+    private void ApplyNodeAvailability()
     {
-        if (progression.Nodes == null)
+        List<EpisodeNodeRuleData> nodeRules =
+            _runtimeModel.ProgressionRules.NodeRules;
+
+        if (nodeRules == null)
             return;
 
-        for (int i = 0; i < progression.Nodes.Count; i++)
+        for (int i = 0; i < nodeRules.Count; i++)
         {
-            EpisodeNodeDefinition node = progression.Nodes[i];
+            EpisodeNodeRuleData rule = nodeRules[i];
 
-            if (node == null || string.IsNullOrEmpty(node.EpisodeId))
+            if (rule == null)
                 continue;
 
-            bool visible = AreMet(node.VisibleConditions);
-
-            if (!visible)
+            if (rule.Kind != EpisodeNodeKind.Main)
                 continue;
 
-            _runtimeModel.VisibleEpisodeIds.Add(node.EpisodeId);
-
-            bool unlocked = AreMet(node.UnlockConditions);
-
-            if (!unlocked)
-                _runtimeModel.LockedEpisodeIds.Add(node.EpisodeId);
+            ApplyAvailability(rule.EpisodeId, rule.VisibleConditions, rule.UnlockConditions);
         }
     }
 
-    private void ApplyAttachmentAvailability(ChapterEpisodeProgressionSO progression)
+    private void ApplyAttachmentAvailability()
     {
-        if (progression.Nodes == null)
+        List<EpisodeNodeRuleData> nodeRules =
+            _runtimeModel.ProgressionRules.NodeRules;
+
+        if (nodeRules == null)
             return;
 
-        for (int i = 0; i < progression.Nodes.Count; i++)
+        for (int i = 0; i < nodeRules.Count; i++)
         {
-            EpisodeNodeDefinition node = progression.Nodes[i];
+            EpisodeNodeRuleData rule = nodeRules[i];
 
-            if (node == null || node.Attachments == null)
+            if (rule == null || rule.Attachments == null)
                 continue;
 
-            for (int j = 0; j < node.Attachments.Count; j++)
+            for (int j = 0; j < rule.Attachments.Count; j++)
             {
-                EpisodeAttachmentDefinition attachment = node.Attachments[j];
+                EpisodeAttachmentRuleData attachment = rule.Attachments[j];
 
-                if (attachment == null || string.IsNullOrEmpty(attachment.AttachmentId))
+                if (attachment == null)
                     continue;
 
-                bool visible = AreMet(attachment.VisibleConditions);
-
-                if (!visible)
-                    continue;
-
-                _runtimeModel.VisibleEpisodeIds.Add(attachment.AttachmentId);
-
-                bool unlocked = AreMet(attachment.UnlockConditions);
-
-                if (!unlocked)
-                    _runtimeModel.LockedEpisodeIds.Add(attachment.AttachmentId);
+                ApplyAvailability(
+                    attachment.AttachmentId,
+                    attachment.VisibleConditions,
+                    attachment.UnlockConditions);
             }
         }
+    }
+
+    private void ApplyAvailability(
+        string episodeId,
+        List<EpisodeCondition> visibleConditions,
+        List<EpisodeCondition> unlockConditions)
+    {
+        if (string.IsNullOrEmpty(episodeId))
+            return;
+
+        bool visible = AreMet(visibleConditions);
+
+        if (!visible)
+            return;
+
+        _runtimeModel.State.VisibleEpisodeIds.Add(episodeId);
+
+        bool reachable = _runtimeModel.State.ReachableEpisodeIds.Count == 0 ||
+                         _runtimeModel.State.ReachableEpisodeIds.Contains(episodeId);
+
+        bool unlocked = AreMet(unlockConditions);
+
+        if (!reachable || !unlocked)
+            _runtimeModel.State.LockedEpisodeIds.Add(episodeId);
     }
 
     private bool IsMet(EpisodeCondition condition)
     {
         if (condition == null)
             return true;
-
-        if (_runtimeModel == null)
-            return false;
 
         switch (condition.Kind)
         {
@@ -118,17 +132,17 @@ public sealed class EpisodeConditionEvaluator
 
             case EpisodeConditionKind.EpisodeCleared:
                 return EvaluateExists(
-                    _runtimeModel.ClearedEpisodeIds.Contains(condition.Key),
+                    _runtimeModel.State.ClearedEpisodeIds.Contains(condition.Key),
                     condition.Op);
 
             case EpisodeConditionKind.ChapterCleared:
                 return EvaluateExists(
-                    _runtimeModel.ClearedChapterIds.Contains(condition.Key),
+                    _runtimeModel.State.ClearedChapterIds.Contains(condition.Key),
                     condition.Op);
 
             case EpisodeConditionKind.Token:
                 return EvaluateExists(
-                    _runtimeModel.Tokens.Contains(condition.Key),
+                    _runtimeModel.State.Tokens.Contains(condition.Key),
                     condition.Op);
 
             default:
@@ -138,7 +152,9 @@ public sealed class EpisodeConditionEvaluator
 
     private bool EvaluateFlag(EpisodeCondition condition)
     {
-        bool exists = _runtimeModel.Flags.TryGetValue(condition.Key, out bool actualValue);
+        bool exists = _runtimeModel.State.Flags.TryGetValue(
+            condition.Key,
+            out bool value);
 
         switch (condition.Op)
         {
@@ -149,10 +165,10 @@ public sealed class EpisodeConditionEvaluator
                 return !exists;
 
             case EpisodeCompareOp.Equal:
-                return exists && actualValue == condition.BoolValue;
+                return exists && value == condition.BoolValue;
 
             case EpisodeCompareOp.NotEqual:
-                return !exists || actualValue != condition.BoolValue;
+                return !exists || value != condition.BoolValue;
 
             default:
                 return false;
@@ -161,7 +177,9 @@ public sealed class EpisodeConditionEvaluator
 
     private bool EvaluateStat(EpisodeCondition condition)
     {
-        bool exists = _runtimeModel.Stats.TryGetValue(condition.Key, out int actualValue);
+        bool exists = _runtimeModel.State.Stats.TryGetValue(
+            condition.Key,
+            out int value);
 
         switch (condition.Op)
         {
@@ -172,16 +190,16 @@ public sealed class EpisodeConditionEvaluator
                 return !exists;
 
             case EpisodeCompareOp.Equal:
-                return exists && actualValue == condition.IntValue;
+                return exists && value == condition.IntValue;
 
             case EpisodeCompareOp.NotEqual:
-                return !exists || actualValue != condition.IntValue;
+                return !exists || value != condition.IntValue;
 
             case EpisodeCompareOp.GreaterOrEqual:
-                return exists && actualValue >= condition.IntValue;
+                return exists && value >= condition.IntValue;
 
             case EpisodeCompareOp.LessOrEqual:
-                return exists && actualValue <= condition.IntValue;
+                return exists && value <= condition.IntValue;
 
             default:
                 return false;
@@ -193,10 +211,14 @@ public sealed class EpisodeConditionEvaluator
         switch (op)
         {
             case EpisodeCompareOp.Exists:
-            case EpisodeCompareOp.Equal:
                 return exists;
 
             case EpisodeCompareOp.NotExists:
+                return !exists;
+
+            case EpisodeCompareOp.Equal:
+                return exists;
+
             case EpisodeCompareOp.NotEqual:
                 return !exists;
 
