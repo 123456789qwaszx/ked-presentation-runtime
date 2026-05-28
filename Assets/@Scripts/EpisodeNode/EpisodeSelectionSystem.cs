@@ -4,8 +4,7 @@ public sealed class EpisodeSelectionSystem
 {
     public event Action<string> EpisodeRequested;
 
-    private readonly ChapterEpisodeProgressionCatalogSO _progressionCatalog;
-    private readonly EpisodeProgressionGraphDataBuilder _graphDataBuilder;
+    private readonly EpisodeSelectionRuntimeModel _runtimeModel;
     private readonly EpisodeConditionEvaluator _conditionEvaluator;
 
     private readonly EpisodeGraphViewModelBuilder _viewModelBuilder;
@@ -13,25 +12,16 @@ public sealed class EpisodeSelectionSystem
     private readonly EpisodeGraphLayoutOptions _layoutOptions;
     private readonly EpisodeGraphScrollController _scrollController;
 
-    private readonly EpisodeSelectionRuntimeState _runtimeState;
-
-    private ChapterEpisodeProgressionSO _currentProgression;
-    private EpisodeGraphData _currentGraphData;
-
     public EpisodeSelectionSystem(
-        ChapterEpisodeProgressionCatalogSO progressionCatalog,
-        EpisodeProgressionGraphDataBuilder graphDataBuilder,
+        EpisodeSelectionRuntimeModel runtimeModel,
         EpisodeConditionEvaluator conditionEvaluator,
-        EpisodeSelectionRuntimeState runtimeState,
         EpisodeGraphViewModelBuilder viewModelBuilder,
         EpisodeGraphRenderer episodeGraphRenderer,
         EpisodeGraphLayoutOptions layoutOptions,
         EpisodeGraphScrollController scrollController)
     {
-        _progressionCatalog = progressionCatalog;
-        _graphDataBuilder = graphDataBuilder;
+        _runtimeModel = runtimeModel;
         _conditionEvaluator = conditionEvaluator;
-        _runtimeState = runtimeState;
 
         _viewModelBuilder = viewModelBuilder;
         _episodeGraphRenderer = episodeGraphRenderer;
@@ -43,40 +33,34 @@ public sealed class EpisodeSelectionSystem
 
     public bool DrawEpisodeNodes(int chapterId)
     {
-        if (_progressionCatalog == null)
+        if (_runtimeModel == null)
             return false;
 
-        if (!_progressionCatalog.TryGetProgression(
-                chapterId,
-                out ChapterEpisodeProgressionSO progression))
-        {
+        if (!_runtimeModel.OpenChapter(chapterId))
             return false;
-        }
 
-        _currentProgression = progression;
-        _currentGraphData = _graphDataBuilder.Build(progression);
+        _conditionEvaluator.RebuildAvailabilityState();
 
-        _conditionEvaluator.BindProgression(progression);
-
-        InitializeRuntimeStateForChapter(chapterId, progression);
-
-        RequestRender();
+        RenderCurrentState();
         return true;
     }
 
-    private void RequestRender()
+    private void RenderCurrentState()
     {
-        if (_currentGraphData == null)
+        if (_runtimeModel == null)
+            return;
+
+        if (_runtimeModel.CurrentGraphData == null)
             return;
 
         EpisodeGraphViewData viewData = _viewModelBuilder.Build(
-            _currentGraphData,
-            _runtimeState,
+            _runtimeModel.CurrentGraphData,
+            _runtimeModel,
             _layoutOptions);
 
         _episodeGraphRenderer.Render(viewData);
 
-        string selected = _runtimeState.SelectedEpisodeId;
+        string selected = _runtimeModel.SelectedEpisodeId;
 
         if (!string.IsNullOrEmpty(selected) &&
             viewData.TryGetNode(selected, out EpisodeNodeViewData node))
@@ -91,8 +75,12 @@ public sealed class EpisodeSelectionSystem
 
     public bool TryGetSelectedEpisodeId(out string episodeId)
     {
-        episodeId = _runtimeState.SelectedEpisodeId;
-        return !string.IsNullOrEmpty(episodeId);
+        episodeId = "";
+
+        if (_runtimeModel == null)
+            return false;
+
+        return _runtimeModel.TryGetSelectedEpisodeId(out episodeId);
     }
 
     public void RequestCompleteEpisode(string episodeId)
@@ -100,35 +88,28 @@ public sealed class EpisodeSelectionSystem
         if (string.IsNullOrEmpty(episodeId))
             return;
 
-        _runtimeState.CurrentEpisodeId = episodeId;
-        _runtimeState.SelectedEpisodeId = episodeId;
-        _runtimeState.ClearedEpisodeIds.Add(episodeId);
+        if (_runtimeModel == null)
+            return;
+
+        _runtimeModel.CompleteEpisode(episodeId);
 
         _conditionEvaluator.RebuildAvailabilityState();
 
-        RequestRender();
+        RenderCurrentState();
     }
 
-    public bool TryGetDialogueEntryId(string episodeId, out string dialogueEntryId)
+    public bool TryGetDialogueEntryId(
+        string episodeId,
+        out string dialogueEntryId)
     {
         dialogueEntryId = "";
 
-        if (string.IsNullOrEmpty(episodeId))
+        if (_runtimeModel == null)
             return false;
 
-        if (_currentGraphData == null)
-            return false;
-
-        EpisodeGraphNodeData node = _currentGraphData.FindNode(episodeId);
-
-        if (node == null)
-            return false;
-
-        if (string.IsNullOrWhiteSpace(node.DialogueEntryId))
-            return false;
-
-        dialogueEntryId = node.DialogueEntryId;
-        return true;
+        return _runtimeModel.TryGetDialogueEntryId(
+            episodeId,
+            out dialogueEntryId);
     }
 
     private void RequestSelectEpisode(string episodeId)
@@ -136,32 +117,16 @@ public sealed class EpisodeSelectionSystem
         if (string.IsNullOrEmpty(episodeId))
             return;
 
-        if (_runtimeState.LockedEpisodeIds.Contains(episodeId))
+        if (_runtimeModel == null)
             return;
 
-        _runtimeState.SelectedEpisodeId = episodeId;
+        if (_runtimeModel.IsEpisodeLocked(episodeId))
+            return;
 
-        RequestRender();
+        _runtimeModel.SelectEpisode(episodeId);
+
+        RenderCurrentState();
 
         EpisodeRequested?.Invoke(episodeId);
-    }
-
-    private void InitializeRuntimeStateForChapter(
-        int chapterId,
-        ChapterEpisodeProgressionSO progression)
-    {
-        _runtimeState.CurrentChapterId = chapterId;
-
-        _runtimeState.SelectedEpisodeId = progression.StartEpisodeId;
-        _runtimeState.CurrentEpisodeId = progression.StartEpisodeId;
-
-        _runtimeState.VisibleEpisodeIds.Clear();
-        _runtimeState.LockedEpisodeIds.Clear();
-        _runtimeState.ReachableEpisodeIds.Clear();
-
-        if (!string.IsNullOrEmpty(progression.StartEpisodeId))
-            _runtimeState.ReachableEpisodeIds.Add(progression.StartEpisodeId);
-
-        _conditionEvaluator.RebuildAvailabilityState();
     }
 }

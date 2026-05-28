@@ -414,10 +414,13 @@ public class VnAppBootstrap : MonoBehaviour
 
     private void BootstrapEpisodeSelectionRuntime()
     {
-        EpisodeSelectionRuntimeState runtimeState = new();
-        EpisodeConditionEvaluator conditionEvaluator = new(runtimeState);
-
         EpisodeProgressionGraphDataBuilder graphDataBuilder = new();
+
+        EpisodeSelectionRuntimeModel runtimeModel = new(
+            chapterEpisodeProgressionCatalog,
+            graphDataBuilder);
+
+        EpisodeConditionEvaluator conditionEvaluator = new(runtimeModel);
 
         EpisodeGraphViewModelBuilder viewModelBuilder = new();
         EpisodeGraphRenderer episodeGraphRenderer = new(nodeRigPrefab);
@@ -425,10 +428,8 @@ public class VnAppBootstrap : MonoBehaviour
         EpisodeGraphScrollController scrollController = new();
 
         _episodeSelectionSystem = new EpisodeSelectionSystem(
-            chapterEpisodeProgressionCatalog,
-            graphDataBuilder,
+            runtimeModel,
             conditionEvaluator,
-            runtimeState,
             viewModelBuilder,
             episodeGraphRenderer,
             layoutOptions,

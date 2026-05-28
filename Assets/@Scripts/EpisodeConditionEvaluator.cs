@@ -2,30 +2,28 @@ using System.Collections.Generic;
 
 public sealed class EpisodeConditionEvaluator
 {
-    private readonly EpisodeSelectionRuntimeState _state;
+    private readonly EpisodeSelectionRuntimeModel _runtimeModel;
 
-    private ChapterEpisodeProgressionSO _currentProgression;
-
-    public EpisodeConditionEvaluator(EpisodeSelectionRuntimeState state)
+    public EpisodeConditionEvaluator(EpisodeSelectionRuntimeModel runtimeModel)
     {
-        _state = state;
-    }
-
-    public void BindProgression(ChapterEpisodeProgressionSO progression)
-    {
-        _currentProgression = progression;
+        _runtimeModel = runtimeModel;
     }
 
     public void RebuildAvailabilityState()
     {
-        if (_currentProgression == null || _state == null)
+        if (_runtimeModel == null)
             return;
 
-        _state.VisibleEpisodeIds.Clear();
-        _state.LockedEpisodeIds.Clear();
+        ChapterEpisodeProgressionSO progression = _runtimeModel.CurrentProgression;
 
-        ApplyNodeAvailability();
-        ApplyAttachmentAvailability();
+        if (progression == null)
+            return;
+
+        _runtimeModel.VisibleEpisodeIds.Clear();
+        _runtimeModel.LockedEpisodeIds.Clear();
+
+        ApplyNodeAvailability(progression);
+        ApplyAttachmentAvailability(progression);
     }
 
     public bool AreMet(List<EpisodeCondition> conditions)
@@ -42,14 +40,14 @@ public sealed class EpisodeConditionEvaluator
         return true;
     }
 
-    private void ApplyNodeAvailability()
+    private void ApplyNodeAvailability(ChapterEpisodeProgressionSO progression)
     {
-        if (_currentProgression.Nodes == null)
+        if (progression.Nodes == null)
             return;
 
-        for (int i = 0; i < _currentProgression.Nodes.Count; i++)
+        for (int i = 0; i < progression.Nodes.Count; i++)
         {
-            EpisodeNodeDefinition node = _currentProgression.Nodes[i];
+            EpisodeNodeDefinition node = progression.Nodes[i];
 
             if (node == null || string.IsNullOrEmpty(node.EpisodeId))
                 continue;
@@ -59,23 +57,23 @@ public sealed class EpisodeConditionEvaluator
             if (!visible)
                 continue;
 
-            _state.VisibleEpisodeIds.Add(node.EpisodeId);
+            _runtimeModel.VisibleEpisodeIds.Add(node.EpisodeId);
 
             bool unlocked = AreMet(node.UnlockConditions);
 
             if (!unlocked)
-                _state.LockedEpisodeIds.Add(node.EpisodeId);
+                _runtimeModel.LockedEpisodeIds.Add(node.EpisodeId);
         }
     }
 
-    private void ApplyAttachmentAvailability()
+    private void ApplyAttachmentAvailability(ChapterEpisodeProgressionSO progression)
     {
-        if (_currentProgression.Nodes == null)
+        if (progression.Nodes == null)
             return;
 
-        for (int i = 0; i < _currentProgression.Nodes.Count; i++)
+        for (int i = 0; i < progression.Nodes.Count; i++)
         {
-            EpisodeNodeDefinition node = _currentProgression.Nodes[i];
+            EpisodeNodeDefinition node = progression.Nodes[i];
 
             if (node == null || node.Attachments == null)
                 continue;
@@ -92,12 +90,12 @@ public sealed class EpisodeConditionEvaluator
                 if (!visible)
                     continue;
 
-                _state.VisibleEpisodeIds.Add(attachment.AttachmentId);
+                _runtimeModel.VisibleEpisodeIds.Add(attachment.AttachmentId);
 
                 bool unlocked = AreMet(attachment.UnlockConditions);
 
                 if (!unlocked)
-                    _state.LockedEpisodeIds.Add(attachment.AttachmentId);
+                    _runtimeModel.LockedEpisodeIds.Add(attachment.AttachmentId);
             }
         }
     }
@@ -107,7 +105,7 @@ public sealed class EpisodeConditionEvaluator
         if (condition == null)
             return true;
 
-        if (_state == null)
+        if (_runtimeModel == null)
             return false;
 
         switch (condition.Kind)
@@ -120,17 +118,17 @@ public sealed class EpisodeConditionEvaluator
 
             case EpisodeConditionKind.EpisodeCleared:
                 return EvaluateExists(
-                    _state.ClearedEpisodeIds.Contains(condition.Key),
+                    _runtimeModel.ClearedEpisodeIds.Contains(condition.Key),
                     condition.Op);
 
             case EpisodeConditionKind.ChapterCleared:
                 return EvaluateExists(
-                    _state.ClearedChapterIds.Contains(condition.Key),
+                    _runtimeModel.ClearedChapterIds.Contains(condition.Key),
                     condition.Op);
 
             case EpisodeConditionKind.Token:
                 return EvaluateExists(
-                    _state.Tokens.Contains(condition.Key),
+                    _runtimeModel.Tokens.Contains(condition.Key),
                     condition.Op);
 
             default:
@@ -140,7 +138,7 @@ public sealed class EpisodeConditionEvaluator
 
     private bool EvaluateFlag(EpisodeCondition condition)
     {
-        bool exists = _state.Flags.TryGetValue(condition.Key, out bool actualValue);
+        bool exists = _runtimeModel.Flags.TryGetValue(condition.Key, out bool actualValue);
 
         switch (condition.Op)
         {
@@ -163,7 +161,7 @@ public sealed class EpisodeConditionEvaluator
 
     private bool EvaluateStat(EpisodeCondition condition)
     {
-        bool exists = _state.Stats.TryGetValue(condition.Key, out int actualValue);
+        bool exists = _runtimeModel.Stats.TryGetValue(condition.Key, out int actualValue);
 
         switch (condition.Op)
         {

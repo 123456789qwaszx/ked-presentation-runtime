@@ -6,7 +6,7 @@ public sealed class EpisodeGraphViewModelBuilder
 {
     public EpisodeGraphViewData Build(
         EpisodeGraphData graphData,
-        EpisodeSelectionRuntimeState runtimeState,
+        EpisodeSelectionRuntimeModel runtimeState,
         EpisodeGraphLayoutOptions options)
     {
         EpisodeGraphViewData viewData = new();
@@ -50,7 +50,7 @@ public sealed class EpisodeGraphViewModelBuilder
 
     private EpisodeNodeVisualState ResolveVisualState(
         string episodeId,
-        EpisodeSelectionRuntimeState state)
+        EpisodeSelectionRuntimeModel state)
     {
         if (state.LockedEpisodeIds.Contains(episodeId))
             return EpisodeNodeVisualState.Locked;
