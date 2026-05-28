@@ -1,12 +1,9 @@
 public sealed class EpisodeProgressionRuntimeStateApplier
 {
-    public void Apply(
-        ChapterEpisodeProgressionSO progression,
-        EpisodeSelectionRuntimeState state)
-    {
-        if (progression == null || state == null)
-            return;
-
+    public void Apply(ChapterEpisodeProgressionSO progression, EpisodeSelectionRuntimeState state) 
+    { 
+        if (progression == null || state == null) return;
+        
         state.VisibleEpisodeIds.Clear();
         state.LockedEpisodeIds.Clear();
 
@@ -16,14 +13,8 @@ public sealed class EpisodeProgressionRuntimeStateApplier
         ApplyAttachments(progression, state, evaluator);
     }
 
-    private void ApplyNodes(
-        ChapterEpisodeProgressionSO progression,
-        EpisodeSelectionRuntimeState state,
-        EpisodeConditionEvaluator evaluator)
+    private void ApplyNodes(ChapterEpisodeProgressionSO progression, EpisodeSelectionRuntimeState state, EpisodeConditionEvaluator evaluator)
     {
-        if (progression.Nodes == null)
-            return;
-
         for (int i = 0; i < progression.Nodes.Count; i++)
         {
             EpisodeNodeDefinition node = progression.Nodes[i];
@@ -45,14 +36,8 @@ public sealed class EpisodeProgressionRuntimeStateApplier
         }
     }
 
-    private void ApplyAttachments(
-        ChapterEpisodeProgressionSO progression,
-        EpisodeSelectionRuntimeState state,
-        EpisodeConditionEvaluator evaluator)
+    private void ApplyAttachments(ChapterEpisodeProgressionSO progression, EpisodeSelectionRuntimeState state, EpisodeConditionEvaluator evaluator)
     {
-        if (progression.Nodes == null)
-            return;
-
         for (int i = 0; i < progression.Nodes.Count; i++)
         {
             EpisodeNodeDefinition node = progression.Nodes[i];

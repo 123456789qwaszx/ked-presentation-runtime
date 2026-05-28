@@ -36,8 +36,8 @@ public sealed class EpisodeConditionEvaluator
                     condition.Op);
 
             default:
-                // 지금 기존 RuntimeState에는 Flag / Stat / Token / ChapterCleared가 아직 없다.
-                // 우선은 미지원 조건은 false로 두는 게 안전하다.
+                // 현재 RuntimeState는 Flag / Stat / Token / ChapterCleared 부재.
+                // 미지원 조건은 false
                 return false;
         }
     }

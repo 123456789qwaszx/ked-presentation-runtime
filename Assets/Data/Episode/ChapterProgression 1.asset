@@ -14,17 +14,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ChapterEpisodeProgressionSO
   ChapterId: 1
   DisplayName: cqwe1
-  StartEpisodeId: new_episode
+  StartEpisodeId: custom1
   Nodes:
-  - EpisodeId: new_episode
-    Title: New Episode
+  - EpisodeId: custom1
+    Title: "\uC7A0\uC774 \uB0B4\uB9AC\uB294 "
     IndexText: 
     Kind: 0
     DialogueEntryId: qwe
     VisibleConditions: []
     UnlockConditions: []
     NextOptions:
-    - TargetEpisodeId: new_episode_2
+    - TargetEpisodeId: custom2
       ChoiceLabel: 
       Conditions: []
       HideWhenLocked: 0
@@ -33,8 +33,8 @@ MonoBehaviour:
     IsChapterEndingCandidate: 0
     EndingKey: 
     DesignerNote: 
-  - EpisodeId: new_episode_2
-    Title: New Episode
+  - EpisodeId: custom2
+    Title: "\uC0B0\uC131\uBE44"
     IndexText: 
     Kind: 0
     DialogueEntryId: rrww
@@ -51,7 +51,7 @@ MonoBehaviour:
     EndingKey: 
     DesignerNote: 
   - EpisodeId: new_episode_3
-    Title: New Episode
+    Title: "\uC78A\uD600\uC9C4 \uAFC8"
     IndexText: 
     Kind: 0
     DialogueEntryId: rr
@@ -68,7 +68,7 @@ MonoBehaviour:
     EndingKey: 
     DesignerNote: 
   - EpisodeId: new_episode_4
-    Title: New Episode
+    Title: "\uB4A4\uB97C \uBCF4\uC9C0\uB9C8"
     IndexText: 
     Kind: 0
     DialogueEntryId: rrwwtt
@@ -85,7 +85,7 @@ MonoBehaviour:
     EndingKey: 
     DesignerNote: 
   - EpisodeId: new_episode_5
-    Title: New Episode
+    Title: "\uC5B4\uB514\uB85C \uAC00\uB294 \uAE38\uC77C\uAE4C"
     IndexText: 
     Kind: 0
     DialogueEntryId: rrwwttyy
@@ -102,7 +102,7 @@ MonoBehaviour:
     EndingKey: 
     DesignerNote: 
   - EpisodeId: new_episode_6
-    Title: New Episode
+    Title: "\uC5D4"
     IndexText: 
     Kind: 0
     DialogueEntryId: rrwwttyyss
@@ -115,7 +115,7 @@ MonoBehaviour:
     DesignerNote: 
   EndingRules:
   - EndingKey: new_ending
-    DisplayName: New Ending
+    DisplayName: "\uB450\uBC88\uC9F8\uC5D4\uB529"
     Conditions: []
     UnlockNextChapter: 0
     NextChapterId: 

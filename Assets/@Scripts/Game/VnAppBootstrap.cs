@@ -104,9 +104,7 @@ public class VnAppBootstrap : MonoBehaviour
     private VNSaveLoadSystem _vnSaveLoadSystem;
     
     [Header("Episode Selection")]
-    private readonly EpisodeSelectionFactory _episodeSelectionFactory = new();
     private EpisodeSelectionSystem _episodeSelectionSystem;
-    private EpisodeSelectionRepository _episodeSelectionRepository;
     [SerializeField] private ChapterEpisodeProgressionCatalogSO chapterEpisodeProgressionCatalog;
 
     [SerializeField] private ChapterEpisodeProgressionSO episodeProgressionSo;
@@ -432,14 +430,6 @@ public class VnAppBootstrap : MonoBehaviour
             episodeGraphRenderer,
             layoutOptions,
             scrollController);
-    }
-
-    private void HandleEpisodeRequested(string episodeId)
-    {
-        UIManager.Instance.PopAllPanels();
-        EpisodeSelectionSnapshot snapshot = _episodeSelectionRepository.ReadSnapshot();
-        EpisodeGraphNodeData node = snapshot.GraphData.FindNode(episodeId);
-        episodePlayer.StartGame(node.DialogueEntryId);
     }
 
     private void InitializeEpisodePlayer()
