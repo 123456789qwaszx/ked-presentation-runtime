@@ -6858,7 +6858,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ChapterCardFactory
   entries:
-  - chapterId: 3
+  - chapterId: 0
     indexText: 01
     chapterIndexLabel: "\uCC55\uD130 01"
     chapterTitle: Stella Sora
@@ -18255,7 +18255,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 458.38, y: -24}
-  m_SizeDelta: {x: 916.76, y: 0}
+  m_SizeDelta: {x: 916.76, y: 24}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!1 &666632935594092605
 GameObject:
@@ -24325,10 +24325,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 788907716558699978}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 1}
+  m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -799.9999, y: 0}
-  m_SizeDelta: {x: -0.28051758, y: 0}
+  m_AnchoredPosition: {x: 0.00012207031, y: 0}
+  m_SizeDelta: {x: -800.2805, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!1 &3068787516776583353
 GameObject:

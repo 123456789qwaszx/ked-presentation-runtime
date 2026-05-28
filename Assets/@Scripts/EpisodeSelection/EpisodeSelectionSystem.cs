@@ -33,16 +33,17 @@ public sealed class EpisodeSelectionSystem
         _viewModelBuilder = new EpisodeGraphViewModelBuilder(SelectionState, layoutOptions);
     }
 
-    public Dictionary<string, EpisodeYarnEntryData> YarnEntryByEpisodeId { get; private set; }
-    public EpisodeGraphData CurrentGraphData { get; private set; }
-    public EpisodeProgressionRuleData ProgressionRules { get; private set; }
-    public EpisodeSelectionStateData SelectionState { get; private set; }
+    private Dictionary<string, EpisodeYarnEntryData> _yarnEntryByEpisodeId;
+    private EpisodeGraphData _currentGraphData;
+    private EpisodeProgressionRuleData _progressionRules;
+    
+    public EpisodeSelectionStateData SelectionState { get; }
     
     public string GetYarnNodeName(string episodeId)
     {
         const string fallback = "yarnNodeFallback";
 
-        if (!YarnEntryByEpisodeId.TryGetValue(episodeId, out EpisodeYarnEntryData entry))
+        if (!_yarnEntryByEpisodeId.TryGetValue(episodeId, out EpisodeYarnEntryData entry))
             return fallback;
 
         return entry.YarnNodeName;
@@ -73,7 +74,8 @@ public sealed class EpisodeSelectionSystem
                 $"[EpisodeSelectionSystem] Yarn entries not found. " +
                 $"requestedChapterId='{chapterId}', " +
                 $"availableChapterIds=[{availableKeys}]. " +
-                $"Empty map will be used.");
+                $"Empty map will be used." +
+                $"Check ChapterCardFactory and make sure each ChapterButtonCardModel has a valid ChapterId.");
             
             yarnEntries = new Dictionary<string, EpisodeYarnEntryData>(StringComparer.Ordinal);
         }
@@ -90,20 +92,20 @@ public sealed class EpisodeSelectionSystem
             ruleData = new EpisodeProgressionRuleData();
         }
         
-        YarnEntryByEpisodeId = yarnEntries;
-        CurrentGraphData = graphData;
-        ProgressionRules = ruleData;
+        _yarnEntryByEpisodeId = yarnEntries;
+        _currentGraphData = graphData;
+        _progressionRules = ruleData;
 
         return true;
     }
 
-    public bool PresentCurrentChapterEpisodes()
+    public bool DrawEpisodeNodes()
     {
         SelectionState.ResetForChapter();
 
-        _conditionEvaluator.RebuildAvailabilityState(ProgressionRules);
+        _conditionEvaluator.RebuildAvailabilityState(_progressionRules);
 
-        RefreshGraphView();
+        RenderGraphView();
         return true;
     }
 
@@ -114,8 +116,8 @@ public sealed class EpisodeSelectionSystem
 
         SelectionState.MarkEpisodeCleared(episodeId);
         
-        //_conditionEvaluator.RebuildAvailabilityState(ProgressionRules);
-        //RefreshGraphView();
+        _conditionEvaluator.RebuildAvailabilityState(_progressionRules);
+        RenderGraphView();
     }
 
     public bool MarkEpisodeSelected(string episodeId)
@@ -124,14 +126,14 @@ public sealed class EpisodeSelectionSystem
             return false;
 
         SelectionState.SetSelectedEpisodeId(episodeId);
-        RefreshGraphView();
+        RenderGraphView();
 
         return true;
     }
 
-    private void RefreshGraphView()
+    private void RenderGraphView()
     {
-        EpisodeGraphViewData viewData = _viewModelBuilder.Build(CurrentGraphData);
+        EpisodeGraphViewData viewData = _viewModelBuilder.Build(_currentGraphData);
         _episodeGraphRenderer.Render(viewData);
     }
 }

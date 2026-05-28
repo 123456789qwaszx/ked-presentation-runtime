@@ -61,6 +61,6 @@ public sealed partial class VnScreenBindings
         OpenEpisodeSelectionPanel();
         
         _episodeSelectionSystem.EnterChapter(card.ChapterId);
-        _episodeSelectionSystem.PresentCurrentChapterEpisodes();
+        _episodeSelectionSystem.DrawEpisodeNodes();
     }
 }
