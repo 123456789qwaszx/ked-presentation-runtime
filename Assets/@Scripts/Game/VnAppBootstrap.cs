@@ -415,7 +415,6 @@ public class VnAppBootstrap : MonoBehaviour
     private void BootstrapEpisodeSelectionRuntime()
     {
         EpisodeProgressionGraphDataBuilder graphDataBuilder = new();
-        EpisodeProgressionRuntimeStateApplier stateApplier = new();
 
         EpisodeGraphViewModelBuilder viewModelBuilder = new();
         EpisodeGraphRenderer episodeGraphRenderer = new(nodeRigPrefab);
@@ -425,7 +424,6 @@ public class VnAppBootstrap : MonoBehaviour
         _episodeSelectionSystem = new EpisodeSelectionSystem(
             chapterEpisodeProgressionCatalog,
             graphDataBuilder,
-            stateApplier,
             viewModelBuilder,
             episodeGraphRenderer,
             layoutOptions,
