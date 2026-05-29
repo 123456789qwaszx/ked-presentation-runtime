@@ -36,9 +36,31 @@ public sealed partial class YarnCommandBridge
         RegisterAdvanceDispatcher("cue", _dialogueAdvanceDispatcher);
 
         // Main Runner only commands.
-        _dialogueRunner.AddCommandHandler("go", DispatchAdvanceToRunner);
-        
-        _dialogueRunner.AddCommandHandler<string>("sub_start", StartSubPresentationNode);
+        // _dialogueRunner.AddCommandHandler("go", DispatchAdvanceToRunner);
+        // _dialogueRunner.AddCommandHandler<string>("sub_start", StartSubPresentationNode);
+        _dialogueRunner.AddCommandHandler("go", EnqueueSubPresentationAdvanceSpec);
+        _dialogueRunner.AddCommandHandler<string>("sub_start", EnqueueSubPresentationStartSpec);
+    }
+    
+    private void EnqueueSubPresentationAdvanceSpec()
+    {
+        var spec = new SubPresentationAdvanceCommandSpec
+        {
+            label = "cue"
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueSubPresentationStartSpec(string nodeName)
+    {
+        var spec = new SubPresentationStartCommandSpec
+        {
+            nodeName = nodeName,
+            restartIfRunning = true
+        };
+
+        Collect(spec);
     }
 
     private void BindRunnerCommands(DialogueRunner runner)

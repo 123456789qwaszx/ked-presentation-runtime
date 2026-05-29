@@ -229,7 +229,9 @@ public class VnAppBootstrap : MonoBehaviour
         // Presentation Control
         PresentationControlCommandFactory presentationControlFactory = new(
             _uiPatchService,
-            dialogueBoxHost);
+            dialogueBoxHost,
+            dialogueAdvanceDispatcher,
+            subPresentationRunner);
 
         // Audio
         ResourcesAudioClipResolver audioClipResolver = new();
@@ -303,6 +305,7 @@ public class VnAppBootstrap : MonoBehaviour
             ellipsisBreathTypewriter,
             _presentationSessionContext,
             _linePresentationAdvanceState,
+            yarnBridgePlaybackDriver,
             vnTrace);
 
         subPresentationPresenter.Initialize(

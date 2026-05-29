@@ -6,4 +6,5 @@ public static class CommandMenuSets
     public const string SetupEmotion = "CharRig/SetupEmotion";
     
     public const string SetupBackground = "BackgroundRigRig/SetupBackground";
+    public const string Presentation = "Control/PresentationStart";
 }

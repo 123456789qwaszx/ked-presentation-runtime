@@ -1,4 +1,5 @@
 using System.Threading;
+using UnityEngine;
 using Yarn.Unity;
 
 public sealed class SubPresentationPresenter : DialoguePresenterBase
@@ -45,22 +46,15 @@ public sealed class SubPresentationPresenter : DialoguePresenterBase
     {
         YarnLineMeta mainMetaAtStart = GetCurrentMainMeta();
 
-        Trace("RunLineStart", line, mainMetaAtStart);
-        
-        Trace("PlayCollectedStart", line, mainMetaAtStart);
         _yarnBridgePlaybackDriver.PlayCollected();
-        Trace("PlayCollectedComplete", line, mainMetaAtStart);
         
-
         if (ShouldPassThroughLine(mainMetaAtStart, out string reason))
         {
             Trace("PassThrough", line, mainMetaAtStart, $"reason={reason}");
             return;
         }
 
-        Trace("WaitForAdvanceStart", line, mainMetaAtStart);
         await WaitForLineAdvanceAsync(token);
-        Trace("WaitForAdvanceComplete", line, mainMetaAtStart);
     }
 
     private async YarnTask WaitForLineAdvanceAsync(LineCancellationToken token)
