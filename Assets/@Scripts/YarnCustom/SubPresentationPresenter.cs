@@ -44,17 +44,19 @@ public sealed class SubPresentationPresenter : DialoguePresenterBase
 
     public override async YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token)
     {
-        YarnLineMeta mainMetaAtStart = GetCurrentMainMeta();
+        Trace("RunLineStart", line);
 
-        _yarnBridgePlaybackDriver.PlayCollected();
-        
-        if (ShouldPassThroughLine(mainMetaAtStart, out string reason))
+        if (!ShouldSuppressPlayback(out string reason))
         {
-            Trace("PassThrough", line, mainMetaAtStart, $"reason={reason}");
-            return;
+            _yarnBridgePlaybackDriver.PlayCollected();
+            Trace("PlayCollected", line);
         }
+        else
+        { }
 
         await WaitForLineAdvanceAsync(token);
+
+        Trace("WaitForAdvanceComplete", line);
     }
 
     private async YarnTask WaitForLineAdvanceAsync(LineCancellationToken token)
@@ -78,23 +80,11 @@ public sealed class SubPresentationPresenter : DialoguePresenterBase
         }
     }
 
-    private bool ShouldPassThroughLine(YarnLineMeta mainMeta, out string reason)
+    private bool ShouldSuppressPlayback(out string reason)
     {
         if (_context != null && _context.IsSpeedUpMode)
         {
             reason = "SpeedUpMode";
-            return true;
-        }
-
-        if (_linePresentationAdvanceState != null && _linePresentationAdvanceState.IsSeeking)
-        {
-            if (IsMainMetaSeekTarget(mainMeta))
-            {
-                reason = "SeekTarget";
-                return false;
-            }
-
-            reason = "SeekingNonTarget";
             return true;
         }
 

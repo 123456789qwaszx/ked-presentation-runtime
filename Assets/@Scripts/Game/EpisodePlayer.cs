@@ -240,7 +240,7 @@ public sealed class EpisodePlayer : MonoBehaviour
             return;
         }
 
-        //subPresentationRunner.StartDialogue("a_presentation");
+        subPresentationRunner.StartDialogue("a_presentation");
         dialogueRunner.StartDialogue(nodeName);
     }
 
