@@ -313,6 +313,7 @@ public class VnAppBootstrap : MonoBehaviour
             _linePresentationAdvanceState,
             yarnBridgePlaybackDriver,
             yarnLineLifecycleBridge,
+            dialogueAdvanceDispatcher,
             vnTrace);
 
         inlineEventMarkupHandler.Initialize(

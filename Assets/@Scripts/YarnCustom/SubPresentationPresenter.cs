@@ -12,17 +12,21 @@ public sealed class SubPresentationPresenter : DialoguePresenterBase
 
     private CancellationTokenSource _presenterLifetimeCts = new();
 
+    private DialogueAdvanceDispatcher _dialogueAdvanceDispatcher;
+
     public void Initialize(
         PresentationSessionContext context,
         LinePresentationAdvanceState linePresentationAdvanceState,
         YarnBridgePlaybackDriver yarnBridgePlaybackDriver,
         YarnLineLifecycleBridge lineLifecycleBridge,
+        DialogueAdvanceDispatcher dialogueAdvanceDispatcher,
         VNTraceStream trace = null)
     {
         _context = context;
         _linePresentationAdvanceState = linePresentationAdvanceState;
         _yarnBridgePlaybackDriver = yarnBridgePlaybackDriver;
         _lineLifecycleBridge = lineLifecycleBridge;
+        _dialogueAdvanceDispatcher = dialogueAdvanceDispatcher;
         _trace = trace;
 
         Trace("Initialized");
@@ -46,17 +50,33 @@ public sealed class SubPresentationPresenter : DialoguePresenterBase
     {
         Trace("RunLineStart", line);
 
-        if (!ShouldSuppressPlayback(out string reason))
-        {
-            _yarnBridgePlaybackDriver.PlayCollected();
-            Trace("PlayCollected", line);
-        }
-        else
-        { }
+        _yarnBridgePlaybackDriver.PlayCollected();
+
+        Trace("WaitForAdvanceStart", line);
+
+        NotifyReadyForAdvance();
 
         await WaitForLineAdvanceAsync(token);
 
+        NotifyNotReady("WaitForAdvanceComplete");
+
         Trace("WaitForAdvanceComplete", line);
+    }
+    
+    private void NotifyReadyForAdvance()
+    {
+        if (_dialogueAdvanceDispatcher == null)
+            return;
+
+        _dialogueAdvanceDispatcher.NotifySubPresentationReadyForAdvance();
+    }
+
+    private void NotifyNotReady(string reason)
+    {
+        if (_dialogueAdvanceDispatcher == null)
+            return;
+
+        _dialogueAdvanceDispatcher.NotifySubPresentationNotReadyForAdvance(reason);
     }
 
     private async YarnTask WaitForLineAdvanceAsync(LineCancellationToken token)
