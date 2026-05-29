@@ -13,7 +13,8 @@ public enum DialogueBoxKind
     Portrait = 0,
     Speaker = 1,
     LetterBox = 2,
-    OnlyText = 3
+    OnlyText = 3,
+    BlackBook= 4
 }
 
 [Serializable]
@@ -58,7 +59,7 @@ public sealed class DialogueBoxHost : MonoBehaviour, IDialogueBoxViewResolver
                 return null;
             }
 
-            view.Validate();
+            //view.Validate();
             return view;
         }
 

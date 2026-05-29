@@ -86,6 +86,13 @@ public sealed class DialogueBoxLineRoutingPolicy
                 case "box=onlytext":
                     kind = DialogueBoxKind.OnlyText;
                     return true;
+                
+                case "blackbook":
+                case "black_book":
+                case "box:blackbook":
+                case "box=blackbook":
+                    kind = DialogueBoxKind.BlackBook;
+                    return true;
             }
         }
 

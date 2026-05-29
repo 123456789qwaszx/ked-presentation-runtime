@@ -328,6 +328,91 @@ MonoBehaviour:
     emotionKey: 10
     sprite: {fileID: 21300000, guid: 03f3bc9fe1b92cc439a5fd58d2a63e03, type: 3}
     assetPath: Assets/Art/Portraits/Gang_Girl/Gang_Girl_b_10.png
+  - characterId: Gerie
+    variantKey: Gerie_a
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: 5c27b5af3033be44890d8e0c7c1daf7c, type: 3}
+    assetPath: Assets/Art/Portraits/Gerie/Gerie_a_02.png
+  - characterId: Gerie
+    variantKey: Gerie_a
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: d6a6f2ff9931c6a499e86ba100861034, type: 3}
+    assetPath: Assets/Art/Portraits/Gerie/Gerie_a_03.png
+  - characterId: Gerie
+    variantKey: Gerie_a
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: 0ab8ff82e8564414a9c6871afa3b6902, type: 3}
+    assetPath: Assets/Art/Portraits/Gerie/Gerie_a_04.png
+  - characterId: Gerie
+    variantKey: Gerie_a
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: 5ad106a439ffedf4dbb94f645b2a08fe, type: 3}
+    assetPath: Assets/Art/Portraits/Gerie/Gerie_a_05.png
+  - characterId: Gerie
+    variantKey: Gerie_a
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: d92ac203235aa3048a19f84aebc02d9d, type: 3}
+    assetPath: Assets/Art/Portraits/Gerie/Gerie_a_06.png
+  - characterId: Gerie
+    variantKey: Gerie_a
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: 930fddab02b79464d9302f5fe3f88d1a, type: 3}
+    assetPath: Assets/Art/Portraits/Gerie/Gerie_a_07.png
+  - characterId: Gerie
+    variantKey: Gerie_a
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: 307e4dce3e5b27644802fe02c2db3702, type: 3}
+    assetPath: Assets/Art/Portraits/Gerie/Gerie_a_08.png
+  - characterId: Gerie
+    variantKey: Gerie_a
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: 7dea080efbcdd6d479d3aa68ce18c803, type: 3}
+    assetPath: Assets/Art/Portraits/Gerie/Gerie_a_09.png
+  - characterId: Gerie
+    variantKey: Gerie_a
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: f7ce9ce78689fae43a5afce7b478ae13, type: 3}
+    assetPath: Assets/Art/Portraits/Gerie/Gerie_a_10.png
+  - characterId: Gerie
+    variantKey: Gerie_a
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: aa922f299d3e2c042b93ae1f522ab13f, type: 3}
+    assetPath: Assets/Art/Portraits/Gerie/Gerie_a_11.png
+  - characterId: Gerie
+    variantKey: Gerie_a
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: cbfa10059cc974c4784586f99d56443f, type: 3}
+    assetPath: Assets/Art/Portraits/Gerie/Gerie_a_12.png
+  - characterId: Gerie
+    variantKey: Gerie_a
+    emotionKey: 13
+    sprite: {fileID: 21300000, guid: 47556b0a571864049a3b2ddb83845df6, type: 3}
+    assetPath: Assets/Art/Portraits/Gerie/Gerie_a_13.png
+  - characterId: Gerie
+    variantKey: Gerie_a
+    emotionKey: 14
+    sprite: {fileID: 21300000, guid: d8e17869efed0014f8f67403743b1f62, type: 3}
+    assetPath: Assets/Art/Portraits/Gerie/Gerie_a_14.png
+  - characterId: Gerie
+    variantKey: Gerie_a
+    emotionKey: 15
+    sprite: {fileID: 21300000, guid: 4c058e3c2460b044caed96701a9473e8, type: 3}
+    assetPath: Assets/Art/Portraits/Gerie/Gerie_a_15.png
+  - characterId: Gerie
+    variantKey: Gerie_a
+    emotionKey: 16
+    sprite: {fileID: 21300000, guid: ec3d3d1e08e71954dac4975f9e8caefe, type: 3}
+    assetPath: Assets/Art/Portraits/Gerie/Gerie_a_16.png
+  - characterId: Gerie
+    variantKey: Gerie_a
+    emotionKey: 17
+    sprite: {fileID: 21300000, guid: 5891f2f56b327b34d9a858cbb94f0d33, type: 3}
+    assetPath: Assets/Art/Portraits/Gerie/Gerie_a_17.png
+  - characterId: Gerie
+    variantKey: Gerie_a
+    emotionKey: 18
+    sprite: {fileID: 21300000, guid: 9c9007a58a443cf47a257f0c36b9fe5d, type: 3}
+    assetPath: Assets/Art/Portraits/Gerie/Gerie_a_18.png
   - characterId: Laru
     variantKey: Laru_a
     emotionKey: 02
@@ -1063,5 +1148,5 @@ MonoBehaviour:
     emotionKey: 02
     sprite: {fileID: 21300000, guid: 2c5e83a3f43fc544fa622f82902d7d2d, type: 3}
     assetPath: Assets/Art/Portraits/reira/reira_a_02.png
-  generatedTicksUtc: 639152708664914698
-  generatedTimeReadable: 2026-05-25 10:54:26
+  generatedTicksUtc: 639155705336178771
+  generatedTimeReadable: 2026-05-28 22:08:53

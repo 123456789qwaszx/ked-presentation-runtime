@@ -1,9 +1,7 @@
 using System.Collections;
-using UnityEngine;
 
 public sealed partial class YarnCommandBridge
 {
-    
     // Marks the next N collected commands as wait=true.
     // This only affects Presentation/Executor playback.
     private void AwaitFor(int count = 1)
@@ -32,20 +30,19 @@ public sealed partial class YarnCommandBridge
         Collect(spec);
     }
     
-    
-    private void EnqueueHideDialogueBoxSpec()
+    private void EnqueueHideDialogueBoxSpec(float duration = 0f)
     {
         var spec = new HideDialogueBoxCommandSpec
         {
             hideAll = true,
-            targetKind = DialogueBoxKind.Speaker,
-            duration = 0.18f,
-            wait = false
+            duration = duration,
+            wait = true
         };
 
         Collect(spec);
     }
-    private void EnqueueUIPatchSpec(string themeId)
+    
+    private void EnqueueUIPatchSpec(string themeId = "default")
     {
         var spec = new UIPatchCommandSpec
         {
@@ -54,5 +51,4 @@ public sealed partial class YarnCommandBridge
 
         Collect(spec);
     }
-    
 }

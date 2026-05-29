@@ -1,0 +1,28 @@
+﻿title: gerie1
+---
+
+//<<ui_patch >>
+이건 내가 처음으로 그녀의 영혼에 닿았을 때의 이야기다. //#box:blackbook
+
+<<spawn_bg building a black b 3>>
+
+//<<hold_begin>>
+<<box_hide 5>>
+//<<hold_end>>
+<<debug_log normal>>
+<<slot Willow>>
+<<cast Willow Willow a 16 true center normal>>
+<<fade_in Willow 0.9>>
+<<debug_log holdbegin>>
+<<hold_begin>>
+<<pause 1.5>>
+<<hold_end>>
+<<debug_log pas?>>
+//<<hold_begin>>
+//<<pause 1.5>>
+//<<hold_end>>
+
+//<<pause 1.5>>
+윌로: 죄송합니다, 이번 의뢰는 보수의 3분의 1밖에 드릴 수 없겠군요.
+
+===

@@ -299,7 +299,8 @@ public class VnAppBootstrap : MonoBehaviour
             ellipsisBreathTypewriter,
             _presentationSessionContext,
             _linePresentationAdvanceState,
-            vnTrace);
+            vnTrace,
+            yarnBridgePlaybackDriver);
 
         yarnLineSideEffectPresenter.Initialize(
             dialogueRunner,

@@ -17,3 +17,5 @@ MonoBehaviour:
     Progression: {fileID: 11400000, guid: 6b6dcda1ce02f5141a876245e3c88c7e, type: 2}
   - ChapterButtonId: 1
     Progression: {fileID: 11400000, guid: 29c6e07105983d24e91de6132db41474, type: 2}
+  - ChapterButtonId: 2
+    Progression: {fileID: 11400000, guid: e4c2e2d4194a2c14390e6d5f652aa370, type: 2}

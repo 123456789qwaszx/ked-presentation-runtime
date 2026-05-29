@@ -1,0 +1,123 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37f69c3bddfec8b4887281032b3fea78, type: 3}
+  m_Name: ChapterProgression 2
+  m_EditorClassIdentifier: Assembly-CSharp::ChapterEpisodeProgressionSO
+  ChapterId: 2
+  DisplayName: "\uB208\uB3D9\uC790\uC5D0 \uBE44\uCE5C \uC11C\uB85C\uC758 \uBAA8\uC2B5"
+  StartEpisodeId: gerie1
+  Nodes:
+  - EpisodeId: gerie1
+    Title: "\uB208\uB3D9\uC790\uC5D0 \uBE44\uCE5C \uC11C\uB85C\uC758 \uBAA8\uC2B5
+      1"
+    IndexText: 
+    Kind: 0
+    DialogueEntryId: gerie1
+    VisibleConditions: []
+    UnlockConditions: []
+    NextOptions:
+    - TargetEpisodeId: custom2
+      ChoiceLabel: 
+      Conditions: []
+      HideWhenLocked: 0
+      LockedReasonText: 
+    Attachments: []
+    IsChapterEndingCandidate: 0
+    EndingKey: 
+    DesignerNote: 
+  - EpisodeId: custom2
+    Title: "\uC0B0\uC131\uBE44"
+    IndexText: 
+    Kind: 0
+    DialogueEntryId: rrww
+    VisibleConditions: []
+    UnlockConditions: []
+    NextOptions:
+    - TargetEpisodeId: new_episode_3
+      ChoiceLabel: 
+      Conditions: []
+      HideWhenLocked: 0
+      LockedReasonText: 
+    Attachments: []
+    IsChapterEndingCandidate: 0
+    EndingKey: 
+    DesignerNote: 
+  - EpisodeId: new_episode_3
+    Title: "\uC78A\uD600\uC9C4 \uAFC8"
+    IndexText: 
+    Kind: 0
+    DialogueEntryId: rr
+    VisibleConditions: []
+    UnlockConditions: []
+    NextOptions:
+    - TargetEpisodeId: new_episode_4
+      ChoiceLabel: 
+      Conditions: []
+      HideWhenLocked: 0
+      LockedReasonText: 
+    Attachments: []
+    IsChapterEndingCandidate: 0
+    EndingKey: 
+    DesignerNote: 
+  - EpisodeId: new_episode_4
+    Title: "\uB4A4\uB97C \uBCF4\uC9C0\uB9C8"
+    IndexText: 
+    Kind: 0
+    DialogueEntryId: rrwwtt
+    VisibleConditions: []
+    UnlockConditions: []
+    NextOptions:
+    - TargetEpisodeId: new_episode_5
+      ChoiceLabel: 
+      Conditions: []
+      HideWhenLocked: 0
+      LockedReasonText: 
+    Attachments: []
+    IsChapterEndingCandidate: 0
+    EndingKey: 
+    DesignerNote: 
+  - EpisodeId: new_episode_5
+    Title: "\uC5B4\uB514\uB85C \uAC00\uB294 \uAE38\uC77C\uAE4C"
+    IndexText: 
+    Kind: 0
+    DialogueEntryId: rrwwttyy
+    VisibleConditions: []
+    UnlockConditions: []
+    NextOptions:
+    - TargetEpisodeId: new_episode_6
+      ChoiceLabel: 
+      Conditions: []
+      HideWhenLocked: 0
+      LockedReasonText: 
+    Attachments: []
+    IsChapterEndingCandidate: 0
+    EndingKey: 
+    DesignerNote: 
+  - EpisodeId: new_episode_6
+    Title: "\uC5D4\uB529"
+    IndexText: 
+    Kind: 0
+    DialogueEntryId: rrwwttyyss
+    VisibleConditions: []
+    UnlockConditions: []
+    NextOptions: []
+    Attachments: []
+    IsChapterEndingCandidate: 1
+    EndingKey: new_ending
+    DesignerNote: 
+  EndingRules:
+  - EndingKey: new_ending
+    DisplayName: "\uB450\uBC88\uC9F8\uC5D4\uB529"
+    Conditions: []
+    UnlockNextChapter: 0
+    NextChapterId: 
+    DesignerNote: 
