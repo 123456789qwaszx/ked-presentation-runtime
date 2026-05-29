@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Yarn.Unity;
 
 public interface ICommandRunScopeProvider
 {
@@ -111,4 +112,48 @@ public sealed class YarnBridgePlaybackDriver : MonoBehaviour
         _collectedSpecs.Clear();
     }
 
+    
+    public IEnumerator PlaySubPresentationNodeBlocking(
+        DialogueRunner runner,
+        string nodeName,
+        string debugSource = "sub-presentation")
+    {
+        if (runner == null)
+        {
+            Debug.LogWarning($"[YarnBridgePlaybackDriver] {debugSource} failed. DialogueRunner is null.");
+            yield break;
+        }
+
+        if (string.IsNullOrWhiteSpace(nodeName))
+        {
+            Debug.LogWarning($"[YarnBridgePlaybackDriver] {debugSource} failed. nodeName is null or empty.");
+            yield break;
+        }
+
+        if (runner.IsDialogueRunning)
+        {
+            Debug.LogWarning($"[YarnBridgePlaybackDriver] {debugSource} ignored. Runner is already running. node='{nodeName}'.");
+            yield break;
+        }
+
+        bool completed = false;
+
+        void OnDialogueComplete()
+        {
+            completed = true;
+        }
+
+        runner.onDialogueComplete.AddListener(OnDialogueComplete);
+
+        Debug.Log($"[YarnBridgePlaybackDriver] {debugSource} start. node='{nodeName}'.");
+
+        runner.StartDialogue(nodeName);
+
+        while (!completed && runner != null && runner.IsDialogueRunning)
+            yield return null;
+
+        runner.onDialogueComplete.RemoveListener(OnDialogueComplete);
+
+        Debug.Log($"[YarnBridgePlaybackDriver] {debugSource} complete. node='{nodeName}'.");
+    }
 }

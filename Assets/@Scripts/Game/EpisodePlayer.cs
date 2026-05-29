@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 using Yarn.Unity;
 
 public sealed class EpisodePlayer : MonoBehaviour
@@ -10,6 +11,8 @@ public sealed class EpisodePlayer : MonoBehaviour
 
     [Header("Yarn")]
     [SerializeField] private DialogueRunner dialogueRunner;
+    [SerializeField] private DialogueRunner subPresentationRunner;
+    
 
     [Header("Presentation")]
     [SerializeField] private DialogueTextRouter dialogueTextRouter;
@@ -175,13 +178,20 @@ public sealed class EpisodePlayer : MonoBehaviour
 
     private void StopYarnRunnerNow()
     {
-        if (dialogueRunner == null)
-            return;
-
-        if (!dialogueRunner.IsDialogueRunning)
-            return;
-
-        //dialogueRunner.Stop();
+        // if (dialogueRunner == null)
+        //     return;
+        //
+        // if (!dialogueRunner.IsDialogueRunning)
+        //     return;
+        //
+        // dialogueRunner.Stop();
+        
+        // if (subPresentationRunner == null)
+        //     return;
+        //
+        // if (!subPresentationRunner.IsDialogueRunning)
+        //     return;
+        // subPresentationRunner.Stop();
     }
 
     private void EndPresentationRouteNow()
@@ -230,6 +240,7 @@ public sealed class EpisodePlayer : MonoBehaviour
             return;
         }
 
+        subPresentationRunner.StartDialogue("a_presentation");
         dialogueRunner.StartDialogue(nodeName);
     }
 

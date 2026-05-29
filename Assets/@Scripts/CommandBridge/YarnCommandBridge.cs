@@ -1,60 +1,126 @@
 using System;
-using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using Yarn.Unity;
 
 public sealed partial class YarnCommandBridge
 {
     private readonly DialogueRunner _dialogueRunner;
+    private readonly DialogueRunner _subPresentationRunner;
+    private readonly DialogueAdvanceDispatcher _dialogueAdvanceDispatcher;
+    
     private readonly YarnBridgePlaybackDriver _playbackDriver;
     private readonly RectTransform _charRigPrefab;
     
-    public YarnCommandBridge(DialogueRunner dialogueRunner, YarnBridgePlaybackDriver playbackDriver, RectTransform charRigPrefab)
+    private readonly Dictionary<string, DialogueAdvanceDispatcher> _advanceDispatchersByKey = new();
+    
+    public YarnCommandBridge(
+        DialogueRunner dialogueRunner,
+        DialogueRunner subPresentationRunner,
+        DialogueAdvanceDispatcher dialogueAdvanceDispatcher,
+        YarnBridgePlaybackDriver playbackDriver, 
+        RectTransform charRigPrefab)
     {
         _dialogueRunner = dialogueRunner;
+        _subPresentationRunner = subPresentationRunner;
+        _dialogueAdvanceDispatcher = dialogueAdvanceDispatcher;
+        
         _playbackDriver = playbackDriver;
         _charRigPrefab = charRigPrefab;
         
-        BindControl();
+        BindRunnerCommands(_dialogueRunner);
+
+        if (_subPresentationRunner != null && !ReferenceEquals(_subPresentationRunner, _dialogueRunner))
+            BindRunnerCommands(_subPresentationRunner);
+
+        RegisterAdvanceDispatcher("cue", _dialogueAdvanceDispatcher);
+
+        // Main Runner only commands.
+        _dialogueRunner.AddCommandHandler("go", DispatchAdvanceToRunner);
         
-        BindCharRigSetup();
-        BindCharRigBasic();
-        BindCharRigActing();
-        BindCharRigIdle();
-        BindCharRigPreset();
-        
-        BindCharRigEmote();
-        
-        BindBackgroundRig();
-        BindShotResponse();
-        
-        BindTransition();
-        BindAudio();
+        _dialogueRunner.AddCommandHandler<string>("sub_start", StartSubPresentationNode);
     }
 
-    private void BindControl()
+    private void BindRunnerCommands(DialogueRunner runner)
+    {
+        if (runner == null)
+        {
+            Debug.LogWarning("[YarnCommandBridge] Cannot bind commands. DialogueRunner is null.");
+            return;
+        }
+
+        BindControl(runner);
+
+        BindCharRigSetup(runner);
+        BindCharRigBasic(runner);
+        BindCharRigActing(runner);
+        BindCharRigIdle(runner);
+        BindCharRigPreset(runner);
+
+        BindCharRigEmote(runner);
+
+        BindBackgroundRig(runner);
+        BindShotResponse(runner);
+
+        BindTransition(runner);
+        BindAudio(runner);
+    }
+    
+    private void RegisterAdvanceDispatcher(string key, DialogueAdvanceDispatcher dispatcher)
+    {
+        if (string.IsNullOrWhiteSpace(key))
+        {
+            Debug.LogWarning("[YarnCommandBridge] Cannot register advance dispatcher. key is null or empty.");
+            return;
+        }
+
+        if (dispatcher == null)
+        {
+            Debug.LogWarning($"[YarnCommandBridge] Cannot register advance dispatcher. key='{key}', dispatcher is null.");
+            return;
+        }
+
+        _advanceDispatchersByKey[key] = dispatcher;
+    }
+    
+    private void DispatchAdvanceToRunner()
+    {
+        if (!_advanceDispatchersByKey.TryGetValue("cue", out DialogueAdvanceDispatcher dispatcher) || dispatcher == null)
+        {
+            Debug.LogWarning("[YarnCommandBridge] advance_runner failed. No dispatcher registered for key='cue'.");
+            return;
+        }
+
+        dispatcher.DispatchSubPresentationAdvance();
+    }
+    
+    private void StartSubPresentationNode(string nodeName)
+    {
+        _subPresentationRunner.StartDialogue(nodeName);
+    }
+
+    private void BindControl(DialogueRunner runner)
     {
         // Marks the next N collected commands as wait=true inside Presentation/Executor.
         // This affects command playback order, but does NOT block Yarn by itself.
-        _dialogueRunner.AddCommandHandler<int>("await", AwaitFor);
+        runner.AddCommandHandler<int>("await", AwaitFor);
 
         // Starts a Yarn-level hold block.
-        _dialogueRunner.AddCommandHandler("hold_begin", BeginHold);
+        runner.AddCommandHandler("hold_begin", BeginHold);
 
         // Blocking Yarn command:
         // closes the hold block and pauses Yarn until the held commands
         // marked with wait=true finish inside Presentation/Executor.
-        //_dialogueRunner.AddCommandHandler("hold_end", (Func<IEnumerator>)(() => PlayHeldCommands()));
-        _dialogueRunner.AddCommandHandler("hold_end", PlayHeldCommands);
+        runner.AddCommandHandler("hold_end", PlayHeldCommands);
         
-        _dialogueRunner.AddCommandHandler<float>("pause", EnqueueWaitSpec);
+        runner.AddCommandHandler<float>("pause", EnqueueWaitSpec);
         
-        _dialogueRunner.AddCommandHandler<string>("ui_patch", EnqueueUIPatchSpec);
+        runner.AddCommandHandler<string>("ui_patch", EnqueueUIPatchSpec);
         
-        _dialogueRunner.AddCommandHandler<float>("box_hide", EnqueueHideDialogueBoxSpec);
+        runner.AddCommandHandler<float>("box_hide", EnqueueHideDialogueBoxSpec);
         
-        _dialogueRunner.AddCommandHandler<string>("debug_log", LogImmediate);
-        _dialogueRunner.AddCommandHandler<string>("debug_state", LogYarnState);
+        runner.AddCommandHandler<string>("debug_log", LogImmediate);
+        runner.AddCommandHandler<string>("debug_state", LogYarnState);
     }
     
     private void LogImmediate(string message)
@@ -80,147 +146,147 @@ public sealed partial class YarnCommandBridge
             $"favor={favor}, patience={patience}, debt={debt}, " +
             $"requested={requestedFee}, paid={paidFee}, trust={trust}, " +
             $"anger={anger}, contract={contractSigned}"
-            );
+        );
     }
 
-    private void BindCharRigSetup()
+    private void BindCharRigSetup(DialogueRunner runner)
     {
-        _dialogueRunner.AddCommandHandler<string, string>("slot", EnqueueSetupCharRigSpec);
+        runner.AddCommandHandler<string, string>("slot", EnqueueSetupCharRigSpec);
         
-        _dialogueRunner.AddCommandHandler<string, string,  string, string, bool, string, string>("cast", EnqueueCastCharacterSpec);
+        runner.AddCommandHandler<string, string, string, string, bool, string, string>("cast", EnqueueCastCharacterSpec);
         
-        _dialogueRunner.AddCommandHandler<string, string, string, string>("pose", EnqueueSetPortraitSpriteSpec);
-        _dialogueRunner.AddCommandHandler<string, string, bool, bool>("place", EnqueueSetAnchorSpecs);
-        _dialogueRunner.AddCommandHandler<string, string>("size", EnqueueSetOriginSizeSpec);
+        runner.AddCommandHandler<string, string, string, string>("pose", EnqueueSetPortraitSpriteSpec);
+        runner.AddCommandHandler<string, string, bool, bool>("place", EnqueueSetAnchorSpecs);
+        runner.AddCommandHandler<string, string>("size", EnqueueSetOriginSizeSpec);
         
-        _dialogueRunner.AddCommandHandler<string, int, int>("place_offset", EnqueueSetAnchorOffsetSpecs);
+        runner.AddCommandHandler<string, int, int>("place_offset", EnqueueSetAnchorOffsetSpecs);
     }
 
-    private void BindCharRigBasic()
+    private void BindCharRigBasic(DialogueRunner runner)
     {
-        _dialogueRunner.AddCommandHandler<string, float>("fade_in", EnqueueFadeInSpec);
-        _dialogueRunner.AddCommandHandler<string, float>("fade_out", EnqueueFadeOutSpec);
+        runner.AddCommandHandler<string, float>("fade_in", EnqueueFadeInSpec);
+        runner.AddCommandHandler<string, float>("fade_out", EnqueueFadeOutSpec);
         
-        _dialogueRunner.AddCommandHandler<string, string>("expression", EnqueueSetEmotionPortraitWipeSpec);
-        _dialogueRunner.AddCommandHandler<string, string>("expression_crossfade", EnqueueSetPortraitCrossfadeSpec);
+        runner.AddCommandHandler<string, string>("expression", EnqueueSetEmotionPortraitWipeSpec);
+        runner.AddCommandHandler<string, string>("expression_crossfade", EnqueueSetPortraitCrossfadeSpec);
         
-        _dialogueRunner.AddCommandHandler<string, string>("slide_in", EnqueueSlideInSpec);
-        _dialogueRunner.AddCommandHandler<string, string>("slide_out", EnqueueSlideOutSpec);
+        runner.AddCommandHandler<string, string>("slide_in", EnqueueSlideInSpec);
+        runner.AddCommandHandler<string, string>("slide_out", EnqueueSlideOutSpec);
         
-        _dialogueRunner.AddCommandHandler<string, float, float, float>("move_by", EnqueueMoveByCharSpec);
-        _dialogueRunner.AddCommandHandler<string, float, float>("scale_to", EnqueueScaleToSpec);
-        _dialogueRunner.AddCommandHandler<string, int>("rotate_to", EnqueuePivotRotateToSpec);
+        runner.AddCommandHandler<string, float, float, float>("move_by", EnqueueMoveByCharSpec);
+        runner.AddCommandHandler<string, float, float>("scale_to", EnqueueScaleToSpec);
+        runner.AddCommandHandler<string, int>("rotate_to", EnqueuePivotRotateToSpec);
     }
     
-    private void BindCharRigActing()
+    private void BindCharRigActing(DialogueRunner runner)
     {
-        _dialogueRunner.AddCommandHandler<string, string>("dip", EnqueueDipInOutSpec);
+        runner.AddCommandHandler<string, string>("dip", EnqueueDipInOutSpec);
         
-        _dialogueRunner.AddCommandHandler<string, int, float, float>("hop", EnqueueHopSpec);
+        runner.AddCommandHandler<string, int, float, float>("hop", EnqueueHopSpec);
         
-        _dialogueRunner.AddCommandHandler<string, string, float, float, int>("shake", EnqueueJoltSpecShake);
-        _dialogueRunner.AddCommandHandler<string, float, float, float, string>("tremble", EnqueueTrembleSpec);
+        runner.AddCommandHandler<string, string, float, float, int>("shake", EnqueueJoltSpecShake);
+        runner.AddCommandHandler<string, float, float, float, string>("tremble", EnqueueTrembleSpec);
         
-        _dialogueRunner.AddCommandHandler<string>("sway", EnqueueSwaySpec);
+        runner.AddCommandHandler<string>("sway", EnqueueSwaySpec);
     }
     
-    private void BindCharRigIdle()
+    private void BindCharRigIdle(DialogueRunner runner)
     {
-        _dialogueRunner.AddCommandHandler<string, float, float, float, float>("idle_bounce", EnqueueBounceInPlaceSpec);
-        _dialogueRunner.AddCommandHandler<string, float, float, float>("idle_breathe", EnqueueBreathInPlaceSpec);
-        _dialogueRunner.AddCommandHandler<string, float, float, float, float, float, string>("idle_flinch", EnqueueTremblePulseSpec);
-        _dialogueRunner.AddCommandHandler<string, float, float, float, float>("idle_walk", EnqueueWalkInPlaceSpec);
+        runner.AddCommandHandler<string, float, float, float, float>("idle_bounce", EnqueueBounceInPlaceSpec);
+        runner.AddCommandHandler<string, float, float, float>("idle_breathe", EnqueueBreathInPlaceSpec);
+        runner.AddCommandHandler<string, float, float, float, float, float, string>("idle_flinch", EnqueueTremblePulseSpec);
+        runner.AddCommandHandler<string, float, float, float, float>("idle_walk", EnqueueWalkInPlaceSpec);
     }
 
-    private void BindCharRigPreset()
+    private void BindCharRigPreset(DialogueRunner runner)
     {
-        _dialogueRunner.AddCommandHandler<string, string>("jolt", EnqueueJoltSpec);
-        _dialogueRunner.AddCommandHandler<string, string>("nudge", EnqueueJoltSpecTap);
-        _dialogueRunner.AddCommandHandler<string, string>("nudge_hard", EnqueueJoltSpecTapHard);
+        runner.AddCommandHandler<string, string>("jolt", EnqueueJoltSpec);
+        runner.AddCommandHandler<string, string>("nudge", EnqueueJoltSpecTap);
+        runner.AddCommandHandler<string, string>("nudge_hard", EnqueueJoltSpecTapHard);
         
-        _dialogueRunner.AddCommandHandler<string>("slide_in_sway", EnqueueSlideInSwayCombo);
-        _dialogueRunner.AddCommandHandler<string, string>("slide_in_nudge", EnqueueSlideInJoltCombo);
+        runner.AddCommandHandler<string>("slide_in_sway", EnqueueSlideInSwayCombo);
+        runner.AddCommandHandler<string, string>("slide_in_nudge", EnqueueSlideInJoltCombo);
         
-        _dialogueRunner.AddCommandHandler<string>("sway_hard", EnqueueSwaySpecPendulum);
-        _dialogueRunner.AddCommandHandler<string>("sway_fast", EnqueueSwaySpecFast);
-        _dialogueRunner.AddCommandHandler<string>("sway_away", EnqueueSwaySpecAway);
-    }
-    
-    private void BindCharRigEmote()
-    {
-        _dialogueRunner.AddCommandHandler<string, string>("emote", EnqueueSetCharacterEmojiSpec);
-        _dialogueRunner.AddCommandHandler<string, string, string>("emote_slot", EnqueueSetCharacterEmojiSlotSpec);
-        
-        _dialogueRunner.AddCommandHandler<string>("emote_hide", EnqueueHideCharacterEmojiSpec);
-        _dialogueRunner.AddCommandHandler<string, string>("emote_hide_slot", EnqueueHideCharacterEmojiSlotSpec);
+        runner.AddCommandHandler<string>("sway_hard", EnqueueSwaySpecPendulum);
+        runner.AddCommandHandler<string>("sway_fast", EnqueueSwaySpecFast);
+        runner.AddCommandHandler<string>("sway_away", EnqueueSwaySpecAway);
     }
     
-    private void BindBackgroundRig()
+    private void BindCharRigEmote(DialogueRunner runner)
     {
-        _dialogueRunner.AddCommandHandler<string, string, string, string, string, float, float, float>("spawn_bg", EnqueueSpawnBackgroundRigSpec);
+        runner.AddCommandHandler<string, string>("emote", EnqueueSetCharacterEmojiSpec);
+        runner.AddCommandHandler<string, string, string>("emote_slot", EnqueueSetCharacterEmojiSlotSpec);
         
-        _dialogueRunner.AddCommandHandler<string, float, float, float>("bg_place", EnqueueSetBackgroundAnchorSpec);
-        _dialogueRunner.AddCommandHandler<string, string, string>("bg_sprite", EnqueueSetBackgroundSpriteSpec);
-        _dialogueRunner.AddCommandHandler<string, string>("bg_size", EnqueueSetBackgroundOriginSizeSpec);
-        
-        _dialogueRunner.AddCommandHandler<string, string, float>("bg_fade_in", EnqueueFadeInBackgroundSpec);
-        _dialogueRunner.AddCommandHandler<string, string, float>("bg_fade_out", EnqueueFadeOutBackgroundSpec);
-        
-        _dialogueRunner.AddCommandHandler<string, float, float, float>("bg_move", EnqueueMoveBackgroundSpec);
-        _dialogueRunner.AddCommandHandler<string, float, float>("bg_scale", EnqueueScaleBackgroundSpec);
-        
-        _dialogueRunner.AddCommandHandler<string, string, float, float>("bg_slide_in", EnqueueSlideInBackgroundSpec);
-        _dialogueRunner.AddCommandHandler<string, string, float, float>("bg_slide_out", EnqueueSlideOutBackgroundSpec);
-        _dialogueRunner.AddCommandHandler<string, string, float, float>("bg_jolt", EnqueueJoltBackgroundSpec);
-        
-        _dialogueRunner.AddCommandHandler<string, string, float, float>("bg_idle_tremble", EnqueueTrembleBackgroundSpec);
-        _dialogueRunner.AddCommandHandler<string, float, float, float>("bg_idle_breath", EnqueueBreathBackgroundSpec);
+        runner.AddCommandHandler<string>("emote_hide", EnqueueHideCharacterEmojiSpec);
+        runner.AddCommandHandler<string, string>("emote_hide_slot", EnqueueHideCharacterEmojiSlotSpec);
     }
     
-    private void BindShotResponse()
+    private void BindBackgroundRig(DialogueRunner runner)
     {
-        _dialogueRunner.AddCommandHandler<string, string>("shot_bind_bg_response", EnqueueRegisterBackgroundResponseBindingSpec);
-        _dialogueRunner.AddCommandHandler<string, string>("shot_bind_char_response", EnqueueRegisterCharacterResponseBindingSpec);
+        runner.AddCommandHandler<string, string, string, string, string, float, float, float>("spawn_bg", EnqueueSpawnBackgroundRigSpec);
         
-        _dialogueRunner.AddCommandHandler<string, string, string, float, float>("shot_zoom_focus", EnqueueShotZoomFocusSpec);
-        _dialogueRunner.AddCommandHandler<float, float, float, float>("shot_to", EnqueueShotToSpec);
-        _dialogueRunner.AddCommandHandler("shot_reset", (Action<float>)EnqueueShotResetSpec);
+        runner.AddCommandHandler<string, float, float, float>("bg_place", EnqueueSetBackgroundAnchorSpec);
+        runner.AddCommandHandler<string, string, string>("bg_sprite", EnqueueSetBackgroundSpriteSpec);
+        runner.AddCommandHandler<string, string>("bg_size", EnqueueSetBackgroundOriginSizeSpec);
         
-        _dialogueRunner.AddCommandHandler<float, float>("shot_zoom", EnqueueShotZoomSpec);
-        _dialogueRunner.AddCommandHandler<float, float, float>("shot_track", EnqueueShotTrackSpec);
+        runner.AddCommandHandler<string, string, float>("bg_fade_in", EnqueueFadeInBackgroundSpec);
+        runner.AddCommandHandler<string, string, float>("bg_fade_out", EnqueueFadeOutBackgroundSpec);
+        
+        runner.AddCommandHandler<string, float, float, float>("bg_move", EnqueueMoveBackgroundSpec);
+        runner.AddCommandHandler<string, float, float>("bg_scale", EnqueueScaleBackgroundSpec);
+        
+        runner.AddCommandHandler<string, string, float, float>("bg_slide_in", EnqueueSlideInBackgroundSpec);
+        runner.AddCommandHandler<string, string, float, float>("bg_slide_out", EnqueueSlideOutBackgroundSpec);
+        runner.AddCommandHandler<string, string, float, float>("bg_jolt", EnqueueJoltBackgroundSpec);
+        
+        runner.AddCommandHandler<string, string, float, float>("bg_idle_tremble", EnqueueTrembleBackgroundSpec);
+        runner.AddCommandHandler<string, float, float, float>("bg_idle_breath", EnqueueBreathBackgroundSpec);
     }
     
-    private void BindTransition()
+    private void BindShotResponse(DialogueRunner runner)
     {
-        _dialogueRunner.AddCommandHandler<string, float>("tx_slant_in", EnqueueSlantedMaskCutInSpec);
-        _dialogueRunner.AddCommandHandler<string, float>("tx_slant_out", EnqueueSlantedMaskCutOutSpec);
-
-        _dialogueRunner.AddCommandHandler<string, float>("tx_strip_cover", EnqueueVerticalStripCoverSpec);
-        _dialogueRunner.AddCommandHandler<string, float>("tx_strip_clear", EnqueueVerticalStripClearSpec);
-
-        _dialogueRunner.AddCommandHandler<string, float>("tx_shutter_open", EnqueueSlantedShutterOpenSpec);
-        _dialogueRunner.AddCommandHandler<string, float>("tx_shutter_close", EnqueueSlantedShutterCloseSpec);
-
-        _dialogueRunner.AddCommandHandler<string, float>("tx_focus_fade_out", EnqueueFocusBlurFadeOutSpec);
-        _dialogueRunner.AddCommandHandler<string, float>("tx_focus_fade_in", EnqueueFocusBlurFadeInSpec);
-
-        _dialogueRunner.AddCommandHandler<string, float>("tx_focus_curtain_close", EnqueueFocusBlurCurtainCloseSpec);
-        _dialogueRunner.AddCommandHandler<string, float>("tx_focus_curtain_open", EnqueueFocusBlurCurtainOpenSpec);
-
-        _dialogueRunner.AddCommandHandler<string, float>("tx_daze_fade_close", EnqueueDazeFadeCloseSpec);
-        _dialogueRunner.AddCommandHandler<string, float>("tx_daze_fade_open", EnqueueDazeFadeOpenSpec);
+        runner.AddCommandHandler<string, string>("shot_bind_bg_response", EnqueueRegisterBackgroundResponseBindingSpec);
+        runner.AddCommandHandler<string, string>("shot_bind_char_response", EnqueueRegisterCharacterResponseBindingSpec);
+        
+        runner.AddCommandHandler<string, string, string, float, float>("shot_zoom_focus", EnqueueShotZoomFocusSpec);
+        runner.AddCommandHandler<float, float, float, float>("shot_to", EnqueueShotToSpec);
+        runner.AddCommandHandler("shot_reset", (Action<float>)EnqueueShotResetSpec);
+        
+        runner.AddCommandHandler<float, float>("shot_zoom", EnqueueShotZoomSpec);
+        runner.AddCommandHandler<float, float, float>("shot_track", EnqueueShotTrackSpec);
     }
     
-    private void BindAudio()
+    private void BindTransition(DialogueRunner runner)
     {
-        _dialogueRunner.AddCommandHandler<string, float>("bgm", EnqueuePlayBgmSpec);
-        _dialogueRunner.AddCommandHandler<float>("stop_bgm", EnqueueStopBgmSpec);
+        runner.AddCommandHandler<string, float>("tx_slant_in", EnqueueSlantedMaskCutInSpec);
+        runner.AddCommandHandler<string, float>("tx_slant_out", EnqueueSlantedMaskCutOutSpec);
 
-        _dialogueRunner.AddCommandHandler<string>("sfx", EnqueuePlaySfxSpec);
-        _dialogueRunner.AddCommandHandler("stop_all_sfx", EnqueueStopAllSfxSpec);
+        runner.AddCommandHandler<string, float>("tx_strip_cover", EnqueueVerticalStripCoverSpec);
+        runner.AddCommandHandler<string, float>("tx_strip_clear", EnqueueVerticalStripClearSpec);
+
+        runner.AddCommandHandler<string, float>("tx_shutter_open", EnqueueSlantedShutterOpenSpec);
+        runner.AddCommandHandler<string, float>("tx_shutter_close", EnqueueSlantedShutterCloseSpec);
+
+        runner.AddCommandHandler<string, float>("tx_focus_fade_out", EnqueueFocusBlurFadeOutSpec);
+        runner.AddCommandHandler<string, float>("tx_focus_fade_in", EnqueueFocusBlurFadeInSpec);
+
+        runner.AddCommandHandler<string, float>("tx_focus_curtain_close", EnqueueFocusBlurCurtainCloseSpec);
+        runner.AddCommandHandler<string, float>("tx_focus_curtain_open", EnqueueFocusBlurCurtainOpenSpec);
+
+        runner.AddCommandHandler<string, float>("tx_daze_fade_close", EnqueueDazeFadeCloseSpec);
+        runner.AddCommandHandler<string, float>("tx_daze_fade_open", EnqueueDazeFadeOpenSpec);
+    }
+    
+    private void BindAudio(DialogueRunner runner)
+    {
+        runner.AddCommandHandler<string, float>("bgm", EnqueuePlayBgmSpec);
+        runner.AddCommandHandler<float>("stop_bgm", EnqueueStopBgmSpec);
+
+        runner.AddCommandHandler<string>("sfx", EnqueuePlaySfxSpec);
+        runner.AddCommandHandler("stop_all_sfx", EnqueueStopAllSfxSpec);
         
-        _dialogueRunner.AddCommandHandler<string>("voice", EnqueuePlayVoiceSpec);
-        _dialogueRunner.AddCommandHandler("stop_voice", EnqueueStopVoiceSpec);
+        runner.AddCommandHandler<string>("voice", EnqueuePlayVoiceSpec);
+        runner.AddCommandHandler("stop_voice", EnqueueStopVoiceSpec);
     }
 
     private void Collect(CommandSpecBase spec)

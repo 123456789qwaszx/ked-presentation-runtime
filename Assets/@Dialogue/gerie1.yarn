@@ -10,39 +10,22 @@
 <<set $contract_signed = false>>
 <<debug_log "[INIT] favor={$favor}, patience={$laru_patience}, debt={$willow_debt}, requested={$requested_fee}, paid={$paid_fee}, trust={$trust}, anger={$anger}, contract={$contract_signed}">>
 
-<<slot Willow>>
-<<slot Laru>>
-
-<<cast Willow Willow a 16 true center normal>>
-<<cast Laru Laru a 16 true left normal>>
-
-<<fade_out Willow 0>>
-<<fade_out Laru 0>>
-
-이건 내가 처음으로 그녀의 영혼에 닿았을 때의 이야기다. //#box:blackbook
-
 <<hold_begin>>
-<<spawn_bg green a green back>>
-
-<<await 1>>
-<<pause 0.8>>
-
-<<await 1>>
-<<fade_in Willow 1.2>>
-
-<<await 1>>
-<<fade_in Laru 1.2>>
-
-<<await 1>>
-<<box_hide 3>>
-
-<<await 1>>
-<<bg_fade_out green all 1.5>>
+<<sub_start a_presentation>>
 <<hold_end>>
 
+
+<<go>>
+이건 내가 처음으로 그녀의 영혼에 닿았을 때의 이야기다. //#box:blackbook
+
+<<go>>
+
 윌로: 죄송합니다, 이번 의뢰는 보수의 3분의 1밖에 드릴 수 없겠군요.
+<<go>>
 라루: 3분의 1?
+<<go>>
 라루: 농담이지?
+<<go>>
 윌로: 농담이었다면 좋았겠지만, 장부는 거짓말을 하지 않습니다.
 
 <<debug_log "[BEFORE_FIRST_CHECK] favor={$favor}, trust={$trust}, anger={$anger}">>

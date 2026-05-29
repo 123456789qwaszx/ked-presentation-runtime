@@ -5,17 +5,20 @@ public sealed class DialogueAdvanceDispatcher : MonoBehaviour
 {
     private AdvanceGate _gate;
     private DialogueRunner _dialogueRunner;
+    private DialogueRunner _subPresentationRunner;
     private InlineEventMarkupHandler _inlineMarkupHandler;
     private LinePresentationAdvanceState _linePresentationAdvanceState;
 
     public void Initialize(
         AdvanceGate gate, 
         DialogueRunner dialogueRunner,
+        DialogueRunner subPresentationRunner,
         InlineEventMarkupHandler inlineMarkupHandler, 
         LinePresentationAdvanceState  linePresentationAdvanceState)
     {
         _gate = gate;
         _dialogueRunner = dialogueRunner;
+        _subPresentationRunner = subPresentationRunner;
         _inlineMarkupHandler = inlineMarkupHandler;
         _linePresentationAdvanceState = linePresentationAdvanceState;
     }
@@ -57,7 +60,6 @@ public sealed class DialogueAdvanceDispatcher : MonoBehaviour
         {
             _inlineMarkupHandler.FlushPendingSignals();
             _dialogueRunner.RequestHurryUpLine();
-
             _gate.AddCooldownSeconds(_gate.CooldownAfterHurryUpSec);
         }
         else
@@ -69,7 +71,14 @@ public sealed class DialogueAdvanceDispatcher : MonoBehaviour
 
         return true;
     }
+    
+    public void DispatchSubPresentationAdvance()
+    {
+        if (_subPresentationRunner == null || !_subPresentationRunner.IsDialogueRunning)
+            return;
 
+        _subPresentationRunner.RequestNextLine();
+    }
 }
 
 // public void DispatchSeekHurryUp()

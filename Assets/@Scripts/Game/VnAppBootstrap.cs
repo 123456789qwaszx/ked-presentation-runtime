@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 using Yarn.Unity;
 
 public class VnAppBootstrap : MonoBehaviour
@@ -51,12 +52,13 @@ public class VnAppBootstrap : MonoBehaviour
 
     [Header("Yarn")] 
     [SerializeField] private DialogueRunner dialogueRunner;
+    [SerializeField] private DialogueRunner subPresentationRunner;
     [SerializeField] private LinePresenter linePresenter;
     [SerializeField] private DialogueTextRouter dialogueTextRouter;
     [SerializeField] private VnRuntimeBridge vnRuntimeBridge;
     [SerializeField] private InlineEventMarkupHandler inlineEventMarkupHandler;
     [SerializeField] private CustomLinePresenter customLinePresenter;
-    [SerializeField] private YarnLineSideEffectPresenter yarnLineSideEffectPresenter;
+    [SerializeField] private SubPresentationPresenter subPresentationPresenter;
 
 
     [Header("VnAdvanceGate")]
@@ -288,6 +290,8 @@ public class VnAppBootstrap : MonoBehaviour
 
         YarnCommandBridge yarnCommandBridge = new(
             dialogueRunner,
+            subPresentationRunner,
+            dialogueAdvanceDispatcher,
             yarnBridgePlaybackDriver,
             rigPrefab);
 
@@ -301,12 +305,12 @@ public class VnAppBootstrap : MonoBehaviour
             _linePresentationAdvanceState,
             vnTrace);
 
-        yarnLineSideEffectPresenter.Initialize(
-            dialogueRunner,
+        subPresentationPresenter.Initialize(
             _presentationSessionContext,
             _linePresentationAdvanceState,
             yarnBridgePlaybackDriver,
-            audioSystem);
+            yarnLineLifecycleBridge,
+            vnTrace);
 
         inlineEventMarkupHandler.Initialize(
             yarnLineLifecycleBridge,
@@ -332,7 +336,7 @@ public class VnAppBootstrap : MonoBehaviour
             vnTrace
         );
 
-        dialogueAdvanceDispatcher.Initialize(advanceGate, dialogueRunner, inlineEventMarkupHandler, _linePresentationAdvanceState);
+        dialogueAdvanceDispatcher.Initialize(advanceGate, dialogueRunner, subPresentationRunner, inlineEventMarkupHandler, _linePresentationAdvanceState);
         vnAdvanceInputPoller.Initialize(dialogueAdvanceDispatcher);
     }
 

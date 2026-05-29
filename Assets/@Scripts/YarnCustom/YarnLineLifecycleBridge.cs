@@ -34,6 +34,8 @@ public sealed class YarnLineLifecycleBridge : ActionMarkupHandler
 
     private YarnLineMeta _currentMeta;
 
+    public YarnLineMeta CurrentMeta => _currentMeta;
+
     public string CurrentNodeName { get; private set; }
     public string CurrentLineId { get; private set; }
     public string CurrentCharacterKey { get; private set; }
@@ -47,8 +49,7 @@ public sealed class YarnLineLifecycleBridge : ActionMarkupHandler
     {
         _dialogueRunner = dialogueRunner;
         _customLinePresenter = customLinePresenter;
-        //***
-        //_trace = trace;
+        _trace = trace;
 
         if (_dialogueRunner != null)
         {
@@ -136,15 +137,15 @@ public sealed class YarnLineLifecycleBridge : ActionMarkupHandler
         if (_trace == null)
             return;
 
-        _trace.Trace(nameof(YarnLineLifecycleBridge), evt, string.Empty, note);
+        _trace.Trace(nameof(YarnLineLifecycleBridge), evt, string.Empty, note, this);
     }
 
-    private static string FormatMeta(YarnLineMeta meta)
+    public static string FormatMeta(YarnLineMeta meta)
     {
         return $"{meta.nodeName}/{meta.lineId}";
     }
 
-    private static string Preview(string text)
+    public static string Preview(string text)
     {
         if (string.IsNullOrEmpty(text))
             return string.Empty;

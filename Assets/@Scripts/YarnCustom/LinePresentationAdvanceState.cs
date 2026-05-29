@@ -1,5 +1,7 @@
 public sealed class LinePresentationAdvanceState
 {
+    
+    
     private readonly VNSeekState _seek;
     private readonly VNLinePresentationState _line;
     private readonly VNTraceStream _trace;
