@@ -52,12 +52,35 @@ public sealed partial class YarnCommandBridge
         _dialogueRunner.AddCommandHandler<string>("ui_patch", EnqueueUIPatchSpec);
         
         _dialogueRunner.AddCommandHandler<float>("box_hide", EnqueueHideDialogueBoxSpec);
+        
         _dialogueRunner.AddCommandHandler<string>("debug_log", LogImmediate);
+        _dialogueRunner.AddCommandHandler<string>("debug_state", LogYarnState);
     }
     
     private void LogImmediate(string message)
     {
         Debug.Log($"[YarnCommandBridge] {message}");
+    }
+    
+    private void LogYarnState(string label)
+    {
+        VariableStorageBehaviour storage = _dialogueRunner.VariableStorage;
+
+        storage.TryGetValue("$favor", out float favor);
+        storage.TryGetValue("$laru_patience", out float patience);
+        storage.TryGetValue("$willow_debt", out float debt);
+        storage.TryGetValue("$requested_fee", out float requestedFee);
+        storage.TryGetValue("$paid_fee", out float paidFee);
+        storage.TryGetValue("$trust", out float trust);
+        storage.TryGetValue("$anger", out float anger);
+        storage.TryGetValue("$contract_signed", out bool contractSigned);
+
+        Debug.Log(
+            $"[YarnState] {label} | " +
+            $"favor={favor}, patience={patience}, debt={debt}, " +
+            $"requested={requestedFee}, paid={paidFee}, trust={trust}, " +
+            $"anger={anger}, contract={contractSigned}"
+            );
     }
 
     private void BindCharRigSetup()
