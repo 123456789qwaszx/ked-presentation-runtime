@@ -44,8 +44,8 @@ public sealed partial class YarnCommandBridge
         // Blocking Yarn command:
         // closes the hold block and pauses Yarn until the held commands
         // marked with wait=true finish inside Presentation/Executor.
-        _dialogueRunner.AddCommandHandler("hold_end", (Func<IEnumerator>)(() => PlayHeldCommands()));
-        //_dialogueRunner.AddCommandHandler("hold_end", PlayHeldCommands);
+        //_dialogueRunner.AddCommandHandler("hold_end", (Func<IEnumerator>)(() => PlayHeldCommands()));
+        _dialogueRunner.AddCommandHandler("hold_end", PlayHeldCommands);
         
         _dialogueRunner.AddCommandHandler<float>("pause", EnqueueWaitSpec);
         

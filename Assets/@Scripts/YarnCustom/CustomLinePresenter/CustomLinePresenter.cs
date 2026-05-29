@@ -18,7 +18,6 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
     private PresentationSessionContext _context;
     private LinePresentationAdvanceState _lineAdvanceState;
     private VNTraceStream _trace;
-    private YarnBridgePlaybackDriver _yarnBridgePlaybackDriver;
 
     private int _presenterGeneration;
 
@@ -55,8 +54,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
         EllipsisBreathTypewriter typewriter,
         PresentationSessionContext context,
         LinePresentationAdvanceState lineAdvanceState,
-        VNTraceStream trace = null,
-        YarnBridgePlaybackDriver yarnBridgePlaybackDriver = null)
+        VNTraceStream trace = null)
     {
         _typewriter = typewriter;
         _typewriter.ActionMarkupHandlers = ActionMarkupHandlers;
@@ -64,7 +62,6 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
         _context = context;
         _lineAdvanceState = lineAdvanceState;
         _trace = trace;
-        _yarnBridgePlaybackDriver = yarnBridgePlaybackDriver;
 
         DialogueBoxTransitionPolicy transitionPolicy = new ();
         DialogueBoxTextPrimer textPrimer = new ();
@@ -144,9 +141,6 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
                 Run = run,
             });
         
-
-        // _yarnBridgePlaybackDriver?.ResetImmediateWaitForNewLine();
-        // _yarnBridgePlaybackDriver?.PlayCollected();
         if (!run.IsValid)
         {
             Trace("RunBecameStaleAfterBoxPresentation", line);

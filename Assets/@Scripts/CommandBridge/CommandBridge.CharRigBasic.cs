@@ -6,7 +6,8 @@ public sealed partial class YarnCommandBridge
     {
         var spec = new FadeInCommandSpecCharR
         {
-            slotKey = roleKey
+            slotKey = roleKey,
+            duration = duration
         };
 
         Collect(spec);

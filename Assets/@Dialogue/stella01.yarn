@@ -34,8 +34,6 @@ Leafia: 이번에 저희[emoji key="21"/] 컴퍼니를 선택해 주셔서 감�
 <<shot_zoom_focus Albedo bust center 10 0.8>>
 메르쿠리아: 반복합니다.
 
-<<move_by Albedo 200 0 5 6>>
-
 <<shot_reset>>
 
 <<slide_out Leafia left>>

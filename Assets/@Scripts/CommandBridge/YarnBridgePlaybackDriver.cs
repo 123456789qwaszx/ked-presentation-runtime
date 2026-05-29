@@ -37,16 +37,10 @@ public sealed class YarnBridgePlaybackDriver : MonoBehaviour
         if (_isHoldActive)
         {
             _heldSpecs.Add(spec);
-            Debug.Log("Held spec: " + spec);
             return;
         }
 
         _collectedSpecs.Add(spec);
-    }
-
-    public void EnqueueHeldSpec(CommandSpecBase spec)
-    {
-        _heldSpecs.Add(spec);
     }
 
     public void PlayCollected()
@@ -54,7 +48,7 @@ public sealed class YarnBridgePlaybackDriver : MonoBehaviour
         // if (_collectedSpecs.Count == 0)
         //     return;
 
-        Debug.Log("Playing collected spec: " + _collectedSpecs.Count);
+        //Debug.Log("Playing collected spec: " + _collectedSpecs.Count);
         var specs = new List<CommandSpecBase>(_collectedSpecs);
         _collectedSpecs.Clear();
 
@@ -98,7 +92,7 @@ public sealed class YarnBridgePlaybackDriver : MonoBehaviour
         var specs = new List<CommandSpecBase>(_heldSpecs);
         _heldSpecs.Clear();
 
-        Debug.Log("[YarnBridgePlaybackDriver] play holded Spec.");
+        //Debug.Log("[YarnBridgePlaybackDriver] play holded Spec.");
         yield return _executor.PlaySpecsBlocking(specs, CurrentScope, "yarn-hold");
     }
 

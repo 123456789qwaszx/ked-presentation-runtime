@@ -25,7 +25,7 @@ public class FadeOutCommandSpecCharR : CharacterRigCommandSpecBase
     public bool disableInteraction = true;
 }
 
-public sealed class FadeOutCommandCharR : CommandBase, IStepScopedCommand
+public sealed class FadeOutCommandCharR : CommandBase
 {
     private readonly FadeOutCommandSpecCharR _spec;
 
