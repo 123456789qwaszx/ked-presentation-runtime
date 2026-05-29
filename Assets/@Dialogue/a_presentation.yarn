@@ -21,32 +21,26 @@
 <<shot_bind_bg_response rigKey>>
 <<shot_bind_bg_response bg0>>
 <<shot_bind_bg_response bg2>>
-<<debug_log 0>>
-1
-
-
+1.물론이지. 제대로 가져왔는지 확인해 볼 거야?
+<<await 1>>
 <<shot_zoom_focus Leafia bust center 3 0.8>>
-<<debug_log 1>>
-2
+2.물건을 건네받은 수상한 사람은 그것을 입으...
 
 <<shot_zoom_focus Albedo bust center 10 0.8>>
 
-<<debug_log 2>>
-3
+3.쩝쩝쩝 ..... 맞아, 바로 이 맛이야.
 
 <<shot_reset>>
 
 <<slide_out Leafia left>>
 <<fade_out Leafia 0.5>>
 
-<<debug_log 3>>
-4
+4.의심스러운 사람은 만족한 듯한 상대의 반응을 확인하고는 본론을 꺼냈다.
 
 <<emote Leafia 17>>
 <<place Leafia left>>
 <<slide_in_sway Leafia>>
 
-<<debug_log 4>>
 5
 
 <<expression Leafia 7>>
