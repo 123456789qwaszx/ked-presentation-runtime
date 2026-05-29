@@ -1,9 +1,9 @@
 ﻿title: OnlyText
 ---
 
-// <<hold_begin>>
-// <<sub_start a_presentation>>
-// <<hold_end>>
+<<hold_begin>>
+<<sub_start a_presentation>>
+<<hold_end>>
 
 
 "물론이지. 제대로 가져왔는지 확인해 볼 거야?"
@@ -21,10 +21,13 @@
 <<go>>
 "내가 부탁했던 건?"
 
+<<go>>
 "빠짐없이 챙겼왔지. 세어 봐."
 
+<<go>>
 수상한 사람이 묵직한 서류 뭉치를 내밀었다.
 
+<<go>>
 의심스러운 사람은 서류를 한 장씩 넘기며 숫자를 읖조렸다.
 
 "하나, 둘, 셋, 넷, 다섯. 맞군."

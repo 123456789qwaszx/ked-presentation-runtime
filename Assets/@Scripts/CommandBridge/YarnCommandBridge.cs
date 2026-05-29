@@ -37,9 +37,9 @@ public sealed partial class YarnCommandBridge
 
         // Main Runner only commands.
         // _dialogueRunner.AddCommandHandler("go", DispatchAdvanceToRunner);
-        // _dialogueRunner.AddCommandHandler<string>("sub_start", StartSubPresentationNode);
+        _dialogueRunner.AddCommandHandler<string>("sub_start", StartSubPresentationNode);
         _dialogueRunner.AddCommandHandler("go", EnqueueSubPresentationAdvanceSpec);
-        _dialogueRunner.AddCommandHandler<string>("sub_start", EnqueueSubPresentationStartSpec);
+        //_dialogueRunner.AddCommandHandler<string>("sub_start", EnqueueSubPresentationStartSpec);
     }
     
     private void EnqueueSubPresentationAdvanceSpec()
