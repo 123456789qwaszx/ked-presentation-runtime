@@ -230,8 +230,7 @@ public class VnAppBootstrap : MonoBehaviour
         PresentationControlCommandFactory presentationControlFactory = new(
             _uiPatchService,
             dialogueBoxHost,
-            dialogueAdvanceDispatcher,
-            subPresentationRunner);
+            dialogueAdvanceDispatcher);
 
         // Audio
         ResourcesAudioClipResolver audioClipResolver = new();
@@ -293,7 +292,6 @@ public class VnAppBootstrap : MonoBehaviour
         YarnCommandBridge yarnCommandBridge = new(
             dialogueRunner,
             subPresentationRunner,
-            dialogueAdvanceDispatcher,
             yarnBridgePlaybackDriver,
             rigPrefab);
 
@@ -330,13 +328,13 @@ public class VnAppBootstrap : MonoBehaviour
 
     private void BootstrapDialogueAdvanceInput()
     {
-        PresentationSession session = presentationSessionEntry.PresentationSession;
 
         AdvanceGate advanceGate = new(
             _vnUxState,
             _vnPlaybackSettings,
             _linePresentationAdvanceState,
-            () => session != null && session.IsNodeBusy(),
+            presentationSessionEntry,
+            commandExecutor,
             vnTrace
         );
 

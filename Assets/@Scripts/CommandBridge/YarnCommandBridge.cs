@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using System.Collections;
 using UnityEngine;
 using Yarn.Unity;
 
@@ -7,70 +7,47 @@ public sealed partial class YarnCommandBridge
 {
     private readonly DialogueRunner _dialogueRunner;
     private readonly DialogueRunner _subPresentationRunner;
-    private readonly DialogueAdvanceDispatcher _dialogueAdvanceDispatcher;
     
     private readonly YarnBridgePlaybackDriver _playbackDriver;
     private readonly RectTransform _charRigPrefab;
     
-    private readonly Dictionary<string, DialogueAdvanceDispatcher> _advanceDispatchersByKey = new();
-    
     public YarnCommandBridge(
         DialogueRunner dialogueRunner,
         DialogueRunner subPresentationRunner,
-        DialogueAdvanceDispatcher dialogueAdvanceDispatcher,
         YarnBridgePlaybackDriver playbackDriver, 
         RectTransform charRigPrefab)
     {
         _dialogueRunner = dialogueRunner;
         _subPresentationRunner = subPresentationRunner;
-        _dialogueAdvanceDispatcher = dialogueAdvanceDispatcher;
         
         _playbackDriver = playbackDriver;
         _charRigPrefab = charRigPrefab;
         
         BindRunnerCommands(_dialogueRunner);
-
-        if (_subPresentationRunner != null && !ReferenceEquals(_subPresentationRunner, _dialogueRunner))
-            BindRunnerCommands(_subPresentationRunner);
-
-        RegisterAdvanceDispatcher("cue", _dialogueAdvanceDispatcher);
+        BindRunnerCommands(_subPresentationRunner);
 
         // Main Runner only commands.
-        // _dialogueRunner.AddCommandHandler("go", DispatchAdvanceToRunner);
         _dialogueRunner.AddCommandHandler<string>("sub_start", StartSubPresentationNode);
-        _dialogueRunner.AddCommandHandler("go", EnqueueSubPresentationAdvanceSpec);
-        //_dialogueRunner.AddCommandHandler<string>("sub_start", EnqueueSubPresentationStartSpec);
+        _dialogueRunner.AddCommandHandler<string>("a", EnqueueSubPresentationAdvanceSpec);
     }
     
-    private void EnqueueSubPresentationAdvanceSpec()
+    private IEnumerator StartSubPresentationNode(string nodeName)
     {
-        var spec = new SubPresentationAdvanceCommandSpec
-        {
-            label = "cue"
-        };
+        _subPresentationRunner.StartDialogue(nodeName);
 
-        Collect(spec);
+        const int minWaitFrames = 10;
+
+        for (int frame = 0; frame < minWaitFrames; frame++)
+            yield return null;
     }
-
-    private void EnqueueSubPresentationStartSpec(string nodeName)
-    {
-        var spec = new SubPresentationStartCommandSpec
-        {
-            nodeName = nodeName,
-            restartIfRunning = true
-        };
-
-        Collect(spec);
-    }
-
+    
+    private void EnqueueSubPresentationAdvanceSpec(string _ = "doNothing") => Collect(new SubPresentationAdvanceCommandSpec());
+    
     private void BindRunnerCommands(DialogueRunner runner)
     {
         if (runner == null)
-        {
             Debug.LogWarning("[YarnCommandBridge] Cannot bind commands. DialogueRunner is null.");
-            return;
-        }
-
+        
         BindControl(runner);
 
         BindCharRigSetup(runner);
@@ -88,52 +65,14 @@ public sealed partial class YarnCommandBridge
         BindAudio(runner);
     }
     
-    private void RegisterAdvanceDispatcher(string key, DialogueAdvanceDispatcher dispatcher)
-    {
-        if (string.IsNullOrWhiteSpace(key))
-        {
-            Debug.LogWarning("[YarnCommandBridge] Cannot register advance dispatcher. key is null or empty.");
-            return;
-        }
-
-        if (dispatcher == null)
-        {
-            Debug.LogWarning($"[YarnCommandBridge] Cannot register advance dispatcher. key='{key}', dispatcher is null.");
-            return;
-        }
-
-        _advanceDispatchersByKey[key] = dispatcher;
-    }
-    
-    private void DispatchAdvanceToRunner()
-    {
-        if (!_advanceDispatchersByKey.TryGetValue("cue", out DialogueAdvanceDispatcher dispatcher) || dispatcher == null)
-        {
-            Debug.LogWarning("[YarnCommandBridge] advance_runner failed. No dispatcher registered for key='cue'.");
-            return;
-        }
-
-        dispatcher.DispatchSubPresentationAdvance();
-    }
-    
-    private void StartSubPresentationNode(string nodeName)
-    {
-        _subPresentationRunner.StartDialogue(nodeName);
-    }
 
     private void BindControl(DialogueRunner runner)
     {
-        // Marks the next N collected commands as wait=true inside Presentation/Executor.
-        // This affects command playback order, but does NOT block Yarn by itself.
-        runner.AddCommandHandler<int>("await", AwaitFor);
-
-        // Starts a Yarn-level hold block.
-        runner.AddCommandHandler("hold_begin", BeginHold);
-
-        // Blocking Yarn command:
-        // closes the hold block and pauses Yarn until the held commands
-        // marked with wait=true finish inside Presentation/Executor.
-        runner.AddCommandHandler("hold_end", PlayHeldCommands);
+        // Starts capturing commands into a virtual command block.
+        // Commands after <<capture_block>> are collected as one block-level execution unit.
+        // Yarn timing is held until <<block_end>> plays the block.
+        runner.AddCommandHandler("capture_block", BeginBlockCapture);
+        runner.AddCommandHandler<float>("play_block", PlayCapturedBlock);
         
         runner.AddCommandHandler<float>("pause", EnqueueWaitSpec);
         
@@ -145,31 +84,6 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler<string>("debug_state", LogYarnState);
     }
     
-    private void LogImmediate(string message)
-    {
-        Debug.Log($"[YarnCommandBridge] {message}");
-    }
-    
-    private void LogYarnState(string label)
-    {
-        VariableStorageBehaviour storage = _dialogueRunner.VariableStorage;
-
-        storage.TryGetValue("$favor", out float favor);
-        storage.TryGetValue("$laru_patience", out float patience);
-        storage.TryGetValue("$willow_debt", out float debt);
-        storage.TryGetValue("$requested_fee", out float requestedFee);
-        storage.TryGetValue("$paid_fee", out float paidFee);
-        storage.TryGetValue("$trust", out float trust);
-        storage.TryGetValue("$anger", out float anger);
-        storage.TryGetValue("$contract_signed", out bool contractSigned);
-
-        Debug.Log(
-            $"[YarnState] {label} | " +
-            $"favor={favor}, patience={patience}, debt={debt}, " +
-            $"requested={requestedFee}, paid={paidFee}, trust={trust}, " +
-            $"anger={anger}, contract={contractSigned}"
-        );
-    }
 
     private void BindCharRigSetup(DialogueRunner runner)
     {

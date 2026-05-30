@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 public sealed class AdvanceGate
@@ -6,9 +5,12 @@ public sealed class AdvanceGate
     private readonly VnUxState _vnUxState;
     private readonly VnPlaybackSettings _vnPlaybackSettings;
     private readonly LinePresentationAdvanceState _lineState;
-    private readonly Func<bool> _isCpsNodeBusy;
+    private ICommandRunScopeProvider _scopeProvider;
+    private readonly CommandExecutor _commandExecutor;
     private readonly VNTraceStream _trace;
 
+    private CommandRunScope CurrentScope => _scopeProvider?.CurrentScope;
+    
     private float UserAdvanceCooldownSec => _vnPlaybackSettings.userAdvanceCooldownSec;
     private float AutoPulseCooldownSec => _vnPlaybackSettings.autoAdvanceRateLimitSec;
     public float CooldownAfterHurryUpSec => _vnPlaybackSettings.cooldownAfterHurryUpSec;
@@ -25,13 +27,15 @@ public sealed class AdvanceGate
         VnUxState uxState,
         VnPlaybackSettings vnPlaybackSettings,
         LinePresentationAdvanceState lineState,
-        Func<bool> isCpsNodeBusy,
+        ICommandRunScopeProvider scopeProvider,
+        CommandExecutor commandExecutor,
         VNTraceStream trace)
     {
         _vnUxState = uxState;
         _vnPlaybackSettings = vnPlaybackSettings;
         _lineState = lineState;
-        _isCpsNodeBusy = isCpsNodeBusy;
+        _scopeProvider = scopeProvider;
+        _commandExecutor = commandExecutor;
         _trace = trace;
     }
 
@@ -82,6 +86,7 @@ public sealed class AdvanceGate
 
     private bool TryEnter(bool isUser)
     {
+        
         if (_lineState != null && _lineState.IsSeekingActive)
             return Reject(isUser, "seek_active");
 
@@ -91,8 +96,12 @@ public sealed class AdvanceGate
         if (_vnUxState.ChoicesVisible)
             return Reject(isUser, "choices_visible");
 
-        if (_isCpsNodeBusy != null && _isCpsNodeBusy())
+        if (_scopeProvider.CurrentScope.IsNodeBusy)
+        {
+            // Debug.Log("executorDispose");
+            // _commandExecutor.CancelAndDisposeToken();
             return Reject(isUser, "cps_node_busy");
+        }
 
         double unscaledNow = Time.unscaledTimeAsDouble;
 
@@ -108,7 +117,7 @@ public sealed class AdvanceGate
         Trace(
             isUser ? "AcceptUserAdvance" : "AcceptAutoPulse",
             $"now={unscaledNow:0.000}");
-
+        
         return true;
     }
 

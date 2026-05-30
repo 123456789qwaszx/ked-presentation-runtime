@@ -11,11 +11,7 @@ using UnityEngine;
     },
     SetOrder = -909)]
 public sealed class SubPresentationAdvanceCommandSpec : CommandSpecBase
-{
-    [Header("Advance")]
-    [Tooltip("디버그/로그용 라벨. 기능상 필수는 아닙니다.")]
-    public string label = "cue";
-}
+{ }
 
 public sealed class SubPresentationAdvanceCommand : CommandBase
 {

@@ -12,7 +12,7 @@ public sealed class DialogueAdvanceDispatcher : MonoBehaviour
 
     private int _pendingSubPresentationAdvanceCount;
     private bool _isSubPresentationReadyForAdvance;
-
+    
     public int PendingSubPresentationAdvanceCount => _pendingSubPresentationAdvanceCount;
     public bool IsSubPresentationReadyForAdvance => _isSubPresentationReadyForAdvance;
 
@@ -30,19 +30,11 @@ public sealed class DialogueAdvanceDispatcher : MonoBehaviour
         _inlineMarkupHandler = inlineMarkupHandler;
         _linePresentationAdvanceState = linePresentationAdvanceState;
         _trace = trace;
-
-        Trace("Initialized");
     }
 
     public void DispatchAdvance()
     {
         Trace("DispatchAdvanceRequested");
-
-        if (_gate == null)
-        {
-            Trace("DispatchAdvanceRejected", "reason=GateNull");
-            return;
-        }
 
         if (!_gate.TryAcceptUserAdvance())
         {
@@ -54,7 +46,6 @@ public sealed class DialogueAdvanceDispatcher : MonoBehaviour
             return;
 
         _gate.AddCooldownSeconds(0.03f);
-        Trace("DispatchAdvanceNoDialogue", "cooldown=0.03");
     }
 
     public void DispatchSeekNext()
@@ -164,14 +155,11 @@ public sealed class DialogueAdvanceDispatcher : MonoBehaviour
         _pendingSubPresentationAdvanceCount--;
         _isSubPresentationReadyForAdvance = false;
 
-        Trace("FlushSubPresentationAdvance",
-            $"reason={reason}, pendingAfter={_pendingSubPresentationAdvanceCount}");
-
         _subPresentationRunner.RequestNextLine();
         return true;
     }
 
-    public void ClearPendingSubPresentationAdvances(string reason = null)
+    public void Clear(string reason = null)
     {
         Trace("ClearPendingSubPresentationAdvances",
             $"reason={reason}, pendingBefore={_pendingSubPresentationAdvanceCount}, readyBefore={_isSubPresentationReadyForAdvance}");

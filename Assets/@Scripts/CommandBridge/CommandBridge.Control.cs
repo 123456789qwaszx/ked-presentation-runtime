@@ -1,23 +1,21 @@
 using System.Collections;
+using UnityEngine;
+using Yarn.Unity;
 
 public sealed partial class YarnCommandBridge
 {
-    // Marks the next N collected commands as wait=true.
-    // This only affects Presentation/Executor playback.
-    private void AwaitFor(int count = 1)
+    private void BeginBlockCapture()
     {
-        _playbackDriver.WaitNextImmediateCommands(count);
+        _playbackDriver.BeginBlockCapture();
     }
     
-    private void BeginHold()
+    // Plays the currently collected command block at this point in Yarn flow.
+    // Yarn waits until playback finishes
+    private IEnumerator PlayCapturedBlock(float waitTime = 1f)
     {
-        _playbackDriver.BeginHold();
-    }
-
-    // Closes the active hold block and blocks Yarn until held wait=true commands finish.
-    private IEnumerator PlayHeldCommands()
-    {
-        yield return _playbackDriver.EndHoldBlocking();
+        EnqueueWaitSpec(waitTime);
+        
+        yield return _playbackDriver.PlayCapturedBlock();
     }
     
     private void EnqueueWaitSpec(float duration)
@@ -50,5 +48,32 @@ public sealed partial class YarnCommandBridge
         };
 
         Collect(spec);
+    }
+    
+    
+    private void LogImmediate(string message)
+    {
+        Debug.Log($"[YarnCommandBridge] {message}");
+    }
+    
+    private void LogYarnState(string label)
+    {
+        VariableStorageBehaviour storage = _dialogueRunner.VariableStorage;
+
+        storage.TryGetValue("$favor", out float favor);
+        storage.TryGetValue("$laru_patience", out float patience);
+        storage.TryGetValue("$willow_debt", out float debt);
+        storage.TryGetValue("$requested_fee", out float requestedFee);
+        storage.TryGetValue("$paid_fee", out float paidFee);
+        storage.TryGetValue("$trust", out float trust);
+        storage.TryGetValue("$anger", out float anger);
+        storage.TryGetValue("$contract_signed", out bool contractSigned);
+
+        Debug.Log(
+            $"[YarnState] {label} | " +
+            $"favor={favor}, patience={patience}, debt={debt}, " +
+            $"requested={requestedFee}, paid={paidFee}, trust={trust}, " +
+            $"anger={anger}, contract={contractSigned}"
+        );
     }
 }
