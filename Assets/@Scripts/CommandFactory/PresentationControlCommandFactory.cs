@@ -1,14 +1,12 @@
-using Yarn.Unity;
-
 public sealed class PresentationControlCommandFactory : INodeCommandFactory
 {
     private readonly UIPatchService _uiPatchService;
-    private readonly IDialogueBoxViewResolver _dialogueBoxResolver;
+    private readonly DialogueBoxHost _dialogueBoxResolver;
     private readonly DialogueAdvanceDispatcher _dialogueAdvanceDispatcher;
 
     public PresentationControlCommandFactory(
         UIPatchService uiPatchService,
-        IDialogueBoxViewResolver dialogueBoxResolver,
+        DialogueBoxHost dialogueBoxResolver,
         DialogueAdvanceDispatcher dialogueAdvanceDispatcher)
     {
         _uiPatchService = uiPatchService;
@@ -26,7 +24,7 @@ public sealed class PresentationControlCommandFactory : INodeCommandFactory
 
             HideDialogueBoxCommandSpec s => new HideDialogueBoxCommand(s, _dialogueBoxResolver),
 
-            SubPresentationAdvanceCommandSpec s => new SubPresentationAdvanceCommand(_dialogueAdvanceDispatcher, s),
+            SubPresentationAdvanceCommandSpec s => new SubPresentationAdvanceCommand(_dialogueAdvanceDispatcher),
 
             _ => null
         };

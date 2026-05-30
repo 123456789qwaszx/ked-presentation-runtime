@@ -1,5 +1,4 @@
 using System;
-using Yarn.Unity;
 
 [Serializable]
 public sealed class DialogueBoxLineRoutingPolicy

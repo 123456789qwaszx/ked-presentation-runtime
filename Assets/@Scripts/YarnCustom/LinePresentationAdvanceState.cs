@@ -1,7 +1,7 @@
 public sealed class LinePresentationAdvanceState
 {
-    private readonly VNSeekState _seek;
-    private readonly VNLinePresentationState _line;
+    private readonly VNSeekState _seek = new();
+    private readonly VNLinePresentationState _line = new();
     private readonly VNTraceStream _trace;
 
     private bool _rollbackPointBlocked;
@@ -28,13 +28,6 @@ public sealed class LinePresentationAdvanceState
     public bool IsSeekingActive => IsSeekActive;
     public bool IsRollbackActive => IsRollbackSeekActive;
     public string TargetNodeName => _seek.TargetNodeName;
-
-    public LinePresentationAdvanceState(VNTraceStream trace)
-    {
-        _trace = trace;
-        _seek = new VNSeekState(trace);
-        _line = new VNLinePresentationState();
-    }
 
     public void StartRollbackSeek(string nodeName, string lineId)
     {

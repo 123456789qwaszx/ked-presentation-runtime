@@ -10,11 +10,9 @@ public sealed class DialogueAdvanceDispatcher : MonoBehaviour
     private LinePresentationAdvanceState _linePresentationAdvanceState;
     private VNTraceStream _trace;
 
-    private int _pendingSubPresentationAdvanceCount;
-    private bool _isSubPresentationReadyForAdvance;
+    private int _pendingSubAdvanceCount;
+    private bool _isSubReadyForAdvance;
     
-    public int PendingSubPresentationAdvanceCount => _pendingSubPresentationAdvanceCount;
-    public bool IsSubPresentationReadyForAdvance => _isSubPresentationReadyForAdvance;
 
     public void Initialize(
         AdvanceGate gate,
@@ -52,13 +50,10 @@ public sealed class DialogueAdvanceDispatcher : MonoBehaviour
     {
         Trace("DispatchSeekNextRequested");
 
-        if (_dialogueRunner == null || !_dialogueRunner.IsDialogueRunning)
-        {
-            Trace("DispatchSeekNextRejected", "reason=MainRunnerNotRunning");
+        if (!_dialogueRunner.IsDialogueRunning)
             return;
-        }
 
-        if (_linePresentationAdvanceState != null && !_linePresentationAdvanceState.IsLineFullyShown)
+        if (!_linePresentationAdvanceState.IsLineFullyShown)
         {
             _inlineMarkupHandler?.FlushPendingSignals();
             _dialogueRunner.RequestHurryUpLine();
@@ -72,100 +67,65 @@ public sealed class DialogueAdvanceDispatcher : MonoBehaviour
 
     private bool TryDispatchToYarn()
     {
-        if (_dialogueRunner == null || !_dialogueRunner.IsDialogueRunning)
-        {
-            Trace("TryDispatchToYarnFailed", "reason=MainRunnerNotRunning");
+        if (!_dialogueRunner.IsDialogueRunning)
             return false;
-        }
 
-        if (_linePresentationAdvanceState != null && !_linePresentationAdvanceState.IsLineFullyShown)
+        if (!_linePresentationAdvanceState.IsLineFullyShown)
         {
             _inlineMarkupHandler?.FlushPendingSignals();
             _dialogueRunner.RequestHurryUpLine();
-
-            if (_gate != null)
-                _gate.AddCooldownSeconds(_gate.CooldownAfterHurryUpSec);
-
+            _gate.AddCooldownSeconds(_gate.CooldownAfterHurryUpSec);
             Trace("TryDispatchToYarnHurryUp");
         }
         else
         {
             _dialogueRunner.RequestNextLine();
-
-            if (_gate != null)
-                _gate.AddCooldownSeconds(_gate.CooldownAfterNextLineSec);
-
+            _gate.AddCooldownSeconds(_gate.CooldownAfterNextLineSec);
             Trace("TryDispatchToYarnNextLine");
         }
 
         return true;
     }
 
-    public void DispatchSubPresentationAdvance()
+    public void DispatchSubAdvance()
     {
-        _pendingSubPresentationAdvanceCount++;
-
-        Trace("DispatchSubPresentationAdvanceLatched",
-            $"pending={_pendingSubPresentationAdvanceCount}, ready={_isSubPresentationReadyForAdvance}");
-
-        TryFlushSubPresentationAdvance("DispatchSubPresentationAdvance");
+        _pendingSubAdvanceCount++;
+        TryFlushSubAdvance();
     }
 
-    public void NotifySubPresentationReadyForAdvance()
+    public void NotifySubReadyForAdvance()
     {
-        _isSubPresentationReadyForAdvance = true;
-
-        Trace("NotifySubPresentationReadyForAdvance",
-            $"pending={_pendingSubPresentationAdvanceCount}, ready={_isSubPresentationReadyForAdvance}");
-
-        TryFlushSubPresentationAdvance("NotifySubPresentationReadyForAdvance");
+        _isSubReadyForAdvance = true;
+        TryFlushSubAdvance();
     }
 
-    public void NotifySubPresentationNotReadyForAdvance(string reason = null)
+    public void NotifySubNotReadyForAdvance()
     {
-        _isSubPresentationReadyForAdvance = false;
-
-        Trace("NotifySubPresentationNotReadyForAdvance",
-            $"reason={reason}, pending={_pendingSubPresentationAdvanceCount}, ready={_isSubPresentationReadyForAdvance}");
+        _isSubReadyForAdvance = false;
     }
 
-    private bool TryFlushSubPresentationAdvance(string reason)
+    private bool TryFlushSubAdvance()
     {
-        if (_pendingSubPresentationAdvanceCount <= 0)
-        {
-            Trace("TryFlushSubPresentationAdvanceSkipped",
-                $"reason={reason}, cause=NoPending, pending={_pendingSubPresentationAdvanceCount}, ready={_isSubPresentationReadyForAdvance}");
+        if (_pendingSubAdvanceCount <= 0)
             return false;
-        }
 
-        if (!_isSubPresentationReadyForAdvance)
-        {
-            Trace("TryFlushSubPresentationAdvanceSkipped",
-                $"reason={reason}, cause=NotReady, pending={_pendingSubPresentationAdvanceCount}, ready={_isSubPresentationReadyForAdvance}");
+        if (!_isSubReadyForAdvance)
             return false;
-        }
-
-        if (_subPresentationRunner == null || !_subPresentationRunner.IsDialogueRunning)
-        {
-            Trace("TryFlushSubPresentationAdvanceSkipped",
-                $"reason={reason}, cause=SubRunnerNotRunning, pending={_pendingSubPresentationAdvanceCount}, ready={_isSubPresentationReadyForAdvance}");
+        
+        if (!_subPresentationRunner.IsDialogueRunning)
             return false;
-        }
 
-        _pendingSubPresentationAdvanceCount--;
-        _isSubPresentationReadyForAdvance = false;
+        _pendingSubAdvanceCount--;
+        _isSubReadyForAdvance = false;
 
         _subPresentationRunner.RequestNextLine();
         return true;
     }
 
-    public void Clear(string reason = null)
+    public void Clear()
     {
-        Trace("ClearPendingSubPresentationAdvances",
-            $"reason={reason}, pendingBefore={_pendingSubPresentationAdvanceCount}, readyBefore={_isSubPresentationReadyForAdvance}");
-
-        _pendingSubPresentationAdvanceCount = 0;
-        _isSubPresentationReadyForAdvance = false;
+        _pendingSubAdvanceCount = 0;
+        _isSubReadyForAdvance = false;
     }
 
     private void Trace(string evt, string note = null)
@@ -173,10 +133,6 @@ public sealed class DialogueAdvanceDispatcher : MonoBehaviour
         if (_trace == null)
             return;
 
-        string state = _linePresentationAdvanceState == null
-            ? "lineState=null"
-            : _linePresentationAdvanceState.Snapshot();
-
-        _trace.Trace(nameof(DialogueAdvanceDispatcher), evt, state, note, this);
+        _trace.Trace(nameof(DialogueAdvanceDispatcher), evt, _linePresentationAdvanceState.Snapshot(), note, this);
     }
 }

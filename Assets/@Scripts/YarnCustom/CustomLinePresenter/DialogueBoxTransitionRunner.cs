@@ -3,29 +3,18 @@ using Yarn.Unity;
 
 public sealed class DialogueBoxTransitionRunner
 {
-    private readonly IDialogueBoxViewResolver _dialogueBoxResolver;
-    private readonly VNTraceStream _trace;
+    private readonly DialogueBoxHost _dialogueBoxResolver;
 
-    public DialogueBoxTransitionRunner(
-        IDialogueBoxViewResolver dialogueBoxResolver,
-        VNTraceStream trace = null)
+    public DialogueBoxTransitionRunner(DialogueBoxHost dialogueBoxResolver)
     {
         _dialogueBoxResolver = dialogueBoxResolver;
-        _trace = trace;
     }
 
     public void Prepare(DialogueBoxTransitionPlan plan)
     {
-        if (plan == null)
-            return;
-
         IDialogueTextTarget nextBox = plan.NextBox;
 
-        Trace(
-            "Prepare",
-            $"transition={plan.TransitionKind}, next={GetBoxName(nextBox)}");
-
-        DialogueBoxHost host = _dialogueBoxResolver as DialogueBoxHost;
+        DialogueBoxHost host = _dialogueBoxResolver;
 
         switch (plan.TransitionKind)
         {
@@ -75,19 +64,6 @@ public sealed class DialogueBoxTransitionRunner
         float fadeDownDuration,
         LinePresentationRun run)
     {
-        if (plan == null)
-            return;
-
-        if (run == null || !run.IsValid)
-        {
-            Trace("ApplyAsyncSkipped", "reason=InvalidRun");
-            return;
-        }
-
-        Trace(
-            "ApplyAsync",
-            $"transition={plan.TransitionKind}, previous={GetBoxName(plan.PreviousBox)}, next={GetBoxName(plan.NextBox)}");
-
         switch (plan.TransitionKind)
         {
             case DialogueBoxTransitionKind.Keep:
@@ -105,17 +81,11 @@ public sealed class DialogueBoxTransitionRunner
                 break;
 
             case DialogueBoxTransitionKind.FadeOutIn:
-                if (plan.PreviousBox != null &&
-                    !ReferenceEquals(plan.PreviousBox, plan.NextBox))
-                {
+                if (plan.PreviousBox != null && !ReferenceEquals(plan.PreviousBox, plan.NextBox))
                     await FadeOutBoxAsync(plan.PreviousBox, fadeDownDuration, run);
-                }
-
+                
                 if (!run.IsValid)
-                {
-                    Trace("ApplyAsyncCanceled", "phase=AfterFadeOut");
                     break;
-                }
 
                 SetVisibleImmediate(plan.PreviousBox, false);
                 PrepareHidden(plan.NextBox);
@@ -135,13 +105,6 @@ public sealed class DialogueBoxTransitionRunner
 
     public void ApplyImmediate(DialogueBoxTransitionPlan plan)
     {
-        if (plan == null)
-            return;
-
-        Trace(
-            "ApplyImmediate",
-            $"transition={plan.TransitionKind}, previous={GetBoxName(plan.PreviousBox)}, next={GetBoxName(plan.NextBox)}");
-
         switch (plan.TransitionKind)
         {
             case DialogueBoxTransitionKind.Keep:
@@ -155,12 +118,9 @@ public sealed class DialogueBoxTransitionRunner
                 break;
 
             case DialogueBoxTransitionKind.FadeOutIn:
-                if (plan.PreviousBox != null &&
-                    !ReferenceEquals(plan.PreviousBox, plan.NextBox))
-                {
+                if (plan.PreviousBox != null && !ReferenceEquals(plan.PreviousBox, plan.NextBox))
                     SetVisibleImmediate(plan.PreviousBox, false);
-                }
-
+                
                 HideAllExcept(plan.NextBox);
                 SetVisibleImmediate(plan.NextBox, true);
                 break;
@@ -173,13 +133,12 @@ public sealed class DialogueBoxTransitionRunner
 
     public void HideAll()
     {
-        if (_dialogueBoxResolver != null)
-            _dialogueBoxResolver.HideAll();
+        _dialogueBoxResolver.HideAll();
     }
 
     public void HideAllExcept(IDialogueTextTarget keep)
     {
-        DialogueBoxHost host = _dialogueBoxResolver as DialogueBoxHost;
+        DialogueBoxHost host = _dialogueBoxResolver;
         if (host != null)
         {
             host.HideAllExcept(keep);
@@ -239,11 +198,11 @@ public sealed class DialogueBoxTransitionRunner
 
     public void ResetBoxTransform(IDialogueTextTarget box)
     {
-        if (box == null)
+        if (box == null) 
             return;
 
         MonoBehaviour behaviour = box as MonoBehaviour;
-        if (behaviour == null)
+        if (behaviour == null) 
             return;
 
         RectTransform rect = behaviour.transform as RectTransform;
@@ -262,18 +221,11 @@ public sealed class DialogueBoxTransitionRunner
         float duration,
         LinePresentationRun run)
     {
-        if (box == null || box.CanvasGroup == null)
-            return;
-
-        if (run == null || !run.IsValid)
-        {
-            Trace("FadeInSkipped", $"box={GetBoxName(box)}, reason=InvalidRun");
-            return;
-        }
+        if (box == null || box.CanvasGroup == null) return;
+        if (run == null || !run.IsValid) return;
+        
 
         CanvasGroup cg = box.CanvasGroup;
-
-        Trace("FadeInStart", $"box={GetBoxName(box)}, duration={duration}");
 
         SetVisibleImmediate(box, true);
         cg.alpha = 0f;
@@ -283,75 +235,32 @@ public sealed class DialogueBoxTransitionRunner
             .SuppressCancellationThrow();
 
         if (!run.IsValid)
-        {
-            Trace("FadeInCanceled", $"box={GetBoxName(box)}");
             return;
-        }
+        
 
         cg.alpha = 1f;
         cg.interactable = true;
         cg.blocksRaycasts = true;
 
-        Trace("FadeInComplete", $"box={GetBoxName(box)}");
     }
 
-    private async YarnTask FadeOutBoxAsync(
-        IDialogueTextTarget box,
-        float duration,
-        LinePresentationRun run)
+    private async YarnTask FadeOutBoxAsync(IDialogueTextTarget box, float duration, LinePresentationRun run)
     {
-        if (box == null || box.CanvasGroup == null)
-            return;
-
-        if (run == null || !run.IsValid)
-        {
-            Trace("FadeOutSkipped", $"box={GetBoxName(box)}, reason=InvalidRun");
-            return;
-        }
-
+        if (box == null || box.CanvasGroup == null) return;
+        if (run == null || !run.IsValid) return;
+        
         CanvasGroup cg = box.CanvasGroup;
         float fromAlpha = cg.alpha;
-
-        Trace("FadeOutStart", $"box={GetBoxName(box)}, from={fromAlpha}, duration={duration}");
 
         await Effects
             .FadeAlphaAsync(cg, fromAlpha, 0f, duration, run.VisualToken)
             .SuppressCancellationThrow();
 
         if (!run.IsValid)
-        {
-            Trace("FadeOutCanceled", $"box={GetBoxName(box)}");
             return;
-        }
 
         cg.alpha = 0f;
         cg.interactable = false;
         cg.blocksRaycasts = false;
-
-        Trace("FadeOutComplete", $"box={GetBoxName(box)}");
-    }
-
-    private void Trace(string evt, string note = null)
-    {
-        if (_trace == null)
-            return;
-
-        _trace.Trace(
-            "DialogueBoxTransition",
-            evt,
-            null,
-            note);
-    }
-
-    private static string GetBoxName(IDialogueTextTarget box)
-    {
-        if (box == null)
-            return "null";
-
-        MonoBehaviour behaviour = box as MonoBehaviour;
-        if (behaviour != null)
-            return behaviour.name;
-
-        return box.GetType().Name;
     }
 }

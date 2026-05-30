@@ -1,13 +1,6 @@
 using System;
 using UnityEngine;
 
-public interface IDialogueBoxViewResolver
-{
-    IDialogueTextTarget ResolveTarget(DialogueBoxKind kind);
-    void ShowOnly(IDialogueTextTarget target);
-    void HideAll();
-}
-
 public enum DialogueBoxKind
 {
     Portrait = 0,
@@ -26,7 +19,7 @@ public struct DialogueBoxHostEntry
     public MonoBehaviour view;
 }
 
-public sealed class DialogueBoxHost : MonoBehaviour, IDialogueBoxViewResolver
+public sealed class DialogueBoxHost : MonoBehaviour
 {
     [Header("Dialogue Box Entries")]
     [SerializeField] private DialogueBoxHostEntry[] entries;
@@ -47,7 +40,6 @@ public sealed class DialogueBoxHost : MonoBehaviour, IDialogueBoxViewResolver
             if (entries[i].view == null)
             {
                 Debug.LogWarning($"[DialogueBoxHost] View is null. kind={entries[i].kind}", this);
-
                 return null;
             }
 
@@ -55,11 +47,9 @@ public sealed class DialogueBoxHost : MonoBehaviour, IDialogueBoxViewResolver
             if (view == null)
             {
                 Debug.LogWarning($"[DialogueBoxHost] View must implement IPresentationDialogueBoxView. kind={entries[i].kind}, go={entries[i].view.name}", entries[i].view);
-
                 return null;
             }
 
-            //view.Validate();
             return view;
         }
 
@@ -86,7 +76,8 @@ public sealed class DialogueBoxHost : MonoBehaviour, IDialogueBoxViewResolver
             // Unity-destroyed views can remain as C# references.
             // Check as MonoBehaviour before casting to an interface.
             MonoBehaviour behaviour = entries[i].view;
-            if (!behaviour) continue;
+            if (!behaviour) 
+                continue;
 
             IPresentationDialogueBoxView view = behaviour as IPresentationDialogueBoxView;
             if (view == null) 
@@ -95,22 +86,13 @@ public sealed class DialogueBoxHost : MonoBehaviour, IDialogueBoxViewResolver
             view.SetVisible(false);
         }
     }
-    
-    public IPresentationDialogueBoxView AsView(IDialogueTextTarget target)
-    {
-        return target as IPresentationDialogueBoxView;
-    }
 
     public void ShowImmediate(IDialogueTextTarget target)
     {
         IPresentationDialogueBoxView view = target as IPresentationDialogueBoxView;
-        if (view == null)
-            return;
 
         view.SetVisible(true);
-
-        if (view.CanvasGroup != null)
-            view.CanvasGroup.alpha = 1f;
+        view.CanvasGroup.alpha = 1f;
     }
 
     public void HideImmediate(IDialogueTextTarget target)

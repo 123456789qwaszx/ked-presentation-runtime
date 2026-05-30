@@ -1,14 +1,14 @@
+using UnityEngine;
 using Yarn.Unity;
 
 public sealed class DialogueBoxPresentationController
 {
     private readonly DialogueBoxLineRoutingPolicy _lineRoutingPolicy;
-    private readonly IDialogueBoxViewResolver _dialogueBoxResolver;
+    private readonly DialogueBoxHost _dialogueBoxResolver;
     private readonly DialogueBoxTransitionPolicy _boxTransitionPolicy;
     private readonly DialogueTextRouter _dialogueTextRouter;
     private readonly DialogueBoxTextPrimer _textPrimer;
     private readonly DialogueBoxTransitionRunner _transitionRunner;
-    private readonly VNTraceStream _trace;
 
     private readonly DialogueBoxCurrentState _boxState = new ();
     
@@ -17,12 +17,11 @@ public sealed class DialogueBoxPresentationController
 
     public DialogueBoxPresentationController(
         DialogueBoxLineRoutingPolicy lineRoutingPolicy,
-        IDialogueBoxViewResolver dialogueBoxResolver,
+        DialogueBoxHost dialogueBoxResolver,
         DialogueBoxTransitionPolicy boxTransitionPolicy,
         DialogueTextRouter dialogueTextRouter,
         DialogueBoxTextPrimer textPrimer,
-        DialogueBoxTransitionRunner transitionRunner,
-        VNTraceStream trace = null)
+        DialogueBoxTransitionRunner transitionRunner)
     {
         _lineRoutingPolicy = lineRoutingPolicy;
         _dialogueBoxResolver = dialogueBoxResolver;
@@ -30,31 +29,18 @@ public sealed class DialogueBoxPresentationController
         _dialogueTextRouter = dialogueTextRouter;
         _textPrimer = textPrimer;
         _transitionRunner = transitionRunner;
-        _trace = trace;
     }
 
     public async YarnTask<DialogueBoxPresentationResult> ShowLineAsync(VNDialogueLine line, DialogueBoxPresentationOptions options)
     {
-        if (line == null)
-        {
-            Trace("ShowLineSkipped", "reason=LineNull");
+        if (line == null || !options.Run.IsValid)
             return new DialogueBoxPresentationResult(null, true);
-        }
-
-        if (options == null || options.Run == null || !options.Run.IsValid)
-        {
-            Trace("ShowLineSkipped", "reason=InvalidOptionsOrRun");
-            return new DialogueBoxPresentationResult(null, true);
-        }
-
+        
         DialogueBoxTransitionPlan plan = BuildPlan(line, options);
-
-        Trace("ShowLineStart", FormatPlan(plan, line, options));
-
+        
         _transitionRunner.ResetBoxTransform(plan.NextBox);
 
         _textPrimer.Prime(plan.NextBox, line);
-        Trace("PrimeText", $"line={line.TextId}, box={GetBoxName(plan.NextBox)}");
 
         _transitionRunner.Prepare(plan);
 
@@ -64,22 +50,17 @@ public sealed class DialogueBoxPresentationController
             await _transitionRunner.ApplyAsync(plan, _fadeUpDuration, _fadeDownDuration, options.Run);
         
         if (!options.Run.IsValid)
-        {
-            Trace("ShowLineStale", FormatPlan(plan, line, options));
             return new DialogueBoxPresentationResult(plan, true);
-        }
 
         Commit(plan);
 
         _dialogueTextRouter.Bind(_boxState);
-        Trace("Commit", FormatPlan(plan, line, options));
 
         return new DialogueBoxPresentationResult(plan, false);
     }
 
     public void HideAllForSeek()
     {
-        Trace("HideAllForSeek");
         _transitionRunner.HideAll();
         _dialogueTextRouter.Clear();
         _boxState.Reset();
@@ -87,7 +68,6 @@ public sealed class DialogueBoxPresentationController
 
     public void CloseAll()
     {
-        Trace("CloseAll");
         _transitionRunner.HideAll();
         _dialogueTextRouter.Clear();
         _boxState.Reset();
@@ -101,21 +81,12 @@ public sealed class DialogueBoxPresentationController
         IDialogueTextTarget previousBox = result.Plan.PreviousBox;
         IDialogueTextTarget nextBox = result.Plan.NextBox;
 
-        if (_transitionRunner == null)
-            return;
-
-        Trace("CleanupStale", $"previous={GetBoxName(previousBox)}, next={GetBoxName(nextBox)}, current={GetBoxName(_boxState.Box)}");
-
         if (nextBox != null && !ReferenceEquals(nextBox, _boxState.Box))
             _transitionRunner.SetVisibleImmediate(nextBox, false);
 
-        if (previousBox != null &&
-            !ReferenceEquals(previousBox, _boxState.Box) &&
-            !ReferenceEquals(previousBox, nextBox))
-        {
+        if (previousBox != null && !ReferenceEquals(previousBox, _boxState.Box) && !ReferenceEquals(previousBox, nextBox))
             _transitionRunner.SetVisibleImmediate(previousBox, false);
-        }
-
+        
         if (_boxState.IsVisible && _boxState.Box != null)
             _transitionRunner.SetVisibleImmediate(_boxState.Box, true);
     }
@@ -146,8 +117,6 @@ public sealed class DialogueBoxPresentationController
             transitionKind,
             options.UseImmediateTransition);
 
-        Trace("BuildPlan", FormatPlan(plan, line, options));
-
         return plan;
     }
 
@@ -157,55 +126,5 @@ public sealed class DialogueBoxPresentationController
             return;
 
         _boxState.Commit(plan.NextKind, plan.NextBox, plan.TransitionKind);
-    }
-
-    private void Trace(string evt, string note = null)
-    {
-        if (_trace == null)
-            return;
-
-        string state =
-            $"boxKind={(_boxState.BoxKind.HasValue ? _boxState.BoxKind.Value.ToString() : "null")}, " +
-            $"box={GetBoxName(_boxState.Box)}, " +
-            $"visible={_boxState.IsVisible}";
-
-        _trace.Trace(
-            "DialogueBoxPresentation",
-            evt,
-            state,
-            note);
-    }
-
-    private static string FormatPlan(DialogueBoxTransitionPlan plan, VNDialogueLine line, DialogueBoxPresentationOptions options)
-    {
-        if (plan == null)
-            return "plan=null";
-
-        string lineId = line != null ? line.TextId : "null";
-
-        bool isSeekTarget = options != null && options.IsSeekTargetLine;
-        bool immediateOption = options != null && options.UseImmediateTransition;
-
-        return
-            $"line={lineId}, " +
-            $"nextKind={plan.NextKind}, " +
-            $"transition={plan.TransitionKind}, " +
-            $"previous={GetBoxName(plan.PreviousBox)}, " +
-            $"next={GetBoxName(plan.NextBox)}, " +
-            $"useImmediate={plan.UseImmediate}, " +
-            $"isSeekTarget={isSeekTarget}, " +
-            $"immediateOption={immediateOption}, ";
-    }
-
-    private static string GetBoxName(IDialogueTextTarget box)
-    {
-        if (box == null)
-            return "null";
-
-        UnityEngine.MonoBehaviour behaviour = box as UnityEngine.MonoBehaviour;
-        if (behaviour != null)
-            return behaviour.name;
-
-        return box.GetType().Name;
     }
 }

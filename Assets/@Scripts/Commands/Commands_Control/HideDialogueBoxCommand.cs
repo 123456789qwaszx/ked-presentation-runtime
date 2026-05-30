@@ -12,20 +12,15 @@ public sealed class HideDialogueBoxCommandSpec : CommandSpecBase
 {
     [Header("Target")]
     public DialogueBoxKind targetKind = DialogueBoxKind.Speaker;
-
-    [Tooltip("true면 특정 kind와 무관하게 모든 DialogueBox를 숨깁니다.")]
     public bool hideAll = true;
-
-    [Header("Fade")]
     public float duration = 0.18f;
-
     public bool snapOnSkip = true;
 }
 
 public sealed class HideDialogueBoxCommand : CommandBase
 {
     private readonly HideDialogueBoxCommandSpec _spec;
-    private readonly IDialogueBoxViewResolver _resolver;
+    private readonly DialogueBoxHost _resolver;
 
     private IDialogueTextTarget _target;
     private CanvasGroup _cg;
@@ -38,7 +33,7 @@ public sealed class HideDialogueBoxCommand : CommandBase
 
     public HideDialogueBoxCommand(
         HideDialogueBoxCommandSpec spec,
-        IDialogueBoxViewResolver resolver)
+        DialogueBoxHost resolver)
     {
         _spec = spec;
         _resolver = resolver;

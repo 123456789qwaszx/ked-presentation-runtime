@@ -16,16 +16,12 @@ public sealed class SubPresentationAdvanceCommandSpec : CommandSpecBase
 public sealed class SubPresentationAdvanceCommand : CommandBase
 {
     private readonly DialogueAdvanceDispatcher _dispatcher;
-    private readonly SubPresentationAdvanceCommandSpec _spec;
 
     public override bool WaitForCompletion => false;
 
-    public SubPresentationAdvanceCommand(
-        DialogueAdvanceDispatcher dispatcher,
-        SubPresentationAdvanceCommandSpec spec)
+    public SubPresentationAdvanceCommand(DialogueAdvanceDispatcher dispatcher)
     {
         _dispatcher = dispatcher;
-        _spec = spec;
     }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
@@ -39,12 +35,6 @@ public sealed class SubPresentationAdvanceCommand : CommandBase
 
     private void Apply()
     {
-        if (_dispatcher == null)
-        {
-            Debug.LogWarning("[SubPresentationAdvanceCommand] dispatcher is null.");
-            return;
-        }
-
-        _dispatcher.DispatchSubPresentationAdvance();
+        _dispatcher.DispatchSubAdvance();
     }
 }
