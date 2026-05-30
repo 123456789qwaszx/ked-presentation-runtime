@@ -8,6 +8,7 @@ public sealed class DialogueBoxPresentationController
     private const DialogueBoxKind DefaultNamedLineBoxKind = DialogueBoxKind.Speaker;
 
     private readonly DialogueBoxHost _host;
+    private readonly DialogueBoxMetadataResolver _metadataResolver;
     private readonly VNTraceStream _trace;
 
     private readonly DialogueBoxCurrentState _boxState = new ();
@@ -20,9 +21,10 @@ public sealed class DialogueBoxPresentationController
 
     public DialogueBoxPresentationPhase CurrentPhase { get; private set; } = DialogueBoxPresentationPhase.None;
 
-    public DialogueBoxPresentationController(DialogueBoxHost host, VNTraceStream trace = null)
+    public DialogueBoxPresentationController(DialogueBoxHost host, DialogueBoxMetadataResolver metadataResolver, VNTraceStream trace = null)
     {
         _host = host;
+        _metadataResolver = metadataResolver;
         _trace = trace;
     }
 
@@ -82,26 +84,17 @@ public sealed class DialogueBoxPresentationController
 
     public void CleanupStale(DialogueBoxPresentationResult result)
     {
-        if (result == null || result.Plan == null)
-            return;
-
         IDialogueTextTarget previousBox = result.Plan.PreviousBox;
         IDialogueTextTarget nextBox = result.Plan.NextBox;
-
-        Trace(
-            "CleanupStale",
-            $"previous={GetBoxName(previousBox)}, next={GetBoxName(nextBox)}, current={GetBoxName(_boxState.Box)}");
+        
+        Trace("CleanupStale", $"previous={GetBoxName(previousBox)}, next={GetBoxName(nextBox)}, current={GetBoxName(_boxState.Box)}");
 
         if (nextBox != null && !ReferenceEquals(nextBox, _boxState.Box))
             SetVisibleImmediate(nextBox, false);
 
-        if (previousBox != null &&
-            !ReferenceEquals(previousBox, _boxState.Box) &&
-            !ReferenceEquals(previousBox, nextBox))
-        {
+        if (previousBox != null && !ReferenceEquals(previousBox, _boxState.Box) && !ReferenceEquals(previousBox, nextBox))
             SetVisibleImmediate(previousBox, false);
-        }
-
+        
         if (_boxState.IsVisible && _boxState.Box != null)
             SetVisibleImmediate(_boxState.Box, true);
     }
@@ -115,14 +108,14 @@ public sealed class DialogueBoxPresentationController
         DialogueBoxKind nextBoxKind = ResolveBoxKind(line.Metadata, line.HasCharacterName);
         IDialogueTextTarget nextBox = _host.ResolveTarget(nextBoxKind);
 
-        bool shouldTreatAsFastForwardForPolicy = !options.IsSeekTargetLine && options.UseImmediateTransition;
+        bool shouldFastForward = !options.IsSeekTargetLine && options.UseImmediateTransition;
 
         DialogueBoxTransitionKind transitionKind = ResolveTransitionKind(
             currentBoxKind,
             currentBoxIsVisible,
             nextBoxKind,
             line.Metadata,
-            shouldTreatAsFastForwardForPolicy);
+            shouldFastForward);
 
         DialogueBoxTransitionPlan plan = new DialogueBoxTransitionPlan(
             nextBoxKind,
@@ -132,18 +125,18 @@ public sealed class DialogueBoxPresentationController
             options.UseImmediateTransition);
 
         Trace("BuildPlan", FormatPlan(plan, line, options));
-
         return plan;
     }
 
     private DialogueBoxKind ResolveBoxKind(string[] metadata, bool hasCharacterName)
     {
-        if (TryResolveBoxKindFromMetadata(metadata, out DialogueBoxKind metadataBoxKind))
+        if (_metadataResolver.TryResolveBoxKind(metadata, out DialogueBoxKind metadataBoxKind))
             return metadataBoxKind;
-
-        return hasCharacterName
-            ? _namedLineBoxKind
-            : _protagonistLineBoxKind;
+        
+        else if (hasCharacterName)
+            return _namedLineBoxKind;
+        else 
+            return _protagonistLineBoxKind;
     }
 
     private DialogueBoxTransitionKind ResolveTransitionKind(
@@ -156,7 +149,7 @@ public sealed class DialogueBoxPresentationController
         if (consumeSilently)
             return DialogueBoxTransitionKind.Cut;
 
-        if (TryResolveTransitionFromMetadata(metadata, out DialogueBoxTransitionKind metadataTransition))
+        if (_metadataResolver.TryResolveTransitionKind(metadata, out DialogueBoxTransitionKind metadataTransition))
             return metadataTransition;
 
         if (!isBoxVisible || currentBoxKind.HasValue == false)
@@ -170,9 +163,6 @@ public sealed class DialogueBoxPresentationController
 
     private void PrimeText(IDialogueTextTarget target, VNDialogueLine line)
     {
-        if (target == null || line == null)
-            return;
-
         TMP_Text lineText = target.LineText;
         if (lineText != null)
         {
@@ -198,9 +188,6 @@ public sealed class DialogueBoxPresentationController
 
     private void PrepareTransition(DialogueBoxTransitionPlan plan)
     {
-        if (plan == null)
-            return;
-
         IDialogueTextTarget nextBox = plan.NextBox;
 
         switch (plan.TransitionKind)
@@ -229,15 +216,8 @@ public sealed class DialogueBoxPresentationController
         Trace("PrepareTransition", $"transition={plan.TransitionKind}, next={GetBoxName(nextBox)}");
     }
 
-    private async YarnTask ApplyAsync(
-        DialogueBoxTransitionPlan plan,
-        float fadeUpDuration,
-        float fadeDownDuration,
-        LinePresentationRun run)
+    private async YarnTask ApplyAsync(DialogueBoxTransitionPlan plan, float fadeUpDuration, float fadeDownDuration, LinePresentationRun run)
     {
-        if (plan == null)
-            return;
-
         switch (plan.TransitionKind)
         {
             case DialogueBoxTransitionKind.Keep:
@@ -279,9 +259,6 @@ public sealed class DialogueBoxPresentationController
 
     private void ApplyImmediate(DialogueBoxTransitionPlan plan)
     {
-        if (plan == null)
-            return;
-
         switch (plan.TransitionKind)
         {
             case DialogueBoxTransitionKind.Keep:
@@ -310,15 +287,9 @@ public sealed class DialogueBoxPresentationController
         Trace("ApplyImmediate", $"transition={plan.TransitionKind}, next={GetBoxName(plan.NextBox)}");
     }
 
-    private async YarnTask FadeInBoxAsync(
-        IDialogueTextTarget box,
-        float duration,
-        LinePresentationRun run)
+    private async YarnTask FadeInBoxAsync(IDialogueTextTarget box, float duration, LinePresentationRun run)
     {
-        if (box == null || box.CanvasGroup == null)
-            return;
-
-        if (run == null || !run.IsValid)
+        if (!run.IsValid)
             return;
 
         CanvasGroup canvasGroup = box.CanvasGroup;
@@ -333,20 +304,12 @@ public sealed class DialogueBoxPresentationController
         if (!run.IsValid)
             return;
 
-        canvasGroup.alpha = 1f;
-        canvasGroup.interactable = true;
-        canvasGroup.blocksRaycasts = true;
+        SetCanvas(canvasGroup, true);
     }
 
-    private async YarnTask FadeOutBoxAsync(
-        IDialogueTextTarget box,
-        float duration,
-        LinePresentationRun run)
+    private async YarnTask FadeOutBoxAsync(IDialogueTextTarget box, float duration, LinePresentationRun run)
     {
-        if (box == null || box.CanvasGroup == null)
-            return;
-
-        if (run == null || !run.IsValid)
+        if (!run.IsValid)
             return;
 
         CanvasGroup canvasGroup = box.CanvasGroup;
@@ -358,10 +321,8 @@ public sealed class DialogueBoxPresentationController
 
         if (!run.IsValid)
             return;
-
-        canvasGroup.alpha = 0f;
-        canvasGroup.interactable = false;
-        canvasGroup.blocksRaycasts = false;
+        
+        SetCanvas(canvasGroup, false);
     }
 
     private void Commit(DialogueBoxTransitionPlan plan)
@@ -375,91 +336,43 @@ public sealed class DialogueBoxPresentationController
     
     private void HideAll()
     {
-        if (_host != null)
-        {
-            _host.HideAll();
-            return;
-        }
+        _host.HideAll();
     }
 
     private void HideAllExcept(IDialogueTextTarget keep)
     {
-        if (_host != null)
-        {
-            _host.HideAllExcept(keep);
-            return;
-        }
-
-        if (keep != null)
-            SetVisibleImmediate(keep, true);
+        _host.HideAllExcept(keep);
     }
 
     private void PrepareHidden(IDialogueTextTarget box)
     {
-        if (box == null)
-            return;
-
         IPresentationDialogueBoxView view = box as IPresentationDialogueBoxView;
         if (view != null)
             view.SetVisible(true);
 
-        CanvasGroup canvasGroup = box.CanvasGroup;
-        if (canvasGroup != null)
-        {
-            canvasGroup.alpha = 0f;
-            canvasGroup.interactable = false;
-            canvasGroup.blocksRaycasts = false;
-        }
+        SetCanvas(box.CanvasGroup, false);
     }
 
     private void SetVisibleImmediate(IDialogueTextTarget box, bool visible)
     {
-        if (box == null)
-            return;
-
         IPresentationDialogueBoxView view = box as IPresentationDialogueBoxView;
         if (view != null)
         {
             view.SetVisible(visible);
-
-            CanvasGroup viewCanvasGroup = view.CanvasGroup;
-            if (viewCanvasGroup != null)
-            {
-                viewCanvasGroup.alpha = visible ? 1f : 0f;
-                viewCanvasGroup.interactable = visible;
-                viewCanvasGroup.blocksRaycasts = visible;
-            }
-
+            SetCanvas(view.CanvasGroup, visible);
             return;
         }
 
-        CanvasGroup canvasGroup = box.CanvasGroup;
-        if (canvasGroup != null)
-        {
-            canvasGroup.alpha = visible ? 1f : 0f;
-            canvasGroup.interactable = visible;
-            canvasGroup.blocksRaycasts = visible;
-        }
+        SetCanvas(box.CanvasGroup, visible);
     }
 
     private void ResetBoxTransform(IDialogueTextTarget box)
     {
-        if (box == null)
-            return;
-
         MonoBehaviour behaviour = box as MonoBehaviour;
-        if (behaviour == null)
-            return;
-
-        RectTransform rect = behaviour.transform as RectTransform;
-        if (rect != null)
-        {
-            rect.localPosition = Vector3.zero;
-            rect.anchoredPosition = Vector2.zero;
-            return;
-        }
-
-        behaviour.transform.localPosition = Vector3.zero;
+        RectTransform rect = behaviour?.transform as RectTransform;
+        
+        rect.localPosition = Vector3.zero;
+        rect.anchoredPosition = Vector2.zero;
     }
 
     private void SetPhase(DialogueBoxPresentationPhase phase)
@@ -478,152 +391,18 @@ public sealed class DialogueBoxPresentationController
             $"box={GetBoxName(_boxState.Box)}, " +
             $"visible={_boxState.IsVisible}";
 
-        _trace.Trace(
-            nameof(DialogueBoxPresentationController),
-            evt,
-            state,
-            note);
+        _trace.Trace(nameof(DialogueBoxPresentationController), evt, state, note);
     }
 
-    private static bool TryResolveBoxKindFromMetadata(
-        string[] metadata,
-        out DialogueBoxKind kind)
+    private static string FormatPlan(DialogueBoxTransitionPlan plan, VNDialogueLine line, DialogueBoxPresentationOptions options)
     {
-        kind = default(DialogueBoxKind);
-
-        if (metadata == null || metadata.Length == 0)
-            return false;
-
-        for (int i = 0; i < metadata.Length; i++)
-        {
-            string tag = metadata[i];
-
-            if (string.IsNullOrWhiteSpace(tag))
-                continue;
-
-            tag = tag.Trim().ToLowerInvariant();
-
-            switch (tag)
-            {
-                case "portrait":
-                case "box:portrait":
-                case "box=portrait":
-                    kind = DialogueBoxKind.Portrait;
-                    return true;
-
-                case "speaker":
-                case "box:speaker":
-                case "box=speaker":
-                    kind = DialogueBoxKind.Speaker;
-                    return true;
-
-                case "letterbox":
-                case "letter_box":
-                case "box:letterbox":
-                case "box=letterbox":
-                    kind = DialogueBoxKind.LetterBox;
-                    return true;
-
-                case "onlytext":
-                case "only_text":
-                case "box:onlytext":
-                case "box=onlytext":
-                    kind = DialogueBoxKind.OnlyText;
-                    return true;
-
-                case "blackbook":
-                case "black_book":
-                case "box:blackbook":
-                case "box=blackbook":
-                    kind = DialogueBoxKind.BlackBook;
-                    return true;
-            }
-        }
-
-        return false;
-    }
-
-    private static bool TryResolveTransitionFromMetadata(
-        string[] metadata,
-        out DialogueBoxTransitionKind transition)
-    {
-        transition = default(DialogueBoxTransitionKind);
-
-        if (metadata == null || metadata.Length == 0)
-            return false;
-
-        for (int i = 0; i < metadata.Length; i++)
-        {
-            string tag = metadata[i];
-
-            if (string.IsNullOrWhiteSpace(tag))
-                continue;
-
-            tag = tag.Trim().ToLowerInvariant();
-
-            switch (tag)
-            {
-                case "boxtransition=keep":
-                case "boxtransition:keep":
-                case "box_transition=keep":
-                case "box_transition:keep":
-                case "boxkeep":
-                case "box_keep":
-                    transition = DialogueBoxTransitionKind.Keep;
-                    return true;
-
-                case "boxtransition=cut":
-                case "boxtransition:cut":
-                case "box_transition=cut":
-                case "box_transition:cut":
-                case "boxcut":
-                case "box_cut":
-                    transition = DialogueBoxTransitionKind.Cut;
-                    return true;
-
-                case "boxtransition=fade":
-                case "boxtransition:fade":
-                case "box_transition=fade":
-                case "box_transition:fade":
-                case "boxfade":
-                case "box_fade":
-                    transition = DialogueBoxTransitionKind.FadeOutIn;
-                    return true;
-
-                case "boxtransition=fadein":
-                case "boxtransition:fadein":
-                case "box_transition=fadein":
-                case "box_transition:fadein":
-                case "boxfadein":
-                case "box_fadein":
-                case "box_fade_in":
-                    transition = DialogueBoxTransitionKind.FadeIn;
-                    return true;
-
-                case "boxtransition=hide":
-                case "boxtransition:hide":
-                case "box_transition=hide":
-                case "box_transition:hide":
-                case "boxhide":
-                case "box_hide":
-                    transition = DialogueBoxTransitionKind.Hide;
-                    return true;
-            }
-        }
-
-        return false;
-    }
-
-    private static string FormatPlan(
-        DialogueBoxTransitionPlan plan,
-        VNDialogueLine line,
-        DialogueBoxPresentationOptions options)
-    {
-        if (plan == null)
+        if (plan == null) 
             return "plan=null";
-
-        string lineId = line != null ? line.TextId : "null";
-
+        
+        string lineId = line != null 
+            ? line.TextId 
+            : "null";
+        
         bool isSeekTarget = options != null && options.IsSeekTargetLine;
         bool immediateOption = options != null && options.UseImmediateTransition;
 
@@ -640,13 +419,23 @@ public sealed class DialogueBoxPresentationController
 
     private static string GetBoxName(IDialogueTextTarget box)
     {
-        if (box == null)
+        if (box == null) 
             return "null";
-
+        
         MonoBehaviour behaviour = box as MonoBehaviour;
-        if (behaviour != null)
+        if (behaviour != null) 
             return behaviour.name;
-
+        
         return box.GetType().Name;
+    }
+    
+    private static void SetCanvas(CanvasGroup canvasGroup, bool visible)
+    {
+        if (canvasGroup == null)
+            return;
+
+        canvasGroup.alpha = visible ? 1f : 0f;
+        canvasGroup.interactable = visible;
+        canvasGroup.blocksRaycasts = visible;
     }
 }

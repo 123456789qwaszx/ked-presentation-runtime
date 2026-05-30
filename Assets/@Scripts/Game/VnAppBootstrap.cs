@@ -303,8 +303,9 @@ public class VnAppBootstrap : MonoBehaviour
             _backlogRecorder,
             _rollbackController,
             _vnRuntimeStateProvider);
-        
-        DialogueBoxPresentationController boxPresentation = new(dialogueBoxHost);
+
+        DialogueBoxMetadataResolver metadataResolver = new();
+        DialogueBoxPresentationController boxPresentation = new(dialogueBoxHost, metadataResolver);
         
         VNSeekLineResolver seekResolver = new(_linePresentationAdvanceState);
         

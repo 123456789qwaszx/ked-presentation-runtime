@@ -31,9 +31,9 @@ public sealed class DialogueBoxPresentationResult
         Plan = plan;
         IsStale = isStale;
 
-        Box = plan != null ? plan.NextBox : null;
-        LineText = Box != null ? Box.LineText : null;
-        NameText = Box != null ? Box.NameText : null;
+        Box = plan?.NextBox;
+        LineText = Box?.LineText;
+        NameText = Box?.NameText;
     }
 
     public static DialogueBoxPresentationResult Completed(DialogueBoxTransitionPlan plan)
