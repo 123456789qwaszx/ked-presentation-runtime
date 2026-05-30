@@ -53,7 +53,6 @@ public class VnAppBootstrap : MonoBehaviour
     [SerializeField] private DialogueRunner dialogueRunner;
     [SerializeField] private DialogueRunner subPresentationRunner;
     [SerializeField] private LinePresenter linePresenter;
-    [SerializeField] private DialogueTextRouter dialogueTextRouter;
     [SerializeField] private VnRuntimeBridge vnRuntimeBridge;
     [SerializeField] private InlineEventMarkupHandler inlineEventMarkupHandler;
     [SerializeField] private CustomLinePresenter customLinePresenter;
@@ -308,17 +307,7 @@ public class VnAppBootstrap : MonoBehaviour
             _rollbackController,
             _vnRuntimeStateProvider);
         
-        DialogueBoxTransitionPolicy transitionPolicy = new();
-        DialogueBoxTextPrimer textPrimer = new();
-        DialogueBoxTransitionRunner transitionRunner = new(dialogueBoxHost);
-
-        DialogueBoxPresentationController boxPresentation = new(
-            _dialogueBoxRoutePolicy,
-            dialogueBoxHost,
-            transitionPolicy,
-            dialogueTextRouter,
-            textPrimer,
-            transitionRunner);
+        DialogueBoxPresentationController boxPresentation = new(dialogueBoxHost);
         
         VNSeekLineResolver seekResolver = new(_linePresentationAdvanceState);
         

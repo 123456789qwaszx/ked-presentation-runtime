@@ -74,8 +74,9 @@ public sealed class VNLinePresentationStateMachine
         bool useImmediateTransition = ctx.ShouldUseImmediateTransition || shouldFastForward();
 
         ctx.BoxResult = await _boxPresentation.ShowLineAsync(
-            VNDialogueLineFactory.FromLocalizedLine(ctx.Line),
-            new DialogueBoxPresentationOptions {
+            VNDialogueLine.FromLocalizedLine(ctx.Line),
+            new DialogueBoxPresentationOptions
+            {
                 IsSeekTargetLine = ctx.IsPendingSeekTargetLine,
                 UseImmediateTransition = useImmediateTransition,
                 Run = ctx.Run,

@@ -15,7 +15,6 @@ public sealed class EpisodePlayer : MonoBehaviour
     
 
     [Header("Presentation")]
-    [SerializeField] private DialogueTextRouter dialogueTextRouter;
     [SerializeField] private PresentationSessionEntry presentationRouteEntry;
     [SerializeField] private PresentationResponseRig presentationResponseRig;
 
