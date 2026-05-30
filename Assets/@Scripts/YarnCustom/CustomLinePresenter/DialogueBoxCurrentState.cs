@@ -1,7 +1,7 @@
 public sealed class DialogueBoxCurrentState
 {
     public DialogueBoxKind? BoxKind { get; private set; }
-    public IDialogueTextTarget Box { get; private set; }
+    public IDialogueTextTarget Box { get; private set; } = null;
     public bool IsVisible { get; private set; }
 
     public void Commit(DialogueBoxKind kind, IDialogueTextTarget box, DialogueBoxTransitionKind transitionKind)

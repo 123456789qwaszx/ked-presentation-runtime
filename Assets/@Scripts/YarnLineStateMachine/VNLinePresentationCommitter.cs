@@ -43,12 +43,12 @@ public sealed class VNLinePresentationCommitter
         _runtimeStateProvider = runtimeStateProvider;
     }
 
-    public YarnLineMeta CurrentMeta { get; private set; }
+    private YarnLineMeta _currentMeta;
 
     public YarnLineMeta CommitLineEntered(LocalizedLine line, string nodeName)
     {
         YarnLineMeta meta = new (nodeName, line.TextID, line.CharacterName, line.TextWithoutCharacterName.Text);
-        CurrentMeta = meta;
+        _currentMeta = meta;
         
         _runtimeStateProvider.HandleLineEntered(meta);
 
@@ -60,7 +60,7 @@ public sealed class VNLinePresentationCommitter
                 _rollbackController.AddRollbackPoint(meta);
         }
         
-        _advanceState.MarkLineEntered(meta);
+        _advanceState.MarkLineEntered();
 
         _playbackDriver.PlayCollected();
 
@@ -69,6 +69,6 @@ public sealed class VNLinePresentationCommitter
 
     public void CommitLineProcessingCompleted()
     {
-        _advanceState.MarkLineDisplayCompleted(CurrentMeta);
+        _advanceState.MarkLineDisplayCompleted(_currentMeta);
     }
 }

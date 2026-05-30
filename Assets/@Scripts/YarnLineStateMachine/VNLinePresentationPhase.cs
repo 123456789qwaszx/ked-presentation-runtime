@@ -13,7 +13,7 @@ public enum VNLinePresentationPhase
     // The line is now classified as normal, pass-through, or pending seek target.
     SeekResolved = 30,
     
-    // The line is being skipped visually as part of an active seek.
+    // The line is being consumed silently as part of an active seek.
     // It should complete processing without showing the dialogue box or typewriter.
     SeekPassThrough = 31,
     
@@ -35,11 +35,12 @@ public enum VNLinePresentationPhase
     // The typewriter is actively revealing the line text.
     TypewriterRunning = 70,
 
-    // The line has been committed as processing-complete.
-    // This applies both to normal display completion and seek pass-through completion.
+    // The line's display processing has been committed as complete.
+    // After this point, the line is considered fully shown/processed by the VN presentation layer.
     DisplayCommitted = 80,
 
-    // The presenter is waiting for Yarn's NextContentToken before ending this line transaction.
+    // The presenter is waiting for the external advance gate before ending this line transaction.
+    // At this point, the line has already been visually processed.
     WaitingForAdvance = 90,
 
     // The line transaction completed normally.
@@ -48,5 +49,4 @@ public enum VNLinePresentationPhase
     // The current LinePresentationRun became stale before the normal final commit.
     // Shared visual/domain state must not be committed after entering this phase.
     Stale = 901,
-
 }

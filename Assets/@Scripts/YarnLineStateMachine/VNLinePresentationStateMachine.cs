@@ -2,7 +2,7 @@ using System;
 using Yarn.Unity;
 
 // Runs one line presentation transaction through its explicit phase sequence.
-// This class owns the execution order, but not the domain commit rules or seek decision rules.
+// This class owns the transaction order, but not the domain commit rules, seek decision rules or presenter lifetime.
 // Domain commits are handled by VNLinePresentationCommitter.
 // Seek decisions are handled by VNSeekLineResolver.
 // CustomLinePresenter remains the owner of presenter lifetime, generation, and cancellation tokens.

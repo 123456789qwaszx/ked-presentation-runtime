@@ -2,6 +2,9 @@ using TMPro;
 using UnityEngine;
 using Yarn.Unity;
 
+// Coordinates dialogue box selection, text priming, transition playback,
+// stale-run cleanup, and current-box state commit for one VN line.
+// This class owns dialogue box visual state, but not the full VN line lifecycle.
 public sealed class DialogueBoxPresentationController
 {
     private const DialogueBoxKind DefaultProtagonistLineBoxKind = DialogueBoxKind.Portrait;

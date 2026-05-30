@@ -74,10 +74,9 @@ public sealed class VNLinePresentationState
         Trace("ClearSeek", $"reason={reason}");
     }
 
-    public void MarkLineEntered(YarnLineMeta meta)
+    public void MarkLineEntered()
     {
         IsLineFullyShown = false;
-        Trace("MarkLineEntered", $"meta={FormatMeta(meta)}");
     }
 
     public void MarkLineDisplayCompleted(YarnLineMeta meta)
