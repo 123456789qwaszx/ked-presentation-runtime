@@ -1,41 +1,21 @@
-using System;
-
 public sealed class RollbackController
 {
     private readonly RollbackHistory _history;
-    private readonly DialogueAdvanceDispatcher _dispatcher;
     private readonly LinePresentationAdvanceState _lineAdvanceState;
-    private readonly VNTraceStream _trace;
 
-    public RollbackController(
-        RollbackHistory history,
-        DialogueAdvanceDispatcher dispatcher,
-        LinePresentationAdvanceState lineAdvanceState,
-        VNTraceStream trace = null)
+    public RollbackController(RollbackHistory history, LinePresentationAdvanceState lineAdvanceState)
     {
         _history = history;
-        _dispatcher = dispatcher;
         _lineAdvanceState = lineAdvanceState;
-        _trace = trace;
     }
 
     public bool RequestRollbackOneStep()
     {
-        Trace("RequestRollbackOneStep");
-
         if (_lineAdvanceState.IsSeekActive)
-        {
-            Trace("RequestRollbackOneStepRejected", "reason=SeekActive");
             return false;
-        }
-
+        
         if (!_history.TryPrepareRollbackOneStep(out RollbackPoint target))
-        {
-            Trace("RequestRollbackOneStepRejected", "reason=NoRollbackTarget");
             return false;
-        }
-
-        Trace("RequestRollbackOneStepAccepted", $"target={target.nodeName}/{target.lineId}, historyIndex={target.historyIndex}");
 
         _lineAdvanceState.StartRollbackSeek(target.nodeName, target.lineId);
         return true;
@@ -43,21 +23,11 @@ public sealed class RollbackController
 
     public bool RequestRollbackToHistoryIndex(int historyIndex)
     {
-        Trace("RequestRollbackToHistoryIndex", $"historyIndex={historyIndex}");
-
         if (_lineAdvanceState.IsSeekActive)
-        {
-            Trace("RequestRollbackToHistoryIndexRejected", "reason=SeekActive");
             return false;
-        }
 
         if (!_history.TryPrepareRollbackToHistoryIndex(historyIndex, out RollbackPoint target))
-        {
-            Trace("RequestRollbackToHistoryIndexRejected", $"historyIndex={historyIndex}");
             return false;
-        }
-
-        Trace("RequestRollbackToHistoryIndexAccepted", $"target={target.nodeName}/{target.lineId}, historyIndex={target.historyIndex}");
 
         _lineAdvanceState.StartRollbackSeek(target.nodeName, target.lineId);
         return true;
@@ -66,29 +36,8 @@ public sealed class RollbackController
     public void AddRollbackPoint(YarnLineMeta meta)
     {
         if (!_lineAdvanceState.CanRecordRollbackPoint)
-        {
-            //Trace("RollbackPointSkipped", $"meta={FormatMeta(meta)}, reason=CanRecordRollbackPoint=false");
             return;
-        }
 
         _history.AddRollbackPoint(meta);
-        Trace("RollbackPointAdded", $"meta={FormatMeta(meta)}");
-    }
-
-    private void Trace(string evt, string note = null)
-    {
-        if (_trace == null)
-            return;
-
-        string state = _lineAdvanceState == null
-            ? "lineState=null"
-            : _lineAdvanceState.Snapshot();
-
-        _trace.Trace(nameof(RollbackController), evt, state, note);
-    }
-
-    private static string FormatMeta(YarnLineMeta meta)
-    {
-        return $"{meta.nodeName}/{meta.lineId}";
     }
 }

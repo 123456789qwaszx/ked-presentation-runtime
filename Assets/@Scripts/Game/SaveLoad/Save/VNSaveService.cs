@@ -115,7 +115,6 @@ public sealed class VNSaveService
 
         UpdateGlobalAfterSave(slotId, isAutoSave);
 
-        Debug.Log($"[VNSaveService] Saved. slot='{slotId}', node='{data.nodeName}', line='{data.lineId}', visitedIndex={data.visitedIndex}");
         return true;
     }
 

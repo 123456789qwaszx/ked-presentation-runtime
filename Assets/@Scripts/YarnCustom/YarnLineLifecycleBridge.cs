@@ -20,8 +20,6 @@ public struct YarnLineMeta
 
 public sealed class YarnLineLifecycleBridge
 {
-    public event Action<YarnLineMeta> LineEntered;
-    
     private YarnLineMeta _currentMeta;
     public YarnLineMeta CurrentMeta => _currentMeta;
     
@@ -32,7 +30,5 @@ public sealed class YarnLineLifecycleBridge
              line.TextID,
              line.CharacterName,
              line.TextWithoutCharacterName.Text);
-
-         LineEntered?.Invoke(_currentMeta);
      }
 }

@@ -107,6 +107,8 @@ public class VnAppBootstrap : MonoBehaviour
 
     private UIPatchService _uiPatchService;
     
+    private VNLoadSeekDriver _vnLoadSeekDriver;
+    
     private VNSaveLoadSystem _vnSaveLoadSystem;
     private VNRuntimeStateProvider _vnRuntimeStateProvider;
     [SerializeField] private AutoAdvanceScheduler autoAdvanceScheduler;
@@ -136,20 +138,13 @@ public class VnAppBootstrap : MonoBehaviour
         ConnectPresentationSessionToYarn();
         
         BootstrapYarn();
-        
         BootstrapDialogueAdvanceInput();
+        
+        BootstrapVnSaveLoadRuntime();
         BootstrapLinePresentationRuntime();
         
-
         BootstrapPlaybackControls();
-
-        BootstrapVnSaveLoadRuntime();
-        
-        
-        
         BootstrapEpisodeSelectionRuntime();
-        
-
         InitializeEpisodePlayer();
         BootstrapScreenBindings();
     }
@@ -336,12 +331,7 @@ public class VnAppBootstrap : MonoBehaviour
     private void BootstrapLinePresentationRuntime()
     {
         _backlogRecorder = new BacklogRecorder();
-
-        _rollbackController = new RollbackController(
-            _rollbackHistory,
-            dialogueAdvanceDispatcher,
-            _linePresentationAdvanceState,
-            vnTrace);
+        _rollbackController = new RollbackController(_rollbackHistory, _linePresentationAdvanceState);
 
         _vnLinePresentationCommitter = new VNLinePresentationCommitter(
             yarnLineLifecycleBridge,
@@ -356,7 +346,7 @@ public class VnAppBootstrap : MonoBehaviour
         DialogueBoxTextPrimer textPrimer = new();
         DialogueBoxTransitionRunner transitionRunner = new(dialogueBoxHost);
 
-        DialogueBoxPresentationController boxPresentation = new (
+        DialogueBoxPresentationController boxPresentation = new(
             _dialogueBoxRoutePolicy,
             dialogueBoxHost,
             transitionPolicy,
@@ -364,27 +354,21 @@ public class VnAppBootstrap : MonoBehaviour
             textPrimer,
             transitionRunner);
         
-        var seekResolver = new VNSeekLineResolver(_linePresentationAdvanceState);
+        VNSeekLineResolver  seekResolver = new(_linePresentationAdvanceState);
         
-        VNLinePresentationStateMachine lineMachine = new (
+        VNLinePresentationStateMachine lineMachine = new(
             _vnLinePresentationCommitter,
             seekResolver,
             dialogueAdvanceDispatcher,
             boxPresentation,
-            ellipsisBreathTypewriter);
+            ellipsisBreathTypewriter,
+            _vnLoadSeekDriver);
 
         customLinePresenter.Initialize(
             dialogueRunner,
-            _vnLinePresentationCommitter,
             lineMachine,
-            yarnLineLifecycleBridge,
-            _dialogueBoxRoutePolicy,
-            dialogueBoxHost,
-            dialogueTextRouter,
             ellipsisBreathTypewriter,
-            _linePresentationAdvanceState,
-            yarnBridgePlaybackDriver,
-            vnTrace);
+            _linePresentationAdvanceState);
     }
     
     private void BootstrapPlaybackControls()
@@ -430,10 +414,8 @@ public class VnAppBootstrap : MonoBehaviour
     
     private void BootstrapVnSaveLoadRuntime()
     {
-        VNLoadSeekDriver vnLoadSeekDriver = new(
-            yarnLineLifecycleBridge,
+        _vnLoadSeekDriver = new VNLoadSeekDriver(
             episodePlayer,
-            dialogueAdvanceDispatcher,
             _linePresentationAdvanceState,
             vnPlaytimeTracker);
 
@@ -445,7 +427,7 @@ public class VnAppBootstrap : MonoBehaviour
         _vnSaveLoadSystem = new (saveSlotCount);
         _vnSaveLoadSystem.AttachRuntime(
             _vnRuntimeStateProvider,
-            vnLoadSeekDriver,
+            _vnLoadSeekDriver,
             vnFlagStore,
             vnSaveSafetyPolicy,
             albumDatabase,

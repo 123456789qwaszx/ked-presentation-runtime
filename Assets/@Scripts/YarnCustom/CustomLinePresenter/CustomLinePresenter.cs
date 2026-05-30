@@ -1,9 +1,6 @@
-using System;
 using System.Collections.Generic;
 using System.Threading;
-using TMPro;
 using UnityEngine;
-using Yarn.Markup;
 using Yarn.Unity;
 
 public interface ILinePresentationAborter
@@ -15,15 +12,12 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
 {
     private string _currentNodeName;
     
-    private VNLinePresentationCommitter _vnLinePresentationCommitter;
     private VNLinePresentationStateMachine _vnLinePresentationStateMachine;
 
     private EllipsisBreathTypewriter _typewriter;
     private DialogueBoxPresentationController _boxPresentation;
     private LinePresentationAdvanceState _lineAdvanceState;
     private VNTraceStream _trace;
-
-    private VNLinePresentationStateMachine _lineMachine;
 
     private int _presenterGeneration;
     private CancellationTokenSource _presenterLifetimeCts = new();
@@ -44,15 +38,9 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
     
     public void Initialize(
         DialogueRunner dialogueRunner,
-        VNLinePresentationCommitter vnLinePresentationCommitter,
         VNLinePresentationStateMachine vnLinePresentationStateMachine,
-        YarnLineLifecycleBridge yarnLineLifecycleBridge,
-        DialogueBoxLineRoutingPolicy lineRoutingPolicy,
-        IDialogueBoxViewResolver dialogueBoxResolver,
-        DialogueTextRouter dialogueTextRouter,
         EllipsisBreathTypewriter typewriter,
         LinePresentationAdvanceState linePresentationAdvanceState,
-        YarnBridgePlaybackDriver yarnBridgePlaybackDriver,
         VNTraceStream trace = null)
     {
         _typewriter = typewriter;
@@ -66,12 +54,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
             dialogueRunner.onNodeStart?.RemoveListener(OnNodeStart);
             dialogueRunner.onNodeStart?.AddListener(OnNodeStart);
         }
-
-        // Box Presentation Controller 구성
-
-        _vnLinePresentationCommitter = vnLinePresentationCommitter;
-
-
+        
         _vnLinePresentationStateMachine = vnLinePresentationStateMachine;
 
         RegisterBeforeDefaultLinePresenter(dialogueRunner);

@@ -13,7 +13,7 @@ public sealed class VNLinePresentationStateMachine
     private readonly DialogueBoxPresentationController _boxPresentation;
     private readonly EllipsisBreathTypewriter _typewriter;
     private readonly DialogueAdvanceDispatcher _dispatcher;
-    private readonly VNTraceStream _trace;
+    private readonly VNLoadSeekDriver _loadSeekDriver;
 
     public VNLinePresentationPhase CurrentPhase { get; private set; } = VNLinePresentationPhase.None;
 
@@ -22,13 +22,15 @@ public sealed class VNLinePresentationStateMachine
         VNSeekLineResolver seekResolver,
         DialogueAdvanceDispatcher dispatcher,
         DialogueBoxPresentationController boxPresentation,
-        EllipsisBreathTypewriter typewriter)
+        EllipsisBreathTypewriter typewriter,
+        VNLoadSeekDriver loadSeekDriver = null)
     {
         _committer = committer;
         _seekResolver = seekResolver;
         _dispatcher = dispatcher;
         _boxPresentation = boxPresentation;
         _typewriter = typewriter;
+        _loadSeekDriver = loadSeekDriver;
     }
 
     public async YarnTask RunAsync(
@@ -58,6 +60,9 @@ public sealed class VNLinePresentationStateMachine
         if (presentationSeekDecision.ShouldConsumeTargetLine) {
             _seekResolver.ConsumeTargetLine(ctx.Line.TextID);
             SetPhase(ctx, VNLinePresentationPhase.SeekTargetConsumed);
+
+            if (presentationSeekDecision.SeekKind == VNSeekKind.Load)
+                _loadSeekDriver?.Complete();
         }
         
         // Phase: VisualRunStarted

@@ -1,45 +1,95 @@
 using System;
 
-public sealed class VNLoadSeekDriver : IDisposable
+public sealed class VNLoadSeekDriver
 {
-    private readonly YarnLineLifecycleBridge _bridge;
     private readonly EpisodePlayer _restarter;
-    private readonly DialogueAdvanceDispatcher _dispatcher;
     private readonly LinePresentationAdvanceState _lineAdvanceState;
     private readonly VNPlaytimeTracker _playtimeTracker;
+    private readonly VNTraceStream _trace;
 
     private VNSaveData _target;
 
     private Action _onComplete;
     private Action _onFail;
 
-    public VNLoadSeekDriver(
-        YarnLineLifecycleBridge bridge,
-        EpisodePlayer restarter,
-        DialogueAdvanceDispatcher dispatcher,
-        LinePresentationAdvanceState lineAdvanceState,
-        VNPlaytimeTracker playtimeTracker)
+    public bool IsActive
     {
-        _bridge = bridge;
+        get { return _target != null; }
+    }
+
+    public VNSaveData Target
+    {
+        get { return _target; }
+    }
+
+    public VNLoadSeekDriver(
+        EpisodePlayer restarter,
+        LinePresentationAdvanceState lineAdvanceState,
+        VNPlaytimeTracker playtimeTracker,
+        VNTraceStream trace = null)
+    {
         _restarter = restarter;
-        _dispatcher = dispatcher;
         _lineAdvanceState = lineAdvanceState;
         _playtimeTracker = playtimeTracker;
-        
-        
+        _trace = trace;
     }
 
     public void BeginSeek(VNSaveData saveData, Action onComplete, Action onFail)
     {
+        if (saveData == null)
+        {
+            Fail(onFail);
+            return;
+        }
+
         _target = saveData;
         _onComplete = onComplete;
         _onFail = onFail;
 
+        Trace("BeginSeek", $"target={saveData.nodeName}/{saveData.lineId}");
+
         _lineAdvanceState.StartLoadSeek(saveData.nodeName, saveData.lineId);
 
-        Subscribe();
-
         _restarter.RestartGame(saveData.nodeName);
+    }
+
+    public void Complete()
+    {
+        if (_target == null)
+        {
+            Trace("CompleteIgnored", "reason=NoTarget");
+            return;
+        }
+
+        VNSaveData completedTarget = _target;
+        Action callback = _onComplete;
+
+        CleanupInternalState();
+
+        Trace("Complete", $"target={completedTarget.nodeName}/{completedTarget.lineId}");
+
+        callback?.Invoke();
+    }
+
+    public void Fail()
+    {
+        Fail(null);
+    }
+
+    private void Fail(Action fallback)
+    {
+        VNSaveData failedTarget = _target;
+        Action callback = fallback ?? _onFail;
+
+        CleanupInternalState();
+
+        string targetText = failedTarget == null
+            ? "target=null"
+            : $"target={failedTarget.nodeName}/{failedTarget.lineId}";
+
+        Trace("Fail", targetText);
+
+        callback?.Invoke();
     }
 
     public void OnLoadComplete(VNSaveData saveData)
@@ -48,71 +98,22 @@ public sealed class VNLoadSeekDriver : IDisposable
             _playtimeTracker.ResumeFromSave(saveData.playtimeSeconds);
     }
 
-    private void HandleLineEntered(YarnLineMeta meta)
-    {
-        if (!_lineAdvanceState.IsLoadSeeking)
-            return;
-
-        bool isTarget = IsTarget(meta);
-        if (isTarget)
-        {
-            _lineAdvanceState?.MarkSeekTargetReached(meta);
-
-            Complete();
-            return;
-        }
-        _dispatcher.DispatchSeekNext();
-    }
-
-    private bool IsTarget(YarnLineMeta meta)
-    {
-        if (!string.Equals(meta.nodeName, _target.nodeName, StringComparison.Ordinal))
-            return false;
-
-        if (string.IsNullOrWhiteSpace(_target.lineId))
-            return true;
-
-        return string.Equals(meta.lineId, _target.lineId, StringComparison.Ordinal);
-    }
-
-    private void Complete()
-    {
-        Action callback = _onComplete;
-        CleanupInternalState();
-        
-        callback?.Invoke();
-    }
-
-    private void Fail(Action fallback = null)
-    {
-        Action callback = fallback ?? _onFail;
-        CleanupInternalState();
-        
-        callback?.Invoke();
-    }
-
     private void CleanupInternalState()
     {
-        Unsubscribe();
-
         _target = null;
         _onComplete = null;
         _onFail = null;
     }
 
-    private void Subscribe()
+    private void Trace(string evt, string note = null)
     {
-        _bridge.LineEntered -= HandleLineEntered;
-        _bridge.LineEntered += HandleLineEntered;
-    }
+        if (_trace == null)
+            return;
 
-    private void Unsubscribe()
-    {
-        _bridge.LineEntered -= HandleLineEntered;
-    }
+        string state = _lineAdvanceState == null
+            ? "lineState=null"
+            : _lineAdvanceState.Snapshot();
 
-    public void Dispose()
-    {
-        Unsubscribe();
+        _trace.Trace(nameof(VNLoadSeekDriver), evt, state, note);
     }
 }

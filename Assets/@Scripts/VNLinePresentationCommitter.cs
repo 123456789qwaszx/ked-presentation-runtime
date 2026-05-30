@@ -35,8 +35,6 @@ public sealed class VNLinePresentationCommitter
     /// Phase: LineReceived → LineEnteredCommitted
     ///
     /// - YarnLineMeta 생성 및 브리지 갱신 (→ LineEntered 이벤트 발행)
-    ///   - BacklogRecorder, RollbackController, VNRuntimeStateProvider는
-    ///     이 이벤트를 구독해 각자 처리한다.
     /// - PlaybackDriver PlayCollected
     /// - AdvanceState MarkLineEntered
     /// </summary>
