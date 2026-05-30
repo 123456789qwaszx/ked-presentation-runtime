@@ -2,41 +2,51 @@ public enum VNLinePresentationPhase
 {
     None = 0,
 
-    // Yarn이 라인을 넘긴 직후. 아직 VN 상태 변경 없음.
-    LineReceived = 1,
+    // Yarn has delivered a line, but no VN-side state has been committed yet.
+    LineReceived = 10,
 
-    // YarnLineMeta 생성 및 CurrentLine 커밋 완료.
-    // Backlog / RollbackPoint 기록 완료 (조건부).
-    LineEnteredCommitted = 2,
+    // The line has been converted into YarnLineMeta and committed as the current line.
+    // Backlog and rollback points may also have been recorded, depending on the current state.
+    LineEnteredCommitted = 20,
 
-    // Seek 상태 판정 완료.
-    // pass-through / target-pending / normal 결정됨.
-    SeekResolved = 3,
+    // Seek state has been evaluated for this line.
+    // The line is now classified as normal, pass-through, or pending seek target.
+    SeekResolved = 30,
+    
+    // The line is being skipped visually as part of an active seek.
+    // It should complete processing without showing the dialogue box or typewriter.
+    SeekPassThrough = 31,
+    
+    // The pending seek target line has been accepted and consumed.
+    // From this point, normal visual presentation resumes for the target line.
+    SeekTargetConsumed = 32,
 
-    // LinePresentationRun 생성 완료. 이전 visual run 취소됨.
-    VisualRunStarted = 4,
+    // A new LinePresentationRun has started.
+    // The previous visual run has been cancelled by the presenter owner.
+    VisualRunStarted = 40,
 
-    // Box 전환 중 (FadeIn / FadeOutIn / Cut 등).
-    BoxTransitioning = 5,
+    // The dialogue box is transitioning into the required state.
+    // This may include fade-in, fade-out-in, cut, or immediate transition.
+    BoxTransitioning = 50,
 
-    // Box가 준비됨. TMP_Text 확보됨.
-    BoxReady = 6,
+    // The dialogue box is ready and the target TMP_Text has been resolved.
+    BoxReady = 60,
 
-    // Typewriter 실행 중.
-    TypewriterRunning = 7,
+    // The typewriter is actively revealing the line text.
+    TypewriterRunning = 70,
 
-    // Typewriter 완료. DisplayCompleted 커밋됨.
-    DisplayCommitted = 8,
+    // The line has been committed as processing-complete.
+    // This applies both to normal display completion and seek pass-through completion.
+    DisplayCommitted = 80,
 
-    // Yarn NextContentToken 대기 중.
-    WaitingForAdvance = 9,
+    // The presenter is waiting for Yarn's NextContentToken before ending this line transaction.
+    WaitingForAdvance = 90,
 
-    // 라인 트랜잭션 정상 종료.
-    Completed = 10,
+    // The line transaction completed normally.
+    Completed = 900,
 
-    // Run이 stale이 되어 정상 커밋 없이 종료.
-    Stale = 11,
+    // The current LinePresentationRun became stale before the normal final commit.
+    // Shared visual/domain state must not be committed after entering this phase.
+    Stale = 901,
 
-    // seek pass-through로 처리된 라인.
-    SeekPassThrough = 12,
 }

@@ -16,6 +16,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
     private string _currentNodeName;
     
     private VNLinePresentationCommitter _vnLinePresentationCommitter;
+    private VNLinePresentationStateMachine _vnLinePresentationStateMachine;
 
     private EllipsisBreathTypewriter _typewriter;
     private DialogueBoxPresentationController _boxPresentation;
@@ -44,6 +45,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
     public void Initialize(
         DialogueRunner dialogueRunner,
         VNLinePresentationCommitter vnLinePresentationCommitter,
+        VNLinePresentationStateMachine vnLinePresentationStateMachine,
         YarnLineLifecycleBridge yarnLineLifecycleBridge,
         DialogueBoxLineRoutingPolicy lineRoutingPolicy,
         IDialogueBoxViewResolver dialogueBoxResolver,
@@ -66,30 +68,11 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
         }
 
         // Box Presentation Controller 구성
-        DialogueBoxTransitionPolicy transitionPolicy = new();
-        DialogueBoxTextPrimer textPrimer = new();
-        DialogueBoxTransitionRunner transitionRunner = new(dialogueBoxResolver, trace);
-
-        _boxPresentation = new DialogueBoxPresentationController(
-            lineRoutingPolicy,
-            dialogueBoxResolver,
-            transitionPolicy,
-            dialogueTextRouter,
-            textPrimer,
-            transitionRunner,
-            trace);
 
         _vnLinePresentationCommitter = vnLinePresentationCommitter;
 
-        var seekResolver = new VNSeekLineResolver(linePresentationAdvanceState);
 
-        _lineMachine = new VNLinePresentationStateMachine(
-            vnLinePresentationCommitter,
-            seekResolver,
-            _boxPresentation,
-            _typewriter,
-            linePresentationAdvanceState,
-            trace);
+        _vnLinePresentationStateMachine = vnLinePresentationStateMachine;
 
         RegisterBeforeDefaultLinePresenter(dialogueRunner);
     }
@@ -103,7 +86,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
             NodeName = _currentNodeName,
         };
 
-        await _lineMachine.RunAsync(
+        await _vnLinePresentationStateMachine.RunAsync(
             ctx,
             beginRun: BeginLinePresentationRun,
             waitForAdvance: WaitForLineAdvanceAsync,

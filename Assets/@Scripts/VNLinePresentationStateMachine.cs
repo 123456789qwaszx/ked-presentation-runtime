@@ -1,201 +1,158 @@
-using TMPro;
-using UnityEngine;
-using Yarn.Markup;
+using System;
 using Yarn.Unity;
 
-/// <summary>
-/// 라인 하나의 표시 트랜잭션을 Phase 순서대로 실행한다.
-/// 도메인 커밋은 Committer, Seek 판정은 SeekResolver에 위임한다.
-/// CustomLinePresenter의 lifetime 소유권(generation, CTS)은 건드리지 않는다.
-/// </summary>
+// Runs one line presentation transaction through its explicit phase sequence.
+// This class owns the execution order, but not the domain commit rules or seek decision rules.
+// Domain commits are handled by VNLinePresentationCommitter.
+// Seek decisions are handled by VNSeekLineResolver.
+// CustomLinePresenter remains the owner of presenter lifetime, generation, and cancellation tokens.
 public sealed class VNLinePresentationStateMachine
 {
     private readonly VNLinePresentationCommitter _committer;
     private readonly VNSeekLineResolver _seekResolver;
     private readonly DialogueBoxPresentationController _boxPresentation;
     private readonly EllipsisBreathTypewriter _typewriter;
-    private readonly LinePresentationAdvanceState _advanceState;
+    private readonly DialogueAdvanceDispatcher _dispatcher;
     private readonly VNTraceStream _trace;
 
-    // Phase 추적 (외부 진단용)
-    public VNLinePresentationPhase CurrentPhase { get; private set; }
-        = VNLinePresentationPhase.None;
+    public VNLinePresentationPhase CurrentPhase { get; private set; } = VNLinePresentationPhase.None;
 
     public VNLinePresentationStateMachine(
         VNLinePresentationCommitter committer,
         VNSeekLineResolver seekResolver,
+        DialogueAdvanceDispatcher dispatcher,
         DialogueBoxPresentationController boxPresentation,
-        EllipsisBreathTypewriter typewriter,
-        LinePresentationAdvanceState advanceState,
-        VNTraceStream trace = null)
+        EllipsisBreathTypewriter typewriter)
     {
         _committer = committer;
         _seekResolver = seekResolver;
+        _dispatcher = dispatcher;
         _boxPresentation = boxPresentation;
         _typewriter = typewriter;
-        _advanceState = advanceState;
-        _trace = trace;
     }
 
     public async YarnTask RunAsync(
         VNLinePresentationContext ctx,
-        System.Func<LinePresentationRun> beginRun,
-        System.Func<LineCancellationToken, YarnTask> waitForAdvance,
-        System.Func<bool> shouldFastForward)
+        Func<LinePresentationRun> beginRun,
+        Func<LineCancellationToken, YarnTask> waitForAdvance,
+        Func<bool> shouldFastForward)
     {
-        // ────────────────────────────────────────────────
-        // Phase: LineReceived → LineEnteredCommitted
-        // ────────────────────────────────────────────────
+        // Phase: LineReceived -> LineEnteredCommitted
         SetPhase(ctx, VNLinePresentationPhase.LineReceived);
-
+        
         ctx.Meta = _committer.CommitLineEntered(ctx.Line, ctx.NodeName);
-
         SetPhase(ctx, VNLinePresentationPhase.LineEnteredCommitted);
-
-        // ────────────────────────────────────────────────
+        
         // Phase: SeekResolved
-        // ────────────────────────────────────────────────
-        VNSeekLineResolver.Decision seekDecision = _seekResolver.Resolve(ctx.Line.TextID);
-
-        ctx.IsPendingSeekTargetLine = seekDecision.IsPendingSeekTargetLine;
-        ctx.ShouldPassThrough = seekDecision.ShouldPassThrough;
-
+        VNSeekLineDecision enteredDecision = _seekResolver.ResolveOnLineEntered(ctx.Meta);
+        ctx.SeekDecision = enteredDecision;
         SetPhase(ctx, VNLinePresentationPhase.SeekResolved);
-        TraceSeekDecision(ctx);
-
-        // ── Seek Pass-Through ───────────────────────────
-        if (ctx.ShouldPassThrough)
-        {
-            SetPhase(ctx, VNLinePresentationPhase.SeekPassThrough);
-
-            _boxPresentation.HideAllForSeek();
-            _committer.CommitLineProcessingCompleted();
-
-            SetPhase(ctx, VNLinePresentationPhase.WaitingForAdvance);
-            await waitForAdvance(ctx.Token);
-
-            SetPhase(ctx, VNLinePresentationPhase.Completed);
+        
+        if (enteredDecision.ShouldDispatchSeekNext) {
+            await RunSeekPassThroughAsync(ctx, waitForAdvance);
             return;
         }
-
-        // ── Seek Target Consume ─────────────────────────
-        if (ctx.IsPendingSeekTargetLine)
+        
+        VNSeekLineDecision presentationSeekDecision = _seekResolver.ResolveBeforePresentation(ctx.Line.TextID);
+        ctx.SeekDecision = presentationSeekDecision;
+        if (presentationSeekDecision.ShouldConsumeTargetLine) {
             _seekResolver.ConsumeTargetLine(ctx.Line.TextID);
-
-        // ────────────────────────────────────────────────
+            SetPhase(ctx, VNLinePresentationPhase.SeekTargetConsumed);
+        }
+        
         // Phase: VisualRunStarted
-        // ────────────────────────────────────────────────
         ctx.Run = beginRun();
         SetPhase(ctx, VNLinePresentationPhase.VisualRunStarted);
-
-        // ────────────────────────────────────────────────
-        // Phase: BoxTransitioning → BoxReady
-        // ────────────────────────────────────────────────
+        
+        // Phase: BoxTransitioning -> BoxReady
         SetPhase(ctx, VNLinePresentationPhase.BoxTransitioning);
+        bool useImmediateTransition = ctx.ShouldUseImmediateTransition || shouldFastForward();
 
         ctx.BoxResult = await _boxPresentation.ShowLineAsync(
             VNDialogueLineFactory.FromLocalizedLine(ctx.Line),
-            new DialogueBoxPresentationOptions
-            {
+            new DialogueBoxPresentationOptions {
                 IsSeekTargetLine = ctx.IsPendingSeekTargetLine,
-                UseImmediateTransition = ctx.IsPendingSeekTargetLine || shouldFastForward(),
+                UseImmediateTransition = useImmediateTransition,
                 Run = ctx.Run,
             });
-
-        // ── Stale 검사: Box 표시 후 ──────────────────────
-        if (!ctx.Run.IsValid)
-        {
-            SetPhase(ctx, VNLinePresentationPhase.Stale);
-            TraceStale(ctx, "AfterBoxPresentation");
-
-            _boxPresentation.CleanupStale(ctx.BoxResult);
-
-            SetPhase(ctx, VNLinePresentationPhase.WaitingForAdvance);
-            await waitForAdvance(ctx.Token);
-
-            SetPhase(ctx, VNLinePresentationPhase.Completed);
+        
+        SetPhase(ctx, VNLinePresentationPhase.BoxReady);
+        
+        if (!ctx.HasValidRun) {
+            await CompleteStaleAfterBoxAsync(ctx, waitForAdvance); 
             return;
         }
-
-        SetPhase(ctx, VNLinePresentationPhase.BoxReady);
-
-        // ────────────────────────────────────────────────
+        
         // Phase: TypewriterRunning
-        // ────────────────────────────────────────────────
-        TMP_Text lineText = ctx.BoxResult?.LineText;
-        _typewriter.SetTextView(lineText);
+        ctx.LineText = ctx.BoxResult?.LineText;
+        _typewriter.SetTextView(ctx.LineText);
 
-        MarkupParseResult text = ctx.Line.TextWithoutCharacterName;
-        _typewriter.PrepareForContent(text);
+        ctx.Text = ctx.Line.TextWithoutCharacterName;
+        _typewriter.PrepareForContent(ctx.Text);
 
         SetPhase(ctx, VNLinePresentationPhase.TypewriterRunning);
 
         await _typewriter
-            .RunTypewriter(text, ctx.Token.HurryUpToken)
-            .SuppressCancellationThrow();
+            .RunTypewriter(ctx.Text, ctx.Token.HurryUpToken).SuppressCancellationThrow();
 
-        // ── Stale 검사: Typewriter 완료 후 ──────────────
-        if (!ctx.Run.IsValid)
-        {
-            SetPhase(ctx, VNLinePresentationPhase.Stale);
-            TraceStale(ctx, "AfterTypewriter");
-
-            SetPhase(ctx, VNLinePresentationPhase.WaitingForAdvance);
-            await waitForAdvance(ctx.Token);
-
-            SetPhase(ctx, VNLinePresentationPhase.Completed);
+        if (!ctx.Run.IsValid) {
+            await CompleteStaleAfterTypewriterAsync(ctx, waitForAdvance); 
             return;
         }
-
-        // ────────────────────────────────────────────────
+        
         // Phase: DisplayCommitted
-        // ────────────────────────────────────────────────
         _committer.CommitLineProcessingCompleted();
         _typewriter.ContentWillDismiss();
 
         SetPhase(ctx, VNLinePresentationPhase.DisplayCommitted);
 
-        // ────────────────────────────────────────────────
-        // Phase: WaitingForAdvance → Completed
-        // ────────────────────────────────────────────────
+        // Phase: WaitingForAdvance -> Completed
         SetPhase(ctx, VNLinePresentationPhase.WaitingForAdvance);
         await waitForAdvance(ctx.Token);
 
         SetPhase(ctx, VNLinePresentationPhase.Completed);
     }
+    
+    private async YarnTask RunSeekPassThroughAsync(VNLinePresentationContext ctx, Func<LineCancellationToken, YarnTask> waitForAdvance)
+    {
+        SetPhase(ctx, VNLinePresentationPhase.SeekPassThrough);
 
-    // ── Trace Helpers ───────────────────────────────────
+        _boxPresentation.HideAllForSeek();
+        _committer.CommitLineProcessingCompleted();
 
+        _dispatcher.DispatchSeekNext();
+
+        SetPhase(ctx, VNLinePresentationPhase.WaitingForAdvance);
+        await waitForAdvance(ctx.Token);
+
+        SetPhase(ctx, VNLinePresentationPhase.Completed);
+    }
+    
+    private async YarnTask CompleteStaleAfterBoxAsync(VNLinePresentationContext ctx, Func<LineCancellationToken, YarnTask> waitForAdvance)
+    {
+        SetPhase(ctx, VNLinePresentationPhase.Stale);
+
+        _boxPresentation.CleanupStale(ctx.BoxResult);
+
+        SetPhase(ctx, VNLinePresentationPhase.WaitingForAdvance);
+        await waitForAdvance(ctx.Token);
+
+        SetPhase(ctx, VNLinePresentationPhase.Completed);
+    }
+    
+    private async YarnTask CompleteStaleAfterTypewriterAsync(VNLinePresentationContext ctx, Func<LineCancellationToken, YarnTask> waitForAdvance)
+    {
+        SetPhase(ctx, VNLinePresentationPhase.Stale);
+
+        SetPhase(ctx, VNLinePresentationPhase.WaitingForAdvance);
+        await waitForAdvance(ctx.Token);
+
+        SetPhase(ctx, VNLinePresentationPhase.Completed);
+    }
+    
     private void SetPhase(VNLinePresentationContext ctx, VNLinePresentationPhase phase)
     {
         ctx.Phase = phase;
         CurrentPhase = phase;
-
-        if (_trace == null) return;
-        _trace.Trace(
-            nameof(VNLinePresentationStateMachine),
-            phase.ToString(),
-            _advanceState?.Snapshot(),
-            $"line={ctx.Line?.TextID}");
-    }
-
-    private void TraceSeekDecision(VNLinePresentationContext ctx)
-    {
-        if (_trace == null) return;
-        _trace.Trace(
-            nameof(VNLinePresentationStateMachine),
-            "SeekDecision",
-            _advanceState?.Snapshot(),
-            $"line={ctx.Line?.TextID}, passThrough={ctx.ShouldPassThrough}, pendingTarget={ctx.IsPendingSeekTargetLine}");
-    }
-
-    private void TraceStale(VNLinePresentationContext ctx, string after)
-    {
-        if (_trace == null) return;
-        _trace.Trace(
-            nameof(VNLinePresentationStateMachine),
-            "RunBecameStale",
-            _advanceState?.Snapshot(),
-            $"line={ctx.Line?.TextID}, after={after}");
     }
 }

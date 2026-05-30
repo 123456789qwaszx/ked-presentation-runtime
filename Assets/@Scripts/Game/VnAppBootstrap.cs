@@ -23,6 +23,7 @@ public class VnAppBootstrap : MonoBehaviour
     private RollbackHistory _rollbackHistory = new ();
     private LinePresentationAdvanceState _linePresentationAdvanceState;
     
+    DialogueBoxLineRoutingPolicy _dialogueBoxRoutePolicy = new();
 
     [Header("Sound")] 
     [SerializeField] private AudioSystem audioSystem;
@@ -280,8 +281,6 @@ public class VnAppBootstrap : MonoBehaviour
     
     private void BootstrapYarn()
     {
-        DialogueBoxLineRoutingPolicy dialogueBoxRoutePolicy = new();
-
         vnRuntimeBridge.Initialize(
             dialogueRunner,
             presentationSessionEntry,
@@ -290,7 +289,7 @@ public class VnAppBootstrap : MonoBehaviour
         YarnCommandRegistry yarnCommandRegistry = new YarnCommandRegistry(
             dialogueRunner,
             vnRuntimeBridge,
-            dialogueBoxRoutePolicy);
+            _dialogueBoxRoutePolicy);
 
         yarnCommandRegistry.Initialize();
 
@@ -304,18 +303,6 @@ public class VnAppBootstrap : MonoBehaviour
             yarnBridgePlaybackDriver,
             _vnRuntimeStateProvider,
             rigPrefab);
-
-        customLinePresenter.Initialize(
-            dialogueRunner,
-            _vnLinePresentationCommitter,
-            yarnLineLifecycleBridge,
-            dialogueBoxRoutePolicy,
-            dialogueBoxHost,
-            dialogueTextRouter,
-            ellipsisBreathTypewriter,
-            _linePresentationAdvanceState,
-            yarnBridgePlaybackDriver,
-            vnTrace);
 
         subPresentationPresenter.Initialize(
             _presentationSessionContext,
@@ -363,6 +350,40 @@ public class VnAppBootstrap : MonoBehaviour
             _backlogRecorder,
             _rollbackController,
             _vnRuntimeStateProvider,
+            vnTrace);
+        
+        DialogueBoxTransitionPolicy transitionPolicy = new();
+        DialogueBoxTextPrimer textPrimer = new();
+        DialogueBoxTransitionRunner transitionRunner = new(dialogueBoxHost);
+
+        DialogueBoxPresentationController boxPresentation = new (
+            _dialogueBoxRoutePolicy,
+            dialogueBoxHost,
+            transitionPolicy,
+            dialogueTextRouter,
+            textPrimer,
+            transitionRunner);
+        
+        var seekResolver = new VNSeekLineResolver(_linePresentationAdvanceState);
+        
+        VNLinePresentationStateMachine lineMachine = new (
+            _vnLinePresentationCommitter,
+            seekResolver,
+            dialogueAdvanceDispatcher,
+            boxPresentation,
+            ellipsisBreathTypewriter);
+
+        customLinePresenter.Initialize(
+            dialogueRunner,
+            _vnLinePresentationCommitter,
+            lineMachine,
+            yarnLineLifecycleBridge,
+            _dialogueBoxRoutePolicy,
+            dialogueBoxHost,
+            dialogueTextRouter,
+            ellipsisBreathTypewriter,
+            _linePresentationAdvanceState,
+            yarnBridgePlaybackDriver,
             vnTrace);
     }
     

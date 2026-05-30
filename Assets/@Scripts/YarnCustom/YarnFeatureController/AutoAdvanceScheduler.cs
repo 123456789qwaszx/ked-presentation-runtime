@@ -1,7 +1,6 @@
 using System;
 using System.Threading;
 using TMPro;
-using UnityEngine;
 using Yarn.Markup;
 using Yarn.Unity;
 
@@ -24,13 +23,11 @@ public sealed class AutoAdvanceScheduler : ActionMarkupHandler
         _nextAutoAdvanceAt = double.PositiveInfinity;
     }
 
-    public override void OnPrepareForLine(MarkupParseResult line, TMP_Text text)
-    {
-    }
+    public override void OnPrepareForLine(MarkupParseResult line, TMP_Text text) { }
 
     public override void OnLineDisplayBegin(MarkupParseResult line, TMP_Text text)
     {
-        NotifyLineStart();
+        _nextAutoAdvanceAt = double.PositiveInfinity;
     }
 
     public override YarnTask OnCharacterWillAppear(
@@ -43,25 +40,6 @@ public sealed class AutoAdvanceScheduler : ActionMarkupHandler
 
     public override void OnLineDisplayComplete()
     {
-        NotifyLineFinishDisplaying();
-    }
-
-    public override void OnLineWillDismiss()
-    {
-    }
-
-    public void NotifyLineStart()
-    {
-        _nextAutoAdvanceAt = double.PositiveInfinity;
-    }
-
-    public void NotifyLineStart(YarnLineMeta meta)
-    {
-        NotifyLineStart();
-    }
-
-    public void NotifyLineFinishDisplaying()
-    {
         if (_playbackSettings == null || _getNow == null)
         {
             _nextAutoAdvanceAt = double.PositiveInfinity;
@@ -71,10 +49,7 @@ public sealed class AutoAdvanceScheduler : ActionMarkupHandler
         _nextAutoAdvanceAt = _getNow() + _playbackSettings.autoModeDelaySeconds;
     }
 
-    public void NotifyLineFinishDisplaying(YarnLineMeta meta)
-    {
-        NotifyLineFinishDisplaying();
-    }
+    public override void OnLineWillDismiss() { }
 
     public void Tick()
     {

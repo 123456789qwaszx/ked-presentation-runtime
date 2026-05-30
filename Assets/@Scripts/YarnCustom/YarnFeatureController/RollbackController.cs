@@ -63,25 +63,6 @@ public sealed class RollbackController
         return true;
     }
 
-    private void HandleLineEnteredDuringRollbackSeek(YarnLineMeta meta)
-    {
-        if (!_lineAdvanceState.IsRollbackSeeking)
-            return;
-
-        bool isTarget = _lineAdvanceState.IsSeekTarget(meta);
-        Trace("CheckRollbackTarget", $"meta={FormatMeta(meta)}, result={isTarget}");
-
-        if (isTarget)
-        {
-            Trace("RollbackTargetReached", $"meta={FormatMeta(meta)}");
-            _lineAdvanceState.MarkSeekTargetReached(meta);
-            return;
-        }
-
-        Trace("DispatchSeekNext", $"meta={FormatMeta(meta)}");
-        _dispatcher.DispatchSeekNext();
-    }
-
     public void AddRollbackPoint(YarnLineMeta meta)
     {
         if (!_lineAdvanceState.CanRecordRollbackPoint)
