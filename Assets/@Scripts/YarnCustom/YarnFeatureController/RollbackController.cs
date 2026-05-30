@@ -1,5 +1,4 @@
 using System;
-using UnityEngine;
 
 public sealed class RollbackController : IDisposable
 {
@@ -77,8 +76,6 @@ public sealed class RollbackController : IDisposable
     {
         if (!_lineAdvanceState.IsRollbackSeeking)
             return;
-
-        //Trace("LineEnteredDuringRollbackSeek", $"meta={FormatMeta(meta)}");
 
         bool isTarget = _lineAdvanceState.IsSeekTarget(meta);
         Trace("CheckRollbackTarget", $"meta={FormatMeta(meta)}, result={isTarget}");

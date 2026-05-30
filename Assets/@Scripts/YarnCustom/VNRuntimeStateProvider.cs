@@ -4,6 +4,9 @@ public sealed class VNRuntimeStateProvider : IVNRuntimeStateProvider
     private readonly RollbackHistory _history;
     private readonly VNPlaytimeTracker _playtimeTracker;
 
+    private YarnLineMeta _currentLineMeta;
+    private bool _hasCurrentLineMeta;
+
     public VNRuntimeStateProvider(
         YarnLineLifecycleBridge bridge,
         RollbackHistory history,
@@ -12,6 +15,8 @@ public sealed class VNRuntimeStateProvider : IVNRuntimeStateProvider
         _bridge = bridge;
         _history = history;
         _playtimeTracker = playtimeTracker;
+
+        _bridge.LineEntered += OnLineEntered;
     }
 
     public string CurrentNodeName
@@ -21,7 +26,7 @@ public sealed class VNRuntimeStateProvider : IVNRuntimeStateProvider
             if (TryGetCurrentSavePoint(out RollbackPoint point))
                 return point.nodeName;
 
-            return _bridge != null ? _bridge.CurrentNodeName : "";
+            return _hasCurrentLineMeta ? _currentLineMeta.nodeName : "";
         }
     }
 
@@ -32,7 +37,15 @@ public sealed class VNRuntimeStateProvider : IVNRuntimeStateProvider
             if (TryGetCurrentSavePoint(out RollbackPoint point))
                 return point.lineId;
 
-            return _bridge != null ? _bridge.CurrentLineId : "";
+            return _hasCurrentLineMeta ? _currentLineMeta.lineId : "";
+        }
+    }
+
+    public string CurrentCharacterKey
+    {
+        get
+        {
+            return _hasCurrentLineMeta ? _currentLineMeta.charName : "";
         }
     }
 
@@ -78,7 +91,7 @@ public sealed class VNRuntimeStateProvider : IVNRuntimeStateProvider
             if (TryGetCurrentSavePoint(out RollbackPoint point))
                 return point.rawText;
 
-            return "";
+            return _hasCurrentLineMeta ? _currentLineMeta.rawText : "";
         }
     }
 
@@ -91,6 +104,12 @@ public sealed class VNRuntimeStateProvider : IVNRuntimeStateProvider
 
             return _playtimeTracker.CurrentPlaytimeSeconds;
         }
+    }
+
+    private void OnLineEntered(YarnLineMeta meta)
+    {
+        _currentLineMeta = meta;
+        _hasCurrentLineMeta = true;
     }
 
     private bool TryGetCurrentSavePoint(out RollbackPoint point)

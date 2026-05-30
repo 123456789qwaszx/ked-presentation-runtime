@@ -1,63 +1,113 @@
 using System;
+using System.Threading;
+using TMPro;
+using UnityEngine;
+using Yarn.Markup;
+using Yarn.Unity;
 
-public sealed class AutoAdvanceScheduler
+public sealed class AutoAdvanceScheduler : ActionMarkupHandler
 {
-    private readonly YarnLineLifecycleBridge _yarnLineLifecycleBridge;
-    
-    private readonly Action _requestAdvance;
-    private readonly VnPlaybackSettings _playbackSettings;
-    private readonly DialogueAdvanceDispatcher _dialogueAdvanceDispatcher;
-    private readonly Func<double> _getNow;
-    
+    private VnPlaybackSettings _playbackSettings;
+    private DialogueAdvanceDispatcher _dialogueAdvanceDispatcher;
+    private Func<double> _getNow;
+
     private double _nextAutoAdvanceAt = double.PositiveInfinity;
 
-    public AutoAdvanceScheduler(
-        YarnLineLifecycleBridge yarnLineLifecycleBridge,
+    public void Initialize(
         VnPlaybackSettings vnPlaybackSettings,
         DialogueAdvanceDispatcher dialogueAdvanceDispatcher,
         Func<double> getNow)
     {
-        _yarnLineLifecycleBridge = yarnLineLifecycleBridge;
         _playbackSettings = vnPlaybackSettings;
         _dialogueAdvanceDispatcher = dialogueAdvanceDispatcher;
         _getNow = getNow;
+        _nextAutoAdvanceAt = double.PositiveInfinity;
+    }
 
-        RegisterToYarn();
-    }
-    
-    private void RegisterToYarn()
+    public override void OnPrepareForLine(MarkupParseResult line, TMP_Text text)
     {
-        _yarnLineLifecycleBridge.LineDisplayBegin -= NotifyLineStart;
-        _yarnLineLifecycleBridge.LineDisplayBegin += NotifyLineStart;
-        _yarnLineLifecycleBridge.LineFinishDisplaying -= NotifyLineFinishDisplaying;
-        _yarnLineLifecycleBridge.LineFinishDisplaying += NotifyLineFinishDisplaying;
     }
-    
-    private void NotifyLineStart(YarnLineMeta meta) => _nextAutoAdvanceAt = double.PositiveInfinity;
-    private void NotifyLineFinishDisplaying(YarnLineMeta meta) => _nextAutoAdvanceAt = _getNow() + _playbackSettings.autoModeDelaySeconds;
-    
-    
-    public void Tick()
+
+    public override void OnLineDisplayBegin(MarkupParseResult line, TMP_Text text)
     {
-        double t = _getNow();
-        
-        if (t >= _nextAutoAdvanceAt)
+        NotifyLineStart();
+    }
+
+    public override YarnTask OnCharacterWillAppear(
+        int currentCharacterIndex,
+        MarkupParseResult line,
+        CancellationToken cancellationToken)
+    {
+        return YarnTask.CompletedTask;
+    }
+
+    public override void OnLineDisplayComplete()
+    {
+        NotifyLineFinishDisplaying();
+    }
+
+    public override void OnLineWillDismiss()
+    {
+    }
+
+    public void NotifyLineStart()
+    {
+        _nextAutoAdvanceAt = double.PositiveInfinity;
+    }
+
+    public void NotifyLineStart(YarnLineMeta meta)
+    {
+        NotifyLineStart();
+    }
+
+    public void NotifyLineFinishDisplaying()
+    {
+        if (_playbackSettings == null || _getNow == null)
         {
             _nextAutoAdvanceAt = double.PositiveInfinity;
-            _dialogueAdvanceDispatcher.DispatchAdvance();
+            return;
         }
-    }
-    
-    public void ResetAutoAdvanceTimer() => _nextAutoAdvanceAt = _getNow() + _playbackSettings.autoModeDelaySeconds;
-    public void NotifyChoicesPresented() => _nextAutoAdvanceAt = double.PositiveInfinity;
-    public void NotifyBacklogOpened() => _nextAutoAdvanceAt = double.PositiveInfinity;
-    
-    
-    private void UnRegisterToYarn()
-    {
-        if (_yarnLineLifecycleBridge == null) return;
 
-        _yarnLineLifecycleBridge.LineDisplayBegin -= NotifyLineStart;
-        _yarnLineLifecycleBridge.LineFinishDisplaying -= NotifyLineFinishDisplaying;
+        _nextAutoAdvanceAt = _getNow() + _playbackSettings.autoModeDelaySeconds;
+    }
+
+    public void NotifyLineFinishDisplaying(YarnLineMeta meta)
+    {
+        NotifyLineFinishDisplaying();
+    }
+
+    public void Tick()
+    {
+        if (_dialogueAdvanceDispatcher == null || _getNow == null)
+            return;
+
+        double t = _getNow();
+
+        if (t < _nextAutoAdvanceAt)
+            return;
+
+        _nextAutoAdvanceAt = double.PositiveInfinity;
+        _dialogueAdvanceDispatcher.DispatchAdvance();
+    }
+
+    public void ResetAutoAdvanceTimer()
+    {
+        if (_playbackSettings == null || _getNow == null)
+        {
+            _nextAutoAdvanceAt = double.PositiveInfinity;
+            return;
+        }
+
+        _nextAutoAdvanceAt = _getNow() + _playbackSettings.autoModeDelaySeconds;
+    }
+
+    public void NotifyChoicesPresented()
+    {
+        _nextAutoAdvanceAt = double.PositiveInfinity;
+    }
+
+    public void NotifyBacklogOpened()
+    {
+        _nextAutoAdvanceAt = double.PositiveInfinity;
     }
 }

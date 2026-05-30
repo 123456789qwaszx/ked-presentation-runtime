@@ -119,18 +119,18 @@ public sealed class RollbackHistoryDebugViewEditor : Editor
 
         using (new EditorGUI.DisabledScope(!Application.isPlaying))
         {
-            if (GUILayout.Button("Clear History"))
-            {
-                if (EditorUtility.DisplayDialog(
-                        "Clear Rollback History",
-                        "RollbackHistory를 비울까요?",
-                        "Clear",
-                        "Cancel"))
-                {
-                    view.ClearHistory();
-                    EditorUtility.SetDirty(view);
-                }
-            }
+            // if (GUILayout.Button("Clear History"))
+            // {
+            //     if (EditorUtility.DisplayDialog(
+            //             "Clear Rollback History",
+            //             "RollbackHistory를 비울까요?",
+            //             "Clear",
+            //             "Cancel"))
+            //     {
+            //         view.ClearHistory();
+            //         EditorUtility.SetDirty(view);
+            //     }
+            // }
         }
 
         if (GUILayout.Button("Dump"))

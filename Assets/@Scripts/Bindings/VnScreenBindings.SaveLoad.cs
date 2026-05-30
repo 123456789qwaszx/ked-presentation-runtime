@@ -46,6 +46,7 @@ public sealed partial class VnScreenBindings
             }
             
             CloseAllPanels();
+            return;
         }
 
         Refresh(UIManager.Instance.GetUI<SaveLoadMenuUIPanel>());

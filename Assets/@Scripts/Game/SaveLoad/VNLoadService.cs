@@ -1,16 +1,10 @@
 ﻿using System;
 using UnityEngine;
 
-public interface IVNLoadSeekDriver
-{
-    void PrepareForLoad();
-    void BeginSeek(VNSaveData saveData, Action onComplete, Action onFail);
-    void OnLoadComplete(VNSaveData saveData);
-}
 public sealed class VNLoadService
 {
     private readonly IVNSaveRepository _saveRepo;
-    private readonly IVNLoadSeekDriver _seekDriver;
+    private readonly VNLoadSeekDriver _seekDriver;
     private readonly IVNFlagStore _flagStore;
     private readonly IVNSaveSafetyPolicy _safetyPolicy;
     private readonly VNTraceStream _trace;
@@ -21,7 +15,7 @@ public sealed class VNLoadService
 
     public VNLoadService(
         IVNSaveRepository saveRepo,
-        IVNLoadSeekDriver seekDriver,
+        VNLoadSeekDriver seekDriver,
         IVNFlagStore flagStore,
         IVNSaveSafetyPolicy safetyPolicy,
         VNTraceStream trace = null)
@@ -42,34 +36,21 @@ public sealed class VNLoadService
     public bool Load(string slotId)
     {
         if (_isLoading)
-        {
-            Debug.LogWarning("[VNLoadService] Already loading. Request ignored.");
-            Trace("LoadRejected", "already loading");
             return false;
-        }
-
-        if (_safetyPolicy != null && !_safetyPolicy.CanLoadNow(out string reason))
+        
+        if (!_safetyPolicy.CanLoadNow(out string reason))
         {
-            Debug.LogWarning($"[VNLoadService] Load blocked. reason='{reason}'");
             Trace("LoadRejected", $"safetyPolicy={reason}");
             return false;
         }
 
         if (!_saveRepo.TryLoad(slotId, out VNSaveData data))
-        {
-            Debug.LogWarning($"[VNLoadService] No save data for slot '{slotId}'.");
-            Trace("LoadRejected", $"no save data slotId={slotId}");
             return false;
-        }
 
         data.Normalize();
 
         if (!data.HasValidTarget())
-        {
-            Debug.LogWarning($"[VNLoadService] Save data has no nodeName. slot='{slotId}'");
-            Trace("LoadRejected", $"invalid target slotId={slotId}");
             return false;
-        }
 
         BeginLoad(data);
         return true;
@@ -83,8 +64,6 @@ public sealed class VNLoadService
 
         try
         {
-            _seekDriver.PrepareForLoad();
-            
             _flagStore.Restore(data.flags);
             
             _seekDriver.BeginSeek(
@@ -95,7 +74,6 @@ public sealed class VNLoadService
         catch (Exception e)
         {
             _isLoading = false;
-            Debug.LogError($"[VNLoadService] BeginLoad exception. slot='{data.slotId}', error='{e.Message}'");
             Trace("BeginLoadException", e.Message);
         }
     }
@@ -131,4 +109,6 @@ public sealed class VNLoadService
 
         _trace.Trace(nameof(VNLoadService), evt, $"isLoading={_isLoading}", note);
     }
+    
+    
 }

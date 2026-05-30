@@ -3,9 +3,16 @@ public sealed partial class YarnCommandBridge : InlineEventMarkupHandler.IInline
     private const string EmojiSlot00 = "0";
     private const string EmojiSlot01 = "1";
     private const string EmojiSlot02 = "2";
-    
-    public void PlayEmojiCue(string characterKey, string cue)
+
+    public void PlayEmojiCue(string cue)
     {
+        string characterKey = _vnRuntimeStateProvider != null
+            ? _vnRuntimeStateProvider.CurrentCharacterKey
+            : "";
+
+        if (string.IsNullOrWhiteSpace(characterKey))
+            return;
+
         if (string.IsNullOrWhiteSpace(cue))
         {
             HideInlineEmojiByCharacterNow(characterKey);
@@ -14,16 +21,23 @@ public sealed partial class YarnCommandBridge : InlineEventMarkupHandler.IInline
 
         PlayInlineEmojiByCharacterNow(characterKey, cue);
     }
-    
-    private SetCharacterEmojiCommandSpecCharR BuildSetCharacterEmojiSpec(string roleKey, string emojiKey, string slotName = EmojiSlot00)
+
+    private SetCharacterEmojiCommandSpecCharR BuildSetCharacterEmojiSpec(
+        string roleKey,
+        string emojiKey,
+        string slotName = EmojiSlot00)
     {
-        CharacterEmojiSlotParser.TryParse(slotName, out CharacterRigTarget rootTarget, out CharacterRigTarget castTarget, out CharacterRigTarget imageTarget);
+        CharacterEmojiSlotParser.TryParse(
+            slotName,
+            out CharacterRigTarget rootTarget,
+            out CharacterRigTarget castTarget,
+            out CharacterRigTarget imageTarget);
 
         return new SetCharacterEmojiCommandSpecCharR
         {
             slotKey = roleKey,
             emojiKey = emojiKey,
-            
+
             rootTarget = rootTarget,
             castTarget = castTarget,
             imageTarget = imageTarget,

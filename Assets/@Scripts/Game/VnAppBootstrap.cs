@@ -18,7 +18,9 @@ public class VnAppBootstrap : MonoBehaviour
     private readonly VnScreenBindings _screenBindings = new();
 
     private EpisodeSelectionStateData _episodeSelectionStateData = new ();
+    private YarnLineLifecycleBridge yarnLineLifecycleBridge = new();
     
+    private RollbackHistory _rollbackHistory = new ();
     private LinePresentationAdvanceState _linePresentationAdvanceState;
     
 
@@ -67,8 +69,6 @@ public class VnAppBootstrap : MonoBehaviour
     [SerializeField] private VnAdvanceInputPoller vnAdvanceInputPoller;
     [SerializeField] private DialogueAdvanceDispatcher dialogueAdvanceDispatcher;
 
-    [Header("YarnVnInputFeature")] 
-    [SerializeField] private YarnLineLifecycleBridge yarnLineLifecycleBridge;
 
     [SerializeField] private VnFeatureController vnFeatureController;
     
@@ -100,11 +100,12 @@ public class VnAppBootstrap : MonoBehaviour
 
     private PresentationSessionBridge _presentationSessionBridge;
 
-    private RollbackHistory _rollbackHistory;
     private BacklogRecorder _backlogRecorder;
     private UIPatchService _uiPatchService;
     
     private VNSaveLoadSystem _vnSaveLoadSystem;
+    private VNRuntimeStateProvider _vnRuntimeStateProvider;
+    [SerializeField] private AutoAdvanceScheduler autoAdvanceScheduler;
     
     [Header("Episode Selection")]
     private EpisodeSelectionSystem _episodeSelectionSystem;
@@ -117,6 +118,8 @@ public class VnAppBootstrap : MonoBehaviour
     
     private void Awake()
     {
+        _vnRuntimeStateProvider = new (yarnLineLifecycleBridge, _rollbackHistory, vnPlaytimeTracker);
+        
         InitializeTrace();
 
         BootstrapAudioSystem();
@@ -128,7 +131,7 @@ public class VnAppBootstrap : MonoBehaviour
         ConnectPresentationSessionToYarn();
 
         BootstrapYarn();
-        SetupYarnLifecycleBridge();
+        
 
         BootstrapDialogueAdvanceInput();
         BootstrapPlaybackControls();
@@ -293,10 +296,12 @@ public class VnAppBootstrap : MonoBehaviour
             dialogueRunner,
             subPresentationRunner,
             yarnBridgePlaybackDriver,
+            _vnRuntimeStateProvider,
             rigPrefab);
 
         customLinePresenter.Initialize(
             dialogueRunner,
+            yarnLineLifecycleBridge,
             dialogueBoxRoutePolicy,
             dialogueBoxHost,
             dialogueTextRouter,
@@ -315,15 +320,9 @@ public class VnAppBootstrap : MonoBehaviour
             vnTrace);
 
         inlineEventMarkupHandler.Initialize(
-            yarnLineLifecycleBridge,
             _presentationSessionBridge,
             inlineSfxHost,
             yarnCommandBridge);
-    }
-
-    private void SetupYarnLifecycleBridge()
-    {
-        yarnLineLifecycleBridge.Initialize(dialogueRunner, customLinePresenter, vnTrace);
     }
 
     private void BootstrapDialogueAdvanceInput()
@@ -347,12 +346,9 @@ public class VnAppBootstrap : MonoBehaviour
     {
         _backlogRecorder = new(
             yarnLineLifecycleBridge,
-            _vnPlaybackSettings,
-            _linePresentationAdvanceState,
-            vnTrace);
+            _linePresentationAdvanceState);
 
-        AutoAdvanceScheduler autoAdvanceScheduler = new(
-            yarnLineLifecycleBridge,
+        autoAdvanceScheduler.Initialize(
             _vnPlaybackSettings,
             dialogueAdvanceDispatcher,
             () => Time.unscaledTimeAsDouble);
@@ -364,7 +360,6 @@ public class VnAppBootstrap : MonoBehaviour
             _presentationSessionContext,
             () => _linePresentationAdvanceState.IsLineFullyShown);
 
-        _rollbackHistory = new RollbackHistory();
         
         if (rollbackHistoryDebugView != null)
             rollbackHistoryDebugView.Bind(_rollbackHistory);
@@ -392,14 +387,11 @@ public class VnAppBootstrap : MonoBehaviour
     
     private void BootstrapVnSaveLoadRuntime()
     {
-        VNRuntimeStateProvider vnRuntimeStateProvider = new (yarnLineLifecycleBridge, _rollbackHistory, vnPlaytimeTracker);
         VNLoadSeekDriver vnLoadSeekDriver = new(
             yarnLineLifecycleBridge,
             episodePlayer,
             dialogueAdvanceDispatcher,
-            customLinePresenter,
             _linePresentationAdvanceState,
-            _rollbackHistory,
             vnPlaytimeTracker);
 
         // 아직 게임 플래그 저장/복원이 없기에 임시로 Empty 사용.
@@ -409,14 +401,12 @@ public class VnAppBootstrap : MonoBehaviour
 
         _vnSaveLoadSystem = new (saveSlotCount);
         _vnSaveLoadSystem.AttachRuntime(
-            vnRuntimeStateProvider,
+            _vnRuntimeStateProvider,
             vnLoadSeekDriver,
             vnFlagStore,
             vnSaveSafetyPolicy,
-            albumDatabase);
-        
-        vnAlbumUnlockDebugList.Initialize(_vnSaveLoadSystem);
-        _screenBindings.ConfigureAlbumView(_vnSaveLoadSystem);
+            albumDatabase,
+            vnTrace);
     }
 
     private void BootstrapEpisodeSelectionRuntime()
@@ -441,7 +431,7 @@ public class VnAppBootstrap : MonoBehaviour
     
     private void InitializeEpisodePlayer()
     {
-        episodePlayer.Initialize(_screenBindings, _rollbackHistory, customLinePresenter, _backlogRecorder);
+        episodePlayer.Initialize(_screenBindings, _rollbackHistory, customLinePresenter, _backlogRecorder, _vnSaveLoadSystem);
     }
     
     private void BootstrapScreenBindings()
@@ -461,6 +451,9 @@ public class VnAppBootstrap : MonoBehaviour
     
     private void Start()
     {
+        vnAlbumUnlockDebugList.Initialize(_vnSaveLoadSystem);
+        _screenBindings.ConfigureAlbumView(_vnSaveLoadSystem);
+        
         OpenInitialScreen();
     }
     

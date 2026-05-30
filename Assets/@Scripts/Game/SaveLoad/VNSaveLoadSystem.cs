@@ -5,7 +5,7 @@
     private readonly VNGlobalProgressData _globalData;
 
     private IVNRuntimeStateProvider _stateProvider;
-    private IVNLoadSeekDriver _seekDriver;
+    private VNLoadSeekDriver _seekDriver;
     private IVNFlagStore _flagStore;
     private IVNSaveSafetyPolicy _safetyPolicy;
     
@@ -24,10 +24,11 @@
 
     public void AttachRuntime(
         IVNRuntimeStateProvider stateProvider,
-        IVNLoadSeekDriver seekDriver,
+        VNLoadSeekDriver seekDriver,
         IVNFlagStore flagStore,
         IVNSaveSafetyPolicy safetyPolicy,
-        VNAlbumDatabaseSO albumDatabase)
+        VNAlbumDatabaseSO albumDatabase,
+        VNTraceStream traceStream)
     {
         _stateProvider = stateProvider;
         _seekDriver = seekDriver;
@@ -35,7 +36,7 @@
         _safetyPolicy = safetyPolicy;
         
         AlbumService = new VNAlbumUnlockService(_globalData, _globalRepository, albumDatabase);
-        LoadService = new VNLoadService(_saveRepository, _seekDriver, _flagStore, _safetyPolicy);
+        LoadService = new VNLoadService(_saveRepository, _seekDriver, _flagStore, _safetyPolicy, traceStream);
         SaveService = new VNSaveService(_saveRepository, _globalRepository, _globalData, _stateProvider, _flagStore, _safetyPolicy);
         
         IsInitialized = true;

@@ -5362,9 +5362,9 @@ Transform:
   - {fileID: 728559836}
   - {fileID: 2005113227}
   - {fileID: 946268261}
+  - {fileID: 608895338}
   - {fileID: 1315566988}
   - {fileID: 307625744}
-  - {fileID: 626587495}
   - {fileID: 451477691}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -5382,7 +5382,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::VnAppBootstrap
   uiManager: {fileID: 2860743132734891021}
   vnTrace:
-    enableTrace: 1
+    enableTrace: 0
     logTraceStreaming: 0
     logDumpToConsole: 0
     tracePreview: 
@@ -5410,7 +5410,6 @@ MonoBehaviour:
   ellipsisBreathTypewriter: {fileID: 1658226451}
   vnAdvanceInputPoller: {fileID: 1315566987}
   dialogueAdvanceDispatcher: {fileID: 307625745}
-  yarnLineLifecycleBridge: {fileID: 626587493}
   vnFeatureController: {fileID: 775605347}
   saveSlotCount: 6
   albumDatabase: {fileID: 11400000, guid: 0f099ab27e27bd24fa3bfcbaee5a7233, type: 2}
@@ -5422,10 +5421,11 @@ MonoBehaviour:
   chapterCardPrefab: {fileID: 2410623267660482620, guid: 60640956e3866b44e9e8c9df1a45dbd3, type: 3}
   chapterCardFactory: {fileID: 767435430}
   nodeRigPrefab: {fileID: 8432584506347833489, guid: 5a92676ae0261c54188d2a64469a3787, type: 3}
+  autoAdvanceScheduler: {fileID: 608895337}
   chapterEpisodeProgressionCatalog: {fileID: 11400000, guid: 466709b071b363747b43332bcdfdeb44, type: 2}
   episodeProgressionSo: {fileID: 11400000, guid: 6b6dcda1ce02f5141a876245e3c88c7e, type: 2}
   rollbackHistoryDebugView: {fileID: 969122867}
---- !u!1 &626587492
+--- !u!1 &608895336
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -5433,37 +5433,37 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 626587495}
-  - component: {fileID: 626587493}
+  - component: {fileID: 608895338}
+  - component: {fileID: 608895337}
   m_Layer: 0
-  m_Name: YarnLineLifecycleBridge
+  m_Name: AutoAdvanceScheduler
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &626587493
+--- !u!114 &608895337
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 626587492}
+  m_GameObject: {fileID: 608895336}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 526aefd5f3709cc4bb6b50a917f14e46, type: 3}
+  m_Script: {fileID: 11500000, guid: f898005ad7d20fc49bb74a37073e9ed7, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::YarnLineLifecycleBridge
---- !u!4 &626587495
+  m_EditorClassIdentifier: Assembly-CSharp::AutoAdvanceScheduler
+--- !u!4 &608895338
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 626587492}
+  m_GameObject: {fileID: 608895336}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 493.1607, y: 42.30905, z: 0}
+  m_LocalPosition: {x: 1726.5803, y: 711.15454, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -15887,8 +15887,6 @@ MonoBehaviour:
   dialogueTextRouter: {fileID: 728559835}
   presentationRouteEntry: {fileID: 1433866633}
   presentationResponseRig: {fileID: 529556882}
-  dialogueAdvanceDispatcher: {fileID: 307625745}
-  playbackDriver: {fileID: 720935691}
   yarnEntryKey: OnlyText
   presentationEntryKey: emo
   runYarnKey: 50
@@ -16551,8 +16549,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CustomLinePresenter
   eventHandlers:
-  - {fileID: 626587493}
   - {fileID: 946268260}
+  - {fileID: 608895337}
 --- !u!4 &2009713541
 Transform:
   m_ObjectHideFlags: 0
@@ -18653,7 +18651,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 458.38, y: -24}
-  m_SizeDelta: {x: 916.76, y: 0}
+  m_SizeDelta: {x: 916.76, y: 24}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!1 &666632935594092605
 GameObject:
@@ -23587,7 +23585,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 318a8bcd1cc73084f9a7ec85d0eb984b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIManager
-  _dontDestroyOnLoad: 1
+  _dontDestroyOnLoad: 0
   _layerUIRoot: {fileID: 87668845}
   _layerPanels: {fileID: 240595999}
   _layerOverlay: {fileID: 1849447420}

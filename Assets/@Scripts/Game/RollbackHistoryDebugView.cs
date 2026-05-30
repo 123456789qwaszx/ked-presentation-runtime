@@ -103,14 +103,14 @@ public sealed class RollbackHistoryDebugView : MonoBehaviour
             : RollbackPointDebugEntry.Empty();
     }
 
-    public void ClearHistory()
-    {
-        if (_history == null)
-            return;
-
-        _history.ClearRollbackHistory();
-        RefreshSnapshot();
-    }
+    // public void ClearHistory()
+    // {
+    //     if (_history == null)
+    //         return;
+    //
+    //     _history.ClearRollbackHistory();
+    //     RefreshSnapshot();
+    // }
 
     public string BuildDump()
     {

@@ -29,6 +29,7 @@ public interface IVNRuntimeStateProvider
 {
     string CurrentNodeName { get; }
     string CurrentLineId { get; }
+    string CurrentCharacterKey { get; }
 
     int CurrentVisitedIndex { get; }
     int CurrentLineVisitCountInNode { get; }

@@ -13,6 +13,9 @@ public interface ILinePresentationAborter
 
 public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentationAborter
 {
+    private YarnLineLifecycleBridge _yarnLineLifecycleBridge;
+    private string _currentNodeName;
+    
     private DialogueBoxPresentationController _boxPresentation;
     private EllipsisBreathTypewriter _typewriter;
     private PresentationSessionContext _context;
@@ -45,10 +48,9 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
         }
     }
 
-    public event Action<LocalizedLine> LineEntered;
-
     public void Initialize(
         DialogueRunner dialogueRunner,
+        YarnLineLifecycleBridge yarnLineLifecycleBridge,
         DialogueBoxLineRoutingPolicy lineRoutingPolicy,
         IDialogueBoxViewResolver dialogueBoxResolver,
         DialogueTextRouter dialogueTextRouter,
@@ -58,6 +60,14 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
         YarnBridgePlaybackDriver yarnBridgePlaybackDriver,
         VNTraceStream trace = null)
     {
+        if (dialogueRunner != null)
+        {
+            dialogueRunner.onNodeStart?.RemoveListener(OnNodeStart);
+            dialogueRunner.onNodeStart?.AddListener(OnNodeStart);
+        }
+        
+        _yarnLineLifecycleBridge = yarnLineLifecycleBridge; 
+        
         _typewriter = typewriter;
         _typewriter.ActionMarkupHandlers = ActionMarkupHandlers;
 
@@ -80,6 +90,11 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
             trace);
         
         RegisterBeforeDefaultLinePresenter(dialogueRunner);
+    }
+    
+    private void OnNodeStart(string nodeName)
+    {
+        _currentNodeName = nodeName ?? string.Empty;
     }
 
     public void AbortCurrentLinePresentationForRollback()
@@ -109,7 +124,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
     public override async YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token)
     {
         Trace("RunLineStart", line);
-        LineEntered?.Invoke(line);
+        _yarnLineLifecycleBridge.RefreshCurrentLineMeta(line, _currentNodeName);
 
         _yarnBridgePlaybackDriver.PlayCollected();
         _lineAdvanceState.MarkLineEntered();

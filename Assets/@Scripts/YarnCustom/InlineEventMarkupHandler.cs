@@ -13,18 +13,15 @@ using Yarn.Unity;
 // - Styling (color/size/etc) must be handled by ReplacementMarkupHandler on LineProvider
 public sealed class InlineEventMarkupHandler : ActionMarkupHandler
 {
-    private YarnLineLifecycleBridge _lineLifecycleBridge;
-    
     private IInlineSignalHost _inlineSignalHost;
     private IInlineAudioHost _inlineAudioHost;
     private IInlineEmojiHost _inlineEmojiHost;
 
-    public void Initialize(YarnLineLifecycleBridge lineLifecycleBridge, 
+    public void Initialize(
         IInlineSignalHost inlineSignalHost, 
         IInlineAudioHost inlineAudioHost, 
         IInlineEmojiHost inlineEmojiHost)
     {
-        _lineLifecycleBridge = lineLifecycleBridge;
         _inlineSignalHost = inlineSignalHost;
         _inlineAudioHost = inlineAudioHost;
         _inlineEmojiHost = inlineEmojiHost;
@@ -42,7 +39,7 @@ public sealed class InlineEventMarkupHandler : ActionMarkupHandler
     
     public interface IInlineEmojiHost
     {
-        void PlayEmojiCue(string characterKey, string cue);
+        void PlayEmojiCue(string cue);
     }
 
     [Serializable]
@@ -266,13 +263,7 @@ public sealed class InlineEventMarkupHandler : ActionMarkupHandler
                     return;
 
                 if (!string.IsNullOrWhiteSpace(action.emojiCue))
-                {
-                    string characterKey = _lineLifecycleBridge != null
-                        ? _lineLifecycleBridge.CurrentCharacterKey
-                        : string.Empty;
-
-                    _inlineEmojiHost?.PlayEmojiCue(characterKey, action.emojiCue);
-                }
+                    _inlineEmojiHost?.PlayEmojiCue(action.emojiCue);
                 return;
         }
     }

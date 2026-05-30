@@ -1,14 +1,11 @@
 using System;
-using UnityEngine;
 
-public sealed class VNLoadSeekDriver : IVNLoadSeekDriver, IDisposable
+public sealed class VNLoadSeekDriver : IDisposable
 {
     private readonly YarnLineLifecycleBridge _bridge;
     private readonly EpisodePlayer _restarter;
     private readonly DialogueAdvanceDispatcher _dispatcher;
-    private readonly ILinePresentationAborter _linePresentationAborter;
     private readonly LinePresentationAdvanceState _lineAdvanceState;
-    private readonly RollbackHistory _rollbackHistory;
     private readonly VNPlaytimeTracker _playtimeTracker;
 
     private VNSaveData _target;
@@ -20,44 +17,20 @@ public sealed class VNLoadSeekDriver : IVNLoadSeekDriver, IDisposable
         YarnLineLifecycleBridge bridge,
         EpisodePlayer restarter,
         DialogueAdvanceDispatcher dispatcher,
-        ILinePresentationAborter linePresentationAborter,
         LinePresentationAdvanceState lineAdvanceState,
-        RollbackHistory rollbackHistory,
         VNPlaytimeTracker playtimeTracker)
     {
         _bridge = bridge;
         _restarter = restarter;
         _dispatcher = dispatcher;
-        _linePresentationAborter = linePresentationAborter;
         _lineAdvanceState = lineAdvanceState;
-        _rollbackHistory = rollbackHistory;
         _playtimeTracker = playtimeTracker;
-    }
-
-    public void PrepareForLoad()
-    {
-        _rollbackHistory?.ClearRollbackHistory();
-        _linePresentationAborter?.AbortCurrentLinePresentationForRollback();
+        
+        
     }
 
     public void BeginSeek(VNSaveData saveData, Action onComplete, Action onFail)
     {
-        if (saveData == null)
-        {
-            Debug.LogError("[VNLoadSeekDriver] BeginSeek failed. saveData is null.");
-            Fail(onFail);
-            return;
-        }
-
-        saveData.Normalize();
-
-        if (!saveData.HasValidTarget())
-        {
-            Debug.LogError("[VNLoadSeekDriver] BeginSeek failed. saveData has no valid target.");
-            Fail(onFail);
-            return;
-        }
-
         _target = saveData;
         _onComplete = onComplete;
         _onFail = onFail;
@@ -77,7 +50,7 @@ public sealed class VNLoadSeekDriver : IVNLoadSeekDriver, IDisposable
 
     private void HandleLineEntered(YarnLineMeta meta)
     {
-        if (_lineAdvanceState != null && !_lineAdvanceState.IsLoadSeeking)
+        if (!_lineAdvanceState.IsLoadSeeking)
             return;
 
         bool isTarget = IsTarget(meta);

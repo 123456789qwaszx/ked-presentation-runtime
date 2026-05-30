@@ -48,11 +48,11 @@ public sealed class SubPresentationPresenter : DialoguePresenterBase
 
     public override async YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token)
     {
-        Trace("RunLineStart", line);
+        Trace("RunLineStart");
 
         _yarnBridgePlaybackDriver.PlayCollected();
 
-        Trace("WaitForAdvanceStart", line);
+        Trace("WaitForAdvanceStart");
 
         NotifyReadyForAdvance();
 
@@ -60,7 +60,7 @@ public sealed class SubPresentationPresenter : DialoguePresenterBase
 
         NotifyNotReady("WaitForAdvanceComplete");
 
-        Trace("WaitForAdvanceComplete", line);
+        Trace("WaitForAdvanceComplete");
     }
     
     private void NotifyReadyForAdvance()
@@ -163,10 +163,7 @@ public sealed class SubPresentationPresenter : DialoguePresenterBase
     }
 
     private void Trace(
-        string evt,
-        LocalizedLine line = null,
-        YarnLineMeta? mainMetaAtStart = null,
-        string note = null)
+        string evt)
     {
         if (_trace == null)
             return;
@@ -175,21 +172,10 @@ public sealed class SubPresentationPresenter : DialoguePresenterBase
             ? "lineState=null"
             : _linePresentationAdvanceState.Snapshot();
 
-        string mainAtStart = mainMetaAtStart.HasValue
-            ? GetMainLineMetaNote("mainAtStart", mainMetaAtStart.Value)
-            : string.Empty;
-
-        string currentMain = GetCurrentMainLineMetaNote();
-        string subLine = GetSubLineNote(line);
-
-        string finalNote = CombineNotes(mainAtStart, currentMain, subLine, note);
-
         _trace.Trace(
             "SubPresentationPresenter",
             evt,
-            state,
-            finalNote,
-            this);
+            state);
     }
 
     private string GetCurrentMainLineMetaNote()
@@ -202,22 +188,9 @@ public sealed class SubPresentationPresenter : DialoguePresenterBase
 
     private static string GetMainLineMetaNote(string label, YarnLineMeta meta)
     {
-        string formattedMeta = YarnLineLifecycleBridge.FormatMeta(meta);
         string charName = meta.charName ?? string.Empty;
-        string textPreview = YarnLineLifecycleBridge.Preview(meta.rawText);
 
-        return $"{label}={formattedMeta}, {label}Char={charName}, {label}Text='{textPreview}'";
-    }
-
-    private static string GetSubLineNote(LocalizedLine line)
-    {
-        if (line == null)
-            return string.Empty;
-
-        string rawText = line.RawText ?? string.Empty;
-        string preview = YarnLineLifecycleBridge.Preview(rawText);
-
-        return $"subRaw='{preview}'";
+        return $"{label}Char={charName}'";
     }
 
     private static string CombineNotes(string a, string b, string c, string d)

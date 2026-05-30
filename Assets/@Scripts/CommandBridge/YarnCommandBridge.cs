@@ -9,18 +9,22 @@ public sealed partial class YarnCommandBridge
     private readonly DialogueRunner _subPresentationRunner;
     
     private readonly YarnBridgePlaybackDriver _playbackDriver;
+    private readonly VNRuntimeStateProvider _vnRuntimeStateProvider;
     private readonly RectTransform _charRigPrefab;
     
     public YarnCommandBridge(
         DialogueRunner dialogueRunner,
         DialogueRunner subPresentationRunner,
-        YarnBridgePlaybackDriver playbackDriver, 
+        YarnBridgePlaybackDriver playbackDriver,
+        VNRuntimeStateProvider vnRuntimeStateProvider,
+        
         RectTransform charRigPrefab)
     {
         _dialogueRunner = dialogueRunner;
         _subPresentationRunner = subPresentationRunner;
         
         _playbackDriver = playbackDriver;
+        _vnRuntimeStateProvider = vnRuntimeStateProvider;
         _charRigPrefab = charRigPrefab;
         
         BindRunnerCommands(_dialogueRunner);

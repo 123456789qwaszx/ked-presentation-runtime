@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.Serialization;
 using Yarn.Unity;
 
 public sealed class EpisodePlayer : MonoBehaviour
@@ -8,6 +7,7 @@ public sealed class EpisodePlayer : MonoBehaviour
     private RollbackHistory _nodeRollbackHistory;
     private ILinePresentationAborter _linePresentationAborter;
     private BacklogRecorder _backlogRecorder;
+    private VNSaveLoadSystem _vnSaveLoadSystem;
 
     [Header("Yarn")]
     [SerializeField] private DialogueRunner dialogueRunner;
@@ -53,12 +53,14 @@ public sealed class EpisodePlayer : MonoBehaviour
         VnScreenBindings vnScreenBindings,
         RollbackHistory nodeRollbackHistory,
         ILinePresentationAborter linePresentationAborter,
-        BacklogRecorder backlogRecorder)
+        BacklogRecorder backlogRecorder,
+        VNSaveLoadSystem saveLoadSystem)
     {
         _vnScreenBindings = vnScreenBindings;
         _nodeRollbackHistory = nodeRollbackHistory;
         _linePresentationAborter = linePresentationAborter;
         _backlogRecorder = backlogRecorder;
+        _vnSaveLoadSystem = saveLoadSystem;
     }
 
     private void Update()
@@ -178,20 +180,14 @@ public sealed class EpisodePlayer : MonoBehaviour
 
     private void StopYarnRunnerNow()
     {
-        // if (dialogueRunner == null)
-        //     return;
+        // if (dialogueRunner.IsDialogueRunning)
+        //     dialogueRunner.Stop();
         //
-        // if (!dialogueRunner.IsDialogueRunning)
-        //     return;
-        //
-        // dialogueRunner.Stop();
+        // 
         
-        // if (subPresentationRunner == null)
-        //     return;
-        //
-        // if (!subPresentationRunner.IsDialogueRunning)
-        //     return;
-        // subPresentationRunner.Stop();
+        // if (subPresentationRunner.IsDialogueRunning)
+        //     subPresentationRunner.Stop();
+        // 
     }
 
     private void EndPresentationRouteNow()
@@ -217,30 +213,11 @@ public sealed class EpisodePlayer : MonoBehaviour
 
     private void StartPresentationRouteFresh()
     {
-        if (presentationRouteEntry == null)
-        {
-            Debug.LogWarning("[EpisodePlayer] Cannot start presentation route. presentationRouteEntry is null.", this);
-            return;
-        }
-
-        if (string.IsNullOrWhiteSpace(presentationEntryKey))
-        {
-            Debug.LogWarning("[EpisodePlayer] Cannot start presentation route. presentationEntryKey is null or empty.", this);
-            return;
-        }
-
         presentationRouteEntry.RestartRoute(presentationEntryKey);
     }
 
     private void StartYarn(string nodeName)
     {
-        if (dialogueRunner == null)
-        {
-            Debug.LogWarning("[EpisodePlayer] Cannot start Yarn. dialogueRunner is null.", this);
-            return;
-        }
-
-        //subPresentationRunner.StartDialogue("a_presentation");
         dialogueRunner.StartDialogue(nodeName);
     }
 
