@@ -1,4 +1,3 @@
-using UnityEngine;
 using Yarn.Unity;
 
 public sealed class DialogueBoxPresentationController
