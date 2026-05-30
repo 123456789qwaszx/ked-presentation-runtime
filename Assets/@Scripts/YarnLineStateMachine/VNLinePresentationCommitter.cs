@@ -22,7 +22,7 @@ public struct YarnLineMeta
 // 시각적 작업(Box, Typewriter)은 포함하지 않는다.
 public sealed class VNLinePresentationCommitter
 {
-    private readonly LinePresentationState _advanceState;
+    private readonly VNLinePresentationState _advanceState;
     private readonly YarnBridgePlaybackDriver _playbackDriver;
 
     private readonly BacklogRecorder _backlogRecorder;
@@ -30,7 +30,7 @@ public sealed class VNLinePresentationCommitter
     private readonly VNRuntimeStateProvider _runtimeStateProvider;
     
     public VNLinePresentationCommitter(
-        LinePresentationState advanceState,
+        VNLinePresentationState advanceState,
         YarnBridgePlaybackDriver playbackDriver,
         BacklogRecorder backlogRecorder,
         RollbackController rollbackController,

@@ -4,7 +4,7 @@ public sealed class AdvanceGate
 {
     private readonly VnUxState _vnUxState;
     private readonly VnPlaybackSettings _vnPlaybackSettings;
-    private readonly LinePresentationState _lineState;
+    private readonly VNLinePresentationState _lineState;
     private ICommandRunScopeProvider _scopeProvider;
     private readonly CommandExecutor _commandExecutor;
     private readonly VNTraceStream _trace;
@@ -26,7 +26,7 @@ public sealed class AdvanceGate
     public AdvanceGate(
         VnUxState uxState,
         VnPlaybackSettings vnPlaybackSettings,
-        LinePresentationState lineState,
+        VNLinePresentationState lineState,
         ICommandRunScopeProvider scopeProvider,
         CommandExecutor commandExecutor,
         VNTraceStream trace)

@@ -1,9 +1,9 @@
 public sealed class RollbackController
 {
     private readonly RollbackHistory _history;
-    private readonly LinePresentationState _lineAdvanceState;
+    private readonly VNLinePresentationState _lineAdvanceState;
 
-    public RollbackController(RollbackHistory history, LinePresentationState lineAdvanceState)
+    public RollbackController(RollbackHistory history, VNLinePresentationState lineAdvanceState)
     {
         _history = history;
         _lineAdvanceState = lineAdvanceState;

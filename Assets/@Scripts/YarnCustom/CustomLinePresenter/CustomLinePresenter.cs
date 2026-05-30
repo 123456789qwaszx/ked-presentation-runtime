@@ -3,30 +3,29 @@ using System.Threading;
 using UnityEngine;
 using Yarn.Unity;
 
-public interface ILinePresentationAborter
+public interface IVNLineAborter
 {
-    void AbortCurrentLinePresentationForRollback();
+    void AbortCurrentVnLine();
 }
 
-public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentationAborter
+public sealed class CustomLinePresenter : DialoguePresenterBase, IVNLineAborter
 {
-    private string _currentNodeName;
-    
     private VNLinePresentationStateMachine _vnLinePresentationStateMachine;
 
     private EllipsisBreathTypewriter _typewriter;
     private DialogueBoxPresentationController _boxPresentation;
-    private LinePresentationState _lineAdvanceState;
+    private VNLinePresentationState _lineAdvanceState;
     private PresentationSessionContext _presentationSessionContext;
     private VNTraceStream _trace;
 
+    private string _currentNodeName;
+    
     private int _presenterGeneration;
     private CancellationTokenSource _presenterLifetimeCts = new();
     private CancellationTokenSource _lineVisualCts;
+    
 
-    [SerializeField]
-    private List<ActionMarkupHandler> eventHandlers = new();
-
+    [SerializeField] private List<ActionMarkupHandler> eventHandlers = new();
     private List<IActionMarkupHandler> ActionMarkupHandlers
     {
         get
@@ -41,27 +40,24 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
         DialogueRunner dialogueRunner,
         VNLinePresentationStateMachine vnLinePresentationStateMachine,
         EllipsisBreathTypewriter typewriter,
-        LinePresentationState linePresentationAdvanceState,
+        VNLinePresentationState linePresentationAdvanceState,
         PresentationSessionContext presentationSessionContext,
-        
         VNTraceStream trace = null)
     {
+        dialogueRunner.onNodeStart?.RemoveListener(OnNodeStart);
+        dialogueRunner.onNodeStart?.AddListener(OnNodeStart);
+        RegisterPresenter(dialogueRunner);
+        
+        _vnLinePresentationStateMachine = vnLinePresentationStateMachine;
+        
         _typewriter = typewriter;
         _typewriter.ActionMarkupHandlers = ActionMarkupHandlers;
 
         _lineAdvanceState = linePresentationAdvanceState;
         _presentationSessionContext = presentationSessionContext;
-        _trace = trace;
-
-        if (dialogueRunner != null)
-        {
-            dialogueRunner.onNodeStart?.RemoveListener(OnNodeStart);
-            dialogueRunner.onNodeStart?.AddListener(OnNodeStart);
-        }
         
-        _vnLinePresentationStateMachine = vnLinePresentationStateMachine;
-
-        RegisterBeforeDefaultLinePresenter(dialogueRunner);
+        _trace = trace;
+        
     }
     
     public override async YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token)
@@ -111,7 +107,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
     
     private bool ShouldFastForwardLine() => _lineAdvanceState.IsSeekingActive || _presentationSessionContext.IsSpeedUpMode;
     
-    public void AbortCurrentLinePresentationForRollback()
+    public void AbortCurrentVnLine()
     {
         _presenterGeneration++;
         CancelLineVisualToken();
@@ -155,7 +151,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
 
     private void OnNodeStart(string nodeName) => _currentNodeName = nodeName ?? string.Empty;
 
-    private void RegisterBeforeDefaultLinePresenter(DialogueRunner dialogueRunner)
+    private void RegisterPresenter(DialogueRunner dialogueRunner)
     {
         var presenters = new List<DialoguePresenterBase>(dialogueRunner.DialoguePresenters);
         presenters.Remove(this);

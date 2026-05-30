@@ -17,7 +17,7 @@ public class VnAppBootstrap : MonoBehaviour
     private readonly VnScreenBindings _screenBindings = new();
     private readonly EpisodeSelectionStateData _episodeSelectionStateData = new ();
     private readonly RollbackHistory _rollbackHistory = new ();
-    private readonly LinePresentationState _linePresentationAdvanceState = new();
+    private readonly VNLinePresentationState _linePresentationAdvanceState = new();
     
     private readonly BacklogRecorder _backlogRecorder = new ();
     private VNRuntimeStateProvider _vnRuntimeStateProvider;

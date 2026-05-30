@@ -3,7 +3,7 @@ using System;
 public sealed class VNLoadSeekDriver
 {
     private readonly EpisodePlayer _restarter;
-    private readonly LinePresentationState _lineAdvanceState;
+    private readonly VNLinePresentationState _lineAdvanceState;
     private readonly VNPlaytimeTracker _playtimeTracker;
     private readonly VNTraceStream _trace;
 
@@ -24,7 +24,7 @@ public sealed class VNLoadSeekDriver
 
     public VNLoadSeekDriver(
         EpisodePlayer restarter,
-        LinePresentationState lineAdvanceState,
+        VNLinePresentationState lineAdvanceState,
         VNPlaytimeTracker playtimeTracker,
         VNTraceStream trace = null)
     {

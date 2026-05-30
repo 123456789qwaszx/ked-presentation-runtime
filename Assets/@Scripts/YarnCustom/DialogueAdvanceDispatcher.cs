@@ -7,7 +7,7 @@ public sealed class DialogueAdvanceDispatcher : MonoBehaviour
     private DialogueRunner _dialogueRunner;
     private DialogueRunner _subPresentationRunner;
     private InlineEventMarkupHandler _inlineMarkupHandler;
-    private LinePresentationState _linePresentationAdvanceState;
+    private VNLinePresentationState _linePresentationAdvanceState;
     private VNTraceStream _trace;
 
     private int _pendingSubAdvanceCount;
@@ -19,7 +19,7 @@ public sealed class DialogueAdvanceDispatcher : MonoBehaviour
         DialogueRunner dialogueRunner,
         DialogueRunner subPresentationRunner,
         InlineEventMarkupHandler inlineMarkupHandler,
-        LinePresentationState linePresentationAdvanceState,
+        VNLinePresentationState linePresentationAdvanceState,
         VNTraceStream trace = null)
     {
         _gate = gate;

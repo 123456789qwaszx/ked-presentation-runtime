@@ -4,7 +4,7 @@ using System.Threading;
 public sealed class CommandRunScope
 {
     private readonly PresentationSessionContext _context;
-    private readonly LinePresentationState _linePresentationAdvanceState;
+    private readonly VNLinePresentationState _linePresentationAdvanceState;
     public CancellationToken Token { get; set; }
     
     public readonly CharacterRigRegistry characterRigs = new();
@@ -23,7 +23,7 @@ public sealed class CommandRunScope
     /// </summary>
     private LifetimeScope RunLifetime { get; } = new();
 
-    public CommandRunScope(PresentationSessionContext context, LinePresentationState linePresentationAdvanceState)
+    public CommandRunScope(PresentationSessionContext context, VNLinePresentationState linePresentationAdvanceState)
     {
         _context = context;
         _linePresentationAdvanceState = linePresentationAdvanceState;

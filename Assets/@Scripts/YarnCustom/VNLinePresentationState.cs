@@ -1,4 +1,4 @@
-public sealed class LinePresentationState
+public sealed class VNLinePresentationState
 {
     private readonly VNSeekState _seekState;
     private readonly VNTraceStream _trace;
@@ -16,10 +16,10 @@ public sealed class LinePresentationState
     public string SeekTargetNodeName => _seekState.TargetNodeName;
     public string SeekTargetLineId => _seekState.TargetLineId;
 
-    public LinePresentationState(VNTraceStream trace = null)
+    public VNLinePresentationState(VNTraceStream trace = null)
     {
-        _trace = trace;
         _seekState = new VNSeekState(trace);
+        _trace = trace;
     }
 
     public void BeginRollbackSeek(string nodeName, string lineId)
@@ -34,7 +34,7 @@ public sealed class LinePresentationState
 
     private void BeginSeek(VNSeekKind kind, string nodeName, string lineId)
     {
-        MarkLineEnteredInternal();
+        IsLineFullyShown = false;
         _seekState.Begin(kind, nodeName, lineId);
 
         Trace("BeginSeek", $"kind={kind}, target={nodeName}/{lineId}");
@@ -76,7 +76,7 @@ public sealed class LinePresentationState
 
     public void MarkLineEntered(YarnLineMeta meta)
     {
-        MarkLineEnteredInternal();
+        IsLineFullyShown = false;
         Trace("MarkLineEntered", $"meta={FormatMeta(meta)}");
     }
 
@@ -97,11 +97,6 @@ public sealed class LinePresentationState
     public string Snapshot()
     {
         return $"{_seekState.Snapshot()}, lineFullyShown={IsLineFullyShown}, canRecordRollbackPoint={CanRecordRollbackPoint}";
-    }
-
-    private void MarkLineEnteredInternal()
-    {
-        IsLineFullyShown = false;
     }
 
     private void Trace(string evt, string note = null)

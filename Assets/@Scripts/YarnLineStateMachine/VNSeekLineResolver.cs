@@ -1,8 +1,8 @@
 public sealed class VNSeekLineResolver
 {
-    private readonly LinePresentationState _advanceState;
+    private readonly VNLinePresentationState _advanceState;
 
-    public VNSeekLineResolver(LinePresentationState advanceState)
+    public VNSeekLineResolver(VNLinePresentationState advanceState)
     {
         _advanceState = advanceState;
     }
