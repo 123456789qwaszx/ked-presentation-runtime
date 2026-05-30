@@ -298,15 +298,21 @@ public class VnAppBootstrap : MonoBehaviour
             yarnBridgePlaybackDriver,
             _vnRuntimeStateProvider,
             rigPrefab);
+        
+        VNLinePresentationCommitter vnLinePresentationCommitter = new(
+            yarnLineLifecycleBridge,
+            _linePresentationAdvanceState,
+            yarnBridgePlaybackDriver);
+        
 
         customLinePresenter.Initialize(
             dialogueRunner,
+            vnLinePresentationCommitter,
             yarnLineLifecycleBridge,
             dialogueBoxRoutePolicy,
             dialogueBoxHost,
             dialogueTextRouter,
             ellipsisBreathTypewriter,
-            _presentationSessionContext,
             _linePresentationAdvanceState,
             yarnBridgePlaybackDriver,
             vnTrace);
@@ -327,7 +333,6 @@ public class VnAppBootstrap : MonoBehaviour
 
     private void BootstrapDialogueAdvanceInput()
     {
-
         AdvanceGate advanceGate = new(
             _vnUxState,
             _vnPlaybackSettings,

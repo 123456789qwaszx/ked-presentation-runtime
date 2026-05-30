@@ -13,72 +13,62 @@ public interface ILinePresentationAborter
 
 public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentationAborter
 {
-    private YarnLineLifecycleBridge _yarnLineLifecycleBridge;
     private string _currentNodeName;
     
-    private DialogueBoxPresentationController _boxPresentation;
+    private VNLinePresentationCommitter _vnLinePresentationCommitter;
+
     private EllipsisBreathTypewriter _typewriter;
-    private PresentationSessionContext _context;
+    private DialogueBoxPresentationController _boxPresentation;
     private LinePresentationAdvanceState _lineAdvanceState;
-    private YarnBridgePlaybackDriver _yarnBridgePlaybackDriver;
     private VNTraceStream _trace;
 
+    private VNLinePresentationStateMachine _lineMachine;
+
     private int _presenterGeneration;
-
-    private CancellationTokenSource _presenterLifetimeCts = new ();
-
+    private CancellationTokenSource _presenterLifetimeCts = new();
     private CancellationTokenSource _lineVisualCts;
 
     [SerializeField]
-    private List<ActionMarkupHandler> eventHandlers = new ();
+    private List<ActionMarkupHandler> eventHandlers = new();
 
     private List<IActionMarkupHandler> ActionMarkupHandlers
     {
         get
         {
-            PauseEventProcessor pauser = new PauseEventProcessor();
-
-            List<IActionMarkupHandler> actionMarkupHandlers = new List<IActionMarkupHandler>
-            {
-                pauser,
-            };
-
-            actionMarkupHandlers.AddRange(eventHandlers);
-            return actionMarkupHandlers;
+            var list = new List<IActionMarkupHandler> { new PauseEventProcessor() };
+            list.AddRange(eventHandlers);
+            return list;
         }
     }
-
+    
     public void Initialize(
         DialogueRunner dialogueRunner,
+        VNLinePresentationCommitter vnLinePresentationCommitter,
         YarnLineLifecycleBridge yarnLineLifecycleBridge,
         DialogueBoxLineRoutingPolicy lineRoutingPolicy,
         IDialogueBoxViewResolver dialogueBoxResolver,
         DialogueTextRouter dialogueTextRouter,
         EllipsisBreathTypewriter typewriter,
-        PresentationSessionContext context,
-        LinePresentationAdvanceState lineAdvanceState,
+        LinePresentationAdvanceState linePresentationAdvanceState,
         YarnBridgePlaybackDriver yarnBridgePlaybackDriver,
         VNTraceStream trace = null)
     {
+        _typewriter = typewriter;
+        _typewriter.ActionMarkupHandlers = ActionMarkupHandlers;
+
+        _lineAdvanceState = linePresentationAdvanceState;
+        _trace = trace;
+
         if (dialogueRunner != null)
         {
             dialogueRunner.onNodeStart?.RemoveListener(OnNodeStart);
             dialogueRunner.onNodeStart?.AddListener(OnNodeStart);
         }
-        
-        _yarnLineLifecycleBridge = yarnLineLifecycleBridge; 
-        
-        _typewriter = typewriter;
-        _typewriter.ActionMarkupHandlers = ActionMarkupHandlers;
 
-        _context = context;
-        _lineAdvanceState = lineAdvanceState;
-        _yarnBridgePlaybackDriver =  yarnBridgePlaybackDriver;
-        _trace = trace;
-
-        DialogueBoxTransitionPolicy transitionPolicy = new ();
-        DialogueBoxTextPrimer textPrimer = new ();
-        DialogueBoxTransitionRunner transitionRunner = new (dialogueBoxResolver, trace);
+        // Box Presentation Controller 구성
+        DialogueBoxTransitionPolicy transitionPolicy = new();
+        DialogueBoxTextPrimer textPrimer = new();
+        DialogueBoxTransitionRunner transitionRunner = new(dialogueBoxResolver, trace);
 
         _boxPresentation = new DialogueBoxPresentationController(
             lineRoutingPolicy,
@@ -88,24 +78,78 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
             textPrimer,
             transitionRunner,
             trace);
-        
+
+        _vnLinePresentationCommitter = vnLinePresentationCommitter;
+
+        var seekResolver = new VNSeekLineResolver(linePresentationAdvanceState);
+
+        _lineMachine = new VNLinePresentationStateMachine(
+            vnLinePresentationCommitter,
+            seekResolver,
+            _boxPresentation,
+            _typewriter,
+            linePresentationAdvanceState,
+            trace);
+
         RegisterBeforeDefaultLinePresenter(dialogueRunner);
     }
     
-    private void OnNodeStart(string nodeName)
+    public override async YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token)
     {
-        _currentNodeName = nodeName ?? string.Empty;
+        var ctx = new VNLinePresentationContext
+        {
+            Line = line,
+            Token = token,
+            NodeName = _currentNodeName,
+        };
+
+        await _lineMachine.RunAsync(
+            ctx,
+            beginRun: BeginLinePresentationRun,
+            waitForAdvance: WaitForLineAdvanceAsync,
+            shouldFastForward: ShouldFastForwardLine);
     }
 
+    private LinePresentationRun BeginLinePresentationRun()
+    {
+        CancelLineVisualToken();
+        _lineVisualCts = CancellationTokenSource.CreateLinkedTokenSource(_presenterLifetimeCts.Token);
+
+        return new LinePresentationRun(
+            _presenterGeneration,
+            () => _presenterGeneration,
+            _lineVisualCts.Token);
+    }
+
+
+    private async YarnTask WaitForLineAdvanceAsync(LineCancellationToken token)
+    {
+        CancellationTokenSource cts = null;
+        try
+        {
+            cts = CancellationTokenSource.CreateLinkedTokenSource(
+                token.NextContentToken,
+                _presenterLifetimeCts.Token);
+
+            await YarnTask.WaitUntilCanceled(cts.Token).SuppressCancellationThrow();
+        }
+        finally
+        {
+            cts?.Dispose();
+        }
+    }
+
+
+    private bool ShouldFastForwardLine() => _lineAdvanceState.IsSeeking;
+
+    
     public void AbortCurrentLinePresentationForRollback()
     {
         _presenterGeneration++;
         CancelLineVisualToken();
         CloseAll();
-
-        Trace("AbortCurrentLinePresentationForRollback");
     }
-
+    
     public override YarnTask OnDialogueStartedAsync()
     {
         CloseAll();
@@ -117,195 +161,49 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
         CancelLineVisualToken();
         CancelPresenterLifetimeWaiters();
         CloseAll();
-
         return YarnTask.CompletedTask;
     }
-
-    public override async YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token)
+    
+    private void CloseAll()
     {
-        Trace("RunLineStart", line);
-        _yarnLineLifecycleBridge.RefreshCurrentLineMeta(line, _currentNodeName);
-
-        _yarnBridgePlaybackDriver.PlayCollected();
-        _lineAdvanceState.MarkLineEntered();
-
-        LinePresentationRun run = BeginLinePresentationRun();
-
-        bool isPendingSeekTargetLine = _lineAdvanceState.IsPendingSeekTargetLine(line.TextID);
-        bool shouldPassThroughSeekLine = _lineAdvanceState.IsSeeking && !isPendingSeekTargetLine;
-        Trace("SeekCheck", line, $"isPendingTarget={isPendingSeekTargetLine}");
-
-        if (shouldPassThroughSeekLine)
-        {
-            Trace("SilentSeekPassThrough", line);
-            _boxPresentation.HideAllForSeek();
-            _lineAdvanceState.MarkLineDisplayCompleted();
-
-            await WaitForLineAdvanceAsync(token);
-            return;
-        }
-
-        if (isPendingSeekTargetLine)
-        {
-            Trace("SeekTargetLineAccepted", line);
-            _lineAdvanceState.ConsumeSeekTargetLine(line.TextID);
-        }
-
-        DialogueBoxPresentationResult boxResult = await _boxPresentation.ShowLineAsync(
-            VNDialogueLineFactory.FromLocalizedLine(line),
-            new DialogueBoxPresentationOptions
-            {
-                IsSeekTargetLine = isPendingSeekTargetLine,
-                UseImmediateTransition = isPendingSeekTargetLine || ShouldFastForwardLine(),
-                Run = run,
-            });
-        
-        if (!run.IsValid)
-        {
-            Trace("RunBecameStaleAfterBoxPresentation", line);
-            _boxPresentation.CleanupStale(boxResult);
-
-            await WaitForLineAdvanceAsync(token);
-            return;
-        }
-
-        TMP_Text lineText = boxResult?.LineText;
-        _typewriter.SetTextView(lineText);
-
-        MarkupParseResult text = line.TextWithoutCharacterName;
-        _typewriter.PrepareForContent(text);
-
-        await _typewriter.RunTypewriter(text, token.HurryUpToken).SuppressCancellationThrow();
-
-        if (!run.IsValid)
-            Trace("SkipDisplayCompletedBecauseRunInvalid", line);
-        else
-        {
-            _lineAdvanceState.MarkLineDisplayCompleted();
-            _typewriter.ContentWillDismiss();
-        }
-
-        await WaitForLineAdvanceAsync(token);
+        _boxPresentation?.CloseAll();
+        _typewriter?.SetTextView(null);
     }
-
-    private LinePresentationRun BeginLinePresentationRun()
+    
+    private void CancelPresenterLifetimeWaiters()
     {
-        CancelLineVisualToken();
-
-        _lineVisualCts = CancellationTokenSource.CreateLinkedTokenSource(_presenterLifetimeCts.Token);
-
-        return new LinePresentationRun(
-            _presenterGeneration,
-            () => _presenterGeneration,
-            _lineVisualCts.Token);
+        _presenterLifetimeCts?.Cancel();
+        _presenterLifetimeCts?.Dispose();
+        _presenterLifetimeCts = new CancellationTokenSource();
     }
-
+    
     private void CancelLineVisualToken()
     {
-        if (_lineVisualCts == null)
-            return;
-
+        if (_lineVisualCts == null) return;
         _lineVisualCts.Cancel();
         _lineVisualCts.Dispose();
         _lineVisualCts = null;
     }
 
-    private async YarnTask WaitForLineAdvanceAsync(LineCancellationToken token)
-    {
-        CancellationTokenSource lineWaitCts = null;
-
-        try
-        {
-            lineWaitCts = CancellationTokenSource.CreateLinkedTokenSource(
-                token.NextContentToken,
-                _presenterLifetimeCts.Token);
-
-            await YarnTask
-                .WaitUntilCanceled(lineWaitCts.Token)
-                .SuppressCancellationThrow();
-        }
-        finally
-        {
-            if (lineWaitCts != null)
-                lineWaitCts.Dispose();
-        }
-    }
-
-    private void CancelPresenterLifetimeWaiters()
-    {
-        if (_presenterLifetimeCts != null)
-        {
-            _presenterLifetimeCts.Cancel();
-            _presenterLifetimeCts.Dispose();
-        }
-
-        _presenterLifetimeCts = new CancellationTokenSource();
-    }
-
-    private bool ShouldFastForwardLine()
-    {
-        return _lineAdvanceState.IsSeeking || _context.IsSpeedUpMode;
-    }
-
-    private void CloseAll()
-    {
-        _boxPresentation.CloseAll();
-        _typewriter.SetTextView(null);
-    }
+    private void OnNodeStart(string nodeName) => _currentNodeName = nodeName ?? string.Empty;
 
     private void RegisterBeforeDefaultLinePresenter(DialogueRunner dialogueRunner)
     {
-        List<DialoguePresenterBase> presenters = new List<DialoguePresenterBase>(dialogueRunner.DialoguePresenters);
-
+        var presenters = new List<DialoguePresenterBase>(dialogueRunner.DialoguePresenters);
         presenters.Remove(this);
 
-        int insertIndex = presenters.FindIndex(x => x is LinePresenter);
-        if (insertIndex < 0)
-            insertIndex = presenters.Count;
+        int idx = presenters.FindIndex(x => x is LinePresenter);
+        if (idx < 0) idx = presenters.Count;
 
-        presenters.Insert(insertIndex, this);
+        presenters.Insert(idx, this);
         dialogueRunner.DialoguePresenters = presenters;
     }
 
     private void OnDestroy()
     {
         CancelLineVisualToken();
-
-        if (_presenterLifetimeCts != null)
-        {
-            _presenterLifetimeCts.Cancel();
-            _presenterLifetimeCts.Dispose();
-            _presenterLifetimeCts = null;
-        }
-    }
-
-    private void Trace(string evt, LocalizedLine line = null, string note = null)
-    {
-        if (_trace == null)
-            return;
-
-        string lineInfo = line == null
-            ? string.Empty
-            : $"line={line.TextID}, char={line.CharacterName ?? string.Empty}";
-
-        string state = _lineAdvanceState == null
-            ? "lineState=null"
-            : _lineAdvanceState.Snapshot();
-
-        string finalNote;
-
-        if (string.IsNullOrWhiteSpace(note))
-            finalNote = lineInfo;
-        else if (string.IsNullOrWhiteSpace(lineInfo))
-            finalNote = note;
-        else
-            finalNote = $"{lineInfo}, {note}";
-
-        _trace.Trace(
-            "CustomLinePresenter",
-            evt,
-            state,
-            finalNote,
-            this);
+        _presenterLifetimeCts?.Cancel();
+        _presenterLifetimeCts?.Dispose();
+        _presenterLifetimeCts = null;
     }
 }
