@@ -24,7 +24,7 @@ public sealed class VnFeatureController : MonoBehaviour
     private PresentationSessionContext _sessionContext;
 
     private EllipsisBreathTypewriter _typewriter;
-    private LinePresentationAdvanceState _linePresentationAdvanceState;
+    private LinePresentationState _linePresentationAdvanceState;
     private InlineEventMarkupHandler _inlineEventMarkupHandler;
 
     private BacklogRecorder _backlogRecorder;
@@ -45,7 +45,7 @@ public sealed class VnFeatureController : MonoBehaviour
         VnUxState uxState,
         VnPlaybackSettings vnPlaybackSettings,
         PresentationSessionContext sessionContext,
-        LinePresentationAdvanceState yarnLineLifecycleBridge,
+        LinePresentationState yarnLineLifecycleBridge,
         EllipsisBreathTypewriter ellipsisBreathTypewriter,
         InlineEventMarkupHandler inlineEventMarkupHandler,
         BacklogRecorder backlogRecorder,

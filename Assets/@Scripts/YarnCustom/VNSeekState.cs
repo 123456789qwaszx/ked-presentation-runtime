@@ -29,7 +29,6 @@ public sealed class VNSeekState
 
     public bool IsActive => Phase != VNSeekPhase.None;
     public bool IsSeeking => Phase == VNSeekPhase.Seeking;
-    public bool IsTargetLinePending => Phase == VNSeekPhase.TargetLinePending;
 
     public VNSeekState(VNTraceStream trace = null)
     {
@@ -38,9 +37,6 @@ public sealed class VNSeekState
 
     public void Begin(VNSeekKind kind, string nodeName, string lineId)
     {
-        if (kind == VNSeekKind.None)
-            return;
-
         Kind = kind;
         Phase = VNSeekPhase.Seeking;
 
@@ -53,16 +49,6 @@ public sealed class VNSeekState
         Trace("Begin", $"kind={kind}, target={nodeName}/{lineId}");
     }
 
-    public bool IsSeekingKind(VNSeekKind kind)
-    {
-        return Kind == kind && Phase == VNSeekPhase.Seeking;
-    }
-
-    public bool IsActiveKind(VNSeekKind kind)
-    {
-        return Kind == kind && Phase != VNSeekPhase.None;
-    }
-
     public bool IsCurrentTarget(YarnLineMeta meta)
     {
         if (Phase != VNSeekPhase.Seeking)
@@ -71,7 +57,6 @@ public sealed class VNSeekState
         if (!string.Equals(meta.nodeName, TargetNodeName, StringComparison.Ordinal))
             return false;
 
-        // Empty lineId means "restore to the first line that enters this node".
         if (string.IsNullOrWhiteSpace(TargetLineId))
             return true;
 

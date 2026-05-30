@@ -4,7 +4,7 @@ public sealed class AdvanceGate
 {
     private readonly VnUxState _vnUxState;
     private readonly VnPlaybackSettings _vnPlaybackSettings;
-    private readonly LinePresentationAdvanceState _lineState;
+    private readonly LinePresentationState _lineState;
     private ICommandRunScopeProvider _scopeProvider;
     private readonly CommandExecutor _commandExecutor;
     private readonly VNTraceStream _trace;
@@ -26,7 +26,7 @@ public sealed class AdvanceGate
     public AdvanceGate(
         VnUxState uxState,
         VnPlaybackSettings vnPlaybackSettings,
-        LinePresentationAdvanceState lineState,
+        LinePresentationState lineState,
         ICommandRunScopeProvider scopeProvider,
         CommandExecutor commandExecutor,
         VNTraceStream trace)
@@ -86,8 +86,7 @@ public sealed class AdvanceGate
 
     private bool TryEnter(bool isUser)
     {
-        
-        if (_lineState != null && _lineState.IsSeekingActive)
+        if (_lineState.IsSeekingActive)
             return Reject(isUser, "seek_active");
 
         if (_vnUxState.BacklogVisible)
@@ -188,8 +187,6 @@ public sealed class AdvanceGate
 
         string state =
             $"lineFullyShown={IsLineFullyShown}, " +
-            $"seekActive={(_lineState != null && _lineState.IsSeekingActive)}, " +
-            $"isSeeking={(_lineState != null && _lineState.IsSeeking)}, " +
             $"ux=backlog:{_vnUxState.BacklogVisible},choices:{_vnUxState.ChoicesVisible},hudHidden:{_vnUxState.HudHidden}, " +
             $"cooldownUntil={_cooldownUntilUnscaled:0.000}";
 

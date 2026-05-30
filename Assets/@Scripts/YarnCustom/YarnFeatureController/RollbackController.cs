@@ -1,9 +1,9 @@
 public sealed class RollbackController
 {
     private readonly RollbackHistory _history;
-    private readonly LinePresentationAdvanceState _lineAdvanceState;
+    private readonly LinePresentationState _lineAdvanceState;
 
-    public RollbackController(RollbackHistory history, LinePresentationAdvanceState lineAdvanceState)
+    public RollbackController(RollbackHistory history, LinePresentationState lineAdvanceState)
     {
         _history = history;
         _lineAdvanceState = lineAdvanceState;
@@ -11,25 +11,25 @@ public sealed class RollbackController
 
     public bool RequestRollbackOneStep()
     {
-        if (_lineAdvanceState.IsSeekActive)
+        if (_lineAdvanceState.IsSeekingActive)
             return false;
         
         if (!_history.TryPrepareRollbackOneStep(out RollbackPoint target))
             return false;
 
-        _lineAdvanceState.StartRollbackSeek(target.nodeName, target.lineId);
+        _lineAdvanceState.BeginRollbackSeek(target.nodeName, target.lineId);
         return true;
     }
 
     public bool RequestRollbackToHistoryIndex(int historyIndex)
     {
-        if (_lineAdvanceState.IsSeekActive)
+        if (_lineAdvanceState.IsSeekingActive)
             return false;
 
         if (!_history.TryPrepareRollbackToHistoryIndex(historyIndex, out RollbackPoint target))
             return false;
 
-        _lineAdvanceState.StartRollbackSeek(target.nodeName, target.lineId);
+        _lineAdvanceState.BeginRollbackSeek(target.nodeName, target.lineId);
         return true;
     }
 

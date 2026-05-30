@@ -22,16 +22,15 @@ public struct YarnLineMeta
 // 시각적 작업(Box, Typewriter)은 포함하지 않는다.
 public sealed class VNLinePresentationCommitter
 {
-    private readonly LinePresentationAdvanceState _advanceState;
+    private readonly LinePresentationState _advanceState;
     private readonly YarnBridgePlaybackDriver _playbackDriver;
 
     private readonly BacklogRecorder _backlogRecorder;
     private readonly RollbackController _rollbackController;
     private readonly VNRuntimeStateProvider _runtimeStateProvider;
-
     
     public VNLinePresentationCommitter(
-        LinePresentationAdvanceState advanceState,
+        LinePresentationState advanceState,
         YarnBridgePlaybackDriver playbackDriver,
         BacklogRecorder backlogRecorder,
         RollbackController rollbackController,
@@ -44,13 +43,16 @@ public sealed class VNLinePresentationCommitter
         _runtimeStateProvider = runtimeStateProvider;
     }
 
+    public YarnLineMeta CurrentMeta { get; private set; }
+
     public YarnLineMeta CommitLineEntered(LocalizedLine line, string nodeName)
     {
         YarnLineMeta meta = new (nodeName, line.TextID, line.CharacterName, line.TextWithoutCharacterName.Text);
+        CurrentMeta = meta;
         
         _runtimeStateProvider.HandleLineEntered(meta);
 
-        if (!_advanceState.IsSeekActive)
+        if (!_advanceState.IsSeekingActive)
         {
             _backlogRecorder.Record(meta);
 
@@ -58,7 +60,7 @@ public sealed class VNLinePresentationCommitter
                 _rollbackController.AddRollbackPoint(meta);
         }
         
-        _advanceState.MarkLineEntered();
+        _advanceState.MarkLineEntered(meta);
 
         _playbackDriver.PlayCollected();
 
@@ -67,6 +69,6 @@ public sealed class VNLinePresentationCommitter
 
     public void CommitLineProcessingCompleted()
     {
-        _advanceState.MarkLineDisplayCompleted();
+        _advanceState.MarkLineDisplayCompleted(CurrentMeta);
     }
 }

@@ -1,19 +1,19 @@
 public sealed class VNSeekLineResolver
 {
-    private readonly LinePresentationAdvanceState _advanceState;
+    private readonly LinePresentationState _advanceState;
 
-    public VNSeekLineResolver(LinePresentationAdvanceState advanceState)
+    public VNSeekLineResolver(LinePresentationState advanceState)
     {
         _advanceState = advanceState;
     }
 
     public VNSeekLineDecision ResolveOnLineEntered(YarnLineMeta meta)
     {
-        if (!_advanceState.IsSeeking)
+        if (!_advanceState.IsSeekingActive)
             return VNSeekLineDecision.NotSeeking();
 
         VNSeekKind seekKind = _advanceState.SeekKind;
-        bool isTarget = _advanceState.IsSeekTarget(meta);
+        bool isTarget = _advanceState.IsSeekTargetLine(meta);
 
         if (isTarget)
         {
@@ -33,7 +33,7 @@ public sealed class VNSeekLineResolver
                 lineId);
         }
 
-        if (_advanceState.IsSeeking)
+        if (_advanceState.IsSeekingActive)
         {
             return new VNSeekLineDecision
             {
@@ -51,6 +51,6 @@ public sealed class VNSeekLineResolver
 
     public void ConsumeTargetLine(string lineId)
     {
-        _advanceState.ConsumeSeekTargetLine(lineId);
+        _advanceState.AcceptPendingSeekTargetLine(lineId);
     }
 }

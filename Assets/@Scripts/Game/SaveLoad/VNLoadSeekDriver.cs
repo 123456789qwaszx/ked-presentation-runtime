@@ -3,7 +3,7 @@ using System;
 public sealed class VNLoadSeekDriver
 {
     private readonly EpisodePlayer _restarter;
-    private readonly LinePresentationAdvanceState _lineAdvanceState;
+    private readonly LinePresentationState _lineAdvanceState;
     private readonly VNPlaytimeTracker _playtimeTracker;
     private readonly VNTraceStream _trace;
 
@@ -24,7 +24,7 @@ public sealed class VNLoadSeekDriver
 
     public VNLoadSeekDriver(
         EpisodePlayer restarter,
-        LinePresentationAdvanceState lineAdvanceState,
+        LinePresentationState lineAdvanceState,
         VNPlaytimeTracker playtimeTracker,
         VNTraceStream trace = null)
     {
@@ -48,7 +48,7 @@ public sealed class VNLoadSeekDriver
 
         Trace("BeginSeek", $"target={saveData.nodeName}/{saveData.lineId}");
 
-        _lineAdvanceState.StartLoadSeek(saveData.nodeName, saveData.lineId);
+        _lineAdvanceState.BeginLoadSeek(saveData.nodeName, saveData.lineId);
 
         _restarter.RestartGame(saveData.nodeName);
     }

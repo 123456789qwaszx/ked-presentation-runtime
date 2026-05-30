@@ -1,116 +1,107 @@
-public sealed class LinePresentationAdvanceState
+public sealed class LinePresentationState
 {
-    private readonly VNSeekState _seek = new();
-    private readonly VNLinePresentationState _line = new();
+    private readonly VNSeekState _seekState;
     private readonly VNTraceStream _trace;
 
-    private bool _rollbackPointBlocked;
+    public VNSeekKind SeekKind => _seekState.Kind;
+    public VNSeekPhase SeekPhase => _seekState.Phase;
 
-    public VNSeekKind SeekKind => _seek.Kind;
-    public VNSeekPhase SeekPhase => _seek.Phase;
+    public bool IsSeekingActive => _seekState.IsActive;
+    public bool IsSeekPassingThrough => _seekState.IsSeeking;
 
-    public bool IsSeekActive => _seek.IsActive;
-    public bool IsSeeking => _seek.IsSeeking;
-    public bool IsTargetLinePending => _seek.IsTargetLinePending;
+    public bool IsLineFullyShown { get; private set; } = true;
 
-    public bool IsRollbackSeeking => _seek.IsSeekingKind(VNSeekKind.Rollback);
-    public bool IsRollbackSeekActive => _seek.IsActiveKind(VNSeekKind.Rollback);
+    public bool CanRecordRollbackPoint => !_seekState.IsActive;
 
-    public bool IsLoadSeeking => _seek.IsSeekingKind(VNSeekKind.Load);
-    public bool IsLoadSeekActive => _seek.IsActiveKind(VNSeekKind.Load);
+    public string SeekTargetNodeName => _seekState.TargetNodeName;
+    public string SeekTargetLineId => _seekState.TargetLineId;
 
-    public bool IsLineFullyShown => _line.IsFullyShown;
-
-    // Kept because rollback history is a separate concept from seek ownership.
-    public bool CanRecordRollbackPoint => !_rollbackPointBlocked && !_seek.IsActive;
-
-    // These aliases keep the rest of the current code compiling while the call sites migrate.
-    public bool IsSeekingActive => IsSeekActive;
-    public bool IsRollbackActive => IsRollbackSeekActive;
-    public string TargetNodeName => _seek.TargetNodeName;
-
-    public void StartRollbackSeek(string nodeName, string lineId)
+    public LinePresentationState(VNTraceStream trace = null)
     {
-        StartSeek(VNSeekKind.Rollback, nodeName, lineId);
+        _trace = trace;
+        _seekState = new VNSeekState(trace);
     }
 
-    public void StartLoadSeek(string nodeName, string lineId)
+    public void BeginRollbackSeek(string nodeName, string lineId)
     {
-        StartSeek(VNSeekKind.Load, nodeName, lineId);
+        BeginSeek(VNSeekKind.Rollback, nodeName, lineId);
     }
 
-    private void StartSeek(VNSeekKind kind, string nodeName, string lineId)
+    public void BeginLoadSeek(string nodeName, string lineId)
     {
-        _rollbackPointBlocked = true;
-        _line.MarkLineEntered();
-        _seek.Begin(kind, nodeName, lineId);
-
-        Trace("StartSeek", $"kind={kind}, target={nodeName}/{lineId}");
+        BeginSeek(VNSeekKind.Load, nodeName, lineId);
     }
 
-    public bool IsSeekTarget(YarnLineMeta meta)
+    private void BeginSeek(VNSeekKind kind, string nodeName, string lineId)
     {
-        bool result = _seek.IsCurrentTarget(meta);
-        Trace("IsSeekTarget", $"meta={FormatMeta(meta)}, result={result}");
-        return result;
+        MarkLineEnteredInternal();
+        _seekState.Begin(kind, nodeName, lineId);
+
+        Trace("BeginSeek", $"kind={kind}, target={nodeName}/{lineId}");
     }
 
-    public bool IsPendingSeekTargetLine(string lineId)
+    public bool IsSeekTargetLine(YarnLineMeta meta)
     {
-        bool result = _seek.IsPendingTargetLine(lineId);
-        Trace("IsPendingSeekTargetLine", $"line={lineId}, result={result}");
+        bool result = _seekState.IsCurrentTarget(meta);
+        Trace("IsSeekTargetLine", $"meta={FormatMeta(meta)}, result={result}");
         return result;
     }
 
     public bool MarkSeekTargetReached(YarnLineMeta meta)
     {
-        bool reached = _seek.MarkTargetReached(meta);
+        bool reached = _seekState.MarkTargetReached(meta);
         Trace("MarkSeekTargetReached", $"meta={FormatMeta(meta)}, reached={reached}");
         return reached;
     }
 
-    public bool ConsumeSeekTargetLine(string lineId)
+    public bool IsPendingSeekTargetLine(string lineId)
     {
-        bool consumed = _seek.ConsumePendingTargetLine(lineId);
+        bool result = _seekState.IsPendingTargetLine(lineId);
+        Trace("IsPendingSeekTargetLine", $"line={lineId}, result={result}");
+        return result;
+    }
 
-        if (consumed)
-            _rollbackPointBlocked = false;
-
-        Trace("ConsumeSeekTargetLine", $"line={lineId}, consumed={consumed}");
-        return consumed;
+    public bool AcceptPendingSeekTargetLine(string lineId)
+    {
+        bool accepted = _seekState.ConsumePendingTargetLine(lineId);
+        Trace("AcceptPendingSeekTargetLine", $"line={lineId}, accepted={accepted}");
+        return accepted;
     }
 
     public void ClearSeek(string reason = "ClearSeek")
     {
-        _seek.Clear(reason);
-        _rollbackPointBlocked = false;
-
+        _seekState.Clear(reason);
         Trace("ClearSeek", $"reason={reason}");
     }
 
-    public void MarkLineEntered()
+    public void MarkLineEntered(YarnLineMeta meta)
     {
-        _line.MarkLineEntered();
-        Trace("MarkLineEntered");
+        MarkLineEnteredInternal();
+        Trace("MarkLineEntered", $"meta={FormatMeta(meta)}");
     }
 
-    public void MarkLineDisplayCompleted()
+    public void MarkLineDisplayCompleted(YarnLineMeta meta)
     {
-        _line.MarkLineDisplayCompleted();
-        Trace("-=-=-=-MarkLineDisplayCompleted-=-=-=-");
+        IsLineFullyShown = true;
+        Trace("MarkLineDisplayCompleted", $"meta={FormatMeta(meta)}");
     }
 
     public void Reset()
     {
-        ClearSeek("Reset");
-        _line.Reset();
+        _seekState.Clear("Reset");
+        IsLineFullyShown = true;
 
         Trace("Reset");
     }
 
     public string Snapshot()
     {
-        return $"{_seek.Snapshot()}, rollbackPointBlocked={_rollbackPointBlocked}, canRecord={CanRecordRollbackPoint}";
+        return $"{_seekState.Snapshot()}, lineFullyShown={IsLineFullyShown}, canRecordRollbackPoint={CanRecordRollbackPoint}";
+    }
+
+    private void MarkLineEnteredInternal()
+    {
+        IsLineFullyShown = false;
     }
 
     private void Trace(string evt, string note = null)
@@ -118,7 +109,7 @@ public sealed class LinePresentationAdvanceState
         if (_trace == null)
             return;
 
-        _trace.Trace("@LinePresentationAdvanceState", evt, Snapshot(), note);
+        _trace.Trace("@VNLinePresentationState", evt, Snapshot(), note);
     }
 
     private static string FormatMeta(YarnLineMeta meta)

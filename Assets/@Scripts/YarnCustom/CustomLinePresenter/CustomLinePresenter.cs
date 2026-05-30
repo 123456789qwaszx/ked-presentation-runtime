@@ -16,7 +16,8 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
 
     private EllipsisBreathTypewriter _typewriter;
     private DialogueBoxPresentationController _boxPresentation;
-    private LinePresentationAdvanceState _lineAdvanceState;
+    private LinePresentationState _lineAdvanceState;
+    private PresentationSessionContext _presentationSessionContext;
     private VNTraceStream _trace;
 
     private int _presenterGeneration;
@@ -40,13 +41,16 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
         DialogueRunner dialogueRunner,
         VNLinePresentationStateMachine vnLinePresentationStateMachine,
         EllipsisBreathTypewriter typewriter,
-        LinePresentationAdvanceState linePresentationAdvanceState,
+        LinePresentationState linePresentationAdvanceState,
+        PresentationSessionContext presentationSessionContext,
+        
         VNTraceStream trace = null)
     {
         _typewriter = typewriter;
         _typewriter.ActionMarkupHandlers = ActionMarkupHandlers;
 
         _lineAdvanceState = linePresentationAdvanceState;
+        _presentationSessionContext = presentationSessionContext;
         _trace = trace;
 
         if (dialogueRunner != null)
@@ -104,10 +108,8 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILinePresentati
             cts?.Dispose();
         }
     }
-
-
-    private bool ShouldFastForwardLine() => _lineAdvanceState.IsSeeking;
-
+    
+    private bool ShouldFastForwardLine() => _lineAdvanceState.IsSeekingActive || _presentationSessionContext.IsSpeedUpMode;
     
     public void AbortCurrentLinePresentationForRollback()
     {

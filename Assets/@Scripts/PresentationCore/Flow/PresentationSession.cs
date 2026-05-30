@@ -14,7 +14,7 @@ public sealed class PresentationSession
     
     // ---- Session-owned context ----
     private readonly PresentationSessionContext _context;
-    private readonly LinePresentationAdvanceState _linePresentationAdvanceState;
+    private readonly LinePresentationState _linePresentationAdvanceState;
     
     // ---- Active run (per-Session) ----
     private CommandRunScope _sessionScope;
@@ -39,7 +39,7 @@ public sealed class PresentationSession
         StepGateAdvancer gateAdvancer,
         CommandExecutor executor,
         PresentationSessionContext presentationSessionContext,
-        LinePresentationAdvanceState linePresentationAdvanceState
+        LinePresentationState linePresentationAdvanceState
     )
     {
         _gatePlanner = gatePlanner;

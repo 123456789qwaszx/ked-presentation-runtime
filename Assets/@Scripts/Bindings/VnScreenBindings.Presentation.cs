@@ -4,14 +4,14 @@ public sealed partial class VnScreenBindings
     private VnUxState _uxState;
     private VnRuntimeBridge _vnRuntimeBridge;
     private DialogueAdvanceDispatcher _dialogueAdvanceDispatcher;
-    private LinePresentationAdvanceState _linePresentationAdvanceState;
+    private LinePresentationState _linePresentationAdvanceState;
 
     public void ConfigurePresentationView(
         VnFeatureController vnFeatures,
         VnUxState uxState,
         VnRuntimeBridge vnRuntimeBridge,
         DialogueAdvanceDispatcher dialogueAdvanceDispatcher,
-        LinePresentationAdvanceState linePresentationAdvanceState)
+        LinePresentationState linePresentationAdvanceState)
     {
         _vnFeatures = vnFeatures;
         _uxState = uxState;
@@ -130,7 +130,7 @@ public sealed partial class VnScreenBindings
         if (!_vnFeatures.RequestRollbackOneStep())
             return;
         
-        _episodePlayer.RestartForRollback(_linePresentationAdvanceState.TargetNodeName);
+        _episodePlayer.RestartForRollback(_linePresentationAdvanceState.SeekTargetNodeName);
     }
     
     private void HandleSaveMenuClicked()

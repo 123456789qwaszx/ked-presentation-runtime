@@ -4,7 +4,7 @@ using System.Threading;
 public sealed class CommandRunScope
 {
     private readonly PresentationSessionContext _context;
-    private readonly LinePresentationAdvanceState _linePresentationAdvanceState;
+    private readonly LinePresentationState _linePresentationAdvanceState;
     public CancellationToken Token { get; set; }
     
     public readonly CharacterRigRegistry characterRigs = new();
@@ -23,7 +23,7 @@ public sealed class CommandRunScope
     /// </summary>
     private LifetimeScope RunLifetime { get; } = new();
 
-    public CommandRunScope(PresentationSessionContext context, LinePresentationAdvanceState linePresentationAdvanceState)
+    public CommandRunScope(PresentationSessionContext context, LinePresentationState linePresentationAdvanceState)
     {
         _context = context;
         _linePresentationAdvanceState = linePresentationAdvanceState;
@@ -34,7 +34,7 @@ public sealed class CommandRunScope
     public bool IsAutoMode => _context != null && _context.IsAutoMode;
     public float TimeScale => _context != null ? _context.TimeScale : 1f;
     public bool IsNodeBusy => _context != null && _context.IsNodeBusy;
-    public bool IsRollbackSeeking => _linePresentationAdvanceState != null && _linePresentationAdvanceState.IsSeeking;
+    public bool IsRollbackSeeking => _linePresentationAdvanceState != null && _linePresentationAdvanceState.IsSeekingActive;
 
     public bool ShouldRespectCommandWait => 
         _context == null || !IsRollbackSeeking || !IsSkipping;
