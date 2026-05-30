@@ -8,17 +8,14 @@ public sealed class YarnCommandRegistry
     
     private readonly DialogueRunner _dialogueRunner;
     private readonly VnRuntimeBridge _vnRuntimeBridge;
-    private readonly DialogueBoxLineRoutingPolicy _routeState;
     
 
     public YarnCommandRegistry(
         DialogueRunner dialogueRunner,
-        VnRuntimeBridge vnRuntimeBridge,
-        DialogueBoxLineRoutingPolicy routeState)
+        VnRuntimeBridge vnRuntimeBridge)
     {
         _dialogueRunner = dialogueRunner;
         _vnRuntimeBridge = vnRuntimeBridge;
-        _routeState = routeState;
     }
 
     private bool _init;
@@ -36,21 +33,21 @@ public sealed class YarnCommandRegistry
         _dialogueRunner.AddCommandHandler("beat", (Func<IEnumerator>)(() => _vnRuntimeBridge.Beat(BeatKey)));
         _dialogueRunner.AddCommandHandler<string>("WaitSignal", key => _vnRuntimeBridge.WaitSignal(key));
         
-        _dialogueRunner.AddCommandHandler<string>("set_named_box", SetNamedBox);
-        _dialogueRunner.AddCommandHandler<string>("set_narration_box", SetProtagonistBox);
+        // _dialogueRunner.AddCommandHandler<string>("set_named_box", SetNamedBox);
+        // _dialogueRunner.AddCommandHandler<string>("set_narration_box", SetProtagonistBox);
     }
     
-    private void SetNamedBox(string key)
-    {
-        if (TryParseKind(key, out DialogueBoxKind kind))
-            _routeState.SetNamedLineBoxKind(kind);
-    }
-
-    private void SetProtagonistBox(string key)
-    {
-        if (TryParseKind(key, out DialogueBoxKind kind))
-            _routeState.SetProtagonistLineBoxKind(kind);
-    }
+    // private void SetNamedBox(string key)
+    // {
+    //     if (TryParseKind(key, out DialogueBoxKind kind))
+    //         _routeState.SetNamedLineBoxKind(kind);
+    // }
+    //
+    // private void SetProtagonistBox(string key)
+    // {
+    //     if (TryParseKind(key, out DialogueBoxKind kind))
+    //         _routeState.SetProtagonistLineBoxKind(kind);
+    // }
 
     private bool TryParseKind(string key, out DialogueBoxKind kind)
     {

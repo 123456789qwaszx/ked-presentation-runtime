@@ -22,8 +22,6 @@ public class VnAppBootstrap : MonoBehaviour
     private readonly BacklogRecorder _backlogRecorder = new ();
     private VNRuntimeStateProvider _vnRuntimeStateProvider;
     
-    private readonly DialogueBoxLineRoutingPolicy _dialogueBoxRoutePolicy = new();
-    
     [Header("Sound")] 
     [SerializeField] private AudioSystem audioSystem;
     [SerializeField] private InlineSfxPlaybackHost inlineSfxHost;
@@ -261,8 +259,7 @@ public class VnAppBootstrap : MonoBehaviour
 
         YarnCommandRegistry yarnCommandRegistry = new YarnCommandRegistry(
             dialogueRunner,
-            vnRuntimeBridge,
-            _dialogueBoxRoutePolicy);
+            vnRuntimeBridge);
 
         yarnCommandRegistry.Initialize();
 

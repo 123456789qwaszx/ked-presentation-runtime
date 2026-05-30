@@ -54,6 +54,8 @@ public sealed class DialogueBoxPresentationController
         }
 
         Commit(plan);
+        SetPhase(DialogueBoxPresentationPhase.Committed);
+        
         SetPhase(DialogueBoxPresentationPhase.Completed);
         Trace("ShowLineCompleted", FormatPlan(plan, line, options));
 

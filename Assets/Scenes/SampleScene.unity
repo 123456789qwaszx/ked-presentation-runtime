@@ -5359,7 +5359,6 @@ Transform:
   - {fileID: 2009713541}
   - {fileID: 780646545}
   - {fileID: 720935692}
-  - {fileID: 728559836}
   - {fileID: 2005113227}
   - {fileID: 946268261}
   - {fileID: 608895338}
@@ -5402,11 +5401,11 @@ MonoBehaviour:
   dialogueRunner: {fileID: 8309902628538800288}
   subPresentationRunner: {fileID: 8309902628667094135}
   linePresenter: {fileID: 2958262985601084670}
-  dialogueTextRouter: {fileID: 728559835}
   vnRuntimeBridge: {fileID: 2005113226}
   inlineEventMarkupHandler: {fileID: 946268260}
   customLinePresenter: {fileID: 2009713540}
   subPresentationPresenter: {fileID: 780646544}
+  autoAdvanceScheduler: {fileID: 608895337}
   ellipsisBreathTypewriter: {fileID: 1658226451}
   vnAdvanceInputPoller: {fileID: 1315566987}
   dialogueAdvanceDispatcher: {fileID: 307625745}
@@ -5419,9 +5418,8 @@ MonoBehaviour:
   characterEmojiLibrarySo: {fileID: 11400000, guid: 50cc0df71f2e038468df66d0c632ebdd, type: 2}
   rigPrefab: {fileID: 5409551162114272258, guid: a8a089dede6a6084d8eac1369e77b04c, type: 3}
   chapterCardPrefab: {fileID: 2410623267660482620, guid: 60640956e3866b44e9e8c9df1a45dbd3, type: 3}
-  chapterCardFactory: {fileID: 767435430}
   nodeRigPrefab: {fileID: 8432584506347833489, guid: 5a92676ae0261c54188d2a64469a3787, type: 3}
-  autoAdvanceScheduler: {fileID: 608895337}
+  chapterCardFactory: {fileID: 767435430}
   chapterEpisodeProgressionCatalog: {fileID: 11400000, guid: 466709b071b363747b43332bcdfdeb44, type: 2}
   episodeProgressionSo: {fileID: 11400000, guid: 6b6dcda1ce02f5141a876245e3c88c7e, type: 2}
   rollbackHistoryDebugView: {fileID: 969122867}
@@ -6490,50 +6488,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 725091909}
   m_CullTransparentMesh: 1
---- !u!1 &728559834
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 728559836}
-  - component: {fileID: 728559835}
-  m_Layer: 0
-  m_Name: DialogueTextRouter
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &728559835
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 728559834}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a984786a3d7d6a64a89f352d7ae86bec, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DialogueTextRouter
---- !u!4 &728559836
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 728559834}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -310.66895, y: -4.4387817, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 596868909}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &730130402
 GameObject:
   m_ObjectHideFlags: 0
@@ -15884,7 +15838,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EpisodePlayer
   dialogueRunner: {fileID: 8309902628538800288}
   subPresentationRunner: {fileID: 8309902628667094135}
-  dialogueTextRouter: {fileID: 728559835}
   presentationRouteEntry: {fileID: 1433866633}
   presentationResponseRig: {fileID: 529556882}
   yarnEntryKey: OnlyText
