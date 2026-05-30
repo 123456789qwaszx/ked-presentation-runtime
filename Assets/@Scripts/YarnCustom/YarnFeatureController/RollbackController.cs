@@ -1,31 +1,22 @@
 using System;
 
-public sealed class RollbackController : IDisposable
+public sealed class RollbackController
 {
     private readonly RollbackHistory _history;
-    private readonly YarnLineLifecycleBridge _bridge;
     private readonly DialogueAdvanceDispatcher _dispatcher;
     private readonly LinePresentationAdvanceState _lineAdvanceState;
     private readonly VNTraceStream _trace;
 
     public RollbackController(
         RollbackHistory history,
-        YarnLineLifecycleBridge bridge,
         DialogueAdvanceDispatcher dispatcher,
         LinePresentationAdvanceState lineAdvanceState,
         VNTraceStream trace = null)
     {
         _history = history;
-        _bridge = bridge;
         _dispatcher = dispatcher;
         _lineAdvanceState = lineAdvanceState;
         _trace = trace;
-
-        _bridge.LineEntered -= HandleLineEnteredDuringRollbackSeek;
-        _bridge.LineEntered += HandleLineEnteredDuringRollbackSeek;
-
-        _bridge.LineEntered -= AddRollbackPoint;
-        _bridge.LineEntered += AddRollbackPoint;
     }
 
     public bool RequestRollbackOneStep()
@@ -91,7 +82,7 @@ public sealed class RollbackController : IDisposable
         _dispatcher.DispatchSeekNext();
     }
 
-    private void AddRollbackPoint(YarnLineMeta meta)
+    public void AddRollbackPoint(YarnLineMeta meta)
     {
         if (!_lineAdvanceState.CanRecordRollbackPoint)
         {
@@ -101,17 +92,6 @@ public sealed class RollbackController : IDisposable
 
         _history.AddRollbackPoint(meta);
         Trace("RollbackPointAdded", $"meta={FormatMeta(meta)}");
-    }
-
-    public void Dispose()
-    {
-        Trace("Dispose");
-
-        if (_bridge == null)
-            return;
-
-        _bridge.LineEntered -= HandleLineEnteredDuringRollbackSeek;
-        _bridge.LineEntered -= AddRollbackPoint;
     }
 
     private void Trace(string evt, string note = null)

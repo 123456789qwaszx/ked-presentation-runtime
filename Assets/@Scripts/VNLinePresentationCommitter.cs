@@ -8,14 +8,27 @@ public sealed class VNLinePresentationCommitter
     private readonly LinePresentationAdvanceState _advanceState;
     private readonly YarnBridgePlaybackDriver _playbackDriver;
 
+    private readonly BacklogRecorder _backlogRecorder;
+    private readonly RollbackController _rollbackController;
+    private readonly VNRuntimeStateProvider _runtimeStateProvider;
+    private readonly VNTraceStream _trace;
+
     public VNLinePresentationCommitter(
         YarnLineLifecycleBridge bridge,
         LinePresentationAdvanceState advanceState,
-        YarnBridgePlaybackDriver playbackDriver)
+        YarnBridgePlaybackDriver playbackDriver,
+        BacklogRecorder backlogRecorder,
+        RollbackController rollbackController,
+        VNRuntimeStateProvider runtimeStateProvider,
+        VNTraceStream trace = null)
     {
         _bridge = bridge;
         _advanceState = advanceState;
         _playbackDriver = playbackDriver;
+        _backlogRecorder = backlogRecorder;
+        _rollbackController = rollbackController;
+        _runtimeStateProvider = runtimeStateProvider;
+        _trace = trace;
     }
 
     /// <summary>
@@ -32,15 +45,29 @@ public sealed class VNLinePresentationCommitter
         // 브리지 갱신: LineEntered 이벤트를 통해
         // BacklogRecorder, RollbackController, VNRuntimeStateProvider가 반응한다.
         _bridge.RefreshCurrentLineMeta(line, nodeName);
+        YarnLineMeta meta = _bridge.CurrentMeta;
+        
+        _runtimeStateProvider?.HandleLineEntered(meta);
 
-        _playbackDriver.PlayCollected();
+        if (!_advanceState.IsSeekActive)
+        {
+            _backlogRecorder?.Record(meta);
+
+            if (_advanceState.CanRecordRollbackPoint)
+                _rollbackController?.AddRollbackPoint(meta);
+        }
 
         // 이 순서가 중요하다:
         // RollbackPoint는 LineEntered 구독자에서 기록되고,
         // MarkLineEntered는 그 이후 IsFullyShown = false로 전환한다.
+        _playbackDriver.PlayCollected();
+
         _advanceState.MarkLineEntered();
 
-        return _bridge.CurrentMeta;
+        Trace("CommitLineEntered", $"meta={FormatMeta(meta)}");
+
+        return meta;
+
     }
 
     /// <summary>
@@ -52,5 +79,23 @@ public sealed class VNLinePresentationCommitter
     public void CommitLineProcessingCompleted()
     {
         _advanceState.MarkLineDisplayCompleted();
+        Trace("CommitLineProcessingCompleted");
+    }
+
+    private void Trace(string evt, string note = null)
+    {
+        if (_trace == null)
+            return;
+
+        _trace.Trace(
+            nameof(VNLinePresentationCommitter),
+            evt,
+            _advanceState?.Snapshot(),
+            note);
+    }
+
+    private static string FormatMeta(YarnLineMeta meta)
+    {
+        return $"{meta.nodeName}/{meta.lineId}";
     }
 }

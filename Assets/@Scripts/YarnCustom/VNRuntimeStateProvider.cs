@@ -1,6 +1,5 @@
 public sealed class VNRuntimeStateProvider : IVNRuntimeStateProvider
 {
-    private readonly YarnLineLifecycleBridge _bridge;
     private readonly RollbackHistory _history;
     private readonly VNPlaytimeTracker _playtimeTracker;
 
@@ -8,15 +7,11 @@ public sealed class VNRuntimeStateProvider : IVNRuntimeStateProvider
     private bool _hasCurrentLineMeta;
 
     public VNRuntimeStateProvider(
-        YarnLineLifecycleBridge bridge,
         RollbackHistory history,
         VNPlaytimeTracker playtimeTracker)
     {
-        _bridge = bridge;
         _history = history;
         _playtimeTracker = playtimeTracker;
-
-        _bridge.LineEntered += OnLineEntered;
     }
 
     public string CurrentNodeName
@@ -106,7 +101,7 @@ public sealed class VNRuntimeStateProvider : IVNRuntimeStateProvider
         }
     }
 
-    private void OnLineEntered(YarnLineMeta meta)
+    public void HandleLineEntered(YarnLineMeta meta)
     {
         _currentLineMeta = meta;
         _hasCurrentLineMeta = true;

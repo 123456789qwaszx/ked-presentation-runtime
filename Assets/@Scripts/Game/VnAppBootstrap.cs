@@ -62,7 +62,11 @@ public class VnAppBootstrap : MonoBehaviour
     [SerializeField] private CustomLinePresenter customLinePresenter;
     [SerializeField] private SubPresentationPresenter subPresentationPresenter;
 
-
+    private BacklogRecorder _backlogRecorder;
+    private RollbackController _rollbackController;
+    private VNLinePresentationCommitter _vnLinePresentationCommitter;
+    
+    
     [Header("VnAdvanceGate")]
     [SerializeField] private EllipsisBreathTypewriter ellipsisBreathTypewriter;
 
@@ -100,7 +104,6 @@ public class VnAppBootstrap : MonoBehaviour
 
     private PresentationSessionBridge _presentationSessionBridge;
 
-    private BacklogRecorder _backlogRecorder;
     private UIPatchService _uiPatchService;
     
     private VNSaveLoadSystem _vnSaveLoadSystem;
@@ -110,15 +113,16 @@ public class VnAppBootstrap : MonoBehaviour
     [Header("Episode Selection")]
     private EpisodeSelectionSystem _episodeSelectionSystem;
     [SerializeField] private ChapterEpisodeProgressionCatalogSO chapterEpisodeProgressionCatalog;
+    
+    
+    
 
     [SerializeField] private ChapterEpisodeProgressionSO episodeProgressionSo;
-    
-    
     [SerializeField] private RollbackHistoryDebugView rollbackHistoryDebugView;
     
     private void Awake()
     {
-        _vnRuntimeStateProvider = new (yarnLineLifecycleBridge, _rollbackHistory, vnPlaytimeTracker);
+        _vnRuntimeStateProvider = new (_rollbackHistory, vnPlaytimeTracker);
         
         InitializeTrace();
 
@@ -129,11 +133,13 @@ public class VnAppBootstrap : MonoBehaviour
 
         BootstrapPresentationSession();
         ConnectPresentationSessionToYarn();
-
+        
         BootstrapYarn();
         
-
         BootstrapDialogueAdvanceInput();
+        BootstrapLinePresentationRuntime();
+        
+
         BootstrapPlaybackControls();
 
         BootstrapVnSaveLoadRuntime();
@@ -271,7 +277,7 @@ public class VnAppBootstrap : MonoBehaviour
 
         _presentationSessionBridge = new(session, unitySignalBus);
     }
-
+    
     private void BootstrapYarn()
     {
         DialogueBoxLineRoutingPolicy dialogueBoxRoutePolicy = new();
@@ -298,16 +304,10 @@ public class VnAppBootstrap : MonoBehaviour
             yarnBridgePlaybackDriver,
             _vnRuntimeStateProvider,
             rigPrefab);
-        
-        VNLinePresentationCommitter vnLinePresentationCommitter = new(
-            yarnLineLifecycleBridge,
-            _linePresentationAdvanceState,
-            yarnBridgePlaybackDriver);
-        
 
         customLinePresenter.Initialize(
             dialogueRunner,
-            vnLinePresentationCommitter,
+            _vnLinePresentationCommitter,
             yarnLineLifecycleBridge,
             dialogueBoxRoutePolicy,
             dialogueBoxHost,
@@ -330,7 +330,7 @@ public class VnAppBootstrap : MonoBehaviour
             inlineSfxHost,
             yarnCommandBridge);
     }
-
+    
     private void BootstrapDialogueAdvanceInput()
     {
         AdvanceGate advanceGate = new(
@@ -345,13 +345,30 @@ public class VnAppBootstrap : MonoBehaviour
         dialogueAdvanceDispatcher.Initialize(advanceGate, dialogueRunner, subPresentationRunner, inlineEventMarkupHandler, _linePresentationAdvanceState);
         vnAdvanceInputPoller.Initialize(dialogueAdvanceDispatcher);
     }
+    
+    private void BootstrapLinePresentationRuntime()
+    {
+        _backlogRecorder = new BacklogRecorder();
 
+        _rollbackController = new RollbackController(
+            _rollbackHistory,
+            dialogueAdvanceDispatcher,
+            _linePresentationAdvanceState,
+            vnTrace);
 
+        _vnLinePresentationCommitter = new VNLinePresentationCommitter(
+            yarnLineLifecycleBridge,
+            _linePresentationAdvanceState,
+            yarnBridgePlaybackDriver,
+            _backlogRecorder,
+            _rollbackController,
+            _vnRuntimeStateProvider,
+            vnTrace);
+    }
+    
     private void BootstrapPlaybackControls()
     {
-        _backlogRecorder = new(
-            yarnLineLifecycleBridge,
-            _linePresentationAdvanceState);
+        //_backlogRecorder = new();
 
         autoAdvanceScheduler.Initialize(
             _vnPlaybackSettings,
@@ -369,13 +386,13 @@ public class VnAppBootstrap : MonoBehaviour
         if (rollbackHistoryDebugView != null)
             rollbackHistoryDebugView.Bind(_rollbackHistory);
 
-        RollbackController rollbackController = new(
-            _rollbackHistory,
-            yarnLineLifecycleBridge,
-            dialogueAdvanceDispatcher,
-            _linePresentationAdvanceState,
-            vnTrace
-        );
+        // _rollbackController = new(
+        //     _rollbackHistory,
+        //     yarnLineLifecycleBridge,
+        //     dialogueAdvanceDispatcher,
+        //     _linePresentationAdvanceState,
+        //     vnTrace
+        // );
 
         vnFeatureController.Initialize(
             _vnUxState,
@@ -387,7 +404,7 @@ public class VnAppBootstrap : MonoBehaviour
             _backlogRecorder,
             autoAdvanceScheduler,
             holdSkipController,
-            rollbackController);
+            _rollbackController);
     }
     
     private void BootstrapVnSaveLoadRuntime()
