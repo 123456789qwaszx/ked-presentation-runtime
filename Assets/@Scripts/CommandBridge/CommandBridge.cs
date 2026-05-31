@@ -74,7 +74,7 @@ public sealed partial class YarnCommandBridge
     {
         // Starts capturing commands into a virtual command block.
         // Commands after <<capture_block>> are collected as one block-level execution unit.
-        // Yarn timing is held until <<block_end>> plays the block.
+        // Yarn timing is held until <<play_block>> plays the block.
         runner.AddCommandHandler("capture_block", BeginBlockCapture);
         runner.AddCommandHandler<float>("play_block", PlayCapturedBlock);
         

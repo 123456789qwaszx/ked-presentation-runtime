@@ -1,6 +1,6 @@
 using System;
 
-public sealed class HoldSpeedUpController
+public sealed class FastForwardController
 {
     private readonly VnPlaybackSettings _settings;
     private readonly EllipsisBreathTypewriter _typewriter;
@@ -11,7 +11,7 @@ public sealed class HoldSpeedUpController
     private bool _isHeld;
     private bool _wasHeld;
 
-    public HoldSpeedUpController(
+    public FastForwardController(
         VnPlaybackSettings settings,
         EllipsisBreathTypewriter typewriter,
         DialogueAdvanceDispatcher dispatcher,

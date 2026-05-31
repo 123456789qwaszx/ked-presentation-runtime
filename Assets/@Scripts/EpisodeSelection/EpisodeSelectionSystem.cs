@@ -80,17 +80,11 @@ public sealed class EpisodeSelectionSystem
             yarnEntries = new Dictionary<string, EpisodeYarnEntryData>(StringComparer.Ordinal);
         }
 
-        if (!_graphDataByChapterId.TryGetValue(chapterId, out EpisodeGraphData graphData))
-        {
-            //Debug.LogWarning($"[EpisodeSelectionSystem] Graph data not found. chapterId='{chapterId}'. Empty graph data will be used.");
+        if (!_graphDataByChapterId.TryGetValue(chapterId, out EpisodeGraphData graphData)) 
             graphData = new EpisodeGraphData();
-        }
-
-        if (!_ruleDataByChapterId.TryGetValue(chapterId, out EpisodeProgressionRuleData ruleData))
-        {
-            //Debug.LogWarning($"[EpisodeSelectionSystem] Progression rule data not found. chapterId='{chapterId}'. Empty rule data will be used.");
+        
+        if (!_ruleDataByChapterId.TryGetValue(chapterId, out EpisodeProgressionRuleData ruleData)) 
             ruleData = new EpisodeProgressionRuleData();
-        }
         
         _yarnEntryByEpisodeId = yarnEntries;
         _currentGraphData = graphData;

@@ -57,6 +57,7 @@ public sealed class VNLinePresentationStateMachine
         
         VNSeekLineDecision presentationSeekDecision = _seekResolver.ResolveBeforePresentation(ctx.Line.TextID);
         ctx.SeekDecision = presentationSeekDecision;
+        
         if (presentationSeekDecision.ShouldConsumeTargetLine) {
             _seekResolver.ConsumeTargetLine(ctx.Line.TextID);
             SetPhase(ctx, VNLinePresentationPhase.SeekTargetConsumed);

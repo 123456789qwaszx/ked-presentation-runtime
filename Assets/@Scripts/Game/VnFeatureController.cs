@@ -29,7 +29,7 @@ public sealed class VnFeatureController : MonoBehaviour
 
     private BacklogRecorder _backlogRecorder;
     private AutoAdvanceScheduler _autoAdvanceScheduler;
-    private HoldSpeedUpController _holdSpeedUpController;
+    private FastForwardController _holdSpeedUpController;
     private RollbackController _rollbackController;
 
     public bool IsAuto => _sessionContext != null && _sessionContext.IsAutoMode;
@@ -50,7 +50,7 @@ public sealed class VnFeatureController : MonoBehaviour
         InlineEventMarkupHandler inlineEventMarkupHandler,
         BacklogRecorder backlogRecorder,
         AutoAdvanceScheduler autoAdvanceScheduler,
-        HoldSpeedUpController holdSpeedUpController,
+        FastForwardController holdSpeedUpController,
         RollbackController rollbackController)
     {
         if (_init)

@@ -51,8 +51,7 @@ public sealed class DialogueBoxPresentationController
         else
             await ApplyAsync(plan, _fadeUpDuration, _fadeDownDuration, options.Run);
 
-        if (!options.Run.IsValid)
-        {
+        if (!options.Run.IsValid) {
             SetPhase(DialogueBoxPresentationPhase.Stale);
             Trace("ShowLineStale", FormatPlan(plan, line, options));
             return DialogueBoxPresentationResult.Stale(plan);

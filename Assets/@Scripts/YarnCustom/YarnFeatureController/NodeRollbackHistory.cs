@@ -5,7 +5,6 @@ using System.Collections.Generic;
 public struct RollbackPoint
 {
     public int historyIndex;
-
     public string nodeName;
     public string lineId;
     public string rawText;

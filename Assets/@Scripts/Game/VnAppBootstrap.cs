@@ -332,7 +332,7 @@ public class VnAppBootstrap : MonoBehaviour
             dialogueAdvanceDispatcher,
             () => Time.unscaledTimeAsDouble);
 
-        HoldSpeedUpController holdSkipController = new(
+        FastForwardController holdSkipController = new(
             _vnPlaybackSettings,
             ellipsisBreathTypewriter,
             dialogueAdvanceDispatcher,

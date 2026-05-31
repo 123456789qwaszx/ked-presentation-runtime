@@ -13,14 +13,7 @@ public sealed partial class ChapterSelectionPanel : IChapterCardRootProvider
 
 public sealed class ChapterCardRuntimeSpawner
 {
-    private IChapterCardRootProvider _rootProvider;
-    private IChapterCardRootProvider ResolveRootProvider()
-    {
-        _rootProvider = UIManager.Instance.GetUI<ChapterSelectionPanel>();
-        return _rootProvider;
-    }
-    
-    private IChapterCardRootProvider RootProvider => _rootProvider ??= ResolveRootProvider();
+    private IChapterCardRootProvider RootProvider => UIManager.Instance.GetUI<ChapterSelectionPanel>();
     
     public List<ChapterButtonCard> CreateCards(RectTransform prefab, int count)
     {
