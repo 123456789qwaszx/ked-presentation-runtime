@@ -78,17 +78,11 @@ public sealed class VNLinePresentationState
     {
         IsLineFullyShown = false;
     }
-
-    public void MarkLineDisplayCompleted(YarnLineMeta meta)
-    {
-        IsLineFullyShown = true;
-        Trace("MarkLineDisplayCompleted", $"meta={FormatMeta(meta)}");
-    }
     
-    public void MarkLineAdvanceReady(YarnLineMeta meta, string reason)
+    public void MarkLineDisplayCompleted(YarnLineMeta meta, string reason)
     {
         IsLineFullyShown = true;
-        Trace("MarkLineAdvanceReady", $"meta={FormatMeta(meta)}, reason={reason}");
+        Trace("MarkLineDisplayCompleted", $"meta={FormatMeta(meta)}, reason={reason}");
     }
 
     public void Reset()

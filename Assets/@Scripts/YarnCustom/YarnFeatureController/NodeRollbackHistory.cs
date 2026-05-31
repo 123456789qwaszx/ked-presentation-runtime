@@ -55,8 +55,7 @@ public sealed class RollbackHistory
         int targetListIndex = _points.Count - 2;
         target = _points[targetListIndex];
 
-        // target은 남기고, target 이후의 미래 기록만 제거한다.
-        RemoveAfterListIndex(targetListIndex);
+        ClearRollbackHistory();
 
         return true;
     }
@@ -71,15 +70,12 @@ public sealed class RollbackHistory
         if (targetListIndex < 0)
             return false;
 
-        // 마지막 지점은 현재 위치에 가까우므로 rollback target으로는 의미가 없다.
-        // UI에서 현재 라인을 선택한 경우 no-op 처리.
         if (targetListIndex >= _points.Count - 1)
             return false;
 
         target = _points[targetListIndex];
 
-        // target은 남기고, target 이후의 미래 기록만 제거한다.
-        RemoveAfterListIndex(targetListIndex);
+        ClearRollbackHistory();
 
         return true;
     }
@@ -160,7 +156,15 @@ public sealed class RollbackHistory
 
         return -1;
     }
+    
+    private void RemoveFromListIndex(int listIndex)
+    {
+        if (listIndex < 0 || listIndex >= _points.Count)
+            return;
 
+        _points.RemoveRange(listIndex, _points.Count - listIndex);
+    }
+    
     private void RemoveAfterListIndex(int listIndex)
     {
         if (listIndex < 0 || listIndex >= _points.Count)

@@ -205,7 +205,7 @@ public sealed class EpisodePlayer : MonoBehaviour
         if (stopYarnRunner)
         {
             Debug.Log($"[EpisodePlayer] StopYarnRunnersAsync begin. label={label}, frame={Time.frameCount}", this);
-            await StopYarnRunnersAsync(label);
+            //await StopYarnRunnersAsync(label);
             Debug.Log($"[EpisodePlayer] StopYarnRunnersAsync complete. label={label}, frame={Time.frameCount}", this);
         }
 

@@ -40,7 +40,10 @@ public sealed class CommandExecutor : MonoBehaviour
         _initialized = true;
     }
 
-    private void OnDestroy() => Stop(CleanupPolicy.Cancel);
+    private void OnDestroy()
+    {
+        Stop(CleanupPolicy.Cancel);
+    }
 
     public void PlayStep(NodeSpec node, int stepIndex, CommandRunScope scope)
     {
@@ -333,8 +336,15 @@ public sealed class CommandExecutor : MonoBehaviour
         }
     }
 
-    public void Stop() => Stop(CleanupPolicy.Cancel);
-    public void FinishAll() => Stop(CleanupPolicy.Finish);
+    public void Stop()
+    {
+        Stop(CleanupPolicy.Cancel);
+    }
+
+    public void FinishAll()
+    {
+        Stop(CleanupPolicy.Finish);
+    }
 
     private void Stop(CleanupPolicy policy)
     {

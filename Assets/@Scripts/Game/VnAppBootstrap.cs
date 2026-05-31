@@ -65,8 +65,7 @@ public class VnAppBootstrap : MonoBehaviour
 
     [SerializeField] private VnAdvanceInputPoller vnAdvanceInputPoller;
     [SerializeField] private DialogueAdvanceDispatcher dialogueAdvanceDispatcher;
-
-
+    
     [SerializeField] private VnFeatureController vnFeatureController;
     
     [Header("VN Save / Load")]
@@ -106,6 +105,7 @@ public class VnAppBootstrap : MonoBehaviour
     
     private VNSideRunnerSyncHub _vnSideRunnerSyncHub;
     private VNSideRunnerGroup _vnSideRunnerGroup;
+    private LineCommandEntryGate _lineCommandEntryGate;
     
     
     
@@ -300,13 +300,18 @@ public class VnAppBootstrap : MonoBehaviour
 
         dialogueAdvanceDispatcher.Initialize(advanceGate, dialogueRunner, inlineEventMarkupHandler, _linePresentationAdvanceState);
         vnAdvanceInputPoller.Initialize(dialogueAdvanceDispatcher);
+        
     }
     
     private void BootstrapLinePresentationRuntime()
     {
+        LineCommandEntryBarrier barrier = new();
+        _lineCommandEntryGate = new(barrier, dialogueAdvanceDispatcher);
+        
         _vnLinePresentationCommitter = new VNLinePresentationCommitter(
             _linePresentationAdvanceState,
             yarnBridgePlaybackDriver,
+            _lineCommandEntryGate,
             _backlogRecorder,
             _rollbackController,
             _vnRuntimeStateProvider);
@@ -314,12 +319,9 @@ public class VnAppBootstrap : MonoBehaviour
         DialogueBoxMetadataResolver metadataResolver = new();
         DialogueBoxPresentationController boxPresentation = new(dialogueBoxHost, metadataResolver);
         
-        VNSeekLineResolver seekResolver = new(_linePresentationAdvanceState);
-        
         VNLinePresentationStateMachine lineMachine = new(
             _vnLinePresentationCommitter,
-            seekResolver,
-            dialogueAdvanceDispatcher,
+            _linePresentationAdvanceState,
             boxPresentation,
             ellipsisBreathTypewriter,
             _vnLoadSeekDriver);

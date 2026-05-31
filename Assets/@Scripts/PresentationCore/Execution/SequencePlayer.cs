@@ -8,6 +8,7 @@ using UnityEngine;
 /// - Gives every accepted command at least one execution-entry attempt.
 /// - Supports non-blocking commands via background coroutines.
 /// - Tracks background coroutine handles so Stop() can cancel them reliably.
+/// - Closes CommandRunTicket entry in finally so external line barriers never wait forever.
 /// </summary>
 public sealed class SequencePlayer
 {
@@ -52,153 +53,157 @@ public sealed class SequencePlayer
         int total = commands != null ? commands.Count : 0;
         Trace($"[run:{runId}] PlayCommands begin (count={total})");
 
-        if (commands == null)
+        try
         {
-            ticket?.CloseEntry();
-            Trace($"[run:{runId}] PlayCommands end: commands null");
-            yield break;
-        }
-
-        for (int i = 0; i < total; i++)
-        {
-            string tag = $"[run:{runId}][{i + 1}/{total}]";
-
-            if (!Valid())
+            if (commands == null)
             {
-                Trace($"{tag} Entry stopped: invalid run.");
-                break;
+                Trace($"[run:{runId}] PlayCommands end: commands null");
+                yield break;
             }
 
-            if (scope == null)
+            for (int i = 0; i < total; i++)
             {
-                Trace($"{tag} Entry stopped: scope is null.");
-                break;
-            }
+                string tag = $"[run:{runId}][{i + 1}/{total}]";
 
-            if (scope.Token.IsCancellationRequested)
-            {
-                Trace($"{tag} Entry stopped: token cancelled before command entry.");
-                break;
-            }
-
-            ISequenceCommand command = commands[i];
-            if (command == null)
-            {
-                Trace($"{tag} Command is null.");
-                ticket?.MarkCommandFailed();
-                continue;
-            }
-
-            string name = GetDebugName(command);
-
-            IEnumerator routine;
-            try
-            {
-                routine = command.Execute(scope);
-            }
-            catch (Exception e)
-            {
-                Trace($"{tag} Exception in Execute(): {name}");
-                Debug.LogException(e);
-                ticket?.MarkCommandFailed();
-                continue;
-            }
-
-            if (routine == null)
-            {
-                Trace($"{tag} Execute() returned null: {name}");
-                ticket?.MarkCommandFailed();
-                continue;
-            }
-
-            bool hasMore;
-            object firstYield;
-
-            try
-            {
-                hasMore = routine.MoveNext();
-                firstYield = hasMore ? routine.Current : null;
-
-                ticket?.MarkCommandEntered();
-                Trace($"{tag} Entered: {name}");
-            }
-            catch (Exception e)
-            {
-                Trace($"{tag} Exception on first MoveNext(): {name}");
-                Debug.LogException(e);
-                ticket?.MarkCommandFailed();
-                continue;
-            }
-
-            if (!hasMore)
-            {
-                Trace($"{tag} Completed on entry: {name}");
-                continue;
-            }
-
-            if (command.WaitForCompletion && scope.ShouldRespectCommandWait)
-            {
-                if (Valid() && !scope.Token.IsCancellationRequested)
-                    yield return firstYield;
-
-                while (Valid() && !scope.Token.IsCancellationRequested)
+                if (!Valid())
                 {
-                    bool movedNext;
+                    Trace($"{tag} Entry stopped: invalid run.");
+                    break;
+                }
 
-                    try
+                if (scope == null)
+                {
+                    Trace($"{tag} Entry stopped: scope is null.");
+                    break;
+                }
+
+                if (scope.Token.IsCancellationRequested)
+                {
+                    Trace($"{tag} Entry stopped: token cancelled before command entry.");
+                    break;
+                }
+
+                ISequenceCommand command = commands[i];
+                if (command == null)
+                {
+                    Trace($"{tag} Command is null.");
+                    ticket?.MarkCommandFailed();
+                    continue;
+                }
+
+                string name = GetDebugName(command);
+
+                IEnumerator routine;
+                try
+                {
+                    routine = command.Execute(scope);
+                }
+                catch (Exception e)
+                {
+                    Trace($"{tag} Exception in Execute(): {name}");
+                    Debug.LogException(e);
+                    ticket?.MarkCommandFailed();
+                    continue;
+                }
+
+                if (routine == null)
+                {
+                    Trace($"{tag} Execute() returned null: {name}");
+                    ticket?.MarkCommandFailed();
+                    continue;
+                }
+
+                bool hasMore;
+                object firstYield;
+
+                try
+                {
+                    hasMore = routine.MoveNext();
+                    firstYield = hasMore ? routine.Current : null;
+
+                    ticket?.MarkCommandEntered();
+                    Trace($"{tag} Entered: {name}");
+                }
+                catch (Exception e)
+                {
+                    Trace($"{tag} Exception on first MoveNext(): {name}");
+                    Debug.LogException(e);
+                    ticket?.MarkCommandFailed();
+                    continue;
+                }
+
+                if (!hasMore)
+                {
+                    Trace($"{tag} Completed on entry: {name}");
+                    continue;
+                }
+
+                if (command.WaitForCompletion && scope.ShouldRespectCommandWait)
+                {
+                    if (Valid() && !scope.Token.IsCancellationRequested)
+                        yield return firstYield;
+
+                    while (Valid() && !scope.Token.IsCancellationRequested)
                     {
-                        movedNext = routine.MoveNext();
+                        bool movedNext;
+
+                        try
+                        {
+                            movedNext = routine.MoveNext();
+                        }
+                        catch (Exception e)
+                        {
+                            Trace($"{tag} Exception while running: {name}");
+                            Debug.LogException(e);
+                            break;
+                        }
+
+                        if (!movedNext)
+                            break;
+
+                        yield return routine.Current;
                     }
-                    catch (Exception e)
+                }
+                else
+                {
+                    IEnumerator wrappedRoutine = RunBackgroundRoutineToEndAfterFirstYield(
+                        routine,
+                        firstYield,
+                        scope,
+                        Valid,
+                        onFinished: null);
+
+                    ActiveBackgroundRoutine active = new ActiveBackgroundRoutine
                     {
-                        Trace($"{tag} Exception while running: {name}");
-                        Debug.LogException(e);
-                        break;
-                    }
+                        Routine = wrappedRoutine,
+                        Coroutine = null,
+                        DebugName = name,
+                    };
 
-                    if (!movedNext)
-                        break;
+                    _activeBackgroundRoutines.Add(active);
 
-                    yield return routine.Current;
+                    if (command is IStepScopedCommand scopedCommand)
+                        scopedCommand.RegisterStepLifetime(scope, _host, wrappedRoutine);
+
+                    active.Coroutine = _host.StartCoroutine(
+                        RunTrackedBackgroundRoutine(active, wrappedRoutine));
                 }
             }
-            else
-            {
-                IEnumerator wrappedRoutine = RunBackgroundRoutineToEndAfterFirstYield(
-                    routine,
-                    firstYield,
-                    scope,
-                    Valid,
-                    onFinished: null);
-
-                ActiveBackgroundRoutine active = new ActiveBackgroundRoutine
-                {
-                    Routine = wrappedRoutine,
-                    Coroutine = null,
-                    DebugName = name,
-                };
-
-                _activeBackgroundRoutines.Add(active);
-
-                if (command is IStepScopedCommand scopedCommand)
-                    scopedCommand.RegisterStepLifetime(scope, _host, wrappedRoutine);
-
-                active.Coroutine = _host.StartCoroutine(
-                    RunTrackedBackgroundRoutine(active, wrappedRoutine));
-            }
         }
-
-        ticket?.CloseEntry();
-
-        if (ticket != null)
+        finally
         {
-            if (ticket.EntrySatisfied)
-                Trace($"[run:{runId}] CommandEntrySatisfied: {ticket.Snapshot()}");
-            else
-                Trace($"[run:{runId}] CommandEntryFailed: {ticket.Snapshot()}");
-        }
+            ticket?.CloseEntry();
 
-        Trace($"[run:{runId}] PlayCommands end");
+            if (ticket != null)
+            {
+                if (ticket.EntrySatisfied)
+                    Trace($"[run:{runId}] CommandEntrySatisfied: {ticket.Snapshot()}");
+                else
+                    Trace($"[run:{runId}] CommandEntryFailed: {ticket.Snapshot()}");
+            }
+
+            Trace($"[run:{runId}] PlayCommands end");
+        }
     }
 
     public void Stop()

@@ -9,9 +9,19 @@ public sealed class CommandRunTicket
 
     public bool EntryClosed { get; private set; }
 
+    public bool HasFailures
+    {
+        get { return FailedCommands > 0; }
+    }
+
     public bool EntrySatisfied
     {
-        get { return EntryClosed && EnteredCommands == TotalCommands && FailedCommands == 0; }
+        get
+        {
+            return EntryClosed &&
+                   EnteredCommands == TotalCommands &&
+                   FailedCommands == 0;
+        }
     }
 
     public CommandRunTicket(int runId, string source, int totalCommands)
@@ -23,16 +33,25 @@ public sealed class CommandRunTicket
 
     public void MarkCommandEntered()
     {
+        if (EntryClosed)
+            return;
+
         EnteredCommands++;
     }
 
     public void MarkCommandFailed()
     {
+        if (EntryClosed)
+            return;
+
         FailedCommands++;
     }
 
     public void CloseEntry()
     {
+        if (EntryClosed)
+            return;
+
         EntryClosed = true;
     }
 

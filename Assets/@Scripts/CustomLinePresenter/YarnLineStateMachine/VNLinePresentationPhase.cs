@@ -8,18 +8,21 @@ public enum VNLinePresentationPhase
     // The line has been converted into YarnLineMeta and committed as the current line.
     // Backlog and rollback points may also have been recorded, depending on the current state.
     LineEnteredCommitted = 20,
-
-    // Seek state has been evaluated for this line.
-    // The line is now classified as normal, pass-through, or pending seek target.
-    SeekResolved = 30,
+    
+    // The current line's runtime state has been resolved before any visual work begins.
+    // This includes line meta propagation, runtime state update, backlog/rollback handling,
+    // collected command registration, and seek decision.
+    // Seek pass-through lines may be consumed for alignment and leave the visual flow here.
+    LineRuntimeStateResolved = 30,
     
     // The line is being consumed silently as part of an active seek.
     // It should complete processing without showing the dialogue box or typewriter.
     SeekPassThrough = 31,
     
-    // The pending seek target line has been accepted and consumed.
-    // From this point, normal visual presentation resumes for the target line.
-    SeekTargetConsumed = 32,
+    // The pending seek target line has been reached, and the target resume policy has been resolved.
+    // This phase decides whether the target line resumes with immediate rules or normal visual flow.
+    // It does not mean that the visual presentation itself has started.
+    ResumePolicyResolved = 32,
 
     // A new LinePresentationRun has started.
     // The previous visual run has been cancelled by the presenter owner.

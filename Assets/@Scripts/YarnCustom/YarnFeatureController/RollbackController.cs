@@ -35,9 +35,6 @@ public sealed class RollbackController
 
     public void AddRollbackPoint(YarnLineMeta meta)
     {
-        if (!_lineAdvanceState.CanRecordRollbackPoint)
-            return;
-
         _history.AddRollbackPoint(meta);
     }
 }

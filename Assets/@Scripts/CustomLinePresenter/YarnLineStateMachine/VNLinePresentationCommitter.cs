@@ -24,56 +24,45 @@ public sealed class VNLinePresentationCommitter
 {
     private readonly VNLinePresentationState _advanceState;
     private readonly YarnBridgePlaybackDriver _playbackDriver;
+    private readonly LineCommandEntryGate _commandEntryGate;
 
     private readonly BacklogRecorder _backlogRecorder;
     private readonly RollbackController _rollbackController;
     private readonly VNRuntimeStateProvider _runtimeStateProvider;
-    
+
     public VNLinePresentationCommitter(
         VNLinePresentationState advanceState,
         YarnBridgePlaybackDriver playbackDriver,
+        LineCommandEntryGate commandEntryGate,
         BacklogRecorder backlogRecorder,
         RollbackController rollbackController,
         VNRuntimeStateProvider runtimeStateProvider)
     {
         _advanceState = advanceState;
         _playbackDriver = playbackDriver;
+        _commandEntryGate = commandEntryGate;
         _backlogRecorder = backlogRecorder;
         _rollbackController = rollbackController;
         _runtimeStateProvider = runtimeStateProvider;
     }
 
-    private YarnLineMeta _currentMeta;
-
     public YarnLineMeta CommitLineEntered(LocalizedLine line, string nodeName)
     {
-        YarnLineMeta meta = new (nodeName, line.TextID, line.CharacterName, line.TextWithoutCharacterName.Text);
-        _currentMeta = meta;
-        
+        YarnLineMeta meta = new YarnLineMeta(
+            nodeName,
+            line.TextID,
+            line.CharacterName,
+            line.TextWithoutCharacterName.Text);
+
         _runtimeStateProvider.HandleLineEntered(meta);
-
-        if (!_advanceState.IsSeekingActive)
-        {
-            _backlogRecorder.Record(meta);
-
-            if (_advanceState.CanRecordRollbackPoint)
-                _rollbackController.AddRollbackPoint(meta);
-        }
-        
         _advanceState.MarkLineEntered();
 
-        _playbackDriver.PlayCollected();
+        _backlogRecorder.Record(meta);
+        _rollbackController.AddRollbackPoint(meta);
+        
+        CommandRunTicket ticket = _playbackDriver.PlayCollected();
+        _commandEntryGate?.Register(ticket);
 
         return meta;
-    }
-
-    public void CommitLineProcessingCompleted()
-    {
-        _advanceState.MarkLineDisplayCompleted(_currentMeta);
-    }
-    
-    public void CommitLineAdvanceReady(string reason)
-    {
-        _advanceState.MarkLineAdvanceReady(_currentMeta, reason);
     }
 }

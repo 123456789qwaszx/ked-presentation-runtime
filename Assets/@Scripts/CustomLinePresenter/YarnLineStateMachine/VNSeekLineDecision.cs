@@ -6,10 +6,10 @@ public sealed class VNSeekLineDecision
     public string NodeName { get; set; }
     public string LineId { get; set; }
 
-    public bool ShouldDispatchSeekNext { get; set; }
+    public bool ShouldSkipVisualAndDispatchSeekNext { get; set; }
     public bool ShouldPassThroughPresentation { get; set; }
     public bool ShouldUseImmediateTransition { get; set; }
-    public bool ShouldConsumeTargetLine { get; set; }
+    public bool IsTargetLineReached { get; set; }
 
     public static VNSeekLineDecision NotSeeking()
     {
@@ -20,51 +20,146 @@ public sealed class VNSeekLineDecision
         };
     }
 
-    public static VNSeekLineDecision PassThrough(VNSeekKind seekKind, YarnLineMeta meta)
+    public static VNSeekLineDecision SkipVisualAndDispatchSeekNext(
+        VNSeekKind seekKind,
+        YarnLineMeta meta)
     {
         return new VNSeekLineDecision
         {
-            Kind = VNSeekLineDecisionKind.PassThrough,
+            Kind = VNSeekLineDecisionKind.SkipVisualAndDispatchSeekNext,
             SeekKind = seekKind,
             NodeName = meta.nodeName,
             LineId = meta.lineId,
-            ShouldDispatchSeekNext = true,
+
+            ShouldSkipVisualAndDispatchSeekNext = true,
             ShouldPassThroughPresentation = true,
             ShouldUseImmediateTransition = true,
+            IsTargetLineReached = false,
         };
     }
 
-    public static VNSeekLineDecision TargetReached(VNSeekKind seekKind, YarnLineMeta meta)
+    public static VNSeekLineDecision TargetLineReachedAndResumePresentation(
+        VNSeekKind seekKind,
+        YarnLineMeta meta)
     {
         return new VNSeekLineDecision
         {
-            Kind = VNSeekLineDecisionKind.TargetReached,
+            Kind = VNSeekLineDecisionKind.PrepareTargetForVisualResume,
             SeekKind = seekKind,
             NodeName = meta.nodeName,
             LineId = meta.lineId,
-            ShouldDispatchSeekNext = false,
+
+            ShouldSkipVisualAndDispatchSeekNext = false,
             ShouldPassThroughPresentation = false,
             ShouldUseImmediateTransition = true,
+            IsTargetLineReached = true,
         };
     }
-
-    public static VNSeekLineDecision PendingTargetLine(VNSeekKind seekKind, string lineId)
+    
+    // public static VNSeekLineDecision PendingTargetLine(VNSeekKind seekKind, YarnLineMeta meta)
+    // {
+    //     return new VNSeekLineDecision
+    //     {
+    //         Kind = VNSeekLineDecisionKind.TargetLineVisualResumeImmediate,
+    //         SeekKind = seekKind,
+    //         LineId = meta.lineId,
+    //         
+    //         ShouldPassThroughPresentation = true,
+    //         ShouldUseImmediateTransition = true,
+    //         IsTargetLineReached = true
+    //     };
+    // }
+    
+    
+    public static VNSeekLineDecision TargetLineVisualResumeImmediate(VNSeekKind seekKind,
+        YarnLineMeta meta)
     {
         return new VNSeekLineDecision
         {
-            Kind = VNSeekLineDecisionKind.PendingTargetLine,
+            Kind = VNSeekLineDecisionKind.TargetLineVisualResumeImmediate,
             SeekKind = seekKind,
-            LineId = lineId,
-            ShouldConsumeTargetLine = true,
+            NodeName = meta.nodeName,
+            LineId = meta.lineId,
+
+            ShouldSkipVisualAndDispatchSeekNext = false,
             ShouldPassThroughPresentation = false,
             ShouldUseImmediateTransition = true,
+            IsTargetLineReached = true,
         };
     }
+
+    public static VNSeekLineDecision TargetLineVisualResumeNormal(VNSeekKind seekKind,
+        YarnLineMeta meta)
+    {
+        return new VNSeekLineDecision
+        {
+            Kind = VNSeekLineDecisionKind.TargetLineVisualResumeNormal,
+            SeekKind = seekKind,
+            NodeName = meta.nodeName,
+            LineId = meta.lineId,
+
+            ShouldSkipVisualAndDispatchSeekNext = false,
+            ShouldPassThroughPresentation = false,
+            ShouldUseImmediateTransition = false,
+            IsTargetLineReached = true,
+        };
+    }
+    
+    //
+    // public static VNSeekLineDecision PendingTargetLine(
+    //     VNSeekKind seekKind,
+    //     YarnLineMeta meta)
+    // {
+    //     if (seekKind == VNSeekKind.Rollback)
+    //     {
+    //         return new VNSeekLineDecision
+    //         {
+    //             Kind = VNSeekLineDecisionKind.TargetLineVisualResumeImmediate,
+    //             SeekKind = seekKind,
+    //             NodeName = meta.nodeName,
+    //             LineId = meta.lineId,
+    //
+    //             ShouldSkipVisualAndDispatchSeekNext = false,
+    //             ShouldPassThroughPresentation = false,
+    //             ShouldUseImmediateTransition = true,
+    //             IsTargetLineReached = true,
+    //         };
+    //     }
+    //
+    //     if (seekKind == VNSeekKind.Load)
+    //     {
+    //         return new VNSeekLineDecision
+    //         {
+    //             Kind = VNSeekLineDecisionKind.TargetLineVisualResumeNormal,
+    //             SeekKind = seekKind,
+    //             NodeName = meta.nodeName,
+    //             LineId = meta.lineId,
+    //
+    //             ShouldSkipVisualAndDispatchSeekNext = false,
+    //             ShouldPassThroughPresentation = false,
+    //             ShouldUseImmediateTransition = false,
+    //             IsTargetLineReached = true,
+    //         };
+    //     }
+    //
+    //     return new VNSeekLineDecision
+    //     {
+    //         Kind = VNSeekLineDecisionKind.TargetLineVisualResumeNormal,
+    //         SeekKind = seekKind,
+    //         NodeName = meta.nodeName,
+    //         LineId = meta.lineId,
+    //
+    //         ShouldSkipVisualAndDispatchSeekNext = false,
+    //         ShouldPassThroughPresentation = false,
+    //         ShouldUseImmediateTransition = false,
+    //         IsTargetLineReached = true,
+    //     };
+    // }
 
     public override string ToString()
     {
         return $"seekDecision={Kind}, seekKind={SeekKind}, node={NodeName}, line={LineId}, " +
-               $"dispatchNext={ShouldDispatchSeekNext}, passThrough={ShouldPassThroughPresentation}, " +
-               $"immediate={ShouldUseImmediateTransition}, consume={ShouldConsumeTargetLine}";
+               $"dispatchNext={ShouldSkipVisualAndDispatchSeekNext}, passThrough={ShouldPassThroughPresentation}, " +
+               $"immediate={ShouldUseImmediateTransition}, targetReached={IsTargetLineReached}";
     }
 }

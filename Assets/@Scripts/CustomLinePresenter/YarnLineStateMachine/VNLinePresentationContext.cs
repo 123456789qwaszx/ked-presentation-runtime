@@ -14,12 +14,14 @@ public sealed class VNLinePresentationContext
 
     // ── Seek Decision ──────────────────────────────────
     public VNSeekLineDecision SeekDecision { get; set; }
+    
+    
 
     public bool IsPendingSeekTargetLine
     {
         get
         {
-            return SeekDecision != null && SeekDecision.ShouldConsumeTargetLine;
+            return SeekDecision != null && SeekDecision.IsTargetLineReached;
         }
     }
 
