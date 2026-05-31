@@ -21,7 +21,7 @@ public sealed class VNLinePresentationState
         _seekState = new VNSeekState(trace);
         _trace = trace;
     }
-
+    
     public void BeginRollbackSeek(string nodeName, string lineId)
     {
         BeginSeek(VNSeekKind.Rollback, nodeName, lineId);
@@ -83,6 +83,12 @@ public sealed class VNLinePresentationState
     {
         IsLineFullyShown = true;
         Trace("MarkLineDisplayCompleted", $"meta={FormatMeta(meta)}");
+    }
+    
+    public void MarkLineAdvanceReady(YarnLineMeta meta, string reason)
+    {
+        IsLineFullyShown = true;
+        Trace("MarkLineAdvanceReady", $"meta={FormatMeta(meta)}, reason={reason}");
     }
 
     public void Reset()

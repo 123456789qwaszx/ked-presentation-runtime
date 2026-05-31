@@ -71,4 +71,9 @@ public sealed class VNLinePresentationCommitter
     {
         _advanceState.MarkLineDisplayCompleted(_currentMeta);
     }
+    
+    public void CommitLineAdvanceReady(string reason)
+    {
+        _advanceState.MarkLineAdvanceReady(_currentMeta, reason);
+    }
 }

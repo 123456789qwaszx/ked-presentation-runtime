@@ -1,4 +1,5 @@
 using System;
+using Yarn.Unity;
 
 public sealed class VNLoadSeekDriver
 {
@@ -36,6 +37,11 @@ public sealed class VNLoadSeekDriver
 
     public void BeginSeek(VNSaveData saveData, Action onComplete, Action onFail)
     {
+        BeginSeekAsync(saveData, onComplete, onFail).Forget();
+    }
+
+    public async YarnTask BeginSeekAsync(VNSaveData saveData, Action onComplete, Action onFail)
+    {
         if (saveData == null)
         {
             Fail(onFail);
@@ -50,7 +56,14 @@ public sealed class VNLoadSeekDriver
 
         _lineAdvanceState.BeginLoadSeek(saveData.nodeName, saveData.lineId);
 
-        _restarter.RestartGame(saveData.nodeName);
+        if (_restarter == null)
+        {
+            Trace("BeginSeekFailed", "reason=RestarterNull");
+            Fail(onFail);
+            return;
+        }
+
+        await _restarter.RestartGameAsync(saveData.nodeName);
     }
 
     public void Complete()

@@ -135,21 +135,39 @@ public sealed class VNLinePresentationStateMachine
         SetPhase(ctx, VNLinePresentationPhase.Completed);
     }
     
-    private async YarnTask CompleteStaleAfterBoxAsync(VNLinePresentationContext ctx, Func<LineCancellationToken, YarnTask> waitForAdvance)
+    private async YarnTask CompleteStaleAfterBoxAsync(
+        VNLinePresentationContext ctx,
+        Func<LineCancellationToken, YarnTask> waitForAdvance)
     {
         SetPhase(ctx, VNLinePresentationPhase.Stale);
 
         _boxPresentation.CleanupStale(ctx.BoxResult);
+
+        // Stale means this visual run no longer owns shared visual commit.
+        // However, the Yarn line is still waiting for advance.
+        // Release the VN advance gate so the next input sends RequestNextLine,
+        // not RequestHurryUpLine.
+        _committer.CommitLineAdvanceReady("StaleAfterBox");
 
         SetPhase(ctx, VNLinePresentationPhase.WaitingForAdvance);
         await waitForAdvance(ctx.Token);
 
         SetPhase(ctx, VNLinePresentationPhase.Completed);
     }
-    
-    private async YarnTask CompleteStaleAfterTypewriterAsync(VNLinePresentationContext ctx, Func<LineCancellationToken, YarnTask> waitForAdvance)
+
+    private async YarnTask CompleteStaleAfterTypewriterAsync(
+        VNLinePresentationContext ctx,
+        Func<LineCancellationToken, YarnTask> waitForAdvance)
     {
         SetPhase(ctx, VNLinePresentationPhase.Stale);
+
+        // Typewriter was already prepared/running, so close its content lifecycle
+        // before the line waits for external advance.
+        _typewriter.ContentWillDismiss();
+
+        // Same reason as StaleAfterBox:
+        // stale visual ownership must not keep the line in "not fully shown" state.
+        _committer.CommitLineAdvanceReady("StaleAfterTypewriter");
 
         SetPhase(ctx, VNLinePresentationPhase.WaitingForAdvance);
         await waitForAdvance(ctx.Token);
