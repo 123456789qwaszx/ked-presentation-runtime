@@ -16,7 +16,7 @@ public sealed class VNLinePresentationContext
     public VNSeekLineDecision SeekDecision { get; set; }
 
     public bool IsPendingSeekTargetLine => SeekDecision != null && SeekDecision.IsTargetLineReached;
-    public bool ShouldPassThrough => SeekDecision != null && SeekDecision.ShouldPassThroughPresentation;
+    public bool ShouldSkipVisualAndDispatchSeekNext => SeekDecision != null && SeekDecision.ShouldPassThroughPresentation;
     public bool ShouldUseImmediateTransition => SeekDecision != null && SeekDecision.ShouldUseImmediateTransition;
 
     // Visual Run

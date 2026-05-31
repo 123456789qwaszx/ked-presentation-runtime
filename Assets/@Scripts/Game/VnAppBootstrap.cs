@@ -100,7 +100,7 @@ public class VnAppBootstrap : MonoBehaviour
     private VNSaveLoadSystem _vnSaveLoadSystem;
     
     private RollbackController _rollbackController;
-    private VNLinePresentationCommitter _vnLinePresentationCommitter;
+    private VNLineMetaProcessor _vnLineMetaProcessor;
     
     
     private VNSideRunnerSyncHub _vnSideRunnerSyncHub;
@@ -308,8 +308,7 @@ public class VnAppBootstrap : MonoBehaviour
         LineCommandEntryBarrier barrier = new();
         _lineCommandEntryGate = new(barrier, dialogueAdvanceDispatcher);
         
-        _vnLinePresentationCommitter = new VNLinePresentationCommitter(
-            _linePresentationAdvanceState,
+        _vnLineMetaProcessor = new VNLineMetaProcessor(
             yarnBridgePlaybackDriver,
             _lineCommandEntryGate,
             _backlogRecorder,
@@ -320,7 +319,7 @@ public class VnAppBootstrap : MonoBehaviour
         DialogueBoxPresentationController boxPresentation = new(dialogueBoxHost, metadataResolver);
         
         VNLinePresentationStateMachine lineMachine = new(
-            _vnLinePresentationCommitter,
+            _vnLineMetaProcessor,
             _linePresentationAdvanceState,
             boxPresentation,
             ellipsisBreathTypewriter,

@@ -18,11 +18,8 @@ public struct YarnLineMeta
     }
 }
 
-// 라인 처리 중 발생하는 도메인 커밋을 전담한다.
-// 시각적 작업(Box, Typewriter)은 포함하지 않는다.
-public sealed class VNLinePresentationCommitter
+public sealed class VNLineMetaProcessor
 {
-    private readonly VNLinePresentationState _advanceState;
     private readonly YarnBridgePlaybackDriver _playbackDriver;
     private readonly LineCommandEntryGate _commandEntryGate;
 
@@ -30,15 +27,13 @@ public sealed class VNLinePresentationCommitter
     private readonly RollbackController _rollbackController;
     private readonly VNRuntimeStateProvider _runtimeStateProvider;
 
-    public VNLinePresentationCommitter(
-        VNLinePresentationState advanceState,
+    public VNLineMetaProcessor(
         YarnBridgePlaybackDriver playbackDriver,
         LineCommandEntryGate commandEntryGate,
         BacklogRecorder backlogRecorder,
         RollbackController rollbackController,
         VNRuntimeStateProvider runtimeStateProvider)
     {
-        _advanceState = advanceState;
         _playbackDriver = playbackDriver;
         _commandEntryGate = commandEntryGate;
         _backlogRecorder = backlogRecorder;
@@ -46,23 +41,23 @@ public sealed class VNLinePresentationCommitter
         _runtimeStateProvider = runtimeStateProvider;
     }
 
-    public YarnLineMeta CommitLineEntered(LocalizedLine line, string nodeName)
+    public YarnLineMeta BuildLineMeta(LocalizedLine line, string nodeName)
     {
-        YarnLineMeta meta = new YarnLineMeta(
+        return new YarnLineMeta(
             nodeName,
             line.TextID,
             line.CharacterName,
             line.TextWithoutCharacterName.Text);
+    }
 
+    public void ProcessExternalSystems(YarnLineMeta meta)
+    {
         _runtimeStateProvider.HandleLineEntered(meta);
-        _advanceState.MarkLineEntered();
 
         _backlogRecorder.Record(meta);
         _rollbackController.AddRollbackPoint(meta);
         
         CommandRunTicket ticket = _playbackDriver.PlayCollected();
         _commandEntryGate?.Register(ticket);
-
-        return meta;
     }
 }
