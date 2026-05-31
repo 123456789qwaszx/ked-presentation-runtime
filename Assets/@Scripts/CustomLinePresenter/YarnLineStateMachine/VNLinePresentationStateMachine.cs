@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 using Yarn.Unity;
 
 // Runs one line presentation transaction through its explicit phase sequence.
@@ -51,14 +52,13 @@ public sealed class VNLinePresentationStateMachine
         }
         else {
             if (_advanceState.IsSeekTargetLine(ctx.Meta)) {
-                _advanceState.MarkSeekTargetReached(ctx.Meta);
-                enteredDecision = VNSeekLineDecision.TargetLineReachedAndResumePresentation(_advanceState.SeekKind, ctx.Meta);
+                enteredDecision = VNSeekLineDecision.TargetLineReachedAndResumePresentation(_advanceState.SeekKind);
             }
             else {
-                enteredDecision = VNSeekLineDecision.SkipVisualAndDispatchSeekNext(_advanceState.SeekKind, ctx.Meta);
+                enteredDecision = VNSeekLineDecision.SkipVisualAndDispatchSeekNext(_advanceState.SeekKind);
                 ctx.SeekDecision = enteredDecision;
                 
-                if (ctx.SeekDecision.ShouldSkipVisualAndDispatchSeekNext) {
+                if (ctx.ShouldPassThrough) {
                     await RunSeekPassThroughAsync(ctx, waitForAdvance);
                     return;
                 }
@@ -70,23 +70,24 @@ public sealed class VNLinePresentationStateMachine
         
         // Phase: ResumePolicyResolved
         VNSeekLineDecision presentationSeekDecision;
-        if (_advanceState.IsPendingSeekTargetLine(ctx.Line.TextID)) {
+        if (ctx.IsPendingSeekTargetLine) {
             if (_advanceState.SeekKind == VNSeekKind.Rollback) {
-                presentationSeekDecision = VNSeekLineDecision.TargetLineVisualResumeImmediate(_advanceState.SeekKind,ctx.Meta);
+                presentationSeekDecision = VNSeekLineDecision.TargetLineVisualResumeImmediate(_advanceState.SeekKind);
             }
             else {
-                presentationSeekDecision = VNSeekLineDecision.TargetLineVisualResumeNormal(_advanceState.SeekKind,ctx.Meta);
+                presentationSeekDecision = VNSeekLineDecision.TargetLineVisualResumeNormal(_advanceState.SeekKind);
                 ctx.SeekDecision = presentationSeekDecision;
 
                 if (ctx.SeekDecision.SeekKind == VNSeekKind.Load) 
                     _loadSeekDriver?.Complete();
             }
             
-            _advanceState.AcceptPendingSeekTargetLine(ctx.Line.TextID);
+            _advanceState.ClearSeek();
         }
-        else 
+        else {
             presentationSeekDecision = VNSeekLineDecision.NotSeeking();
-        
+        }
+
         ctx.SeekDecision = presentationSeekDecision;
         SetPhase(ctx, VNLinePresentationPhase.ResumePolicyResolved);
         

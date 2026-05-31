@@ -1,5 +1,3 @@
-using Yarn.Unity;
-
 public sealed partial class VnScreenBindings
 {
     private VnFeatureController _vnFeatures;
@@ -129,16 +127,10 @@ public sealed partial class VnScreenBindings
     
     private void HandleRollbackClicked()
     {
-        HandleRollbackClickedAsync();
-    }
-
-    private void  HandleRollbackClickedAsync()
-    {
         if (!_vnFeatures.RequestRollbackOneStep())
             return;
 
-        _episodePlayer.StartGame(
-            _linePresentationAdvanceState.SeekTargetNodeName);
+        _episodePlayer.StartGame(_linePresentationAdvanceState.SeekTargetNodeName);
     }
     
     private void HandleSaveMenuClicked()
