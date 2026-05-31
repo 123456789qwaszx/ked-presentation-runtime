@@ -324,7 +324,8 @@ public class VnAppBootstrap : MonoBehaviour
             _linePresentationAdvanceState,
             boxPresentation,
             ellipsisBreathTypewriter,
-            _vnLoadSeekDriver);
+            _vnLoadSeekDriver,
+            _vnSideRunnerSyncHub);
 
         customLinePresenter.Initialize(
             dialogueRunner,

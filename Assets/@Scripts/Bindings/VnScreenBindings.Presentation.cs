@@ -129,15 +129,15 @@ public sealed partial class VnScreenBindings
     
     private void HandleRollbackClicked()
     {
-        HandleRollbackClickedAsync().Forget();
+        HandleRollbackClickedAsync();
     }
 
-    private async YarnTask HandleRollbackClickedAsync()
+    private void  HandleRollbackClickedAsync()
     {
         if (!_vnFeatures.RequestRollbackOneStep())
             return;
 
-        await _episodePlayer.RestartForRollbackAsync(
+        _episodePlayer.StartGame(
             _linePresentationAdvanceState.SeekTargetNodeName);
     }
     

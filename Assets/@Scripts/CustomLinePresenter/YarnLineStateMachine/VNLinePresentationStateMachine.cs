@@ -12,6 +12,7 @@ public sealed class VNLinePresentationStateMachine
     private readonly DialogueBoxPresentationController _boxPresentation;
     private readonly EllipsisBreathTypewriter _typewriter;
     private readonly VNLoadSeekDriver _loadSeekDriver;
+    private readonly VNSideRunnerSyncHub _sideRunnerSyncHub;
 
     public VNLinePresentationPhase CurrentPhase { get; private set; } = VNLinePresentationPhase.None;
 
@@ -20,13 +21,15 @@ public sealed class VNLinePresentationStateMachine
         VNLinePresentationState advanceState,
         DialogueBoxPresentationController boxPresentation,
         EllipsisBreathTypewriter typewriter,
-        VNLoadSeekDriver loadSeekDriver = null)
+        VNLoadSeekDriver loadSeekDriver,
+        VNSideRunnerSyncHub vnSideRunnerSyncHub)
     {
         _committer = committer;
         _advanceState = advanceState;
         _boxPresentation = boxPresentation;
         _typewriter = typewriter;
         _loadSeekDriver = loadSeekDriver;
+        _sideRunnerSyncHub = vnSideRunnerSyncHub;
     }
 
     public async YarnTask RunAsync(
@@ -149,7 +152,9 @@ public sealed class VNLinePresentationStateMachine
         _advanceState.MarkLineDisplayCompleted(ctx.Meta, "passThrough");
         
         SetPhase(ctx, VNLinePresentationPhase.WaitingForAdvance);
-        await waitForAdvance(ctx.Token);
+        
+        await _sideRunnerSyncHub.WaitUntilLaneReadyAsync(
+            VNSideRunnerLaneKeys.Presentation);
 
         SetPhase(ctx, VNLinePresentationPhase.Completed);
     }

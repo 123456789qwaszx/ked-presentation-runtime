@@ -5,9 +5,11 @@ using Yarn.Unity;
 
 public sealed class VNSideRunnerSyncHub
 {
-    private readonly Dictionary<string, VNSideRunnerLaneState> _lanes = new (StringComparer.Ordinal);
+    private readonly Dictionary<string, VNSideRunnerLaneState> _lanes = new(StringComparer.Ordinal);
 
     private readonly VNTraceStream _trace;
+
+    public event Action<string, int> LaneReady;
 
     public VNSideRunnerSyncHub(VNTraceStream trace = null)
     {
@@ -53,6 +55,55 @@ public sealed class VNSideRunnerSyncHub
         return runner != null;
     }
 
+    public async YarnTask WaitUntilLaneReadyAsync(string laneKey, int generation)
+    {
+        VNSideRunnerLaneState lane;
+        if (!TryGetLane(laneKey, out lane))
+            return;
+
+        if (generation != lane.Generation)
+        {
+            Trace("WaitUntilLaneReadyIgnored", $"reason=OldGeneration, received={generation}, {lane.Snapshot()}");
+            return;
+        }
+
+        if (lane.IsReadyForAdvance)
+        {
+            Trace("WaitUntilLaneReadyAlreadyReady", lane.Snapshot());
+            return;
+        }
+
+        bool ready = false;
+
+        void OnLaneReady(string readyLaneKey, int readyGeneration)
+        {
+            if (!string.Equals(readyLaneKey, laneKey, StringComparison.Ordinal))
+                return;
+
+            if (readyGeneration != generation)
+                return;
+
+            ready = true;
+        }
+
+        LaneReady += OnLaneReady;
+
+        Trace("WaitUntilLaneReadyStarted", lane.Snapshot());
+
+        while (!ready)
+            await YarnTask.Yield();
+
+        LaneReady -= OnLaneReady;
+
+        Trace("WaitUntilLaneReadyCompleted", lane.Snapshot());
+    }
+
+    public async YarnTask WaitUntilLaneReadyAsync(string laneKey)
+    {
+        int generation = GetLaneGeneration(laneKey);
+        await WaitUntilLaneReadyAsync(laneKey, generation);
+    }
+
     public void DispatchLaneAdvance(string laneKey)
     {
         int generation = GetLaneGeneration(laneKey);
@@ -91,6 +142,10 @@ public sealed class VNSideRunnerSyncHub
 
         lane.IsReadyForAdvance = true;
         Trace("NotifyLaneReady", lane.Snapshot());
+
+        Action<string, int> handler = LaneReady;
+        if (handler != null)
+            handler(laneKey, generation);
 
         TryFlush(lane);
     }

@@ -37,10 +37,10 @@ public sealed class VNLoadSeekDriver
 
     public void BeginSeek(VNSaveData saveData, Action onComplete, Action onFail)
     {
-        BeginSeekAsync(saveData, onComplete, onFail).Forget();
+        BeginSeekAsync(saveData, onComplete, onFail);
     }
 
-    public async YarnTask BeginSeekAsync(VNSaveData saveData, Action onComplete, Action onFail)
+    public void BeginSeekAsync(VNSaveData saveData, Action onComplete, Action onFail)
     {
         if (saveData == null)
         {
@@ -63,7 +63,7 @@ public sealed class VNLoadSeekDriver
             return;
         }
 
-        await _restarter.RestartGameAsync(saveData.nodeName);
+        _restarter.StartGame(saveData.nodeName);
     }
 
     public void Complete()
@@ -123,10 +123,10 @@ public sealed class VNLoadSeekDriver
         if (_trace == null)
             return;
 
-        string state = _lineAdvanceState == null
-            ? "lineState=null"
-            : _lineAdvanceState.Snapshot();
+        // string state = _lineAdvanceState == null
+        //     ? "lineState=null"
+        //     : _lineAdvanceState.Snapshot();
 
-        _trace.Trace(nameof(VNLoadSeekDriver), evt, state, note);
+        _trace.Trace(nameof(VNLoadSeekDriver), evt, note);
     }
 }

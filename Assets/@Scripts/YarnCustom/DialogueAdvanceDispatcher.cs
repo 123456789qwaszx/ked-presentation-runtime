@@ -90,6 +90,6 @@ public sealed class DialogueAdvanceDispatcher : MonoBehaviour
         if (_trace == null)
             return;
 
-        _trace.Trace(nameof(DialogueAdvanceDispatcher), evt, _linePresentationAdvanceState.Snapshot(), note, this);
+        //_trace.Trace(nameof(DialogueAdvanceDispatcher), evt, _linePresentationAdvanceState.Snapshot(), note, this);
     }
 }
