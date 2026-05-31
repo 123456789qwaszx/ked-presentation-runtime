@@ -59,13 +59,6 @@ public sealed class VNSideRunnerGroup
 
         while (!startTask.IsCompletedSuccessfully())
             yield return null;
-        yield return null;
-        yield return null;
-        yield return null;
-        yield return null;
-        yield return null;
-        yield return null;
-        yield return null;
     }
 
     public IEnumerator StopAllCoroutine()

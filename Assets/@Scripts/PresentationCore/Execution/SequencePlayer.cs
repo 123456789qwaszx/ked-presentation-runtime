@@ -4,51 +4,92 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// - Per-command exception safety (log & continue; never kills the whole run)
-/// - Supports non-blocking commands via background coroutines (requires host)
-///   and tracks them so Stop() can cancel all fire-and-forget routines at once.
+/// - Per-command exception safety.
+/// - Gives every accepted command at least one execution-entry attempt.
+/// - Supports non-blocking commands via background coroutines.
+/// - Tracks background coroutine handles so Stop() can cancel them reliably.
 /// </summary>
 public sealed class SequencePlayer
 {
+    private sealed class ActiveBackgroundRoutine
+    {
+        public IEnumerator Routine;
+        public Coroutine Coroutine;
+        public string DebugName;
+    }
+
     private readonly MonoBehaviour _host;
-    private readonly List<IEnumerator> _activeBackgroundRoutines = new();
-    
+    private readonly List<ActiveBackgroundRoutine> _activeBackgroundRoutines =
+        new List<ActiveBackgroundRoutine>();
 
     public SequencePlayer(MonoBehaviour host)
     {
         if (host == null)
             throw new ArgumentNullException(nameof(host));
+
         _host = host;
     }
-    
-    public IEnumerator PlayCommands(IReadOnlyList<ISequenceCommand> commands, CommandRunScope scope, int runId,
-        Func<bool> isValid, Action<string> trace = null)
+
+    public IEnumerator PlayCommands(
+        IReadOnlyList<ISequenceCommand> commands,
+        CommandRunScope scope,
+        int runId,
+        Func<bool> isValid,
+        CommandRunTicket ticket,
+        Action<string> trace = null)
     {
-        bool Valid() => isValid();
+        bool Valid()
+        {
+            return isValid == null || isValid();
+        }
 
-        void Trace(string s) => trace?.Invoke(s);
+        void Trace(string s)
+        {
+            if (trace != null)
+                trace(s);
+        }
 
-        int total = commands.Count;
+        int total = commands != null ? commands.Count : 0;
         Trace($"[run:{runId}] PlayCommands begin (count={total})");
+
+        if (commands == null)
+        {
+            ticket?.CloseEntry();
+            Trace($"[run:{runId}] PlayCommands end: commands null");
+            yield break;
+        }
 
         for (int i = 0; i < total; i++)
         {
+            string tag = $"[run:{runId}][{i + 1}/{total}]";
+
             if (!Valid())
             {
-                Trace($"[run:{runId}] Abort: invalid at idx={i + 1}/{total}");
-                yield break;
+                Trace($"{tag} Entry stopped: invalid run.");
+                break;
+            }
+
+            if (scope == null)
+            {
+                Trace($"{tag} Entry stopped: scope is null.");
+                break;
             }
 
             if (scope.Token.IsCancellationRequested)
             {
-                Trace($"[run:{runId}] Abort: token cancelled at idx={i + 1}/{total}");
-                yield break;
+                Trace($"{tag} Entry stopped: token cancelled before command entry.");
+                break;
             }
 
             ISequenceCommand command = commands[i];
+            if (command == null)
+            {
+                Trace($"{tag} Command is null.");
+                ticket?.MarkCommandFailed();
+                continue;
+            }
 
             string name = GetDebugName(command);
-            string tag = $"[run:{runId}][{i + 1}/{total}]";
 
             IEnumerator routine;
             try
@@ -59,17 +100,47 @@ public sealed class SequencePlayer
             {
                 Trace($"{tag} Exception in Execute(): {name}");
                 Debug.LogException(e);
+                ticket?.MarkCommandFailed();
                 continue;
             }
 
             if (routine == null)
             {
                 Trace($"{tag} Execute() returned null: {name}");
+                ticket?.MarkCommandFailed();
                 continue;
             }
-            
+
+            bool hasMore;
+            object firstYield;
+
+            try
+            {
+                hasMore = routine.MoveNext();
+                firstYield = hasMore ? routine.Current : null;
+
+                ticket?.MarkCommandEntered();
+                Trace($"{tag} Entered: {name}");
+            }
+            catch (Exception e)
+            {
+                Trace($"{tag} Exception on first MoveNext(): {name}");
+                Debug.LogException(e);
+                ticket?.MarkCommandFailed();
+                continue;
+            }
+
+            if (!hasMore)
+            {
+                Trace($"{tag} Completed on entry: {name}");
+                continue;
+            }
+
             if (command.WaitForCompletion && scope.ShouldRespectCommandWait)
             {
+                if (Valid() && !scope.Token.IsCancellationRequested)
+                    yield return firstYield;
+
                 while (Valid() && !scope.Token.IsCancellationRequested)
                 {
                     bool movedNext;
@@ -93,53 +164,98 @@ public sealed class SequencePlayer
             }
             else
             {
-                // ---- Non-blocking commands ----
-                // These still run even after PlayCommands yield break
-                _activeBackgroundRoutines.Add(routine);
+                IEnumerator wrappedRoutine = RunBackgroundRoutineToEndAfterFirstYield(
+                    routine,
+                    firstYield,
+                    scope,
+                    Valid,
+                    onFinished: null);
 
-                // Non-blocking commands can optionally bind themselves to step lifetime.
+                ActiveBackgroundRoutine active = new ActiveBackgroundRoutine
+                {
+                    Routine = wrappedRoutine,
+                    Coroutine = null,
+                    DebugName = name,
+                };
+
+                _activeBackgroundRoutines.Add(active);
+
                 if (command is IStepScopedCommand scopedCommand)
-                    scopedCommand.RegisterStepLifetime(scope, _host, routine);
-                
-                _host.StartCoroutine(
-                    RunBackgroundRoutineToEnd(
-                        routine,
-                        scope,
-                        Valid,
-                        onFinished: () => { _activeBackgroundRoutines.Remove(routine); }));
+                    scopedCommand.RegisterStepLifetime(scope, _host, wrappedRoutine);
+
+                active.Coroutine = _host.StartCoroutine(
+                    RunTrackedBackgroundRoutine(active, wrappedRoutine));
             }
+        }
+
+        ticket?.CloseEntry();
+
+        if (ticket != null)
+        {
+            if (ticket.EntrySatisfied)
+                Trace($"[run:{runId}] CommandEntrySatisfied: {ticket.Snapshot()}");
+            else
+                Trace($"[run:{runId}] CommandEntryFailed: {ticket.Snapshot()}");
         }
 
         Trace($"[run:{runId}] PlayCommands end");
     }
 
-    // Stops all background (non-blocking) routines started by this player.
-    // Blocking (WaitForCompletion) commands are controlled externally via isValid() and api.Token.
     public void Stop()
     {
         if (_activeBackgroundRoutines.Count <= 0)
             return;
 
-        IEnumerator[] snapshot = _activeBackgroundRoutines.ToArray();
+        ActiveBackgroundRoutine[] snapshot = _activeBackgroundRoutines.ToArray();
+
         for (int i = 0; i < snapshot.Length; i++)
         {
-            if (snapshot[i] != null)
-                _host.StopCoroutine(snapshot[i]);
+            ActiveBackgroundRoutine active = snapshot[i];
+            if (active == null)
+                continue;
+
+            if (active.Coroutine != null)
+                _host.StopCoroutine(active.Coroutine);
+            else if (active.Routine != null)
+                _host.StopCoroutine(active.Routine);
         }
 
         _activeBackgroundRoutines.Clear();
     }
 
+    private IEnumerator RunTrackedBackgroundRoutine(
+        ActiveBackgroundRoutine active,
+        IEnumerator routine)
+    {
+        try
+        {
+            yield return routine;
+        }
+        finally
+        {
+            _activeBackgroundRoutines.Remove(active);
+        }
+    }
 
-    private static IEnumerator RunBackgroundRoutineToEnd(
+    private static IEnumerator RunBackgroundRoutineToEndAfterFirstYield(
         IEnumerator routine,
-        CommandRunScope ctx,
+        object firstYield,
+        CommandRunScope scope,
         Func<bool> isValid,
         Action onFinished)
     {
         try
         {
-            while (isValid() && !ctx.Token.IsCancellationRequested)
+            if (scope == null)
+                yield break;
+
+            if (isValid == null || isValid())
+            {
+                if (!scope.Token.IsCancellationRequested)
+                    yield return firstYield;
+            }
+
+            while ((isValid == null || isValid()) && !scope.Token.IsCancellationRequested)
             {
                 bool movedNext;
 
@@ -153,14 +269,16 @@ public sealed class SequencePlayer
                     yield break;
                 }
 
-                if (!movedNext) yield break;
+                if (!movedNext)
+                    yield break;
 
                 yield return routine.Current;
             }
         }
         finally
         {
-            onFinished?.Invoke();
+            if (onFinished != null)
+                onFinished();
         }
     }
 

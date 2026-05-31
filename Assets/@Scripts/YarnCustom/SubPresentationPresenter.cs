@@ -1,4 +1,5 @@
 using System.Threading;
+using UnityEngine;
 using Yarn.Unity;
 
 public sealed class SubPresentationPresenter : DialoguePresenterBase
@@ -33,7 +34,9 @@ public sealed class SubPresentationPresenter : DialoguePresenterBase
     {
         int generation = _syncHub.GetLaneGeneration(PresentationLaneKey);
 
-        _playbackDriver.PlayCollected();
+        CommandRunTicket ticket = _playbackDriver.PlayCollected();
+
+        await WaitUntilCommandEntryClosedAsync(ticket, token);
 
         _syncHub.NotifyLaneReady(PresentationLaneKey, generation);
 
@@ -45,6 +48,25 @@ public sealed class SubPresentationPresenter : DialoguePresenterBase
         {
             _syncHub.NotifyLaneNotReady(PresentationLaneKey, generation);
         }
+    }
+
+    private async YarnTask WaitUntilCommandEntryClosedAsync(
+        CommandRunTicket ticket,
+        LineCancellationToken token)
+    {
+        if (ticket == null)
+            return;
+
+        while (!ticket.EntryClosed)
+        {
+            if (token.NextContentToken.IsCancellationRequested)
+                return;
+
+            await YarnTask.Yield();
+        }
+
+        if (!ticket.EntrySatisfied)
+            Debug.LogWarning($"[SubPresentationPresenter] Command entry was not fully satisfied. {ticket.Snapshot()}");
     }
 
     private async YarnTask WaitForLineAdvanceAsync(LineCancellationToken token)

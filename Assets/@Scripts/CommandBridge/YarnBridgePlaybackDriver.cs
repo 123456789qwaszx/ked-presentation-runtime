@@ -36,12 +36,27 @@ public sealed class YarnBridgePlaybackDriver : MonoBehaviour
         _collectedSpecs.Add(spec);
     }
 
-    public void PlayCollected()
+    // public void PlayCollected()
+    // {
+    //     var specs = new List<CommandSpecBase>(_collectedSpecs);
+    //     _collectedSpecs.Clear();
+    //
+    //     _executor.PlaySpecs(specs, CurrentScope, "yarn-bridge");
+    // }
+    
+    public CommandRunTicket PlayCollected()
     {
         var specs = new List<CommandSpecBase>(_collectedSpecs);
         _collectedSpecs.Clear();
 
-        _executor.PlaySpecs(specs, CurrentScope, "yarn-bridge");
+        if (specs.Count == 0)
+        {
+            CommandRunTicket empty = new CommandRunTicket(-1, "yarn-bridge-empty", 0);
+            empty.CloseEntry();
+            return empty;
+        }
+
+        return _executor.PlaySpecs(specs, CurrentScope, "yarn-bridge");
     }
 
     public void PlayImmediate(IReadOnlyList<CommandSpecBase> specs, string debugSource = "yarn-inline")

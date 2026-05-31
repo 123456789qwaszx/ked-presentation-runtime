@@ -23,6 +23,7 @@ public sealed class CommandExecutor : MonoBehaviour
     private CancellationTokenSource _cts;
     private Coroutine _mainRoutine;
     private CommandRunScope _activeScope;
+    private CommandRunTicket _activeTicket;
 
     private int _runId;
     private bool _isStopInProgress;
@@ -30,20 +31,22 @@ public sealed class CommandExecutor : MonoBehaviour
 
     public void Initialize(CompositeCommandFactory factory)
     {
-        if(_initialized) return;
-        
+        if (_initialized)
+            return;
+
         _sequencePlayer = new SequencePlayer(this);
         _factory = factory;
-        
+
         _initialized = true;
     }
 
-    //private void OnDisable() => Stop(CleanupPolicy.Cancel);
     private void OnDestroy() => Stop(CleanupPolicy.Cancel);
 
     public void PlayStep(NodeSpec node, int stepIndex, CommandRunScope scope)
     {
         ClearTrace();
+
+        CloseActiveTicketIfOpen("New PlayStep requested");
 
         int runId = NextRunId("PlayStep");
 
@@ -51,14 +54,28 @@ public sealed class CommandExecutor : MonoBehaviour
 
         _activeScope = scope;
 
+        if (_activeScope == null)
+        {
+            Trace($"PlayStep skipped: scope is null. stepIndex={stepIndex}, runId={runId}");
+            return;
+        }
+
         CleanupPolicy policy = DecideCleanupPolicy(_activeScope);
         Trace($"CleanupStep(policy={policy})");
         _activeScope.CleanupStep(policy);
 
         List<ISequenceCommand> commands = BuildCommandsFromStep(node, stepIndex);
+        int commandCount = commands != null ? commands.Count : 0;
+
+        CommandRunTicket ticket = new CommandRunTicket(runId, $"step:{stepIndex}", commandCount);
+        _activeTicket = ticket;
+
         if (commands == null || commands.Count == 0)
         {
             Trace($"PlayStep skipped: stepIndex={stepIndex}, no commands. runId={runId}");
+            ticket.CloseEntry();
+            Trace($"CommandEntrySatisfied: {ticket.Snapshot()}");
+            ClearActiveTicketIfSame(ticket);
             return;
         }
 
@@ -66,55 +83,100 @@ public sealed class CommandExecutor : MonoBehaviour
         _activeScope.Token = _cts.Token;
 
         Trace($"PlayStep begin: stepIndex={stepIndex}, commands={commands.Count}, runId={runId}");
-        _mainRoutine = StartCoroutine(RunNode(commands, _activeScope, runId));
-    } 
-    
-    public void PlaySpecs(IReadOnlyList<CommandSpecBase> specs, CommandRunScope scope, string debugSource = "bridge")
+        _mainRoutine = StartCoroutine(RunNode(commands, _activeScope, runId, ticket));
+    }
+
+    public CommandRunTicket PlaySpecs(
+        IReadOnlyList<CommandSpecBase> specs,
+        CommandRunScope scope,
+        string debugSource = "bridge")
     {
         ClearTrace();
-        
-        int runId = NextRunId($"PlaySpecs/{debugSource}");
 
-        Trace($"PlaySpecs requested: source={debugSource}, specs={specs.Count}, runId={runId}");
+        CloseActiveTicketIfOpen($"New PlaySpecs requested. source={debugSource}");
+
+        int runId = NextRunId($"PlaySpecs/{debugSource}");
+        int specCount = specs != null ? specs.Count : 0;
+
+        Trace($"PlaySpecs requested: source={debugSource}, specs={specCount}, runId={runId}");
 
         _activeScope = scope;
+
+        if (_activeScope == null)
+        {
+            Trace($"PlaySpecs skipped: source={debugSource}, scope is null. runId={runId}");
+
+            CommandRunTicket nullScopeTicket = new CommandRunTicket(runId, debugSource, 0);
+            nullScopeTicket.CloseEntry();
+            return nullScopeTicket;
+        }
 
         CleanupPolicy policy = DecideCleanupPolicy(_activeScope);
         Trace($"CleanupStep(policy={policy})");
         _activeScope.CleanupStep(policy);
 
         List<ISequenceCommand> commands = BuildCommandsFromSpecs(specs);
+        int commandCount = commands != null ? commands.Count : 0;
+
+        CommandRunTicket ticket = new CommandRunTicket(runId, debugSource, commandCount);
+        _activeTicket = ticket;
+
         if (commands == null || commands.Count == 0)
         {
             Trace($"PlaySpecs skipped: source={debugSource}, no commands. runId={runId}");
-            return;
+            ticket.CloseEntry();
+            Trace($"CommandEntrySatisfied: {ticket.Snapshot()}");
+            ClearActiveTicketIfSame(ticket);
+            return ticket;
         }
 
         ResetToken();
         _activeScope.Token = _cts.Token;
 
         Trace($"PlaySpecs begin: source={debugSource}, commands={commands.Count}, runId={runId}");
-        _mainRoutine = StartCoroutine(RunNode(commands, _activeScope, runId));
+        _mainRoutine = StartCoroutine(RunNode(commands, _activeScope, runId, ticket));
+
+        return ticket;
     }
 
-    public IEnumerator PlaySpecsBlocking(IReadOnlyList<CommandSpecBase> specs, CommandRunScope scope, string debugSource = "bridge_blocking")
+    public IEnumerator PlaySpecsBlocking(
+        IReadOnlyList<CommandSpecBase> specs,
+        CommandRunScope scope,
+        string debugSource = "bridge_blocking")
     {
         ClearTrace();
 
-        int runId = NextRunId($"PlaySpecsBlocking/{debugSource}");
+        CloseActiveTicketIfOpen($"New PlaySpecsBlocking requested. source={debugSource}");
 
-        Trace($"PlaySpecsBlocking requested: source={debugSource}, specs={specs.Count}, runId={runId}");
+        int runId = NextRunId($"PlaySpecsBlocking/{debugSource}");
+        int specCount = specs != null ? specs.Count : 0;
+
+        Trace($"PlaySpecsBlocking requested: source={debugSource}, specs={specCount}, runId={runId}");
 
         _activeScope = scope;
+
+        if (_activeScope == null)
+        {
+            Trace($"PlaySpecsBlocking skipped: source={debugSource}, scope is null. runId={runId}");
+            yield break;
+        }
 
         CleanupPolicy policy = DecideCleanupPolicy(_activeScope);
         Trace($"CleanupStep(policy={policy})");
         _activeScope.CleanupStep(policy);
 
         List<ISequenceCommand> commands = BuildCommandsFromSpecs(specs);
+        int commandCount = commands != null ? commands.Count : 0;
+
+        CommandRunTicket ticket = new CommandRunTicket(runId, debugSource, commandCount);
+        _activeTicket = ticket;
+
         if (commands == null || commands.Count == 0)
         {
             Trace($"PlaySpecsBlocking skipped: source={debugSource}, no commands. runId={runId}");
+            ticket.CloseEntry();
+            Trace($"CommandEntrySatisfied: {ticket.Snapshot()}");
+            ClearActiveTicketIfSame(ticket);
             yield break;
         }
 
@@ -123,12 +185,18 @@ public sealed class CommandExecutor : MonoBehaviour
 
         Trace($"PlaySpecsBlocking begin: source={debugSource}, commands={commands.Count}, runId={runId}");
 
-        yield return RunNode(commands, _activeScope, runId);
+        yield return RunNode(commands, _activeScope, runId, ticket);
     }
 
     private List<ISequenceCommand> BuildCommandsFromStep(NodeSpec node, int stepIndex)
     {
         var list = new List<ISequenceCommand>();
+
+        if (node == null)
+        {
+            Trace("BuildCommandsFromStep skipped: node is null.");
+            return list;
+        }
 
         if (node.steps == null || node.steps.Count == 0)
         {
@@ -200,23 +268,30 @@ public sealed class CommandExecutor : MonoBehaviour
         return list;
     }
 
-    private IEnumerator RunNode(List<ISequenceCommand> commands, CommandRunScope scope, int runId)
+    private IEnumerator RunNode(
+        List<ISequenceCommand> commands,
+        CommandRunScope scope,
+        int runId,
+        CommandRunTicket ticket)
     {
         if (runId != _runId)
         {
             Trace($"RunNode exited early: stale runId={runId}, current={_runId}");
+            CloseTicket(ticket, "RunNode exited early: stale run");
             yield break;
         }
 
         if (commands == null)
         {
             Trace($"RunNode exited early: commands is null. runId={runId}");
+            CloseTicket(ticket, "RunNode exited early: commands null");
             yield break;
         }
 
         if (scope == null)
         {
             Trace($"RunNode exited early: scope is null. runId={runId}");
+            CloseTicket(ticket, "RunNode exited early: scope null");
             yield break;
         }
 
@@ -230,11 +305,13 @@ public sealed class CommandExecutor : MonoBehaviour
                 scope,
                 runId: runId,
                 isValid: () => runId == _runId,
-                trace: Trace
-            );
+                ticket: ticket,
+                trace: Trace);
         }
         finally
         {
+            CloseTicket(ticket, "RunNode finally");
+
             if (runId == _runId)
             {
                 scope.SetNodeBusy(false);
@@ -251,6 +328,8 @@ public sealed class CommandExecutor : MonoBehaviour
                 scope.SetNodeBusy(false);
                 Trace($"Node End skipped cleanup: stale runId={runId}, current={_runId}");
             }
+
+            ClearActiveTicketIfSame(ticket);
         }
     }
 
@@ -259,7 +338,6 @@ public sealed class CommandExecutor : MonoBehaviour
 
     private void Stop(CleanupPolicy policy)
     {
-        //Debug.Log($"ExecutorStop policy:{policy}");
         if (_isStopInProgress)
         {
             Trace($"Stop ignored: already in progress. policy={policy}");
@@ -274,6 +352,8 @@ public sealed class CommandExecutor : MonoBehaviour
             _runId++;
 
             Trace($"Stop begin: policy={policy}, runId {previousRunId} -> {_runId}");
+
+            CloseActiveTicketIfOpen($"Stop({policy})");
 
             CancelAndDisposeToken();
 
@@ -348,6 +428,46 @@ public sealed class CommandExecutor : MonoBehaviour
         return CleanupPolicy.Finish;
     }
 
+    private void CloseActiveTicketIfOpen(string reason)
+    {
+        if (_activeTicket == null)
+            return;
+
+        if (!_activeTicket.EntryClosed)
+        {
+            _activeTicket.CloseEntry();
+            Trace($"ActiveTicketClosed: reason={reason}, {_activeTicket.Snapshot()}");
+
+            if (!_activeTicket.EntrySatisfied)
+                Trace($"CommandEntryGuaranteeFailed: reason={reason}, {_activeTicket.Snapshot()}");
+        }
+
+        _activeTicket = null;
+    }
+
+    private void CloseTicket(CommandRunTicket ticket, string reason)
+    {
+        if (ticket == null)
+            return;
+
+        if (!ticket.EntryClosed)
+        {
+            ticket.CloseEntry();
+            Trace($"TicketClosed: reason={reason}, {ticket.Snapshot()}");
+        }
+
+        if (!ticket.EntrySatisfied)
+            Trace($"CommandEntryGuaranteeFailed: reason={reason}, {ticket.Snapshot()}");
+        else
+            Trace($"CommandEntrySatisfied: reason={reason}, {ticket.Snapshot()}");
+    }
+
+    private void ClearActiveTicketIfSame(CommandRunTicket ticket)
+    {
+        if (ReferenceEquals(_activeTicket, ticket))
+            _activeTicket = null;
+    }
+
     private void Trace(string msg)
     {
         if (!enableTrace)
@@ -375,11 +495,10 @@ public sealed class CommandExecutor : MonoBehaviour
 
     public void ClearTrace()
     {
-        
         //_trace.Clear();
         //tracePreview = string.Empty;
     }
-    
+
     private int NextRunId(string reason)
     {
         int previous = _runId;
