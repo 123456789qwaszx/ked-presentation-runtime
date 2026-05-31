@@ -5,26 +5,19 @@ public sealed class DialogueAdvanceDispatcher : MonoBehaviour
 {
     private AdvanceGate _gate;
     private DialogueRunner _dialogueRunner;
-    private DialogueRunner _subPresentationRunner;
     private InlineEventMarkupHandler _inlineMarkupHandler;
     private VNLinePresentationState _linePresentationAdvanceState;
     private VNTraceStream _trace;
 
-    private int _pendingSubAdvanceCount;
-    private bool _isSubReadyForAdvance;
-    
-
     public void Initialize(
         AdvanceGate gate,
         DialogueRunner dialogueRunner,
-        DialogueRunner subPresentationRunner,
         InlineEventMarkupHandler inlineMarkupHandler,
         VNLinePresentationState linePresentationAdvanceState,
         VNTraceStream trace = null)
     {
         _gate = gate;
         _dialogueRunner = dialogueRunner;
-        _subPresentationRunner = subPresentationRunner;
         _inlineMarkupHandler = inlineMarkupHandler;
         _linePresentationAdvanceState = linePresentationAdvanceState;
         _trace = trace;
@@ -87,45 +80,9 @@ public sealed class DialogueAdvanceDispatcher : MonoBehaviour
         return true;
     }
 
-    public void DispatchSubAdvance()
-    {
-        _pendingSubAdvanceCount++;
-        TryFlushSubAdvance();
-    }
-
-    public void NotifySubReadyForAdvance()
-    {
-        _isSubReadyForAdvance = true;
-        TryFlushSubAdvance();
-    }
-
-    public void NotifySubNotReadyForAdvance()
-    {
-        _isSubReadyForAdvance = false;
-    }
-
-    private bool TryFlushSubAdvance()
-    {
-        if (_pendingSubAdvanceCount <= 0)
-            return false;
-
-        if (!_isSubReadyForAdvance)
-            return false;
-        
-        if (!_subPresentationRunner.IsDialogueRunning)
-            return false;
-
-        _pendingSubAdvanceCount--;
-        _isSubReadyForAdvance = false;
-
-        _subPresentationRunner.RequestNextLine();
-        return true;
-    }
-
     public void Clear()
     {
-        _pendingSubAdvanceCount = 0;
-        _isSubReadyForAdvance = false;
+        Trace("Clear");
     }
 
     private void Trace(string evt, string note = null)

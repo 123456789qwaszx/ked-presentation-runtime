@@ -20,6 +20,7 @@ public class VnAppBootstrap : MonoBehaviour
     private readonly VNLinePresentationState _linePresentationAdvanceState = new();
     
     private readonly BacklogRecorder _backlogRecorder = new ();
+    
     private VNRuntimeStateProvider _vnRuntimeStateProvider;
     
     [Header("Sound")] 
@@ -103,6 +104,10 @@ public class VnAppBootstrap : MonoBehaviour
     private VNLinePresentationCommitter _vnLinePresentationCommitter;
     
     
+    private VNSideRunnerSyncHub _vnSideRunnerSyncHub;
+    private VNSideRunnerGroup _vnSideRunnerGroup;
+    
+    
     
     [Header("Episode Selection")]
     private EpisodeSelectionSystem _episodeSelectionSystem;
@@ -116,6 +121,9 @@ public class VnAppBootstrap : MonoBehaviour
         _vnRuntimeStateProvider = new (_rollbackHistory, vnPlaytimeTracker);
         _rollbackController = new RollbackController(_rollbackHistory, _linePresentationAdvanceState);
         rollbackHistoryDebugView.Bind(_rollbackHistory);
+        
+        _vnSideRunnerSyncHub = new VNSideRunnerSyncHub();
+        _vnSideRunnerGroup = new(_vnSideRunnerSyncHub);
 
         BootstrapAudioSystem();
         ConnectAudioSystemToYarn();
@@ -215,7 +223,8 @@ public class VnAppBootstrap : MonoBehaviour
         PresentationControlCommandFactory presentationControlFactory = new(
             _uiPatchService,
             dialogueBoxHost,
-            dialogueAdvanceDispatcher);
+            dialogueAdvanceDispatcher,
+            _vnSideRunnerSyncHub);
 
         // Audio
         ResourcesAudioClipResolver audioClipResolver = new();
@@ -257,27 +266,25 @@ public class VnAppBootstrap : MonoBehaviour
     {
         vnRuntimeBridge.Initialize(dialogueRunner, presentationSessionEntry, _presentationSessionBridge);
 
-        YarnCommandRegistry yarnCommandRegistry = new YarnCommandRegistry(
-            dialogueRunner,
-            vnRuntimeBridge);
+        YarnCommandRegistry yarnCommandRegistry = new YarnCommandRegistry(dialogueRunner, vnRuntimeBridge);
 
         yarnCommandRegistry.Initialize();
-
         yarnBridgePlaybackDriver.Initialize(commandExecutor, presentationSessionEntry);
-
+        
+        subPresentationPresenter.Initialize(yarnBridgePlaybackDriver, _vnSideRunnerSyncHub);
+        
+        _vnSideRunnerGroup.RegisterLane(VNSideRunnerLaneKeys.Presentation, subPresentationRunner);
+        
         YarnCommandBridge yarnCommandBridge = new(
             dialogueRunner,
             subPresentationRunner,
             yarnBridgePlaybackDriver,
             _vnRuntimeStateProvider,
+            _vnSideRunnerSyncHub,
+            _vnSideRunnerGroup,
             rigPrefab);
-
-        subPresentationPresenter.Initialize(yarnBridgePlaybackDriver, dialogueAdvanceDispatcher);
-
-        inlineEventMarkupHandler.Initialize(
-            _presentationSessionBridge,
-            inlineSfxHost,
-            yarnCommandBridge);
+        
+        inlineEventMarkupHandler.Initialize(_presentationSessionBridge, inlineSfxHost, yarnCommandBridge);
     }
     
     private void BootstrapDialogueAdvanceInput()
@@ -291,7 +298,7 @@ public class VnAppBootstrap : MonoBehaviour
             vnTrace
         );
 
-        dialogueAdvanceDispatcher.Initialize(advanceGate, dialogueRunner, subPresentationRunner, inlineEventMarkupHandler, _linePresentationAdvanceState);
+        dialogueAdvanceDispatcher.Initialize(advanceGate, dialogueRunner, inlineEventMarkupHandler, _linePresentationAdvanceState);
         vnAdvanceInputPoller.Initialize(dialogueAdvanceDispatcher);
     }
     

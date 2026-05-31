@@ -5,28 +5,36 @@ using Yarn.Unity;
 
 public sealed partial class YarnCommandBridge
 {
+    private const string PresentationLaneKey = VNSideRunnerLaneKeys.Presentation;
+
     private readonly DialogueRunner _dialogueRunner;
     private readonly DialogueRunner _subPresentationRunner;
-    
+
     private readonly YarnBridgePlaybackDriver _playbackDriver;
     private readonly VNRuntimeStateProvider _vnRuntimeStateProvider;
     private readonly RectTransform _charRigPrefab;
-    
+
+    private readonly VNSideRunnerSyncHub _sideRunnerSyncHub;
+    private readonly VNSideRunnerGroup _sideRunnerGroup;
+
     public YarnCommandBridge(
         DialogueRunner dialogueRunner,
         DialogueRunner subPresentationRunner,
         YarnBridgePlaybackDriver playbackDriver,
         VNRuntimeStateProvider vnRuntimeStateProvider,
-        
+        VNSideRunnerSyncHub sideRunnerSyncHub,
+        VNSideRunnerGroup sideRunnerGroup,
         RectTransform charRigPrefab)
     {
         _dialogueRunner = dialogueRunner;
         _subPresentationRunner = subPresentationRunner;
-        
+
         _playbackDriver = playbackDriver;
         _vnRuntimeStateProvider = vnRuntimeStateProvider;
+        _sideRunnerSyncHub = sideRunnerSyncHub;
+        _sideRunnerGroup = sideRunnerGroup;
         _charRigPrefab = charRigPrefab;
-        
+
         BindRunnerCommands(_dialogueRunner);
         BindRunnerCommands(_subPresentationRunner);
 
@@ -34,18 +42,29 @@ public sealed partial class YarnCommandBridge
         _dialogueRunner.AddCommandHandler<string>("sub_start", StartSubPresentationNode);
         _dialogueRunner.AddCommandHandler<string>("a", EnqueueSubPresentationAdvanceSpec);
     }
-    
+
     private IEnumerator StartSubPresentationNode(string nodeName)
     {
-        _subPresentationRunner.StartDialogue(nodeName);
+        if (_sideRunnerGroup == null)
+            yield break;
 
-        const int minWaitFrames = 10;
-
-        for (int frame = 0; frame < minWaitFrames; frame++)
-            yield return null;
+        yield return _sideRunnerGroup.RestartLaneCoroutine(PresentationLaneKey, nodeName);
     }
-    
-    private void EnqueueSubPresentationAdvanceSpec(string _ = "doNothing") => Collect(new SubPresentationAdvanceCommandSpec());
+
+    private void EnqueueSubPresentationAdvanceSpec(string _ = "doNothing")
+    {
+        int generation = _sideRunnerSyncHub != null
+            ? _sideRunnerSyncHub.GetLaneGeneration(PresentationLaneKey)
+            : -1;
+
+        var spec = new SubPresentationAdvanceCommandSpec
+        {
+            laneKey = PresentationLaneKey,
+            generation = generation,
+        };
+
+        Collect(spec);
+    }
     
     private void BindRunnerCommands(DialogueRunner runner)
     {

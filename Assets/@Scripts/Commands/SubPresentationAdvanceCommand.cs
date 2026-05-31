@@ -10,17 +10,24 @@ using System.Collections;
     },
     SetOrder = -909)]
 public sealed class SubPresentationAdvanceCommandSpec : CommandSpecBase
-{ }
+{
+    public string laneKey = VNSideRunnerLaneKeys.Presentation;
+    public int generation;
+}
 
 public sealed class SubPresentationAdvanceCommand : CommandBase
 {
-    private readonly DialogueAdvanceDispatcher _dispatcher;
+    private readonly SubPresentationAdvanceCommandSpec _spec;
+    private readonly VNSideRunnerSyncHub _syncHub;
 
     public override bool WaitForCompletion => false;
 
-    public SubPresentationAdvanceCommand(DialogueAdvanceDispatcher dispatcher)
+    public SubPresentationAdvanceCommand(
+        SubPresentationAdvanceCommandSpec spec,
+        VNSideRunnerSyncHub syncHub)
     {
-        _dispatcher = dispatcher;
+        _spec = spec;
+        _syncHub = syncHub;
     }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
@@ -34,6 +41,9 @@ public sealed class SubPresentationAdvanceCommand : CommandBase
 
     private void Apply()
     {
-        _dispatcher.DispatchSubAdvance();
+        if (_syncHub == null)
+            return;
+
+        _syncHub.DispatchLaneAdvance(_spec.laneKey, _spec.generation);
     }
 }

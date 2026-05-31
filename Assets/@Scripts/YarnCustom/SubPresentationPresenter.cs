@@ -3,18 +3,26 @@ using Yarn.Unity;
 
 public sealed class SubPresentationPresenter : DialoguePresenterBase
 {
+    private const string PresentationLaneKey = VNSideRunnerLaneKeys.Presentation;
+
     private YarnBridgePlaybackDriver _playbackDriver;
-    private DialogueAdvanceDispatcher _advanceDispatcher;
+    private VNSideRunnerSyncHub _syncHub;
 
-    private CancellationTokenSource _presenterLifetimeCts = new();
+    private CancellationTokenSource _presenterLifetimeCts = new CancellationTokenSource();
 
-    public void Initialize(YarnBridgePlaybackDriver playbackDriver, DialogueAdvanceDispatcher advanceDispatcher)
+    public void Initialize(
+        YarnBridgePlaybackDriver playbackDriver,
+        VNSideRunnerSyncHub syncHub)
     {
         _playbackDriver = playbackDriver;
-        _advanceDispatcher = advanceDispatcher;
+        _syncHub = syncHub;
     }
-    
-    public override YarnTask OnDialogueStartedAsync() { return YarnTask.CompletedTask; }
+
+    public override YarnTask OnDialogueStartedAsync()
+    {
+        return YarnTask.CompletedTask;
+    }
+
     public override YarnTask OnDialogueCompleteAsync()
     {
         CancelPresenterLifetimeWaiters();
@@ -23,11 +31,20 @@ public sealed class SubPresentationPresenter : DialoguePresenterBase
 
     public override async YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token)
     {
-        _playbackDriver.PlayCollected();
-        _advanceDispatcher.NotifySubReadyForAdvance();
+        int generation = _syncHub.GetLaneGeneration(PresentationLaneKey);
 
-        await WaitForLineAdvanceAsync(token);
-        _advanceDispatcher.NotifySubNotReadyForAdvance();
+        _playbackDriver.PlayCollected();
+
+        _syncHub.NotifyLaneReady(PresentationLaneKey, generation);
+
+        try
+        {
+            await WaitForLineAdvanceAsync(token);
+        }
+        finally
+        {
+            _syncHub.NotifyLaneNotReady(PresentationLaneKey, generation);
+        }
     }
 
     private async YarnTask WaitForLineAdvanceAsync(LineCancellationToken token)
