@@ -12,7 +12,6 @@ using System.Collections;
 public sealed class SubPresentationAdvanceCommandSpec : CommandSpecBase
 {
     public string laneKey = VNSideRunnerLaneKeys.Presentation;
-    public int generation;
 }
 
 public sealed class SubPresentationAdvanceCommand : CommandBase
@@ -44,6 +43,6 @@ public sealed class SubPresentationAdvanceCommand : CommandBase
         if (_syncHub == null)
             return;
 
-        _syncHub.DispatchLaneAdvance(_spec.laneKey, _spec.generation);
+        _syncHub.DispatchLaneAdvance(_spec.laneKey);
     }
 }

@@ -7,7 +7,6 @@ public sealed class VNSideRunnerLaneState
 
     public int PendingAdvanceCount;
     public bool IsReadyForAdvance;
-    public int Generation;
 
     public VNSideRunnerLaneState(string laneKey, DialogueRunner runner)
     {
@@ -23,20 +22,6 @@ public sealed class VNSideRunnerLaneState
 
     public void ResetForRestart()
     {
-        Generation++;
         Clear();
-    }
-
-    public string Snapshot()
-    {
-        string runnerName = Runner != null ? Runner.name : "null";
-
-        return
-            $"lane={LaneKey}, " +
-            $"runner={runnerName}, " +
-            $"generation={Generation}, " +
-            $"pending={PendingAdvanceCount}, " +
-            $"ready={IsReadyForAdvance}, " +
-            $"running={(Runner != null && Runner.IsDialogueRunning)}";
     }
 }

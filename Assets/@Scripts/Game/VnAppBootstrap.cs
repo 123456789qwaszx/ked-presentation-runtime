@@ -104,7 +104,6 @@ public class VnAppBootstrap : MonoBehaviour
     
     
     private VNSideRunnerSyncHub _vnSideRunnerSyncHub;
-    private VNSideRunnerGroup _vnSideRunnerGroup;
     private LineCommandEntryGate _lineCommandEntryGate;
     
     
@@ -123,7 +122,6 @@ public class VnAppBootstrap : MonoBehaviour
         rollbackHistoryDebugView.Bind(_rollbackHistory);
         
         _vnSideRunnerSyncHub = new VNSideRunnerSyncHub();
-        _vnSideRunnerGroup = new(_vnSideRunnerSyncHub);
 
         BootstrapAudioSystem();
         ConnectAudioSystemToYarn();
@@ -273,15 +271,12 @@ public class VnAppBootstrap : MonoBehaviour
         
         subPresentationPresenter.Initialize(yarnBridgePlaybackDriver, _vnSideRunnerSyncHub);
         
-        _vnSideRunnerGroup.RegisterLane(VNSideRunnerLaneKeys.Presentation, subPresentationRunner);
-        
         YarnCommandBridge yarnCommandBridge = new(
             dialogueRunner,
             subPresentationRunner,
             yarnBridgePlaybackDriver,
             _vnRuntimeStateProvider,
             _vnSideRunnerSyncHub,
-            _vnSideRunnerGroup,
             rigPrefab);
         
         inlineEventMarkupHandler.Initialize(_presentationSessionBridge, inlineSfxHost, yarnCommandBridge);

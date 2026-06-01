@@ -32,13 +32,11 @@ public sealed class SubPresentationPresenter : DialoguePresenterBase
 
     public override async YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token)
     {
-        int generation = _syncHub.GetLaneGeneration(PresentationLaneKey);
-
         CommandRunTicket ticket = _playbackDriver.PlayCollected();
 
         await WaitUntilCommandEntryClosedAsync(ticket, token);
 
-        _syncHub.NotifyLaneReady(PresentationLaneKey, generation);
+        _syncHub.NotifyLaneReady(PresentationLaneKey);
 
         try
         {
@@ -46,7 +44,7 @@ public sealed class SubPresentationPresenter : DialoguePresenterBase
         }
         finally
         {
-            _syncHub.NotifyLaneNotReady(PresentationLaneKey, generation);
+            _syncHub.NotifyLaneNotReady(PresentationLaneKey);
         }
     }
 

@@ -15,7 +15,6 @@ public sealed partial class YarnCommandBridge
     private readonly RectTransform _charRigPrefab;
 
     private readonly VNSideRunnerSyncHub _sideRunnerSyncHub;
-    private readonly VNSideRunnerGroup _sideRunnerGroup;
 
     public YarnCommandBridge(
         DialogueRunner dialogueRunner,
@@ -23,7 +22,6 @@ public sealed partial class YarnCommandBridge
         YarnBridgePlaybackDriver playbackDriver,
         VNRuntimeStateProvider vnRuntimeStateProvider,
         VNSideRunnerSyncHub sideRunnerSyncHub,
-        VNSideRunnerGroup sideRunnerGroup,
         RectTransform charRigPrefab)
     {
         _dialogueRunner = dialogueRunner;
@@ -32,8 +30,9 @@ public sealed partial class YarnCommandBridge
         _playbackDriver = playbackDriver;
         _vnRuntimeStateProvider = vnRuntimeStateProvider;
         _sideRunnerSyncHub = sideRunnerSyncHub;
-        _sideRunnerGroup = sideRunnerGroup;
         _charRigPrefab = charRigPrefab;
+        
+        _sideRunnerSyncHub.RegisterLane(VNSideRunnerLaneKeys.Presentation, subPresentationRunner);
 
         BindRunnerCommands(_dialogueRunner);
         BindRunnerCommands(_subPresentationRunner);
@@ -45,22 +44,14 @@ public sealed partial class YarnCommandBridge
 
     private IEnumerator StartSubPresentationNode(string nodeName)
     {
-        if (_sideRunnerGroup == null)
-            yield break;
-
-        yield return _sideRunnerGroup.RestartLaneCoroutine(PresentationLaneKey, nodeName);
+        yield return _sideRunnerSyncHub.RestartLaneCoroutine(PresentationLaneKey, nodeName);
     }
 
     private void EnqueueSubPresentationAdvanceSpec(string _ = "doNothing")
     {
-        int generation = _sideRunnerSyncHub != null
-            ? _sideRunnerSyncHub.GetLaneGeneration(PresentationLaneKey)
-            : -1;
-
         var spec = new SubPresentationAdvanceCommandSpec
         {
             laneKey = PresentationLaneKey,
-            generation = generation,
         };
 
         Collect(spec);
