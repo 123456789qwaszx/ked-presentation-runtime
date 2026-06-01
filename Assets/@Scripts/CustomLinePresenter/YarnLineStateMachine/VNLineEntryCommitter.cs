@@ -19,7 +19,6 @@ public readonly struct YarnLineMeta
 public sealed class VNLineEntryCommitter
 {
     private readonly YarnBridgePlaybackDriver _playbackDriver;
-    private readonly LineCommandEntryGate _commandEntryGate;
 
     private readonly BacklogRecorder _backlogRecorder;
     private readonly RollbackController _rollbackController;
@@ -27,13 +26,11 @@ public sealed class VNLineEntryCommitter
 
     public VNLineEntryCommitter(
         YarnBridgePlaybackDriver playbackDriver,
-        LineCommandEntryGate commandEntryGate,
         BacklogRecorder backlogRecorder,
         RollbackController rollbackController,
         VNRuntimeStateProvider runtimeStateProvider)
     {
         _playbackDriver = playbackDriver;
-        _commandEntryGate = commandEntryGate;
         _backlogRecorder = backlogRecorder;
         _rollbackController = rollbackController;
         _runtimeStateProvider = runtimeStateProvider;
@@ -55,7 +52,6 @@ public sealed class VNLineEntryCommitter
         _backlogRecorder.Record(meta);
         _rollbackController.AddRollbackPoint(meta);
         
-        CommandRunTicket ticket = _playbackDriver.PlayCollected();
-        _commandEntryGate.Register(ticket);
+        _playbackDriver.PlayCollected();
     }
 }

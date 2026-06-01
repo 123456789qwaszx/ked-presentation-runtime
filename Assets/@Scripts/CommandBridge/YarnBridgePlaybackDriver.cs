@@ -7,16 +7,11 @@ public interface ICommandRunScopeProvider
     CommandRunScope CurrentScope { get; }
 }
 
-public interface ICommandEntryBarrierProvider
-{
-    LineCommandEntryBarrier CurrentCommandEntryBarrier { get; }
-}
 
 public sealed class YarnBridgePlaybackDriver : MonoBehaviour
 {
     private CommandExecutor _executor;
     private ICommandRunScopeProvider _scopeProvider;
-    private ICommandEntryBarrierProvider _entryBarrierProvider;
 
     private readonly List<CommandSpecBase> _collectedSpecs = new ();
     private readonly List<CommandSpecBase> _heldSpecs = new ();
@@ -27,24 +22,13 @@ public sealed class YarnBridgePlaybackDriver : MonoBehaviour
         get { return _scopeProvider != null ? _scopeProvider.CurrentScope : null; }
     }
 
-    private LineCommandEntryBarrier CurrentEntryBarrier
-    {
-        get
-        {
-            return _entryBarrierProvider != null
-                ? _entryBarrierProvider.CurrentCommandEntryBarrier
-                : null;
-        }
-    }
 
     public void Initialize(
         CommandExecutor executor,
-        ICommandRunScopeProvider scopeProvider,
-        ICommandEntryBarrierProvider entryBarrierProvider = null)
+        ICommandRunScopeProvider scopeProvider)
     {
         _executor = executor;
         _scopeProvider = scopeProvider;
-        _entryBarrierProvider = entryBarrierProvider;
     }
 
     public void Enqueue(CommandSpecBase spec)
@@ -85,7 +69,6 @@ public sealed class YarnBridgePlaybackDriver : MonoBehaviour
             ticket = _executor.PlaySpecs(specs, CurrentScope, "yarn-bridge");
         }
 
-        RegisterTicket(ticket);
         return ticket;
     }
 
@@ -99,7 +82,6 @@ public sealed class YarnBridgePlaybackDriver : MonoBehaviour
         {
             ticket = new CommandRunTicket(-1, debugSource + "-empty", 0);
             ticket.CloseEntry();
-            RegisterTicket(ticket);
             return ticket;
         }
 
@@ -109,14 +91,12 @@ public sealed class YarnBridgePlaybackDriver : MonoBehaviour
 
             ticket = new CommandRunTicket(-1, debugSource + "-no-executor", 0);
             ticket.CloseEntry();
-            RegisterTicket(ticket);
             return ticket;
         }
 
         var copied = new List<CommandSpecBase>(specs);
         ticket = _executor.PlaySpecs(copied, CurrentScope, debugSource);
 
-        RegisterTicket(ticket);
         return ticket;
     }
 
@@ -176,13 +156,4 @@ public sealed class YarnBridgePlaybackDriver : MonoBehaviour
         _isHoldActive = false;
     }
 
-    private void RegisterTicket(CommandRunTicket ticket)
-    {
-        LineCommandEntryBarrier barrier = CurrentEntryBarrier;
-
-        if (barrier == null)
-            return;
-
-        barrier.Register(ticket);
-    }
 }

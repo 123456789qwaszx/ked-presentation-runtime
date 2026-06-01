@@ -111,7 +111,7 @@ public sealed class EpisodePlayer : MonoBehaviour
     {
         _nodeRollbackHistory.ClearRollbackHistory();
         _backlogRecorder.ClearBacklog();
-        //await StopYarnRunnersAsync();
+        await StopYarnRunnersAsync();
         _linePresentationAborter?.AbortCurrentVnLine();
         presentationRouteEntry.EndRouteNow();
         ResetVisualState();
@@ -120,16 +120,16 @@ public sealed class EpisodePlayer : MonoBehaviour
     private async YarnTask StopYarnRunnersAsync()
     {
         List<YarnTask> tasks = new List<YarnTask>();
-
-        if (dialogueRunner != null && dialogueRunner.IsDialogueRunning)
-            tasks.Add(dialogueRunner.Stop());
-        
-        if (subPresentationRunner != null && subPresentationRunner.IsDialogueRunning)
-            tasks.Add(subPresentationRunner.Stop());
-        
-        if (tasks.Count <= 0)
-            return;
-        
+        //
+        // if (dialogueRunner != null && dialogueRunner.IsDialogueRunning)
+        //     tasks.Add(dialogueRunner.Stop());
+        //
+        // if (subPresentationRunner != null && subPresentationRunner.IsDialogueRunning)
+        //     tasks.Add(subPresentationRunner.Stop());
+        //
+        // if (tasks.Count <= 0)
+        //     return;
+        //
         await YarnTask.WhenAll(tasks);
     }
 

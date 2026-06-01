@@ -103,11 +103,6 @@ public class VnAppBootstrap : MonoBehaviour
     private RollbackController _rollbackController;
     private VNLineEntryCommitter _vnLineEntryCommitter;
     
-    
-    private LineCommandEntryGate _lineCommandEntryGate;
-    
-    
-    
     [Header("Episode Selection")]
     private EpisodeSelectionSystem _episodeSelectionSystem;
     [SerializeField] private ChapterEpisodeProgressionCatalogSO chapterEpisodeProgressionCatalog;
@@ -298,12 +293,9 @@ public class VnAppBootstrap : MonoBehaviour
     
     private void BootstrapLinePresentationRuntime()
     {
-        LineCommandEntryBarrier barrier = new();
-        _lineCommandEntryGate = new(barrier, dialogueAdvanceDispatcher);
         
         _vnLineEntryCommitter = new VNLineEntryCommitter(
             yarnBridgePlaybackDriver,
-            _lineCommandEntryGate,
             _backlogRecorder,
             _rollbackController,
             _vnRuntimeStateProvider);
