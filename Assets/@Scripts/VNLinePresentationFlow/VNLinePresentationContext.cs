@@ -29,9 +29,4 @@ public sealed class VNLinePresentationContext
 
     // Phase Tracking
     public VNLinePresentationPhase Phase { get; set; } = VNLinePresentationPhase.None;
-    
-    public bool HasValidRun
-    {
-        get { return Run != null && Run.IsValid; }
-    }
 }

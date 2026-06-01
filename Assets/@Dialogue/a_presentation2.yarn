@@ -1,4 +1,4 @@
-﻿title: a_presentation
+﻿title: a_presentation2
 ---
 
 set 
@@ -24,16 +24,13 @@ set
 <<shot_bind_bg_response bg2>>
 
 
-a1.(물건을 건네받은 수상한 사람은 그것을 입으로 가져가 조심스럽게 베어 물었다. 고요한 골목 안에 기괴한 저작음이 울려 퍼졌다.
 //<<shot_zoom_focus Leafia bust center 3 0.8>>
 <<jolt Leafia>>
 
-a2.(쩝쩝쩝 ..... 맞아, 바로 이 맛이야.
 //<<shot_zoom_focus Albedo bust center 10 0.8>>
 
 <<shake Leafia>>
 
-a3.(의심스러운 사람은 만족한 듯한 상대의 반응을 확인하고는 본론을 꺼냈다.
 
 <<shot_reset>>
 <<slide_out Leafia left>>
@@ -42,22 +39,18 @@ a3.(의심스러운 사람은 만족한 듯한 상대의 반응을 확인하고�
 <<move_by Albedo 200 0>>
 
 
-a4.(내가 부탁했던 건?
 <<emote Leafia 17>>
 <<place Leafia left>>
 <<slide_in_sway Leafia>>
 
 
-a5.("빠짐없이 챙겼왔지. 세어 봐."
 <<expression Leafia 7>>
 <<shot_zoom_focus Leafia bust center 1 1>>
 
 
-a6.(수상한 사람이 묵직한 서류 뭉치를 내밀었다.
 <<shot_track 200 0 0.5>>
 
 
-a7.(의심스러운 사람은 서류를 한 장씩 넘기며 숫자를 읖조렸다.
 <<shot_to -500 00 2 1.5>>
 
 
@@ -95,13 +88,4 @@ a13.
 <<fade_in Laru 1.2>>
 <<box_hide 3>>
 <<bg_fade_out green all 1.5>>
-
-
-a14.윌로:미안하게 됐어.
-
-a15.라루:3분의 1?
-
-a16.라루:농담이지?
-
-a17.윌로:농담이었다면 좋았겠지만, 장부는 거짓말을 하지 않습니다.
 ===

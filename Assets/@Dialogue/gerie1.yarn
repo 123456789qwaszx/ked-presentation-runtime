@@ -13,34 +13,27 @@
 <<sub_start a_presentation>>
 
 
-<<a 1>>이건 내가 처음으로 그녀의 영혼에 닿았을 때의 이야기다. //#box:blackbook
-<<a 2>>윌로:죄송합니다, 이번 의뢰는 보수의 3분의 1밖에 드릴 수 없겠군요.
-<<a 3>>라루:3분의 1?
-<<a 4>>라루:농담이지?
-<<a 5>>윌로:농담이었다면 좋았겠지만, 장부는 거짓말을 하지 않습니다.
+<<a>>이건 내가 처음으로 그녀의 영혼에 닿았을 때의 이야기다. //#box:blackbook
+<<a>>윌로:죄송합니다, 이번 의뢰는 보수의 3분의 1밖에 드릴 수 없겠군요.
+<<a>>라루:3분의 1?
+<<a>>라루:농담이지?
+<<a>>윌로:농담이었다면 좋았겠지만, 장부는 거짓말을 하지 않습니다.
 
-<<debug_log "[BEFORE_FIRST_CHECK] favor={$favor}, trust={$trust}, anger={$anger}">>
 
 <<if $favor >= 5>>
-    <<debug_log "[FAVOR_CHECK]favor = 5.Willow explains softly.">>
     윌로: 그래도 당신에게만은 먼저 설명드려야 한다고 생각했습니다.
     <<set $trust = $trust + 1>>
-    <<debug_log "[STATE] trust increased. favor={$favor}, trust={$trust}, anger={$anger}">>
 <<else>>
-    <<debug_log "[FAVOR_CHECK] favor < 5. Willow answers formally.">>
     윌로: 원하신다면 항의는 접수하겠습니다. 다만 결과가 바뀌진 않을 겁니다.
     <<set $anger = $anger + 1>>
-    <<debug_log "[STATE] anger increased. favor={$favor}, trust={$trust}, anger={$anger}">>
 <<endif>>
 
 라루: 설명으로 배가 부르진 않아.
 라루: 약속한 건 900이야. 그런데 지금 내민 건 300이고.
 
 <<if $paid_fee < $requested_fee>>
-    <<debug_log "[PAY_CHECK] paid_fee < requested_fee. paid={$paid_fee}, requested={$requested_fee}">>
     라루: 부족한 금액은 정확히 600이군.
     <<set $anger = $anger + 1>>
-    <<debug_log "[STATE] Laru anger increased after payment check. anger={$anger}">>
 <<endif>>
 
 윌로: 맞습니다. 그래서 선택지를 드리려 합니다.
@@ -154,10 +147,18 @@ title: gerie1_contract_route
 ---
 <<debug_log "[ENTER_NODE] gerie1_contract_route. favor={$favor}, patience={$laru_patience}, trust={$trust}, anger={$anger}">>
 
+
+<<sub_start a_presentation2>>
+<<a>>
+
 윌로: 계약서에는 900이라 적혀 있습니다.
+<<a>>
 윌로: 그리고 작은 글씨로, 의뢰 중 발생한 긴급 구조비는 보수에서 선공제될 수 있다고도 적혀 있죠.
+<<a>>
 
 라루: 작은 글씨?
+
+<<a>>
 라루: 너 지금 그걸 말이라고 해?
 
 <<set $anger = $anger + 1>>
@@ -241,6 +242,8 @@ title: gerie1_debt_promise_end
 ---
 <<debug_log "[ENTER_END] gerie1_debt_promise_end. favor={$favor}, trust={$trust}, debt={$willow_debt}, contract={$contract_signed}">>
 
+<<sub_start a_presentation2>>
+<<a>>
 윌로: 그럼 남은 빚은 600.
 윌로: 제 인장을 담보로, 다음 의뢰 전까지 갚겠습니다.
 

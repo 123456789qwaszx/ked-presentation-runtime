@@ -107,7 +107,7 @@ public sealed class VNLinePresentationFlow
             });
         SetPhase(ctx, VNLinePresentationPhase.BoxReady);
 
-        if (!ctx.HasValidRun) {
+        if (!ctx.Run.IsValid || !ctx.BoxResult.IsValid) {
             await CompleteStaleAfterBoxAsync(ctx, waitForAdvance);
             return;
         }

@@ -10,11 +10,11 @@ public interface IVNLineAborter
 
 public sealed class CustomLinePresenter : DialoguePresenterBase, IVNLineAborter
 {
-    private VNLinePresentationFlow _vnLinePresentationStateMachine;
+    private VNLinePresentationFlow _vnLinePresentationFlow;
 
     private EllipsisBreathTypewriter _typewriter;
     private DialogueBoxPresentationController _boxPresentation;
-    private VNLinePresentationState _lineAdvanceState;
+    private VNLinePresentationState _vnLinePresentationState;
     private PresentationSessionContext _presentationSessionContext;
     private VNTraceStream _trace;
 
@@ -38,9 +38,9 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, IVNLineAborter
     
     public void Initialize(
         DialogueRunner dialogueRunner,
-        VNLinePresentationFlow vnLinePresentationStateMachine,
+        VNLinePresentationFlow vnLinePresentationFlow,
         EllipsisBreathTypewriter typewriter,
-        VNLinePresentationState linePresentationAdvanceState,
+        VNLinePresentationState vnLinePresentationState,
         PresentationSessionContext presentationSessionContext,
         VNTraceStream trace = null)
     {
@@ -48,12 +48,12 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, IVNLineAborter
         dialogueRunner.onNodeStart?.AddListener(OnNodeStart);
         RegisterPresenter(dialogueRunner);
         
-        _vnLinePresentationStateMachine = vnLinePresentationStateMachine;
+        _vnLinePresentationFlow = vnLinePresentationFlow;
         
         _typewriter = typewriter;
         _typewriter.ActionMarkupHandlers = ActionMarkupHandlers;
 
-        _lineAdvanceState = linePresentationAdvanceState;
+        _vnLinePresentationState = vnLinePresentationState;
         _presentationSessionContext = presentationSessionContext;
         
         _trace = trace;
@@ -69,7 +69,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, IVNLineAborter
             NodeName = _currentNodeName,
         };
 
-        await _vnLinePresentationStateMachine.RunAsync(
+        await _vnLinePresentationFlow.RunAsync(
             ctx,
             beginRun: BeginLinePresentationRun,
             waitForAdvance: WaitForLineAdvanceAsync,
@@ -105,7 +105,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, IVNLineAborter
         }
     }
     
-    private bool ShouldFastForwardLine() => _lineAdvanceState.IsSeekingActive || _presentationSessionContext.IsSpeedUpMode;
+    private bool ShouldFastForwardLine() => _vnLinePresentationState.IsSeekingActive || _presentationSessionContext.IsSpeedUpMode;
     
     public void AbortCurrentVnLine()
     {

@@ -24,12 +24,12 @@ public sealed class DialogueBoxPresentationResult
     public IDialogueTextTarget Box { get; private set; }
     public TMP_Text LineText { get; private set; }
     public TMP_Text NameText { get; private set; }
-    public bool IsStale { get; private set; }
+    public bool IsValid { get; private set; }
 
-    private DialogueBoxPresentationResult(DialogueBoxTransitionPlan plan, bool isStale)
+    private DialogueBoxPresentationResult(DialogueBoxTransitionPlan plan, bool isValid)
     {
         Plan = plan;
-        IsStale = isStale;
+        IsValid = isValid;
 
         Box = plan?.NextBox;
         LineText = Box?.LineText;
@@ -38,12 +38,12 @@ public sealed class DialogueBoxPresentationResult
 
     public static DialogueBoxPresentationResult Completed(DialogueBoxTransitionPlan plan)
     {
-        return new DialogueBoxPresentationResult(plan, false);
+        return new DialogueBoxPresentationResult(plan, true);
     }
 
     public static DialogueBoxPresentationResult Stale(DialogueBoxTransitionPlan plan)
     {
-        return new DialogueBoxPresentationResult(plan, true);
+        return new DialogueBoxPresentationResult(plan, false);
     }
 }
 
