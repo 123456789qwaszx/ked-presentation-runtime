@@ -10,22 +10,16 @@ using System.Collections;
     },
     SetOrder = -909)]
 public sealed class SubPresentationAdvanceCommandSpec : CommandSpecBase
-{
-    public string laneKey = VNSideRunnerLaneKeys.Presentation;
-}
+{ }
 
 public sealed class SubPresentationAdvanceCommand : CommandBase
 {
-    private readonly SubPresentationAdvanceCommandSpec _spec;
     private readonly VNSideRunnerSyncHub _syncHub;
 
     public override bool WaitForCompletion => false;
 
-    public SubPresentationAdvanceCommand(
-        SubPresentationAdvanceCommandSpec spec,
-        VNSideRunnerSyncHub syncHub)
+    public SubPresentationAdvanceCommand(VNSideRunnerSyncHub syncHub)
     {
-        _spec = spec;
         _syncHub = syncHub;
     }
 
@@ -52,7 +46,7 @@ public sealed class SubPresentationAdvanceCommand : CommandBase
         //   Main line entered
         //     -> CommitLineEntered updates current meta / backlog / rollback state
         //     -> PlayCollected runs this command
-        //     -> DispatchLaneAdvance
-        _syncHub.DispatchLaneAdvance(_spec.laneKey);
+        //     -> DispatchPresentationAdvance
+        _syncHub.DispatchPresentationAdvance();
     }
 }

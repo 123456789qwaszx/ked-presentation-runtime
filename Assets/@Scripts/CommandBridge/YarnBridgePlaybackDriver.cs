@@ -7,15 +7,19 @@ public interface ICommandRunScopeProvider
     CommandRunScope CurrentScope { get; }
 }
 
+public interface ICommandEntryBarrierProvider
+{
+    LineCommandEntryBarrier CurrentCommandEntryBarrier { get; }
+}
+
 public sealed class YarnBridgePlaybackDriver : MonoBehaviour
 {
     private CommandExecutor _executor;
     private ICommandRunScopeProvider _scopeProvider;
     private ICommandEntryBarrierProvider _entryBarrierProvider;
 
-    private readonly List<CommandSpecBase> _collectedSpecs = new List<CommandSpecBase>();
-
-    private readonly List<CommandSpecBase> _heldSpecs = new List<CommandSpecBase>();
+    private readonly List<CommandSpecBase> _collectedSpecs = new ();
+    private readonly List<CommandSpecBase> _heldSpecs = new ();
     private bool _isHoldActive;
 
     private CommandRunScope CurrentScope

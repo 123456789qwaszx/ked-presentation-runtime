@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 public sealed class LineCommandEntryBarrier
 {
-    private readonly List<CommandRunTicket> _tickets = new List<CommandRunTicket>();
+    private readonly List<CommandRunTicket> _tickets = new ();
 
     public int TicketCount
     {
@@ -53,20 +53,4 @@ public sealed class LineCommandEntryBarrier
 
         _tickets.Add(ticket);
     }
-
-    public string Snapshot()
-    {
-        if (_tickets.Count == 0)
-            return "tickets=0, entryClosed=True, entrySatisfied=True";
-
-        return
-            $"tickets={_tickets.Count}, " +
-            $"entryClosed={IsEntryClosed}, " +
-            $"entrySatisfied={IsEntrySatisfied}";
-    }
-}
-
-public interface ICommandEntryBarrierProvider
-{
-    LineCommandEntryBarrier CurrentCommandEntryBarrier { get; }
 }

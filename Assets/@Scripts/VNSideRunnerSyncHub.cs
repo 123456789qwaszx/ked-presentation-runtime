@@ -1,74 +1,91 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using Yarn.Unity;
+
+public static class VNSideRunnerLaneKeys
+{
+    public const string Presentation = "presentation";
+    public const string Camera = "camera";
+    public const string Option = "option";
+    public const string Choice = "choice";
+    public const string Data = "data";
+}
 
 public sealed class VNSideRunnerSyncHub
 {
-    private readonly List<string> _laneKeys = new ();
-    
-    private readonly Dictionary<string, VNSideRunnerLaneState> _lanes = new(StringComparer.Ordinal);
+    private sealed class LaneState
+    {
+        public readonly DialogueRunner Runner;
+        public int PendingAdvanceCount;
+        public bool IsReadyForAdvance;
 
-    private readonly VNTraceStream _trace;
+        public LaneState(DialogueRunner runner)
+        {
+            Runner = runner;
+        }
+
+        public void Reset()
+        {
+            PendingAdvanceCount = 0;
+            IsReadyForAdvance = false;
+        }
+    }
+
+    private readonly Dictionary<string, LaneState> _lanes = new(StringComparer.Ordinal);
 
     public event Action<string> LaneReady;
 
-    public VNSideRunnerSyncHub(VNTraceStream trace = null)
-    {
-        _trace = trace;
-    }
+    public bool RegisterPresentationLane(DialogueRunner runner) => RegisterLane(VNSideRunnerLaneKeys.Presentation, runner);
+    public IEnumerator StartPresentationLaneCoroutine(string nodeName) => StartLaneCoroutine(VNSideRunnerLaneKeys.Presentation, nodeName);
+    public YarnTask WaitUntilPresentationLaneReadyAsync() => WaitUntilLaneReadyAsync(VNSideRunnerLaneKeys.Presentation);
+    public void DispatchPresentationAdvance() => DispatchLaneAdvance(VNSideRunnerLaneKeys.Presentation);
+    public void NotifyPresentationLaneReady() => NotifyLaneReady(VNSideRunnerLaneKeys.Presentation);
+    public void NotifyPresentationLaneNotReady() => NotifyLaneNotReady(VNSideRunnerLaneKeys.Presentation);
     
-    public void RegisterLane(string laneKey, DialogueRunner runner)
+    public void ClearAllForSeekOrLoad()
     {
-        _lanes[laneKey] = new VNSideRunnerLaneState(laneKey, runner);
+        foreach (LaneState lane in _lanes.Values)
+        {
+            lane.Reset();
+        }
+    }
 
-        if (!_laneKeys.Contains(laneKey))
-            _laneKeys.Add(laneKey);
-    }
-    
-    public IEnumerator RestartLaneCoroutine(string laneKey, string nodeName)
+    private bool RegisterLane(string laneKey, DialogueRunner runner)
     {
-        if (!TryGetRunner(laneKey, out DialogueRunner runner))
+        if (string.IsNullOrEmpty(laneKey) || runner == null)
+            return false;
+
+        if (_lanes.ContainsKey(laneKey))
+            return true;
+
+        _lanes.Add(laneKey, new LaneState(runner));
+        return true;
+    }
+
+    private IEnumerator StartLaneCoroutine(string laneKey, string nodeName)
+    {
+        LaneState lane = GetLane(laneKey);
+        if (lane == null)
             yield break;
 
-        ResetLaneForRestart(laneKey);
+        lane.Reset();
 
-        if (runner.IsDialogueRunning)
-        {
-            YarnTask stopTask = runner.Stop();
-
-            while (!stopTask.IsCompletedSuccessfully())
-                yield return null;
-        }
-
-        YarnTask startTask = runner.StartDialogue(nodeName);
+        YarnTask startTask = lane.Runner.StartDialogue(nodeName);
 
         while (!startTask.IsCompletedSuccessfully())
             yield return null;
     }
 
-    public bool TryGetRunner(string laneKey, out DialogueRunner runner)
+    private async YarnTask WaitUntilLaneReadyAsync(string laneKey)
     {
-        runner = null;
-
-        VNSideRunnerLaneState lane;
-        if (!TryGetLane(laneKey, out lane))
-            return false;
-
-        runner = lane.Runner;
-        return runner != null;
-    }
-
-    public async YarnTask WaitUntilLaneReadyAsync(string laneKey)
-    {
-        VNSideRunnerLaneState lane;
-        if (!TryGetLane(laneKey, out lane))
+        LaneState lane = GetLane(laneKey);
+        if (lane == null)
             return;
 
         if (lane.IsReadyForAdvance)
             return;
-        
+
         bool ready = false;
 
         void OnLaneReady(string readyLaneKey)
@@ -87,20 +104,21 @@ public sealed class VNSideRunnerSyncHub
         LaneReady -= OnLaneReady;
     }
 
-    public void DispatchLaneAdvance(string laneKey)
+    private void DispatchLaneAdvance(string laneKey)
     {
-        if (!TryGetLane(laneKey, out VNSideRunnerLaneState lane))
+        LaneState lane = GetLane(laneKey);
+        if (lane == null)
             return;
-        
+
         lane.PendingAdvanceCount++;
 
         TryFlush(lane);
     }
 
-    public void NotifyLaneReady(string laneKey)
+    private void NotifyLaneReady(string laneKey)
     {
-        VNSideRunnerLaneState lane;
-        if (!TryGetLane(laneKey, out lane))
+        LaneState lane = GetLane(laneKey);
+        if (lane == null)
             return;
 
         lane.IsReadyForAdvance = true;
@@ -112,33 +130,16 @@ public sealed class VNSideRunnerSyncHub
         TryFlush(lane);
     }
 
-    public void NotifyLaneNotReady(string laneKey)
+    private void NotifyLaneNotReady(string laneKey)
     {
-        VNSideRunnerLaneState lane;
-        if (!TryGetLane(laneKey, out lane))
+        LaneState lane = GetLane(laneKey);
+        if (lane == null)
             return;
 
         lane.IsReadyForAdvance = false;
     }
 
-    public void ResetLaneForRestart(string laneKey)
-    {
-        VNSideRunnerLaneState lane;
-        if (!TryGetLane(laneKey, out lane))
-            return;
-
-        lane.ResetForRestart();
-    }
-
-    public void ClearAllForSeekOrLoad()
-    {
-        foreach (VNSideRunnerLaneState lane in _lanes.Values)
-        {
-            lane.ResetForRestart();
-        }
-    }
-
-    private bool TryFlush(VNSideRunnerLaneState lane)
+    private bool TryFlush(LaneState lane)
     {
         if (lane.PendingAdvanceCount <= 0)
             return false;
@@ -146,9 +147,9 @@ public sealed class VNSideRunnerSyncHub
         if (!lane.IsReadyForAdvance)
             return false;
 
-        if (!lane.Runner.IsDialogueRunning)
+        if (lane.Runner == null || !lane.Runner.IsDialogueRunning)
             return false;
-        
+
         lane.PendingAdvanceCount--;
         lane.IsReadyForAdvance = false;
 
@@ -156,11 +157,9 @@ public sealed class VNSideRunnerSyncHub
         return true;
     }
 
-    private bool TryGetLane(string laneKey, out VNSideRunnerLaneState lane)
+    private LaneState GetLane(string laneKey)
     {
-        if (_lanes.TryGetValue(laneKey, out lane))
-            return true;
-
-        return false;
+        _lanes.TryGetValue(laneKey, out LaneState lane);
+        return lane;
     }
 }

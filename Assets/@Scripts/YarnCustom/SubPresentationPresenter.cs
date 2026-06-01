@@ -36,7 +36,7 @@ public sealed class SubPresentationPresenter : DialoguePresenterBase
 
         await WaitUntilCommandEntryClosedAsync(ticket, token);
 
-        _syncHub.NotifyLaneReady(PresentationLaneKey);
+        _syncHub.NotifyPresentationLaneReady();
 
         try
         {
@@ -44,7 +44,7 @@ public sealed class SubPresentationPresenter : DialoguePresenterBase
         }
         finally
         {
-            _syncHub.NotifyLaneNotReady(PresentationLaneKey);
+            _syncHub.NotifyPresentationLaneNotReady();
         }
     }
 

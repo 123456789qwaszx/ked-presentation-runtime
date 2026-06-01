@@ -147,7 +147,7 @@ public sealed class VNLinePresentationStateMachine
         _advanceState.MarkLineDisplayCompleted(ctx.Meta, "passThrough");
         
         SetPhase(ctx, VNLinePresentationPhase.WaitingForAdvance);
-        await _sideRunnerSyncHub.WaitUntilLaneReadyAsync(VNSideRunnerLaneKeys.Presentation);
+        await _sideRunnerSyncHub.WaitUntilPresentationLaneReadyAsync();
 
         SetPhase(ctx, VNLinePresentationPhase.Completed);
     }

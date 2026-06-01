@@ -5,16 +5,15 @@ using Yarn.Unity;
 
 public sealed partial class YarnCommandBridge
 {
-    private const string PresentationLaneKey = VNSideRunnerLaneKeys.Presentation;
-
     private readonly DialogueRunner _dialogueRunner;
-    private readonly DialogueRunner _subPresentationRunner;
 
     private readonly YarnBridgePlaybackDriver _playbackDriver;
     private readonly VNRuntimeStateProvider _vnRuntimeStateProvider;
     private readonly RectTransform _charRigPrefab;
 
     private readonly VNSideRunnerSyncHub _sideRunnerSyncHub;
+
+    private readonly bool _presentationInit;
 
     public YarnCommandBridge(
         DialogueRunner dialogueRunner,
@@ -25,36 +24,47 @@ public sealed partial class YarnCommandBridge
         RectTransform charRigPrefab)
     {
         _dialogueRunner = dialogueRunner;
-        _subPresentationRunner = subPresentationRunner;
 
         _playbackDriver = playbackDriver;
         _vnRuntimeStateProvider = vnRuntimeStateProvider;
         _sideRunnerSyncHub = sideRunnerSyncHub;
         _charRigPrefab = charRigPrefab;
         
-        _sideRunnerSyncHub.RegisterLane(VNSideRunnerLaneKeys.Presentation, subPresentationRunner);
+        if (_sideRunnerSyncHub.RegisterPresentationLane(subPresentationRunner))
+            _presentationInit = true;
 
         BindRunnerCommands(_dialogueRunner);
-        BindRunnerCommands(_subPresentationRunner);
+        BindRunnerCommands(subPresentationRunner);
 
         // Main Runner only commands.
         _dialogueRunner.AddCommandHandler<string>("sub_start", StartSubPresentationNode);
         _dialogueRunner.AddCommandHandler<string>("a", EnqueueSubPresentationAdvanceSpec);
+        
+        // Starts capturing commands into a virtual command block.
+        // Commands after <<capture_block>> are collected as one block-level execution unit.
+        // Yarn timing is held until <<play_block>> plays the block.
+        _dialogueRunner.AddCommandHandler("capture_block", BeginBlockCapture);
+        
+        // Plays the currently collected command block at this point in Yarn flow.
+        // Yarn waits until playback finishes
+        _dialogueRunner.AddCommandHandler<float>("play_block", PlayCapturedBlock);
     }
 
     private IEnumerator StartSubPresentationNode(string nodeName)
     {
-        yield return _sideRunnerSyncHub.RestartLaneCoroutine(PresentationLaneKey, nodeName);
+        if (_presentationInit)
+            yield return _sideRunnerSyncHub.StartPresentationLaneCoroutine(nodeName);
+
+        EnqueueSubPresentationAdvanceSpec();
     }
-
-    private void EnqueueSubPresentationAdvanceSpec(string _ = "doNothing")
+    
+    private void EnqueueSubPresentationAdvanceSpec(string _ = "doNothing") => Collect(new SubPresentationAdvanceCommandSpec());
+    
+    private void BeginBlockCapture() => _playbackDriver.BeginBlockCapture();
+    private IEnumerator PlayCapturedBlock(float waitTime = 1f)
     {
-        var spec = new SubPresentationAdvanceCommandSpec
-        {
-            laneKey = PresentationLaneKey,
-        };
-
-        Collect(spec);
+        EnqueueWaitSpec(waitTime);
+        yield return _playbackDriver.PlayCapturedBlock();
     }
     
     private void BindRunnerCommands(DialogueRunner runner)
@@ -82,12 +92,6 @@ public sealed partial class YarnCommandBridge
 
     private void BindControl(DialogueRunner runner)
     {
-        // Starts capturing commands into a virtual command block.
-        // Commands after <<capture_block>> are collected as one block-level execution unit.
-        // Yarn timing is held until <<play_block>> plays the block.
-        runner.AddCommandHandler("capture_block", BeginBlockCapture);
-        runner.AddCommandHandler<float>("play_block", PlayCapturedBlock);
-        
         runner.AddCommandHandler<float>("pause", EnqueueWaitSpec);
         
         runner.AddCommandHandler<string>("ui_patch", EnqueueUIPatchSpec);

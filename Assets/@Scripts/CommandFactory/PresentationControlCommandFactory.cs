@@ -27,7 +27,7 @@ public sealed class PresentationControlCommandFactory : INodeCommandFactory
 
             HideDialogueBoxCommandSpec s => new HideDialogueBoxCommand(s, _dialogueBoxResolver),
 
-            SubPresentationAdvanceCommandSpec s => new SubPresentationAdvanceCommand(s, _vnSideRunnerSyncHub),
+            SubPresentationAdvanceCommandSpec s => new SubPresentationAdvanceCommand(_vnSideRunnerSyncHub),
 
             _ => null
         };

@@ -20,6 +20,7 @@ public class VnAppBootstrap : MonoBehaviour
     private readonly VNLinePresentationState _linePresentationAdvanceState = new();
     
     private readonly BacklogRecorder _backlogRecorder = new ();
+    private readonly VNSideRunnerSyncHub _vnSideRunnerSyncHub = new();
     
     private VNRuntimeStateProvider _vnRuntimeStateProvider;
     
@@ -103,7 +104,6 @@ public class VnAppBootstrap : MonoBehaviour
     private VNLineEntryCommitter _vnLineEntryCommitter;
     
     
-    private VNSideRunnerSyncHub _vnSideRunnerSyncHub;
     private LineCommandEntryGate _lineCommandEntryGate;
     
     
@@ -120,8 +120,6 @@ public class VnAppBootstrap : MonoBehaviour
         _vnRuntimeStateProvider = new (_rollbackHistory, vnPlaytimeTracker);
         _rollbackController = new RollbackController(_rollbackHistory, _linePresentationAdvanceState);
         rollbackHistoryDebugView.Bind(_rollbackHistory);
-        
-        _vnSideRunnerSyncHub = new VNSideRunnerSyncHub();
 
         BootstrapAudioSystem();
         ConnectAudioSystemToYarn();
