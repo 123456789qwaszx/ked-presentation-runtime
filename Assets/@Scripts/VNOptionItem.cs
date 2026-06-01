@@ -57,12 +57,7 @@ public sealed class VNOptionItem : Selectable, ISubmitHandler, IPointerClickHand
         if (_label != null)
             _label.text = viewModel.Label;
 
-        if (_effectText != null)
-        {
-            string effectText = BuildEffectText(viewModel);
-            _effectText.text = effectText;
-            _effectText.gameObject.SetActive(!string.IsNullOrEmpty(effectText));
-        }
+        ApplyEffectText(viewModel);
 
         interactable = viewModel.IsAvailable;
 
@@ -148,6 +143,38 @@ public sealed class VNOptionItem : Selectable, ISubmitHandler, IPointerClickHand
             Submitted.Invoke(this);
     }
 
+    private void ApplyEffectText(VNOptionViewModel viewModel)
+    {
+        if (_effectText == null)
+            return;
+
+        string effectText = BuildEffectText(viewModel);
+
+        _effectText.text = effectText;
+        _effectText.gameObject.SetActive(!string.IsNullOrEmpty(effectText));
+    }
+
+    private static string BuildEffectText(VNOptionViewModel viewModel)
+    {
+        if (viewModel == null)
+            return string.Empty;
+
+        if (viewModel.Effects == null || viewModel.Effects.Count == 0)
+            return string.Empty;
+
+        var parts = new List<string>();
+
+        for (int i = 0; i < viewModel.Effects.Count; i++)
+        {
+            string text = viewModel.Effects[i].ToDisplayText();
+
+            if (!string.IsNullOrEmpty(text))
+                parts.Add(text);
+        }
+
+        return string.Join(" / ", parts);
+    }
+
     private void ApplyStateAlpha()
     {
         if (!_hasViewModel)
@@ -169,22 +196,5 @@ public sealed class VNOptionItem : Selectable, ISubmitHandler, IPointerClickHand
     {
         if (_selectionIndicator != null)
             _selectionIndicator.SetActive(active);
-    }
-
-    private static string BuildEffectText(VNOptionViewModel viewModel)
-    {
-        if (viewModel.Effects == null || viewModel.Effects.Count == 0)
-            return string.Empty;
-
-        var parts = new List<string>();
-
-        for (int i = 0; i < viewModel.Effects.Count; i++)
-        {
-            string text = viewModel.Effects[i].ToDisplayText();
-            if (!string.IsNullOrEmpty(text))
-                parts.Add(text);
-        }
-
-        return string.Join(" / ", parts);
     }
 }

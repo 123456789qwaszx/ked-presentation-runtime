@@ -15,7 +15,7 @@ public sealed class VNOptionViewModel
         List<VNOptionEffectPreview> effects)
     {
         SourceOption = sourceOption;
-        Label = label;
+        Label = label ?? string.Empty;
         IsAvailable = isAvailable;
         Effects = effects ?? new List<VNOptionEffectPreview>();
     }

@@ -3,30 +3,58 @@ using System;
 [Serializable]
 public struct VNOptionEffectPreview
 {
-    public string statKey;
-    public int minValue;
-    public int maxValue;
+    public string StatKey { get; private set; }
+    public int MinValue { get; private set; }
+    public int MaxValue { get; private set; }
 
     public bool HasRange
     {
-        get { return minValue != maxValue; }
+        get { return MinValue != MaxValue; }
     }
 
     public VNOptionEffectPreview(string statKey, int minValue, int maxValue)
     {
-        this.statKey = statKey;
-        this.minValue = minValue;
-        this.maxValue = maxValue;
+        StatKey = statKey ?? string.Empty;
+        MinValue = minValue;
+        MaxValue = maxValue;
     }
 
     public string ToDisplayText()
     {
-        if (string.IsNullOrEmpty(statKey))
+        if (string.IsNullOrEmpty(StatKey))
             return string.Empty;
 
-        if (HasRange)
-            return string.Format("{0} {1:+#;-#;0}~{2:+#;-#;0}", statKey, minValue, maxValue);
+        string displayName = ResolveDisplayName(StatKey);
 
-        return string.Format("{0} {1:+#;-#;0}", statKey, minValue);
+        if (HasRange)
+            return string.Format("{0} {1:+#;-#;0}~{2:+#;-#;0}", displayName, MinValue, MaxValue);
+
+        return string.Format("{0} {1:+#;-#;0}", displayName, MinValue);
+    }
+
+    private static string ResolveDisplayName(string statKey)
+    {
+        switch (statKey)
+        {
+            case "fatigue":
+                return "피로";
+
+            case "rare_ingredient":
+                return "희귀재료";
+
+            case "common_ingredient":
+                return "일반재료";
+
+            case "risk":
+                return "위험";
+
+            case "trust":
+                return "신뢰";
+
+            case "anger":
+                return "분노";
+        }
+
+        return statKey;
     }
 }
