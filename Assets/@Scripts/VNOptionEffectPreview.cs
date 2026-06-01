@@ -24,7 +24,7 @@ public struct VNOptionEffectPreview
         if (string.IsNullOrEmpty(StatKey))
             return string.Empty;
 
-        string displayName = ResolveDisplayName(StatKey);
+        string displayName = VNOptionEffectDisplayNameResolver.Resolve(StatKey);
 
         if (HasRange)
             return string.Format("{0} {1:+#;-#;0}~{2:+#;-#;0}", displayName, MinValue, MaxValue);
