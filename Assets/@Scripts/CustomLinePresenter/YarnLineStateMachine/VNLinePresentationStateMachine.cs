@@ -1,5 +1,4 @@
 using System;
-using UnityEngine;
 using Yarn.Unity;
 
 // Runs one line presentation transaction through its explicit phase sequence.
@@ -8,7 +7,7 @@ using Yarn.Unity;
 // CustomLinePresenter remains the owner of presenter lifetime, generation, and cancellation tokens.
 public sealed class VNLinePresentationStateMachine
 {
-    private readonly VNLineMetaProcessor _vnLineMetaProcessor;
+    private readonly VNLineEntryCommitter _vnLineEntryCommitter;
     private readonly VNLinePresentationState _advanceState;
     private readonly DialogueBoxPresentationController _boxPresentation;
     private readonly EllipsisBreathTypewriter _typewriter;
@@ -18,14 +17,14 @@ public sealed class VNLinePresentationStateMachine
     public VNLinePresentationPhase CurrentPhase { get; private set; } = VNLinePresentationPhase.None;
 
     public VNLinePresentationStateMachine(
-        VNLineMetaProcessor vnLineMetaProcessor,
+        VNLineEntryCommitter vnLineEntryCommitter,
         VNLinePresentationState advanceState,
         DialogueBoxPresentationController boxPresentation,
         EllipsisBreathTypewriter typewriter,
         VNLoadSeekDriver loadSeekDriver,
         VNSideRunnerSyncHub vnSideRunnerSyncHub)
     {
-        _vnLineMetaProcessor = vnLineMetaProcessor;
+        _vnLineEntryCommitter = vnLineEntryCommitter;
         _advanceState = advanceState;
         _boxPresentation = boxPresentation;
         _typewriter = typewriter;
@@ -43,8 +42,8 @@ public sealed class VNLinePresentationStateMachine
         SetPhase(ctx, VNLinePresentationPhase.LineReceived);
         
         _advanceState.MarkLineEntered();
-        ctx.Meta = _vnLineMetaProcessor.BuildLineMeta(ctx.Line, ctx.NodeName);
-        _vnLineMetaProcessor.ProcessExternalSystems(ctx.Meta);
+        ctx.Meta = _vnLineEntryCommitter.BuildLineMeta(ctx.Line, ctx.NodeName);
+        _vnLineEntryCommitter.CommitLineEntered(ctx.Meta);
         SetPhase(ctx, VNLinePresentationPhase.LineEnteredCommitted);
 
         // Phase: LineRuntimeStateResolved
@@ -62,7 +61,7 @@ public sealed class VNLinePresentationStateMachine
         ctx.SeekDecision = enteredDecision;
         SetPhase(ctx, VNLinePresentationPhase.LineRuntimeStateResolved);
 
-        if (ctx.ShouldSkipVisualAndDispatchSeekNext) {
+        if (ctx.ShouldSkipVisual) {
             await RunSeekPassThroughAsync(ctx, waitForAdvance);
             return;
         }
@@ -81,9 +80,7 @@ public sealed class VNLinePresentationStateMachine
             if (seekKind == VNSeekKind.Load)
                 _loadSeekDriver?.Complete();
         }
-        else {
-            presentationSeekDecision = VNSeekLineDecision.NotSeeking();
-        }
+        else presentationSeekDecision = VNSeekLineDecision.NotSeeking();
 
         ctx.SeekDecision = presentationSeekDecision;
         SetPhase(ctx, VNLinePresentationPhase.ResumePolicyResolved);

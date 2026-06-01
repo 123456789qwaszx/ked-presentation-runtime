@@ -136,6 +136,7 @@ public sealed class EpisodePlayer : MonoBehaviour
     private void ResetVisualState()
     {
         presentationResponseRig.Clear();
+        
         IPresentationTransitionSlotProvider provider = UIManager.Instance.GetUI<PresentationUIRoot>();
         SlantedMaskGraphic mask = provider.SlantedMaskEdgeGraphic.GetComponent<SlantedMaskGraphic>();
         mask?.ResetToHiddenOffset();

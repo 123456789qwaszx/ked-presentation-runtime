@@ -117,10 +117,7 @@ public sealed class VNSideRunnerSyncHub
             return;
 
         if (generation != lane.Generation)
-        {
-            Trace("DispatchLaneAdvanceIgnored", $"reason=OldGeneration, received={generation}, {lane.Snapshot()}");
             return;
-        }
 
         lane.PendingAdvanceCount++;
         Trace("DispatchLaneAdvance", lane.Snapshot());

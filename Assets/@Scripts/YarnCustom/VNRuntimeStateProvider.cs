@@ -101,7 +101,7 @@ public sealed class VNRuntimeStateProvider : IVNRuntimeStateProvider
         }
     }
 
-    public void HandleLineEntered(YarnLineMeta meta)
+    public void UpdateCurrentLineMeta(YarnLineMeta meta)
     {
         _currentLineMeta = meta;
         _hasCurrentLineMeta = true;

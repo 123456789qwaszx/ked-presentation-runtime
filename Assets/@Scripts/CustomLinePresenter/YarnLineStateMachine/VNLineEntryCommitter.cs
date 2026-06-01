@@ -1,13 +1,11 @@
-using System;
 using Yarn.Unity;
 
-[Serializable]
-public struct YarnLineMeta
+public readonly struct YarnLineMeta
 {
-    public string nodeName;
-    public string lineId;
-    public string charName;
-    public string rawText;
+    public readonly string nodeName;
+    public readonly string lineId;
+    public readonly string charName;
+    public readonly string rawText;
 
     public YarnLineMeta(string nodeName, string lineId, string charName, string rawText)
     {
@@ -18,7 +16,7 @@ public struct YarnLineMeta
     }
 }
 
-public sealed class VNLineMetaProcessor
+public sealed class VNLineEntryCommitter
 {
     private readonly YarnBridgePlaybackDriver _playbackDriver;
     private readonly LineCommandEntryGate _commandEntryGate;
@@ -27,7 +25,7 @@ public sealed class VNLineMetaProcessor
     private readonly RollbackController _rollbackController;
     private readonly VNRuntimeStateProvider _runtimeStateProvider;
 
-    public VNLineMetaProcessor(
+    public VNLineEntryCommitter(
         YarnBridgePlaybackDriver playbackDriver,
         LineCommandEntryGate commandEntryGate,
         BacklogRecorder backlogRecorder,
@@ -50,14 +48,14 @@ public sealed class VNLineMetaProcessor
             line.TextWithoutCharacterName.Text);
     }
 
-    public void ProcessExternalSystems(YarnLineMeta meta)
+    public void CommitLineEntered(YarnLineMeta meta)
     {
-        _runtimeStateProvider.HandleLineEntered(meta);
+        _runtimeStateProvider.UpdateCurrentLineMeta(meta);
 
         _backlogRecorder.Record(meta);
         _rollbackController.AddRollbackPoint(meta);
         
         CommandRunTicket ticket = _playbackDriver.PlayCollected();
-        _commandEntryGate?.Register(ticket);
+        _commandEntryGate.Register(ticket);
     }
 }
