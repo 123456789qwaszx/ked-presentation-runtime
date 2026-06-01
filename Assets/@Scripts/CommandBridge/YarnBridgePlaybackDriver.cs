@@ -7,7 +7,6 @@ public interface ICommandRunScopeProvider
     CommandRunScope CurrentScope { get; }
 }
 
-
 public sealed class YarnBridgePlaybackDriver : MonoBehaviour
 {
     private CommandExecutor _executor;
@@ -17,15 +16,9 @@ public sealed class YarnBridgePlaybackDriver : MonoBehaviour
     private readonly List<CommandSpecBase> _heldSpecs = new ();
     private bool _isHoldActive;
 
-    private CommandRunScope CurrentScope
-    {
-        get { return _scopeProvider != null ? _scopeProvider.CurrentScope : null; }
-    }
-
-
-    public void Initialize(
-        CommandExecutor executor,
-        ICommandRunScopeProvider scopeProvider)
+    private CommandRunScope CurrentScope => _scopeProvider?.CurrentScope;
+    
+    public void Initialize(CommandExecutor executor, ICommandRunScopeProvider scopeProvider)
     {
         _executor = executor;
         _scopeProvider = scopeProvider;
@@ -49,55 +42,28 @@ public sealed class YarnBridgePlaybackDriver : MonoBehaviour
     {
         var specs = new List<CommandSpecBase>(_collectedSpecs);
         _collectedSpecs.Clear();
-
-        CommandRunTicket ticket;
-
+        
         if (specs.Count == 0)
         {
-            ticket = new CommandRunTicket(-1, "yarn-bridge-empty", 0);
+            CommandRunTicket ticket = new CommandRunTicket(-1, "yarn-bridge-empty", 0);
             ticket.CloseEntry();
         }
-        else if (_executor == null)
-        {
-            Debug.LogWarning("[YarnBridgePlaybackDriver] PlayCollected skipped: executor is null.", this);
-
-            ticket = new CommandRunTicket(-1, "yarn-bridge-no-executor", 0);
-            ticket.CloseEntry();
-        }
-        else
-        {
-            ticket = _executor.PlaySpecs(specs, CurrentScope, "yarn-bridge");
-        }
-
-        return ticket;
+        
+        return _executor.PlaySpecs(specs, CurrentScope, "yarn-bridge");
     }
 
-    public CommandRunTicket PlayImmediate(
-        IReadOnlyList<CommandSpecBase> specs,
-        string debugSource = "yarn-inline")
+    public CommandRunTicket PlayImmediate(IReadOnlyList<CommandSpecBase> specs, string debugSource = "yarn-inline")
     {
-        CommandRunTicket ticket;
-
         if (specs == null || specs.Count == 0)
         {
-            ticket = new CommandRunTicket(-1, debugSource + "-empty", 0);
-            ticket.CloseEntry();
-            return ticket;
-        }
-
-        if (_executor == null)
-        {
-            Debug.LogWarning("[YarnBridgePlaybackDriver] PlayImmediate skipped: executor is null.", this);
-
-            ticket = new CommandRunTicket(-1, debugSource + "-no-executor", 0);
+            CommandRunTicket ticket = new CommandRunTicket(-1, debugSource + "-empty", 0);
             ticket.CloseEntry();
             return ticket;
         }
 
         var copied = new List<CommandSpecBase>(specs);
-        ticket = _executor.PlaySpecs(copied, CurrentScope, debugSource);
 
-        return ticket;
+        return _executor.PlaySpecs(copied, CurrentScope, debugSource);
     }
 
     public void BeginBlockCapture()
@@ -136,13 +102,6 @@ public sealed class YarnBridgePlaybackDriver : MonoBehaviour
         if (_heldSpecs.Count == 0)
             yield break;
 
-        if (_executor == null)
-        {
-            Debug.LogWarning("[YarnBridgePlaybackDriver] PlayCapturedBlock skipped: executor is null.", this);
-            _heldSpecs.Clear();
-            yield break;
-        }
-
         var heldSpecs = new List<CommandSpecBase>(_heldSpecs);
         _heldSpecs.Clear();
 
@@ -155,5 +114,4 @@ public sealed class YarnBridgePlaybackDriver : MonoBehaviour
         _heldSpecs.Clear();
         _isHoldActive = false;
     }
-
 }
