@@ -6,36 +6,55 @@ using Yarn.Unity;
 
 public sealed class VNOptionsPresenter : DialoguePresenterBase
 {
-    [Header("Accumulated Status")] [SerializeField]
-    private TextMeshProUGUI _accumulatedStatusText;
+    [Header("Accumulated Status")]
+    [SerializeField] private TextMeshProUGUI _accumulatedStatusText;
 
-    [Tooltip("If true, the accumulated status text is hidden when there are no tracked stats.")] [SerializeField]
-    private bool _hideAccumulatedStatusWhenEmpty = true;
+    [Tooltip("If true, the accumulated status text is hidden when there are no tracked stats.")]
+    [SerializeField] private bool _hideAccumulatedStatusWhenEmpty = true;
 
-    [Tooltip(
-        "Optional. If assigned, this runner is used to read Yarn variables. Otherwise the presenter tries to resolve it from option.Line.Source.")]
-    [SerializeField]
-    private DialogueRunner _dialogueRunner;
+    [Tooltip("Optional. If assigned, this runner is used to read Yarn variables. Otherwise the presenter tries to resolve it from option.Line.Source.")]
+    [SerializeField] private DialogueRunner _dialogueRunner;
 
-    [Header("References")] [SerializeField]
-    private VNOptionItem _optionItemPrefab;
-
+    [Header("References")]
+    [SerializeField] private VNOptionItem _optionItemPrefab;
     [SerializeField] private RectTransform _optionContainer;
     [SerializeField] private CanvasGroup _canvasGroup;
 
-    [Header("Options")] [SerializeField] private bool _showUnavailableOptions = false;
+    [Header("Options")]
+    [SerializeField] private bool _showUnavailableOptions = false;
 
-    [Header("Sequential Reveal")] [SerializeField]
-    private float _revealStaggerSeconds = 0.12f;
-
+    [Header("Sequential Reveal")]
+    [SerializeField] private float _revealStaggerSeconds = 0.12f;
     [SerializeField] private float _itemFadeInSeconds = 0.18f;
 
-    [Header("Dismiss")] [SerializeField] private float _dismissFadeSeconds = 0.15f;
+    [Header("Dismiss")]
+    [SerializeField] private float _dismissFadeSeconds = 0.15f;
 
     private readonly List<VNOptionItem> _pool = new List<VNOptionItem>();
 
+    private RollbackHistory _rollbackHistory;
+    private VNLinePresentationState _linePresentationState;
+
+    private string _currentNodeName = "";
+
     private YarnTaskCompletionSource<DialogueOption> _selectionSource;
     private CancellationToken _completionToken;
+
+    public void Initialize(
+        RollbackHistory rollbackHistory,
+        VNLinePresentationState linePresentationState)
+    {
+        _rollbackHistory = rollbackHistory;
+        _linePresentationState = linePresentationState;
+    }
+
+    public override void OnNodeEnter(string nodeName)
+    {
+        _currentNodeName = nodeName ?? "";
+
+        if (_rollbackHistory != null)
+            _rollbackHistory.NotifyNodeStarted(_currentNodeName);
+    }
 
     public override YarnTask OnDialogueStartedAsync()
     {
@@ -63,7 +82,22 @@ public sealed class VNOptionsPresenter : DialoguePresenterBase
         if (!AnyOptionAvailable(dialogueOptions))
             return await DialogueRunner.NoOptionSelected;
 
-        List<VNOptionViewModel> viewModels = BuildViewModels(dialogueOptions);
+        if (_rollbackHistory == null)
+        {
+            Debug.LogError("[VNOptionsPresenter] RollbackHistory is not initialized.", this);
+            return await DialogueRunner.NoOptionSelected;
+        }
+
+        int choiceIndexInNode =
+            _rollbackHistory.ConsumeChoiceIndexInCurrentNode(_currentNodeName);
+
+        if (_linePresentationState != null && _linePresentationState.IsSeekingActive)
+        {
+            return ResolveReplayOptionOrNoOption(dialogueOptions, choiceIndexInNode);
+        }
+
+        List<VNOptionViewModel> viewModels =
+            BuildViewModels(dialogueOptions, choiceIndexInNode);
 
         if (viewModels.Count == 0)
             return await DialogueRunner.NoOptionSelected;
@@ -118,7 +152,9 @@ public sealed class VNOptionsPresenter : DialoguePresenterBase
         }
     }
 
-    private List<VNOptionViewModel> BuildViewModels(DialogueOption[] dialogueOptions)
+    private List<VNOptionViewModel> BuildViewModels(
+        DialogueOption[] dialogueOptions,
+        int choiceIndexInNode)
     {
         var result = new List<VNOptionViewModel>();
 
@@ -129,10 +165,59 @@ public sealed class VNOptionsPresenter : DialoguePresenterBase
             if (!option.IsAvailable && !_showUnavailableOptions)
                 continue;
 
-            result.Add(VNOptionViewModelBuilder.Build(option));
+            result.Add(VNOptionViewModelBuilder.Build(
+                option,
+                sourceOptionIndex: i,
+                choiceIndexInNode: choiceIndexInNode));
         }
 
         return result;
+    }
+
+    private DialogueOption ResolveReplayOptionOrNoOption(
+        DialogueOption[] dialogueOptions,
+        int choiceIndexInNode)
+    {
+        if (_rollbackHistory == null)
+        {
+            Debug.LogError("[VNOptionsPresenter] Cannot replay option. RollbackHistory is null.", this);
+            return null;
+        }
+
+        if (!_rollbackHistory.TryGetChoiceRecord(
+                _currentNodeName,
+                choiceIndexInNode,
+                out VNChoiceRecord record))
+        {
+            Debug.LogError(
+                $"[VNOptionsPresenter] Seek reached options, but no choice record was found. node='{_currentNodeName}', choiceIndex={choiceIndexInNode}",
+                this);
+
+            return null;
+        }
+
+        if (record.selectedOptionIndex < 0 ||
+            record.selectedOptionIndex >= dialogueOptions.Length)
+        {
+            Debug.LogError(
+                $"[VNOptionsPresenter] Stored choice index is out of range. node='{_currentNodeName}', choiceIndex={choiceIndexInNode}, selected={record.selectedOptionIndex}, optionCount={dialogueOptions.Length}",
+                this);
+
+            return null;
+        }
+
+        DialogueOption option = dialogueOptions[record.selectedOptionIndex];
+
+        if (option == null || !option.IsAvailable)
+        {
+            Debug.LogError(
+                $"[VNOptionsPresenter] Stored choice is unavailable during seek. node='{_currentNodeName}', choiceIndex={choiceIndexInNode}, selected={record.selectedOptionIndex}",
+                this);
+
+            return null;
+        }
+
+        return option;
     }
 
     private void PrepareItems(List<VNOptionViewModel> viewModels)
@@ -168,7 +253,17 @@ public sealed class VNOptionsPresenter : DialoguePresenterBase
         if (_selectionSource == null)
             return;
 
-        _selectionSource.TrySetResult(item.ViewModel.SourceOption);
+        VNOptionViewModel viewModel = item.ViewModel;
+
+        if (_rollbackHistory != null)
+        {
+            _rollbackHistory.AddChoiceRecord(
+                _currentNodeName,
+                viewModel.ChoiceIndexInNode,
+                viewModel.SourceOptionIndex);
+        }
+
+        _selectionSource.TrySetResult(viewModel.SourceOption);
     }
 
     private async YarnTask RevealItemsSequentiallyAsync(int count, CancellationToken hurryUp)

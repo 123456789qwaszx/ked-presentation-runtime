@@ -5414,6 +5414,7 @@ MonoBehaviour:
   customLinePresenter: {fileID: 2009713540}
   subPresentationPresenter: {fileID: 780646544}
   autoAdvanceScheduler: {fileID: 608895337}
+  vnOptionsPresenter: {fileID: 1180068359}
   ellipsisBreathTypewriter: {fileID: 1658226451}
   vnAdvanceInputPoller: {fileID: 1315566987}
   dialogueAdvanceDispatcher: {fileID: 307625745}
@@ -10001,7 +10002,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::VNOptionsPresenter
   _accumulatedStatusText: {fileID: 1753826490}
   _hideAccumulatedStatusWhenEmpty: 1
-  _dialogueRunner: {fileID: 0}
+  _dialogueRunner: {fileID: 8309902628538800288}
   _optionItemPrefab: {fileID: 1289697509}
   _optionContainer: {fileID: 1586966950}
   _canvasGroup: {fileID: 1586966949}

@@ -109,7 +109,7 @@ public sealed class EpisodePlayer : MonoBehaviour
 
     private async YarnTask StopDialogueInternalAsync()
     {
-        _nodeRollbackHistory.ClearRollbackHistory();
+        _nodeRollbackHistory.ClearRollbackPointsForSeekRebuild();
         _backlogRecorder.ClearBacklog();
         await StopYarnRunnersAsync();
         _linePresentationAborter?.AbortCurrentVnLine();

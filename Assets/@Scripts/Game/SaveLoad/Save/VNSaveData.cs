@@ -10,7 +10,7 @@ public sealed class VNSaveData
     public string lineId = "";
 
     /// <summary>
-    /// RollbackHistory / YarnLineLifecycleBridge 기준의 방문 인덱스.
+    /// RollbackHistory 기준의 방문 인덱스.
     /// lineId만으로는 루프/재진입/분기에서 애매할 수 있으므로 같이 저장한다.
     /// </summary>
     public int visitedIndex = -1;
@@ -31,6 +31,12 @@ public sealed class VNSaveData
 
     public List<VNFlagEntry> flags = new List<VNFlagEntry>();
 
+    /// <summary>
+    /// 현재 save target line까지 도달하기 위해 재현해야 하는 선택 기록.
+    /// Load/Rollback seek 중 option set을 만나면 이 기록을 사용해 UI 없이 자동 선택한다.
+    /// </summary>
+    public List<VNChoiceRecord> choices = new List<VNChoiceRecord>();
+
     public void Normalize()
     {
         if (slotId == null) slotId = "";
@@ -40,9 +46,9 @@ public sealed class VNSaveData
         if (linePreview == null) linePreview = "";
         if (savedAt == null) savedAt = "";
         if (flags == null) flags = new List<VNFlagEntry>();
+        if (choices == null) choices = new List<VNChoiceRecord>();
     }
 
-    // 나중엔 Project에서 해당 노드가 있는지 검사하게 해야함.
     public bool HasValidTarget()
     {
         return !string.IsNullOrWhiteSpace(nodeName);

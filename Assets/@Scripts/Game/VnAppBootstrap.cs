@@ -58,7 +58,8 @@ public class VnAppBootstrap : MonoBehaviour
     [SerializeField] private CustomLinePresenter customLinePresenter;
     [SerializeField] private SubPresentationPresenter subPresentationPresenter;
     [SerializeField] private AutoAdvanceScheduler autoAdvanceScheduler;
-
+    
+    [SerializeField] private VNOptionsPresenter vnOptionsPresenter;
     
     
     [Header("VnAdvanceGate")]
@@ -316,6 +317,11 @@ public class VnAppBootstrap : MonoBehaviour
             ellipsisBreathTypewriter,
             _linePresentationAdvanceState,
             _presentationSessionContext);
+        
+        vnOptionsPresenter.Initialize(
+            _rollbackHistory, 
+            _linePresentationAdvanceState);
+        
     }
     
     private void BootstrapPlaybackControls()
@@ -350,7 +356,9 @@ public class VnAppBootstrap : MonoBehaviour
         _vnLoadSeekDriver = new VNLoadSeekDriver(
             episodePlayer,
             _linePresentationAdvanceState,
-            vnPlaytimeTracker);
+            vnPlaytimeTracker,
+            _rollbackHistory,
+            vnTrace);
 
         // 아직 게임 플래그 저장/복원이 없기에 임시로 Empty 사용.
         // 선택지/분기가 들어가면 실제 구현체로 교체.

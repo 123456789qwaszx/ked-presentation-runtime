@@ -6,6 +6,7 @@ public sealed class VNLoadSeekDriver
     private readonly EpisodePlayer _restarter;
     private readonly VNLinePresentationState _lineAdvanceState;
     private readonly VNPlaytimeTracker _playtimeTracker;
+    private readonly RollbackHistory _rollbackHistory;
     private readonly VNTraceStream _trace;
 
     private VNSaveData _target;
@@ -27,11 +28,13 @@ public sealed class VNLoadSeekDriver
         EpisodePlayer restarter,
         VNLinePresentationState lineAdvanceState,
         VNPlaytimeTracker playtimeTracker,
+        RollbackHistory rollbackHistory,
         VNTraceStream trace = null)
     {
         _restarter = restarter;
         _lineAdvanceState = lineAdvanceState;
         _playtimeTracker = playtimeTracker;
+        _rollbackHistory = rollbackHistory;
         _trace = trace;
     }
 
@@ -48,11 +51,16 @@ public sealed class VNLoadSeekDriver
             return;
         }
 
+        saveData.Normalize();
+
         _target = saveData;
         _onComplete = onComplete;
         _onFail = onFail;
 
-        Trace("BeginSeek", $"target={saveData.nodeName}/{saveData.lineId}");
+        Trace("BeginSeek", $"target={saveData.nodeName}/{saveData.lineId}, choices={saveData.choices.Count}");
+
+        if (_rollbackHistory != null)
+            _rollbackHistory.RestoreChoiceSnapshot(saveData.choices);
 
         _lineAdvanceState.BeginLoadSeek(saveData.nodeName, saveData.lineId);
 
@@ -122,10 +130,6 @@ public sealed class VNLoadSeekDriver
     {
         if (_trace == null)
             return;
-
-        // string state = _lineAdvanceState == null
-        //     ? "lineState=null"
-        //     : _lineAdvanceState.Snapshot();
 
         _trace.Trace(nameof(VNLoadSeekDriver), evt, note);
     }

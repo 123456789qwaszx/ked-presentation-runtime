@@ -6,7 +6,10 @@ public static class VNOptionViewModelBuilder
     private static readonly VNOptionEffectPreviewResolver EffectResolver =
         new VNOptionEffectPreviewResolver();
 
-    public static VNOptionViewModel Build(DialogueOption option)
+    public static VNOptionViewModel Build(
+        DialogueOption option,
+        int sourceOptionIndex,
+        int choiceIndexInNode)
     {
         string label = option.Line.TextWithoutCharacterName.Text;
 
@@ -15,6 +18,8 @@ public static class VNOptionViewModelBuilder
 
         return new VNOptionViewModel(
             sourceOption: option,
+            sourceOptionIndex: sourceOptionIndex,
+            choiceIndexInNode: choiceIndexInNode,
             label: label,
             isAvailable: option.IsAvailable,
             effects: effects);

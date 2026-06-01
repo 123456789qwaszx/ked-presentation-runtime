@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 public sealed class VNRuntimeStateProvider : IVNRuntimeStateProvider
 {
     private readonly RollbackHistory _history;
@@ -59,7 +61,6 @@ public sealed class VNRuntimeStateProvider : IVNRuntimeStateProvider
     {
         get
         {
-            // MVP에서는 historyIndex가 있으므로 0으로.
             return 0;
         }
     }
@@ -68,8 +69,6 @@ public sealed class VNRuntimeStateProvider : IVNRuntimeStateProvider
     {
         get
         {
-            // 복원용 값이 아니라 Save 슬롯 UI 표시용.
-            // MVP에서는 nodeName을 fallback으로.
             string nodeName = CurrentNodeName;
 
             if (string.IsNullOrWhiteSpace(nodeName))
@@ -105,6 +104,14 @@ public sealed class VNRuntimeStateProvider : IVNRuntimeStateProvider
     {
         _currentLineMeta = meta;
         _hasCurrentLineMeta = true;
+    }
+
+    public List<VNChoiceRecord> CreateChoiceSnapshot()
+    {
+        if (_history == null)
+            return new List<VNChoiceRecord>();
+
+        return _history.CreateChoiceSnapshot();
     }
 
     private bool TryGetCurrentSavePoint(out RollbackPoint point)

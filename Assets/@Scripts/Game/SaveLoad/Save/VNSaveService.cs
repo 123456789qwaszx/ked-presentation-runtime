@@ -38,6 +38,8 @@ public interface IVNRuntimeStateProvider
     string CurrentLinePreview { get; }
 
     int CurrentPlaytimeSeconds { get; }
+
+    List<VNChoiceRecord> CreateChoiceSnapshot();
 }
 
 public interface IVNFlagStore
@@ -155,7 +157,8 @@ public sealed class VNSaveService
 
             playtimeSeconds = Mathf.Max(0, _stateProvider.CurrentPlaytimeSeconds),
 
-            flags = flags ?? new List<VNFlagEntry>()
+            flags = flags ?? new List<VNFlagEntry>(),
+            choices = _stateProvider.CreateChoiceSnapshot()
         };
 
         data.Normalize();
