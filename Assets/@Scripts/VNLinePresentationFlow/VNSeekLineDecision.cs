@@ -21,9 +21,9 @@ public sealed class VNSeekLineDecision
         {
             SeekKind = seekKind,
 
+            ShouldSkipVisualAndDispatchSeekNext = true,
             ShouldPassThroughPresentation = true,
             ShouldUseImmediateTransition = true,
-            ShouldSkipVisualAndDispatchSeekNext = true,
             IsTargetLineReached = false,
         };
     }

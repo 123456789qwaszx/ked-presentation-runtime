@@ -101,7 +101,7 @@ public class VnAppBootstrap : MonoBehaviour
     private VNSaveLoadSystem _vnSaveLoadSystem;
     
     private RollbackController _rollbackController;
-    private VNLineEntryCommitter _vnLineEntryCommitter;
+    private VNYarnLineBoundary _vnYarnLineBoundary;
     
     [Header("Episode Selection")]
     private EpisodeSelectionSystem _episodeSelectionSystem;
@@ -293,9 +293,7 @@ public class VnAppBootstrap : MonoBehaviour
     
     private void BootstrapLinePresentationRuntime()
     {
-        
-        _vnLineEntryCommitter = new VNLineEntryCommitter(
-            yarnBridgePlaybackDriver,
+        _vnYarnLineBoundary = new VNYarnLineBoundary(
             _backlogRecorder,
             _rollbackController,
             _vnRuntimeStateProvider);
@@ -303,17 +301,18 @@ public class VnAppBootstrap : MonoBehaviour
         DialogueBoxMetadataResolver metadataResolver = new();
         DialogueBoxPresentationController boxPresentation = new(dialogueBoxHost, metadataResolver);
         
-        VNLinePresentationStateMachine lineMachine = new(
-            _vnLineEntryCommitter,
+        VNLinePresentationFlow vnLinePresentationFlow = new(
+            _vnYarnLineBoundary,
             _linePresentationAdvanceState,
             boxPresentation,
             ellipsisBreathTypewriter,
             _vnLoadSeekDriver,
-            _vnSideRunnerSyncHub);
+            _vnSideRunnerSyncHub,
+            yarnBridgePlaybackDriver);
 
         customLinePresenter.Initialize(
             dialogueRunner,
-            lineMachine,
+            vnLinePresentationFlow,
             ellipsisBreathTypewriter,
             _linePresentationAdvanceState,
             _presentationSessionContext);

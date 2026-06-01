@@ -16,21 +16,17 @@ public readonly struct YarnLineMeta
     }
 }
 
-public sealed class VNLineEntryCommitter
+public sealed class VNYarnLineBoundary
 {
-    private readonly YarnBridgePlaybackDriver _playbackDriver;
-
     private readonly BacklogRecorder _backlogRecorder;
     private readonly RollbackController _rollbackController;
     private readonly VNRuntimeStateProvider _runtimeStateProvider;
 
-    public VNLineEntryCommitter(
-        YarnBridgePlaybackDriver playbackDriver,
+    public VNYarnLineBoundary(
         BacklogRecorder backlogRecorder,
         RollbackController rollbackController,
         VNRuntimeStateProvider runtimeStateProvider)
     {
-        _playbackDriver = playbackDriver;
         _backlogRecorder = backlogRecorder;
         _rollbackController = rollbackController;
         _runtimeStateProvider = runtimeStateProvider;
@@ -51,7 +47,5 @@ public sealed class VNLineEntryCommitter
 
         _backlogRecorder.Record(meta);
         _rollbackController.AddRollbackPoint(meta);
-        
-        _playbackDriver.PlayCollected();
     }
 }

@@ -10,7 +10,7 @@ public interface IVNLineAborter
 
 public sealed class CustomLinePresenter : DialoguePresenterBase, IVNLineAborter
 {
-    private VNLinePresentationStateMachine _vnLinePresentationStateMachine;
+    private VNLinePresentationFlow _vnLinePresentationStateMachine;
 
     private EllipsisBreathTypewriter _typewriter;
     private DialogueBoxPresentationController _boxPresentation;
@@ -38,7 +38,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, IVNLineAborter
     
     public void Initialize(
         DialogueRunner dialogueRunner,
-        VNLinePresentationStateMachine vnLinePresentationStateMachine,
+        VNLinePresentationFlow vnLinePresentationStateMachine,
         EllipsisBreathTypewriter typewriter,
         VNLinePresentationState linePresentationAdvanceState,
         PresentationSessionContext presentationSessionContext,

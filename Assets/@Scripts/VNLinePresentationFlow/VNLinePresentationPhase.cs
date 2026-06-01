@@ -35,8 +35,13 @@ public enum VNLinePresentationPhase
     // The dialogue box is ready and the target TMP_Text has been resolved.
     BoxReady = 60,
 
-    // The typewriter is actively revealing the line text.
-    TypewriterRunning = 70,
+    // The typewriter has been bound to the resolved text view and prepared with line content.
+    // No visible character reveal has started yet.
+    TypewriterReady = 70,
+    
+    // The typewriter reveal has finished or was cancelled/suppressed through the current line token.
+    // The line is not yet committed as fully displayed until the run is validated afterward.
+    TypewriterCompleted = 71,
 
     // The line's display processing has been committed as complete.
     // After this point, the line is considered fully shown/processed by the VN presentation layer.

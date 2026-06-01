@@ -3,33 +3,37 @@ using Yarn.Unity;
 
 // Runs one line presentation transaction through its explicit phase sequence.
 // This class owns the transaction order, seek decision flow, but not the domain commit rules or presenter lifetime.
-// Domain commits are handled by VNLinePresentationCommitter.
+// Domain commits are handled by VNLineEntryCommitter.
 // CustomLinePresenter remains the owner of presenter lifetime, generation, and cancellation tokens.
-public sealed class VNLinePresentationStateMachine
+public sealed class VNLinePresentationFlow
 {
-    private readonly VNLineEntryCommitter _vnLineEntryCommitter;
+    private readonly VNYarnLineBoundary _vnYarnLineBoundary;
     private readonly VNLinePresentationState _advanceState;
     private readonly DialogueBoxPresentationController _boxPresentation;
     private readonly EllipsisBreathTypewriter _typewriter;
     private readonly VNLoadSeekDriver _loadSeekDriver;
     private readonly VNSideRunnerSyncHub _sideRunnerSyncHub;
+    private readonly YarnBridgePlaybackDriver _playbackDriver;
 
     public VNLinePresentationPhase CurrentPhase { get; private set; } = VNLinePresentationPhase.None;
 
-    public VNLinePresentationStateMachine(
-        VNLineEntryCommitter vnLineEntryCommitter,
+    public VNLinePresentationFlow(
+        VNYarnLineBoundary vnYarnLineBoundary,
         VNLinePresentationState advanceState,
         DialogueBoxPresentationController boxPresentation,
         EllipsisBreathTypewriter typewriter,
         VNLoadSeekDriver loadSeekDriver,
-        VNSideRunnerSyncHub vnSideRunnerSyncHub)
+        VNSideRunnerSyncHub vnSideRunnerSyncHub,
+        YarnBridgePlaybackDriver playbackDriver
+        )
     {
-        _vnLineEntryCommitter = vnLineEntryCommitter;
+        _vnYarnLineBoundary = vnYarnLineBoundary;
         _advanceState = advanceState;
         _boxPresentation = boxPresentation;
         _typewriter = typewriter;
         _loadSeekDriver = loadSeekDriver;
         _sideRunnerSyncHub = vnSideRunnerSyncHub;
+        _playbackDriver = playbackDriver;
     }
 
     public async YarnTask RunAsync(
@@ -42,8 +46,9 @@ public sealed class VNLinePresentationStateMachine
         SetPhase(ctx, VNLinePresentationPhase.LineReceived);
         
         _advanceState.MarkLineEntered();
-        ctx.Meta = _vnLineEntryCommitter.BuildLineMeta(ctx.Line, ctx.NodeName);
-        _vnLineEntryCommitter.CommitLineEntered(ctx.Meta);
+        ctx.Meta = _vnYarnLineBoundary.BuildLineMeta(ctx.Line, ctx.NodeName);
+        _vnYarnLineBoundary.CommitLineEntered(ctx.Meta);
+        _playbackDriver.PlayCollected();
         SetPhase(ctx, VNLinePresentationPhase.LineEnteredCommitted);
 
         // Phase: LineRuntimeStateResolved
@@ -62,7 +67,7 @@ public sealed class VNLinePresentationStateMachine
         SetPhase(ctx, VNLinePresentationPhase.LineRuntimeStateResolved);
 
         if (ctx.ShouldSkipVisual) {
-            await RunSeekPassThroughAsync(ctx, waitForAdvance);
+            await RunSeekPassThroughAsync(ctx);
             return;
         }
         
@@ -107,19 +112,20 @@ public sealed class VNLinePresentationStateMachine
             return;
         }
 
-        // Phase: TypewriterRunning
+        // Phase: TypewriterReady
         ctx.LineText = ctx.BoxResult?.LineText;
         _typewriter.SetTextView(ctx.LineText);
 
         ctx.Text = ctx.Line.TextWithoutCharacterName;
         _typewriter.PrepareForContent(ctx.Text);
+        SetPhase(ctx, VNLinePresentationPhase.TypewriterReady);
         
-        SetPhase(ctx, VNLinePresentationPhase.TypewriterRunning);
-
+        // Phase: TypewriterCompleted
         await _typewriter
             .RunTypewriter(ctx.Text, ctx.Token.HurryUpToken)
             .SuppressCancellationThrow();
-
+        SetPhase(ctx, VNLinePresentationPhase.TypewriterCompleted);
+        
         if (!ctx.Run.IsValid) {
             await CompleteStaleAfterTypewriterAsync(ctx, waitForAdvance);
             return;
@@ -138,8 +144,7 @@ public sealed class VNLinePresentationStateMachine
     }
     
     private async YarnTask RunSeekPassThroughAsync(
-        VNLinePresentationContext ctx, 
-        Func<LineCancellationToken, YarnTask> waitForAdvance)
+        VNLinePresentationContext ctx)
     {
         SetPhase(ctx, VNLinePresentationPhase.SeekPassThrough);
         
