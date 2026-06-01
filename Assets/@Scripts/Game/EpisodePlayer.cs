@@ -111,7 +111,7 @@ public sealed class EpisodePlayer : MonoBehaviour
     {
         _nodeRollbackHistory.ClearRollbackHistory();
         _backlogRecorder.ClearBacklog();
-        await StopYarnRunnersAsync();
+        //await StopYarnRunnersAsync();
         _linePresentationAborter?.AbortCurrentVnLine();
         presentationRouteEntry.EndRouteNow();
         ResetVisualState();

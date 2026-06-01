@@ -15869,7 +15869,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EpisodePlayer
   dialogueRunner: {fileID: 8309902628538800288}
-  subPresentationRunner: {fileID: 8309902628667094135}
+  subPresentationRunner: {fileID: 0}
   presentationRouteEntry: {fileID: 1433866633}
   presentationResponseRig: {fileID: 529556882}
   yarnEntryKey: OnlyText

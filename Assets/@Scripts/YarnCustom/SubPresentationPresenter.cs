@@ -64,7 +64,28 @@ public sealed class SubPresentationPresenter : DialoguePresenterBase
         }
 
         if (!ticket.EntrySatisfied)
-            Debug.LogWarning($"[SubPresentationPresenter] Command entry was not fully satisfied. {ticket.Snapshot()}");
+        {
+            if (ticket.HasFailures)
+            {
+                Debug.LogWarning(
+                    "[SubPresentationPresenter] Command entry failed.\n" +
+                    ticket.UnsatisfiedCommandSnapshot());
+            }
+            else if (ticket.WasInterrupted)
+            {
+                // Debug.Log(
+                //     "[SubPresentationPresenter] Command entry was interrupted by an expected route change.\n" +
+                //     "This can happen when rollback/load/stop is requested while a wait=true command is running. " +
+                //     "Remaining commands from the previous run are intentionally skipped.\n" +
+                //     ticket.UnsatisfiedCommandSnapshot());
+            }
+            else
+            {
+                Debug.LogWarning(
+                    "[SubPresentationPresenter] Command entry was closed before all commands entered, but no failure or interrupt reason was recorded.\n" +
+                    ticket.UnsatisfiedCommandSnapshot());
+            }
+        }
     }
 
     private async YarnTask WaitForLineAdvanceAsync(LineCancellationToken token)

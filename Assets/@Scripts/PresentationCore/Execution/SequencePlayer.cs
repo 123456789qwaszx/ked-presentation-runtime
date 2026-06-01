@@ -52,6 +52,7 @@ public sealed class SequencePlayer
 
         int total = commands != null ? commands.Count : 0;
         Trace($"[run:{runId}] PlayCommands begin (count={total})");
+        RegisterExpectedCommands(commands, ticket);
 
         try
         {
@@ -87,7 +88,7 @@ public sealed class SequencePlayer
                 if (command == null)
                 {
                     Trace($"{tag} Command is null.");
-                    ticket?.MarkCommandFailed();
+                    ticket?.MarkCommandFailed(i, "Command is null");
                     continue;
                 }
 
@@ -102,14 +103,14 @@ public sealed class SequencePlayer
                 {
                     Trace($"{tag} Exception in Execute(): {name}");
                     Debug.LogException(e);
-                    ticket?.MarkCommandFailed();
+                    ticket?.MarkCommandFailed(i, "Exception in Execute()");
                     continue;
                 }
 
                 if (routine == null)
                 {
                     Trace($"{tag} Execute() returned null: {name}");
-                    ticket?.MarkCommandFailed();
+                    ticket?.MarkCommandFailed(i, "Execute() returned null");
                     continue;
                 }
 
@@ -121,14 +122,14 @@ public sealed class SequencePlayer
                     hasMore = routine.MoveNext();
                     firstYield = hasMore ? routine.Current : null;
 
-                    ticket?.MarkCommandEntered();
+                    ticket?.MarkCommandEntered(i);
                     Trace($"{tag} Entered: {name}");
                 }
                 catch (Exception e)
                 {
                     Trace($"{tag} Exception on first MoveNext(): {name}");
                     Debug.LogException(e);
-                    ticket?.MarkCommandFailed();
+                    ticket?.MarkCommandFailed(i, "Exception on first MoveNext()");
                     continue;
                 }
 
@@ -199,7 +200,7 @@ public sealed class SequencePlayer
                 if (ticket.EntrySatisfied)
                     Trace($"[run:{runId}] CommandEntrySatisfied: {ticket.Snapshot()}");
                 else
-                    Trace($"[run:{runId}] CommandEntryFailed: {ticket.Snapshot()}");
+                    Trace($"[run:{runId}] CommandEntryFailed:\n{ticket.DetailedSnapshot()}");
             }
 
             Trace($"[run:{runId}] PlayCommands end");
@@ -293,5 +294,27 @@ public sealed class SequencePlayer
             return commandBase.DebugName;
 
         return command.GetType().Name;
+    }
+    
+    private static void RegisterExpectedCommands(
+        IReadOnlyList<ISequenceCommand> commands,
+        CommandRunTicket ticket)
+    {
+        if (ticket == null)
+            return;
+
+        if (commands == null)
+            return;
+
+        for (int i = 0; i < commands.Count; i++)
+        {
+            ISequenceCommand command = commands[i];
+
+            string name = command != null
+                ? GetDebugName(command)
+                : "<null-command>";
+
+            ticket.RegisterExpectedCommand(i, name);
+        }
     }
 }

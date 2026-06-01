@@ -445,14 +445,35 @@ public sealed class CommandExecutor : MonoBehaviour
 
         if (!_activeTicket.EntryClosed)
         {
+            if (IsExpectedInterruptReason(reason))
+                _activeTicket.MarkInterrupted(reason);
+
             _activeTicket.CloseEntry();
-            Trace($"ActiveTicketClosed: reason={reason}, {_activeTicket.Snapshot()}");
+
+            Trace($"ActiveTicketClosed: reason={reason}\n{_activeTicket.DetailedSnapshot()}");
 
             if (!_activeTicket.EntrySatisfied)
-                Trace($"CommandEntryGuaranteeFailed: reason={reason}, {_activeTicket.Snapshot()}");
+            {
+                if (_activeTicket.WasInterrupted && !_activeTicket.HasFailures)
+                    Trace($"CommandEntryInterrupted: reason={reason}\n{_activeTicket.DetailedSnapshot()}");
+                else
+                    Trace($"CommandEntryGuaranteeFailed: reason={reason}\n{_activeTicket.DetailedSnapshot()}");
+            }
         }
 
         _activeTicket = null;
+    }
+    
+    private static bool IsExpectedInterruptReason(string reason)
+    {
+        if (string.IsNullOrEmpty(reason))
+            return false;
+
+        return reason.Contains("Stop") ||
+               reason.Contains("New PlaySpecs requested") ||
+               reason.Contains("New PlayStep requested") ||
+               reason.Contains("RunNode exited early") ||
+               reason.Contains("stale run");
     }
 
     private void CloseTicket(CommandRunTicket ticket, string reason)
@@ -462,14 +483,32 @@ public sealed class CommandExecutor : MonoBehaviour
 
         if (!ticket.EntryClosed)
         {
+            if (IsExpectedInterruptReason(reason))
+                ticket.MarkInterrupted(reason);
+
             ticket.CloseEntry();
             Trace($"TicketClosed: reason={reason}, {ticket.Snapshot()}");
         }
 
-        if (!ticket.EntrySatisfied)
-            Trace($"CommandEntryGuaranteeFailed: reason={reason}, {ticket.Snapshot()}");
-        else
+        if (ticket.EntrySatisfied)
+        {
             Trace($"CommandEntrySatisfied: reason={reason}, {ticket.Snapshot()}");
+            return;
+        }
+
+        if (ticket.HasFailures)
+        {
+            Trace($"CommandEntryFailed: reason={reason}\n{ticket.DetailedSnapshot()}");
+            return;
+        }
+
+        if (ticket.WasInterrupted)
+        {
+            Trace($"CommandEntryInterrupted: reason={reason}\n{ticket.DetailedSnapshot()}");
+            return;
+        }
+
+        Trace($"CommandEntryGuaranteeUnknownFailure: reason={reason}\n{ticket.DetailedSnapshot()}");
     }
 
     private void ClearActiveTicketIfSame(CommandRunTicket ticket)
