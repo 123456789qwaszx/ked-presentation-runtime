@@ -59,14 +59,12 @@ public class ChoiceHistory
 
     public void RemoveChoiceAnchorAfterRollbackPoint(RollbackPoint target)
     {
-        
         for (int i = _choices.Count - 1; i >= 0; i--)
         {
             if (_choices[i].anchorHistoryIndex > target.historyIndex)
                 _choices.RemoveAt(i);
         }
     }
-    
     
     public void AddChoiceRecord(IReadOnlyList<RollbackPoint> rollbackPoints, string nodeName, int choiceIndexInNode, int selectedOptionIndex)
     {

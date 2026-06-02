@@ -16,9 +16,10 @@ public class VnAppBootstrap : MonoBehaviour
     private readonly PresentationSessionContext _presentationSessionContext = new();
     private readonly VnScreenBindings _screenBindings = new();
     private readonly EpisodeSelectionStateData _episodeSelectionStateData = new ();
-    private readonly RollbackHistory _rollbackHistory = new ();
+    private readonly RollbackController _rollbackHistory = new ();
     private readonly ChoiceHistory _choiceHistory = new ();
     private readonly VNLinePresentationState _linePresentationAdvanceState = new();
+    private RollbackController _rollbackController = new();
     
     private readonly BacklogRecorder _backlogRecorder = new ();
     private readonly VNSideRunnerSyncHub _vnSideRunnerSyncHub = new();
@@ -102,7 +103,6 @@ public class VnAppBootstrap : MonoBehaviour
     private VNLoadSeekDriver _vnLoadSeekDriver;
     private VNSaveLoadSystem _vnSaveLoadSystem;
     
-    private RollbackController _rollbackController;
     private VNYarnLineBoundary _vnYarnLineBoundary;
     
     [Header("Episode Selection")]
@@ -115,7 +115,6 @@ public class VnAppBootstrap : MonoBehaviour
     private void Awake()
     {
         _vnRuntimeStateProvider = new (_rollbackHistory, _choiceHistory, vnPlaytimeTracker);
-        _rollbackController = new RollbackController(_rollbackHistory, _linePresentationAdvanceState);
         rollbackHistoryDebugView.Bind(_rollbackHistory);
 
         BootstrapAudioSystem();
@@ -353,7 +352,9 @@ public class VnAppBootstrap : MonoBehaviour
             _backlogRecorder,
             autoAdvanceScheduler,
             holdSkipController,
-            _rollbackController);
+            _rollbackController,
+            _linePresentationAdvanceState,
+            _choiceHistory);
     }
     
     private void BootstrapVnSaveLoadRuntime()

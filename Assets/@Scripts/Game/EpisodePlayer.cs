@@ -6,7 +6,7 @@ using Yarn.Unity;
 public sealed class EpisodePlayer : MonoBehaviour
 {
     private VnScreenBindings _vnScreenBindings;
-    private RollbackHistory _nodeRollbackHistory;
+    private RollbackController _nodeRollbackHistory;
     private IVNLineAborter _linePresentationAborter;
     private BacklogRecorder _backlogRecorder;
     private VNSaveLoadSystem _vnSaveLoadSystem;
@@ -37,7 +37,7 @@ public sealed class EpisodePlayer : MonoBehaviour
 
     public void Initialize(
         VnScreenBindings vnScreenBindings,
-        RollbackHistory nodeRollbackHistory,
+        RollbackController nodeRollbackHistory,
         IVNLineAborter linePresentationAborter,
         BacklogRecorder backlogRecorder,
         VNSaveLoadSystem saveLoadSystem)

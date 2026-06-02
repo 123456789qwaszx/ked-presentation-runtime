@@ -5,7 +5,7 @@ using Yarn.Unity;
 
 public sealed partial class VNOptionsPresenter : DialoguePresenterBase
 {
-    private RollbackHistory _rollbackHistory;
+    private RollbackController _rollbackHistory;
     private ChoiceHistory _choiceHistory;
     private VNLinePresentationState _linePresentationState;
 
@@ -21,7 +21,7 @@ public sealed partial class VNOptionsPresenter : DialoguePresenterBase
     private YarnTaskCompletionSource<DialogueOption> _selectionSource;
     private CancellationToken _completionToken;
 
-    public void Initialize(DialogueRunner dialogueRunner, RollbackHistory rollbackHistory, ChoiceHistory choiceHistory, VNLinePresentationState linePresentationState)
+    public void Initialize(DialogueRunner dialogueRunner, RollbackController rollbackHistory, ChoiceHistory choiceHistory, VNLinePresentationState linePresentationState)
     {
         _rollbackHistory = rollbackHistory;
         _choiceHistory = choiceHistory;

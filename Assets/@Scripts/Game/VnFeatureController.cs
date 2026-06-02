@@ -31,6 +31,8 @@ public sealed class VnFeatureController : MonoBehaviour
     private AutoAdvanceScheduler _autoAdvanceScheduler;
     private FastForwardController _holdSpeedUpController;
     private RollbackController _rollbackController;
+    private VNLinePresentationState _vnLinePresentationState;
+    private ChoiceHistory _choiceHistory;
 
     public bool IsAuto => _sessionContext != null && _sessionContext.IsAutoMode;
     public bool IsSpeedup => _sessionContext != null && _sessionContext.IsSpeedUpMode;
@@ -51,7 +53,10 @@ public sealed class VnFeatureController : MonoBehaviour
         BacklogRecorder backlogRecorder,
         AutoAdvanceScheduler autoAdvanceScheduler,
         FastForwardController holdSpeedUpController,
-        RollbackController rollbackController)
+        RollbackController rollbackController,
+        VNLinePresentationState vnLinePresentationState,
+        ChoiceHistory choiceHistory
+        )
     {
         if (_init)
             return;
@@ -67,6 +72,8 @@ public sealed class VnFeatureController : MonoBehaviour
         _autoAdvanceScheduler = autoAdvanceScheduler;
         _holdSpeedUpController = holdSpeedUpController;
         _rollbackController = rollbackController;
+        _vnLinePresentationState = vnLinePresentationState;
+        _choiceHistory = choiceHistory;
 
         _init = true;
     }
@@ -126,10 +133,21 @@ public sealed class VnFeatureController : MonoBehaviour
 
     public bool RequestRollbackOneStep()
     {
+        if (_vnLinePresentationState.IsSeekingActive)
+            return false;
+        
+        if (!_rollbackController.GetRollbackPoint(out RollbackPoint target))
+            return false;
+
+        _choiceHistory.RemoveChoiceAnchorAfterRollbackPoint(target);
+        
+        _rollbackController.ClearRollbackPoints();
+        _vnLinePresentationState.BeginRollbackSeek(target.nodeName, target.lineId);
+        
         SetMode(VnPlayMode.Manual);
         _autoAdvanceScheduler.ResetAutoAdvanceTimer();
-
-        return _rollbackController.RequestRollbackOneStep();
+        
+        return true;
     }
 
     private void SetMode(VnPlayMode mode)
