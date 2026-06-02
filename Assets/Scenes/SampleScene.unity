@@ -10002,14 +10002,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::VNOptionsPresenter
   _accumulatedStatusText: {fileID: 1753826490}
   _hideAccumulatedStatusWhenEmpty: 1
-  _dialogueRunner: {fileID: 8309902628538800288}
-  _optionItemPrefab: {fileID: 1289697509}
-  _optionContainer: {fileID: 1586966950}
-  _canvasGroup: {fileID: 1586966949}
-  _showUnavailableOptions: 0
-  _revealStaggerSeconds: 0.12
-  _itemFadeInSeconds: 0.18
-  _dismissFadeSeconds: 0.15
+  optionItemPrefab: {fileID: 1289697509}
+  optionContainer: {fileID: 1586966950}
+  canvasGroup: {fileID: 1586966949}
 --- !u!4 &1180068360
 Transform:
   m_ObjectHideFlags: 0
@@ -16692,7 +16687,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EpisodePlayer
   dialogueRunner: {fileID: 8309902628538800288}
-  subPresentationRunner: {fileID: 0}
+  subPresentationRunner: {fileID: 8309902628667094135}
   presentationRouteEntry: {fileID: 1433866633}
   presentationResponseRig: {fileID: 529556882}
   yarnEntryKey: options

@@ -404,7 +404,12 @@ public class VnAppBootstrap : MonoBehaviour
     
     private void InitializeEpisodePlayer()
     {
-        episodePlayer.Initialize(_screenBindings, _rollbackHistory, customLinePresenter, _backlogRecorder, _vnSaveLoadSystem);
+        episodePlayer.Initialize(
+            _screenBindings, 
+            _rollbackHistory, 
+            customLinePresenter,
+            _backlogRecorder, 
+            _choiceHistory);
     }
     
     private void BootstrapScreenBindings()

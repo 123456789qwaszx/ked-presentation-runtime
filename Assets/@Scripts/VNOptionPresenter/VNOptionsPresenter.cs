@@ -10,13 +10,13 @@ public sealed partial class VNOptionsPresenter : DialoguePresenterBase
     private VNLinePresentationState _linePresentationState;
 
     [Header("References")]
-    [SerializeField] private VNOptionItem _optionItemPrefab;
-    [SerializeField] private RectTransform _optionContainer;
-    [SerializeField] private CanvasGroup _canvasGroup;
+    [SerializeField] private VNOptionItem optionItemPrefab;
+    [SerializeField] private RectTransform optionContainer;
+    [SerializeField] private CanvasGroup canvasGroup;
 
     private readonly List<VNOptionItem> _pool = new ();
     
-    private string _currentNodeName = "";
+    private string _currentNodeName;
 
     private YarnTaskCompletionSource<DialogueOption> _selectionSource;
     private CancellationToken _completionToken;
@@ -27,18 +27,9 @@ public sealed partial class VNOptionsPresenter : DialoguePresenterBase
         _choiceHistory = choiceHistory;
         _linePresentationState = linePresentationState;
         
-        dialogueRunner.onNodeStart?.RemoveListener(OnNodeStart);
-        dialogueRunner.onNodeStart?.AddListener(OnNodeStart);
+        dialogueRunner.onNodeStart?.AddListener((nodeName) => _currentNodeName = nodeName);
     }
-
-    private void OnNodeStart(string nodeName) => _currentNodeName = nodeName ?? string.Empty;
-    public override void OnNodeEnter(string nodeName)
-    {
-        _currentNodeName = nodeName ?? "";
-
-        _choiceHistory.NotifyNodeStarted(nodeName);
-    }
-
+    
     public override YarnTask OnDialogueStartedAsync()
     {
         HidePanelImmediate();
@@ -60,6 +51,7 @@ public sealed partial class VNOptionsPresenter : DialoguePresenterBase
         DialogueOption[] dialogueOptions,
         LineCancellationToken cancellationToken)
     {
+        #region NoOptions
         bool AnyOptionAvailable(DialogueOption[] options)
         {
             for (int i = 0; i < options.Length; i++)
@@ -73,13 +65,17 @@ public sealed partial class VNOptionsPresenter : DialoguePresenterBase
         
         if (!AnyOptionAvailable(dialogueOptions))
             return await DialogueRunner.NoOptionSelected;
+        #endregion
 
-        int choiceIndexInNode = _choiceHistory.ConsumeChoiceIndexInCurrentNode(_currentNodeName);
+        int targetChoiceIndex = _choiceHistory.NextChoiceIndex;
+        _choiceHistory.NextChoiceIndex++;
 
+        #region IfSeeking
         if (_linePresentationState.IsSeekingActive)
-            return ResolveReplayOptionOrNoOption(dialogueOptions, choiceIndexInNode);
+            return ResolveReplayOptionOrNoOption(dialogueOptions, targetChoiceIndex);
+        #endregion
 
-        List<VNOptionViewModel> viewModels = BuildViewModels(dialogueOptions, choiceIndexInNode);
+        List<VNOptionViewModel> viewModels = BuildViewModels(dialogueOptions, targetChoiceIndex);
 
         if (viewModels.Count == 0)
             return await DialogueRunner.NoOptionSelected;
@@ -87,8 +83,8 @@ public sealed partial class VNOptionsPresenter : DialoguePresenterBase
         
         while (_pool.Count < viewModels.Count)
         {
-            Transform parent = _optionContainer;
-            VNOptionItem item = Instantiate(_optionItemPrefab, parent);
+            Transform parent = optionContainer;
+            VNOptionItem item = Instantiate(optionItemPrefab, parent);
 
             item.gameObject.SetActive(false);
             item.ResetView();
@@ -108,24 +104,24 @@ public sealed partial class VNOptionsPresenter : DialoguePresenterBase
 
             PrepareItems(viewModels);
             
-            _canvasGroup.alpha = 1f;
-            _canvasGroup.interactable = false;
-            _canvasGroup.blocksRaycasts = false;
+            canvasGroup.alpha = 1f;
+            canvasGroup.interactable = false;
+            canvasGroup.blocksRaycasts = false;
 
             for (int i = 0; i < viewModels.Count; i++)
             {
                 _pool[i].SetRevealAlpha(1f);
             }
 
-            _canvasGroup.interactable = true;
-            _canvasGroup.blocksRaycasts = true;
+            canvasGroup.interactable = true;
+            canvasGroup.blocksRaycasts = true;
             SelectFirstAvailableItem(viewModels.Count);
 
             DialogueOption selected = await _selectionSource.Task;
 
             internalCancel.Cancel();
-            _canvasGroup.interactable = false;
-            _canvasGroup.blocksRaycasts = false;
+            canvasGroup.interactable = false;
+            canvasGroup.blocksRaycasts = false;
 
             if (cancellationToken.IsNextContentRequested)
                 return await DialogueRunner.NoOptionSelected;
@@ -168,7 +164,7 @@ public sealed partial class VNOptionsPresenter : DialoguePresenterBase
 
     private DialogueOption ResolveReplayOptionOrNoOption(DialogueOption[] dialogueOptions, int choiceIndexInNode)
     {
-        if (!_choiceHistory.TryGetChoiceRecord(_currentNodeName, choiceIndexInNode, out VNChoiceRecord record))
+        if (!_choiceHistory.TryGetChoiceRecord(choiceIndexInNode, out VNChoiceRecord record))
             return null;
 
         if (record.selectedOptionIndex < 0 || record.selectedOptionIndex >= dialogueOptions.Length)
@@ -254,9 +250,9 @@ public sealed partial class VNOptionsPresenter : DialoguePresenterBase
     
     private void HidePanelImmediate()
     {
-        _canvasGroup.alpha = 0f;
-        _canvasGroup.interactable = false;
-        _canvasGroup.blocksRaycasts = false;
+        canvasGroup.alpha = 0f;
+        canvasGroup.interactable = false;
+        canvasGroup.blocksRaycasts = false;
 
         SetAccumulatedStatusText(string.Empty);
     }

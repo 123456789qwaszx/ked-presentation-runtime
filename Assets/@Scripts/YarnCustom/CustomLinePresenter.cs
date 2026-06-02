@@ -44,8 +44,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, IVNLineAborter
         PresentationSessionContext presentationSessionContext,
         VNTraceStream trace = null)
     {
-        dialogueRunner.onNodeStart?.RemoveListener(OnNodeStart);
-        dialogueRunner.onNodeStart?.AddListener(OnNodeStart);
+        dialogueRunner.onNodeStart?.AddListener(nodeName =>_currentNodeName = nodeName );
         RegisterPresenter(dialogueRunner);
         
         _vnLinePresentationFlow = vnLinePresentationFlow;
@@ -148,8 +147,6 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, IVNLineAborter
         _lineVisualCts.Dispose();
         _lineVisualCts = null;
     }
-
-    private void OnNodeStart(string nodeName) => _currentNodeName = nodeName ?? string.Empty;
 
     private void RegisterPresenter(DialogueRunner dialogueRunner)
     {

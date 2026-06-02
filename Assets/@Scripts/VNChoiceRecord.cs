@@ -20,42 +20,17 @@ public struct VNChoiceRecord
         this.choiceIndexInNode = choiceIndexInNode;
         this.selectedOptionIndex = selectedOptionIndex;
     }
-
-    public bool IsValid()
-    {
-        return !string.IsNullOrWhiteSpace(nodeName)
-               && choiceIndexInNode >= 0
-               && selectedOptionIndex >= 0;
-    }
 }
 
 public class ChoiceHistory
 {
-    private const int MaxOptionCount = 5;
-    
-    private string _currentChoiceNodeName;
-    private int _nextChoiceIndexInNode;
-    
+    public int NextChoiceIndex { get; set; }
+
     private readonly List<VNChoiceRecord> _choices = new();
     
     public List<VNChoiceRecord> CreateChoiceSnapshot() => new (_choices);
     
-    public void NotifyNodeStarted(string nodeName)
-    {
-        _currentChoiceNodeName = nodeName;
-        _nextChoiceIndexInNode = 0;
-    }
-    
-    public int ConsumeChoiceIndexInCurrentNode(string nodeName)
-    {
-        if (!string.Equals(_currentChoiceNodeName, nodeName, StringComparison.Ordinal))
-            NotifyNodeStarted(nodeName);
-
-        int index = _nextChoiceIndexInNode;
-        _nextChoiceIndexInNode++;
-
-        return index;
-    }
+    public void ResetIndex() => NextChoiceIndex = 0;
 
     public void RemoveChoiceAnchorAfterRollbackPoint(RollbackPoint target)
     {
@@ -93,16 +68,13 @@ public class ChoiceHistory
             selectedOptionIndex));
     }
 
-    public bool TryGetChoiceRecord(string nodeName, int choiceIndexInNode, out VNChoiceRecord record)
+    public bool TryGetChoiceRecord(int choiceIndexInNode, out VNChoiceRecord record)
     {
         record = default;
 
         for (int i = _choices.Count - 1; i >= 0; i--)
         {
             VNChoiceRecord choice = _choices[i];
-
-            if (!string.Equals(choice.nodeName, nodeName, StringComparison.Ordinal))
-                continue;
 
             if (choice.choiceIndexInNode != choiceIndexInNode)
                 continue;
@@ -118,37 +90,18 @@ public class ChoiceHistory
     public void RestoreChoiceSnapshot(IReadOnlyList<VNChoiceRecord> choices)
     {
         _choices.Clear();
-
-        if (choices == null)
-            return;
+        NextChoiceIndex = 0;
 
         for (int i = 0; i < choices.Count; i++)
         {
-            VNChoiceRecord choice = choices[i];
-
-            if (!choice.IsValid())
-                continue;
-
-            if (choice.selectedOptionIndex < 0 ||
-                choice.selectedOptionIndex >= MaxOptionCount)
-                continue;
-
-            _choices.Add(choice);
+            _choices.Add(choices[i]);
         }
     }
     
     
-    public void ClearAll()
+    public void Clear()
     {
         _choices.Clear();
-
-        _currentChoiceNodeName = "";
-        _nextChoiceIndexInNode = 0;
-    }
-
-    public void ClearRollbackPointsForSeekRebuild()
-    {
-        _currentChoiceNodeName = "";
-        _nextChoiceIndexInNode = 0;
+        NextChoiceIndex = 0;
     }
 }

@@ -9,7 +9,7 @@ public sealed class EpisodePlayer : MonoBehaviour
     private RollbackController _nodeRollbackHistory;
     private IVNLineAborter _linePresentationAborter;
     private BacklogRecorder _backlogRecorder;
-    private VNSaveLoadSystem _vnSaveLoadSystem;
+    private ChoiceHistory _choiceHistory;
 
     [Header("Yarn")]
     [SerializeField] private DialogueRunner dialogueRunner;
@@ -40,13 +40,13 @@ public sealed class EpisodePlayer : MonoBehaviour
         RollbackController nodeRollbackHistory,
         IVNLineAborter linePresentationAborter,
         BacklogRecorder backlogRecorder,
-        VNSaveLoadSystem saveLoadSystem)
+        ChoiceHistory choiceHistory)
     {
         _vnScreenBindings = vnScreenBindings;
         _nodeRollbackHistory = nodeRollbackHistory;
         _linePresentationAborter = linePresentationAborter;
         _backlogRecorder = backlogRecorder;
-        _vnSaveLoadSystem = saveLoadSystem;
+        _choiceHistory = choiceHistory;
     }
 
     private void Update()
@@ -111,6 +111,7 @@ public sealed class EpisodePlayer : MonoBehaviour
     {
         _nodeRollbackHistory.ClearRollbackPoints();
         _backlogRecorder.ClearBacklog();
+        _choiceHistory.ResetIndex();
         await StopYarnRunnersAsync();
         _linePresentationAborter?.AbortCurrentVnLine();
         presentationRouteEntry.EndRouteNow();
