@@ -1,5 +1,4 @@
 using System;
-using Yarn.Unity;
 
 public sealed class VNLoadSeekDriver
 {
@@ -7,6 +6,7 @@ public sealed class VNLoadSeekDriver
     private readonly VNLinePresentationState _lineAdvanceState;
     private readonly VNPlaytimeTracker _playtimeTracker;
     private readonly RollbackHistory _rollbackHistory;
+    private readonly ChoiceHistory _choiceHistory;
     private readonly VNTraceStream _trace;
 
     private VNSaveData _target;
@@ -29,12 +29,14 @@ public sealed class VNLoadSeekDriver
         VNLinePresentationState lineAdvanceState,
         VNPlaytimeTracker playtimeTracker,
         RollbackHistory rollbackHistory,
+        ChoiceHistory choiceHistory,
         VNTraceStream trace = null)
     {
         _restarter = restarter;
         _lineAdvanceState = lineAdvanceState;
         _playtimeTracker = playtimeTracker;
         _rollbackHistory = rollbackHistory;
+        _choiceHistory = choiceHistory;
         _trace = trace;
     }
 
@@ -59,8 +61,7 @@ public sealed class VNLoadSeekDriver
 
         Trace("BeginSeek", $"target={saveData.nodeName}/{saveData.lineId}, choices={saveData.choices.Count}");
 
-        if (_rollbackHistory != null)
-            _rollbackHistory.RestoreChoiceSnapshot(saveData.choices);
+        _choiceHistory.RestoreChoiceSnapshot(saveData.choices);
 
         _lineAdvanceState.BeginLoadSeek(saveData.nodeName, saveData.lineId);
 

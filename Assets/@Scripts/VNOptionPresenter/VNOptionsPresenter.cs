@@ -1,59 +1,42 @@
 using System.Collections.Generic;
 using System.Threading;
-using TMPro;
 using UnityEngine;
 using Yarn.Unity;
 
-public sealed class VNOptionsPresenter : DialoguePresenterBase
+public sealed partial class VNOptionsPresenter : DialoguePresenterBase
 {
-    [Header("Accumulated Status")]
-    [SerializeField] private TextMeshProUGUI _accumulatedStatusText;
-
-    [Tooltip("If true, the accumulated status text is hidden when there are no tracked stats.")]
-    [SerializeField] private bool _hideAccumulatedStatusWhenEmpty = true;
-
-    [Tooltip("Optional. If assigned, this runner is used to read Yarn variables. Otherwise the presenter tries to resolve it from option.Line.Source.")]
-    [SerializeField] private DialogueRunner _dialogueRunner;
+    private RollbackHistory _rollbackHistory;
+    private ChoiceHistory _choiceHistory;
+    private VNLinePresentationState _linePresentationState;
 
     [Header("References")]
     [SerializeField] private VNOptionItem _optionItemPrefab;
     [SerializeField] private RectTransform _optionContainer;
     [SerializeField] private CanvasGroup _canvasGroup;
 
-    [Header("Options")]
-    [SerializeField] private bool _showUnavailableOptions = false;
-
-    [Header("Sequential Reveal")]
-    [SerializeField] private float _revealStaggerSeconds = 0.12f;
-    [SerializeField] private float _itemFadeInSeconds = 0.18f;
-
-    [Header("Dismiss")]
-    [SerializeField] private float _dismissFadeSeconds = 0.15f;
-
-    private readonly List<VNOptionItem> _pool = new List<VNOptionItem>();
-
-    private RollbackHistory _rollbackHistory;
-    private VNLinePresentationState _linePresentationState;
-
+    private readonly List<VNOptionItem> _pool = new ();
+    
     private string _currentNodeName = "";
 
     private YarnTaskCompletionSource<DialogueOption> _selectionSource;
     private CancellationToken _completionToken;
 
-    public void Initialize(
-        RollbackHistory rollbackHistory,
-        VNLinePresentationState linePresentationState)
+    public void Initialize(DialogueRunner dialogueRunner, RollbackHistory rollbackHistory, ChoiceHistory choiceHistory, VNLinePresentationState linePresentationState)
     {
         _rollbackHistory = rollbackHistory;
+        _choiceHistory = choiceHistory;
         _linePresentationState = linePresentationState;
+        
+        dialogueRunner.onNodeStart?.RemoveListener(OnNodeStart);
+        dialogueRunner.onNodeStart?.AddListener(OnNodeStart);
     }
 
+    private void OnNodeStart(string nodeName) => _currentNodeName = nodeName ?? string.Empty;
     public override void OnNodeEnter(string nodeName)
     {
         _currentNodeName = nodeName ?? "";
 
-        if (_rollbackHistory != null)
-            _rollbackHistory.NotifyNodeStarted(_currentNodeName);
+        _choiceHistory.NotifyNodeStarted(nodeName);
     }
 
     public override YarnTask OnDialogueStartedAsync()
@@ -70,41 +53,48 @@ public sealed class VNOptionsPresenter : DialoguePresenterBase
         return YarnTask.CompletedTask;
     }
 
-    public override YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token)
-    {
-        return YarnTask.CompletedTask;
-    }
+    public override YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token) 
+    { return YarnTask.CompletedTask; }
 
     public override async YarnTask<DialogueOption> RunOptionsAsync(
         DialogueOption[] dialogueOptions,
         LineCancellationToken cancellationToken)
     {
+        bool AnyOptionAvailable(DialogueOption[] options)
+        {
+            for (int i = 0; i < options.Length; i++)
+            {
+                if (options[i].IsAvailable)
+                    return true;
+            }
+            
+            return false;
+        }
+        
         if (!AnyOptionAvailable(dialogueOptions))
             return await DialogueRunner.NoOptionSelected;
 
-        if (_rollbackHistory == null)
-        {
-            Debug.LogError("[VNOptionsPresenter] RollbackHistory is not initialized.", this);
-            return await DialogueRunner.NoOptionSelected;
-        }
+        int choiceIndexInNode = _choiceHistory.ConsumeChoiceIndexInCurrentNode(_currentNodeName);
 
-        int choiceIndexInNode =
-            _rollbackHistory.ConsumeChoiceIndexInCurrentNode(_currentNodeName);
-
-        if (_linePresentationState != null && _linePresentationState.IsSeekingActive)
-        {
+        if (_linePresentationState.IsSeekingActive)
             return ResolveReplayOptionOrNoOption(dialogueOptions, choiceIndexInNode);
-        }
 
-        List<VNOptionViewModel> viewModels =
-            BuildViewModels(dialogueOptions, choiceIndexInNode);
+        List<VNOptionViewModel> viewModels = BuildViewModels(dialogueOptions, choiceIndexInNode);
 
         if (viewModels.Count == 0)
             return await DialogueRunner.NoOptionSelected;
 
-        RefreshAccumulatedStatus(viewModels);
+        
+        while (_pool.Count < viewModels.Count)
+        {
+            Transform parent = _optionContainer;
+            VNOptionItem item = Instantiate(_optionItemPrefab, parent);
 
-        EnsurePoolSize(viewModels.Count);
+            item.gameObject.SetActive(false);
+            item.ResetView();
+
+            _pool.Add(item);
+        }
 
         var internalCancel = CancellationTokenSource.CreateLinkedTokenSource(
             cancellationToken.NextContentToken);
@@ -117,21 +107,25 @@ public sealed class VNOptionsPresenter : DialoguePresenterBase
             MonitorExternalCancellation(cancellationToken, _selectionSource, internalCancel.Token).Forget();
 
             PrepareItems(viewModels);
+            
+            _canvasGroup.alpha = 1f;
+            _canvasGroup.interactable = false;
+            _canvasGroup.blocksRaycasts = false;
 
-            ShowPanelForReveal();
-            SetPanelInteractable(false);
+            for (int i = 0; i < viewModels.Count; i++)
+            {
+                _pool[i].SetRevealAlpha(1f);
+            }
 
-            await RevealItemsSequentiallyAsync(viewModels.Count, cancellationToken.HurryUpToken);
-
-            SetPanelInteractable(true);
+            _canvasGroup.interactable = true;
+            _canvasGroup.blocksRaycasts = true;
             SelectFirstAvailableItem(viewModels.Count);
 
             DialogueOption selected = await _selectionSource.Task;
 
             internalCancel.Cancel();
-
-            SetPanelInteractable(false);
-            await FadePanelAsync(1f, 0f, _dismissFadeSeconds, cancellationToken.HurryUpToken);
+            _canvasGroup.interactable = false;
+            _canvasGroup.blocksRaycasts = false;
 
             if (cancellationToken.IsNextContentRequested)
                 return await DialogueRunner.NoOptionSelected;
@@ -152,9 +146,7 @@ public sealed class VNOptionsPresenter : DialoguePresenterBase
         }
     }
 
-    private List<VNOptionViewModel> BuildViewModels(
-        DialogueOption[] dialogueOptions,
-        int choiceIndexInNode)
+    private List<VNOptionViewModel> BuildViewModels(DialogueOption[] dialogueOptions, int choiceIndexInNode)
     {
         var result = new List<VNOptionViewModel>();
 
@@ -162,7 +154,7 @@ public sealed class VNOptionsPresenter : DialoguePresenterBase
         {
             DialogueOption option = dialogueOptions[i];
 
-            if (!option.IsAvailable && !_showUnavailableOptions)
+            if (!option.IsAvailable)
                 continue;
 
             result.Add(VNOptionViewModelBuilder.Build(
@@ -174,49 +166,19 @@ public sealed class VNOptionsPresenter : DialoguePresenterBase
         return result;
     }
 
-    private DialogueOption ResolveReplayOptionOrNoOption(
-        DialogueOption[] dialogueOptions,
-        int choiceIndexInNode)
+    private DialogueOption ResolveReplayOptionOrNoOption(DialogueOption[] dialogueOptions, int choiceIndexInNode)
     {
-        if (_rollbackHistory == null)
-        {
-            Debug.LogError("[VNOptionsPresenter] Cannot replay option. RollbackHistory is null.", this);
+        if (!_choiceHistory.TryGetChoiceRecord(_currentNodeName, choiceIndexInNode, out VNChoiceRecord record))
             return null;
-        }
 
-        if (!_rollbackHistory.TryGetChoiceRecord(
-                _currentNodeName,
-                choiceIndexInNode,
-                out VNChoiceRecord record))
-        {
-            Debug.LogError(
-                $"[VNOptionsPresenter] Seek reached options, but no choice record was found. node='{_currentNodeName}', choiceIndex={choiceIndexInNode}",
-                this);
-
+        if (record.selectedOptionIndex < 0 || record.selectedOptionIndex >= dialogueOptions.Length)
             return null;
-        }
-
-        if (record.selectedOptionIndex < 0 ||
-            record.selectedOptionIndex >= dialogueOptions.Length)
-        {
-            Debug.LogError(
-                $"[VNOptionsPresenter] Stored choice index is out of range. node='{_currentNodeName}', choiceIndex={choiceIndexInNode}, selected={record.selectedOptionIndex}, optionCount={dialogueOptions.Length}",
-                this);
-
-            return null;
-        }
-
+        
         DialogueOption option = dialogueOptions[record.selectedOptionIndex];
 
         if (option == null || !option.IsAvailable)
-        {
-            Debug.LogError(
-                $"[VNOptionsPresenter] Stored choice is unavailable during seek. node='{_currentNodeName}', choiceIndex={choiceIndexInNode}, selected={record.selectedOptionIndex}",
-                this);
-
             return null;
-        }
-
+        
         return option;
     }
 
@@ -255,118 +217,16 @@ public sealed class VNOptionsPresenter : DialoguePresenterBase
 
         VNOptionViewModel viewModel = item.ViewModel;
 
-        if (_rollbackHistory != null)
-        {
-            _rollbackHistory.AddChoiceRecord(
-                _currentNodeName,
-                viewModel.ChoiceIndexInNode,
-                viewModel.SourceOptionIndex);
-        }
+        _choiceHistory.AddChoiceRecord(
+            _rollbackHistory.Points,
+            _currentNodeName,
+            viewModel.ChoiceIndexInNode,
+            viewModel.SourceOptionIndex);
+        
 
         _selectionSource.TrySetResult(viewModel.SourceOption);
     }
 
-    private async YarnTask RevealItemsSequentiallyAsync(int count, CancellationToken hurryUp)
-    {
-        for (int i = 0; i < count; i++)
-        {
-            if (hurryUp.IsCancellationRequested)
-            {
-                for (int j = i; j < count; j++)
-                    _pool[j].SetRevealAlpha(1f);
-
-                return;
-            }
-
-            await FadeItemAsync(_pool[i], 0f, 1f, _itemFadeInSeconds, hurryUp);
-
-            if (i < count - 1)
-                await WaitAsync(_revealStaggerSeconds, hurryUp);
-        }
-    }
-
-    private async YarnTask FadeItemAsync(
-        VNOptionItem item,
-        float from,
-        float to,
-        float duration,
-        CancellationToken cancel)
-    {
-        if (duration <= 0f)
-        {
-            item.SetRevealAlpha(to);
-            return;
-        }
-
-        float elapsed = 0f;
-        item.SetRevealAlpha(from);
-
-        while (elapsed < duration)
-        {
-            if (cancel.IsCancellationRequested)
-            {
-                item.SetRevealAlpha(to);
-                return;
-            }
-
-            elapsed += Time.deltaTime;
-            item.SetRevealAlpha(Mathf.Lerp(from, to, elapsed / duration));
-            await YarnTask.Yield();
-        }
-
-        item.SetRevealAlpha(to);
-    }
-
-    private async YarnTask FadePanelAsync(
-        float from,
-        float to,
-        float duration,
-        CancellationToken cancel)
-    {
-        if (_canvasGroup == null)
-            return;
-
-        if (duration <= 0f)
-        {
-            _canvasGroup.alpha = to;
-            return;
-        }
-
-        float elapsed = 0f;
-        _canvasGroup.alpha = from;
-
-        while (elapsed < duration)
-        {
-            if (cancel.IsCancellationRequested)
-            {
-                _canvasGroup.alpha = to;
-                return;
-            }
-
-            elapsed += Time.deltaTime;
-            _canvasGroup.alpha = Mathf.Lerp(from, to, elapsed / duration);
-            await YarnTask.Yield();
-        }
-
-        _canvasGroup.alpha = to;
-    }
-
-    private async YarnTask WaitAsync(float seconds, CancellationToken cancel)
-    {
-        if (seconds <= 0f)
-            return;
-
-        float elapsed = 0f;
-
-        while (elapsed < seconds)
-        {
-            if (cancel.IsCancellationRequested)
-                return;
-
-            elapsed += Time.deltaTime;
-            await YarnTask.Yield();
-        }
-    }
 
     private async YarnTask MonitorExternalCancellation(
         LineCancellationToken token,
@@ -379,25 +239,6 @@ public sealed class VNOptionsPresenter : DialoguePresenterBase
             source.TrySetResult(null);
     }
 
-    private void EnsurePoolSize(int required)
-    {
-        while (_pool.Count < required)
-        {
-            if (_optionItemPrefab == null)
-            {
-                Debug.LogError($"{nameof(VNOptionsPresenter)}: option item prefab is not assigned.", this);
-                return;
-            }
-
-            Transform parent = _optionContainer != null ? _optionContainer : transform;
-            VNOptionItem item = Instantiate(_optionItemPrefab, parent);
-
-            item.gameObject.SetActive(false);
-            item.ResetView();
-
-            _pool.Add(item);
-        }
-    }
 
     private void HideAllItems()
     {
@@ -410,22 +251,9 @@ public sealed class VNOptionsPresenter : DialoguePresenterBase
             item.gameObject.SetActive(false);
         }
     }
-
-    private void ShowPanelForReveal()
-    {
-        if (_canvasGroup == null)
-            return;
-
-        _canvasGroup.alpha = 1f;
-        _canvasGroup.interactable = false;
-        _canvasGroup.blocksRaycasts = false;
-    }
-
+    
     private void HidePanelImmediate()
     {
-        if (_canvasGroup == null)
-            return;
-
         _canvasGroup.alpha = 0f;
         _canvasGroup.interactable = false;
         _canvasGroup.blocksRaycasts = false;
@@ -433,14 +261,6 @@ public sealed class VNOptionsPresenter : DialoguePresenterBase
         SetAccumulatedStatusText(string.Empty);
     }
 
-    private void SetPanelInteractable(bool interactable)
-    {
-        if (_canvasGroup == null)
-            return;
-
-        _canvasGroup.interactable = interactable;
-        _canvasGroup.blocksRaycasts = interactable;
-    }
 
     private void SelectFirstAvailableItem(int activeCount)
     {
@@ -454,143 +274,5 @@ public sealed class VNOptionsPresenter : DialoguePresenterBase
                 return;
             }
         }
-    }
-
-    private static bool AnyOptionAvailable(DialogueOption[] options)
-    {
-        for (int i = 0; i < options.Length; i++)
-        {
-            if (options[i].IsAvailable)
-                return true;
-        }
-
-        return false;
-    }
-
-    private void RefreshAccumulatedStatus(List<VNOptionViewModel> viewModels)
-    {
-        if (_accumulatedStatusText == null)
-            return;
-
-        DialogueRunner runner = ResolveDialogueRunner(viewModels);
-
-        if (runner == null || runner.VariableStorage == null)
-        {
-            SetAccumulatedStatusText(string.Empty);
-            return;
-        }
-
-        List<string> statKeys = CollectStatKeys(viewModels);
-
-        if (statKeys.Count == 0)
-        {
-            SetAccumulatedStatusText(string.Empty);
-            return;
-        }
-
-        List<string> parts = new List<string>();
-
-        for (int i = 0; i < statKeys.Count; i++)
-        {
-            string statKey = statKeys[i];
-            float value = ReadYarnNumber(runner, statKey);
-
-            string displayName = VNOptionEffectDisplayNameResolver.Resolve(statKey);
-            parts.Add(string.Format("{0} {1}", displayName, FormatNumber(value)));
-        }
-
-        SetAccumulatedStatusText("현재 누적  " + string.Join(" / ", parts));
-    }
-
-    private DialogueRunner ResolveDialogueRunner(List<VNOptionViewModel> viewModels)
-    {
-        if (_dialogueRunner != null)
-            return _dialogueRunner;
-
-        if (viewModels != null)
-        {
-            for (int i = 0; i < viewModels.Count; i++)
-            {
-                VNOptionViewModel viewModel = viewModels[i];
-
-                if (viewModel == null)
-                    continue;
-
-                if (viewModel.SourceOption == null)
-                    continue;
-
-                if (viewModel.SourceOption.Line == null)
-                    continue;
-
-                DialogueRunner runner = viewModel.SourceOption.Line.Source as DialogueRunner;
-
-                if (runner != null)
-                    return runner;
-            }
-        }
-
-        return null;
-    }
-
-    private static List<string> CollectStatKeys(List<VNOptionViewModel> viewModels)
-    {
-        var result = new List<string>();
-
-        if (viewModels == null)
-            return result;
-
-        for (int i = 0; i < viewModels.Count; i++)
-        {
-            VNOptionViewModel viewModel = viewModels[i];
-
-            if (viewModel == null || viewModel.Effects == null)
-                continue;
-
-            for (int j = 0; j < viewModel.Effects.Count; j++)
-            {
-                string statKey = viewModel.Effects[j].StatKey;
-
-                if (string.IsNullOrEmpty(statKey))
-                    continue;
-
-                if (!result.Contains(statKey))
-                    result.Add(statKey);
-            }
-        }
-
-        return result;
-    }
-
-    private static float ReadYarnNumber(DialogueRunner runner, string statKey)
-    {
-        if (runner == null || runner.VariableStorage == null)
-            return 0f;
-
-        string variableName = statKey.StartsWith("$") ? statKey : "$" + statKey;
-
-        float floatValue;
-        if (runner.VariableStorage.TryGetValue<float>(variableName, out floatValue))
-            return floatValue;
-
-        return 0f;
-    }
-
-    private static string FormatNumber(float value)
-    {
-        if (Mathf.Approximately(value, Mathf.Round(value)))
-            return Mathf.RoundToInt(value).ToString();
-
-        return value.ToString("0.##");
-    }
-
-    private void SetAccumulatedStatusText(string text)
-    {
-        if (_accumulatedStatusText == null)
-            return;
-
-        _accumulatedStatusText.text = text ?? string.Empty;
-
-        if (_hideAccumulatedStatusWhenEmpty)
-            _accumulatedStatusText.gameObject.SetActive(!string.IsNullOrEmpty(_accumulatedStatusText.text));
     }
 }

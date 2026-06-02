@@ -17,6 +17,7 @@ public class VnAppBootstrap : MonoBehaviour
     private readonly VnScreenBindings _screenBindings = new();
     private readonly EpisodeSelectionStateData _episodeSelectionStateData = new ();
     private readonly RollbackHistory _rollbackHistory = new ();
+    private readonly ChoiceHistory _choiceHistory = new ();
     private readonly VNLinePresentationState _linePresentationAdvanceState = new();
     
     private readonly BacklogRecorder _backlogRecorder = new ();
@@ -113,7 +114,7 @@ public class VnAppBootstrap : MonoBehaviour
     
     private void Awake()
     {
-        _vnRuntimeStateProvider = new (_rollbackHistory, vnPlaytimeTracker);
+        _vnRuntimeStateProvider = new (_rollbackHistory, _choiceHistory, vnPlaytimeTracker);
         _rollbackController = new RollbackController(_rollbackHistory, _linePresentationAdvanceState);
         rollbackHistoryDebugView.Bind(_rollbackHistory);
 
@@ -319,8 +320,12 @@ public class VnAppBootstrap : MonoBehaviour
             _presentationSessionContext);
         
         vnOptionsPresenter.Initialize(
+            dialogueRunner,
             _rollbackHistory, 
+            _choiceHistory,
             _linePresentationAdvanceState);
+        
+        vnOptionsPresenter.AttachDialogueRunner(dialogueRunner);
         
     }
     
@@ -358,6 +363,7 @@ public class VnAppBootstrap : MonoBehaviour
             _linePresentationAdvanceState,
             vnPlaytimeTracker,
             _rollbackHistory,
+            _choiceHistory,
             vnTrace);
 
         // 아직 게임 플래그 저장/복원이 없기에 임시로 Empty 사용.

@@ -28,6 +28,18 @@ public sealed class EpisodeGraphRenderer
         return _rootProvider;
     }
     
+    #region Handlers
+    public void SetHandlers(Action<string> onMainClicked)
+    {
+        _onMainClicked = onMainClicked;
+    }
+
+    private void HandleMainClicked(string episodeId)
+    {
+        _onMainClicked?.Invoke(episodeId);
+    }
+    #endregion
+    
     private readonly RectTransform _nodeRigPrefab;
 
     private readonly EpisodeNodeBuilder _builder = new();
@@ -210,18 +222,6 @@ public sealed class EpisodeGraphRenderer
         for (int i = 0; i < removeKeys.Count; i++)
             _activeById.Remove(removeKeys[i]);
     }
-    
-    #region Handlers
-    public void SetHandlers(Action<string> onMainClicked)
-    {
-        _onMainClicked = onMainClicked;
-    }
-
-    private void HandleMainClicked(string episodeId)
-    {
-        _onMainClicked?.Invoke(episodeId);
-    }
-    #endregion
 
     #region Helpers
     private static string BuildNodePrefix(string episodeId)

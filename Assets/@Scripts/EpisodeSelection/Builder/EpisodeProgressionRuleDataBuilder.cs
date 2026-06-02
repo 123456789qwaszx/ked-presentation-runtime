@@ -2,24 +2,13 @@ using System.Collections.Generic;
 
 public sealed class EpisodeProgressionRuleDataBuilder
 {
-    public Dictionary<string, EpisodeProgressionRuleData> Build(
-        ChapterEpisodeProgressionCatalogSO catalog)
+    public Dictionary<string, EpisodeProgressionRuleData> Build(ChapterEpisodeProgressionCatalogSO catalog)
     {
-        Dictionary<string, EpisodeProgressionRuleData> result =
-            new Dictionary<string, EpisodeProgressionRuleData>();
+        Dictionary<string, EpisodeProgressionRuleData> result = new ();
 
         if (catalog == null)
             return result;
 
-        AddChapterRuleData(catalog, result);
-
-        return result;
-    }
-
-    private void AddChapterRuleData(
-        ChapterEpisodeProgressionCatalogSO catalog,
-        Dictionary<string, EpisodeProgressionRuleData> result)
-    {
         foreach (KeyValuePair<string, ChapterEpisodeProgressionSO> pair in catalog.EnumerateProgressions())
         {
             string chapterId = pair.Key;
@@ -30,15 +19,13 @@ public sealed class EpisodeProgressionRuleDataBuilder
 
             result[chapterId] = BuildChapterRuleData(progression);
         }
+
+        return result;
     }
 
-    private EpisodeProgressionRuleData BuildChapterRuleData(
-        ChapterEpisodeProgressionSO progression)
+    private EpisodeProgressionRuleData BuildChapterRuleData(ChapterEpisodeProgressionSO progression)
     {
         EpisodeProgressionRuleData data = new EpisodeProgressionRuleData();
-
-        if (progression == null)
-            return data;
 
         AddNodeRules(progression, data);
         AddEndingRules(progression, data);
@@ -46,9 +33,7 @@ public sealed class EpisodeProgressionRuleDataBuilder
         return data;
     }
 
-    private void AddNodeRules(
-        ChapterEpisodeProgressionSO progression,
-        EpisodeProgressionRuleData data)
+    private void AddNodeRules(ChapterEpisodeProgressionSO progression, EpisodeProgressionRuleData data)
     {
         if (progression.Nodes == null)
             return;
@@ -80,9 +65,7 @@ public sealed class EpisodeProgressionRuleDataBuilder
         }
     }
 
-    private void AddNextOptions(
-        EpisodeNodeDefinition node,
-        EpisodeNodeRuleData rule)
+    private void AddNextOptions(EpisodeNodeDefinition node, EpisodeNodeRuleData rule)
     {
         if (node.NextOptions == null)
             return;
@@ -105,9 +88,7 @@ public sealed class EpisodeProgressionRuleDataBuilder
         }
     }
 
-    private void AddAttachments(
-        EpisodeNodeDefinition node,
-        EpisodeNodeRuleData rule)
+    private void AddAttachments(EpisodeNodeDefinition node, EpisodeNodeRuleData rule)
     {
         if (node.Attachments == null)
             return;
@@ -137,9 +118,7 @@ public sealed class EpisodeProgressionRuleDataBuilder
         }
     }
 
-    private void AddEndingRules(
-        ChapterEpisodeProgressionSO progression,
-        EpisodeProgressionRuleData data)
+    private void AddEndingRules(ChapterEpisodeProgressionSO progression, EpisodeProgressionRuleData data)
     {
         if (progression.EndingRules == null)
             return;
@@ -165,8 +144,7 @@ public sealed class EpisodeProgressionRuleDataBuilder
         }
     }
 
-    private static List<EpisodeCondition> CopyConditions(
-        List<EpisodeCondition> source)
+    private static List<EpisodeCondition> CopyConditions(List<EpisodeCondition> source)
     {
         List<EpisodeCondition> result = new List<EpisodeCondition>();
 

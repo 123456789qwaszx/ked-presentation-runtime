@@ -2,24 +2,13 @@ using System.Collections.Generic;
 
 public sealed class EpisodeProgressionGraphDataBuilder
 {
-    public Dictionary<string, EpisodeGraphData> Build(
-        ChapterEpisodeProgressionCatalogSO catalog)
+    public Dictionary<string, EpisodeGraphData> Build(ChapterEpisodeProgressionCatalogSO catalog)
     {
-        Dictionary<string, EpisodeGraphData> result =
-            new Dictionary<string, EpisodeGraphData>();
+        Dictionary<string, EpisodeGraphData> result = new ();
 
         if (catalog == null)
             return result;
 
-        AddChapterGraphData(catalog, result);
-
-        return result;
-    }
-
-    private void AddChapterGraphData(
-        ChapterEpisodeProgressionCatalogSO catalog,
-        Dictionary<string, EpisodeGraphData> result)
-    {
         foreach (KeyValuePair<string, ChapterEpisodeProgressionSO> pair in catalog.EnumerateProgressions())
         {
             string chapterId = pair.Key;
@@ -30,15 +19,13 @@ public sealed class EpisodeProgressionGraphDataBuilder
 
             result[chapterId] = BuildChapterGraphData(progression);
         }
+
+        return result;
     }
 
-    private EpisodeGraphData BuildChapterGraphData(
-        ChapterEpisodeProgressionSO progression)
+    private EpisodeGraphData BuildChapterGraphData(ChapterEpisodeProgressionSO progression)
     {
         EpisodeGraphData graphData = new EpisodeGraphData();
-
-        if (progression == null)
-            return graphData;
 
         AddMainNodes(progression, graphData);
         AddMainEdges(progression, graphData);
@@ -47,9 +34,7 @@ public sealed class EpisodeProgressionGraphDataBuilder
         return graphData;
     }
 
-    private void AddMainNodes(
-        ChapterEpisodeProgressionSO progression,
-        EpisodeGraphData graphData)
+    private void AddMainNodes(ChapterEpisodeProgressionSO progression, EpisodeGraphData graphData)
     {
         if (progression.Nodes == null)
             return;
@@ -75,9 +60,7 @@ public sealed class EpisodeProgressionGraphDataBuilder
         }
     }
 
-    private void AddMainEdges(
-        ChapterEpisodeProgressionSO progression,
-        EpisodeGraphData graphData)
+    private void AddMainEdges(ChapterEpisodeProgressionSO progression, EpisodeGraphData graphData)
     {
         if (progression.Nodes == null)
             return;
@@ -111,9 +94,7 @@ public sealed class EpisodeProgressionGraphDataBuilder
         }
     }
 
-    private void AddAttachmentNodes(
-        ChapterEpisodeProgressionSO progression,
-        EpisodeGraphData graphData)
+    private void AddAttachmentNodes(ChapterEpisodeProgressionSO progression, EpisodeGraphData graphData)
     {
         if (progression.Nodes == null)
             return;

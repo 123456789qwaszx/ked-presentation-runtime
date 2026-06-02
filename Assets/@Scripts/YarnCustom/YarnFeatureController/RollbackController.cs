@@ -1,11 +1,11 @@
 public sealed class RollbackController
 {
-    private readonly RollbackHistory _history;
+    private readonly RollbackHistory _rollbackHistory;
     private readonly VNLinePresentationState _lineAdvanceState;
 
-    public RollbackController(RollbackHistory history, VNLinePresentationState lineAdvanceState)
+    public RollbackController(RollbackHistory rollbackHistory, VNLinePresentationState lineAdvanceState)
     {
-        _history = history;
+        _rollbackHistory = rollbackHistory;
         _lineAdvanceState = lineAdvanceState;
     }
 
@@ -14,20 +14,10 @@ public sealed class RollbackController
         if (_lineAdvanceState.IsSeekingActive)
             return false;
         
-        if (!_history.TryPrepareRollbackOneStep(out RollbackPoint target))
+        if (!_rollbackHistory.GetRollbackPoint(out RollbackPoint target))
             return false;
-
-        _lineAdvanceState.BeginRollbackSeek(target.nodeName, target.lineId);
-        return true;
-    }
-
-    public bool RequestRollbackToHistoryIndex(int historyIndex)
-    {
-        if (_lineAdvanceState.IsSeekingActive)
-            return false;
-
-        if (!_history.TryPrepareRollbackToHistoryIndex(historyIndex, out RollbackPoint target))
-            return false;
+        
+        _rollbackHistory.ClearRollbackPoints();
 
         _lineAdvanceState.BeginRollbackSeek(target.nodeName, target.lineId);
         return true;
@@ -35,6 +25,6 @@ public sealed class RollbackController
 
     public void AddRollbackPoint(YarnLineMeta meta)
     {
-        _history.AddRollbackPoint(meta);
+        _rollbackHistory.AddRollbackPoint(meta);
     }
 }

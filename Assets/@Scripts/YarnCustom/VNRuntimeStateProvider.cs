@@ -2,17 +2,20 @@ using System.Collections.Generic;
 
 public sealed class VNRuntimeStateProvider : IVNRuntimeStateProvider
 {
-    private readonly RollbackHistory _history;
+    private readonly RollbackHistory _rollbackHistory;
+    private readonly ChoiceHistory _choiceHistory;
     private readonly VNPlaytimeTracker _playtimeTracker;
 
     private YarnLineMeta _currentLineMeta;
     private bool _hasCurrentLineMeta;
 
     public VNRuntimeStateProvider(
-        RollbackHistory history,
+        RollbackHistory rollbackHistory,
+        ChoiceHistory choiceHistory,
         VNPlaytimeTracker playtimeTracker)
     {
-        _history = history;
+        _rollbackHistory = rollbackHistory;
+        _choiceHistory = choiceHistory;
         _playtimeTracker = playtimeTracker;
     }
 
@@ -106,20 +109,18 @@ public sealed class VNRuntimeStateProvider : IVNRuntimeStateProvider
         _hasCurrentLineMeta = true;
     }
 
-    public List<VNChoiceRecord> CreateChoiceSnapshot()
-    {
-        if (_history == null)
-            return new List<VNChoiceRecord>();
-
-        return _history.CreateChoiceSnapshot();
-    }
+    public List<VNChoiceRecord> CreateChoiceSnapshot() => _choiceHistory.CreateChoiceSnapshot();
+    
 
     private bool TryGetCurrentSavePoint(out RollbackPoint point)
     {
-        if (_history != null && _history.TryGetLatestPoint(out point))
-            return true;
-
-        point = default;
-        return false;
+        if (_rollbackHistory.Points.Count == 0)
+        {
+            point = default;
+            return false;
+        }
+        
+        point =  _rollbackHistory.Points[^1];
+        return true;
     }
 }
