@@ -10,21 +10,18 @@ public sealed class VNOptionsPresentationFlow
 {
     private readonly VNOptionsBoxPresentationController _boxPresentation;
     private readonly VNLinePresentationState _advanceState;
-    private readonly ChoiceHistory _choiceHistory;
-    private readonly RollbackController _rollbackHistory;
+    private readonly VNChoiceBoundary _choiceBoundary;
 
     public VNOptionsPresentationPhase CurrentPhase { get; private set; } = VNOptionsPresentationPhase.None;
 
     public VNOptionsPresentationFlow(
         VNOptionsBoxPresentationController boxPresentation,
         VNLinePresentationState advanceState,
-        ChoiceHistory choiceHistory,
-        RollbackController rollbackHistory)
+        VNChoiceBoundary choiceBoundary)
     {
         _boxPresentation = boxPresentation;
         _advanceState = advanceState;
-        _choiceHistory = choiceHistory;
-        _rollbackHistory = rollbackHistory;
+        _choiceBoundary = choiceBoundary;
     }
 
     public async YarnTask<DialogueOption> RunAsync(
@@ -37,12 +34,20 @@ public sealed class VNOptionsPresentationFlow
         // Phase: OptionsReceived -> OptionSetCommitted
         SetPhase(ctx, VNOptionsPresentationPhase.OptionsReceived);
 
-        ctx.ChoiceIndexInNode = _choiceHistory.NextChoiceIndex;
-        _choiceHistory.NextChoiceIndex++;
+        ctx.ChoiceIndexInNode = _choiceBoundary.ReserveChoiceIndex();
         SetPhase(ctx, VNOptionsPresentationPhase.OptionSetCommitted);
 
         // Phase: SelectionPolicyResolved
-        ctx.SelectionDecision = ResolveSelectionDecision(ctx);
+        VNOptionSelectionDecision enteredDecision;
+
+        if (ctx.HasAnyAvailableOption) {
+            enteredDecision = _advanceState.IsSeekingActive
+                ? VNOptionSelectionDecision.ReplayDuringSeek()
+                : VNOptionSelectionDecision.PresentInteractive();
+        }
+        else enteredDecision = VNOptionSelectionDecision.NoOptionAvailable();
+
+        ctx.SelectionDecision = enteredDecision;
         SetPhase(ctx, VNOptionsPresentationPhase.SelectionPolicyResolved);
 
         if (ctx.ShouldReturnNoOption) {
@@ -51,7 +56,16 @@ public sealed class VNOptionsPresentationFlow
         }
 
         if (ctx.ShouldReplayRecordedSelection) {
-            ctx.SelectedOption = ResolveReplayOption(ctx);
+            ctx.IsReplay = _choiceBoundary.TryResolveReplayOption(
+                ctx.ChoiceIndexInNode,
+                ctx.SourceOptions,
+                out DialogueOption replayOption);
+
+            ctx.ReplayOption = replayOption;
+            ctx.SelectedOption = ctx.IsReplay 
+                ? ctx.ReplayOption 
+                : null;
+
             SetPhase(ctx, VNOptionsPresentationPhase.ReplayResolved);
             SetPhase(ctx, VNOptionsPresentationPhase.Completed);
             return ctx.SelectedOption;
@@ -112,28 +126,6 @@ public sealed class VNOptionsPresentationFlow
         }
     }
 
-    private VNOptionSelectionDecision ResolveSelectionDecision(VNOptionsPresentationContext ctx)
-    {
-        if (!HasAnyAvailableOption(ctx.SourceOptions))
-            return VNOptionSelectionDecision.NoOptionAvailable();
-
-        if (_advanceState.IsSeekingActive)
-            return VNOptionSelectionDecision.ReplayDuringSeek();
-
-        return VNOptionSelectionDecision.PresentInteractive();
-    }
-
-    private static bool HasAnyAvailableOption(DialogueOption[] options)
-    {
-        for (int i = 0; i < options.Length; i++)
-        {
-            if (options[i].IsAvailable)
-                return true;
-        }
-
-        return false;
-    }
-
     private List<VNOptionViewModel> BuildViewModels(VNOptionsPresentationContext ctx)
     {
         var result = new List<VNOptionViewModel>();
@@ -154,28 +146,9 @@ public sealed class VNOptionsPresentationFlow
         return result;
     }
 
-    // Resolves the option to take during a seek from recorded choice history.
-    // Returns null when no usable record exists, which the caller surfaces as NoOptionSelected.
-    private DialogueOption ResolveReplayOption(VNOptionsPresentationContext ctx)
-    {
-        if (!_choiceHistory.TryGetChoiceRecord(ctx.ChoiceIndexInNode, out VNChoiceRecord record))
-            return null;
-
-        if (record.selectedOptionIndex < 0 || record.selectedOptionIndex >= ctx.SourceOptions.Length)
-            return null;
-
-        DialogueOption option = ctx.SourceOptions[record.selectedOptionIndex];
-
-        if (option == null || !option.IsAvailable)
-            return null;
-
-        return option;
-    }
-
     private void CommitSelection(VNOptionsPresentationContext ctx, VNOptionViewModel selected)
     {
-        _choiceHistory.AddChoiceRecord(
-            _rollbackHistory.Points,
+        _choiceBoundary.CommitSelection(
             ctx.NodeName,
             selected.ChoiceIndexInNode,
             selected.SourceOptionIndex,

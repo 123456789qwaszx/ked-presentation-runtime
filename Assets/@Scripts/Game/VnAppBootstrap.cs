@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 using Yarn.Unity;
 
 public class VnAppBootstrap : MonoBehaviour
@@ -104,6 +105,8 @@ public class VnAppBootstrap : MonoBehaviour
     private VNSaveLoadSystem _vnSaveLoadSystem;
     
     private VNYarnLineBoundary _vnYarnLineBoundary;
+    
+    [SerializeField] private VNOptionsBoxPresentationController boxPresentation;
     
     [Header("Episode Selection")]
     private EpisodeSelectionSystem _episodeSelectionSystem;
@@ -289,7 +292,6 @@ public class VnAppBootstrap : MonoBehaviour
 
         dialogueAdvanceDispatcher.Initialize(advanceGate, dialogueRunner, inlineEventMarkupHandler, _linePresentationAdvanceState);
         vnAdvanceInputPoller.Initialize(dialogueAdvanceDispatcher);
-        
     }
     
     private void BootstrapLinePresentationRuntime()
@@ -318,14 +320,11 @@ public class VnAppBootstrap : MonoBehaviour
             _linePresentationAdvanceState,
             _presentationSessionContext);
         
-        vnOptionsPresenter.Initialize(
-            dialogueRunner,
-            _rollbackHistory, 
-            _choiceHistory,
-            _linePresentationAdvanceState);
+        VNChoiceBoundary vnChoiceBoundary = new(_choiceHistory, _rollbackHistory);
+        VNOptionsPresentationFlow flow = new VNOptionsPresentationFlow(this.boxPresentation, _linePresentationAdvanceState, vnChoiceBoundary);
+        vnOptionsPresenter.Initialize(dialogueRunner, flow);
         
         vnOptionsPresenter.AttachDialogueRunner(dialogueRunner);
-        
     }
     
     private void BootstrapPlaybackControls()

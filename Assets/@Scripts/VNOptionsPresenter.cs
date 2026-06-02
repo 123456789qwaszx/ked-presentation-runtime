@@ -12,7 +12,7 @@ public sealed partial class VNOptionsPresenter : DialoguePresenterBase
     [SerializeField] private VNOptionItem optionItemPrefab;
     [SerializeField] private VNOptionsBoxPresentationController boxPresentation;
     [SerializeField] private CanvasGroup canvasGroup;
-    
+
     private VNOptionsPresentationFlow _flow;
 
     private readonly List<VNOptionItem> _pool = new ();
@@ -22,14 +22,9 @@ public sealed partial class VNOptionsPresenter : DialoguePresenterBase
     private YarnTaskCompletionSource<VNOptionViewModel> _selectionSource;
     private CancellationToken _completionToken;
 
-    public void Initialize(DialogueRunner dialogueRunner, RollbackController rollbackHistory, ChoiceHistory choiceHistory, VNLinePresentationState linePresentationState)
+    public void Initialize(DialogueRunner dialogueRunner, VNOptionsPresentationFlow flow)
     {
-        _flow = new VNOptionsPresentationFlow(
-            boxPresentation,
-            linePresentationState,
-            choiceHistory,
-            rollbackHistory);
-
+        _flow = flow;
         dialogueRunner.onNodeStart?.AddListener((nodeName) => _currentNodeName = nodeName);
     }
 

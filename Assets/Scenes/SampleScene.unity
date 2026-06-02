@@ -5429,6 +5429,7 @@ MonoBehaviour:
   chapterCardPrefab: {fileID: 2410623267660482620, guid: 60640956e3866b44e9e8c9df1a45dbd3, type: 3}
   nodeRigPrefab: {fileID: 8432584506347833489, guid: 5a92676ae0261c54188d2a64469a3787, type: 3}
   chapterCardFactory: {fileID: 767435430}
+  boxPresentation: {fileID: 1180889818}
   chapterEpisodeProgressionCatalog: {fileID: 11400000, guid: 466709b071b363747b43332bcdfdeb44, type: 2}
   episodeProgressionSo: {fileID: 11400000, guid: 6b6dcda1ce02f5141a876245e3c88c7e, type: 2}
   rollbackHistoryDebugView: {fileID: 969122867}
@@ -10050,8 +10051,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7df2aecd80b118b4888e7724758e1b56, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VNOptionsBoxPresentationController
-  _canvasGroup: {fileID: 1289697506}
-  _itemContainer: {fileID: 1289697505}
+  _canvasGroup: {fileID: 1586966949}
+  _itemContainer: {fileID: 1586966950}
 --- !u!4 &1180889819
 Transform:
   m_ObjectHideFlags: 0

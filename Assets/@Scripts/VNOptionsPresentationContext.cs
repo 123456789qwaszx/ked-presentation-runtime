@@ -13,6 +13,27 @@ public sealed class VNOptionsPresentationContext
     public VNOptionSelectionDecision SelectionDecision { get; set; }
     public List<VNOptionViewModel> ViewModels { get; set; }
 
+    public bool HasAnyAvailableOption
+    {
+        get
+        {
+            if (SourceOptions == null)
+                return false;
+
+            for (int i = 0; i < SourceOptions.Length; i++)
+            {
+                if (SourceOptions[i].IsAvailable)
+                    return true;
+            }
+
+            return false;
+        }
+    }
+
+    // Replay
+    public DialogueOption ReplayOption { get; set; }
+    public bool IsReplay { get; set; }
+
     // Box Presentation
     public VNOptionsBoxPresentationResult BoxResult { get; set; }
 
