@@ -10003,7 +10003,7 @@ MonoBehaviour:
   _accumulatedStatusText: {fileID: 1753826490}
   _hideAccumulatedStatusWhenEmpty: 1
   optionItemPrefab: {fileID: 1289697509}
-  optionContainer: {fileID: 1586966950}
+  boxPresentation: {fileID: 1180889818}
   canvasGroup: {fileID: 1586966949}
 --- !u!4 &1180068360
 Transform:
@@ -10019,6 +10019,52 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 791711321}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1180889817
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1180889819}
+  - component: {fileID: 1180889818}
+  m_Layer: 0
+  m_Name: VNOptionsBoxPresentationController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1180889818
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1180889817}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7df2aecd80b118b4888e7724758e1b56, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::VNOptionsBoxPresentationController
+  _canvasGroup: {fileID: 1289697506}
+  _itemContainer: {fileID: 1289697505}
+--- !u!4 &1180889819
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1180889817}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 949.62524, y: 576.40717, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1196936079
@@ -40391,3 +40437,4 @@ SceneRoots:
   - {fileID: 99511076}
   - {fileID: 1580823190}
   - {fileID: 1180068360}
+  - {fileID: 1180889819}

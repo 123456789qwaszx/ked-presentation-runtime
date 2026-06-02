@@ -9,16 +9,23 @@ public struct VNChoiceRecord
     public int choiceIndexInNode;
     public int selectedOptionIndex;
 
+    // Line ID of the selected option. Recorded alongside the index so a selection can still be
+    // identified if option ordering changes between authoring sessions. Index remains the primary
+    // replay key today; lineId is the more durable fallback to migrate toward.
+    public string selectedOptionLineId;
+
     public VNChoiceRecord(
         int anchorHistoryIndex,
         string nodeName,
         int choiceIndexInNode,
-        int selectedOptionIndex)
+        int selectedOptionIndex,
+        string selectedOptionLineId)
     {
         this.anchorHistoryIndex = anchorHistoryIndex;
         this.nodeName = nodeName ?? "";
         this.choiceIndexInNode = choiceIndexInNode;
         this.selectedOptionIndex = selectedOptionIndex;
+        this.selectedOptionLineId = selectedOptionLineId ?? "";
     }
 }
 
@@ -27,9 +34,9 @@ public class ChoiceHistory
     public int NextChoiceIndex { get; set; }
 
     private readonly List<VNChoiceRecord> _choices = new();
-    
+
     public List<VNChoiceRecord> CreateChoiceSnapshot() => new (_choices);
-    
+
     public void ResetIndex() => NextChoiceIndex = 0;
 
     public void RemoveChoiceAnchorAfterRollbackPoint(RollbackPoint target)
@@ -40,12 +47,12 @@ public class ChoiceHistory
                 _choices.RemoveAt(i);
         }
     }
-    
-    public void AddChoiceRecord(IReadOnlyList<RollbackPoint> rollbackPoints, string nodeName, int choiceIndexInNode, int selectedOptionIndex)
+
+    public void AddChoiceRecord(IReadOnlyList<RollbackPoint> rollbackPoints, string nodeName, int choiceIndexInNode, int selectedOptionIndex, string selectedOptionLineId)
     {
         if (rollbackPoints.Count <= 0)
             return;
-        
+
         int anchorHistoryIndex = rollbackPoints[^1].historyIndex;
 
         for (int i = _choices.Count - 1; i >= 0; i--)
@@ -65,7 +72,8 @@ public class ChoiceHistory
             anchorHistoryIndex,
             nodeName,
             choiceIndexInNode,
-            selectedOptionIndex));
+            selectedOptionIndex,
+            selectedOptionLineId));
     }
 
     public bool TryGetChoiceRecord(int choiceIndexInNode, out VNChoiceRecord record)
@@ -85,8 +93,7 @@ public class ChoiceHistory
 
         return false;
     }
-    
-    
+
     public void RestoreChoiceSnapshot(IReadOnlyList<VNChoiceRecord> choices)
     {
         _choices.Clear();
@@ -97,8 +104,7 @@ public class ChoiceHistory
             _choices.Add(choices[i]);
         }
     }
-    
-    
+
     public void Clear()
     {
         _choices.Clear();
