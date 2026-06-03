@@ -48,6 +48,7 @@ public sealed class VNLinePresentationFlow
         _advanceState.MarkLineEntered();
         ctx.Meta = _vnYarnLineBoundary.BuildLineMeta(ctx.Line, ctx.NodeName);
         _vnYarnLineBoundary.CommitLineEntered(ctx.Meta);
+        
         _playbackDriver.PlayCollected();
         SetPhase(ctx, VNLinePresentationPhase.LineEnteredCommitted);
 

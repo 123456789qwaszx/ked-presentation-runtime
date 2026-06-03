@@ -37,17 +37,17 @@ public sealed partial class YarnCommandBridge
         BindRunnerCommands(subPresentationRunner);
 
         // Main Runner only commands.
-        _dialogueRunner.AddCommandHandler<string>("sub_start", StartSubPresentationNode);
+        _dialogueRunner.AddCommandHandler<string>("sub_table", StartSubPresentationNode);
         _dialogueRunner.AddCommandHandler<string>("a", EnqueueSubPresentationAdvanceSpec);
         
         // Starts capturing commands into a virtual command block.
         // Commands after <<capture_block>> are collected as one block-level execution unit.
         // Yarn timing is held until <<play_block>> plays the block.
-        _dialogueRunner.AddCommandHandler("capture_block", BeginBlockCapture);
+        _dialogueRunner.AddCommandHandler("block_hold", BeginBlockCapture);
         
         // Plays the currently collected command block at this point in Yarn flow.
         // Yarn waits until playback finishes
-        _dialogueRunner.AddCommandHandler<float>("play_block", PlayCapturedBlock);
+        _dialogueRunner.AddCommandHandler<float>("block_end", PlayCapturedBlock);
     }
 
     private IEnumerator StartSubPresentationNode(string nodeName)
@@ -55,7 +55,7 @@ public sealed partial class YarnCommandBridge
         if (_presentationInit)
             yield return _sideRunnerSyncHub.StartPresentationLaneCoroutine(nodeName);
 
-        EnqueueSubPresentationAdvanceSpec();
+        //EnqueueSubPresentationAdvanceSpec();
     }
     
     private void EnqueueSubPresentationAdvanceSpec(string _ = "doNothing") => Collect(new SubPresentationAdvanceCommandSpec());
@@ -121,8 +121,8 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler<string, float>("fade_in", EnqueueFadeInSpec);
         runner.AddCommandHandler<string, float>("fade_out", EnqueueFadeOutSpec);
         
-        runner.AddCommandHandler<string, string>("expression", EnqueueSetEmotionPortraitWipeSpec);
-        runner.AddCommandHandler<string, string>("expression_crossfade", EnqueueSetPortraitCrossfadeSpec);
+        runner.AddCommandHandler<string, string>("face", EnqueueSetEmotionPortraitWipeSpec);
+        runner.AddCommandHandler<string, string>("face_crossfade", EnqueueSetPortraitCrossfadeSpec);
         
         runner.AddCommandHandler<string, string>("slide_in", EnqueueSlideInSpec);
         runner.AddCommandHandler<string, string>("slide_out", EnqueueSlideOutSpec);
@@ -168,16 +168,16 @@ public sealed partial class YarnCommandBridge
     
     private void BindCharRigEmote(DialogueRunner runner)
     {
-        runner.AddCommandHandler<string, string>("emote", EnqueueSetCharacterEmojiSpec);
-        runner.AddCommandHandler<string, string, string>("emote_slot", EnqueueSetCharacterEmojiSlotSpec);
+        runner.AddCommandHandler<string, string>("emoji", EnqueueSetCharacterEmojiSpec);
+        runner.AddCommandHandler<string, string, string>("emoji_slot", EnqueueSetCharacterEmojiSlotSpec);
         
-        runner.AddCommandHandler<string>("emote_hide", EnqueueHideCharacterEmojiSpec);
-        runner.AddCommandHandler<string, string>("emote_hide_slot", EnqueueHideCharacterEmojiSlotSpec);
+        runner.AddCommandHandler<string>("emoji_hide", EnqueueHideCharacterEmojiSpec);
+        runner.AddCommandHandler<string, string>("emoji_hide_slot", EnqueueHideCharacterEmojiSlotSpec);
     }
     
     private void BindBackgroundRig(DialogueRunner runner)
     {
-        runner.AddCommandHandler<string, string, string, string, string, float, float, float>("spawn_bg", EnqueueSpawnBackgroundRigSpec);
+        runner.AddCommandHandler<string, string, string, string, string, float, float, float>("bg_spawn", EnqueueSpawnBackgroundRigSpec);
         
         runner.AddCommandHandler<string, float, float, float>("bg_place", EnqueueSetBackgroundAnchorSpec);
         runner.AddCommandHandler<string, string, string>("bg_sprite", EnqueueSetBackgroundSpriteSpec);

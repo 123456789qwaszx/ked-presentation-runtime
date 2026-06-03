@@ -2,53 +2,55 @@
 ---
 
 set 
-<<shot_reset>>
+// <<shot_reset>>
 
-<<slot Leafia 0>>
-<<cast Leafia Matilda a 02 true left normal>>
-<<shot_bind_char_response Leafia 0>>
+// <<slot Leafia 0>>
+// <<cast Leafia Matilda a 02 true left normal>>
+// <<shot_bind_char_response Leafia 0>>
 
-<<slot Albedo 0>>
-<<cast Albedo Albedo a 02 true right normal>>
+// <<slot Albedo 0>>
+// <<cast Albedo Albedo a 02 true right normal>>
 
-<<spawn_bg rigKey stage00 green back 5 0 0 30>>
-<<spawn_bg bg0 stage00 black back 0.9 0 -90 0>>
-<<spawn_bg bg2 stage00 white back 0.5 0 -250 0>>
+// <<bg_spawn rigKey stage00 green back 5 0 0 30>>
+// <<bg_spawn bg0 stage00 black back 0.9 0 -90 0>>
+// <<bg_spawn bg2 stage00 white back 0.5 0 -250 0>>
 
-<<idle_breathe Leafia 99 5 0.25>>
+// <<idle_breathe Leafia 99 5 0.25>>
 
-<<shot_bind_char_response Albedo 0>>
+// <<shot_bind_char_response Albedo 0>>
 
-<<shot_bind_bg_response rigKey>>
-<<shot_bind_bg_response bg0>>
-<<shot_bind_bg_response bg2>>
-
-
-//<<shot_zoom_focus Leafia bust center 3 0.8>>
-<<jolt Leafia>>
-
-//<<shot_zoom_focus Albedo bust center 10 0.8>>
-
-<<shake Leafia>>
+// <<shot_bind_bg_response rigKey>>
+// <<shot_bind_bg_response bg0>>
+// <<shot_bind_bg_response bg2>>
 
 
-<<shot_reset>>
-<<slide_out Leafia left>>
-<<fade_out Leafia 0.5>>
+// //<<shot_zoom_focus Leafia bust center 3 0.8>>
+// <<jolt Leafia>>
 
-<<move_by Albedo 200 0>>
+// //<<shot_zoom_focus Albedo bust center 10 0.8>>
 
-
-<<emote Leafia 17>>
-<<place Leafia left>>
-<<slide_in_sway Leafia>>
+// <<shake Leafia>>
 
 
-<<expression Leafia 7>>
-<<shot_zoom_focus Leafia bust center 1 1>>
+// <<shot_reset>>
+// <<slide_out Leafia left>>
+// <<fade_out Leafia 0.5>>
+
+<<place Albedo right>>
+
+<<move_by Albedo -700 0>>
+
+// <<emote Leafia 17>>
+// <<place Leafia left>>
+// <<slide_in_sway Leafia>>
 
 
-<<shot_track 200 0 0.5>>
+<<face Leafia 3>>
+<<face Albedo 5>>
+// <<shot_zoom_focus Leafia bust center 1 1>>
+
+
+// <<shot_track 200 0 0.5>>
 
 
 <<shot_to -500 00 2 1.5>>
@@ -82,7 +84,7 @@ a12.(물론이지. 제대로 가져왔는지 확인해 볼 거야?)
 
 
 a13.
-<<spawn_bg green a green back>>
+<<bg_spawn green a green back>>
 <<pause 0.8>>
 <<fade_in Willow 1.2>>
 <<fade_in Laru 1.2>>

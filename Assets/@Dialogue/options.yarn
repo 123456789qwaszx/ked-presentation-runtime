@@ -5,7 +5,7 @@ title: options
 <<set $rare_ingredient = 0>>
 <<set $risk = 0>>
 
-<<sub_start a_presentation2>>
+<<sub_table a_presentation2>>
 
 <<a>>숲 입구에 도착했다.
 <<a>>어디를 조사할까?

@@ -16,22 +16,9 @@ public interface IRunScopedCommand
     void RegisterRunLifetime(CommandRunScope scope, MonoBehaviour host, IEnumerator routine);
 }
 
-// Background (WaitForCompletion == false) lifetime model:
-//   - Step-scoped by DEFAULT: CommandBase implements IStepScopedCommand, so a background routine
-//     is cleaned at the next step boundary unless it opts out. Matches the common case —
-//     transient effects shouldn't survive into the next step.
-//   - Run-scoped by OPT-IN: a command that must live until the run ends additionally declares
-//     ': IRunScopedCommand'. SequencePlayer checks Run before Step, so the opt-in wins.
-//     (RegisterRunLifetime below is the inherited default impl for that opt-in.)
 public abstract class CommandBase : ISequenceCommand, IRunScopedCommand
 {
-    // Ignore: drop trivial VFX/SFX/shakes on skip.
-    // ExecuteEvenIfSkipping: must still run (text/log/signals).
     protected virtual SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
-
-    // If true, SequencePlayer waits for this command before moving on.
-    // If false, it runs in the background (fire-and-forget). Cleanup is bound to a lifetime:
-    // step by default (via IStepScopedCommand on CommandBase), or run if it opts into IRunScopedCommand.
     public virtual bool WaitForCompletion => false;
     
     public IEnumerator Execute(CommandRunScope scope)

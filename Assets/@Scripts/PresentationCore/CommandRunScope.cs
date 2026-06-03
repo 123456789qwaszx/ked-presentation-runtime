@@ -61,12 +61,11 @@ public sealed class CommandRunScope
         SetNodeBusy(false);
     }
 
-    // Boundary cleanup
+    public void TrackStep(Action cancel, Action finish = null) => StepLifetime.Track(cancel, finish);
+    public void TrackRun (Action cancel, Action finish = null) => RunLifetime.Track(cancel, finish);
+    
     public void CleanupStep(CleanupPolicy policy) => StepLifetime.Cleanup(policy);
     public void CleanupRun (CleanupPolicy policy) => RunLifetime.Cleanup(policy);
 
-    // Domain-agnostic tracking (no DOTween/Coroutine types needed)
-    public void TrackStep(Action cancel, Action finish = null) => StepLifetime.Track(cancel, finish);
-    public void TrackRun (Action cancel, Action finish = null) => RunLifetime.Track(cancel, finish);
     
 }

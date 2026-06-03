@@ -2,8 +2,6 @@
 ---
 
 set 
-<<shot_reset>>
-
 <<slot Leafia 0>>
 <<cast Leafia Matilda a 02 true left normal>>
 <<shot_bind_char_response Leafia 0>>
@@ -11,9 +9,9 @@ set
 <<slot Albedo 0>>
 <<cast Albedo Albedo a 02 true right normal>>
 
-<<spawn_bg rigKey stage00 green back 5 0 0 30>>
-<<spawn_bg bg0 stage00 black back 0.9 0 -90 0>>
-<<spawn_bg bg2 stage00 white back 0.5 0 -250 0>>
+<<bg_spawn rigKey stage00 green back 5 0 0 30>>
+<<bg_spawn bg0 stage00 black back 0.9 0 -90 0>>
+<<bg_spawn bg2 stage00 white back 0.5 0 -250 0>>
 
 <<idle_breathe Leafia 99 5 0.25>>
 
@@ -89,7 +87,7 @@ a12.(물론이지. 제대로 가져왔는지 확인해 볼 거야?)
 
 
 a13.
-<<spawn_bg green a green back>>
+<<bg_spawn green a green back>>
 <<pause 0.8>>
 <<fade_in Willow 1.2>>
 <<fade_in Laru 1.2>>
