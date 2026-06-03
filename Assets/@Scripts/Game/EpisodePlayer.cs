@@ -111,7 +111,6 @@ public sealed class EpisodePlayer : MonoBehaviour
     {
         _nodeRollbackHistory.ClearRollbackPoints();
         _backlogRecorder.ClearBacklog();
-        _choiceHistory.ResetIndex();
         await StopYarnRunnersAsync();
         _linePresentationAborter?.AbortCurrentVnLine();
         presentationRouteEntry.EndRouteNow();
@@ -130,7 +129,7 @@ public sealed class EpisodePlayer : MonoBehaviour
         //
         // if (tasks.Count <= 0)
         //     return;
-        //
+        
         await YarnTask.WhenAll(tasks);
     }
 

@@ -1,3 +1,5 @@
+using UnityEngine;
+
 public sealed class VNLinePresentationState
 {
     private readonly VNSeekState _seekState = new ();
@@ -34,6 +36,7 @@ public sealed class VNLinePresentationState
     
     public void MarkLineDisplayCompleted(YarnLineMeta meta, string reason)
     {
+        //Debug.Log($"{meta.rawText}+{reason}");
         IsLineFullyShown = true;
     }
 }

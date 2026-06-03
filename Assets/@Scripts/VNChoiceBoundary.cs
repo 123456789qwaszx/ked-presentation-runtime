@@ -1,3 +1,4 @@
+using UnityEngine;
 using Yarn.Unity;
 
 // Owns reads and writes against the choice history and rollback history for one option set.
@@ -31,9 +32,6 @@ public sealed class VNChoiceBoundary
     public bool TryResolveReplayOption(int choiceIndexInNode, DialogueOption[] sourceOptions, out DialogueOption option)
     {
         option = null;
-
-        if (sourceOptions == null)
-            return false;
 
         if (!_choiceHistory.TryGetChoiceRecord(choiceIndexInNode, out VNChoiceRecord record))
             return false;

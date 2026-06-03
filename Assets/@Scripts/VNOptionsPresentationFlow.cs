@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 using Yarn.Unity;
 
 // Runs one option-set presentation transaction through its explicit phase sequence.
@@ -11,17 +12,20 @@ public sealed class VNOptionsPresentationFlow
     private readonly VNOptionsBoxPresentationController _boxPresentation;
     private readonly VNLinePresentationState _advanceState;
     private readonly VNChoiceBoundary _choiceBoundary;
+    private readonly VnUxState _uxState;
 
     public VNOptionsPresentationPhase CurrentPhase { get; private set; } = VNOptionsPresentationPhase.None;
 
     public VNOptionsPresentationFlow(
         VNOptionsBoxPresentationController boxPresentation,
         VNLinePresentationState advanceState,
-        VNChoiceBoundary choiceBoundary)
+        VNChoiceBoundary choiceBoundary,
+        VnUxState uxState)
     {
         _boxPresentation = boxPresentation;
         _advanceState = advanceState;
         _choiceBoundary = choiceBoundary;
+        _uxState = uxState;
     }
 
     public async YarnTask<DialogueOption> RunAsync(
@@ -42,7 +46,7 @@ public sealed class VNOptionsPresentationFlow
 
         if (ctx.HasAnyAvailableOption) {
             enteredDecision = _advanceState.IsSeekingActive
-                ? VNOptionSelectionDecision.ReplayDuringSeek()
+                ? VNOptionSelectionDecision.ReplayRecordedChoiceDuringSeek()
                 : VNOptionSelectionDecision.PresentInteractive();
         }
         else enteredDecision = VNOptionSelectionDecision.NoOptionAvailable();
@@ -50,21 +54,20 @@ public sealed class VNOptionsPresentationFlow
         ctx.SelectionDecision = enteredDecision;
         SetPhase(ctx, VNOptionsPresentationPhase.SelectionPolicyResolved);
 
-        if (ctx.ShouldReturnNoOption) {
+        if (ctx.NoOptionsAvailable) {
+            Debug.Log("no option selected");
             SetPhase(ctx, VNOptionsPresentationPhase.Completed);
             return null;
         }
 
-        if (ctx.ShouldReplayRecordedSelection) {
+        if (ctx.ShouldReplayRecordedChoice) {
             ctx.IsReplay = _choiceBoundary.TryResolveReplayOption(
                 ctx.ChoiceIndexInNode,
                 ctx.SourceOptions,
                 out DialogueOption replayOption);
 
             ctx.ReplayOption = replayOption;
-            ctx.SelectedOption = ctx.IsReplay 
-                ? ctx.ReplayOption 
-                : null;
+            ctx.SelectedOption = ctx.IsReplay ? ctx.ReplayOption : null;
 
             SetPhase(ctx, VNOptionsPresentationPhase.ReplayResolved);
             SetPhase(ctx, VNOptionsPresentationPhase.Completed);
@@ -81,6 +84,8 @@ public sealed class VNOptionsPresentationFlow
         SetPhase(ctx, VNOptionsPresentationPhase.ViewModelsBuilt);
 
         try {
+            _uxState.SetChoicesVisible(true);
+
             // Phase: BoxTransitioning -> BoxReady
             SetPhase(ctx, VNOptionsPresentationPhase.BoxTransitioning);
 
@@ -111,7 +116,15 @@ public sealed class VNOptionsPresentationFlow
             }
 
             // Phase: SelectionCommitted
-            CommitSelection(ctx, selected);
+            
+            _choiceBoundary.CommitSelection(
+                ctx.NodeName,
+                selected.ChoiceIndexInNode,
+                selected.SourceOptionIndex,
+                selected.SourceOption.Line.TextID);
+
+            ctx.SelectedOption = selected.SourceOption;
+            
             SetPhase(ctx, VNOptionsPresentationPhase.SelectionCommitted);
 
             SetPhase(ctx, VNOptionsPresentationPhase.Completed);
@@ -122,6 +135,7 @@ public sealed class VNOptionsPresentationFlow
             throw;
         }
         finally {
+            _uxState.SetChoicesVisible(false);
             await cleanup(ctx);
         }
     }
@@ -144,17 +158,6 @@ public sealed class VNOptionsPresentationFlow
         }
 
         return result;
-    }
-
-    private void CommitSelection(VNOptionsPresentationContext ctx, VNOptionViewModel selected)
-    {
-        _choiceBoundary.CommitSelection(
-            ctx.NodeName,
-            selected.ChoiceIndexInNode,
-            selected.SourceOptionIndex,
-            selected.SourceOption.Line.TextID);
-
-        ctx.SelectedOption = selected.SourceOption;
     }
 
     private async YarnTask AbortAsync(VNOptionsPresentationContext ctx)

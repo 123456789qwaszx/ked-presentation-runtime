@@ -138,7 +138,7 @@ public sealed class VnFeatureController : MonoBehaviour
         
         if (!_rollbackController.GetRollbackPoint(out RollbackPoint target))
             return false;
-
+        
         _choiceHistory.RemoveChoiceAnchorAfterRollbackPoint(target);
         
         _rollbackController.ClearRollbackPoints();

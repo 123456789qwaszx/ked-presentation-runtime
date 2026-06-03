@@ -3,8 +3,7 @@ using Yarn.Unity;
 
 public static class VNOptionViewModelBuilder
 {
-    private static readonly VNOptionEffectPreviewResolver EffectResolver =
-        new VNOptionEffectPreviewResolver();
+    private static readonly VNOptionEffectPreviewResolver EffectResolver = new ();
 
     public static VNOptionViewModel Build(
         DialogueOption option,
@@ -13,8 +12,7 @@ public static class VNOptionViewModelBuilder
     {
         string label = option.Line.TextWithoutCharacterName.Text;
 
-        List<VNOptionEffectPreview> effects =
-            EffectResolver.Resolve(option.Line.Metadata);
+        List<VNOptionEffectPreview> effects = EffectResolver.Resolve(option.Line.Metadata);
 
         return new VNOptionViewModel(
             sourceOption: option,

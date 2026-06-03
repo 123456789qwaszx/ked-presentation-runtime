@@ -61,6 +61,8 @@ public sealed class VNLoadSeekDriver
 
         Trace("BeginSeek", $"target={saveData.nodeName}/{saveData.lineId}, choices={saveData.choices.Count}");
 
+        
+        _choiceHistory.ClearChoiceRecords();
         _choiceHistory.RestoreChoiceSnapshot(saveData.choices);
 
         _lineAdvanceState.BeginLoadSeek(saveData.nodeName, saveData.lineId);

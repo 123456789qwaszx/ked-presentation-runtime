@@ -43,7 +43,7 @@ public sealed class VNOptionsPresentationContext
     // Phase Tracking
     public VNOptionsPresentationPhase Phase { get; set; } = VNOptionsPresentationPhase.None;
 
-    public bool ShouldReturnNoOption => SelectionDecision != null && SelectionDecision.ShouldReturnNoOption;
-    public bool ShouldReplayRecordedSelection => SelectionDecision != null && SelectionDecision.ShouldReplayRecordedSelection;
+    public bool NoOptionsAvailable => SelectionDecision != null && SelectionDecision.ShouldReturnNoOption;
+    public bool ShouldReplayRecordedChoice => SelectionDecision != null && SelectionDecision.ShouldRecordedChoiceDuringSeek;
     public bool ShouldPresentInteractive => SelectionDecision != null && SelectionDecision.ShouldPresentInteractive;
 }

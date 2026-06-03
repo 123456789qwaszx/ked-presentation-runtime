@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 [Serializable]
 public struct VNChoiceRecord
@@ -37,16 +38,6 @@ public class ChoiceHistory
 
     public List<VNChoiceRecord> CreateChoiceSnapshot() => new (_choices);
 
-    public void ResetIndex() => NextChoiceIndex = 0;
-
-    public void RemoveChoiceAnchorAfterRollbackPoint(RollbackPoint target)
-    {
-        for (int i = _choices.Count - 1; i >= 0; i--)
-        {
-            if (_choices[i].anchorHistoryIndex > target.historyIndex)
-                _choices.RemoveAt(i);
-        }
-    }
 
     public void AddChoiceRecord(IReadOnlyList<RollbackPoint> rollbackPoints, string nodeName, int choiceIndexInNode, int selectedOptionIndex, string selectedOptionLineId)
     {
@@ -96,18 +87,26 @@ public class ChoiceHistory
 
     public void RestoreChoiceSnapshot(IReadOnlyList<VNChoiceRecord> choices)
     {
-        _choices.Clear();
-        NextChoiceIndex = 0;
-
         for (int i = 0; i < choices.Count; i++)
         {
             _choices.Add(choices[i]);
         }
     }
-
-    public void Clear()
+    
+    public void ClearChoiceRecords()
     {
         _choices.Clear();
         NextChoiceIndex = 0;
+    }
+
+    public void RemoveChoiceAnchorAfterRollbackPoint(RollbackPoint target)
+    {
+        NextChoiceIndex = 0;
+        
+        for (int i = _choices.Count - 1; i >= 0; i--)
+        {
+            if (_choices[i].anchorHistoryIndex > target.historyIndex)
+                _choices.RemoveAt(i);
+        }
     }
 }

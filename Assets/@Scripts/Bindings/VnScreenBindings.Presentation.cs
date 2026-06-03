@@ -5,7 +5,9 @@ public sealed partial class VnScreenBindings
     private VnRuntimeBridge _vnRuntimeBridge;
     private DialogueAdvanceDispatcher _dialogueAdvanceDispatcher;
     private VNLinePresentationState _linePresentationAdvanceState;
-
+    
+    private bool ChoicesVisible => _uxState.ChoicesVisible;
+    
     public void ConfigurePresentationView(
         VnFeatureController vnFeatures,
         VnUxState uxState,
@@ -81,68 +83,91 @@ public sealed partial class VnScreenBindings
 
     private void HandleAutoClicked()
     {
+        if (ChoicesVisible)
+            return;
+
         _vnFeatures.ToggleAuto();
     }
-    
+
     private void HandleBackLogClicked()
     {
+        if (ChoicesVisible)
+            return;
+
         OpenBacklogPanel();
     }
-    
+
     private void HandleFastForwardDown()
     {
+        if (ChoicesVisible)
+            return;
+
         _vnFeatures.BeginFastForward();
     }
-    
+
     private void HandleFastForwardUp()
     {
         _vnFeatures.EndFastForward();
     }
-    
-    private void HandleExpandClicked()
-    {
-    }
 
     private void HandleHurryUpClicked()
     {
+        if (ChoicesVisible)
+            return;
+
         _dialogueAdvanceDispatcher.DispatchAdvance();
     }
-    
+
     private void HandleLoadMenuClicked()
     {
-        if (HasPanel)
+        if (ChoicesVisible || HasPanel)
             return;
 
         OpenSaveLoadMenu(SaveLoadMenuMode.Load);
     }
-    
+
     private void HandlePlaybackSpeedClicked()
     {
+        if (ChoicesVisible)
+            return;
+
         _vnFeatures.TogglePlaybackSpeed();
     }
-    
-    private void HandleQuickMenuClicked()
-    {
-    }
-    
+
     private void HandleRollbackClicked()
     {
+        if (ChoicesVisible)
+            return;
+
         if (!_vnFeatures.RequestRollbackOneStep())
             return;
 
         _episodePlayer.StartGame(_linePresentationAdvanceState.SeekTargetNodeName);
     }
     
+    private void HandleQuickMenuClicked()
+    {
+        
+    }
+
+    private void HandleExpandClicked()
+    {
+        
+    }
+
     private void HandleSaveMenuClicked()
     {
-        if (HasPanel)
+        if (ChoicesVisible || HasPanel)
             return;
 
         OpenSaveLoadMenu(SaveLoadMenuMode.Save);
     }
-    
+
     private void HandleSkipMenuClicked()
     {
+        if (ChoicesVisible)
+            return;
+
         OpenEpisodeSkipConfirmPanel();
     }
 }

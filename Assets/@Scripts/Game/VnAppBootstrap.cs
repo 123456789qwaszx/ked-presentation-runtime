@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.Serialization;
 using Yarn.Unity;
 
 public class VnAppBootstrap : MonoBehaviour
@@ -20,7 +19,6 @@ public class VnAppBootstrap : MonoBehaviour
     private readonly RollbackController _rollbackHistory = new ();
     private readonly ChoiceHistory _choiceHistory = new ();
     private readonly VNLinePresentationState _linePresentationAdvanceState = new();
-    private RollbackController _rollbackController = new();
     
     private readonly BacklogRecorder _backlogRecorder = new ();
     private readonly VNSideRunnerSyncHub _vnSideRunnerSyncHub = new();
@@ -298,7 +296,7 @@ public class VnAppBootstrap : MonoBehaviour
     {
         _vnYarnLineBoundary = new VNYarnLineBoundary(
             _backlogRecorder,
-            _rollbackController,
+            _rollbackHistory,
             _vnRuntimeStateProvider);
 
         DialogueBoxMetadataResolver metadataResolver = new();
@@ -321,7 +319,13 @@ public class VnAppBootstrap : MonoBehaviour
             _presentationSessionContext);
         
         VNChoiceBoundary vnChoiceBoundary = new(_choiceHistory, _rollbackHistory);
-        VNOptionsPresentationFlow flow = new VNOptionsPresentationFlow(this.boxPresentation, _linePresentationAdvanceState, vnChoiceBoundary);
+
+        VNOptionsPresentationFlow flow = new VNOptionsPresentationFlow(
+            this.boxPresentation,
+            _linePresentationAdvanceState,
+            vnChoiceBoundary,
+            _vnUxState);
+
         vnOptionsPresenter.Initialize(dialogueRunner, flow);
         
         vnOptionsPresenter.AttachDialogueRunner(dialogueRunner);
@@ -351,7 +355,7 @@ public class VnAppBootstrap : MonoBehaviour
             _backlogRecorder,
             autoAdvanceScheduler,
             holdSkipController,
-            _rollbackController,
+            _rollbackHistory,
             _linePresentationAdvanceState,
             _choiceHistory);
     }
