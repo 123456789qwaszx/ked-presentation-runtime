@@ -121,14 +121,14 @@ public sealed class EpisodePlayer : MonoBehaviour
     {
         List<YarnTask> tasks = new List<YarnTask>();
         //
-        // if (dialogueRunner != null && dialogueRunner.IsDialogueRunning)
-        //     tasks.Add(dialogueRunner.Stop());
-        //
-        // if (subPresentationRunner != null && subPresentationRunner.IsDialogueRunning)
-        //     tasks.Add(subPresentationRunner.Stop());
-        //
-        // if (tasks.Count <= 0)
-        //     return;
+        if (dialogueRunner != null && dialogueRunner.IsDialogueRunning)
+            tasks.Add(dialogueRunner.Stop());
+        
+        if (subPresentationRunner != null && subPresentationRunner.IsDialogueRunning)
+            tasks.Add(subPresentationRunner.Stop());
+        
+        if (tasks.Count <= 0)
+            return;
         
         await YarnTask.WhenAll(tasks);
     }

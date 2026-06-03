@@ -79,10 +79,10 @@ a11.(상대방인 의심스러운 사람이 품 안에서 소중한 듯 무언�
 
 a12.(물론이지. 제대로 가져왔는지 확인해 볼 거야?)
 <<slot AFK>>
-<<cast AFK Willow a 11 true center normal>>
+<<cast AFK Sapphire a 11 true center normal>>
 
-<<slot Laru>>
-<<cast Laru Laru a 2 true left normal>>
+<<slot RUB>>
+<<cast RUB Ruby a 2 true left normal>>
 
 a13.
 
@@ -90,10 +90,10 @@ a13.
 
 <<pause 1.5>>
 <<move_by AFK -500 333  2>>
-<<shot_bind_char_response Willow 0>>
+<<shot_bind_char_response Sapphire 0>>
 
 <<pause 0.4>>
-<<shot_zoom_focus Willow bust center 10 4.5>>
+<<shot_zoom_focus Sapphire bust center 10 4.5>>
 
 
 a14.윌로:미안하게 됐어.
@@ -102,5 +102,6 @@ a15.라루:3분의 1?
 
 a16.라루:농담이지?
 
+<<shot_zoom_focus KRKRKRKR bust center 10 4.5>>
 a17.윌로:농담이었다면 좋았겠지만, 장부는 거짓말을 하지 않습니다.
 ===

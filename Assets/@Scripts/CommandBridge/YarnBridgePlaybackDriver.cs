@@ -12,12 +12,13 @@ public sealed class YarnBridgePlaybackDriver : MonoBehaviour
     private CommandExecutor _executor;
     private ICommandRunScopeProvider _scopeProvider;
 
-    private readonly List<CommandSpecBase> _collectedSpecs = new ();
-    private readonly List<CommandSpecBase> _heldSpecs = new ();
+    private readonly List<CommandSpecBase> _collectedSpecs = new();
+    private readonly List<CommandSpecBase> _heldSpecs = new();
+
     private bool _isHoldActive;
 
     private CommandRunScope CurrentScope => _scopeProvider?.CurrentScope;
-    
+
     public void Initialize(CommandExecutor executor, ICommandRunScopeProvider scopeProvider)
     {
         _executor = executor;
@@ -42,30 +43,17 @@ public sealed class YarnBridgePlaybackDriver : MonoBehaviour
     {
         var specs = new List<CommandSpecBase>(_collectedSpecs);
         _collectedSpecs.Clear();
-        
-        if (specs.Count == 0)
-        {
-            CommandRunTicket ticket = new CommandRunTicket(-1);
-            CurrentScope.CleanupStep(CleanupPolicy.Finish);
-            ticket.CloseEntry();
-        }
-        
-        return _executor.PlaySpecs(specs, CurrentScope);
+
+        return PlayCopiedSpecs(specs);
     }
 
     public CommandRunTicket PlayImmediate(IReadOnlyList<CommandSpecBase> specs)
     {
         if (specs == null || specs.Count == 0)
-        {
-            CommandRunTicket ticket = new CommandRunTicket(-1);
-            CurrentScope.CleanupStep(CleanupPolicy.Finish);
-            ticket.CloseEntry();
-            return ticket;
-        }
+            return CreateCompletedEmptyTicket();
 
         var copied = new List<CommandSpecBase>(specs);
-
-        return _executor.PlaySpecs(copied, CurrentScope);
+        return PlayCopiedSpecs(copied);
     }
 
     public void BeginBlockCapture()
@@ -83,8 +71,7 @@ public sealed class YarnBridgePlaybackDriver : MonoBehaviour
             Debug.Log(
                 $"[YarnBridgePlaybackDriver] <<block_begin>> found {_collectedSpecs.Count} pre-collected command spec(s): {commandNames}. " +
                 $"These commands will run with the line after <<block_end>>. " +
-                $"For readability, move them below <<block_end>> if that is the intended timing."
-            );
+                $"For readability, move them below <<block_end>> if that is the intended timing.");
         }
 
         _isHoldActive = true;
@@ -107,7 +94,14 @@ public sealed class YarnBridgePlaybackDriver : MonoBehaviour
         var heldSpecs = new List<CommandSpecBase>(_heldSpecs);
         _heldSpecs.Clear();
 
-        yield return _executor.PlaySpecsBlocking(heldSpecs, CurrentScope);
+        CommandRunScope scope = CurrentScope;
+        if (scope == null)
+        {
+            Debug.LogWarning("[YarnBridgePlaybackDriver] Cannot play captured block. CurrentScope is null.");
+            yield break;
+        }
+
+        yield return _executor.PlaySpecsBlocking(heldSpecs, scope);
     }
 
     public void Clear()
@@ -115,5 +109,35 @@ public sealed class YarnBridgePlaybackDriver : MonoBehaviour
         _collectedSpecs.Clear();
         _heldSpecs.Clear();
         _isHoldActive = false;
+    }
+
+    private CommandRunTicket PlayCopiedSpecs(IReadOnlyList<CommandSpecBase> specs)
+    {
+        if (specs == null || specs.Count == 0)
+            return CreateCompletedEmptyTicket();
+
+        CommandRunScope scope = CurrentScope;
+        if (scope == null)
+        {
+            Debug.LogWarning("[YarnBridgePlaybackDriver] Cannot play command specs. CurrentScope is null.");
+
+            var failedTicket = new CommandRunTicket(specs.Count);
+            failedTicket.CloseEntry(CommandRunTicketCloseReason.Faulted);
+            return failedTicket;
+        }
+
+        return _executor.PlaySpecs(specs, scope);
+    }
+
+    private CommandRunTicket CreateCompletedEmptyTicket()
+    {
+        var ticket = new CommandRunTicket(0);
+
+        CommandRunScope scope = CurrentScope;
+        if (scope != null)
+            scope.CleanupStep(CleanupPolicy.Finish);
+
+        ticket.CloseEntry(CommandRunTicketCloseReason.Completed);
+        return ticket;
     }
 }

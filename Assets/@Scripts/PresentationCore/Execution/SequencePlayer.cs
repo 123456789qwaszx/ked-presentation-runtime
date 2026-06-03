@@ -62,15 +62,16 @@ public sealed class SequencePlayer
         }
         finally
         {
-            ticket?.CloseEntry();
+            ticket?.CloseEntry(CommandRunTicketCloseReason.Completed);
         }
     }
 
     private static IEnumerator RunAfterFirstYield(
         IEnumerator routine, object firstYield, CommandRunScope scope, Func<bool> isValid)
     {
-        yield return firstYield;
-
+        if (isValid() && !scope.Token.IsCancellationRequested)
+            yield return firstYield;
+        
         while (isValid() && !scope.Token.IsCancellationRequested)
         {
             bool movedNext;

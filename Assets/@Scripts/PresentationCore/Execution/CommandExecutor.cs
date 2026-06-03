@@ -14,26 +14,26 @@ public sealed class CommandExecutor : MonoBehaviour
     private CommandRunTicket _activeTicket;
 
     private int _runId;
-    private bool _isStopInProgress;
 
     public void Initialize(CompositeCommandFactory factory)
     {
         _sequencePlayer = new SequencePlayer(this);
         _factory = factory;
     }
-    
+
     public void PlayStep(NodeSpec node, int stepIndex, CommandRunScope scope)
     {
-        CloseActiveTicketIfOpen();
+        CloseActiveTicketIfOpen(CommandRunTicketCloseReason.Superseded);
+
         int runId = _runId;
         _activeScope = scope;
-        
+
         CleanupPolicy policy = DecideCleanupPolicy(_activeScope);
         _activeScope.CleanupStep(policy);
 
         List<ISequenceCommand> commands = BuildCommandsFromStep(node, stepIndex);
         int commandCount = commands.Count;
-        
+
         var ticket = new CommandRunTicket(commandCount);
         _activeTicket = ticket;
 
@@ -45,10 +45,11 @@ public sealed class CommandExecutor : MonoBehaviour
 
     public CommandRunTicket PlaySpecs(IReadOnlyList<CommandSpecBase> specs, CommandRunScope scope)
     {
-        CloseActiveTicketIfOpen();
+        CloseActiveTicketIfOpen(CommandRunTicketCloseReason.Superseded);
+
         int runId = _runId;
         _activeScope = scope;
-        
+
         CleanupPolicy policy = DecideCleanupPolicy(_activeScope);
         _activeScope.CleanupStep(policy);
 
@@ -60,6 +61,7 @@ public sealed class CommandExecutor : MonoBehaviour
 
         ResetToken();
         _activeScope.Token = _cts.Token;
+
         _mainRoutine = StartCoroutine(RunNode(commands, _activeScope, runId, ticket));
 
         return ticket;
@@ -67,10 +69,11 @@ public sealed class CommandExecutor : MonoBehaviour
 
     public IEnumerator PlaySpecsBlocking(IReadOnlyList<CommandSpecBase> specs, CommandRunScope scope)
     {
-        CloseActiveTicketIfOpen();
+        CloseActiveTicketIfOpen(CommandRunTicketCloseReason.Superseded);
+
         int runId = _runId;
         _activeScope = scope;
-        
+
         CleanupPolicy policy = DecideCleanupPolicy(_activeScope);
         _activeScope.CleanupStep(policy);
 
@@ -85,17 +88,17 @@ public sealed class CommandExecutor : MonoBehaviour
 
         yield return RunNode(commands, _activeScope, runId, ticket);
     }
-    
+
     private List<ISequenceCommand> BuildCommandsFromStep(NodeSpec node, int stepIndex)
     {
         var list = new List<ISequenceCommand>();
 
-        if (node == null || node.steps == null || node.steps.Count == 0) 
+        if (node == null || node.steps == null || node.steps.Count == 0)
             return list;
-        
-        if (stepIndex < 0 || stepIndex >= node.steps.Count) 
+
+        if (stepIndex < 0 || stepIndex >= node.steps.Count)
             return list;
-        
+
         StepSpec step = node.steps[stepIndex];
 
         return BuildCommandsFromSpecs(step.compiled);
@@ -105,9 +108,15 @@ public sealed class CommandExecutor : MonoBehaviour
     {
         var list = new List<ISequenceCommand>();
 
+        if (specs == null)
+            return list;
+
         for (int i = 0; i < specs.Count; i++)
         {
             CommandSpecBase spec = specs[i];
+
+            if (spec == null)
+                continue;
 
             if (!_factory.TryCreate(spec, out ISequenceCommand command) || command == null)
             {
@@ -117,11 +126,15 @@ public sealed class CommandExecutor : MonoBehaviour
 
             list.Add(command);
         }
-        
+
         return list;
     }
 
-    private IEnumerator RunNode(List<ISequenceCommand> commands, CommandRunScope scope, int runId, CommandRunTicket ticket)
+    private IEnumerator RunNode(
+        List<ISequenceCommand> commands,
+        CommandRunScope scope,
+        int runId,
+        CommandRunTicket ticket)
     {
         scope.SetNodeBusy(true);
 
@@ -136,28 +149,42 @@ public sealed class CommandExecutor : MonoBehaviour
         finally
         {
             if (!ticket.EntryClosed)
-                ticket.CloseEntry();
+                ticket.CloseEntry(CommandRunTicketCloseReason.Completed);
 
             if (runId == _runId)
             {
                 scope.Token = CancellationToken.None;
                 _mainRoutine = null;
+
+                if (_activeTicket == ticket)
+                    _activeTicket = null;
             }
-            
+
             scope.SetNodeBusy(false);
         }
     }
-    
-    
-    public void Stop() => Stop(CleanupPolicy.Cancel);
-    public void FinishAll() => Stop(CleanupPolicy.Finish);
-    
+
+    public void Stop()
+    {
+        Stop(CleanupPolicy.Cancel);
+    }
+
+    public void FinishAll()
+    {
+        Stop(CleanupPolicy.Finish);
+    }
+
     private void Stop(CleanupPolicy policy)
-    { 
+    {
         _runId++;
-        CloseActiveTicketIfOpen();
+
+        CommandRunTicketCloseReason reason = policy == CleanupPolicy.Cancel
+            ? CommandRunTicketCloseReason.Cancelled
+            : CommandRunTicketCloseReason.Finished;
+
+        CloseActiveTicketIfOpen(reason);
         CancelAndDisposeToken();
-        
+
         if (_mainRoutine != null)
         {
             StopCoroutine(_mainRoutine);
@@ -185,18 +212,18 @@ public sealed class CommandExecutor : MonoBehaviour
         _cts.Dispose();
         _cts = null;
     }
-    
-    private void CloseActiveTicketIfOpen()
+
+    private void CloseActiveTicketIfOpen(CommandRunTicketCloseReason reason)
     {
         if (_activeTicket == null)
             return;
 
         if (!_activeTicket.EntryClosed)
-            _activeTicket.CloseEntry();
-        
+            _activeTicket.CloseEntry(reason);
+
         _activeTicket = null;
     }
-    
+
     private CleanupPolicy DecideCleanupPolicy(CommandRunScope scope)
     {
         if (scope == null)

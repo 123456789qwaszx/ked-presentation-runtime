@@ -24,7 +24,11 @@ public abstract class CommandBase : ISequenceCommand, IStepScopedCommand
     public IEnumerator Execute(CommandRunScope scope)
     {
         if (scope.Token.IsCancellationRequested)
+        {
+            Debug.Log("CommandBase.Execute called with cancellation token");
             yield break;
+            
+        }
 
         if (scope.IsSkipping)
         {
