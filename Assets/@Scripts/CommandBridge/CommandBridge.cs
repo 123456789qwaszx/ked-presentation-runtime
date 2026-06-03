@@ -37,8 +37,14 @@ public sealed partial class YarnCommandBridge
         BindRunnerCommands(subPresentationRunner);
 
         // Main Runner only commands.
+        // Main Runner only commands.
         _dialogueRunner.AddCommandHandler<string>("sub_table", StartSubPresentationNode);
-        _dialogueRunner.AddCommandHandler<string>("a", EnqueueSubPresentationAdvanceSpec);
+        _dialogueRunner.AddCommandHandler("sub_table_end", StopSubPresentationNode);                  // 서브 라인 해제/종료
+
+        // 자동 진행 제어 (재호출 시 마지막 값으로 덮어씀)
+        _dialogueRunner.AddCommandHandler<int>("sub_hold", HoldSubPresentation);                       // N라인 멈춤 (999 = pause)
+        _dialogueRunner.AddCommandHandler<int>("sub_advance", AdvanceSubPresentationExtra);            // 이번 라인 N개 추가
+        _dialogueRunner.AddCommandHandler<bool>("sub_suppress_first", SetSubPresentationSuppressFirst);// 시작 첫 라인 suppress on/off
         
         // Starts capturing commands into a virtual command block.
         // Commands after <<capture_block>> are collected as one block-level execution unit.
@@ -57,6 +63,17 @@ public sealed partial class YarnCommandBridge
 
         //EnqueueSubPresentationAdvanceSpec();
     }
+    
+    private IEnumerator StopSubPresentationNode()
+    {
+        if (_presentationInit)
+            yield return _sideRunnerSyncHub.StopPresentationLaneCoroutine();
+    }
+
+    private void HoldSubPresentation(int lines)         => _sideRunnerSyncHub.HoldPresentation(lines);
+    private void AdvanceSubPresentationExtra(int steps) => _sideRunnerSyncHub.AdvancePresentationExtra(steps);
+    private void SetSubPresentationSuppressFirst(bool suppress)
+        => _sideRunnerSyncHub.SetPresentationSuppressFirstAutoAdvance(suppress);
     
     private void EnqueueSubPresentationAdvanceSpec(string _ = "doNothing") => Collect(new SubPresentationAdvanceCommandSpec());
     

@@ -48,8 +48,18 @@ public sealed class VNLinePresentationFlow
         _advanceState.MarkLineEntered();
         ctx.Meta = _vnYarnLineBoundary.BuildLineMeta(ctx.Line, ctx.NodeName);
         _vnYarnLineBoundary.CommitLineEntered(ctx.Meta);
-        
+
+        // 자동 sub advance: <<a>>를 대체. 수집 spec으로 emit하므로 OnRollbackSeek 파이프라인을 타고
+        // 롤백 시 서브 재동기화가 자동으로 맞는다. RunAsync(메인 전용)에서만 emit → runaway 없음.
+        int subAdvanceCount = _advanceState.IsSeekingActive
+            ? _sideRunnerSyncHub.ConsumePresentationSeekResyncCount()   // 시크: base 재동기화
+            : _sideRunnerSyncHub.ConsumePresentationAutoAdvanceCount(); // 정방향: hold/extra/suppress 적용
+
+        for (int i = 0; i < subAdvanceCount; i++)
+            _playbackDriver.Enqueue(new SubPresentationAdvanceCommandSpec());
+
         _playbackDriver.PlayCollected();
+        
         SetPhase(ctx, VNLinePresentationPhase.LineEnteredCommitted);
 
         // Phase: LineRuntimeStateResolved

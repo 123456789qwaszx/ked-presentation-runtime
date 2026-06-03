@@ -16732,7 +16732,7 @@ MonoBehaviour:
   subPresentationRunner: {fileID: 8309902628667094135}
   presentationRouteEntry: {fileID: 1433866633}
   presentationResponseRig: {fileID: 529556882}
-  yarnEntryKey: OnlyText
+  yarnEntryKey: stella01
   presentationEntryKey: emo
   runYarnKey: 50
 --- !u!4 &1924806293

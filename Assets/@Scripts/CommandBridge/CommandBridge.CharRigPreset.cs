@@ -120,22 +120,22 @@ public sealed partial class YarnCommandBridge
             startPositive = false
         };
 
-        var spec7 = new WaitCommandSpec()
-        {
-            seconds = 0.4f,
-        };
-
-        var spec8 = new JoltCommandSpec()
-        {
-            slotKey = roleKey,
-            target = CharacterRigTarget.CharacterPortrait_Track,
-            strength = 45f,
-            direction = CharRigDirection.Up,
-            duration = 0.55f,
-            taps = 3,
-            damping = 11,
-            anticipation = 3
-        };
+        // var spec7 = new WaitCommandSpec()
+        // {
+        //     seconds = 0.4f,
+        // };
+        //
+        // var spec8 = new JoltCommandSpec()
+        // {
+        //     slotKey = roleKey,
+        //     target = CharacterRigTarget.CharacterPortrait_Track,
+        //     strength = 45f,
+        //     direction = CharRigDirection.Up,
+        //     duration = 0.55f,
+        //     taps = 3,
+        //     damping = 11,
+        //     anticipation = 3
+        // };
 
         Collect(spec);
         Collect(spec1);
@@ -144,8 +144,8 @@ public sealed partial class YarnCommandBridge
         Collect(spec4);
         Collect(spec5);
         Collect(spec6);
-        Collect(spec7);
-        Collect(spec8);
+        // Collect(spec7);
+        // Collect(spec8);
     }
     
     private void EnqueueSlideInJoltCombo(string roleKey, string direction = "right")

@@ -1,7 +1,6 @@
 ﻿title: a_presentation
 ---
 
-set 
 <<slot Leafia 0>>
 <<cast Leafia Matilda a 02 true left normal>>
 <<shot_bind_char_response Leafia 0>>
