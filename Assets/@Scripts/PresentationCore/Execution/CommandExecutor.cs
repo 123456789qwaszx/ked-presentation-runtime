@@ -32,13 +32,14 @@ public sealed class CommandExecutor : MonoBehaviour
         _activeScope.CleanupStep(policy);
 
         List<ISequenceCommand> commands = BuildCommandsFromStep(node, stepIndex);
-        CommandRunTicket ticket = new CommandRunTicket(commands.Count);
+        int commandCount = commands.Count;
+        
+        var ticket = new CommandRunTicket(commandCount);
         _activeTicket = ticket;
 
         if (commands.Count == 0)
         {
             ticket.CloseEntry();
-            ClearActiveTicketIfSame(ticket);
             return;
         }
 
@@ -60,13 +61,12 @@ public sealed class CommandExecutor : MonoBehaviour
         List<ISequenceCommand> commands = BuildCommandsFromSpecs(specs);
         int commandCount = commands.Count;
 
-        CommandRunTicket ticket = new CommandRunTicket(commandCount);
+        var ticket = new CommandRunTicket(commandCount);
         _activeTicket = ticket;
 
         if (commands.Count == 0)
         {
             ticket.CloseEntry();
-            ClearActiveTicketIfSame(ticket);
             return ticket;
         }
 
@@ -89,13 +89,12 @@ public sealed class CommandExecutor : MonoBehaviour
         List<ISequenceCommand> commands = BuildCommandsFromSpecs(specs);
         int commandCount = commands.Count;
 
-        CommandRunTicket ticket = new CommandRunTicket(commandCount);
+        var ticket = new CommandRunTicket(commandCount);
         _activeTicket = ticket;
 
         if (commands.Count == 0)
         {
             ticket.CloseEntry();
-            ClearActiveTicketIfSame(ticket);
             yield break;
         }
 
@@ -104,13 +103,14 @@ public sealed class CommandExecutor : MonoBehaviour
 
         yield return RunNode(commands, _activeScope, runId, ticket);
     }
-
+    
     private List<ISequenceCommand> BuildCommandsFromStep(NodeSpec node, int stepIndex)
     {
         var list = new List<ISequenceCommand>();
 
         if (node == null || node.steps == null || node.steps.Count == 0) 
             return list;
+        
         if (stepIndex < 0 || stepIndex >= node.steps.Count) 
             return list;
         
@@ -163,32 +163,27 @@ public sealed class CommandExecutor : MonoBehaviour
             }
             
             scope.SetNodeBusy(false);
-            ClearActiveTicketIfSame(ticket);
         }
     }
-
+    
+    
     public void Stop() => Stop(CleanupPolicy.Cancel);
     public void FinishAll() => Stop(CleanupPolicy.Finish);
     
     private void Stop(CleanupPolicy policy)
     { 
         _runId++;
-
         CloseActiveTicketIfOpen();
         CancelAndDisposeToken();
+        
         if (_mainRoutine != null)
         {
             StopCoroutine(_mainRoutine);
             _mainRoutine = null;
         }
-            
-        _sequencePlayer?.Stop();
 
-        if (_activeScope != null)
-        { 
-            _activeScope.ClearRuntimeState(policy);
-            _activeScope = null;
-        }
+        _activeScope?.ClearRuntimeState(policy);
+        _activeScope = null;
     }
 
     private void ResetToken()
@@ -208,15 +203,7 @@ public sealed class CommandExecutor : MonoBehaviour
         _cts.Dispose();
         _cts = null;
     }
-
-    private CleanupPolicy DecideCleanupPolicy(CommandRunScope scope)
-    {
-        if (scope == null)
-            return CleanupPolicy.Cancel;
-
-        return CleanupPolicy.Finish;
-    }
-
+    
     private void CloseActiveTicketIfOpen()
     {
         if (_activeTicket == null)
@@ -227,10 +214,12 @@ public sealed class CommandExecutor : MonoBehaviour
         
         _activeTicket = null;
     }
-
-    private void ClearActiveTicketIfSame(CommandRunTicket ticket)
+    
+    private CleanupPolicy DecideCleanupPolicy(CommandRunScope scope)
     {
-        if (ReferenceEquals(_activeTicket, ticket))
-            _activeTicket = null;
+        if (scope == null)
+            return CleanupPolicy.Cancel;
+
+        return CleanupPolicy.Finish;
     }
 }

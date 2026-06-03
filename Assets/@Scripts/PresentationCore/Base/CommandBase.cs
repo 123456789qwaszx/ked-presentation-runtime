@@ -8,8 +8,6 @@ public interface IStepScopedCommand
 
 public abstract class CommandBase : ISequenceCommand
 {
-    public virtual string DebugName => GetType().Name;
-
     // Ignore: drop trivial VFX/SFX/shakes on skip.
     // ExecuteEvenIfSkipping: must still run (text/log/signals).
     protected virtual SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;

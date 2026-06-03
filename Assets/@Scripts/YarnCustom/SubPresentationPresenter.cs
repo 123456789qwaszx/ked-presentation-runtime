@@ -86,14 +86,4 @@ public sealed class SubPresentationPresenter : DialoguePresenterBase
 
         _presenterLifetimeCts = new CancellationTokenSource();
     }
-
-    private void OnDestroy()
-    {
-        if (_presenterLifetimeCts != null)
-        {
-            _presenterLifetimeCts.Cancel();
-            _presenterLifetimeCts.Dispose();
-            _presenterLifetimeCts = null;
-        }
-    }
 }
