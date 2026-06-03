@@ -54,7 +54,7 @@ public sealed class TrembleCommandSpecCharR : CharacterRigCommandSpecBase
     public bool killTween = true;
 }
 
-public sealed class TrembleCommandCharR : CommandBase, IStepScopedCommand
+public sealed class TrembleCommandCharR : CommandBase
 {
     private readonly TrembleCommandSpecCharR _spec;
 

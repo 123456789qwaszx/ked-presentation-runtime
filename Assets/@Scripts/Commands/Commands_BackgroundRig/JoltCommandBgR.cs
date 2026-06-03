@@ -27,7 +27,7 @@ public sealed class JoltCommandSpecBgR : BackgroundRigCommandSpecBase
     public bool killTween = true;
 }
 
-public sealed class JoltCommandBgR : CommandBase, IStepScopedCommand
+public sealed class JoltCommandBgR : CommandBase
 {
     private readonly JoltCommandSpecBgR _spec;
 

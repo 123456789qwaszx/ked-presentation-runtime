@@ -48,7 +48,7 @@ public sealed class BounceInPlaceCommandSpecCharR : CharacterRigCommandSpecBase
     public bool killTween = true;
 }
 
-public sealed class BounceInPlaceCommandCharR : CommandBase, IStepScopedCommand
+public sealed class BounceInPlaceCommandCharR : CommandBase
 {
     private readonly BounceInPlaceCommandSpecCharR _spec;
 

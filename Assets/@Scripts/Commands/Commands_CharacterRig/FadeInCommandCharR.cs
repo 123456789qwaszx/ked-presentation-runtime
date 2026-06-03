@@ -23,7 +23,7 @@ public class FadeInCommandSpecCharR : CharacterRigCommandSpecBase
     public bool EnableInteraction = true;
 }
 
-public sealed class FadeInCommandCharR : CommandBase, IStepScopedCommand
+public sealed class FadeInCommandCharR : CommandBase
 {
     private readonly FadeInCommandSpecCharR _spec;
 

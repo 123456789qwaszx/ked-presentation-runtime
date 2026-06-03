@@ -48,7 +48,7 @@ public sealed class SwayCommandSpecCharR : CharacterRigCommandSpecBase
     public bool killTween = true;
 }
 
-public sealed class SwayCommandCharR : CommandBase, IStepScopedCommand
+public sealed class SwayCommandCharR : CommandBase
 {
     private readonly SwayCommandSpecCharR _spec;
 

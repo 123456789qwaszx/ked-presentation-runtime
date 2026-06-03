@@ -46,7 +46,7 @@ public sealed class SlantedShutterCommandSpec : CommandSpecBase
     public bool blockRaycastWhileClosed = false;
 }
 
-public sealed class SlantedShutterCommand : CommandBase, IStepScopedCommand
+public sealed class SlantedShutterCommand : CommandBase
 {
     private readonly SlantedShutterCommandSpec _spec;
 

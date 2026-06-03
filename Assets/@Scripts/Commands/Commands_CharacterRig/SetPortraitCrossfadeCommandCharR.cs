@@ -26,7 +26,7 @@ public sealed class SetPortraitCrossfadeCommandSpecCharR : CharacterRigCommandSp
         CharRigImageSizingPolicy.HorizontalAlign.Center;
 }
 
-public sealed class SetPortraitCrossfadeCommandCharR : CommandBase, IStepScopedCommand
+public sealed class SetPortraitCrossfadeCommandCharR : CommandBase
 {
     private readonly SetPortraitCrossfadeCommandSpecCharR _spec;
     private readonly PortraitResolver _resolver;

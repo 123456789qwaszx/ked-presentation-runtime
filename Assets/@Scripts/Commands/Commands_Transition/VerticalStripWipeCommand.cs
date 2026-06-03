@@ -66,7 +66,7 @@ public sealed class VerticalStripWipeCommandSpec : CommandSpecBase
     public bool disableWhenClear = true;
 }
 
-public sealed class VerticalStripWipeCommand : CommandBase, IStepScopedCommand
+public sealed class VerticalStripWipeCommand : CommandBase
 {
     private readonly VerticalStripWipeCommandSpec _spec;
 

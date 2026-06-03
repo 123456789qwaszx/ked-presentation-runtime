@@ -27,7 +27,7 @@ public sealed class FadeInCommandSpecBgR : BackgroundRigCommandSpecBase
     public bool enableInteraction = false;
 }
 
-public sealed class FadeInCommandBgR : CommandBase, IStepScopedCommand
+public sealed class FadeInCommandBgR : CommandBase
 {
     private readonly FadeInCommandSpecBgR _spec;
 

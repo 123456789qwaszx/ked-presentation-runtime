@@ -32,7 +32,7 @@ public class PunchScaleCommandSpecCharR : CharacterRigCommandSpecBase
     public bool killTween = true;
 }
 
-public sealed class PunchScaleCommandCharR : CommandBase, IStepScopedCommand
+public sealed class PunchScaleCommandCharR : CommandBase
 {
     private readonly PunchScaleCommandSpecCharR _spec;
 

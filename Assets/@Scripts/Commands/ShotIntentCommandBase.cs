@@ -17,7 +17,7 @@ public abstract class ShotIntentCommandSpecBase : CommandSpecBase
     public bool killTween = true;
 }
 
-public abstract class ShotIntentCommandBase<TSpec> : CommandBase, IStepScopedCommand
+public abstract class ShotIntentCommandBase<TSpec> : CommandBase
     where TSpec : ShotIntentCommandSpecBase
 {
     protected readonly PresentationResponseRig rig;

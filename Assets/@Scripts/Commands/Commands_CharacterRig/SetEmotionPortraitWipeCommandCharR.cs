@@ -27,7 +27,7 @@ public sealed class SetEmotionPortraitWipeCommandSpec : CharacterRigCommandSpecB
         CharRigImageSizingPolicy.HorizontalAlign.Center;
 }
 
-public sealed class SetEmotionPortraitWipeCommand : CommandBase, IStepScopedCommand
+public sealed class SetEmotionPortraitWipeCommand : CommandBase
 {
     private readonly SetEmotionPortraitWipeCommandSpec _spec;
     private readonly PortraitResolver _resolver;

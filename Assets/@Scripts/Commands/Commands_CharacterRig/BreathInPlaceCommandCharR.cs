@@ -51,7 +51,7 @@ public sealed class BreathInPlaceCommandSpecCharR : CharacterRigCommandSpecBase
     public bool killTween = true;
 }
 
-public sealed class BreathInPlaceCommandCharR : CommandBase, IStepScopedCommand
+public sealed class BreathInPlaceCommandCharR : CommandBase, IRunScopedCommand
 {
     private readonly BreathInPlaceCommandSpecCharR _spec;
 

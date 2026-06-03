@@ -40,7 +40,7 @@ public sealed class HopCommandSpecCharR : CharacterRigCommandSpecBase
     public bool killTween = true;
 }
 
-public sealed class HopCommandCharR : CommandBase, IStepScopedCommand
+public sealed class HopCommandCharR : CommandBase
 {
     private readonly HopCommandSpecCharR _spec;
 

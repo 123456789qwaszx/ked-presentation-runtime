@@ -39,7 +39,7 @@ public sealed class FocusBlurFadeCommandSpec : CommandSpecBase
     public bool blockRaycastWhenVisible = false;
 }
 
-public sealed class FocusBlurFadeCommand : CommandBase, IStepScopedCommand
+public sealed class FocusBlurFadeCommand : CommandBase
 {
     private readonly FocusBlurFadeCommandSpec _spec;
 

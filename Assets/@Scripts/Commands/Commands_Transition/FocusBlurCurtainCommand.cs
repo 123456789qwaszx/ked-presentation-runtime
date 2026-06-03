@@ -54,7 +54,7 @@ public sealed class FocusBlurCurtainCommandSpec : CommandSpecBase
     public bool blockRaycastWhenClosed = false;
 }
 
-public sealed class FocusBlurCurtainCommand : CommandBase, IStepScopedCommand
+public sealed class FocusBlurCurtainCommand : CommandBase
 {
     private readonly FocusBlurCurtainCommandSpec _spec;
 

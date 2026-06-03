@@ -27,7 +27,7 @@ public sealed class SlideOutCommandSpecBgR : BackgroundRigCommandSpecBase
     public bool killTween = true;
 }
 
-public sealed class SlideOutCommandBgR : CommandBase, IStepScopedCommand
+public sealed class SlideOutCommandBgR : CommandBase
 {
     private readonly SlideOutCommandSpecBgR _spec;
 

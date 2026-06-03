@@ -28,7 +28,7 @@ public sealed class MoveByCommandSpecBgR : BackgroundRigCommandSpecBase
     public bool killTween = true;
 }
 
-public sealed class MoveByCommandBgR : CommandBase, IStepScopedCommand
+public sealed class MoveByCommandBgR : CommandBase
 {
     private readonly MoveByCommandSpecBgR _spec;
 

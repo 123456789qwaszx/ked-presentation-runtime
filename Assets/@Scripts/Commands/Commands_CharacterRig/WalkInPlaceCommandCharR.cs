@@ -41,7 +41,7 @@ public sealed class WalkInPlaceCommandSpecCharR : CharacterRigCommandSpecBase
     public bool killTween = true;
 }
 
-public sealed class WalkInPlaceCommandCharR : CommandBase, IStepScopedCommand
+public sealed class WalkInPlaceCommandCharR : CommandBase
 {
     private readonly WalkInPlaceCommandSpecCharR _spec;
 

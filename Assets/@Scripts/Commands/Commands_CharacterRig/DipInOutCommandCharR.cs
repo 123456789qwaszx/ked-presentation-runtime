@@ -28,7 +28,7 @@ public sealed class DipInOutCommandSpecCharR : CharacterRigCommandSpecBase
     public bool killTween = true;
 }
 
-public sealed class DipInOutCommandCharR : CommandBase, IStepScopedCommand
+public sealed class DipInOutCommandCharR : CommandBase
 {
     private readonly DipInOutCommandSpecCharR _spec;
 

@@ -29,7 +29,7 @@ public class ScaleToCommandSpecCharR : CharacterRigCommandSpecBase
     public bool killTween = true;
 }
 
-public sealed class ScaleToCommandCharR : CommandBase, IStepScopedCommand
+public sealed class ScaleToCommandCharR : CommandBase
 {
     private readonly ScaleToCommandSpecCharR _spec;
 

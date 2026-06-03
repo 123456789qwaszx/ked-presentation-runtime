@@ -51,7 +51,7 @@ public sealed class PivotRotateToCommandSpecCharR : CharacterRigCommandSpecBase
     public bool killTween = true;
 }
 
-public sealed class PivotRotateToCommandCharR : CommandBase, IStepScopedCommand
+public sealed class PivotRotateToCommandCharR : CommandBase
 {
     private readonly PivotRotateToCommandSpecCharR _spec;
 

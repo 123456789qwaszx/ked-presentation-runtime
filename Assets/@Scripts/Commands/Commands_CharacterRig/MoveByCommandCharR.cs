@@ -28,7 +28,7 @@ public class MoveByCommandSpecCharR : CharacterRigCommandSpecBase
     public bool killTween = true;
 }
 
-public sealed class MoveByCommandCharR : CommandBase, IStepScopedCommand
+public sealed class MoveByCommandCharR : CommandBase
 {
     private readonly MoveByCommandSpecCharR _spec;
 

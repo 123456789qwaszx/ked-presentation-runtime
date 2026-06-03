@@ -34,7 +34,7 @@ public sealed class SlantedMaskSlideInCommandSpec : CommandSpecBase
     public bool killTween = true;
 }
 
-public sealed class SlantedMaskSlideInCommand : CommandBase, IStepScopedCommand
+public sealed class SlantedMaskSlideInCommand : CommandBase
 {
     private readonly SlantedMaskSlideInCommandSpec _spec;
 

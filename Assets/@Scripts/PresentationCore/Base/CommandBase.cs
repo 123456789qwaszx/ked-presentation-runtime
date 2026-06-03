@@ -16,7 +16,7 @@ public interface IRunScopedCommand
     void RegisterRunLifetime(CommandRunScope scope, MonoBehaviour host, IEnumerator routine);
 }
 
-public abstract class CommandBase : ISequenceCommand, IRunScopedCommand
+public abstract class CommandBase : ISequenceCommand, IStepScopedCommand
 {
     protected virtual SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
     public virtual bool WaitForCompletion => false;

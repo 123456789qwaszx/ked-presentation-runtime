@@ -28,7 +28,7 @@ public sealed class ScaleToCommandSpecBgR : BackgroundRigCommandSpecBase
     public bool killTween = true;
 }
 
-public sealed class ScaleToCommandBgR : CommandBase, IStepScopedCommand
+public sealed class ScaleToCommandBgR : CommandBase
 {
     private readonly ScaleToCommandSpecBgR _spec;
 

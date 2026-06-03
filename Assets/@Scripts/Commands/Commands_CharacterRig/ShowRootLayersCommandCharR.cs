@@ -20,7 +20,7 @@ public class ShowRootLayersCommandSpecCharR : CharacterRigCommandSpecBase
     public bool enableInteraction = true;
 }
 
-public sealed class ShowRootLayersCommandCharR : CommandBase, IStepScopedCommand
+public sealed class ShowRootLayersCommandCharR : CommandBase
 {
     private readonly ShowRootLayersCommandSpecCharR _spec;
 

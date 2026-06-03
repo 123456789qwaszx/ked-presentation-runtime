@@ -45,7 +45,7 @@ public sealed class BreathInPlaceCommandSpecBgR : BackgroundRigCommandSpecBase
     public bool killTween = true;
 }
 
-public sealed class BreathInPlaceCommandBgR : CommandBase, IStepScopedCommand
+public sealed class BreathInPlaceCommandBgR : CommandBase
 {
     private readonly BreathInPlaceCommandSpecBgR _spec;
 

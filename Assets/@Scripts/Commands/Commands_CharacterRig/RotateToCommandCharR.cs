@@ -29,7 +29,7 @@ public class RotateToCommandSpecCharR : CharacterRigCommandSpecBase
     public bool killTween = true;
 }
 
-public sealed class RotateToCommandCharR : CommandBase, IStepScopedCommand
+public sealed class RotateToCommandCharR : CommandBase
 {
     private readonly RotateToCommandSpecCharR _spec;
 

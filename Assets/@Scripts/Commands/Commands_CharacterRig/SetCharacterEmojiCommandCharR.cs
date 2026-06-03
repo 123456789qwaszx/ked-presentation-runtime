@@ -43,7 +43,7 @@ public sealed class SetCharacterEmojiCommandSpecCharR : CharacterRigCommandSpecB
 }
 
 
-public sealed class SetCharacterEmojiCommandCharR : CommandBase, IStepScopedCommand
+public sealed class SetCharacterEmojiCommandCharR : CommandBase
 {
     private readonly SetCharacterEmojiCommandSpecCharR _spec;
     private readonly CharacterEmojiResolver _resolver;
