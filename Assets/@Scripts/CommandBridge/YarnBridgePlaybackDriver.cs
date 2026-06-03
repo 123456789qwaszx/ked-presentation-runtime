@@ -46,6 +46,7 @@ public sealed class YarnBridgePlaybackDriver : MonoBehaviour
         if (specs.Count == 0)
         {
             CommandRunTicket ticket = new CommandRunTicket(-1);
+            CurrentScope.CleanupStep(CleanupPolicy.Finish);
             ticket.CloseEntry();
         }
         
@@ -57,6 +58,7 @@ public sealed class YarnBridgePlaybackDriver : MonoBehaviour
         if (specs == null || specs.Count == 0)
         {
             CommandRunTicket ticket = new CommandRunTicket(-1);
+            CurrentScope.CleanupStep(CleanupPolicy.Finish);
             ticket.CloseEntry();
             return ticket;
         }

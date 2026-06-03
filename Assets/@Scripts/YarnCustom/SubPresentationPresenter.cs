@@ -52,7 +52,7 @@ public sealed class SubPresentationPresenter : DialoguePresenterBase
         }
 
         if (!ticket.EntrySatisfied)
-            Debug.LogWarning("[SubPresentationPresenter] Command entry failed or interrupted.");
+            Debug.LogWarning("[SubPresentationPresenter] Command entry failed or interrupted. Wait = true 인 커맨드 실행 중 Rollback");
     }
 
     private async YarnTask WaitForLineAdvanceAsync(LineCancellationToken token)

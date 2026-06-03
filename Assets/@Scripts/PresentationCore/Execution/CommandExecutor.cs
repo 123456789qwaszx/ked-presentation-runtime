@@ -37,12 +37,6 @@ public sealed class CommandExecutor : MonoBehaviour
         var ticket = new CommandRunTicket(commandCount);
         _activeTicket = ticket;
 
-        if (commands.Count == 0)
-        {
-            ticket.CloseEntry();
-            return;
-        }
-
         ResetToken();
         _activeScope.Token = _cts.Token;
 
@@ -63,12 +57,6 @@ public sealed class CommandExecutor : MonoBehaviour
 
         var ticket = new CommandRunTicket(commandCount);
         _activeTicket = ticket;
-
-        if (commands.Count == 0)
-        {
-            ticket.CloseEntry();
-            return ticket;
-        }
 
         ResetToken();
         _activeScope.Token = _cts.Token;
@@ -91,12 +79,6 @@ public sealed class CommandExecutor : MonoBehaviour
 
         var ticket = new CommandRunTicket(commandCount);
         _activeTicket = ticket;
-
-        if (commands.Count == 0)
-        {
-            ticket.CloseEntry();
-            yield break;
-        }
 
         ResetToken();
         _activeScope.Token = _cts.Token;

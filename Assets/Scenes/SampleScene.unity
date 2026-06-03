@@ -5387,12 +5387,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 355984e90625bb24fbaa9aa39f39f63f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VnAppBootstrap
-  uiManager: {fileID: 2860743132734891021}
   vnTrace:
     enableTrace: 0
     logTraceStreaming: 0
     logDumpToConsole: 0
     tracePreview: 
+  uiManager: {fileID: 2860743132734891021}
   audioSystem: {fileID: 32255926}
   inlineSfxHost: {fileID: 1571925710}
   dialogueBoxHost: {fileID: 1332040255}
@@ -5415,24 +5415,23 @@ MonoBehaviour:
   subPresentationPresenter: {fileID: 780646544}
   autoAdvanceScheduler: {fileID: 608895337}
   vnOptionsPresenter: {fileID: 1180068359}
+  vnOptionsBoxPresentationController: {fileID: 1180889818}
   ellipsisBreathTypewriter: {fileID: 1658226451}
   vnAdvanceInputPoller: {fileID: 1315566987}
   dialogueAdvanceDispatcher: {fileID: 307625745}
   vnFeatureController: {fileID: 775605347}
-  saveSlotCount: 6
-  albumDatabase: {fileID: 11400000, guid: 0f099ab27e27bd24fa3bfcbaee5a7233, type: 2}
-  vnPlaytimeTracker: {fileID: 451477690}
-  vnAlbumUnlockDebugList: {fileID: 739385218}
-  episodePlayer: {fileID: 1924806292}
-  characterEmojiLibrarySo: {fileID: 11400000, guid: 50cc0df71f2e038468df66d0c632ebdd, type: 2}
   rigPrefab: {fileID: 5409551162114272258, guid: a8a089dede6a6084d8eac1369e77b04c, type: 3}
   chapterCardPrefab: {fileID: 2410623267660482620, guid: 60640956e3866b44e9e8c9df1a45dbd3, type: 3}
   nodeRigPrefab: {fileID: 8432584506347833489, guid: 5a92676ae0261c54188d2a64469a3787, type: 3}
   chapterCardFactory: {fileID: 767435430}
-  _vnOptionsBoxPresentationController: {fileID: 1180889818}
+  albumDatabase: {fileID: 11400000, guid: 0f099ab27e27bd24fa3bfcbaee5a7233, type: 2}
+  vnPlaytimeTracker: {fileID: 451477690}
+  vnAlbumUnlockDebugList: {fileID: 739385218}
   chapterEpisodeProgressionCatalog: {fileID: 11400000, guid: 466709b071b363747b43332bcdfdeb44, type: 2}
   episodeProgressionSo: {fileID: 11400000, guid: 6b6dcda1ce02f5141a876245e3c88c7e, type: 2}
   rollbackHistoryDebugView: {fileID: 969122867}
+  characterEmojiLibrarySo: {fileID: 11400000, guid: 50cc0df71f2e038468df66d0c632ebdd, type: 2}
+  episodePlayer: {fileID: 1924806292}
 --- !u!1 &608895336
 GameObject:
   m_ObjectHideFlags: 0
@@ -10737,10 +10736,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5a3f81eaca50f144ab19e60b4c29c1c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CommandExecutor
-  enableTrace: 0
-  logTraceStreaming: 0
-  logTraceDumpOnRunEnd: 0
-  tracePreview: 
 --- !u!4 &1257280953
 Transform:
   m_ObjectHideFlags: 0

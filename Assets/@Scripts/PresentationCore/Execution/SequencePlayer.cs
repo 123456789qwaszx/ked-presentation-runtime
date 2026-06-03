@@ -50,38 +50,12 @@ public sealed class SequencePlayer
 
                 if (command.WaitForCompletion && scope.ShouldRespectCommandWait)
                 {
-                    if (isValid())
-                        yield return firstYield;
-
-                    while (isValid())
-                    {
-                        bool movedNext;
-
-                        try
-                        {
-                            movedNext = routine.MoveNext();
-                        }
-                        catch (Exception e)
-                        {
-                            Debug.LogException(e);
-                            break;
-                        }
-
-                        if (!movedNext)
-                            break;
-
-                        yield return routine.Current;
-                    }
+                    yield return RunAfterFirstYield(routine, firstYield, scope, isValid);
                 }
                 else
                 {
-                    // ---- Non-blocking commands ----
-                    // These still run even after PlayCommands yield break
-                    IEnumerator wrappedRoutine = DriveToCompletion(routine, firstYield, scope, isValid);
-                    
-                    // Non-blocking commands can bind themselves to lifetime.
+                    IEnumerator wrappedRoutine = RunAfterFirstYield(routine, firstYield, scope, isValid);
                     BindBackgroundLifetime(command, scope, wrappedRoutine);
-
                     _host.StartCoroutine(wrappedRoutine);
                 }
             }
@@ -92,11 +66,10 @@ public sealed class SequencePlayer
         }
     }
 
-    private static IEnumerator DriveToCompletion(
+    private static IEnumerator RunAfterFirstYield(
         IEnumerator routine, object firstYield, CommandRunScope scope, Func<bool> isValid)
     {
-        if (isValid())
-            yield return firstYield;
+        yield return firstYield;
 
         while (isValid() && !scope.Token.IsCancellationRequested)
         {
