@@ -8,6 +8,7 @@ public sealed class VNLoadSeekDriver
     private readonly RollbackHistory _rollbackHistory;
     private readonly ChoiceHistory _choiceHistory;
     private readonly VNTraceStream _trace;
+    private readonly VNSideRunnerSyncHub _sideRunnerSyncHub;
 
     private VNSaveData _target;
 
@@ -30,6 +31,7 @@ public sealed class VNLoadSeekDriver
         VNPlaytimeTracker playtimeTracker,
         RollbackHistory rollbackHistory,
         ChoiceHistory choiceHistory,
+        VNSideRunnerSyncHub sideRunnerSyncHub,        // NEW
         VNTraceStream trace = null)
     {
         _restarter = restarter;
@@ -37,6 +39,7 @@ public sealed class VNLoadSeekDriver
         _playtimeTracker = playtimeTracker;
         _rollbackHistory = rollbackHistory;
         _choiceHistory = choiceHistory;
+        _sideRunnerSyncHub = sideRunnerSyncHub;        // NEW
         _trace = trace;
     }
 
@@ -73,6 +76,10 @@ public sealed class VNLoadSeekDriver
             Fail(onFail);
             return;
         }
+
+        // Load는 새 지점으로 점프하므로, 이전 연결된 sub 레인을 하드 컷한다.
+        // (로드된 노드가 재생 중 sub_table을 다시 만나면 거기서 새로 시작됨)
+        _sideRunnerSyncHub.StopAllLanes();
 
         _restarter.StartGame(saveData.nodeName);
     }

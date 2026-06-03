@@ -20,16 +20,13 @@ public sealed class VNSideRunnerSyncHub
         public int PendingAdvanceCount;
         public bool IsReadyForAdvance;
 
-        // --- 자동 진행 제어 상태 ---
-        public int HoldRemaining;                      // 남은 hold 라인 수
-        public int ExtraAdvance;                        // 이번 라인에 추가 진행할 수
-        public bool SuppressFirstAutoAdvance = true;    // 정책: 시작 첫 라인 suppress (기본 on)
-        public bool SuppressNextAutoAdvance;            // 라이브 1회성 플래그
+        public int HoldRemaining;
+        public int ExtraAdvance;
+        public bool SuppressFirstAutoAdvance = true;
+        public bool SuppressNextAutoAdvance;
+        public bool Paused;
 
-        public LaneState(DialogueRunner runner)
-        {
-            Runner = runner;
-        }
+        public LaneState(DialogueRunner runner) { Runner = runner; }
 
         public void Reset()
         {
@@ -37,6 +34,7 @@ public sealed class VNSideRunnerSyncHub
             IsReadyForAdvance = false;
             HoldRemaining = 0;
             ExtraAdvance = 0;
+            Paused = false;                              // NEW
             SuppressNextAutoAdvance = SuppressFirstAutoAdvance;
         }
     }
@@ -63,6 +61,27 @@ public sealed class VNSideRunnerSyncHub
     public void AdvancePresentationExtra(int steps) => SetExtraAdvance(VNSideRunnerLaneKeys.Presentation, steps);
     public void SetPresentationSuppressFirstAutoAdvance(bool suppress)
         => SetSuppressFirst(VNSideRunnerLaneKeys.Presentation, suppress);
+    
+    public void PausePresentation()  => SetPaused(VNSideRunnerLaneKeys.Presentation, true);
+    public void ResumePresentation() => SetPaused(VNSideRunnerLaneKeys.Presentation, false);
+
+    private void SetPaused(string laneKey, bool paused)
+    {
+        LaneState lane = GetLane(laneKey);
+        if (lane != null) lane.Paused = paused;
+    }
+
+    // Load 등 하드 컷: 등록된 모든 사이드 레인의 러너를 멈추고 상태 초기화.
+    // (메인 러너는 레인이 아니므로 영향 없음)
+    public void StopAllLanes()
+    {
+        foreach (LaneState lane in _lanes.Values)
+        {
+            if (lane.Runner != null && lane.Runner.IsDialogueRunning)
+                lane.Runner.Stop();   // ※ Yarn 버전별 API 확인
+            lane.Reset();
+        }
+    }
 
     public void ClearAllForSeekOrLoad()
     {
@@ -179,21 +198,13 @@ public sealed class VNSideRunnerSyncHub
         if (lane == null || lane.Runner == null || !lane.Runner.IsDialogueRunning)
             return 0;
 
+        if (lane.Paused)                                 // NEW: 일시정지면 정지
+            return 0;
+
         int baseStep;
-        if (lane.SuppressNextAutoAdvance)
-        {
-            lane.SuppressNextAutoAdvance = false;
-            baseStep = 0;
-        }
-        else if (lane.HoldRemaining > 0)
-        {
-            lane.HoldRemaining--;
-            baseStep = 0;
-        }
-        else
-        {
-            baseStep = 1;
-        }
+        if (lane.SuppressNextAutoAdvance) { lane.SuppressNextAutoAdvance = false; baseStep = 0; }
+        else if (lane.HoldRemaining > 0)  { lane.HoldRemaining--;               baseStep = 0; }
+        else                              baseStep = 1;
 
         int extra = lane.ExtraAdvance;
         lane.ExtraAdvance = 0;
@@ -206,12 +217,10 @@ public sealed class VNSideRunnerSyncHub
         if (lane == null || lane.Runner == null || !lane.Runner.IsDialogueRunning)
             return 0;
 
-        // 노드 시작 정렬을 정방향과 맞추기 위해 suppress만 존중. hold/extra는 무시(아래 한계 메모 참고).
-        if (lane.SuppressNextAutoAdvance)
-        {
-            lane.SuppressNextAutoAdvance = false;
+        if (lane.Paused)                                 // NEW: 정지 구간은 재생 중에도 정지 유지
             return 0;
-        }
+
+        if (lane.SuppressNextAutoAdvance) { lane.SuppressNextAutoAdvance = false; return 0; }
         return 1;
     }
 

@@ -363,6 +363,7 @@ public class VnAppBootstrap : MonoBehaviour
             vnPlaytimeTracker,
             _rollbackHistory,
             _choiceHistory,
+            _vnSideRunnerSyncHub,
             vnTrace);
 
         // 아직 게임 플래그 저장/복원이 없기에 임시로 Empty 사용.

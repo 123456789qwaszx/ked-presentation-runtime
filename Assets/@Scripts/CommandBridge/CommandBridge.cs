@@ -40,6 +40,9 @@ public sealed partial class YarnCommandBridge
         // Main Runner only commands.
         _dialogueRunner.AddCommandHandler<string>("sub_table", StartSubPresentationNode);
         _dialogueRunner.AddCommandHandler("sub_table_end", StopSubPresentationNode);                  // 서브 라인 해제/종료
+        
+        _dialogueRunner.AddCommandHandler("sub_table_pause",  PauseSubPresentation);   // 일시정지 (레인 유지)
+        _dialogueRunner.AddCommandHandler("sub_table_resume", ResumeSubPresentation);  // 재개
 
         // 자동 진행 제어 (재호출 시 마지막 값으로 덮어씀)
         _dialogueRunner.AddCommandHandler<int>("sub_hold", HoldSubPresentation);                       // N라인 멈춤 (999 = pause)
@@ -75,7 +78,9 @@ public sealed partial class YarnCommandBridge
     private void SetSubPresentationSuppressFirst(bool suppress)
         => _sideRunnerSyncHub.SetPresentationSuppressFirstAutoAdvance(suppress);
     
-    private void EnqueueSubPresentationAdvanceSpec(string _ = "doNothing") => Collect(new SubPresentationAdvanceCommandSpec());
+    private void PauseSubPresentation()  => _sideRunnerSyncHub.PausePresentation();
+    private void ResumeSubPresentation() => _sideRunnerSyncHub.ResumePresentation();
+    
     
     private void BeginBlockCapture() => _playbackDriver.BeginBlockCapture();
     private IEnumerator PlayCapturedBlock(float waitTime = 1f)

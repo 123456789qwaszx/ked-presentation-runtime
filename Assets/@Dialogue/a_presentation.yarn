@@ -67,6 +67,7 @@ a9.
 
 
 a10.(어둠 속에서 누군가가 나직한 목소리로 물었다.
+<<shot_zoom_focus Leafia bust center 10 4.5>>
 
 
 a11.(상대방인 의심스러운 사람이 품 안에서 소중한 듯 무언가를 꺼내 보이며 대꾸했다.
@@ -77,21 +78,22 @@ a11.(상대방인 의심스러운 사람이 품 안에서 소중한 듯 무언�
 
 
 a12.(물론이지. 제대로 가져왔는지 확인해 볼 거야?)
-<<slot Willow>>
-<<slot Laru>>
-<<cast Willow Willow a 16 true center normal>>
-<<cast Laru Laru a 16 true left normal>>
-<<fade_out Willow 0>>
-<<fade_out Laru 0>>
+<<slot AFK>>
+<<cast AFK Willow a 11 true center normal>>
 
+<<slot Laru>>
+<<cast Laru Laru a 2 true left normal>>
 
 a13.
-<<bg_spawn green a green back>>
-<<pause 0.8>>
-<<fade_in Willow 1.2>>
-<<fade_in Laru 1.2>>
+
 <<box_hide 3>>
-<<bg_fade_out green all 1.5>>
+
+<<pause 1.5>>
+<<move_by AFK -500 333  2>>
+<<shot_bind_char_response Willow 0>>
+
+<<pause 0.4>>
+<<shot_zoom_focus Willow bust center 10 4.5>>
 
 
 a14.윌로:미안하게 됐어.
