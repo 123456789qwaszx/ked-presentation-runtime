@@ -22,7 +22,7 @@ public struct RollbackPoint
     }
 }
 
-public sealed class RollbackController
+public sealed class RollbackHistory
 {
     private readonly List<RollbackPoint> _points = new();
     private int _nextHistoryIndex;

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 public sealed class VNRuntimeStateProvider : IVNRuntimeStateProvider
 {
-    private readonly RollbackController _rollbackHistory;
+    private readonly RollbackHistory _rollbackHistory;
     private readonly ChoiceHistory _choiceHistory;
     private readonly VNPlaytimeTracker _playtimeTracker;
 
@@ -10,7 +10,7 @@ public sealed class VNRuntimeStateProvider : IVNRuntimeStateProvider
     private bool _hasCurrentLineMeta;
 
     public VNRuntimeStateProvider(
-        RollbackController rollbackHistory,
+        RollbackHistory rollbackHistory,
         ChoiceHistory choiceHistory,
         VNPlaytimeTracker playtimeTracker)
     {

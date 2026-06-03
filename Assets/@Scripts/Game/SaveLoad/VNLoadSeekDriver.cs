@@ -5,7 +5,7 @@ public sealed class VNLoadSeekDriver
     private readonly EpisodePlayer _restarter;
     private readonly VNLinePresentationState _lineAdvanceState;
     private readonly VNPlaytimeTracker _playtimeTracker;
-    private readonly RollbackController _rollbackHistory;
+    private readonly RollbackHistory _rollbackHistory;
     private readonly ChoiceHistory _choiceHistory;
     private readonly VNTraceStream _trace;
 
@@ -28,7 +28,7 @@ public sealed class VNLoadSeekDriver
         EpisodePlayer restarter,
         VNLinePresentationState lineAdvanceState,
         VNPlaytimeTracker playtimeTracker,
-        RollbackController rollbackHistory,
+        RollbackHistory rollbackHistory,
         ChoiceHistory choiceHistory,
         VNTraceStream trace = null)
     {

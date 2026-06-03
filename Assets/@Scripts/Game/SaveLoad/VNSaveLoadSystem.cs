@@ -1,5 +1,7 @@
 ﻿public sealed class VNSaveLoadSystem
 {
+    private int saveSlotCount = 6;
+    
     private readonly IVNSaveRepository _saveRepository;
     private readonly IVNGlobalProgressRepository _globalRepository;
     private readonly VNGlobalProgressData _globalData;
@@ -15,7 +17,7 @@
     
     public bool IsInitialized { get; private set; }
 
-    public VNSaveLoadSystem(int saveSlotCount)
+    public VNSaveLoadSystem()
     {
         _saveRepository = new JsonVNSaveRepository(saveSlotCount);
         _globalRepository = new JsonVNGlobalProgressRepository();

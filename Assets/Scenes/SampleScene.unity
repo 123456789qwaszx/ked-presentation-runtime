@@ -5429,7 +5429,7 @@ MonoBehaviour:
   chapterCardPrefab: {fileID: 2410623267660482620, guid: 60640956e3866b44e9e8c9df1a45dbd3, type: 3}
   nodeRigPrefab: {fileID: 8432584506347833489, guid: 5a92676ae0261c54188d2a64469a3787, type: 3}
   chapterCardFactory: {fileID: 767435430}
-  boxPresentation: {fileID: 1180889818}
+  _vnOptionsBoxPresentationController: {fileID: 1180889818}
   chapterEpisodeProgressionCatalog: {fileID: 11400000, guid: 466709b071b363747b43332bcdfdeb44, type: 2}
   episodeProgressionSo: {fileID: 11400000, guid: 6b6dcda1ce02f5141a876245e3c88c7e, type: 2}
   rollbackHistoryDebugView: {fileID: 969122867}

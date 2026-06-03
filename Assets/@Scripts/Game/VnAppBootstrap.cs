@@ -3,27 +3,29 @@ using Yarn.Unity;
 
 public class VnAppBootstrap : MonoBehaviour
 {
-    [SerializeField] UIManager uiManager;
-
     private readonly UnityInputSource _unityInputSource = new();
     private readonly UnityTimeSource _unityTimeSource = new();
+    
+    private readonly VnPlaybackSettings _vnPlaybackSettings = new();
+    
+    private readonly VnUxState _vnUxState = new();
+    private readonly EpisodeSelectionStateData _episodeSelectionStateData = new ();
+    private readonly RollbackHistory _rollbackHistory = new ();
+    private readonly ChoiceHistory _choiceHistory = new ();
+    private readonly VNLinePresentationState _linePresentationAdvanceState = new();
+    private readonly PresentationSessionContext _presentationSessionContext = new();
+    
+    private readonly VNSideRunnerSyncHub _vnSideRunnerSyncHub = new();
+    private readonly BacklogRecorder _backlogRecorder = new ();
+    
+    private VNRuntimeStateProvider _vnRuntimeStateProvider;
+    private readonly VnScreenBindings _screenBindings = new();
     
     [Header("VN Trace")]
     [SerializeField] private VNTraceStream vnTrace = new ();
 
-    private readonly VnUxState _vnUxState = new();
-    private readonly VnPlaybackSettings _vnPlaybackSettings = new();
-    private readonly PresentationSessionContext _presentationSessionContext = new();
-    private readonly VnScreenBindings _screenBindings = new();
-    private readonly EpisodeSelectionStateData _episodeSelectionStateData = new ();
-    private readonly RollbackController _rollbackHistory = new ();
-    private readonly ChoiceHistory _choiceHistory = new ();
-    private readonly VNLinePresentationState _linePresentationAdvanceState = new();
-    
-    private readonly BacklogRecorder _backlogRecorder = new ();
-    private readonly VNSideRunnerSyncHub _vnSideRunnerSyncHub = new();
-    
-    private VNRuntimeStateProvider _vnRuntimeStateProvider;
+    [Header("UIManager")]
+    [SerializeField] private UIManager uiManager;
     
     [Header("Sound")] 
     [SerializeField] private AudioSystem audioSystem;
@@ -59,59 +61,52 @@ public class VnAppBootstrap : MonoBehaviour
     [SerializeField] private CustomLinePresenter customLinePresenter;
     [SerializeField] private SubPresentationPresenter subPresentationPresenter;
     [SerializeField] private AutoAdvanceScheduler autoAdvanceScheduler;
-    
     [SerializeField] private VNOptionsPresenter vnOptionsPresenter;
-    
+    [SerializeField] private VNOptionsBoxPresentationController vnOptionsBoxPresentationController;
+    [SerializeField] private EllipsisBreathTypewriter ellipsisBreathTypewriter;
     
     [Header("VnAdvanceGate")]
-    [SerializeField] private EllipsisBreathTypewriter ellipsisBreathTypewriter;
-
     [SerializeField] private VnAdvanceInputPoller vnAdvanceInputPoller;
     [SerializeField] private DialogueAdvanceDispatcher dialogueAdvanceDispatcher;
     
+    [Header("FeatureController")]
     [SerializeField] private VnFeatureController vnFeatureController;
     
-    [Header("VN Save / Load")]
-    [SerializeField] private int saveSlotCount = 10;
-    [SerializeField] private VNAlbumDatabaseSO albumDatabase;
-    [SerializeField] private VNPlaytimeTracker vnPlaytimeTracker;
-    [SerializeField] private VNAlbumUnlockDebugList vnAlbumUnlockDebugList;
-
-    [Header("UI")] 
-    [SerializeField] private EpisodePlayer episodePlayer;
     
-    [Header("Emoji")] 
-    [SerializeField] private CharacterEmojiLibrarySO characterEmojiLibrarySo;
-    
-    [Header("RigPrefab")] 
-    [Tooltip("CharacterRig prefab used for command presentation. " +
-             "Empty fields bake a complete rig from CharacterRigSchema at runtime. " +
-             "Prefab the baked result when you need performance setup, external systems, response targets, or shot helpers.")]
+    [Header("RigPrefab")] [Tooltip("CharacterRig prefab used for command presentation. " +
+                                   "Empty fields bake a complete rig from CharacterRigSchema at runtime. " +
+                                   "Prefab the baked result when you need performance setup, external systems, response targets, or shot helpers.")] 
     [SerializeField] private RectTransform rigPrefab;
-    
     
     [Header("ChapterButtonCard")] 
     [SerializeField] private RectTransform chapterCardPrefab;
     [SerializeField] private RectTransform nodeRigPrefab;
     [SerializeField] private ChapterCardFactory chapterCardFactory;
-
     
-    private PresentationSessionBridge _presentationSessionBridge;
-    private UIPatchService _uiPatchService;
-    
-    private VNLoadSeekDriver _vnLoadSeekDriver;
-    private VNSaveLoadSystem _vnSaveLoadSystem;
-    
-    private VNYarnLineBoundary _vnYarnLineBoundary;
-    
-    [SerializeField] private VNOptionsBoxPresentationController boxPresentation;
+    [Header("VN Save / Load")]
+    [SerializeField] private VNAlbumDatabaseSO albumDatabase;
+    [SerializeField] private VNPlaytimeTracker vnPlaytimeTracker;
+    [SerializeField] private VNAlbumUnlockDebugList vnAlbumUnlockDebugList;
     
     [Header("Episode Selection")]
-    private EpisodeSelectionSystem _episodeSelectionSystem;
     [SerializeField] private ChapterEpisodeProgressionCatalogSO chapterEpisodeProgressionCatalog;
     
     [SerializeField] private ChapterEpisodeProgressionSO episodeProgressionSo;
     [SerializeField] private RollbackHistoryDebugView rollbackHistoryDebugView;
+    
+    [Header("Emoji")] 
+    [SerializeField] private CharacterEmojiLibrarySO characterEmojiLibrarySo;
+    
+    [Header("UI")] 
+    [SerializeField] private EpisodePlayer episodePlayer;
+
+    
+    private PresentationSessionBridge _presentationSessionBridge;
+    private UIPatchService _uiPatchService;
+    private VNLoadSeekDriver _vnLoadSeekDriver;
+    private VNSaveLoadSystem _vnSaveLoadSystem;
+    private EpisodeSelectionSystem _episodeSelectionSystem;
+    
     
     private void Awake()
     {
@@ -294,7 +289,7 @@ public class VnAppBootstrap : MonoBehaviour
     
     private void BootstrapLinePresentationRuntime()
     {
-        _vnYarnLineBoundary = new VNYarnLineBoundary(
+        VNYarnLineBoundary vnYarnLineBoundary = new (
             _backlogRecorder,
             _rollbackHistory,
             _vnRuntimeStateProvider);
@@ -303,7 +298,7 @@ public class VnAppBootstrap : MonoBehaviour
         DialogueBoxPresentationController boxPresentation = new(dialogueBoxHost, metadataResolver);
         
         VNLinePresentationFlow vnLinePresentationFlow = new(
-            _vnYarnLineBoundary,
+            vnYarnLineBoundary,
             _linePresentationAdvanceState,
             boxPresentation,
             ellipsisBreathTypewriter,
@@ -321,7 +316,7 @@ public class VnAppBootstrap : MonoBehaviour
         VNChoiceBoundary vnChoiceBoundary = new(_choiceHistory, _rollbackHistory);
 
         VNOptionsPresentationFlow flow = new VNOptionsPresentationFlow(
-            this.boxPresentation,
+            vnOptionsBoxPresentationController,
             _linePresentationAdvanceState,
             vnChoiceBoundary,
             _vnUxState);
@@ -375,7 +370,7 @@ public class VnAppBootstrap : MonoBehaviour
         EmptyVNFlagStore vnFlagStore = new ();
         AlwaysAllowVNSaveSafetyPolicy vnSaveSafetyPolicy = new ();
 
-        _vnSaveLoadSystem = new (saveSlotCount);
+        _vnSaveLoadSystem = new ();
         _vnSaveLoadSystem.AttachRuntime(
             _vnRuntimeStateProvider,
             _vnLoadSeekDriver,

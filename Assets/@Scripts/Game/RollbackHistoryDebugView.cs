@@ -25,7 +25,7 @@ public sealed class RollbackHistoryDebugView : MonoBehaviour
     [Header("Points")]
     [SerializeField] private List<RollbackPointDebugEntry> points = new();
 
-    private RollbackController _history;
+    private RollbackHistory _history;
     private float _nextRefreshTime;
 
     public bool IsBound => isBound;
@@ -35,7 +35,7 @@ public sealed class RollbackHistoryDebugView : MonoBehaviour
     public int NextRollbackTargetListIndex => nextRollbackTargetListIndex;
     public IReadOnlyList<RollbackPointDebugEntry> Points => points;
 
-    public void Bind(RollbackController history)
+    public void Bind(RollbackHistory history)
     {
         _history = history;
         isBound = _history != null;

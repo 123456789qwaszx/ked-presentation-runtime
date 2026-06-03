@@ -30,7 +30,7 @@ public sealed class VnFeatureController : MonoBehaviour
     private BacklogRecorder _backlogRecorder;
     private AutoAdvanceScheduler _autoAdvanceScheduler;
     private FastForwardController _holdSpeedUpController;
-    private RollbackController _rollbackController;
+    private RollbackHistory _rollbackController;
     private VNLinePresentationState _vnLinePresentationState;
     private ChoiceHistory _choiceHistory;
 
@@ -53,7 +53,7 @@ public sealed class VnFeatureController : MonoBehaviour
         BacklogRecorder backlogRecorder,
         AutoAdvanceScheduler autoAdvanceScheduler,
         FastForwardController holdSpeedUpController,
-        RollbackController rollbackController,
+        RollbackHistory rollbackController,
         VNLinePresentationState vnLinePresentationState,
         ChoiceHistory choiceHistory
         )

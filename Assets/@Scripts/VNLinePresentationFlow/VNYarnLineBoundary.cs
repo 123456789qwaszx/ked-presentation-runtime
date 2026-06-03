@@ -19,16 +19,16 @@ public readonly struct YarnLineMeta
 public sealed class VNYarnLineBoundary
 {
     private readonly BacklogRecorder _backlogRecorder;
-    private readonly RollbackController _rollbackController;
+    private readonly RollbackHistory _rollbackHistory;
     private readonly VNRuntimeStateProvider _runtimeStateProvider;
 
     public VNYarnLineBoundary(
         BacklogRecorder backlogRecorder,
-        RollbackController rollbackController,
+        RollbackHistory rollbackHistory,
         VNRuntimeStateProvider runtimeStateProvider)
     {
         _backlogRecorder = backlogRecorder;
-        _rollbackController = rollbackController;
+        _rollbackHistory = rollbackHistory;
         _runtimeStateProvider = runtimeStateProvider;
     }
 
@@ -46,6 +46,6 @@ public sealed class VNYarnLineBoundary
         _runtimeStateProvider.UpdateCurrentLineMeta(meta);
 
         _backlogRecorder.Record(meta);
-        _rollbackController.AddRollbackPoint(meta);
+        _rollbackHistory.AddRollbackPoint(meta);
     }
 }

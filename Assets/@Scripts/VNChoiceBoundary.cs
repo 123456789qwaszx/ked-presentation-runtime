@@ -8,11 +8,11 @@ using Yarn.Unity;
 public sealed class VNChoiceBoundary
 {
     private readonly ChoiceHistory _choiceHistory;
-    private readonly RollbackController _rollbackController;
+    private readonly RollbackHistory _rollbackController;
 
     public VNChoiceBoundary(
         ChoiceHistory choiceHistory,
-        RollbackController rollbackController)
+        RollbackHistory rollbackController)
     {
         _choiceHistory = choiceHistory;
         _rollbackController = rollbackController;
