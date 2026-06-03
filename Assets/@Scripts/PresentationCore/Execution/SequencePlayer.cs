@@ -3,8 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-// 모든 커맨드에 최소 한 번의 실행 진입을 보장
-// rm 직후 ticket?.MarkCommandEntered()로 "이 커맨드는 진입했다"를 기록
+// Every command is guaranteed one execution entry (first MoveNext);
+// ticket.MarkCommandEntered() records the entry right after.
 public sealed class SequencePlayer
 {
     private readonly MonoBehaviour _host;
@@ -36,12 +36,12 @@ public sealed class SequencePlayer
                         ? routine.Current 
                         : null;
 
-                    ticket?.MarkCommandEntered();
+                    ticket.MarkCommandEntered();
                 }
                 catch (Exception e)
                 {
                     Debug.LogException(e);
-                    ticket?.MarkCommandFailed();
+                    ticket.MarkCommandFailed();
                     continue;
                 }
 
@@ -77,15 +77,10 @@ public sealed class SequencePlayer
                 {
                     // ---- Non-blocking commands ----
                     // These still run even after PlayCommands yield break
-                    IEnumerator wrappedRoutine = RunBackgroundRoutineToEndAfterFirstYield(
-                        routine,
-                        firstYield,
-                        scope,
-                        isValid);
-
-                    // Non-blocking commands can bind themselves to step lifetime.
-                    if (command is IStepScopedCommand scopedCommand)
-                        scopedCommand.RegisterStepLifetime(scope, _host, wrappedRoutine);
+                    IEnumerator wrappedRoutine = DriveToCompletion(routine, firstYield, scope, isValid);
+                    
+                    // Non-blocking commands can bind themselves to lifetime.
+                    BindBackgroundLifetime(command, scope, wrappedRoutine);
 
                     _host.StartCoroutine(wrappedRoutine);
                 }
@@ -97,7 +92,7 @@ public sealed class SequencePlayer
         }
     }
 
-    private static IEnumerator RunBackgroundRoutineToEndAfterFirstYield(
+    private static IEnumerator DriveToCompletion(
         IEnumerator routine, object firstYield, CommandRunScope scope, Func<bool> isValid)
     {
         if (isValid())
@@ -121,6 +116,33 @@ public sealed class SequencePlayer
                 yield break;
 
             yield return routine.Current;
+        }
+    }
+    
+    // Binds a background routine to its cleanup lifetime.
+    // Run is matched first, so a command that opts into IRunScopedCommand overrides the step-scoped default.
+    private void BindBackgroundLifetime(ISequenceCommand command, CommandRunScope scope, IEnumerator routine)
+    {
+        switch (command)
+        {
+            case IRunScopedCommand runScoped:
+                runScoped.RegisterRunLifetime(scope, _host, routine);
+                break;
+
+            case IStepScopedCommand stepScoped:
+                stepScoped.RegisterStepLifetime(scope, _host, routine);
+                break;
+
+            default:
+                Debug.LogWarning(
+                    $"[SequencePlayer] Background command '{command.GetType().Name}' implements no " +
+                    $"lifetime scope. Derive from CommandBase, or implement IStepScopedCommand / " +
+                    $"IRunScopedCommand. Binding to StepLifetime as a fallback.");
+
+                scope.TrackStep(
+                    cancel: () => _host.StopCoroutine(routine),
+                    finish: () => _host.StopCoroutine(routine));
+                break;
         }
     }
 }
