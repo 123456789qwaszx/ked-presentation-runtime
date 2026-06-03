@@ -41,13 +41,13 @@ a3.(의심스러운 사람은 만족한 듯한 상대의 반응을 확인하고�
 
 
 a4.(내가 부탁했던 건?
-<<emote Leafia 17>>
+<<emoji Leafia 17>>
 <<place Leafia left>>
 <<slide_in_sway Leafia>>
 
 
 a5.("빠짐없이 챙겼왔지. 세어 봐."
-<<expression Leafia 7>>
+<<face Leafia 7>>
 <<shot_zoom_focus Leafia bust center 1 1>>
 
 

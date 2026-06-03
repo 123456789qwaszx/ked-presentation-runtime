@@ -37,10 +37,15 @@ public sealed class VNSideRunnerSyncHub
     public event Action<string> LaneReady;
 
     public bool RegisterPresentationLane(DialogueRunner runner) => RegisterLane(VNSideRunnerLaneKeys.Presentation, runner);
+    
     public IEnumerator StartPresentationLaneCoroutine(string nodeName) => StartLaneCoroutine(VNSideRunnerLaneKeys.Presentation, nodeName);
+    
     public YarnTask WaitUntilPresentationLaneReadyAsync() => WaitUntilLaneReadyAsync(VNSideRunnerLaneKeys.Presentation);
+    
     public void DispatchPresentationAdvance() => DispatchLaneAdvance(VNSideRunnerLaneKeys.Presentation);
+    
     public void NotifyPresentationLaneReady() => NotifyLaneReady(VNSideRunnerLaneKeys.Presentation);
+    
     public void NotifyPresentationLaneNotReady() => NotifyLaneNotReady(VNSideRunnerLaneKeys.Presentation);
     
     public void ClearAllForSeekOrLoad()

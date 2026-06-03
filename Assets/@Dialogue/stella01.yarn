@@ -10,9 +10,9 @@
 <<cast Albedo Albedo a 02 true right normal>>
 
 
-<<spawn_bg rigKey stage00 green back 5 0 0 30>>
-<<spawn_bg bg0 stage00 black back 0.9 0 -90 0>>
-<<spawn_bg bg2 stage00 white back 0.5 0 -250 0>>
+<<bg_spawn rigKey stage00 green back 5 0 0 30>>
+<<bg_spawn bg0 stage00 black back 0.9 0 -90 0>>
+<<bg_spawn bg2 stage00 white back 0.5 0 -250 0>>
 
 <<idle_breathe Leafia 99 5 0.25>>
 
@@ -43,12 +43,12 @@ Leafia: 이번에 저희[emoji key="21"/] 컴퍼니를 선택해 주셔서 감�
 //-> bgTest
 //<<jump bgTest>>
 
-<<emote Leafia 17>>
+<<emoji Leafia 17>>
 <<place Leafia left>>
 <<slide_in_sway Leafia>>
 메르쿠리아: 안내하겠습니다
 
-<<expression Leafia 7>>
+<<face Leafia 7>>
 <<shot_zoom_focus Leafia bust center 1 1>>
 메르쿠리아: 이전에 작성해 주신 설문을 보니, 고객님께서는 실속 있는 생명보험을 고려 중이신 것으로 보입니다만.
 
