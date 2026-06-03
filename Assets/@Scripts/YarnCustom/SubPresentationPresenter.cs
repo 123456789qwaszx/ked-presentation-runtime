@@ -4,25 +4,18 @@ using Yarn.Unity;
 
 public sealed class SubPresentationPresenter : DialoguePresenterBase
 {
-    private const string PresentationLaneKey = VNSideRunnerLaneKeys.Presentation;
-
     private YarnBridgePlaybackDriver _playbackDriver;
     private VNSideRunnerSyncHub _syncHub;
 
-    private CancellationTokenSource _presenterLifetimeCts = new CancellationTokenSource();
+    private CancellationTokenSource _presenterLifetimeCts = new ();
 
-    public void Initialize(
-        YarnBridgePlaybackDriver playbackDriver,
-        VNSideRunnerSyncHub syncHub)
+    public void Initialize(YarnBridgePlaybackDriver playbackDriver, VNSideRunnerSyncHub syncHub)
     {
         _playbackDriver = playbackDriver;
         _syncHub = syncHub;
     }
 
-    public override YarnTask OnDialogueStartedAsync()
-    {
-        return YarnTask.CompletedTask;
-    }
+    public override YarnTask OnDialogueStartedAsync() { return YarnTask.CompletedTask; }
 
     public override YarnTask OnDialogueCompleteAsync()
     {
@@ -48,13 +41,8 @@ public sealed class SubPresentationPresenter : DialoguePresenterBase
         }
     }
 
-    private async YarnTask WaitUntilCommandEntryClosedAsync(
-        CommandRunTicket ticket,
-        LineCancellationToken token)
+    private async YarnTask WaitUntilCommandEntryClosedAsync(CommandRunTicket ticket, LineCancellationToken token)
     {
-        if (ticket == null)
-            return;
-
         while (!ticket.EntryClosed)
         {
             if (token.NextContentToken.IsCancellationRequested)
@@ -64,28 +52,7 @@ public sealed class SubPresentationPresenter : DialoguePresenterBase
         }
 
         if (!ticket.EntrySatisfied)
-        {
-            if (ticket.HasFailures)
-            {
-                Debug.LogWarning(
-                    "[SubPresentationPresenter] Command entry failed.\n" +
-                    ticket.UnsatisfiedCommandSnapshot());
-            }
-            else if (ticket.WasInterrupted)
-            {
-                // Debug.Log(
-                //     "[SubPresentationPresenter] Command entry was interrupted by an expected route change.\n" +
-                //     "This can happen when rollback/load/stop is requested while a wait=true command is running. " +
-                //     "Remaining commands from the previous run are intentionally skipped.\n" +
-                //     ticket.UnsatisfiedCommandSnapshot());
-            }
-            else
-            {
-                Debug.LogWarning(
-                    "[SubPresentationPresenter] Command entry was closed before all commands entered, but no failure or interrupt reason was recorded.\n" +
-                    ticket.UnsatisfiedCommandSnapshot());
-            }
-        }
+            Debug.LogWarning("[SubPresentationPresenter] Command entry failed or interrupted.");
     }
 
     private async YarnTask WaitForLineAdvanceAsync(LineCancellationToken token)

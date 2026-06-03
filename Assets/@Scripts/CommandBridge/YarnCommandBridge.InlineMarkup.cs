@@ -10,7 +10,7 @@ public sealed partial class YarnCommandBridge
         SetCharacterEmojiCommandSpecCharR spec = BuildSetCharacterEmojiSpec(roleKey, emojiKey);
         var specs = new List<CommandSpecBase>(1) { spec };
 
-        _playbackDriver.PlayImmediate(specs, "inline-emoji");
+        _playbackDriver.PlayImmediate(specs);
     }
 
     public void HideInlineEmojiByCharacterNow(string roleKey)
@@ -18,6 +18,6 @@ public sealed partial class YarnCommandBridge
         SetCharacterEmojiCommandSpecCharR spec = BuildSetCharacterEmojiSpec(roleKey, "");
         var specs = new List<CommandSpecBase>(1) { spec };
         
-        _playbackDriver.PlayImmediate(specs, "inline-emoji-hide");
+        _playbackDriver.PlayImmediate(specs);
     }
 }

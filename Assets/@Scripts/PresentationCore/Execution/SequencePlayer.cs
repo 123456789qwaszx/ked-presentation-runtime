@@ -16,103 +16,30 @@ public sealed class SequencePlayer
     {
         public IEnumerator Routine;
         public Coroutine Coroutine;
-        public string DebugName;
     }
 
     private readonly MonoBehaviour _host;
-    private readonly List<ActiveBackgroundRoutine> _activeBackgroundRoutines =
-        new List<ActiveBackgroundRoutine>();
+    private readonly List<ActiveBackgroundRoutine> _activeBackgroundRoutines = new ();
 
     public SequencePlayer(MonoBehaviour host)
     {
-        if (host == null)
-            throw new ArgumentNullException(nameof(host));
-
         _host = host;
     }
 
     public IEnumerator PlayCommands(
         IReadOnlyList<ISequenceCommand> commands,
         CommandRunScope scope,
-        int runId,
         Func<bool> isValid,
-        CommandRunTicket ticket,
-        Action<string> trace = null)
+        CommandRunTicket ticket)
     {
-        bool Valid()
-        {
-            return isValid == null || isValid();
-        }
-
-        void Trace(string s)
-        {
-            if (trace != null)
-                trace(s);
-        }
-
-        int total = commands != null ? commands.Count : 0;
-        Trace($"[run:{runId}] PlayCommands begin (count={total})");
-        RegisterExpectedCommands(commands, ticket);
+        int total = commands.Count;
 
         try
         {
-            if (commands == null)
-            {
-                Trace($"[run:{runId}] PlayCommands end: commands null");
-                yield break;
-            }
-
             for (int i = 0; i < total; i++)
             {
-                string tag = $"[run:{runId}][{i + 1}/{total}]";
-
-                if (!Valid())
-                {
-                    Trace($"{tag} Entry stopped: invalid run.");
-                    break;
-                }
-
-                if (scope == null)
-                {
-                    Trace($"{tag} Entry stopped: scope is null.");
-                    break;
-                }
-
-                if (scope.Token.IsCancellationRequested)
-                {
-                    Trace($"{tag} Entry stopped: token cancelled before command entry.");
-                    break;
-                }
-
                 ISequenceCommand command = commands[i];
-                if (command == null)
-                {
-                    Trace($"{tag} Command is null.");
-                    ticket?.MarkCommandFailed(i, "Command is null");
-                    continue;
-                }
-
-                string name = GetDebugName(command);
-
-                IEnumerator routine;
-                try
-                {
-                    routine = command.Execute(scope);
-                }
-                catch (Exception e)
-                {
-                    Trace($"{tag} Exception in Execute(): {name}");
-                    Debug.LogException(e);
-                    ticket?.MarkCommandFailed(i, "Exception in Execute()");
-                    continue;
-                }
-
-                if (routine == null)
-                {
-                    Trace($"{tag} Execute() returned null: {name}");
-                    ticket?.MarkCommandFailed(i, "Execute() returned null");
-                    continue;
-                }
+                IEnumerator routine = command.Execute(scope);
 
                 bool hasMore;
                 object firstYield;
@@ -120,31 +47,28 @@ public sealed class SequencePlayer
                 try
                 {
                     hasMore = routine.MoveNext();
-                    firstYield = hasMore ? routine.Current : null;
+                    firstYield = hasMore 
+                        ? routine.Current 
+                        : null;
 
-                    ticket?.MarkCommandEntered(i);
-                    Trace($"{tag} Entered: {name}");
+                    ticket?.MarkCommandEntered();
                 }
                 catch (Exception e)
                 {
-                    Trace($"{tag} Exception on first MoveNext(): {name}");
                     Debug.LogException(e);
-                    ticket?.MarkCommandFailed(i, "Exception on first MoveNext()");
+                    ticket?.MarkCommandFailed();
                     continue;
                 }
 
                 if (!hasMore)
-                {
-                    Trace($"{tag} Completed on entry: {name}");
                     continue;
-                }
 
                 if (command.WaitForCompletion && scope.ShouldRespectCommandWait)
                 {
-                    if (Valid() && !scope.Token.IsCancellationRequested)
+                    if (isValid())
                         yield return firstYield;
 
-                    while (Valid() && !scope.Token.IsCancellationRequested)
+                    while (isValid())
                     {
                         bool movedNext;
 
@@ -154,7 +78,6 @@ public sealed class SequencePlayer
                         }
                         catch (Exception e)
                         {
-                            Trace($"{tag} Exception while running: {name}");
                             Debug.LogException(e);
                             break;
                         }
@@ -171,14 +94,12 @@ public sealed class SequencePlayer
                         routine,
                         firstYield,
                         scope,
-                        Valid,
-                        onFinished: null);
+                        isValid);
 
                     ActiveBackgroundRoutine active = new ActiveBackgroundRoutine
                     {
                         Routine = wrappedRoutine,
                         Coroutine = null,
-                        DebugName = name,
                     };
 
                     _activeBackgroundRoutines.Add(active);
@@ -194,16 +115,6 @@ public sealed class SequencePlayer
         finally
         {
             ticket?.CloseEntry();
-
-            if (ticket != null)
-            {
-                if (ticket.EntrySatisfied)
-                    Trace($"[run:{runId}] CommandEntrySatisfied: {ticket.Snapshot()}");
-                else
-                    Trace($"[run:{runId}] CommandEntryFailed:\n{ticket.DetailedSnapshot()}");
-            }
-
-            Trace($"[run:{runId}] PlayCommands end");
         }
     }
 
@@ -247,11 +158,8 @@ public sealed class SequencePlayer
         IEnumerator routine,
         object firstYield,
         CommandRunScope scope,
-        Func<bool> isValid,
-        Action onFinished)
+        Func<bool> isValid)
     {
-        try
-        {
             if (scope == null)
                 yield break;
 
@@ -280,41 +188,6 @@ public sealed class SequencePlayer
 
                 yield return routine.Current;
             }
-        }
-        finally
-        {
-            if (onFinished != null)
-                onFinished();
-        }
-    }
-
-    private static string GetDebugName(ISequenceCommand command)
-    {
-        if (command is CommandBase commandBase)
-            return commandBase.DebugName;
-
-        return command.GetType().Name;
-    }
-    
-    private static void RegisterExpectedCommands(
-        IReadOnlyList<ISequenceCommand> commands,
-        CommandRunTicket ticket)
-    {
-        if (ticket == null)
-            return;
-
-        if (commands == null)
-            return;
-
-        for (int i = 0; i < commands.Count; i++)
-        {
-            ISequenceCommand command = commands[i];
-
-            string name = command != null
-                ? GetDebugName(command)
-                : "<null-command>";
-
-            ticket.RegisterExpectedCommand(i, name);
-        }
+        
     }
 }

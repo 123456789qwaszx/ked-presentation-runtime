@@ -45,25 +45,25 @@ public sealed class YarnBridgePlaybackDriver : MonoBehaviour
         
         if (specs.Count == 0)
         {
-            CommandRunTicket ticket = new CommandRunTicket(-1, "yarn-bridge-empty", 0);
+            CommandRunTicket ticket = new CommandRunTicket(-1);
             ticket.CloseEntry();
         }
         
-        return _executor.PlaySpecs(specs, CurrentScope, "yarn-bridge");
+        return _executor.PlaySpecs(specs, CurrentScope);
     }
 
-    public CommandRunTicket PlayImmediate(IReadOnlyList<CommandSpecBase> specs, string debugSource = "yarn-inline")
+    public CommandRunTicket PlayImmediate(IReadOnlyList<CommandSpecBase> specs)
     {
         if (specs == null || specs.Count == 0)
         {
-            CommandRunTicket ticket = new CommandRunTicket(-1, debugSource + "-empty", 0);
+            CommandRunTicket ticket = new CommandRunTicket(-1);
             ticket.CloseEntry();
             return ticket;
         }
 
         var copied = new List<CommandSpecBase>(specs);
 
-        return _executor.PlaySpecs(copied, CurrentScope, debugSource);
+        return _executor.PlaySpecs(copied, CurrentScope);
     }
 
     public void BeginBlockCapture()
@@ -105,7 +105,7 @@ public sealed class YarnBridgePlaybackDriver : MonoBehaviour
         var heldSpecs = new List<CommandSpecBase>(_heldSpecs);
         _heldSpecs.Clear();
 
-        yield return _executor.PlaySpecsBlocking(heldSpecs, CurrentScope, "yarn-block");
+        yield return _executor.PlaySpecsBlocking(heldSpecs, CurrentScope);
     }
 
     public void Clear()
