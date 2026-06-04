@@ -50,6 +50,8 @@ public sealed class VNSideRunnerSyncHub
     public void DispatchPresentationAdvance() => DispatchLaneAdvance(VNSideRunnerLaneKeys.Presentation);
     public void NotifyPresentationLaneReady() => NotifyLaneReady(VNSideRunnerLaneKeys.Presentation);
     public void NotifyPresentationLaneNotReady() => NotifyLaneNotReady(VNSideRunnerLaneKeys.Presentation);
+    // public API 영역 (NotifyPresentationLaneNotReady 아래)
+    public void NotifyPresentationLaneReleased() => NotifyLaneReleased(VNSideRunnerLaneKeys.Presentation);
 
     // 정방향: suppress/hold/extra 적용한 advance 횟수
     public int ConsumePresentationAutoAdvanceCount() => ConsumeAutoAdvanceCount(VNSideRunnerLaneKeys.Presentation);
@@ -176,6 +178,22 @@ public sealed class VNSideRunnerSyncHub
             return;
         lane.IsReadyForAdvance = false;
     }
+    
+    // NotifyLaneNotReady 메서드 아래에 추가
+    // 취소/중단으로 끝난 라인을 위한 경로.
+    // main 대기(seek pass-through의 WaitUntilLaneReadyAsync)는 풀어주되,
+    // lane을 advanceable로 만들지 않고 TryFlush도 호출하지 않는다.
+    // → cancelled 라인이 pending을 소모하거나 RequestNextLine을 유발하지 못하게 막는다.
+    private void NotifyLaneReleased(string laneKey)
+    {
+        LaneState lane = GetLane(laneKey);
+        if (lane == null)
+            return;
+
+        lane.IsReadyForAdvance = false;   // 전진 불가 상태로 둠
+        LaneReady?.Invoke(laneKey);       // 단, 대기 중인 main은 깨움 (hang 방지)
+        // 의도적으로 TryFlush 없음.
+    }
 
     private bool TryFlush(LaneState lane)
     {
@@ -223,6 +241,7 @@ public sealed class VNSideRunnerSyncHub
         if (lane.SuppressNextAutoAdvance) { lane.SuppressNextAutoAdvance = false; return 0; }
         return 1;
     }
+    
 
     private void SetHold(string laneKey, int lines)
     {

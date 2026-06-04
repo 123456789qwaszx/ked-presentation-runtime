@@ -30,14 +30,17 @@ public sealed class SubPresentationPresenter : DialoguePresenterBase
     {
         CommandRunTicket ticket = _playbackDriver.PlayCollected();
 
-        await WaitUntilCommandEntryClosedAsync(ticket, token);
+        bool cancelledDuringEntry = await WaitUntilCommandEntryClosedAsync(ticket, token);
 
-        // This means "the sub presentation lane no longer blocks the main runner."
-        // It does not necessarily mean every command completed normally.
-        //
-        // During rollback/load/stop, a wait=true command may be interrupted before
-        // later commands enter. That is a normal lane release path.
-        _syncHub.NotifyPresentationLaneReady();
+        // 취소(rollback / stop / 직전 라인의 RequestNextLine)로 무너진 라인은
+        // "완료된 advance"로 취급하면 안 된다. 그러면 pending을 소모하고
+        // RequestNextLine을 한 번 더 쳐서 — 그게 질주다. 대신 main 대기만 풀어준다.
+        bool tornDown = cancelledDuringEntry || token.NextContentToken.IsCancellationRequested;
+
+        if (tornDown)
+            _syncHub.NotifyPresentationLaneReleased();
+        else
+            _syncHub.NotifyPresentationLaneReady();
 
         try
         {
@@ -49,20 +52,22 @@ public sealed class SubPresentationPresenter : DialoguePresenterBase
         }
     }
 
-    private async YarnTask WaitUntilCommandEntryClosedAsync(CommandRunTicket ticket, LineCancellationToken token)
+    // entry가 닫히기 전에 라인 취소로 빠져나왔으면 true.
+    private async YarnTask<bool> WaitUntilCommandEntryClosedAsync(CommandRunTicket ticket, LineCancellationToken token)
     {
         if (ticket == null)
-            return;
+            return token.NextContentToken.IsCancellationRequested;
 
         while (!ticket.EntryClosed)
         {
             if (token.NextContentToken.IsCancellationRequested)
-                return;
+                return true;   // entry 닫히기 전 취소됨
 
             await YarnTask.Yield();
         }
 
-        ReportTicketIfNeeded(ticket);
+        ReportTicketIfNeeded(ticket);   // 진단 로그는 유지
+        return false;                   // entry 정상적으로 닫힘
     }
 
     private void ReportTicketIfNeeded(CommandRunTicket ticket)

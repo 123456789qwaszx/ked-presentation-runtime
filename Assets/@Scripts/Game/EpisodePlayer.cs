@@ -10,6 +10,7 @@ public sealed class EpisodePlayer : MonoBehaviour
     private IVNLineAborter _linePresentationAborter;
     private BacklogRecorder _backlogRecorder;
     private ChoiceHistory _choiceHistory;
+    private VNSideRunnerSyncHub _sideRunnerSyncHub;
 
     [Header("Yarn")]
     [SerializeField] private DialogueRunner dialogueRunner;
@@ -40,13 +41,15 @@ public sealed class EpisodePlayer : MonoBehaviour
         RollbackHistory nodeRollbackHistory,
         IVNLineAborter linePresentationAborter,
         BacklogRecorder backlogRecorder,
-        ChoiceHistory choiceHistory)
+        ChoiceHistory choiceHistory,
+        VNSideRunnerSyncHub sideRunnerSyncHub)
     {
         _vnScreenBindings = vnScreenBindings;
         _nodeRollbackHistory = nodeRollbackHistory;
         _linePresentationAborter = linePresentationAborter;
         _backlogRecorder = backlogRecorder;
         _choiceHistory = choiceHistory;
+        _sideRunnerSyncHub = sideRunnerSyncHub;
     }
 
     private void Update()
@@ -120,17 +123,19 @@ public sealed class EpisodePlayer : MonoBehaviour
     private async YarnTask StopYarnRunnersAsync()
     {
         List<YarnTask> tasks = new List<YarnTask>();
-        //
+
         if (dialogueRunner != null && dialogueRunner.IsDialogueRunning)
             tasks.Add(dialogueRunner.Stop());
-        
+
         if (subPresentationRunner != null && subPresentationRunner.IsDialogueRunning)
             tasks.Add(subPresentationRunner.Stop());
-        
-        if (tasks.Count <= 0)
-            return;
-        
-        await YarnTask.WhenAll(tasks);
+
+        if (tasks.Count > 0)
+            await YarnTask.WhenAll(tasks);
+
+        // 러너가 멈춘 뒤, hub lane 장부를 초기화한다.
+        // → 직전 세션의 stale pending/ready가 재시작된 세션으로 새지 않게 한다.
+        _sideRunnerSyncHub.ClearAllForSeekOrLoad();
     }
 
     private void ResetVisualState()

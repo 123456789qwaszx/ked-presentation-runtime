@@ -408,7 +408,9 @@ public class VnAppBootstrap : MonoBehaviour
             _rollbackHistory, 
             customLinePresenter,
             _backlogRecorder, 
-            _choiceHistory);
+            _choiceHistory,
+            _vnSideRunnerSyncHub
+            );
     }
     
     private void BootstrapScreenBindings()
