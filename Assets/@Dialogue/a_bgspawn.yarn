@@ -1,0 +1,11 @@
+﻿title: a_bgspawn
+---
+
+<<bg_spawn q2 stage00 green back 5 0 0 30>>
+<<bg_spawn q3 stage00 black back 0.9 0 -90 0>>
+<<bg_spawn q4 stage00 white back 0.5 0 -250 0>>
+
+<<shot_bind_bg_response q2>>
+<<shot_bind_bg_response q3>>
+<<shot_bind_bg_response q4>>
+===

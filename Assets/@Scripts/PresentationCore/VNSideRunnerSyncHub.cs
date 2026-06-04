@@ -34,7 +34,7 @@ public sealed class VNSideRunnerSyncHub
             IsReadyForAdvance = false;
             HoldRemaining = 0;
             ExtraAdvance = 0;
-            Paused = false;                              // NEW
+            Paused = false;
             SuppressNextAutoAdvance = SuppressFirstAutoAdvance;
         }
     }

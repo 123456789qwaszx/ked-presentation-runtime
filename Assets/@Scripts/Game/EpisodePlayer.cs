@@ -15,6 +15,7 @@ public sealed class EpisodePlayer : MonoBehaviour
     [Header("Yarn")]
     [SerializeField] private DialogueRunner dialogueRunner;
     [SerializeField] private DialogueRunner subPresentationRunner;
+    [SerializeField] private DialogueRunner oneShotRunner;
 
     [Header("Presentation")]
     [SerializeField] private PresentationSessionEntry presentationRouteEntry;
@@ -129,7 +130,10 @@ public sealed class EpisodePlayer : MonoBehaviour
 
         if (subPresentationRunner != null && subPresentationRunner.IsDialogueRunning)
             tasks.Add(subPresentationRunner.Stop());
-
+        
+        if (oneShotRunner != null && oneShotRunner.IsDialogueRunning)
+            tasks.Add(oneShotRunner.Stop());
+        
         if (tasks.Count > 0)
             await YarnTask.WhenAll(tasks);
 
