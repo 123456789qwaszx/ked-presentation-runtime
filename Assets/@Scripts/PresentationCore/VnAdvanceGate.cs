@@ -6,7 +6,6 @@ public sealed class AdvanceGate
     private readonly VnPlaybackSettings _vnPlaybackSettings;
     private readonly VNLinePresentationState _lineState;
     private ICommandRunScopeProvider _scopeProvider;
-    private readonly CommandExecutor _commandExecutor;
     private readonly VNTraceStream _trace;
 
     private CommandRunScope CurrentScope => _scopeProvider?.CurrentScope;
@@ -28,14 +27,12 @@ public sealed class AdvanceGate
         VnPlaybackSettings vnPlaybackSettings,
         VNLinePresentationState lineState,
         ICommandRunScopeProvider scopeProvider,
-        CommandExecutor commandExecutor,
         VNTraceStream trace)
     {
         _vnUxState = uxState;
         _vnPlaybackSettings = vnPlaybackSettings;
         _lineState = lineState;
         _scopeProvider = scopeProvider;
-        _commandExecutor = commandExecutor;
         _trace = trace;
     }
 
@@ -95,7 +92,7 @@ public sealed class AdvanceGate
         if (_vnUxState.ChoicesVisible)
             return Reject(isUser, "choices_visible");
 
-        if (_scopeProvider.CurrentScope.IsNodeBusy)
+        if (CurrentScope.IsNodeBusy)
         {
             // Debug.Log("executorDispose");
             // _commandExecutor.CancelAndDisposeToken();

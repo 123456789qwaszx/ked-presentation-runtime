@@ -18,6 +18,7 @@ public sealed class PresentationSession
     
     // ---- Active run (per-Session) ----
     private CommandRunScope _sessionScope;
+    private PresentationStage _stage;
     
     // ---- Runtime state ----
     private SequenceProgressState _state;
@@ -39,7 +40,8 @@ public sealed class PresentationSession
         StepGateAdvancer gateAdvancer,
         CommandExecutor executor,
         PresentationSessionContext presentationSessionContext,
-        VNLinePresentationState linePresentationAdvanceState
+        VNLinePresentationState linePresentationAdvanceState,
+        PresentationStage presentationStage
     )
     {
         _gatePlanner = gatePlanner;
@@ -47,6 +49,7 @@ public sealed class PresentationSession
         _executor = executor;
         _context = presentationSessionContext;
         _linePresentationAdvanceState = linePresentationAdvanceState;
+        _stage = presentationStage;
     }
     
     public void Start(Route route, SequenceSpecSO sequence)
@@ -62,7 +65,7 @@ public sealed class PresentationSession
         
         _state = new SequenceProgressState(route);
         _sequence = sequence;
-        _sessionScope = new CommandRunScope(_context, _linePresentationAdvanceState);
+        _sessionScope = new CommandRunScope(_context, _linePresentationAdvanceState, _stage);
         
         _context.ResetSessionFlagsForStart();
         
@@ -147,9 +150,11 @@ public sealed class PresentationSession
     private void End()
     {
         _gateAdvancer.ClearLatchedSignals();
-        _executor.FinishAll(); // clear the session scope.
+        _executor.FinishAll(); // clear the session scope. 실행 중인 커맨드 정지
+        _stage?.Clear(); // 커맨드 정리 후 공유무대 파괴
         _sequence = null;
         _state = null;
+        _sessionScope = null;
     }
 
     #region Editor

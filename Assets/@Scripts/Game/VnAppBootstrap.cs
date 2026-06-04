@@ -9,11 +9,13 @@ public class VnAppBootstrap : MonoBehaviour
     private readonly VnPlaybackSettings _vnPlaybackSettings = new();
     
     private readonly VnUxState _vnUxState = new();
-    private readonly EpisodeSelectionStateData _episodeSelectionStateData = new ();
-    private readonly RollbackHistory _rollbackHistory = new ();
-    private readonly ChoiceHistory _choiceHistory = new ();
+    private readonly EpisodeSelectionStateData _episodeSelectionStateData = new();
+    private readonly RollbackHistory _rollbackHistory = new();
+    private readonly ChoiceHistory _choiceHistory = new();
     private readonly VNLinePresentationState _linePresentationAdvanceState = new();
     private readonly PresentationSessionContext _presentationSessionContext = new();
+    
+    private readonly PresentationStage presentationStage = new();
     
     private readonly VNSideRunnerSyncHub _vnSideRunnerSyncHub = new();
     private readonly BacklogRecorder _backlogRecorder = new ();
@@ -237,7 +239,8 @@ public class VnAppBootstrap : MonoBehaviour
             gateAdvancer,
             commandExecutor,
             _presentationSessionContext,
-            _linePresentationAdvanceState);
+            _linePresentationAdvanceState,
+            presentationStage);
 
         presentationSessionEntry.Initialize(
             presentationSession,
@@ -279,7 +282,6 @@ public class VnAppBootstrap : MonoBehaviour
             _vnPlaybackSettings,
             _linePresentationAdvanceState,
             presentationSessionEntry,
-            commandExecutor,
             vnTrace
         );
 

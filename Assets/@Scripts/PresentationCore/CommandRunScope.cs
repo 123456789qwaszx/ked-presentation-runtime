@@ -7,9 +7,10 @@ public sealed class CommandRunScope
     private readonly VNLinePresentationState _linePresentationAdvanceState;
     public CancellationToken Token { get; set; }
     
-    public readonly CharacterRigRegistry characterRigs = new();
-    public readonly BackgroundRigRegistry backgroundRigs = new();
-    public readonly CastRegistry castRegistry = new();
+    public PresentationStage Stage { get; }
+    public CharacterRigRegistry characterRigs => Stage.characterRigs;
+    public BackgroundRigRegistry backgroundRigs => Stage.backgroundRigs;
+    public CastRegistry castRegistry => Stage.castRegistry;
     
     /// <summary>
     /// Lifetime for resources spawned by commands within the current step.
@@ -23,10 +24,14 @@ public sealed class CommandRunScope
     /// </summary>
     private LifetimeScope RunLifetime { get; } = new();
 
-    public CommandRunScope(PresentationSessionContext context, VNLinePresentationState linePresentationAdvanceState)
+    public CommandRunScope(
+        PresentationSessionContext context,
+        VNLinePresentationState linePresentationAdvanceState,
+        PresentationStage stage)
     {
         _context = context;
         _linePresentationAdvanceState = linePresentationAdvanceState;
+        Stage = stage;
         Token = CancellationToken.None;
     }
 
@@ -52,10 +57,6 @@ public sealed class CommandRunScope
     {
         CleanupStep(policy);
         CleanupRun(policy);
-
-        characterRigs.Clear();
-        backgroundRigs.Clear();
-        castRegistry.Clear();
 
         Token = CancellationToken.None;
         SetNodeBusy(false);
