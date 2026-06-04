@@ -2958,6 +2958,50 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1cba62d4376bddf4abfef882af0ed3bb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ButtonWidget
+--- !u!1 &319545787
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 319545788}
+  - component: {fileID: 319545789}
+  m_Layer: 0
+  m_Name: SubCommandExecutor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &319545788
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 319545787}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 350.9887, y: -595.1418, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 596868909}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &319545789
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 319545787}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a3f81eaca50f144ab19e60b4c29c1c9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CommandExecutor
 --- !u!1 &330585543
 GameObject:
   m_ObjectHideFlags: 0
@@ -5363,10 +5407,12 @@ Transform:
   - {fileID: 529556883}
   - {fileID: 552181529}
   - {fileID: 1257280953}
+  - {fileID: 720935692}
+  - {fileID: 319545788}
+  - {fileID: 2117089916}
   - {fileID: 1433866632}
   - {fileID: 2009713541}
   - {fileID: 780646545}
-  - {fileID: 720935692}
   - {fileID: 2005113227}
   - {fileID: 946268261}
   - {fileID: 608895338}
@@ -5388,7 +5434,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VnAppBootstrap
   vnTrace:
-    enableTrace: 0
+    enableTrace: 1
     logTraceStreaming: 0
     logDumpToConsole: 0
     tracePreview: 
@@ -5403,9 +5449,11 @@ MonoBehaviour:
   characterFocusTuningDb: {fileID: 11400000, guid: b77af4e295606b446ae4f74dad106f5f, type: 2}
   unitySignalBus: {fileID: 552181530}
   commandExecutor: {fileID: 1257280952}
+  mainYarnBridgePlaybackDriver: {fileID: 720935691}
+  subCommandExecutor: {fileID: 319545789}
+  subYarnBridgePlaybackDriver: {fileID: 2117089917}
   routeCatalogSo: {fileID: 11400000, guid: 0a509c33b083b264c8262b318a84b25f, type: 2}
   presentationSessionEntry: {fileID: 1433866633}
-  yarnBridgePlaybackDriver: {fileID: 720935691}
   dialogueRunner: {fileID: 8309902628538800288}
   subPresentationRunner: {fileID: 8309902628667094135}
   linePresenter: {fileID: 2958262985601084670}
@@ -6330,7 +6378,7 @@ GameObject:
   - component: {fileID: 720935692}
   - component: {fileID: 720935691}
   m_Layer: 0
-  m_Name: YarnBridgePlaybackDriver
+  m_Name: MainYarnBridgePlaybackDriver
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10718,7 +10766,7 @@ GameObject:
   - component: {fileID: 1257280953}
   - component: {fileID: 1257280952}
   m_Layer: 0
-  m_Name: CommandExecutor
+  m_Name: MainCommandExecutor
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -16732,7 +16780,7 @@ MonoBehaviour:
   subPresentationRunner: {fileID: 8309902628667094135}
   presentationRouteEntry: {fileID: 1433866633}
   presentationResponseRig: {fileID: 529556882}
-  yarnEntryKey: options
+  yarnEntryKey: OnlyText
   presentationEntryKey: emo
   runYarnKey: 50
 --- !u!4 &1924806293
@@ -18293,6 +18341,50 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &2117089915
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2117089916}
+  - component: {fileID: 2117089917}
+  m_Layer: 0
+  m_Name: SubYarnBridgePlaybackDriver
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2117089916
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2117089915}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 350.9887, y: -595.1418, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 596868909}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2117089917
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2117089915}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 198fdff9603208d49ac312acbafe6a81, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::YarnBridgePlaybackDriver
 --- !u!1 &2128428037
 GameObject:
   m_ObjectHideFlags: 0

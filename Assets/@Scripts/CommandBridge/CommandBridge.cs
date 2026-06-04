@@ -5,7 +5,7 @@ using Yarn.Unity;
 
 public sealed partial class YarnCommandBridge
 {
-    private readonly DialogueRunner _dialogueRunner;
+    private readonly DialogueRunner _runner;
 
     private readonly YarnBridgePlaybackDriver _playbackDriver;
     private readonly VNRuntimeStateProvider _vnRuntimeStateProvider;
@@ -13,87 +13,90 @@ public sealed partial class YarnCommandBridge
 
     private readonly VNSideRunnerSyncHub _sideRunnerSyncHub;
 
-    private readonly bool _presentationInit;
-
+    
+    // 한 브리지 = 한 레인(러너 1 + 드라이버 1).
+    // 두 레인의 커맨드 셋을 시스템적으로 동일하게 유지하려고 동일한 BindRunnerCommands를 그대로 바인딩한다.
+    // bindMainLaneCommands=true 인 레인만 sub_table / sub_* / block_* (현 메인 전용 커맨드)를 추가로 가진다.
     public YarnCommandBridge(
-        DialogueRunner dialogueRunner,
-        DialogueRunner subPresentationRunner,
+        DialogueRunner runner,
         YarnBridgePlaybackDriver playbackDriver,
         VNRuntimeStateProvider vnRuntimeStateProvider,
         VNSideRunnerSyncHub sideRunnerSyncHub,
-        RectTransform charRigPrefab)
+        RectTransform charRigPrefab,
+        bool bindMainLaneCommands)
     {
-        _dialogueRunner = dialogueRunner;
-
+        _runner = runner;
         _playbackDriver = playbackDriver;
         _vnRuntimeStateProvider = vnRuntimeStateProvider;
         _sideRunnerSyncHub = sideRunnerSyncHub;
         _charRigPrefab = charRigPrefab;
-        
-        if (_sideRunnerSyncHub.RegisterPresentationLane(subPresentationRunner))
-            _presentationInit = true;
 
-        BindRunnerCommands(_dialogueRunner);
-        BindRunnerCommands(subPresentationRunner);
+        if (_runner == null)
+            Debug.LogWarning("[YarnCommandBridge] runner is null.");
 
+        BindRunnerCommands(_runner);
+
+        if (bindMainLaneCommands)
+            BindMainLaneCommands(_runner);
+    }
+    
+    private void BindMainLaneCommands(DialogueRunner runner)
+    {
         // Main Runner only commands.
-        // Main Runner only commands.
-        _dialogueRunner.AddCommandHandler<string>("sub_table", StartSubPresentationNode);
-        _dialogueRunner.AddCommandHandler("sub_table_end", StopSubPresentationNode);                  // 서브 라인 해제/종료
+        runner.AddCommandHandler<string>("sub_table", StartSubPresentationNode);
+        runner.AddCommandHandler("sub_table_end", StopSubPresentationNode);                  // 서브 라인 해제/종료
         
-        _dialogueRunner.AddCommandHandler("sub_table_pause",  PauseSubPresentation);   // 일시정지 (레인 유지)
-        _dialogueRunner.AddCommandHandler("sub_table_resume", ResumeSubPresentation);  // 재개
+        runner.AddCommandHandler("sub_table_pause",  PauseSubPresentation);   // 일시정지 (레인 유지)
+        runner.AddCommandHandler("sub_table_resume", ResumeSubPresentation);  // 재개
 
         // 자동 진행 제어 (재호출 시 마지막 값으로 덮어씀)
-        _dialogueRunner.AddCommandHandler<int>("sub_hold", HoldSubPresentation);                       // N라인 멈춤 (999 = pause)
-        _dialogueRunner.AddCommandHandler<int>("sub_advance", AdvanceSubPresentationExtra);            // 이번 라인 N개 추가
-        _dialogueRunner.AddCommandHandler<bool>("sub_suppress_first", SetSubPresentationSuppressFirst);// 시작 첫 라인 suppress on/off
+        runner.AddCommandHandler<int>("sub_hold", HoldSubPresentation);                       // N라인 멈춤 (999 = pause)
+        runner.AddCommandHandler<int>("sub_advance", AdvanceSubPresentationExtra);            // 이번 라인 N개 추가
+        runner.AddCommandHandler<bool>("sub_suppress_first", SetSubPresentationSuppressFirst);// 시작 첫 라인 suppress on/off
         
         // Starts capturing commands into a virtual command block.
         // Commands after <<capture_block>> are collected as one block-level execution unit.
         // Yarn timing is held until <<play_block>> plays the block.
-        _dialogueRunner.AddCommandHandler("block_hold", BeginBlockCapture);
+        runner.AddCommandHandler("block_hold", BeginBlockCapture);
         
         // Plays the currently collected command block at this point in Yarn flow.
         // Yarn waits until playback finishes
-        _dialogueRunner.AddCommandHandler<float>("block_end", PlayCapturedBlock);
+        runner.AddCommandHandler<float>("block_end", PlayCapturedBlock);
     }
 
+    // 레인 등록은 bootstrap이 명시적으로 한다: hub.RegisterPresentationLane(subRunner).
+    // 미등록 시 StartPresentationLaneCoroutine 은 hub 내부에서 null-lane으로 안전하게 no-op.
     private IEnumerator StartSubPresentationNode(string nodeName)
     {
-        if (_presentationInit)
-            yield return _sideRunnerSyncHub.StartPresentationLaneCoroutine(nodeName);
-
-        //EnqueueSubPresentationAdvanceSpec();
+        yield return _sideRunnerSyncHub.StartPresentationLaneCoroutine(nodeName);
     }
     
     private IEnumerator StopSubPresentationNode()
     {
-        if (_presentationInit)
-            yield return _sideRunnerSyncHub.StopPresentationLaneCoroutine();
+        yield return _sideRunnerSyncHub.StopPresentationLaneCoroutine();
     }
 
-    private void HoldSubPresentation(int lines)         => _sideRunnerSyncHub.HoldPresentation(lines);
+    private void HoldSubPresentation(int lines) => _sideRunnerSyncHub.HoldPresentation(lines);
+    
     private void AdvanceSubPresentationExtra(int steps) => _sideRunnerSyncHub.AdvancePresentationExtra(steps);
-    private void SetSubPresentationSuppressFirst(bool suppress)
-        => _sideRunnerSyncHub.SetPresentationSuppressFirstAutoAdvance(suppress);
+    
+    private void SetSubPresentationSuppressFirst(bool suppress) => _sideRunnerSyncHub.SetPresentationSuppressFirstAutoAdvance(suppress);
     
     private void PauseSubPresentation()  => _sideRunnerSyncHub.PausePresentation();
+    
     private void ResumeSubPresentation() => _sideRunnerSyncHub.ResumePresentation();
     
-    
     private void BeginBlockCapture() => _playbackDriver.BeginBlockCapture();
+    
     private IEnumerator PlayCapturedBlock(float waitTime = 1f)
     {
         EnqueueWaitSpec(waitTime);
         yield return _playbackDriver.PlayCapturedBlock();
     }
     
+    
     private void BindRunnerCommands(DialogueRunner runner)
     {
-        if (runner == null)
-            Debug.LogWarning("[YarnCommandBridge] Cannot bind commands. DialogueRunner is null.");
-        
         BindControl(runner);
 
         BindCharRigSetup(runner);

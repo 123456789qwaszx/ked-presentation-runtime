@@ -7,6 +7,8 @@ public sealed class CommandRunScope
     private readonly VNLinePresentationState _linePresentationAdvanceState;
     public CancellationToken Token { get; set; }
     
+    private readonly bool _reportsNodeBusy;
+    
     public PresentationStage Stage { get; }
     public CharacterRigRegistry characterRigs => Stage.characterRigs;
     public BackgroundRigRegistry backgroundRigs => Stage.backgroundRigs;
@@ -27,11 +29,13 @@ public sealed class CommandRunScope
     public CommandRunScope(
         PresentationSessionContext context,
         VNLinePresentationState linePresentationAdvanceState,
-        PresentationStage stage)
+        PresentationStage stage,
+        bool reportsNodeBusy = true)
     {
         _context = context;
         _linePresentationAdvanceState = linePresentationAdvanceState;
         Stage = stage;
+        _reportsNodeBusy = reportsNodeBusy;
         Token = CancellationToken.None;
     }
 
@@ -45,11 +49,13 @@ public sealed class CommandRunScope
         _context == null || !IsRollbackSeeking || !IsSkipping;
     public bool ShouldCompressTime => IsRollbackSeeking;
     
-    /// <summary>
-    /// Must be called only by the Executor.
-    /// </summary>
+    // 메인 레인만 공유 컨텍스트의 NodeBusy를 토글한다.
+    // 서브 레인(reportsNodeBusy=false)은 no-op → 공유 NodeBusy/AdvanceGate를 메인 기준으로 보존.
     public void SetNodeBusy(bool busy)
     {
+        if (!_reportsNodeBusy)
+            return;
+
         _context?.SetNodeBusy(busy);
     }
     

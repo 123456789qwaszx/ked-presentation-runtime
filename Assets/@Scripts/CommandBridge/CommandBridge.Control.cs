@@ -44,7 +44,7 @@ public sealed partial class YarnCommandBridge
     
     private void LogYarnState(string label)
     {
-        VariableStorageBehaviour storage = _dialogueRunner.VariableStorage;
+        VariableStorageBehaviour storage = _runner.VariableStorage;
 
         storage.TryGetValue("$favor", out float favor);
         storage.TryGetValue("$laru_patience", out float patience);

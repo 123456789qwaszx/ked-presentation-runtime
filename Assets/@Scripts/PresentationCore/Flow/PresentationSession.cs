@@ -11,6 +11,7 @@ public sealed class PresentationSession
     private readonly StepGatePlanBuilder _gatePlanner;
     private readonly StepGateAdvancer _gateAdvancer;
     private readonly CommandExecutor _executor;
+    private readonly CommandExecutor _subExecutor;
     
     // ---- Session-owned context ----
     private readonly PresentationSessionContext _context;
@@ -18,13 +19,17 @@ public sealed class PresentationSession
     
     // ---- Active run (per-Session) ----
     private CommandRunScope _sessionScope;
+    public CommandRunScope CurrentScope => _sessionScope;
+    
     private PresentationStage _stage;
+    
+    private CommandRunScope _subScope;
+    public CommandRunScope SubScope => _subScope;
     
     // ---- Runtime state ----
     private SequenceProgressState _state;
     private SequenceSpecSO _sequence;
     
-    public CommandRunScope CurrentScope => _sessionScope;
     public bool IsRunning => _sequence != null && _state != null && _sessionScope != null;
 
     public bool IsNodeBusy()
@@ -39,14 +44,15 @@ public sealed class PresentationSession
         StepGatePlanBuilder gatePlanner,
         StepGateAdvancer gateAdvancer,
         CommandExecutor executor,
+        CommandExecutor subExecutor,
         PresentationSessionContext presentationSessionContext,
         VNLinePresentationState linePresentationAdvanceState,
-        PresentationStage presentationStage
-    )
+        PresentationStage presentationStage)
     {
         _gatePlanner = gatePlanner;
         _gateAdvancer = gateAdvancer;
         _executor = executor;
+        _subExecutor = subExecutor;
         _context = presentationSessionContext;
         _linePresentationAdvanceState = linePresentationAdvanceState;
         _stage = presentationStage;
@@ -66,6 +72,8 @@ public sealed class PresentationSession
         _state = new SequenceProgressState(route);
         _sequence = sequence;
         _sessionScope = new CommandRunScope(_context, _linePresentationAdvanceState, _stage);
+        
+        _subScope = new CommandRunScope(_context, _linePresentationAdvanceState, _stage, reportsNodeBusy: false);
         
         _context.ResetSessionFlagsForStart();
         
@@ -150,11 +158,18 @@ public sealed class PresentationSession
     private void End()
     {
         _gateAdvancer.ClearLatchedSignals();
+        
         _executor.FinishAll(); // clear the session scope. 실행 중인 커맨드 정지
-        _stage?.Clear(); // 커맨드 정리 후 공유무대 파괴
+        _subExecutor?.FinishAll();    // 서브 레인 정지/정리
+        _subScope?.ClearRuntimeState(CleanupPolicy.Finish);  // 서브 scope lifetime 정리
+        
+        _stage?.Clear(); // 두 레인 모두 멈춘 뒤 공유 무대 파괴
+        
+        _subScope = null;
+        _sessionScope = null;
+        
         _sequence = null;
         _state = null;
-        _sessionScope = null;
     }
 
     #region Editor
