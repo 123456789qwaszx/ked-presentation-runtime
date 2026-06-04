@@ -1,5 +1,6 @@
 ﻿title: OnlyText
 ---
+<<run_setup c_oneshot>>
 <<sub_table a_presentation>>
 //<<sub_hold 999>>
 물론이지. 제대로 가져왔는지 확인해 볼 거야?

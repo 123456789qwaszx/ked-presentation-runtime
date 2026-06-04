@@ -10,6 +10,13 @@ public enum CommandRunTicketCloseReason
     Faulted = 900,
 }
 
+
+// EntryClosed does not mean that every visual effect has completed.
+// It means the command batch has finished its entry phase and the caller no longer needs to block.
+//
+// Each command is responsible for committing its own entry result to this ticket
+// when its entry run completes, fails, or is interrupted.
+// Background commands may continue afterward under their registered lifetime scope.
 public sealed class CommandRunTicket
 {
     private readonly int _totalCount;
