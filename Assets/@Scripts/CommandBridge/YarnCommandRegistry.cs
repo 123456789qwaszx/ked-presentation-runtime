@@ -30,7 +30,7 @@ public sealed class YarnCommandRegistry
 
     private void RegisterYarnCommands()
     {
-        _dialogueRunner.AddCommandHandler("beat", (Func<IEnumerator>)(() => _vnRuntimeBridge.Beat(BeatKey)));
+        _dialogueRunner.AddCommandHandler("legacy_beat", (Func<IEnumerator>)(() => _vnRuntimeBridge.Beat(BeatKey)));
         _dialogueRunner.AddCommandHandler<string>("WaitSignal", key => _vnRuntimeBridge.WaitSignal(key));
         
         // _dialogueRunner.AddCommandHandler<string>("set_named_box", SetNamedBox);

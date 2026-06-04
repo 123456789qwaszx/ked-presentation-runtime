@@ -47,18 +47,18 @@ public sealed partial class YarnCommandBridge
     private void BindMainLaneCommands(DialogueRunner runner)
     {
         // Main Runner only commands.
-        runner.AddCommandHandler<string>("sub_table", StartSubPresentationNode);
-        runner.AddCommandHandler("sub_table_end", StopSubPresentationNode);                  // 서브 라인 해제/종료
+        runner.AddCommandHandler<string>("pres_start", StartSubPresentationNode);
+        runner.AddCommandHandler("pres_end", StopSubPresentationNode);
         
-        runner.AddCommandHandler<string>("run_setup", RunOneShotNode);
-        
-        runner.AddCommandHandler("sub_table_pause",  PauseSubPresentation);   // 일시정지 (레인 유지)
-        runner.AddCommandHandler("sub_table_resume", ResumeSubPresentation);  // 재개
+        runner.AddCommandHandler("pres_pause",  PauseSubPresentation);  // 일시정지
+        runner.AddCommandHandler("pres_resume", ResumeSubPresentation); // 재개
 
         // 자동 진행 제어 (재호출 시 마지막 값으로 덮어씀)
-        runner.AddCommandHandler<int>("sub_hold", HoldSubPresentation);                       // N라인 멈춤 (999 = pause)
-        runner.AddCommandHandler<int>("sub_advance", AdvanceSubPresentationExtra);            // 이번 라인 N개 추가
-        runner.AddCommandHandler<bool>("sub_suppress_first", SetSubPresentationSuppressFirst);// 시작 첫 라인 suppress on/off
+        runner.AddCommandHandler<int>("pres_hold", HoldSubPresentation);                        // N라인 멈춤
+        runner.AddCommandHandler<int>("pres_advance", AdvanceSubPresentationExtra);             // 이번 라인 N개 추가
+        runner.AddCommandHandler<bool>("pres_suppress_first", SetSubPresentationSuppressFirst); // 시작 첫 라인 suppress on/off
+        
+        runner.AddCommandHandler<string>("beat", RunOneShotNode); // One-Shot Node 재생. 커맨드로만 이루어졌기에 즉시 재생 및 자동 종료
         
         // Starts capturing commands into a virtual command block.
         // Commands after <<capture_block>> are collected as one block-level execution unit.
