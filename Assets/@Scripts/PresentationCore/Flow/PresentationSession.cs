@@ -12,19 +12,22 @@ public sealed class PresentationSession
     private readonly StepGateAdvancer _gateAdvancer;
     private readonly CommandExecutor _executor;
     private readonly CommandExecutor _subExecutor;
+    private readonly CommandExecutor _subOneShotExecutor;
     
     // ---- Session-owned context ----
     private readonly PresentationSessionContext _context;
     private readonly VNLinePresentationState _linePresentationAdvanceState;
+    private PresentationStage _stage;
     
-    // ---- Active run (per-Session) ----
+    // ---- CommandRunScope (per-Lane) ----
     private CommandRunScope _sessionScope;
     public CommandRunScope CurrentScope => _sessionScope;
     
-    private PresentationStage _stage;
-    
     private CommandRunScope _subScope;
     public CommandRunScope SubScope => _subScope;
+    
+    private CommandRunScope _subOneShotScope;
+    public  CommandRunScope SubOneShotScope => _subOneShotScope;
     
     // ---- Runtime state ----
     private SequenceProgressState _state;
@@ -45,6 +48,7 @@ public sealed class PresentationSession
         StepGateAdvancer gateAdvancer,
         CommandExecutor executor,
         CommandExecutor subExecutor,
+        CommandExecutor subOneShotExecutor,
         PresentationSessionContext presentationSessionContext,
         VNLinePresentationState linePresentationAdvanceState,
         PresentationStage presentationStage)
@@ -53,6 +57,7 @@ public sealed class PresentationSession
         _gateAdvancer = gateAdvancer;
         _executor = executor;
         _subExecutor = subExecutor;
+        _subOneShotExecutor = subOneShotExecutor;
         _context = presentationSessionContext;
         _linePresentationAdvanceState = linePresentationAdvanceState;
         _stage = presentationStage;
@@ -72,8 +77,8 @@ public sealed class PresentationSession
         _state = new SequenceProgressState(route);
         _sequence = sequence;
         _sessionScope = new CommandRunScope(_context, _linePresentationAdvanceState, _stage);
-        
         _subScope = new CommandRunScope(_context, _linePresentationAdvanceState, _stage, reportsNodeBusy: false);
+        _subOneShotScope = new CommandRunScope(_context, _linePresentationAdvanceState, _stage, reportsNodeBusy: false);
         
         _context.ResetSessionFlagsForStart();
         
@@ -161,11 +166,13 @@ public sealed class PresentationSession
         
         _executor.Stop(); // clear the session scope. 실행 중인 커맨드 정지
         _subExecutor?.Stop();    // 서브 레인 정지/정리
+        _subOneShotExecutor?.Stop();
         
         _stage?.Clear(); // 두 레인 모두 멈춘 뒤 공유 무대 파괴
         
-        _subScope = null;
         _sessionScope = null;
+        _subScope = null;
+        _subOneShotScope = null;
         
         _sequence = null;
         _state = null;

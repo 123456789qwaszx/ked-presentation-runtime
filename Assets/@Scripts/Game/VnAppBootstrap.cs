@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.Serialization;
 using Yarn.Unity;
 
 public class VnAppBootstrap : MonoBehaviour
@@ -55,6 +54,10 @@ public class VnAppBootstrap : MonoBehaviour
     [SerializeField] private CommandExecutor subCommandExecutor;
     [SerializeField] private YarnBridgePlaybackDriver subYarnBridgePlaybackDriver;
     
+    [Header("OneShotExecutor")]
+    [SerializeField] private CommandExecutor oneShotCommandExecutor;
+    [SerializeField] private YarnBridgePlaybackDriver oneShotYarnBridgePlaybackDriver;
+    
 
     [Header("PresentationEntry")] 
     [SerializeField] private RouteCatalogSO routeCatalogSo;
@@ -64,6 +67,8 @@ public class VnAppBootstrap : MonoBehaviour
     [Header("Yarn")] 
     [SerializeField] private DialogueRunner dialogueRunner;
     [SerializeField] private DialogueRunner subPresentationRunner;
+    [SerializeField] private DialogueRunner subOneShotRunner;
+    
     [SerializeField] private LinePresenter linePresenter;
     [SerializeField] private VnRuntimeBridge vnRuntimeBridge;
     [SerializeField] private InlineEventMarkupHandler inlineEventMarkupHandler;
@@ -241,13 +246,14 @@ public class VnAppBootstrap : MonoBehaviour
 
         commandExecutor.Initialize(factory);
         subCommandExecutor.Initialize(factory);
+        oneShotCommandExecutor.Initialize(factory);
         
-
         PresentationSession presentationSession = new(
             gatePlanner,
             gateAdvancer,
             commandExecutor,
             subCommandExecutor,
+            oneShotCommandExecutor,
             _presentationSessionContext,
             _linePresentationAdvanceState,
             presentationStage);
@@ -272,8 +278,11 @@ public class VnAppBootstrap : MonoBehaviour
         yarnCommandRegistry.Initialize();
         mainYarnBridgePlaybackDriver.Initialize(commandExecutor, presentationSessionEntry);
         subYarnBridgePlaybackDriver.Initialize(subCommandExecutor, new SubPresentationScopeProvider(presentationSessionEntry));
+        oneShotYarnBridgePlaybackDriver.Initialize(oneShotCommandExecutor, presentationSessionEntry);
 
         _vnSideRunnerSyncHub.RegisterPresentationLane(subPresentationRunner);
+
+        OneShotPresentationLane oneShotPresentationLane = new(subOneShotRunner, oneShotYarnBridgePlaybackDriver);
         
         YarnCommandBridge yarnCommandBridge = new(
             dialogueRunner,
@@ -281,6 +290,7 @@ public class VnAppBootstrap : MonoBehaviour
             _vnRuntimeStateProvider,
             _vnSideRunnerSyncHub,
             rigPrefab,
+            oneShotPresentationLane,
             bindMainLaneCommands: true);
         
         YarnCommandBridge subYarnCommandBridge = new YarnCommandBridge(
@@ -289,6 +299,16 @@ public class VnAppBootstrap : MonoBehaviour
             _vnRuntimeStateProvider,
             _vnSideRunnerSyncHub, 
             rigPrefab, 
+            oneShotPresentationLane,
+            bindMainLaneCommands: false);
+        
+        YarnCommandBridge subOneShotYarnCommandBridge = new YarnCommandBridge(
+            subOneShotRunner, 
+            oneShotYarnBridgePlaybackDriver,
+            _vnRuntimeStateProvider,
+            _vnSideRunnerSyncHub, 
+            rigPrefab, 
+            oneShotPresentationLane,
             bindMainLaneCommands: false);
             
         subPresentationPresenter.Initialize(subYarnBridgePlaybackDriver, _vnSideRunnerSyncHub);

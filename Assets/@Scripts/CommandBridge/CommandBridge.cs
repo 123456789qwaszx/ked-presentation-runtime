@@ -12,6 +12,7 @@ public sealed partial class YarnCommandBridge
     private readonly RectTransform _charRigPrefab;
 
     private readonly VNSideRunnerSyncHub _sideRunnerSyncHub;
+    private readonly OneShotPresentationLane _oneShotPresentationLane;
 
     
     // 한 브리지 = 한 레인(러너 1 + 드라이버 1).
@@ -23,6 +24,7 @@ public sealed partial class YarnCommandBridge
         VNRuntimeStateProvider vnRuntimeStateProvider,
         VNSideRunnerSyncHub sideRunnerSyncHub,
         RectTransform charRigPrefab,
+        OneShotPresentationLane oneShotPresentationLane,
         bool bindMainLaneCommands)
     {
         _runner = runner;
@@ -38,6 +40,8 @@ public sealed partial class YarnCommandBridge
 
         if (bindMainLaneCommands)
             BindMainLaneCommands(_runner);
+        
+        _oneShotPresentationLane = oneShotPresentationLane;
     }
     
     private void BindMainLaneCommands(DialogueRunner runner)
@@ -45,6 +49,8 @@ public sealed partial class YarnCommandBridge
         // Main Runner only commands.
         runner.AddCommandHandler<string>("sub_table", StartSubPresentationNode);
         runner.AddCommandHandler("sub_table_end", StopSubPresentationNode);                  // 서브 라인 해제/종료
+        
+        runner.AddCommandHandler<string>("run_setup", RunOneShotNode);
         
         runner.AddCommandHandler("sub_table_pause",  PauseSubPresentation);   // 일시정지 (레인 유지)
         runner.AddCommandHandler("sub_table_resume", ResumeSubPresentation);  // 재개
@@ -74,6 +80,12 @@ public sealed partial class YarnCommandBridge
     private IEnumerator StopSubPresentationNode()
     {
         yield return _sideRunnerSyncHub.StopPresentationLaneCoroutine();
+    }
+    
+    private IEnumerator RunOneShotNode(string nodeName)
+    {
+        if (_oneShotPresentationLane != null)
+            yield return _oneShotPresentationLane.RunNodeCoroutine(nodeName);
     }
 
     private void HoldSubPresentation(int lines) => _sideRunnerSyncHub.HoldPresentation(lines);
