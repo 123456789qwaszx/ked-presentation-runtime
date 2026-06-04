@@ -183,12 +183,13 @@ public sealed class CommandExecutor : MonoBehaviour
             : CommandRunTicketCloseReason.Finished;
 
         CloseActiveTicketIfOpen(reason);
-        CancelAndDisposeToken();
 
         if (_mainRoutine != null)
         {
             StopCoroutine(_mainRoutine);
             _mainRoutine = null;
+            
+            CancelAndDisposeToken();
         }
 
         _activeScope?.ClearRuntimeState(policy);
