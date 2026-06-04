@@ -59,53 +59,19 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler<bool>("pres_suppress_first", SetSubPresentationSuppressFirst); // 시작 첫 라인 suppress on/off
         
         runner.AddCommandHandler<string>("beat", RunOneShotNode); // One-Shot Node 재생. 커맨드로만 이루어졌기에 즉시 재생 및 자동 종료
-        
-        // Starts capturing commands into a virtual command block.
-        // Commands after <<capture_block>> are collected as one block-level execution unit.
-        // Yarn timing is held until <<play_block>> plays the block.
-        runner.AddCommandHandler("block_hold", BeginBlockCapture);
-        
-        // Plays the currently collected command block at this point in Yarn flow.
-        // Yarn waits until playback finishes
-        runner.AddCommandHandler<float>("block_end", PlayCapturedBlock);
     }
 
-    // 레인 등록은 bootstrap이 명시적으로 한다: hub.RegisterPresentationLane(subRunner).
-    // 미등록 시 StartPresentationLaneCoroutine 은 hub 내부에서 null-lane으로 안전하게 no-op.
-    private IEnumerator StartSubPresentationNode(string nodeName)
-    {
-        yield return _sideRunnerSyncHub.StartPresentationLaneCoroutine(nodeName);
-    }
-    
-    private IEnumerator StopSubPresentationNode()
-    {
-        yield return _sideRunnerSyncHub.StopPresentationLaneCoroutine();
-    }
-    
-    private IEnumerator RunOneShotNode(string nodeName)
-    {
-        if (_oneShotPresentationLane != null)
-            yield return _oneShotPresentationLane.RunNodeCoroutine(nodeName);
-    }
-
+    // Lane registration is explicitly handled by bootstrap:
+    // hub.RegisterPresentationLane(subRunner).
+    private IEnumerator StartSubPresentationNode(string nodeName) => _sideRunnerSyncHub.StartPresentationLaneCoroutine(nodeName);
+    private IEnumerator StopSubPresentationNode() => _sideRunnerSyncHub.StopPresentationLaneCoroutine();
+    private void PauseSubPresentation()  => _sideRunnerSyncHub.PausePresentation();
+    private void ResumeSubPresentation() => _sideRunnerSyncHub.ResumePresentation();
     private void HoldSubPresentation(int lines) => _sideRunnerSyncHub.HoldPresentation(lines);
-    
     private void AdvanceSubPresentationExtra(int steps) => _sideRunnerSyncHub.AdvancePresentationExtra(steps);
-    
     private void SetSubPresentationSuppressFirst(bool suppress) => _sideRunnerSyncHub.SetPresentationSuppressFirstAutoAdvance(suppress);
     
-    private void PauseSubPresentation()  => _sideRunnerSyncHub.PausePresentation();
-    
-    private void ResumeSubPresentation() => _sideRunnerSyncHub.ResumePresentation();
-    
-    private void BeginBlockCapture() => _playbackDriver.BeginBlockCapture();
-    
-    private IEnumerator PlayCapturedBlock(float waitTime = 1f)
-    {
-        EnqueueWaitSpec(waitTime);
-        yield return _playbackDriver.PlayCapturedBlock();
-    }
-    
+    private IEnumerator RunOneShotNode(string nodeName) => _oneShotPresentationLane.RunNodeCoroutine(nodeName);
     
     private void BindRunnerCommands(DialogueRunner runner)
     {
@@ -129,6 +95,15 @@ public sealed partial class YarnCommandBridge
 
     private void BindControl(DialogueRunner runner)
     {
+        // Starts capturing commands into a virtual command block.
+        // Commands after <<capture_block>> are collected as one block-level execution unit.
+        // Yarn timing is held until <<play_block>> plays the block.
+        runner.AddCommandHandler("block_hold", BeginBlockCapture);
+        
+        // Plays the currently collected command block at this point in Yarn flow.
+        // Yarn waits until playback finishes
+        runner.AddCommandHandler<float>("block_end", PlayCapturedBlock);
+        
         runner.AddCommandHandler<float>("pause", EnqueueWaitSpec);
         
         runner.AddCommandHandler<string>("ui_patch", EnqueueUIPatchSpec);

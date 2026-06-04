@@ -24,6 +24,7 @@
 a1.(물건을 건네받은 수상한 사람은 그것을 입으로 가져가 조심스럽게 베어 물었다. 고요한 골목 안에 기괴한 저작음이 울려 퍼졌다.
 //<<shot_zoom_focus Leafia bust center 3 0.8>>
 <<jolt Leafia>>
+<<shot_zoom_focus Leafia Body bottom 0 1>>
 
 a2.(쩝쩝쩝 ..... 맞아, 바로 이 맛이야.
 //<<shot_zoom_focus Albedo bust center 10 0.8>>
@@ -67,7 +68,7 @@ a9.
 
 
 a10.(어둠 속에서 누군가가 나직한 목소리로 물었다.
-<<shot_zoom_focus Leafia bust center 10 4.5>>
+<<shot_zoom_focus Leafia bust center 0 4.5>>
 
 
 a11.(상대방인 의심스러운 사람이 품 안에서 소중한 듯 무언가를 꺼내 보이며 대꾸했다.
@@ -83,11 +84,42 @@ a13.
 
 //<<box_hide 3>>
 
-<<pause 1.5>>
 <<move_by AFK -500 333  2>>
 <<shot_bind_char_response Sapphire 0>>
 
-<<pause 0.4>>
+<<shot_zoom_focus Sapphire bust center 10 4.5>>
+
+
+a14.윌로:미안하게 됐어.
+
+a15.라루:3분의 1?
+
+a16.의심스러운 사람은 만족한 듯한 상대의 반응을 확인하고는 본론을 꺼냈다.
+<<move_by AFK -500 333  2>>
+<<shot_bind_char_response Sapphire 0>>
+
+<<shot_zoom_focus Sapphire bust center 10 4.5>>
+
+
+a14.윌로:미안하게 됐어.
+
+a15.라루:3분의 1?
+
+a16.의심스러운 사람은 만족한 듯한 상대의 반응을 확인하고는 본론을 꺼냈다.
+<<move_by AFK -500 333  2>>
+<<shot_bind_char_response Sapphire 0>>
+
+<<shot_zoom_focus Sapphire bust center 10 4.5>>
+
+
+a14.윌로:미안하게 됐어.
+
+a15.라루:3분의 1?
+
+a16.의심스러운 사람은 만족한 듯한 상대의 반응을 확인하고는 본론을 꺼냈다.
+<<move_by AFK -500 333  2>>
+<<shot_bind_char_response Sapphire 0>>
+
 <<shot_zoom_focus Sapphire bust center 10 4.5>>
 
 

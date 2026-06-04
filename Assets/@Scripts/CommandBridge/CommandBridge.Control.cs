@@ -4,6 +4,14 @@ using Yarn.Unity;
 
 public sealed partial class YarnCommandBridge
 {
+    private void BeginBlockCapture() => _playbackDriver.BeginBlockCapture();
+    
+    private IEnumerator PlayCapturedBlock(float waitTime = 1f)
+    {
+        EnqueueWaitSpec(waitTime);
+        yield return _playbackDriver.PlayCapturedBlock();
+    }
+    
     private void EnqueueWaitSpec(float duration)
     {
         var spec = new WaitCommandSpec()

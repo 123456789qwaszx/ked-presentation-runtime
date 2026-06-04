@@ -2,7 +2,7 @@
 ---
 
 <<slot Leafia 0>>
-<<cast Leafia Matilda a 02 true left normal>>
+<<cast Leafia Leafia a 02 true left normal>>
 <<shot_bind_char_response Leafia 0>>
 
 <<slot Albedo 0>>
@@ -18,11 +18,11 @@
 
 
 
-<<slot AFK>>
-<<cast AFK Sapphire a 11 true center normal>>
+// <<slot AFK>>
+// <<cast AFK Sapphire a 11 true center normal>>
 
-<<slot RUB>>
-<<cast RUB Ruby a 2 true left normal>>
+// <<slot RUB>>
+// <<cast RUB Ruby a 2 true left normal>>
 
 
 ===

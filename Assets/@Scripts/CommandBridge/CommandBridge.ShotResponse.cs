@@ -89,8 +89,7 @@ public sealed partial class YarnCommandBridge
             zoom = Mathf.Clamp(zoom, -10f, 10f),
             duration = duration,
             ease = Ease.OutCubic,
-            wait = false,
-            killTween = true
+            wait = false
         };
         
         Collect(spec);
@@ -104,8 +103,7 @@ public sealed partial class YarnCommandBridge
             relative = true,
             duration = duration,
             ease = Ease.OutCubic,
-            wait = false,
-            killTween = true
+            wait = false
         };
         
         Collect(spec);
