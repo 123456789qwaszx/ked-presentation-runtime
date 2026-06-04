@@ -159,9 +159,8 @@ public sealed class PresentationSession
     {
         _gateAdvancer.ClearLatchedSignals();
         
-        _executor.FinishAll(); // clear the session scope. 실행 중인 커맨드 정지
-        _subExecutor?.FinishAll();    // 서브 레인 정지/정리
-        _subScope?.ClearRuntimeState(CleanupPolicy.Finish);  // 서브 scope lifetime 정리
+        _executor.Stop(); // clear the session scope. 실행 중인 커맨드 정지
+        _subExecutor?.Stop();    // 서브 레인 정지/정리
         
         _stage?.Clear(); // 두 레인 모두 멈춘 뒤 공유 무대 파괴
         

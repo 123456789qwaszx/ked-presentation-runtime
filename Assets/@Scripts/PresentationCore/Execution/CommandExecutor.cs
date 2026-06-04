@@ -187,12 +187,11 @@ public sealed class CommandExecutor : MonoBehaviour
         if (_mainRoutine != null)
         {
             StopCoroutine(_mainRoutine);
-            _mainRoutine = null;
-            
-            CancelAndDisposeToken();
         }
 
         _activeScope?.ClearRuntimeState(policy);
+        CancelAndDisposeToken();
+        _mainRoutine = null;
         _activeScope = null;
     }
 
