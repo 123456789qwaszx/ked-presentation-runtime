@@ -79,7 +79,7 @@ public sealed class VNLoadSeekDriver
 
         // Load는 새 지점으로 점프하므로, 이전 연결된 sub 레인을 하드 컷한다.
         // (로드된 노드가 재생 중 sub_table을 다시 만나면 거기서 새로 시작됨)
-        _sideRunnerSyncHub.StopAllLanes();
+        _sideRunnerSyncHub.ResetPresentationLane();
 
         _restarter.StartGame(saveData.nodeName);
     }

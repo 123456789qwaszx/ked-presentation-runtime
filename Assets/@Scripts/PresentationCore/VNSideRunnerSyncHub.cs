@@ -1,269 +1,333 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
+using UnityEngine;
 using Yarn.Unity;
-
-public static class VNSideRunnerLaneKeys
-{
-    public const string Presentation = "presentation";
-    public const string Camera = "camera";
-    public const string Option = "option";
-    public const string Choice = "choice";
-    public const string Data = "data";
-}
 
 public sealed class VNSideRunnerSyncHub
 {
-    private sealed class LaneState
+    private sealed class PresentationLaneState
     {
-        public readonly DialogueRunner Runner;
+        public DialogueRunner Runner;
+
         public int PendingAdvanceCount;
+        public int HoldRemainingLines;
+        public int ExtraAdvanceCount;
+
+        public bool IsStarted;
+        public bool IsCompleted;
         public bool IsReadyForAdvance;
+        public bool IsReleased;
+        public bool IsPaused;
+        public bool SuppressFirstAutoAdvance;
 
-        public int HoldRemaining;
-        public int ExtraAdvance;
-        public bool SuppressFirstAutoAdvance = true;
-        public bool SuppressNextAutoAdvance;
-        public bool Paused;
+        public bool CanAcceptAdvance
+        {
+            get
+            {
+                if (Runner == null)
+                    return false;
 
-        public LaneState(DialogueRunner runner) { Runner = runner; }
+                if (!IsStarted)
+                    return false;
 
-        public void Reset()
+                if (IsCompleted)
+                    return false;
+
+                return true;
+            }
+        }
+
+        public bool IsBlockingMainFlow
+        {
+            get
+            {
+                if (Runner == null)
+                    return false;
+
+                if (!IsStarted)
+                    return false;
+
+                if (IsCompleted)
+                    return false;
+
+                if (IsReadyForAdvance)
+                    return false;
+
+                if (IsReleased)
+                    return false;
+
+                return true;
+            }
+        }
+
+        public void ResetForStart()
         {
             PendingAdvanceCount = 0;
+            HoldRemainingLines = 0;
+            ExtraAdvanceCount = 0;
+
+            IsStarted = true;
+            IsCompleted = false;
             IsReadyForAdvance = false;
-            HoldRemaining = 0;
-            ExtraAdvance = 0;
-            Paused = false;
-            SuppressNextAutoAdvance = SuppressFirstAutoAdvance;
+            IsReleased = false;
+            IsPaused = false;
+        }
+
+        public void ResetAll()
+        {
+            PendingAdvanceCount = 0;
+            HoldRemainingLines = 0;
+            ExtraAdvanceCount = 0;
+
+            IsStarted = false;
+            IsCompleted = false;
+            IsReadyForAdvance = false;
+            IsReleased = false;
+            IsPaused = false;
+            SuppressFirstAutoAdvance = false;
+        }
+
+        public void MarkCompleted()
+        {
+            PendingAdvanceCount = 0;
+            ExtraAdvanceCount = 0;
+            HoldRemainingLines = 0;
+
+            IsCompleted = true;
+            IsReadyForAdvance = false;
+            IsReleased = false;
+            IsPaused = false;
         }
     }
 
-    private readonly Dictionary<string, LaneState> _lanes = new(StringComparer.Ordinal);
+    private readonly PresentationLaneState _presentation = new PresentationLaneState();
 
-    public event Action<string> LaneReady;
-
-    public bool RegisterPresentationLane(DialogueRunner runner) => RegisterLane(VNSideRunnerLaneKeys.Presentation, runner);
-    public IEnumerator StartPresentationLaneCoroutine(string nodeName) => StartLaneCoroutine(VNSideRunnerLaneKeys.Presentation, nodeName);
-    public IEnumerator StopPresentationLaneCoroutine() => StopLaneCoroutine(VNSideRunnerLaneKeys.Presentation);
-    public YarnTask WaitUntilPresentationLaneReadyAsync() => WaitUntilLaneReadyAsync(VNSideRunnerLaneKeys.Presentation);
-    public void DispatchPresentationAdvance() => DispatchLaneAdvance(VNSideRunnerLaneKeys.Presentation);
-    public void NotifyPresentationLaneReady() => NotifyLaneReady(VNSideRunnerLaneKeys.Presentation);
-    public void NotifyPresentationLaneNotReady() => NotifyLaneNotReady(VNSideRunnerLaneKeys.Presentation);
-    // public API 영역 (NotifyPresentationLaneNotReady 아래)
-    public void NotifyPresentationLaneReleased() => NotifyLaneReleased(VNSideRunnerLaneKeys.Presentation);
-
-    // 정방향: suppress/hold/extra 적용한 advance 횟수
-    public int ConsumePresentationAutoAdvanceCount() => ConsumeAutoAdvanceCount(VNSideRunnerLaneKeys.Presentation);
-    // 시크(롤백/로드): base 재동기화 횟수. suppress만 존중, hold/extra는 의도적으로 무시.
-    public int ConsumePresentationSeekResyncCount() => ConsumeSeekResyncCount(VNSideRunnerLaneKeys.Presentation);
-
-    // 제어 커맨드 (override = 마지막 값으로 덮어씀)
-    public void HoldPresentation(int lines)         => SetHold(VNSideRunnerLaneKeys.Presentation, lines);
-    public void AdvancePresentationExtra(int steps) => SetExtraAdvance(VNSideRunnerLaneKeys.Presentation, steps);
-    public void SetPresentationSuppressFirstAutoAdvance(bool suppress)
-        => SetSuppressFirst(VNSideRunnerLaneKeys.Presentation, suppress);
-    
-    public void PausePresentation()  => SetPaused(VNSideRunnerLaneKeys.Presentation, true);
-    public void ResumePresentation() => SetPaused(VNSideRunnerLaneKeys.Presentation, false);
-
-    private void SetPaused(string laneKey, bool paused)
+    public void RegisterPresentationLane(DialogueRunner runner)
     {
-        LaneState lane = GetLane(laneKey);
-        if (lane != null) lane.Paused = paused;
+        _presentation.Runner = runner;
     }
 
-    // Load 등 하드 컷: 등록된 모든 사이드 레인의 러너를 멈추고 상태 초기화.
-    // (메인 러너는 레인이 아니므로 영향 없음)
-    public void StopAllLanes()
+    public IEnumerator StartPresentationLaneCoroutine(string nodeName)
     {
-        foreach (LaneState lane in _lanes.Values)
+        if (_presentation.Runner == null)
         {
-            if (lane.Runner != null && lane.Runner.IsDialogueRunning)
-                lane.Runner.Stop();   // ※ Yarn 버전별 API 확인
-            lane.Reset();
+            Debug.LogWarning("[VNSideRunnerSyncHub] Cannot start presentation lane. Runner is null.");
+            yield break;
+        }
+
+        if (string.IsNullOrEmpty(nodeName))
+        {
+            Debug.LogWarning("[VNSideRunnerSyncHub] Cannot start presentation lane. nodeName is null or empty.");
+            yield break;
+        }
+
+        if (_presentation.Runner.IsDialogueRunning)
+        {
+            YarnTask stopTask = _presentation.Runner.Stop();
+            while (!stopTask.IsCompletedSuccessfully())
+                yield return null;
+        }
+
+        _presentation.ResetForStart();
+
+        YarnTask startTask = _presentation.Runner.StartDialogue(nodeName);
+        while (!startTask.IsCompletedSuccessfully())
+            yield return null;
+
+        TryFlushPresentationLane();
+    }
+
+    public IEnumerator StopPresentationLaneCoroutine()
+    {
+        if (_presentation.Runner == null)
+            yield break;
+
+        _presentation.MarkCompleted();
+
+        if (_presentation.Runner.IsDialogueRunning)
+        {
+            YarnTask stopTask = _presentation.Runner.Stop();
+            while (!stopTask.IsCompletedSuccessfully())
+                yield return null;
         }
     }
 
     public void ClearAllForSeekOrLoad()
     {
-        foreach (LaneState lane in _lanes.Values)
-            lane.Reset();
+        _presentation.PendingAdvanceCount = 0;
+        _presentation.IsReadyForAdvance = false;
+        _presentation.IsReleased = false;
     }
 
-    private bool RegisterLane(string laneKey, DialogueRunner runner)
+    public void ResetPresentationLane()
     {
-        if (string.IsNullOrEmpty(laneKey) || runner == null)
-            return false;
-        if (_lanes.ContainsKey(laneKey))
-            return true;
-        _lanes.Add(laneKey, new LaneState(runner));
-        return true;
+        _presentation.ResetAll();
     }
 
-    private IEnumerator StartLaneCoroutine(string laneKey, string nodeName)
+    public void NotifyPresentationLaneReady()
     {
-        LaneState lane = GetLane(laneKey);
-        if (lane == null)
-            yield break;
-
-        lane.Reset();   // suppress 정책 적용 + hold/extra 클리어
-
-        YarnTask startTask = lane.Runner.StartDialogue(nodeName);
-        while (!startTask.IsCompletedSuccessfully())
-            yield return null;
-    }
-
-    private IEnumerator StopLaneCoroutine(string laneKey)
-    {
-        LaneState lane = GetLane(laneKey);
-        if (lane == null)
-            yield break;
-
-        if (lane.Runner != null && lane.Runner.IsDialogueRunning)
-            lane.Runner.Stop();   // ※ Yarn 버전별 API 확인
-
-        lane.Reset();
-    }
-
-    private async YarnTask WaitUntilLaneReadyAsync(string laneKey)
-    {
-        LaneState lane = GetLane(laneKey);
-        if (lane == null)
+        if (!_presentation.CanAcceptAdvance)
             return;
 
-        // 레인이 실행 중이 아니면 기다릴 대상이 없음 → 즉시 반환 (롤백/로드 hang 방지)
-        if (lane.Runner == null || !lane.Runner.IsDialogueRunning)
+        _presentation.IsReadyForAdvance = true;
+        _presentation.IsReleased = false;
+
+        TryFlushPresentationLane();
+    }
+
+    public void NotifyPresentationLaneReleased()
+    {
+        if (!_presentation.CanAcceptAdvance)
             return;
 
-        if (lane.IsReadyForAdvance)
+        // Released means the current sub line was torn down by rollback/stop/request-next
+        // before its command entry naturally completed.
+        // It should unblock main-side waiting, but it must not consume pending advance.
+        _presentation.IsReadyForAdvance = false;
+        _presentation.IsReleased = true;
+    }
+
+    public void NotifyPresentationLaneNotReady()
+    {
+        if (_presentation.IsCompleted)
             return;
 
-        bool ready = false;
-        void OnLaneReady(string readyLaneKey)
+        _presentation.IsReadyForAdvance = false;
+        _presentation.IsReleased = false;
+    }
+
+    public void NotifyPresentationLaneCompleted()
+    {
+        _presentation.MarkCompleted();
+    }
+
+    public int ConsumePresentationAutoAdvanceCount()
+    {
+        if (!_presentation.CanAcceptAdvance)
+            return 0;
+
+        if (_presentation.IsPaused)
+            return 0;
+
+        if (_presentation.SuppressFirstAutoAdvance)
         {
-            if (string.Equals(readyLaneKey, laneKey, StringComparison.Ordinal))
-                ready = true;
+            _presentation.SuppressFirstAutoAdvance = false;
+            return ConsumeExtraAdvanceOnly();
         }
 
-        LaneReady += OnLaneReady;
-        while (!ready)
-            await YarnTask.Yield();
-        LaneReady -= OnLaneReady;
+        if (_presentation.HoldRemainingLines > 0)
+        {
+            _presentation.HoldRemainingLines--;
+            return ConsumeExtraAdvanceOnly();
+        }
+
+        int count = 1 + _presentation.ExtraAdvanceCount;
+        _presentation.ExtraAdvanceCount = 0;
+
+        return count;
     }
 
-    private void DispatchLaneAdvance(string laneKey)
+    public int ConsumePresentationSeekResyncCount()
     {
-        LaneState lane = GetLane(laneKey);
-        if (lane == null)
-            return;
-        lane.PendingAdvanceCount++;
-        TryFlush(lane);
-    }
-
-    private void NotifyLaneReady(string laneKey)
-    {
-        LaneState lane = GetLane(laneKey);
-        if (lane == null)
-            return;
-        lane.IsReadyForAdvance = true;
-        LaneReady?.Invoke(laneKey);
-        TryFlush(lane);
-    }
-
-    private void NotifyLaneNotReady(string laneKey)
-    {
-        LaneState lane = GetLane(laneKey);
-        if (lane == null)
-            return;
-        lane.IsReadyForAdvance = false;
-    }
-    
-    // NotifyLaneNotReady 메서드 아래에 추가
-    // 취소/중단으로 끝난 라인을 위한 경로.
-    // main 대기(seek pass-through의 WaitUntilLaneReadyAsync)는 풀어주되,
-    // lane을 advanceable로 만들지 않고 TryFlush도 호출하지 않는다.
-    // → cancelled 라인이 pending을 소모하거나 RequestNextLine을 유발하지 못하게 막는다.
-    private void NotifyLaneReleased(string laneKey)
-    {
-        LaneState lane = GetLane(laneKey);
-        if (lane == null)
-            return;
-
-        lane.IsReadyForAdvance = false;   // 전진 불가 상태로 둠
-        LaneReady?.Invoke(laneKey);       // 단, 대기 중인 main은 깨움 (hang 방지)
-        // 의도적으로 TryFlush 없음.
-    }
-
-    private bool TryFlush(LaneState lane)
-    {
-        if (lane.PendingAdvanceCount <= 0)
-            return false;
-        if (!lane.IsReadyForAdvance)
-            return false;
-        if (lane.Runner == null || !lane.Runner.IsDialogueRunning)
-            return false;
-
-        lane.PendingAdvanceCount--;
-        lane.IsReadyForAdvance = false;
-        lane.Runner.RequestNextLine();
-        return true;
-    }
-
-    private int ConsumeAutoAdvanceCount(string laneKey)
-    {
-        LaneState lane = GetLane(laneKey);
-        if (lane == null || lane.Runner == null || !lane.Runner.IsDialogueRunning)
+        if (!_presentation.CanAcceptAdvance)
             return 0;
 
-        if (lane.Paused)                                 // NEW: 일시정지면 정지
+        if (_presentation.IsPaused)
             return 0;
 
-        int baseStep;
-        if (lane.SuppressNextAutoAdvance) { lane.SuppressNextAutoAdvance = false; baseStep = 0; }
-        else if (lane.HoldRemaining > 0)  { lane.HoldRemaining--;               baseStep = 0; }
-        else                              baseStep = 1;
+        // During seek, the main flow asks the presentation lane to resync to the base line.
+        // Extra forward-play advances are not meaningful in seek, so clear them.
+        _presentation.ExtraAdvanceCount = 0;
 
-        int extra = lane.ExtraAdvance;
-        lane.ExtraAdvance = 0;
-        return baseStep + extra;
-    }
-
-    private int ConsumeSeekResyncCount(string laneKey)
-    {
-        LaneState lane = GetLane(laneKey);
-        if (lane == null || lane.Runner == null || !lane.Runner.IsDialogueRunning)
-            return 0;
-
-        if (lane.Paused)                                 // NEW: 정지 구간은 재생 중에도 정지 유지
-            return 0;
-
-        if (lane.SuppressNextAutoAdvance) { lane.SuppressNextAutoAdvance = false; return 0; }
         return 1;
     }
-    
 
-    private void SetHold(string laneKey, int lines)
+    public void DispatchPresentationAdvance()
     {
-        LaneState lane = GetLane(laneKey);
-        if (lane != null) lane.HoldRemaining = Math.Max(0, lines);
+        if (!_presentation.CanAcceptAdvance)
+            return;
+
+        if (_presentation.IsPaused)
+            return;
+
+        _presentation.PendingAdvanceCount++;
+        TryFlushPresentationLane();
     }
 
-    private void SetExtraAdvance(string laneKey, int steps)
+    public async YarnTask WaitUntilPresentationLaneReadyAsync()
     {
-        LaneState lane = GetLane(laneKey);
-        if (lane != null) lane.ExtraAdvance = Math.Max(0, steps);
+        while (_presentation.IsBlockingMainFlow)
+            await YarnTask.Yield();
     }
 
-    private void SetSuppressFirst(string laneKey, bool suppress)
+    public void HoldPresentation(int lines)
     {
-        LaneState lane = GetLane(laneKey);
-        if (lane != null) lane.SuppressFirstAutoAdvance = suppress;   // 다음 sub_table(Reset) 때 적용
+        if (lines < 0)
+            lines = 0;
+
+        _presentation.HoldRemainingLines = lines;
     }
 
-    private LaneState GetLane(string laneKey)
+    public void AdvancePresentationExtra(int steps)
     {
-        _lanes.TryGetValue(laneKey, out LaneState lane);
-        return lane;
+        if (steps <= 0)
+            return;
+
+        if (!_presentation.CanAcceptAdvance)
+            return;
+
+        _presentation.ExtraAdvanceCount += steps;
+    }
+
+    public void SetPresentationSuppressFirstAutoAdvance(bool suppress)
+    {
+        _presentation.SuppressFirstAutoAdvance = suppress;
+    }
+
+    public void PausePresentation()
+    {
+        _presentation.IsPaused = true;
+    }
+
+    public void ResumePresentation()
+    {
+        _presentation.IsPaused = false;
+        TryFlushPresentationLane();
+    }
+
+    private int ConsumeExtraAdvanceOnly()
+    {
+        int count = _presentation.ExtraAdvanceCount;
+        _presentation.ExtraAdvanceCount = 0;
+        return count;
+    }
+
+    private void TryFlushPresentationLane()
+    {
+        if (!_presentation.CanAcceptAdvance)
+            return;
+
+        if (_presentation.IsPaused)
+            return;
+
+        if (_presentation.PendingAdvanceCount <= 0)
+            return;
+
+        if (!_presentation.IsReadyForAdvance)
+            return;
+
+        _presentation.PendingAdvanceCount--;
+        _presentation.IsReadyForAdvance = false;
+        _presentation.IsReleased = false;
+
+        if (_presentation.Runner == null)
+            return;
+
+        if (!_presentation.Runner.IsDialogueRunning)
+        {
+            _presentation.MarkCompleted();
+            return;
+        }
+
+        _presentation.Runner.RequestNextLine();
     }
 }

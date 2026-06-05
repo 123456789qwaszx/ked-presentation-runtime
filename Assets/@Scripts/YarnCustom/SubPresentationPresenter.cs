@@ -7,7 +7,7 @@ public sealed class SubPresentationPresenter : DialoguePresenterBase
     private YarnBridgePlaybackDriver _playbackDriver;
     private VNSideRunnerSyncHub _syncHub;
 
-    private CancellationTokenSource _presenterLifetimeCts = new();
+    private CancellationTokenSource _presenterLifetimeCts = new CancellationTokenSource();
 
     public void Initialize(YarnBridgePlaybackDriver playbackDriver, VNSideRunnerSyncHub syncHub)
     {
@@ -23,6 +23,10 @@ public sealed class SubPresentationPresenter : DialoguePresenterBase
     public override YarnTask OnDialogueCompleteAsync()
     {
         CancelPresenterLifetimeWaiters();
+
+        if (_syncHub != null)
+            _syncHub.NotifyPresentationLaneCompleted();
+
         return YarnTask.CompletedTask;
     }
 
@@ -34,13 +38,17 @@ public sealed class SubPresentationPresenter : DialoguePresenterBase
 
         // 취소(rollback / stop / 직전 라인의 RequestNextLine)로 무너진 라인은
         // "완료된 advance"로 취급하면 안 된다. 그러면 pending을 소모하고
-        // RequestNextLine을 한 번 더 쳐서 — 그게 질주다. 대신 main 대기만 풀어준다.
+        // RequestNextLine을 한 번 더 쳐서 질주한다.
+        // 대신 main 대기만 풀어준다.
         bool tornDown = cancelledDuringEntry || token.NextContentToken.IsCancellationRequested;
 
-        if (tornDown)
-            _syncHub.NotifyPresentationLaneReleased();
-        else
-            _syncHub.NotifyPresentationLaneReady();
+        if (_syncHub != null)
+        {
+            if (tornDown)
+                _syncHub.NotifyPresentationLaneReleased();
+            else
+                _syncHub.NotifyPresentationLaneReady();
+        }
 
         try
         {
@@ -48,7 +56,8 @@ public sealed class SubPresentationPresenter : DialoguePresenterBase
         }
         finally
         {
-            _syncHub.NotifyPresentationLaneNotReady();
+            if (_syncHub != null)
+                _syncHub.NotifyPresentationLaneNotReady();
         }
     }
 
@@ -61,13 +70,13 @@ public sealed class SubPresentationPresenter : DialoguePresenterBase
         while (!ticket.EntryClosed)
         {
             if (token.NextContentToken.IsCancellationRequested)
-                return true;   // entry 닫히기 전 취소됨
+                return true;
 
             await YarnTask.Yield();
         }
 
-        ReportTicketIfNeeded(ticket);   // 진단 로그는 유지
-        return false;                   // entry 정상적으로 닫힘
+        ReportTicketIfNeeded(ticket);
+        return false;
     }
 
     private void ReportTicketIfNeeded(CommandRunTicket ticket)

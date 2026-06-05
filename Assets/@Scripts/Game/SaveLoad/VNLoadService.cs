@@ -35,8 +35,8 @@ public sealed class VNLoadService
 
     public bool Load(string slotId)
     {
-        if (_isLoading)
-            return false;
+        // if (_isLoading)
+        //     return false;
         
         if (!_safetyPolicy.CanLoadNow(out string reason))
         {
