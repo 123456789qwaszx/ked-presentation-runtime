@@ -1,25 +1,53 @@
 using UnityEngine;
 
-public interface IPresentationRigSpaceRootProvider { RectTransform RigSpaceRoot  { get; } }
-public sealed partial class PresentationUIRoot : IPresentationRigSpaceRootProvider { public RectTransform RigSpaceRoot  => View.Rect(Refs.StageShot_Root); }
+public interface IPresentationRigSpaceRootProvider
+{
+    RectTransform RigSpaceRoot { get; }
+}
+
+public sealed partial class PresentationUIRoot : IPresentationRigSpaceRootProvider
+{
+    public RectTransform RigSpaceRoot => View.Rect(Refs.StageShot_Root);
+}
 
 public sealed class PresentationResponseCoordinateMapper
 {
-    private readonly IPresentationRigSpaceRootProvider _stageRootProvider = UIManager.Instance.GetUI<PresentationUIRoot>();
-    
-    public Vector2 CaptureNeutralPivotInRigSpace(IResponseTarget target)
+    private IPresentationRigSpaceRootProvider _stageRootProvider;
+
+    public PresentationResponseMeasure CaptureCurrentMeasure(IResponseTarget target)
     {
-        return PresentationCoordinateMath.CaptureNeutralPivotInRigSpace(
-            target.MeasureRect, 
-            _stageRootProvider.RigSpaceRoot);
+        RectTransform rigSpaceRoot = GetRigSpaceRoot();
+
+        Vector2 basePositionInRigSpace =
+            PresentationCoordinateMath.CaptureNeutralPivotInRigSpace(
+                target.MeasureRect,
+                rigSpaceRoot);
+
+        Vector2 baseLocalScale =
+            PresentationCoordinateMath.CaptureNeutralScale(
+                target.MeasureRect);
+
+        return new PresentationResponseMeasure(
+            basePositionInRigSpace,
+            baseLocalScale);
     }
-    
-    public Vector2 ConvertPositionFromRigSpaceToTargetParentSpace(Vector2 positionInRigSpace, IResponseTarget target)
+
+    public Vector2 ConvertPositionFromRigSpaceToTargetParentSpace(
+        Vector2 positionInRigSpace,
+        IResponseTarget target)
     {
         return PresentationCoordinateMath.ConvertPointFromRigSpaceToTargetPositionParentSpace(
             positionInRigSpace,
-            _stageRootProvider.RigSpaceRoot,
+            GetRigSpaceRoot(),
             target.PositionRect.parent as RectTransform);
+    }
+
+    private RectTransform GetRigSpaceRoot()
+    {
+        if (_stageRootProvider == null)
+            _stageRootProvider = UIManager.Instance.GetUI<PresentationUIRoot>();
+
+        return _stageRootProvider.RigSpaceRoot;
     }
 }
 
@@ -37,6 +65,15 @@ public static class PresentationCoordinateMath
         Vector3 localPivot = rigSpaceRoot.InverseTransformPoint(worldPivot);
 
         return new Vector2(localPivot.x, localPivot.y);
+    }
+    
+    public static Vector2 CaptureNeutralScale(RectTransform neutralScaleSource)
+    {
+        if (neutralScaleSource == null)
+            return Vector2.one;
+
+        Vector3 scale = neutralScaleSource.localScale;
+        return new Vector2(scale.x, scale.y);
     }
     
     public static Vector2 ConvertPointFromRigSpaceToTargetPositionParentSpace(

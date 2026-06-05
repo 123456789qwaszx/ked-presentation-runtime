@@ -11,42 +11,45 @@ public sealed class PresentationResponseRig
         public PresentationResponseProfile profile;
 
         public bool IsAlive =>
-            target != null && target.MeasureRect != null &&
+            target != null &&
+            target.MeasureRect != null &&
             target.PositionRect != null &&
-            target.ScaleRect != null;
+            target.ScaleRect != null &&
+            profile != null;
     }
 
     private readonly List<RuntimeBinding> _bindings = new();
     private readonly PresentationCameraRootApplier _cameraRootApplier = new();
     private readonly PresentationResponseCoordinateMapper _coordinateMapper = new();
-    
+
     private PresentationIntentState _currentState = PresentationIntentState.Default;
-    
+
     public PresentationIntentState CurrentState => _currentState;
 
-    public void RegisterRuntimeBinding(string bindingKey, IResponseTarget target, PresentationResponseProfile presetProfile)
+    public void RegisterRuntimeBinding(
+        string bindingKey,
+        IResponseTarget target,
+        PresentationResponseProfile presetProfile)
     {
-        PresentationResponseProfile runtimeProfile = new() 
-        {
-            focusSpreadPixelsPerZoom = presetProfile.focusSpreadPixelsPerZoom,
-            panResponse = presetProfile.panResponse,
-            basePositionInRigSpace = _coordinateMapper.CaptureNeutralPivotInRigSpace(target),
-            baseLocalScale = new Vector2(target.ScaleRect.localScale.x, target.ScaleRect.localScale.y)
-        };
+        if (string.IsNullOrEmpty(bindingKey))
+            return;
+
+        if (target == null || presetProfile == null)
+            return;
 
         RuntimeBinding binding = new()
         {
             key = bindingKey,
             target = target,
-            profile = runtimeProfile
+            profile = presetProfile,
         };
 
         AddOrReplaceBinding(bindingKey, binding);
-        
-        PresentationTargetResponse responseForTarget = BuildTargetSpaceResponse(in _currentState, binding);
-        binding.target.ApplyResponse(in responseForTarget);
+
+        // Register는 연결만 담당한다.
+        // 실제 측정과 적용은 ApplyToAllBindings, Shot Zoom/Focus 실행 시점에 수행.
     }
-    
+
     public bool RemoveBinding(string bindingKey)
     {
         bool removed = false;
@@ -55,7 +58,7 @@ public sealed class PresentationResponseRig
         {
             RuntimeBinding binding = _bindings[i];
 
-            if (binding == null || !binding.IsAlive)
+            if (binding == null)
                 continue;
 
             if (string.Equals(binding.key, bindingKey, StringComparison.Ordinal))
@@ -83,8 +86,10 @@ public sealed class PresentationResponseRig
                 _bindings.RemoveAt(i);
                 continue;
             }
-            
-            PresentationTargetResponse responseForTarget = BuildTargetSpaceResponse(in state, binding);
+
+            PresentationTargetResponse responseForTarget =
+                BuildTargetSpaceResponse(in state, binding);
+
             binding.target.ApplyResponse(in responseForTarget);
         }
     }
@@ -95,15 +100,24 @@ public sealed class PresentationResponseRig
         _bindings.Clear();
         _cameraRootApplier.Apply(in _currentState);
     }
-    
-    
-    private PresentationTargetResponse BuildTargetSpaceResponse(in PresentationIntentState state, RuntimeBinding binding)
+
+    private PresentationTargetResponse BuildTargetSpaceResponse(
+        in PresentationIntentState state,
+        RuntimeBinding binding)
     {
+        PresentationResponseMeasure measure =
+            _coordinateMapper.CaptureCurrentMeasure(binding.target);
+
         PresentationTargetResponse responseInRigSpace =
-            PresentationResponseMath.CalculateTargetTransformResponseFromShotIntent(in state, binding.profile);
+            PresentationResponseMath.CalculateTargetTransformResponseFromShotIntent(
+                in state,
+                binding.profile,
+                in measure);
 
         responseInRigSpace.anchoredPosition =
-            _coordinateMapper.ConvertPositionFromRigSpaceToTargetParentSpace(responseInRigSpace.anchoredPosition, binding.target);
+            _coordinateMapper.ConvertPositionFromRigSpaceToTargetParentSpace(
+                responseInRigSpace.anchoredPosition,
+                binding.target);
 
         return responseInRigSpace;
     }
