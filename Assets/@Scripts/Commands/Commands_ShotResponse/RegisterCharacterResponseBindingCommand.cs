@@ -46,13 +46,14 @@ public sealed class RegisterCharacterResponseBindingCommand : CommandBase
 
     private void Apply(CommandRunScope scope)
     {
-        string resolvedSlotKey = ResponseBindingKeys.CharacterRig(scope, _spec.targetKey);
-        if (!scope.characterRigs.TryGetRig(resolvedSlotKey, out CharacterRigRefs rigRefs))
+        if (!scope.characterRigs.TryGetRig(_spec.targetKey, out CharacterRigRefs rigRefs))
             return;
 
-        string bindingKey = ResponseBindingKeys.CharacterRigFromSlotKey(resolvedSlotKey);
         CharacterRigResponseTarget target = new CharacterRigResponseTarget(rigRefs);
 
-        _responseRig.RegisterRuntimeBinding(bindingKey, target, _spec.responseProfile);
+        _responseRig.RegisterRuntimeBinding(
+            ResponseBindingKeys.CharacterRigFromSlotKey(_spec.targetKey),
+            target,
+            _spec.responseProfile);
     }
 }

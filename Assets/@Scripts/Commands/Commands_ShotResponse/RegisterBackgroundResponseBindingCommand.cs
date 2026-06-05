@@ -46,13 +46,14 @@ public sealed class RegisterBackgroundResponseBindingCommand : CommandBase
 
     private void Apply(CommandRunScope scope)
     {
-        string resolvedBgKey = ResponseBindingKeys.BackgroundRig(scope, _spec.rigKey);
-        if (!scope.backgroundRigs.TryGetRig(resolvedBgKey, out BackgroundRigRefs rigRefs))
+        if (!scope.backgroundRigs.TryGetRig(_spec.rigKey, out BackgroundRigRefs rigRefs))
             return;
 
-        string bindingKey = ResponseBindingKeys.BackgroundRigFromRigKey(resolvedBgKey);
         BackgroundRigResponseTarget target = new(rigRefs);
 
-        _responseRig.RegisterRuntimeBinding(bindingKey, target, _spec.responseProfile);
+        _responseRig.RegisterRuntimeBinding(
+            ResponseBindingKeys.BackgroundRigFromRigKey(_spec.rigKey),
+            target,
+            _spec.responseProfile);
     }
 }

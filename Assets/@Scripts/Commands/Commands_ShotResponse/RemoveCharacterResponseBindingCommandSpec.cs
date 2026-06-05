@@ -43,9 +43,8 @@ public sealed class RemoveCharacterResponseBindingCommand : CommandBase
 
     private void Apply(CommandRunScope scope)
     {
-        string resolvedSlotKey = ResponseBindingKeys.CharacterRig(scope, _spec.targetKey);
-        string bindingKey = ResponseBindingKeys.CharacterRigFromSlotKey(resolvedSlotKey);
+        string resolvedSlotKey = CharacterRigTargetResolver.ResolveRigKeyByPolicy(scope, _spec.targetKey);
 
-        _responseRig.RemoveBinding(bindingKey);
+        _responseRig.RemoveBinding(ResponseBindingKeys.CharacterRigFromSlotKey(resolvedSlotKey));
     }
 }

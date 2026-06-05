@@ -43,9 +43,6 @@ public sealed class RemoveBackgroundResponseBindingCommand : CommandBase
 
     private void Apply(CommandRunScope scope)
     {
-        string resolvedBgKey = ResponseBindingKeys.BackgroundRig(scope, _spec.rigKey);
-        string bindingKey = ResponseBindingKeys.BackgroundRigFromRigKey(resolvedBgKey);
-
-        _responseRig.RemoveBinding(bindingKey);
+        _responseRig.RemoveBinding(ResponseBindingKeys.BackgroundRigFromRigKey(_spec.rigKey));
     }
 }

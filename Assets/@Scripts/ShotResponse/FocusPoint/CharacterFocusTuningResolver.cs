@@ -43,12 +43,6 @@ public static class CharacterFocusTuningResolver
 
     public static string BuildTuningKey(string roleKey, string poseKey)
     {
-        roleKey = roleKey ?? "";
-        poseKey = poseKey ?? "";
-
-        roleKey = roleKey.Trim();
-        poseKey = poseKey.Trim();
-
         if (string.IsNullOrWhiteSpace(poseKey))
             return roleKey;
 
