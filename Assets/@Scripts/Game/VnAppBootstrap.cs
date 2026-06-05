@@ -72,6 +72,7 @@ public class VnAppBootstrap : MonoBehaviour
     [SerializeField] private InlineEventMarkupHandler inlineEventMarkupHandler;
     [SerializeField] private CustomLinePresenter customLinePresenter;
     [SerializeField] private SubPresentationPresenter subPresentationPresenter;
+    [SerializeField] private OneShotPresentationPresenter oneShotPresentationPresenter;
     [SerializeField] private AutoAdvanceScheduler autoAdvanceScheduler;
     [SerializeField] private VNOptionsPresenter vnOptionsPresenter;
     [SerializeField] private VNOptionsBoxPresentationController vnOptionsBoxPresentationController;
@@ -111,6 +112,9 @@ public class VnAppBootstrap : MonoBehaviour
     
     [Header("UI")] 
     [SerializeField] private EpisodePlayer episodePlayer;
+    
+    [Header("NodeDebug")] 
+    [SerializeField] private YarnLaneDebugView yarnLaneDebugView;
 
     
     private PresentationSessionBridge _presentationSessionBridge;
@@ -309,8 +313,10 @@ public class VnAppBootstrap : MonoBehaviour
             rigPrefab, 
             oneShotPresentationLane,
             bindMainLaneCommands: false);
-            
-        subPresentationPresenter.Initialize(subYarnBridgePlaybackDriver, _vnSideRunnerSyncHub);
+        
+        subPresentationPresenter.Initialize(subPresentationRunner, subYarnBridgePlaybackDriver, _vnSideRunnerSyncHub, yarnLaneDebugView);
+        
+        oneShotPresentationPresenter.Initialize(subOneShotRunner, yarnLaneDebugView);
         
         inlineEventMarkupHandler.Initialize(_presentationSessionBridge, inlineSfxHost, yarnCommandBridge);
     }
@@ -353,7 +359,9 @@ public class VnAppBootstrap : MonoBehaviour
             vnLinePresentationFlow,
             ellipsisBreathTypewriter,
             _linePresentationAdvanceState,
-            _presentationSessionContext);
+            _presentationSessionContext,
+            trace: null,
+            yarnLaneDebugView);
         
         VNChoiceBoundary vnChoiceBoundary = new(_choiceHistory, _rollbackHistory);
 

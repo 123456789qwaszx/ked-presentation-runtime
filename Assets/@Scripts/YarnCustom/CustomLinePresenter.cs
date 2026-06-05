@@ -17,6 +17,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, IVNLineAborter
     private VNLinePresentationState _vnLinePresentationState;
     private PresentationSessionContext _presentationSessionContext;
     private VNTraceStream _trace;
+    private IYarnLaneDebugSink _debugSink;
 
     private string _currentNodeName;
     
@@ -42,7 +43,8 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, IVNLineAborter
         EllipsisBreathTypewriter typewriter,
         VNLinePresentationState vnLinePresentationState,
         PresentationSessionContext presentationSessionContext,
-        VNTraceStream trace = null)
+        VNTraceStream trace = null,
+        IYarnLaneDebugSink debugSink = null)
     {
         dialogueRunner.onNodeStart?.AddListener(nodeName =>_currentNodeName = nodeName );
         RegisterPresenter(dialogueRunner);
@@ -56,11 +58,13 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, IVNLineAborter
         _presentationSessionContext = presentationSessionContext;
         
         _trace = trace;
-        
+        _debugSink = debugSink;
     }
     
     public override async YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token)
     {
+        _debugSink?.SetMain(_currentNodeName, line.TextWithoutCharacterName.Text);
+        
         var ctx = new VNLinePresentationContext
         {
             Line = line,
@@ -124,6 +128,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, IVNLineAborter
         CancelLineVisualToken();
         CancelPresenterLifetimeWaiters();
         CloseAll();
+        _debugSink?.ClearMain();
         return YarnTask.CompletedTask;
     }
     

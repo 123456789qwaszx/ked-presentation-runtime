@@ -99,7 +99,7 @@ public sealed class VNSideRunnerSyncHub
         }
     }
 
-    private readonly PresentationLaneState _presentation = new PresentationLaneState();
+    private readonly PresentationLaneState _presentation = new();
 
     public void RegisterPresentationLane(DialogueRunner runner)
     {
@@ -108,18 +108,6 @@ public sealed class VNSideRunnerSyncHub
 
     public IEnumerator StartPresentationLaneCoroutine(string nodeName)
     {
-        if (_presentation.Runner == null)
-        {
-            Debug.LogWarning("[VNSideRunnerSyncHub] Cannot start presentation lane. Runner is null.");
-            yield break;
-        }
-
-        if (string.IsNullOrEmpty(nodeName))
-        {
-            Debug.LogWarning("[VNSideRunnerSyncHub] Cannot start presentation lane. nodeName is null or empty.");
-            yield break;
-        }
-
         if (_presentation.Runner.IsDialogueRunning)
         {
             YarnTask stopTask = _presentation.Runner.Stop();

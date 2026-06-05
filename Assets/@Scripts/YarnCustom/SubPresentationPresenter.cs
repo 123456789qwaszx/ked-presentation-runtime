@@ -6,13 +6,25 @@ public sealed class SubPresentationPresenter : DialoguePresenterBase
 {
     private YarnBridgePlaybackDriver _playbackDriver;
     private VNSideRunnerSyncHub _syncHub;
-
+    private IYarnLaneDebugSink _debugSink;
+    
+    private string _currentNodeName;
+    
     private CancellationTokenSource _presenterLifetimeCts = new CancellationTokenSource();
 
-    public void Initialize(YarnBridgePlaybackDriver playbackDriver, VNSideRunnerSyncHub syncHub)
+    
+    public void Initialize(
+        DialogueRunner dialogueRunner,
+        YarnBridgePlaybackDriver playbackDriver,
+        VNSideRunnerSyncHub syncHub,
+        IYarnLaneDebugSink debugSink = null)
     {
+        if (dialogueRunner != null)
+            dialogueRunner.onNodeStart?.AddListener(nodeName => _currentNodeName = nodeName);
+
         _playbackDriver = playbackDriver;
         _syncHub = syncHub;
+        _debugSink = debugSink;
     }
 
     public override YarnTask OnDialogueStartedAsync()
@@ -24,14 +36,17 @@ public sealed class SubPresentationPresenter : DialoguePresenterBase
     {
         CancelPresenterLifetimeWaiters();
 
-        if (_syncHub != null)
-            _syncHub.NotifyPresentationLaneCompleted();
-
+        _syncHub.NotifyPresentationLaneCompleted();
+        
+        _debugSink?.ClearPresentation();
+        
         return YarnTask.CompletedTask;
     }
 
     public override async YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token)
     {
+        _debugSink?.SetPresentation(_currentNodeName, line.TextWithoutCharacterName.Text);
+        
         CommandRunTicket ticket = _playbackDriver.PlayCollected();
 
         bool cancelledDuringEntry = await WaitUntilCommandEntryClosedAsync(ticket, token);
