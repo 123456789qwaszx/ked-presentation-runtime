@@ -5,8 +5,8 @@ title: options
 <<set $rare_ingredient = 0>>
 <<set $risk = 0>>
 
-<<run_setup c_oneshot>>
-<<sub_table a_presentation>>
+<<beat c_oneshot>>
+<<pres_start a_presentation>>
 
 숲 입구에 도착했다.
 어디를 조사할까?

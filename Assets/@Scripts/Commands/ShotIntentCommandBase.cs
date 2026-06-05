@@ -1,17 +1,20 @@
 ﻿using System;
 using System.Collections;
 using DG.Tweening;
+using UnityEngine;
 
 [Serializable]
 public abstract class ShotIntentCommandSpecBase : CommandSpecBase
 {
+    [Header("Tween")]
+    [Tooltip("0 이하이면 즉시 스냅합니다.")]
     public float duration = 0.45f;
 
     public Ease ease = Ease.OutCubic;
 
-    // killTween 제거:
-    // rig가 단일 shot 드라이버를 소유하므로, 새 shot 커맨드는 항상 현재 visual에서
-    // 다음 목표로 재타깃된다. 더 이상 커맨드별 kill 플래그가 필요 없다.
+    [Header("Options")]
+    [Tooltip("체크하면 기존 shot tween을 끝내고 committed state에서 시작합니다.")]
+    public bool killTween = true;
 }
 
 public abstract class ShotIntentCommandBase<TSpec> : CommandBase
@@ -20,7 +23,10 @@ public abstract class ShotIntentCommandBase<TSpec> : CommandBase
     protected readonly PresentationResponseRig rig;
     protected readonly TSpec spec;
 
+    private PresentationIntentState _fromState;
     private PresentationIntentState _toState;
+    private Tween _tween;
+    private bool _canCommitFinalState;
 
     public override bool WaitForCompletion => spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
@@ -33,57 +39,99 @@ public abstract class ShotIntentCommandBase<TSpec> : CommandBase
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
-        if (rig == null)
-            yield break;
+        if (spec.killTween)
+            KillRigTween(true); // 이전 shot을 끝내고 committed state에서 시작 (다른 커맨드와 동일 규약).
 
-        // from = 결정론적 logical 상태 (visual의 중간값이 아니다).
-        _toState = BuildTargetState(rig.CurrentState, scope);
+        _canCommitFinalState = true;
 
-        if (spec.duration <= 0f)
+        _fromState = rig.CurrentState;                  // 실제 현재 상태에서 출발
+        _toState = BuildTargetState(_fromState, scope);
+
+        if (spec.duration <= 0f || PresentationShotIntentMath.ApproximatelyEqual(_fromState, _toState))
         {
-            rig.SetShotImmediate(_toState);
+            Commit(_toState);
+            ClearRuntimeState();
             yield break;
         }
 
-        // logical은 즉시 _toState로 확정되고(롤백과 동일), visual만 현재값에서 ease한다.
-        rig.DriveShotTo(_toState, spec.duration, spec.ease);
+        _tween = DOTween
+            .To(
+                () => 0f,
+                t =>
+                {
+                    if (!_canCommitFinalState || rig == null)
+                        return;
 
-        if (!spec.wait)
-            yield break;
+                    PresentationIntentState state = PresentationShotIntentMath.Interpolate(_fromState, _toState, t);
 
-        // wait면 화면이 목표에 닿을 때까지 시퀀스를 막는다.
-        while (rig != null && rig.IsShotDriving)
-        {
-            if (scope.Token.IsCancellationRequested)
-                yield break;
-
-            if (scope.IsSkipping)
+                    rig.ApplyToAllBindings(state);
+                },
+                1f,
+                spec.duration)
+            .SetEase(spec.ease)
+            .SetUpdate(true)
+            .SetTarget(rig)
+            .OnComplete(() =>
             {
-                rig.SetShotImmediate(_toState);
-                yield break;
-            }
+                if (!_canCommitFinalState || rig == null)
+                    return;
 
-            yield return null;
-        }
+                Commit(_toState);
+                ClearRuntimeState();
+            });
+
+        if (spec.wait)
+            yield return _tween.WaitForCompletion();
     }
 
-    // logical은 ExecuteInner/OnSkip에서 이미 확정
-    // 드라이버를 rig가 소유하므로 스텝 경계에서 커맨드가 최종값을 강제 커밋하지 않는다.
-    // 다음 shot 커맨드가 있으면 현재 visual에서 재타깃 → 점프가 발생하지 않는다.
     protected override void OnSkip(CommandRunScope scope)
     {
         if (rig == null)
             return;
 
-        _toState = BuildTargetState(rig.CurrentState, scope);
-        rig.SetShotImmediate(_toState);
+        KillRigTween(false);
+
+        _fromState = rig.CurrentState;
+        _toState = BuildTargetState(_fromState, scope);
+
+        Commit(_toState);
+        ClearRuntimeState();
     }
 
     protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
 
-    protected override void OnCommandCompleted(CommandRunScope scope) => OnSkip(scope);
+    protected override void OnCommandCompleted(CommandRunScope scope)
+    {
+        if (!_canCommitFinalState || rig == null)
+            return;
+
+        KillRigTween(false);
+        Commit(_toState);
+        ClearRuntimeState();
+    }
 
     protected abstract PresentationIntentState BuildTargetState(
         in PresentationIntentState from,
         CommandRunScope scope);
+
+    private void Commit(in PresentationIntentState state)
+    {
+        if (rig != null)
+            rig.ApplyToAllBindings(state);
+    }
+
+    private void KillRigTween(bool complete)
+    {
+        if (rig == null)
+            return;
+
+        DOTween.Kill(rig, complete);
+        _tween = null;
+    }
+
+    private void ClearRuntimeState()
+    {
+        _canCommitFinalState = false;
+        _tween = null;
+    }
 }

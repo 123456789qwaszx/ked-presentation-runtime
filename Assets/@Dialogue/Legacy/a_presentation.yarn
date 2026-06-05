@@ -1,30 +1,9 @@
 ﻿title: a_presentation
 ---
-
-// <<slot Leafia 0>>
-// <<cast Leafia Matilda a 02 true left normal>>
-// <<shot_bind_char_response Leafia 0>>
-
-// <<slot Albedo 0>>
-// <<cast Albedo Albedo a 02 true right normal>>
-
-// <<bg_spawn rigKey stage00 green back 5 0 0 30>>
-// <<bg_spawn bg0 stage00 black back 0.9 0 -90 0>>
-// <<bg_spawn bg2 stage00 white back 0.5 0 -250 0>>
-
-// <<idle_breathe Leafia 99 5 0.25>>
-
-// <<shot_bind_char_response Albedo 0>>
-
-// <<shot_bind_bg_response rigKey>>
-// <<shot_bind_bg_response bg0>>
-// <<shot_bind_bg_response bg2>>
-
-
 a1.(물건을 건네받은 수상한 사람은 그것을 입으로 가져가 조심스럽게 베어 물었다. 고요한 골목 안에 기괴한 저작음이 울려 퍼졌다.
 //<<shot_zoom_focus Leafia bust center 3 0.8>>
 <<jolt Leafia>>
-<<shot_zoom_focus Leafia Body bottom 0 1>>
+<<shot_zoom_focus Leafia Body center 0 1>>
 
 a2.(쩝쩝쩝 ..... 맞아, 바로 이 맛이야.
 //<<shot_zoom_focus Albedo bust center 10 0.8>>
@@ -77,56 +56,5 @@ a11.(상대방인 의심스러운 사람이 품 안에서 소중한 듯 무언�
 <<idle_breathe Leafia 99 18 0.3>>
 <<tx_slant_out stage01 0.65>>
 
-
-a12.(물론이지. 제대로 가져왔는지 확인해 볼 거야?)
-
-a13.
-
-//<<box_hide 3>>
-
-<<move_by AFK -500 333  2>>
-<<shot_bind_char_response Sapphire 0>>
-
-<<shot_zoom_focus Sapphire bust center 10 4.5>>
-
-
-a14.윌로:미안하게 됐어.
-
-a15.라루:3분의 1?
-
-a16.의심스러운 사람은 만족한 듯한 상대의 반응을 확인하고는 본론을 꺼냈다.
-<<move_by AFK -500 333  2>>
-<<shot_bind_char_response Sapphire 0>>
-
-<<shot_zoom_focus Sapphire bust center 10 4.5>>
-
-
-a14.윌로:미안하게 됐어.
-
-a15.라루:3분의 1?
-
-a16.의심스러운 사람은 만족한 듯한 상대의 반응을 확인하고는 본론을 꺼냈다.
-<<move_by AFK -500 333  2>>
-<<shot_bind_char_response Sapphire 0>>
-
-<<shot_zoom_focus Sapphire bust center 10 4.5>>
-
-
-a14.윌로:미안하게 됐어.
-
-a15.라루:3분의 1?
-
-a16.의심스러운 사람은 만족한 듯한 상대의 반응을 확인하고는 본론을 꺼냈다.
-<<move_by AFK -500 333  2>>
-<<shot_bind_char_response Sapphire 0>>
-
-<<shot_zoom_focus Sapphire bust center 10 4.5>>
-
-
-a14.윌로:미안하게 됐어.
-
-a15.라루:3분의 1?
-
-a16.의심스러운 사람은 만족한 듯한 상대의 반응을 확인하고는 본론을 꺼냈다.
 
 ===

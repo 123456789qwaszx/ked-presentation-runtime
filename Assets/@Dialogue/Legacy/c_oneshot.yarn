@@ -3,7 +3,7 @@
 
 <<slot Leafia 0>>
 <<cast Leafia Leafia a 02 true left normal>>
-<<shot_bind_char_response Leafia 0>>
+//<<shot_bind_char_response Leafia>>
 
 <<slot Albedo 0>>
 <<cast Albedo Albedo a 02 true right normal>>
@@ -15,14 +15,6 @@
 <<idle_breathe Leafia 99 5 0.25>>
 
 <<shot_bind_char_response Albedo 0>>
-
-
-
-// <<slot AFK>>
-// <<cast AFK Sapphire a 11 true center normal>>
-
-// <<slot RUB>>
-// <<cast RUB Ruby a 2 true left normal>>
 
 
 ===

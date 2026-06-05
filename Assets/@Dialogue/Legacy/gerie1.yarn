@@ -10,8 +10,8 @@
 <<set $contract_signed = false>>
 <<debug_log "[INIT] favor={$favor}, patience={$laru_patience}, debt={$willow_debt}, requested={$requested_fee}, paid={$paid_fee}, trust={$trust}, anger={$anger}, contract={$contract_signed}">>
 
-<<run_setup c_oneshot>>
-<<sub_table a_presentation>>
+<<beat c_oneshot>>
+<<pres_start a_presentation>>
 
 이건 내가 처음으로 그녀의 영혼에 닿았을 때의 이야기다. //#box:blackbook
 윌로:죄송합니다, 이번 의뢰는 보수의 3분의 1밖에 드릴 수 없겠군요.

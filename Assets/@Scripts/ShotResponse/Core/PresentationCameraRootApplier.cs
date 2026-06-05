@@ -16,43 +16,30 @@ public sealed class PresentationCameraRootApplier
 {
     private IPresentationCameraRootProvider _cameraRootProvider;
 
-    private readonly float _maxScale;
-    private readonly float _panMultiplier;
-
-    private bool _init;
-
-    public PresentationCameraRootApplier(
-        float maxScale = 5.0f,
-        float panMultiplier = 1.0f)
-    {
-        _maxScale = Mathf.Max(1.0001f, maxScale);
-        _panMultiplier = panMultiplier;
-    }
-
     public void Apply(in PresentationIntentState state)
     {
-        if (!_init)
-            EnsureProvider();
+        if (!TryEnsureCameraRootProvider())
+            return;
 
-        RectTransform stageZoomRoot = _cameraRootProvider?.StageZoomRoot;
-        RectTransform stagePanRoot = _cameraRootProvider?.StagePanRoot;
+        float scale = PresentationShotIntentMath.EvaluateCameraScale(state.zoom);
 
-        if (stageZoomRoot != null)
-        {
-            float scale = PresentationShotIntentMath.EvaluateCameraScale(state.zoom, _maxScale);
-            
-            stageZoomRoot.localScale = new Vector3(scale, scale, 1f);
-        }
-
-        if (stagePanRoot != null)
-            stagePanRoot.anchoredPosition = state.pan * _panMultiplier;
+        _cameraRootProvider.StageZoomRoot.localScale = new Vector3(scale, scale, 1f);
+        _cameraRootProvider.StagePanRoot.anchoredPosition = state.pan;
     }
 
-    private void EnsureProvider()
+    private bool TryEnsureCameraRootProvider()
     {
+        if (_cameraRootProvider != null)
+            return true;
+
         _cameraRootProvider = UIManager.Instance.GetUI<PresentationUIRoot>();
 
-        if (_cameraRootProvider != null)
-            _init = true;
+        if (_cameraRootProvider == null)
+        {
+            Debug.LogWarning("[PresentationCameraRootApplier] Failed to resolve IPresentationCameraRootProvider.");
+            return false;
+        }
+
+        return true;
     }
 }

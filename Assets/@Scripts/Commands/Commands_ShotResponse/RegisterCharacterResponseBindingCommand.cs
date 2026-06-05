@@ -24,18 +24,15 @@ public sealed class RegisterCharacterResponseBindingCommand : CommandBase
 {
     private readonly RegisterCharacterResponseBindingCommandSpec _spec;
     private readonly PresentationResponseRig _responseRig;
-    private readonly ICameraFocusStageRootProvider _stageRootProvider;
 
     public override bool WaitForCompletion => true;
 
     public RegisterCharacterResponseBindingCommand(
         RegisterCharacterResponseBindingCommandSpec spec,
-        PresentationResponseRig responseRig,
-        ICameraFocusStageRootProvider cameraFocusStageRootProvider)
+        PresentationResponseRig responseRig)
     {
         _spec = spec;
         _responseRig = responseRig;
-        _stageRootProvider = cameraFocusStageRootProvider;
     }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
@@ -59,7 +56,6 @@ public sealed class RegisterCharacterResponseBindingCommand : CommandBase
         _responseRig.RegisterRuntimeBinding(
             bindingKey,
             target,
-            _spec.responseProfile,
-            _stageRootProvider.StageRoot);
+            _spec.responseProfile);
     }
 }

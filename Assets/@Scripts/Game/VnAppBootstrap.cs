@@ -15,12 +15,11 @@ public class VnAppBootstrap : MonoBehaviour
     private readonly VNLinePresentationState _linePresentationAdvanceState = new();
     private readonly PresentationSessionContext _presentationSessionContext = new();
     
-    private readonly PresentationStage presentationStage = new();
+    private readonly PresentationStage _presentationStage = new();
     
     private readonly VNSideRunnerSyncHub _vnSideRunnerSyncHub = new();
     private readonly BacklogRecorder _backlogRecorder = new ();
     
-    private VNRuntimeStateProvider _vnRuntimeStateProvider;
     private readonly VnScreenBindings _screenBindings = new();
     
     [Header("VN Trace")]
@@ -35,7 +34,6 @@ public class VnAppBootstrap : MonoBehaviour
 
     [SerializeField] private DialogueBoxHost dialogueBoxHost;
 
-    [SerializeField] private PresentationResponseRig presentationResponseRig;
     
     [Header("Presentation")] 
     [SerializeField] private CharStageTuningSO globalTuning;
@@ -121,16 +119,21 @@ public class VnAppBootstrap : MonoBehaviour
     private VNSaveLoadSystem _vnSaveLoadSystem;
     private EpisodeSelectionSystem _episodeSelectionSystem;
     
+    private VNRuntimeStateProvider _vnRuntimeStateProvider;
+    private PresentationResponseRig _presentationResponseRig;
+    
     
     private void Awake()
     {
-        _vnRuntimeStateProvider = new (_rollbackHistory, _choiceHistory, vnPlaytimeTracker);
+        BootstrapUIManager();
+        
+        _vnRuntimeStateProvider = new VNRuntimeStateProvider(_rollbackHistory, _choiceHistory, vnPlaytimeTracker);
         rollbackHistoryDebugView.Bind(_rollbackHistory);
+        _presentationResponseRig = new PresentationResponseRig();
 
         BootstrapAudioSystem();
         ConnectAudioSystemToYarn();
 
-        BootstrapUIManager();
 
         BootstrapPresentationSession();
         ConnectPresentationSessionToYarn();
@@ -211,12 +214,8 @@ public class VnAppBootstrap : MonoBehaviour
             backgroundRigBuilder,
             backgroundSpriteResolver);
 
-        // Presentation Shot / Response Rig
-        PresentationCameraRootApplier cameraRootApplier = new();
-        presentationResponseRig.Initialize(cameraRootApplier);
-
         ShotResponseCommandFactory presentationShotFactory = new(
-            presentationResponseRig, characterFocusTuningDb);
+            _presentationResponseRig, characterFocusTuningDb);
 
         // Presentation Transition
         PresentationTransitionCommandFactory presentationTransitionFactory = new();
@@ -256,7 +255,7 @@ public class VnAppBootstrap : MonoBehaviour
             oneShotCommandExecutor,
             _presentationSessionContext,
             _linePresentationAdvanceState,
-            presentationStage);
+            _presentationStage);
 
         presentationSessionEntry.Initialize(
             presentationSession,
@@ -452,7 +451,8 @@ public class VnAppBootstrap : MonoBehaviour
             customLinePresenter,
             _backlogRecorder, 
             _choiceHistory,
-            _vnSideRunnerSyncHub
+            _vnSideRunnerSyncHub,
+            _presentationResponseRig
             );
     }
     

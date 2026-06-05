@@ -1,8 +1,9 @@
 using System;
 using UnityEngine;
 
-// Authoring-level shot intent.
-// Stores abstract camera intent values, not actual transform results.
+// Shot intent state.
+// This is not a final Transform state.
+// zoom, pan, and focusPoint are authored/logical values used to solve camera roots and response targets.
 [Serializable]
 public struct PresentationIntentState
 {

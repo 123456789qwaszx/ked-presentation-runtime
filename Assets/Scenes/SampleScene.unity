@@ -4640,50 +4640,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!1 &529556881
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 529556883}
-  - component: {fileID: 529556882}
-  m_Layer: 0
-  m_Name: PresentationResponseRig
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &529556882
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 529556881}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6fb46a1e1f73dea42a14597e2c27871d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PresentationResponseRig
---- !u!4 &529556883
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 529556881}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -271.8101, y: -90.016785, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 596868909}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &544300780
 GameObject:
   m_ObjectHideFlags: 0
@@ -5493,7 +5449,6 @@ Transform:
   - {fileID: 7985477256358699683}
   - {fileID: 7985477256251313780}
   - {fileID: 3741609527537220520}
-  - {fileID: 529556883}
   - {fileID: 552181529}
   - {fileID: 1433866632}
   - {fileID: 2005113227}
@@ -5523,7 +5478,6 @@ MonoBehaviour:
   audioSystem: {fileID: 32255926}
   inlineSfxHost: {fileID: 1571925710}
   dialogueBoxHost: {fileID: 1332040255}
-  presentationResponseRig: {fileID: 529556882}
   globalTuning: {fileID: 11400000, guid: db30a92a6d8545a41b703c2585f4013d, type: 2}
   roleTuningDb: {fileID: 11400000, guid: c49265a67487bce458b734a0473b75b5, type: 2}
   portraitGeneratedDbSo: {fileID: 11400000, guid: 9a31d992344284d4f8ff35f5e9be5ae9, type: 2}
@@ -16906,8 +16860,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EpisodePlayer
   dialogueRunner: {fileID: 8309902628538800288}
   subPresentationRunner: {fileID: 8309902628667094135}
+  oneShotRunner: {fileID: 0}
   presentationRouteEntry: {fileID: 1433866633}
-  presentationResponseRig: {fileID: 529556882}
   yarnEntryKey: OnlyText
   presentationEntryKey: emo
   runYarnKey: 50

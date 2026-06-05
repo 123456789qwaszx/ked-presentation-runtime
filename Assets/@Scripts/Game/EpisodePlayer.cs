@@ -11,6 +11,7 @@ public sealed class EpisodePlayer : MonoBehaviour
     private BacklogRecorder _backlogRecorder;
     private ChoiceHistory _choiceHistory;
     private VNSideRunnerSyncHub _sideRunnerSyncHub;
+    private PresentationResponseRig _presentationResponseRig;
 
     [Header("Yarn")]
     [SerializeField] private DialogueRunner dialogueRunner;
@@ -19,7 +20,6 @@ public sealed class EpisodePlayer : MonoBehaviour
 
     [Header("Presentation")]
     [SerializeField] private PresentationSessionEntry presentationRouteEntry;
-    [SerializeField] private PresentationResponseRig presentationResponseRig;
 
     [Header("Entry Keys")]
     [SerializeField] private string yarnEntryKey;
@@ -43,7 +43,8 @@ public sealed class EpisodePlayer : MonoBehaviour
         IVNLineAborter linePresentationAborter,
         BacklogRecorder backlogRecorder,
         ChoiceHistory choiceHistory,
-        VNSideRunnerSyncHub sideRunnerSyncHub)
+        VNSideRunnerSyncHub sideRunnerSyncHub,
+        PresentationResponseRig presentationResponseRig)
     {
         _vnScreenBindings = vnScreenBindings;
         _nodeRollbackHistory = nodeRollbackHistory;
@@ -51,6 +52,7 @@ public sealed class EpisodePlayer : MonoBehaviour
         _backlogRecorder = backlogRecorder;
         _choiceHistory = choiceHistory;
         _sideRunnerSyncHub = sideRunnerSyncHub;
+        _presentationResponseRig = presentationResponseRig;
     }
 
     private void Update()
@@ -144,7 +146,7 @@ public sealed class EpisodePlayer : MonoBehaviour
 
     private void ResetVisualState()
     {
-        presentationResponseRig.Clear();
+        _presentationResponseRig.Clear();
         
         IPresentationTransitionSlotProvider provider = UIManager.Instance.GetUI<PresentationUIRoot>();
         SlantedMaskGraphic mask = provider.SlantedMaskEdgeGraphic.GetComponent<SlantedMaskGraphic>();

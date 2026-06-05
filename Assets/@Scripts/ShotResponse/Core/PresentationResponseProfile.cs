@@ -8,12 +8,8 @@ public sealed class PresentationResponseProfile
     public Vector2 basePositionInRigSpace = Vector2.zero;
     public Vector2 baseLocalScale = Vector2.one;
 
-    [Header("Response")]
-    [Tooltip("zoom +10 일 때 최대 scale delta. 0.25 = 최대 25% 확대")]
-    public float maxZoomScaleDelta = 0.25f;
-
-    [Tooltip("focus 기준 위치 퍼짐 강도. 0이면 퍼지지 않음")]
-    public float maxZoomSpreadPixels = 40f;
+    [Tooltip("zoom intent 1당 focusPoint 기준으로 대상이 바깥쪽으로 밀려나는 거리. 0이면 퍼지지 않음")]
+    public float focusSpreadPixelsPerZoom  = 40f;
 
     [Tooltip("pan 픽셀값을 얼마나 따라갈지. CharacterSlot=1, BG는 낮게")]
     public float panResponse = 1f;
@@ -22,8 +18,7 @@ public sealed class PresentationResponseProfile
     {
         basePositionInRigSpace = Vector2.zero,
         baseLocalScale = Vector2.one,
-        maxZoomScaleDelta = 0.0001f,
-        maxZoomSpreadPixels = 0f,
+        focusSpreadPixelsPerZoom = 0f,
         panResponse = 0.1f,
     };
 
@@ -31,8 +26,7 @@ public sealed class PresentationResponseProfile
     {
         basePositionInRigSpace = Vector2.zero,
         baseLocalScale = Vector2.one,
-        maxZoomScaleDelta = 0.03f,
-        maxZoomSpreadPixels = 6f,
+        focusSpreadPixelsPerZoom = 6f,
         panResponse = 0.08f,
     };
 
@@ -40,8 +34,7 @@ public sealed class PresentationResponseProfile
     {
         basePositionInRigSpace = Vector2.zero,
         baseLocalScale = Vector2.one,
-        maxZoomScaleDelta = 0.015f,
-        maxZoomSpreadPixels = 3f,
+        focusSpreadPixelsPerZoom = 3f,
         panResponse = 0.8f,
     };
 
@@ -49,8 +42,7 @@ public sealed class PresentationResponseProfile
     {
         basePositionInRigSpace = Vector2.zero,
         baseLocalScale = Vector2.one,
-        maxZoomScaleDelta = 0.07f,
-        maxZoomSpreadPixels = 16f,
+        focusSpreadPixelsPerZoom = 16f,
         panResponse = 0.25f,
     };
 }

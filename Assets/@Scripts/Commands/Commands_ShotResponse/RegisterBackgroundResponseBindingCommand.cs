@@ -24,18 +24,15 @@ public sealed class RegisterBackgroundResponseBindingCommand : CommandBase
 {
     private readonly PresentationResponseRig _responseRig;
     private readonly RegisterBackgroundResponseBindingCommandSpec _spec;
-    private readonly ICameraFocusStageRootProvider _stageRootProvider;
 
     public override bool WaitForCompletion => true;
 
     public RegisterBackgroundResponseBindingCommand(
         RegisterBackgroundResponseBindingCommandSpec spec,
-        PresentationResponseRig responseRig,
-        ICameraFocusStageRootProvider cameraFocusStageRootProvider)
+        PresentationResponseRig responseRig)
     {
         _responseRig = responseRig;
         _spec = spec;
-        _stageRootProvider = cameraFocusStageRootProvider;
     }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
@@ -56,6 +53,6 @@ public sealed class RegisterBackgroundResponseBindingCommand : CommandBase
         string bindingKey = ResponseBindingKeys.BackgroundRigFromRigKey(resolvedBgKey);
         BackgroundRigResponseTarget target = new BackgroundRigResponseTarget(rigRefs);
 
-        _responseRig.RegisterRuntimeBinding(bindingKey, target, _spec.responseProfile, _stageRootProvider.StageRoot);
+        _responseRig.RegisterRuntimeBinding(bindingKey, target, _spec.responseProfile);
     }
 }

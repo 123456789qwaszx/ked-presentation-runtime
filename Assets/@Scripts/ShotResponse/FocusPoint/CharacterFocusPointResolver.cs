@@ -39,13 +39,13 @@ public static class CharacterFocusPointResolver
         if (measureRect == null)
             return false;
 
-        ICameraFocusStageRootProvider stageRootProvider =
+        IPresentationRigSpaceRootProvider stageRootProvider =
             UIManager.Instance.GetUI<PresentationUIRoot>();
 
-        if (stageRootProvider == null || stageRootProvider.StageRoot == null)
+        if (stageRootProvider == null || stageRootProvider.RigSpaceRoot == null)
             return false;
 
-        RectTransform stageRoot = stageRootProvider.StageRoot;
+        RectTransform stageRoot = stageRootProvider.RigSpaceRoot;
 
         // 마커 표시용 부모. focus 계산과는 무관하므로 기존대로 둔다.
         RectTransform previewRoot = rigRefs.Character_ExtensionsRoot != null

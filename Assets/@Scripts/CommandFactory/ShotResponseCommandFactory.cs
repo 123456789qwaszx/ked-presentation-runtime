@@ -1,21 +1,8 @@
-using UnityEngine;
-
-public interface ICameraFocusStageRootProvider
-{
-    RectTransform StageRoot { get; }
-}
-
-public sealed partial class PresentationUIRoot : ICameraFocusStageRootProvider
-{
-    public RectTransform StageRoot => View.Rect(Refs.StageShot_Root);
-}
-
 public sealed class ShotResponseCommandFactory : INodeCommandFactory
 {
     private readonly PresentationResponseRig _presentationResponseRig;
     private readonly CharacterFocusTuningDBSO _focusTuningDB;
 
-    private ICameraFocusStageRootProvider _stageRootProvider;
     private bool _stageRootProviderInit;
 
     public ShotResponseCommandFactory(
@@ -32,8 +19,8 @@ public sealed class ShotResponseCommandFactory : INodeCommandFactory
         {
             null => null,
 
-            RegisterBackgroundResponseBindingCommandSpec s => new RegisterBackgroundResponseBindingCommand(s, _presentationResponseRig, StageRootProvider),
-            RegisterCharacterResponseBindingCommandSpec s => new RegisterCharacterResponseBindingCommand(s, _presentationResponseRig, StageRootProvider),
+            RegisterBackgroundResponseBindingCommandSpec s => new RegisterBackgroundResponseBindingCommand(s, _presentationResponseRig),
+            RegisterCharacterResponseBindingCommandSpec s => new RegisterCharacterResponseBindingCommand(s, _presentationResponseRig),
 
             ShotResetCommandSpec s => new ShotResetCommand(_presentationResponseRig, s),
             
@@ -47,24 +34,5 @@ public sealed class ShotResponseCommandFactory : INodeCommandFactory
         };
 
         return command != null;
-    }
-
-    private ICameraFocusStageRootProvider StageRootProvider
-    {
-        get
-        {
-            if (!_stageRootProviderInit)
-                EnsureStageRootProvider();
-
-            return _stageRootProvider;
-        }
-    }
-
-    private void EnsureStageRootProvider()
-    {
-        _stageRootProvider = UIManager.Instance.GetUI<PresentationUIRoot>();
-
-        if (_stageRootProvider != null)
-            _stageRootProviderInit = true;
     }
 }

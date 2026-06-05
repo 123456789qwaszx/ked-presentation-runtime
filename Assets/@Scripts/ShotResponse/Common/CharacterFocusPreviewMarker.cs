@@ -56,8 +56,7 @@ public sealed class CharacterFocusPreviewMarker : MonoBehaviour
     //  Serialized Fields
     // ═══════════════════════════════════════════════════════════════
 
-    [Header("Auto Resolve")]
-    [Tooltip("비워두면 부모 계층에서 Character_CastTransform 이름을 가진 RectTransform을 자동으로 찾습니다.")]
+    [Tooltip("비워두면 부모 계층에서 CharSlot_Scale 이름의 RectTransform을 자동으로 찾습니다. (focus 계산 기준 = response 중립 노드)")]
     [SerializeField] private RectTransform focusRect;
 
     [Tooltip("비워두면 이 오브젝트의 parent RectTransform을 표시 기준으로 사용합니다. 보통 Character_ExtensionsRoot입니다.")]
@@ -306,7 +305,7 @@ public sealed class CharacterFocusPreviewMarker : MonoBehaviour
     private void ResolveRefs()
     {
         if (focusRect == null)
-            focusRect = FindInParentHierarchy("Character_CastTransform");
+            focusRect = FindInParentHierarchy("CharSlot_Scale");   // ← Character_CastTransform 에서 변경
 
         if (previewRoot == null)
             previewRoot = transform.parent as RectTransform;

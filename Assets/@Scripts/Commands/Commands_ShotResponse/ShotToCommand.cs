@@ -28,7 +28,7 @@ public sealed class ShotToCommand : ShotIntentCommandBase<ShotToCommandSpec>
     {
         return new PresentationIntentState
         {
-            zoom = PresentationShotIntentMath.ClampZoom(spec.zoom),
+            zoom = spec.zoom,
             pan = spec.pan,
             focusPoint = from.focusPoint,
         };
