@@ -49,7 +49,7 @@ public sealed class RegisterCharacterResponseBindingCommand : CommandBase
         if (!scope.characterRigs.TryGetRig(_spec.targetKey, out CharacterRigRefs rigRefs))
             return;
 
-        CharacterRigResponseTarget target = new CharacterRigResponseTarget(rigRefs);
+        var target = new CharacterRigResponseTarget(rigRefs);
 
         _responseRig.RegisterRuntimeBinding(
             ResponseBindingKeys.CharacterRigFromSlotKey(_spec.targetKey),

@@ -56,7 +56,7 @@ public sealed class CharacterFocusPreviewMarker : MonoBehaviour
     //  Serialized Fields
     // ═══════════════════════════════════════════════════════════════
 
-    [Tooltip("비워두면 부모 계층에서 CharSlot_Scale 이름의 RectTransform을 자동으로 찾습니다. (focus 계산 기준 = response 중립 노드)")]
+    [Tooltip("focus 계산 기준 노드(CharSlot_Scale). 비워두거나 구버전 노드를 가리키면 자동으로 재바인딩됩니다. 리졸버의 MeasureRect와 동일해야 프리뷰가 실제 focus와 일치합니다.")]
     [SerializeField] private RectTransform focusRect;
 
     [Tooltip("비워두면 이 오브젝트의 parent RectTransform을 표시 기준으로 사용합니다. 보통 Character_ExtensionsRoot입니다.")]
@@ -152,6 +152,15 @@ public sealed class CharacterFocusPreviewMarker : MonoBehaviour
 
     /// <summary>런타임 오브젝트 이름에서 roleKey를 추출할 때 기준이 되는 접미사.</summary>
     private const string FocusMarkerSuffix = "_FocusMarker";
+
+    /// <summary>생성되는 프리뷰 마커 GameObject 이름의 공통 토큰.</summary>
+    private const string MarkerNameToken = "__FocusPoint_";
+
+    /// <summary>
+    /// focus 계산 기준 노드 이름. CharacterFocusPointResolver가 측정에 쓰는 MeasureRect(CharSlot_Scale)와
+    /// 반드시 동일해야 프리뷰가 실제 focus point와 일치한다. (framing response보다 위, response 중립 노드)
+    /// </summary>
+    private const string FocusBasisNodeName = "CharSlot_Scale";
 
     // ═══════════════════════════════════════════════════════════════
     //  Unity Messages
@@ -304,8 +313,11 @@ public sealed class CharacterFocusPreviewMarker : MonoBehaviour
     /// </summary>
     private void ResolveRefs()
     {
-        if (focusRect == null)
-            focusRect = FindInParentHierarchy("CharSlot_Scale");   // ← Character_CastTransform 에서 변경
+        // focusRect는 CharacterFocusPointResolver의 MeasureRect(CharSlot_Scale)와 같은 노드여야 한다.
+        // 비어있거나, 구버전(Character_CastTransform) 또는 다른 노드를 가리키고 있으면 재바인딩한다.
+        // (직렬화된 ref를 그대로 두면 코드만 고쳐도 옛 prefab 인스턴스는 계속 어긋난다.)
+        if (focusRect == null || !IsFocusBasisRect(focusRect))
+            focusRect = FindFocusBasisInParentHierarchy();
 
         if (previewRoot == null)
             previewRoot = transform.parent as RectTransform;
@@ -421,16 +433,15 @@ public sealed class CharacterFocusPreviewMarker : MonoBehaviour
         if (_markerMap.TryGetValue(markerName, out RectTransform cached) && cached != null)
             return cached;
 
-        // 2) 자식 계층에서 탐색 (map에 없는 경우)
-        Transform existing = transform.Find(markerName);
-        if (existing != null)
+        // 2) 자식 계층에서 탐색 (map에 없는 경우).
+        //    런타임에 rig 빌더가 모든 노드에 role prefix를 붙이므로 마커 이름이
+        //    "Leafia___FocusPoint_Bust"처럼 바뀐다. 정확 일치(transform.Find)로는 못 찾아
+        //    새 마커를 또 만들어 중복(8개)이 된다. prefix를 무시하고 suffix로 식별해 채택한다.
+        RectTransform existingRect = FindExistingMarkerBySuffix(markerName);
+        if (existingRect != null)
         {
-            RectTransform existingRect = existing as RectTransform;
-            if (existingRect != null)
-            {
-                _markerMap[markerName] = existingRect;
-                return existingRect;
-            }
+            _markerMap[markerName] = existingRect;
+            return existingRect;
         }
 
         if (!allowCreate || !CanCreateChildMarkers())
@@ -447,6 +458,10 @@ public sealed class CharacterFocusPreviewMarker : MonoBehaviour
             typeof(RectTransform),
             typeof(CanvasRenderer),
             typeof(Image));
+
+        // 프리뷰 전용 오브젝트. 씬/프리팹에 직렬화되지 않게 한다.
+        // → rig 빌더의 role prefix 부여 대상이 되지 않고, Instantiate 시 baking 중복도 생기지 않는다.
+        go.hideFlags = HideFlags.DontSave;
 
 #if UNITY_EDITOR
         if (!Application.isPlaying)
@@ -490,7 +505,7 @@ public sealed class CharacterFocusPreviewMarker : MonoBehaviour
     }
 
     private static string BuildMarkerName(Point point) =>
-        "__FocusPoint_" + point.DisplayName;
+        MarkerNameToken + point.DisplayName;
 
     private bool CanCreateChildMarkers()
     {
@@ -526,17 +541,53 @@ public sealed class CharacterFocusPreviewMarker : MonoBehaviour
     {
         _markerMap.Clear();
 
+        // 자식 이름은 런타임에 role prefix가 붙어 더럽혀질 수 있다("Leafia___FocusPoint_Bust").
+        // 따라서 prefix를 무시하고, 현재 points로부터 만든 canonical 이름("__FocusPoint_Bust")으로
+        // 끝나는지로 식별해 canonical 키로 채택한다. 같은 canonical이 둘 이상이면 첫 것만 채택한다.
         for (int i = 0; i < transform.childCount; i++)
         {
             RectTransform child = transform.GetChild(i) as RectTransform;
             if (child == null)
                 continue;
 
-            if (!child.name.StartsWith("__FocusPoint_", StringComparison.Ordinal))
+            if (child.name.IndexOf(MarkerNameToken, StringComparison.Ordinal) < 0)
                 continue;
 
-            _markerMap[child.name] = child;
+            string canonical = ResolveCanonicalMarkerName(child.name);
+            if (canonical == null)
+                continue;
+
+            if (!_markerMap.ContainsKey(canonical))
+                _markerMap[canonical] = child;
         }
+    }
+
+    /// <summary>자식 이름이 (prefix 무시) 어떤 point의 canonical 마커 이름으로 끝나면 그 canonical을 돌려준다.</summary>
+    private string ResolveCanonicalMarkerName(string childName)
+    {
+        for (int i = 0; i < points.Count; i++)
+        {
+            Point point = points[i];
+            if (point == null)
+                continue;
+
+            string canonical = BuildMarkerName(point);
+            if (childName.EndsWith(canonical, StringComparison.Ordinal))
+                return canonical;
+        }
+        return null;
+    }
+
+    /// <summary>canonical 마커 이름으로 끝나는 자식을 찾는다(role prefix 허용).</summary>
+    private RectTransform FindExistingMarkerBySuffix(string canonicalMarkerName)
+    {
+        for (int i = 0; i < transform.childCount; i++)
+        {
+            Transform child = transform.GetChild(i);
+            if (child != null && child.name.EndsWith(canonicalMarkerName, StringComparison.Ordinal))
+                return child as RectTransform;
+        }
+        return null;
     }
 
     private void SetAllGameViewMarkersVisible(bool visible)
@@ -664,6 +715,59 @@ public sealed class CharacterFocusPreviewMarker : MonoBehaviour
         for (int i = 0; i < root.childCount; i++)
         {
             RectTransform found = FindChildRecursive(root.GetChild(i), targetName);
+            if (found != null)
+                return found;
+        }
+
+        return null;
+    }
+
+    /// <summary>focus 기준 노드를 부모 계층에서 찾는다. role prefix("Albedo_CharSlot_Scale")도 허용.</summary>
+    private RectTransform FindFocusBasisInParentHierarchy()
+    {
+        RectTransform exact = FindInParentHierarchy(FocusBasisNodeName);
+        if (exact != null)
+            return exact;
+
+        // 런타임 rig는 모든 노드 이름에 role prefix가 붙으므로 정확 일치가 실패할 수 있다.
+        return FindInParentHierarchyBySuffix(FocusBasisNodeName);
+    }
+
+    private static bool IsFocusBasisRect(RectTransform rect)
+    {
+        if (rect == null)
+            return false;
+
+        // 정확 일치 또는 prefix가 붙은 "..._CharSlot_Scale" 모두 기준 노드로 인정.
+        return string.Equals(rect.name, FocusBasisNodeName, StringComparison.Ordinal)
+            || rect.name.EndsWith(FocusBasisNodeName, StringComparison.Ordinal);
+    }
+
+    private RectTransform FindInParentHierarchyBySuffix(string suffix)
+    {
+        Transform current = transform.parent;
+        while (current != null)
+        {
+            RectTransform found = FindChildRecursiveBySuffix(current, suffix);
+            if (found != null)
+                return found;
+
+            current = current.parent;
+        }
+        return null;
+    }
+
+    private static RectTransform FindChildRecursiveBySuffix(Transform root, string suffix)
+    {
+        if (root == null)
+            return null;
+
+        if (root.name.EndsWith(suffix, StringComparison.Ordinal))
+            return root as RectTransform;
+
+        for (int i = 0; i < root.childCount; i++)
+        {
+            RectTransform found = FindChildRecursiveBySuffix(root.GetChild(i), suffix);
             if (found != null)
                 return found;
         }

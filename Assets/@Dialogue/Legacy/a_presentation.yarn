@@ -1,10 +1,11 @@
 ﻿title: a_presentation
 ---
 0.set
+
 a1.(물건을 건네받은 수상한 사람은 그것을 입으로 가져가 조심스럽게 베어 물었다. 고요한 골목 안에 기괴한 저작음이 울려 퍼졌다.
 //<<shot_zoom_focus Leafia bust center 3 0.8>>
 <<jolt Leafia>>
-<<shot_zoom_focus Leafia Body center 0 1>>
+<<shot_zoom_focus Leafia face center 0.5 1>>
 
 a2.(쩝쩝쩝 ..... 맞아, 바로 이 맛이야.
 //<<shot_zoom_focus Albedo bust center 10 0.8>>
@@ -12,10 +13,11 @@ a2.(쩝쩝쩝 ..... 맞아, 바로 이 맛이야.
 <<shake Leafia>>
 
 a3.(의심스러운 사람은 만족한 듯한 상대의 반응을 확인하고는 본론을 꺼냈다.
+<<shot_zoom_focus Leafia face left 0.5 1>>
 
-<<shot_reset>>
-<<slide_out Leafia left>>
-<<fade_out Leafia 0.5>>
+//<<shot_reset>>
+//<<slide_out Leafia left>>
+//<<fade_out Leafia 0.5>>
 
 <<move_by Albedo 200 0>>
 

@@ -119,8 +119,8 @@ public sealed class EpisodePlayer : MonoBehaviour
         _backlogRecorder.ClearBacklog();
         await StopYarnRunnersAsync();
         _linePresentationAborter?.AbortCurrentVnLine();
-        presentationRouteEntry.EndRouteNow();
         ResetVisualState();
+        presentationRouteEntry.EndRouteNow();
     }
 
     private async YarnTask StopYarnRunnersAsync()
