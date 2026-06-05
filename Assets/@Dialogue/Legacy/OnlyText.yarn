@@ -1,5 +1,6 @@
 ﻿title: OnlyText
 ---
+<<shot_reset>>
 <<beat c_oneshot>>
 <<pres_start a_presentation>>
 //<<sub_hold 999>>

@@ -77,11 +77,11 @@ public sealed partial class YarnCommandBridge
         Collect(spec);
     }
     
-    private void EnqueueShotResetSpec(float duration = 0.35f)
+    private void EnqueueShotResetSpec(float duration = 0f)
     {
         var spec = new ShotResetCommandSpec
         {
-            duration = Mathf.Max(0f, duration),
+            duration = duration,
             ease = Ease.OutCubic,
             wait = false
         };

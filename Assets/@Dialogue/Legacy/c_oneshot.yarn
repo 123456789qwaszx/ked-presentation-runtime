@@ -1,6 +1,6 @@
 ﻿title: c_oneshot
 ---
-
+//<<shot_reset>>
 <<slot Leafia 0>>
 <<cast Leafia Leafia a 02 true left normal>>
 

@@ -13,11 +13,7 @@ public sealed partial class YarnCommandBridge
 
     private readonly VNSideRunnerSyncHub _sideRunnerSyncHub;
     private readonly OneShotPresentationLane _oneShotPresentationLane;
-
     
-    // 한 브리지 = 한 레인(러너 1 + 드라이버 1).
-    // 두 레인의 커맨드 셋을 시스템적으로 동일하게 유지하려고 동일한 BindRunnerCommands를 그대로 바인딩한다.
-    // bindMainLaneCommands=true 인 레인만 sub_table / sub_* / block_* (현 메인 전용 커맨드)를 추가로 가진다.
     public YarnCommandBridge(
         DialogueRunner runner,
         YarnBridgePlaybackDriver playbackDriver,
@@ -32,9 +28,6 @@ public sealed partial class YarnCommandBridge
         _vnRuntimeStateProvider = vnRuntimeStateProvider;
         _sideRunnerSyncHub = sideRunnerSyncHub;
         _charRigPrefab = charRigPrefab;
-
-        if (_runner == null)
-            Debug.LogWarning("[YarnCommandBridge] runner is null.");
 
         BindRunnerCommands(_runner);
 
