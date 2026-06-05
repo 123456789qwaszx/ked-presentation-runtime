@@ -4,6 +4,8 @@ public sealed class BackgroundRigResponseTarget : IResponseTarget
 {
     private readonly BackgroundRigRefs _refs;
 
+    // Background_Root is the response-neutral base node.
+    // Framing nodes are below it, so measuring base position is not polluted by response.
     public RectTransform MeasureRect => _refs.Background_Root;
     public RectTransform PositionRect => _refs.Background_FramingTransform;
     public RectTransform ScaleRect => _refs.Background_FramingScale;

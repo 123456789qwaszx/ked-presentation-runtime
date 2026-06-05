@@ -1,17 +1,17 @@
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-
 public static class BackgroundRigSchema
 {
     public enum Refs
     {
+        // Background base axis - response-neutral placement / measurement
+        Background_Root,
+
         // Framing axis - pseudo camera / focus response
         Background_FramingTransform,
         Background_FramingScale,
 
         // Background casting axis - per-background defaults
-        Background_Root,
         Background_CastTransform,
 
         // Background acting axis
@@ -61,13 +61,15 @@ public static class BackgroundRigSchema
 
     public static readonly NodeDef[] Nodes =
     {
+        // Background base axis - response-neutral placement / measurement
+        new() { Id = Refs.Background_Root, Parent = null, NeedsCanvasGroup = true },
+
         // Framing axis - pseudo camera / focus response
-        new() { Id = Refs.Background_FramingTransform, Parent = null },
+        new() { Id = Refs.Background_FramingTransform, Parent = Refs.Background_Root },
         new() { Id = Refs.Background_FramingScale, Parent = Refs.Background_FramingTransform },
 
         // Background casting axis - per-background defaults
-        new() { Id = Refs.Background_Root, Parent = Refs.Background_FramingScale, NeedsCanvasGroup = true },
-        new() { Id = Refs.Background_CastTransform, Parent = Refs.Background_Root },
+        new() { Id = Refs.Background_CastTransform, Parent = Refs.Background_FramingScale },
 
         // Background acting axis
         new() { Id = Refs.Background_Track, Parent = Refs.Background_CastTransform },
@@ -104,12 +106,14 @@ public static class BackgroundRigSchema
 
 public enum BackgroundRigTarget
 {
+    // Background base axis - response-neutral placement / measurement
+    Background_Root,
+
     // Framing axis - pseudo camera / focus response
     Background_FramingTransform,
     Background_FramingScale,
 
     // Background casting axis - per-background defaults
-    Background_Root,
     Background_CastTransform,
 
     // Background acting axis
@@ -153,12 +157,14 @@ public sealed class BackgroundRigRefs
         RigRoot = rigRoot;
     }
 
+    // Background base axis - response-neutral placement / measurement
+    public RectTransform Background_Root;
+
     // Framing axis - pseudo camera / focus response
     public RectTransform Background_FramingTransform;
     public RectTransform Background_FramingScale;
 
     // Background casting axis - per-background defaults
-    public RectTransform Background_Root;
     public RectTransform Background_CastTransform;
 
     // Background acting axis
@@ -217,12 +223,14 @@ public static class BackgroundRigRefsExtensions
 
         return target switch
         {
+            // Background base axis - response-neutral placement / measurement
+            BackgroundRigTarget.Background_Root => refs.Background_Root,
+
             // Framing axis - pseudo camera / focus response
             BackgroundRigTarget.Background_FramingTransform => refs.Background_FramingTransform,
             BackgroundRigTarget.Background_FramingScale => refs.Background_FramingScale,
 
             // Background casting axis - per-background defaults
-            BackgroundRigTarget.Background_Root => refs.Background_Root,
             BackgroundRigTarget.Background_CastTransform => refs.Background_CastTransform,
 
             // Background acting axis
