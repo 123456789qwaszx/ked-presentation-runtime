@@ -13,7 +13,7 @@ public sealed class BackgroundRigResponseTarget : IResponseTarget
         _refs = refs;
     }
 
-    public void ApplyResponse(in PresentationResponseBinding.Response response)
+    public void ApplyResponse(in PresentationTargetResponse response)
     {
         if (PositionRect != null)
             PositionRect.anchoredPosition = response.anchoredPosition;

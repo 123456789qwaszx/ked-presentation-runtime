@@ -15,7 +15,7 @@ public sealed class CharacterRigResponseTarget : IResponseTarget
         _refs = refs;
     }
 
-    public void ApplyResponse(in PresentationResponseBinding.Response response)
+    public void ApplyResponse(in PresentationTargetResponse response)
     {
         if (PositionRect != null)
             PositionRect.anchoredPosition = response.anchoredPosition;

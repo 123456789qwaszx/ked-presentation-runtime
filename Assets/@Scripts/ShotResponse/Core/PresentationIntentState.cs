@@ -1,21 +1,26 @@
 using System;
 using UnityEngine;
 
-// Shot intent state.
+// Authored shot intent state.
 // This is not a final Transform state.
-// zoom, pan, and focusPoint are authored/logical values used to solve camera roots and response targets.
+// Values are solved later into camera root transforms and per-target response transforms.
 [Serializable]
 public struct PresentationIntentState
 {
-    [Range(-10f, 10f)]
-    public float zoom; // Camera zoom intensity
-    public Vector2 pan;  // Camera pan offset in rig space
-    public Vector2 focusPoint; // Target position in rig space (Stage_Root) the camera should focus on
+    // Authored zoom intent, not final camera scale.
+    public float zoom;
 
-    public static PresentationIntentState Default => new ()
+    // Camera pan offset in shared rig space.
+    public Vector2 panInRigSpace;
+
+    // Logical focus point in shared rig space.
+    // Camera framing and target spread are solved relative to this point.
+    public Vector2 focusPointInRigSpace;
+
+    public static PresentationIntentState Default => new()
     {
         zoom = 0f,
-        pan = Vector2.zero,
-        focusPoint = Vector2.zero,
+        panInRigSpace = Vector2.zero,
+        focusPointInRigSpace = Vector2.zero,
     };
 }

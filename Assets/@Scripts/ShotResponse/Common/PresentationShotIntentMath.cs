@@ -32,39 +32,14 @@ public static class PresentationShotIntentMath
         float t)
         => new() {
             zoom = Mathf.Lerp(from.zoom, to.zoom, t),
-            pan = Vector2.Lerp(from.pan, to.pan, t),
-            focusPoint = Vector2.Lerp(from.focusPoint, to.focusPoint, t) };
+            panInRigSpace = Vector2.Lerp(from.panInRigSpace, to.panInRigSpace, t),
+            focusPointInRigSpace = Vector2.Lerp(from.focusPointInRigSpace, to.focusPointInRigSpace, t) };
 
     // Used to skip unnecessary tweens.
     public static bool ApproximatelyEqual(
         in PresentationIntentState a, 
         in PresentationIntentState b) 
         => Mathf.Abs(a.zoom - b.zoom) <= 0.0001f &&
-           Vector2.SqrMagnitude(a.pan - b.pan) <= 0.0001f &&
-           Vector2.SqrMagnitude(a.focusPoint - b.focusPoint) <= 0.0001f;
-}
-
-
-// ShotIntentState토대로, 개별 대상의 반응을 계산
-public static class PresentationResponseMath
-{
-    public static PresentationResponseBinding.Response CalculateTargetTransformResponseFromShotIntent(
-        in PresentationIntentState state,
-        PresentationResponseProfile profile)
-    {
-        Vector2 focusToTarget = profile.basePositionInRigSpace - state.focusPoint;
-        Vector2 directionFromFocus = focusToTarget.normalized;
-        
-        float spreadDistance = state.zoom * profile.focusSpreadPixelsPerZoom;
-        Vector2 focusSpreadOffset = directionFromFocus * spreadDistance;
-
-        Vector2 destPos = profile.basePositionInRigSpace + state.pan * profile.panResponse + focusSpreadOffset;
-        Vector2 destScale = profile.baseLocalScale * (1f + state.zoom);
-        
-        return new PresentationResponseBinding.Response
-        {
-            anchoredPosition = destPos,
-            scale = destScale,
-        };
-    }
+           Vector2.SqrMagnitude(a.panInRigSpace - b.panInRigSpace) <= 0.0001f &&
+           Vector2.SqrMagnitude(a.focusPointInRigSpace - b.focusPointInRigSpace) <= 0.0001f;
 }

@@ -4,35 +4,32 @@ using UnityEngine;
 
 [Serializable]
 [CommandMenuHint(
-    "Background Rig", "Register Background Response Binding", Order = -997,
+    "Background Rig", "Remove Background Response Binding", Order = -996,
     Sets = new[]
     {
         CommandMenuSets.SetupBackground,
     },
-    SetOrder = -979)]
-public sealed class RegisterBackgroundResponseBindingCommandSpec : CommandSpecBase
+    SetOrder = -978)]
+public sealed class RemoveBackgroundResponseBindingCommandSpec : CommandSpecBase
 {
     [Header("Rig")]
     [Tooltip("BackgroundRigRegistry에 등록된 rigKey.")]
     public string rigKey;
-
-    [Tooltip("BackgroundRig가 shot intent에 반응하는 방식.")]
-    public PresentationResponseProfile responseProfile = PresentationResponseProfile.Background;
 }
 
-public sealed class RegisterBackgroundResponseBindingCommand : CommandBase
+public sealed class RemoveBackgroundResponseBindingCommand : CommandBase
 {
+    private readonly RemoveBackgroundResponseBindingCommandSpec _spec;
     private readonly PresentationResponseRig _responseRig;
-    private readonly RegisterBackgroundResponseBindingCommandSpec _spec;
 
     public override bool WaitForCompletion => true;
 
-    public RegisterBackgroundResponseBindingCommand(
-        RegisterBackgroundResponseBindingCommandSpec spec,
+    public RemoveBackgroundResponseBindingCommand(
+        RemoveBackgroundResponseBindingCommandSpec spec,
         PresentationResponseRig responseRig)
     {
-        _responseRig = responseRig;
         _spec = spec;
+        _responseRig = responseRig;
     }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
@@ -47,12 +44,8 @@ public sealed class RegisterBackgroundResponseBindingCommand : CommandBase
     private void Apply(CommandRunScope scope)
     {
         string resolvedBgKey = ResponseBindingKeys.BackgroundRig(scope, _spec.rigKey);
-        if (!scope.backgroundRigs.TryGetRig(resolvedBgKey, out BackgroundRigRefs rigRefs))
-            return;
-
         string bindingKey = ResponseBindingKeys.BackgroundRigFromRigKey(resolvedBgKey);
-        BackgroundRigResponseTarget target = new(rigRefs);
 
-        _responseRig.RegisterRuntimeBinding(bindingKey, target, _spec.responseProfile);
+        _responseRig.RemoveBinding(bindingKey);
     }
 }

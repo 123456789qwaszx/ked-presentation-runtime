@@ -77,7 +77,7 @@ public sealed class ShotZoomFocusCommand : ShotIntentCommandBase<ShotZoomFocusCo
 
         // 4. 현재 측정된 캐릭터 focus 위치에서 현재 pan/scale을 제거해서 논리 focusPoint로 되돌린다.
         Vector2 logicalFocusPoint =
-            PresentationShotIntentMath.RemoveCurrentCameraTransformFromFocusPoint(focus.FocusPointInStageSpace, from.pan, fromScale);
+            PresentationShotIntentMath.RemoveCurrentCameraTransformFromFocusPoint(focus.FocusPointInStageSpace, from.panInRigSpace, fromScale);
 
         // 5. 화면의 어느 지점에 focus를 두고 싶은지 구한다. 예: Center, Left, Right, Upper 등
         Vector2 desiredPoint =
@@ -91,8 +91,8 @@ public sealed class ShotZoomFocusCommand : ShotIntentCommandBase<ShotZoomFocusCo
         return new PresentationIntentState
         {
             zoom = targetZoom,
-            pan = targetPan,
-            focusPoint = logicalFocusPoint,
+            panInRigSpace = targetPan,
+            focusPointInRigSpace = logicalFocusPoint,
         };
     }
 }

@@ -213,11 +213,14 @@ public sealed partial class YarnCommandBridge
     {
         runner.AddCommandHandler<string, string>("shot_bind_bg_response", EnqueueRegisterBackgroundResponseBindingSpec);
         runner.AddCommandHandler<string, string>("shot_bind_char_response", EnqueueRegisterCharacterResponseBindingSpec);
-        
+
+        runner.AddCommandHandler<string, string>("shot_unbind_bg_response", EnqueueRemoveBackgroundResponseBindingSpec);
+        runner.AddCommandHandler<string, string>("shot_unbind_char_response", EnqueueRemoveCharacterResponseBindingSpec);
+
         runner.AddCommandHandler<string, string, string, float, float>("shot_zoom_focus", EnqueueShotZoomFocusSpec);
         runner.AddCommandHandler<float, float, float, float>("shot_to", EnqueueShotToSpec);
         runner.AddCommandHandler("shot_reset", (Action<float>)EnqueueShotResetSpec);
-        
+
         runner.AddCommandHandler<float, float>("shot_zoom", EnqueueShotZoomSpec);
         runner.AddCommandHandler<float, float, float>("shot_track", EnqueueShotTrackSpec);
     }

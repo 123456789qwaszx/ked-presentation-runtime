@@ -4,31 +4,28 @@ using UnityEngine;
 
 [Serializable]
 [CommandMenuHint(
-    "Char Rig", "Register Character Response Binding", Order = -997,
+    "Char Rig", "Remove Character Response Binding", Order = -996,
     Sets = new[]
     {
         CommandMenuSets.BuildChar,
     },
-    SetOrder = -979)]
-public sealed class RegisterCharacterResponseBindingCommandSpec : CommandSpecBase
+    SetOrder = -978)]
+public sealed class RemoveCharacterResponseBindingCommandSpec : CommandSpecBase
 {
     [Header("Rig")]
     [Tooltip("CharacterRigRegistry에 등록된 slotKey / characterKey.")]
     public string targetKey;
-
-    [Tooltip("CharacterRig가 shot intent에 반응하는 방식.")]
-    public PresentationResponseProfile responseProfile = PresentationResponseProfile.CharacterSlot;
 }
 
-public sealed class RegisterCharacterResponseBindingCommand : CommandBase
+public sealed class RemoveCharacterResponseBindingCommand : CommandBase
 {
-    private readonly RegisterCharacterResponseBindingCommandSpec _spec;
+    private readonly RemoveCharacterResponseBindingCommandSpec _spec;
     private readonly PresentationResponseRig _responseRig;
 
     public override bool WaitForCompletion => true;
 
-    public RegisterCharacterResponseBindingCommand(
-        RegisterCharacterResponseBindingCommandSpec spec,
+    public RemoveCharacterResponseBindingCommand(
+        RemoveCharacterResponseBindingCommandSpec spec,
         PresentationResponseRig responseRig)
     {
         _spec = spec;
@@ -47,12 +44,8 @@ public sealed class RegisterCharacterResponseBindingCommand : CommandBase
     private void Apply(CommandRunScope scope)
     {
         string resolvedSlotKey = ResponseBindingKeys.CharacterRig(scope, _spec.targetKey);
-        if (!scope.characterRigs.TryGetRig(resolvedSlotKey, out CharacterRigRefs rigRefs))
-            return;
-
         string bindingKey = ResponseBindingKeys.CharacterRigFromSlotKey(resolvedSlotKey);
-        CharacterRigResponseTarget target = new CharacterRigResponseTarget(rigRefs);
 
-        _responseRig.RegisterRuntimeBinding(bindingKey, target, _spec.responseProfile);
+        _responseRig.RemoveBinding(bindingKey);
     }
 }

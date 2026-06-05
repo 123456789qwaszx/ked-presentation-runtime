@@ -24,7 +24,7 @@ public sealed class PresentationCameraRootApplier
         float scale = PresentationShotIntentMath.EvaluateCameraScale(state.zoom);
 
         _cameraRootProvider.StageZoomRoot.localScale = new Vector3(scale, scale, 1f);
-        _cameraRootProvider.StagePanRoot.anchoredPosition = state.pan;
+        _cameraRootProvider.StagePanRoot.anchoredPosition = state.panInRigSpace;
     }
 
     private bool TryEnsureCameraRootProvider()
@@ -35,10 +35,7 @@ public sealed class PresentationCameraRootApplier
         _cameraRootProvider = UIManager.Instance.GetUI<PresentationUIRoot>();
 
         if (_cameraRootProvider == null)
-        {
-            Debug.LogWarning("[PresentationCameraRootApplier] Failed to resolve IPresentationCameraRootProvider.");
             return false;
-        }
 
         return true;
     }

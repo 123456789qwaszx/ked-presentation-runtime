@@ -27,14 +27,14 @@ public sealed class ShotTrackCommand : ShotIntentCommandBase<ShotTrackCommandSpe
         CommandRunScope scope)
     {
         Vector2 targetPan = spec.relative
-            ? from.pan + spec.pan
+            ? from.panInRigSpace + spec.pan
             : spec.pan;
 
         return new PresentationIntentState
         {
             zoom = from.zoom,
-            pan = targetPan,
-            focusPoint = from.focusPoint,
+            panInRigSpace = targetPan,
+            focusPointInRigSpace = from.focusPointInRigSpace,
         };
     }
 }

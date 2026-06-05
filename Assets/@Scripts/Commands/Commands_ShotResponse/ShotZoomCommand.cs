@@ -27,8 +27,8 @@ public sealed class ShotZoomCommand : ShotIntentCommandBase<ShotZoomCommandSpec>
         return new PresentationIntentState
         {
             zoom = spec.zoom,
-            pan = from.pan,
-            focusPoint = from.focusPoint,
+            panInRigSpace = from.panInRigSpace,
+            focusPointInRigSpace = from.focusPointInRigSpace,
         };
     }
 }

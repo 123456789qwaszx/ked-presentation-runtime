@@ -6,5 +6,5 @@ public interface IResponseTarget
     RectTransform PositionRect { get; }
     RectTransform ScaleRect { get; }
 
-    void ApplyResponse(in PresentationResponseBinding.Response response);
+    void ApplyResponse(in PresentationTargetResponse response);
 }

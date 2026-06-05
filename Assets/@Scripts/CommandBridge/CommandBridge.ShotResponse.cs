@@ -25,6 +25,26 @@ public sealed partial class YarnCommandBridge
         Collect(spec);
     }
     
+    private void EnqueueRemoveBackgroundResponseBindingSpec(string rigKey, string stageKey = "0")
+    {
+        var spec = new RemoveBackgroundResponseBindingCommandSpec
+        {
+            rigKey = rigKey
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueRemoveCharacterResponseBindingSpec(string targetKey, string stageKey = "0")
+    {
+        var spec = new RemoveCharacterResponseBindingCommandSpec
+        {
+            targetKey = targetKey
+        };
+
+        Collect(spec);
+    }
+    
     private void EnqueueShotZoomFocusSpec(string roleKey, string focusName = "body", string screenPointName = "center", float zoom = 2.5f, float duration = 1.2f)
     {
         CharacterFocusPreset focusPreset;
