@@ -15,7 +15,6 @@ public sealed class CharacterRigResponseTarget : IResponseTarget
 
     public void ApplyResponse(in PresentationTargetResponse response)
     {
-        
         if (PositionRect != null)
             PositionRect.anchoredPosition = response.anchoredPosition;
 

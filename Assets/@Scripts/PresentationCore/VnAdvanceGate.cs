@@ -92,7 +92,7 @@ public sealed class AdvanceGate
         if (_vnUxState.ChoicesVisible)
             return Reject(isUser, "choices_visible");
 
-        if (CurrentScope.IsNodeBusy)
+        if (CurrentScope != null && CurrentScope.IsNodeBusy)
         {
             // Debug.Log("executorDispose");
             // _commandExecutor.CancelAndDisposeToken();

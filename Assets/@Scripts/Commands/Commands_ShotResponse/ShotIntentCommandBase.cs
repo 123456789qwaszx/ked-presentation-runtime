@@ -40,11 +40,11 @@ public abstract class ShotIntentCommandBase<TSpec> : CommandBase
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
         if (spec.killTween)
-            KillRigTween(true); // 이전 shot을 끝내고 committed state에서 시작 (다른 커맨드와 동일 규약).
+            KillRigTween(true);
 
         _canCommitFinalState = true;
 
-        _fromState = rig.CurrentState;                  // 실제 현재 상태에서 출발
+        _fromState = rig.CurrentState;
         _toState = BuildTargetState(_fromState, scope);
 
         if (spec.duration <= 0f || PresentationShotIntentMath.ApproximatelyEqual(_fromState, _toState))
@@ -110,9 +110,7 @@ public abstract class ShotIntentCommandBase<TSpec> : CommandBase
         ClearRuntimeState();
     }
 
-    protected abstract PresentationIntentState BuildTargetState(
-        in PresentationIntentState from,
-        CommandRunScope scope);
+    protected abstract PresentationIntentState BuildTargetState(in PresentationIntentState from, CommandRunScope scope);
 
     private void Commit(in PresentationIntentState state)
     {
