@@ -60,8 +60,8 @@ public sealed partial class YarnCommandBridge
     private IEnumerator StopSubPresentationNode() => _sideRunnerSyncHub.StopPresentationLaneCoroutine();
     private void PauseSubPresentation()  => _sideRunnerSyncHub.PausePresentation();
     private void ResumeSubPresentation() => _sideRunnerSyncHub.ResumePresentation();
-    private void HoldSubPresentation(int lines) => _sideRunnerSyncHub.HoldPresentation(lines);
-    private void AdvanceSubPresentationExtra(int steps) => _sideRunnerSyncHub.AdvancePresentationExtra(steps);
+    private void HoldSubPresentation(int lines = 1) => _sideRunnerSyncHub.HoldPresentation(lines);
+    private void AdvanceSubPresentationExtra(int steps = 1) => _sideRunnerSyncHub.AdvancePresentationExtra(steps);
     private void SetSubPresentationSuppressFirst(bool suppress) => _sideRunnerSyncHub.SetPresentationSuppressFirstAutoAdvance(suppress);
     
     private IEnumerator RunOneShotNode(string nodeName) => _oneShotPresentationLane.RunNodeCoroutine(nodeName);
@@ -182,14 +182,14 @@ public sealed partial class YarnCommandBridge
     
     private void BindBackgroundRig(DialogueRunner runner)
     {
-        runner.AddCommandHandler<string, string, string, string, string, float, float, float>("bg_spawn", EnqueueSpawnBackgroundRigSpec);
+        runner.AddCommandHandler<string, string, string, string, float, float, float, string>("bg_spawn", EnqueueSpawnBackgroundRigSpec);
         
         runner.AddCommandHandler<string, float, float, float>("bg_place", EnqueueSetBackgroundAnchorSpec);
         runner.AddCommandHandler<string, string, string>("bg_sprite", EnqueueSetBackgroundSpriteSpec);
         runner.AddCommandHandler<string, string>("bg_size", EnqueueSetBackgroundOriginSizeSpec);
         
-        runner.AddCommandHandler<string, string, float>("bg_fade_in", EnqueueFadeInBackgroundSpec);
-        runner.AddCommandHandler<string, string, float>("bg_fade_out", EnqueueFadeOutBackgroundSpec);
+        runner.AddCommandHandler<string, float, string>("bg_fade_in", EnqueueFadeInBackgroundSpec);
+        runner.AddCommandHandler<string, float, string>("bg_fade_out", EnqueueFadeOutBackgroundSpec);
         
         runner.AddCommandHandler<string, float, float, float>("bg_move", EnqueueMoveBackgroundSpec);
         runner.AddCommandHandler<string, float, float>("bg_scale", EnqueueScaleBackgroundSpec);
@@ -220,23 +220,23 @@ public sealed partial class YarnCommandBridge
     
     private void BindTransition(DialogueRunner runner)
     {
-        runner.AddCommandHandler<string, float>("tx_slant_in", EnqueueSlantedMaskCutInSpec);
-        runner.AddCommandHandler<string, float>("tx_slant_out", EnqueueSlantedMaskCutOutSpec);
+        runner.AddCommandHandler<float>("tx_slant_in", EnqueueSlantedMaskCutInSpec);
+        runner.AddCommandHandler<float>("tx_slant_out", EnqueueSlantedMaskCutOutSpec);
 
-        runner.AddCommandHandler<string, float>("tx_strip_cover", EnqueueVerticalStripCoverSpec);
-        runner.AddCommandHandler<string, float>("tx_strip_clear", EnqueueVerticalStripClearSpec);
+        runner.AddCommandHandler<float>("tx_strip_in", EnqueueVerticalStripCoverSpec);
+        runner.AddCommandHandler<float>("tx_strip_out", EnqueueVerticalStripClearSpec);
 
-        runner.AddCommandHandler<string, float>("tx_shutter_open", EnqueueSlantedShutterOpenSpec);
-        runner.AddCommandHandler<string, float>("tx_shutter_close", EnqueueSlantedShutterCloseSpec);
+        runner.AddCommandHandler<float>("tx_shutter_in", EnqueueSlantedShutterCloseSpec);
+        runner.AddCommandHandler<float>("tx_shutter_out", EnqueueSlantedShutterOpenSpec);
 
-        runner.AddCommandHandler<string, float>("tx_focus_fade_out", EnqueueFocusBlurFadeOutSpec);
-        runner.AddCommandHandler<string, float>("tx_focus_fade_in", EnqueueFocusBlurFadeInSpec);
+        runner.AddCommandHandler<float>("tx_focus_fade_in", EnqueueFocusBlurFadeOutSpec);
+        runner.AddCommandHandler<float>("tx_focus_fade_out", EnqueueFocusBlurFadeInSpec);
 
-        runner.AddCommandHandler<string, float>("tx_focus_curtain_close", EnqueueFocusBlurCurtainCloseSpec);
-        runner.AddCommandHandler<string, float>("tx_focus_curtain_open", EnqueueFocusBlurCurtainOpenSpec);
+        runner.AddCommandHandler<float>("tx_focus_curtain_in", EnqueueFocusBlurCurtainCloseSpec);
+        runner.AddCommandHandler<float>("tx_focus_curtain_out", EnqueueFocusBlurCurtainOpenSpec);
 
-        runner.AddCommandHandler<string, float>("tx_daze_fade_close", EnqueueDazeFadeCloseSpec);
-        runner.AddCommandHandler<string, float>("tx_daze_fade_open", EnqueueDazeFadeOpenSpec);
+        runner.AddCommandHandler<float>("tx_daze_fade_in", EnqueueDazeFadeCloseSpec);
+        runner.AddCommandHandler<float>("tx_daze_fade_out", EnqueueDazeFadeOpenSpec);
     }
     
     private void BindAudio(DialogueRunner runner)

@@ -3,11 +3,8 @@ using UnityEngine;
 
 public sealed partial class YarnCommandBridge
 {
-    private void EnqueueDazeFadeCloseSpec(
-        string targetName,
-        float duration = 0.85f)
+    private void EnqueueDazeFadeCloseSpec(float duration = 0.85f)
     {
-
         var spec = new FocusBlurCurtainCommandSpec
         {
             mode = FocusBlurCurtainMode.Close,
@@ -44,11 +41,8 @@ public sealed partial class YarnCommandBridge
         Collect(spec);
     }
 
-    private void EnqueueDazeFadeOpenSpec(
-        string targetName,
-        float duration = 0.65f)
+    private void EnqueueDazeFadeOpenSpec(float duration = 0.65f)
     {
-
         var spec = new FocusBlurCurtainCommandSpec
         {
 
@@ -80,9 +74,7 @@ public sealed partial class YarnCommandBridge
         Collect(spec);
     }
 
-    private void EnqueueFocusBlurCurtainCloseSpec(
-        string targetName,
-        float duration = 0.55f)
+    private void EnqueueFocusBlurCurtainCloseSpec(float duration = 0.55f)
     {
         var spec = new FocusBlurCurtainCommandSpec
         {
@@ -114,11 +106,8 @@ public sealed partial class YarnCommandBridge
         Collect(spec);
     }
 
-    private void EnqueueFocusBlurCurtainOpenSpec(
-        string targetName,
-        float duration = 0.42f)
+    private void EnqueueFocusBlurCurtainOpenSpec(float duration = 0.42f)
     {
-
         var spec = new FocusBlurCurtainCommandSpec
         {
             mode = FocusBlurCurtainMode.Open,
@@ -150,9 +139,7 @@ public sealed partial class YarnCommandBridge
     }
 
 
-    private void EnqueueFocusBlurFadeOutSpec(
-        string targetName,
-        float duration = 0.45f)
+    private void EnqueueFocusBlurFadeOutSpec(float duration = 0.45f)
     {
         var spec = new FocusBlurFadeCommandSpec
         {
@@ -174,11 +161,8 @@ public sealed partial class YarnCommandBridge
         Collect(spec);
     }
 
-    private void EnqueueFocusBlurFadeInSpec(
-        string targetName,
-        float duration = 0.35f)
+    private void EnqueueFocusBlurFadeInSpec(float duration = 0.35f)
     {
-
         var spec = new FocusBlurFadeCommandSpec
         {
 
@@ -200,14 +184,10 @@ public sealed partial class YarnCommandBridge
         Collect(spec);
     }
 
-    private void EnqueueSlantedShutterCloseSpec(
-        string targetName,
-        float duration = 0.38f)
+    private void EnqueueSlantedShutterCloseSpec(float duration = 0.38f)
     {
-
         var spec = new SlantedShutterCommandSpec
         {
-
             mode = SlantedShutterMode.Close,
 
             slantPixels = 140f,
@@ -232,11 +212,8 @@ public sealed partial class YarnCommandBridge
         Collect(spec);
     }
 
-    private void EnqueueSlantedShutterOpenSpec(
-        string targetName,
-        float duration = 0.32f)
+    private void EnqueueSlantedShutterOpenSpec(float duration = 0.32f)
     {
-
         var spec = new SlantedShutterCommandSpec
         {
             mode = SlantedShutterMode.Open,
@@ -263,14 +240,10 @@ public sealed partial class YarnCommandBridge
         Collect(spec);
     }
 
-    private void EnqueueVerticalStripCoverSpec(
-        string targetName,
-        float duration = 0f)
+    private void EnqueueVerticalStripCoverSpec(float duration = 0.4f)
     {
-
         var spec = new VerticalStripWipeCommandSpec
         {
-
             mode = VerticalStripWipeMode.Cover,
             order = VerticalStripWipeOrder.LeftToRight,
 
@@ -291,11 +264,8 @@ public sealed partial class YarnCommandBridge
         Collect(spec);
     }
 
-    private void EnqueueVerticalStripClearSpec(
-        string targetName,
-        float duration = 0f)
+    private void EnqueueVerticalStripClearSpec(float duration = 0.4f)
     {
-
         var spec = new VerticalStripWipeCommandSpec
         {
             mode = VerticalStripWipeMode.Clear,
@@ -318,11 +288,8 @@ public sealed partial class YarnCommandBridge
         Collect(spec);
     }
     
-    private void EnqueueSlantedMaskCutInSpec(
-        string targetName,
-        float duration = 0.65f)
+    private void EnqueueSlantedMaskCutInSpec(float duration = 0.65f)
     {
-
         var spec = new SlantedMaskSlideInCommandSpec
         {
             fromOffset = new Vector2(-2200f, 0f),
@@ -344,11 +311,8 @@ public sealed partial class YarnCommandBridge
         Collect(spec);
     }
 
-    private void EnqueueSlantedMaskCutOutSpec(
-        string targetName,
-        float duration = 0.45f)
+    private void EnqueueSlantedMaskCutOutSpec(float duration = 0.45f)
     {
-
         var spec = new SlantedMaskSlideOutCommandSpec
         {
             fromOffset = new Vector2(-770f, 0f),

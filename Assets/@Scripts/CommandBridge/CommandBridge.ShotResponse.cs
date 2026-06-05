@@ -77,7 +77,7 @@ public sealed partial class YarnCommandBridge
         Collect(spec);
     }
     
-    private void EnqueueShotResetSpec(float duration = 0f)
+    private void EnqueueShotResetSpec(float duration = 0.3f)
     {
         var spec = new ShotResetCommandSpec
         {

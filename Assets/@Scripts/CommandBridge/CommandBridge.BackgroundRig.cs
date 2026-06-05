@@ -4,9 +4,10 @@ public sealed partial class YarnCommandBridge
 {
     private void EnqueueSpawnBackgroundRigSpec(
         string rigKey, string parentSlotKey = "stage00",
-        string spriteKey = "green", string layerKey = "back",
-        string scaleArg = "1.3",
-        float x = 0f, float y = 0f, float rotationZ = 0f
+        string spriteKey = "green",
+        string scaleArg = "1",
+        float x = 0f, float y = 0f, float rotationZ = 0f,
+        string layerKey = "back"
         )
     {
         EnqueueSetupBackgroundRigSpec(rigKey, parentSlotKey);
@@ -71,7 +72,7 @@ public sealed partial class YarnCommandBridge
     }
 
 
-    private void EnqueueFadeInBackgroundSpec(string rigKey, string targetKey = "root", float duration = 0.47f)
+    private void EnqueueFadeInBackgroundSpec(string rigKey, float duration = 0.47f, string targetKey = "root")
     {
         var spec = new FadeInCommandSpecBgR
         {
@@ -83,7 +84,7 @@ public sealed partial class YarnCommandBridge
         Collect(spec);
     }
 
-    private void EnqueueFadeOutBackgroundSpec(string rigKey, string targetKey = "root", float duration = 0.38f)
+    private void EnqueueFadeOutBackgroundSpec(string rigKey,  float duration = 0.38f, string targetKey = "root")
     {
         var spec = new FadeOutCommandSpecBgR
         {
