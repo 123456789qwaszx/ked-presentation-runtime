@@ -1,5 +1,3 @@
-using UnityEngine;
-
 public sealed class VNLinePresentationState
 {
     private readonly VNSeekState _seekState = new ();

@@ -112,7 +112,7 @@ public sealed partial class YarnCommandBridge
     {
         runner.AddCommandHandler<string, string>("slot", EnqueueSetupCharRigSpec);
         
-        runner.AddCommandHandler<string, string, string, string, bool, string, string>("cast", EnqueueCastCharacterSpec);
+        runner.AddCommandHandler<string, string, string, string, string>("cast", EnqueueCastCharacterSpec);
         
         runner.AddCommandHandler<string, string, string, string>("pose", EnqueueSetPortraitSpriteSpec);
         runner.AddCommandHandler<string, string, bool, bool>("place", EnqueueSetAnchorSpecs);

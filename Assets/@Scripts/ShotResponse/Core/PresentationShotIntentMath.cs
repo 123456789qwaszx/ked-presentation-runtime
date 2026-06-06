@@ -9,19 +9,21 @@ public static class PresentationShotIntentMath
         float zoom) 
         => Mathf.Min(1f + zoom * DefaultZoomToScaleFactor);
 
-    // 현재 보이는 위치에서의 카메라 값을 제거하여, 원래 좌표 복원.
+    // 현재 보이는 위치에서 authored screen-pan 값을 제거하여, 원래 논리 좌표 복원.
     public static Vector2 RemoveCurrentCameraTransformFromFocusPoint(
         Vector2 focusPointInStageSpace, 
         Vector2 currentPan, 
         float currentScale)
-        => (focusPointInStageSpace - currentPan) / currentScale;
-    
-    // 캐릭터 얼굴이 원하는 위치에 보이도록 카메라 pan 값을 역산.
+        => (focusPointInStageSpace + currentPan) / currentScale;
+
+    // 캐릭터 얼굴이 원하는 화면 위치에 보이도록 authored screen-pan 값을 역산.
+    // Positive pan means the visible presentation moves in that direction,
+    // while the camera root applies the inverse transform.
     public static Vector2 CalculatePanToPlaceFocusAtScreenPoint(
         Vector2 logicalFocusPointInStageSpace, 
         Vector2 desiredPointInStageSpace, 
         float targetScale)
-        => desiredPointInStageSpace - logicalFocusPointInStageSpace * targetScale;
+        => logicalFocusPointInStageSpace * targetScale - desiredPointInStageSpace;
     
 
     // This interpolates authored intent values, not final Transform values.

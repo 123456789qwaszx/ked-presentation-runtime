@@ -211,18 +211,18 @@ position: 234,-104
 <<bg_fade_out bg5>>
 
 <<slot igna>>
+<<cast igna Mercurio right>>
+
 <<slot npc1>>
-<<cast igna Mercurio a 3 true right>>
-<<cast npc1 Gang_Girl a 2 true left>>
-
-<<fade_out igna 0>>
-<<fade_out npc1 0>>
-
+<<cast npc1 Gang_Girl left>>
 
 <<slot kronis>>
-<<cast kronis Willow a 3 true duoleft>>
+<<cast kronis Willow duoleft>>
 
-<<fade_out kronis 0>>
+<<fade_out Mercurio 0>>
+<<fade_out Gang_Girl 0>>
+<<fade_out Willow 0>>
+
 <<place_offset kronis 0 -400>>
 
 ===

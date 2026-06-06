@@ -20,8 +20,7 @@ public sealed class PresentationSessionEntry : MonoBehaviour, ICommandRunScopePr
         }
     }
     
-    public CommandRunScope SubScope =>
-        PresentationSession != null ? PresentationSession.SubScope : null;
+    public CommandRunScope SubScope => PresentationSession != null ? PresentationSession.SubScope : null;
 
     public void Initialize(PresentationSession presentationSession, RouteCatalogSO routeCatalogSo)
     {

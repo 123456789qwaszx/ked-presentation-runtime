@@ -24,7 +24,7 @@ public sealed class PresentationCameraRootApplier
         float scale = PresentationShotIntentMath.EvaluateCameraScale(state.zoom);
 
         _cameraRootProvider.StageZoomRoot.localScale = new Vector3(scale, scale, 1f);
-        _cameraRootProvider.StagePanRoot.anchoredPosition = state.panInRigSpace;
+        _cameraRootProvider.StagePanRoot.anchoredPosition = -state.panInRigSpace;
     }
 
     private bool TryEnsureCameraRootProvider()

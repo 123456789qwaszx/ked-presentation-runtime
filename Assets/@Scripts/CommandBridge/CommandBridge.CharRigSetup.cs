@@ -17,10 +17,9 @@ public sealed partial class YarnCommandBridge
     }
     
     private void EnqueueCastCharacterSpec(string slotKey, string characterKey, 
-        string variantKey = "a", string emotionKey = "02",
-        bool applySetup = true,
         string positionPreset = "center",
-        string scaleArg = "normal")
+        string scaleArg = "normal",
+        string variantKey = "a")
     {
         var castSpec = new CastCharacterCommandSpec
         {
@@ -31,14 +30,9 @@ public sealed partial class YarnCommandBridge
         
         Collect(castSpec);
 
-        EnqueueSetPortraitSpriteSpec(slotKey, characterKey, variantKey, emotionKey);
-        
-        if (!applySetup)
-            return;
-
+        EnqueueSetPortraitSpriteSpec(slotKey, characterKey, variantKey, "2");
         EnqueueSetAnchorSpecs(slotKey, positionPreset);
         EnqueueSetOriginSizeSpec(slotKey, scaleArg);
-        EnqueueFadeInSpec(slotKey);
     }
     
     private void EnqueueSetPortraitSpriteSpec(string slotKey, 
