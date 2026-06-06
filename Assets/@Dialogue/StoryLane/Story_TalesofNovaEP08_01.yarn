@@ -58,8 +58,8 @@ position: 694,90
 
 //<<solo_shot npc1>>
 
-<<char_focus igna 3 0.45>>
-<<char_defocus npc1 8 0.45>>
+// <<char_focus igna 3 0.45>>
+// <<char_defocus npc1 8 0.45>>
 //<<fade_out igna>>
 
 <<bg_fade_out qr5 1.2 front>>
