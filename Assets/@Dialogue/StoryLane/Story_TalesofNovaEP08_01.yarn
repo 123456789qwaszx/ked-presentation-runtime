@@ -54,10 +54,13 @@ position: 694,90
 
 // 한쪽 우세 구도
 //<<duo_shot npc1 igna left_dominant 0.45>>
-//<<duo_shot npc1 igna right_dominant 0.45>>
+<<duo_shot npc1 igna right_dominant 0.45>>
 
-<<solo_shot npc1>>
-<<fade_out igna>>
+//<<solo_shot npc1>>
+
+<<char_focus igna 3 0.45>>
+<<char_defocus npc1 8 0.45>>
+//<<fade_out igna>>
 
 <<bg_fade_out qr5 1.2 front>>
 <<pause 1.2>>
@@ -231,7 +234,7 @@ position: 234,-104
 
 <<slot igna>>
 <<cast igna Mercurio right>>
-<<color_to Mercurio 0 0 0>>
+//<<color_to Mercurio 0 0 0>>
 
 <<slot npc1>>
 <<cast npc1 Gang_Girl left>>

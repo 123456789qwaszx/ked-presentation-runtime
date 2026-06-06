@@ -91,6 +91,7 @@ public sealed partial class YarnCommandBridge
         BindCharRigPreset(runner);
 
         BindCharRigEmote(runner);
+        BindCharRigVisual(runner);
 
         BindBackgroundRig(runner);
         BindShotResponse(runner);
@@ -187,6 +188,19 @@ public sealed partial class YarnCommandBridge
         
         runner.AddCommandHandler<string>("emoji_hide", EnqueueHideCharacterEmojiSpec);
         runner.AddCommandHandler<string, string>("emoji_hide_slot", EnqueueHideCharacterEmojiSlotSpec);
+    }
+    
+    private void BindCharRigVisual(DialogueRunner runner)
+    {
+        runner.AddCommandHandler<string, float, float>("char_focus", EnqueueCharFocusSpec);
+        runner.AddCommandHandler<string, float, float>("char_defocus", EnqueueCharDefocusSpec);
+        runner.AddCommandHandler<string, float>("char_clear_focus", EnqueueCharClearFocusSpec);
+        
+        runner.AddCommandHandler<string, float, float>("char_dim", EnqueueCharDimSpec);
+        
+        runner.AddCommandHandler<string, float, float, float, float>("char_visual", EnqueueCharVisualSpec);
+        runner.AddCommandHandler<string, float, float, float, float, float, float, float>("char_visual_color", EnqueueCharVisualRimColorSpec);
+        
     }
     
     private void BindBackgroundRig(DialogueRunner runner)

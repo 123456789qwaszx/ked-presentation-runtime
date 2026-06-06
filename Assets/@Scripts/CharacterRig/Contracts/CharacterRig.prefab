@@ -1479,6 +1479,7 @@ GameObject:
   - component: {fileID: 4207469161910053921}
   - component: {fileID: 2231885033842388350}
   - component: {fileID: 6349513092616307074}
+  - component: {fileID: 3159160103682620938}
   m_Layer: 0
   m_Name: CharacterPortraitSprite_Image
   m_TagString: Untagged
@@ -1543,6 +1544,24 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &3159160103682620938
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5767492346481863705}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d7014d727c54d3d4c943f756b488ff9f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterRigVisualEffectController
+  portraitImage: {fileID: 6349513092616307074}
+  sourceMaterial: {fileID: 2100000, guid: 46337e245711745458b43b0629964e9f, type: 2}
+  rimColor: {r: 1, g: 1, b: 1, a: 1}
+  focusRimAmount: 0.35
+  defocusDimAmount: 0.28
+  defocusBlurAmount: 0.25
 --- !u!1 &5826825319622888613
 GameObject:
   m_ObjectHideFlags: 0

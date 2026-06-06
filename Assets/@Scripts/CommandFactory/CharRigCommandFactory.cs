@@ -64,7 +64,9 @@ public sealed class CharRigCommandFactory : INodeCommandFactory
             // Visual State
             SetColorCommandSpecCharR s => new SetColorCommandCharR(s),
             SetSpriteCommandSpecCharR s => new SetSpriteCommandCharR(s),
-
+            
+            CharVisualFocusCommandSpecCharR s => new CharVisualFocusCommandCharR(s),
+            
             SetPortraitSpriteCommandSpecCharR s => new SetPortraitSpriteCommandCharR(s, _portraitResolver),
             SetEmotionPortraitWipeCommandSpec s => new SetEmotionPortraitWipeCommand(s, _portraitResolver),
             SetPortraitCrossfadeCommandSpecCharR s => new SetPortraitCrossfadeCommandCharR(s, _portraitResolver),
