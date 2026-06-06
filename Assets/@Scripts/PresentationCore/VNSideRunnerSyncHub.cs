@@ -16,6 +16,12 @@ public sealed class VNSideRunnerSyncHub
         // Set by StepPresentationOnce(); consumed one line at a time as the lane becomes ready.
         public int ManualStepBudget;
 
+        // Monotonic counter bumped once per sub beat that finishes its entry phase.
+        // Main forward flow captures a baseline and waits for (baseline + dispatchedCount).
+        // NOTE: this is NOT reset on start/seek/load; it is monotonic on purpose so that
+        // an in-flight main wait never sees its target go backwards.
+        public int ForwardSettleEpoch;
+
         public bool IsStarted;
         public bool IsCompleted;
         public bool IsReadyForAdvance;
@@ -194,6 +200,43 @@ public sealed class VNSideRunnerSyncHub
     public void NotifyPresentationLaneCompleted()
     {
         _presentation.MarkCompleted();
+    }
+
+    // ---- Forward settle handshake (Phase 2 plumbing) ----
+    // Raised by SubPresentationPresenter once per beat, right after its command entry phase
+    // resolves (WaitUntilCommandEntryClosedAsync). For a beat whose commands are wait=true,
+    // entry-close == completion, so this fires only after the held visual finishes.
+    // Main forward flow awaits this (Phase 3) so it respects sub holds without touching
+    // NotifyPresentationLaneReady (which stays seek/advance-only).
+
+    public int ForwardSettleEpoch => _presentation.ForwardSettleEpoch;
+
+    public void NotifyPresentationForwardSettled()
+    {
+        unchecked
+        {
+            _presentation.ForwardSettleEpoch++;
+        }
+    }
+
+    // Phase 3 will call this from VNLinePresentationFlow's forward branch.
+    // Breaks early when the lane cannot produce further beats (completed / paused / not accepting),
+    // so main never hangs on an advance that will never settle.
+    public async YarnTask WaitUntilForwardSettledAsync(int targetEpoch)
+    {
+        while (_presentation.ForwardSettleEpoch < targetEpoch)
+        {
+            if (_presentation.IsCompleted)
+                break;
+
+            if (_presentation.IsPaused)
+                break;
+
+            if (!_presentation.CanAcceptAdvance)
+                break;
+
+            await YarnTask.Yield();
+        }
     }
 
     public int ConsumePresentationAutoAdvanceCount()

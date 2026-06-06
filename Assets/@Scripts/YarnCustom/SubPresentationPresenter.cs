@@ -51,6 +51,14 @@ public sealed class SubPresentationPresenter : DialoguePresenterBase
 
         bool cancelledDuringEntry = await WaitUntilCommandEntryClosedAsync(ticket, token);
 
+        // Forward settle handshake (Phase 2):
+        // The command entry phase for this beat has resolved. For wait=true commands this
+        // is the completion point, so a held beat naturally delays this signal. Raise it
+        // once per beat — before the ready/released branch — so main forward flow can wait
+        // for sub holds without coupling to the seek-only ready signal. This is decoupled
+        // from NotifyPresentationLaneReady on purpose.
+        _syncHub?.NotifyPresentationForwardSettled();
+
         // 취소(rollback / stop / 직전 라인의 RequestNextLine)로 무너진 라인은
         // "완료된 advance"로 취급하면 안 된다. 그러면 pending을 소모하고
         // RequestNextLine을 한 번 더 쳐서 질주한다.

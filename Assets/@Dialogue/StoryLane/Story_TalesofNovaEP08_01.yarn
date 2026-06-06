@@ -6,10 +6,8 @@ position: 694,90
 음...... 벌써 며칠째지...... #LetterBox
 이 감옥엔 창문이나 시계 같은 것도 없군 #LetterBox
 
-<<block_hold>>
 <<box_hide 0.5>>
 <<tx_shutter_in>>
-<<block_end 0.5>>
 
 <<tx_shutter_out>>
 <<bg_fade_in qr5>>
@@ -47,17 +45,13 @@ position: 694,90
 
 감옥 간수:..#boxhide
 
-<<block_hold>>
 <<fade_in igna 0.4>>
 <<shot_zoom_focus igna bust center 0.3 3.5>>
-<<block_end 4.1>>
 //<<flip_horizontal kronis 180 0.95>>
 ???: 오랜만이네, 크루니스.
 
 <<flip_vertical kronis 30 0.95>>
 ???:.. #boxhide
-<<block_hold>>
-<<block_end 1.1>>
 크루니스: 누군가 했더니...... 귀한 손님이 오셨네...... 설마 너일 줄이야.
 
 <<fade_out igna 0.4>>
@@ -65,10 +59,8 @@ position: 694,90
 <<shot_to -220 -80 1.9 2.1>>
 
 ???:... #boxhide
-<<block_hold>>
 <<sway kronis>>
 <<move_by kronis 0 -800 1.1>>
-<<block_end 1.2>>
 
 <<shot_reset>>
 
@@ -143,13 +135,11 @@ position: 694,90
 
 크루니스: 원래는 신을 부정하는 말을 하면서 마법을 쓸 생각이었지만, 너무 번거롭더라고...... 마법의 기본 원리부터 다시 설명해 줘야 하잖아.
 
-<<block_hold>>
 <<tx_focus_fade_in>>
 <<bg_fade_out bg4>>
 <<bg_fade_out bg3>>
 <<fade_in igna>>
 <<fade_in kronis>>
-<<block_end 0.4>>
 
 <<tx_focus_fade_out>>
 이그나: 그래서 그 후의 추가 증거 조사나 변론은 전부 거부하고, 그냥 판결을 기다렸던 거야?
@@ -171,12 +161,10 @@ position: 694,90
 이그나: 그 때 네가 나를 만나지 않았더라면, 아마 이 길로 들어서지도 않았겠지.
 
 2년전 #box:blackbook
-<<block_hold>>
 <<bg_fade_in bg5>>
 <<fade_out igna 0>>
 <<place kronis center true true>>
 <<move_by kronis -1200 0 0>>
-<<block_end>>
 
 <<pause 0.6>>
 <<hop kronis 4 55 35>>

@@ -88,15 +88,6 @@ public sealed partial class YarnCommandBridge
 
     private void BindControl(DialogueRunner runner)
     {
-        // Starts capturing commands into a virtual command block.
-        // Commands after <<capture_block>> are collected as one block-level execution unit.
-        // Yarn timing is held until <<play_block>> plays the block.
-        runner.AddCommandHandler("block_hold", BeginBlockCapture);
-        
-        // Plays the currently collected command block at this point in Yarn flow.
-        // Yarn waits until playback finishes
-        runner.AddCommandHandler<float>("block_end", PlayCapturedBlock);
-        
         runner.AddCommandHandler<float>("pause", EnqueueWaitSpec);
         
         runner.AddCommandHandler<string>("ui_patch", EnqueueUIPatchSpec);
