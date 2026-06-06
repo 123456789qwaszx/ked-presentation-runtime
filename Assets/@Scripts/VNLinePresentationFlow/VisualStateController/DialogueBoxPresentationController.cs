@@ -381,6 +381,38 @@ public sealed class DialogueBoxPresentationController
     {
         CurrentPhase = phase;
     }
+    
+    public void SetProtagonistLineBoxKind(DialogueBoxKind kind)
+    {
+        _protagonistLineBoxKind = kind;
+        Trace("SetProtagonistLineBoxKind", $"kind={kind}");
+    }
+
+    public void SetNamedLineBoxKind(DialogueBoxKind kind)
+    {
+        _namedLineBoxKind = kind;
+        Trace("SetNamedLineBoxKind", $"kind={kind}");
+    }
+
+    public void SetDefaultLineBoxKinds(DialogueBoxKind protagonistKind, DialogueBoxKind namedKind)
+    {
+        _protagonistLineBoxKind = protagonistKind;
+        _namedLineBoxKind = namedKind;
+
+        Trace(
+            "SetDefaultLineBoxKinds",
+            $"protagonist={protagonistKind}, named={namedKind}");
+    }
+
+    public void ResetDefaultLineBoxKinds()
+    {
+        _protagonistLineBoxKind = DefaultProtagonistLineBoxKind;
+        _namedLineBoxKind = DefaultNamedLineBoxKind;
+
+        Trace(
+            "ResetDefaultLineBoxKinds",
+            $"protagonist={_protagonistLineBoxKind}, named={_namedLineBoxKind}");
+    }
 
     private void Trace(string evt, string note = null)
     {

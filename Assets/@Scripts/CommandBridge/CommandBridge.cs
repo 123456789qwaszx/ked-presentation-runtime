@@ -13,6 +13,7 @@ public sealed partial class YarnCommandBridge
 
     private readonly VNSideRunnerSyncHub _sideRunnerSyncHub;
     private readonly OneShotPresentationLane _oneShotPresentationLane;
+    private readonly DialogueBoxPresentationController _dialogueBoxPresentation;
     
     public YarnCommandBridge(
         DialogueRunner runner,
@@ -21,6 +22,7 @@ public sealed partial class YarnCommandBridge
         VNSideRunnerSyncHub sideRunnerSyncHub,
         RectTransform charRigPrefab,
         OneShotPresentationLane oneShotPresentationLane,
+        DialogueBoxPresentationController dialogueBoxPresentation,
         bool bindMainLaneCommands)
     {
         _runner = runner;
@@ -28,13 +30,14 @@ public sealed partial class YarnCommandBridge
         _vnRuntimeStateProvider = vnRuntimeStateProvider;
         _sideRunnerSyncHub = sideRunnerSyncHub;
         _charRigPrefab = charRigPrefab;
-
+        _oneShotPresentationLane = oneShotPresentationLane;
+        _dialogueBoxPresentation = dialogueBoxPresentation;
+        
         BindRunnerCommands(_runner);
 
         if (bindMainLaneCommands)
             BindMainLaneCommands(_runner);
         
-        _oneShotPresentationLane = oneShotPresentationLane;
     }
     
     private void BindMainLaneCommands(DialogueRunner runner)
@@ -52,6 +55,17 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler<bool>("pres_suppress_first", SetSubPresentationSuppressFirst); // 시작 첫 라인 suppress on/off
         
         runner.AddCommandHandler<string>("beat", RunOneShotNode); // One-Shot Node 재생. 커맨드로만 이루어졌기에 즉시 재생 및 자동 종료
+        
+        
+        // Portrait = 0,
+        // Speaker = 1,
+        // LetterBox = 2,
+        // OnlyText = 3,
+        // BlackBook= 4
+        runner.AddCommandHandler<string>("box_named", SetNamedLineBoxKind);
+        runner.AddCommandHandler<string>("box_protagonist", SetProtagonistLineBoxKind);
+        runner.AddCommandHandler<string, string>("box_defaults", SetDefaultLineBoxKinds);
+        runner.AddCommandHandler("box_reset", ResetDefaultLineBoxKinds);
     }
 
     // Lane registration is explicitly handled by bootstrap:

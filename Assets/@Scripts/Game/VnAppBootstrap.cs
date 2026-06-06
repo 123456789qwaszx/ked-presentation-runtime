@@ -122,6 +122,7 @@ public class VnAppBootstrap : MonoBehaviour
     private VNLoadSeekDriver _vnLoadSeekDriver;
     private VNSaveLoadSystem _vnSaveLoadSystem;
     private EpisodeSelectionSystem _episodeSelectionSystem;
+    private DialogueBoxPresentationController  _dialogueBoxPresentationController;
     
     private VNRuntimeStateProvider _vnRuntimeStateProvider;
     private PresentationResponseRig _presentationResponseRig;
@@ -286,6 +287,9 @@ public class VnAppBootstrap : MonoBehaviour
 
         OneShotPresentationLane oneShotPresentationLane = new(subOneShotRunner, oneShotYarnBridgePlaybackDriver);
         
+        DialogueBoxMetadataResolver metadataResolver = new();
+        _dialogueBoxPresentationController = new(dialogueBoxHost, metadataResolver);
+        
         YarnCommandBridge yarnCommandBridge = new(
             dialogueRunner,
             mainYarnBridgePlaybackDriver,
@@ -293,6 +297,7 @@ public class VnAppBootstrap : MonoBehaviour
             _vnSideRunnerSyncHub,
             rigPrefab,
             oneShotPresentationLane,
+            _dialogueBoxPresentationController,
             bindMainLaneCommands: true);
         
         YarnCommandBridge subYarnCommandBridge = new YarnCommandBridge(
@@ -302,6 +307,7 @@ public class VnAppBootstrap : MonoBehaviour
             _vnSideRunnerSyncHub, 
             rigPrefab, 
             oneShotPresentationLane,
+            _dialogueBoxPresentationController,
             bindMainLaneCommands: false);
         
         YarnCommandBridge subOneShotYarnCommandBridge = new YarnCommandBridge(
@@ -311,6 +317,7 @@ public class VnAppBootstrap : MonoBehaviour
             _vnSideRunnerSyncHub, 
             rigPrefab, 
             oneShotPresentationLane,
+            _dialogueBoxPresentationController,
             bindMainLaneCommands: false);
         
         subPresentationPresenter.Initialize(subPresentationRunner, subYarnBridgePlaybackDriver, _vnSideRunnerSyncHub, yarnLaneDebugView);
@@ -341,13 +348,11 @@ public class VnAppBootstrap : MonoBehaviour
             _rollbackHistory,
             _vnRuntimeStateProvider);
 
-        DialogueBoxMetadataResolver metadataResolver = new();
-        DialogueBoxPresentationController boxPresentation = new(dialogueBoxHost, metadataResolver);
         
         VNLinePresentationFlow vnLinePresentationFlow = new(
             vnYarnLineBoundary,
             _linePresentationAdvanceState,
-            boxPresentation,
+            _dialogueBoxPresentationController,
             ellipsisBreathTypewriter,
             _vnLoadSeekDriver,
             _vnSideRunnerSyncHub,
