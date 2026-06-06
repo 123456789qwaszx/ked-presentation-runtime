@@ -220,6 +220,7 @@ public sealed partial class YarnCommandBridge
     {
         runner.AddCommandHandler<float>("tx_slant_in", EnqueueSlantedMaskCutInSpec);
         runner.AddCommandHandler<float>("tx_slant_out", EnqueueSlantedMaskCutOutSpec);
+        runner.AddCommandHandler<float>("tx_out_slant", EnqueueTransitionOutSlantSpec);
 
         runner.AddCommandHandler<float>("tx_strip_in", EnqueueVerticalStripCoverSpec);
         runner.AddCommandHandler<float>("tx_strip_out", EnqueueVerticalStripClearSpec);
@@ -235,6 +236,15 @@ public sealed partial class YarnCommandBridge
 
         runner.AddCommandHandler<float>("tx_daze_fade_in", EnqueueDazeFadeCloseSpec);
         runner.AddCommandHandler<float>("tx_daze_fade_out", EnqueueDazeFadeOpenSpec);
+        
+        runner.AddCommandHandler("tx_clear_all", EnqueueClearAllTransitionsSpec);
+        runner.AddCommandHandler<string, float>("tx_reveal", EnqueueRevealWithTransitionSpec);
+        
+        runner.AddCommandHandler<float>("tx_out_shutter", EnqueueTransitionOutShutterSpec);
+        runner.AddCommandHandler<float>("tx_out_strip", EnqueueTransitionOutStripSpec);
+        runner.AddCommandHandler<float>("tx_out_focus_fade", EnqueueTransitionOutFocusFadeSpec);
+        runner.AddCommandHandler<float>("tx_out_focus_curtain", EnqueueTransitionOutFocusCurtainSpec);
+        runner.AddCommandHandler<float>("tx_out_daze", EnqueueTransitionOutDazeFadeSpec);
     }
     
     private void BindAudio(DialogueRunner runner)

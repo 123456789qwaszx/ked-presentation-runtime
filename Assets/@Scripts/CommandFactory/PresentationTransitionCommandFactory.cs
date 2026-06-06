@@ -21,6 +21,15 @@ public sealed class PresentationTransitionCommandFactory : INodeCommandFactory
             
             // Daze
             FocusBlurCurtainCommandSpec s => new FocusBlurCurtainCommand(s),
+            
+            ClearAllTransitionsCommandSpec s => new ClearAllTransitionsCommand(s),
+            RevealWithTransitionCommandSpec s => new RevealWithTransitionCommand(s),
+            
+            TransitionOutShutterCommandSpec s => new TransitionOutShutterCommand(s),
+            TransitionOutStripCommandSpec s => new TransitionOutStripCommand(s),
+            TransitionOutSlantCommandSpec s => new TransitionOutSlantCommand(s),
+            TransitionOutFocusFadeCommandSpec s => new TransitionOutFocusFadeCommand(s),
+            TransitionOutFocusCurtainCommandSpec s => new TransitionOutFocusCurtainCommand(s),
 
             _ => null
         };

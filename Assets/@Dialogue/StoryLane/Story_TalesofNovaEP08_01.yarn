@@ -8,7 +8,10 @@ position: 694,90
 
 <<tx_shutter_in>>
 
-<<tx_shutter_out>>
+테스트 #beat #stay
+
+<<tx_out_slant>>
+//<<tx_shutter_out>>
 <<bg_fade_in qr5>>
 <<bg_scale qr5 1.2 10>>
 종아리에 감각이 없어......
