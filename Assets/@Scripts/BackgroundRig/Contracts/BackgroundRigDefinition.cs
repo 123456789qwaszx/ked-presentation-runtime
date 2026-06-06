@@ -90,7 +90,7 @@ public static class BackgroundRigSchema
         new() { Id = Refs.Background_BackLayer_Image, Parent = Refs.Background_BackLayer_Root, NeedsImage = true },
 
         // Object slots
-        new() { Id = Refs.Background_ObjectSlotRoot, Parent = Refs.Background_LayerRoot },
+        new() { Id = Refs.Background_ObjectSlotRoot, Parent = Refs.Background_LayerRoot, NeedsCanvasGroup = true, InitialCanvasGroupAlpha = 0f },
         new() { Id = Refs.Background_ObjectSlot00, Parent = Refs.Background_ObjectSlotRoot },
         new() { Id = Refs.Background_ObjectSlot01, Parent = Refs.Background_ObjectSlotRoot },
         new() { Id = Refs.Background_ObjectSlot02, Parent = Refs.Background_ObjectSlotRoot },

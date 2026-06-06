@@ -193,6 +193,9 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler<string, float, string>("bg_fade_in", EnqueueFadeInBackgroundSpec);
         runner.AddCommandHandler<string, float, string>("bg_fade_out", EnqueueFadeOutBackgroundSpec);
         
+        runner.AddCommandHandler<string, string>("bg_hide_layers", EnqueueHideBackgroundRootLayersSpec);
+        runner.AddCommandHandler<string, string>("bg_show_layers", EnqueueShowBackgroundRootLayersSpec);
+        
         runner.AddCommandHandler<string, float, float, float>("bg_move", EnqueueMoveBackgroundSpec);
         runner.AddCommandHandler<string, float, float>("bg_scale", EnqueueScaleBackgroundSpec);
         

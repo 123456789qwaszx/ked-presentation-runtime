@@ -8,7 +8,7 @@ public sealed partial class YarnCommandBridge
         string scaleArg = "1",
         float x = 0f, float y = 0f, float rotationZ = 0f,
         string layerKey = "back"
-        )
+    )
     {
         EnqueueSetupBackgroundRigSpec(rigKey, parentSlotKey);
         EnqueueSetBackgroundSpriteSpec(rigKey, spriteKey, layerKey);
@@ -27,7 +27,7 @@ public sealed partial class YarnCommandBridge
         Collect(spec);
     }
 
-    private void EnqueueSetBackgroundAnchorSpec(string rigKey, 
+    private void EnqueueSetBackgroundAnchorSpec(string rigKey,
         float x = 0f, float y = 0f,
         float rotationZ = 0f)
     {
@@ -84,13 +84,35 @@ public sealed partial class YarnCommandBridge
         Collect(spec);
     }
 
-    private void EnqueueFadeOutBackgroundSpec(string rigKey,  float duration = 0.38f, string targetKey = "root")
+    private void EnqueueFadeOutBackgroundSpec(string rigKey, float duration = 0.38f, string targetKey = "root")
     {
         var spec = new FadeOutCommandSpecBgR
         {
             rigKey = rigKey,
             target = BackgroundRigTargetParser.ParseFadeTarget(targetKey),
             duration = duration,
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueHideBackgroundRootLayersSpec(string rigKey, string mask = "visual")
+    {
+        var spec = new HideRootLayersCommandSpecBgR
+        {
+            rigKey = rigKey,
+            targetMask = BackgroundRigRootMaskParser.Parse(mask),
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueShowBackgroundRootLayersSpec(string rigKey, string mask = "visual")
+    {
+        var spec = new ShowRootLayersCommandSpecBgR
+        {
+            rigKey = rigKey,
+            targetMask = BackgroundRigRootMaskParser.Parse(mask),
         };
 
         Collect(spec);
@@ -122,7 +144,8 @@ public sealed partial class YarnCommandBridge
         Collect(spec);
     }
 
-    private void EnqueueSlideInBackgroundSpec(string rigKey, string directionKey = "left", float distance = 480f, float duration = 0.55f)
+    private void EnqueueSlideInBackgroundSpec(string rigKey, string directionKey = "left", float distance = 480f,
+        float duration = 0.55f)
     {
         var spec = new SlideInCommandSpecBgR
         {
@@ -136,7 +159,8 @@ public sealed partial class YarnCommandBridge
         Collect(spec);
     }
 
-    private void EnqueueSlideOutBackgroundSpec(string rigKey, string directionKey = "right", float distance = 480f, float duration = 0.45f)
+    private void EnqueueSlideOutBackgroundSpec(string rigKey, string directionKey = "right", float distance = 480f,
+        float duration = 0.45f)
     {
         var spec = new SlideOutCommandSpecBgR
         {
@@ -150,7 +174,8 @@ public sealed partial class YarnCommandBridge
         Collect(spec);
     }
 
-    private void EnqueueJoltBackgroundSpec(string rigKey, string directionKey = "right", float strength = 22f, float duration = 0.88f)
+    private void EnqueueJoltBackgroundSpec(string rigKey, string directionKey = "right", float strength = 22f,
+        float duration = 0.88f)
     {
         var spec = new JoltCommandSpecBgR
         {
@@ -167,7 +192,8 @@ public sealed partial class YarnCommandBridge
         Collect(spec);
     }
 
-    private void EnqueueTrembleBackgroundSpec(string rigKey, string directionKey = "right", float strength = 8f, float duration = 1.2f)
+    private void EnqueueTrembleBackgroundSpec(string rigKey, string directionKey = "right", float strength = 8f,
+        float duration = 1.2f)
     {
         var spec = new TrembleCommandSpecBgR
         {
@@ -181,7 +207,8 @@ public sealed partial class YarnCommandBridge
         Collect(spec);
     }
 
-    private void EnqueueBreathBackgroundSpec(string rigKey, float duration = 99f, float height = 6f, float breathsPerSecond = 0.2f)
+    private void EnqueueBreathBackgroundSpec(string rigKey, float duration = 99f, float height = 6f,
+        float breathsPerSecond = 0.2f)
     {
         var spec = new BreathInPlaceCommandSpecBgR
         {

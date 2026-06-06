@@ -199,16 +199,19 @@ title: Setup_TalesofNovaEP08_01
 position: 234,-104
 ---
 
-<<bg_spawn q1 stage00 ep08_1 5>>
+<<bg_spawn q1 stage00 ep08_1 5 0 0 0 front>>
 <<bg_spawn qr5 stage00 ep08_2 1>>
 <<bg_spawn bg3 stage00 ep08_3 1.5>>
 <<bg_spawn bg4 stage00 ep08_4 1.5>>
 <<bg_spawn bg5 stage00 ep08_5 5.5>>
 
-<<bg_fade_out qr5>>
-<<bg_fade_out bg3>>
-<<bg_fade_out bg4>>
-<<bg_fade_out bg5>>
+<<bg_hide_layers q1>>
+<<bg_fade_in q1 9.5 front>>
+
+<<bg_hide_layers qr5>>
+<<bg_hide_layers bg3>>
+<<bg_hide_layers bg4>>
+<<bg_hide_layers bg5>>
 
 <<slot igna>>
 <<cast igna Mercurio right>>

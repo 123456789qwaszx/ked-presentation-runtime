@@ -31,6 +31,8 @@ public sealed class BackgroundRigCommandFactory : INodeCommandFactory
             // Visibility
             FadeInCommandSpecBgR s => new FadeInCommandBgR(s),
             FadeOutCommandSpecBgR s => new FadeOutCommandBgR(s),
+            HideRootLayersCommandSpecBgR s => new HideRootLayersCommandBgR(s),
+            ShowRootLayersCommandSpecBgR s => new ShowRootLayersCommandBgR(s),
 
             // Transform
             MoveByCommandSpecBgR s => new MoveByCommandBgR(s),
