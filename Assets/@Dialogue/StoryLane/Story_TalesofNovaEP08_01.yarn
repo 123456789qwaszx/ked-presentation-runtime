@@ -51,8 +51,10 @@ position: 694,90
 <<fade_in igna 0.4>>
 <<shot_zoom_focus igna bust center 0.3 3.5>>
 <<block_end 4.1>>
+//<<flip_horizontal kronis 180 0.95>>
 ???: 오랜만이네, 크루니스.
 
+<<flip_vertical kronis 30 0.95>>
 ???:.. #boxhide
 <<block_hold>>
 <<block_end 1.1>>

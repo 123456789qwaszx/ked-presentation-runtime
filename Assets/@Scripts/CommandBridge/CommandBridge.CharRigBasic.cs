@@ -130,4 +130,30 @@ public sealed partial class YarnCommandBridge
 
         Collect(spec);
     }
+    
+    private void EnqueueFlipHorizontalSpec(string roleKey, int angle, float duration = 0.25f)
+    {
+        var spec = new RotateToCommandSpecCharR
+        {
+            slotKey = roleKey,
+            target = CharacterRigTarget.CharacterPortrait_Rotation,
+            toEuler = new Vector3(0f, angle, 0f),
+            duration = duration
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueFlipVerticalSpec(string roleKey, int angle, float duration = 0.25f)
+    {
+        var spec = new RotateToCommandSpecCharR
+        {
+            slotKey = roleKey,
+            target = CharacterRigTarget.CharacterPortrait_Rotation,
+            toEuler = new Vector3(angle, 0f, 0f),
+            duration = duration
+        };
+
+        Collect(spec);
+    }
 }

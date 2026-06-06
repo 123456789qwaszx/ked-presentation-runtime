@@ -137,6 +137,9 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler<string, float, float, float>("move_by", EnqueueMoveByCharSpec);
         runner.AddCommandHandler<string, float, float>("scale_to", EnqueueScaleToSpec);
         runner.AddCommandHandler<string, int>("rotate_to", EnqueuePivotRotateToSpec);
+        
+        runner.AddCommandHandler<string, int, float>("flip_horizontal", EnqueueFlipHorizontalSpec);
+        runner.AddCommandHandler<string, int, float>("flip_vertical", EnqueueFlipVerticalSpec);
     }
     
     private void BindCharRigActing(DialogueRunner runner)
