@@ -32,7 +32,28 @@ position: 694,90
 
 <<fade_in igna 0>>
 <<fade_in npc1 0>>
-<<bg_fade_out qr5 1.2>>
+
+// Leafia의 얼굴이 화면 중앙에 오도록 캐릭터 placement 이동
+//<<char_place igna bust left 0.35>>
+
+
+// 두 캐릭터를 기본 대화 구도로 자동 배치
+//<<duo_shot igna npc1 balanced 0.45>>
+
+// 가까운 대화 구도
+//<<duo_shot npc1 igna close 0.45>>
+
+// 대치 구도
+//<<duo_shot npc1 igna confrontation 0.35>>
+
+// 한쪽 우세 구도
+//<<duo_shot npc1 igna left_dominant 0.45>>
+//<<duo_shot npc1 igna right_dominant 0.45>>
+
+<<solo_shot npc1 0.5>>
+<<fade_out igna>>
+
+<<bg_fade_out qr5 1.2 front>>
 <<pause 1.2>>
 ???: 고마워, 먼저 나가 있어. 크루니스는 내가 직접 신문할 거야.
 

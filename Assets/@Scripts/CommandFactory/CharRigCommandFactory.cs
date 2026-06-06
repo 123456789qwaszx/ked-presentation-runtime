@@ -7,6 +7,8 @@ public sealed class CharRigCommandFactory : INodeCommandFactory
 
     private readonly CharStageTuningSO _globalTuning;
     private readonly RoleAnchorTuningDBSO _roleTuningDb;
+    
+    private readonly CharacterFocusTuningDBSO _characterFocusTuningDb;
 
     public CharRigCommandFactory(
         CharRigSlotResolver charRigSlotResolver,
@@ -14,7 +16,8 @@ public sealed class CharRigCommandFactory : INodeCommandFactory
         PortraitResolver portraitResolver,
         CharacterEmojiResolver emojiResolver,
         CharStageTuningSO globalTuning,
-        RoleAnchorTuningDBSO roleTuningDb)
+        RoleAnchorTuningDBSO roleTuningDb,
+        CharacterFocusTuningDBSO characterFocusTuningDb)
     {
         _rigSlotResolver = charRigSlotResolver;
         _rigBuilder = charRigBuilder;
@@ -22,6 +25,7 @@ public sealed class CharRigCommandFactory : INodeCommandFactory
         _emojiResolver = emojiResolver;
         _globalTuning = globalTuning;
         _roleTuningDb = roleTuningDb;
+        _characterFocusTuningDb = characterFocusTuningDb;
     }
 
     public bool TryCreate(CommandSpecBase spec, out ISequenceCommand command)
@@ -51,6 +55,11 @@ public sealed class CharRigCommandFactory : INodeCommandFactory
             ScaleToCommandSpecCharR s => new ScaleToCommandCharR(s),
             RotateToCommandSpecCharR s => new RotateToCommandCharR(s),
             PivotRotateToCommandSpecCharR s => new PivotRotateToCommandCharR(s),
+            
+            // Composition / Focus-aware Placement
+            PlaceCharacterFocusCommandSpecCharR s => new PlaceCharacterFocusCommandCharR(s, _characterFocusTuningDb),
+            SoloShotCommandSpecCharR s => new SoloShotCommandCharR(s, _characterFocusTuningDb),
+            DuoShotCommandSpecCharR s => new DuoShotCommandCharR(s, _characterFocusTuningDb),
 
             // Visual State
             SetColorCommandSpecCharR s => new SetColorCommandCharR(s),

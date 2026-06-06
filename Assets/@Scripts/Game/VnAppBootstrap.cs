@@ -206,7 +206,8 @@ public class VnAppBootstrap : MonoBehaviour
             portraitResolver,
             emojiResolver,
             globalTuning,
-            roleTuningDb);
+            roleTuningDb,
+            characterFocusTuningDb);
 
         // Background Rig
         BackgroundRigSlotResolver backgroundRigSlotResolver = new();

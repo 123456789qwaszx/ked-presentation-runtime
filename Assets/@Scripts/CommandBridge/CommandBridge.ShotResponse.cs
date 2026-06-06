@@ -50,7 +50,7 @@ public sealed partial class YarnCommandBridge
         CharacterFocusPreset focusPreset;
         string customFocusKey = "";
 
-        if (CharacterFocusPresetParser.TryParse(focusName, out CharacterFocusPreset parsedPreset))
+        if (CharacterFocusPresetParser.TryParse1(focusName, out CharacterFocusPreset parsedPreset))
         {
             focusPreset = parsedPreset;
         }
