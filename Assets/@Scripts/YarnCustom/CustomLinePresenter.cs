@@ -72,6 +72,16 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, IVNLineAborter
             NodeName = _currentNodeName,
         };
 
+        // Staging-only beat: no dialogue box / typewriter, auto-advance when staging settles.
+        if (DialogueBoxMetadataResolver.IsPresentationBeat(line.Metadata))
+        {
+            await _vnLinePresentationFlow.RunPresentationBeatAsync(
+                ctx,
+                beginRun: BeginLinePresentationRun,
+                waitForAdvance: WaitForLineAdvanceAsync);
+            return;
+        }
+
         await _vnLinePresentationFlow.RunAsync(
             ctx,
             beginRun: BeginLinePresentationRun,

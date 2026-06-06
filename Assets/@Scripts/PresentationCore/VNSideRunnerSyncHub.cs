@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Threading;
 using UnityEngine;
 using Yarn.Unity;
 
@@ -222,10 +223,13 @@ public sealed class VNSideRunnerSyncHub
     // Phase 3 will call this from VNLinePresentationFlow's forward branch.
     // Breaks early when the lane cannot produce further beats (completed / paused / not accepting),
     // so main never hangs on an advance that will never settle.
-    public async YarnTask WaitUntilForwardSettledAsync(int targetEpoch)
+    public async YarnTask WaitUntilForwardSettledAsync(int targetEpoch, CancellationToken cancel)
     {
         while (_presentation.ForwardSettleEpoch < targetEpoch)
         {
+            if (cancel.IsCancellationRequested)
+                break;
+
             if (_presentation.IsCompleted)
                 break;
 

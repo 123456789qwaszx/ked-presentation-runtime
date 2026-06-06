@@ -17,7 +17,7 @@ position: 694,90
 크루니스: 그렇군...... 인간의 신체는 오랫동안 무릎 꿇은 자세를 유지하면, 이런 느낌이 드는구나~
 
 <<pres_start Pres_TalesofNovaEp08_01>>
-크루니스:..#boxhide
+.:(문이 닫히는 소리가 들린다) #beat
 <<pause 0.5>>
 크루니스: 인체는 참 신기하다니까~ 
 크루니스: 도망칠 생각도 없는데, 굳이 이렇게까지 묶어 둘 필요가 있나?
@@ -39,7 +39,7 @@ position: 694,90
 
 감옥 간수: 그럼 먼저 물러나겠습니다.
 
-감옥 간수:..#boxhide
+감옥 간수:.. #beat #stay
 
 감옥 간수: 너! 허튼짓 할 생각 하지 말고!!! 가만히 있어!
 
@@ -47,10 +47,9 @@ position: 694,90
 
 <<fade_in igna 0.4>>
 <<shot_zoom_focus igna bust center 0.3 3.5>>
-//<<flip_horizontal kronis 180 0.95>>
+<<flip_horizontal kronis 180 0.95>>
 ???: 오랜만이네, 크루니스.
 
-<<flip_vertical kronis 30 0.95>>
 ???:.. #boxhide
 크루니스: 누군가 했더니...... 귀한 손님이 오셨네...... 설마 너일 줄이야.
 
@@ -58,7 +57,8 @@ position: 694,90
 <<scale_to kronis 1.15 1.4>>
 <<shot_to -220 -80 1.9 2.1>>
 
-???:... #boxhide
+<<pause 0.1>>
+???:... #beat #stay
 <<sway kronis>>
 <<move_by kronis 0 -800 1.1>>
 
@@ -72,7 +72,7 @@ position: 694,90
 이그나: 흥... 괜히 센 척하지 마. 다리 저릴 텐데, 내가 부축해 줄게.
 
 <<tx_focus_curtain_in>>
-???:.. #boxhide
+???:.. #beat #stay
 
 <<place kronis duoleft true true>>
 <<place igna duoright true true>>

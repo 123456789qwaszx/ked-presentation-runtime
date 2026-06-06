@@ -12,6 +12,11 @@ public sealed class VNLinePresentationContext
     // Derived
     public YarnLineMeta Meta { get; set; }
 
+    // Command batch ticket from PlayCollected (shared front-matter).
+    // The presentation-beat tail awaits its entry-close to know when its own
+    // wait=true staging has completed before auto-advancing.
+    public CommandRunTicket CommandTicket { get; set; }
+
     // Seek Decision
     public VNSeekLineDecision SeekDecision { get; set; }
 

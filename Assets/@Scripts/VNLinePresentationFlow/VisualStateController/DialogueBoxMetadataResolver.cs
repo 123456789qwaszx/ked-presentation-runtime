@@ -46,6 +46,53 @@ public sealed class DialogueBoxMetadataResolver
         return false;
     }
 
+    // ---- Presentation beat detection (Phase 3) ----
+    // A presentation beat is a line that plays staging only: no dialogue box/typewriter,
+    // but it still consumes a sub advance and is recorded to backlog/rollback (handled by
+    // the shared line front-matter). It auto-advances when the staging completes.
+    // Marker tags: #beat / #stage / #stage_only / #present
+    public static bool IsPresentationBeat(string[] metadata)
+    {
+        if (metadata == null)
+            return false;
+
+        for (int i = 0; i < metadata.Length; i++)
+        {
+            switch (NormalizeMetadataTag(metadata[i]))
+            {
+                case "beat":
+                case "stage":
+                case "stage_only":
+                case "present":
+                    return true;
+            }
+        }
+
+        return false;
+    }
+
+    // #stay modifier on a beat: after the staging completes, wait for the player to advance
+    // instead of auto-advancing. (Distinct from the sub-lane "hold", which is wait=true driven.)
+    // Marker tags: #stay / #beat_stay / #no_auto
+    public static bool IsBeatStay(string[] metadata)
+    {
+        if (metadata == null)
+            return false;
+
+        for (int i = 0; i < metadata.Length; i++)
+        {
+            switch (NormalizeMetadataTag(metadata[i]))
+            {
+                case "stay":
+                case "beat_stay":
+                case "no_auto":
+                    return true;
+            }
+        }
+
+        return false;
+    }
+
     private static bool TryResolveBoxKindTag(
         string tag,
         out DialogueBoxKind kind)
