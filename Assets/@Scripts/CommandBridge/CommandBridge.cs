@@ -129,6 +129,8 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler<string, string>("face", EnqueueSetEmotionPortraitWipeSpec);
         runner.AddCommandHandler<string, string>("face_crossfade", EnqueueSetPortraitCrossfadeSpec);
         
+        runner.AddCommandHandler<string, float, float, float, float>("color_to", EnqueueColorToSpec);
+        
         runner.AddCommandHandler<string, string>("slide_in", EnqueueSlideInSpec);
         runner.AddCommandHandler<string, string>("slide_out", EnqueueSlideOutSpec);
         

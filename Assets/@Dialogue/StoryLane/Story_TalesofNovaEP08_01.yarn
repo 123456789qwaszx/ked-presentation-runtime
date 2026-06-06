@@ -212,6 +212,7 @@ position: 234,-104
 
 <<slot igna>>
 <<cast igna Mercurio right>>
+<<color_to Mercurio 0 0 0>>
 
 <<slot npc1>>
 <<cast npc1 Gang_Girl left>>

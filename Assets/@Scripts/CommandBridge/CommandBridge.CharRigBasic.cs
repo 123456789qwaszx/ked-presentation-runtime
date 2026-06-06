@@ -24,6 +24,20 @@ public sealed partial class YarnCommandBridge
         Collect(spec);
     }
     
+    private void EnqueueColorToSpec(string roleKey, float r, float g, float b, float duration = 0.35f)
+    {
+        var spec = new SetColorCommandSpecCharR
+        {
+            slotKey = roleKey,
+            target = CharacterRigTarget.CharacterPortraitSprite_Image,
+            color = new Color(r, g, b, 1f),
+            keepAlpha = true,
+            duration = duration
+        };
+
+        Collect(spec);
+    }
+    
     private void EnqueueSlideInSpec(string roleKey, string direction = "left")
     {
         CharRigDirection from = CharRigDirectionParser.ParseSlideDirection(direction, CharRigDirection.Left);
