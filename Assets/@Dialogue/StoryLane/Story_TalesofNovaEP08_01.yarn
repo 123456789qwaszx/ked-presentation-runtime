@@ -50,7 +50,7 @@ position: 694,90
 //<<duo_shot npc1 igna left_dominant 0.45>>
 //<<duo_shot npc1 igna right_dominant 0.45>>
 
-<<solo_shot npc1 0.5>>
+<<solo_shot npc1>>
 <<fade_out igna>>
 
 <<bg_fade_out qr5 1.2 front>>
@@ -116,7 +116,7 @@ position: 694,90
 
 <<jolt kronis left>>
 <<face kronis 9>>
-<<emoji kronis 14>>
+<<emoji kronis 8>>
 크루니스: 하하, 예상대로네. 지루하기 짝이 없다니까...... 이해하지 못하는 일은 언제나 가장 단순하고 난폭한 방식으로 처리하려 드는 머저리들.
 
 <<move_by kronis -100 0>>

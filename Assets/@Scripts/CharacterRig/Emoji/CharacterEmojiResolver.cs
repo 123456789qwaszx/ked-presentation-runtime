@@ -20,7 +20,9 @@ public sealed class CharacterEmojiResolver
         if (_library == null)
             return false;
 
-        if (!_library.TryGet(emojiKey, out CharacterEmojiEntry entry))
+        string normalizedKey = NormalizeEmojiKey(emojiKey);
+
+        if (!_library.TryGet(normalizedKey, out CharacterEmojiEntry entry))
             return false;
 
         if (entry.sprite == null)
@@ -29,5 +31,21 @@ public sealed class CharacterEmojiResolver
         sprite = entry.sprite;
         layout = entry.layout;
         return true;
+    }
+
+    private static string NormalizeEmojiKey(string emojiKey)
+    {
+        if (string.IsNullOrWhiteSpace(emojiKey))
+            return emojiKey;
+
+        string trimmed = emojiKey.Trim();
+
+        // Authoring shortcut:
+        // "1", "9" resolve to "01","09".
+        // Existing keys like "07", "10" are preserved.
+        if (trimmed.Length == 1 && trimmed[0] >= '1' && trimmed[0] <= '9')
+            return "0" + trimmed;
+
+        return trimmed;
     }
 }
