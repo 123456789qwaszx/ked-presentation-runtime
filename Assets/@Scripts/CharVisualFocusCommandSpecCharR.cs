@@ -26,14 +26,20 @@ public sealed class CharVisualFocusCommandSpecCharR : CharacterRigCommandSpecBas
     [Header("Mode")]
     public CharacterVisualFocusMode mode = CharacterVisualFocusMode.Focus;
 
+    [Range(0f, 1f)]
     public float intensity = 1f;
 
     [Header("Custom Values")]
-    public float dim = 0f;
-    public float rim = 0f;
-    public float blur = 0f;
+    [Range(0f, 1f)] public float dim = 0f;
+
+    [Tooltip("Legacy/custom rim amount. In the new UI shader this maps to Outer Rim.")]
+    [Range(0f, 1f)] public float rim = 0f;
+
+    [Range(0f, 1f)] public float innerRim = 0f;
+    [Range(0f, 1f)] public float blur = 0f;
 
     public Color rimColor = Color.white;
+    public Color innerRimColor = new Color(1f, 0.96f, 0.86f, 1f);
 
     [Header("Tween")]
     public float duration = 0.25f;
@@ -74,7 +80,7 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
             yield break;
 
         if (_spec.killTween)
-            _controller.DOKill(true); // Finish previous visual tween so this command starts from a committed state.
+            _controller.DOKill(true);
 
         _fromState = CaptureCurrentState();
         _destState = BuildDestState();
@@ -181,7 +187,7 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
         Debug.LogWarning(
             $"[CharVisualFocusCommandCharR] CharacterRigVisualEffectController is missing on " +
             $"'{rigRefs.CharacterPortraitSprite_Image.name}'. " +
-            $"Attach it to CharacterPortraitSprite_Image and assign M_VNCharacterFocus. " +
+            $"Attach it to CharacterPortraitSprite_Image and assign the Canvas Shader Graph material. " +
             $"slotKey='{_spec.slotKey}'.",
             rigRefs.CharacterPortraitSprite_Image);
     }
@@ -190,49 +196,63 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
     {
         return new VisualState(
             _controller.DimAmount,
-            _controller.RimAmount,
+            _controller.OuterRimAmount,
+            _controller.InnerRimAmount,
             _controller.BlurAmount,
-            _controller.RimColor);
+            _controller.OuterRimColor,
+            _controller.InnerRimColor);
     }
 
     private VisualState BuildDestState()
     {
+        float intensity = Mathf.Clamp01(_spec.intensity);
+
         switch (_spec.mode)
         {
             case CharacterVisualFocusMode.Focus:
                 return new VisualState(
                     0f,
-                    _controller.FocusRimAmount * _spec.intensity,
+                    _controller.FocusOuterRimAmount * intensity,
+                    _controller.FocusInnerRimAmount * intensity,
                     0f,
-                    _controller.RimColor);
+                    _controller.OuterRimColor,
+                    _controller.InnerRimColor);
 
             case CharacterVisualFocusMode.Defocus:
                 return new VisualState(
-                    _controller.DefocusDimAmount * _spec.intensity,
+                    _controller.DefocusDimAmount * intensity,
                     0f,
-                    _controller.DefocusBlurAmount * _spec.intensity,
-                    _controller.RimColor);
+                    0f,
+                    _controller.DefocusBlurAmount * intensity,
+                    _controller.OuterRimColor,
+                    _controller.InnerRimColor);
 
             case CharacterVisualFocusMode.Clear:
                 return new VisualState(
                     0f,
                     0f,
                     0f,
-                    _controller.RimColor);
+                    0f,
+                    _controller.OuterRimColor,
+                    _controller.InnerRimColor);
 
             case CharacterVisualFocusMode.Custom:
                 return new VisualState(
                     _spec.dim,
                     _spec.rim,
+                    _spec.innerRim,
                     _spec.blur,
-                    _spec.rimColor);
+                    _spec.rimColor,
+                    _spec.innerRimColor);
 
             default:
                 return new VisualState(
                     0f,
                     0f,
                     0f,
-                    _controller.RimColor);
+                    0f,
+                    _controller.OuterRimColor,
+                    _controller.InnerRimColor);
         }
     }
 
@@ -253,9 +273,11 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
 
         _controller.ApplyImmediate(
             state.Dim,
-            state.Rim,
+            state.OuterRim,
+            state.InnerRim,
             state.Blur,
-            state.RimColor);
+            state.OuterRimColor,
+            state.InnerRimColor);
     }
 
     private void ClearRuntimeRefs()
@@ -268,25 +290,39 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
     private readonly struct VisualState
     {
         public readonly float Dim;
-        public readonly float Rim;
+        public readonly float OuterRim;
+        public readonly float InnerRim;
         public readonly float Blur;
-        public readonly Color RimColor;
+        public readonly Color OuterRimColor;
+        public readonly Color InnerRimColor;
 
-        public VisualState(float dim, float rim, float blur, Color rimColor)
+        public VisualState(
+            float dim,
+            float outerRim,
+            float innerRim,
+            float blur,
+            Color outerRimColor,
+            Color innerRimColor)
         {
-            Dim = dim;
-            Rim = rim;
-            Blur = blur;
-            RimColor = rimColor;
+            Dim = Mathf.Clamp01(dim);
+            OuterRim = Mathf.Clamp01(outerRim);
+            InnerRim = Mathf.Clamp01(innerRim);
+            Blur = Mathf.Clamp01(blur);
+            OuterRimColor = outerRimColor;
+            InnerRimColor = innerRimColor;
         }
 
         public static VisualState Lerp(VisualState from, VisualState to, float t)
         {
+            t = Mathf.Clamp01(t);
+
             return new VisualState(
                 Mathf.Lerp(from.Dim, to.Dim, t),
-                Mathf.Lerp(from.Rim, to.Rim, t),
+                Mathf.Lerp(from.OuterRim, to.OuterRim, t),
+                Mathf.Lerp(from.InnerRim, to.InnerRim, t),
                 Mathf.Lerp(from.Blur, to.Blur, t),
-                Color.Lerp(from.RimColor, to.RimColor, t));
+                Color.Lerp(from.OuterRimColor, to.OuterRimColor, t),
+                Color.Lerp(from.InnerRimColor, to.InnerRimColor, t));
         }
     }
 }

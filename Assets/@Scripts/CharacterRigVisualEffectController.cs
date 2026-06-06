@@ -9,35 +9,73 @@ public sealed class CharacterRigVisualEffectController : MonoBehaviour
     [Header("Material")]
     [SerializeField] private Material sourceMaterial;
 
-    [Header("Default Values")]
-    [SerializeField] private Color rimColor = Color.white;
+    [Header("Dim Style")]
+    [SerializeField, Range(0f, 1f)] private float dimBrightness = 0.62f;
+    [SerializeField, Range(0f, 1f)] private float dimSaturation = 0.70f;
+    [SerializeField] private Color dimTintColor = new Color(0.45f, 0.48f, 0.55f, 1f);
+
+    [Header("Outer Rim Style")]
+    [SerializeField] private Color outerRimColor = Color.white;
+    [SerializeField, Min(0f)] private float outerRimWidth = 0.006f;
+    [SerializeField, Min(0.0001f)] private float outerRimSoftness = 0.02f;
+
+    [Header("Inner Rim Style")]
+    [SerializeField] private Color innerRimColor = new Color(1f, 0.96f, 0.86f, 1f);
+    [SerializeField, Min(0f)] private float innerRimWidth = 0.004f;
+    [SerializeField, Min(0.0001f)] private float innerRimSoftness = 0.02f;
+
+    [Header("Blur Style")]
+    [SerializeField, Min(0f)] private float blurSize = 0.004f;
 
     [Header("Focus Preset")]
-    [SerializeField] private float focusRimAmount = 0.35f;
+    [SerializeField, Range(0f, 1f)] private float focusInnerRimAmount = 0.25f;
+    [SerializeField, Range(0f, 1f)] private float focusOuterRimAmount = 0f;
 
     [Header("Defocus Preset")]
-    [SerializeField] private float defocusDimAmount = 0.28f;
-    [SerializeField] private float defocusBlurAmount = 0.25f;
+    [SerializeField, Range(0f, 1f)] private float defocusDimAmount = 0.45f;
+    [SerializeField, Range(0f, 1f)] private float defocusBlurAmount = 0.25f;
 
     private Material _runtimeMaterial;
 
     private float _dimAmount;
-    private float _rimAmount;
     private float _blurAmount;
-    private Color _rimColor;
+    private float _outerRimAmount;
+    private float _innerRimAmount;
+    private Color _outerRimColor;
+    private Color _innerRimColor;
 
     private static readonly int DimAmountId = Shader.PropertyToID("_DimAmount");
+    private static readonly int DimBrightnessId = Shader.PropertyToID("_DimBrightness");
+    private static readonly int DimSaturationId = Shader.PropertyToID("_DimSaturation");
+    private static readonly int DimTintColorId = Shader.PropertyToID("_DimTintColor");
+
     private static readonly int RimAmountId = Shader.PropertyToID("_RimAmount");
     private static readonly int RimColorId = Shader.PropertyToID("_RimColor");
+    private static readonly int RimWidthId = Shader.PropertyToID("_RimWidth");
+    private static readonly int RimSoftnessId = Shader.PropertyToID("_RimSoftness");
+
+    private static readonly int InnerRimAmountId = Shader.PropertyToID("_InnerRimAmount");
+    private static readonly int InnerRimColorId = Shader.PropertyToID("_InnerRimColor");
+    private static readonly int InnerRimWidthId = Shader.PropertyToID("_InnerRimWidth");
+    private static readonly int InnerRimSoftnessId = Shader.PropertyToID("_InnerRimSoftness");
+
     private static readonly int BlurAmountId = Shader.PropertyToID("_BlurAmount");
-    private static readonly int TexelSizeId = Shader.PropertyToID("_TexelSize");
+    private static readonly int BlurSizeId = Shader.PropertyToID("_BlurSize");
 
     public float DimAmount => _dimAmount;
-    public float RimAmount => _rimAmount;
     public float BlurAmount => _blurAmount;
-    public Color RimColor => _rimColor;
+    public float OuterRimAmount => _outerRimAmount;
+    public float InnerRimAmount => _innerRimAmount;
 
-    public float FocusRimAmount => focusRimAmount;
+    // Legacy compatibility.
+    public float RimAmount => _outerRimAmount;
+    public Color RimColor => _outerRimColor;
+
+    public Color OuterRimColor => _outerRimColor;
+    public Color InnerRimColor => _innerRimColor;
+
+    public float FocusInnerRimAmount => focusInnerRimAmount;
+    public float FocusOuterRimAmount => focusOuterRimAmount;
     public float DefocusDimAmount => defocusDimAmount;
     public float DefocusBlurAmount => defocusBlurAmount;
 
@@ -47,9 +85,11 @@ public sealed class CharacterRigVisualEffectController : MonoBehaviour
         EnsureRuntimeMaterial();
 
         _dimAmount = 0f;
-        _rimAmount = 0f;
         _blurAmount = 0f;
-        _rimColor = rimColor;
+        _outerRimAmount = 0f;
+        _innerRimAmount = 0f;
+        _outerRimColor = outerRimColor;
+        _innerRimColor = innerRimColor;
 
         ApplyMaterialValues();
     }
@@ -68,47 +108,81 @@ public sealed class CharacterRigVisualEffectController : MonoBehaviour
         }
     }
 
-    public void ApplyImmediate(float dim, float rim, float blur, Color color)
+    public void ApplyImmediate(
+        float dim,
+        float outerRim,
+        float innerRim,
+        float blur,
+        Color outerColor,
+        Color innerColor)
     {
         EnsureRuntimeMaterial();
 
         if (_runtimeMaterial == null)
             return;
 
-        _dimAmount = dim;
-        _rimAmount = rim;
-        _blurAmount = blur;
-        _rimColor = color;
+        _dimAmount = Mathf.Clamp01(dim);
+        _outerRimAmount = Mathf.Clamp01(outerRim);
+        _innerRimAmount = Mathf.Clamp01(innerRim);
+        _blurAmount = Mathf.Clamp01(blur);
+        _outerRimColor = outerColor;
+        _innerRimColor = innerColor;
 
         ApplyMaterialValues();
     }
 
-    public void ApplyFocusImmediate(float intensity)
+    // Legacy compatibility. Old "rim" maps to outer rim.
+    public void ApplyImmediate(float dim, float rim, float blur, Color color)
     {
         ApplyImmediate(
+            dim,
+            rim,
             0f,
-            focusRimAmount * intensity,
+            blur,
+            color,
+            innerRimColor);
+    }
+
+    public void ApplyFocusImmediate(float intensity)
+    {
+        intensity = Mathf.Clamp01(intensity);
+
+        ApplyImmediate(
             0f,
-            rimColor);
+            focusOuterRimAmount * intensity,
+            focusInnerRimAmount * intensity,
+            0f,
+            outerRimColor,
+            innerRimColor);
     }
 
     public void ApplyDefocusImmediate(float intensity)
     {
+        intensity = Mathf.Clamp01(intensity);
+
         ApplyImmediate(
             defocusDimAmount * intensity,
             0f,
+            0f,
             defocusBlurAmount * intensity,
-            rimColor);
+            outerRimColor,
+            innerRimColor);
     }
 
     public void ClearImmediate()
     {
-        ApplyImmediate(0f, 0f, 0f, rimColor);
+        ApplyImmediate(
+            0f,
+            0f,
+            0f,
+            0f,
+            outerRimColor,
+            innerRimColor);
     }
 
-    public void RefreshTexelSize()
+    public void RefreshStyleValues()
     {
-        ApplyTexelSize();
+        ApplyMaterialValues();
     }
 
     private void EnsureTarget()
@@ -154,30 +228,21 @@ public sealed class CharacterRigVisualEffectController : MonoBehaviour
             return;
 
         _runtimeMaterial.SetFloat(DimAmountId, _dimAmount);
-        _runtimeMaterial.SetFloat(RimAmountId, _rimAmount);
+        _runtimeMaterial.SetFloat(DimBrightnessId, Mathf.Clamp01(dimBrightness));
+        _runtimeMaterial.SetFloat(DimSaturationId, Mathf.Clamp01(dimSaturation));
+        _runtimeMaterial.SetColor(DimTintColorId, dimTintColor);
+
+        _runtimeMaterial.SetFloat(RimAmountId, _outerRimAmount);
+        _runtimeMaterial.SetColor(RimColorId, _outerRimColor);
+        _runtimeMaterial.SetFloat(RimWidthId, Mathf.Max(0f, outerRimWidth));
+        _runtimeMaterial.SetFloat(RimSoftnessId, Mathf.Max(0.0001f, outerRimSoftness));
+
+        _runtimeMaterial.SetFloat(InnerRimAmountId, _innerRimAmount);
+        _runtimeMaterial.SetColor(InnerRimColorId, _innerRimColor);
+        _runtimeMaterial.SetFloat(InnerRimWidthId, Mathf.Max(0f, innerRimWidth));
+        _runtimeMaterial.SetFloat(InnerRimSoftnessId, Mathf.Max(0.0001f, innerRimSoftness));
+
         _runtimeMaterial.SetFloat(BlurAmountId, _blurAmount);
-        _runtimeMaterial.SetColor(RimColorId, _rimColor);
-
-        ApplyTexelSize();
-    }
-
-    private void ApplyTexelSize()
-    {
-        if (_runtimeMaterial == null || portraitImage == null)
-            return;
-
-        Sprite sprite = portraitImage.sprite;
-        if (sprite == null || sprite.texture == null)
-            return;
-
-        Texture texture = sprite.texture;
-
-        _runtimeMaterial.SetVector(
-            TexelSizeId,
-            new Vector4(
-                1f / texture.width,
-                1f / texture.height,
-                0f,
-                0f));
+        _runtimeMaterial.SetFloat(BlurSizeId, Mathf.Max(0f, blurSize));
     }
 }

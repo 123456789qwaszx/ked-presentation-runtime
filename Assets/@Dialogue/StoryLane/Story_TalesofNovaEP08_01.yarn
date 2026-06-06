@@ -39,7 +39,7 @@ position: 694,90
 <<fade_in igna 0>>
 <<fade_in npc1 0>>
 
-// Leafia의 얼굴이 화면 중앙에 오도록 캐릭터 placement 이동
+// igna의 얼굴이 화면 중앙에 오도록 캐릭터 placement 이동
 //<<char_place igna bust left 0.35>>
 
 
@@ -58,12 +58,21 @@ position: 694,90
 
 //<<solo_shot npc1>>
 
-// <<char_focus igna 3 0.45>>
-// <<char_defocus npc1 8 0.45>>
-//<<fade_out igna>>
+//<<char_focus igna 1 0.3>>
+<<char_defocus npc1 23 0.3>>
+//<<pause 1>>
+<<char_focus igna 0.1 0.3>>
+//<<pause 1>>
+//<<char_clear_focus igna 0.55>>
+//<<char_visual igna 0.4 0.2 0.25 0.3>>
+//<<char_inner_rim igna 0.4 0.3>>
+//<<char_outer_rim igna 0.4 0.3>>
 
-<<bg_fade_out qr5 1.2 front>>
-<<pause 1.2>>
+//<<fade_out igna>>
+<<bg_show_layers qr5 back>>
+<<bg_fade_in qr5 0>>
+<<bg_fade_out q1 1.2 front>>
+//<<pause 1.2>>
 ???: 고마워, 먼저 나가 있어. 크루니스는 내가 직접 신문할 거야.
 
 감옥 간수: 그럼 먼저 물러나겠습니다.

@@ -197,6 +197,8 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler<string, float>("char_clear_focus", EnqueueCharClearFocusSpec);
         
         runner.AddCommandHandler<string, float, float>("char_dim", EnqueueCharDimSpec);
+        runner.AddCommandHandler<string, float, float>("char_inner_rim", EnqueueCharInnerRimSpec);
+        runner.AddCommandHandler<string, float, float>("char_outer_rim", EnqueueCharOuterRimSpec);
         
         runner.AddCommandHandler<string, float, float, float, float>("char_visual", EnqueueCharVisualSpec);
         runner.AddCommandHandler<string, float, float, float, float, float, float, float>("char_visual_color", EnqueueCharVisualRimColorSpec);
