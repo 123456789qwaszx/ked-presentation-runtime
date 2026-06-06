@@ -6,7 +6,6 @@ position: 694,90
 음...... 벌써 며칠째지...... #LetterBox
 이 감옥엔 창문이나 시계 같은 것도 없군 #LetterBox
 
-<<box_hide 0.5>>
 <<tx_shutter_in>>
 
 <<tx_shutter_out>>

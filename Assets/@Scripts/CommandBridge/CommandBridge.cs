@@ -89,13 +89,8 @@ public sealed partial class YarnCommandBridge
     private void BindControl(DialogueRunner runner)
     {
         runner.AddCommandHandler<float>("pause", EnqueueWaitSpec);
-        
         runner.AddCommandHandler<string>("ui_patch", EnqueueUIPatchSpec);
-        
-        runner.AddCommandHandler<float>("box_hide", EnqueueHideDialogueBoxSpec);
-        
         runner.AddCommandHandler<string>("debug_log", LogImmediate);
-        runner.AddCommandHandler<string>("debug_state", LogYarnState);
     }
     
 

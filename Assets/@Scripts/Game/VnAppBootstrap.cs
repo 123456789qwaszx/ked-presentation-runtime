@@ -227,8 +227,6 @@ public class VnAppBootstrap : MonoBehaviour
         // Presentation Control
         PresentationControlCommandFactory presentationControlFactory = new(
             _uiPatchService,
-            dialogueBoxHost,
-            dialogueAdvanceDispatcher,
             _vnSideRunnerSyncHub);
 
         // Audio

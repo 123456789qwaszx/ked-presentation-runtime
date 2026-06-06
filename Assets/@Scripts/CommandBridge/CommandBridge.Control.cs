@@ -14,18 +14,6 @@ public sealed partial class YarnCommandBridge
         Collect(spec);
     }
     
-    private void EnqueueHideDialogueBoxSpec(float duration = 0f)
-    {
-        var spec = new HideDialogueBoxCommandSpec
-        {
-            hideAll = true,
-            duration = duration,
-            wait = true
-        };
-
-        Collect(spec);
-    }
-    
     private void EnqueueUIPatchSpec(string themeId = "default")
     {
         var spec = new UIPatchCommandSpec
@@ -40,26 +28,5 @@ public sealed partial class YarnCommandBridge
     private void LogImmediate(string message)
     {
         Debug.Log($"[YarnCommandBridge] {message}");
-    }
-    
-    private void LogYarnState(string label)
-    {
-        VariableStorageBehaviour storage = _runner.VariableStorage;
-
-        storage.TryGetValue("$favor", out float favor);
-        storage.TryGetValue("$laru_patience", out float patience);
-        storage.TryGetValue("$willow_debt", out float debt);
-        storage.TryGetValue("$requested_fee", out float requestedFee);
-        storage.TryGetValue("$paid_fee", out float paidFee);
-        storage.TryGetValue("$trust", out float trust);
-        storage.TryGetValue("$anger", out float anger);
-        storage.TryGetValue("$contract_signed", out bool contractSigned);
-
-        Debug.Log(
-            $"[YarnState] {label} | " +
-            $"favor={favor}, patience={patience}, debt={debt}, " +
-            $"requested={requestedFee}, paid={paidFee}, trust={trust}, " +
-            $"anger={anger}, contract={contractSigned}"
-        );
     }
 }
