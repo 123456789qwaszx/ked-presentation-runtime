@@ -12,6 +12,10 @@ public sealed class VNSideRunnerSyncHub
         public int HoldRemainingLines;
         public int ExtraAdvanceCount;
 
+        // Manual single-step budget that is allowed to drive the lane even while paused.
+        // Set by StepPresentationOnce(); consumed one line at a time as the lane becomes ready.
+        public int ManualStepBudget;
+
         public bool IsStarted;
         public bool IsCompleted;
         public bool IsReadyForAdvance;
@@ -64,6 +68,7 @@ public sealed class VNSideRunnerSyncHub
             PendingAdvanceCount = 0;
             HoldRemainingLines = 0;
             ExtraAdvanceCount = 0;
+            ManualStepBudget = 0;
 
             IsStarted = true;
             IsCompleted = false;
@@ -77,6 +82,7 @@ public sealed class VNSideRunnerSyncHub
             PendingAdvanceCount = 0;
             HoldRemainingLines = 0;
             ExtraAdvanceCount = 0;
+            ManualStepBudget = 0;
 
             IsStarted = false;
             IsCompleted = false;
@@ -91,6 +97,7 @@ public sealed class VNSideRunnerSyncHub
             PendingAdvanceCount = 0;
             ExtraAdvanceCount = 0;
             HoldRemainingLines = 0;
+            ManualStepBudget = 0;
 
             IsCompleted = true;
             IsReadyForAdvance = false;
@@ -142,6 +149,7 @@ public sealed class VNSideRunnerSyncHub
     public void ClearAllForSeekOrLoad()
     {
         _presentation.PendingAdvanceCount = 0;
+        _presentation.ManualStepBudget = 0;
         _presentation.IsReadyForAdvance = false;
         _presentation.IsReleased = false;
     }
@@ -282,6 +290,26 @@ public sealed class VNSideRunnerSyncHub
         TryFlushPresentationLane();
     }
 
+    // Manual single-step that bypasses the pause gate.
+    // Advances the presentation lane exactly `steps` lines, one per ready cycle,
+    // regardless of IsPaused. If the lane is mid-line (not ready) when called,
+    // the step is buffered in ManualStepBudget and fires the moment the lane
+    // becomes ready (see NotifyPresentationLaneReady -> TryFlushPresentationLane).
+    public void StepPresentationOnce(int steps = 1)
+    {
+        if (steps <= 0)
+            steps = 1;
+
+        if (!_presentation.CanAcceptAdvance)
+            return;
+
+        _presentation.PendingAdvanceCount += steps;
+        _presentation.ManualStepBudget += steps;
+
+        // Try to consume one immediately; the rest drains as the lane re-readies.
+        AdvanceOnceIfReady();
+    }
+
     private int ConsumeExtraAdvanceOnly()
     {
         int count = _presentation.ExtraAdvanceCount;
@@ -289,33 +317,53 @@ public sealed class VNSideRunnerSyncHub
         return count;
     }
 
+    // Pause-aware flush used by the normal auto/dispatch/resume/ready paths.
+    // While paused, only the manual-step budget is allowed to drive the lane.
     private void TryFlushPresentationLane()
     {
-        if (!_presentation.CanAcceptAdvance)
-            return;
-
         if (_presentation.IsPaused)
+        {
+            if (_presentation.ManualStepBudget > 0)
+                AdvanceOnceIfReady();
+
             return;
+        }
+
+        AdvanceOnceIfReady();
+    }
+
+    // Pause-agnostic core: advance exactly one line if the lane is ready.
+    // Decrements ManualStepBudget alongside PendingAdvanceCount when a manual
+    // step is outstanding, so manual and auto advances never double-count.
+    private bool AdvanceOnceIfReady()
+    {
+        if (!_presentation.CanAcceptAdvance)
+            return false;
 
         if (_presentation.PendingAdvanceCount <= 0)
-            return;
+            return false;
 
         if (!_presentation.IsReadyForAdvance)
-            return;
+            return false;
 
         _presentation.PendingAdvanceCount--;
+
+        if (_presentation.ManualStepBudget > 0)
+            _presentation.ManualStepBudget--;
+
         _presentation.IsReadyForAdvance = false;
         _presentation.IsReleased = false;
 
         if (_presentation.Runner == null)
-            return;
+            return false;
 
         if (!_presentation.Runner.IsDialogueRunning)
         {
             _presentation.MarkCompleted();
-            return;
+            return false;
         }
 
         _presentation.Runner.RequestNextLine();
+        return true;
     }
 }

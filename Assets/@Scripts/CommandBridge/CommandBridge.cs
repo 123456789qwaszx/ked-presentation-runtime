@@ -61,7 +61,7 @@ public sealed partial class YarnCommandBridge
     private void PauseSubPresentation()  => _sideRunnerSyncHub.PausePresentation();
     private void ResumeSubPresentation() => _sideRunnerSyncHub.ResumePresentation();
     private void HoldSubPresentation(int lines = 1) => _sideRunnerSyncHub.HoldPresentation(lines);
-    private void AdvanceSubPresentationExtra(int steps = 1) => _sideRunnerSyncHub.AdvancePresentationExtra(steps);
+    private void AdvanceSubPresentationExtra(int steps = 1) => _sideRunnerSyncHub.StepPresentationOnce(steps);
     private void SetSubPresentationSuppressFirst(bool suppress) => _sideRunnerSyncHub.SetPresentationSuppressFirstAutoAdvance(suppress);
     
     private IEnumerator RunOneShotNode(string nodeName) => _oneShotPresentationLane.RunNodeCoroutine(nodeName);
