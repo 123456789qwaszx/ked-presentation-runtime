@@ -9,6 +9,9 @@ public sealed class ScreenEffectCommandFactory : INodeCommandFactory
             // Flash / Hit feedback
             ScreenFlashCommandSpec s => new ScreenFlashCommand(s),
 
+            // Mood / Vignette
+            ScreenVignetteCommandSpec s => new ScreenVignetteCommand(s),
+            
             _ => null
         };
 

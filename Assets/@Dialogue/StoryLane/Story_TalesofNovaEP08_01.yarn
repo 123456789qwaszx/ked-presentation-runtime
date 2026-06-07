@@ -3,21 +3,21 @@ position: 694,90
 ---
 <<shot_reset>>
 <<beat Setup_TalesofNovaEP08_01>>
-음...... 벌써 며칠째지...... #LetterBox
-이 감옥엔 창문이나 시계 같은 것도 없군 #LetterBox
+음...... 벌써 며칠째지......
+이 감옥엔 창문이나 시계 같은 것도 없군
 
-<<tx_shutter_in>>
-
+//<<tx_shutter_in>>
+<<beat Beat_Screen_Vignette>>
 테스트 #beat #stay
 
-<<tx_out_slant>>
+//<<tx_out_slant>>
 //<<tx_shutter_out>>
 <<bg_fade_in qr5>>
 <<bg_scale qr5 1.2 10>>
 종아리에 감각이 없어......
 
 
-<<box_named LetterBox>>
+<<box_named Speaker>>
 
 크루니스: 그렇군...... 인간의 신체는 오랫동안 무릎 꿇은 자세를 유지하면, 이런 느낌이 드는구나~
 
@@ -126,6 +126,7 @@ position: 694,90
 <<move_by igna 100 0 0.6>>
 이그나: 네 판결이 나왔어. 직접 확인해 봐.
 
+<<char_focus kronis 0.3>>
 <<fade_out igna 0.7>>
 <<pause 0.6>>
 <<move_by kronis 200 -80>>
