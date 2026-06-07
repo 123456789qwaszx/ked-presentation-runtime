@@ -8,11 +8,17 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler<float, float>("screen_flash", EnqueueScreenFlashSpec);
         runner.AddCommandHandler<float, float, float, float, float>("screen_flash_rgb", EnqueueScreenFlashRgbSpec);
         runner.AddCommandHandler("screen_flash_hit", EnqueueScreenFlashHitSpec);
-    
+
         runner.AddCommandHandler<string, float, float>("screen_vignette", EnqueueScreenVignettePresetSpec);
         runner.AddCommandHandler<float>("screen_vignette_clear", EnqueueScreenVignetteClearSpec);
         runner.AddCommandHandler<float, float>("screen_letterbox", EnqueueScreenLetterBoxSpec);
-        runner.AddCommandHandler<float, float, float, float, float, float, float>("screen_vignette_custom", EnqueueScreenVignetteCustomSpec);
+        runner.AddCommandHandler<float, float, float, float, float, float, float>("screen_vignette_custom",
+            EnqueueScreenVignetteCustomSpec);
+
+        runner.AddCommandHandler<string, float, float>("screen_noise", EnqueueScreenNoisePresetSpec);
+        runner.AddCommandHandler<float>("screen_noise_clear", EnqueueScreenNoiseClearSpec);
+        runner.AddCommandHandler<float, float, float, float, float, float>("screen_noise_custom",
+            EnqueueScreenNoiseCustomSpec);
     }
 
     private void EnqueueScreenFlashSpec(float amount = 1f, float duration = 0.16f)
@@ -64,7 +70,7 @@ public sealed partial class YarnCommandBridge
 
         Collect(spec);
     }
-    
+
     private void EnqueueScreenVignettePresetSpec(
         string presetKey,
         float intensity = 1f,
@@ -173,6 +179,102 @@ public sealed partial class YarnCommandBridge
                     $"[YarnCommandBridge] Unknown screen vignette preset '{key}'. " +
                     $"Fallback to DefaultFocus.");
                 return ScreenVignettePreset.DefaultFocus;
+        }
+    }
+
+    private void EnqueueScreenNoisePresetSpec(
+        string presetKey,
+        float intensity = 1f,
+        float duration = 0.35f)
+    {
+        var spec = new ScreenNoiseCommandSpec
+        {
+            mode = ScreenNoiseMode.Preset,
+            preset = ParseNoisePreset(presetKey),
+            intensity = intensity,
+            duration = duration,
+            wait = false
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueScreenNoiseClearSpec(float duration = 0.35f)
+    {
+        var spec = new ScreenNoiseCommandSpec
+        {
+            mode = ScreenNoiseMode.Clear,
+            duration = duration,
+            wait = false
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueScreenNoiseCustomSpec(
+        float amount,
+        float scale,
+        float speedX,
+        float speedY,
+        float contrast,
+        float duration = 0.35f)
+    {
+        var spec = new ScreenNoiseCommandSpec
+        {
+            mode = ScreenNoiseMode.Custom,
+            amount = amount,
+            color = Color.white,
+            scale = scale,
+            speedX = speedX,
+            speedY = speedY,
+            contrast = contrast,
+            duration = duration,
+            wait = false
+        };
+
+        Collect(spec);
+    }
+
+    private ScreenNoisePreset ParseNoisePreset(string key)
+    {
+        if (string.IsNullOrWhiteSpace(key))
+            return ScreenNoisePreset.Default;
+
+        switch (key.Trim().ToLowerInvariant())
+        {
+            case "default":
+            case "normal":
+                return ScreenNoisePreset.Default;
+
+            case "memory":
+            case "recall":
+            case "flashback":
+                return ScreenNoisePreset.Memory;
+
+            case "horror":
+            case "fear":
+                return ScreenNoisePreset.Horror;
+
+            case "broadcast":
+            case "stream":
+            case "tv":
+            case "monitor":
+                return ScreenNoisePreset.Broadcast;
+
+            case "dream":
+            case "dreamy":
+                return ScreenNoisePreset.Dream;
+
+            case "rain":
+            case "rain_mood":
+            case "rainy":
+                return ScreenNoisePreset.RainMood;
+
+            default:
+                Debug.LogWarning(
+                    $"[YarnCommandBridge] Unknown screen noise preset '{key}'. " +
+                    $"Fallback to Default.");
+                return ScreenNoisePreset.Default;
         }
     }
 }

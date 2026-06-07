@@ -12,6 +12,9 @@ public sealed class ScreenEffectCommandFactory : INodeCommandFactory
             // Mood / Vignette
             ScreenVignetteCommandSpec s => new ScreenVignetteCommand(s),
             
+            // Noise / Texture overlay
+            ScreenNoiseCommandSpec s => new ScreenNoiseCommand(s),
+            
             _ => null
         };
 
