@@ -3,15 +3,18 @@ public sealed class BackgroundRigCommandFactory : INodeCommandFactory
     private readonly BackgroundRigSlotResolver _rigSlotResolver;
     private readonly BackgroundRigBuilder _rigBuilder;
     private readonly BackgroundSpriteResolver _spriteResolver;
+    private readonly IBackgroundRigBlurRuntime _blurRuntime;
 
     public BackgroundRigCommandFactory(
         BackgroundRigSlotResolver backgroundRigSlotResolver,
         BackgroundRigBuilder backgroundRigBuilder,
-        BackgroundSpriteResolver backgroundSpriteResolver)
+        BackgroundSpriteResolver backgroundSpriteResolver,
+        IBackgroundRigBlurRuntime blurRuntime)
     {
         _rigSlotResolver = backgroundRigSlotResolver;
         _rigBuilder = backgroundRigBuilder;
         _spriteResolver = backgroundSpriteResolver;
+        _blurRuntime = blurRuntime;
     }
 
     public bool TryCreate(CommandSpecBase spec, out ISequenceCommand command)
@@ -21,7 +24,11 @@ public sealed class BackgroundRigCommandFactory : INodeCommandFactory
             null => null,
 
             // Setup
-            SetupBackgroundRigCommandSpec s => new SetupBackgroundRigCommand(_rigSlotResolver, _rigBuilder, s),
+            SetupBackgroundRigCommandSpec s => new SetupBackgroundRigCommand(
+                _rigSlotResolver,
+                _rigBuilder,
+                _blurRuntime,
+                s),
 
             // Basic State
             SetAnchorCommandSpecBgR s => new SetAnchorCommandBgR(s),
@@ -44,6 +51,10 @@ public sealed class BackgroundRigCommandFactory : INodeCommandFactory
             JoltCommandSpecBgR s => new JoltCommandBgR(s),
             TrembleCommandSpecBgR s => new TrembleCommandBgR(s),
             BreathInPlaceCommandSpecBgR s => new BreathInPlaceCommandBgR(s),
+
+            // Defocus / Blur
+            BackgroundDefocusCommandSpecBgR s => new BackgroundDefocusCommandBgR(_blurRuntime, s),
+            BackgroundDefocusClearCommandSpecBgR s => new BackgroundDefocusClearCommandBgR(_blurRuntime, s),
 
             _ => null
         };

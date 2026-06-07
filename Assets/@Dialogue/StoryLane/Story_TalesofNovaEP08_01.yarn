@@ -32,6 +32,7 @@ position: 694,90
 크루니스: 솔직히 골격 표본 하나만 가져다주면 여기서 평생 지낼 수도 있겠어. 조용하고 방해꾼도 없고, 실험 도구를 전부 여기로 옮기고 싶을 정도야......
 감옥 간수: 오래 갖혀 있었더니...... 머리가 어떻게 되기라도 했나? 경고하는데, 미친 척해 봤자 절대 못 나가!
 
+<<bg_defocus q1  0.8 1.5>>
 ???: 풀어 줘. 무릎 꿇린 채로는 대화하기 힘드니까.
 크루니스: 정말......?
 감옥 간수: 이그나 님! 알겠습니다, 지금 바로 풀겠습니다.
@@ -39,35 +40,13 @@ position: 694,90
 <<fade_in igna 0>>
 <<fade_in npc1 0>>
 
-// igna의 얼굴이 화면 중앙에 오도록 캐릭터 placement 이동
-//<<char_place igna bust left 0.35>>
+<<duo_shot igna npc1 balanced 0.45>>
 
 
-// 두 캐릭터를 기본 대화 구도로 자동 배치
-//<<duo_shot igna npc1 balanced 0.45>>
-
-// 가까운 대화 구도
-//<<duo_shot npc1 igna close 0.45>>
-
-// 대치 구도
-//<<duo_shot npc1 igna confrontation 0.35>>
-
-// 한쪽 우세 구도
-//<<duo_shot npc1 igna left_dominant 0.45>>
-<<duo_shot npc1 igna right_dominant 0.45>>
-
-//<<solo_shot npc1>>
-
-//<<char_focus igna 1 0.3>>
 <<char_defocus npc1 23 0.3>>
-//<<pause 1>>
 <<char_focus igna 0.1 0.3>>
-//<<pause 1>>
-//<<char_clear_focus igna 0.55>>
-//<<char_visual igna 0.4 0.2 0.25 0.3>>
-//<<char_inner_rim igna 0.4 0.3>>
-//<<char_outer_rim igna 0.4 0.3>>
 <<screen_flash_rgb 1 0.1 0.05 0.45 0.18>>
+
 //<<fade_out igna>>
 <<bg_show_layers qr5 back>>
 <<bg_fade_in qr5 0>>
@@ -79,6 +58,7 @@ position: 694,90
 
 감옥 간수:.. #beat #stay
 
+//<<solo_shot npc1>>
 감옥 간수: 너! 허튼짓 할 생각 하지 말고!!! 가만히 있어!
 
 감옥 간수:..#boxhide
@@ -108,14 +88,12 @@ position: 694,90
 <<scale_to igna 1.8>>
 
 이그나: 흥... 괜히 센 척하지 마. 다리 저릴 텐데, 내가 부축해 줄게.
-
-<<tx_focus_curtain_in>>
+<<screen_noise memory>>
 ???:.. #beat #stay
 
 <<place kronis duoleft true true>>
 <<place igna duoright true true>>
 
-<<tx_focus_curtain_out>>
 이그나: 얼마 전까지 은혜의지의 동료였는데 다들 정말 인정사정없네.
 
 <<shake kronis left>>

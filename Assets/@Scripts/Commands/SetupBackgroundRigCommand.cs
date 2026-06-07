@@ -45,6 +45,7 @@ public sealed class SetupBackgroundRigCommand : CommandBase
 {
     private readonly BackgroundRigSlotResolver _slotResolver;
     private readonly BackgroundRigBuilder _rigBuilder;
+    private readonly IBackgroundRigBlurRuntime _blurRuntime;
     private readonly SetupBackgroundRigCommandSpec _spec;
 
     public override bool WaitForCompletion => true;
@@ -52,10 +53,12 @@ public sealed class SetupBackgroundRigCommand : CommandBase
     public SetupBackgroundRigCommand(
         BackgroundRigSlotResolver slotResolver,
         BackgroundRigBuilder rigBuilder,
+        IBackgroundRigBlurRuntime blurRuntime,
         SetupBackgroundRigCommandSpec spec)
     {
         _slotResolver = slotResolver;
         _rigBuilder = rigBuilder;
+        _blurRuntime = blurRuntime;
         _spec = spec;
     }
 
@@ -87,15 +90,14 @@ public sealed class SetupBackgroundRigCommand : CommandBase
 
         scope.backgroundRigs.Register(rigKey, refs);
 
+        _blurRuntime?.Bind(rigKey, refs);
+
         // Optional bake helper:
         // Enable after refs registration when saving the generated rig as a reusable prefab.
         //StripRolePrefixForBake(rigRoot, rolePrefix, spec.rigRootName);
     }
 
     #region Helpers
-    // For prefab baking: turns 'City_Background_FramingTransform' back into 'Background_FramingTransform'.
-    // Safe only after refs are already bound.
-    // Do not call before BuildRefMap/BindRefs.
     private static void StripRolePrefixForBake(RectTransform rigRoot, string rolePrefix, string rigRootName)
     {
         if (rigRoot == null)

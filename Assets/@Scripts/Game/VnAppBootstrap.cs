@@ -115,6 +115,8 @@ public class VnAppBootstrap : MonoBehaviour
     
     [Header("NodeDebug")] 
     [SerializeField] private YarnLaneDebugView yarnLaneDebugView;
+    
+    [SerializeField] private UIBackgroundRigBlurRuntime uiBackgroundRigBlurRuntime;
 
     
     private PresentationSessionBridge _presentationSessionBridge;
@@ -214,11 +216,12 @@ public class VnAppBootstrap : MonoBehaviour
         BackgroundRigSlotResolver backgroundRigSlotResolver = new();
         BackgroundRigBuilder backgroundRigBuilder = new();
         BackgroundSpriteResolver backgroundSpriteResolver = new();
-
+        
         BackgroundRigCommandFactory backgroundRigFactory = new(
             backgroundRigSlotResolver,
             backgroundRigBuilder,
-            backgroundSpriteResolver);
+            backgroundSpriteResolver,
+            uiBackgroundRigBlurRuntime);
 
         ShotResponseCommandFactory presentationShotFactory = new(
             _presentationResponseRig, characterFocusTuningDb);

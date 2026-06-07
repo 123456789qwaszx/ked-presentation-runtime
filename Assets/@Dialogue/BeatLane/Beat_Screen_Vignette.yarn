@@ -18,7 +18,7 @@
 //<<screen_vignette memory 3 0.6>>
 
 //몽환:
-<<screen_vignette dream 3 0.6>>
+//<<screen_vignette dream 3 0.6>>
 
 //해제:
 // <<screen_vignette_clear 0.4>>

@@ -65,9 +65,6 @@ public sealed class BackgroundRigBuilder
         for (int i = rigRoot.childCount - 1; i >= 0; i--)
         {
             Transform child = rigRoot.GetChild(i);
-
-            // Destroy() is delayed until the end of the frame.
-            // Detach first so EnsureGraph() cannot find soon-to-be-destroyed nodes.
             child.SetParent(null, false);
             Object.Destroy(child.gameObject);
         }
@@ -168,7 +165,16 @@ public sealed class BackgroundRigBuilder
         }
 
         if (node.NeedsImage && !rt.TryGetComponent<Image>(out _))
-            rt.gameObject.AddComponent<Image>();
+        {
+            Image image = rt.gameObject.AddComponent<Image>();
+            image.raycastTarget = false;
+        }
+
+        if (node.NeedsRawImage && !rt.TryGetComponent<RawImage>(out _))
+        {
+            RawImage rawImage = rt.gameObject.AddComponent<RawImage>();
+            rawImage.raycastTarget = false;
+        }
     }
 
     private RectTransform EnsureRect(RectTransform parent, string name)
@@ -210,7 +216,7 @@ public sealed class BackgroundRigBuilder
         Dictionary<BackgroundRigSchema.Refs, RectTransform> map)
     {
         BackgroundRigRefs refs = new(rigRoot);
-    
+
         RectTransform GetRt(BackgroundRigSchema.Refs key)
         {
             if (!map.TryGetValue(key, out RectTransform targetRect) || targetRect == null)
@@ -218,36 +224,52 @@ public sealed class BackgroundRigBuilder
                 Debug.LogWarning($"[BackgroundRigBuilder] Missing bound ref '{key}'.");
                 return null;
             }
-    
+
             return targetRect;
         }
-    
+
         Image GetImg(BackgroundRigSchema.Refs key)
         {
             RectTransform rt = GetRt(key);
             if (rt == null)
                 return null;
-    
+
             Image img = rt.GetComponent<Image>();
             if (img == null)
             {
                 Debug.LogWarning($"[BackgroundRigBuilder] Missing Image on '{rt.name}'.");
                 return null;
             }
-    
+
             return img;
         }
-    
+
+        RawImage GetRawImg(BackgroundRigSchema.Refs key)
+        {
+            RectTransform rt = GetRt(key);
+            if (rt == null)
+                return null;
+
+            RawImage rawImg = rt.GetComponent<RawImage>();
+            if (rawImg == null)
+            {
+                Debug.LogWarning($"[BackgroundRigBuilder] Missing RawImage on '{rt.name}'.");
+                return null;
+            }
+
+            return rawImg;
+        }
+
         // Background base axis - response-neutral placement / measurement
         refs.Background_Root = GetRt(BackgroundRigSchema.Refs.Background_Root);
-    
+
         // Framing axis - pseudo camera / focus response
         refs.Background_FramingTransform = GetRt(BackgroundRigSchema.Refs.Background_FramingTransform);
         refs.Background_FramingScale = GetRt(BackgroundRigSchema.Refs.Background_FramingScale);
-    
+
         // Background casting axis - per-background defaults
         refs.Background_CastTransform = GetRt(BackgroundRigSchema.Refs.Background_CastTransform);
-    
+
         // Background acting axis
         refs.Background_Track = GetRt(BackgroundRigSchema.Refs.Background_Track);
         refs.Background_Track_Move = GetRt(BackgroundRigSchema.Refs.Background_Track_Move);
@@ -258,27 +280,31 @@ public sealed class BackgroundRigBuilder
         refs.Background_ActingScale = GetRt(BackgroundRigSchema.Refs.Background_ActingScale);
         refs.Background_ActingScale_X = GetRt(BackgroundRigSchema.Refs.Background_ActingScale_X);
         refs.Background_ActingScale_Y = GetRt(BackgroundRigSchema.Refs.Background_ActingScale_Y);
-    
+
         // Layer stack
         refs.Background_LayerRoot = GetRt(BackgroundRigSchema.Refs.Background_LayerRoot);
-    
+
         // Back layer
         refs.Background_BackLayer_Root = GetRt(BackgroundRigSchema.Refs.Background_BackLayer_Root);
         refs.Background_BackLayer_Image = GetImg(BackgroundRigSchema.Refs.Background_BackLayer_Image);
-    
+
         // Object slots
         refs.Background_ObjectSlotRoot = GetRt(BackgroundRigSchema.Refs.Background_ObjectSlotRoot);
         refs.Background_ObjectSlot00 = GetRt(BackgroundRigSchema.Refs.Background_ObjectSlot00);
         refs.Background_ObjectSlot01 = GetRt(BackgroundRigSchema.Refs.Background_ObjectSlot01);
         refs.Background_ObjectSlot02 = GetRt(BackgroundRigSchema.Refs.Background_ObjectSlot02);
-    
+
         // Front layer
         refs.Background_FrontLayer_Root = GetRt(BackgroundRigSchema.Refs.Background_FrontLayer_Root);
         refs.Background_FrontLayer_Image = GetImg(BackgroundRigSchema.Refs.Background_FrontLayer_Image);
-    
+
+        // Defocus overlay
+        refs.Background_DefocusOverlay_Root = GetRt(BackgroundRigSchema.Refs.Background_DefocusOverlay_Root);
+        refs.Background_DefocusOverlay_RawImage = GetRawImg(BackgroundRigSchema.Refs.Background_DefocusOverlay_RawImage);
+
         // Extension / preserved systems
         refs.Background_ExtensionsRoot = GetRt(BackgroundRigSchema.Refs.Background_ExtensionsRoot);
-    
+
         return refs;
     }
     #endregion

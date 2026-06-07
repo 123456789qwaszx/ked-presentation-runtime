@@ -230,6 +230,11 @@ public sealed partial class YarnCommandBridge
         
         runner.AddCommandHandler<string, string, float, float>("bg_idle_tremble", EnqueueTrembleBackgroundSpec);
         runner.AddCommandHandler<string, float, float, float>("bg_idle_breath", EnqueueBreathBackgroundSpec);
+        
+        // Background defocus / blur
+        runner.AddCommandHandler<string, float, float>("bg_defocus", EnqueueBackgroundDefocusSpec);
+        runner.AddCommandHandler<string, float, float, int, string, float>("bg_defocus_custom", EnqueueBackgroundDefocusCustomSpec);
+        runner.AddCommandHandler<string, float>("bg_defocus_clear", EnqueueBackgroundDefocusClearSpec);
     }
     
     private void BindShotResponse(DialogueRunner runner)

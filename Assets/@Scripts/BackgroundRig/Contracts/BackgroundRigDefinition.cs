@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+
 public static class BackgroundRigSchema
 {
     public enum Refs
@@ -42,6 +43,10 @@ public static class BackgroundRigSchema
         Background_FrontLayer_Root,
         Background_FrontLayer_Image,
 
+        // Defocus overlay - blurred RenderTexture is displayed here.
+        Background_DefocusOverlay_Root,
+        Background_DefocusOverlay_RawImage,
+
         // Extension / preserved systems
         Background_ExtensionsRoot
     }
@@ -52,6 +57,7 @@ public static class BackgroundRigSchema
         public Refs? Parent;
 
         public bool NeedsImage;
+        public bool NeedsRawImage;
         public bool NeedsCanvasGroup;
         public bool NeedsCenterPivot;
         public bool NeedsBottomPivot;
@@ -99,6 +105,11 @@ public static class BackgroundRigSchema
         new() { Id = Refs.Background_FrontLayer_Root, Parent = Refs.Background_LayerRoot, NeedsCanvasGroup = true, InitialCanvasGroupAlpha = 0f },
         new() { Id = Refs.Background_FrontLayer_Image, Parent = Refs.Background_FrontLayer_Root, NeedsImage = true },
 
+        // Defocus overlay
+        // This is inside the rig so the blur result belongs to the background rig itself.
+        new() { Id = Refs.Background_DefocusOverlay_Root, Parent = Refs.Background_LayerRoot, NeedsCanvasGroup = true, InitialCanvasGroupAlpha = 0f },
+        new() { Id = Refs.Background_DefocusOverlay_RawImage, Parent = Refs.Background_DefocusOverlay_Root, NeedsRawImage = true },
+
         // Extension / preserved systems
         new() { Id = Refs.Background_ExtensionsRoot, Parent = Refs.Background_LayerRoot },
     };
@@ -143,6 +154,10 @@ public enum BackgroundRigTarget
     // Front layer
     Background_FrontLayer_Root,
     Background_FrontLayer_Image,
+
+    // Defocus overlay
+    Background_DefocusOverlay_Root,
+    Background_DefocusOverlay_RawImage,
 
     // Extension / preserved systems
     Background_ExtensionsRoot
@@ -195,6 +210,10 @@ public sealed class BackgroundRigRefs
     public RectTransform Background_FrontLayer_Root;
     public Image Background_FrontLayer_Image;
 
+    // Defocus overlay
+    public RectTransform Background_DefocusOverlay_Root;
+    public RawImage Background_DefocusOverlay_RawImage;
+
     // Extension / preserved systems
     public RectTransform Background_ExtensionsRoot;
 }
@@ -214,6 +233,11 @@ public static class BackgroundRigRefsExtensions
     public static Image GetImage(this BackgroundRigRefs refs, BackgroundRigTarget target)
     {
         return refs.GetComponent(target) as Image;
+    }
+
+    public static RawImage GetRawImage(this BackgroundRigRefs refs, BackgroundRigTarget target)
+    {
+        return refs.GetComponent(target) as RawImage;
     }
 
     private static Component GetComponent(this BackgroundRigRefs refs, BackgroundRigTarget target)
@@ -260,6 +284,10 @@ public static class BackgroundRigRefsExtensions
             // Front layer
             BackgroundRigTarget.Background_FrontLayer_Root => refs.Background_FrontLayer_Root,
             BackgroundRigTarget.Background_FrontLayer_Image => refs.Background_FrontLayer_Image,
+
+            // Defocus overlay
+            BackgroundRigTarget.Background_DefocusOverlay_Root => refs.Background_DefocusOverlay_Root,
+            BackgroundRigTarget.Background_DefocusOverlay_RawImage => refs.Background_DefocusOverlay_RawImage,
 
             // Extension / preserved systems
             BackgroundRigTarget.Background_ExtensionsRoot => refs.Background_ExtensionsRoot,
