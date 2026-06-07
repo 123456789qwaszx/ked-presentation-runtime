@@ -67,7 +67,7 @@ position: 694,90
 //<<char_visual igna 0.4 0.2 0.25 0.3>>
 //<<char_inner_rim igna 0.4 0.3>>
 //<<char_outer_rim igna 0.4 0.3>>
-
+<<screen_flash_rgb 1 0.1 0.05 0.45 0.18>>
 //<<fade_out igna>>
 <<bg_show_layers qr5 back>>
 <<bg_fade_in qr5 0>>

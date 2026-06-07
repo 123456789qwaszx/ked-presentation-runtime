@@ -20,11 +20,6 @@ public partial class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
 
     public enum Refs
     {
-        FullscreenFade_Root,
-        Letterbox_Root,
-        Flash_Root,
-        ScreenOverlay_Root,
-
         StageShot_Root,
         StagePan_Root,
         StageZoom_Root,
@@ -145,7 +140,15 @@ public partial class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
         SkipToggle_Text,
         SkipToggleIcon_Root,
         SkipToggleIcon_Image,
-        SkipToggle_Button
+        SkipToggle_Button,
+        
+        ScreenEffectLayer,
+        FullscreenFade_Root,
+        Letterbox_Root,
+        Flash_Root,
+        ScreenOverlay_Root,
+        
+        ScreenFlashOverlay_Image
     }
 
     [SerializeField] private DialogueBoxHost dialogueBoxHost;

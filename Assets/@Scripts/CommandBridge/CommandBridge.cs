@@ -98,6 +98,8 @@ public sealed partial class YarnCommandBridge
 
         BindTransition(runner);
         BindAudio(runner);
+        
+        BindScreenEffects(runner);
     }
     
 

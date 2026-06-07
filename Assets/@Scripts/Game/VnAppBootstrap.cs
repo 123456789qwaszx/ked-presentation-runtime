@@ -238,6 +238,8 @@ public class VnAppBootstrap : MonoBehaviour
             audioSystem,
             audioClipResolver);
 
+        ScreenEffectCommandFactory screenEffectFactory = new();
+
         CompositeCommandFactory factory = new(
             charRigFactory,
             backgroundRigFactory,
@@ -245,7 +247,8 @@ public class VnAppBootstrap : MonoBehaviour
             presentationTransitionFactory,
             presentationControlFactory,
             audioFactory,
-            signalFactory);
+            signalFactory,
+            screenEffectFactory);
 
         commandExecutor.Initialize(factory);
         subCommandExecutor.Initialize(factory);
