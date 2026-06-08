@@ -46,7 +46,8 @@ position: 694,90
 <<screen_flash_rgb 1 0.1 0.05 0.45 0.18>>
 
 //<<fade_out igna>>
-<<bg_defocus_custom q1  0.1 0.1 1 quarter 1.4>>
+<<screen_noise>>
+<<bg_defocus q1 0.99 1.4>>
 //<<bg_show_layers qr5 back>>
 //<<bg_fade_in qr5 0>>
 //<<bg_fade_out q1 1.2 back>>

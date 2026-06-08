@@ -51,15 +51,15 @@ public sealed class SetupBackgroundRigCommand : CommandBase
     public override bool WaitForCompletion => true;
 
     public SetupBackgroundRigCommand(
+    SetupBackgroundRigCommandSpec spec,
         BackgroundRigSlotResolver slotResolver,
         BackgroundRigBuilder rigBuilder,
-        IBackgroundRigBlurRuntime blurRuntime,
-        SetupBackgroundRigCommandSpec spec)
+        IBackgroundRigBlurRuntime blurRuntime = null)
     {
+        _spec = spec;
         _slotResolver = slotResolver;
         _rigBuilder = rigBuilder;
         _blurRuntime = blurRuntime;
-        _spec = spec;
     }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)

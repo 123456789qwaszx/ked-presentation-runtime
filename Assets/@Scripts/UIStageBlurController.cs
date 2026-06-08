@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public enum UIStageBlurDownsample
 {
@@ -15,9 +16,7 @@ public sealed class UIStageBlurController : MonoBehaviour
 
     [Header("Input")]
     [SerializeField] private Camera captureCamera;
-
-    [Header("Material")]
-    [SerializeField] private Material blurMaterial;
+    [SerializeField] private Material M_UISeparableBlur;
 
     [Header("Blur Settings")]
     [SerializeField] private UIStageBlurDownsample downsample = UIStageBlurDownsample.Quarter;
@@ -27,8 +26,6 @@ public sealed class UIStageBlurController : MonoBehaviour
     [Header("Runtime")]
     // 캡처 카메라를 이 컨트롤러가 수동으로 구동한다(평소엔 렌더하지 않음).
     [SerializeField] private bool controlCaptureCamera = true;
-    // 디버그 프리뷰용. 게임플레이는 ForceRenderBlur()로 온디맨드 구동한다.
-    [SerializeField] private bool renderEveryFrame = false;
 
     private RenderTexture _blurA;
     private RenderTexture _blurB;
@@ -36,15 +33,7 @@ public sealed class UIStageBlurController : MonoBehaviour
     private int _height;
     private UIStageBlurDownsample _allocatedDownsample;
 
-    public RenderTexture SourceTexture => GetSourceTexture();
     public RenderTexture BlurredTexture => _blurA;
-
-    public bool IsReady =>
-        captureCamera != null &&
-        captureCamera.targetTexture != null &&
-        blurMaterial != null &&
-        _blurA != null &&
-        _blurB != null;
 
     private void OnEnable()
     {
@@ -52,33 +41,8 @@ public sealed class UIStageBlurController : MonoBehaviour
         ApplyCaptureCameraControl();
     }
 
-    private void OnDisable()
-    {
-        ReleaseRenderTextures();
-    }
-
-    private void OnDestroy()
-    {
-        ReleaseRenderTextures();
-    }
-
-    private void LateUpdate()
-    {
-        if (!renderEveryFrame)
-            return;
-
-        RenderBlur();
-    }
-
-    public void SetCaptureCamera(Camera camera)
-    {
-        if (captureCamera == camera)
-            return;
-
-        captureCamera = camera;
-        ApplyCaptureCameraControl();
-        RecreateRenderTextures();
-    }
+    private void OnDisable() => ReleaseRenderTextures();
+    private void OnDestroy() => ReleaseRenderTextures();
 
     public void SetBlur(float radius, int iterationCount)
     {
@@ -96,20 +60,15 @@ public sealed class UIStageBlurController : MonoBehaviour
     }
 
     // 온디맨드 구동 진입점: 캡처 카메라를 한 번 렌더한 뒤 블러를 굽는다.
-    public void ForceRenderBlur()
-    {
-        RenderBlur();
-    }
-
-    private void RenderBlur()
+    public void RenderBlur()
     {
         // 수동 구동이면 이 시점에만 캡처 카메라를 렌더해 source RT를 갱신한다.
         if (controlCaptureCamera && captureCamera != null)
             captureCamera.Render();
 
-        RenderTexture source = GetSourceTexture();
+        RenderTexture source = captureCamera.targetTexture;
 
-        if (source == null || blurMaterial == null)
+        if (source == null || M_UISeparableBlur == null)
             return;
 
         EnsureRenderTextures();
@@ -123,8 +82,8 @@ public sealed class UIStageBlurController : MonoBehaviour
             return;
         }
 
-        blurMaterial.SetFloat(BlurRadiusId, blurRadius);
-        blurMaterial.SetVector(
+        M_UISeparableBlur.SetFloat(BlurRadiusId, blurRadius);
+        M_UISeparableBlur.SetVector(
             BlurTexelSizeId,
             new Vector4(1f / _width, 1f / _height, _width, _height));
 
@@ -132,8 +91,8 @@ public sealed class UIStageBlurController : MonoBehaviour
 
         for (int i = 0; i < iterations; i++)
         {
-            Graphics.Blit(_blurA, _blurB, blurMaterial, 0);
-            Graphics.Blit(_blurB, _blurA, blurMaterial, 1);
+            Graphics.Blit(_blurA, _blurB, M_UISeparableBlur, 0);
+            Graphics.Blit(_blurB, _blurA, M_UISeparableBlur, 1);
         }
     }
 
@@ -146,17 +105,9 @@ public sealed class UIStageBlurController : MonoBehaviour
         captureCamera.enabled = false;
     }
 
-    private RenderTexture GetSourceTexture()
-    {
-        if (captureCamera == null)
-            return null;
-
-        return captureCamera.targetTexture;
-    }
-
     private void EnsureRenderTextures()
     {
-        RenderTexture source = GetSourceTexture();
+        RenderTexture source = captureCamera.targetTexture;
 
         if (source == null)
             return;

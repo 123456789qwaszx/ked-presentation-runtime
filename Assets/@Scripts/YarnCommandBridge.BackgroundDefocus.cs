@@ -12,8 +12,8 @@ public sealed partial class YarnCommandBridge
             duration = duration,
 
             // Default quality preset
-            blurRadius = 3f,
-            iterations = 2,
+            blurRadius = 0.5f,
+            iterations = 1,
             downsample = UIStageBlurDownsample.Quarter
         });
     }

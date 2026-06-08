@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 using Yarn.Unity;
 
 public class VnAppBootstrap : MonoBehaviour

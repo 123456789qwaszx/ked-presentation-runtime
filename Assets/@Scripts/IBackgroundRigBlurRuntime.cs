@@ -1,7 +1,7 @@
 public interface IBackgroundRigBlurRuntime
 {
     void Bind(string rigKey, BackgroundRigRefs refs);
-    void ClearSources();
+    void ClearBindings();
 
     void ShowDefocus(
         string rigKey,
@@ -12,5 +12,4 @@ public interface IBackgroundRigBlurRuntime
         UIStageBlurDownsample downsample);
 
     void HideDefocus(string rigKey, float duration);
-    void ClearDefocusImmediate(string rigKey);
 }

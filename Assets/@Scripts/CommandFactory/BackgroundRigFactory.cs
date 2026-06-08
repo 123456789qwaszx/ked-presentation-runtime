@@ -24,11 +24,7 @@ public sealed class BackgroundRigCommandFactory : INodeCommandFactory
             null => null,
 
             // Setup
-            SetupBackgroundRigCommandSpec s => new SetupBackgroundRigCommand(
-                _rigSlotResolver,
-                _rigBuilder,
-                _blurRuntime,
-                s),
+            SetupBackgroundRigCommandSpec s => new SetupBackgroundRigCommand(s, _rigSlotResolver, _rigBuilder, _blurRuntime),
 
             // Basic State
             SetAnchorCommandSpecBgR s => new SetAnchorCommandBgR(s),

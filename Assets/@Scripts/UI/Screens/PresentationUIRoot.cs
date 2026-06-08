@@ -150,7 +150,10 @@ public partial class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
         
         ScreenFlashOverlay_Image,
         ScreenVignetteOverlay_Image,
-        ScreenNoiseOverlay_Image
+        ScreenNoiseOverlay_Image,
+        
+        FrostedGlassMask,
+        FrostedGlassRawImage
     }
 
     [SerializeField] private DialogueBoxHost dialogueBoxHost;

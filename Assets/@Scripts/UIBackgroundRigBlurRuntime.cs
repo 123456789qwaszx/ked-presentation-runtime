@@ -3,13 +3,21 @@ using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
 
+public interface IPresentationDefocusOverlayProvider
+{
+    CanvasGroup FrostedGlassMaskCanvasGroup { get; }
+    RawImage FrostedGlassRawImage { get; }
+}
+
+public sealed partial class PresentationUIRoot : IPresentationDefocusOverlayProvider
+{
+    public CanvasGroup FrostedGlassMaskCanvasGroup => View.Rect(Refs.FrostedGlassMask).GetComponent<CanvasGroup>();
+    public RawImage FrostedGlassRawImage => View.Rect(Refs.FrostedGlassRawImage).GetComponent<RawImage>();
+}
+
 public sealed class UIBackgroundRigBlurRuntime : MonoBehaviour, IBackgroundRigBlurRuntime
 {
-    private const string CaptureBackProxyName = "Capture_BackLayer_Image";
-    private const string CaptureFrontProxyName = "Capture_FrontLayer_Image";
-
-    [Header("Source / Capture Canvas")]
-    [SerializeField] private Canvas sourceCanvas;
+    [Header("Capture Canvas")]
     [SerializeField] private Canvas captureCanvas;
     [SerializeField] private RectTransform captureRoot;
 
@@ -19,94 +27,55 @@ public sealed class UIBackgroundRigBlurRuntime : MonoBehaviour, IBackgroundRigBl
 
     [Header("Blur")]
     [SerializeField] private UIStageBlurController blurController;
-    
-    [Header("External Presentation Mask")]
-    [SerializeField] private CanvasGroup frostedGlassMaskCanvasGroup;
-    [SerializeField] private bool controlFrostedGlassMask = true;
-
-    [Header("Copy Options")]
-    [SerializeField] private bool copySprite = true;
-    [SerializeField] private bool copyColor = true;
-    [SerializeField] private bool multiplyInheritedCanvasGroupAlpha = true;
-    [SerializeField] private bool copyMaterial = false;
-    [SerializeField] private bool copyImageType = true;
-    [SerializeField] private bool copyPreserveAspect = true;
-    [SerializeField] private bool disableRaycastTarget = true;
 
     private readonly Dictionary<string, RigBinding> _bindings = new();
     private readonly Vector3[] _sourceWorldCorners = new Vector3[4];
     private readonly Vector2[] _captureLocalCorners = new Vector2[4];
 
     private string _activeRigKey;
-
-    // 디포커스가 떠 있는 동안에만 소스를 미러링/재블러한다. 꺼져 있으면 파이프라인 전체 정지.
     private bool _isTracking;
 
-    private void Awake()
-    {
-        EnsureCaptureProxyImages();
-    }
+    private Tween _defocusTween;
 
-    private void OnEnable()
-    {
-        EnsureCaptureProxyImages();
-        SetFrostedGlassMaskVisible(false, 0f);
-        Sync();
-    }
-
-    private void OnValidate()
-    {
-        EnsureCaptureProxyImages();
-        Sync();
-    }
+    private IPresentationDefocusOverlayProvider _overlay;
+    private CanvasGroup _overlayCanvasGroup;
+    private RawImage _overlayRawImage;
 
     private void LateUpdate()
     {
         if (!_isTracking)
             return;
 
-        RigBinding active = ResolveBinding(_activeRigKey);
-        if (active == null)
+        if (!SyncCaptureProxies())
             return;
 
-        // Sync는 변경 여부를 반환한다. 정지 프레임이면 false → 캡처/블러 비용 0.
-        bool changed = Sync();
-        if (!changed)
-            return;
-
-        if (blurController != null)
-            blurController.ForceRenderBlur();
-
-        ApplyBlurTexture(active);
+        blurController.RenderBlur();
+        ApplyBlurTextureToOverlay();
     }
 
     public void Bind(string rigKey, BackgroundRigRefs refs)
     {
-        if (string.IsNullOrEmpty(rigKey) || refs == null)
-            return;
-
-        EnsureCaptureProxyImages();
-
-        RigBinding binding = new RigBinding(rigKey, refs);
-        SetupOverlay(binding);
-
-        _bindings[rigKey] = binding;
+        _bindings[rigKey] = new RigBinding(rigKey, refs);
 
         if (string.IsNullOrEmpty(_activeRigKey))
             _activeRigKey = rigKey;
 
-        Sync();
+        if (_activeRigKey == rigKey)
+            SyncCaptureProxies();
     }
 
-    public void ClearSources()
+    public void ClearBindings()
     {
         _isTracking = false;
-
         _activeRigKey = null;
         _bindings.Clear();
 
-        ClearProxy(captureBackLayerImage);
-        ClearProxy(captureFrontLayerImage);
+        ResetCaptureProxies();
+        SetOverlayVisible(false, 0f);
+
+        _overlay = null;
+        _overlayCanvasGroup = null;
+        _overlayRawImage = null;
     }
 
     public void ShowDefocus(
@@ -117,111 +86,74 @@ public sealed class UIBackgroundRigBlurRuntime : MonoBehaviour, IBackgroundRigBl
         int iterations,
         UIStageBlurDownsample downsample)
     {
-        RigBinding binding = ResolveBinding(rigKey);
+        EnsureOverlay();
 
-        if (binding == null)
-            return;
+        _activeRigKey = ResolveBinding(rigKey).RigKey;
+        SyncCaptureProxies();
 
-        _activeRigKey = binding.RigKey;
+        blurController.SetDownsample(downsample);
+        blurController.SetBlur(blurRadius, iterations);
+        blurController.RenderBlur();
 
-        // 첫 블러를 굽기 전에 프록시를 현재 소스 상태로 맞춘다.
-        Sync();
+        ApplyBlurTextureToOverlay();
 
-        if (blurController != null)
-        {
-            blurController.SetDownsample(downsample);
-            blurController.SetBlur(blurRadius, iterations);
-            blurController.ForceRenderBlur();
-        }
-
-        ApplyBlurTexture(binding);
         float targetAlpha = Mathf.Clamp01(alpha);
+        bool visible = targetAlpha > 0.001f;
 
-        ApplyBlurTexture(binding);
-        FadeOverlay(binding, targetAlpha, duration);
-        SetFrostedGlassMaskVisible(targetAlpha > 0.001f, duration);
-
-        // 디포커스가 떠 있는 동안만 추적 시작. 배경이 정지면 매 프레임 비용은 Sync(코너 투영)뿐.
-        _isTracking = targetAlpha > 0.001f;
+        SetOverlayVisible(visible, duration, targetAlpha);
+        _isTracking = visible;
     }
 
     public void HideDefocus(string rigKey, float duration)
     {
-        RigBinding binding = ResolveBinding(rigKey);
+        EnsureOverlay();
 
-        if (binding == null)
-            return;
-
-        // 마지막 블러 프레임을 고정. 페이드 아웃은 구워둔 RT에 알파만 애니메이션한다.
         _isTracking = false;
-
-        FadeOverlay(binding, 0f, duration);
-        SetFrostedGlassMaskVisible(false, duration);
+        SetOverlayVisible(false, duration);
     }
 
-    public void ClearDefocusImmediate(string rigKey)
+    private void EnsureOverlay()
     {
-        _isTracking = false;
-        SetFrostedGlassMaskVisible(false, 0f);
-
-        RigBinding binding = ResolveBinding(rigKey);
-
-        if (binding == null)
+        if (_overlay != null)
             return;
 
-        binding.FadeTween?.Kill();
-        binding.FadeTween = null;
-
-        if (binding.OverlayCanvasGroup != null)
-            binding.OverlayCanvasGroup.alpha = 0f;
-
-        if (binding.OverlayRawImage != null)
-            binding.OverlayRawImage.enabled = false;
+        _overlay = UIManager.Instance.GetUI<PresentationUIRoot>();
+        _overlayCanvasGroup = _overlay.FrostedGlassMaskCanvasGroup;
+        _overlayRawImage = _overlay.FrostedGlassRawImage;
     }
 
-    private bool Sync()
+    private bool SyncCaptureProxies()
     {
         RigBinding active = ResolveBinding(_activeRigKey);
 
-        if (active == null)
+        Image sourceBack = active.Refs.Background_BackLayer_Image;
+        Image sourceFront = active.Refs.Background_FrontLayer_Image;
+
+        if (!IsCaptureSourceAlive(sourceBack, sourceFront))
         {
-            ClearProxy(captureBackLayerImage);
-            ClearProxy(captureFrontLayerImage);
+            StopTrackingAndClearActiveBinding();
             return false;
         }
 
         bool changed = false;
-        changed |= SyncPair(active.Refs.Background_BackLayer_Image, captureBackLayerImage);
-        changed |= SyncPair(active.Refs.Background_FrontLayer_Image, captureFrontLayerImage);
-        return changed;
-    }
 
-    private bool SyncPair(Image source, Image proxy)
-    {
-        if (proxy == null)
-            return false;
+        changed |= SyncGraphicState(sourceBack, captureBackLayerImage);
+        changed |= SyncProxyRectToSource(sourceBack.rectTransform, captureBackLayerImage.rectTransform);
 
-        if (source == null)
-        {
-            bool wasVisible = proxy.enabled || proxy.sprite != null;
-            ClearProxy(proxy);
-            return wasVisible;
-        }
+        changed |= SyncGraphicState(sourceFront, captureFrontLayerImage);
+        changed |= SyncProxyRectToSource(sourceFront.rectTransform, captureFrontLayerImage.rectTransform);
 
-        bool changed = SyncGraphicState(source, proxy);
-        changed |= SyncProxyRectToSource(source.rectTransform, proxy.rectTransform);
         return changed;
     }
 
     private bool SyncGraphicState(Image source, Image proxy)
     {
-        bool changed = false;
-
         bool sourceVisible =
-            source != null &&
             source.enabled &&
             source.gameObject.activeInHierarchy &&
             source.sprite != null;
+
+        bool changed = false;
 
         if (proxy.enabled != sourceVisible)
         {
@@ -232,70 +164,37 @@ public sealed class UIBackgroundRigBlurRuntime : MonoBehaviour, IBackgroundRigBl
         if (!sourceVisible)
             return changed;
 
-        if (disableRaycastTarget)
-            proxy.raycastTarget = false;
-
-        if (copySprite && proxy.sprite != source.sprite)
+        if (proxy.sprite != source.sprite)
         {
             proxy.sprite = source.sprite;
             changed = true;
         }
 
-        if (copyColor)
+        if (proxy.color != source.color)
         {
-            Color color = source.color;
-
-            if (multiplyInheritedCanvasGroupAlpha)
-                color.a *= CalculateInheritedCanvasGroupAlpha(source.transform);
-
-            if (proxy.color != color)
-            {
-                proxy.color = color;
-                changed = true;
-            }
+            proxy.color = source.color;
+            changed = true;
         }
 
-        if (copyMaterial)
-            proxy.material = source.material;
-        else
-            proxy.material = null;
-
-        if (copyImageType)
+        if (proxy.preserveAspect != source.preserveAspect)
         {
-            proxy.type = source.type;
-            proxy.fillMethod = source.fillMethod;
-            proxy.fillOrigin = source.fillOrigin;
-            proxy.fillAmount = source.fillAmount;
-            proxy.fillClockwise = source.fillClockwise;
-            proxy.pixelsPerUnitMultiplier = source.pixelsPerUnitMultiplier;
-        }
-
-        if (copyPreserveAspect)
             proxy.preserveAspect = source.preserveAspect;
+            changed = true;
+        }
 
         return changed;
     }
 
     private bool SyncProxyRectToSource(RectTransform sourceRect, RectTransform proxyRect)
     {
-        if (sourceRect == null || proxyRect == null || captureRoot == null)
-            return false;
-
         sourceRect.GetWorldCorners(_sourceWorldCorners);
-
-        Camera sourceCamera = GetCanvasCamera(sourceCanvas);
-        Camera captureCamera = GetCanvasCamera(captureCanvas);
 
         for (int i = 0; i < 4; i++)
         {
-            Vector2 screenPoint = RectTransformUtility.WorldToScreenPoint(
-                sourceCamera,
-                _sourceWorldCorners[i]);
-
             RectTransformUtility.ScreenPointToLocalPointInRectangle(
                 captureRoot,
-                screenPoint,
-                captureCamera,
+                _sourceWorldCorners[i],
+                captureCanvas.worldCamera,
                 out _captureLocalCorners[i]);
         }
 
@@ -305,7 +204,6 @@ public sealed class UIBackgroundRigBlurRuntime : MonoBehaviour, IBackgroundRigBl
         Vector2 bottomRight = _captureLocalCorners[3];
 
         Vector2 center = (bottomLeft + topLeft + topRight + bottomRight) * 0.25f;
-
         float width = Vector2.Distance(bottomLeft, bottomRight);
         float height = Vector2.Distance(bottomLeft, topLeft);
 
@@ -318,7 +216,6 @@ public sealed class UIBackgroundRigBlurRuntime : MonoBehaviour, IBackgroundRigBl
             angle = Mathf.Atan2(rightDirection.y, rightDirection.x) * Mathf.Rad2Deg;
         }
 
-        // 직전 프레임(=프록시 현재 값)과 비교해 변경 여부 판단. 임계치로 서브픽셀 지터 흡수.
         bool changed =
             (proxyRect.anchoredPosition - center).sqrMagnitude > 0.01f ||
             Mathf.Abs(proxyRect.sizeDelta.x - width) > 0.05f ||
@@ -336,217 +233,98 @@ public sealed class UIBackgroundRigBlurRuntime : MonoBehaviour, IBackgroundRigBl
         return changed;
     }
 
-    private void SetupOverlay(RigBinding binding)
+    private void ApplyBlurTextureToOverlay()
     {
-        BackgroundRigRefs refs = binding.Refs;
-
-        RawImage rawImage = refs.Background_DefocusOverlay_RawImage;
-        RectTransform overlayRoot = refs.Background_DefocusOverlay_Root;
-
-        if (rawImage == null || overlayRoot == null)
-            return;
-
-        CanvasGroup canvasGroup = overlayRoot.GetComponent<CanvasGroup>();
-        if (canvasGroup == null)
-            canvasGroup = overlayRoot.gameObject.AddComponent<CanvasGroup>();
-
-        rawImage.raycastTarget = false;
-        rawImage.color = Color.white;
-        rawImage.enabled = false;
-
-        canvasGroup.alpha = 0f;
-
-        binding.OverlayRawImage = rawImage;
-        binding.OverlayCanvasGroup = canvasGroup;
-
-        ApplyBlurTexture(binding);
-    }
-
-    private void ApplyBlurTexture(RigBinding binding)
-    {
-        if (binding == null || binding.OverlayRawImage == null || blurController == null)
+        if (_overlayRawImage == null)
             return;
 
         RenderTexture texture = blurController.BlurredTexture;
-
-        if (texture == null)
+        if (texture == null) 
             return;
 
-        if (binding.OverlayRawImage.texture == texture)
+        if (_overlayRawImage.texture == texture) 
             return;
 
-        binding.OverlayRawImage.texture = texture;
+        _overlayRawImage.texture = texture;
     }
 
-    private void FadeOverlay(RigBinding binding, float targetAlpha, float duration)
+    private void SetOverlayVisible(bool visible, float duration, float visibleAlpha = 1f)
     {
-        if (binding == null || binding.OverlayCanvasGroup == null)
+        if (_overlayCanvasGroup == null || _overlayRawImage == null)
             return;
 
-        binding.FadeTween?.Kill();
-        binding.FadeTween = null;
+        _defocusTween?.Kill();
+        _defocusTween = null;
 
-        if (binding.OverlayRawImage != null)
-            binding.OverlayRawImage.enabled = true;
+        float targetAlpha = visible ? Mathf.Clamp01(visibleAlpha) : 0f;
+
+        _overlayRawImage.raycastTarget = false;
+        _overlayCanvasGroup.blocksRaycasts = false;
+        _overlayCanvasGroup.interactable = false;
+
+        if (visible)
+            _overlayRawImage.enabled = true;
 
         if (duration <= 0f)
         {
-            binding.OverlayCanvasGroup.alpha = targetAlpha;
+            _overlayCanvasGroup.alpha = targetAlpha;
 
-            if (binding.OverlayRawImage != null && targetAlpha <= 0.001f)
-                binding.OverlayRawImage.enabled = false;
+            if (targetAlpha <= 0.001f)
+                _overlayRawImage.enabled = false;
 
             return;
         }
 
-        binding.FadeTween = binding.OverlayCanvasGroup
+        _defocusTween = _overlayCanvasGroup
             .DOFade(targetAlpha, duration)
             .SetEase(Ease.OutCubic)
             .OnComplete(() =>
             {
-                if (binding.OverlayRawImage != null && targetAlpha <= 0.001f)
-                    binding.OverlayRawImage.enabled = false;
+                if (targetAlpha <= 0.001f)
+                    _overlayRawImage.enabled = false;
             });
     }
     
-    private void SetFrostedGlassMaskVisible(bool visible, float duration)
+    private bool IsCaptureSourceAlive(Image sourceBack, Image sourceFront)
     {
-        if (!controlFrostedGlassMask || frostedGlassMaskCanvasGroup == null)
-            return;
+        return sourceBack && sourceFront;
+    }
+    
+    private void StopTrackingAndClearActiveBinding()
+    {
+        string deadRigKey = _activeRigKey;
 
-        frostedGlassMaskCanvasGroup.DOKill(false);
+        _isTracking = false;
+        _activeRigKey = null;
 
-        float targetAlpha = visible ? 1f : 0f;
+        if (!string.IsNullOrEmpty(deadRigKey))
+            _bindings.Remove(deadRigKey);
 
-        frostedGlassMaskCanvasGroup.blocksRaycasts = visible;
-        frostedGlassMaskCanvasGroup.interactable = visible;
+        ResetCaptureProxies();
+        SetOverlayVisible(false, 0f);
+    }
 
-        if (duration <= 0f)
-        {
-            frostedGlassMaskCanvasGroup.alpha = targetAlpha;
-            return;
-        }
+    private void ResetCaptureProxies()
+    {
+        captureBackLayerImage.enabled = false;
+        captureBackLayerImage.sprite = null;
+        captureBackLayerImage.material = null;
 
-        frostedGlassMaskCanvasGroup
-            .DOFade(targetAlpha, duration)
-            .SetEase(Ease.OutCubic)
-            .OnComplete(() =>
-            {
-                bool isVisible = targetAlpha > 0.001f;
-                frostedGlassMaskCanvasGroup.blocksRaycasts = isVisible;
-                frostedGlassMaskCanvasGroup.interactable = isVisible;
-            });
+        captureFrontLayerImage.enabled = false;
+        captureFrontLayerImage.sprite = null;
+        captureFrontLayerImage.material = null;
     }
 
     private RigBinding ResolveBinding(string rigKey)
     {
-        if (!string.IsNullOrEmpty(rigKey) && _bindings.TryGetValue(rigKey, out RigBinding binding))
-            return binding;
-
-        if (!string.IsNullOrEmpty(_activeRigKey) && _bindings.TryGetValue(_activeRigKey, out binding))
-            return binding;
-
-        return null;
-    }
-
-    private void EnsureCaptureProxyImages()
-    {
-        if (captureRoot == null)
-            return;
-
-        if (captureBackLayerImage == null)
-            captureBackLayerImage = EnsureProxyImage(CaptureBackProxyName);
-
-        if (captureFrontLayerImage == null)
-            captureFrontLayerImage = EnsureProxyImage(CaptureFrontProxyName);
-    }
-
-    private Image EnsureProxyImage(string objectName)
-    {
-        RectTransform existing = FindDirectChild(captureRoot, objectName);
-
-        if (existing == null)
-        {
-            GameObject go = new GameObject(objectName, typeof(RectTransform), typeof(Image));
-            existing = (RectTransform)go.transform;
-            existing.SetParent(captureRoot, false);
-            existing.gameObject.layer = captureRoot.gameObject.layer;
-        }
-
-        Image image = existing.GetComponent<Image>();
-        if (image == null)
-            image = existing.gameObject.AddComponent<Image>();
-
-        image.raycastTarget = false;
-        image.enabled = false;
-
-        return image;
-    }
-
-    private RectTransform FindDirectChild(RectTransform parent, string childName)
-    {
-        if (parent == null)
-            return null;
-
-        for (int i = 0; i < parent.childCount; i++)
-        {
-            Transform child = parent.GetChild(i);
-            if (child.name == childName)
-                return child as RectTransform;
-        }
-
-        return null;
-    }
-
-    private float CalculateInheritedCanvasGroupAlpha(Transform source)
-    {
-        float alpha = 1f;
-
-        Transform current = source;
-        while (current != null)
-        {
-            CanvasGroup group = current.GetComponent<CanvasGroup>();
-            if (group != null)
-                alpha *= group.alpha;
-
-            if (sourceCanvas != null && current == sourceCanvas.transform)
-                break;
-
-            current = current.parent;
-        }
-
-        return alpha;
-    }
-
-    private Camera GetCanvasCamera(Canvas canvas)
-    {
-        if (canvas == null)
-            return null;
-
-        if (canvas.renderMode == RenderMode.ScreenSpaceOverlay)
-            return null;
-
-        return canvas.worldCamera;
-    }
-
-    private void ClearProxy(Image proxy)
-    {
-        if (proxy == null)
-            return;
-
-        proxy.enabled = false;
-        proxy.sprite = null;
-        proxy.material = null;
+        string key = string.IsNullOrEmpty(rigKey) ? _activeRigKey : rigKey;
+        return _bindings[key];
     }
 
     private sealed class RigBinding
     {
         public readonly string RigKey;
         public readonly BackgroundRigRefs Refs;
-
-        public RawImage OverlayRawImage;
-        public CanvasGroup OverlayCanvasGroup;
-        public Tween FadeTween;
 
         public RigBinding(string rigKey, BackgroundRigRefs refs)
         {

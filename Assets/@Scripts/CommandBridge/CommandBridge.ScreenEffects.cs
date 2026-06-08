@@ -222,7 +222,7 @@ public sealed partial class YarnCommandBridge
     }
 
     private void EnqueueScreenNoisePresetSpec(
-        string presetKey,
+        string presetKey = "default",
         float intensity = 1f,
         float duration = 0.35f)
     {
