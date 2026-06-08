@@ -12,13 +12,11 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler<string, float, float>("screen_vignette", EnqueueScreenVignettePresetSpec);
         runner.AddCommandHandler<float>("screen_vignette_clear", EnqueueScreenVignetteClearSpec);
         runner.AddCommandHandler<float, float>("screen_letterbox", EnqueueScreenLetterBoxSpec);
-        runner.AddCommandHandler<float, float, float, float, float, float, float>("screen_vignette_custom",
-            EnqueueScreenVignetteCustomSpec);
+        runner.AddCommandHandler<float, float, float, float, float, float, float>("screen_vignette_custom", EnqueueScreenVignetteCustomSpec);
 
         runner.AddCommandHandler<string, float, float>("screen_noise", EnqueueScreenNoisePresetSpec);
         runner.AddCommandHandler<float>("screen_noise_clear", EnqueueScreenNoiseClearSpec);
-        runner.AddCommandHandler<float, float, float, float, float, float>("screen_noise_custom",
-            EnqueueScreenNoiseCustomSpec);
+        runner.AddCommandHandler<float, float, float, float, float, float>("screen_noise_custom", EnqueueScreenNoiseCustomSpec);
     }
 
     private void EnqueueScreenFlashSpec(float amount = 1f, float duration = 0.16f)

@@ -29,7 +29,10 @@ public sealed class UIStageBlurController : MonoBehaviour
     [SerializeField, Range(0f, 8f)] private float blurRadius = 3f;
 
     [Header("Runtime")]
-    [SerializeField] private bool renderEveryFrame = true;
+    // 캡처 카메라를 이 컨트롤러가 수동으로 구동한다(평소엔 렌더하지 않음).
+    [SerializeField] private bool controlCaptureCamera = true;
+    // 디버그 프리뷰용. 게임플레이는 ForceRenderBlur()로 온디맨드 구동한다.
+    [SerializeField] private bool renderEveryFrame = false;
 
     private RenderTexture _blurA;
     private RenderTexture _blurB;
@@ -51,6 +54,7 @@ public sealed class UIStageBlurController : MonoBehaviour
     {
         EnsureRenderTextures();
         ApplyPreviewTexture();
+        ApplyCaptureCameraControl();
     }
 
     private void OnDisable()
@@ -77,6 +81,7 @@ public sealed class UIStageBlurController : MonoBehaviour
             return;
 
         captureCamera = camera;
+        ApplyCaptureCameraControl();
         RecreateRenderTextures();
     }
 
@@ -101,6 +106,7 @@ public sealed class UIStageBlurController : MonoBehaviour
         RecreateRenderTextures();
     }
 
+    // 온디맨드 구동 진입점: 캡처 카메라를 한 번 렌더한 뒤 블러를 굽는다.
     public void ForceRenderBlur()
     {
         RenderBlur();
@@ -114,6 +120,10 @@ public sealed class UIStageBlurController : MonoBehaviour
 
     private void RenderBlur()
     {
+        // 수동 구동이면 이 시점에만 캡처 카메라를 렌더해 source RT를 갱신한다.
+        if (controlCaptureCamera && captureCamera != null)
+            captureCamera.Render();
+
         RenderTexture source = GetSourceTexture();
 
         if (source == null || blurMaterial == null)
@@ -142,6 +152,15 @@ public sealed class UIStageBlurController : MonoBehaviour
             Graphics.Blit(_blurA, _blurB, blurMaterial, 0);
             Graphics.Blit(_blurB, _blurA, blurMaterial, 1);
         }
+    }
+
+    private void ApplyCaptureCameraControl()
+    {
+        if (!controlCaptureCamera || captureCamera == null)
+            return;
+
+        // 평소엔 매 프레임 렌더하지 않도록 비활성화하고, RenderBlur에서 수동 Render()로만 구동한다.
+        captureCamera.enabled = false;
     }
 
     private RenderTexture GetSourceTexture()

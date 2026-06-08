@@ -19,6 +19,10 @@ public sealed class UIBackgroundRigBlurRuntime : MonoBehaviour, IBackgroundRigBl
 
     [Header("Blur")]
     [SerializeField] private UIStageBlurController blurController;
+    
+    [Header("External Presentation Mask")]
+    [SerializeField] private CanvasGroup frostedGlassMaskCanvasGroup;
+    [SerializeField] private bool controlFrostedGlassMask = true;
 
     [Header("Copy Options")]
     [SerializeField] private bool copySprite = true;
@@ -29,14 +33,14 @@ public sealed class UIBackgroundRigBlurRuntime : MonoBehaviour, IBackgroundRigBl
     [SerializeField] private bool copyPreserveAspect = true;
     [SerializeField] private bool disableRaycastTarget = true;
 
-    [Header("Runtime")]
-    [SerializeField] private bool syncEveryFrame = true;
-
     private readonly Dictionary<string, RigBinding> _bindings = new();
     private readonly Vector3[] _sourceWorldCorners = new Vector3[4];
     private readonly Vector2[] _captureLocalCorners = new Vector2[4];
 
     private string _activeRigKey;
+
+    // 디포커스가 떠 있는 동안에만 소스를 미러링/재블러한다. 꺼져 있으면 파이프라인 전체 정지.
+    private bool _isTracking;
 
     private void Awake()
     {
@@ -46,6 +50,7 @@ public sealed class UIBackgroundRigBlurRuntime : MonoBehaviour, IBackgroundRigBl
     private void OnEnable()
     {
         EnsureCaptureProxyImages();
+        SetFrostedGlassMaskVisible(false, 0f);
         Sync();
     }
 
@@ -57,10 +62,22 @@ public sealed class UIBackgroundRigBlurRuntime : MonoBehaviour, IBackgroundRigBl
 
     private void LateUpdate()
     {
-        if (!syncEveryFrame)
+        if (!_isTracking)
             return;
 
-        Sync();
+        RigBinding active = ResolveBinding(_activeRigKey);
+        if (active == null)
+            return;
+
+        // Sync는 변경 여부를 반환한다. 정지 프레임이면 false → 캡처/블러 비용 0.
+        bool changed = Sync();
+        if (!changed)
+            return;
+
+        if (blurController != null)
+            blurController.ForceRenderBlur();
+
+        ApplyBlurTexture(active);
     }
 
     public void Bind(string rigKey, BackgroundRigRefs refs)
@@ -83,6 +100,8 @@ public sealed class UIBackgroundRigBlurRuntime : MonoBehaviour, IBackgroundRigBl
 
     public void ClearSources()
     {
+        _isTracking = false;
+
         _activeRigKey = null;
         _bindings.Clear();
 
@@ -105,6 +124,9 @@ public sealed class UIBackgroundRigBlurRuntime : MonoBehaviour, IBackgroundRigBl
 
         _activeRigKey = binding.RigKey;
 
+        // 첫 블러를 굽기 전에 프록시를 현재 소스 상태로 맞춘다.
+        Sync();
+
         if (blurController != null)
         {
             blurController.SetDownsample(downsample);
@@ -113,7 +135,14 @@ public sealed class UIBackgroundRigBlurRuntime : MonoBehaviour, IBackgroundRigBl
         }
 
         ApplyBlurTexture(binding);
-        FadeOverlay(binding, Mathf.Clamp01(alpha), duration);
+        float targetAlpha = Mathf.Clamp01(alpha);
+
+        ApplyBlurTexture(binding);
+        FadeOverlay(binding, targetAlpha, duration);
+        SetFrostedGlassMaskVisible(targetAlpha > 0.001f, duration);
+
+        // 디포커스가 떠 있는 동안만 추적 시작. 배경이 정지면 매 프레임 비용은 Sync(코너 투영)뿐.
+        _isTracking = targetAlpha > 0.001f;
     }
 
     public void HideDefocus(string rigKey, float duration)
@@ -123,11 +152,18 @@ public sealed class UIBackgroundRigBlurRuntime : MonoBehaviour, IBackgroundRigBl
         if (binding == null)
             return;
 
+        // 마지막 블러 프레임을 고정. 페이드 아웃은 구워둔 RT에 알파만 애니메이션한다.
+        _isTracking = false;
+
         FadeOverlay(binding, 0f, duration);
+        SetFrostedGlassMaskVisible(false, duration);
     }
 
     public void ClearDefocusImmediate(string rigKey)
     {
+        _isTracking = false;
+        SetFrostedGlassMaskVisible(false, 0f);
+
         RigBinding binding = ResolveBinding(rigKey);
 
         if (binding == null)
@@ -143,7 +179,7 @@ public sealed class UIBackgroundRigBlurRuntime : MonoBehaviour, IBackgroundRigBl
             binding.OverlayRawImage.enabled = false;
     }
 
-    private void Sync()
+    private bool Sync()
     {
         RigBinding active = ResolveBinding(_activeRigKey);
 
@@ -151,47 +187,59 @@ public sealed class UIBackgroundRigBlurRuntime : MonoBehaviour, IBackgroundRigBl
         {
             ClearProxy(captureBackLayerImage);
             ClearProxy(captureFrontLayerImage);
-            return;
+            return false;
         }
 
-        SyncPair(active.Refs.Background_BackLayer_Image, captureBackLayerImage);
-        SyncPair(active.Refs.Background_FrontLayer_Image, captureFrontLayerImage);
-        ApplyBlurTexture(active);
+        bool changed = false;
+        changed |= SyncPair(active.Refs.Background_BackLayer_Image, captureBackLayerImage);
+        changed |= SyncPair(active.Refs.Background_FrontLayer_Image, captureFrontLayerImage);
+        return changed;
     }
 
-    private void SyncPair(Image source, Image proxy)
+    private bool SyncPair(Image source, Image proxy)
     {
         if (proxy == null)
-            return;
+            return false;
 
         if (source == null)
         {
+            bool wasVisible = proxy.enabled || proxy.sprite != null;
             ClearProxy(proxy);
-            return;
+            return wasVisible;
         }
 
-        SyncGraphicState(source, proxy);
-        SyncProxyRectToSource(source.rectTransform, proxy.rectTransform);
+        bool changed = SyncGraphicState(source, proxy);
+        changed |= SyncProxyRectToSource(source.rectTransform, proxy.rectTransform);
+        return changed;
     }
 
-    private void SyncGraphicState(Image source, Image proxy)
+    private bool SyncGraphicState(Image source, Image proxy)
     {
+        bool changed = false;
+
         bool sourceVisible =
             source != null &&
             source.enabled &&
             source.gameObject.activeInHierarchy &&
             source.sprite != null;
 
-        proxy.enabled = sourceVisible;
+        if (proxy.enabled != sourceVisible)
+        {
+            proxy.enabled = sourceVisible;
+            changed = true;
+        }
 
         if (!sourceVisible)
-            return;
+            return changed;
 
         if (disableRaycastTarget)
             proxy.raycastTarget = false;
 
-        if (copySprite)
+        if (copySprite && proxy.sprite != source.sprite)
+        {
             proxy.sprite = source.sprite;
+            changed = true;
+        }
 
         if (copyColor)
         {
@@ -200,7 +248,11 @@ public sealed class UIBackgroundRigBlurRuntime : MonoBehaviour, IBackgroundRigBl
             if (multiplyInheritedCanvasGroupAlpha)
                 color.a *= CalculateInheritedCanvasGroupAlpha(source.transform);
 
-            proxy.color = color;
+            if (proxy.color != color)
+            {
+                proxy.color = color;
+                changed = true;
+            }
         }
 
         if (copyMaterial)
@@ -220,12 +272,14 @@ public sealed class UIBackgroundRigBlurRuntime : MonoBehaviour, IBackgroundRigBl
 
         if (copyPreserveAspect)
             proxy.preserveAspect = source.preserveAspect;
+
+        return changed;
     }
 
-    private void SyncProxyRectToSource(RectTransform sourceRect, RectTransform proxyRect)
+    private bool SyncProxyRectToSource(RectTransform sourceRect, RectTransform proxyRect)
     {
         if (sourceRect == null || proxyRect == null || captureRoot == null)
-            return;
+            return false;
 
         sourceRect.GetWorldCorners(_sourceWorldCorners);
 
@@ -264,6 +318,13 @@ public sealed class UIBackgroundRigBlurRuntime : MonoBehaviour, IBackgroundRigBl
             angle = Mathf.Atan2(rightDirection.y, rightDirection.x) * Mathf.Rad2Deg;
         }
 
+        // 직전 프레임(=프록시 현재 값)과 비교해 변경 여부 판단. 임계치로 서브픽셀 지터 흡수.
+        bool changed =
+            (proxyRect.anchoredPosition - center).sqrMagnitude > 0.01f ||
+            Mathf.Abs(proxyRect.sizeDelta.x - width) > 0.05f ||
+            Mathf.Abs(proxyRect.sizeDelta.y - height) > 0.05f ||
+            Mathf.Abs(Mathf.DeltaAngle(proxyRect.localEulerAngles.z, angle)) > 0.05f;
+
         proxyRect.anchorMin = new Vector2(0.5f, 0.5f);
         proxyRect.anchorMax = new Vector2(0.5f, 0.5f);
         proxyRect.pivot = new Vector2(0.5f, 0.5f);
@@ -271,6 +332,8 @@ public sealed class UIBackgroundRigBlurRuntime : MonoBehaviour, IBackgroundRigBl
         proxyRect.sizeDelta = new Vector2(width, height);
         proxyRect.localRotation = Quaternion.Euler(0f, 0f, angle);
         proxyRect.localScale = Vector3.one;
+
+        return changed;
     }
 
     private void SetupOverlay(RigBinding binding)
@@ -343,6 +406,35 @@ public sealed class UIBackgroundRigBlurRuntime : MonoBehaviour, IBackgroundRigBl
             {
                 if (binding.OverlayRawImage != null && targetAlpha <= 0.001f)
                     binding.OverlayRawImage.enabled = false;
+            });
+    }
+    
+    private void SetFrostedGlassMaskVisible(bool visible, float duration)
+    {
+        if (!controlFrostedGlassMask || frostedGlassMaskCanvasGroup == null)
+            return;
+
+        frostedGlassMaskCanvasGroup.DOKill(false);
+
+        float targetAlpha = visible ? 1f : 0f;
+
+        frostedGlassMaskCanvasGroup.blocksRaycasts = visible;
+        frostedGlassMaskCanvasGroup.interactable = visible;
+
+        if (duration <= 0f)
+        {
+            frostedGlassMaskCanvasGroup.alpha = targetAlpha;
+            return;
+        }
+
+        frostedGlassMaskCanvasGroup
+            .DOFade(targetAlpha, duration)
+            .SetEase(Ease.OutCubic)
+            .OnComplete(() =>
+            {
+                bool isVisible = targetAlpha > 0.001f;
+                frostedGlassMaskCanvasGroup.blocksRaycasts = isVisible;
+                frostedGlassMaskCanvasGroup.interactable = isVisible;
             });
     }
 

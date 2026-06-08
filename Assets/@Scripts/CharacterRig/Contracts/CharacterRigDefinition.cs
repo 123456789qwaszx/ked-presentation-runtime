@@ -276,6 +276,10 @@ public sealed class CharacterRigRefs
 {
     public RectTransform RigRoot { get; private set; }
     public CharacterRigRefs(RectTransform rigRoot) => RigRoot = rigRoot;
+    
+    // Visual effect: CharacterPortraitSprite_Image에 바인딩된 runtime material 소유자.
+    // SetupCharRigCommand가 생성, CharacterRigRegistry.DestroyRig가 Dispose.
+    public CharacterRigVisualEffectController VisualEffect;
 
     // Slot axis - stage placement
     public RectTransform CharSlot_Anchor;

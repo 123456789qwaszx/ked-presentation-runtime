@@ -29,6 +29,13 @@ public sealed class CharVisualFocusCommandSpecCharR : CharacterRigCommandSpecBas
     [Range(0f, 1f)]
     public float intensity = 1f;
 
+    [Header("Focus / Defocus Preset Amounts")]
+    [Tooltip("프로젝트 고정값. 한번 정하면 완료까지 바뀌지 않으므로 spec 기본값으로 둔다.")]
+    [Range(0f, 1f)] public float focusOuterRimAmount = 0f;
+    [Range(0f, 1f)] public float focusInnerRimAmount = 0.25f;
+    [Range(0f, 1f)] public float defocusDimAmount = 0.45f;
+    [Range(0f, 1f)] public float defocusBlurAmount = 0.25f;
+
     [Header("Custom Values")]
     [Range(0f, 1f)] public float dim = 0f;
 
@@ -45,9 +52,8 @@ public sealed class CharVisualFocusCommandSpecCharR : CharacterRigCommandSpecBas
     public float duration = 0.25f;
     public Ease ease = Ease.OutCubic;
 
-    [Header("Options")]
-    [Tooltip("체크하면 기존 Visual Focus Tween을 끝내고 committed state에서 시작합니다.")]
-    public bool killTween = true;
+    // focus는 굳이 killTween 시작위치를 따지지 않고, 특정 값에 도달만 하면 되기에 killTween이 필요없음.
+    public bool killTween = false;
 }
 
 public sealed class CharVisualFocusCommandCharR : CommandBase
@@ -79,8 +85,8 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
         if (_controller == null)
             yield break;
 
-        if (_spec.killTween)
-            _controller.DOKill(true);
+        // if (_spec.killTween)
+        //     _controller.DOKill(true);
 
         _fromState = CaptureCurrentState();
         _destState = BuildDestState();
@@ -108,7 +114,6 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
                 _spec.duration)
             .SetEase(_spec.ease)
             .SetUpdate(true)
-            .SetTarget(_controller)
             .OnComplete(() =>
             {
                 if (!_canCommitFinalState || _controller == null)
@@ -147,7 +152,7 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
             return;
 
         _tween?.Kill(false);
-        _controller.DOKill(false);
+        //_controller.DOKill(false);
 
         CommitFinalState();
     }
@@ -156,40 +161,16 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
     {
         _resolveAttempted = true;
 
-        CharacterRigRefs rigRefs =
-            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(
-                scope,
-                _spec.slotKey);
-
-        if (rigRefs == null)
-        {
-            Debug.LogWarning(
-                $"[CharVisualFocusCommandCharR] Failed to resolve CharacterRigRefs. " +
-                $"slotKey='{_spec.slotKey}'.");
-            return;
-        }
-
-        if (rigRefs.CharacterPortraitSprite_Image == null)
-        {
-            Debug.LogWarning(
-                $"[CharVisualFocusCommandCharR] CharacterPortraitSprite_Image is null. " +
-                $"slotKey='{_spec.slotKey}'.");
-            return;
-        }
-
-        _controller =
-            rigRefs.CharacterPortraitSprite_Image
-                .GetComponent<CharacterRigVisualEffectController>();
+        CharacterRigRefs rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
+        _controller = rigRefs?.VisualEffect;
 
         if (_controller != null)
             return;
 
         Debug.LogWarning(
-            $"[CharVisualFocusCommandCharR] CharacterRigVisualEffectController is missing on " +
-            $"'{rigRefs.CharacterPortraitSprite_Image.name}'. " +
-            $"Attach it to CharacterPortraitSprite_Image and assign the Canvas Shader Graph material. " +
-            $"slotKey='{_spec.slotKey}'.",
-            rigRefs.CharacterPortraitSprite_Image);
+            $"[CharVisualFocusCommandCharR] VisualEffect controller is missing. " +
+            $"SetupCharRig가 컨트롤러를 생성했는지, source material 경로가 맞는지 확인하세요. " +
+            $"slotKey='{_spec.slotKey}'.");
     }
 
     private VisualState CaptureCurrentState()
@@ -212,18 +193,18 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
             case CharacterVisualFocusMode.Focus:
                 return new VisualState(
                     0f,
-                    _controller.FocusOuterRimAmount * intensity,
-                    _controller.FocusInnerRimAmount * intensity,
+                    _spec.focusOuterRimAmount * intensity,
+                    _spec.focusInnerRimAmount * intensity,
                     0f,
                     _controller.OuterRimColor,
                     _controller.InnerRimColor);
 
             case CharacterVisualFocusMode.Defocus:
                 return new VisualState(
-                    _controller.DefocusDimAmount * intensity,
+                    _spec.defocusDimAmount * intensity,
                     0f,
                     0f,
-                    _controller.DefocusBlurAmount * intensity,
+                    _spec.defocusBlurAmount * intensity,
                     _controller.OuterRimColor,
                     _controller.InnerRimColor);
 
@@ -258,7 +239,7 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
 
     private void CommitFinalState()
     {
-        _tween?.Kill(false);
+        _tween?.Kill(true);
 
         if (_controller != null)
             ApplyState(_destState);

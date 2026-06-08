@@ -63,7 +63,14 @@ public sealed class CharacterRigRegistry
 
     private static void DestroyRig(CharacterRigRefs rigRefs)
     {
-        if (rigRefs?.RigRoot == null)
+        if (rigRefs == null)
+            return;
+
+        // runtime material 명시적 회수. RigRoot가 이미 파괴됐어도 material 누수를 막기 위해 먼저 처리.
+        rigRefs.VisualEffect?.Dispose();
+        rigRefs.VisualEffect = null;
+
+        if (rigRefs.RigRoot == null)
             return;
 
         KillTweenOnHierarchy(rigRefs.RigRoot);
