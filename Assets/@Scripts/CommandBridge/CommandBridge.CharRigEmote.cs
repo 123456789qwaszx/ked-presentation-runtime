@@ -1,221 +1,430 @@
+using DG.Tweening;
+using UnityEngine;
+
 public sealed partial class YarnCommandBridge : InlineEventMarkupHandler.IInlineEmojiHost
 {
-    private const string EmojiSlot00 = "0";
-    private const string EmojiSlot01 = "1";
-    private const string EmojiSlot02 = "2";
-
-    private enum EmojiEffect
-    {
-        Pop,
-        Reveal,
-        Conceal
-    }
-
     public void PlayEmojiCue(string cue)
     {
-        string characterKey = _vnRuntimeStateProvider != null
-            ? _vnRuntimeStateProvider.CurrentCharacterKey
-            : "";
-
-        if (string.IsNullOrWhiteSpace(characterKey))
-            return;
-
-        if (string.IsNullOrWhiteSpace(cue))
-        {
-            HideInlineEmojiByCharacterNow(characterKey);
-            return;
-        }
-
-        PlayInlineEmojiByCharacterNow(characterKey, cue);
+        // string characterKey = _vnRuntimeStateProvider != null
+        //     ? _vnRuntimeStateProvider.CurrentCharacterKey
+        //     : "";
+        //
+        // if (string.IsNullOrWhiteSpace(characterKey))
+        //     return;
+        //
+        // if (string.IsNullOrWhiteSpace(cue))
+        // {
+        //     EnqueueEmojiHideSpec(characterKey);
+        //     return;
+        // }
+        //
+        // EnqueueEmojiPopSpec(characterKey, cue);
     }
 
-    private SetCharacterEmojiCommandSpecCharR BuildSetCharacterEmojiSpec(
+    // ----------------------------------------------------------------------
+    // Public Yarn command handlers
+    // ----------------------------------------------------------------------
+
+    // <<emoji igna 19>>
+    private void EnqueueEmojiPopSpec(string roleKey, string emojiKey)
+    {
+        Collect(BuildSetEmojiSpec(
+            roleKey,
+            emojiKey,
+            initialReveal: 0f));
+
+        // Reveal과 scale overshoot를 동시에 시작한다.
+        Collect(BuildRevealEmojiSpec(
+            roleKey,
+            fromReveal: 0f,
+            toReveal: 1f,
+            duration: 0.8f,
+            ease: Ease.OutCubic,
+            wait: false));
+
+        // 한 번 부드럽게 커졌다가 돌아오는 기본 Pop.
+        Collect(BuildEmojiScaleToSpec(
+            roleKey,
+            xyScale: 1.18f,
+            duration: 0.28f,
+            ease: Ease.OutBack,
+            wait: true,
+            killTween: true));
+
+        Collect(BuildEmojiScaleToSpec(
+            roleKey,
+            xyScale: 1.0f,
+            duration: 0.52f,
+            ease: Ease.OutCubic,
+            wait: true,
+            killTween: true));
+    }
+
+    // <<emoji_drop igna 19>>
+    private void EnqueueEmojiDropSpec(string roleKey, string emojiKey)
+    {
+        Collect(BuildSetEmojiSpec(
+            roleKey,
+            emojiKey,
+            initialReveal: 0f));
+
+        Collect(BuildRevealEmojiSpec(
+            roleKey,
+            fromReveal: 0f,
+            toReveal: 1f,
+            duration: 0.8f,
+            ease: Ease.OutCubic,
+            wait: false));
+
+        // 위에서 툭 내려오며 정착.
+        Collect(BuildEmojiSlideInSpec(
+            roleKey,
+            direction: CharRigDirection.Up,
+            distance: 90f,
+            duration: 0.8f,
+            ease: Ease.OutBack,
+            punch: 0f,
+            wait: true,
+            killTween: true));
+    }
+
+    // <<emoji_shock igna 19>>
+    private void EnqueueEmojiShockSpec(string roleKey, string emojiKey)
+    {
+        Collect(BuildSetEmojiSpec(
+            roleKey,
+            emojiKey,
+            initialReveal: 0f));
+
+        Collect(BuildRevealEmojiSpec(
+            roleKey,
+            fromReveal: 0f,
+            toReveal: 1f,
+            duration: 0.7f,
+            ease: Ease.OutCubic,
+            wait: false));
+
+        // 위치 jolt와 scale overshoot를 동시에 시작한다.
+        Collect(BuildEmojiJoltSpec(
+            roleKey,
+            strength: 20f,
+            duration: 0.75f,
+            wait: false));
+
+        Collect(BuildEmojiScaleToSpec(
+            roleKey,
+            xyScale: 1.28f,
+            duration: 0.24f,
+            ease: Ease.OutBack,
+            wait: true,
+            killTween: true));
+
+        Collect(BuildEmojiScaleToSpec(
+            roleKey,
+            xyScale: 1.0f,
+            duration: 0.46f,
+            ease: Ease.OutCubic,
+            wait: true,
+            killTween: true));
+    }
+
+    // <<emoji_hop igna 19>>
+    private void EnqueueEmojiHopSpec(string roleKey, string emojiKey)
+    {
+        Collect(BuildSetEmojiSpec(
+            roleKey,
+            emojiKey,
+            initialReveal: 0f));
+
+        Collect(BuildRevealEmojiSpec(
+            roleKey,
+            fromReveal: 0f,
+            toReveal: 1f,
+            duration: 0.8f,
+            ease: Ease.OutCubic,
+            wait: false));
+
+        // 작은 감정표현이 머리 위에서 통 하고 한 번 뜨는 느낌.
+        Collect(BuildEmojiHopSpec(
+            roleKey,
+            height: 54f,
+            duration: 0.8f,
+            wait: true));
+    }
+
+    // <<emoji_sway igna 19>>
+    private void EnqueueEmojiSwaySpec(string roleKey, string emojiKey)
+    {
+        Collect(BuildSetEmojiSpec(
+            roleKey,
+            emojiKey,
+            initialReveal: 0f));
+
+        Collect(BuildRevealEmojiSpec(
+            roleKey,
+            fromReveal: 0f,
+            toReveal: 1f,
+            duration: 0.8f,
+            ease: Ease.OutCubic,
+            wait: false));
+
+        // 당황/고민/물음표 계열에 어울리는 기울기 흔들림.
+        Collect(BuildEmojiSwaySpec(
+            roleKey,
+            strength: 9f,
+            duration: 0.8f,
+            cycles: 1,
+            wait: true));
+    }
+
+    // <<emoji_tremble igna 19>>
+    private void EnqueueEmojiTrembleSpec(string roleKey, string emojiKey)
+    {
+        Collect(BuildSetEmojiSpec(
+            roleKey,
+            emojiKey,
+            initialReveal: 0f));
+
+        Collect(BuildRevealEmojiSpec(
+            roleKey,
+            fromReveal: 0f,
+            toReveal: 1f,
+            duration: 0.75f,
+            ease: Ease.OutCubic,
+            wait: false));
+
+        // 공포/분노/불안 계열의 달달 떨림.
+        Collect(BuildEmojiTrembleSpec(
+            roleKey,
+            strength: 6f,
+            duration: 0.8f,
+            frequency: 20f,
+            wait: true));
+    }
+
+    // <<emoji_set igna 19>>
+    private void EnqueueEmojiSetSpec(string roleKey, string emojiKey)
+    {
+        Collect(BuildSetEmojiSpec(
+            roleKey,
+            emojiKey,
+            initialReveal: 1f));
+    }
+
+    // <<emoji_hide igna>>
+    private void EnqueueEmojiHideSpec(string roleKey)
+    {
+        Collect(BuildSetEmojiSpec(
+            roleKey,
+            "",
+            initialReveal: 0f));
+    }
+
+    // ----------------------------------------------------------------------
+    // Spec builders - EmojiSlot00 only
+    // ----------------------------------------------------------------------
+
+    private SetCharacterEmojiCommandSpecCharR BuildSetEmojiSpec(
         string roleKey,
         string emojiKey,
-        string slotName = EmojiSlot00,
-        float initialReveal = 1f,
-        float fadeIn = 0.08f)
+        float initialReveal)
     {
-        CharacterEmojiSlotParser.TryParse(
-            slotName,
-            out CharacterRigTarget rootTarget,
-            out CharacterRigTarget castTarget,
-            out CharacterRigTarget imageTarget);
-
         return new SetCharacterEmojiCommandSpecCharR
         {
             slotKey = roleKey,
             emojiKey = emojiKey,
 
-            rootTarget = rootTarget,
-            castTarget = castTarget,
-            imageTarget = imageTarget,
+            rootTarget = CharacterRigTarget.CharacterEmojiSlot00_Root,
+            castTarget = CharacterRigTarget.CharacterEmojiSlot00_CastTransform,
+            imageTarget = CharacterRigTarget.EmojiSlot00_Image,
 
+            alpha = 1f,
             initialReveal = initialReveal,
-            fadeIn = fadeIn
-        };
-    }
-
-    private RevealCharacterEmojiCommandSpecCharR BuildRevealCharacterEmojiSpec(
-        string roleKey,
-        string slotName = EmojiSlot00,
-        bool reverse = false,
-        float duration = 1.2f)
-    {
-        CharacterEmojiSlotParser.TryParse(
-            slotName,
-            out _,
-            out _,
-            out CharacterRigTarget imageTarget);
-
-        return new RevealCharacterEmojiCommandSpecCharR
-        {
-            slotKey = roleKey,
-            imageTarget = imageTarget,
-
-            usePresetReveal = false,
-
-            fromReveal = reverse ? 1f : 0f,
-            toReveal = reverse ? 0f : 1f,
-            duration = duration,
 
             wait = false,
             killTween = true
         };
     }
 
-    private void EnqueueSetCharacterEmojiSpec(string roleKey, string emojiKey)
+    private RevealCharacterEmojiCommandSpecCharR BuildRevealEmojiSpec(
+        string roleKey,
+        float fromReveal,
+        float toReveal,
+        float duration,
+        Ease ease,
+        bool wait)
     {
-        Collect(BuildSetCharacterEmojiSpec(
-            roleKey,
-            emojiKey,
-            EmojiSlot00,
-            initialReveal: 1f,
-            fadeIn: 0.08f));
-    }
-
-    private void EnqueueSetCharacterEmojiSlotSpec(string roleKey, string emojiKey, string slotName)
-    {
-        Collect(BuildSetCharacterEmojiSpec(
-            roleKey,
-            emojiKey,
-            slotName,
-            initialReveal: 1f,
-            fadeIn: 0.08f));
-    }
-
-    private void EnqueueEmojiFxSpec(string roleKey, string emojiKey, string effect)
-    {
-        EnqueueEmojiFx(roleKey, emojiKey, EmojiSlot00, effect);
-    }
-
-    private void EnqueueEmojiSlotFxSpec(string roleKey, string emojiKey, string slotName, string effect)
-    {
-        EnqueueEmojiFx(roleKey, emojiKey, slotName, effect);
-    }
-
-    private void EnqueueEmojiFx(string roleKey, string emojiKey, string slotName, string effect)
-    {
-        switch (ParseEmojiEffect(effect))
+        return new RevealCharacterEmojiCommandSpecCharR
         {
-            case EmojiEffect.Reveal:
-                Collect(BuildSetCharacterEmojiSpec(
-                    roleKey,
-                    emojiKey,
-                    slotName,
-                    initialReveal: 0f,
-                    fadeIn: 0f));
+            slotKey = roleKey,
+            imageTarget = CharacterRigTarget.EmojiSlot00_Image,
 
-                Collect(BuildRevealCharacterEmojiSpec(
-                    roleKey,
-                    slotName,
-                    reverse: false,
-                    duration: 0.12f));
-                return;
+            usePresetReveal = false,
 
-            case EmojiEffect.Conceal:
-                Collect(BuildSetCharacterEmojiSpec(
-                    roleKey,
-                    emojiKey,
-                    slotName,
-                    initialReveal: 1f,
-                    fadeIn: 0f));
+            fromReveal = fromReveal,
+            toReveal = toReveal,
+            duration = duration,
+            ease = ease,
 
-                Collect(BuildRevealCharacterEmojiSpec(
-                    roleKey,
-                    slotName,
-                    reverse: true,
-                    duration: 0.12f));
-                return;
-
-            case EmojiEffect.Pop:
-            default:
-                Collect(BuildSetCharacterEmojiSpec(
-                    roleKey,
-                    emojiKey,
-                    slotName,
-                    initialReveal: 1f,
-                    fadeIn: 0.08f));
-                return;
-        }
+            wait = wait,
+            killTween = true
+        };
     }
 
-    private void EnqueueHideCharacterEmojiSpec(string roleKey)
+    private ScaleToCommandSpecCharR BuildEmojiScaleToSpec(
+        string roleKey,
+        float xyScale,
+        float duration,
+        Ease ease,
+        bool wait,
+        bool killTween)
     {
-        Collect(BuildSetCharacterEmojiSpec(roleKey, ""));
-    }
-
-    private void EnqueueHideCharacterEmojiSlotSpec(string roleKey, string slotName)
-    {
-        Collect(BuildSetCharacterEmojiSpec(roleKey, "", slotName));
-    }
-
-    private void EnqueueRevealCharacterEmojiSpec(string roleKey)
-    {
-        Collect(BuildRevealCharacterEmojiSpec(roleKey));
-    }
-
-    private void EnqueueRevealCharacterEmojiSlotSpec(string roleKey, string slotName)
-    {
-        Collect(BuildRevealCharacterEmojiSpec(roleKey, slotName));
-    }
-
-    private void EnqueueConcealCharacterEmojiSpec(string roleKey)
-    {
-        Collect(BuildRevealCharacterEmojiSpec(roleKey, EmojiSlot00, reverse: true));
-    }
-
-    private void EnqueueConcealCharacterEmojiSlotSpec(string roleKey, string slotName)
-    {
-        Collect(BuildRevealCharacterEmojiSpec(roleKey, slotName, reverse: true));
-    }
-
-    private static EmojiEffect ParseEmojiEffect(string effect)
-    {
-        if (string.IsNullOrWhiteSpace(effect))
-            return EmojiEffect.Pop;
-
-        switch (effect.Trim().ToLowerInvariant())
+        return new ScaleToCommandSpecCharR
         {
-            case "reveal":
-            case "wipe":
-            case "show":
-                return EmojiEffect.Reveal;
+            slotKey = roleKey,
+            target = CharacterRigTarget.EmojiSlot00_Scale,
 
-            case "conceal":
-            case "hide":
-            case "close":
-                return EmojiEffect.Conceal;
+            toScale = new Vector2(xyScale, xyScale),
+            duration = duration,
+            ease = ease,
 
-            case "pop":
-            case "default":
-            case "normal":
-                return EmojiEffect.Pop;
+            wait = wait,
+            killTween = killTween
+        };
+    }
 
-            default:
-                UnityEngine.Debug.LogWarning(
-                    $"[YarnCommandBridge] Unknown emoji effect '{effect}'. Fallback to Pop.");
-                return EmojiEffect.Pop;
-        }
+    private SlideInCommandSpecCharR BuildEmojiSlideInSpec(
+        string roleKey,
+        CharRigDirection direction,
+        float distance,
+        float duration,
+        Ease ease,
+        float punch,
+        bool wait,
+        bool killTween)
+    {
+        return new SlideInCommandSpecCharR
+        {
+            slotKey = roleKey,
+            target = CharacterRigTarget.EmojiSlot00_Track_Move,
+
+            direction = direction,
+            distance = distance,
+            duration = duration,
+            ease = ease,
+            punch = punch,
+
+            wait = wait,
+            killTween = killTween
+        };
+    }
+
+    private HopCommandSpecCharR BuildEmojiHopSpec(
+        string roleKey,
+        float height,
+        float duration,
+        bool wait)
+    {
+        return new HopCommandSpecCharR
+        {
+            slotKey = roleKey,
+            target = CharacterRigTarget.EmojiSlot00_Track_Y,
+
+            duration = duration,
+            ease = Ease.OutCubic,
+
+            hopCount = 1,
+            height = height,
+            airWidth = 0.85f,
+            lastArcHeight = -1f,
+            lastAirWidth = -1f,
+
+            wait = wait,
+            killTween = true
+        };
+    }
+
+    private JoltCommandSpec BuildEmojiJoltSpec(
+        string roleKey,
+        float strength,
+        float duration,
+        bool wait)
+    {
+        return new JoltCommandSpec
+        {
+            slotKey = roleKey,
+            target = CharacterRigTarget.EmojiSlot00_Track_Move,
+
+            strength = strength,
+            direction = CharRigDirection.Right,
+            duration = duration,
+
+            taps = 2,
+            damping = 6f,
+            anticipation = 0f,
+
+            wait = wait,
+            killTween = true
+        };
+    }
+
+    private SwayCommandSpecCharR BuildEmojiSwaySpec(
+        string roleKey,
+        float strength,
+        float duration,
+        int cycles,
+        bool wait)
+    {
+        return new SwayCommandSpecCharR
+        {
+            slotKey = roleKey,
+            target = CharacterRigTarget.EmojiSlot00_Rotation,
+
+            strength = strength,
+            duration = duration,
+            cycles = cycles,
+
+            damping = 2.1f,
+            speed = 1.0f,
+            finalOvershoot = 0.2f,
+
+            anticipation = 0f,
+            startPositive = true,
+
+            wait = wait,
+            killTween = true
+        };
+    }
+
+    private TrembleCommandSpecCharR BuildEmojiTrembleSpec(
+        string roleKey,
+        float strength,
+        float duration,
+        float frequency,
+        bool wait)
+    {
+        return new TrembleCommandSpecCharR
+        {
+            slotKey = roleKey,
+            target = CharacterRigTarget.EmojiSlot00_Track_Move,
+
+            strength = strength,
+            direction = CharRigDirection.Right,
+            duration = duration,
+            frequency = frequency,
+
+            crossAxisRatio = 0.35f,
+            noiseRatio = 0.2f,
+
+            usePulse = false,
+            pulseInterval = 1.0f,
+            pulseDuration = 0.16f,
+
+            blendIn = 0.04f,
+            blendOut = 0.08f,
+
+            wait = wait,
+            killTween = true
+        };
     }
 }

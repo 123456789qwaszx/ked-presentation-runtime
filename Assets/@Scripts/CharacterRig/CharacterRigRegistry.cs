@@ -70,7 +70,9 @@ public sealed class CharacterRigRegistry
         rigRefs.VisualEffect?.Dispose();
         rigRefs.VisualEffect = null;
         
-        rigRefs.DisposeEmojiMaterialRuntimes();
+        rigRefs.EmojiSlot00_MaterialRuntime?.DestroyRuntimeMaterial();
+        rigRefs.EmojiSlot01_MaterialRuntime?.DestroyRuntimeMaterial();
+        rigRefs.EmojiSlot02_MaterialRuntime?.DestroyRuntimeMaterial();
 
         if (rigRefs.RigRoot == null)
             return;

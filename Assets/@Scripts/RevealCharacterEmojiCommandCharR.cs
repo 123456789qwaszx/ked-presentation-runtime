@@ -12,7 +12,7 @@ public sealed class RevealCharacterEmojiCommandSpecCharR : CharacterRigCommandSp
     public CharacterRigTarget imageTarget = CharacterRigTarget.EmojiSlot00_Image;
 
     [Header("Visual Fallback")]
-    [Tooltip("이미 runtime material이 없을 때만 baseMaterial 확보용으로 사용합니다.")]
+    [Tooltip("Runtime material이 없을 때만 baseMaterial 확보용으로 사용합니다.")]
     public CharacterEmojiVisualPresetSO visualPreset;
 
     [Header("Reveal")]
@@ -40,11 +40,15 @@ public sealed class RevealCharacterEmojiCommandCharR : CommandBase
     private CharacterRigRefs _rigRefs;
     private Image _image;
     private CharacterEmojiMaterialRuntime _materialRuntime;
-    private Tween _revealTween;
+    private Tween _tween;
 
     private bool _resolveAttempted;
     private bool _canCommitFinalState;
-    private float _targetReveal;
+
+    private float _fromReveal;
+    private float _toReveal;
+    private float _duration;
+    private Ease _ease;
 
     public override bool WaitForCompletion => _spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
@@ -57,75 +61,71 @@ public sealed class RevealCharacterEmojiCommandCharR : CommandBase
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
         if (!_resolveAttempted)
-            Resolve(scope);
+            ResolveRefs(scope);
 
-        if (!HasValidRefs() || !PrepareMaterial())
+        if (!HasValidRefs())
         {
             ClearRuntimeRefs();
             yield break;
         }
 
+        if (!PrepareMaterial())
+        {
+            ClearRuntimeRefs();
+            yield break;
+        }
+
+        ResolveTweenValues();
+
         if (_spec.killTween)
-            KillTween(true);
+            _materialRuntime.KillTween(true); // Finish previous reveal so this command starts from a committed state.
 
         _canCommitFinalState = true;
 
-        float from = ResolveStartReveal();
-        _targetReveal = ResolveTargetReveal();
-        float duration = ResolveDuration();
-        Ease ease = ResolveEase();
-
-        if (scope.ShouldCompressTime || duration <= 0f)
+        if (_duration <= 0f || scope.ShouldCompressTime)
         {
-            CommitFinalState();
+            _materialRuntime.SetReveal(_toReveal);
             ClearRuntimeRefs();
             yield break;
         }
 
-        _revealTween = _materialRuntime.TweenReveal(
-            from,
-            _targetReveal,
-            duration,
-            ease,
-            useUnscaledTime: true);
+        _tween = _materialRuntime
+            .TweenReveal(
+                _fromReveal,
+                _toReveal,
+                _duration,
+                _ease,
+                useUnscaledTime: true);
 
-        if (_revealTween == null)
+        if (_tween == null)
         {
-            CommitFinalState();
+            _materialRuntime.SetReveal(_toReveal);
             ClearRuntimeRefs();
             yield break;
         }
 
         if (_spec.wait)
-        {
-            yield return _revealTween.WaitForCompletion();
-
-            CommitFinalState();
-            ClearRuntimeRefs();
-            yield break;
-        }
-
-        // wait=false인 경우에는 runtime이 tween을 소유한다.
-        // command는 entry를 닫되, tween을 즉시 final commit하지 않는다.
-        _canCommitFinalState = false;
-        ClearRuntimeRefs();
+            yield return _tween.WaitForCompletion();
     }
 
     protected override void OnSkip(CommandRunScope scope)
     {
         if (!_resolveAttempted)
-            Resolve(scope);
+            ResolveRefs(scope);
 
-        if (!HasValidRefs() || !PrepareMaterial())
+        if (!HasValidRefs())
+            return;
+
+        if (!PrepareMaterial())
         {
             ClearRuntimeRefs();
             return;
         }
 
-        _canCommitFinalState = true;
-        _targetReveal = ResolveTargetReveal();
+        ResolveTweenValues();
 
-        CommitFinalState();
+        _materialRuntime.SetReveal(_toReveal);
+
         ClearRuntimeRefs();
     }
 
@@ -136,16 +136,22 @@ public sealed class RevealCharacterEmojiCommandCharR : CommandBase
 
     protected override void OnCommandCompleted(CommandRunScope scope)
     {
-        // wait=false reveal은 runtime tween이 소유하므로 여기서 final commit하면
-        // 같은 프레임에 바로 스냅되어 reveal이 보이지 않는다.
-        if (!_canCommitFinalState)
+        if (!_resolveAttempted)
+            ResolveRefs(scope);
+
+        if (!_canCommitFinalState || !HasValidRefs())
             return;
 
-        CommitFinalState();
+        ResolveTweenValues();
+
+        _tween?.Kill(false);
+        _materialRuntime.KillTween(false);
+        _materialRuntime.SetReveal(_toReveal);
+
         ClearRuntimeRefs();
     }
 
-    private void Resolve(CommandRunScope scope)
+    private void ResolveRefs(CommandRunScope scope)
     {
         _resolveAttempted = true;
 
@@ -191,68 +197,21 @@ public sealed class RevealCharacterEmojiCommandCharR : CommandBase
         return _materialRuntime.EnsureMaterial(_spec.visualPreset.baseMaterial);
     }
 
-    private float ResolveStartReveal()
+    private void ResolveTweenValues()
     {
         if (_spec.usePresetReveal && _spec.visualPreset != null)
-            return _spec.visualPreset.startReveal;
-
-        return _spec.fromReveal;
-    }
-
-    private float ResolveTargetReveal()
-    {
-        if (_spec.usePresetReveal && _spec.visualPreset != null)
-            return _spec.visualPreset.endReveal;
-
-        return _spec.toReveal;
-    }
-
-    private float ResolveDuration()
-    {
-        if (_spec.usePresetReveal && _spec.visualPreset != null)
-            return _spec.visualPreset.revealDuration;
-
-        return _spec.duration;
-    }
-
-    private Ease ResolveEase()
-    {
-        if (_spec.usePresetReveal && _spec.visualPreset != null)
-            return _spec.visualPreset.revealEase;
-
-        return _spec.ease;
-    }
-
-    private void CommitFinalState()
-    {
-        KillTween(false);
-
-        if (!HasValidRefs())
         {
-            _canCommitFinalState = false;
+            _fromReveal = _spec.visualPreset.startReveal;
+            _toReveal = _spec.visualPreset.endReveal;
+            _duration = _spec.visualPreset.revealDuration;
+            _ease = _spec.visualPreset.revealEase;
             return;
         }
 
-        if (!PrepareMaterial())
-        {
-            _canCommitFinalState = false;
-            return;
-        }
-
-        _materialRuntime.SetReveal(_targetReveal);
-
-        _canCommitFinalState = false;
-    }
-
-    private void KillTween(bool complete)
-    {
-        if (_revealTween != null)
-        {
-            _revealTween.Kill(complete);
-            _revealTween = null;
-        }
-
-        _materialRuntime?.KillTween(complete);
+        _fromReveal = _spec.fromReveal;
+        _toReveal = _spec.toReveal;
+        _duration = _spec.duration;
+        _ease = _spec.ease;
     }
 
     private bool HasValidRefs()
@@ -263,13 +222,16 @@ public sealed class RevealCharacterEmojiCommandCharR : CommandBase
 
     private void ClearRuntimeRefs()
     {
-        _revealTween = null;
+        _canCommitFinalState = false;
 
         _rigRefs = null;
         _image = null;
         _materialRuntime = null;
+        _tween = null;
 
-        _resolveAttempted = false;
-        _canCommitFinalState = false;
+        _fromReveal = 0f;
+        _toReveal = 1f;
+        _duration = 0f;
+        _ease = Ease.OutCubic;
     }
 }

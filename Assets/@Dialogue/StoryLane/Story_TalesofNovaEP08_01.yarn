@@ -52,11 +52,9 @@ position: 694,90
 //<<bg_fade_in qr5 0>>
 //<<bg_fade_out q1 1.2 back>>
 //<<pause 1.2>>
-//<<emoji igna 08>>
 감옥 간수: 이그나 님! 알겠습니다, 지금 바로 풀겠습니다.
 
-<<emoji_fx igna 08 reveal>>
-//<<emoji_reveal igna>>
+<<emoji igna 9>>
 ???: 고마워, 먼저 나가 있어. 크루니스는 내가 직접 신문할 거야.
 
 <<char_focus igna 1 0.8>>
@@ -65,6 +63,7 @@ position: 694,90
 감옥 간수:.. #beat #stay
 
 //<<solo_shot npc1>>
+<<emoji npc1 5>>
 감옥 간수: 너! 허튼짓 할 생각 하지 말고!!! 가만히 있어!
 
 감옥 간수:..#boxhide
@@ -119,7 +118,6 @@ position: 694,90
 
 <<jolt kronis left>>
 <<face kronis 9>>
-<<emoji kronis 8>>
 크루니스: 하하, 예상대로네. 지루하기 짝이 없다니까...... 이해하지 못하는 일은 언제나 가장 단순하고 난폭한 방식으로 처리하려 드는 머저리들.
 
 <<move_by kronis -100 0>>
@@ -130,7 +128,6 @@ position: 694,90
 
 크루니스: 그걸 토론이라고 할 수 있나? 황혼청 심판관들의 지식수준이 너무 얕아서 기가 막힐 정도던걸...... 그 곳에서의 대화는 그야말로 소 귀에 경 읽기였어.
 
-<<emoji kronis 13>>
 크루니스: "은혜의 신의 가호를 받지 않아도, 영야는 마법을 사용할 수 있다."라고 말했거든.
 
 크루니스: "그들은 스스로 만들어 낸 마력을 사용하며, 심상석을 사용하지 않는다."... 이렇게 단순하고 명쾌한데 말이야.
@@ -173,7 +170,6 @@ position: 694,90
 이그나: 소귀에 경 읽기라...... 푸핫!
 
 <<jolt igna down>>
-<<emoji igna 16>>
 이그나: 말투가 꼭 성휘 부속대학 교수 같잖아, 푸하하!
 
 크루니스: 성휘 부속대학에 저런 학생들은 없어! 그런 멍청한 토론회를 열 일도 없고!
@@ -268,7 +264,7 @@ position: 508,-78
 `???: 고마워, 먼저 나가 있어. 크루니스는 내가 직접 신문할 거야.
 
 <<nudge npc1 up>>
-<<emoji npc1 03>>
+//<<emoji npc1 03>>
 감옥 간수: 그럼 먼저 물러나겠습니다.
 
 <<shot_bind_char_response npc1>>
@@ -287,8 +283,6 @@ position: 508,-78
 <<pause 1.7>>
 <<shake kronis left>>
 
-<<pause 0.4>>
-<<emoji kronis 18>>
 <<pause 0.4>>
 <<shake kronis left>>
 
@@ -320,7 +314,6 @@ position: 508,-78
 ``
 
 <<jolt kronis left>>
-<<emoji kronis 10>>
 `크루니스: 누군가 했더니...... 귀한 손님이 오셨네...... 설마 너일 줄이야.
 ..
 ..

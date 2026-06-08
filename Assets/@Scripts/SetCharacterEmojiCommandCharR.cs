@@ -1,7 +1,7 @@
 using System;
+using System.Collections;
 using DG.Tweening;
 using UnityEngine;
-using System.Collections;
 using UnityEngine.UI;
 
 [Serializable]
@@ -25,21 +25,17 @@ public sealed class SetCharacterEmojiCommandSpecCharR : CharacterRigCommandSpecB
     public CharacterEmojiLayout layout = CharacterEmojiLayout.Default;
 
     [Header("Visibility")]
+    [Tooltip("배치 직후 Emoji slot Root의 CanvasGroup alpha입니다. Fade 연출이 아니라 즉시 상태값입니다.")]
     [Range(0f, 1f)]
     public float alpha = 1f;
-
-    [Min(0f)]
-    public float fadeIn = 0.08f;
-
-    public Ease fadeEase = Ease.OutCubic;
 
     [Header("Visual")]
     public CharacterEmojiVisualPresetSO visualPreset;
     public bool useResolvedVisualPreset = true;
     public bool overrideVisualPreset = false;
 
-    [Header("Reveal")]
-    [Tooltip("배치 직후 머터리얼 _Reveal 값. 일반 표시=1, reveal 합성 준비=0.")]
+    [Header("Reveal Initial State")]
+    [Tooltip("배치 직후 머터리얼 _Reveal 값입니다. 일반 표시=1, reveal/pop 합성 준비=0.")]
     [Range(0f, 1f)]
     public float initialReveal = 1f;
 
@@ -47,6 +43,7 @@ public sealed class SetCharacterEmojiCommandSpecCharR : CharacterRigCommandSpecB
     public bool resetCastTransform = true;
 
     [Header("Tween")]
+    [Tooltip("true면 이모지를 새로 세팅하기 전에 관련 target의 기존 tween을 committed state로 정리합니다.")]
     public bool killTween = true;
 }
 
@@ -62,13 +59,11 @@ public sealed class SetCharacterEmojiCommandCharR : CommandBase
     private Image _image;
     private CanvasGroup _rootCanvasGroup;
 
-    private Sprite _resolvedSprite;
-    private CharacterEmojiLayout _resolvedLayout;
-
-    private CharacterEmojiVisualPresetSO _resolvedVisualPreset;
     private CharacterEmojiMaterialRuntime _materialRuntime;
 
-    private Tween _fadeTween;
+    private Sprite _resolvedSprite;
+    private CharacterEmojiLayout _resolvedLayout;
+    private CharacterEmojiVisualPresetSO _resolvedVisualPreset;
 
     private bool _resolveAttempted;
     private bool _canCommitFinalState;
@@ -77,7 +72,9 @@ public sealed class SetCharacterEmojiCommandCharR : CommandBase
     public override bool WaitForCompletion => _spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
-    public SetCharacterEmojiCommandCharR(SetCharacterEmojiCommandSpecCharR spec, CharacterEmojiResolver resolver)
+    public SetCharacterEmojiCommandCharR(
+        SetCharacterEmojiCommandSpecCharR spec,
+        CharacterEmojiResolver resolver)
     {
         _spec = spec;
         _resolver = resolver;
@@ -86,7 +83,7 @@ public sealed class SetCharacterEmojiCommandCharR : CommandBase
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
         if (!_resolveAttempted)
-            Resolve(scope);
+            ResolveRefs(scope);
 
         if (!HasValidTargets())
         {
@@ -99,53 +96,16 @@ public sealed class SetCharacterEmojiCommandCharR : CommandBase
 
         _canCommitFinalState = true;
 
-        if (_isHideRequest)
-        {
-            ApplyHiddenState();
-            ClearRuntimeRefs();
-            yield break;
-        }
+        CommitFinalState();
+        ClearRuntimeRefs();
 
-        if (_resolvedSprite == null)
-        {
-            ClearRuntimeRefs();
-            yield break;
-        }
-
-        ApplySpriteAndLayout();
-        ApplyEmojiMaterialFinalState();
-
-        if (_spec.fadeIn <= 0f || scope.ShouldCompressTime)
-        {
-            CommitFinalState();
-            ClearRuntimeRefs();
-            yield break;
-        }
-
-        _rootCanvasGroup.alpha = 0f;
-
-        _fadeTween = _rootCanvasGroup
-            .DOFade(_spec.alpha, _spec.fadeIn)
-            .SetEase(_spec.fadeEase)
-            .SetUpdate(true)
-            .SetTarget(_rootCanvasGroup)
-            .OnComplete(() =>
-            {
-                if (!_canCommitFinalState || !HasValidTargets())
-                    return;
-
-                CommitFinalState();
-                ClearRuntimeRefs();
-            });
-
-        if (_spec.wait)
-            yield return _fadeTween.WaitForCompletion();
+        yield break;
     }
 
     protected override void OnSkip(CommandRunScope scope)
     {
         if (!_resolveAttempted)
-            Resolve(scope);
+            ResolveRefs(scope);
 
         CommitFinalState();
         ClearRuntimeRefs();
@@ -159,7 +119,7 @@ public sealed class SetCharacterEmojiCommandCharR : CommandBase
     protected override void OnCommandCompleted(CommandRunScope scope)
     {
         if (!_resolveAttempted)
-            Resolve(scope);
+            ResolveRefs(scope);
 
         if (!_canCommitFinalState)
             return;
@@ -168,7 +128,7 @@ public sealed class SetCharacterEmojiCommandCharR : CommandBase
         ClearRuntimeRefs();
     }
 
-    private void Resolve(CommandRunScope scope)
+    private void ResolveRefs(CommandRunScope scope)
     {
         _resolveAttempted = true;
 
@@ -243,6 +203,35 @@ public sealed class SetCharacterEmojiCommandCharR : CommandBase
             $"emojiKey='{_spec.emojiKey}', targetKey='{_spec.slotKey}'.");
     }
 
+    private void CommitFinalState()
+    {
+        if (!HasValidTargets())
+        {
+            _canCommitFinalState = false;
+            return;
+        }
+
+        if (_isHideRequest)
+        {
+            ApplyHiddenState();
+            ClearCommitFlag();
+            return;
+        }
+
+        if (_resolvedSprite == null)
+        {
+            ClearCommitFlag();
+            return;
+        }
+
+        ApplySpriteAndLayout();
+        ApplyEmojiMaterialInitialState();
+
+        _rootCanvasGroup.alpha = _spec.alpha;
+
+        ClearCommitFlag();
+    }
+
     private void ApplySpriteAndLayout()
     {
         if (!HasValidTargets() || _resolvedSprite == null)
@@ -265,7 +254,7 @@ public sealed class SetCharacterEmojiCommandCharR : CommandBase
             _image.SetNativeSize();
     }
 
-    private void ApplyEmojiMaterialFinalState()
+    private void ApplyEmojiMaterialInitialState()
     {
         CharacterEmojiVisualPresetSO preset = ResolveVisualPreset();
 
@@ -330,62 +319,24 @@ public sealed class SetCharacterEmojiCommandCharR : CommandBase
 
     private void ApplyHiddenState()
     {
-        KillTween(false);
-
         if (!HasValidTargets())
-        {
-            _canCommitFinalState = false;
             return;
-        }
 
         _image.sprite = null;
         _image.enabled = false;
         _rootCanvasGroup.alpha = 0f;
 
         _materialRuntime?.KillTween(false);
-
-        _canCommitFinalState = false;
-    }
-
-    private void CommitFinalState()
-    {
-        KillTween(false);
-
-        if (!HasValidTargets())
-        {
-            _canCommitFinalState = false;
-            return;
-        }
-
-        if (_isHideRequest)
-        {
-            ApplyHiddenState();
-            return;
-        }
-
-        ApplySpriteAndLayout();
-        ApplyEmojiMaterialFinalState();
-
-        _rootCanvasGroup.alpha = _spec.alpha;
-
-        _canCommitFinalState = false;
     }
 
     private void KillTween(bool complete)
     {
-        if (_fadeTween != null)
-        {
-            _fadeTween.Kill(complete);
-            _fadeTween = null;
-        }
-
+        // SetCharacterEmoji는 reveal/motion/fade 연출을 소유하지 않는다.
+        // 다만 새 emoji를 배치할 때 같은 material runtime의 이전 reveal tween은 committed state로 정리한다.
         _materialRuntime?.KillTween(complete);
 
         if (_rootCanvasGroup != null)
             _rootCanvasGroup.DOKill(complete);
-
-        if (_root != null)
-            _root.DOKill(complete);
 
         if (_castTransform != null)
             _castTransform.DOKill(complete);
@@ -399,10 +350,13 @@ public sealed class SetCharacterEmojiCommandCharR : CommandBase
                && _image != null;
     }
 
+    private void ClearCommitFlag()
+    {
+        _canCommitFinalState = false;
+    }
+
     private void ClearRuntimeRefs()
     {
-        _fadeTween = null;
-
         _rigRefs = null;
 
         _root = null;

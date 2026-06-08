@@ -386,20 +386,6 @@ public static class CharacterRigRefsExtensions
             _ => null
         };
     }
-
-    public static void DisposeEmojiMaterialRuntimes(this CharacterRigRefs refs)
-    {
-        if (refs == null)
-            return;
-
-        refs.EmojiSlot00_MaterialRuntime?.DestroyRuntimeMaterial();
-        refs.EmojiSlot01_MaterialRuntime?.DestroyRuntimeMaterial();
-        refs.EmojiSlot02_MaterialRuntime?.DestroyRuntimeMaterial();
-
-        refs.EmojiSlot00_MaterialRuntime = null;
-        refs.EmojiSlot01_MaterialRuntime = null;
-        refs.EmojiSlot02_MaterialRuntime = null;
-    }
     
     public static RectTransform GetRect(this CharacterRigRefs refs, CharacterRigTarget target)
     {

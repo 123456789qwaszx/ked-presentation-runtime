@@ -185,20 +185,53 @@ public sealed partial class YarnCommandBridge
     
     private void BindCharRigEmote(DialogueRunner runner)
     {
-        runner.AddCommandHandler<string, string>("emoji", EnqueueSetCharacterEmojiSpec);
-        runner.AddCommandHandler<string, string, string>("emoji_slot", EnqueueSetCharacterEmojiSlotSpec);
+        // Default Pop preset.
+        // <<emoji igna 19>>
+        runner.AddCommandHandler<string, string>(
+            "emoji",
+            EnqueueEmojiPopSpec);
 
-        runner.AddCommandHandler<string, string, string>("emoji_fx", EnqueueEmojiFxSpec);
-        runner.AddCommandHandler<string, string, string, string>("emoji_slot_fx", EnqueueEmojiSlotFxSpec);
+        // Drop preset.
+        // <<emoji_drop igna 19>>
+        runner.AddCommandHandler<string, string>(
+            "emoji_drop",
+            EnqueueEmojiDropSpec);
 
-        runner.AddCommandHandler<string>("emoji_hide", EnqueueHideCharacterEmojiSpec);
-        runner.AddCommandHandler<string, string>("emoji_hide_slot", EnqueueHideCharacterEmojiSlotSpec);
+        // Shock preset.
+        // <<emoji_shock igna 19>>
+        runner.AddCommandHandler<string, string>(
+            "emoji_shock",
+            EnqueueEmojiShockSpec);
 
-        runner.AddCommandHandler<string>("emoji_reveal", EnqueueRevealCharacterEmojiSpec);
-        runner.AddCommandHandler<string, string>("emoji_reveal_slot", EnqueueRevealCharacterEmojiSlotSpec);
+        // Hop preset.
+        // <<emoji_hop igna 19>>
+        runner.AddCommandHandler<string, string>(
+            "emoji_hop",
+            EnqueueEmojiHopSpec);
 
-        runner.AddCommandHandler<string>("emoji_conceal", EnqueueConcealCharacterEmojiSpec);
-        runner.AddCommandHandler<string, string>("emoji_conceal_slot", EnqueueConcealCharacterEmojiSlotSpec);
+        // Sway preset.
+        // <<emoji_sway igna 19>>
+        runner.AddCommandHandler<string, string>(
+            "emoji_sway",
+            EnqueueEmojiSwaySpec);
+
+        // Tremble preset.
+        // <<emoji_tremble igna 19>>
+        runner.AddCommandHandler<string, string>(
+            "emoji_tremble",
+            EnqueueEmojiTrembleSpec);
+
+        // Raw set only.
+        // <<emoji_set igna 19>>
+        runner.AddCommandHandler<string, string>(
+            "emoji_set",
+            EnqueueEmojiSetSpec);
+
+        // Hide.
+        // <<emoji_hide igna>>
+        runner.AddCommandHandler<string>(
+            "emoji_hide",
+            EnqueueEmojiHideSpec);
     }
     
     private void BindCharRigVisual(DialogueRunner runner)

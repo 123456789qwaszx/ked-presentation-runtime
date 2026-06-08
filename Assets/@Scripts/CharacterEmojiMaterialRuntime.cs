@@ -95,7 +95,7 @@ public sealed class CharacterEmojiMaterialRuntime
         Ease ease,
         bool useUnscaledTime)
     {
-        KillTween(false);
+        KillTween(true);
 
         if (!HasAliveSource())
         {
@@ -106,13 +106,13 @@ public sealed class CharacterEmojiMaterialRuntime
         if (_runtimeMaterial == null)
             return null;
 
+        _runtimeMaterial.SetFloat(CharacterEmojiShaderIds.Reveal, from);
+
         if (duration <= 0f)
         {
             SetReveal(to);
             return null;
         }
-
-        _runtimeMaterial.SetFloat(CharacterEmojiShaderIds.Reveal, from);
 
         _revealTween = DOTween
             .To(
@@ -127,11 +127,12 @@ public sealed class CharacterEmojiMaterialRuntime
                 to,
                 duration)
             .SetEase(ease)
-            .SetUpdate(useUnscaledTime)
+            .SetUpdate(true)
             .SetTarget(this)
             .OnComplete(() =>
             {
                 SetReveal(to);
+                _revealTween = null;
             })
             .OnKill(() =>
             {
@@ -141,46 +142,15 @@ public sealed class CharacterEmojiMaterialRuntime
         return _revealTween;
     }
 
-    public Tween TweenReveal(CharacterEmojiVisualPresetSO preset, bool useUnscaledTime)
-    {
-        if (preset == null)
-            return null;
-
-        return TweenReveal(
-            preset.startReveal,
-            preset.endReveal,
-            preset.revealDuration,
-            preset.revealEase,
-            useUnscaledTime);
-    }
-
-    public void CompleteReveal(CharacterEmojiVisualPresetSO preset)
-    {
-        KillTween(false);
-
-        if (preset == null)
-            return;
-
-        SetReveal(preset.endReveal);
-    }
-
-    public void ResetReveal(CharacterEmojiVisualPresetSO preset)
-    {
-        KillTween(false);
-
-        if (preset == null)
-            return;
-
-        SetReveal(preset.startReveal);
-    }
-
     public void KillTween(bool complete)
     {
-        if (_revealTween == null)
-            return;
+        if (_revealTween != null)
+        {
+            _revealTween.Kill(complete);
+            _revealTween = null;
+        }
 
-        _revealTween.Kill(complete);
-        _revealTween = null;
+        DOTween.Kill(this, complete);
     }
 
     public void ClearRuntimeState()
