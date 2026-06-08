@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.UI;
 
 public enum UIStageBlurDownsample
 {
@@ -16,9 +15,6 @@ public sealed class UIStageBlurController : MonoBehaviour
 
     [Header("Input")]
     [SerializeField] private Camera captureCamera;
-
-    [Header("Output Preview")]
-    [SerializeField] private RawImage previewRawImage;
 
     [Header("Material")]
     [SerializeField] private Material blurMaterial;
@@ -53,7 +49,6 @@ public sealed class UIStageBlurController : MonoBehaviour
     private void OnEnable()
     {
         EnsureRenderTextures();
-        ApplyPreviewTexture();
         ApplyCaptureCameraControl();
     }
 
@@ -85,12 +80,6 @@ public sealed class UIStageBlurController : MonoBehaviour
         RecreateRenderTextures();
     }
 
-    public void SetPreview(RawImage rawImage)
-    {
-        previewRawImage = rawImage;
-        ApplyPreviewTexture();
-    }
-
     public void SetBlur(float radius, int iterationCount)
     {
         blurRadius = Mathf.Max(0f, radius);
@@ -110,12 +99,6 @@ public sealed class UIStageBlurController : MonoBehaviour
     public void ForceRenderBlur()
     {
         RenderBlur();
-    }
-
-    public void ClearPreview()
-    {
-        if (previewRawImage != null)
-            previewRawImage.texture = null;
     }
 
     private void RenderBlur()
@@ -201,8 +184,6 @@ public sealed class UIStageBlurController : MonoBehaviour
 
         _blurA = CreateRT(_width, _height, "RT_UIStageBlur_A");
         _blurB = CreateRT(_width, _height, "RT_UIStageBlur_B");
-
-        ApplyPreviewTexture();
     }
 
     private RenderTexture CreateRT(int width, int height, string textureName)
@@ -220,19 +201,10 @@ public sealed class UIStageBlurController : MonoBehaviour
         return rt;
     }
 
-    private void ApplyPreviewTexture()
-    {
-        if (previewRawImage == null)
-            return;
-
-        previewRawImage.texture = _blurA;
-    }
-
     private void RecreateRenderTextures()
     {
         ReleaseRenderTextures();
         EnsureRenderTextures();
-        ApplyPreviewTexture();
     }
 
     private void ReleaseRenderTextures()
