@@ -52,10 +52,11 @@ position: 694,90
 //<<bg_fade_in qr5 0>>
 //<<bg_fade_out q1 1.2 back>>
 //<<pause 1.2>>
+//<<emoji igna 08>>
 감옥 간수: 이그나 님! 알겠습니다, 지금 바로 풀겠습니다.
 
-<<emoji igna 8>>
-<<char_defocus igna 1 0.8>>
+<<emoji_fx igna 08 reveal>>
+//<<emoji_reveal igna>>
 ???: 고마워, 먼저 나가 있어. 크루니스는 내가 직접 신문할 거야.
 
 <<char_focus igna 1 0.8>>

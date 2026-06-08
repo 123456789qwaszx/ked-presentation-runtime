@@ -309,6 +309,7 @@ public sealed class CharacterEmojiLibrarySOEditor : Editor
             SerializedProperty emojiKey = entry.FindPropertyRelative("emojiKey");
             SerializedProperty sprite = entry.FindPropertyRelative("sprite");
             SerializedProperty layout = entry.FindPropertyRelative("layout");
+            SerializedProperty defaultVisualPreset = entry.FindPropertyRelative("defaultVisualPreset");
 
             using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
             {
@@ -321,7 +322,7 @@ public sealed class CharacterEmojiLibrarySOEditor : Editor
                     using (new EditorGUILayout.HorizontalScope())
                     {
                         DrawSpritePreview(sprite);
-                        DrawEntryFields(emojiKey, sprite);
+                        DrawEntryFields(emojiKey, sprite, defaultVisualPreset);
                     }
 
                     EditorGUILayout.Space(4);
@@ -437,12 +438,17 @@ public sealed class CharacterEmojiLibrarySOEditor : Editor
         }
     }
 
-    private void DrawEntryFields(SerializedProperty emojiKey, SerializedProperty sprite)
+    private void DrawEntryFields(
+        SerializedProperty emojiKey,
+        SerializedProperty sprite,
+        SerializedProperty defaultVisualPreset)
     {
         using (new EditorGUILayout.VerticalScope())
         {
             EditorGUILayout.PropertyField(emojiKey);
             EditorGUILayout.PropertyField(sprite);
+
+            EditorGUILayout.PropertyField(defaultVisualPreset, new GUIContent("Default Visual Preset"));
         }
     }
 
@@ -663,6 +669,11 @@ public sealed class CharacterEmojiLibrarySOEditor : Editor
         entry.FindPropertyRelative("emojiKey").stringValue = "";
         entry.FindPropertyRelative("sprite").objectReferenceValue = null;
 
+        SerializedProperty defaultVisualPreset = entry.FindPropertyRelative("defaultVisualPreset");
+
+        if (defaultVisualPreset != null)
+            defaultVisualPreset.objectReferenceValue = null;
+
         WriteLayout(entry.FindPropertyRelative("layout"), CharacterEmojiLayout.Default);
 
         _scroll = Vector2.zero;
@@ -764,7 +775,8 @@ public sealed class CharacterEmojiLibrarySOEditor : Editor
             {
                 emojiKey = entry.FindPropertyRelative("emojiKey").stringValue,
                 sprite = entry.FindPropertyRelative("sprite").objectReferenceValue as Sprite,
-                layout = ReadLayout(entry.FindPropertyRelative("layout"))
+                layout = ReadLayout(entry.FindPropertyRelative("layout")),
+                defaultVisualPreset = entry.FindPropertyRelative("defaultVisualPreset").objectReferenceValue as CharacterEmojiVisualPresetSO
             };
 
             snapshots.Add(snapshot);
@@ -782,6 +794,12 @@ public sealed class CharacterEmojiLibrarySOEditor : Editor
 
             entry.FindPropertyRelative("emojiKey").stringValue = snapshots[i].emojiKey;
             entry.FindPropertyRelative("sprite").objectReferenceValue = snapshots[i].sprite;
+
+            SerializedProperty defaultVisualPreset =
+                entry.FindPropertyRelative("defaultVisualPreset");
+
+            if (defaultVisualPreset != null)
+                defaultVisualPreset.objectReferenceValue = snapshots[i].defaultVisualPreset;
 
             WriteLayout(entry.FindPropertyRelative("layout"), snapshots[i].layout);
         }
@@ -843,5 +861,6 @@ public sealed class CharacterEmojiLibrarySOEditor : Editor
         public string emojiKey;
         public Sprite sprite;
         public CharacterEmojiLayout layout;
+        public CharacterEmojiVisualPresetSO defaultVisualPreset;
     }
 }

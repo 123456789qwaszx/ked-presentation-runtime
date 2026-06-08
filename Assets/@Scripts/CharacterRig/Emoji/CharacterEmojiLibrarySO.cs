@@ -8,6 +8,7 @@ public sealed class CharacterEmojiEntry
     public string emojiKey;
     public Sprite sprite;
     public CharacterEmojiLayout layout = CharacterEmojiLayout.Default;
+    public CharacterEmojiVisualPresetSO defaultVisualPreset;
 }
 
 [Serializable]

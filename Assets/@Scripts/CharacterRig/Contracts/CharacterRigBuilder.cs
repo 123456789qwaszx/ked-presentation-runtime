@@ -302,7 +302,11 @@ public sealed class CharacterRigBuilder
         refs.EmojiSlot02_Scale = GetRt(CharacterRigSchema.Refs.EmojiSlot02_Scale);
         refs.EmojiSlot02_Rotation = GetRt(CharacterRigSchema.Refs.EmojiSlot02_Rotation);
         refs.EmojiSlot02_Image = GetImg(CharacterRigSchema.Refs.EmojiSlot02_Image);
-
+        
+        refs.EmojiSlot00_MaterialRuntime = new CharacterEmojiMaterialRuntime(refs.EmojiSlot00_Image);
+        refs.EmojiSlot01_MaterialRuntime = new CharacterEmojiMaterialRuntime(refs.EmojiSlot01_Image);
+        refs.EmojiSlot02_MaterialRuntime = new CharacterEmojiMaterialRuntime(refs.EmojiSlot02_Image);
+        
         return refs;
     }
     #endregion

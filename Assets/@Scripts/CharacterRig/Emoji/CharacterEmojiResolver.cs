@@ -12,10 +12,12 @@ public sealed class CharacterEmojiResolver
     public bool TryResolve(
         string emojiKey,
         out Sprite sprite,
-        out CharacterEmojiLayout layout)
+        out CharacterEmojiLayout layout,
+        out CharacterEmojiVisualPresetSO visualPreset)
     {
         sprite = null;
         layout = CharacterEmojiLayout.Default;
+        visualPreset = null;
 
         if (_library == null)
             return false;
@@ -30,6 +32,7 @@ public sealed class CharacterEmojiResolver
 
         sprite = entry.sprite;
         layout = entry.layout;
+        visualPreset = entry.defaultVisualPreset;
         return true;
     }
 

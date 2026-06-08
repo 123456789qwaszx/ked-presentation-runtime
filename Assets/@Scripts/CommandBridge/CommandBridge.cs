@@ -187,9 +187,18 @@ public sealed partial class YarnCommandBridge
     {
         runner.AddCommandHandler<string, string>("emoji", EnqueueSetCharacterEmojiSpec);
         runner.AddCommandHandler<string, string, string>("emoji_slot", EnqueueSetCharacterEmojiSlotSpec);
-        
+
+        runner.AddCommandHandler<string, string, string>("emoji_fx", EnqueueEmojiFxSpec);
+        runner.AddCommandHandler<string, string, string, string>("emoji_slot_fx", EnqueueEmojiSlotFxSpec);
+
         runner.AddCommandHandler<string>("emoji_hide", EnqueueHideCharacterEmojiSpec);
         runner.AddCommandHandler<string, string>("emoji_hide_slot", EnqueueHideCharacterEmojiSlotSpec);
+
+        runner.AddCommandHandler<string>("emoji_reveal", EnqueueRevealCharacterEmojiSpec);
+        runner.AddCommandHandler<string, string>("emoji_reveal_slot", EnqueueRevealCharacterEmojiSlotSpec);
+
+        runner.AddCommandHandler<string>("emoji_conceal", EnqueueConcealCharacterEmojiSpec);
+        runner.AddCommandHandler<string, string>("emoji_conceal_slot", EnqueueConcealCharacterEmojiSlotSpec);
     }
     
     private void BindCharRigVisual(DialogueRunner runner)

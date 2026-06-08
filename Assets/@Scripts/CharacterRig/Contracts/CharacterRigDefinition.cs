@@ -277,6 +277,10 @@ public sealed class CharacterRigRefs
     public RectTransform RigRoot { get; private set; }
     public CharacterRigRefs(RectTransform rigRoot) => RigRoot = rigRoot;
     
+    public CharacterEmojiMaterialRuntime EmojiSlot00_MaterialRuntime;
+    public CharacterEmojiMaterialRuntime EmojiSlot01_MaterialRuntime;
+    public CharacterEmojiMaterialRuntime EmojiSlot02_MaterialRuntime;
+    
     // Visual effect: CharacterPortraitSprite_Image에 바인딩된 runtime material 소유자.
     // SetupCharRigCommand가 생성, CharacterRigRegistry.DestroyRig가 Dispose.
     public CharacterRigVisualEffectController VisualEffect;
@@ -367,6 +371,36 @@ public sealed class CharacterRigRefs
 
 public static class CharacterRigRefsExtensions
 {
+    public static CharacterEmojiMaterialRuntime GetEmojiMaterialRuntime(
+        this CharacterRigRefs refs,
+        CharacterRigTarget imageTarget)
+    {
+        if (refs == null)
+            return null;
+
+        return imageTarget switch
+        {
+            CharacterRigTarget.EmojiSlot00_Image => refs.EmojiSlot00_MaterialRuntime,
+            CharacterRigTarget.EmojiSlot01_Image => refs.EmojiSlot01_MaterialRuntime,
+            CharacterRigTarget.EmojiSlot02_Image => refs.EmojiSlot02_MaterialRuntime,
+            _ => null
+        };
+    }
+
+    public static void DisposeEmojiMaterialRuntimes(this CharacterRigRefs refs)
+    {
+        if (refs == null)
+            return;
+
+        refs.EmojiSlot00_MaterialRuntime?.DestroyRuntimeMaterial();
+        refs.EmojiSlot01_MaterialRuntime?.DestroyRuntimeMaterial();
+        refs.EmojiSlot02_MaterialRuntime?.DestroyRuntimeMaterial();
+
+        refs.EmojiSlot00_MaterialRuntime = null;
+        refs.EmojiSlot01_MaterialRuntime = null;
+        refs.EmojiSlot02_MaterialRuntime = null;
+    }
+    
     public static RectTransform GetRect(this CharacterRigRefs refs, CharacterRigTarget target)
     {
         return refs?.GetComponent(target).transform as RectTransform;
