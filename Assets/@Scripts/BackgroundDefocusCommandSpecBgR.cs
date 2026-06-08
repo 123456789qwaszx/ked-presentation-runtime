@@ -24,46 +24,40 @@ public sealed class BackgroundDefocusCommandSpecBgR : CommandSpecBase
 
 public sealed class BackgroundDefocusCommandBgR : CommandBase
 {
-    private readonly IBackgroundRigBlurRuntime _runtime;
     private readonly BackgroundDefocusCommandSpecBgR _spec;
+    private readonly IBackgroundRigBlurRuntime _runtime;
 
     public override bool WaitForCompletion => _spec.wait;
 
-    public BackgroundDefocusCommandBgR(
-        IBackgroundRigBlurRuntime runtime,
-        BackgroundDefocusCommandSpecBgR spec)
+    public BackgroundDefocusCommandBgR(BackgroundDefocusCommandSpecBgR spec, IBackgroundRigBlurRuntime runtime)
     {
-        _runtime = runtime;
         _spec = spec;
+        _runtime = runtime;
     }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
-        _runtime?.ShowDefocus(
-            _spec.rigKey,
-            _spec.alpha,
-            _spec.duration,
-            _spec.blurRadius,
-            _spec.iterations,
-            _spec.downsample);
+        Apply(scope, _spec.duration);
 
         if (_spec.wait && _spec.duration > 0f)
             yield return new WaitForSeconds(_spec.duration);
     }
 
-    protected override void OnSkip(CommandRunScope scope)
+    protected override void OnSkip(CommandRunScope scope) => Apply(scope, 0f);
+    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
+    
+    private void Apply(CommandRunScope scope, float duration)  
     {
+        if (!scope.backgroundRigs.TryGetRig(_spec.rigKey, out BackgroundRigRefs refs))
+            return;
+
         _runtime?.ShowDefocus(
             _spec.rigKey,
+            refs,
             _spec.alpha,
-            0f,
+            duration,
             _spec.blurRadius,
             _spec.iterations,
             _spec.downsample);
-    }
-
-    protected override void OnRollbackSeek(CommandRunScope scope)
-    {
-        OnSkip(scope);
     }
 }

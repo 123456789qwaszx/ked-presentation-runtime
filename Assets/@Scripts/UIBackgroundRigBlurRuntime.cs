@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
@@ -28,11 +27,11 @@ public sealed class UIBackgroundRigBlurRuntime : MonoBehaviour, IBackgroundRigBl
     [Header("Blur")]
     [SerializeField] private UIStageBlurController blurController;
 
-    private readonly Dictionary<string, RigBinding> _bindings = new();
     private readonly Vector3[] _sourceWorldCorners = new Vector3[4];
     private readonly Vector2[] _captureLocalCorners = new Vector2[4];
 
     private string _activeRigKey;
+    private BackgroundRigRefs _activeRefs;
     private bool _isTracking;
 
     private Tween _defocusTween;
@@ -53,33 +52,9 @@ public sealed class UIBackgroundRigBlurRuntime : MonoBehaviour, IBackgroundRigBl
         ApplyBlurTextureToOverlay();
     }
 
-    public void Bind(string rigKey, BackgroundRigRefs refs)
-    {
-        _bindings[rigKey] = new RigBinding(rigKey, refs);
-
-        if (string.IsNullOrEmpty(_activeRigKey))
-            _activeRigKey = rigKey;
-
-        if (_activeRigKey == rigKey)
-            SyncCaptureProxies();
-    }
-
-    public void ClearBindings()
-    {
-        _isTracking = false;
-        _activeRigKey = null;
-        _bindings.Clear();
-
-        ResetCaptureProxies();
-        SetOverlayVisible(false, 0f);
-
-        _overlay = null;
-        _overlayCanvasGroup = null;
-        _overlayRawImage = null;
-    }
-
     public void ShowDefocus(
         string rigKey,
+        BackgroundRigRefs refs,
         float alpha,
         float duration,
         float blurRadius,
@@ -88,7 +63,9 @@ public sealed class UIBackgroundRigBlurRuntime : MonoBehaviour, IBackgroundRigBl
     {
         EnsureOverlay();
 
-        _activeRigKey = ResolveBinding(rigKey).RigKey;
+        _activeRigKey = rigKey;
+        _activeRefs = refs;
+
         SyncCaptureProxies();
 
         blurController.SetDownsample(downsample);
@@ -108,6 +85,9 @@ public sealed class UIBackgroundRigBlurRuntime : MonoBehaviour, IBackgroundRigBl
     {
         EnsureOverlay();
 
+        if (!string.IsNullOrEmpty(rigKey) && _activeRigKey != rigKey)
+            return;
+
         _isTracking = false;
         SetOverlayVisible(false, duration);
     }
@@ -124,14 +104,12 @@ public sealed class UIBackgroundRigBlurRuntime : MonoBehaviour, IBackgroundRigBl
 
     private bool SyncCaptureProxies()
     {
-        RigBinding active = ResolveBinding(_activeRigKey);
-
-        Image sourceBack = active.Refs.Background_BackLayer_Image;
-        Image sourceFront = active.Refs.Background_FrontLayer_Image;
+        Image sourceBack = _activeRefs.Background_BackLayer_Image;
+        Image sourceFront = _activeRefs.Background_FrontLayer_Image;
 
         if (!IsCaptureSourceAlive(sourceBack, sourceFront))
         {
-            StopTrackingAndClearActiveBinding();
+            StopTrackingAndClearActiveSource();
             return false;
         }
 
@@ -191,9 +169,13 @@ public sealed class UIBackgroundRigBlurRuntime : MonoBehaviour, IBackgroundRigBl
 
         for (int i = 0; i < 4; i++)
         {
+            Vector2 screenPoint = RectTransformUtility.WorldToScreenPoint(
+                null,
+                _sourceWorldCorners[i]);
+
             RectTransformUtility.ScreenPointToLocalPointInRectangle(
                 captureRoot,
-                _sourceWorldCorners[i],
+                screenPoint,
                 captureCanvas.worldCamera,
                 out _captureLocalCorners[i]);
         }
@@ -239,10 +221,10 @@ public sealed class UIBackgroundRigBlurRuntime : MonoBehaviour, IBackgroundRigBl
             return;
 
         RenderTexture texture = blurController.BlurredTexture;
-        if (texture == null) 
+        if (texture == null)
             return;
 
-        if (_overlayRawImage.texture == texture) 
+        if (_overlayRawImage.texture == texture)
             return;
 
         _overlayRawImage.texture = texture;
@@ -284,21 +266,17 @@ public sealed class UIBackgroundRigBlurRuntime : MonoBehaviour, IBackgroundRigBl
                     _overlayRawImage.enabled = false;
             });
     }
-    
+
     private bool IsCaptureSourceAlive(Image sourceBack, Image sourceFront)
     {
         return sourceBack && sourceFront;
     }
-    
-    private void StopTrackingAndClearActiveBinding()
-    {
-        string deadRigKey = _activeRigKey;
 
+    private void StopTrackingAndClearActiveSource()
+    {
         _isTracking = false;
         _activeRigKey = null;
-
-        if (!string.IsNullOrEmpty(deadRigKey))
-            _bindings.Remove(deadRigKey);
+        _activeRefs = null;
 
         ResetCaptureProxies();
         SetOverlayVisible(false, 0f);
@@ -313,23 +291,5 @@ public sealed class UIBackgroundRigBlurRuntime : MonoBehaviour, IBackgroundRigBl
         captureFrontLayerImage.enabled = false;
         captureFrontLayerImage.sprite = null;
         captureFrontLayerImage.material = null;
-    }
-
-    private RigBinding ResolveBinding(string rigKey)
-    {
-        string key = string.IsNullOrEmpty(rigKey) ? _activeRigKey : rigKey;
-        return _bindings[key];
-    }
-
-    private sealed class RigBinding
-    {
-        public readonly string RigKey;
-        public readonly BackgroundRigRefs Refs;
-
-        public RigBinding(string rigKey, BackgroundRigRefs refs)
-        {
-            RigKey = rigKey;
-            Refs = refs;
-        }
     }
 }

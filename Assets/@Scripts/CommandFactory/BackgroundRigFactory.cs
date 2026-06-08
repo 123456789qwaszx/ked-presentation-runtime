@@ -24,7 +24,7 @@ public sealed class BackgroundRigCommandFactory : INodeCommandFactory
             null => null,
 
             // Setup
-            SetupBackgroundRigCommandSpec s => new SetupBackgroundRigCommand(s, _rigSlotResolver, _rigBuilder, _blurRuntime),
+            SetupBackgroundRigCommandSpec s => new SetupBackgroundRigCommand(s, _rigSlotResolver, _rigBuilder),
 
             // Basic State
             SetAnchorCommandSpecBgR s => new SetAnchorCommandBgR(s),
@@ -49,8 +49,8 @@ public sealed class BackgroundRigCommandFactory : INodeCommandFactory
             BreathInPlaceCommandSpecBgR s => new BreathInPlaceCommandBgR(s),
 
             // Defocus / Blur
-            BackgroundDefocusCommandSpecBgR s => new BackgroundDefocusCommandBgR(_blurRuntime, s),
-            BackgroundDefocusClearCommandSpecBgR s => new BackgroundDefocusClearCommandBgR(_blurRuntime, s),
+            BackgroundDefocusCommandSpecBgR s => new BackgroundDefocusCommandBgR(s, _blurRuntime),
+            BackgroundDefocusClearCommandSpecBgR s => new BackgroundDefocusClearCommandBgR(s, _blurRuntime),
 
             _ => null
         };

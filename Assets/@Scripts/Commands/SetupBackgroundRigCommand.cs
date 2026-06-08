@@ -45,7 +45,6 @@ public sealed class SetupBackgroundRigCommand : CommandBase
 {
     private readonly BackgroundRigSlotResolver _slotResolver;
     private readonly BackgroundRigBuilder _rigBuilder;
-    private readonly IBackgroundRigBlurRuntime _blurRuntime;
     private readonly SetupBackgroundRigCommandSpec _spec;
 
     public override bool WaitForCompletion => true;
@@ -53,13 +52,11 @@ public sealed class SetupBackgroundRigCommand : CommandBase
     public SetupBackgroundRigCommand(
     SetupBackgroundRigCommandSpec spec,
         BackgroundRigSlotResolver slotResolver,
-        BackgroundRigBuilder rigBuilder,
-        IBackgroundRigBlurRuntime blurRuntime = null)
+        BackgroundRigBuilder rigBuilder)
     {
         _spec = spec;
         _slotResolver = slotResolver;
         _rigBuilder = rigBuilder;
-        _blurRuntime = blurRuntime;
     }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
@@ -89,8 +86,6 @@ public sealed class SetupBackgroundRigCommand : CommandBase
         _rigBuilder.BindRefsFromRoot(rigRoot, rolePrefix, out BackgroundRigRefs refs);
 
         scope.backgroundRigs.Register(rigKey, refs);
-
-        _blurRuntime?.Bind(rigKey, refs);
 
         // Optional bake helper:
         // Enable after refs registration when saving the generated rig as a reusable prefab.
