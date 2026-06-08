@@ -114,6 +114,7 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
                 _spec.duration)
             .SetEase(_spec.ease)
             .SetUpdate(true)
+            .SetTarget(_controller)
             .OnComplete(() =>
             {
                 if (!_canCommitFinalState || _controller == null)

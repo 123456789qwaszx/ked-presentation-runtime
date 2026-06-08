@@ -8,6 +8,7 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler<float, float>("screen_flash", EnqueueScreenFlashSpec);
         runner.AddCommandHandler<float, float, float, float, float>("screen_flash_rgb", EnqueueScreenFlashRgbSpec);
         runner.AddCommandHandler("screen_flash_hit", EnqueueScreenFlashHitSpec);
+        runner.AddCommandHandler<string, float>("screen_flash_preset", EnqueueScreenFlashPresetSpec);
 
         runner.AddCommandHandler<string, float, float>("screen_vignette", EnqueueScreenVignettePresetSpec);
         runner.AddCommandHandler<float>("screen_vignette_clear", EnqueueScreenVignetteClearSpec);
@@ -19,10 +20,11 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler<float, float, float, float, float, float>("screen_noise_custom", EnqueueScreenNoiseCustomSpec);
     }
 
-    private void EnqueueScreenFlashSpec(float amount = 1f, float duration = 0.16f)
+   private void EnqueueScreenFlashSpec(float amount = 1f, float duration = 0.16f)
     {
         var spec = new ScreenFlashCommandSpec
         {
+            mode = ScreenFlashMode.Custom,
             color = Color.white,
             amount = amount,
             attackDuration = 0.02f,
@@ -34,15 +36,11 @@ public sealed partial class YarnCommandBridge
         Collect(spec);
     }
 
-    private void EnqueueScreenFlashRgbSpec(
-        float r,
-        float g,
-        float b,
-        float amount = 1f,
-        float duration = 0.16f)
+    private void EnqueueScreenFlashRgbSpec(float r, float g, float b, float amount = 1f, float duration = 0.16f)
     {
         var spec = new ScreenFlashCommandSpec
         {
+            mode = ScreenFlashMode.Custom,
             color = new Color(r, g, b, 1f),
             amount = amount,
             attackDuration = 0.02f,
@@ -58,15 +56,58 @@ public sealed partial class YarnCommandBridge
     {
         var spec = new ScreenFlashCommandSpec
         {
-            color = new Color(1f, 0.16f, 0.10f, 1f),
-            amount = 0.45f,
-            attackDuration = 0.015f,
-            holdDuration = 0.015f,
-            releaseDuration = 0.18f,
+            mode = ScreenFlashMode.Preset,
+            preset = ScreenFlashPreset.Hit,
+            intensity = 1f,
             wait = false
         };
 
         Collect(spec);
+    }
+
+    private void EnqueueScreenFlashPresetSpec(string presetKey, float intensity = 1f)
+    {
+        var spec = new ScreenFlashCommandSpec
+        {
+            mode = ScreenFlashMode.Preset,
+            preset = ParseFlashPreset(presetKey),
+            intensity = intensity,
+            wait = false
+        };
+
+        Collect(spec);
+    }
+
+    private ScreenFlashPreset ParseFlashPreset(string key)
+    {
+        if (string.IsNullOrWhiteSpace(key))
+            return ScreenFlashPreset.Default;
+
+        switch (key.Trim().ToLowerInvariant())
+        {
+            case "default":
+            case "white":
+            case "pop":
+                return ScreenFlashPreset.Default;
+
+            case "soft":
+            case "gentle":
+                return ScreenFlashPreset.Soft;
+
+            case "hit":
+            case "impact":
+            case "damage":
+                return ScreenFlashPreset.Hit;
+
+            case "camera":
+            case "photo":
+                return ScreenFlashPreset.Camera;
+
+            default:
+                Debug.LogWarning(
+                    $"[YarnCommandBridge] Unknown screen flash preset '{key}'. Fallback to Default.");
+                return ScreenFlashPreset.Default;
+        }
     }
 
     private void EnqueueScreenVignettePresetSpec(

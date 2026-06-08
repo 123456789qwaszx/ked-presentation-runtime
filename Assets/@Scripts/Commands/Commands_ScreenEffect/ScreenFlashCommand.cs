@@ -3,6 +3,20 @@ using System.Collections;
 using DG.Tweening;
 using UnityEngine;
 
+public enum ScreenFlashMode
+{
+    Custom = 0,
+    Preset = 1
+}
+
+public enum ScreenFlashPreset
+{
+    Default = 0,
+    Soft = 1,
+    Hit = 2,
+    Camera = 3
+}
+
 [Serializable]
 [CommandMenuHint(
     "Screen Effect",
@@ -15,13 +29,20 @@ using UnityEngine;
     SetOrder = -700)]
 public sealed class ScreenFlashCommandSpec : CommandSpecBase
 {
-    [Header("Flash")]
+    [Header("Mode")]
+    public ScreenFlashMode mode = ScreenFlashMode.Preset;
+    public ScreenFlashPreset preset = ScreenFlashPreset.Default;
+
+    [Range(0f, 1f)]
+    public float intensity = 1f;
+
+    [Header("Custom - Flash")]
     public Color color = Color.white;
 
     [Range(0f, 1f)]
     public float amount = 1f;
 
-    [Header("Timing")]
+    [Header("Custom - Timing")]
     [Min(0f)] public float attackDuration = 0.03f;
     [Min(0f)] public float holdDuration = 0.02f;
     [Min(0f)] public float releaseDuration = 0.14f;
@@ -37,6 +58,7 @@ public sealed class ScreenFlashCommandSpec : CommandSpecBase
 public sealed class ScreenFlashCommand : CommandBase
 {
     private readonly ScreenFlashCommandSpec _spec;
+    private readonly ScreenFlashPresetDBSO _presetDb;
 
     private ScreenFlashEffectController _controller;
     private Sequence _sequence;
@@ -47,9 +69,10 @@ public sealed class ScreenFlashCommand : CommandBase
     public override bool WaitForCompletion => _spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
-    public ScreenFlashCommand(ScreenFlashCommandSpec spec)
+    public ScreenFlashCommand(ScreenFlashCommandSpec spec, ScreenFlashPresetDBSO presetDb)
     {
         _spec = spec;
+        _presetDb = presetDb;
     }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
@@ -65,24 +88,25 @@ public sealed class ScreenFlashCommand : CommandBase
 
         _canApply = true;
 
-        float targetAmount = Mathf.Clamp01(_spec.amount);
+        FlashSettings settings = BuildSettings();
+        float targetAmount = settings.Amount;
 
-        if (_spec.attackDuration <= 0f &&
-            _spec.holdDuration <= 0f &&
-            _spec.releaseDuration <= 0f)
+        if (settings.AttackDuration <= 0f &&
+            settings.HoldDuration <= 0f &&
+            settings.ReleaseDuration <= 0f)
         {
-            _controller.ApplyImmediate(0f, _spec.color);
+            _controller.ApplyImmediate(0f, settings.Color);
             ClearRuntimeRefs();
             yield break;
         }
 
-        _controller.ApplyImmediate(0f, _spec.color);
+        _controller.ApplyImmediate(0f, settings.Color);
 
         _sequence = DOTween.Sequence()
             .SetTarget(_controller.transform)
             .SetUpdate(true);
 
-        if (_spec.attackDuration > 0f)
+        if (settings.AttackDuration > 0f)
         {
             _sequence.Append(DOTween.To(
                     () => _controller != null ? _controller.FlashAmount : 0f,
@@ -91,11 +115,11 @@ public sealed class ScreenFlashCommand : CommandBase
                         if (!_canApply || _controller == null)
                             return;
 
-                        _controller.ApplyImmediate(value, _spec.color);
+                        _controller.ApplyImmediate(value, settings.Color);
                     },
                     targetAmount,
-                    _spec.attackDuration)
-                .SetEase(_spec.attackEase));
+                    settings.AttackDuration)
+                .SetEase(settings.AttackEase));
         }
         else
         {
@@ -104,14 +128,14 @@ public sealed class ScreenFlashCommand : CommandBase
                 if (!_canApply || _controller == null)
                     return;
 
-                _controller.ApplyImmediate(targetAmount, _spec.color);
+                _controller.ApplyImmediate(targetAmount, settings.Color);
             });
         }
 
-        if (_spec.holdDuration > 0f)
-            _sequence.AppendInterval(_spec.holdDuration);
+        if (settings.HoldDuration > 0f)
+            _sequence.AppendInterval(settings.HoldDuration);
 
-        if (_spec.releaseDuration > 0f)
+        if (settings.ReleaseDuration > 0f)
         {
             _sequence.Append(DOTween.To(
                     () => _controller != null ? _controller.FlashAmount : targetAmount,
@@ -120,11 +144,11 @@ public sealed class ScreenFlashCommand : CommandBase
                         if (!_canApply || _controller == null)
                             return;
 
-                        _controller.ApplyImmediate(value, _spec.color);
+                        _controller.ApplyImmediate(value, settings.Color);
                     },
                     0f,
-                    _spec.releaseDuration)
-                .SetEase(_spec.releaseEase));
+                    settings.ReleaseDuration)
+                .SetEase(settings.ReleaseEase));
         }
         else
         {
@@ -133,7 +157,7 @@ public sealed class ScreenFlashCommand : CommandBase
                 if (!_canApply || _controller == null)
                     return;
 
-                _controller.ApplyImmediate(0f, _spec.color);
+                _controller.ApplyImmediate(0f, settings.Color);
             });
         }
 
@@ -142,7 +166,7 @@ public sealed class ScreenFlashCommand : CommandBase
             if (!_canApply || _controller == null)
                 return;
 
-            _controller.ApplyImmediate(0f, _spec.color);
+            _controller.ApplyImmediate(0f, settings.Color);
             ClearRuntimeRefs();
         });
 
@@ -187,6 +211,42 @@ public sealed class ScreenFlashCommand : CommandBase
         ClearRuntimeRefs();
     }
 
+    private FlashSettings BuildSettings()
+    {
+        float intensity = Mathf.Clamp01(_spec.intensity);
+
+        switch (_spec.mode)
+        {
+            case ScreenFlashMode.Preset:
+                if (_presetDb != null && _presetDb.TryGet(_spec.preset, out ScreenFlashPresetDBSO.Entry e))
+                {
+                    return new FlashSettings(
+                        e.color,
+                        e.amount * intensity,
+                        e.attackDuration,
+                        e.holdDuration,
+                        e.releaseDuration,
+                        e.attackEase,
+                        e.releaseEase);
+                }
+
+                // SO 미할당/누락 시 폴백 (기존 default white flash).
+                return new FlashSettings(
+                    Color.white, 1f * intensity, 0.02f, 0.01f, 0.16f, Ease.OutCubic, Ease.OutCubic);
+
+            case ScreenFlashMode.Custom:
+            default:
+                return new FlashSettings(
+                    _spec.color,
+                    _spec.amount * intensity,
+                    _spec.attackDuration,
+                    _spec.holdDuration,
+                    _spec.releaseDuration,
+                    _spec.attackEase,
+                    _spec.releaseEase);
+        }
+    }
+
     private void ResolveRefs()
     {
         _resolveAttempted = true;
@@ -195,8 +255,7 @@ public sealed class ScreenFlashCommand : CommandBase
 
         if (root == null)
         {
-            Debug.LogWarning(
-                "[ScreenFlashCommand] Failed to resolve PresentationUIRoot.");
+            Debug.LogWarning("[ScreenFlashCommand] Failed to resolve PresentationUIRoot.");
             return;
         }
 
@@ -205,9 +264,7 @@ public sealed class ScreenFlashCommand : CommandBase
         if (_controller != null)
             return;
 
-        Debug.LogWarning(
-            "[ScreenFlashCommand] Failed to resolve ScreenFlashEffectController.",
-            root);
+        Debug.LogWarning("[ScreenFlashCommand] Failed to resolve ScreenFlashEffectController.", root);
     }
 
     private void ClearRuntimeRefs()
@@ -215,5 +272,34 @@ public sealed class ScreenFlashCommand : CommandBase
         _canApply = false;
         _controller = null;
         _sequence = null;
+    }
+
+    private readonly struct FlashSettings
+    {
+        public readonly Color Color;
+        public readonly float Amount;
+        public readonly float AttackDuration;
+        public readonly float HoldDuration;
+        public readonly float ReleaseDuration;
+        public readonly Ease AttackEase;
+        public readonly Ease ReleaseEase;
+
+        public FlashSettings(
+            Color color,
+            float amount,
+            float attackDuration,
+            float holdDuration,
+            float releaseDuration,
+            Ease attackEase,
+            Ease releaseEase)
+        {
+            Color = color;
+            Amount = Mathf.Clamp01(amount);
+            AttackDuration = Mathf.Max(0f, attackDuration);
+            HoldDuration = Mathf.Max(0f, holdDuration);
+            ReleaseDuration = Mathf.Max(0f, releaseDuration);
+            AttackEase = attackEase;
+            ReleaseEase = releaseEase;
+        }
     }
 }

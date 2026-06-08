@@ -75,6 +75,7 @@ public sealed class ScreenVignetteCommandSpec : CommandSpecBase
 public sealed class ScreenVignetteCommand : CommandBase
 {
     private readonly ScreenVignetteCommandSpec _spec;
+    private readonly ScreenVignettePresetDBSO _presetDb;
 
     private ScreenVignetteEffectController _controller;
     private Tween _tween;
@@ -88,9 +89,10 @@ public sealed class ScreenVignetteCommand : CommandBase
     public override bool WaitForCompletion => _spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
-    public ScreenVignetteCommand(ScreenVignetteCommandSpec spec)
+    public ScreenVignetteCommand(ScreenVignetteCommandSpec spec, ScreenVignettePresetDBSO presetDb)
     {
         _spec = spec;
+        _presetDb = presetDb;
     }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
@@ -252,64 +254,17 @@ public sealed class ScreenVignetteCommand : CommandBase
 
     private VignetteState BuildPresetState(ScreenVignettePreset preset, float intensity)
     {
-        switch (preset)
+        if (_presetDb != null && _presetDb.TryGet(preset, out ScreenVignettePresetDBSO.Entry e))
         {
-            case ScreenVignettePreset.DefaultFocus:
-                return new VignetteState(
-                    0.35f * intensity,
-                    Color.black,
-                    0.25f,
-                    0.10f,
-                    1.2f);
-
-            case ScreenVignettePreset.Tension:
-                return new VignetteState(
-                    0.55f * intensity,
-                    Color.black,
-                    0.15f,
-                    0.22f,
-                    1.2f);
-
-            case ScreenVignettePreset.Horror:
-                return new VignetteState(
-                    0.78f * intensity,
-                    new Color(0.02f, 0.015f, 0.018f, 1f),
-                    0.14f,
-                    0.36f,
-                    1.2f);
-
-            case ScreenVignettePreset.Danger:
-                return new VignetteState(
-                    0.58f * intensity,
-                    new Color(0.35f, 0.02f, 0.015f, 1f),
-                    0.14f,
-                    0.34f,
-                    1.2f);
-
-            case ScreenVignettePreset.Memory:
-                return new VignetteState(
-                    0.36f * intensity,
-                    new Color(0.34f, 0.38f, 0.48f, 1f),
-                    0.10f,
-                    0.36f,
-                    1.2f);
-
-            case ScreenVignettePreset.Dream:
-                return new VignetteState(
-                    0.32f * intensity,
-                    new Color(0.38f, 0.32f, 0.52f, 1f),
-                    0.34f,
-                    0.12f,
-                    1.2f);
-
-            default:
-                return new VignetteState(
-                    0.35f * intensity,
-                    Color.black,
-                    0.25f,
-                    0.20f,
-                    1.777f);
+            return new VignetteState(
+                e.amount * intensity,
+                e.color,
+                e.radius,
+                e.softness,
+                e.aspect);
         }
+
+        return new VignetteState(0.35f * intensity, Color.black, 0.25f, 0.10f, 1.2f);
     }
 
     private VignetteState BuildLetterBoxState(float amount, float intensity)
@@ -317,17 +272,19 @@ public sealed class ScreenVignetteCommand : CommandBase
         float t = Mathf.Clamp01(amount) * intensity;
 
         // SG structure:
-        // Aspect = 0 removes horizontal distance.
-        // Distance becomes mostly abs(uv.y - 0.5).
-        // Higher radius means less visible bar.
-        // Lower radius means bars move further inward.
-        float radius = Mathf.Lerp(0.52f, 0.23f, t);
+        // Aspect = 0 removes horizontal distance. Distance becomes mostly abs(uv.y - 0.5).
+        // Higher radius means less visible bar. Lower radius means bars move further inward.
+        ScreenVignettePresetDBSO.LetterBoxConfig lb = _presetDb != null
+            ? _presetDb.LetterBox
+            : ScreenVignettePresetDBSO.DefaultLetterBox();
+
+        float radius = Mathf.Lerp(lb.radiusOpen, lb.radiusClosed, t);
 
         return new VignetteState(
             1f,
-            Color.black,
+            lb.color,
             radius,
-            Mathf.Max(0.001f, _spec.letterBoxSoftness),
+            Mathf.Max(0.001f, _spec.letterBoxSoftness), // softness는 spec(per-call) 유지
             0f);
     }
 

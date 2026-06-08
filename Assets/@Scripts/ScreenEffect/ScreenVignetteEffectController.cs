@@ -19,7 +19,7 @@ public sealed class ScreenVignetteEffectController : MonoBehaviour
     [SerializeField, Range(0.001f, 1f)] private float defaultSoftness = 0.35f;
     [SerializeField, Min(0f)] private float defaultAspect = 1.777f;
 
-    private Material _runtimeMaterial;
+    private UiEffectMaterialBinding _material;
 
     private float _amount;
     private Color _color;
@@ -39,15 +39,12 @@ public sealed class ScreenVignetteEffectController : MonoBehaviour
     public float Softness => _softness;
     public float Aspect => _aspect;
 
-    private void Reset()
-    {
-        EnsureTarget();
-    }
+    private void Reset() => EnsureTarget();
 
     private void Awake()
     {
         EnsureTarget();
-        EnsureRuntimeMaterial();
+        EnsureMaterial();
 
         _amount = Mathf.Clamp01(defaultAmount);
         _color = defaultColor;
@@ -64,12 +61,8 @@ public sealed class ScreenVignetteEffectController : MonoBehaviour
     private void OnDestroy()
     {
         KillTween(false);
-
-        if (_runtimeMaterial != null)
-        {
-            Destroy(_runtimeMaterial);
-            _runtimeMaterial = null;
-        }
+        _material?.Dispose();
+        _material = null;
     }
 
     public void ApplyImmediate(
@@ -79,9 +72,9 @@ public sealed class ScreenVignetteEffectController : MonoBehaviour
         float softness,
         float aspect)
     {
-        EnsureRuntimeMaterial();
+        EnsureMaterial();
 
-        if (_runtimeMaterial == null)
+        if (_material == null || !_material.IsValid)
             return;
 
         _amount = Mathf.Clamp01(amount);
@@ -95,70 +88,42 @@ public sealed class ScreenVignetteEffectController : MonoBehaviour
 
     public void ClearImmediate()
     {
-        ApplyImmediate(
-            0f,
-            _color,
-            _radius,
-            _softness,
-            _aspect);
+        ApplyImmediate(0f, _color, _radius, _softness, _aspect);
     }
 
-    public void KillTween(bool complete)
-    {
-        transform.DOKill(complete);
-    }
+    public void KillTween(bool complete) => transform.DOKill(complete);
 
     private void EnsureTarget()
     {
-        if (targetImage != null)
-            return;
-
-        targetImage = GetComponent<Image>();
+        if (targetImage == null)
+            targetImage = GetComponent<Image>();
     }
 
-    private void EnsureRuntimeMaterial()
+    private void EnsureMaterial()
     {
         EnsureTarget();
 
-        if (_runtimeMaterial != null)
+        if (_material != null)
             return;
 
         if (targetImage == null)
         {
-            Debug.LogWarning(
-                "[ScreenVignetteEffectController] targetImage is missing.",
-                this);
+            Debug.LogWarning("[ScreenVignetteEffectController] targetImage is missing.", this);
             return;
         }
 
-        Material baseMaterial = sourceMaterial != null
-            ? sourceMaterial
-            : targetImage.material;
-
-        if (baseMaterial == null)
-        {
-            Debug.LogWarning(
-                "[ScreenVignetteEffectController] source material is missing. " +
-                "Assign M_UIScreenVignette to the Image material or sourceMaterial.",
-                this);
-            return;
-        }
-
-        _runtimeMaterial = Instantiate(baseMaterial);
-        _runtimeMaterial.name = $"{baseMaterial.name}_Runtime_{gameObject.name}";
-
-        targetImage.material = _runtimeMaterial;
+        _material = new UiEffectMaterialBinding(targetImage, sourceMaterial, gameObject.name);
     }
 
     private void ApplyMaterialValues()
     {
-        if (_runtimeMaterial == null)
+        if (_material == null)
             return;
 
-        _runtimeMaterial.SetFloat(VignetteAmountId, _amount);
-        _runtimeMaterial.SetColor(VignetteColorId, _color);
-        _runtimeMaterial.SetFloat(VignetteRadiusId, _radius);
-        _runtimeMaterial.SetFloat(VignetteSoftnessId, _softness);
-        _runtimeMaterial.SetFloat(AspectId, _aspect);
+        _material.SetFloat(VignetteAmountId, _amount);
+        _material.SetColor(VignetteColorId, _color);
+        _material.SetFloat(VignetteRadiusId, _radius);
+        _material.SetFloat(VignetteSoftnessId, _softness);
+        _material.SetFloat(AspectId, _aspect);
     }
 }

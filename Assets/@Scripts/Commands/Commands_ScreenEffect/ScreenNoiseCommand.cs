@@ -59,6 +59,7 @@ public sealed class ScreenNoiseCommandSpec : CommandSpecBase
 public sealed class ScreenNoiseCommand : CommandBase
 {
     private readonly ScreenNoiseCommandSpec _spec;
+    private readonly ScreenNoisePresetDBSO _presetDb;
 
     private ScreenNoiseEffectController _controller;
     private Tween _tween;
@@ -72,9 +73,10 @@ public sealed class ScreenNoiseCommand : CommandBase
     public override bool WaitForCompletion => _spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
-    public ScreenNoiseCommand(ScreenNoiseCommandSpec spec)
+    public ScreenNoiseCommand(ScreenNoiseCommandSpec spec, ScreenNoisePresetDBSO presetDb)
     {
         _spec = spec;
+        _presetDb = presetDb;
     }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
@@ -236,71 +238,18 @@ public sealed class ScreenNoiseCommand : CommandBase
 
     private NoiseState BuildPresetState(ScreenNoisePreset preset, float intensity)
     {
-        switch (preset)
+        if (_presetDb != null && _presetDb.TryGet(preset, out ScreenNoisePresetDBSO.Entry e))
         {
-            case ScreenNoisePreset.Default:
-                return new NoiseState(
-                    1f * intensity,
-                    Color.white,
-                    0.8f,
-                    0.015f,
-                    0.012f,
-                    1f);
-
-            case ScreenNoisePreset.Memory:
-                return new NoiseState(
-                    0.32f * intensity,
-                    new Color(0.72f, 0.78f, 0.90f, 1f),
-                    0.85f,
-                    0.010f,
-                    0.008f,
-                    1.15f);
-
-            case ScreenNoisePreset.Horror:
-                return new NoiseState(
-                    0.55f * intensity,
-                    new Color(0.62f, 0.62f, 0.66f, 1f),
-                    1.25f,
-                    0.030f,
-                    0.045f,
-                    1.8f);
-
-            case ScreenNoisePreset.Broadcast:
-                return new NoiseState(
-                    0.50f * intensity,
-                    new Color(0.80f, 0.90f, 1f, 1f),
-                    1.8f,
-                    0.080f,
-                    0.012f,
-                    2.2f);
-
-            case ScreenNoisePreset.Dream:
-                return new NoiseState(
-                    0.22f * intensity,
-                    new Color(0.76f, 0.70f, 0.95f, 1f),
-                    0.65f,
-                    0.006f,
-                    0.010f,
-                    0.9f);
-
-            case ScreenNoisePreset.RainMood:
-                return new NoiseState(
-                    0.28f * intensity,
-                    new Color(0.70f, 0.78f, 0.90f, 1f),
-                    1.0f,
-                    0.012f,
-                    0.035f,
-                    1.1f);
-
-            default:
-                return new NoiseState(
-                    1f * intensity,
-                    Color.white,
-                    0.8f,
-                    0.015f,
-                    0.012f,
-                    1f);
+            return new NoiseState(
+                e.amount * intensity,
+                e.color,
+                e.scale,
+                e.speedX,
+                e.speedY,
+                e.contrast);
         }
+
+        return new NoiseState(1f * intensity, Color.white, 0.8f, 0.015f, 0.012f, 1f);
     }
 
     private void CommitFinalState()

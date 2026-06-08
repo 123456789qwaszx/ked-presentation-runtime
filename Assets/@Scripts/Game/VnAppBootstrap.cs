@@ -117,6 +117,10 @@ public class VnAppBootstrap : MonoBehaviour
     [SerializeField] private YarnLaneDebugView yarnLaneDebugView;
     
     [SerializeField] private UIBackgroundRigBlurRuntime uiBackgroundRigBlurRuntime;
+    [SerializeField] private ScreenNoisePresetDBSO screenNoisePresetDbso;
+    [SerializeField] private ScreenVignettePresetDBSO screenVignettePresetDbso;
+    [SerializeField] private ScreenFlashPresetDBSO screenFlashPresetDbso;
+    
 
     
     private PresentationSessionBridge _presentationSessionBridge;
@@ -241,7 +245,10 @@ public class VnAppBootstrap : MonoBehaviour
             audioSystem,
             audioClipResolver);
 
-        ScreenEffectCommandFactory screenEffectFactory = new();
+        ScreenEffectCommandFactory screenEffectFactory = new(
+            screenFlashPresetDbso,
+            screenNoisePresetDbso, 
+            screenVignettePresetDbso);
 
         CompositeCommandFactory factory = new(
             charRigFactory,

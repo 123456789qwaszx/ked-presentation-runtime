@@ -20,7 +20,7 @@ public sealed class ScreenNoiseEffectController : MonoBehaviour
     [SerializeField] private float defaultSpeedY = 0.012f;
     [SerializeField, Min(0f)] private float defaultContrast = 1f;
 
-    private Material _runtimeMaterial;
+    private UiEffectMaterialBinding _material;
 
     private float _amount;
     private Color _color;
@@ -43,15 +43,12 @@ public sealed class ScreenNoiseEffectController : MonoBehaviour
     public float SpeedY => _speedY;
     public float Contrast => _contrast;
 
-    private void Reset()
-    {
-        EnsureTarget();
-    }
+    private void Reset() => EnsureTarget();
 
     private void Awake()
     {
         EnsureTarget();
-        EnsureRuntimeMaterial();
+        EnsureMaterial();
 
         _amount = Mathf.Clamp01(defaultAmount);
         _color = defaultColor;
@@ -69,12 +66,8 @@ public sealed class ScreenNoiseEffectController : MonoBehaviour
     private void OnDestroy()
     {
         KillTween(false);
-
-        if (_runtimeMaterial != null)
-        {
-            Destroy(_runtimeMaterial);
-            _runtimeMaterial = null;
-        }
+        _material?.Dispose();
+        _material = null;
     }
 
     public void ApplyImmediate(
@@ -85,9 +78,9 @@ public sealed class ScreenNoiseEffectController : MonoBehaviour
         float speedY,
         float contrast)
     {
-        EnsureRuntimeMaterial();
+        EnsureMaterial();
 
-        if (_runtimeMaterial == null)
+        if (_material == null || !_material.IsValid)
             return;
 
         _amount = Mathf.Clamp01(amount);
@@ -102,72 +95,43 @@ public sealed class ScreenNoiseEffectController : MonoBehaviour
 
     public void ClearImmediate()
     {
-        ApplyImmediate(
-            0f,
-            _color,
-            _scale,
-            _speedX,
-            _speedY,
-            _contrast);
+        ApplyImmediate(0f, _color, _scale, _speedX, _speedY, _contrast);
     }
 
-    public void KillTween(bool complete)
-    {
-        transform.DOKill(complete);
-    }
+    public void KillTween(bool complete) => transform.DOKill(complete);
 
     private void EnsureTarget()
     {
-        if (targetImage != null)
-            return;
-
-        targetImage = GetComponent<Image>();
+        if (targetImage == null)
+            targetImage = GetComponent<Image>();
     }
 
-    private void EnsureRuntimeMaterial()
+    private void EnsureMaterial()
     {
         EnsureTarget();
 
-        if (_runtimeMaterial != null)
+        if (_material != null)
             return;
 
         if (targetImage == null)
         {
-            Debug.LogWarning(
-                "[ScreenNoiseEffectController] targetImage is missing.",
-                this);
+            Debug.LogWarning("[ScreenNoiseEffectController] targetImage is missing.", this);
             return;
         }
 
-        Material baseMaterial = sourceMaterial != null
-            ? sourceMaterial
-            : targetImage.material;
-
-        if (baseMaterial == null)
-        {
-            Debug.LogWarning(
-                "[ScreenNoiseEffectController] source material is missing. " +
-                "Assign M_UIScreenNoise to the Image material or sourceMaterial.",
-                this);
-            return;
-        }
-
-        _runtimeMaterial = Instantiate(baseMaterial);
-        _runtimeMaterial.name = $"{baseMaterial.name}_Runtime_{gameObject.name}";
-
-        targetImage.material = _runtimeMaterial;
+        _material = new UiEffectMaterialBinding(targetImage, sourceMaterial, gameObject.name);
     }
 
     private void ApplyMaterialValues()
     {
-        if (_runtimeMaterial == null)
+        if (_material == null)
             return;
 
-        _runtimeMaterial.SetFloat(NoiseAmountId, _amount);
-        _runtimeMaterial.SetColor(NoiseColorId, _color);
-        _runtimeMaterial.SetFloat(NoiseScaleId, _scale);
-        _runtimeMaterial.SetFloat(NoiseSpeedXId, _speedX);
-        _runtimeMaterial.SetFloat(NoiseSpeedYId, _speedY);
-        _runtimeMaterial.SetFloat(NoiseContrastId, _contrast);
+        _material.SetFloat(NoiseAmountId, _amount);
+        _material.SetColor(NoiseColorId, _color);
+        _material.SetFloat(NoiseScaleId, _scale);
+        _material.SetFloat(NoiseSpeedXId, _speedX);
+        _material.SetFloat(NoiseSpeedYId, _speedY);
+        _material.SetFloat(NoiseContrastId, _contrast);
     }
 }

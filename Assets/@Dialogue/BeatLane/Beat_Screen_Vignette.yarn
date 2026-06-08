@@ -6,7 +6,7 @@
 
 
 //긴장:
-//<<screen_vignette tension 33 0.5>>
+<<screen_vignette tension 0.5 0.5>>
 
 //공포:
 //<<screen_vignette horror 3 0.7>>
