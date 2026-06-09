@@ -47,8 +47,7 @@ public sealed class JoltCommand : CommandBase
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        _rect.DOKill(true);
-        HasClaimedTarget = true;
+        ClaimTarget();
 
         if (_spec.duration <= 0f || Mathf.Approximately(_spec.strength, 0f))
         {
@@ -104,7 +103,7 @@ public sealed class JoltCommand : CommandBase
             ResolveRefs(scope);
 
         if (!HasClaimedTarget)
-            _rect.DOKill(true);
+            ClaimTarget();
         
         CommitFinalState();
     }
@@ -116,15 +115,22 @@ public sealed class JoltCommand : CommandBase
         _resolveAttempted = true;
 
         CharacterRigRefs rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
-
         _rect = rig.GetRect(_spec.target);
+    }
+    
+    private void ClaimTarget()
+    {
+        _rect.DOKill(true);
         _basePos = _rect.anchoredPosition;
+        
+        HasClaimedTarget = true;
     }
     
     private void CommitFinalState()
     {
-        _rect.DOKill(false);
         _rect.anchoredPosition = _basePos;
+        
+        HasClaimedTarget = false;
     }
 
     private static Vector2 GetSignedDirection(CharRigDirection direction)
