@@ -34,7 +34,6 @@ public sealed class FocusBlurFadeCommandSpec : CommandSpecBase
     public Ease ease = Ease.InOutCubic;
 
     [Header("Options")]
-    public bool killTween = true;
     public bool disableWhenClear = true;
     public bool blockRaycastWhenVisible = false;
 }
@@ -44,12 +43,15 @@ public sealed class FocusBlurFadeCommand : CommandBase
     private readonly FocusBlurFadeCommandSpec _spec;
 
     private FocusBlurFadeOverlay _overlay;
-    private Tween _tween;
-    private bool _resolveAttempted;
-    private bool _canCommitFinalState;
 
+    private float _startAlpha;
     private float _finalAlpha;
+    private float _startZoomAmount;
     private float _finalZoomAmount;
+
+    private bool _resolveAttempted;
+
+    private bool HasClaimedTarget { get; set; }
 
     public override bool WaitForCompletion => _spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
@@ -67,57 +69,27 @@ public sealed class FocusBlurFadeCommand : CommandBase
         if (_overlay == null)
             yield break;
 
-        if (_spec.killTween)
-            DOTween.Kill(_overlay, true);
+        ClaimTarget();
 
-        ApplyConfig();
-
-        float startAlpha = _spec.mode == FocusBlurFadeMode.FadeOut
-            ? 0f
-            : _spec.maxAlpha;
-
-        _finalAlpha = _spec.mode == FocusBlurFadeMode.FadeOut
-            ? _spec.maxAlpha
-            : 0f;
-
-        float startZoomAmount = _spec.mode == FocusBlurFadeMode.FadeOut
-            ? 0f
-            : _spec.zoomAmount;
-
-        _finalZoomAmount = _spec.mode == FocusBlurFadeMode.FadeOut
-            ? _spec.zoomAmount
-            : 0f;
-
-        _canCommitFinalState = true;
-
-        if (scope.IsRollbackSeeking)
-        {
-            CommitFinalState();
-            yield break;
-        }
-
-        if (_spec.duration <= 0f)
+        if (scope.IsRollbackSeeking || _spec.duration <= 0f)
         {
             CommitFinalState();
             yield break;
         }
 
         _overlay.gameObject.SetActive(true);
-        _overlay.SetAlpha(startAlpha);
-        _overlay.SetZoomAmount(startZoomAmount);
+        _overlay.SetAlpha(_startAlpha);
+        _overlay.SetZoomAmount(_startZoomAmount);
 
-        _tween = DOTween
+        Tween tween = DOTween
             .To(
                 () => 0f,
                 t =>
                 {
-                    if (!_canCommitFinalState || _overlay == null)
-                        return;
-
                     float e = DOVirtual.EasedValue(0f, 1f, t, _spec.ease);
 
-                    float alpha = Mathf.Lerp(startAlpha, _finalAlpha, e);
-                    float zoom = Mathf.Lerp(startZoomAmount, _finalZoomAmount, e);
+                    float alpha = Mathf.Lerp(_startAlpha, _finalAlpha, e);
+                    float zoom = Mathf.Lerp(_startZoomAmount, _finalZoomAmount, e);
 
                     _overlay.SetAlpha(alpha);
                     _overlay.SetZoomAmount(zoom);
@@ -127,16 +99,10 @@ public sealed class FocusBlurFadeCommand : CommandBase
             .SetEase(Ease.Linear)
             .SetUpdate(true)
             .SetTarget(_overlay)
-            .OnComplete(() =>
-            {
-                if (!_canCommitFinalState || _overlay == null)
-                    return;
-
-                CommitFinalState();
-            });
+            .OnComplete(CommitFinalState);
 
         if (_spec.wait)
-            yield return _tween.WaitForCompletion();
+            yield return tween.WaitForCompletion();
     }
 
     protected override void OnSkip(CommandRunScope scope)
@@ -147,65 +113,68 @@ public sealed class FocusBlurFadeCommand : CommandBase
         if (_overlay == null)
             return;
 
-        CommitFinalState();
-    }
-
-    protected override void OnRollbackSeek(CommandRunScope scope)
-    {
-        OnSkip(scope);
-    }
-
-    protected override void OnCommandCompleted(CommandRunScope scope)
-    {
-        if (!_resolveAttempted)
-            ResolveRefs(scope);
-
-        if (!_canCommitFinalState || _overlay == null)
-            return;
-
-        _tween?.Kill(false);
-        DOTween.Kill(_overlay, false);
+        if (!HasClaimedTarget)
+            ClaimTarget();
 
         CommitFinalState();
     }
 
-    private void CommitFinalState()
-    {
-        if (_overlay != null)
-        {
-            ApplyConfig();
-
-            _overlay.SetAlpha(_finalAlpha);
-            _overlay.SetZoomAmount(_finalZoomAmount);
-
-            if (_spec.disableWhenClear && _finalAlpha <= 0f)
-            {
-                _overlay.ResetZoom();
-                _overlay.gameObject.SetActive(false);
-            }
-        }
-
-        _canCommitFinalState = false;
-        _overlay = null;
-        _tween = null;
-    }
+    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
 
     private void ResolveRefs(CommandRunScope scope)
     {
         _resolveAttempted = true;
 
-        IPresentationTransitionSlotProvider transitionSlotProvider = UIManager.Instance.GetUI<PresentationUIRoot>();
+        IPresentationTransitionSlotProvider transitionSlotProvider =
+            UIManager.Instance.GetUI<PresentationUIRoot>();
+
         RectTransform rect = transitionSlotProvider.FocusBlurFade;
-
         _overlay = rect.GetComponent<FocusBlurFadeOverlay>();
+    }
 
+    private void ClaimTarget()
+    {
+        DOTween.Kill(_overlay, true);
+
+        ApplyConfig();
+
+        _startAlpha = _spec.mode == FocusBlurFadeMode.FadeOut
+            ? 0f
+            : _spec.maxAlpha;
+
+        _finalAlpha = _spec.mode == FocusBlurFadeMode.FadeOut
+            ? _spec.maxAlpha
+            : 0f;
+
+        _startZoomAmount = _spec.mode == FocusBlurFadeMode.FadeOut
+            ? 0f
+            : _spec.zoomAmount;
+
+        _finalZoomAmount = _spec.mode == FocusBlurFadeMode.FadeOut
+            ? _spec.zoomAmount
+            : 0f;
+
+        HasClaimedTarget = true;
+    }
+
+    private void CommitFinalState()
+    {
+        ApplyConfig();
+
+        _overlay.SetAlpha(_finalAlpha);
+        _overlay.SetZoomAmount(_finalZoomAmount);
+
+        if (_spec.disableWhenClear && _finalAlpha <= 0f)
+        {
+            _overlay.ResetZoom();
+            _overlay.gameObject.SetActive(false);
+        }
+
+        HasClaimedTarget = false;
     }
 
     private void ApplyConfig()
     {
-        if (_overlay == null)
-            return;
-
         _overlay.SetColor(_spec.color);
         _overlay.BlockRaycastWhenVisible = _spec.blockRaycastWhenVisible;
     }

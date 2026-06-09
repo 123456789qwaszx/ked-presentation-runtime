@@ -17,7 +17,7 @@ public sealed class SignalCommandFactory : INodeCommandFactory
         {
             null => null,
 
-            WaitCommandSpec s => Create(s),
+            WaitCommandSpec s =>  new WaitCommand(s),
             HoldSignalCommandSpec s => Create(s),
             RaiseSignalCommandSpec s => Create(s),
 
@@ -27,8 +27,6 @@ public sealed class SignalCommandFactory : INodeCommandFactory
         return command != null;
     }
 
-    private CpsWaitCommand Create(WaitCommandSpec s)
-        => new(seconds: s.duration);
 
     private HoldSignalCommand Create(HoldSignalCommandSpec s)
         => new(

@@ -29,9 +29,6 @@ public sealed class SlantedMaskSlideInCommandSpec : CommandSpecBase
     [Tooltip("오버슛이 시작되는 진행률입니다. 0.75면 마지막 25% 구간에서 고무줄처럼 처리됩니다.")]
     [Range(0.01f, 0.99f)]
     public float overshootStart = 0.72f;
-
-    [Header("Options")]
-    public bool killTween = true;
 }
 
 public sealed class SlantedMaskSlideInCommand : CommandBase
@@ -39,9 +36,10 @@ public sealed class SlantedMaskSlideInCommand : CommandBase
     private readonly SlantedMaskSlideInCommandSpec _spec;
 
     private SlantedMaskGraphic _maskGraphic;
-    private Tween _tween;
+
     private bool _resolveAttempted;
-    private bool _canCommitFinalState;
+
+    private bool HasClaimedTarget { get; set; }
 
     public override bool WaitForCompletion => _spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
@@ -59,14 +57,9 @@ public sealed class SlantedMaskSlideInCommand : CommandBase
         if (_maskGraphic == null)
             yield break;
 
-        if (_spec.killTween)
-            DOTween.Kill(_maskGraphic, true);
+        ClaimTarget();
 
-        ApplyFixedMaskOptions();
-
-        _canCommitFinalState = true;
-
-        if (scope.IsRollbackSeeking)
+        if (scope.IsRollbackSeeking || _spec.duration <= 0f)
         {
             CommitFinalState();
             yield break;
@@ -75,12 +68,6 @@ public sealed class SlantedMaskSlideInCommand : CommandBase
         Vector2 start = _spec.fromOffset;
         Vector2 dest = _spec.toOffset;
 
-        if (_spec.duration <= 0f)
-        {
-            CommitFinalState();
-            yield break;
-        }
-
         Vector2 moveDir = dest - start;
         moveDir = moveDir.sqrMagnitude > 0f
             ? moveDir.normalized
@@ -88,14 +75,11 @@ public sealed class SlantedMaskSlideInCommand : CommandBase
 
         _maskGraphic.ShapeOffsetPixels = start;
 
-        _tween = DOTween
+        Tween tween = DOTween
             .To(
                 () => 0f,
                 t =>
                 {
-                    if (!_canCommitFinalState || _maskGraphic == null)
-                        return;
-
                     float e = DOVirtual.EasedValue(0f, 1f, t, _spec.ease);
 
                     Vector2 baseOffset = Vector2.LerpUnclamped(start, dest, e);
@@ -109,16 +93,10 @@ public sealed class SlantedMaskSlideInCommand : CommandBase
             .SetEase(Ease.Linear)
             .SetUpdate(true)
             .SetTarget(_maskGraphic)
-            .OnComplete(() =>
-            {
-                if (!_canCommitFinalState || _maskGraphic == null)
-                    return;
-
-                CommitFinalState();
-            });
+            .OnComplete(CommitFinalState);
 
         if (_spec.wait)
-            yield return _tween.WaitForCompletion();
+            yield return tween.WaitForCompletion();
     }
 
     protected override void OnSkip(CommandRunScope scope)
@@ -129,56 +107,43 @@ public sealed class SlantedMaskSlideInCommand : CommandBase
         if (_maskGraphic == null)
             return;
 
-        CommitFinalState();
-    }
-
-    protected override void OnRollbackSeek(CommandRunScope scope)
-    {
-        OnSkip(scope);
-    }
-
-    protected override void OnCommandCompleted(CommandRunScope scope)
-    {
-        if (!_resolveAttempted)
-            ResolveRefs(scope);
-
-        if (!_canCommitFinalState || _maskGraphic == null)
-            return;
-
-        _tween?.Kill(false);
-        DOTween.Kill(_maskGraphic, false);
+        if (!HasClaimedTarget)
+            ClaimTarget();
 
         CommitFinalState();
     }
 
-    private void CommitFinalState()
-    {
-        if (_maskGraphic != null)
-        {
-            ApplyFixedMaskOptions();
-            _maskGraphic.ShapeOffsetPixels = _spec.toOffset;
-        }
-
-        _canCommitFinalState = false;
-        _maskGraphic = null;
-        _tween = null;
-    }
+    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
 
     private void ResolveRefs(CommandRunScope scope)
     {
         _resolveAttempted = true;
 
-        IPresentationTransitionSlotProvider transitionSlotProvider = UIManager.Instance.GetUI<PresentationUIRoot>();
+        IPresentationTransitionSlotProvider transitionSlotProvider =
+            UIManager.Instance.GetUI<PresentationUIRoot>();
+
         RectTransform rect = transitionSlotProvider.SlantedMaskEdgeGraphic;
-        
         _maskGraphic = rect.GetComponent<SlantedMaskGraphic>();
+    }
+
+    private void ClaimTarget()
+    {
+        DOTween.Kill(_maskGraphic, true);
+        ApplyFixedMaskOptions();
+
+        HasClaimedTarget = true;
+    }
+
+    private void CommitFinalState()
+    {
+        ApplyFixedMaskOptions();
+        _maskGraphic.ShapeOffsetPixels = _spec.toOffset;
+
+        HasClaimedTarget = false;
     }
 
     private void ApplyFixedMaskOptions()
     {
-        if (_maskGraphic == null)
-            return;
-
         _maskGraphic.SlantToRight = _spec.slantToRight;
         _maskGraphic.FlipVertical = _spec.flipVertical;
     }
@@ -192,9 +157,6 @@ public sealed class SlantedMaskSlideInCommand : CommandBase
             return 0f;
 
         float t = Mathf.InverseLerp(overshootStart, 1f, e);
-
-        // 0 -> 1 -> 0
-        // 마지막 구간에서만 목적지를 살짝 지나갔다가 다시 돌아온다.
         return Mathf.Sin(t * Mathf.PI);
     }
 }

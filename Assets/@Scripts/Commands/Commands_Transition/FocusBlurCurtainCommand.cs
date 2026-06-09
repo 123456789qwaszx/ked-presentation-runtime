@@ -49,7 +49,6 @@ public sealed class FocusBlurCurtainCommandSpec : CommandSpecBase
     public Ease ease = Ease.InOutCubic;
 
     [Header("Options")]
-    public bool killTween = true;
     public bool disableWhenOpen = true;
     public bool blockRaycastWhenClosed = false;
 }
@@ -59,10 +58,12 @@ public sealed class FocusBlurCurtainCommand : CommandBase
     private readonly FocusBlurCurtainCommandSpec _spec;
 
     private FocusBlurCurtainGraphic _graphic;
-    private Tween _tween;
-    private bool _resolveAttempted;
-    private bool _canCommitFinalState;
+    private float _startProgress;
     private float _finalProgress;
+
+    private bool _resolveAttempted;
+
+    private bool HasClaimedTarget { get; set; }
 
     public override bool WaitForCompletion => _spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
@@ -80,59 +81,34 @@ public sealed class FocusBlurCurtainCommand : CommandBase
         if (_graphic == null)
             yield break;
 
-        if (_spec.killTween)
-            DOTween.Kill(_graphic, true);
+        ClaimTarget();
 
-        ApplyConfig();
-
-        float startProgress = _spec.mode == FocusBlurCurtainMode.Close ? 0f : 1f;
-        _finalProgress = _spec.mode == FocusBlurCurtainMode.Close ? 1f : 0f;
-
-        _canCommitFinalState = true;
-
-        if (scope.IsRollbackSeeking)
-        {
-            CommitFinalState();
-            yield break;
-        }
-
-        if (_spec.duration <= 0f)
+        if (scope.IsRollbackSeeking || _spec.duration <= 0f)
         {
             CommitFinalState();
             yield break;
         }
 
         _graphic.gameObject.SetActive(true);
-        _graphic.Progress01 = startProgress;
+        _graphic.Progress01 = _startProgress;
 
-        _tween = DOTween
+        Tween tween = DOTween
             .To(
                 () => 0f,
                 t =>
                 {
-                    if (!_canCommitFinalState || _graphic == null)
-                        return;
-
                     float e = DOVirtual.EasedValue(0f, 1f, t, _spec.ease);
-                    float value = Mathf.Lerp(startProgress, _finalProgress, e);
-
-                    _graphic.Progress01 = value;
+                    _graphic.Progress01 = Mathf.Lerp(_startProgress, _finalProgress, e);
                 },
                 1f,
                 _spec.duration)
             .SetEase(Ease.Linear)
             .SetUpdate(true)
             .SetTarget(_graphic)
-            .OnComplete(() =>
-            {
-                if (!_canCommitFinalState || _graphic == null)
-                    return;
-
-                CommitFinalState();
-            });
+            .OnComplete(CommitFinalState);
 
         if (_spec.wait)
-            yield return _tween.WaitForCompletion();
+            yield return tween.WaitForCompletion();
     }
 
     protected override void OnSkip(CommandRunScope scope)
@@ -143,65 +119,56 @@ public sealed class FocusBlurCurtainCommand : CommandBase
         if (_graphic == null)
             return;
 
-        CommitFinalState();
-    }
-
-    protected override void OnRollbackSeek(CommandRunScope scope)
-    {
-        OnSkip(scope);
-    }
-
-    protected override void OnCommandCompleted(CommandRunScope scope)
-    {
-        if (!_resolveAttempted)
-            ResolveRefs(scope);
-
-        if (!_canCommitFinalState || _graphic == null)
-            return;
-
-        _tween?.Kill(false);
-        DOTween.Kill(_graphic, false);
+        if (!HasClaimedTarget)
+            ClaimTarget();
 
         CommitFinalState();
     }
 
-    private void CommitFinalState()
-    {
-        if (_graphic != null)
-        {
-            ApplyConfig();
-
-            _graphic.Progress01 = _finalProgress;
-
-            bool isClosed = _finalProgress >= 1f;
-            bool isOpen = _finalProgress <= 0f;
-
-            _graphic.RaycastBlocking = _spec.blockRaycastWhenClosed && isClosed;
-
-            if (_spec.disableWhenOpen && isOpen)
-                _graphic.gameObject.SetActive(false);
-        }
-
-        _canCommitFinalState = false;
-        _graphic = null;
-        _tween = null;
-    }
+    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
 
     private void ResolveRefs(CommandRunScope scope)
     {
         _resolveAttempted = true;
 
-        IPresentationTransitionSlotProvider transitionSlotProvider = UIManager.Instance.GetUI<PresentationUIRoot>();
-        RectTransform rect = transitionSlotProvider.FocusBlurCurtain;
+        IPresentationTransitionSlotProvider transitionSlotProvider =
+            UIManager.Instance.GetUI<PresentationUIRoot>();
 
+        RectTransform rect = transitionSlotProvider.FocusBlurCurtain;
         _graphic = rect.GetComponent<FocusBlurCurtainGraphic>();
+    }
+
+    private void ClaimTarget()
+    {
+        DOTween.Kill(_graphic, true);
+
+        ApplyConfig();
+
+        _startProgress = _spec.mode == FocusBlurCurtainMode.Close ? 0f : 1f;
+        _finalProgress = _spec.mode == FocusBlurCurtainMode.Close ? 1f : 0f;
+
+        HasClaimedTarget = true;
+    }
+
+    private void CommitFinalState()
+    {
+        ApplyConfig();
+
+        _graphic.Progress01 = _finalProgress;
+
+        bool isClosed = _finalProgress >= 1f;
+        bool isOpen = _finalProgress <= 0f;
+
+        _graphic.RaycastBlocking = _spec.blockRaycastWhenClosed && isClosed;
+
+        if (_spec.disableWhenOpen && isOpen)
+            _graphic.gameObject.SetActive(false);
+
+        HasClaimedTarget = false;
     }
 
     private void ApplyConfig()
     {
-        if (_graphic == null)
-            return;
-
         _graphic.color = _spec.color;
 
         _graphic.Configure(

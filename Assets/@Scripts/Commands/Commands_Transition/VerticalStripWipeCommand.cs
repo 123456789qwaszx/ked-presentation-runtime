@@ -3,14 +3,6 @@ using System.Collections;
 using DG.Tweening;
 using UnityEngine;
 
-public enum PresentationDirection
-{
-    Left,
-    Right,
-    Up,
-    Down
-}
-
 public interface IPresentationTransitionSlotProvider
 {
     RectTransform VerticalStripWipe { get; }
@@ -27,7 +19,6 @@ public sealed partial class PresentationUIRoot : IPresentationTransitionSlotProv
     public RectTransform FocusBlurFade => View.Rect(Refs.FocusBlurFade);
     public RectTransform FocusBlurCurtain => View.Rect(Refs.FocusBlurCurtain);
     public RectTransform SlantedMaskEdgeGraphic => View.Rect(Refs.Stage01_Root);
-
 }
 
 public enum VerticalStripWipeMode
@@ -62,7 +53,6 @@ public sealed class VerticalStripWipeCommandSpec : CommandSpecBase
     public Ease ease = Ease.Linear;
 
     [Header("Options")]
-    public bool killTween = true;
     public bool disableWhenClear = true;
 }
 
@@ -71,10 +61,13 @@ public sealed class VerticalStripWipeCommand : CommandBase
     private readonly VerticalStripWipeCommandSpec _spec;
 
     private VerticalStripWipeGraphic _graphic;
-    private Tween _tween;
-    private bool _resolveAttempted;
-    private bool _canCommitFinalState;
+    private float _startProgress;
     private float _finalProgress;
+    private float _duration;
+
+    private bool _resolveAttempted;
+
+    private bool HasClaimedTarget { get; set; }
 
     public override bool WaitForCompletion => _spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
@@ -92,60 +85,33 @@ public sealed class VerticalStripWipeCommand : CommandBase
         if (_graphic == null)
             yield break;
 
-        if (_spec.killTween)
-            DOTween.Kill(_graphic, true);
+        ClaimTarget();
 
-        ApplyConfig();
-
-        float startProgress = _spec.mode == VerticalStripWipeMode.Cover ? 0f : 1f;
-        _finalProgress = _spec.mode == VerticalStripWipeMode.Cover ? 1f : 0f;
-
-        _canCommitFinalState = true;
-
-        if (scope.IsRollbackSeeking)
-        {
-            CommitFinalState();
-            yield break;
-        }
-
-        float duration = _spec.duration > 0f
-            ? _spec.duration
-            : _graphic.TotalDuration;
-
-        if (duration <= 0f)
+        if (scope.IsRollbackSeeking || _duration <= 0f)
         {
             CommitFinalState();
             yield break;
         }
 
         _graphic.gameObject.SetActive(true);
-        _graphic.Progress01 = startProgress;
+        _graphic.Progress01 = _startProgress;
 
-        _tween = DOTween
+        Tween tween = DOTween
             .To(
-                () => startProgress,
+                () => _startProgress,
                 value =>
                 {
-                    if (!_canCommitFinalState || _graphic == null)
-                        return;
-
                     _graphic.Progress01 = value;
                 },
                 _finalProgress,
-                duration)
+                _duration)
             .SetEase(_spec.ease)
             .SetUpdate(true)
             .SetTarget(_graphic)
-            .OnComplete(() =>
-            {
-                if (!_canCommitFinalState || _graphic == null)
-                    return;
-
-                CommitFinalState();
-            });
+            .OnComplete(CommitFinalState);
 
         if (_spec.wait)
-            yield return _tween.WaitForCompletion();
+            yield return tween.WaitForCompletion();
     }
 
     protected override void OnSkip(CommandRunScope scope)
@@ -156,62 +122,58 @@ public sealed class VerticalStripWipeCommand : CommandBase
         if (_graphic == null)
             return;
 
-        CommitFinalState();
-    }
-
-    protected override void OnRollbackSeek(CommandRunScope scope)
-    {
-        OnSkip(scope);
-    }
-
-    protected override void OnCommandCompleted(CommandRunScope scope)
-    {
-        if (!_resolveAttempted)
-            ResolveRefs(scope);
-
-        if (!_canCommitFinalState || _graphic == null)
-            return;
-
-        _tween?.Kill(false);
-        DOTween.Kill(_graphic, false);
+        if (!HasClaimedTarget)
+            ClaimTarget();
 
         CommitFinalState();
     }
 
-    private void CommitFinalState()
-    {
-        if (_graphic != null)
-        {
-            ApplyConfig();
-            _graphic.Progress01 = _finalProgress;
-
-            if (_spec.disableWhenClear && _finalProgress <= 0f)
-                _graphic.gameObject.SetActive(false);
-        }
-
-        _canCommitFinalState = false;
-        _graphic = null;
-        _tween = null;
-    }
+    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
 
     private void ResolveRefs(CommandRunScope scope)
     {
         _resolveAttempted = true;
 
-        IPresentationTransitionSlotProvider transitionSlotProvider = UIManager.Instance.GetUI<PresentationUIRoot>();
+        IPresentationTransitionSlotProvider transitionSlotProvider =
+            UIManager.Instance.GetUI<PresentationUIRoot>();
+
         RectTransform rect = transitionSlotProvider.VerticalStripWipe;
-        if (rect == null)
-            return;
 
         _graphic = rect.GetComponent<VerticalStripWipeGraphic>();
     }
 
+    private void ClaimTarget()
+    {
+        DOTween.Kill(_graphic, true);
+
+        ApplyConfig();
+
+        _startProgress = _spec.mode == VerticalStripWipeMode.Cover ? 0f : 1f;
+        _finalProgress = _spec.mode == VerticalStripWipeMode.Cover ? 1f : 0f;
+
+        _duration = _spec.duration > 0f
+            ? _spec.duration
+            : _graphic.TotalDuration;
+
+        HasClaimedTarget = true;
+    }
+
+    private void CommitFinalState()
+    {
+        ApplyConfig();
+
+        _graphic.Progress01 = _finalProgress;
+
+        if (_spec.disableWhenClear && _finalProgress <= 0f)
+            _graphic.gameObject.SetActive(false);
+
+        HasClaimedTarget = false;
+    }
+
     private void ApplyConfig()
     {
-        if (_graphic == null)
-            return;
-
         _graphic.color = _spec.color;
+
         _graphic.Configure(
             _spec.stripCount,
             _spec.stripDelay,

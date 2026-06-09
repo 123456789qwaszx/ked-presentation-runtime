@@ -41,7 +41,6 @@ public sealed class SlantedShutterCommandSpec : CommandSpecBase
     public Ease ease = Ease.OutCubic;
 
     [Header("Options")]
-    public bool killTween = true;
     public bool disableWhenOpen = true;
     public bool blockRaycastWhileClosed = false;
 }
@@ -51,10 +50,12 @@ public sealed class SlantedShutterCommand : CommandBase
     private readonly SlantedShutterCommandSpec _spec;
 
     private SlantedShutterGraphic _graphic;
-    private Tween _tween;
-    private bool _resolveAttempted;
-    private bool _canCommitFinalState;
+    private float _startProgress;
     private float _finalProgress;
+
+    private bool _resolveAttempted;
+
+    private bool HasClaimedTarget { get; set; }
 
     public override bool WaitForCompletion => _spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
@@ -72,40 +73,23 @@ public sealed class SlantedShutterCommand : CommandBase
         if (_graphic == null)
             yield break;
 
-        if (_spec.killTween)
-            DOTween.Kill(_graphic, true);
+        ClaimTarget();
 
-        ApplyConfig();
-
-        float startProgress = _spec.mode == SlantedShutterMode.Close ? 0f : 1f;
-        _finalProgress = _spec.mode == SlantedShutterMode.Close ? 1f : 0f;
-
-        _canCommitFinalState = true;
-
-        if (scope.IsRollbackSeeking)
-        {
-            CommitFinalState();
-            yield break;
-        }
-
-        if (_spec.duration <= 0f)
+        if (scope.IsRollbackSeeking || _spec.duration <= 0f)
         {
             CommitFinalState();
             yield break;
         }
 
         _graphic.gameObject.SetActive(true);
-        _graphic.Progress01 = startProgress;
-        _graphic.RaycastBlocking = _spec.blockRaycastWhileClosed && startProgress >= 1f;
+        _graphic.Progress01 = _startProgress;
+        _graphic.RaycastBlocking = _spec.blockRaycastWhileClosed && _startProgress >= 1f;
 
-        _tween = DOTween
+        Tween tween = DOTween
             .To(
-                () => startProgress,
+                () => _startProgress,
                 value =>
                 {
-                    if (!_canCommitFinalState || _graphic == null)
-                        return;
-
                     _graphic.Progress01 = value;
                     _graphic.RaycastBlocking =
                         _spec.blockRaycastWhileClosed && value >= 0.98f;
@@ -115,16 +99,10 @@ public sealed class SlantedShutterCommand : CommandBase
             .SetEase(_spec.ease)
             .SetUpdate(true)
             .SetTarget(_graphic)
-            .OnComplete(() =>
-            {
-                if (!_canCommitFinalState || _graphic == null)
-                    return;
-
-                CommitFinalState();
-            });
+            .OnComplete(CommitFinalState);
 
         if (_spec.wait)
-            yield return _tween.WaitForCompletion();
+            yield return tween.WaitForCompletion();
     }
 
     protected override void OnSkip(CommandRunScope scope)
@@ -135,65 +113,56 @@ public sealed class SlantedShutterCommand : CommandBase
         if (_graphic == null)
             return;
 
+        if (!HasClaimedTarget)
+            ClaimTarget();
+        
         CommitFinalState();
     }
 
-    protected override void OnRollbackSeek(CommandRunScope scope)
-    {
-        OnSkip(scope);
-    }
-
-    protected override void OnCommandCompleted(CommandRunScope scope)
-    {
-        if (!_resolveAttempted)
-            ResolveRefs(scope);
-
-        if (!_canCommitFinalState || _graphic == null)
-            return;
-
-        _tween?.Kill(false);
-        DOTween.Kill(_graphic, false);
-
-        CommitFinalState();
-    }
-
-    private void CommitFinalState()
-    {
-        if (_graphic != null)
-        {
-            ApplyConfig();
-
-            _graphic.Progress01 = _finalProgress;
-
-            bool isClosed = _finalProgress >= 1f;
-            bool isOpen = _finalProgress <= 0f;
-
-            _graphic.RaycastBlocking = _spec.blockRaycastWhileClosed && isClosed;
-
-            if (_spec.disableWhenOpen && isOpen)
-                _graphic.gameObject.SetActive(false);
-        }
-
-        _canCommitFinalState = false;
-        _graphic = null;
-        _tween = null;
-    }
+    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
 
     private void ResolveRefs(CommandRunScope scope)
     {
         _resolveAttempted = true;
 
-        IPresentationTransitionSlotProvider transitionSlotProvider = UIManager.Instance.GetUI<PresentationUIRoot>();
+        IPresentationTransitionSlotProvider transitionSlotProvider =
+            UIManager.Instance.GetUI<PresentationUIRoot>();
+
         RectTransform rect = transitionSlotProvider.SlantedShutter;
-        
         _graphic = rect.GetComponent<SlantedShutterGraphic>();
+    }
+
+    private void ClaimTarget()
+    {
+        DOTween.Kill(_graphic, true);
+
+        ApplyConfig();
+
+        _startProgress = _spec.mode == SlantedShutterMode.Close ? 0f : 1f;
+        _finalProgress = _spec.mode == SlantedShutterMode.Close ? 1f : 0f;
+
+        HasClaimedTarget = true;
+    }
+
+    private void CommitFinalState()
+    {
+        ApplyConfig();
+
+        _graphic.Progress01 = _finalProgress;
+
+        bool isClosed = _finalProgress >= 1f;
+        bool isOpen = _finalProgress <= 0f;
+
+        _graphic.RaycastBlocking = _spec.blockRaycastWhileClosed && isClosed;
+
+        if (_spec.disableWhenOpen && isOpen)
+            _graphic.gameObject.SetActive(false);
+
+        HasClaimedTarget = false;
     }
 
     private void ApplyConfig()
     {
-        if (_graphic == null)
-            return;
-
         _graphic.color = _spec.color;
 
         _graphic.Configure(

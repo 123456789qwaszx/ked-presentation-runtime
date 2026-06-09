@@ -33,7 +33,6 @@ public sealed partial class YarnCommandBridge
             ease = Ease.InOutSine,
 
             wait = true,
-            killTween = true,
             disableWhenOpen = true,
             blockRaycastWhenClosed = false,
         };
@@ -66,7 +65,6 @@ public sealed partial class YarnCommandBridge
             ease = Ease.InOutSine,
 
             wait = true,
-            killTween = true,
             disableWhenOpen = true,
             blockRaycastWhenClosed = false,
         };
@@ -98,7 +96,6 @@ public sealed partial class YarnCommandBridge
             ease = Ease.InOutCubic,
 
             wait = true,
-            killTween = true,
             disableWhenOpen = true,
             blockRaycastWhenClosed = false,
         };
@@ -130,7 +127,6 @@ public sealed partial class YarnCommandBridge
             ease = Ease.InOutCubic,
 
             wait = true,
-            killTween = true,
             disableWhenOpen = true,
             blockRaycastWhenClosed = false,
         };
@@ -153,7 +149,6 @@ public sealed partial class YarnCommandBridge
             ease = Ease.InOutCubic,
 
             wait = true,
-            killTween = true,
             disableWhenClear = true,
             blockRaycastWhenVisible = false,
         };
@@ -176,7 +171,6 @@ public sealed partial class YarnCommandBridge
             ease = Ease.InOutCubic,
 
             wait = true,
-            killTween = true,
             disableWhenClear = true,
             blockRaycastWhenVisible = false,
         };
@@ -204,7 +198,6 @@ public sealed partial class YarnCommandBridge
             ease = Ease.OutCubic,
 
             wait = true,
-            killTween = true,
             disableWhenOpen = true,
             blockRaycastWhileClosed = false,
         };
@@ -232,7 +225,6 @@ public sealed partial class YarnCommandBridge
             ease = Ease.InCubic,
 
             wait = true,
-            killTween = true,
             disableWhenOpen = true,
             blockRaycastWhileClosed = false,
         };
@@ -257,7 +249,6 @@ public sealed partial class YarnCommandBridge
             ease = Ease.Linear,
 
             wait = true,
-            killTween = true,
             disableWhenClear = true,
         };
 
@@ -281,7 +272,6 @@ public sealed partial class YarnCommandBridge
             ease = Ease.Linear,
 
             wait = true,
-            killTween = true,
             disableWhenClear = true,
         };
 
@@ -304,8 +294,7 @@ public sealed partial class YarnCommandBridge
             overshootPixels = 72f,
             overshootStart = 0.72f,
 
-            wait = false,
-            killTween = true,
+            wait = false
         };
 
         Collect(spec);
@@ -327,8 +316,7 @@ public sealed partial class YarnCommandBridge
             pullPixels = 0f,
             pullEnd = 0.28f,
 
-            wait = false,
-            killTween = true,
+            wait = false
         };
 
         Collect(spec);
