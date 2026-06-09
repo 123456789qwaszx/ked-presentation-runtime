@@ -42,7 +42,6 @@ public sealed class CharacterRigVisualEffectController : IDisposable
     private static readonly int BlurAmountId = Shader.PropertyToID("_BlurAmount");
     private static readonly int BlurSizeId = Shader.PropertyToID("_BlurSize");
 
-    private readonly Image _portraitImage;
     private Material _runtimeMaterial;
 
     private float _dimAmount;
@@ -65,9 +64,7 @@ public sealed class CharacterRigVisualEffectController : IDisposable
 
     public CharacterRigVisualEffectController(Image portraitImage, Material sourceMaterial)
     {
-        _portraitImage = portraitImage;
-
-        if (_portraitImage == null)
+        if (portraitImage == null)
         {
             Debug.LogWarning("[CharacterRigVisualEffectController] portraitImage is null.");
             return;
@@ -78,13 +75,13 @@ public sealed class CharacterRigVisualEffectController : IDisposable
             Debug.LogWarning(
                 "[CharacterRigVisualEffectController] sourceMaterial is null. " +
                 "Check the Resources path in SetupCharRigCommand.",
-                _portraitImage);
+                portraitImage);
             return;
         }
 
         _runtimeMaterial = Object.Instantiate(sourceMaterial);
-        _runtimeMaterial.name = $"{sourceMaterial.name}_Runtime_{_portraitImage.name}";
-        _portraitImage.material = _runtimeMaterial;
+        _runtimeMaterial.name = $"{sourceMaterial.name}_Runtime_{portraitImage.name}";
+        portraitImage.material = _runtimeMaterial;
 
         _dimAmount = 0f;
         _blurAmount = 0f;

@@ -29,7 +29,9 @@ public sealed class BackgroundDefocusCommandBgR : CommandBase
 
     public override bool WaitForCompletion => _spec.wait;
 
-    public BackgroundDefocusCommandBgR(BackgroundDefocusCommandSpecBgR spec, IBackgroundRigBlurRuntime runtime)
+    public BackgroundDefocusCommandBgR(
+        BackgroundDefocusCommandSpecBgR spec,
+        IBackgroundRigBlurRuntime runtime)
     {
         _spec = spec;
         _runtime = runtime;
@@ -46,12 +48,11 @@ public sealed class BackgroundDefocusCommandBgR : CommandBase
     protected override void OnSkip(CommandRunScope scope) => Apply(scope, 0f);
     protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
     
-    private void Apply(CommandRunScope scope, float duration)  
+    private void Apply(CommandRunScope scope, float duration)
     {
-        if (!scope.backgroundRigs.TryGetRig(_spec.rigKey, out BackgroundRigRefs refs))
-            return;
+        scope.backgroundRigs.TryGetRig(_spec.rigKey, out BackgroundRigRefs refs);
 
-        _runtime?.ShowDefocus(
+        _runtime.ShowDefocus(
             _spec.rigKey,
             refs,
             _spec.alpha,

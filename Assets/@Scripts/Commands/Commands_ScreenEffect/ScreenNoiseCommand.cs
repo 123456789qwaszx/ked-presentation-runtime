@@ -50,10 +50,6 @@ public sealed class ScreenNoiseCommandSpec : CommandSpecBase
     [Header("Tween")]
     public float duration = 0.35f;
     public Ease ease = Ease.OutCubic;
-
-    [Header("Options")]
-    public bool killTween = true;
-    public bool clearOnSkipOrRollback = false;
 }
 
 public sealed class ScreenNoiseCommand : CommandBase
@@ -62,13 +58,13 @@ public sealed class ScreenNoiseCommand : CommandBase
     private readonly ScreenNoisePresetDBSO _presetDb;
 
     private ScreenNoiseEffectController _controller;
-    private Tween _tween;
-
-    private bool _resolveAttempted;
-    private bool _canApply;
 
     private NoiseState _fromState;
     private NoiseState _destState;
+
+    private bool _resolveAttempted;
+
+    private bool HasClaimedController { get; set; }
 
     public override bool WaitForCompletion => _spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
@@ -84,16 +80,7 @@ public sealed class ScreenNoiseCommand : CommandBase
         if (!_resolveAttempted)
             ResolveRefs();
 
-        if (_controller == null)
-            yield break;
-
-        if (_spec.killTween)
-            _controller.KillTween(true);
-
-        _fromState = CaptureCurrentState();
-        _destState = BuildDestState();
-
-        _canApply = true;
+        ClaimController();
 
         if (_spec.duration <= 0f)
         {
@@ -101,14 +88,11 @@ public sealed class ScreenNoiseCommand : CommandBase
             yield break;
         }
 
-        _tween = DOTween
+        Tween tween = DOTween
             .To(
                 () => 0f,
                 t =>
                 {
-                    if (!_canApply || _controller == null)
-                        return;
-
                     NoiseState state = NoiseState.Lerp(_fromState, _destState, t);
                     ApplyState(state);
                 },
@@ -117,16 +101,10 @@ public sealed class ScreenNoiseCommand : CommandBase
             .SetEase(_spec.ease)
             .SetUpdate(true)
             .SetTarget(_controller.transform)
-            .OnComplete(() =>
-            {
-                if (!_canApply || _controller == null)
-                    return;
-
-                CommitFinalState();
-            });
+            .OnComplete(CommitFinalState);
 
         if (_spec.wait)
-            yield return _tween.WaitForCompletion();
+            yield return tween.WaitForCompletion();
     }
 
     protected override void OnSkip(CommandRunScope scope)
@@ -134,63 +112,41 @@ public sealed class ScreenNoiseCommand : CommandBase
         if (!_resolveAttempted)
             ResolveRefs();
 
-        if (_controller == null)
-            return;
-
-        _tween?.Kill(false);
-        _controller.KillTween(false);
-
-        if (_spec.clearOnSkipOrRollback)
-        {
-            _controller.ClearImmediate();
-            ClearRuntimeRefs();
-            return;
-        }
-
-        _destState = BuildDestState();
-        CommitFinalState();
-    }
-
-    protected override void OnRollbackSeek(CommandRunScope scope)
-    {
-        OnSkip(scope);
-    }
-
-    protected override void OnCommandCompleted(CommandRunScope scope)
-    {
-        if (!_resolveAttempted)
-            ResolveRefs();
-
-        if (!_canApply || _controller == null)
-            return;
-
-        _tween?.Kill(false);
-        _controller.KillTween(false);
+        if (!HasClaimedController)
+            ClaimController();
 
         CommitFinalState();
     }
+
+    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
 
     private void ResolveRefs()
     {
         _resolveAttempted = true;
 
         PresentationUIRoot root = UIManager.Instance.GetUI<PresentationUIRoot>();
-
-        if (root == null)
-        {
-            Debug.LogWarning(
-                "[ScreenNoiseCommand] Failed to resolve PresentationUIRoot.");
-            return;
-        }
-
         _controller = root.GetScreenNoiseEffect();
+    }
 
-        if (_controller != null)
-            return;
+    private void ClaimController()
+    {
+        DOTween.Kill(_controller.transform, true);
+        _controller.KillTween(true);
 
-        Debug.LogWarning(
-            "[ScreenNoiseCommand] Failed to resolve ScreenNoiseEffectController.",
-            root);
+        _fromState = CaptureCurrentState();
+        _destState = BuildDestState();
+
+        HasClaimedController = true;
+    }
+
+    private void CommitFinalState()
+    {
+        DOTween.Kill(_controller.transform, false);
+        _controller.KillTween(false);
+        
+        ApplyState(_destState);
+
+        HasClaimedController = false;
     }
 
     private NoiseState CaptureCurrentState()
@@ -252,21 +208,8 @@ public sealed class ScreenNoiseCommand : CommandBase
         return new NoiseState(1f * intensity, Color.white, 0.8f, 0.015f, 0.012f, 1f);
     }
 
-    private void CommitFinalState()
-    {
-        _tween?.Kill(false);
-
-        if (_controller != null)
-            ApplyState(_destState);
-
-        ClearRuntimeRefs();
-    }
-
     private void ApplyState(NoiseState state)
     {
-        if (_controller == null)
-            return;
-
         _controller.ApplyImmediate(
             state.Amount,
             state.Color,
@@ -274,13 +217,6 @@ public sealed class ScreenNoiseCommand : CommandBase
             state.SpeedX,
             state.SpeedY,
             state.Contrast);
-    }
-
-    private void ClearRuntimeRefs()
-    {
-        _canApply = false;
-        _controller = null;
-        _tween = null;
     }
 
     private readonly struct NoiseState

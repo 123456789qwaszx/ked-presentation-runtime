@@ -68,7 +68,8 @@ title: Story_TalesOfNovaEP12_01
 <<jolt Noya>>
 세이나: 안 돼! 이 신기를 얻으려고 우리가 성해를 얼마나 많이 물리쳤는데...... <br>검날이 다 무뎌질 정도였다고!
 
-
+<<screen_flash>>
+<<char_focus Noya>>
 <<face Noya 3>>
 <<move_by char1 90 0>>
 <<face Willow 25>>

@@ -85,7 +85,7 @@ public sealed class UIBackgroundRigBlurRuntime : MonoBehaviour, IBackgroundRigBl
     {
         EnsureOverlay();
 
-        if (!string.IsNullOrEmpty(rigKey) && _activeRigKey != rigKey)
+        if (_activeRigKey != rigKey)
             return;
 
         _isTracking = false;

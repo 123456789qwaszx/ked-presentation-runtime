@@ -53,9 +53,6 @@ public sealed class CharVisualFocusCommandSpecCharR : CharacterRigCommandSpecBas
     [Header("Tween")]
     public float duration = 0.25f;
     public Ease ease = Ease.OutCubic;
-
-    // focus는 굳이 killTween 시작위치를 따지지 않고, 특정 값에 도달만 하면 되기에 killTween이 필요없음.
-    public bool killTween = false;
 }
 
 public sealed class CharVisualFocusCommandCharR : CommandBase
@@ -63,13 +60,13 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
     private readonly CharVisualFocusCommandSpecCharR _spec;
 
     private CharacterRigVisualEffectController _controller;
-    private Tween _tween;
-
-    private bool _resolveAttempted;
-    private bool _canCommitFinalState;
 
     private VisualState _fromState;
     private VisualState _destState;
+
+    private bool _resolveAttempted;
+
+    private bool HasClaimedController { get; set; }
 
     public override bool WaitForCompletion => _spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
@@ -87,13 +84,7 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
         if (_controller == null)
             yield break;
 
-        // if (_spec.killTween)
-        //     _controller.DOKill(true);
-
-        _fromState = CaptureCurrentState();
-        _destState = BuildDestState();
-
-        _canCommitFinalState = true;
+        ClaimController();
 
         if (_spec.duration <= 0f)
         {
@@ -101,14 +92,11 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
             yield break;
         }
 
-        _tween = DOTween
+        Tween tween = DOTween
             .To(
                 () => 0f,
                 t =>
                 {
-                    if (!_canCommitFinalState || _controller == null)
-                        return;
-
                     VisualState state = VisualState.Lerp(_fromState, _destState, t);
                     ApplyState(state);
                 },
@@ -117,54 +105,31 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
             .SetEase(_spec.ease)
             .SetUpdate(true)
             .SetTarget(_controller)
-            .OnComplete(() =>
-            {
-                if (!_canCommitFinalState || _controller == null)
-                    return;
-
-                CommitFinalState();
-            });
+            .OnComplete(CommitFinalState);
 
         if (_spec.wait)
-            yield return _tween.WaitForCompletion();
+            yield return tween.WaitForCompletion();
     }
 
     protected override void OnSkip(CommandRunScope scope)
     {
         if (!_resolveAttempted)
             ResolveRefs(scope);
-
-        if (_controller == null)
-            return;
-
-        _destState = BuildDestState();
-        CommitFinalState();
-    }
-
-    protected override void OnRollbackSeek(CommandRunScope scope)
-    {
-        OnSkip(scope);
-    }
-
-    protected override void OnCommandCompleted(CommandRunScope scope)
-    {
-        if (!_resolveAttempted)
-            ResolveRefs(scope);
-
-        if (!_canCommitFinalState || _controller == null)
-            return;
-
-        _tween?.Kill(false);
-        //_controller.DOKill(false);
+        
+        if (!HasClaimedController)
+            ClaimController();
 
         CommitFinalState();
     }
+
+    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
 
     private void ResolveRefs(CommandRunScope scope)
     {
         _resolveAttempted = true;
 
         CharacterRigRefs rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
+
         _controller = rigRefs?.VisualEffect;
 
         if (_controller != null)
@@ -174,6 +139,23 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
             $"[CharVisualFocusCommandCharR] VisualEffect controller is missing. " +
             $"SetupCharRig가 컨트롤러를 생성했는지, source material 경로가 맞는지 확인하세요. " +
             $"slotKey='{_spec.slotKey}'.");
+    }
+
+    private void ClaimController()
+    {
+        DOTween.Kill(_controller, true);
+
+        _fromState = CaptureCurrentState();
+        _destState = BuildDestState();
+
+        HasClaimedController = true;
+    }
+
+    private void CommitFinalState()
+    {
+        ApplyState(_destState);
+
+        HasClaimedController = false;
     }
 
     private VisualState CaptureCurrentState()
@@ -246,21 +228,8 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
         }
     }
 
-    private void CommitFinalState()
-    {
-        _tween?.Kill(true);
-
-        if (_controller != null)
-            ApplyState(_destState);
-
-        ClearRuntimeRefs();
-    }
-
     private void ApplyState(VisualState state)
     {
-        if (_controller == null)
-            return;
-
         _controller.ApplyImmediate(
             state.Dim,
             state.DimTintColor,
@@ -269,13 +238,6 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
             state.Blur,
             state.OuterRimColor,
             state.InnerRimColor);
-    }
-
-    private void ClearRuntimeRefs()
-    {
-        _canCommitFinalState = false;
-        _controller = null;
-        _tween = null;
     }
 
     private readonly struct VisualState

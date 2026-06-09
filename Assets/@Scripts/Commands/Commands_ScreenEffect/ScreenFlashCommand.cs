@@ -49,10 +49,6 @@ public sealed class ScreenFlashCommandSpec : CommandSpecBase
 
     public Ease attackEase = Ease.OutCubic;
     public Ease releaseEase = Ease.OutCubic;
-
-    [Header("Options")]
-    public bool killTween = true;
-    public bool clearOnSkipOrRollback = true;
 }
 
 public sealed class ScreenFlashCommand : CommandBase
@@ -61,10 +57,11 @@ public sealed class ScreenFlashCommand : CommandBase
     private readonly ScreenFlashPresetDBSO _presetDb;
 
     private ScreenFlashEffectController _controller;
-    private Sequence _sequence;
+    private FlashSettings _settings;
 
     private bool _resolveAttempted;
-    private bool _canApply;
+
+    private bool HasClaimedController { get; set; }
 
     public override bool WaitForCompletion => _spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
@@ -83,95 +80,83 @@ public sealed class ScreenFlashCommand : CommandBase
         if (_controller == null)
             yield break;
 
-        if (_spec.killTween)
-            _controller.KillTween(false);
+        ClaimController();
 
-        _canApply = true;
-
-        FlashSettings settings = BuildSettings();
-        float targetAmount = settings.Amount;
-
-        if (settings.AttackDuration <= 0f &&
-            settings.HoldDuration <= 0f &&
-            settings.ReleaseDuration <= 0f)
+        if (_settings.AttackDuration <= 0f &&
+            _settings.HoldDuration <= 0f &&
+            _settings.ReleaseDuration <= 0f)
         {
-            _controller.ApplyImmediate(0f, settings.Color);
-            ClearRuntimeRefs();
+            CommitFinalState();
             yield break;
         }
 
-        _controller.ApplyImmediate(0f, settings.Color);
+        _controller.ApplyImmediate(0f, _settings.Color);
 
-        _sequence = DOTween.Sequence()
+        Sequence sequence = DOTween.Sequence()
             .SetTarget(_controller.transform)
             .SetUpdate(true);
 
-        if (settings.AttackDuration > 0f)
+        if (_settings.AttackDuration > 0f)
         {
-            _sequence.Append(DOTween.To(
+            sequence.Append(DOTween.To(
                     () => _controller != null ? _controller.FlashAmount : 0f,
                     value =>
                     {
-                        if (!_canApply || _controller == null)
+                        if (_controller == null)
                             return;
 
-                        _controller.ApplyImmediate(value, settings.Color);
+                        _controller.ApplyImmediate(value, _settings.Color);
                     },
-                    targetAmount,
-                    settings.AttackDuration)
-                .SetEase(settings.AttackEase));
+                    _settings.Amount,
+                    _settings.AttackDuration)
+                .SetEase(_settings.AttackEase)
+                .SetTarget(_controller.transform));
         }
         else
         {
-            _sequence.AppendCallback(() =>
+            sequence.AppendCallback(() =>
             {
-                if (!_canApply || _controller == null)
+                if (_controller == null)
                     return;
 
-                _controller.ApplyImmediate(targetAmount, settings.Color);
+                _controller.ApplyImmediate(_settings.Amount, _settings.Color);
             });
         }
 
-        if (settings.HoldDuration > 0f)
-            _sequence.AppendInterval(settings.HoldDuration);
+        if (_settings.HoldDuration > 0f)
+            sequence.AppendInterval(_settings.HoldDuration);
 
-        if (settings.ReleaseDuration > 0f)
+        if (_settings.ReleaseDuration > 0f)
         {
-            _sequence.Append(DOTween.To(
-                    () => _controller != null ? _controller.FlashAmount : targetAmount,
+            sequence.Append(DOTween.To(
+                    () => _controller != null ? _controller.FlashAmount : _settings.Amount,
                     value =>
                     {
-                        if (!_canApply || _controller == null)
+                        if (_controller == null)
                             return;
 
-                        _controller.ApplyImmediate(value, settings.Color);
+                        _controller.ApplyImmediate(value, _settings.Color);
                     },
                     0f,
-                    settings.ReleaseDuration)
-                .SetEase(settings.ReleaseEase));
+                    _settings.ReleaseDuration)
+                .SetEase(_settings.ReleaseEase)
+                .SetTarget(_controller.transform));
         }
         else
         {
-            _sequence.AppendCallback(() =>
+            sequence.AppendCallback(() =>
             {
-                if (!_canApply || _controller == null)
+                if (_controller == null)
                     return;
 
-                _controller.ApplyImmediate(0f, settings.Color);
+                _controller.ApplyImmediate(0f, _settings.Color);
             });
         }
 
-        _sequence.OnComplete(() =>
-        {
-            if (!_canApply || _controller == null)
-                return;
-
-            _controller.ApplyImmediate(0f, settings.Color);
-            ClearRuntimeRefs();
-        });
+        sequence.OnComplete(CommitFinalState);
 
         if (_spec.wait)
-            yield return _sequence.WaitForCompletion();
+            yield return sequence.WaitForCompletion();
     }
 
     protected override void OnSkip(CommandRunScope scope)
@@ -179,36 +164,40 @@ public sealed class ScreenFlashCommand : CommandBase
         if (!_resolveAttempted)
             ResolveRefs();
 
-        if (_controller == null)
-            return;
+        if (!HasClaimedController)
+            ClaimController();
 
-        _sequence?.Kill(false);
-        _controller.KillTween(false);
-
-        if (_spec.clearOnSkipOrRollback)
-            _controller.ClearImmediate();
-
-        ClearRuntimeRefs();
+        CommitFinalState();
     }
 
-    protected override void OnRollbackSeek(CommandRunScope scope)
+    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
+
+    private void ResolveRefs()
     {
-        OnSkip(scope);
+        _resolveAttempted = true;
+
+        PresentationUIRoot root = UIManager.Instance.GetUI<PresentationUIRoot>();
+        _controller = root.GetScreenFlashEffect();
     }
 
-    protected override void OnCommandCompleted(CommandRunScope scope)
+    private void ClaimController()
     {
-        if (!_resolveAttempted)
-            ResolveRefs();
+        DOTween.Kill(_controller.transform, true);
+        _controller.KillTween(true);
 
-        if (_controller == null)
-            return;
+        _settings = BuildSettings();
 
-        _sequence?.Kill(false);
+        HasClaimedController = true;
+    }
+
+    private void CommitFinalState()
+    {
+        DOTween.Kill(_controller.transform, false);
         _controller.KillTween(false);
-        _controller.ClearImmediate();
+        
+        _controller.ApplyImmediate(0f, _settings.Color);
 
-        ClearRuntimeRefs();
+        HasClaimedController = false;
     }
 
     private FlashSettings BuildSettings()
@@ -230,9 +219,14 @@ public sealed class ScreenFlashCommand : CommandBase
                         e.releaseEase);
                 }
 
-                // SO 미할당/누락 시 폴백 (기존 default white flash).
                 return new FlashSettings(
-                    Color.white, 1f * intensity, 0.02f, 0.01f, 0.16f, Ease.OutCubic, Ease.OutCubic);
+                    Color.white,
+                    1f * intensity,
+                    0.02f,
+                    0.01f,
+                    0.16f,
+                    Ease.OutCubic,
+                    Ease.OutCubic);
 
             case ScreenFlashMode.Custom:
             default:
@@ -245,33 +239,6 @@ public sealed class ScreenFlashCommand : CommandBase
                     _spec.attackEase,
                     _spec.releaseEase);
         }
-    }
-
-    private void ResolveRefs()
-    {
-        _resolveAttempted = true;
-
-        PresentationUIRoot root = UIManager.Instance.GetUI<PresentationUIRoot>();
-
-        if (root == null)
-        {
-            Debug.LogWarning("[ScreenFlashCommand] Failed to resolve PresentationUIRoot.");
-            return;
-        }
-
-        _controller = root.GetScreenFlashEffect();
-
-        if (_controller != null)
-            return;
-
-        Debug.LogWarning("[ScreenFlashCommand] Failed to resolve ScreenFlashEffectController.", root);
-    }
-
-    private void ClearRuntimeRefs()
-    {
-        _canApply = false;
-        _controller = null;
-        _sequence = null;
     }
 
     private readonly struct FlashSettings

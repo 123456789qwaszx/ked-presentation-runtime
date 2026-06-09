@@ -66,10 +66,6 @@ public sealed class ScreenVignetteCommandSpec : CommandSpecBase
     [Header("Tween")]
     public float duration = 0.35f;
     public Ease ease = Ease.OutCubic;
-
-    [Header("Options")]
-    public bool killTween = true;
-    public bool clearOnSkipOrRollback = false;
 }
 
 public sealed class ScreenVignetteCommand : CommandBase
@@ -78,13 +74,13 @@ public sealed class ScreenVignetteCommand : CommandBase
     private readonly ScreenVignettePresetDBSO _presetDb;
 
     private ScreenVignetteEffectController _controller;
-    private Tween _tween;
-
-    private bool _resolveAttempted;
-    private bool _canApply;
 
     private VignetteState _fromState;
     private VignetteState _destState;
+
+    private bool _resolveAttempted;
+
+    private bool HasClaimedController { get; set; }
 
     public override bool WaitForCompletion => _spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
@@ -100,16 +96,7 @@ public sealed class ScreenVignetteCommand : CommandBase
         if (!_resolveAttempted)
             ResolveRefs();
 
-        if (_controller == null)
-            yield break;
-
-        if (_spec.killTween)
-            _controller.KillTween(true);
-
-        _fromState = CaptureCurrentState();
-        _destState = BuildDestState();
-
-        _canApply = true;
+        ClaimController();
 
         if (_spec.duration <= 0f)
         {
@@ -117,14 +104,11 @@ public sealed class ScreenVignetteCommand : CommandBase
             yield break;
         }
 
-        _tween = DOTween
+        Tween tween = DOTween
             .To(
                 () => 0f,
                 t =>
                 {
-                    if (!_canApply || _controller == null)
-                        return;
-
                     VignetteState state = VignetteState.Lerp(_fromState, _destState, t);
                     ApplyState(state);
                 },
@@ -133,16 +117,10 @@ public sealed class ScreenVignetteCommand : CommandBase
             .SetEase(_spec.ease)
             .SetUpdate(true)
             .SetTarget(_controller.transform)
-            .OnComplete(() =>
-            {
-                if (!_canApply || _controller == null)
-                    return;
-
-                CommitFinalState();
-            });
+            .OnComplete(CommitFinalState);
 
         if (_spec.wait)
-            yield return _tween.WaitForCompletion();
+            yield return tween.WaitForCompletion();
     }
 
     protected override void OnSkip(CommandRunScope scope)
@@ -150,63 +128,41 @@ public sealed class ScreenVignetteCommand : CommandBase
         if (!_resolveAttempted)
             ResolveRefs();
 
-        if (_controller == null)
-            return;
-
-        _tween?.Kill(false);
-        _controller.KillTween(false);
-
-        if (_spec.clearOnSkipOrRollback)
-        {
-            _controller.ClearImmediate();
-            ClearRuntimeRefs();
-            return;
-        }
-
-        _destState = BuildDestState();
-        CommitFinalState();
-    }
-
-    protected override void OnRollbackSeek(CommandRunScope scope)
-    {
-        OnSkip(scope);
-    }
-
-    protected override void OnCommandCompleted(CommandRunScope scope)
-    {
-        if (!_resolveAttempted)
-            ResolveRefs();
-
-        if (!_canApply || _controller == null)
-            return;
-
-        _tween?.Kill(false);
-        _controller.KillTween(false);
+        if (!HasClaimedController)
+            ClaimController();
 
         CommitFinalState();
     }
+
+    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
 
     private void ResolveRefs()
     {
         _resolveAttempted = true;
 
         PresentationUIRoot root = UIManager.Instance.GetUI<PresentationUIRoot>();
-
-        if (root == null)
-        {
-            Debug.LogWarning(
-                "[ScreenVignetteCommand] Failed to resolve PresentationUIRoot.");
-            return;
-        }
-
         _controller = root.GetScreenVignetteEffect();
+    }
 
-        if (_controller != null)
-            return;
+    private void ClaimController()
+    {
+        DOTween.Kill(_controller.transform, true);
+        _controller.KillTween(true);
 
-        Debug.LogWarning(
-            "[ScreenVignetteCommand] Failed to resolve ScreenVignetteEffectController.",
-            root);
+        _fromState = CaptureCurrentState();
+        _destState = BuildDestState();
+
+        HasClaimedController = true;
+    }
+    
+    private void CommitFinalState()
+    {
+        DOTween.Kill(_controller.transform, false);
+        _controller.KillTween(false);
+        
+        ApplyState(_destState);
+
+        HasClaimedController = false;
     }
 
     private VignetteState CaptureCurrentState()
@@ -271,9 +227,6 @@ public sealed class ScreenVignetteCommand : CommandBase
     {
         float t = Mathf.Clamp01(amount) * intensity;
 
-        // SG structure:
-        // Aspect = 0 removes horizontal distance. Distance becomes mostly abs(uv.y - 0.5).
-        // Higher radius means less visible bar. Lower radius means bars move further inward.
         ScreenVignettePresetDBSO.LetterBoxConfig lb = _presetDb != null
             ? _presetDb.LetterBox
             : ScreenVignettePresetDBSO.DefaultLetterBox();
@@ -284,38 +237,18 @@ public sealed class ScreenVignetteCommand : CommandBase
             1f,
             lb.color,
             radius,
-            Mathf.Max(0.001f, _spec.letterBoxSoftness), // softness는 spec(per-call) 유지
+            Mathf.Max(0.001f, _spec.letterBoxSoftness),
             0f);
-    }
-
-    private void CommitFinalState()
-    {
-        _tween?.Kill(false);
-
-        if (_controller != null)
-            ApplyState(_destState);
-
-        ClearRuntimeRefs();
     }
 
     private void ApplyState(VignetteState state)
     {
-        if (_controller == null)
-            return;
-
         _controller.ApplyImmediate(
             state.Amount,
             state.Color,
             state.Radius,
             state.Softness,
             state.Aspect);
-    }
-
-    private void ClearRuntimeRefs()
-    {
-        _canApply = false;
-        _controller = null;
-        _tween = null;
     }
 
     private readonly struct VignetteState
