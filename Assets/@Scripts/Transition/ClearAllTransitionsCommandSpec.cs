@@ -33,11 +33,6 @@ public sealed class ClearAllTransitionsCommand : CommandBase
         PresentationTransitionClearUtility.ClearAll();
     }
 
-    protected override void OnRollbackSeek(CommandRunScope scope)
-    {
-        PresentationTransitionClearUtility.ClearAll();
-    }
-
     protected override void OnCommandCompleted(CommandRunScope scope)
     {
         PresentationTransitionClearUtility.ClearAll();

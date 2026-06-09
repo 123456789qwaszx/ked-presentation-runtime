@@ -44,8 +44,6 @@ public sealed class ShowRootLayersCommandCharR : CommandBase
 
         Apply();
     }
-
-    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
     
     private void ResolveRefs(CommandRunScope scope)
     {

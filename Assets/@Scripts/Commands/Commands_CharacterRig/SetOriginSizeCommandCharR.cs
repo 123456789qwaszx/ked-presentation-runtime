@@ -81,8 +81,6 @@ public sealed class SetOriginSizeCommandCharR : CommandBase
 
         Apply();
     }
-
-    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
     
     private void Apply()
     {

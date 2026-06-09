@@ -58,7 +58,7 @@ public sealed class RevealWithTransitionCommand : CommandBase
 
         _canCommitFinalState = true;
 
-        if (scope.IsRollbackSeeking || _spec.duration <= 0f)
+        if (scope.IsSeekPassThrough || _spec.duration <= 0f)
         {
             CommitFinalState();
             yield break;
@@ -85,11 +85,6 @@ public sealed class RevealWithTransitionCommand : CommandBase
     }
 
     protected override void OnSkip(CommandRunScope scope)
-    {
-        CommitFinalState();
-    }
-
-    protected override void OnRollbackSeek(CommandRunScope scope)
     {
         CommitFinalState();
     }

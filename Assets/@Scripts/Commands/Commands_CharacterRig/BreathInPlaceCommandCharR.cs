@@ -139,8 +139,6 @@ public sealed class BreathInPlaceCommandCharR : CommandBase, IRunScopedCommand
         CommitFinalState();
     }
 
-    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
-
     private void ResolveRefs(CommandRunScope scope)
     {
         _resolveAttempted = true;

@@ -78,8 +78,6 @@ public sealed class MoveByCommandBgR : CommandBase
         CommitFinalState();
     }
 
-    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
-
     private void ResolveRefs(CommandRunScope scope)
     {
         _resolveAttempted = true;

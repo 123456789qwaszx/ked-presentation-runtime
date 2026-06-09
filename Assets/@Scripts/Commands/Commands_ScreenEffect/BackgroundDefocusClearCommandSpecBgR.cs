@@ -43,6 +43,4 @@ public sealed class BackgroundDefocusClearCommandBgR : CommandBase
     {
         _runtime.HideDefocus(_spec.rigKey, 0f);
     }
-
-    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
 }

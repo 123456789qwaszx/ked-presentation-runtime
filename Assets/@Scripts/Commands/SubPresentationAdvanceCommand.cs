@@ -28,7 +28,6 @@ public sealed class SubPresentationAdvanceCommand : CommandBase
     }
 
     protected override void OnSkip(CommandRunScope scope) => Apply();
-    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
 
     private void Apply()
     {

@@ -29,7 +29,7 @@ public abstract class CommandBase : ISequenceCommand, IStepScopedCommand
             yield break;
         }
 
-        if (scope.IsSkipping)
+        if (scope.IsSpeedUpMode)
         {
             switch (SkipPolicy)
             {
@@ -53,7 +53,7 @@ public abstract class CommandBase : ISequenceCommand, IStepScopedCommand
             }
         }
 
-        if (scope.IsRollbackSeeking)
+        if (scope.IsSeekPassThrough)
         {
             OnRollbackSeek(scope);
             yield break;
@@ -81,6 +81,7 @@ public abstract class CommandBase : ISequenceCommand, IStepScopedCommand
 
     protected virtual void OnRollbackSeek(CommandRunScope scope)
     {
+        OnSkip(scope);
     }
     
     protected IEnumerator Wait(CommandRunScope scope, float seconds)
@@ -91,7 +92,7 @@ public abstract class CommandBase : ISequenceCommand, IStepScopedCommand
             if (scope.Token.IsCancellationRequested)
                 yield break;
 
-            if (scope.IsSkipping)
+            if (scope.IsSpeedUpMode)
             {
                 if (SkipPolicy == SkipPolicy.CompleteImmediately)
                 {

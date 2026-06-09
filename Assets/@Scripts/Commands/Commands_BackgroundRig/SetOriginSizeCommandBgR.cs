@@ -69,8 +69,6 @@ public sealed class SetOriginSizeCommandBgR : CommandBase
         Apply();
     }
 
-    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
-
     private void Apply()
     {
         if (_spec.overrideScale)

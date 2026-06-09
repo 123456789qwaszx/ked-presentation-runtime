@@ -133,8 +133,6 @@ public sealed class ScreenVignetteCommand : CommandBase
         CommitFinalState();
     }
 
-    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
-
     private void ResolveRefs()
     {
         _resolveAttempted = true;

@@ -119,15 +119,11 @@ public sealed class DipInOutCommandCharR : CommandBase
         CommitFinalState();
     }
 
-    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
-
     private void ResolveRefs(CommandRunScope scope)
     {
         _resolveAttempted = true;
 
-        CharacterRigRefs rig =
-            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
-
+        CharacterRigRefs rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
         _rect = rig.GetRect(_spec.target);
     }
 

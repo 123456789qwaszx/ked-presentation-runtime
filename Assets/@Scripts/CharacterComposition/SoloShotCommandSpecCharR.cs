@@ -142,8 +142,6 @@ public sealed class SoloShotCommandCharR : CommandBase
         ClearRuntimeState();
     }
 
-    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
-
     protected override void OnCommandCompleted(CommandRunScope scope)
     {
         if (!_canCommitFinalState)

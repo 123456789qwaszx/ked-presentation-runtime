@@ -70,8 +70,6 @@ public sealed class SetAnchorCommandCharR : CommandBase
         Apply(scope);
     }
     
-    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
-    
     private void Apply(CommandRunScope scope)
     {
         string characterKey = CharacterRigTargetResolver.ResolveRigKeyByPolicy(scope, _spec.slotKey);

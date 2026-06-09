@@ -40,7 +40,6 @@ public sealed class RegisterBackgroundResponseBindingCommand : CommandBase
     }
 
     protected override void OnSkip(CommandRunScope scope) => Apply(scope);
-    protected override void OnRollbackSeek(CommandRunScope scope) => Apply(scope);
 
     private void Apply(CommandRunScope scope)
     {

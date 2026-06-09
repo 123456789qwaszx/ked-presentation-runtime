@@ -117,8 +117,6 @@ public sealed class ScreenNoiseCommand : CommandBase
         CommitFinalState();
     }
 
-    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
-
     private void ResolveRefs()
     {
         _resolveAttempted = true;

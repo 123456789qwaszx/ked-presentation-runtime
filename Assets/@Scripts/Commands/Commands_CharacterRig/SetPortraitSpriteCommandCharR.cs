@@ -56,8 +56,6 @@ public sealed class SetPortraitSpriteCommandCharR : CommandBase
         Apply(scope);
     }
 
-    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
-
     private void Apply(CommandRunScope scope)
     {
         Sprite sprite = _resolver.Resolve(scope, _spec.slotKey, _spec.portrait, nameof(SetPortraitSpriteCommandCharR));

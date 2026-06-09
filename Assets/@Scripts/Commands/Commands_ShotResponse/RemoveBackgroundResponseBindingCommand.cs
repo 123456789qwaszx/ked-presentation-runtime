@@ -37,7 +37,6 @@ public sealed class RemoveBackgroundResponseBindingCommand : CommandBase
     }
 
     protected override void OnSkip(CommandRunScope scope) => Apply(scope);
-    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
 
     private void Apply(CommandRunScope scope)
     {

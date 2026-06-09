@@ -83,7 +83,7 @@ public sealed class VerticalStripWipeCommand : CommandBase
 
         ClaimTarget();
 
-        if (scope.IsRollbackSeeking || _duration <= 0f)
+        if (scope.IsSeekPassThrough || _duration <= 0f)
         {
             CommitFinalState();
             yield break;
@@ -123,8 +123,6 @@ public sealed class VerticalStripWipeCommand : CommandBase
 
         CommitFinalState();
     }
-
-    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
 
     private void ResolveRefs(CommandRunScope scope)
     {

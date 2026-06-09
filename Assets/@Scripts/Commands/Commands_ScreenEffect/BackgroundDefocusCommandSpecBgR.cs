@@ -46,7 +46,6 @@ public sealed class BackgroundDefocusCommandBgR : CommandBase
     }
 
     protected override void OnSkip(CommandRunScope scope) => Apply(scope, 0f);
-    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
     
     private void Apply(CommandRunScope scope, float duration)
     {

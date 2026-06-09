@@ -74,7 +74,7 @@ public sealed class SlantedShutterCommand : CommandBase
 
         ClaimTarget();
 
-        if (scope.IsRollbackSeeking || _spec.duration <= 0f)
+        if (scope.IsSeekPassThrough || _spec.duration <= 0f)
         {
             CommitFinalState();
             yield break;
@@ -117,8 +117,6 @@ public sealed class SlantedShutterCommand : CommandBase
         
         CommitFinalState();
     }
-
-    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
 
     private void ResolveRefs(CommandRunScope scope)
     {

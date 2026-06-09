@@ -61,8 +61,6 @@ public sealed class SetBackgroundSpriteCommandBgR : CommandBase
         Apply();
     }
 
-    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
-
     private void Apply()
     {
         Sprite sprite = _resolver.Resolve(_spec.spriteKey, nameof(SetBackgroundSpriteCommandBgR));

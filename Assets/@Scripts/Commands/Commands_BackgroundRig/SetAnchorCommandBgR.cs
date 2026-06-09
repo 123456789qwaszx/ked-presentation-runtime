@@ -65,8 +65,6 @@ public sealed class SetAnchorCommandBgR : CommandBase
         Apply();
     }
 
-    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
-
     private void Apply()
     {
         _rect.anchoredPosition = _spec.anchoredPosition;

@@ -46,11 +46,6 @@ public sealed class HideRootLayersCommandCharR : CommandBase
         Apply();
     }
 
-    protected override void OnRollbackSeek(CommandRunScope scope)
-    {
-        OnSkip(scope);
-    }
-
     private void ResolveRefs(CommandRunScope scope)
     {
         _resolveAttempted = true;

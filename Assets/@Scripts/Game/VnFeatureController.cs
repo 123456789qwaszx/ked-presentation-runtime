@@ -5,7 +5,6 @@ using UnityEngine;
 [Serializable]
 public class VnPlaybackSettings
 {
-    public int maxLogCount = 100;
     public float speedupModeMultiplier = 12f;
     public float autoModeDelaySeconds = 1.5f;
     

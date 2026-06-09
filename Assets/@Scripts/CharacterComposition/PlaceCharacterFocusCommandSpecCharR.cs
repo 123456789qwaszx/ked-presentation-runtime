@@ -122,8 +122,6 @@ public sealed class PlaceCharacterFocusCommandCharR : CommandBase
         ClearRuntimeState();
     }
 
-    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
-
     protected override void OnCommandCompleted(CommandRunScope scope)
     {
         if (!_canCommitFinalState)

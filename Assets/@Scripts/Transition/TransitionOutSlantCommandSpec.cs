@@ -69,7 +69,7 @@ public sealed class TransitionOutSlantCommand : CommandBase
 
         _canCommitFinalState = true;
 
-        if (scope.IsRollbackSeeking || _spec.duration <= 0f)
+        if (scope.IsSeekPassThrough || _spec.duration <= 0f)
         {
             CommitFinalState();
             yield break;
@@ -121,11 +121,6 @@ public sealed class TransitionOutSlantCommand : CommandBase
             ResolveRefs();
 
         CommitFinalState();
-    }
-
-    protected override void OnRollbackSeek(CommandRunScope scope)
-    {
-        OnSkip(scope);
     }
 
     protected override void OnCommandCompleted(CommandRunScope scope)

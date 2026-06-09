@@ -71,8 +71,6 @@ public abstract class ShotIntentCommandBase<TSpec> : CommandBase
         CommitFinalState();
     }
 
-    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
-
     protected abstract PresentationIntentState BuildTargetState(
         in PresentationIntentState from,
         CommandRunScope scope);
