@@ -15,12 +15,9 @@ public sealed class ShotToCommandSpec : ShotIntentCommandSpecBase
 
 public sealed class ShotToCommand : ShotIntentCommandBase<ShotToCommandSpec>
 {
-    public ShotToCommand(
-        PresentationResponseRig rig,
-        ShotToCommandSpec spec)
+    public ShotToCommand(PresentationResponseRig rig, ShotToCommandSpec spec)
         : base(rig, spec)
-    {
-    }
+    { }
 
     protected override PresentationIntentState BuildTargetState(
         in PresentationIntentState from,

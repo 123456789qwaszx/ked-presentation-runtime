@@ -68,14 +68,13 @@ title: Story_TalesOfNovaEP12_01
 <<jolt Noya>>
 세이나: 안 돼! 이 신기를 얻으려고 우리가 성해를 얼마나 많이 물리쳤는데...... <br>검날이 다 무뎌질 정도였다고!
 
-<<screen_flash>>
+<<shot_to 4 -200 80>>
 <<char_focus Noya>>
 <<face Noya 3>>
 <<move_by char1 90 0>>
 <<face Willow 25>>
 
 <<fade_in Iris>>
-<<shot_to 1 0 0>>
 <<hop Iris 1 60 10>>
 <<slide_in Iris left>>
 <<emoji Iris 6>>
@@ -83,6 +82,7 @@ title: Story_TalesOfNovaEP12_01
 
 <<char_silhouette Willow>>
 
+<<shot_to 1 0 0>>
 <<bg_fade_in bg2>>
 <<fade_in Amber>>
 코하쿠: 심상석에 은혜도 없어.

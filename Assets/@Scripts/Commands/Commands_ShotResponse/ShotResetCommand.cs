@@ -2,18 +2,14 @@ using System;
 
 [Serializable]
 [CommandMenuHint("Presentation Shot", "Shot Reset", Order = -849)]
-public sealed class ShotResetCommandSpec : ShotIntentCommandSpecBase
+public sealed class ShotResetCommandSpec : ShotIntentCommandSpecBase 
 { }
 
 public sealed class ShotResetCommand : ShotIntentCommandBase<ShotResetCommandSpec>
 {
-
-    public ShotResetCommand(
-        PresentationResponseRig rig,
-        ShotResetCommandSpec spec)
-        : base(rig, spec)
-    {
-    }
+    public ShotResetCommand(PresentationResponseRig rig, ShotResetCommandSpec spec) 
+        : base(rig, spec) 
+    { }
 
     protected override PresentationIntentState BuildTargetState(
         in PresentationIntentState from,

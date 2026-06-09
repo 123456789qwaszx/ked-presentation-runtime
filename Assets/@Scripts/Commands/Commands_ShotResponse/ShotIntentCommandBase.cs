@@ -11,10 +11,6 @@ public abstract class ShotIntentCommandSpecBase : CommandSpecBase
     public float duration = 0.45f;
 
     public Ease ease = Ease.OutCubic;
-
-    [Header("Options")]
-    [Tooltip("체크하면 기존 shot tween을 끝내고 committed state에서 시작합니다.")]
-    public bool killTween = true;
 }
 
 public abstract class ShotIntentCommandBase<TSpec> : CommandBase
@@ -25,8 +21,8 @@ public abstract class ShotIntentCommandBase<TSpec> : CommandBase
 
     private PresentationIntentState _fromState;
     private PresentationIntentState _toState;
-    private Tween _tween;
-    private bool _canCommitFinalState;
+
+    private bool HasClaimedRig { get; set; }
 
     public override bool WaitForCompletion => spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
@@ -39,30 +35,22 @@ public abstract class ShotIntentCommandBase<TSpec> : CommandBase
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
-        if (spec.killTween)
-            KillRigTween(true);
+        ClaimRig(scope);
 
-        _canCommitFinalState = true;
-
-        _fromState = rig.CurrentState;
-        _toState = BuildTargetState(_fromState, scope);
-
-        if (spec.duration <= 0f || PresentationShotIntentMath.ApproximatelyEqual(_fromState, _toState))
+        if (spec.duration <= 0f ||
+            PresentationShotIntentMath.ApproximatelyEqual(_fromState, _toState))
         {
-            Commit(_toState);
-            ClearRuntimeState();
+            CommitFinalState();
             yield break;
         }
 
-        _tween = DOTween
+        Tween tween = DOTween
             .To(
                 () => 0f,
                 t =>
                 {
-                    if (!_canCommitFinalState || rig == null)
-                        return;
-
-                    PresentationIntentState state = PresentationShotIntentMath.Interpolate(_fromState, _toState, t);
+                    PresentationIntentState state =
+                        PresentationShotIntentMath.Interpolate(_fromState, _toState, t);
 
                     rig.ApplyToAllBindings(state);
                 },
@@ -71,65 +59,41 @@ public abstract class ShotIntentCommandBase<TSpec> : CommandBase
             .SetEase(spec.ease)
             .SetUpdate(true)
             .SetTarget(rig)
-            .OnComplete(() =>
-            {
-                if (!_canCommitFinalState || rig == null)
-                    return;
-
-                Commit(_toState);
-                ClearRuntimeState();
-            });
+            .OnComplete(CommitFinalState);
 
         if (spec.wait)
-            yield return _tween.WaitForCompletion();
+            yield return tween.WaitForCompletion();
     }
 
     protected override void OnSkip(CommandRunScope scope)
     {
-        if (rig == null)
-            return;
+        if (!HasClaimedRig)
+            ClaimRig(scope);
 
-        KillRigTween(false);
-
-        _fromState = rig.CurrentState;
-        _toState = BuildTargetState(_fromState, scope);
-
-        Commit(_toState);
-        ClearRuntimeState();
+        CommitFinalState();
     }
 
     protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
 
-    protected override void OnCommandCompleted(CommandRunScope scope)
-    {
-        if (!_canCommitFinalState || rig == null)
-            return;
+    protected abstract PresentationIntentState BuildTargetState(
+        in PresentationIntentState from,
+        CommandRunScope scope);
+    
 
-        KillRigTween(false);
-        Commit(_toState);
-        ClearRuntimeState();
+    private void ClaimRig(CommandRunScope scope)
+    {
+        DOTween.Kill(rig, true);
+
+        _fromState = rig.CurrentState;
+        _toState = BuildTargetState(_fromState, scope);
+
+        HasClaimedRig = true;
     }
 
-    protected abstract PresentationIntentState BuildTargetState(in PresentationIntentState from, CommandRunScope scope);
-
-    private void Commit(in PresentationIntentState state)
+    private void CommitFinalState()
     {
-        if (rig != null)
-            rig.ApplyToAllBindings(state);
-    }
+        rig.ApplyToAllBindings(_toState);
 
-    private void KillRigTween(bool complete)
-    {
-        if (rig == null)
-            return;
-
-        DOTween.Kill(rig, complete);
-        _tween = null;
-    }
-
-    private void ClearRuntimeState()
-    {
-        _canCommitFinalState = false;
-        _tween = null;
+        HasClaimedRig = false;
     }
 }

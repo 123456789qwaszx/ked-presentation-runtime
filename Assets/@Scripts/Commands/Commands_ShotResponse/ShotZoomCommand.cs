@@ -6,19 +6,16 @@ using UnityEngine;
 public sealed class ShotZoomCommandSpec : ShotIntentCommandSpecBase
 {
     [Header("Zoom")]
-    [Tooltip("목표 zoom intent 값. 현재 pan/focusPoint는 유지합니다.")]
+    [Tooltip("목표 zoom intent 값")]
     [Range(-10f, 10f)]
     public float zoom = 0f;
 }
 
 public sealed class ShotZoomCommand : ShotIntentCommandBase<ShotZoomCommandSpec>
 {
-    public ShotZoomCommand(
-        PresentationResponseRig rig,
-        ShotZoomCommandSpec spec)
+    public ShotZoomCommand(PresentationResponseRig rig, ShotZoomCommandSpec spec)
         : base(rig, spec)
-    {
-    }
+    { }
 
     protected override PresentationIntentState BuildTargetState(
         in PresentationIntentState from,

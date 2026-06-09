@@ -15,9 +15,6 @@ public sealed class ShotZoomFocusCommandSpec : ShotIntentCommandSpecBase
     [Tooltip("focusPreset이 Custom일 때 사용할 custom point key입니다. 예: hand_left, weapon, phone")]
     public string customFocusKey = "";
 
-    //[Tooltip("캐릭터/포즈별 focus 보정 DB입니다.")]
-    //public CharacterFocusTuningDBSO focusTuningDb;
-
     [Tooltip("선택한 focus preset에 추가로 더할 최종 command-time offset입니다.")]
     public Vector2 focusOffset = Vector2.zero;
 
@@ -41,8 +38,8 @@ public sealed class ShotZoomFocusCommand : ShotIntentCommandBase<ShotZoomFocusCo
     CharacterFocusTuningDBSO _focusTuningDB;
     
     public ShotZoomFocusCommand(
-        PresentationResponseRig rig,
-        ShotZoomFocusCommandSpec spec,
+        PresentationResponseRig rig, 
+        ShotZoomFocusCommandSpec spec, 
         CharacterFocusTuningDBSO focusTuningDB)
         : base(rig, spec)
     {
@@ -77,7 +74,9 @@ public sealed class ShotZoomFocusCommand : ShotIntentCommandBase<ShotZoomFocusCo
 
         // 4. 현재 측정된 캐릭터 focus 위치에서 현재 pan/scale을 제거해서 논리 focusPoint로 되돌린다.
         Vector2 logicalFocusPoint =
-            PresentationShotIntentMath.RemoveCurrentCameraTransformFromFocusPoint(focus.FocusPointInStageSpace, from.panInRigSpace, fromScale);
+            PresentationShotIntentMath.RemoveCurrentCameraTransformFromFocusPoint(
+                focus.FocusPointInStageSpace, 
+                from.panInRigSpace, fromScale);
 
         // 5. 화면의 어느 지점에 focus를 두고 싶은지 구한다. 예: Center, Left, Right, Upper 등
         Vector2 desiredPoint =
@@ -85,7 +84,10 @@ public sealed class ShotZoomFocusCommand : ShotIntentCommandBase<ShotZoomFocusCo
 
         // 6. targetScale에서 logicalFocusPoint가 desiredPoint에 오도록 필요한 targetPan을 계산한다.
         Vector2 targetPan =
-            PresentationShotIntentMath.CalculatePanToPlaceFocusAtScreenPoint(logicalFocusPoint, desiredPoint, targetScale);
+            PresentationShotIntentMath.CalculatePanToPlaceFocusAtScreenPoint(
+                logicalFocusPoint,
+                desiredPoint,
+                targetScale);
 
         // 7. zoom, pan, focusPoint를 새 IntentState로 만든다.
         return new PresentationIntentState

@@ -120,7 +120,6 @@ public sealed partial class YarnCommandBridge
         var spec = new ShotTrackCommandSpec
         {
             pan = new Vector2(x, y),
-            relative = true,
             duration = duration,
             ease = Ease.OutCubic,
             wait = false
