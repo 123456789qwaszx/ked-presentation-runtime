@@ -26,23 +26,18 @@ public class SetColorCommandSpecCharR : CharacterRigCommandSpecBase
     public float duration = 0f;
 
     public Ease ease = Ease.OutCubic;
-
-    [Header("Options")]
-    [Tooltip("체크하면 기존 color tween을 끝내고 committed state에서 시작합니다.")]
-    public bool killTween = true;
 }
+
 public sealed class SetColorCommandCharR : CommandBase
 {
     private readonly SetColorCommandSpecCharR _spec;
 
     private Image _image;
-    private Tween _tween;
-    private bool _resolveAttempted;
-    private bool _canCommitFinalState;
-
-    private bool _hasComputedColor;
-    private Color _startColor;
     private Color _destColor;
+
+    private bool _resolveAttempted;
+
+    private bool HasClaimedTarget { get; set; }
 
     public override bool WaitForCompletion => _spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
@@ -57,45 +52,23 @@ public sealed class SetColorCommandCharR : CommandBase
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (_image == null)
-            yield break;
-
-        _hasComputedColor = false;
-
-        if (_spec.killTween)
-            _image.DOKill(true); // Finish previous color tween so this command starts from a committed state.
-
-        _canCommitFinalState = true;
-
-        ComputeColorIfNeeded();
+        ClaimTarget();
 
         if (_spec.duration <= 0f)
         {
-            _image.color = _destColor;
-            _canCommitFinalState = false;
-            _image = null;
-            _tween = null;
+            CommitFinalState();
             yield break;
         }
 
-        _tween = _image
+        Tween tween = _image
             .DOColor(_destColor, _spec.duration)
             .SetEase(_spec.ease)
             .SetUpdate(true)
             .SetTarget(_image)
-            .OnComplete(() =>
-            {
-                if (!_canCommitFinalState || _image == null)
-                    return;
-
-                _image.color = _destColor;
-                _canCommitFinalState = false;
-                _image = null;
-                _tween = null;
-            });
+            .OnComplete(CommitFinalState);
 
         if (_spec.wait)
-            yield return _tween.WaitForCompletion();
+            yield return tween.WaitForCompletion();
     }
 
     protected override void OnSkip(CommandRunScope scope)
@@ -103,76 +76,39 @@ public sealed class SetColorCommandCharR : CommandBase
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (_image == null)
-            return;
+        if (!HasClaimedTarget)
+            ClaimTarget();
+        else
+            _image.DOKill(false);
 
-        _hasComputedColor = false;
-        ComputeColorIfNeeded();
-
-        _image.color = _destColor;
-        _canCommitFinalState = false;
-        _image = null;
-        _tween = null;
+        CommitFinalState();
     }
 
-    protected override void OnRollbackSeek(CommandRunScope scope)
-    {
-        OnSkip(scope);
-    }
-
-    protected override void OnCommandCompleted(CommandRunScope scope)
-    {
-        if (!_resolveAttempted)
-            ResolveRefs(scope);
-
-        if (!_canCommitFinalState || _image == null)
-            return;
-
-        _tween?.Kill(false);
-        _image.DOKill(false);
-
-        ComputeColorIfNeeded();
-        _image.color = _destColor;
-
-        _canCommitFinalState = false;
-        _image = null;
-        _tween = null;
-    }
-
-    private void ComputeColorIfNeeded()
-    {
-        if (_hasComputedColor)
-            return;
-
-        _hasComputedColor = true;
-        _startColor = _image.color;
-        _destColor = _spec.color;
-
-        if (_spec.keepAlpha)
-            _destColor.a = _startColor.a;
-    }
+    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
 
     private void ResolveRefs(CommandRunScope scope)
     {
         _resolveAttempted = true;
 
-        CharacterRigRefs rig =
-            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(
-                scope,
-                _spec.slotKey);
+        CharacterRigRefs rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
+        _image = rig.GetImage(_spec.target);
+    }
 
-        if (rig == null)
-            return;
+    private void ClaimTarget()
+    {
+        _image.DOKill(true);
 
-        RectTransform rect = rig.GetRect(_spec.target);
+        _destColor = _spec.color;
+        if (_spec.keepAlpha)
+            _destColor.a = _image.color.a;
 
-        if (rect == null)
-            return;
+        HasClaimedTarget = true;
+    }
 
-        if (!rect.TryGetComponent(out _image))
-        {
-            Debug.LogWarning(
-                $"[SetColorCommandCharR] Target Image not found. targetKey='{_spec.slotKey}', target='{_spec.target}'");
-        }
+    private void CommitFinalState()
+    {
+        _image.color = _destColor;
+
+        HasClaimedTarget = false;
     }
 }

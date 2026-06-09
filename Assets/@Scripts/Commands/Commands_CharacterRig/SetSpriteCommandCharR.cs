@@ -62,33 +62,21 @@ public sealed class SetSpriteCommandCharR : CommandBase
     {
         _resolveAttempted = true;
 
-        CharacterRigRefs rig =
-            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(
-                scope,
-                _spec.slotKey);
-
+        CharacterRigRefs rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
         _image = rig.GetImage(_spec.target);
-
-        if (_image == null)
-        {
-            throw new InvalidOperationException(
-                $"[SetSpriteCommandCharR] Target Image not found. targetKey='{_spec.slotKey}', target='{_spec.target}'.");
-        }
     }
 
     private void Apply()
     {
-        _image.sprite = _spec.sprite;
-
         if (_spec.sprite == null)
             return;
-
-        CharRigImageSizingMode mode = _spec.sizingMode;
-
+        
+        _image.sprite = _spec.sprite;
+        
         CharRigImageSizingPolicy.Apply(
             _image,
             _spec.sprite,
-            mode,
+            _spec.sizingMode,
             _spec.horizontalAlign);
     }
 }

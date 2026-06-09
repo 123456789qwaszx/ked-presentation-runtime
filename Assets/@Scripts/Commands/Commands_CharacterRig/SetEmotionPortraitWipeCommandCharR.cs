@@ -17,9 +17,6 @@ public sealed class SetEmotionPortraitWipeCommandSpec : CharacterRigCommandSpecB
 
     public Ease ease = Ease.OutCubic;
 
-    [Tooltip("체크하면 기존 Portrait/Overlay Tween을 끝내고 committed state에서 시작합니다.")]
-    public bool killTween = true;
-
     [Header("Sizing Policy")]
     public CharRigImageSizingMode sizingMode = CharRigImageSizingMode.HeightFitPreserveAspect;
 
@@ -39,13 +36,13 @@ public sealed class SetEmotionPortraitWipeCommand : CommandBase
     private CanvasGroup _portraitCanvasGroup;
     private CanvasGroup _overlayCanvasGroup;
 
+    private Sprite _targetSprite;
     private Sequence _seq;
 
     private bool _resolveAttempted;
-    private bool _canCommitFinalState;
-
     private bool _hasResolvedTargetSprite;
-    private Sprite _targetSprite;
+
+    private bool HasClaimedTarget { get; set; }
 
     public override bool WaitForCompletion => _spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
@@ -65,29 +62,12 @@ public sealed class SetEmotionPortraitWipeCommand : CommandBase
 
         ResolveTargetSprite(scope);
 
-        if (_spec.killTween)
-            KillTween(true); // Finish previous portrait/overlay tween so this command starts from a committed state.
-
-        _canCommitFinalState = true;
-
-        if (!HasValidRefs())
-        {
-            ClearRuntimeRefs();
-            yield break;
-        }
-
-        EnsureRootsVisible();
-
-        _portraitCanvasGroup.alpha = 1f;
-        _overlayCanvasGroup.alpha = 0f;
-
-        _overlayImage.sprite = _targetSprite;
-        ApplySizing(_overlayImage, _targetSprite);
+        ClaimTarget();
+        PrepareTransitionState();
 
         if (_spec.duration <= 0f)
         {
             CommitFinalState();
-            ClearRuntimeRefs();
             yield break;
         }
 
@@ -104,9 +84,6 @@ public sealed class SetEmotionPortraitWipeCommand : CommandBase
 
         _seq.AppendCallback(() =>
         {
-            if (!_canCommitFinalState || !HasValidRefs())
-                return;
-
             _portraitImage.sprite = _targetSprite;
             ApplySizing(_portraitImage, _targetSprite);
             _portraitCanvasGroup.alpha = 1f;
@@ -119,14 +96,7 @@ public sealed class SetEmotionPortraitWipeCommand : CommandBase
                 .SetUpdate(true)
                 .SetTarget(_overlayCanvasGroup));
 
-        _seq.OnComplete(() =>
-        {
-            if (!_canCommitFinalState || !HasValidRefs())
-                return;
-
-            CommitFinalState();
-            ClearRuntimeRefs();
-        });
+        _seq.OnComplete(CommitFinalState);
 
         if (_spec.wait)
             yield return _seq.WaitForCompletion();
@@ -139,43 +109,29 @@ public sealed class SetEmotionPortraitWipeCommand : CommandBase
 
         ResolveTargetSprite(scope);
 
-        CommitFinalState();
-        ClearRuntimeRefs();
-    }
-
-    protected override void OnRollbackSeek(CommandRunScope scope)
-    {
-        OnSkip(scope);
-    }
-
-    protected override void OnCommandCompleted(CommandRunScope scope)
-    {
-        if (!_canCommitFinalState)
-            return;
-
-        if (!_resolveAttempted)
-            ResolveRefs(scope);
-
-        ResolveTargetSprite(scope);
+        if (!HasClaimedTarget)
+            ClaimTarget();
+        else
+            KillCurrentTween();
 
         CommitFinalState();
-        ClearRuntimeRefs();
     }
+
+    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
 
     private void ResolveRefs(CommandRunScope scope)
     {
         _resolveAttempted = true;
 
-        CharacterRigRefs rigRefs =
-            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
+        CharacterRigRefs rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
 
         _portraitRoot = rigRefs.CharacterPortraitSprite_Root;
         _overlayRoot = rigRefs.CharacterPortraitSpriteOverlay_Root;
         _portraitImage = rigRefs.CharacterPortraitSprite_Image;
         _overlayImage = rigRefs.CharacterPortraitSpriteOverlay_Image;
 
-        _portraitCanvasGroup = GetRootCanvasGroup(_portraitRoot, "CharacterPortrait_Root");
-        _overlayCanvasGroup = GetRootCanvasGroup(_overlayRoot, "CharacterPortraitOverlay_Root");
+        _portraitCanvasGroup = _portraitRoot.GetComponent<CanvasGroup>();
+        _overlayCanvasGroup = _overlayRoot.GetComponent<CanvasGroup>();
     }
 
     private void ResolveTargetSprite(CommandRunScope scope)
@@ -184,101 +140,61 @@ public sealed class SetEmotionPortraitWipeCommand : CommandBase
             return;
 
         _targetSprite = _resolver.Resolve(
-                scope,
-                _spec.slotKey,
-                _spec.portrait,
-                nameof(SetEmotionPortraitWipeCommand));
-        
+            scope,
+            _spec.slotKey,
+            _spec.portrait,
+            nameof(SetEmotionPortraitWipeCommand));
+
         _hasResolvedTargetSprite = true;
     }
 
-    private void EnsureRootsVisible()
+    private void ClaimTarget()
     {
-        if (_portraitRoot != null && !_portraitRoot.gameObject.activeSelf)
-            _portraitRoot.gameObject.SetActive(true);
+        KillPreviousTween();
 
-        if (_overlayRoot != null && !_overlayRoot.gameObject.activeSelf)
-            _overlayRoot.gameObject.SetActive(true);
+        HasClaimedTarget = true;
+    }
+
+    private void PrepareTransitionState()
+    {
+        _portraitCanvasGroup.alpha = 1f;
+        _overlayCanvasGroup.alpha = 0f;
+
+        _overlayImage.sprite = _targetSprite;
+        ApplySizing(_overlayImage, _targetSprite);
     }
 
     private void CommitFinalState()
     {
-        KillTween(false);
-
-        if (!HasValidRefs())
-        {
-            _canCommitFinalState = false;
-            return;
-        }
-
         _portraitImage.sprite = _targetSprite;
         ApplySizing(_portraitImage, _targetSprite);
 
         _portraitCanvasGroup.alpha = 1f;
         _overlayCanvasGroup.alpha = 0f;
 
-        _canCommitFinalState = false;
+        HasClaimedTarget = false;
     }
 
-    private void KillTween(bool completePreviousTweens)
+    private void KillPreviousTween()
     {
-        if (_seq != null)
-        {
-            _seq.Kill(false);
-            _seq = null;
-        }
-
-        if (_overlayCanvasGroup != null)
-            _overlayCanvasGroup.DOKill(completePreviousTweens);
-
-        if (_portraitCanvasGroup != null)
-            _portraitCanvasGroup.DOKill(completePreviousTweens);
-
-        if (_overlayRoot != null)
-            _overlayRoot.DOKill(completePreviousTweens);
-
-        if (_portraitRoot != null)
-            _portraitRoot.DOKill(completePreviousTweens);
-    }
-
-    private bool HasValidRefs()
-    {
-        return _portraitRoot != null
-               && _overlayRoot != null
-               && _portraitImage != null
-               && _overlayImage != null
-               && _portraitCanvasGroup != null
-               && _overlayCanvasGroup != null;
-    }
-
-    private void ClearRuntimeRefs()
-    {
+        _seq?.Kill(false);
         _seq = null;
 
-        _portraitRoot = null;
-        _overlayRoot = null;
-        _portraitImage = null;
-        _overlayImage = null;
-        _portraitCanvasGroup = null;
-        _overlayCanvasGroup = null;
-
-        _targetSprite = null;
-        _hasResolvedTargetSprite = false;
-        _resolveAttempted = false;
-        _canCommitFinalState = false;
+        _overlayCanvasGroup.DOKill(true);
+        _portraitCanvasGroup.DOKill(true);
+        _overlayRoot.DOKill(true);
+        _portraitRoot.DOKill(true);
     }
 
-    private static CanvasGroup GetRootCanvasGroup(RectTransform root, string debugName)
+    private void KillCurrentTween()
     {
-        if (root == null)
-            throw new InvalidOperationException(
-                $"[SetEmotionPortraitWipeCommand] Root is null: {debugName}");
+        _seq?.Kill(false);
+        _seq = null;
 
-        if (root.TryGetComponent(out CanvasGroup canvasGroup))
-            return canvasGroup;
-
-        throw new InvalidOperationException(
-            $"[SetEmotionPortraitWipeCommand] CanvasGroup missing on Root: {debugName} ({root.name})");
+        _overlayCanvasGroup.DOKill(false);
+        _portraitCanvasGroup.DOKill(false);
+        _overlayRoot.DOKill(false);
+        _portraitRoot.DOKill(false);
     }
 
     private void ApplySizing(Image image, Sprite sprite)

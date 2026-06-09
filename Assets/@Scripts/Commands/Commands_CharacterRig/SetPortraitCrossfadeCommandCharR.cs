@@ -1,7 +1,7 @@
 using System;
-using UnityEngine;
-using DG.Tweening;
 using System.Collections;
+using DG.Tweening;
+using UnityEngine;
 using UnityEngine.UI;
 
 [Serializable]
@@ -16,7 +16,6 @@ public sealed class SetPortraitCrossfadeCommandSpecCharR : CharacterRigCommandSp
     public float duration = 0.28f;
 
     public Ease ease = Ease.OutCubic;
-    public bool snapOnSkip = true;
 
     [Header("Sizing Policy")]
     public CharRigImageSizingMode sizingMode =
@@ -38,9 +37,13 @@ public sealed class SetPortraitCrossfadeCommandCharR : CommandBase
     private CanvasGroup _portraitCanvasGroup;
     private CanvasGroup _overlayCanvasGroup;
 
-    private bool _resolveAttempted;
-    private bool _canCommitFinalState;
+    private Sprite _targetSprite;
     private Sequence _seq;
+
+    private bool _resolveAttempted;
+    private bool _hasResolvedTargetSprite;
+
+    private bool HasClaimedTarget { get; set; }
 
     public override bool WaitForCompletion => _spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
@@ -57,59 +60,32 @@ public sealed class SetPortraitCrossfadeCommandCharR : CommandBase
     {
         if (!_resolveAttempted)
             ResolveRefs(scope);
-        
-        Sprite targetSprite =
-            _resolver.Resolve(
-                scope,
-                _spec.slotKey,
-                _spec.portrait,
-                nameof(SetPortraitCrossfadeCommandCharR));
 
-        _overlayCanvasGroup.DOKill(true);
-        _portraitCanvasGroup.DOKill(true);
-        _seq?.Kill(false);
-        _seq = null;
-        _canCommitFinalState = true;
+        ResolveTargetSprite(scope);
 
-        EnsureRootsVisible();
-
-        _overlayImage.sprite = targetSprite;
-        ApplySizing(_overlayImage, targetSprite);
-
-        _portraitCanvasGroup.alpha = 1f;
-        _overlayCanvasGroup.alpha = 0f;
+        ClaimTarget();
+        PrepareTransitionState();
 
         if (_spec.duration <= 0f)
         {
-            CommitFinalState(targetSprite);
-            _canCommitFinalState = false;
-            _seq = null;
+            CommitFinalState();
             yield break;
         }
 
         _seq = DOTween.Sequence()
             .SetUpdate(true)
+            .SetTarget(_overlayRoot)
             .Join(_portraitCanvasGroup
                 .DOFade(0f, _spec.duration)
-                .SetEase(_spec.ease))
+                .SetEase(_spec.ease)
+                .SetUpdate(true)
+                .SetTarget(_portraitCanvasGroup))
             .Join(_overlayCanvasGroup
                 .DOFade(1f, _spec.duration)
-                .SetEase(_spec.ease))
-            .AppendCallback(() =>
-            {
-                if (!_canCommitFinalState)
-                    return;
-
-                CommitFinalState(targetSprite);
-            })
-            .OnComplete(() =>
-            {
-                if (!_canCommitFinalState)
-                    return;
-
-                _canCommitFinalState = false;
-                _seq = null;
-            });
+                .SetEase(_spec.ease)
+                .SetUpdate(true)
+                .SetTarget(_overlayCanvasGroup))
+            .OnComplete(CommitFinalState);
 
         if (_spec.wait)
             yield return _seq.WaitForCompletion();
@@ -120,93 +96,94 @@ public sealed class SetPortraitCrossfadeCommandCharR : CommandBase
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        Sprite targetSprite =
-            _resolver.Resolve(
-                scope,
-                _spec.slotKey,
-                _spec.portrait,
-                nameof(SetPortraitCrossfadeCommandCharR));
+        ResolveTargetSprite(scope);
 
-        CommitFinalState(targetSprite);
-        _canCommitFinalState = false;
-        _seq = null;
-    }
-
-    protected override void OnRollbackSeek(CommandRunScope scope)
-    {
-        OnSkip(scope);
-    }
-
-    protected override void OnCommandCompleted(CommandRunScope scope)
-    {
-        if (!_canCommitFinalState || _portraitRoot == null || _overlayRoot == null)
-            return;
-
-        if (_seq == null)
-            return;
-
-        if (_spec.snapOnSkip)
-            _seq.Complete(true);
+        if (!HasClaimedTarget)
+            ClaimTarget();
         else
-            _seq.Kill(false);
+            KillCurrentTween();
 
-        _canCommitFinalState = false;
-        _seq = null;
+        CommitFinalState();
     }
+
+    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
 
     private void ResolveRefs(CommandRunScope scope)
     {
         _resolveAttempted = true;
 
-        CharacterRigRefs rigRefs =
-            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
+        CharacterRigRefs rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
 
         _portraitRoot = rigRefs.CharacterPortraitSprite_Root;
         _overlayRoot = rigRefs.CharacterPortraitSpriteOverlay_Root;
         _portraitImage = rigRefs.CharacterPortraitSprite_Image;
         _overlayImage = rigRefs.CharacterPortraitSpriteOverlay_Image;
 
-        _portraitCanvasGroup =
-            GetRootCanvasGroup(_portraitRoot, "CharacterPortrait_Root");
-
-        _overlayCanvasGroup =
-            GetRootCanvasGroup(_overlayRoot, "CharacterPortraitOverlay_Root");
+        _portraitCanvasGroup = _portraitRoot.GetComponent<CanvasGroup>();
+        _overlayCanvasGroup =_overlayRoot.GetComponent<CanvasGroup>();
     }
 
-    private void EnsureRootsVisible()
+    private void ResolveTargetSprite(CommandRunScope scope)
     {
-        if (!_portraitRoot.gameObject.activeSelf)
-            _portraitRoot.gameObject.SetActive(true);
+        if (_hasResolvedTargetSprite)
+            return;
 
-        if (!_overlayRoot.gameObject.activeSelf)
-            _overlayRoot.gameObject.SetActive(true);
+        _targetSprite = _resolver.Resolve(
+            scope,
+            _spec.slotKey,
+            _spec.portrait,
+            nameof(SetPortraitCrossfadeCommandCharR));
+
+        _hasResolvedTargetSprite = true;
     }
 
-    private void CommitFinalState(Sprite targetSprite)
+    private void ClaimTarget()
     {
-        _seq?.Kill(false);
-        _seq = null;
+        KillPreviousTween();
 
-        _portraitImage.sprite = targetSprite;
-        ApplySizing(_portraitImage, targetSprite);
+        HasClaimedTarget = true;
+    }
+
+    private void PrepareTransitionState()
+    {
+        _overlayImage.sprite = _targetSprite;
+        ApplySizing(_overlayImage, _targetSprite);
 
         _portraitCanvasGroup.alpha = 1f;
         _overlayCanvasGroup.alpha = 0f;
     }
 
-    private static CanvasGroup GetRootCanvasGroup(RectTransform root, string debugName)
+    private void CommitFinalState()
     {
-        if (root == null)
-        {
-            throw new InvalidOperationException(
-                $"[SetPortraitCrossfadeCommandCharR] Root is null: {debugName}");
-        }
+        _portraitImage.sprite = _targetSprite;
+        ApplySizing(_portraitImage, _targetSprite);
 
-        if (root.TryGetComponent(out CanvasGroup canvasGroup))
-            return canvasGroup;
+        _portraitCanvasGroup.alpha = 1f;
+        _overlayCanvasGroup.alpha = 0f;
 
-        throw new InvalidOperationException(
-            $"[SetPortraitCrossfadeCommandCharR] CanvasGroup missing on Root: {debugName} ({root.name})");
+        HasClaimedTarget = false;
+    }
+
+    private void KillPreviousTween()
+    {
+        _seq?.Kill(false);
+        _seq = null;
+
+        _overlayCanvasGroup.DOKill(true);
+        _portraitCanvasGroup.DOKill(true);
+        _overlayRoot.DOKill(true);
+        _portraitRoot.DOKill(true);
+    }
+
+    private void KillCurrentTween()
+    {
+        _seq?.Kill(false);
+        _seq = null;
+
+        _overlayCanvasGroup.DOKill(false);
+        _portraitCanvasGroup.DOKill(false);
+        _overlayRoot.DOKill(false);
+        _portraitRoot.DOKill(false);
     }
 
     private void ApplySizing(Image image, Sprite sprite)

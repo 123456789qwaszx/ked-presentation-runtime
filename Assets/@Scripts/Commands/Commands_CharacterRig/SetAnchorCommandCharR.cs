@@ -60,19 +60,14 @@ public sealed class SetAnchorCommandCharR : CommandBase
         if (!_resolveAttempted)
             ResolveRefs(scope);
         
-        if (_rect == null)
-            yield break;
-        
         Apply(scope);
+        yield break;
     }
     
     protected override void OnSkip(CommandRunScope scope)
     {
         if (!_resolveAttempted)
             ResolveRefs(scope);
-
-        if (_rect == null)
-            return;
 
         Apply(scope);
     }
@@ -82,7 +77,6 @@ public sealed class SetAnchorCommandCharR : CommandBase
     private void Apply(CommandRunScope scope)
     {
         string characterKey = CharacterRigTargetResolver.ResolveRigKeyByPolicy(scope, _spec.slotKey);
-        //scope.CastRegistry.TryGetCharacter(_spec.slotKey, out string characterKey);
         
         Vector2 anchoredPosition = CharAnchorPlacementResolver.ResolveAnchoredPosition(
             _rect,
