@@ -67,9 +67,6 @@ public sealed class SetBackgroundSpriteCommandBgR : CommandBase
 
     private void Apply()
     {
-        if (_image == null)
-            return;
-
         Sprite sprite = _resolver.Resolve(_spec.spriteKey, nameof(SetBackgroundSpriteCommandBgR));
 
         _image.sprite = sprite;
@@ -84,9 +81,7 @@ public sealed class SetBackgroundSpriteCommandBgR : CommandBase
     {
         _resolveAttempted = true;
 
-        BackgroundRigRefs rigRefs =
-            BackgroundRigTargetResolver.ResolveBackgroundRigFromTargetKey(scope, _spec.rigKey);
-
+        BackgroundRigRefs rigRefs = BackgroundRigTargetResolver.ResolveBackgroundRigFromTargetKey(scope, _spec.rigKey);
         _image = rigRefs.GetRect(_spec.target).GetComponent<Image>();
     }
 }

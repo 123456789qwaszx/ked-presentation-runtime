@@ -22,10 +22,6 @@ public sealed class MoveByCommandSpecBgR : BackgroundRigCommandSpecBase
     public float duration = 0.4f;
 
     public Ease ease = Ease.OutCubic;
-
-    [Header("Options")]
-    [Tooltip("체크하면 기존 위치 관련 트윈을 끝내고 committed state에서 시작합니다.")]
-    public bool killTween = true;
 }
 
 public sealed class MoveByCommandBgR : CommandBase
@@ -33,13 +29,12 @@ public sealed class MoveByCommandBgR : CommandBase
     private readonly MoveByCommandSpecBgR _spec;
 
     private RectTransform _rect;
-    private Tween _tween;
-    private bool _resolveAttempted;
-    private bool _canCommitFinalState;
-
-    private bool _hasComputedDest;
     private Vector2 _startPos;
     private Vector2 _destPos;
+
+    private bool _resolveAttempted;
+
+    private bool HasClaimedTarget { get; set; }
 
     public override bool WaitForCompletion => _spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
@@ -54,45 +49,23 @@ public sealed class MoveByCommandBgR : CommandBase
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (_rect == null)
-            yield break;
-
-        _hasComputedDest = false;
-
-        if (_spec.killTween)
-            _rect.DOKill(true);
-
-        _canCommitFinalState = true;
-
-        ComputeDestIfNeeded();
+        ClaimTarget();
 
         if (_spec.duration <= 0f)
         {
-            _rect.anchoredPosition = _destPos;
-            _canCommitFinalState = false;
-            _rect = null;
-            _tween = null;
+            CommitFinalState();
             yield break;
         }
 
-        _tween = _rect
+        Tween tween = _rect
             .DOAnchorPos(_destPos, _spec.duration)
             .SetEase(_spec.ease)
             .SetUpdate(true)
             .SetTarget(_rect)
-            .OnComplete(() =>
-            {
-                if (!_canCommitFinalState || _rect == null)
-                    return;
-
-                _rect.anchoredPosition = _destPos;
-                _canCommitFinalState = false;
-                _rect = null;
-                _tween = null;
-            });
+            .OnComplete(CommitFinalState);
 
         if (_spec.wait)
-            yield return _tween.WaitForCompletion();
+            yield return tween.WaitForCompletion();
     }
 
     protected override void OnSkip(CommandRunScope scope)
@@ -100,57 +73,36 @@ public sealed class MoveByCommandBgR : CommandBase
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (_rect == null)
-            return;
+        if (!HasClaimedTarget)
+            ClaimTarget();
 
-        _hasComputedDest = false;
-        ComputeDestIfNeeded();
-
-        _rect.anchoredPosition = _destPos;
-
-        _canCommitFinalState = false;
-        _rect = null;
-        _tween = null;
+        CommitFinalState();
     }
 
     protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
-
-    protected override void OnCommandCompleted(CommandRunScope scope)
-    {
-        if (!_resolveAttempted)
-            ResolveRefs(scope);
-
-        if (!_canCommitFinalState || _rect == null)
-            return;
-
-        _tween?.Kill(false);
-        _rect.DOKill(false);
-
-        ComputeDestIfNeeded();
-        _rect.anchoredPosition = _destPos;
-
-        _canCommitFinalState = false;
-        _rect = null;
-        _tween = null;
-    }
-
-    private void ComputeDestIfNeeded()
-    {
-        if (_hasComputedDest)
-            return;
-
-        _hasComputedDest = true;
-        _startPos = _rect.anchoredPosition;
-        _destPos = _startPos + _spec.delta;
-    }
 
     private void ResolveRefs(CommandRunScope scope)
     {
         _resolveAttempted = true;
 
-        BackgroundRigRefs rigRefs =
-            BackgroundRigTargetResolver.ResolveBackgroundRigFromTargetKey(scope, _spec.rigKey);
+        BackgroundRigRefs rig = BackgroundRigTargetResolver.ResolveBackgroundRigFromTargetKey(scope, _spec.rigKey);
+        _rect = rig.GetRect(_spec.target);
+    }
 
-        _rect = rigRefs.GetRect(_spec.target);
+    private void ClaimTarget()
+    {
+        _rect.DOKill(true);
+
+        _startPos = _rect.anchoredPosition;
+        _destPos = _startPos + _spec.delta;
+
+        HasClaimedTarget = true;
+    }
+
+    private void CommitFinalState()
+    {
+        _rect.anchoredPosition = _destPos;
+
+        HasClaimedTarget = false;
     }
 }

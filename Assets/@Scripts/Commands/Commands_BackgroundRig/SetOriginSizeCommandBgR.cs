@@ -59,19 +59,14 @@ public sealed class SetOriginSizeCommandBgR : CommandBase
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (_rect == null)
-            yield break;
-
         Apply();
+        yield break;
     }
 
     protected override void OnSkip(CommandRunScope scope)
     {
         if (!_resolveAttempted)
             ResolveRefs(scope);
-
-        if (_rect == null)
-            return;
 
         Apply();
     }
@@ -80,46 +75,33 @@ public sealed class SetOriginSizeCommandBgR : CommandBase
 
     private void Apply()
     {
-        if (_rect == null)
-            return;
-
         if (_spec.overrideScale)
         {
             _rect.localScale = _spec.scaleOverride;
             return;
         }
 
-        float scale = SafeScale(_spec.scale);
+        float scale = _spec.scale;
 
         if (_spec.uniformScale)
         {
             _rect.localScale = new Vector3(scale, scale, scale);
             return;
         }
-
+        
         _rect.localScale = new Vector3(
             scale * SafeMultiplier(_spec.xMultiplier),
             scale * SafeMultiplier(_spec.yMultiplier),
             scale * SafeMultiplier(_spec.zMultiplier));
     }
 
-    private static float SafeScale(float value)
-    {
-        return value <= 0f ? 1f : value;
-    }
-
-    private static float SafeMultiplier(float value)
-    {
-        return value <= 0f ? 1f : value;
-    }
+    private static float SafeMultiplier(float value) => value == 0f ? 1f : value;
 
     private void ResolveRefs(CommandRunScope scope)
     {
         _resolveAttempted = true;
 
-        BackgroundRigRefs rigRefs =
-            BackgroundRigTargetResolver.ResolveBackgroundRigFromTargetKey(scope, _spec.rigKey);
-
+        BackgroundRigRefs rigRefs = BackgroundRigTargetResolver.ResolveBackgroundRigFromTargetKey(scope, _spec.rigKey);
         _rect = rigRefs.GetRect(_spec.target);
     }
 }

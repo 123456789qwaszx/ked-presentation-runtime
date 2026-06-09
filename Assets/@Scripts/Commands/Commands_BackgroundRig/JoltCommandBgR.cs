@@ -22,9 +22,6 @@ public sealed class JoltCommandSpecBgR : BackgroundRigCommandSpecBase
 
     [Header("Style")]
     public float anticipation = 3f;
-
-    [Header("Options")]
-    public bool killTween = true;
 }
 
 public sealed class JoltCommandBgR : CommandBase
@@ -32,10 +29,11 @@ public sealed class JoltCommandBgR : CommandBase
     private readonly JoltCommandSpecBgR _spec;
 
     private RectTransform _rect;
-    private Tween _tween;
-    private Vector2 _destPos;
+    private Vector2 _basePos;
+
     private bool _resolveAttempted;
-    private bool _canCommitFinalState;
+
+    private bool HasClaimedTarget { get; set; }
 
     public override bool WaitForCompletion => _spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
@@ -50,22 +48,15 @@ public sealed class JoltCommandBgR : CommandBase
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (_rect == null)
-            yield break;
-
-        if (_spec.killTween)
-            _rect.DOKill(true);
-
-        _canCommitFinalState = true;
+        ClaimTarget();
 
         if (_spec.duration <= 0f || Mathf.Approximately(_spec.strength, 0f))
         {
-            _rect.anchoredPosition = _destPos;
-            ClearRuntimeRefs();
+            CommitFinalState();
             yield break;
         }
 
-        Vector2 basePos = _destPos;
+        Vector2 basePos = _basePos;
 
         float amplitude = Mathf.Abs(_spec.strength);
         int taps = Mathf.Max(1, _spec.taps);
@@ -74,14 +65,11 @@ public sealed class JoltCommandBgR : CommandBase
 
         Vector2 dir = GetSignedDirection(_spec.direction);
 
-        _tween = DOTween
+        Tween tween = DOTween
             .To(
                 () => 0f,
                 t =>
                 {
-                    if (!_canCommitFinalState || _rect == null)
-                        return;
-
                     float u = Mathf.Clamp01(t);
 
                     float antiTerm = 0f;
@@ -105,17 +93,10 @@ public sealed class JoltCommandBgR : CommandBase
             .SetEase(Ease.Linear)
             .SetUpdate(true)
             .SetTarget(_rect)
-            .OnComplete(() =>
-            {
-                if (!_canCommitFinalState || _rect == null)
-                    return;
-
-                _rect.anchoredPosition = basePos;
-                ClearRuntimeRefs();
-            });
+            .OnComplete(CommitFinalState);
 
         if (_spec.wait)
-            yield return _tween.WaitForCompletion();
+            yield return tween.WaitForCompletion();
     }
 
     protected override void OnSkip(CommandRunScope scope)
@@ -123,48 +104,36 @@ public sealed class JoltCommandBgR : CommandBase
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (_rect == null)
-            return;
+        if (!HasClaimedTarget)
+            ClaimTarget();
 
-        _rect.anchoredPosition = _destPos;
-        ClearRuntimeRefs();
+        CommitFinalState();
     }
 
     protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
-
-    protected override void OnCommandCompleted(CommandRunScope scope)
-    {
-        if (!_resolveAttempted)
-            ResolveRefs(scope);
-
-        if (!_canCommitFinalState || _rect == null)
-            return;
-
-        _tween?.Kill(false);
-        _rect.DOKill(false);
-        _rect.anchoredPosition = _destPos;
-
-        ClearRuntimeRefs();
-    }
 
     private void ResolveRefs(CommandRunScope scope)
     {
         _resolveAttempted = true;
 
-        BackgroundRigRefs rigRefs =
-            BackgroundRigTargetResolver.ResolveBackgroundRigFromTargetKey(scope, _spec.rigKey);
-
-        _rect = rigRefs.GetRect(_spec.target);
-
-        if (_rect != null)
-            _destPos = _rect.anchoredPosition;
+        BackgroundRigRefs rig = BackgroundRigTargetResolver.ResolveBackgroundRigFromTargetKey(scope, _spec.rigKey);
+        _rect = rig.GetRect(_spec.target);
     }
 
-    private void ClearRuntimeRefs()
+    private void ClaimTarget()
     {
-        _canCommitFinalState = false;
-        _rect = null;
-        _tween = null;
+        _rect.DOKill(true);
+
+        _basePos = _rect.anchoredPosition;
+
+        HasClaimedTarget = true;
+    }
+
+    private void CommitFinalState()
+    {
+        _rect.anchoredPosition = _basePos;
+
+        HasClaimedTarget = false;
     }
 
     private static Vector2 GetSignedDirection(CharRigDirection direction)

@@ -55,19 +55,14 @@ public sealed class SetAnchorCommandBgR : CommandBase
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (_rect == null)
-            yield break;
-
         Apply();
+        yield break;
     }
 
     protected override void OnSkip(CommandRunScope scope)
     {
         if (!_resolveAttempted)
             ResolveRefs(scope);
-
-        if (_rect == null)
-            return;
 
         Apply();
     }

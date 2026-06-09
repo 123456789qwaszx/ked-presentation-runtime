@@ -19,22 +19,20 @@ public sealed class FadeInCommandSpecBgR : BackgroundRigCommandSpecBase
     public BackgroundRigTarget target = BackgroundRigTarget.Background_Root;
 
     [Tooltip("페이드 시간(초). 0 이하이면 즉시 스냅합니다.")]
-    public float duration = 0.47f;
+    public float duration = 0.4f;
 
     public Ease ease = Ease.OutCubic;
-
-    [Tooltip("true면 대상의 입력 기능 해금(interactable/blocksRaycasts=true)")]
-    public bool enableInteraction = false;
 }
 
 public sealed class FadeInCommandBgR : CommandBase
 {
     private readonly FadeInCommandSpecBgR _spec;
 
-    private RectTransform _target;
+    private CanvasGroup _canvasGroup;
+
     private bool _resolveAttempted;
-    private bool _canCommitFinalState;
-    private bool _pending;
+
+    private bool HasClaimedTarget { get; set; }
 
     public override bool WaitForCompletion => _spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
@@ -49,84 +47,23 @@ public sealed class FadeInCommandBgR : CommandBase
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        _pending = false;
-        _canCommitFinalState = true;
-
-        if (_target == null)
-        {
-            _canCommitFinalState = false;
-            yield break;
-        }
-
-        CanvasGroup cg = GetOrAddCanvasGroup(_target);
-        if (cg == null)
-        {
-            _canCommitFinalState = false;
-            yield break;
-        }
-
-        cg.DOKill(true);
+        ClaimTarget();
 
         if (_spec.duration <= 0f)
         {
-            SnapOn(cg);
-            _canCommitFinalState = false;
+            CommitFinalState();
             yield break;
         }
 
-        _pending = true;
-
-        DOTween.To(
-                () => cg != null ? cg.alpha : 0f,
-                x =>
-                {
-                    if (!_canCommitFinalState || cg == null)
-                        return;
-
-                    cg.alpha = x;
-                },
-                1f,
-                _spec.duration
-            )
+        Tween tween = _canvasGroup
+            .DOFade(1f, _spec.duration)
             .SetEase(_spec.ease)
             .SetUpdate(true)
-            .SetTarget(cg)
-            .OnComplete(() =>
-            {
-                _pending = false;
+            .SetTarget(_canvasGroup)
+            .OnComplete(CommitFinalState);
 
-                if (!_canCommitFinalState)
-                    return;
-
-                if (cg == null)
-                {
-                    _canCommitFinalState = false;
-                    return;
-                }
-
-                if (_spec.enableInteraction)
-                {
-                    cg.interactable = true;
-                    cg.blocksRaycasts = true;
-                }
-
-                _canCommitFinalState = false;
-            });
-
-        if (!_spec.wait)
-            yield break;
-
-        while (_pending)
-        {
-            if (_target == null)
-            {
-                _pending = false;
-                _canCommitFinalState = false;
-                yield break;
-            }
-
-            yield return null;
-        }
+        if (_spec.wait)
+            yield return tween.WaitForCompletion();
     }
 
     protected override void OnSkip(CommandRunScope scope)
@@ -134,74 +71,42 @@ public sealed class FadeInCommandBgR : CommandBase
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (_target == null)
-        {
-            _pending = false;
-            _canCommitFinalState = false;
-            return;
-        }
+        if (!HasClaimedTarget)
+            ClaimTarget();
 
-        CanvasGroup cg = GetOrAddCanvasGroup(_target);
-        SnapOn(cg);
-
-        _pending = false;
-        _canCommitFinalState = false;
+        CommitFinalState();
     }
 
     protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
-
-    protected override void OnCommandCompleted(CommandRunScope scope)
-    {
-        if (!_resolveAttempted)
-            ResolveRefs(scope);
-
-        if (_target == null)
-            return;
-
-        if (!_canCommitFinalState)
-        {
-            _pending = false;
-            return;
-        }
-
-        CanvasGroup cg = GetOrAddCanvasGroup(_target);
-        SnapOn(cg);
-
-        _pending = false;
-        _canCommitFinalState = false;
-    }
 
     private void ResolveRefs(CommandRunScope scope)
     {
         _resolveAttempted = true;
 
-        BackgroundRigRefs rigRefs =
-            BackgroundRigTargetResolver.ResolveBackgroundRigFromTargetKey(scope, _spec.rigKey);
-
-        _target = rigRefs.GetRect(_spec.target);
+        BackgroundRigRefs rig = BackgroundRigTargetResolver.ResolveBackgroundRigFromTargetKey(scope, _spec.rigKey);
+        RectTransform target = rig.GetRect(_spec.target);
+        _canvasGroup = GetOrAddCanvasGroup(target);
     }
 
-    private void SnapOn(CanvasGroup cg)
+    private void ClaimTarget()
     {
-        if (cg == null)
-            return;
+        _canvasGroup.DOKill(true);
 
-        cg.DOKill(false);
-        cg.alpha = 1f;
-
-        if (_spec.enableInteraction)
-        {
-            cg.interactable = true;
-            cg.blocksRaycasts = true;
-        }
+        HasClaimedTarget = true;
     }
 
-    private CanvasGroup GetOrAddCanvasGroup(RectTransform rect)
+    private void CommitFinalState()
     {
-        if (rect == null)
-            return null;
+        _canvasGroup.alpha = 1f;
+        _canvasGroup.interactable = true;
+        _canvasGroup.blocksRaycasts = true;
 
-        if (rect.TryGetComponent<CanvasGroup>(out CanvasGroup group))
+        HasClaimedTarget = false;
+    }
+    
+    private static CanvasGroup GetOrAddCanvasGroup(RectTransform rect)
+    {
+        if (rect.TryGetComponent(out CanvasGroup group))
             return group;
 
         Debug.LogWarning($"[FadeInCommandBgR] CanvasGroup missing. Added automatically: {rect.name}", rect);

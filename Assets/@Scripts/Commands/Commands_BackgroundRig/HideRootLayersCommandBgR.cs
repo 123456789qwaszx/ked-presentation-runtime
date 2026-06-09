@@ -13,10 +13,6 @@ using UnityEngine;
 public sealed class HideRootLayersCommandSpecBgR : BackgroundRigCommandSpecBase
 {
     public BackgroundRigRootMask targetMask = BackgroundRigRootMask.VisualLayers;
-
-    [Header("Interaction")]
-    [Tooltip("true면 숨긴 대상의 입력을 완전히 차단(interactable/blocksRaycasts=false)")]
-    public bool disableInteraction = true;
 }
 
 public sealed class HideRootLayersCommandBgR : CommandBase
@@ -50,64 +46,28 @@ public sealed class HideRootLayersCommandBgR : CommandBase
         Apply();
     }
 
-    protected override void OnRollbackSeek(CommandRunScope scope)
-    {
-        OnSkip(scope);
-    }
-
+    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
+    
     private void ResolveRefs(CommandRunScope scope)
     {
         _resolveAttempted = true;
-        _targets.Clear();
-
-        if (_spec.targetMask == BackgroundRigRootMask.None)
-            return;
-
-        BackgroundRigRefs rig =
-            BackgroundRigTargetResolver.ResolveBackgroundRigFromTargetKey(
-                scope,
-                _spec.rigKey);
-
-        BackgroundRigRootSelector.CollectRects(
-            rig,
-            _spec.targetMask,
-            _targets);
+        
+        BackgroundRigRefs rig = BackgroundRigTargetResolver.ResolveBackgroundRigFromTargetKey(scope, _spec.rigKey);
+        BackgroundRigRootSelector.CollectRects(rig, _spec.targetMask, _targets);
     }
 
     private void Apply()
     {
-        if (_targets.Count == 0)
-            return;
-
-        SnapOffTargets(_targets);
-    }
-
-    private void SnapOffTargets(List<RectTransform> targets)
-    {
-        for (int i = 0; i < targets.Count; i++)
+        for (int i = 0; i < _targets.Count; i++)
         {
-            CanvasGroup canvasGroup = GetOrAddCanvasGroup(targets[i]);
+            CanvasGroup canvasGroup = _targets[i].GetComponent<CanvasGroup>();
 
             canvasGroup.DOKill(true);
+            
             canvasGroup.alpha = 0f;
-
-            if (_spec.disableInteraction)
-            {
-                canvasGroup.interactable = false;
-                canvasGroup.blocksRaycasts = false;
-            }
+            canvasGroup.interactable = false;
+            canvasGroup.blocksRaycasts = false;
+            
         }
-    }
-
-    private CanvasGroup GetOrAddCanvasGroup(RectTransform rect)
-    {
-        if (rect.TryGetComponent(out CanvasGroup canvasGroup))
-            return canvasGroup;
-
-        Debug.LogWarning(
-            $"[HideRootLayersCommandBgR] CanvasGroup missing. Added automatically: {rect.name}",
-            rect);
-
-        return rect.gameObject.AddComponent<CanvasGroup>();
     }
 }
