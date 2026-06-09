@@ -27,9 +27,6 @@ public class PunchScaleCommandSpecCharR : CharacterRigCommandSpecBase
     [Tooltip("탄성(0~1). 값이 클수록 더 튕기는 느낌입니다.")]
     [Range(0f, 1f)]
     public float elasticity = 0.75f;
-
-    [Header("Options")]
-    public bool killTween = true;
 }
 
 public sealed class PunchScaleCommandCharR : CommandBase
@@ -37,61 +34,52 @@ public sealed class PunchScaleCommandCharR : CommandBase
     private readonly PunchScaleCommandSpecCharR _spec;
 
     private RectTransform _rect;
-    private Tween _tween;
-    private Vector3 _originScale;
+    private Vector3 _baseScale;
+
     private bool _resolveAttempted;
-    private bool _canCommitFinalState;
+
+    private bool HasClaimedTarget { get; set; }
 
     public override bool WaitForCompletion => _spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
-    public PunchScaleCommandCharR(PunchScaleCommandSpecCharR spec) => _spec = spec;
+    public PunchScaleCommandCharR(PunchScaleCommandSpecCharR spec)
+    {
+        _spec = spec;
+    }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (_rect == null)
-            yield break;
-
-        if (_spec.killTween)
-            _rect.DOKill(true); // Finish previous motion so this command starts from a committed state.
-
-        _canCommitFinalState = true;
-        _originScale = _rect.localScale;
+        ClaimTarget();
 
         if (_spec.duration <= 0f || Mathf.Approximately(_spec.strength, 0f))
         {
-            _rect.localScale = _originScale;
-            _canCommitFinalState = false;
-            _rect = null;
-            _tween = null;
+            CommitFinalState();
             yield break;
         }
 
-        Vector3 baseScale = _originScale;
         int vibrato = Mathf.Max(1, _spec.vibrato);
         float elasticity = Mathf.Clamp01(_spec.elasticity);
         float strength = _spec.strength;
 
-        _tween = DOTween
+        Tween tween = DOTween
             .To(
                 () => 0f,
                 t =>
                 {
-                    if (!_canCommitFinalState || _rect == null)
-                        return;
-
                     float u = Mathf.Clamp01(t);
 
                     float punch = EvaluatePunch(u, vibrato, elasticity);
                     float scaleOffset = strength * punch;
 
-                    Vector3 s = baseScale;
-                    s.x = baseScale.x + scaleOffset;
-                    s.y = baseScale.y + scaleOffset;
-                    _rect.localScale = s;
+                    Vector3 scale = _baseScale;
+                    scale.x = _baseScale.x + scaleOffset;
+                    scale.y = _baseScale.y + scaleOffset;
+
+                    _rect.localScale = scale;
                 },
                 1f,
                 _spec.duration
@@ -99,19 +87,10 @@ public sealed class PunchScaleCommandCharR : CommandBase
             .SetEase(Ease.Linear)
             .SetUpdate(true)
             .SetTarget(_rect)
-            .OnComplete(() =>
-            {
-                if (!_canCommitFinalState || _rect == null)
-                    return;
-
-                _rect.localScale = _originScale;
-                _canCommitFinalState = false;
-                _rect = null;
-                _tween = null;
-            });
+            .OnComplete(CommitFinalState);
 
         if (_spec.wait)
-            yield return _tween.WaitForCompletion();
+            yield return tween.WaitForCompletion();
     }
 
     protected override void OnSkip(CommandRunScope scope)
@@ -119,46 +98,35 @@ public sealed class PunchScaleCommandCharR : CommandBase
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (_rect == null)
-            return;
+        if (!HasClaimedTarget)
+            ClaimTarget();
 
-        _rect.localScale = _originScale;
-        _canCommitFinalState = false;
-        _rect = null;
-        _tween = null;
+        CommitFinalState();
     }
 
-    
     protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
-    
-    protected override void OnCommandCompleted(CommandRunScope scope)
-    {
-        if (!_resolveAttempted)
-            ResolveRefs(scope);
-
-        if (!_canCommitFinalState || _rect == null)
-            return;
-
-        _tween?.Kill(false);
-        _rect.DOKill(false);
-        _rect.localScale = _originScale;
-
-        _canCommitFinalState = false;
-        _rect = null;
-        _tween = null;
-    }
 
     private void ResolveRefs(CommandRunScope scope)
     {
         _resolveAttempted = true;
 
-        CharacterRigRefs rigRefs =
-            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
+        CharacterRigRefs rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
+        _rect = rig.GetRect(_spec.target);
+    }
 
+    private void ClaimTarget()
+    {
+        _rect.DOKill(true);
+        _baseScale = _rect.localScale;
 
-        _rect = rigRefs.GetRect(_spec.target);
-        if (_rect != null)
-            _originScale = _rect.localScale;
+        HasClaimedTarget = true;
+    }
+
+    private void CommitFinalState()
+    {
+        _rect.localScale = _baseScale;
+
+        HasClaimedTarget = false;
     }
 
     private static float EvaluatePunch(float u, int vibrato, float elasticity)
@@ -171,7 +139,6 @@ public sealed class PunchScaleCommandCharR : CommandBase
         float envelope = Mathf.Pow(1f - u, decayPower);
 
         float wave = Mathf.Sin(u * Mathf.PI * (vibrato + 0.5f));
-
         float attack = 1f - Mathf.Pow(1f - u, 2.2f);
 
         return wave * envelope * attack;

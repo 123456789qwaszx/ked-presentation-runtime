@@ -24,9 +24,6 @@ public class RotateToCommandSpecCharR : CharacterRigCommandSpecBase
     [Header("Tween")]
     public float duration = 0.4f;
     public Ease ease = Ease.OutCubic;
-
-    [Header("Options")]
-    public bool killTween = true;
 }
 
 public sealed class RotateToCommandCharR : CommandBase
@@ -34,55 +31,44 @@ public sealed class RotateToCommandCharR : CommandBase
     private readonly RotateToCommandSpecCharR _spec;
 
     private RectTransform _rect;
-    private Tween _tween;
+
     private bool _resolveAttempted;
-    private bool _canCommitFinalState;
+
+    private bool HasClaimedTarget { get; set; }
 
     public override bool WaitForCompletion => _spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
-    public RotateToCommandCharR(RotateToCommandSpecCharR spec) => _spec = spec;
+    public RotateToCommandCharR(RotateToCommandSpecCharR spec)
+    {
+        _spec = spec;
+    }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (_spec.killTween)
-            _rect.DOKill(true); // Finish previous motion so this command starts from a committed state.
-
-        _canCommitFinalState = true;
+        ClaimTarget();
 
         if (_spec.overrideFromEuler)
-            SetLocalEuler(_rect, _spec.fromEuler);
+            _rect.localEulerAngles = _spec.fromEuler;
 
         if (_spec.duration <= 0f)
         {
-            SetLocalEuler(_rect, _spec.toEuler);
-            _canCommitFinalState = false;
-            _rect = null;
-            _tween = null;
+            CommitFinalState();
             yield break;
         }
 
-        _tween = _rect
+        Tween tween = _rect
             .DOLocalRotate(_spec.toEuler, _spec.duration, RotateMode.Fast)
             .SetEase(_spec.ease)
             .SetUpdate(true)
             .SetTarget(_rect)
-            .OnComplete(() =>
-            {
-                if (!_canCommitFinalState || _rect == null)
-                    return;
-
-                SetLocalEuler(_rect, _spec.toEuler);
-                _canCommitFinalState = false;
-                _rect = null;
-                _tween = null;
-            });
+            .OnComplete(CommitFinalState);
 
         if (_spec.wait)
-            yield return _tween.WaitForCompletion();
+            yield return tween.WaitForCompletion();
     }
 
     protected override void OnSkip(CommandRunScope scope)
@@ -90,48 +76,33 @@ public sealed class RotateToCommandCharR : CommandBase
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (_rect == null)
-            return;
+        if (!HasClaimedTarget)
+            ClaimTarget();
 
-        SetLocalEuler(_rect, _spec.toEuler);
-
-        _canCommitFinalState = false;
-        _rect = null;
-        _tween = null;
+        CommitFinalState();
     }
 
-    
     protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
-    
-    protected override void OnCommandCompleted(CommandRunScope scope)
-    {
-        if (!_resolveAttempted)
-            ResolveRefs(scope);
-
-        if (!_canCommitFinalState || _rect == null)
-            return;
-
-        _tween?.Kill(false);
-        _rect.DOKill(false);
-        SetLocalEuler(_rect, _spec.toEuler);
-
-        _canCommitFinalState = false;
-        _rect = null;
-        _tween = null;
-    }
 
     private void ResolveRefs(CommandRunScope scope)
     {
         _resolveAttempted = true;
 
-        CharacterRigRefs rigRefs =
-            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
-        
-        _rect = rigRefs.GetRect(_spec.target);
+        CharacterRigRefs rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
+        _rect = rig.GetRect(_spec.target);
     }
 
-    private static void SetLocalEuler(RectTransform rect, Vector3 euler)
+    private void ClaimTarget()
     {
-        rect.localEulerAngles = euler;
+        _rect.DOKill(true);
+
+        HasClaimedTarget = true;
+    }
+
+    private void CommitFinalState()
+    {
+        _rect.localEulerAngles = _spec.toEuler;
+
+        HasClaimedTarget = false;
     }
 }

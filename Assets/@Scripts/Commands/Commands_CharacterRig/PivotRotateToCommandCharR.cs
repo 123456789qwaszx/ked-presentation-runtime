@@ -45,10 +45,6 @@ public sealed class PivotRotateToCommandSpecCharR : CharacterRigCommandSpecBase
     [Header("Timing")]
     [Tooltip("총 길이. <= 0이면 즉시 적용.")]
     public float duration = 0.7f;
-    
-    [Header("Options")]
-    [Tooltip("체크하면 기존 위치 관련 트윈을 끝내고 committed state에서 시작합니다.")]
-    public bool killTween = true;
 }
 
 public sealed class PivotRotateToCommandCharR : CommandBase
@@ -56,47 +52,34 @@ public sealed class PivotRotateToCommandCharR : CommandBase
     private readonly PivotRotateToCommandSpecCharR _spec;
 
     private RectTransform _rect;
-    private bool _resolveAttempted;
 
     private float _startRotationZ;
-    private float _currentRotationZ;
     private float _finalRotationZ;
 
-    private Tween _tween;
-    private bool _canCommitFinalState;
+    private bool _resolveAttempted;
+
+    private bool HasClaimedTarget { get; set; }
 
     public override bool WaitForCompletion => _spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
-    public PivotRotateToCommandCharR(PivotRotateToCommandSpecCharR spec) => _spec = spec;
+    public PivotRotateToCommandCharR(PivotRotateToCommandSpecCharR spec)
+    {
+        _spec = spec;
+    }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (_spec.killTween)
-            _rect.DOKill(true); // Finish previous motion so this command starts from a committed state.
-        
-        _tween?.Kill(false);
-        _tween = null;
-        _canCommitFinalState = true;
-
-        _startRotationZ = NormalizeAngle(_rect.localEulerAngles.z);
-        _currentRotationZ = _startRotationZ;
-        _finalRotationZ = ResolveNearestEquivalentAngle(_startRotationZ, _spec.degree);
+        ClaimTarget();
 
         if (_spec.duration <= 0f)
         {
-            SetLocalEulerZ(_rect, _finalRotationZ);
-            _currentRotationZ = _finalRotationZ;
-            _canCommitFinalState = false;
-            _rect = null;
-            _tween = null;
+            CommitFinalState();
             yield break;
         }
-
-        float total = Mathf.Max(0.0001f, _spec.duration);
 
         float deltaToFinal = _finalRotationZ - _startRotationZ;
         float mainDirection = Mathf.Sign(deltaToFinal);
@@ -106,14 +89,16 @@ public sealed class PivotRotateToCommandCharR : CommandBase
         float anticipationPortion = Mathf.Clamp01(_spec.anticipationPortion);
         float overshootPortion = Mathf.Clamp01(_spec.overshootPortion);
 
-        bool useAnticipation = _spec.useAnticipation &&
-                               !Mathf.Approximately(_spec.anticipation, 0f) &&
-                               anticipationPortion > 0f;
+        bool useAnticipation =
+            _spec.useAnticipation &&
+            !Mathf.Approximately(_spec.anticipation, 0f) &&
+            anticipationPortion > 0f;
 
-        bool useOvershoot = _spec.useOvershoot &&
-                            !Mathf.Approximately(_spec.overshoot, 0f) &&
-                            overshootPortion > 0f &&
-                            overshootPortion < 1f;
+        bool useOvershoot =
+            _spec.useOvershoot &&
+            !Mathf.Approximately(_spec.overshoot, 0f) &&
+            overshootPortion > 0f &&
+            overshootPortion < 1f;
 
         if (!useAnticipation)
             anticipationPortion = 0f;
@@ -124,15 +109,12 @@ public sealed class PivotRotateToCommandCharR : CommandBase
         float anticipationZ = _startRotationZ + (-mainDirection * _spec.anticipation);
         float overshootZ = _finalRotationZ + (mainDirection * _spec.overshoot);
 
-        _tween = DOTween
+        Tween tween = DOTween
             .To(
                 () => 0f,
                 t =>
                 {
-                    if (!_canCommitFinalState || _rect == null)
-                        return;
-                    
-                    float u = Mathf.Clamp01(t / total);
+                    float u = Mathf.Clamp01(t);
                     float z;
 
                     if (useAnticipation && u < anticipationPortion)
@@ -161,29 +143,18 @@ public sealed class PivotRotateToCommandCharR : CommandBase
                         z = Mathf.LerpUnclamped(fromZ, _finalRotationZ, eased);
                     }
 
-                    _currentRotationZ = z;
                     SetLocalEulerZ(_rect, z);
                 },
-                total,
-                total
+                1f,
+                _spec.duration
             )
             .SetEase(Ease.Linear)
             .SetTarget(_rect)
             .SetUpdate(true)
-            .OnComplete(() =>
-            {
-                if (!_canCommitFinalState || _rect == null)
-                    return;
-
-                _currentRotationZ = _finalRotationZ;
-                SetLocalEulerZ(_rect, _finalRotationZ);
-                _canCommitFinalState = false;
-                _rect = null;
-                _tween = null;
-            });
+            .OnComplete(CommitFinalState);
 
         if (_spec.wait)
-            yield return _tween.WaitForCompletion();
+            yield return tween.WaitForCompletion();
     }
 
     protected override void OnSkip(CommandRunScope scope)
@@ -191,53 +162,37 @@ public sealed class PivotRotateToCommandCharR : CommandBase
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (_rect == null)
-            return;
+        if (!HasClaimedTarget)
+            ClaimTarget();
 
-        _startRotationZ = NormalizeAngle(_rect.localEulerAngles.z);
-        _finalRotationZ = ResolveNearestEquivalentAngle(_startRotationZ, _spec.degree);
-
-        _currentRotationZ = _finalRotationZ;
-        SetLocalEulerZ(_rect, _finalRotationZ);
-
-        _canCommitFinalState = false;
-        _rect = null;
-        _tween = null;
+        CommitFinalState();
     }
-    
+
     protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
-    
-    protected override void OnCommandCompleted(CommandRunScope scope)
-    {
-        if (!_resolveAttempted)
-            ResolveRefs(scope);
-
-        if (!_canCommitFinalState || _rect == null)
-            return;
-
-        _tween?.Kill(false);
-        _rect.DOKill(false);
-
-        _startRotationZ = NormalizeAngle(_rect.localEulerAngles.z);
-        _finalRotationZ = ResolveNearestEquivalentAngle(_startRotationZ, _spec.degree);
-
-        _currentRotationZ = _finalRotationZ;
-        SetLocalEulerZ(_rect, _finalRotationZ);
-
-        _canCommitFinalState = false;
-        _rect = null;
-        _tween = null;
-    }
 
     private void ResolveRefs(CommandRunScope scope)
     {
         _resolveAttempted = true;
 
-        CharacterRigRefs rigRefs =
-            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
+        CharacterRigRefs rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
+        _rect = rig.GetRect(_spec.target);
+    }
 
+    private void ClaimTarget()
+    {
+        _rect.DOKill(true);
 
-        _rect = rigRefs.GetRect(_spec.target);
+        _startRotationZ = NormalizeAngle(_rect.localEulerAngles.z);
+        _finalRotationZ = ResolveNearestEquivalentAngle(_startRotationZ, _spec.degree);
+
+        HasClaimedTarget = true;
+    }
+
+    private void CommitFinalState()
+    {
+        SetLocalEulerZ(_rect, _finalRotationZ);
+
+        HasClaimedTarget = false;
     }
 
     private static float ResolveNearestEquivalentAngle(float reference, float target)

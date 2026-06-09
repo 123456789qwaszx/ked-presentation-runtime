@@ -48,16 +48,14 @@ public sealed partial class YarnCommandBridge : InlineEventMarkupHandler.IInline
             xyScale: 1.18f,
             duration: 0.28f,
             ease: Ease.OutBack,
-            wait: false,
-            killTween: true));
+            wait: false));
 
         Collect(BuildEmojiScaleToSpec(
             roleKey,
             xyScale: 1.0f,
             duration: 0.52f,
             ease: Ease.OutCubic,
-            wait: false,
-            killTween: true));
+            wait: false));
         
         Collect(new WaitCommandSpec
         {
@@ -128,16 +126,14 @@ public sealed partial class YarnCommandBridge : InlineEventMarkupHandler.IInline
             xyScale: 1.28f,
             duration: 0.24f,
             ease: Ease.OutBack,
-            wait: true,
-            killTween: true));
+            wait: true));
 
         Collect(BuildEmojiScaleToSpec(
             roleKey,
             xyScale: 1.0f,
             duration: 0.46f,
             ease: Ease.OutCubic,
-            wait: true,
-            killTween: true));
+            wait: true));
     }
 
     // <<emoji_hop igna 19>>
@@ -288,8 +284,7 @@ public sealed partial class YarnCommandBridge : InlineEventMarkupHandler.IInline
         float xyScale,
         float duration,
         Ease ease,
-        bool wait,
-        bool killTween)
+        bool wait)
     {
         return new ScaleToCommandSpecCharR
         {
@@ -301,7 +296,6 @@ public sealed partial class YarnCommandBridge : InlineEventMarkupHandler.IInline
             ease = ease,
 
             wait = wait,
-            killTween = killTween
         };
     }
 
