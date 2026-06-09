@@ -38,33 +38,35 @@ public sealed partial class YarnCommandBridge
         Collect(spec);
     }
     
-    private void EnqueueSlideInSpec(string roleKey, string direction = "left")
+    private void EnqueueSlideInSpec(string roleKey, string direction = "left", float duration = 0.4f)
     {
         CharRigDirection from = CharRigDirectionParser.ParseSlideDirection(direction, CharRigDirection.Left);
 
         var spec = new SlideInCommandSpecCharR
         {
             slotKey = roleKey,
-            direction = from
+            direction = from,
+            duration = duration
         };
 
         Collect(spec);
     }
 
-    private void EnqueueSlideOutSpec(string roleKey, string direction = "right")
+    private void EnqueueSlideOutSpec(string roleKey, string direction = "right", float duration = 0.4f)
     {
         CharRigDirection to = CharRigDirectionParser.ParseSlideDirection(direction, CharRigDirection.Right);
 
         var spec = new SlideOutCommandSpecCharR
         {
             slotKey = roleKey,
-            to = to
+            to = to,
+            duration = duration
         };
 
         Collect(spec);
     }
     
-    private void EnqueueMoveByCharSpec(string roleKey, float x, float y, float duration = 1.2f)
+    private void EnqueueMoveByCharSpec(string roleKey, float x, float y, float duration = 0.4f)
     {
         var spec = new MoveByCommandSpecCharR
         {
@@ -108,7 +110,7 @@ public sealed partial class YarnCommandBridge
             slotKey = targetKey,
             portrait = new PortraitIdentity
             {
-                emotion = emotion
+                emotion = emotion,
             }
         };
 

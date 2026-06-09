@@ -89,12 +89,12 @@ public sealed partial class YarnCommandBridge
         Collect(spec);
     }
     
-    private void EnqueueShotToSpec(float x, float y, float zoom, float duration = 0.45f)
+    private void EnqueueShotToSpec(float zoom = 1f, float x = 100f, float y = 0f, float duration = 0.45f)
     {
         var spec = new ShotToCommandSpec
         {
-            pan = new Vector2(x, y),
             zoom = zoom,
+            pan = new Vector2(x, y),
             duration = duration,
             wait = false
         };
@@ -102,7 +102,7 @@ public sealed partial class YarnCommandBridge
         Collect(spec);
     }
 
-    private void EnqueueShotZoomSpec(float zoom, float duration = 0.45f)
+    private void EnqueueShotZoomSpec(float zoom = 1f, float duration = 0.45f)
     {
         var spec = new ShotZoomCommandSpec
         {
@@ -115,7 +115,7 @@ public sealed partial class YarnCommandBridge
         Collect(spec);
     }
 
-    private void EnqueueShotTrackSpec(float x, float y, float duration = 0.35f)
+    private void EnqueueShotTrackSpec(float x = 100f, float y = 0f, float duration = 0.35f)
     {
         var spec = new ShotTrackCommandSpec
         {

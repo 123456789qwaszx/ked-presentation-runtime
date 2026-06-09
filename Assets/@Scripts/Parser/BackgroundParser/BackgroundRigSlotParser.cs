@@ -14,6 +14,7 @@ public static class BackgroundRigSlotParser
             case "s0":
             case "a":
             case "0":
+            case "00":
                 return BackgroundRigSlot.Stage00BackgroundSlot;
 
             case "stage01":
@@ -21,6 +22,7 @@ public static class BackgroundRigSlotParser
             case "s1":
             case "b":
             case "1":
+            case "01":
                 return BackgroundRigSlot.Stage01BackgroundSlot;
 
             case "stage02":
@@ -28,6 +30,7 @@ public static class BackgroundRigSlotParser
             case "s2":
             case "c":
             case "2":
+            case "02":
                 return BackgroundRigSlot.Stage02BackgroundSlot;
 
             default:

@@ -58,6 +58,18 @@ public sealed partial class YarnCommandBridge : InlineEventMarkupHandler.IInline
             ease: Ease.OutCubic,
             wait: true,
             killTween: true));
+        
+        Collect(new WaitCommandSpec
+        {
+            duration = 0.5f
+        });
+        
+        Collect(new FadeOutCommandSpecCharR
+        {
+            slotKey = roleKey,
+            targetMask = CharRigRootMask.CharacterEmoji_Root,
+            duration = 0.4f
+        });
     }
 
     // <<emoji_drop igna 19>>

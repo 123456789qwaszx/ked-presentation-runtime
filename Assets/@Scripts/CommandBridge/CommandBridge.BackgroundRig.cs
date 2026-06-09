@@ -3,17 +3,12 @@ using UnityEngine;
 public sealed partial class YarnCommandBridge
 {
     private void EnqueueSpawnBackgroundRigSpec(
-        string rigKey, string parentSlotKey = "stage00",
-        string spriteKey = "green",
-        string scaleArg = "1",
-        float x = 0f, float y = 0f, float rotationZ = 0f,
-        string layerKey = "back"
-    )
+        string rigKey, 
+        string spriteKey,
+        string parentSlotKey = "stage00")
     {
         EnqueueSetupBackgroundRigSpec(rigKey, parentSlotKey);
-        EnqueueSetBackgroundSpriteSpec(rigKey, spriteKey, layerKey);
-        EnqueueSetBackgroundAnchorSpec(rigKey, x, y, rotationZ);
-        EnqueueSetBackgroundOriginSizeSpec(rigKey, scaleArg);
+        EnqueueSetBackgroundSpriteSpec(rigKey, spriteKey);
     }
 
     private void EnqueueSetupBackgroundRigSpec(string rigKey, string parentSlotKey)
@@ -21,6 +16,7 @@ public sealed partial class YarnCommandBridge
         var spec = new SetupBackgroundRigCommandSpec
         {
             rigKey = rigKey,
+            rigPrefab = _backgroundRigPrefab,
             parentSlot = BackgroundRigSlotParser.Parse(parentSlotKey, BackgroundRigSlot.Stage00BackgroundSlot)
         };
 
@@ -72,24 +68,24 @@ public sealed partial class YarnCommandBridge
     }
 
 
-    private void EnqueueFadeInBackgroundSpec(string rigKey, float duration = 0.47f, string targetKey = "root")
+    private void EnqueueFadeInBackgroundSpec(string rigKey, float duration = 0.4f)
     {
         var spec = new FadeInCommandSpecBgR
         {
             rigKey = rigKey,
-            target = BackgroundRigTargetParser.ParseFadeTarget(targetKey),
+            target = BackgroundRigTarget.Background_Root,
             duration = duration,
         };
 
         Collect(spec);
     }
 
-    private void EnqueueFadeOutBackgroundSpec(string rigKey, float duration = 0.38f, string targetKey = "root")
+    private void EnqueueFadeOutBackgroundSpec(string rigKey, float duration = 0.4f)
     {
         var spec = new FadeOutCommandSpecBgR
         {
             rigKey = rigKey,
-            target = BackgroundRigTargetParser.ParseFadeTarget(targetKey),
+            target = BackgroundRigTarget.Background_Root,
             duration = duration,
         };
 

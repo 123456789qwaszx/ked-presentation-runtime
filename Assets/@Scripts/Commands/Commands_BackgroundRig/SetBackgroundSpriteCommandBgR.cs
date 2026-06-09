@@ -87,6 +87,6 @@ public sealed class SetBackgroundSpriteCommandBgR : CommandBase
         BackgroundRigRefs rigRefs =
             BackgroundRigTargetResolver.ResolveBackgroundRigFromTargetKey(scope, _spec.rigKey);
 
-        _image = rigRefs.GetImage(_spec.target);
+        _image = rigRefs.GetRect(_spec.target).GetComponent<Image>();
     }
 }

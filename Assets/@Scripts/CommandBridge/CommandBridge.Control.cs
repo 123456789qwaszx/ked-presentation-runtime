@@ -3,11 +3,11 @@ using UnityEngine;
 
 public sealed partial class YarnCommandBridge
 {
-    private void EnqueueWaitSpec(float duration)
+    private void EnqueueWaitSpec(float duration = 0.18f)
     {
         var spec = new WaitCommandSpec()
         {
-            seconds = duration,
+            duration = duration,
         };
         
         Collect(spec);
@@ -75,5 +75,75 @@ public sealed partial class YarnCommandBridge
     private void LogImmediate(string message)
     {
         Debug.Log($"[YarnCommandBridge] {message}");
+    }
+    
+    private void EnqueueAttachCharRigToBackgroundObjectSlotSpec(
+        string charRigKey,
+        string backgroundRigKey,
+        string parentTarget = "Background_ObjectSlotRoot")
+    {
+        if (!Enum.TryParse(parentTarget, out BackgroundRigTarget parsedTarget))
+        {
+            Debug.LogWarning(
+                $"[YarnCommandBridge] Invalid BackgroundRigTarget '{parentTarget}'. " +
+                "Fallback to Background_ObjectSlotRoot.");
+
+            parsedTarget = BackgroundRigTarget.Background_ObjectSlotRoot;
+        }
+
+        var spec = new AttachCharRigToBackgroundObjectSlotCommandSpec
+        {
+            charRigKey = charRigKey,
+            backgroundRigKey = backgroundRigKey,
+            parentTarget = parsedTarget,
+            worldPositionStays = false,
+            setAsLastSibling = true,
+            wait = true
+        };
+        
+        var spec2 = new ScaleToCommandSpecBgR
+        {
+            rigKey = backgroundRigKey,
+            target = BackgroundRigTarget.Background_CastTransform,
+            toScale = new Vector2(0.5f, 0.5f),
+            duration = 0
+        };
+        
+        var spec4 = new ScaleToCommandSpecBgR
+        {
+            rigKey = backgroundRigKey,
+            target = BackgroundRigTarget.Background_ObjectSlotRoot,
+            toScale = new Vector2(2f, 2f),
+            duration = 0
+        };
+        
+        var spec5 = new MoveByCommandSpecBgR
+        {
+            rigKey = backgroundRigKey,
+            target = BackgroundRigTarget.Background_ObjectSlotRoot,
+            delta = new Vector2(0, -380),
+            duration = 0
+        };
+        
+        var spec6 = new SetBackgroundSpriteCommandSpecBgR
+        {
+            rigKey = backgroundRigKey,
+            spriteKey = "slot3bg",
+            target = BackgroundRigTarget.Background_LayerRoot
+        };
+        
+        var spec7 = new SetBackgroundSpriteCommandSpecBgR
+        {
+            rigKey = backgroundRigKey,
+            spriteKey = "slot3bg2",
+            target = BackgroundRigTarget.Background_BackLayer_Image
+        };
+        
+        Collect(spec);
+        Collect(spec2);
+        Collect(spec4);
+        Collect(spec5);
+        Collect(spec6);
+        Collect(spec7);
     }
 }

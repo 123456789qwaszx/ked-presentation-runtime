@@ -122,7 +122,7 @@ public sealed partial class YarnCommandBridge
 
         var spec7 = new WaitCommandSpec()
         {
-            seconds = 0.4f,
+            duration = 0.4f,
         };
         
         var spec8 = new JoltCommandSpec()

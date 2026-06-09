@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using System.Collections;
+using UnityEngine.Serialization;
 
 [Serializable]
 [CommandMenuHint(
@@ -10,8 +11,7 @@ using System.Collections;
     Order = 10)]
 public sealed class WaitCommandSpec : CommandSpecBase
 {
-    [Header("Time")]
-    public float seconds = 0.2f;
+    public float duration = 0.2f;
 }
 
 public sealed class CpsWaitCommand : CommandBase

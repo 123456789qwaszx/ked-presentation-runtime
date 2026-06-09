@@ -22,13 +22,15 @@ public sealed partial class YarnCommandBridge
     private void EnqueueCharDefocusSpec(
         string roleKey,
         float intensity = 1f,
-        float duration = 0.4f)
+        float blur = 0.5f,
+        float duration = 0.7f)
     {
         var spec = new CharVisualFocusCommandSpecCharR
         {
             slotKey = roleKey.Trim(),
             mode = CharacterVisualFocusMode.Defocus,
             intensity = intensity,
+            defocusBlurAmount = blur,
             duration = duration,
             wait = false
         };

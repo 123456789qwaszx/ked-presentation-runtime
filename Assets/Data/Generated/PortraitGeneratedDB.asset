@@ -98,6 +98,391 @@ MonoBehaviour:
     emotionKey: 18
     sprite: {fileID: 21300000, guid: a9ea08571b89a624ba4952f3f08816fc, type: 3}
     assetPath: Assets/Art/Portraits/Albedo/Albedo_a_18.png
+  - characterId: Amber
+    variantKey: Amber_a
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: dd63d1b89be9e90448ef86483dbac343, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_a_02.png
+  - characterId: Amber
+    variantKey: Amber_a
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: cc48c22b4cb360c42a44a773087f60a4, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_a_03.png
+  - characterId: Amber
+    variantKey: Amber_a
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: 0c29d6e3431dc5b4ab2203357cd4ee0f, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_a_04.png
+  - characterId: Amber
+    variantKey: Amber_a
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: 05ea3013e1f4859429ec9f939291a2be, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_a_05.png
+  - characterId: Amber
+    variantKey: Amber_a
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: 77154e0dd0a86f34eb807d735cb99125, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_a_06.png
+  - characterId: Amber
+    variantKey: Amber_a
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: 5001dfb45d5f3cd41b1c0dc8aa8024cd, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_a_07.png
+  - characterId: Amber
+    variantKey: Amber_a
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: 2f53ec8a714ea5a4d82735609d83c02b, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_a_08.png
+  - characterId: Amber
+    variantKey: Amber_a
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: 12a13ef8a4663394c930769fc359bb44, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_a_09.png
+  - characterId: Amber
+    variantKey: Amber_a
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: d0f2b8161110a864badfc8731034b7c5, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_a_10.png
+  - characterId: Amber
+    variantKey: Amber_a
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: b2798299aa866404289adca03846498d, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_a_11.png
+  - characterId: Amber
+    variantKey: Amber_a
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: b3e46924183589f4f97c07d532b2b683, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_a_12.png
+  - characterId: Amber
+    variantKey: Amber_a
+    emotionKey: 13
+    sprite: {fileID: 21300000, guid: 576ddd35493c6dc4990123814b732f4b, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_a_13.png
+  - characterId: Amber
+    variantKey: Amber_a
+    emotionKey: 14
+    sprite: {fileID: 21300000, guid: 0e5ebbe0b7d78044a8d7c947f18e4192, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_a_14.png
+  - characterId: Amber
+    variantKey: Amber_a
+    emotionKey: 15
+    sprite: {fileID: 21300000, guid: a5fc2f9f75d03a44197f94909214f7c8, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_a_15.png
+  - characterId: Amber
+    variantKey: Amber_a
+    emotionKey: 16
+    sprite: {fileID: 21300000, guid: eb67fb8a91d1bd24d95e0a6ff436400e, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_a_16.png
+  - characterId: Amber
+    variantKey: Amber_a
+    emotionKey: 17
+    sprite: {fileID: 21300000, guid: 27d06ba125619e543997532756f51133, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_a_17.png
+  - characterId: Amber
+    variantKey: Amber_a
+    emotionKey: 19
+    sprite: {fileID: 21300000, guid: 111faafe28dd29945a0ad9f975531e55, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_a_19.png
+  - characterId: Amber
+    variantKey: Amber_b
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: a0c0f4cbb1d24094dbe1b58ddc31cf41, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_b_03.png
+  - characterId: Amber
+    variantKey: Amber_b
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: 0aa56843ae741bc4ab786e624d50620f, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_b_04.png
+  - characterId: Amber
+    variantKey: Amber_b
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: 1b74bb17b1dede9408093d67757297d1, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_b_05.png
+  - characterId: Amber
+    variantKey: Amber_b
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: 9130b96e01ef5b54080080df0819f8f4, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_b_06.png
+  - characterId: Amber
+    variantKey: Amber_b
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: 8c41d486136c65545b8aff4cbfa9a0d2, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_b_07.png
+  - characterId: Amber
+    variantKey: Amber_b
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: e654bc2238c82834582e71b7f2d615a8, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_b_08.png
+  - characterId: Amber
+    variantKey: Amber_b
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: 92a9f91206d768649b2af972b2f18b1c, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_b_09.png
+  - characterId: Amber
+    variantKey: Amber_c
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: 98b0d849a462ea548aaefc16fe49bd8c, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_c_02.png
+  - characterId: Amber
+    variantKey: Amber_c
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: ba3f500bb7620ad47b1848dba9a31555, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_c_03.png
+  - characterId: Amber
+    variantKey: Amber_c
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: 644f130f07a466448beaf8a3378abcfd, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_c_04.png
+  - characterId: Amber
+    variantKey: Amber_c
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: 508c318c399b9f641aacbeb058aa9a16, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_c_05.png
+  - characterId: Amber
+    variantKey: Amber_c
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: 9712127941eaaab489911712c26e6f52, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_c_06.png
+  - characterId: Amber
+    variantKey: Amber_c
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: f105f77280563204cbcd15ccf283a9f5, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_c_07.png
+  - characterId: Amber
+    variantKey: Amber_c
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: 3e1fd8afe91c30d45b18235651aa8c4f, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_c_08.png
+  - characterId: Amber
+    variantKey: Amber_c
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: f324f127d03d489419d4a5c8e73242a2, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_c_09.png
+  - characterId: Amber
+    variantKey: Amber_d
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: 15358212612ed8e4da176be486322a91, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_d_02.png
+  - characterId: Amber
+    variantKey: Amber_d
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: c4e9e5ba93e67bd408e42173ea340f57, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_d_03.png
+  - characterId: Amber
+    variantKey: Amber_d
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: 393722ec8df61c349bd33e26de2c4c28, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_d_04.png
+  - characterId: Amber
+    variantKey: Amber_d
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: e5a5166398d82d74ca1da0243f7a646b, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_d_05.png
+  - characterId: Amber
+    variantKey: Amber_d
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: d31cf55fce2eb7e4ca829ddf82addc40, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_d_06.png
+  - characterId: Amber
+    variantKey: Amber_d
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: 744acc4e98d88554aaeb7f7aad4c7547, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_d_07.png
+  - characterId: Amber
+    variantKey: Amber_d
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: 371504cc636ba4942b5f9083935467ca, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_d_08.png
+  - characterId: Amber
+    variantKey: Amber_e
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: cfd08252e48a6414f88e752b93d45c0b, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_e_02.png
+  - characterId: Amber
+    variantKey: Amber_e
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: 76b5af6619f615c4a83ea38a2b095ef8, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_e_03.png
+  - characterId: Amber
+    variantKey: Amber_e
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: d28ae69d21172eb4a83e6f6eb512d42d, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_e_04.png
+  - characterId: Amber
+    variantKey: Amber_e
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: 00661a4d8bf929844ba6ceb0b3c4c172, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_e_05.png
+  - characterId: Amber
+    variantKey: Amber_e
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: 9cea1d31ff7fe684c987412bb5bd4f55, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_e_06.png
+  - characterId: Amber
+    variantKey: Amber_e
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: 88bde8a67510d0f40b5be43e5218063a, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_e_07.png
+  - characterId: Amber
+    variantKey: Amber_e
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: 2b81472bb194f9040b078fb83cd17fcc, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_e_08.png
+  - characterId: Amber
+    variantKey: Amber_e
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: 6bfa6b318177e994aab47ec12a9730ee, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_e_09.png
+  - characterId: Amber
+    variantKey: Amber_e
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: fa9d701e0f9338e4b835ee701eb0f7cc, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_e_10.png
+  - characterId: Amber
+    variantKey: Amber_e
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: 4272a820ea0afa94cb82558647720b2d, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_e_11.png
+  - characterId: Amber
+    variantKey: Amber_e
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: affe585cb3c89004596e01cda922c669, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_e_12.png
+  - characterId: Amber
+    variantKey: Amber_f
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: 5dda01b29c35e434c99fc6fb38c3eff8, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_f_02.png
+  - characterId: Amber
+    variantKey: Amber_f
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: 8c0ebedd60cb1914f9ada2d435405bbf, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_f_03.png
+  - characterId: Amber
+    variantKey: Amber_f
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: fa730bd20939b4d42a452db37c9dc549, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_f_04.png
+  - characterId: Amber
+    variantKey: Amber_f
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: c2eca5886064fa646a19018d4b67388c, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_f_05.png
+  - characterId: Amber
+    variantKey: Amber_f
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: 3ca1400de70e6ff4cb3b8ad01df860ea, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_f_06.png
+  - characterId: Amber
+    variantKey: Amber_f
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: bbf7f8efeb681204d897b88910e2773e, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_f_07.png
+  - characterId: Amber
+    variantKey: Amber_f
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: f65e0adc22698e146892850207f06365, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_f_08.png
+  - characterId: Amber
+    variantKey: Amber_f
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: 316560f15850acb43af6527c70bc4cd0, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_f_09.png
+  - characterId: Amber
+    variantKey: Amber_f
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: f8f3a21fd1842634eb2772b6cd81e0a1, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_f_10.png
+  - characterId: Amber
+    variantKey: Amber_f
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: b7adacb33ad4295419cbe4b9feab7571, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_f_11.png
+  - characterId: Amber
+    variantKey: Amber_g
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: c439d814a8179154c91c06fd83c1623e, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_g_02.png
+  - characterId: Amber
+    variantKey: Amber_g
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: 0dba9620ff0005b46a666ef930940e87, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_g_03.png
+  - characterId: Amber
+    variantKey: Amber_g
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: acc3302c34c0cf0418dafe38dc11c7ef, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_g_04.png
+  - characterId: Amber
+    variantKey: Amber_g
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: 85e152555036a204b89bbf3dff1e3f66, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_g_05.png
+  - characterId: Amber
+    variantKey: Amber_g
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: 43c59e08ca8cf544c851b8b0ddd9455a, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_g_06.png
+  - characterId: Amber
+    variantKey: Amber_g
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: ff3c6c7311acb69489eaacebb34b4d8f, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_g_07.png
+  - characterId: Amber
+    variantKey: Amber_g
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: 0af309cc7074b524aa7d5c2a9c7c87bf, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_g_08.png
+  - characterId: Amber
+    variantKey: Amber_g
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: dfeeb8a38d333f44791088e18d2bd119, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_g_09.png
+  - characterId: Amber
+    variantKey: Amber_g
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: 9099f01fa366f4b41b35e29d1c638c59, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_g_10.png
+  - characterId: Amber
+    variantKey: Amber_g
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: 7d8dba53219b23749a954daa2c8a263a, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_g_11.png
+  - characterId: Amber
+    variantKey: Amber_g
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: 8830aab8a0efc6b4993191630436041c, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_g_12.png
+  - characterId: Amber
+    variantKey: Amber_g
+    emotionKey: 13
+    sprite: {fileID: 21300000, guid: 06dfefaffc10182459321d9b0ea8aeb2, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_g_13.png
+  - characterId: Amber
+    variantKey: Amber_g
+    emotionKey: 14
+    sprite: {fileID: 21300000, guid: cbd505f56ca10f8459641e6daa4c1b55, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_g_14.png
+  - characterId: Amber
+    variantKey: Amber_g
+    emotionKey: 15
+    sprite: {fileID: 21300000, guid: ff7578245ae020e4bad93096245ff3cc, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_g_15.png
+  - characterId: Amber
+    variantKey: Amber_g
+    emotionKey: 16
+    sprite: {fileID: 21300000, guid: 0743718a90df3d04580001c5e32121a6, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_g_16.png
+  - characterId: Amber
+    variantKey: Amber_g
+    emotionKey: 17
+    sprite: {fileID: 21300000, guid: 39ee501db3957f9459f7f158eeadd346, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_g_17.png
+  - characterId: Amber
+    variantKey: Amber_g
+    emotionKey: 18
+    sprite: {fileID: 21300000, guid: 74597d11d39659a4eb1d950b7b10b064, type: 3}
+    assetPath: Assets/Art/Portraits/Amber/Amber_g_18.png
   - characterId: Bastelina
     variantKey: Bastelina_a
     emotionKey: 02
@@ -413,6 +798,451 @@ MonoBehaviour:
     emotionKey: 18
     sprite: {fileID: 21300000, guid: 9c9007a58a443cf47a257f0c36b9fe5d, type: 3}
     assetPath: Assets/Art/Portraits/Gerie/Gerie_a_18.png
+  - characterId: Iris
+    variantKey: Iris_a
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: 5956aa0f854fdda45b93fca86d3718fc, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_a_02.png
+  - characterId: Iris
+    variantKey: Iris_a
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: fa5e36e3c8b44934191168ea5be6e2df, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_a_03.png
+  - characterId: Iris
+    variantKey: Iris_a
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: 9f9a72c525eb8a0439102168d29ed5c1, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_a_04.png
+  - characterId: Iris
+    variantKey: Iris_a
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: b7fc9ebfffbd70147bc9f5b4941b4b70, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_a_05.png
+  - characterId: Iris
+    variantKey: Iris_a
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: 3416e5fc3e7449a44bdc324b4f25e779, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_a_06.png
+  - characterId: Iris
+    variantKey: Iris_a
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: 23f3b9873e172d646a35f6795189da8f, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_a_07.png
+  - characterId: Iris
+    variantKey: Iris_a
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: 92530370cd0addb4380ba117f57fc18a, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_a_08.png
+  - characterId: Iris
+    variantKey: Iris_a
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: bb43c5d083582614bbdd54502abec0fe, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_a_09.png
+  - characterId: Iris
+    variantKey: Iris_a
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: 4761f73106465a6499485c26a9f2ef4e, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_a_10.png
+  - characterId: Iris
+    variantKey: Iris_a
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: 51c93ec4d6cdbf44eb73d1ced4ebbfd2, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_a_11.png
+  - characterId: Iris
+    variantKey: Iris_a
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: a097d0d9a9dad0046bd5b4fb945f889c, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_a_12.png
+  - characterId: Iris
+    variantKey: Iris_a
+    emotionKey: 13
+    sprite: {fileID: 21300000, guid: 01856c7225c012c46a289774e5e4b615, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_a_13.png
+  - characterId: Iris
+    variantKey: Iris_a
+    emotionKey: 14
+    sprite: {fileID: 21300000, guid: 43e3f4602479e084588045ec497684ed, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_a_14.png
+  - characterId: Iris
+    variantKey: Iris_a
+    emotionKey: 15
+    sprite: {fileID: 21300000, guid: e73fcf0864c561446a7427893bc22cbd, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_a_15.png
+  - characterId: Iris
+    variantKey: Iris_a
+    emotionKey: 16
+    sprite: {fileID: 21300000, guid: 0abffc4760b8ec248840bc675f0662b1, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_a_16.png
+  - characterId: Iris
+    variantKey: Iris_a
+    emotionKey: 17
+    sprite: {fileID: 21300000, guid: f217b7debdb3c2c478084704b9bddbd4, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_a_17.png
+  - characterId: Iris
+    variantKey: Iris_a
+    emotionKey: 18
+    sprite: {fileID: 21300000, guid: 60851bf7cdd97624c89bc22f26260860, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_a_18.png
+  - characterId: Iris
+    variantKey: Iris_a
+    emotionKey: 19
+    sprite: {fileID: 21300000, guid: be4750e4a0691454ea2b7d66d074fbd8, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_a_19.png
+  - characterId: Iris
+    variantKey: Iris_a
+    emotionKey: 20
+    sprite: {fileID: 21300000, guid: 5759714c66d54b14eaf9c782e9883236, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_a_20.png
+  - characterId: Iris
+    variantKey: Iris_a
+    emotionKey: 21
+    sprite: {fileID: 21300000, guid: 90984af13408dfb4abe63fa32e348114, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_a_21.png
+  - characterId: Iris
+    variantKey: Iris_a
+    emotionKey: 22
+    sprite: {fileID: 21300000, guid: b22f4b62204ca93488982ce0b780b072, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_a_22.png
+  - characterId: Iris
+    variantKey: Iris_a
+    emotionKey: 23
+    sprite: {fileID: 21300000, guid: 18182ba10e68b004d89712a1164f1cc7, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_a_23.png
+  - characterId: Iris
+    variantKey: Iris_a
+    emotionKey: 24
+    sprite: {fileID: 21300000, guid: b688940e6ea95024caaaac823af4aaec, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_a_24.png
+  - characterId: Iris
+    variantKey: Iris_a
+    emotionKey: 25
+    sprite: {fileID: 21300000, guid: 606fc6bae0dd04040840d87f16266573, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_a_25.png
+  - characterId: Iris
+    variantKey: Iris_a
+    emotionKey: 26
+    sprite: {fileID: 21300000, guid: 4595222b5874c2e489f522595ed83bbf, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_a_26.png
+  - characterId: Iris
+    variantKey: Iris_a
+    emotionKey: 27
+    sprite: {fileID: 21300000, guid: cacd4ba1480ab1e4ca82a1a1153ea38d, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_a_27.png
+  - characterId: Iris
+    variantKey: Iris_a
+    emotionKey: 28
+    sprite: {fileID: 21300000, guid: 37c76ddb55d81f14da47832169809fe3, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_a_28.png
+  - characterId: Iris
+    variantKey: Iris_b
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: ed1e3af63825c534ca1ab62a913586e5, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_b_02.png
+  - characterId: Iris
+    variantKey: Iris_b
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: 828bc0255ee89b94ea9f78e9d879a997, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_b_03.png
+  - characterId: Iris
+    variantKey: Iris_b
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: dd164e6997425f14ca379e58bc9797bc, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_b_04.png
+  - characterId: Iris
+    variantKey: Iris_b
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: 70de22afb4de60b4b9f470f52aa1d6c1, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_b_05.png
+  - characterId: Iris
+    variantKey: Iris_b
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: dddd6f5c7f4aab647b7e2fea384d4bae, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_b_06.png
+  - characterId: Iris
+    variantKey: Iris_b
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: 6a338064a754c6c41b473299786a1983, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_b_07.png
+  - characterId: Iris
+    variantKey: Iris_c
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: 29340c17031dca6428a954ad2927884a, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_c_02.png
+  - characterId: Iris
+    variantKey: Iris_c
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: 206a1a58d4a48d74d8bce91d4d6b398f, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_c_03.png
+  - characterId: Iris
+    variantKey: Iris_c
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: a2851232376802c479c74bf45d3d2e80, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_c_04.png
+  - characterId: Iris
+    variantKey: Iris_c
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: df30538435637454abb48ad3bf6cfb74, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_c_05.png
+  - characterId: Iris
+    variantKey: Iris_c
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: 208284d19d6890d44b528d1f9d4ae74b, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_c_06.png
+  - characterId: Iris
+    variantKey: Iris_c
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: 3f4085d6ac5b786418361387f2f401c8, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_c_07.png
+  - characterId: Iris
+    variantKey: Iris_c
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: 49da6153eddf240428448d98e1fd529a, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_c_08.png
+  - characterId: Iris
+    variantKey: Iris_c
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: 7ed0723d4fbafd745a72a2f292cfe119, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_c_09.png
+  - characterId: Iris
+    variantKey: Iris_c
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: c1f8e9664dd581d4b9328cdb46c655f2, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_c_10.png
+  - characterId: Iris
+    variantKey: Iris_c
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: 07f5511ef91f2434a95255b31339e39e, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_c_11.png
+  - characterId: Iris
+    variantKey: Iris_c
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: 0e596a9e7510cf048a4af0bd8daddf73, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_c_12.png
+  - characterId: Iris
+    variantKey: Iris_c
+    emotionKey: 13
+    sprite: {fileID: 21300000, guid: 5cf41c939103b4142a3fff6eceeeb4dc, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_c_13.png
+  - characterId: Iris
+    variantKey: Iris_c
+    emotionKey: 14
+    sprite: {fileID: 21300000, guid: 0acf7cbcf9fcd2440a401172a9fca750, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_c_14.png
+  - characterId: Iris
+    variantKey: Iris_c
+    emotionKey: 15
+    sprite: {fileID: 21300000, guid: 76aedbc6c8a310445a14dd01a085c1f9, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_c_15.png
+  - characterId: Iris
+    variantKey: Iris_c
+    emotionKey: 16
+    sprite: {fileID: 21300000, guid: e6ace6a91fedfa7439c99fdddebadc39, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_c_16.png
+  - characterId: Iris
+    variantKey: Iris_c
+    emotionKey: 17
+    sprite: {fileID: 21300000, guid: 1f754a233f16ec14797387a65e51342b, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_c_17.png
+  - characterId: Iris
+    variantKey: Iris_c
+    emotionKey: 18
+    sprite: {fileID: 21300000, guid: e66269d0506441445854670423a16a18, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_c_18.png
+  - characterId: Iris
+    variantKey: Iris_d
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: 881ecb66c53b9de4c8b9dd0c87bbd4f6, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_d_02.png
+  - characterId: Iris
+    variantKey: Iris_d
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: 47d1729d200fab044a2c3ffaf01f3f2f, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_d_03.png
+  - characterId: Iris
+    variantKey: Iris_d
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: 5781110397e939348acd1061b1ecc5cb, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_d_04.png
+  - characterId: Iris
+    variantKey: Iris_d
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: 06ac6a272100212409cb60b959eb8dc9, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_d_05.png
+  - characterId: Iris
+    variantKey: Iris_d
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: bf73cb8535558604798387d8de04cd7d, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_d_06.png
+  - characterId: Iris
+    variantKey: Iris_d
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: a175bb19005774f44b30c9407cd6b1fd, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_d_07.png
+  - characterId: Iris
+    variantKey: Iris_d
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: a1f18755ba6b2d9498f637d0c077cb31, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_d_08.png
+  - characterId: Iris
+    variantKey: Iris_d
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: 8b63b05c8f984b64eaa4d76bce870904, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_d_09.png
+  - characterId: Iris
+    variantKey: Iris_d
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: cb000cd4e8e735f40a9baca238cce758, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_d_10.png
+  - characterId: Iris
+    variantKey: Iris_d
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: 21b2de40d498f484f975af6aae2f7339, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_d_11.png
+  - characterId: Iris
+    variantKey: Iris_d
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: 6c1d75d00582405479adc415631c8e06, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_d_12.png
+  - characterId: Iris
+    variantKey: Iris_d
+    emotionKey: 13
+    sprite: {fileID: 21300000, guid: 8e45a08b77fa3a845b217b01c56c2b78, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_d_13.png
+  - characterId: Iris
+    variantKey: Iris_d
+    emotionKey: 14
+    sprite: {fileID: 21300000, guid: 323fbfd2e49a4f340b7b60b2bdd043f6, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_d_14.png
+  - characterId: Iris
+    variantKey: Iris_d
+    emotionKey: 15
+    sprite: {fileID: 21300000, guid: 18a30870b365c4149bc2edfda7e18111, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_d_15.png
+  - characterId: Iris
+    variantKey: Iris_d
+    emotionKey: 16
+    sprite: {fileID: 21300000, guid: 5b150a54c69fa3c4e8e9ce38da3f2695, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_d_16.png
+  - characterId: Iris
+    variantKey: Iris_d
+    emotionKey: 17
+    sprite: {fileID: 21300000, guid: d12c78c47fb894e4fb66cecb21456571, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_d_17.png
+  - characterId: Iris
+    variantKey: Iris_d
+    emotionKey: 18
+    sprite: {fileID: 21300000, guid: 9b3e43a937f61c74b94abffb3cda0514, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_d_18.png
+  - characterId: Iris
+    variantKey: Iris_d
+    emotionKey: 19
+    sprite: {fileID: 21300000, guid: d57f3dd37faca64429193eb506c40fcf, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_d_19.png
+  - characterId: Iris
+    variantKey: Iris_d
+    emotionKey: 20
+    sprite: {fileID: 21300000, guid: 8e2ba910a47228b48b3cdc7b8c0526a5, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_d_20.png
+  - characterId: Iris
+    variantKey: Iris_d
+    emotionKey: 21
+    sprite: {fileID: 21300000, guid: 9b980d5903fd7ac41ae405d3de6e3dc0, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_d_21.png
+  - characterId: Iris
+    variantKey: Iris_d
+    emotionKey: 22
+    sprite: {fileID: 21300000, guid: 739ceaf650b7b4f4698bd879ad3290b4, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_d_22.png
+  - characterId: Iris
+    variantKey: Iris_d
+    emotionKey: 23
+    sprite: {fileID: 21300000, guid: bf50ed95be130f24d8141363a1c2e4d2, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_d_23.png
+  - characterId: Iris
+    variantKey: Iris_d
+    emotionKey: 24
+    sprite: {fileID: 21300000, guid: 3ff4e690854908240a6aa07ba1eb1abd, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_d_24.png
+  - characterId: Iris
+    variantKey: Iris_d
+    emotionKey: 25
+    sprite: {fileID: 21300000, guid: 0ca5f89d387554b40955c1f21ca93a74, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_d_25.png
+  - characterId: Iris
+    variantKey: Iris_d
+    emotionKey: 26
+    sprite: {fileID: 21300000, guid: 60bbf0f0cad492d4ca7993b6448c5798, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_d_26.png
+  - characterId: Iris
+    variantKey: Iris_d
+    emotionKey: 27
+    sprite: {fileID: 21300000, guid: 0847d131b834bb742b0e80029db5d988, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_d_27.png
+  - characterId: Iris
+    variantKey: Iris_d
+    emotionKey: 28
+    sprite: {fileID: 21300000, guid: c6c6f63dc370cfb42a30d2a248be0b40, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_d_28.png
+  - characterId: Iris
+    variantKey: Iris_e
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: 41399c69584483c4eb5e2f2cca9b2e46, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_e_02.png
+  - characterId: Iris
+    variantKey: Iris_e
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: 69ccf8172b2677a46b1e7dea40a8ec69, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_e_03.png
+  - characterId: Iris
+    variantKey: Iris_e
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: 8936a3dd43c66344c926805e2f08bfa0, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_e_04.png
+  - characterId: Iris
+    variantKey: Iris_e
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: 5d12ce68356fa6543b4c72d505880f6b, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_e_05.png
+  - characterId: Iris
+    variantKey: Iris_e
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: 3cd75ed97128cdb4e8e3e50f07bb78af, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_e_06.png
+  - characterId: Iris
+    variantKey: Iris_e
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: e727a2fcc6d0f4a469a431128b2de53e, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_e_07.png
+  - characterId: Iris
+    variantKey: Iris_e
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: ebc4c9a263874fc4f8e02f4dc2d103a6, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_e_08.png
+  - characterId: Iris
+    variantKey: Iris_e
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: c85e13216f74e904eb9d817492adb559, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_e_09.png
+  - characterId: Iris
+    variantKey: Iris_e
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: fe04c2f654a39d7428587a457897844a, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_e_10.png
+  - characterId: Iris
+    variantKey: Iris_e
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: 5c601317d9f141e498f9447513b0f9f0, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_e_11.png
+  - characterId: Iris
+    variantKey: Iris_e
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: 266438fc3dab8754791b83c1aa84e252, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_e_12.png
+  - characterId: Iris
+    variantKey: Iris_e
+    emotionKey: 13
+    sprite: {fileID: 21300000, guid: 0c9c6b4f96961424fba466f5b42fbd9d, type: 3}
+    assetPath: Assets/Art/Portraits/Iris/Iris_e_13.png
   - characterId: Laru
     variantKey: Laru_a
     emotionKey: 02
@@ -763,6 +1593,426 @@ MonoBehaviour:
     emotionKey: 12
     sprite: {fileID: 21300000, guid: 7b56f4adf77f8ff48b8cc2bd3228a2e0, type: 3}
     assetPath: Assets/Art/Portraits/Mercurio/Mercurio_a_12.png
+  - characterId: Noya
+    variantKey: Noya_a
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: acb55bf3ddef4ab41b60d268e8bc6e6b, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_a_02.png
+  - characterId: Noya
+    variantKey: Noya_a
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: b20794bddeeea344785097547c52cb96, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_a_03.png
+  - characterId: Noya
+    variantKey: Noya_a
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: 92a77fbbf14bdea4488496d7bad9083e, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_a_04.png
+  - characterId: Noya
+    variantKey: Noya_a
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: 685ef246ff2b23849a247cab5b47db00, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_a_05.png
+  - characterId: Noya
+    variantKey: Noya_a
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: 17c8b7df9ddfcf94881c8c4898d044d7, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_a_06.png
+  - characterId: Noya
+    variantKey: Noya_a
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: aeaaebb5dc426294ea76476aaf8565df, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_a_07.png
+  - characterId: Noya
+    variantKey: Noya_a
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: 26c79af9bdd95d9459038e5a01e24320, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_a_08.png
+  - characterId: Noya
+    variantKey: Noya_a
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: 415014f55c1b4144aa385df2579e04e5, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_a_09.png
+  - characterId: Noya
+    variantKey: Noya_a
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: 37fb046175ce51b4c8966cfe0901b3ce, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_a_10.png
+  - characterId: Noya
+    variantKey: Noya_a
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: b0551f6ad87a2594eb79030d0362f48e, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_a_11.png
+  - characterId: Noya
+    variantKey: Noya_a
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: 65672fced48097142b5350d9f8f13734, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_a_12.png
+  - characterId: Noya
+    variantKey: Noya_a
+    emotionKey: 13
+    sprite: {fileID: 21300000, guid: 66e02427816af8f4293eebf5e2f1a242, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_a_13.png
+  - characterId: Noya
+    variantKey: Noya_a
+    emotionKey: 14
+    sprite: {fileID: 21300000, guid: 6d6f28c75cefb6f42899036405445c08, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_a_14.png
+  - characterId: Noya
+    variantKey: Noya_a
+    emotionKey: 15
+    sprite: {fileID: 21300000, guid: f971a044c9d98f94da9400a2adeaf560, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_a_15.png
+  - characterId: Noya
+    variantKey: Noya_a
+    emotionKey: 16
+    sprite: {fileID: 21300000, guid: c95b5534319768e43a578f1faf7dd3b2, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_a_16.png
+  - characterId: Noya
+    variantKey: Noya_a
+    emotionKey: 17
+    sprite: {fileID: 21300000, guid: f29970f24af314b41afe2177aa3fd6e7, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_a_17.png
+  - characterId: Noya
+    variantKey: Noya_a
+    emotionKey: 18
+    sprite: {fileID: 21300000, guid: c54da2cf3e33b3b4fb7bdbff22148f6a, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_a_18.png
+  - characterId: Noya
+    variantKey: Noya_a
+    emotionKey: 19
+    sprite: {fileID: 21300000, guid: c99b00b963743c346940609cfd9679d2, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_a_19.png
+  - characterId: Noya
+    variantKey: Noya_a
+    emotionKey: 20
+    sprite: {fileID: 21300000, guid: 9510a75e6cb9ffc4595a35dd3c909ddf, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_a_20.png
+  - characterId: Noya
+    variantKey: Noya_a
+    emotionKey: 21
+    sprite: {fileID: 21300000, guid: a9c5ebfafc9104841a5b9ef14923cd5b, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_a_21.png
+  - characterId: Noya
+    variantKey: Noya_a
+    emotionKey: 22
+    sprite: {fileID: 21300000, guid: d16c01b136fb5294bb59b1463c7be34a, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_a_22.png
+  - characterId: Noya
+    variantKey: Noya_a
+    emotionKey: 23
+    sprite: {fileID: 21300000, guid: a591b68c0fa32e4499a5f20efc0252fd, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_a_23.png
+  - characterId: Noya
+    variantKey: Noya_a
+    emotionKey: 24
+    sprite: {fileID: 21300000, guid: 7e985ae8ac366d345b6635f1f299dd37, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_a_24.png
+  - characterId: Noya
+    variantKey: Noya_a
+    emotionKey: 25
+    sprite: {fileID: 21300000, guid: 066d2c0cbf19a514c95d5a40c0eccf84, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_a_25.png
+  - characterId: Noya
+    variantKey: Noya_b
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: cf50f2908e3c43b418dea7131d298741, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_b_02.png
+  - characterId: Noya
+    variantKey: Noya_b
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: 65d98a6de17849843baf2e810063ddd3, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_b_03.png
+  - characterId: Noya
+    variantKey: Noya_b
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: b17d9271b150e3e419c1695f7adeb7a7, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_b_04.png
+  - characterId: Noya
+    variantKey: Noya_b
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: ed56965d28813564980f93db78593c14, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_b_05.png
+  - characterId: Noya
+    variantKey: Noya_b
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: c3d17ba6abfad1d45a1acb868d364dbe, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_b_06.png
+  - characterId: Noya
+    variantKey: Noya_b
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: f9dc8ba1cc1457344a221de478b2ae80, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_b_07.png
+  - characterId: Noya
+    variantKey: Noya_b
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: c5c36f6a2bf5a2d419599dc85829b754, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_b_08.png
+  - characterId: Noya
+    variantKey: Noya_c
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: 93b8be235a4ffdf4095fa89fd59f0977, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_c_02.png
+  - characterId: Noya
+    variantKey: Noya_c
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: 9b89b6459ebe8de4b9a06e48520b99a1, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_c_03.png
+  - characterId: Noya
+    variantKey: Noya_c
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: be09ec20a3f16d846b2044d64c847571, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_c_04.png
+  - characterId: Noya
+    variantKey: Noya_c
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: a7aca2f357178fc4893cd2a4f0a8ba1c, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_c_05.png
+  - characterId: Noya
+    variantKey: Noya_c
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: 08dc2747222bfa44fa4ca57480dd694a, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_c_06.png
+  - characterId: Noya
+    variantKey: Noya_c
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: 8f5006e08ab1ec2438e4ebd0c6ecfd35, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_c_07.png
+  - characterId: Noya
+    variantKey: Noya_c
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: fb17226592f5282458fc7409de961ebd, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_c_08.png
+  - characterId: Noya
+    variantKey: Noya_c
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: 6d98fd8d5be8de14d99f68fedd163dc6, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_c_09.png
+  - characterId: Noya
+    variantKey: Noya_c
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: a851677ef5108924086382641903acf7, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_c_10.png
+  - characterId: Noya
+    variantKey: Noya_c
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: 453b185195129e4499dc2ae408116dc3, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_c_11.png
+  - characterId: Noya
+    variantKey: Noya_c
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: 402199908978f754a84dc2e21b9df070, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_c_12.png
+  - characterId: Noya
+    variantKey: Noya_c
+    emotionKey: 13
+    sprite: {fileID: 21300000, guid: 31b1d38a1caf8354f8a6b39a0ac3be57, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_c_13.png
+  - characterId: Noya
+    variantKey: Noya_c
+    emotionKey: 14
+    sprite: {fileID: 21300000, guid: 3ba53ecb947787d44a314c38dafd7734, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_c_14.png
+  - characterId: Noya
+    variantKey: Noya_c
+    emotionKey: 15
+    sprite: {fileID: 21300000, guid: 097479a35126f7847845e6d82a052608, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_c_15.png
+  - characterId: Noya
+    variantKey: Noya_c
+    emotionKey: 16
+    sprite: {fileID: 21300000, guid: a9f360bf42e767a4898d701a5c2ffaae, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_c_16.png
+  - characterId: Noya
+    variantKey: Noya_c
+    emotionKey: 17
+    sprite: {fileID: 21300000, guid: d38feb5d2744c414295ceb15fd136136, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_c_17.png
+  - characterId: Noya
+    variantKey: Noya_c
+    emotionKey: 18
+    sprite: {fileID: 21300000, guid: bae87d14a3feebc4da61c86563511ec3, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_c_18.png
+  - characterId: Noya
+    variantKey: Noya_c
+    emotionKey: 19
+    sprite: {fileID: 21300000, guid: 13bf8f11ef9a14c40bfd89e78412ec81, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_c_19.png
+  - characterId: Noya
+    variantKey: Noya_c
+    emotionKey: 20
+    sprite: {fileID: 21300000, guid: 4eec2d81b237467488890637755db071, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_c_20.png
+  - characterId: Noya
+    variantKey: Noya_d
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: 2cae1df4e39ca06479fefe533fe0e238, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_d_02.png
+  - characterId: Noya
+    variantKey: Noya_d
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: fd1b7eb65dc10204c849c8b8e3352504, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_d_03.png
+  - characterId: Noya
+    variantKey: Noya_d
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: 160eab8ac1337a34fa266f8a2267064c, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_d_04.png
+  - characterId: Noya
+    variantKey: Noya_d
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: c911d84483d5e0d4e8c1d48ed88f2c16, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_d_05.png
+  - characterId: Noya
+    variantKey: Noya_d
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: 77f349b87cfe4b446a2ddf487c74b6f4, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_d_06.png
+  - characterId: Noya
+    variantKey: Noya_d
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: 1e256e5c67663a747b4703b0c1805632, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_d_07.png
+  - characterId: Noya
+    variantKey: Noya_d
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: 49a8239310e670743a0963f977cf58d2, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_d_08.png
+  - characterId: Noya
+    variantKey: Noya_d
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: e74941efefbbedc4bb7d49821b26dd1b, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_d_09.png
+  - characterId: Noya
+    variantKey: Noya_d
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: d308ac19a1fc45c4b833a55d837a025d, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_d_10.png
+  - characterId: Noya
+    variantKey: Noya_d
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: 8d6d1dbae0f971444a7cfab042b96a71, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_d_11.png
+  - characterId: Noya
+    variantKey: Noya_e
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: 5e67dc2b232675e4d8fa189d49c89019, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_e_02.png
+  - characterId: Noya
+    variantKey: Noya_e
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: 2a1478f3aaa7e1642b0e6bb9cb4505ee, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_e_03.png
+  - characterId: Noya
+    variantKey: Noya_e
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: f35850c19c1e8314db50fcb7d8681a75, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_e_04.png
+  - characterId: Noya
+    variantKey: Noya_e
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: edf565360b1a99b4090f082fada00d2c, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_e_05.png
+  - characterId: Noya
+    variantKey: Noya_e
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: 9b67625d83b422540b1b296453b8b159, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_e_06.png
+  - characterId: Noya
+    variantKey: Noya_e
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: 8076c376cfcd167439bc22d437c8a14c, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_e_07.png
+  - characterId: Noya
+    variantKey: Noya_e
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: 156721b44063b4d4fa71a9e06a360582, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_e_08.png
+  - characterId: Noya
+    variantKey: Noya_e
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: ce005fcc0942c0f4bb8c52f181882b2a, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_e_09.png
+  - characterId: Noya
+    variantKey: Noya_e
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: 9e6c778cee9c36f4da31859f2f1f711b, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_e_10.png
+  - characterId: Noya
+    variantKey: Noya_e
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: 9f7c4b2981f5d91408836ce4dbb64ac7, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_e_11.png
+  - characterId: Noya
+    variantKey: Noya_e
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: 6b6842038b681b040b319fea5940e6a4, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_e_12.png
+  - characterId: Noya
+    variantKey: Noya_e
+    emotionKey: 13
+    sprite: {fileID: 21300000, guid: f1f3830a2a9e57c49b35e14215cf2e77, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_e_13.png
+  - characterId: Noya
+    variantKey: Noya_e
+    emotionKey: 14
+    sprite: {fileID: 21300000, guid: 2e7b7c80a5dff5340a44931b900b7957, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_e_14.png
+  - characterId: Noya
+    variantKey: Noya_e
+    emotionKey: 15
+    sprite: {fileID: 21300000, guid: 3184ed9aeb9fc1546ad5365c91a74c46, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_e_15.png
+  - characterId: Noya
+    variantKey: Noya_e
+    emotionKey: 16
+    sprite: {fileID: 21300000, guid: ec4e98734d61918468e322354752a68b, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_e_16.png
+  - characterId: Noya
+    variantKey: Noya_e
+    emotionKey: 17
+    sprite: {fileID: 21300000, guid: ce6030f12a3feec44a4ff7864323e09e, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_e_17.png
+  - characterId: Noya
+    variantKey: Noya_e
+    emotionKey: 18
+    sprite: {fileID: 21300000, guid: 1eee610f26662624abd9790ff3c8e7c7, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_e_18.png
+  - characterId: Noya
+    variantKey: Noya_e
+    emotionKey: 19
+    sprite: {fileID: 21300000, guid: d0a11ca91b991714288087ff13410a82, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_e_19.png
+  - characterId: Noya
+    variantKey: Noya_e
+    emotionKey: 20
+    sprite: {fileID: 21300000, guid: feb42b49507e1334da4789928e09b9e2, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_e_20.png
+  - characterId: Noya
+    variantKey: Noya_e
+    emotionKey: 21
+    sprite: {fileID: 21300000, guid: a2747ec2be304784e8a6c5d8a64279be, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_e_21.png
+  - characterId: Noya
+    variantKey: Noya_e
+    emotionKey: 22
+    sprite: {fileID: 21300000, guid: 019cc64410ac2864b9268478ce86c8d8, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_e_22.png
+  - characterId: Noya
+    variantKey: Noya_e
+    emotionKey: 23
+    sprite: {fileID: 21300000, guid: 5d501b47869655e4bbb21efe1638f44c, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_e_23.png
+  - characterId: Noya
+    variantKey: Noya_e
+    emotionKey: 24
+    sprite: {fileID: 21300000, guid: 25abfcdcf49c127449123ef0379d15e2, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_e_24.png
+  - characterId: Noya
+    variantKey: Noya_e
+    emotionKey: 25
+    sprite: {fileID: 21300000, guid: b9198b6f8d40b5441924d608b0c3799f, type: 3}
+    assetPath: Assets/Art/Portraits/Noya/Noya_e_25.png
   - characterId: Okra
     variantKey: Okra_a
     emotionKey: 02
@@ -1148,5 +2398,5 @@ MonoBehaviour:
     emotionKey: 02
     sprite: {fileID: 21300000, guid: 2c5e83a3f43fc544fa622f82902d7d2d, type: 3}
     assetPath: Assets/Art/Portraits/reira/reira_a_02.png
-  generatedTicksUtc: 639155705336178771
-  generatedTimeReadable: 2026-05-28 22:08:53
+  generatedTicksUtc: 639165765654805773
+  generatedTimeReadable: 2026-06-09 13:36:05

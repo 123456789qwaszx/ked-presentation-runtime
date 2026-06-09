@@ -91,6 +91,7 @@ public class VnAppBootstrap : MonoBehaviour
                                    "Empty fields bake a complete rig from CharacterRigSchema at runtime. " +
                                    "Prefab the baked result when you need performance setup, external systems, response targets, or shot helpers.")] 
     [SerializeField] private RectTransform rigPrefab;
+    [SerializeField] private RectTransform backgroundRigPrefab;
     
     [Header("ChapterButtonCard")] 
     [SerializeField] private RectTransform chapterCardPrefab;
@@ -310,6 +311,7 @@ public class VnAppBootstrap : MonoBehaviour
             _vnRuntimeStateProvider,
             _vnSideRunnerSyncHub,
             rigPrefab,
+            backgroundRigPrefab,
             oneShotPresentationLane,
             _dialogueBoxPresentationController,
             bindMainLaneCommands: true);
@@ -320,6 +322,7 @@ public class VnAppBootstrap : MonoBehaviour
             _vnRuntimeStateProvider,
             _vnSideRunnerSyncHub, 
             rigPrefab, 
+            backgroundRigPrefab,
             oneShotPresentationLane,
             _dialogueBoxPresentationController,
             bindMainLaneCommands: false);
@@ -330,6 +333,7 @@ public class VnAppBootstrap : MonoBehaviour
             _vnRuntimeStateProvider,
             _vnSideRunnerSyncHub, 
             rigPrefab, 
+            backgroundRigPrefab,
             oneShotPresentationLane,
             _dialogueBoxPresentationController,
             bindMainLaneCommands: false);

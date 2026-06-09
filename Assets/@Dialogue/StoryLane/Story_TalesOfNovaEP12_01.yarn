@@ -1,5 +1,83 @@
-﻿title: Story_TalesOfNovaEP12_01
+﻿title: Setup_TalesOfNovaEP12_01
+position: -2,-160
 ---
+<<shot_reset>>
+
+<<bg_spawn bg3 ep12_01>>
+
+<<bg_spawn bg1 ep12_01>>
+<<bg_size bg1 1.5>>
+
+<<bg_spawn bg2 bgslot_01 02>>
+<<bg_hide_layers bg2 front>>
+<<bg_show_layers bg2 object>>
+<<bg_hide_layers bg2 root>>
+
+
+<<slot char1>>
+<<slot char2>>
+<<slot char3>>
+<<slot char4>>
+
+<<cast char1 Willow center>>
+<<pose char1 Willow a 21>>
+
+<<cast char2 Noya duoright>>
+<<pose char2 Noya a 15>>
+<<size char2 close>>
+<<place_offset char2 0 -800>>
+
+
+<<cast char3 Iris duoleft>>
+<<pose char3 Iris a 7>>
+<<size char3 close>>
+<<place_offset char3 0 -800>>
+
+<<cast char4 Amber>>
+<<pose char4 Amber a 12>>
+//<<size char4 large>>
+//<<place_offset char4 0 -800>>
+
+<<attach_to_bg char4 bg2>>
+
+=== 
+
+
+title: Story_TalesOfNovaEP12_01
+---
+<<beat Setup_TalesOfNovaEP12_01>>
 이건 내가 처음으로 그녀의 영혼에 닿았을 때의 이야기다. #box:blackbook
 
+<<fade_in Willow>>
+<<emoji Willow 02-1>>
+<<pause>>
+<<dip Willow down>>
+윌로: 죄송합니다만, 이번 의뢰는 보수의 3분의 1밖에 드릴 수 없겠군요.
+
+<<emoji_hide Willow>>
+<<char_defocus Willow>>
+<<move_by char1 -50 20>>
+
+<<fade_in Noya>>
+<<shot_to 1 200 30>>
+<<hop Noya 1 60 10>>
+<<slide_in Noya right>>
+<<emoji Noya 18>>
+세이나: 안 돼! 이 신기를 얻으려고 우리가 성해를 얼마나 많이 물리쳤는데...... <br>검날이 다 무뎌질 정도였다고!
+<<move_by char1 90 0>>
+<<face Willow 25>>
+
+<<fade_in Iris>>
+<<shot_to 1 0 0>>
+<<hop Iris 1 60 10>>
+<<slide_in Iris left>>
+<<emoji Iris 6>>
+아야메: 이번에 돌아와서 물자를 보충하는 것만으로도 기존에 약속했던 보수의 절반을 사용해야 해요. 3분의 1만 받는다면, 우린 적자예요.
+
+<<bg_fade_in bg2>>
+<<fade_in Amber>>
+코하쿠: 심상석에 은혜도 없어.
+..
+..
+..
 ===

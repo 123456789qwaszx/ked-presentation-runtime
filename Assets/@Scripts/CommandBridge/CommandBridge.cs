@@ -10,6 +10,7 @@ public sealed partial class YarnCommandBridge
     private readonly YarnBridgePlaybackDriver _playbackDriver;
     private readonly VNRuntimeStateProvider _vnRuntimeStateProvider;
     private readonly RectTransform _charRigPrefab;
+    private readonly RectTransform _backgroundRigPrefab;
 
     private readonly VNSideRunnerSyncHub _sideRunnerSyncHub;
     private readonly OneShotPresentationLane _oneShotPresentationLane;
@@ -21,6 +22,7 @@ public sealed partial class YarnCommandBridge
         VNRuntimeStateProvider vnRuntimeStateProvider,
         VNSideRunnerSyncHub sideRunnerSyncHub,
         RectTransform charRigPrefab,
+        RectTransform backgroundRigPrefab,
         OneShotPresentationLane oneShotPresentationLane,
         DialogueBoxPresentationController dialogueBoxPresentation,
         bool bindMainLaneCommands)
@@ -30,6 +32,7 @@ public sealed partial class YarnCommandBridge
         _vnRuntimeStateProvider = vnRuntimeStateProvider;
         _sideRunnerSyncHub = sideRunnerSyncHub;
         _charRigPrefab = charRigPrefab;
+        _backgroundRigPrefab = backgroundRigPrefab;
         _oneShotPresentationLane = oneShotPresentationLane;
         _dialogueBoxPresentation = dialogueBoxPresentation;
         
@@ -108,6 +111,7 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler<float>("pause", EnqueueWaitSpec);
         runner.AddCommandHandler<string>("ui_patch", EnqueueUIPatchSpec);
         runner.AddCommandHandler<string>("debug_log", LogImmediate);
+        runner.AddCommandHandler<string, string, string>("attach_to_bg", EnqueueAttachCharRigToBackgroundObjectSlotSpec);
     }
     
 
@@ -122,6 +126,7 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler<string, string>("size", EnqueueSetOriginSizeSpec);
         
         runner.AddCommandHandler<string, int, int>("place_offset", EnqueueSetAnchorOffsetSpecs);
+        
     }
 
     private void BindCharRigBasic(DialogueRunner runner)
@@ -134,8 +139,8 @@ public sealed partial class YarnCommandBridge
         
         runner.AddCommandHandler<string, float, float, float, float>("color_to", EnqueueColorToSpec);
         
-        runner.AddCommandHandler<string, string>("slide_in", EnqueueSlideInSpec);
-        runner.AddCommandHandler<string, string>("slide_out", EnqueueSlideOutSpec);
+        runner.AddCommandHandler<string, string, float>("slide_in", EnqueueSlideInSpec);
+        runner.AddCommandHandler<string, string, float>("slide_out", EnqueueSlideOutSpec);
         
         runner.AddCommandHandler<string, float, float, float>("move_by", EnqueueMoveByCharSpec);
         runner.AddCommandHandler<string, float, float>("scale_to", EnqueueScaleToSpec);
@@ -153,7 +158,7 @@ public sealed partial class YarnCommandBridge
     {
         runner.AddCommandHandler<string, string>("dip", EnqueueDipInOutSpec);
         
-        runner.AddCommandHandler<string, int, float, float>("hop", EnqueueHopSpec);
+        runner.AddCommandHandler<string, int, float, float, float>("hop", EnqueueHopSpec);
         
         runner.AddCommandHandler<string, string, float, float, int>("shake", EnqueueJoltSpecShake);
         runner.AddCommandHandler<string, float, float, float, string>("tremble", EnqueueTrembleSpec);
@@ -186,58 +191,22 @@ public sealed partial class YarnCommandBridge
     private void BindCharRigEmote(DialogueRunner runner)
     {
         // Default Pop preset.
-        // <<emoji igna 19>>
-        runner.AddCommandHandler<string, string>(
-            "emoji",
-            EnqueueEmojiPopSpec);
+        runner.AddCommandHandler<string, string>("emoji", EnqueueEmojiPopSpec);
+        runner.AddCommandHandler<string>("emoji_hide", EnqueueEmojiHideSpec);
 
-        // Drop preset.
-        // <<emoji_drop igna 19>>
-        runner.AddCommandHandler<string, string>(
-            "emoji_drop",
-            EnqueueEmojiDropSpec);
-
-        // Shock preset.
-        // <<emoji_shock igna 19>>
-        runner.AddCommandHandler<string, string>(
-            "emoji_shock",
-            EnqueueEmojiShockSpec);
-
-        // Hop preset.
-        // <<emoji_hop igna 19>>
-        runner.AddCommandHandler<string, string>(
-            "emoji_hop",
-            EnqueueEmojiHopSpec);
-
-        // Sway preset.
-        // <<emoji_sway igna 19>>
-        runner.AddCommandHandler<string, string>(
-            "emoji_sway",
-            EnqueueEmojiSwaySpec);
-
-        // Tremble preset.
-        // <<emoji_tremble igna 19>>
-        runner.AddCommandHandler<string, string>(
-            "emoji_tremble",
-            EnqueueEmojiTrembleSpec);
-
-        // Raw set only.
-        // <<emoji_set igna 19>>
-        runner.AddCommandHandler<string, string>(
-            "emoji_set",
-            EnqueueEmojiSetSpec);
-
-        // Hide.
-        // <<emoji_hide igna>>
-        runner.AddCommandHandler<string>(
-            "emoji_hide",
-            EnqueueEmojiHideSpec);
+        runner.AddCommandHandler<string, string>("emoji_drop", EnqueueEmojiDropSpec);
+        runner.AddCommandHandler<string, string>("emoji_shock", EnqueueEmojiShockSpec);
+        runner.AddCommandHandler<string, string>("emoji_hop", EnqueueEmojiHopSpec);
+        runner.AddCommandHandler<string, string>("emoji_sway", EnqueueEmojiSwaySpec);
+        runner.AddCommandHandler<string, string>("emoji_tremble", EnqueueEmojiTrembleSpec);
+        
+        runner.AddCommandHandler<string, string>("emoji_set", EnqueueEmojiSetSpec); // Raw set only.
     }
     
     private void BindCharRigVisual(DialogueRunner runner)
     {
         runner.AddCommandHandler<string, float, float>("char_focus", EnqueueCharFocusSpec);
-        runner.AddCommandHandler<string, float, float>("char_defocus", EnqueueCharDefocusSpec);
+        runner.AddCommandHandler<string, float, float, float>("char_defocus", EnqueueCharDefocusSpec);
         runner.AddCommandHandler<string, float>("char_clear_focus", EnqueueCharClearFocusSpec);
         
         runner.AddCommandHandler<string, float, float>("char_dim", EnqueueCharDimSpec);
@@ -245,20 +214,21 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler<string, float, float>("char_outer_rim", EnqueueCharOuterRimSpec);
         
         runner.AddCommandHandler<string, float, float, float, float>("char_visual", EnqueueCharVisualSpec);
-        runner.AddCommandHandler<string, float, float, float, float, float, float, float>("char_visual_color", EnqueueCharVisualRimColorSpec);
+        runner.AddCommandHandler<string, float, float, float, float, float, float, float>("char_visual_color",
+            EnqueueCharVisualRimColorSpec);
         
     }
     
     private void BindBackgroundRig(DialogueRunner runner)
     {
-        runner.AddCommandHandler<string, string, string, string, float, float, float, string>("bg_spawn", EnqueueSpawnBackgroundRigSpec);
+        runner.AddCommandHandler<string, string, string>("bg_spawn", EnqueueSpawnBackgroundRigSpec);
         
         runner.AddCommandHandler<string, float, float, float>("bg_place", EnqueueSetBackgroundAnchorSpec);
         runner.AddCommandHandler<string, string, string>("bg_sprite", EnqueueSetBackgroundSpriteSpec);
         runner.AddCommandHandler<string, string>("bg_size", EnqueueSetBackgroundOriginSizeSpec);
         
-        runner.AddCommandHandler<string, float, string>("bg_fade_in", EnqueueFadeInBackgroundSpec);
-        runner.AddCommandHandler<string, float, string>("bg_fade_out", EnqueueFadeOutBackgroundSpec);
+        runner.AddCommandHandler<string, float>("bg_fade_in", EnqueueFadeInBackgroundSpec);
+        runner.AddCommandHandler<string, float>("bg_fade_out", EnqueueFadeOutBackgroundSpec);
         
         runner.AddCommandHandler<string, string>("bg_hide_layers", EnqueueHideBackgroundRootLayersSpec);
         runner.AddCommandHandler<string, string>("bg_show_layers", EnqueueShowBackgroundRootLayersSpec);

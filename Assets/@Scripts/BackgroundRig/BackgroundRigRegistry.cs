@@ -7,12 +7,28 @@ using Object = UnityEngine.Object;
 
 public sealed class BackgroundRigRegistry
 {
+    private sealed class ExternalChildRecord
+    {
+        public RectTransform ChildRoot;
+        public RectTransform RestoreParent;
+
+        public ExternalChildRecord(RectTransform childRoot, RectTransform restoreParent)
+        {
+            ChildRoot = childRoot;
+            RestoreParent = restoreParent;
+        }
+    }
+
     private readonly Dictionary<string, BackgroundRigRefs> _rigs = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, List<ExternalChildRecord>> _externalChildrenByRigKey = new(StringComparer.Ordinal);
 
     public void Register(string rigKey, BackgroundRigRefs rigRefs)
     {
         if (_rigs.TryGetValue(rigKey, out BackgroundRigRefs existingRig))
+        {
+            DetachExternalChildren(rigKey);
             DestroyRig(existingRig);
+        }
 
         _rigs[rigKey] = rigRefs;
     }
@@ -25,6 +41,7 @@ public sealed class BackgroundRigRegistry
             return false;
         }
 
+        DetachExternalChildren(rigKey);
         DestroyRig(rigRefs);
         return true;
     }
@@ -52,12 +69,130 @@ public sealed class BackgroundRigRegistry
         return true;
     }
 
+    public void RegisterExternalChild(string rigKey, RectTransform childRoot, RectTransform restoreParent)
+    {
+        if (string.IsNullOrEmpty(rigKey))
+        {
+            Debug.LogWarning("[BackgroundRigRegistry] RegisterExternalChild failed. rigKey is empty.");
+            return;
+        }
+
+        if (childRoot == null)
+        {
+            Debug.LogWarning($"[BackgroundRigRegistry] RegisterExternalChild failed. childRoot is null. rigKey='{rigKey}'.");
+            return;
+        }
+
+        if (!_rigs.ContainsKey(rigKey))
+        {
+            Debug.LogWarning($"[BackgroundRigRegistry] RegisterExternalChild failed. Background rig not found. rigKey='{rigKey}'.");
+            return;
+        }
+
+        RectTransform preservedRestoreParent = RemoveExternalChildRecord(childRoot);
+
+        if (preservedRestoreParent != null)
+            restoreParent = preservedRestoreParent;
+
+        if (!_externalChildrenByRigKey.TryGetValue(rigKey, out List<ExternalChildRecord> records))
+        {
+            records = new List<ExternalChildRecord>();
+            _externalChildrenByRigKey[rigKey] = records;
+        }
+
+        records.Add(new ExternalChildRecord(childRoot, restoreParent));
+    }
+
+    public void UnregisterExternalChild(RectTransform childRoot)
+    {
+        RemoveExternalChildRecord(childRoot);
+    }
+
     public void Clear()
     {
-        foreach (BackgroundRigRefs rigRefs in _rigs.Values)
+        List<string> rigKeys = new List<string>(_rigs.Keys);
+
+        for (int i = 0; i < rigKeys.Count; i++)
+        {
+            string rigKey = rigKeys[i];
+
+            if (!_rigs.TryGetValue(rigKey, out BackgroundRigRefs rigRefs))
+                continue;
+
+            DetachExternalChildren(rigKey);
             DestroyRig(rigRefs);
+        }
 
         _rigs.Clear();
+        _externalChildrenByRigKey.Clear();
+    }
+
+    private RectTransform RemoveExternalChildRecord(RectTransform childRoot)
+    {
+        if (childRoot == null)
+            return null;
+
+        RectTransform preservedRestoreParent = null;
+        List<string> emptyKeys = null;
+
+        foreach (KeyValuePair<string, List<ExternalChildRecord>> pair in _externalChildrenByRigKey)
+        {
+            List<ExternalChildRecord> records = pair.Value;
+
+            for (int i = records.Count - 1; i >= 0; i--)
+            {
+                ExternalChildRecord record = records[i];
+
+                if (record == null || record.ChildRoot == null)
+                {
+                    records.RemoveAt(i);
+                    continue;
+                }
+
+                if (record.ChildRoot != childRoot)
+                    continue;
+
+                if (preservedRestoreParent == null)
+                    preservedRestoreParent = record.RestoreParent;
+
+                records.RemoveAt(i);
+            }
+
+            if (records.Count == 0)
+            {
+                emptyKeys ??= new List<string>();
+                emptyKeys.Add(pair.Key);
+            }
+        }
+
+        if (emptyKeys != null)
+        {
+            for (int i = 0; i < emptyKeys.Count; i++)
+                _externalChildrenByRigKey.Remove(emptyKeys[i]);
+        }
+
+        return preservedRestoreParent;
+    }
+
+    private void DetachExternalChildren(string rigKey)
+    {
+        if (!_externalChildrenByRigKey.Remove(rigKey, out List<ExternalChildRecord> records))
+            return;
+
+        for (int i = 0; i < records.Count; i++)
+        {
+            ExternalChildRecord record = records[i];
+
+            if (record == null || record.ChildRoot == null)
+                continue;
+
+            RectTransform restoreParent = record.RestoreParent;
+
+            if (restoreParent != null)
+                record.ChildRoot.SetParent(restoreParent, false);
+            else
+                record.ChildRoot.SetParent(null, false);
+        }
     }
 
     private static void DestroyRig(BackgroundRigRefs rigRefs)

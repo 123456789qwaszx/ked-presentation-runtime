@@ -89,6 +89,9 @@ public sealed class CharRigCommandFactory : INodeCommandFactory
             // Emote
             SetCharacterEmojiCommandSpecCharR s => new SetCharacterEmojiCommandCharR(s, _emojiResolver),
             RevealCharacterEmojiCommandSpecCharR s => new RevealCharacterEmojiCommandCharR(s),
+            
+            // AttachCharRigToBackgroundObjectSlot
+            AttachCharRigToBackgroundObjectSlotCommandSpec s => new AttachCharRigToBackgroundObjectSlotCommand(s),
 
             _ => null
         };
