@@ -73,8 +73,7 @@ public sealed partial class YarnCommandBridge
             noiseRatio = 0.25f,
             blendIn = 0.04f,
             blendOut = 0.08f,
-            wait = false,
-            killTween = true
+            wait = false
         };
 
         Collect(spec);

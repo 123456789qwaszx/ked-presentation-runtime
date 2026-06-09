@@ -42,10 +42,6 @@ public sealed class SwayCommandSpecCharR : CharacterRigCommandSpecBase
 
     [Tooltip("흔들리는 시작 방향. true면 +방향부터, false면 -방향부터.")]
     public bool startPositive = true;
-
-    [Header("Options")]
-    [Tooltip("체크하면 기존 위치 관련 트윈을 끝내고 committed state에서 시작합니다.")]
-    public bool killTween = true;
 }
 
 public sealed class SwayCommandCharR : CommandBase
@@ -53,35 +49,30 @@ public sealed class SwayCommandCharR : CommandBase
     private readonly SwayCommandSpecCharR _spec;
 
     private RectTransform _rect;
-    private Tween _tween;
-    private float _originSwayRotationZ;
-    private float _currentSwayRotationZ;
+    private float _baseRotationZ;
+
     private bool _resolveAttempted;
-    private bool _canCommitFinalState;
+
+    private bool HasClaimedTarget { get; set; }
 
     public override bool WaitForCompletion => _spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
-    public SwayCommandCharR(SwayCommandSpecCharR spec) => _spec = spec;
+    public SwayCommandCharR(SwayCommandSpecCharR spec)
+    {
+        _spec = spec;
+    }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (_spec.killTween)
-            _rect.DOKill(true); // Finish previous motion so this command starts from a committed state.
-        
-        _tween?.Kill(false);
-        _tween = null;
-        _canCommitFinalState = true;
+        ClaimTarget();
 
         if (_spec.duration <= 0f || Mathf.Approximately(_spec.strength, 0f))
         {
-            SnapToOrigin();
-            _canCommitFinalState = false;
-            _rect = null;
-            _tween = null;
+            CommitFinalState();
             yield break;
         }
 
@@ -107,14 +98,11 @@ public sealed class SwayCommandCharR : CommandBase
         int segmentCount = pointCount - 1;
         int lastSegmentIndex = segmentCount - 1;
 
-        _tween = DOTween
+        Tween tween = DOTween
             .To(
                 () => 0f,
                 t =>
                 {
-                    if (!_canCommitFinalState || _rect == null)
-                        return;
-                    
                     float u = Mathf.Clamp01(t / totalDuration);
 
                     float pathT = u * segmentCount;
@@ -141,8 +129,7 @@ public sealed class SwayCommandCharR : CommandBase
                     float wave = Mathf.LerpUnclamped(from, to, shapedT);
                     float angleOffset = directionSign * wave * amplitude;
 
-                    _currentSwayRotationZ = _originSwayRotationZ + angleOffset;
-                    SetLocalEulerZ(_rect, _currentSwayRotationZ);
+                    SetLocalEulerZ(_rect, _baseRotationZ + angleOffset);
                 },
                 totalDuration,
                 totalDuration
@@ -150,74 +137,46 @@ public sealed class SwayCommandCharR : CommandBase
             .SetEase(Ease.Linear)
             .SetTarget(_rect)
             .SetUpdate(true)
-            .OnComplete(() =>
-            {
-                if (!_canCommitFinalState || _rect == null)
-                    return;
-
-                SnapToOrigin();
-                _canCommitFinalState = false;
-                _rect = null;
-                _tween = null;
-            });
+            .OnComplete(CommitFinalState);
 
         if (_spec.wait)
-            yield return _tween.WaitForCompletion();
+            yield return tween.WaitForCompletion();
     }
-    
+
     protected override void OnSkip(CommandRunScope scope)
     {
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (_rect == null)
-            return;
+        if (!HasClaimedTarget)
+            ClaimTarget();
 
-        SnapToOrigin();
-
-        _canCommitFinalState = false;
-        _rect = null;
-        _tween = null;
+        CommitFinalState();
     }
 
     protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
-    
-    protected override void OnCommandCompleted(CommandRunScope scope)
-    {
-        if (!_resolveAttempted)
-            ResolveRefs(scope);
-
-        if (!_canCommitFinalState || _rect == null)
-            return;
-
-        _tween?.Kill(false);
-        _rect.DOKill(false);
-
-        SnapToOrigin();
-
-        _canCommitFinalState = false;
-        _rect = null;
-        _tween = null;
-    }
 
     private void ResolveRefs(CommandRunScope scope)
     {
         _resolveAttempted = true;
 
-        CharacterRigRefs rigRefs =
-            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
-
-
-        _rect = rigRefs.GetRect(_spec.target);
-        _originSwayRotationZ = NormalizeAngle(_rect.localEulerAngles.z);
-        _currentSwayRotationZ = _originSwayRotationZ;
-        SetLocalEulerZ(_rect, _currentSwayRotationZ);
+        CharacterRigRefs rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
+        _rect = rig.GetRect(_spec.target);
     }
 
-    private void SnapToOrigin()
+    private void ClaimTarget()
     {
-        _currentSwayRotationZ = _originSwayRotationZ;
-        SetLocalEulerZ(_rect, _originSwayRotationZ);
+        _rect.DOKill(true);
+        _baseRotationZ = NormalizeAngle(_rect.localEulerAngles.z);
+
+        HasClaimedTarget = true;
+    }
+
+    private void CommitFinalState()
+    {
+        SetLocalEulerZ(_rect, _baseRotationZ);
+
+        HasClaimedTarget = false;
     }
 
     private static float GetWavePointWithAnticipation(

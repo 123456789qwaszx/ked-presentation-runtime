@@ -35,10 +35,6 @@ public sealed class WalkInPlaceCommandSpecCharR : CharacterRigCommandSpecBase
 
     [Tooltip("끝날 때 자연스럽게 원래 위치로 돌아오는 시간.")]
     public float blendOut = 0.08f;
-
-    [Header("Options")]
-    [Tooltip("체크하면 기존 위치 관련 트윈을 끝내고 committed state에서 시작합니다.")]
-    public bool killTween = true;
 }
 
 public sealed class WalkInPlaceCommandCharR : CommandBase
@@ -46,10 +42,11 @@ public sealed class WalkInPlaceCommandCharR : CommandBase
     private readonly WalkInPlaceCommandSpecCharR _spec;
 
     private RectTransform _rect;
-    private Tween _tween;
     private Vector2 _basePos;
+
     private bool _resolveAttempted;
-    private bool _canCommitFinalState;
+
+    private bool HasClaimedTarget { get; set; }
 
     public override bool WaitForCompletion => _spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
@@ -64,14 +61,7 @@ public sealed class WalkInPlaceCommandCharR : CommandBase
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (_rect == null)
-            yield break;
-
-        if (_spec.killTween)
-            _rect.DOKill(true); // Finish previous motion so this command starts from a committed state.
-
-        _basePos = _rect.anchoredPosition;
-        _canCommitFinalState = true;
+        ClaimTarget();
 
         if (_spec.duration <= 0f || _spec.stepsPerSecond <= 0f)
         {
@@ -79,14 +69,11 @@ public sealed class WalkInPlaceCommandCharR : CommandBase
             yield break;
         }
 
-        _tween = DOTween
+        Tween tween = DOTween
             .To(
                 () => 0f,
                 elapsed =>
                 {
-                    if (!_canCommitFinalState || _rect == null)
-                        return;
-
                     float phase = Mathf.Repeat(elapsed * _spec.stepsPerSecond, 1f);
                     float envelope = EvaluateEnvelope(elapsed, _spec.duration, _spec.blendIn, _spec.blendOut);
 
@@ -101,16 +88,10 @@ public sealed class WalkInPlaceCommandCharR : CommandBase
             .SetEase(Ease.Linear)
             .SetUpdate(true)
             .SetTarget(_rect)
-            .OnComplete(() =>
-            {
-                if (!_canCommitFinalState || _rect == null)
-                    return;
-
-                CommitFinalState();
-            });
+            .OnComplete(CommitFinalState);
 
         if (_spec.wait)
-            yield return _tween.WaitForCompletion();
+            yield return tween.WaitForCompletion();
     }
 
     protected override void OnSkip(CommandRunScope scope)
@@ -118,52 +99,35 @@ public sealed class WalkInPlaceCommandCharR : CommandBase
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (_rect == null)
-            return;
+        if (!HasClaimedTarget)
+            ClaimTarget();
 
         CommitFinalState();
     }
 
-    protected override void OnRollbackSeek(CommandRunScope scope)
-    {
-        OnSkip(scope);
-    }
-
-    protected override void OnCommandCompleted(CommandRunScope scope)
-    {
-        if (!_resolveAttempted)
-            ResolveRefs(scope);
-
-        if (!_canCommitFinalState || _rect == null)
-            return;
-
-        _tween?.Kill(false);
-        _rect.DOKill(false);
-
-        CommitFinalState();
-    }
+    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
 
     private void ResolveRefs(CommandRunScope scope)
     {
         _resolveAttempted = true;
 
-        CharacterRigRefs rigRefs =
-            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
+        CharacterRigRefs rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
+        _rect = rig.GetRect(_spec.target);
+    }
 
-        _rect = rigRefs.GetRect(_spec.target);
+    private void ClaimTarget()
+    {
+        _rect.DOKill(true);
+        _basePos = _rect.anchoredPosition;
 
-        if (_rect != null)
-            _basePos = _rect.anchoredPosition;
+        HasClaimedTarget = true;
     }
 
     private void CommitFinalState()
     {
-        if (_rect != null)
-            _rect.anchoredPosition = _basePos;
+        _rect.anchoredPosition = _basePos;
 
-        _canCommitFinalState = false;
-        _rect = null;
-        _tween = null;
+        HasClaimedTarget = false;
     }
 
     private static float HopHeight(float u, float height, float airWidth)

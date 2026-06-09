@@ -57,7 +57,10 @@ public sealed class SetOriginSizeCommandCharR : CommandBase
 
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
-    public SetOriginSizeCommandCharR(SetOriginSizeCommandSpecCharR spec, CharStageTuningSO globalTuning, RoleAnchorTuningDBSO roleTuningDb)
+    public SetOriginSizeCommandCharR(
+        SetOriginSizeCommandSpecCharR spec,
+        CharStageTuningSO globalTuning,
+        RoleAnchorTuningDBSO roleTuningDb)
     {
         _spec = spec;
         _globalTuning = globalTuning;
@@ -69,10 +72,8 @@ public sealed class SetOriginSizeCommandCharR : CommandBase
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (_rect == null)
-            yield break;
-
         Apply();
+        yield break;
     }
 
     protected override void OnSkip(CommandRunScope scope)
@@ -80,22 +81,13 @@ public sealed class SetOriginSizeCommandCharR : CommandBase
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (_rect == null)
-            return;
-
         Apply();
     }
 
-    protected override void OnRollbackSeek(CommandRunScope scope)
-    {
-        OnSkip(scope);
-    }
-
+    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
+    
     private void Apply()
     {
-        if (_rect == null)
-            return;
-
         if (_spec.overrideScale)
         {
             _rect.localScale = _spec.scaleOverride;
@@ -118,13 +110,8 @@ public sealed class SetOriginSizeCommandCharR : CommandBase
 
         _rect.localScale = new Vector3(
             scale,
-            scale * SafeMultiplier(_spec.yMultiplier),
-            scale * SafeMultiplier(_spec.zMultiplier));
-    }
-
-    private static float SafeMultiplier(float value)
-    {
-        return value <= 0f ? 1f : value;
+            scale * _spec.yMultiplier,
+            scale * _spec.zMultiplier);
     }
 
     private void ResolveRefs(CommandRunScope scope)

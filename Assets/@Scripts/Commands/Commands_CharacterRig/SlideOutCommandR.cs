@@ -21,10 +21,6 @@ public sealed class SlideOutCommandSpecCharR : CharacterRigCommandSpecBase
     [Header("Juice (launch kick at the start)")]
     [Tooltip("0이면 심심한 SlideOut. 8~20 정도가 예쁘게 튐.")]
     public float punch = 14f;
-
-    [Header("Options")]
-    [Tooltip("체크하면 기존 위치 관련 트윈을 끝내고 committed state에서 시작합니다.")]
-    public bool killTween = true;
 }
 
 public sealed class SlideOutCommandCharR : CommandBase
@@ -32,52 +28,47 @@ public sealed class SlideOutCommandCharR : CommandBase
     private readonly SlideOutCommandSpecCharR _spec;
 
     private RectTransform _rect;
-    private Tween _tween;
     private Vector2 _startPos;
+    private Vector2 _endPos;
+
     private bool _resolveAttempted;
-    private bool _canCommitFinalState;
+
+    private bool HasClaimedTarget { get; set; }
 
     public override bool WaitForCompletion => _spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
-    public SlideOutCommandCharR(SlideOutCommandSpecCharR spec) => _spec = spec;
+    public SlideOutCommandCharR(SlideOutCommandSpecCharR spec)
+    {
+        _spec = spec;
+    }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (_spec.killTween)
-            _rect.DOKill(true); // Finish previous motion so this command starts from a committed state.
-        
-        _canCommitFinalState = true;
-
-        Vector2 start = _startPos;
-        Vector2 dir = GetDir(_spec.to);
-        Vector2 end = start + dir * _spec.distance;
+        ClaimTarget();
 
         if (_spec.duration <= 0f)
         {
-            _rect.anchoredPosition = end;
-            _canCommitFinalState = false;
-            _rect = null;
-            _tween = null;
+            CommitFinalState();
             yield break;
         }
+
+        Vector2 start = _startPos;
+        Vector2 end = _endPos;
 
         Vector2 slideDir = end - start;
         slideDir = slideDir.sqrMagnitude > 0f
             ? slideDir.normalized
-            : dir;
-        
-        _tween = DOTween
+            : GetDir(_spec.to);
+
+        Tween tween = DOTween
             .To(
                 () => 0f,
                 t =>
                 {
-                    if (!_canCommitFinalState || _rect == null)
-                        return;
-                    
                     float e = DOVirtual.EasedValue(0f, 1f, t, _spec.ease);
                     Vector2 basePos = Vector2.LerpUnclamped(start, end, e);
 
@@ -92,19 +83,10 @@ public sealed class SlideOutCommandCharR : CommandBase
             .SetEase(Ease.Linear)
             .SetUpdate(true)
             .SetTarget(_rect)
-            .OnComplete(() =>
-            {
-                if (!_canCommitFinalState || _rect == null)
-                    return;
-
-                _rect.anchoredPosition = end;
-                _canCommitFinalState = false;
-                _rect = null;
-                _tween = null;
-            });
+            .OnComplete(CommitFinalState);
 
         if (_spec.wait)
-            yield return _tween.WaitForCompletion();
+            yield return tween.WaitForCompletion();
     }
 
     protected override void OnSkip(CommandRunScope scope)
@@ -112,44 +94,37 @@ public sealed class SlideOutCommandCharR : CommandBase
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (_rect == null)
-            return;
+        if (!HasClaimedTarget)
+            ClaimTarget();
 
-        _rect.anchoredPosition = _startPos + GetDir(_spec.to) * _spec.distance;
-
-        _canCommitFinalState = false;
-        _rect = null;
-        _tween = null;
+        CommitFinalState();
     }
 
     protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
-    
-    protected override void OnCommandCompleted(CommandRunScope scope)
-    {
-        if (!_resolveAttempted)
-            ResolveRefs(scope);
-
-        if (!_canCommitFinalState || _rect == null)
-            return;
-
-        _tween?.Kill(false);
-        _rect.DOKill(false);
-        _rect.anchoredPosition = _startPos + GetDir(_spec.to) * _spec.distance;
-
-        _canCommitFinalState = false;
-        _rect = null;
-        _tween = null;
-    }
 
     private void ResolveRefs(CommandRunScope scope)
     {
         _resolveAttempted = true;
 
-        CharacterRigRefs rigRefs =
-            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
+        CharacterRigRefs rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
+        _rect = rig.GetRect(_spec.target);
+    }
 
-        _rect = rigRefs.GetRect(_spec.target);
+    private void ClaimTarget()
+    {
+        _rect.DOKill(true);
+
         _startPos = _rect.anchoredPosition;
+        _endPos = _startPos + GetDir(_spec.to) * _spec.distance;
+
+        HasClaimedTarget = true;
+    }
+
+    private void CommitFinalState()
+    {
+        _rect.anchoredPosition = _endPos;
+
+        HasClaimedTarget = false;
     }
 
     private static Vector2 GetDir(CharRigDirection from) => from switch

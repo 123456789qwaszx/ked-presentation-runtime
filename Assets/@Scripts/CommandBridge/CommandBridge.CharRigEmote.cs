@@ -94,8 +94,7 @@ public sealed partial class YarnCommandBridge : InlineEventMarkupHandler.IInline
             duration: 0.8f,
             ease: Ease.OutBack,
             punch: 0f,
-            wait: true,
-            killTween: true));
+            wait: true));
     }
 
     // <<emoji_shock igna 19>>
@@ -306,8 +305,7 @@ public sealed partial class YarnCommandBridge : InlineEventMarkupHandler.IInline
         float duration,
         Ease ease,
         float punch,
-        bool wait,
-        bool killTween)
+        bool wait)
     {
         return new SlideInCommandSpecCharR
         {
@@ -321,7 +319,6 @@ public sealed partial class YarnCommandBridge : InlineEventMarkupHandler.IInline
             punch = punch,
 
             wait = wait,
-            killTween = killTween
         };
     }
 
@@ -396,8 +393,7 @@ public sealed partial class YarnCommandBridge : InlineEventMarkupHandler.IInline
             anticipation = 0f,
             startPositive = true,
 
-            wait = wait,
-            killTween = true
+            wait = wait
         };
     }
 
@@ -428,8 +424,7 @@ public sealed partial class YarnCommandBridge : InlineEventMarkupHandler.IInline
             blendIn = 0.04f,
             blendOut = 0.08f,
 
-            wait = wait,
-            killTween = true
+            wait = wait
         };
     }
 }

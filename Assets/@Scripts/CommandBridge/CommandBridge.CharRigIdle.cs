@@ -123,8 +123,7 @@ public sealed partial class YarnCommandBridge
             usePulse = true,
             pulseInterval = pulseInterval,
             pulseDuration = pulseDuration,
-            wait = false,
-            killTween = true
+            wait = false
         };
 
         Collect(spec);
@@ -147,8 +146,7 @@ public sealed partial class YarnCommandBridge
             sideSway = 0.3f,
             blendIn = 0.08f,
             blendOut = 0.08f,
-            wait = false,
-            killTween = true
+            wait = false
         };
 
         Collect(spec);
