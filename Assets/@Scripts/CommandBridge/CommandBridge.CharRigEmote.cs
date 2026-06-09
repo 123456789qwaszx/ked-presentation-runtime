@@ -48,7 +48,7 @@ public sealed partial class YarnCommandBridge : InlineEventMarkupHandler.IInline
             xyScale: 1.18f,
             duration: 0.28f,
             ease: Ease.OutBack,
-            wait: true,
+            wait: false,
             killTween: true));
 
         Collect(BuildEmojiScaleToSpec(
@@ -56,13 +56,13 @@ public sealed partial class YarnCommandBridge : InlineEventMarkupHandler.IInline
             xyScale: 1.0f,
             duration: 0.52f,
             ease: Ease.OutCubic,
-            wait: true,
+            wait: false,
             killTween: true));
         
-        // Collect(new WaitCommandSpec
-        // {
-        //     duration = 0.5f
-        // });
+        Collect(new WaitCommandSpec
+        {
+            duration = 0.5f
+        });
         
         Collect(new FadeOutCommandSpecCharR
         {
@@ -376,7 +376,6 @@ public sealed partial class YarnCommandBridge : InlineEventMarkupHandler.IInline
             anticipation = 0f,
 
             wait = wait,
-            killTween = true
         };
     }
 

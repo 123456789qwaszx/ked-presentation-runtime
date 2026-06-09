@@ -15,16 +15,12 @@ public sealed class JoltCommandSpec : CharacterRigCommandSpecBase
     public CharRigDirection direction = CharRigDirection.Right;
     public float duration = 0.88f;
 
-    [Min(1)]
-    public int taps = 3;
+    [Min(1)] public int taps = 3;
 
     public float damping = 6f;
 
     [Header("Style")]
     public float anticipation = 3f;
-
-    [Header("Options")]
-    public bool killTween = true;
 }
 
 public sealed class JoltCommand : CommandBase
@@ -32,14 +28,15 @@ public sealed class JoltCommand : CommandBase
     private readonly JoltCommandSpec _spec;
 
     private RectTransform _rect;
-    private Tween _tween;
-    private Vector2 _destPos;
+    private Vector2 _basePos;
+    
     private bool _resolveAttempted;
-    private bool _canCommitFinalState;
+    
+    private bool HasClaimedTarget { get; set; }
 
     public override bool WaitForCompletion => _spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
-
+    
     public JoltCommand(JoltCommandSpec spec)
     {
         _spec = spec;
@@ -50,22 +47,14 @@ public sealed class JoltCommand : CommandBase
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (_rect == null)
-            yield break;
-
-        if (_spec.killTween)
-            _rect.DOKill(true); // Finish previous motion so this command starts from a committed state.
-
-        _canCommitFinalState = true;
+        _rect.DOKill(true);
+        HasClaimedTarget = true;
 
         if (_spec.duration <= 0f || Mathf.Approximately(_spec.strength, 0f))
         {
-            _rect.anchoredPosition = _destPos;
-            ClearRuntimeRefs();
+            CommitFinalState();
             yield break;
         }
-
-        Vector2 rect = _destPos;
 
         float amplitude = Mathf.Abs(_spec.strength);
         int taps = Mathf.Max(1, _spec.taps);
@@ -74,14 +63,11 @@ public sealed class JoltCommand : CommandBase
 
         Vector2 dir = GetSignedDirection(_spec.direction);
 
-        _tween = DOTween
+        Tween tween = DOTween
             .To(
                 () => 0f,
                 t =>
                 {
-                    if (!_canCommitFinalState || _rect == null)
-                        return;
-
                     float u = Mathf.Clamp01(t);
 
                     float antiTerm = 0f;
@@ -98,7 +84,7 @@ public sealed class JoltCommand : CommandBase
 
                     float scalar = antiTerm + (amplitude * decay * osc * settleEnvelope);
 
-                    _rect.anchoredPosition = rect + dir * scalar;
+                    _rect.anchoredPosition = _basePos + dir * scalar;
                 },
                 1f,
                 _spec.duration
@@ -106,17 +92,10 @@ public sealed class JoltCommand : CommandBase
             .SetEase(Ease.Linear)
             .SetUpdate(true)
             .SetTarget(_rect)
-            .OnComplete(() =>
-            {
-                if (!_canCommitFinalState || _rect == null)
-                    return;
-
-                _rect.anchoredPosition = rect;
-                ClearRuntimeRefs();
-            });
+            .OnComplete(CommitFinalState);
 
         if (_spec.wait)
-            yield return _tween.WaitForCompletion();
+            yield return tween.WaitForCompletion();
     }
 
     protected override void OnSkip(CommandRunScope scope)
@@ -124,32 +103,13 @@ public sealed class JoltCommand : CommandBase
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (_rect == null)
-            return;
-
-        _rect.anchoredPosition = _destPos;
-        ClearRuntimeRefs();
+        if (!HasClaimedTarget)
+            _rect.DOKill(true);
+        
+        CommitFinalState();
     }
 
-    protected override void OnRollbackSeek(CommandRunScope scope)
-    {
-        OnSkip(scope);
-    }
-
-    protected override void OnCommandCompleted(CommandRunScope scope)
-    {
-        if (!_resolveAttempted)
-            ResolveRefs(scope);
-
-        if (!_canCommitFinalState || _rect == null)
-            return;
-
-        _tween?.Kill(false);
-        _rect.DOKill(false);
-        _rect.anchoredPosition = _destPos;
-
-        ClearRuntimeRefs();
-    }
+    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
     
     private void ResolveRefs(CommandRunScope scope)
     {
@@ -158,14 +118,13 @@ public sealed class JoltCommand : CommandBase
         CharacterRigRefs rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
 
         _rect = rig.GetRect(_spec.target);
-        _destPos = _rect.anchoredPosition;
+        _basePos = _rect.anchoredPosition;
     }
-
-    private void ClearRuntimeRefs()
+    
+    private void CommitFinalState()
     {
-        _canCommitFinalState = false;
-        _rect = null;
-        _tween = null;
+        _rect.DOKill(false);
+        _rect.anchoredPosition = _basePos;
     }
 
     private static Vector2 GetSignedDirection(CharRigDirection direction)
