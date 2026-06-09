@@ -25,8 +25,6 @@ public sealed class RegisterBackgroundResponseBindingCommand : CommandBase
     private readonly PresentationResponseRig _responseRig;
     private readonly RegisterBackgroundResponseBindingCommandSpec _spec;
 
-    public override bool WaitForCompletion => true;
-
     public RegisterBackgroundResponseBindingCommand(
         RegisterBackgroundResponseBindingCommandSpec spec,
         PresentationResponseRig responseRig)

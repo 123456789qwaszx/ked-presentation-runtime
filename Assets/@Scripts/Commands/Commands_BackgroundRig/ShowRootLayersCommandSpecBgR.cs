@@ -22,8 +22,6 @@ public sealed class ShowRootLayersCommandBgR : CommandBase
     private readonly List<RectTransform> _targets = new();
     private bool _resolveAttempted;
 
-    protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
-
     public ShowRootLayersCommandBgR(ShowRootLayersCommandSpecBgR spec)
     {
         _spec = spec;

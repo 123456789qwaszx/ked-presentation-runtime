@@ -36,8 +36,6 @@ public sealed class SetBackgroundSpriteCommandBgR : CommandBase
     private Image _image;
     private bool _resolveAttempted;
 
-    protected override SkipPolicy SkipPolicy => SkipPolicy.ExecuteEvenIfSkipping;
-
     public SetBackgroundSpriteCommandBgR(
         SetBackgroundSpriteCommandSpecBgR spec,
         BackgroundSpriteResolver resolver)

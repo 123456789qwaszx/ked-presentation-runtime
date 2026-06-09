@@ -35,7 +35,6 @@ public sealed class FadeOutCommandBgR : CommandBase
     private bool HasClaimedTarget { get; set; }
 
     public override bool WaitForCompletion => _spec.wait;
-    protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
     public FadeOutCommandBgR(FadeOutCommandSpecBgR spec)
     {

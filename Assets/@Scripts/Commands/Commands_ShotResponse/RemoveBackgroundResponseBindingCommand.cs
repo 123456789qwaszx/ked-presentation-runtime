@@ -22,8 +22,6 @@ public sealed class RemoveBackgroundResponseBindingCommand : CommandBase
     private readonly RemoveBackgroundResponseBindingCommandSpec _spec;
     private readonly PresentationResponseRig _responseRig;
 
-    public override bool WaitForCompletion => true;
-
     public RemoveBackgroundResponseBindingCommand(
         RemoveBackgroundResponseBindingCommandSpec spec,
         PresentationResponseRig responseRig)

@@ -50,8 +50,6 @@ public sealed class ApplyTrackOffsetCommandCharR : CommandBase
 
     private bool _resolveAttempted;
 
-    protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
-
     public ApplyTrackOffsetCommandCharR(ApplyTrackOffsetCommandSpecCharR spec)
     {
         _spec = spec;

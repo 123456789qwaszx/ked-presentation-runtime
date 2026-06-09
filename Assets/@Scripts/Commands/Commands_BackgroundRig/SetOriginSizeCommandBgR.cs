@@ -47,8 +47,6 @@ public sealed class SetOriginSizeCommandBgR : CommandBase
     private RectTransform _rect;
     private bool _resolveAttempted;
 
-    protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
-
     public SetOriginSizeCommandBgR(SetOriginSizeCommandSpecBgR spec)
     {
         _spec = spec;

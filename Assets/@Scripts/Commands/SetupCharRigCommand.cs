@@ -45,13 +45,10 @@ public sealed class SetupCharRigCommand : CommandBase
 {
     // Resources 내 머터리얼 경로. (예: Assets/Resources/VisualEffects/CharRigVisualEffect.mat)
     private const string VisualEffectMaterialPath = "VisualEffects/M_UICharacterVisual";
-
     
     private readonly CharRigSlotResolver _slotResolver;
     private readonly CharacterRigBuilder _rigBuilder;
     private readonly SetupCharRigCommandSpec _spec;
-
-    public override bool WaitForCompletion => true;
 
     public SetupCharRigCommand(
         CharRigSlotResolver slotResolver,

@@ -46,7 +46,6 @@ public sealed class SetPortraitCrossfadeCommandCharR : CommandBase
     private bool HasClaimedTarget { get; set; }
 
     public override bool WaitForCompletion => _spec.wait;
-    protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
     public SetPortraitCrossfadeCommandCharR(
         SetPortraitCrossfadeCommandSpecCharR spec,

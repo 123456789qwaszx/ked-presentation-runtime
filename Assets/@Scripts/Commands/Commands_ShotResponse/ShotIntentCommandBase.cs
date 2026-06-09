@@ -25,7 +25,6 @@ public abstract class ShotIntentCommandBase<TSpec> : CommandBase
     private bool HasClaimedRig { get; set; }
 
     public override bool WaitForCompletion => spec.wait;
-    protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
     protected ShotIntentCommandBase(PresentationResponseRig rig, TSpec spec)
     {
@@ -37,8 +36,7 @@ public abstract class ShotIntentCommandBase<TSpec> : CommandBase
     {
         ClaimRig(scope);
 
-        if (spec.duration <= 0f ||
-            PresentationShotIntentMath.ApproximatelyEqual(_fromState, _toState))
+        if (spec.duration <= 0f || PresentationShotIntentMath.ApproximatelyEqual(_fromState, _toState))
         {
             CommitFinalState();
             yield break;

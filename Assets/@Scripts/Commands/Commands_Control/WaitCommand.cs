@@ -17,7 +17,6 @@ public sealed class WaitCommand : CommandBase
     private readonly WaitCommandSpec _spec;
 
     public override bool WaitForCompletion => true;
-    protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
     public WaitCommand(WaitCommandSpec spec)
     {

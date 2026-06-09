@@ -35,7 +35,6 @@ public sealed class JoltCommand : CommandBase
     private bool HasClaimedTarget { get; set; }
 
     public override bool WaitForCompletion => _spec.wait;
-    protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
     
     public JoltCommand(JoltCommandSpec spec)
     {

@@ -25,8 +25,6 @@ public sealed class RegisterCharacterResponseBindingCommand : CommandBase
     private readonly RegisterCharacterResponseBindingCommandSpec _spec;
     private readonly PresentationResponseRig _responseRig;
 
-    public override bool WaitForCompletion => true;
-
     public RegisterCharacterResponseBindingCommand(
         RegisterCharacterResponseBindingCommandSpec spec,
         PresentationResponseRig responseRig)

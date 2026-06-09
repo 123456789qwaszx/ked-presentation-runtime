@@ -47,8 +47,6 @@ public sealed class SetupBackgroundRigCommand : CommandBase
     private readonly BackgroundRigBuilder _rigBuilder;
     private readonly SetupBackgroundRigCommandSpec _spec;
 
-    public override bool WaitForCompletion => true;
-
     public SetupBackgroundRigCommand(
     SetupBackgroundRigCommandSpec spec,
         BackgroundRigSlotResolver slotResolver,

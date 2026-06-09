@@ -46,7 +46,6 @@ public sealed class HoldSignalCommand : CommandBase
     }
 
     public override bool WaitForCompletion => true;
-    protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
@@ -84,8 +83,6 @@ public sealed class HoldSignalCommand : CommandBase
             yield return null;
         }
     }
-    
-    protected override void OnSkip(CommandRunScope scope) { }
     
     private bool IsSatisfied() => _consumeSignal ? _latch.Consume(_key) : _latch.IsLatched(_key);
 }

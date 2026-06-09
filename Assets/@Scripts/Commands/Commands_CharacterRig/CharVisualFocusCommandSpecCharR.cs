@@ -69,7 +69,6 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
     private bool HasClaimedController { get; set; }
 
     public override bool WaitForCompletion => _spec.wait;
-    protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
     public CharVisualFocusCommandCharR(CharVisualFocusCommandSpecCharR spec)
     {

@@ -13,7 +13,6 @@ public sealed class StopAllSfxCommand : CommandBase
     private readonly AudioSystem _audio;
 
     protected override SkipPolicy SkipPolicy => SkipPolicy.ExecuteEvenIfSkipping;
-    public override bool WaitForCompletion => false;
 
     public StopAllSfxCommand(AudioSystem audio)
     {

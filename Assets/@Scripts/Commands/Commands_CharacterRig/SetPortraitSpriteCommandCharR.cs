@@ -33,8 +33,6 @@ public sealed class SetPortraitSpriteCommandCharR : CommandBase
     private Image _image;
     private bool _resolveAttempted;
 
-    protected override SkipPolicy SkipPolicy => SkipPolicy.ExecuteEvenIfSkipping;
-
     public SetPortraitSpriteCommandCharR(SetPortraitSpriteCommandSpecCharR spec, PortraitResolver resolver)
     {
         _spec = spec;

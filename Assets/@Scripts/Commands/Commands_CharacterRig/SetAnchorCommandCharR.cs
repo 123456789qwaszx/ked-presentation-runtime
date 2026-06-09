@@ -46,8 +46,6 @@ public sealed class SetAnchorCommandCharR : CommandBase
     private RectTransform _rect;
     private bool _resolveAttempted;
 
-    protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
-
     public SetAnchorCommandCharR(SetAnchorCommandSpecCharR spec, CharStageTuningSO globalTuning, RoleAnchorTuningDBSO roleTuningDb)
     {
         _spec = spec;

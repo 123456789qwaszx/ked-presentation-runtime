@@ -27,8 +27,6 @@ public sealed class CastCharacterCommand : CommandBase
 {
     private readonly CastCharacterCommandSpec _spec;
 
-    protected override SkipPolicy SkipPolicy => SkipPolicy.ExecuteEvenIfSkipping;
-
     public CastCharacterCommand(CastCharacterCommandSpec spec)
     {
         _spec = spec;

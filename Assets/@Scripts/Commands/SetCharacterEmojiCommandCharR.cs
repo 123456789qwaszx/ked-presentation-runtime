@@ -70,7 +70,6 @@ public sealed class SetCharacterEmojiCommandCharR : CommandBase
     private bool _isHideRequest;
 
     public override bool WaitForCompletion => _spec.wait;
-    protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
     public SetCharacterEmojiCommandCharR(
         SetCharacterEmojiCommandSpecCharR spec,

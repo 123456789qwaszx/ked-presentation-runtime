@@ -55,8 +55,6 @@ public sealed class SetOriginSizeCommandCharR : CommandBase
     private RectTransform _rect;
     private bool _resolveAttempted;
 
-    protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
-
     public SetOriginSizeCommandCharR(
         SetOriginSizeCommandSpecCharR spec,
         CharStageTuningSO globalTuning,

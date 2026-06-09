@@ -16,7 +16,6 @@ public sealed class StopBgmCommand : CommandBase
     private readonly float       _fadeDuration;
 
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
-    public override bool WaitForCompletion => false;
 
     public StopBgmCommand(AudioSystem audio, float fadeDuration = 1f)
     {

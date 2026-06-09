@@ -29,8 +29,6 @@ public sealed class SetSpriteCommandCharR : CommandBase
     private Image _image;
     private bool _resolveAttempted;
 
-    protected override SkipPolicy SkipPolicy => SkipPolicy.ExecuteEvenIfSkipping;
-
     public SetSpriteCommandCharR(SetSpriteCommandSpecCharR spec)
     {
         _spec = spec;

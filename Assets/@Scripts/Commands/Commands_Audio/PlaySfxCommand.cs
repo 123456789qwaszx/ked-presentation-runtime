@@ -19,7 +19,6 @@ public sealed class PlaySfxCommand : CommandBase
     private readonly AudioClip   _clip;
 
     protected override SkipPolicy SkipPolicy => SkipPolicy.Ignore;
-    public override bool WaitForCompletion => false;
 
     public PlaySfxCommand(AudioSystem audio, AudioClip clip)
     {

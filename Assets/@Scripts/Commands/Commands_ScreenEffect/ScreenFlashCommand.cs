@@ -64,7 +64,6 @@ public sealed class ScreenFlashCommand : CommandBase
     private bool HasClaimedController { get; set; }
 
     public override bool WaitForCompletion => _spec.wait;
-    protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
     public ScreenFlashCommand(ScreenFlashCommandSpec spec, ScreenFlashPresetDBSO presetDb)
     {

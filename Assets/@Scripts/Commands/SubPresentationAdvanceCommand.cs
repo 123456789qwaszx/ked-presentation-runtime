@@ -16,8 +16,6 @@ public sealed class SubPresentationAdvanceCommand : CommandBase
 {
     private readonly VNSideRunnerSyncHub _syncHub;
 
-    public override bool WaitForCompletion => false;
-
     public SubPresentationAdvanceCommand(VNSideRunnerSyncHub syncHub)
     {
         _syncHub = syncHub;
@@ -30,7 +28,7 @@ public sealed class SubPresentationAdvanceCommand : CommandBase
     }
 
     protected override void OnSkip(CommandRunScope scope) => Apply();
-    protected override void OnRollbackSeek(CommandRunScope scope) => Apply();
+    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
 
     private void Apply()
     {

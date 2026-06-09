@@ -48,12 +48,9 @@ public sealed class VerticalStripWipeCommandSpec : CommandSpecBase
 
     [Header("Tween")]
     [Tooltip("0 이하이면 stripDelay와 stripFillDuration으로 계산된 전체 시간을 사용합니다.")]
-    public float duration = 0f;
+    public float duration = 0.4f;
 
     public Ease ease = Ease.Linear;
-
-    [Header("Options")]
-    public bool disableWhenClear = true;
 }
 
 public sealed class VerticalStripWipeCommand : CommandBase
@@ -70,7 +67,6 @@ public sealed class VerticalStripWipeCommand : CommandBase
     private bool HasClaimedTarget { get; set; }
 
     public override bool WaitForCompletion => _spec.wait;
-    protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
     public VerticalStripWipeCommand(VerticalStripWipeCommandSpec spec)
     {
@@ -134,11 +130,10 @@ public sealed class VerticalStripWipeCommand : CommandBase
     {
         _resolveAttempted = true;
 
-        IPresentationTransitionSlotProvider transitionSlotProvider =
+        IPresentationTransitionSlotProvider transitionSlotProvider = 
             UIManager.Instance.GetUI<PresentationUIRoot>();
-
+        
         RectTransform rect = transitionSlotProvider.VerticalStripWipe;
-
         _graphic = rect.GetComponent<VerticalStripWipeGraphic>();
     }
 
@@ -164,7 +159,7 @@ public sealed class VerticalStripWipeCommand : CommandBase
 
         _graphic.Progress01 = _finalProgress;
 
-        if (_spec.disableWhenClear && _finalProgress <= 0f)
+        if (_finalProgress <= 0f)
             _graphic.gameObject.SetActive(false);
 
         HasClaimedTarget = false;

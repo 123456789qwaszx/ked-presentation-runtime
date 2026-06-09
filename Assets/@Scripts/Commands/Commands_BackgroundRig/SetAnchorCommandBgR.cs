@@ -43,8 +43,6 @@ public sealed class SetAnchorCommandBgR : CommandBase
     private RectTransform _rect;
     private bool _resolveAttempted;
 
-    protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
-
     public SetAnchorCommandBgR(SetAnchorCommandSpecBgR spec)
     {
         _spec = spec;

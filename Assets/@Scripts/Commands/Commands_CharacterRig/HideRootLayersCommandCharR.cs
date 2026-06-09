@@ -24,8 +24,6 @@ public sealed class HideRootLayersCommandCharR : CommandBase
     private readonly List<RectTransform> _targets = new();
     private bool _resolveAttempted;
 
-    protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
-
     public HideRootLayersCommandCharR(HideRootLayersCommandSpecCharR spec)
     {
         _spec = spec;

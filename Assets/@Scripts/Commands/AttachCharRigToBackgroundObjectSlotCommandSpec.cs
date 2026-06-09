@@ -38,10 +38,7 @@ public sealed class AttachCharRigToBackgroundObjectSlotCommand : CommandBase
 {
     private readonly AttachCharRigToBackgroundObjectSlotCommandSpec _spec;
 
-    public override bool WaitForCompletion => true;
-
-    public AttachCharRigToBackgroundObjectSlotCommand(
-        AttachCharRigToBackgroundObjectSlotCommandSpec spec)
+    public AttachCharRigToBackgroundObjectSlotCommand(AttachCharRigToBackgroundObjectSlotCommandSpec spec)
     {
         _spec = spec;
     }
@@ -57,55 +54,25 @@ public sealed class AttachCharRigToBackgroundObjectSlotCommand : CommandBase
 
     private void Apply(CommandRunScope scope)
     {
-        AttachCharRigToBackgroundObjectSlotCommandSpec spec = _spec;
 
-        if (scope == null)
+        if (!scope.characterRigs.TryGetRig(_spec.charRigKey, out CharacterRigRefs charRefs))
             return;
 
-        if (string.IsNullOrEmpty(spec.charRigKey))
-        {
-            Debug.LogWarning("[AttachCharRigToBackgroundObjectSlotCommand] charRigKey is empty.");
-            return;
-        }
-
-        if (string.IsNullOrEmpty(spec.backgroundRigKey))
-        {
-            Debug.LogWarning("[AttachCharRigToBackgroundObjectSlotCommand] backgroundRigKey is empty.");
-            return;
-        }
-
-        if (!scope.characterRigs.TryGetRig(spec.charRigKey, out CharacterRigRefs charRefs))
-            return;
-
-        if (!scope.backgroundRigs.TryGetRig(spec.backgroundRigKey, out BackgroundRigRefs backgroundRefs))
+        if (!scope.backgroundRigs.TryGetRig(_spec.backgroundRigKey, out BackgroundRigRefs backgroundRefs))
             return;
 
         RectTransform childRoot = charRefs.RigRoot;
-        if (childRoot == null)
-        {
-            Debug.LogWarning($"[AttachCharRigToBackgroundObjectSlotCommand] Character rig root is null. charRigKey='{spec.charRigKey}'.");
-            return;
-        }
-
-        RectTransform parent = backgroundRefs.GetRect(spec.parentTarget);
-        if (parent == null)
-        {
-            Debug.LogWarning(
-                $"[AttachCharRigToBackgroundObjectSlotCommand] Background parent target is null. " +
-                $"backgroundRigKey='{spec.backgroundRigKey}', parentTarget='{spec.parentTarget}'.");
-            return;
-        }
-
+        RectTransform parent = backgroundRefs.GetRect(_spec.parentTarget);
         RectTransform restoreParent = childRoot.parent as RectTransform;
 
         scope.backgroundRigs.RegisterExternalChild(
-            spec.backgroundRigKey,
+            _spec.backgroundRigKey,
             childRoot,
             restoreParent);
 
-        childRoot.SetParent(parent, spec.worldPositionStays);
+        childRoot.SetParent(parent, _spec.worldPositionStays);
 
-        if (spec.setAsLastSibling)
+        if (_spec.setAsLastSibling)
             childRoot.SetAsLastSibling();
     }
 }

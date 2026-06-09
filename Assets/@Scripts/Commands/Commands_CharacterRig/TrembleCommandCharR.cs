@@ -63,7 +63,6 @@ public sealed class TrembleCommandCharR : CommandBase
     private bool HasClaimedTarget { get; set; }
 
     public override bool WaitForCompletion => _spec.wait;
-    protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
     public TrembleCommandCharR(TrembleCommandSpecCharR spec)
     {

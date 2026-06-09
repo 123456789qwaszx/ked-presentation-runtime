@@ -23,8 +23,6 @@ public sealed class ShowRootLayersCommandCharR : CommandBase
     private readonly List<RectTransform> _targets = new();
     private bool _resolveAttempted;
 
-    protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
-
     public ShowRootLayersCommandCharR(ShowRootLayersCommandSpecCharR spec)
     {
         _spec = spec;

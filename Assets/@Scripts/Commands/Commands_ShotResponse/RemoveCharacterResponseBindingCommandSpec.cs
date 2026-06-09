@@ -22,8 +22,6 @@ public sealed class RemoveCharacterResponseBindingCommand : CommandBase
     private readonly RemoveCharacterResponseBindingCommandSpec _spec;
     private readonly PresentationResponseRig _responseRig;
 
-    public override bool WaitForCompletion => true;
-
     public RemoveCharacterResponseBindingCommand(
         RemoveCharacterResponseBindingCommandSpec spec,
         PresentationResponseRig responseRig)

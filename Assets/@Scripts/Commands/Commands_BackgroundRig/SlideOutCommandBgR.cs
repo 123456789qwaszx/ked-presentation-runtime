@@ -36,7 +36,6 @@ public sealed class SlideOutCommandBgR : CommandBase
     private bool HasClaimedTarget { get; set; }
 
     public override bool WaitForCompletion => _spec.wait;
-    protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
     public SlideOutCommandBgR(SlideOutCommandSpecBgR spec)
     {

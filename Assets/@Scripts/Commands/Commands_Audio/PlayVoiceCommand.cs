@@ -19,7 +19,6 @@ public sealed class PlayVoiceCommand : CommandBase
     private readonly AudioClip   _clip;
 
     protected override SkipPolicy SkipPolicy => SkipPolicy.Ignore;
-    public override bool WaitForCompletion => false;
 
     public PlayVoiceCommand(AudioSystem audio, AudioClip clip)
     {

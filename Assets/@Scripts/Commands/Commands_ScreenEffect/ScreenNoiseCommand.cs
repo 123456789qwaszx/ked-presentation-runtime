@@ -67,7 +67,6 @@ public sealed class ScreenNoiseCommand : CommandBase
     private bool HasClaimedController { get; set; }
 
     public override bool WaitForCompletion => _spec.wait;
-    protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
     public ScreenNoiseCommand(ScreenNoiseCommandSpec spec, ScreenNoisePresetDBSO presetDb)
     {

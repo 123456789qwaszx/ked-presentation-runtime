@@ -22,8 +22,6 @@ public sealed class HideRootLayersCommandBgR : CommandBase
     private readonly List<RectTransform> _targets = new();
     private bool _resolveAttempted;
 
-    protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
-
     public HideRootLayersCommandBgR(HideRootLayersCommandSpecBgR spec)
     {
         _spec = spec;

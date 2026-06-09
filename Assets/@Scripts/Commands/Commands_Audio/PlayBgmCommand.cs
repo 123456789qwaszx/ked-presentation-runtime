@@ -24,7 +24,6 @@ public sealed class PlayBgmCommand : CommandBase
     private readonly float       _fadeDuration;
 
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
-    public override bool WaitForCompletion => false;
 
     public PlayBgmCommand(AudioSystem audio, AudioClip clip, float fadeDuration = 1f)
     {

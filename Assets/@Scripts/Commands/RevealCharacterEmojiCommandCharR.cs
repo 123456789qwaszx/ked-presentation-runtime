@@ -51,7 +51,6 @@ public sealed class RevealCharacterEmojiCommandCharR : CommandBase
     private Ease _ease;
 
     public override bool WaitForCompletion => _spec.wait;
-    protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
     public RevealCharacterEmojiCommandCharR(RevealCharacterEmojiCommandSpecCharR spec)
     {
@@ -155,8 +154,7 @@ public sealed class RevealCharacterEmojiCommandCharR : CommandBase
     {
         _resolveAttempted = true;
 
-        _rigRefs =
-            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(
+        _rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(
                 scope,
                 _spec.slotKey);
 

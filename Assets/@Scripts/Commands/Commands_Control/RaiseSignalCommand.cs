@@ -29,9 +29,6 @@ public sealed class RaiseSignalCommand : CommandBase
         _raiseOnSkip = raiseOnSkip;
     }
 
-    public override bool WaitForCompletion => false;
-    protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
-
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
         Raise();
