@@ -342,8 +342,7 @@ public sealed partial class YarnCommandBridge : InlineEventMarkupHandler.IInline
             lastArcHeight = -1f,
             lastAirWidth = -1f,
 
-            wait = wait,
-            killTween = true
+            wait = wait
         };
     }
 

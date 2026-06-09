@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using DG.Tweening;
 using UnityEngine;
-using UnityEngine.Serialization;
 using RectTransform = UnityEngine.RectTransform;
 
 [Serializable]
@@ -34,10 +33,6 @@ public sealed class HopCommandSpecCharR : CharacterRigCommandSpecBase
     [Range(0.05f, 1f)]
     [Tooltip("If < 0, uses airWidth.")]
     public float lastAirWidth = -1f;
-
-    [Header("Options")]
-    [Tooltip("체크하면 기존 위치 관련 트윈을 끝내고 committed state에서 시작합니다.")]
-    public bool killTween = true;
 }
 
 public sealed class HopCommandCharR : CommandBase
@@ -45,10 +40,11 @@ public sealed class HopCommandCharR : CommandBase
     private readonly HopCommandSpecCharR _spec;
 
     private RectTransform _rect;
-    private Tween _tween;
     private Vector2 _basePos;
+
     private bool _resolveAttempted;
-    private bool _canCommitFinalState;
+
+    private bool HasClaimedTarget { get; set; }
 
     public override bool WaitForCompletion => _spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
@@ -63,14 +59,7 @@ public sealed class HopCommandCharR : CommandBase
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (_rect == null)
-            yield break;
-
-        if (_spec.killTween)
-            _rect.DOKill(true); // Finish previous motion so this command starts from a committed state.
-
-        _basePos = _rect.anchoredPosition;
-        _canCommitFinalState = true;
+        ClaimTarget();
 
         int hops = Mathf.Max(1, _spec.hopCount);
 
@@ -88,14 +77,11 @@ public sealed class HopCommandCharR : CommandBase
             ? Mathf.Clamp(_spec.lastAirWidth, 0.05f, 1f)
             : mainAirW;
 
-        _tween = DOTween
+        Tween tween = DOTween
             .To(
                 () => 0f,
                 t =>
                 {
-                    if (!_canCommitFinalState || _rect == null)
-                        return;
-
                     float e = DOVirtual.EasedValue(0f, 1f, t, _spec.ease);
 
                     float hf = e * hops;
@@ -116,16 +102,10 @@ public sealed class HopCommandCharR : CommandBase
             .SetEase(Ease.Linear)
             .SetUpdate(true)
             .SetTarget(_rect)
-            .OnComplete(() =>
-            {
-                if (!_canCommitFinalState || _rect == null)
-                    return;
-
-                CommitFinalState();
-            });
+            .OnComplete(CommitFinalState);
 
         if (_spec.wait)
-            yield return _tween.WaitForCompletion();
+            yield return tween.WaitForCompletion();
     }
 
     protected override void OnSkip(CommandRunScope scope)
@@ -133,52 +113,35 @@ public sealed class HopCommandCharR : CommandBase
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (_rect == null)
-            return;
+        if (!HasClaimedTarget)
+            ClaimTarget();
 
         CommitFinalState();
     }
 
-    protected override void OnRollbackSeek(CommandRunScope scope)
-    {
-        OnSkip(scope);
-    }
-
-    protected override void OnCommandCompleted(CommandRunScope scope)
-    {
-        if (!_resolveAttempted)
-            ResolveRefs(scope);
-
-        if (!_canCommitFinalState || _rect == null)
-            return;
-
-        _tween?.Kill(false);
-        _rect.DOKill(false);
-
-        CommitFinalState();
-    }
+    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
 
     private void ResolveRefs(CommandRunScope scope)
     {
         _resolveAttempted = true;
 
-        CharacterRigRefs rigRefs =
-            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
+        CharacterRigRefs rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
+        _rect = rig.GetRect(_spec.target);
+    }
 
-        _rect = rigRefs.GetRect(_spec.target);
+    private void ClaimTarget()
+    {
+        _rect.DOKill(true);
+        _basePos = _rect.anchoredPosition;
 
-        if (_rect != null)
-            _basePos = _rect.anchoredPosition;
+        HasClaimedTarget = true;
     }
 
     private void CommitFinalState()
     {
-        if (_rect != null)
-            _rect.anchoredPosition = _basePos;
+        _rect.anchoredPosition = _basePos;
 
-        _canCommitFinalState = false;
-        _rect = null;
-        _tween = null;
+        HasClaimedTarget = false;
     }
 
     private static float HopHeight(float u, float height, float airW)

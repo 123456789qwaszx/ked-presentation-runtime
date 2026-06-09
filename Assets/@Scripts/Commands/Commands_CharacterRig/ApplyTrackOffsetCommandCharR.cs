@@ -26,9 +26,6 @@ public class ApplyTrackOffsetCommandSpecCharR : CharacterRigCommandSpecBase
     [Header("Reset Target Before Apply")]
     [Tooltip("체크하면 target의 위치를 먼저 (0,0)으로 맞춘 뒤 offset을 적용합니다. 상위 Anchor의 위치는 유지됩니다.")]
     public bool applyFromZero = true;
-
-    public bool resetSlot = false;
-    public bool resetCharacter = false;
     
     [Header("Track Layer Reset")]
     [Tooltip("체크하면 Character_Track / Move / X / Y 를 전부 (0,0)으로 초기화합니다.")]
@@ -50,22 +47,44 @@ public sealed class ApplyTrackOffsetCommandCharR : CommandBase
 
     private CharacterRigRefs _rigRefs;
     private RectTransform _rect;
+
     private bool _resolveAttempted;
 
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
-    public ApplyTrackOffsetCommandCharR(ApplyTrackOffsetCommandSpecCharR spec) => _spec = spec;
+    public ApplyTrackOffsetCommandCharR(ApplyTrackOffsetCommandSpecCharR spec)
+    {
+        _spec = spec;
+    }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        Apply();
+        ApplyFinalState();
         yield break;
     }
 
-    private void Apply()
+    protected override void OnSkip(CommandRunScope scope)
+    {
+        if (!_resolveAttempted)
+            ResolveRefs(scope);
+
+        ApplyFinalState();
+    }
+
+    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
+
+    private void ResolveRefs(CommandRunScope scope)
+    {
+        _resolveAttempted = true;
+        
+        _rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
+        _rect = _rigRefs.GetRect(_spec.target);
+    }
+
+    private void ApplyFinalState()
     {
         if (_spec.resetAllTrackLayers || _spec.resetCharTrack)
             ResetRect(_rigRefs.CharSlot_Track);
@@ -76,7 +95,7 @@ public sealed class ApplyTrackOffsetCommandCharR : CommandBase
         if (_spec.resetAllTrackLayers || _spec.resetCharTrackY)
             ResetRect(_rigRefs.CharSlot_Track_Y);
 
-        _rect.DOKill(true); // Finish previous motion so this command starts from a committed state.
+        _rect.DOKill(true);
 
         if (_spec.applyFromZero)
             _rect.anchoredPosition = Vector2.zero;
@@ -84,29 +103,9 @@ public sealed class ApplyTrackOffsetCommandCharR : CommandBase
         _rect.anchoredPosition += _spec.offset;
     }
     
-    protected override void OnSkip(CommandRunScope scope)
-    {
-        if (!_resolveAttempted)
-            ResolveRefs(scope);
-
-        Apply();
-    }
-
-    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
-
-
-    private void ResolveRefs(CommandRunScope scope)
-    {
-        _resolveAttempted = true;
-        
-        _rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
-        
-        _rect = _rigRefs.GetRect(_spec.target);
-    }
-    
     private static void ResetRect(RectTransform rect)
     {
-        rect.DOKill(true);  // Finish previous motion so this command starts from a committed state.
+        rect.DOKill(true);
         rect.anchoredPosition = Vector2.zero;
     }
 }

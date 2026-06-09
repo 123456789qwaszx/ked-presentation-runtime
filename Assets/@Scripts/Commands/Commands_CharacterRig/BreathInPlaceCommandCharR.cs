@@ -45,10 +45,6 @@ public sealed class BreathInPlaceCommandSpecCharR : CharacterRigCommandSpecBase
 
     [Tooltip("끝날 때 자연스럽게 원래 위치로 돌아오는 시간.")]
     public float blendOut = 0.25f;
-
-    [Header("Options")]
-    [Tooltip("체크하면 기존 위치/스케일 관련 트윈을 끝내고 committed state에서 시작합니다.")]
-    public bool killTween = true;
 }
 
 public sealed class BreathInPlaceCommandCharR : CommandBase, IRunScopedCommand
@@ -56,13 +52,13 @@ public sealed class BreathInPlaceCommandCharR : CommandBase, IRunScopedCommand
     private readonly BreathInPlaceCommandSpecCharR _spec;
 
     private RectTransform _rect;
-    private Tween _tween;
 
     private Vector2 _basePos;
     private Vector3 _baseScale;
 
     private bool _resolveAttempted;
-    private bool _canCommitFinalState;
+
+    private bool HasClaimedTarget { get; set; }
 
     public override bool WaitForCompletion => _spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
@@ -77,15 +73,7 @@ public sealed class BreathInPlaceCommandCharR : CommandBase, IRunScopedCommand
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (_rect == null)
-            yield break;
-
-        if (_spec.killTween)
-            _rect.DOKill(true); // Finish previous motion so this command starts from a committed state.
-
-        _basePos = _rect.anchoredPosition;
-        _baseScale = _rect.localScale;
-        _canCommitFinalState = true;
+        ClaimTarget();
 
         if (_spec.duration <= 0f || _spec.breathsPerSecond <= 0f)
         {
@@ -99,14 +87,11 @@ public sealed class BreathInPlaceCommandCharR : CommandBase, IRunScopedCommand
         float sideSway = _spec.sideSway;
         float scaleAmount = Mathf.Max(0f, _spec.scaleAmount);
 
-        _tween = DOTween
+        Tween tween = DOTween
             .To(
                 () => 0f,
                 elapsed =>
                 {
-                    if (!_canCommitFinalState || _rect == null)
-                        return;
-
                     float envelope = EvaluateEnvelope(
                         elapsed,
                         duration,
@@ -115,16 +100,10 @@ public sealed class BreathInPlaceCommandCharR : CommandBase, IRunScopedCommand
 
                     float phase = (elapsed * breathsPerSecond + _spec.phaseOffset) * Mathf.PI * 2f;
 
-                    // 0 → 1 → 0 형태의 부드러운 호흡값.
-                    // sin 결과를 0~1로 바꾼 뒤 easing을 한 번 더 먹여서 더 폭신하게 만든다.
                     float breath01 = (Mathf.Sin(phase - Mathf.PI * 0.5f) + 1f) * 0.5f;
                     float eased = DOVirtual.EasedValue(0f, 1f, breath01, _spec.ease);
 
-                    // 중앙 기준으로 -0.5~+0.5가 아니라,
-                    // 살짝 위로 떠올랐다가 돌아오는 느낌을 우선한다.
                     float y = eased * height;
-
-                    // 좌우는 아주 작게만. breathing에는 과하면 걸음처럼 보인다.
                     float x = Mathf.Sin(phase) * sideSway;
 
                     Vector2 offset = new Vector2(x, y) * envelope;
@@ -144,16 +123,10 @@ public sealed class BreathInPlaceCommandCharR : CommandBase, IRunScopedCommand
             .SetEase(Ease.Linear)
             .SetUpdate(true)
             .SetTarget(_rect)
-            .OnComplete(() =>
-            {
-                if (!_canCommitFinalState || _rect == null)
-                    return;
-
-                CommitFinalState();
-            });
+            .OnComplete(CommitFinalState);
 
         if (_spec.wait)
-            yield return _tween.WaitForCompletion();
+            yield return tween.WaitForCompletion();
     }
 
     protected override void OnSkip(CommandRunScope scope)
@@ -161,58 +134,38 @@ public sealed class BreathInPlaceCommandCharR : CommandBase, IRunScopedCommand
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (_rect == null)
-            return;
+        if (!HasClaimedTarget)
+            ClaimTarget();
 
         CommitFinalState();
     }
 
-    protected override void OnRollbackSeek(CommandRunScope scope)
-    {
-        OnSkip(scope);
-    }
-
-    protected override void OnCommandCompleted(CommandRunScope scope)
-    {
-        if (!_resolveAttempted)
-            ResolveRefs(scope);
-
-        if (!_canCommitFinalState || _rect == null)
-            return;
-
-        _tween?.Kill(false);
-        _rect.DOKill(false);
-
-        CommitFinalState();
-    }
+    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
 
     private void ResolveRefs(CommandRunScope scope)
     {
         _resolveAttempted = true;
 
-        CharacterRigRefs rigRefs =
-            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
+        CharacterRigRefs rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
+        _rect = rig.GetRect(_spec.target);
+    }
 
-        _rect = rigRefs.GetRect(_spec.target);
+    private void ClaimTarget()
+    {
+        _rect.DOKill(true);
 
-        if (_rect != null)
-        {
-            _basePos = _rect.anchoredPosition;
-            _baseScale = _rect.localScale;
-        }
+        _basePos = _rect.anchoredPosition;
+        _baseScale = _rect.localScale;
+
+        HasClaimedTarget = true;
     }
 
     private void CommitFinalState()
     {
-        if (_rect != null)
-        {
-            _rect.anchoredPosition = _basePos;
-            _rect.localScale = _baseScale;
-        }
+        _rect.anchoredPosition = _basePos;
+        _rect.localScale = _baseScale;
 
-        _canCommitFinalState = false;
-        _rect = null;
-        _tween = null;
+        HasClaimedTarget = false;
     }
 
     private static float EvaluateEnvelope(

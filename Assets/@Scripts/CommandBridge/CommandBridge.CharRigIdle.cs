@@ -63,8 +63,7 @@ public sealed partial class YarnCommandBridge
             fallEase = Ease.InOutSine,
             blendIn = 0.04f,
             blendOut = 0.08f,
-            wait = false,
-            killTween = true
+            wait = false
         };
 
         Collect(spec);
@@ -90,8 +89,7 @@ public sealed partial class YarnCommandBridge
             phaseOffset = 0f,
             blendIn = 0.25f,
             blendOut = 0.25f,
-            wait = false,
-            killTween = true
+            wait = false
         };
 
         Collect(spec);

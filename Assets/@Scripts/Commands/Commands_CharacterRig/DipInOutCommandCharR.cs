@@ -22,10 +22,6 @@ public sealed class DipInOutCommandSpecCharR : CharacterRigCommandSpecBase
 
     [Tooltip("Base ease used as a hint. Enter will use an Out-ish ease, return will use an In-ish ease.")]
     public Ease ease = Ease.InCubic;
-    
-    [Header("Options")]
-    [Tooltip("체크하면 기존 위치 관련 트윈을 끝내고 committed state에서 시작합니다.")]
-    public bool killTween = true;
 }
 
 public sealed class DipInOutCommandCharR : CommandBase
@@ -33,40 +29,38 @@ public sealed class DipInOutCommandCharR : CommandBase
     private readonly DipInOutCommandSpecCharR _spec;
 
     private RectTransform _rect;
-    private Tween _tween;
-    private Vector2 _destPos;
+    private Vector2 _basePos;
+
     private bool _resolveAttempted;
-    private bool _canCommitFinalState;
+
+    private bool HasClaimedTarget { get; set; }
 
     public override bool WaitForCompletion => _spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
-    public DipInOutCommandCharR(DipInOutCommandSpecCharR spec) => _spec = spec;
+    public DipInOutCommandCharR(DipInOutCommandSpecCharR spec)
+    {
+        _spec = spec;
+    }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (_spec.killTween)
-            _rect.DOKill(true); // Finish previous motion so this command starts from a committed state.
-        
-        _canCommitFinalState = true;
+        ClaimTarget();
 
         float total = _spec.duration;
         float dist = _spec.distance;
 
         if (total <= 0f || Mathf.Approximately(dist, 0f))
         {
-            _rect.anchoredPosition = _destPos;
-            _canCommitFinalState = false;
-            _rect = null;
-            _tween = null;
+            CommitFinalState();
             yield break;
         }
 
-        Vector2 rect = _destPos;
-        Vector2 dipped = rect + GetOffset(_spec.dir, dist);
+        Vector2 basePos = _basePos;
+        Vector2 dipped = basePos + GetOffset(_spec.dir, dist);
 
         float tEnter = total * 0.32f;
         float tHold = total * 0.24f;
@@ -75,22 +69,19 @@ public sealed class DipInOutCommandCharR : CommandBase
         float holdStart = tEnter;
         float returnStart = tEnter + tHold;
 
-        Ease enterEase = ToOutEase(_spec.ease);
-        Ease returnEase = ToInEase(_spec.ease);
+        Ease enterEase = ToEase(_spec.ease);
+        Ease returnEase = ToEase(_spec.ease);
 
-        _tween = DOTween
+        Tween tween = DOTween
             .To(
                 () => 0f,
                 t =>
                 {
-                    if (!_canCommitFinalState || _rect == null)
-                        return;
-                    
                     if (t <= holdStart)
                     {
                         float localT = tEnter <= 0.0001f ? 1f : t / tEnter;
                         float e = DOVirtual.EasedValue(0f, 1f, localT, enterEase);
-                        _rect.anchoredPosition = Vector2.LerpUnclamped(rect, dipped, e);
+                        _rect.anchoredPosition = Vector2.LerpUnclamped(basePos, dipped, e);
                         return;
                     }
 
@@ -102,7 +93,7 @@ public sealed class DipInOutCommandCharR : CommandBase
 
                     float localReturnT = tReturn <= 0.0001f ? 1f : (t - returnStart) / tReturn;
                     float eReturn = DOVirtual.EasedValue(0f, 1f, localReturnT, returnEase);
-                    _rect.anchoredPosition = Vector2.LerpUnclamped(dipped, rect, eReturn);
+                    _rect.anchoredPosition = Vector2.LerpUnclamped(dipped, basePos, eReturn);
                 },
                 total,
                 total
@@ -110,19 +101,10 @@ public sealed class DipInOutCommandCharR : CommandBase
             .SetEase(Ease.Linear)
             .SetUpdate(true)
             .SetTarget(_rect)
-            .OnComplete(() =>
-            {
-                if (!_canCommitFinalState || _rect == null)
-                    return;
-
-                _rect.anchoredPosition = rect;
-                _canCommitFinalState = false;
-                _rect = null;
-                _tween = null;
-            });
+            .OnComplete(CommitFinalState);
 
         if (_spec.wait)
-            yield return _tween.WaitForCompletion();
+            yield return tween.WaitForCompletion();
     }
 
     protected override void OnSkip(CommandRunScope scope)
@@ -130,44 +112,37 @@ public sealed class DipInOutCommandCharR : CommandBase
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (_rect == null)
-            return;
+        if (!HasClaimedTarget)
+            ClaimTarget();
 
-        _rect.anchoredPosition = _destPos;
-        _canCommitFinalState = false;
-        _rect = null;
-        _tween = null;
+        CommitFinalState();
     }
 
-    
     protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
-    
-    protected override void OnCommandCompleted(CommandRunScope scope)
-    {
-        if (!_resolveAttempted)
-            ResolveRefs(scope);
-
-        if (!_canCommitFinalState || _rect == null)
-            return;
-
-        _tween?.Kill(false);
-        _rect.DOKill(false);
-        _rect.anchoredPosition = _destPos;
-
-        _canCommitFinalState = false;
-        _rect = null;
-        _tween = null;
-    }
 
     private void ResolveRefs(CommandRunScope scope)
     {
         _resolveAttempted = true;
 
-        CharacterRigRefs rigRefs =
+        CharacterRigRefs rig =
             CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
-        
-        _rect = rigRefs.GetRect(_spec.target);
-        _destPos = _rect.anchoredPosition;
+
+        _rect = rig.GetRect(_spec.target);
+    }
+
+    private void ClaimTarget()
+    {
+        _rect.DOKill(true);
+        _basePos = _rect.anchoredPosition;
+
+        HasClaimedTarget = true;
+    }
+
+    private void CommitFinalState()
+    {
+        _rect.anchoredPosition = _basePos;
+
+        HasClaimedTarget = false;
     }
 
     private static Vector2 GetOffset(CharRigDirection dir, float distance) => dir switch
@@ -178,7 +153,7 @@ public sealed class DipInOutCommandCharR : CommandBase
         _ => new Vector2(-distance, 0f),
     };
 
-    private static Ease ToOutEase(Ease baseEase) => baseEase switch
+    private static Ease ToEase(Ease baseEase) => baseEase switch
     {
         Ease.InQuad => Ease.OutQuad,
         Ease.InCubic => Ease.OutCubic,
@@ -199,24 +174,4 @@ public sealed class DipInOutCommandCharR : CommandBase
         _ => baseEase,
     };
 
-    private static Ease ToInEase(Ease baseEase) => baseEase switch
-    {
-        Ease.OutQuad => Ease.InQuad,
-        Ease.OutCubic => Ease.InCubic,
-        Ease.OutQuart => Ease.InQuart,
-        Ease.OutQuint => Ease.InQuint,
-        Ease.OutSine => Ease.InSine,
-        Ease.OutExpo => Ease.InExpo,
-        Ease.OutCirc => Ease.InCirc,
-        Ease.OutBack => Ease.InBack,
-        Ease.InOutQuad => Ease.InQuad,
-        Ease.InOutCubic => Ease.InCubic,
-        Ease.InOutQuart => Ease.InQuart,
-        Ease.InOutQuint => Ease.InQuint,
-        Ease.InOutSine => Ease.InSine,
-        Ease.InOutExpo => Ease.InExpo,
-        Ease.InOutCirc => Ease.InCirc,
-        Ease.InOutBack => Ease.InBack,
-        _ => baseEase,
-    };
 }
