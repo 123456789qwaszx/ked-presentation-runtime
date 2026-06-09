@@ -74,8 +74,6 @@ public sealed class MoveByCommandCharR : CommandBase
 
         if (!HasClaimedTarget)
             ClaimTarget();
-        else
-            _rect.DOKill(false);
 
         CommitFinalState();
     }

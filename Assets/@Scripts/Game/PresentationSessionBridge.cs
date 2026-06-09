@@ -72,22 +72,22 @@ public sealed class PresentationSessionBridge : VnRuntimeBridge.IPresentationSig
         Debug.Log($"[Markup] {key}");
     }
     
-    public bool TryGetCurrentAnchor(out int nodeIndex, out int stepIndex)
-    {
-        nodeIndex = -1;
-        stepIndex = -1;
-
-        if (_session == null)
-            return false;
-
-        return _session.TryGetCurrentAnchor(out nodeIndex, out stepIndex);
-    }
-
-    public bool JumpTo(int nodeIndex, int stepIndex)
-    {
-        if (_session == null)
-            return false;
-
-        return _session.JumpTo(nodeIndex, stepIndex);
-    }
+    // public bool TryGetCurrentAnchor(out int nodeIndex, out int stepIndex)
+    // {
+    //     nodeIndex = -1;
+    //     stepIndex = -1;
+    //
+    //     if (_session == null)
+    //         return false;
+    //
+    //     return _session.TryGetCurrentAnchor(out nodeIndex, out stepIndex);
+    // }
+    //
+    // public bool JumpTo(int nodeIndex, int stepIndex)
+    // {
+    //     if (_session == null)
+    //         return false;
+    //
+    //     return _session.JumpTo(nodeIndex, stepIndex);
+    // }
 }

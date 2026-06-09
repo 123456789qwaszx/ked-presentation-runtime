@@ -115,6 +115,9 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
         if (!_resolveAttempted)
             ResolveRefs(scope);
         
+        if (_controller == null)
+            return;
+        
         if (!HasClaimedController)
             ClaimController();
 
@@ -142,7 +145,7 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
 
     private void ClaimController()
     {
-        DOTween.Kill(_controller, true);
+        DOTween.Kill(_controller, false);
 
         _fromState = CaptureCurrentState();
         _destState = BuildDestState();
@@ -152,6 +155,8 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
 
     private void CommitFinalState()
     {
+        DOTween.Kill(_controller, false);
+        
         ApplyState(_destState);
 
         HasClaimedController = false;

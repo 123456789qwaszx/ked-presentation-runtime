@@ -71,7 +71,7 @@ public sealed partial class YarnCommandBridge
     
     private void EnqueueBreathInPlaceSpec(
         string roleKey,
-        float duration = 2.4f,
+        float duration = 99f,
         float height = 8f,
         float breathsPerSecond = 0.35f)
     {

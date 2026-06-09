@@ -33,31 +33,15 @@ public sealed class PresentationSessionEntry : MonoBehaviour, ICommandRunScopePr
         if (PresentationSession != null)
             PresentationSession.Tick();
     }
-
-    public bool TryStartRoute(string routeKey)
-    {
-        if (!TryResolveRoute(routeKey, out Route route, out SequenceSpecSO sequence))
-            return false;
-
-        PresentationSession.Start(route, sequence);
-        return true;
-    }
-
-    public bool TryRestartRoute(string routeKey)
-    {
-        EndRouteNow();
-
-        return TryStartRoute(routeKey);
-    }
-
-    public void StartRoute(string routeKey)
-    {
-        TryStartRoute(routeKey);
-    }
-
+    
     public void RestartRoute(string routeKey)
     {
-        TryRestartRoute(routeKey);
+        //EndRouteNow();
+        
+        if (!TryResolveRoute(routeKey, out Route route, out SequenceSpecSO sequence))
+            return;
+        PresentationSession.ClearStage();
+        PresentationSession.Start(route, sequence);
     }
 
     public void RequestEnd()

@@ -44,6 +44,7 @@ public sealed class DipInOutCommandCharR : CommandBase
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
+        Debug.Log("DipInOutCommandSpecCharR ExecuteInner");
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
@@ -108,6 +109,7 @@ public sealed class DipInOutCommandCharR : CommandBase
 
     protected override void OnSkip(CommandRunScope scope)
     {
+        Debug.Log("DipInOutCommandSpecCharR Skip");
         if (!_resolveAttempted)
             ResolveRefs(scope);
 

@@ -88,8 +88,8 @@ public sealed class PresentationSession
             nodeIndex: _state.NodeIndex,
             stepIndex: _state.StepGate.Cursor);
         
-        if (TryApplyDebugStartStepName())
-            return;
+        // if (TryApplyDebugStartStepName())
+        //     return;
     }
 
     public void Tick()
@@ -164,11 +164,11 @@ public sealed class PresentationSession
     {
         _gateAdvancer.ClearLatchedSignals();
         
-        _executor.Stop(); // clear the session scope. 실행 중인 커맨드 정지
-        _subExecutor?.Stop();    // 서브 레인 정지/정리
-        _subOneShotExecutor?.Stop();
+        _executor.Stop(CleanupPolicy.Cancel); // clear the session scope. 실행 중인 커맨드 정지
+        _subExecutor?.Stop(CleanupPolicy.Cancel);    // 서브 레인 정지/정리
+        _subOneShotExecutor?.Stop(CleanupPolicy.Cancel);
         
-        _stage?.Clear(); // 두 레인 모두 멈춘 뒤 공유 무대 파괴
+        //_stage?.Clear(); // 두 레인 모두 멈춘 뒤 공유 무대 파괴
         
         _sessionScope = null;
         _subScope = null;
@@ -178,92 +178,97 @@ public sealed class PresentationSession
         _state = null;
     }
 
-    #region Editor
-    private bool TryApplyDebugStartStepName()
+    public void ClearStage()
     {
-        if (_sequence == null || _state == null) return false;
-
-        if (!_context.IsDebugStartEnabled)
-            return false;
-
-        string startName = _context.DebugStartStepName; 
-        if (string.IsNullOrEmpty(startName)) return false;
-
-        if (StepNameResolver.TryResolveUnique(_sequence, startName, out int nodeIndex, out int stepIndex, out int matchCount))
-        {
-            ApplyStartAt(nodeIndex, stepIndex);
-            return true;
-        }
-        
-
-        if (matchCount == 0)
-        {
-            Debug.LogWarning($"[CPS] DebugStartStepName not found: '{startName}'", _sequence);
-            return false;
-        }
-
-        var matches = new List<(int n, int s)>(matchCount);
-        StepNameResolver.TryResolveUnique(_sequence, startName, out _, out _, out matchCount, matches);
-
-        var msg = $"[CPS] DebugStartStepName is not unique: '{startName}' (matches={matchCount})\n";
-        for (int i = 0; i < matches.Count; i++)
-            msg += $"  - node={matches[i].n}, step={matches[i].s}\n";
-
-        Debug.LogWarning(msg, _sequence);
-        return false;
+        _stage?.Clear(); // 두 레인 모두 멈춘 뒤 공유 무대 파괴
     }
 
-    private void ApplyStartAt(int nodeIndex, int stepIndex)
-    {
-        _state.NodeIndex = nodeIndex;
-
-        _gatePlanner.BuildForCurrentNode(_sequence, _state);
-
-        if (_state.StepGate.Tokens != null)
-            _state.StepGate.Cursor = Mathf.Clamp(stepIndex, 0, _state.StepGate.Tokens.Count - 1);
-
-        PlayStep(_state.NodeIndex, _state.StepGate.Cursor);
-    }
-    #endregion
-    
-    
-    public bool TryGetCurrentAnchor(out int nodeIndex, out int stepIndex)
-    {
-        nodeIndex = -1;
-        stepIndex = -1;
-
-        if (_sequence == null || _state == null)
-            return false;
-
-        nodeIndex = _state.NodeIndex;
-        stepIndex = _state.StepGate.Cursor;
-        return true;
-    }
-    
-
-    public bool JumpTo(int nodeIndex, int stepIndex)
-    {
-        if (_sequence == null || _state == null)
-            return false;
-
-        if (nodeIndex < 0 || nodeIndex >= _sequence.nodes.Count)
-            return false;
-
-        _executor.Stop();
-
-        _state.NodeIndex = nodeIndex;
-        _gatePlanner.BuildForCurrentNode(_sequence, _state);
-
-        if (_state.StepGate.Tokens == null || _state.StepGate.Tokens.Count == 0)
-            return false;
-
-        _state.StepGate.Cursor = Mathf.Clamp(
-            stepIndex,
-            0,
-            _state.StepGate.Tokens.Count - 1
-        );
-
-        PlayStep(_state.NodeIndex, _state.StepGate.Cursor);
-        return true;
-    }
+    // #region Editor
+    // private bool TryApplyDebugStartStepName()
+    // {
+    //     if (_sequence == null || _state == null) return false;
+    //
+    //     if (!_context.IsDebugStartEnabled)
+    //         return false;
+    //
+    //     string startName = _context.DebugStartStepName; 
+    //     if (string.IsNullOrEmpty(startName)) return false;
+    //
+    //     if (StepNameResolver.TryResolveUnique(_sequence, startName, out int nodeIndex, out int stepIndex, out int matchCount))
+    //     {
+    //         ApplyStartAt(nodeIndex, stepIndex);
+    //         return true;
+    //     }
+    //     
+    //
+    //     if (matchCount == 0)
+    //     {
+    //         Debug.LogWarning($"[CPS] DebugStartStepName not found: '{startName}'", _sequence);
+    //         return false;
+    //     }
+    //
+    //     var matches = new List<(int n, int s)>(matchCount);
+    //     StepNameResolver.TryResolveUnique(_sequence, startName, out _, out _, out matchCount, matches);
+    //
+    //     var msg = $"[CPS] DebugStartStepName is not unique: '{startName}' (matches={matchCount})\n";
+    //     for (int i = 0; i < matches.Count; i++)
+    //         msg += $"  - node={matches[i].n}, step={matches[i].s}\n";
+    //
+    //     Debug.LogWarning(msg, _sequence);
+    //     return false;
+    // }
+    //
+    // private void ApplyStartAt(int nodeIndex, int stepIndex)
+    // {
+    //     _state.NodeIndex = nodeIndex;
+    //
+    //     _gatePlanner.BuildForCurrentNode(_sequence, _state);
+    //
+    //     if (_state.StepGate.Tokens != null)
+    //         _state.StepGate.Cursor = Mathf.Clamp(stepIndex, 0, _state.StepGate.Tokens.Count - 1);
+    //
+    //     PlayStep(_state.NodeIndex, _state.StepGate.Cursor);
+    // }
+    // #endregion
+    //
+    //
+    // public bool TryGetCurrentAnchor(out int nodeIndex, out int stepIndex)
+    // {
+    //     nodeIndex = -1;
+    //     stepIndex = -1;
+    //
+    //     if (_sequence == null || _state == null)
+    //         return false;
+    //
+    //     nodeIndex = _state.NodeIndex;
+    //     stepIndex = _state.StepGate.Cursor;
+    //     return true;
+    // }
+    //
+    //
+    // public bool JumpTo(int nodeIndex, int stepIndex)
+    // {
+    //     if (_sequence == null || _state == null)
+    //         return false;
+    //
+    //     if (nodeIndex < 0 || nodeIndex >= _sequence.nodes.Count)
+    //         return false;
+    //
+    //     _executor.Stop();
+    //
+    //     _state.NodeIndex = nodeIndex;
+    //     _gatePlanner.BuildForCurrentNode(_sequence, _state);
+    //
+    //     if (_state.StepGate.Tokens == null || _state.StepGate.Tokens.Count == 0)
+    //         return false;
+    //
+    //     _state.StepGate.Cursor = Mathf.Clamp(
+    //         stepIndex,
+    //         0,
+    //         _state.StepGate.Tokens.Count - 1
+    //     );
+    //
+    //     PlayStep(_state.NodeIndex, _state.StepGate.Cursor);
+    //     return true;
+    // }
 }

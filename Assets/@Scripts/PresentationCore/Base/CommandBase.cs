@@ -27,7 +27,6 @@ public abstract class CommandBase : ISequenceCommand, IStepScopedCommand
         {
             Debug.Log("CommandBase.Execute called with cancellation token");
             yield break;
-            
         }
 
         if (scope.IsSkipping)

@@ -48,14 +48,14 @@ public sealed partial class YarnCommandBridge : InlineEventMarkupHandler.IInline
             xyScale: 1.18f,
             duration: 0.28f,
             ease: Ease.OutBack,
-            wait: false));
+            wait: true));
 
         Collect(BuildEmojiScaleToSpec(
             roleKey,
             xyScale: 1.0f,
             duration: 0.52f,
             ease: Ease.OutCubic,
-            wait: false));
+            wait: true));
         
         Collect(new WaitCommandSpec
         {

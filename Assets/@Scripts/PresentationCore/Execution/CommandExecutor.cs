@@ -169,12 +169,7 @@ public sealed class CommandExecutor : MonoBehaviour
         Stop(CleanupPolicy.Cancel);
     }
 
-    public void FinishAll()
-    {
-        Stop(CleanupPolicy.Finish);
-    }
-
-    private void Stop(CleanupPolicy policy)
+    public void Stop(CleanupPolicy policy)
     {
         _runId++;
 
@@ -183,16 +178,16 @@ public sealed class CommandExecutor : MonoBehaviour
             : CommandRunTicketCloseReason.Finished;
 
         CloseActiveTicketIfOpen(reason);
-
-        if (_mainRoutine != null)
-        {
-            StopCoroutine(_mainRoutine);
-        }
-
-        _activeScope?.ClearRuntimeState(policy);
         CancelAndDisposeToken();
+        
+        if (_mainRoutine != null)
+            StopCoroutine(_mainRoutine);
+        
+        _activeScope?.ClearRuntimeState(policy);
+        
         _mainRoutine = null;
-        _activeScope = null;
+        Debug.Log($"Stopping {_activeScope}");
+        //_activeScope = null;
     }
 
     private void ResetToken()
