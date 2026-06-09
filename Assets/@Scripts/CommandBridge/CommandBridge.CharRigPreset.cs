@@ -67,7 +67,7 @@ public sealed partial class YarnCommandBridge
         var spec1 = new FadeInCommandSpecCharR()
         {
             slotKey = roleKey,
-            targetMask = CharRigRootMask.CharacterPortrait_Root,
+            target = CharacterRigTarget.CharacterPortraitSprite_Root,
             duration = 0.28f
         };
 

@@ -65,7 +65,7 @@ public sealed partial class YarnCommandBridge : InlineEventMarkupHandler.IInline
         Collect(new FadeOutCommandSpecCharR
         {
             slotKey = roleKey,
-            targetMask = CharRigRootMask.CharacterEmoji_Root,
+            target = CharacterRigTarget.CharacterEmojiSlot00_Root,
             duration = 0.4f
         });
     }
