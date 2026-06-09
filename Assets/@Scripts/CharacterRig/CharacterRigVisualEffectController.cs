@@ -12,7 +12,7 @@ public sealed class CharacterRigVisualEffectController : IDisposable
 {
     private const float DimBrightness = 0.62f;
     private const float DimSaturation = 0.70f;
-    private static readonly Color DimTintColor = new(0.45f, 0.48f, 0.55f, 1f);
+    private static readonly Color DefaultDimTintColor = new(0.45f, 0.48f, 0.55f, 1f);
 
     private static readonly Color DefaultOuterRimColor = Color.white;
     private const float OuterRimWidth = 0.006f;
@@ -49,6 +49,8 @@ public sealed class CharacterRigVisualEffectController : IDisposable
     private float _blurAmount;
     private float _outerRimAmount;
     private float _innerRimAmount;
+
+    private Color _dimTintColor;
     private Color _outerRimColor;
     private Color _innerRimColor;
 
@@ -56,6 +58,8 @@ public sealed class CharacterRigVisualEffectController : IDisposable
     public float BlurAmount => _blurAmount;
     public float OuterRimAmount => _outerRimAmount;
     public float InnerRimAmount => _innerRimAmount;
+
+    public Color DimTintColor => _dimTintColor;
     public Color OuterRimColor => _outerRimColor;
     public Color InnerRimColor => _innerRimColor;
 
@@ -86,6 +90,8 @@ public sealed class CharacterRigVisualEffectController : IDisposable
         _blurAmount = 0f;
         _outerRimAmount = 0f;
         _innerRimAmount = 0f;
+
+        _dimTintColor = DefaultDimTintColor;
         _outerRimColor = DefaultOuterRimColor;
         _innerRimColor = DefaultInnerRimColor;
 
@@ -101,10 +107,30 @@ public sealed class CharacterRigVisualEffectController : IDisposable
         Color outerColor,
         Color innerColor)
     {
+        ApplyImmediate(
+            dim,
+            _dimTintColor,
+            outerRim,
+            innerRim,
+            blur,
+            outerColor,
+            innerColor);
+    }
+
+    public void ApplyImmediate(
+        float dim,
+        Color dimTintColor,
+        float outerRim,
+        float innerRim,
+        float blur,
+        Color outerColor,
+        Color innerColor)
+    {
         if (_runtimeMaterial == null)
             return;
 
         _dimAmount = Mathf.Clamp01(dim);
+        _dimTintColor = dimTintColor;
         _outerRimAmount = Mathf.Clamp01(outerRim);
         _innerRimAmount = Mathf.Clamp01(innerRim);
         _blurAmount = Mathf.Clamp01(blur);
@@ -116,7 +142,14 @@ public sealed class CharacterRigVisualEffectController : IDisposable
 
     public void ClearImmediate()
     {
-        ApplyImmediate(0f, 0f, 0f, 0f, DefaultOuterRimColor, DefaultInnerRimColor);
+        ApplyImmediate(
+            0f,
+            DefaultDimTintColor,
+            0f,
+            0f,
+            0f,
+            DefaultOuterRimColor,
+            DefaultInnerRimColor);
     }
 
     // 정적 스타일은 균일·불변이므로 생성 시 한 번만 기록. tween 프레임마다 다시 쓰지 않는다.
@@ -127,7 +160,6 @@ public sealed class CharacterRigVisualEffectController : IDisposable
 
         _runtimeMaterial.SetFloat(DimBrightnessId, DimBrightness);
         _runtimeMaterial.SetFloat(DimSaturationId, DimSaturation);
-        _runtimeMaterial.SetColor(DimTintColorId, DimTintColor);
 
         _runtimeMaterial.SetFloat(RimWidthId, OuterRimWidth);
         _runtimeMaterial.SetFloat(RimSoftnessId, OuterRimSoftness);
@@ -144,10 +176,14 @@ public sealed class CharacterRigVisualEffectController : IDisposable
             return;
 
         _runtimeMaterial.SetFloat(DimAmountId, _dimAmount);
+        _runtimeMaterial.SetColor(DimTintColorId, _dimTintColor);
+
         _runtimeMaterial.SetFloat(RimAmountId, _outerRimAmount);
         _runtimeMaterial.SetColor(RimColorId, _outerRimColor);
+
         _runtimeMaterial.SetFloat(InnerRimAmountId, _innerRimAmount);
         _runtimeMaterial.SetColor(InnerRimColorId, _innerRimColor);
+
         _runtimeMaterial.SetFloat(BlurAmountId, _blurAmount);
     }
 

@@ -37,7 +37,9 @@ public sealed class CharVisualFocusCommandSpecCharR : CharacterRigCommandSpecBas
     [Range(0f, 1f)] public float defocusBlurAmount = 0.25f;
 
     [Header("Custom Values")]
-    [Range(0f, 1f)] public float dim = 0f;
+    [Range(0f, 3f)] public float dim = 0f;
+    
+    public Color dimTintColor = new Color(0.45f, 0.48f, 0.55f, 1f);
 
     [Tooltip("Legacy/custom rim amount. In the new UI shader this maps to Outer Rim.")]
     [Range(0f, 1f)] public float rim = 0f;
@@ -178,6 +180,7 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
     {
         return new VisualState(
             _controller.DimAmount,
+            _controller.DimTintColor,
             _controller.OuterRimAmount,
             _controller.InnerRimAmount,
             _controller.BlurAmount,
@@ -194,6 +197,7 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
             case CharacterVisualFocusMode.Focus:
                 return new VisualState(
                     0f,
+                    _controller.DimTintColor,
                     _spec.focusOuterRimAmount * intensity,
                     _spec.focusInnerRimAmount * intensity,
                     0f,
@@ -203,6 +207,7 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
             case CharacterVisualFocusMode.Defocus:
                 return new VisualState(
                     _spec.defocusDimAmount * intensity,
+                    _controller.DimTintColor,
                     0f,
                     0f,
                     _spec.defocusBlurAmount * intensity,
@@ -212,6 +217,7 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
             case CharacterVisualFocusMode.Clear:
                 return new VisualState(
                     0f,
+                    _controller.DimTintColor,
                     0f,
                     0f,
                     0f,
@@ -221,6 +227,7 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
             case CharacterVisualFocusMode.Custom:
                 return new VisualState(
                     _spec.dim,
+                    _spec.dimTintColor,
                     _spec.rim,
                     _spec.innerRim,
                     _spec.blur,
@@ -230,6 +237,7 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
             default:
                 return new VisualState(
                     0f,
+                    _controller.DimTintColor,
                     0f,
                     0f,
                     0f,
@@ -255,6 +263,7 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
 
         _controller.ApplyImmediate(
             state.Dim,
+            state.DimTintColor,
             state.OuterRim,
             state.InnerRim,
             state.Blur,
@@ -272,6 +281,7 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
     private readonly struct VisualState
     {
         public readonly float Dim;
+        public readonly Color DimTintColor;
         public readonly float OuterRim;
         public readonly float InnerRim;
         public readonly float Blur;
@@ -280,13 +290,15 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
 
         public VisualState(
             float dim,
+            Color dimTintColor,
             float outerRim,
             float innerRim,
             float blur,
             Color outerRimColor,
             Color innerRimColor)
         {
-            Dim = Mathf.Clamp01(dim);
+            Dim = dim;
+            DimTintColor = dimTintColor;
             OuterRim = Mathf.Clamp01(outerRim);
             InnerRim = Mathf.Clamp01(innerRim);
             Blur = Mathf.Clamp01(blur);
@@ -300,6 +312,7 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
 
             return new VisualState(
                 Mathf.Lerp(from.Dim, to.Dim, t),
+                Color.Lerp(from.DimTintColor, to.DimTintColor, t),
                 Mathf.Lerp(from.OuterRim, to.OuterRim, t),
                 Mathf.Lerp(from.InnerRim, to.InnerRim, t),
                 Mathf.Lerp(from.Blur, to.Blur, t),

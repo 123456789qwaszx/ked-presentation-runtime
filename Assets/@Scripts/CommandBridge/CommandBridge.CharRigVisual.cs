@@ -120,6 +120,7 @@ public sealed partial class YarnCommandBridge
             slotKey = roleKey.Trim(),
             mode = CharacterVisualFocusMode.Custom,
             dim = dim,
+            dimTintColor = new Color(0.45f, 0.48f, 0.55f, 1f),
             rim = 0f,
             innerRim = 0f,
             blur = 0f,
@@ -147,6 +148,38 @@ public sealed partial class YarnCommandBridge
             blur = 0f,
             rimColor = Color.white,
             innerRimColor = new Color(1f, 0.96f, 0.86f, 1f),
+            duration = duration,
+            wait = false
+        };
+
+        Collect(spec);
+    }
+    
+    private void EnqueueCharSilhouetteSpec(
+        string roleKey,
+        float dim = 1f,
+        float duration = 0.25f)
+    {
+        var spec = new CharVisualFocusCommandSpecCharR
+        {
+            slotKey = roleKey.Trim(),
+            mode = CharacterVisualFocusMode.Custom,
+
+            // 실루엣 전용.
+            // _DimTintColor를 black으로 바꿔 정보량을 강하게 줄인다.
+            dim = dim,
+            dimTintColor = Color.black,
+
+            // 실루엣에서는 rim 계열을 끈다.
+            rim = 0f,
+            innerRim = 0f,
+
+            // 형태는 남기되 디테일만 살짝 뭉개는 정도.
+            blur = 0.08f,
+
+            rimColor = Color.white,
+            innerRimColor = new Color(1f, 0.96f, 0.86f, 1f),
+
             duration = duration,
             wait = false
         };

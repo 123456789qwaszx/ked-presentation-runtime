@@ -59,10 +59,10 @@ public sealed partial class YarnCommandBridge : InlineEventMarkupHandler.IInline
             wait: true,
             killTween: true));
         
-        Collect(new WaitCommandSpec
-        {
-            duration = 0.5f
-        });
+        // Collect(new WaitCommandSpec
+        // {
+        //     duration = 0.5f
+        // });
         
         Collect(new FadeOutCommandSpecCharR
         {
