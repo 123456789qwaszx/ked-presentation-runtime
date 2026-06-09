@@ -248,8 +248,7 @@ public sealed partial class YarnCommandBridge
             duration = duration,
             ease = Ease.Linear,
 
-            wait = true,
-            disableWhenClear = true,
+            wait = true
         };
 
         Collect(spec);
@@ -271,8 +270,7 @@ public sealed partial class YarnCommandBridge
             duration = duration,
             ease = Ease.Linear,
 
-            wait = true,
-            disableWhenClear = true,
+            wait = true
         };
 
         Collect(spec);

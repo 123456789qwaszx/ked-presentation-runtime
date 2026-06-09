@@ -375,9 +375,6 @@ public static class CharacterRigRefsExtensions
         this CharacterRigRefs refs,
         CharacterRigTarget imageTarget)
     {
-        if (refs == null)
-            return null;
-
         return imageTarget switch
         {
             CharacterRigTarget.EmojiSlot00_Image => refs.EmojiSlot00_MaterialRuntime,

@@ -248,8 +248,7 @@ public sealed partial class YarnCommandBridge : InlineEventMarkupHandler.IInline
             alpha = 1f,
             initialReveal = initialReveal,
 
-            wait = false,
-            killTween = true
+            wait = false
         };
     }
 
@@ -273,8 +272,7 @@ public sealed partial class YarnCommandBridge : InlineEventMarkupHandler.IInline
             duration = duration,
             ease = ease,
 
-            wait = wait,
-            killTween = true
+            wait = wait
         };
     }
 

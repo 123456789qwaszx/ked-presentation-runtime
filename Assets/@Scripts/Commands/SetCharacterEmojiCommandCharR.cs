@@ -41,10 +41,6 @@ public sealed class SetCharacterEmojiCommandSpecCharR : CharacterRigCommandSpecB
 
     [Header("Reset")]
     public bool resetCastTransform = true;
-
-    [Header("Tween")]
-    [Tooltip("true면 이모지를 새로 세팅하기 전에 관련 target의 기존 tween을 committed state로 정리합니다.")]
-    public bool killTween = true;
 }
 
 public sealed class SetCharacterEmojiCommandCharR : CommandBase
@@ -52,13 +48,10 @@ public sealed class SetCharacterEmojiCommandCharR : CommandBase
     private readonly SetCharacterEmojiCommandSpecCharR _spec;
     private readonly CharacterEmojiResolver _resolver;
 
-    private CharacterRigRefs _rigRefs;
-
     private RectTransform _root;
     private RectTransform _castTransform;
     private Image _image;
     private CanvasGroup _rootCanvasGroup;
-
     private CharacterEmojiMaterialRuntime _materialRuntime;
 
     private Sprite _resolvedSprite;
@@ -66,10 +59,12 @@ public sealed class SetCharacterEmojiCommandCharR : CommandBase
     private CharacterEmojiVisualPresetSO _resolvedVisualPreset;
 
     private bool _resolveAttempted;
-    private bool _canCommitFinalState;
     private bool _isHideRequest;
 
+    private bool HasClaimedTarget { get; set; }
+
     public override bool WaitForCompletion => _spec.wait;
+    protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
     public SetCharacterEmojiCommandCharR(
         SetCharacterEmojiCommandSpecCharR spec,
@@ -85,18 +80,10 @@ public sealed class SetCharacterEmojiCommandCharR : CommandBase
             ResolveRefs(scope);
 
         if (!HasValidTargets())
-        {
-            ClearRuntimeRefs();
             yield break;
-        }
 
-        if (_spec.killTween)
-            KillTween(true);
-
-        _canCommitFinalState = true;
-
+        ClaimTarget();
         CommitFinalState();
-        ClearRuntimeRefs();
 
         yield break;
     }
@@ -106,37 +93,29 @@ public sealed class SetCharacterEmojiCommandCharR : CommandBase
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        CommitFinalState();
-        ClearRuntimeRefs();
-    }
-
-    protected override void OnRollbackSeek(CommandRunScope scope)
-    {
-        OnSkip(scope);
-    }
-
-    protected override void OnCommandCompleted(CommandRunScope scope)
-    {
-        if (!_resolveAttempted)
-            ResolveRefs(scope);
-
-        if (!_canCommitFinalState)
+        if (!HasValidTargets())
             return;
 
+        if (!HasClaimedTarget)
+            ClaimTarget();
+        else
+            KillCurrentTween();
+
         CommitFinalState();
-        ClearRuntimeRefs();
     }
+
+    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
 
     private void ResolveRefs(CommandRunScope scope)
     {
         _resolveAttempted = true;
 
-        _rigRefs =
+        CharacterRigRefs rigRefs =
             CharacterRigTargetResolver.ResolveCharRigFromTargetKey(
                 scope,
                 _spec.slotKey);
 
-        if (_rigRefs == null)
+        if (rigRefs == null)
         {
             Debug.LogWarning(
                 $"[SetCharacterEmojiCommandCharR] Failed to resolve CharacterRigRefs. " +
@@ -144,15 +123,73 @@ public sealed class SetCharacterEmojiCommandCharR : CommandBase
             return;
         }
 
-        _root = _rigRefs.GetRect(_spec.rootTarget);
-        _castTransform = _rigRefs.GetRect(_spec.castTarget);
-        _image = _rigRefs.GetImage(_spec.imageTarget);
-        _materialRuntime = _rigRefs.GetEmojiMaterialRuntime(_spec.imageTarget);
+        _root = rigRefs.GetRect(_spec.rootTarget);
+        _castTransform = rigRefs.GetRect(_spec.castTarget);
+        _image = rigRefs.GetImage(_spec.imageTarget);
+        _materialRuntime = rigRefs.GetEmojiMaterialRuntime(_spec.imageTarget);
 
         if (_root != null)
             _root.TryGetComponent(out _rootCanvasGroup);
 
         ResolveEmoji();
+    }
+
+    private void ClaimTarget()
+    {
+        KillPreviousTween();
+
+        HasClaimedTarget = true;
+    }
+
+    private void KillPreviousTween()
+    {
+        _materialRuntime?.KillTween(true);
+
+        if (_rootCanvasGroup != null)
+            _rootCanvasGroup.DOKill(true);
+
+        if (_castTransform != null)
+            _castTransform.DOKill(true);
+    }
+
+    private void KillCurrentTween()
+    {
+        _materialRuntime?.KillTween(false);
+
+        if (_rootCanvasGroup != null)
+            _rootCanvasGroup.DOKill(false);
+
+        if (_castTransform != null)
+            _castTransform.DOKill(false);
+    }
+
+    private void CommitFinalState()
+    {
+        if (!HasValidTargets())
+        {
+            HasClaimedTarget = false;
+            return;
+        }
+
+        if (_isHideRequest)
+        {
+            ApplyHiddenState();
+            HasClaimedTarget = false;
+            return;
+        }
+
+        if (_resolvedSprite == null)
+        {
+            HasClaimedTarget = false;
+            return;
+        }
+
+        ApplySpriteAndLayout();
+        ApplyEmojiMaterialInitialState();
+
+        _rootCanvasGroup.alpha = _spec.alpha;
+
+        HasClaimedTarget = false;
     }
 
     private void ResolveEmoji()
@@ -200,35 +237,6 @@ public sealed class SetCharacterEmojiCommandCharR : CommandBase
         Debug.LogWarning(
             $"[SetCharacterEmojiCommandCharR] Failed to resolve emoji sprite. " +
             $"emojiKey='{_spec.emojiKey}', targetKey='{_spec.slotKey}'.");
-    }
-
-    private void CommitFinalState()
-    {
-        if (!HasValidTargets())
-        {
-            _canCommitFinalState = false;
-            return;
-        }
-
-        if (_isHideRequest)
-        {
-            ApplyHiddenState();
-            ClearCommitFlag();
-            return;
-        }
-
-        if (_resolvedSprite == null)
-        {
-            ClearCommitFlag();
-            return;
-        }
-
-        ApplySpriteAndLayout();
-        ApplyEmojiMaterialInitialState();
-
-        _rootCanvasGroup.alpha = _spec.alpha;
-
-        ClearCommitFlag();
     }
 
     private void ApplySpriteAndLayout()
@@ -298,9 +306,6 @@ public sealed class SetCharacterEmojiCommandCharR : CommandBase
 
     private void ApplyLayout()
     {
-        if (_castTransform == null)
-            return;
-
         _castTransform.anchoredPosition = _resolvedLayout.anchoredPosition;
         _castTransform.localScale = _resolvedLayout.localScale;
         _castTransform.localRotation = Quaternion.Euler(0f, 0f, _resolvedLayout.rotationZ);
@@ -308,9 +313,6 @@ public sealed class SetCharacterEmojiCommandCharR : CommandBase
 
     private void ResetCastTransform()
     {
-        if (_castTransform == null)
-            return;
-
         _castTransform.anchoredPosition = Vector2.zero;
         _castTransform.localScale = Vector3.one;
         _castTransform.localRotation = Quaternion.identity;
@@ -318,9 +320,6 @@ public sealed class SetCharacterEmojiCommandCharR : CommandBase
 
     private void ApplyHiddenState()
     {
-        if (!HasValidTargets())
-            return;
-
         _image.sprite = null;
         _image.enabled = false;
         _rootCanvasGroup.alpha = 0f;
@@ -328,49 +327,8 @@ public sealed class SetCharacterEmojiCommandCharR : CommandBase
         _materialRuntime?.KillTween(false);
     }
 
-    private void KillTween(bool complete)
-    {
-        // SetCharacterEmoji는 reveal/motion/fade 연출을 소유하지 않는다.
-        // 다만 새 emoji를 배치할 때 같은 material runtime의 이전 reveal tween은 committed state로 정리한다.
-        _materialRuntime?.KillTween(complete);
-
-        if (_rootCanvasGroup != null)
-            _rootCanvasGroup.DOKill(complete);
-
-        if (_castTransform != null)
-            _castTransform.DOKill(complete);
-    }
-
     private bool HasValidTargets()
     {
-        return _root != null
-               && _rootCanvasGroup != null
-               && _castTransform != null
-               && _image != null;
-    }
-
-    private void ClearCommitFlag()
-    {
-        _canCommitFinalState = false;
-    }
-
-    private void ClearRuntimeRefs()
-    {
-        _rigRefs = null;
-
-        _root = null;
-        _castTransform = null;
-        _image = null;
-        _rootCanvasGroup = null;
-
-        _materialRuntime = null;
-
-        _resolvedSprite = null;
-        _resolvedLayout = CharacterEmojiLayout.Default;
-        _resolvedVisualPreset = null;
-
-        _isHideRequest = false;
-        _resolveAttempted = false;
-        _canCommitFinalState = false;
+        return _root != null && _rootCanvasGroup != null && _castTransform != null && _image != null;
     }
 }

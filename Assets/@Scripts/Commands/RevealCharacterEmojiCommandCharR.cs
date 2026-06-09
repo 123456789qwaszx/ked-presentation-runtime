@@ -28,29 +28,26 @@ public sealed class RevealCharacterEmojiCommandSpecCharR : CharacterRigCommandSp
     public float duration = 0.12f;
 
     public Ease ease = Ease.OutCubic;
-
-    [Header("Tween")]
-    public bool killTween = true;
 }
 
 public sealed class RevealCharacterEmojiCommandCharR : CommandBase
 {
     private readonly RevealCharacterEmojiCommandSpecCharR _spec;
 
-    private CharacterRigRefs _rigRefs;
     private Image _image;
     private CharacterEmojiMaterialRuntime _materialRuntime;
-    private Tween _tween;
-
-    private bool _resolveAttempted;
-    private bool _canCommitFinalState;
 
     private float _fromReveal;
     private float _toReveal;
     private float _duration;
     private Ease _ease;
 
+    private bool _resolveAttempted;
+
+    private bool HasClaimedTarget { get; set; }
+
     public override bool WaitForCompletion => _spec.wait;
+    protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
     public RevealCharacterEmojiCommandCharR(RevealCharacterEmojiCommandSpecCharR spec)
     {
@@ -63,48 +60,35 @@ public sealed class RevealCharacterEmojiCommandCharR : CommandBase
             ResolveRefs(scope);
 
         if (!HasValidRefs())
-        {
-            ClearRuntimeRefs();
             yield break;
-        }
 
         if (!PrepareMaterial())
-        {
-            ClearRuntimeRefs();
             yield break;
-        }
 
         ResolveTweenValues();
-
-        if (_spec.killTween)
-            _materialRuntime.KillTween(true); // Finish previous reveal so this command starts from a committed state.
-
-        _canCommitFinalState = true;
+        ClaimTarget();
 
         if (_duration <= 0f || scope.ShouldCompressTime)
         {
-            _materialRuntime.SetReveal(_toReveal);
-            ClearRuntimeRefs();
+            CommitFinalState();
             yield break;
         }
 
-        _tween = _materialRuntime
-            .TweenReveal(
-                _fromReveal,
-                _toReveal,
-                _duration,
-                _ease,
-                useUnscaledTime: true);
+        Tween tween = _materialRuntime.TweenReveal(
+            _fromReveal,
+            _toReveal,
+            _duration,
+            _ease,
+            useUnscaledTime: true);
 
-        if (_tween == null)
+        if (tween == null)
         {
-            _materialRuntime.SetReveal(_toReveal);
-            ClearRuntimeRefs();
+            CommitFinalState();
             yield break;
         }
 
         if (_spec.wait)
-            yield return _tween.WaitForCompletion();
+            yield return tween.WaitForCompletion();
     }
 
     protected override void OnSkip(CommandRunScope scope)
@@ -116,58 +100,39 @@ public sealed class RevealCharacterEmojiCommandCharR : CommandBase
             return;
 
         if (!PrepareMaterial())
-        {
-            ClearRuntimeRefs();
-            return;
-        }
-
-        ResolveTweenValues();
-
-        _materialRuntime.SetReveal(_toReveal);
-
-        ClearRuntimeRefs();
-    }
-
-    protected override void OnRollbackSeek(CommandRunScope scope)
-    {
-        OnSkip(scope);
-    }
-
-    protected override void OnCommandCompleted(CommandRunScope scope)
-    {
-        if (!_resolveAttempted)
-            ResolveRefs(scope);
-
-        if (!_canCommitFinalState || !HasValidRefs())
             return;
 
         ResolveTweenValues();
 
-        _tween?.Kill(false);
-        _materialRuntime.KillTween(false);
-        _materialRuntime.SetReveal(_toReveal);
+        if (!HasClaimedTarget)
+            ClaimTarget();
 
-        ClearRuntimeRefs();
+        CommitFinalState();
     }
+
+    protected override void OnRollbackSeek(CommandRunScope scope) => OnSkip(scope);
 
     private void ResolveRefs(CommandRunScope scope)
     {
         _resolveAttempted = true;
 
-        _rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(
-                scope,
-                _spec.slotKey);
+        CharacterRigRefs rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
+        _image = rigRefs.GetImage(_spec.imageTarget);
+        _materialRuntime = rigRefs.GetEmojiMaterialRuntime(_spec.imageTarget);
+    }
 
-        if (_rigRefs == null)
-        {
-            Debug.LogWarning(
-                $"[RevealCharacterEmojiCommandCharR] Failed to resolve CharacterRigRefs. " +
-                $"targetKey='{_spec.slotKey}', imageTarget='{_spec.imageTarget}'.");
-            return;
-        }
+    private void ClaimTarget()
+    {
+        _materialRuntime.KillTween(true);
 
-        _image = _rigRefs.GetImage(_spec.imageTarget);
-        _materialRuntime = _rigRefs.GetEmojiMaterialRuntime(_spec.imageTarget);
+        HasClaimedTarget = true;
+    }
+
+    private void CommitFinalState()
+    {
+        _materialRuntime.SetReveal(_toReveal);
+
+        HasClaimedTarget = false;
     }
 
     private bool PrepareMaterial()
@@ -214,22 +179,6 @@ public sealed class RevealCharacterEmojiCommandCharR : CommandBase
 
     private bool HasValidRefs()
     {
-        return _image != null
-               && _materialRuntime != null;
-    }
-
-    private void ClearRuntimeRefs()
-    {
-        _canCommitFinalState = false;
-
-        _rigRefs = null;
-        _image = null;
-        _materialRuntime = null;
-        _tween = null;
-
-        _fromReveal = 0f;
-        _toReveal = 1f;
-        _duration = 0f;
-        _ease = Ease.OutCubic;
+        return _image != null && _materialRuntime != null;
     }
 }
