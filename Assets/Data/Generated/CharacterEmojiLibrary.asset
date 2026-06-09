@@ -13,6 +13,24 @@ MonoBehaviour:
   m_Name: CharacterEmojiLibrary
   m_EditorClassIdentifier: Assembly-CSharp::CharacterEmojiLibrarySO
   entries:
+  - emojiKey: 05
+    sprite: {fileID: 21300000, guid: bcdfa9bf761b70e499fcabdfdeefedb5, type: 3}
+    layout:
+      anchoredPosition: {x: 130, y: 350}
+      localScale: {x: 0.05, y: 0.05, z: 0.05}
+      rotationZ: 0
+      preserveAspect: 1
+      setNativeSize: 0
+    defaultVisualPreset: {fileID: 11400000, guid: e00fbe47d88401f458328299b0b76437, type: 2}
+  - emojiKey: 08
+    sprite: {fileID: 21300000, guid: b6b1efbab66e0fd4c8feba43da04fcc3, type: 3}
+    layout:
+      anchoredPosition: {x: -50, y: 380}
+      localScale: {x: 0.05, y: 0.07, z: 0.07}
+      rotationZ: 0
+      preserveAspect: 1
+      setNativeSize: 0
+    defaultVisualPreset: {fileID: 11400000, guid: e00fbe47d88401f458328299b0b76437, type: 2}
   - emojiKey: 00
     sprite: {fileID: 21300000, guid: 55ade53086ff81a4498330e2eb14d12c, type: 3}
     layout:
@@ -76,15 +94,6 @@ MonoBehaviour:
       preserveAspect: 1
       setNativeSize: 0
     defaultVisualPreset: {fileID: 11400000, guid: e00fbe47d88401f458328299b0b76437, type: 2}
-  - emojiKey: 05
-    sprite: {fileID: 21300000, guid: bcdfa9bf761b70e499fcabdfdeefedb5, type: 3}
-    layout:
-      anchoredPosition: {x: 130, y: 350}
-      localScale: {x: 0.05, y: 0.05, z: 0.05}
-      rotationZ: 0
-      preserveAspect: 1
-      setNativeSize: 0
-    defaultVisualPreset: {fileID: 11400000, guid: e00fbe47d88401f458328299b0b76437, type: 2}
   - emojiKey: 06
     sprite: {fileID: 21300000, guid: 2fba80d8de8347b4eaf9110bfc19c1fd, type: 3}
     layout:
@@ -100,15 +109,6 @@ MonoBehaviour:
       anchoredPosition: {x: 95, y: 370}
       localScale: {x: 0.12, y: 0.12, z: 0.12}
       rotationZ: -10
-      preserveAspect: 1
-      setNativeSize: 0
-    defaultVisualPreset: {fileID: 11400000, guid: e00fbe47d88401f458328299b0b76437, type: 2}
-  - emojiKey: 08
-    sprite: {fileID: 21300000, guid: b6b1efbab66e0fd4c8feba43da04fcc3, type: 3}
-    layout:
-      anchoredPosition: {x: -50, y: 380}
-      localScale: {x: 0.05, y: 0.07, z: 0.07}
-      rotationZ: 0
       preserveAspect: 1
       setNativeSize: 0
     defaultVisualPreset: {fileID: 11400000, guid: e00fbe47d88401f458328299b0b76437, type: 2}

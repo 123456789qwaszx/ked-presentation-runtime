@@ -8,10 +8,7 @@ public static class PresentationResponseMath
         in PresentationResponseMeasure measure)
     {
         Vector2 focusToTarget = measure.basePositionInRigSpace - state.focusPointInRigSpace;
-
-        Vector2 directionFromFocus = focusToTarget.sqrMagnitude <= 0.0001f
-            ? Vector2.zero
-            : focusToTarget.normalized;
+        Vector2 directionFromFocus = focusToTarget.normalized;
 
         float spreadDistance = state.zoom * profile.focusSpreadPixelsPerZoom;
         Vector2 focusSpreadOffset = directionFromFocus * spreadDistance;

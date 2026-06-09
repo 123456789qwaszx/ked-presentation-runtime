@@ -1,8 +1,8 @@
-﻿title: Story_TalesofNovaEP08_01
+﻿title: Story_TalesOfNovaEP08_01
 position: 694,90
 ---
 <<shot_reset>>
-<<beat Setup_TalesofNovaEP08_01>>
+<<beat Setup_TalesOfNovaEP08_01>>
 음...... 벌써 며칠째지......
 이 감옥엔 창문이나 시계 같은 것도 없군
 
@@ -22,7 +22,7 @@ position: 694,90
 <<beat Beat_Screen_Vignette>>
 크루니스: 그렇군...... 인간의 신체는 오랫동안 무릎 꿇은 자세를 유지하면, 이런 느낌이 드는구나~
 
-<<pres_start Pres_TalesofNovaEp08_01>>
+<<pres_start Pres_TalesOfNovaEp08_01>>
 .:(문이 닫히는 소리가 들린다) #beat #stay
 <<pause 0.5>>
 크루니스: 인체는 참 신기하다니까~ 
@@ -63,7 +63,6 @@ position: 694,90
 감옥 간수:.. #beat #stay
 
 //<<solo_shot npc1>>
-<<emoji npc1 5>>
 감옥 간수: 너! 허튼짓 할 생각 하지 말고!!! 가만히 있어!
 
 감옥 간수:..#boxhide
@@ -71,6 +70,7 @@ position: 694,90
 <<fade_in igna 0.4>>
 <<shot_zoom_focus igna bust center 0.3 3.5>>
 <<flip_horizontal kronis 180 0.95>>
+<<emoji kronis 8>>
 ???: 오랜만이네, 크루니스.
 
 ???:.. #boxhide
@@ -204,7 +204,7 @@ position: 694,90
 
 ===
 
-title: Setup_TalesofNovaEP08_01
+title: Setup_TalesOfNovaEP08_01
 position: 234,-104
 ---
 
@@ -240,7 +240,7 @@ position: 234,-104
 
 ===
 
-title: Pres_TalesofNovaEp08_01
+title: Pres_TalesOfNovaEp08_01
 position: 508,-78
 ---
 1.(크루니스: 인체는 참 신기하다니까~)

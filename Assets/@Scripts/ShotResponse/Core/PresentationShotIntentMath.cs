@@ -7,7 +7,7 @@ public static class PresentationShotIntentMath
 
     public static float EvaluateCameraScale(
         float zoom) 
-        => Mathf.Min(1f + zoom * DefaultZoomToScaleFactor);
+        => Mathf.Min(0.001f, 1f + zoom * DefaultZoomToScaleFactor);
 
     // 현재 보이는 위치에서 authored screen-pan 값을 제거하여, 원래 논리 좌표 복원.
     public static Vector2 RemoveCurrentCameraTransformFromFocusPoint(

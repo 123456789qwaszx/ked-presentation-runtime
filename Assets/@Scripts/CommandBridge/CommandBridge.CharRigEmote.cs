@@ -5,20 +5,20 @@ public sealed partial class YarnCommandBridge : InlineEventMarkupHandler.IInline
 {
     public void PlayEmojiCue(string cue)
     {
-        // string characterKey = _vnRuntimeStateProvider != null
-        //     ? _vnRuntimeStateProvider.CurrentCharacterKey
-        //     : "";
-        //
-        // if (string.IsNullOrWhiteSpace(characterKey))
-        //     return;
-        //
-        // if (string.IsNullOrWhiteSpace(cue))
-        // {
-        //     EnqueueEmojiHideSpec(characterKey);
-        //     return;
-        // }
-        //
-        // EnqueueEmojiPopSpec(characterKey, cue);
+        string characterKey = _vnRuntimeStateProvider != null
+            ? _vnRuntimeStateProvider.CurrentCharacterKey
+            : "";
+        
+        if (string.IsNullOrWhiteSpace(characterKey))
+            return;
+        
+        if (string.IsNullOrWhiteSpace(cue))
+        {
+            EnqueueEmojiHideSpec(characterKey);
+            return;
+        }
+        
+        EnqueueEmojiPopSpec(characterKey, cue);
     }
 
     // ----------------------------------------------------------------------

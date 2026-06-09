@@ -67,11 +67,9 @@ public static class PresentationCoordinateMath
         return new Vector2(localPivot.x, localPivot.y);
     }
     
-    public static Vector2 CaptureNeutralScale(RectTransform neutralScaleSource)
+    public static Vector2 CaptureNeutralScale(
+        RectTransform neutralScaleSource)
     {
-        if (neutralScaleSource == null)
-            return Vector2.one;
-
         Vector3 scale = neutralScaleSource.localScale;
         return new Vector2(scale.x, scale.y);
     }
@@ -86,5 +84,4 @@ public static class PresentationCoordinateMath
         
         return new Vector2(positionInParentSpace.x, positionInParentSpace.y);
     }
-
 }
