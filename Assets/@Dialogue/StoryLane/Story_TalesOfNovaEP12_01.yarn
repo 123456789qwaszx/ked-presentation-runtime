@@ -10,9 +10,6 @@ position: -2,-160
 <<bg_size bg1 1.5>>
 
 <<bg_spawn bg2 bgslot_01 02>>
-<<bg_hide_layers bg2 front>>
-<<bg_show_layers bg2 object>>
-<<bg_hide_layers bg2 root>>
 <<bg_place bg2 40 200>>
 
 
