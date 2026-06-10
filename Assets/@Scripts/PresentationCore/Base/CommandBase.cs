@@ -52,17 +52,8 @@ public abstract class CommandBase : ISequenceCommand, IStepScopedCommand
                     break;
             }
         }
-
-        IEnumerator inner = null;
-        try
-        {
-            inner = ExecuteInner(scope);
-        }
-        catch (System.Exception e)
-        {
-            Debug.LogException(e);
-            yield break;
-        }
+        
+        IEnumerator inner = ExecuteInner(scope);
 
         if (inner != null)
             yield return inner;

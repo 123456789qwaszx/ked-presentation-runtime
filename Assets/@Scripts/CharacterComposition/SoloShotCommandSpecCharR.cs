@@ -34,17 +34,12 @@ public sealed class SoloShotCommandSpecCharR : CharacterRigCommandSpecBase
     [Tooltip("단독샷 스케일을 적용할 대상입니다. 보통 CharSlot_Scale입니다.")]
     public CharacterRigTarget scaleTarget = CharacterRigTarget.CharSlot_Scale;
 
-    public bool applyScale = true;
-
     [Header("Scale")]
     public Vector2 targetScale = new Vector2(1.08f, 1.08f);
 
     [Header("Tween")]
     public float duration = 0.45f;
     public Ease ease = Ease.OutCubic;
-
-    [Header("Options")]
-    public bool killTween = true;
 }
 
 public sealed class SoloShotCommandCharR : CommandBase
@@ -55,18 +50,14 @@ public sealed class SoloShotCommandCharR : CommandBase
     private RectTransform _moveRect;
     private RectTransform _scaleRect;
 
-    private Tween _moveTween;
-    private Tween _scaleTween;
-
-    private bool _resolveAttempted;
-    private bool _hasComputedDestination;
-    private bool _canCommitFinalState;
-
     private Vector2 _destination;
     private Vector2 _targetScale;
 
+    private bool _resolveAttempted;
+
+    private bool HasClaimedTargets { get; set; }
+
     public override bool WaitForCompletion => _spec.wait;
-    protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
     public SoloShotCommandCharR(
         SoloShotCommandSpecCharR spec,
@@ -78,138 +69,88 @@ public sealed class SoloShotCommandCharR : CommandBase
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
-        if (!EnsureRefs(scope))
-            yield break;
+        if (!_resolveAttempted)
+            ResolveRefs(scope);
 
-        if (_spec.killTween)
-        {
-            _moveRect.DOKill(true);
-
-            if (_scaleRect != null)
-                _scaleRect.DOKill(true);
-        }
-
-        _hasComputedDestination = false;
-
-        if (!ComputeDestinationIfNeeded(scope))
-            yield break;
-
-        _canCommitFinalState = true;
+        ClaimTargets(scope);
 
         if (_spec.duration <= 0f)
         {
             CommitFinalState();
-            ClearRuntimeState();
             yield break;
         }
 
-        _moveTween = _moveRect
-            .DOAnchorPos(_destination, _spec.duration)
-            .SetEase(_spec.ease)
+        Sequence sequence = DOTween.Sequence()
             .SetUpdate(true)
             .SetTarget(_moveRect);
 
-        if (_spec.applyScale && _scaleRect != null)
-        {
-            Vector3 endScale = _scaleRect.localScale;
-            endScale.x = _targetScale.x;
-            endScale.y = _targetScale.y;
-
-            _scaleTween = _scaleRect
-                .DOScale(endScale, _spec.duration)
+        sequence.Join(
+            _moveRect
+                .DOAnchorPos(_destination, _spec.duration)
                 .SetEase(_spec.ease)
                 .SetUpdate(true)
-                .SetTarget(_scaleRect);
-        }
+                .SetTarget(_moveRect));
+
+        Vector3 endScale = _scaleRect.localScale;
+        endScale.x = _targetScale.x;
+        endScale.y = _targetScale.y;
+
+        sequence.Join(
+            _scaleRect
+            .DOScale(endScale, _spec.duration)
+            .SetEase(_spec.ease)
+            .SetUpdate(true)
+            .SetTarget(_scaleRect));
+        
+
+        sequence.OnComplete(CommitFinalState);
 
         if (_spec.wait)
-            yield return WaitUntilTweensComplete();
+            yield return sequence.WaitForCompletion();
     }
 
     protected override void OnSkip(CommandRunScope scope)
     {
-        if (!EnsureRefs(scope))
-            return;
+        if (!_resolveAttempted)
+            ResolveRefs(scope);
 
-        KillTweens(false);
-
-        _hasComputedDestination = false;
-
-        if (!ComputeDestinationIfNeeded(scope))
-            return;
+        if (!HasClaimedTargets) 
+            ClaimTargets(scope);
 
         CommitFinalState();
-        ClearRuntimeState();
     }
 
-    protected override void OnCommandCompleted(CommandRunScope scope)
+    private void ResolveRefs(CommandRunScope scope)
     {
-        if (!_canCommitFinalState)
-            return;
-
-        if (!EnsureRefs(scope))
-            return;
-
-        KillTweens(false);
-
-        if (!ComputeDestinationIfNeeded(scope))
-            return;
-
-        CommitFinalState();
-        ClearRuntimeState();
-    }
-
-    private bool EnsureRefs(CommandRunScope scope)
-    {
-        if (_resolveAttempted)
-            return _moveRect != null;
-
         _resolveAttempted = true;
 
-        CharacterRigRefs rigRefs =
-            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
+        CharacterRigRefs rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
+        _moveRect = rig.GetRect(_spec.moveTarget);
+        _scaleRect = rig.GetRect(_spec.scaleTarget);
+    }
 
-        if (rigRefs == null)
+    private bool ClaimTargets(CommandRunScope scope)
+    {
+        KillPreviousTweens();
+
+        if (!ComputeDestination(scope))
             return false;
 
-        _moveRect = rigRefs.GetRect(_spec.moveTarget);
-
-        if (_moveRect == null)
-        {
-            Debug.LogWarning(
-                $"[SoloShotCommandCharR] Missing move target. " +
-                $"slotKey='{_spec.slotKey}', target='{_spec.moveTarget}'.");
-            return false;
-        }
-
-        if (_spec.applyScale)
-        {
-            _scaleRect = rigRefs.GetRect(_spec.scaleTarget);
-
-            if (_scaleRect == null)
-            {
-                Debug.LogWarning(
-                    $"[SoloShotCommandCharR] Missing scale target. " +
-                    $"slotKey='{_spec.slotKey}', target='{_spec.scaleTarget}'.");
-                return false;
-            }
-        }
-
+        HasClaimedTargets = true;
         return true;
     }
 
-    private bool ComputeDestinationIfNeeded(CommandRunScope scope)
+    private void KillPreviousTweens()
     {
-        if (_hasComputedDestination)
-            return true;
+        _moveRect.DOKill(true);
+        _scaleRect.DOKill(true);
+    }
 
-        _hasComputedDestination = true;
+    private bool ComputeDestination(CommandRunScope scope)
+    {
         _targetScale = _spec.targetScale;
 
-        CharacterPlacementScalePreview scalePreview =
-            _spec.applyScale
-                ? new CharacterPlacementScalePreview(_scaleRect, _targetScale)
-                : CharacterPlacementScalePreview.None;
+        CharacterPlacementScalePreview scalePreview = new CharacterPlacementScalePreview(_scaleRect, _targetScale);
 
         if (!CharacterPlacementSolver.TryCalculateFocusPlacement(
                 scope,
@@ -228,6 +169,7 @@ public sealed class SoloShotCommandCharR : CommandBase
             Debug.LogWarning(
                 $"[SoloShotCommandCharR] Failed to calculate solo shot placement. " +
                 $"slotKey='{_spec.slotKey}', focus='{_spec.focusPreset}', screenPoint='{_spec.screenPoint}'.");
+
             return false;
         }
 
@@ -235,53 +177,15 @@ public sealed class SoloShotCommandCharR : CommandBase
         return true;
     }
 
-    private IEnumerator WaitUntilTweensComplete()
-    {
-        while (IsTweenActive(_moveTween) || IsTweenActive(_scaleTween))
-            yield return null;
-    }
-
-    private static bool IsTweenActive(Tween tween)
-    {
-        return tween != null && tween.IsActive() && tween.IsPlaying();
-    }
-
     private void CommitFinalState()
     {
-        if (_moveRect != null)
-            _moveRect.anchoredPosition = _destination;
+        _moveRect.anchoredPosition = _destination;
 
-        if (_spec.applyScale && _scaleRect != null)
-        {
-            Vector3 s = _scaleRect.localScale;
-            s.x = _targetScale.x;
-            s.y = _targetScale.y;
-            _scaleRect.localScale = s;
-        }
-    }
+        Vector3 scale = _scaleRect.localScale;
+        scale.x = _targetScale.x;
+        scale.y = _targetScale.y;
+        _scaleRect.localScale = scale;
 
-    private void KillTweens(bool complete)
-    {
-        _moveTween?.Kill(complete);
-        _scaleTween?.Kill(complete);
-
-        if (_moveRect != null)
-            _moveRect.DOKill(complete);
-
-        if (_scaleRect != null)
-            _scaleRect.DOKill(complete);
-
-        _moveTween = null;
-        _scaleTween = null;
-    }
-
-    private void ClearRuntimeState()
-    {
-        _canCommitFinalState = false;
-
-        _moveTween = null;
-        _scaleTween = null;
-        _moveRect = null;
-        _scaleRect = null;
+        HasClaimedTargets = false;
     }
 }

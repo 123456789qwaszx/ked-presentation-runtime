@@ -167,13 +167,12 @@ public sealed partial class YarnCommandBridge
         string screenPoint = "center",
         float duration = 0.4f)
     {
-        CharacterFocusPreset focusPreset =
-            CharacterFocusPresetParser.Parse(focus, CharacterFocusPreset.Face);
+        CharacterFocusPreset focusPreset = CharacterFocusPresetParser.Parse(focus, CharacterFocusPreset.Face);
 
-        ScreenFocusPoint screen =
-            ScreenFocusPointParser.TryParse(screenPoint, out ScreenFocusPoint parsed)
-                ? parsed
-                : ScreenFocusPoint.Center;
+        ScreenFocusPoint screen = 
+            ScreenFocusPointParser.TryParse(screenPoint, out ScreenFocusPoint parsed) 
+            ? parsed 
+            : ScreenFocusPoint.Center;
 
         var spec = new PlaceCharacterFocusCommandSpecCharR
         {
@@ -182,8 +181,7 @@ public sealed partial class YarnCommandBridge
             screenPoint = screen,
             moveTarget = CharacterRigTarget.CharSlot_Track,
             duration = duration,
-            wait = false,
-            killTween = true
+            wait = false
         };
 
         Collect(spec);
@@ -201,12 +199,10 @@ public sealed partial class YarnCommandBridge
 
             moveTarget = CharacterRigTarget.CharSlot_Track,
             scaleTarget = CharacterRigTarget.CharSlot_Scale,
-            applyScale = true,
             targetScale = new Vector2(1.08f, 1.08f),
 
             duration = duration,
-            wait = false,
-            killTween = true
+            wait = false
         };
 
         Collect(spec);
@@ -218,8 +214,7 @@ public sealed partial class YarnCommandBridge
         string presetName = "balanced",
         float duration = 0.45f)
     {
-        CharacterDuoShotPreset preset =
-            CharacterDuoShotPresetParser.Parse(presetName, CharacterDuoShotPreset.Balanced);
+        CharacterDuoShotPreset preset = CharacterDuoShotPresetParser.Parse(presetName, CharacterDuoShotPreset.Balanced);
 
         var spec = new DuoShotCommandSpecCharR
         {
@@ -228,10 +223,8 @@ public sealed partial class YarnCommandBridge
             preset = preset,
             moveTarget = CharacterRigTarget.CharSlot_Track,
             scaleTarget = CharacterRigTarget.CharSlot_Scale,
-            applyScale = true,
             duration = duration,
-            wait = false,
-            killTween = true
+            wait = false
         };
 
         Collect(spec);

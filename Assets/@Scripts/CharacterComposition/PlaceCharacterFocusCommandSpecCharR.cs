@@ -35,9 +35,6 @@ public sealed class PlaceCharacterFocusCommandSpecCharR : CharacterRigCommandSpe
     [Header("Tween")]
     public float duration = 0.4f;
     public Ease ease = Ease.OutCubic;
-
-    [Header("Options")]
-    public bool killTween = true;
 }
 
 public sealed class PlaceCharacterFocusCommandCharR : CommandBase
@@ -46,16 +43,13 @@ public sealed class PlaceCharacterFocusCommandCharR : CommandBase
     private readonly CharacterFocusTuningDBSO _focusTuningDb;
 
     private RectTransform _moveRect;
-    private Tween _tween;
-
-    private bool _resolveAttempted;
-    private bool _hasComputedDestination;
-    private bool _canCommitFinalState;
-
     private Vector2 _destination;
 
+    private bool _resolveAttempted;
+
+    private bool HasClaimedTarget { get; set; }
+
     public override bool WaitForCompletion => _spec.wait;
-    protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
     public PlaceCharacterFocusCommandCharR(
         PlaceCharacterFocusCommandSpecCharR spec,
@@ -67,112 +61,58 @@ public sealed class PlaceCharacterFocusCommandCharR : CommandBase
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
-        if (!EnsureMoveRect(scope))
-            yield break;
+        if (!_resolveAttempted)
+            ResolveRefs(scope);
 
-        if (_spec.killTween)
-            _moveRect.DOKill(true);
-
-        _hasComputedDestination = false;
-
-        if (!ComputeDestinationIfNeeded(scope))
-            yield break;
-
-        _canCommitFinalState = true;
+        ClaimTarget(scope);
 
         if (_spec.duration <= 0f)
         {
-            CommitDestination();
-            ClearRuntimeState();
+            CommitFinalState();
             yield break;
         }
 
-        _tween = _moveRect
+        Tween tween = _moveRect
             .DOAnchorPos(_destination, _spec.duration)
             .SetEase(_spec.ease)
             .SetUpdate(true)
             .SetTarget(_moveRect)
-            .OnComplete(() =>
-            {
-                if (!_canCommitFinalState || _moveRect == null)
-                    return;
-
-                CommitDestination();
-                ClearRuntimeState();
-            });
+            .OnComplete(CommitFinalState);
 
         if (_spec.wait)
-            yield return _tween.WaitForCompletion();
+            yield return tween.WaitForCompletion();
     }
 
     protected override void OnSkip(CommandRunScope scope)
     {
-        if (!EnsureMoveRect(scope))
-            return;
+        if (!_resolveAttempted)
+            ResolveRefs(scope);
 
-        if (_spec.killTween)
-            _moveRect.DOKill(false);
-
-        _hasComputedDestination = false;
-
-        if (!ComputeDestinationIfNeeded(scope))
-            return;
-
-        CommitDestination();
-        ClearRuntimeState();
+        if (!HasClaimedTarget)
+            ClaimTarget(scope);
+        
+        CommitFinalState();
     }
 
-    protected override void OnCommandCompleted(CommandRunScope scope)
+    private void ResolveRefs(CommandRunScope scope)
     {
-        if (!_canCommitFinalState)
-            return;
-
-        if (!EnsureMoveRect(scope))
-            return;
-
-        _tween?.Kill(false);
-        _moveRect.DOKill(false);
-
-        if (!ComputeDestinationIfNeeded(scope))
-            return;
-
-        CommitDestination();
-        ClearRuntimeState();
-    }
-
-    private bool EnsureMoveRect(CommandRunScope scope)
-    {
-        if (_resolveAttempted)
-            return _moveRect != null;
-
         _resolveAttempted = true;
 
-        CharacterRigRefs rigRefs =
-            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
-
-        if (rigRefs == null)
-            return false;
-
-        _moveRect = rigRefs.GetRect(_spec.moveTarget);
-
-        if (_moveRect == null)
-        {
-            Debug.LogWarning(
-                $"[PlaceCharacterFocusCommandCharR] Missing move target. " +
-                $"slotKey='{_spec.slotKey}', target='{_spec.moveTarget}'.");
-            return false;
-        }
-
-        return true;
+        CharacterRigRefs rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
+        _moveRect = rig.GetRect(_spec.moveTarget);
     }
 
-    private bool ComputeDestinationIfNeeded(CommandRunScope scope)
+    private void ClaimTarget(CommandRunScope scope)
     {
-        if (_hasComputedDestination)
-            return true;
+        _moveRect.DOKill(true);
 
-        _hasComputedDestination = true;
+        ComputeDestination(scope);
 
+        HasClaimedTarget = true;
+    }
+
+    private bool ComputeDestination(CommandRunScope scope)
+    {
         if (!CharacterPlacementSolver.TryCalculateFocusPlacement(
                 scope,
                 _spec.slotKey,
@@ -190,6 +130,7 @@ public sealed class PlaceCharacterFocusCommandCharR : CommandBase
             Debug.LogWarning(
                 $"[PlaceCharacterFocusCommandCharR] Failed to calculate placement. " +
                 $"slotKey='{_spec.slotKey}', focus='{_spec.focusPreset}', screenPoint='{_spec.screenPoint}'.");
+
             return false;
         }
 
@@ -197,16 +138,10 @@ public sealed class PlaceCharacterFocusCommandCharR : CommandBase
         return true;
     }
 
-    private void CommitDestination()
+    private void CommitFinalState()
     {
-        if (_moveRect != null)
-            _moveRect.anchoredPosition = _destination;
-    }
+        _moveRect.anchoredPosition = _destination;
 
-    private void ClearRuntimeState()
-    {
-        _canCommitFinalState = false;
-        _tween = null;
-        _moveRect = null;
+        HasClaimedTarget = false;
     }
 }

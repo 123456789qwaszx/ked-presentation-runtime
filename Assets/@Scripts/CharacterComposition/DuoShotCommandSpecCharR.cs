@@ -32,14 +32,9 @@ public sealed class DuoShotCommandSpecCharR : CommandSpecBase
     [Tooltip("DuoShot scale을 적용할 대상입니다. 보통 CharSlot_Scale입니다.")]
     public CharacterRigTarget scaleTarget = CharacterRigTarget.CharSlot_Scale;
 
-    public bool applyScale = true;
-
     [Header("Tween")]
     public float duration = 0.45f;
     public Ease ease = Ease.OutCubic;
-
-    [Header("Options")]
-    public bool killTween = true;
 }
 
 public sealed class DuoShotCommandCharR : CommandBase
@@ -54,20 +49,17 @@ public sealed class DuoShotCommandCharR : CommandBase
 
         public Vector2 Destination;
         public Vector2 TargetScale;
-
-        public Tween MoveTween;
-        public Tween ScaleTween;
     }
 
     private readonly DuoShotCommandSpecCharR _spec;
     private readonly CharacterFocusTuningDBSO _focusTuningDb;
 
-    private readonly SideRuntime _left = new SideRuntime();
-    private readonly SideRuntime _right = new SideRuntime();
+    private readonly SideRuntime _left = new();
+    private readonly SideRuntime _right = new();
 
-    private bool _resolved;
-    private bool _computed;
-    private bool _canCommitFinalState;
+    private bool _resolveAttempted;
+
+    private bool HasClaimedTargets { get; set; }
 
     public override bool WaitForCompletion => _spec.wait;
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
@@ -82,76 +74,41 @@ public sealed class DuoShotCommandCharR : CommandBase
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
-        if (!ResolveRuntime(scope))
-            yield break;
+        if (!_resolveAttempted)
+            ResolveRefs(scope);
 
-        if (_spec.killTween)
-        {
-            KillSideTweens(_left, complete: true);
-            KillSideTweens(_right, complete: true);
-        }
-
-        _computed = false;
-
-        if (!ComputeDestinations(scope))
-            yield break;
-
-        _canCommitFinalState = true;
+        ClaimTargets(scope);
 
         if (_spec.duration <= 0f)
         {
             CommitFinalState();
-            ClearRuntimeState();
             yield break;
         }
 
-        StartTweens();
+        Sequence leftSequence = CreateSideSequence(_left);
+        Sequence rightSequence = CreateSideSequence(_right);
 
         if (_spec.wait)
-            yield return WaitUntilTweensComplete();
+        {
+            while (leftSequence.IsPlaying() || rightSequence.IsPlaying())
+                yield return null;
+        }
     }
 
     protected override void OnSkip(CommandRunScope scope)
     {
-        if (!ResolveRuntime(scope))
-            return;
-
-        KillSideTweens(_left, complete: false);
-        KillSideTweens(_right, complete: false);
-
-        _computed = false;
-
-        if (!ComputeDestinations(scope))
-            return;
+        if (!_resolveAttempted)
+            ResolveRefs(scope);
+        
+        if (!HasClaimedTargets)
+            ClaimTargets(scope);
 
         CommitFinalState();
-        ClearRuntimeState();
     }
 
-    protected override void OnCommandCompleted(CommandRunScope scope)
+    private void ResolveRefs(CommandRunScope scope)
     {
-        if (!_canCommitFinalState)
-            return;
-
-        if (!ResolveRuntime(scope))
-            return;
-
-        KillSideTweens(_left, complete: false);
-        KillSideTweens(_right, complete: false);
-
-        if (!ComputeDestinations(scope))
-            return;
-
-        CommitFinalState();
-        ClearRuntimeState();
-    }
-
-    private bool ResolveRuntime(CommandRunScope scope)
-    {
-        if (_resolved)
-            return _left.MoveRect != null && _right.MoveRect != null;
-
-        _resolved = true;
+        _resolveAttempted = true;
 
         _left.RoleKey = _spec.leftRoleKey;
         _left.PoseKey = _spec.leftPoseKey;
@@ -159,59 +116,32 @@ public sealed class DuoShotCommandCharR : CommandBase
         _right.RoleKey = _spec.rightRoleKey;
         _right.PoseKey = _spec.rightPoseKey;
 
-        if (!ResolveSide(scope, _left))
-            return false;
-
-        if (!ResolveSide(scope, _right))
-            return false;
-
-        return true;
+        ResolveSide(scope, _left);
+        ResolveSide(scope, _right);
     }
 
-    private bool ResolveSide(CommandRunScope scope, SideRuntime side)
+    private void ResolveSide(CommandRunScope scope, SideRuntime side)
     {
         if (string.IsNullOrWhiteSpace(side.RoleKey))
-            return false;
+            return;
 
-        CharacterRigRefs rigRefs =
-            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, side.RoleKey);
+        CharacterRigRefs rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, side.RoleKey);
+        side.MoveRect = rig.GetRect(_spec.moveTarget);
+        side.ScaleRect = rig.GetRect(_spec.scaleTarget);
+    }
 
-        if (rigRefs == null)
-            return false;
+    private void ClaimTargets(CommandRunScope scope)
+    {
+        _left.MoveRect.DOKill(true);
+        _right.ScaleRect.DOKill(true);
 
-        side.MoveRect = rigRefs.GetRect(_spec.moveTarget);
+        ComputeDestinations(scope);
 
-        if (side.MoveRect == null)
-        {
-            Debug.LogWarning(
-                $"[DuoShotCommandCharR] Missing move target. " +
-                $"roleKey='{side.RoleKey}', target='{_spec.moveTarget}'.");
-            return false;
-        }
-
-        if (_spec.applyScale)
-        {
-            side.ScaleRect = rigRefs.GetRect(_spec.scaleTarget);
-
-            if (side.ScaleRect == null)
-            {
-                Debug.LogWarning(
-                    $"[DuoShotCommandCharR] Missing scale target. " +
-                    $"roleKey='{side.RoleKey}', target='{_spec.scaleTarget}'.");
-                return false;
-            }
-        }
-
-        return true;
+        HasClaimedTargets = true;
     }
 
     private bool ComputeDestinations(CommandRunScope scope)
     {
-        if (_computed)
-            return true;
-
-        _computed = true;
-
         CharacterDuoShotLayout layout =
             _spec.overrideLayout && _spec.layout != null
                 ? _spec.layout
@@ -236,10 +166,7 @@ public sealed class DuoShotCommandCharR : CommandBase
     {
         side.TargetScale = layout.scale;
 
-        CharacterPlacementScalePreview scalePreview =
-            _spec.applyScale
-                ? new CharacterPlacementScalePreview(side.ScaleRect, layout.scale)
-                : CharacterPlacementScalePreview.None;
+        CharacterPlacementScalePreview scalePreview = new CharacterPlacementScalePreview(side.ScaleRect, layout.scale);
 
         if (!CharacterPlacementSolver.TryCalculateFocusPlacement(
                 scope,
@@ -258,6 +185,7 @@ public sealed class DuoShotCommandCharR : CommandBase
             Debug.LogWarning(
                 $"[DuoShotCommandCharR] Failed to calculate side placement. " +
                 $"roleKey='{side.RoleKey}', focus='{layout.focusPreset}', screenPoint='{layout.screenPoint}'.");
+
             return false;
         }
 
@@ -265,101 +193,50 @@ public sealed class DuoShotCommandCharR : CommandBase
         return true;
     }
 
-    private void StartTweens()
+    private Sequence CreateSideSequence(SideRuntime side)
     {
-        StartMoveTween(_left);
-        StartMoveTween(_right);
-
-        if (_spec.applyScale)
-        {
-            StartScaleTween(_left);
-            StartScaleTween(_right);
-        }
-    }
-
-    private void StartMoveTween(SideRuntime side)
-    {
-        side.MoveTween = side.MoveRect
-            .DOAnchorPos(side.Destination, _spec.duration)
-            .SetEase(_spec.ease)
+        Sequence sequence = DOTween.Sequence()
             .SetUpdate(true)
             .SetTarget(side.MoveRect);
-    }
 
-    private void StartScaleTween(SideRuntime side)
-    {
-        if (side.ScaleRect == null)
-            return;
+        sequence.Join(
+            side.MoveRect
+                .DOAnchorPos(side.Destination, _spec.duration)
+                .SetEase(_spec.ease)
+                .SetUpdate(true)
+                .SetTarget(side.MoveRect));
 
-        Vector3 target = side.ScaleRect.localScale;
-        target.x = side.TargetScale.x;
-        target.y = side.TargetScale.y;
-
-        side.ScaleTween = side.ScaleRect
-            .DOScale(target, _spec.duration)
+        Vector3 targetScale = side.ScaleRect.localScale;
+        targetScale.x = side.TargetScale.x;
+        targetScale.y = side.TargetScale.y;
+        
+        sequence.Join(
+            side.ScaleRect
+            .DOScale(targetScale, _spec.duration)
             .SetEase(_spec.ease)
             .SetUpdate(true)
-            .SetTarget(side.ScaleRect);
-    }
+            .SetTarget(side.ScaleRect));
 
-    private IEnumerator WaitUntilTweensComplete()
-    {
-        while (IsTweenActive(_left.MoveTween) ||
-               IsTweenActive(_right.MoveTween) ||
-               IsTweenActive(_left.ScaleTween) ||
-               IsTweenActive(_right.ScaleTween))
-        {
-            yield return null;
-        }
-    }
+        sequence.OnComplete(() => CommitSide(side));
 
-    private static bool IsTweenActive(Tween tween)
-    {
-        return tween != null && tween.IsActive() && tween.IsPlaying();
+        return sequence;
     }
 
     private void CommitFinalState()
     {
         CommitSide(_left);
         CommitSide(_right);
+
+        HasClaimedTargets = false;
     }
 
     private void CommitSide(SideRuntime side)
     {
-        if (side.MoveRect != null)
-            side.MoveRect.anchoredPosition = side.Destination;
+        side.MoveRect.anchoredPosition = side.Destination;
 
-        if (_spec.applyScale && side.ScaleRect != null)
-        {
-            Vector3 s = side.ScaleRect.localScale;
-            s.x = side.TargetScale.x;
-            s.y = side.TargetScale.y;
-            side.ScaleRect.localScale = s;
-        }
-    }
-
-    private void KillSideTweens(SideRuntime side, bool complete)
-    {
-        side.MoveTween?.Kill(complete);
-        side.ScaleTween?.Kill(complete);
-
-        if (side.MoveRect != null)
-            side.MoveRect.DOKill(complete);
-
-        if (side.ScaleRect != null)
-            side.ScaleRect.DOKill(complete);
-
-        side.MoveTween = null;
-        side.ScaleTween = null;
-    }
-
-    private void ClearRuntimeState()
-    {
-        _canCommitFinalState = false;
-
-        _left.MoveTween = null;
-        _left.ScaleTween = null;
-        _right.MoveTween = null;
-        _right.ScaleTween = null;
+        Vector3 scale = side.ScaleRect.localScale;
+        scale.x = side.TargetScale.x;
+        scale.y = side.TargetScale.y;
+        side.ScaleRect.localScale = scale;
     }
 }
