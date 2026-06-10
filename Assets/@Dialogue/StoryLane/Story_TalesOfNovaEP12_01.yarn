@@ -57,7 +57,7 @@ title: Story_TalesOfNovaEP12_01
 
 
 <<char_defocus Willow>>
-<<move_by char1 -50 20>>
+<<move_by char1 -500 200 35>>
 
 <<fade_in Noya>>
 <<shot_to 1 200 30>>
@@ -70,7 +70,7 @@ title: Story_TalesOfNovaEP12_01
 <<shot_to 4 -200 80>>
 <<char_focus Noya>>
 <<face Noya 3>>
-<<move_by char1 90 0>>
+//<<move_by char1 90 0>>
 <<face Willow 25>>
 
 <<fade_in Iris>>

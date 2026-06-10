@@ -26,11 +26,15 @@ public class MoveByCommandSpecCharR : CharacterRigCommandSpecBase
 
 public sealed class MoveByCommandCharR : CommandBase
 {
+    private const float StepFinishSpeedUpMultiplier = 30f;
+
     private readonly MoveByCommandSpecCharR _spec;
 
     private RectTransform _rect;
     private Vector2 _startPos;
     private Vector2 _destPos;
+
+    private Tween _tween;
 
     private bool _resolveAttempted;
 
@@ -56,7 +60,7 @@ public sealed class MoveByCommandCharR : CommandBase
             yield break;
         }
 
-        Tween tween = _rect
+        _tween = _rect
             .DOAnchorPos(_destPos, _spec.duration)
             .SetEase(_spec.ease)
             .SetUpdate(true)
@@ -64,7 +68,7 @@ public sealed class MoveByCommandCharR : CommandBase
             .OnComplete(CommitFinalState);
 
         if (_spec.wait)
-            yield return tween.WaitForCompletion();
+            yield return _tween.WaitForCompletion();
     }
 
     protected override void OnSkip(CommandRunScope scope)
@@ -98,8 +102,43 @@ public sealed class MoveByCommandCharR : CommandBase
 
     private void CommitFinalState()
     {
-        _rect.anchoredPosition = _destPos;
+        if (_rect != null)
+            _rect.anchoredPosition = _destPos;
 
         HasClaimedTarget = false;
+        _tween = null;
+        _rect = null;
     }
+    
+    #region StepLifetimeHook
+    
+    protected override void OnStepLifetimeFinished(CommandRunScope scope)
+    {
+        _tween.Kill(false);
+
+        float duration = CalculateAcceleratedRemainingDuration();
+
+        _tween = _rect
+            .DOAnchorPos(_destPos, duration)
+            .SetEase(_spec.ease)
+            .SetUpdate(true)
+            .SetTarget(_rect)
+            .OnComplete(CommitFinalState);
+    }
+
+    private float CalculateAcceleratedRemainingDuration()
+    {
+        float originalDistance = Vector2.Distance(_startPos, _destPos);
+        float remainingDistance = Vector2.Distance(_rect.anchoredPosition, _destPos);
+
+        if (originalDistance <= 0.001f || remainingDistance <= 0.001f)
+            return 0f;
+
+        float remainingRatio = Mathf.Clamp01(remainingDistance / originalDistance);
+        float remainingDuration = _spec.duration * remainingRatio;
+
+        return Mathf.Max(0.01f, remainingDuration / StepFinishSpeedUpMultiplier);
+    }
+    
+    #endregion
 }

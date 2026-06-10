@@ -63,6 +63,4 @@ public sealed class CommandRunScope
     
     public void CleanupStep(CleanupPolicy policy) => StepLifetime.Cleanup(policy);
     public void CleanupRun (CleanupPolicy policy) => RunLifetime.Cleanup(policy);
-
-    
 }

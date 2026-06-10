@@ -23,12 +23,6 @@ public abstract class CommandBase : ISequenceCommand, IStepScopedCommand
     
     public IEnumerator Execute(CommandRunScope scope)
     {
-        if (scope.Token.IsCancellationRequested)
-        {
-            Debug.Log("CommandBase.Execute called with cancellation token");
-            yield break;
-        }
-
         if (scope.ShouldCompressCommandExecution)
         {
             switch (SkipPolicy)
@@ -37,15 +31,7 @@ public abstract class CommandBase : ISequenceCommand, IStepScopedCommand
                     yield break;
 
                 case SkipPolicy.CompleteImmediately:
-                    try
-                    {
-                        OnSkip(scope);
-                    }
-                    catch (System.Exception e)
-                    {
-                        Debug.LogException(e);
-                    }
-
+                    OnSkip(scope);
                     yield break;
 
                 case SkipPolicy.ExecuteEvenIfSkipping:
@@ -65,8 +51,10 @@ public abstract class CommandBase : ISequenceCommand, IStepScopedCommand
     {
     }
     
-    // Default (step) binding: every command gets this. Routine is stopped — and OnCommandCompleted
-    // fired on Finish — at the next step boundary.
+    // Default step-lifetime binding.
+    // Background routines are stopped at the next step boundary.
+    // OnStepLifetimeFinished is called only when the boundary cleanup uses CleanupPolicy.Finish.
+    // It is not a natural completion callback.
     public virtual void RegisterStepLifetime(CommandRunScope scope, MonoBehaviour host, IEnumerator routine)
     {
         scope.TrackStep(
@@ -80,10 +68,9 @@ public abstract class CommandBase : ISequenceCommand, IStepScopedCommand
                 if (routine != null)
                     host.StopCoroutine(routine);
                 
-                OnCommandCompleted(scope);
+                OnStepLifetimeFinished(scope);
             });
     }
-    
     
     // Opt-in (run) binding for IRunScopedCommand: same shape as step, but cleaned at run end
     // instead of the next step boundary. Use for work that must persist across steps.
@@ -100,13 +87,12 @@ public abstract class CommandBase : ISequenceCommand, IStepScopedCommand
                 if (routine != null)
                     host.StopCoroutine(routine);
 
-                OnCommandCompleted(scope);
+                OnRunLifetimeFinished(scope);
             });
     }
     
     // Completion hook tied to step cleanup (CleanupPolicy.Finish).
     // Called when the step finishes (normal end / finish-all), not on Cancel-only cleanup.
-    protected virtual void OnCommandCompleted(CommandRunScope scope)
-    {
-    }
+    protected virtual void OnStepLifetimeFinished(CommandRunScope scope) { }
+    protected virtual void OnRunLifetimeFinished(CommandRunScope scope) { }
 }
