@@ -193,6 +193,9 @@ public sealed class SoloShotCommandCharR : CommandBase
 
     protected override void OnStepLifetimeFinished(CommandRunScope scope)
     {
+        if (!HasClaimedTargets)
+            return;
+        
         _sequence.Kill(false);
 
         float duration = CalculateAcceleratedRemainingDuration();

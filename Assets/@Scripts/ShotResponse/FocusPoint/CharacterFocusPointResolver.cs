@@ -19,7 +19,7 @@ public static class CharacterFocusPointResolver
 
         string resolvedRigKey = CharacterRigTargetResolver.ResolveRigKeyByPolicy(scope, roleKey);
 
-        if (!scope.characterRigs.TryGetRig(resolvedRigKey, out CharacterRigRefs rigRefs))
+        if (!scope.CharacterRigs.TryGetRig(resolvedRigKey, out CharacterRigRefs rigRefs))
             return false;
 
         if (rigRefs == null)

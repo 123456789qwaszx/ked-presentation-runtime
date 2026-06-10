@@ -92,7 +92,7 @@ public sealed class SetupCharRigCommand : CommandBase
             refs.CharacterPortraitSpriteOverlay_Image,
             sourceMaterial);
         
-        scope.characterRigs.Register(rigKey, refs);
+        scope.CharacterRigs.Register(rigKey, refs);
         
         // Optional bake helper:
         // Enable after refs registration when saving the generated rig as a reusable prefab.

@@ -49,6 +49,6 @@ public sealed class CastCharacterCommand : CommandBase
         string characterKey = _spec.characterKey;
         string variantKey = _spec.variantKey;
 
-        scope.castRegistry.CastCharRig(slotKey, characterKey, variantKey);
+        scope.CastRegistry.CastCharRig(slotKey, characterKey, variantKey);
     }
 }

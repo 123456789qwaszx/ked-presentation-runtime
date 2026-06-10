@@ -170,6 +170,9 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
 
     protected override void OnStepLifetimeFinished(CommandRunScope scope)
     {
+        if (!HasClaimedController)
+            return;
+        
         _tween.Kill(false);
 
         VisualState currentState = CaptureCurrentState();

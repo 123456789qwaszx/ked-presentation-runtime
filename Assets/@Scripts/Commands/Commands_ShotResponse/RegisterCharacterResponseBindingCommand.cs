@@ -43,7 +43,7 @@ public sealed class RegisterCharacterResponseBindingCommand : CommandBase
 
     private void Apply(CommandRunScope scope)
     {
-        if (!scope.characterRigs.TryGetRig(_spec.targetKey, out CharacterRigRefs rigRefs))
+        if (!scope.CharacterRigs.TryGetRig(_spec.targetKey, out CharacterRigRefs rigRefs))
             return;
 
         var target = new CharacterRigResponseTarget(rigRefs);

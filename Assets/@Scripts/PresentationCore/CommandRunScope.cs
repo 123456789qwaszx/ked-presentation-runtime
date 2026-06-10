@@ -5,14 +5,14 @@ public sealed class CommandRunScope
 {
     private readonly PresentationSessionContext _context;
     private readonly VNLinePresentationState _linePresentationAdvanceState;
-    public CancellationToken Token { get; set; }
-    
+    private readonly PresentationStage _stage;
     private readonly bool _reportsNodeBusy;
     
-    public PresentationStage Stage { get; }
-    public CharacterRigRegistry characterRigs => Stage.characterRigs;
-    public BackgroundRigRegistry backgroundRigs => Stage.backgroundRigs;
-    public CastRegistry castRegistry => Stage.castRegistry;
+    public CancellationToken Token { get; set; }
+    
+    public CharacterRigRegistry CharacterRigs => _stage.characterRigs;
+    public BackgroundRigRegistry BackgroundRigs => _stage.backgroundRigs;
+    public CastRegistry CastRegistry => _stage.castRegistry;
     
     private LifetimeScope StepLifetime { get; } = new();
     private LifetimeScope RunLifetime { get; } = new();
@@ -25,7 +25,7 @@ public sealed class CommandRunScope
     {
         _context = context;
         _linePresentationAdvanceState = linePresentationAdvanceState;
-        Stage = stage;
+        _stage = stage;
         _reportsNodeBusy = reportsNodeBusy;
         Token = CancellationToken.None;
     }

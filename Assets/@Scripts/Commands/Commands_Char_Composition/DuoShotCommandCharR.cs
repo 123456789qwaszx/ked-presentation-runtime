@@ -227,6 +227,9 @@ public sealed class DuoShotCommandCharR : CommandBase
 
     protected override void OnStepLifetimeFinished(CommandRunScope scope)
     {
+        if (!HasClaimedTargets)
+            return;
+        
         _sequence.Kill(false);
 
         float duration = Mathf.Max(

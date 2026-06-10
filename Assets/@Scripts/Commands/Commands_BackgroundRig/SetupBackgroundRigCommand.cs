@@ -82,7 +82,7 @@ public sealed class SetupBackgroundRigCommand : CommandBase
 
         _rigBuilder.BindRefsFromRoot(rigRoot, rolePrefix, out BackgroundRigRefs refs);
 
-        scope.backgroundRigs.Register(rigKey, refs);
+        scope.BackgroundRigs.Register(rigKey, refs);
 
         // Optional bake helper:
         // Enable after refs registration when saving the generated rig as a reusable prefab.

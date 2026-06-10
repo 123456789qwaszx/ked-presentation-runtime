@@ -43,7 +43,7 @@ public sealed class RegisterBackgroundResponseBindingCommand : CommandBase
 
     private void Apply(CommandRunScope scope)
     {
-        if (!scope.backgroundRigs.TryGetRig(_spec.rigKey, out BackgroundRigRefs rigRefs))
+        if (!scope.BackgroundRigs.TryGetRig(_spec.rigKey, out BackgroundRigRefs rigRefs))
             return;
 
         BackgroundRigResponseTarget target = new(rigRefs);

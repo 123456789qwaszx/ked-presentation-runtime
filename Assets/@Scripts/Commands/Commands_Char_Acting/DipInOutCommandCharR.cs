@@ -149,6 +149,9 @@ public sealed class DipInOutCommandCharR : CommandBase
 
     protected override void OnStepLifetimeFinished(CommandRunScope scope)
     {
+        if (!HasClaimedTarget)
+            return;
+        
         _tween.Kill(false);
 
         float duration = CalculateAcceleratedRemainingDuration();

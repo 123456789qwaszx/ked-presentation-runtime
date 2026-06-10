@@ -142,6 +142,9 @@ public sealed class RevealCharacterEmojiCommandCharR : CommandBase
 
     protected override void OnStepLifetimeFinished(CommandRunScope scope)
     {
+        if (!HasClaimedTarget)
+            return;
+        
         _materialRuntime.KillTween(false);
 
         float currentReveal = CaptureCurrentReveal();

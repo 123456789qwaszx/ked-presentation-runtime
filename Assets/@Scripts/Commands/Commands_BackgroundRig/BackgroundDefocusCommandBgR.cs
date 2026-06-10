@@ -49,7 +49,7 @@ public sealed class BackgroundDefocusCommandBgR : CommandBase
     
     private void Apply(CommandRunScope scope, float duration)
     {
-        scope.backgroundRigs.TryGetRig(_spec.rigKey, out BackgroundRigRefs refs);
+        scope.BackgroundRigs.TryGetRig(_spec.rigKey, out BackgroundRigRefs refs);
 
         _runtime.ShowDefocus(
             _spec.rigKey,

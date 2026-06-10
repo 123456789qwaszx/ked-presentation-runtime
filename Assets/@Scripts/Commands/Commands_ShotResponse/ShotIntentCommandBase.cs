@@ -101,6 +101,9 @@ public abstract class ShotIntentCommandBase<TSpec> : CommandBase
 
     protected override void OnStepLifetimeFinished(CommandRunScope scope)
     {
+        if (!HasClaimedRig)
+            return;
+        
         _tween.Kill(false);
 
         PresentationIntentState currentState = rig.CurrentState;
