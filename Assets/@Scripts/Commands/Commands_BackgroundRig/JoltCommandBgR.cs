@@ -26,10 +26,14 @@ public sealed class JoltCommandSpecBgR : BackgroundRigCommandSpecBase
 
 public sealed class JoltCommandBgR : CommandBase
 {
+    private const float StepFinishSpeedUpMultiplier = 30f;
+
     private readonly JoltCommandSpecBgR _spec;
 
     private RectTransform _rect;
     private Vector2 _basePos;
+
+    private Tween _tween;
 
     private bool _resolveAttempted;
 
@@ -64,7 +68,7 @@ public sealed class JoltCommandBgR : CommandBase
 
         Vector2 dir = GetSignedDirection(_spec.direction);
 
-        Tween tween = DOTween
+        _tween = DOTween
             .To(
                 () => 0f,
                 t =>
@@ -95,7 +99,7 @@ public sealed class JoltCommandBgR : CommandBase
             .OnComplete(CommitFinalState);
 
         if (_spec.wait)
-            yield return tween.WaitForCompletion();
+            yield return _tween.WaitForCompletion();
     }
 
     protected override void OnSkip(CommandRunScope scope)
@@ -131,7 +135,48 @@ public sealed class JoltCommandBgR : CommandBase
         _rect.anchoredPosition = _basePos;
 
         HasClaimedTarget = false;
+        _tween = null;
     }
+
+    #region StepLifetimeHook
+
+    protected override void OnStepLifetimeFinished(CommandRunScope scope)
+    {
+        _tween.Kill(false);
+
+        float duration = CalculateAcceleratedRemainingDuration();
+
+        _tween = _rect
+            .DOAnchorPos(_basePos, duration)
+            .SetEase(Ease.OutCubic)
+            .SetUpdate(true)
+            .SetTarget(_rect)
+            .OnComplete(CommitFinalState);
+    }
+
+    private float CalculateAcceleratedRemainingDuration()
+    {
+        float originalDistance = CalculateReferenceAmplitude();
+        float remainingDistance = Vector2.Distance(_rect.anchoredPosition, _basePos);
+
+        if (originalDistance <= 0.001f || remainingDistance <= 0.001f)
+            return 0f;
+
+        float remainingRatio = Mathf.Clamp01(remainingDistance / originalDistance);
+        float remainingDuration = _spec.duration * remainingRatio;
+
+        return Mathf.Max(0.01f, remainingDuration / StepFinishSpeedUpMultiplier);
+    }
+
+    private float CalculateReferenceAmplitude()
+    {
+        return Mathf.Max(
+            Mathf.Abs(_spec.strength),
+            Mathf.Abs(_spec.anticipation),
+            0.001f);
+    }
+
+    #endregion
 
     private static Vector2 GetSignedDirection(CharRigDirection direction)
     {

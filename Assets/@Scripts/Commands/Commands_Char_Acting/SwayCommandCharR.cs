@@ -46,10 +46,14 @@ public sealed class SwayCommandSpecCharR : CharacterRigCommandSpecBase
 
 public sealed class SwayCommandCharR : CommandBase
 {
+    private const float StepFinishSpeedUpMultiplier = 30f;
+
     private readonly SwayCommandSpecCharR _spec;
 
     private RectTransform _rect;
     private float _baseRotationZ;
+
+    private Tween _tween;
 
     private bool _resolveAttempted;
 
@@ -97,7 +101,7 @@ public sealed class SwayCommandCharR : CommandBase
         int segmentCount = pointCount - 1;
         int lastSegmentIndex = segmentCount - 1;
 
-        Tween tween = DOTween
+        _tween = DOTween
             .To(
                 () => 0f,
                 t =>
@@ -139,7 +143,7 @@ public sealed class SwayCommandCharR : CommandBase
             .OnComplete(CommitFinalState);
 
         if (_spec.wait)
-            yield return tween.WaitForCompletion();
+            yield return _tween.WaitForCompletion();
     }
 
     protected override void OnSkip(CommandRunScope scope)
@@ -174,7 +178,68 @@ public sealed class SwayCommandCharR : CommandBase
         SetLocalEulerZ(_rect, _baseRotationZ);
 
         HasClaimedTarget = false;
+        _tween = null;
     }
+
+    #region StepLifetimeHook
+
+    protected override void OnStepLifetimeFinished(CommandRunScope scope)
+    {
+        _tween.Kill(false);
+
+        float currentZ = NormalizeAngle(_rect.localEulerAngles.z);
+        float targetZ = ResolveNearestEquivalentAngle(currentZ, _baseRotationZ);
+        float duration = CalculateAcceleratedRemainingDuration(currentZ, targetZ);
+
+        _tween = DOTween
+            .To(
+                () => currentZ,
+                z => SetLocalEulerZ(_rect, z),
+                targetZ,
+                duration)
+            .SetEase(Ease.OutCubic)
+            .SetTarget(_rect)
+            .SetUpdate(true)
+            .OnComplete(CommitFinalState);
+    }
+
+    private float CalculateAcceleratedRemainingDuration(float currentZ, float targetZ)
+    {
+        float originalDistance = CalculateReferenceAmplitude();
+        float remainingDistance = Mathf.Abs(targetZ - currentZ);
+
+        if (originalDistance <= 0.001f || remainingDistance <= 0.001f)
+            return 0f;
+
+        float remainingRatio = Mathf.Clamp01(remainingDistance / originalDistance);
+        float remainingDuration = _spec.duration * remainingRatio;
+
+        return Mathf.Max(0.01f, remainingDuration / StepFinishSpeedUpMultiplier);
+    }
+
+    private float CalculateReferenceAmplitude()
+    {
+        float amplitude = Mathf.Abs(_spec.strength);
+        float anticipation = Mathf.Abs(_spec.anticipation);
+        float overshoot = amplitude * Mathf.Clamp01(_spec.finalOvershoot);
+
+        return Mathf.Max(amplitude + overshoot, anticipation, 0.001f);
+    }
+
+    private static float ResolveNearestEquivalentAngle(float reference, float target)
+    {
+        target = NormalizeAngle(target);
+
+        while (target - reference > 180f)
+            target -= 360f;
+
+        while (target - reference < -180f)
+            target += 360f;
+
+        return target;
+    }
+
+    #endregion
 
     private static float GetWavePointWithAnticipation(
         int pointIndex,

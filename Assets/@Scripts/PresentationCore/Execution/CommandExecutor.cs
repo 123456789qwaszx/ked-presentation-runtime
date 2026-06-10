@@ -164,11 +164,6 @@ public sealed class CommandExecutor : MonoBehaviour
         }
     }
 
-    public void Stop()
-    {
-        Stop(CleanupPolicy.Cancel);
-    }
-
     public void Stop(CleanupPolicy policy)
     {
         _runId++;
@@ -186,8 +181,6 @@ public sealed class CommandExecutor : MonoBehaviour
         _activeScope?.ClearRuntimeState(policy);
         
         _mainRoutine = null;
-        Debug.Log($"Stopping {_activeScope}");
-        //_activeScope = null;
     }
 
     private void ResetToken()

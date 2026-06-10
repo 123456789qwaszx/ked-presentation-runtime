@@ -306,6 +306,23 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler<string>("voice", EnqueuePlayVoiceSpec);
         runner.AddCommandHandler("stop_voice", EnqueueStopVoiceSpec);
     }
+    
+    private void BindScreenEffects(DialogueRunner runner)
+    {
+        runner.AddCommandHandler<float, float>("screen_flash", EnqueueScreenFlashSpec);
+        runner.AddCommandHandler<float, float, float, float, float>("screen_flash_rgb", EnqueueScreenFlashRgbSpec);
+        runner.AddCommandHandler("screen_flash_hit", EnqueueScreenFlashHitSpec);
+        runner.AddCommandHandler<string, float>("screen_flash_preset", EnqueueScreenFlashPresetSpec);
+
+        runner.AddCommandHandler<string, float, float>("screen_vignette", EnqueueScreenVignettePresetSpec);
+        runner.AddCommandHandler<float>("screen_vignette_clear", EnqueueScreenVignetteClearSpec);
+        runner.AddCommandHandler<float, float>("screen_letterbox", EnqueueScreenLetterBoxSpec);
+        runner.AddCommandHandler<float, float, float, float, float, float, float>("screen_vignette_custom", EnqueueScreenVignetteCustomSpec);
+
+        runner.AddCommandHandler<string, float, float>("screen_noise", EnqueueScreenNoisePresetSpec);
+        runner.AddCommandHandler<float>("screen_noise_clear", EnqueueScreenNoiseClearSpec);
+        runner.AddCommandHandler<float, float, float, float, float, float>("screen_noise_custom", EnqueueScreenNoiseCustomSpec);
+    }
 
     private void Collect(CommandSpecBase spec)
     {

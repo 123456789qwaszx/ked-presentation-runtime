@@ -26,9 +26,15 @@ public sealed class FadeInCommandSpecBgR : BackgroundRigCommandSpecBase
 
 public sealed class FadeInCommandBgR : CommandBase
 {
+    private const float StepFinishSpeedUpMultiplier = 30f;
+    private const float TargetAlpha = 1f;
+
     private readonly FadeInCommandSpecBgR _spec;
 
     private CanvasGroup _canvasGroup;
+
+    private float _startAlpha;
+    private Tween _tween;
 
     private bool _resolveAttempted;
 
@@ -54,15 +60,15 @@ public sealed class FadeInCommandBgR : CommandBase
             yield break;
         }
 
-        Tween tween = _canvasGroup
-            .DOFade(1f, _spec.duration)
+        _tween = _canvasGroup
+            .DOFade(TargetAlpha, _spec.duration)
             .SetEase(_spec.ease)
             .SetUpdate(true)
             .SetTarget(_canvasGroup)
             .OnComplete(CommitFinalState);
 
         if (_spec.wait)
-            yield return tween.WaitForCompletion();
+            yield return _tween.WaitForCompletion();
     }
 
     protected override void OnSkip(CommandRunScope scope)
@@ -89,18 +95,53 @@ public sealed class FadeInCommandBgR : CommandBase
     {
         _canvasGroup.DOKill(true);
 
+        _startAlpha = _canvasGroup.alpha;
+
         HasClaimedTarget = true;
     }
 
     private void CommitFinalState()
     {
-        _canvasGroup.alpha = 1f;
+        _canvasGroup.alpha = TargetAlpha;
         _canvasGroup.interactable = true;
         _canvasGroup.blocksRaycasts = true;
 
         HasClaimedTarget = false;
+        _tween = null;
     }
-    
+
+    #region StepLifetimeHook
+
+    protected override void OnStepLifetimeFinished(CommandRunScope scope)
+    {
+        _tween.Kill(false);
+
+        float duration = CalculateAcceleratedRemainingDuration();
+
+        _tween = _canvasGroup
+            .DOFade(TargetAlpha, duration)
+            .SetEase(_spec.ease)
+            .SetUpdate(true)
+            .SetTarget(_canvasGroup)
+            .OnComplete(CommitFinalState);
+    }
+
+    private float CalculateAcceleratedRemainingDuration()
+    {
+        float originalDistance = Mathf.Abs(TargetAlpha - _startAlpha);
+        float remainingDistance = Mathf.Abs(TargetAlpha - _canvasGroup.alpha);
+
+        if (originalDistance <= 0.001f || remainingDistance <= 0.001f)
+            return 0f;
+
+        float remainingRatio = Mathf.Clamp01(remainingDistance / originalDistance);
+        float remainingDuration = _spec.duration * remainingRatio;
+
+        return Mathf.Max(0.01f, remainingDuration / StepFinishSpeedUpMultiplier);
+    }
+
+    #endregion
+
     private static CanvasGroup GetOrAddCanvasGroup(RectTransform rect)
     {
         if (rect.TryGetComponent(out CanvasGroup group))

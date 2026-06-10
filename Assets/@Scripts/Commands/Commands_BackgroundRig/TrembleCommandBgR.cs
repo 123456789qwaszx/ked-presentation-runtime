@@ -52,11 +52,15 @@ public sealed class TrembleCommandSpecBgR : BackgroundRigCommandSpecBase
 
 public sealed class TrembleCommandBgR : CommandBase
 {
+    private const float StepFinishSpeedUpMultiplier = 30f;
+
     private readonly TrembleCommandSpecBgR _spec;
 
     private RectTransform _rect;
     private Vector2 _basePos;
     private float _seed;
+
+    private Tween _tween;
 
     private bool _resolveAttempted;
 
@@ -90,7 +94,7 @@ public sealed class TrembleCommandBgR : CommandBase
         float crossRatio = Mathf.Clamp01(_spec.crossAxisRatio);
         float noiseRatio = Mathf.Clamp01(_spec.noiseRatio);
 
-        Tween tween = DOTween
+        _tween = DOTween
             .To(
                 () => 0f,
                 elapsed =>
@@ -134,7 +138,7 @@ public sealed class TrembleCommandBgR : CommandBase
             .OnComplete(CommitFinalState);
 
         if (_spec.wait)
-            yield return tween.WaitForCompletion();
+            yield return _tween.WaitForCompletion();
     }
 
     protected override void OnSkip(CommandRunScope scope)
@@ -171,7 +175,50 @@ public sealed class TrembleCommandBgR : CommandBase
         _rect.anchoredPosition = _basePos;
 
         HasClaimedTarget = false;
+        _tween = null;
     }
+
+    #region StepLifetimeHook
+
+    protected override void OnStepLifetimeFinished(CommandRunScope scope)
+    {
+        _tween.Kill(false);
+
+        float duration = CalculateAcceleratedRemainingDuration();
+
+        _tween = _rect
+            .DOAnchorPos(_basePos, duration)
+            .SetEase(Ease.OutCubic)
+            .SetUpdate(true)
+            .SetTarget(_rect)
+            .OnComplete(CommitFinalState);
+    }
+
+    private float CalculateAcceleratedRemainingDuration()
+    {
+        float originalDistance = CalculateReferenceAmplitude();
+        float remainingDistance = Vector2.Distance(_rect.anchoredPosition, _basePos);
+
+        if (originalDistance <= 0.001f || remainingDistance <= 0.001f)
+            return 0f;
+
+        float remainingRatio = Mathf.Clamp01(remainingDistance / originalDistance);
+        float remainingDuration = _spec.duration * remainingRatio;
+
+        return Mathf.Max(0.01f, remainingDuration / StepFinishSpeedUpMultiplier);
+    }
+
+    private float CalculateReferenceAmplitude()
+    {
+        float strength = Mathf.Abs(_spec.strength);
+        float crossRatio = Mathf.Clamp01(_spec.crossAxisRatio);
+
+        return Mathf.Max(
+            strength * Mathf.Sqrt(1f + crossRatio * crossRatio),
+            0.001f);
+    }
+
+    #endregion
 
     private static float EvaluateEnvelope(float elapsed, float duration, float blendIn, float blendOut)
     {

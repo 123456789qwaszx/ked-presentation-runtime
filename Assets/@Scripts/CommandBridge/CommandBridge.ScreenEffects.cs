@@ -1,25 +1,7 @@
 using UnityEngine;
-using Yarn.Unity;
 
 public sealed partial class YarnCommandBridge
 {
-    private void BindScreenEffects(DialogueRunner runner)
-    {
-        runner.AddCommandHandler<float, float>("screen_flash", EnqueueScreenFlashSpec);
-        runner.AddCommandHandler<float, float, float, float, float>("screen_flash_rgb", EnqueueScreenFlashRgbSpec);
-        runner.AddCommandHandler("screen_flash_hit", EnqueueScreenFlashHitSpec);
-        runner.AddCommandHandler<string, float>("screen_flash_preset", EnqueueScreenFlashPresetSpec);
-
-        runner.AddCommandHandler<string, float, float>("screen_vignette", EnqueueScreenVignettePresetSpec);
-        runner.AddCommandHandler<float>("screen_vignette_clear", EnqueueScreenVignetteClearSpec);
-        runner.AddCommandHandler<float, float>("screen_letterbox", EnqueueScreenLetterBoxSpec);
-        runner.AddCommandHandler<float, float, float, float, float, float, float>("screen_vignette_custom", EnqueueScreenVignetteCustomSpec);
-
-        runner.AddCommandHandler<string, float, float>("screen_noise", EnqueueScreenNoisePresetSpec);
-        runner.AddCommandHandler<float>("screen_noise_clear", EnqueueScreenNoiseClearSpec);
-        runner.AddCommandHandler<float, float, float, float, float, float>("screen_noise_custom", EnqueueScreenNoiseCustomSpec);
-    }
-
    private void EnqueueScreenFlashSpec(float amount = 1f, float duration = 0.16f)
     {
         var spec = new ScreenFlashCommandSpec
@@ -113,7 +95,7 @@ public sealed partial class YarnCommandBridge
     private void EnqueueScreenVignettePresetSpec(
         string presetKey,
         float intensity = 1f,
-        float duration = 0.35f)
+        float duration = 55f)
     {
         var spec = new ScreenVignetteCommandSpec
         {

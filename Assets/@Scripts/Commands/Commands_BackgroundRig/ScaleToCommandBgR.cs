@@ -27,10 +27,17 @@ public sealed class ScaleToCommandSpecBgR : BackgroundRigCommandSpecBase
 
 public sealed class ScaleToCommandBgR : CommandBase
 {
+    private const float StepFinishSpeedUpMultiplier = 30f;
+
     private readonly ScaleToCommandSpecBgR _spec;
 
     private RectTransform _rect;
+
+    private Vector2 _startScale;
+    private Vector2 _targetScale;
     private Vector3 _endScale;
+
+    private Tween _tween;
 
     private bool _resolveAttempted;
 
@@ -56,7 +63,7 @@ public sealed class ScaleToCommandBgR : CommandBase
             yield break;
         }
 
-        Tween tween = _rect
+        _tween = _rect
             .DOScale(_endScale, _spec.duration)
             .SetEase(_spec.ease)
             .SetUpdate(true)
@@ -64,7 +71,7 @@ public sealed class ScaleToCommandBgR : CommandBase
             .OnComplete(CommitFinalState);
 
         if (_spec.wait)
-            yield return tween.WaitForCompletion();
+            yield return _tween.WaitForCompletion();
     }
 
     protected override void OnSkip(CommandRunScope scope)
@@ -93,19 +100,60 @@ public sealed class ScaleToCommandBgR : CommandBase
         if (_spec.overrideFromScale)
             ApplyScaleXY(_rect, _spec.fromScale);
 
-        _endScale = _rect.localScale;
-        _endScale.x = _spec.toScale.x;
-        _endScale.y = _spec.toScale.y;
+        Vector3 currentScale = _rect.localScale;
+
+        _startScale = new Vector2(currentScale.x, currentScale.y);
+        _targetScale = _spec.toScale;
+
+        _endScale = currentScale;
+        _endScale.x = _targetScale.x;
+        _endScale.y = _targetScale.y;
 
         HasClaimedTarget = true;
     }
 
     private void CommitFinalState()
     {
-        ApplyScaleXY(_rect, _spec.toScale);
+        ApplyScaleXY(_rect, _targetScale);
 
         HasClaimedTarget = false;
+        _tween = null;
     }
+
+    #region StepLifetimeHook
+
+    protected override void OnStepLifetimeFinished(CommandRunScope scope)
+    {
+        _tween.Kill(false);
+
+        float duration = CalculateAcceleratedRemainingDuration();
+
+        _tween = _rect
+            .DOScale(_endScale, duration)
+            .SetEase(_spec.ease)
+            .SetUpdate(true)
+            .SetTarget(_rect)
+            .OnComplete(CommitFinalState);
+    }
+
+    private float CalculateAcceleratedRemainingDuration()
+    {
+        Vector3 currentScale3 = _rect.localScale;
+        Vector2 currentScale = new(currentScale3.x, currentScale3.y);
+
+        float originalDistance = Vector2.Distance(_startScale, _targetScale);
+        float remainingDistance = Vector2.Distance(currentScale, _targetScale);
+
+        if (originalDistance <= 0.001f || remainingDistance <= 0.001f)
+            return 0f;
+
+        float remainingRatio = Mathf.Clamp01(remainingDistance / originalDistance);
+        float remainingDuration = _spec.duration * remainingRatio;
+
+        return Mathf.Max(0.01f, remainingDuration / StepFinishSpeedUpMultiplier);
+    }
+
+    #endregion
 
     private static void ApplyScaleXY(RectTransform rect, Vector2 targetXY)
     {

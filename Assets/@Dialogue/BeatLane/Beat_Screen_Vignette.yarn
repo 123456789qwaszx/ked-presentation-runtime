@@ -1,12 +1,18 @@
 ﻿title: Beat_Screen_Vignette
 ---
 
+<<tx_focus_curtain_in>>
+//<<screen_flash 1 22>>
+//<<screen_flash_hit>>
+
+//<<screen_noise rain 1 15>>
+
 //기본 집중:
 //<<screen_vignette focus 0.1 0.35>>
 
 
 //긴장:
-<<screen_vignette tension 0.5 0.5>>
+//<<screen_vignette tension 0.5 0.5>>
 
 //공포:
 //<<screen_vignette horror 3 0.7>>
@@ -18,12 +24,12 @@
 //<<screen_vignette memory 3 0.6>>
 
 //몽환:
-//<<screen_vignette dream 3 0.6>>
+//<<screen_vignette dream 1 12>>
 
 //해제:
 // <<screen_vignette_clear 0.4>>
 
 //LetterBox형 상하 암막:
-// <<screen_letterbox 0.55 0.45>>
-// <<screen_letterbox 0.85 0.6>>
+//<<screen_letterbox 0.55 0.45>>
+<<screen_letterbox 0.85 10>>
 ===
