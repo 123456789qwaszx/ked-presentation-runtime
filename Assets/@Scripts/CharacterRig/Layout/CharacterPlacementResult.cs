@@ -1,29 +1,5 @@
 using UnityEngine;
 
-public readonly struct CharacterPlacementResult
-{
-    public readonly RectTransform MoveRect;
-    public readonly Vector2 DestinationAnchoredPosition;
-
-    public readonly Vector2 CurrentFocusInRigSpace;
-    public readonly Vector2 DesiredFocusInRigSpace;
-    public readonly Vector2 DeltaInTargetParentSpace;
-
-    public CharacterPlacementResult(
-        RectTransform moveRect,
-        Vector2 destinationAnchoredPosition,
-        Vector2 currentFocusInRigSpace,
-        Vector2 desiredFocusInRigSpace,
-        Vector2 deltaInTargetParentSpace)
-    {
-        MoveRect = moveRect;
-        DestinationAnchoredPosition = destinationAnchoredPosition;
-        CurrentFocusInRigSpace = currentFocusInRigSpace;
-        DesiredFocusInRigSpace = desiredFocusInRigSpace;
-        DeltaInTargetParentSpace = deltaInTargetParentSpace;
-    }
-}
-
 public readonly struct CharacterPlacementScalePreview
 {
     public readonly bool Enabled;
@@ -39,8 +15,7 @@ public readonly struct CharacterPlacementScalePreview
         TargetScale = targetScale;
     }
 
-    public static CharacterPlacementScalePreview None =>
-        new CharacterPlacementScalePreview(null, Vector2.one);
+    public static CharacterPlacementScalePreview None => new (null, Vector2.one);
 }
 
 public static class CharacterPlacementSolver
@@ -57,9 +32,9 @@ public static class CharacterPlacementSolver
         ScreenFocusPoint screenPoint,
         Vector2 screenOffset,
         CharacterPlacementScalePreview scalePreview,
-        out CharacterPlacementResult result)
+        out Vector2 destinationAnchoredPosition)
     {
-        result = default;
+        destinationAnchoredPosition = default;
 
         if (scope == null)
             return false;
@@ -120,15 +95,11 @@ public static class CharacterPlacementSolver
                 focus.StageRoot,
                 targetParent);
 
-        Vector2 deltaInParentSpace = desiredFocusInParentSpace - currentFocusInParentSpace;
-        Vector2 destination = moveRect.anchoredPosition + deltaInParentSpace;
+        Vector2 deltaInParentSpace =
+            desiredFocusInParentSpace - currentFocusInParentSpace;
 
-        result = new CharacterPlacementResult(
-            moveRect,
-            destination,
-            focus.FocusPointInStageSpace,
-            desiredFocusInRigSpace,
-            deltaInParentSpace);
+        destinationAnchoredPosition =
+            moveRect.anchoredPosition + deltaInParentSpace;
 
         return true;
     }

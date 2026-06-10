@@ -164,7 +164,7 @@ public sealed class SoloShotCommandCharR : CommandBase
                 _spec.screenPoint,
                 _spec.screenOffset,
                 scalePreview,
-                out CharacterPlacementResult placement))
+                out Vector2 destPos))
         {
             Debug.LogWarning(
                 $"[SoloShotCommandCharR] Failed to calculate solo shot placement. " +
@@ -173,7 +173,7 @@ public sealed class SoloShotCommandCharR : CommandBase
             return false;
         }
 
-        _destination = placement.DestinationAnchoredPosition;
+        _destination = destPos;
         return true;
     }
 

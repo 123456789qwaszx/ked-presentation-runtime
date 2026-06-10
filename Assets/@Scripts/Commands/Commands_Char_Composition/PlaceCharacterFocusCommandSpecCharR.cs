@@ -125,7 +125,7 @@ public sealed class PlaceCharacterFocusCommandCharR : CommandBase
                 _spec.screenPoint,
                 _spec.screenOffset,
                 CharacterPlacementScalePreview.None,
-                out CharacterPlacementResult placement))
+                out Vector2 destPos))
         {
             Debug.LogWarning(
                 $"[PlaceCharacterFocusCommandCharR] Failed to calculate placement. " +
@@ -134,7 +134,7 @@ public sealed class PlaceCharacterFocusCommandCharR : CommandBase
             return false;
         }
 
-        _destination = placement.DestinationAnchoredPosition;
+        _destination = destPos;
         return true;
     }
 

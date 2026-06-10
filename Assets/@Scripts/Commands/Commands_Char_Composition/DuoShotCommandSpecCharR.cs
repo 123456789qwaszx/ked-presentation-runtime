@@ -180,7 +180,7 @@ public sealed class DuoShotCommandCharR : CommandBase
                 layout.screenPoint,
                 layout.screenOffset,
                 scalePreview,
-                out CharacterPlacementResult placement))
+                out Vector2 destPos))
         {
             Debug.LogWarning(
                 $"[DuoShotCommandCharR] Failed to calculate side placement. " +
@@ -189,7 +189,7 @@ public sealed class DuoShotCommandCharR : CommandBase
             return false;
         }
 
-        side.Destination = placement.DestinationAnchoredPosition;
+        side.Destination = destPos;
         return true;
     }
 
