@@ -102,7 +102,6 @@ public sealed class SoloShotCommandCharR : CommandBase
             .SetUpdate(true)
             .SetTarget(_scaleRect));
         
-
         sequence.OnComplete(CommitFinalState);
 
         if (_spec.wait)
@@ -122,37 +121,28 @@ public sealed class SoloShotCommandCharR : CommandBase
 
     private void ResolveRefs(CommandRunScope scope)
     {
-        _resolveAttempted = true;
-
         CharacterRigRefs rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
         _moveRect = rig.GetRect(_spec.moveTarget);
         _scaleRect = rig.GetRect(_spec.scaleTarget);
+        
+        _resolveAttempted = true;
     }
 
-    private bool ClaimTargets(CommandRunScope scope)
-    {
-        KillPreviousTweens();
-
-        if (!ComputeDestination(scope))
-            return false;
-
-        HasClaimedTargets = true;
-        return true;
-    }
-
-    private void KillPreviousTweens()
+    private void ClaimTargets(CommandRunScope scope)
     {
         _moveRect.DOKill(true);
         _scaleRect.DOKill(true);
+
+        ComputeDestination(scope);
+
+        HasClaimedTargets = true;
     }
 
-    private bool ComputeDestination(CommandRunScope scope)
+    private void ComputeDestination(CommandRunScope scope)
     {
         _targetScale = _spec.targetScale;
 
-        CharacterPlacementScalePreview scalePreview = new CharacterPlacementScalePreview(_scaleRect, _targetScale);
-
-        if (!CharacterPlacementSolver.TryCalculateFocusPlacement(
+        CharacterFocusPlacementSolver.TryCalculateFocusPlacement(
                 scope,
                 _spec.slotKey,
                 _moveRect,
@@ -163,18 +153,9 @@ public sealed class SoloShotCommandCharR : CommandBase
                 _focusTuningDb,
                 _spec.screenPoint,
                 _spec.screenOffset,
-                scalePreview,
-                out Vector2 destPos))
-        {
-            Debug.LogWarning(
-                $"[SoloShotCommandCharR] Failed to calculate solo shot placement. " +
-                $"slotKey='{_spec.slotKey}', focus='{_spec.focusPreset}', screenPoint='{_spec.screenPoint}'.");
-
-            return false;
-        }
+                out Vector2 destPos);
 
         _destination = destPos;
-        return true;
     }
 
     private void CommitFinalState()

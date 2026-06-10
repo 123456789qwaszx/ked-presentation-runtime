@@ -96,10 +96,10 @@ public sealed class PlaceCharacterFocusCommandCharR : CommandBase
 
     private void ResolveRefs(CommandRunScope scope)
     {
-        _resolveAttempted = true;
-
         CharacterRigRefs rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
         _moveRect = rig.GetRect(_spec.moveTarget);
+        
+        _resolveAttempted = true;
     }
 
     private void ClaimTarget(CommandRunScope scope)
@@ -111,9 +111,9 @@ public sealed class PlaceCharacterFocusCommandCharR : CommandBase
         HasClaimedTarget = true;
     }
 
-    private bool ComputeDestination(CommandRunScope scope)
+    private void ComputeDestination(CommandRunScope scope)
     {
-        if (!CharacterPlacementSolver.TryCalculateFocusPlacement(
+       CharacterFocusPlacementSolver.TryCalculateFocusPlacement(
                 scope,
                 _spec.slotKey,
                 _moveRect,
@@ -124,18 +124,9 @@ public sealed class PlaceCharacterFocusCommandCharR : CommandBase
                 _focusTuningDb,
                 _spec.screenPoint,
                 _spec.screenOffset,
-                CharacterPlacementScalePreview.None,
-                out Vector2 destPos))
-        {
-            Debug.LogWarning(
-                $"[PlaceCharacterFocusCommandCharR] Failed to calculate placement. " +
-                $"slotKey='{_spec.slotKey}', focus='{_spec.focusPreset}', screenPoint='{_spec.screenPoint}'.");
-
-            return false;
-        }
+                out Vector2 destPos);
 
         _destination = destPos;
-        return true;
     }
 
     private void CommitFinalState()

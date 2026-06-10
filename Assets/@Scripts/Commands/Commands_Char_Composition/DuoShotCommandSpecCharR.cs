@@ -17,11 +17,6 @@ public sealed class DuoShotCommandSpecCharR : CommandSpecBase
     [Header("Preset")]
     public CharacterDuoShotPreset preset = CharacterDuoShotPreset.Balanced;
 
-    [Tooltip("true이면 preset 대신 아래 layout을 사용합니다.")]
-    public bool overrideLayout = false;
-
-    public CharacterDuoShotLayout layout = new CharacterDuoShotLayout();
-
     [Header("Optional Pose Tuning")]
     public string leftPoseKey = "";
     public string rightPoseKey = "";
@@ -108,8 +103,6 @@ public sealed class DuoShotCommandCharR : CommandBase
 
     private void ResolveRefs(CommandRunScope scope)
     {
-        _resolveAttempted = true;
-
         _left.RoleKey = _spec.leftRoleKey;
         _left.PoseKey = _spec.leftPoseKey;
 
@@ -118,13 +111,12 @@ public sealed class DuoShotCommandCharR : CommandBase
 
         ResolveSide(scope, _left);
         ResolveSide(scope, _right);
+        
+        _resolveAttempted = true;
     }
 
     private void ResolveSide(CommandRunScope scope, SideRuntime side)
     {
-        if (string.IsNullOrWhiteSpace(side.RoleKey))
-            return;
-
         CharacterRigRefs rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, side.RoleKey);
         side.MoveRect = rig.GetRect(_spec.moveTarget);
         side.ScaleRect = rig.GetRect(_spec.scaleTarget);
@@ -140,35 +132,19 @@ public sealed class DuoShotCommandCharR : CommandBase
         HasClaimedTargets = true;
     }
 
-    private bool ComputeDestinations(CommandRunScope scope)
+    private void ComputeDestinations(CommandRunScope scope)
     {
-        CharacterDuoShotLayout layout =
-            _spec.overrideLayout && _spec.layout != null
-                ? _spec.layout
-                : CharacterDuoShotPresetResolver.Resolve(_spec.preset);
+        CharacterDuoShotLayout layout = CharacterDuoShotPresetResolver.Resolve(_spec.preset);
 
-        if (layout == null || layout.left == null || layout.right == null)
-            return false;
-
-        if (!ComputeSideDestination(scope, _left, layout.left))
-            return false;
-
-        if (!ComputeSideDestination(scope, _right, layout.right))
-            return false;
-
-        return true;
+        ComputeSideDestination(scope, _left, layout.left);
+        ComputeSideDestination(scope, _right, layout.right);
     }
 
-    private bool ComputeSideDestination(
-        CommandRunScope scope,
-        SideRuntime side,
-        CharacterDuoShotSideLayout layout)
+    private void ComputeSideDestination(CommandRunScope scope, SideRuntime side, CharacterDuoShotSideLayout layout)
     {
         side.TargetScale = layout.scale;
 
-        CharacterPlacementScalePreview scalePreview = new CharacterPlacementScalePreview(side.ScaleRect, layout.scale);
-
-        if (!CharacterPlacementSolver.TryCalculateFocusPlacement(
+        CharacterFocusPlacementSolver.TryCalculateFocusPlacement(
                 scope,
                 side.RoleKey,
                 side.MoveRect,
@@ -179,18 +155,9 @@ public sealed class DuoShotCommandCharR : CommandBase
                 _focusTuningDb,
                 layout.screenPoint,
                 layout.screenOffset,
-                scalePreview,
-                out Vector2 destPos))
-        {
-            Debug.LogWarning(
-                $"[DuoShotCommandCharR] Failed to calculate side placement. " +
-                $"roleKey='{side.RoleKey}', focus='{layout.focusPreset}', screenPoint='{layout.screenPoint}'.");
-
-            return false;
-        }
+                out Vector2 destPos);
 
         side.Destination = destPos;
-        return true;
     }
 
     private Sequence CreateSideSequence(SideRuntime side)
