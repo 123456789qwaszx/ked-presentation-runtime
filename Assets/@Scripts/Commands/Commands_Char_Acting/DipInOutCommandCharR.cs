@@ -26,10 +26,14 @@ public sealed class DipInOutCommandSpecCharR : CharacterRigCommandSpecBase
 
 public sealed class DipInOutCommandCharR : CommandBase
 {
+    private const float StepFinishSpeedUpMultiplier = 30f;
+
     private readonly DipInOutCommandSpecCharR _spec;
 
     private RectTransform _rect;
     private Vector2 _basePos;
+
+    private Tween _tween;
 
     private bool _resolveAttempted;
 
@@ -44,7 +48,6 @@ public sealed class DipInOutCommandCharR : CommandBase
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
-        Debug.Log("DipInOutCommandSpecCharR ExecuteInner");
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
@@ -72,7 +75,7 @@ public sealed class DipInOutCommandCharR : CommandBase
         Ease enterEase = ToEase(_spec.ease);
         Ease returnEase = ToEase(_spec.ease);
 
-        Tween tween = DOTween
+        _tween = DOTween
             .To(
                 () => 0f,
                 t =>
@@ -104,12 +107,11 @@ public sealed class DipInOutCommandCharR : CommandBase
             .OnComplete(CommitFinalState);
 
         if (_spec.wait)
-            yield return tween.WaitForCompletion();
+            yield return _tween.WaitForCompletion();
     }
 
     protected override void OnSkip(CommandRunScope scope)
     {
-        Debug.Log("DipInOutCommandSpecCharR Skip");
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
@@ -140,7 +142,40 @@ public sealed class DipInOutCommandCharR : CommandBase
         _rect.anchoredPosition = _basePos;
 
         HasClaimedTarget = false;
+        _tween = null;
     }
+
+    #region StepLifetimeHook
+
+    protected override void OnStepLifetimeFinished(CommandRunScope scope)
+    {
+        _tween.Kill(false);
+
+        float duration = CalculateAcceleratedRemainingDuration();
+
+        _tween = _rect
+            .DOAnchorPos(_basePos, duration)
+            .SetEase(ToEase(_spec.ease))
+            .SetUpdate(true)
+            .SetTarget(_rect)
+            .OnComplete(CommitFinalState);
+    }
+
+    private float CalculateAcceleratedRemainingDuration()
+    {
+        float originalDistance = Mathf.Abs(_spec.distance);
+        float remainingDistance = Vector2.Distance(_rect.anchoredPosition, _basePos);
+
+        if (originalDistance <= 0.001f || remainingDistance <= 0.001f)
+            return 0f;
+
+        float remainingRatio = Mathf.Clamp01(remainingDistance / originalDistance);
+        float remainingDuration = _spec.duration * remainingRatio;
+
+        return Mathf.Max(0.01f, remainingDuration / StepFinishSpeedUpMultiplier);
+    }
+
+    #endregion
 
     private static Vector2 GetOffset(CharRigDirection dir, float distance) => dir switch
     {
@@ -170,5 +205,4 @@ public sealed class DipInOutCommandCharR : CommandBase
         Ease.InOutBack => Ease.OutBack,
         _ => baseEase,
     };
-
 }

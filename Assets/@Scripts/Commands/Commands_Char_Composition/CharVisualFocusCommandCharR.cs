@@ -57,12 +57,16 @@ public sealed class CharVisualFocusCommandSpecCharR : CharacterRigCommandSpecBas
 
 public sealed class CharVisualFocusCommandCharR : CommandBase
 {
+    private const float StepFinishSpeedUpMultiplier = 30f;
+
     private readonly CharVisualFocusCommandSpecCharR _spec;
 
     private CharacterRigVisualEffectController _controller;
 
     private VisualState _fromState;
     private VisualState _destState;
+
+    private Tween _tween;
 
     private bool _resolveAttempted;
 
@@ -91,7 +95,7 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
             yield break;
         }
 
-        Tween tween = DOTween
+        _tween = DOTween
             .To(
                 () => 0f,
                 t =>
@@ -107,17 +111,17 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
             .OnComplete(CommitFinalState);
 
         if (_spec.wait)
-            yield return tween.WaitForCompletion();
+            yield return _tween.WaitForCompletion();
     }
 
     protected override void OnSkip(CommandRunScope scope)
     {
         if (!_resolveAttempted)
             ResolveRefs(scope);
-        
+
         if (_controller == null)
             return;
-        
+
         if (!HasClaimedController)
             ClaimController();
 
@@ -154,11 +158,55 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
     private void CommitFinalState()
     {
         DOTween.Kill(_controller, false);
-        
+
         ApplyState(_destState);
 
         HasClaimedController = false;
+        _tween = null;
     }
+
+    #region StepLifetimeHook
+
+    protected override void OnStepLifetimeFinished(CommandRunScope scope)
+    {
+        _tween.Kill(false);
+
+        VisualState currentState = CaptureCurrentState();
+        float duration = CalculateAcceleratedRemainingDuration(currentState);
+
+        _fromState = currentState;
+
+        _tween = DOTween
+            .To(
+                () => 0f,
+                t =>
+                {
+                    VisualState state = VisualState.Lerp(_fromState, _destState, t);
+                    ApplyState(state);
+                },
+                1f,
+                duration)
+            .SetEase(_spec.ease)
+            .SetUpdate(true)
+            .SetTarget(_controller)
+            .OnComplete(CommitFinalState);
+    }
+
+    private float CalculateAcceleratedRemainingDuration(VisualState currentState)
+    {
+        float originalDistance = VisualState.Distance(_fromState, _destState);
+        float remainingDistance = VisualState.Distance(currentState, _destState);
+
+        if (originalDistance <= 0.001f || remainingDistance <= 0.001f)
+            return 0f;
+
+        float remainingRatio = Mathf.Clamp01(remainingDistance / originalDistance);
+        float remainingDuration = _spec.duration * remainingRatio;
+
+        return Mathf.Max(0.01f, remainingDuration / StepFinishSpeedUpMultiplier);
+    }
+
+    #endregion
 
     private VisualState CaptureCurrentState()
     {
@@ -282,6 +330,36 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
                 Mathf.Lerp(from.Blur, to.Blur, t),
                 Color.Lerp(from.OuterRimColor, to.OuterRimColor, t),
                 Color.Lerp(from.InnerRimColor, to.InnerRimColor, t));
+        }
+
+        public static float Distance(VisualState from, VisualState to)
+        {
+            float dim = Mathf.Abs(to.Dim - from.Dim);
+            float outerRim = Mathf.Abs(to.OuterRim - from.OuterRim);
+            float innerRim = Mathf.Abs(to.InnerRim - from.InnerRim);
+            float blur = Mathf.Abs(to.Blur - from.Blur);
+
+            float dimTint = ColorDistance(from.DimTintColor, to.DimTintColor);
+            float outerRimColor = ColorDistance(from.OuterRimColor, to.OuterRimColor);
+            float innerRimColor = ColorDistance(from.InnerRimColor, to.InnerRimColor);
+
+            return dim +
+                   outerRim +
+                   innerRim +
+                   blur +
+                   dimTint +
+                   outerRimColor +
+                   innerRimColor;
+        }
+
+        private static float ColorDistance(Color from, Color to)
+        {
+            float r = to.r - from.r;
+            float g = to.g - from.g;
+            float b = to.b - from.b;
+            float a = to.a - from.a;
+
+            return Mathf.Sqrt(r * r + g * g + b * b + a * a);
         }
     }
 }

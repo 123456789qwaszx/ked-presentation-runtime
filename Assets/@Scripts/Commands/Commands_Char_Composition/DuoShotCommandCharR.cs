@@ -34,6 +34,8 @@ public sealed class DuoShotCommandSpecCharR : CommandSpecBase
 
 public sealed class DuoShotCommandCharR : CommandBase
 {
+    private const float StepFinishSpeedUpMultiplier = 30f;
+
     private sealed class SideRuntime
     {
         public string RoleKey;
@@ -42,7 +44,10 @@ public sealed class DuoShotCommandCharR : CommandBase
         public RectTransform MoveRect;
         public RectTransform ScaleRect;
 
+        public Vector2 StartPosition;
         public Vector2 Destination;
+
+        public Vector2 StartScale;
         public Vector2 TargetScale;
     }
 
@@ -51,6 +56,8 @@ public sealed class DuoShotCommandCharR : CommandBase
 
     private readonly SideRuntime _left = new();
     private readonly SideRuntime _right = new();
+
+    private Sequence _sequence;
 
     private bool _resolveAttempted;
 
@@ -80,21 +87,24 @@ public sealed class DuoShotCommandCharR : CommandBase
             yield break;
         }
 
-        Sequence leftSequence = CreateSideSequence(_left);
-        Sequence rightSequence = CreateSideSequence(_right);
+        _sequence = DOTween.Sequence()
+            .SetUpdate(true)
+            .SetTarget(this);
+
+        JoinSideTween(_sequence, _left, _spec.duration);
+        JoinSideTween(_sequence, _right, _spec.duration);
+
+        _sequence.OnComplete(CommitFinalState);
 
         if (_spec.wait)
-        {
-            while (leftSequence.IsPlaying() || rightSequence.IsPlaying())
-                yield return null;
-        }
+            yield return _sequence.WaitForCompletion();
     }
 
     protected override void OnSkip(CommandRunScope scope)
     {
         if (!_resolveAttempted)
             ResolveRefs(scope);
-        
+
         if (!HasClaimedTargets)
             ClaimTargets(scope);
 
@@ -111,7 +121,7 @@ public sealed class DuoShotCommandCharR : CommandBase
 
         ResolveSide(scope, _left);
         ResolveSide(scope, _right);
-        
+
         _resolveAttempted = true;
     }
 
@@ -125,11 +135,24 @@ public sealed class DuoShotCommandCharR : CommandBase
     private void ClaimTargets(CommandRunScope scope)
     {
         _left.MoveRect.DOKill(true);
+        _left.ScaleRect.DOKill(true);
+        _right.MoveRect.DOKill(true);
         _right.ScaleRect.DOKill(true);
+
+        CaptureStartState(_left);
+        CaptureStartState(_right);
 
         ComputeDestinations(scope);
 
         HasClaimedTargets = true;
+    }
+
+    private static void CaptureStartState(SideRuntime side)
+    {
+        side.StartPosition = side.MoveRect.anchoredPosition;
+
+        Vector3 scale = side.ScaleRect.localScale;
+        side.StartScale = new Vector2(scale.x, scale.y);
     }
 
     private void ComputeDestinations(CommandRunScope scope)
@@ -145,30 +168,26 @@ public sealed class DuoShotCommandCharR : CommandBase
         side.TargetScale = layout.scale;
 
         CharacterFocusPlacementSolver.TryCalculateFocusPlacement(
-                scope,
-                side.RoleKey,
-                side.MoveRect,
-                layout.focusPreset,
-                side.PoseKey,
-                layout.customFocusKey,
-                layout.focusOffset,
-                _focusTuningDb,
-                layout.screenPoint,
-                layout.screenOffset,
-                out Vector2 destPos);
+            scope,
+            side.RoleKey,
+            side.MoveRect,
+            layout.focusPreset,
+            side.PoseKey,
+            layout.customFocusKey,
+            layout.focusOffset,
+            _focusTuningDb,
+            layout.screenPoint,
+            layout.screenOffset,
+            out Vector2 destPos);
 
         side.Destination = destPos;
     }
 
-    private Sequence CreateSideSequence(SideRuntime side)
+    private void JoinSideTween(Sequence sequence, SideRuntime side, float duration)
     {
-        Sequence sequence = DOTween.Sequence()
-            .SetUpdate(true)
-            .SetTarget(side.MoveRect);
-
         sequence.Join(
             side.MoveRect
-                .DOAnchorPos(side.Destination, _spec.duration)
+                .DOAnchorPos(side.Destination, duration)
                 .SetEase(_spec.ease)
                 .SetUpdate(true)
                 .SetTarget(side.MoveRect));
@@ -176,17 +195,13 @@ public sealed class DuoShotCommandCharR : CommandBase
         Vector3 targetScale = side.ScaleRect.localScale;
         targetScale.x = side.TargetScale.x;
         targetScale.y = side.TargetScale.y;
-        
+
         sequence.Join(
             side.ScaleRect
-            .DOScale(targetScale, _spec.duration)
-            .SetEase(_spec.ease)
-            .SetUpdate(true)
-            .SetTarget(side.ScaleRect));
-
-        sequence.OnComplete(() => CommitSide(side));
-
-        return sequence;
+                .DOScale(targetScale, duration)
+                .SetEase(_spec.ease)
+                .SetUpdate(true)
+                .SetTarget(side.ScaleRect));
     }
 
     private void CommitFinalState()
@@ -195,6 +210,7 @@ public sealed class DuoShotCommandCharR : CommandBase
         CommitSide(_right);
 
         HasClaimedTargets = false;
+        _sequence = null;
     }
 
     private void CommitSide(SideRuntime side)
@@ -206,4 +222,62 @@ public sealed class DuoShotCommandCharR : CommandBase
         scale.y = side.TargetScale.y;
         side.ScaleRect.localScale = scale;
     }
+
+    #region StepLifetimeHook
+
+    protected override void OnStepLifetimeFinished(CommandRunScope scope)
+    {
+        _sequence.Kill(false);
+
+        float duration = Mathf.Max(
+            CalculateAcceleratedRemainingDuration(_left),
+            CalculateAcceleratedRemainingDuration(_right));
+
+        _sequence = DOTween.Sequence()
+            .SetUpdate(true)
+            .SetTarget(this);
+
+        JoinSideTween(_sequence, _left, duration);
+        JoinSideTween(_sequence, _right, duration);
+
+        _sequence.OnComplete(CommitFinalState);
+    }
+
+    private float CalculateAcceleratedRemainingDuration(SideRuntime side)
+    {
+        float moveRatio = CalculateMoveRemainingRatio(side);
+        float scaleRatio = CalculateScaleRemainingRatio(side);
+
+        float remainingRatio = Mathf.Max(moveRatio, scaleRatio);
+        float remainingDuration = _spec.duration * remainingRatio;
+
+        return Mathf.Max(0.01f, remainingDuration / StepFinishSpeedUpMultiplier);
+    }
+
+    private static float CalculateMoveRemainingRatio(SideRuntime side)
+    {
+        float originalDistance = Vector2.Distance(side.StartPosition, side.Destination);
+        float remainingDistance = Vector2.Distance(side.MoveRect.anchoredPosition, side.Destination);
+
+        if (originalDistance <= 0.001f || remainingDistance <= 0.001f)
+            return 0f;
+
+        return Mathf.Clamp01(remainingDistance / originalDistance);
+    }
+
+    private static float CalculateScaleRemainingRatio(SideRuntime side)
+    {
+        Vector3 currentScale3 = side.ScaleRect.localScale;
+        Vector2 currentScale = new(currentScale3.x, currentScale3.y);
+
+        float originalDistance = Vector2.Distance(side.StartScale, side.TargetScale);
+        float remainingDistance = Vector2.Distance(currentScale, side.TargetScale);
+
+        if (originalDistance <= 0.001f || remainingDistance <= 0.001f)
+            return 0f;
+
+        return Mathf.Clamp01(remainingDistance / originalDistance);
+    }
+
+    #endregion
 }

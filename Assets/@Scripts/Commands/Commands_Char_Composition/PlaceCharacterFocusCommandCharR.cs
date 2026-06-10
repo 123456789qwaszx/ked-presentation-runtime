@@ -39,11 +39,17 @@ public sealed class PlaceCharacterFocusCommandSpecCharR : CharacterRigCommandSpe
 
 public sealed class PlaceCharacterFocusCommandCharR : CommandBase
 {
+    private const float StepFinishSpeedUpMultiplier = 30f;
+
     private readonly PlaceCharacterFocusCommandSpecCharR _spec;
     private readonly CharacterFocusTuningDBSO _focusTuningDb;
 
     private RectTransform _moveRect;
+
+    private Vector2 _startPosition;
     private Vector2 _destination;
+
+    private Tween _tween;
 
     private bool _resolveAttempted;
 
@@ -72,7 +78,7 @@ public sealed class PlaceCharacterFocusCommandCharR : CommandBase
             yield break;
         }
 
-        Tween tween = _moveRect
+        _tween = _moveRect
             .DOAnchorPos(_destination, _spec.duration)
             .SetEase(_spec.ease)
             .SetUpdate(true)
@@ -80,7 +86,7 @@ public sealed class PlaceCharacterFocusCommandCharR : CommandBase
             .OnComplete(CommitFinalState);
 
         if (_spec.wait)
-            yield return tween.WaitForCompletion();
+            yield return _tween.WaitForCompletion();
     }
 
     protected override void OnSkip(CommandRunScope scope)
@@ -90,7 +96,7 @@ public sealed class PlaceCharacterFocusCommandCharR : CommandBase
 
         if (!HasClaimedTarget)
             ClaimTarget(scope);
-        
+
         CommitFinalState();
     }
 
@@ -98,13 +104,15 @@ public sealed class PlaceCharacterFocusCommandCharR : CommandBase
     {
         CharacterRigRefs rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
         _moveRect = rig.GetRect(_spec.moveTarget);
-        
+
         _resolveAttempted = true;
     }
 
     private void ClaimTarget(CommandRunScope scope)
     {
         _moveRect.DOKill(true);
+
+        _startPosition = _moveRect.anchoredPosition;
 
         ComputeDestination(scope);
 
@@ -113,18 +121,18 @@ public sealed class PlaceCharacterFocusCommandCharR : CommandBase
 
     private void ComputeDestination(CommandRunScope scope)
     {
-       CharacterFocusPlacementSolver.TryCalculateFocusPlacement(
-                scope,
-                _spec.slotKey,
-                _moveRect,
-                _spec.focusPreset,
-                _spec.poseKey,
-                _spec.customFocusKey,
-                _spec.focusOffset,
-                _focusTuningDb,
-                _spec.screenPoint,
-                _spec.screenOffset,
-                out Vector2 destPos);
+        CharacterFocusPlacementSolver.TryCalculateFocusPlacement(
+            scope,
+            _spec.slotKey,
+            _moveRect,
+            _spec.focusPreset,
+            _spec.poseKey,
+            _spec.customFocusKey,
+            _spec.focusOffset,
+            _focusTuningDb,
+            _spec.screenPoint,
+            _spec.screenOffset,
+            out Vector2 destPos);
 
         _destination = destPos;
     }
@@ -134,5 +142,38 @@ public sealed class PlaceCharacterFocusCommandCharR : CommandBase
         _moveRect.anchoredPosition = _destination;
 
         HasClaimedTarget = false;
+        _tween = null;
     }
+
+    #region StepLifetimeHook
+
+    protected override void OnStepLifetimeFinished(CommandRunScope scope)
+    {
+        _tween.Kill(false);
+
+        float duration = CalculateAcceleratedRemainingDuration();
+
+        _tween = _moveRect
+            .DOAnchorPos(_destination, duration)
+            .SetEase(_spec.ease)
+            .SetUpdate(true)
+            .SetTarget(_moveRect)
+            .OnComplete(CommitFinalState);
+    }
+
+    private float CalculateAcceleratedRemainingDuration()
+    {
+        float originalDistance = Vector2.Distance(_startPosition, _destination);
+        float remainingDistance = Vector2.Distance(_moveRect.anchoredPosition, _destination);
+
+        if (originalDistance <= 0.001f || remainingDistance <= 0.001f)
+            return 0f;
+
+        float remainingRatio = Mathf.Clamp01(remainingDistance / originalDistance);
+        float remainingDuration = _spec.duration * remainingRatio;
+
+        return Mathf.Max(0.01f, remainingDuration / StepFinishSpeedUpMultiplier);
+    }
+
+    #endregion
 }

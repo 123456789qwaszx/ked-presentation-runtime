@@ -28,9 +28,16 @@ public class RotateToCommandSpecCharR : CharacterRigCommandSpecBase
 
 public sealed class RotateToCommandCharR : CommandBase
 {
+    private const float StepFinishSpeedUpMultiplier = 30f;
+
     private readonly RotateToCommandSpecCharR _spec;
 
     private RectTransform _rect;
+
+    private Vector3 _startEuler;
+    private Vector3 _targetEuler;
+
+    private Tween _tween;
 
     private bool _resolveAttempted;
 
@@ -53,21 +60,23 @@ public sealed class RotateToCommandCharR : CommandBase
         if (_spec.overrideFromEuler)
             _rect.localEulerAngles = _spec.fromEuler;
 
+        CaptureTweenEndpoints();
+
         if (_spec.duration <= 0f)
         {
             CommitFinalState();
             yield break;
         }
 
-        Tween tween = _rect
-            .DOLocalRotate(_spec.toEuler, _spec.duration, RotateMode.Fast)
+        _tween = _rect
+            .DOLocalRotate(_targetEuler, _spec.duration, RotateMode.Fast)
             .SetEase(_spec.ease)
             .SetUpdate(true)
             .SetTarget(_rect)
             .OnComplete(CommitFinalState);
 
         if (_spec.wait)
-            yield return tween.WaitForCompletion();
+            yield return _tween.WaitForCompletion();
     }
 
     protected override void OnSkip(CommandRunScope scope)
@@ -93,13 +102,63 @@ public sealed class RotateToCommandCharR : CommandBase
     {
         _rect.DOKill(true);
 
+        _targetEuler = _spec.toEuler;
+
         HasClaimedTarget = true;
+    }
+
+    private void CaptureTweenEndpoints()
+    {
+        _startEuler = _rect.localEulerAngles;
+        _targetEuler = _spec.toEuler;
     }
 
     private void CommitFinalState()
     {
-        _rect.localEulerAngles = _spec.toEuler;
+        _rect.localEulerAngles = _targetEuler;
 
         HasClaimedTarget = false;
+        _tween = null;
     }
+
+    #region StepLifetimeHook
+
+    protected override void OnStepLifetimeFinished(CommandRunScope scope)
+    {
+        _tween.Kill(false);
+
+        float duration = CalculateAcceleratedRemainingDuration();
+
+        _tween = _rect
+            .DOLocalRotate(_targetEuler, duration, RotateMode.Fast)
+            .SetEase(_spec.ease)
+            .SetUpdate(true)
+            .SetTarget(_rect)
+            .OnComplete(CommitFinalState);
+    }
+
+    private float CalculateAcceleratedRemainingDuration()
+    {
+        float originalDistance = EulerDistance(_startEuler, _targetEuler);
+        float remainingDistance = EulerDistance(_rect.localEulerAngles, _targetEuler);
+
+        if (originalDistance <= 0.001f || remainingDistance <= 0.001f)
+            return 0f;
+
+        float remainingRatio = Mathf.Clamp01(remainingDistance / originalDistance);
+        float remainingDuration = _spec.duration * remainingRatio;
+
+        return Mathf.Max(0.01f, remainingDuration / StepFinishSpeedUpMultiplier);
+    }
+
+    private static float EulerDistance(Vector3 from, Vector3 to)
+    {
+        float x = Mathf.DeltaAngle(from.x, to.x);
+        float y = Mathf.DeltaAngle(from.y, to.y);
+        float z = Mathf.DeltaAngle(from.z, to.z);
+
+        return new Vector3(x, y, z).magnitude;
+    }
+
+    #endregion
 }

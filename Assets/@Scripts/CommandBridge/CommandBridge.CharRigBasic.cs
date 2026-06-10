@@ -94,12 +94,13 @@ public sealed partial class YarnCommandBridge
         Collect(spec);
     }
     
-    private void EnqueuePivotRotateToSpec(string roleKey, int angle)
+    private void EnqueuePivotRotateToSpec(string roleKey, int angle, float duration = 0.4f)
     {
         var spec = new PivotRotateToCommandSpecCharR()
         {
             slotKey = roleKey,
-            degree = angle
+            degree = angle,
+            duration = duration
         };
 
         Collect(spec);

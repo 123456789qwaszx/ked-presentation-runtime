@@ -18,16 +18,20 @@ public class FadeOutCommandSpecCharR : CharacterRigCommandSpecBase
     public float duration = 0.38f;
 
     public Ease ease = Ease.OutCubic;
-
-    [Tooltip("true면 숨긴 대상의 입력을 완전히 차단(interactable/blocksRaycasts=false)")]
-    public bool disableInteraction = true;
 }
 
 public sealed class FadeOutCommandCharR : CommandBase
 {
+    private const float StepFinishSpeedUpMultiplier = 30f;
+
     private readonly FadeOutCommandSpecCharR _spec;
 
     private CanvasGroup _canvasGroup;
+
+    private float _startAlpha;
+    private const float TargetAlpha = 0f;
+
+    private Tween _tween;
 
     private bool _resolveAttempted;
 
@@ -53,15 +57,15 @@ public sealed class FadeOutCommandCharR : CommandBase
             yield break;
         }
 
-        Tween tween = _canvasGroup
-            .DOFade(0f, _spec.duration)
+        _tween = _canvasGroup
+            .DOFade(TargetAlpha, _spec.duration)
             .SetEase(_spec.ease)
             .SetUpdate(true)
             .SetTarget(_canvasGroup)
             .OnComplete(CommitFinalState);
 
         if (_spec.wait)
-            yield return tween.WaitForCompletion();
+            yield return _tween.WaitForCompletion();
     }
 
     protected override void OnSkip(CommandRunScope scope)
@@ -88,17 +92,52 @@ public sealed class FadeOutCommandCharR : CommandBase
     {
         _canvasGroup.DOKill(true);
 
+        _startAlpha = _canvasGroup.alpha;
+
         HasClaimedTarget = true;
     }
 
     private void CommitFinalState()
     {
-        _canvasGroup.alpha = 0f;
+        _canvasGroup.alpha = TargetAlpha;
         _canvasGroup.interactable = false;
         _canvasGroup.blocksRaycasts = false;
 
         HasClaimedTarget = false;
+        _tween = null;
     }
+
+    #region StepLifetimeHook
+
+    protected override void OnStepLifetimeFinished(CommandRunScope scope)
+    {
+        _tween.Kill(false);
+
+        float duration = CalculateAcceleratedRemainingDuration();
+
+        _tween = _canvasGroup
+            .DOFade(TargetAlpha, duration)
+            .SetEase(_spec.ease)
+            .SetUpdate(true)
+            .SetTarget(_canvasGroup)
+            .OnComplete(CommitFinalState);
+    }
+
+    private float CalculateAcceleratedRemainingDuration()
+    {
+        float originalDistance = Mathf.Abs(_startAlpha - TargetAlpha);
+        float remainingDistance = Mathf.Abs(_canvasGroup.alpha - TargetAlpha);
+
+        if (originalDistance <= 0.001f || remainingDistance <= 0.001f)
+            return 0f;
+
+        float remainingRatio = Mathf.Clamp01(remainingDistance / originalDistance);
+        float remainingDuration = _spec.duration * remainingRatio;
+
+        return Mathf.Max(0.01f, remainingDuration / StepFinishSpeedUpMultiplier);
+    }
+
+    #endregion
 
     private static CanvasGroup GetOrAddCanvasGroup(RectTransform rect)
     {

@@ -47,6 +47,7 @@ title: Story_TalesOfNovaEP12_01
 <<beat Setup_TalesOfNovaEP12_01>>
 이건 내가 처음으로 그녀의 영혼에 닿았을 때의 이야기다. #box:blackbook
 
+<<shot_zoom_focus Willow body center 3 22>>
 <<fade_in Willow>>
 <<emoji Willow 02-1>>
 //<<idle_breathe Willow>>
@@ -58,6 +59,7 @@ title: Story_TalesOfNovaEP12_01
 
 <<char_defocus Willow>>
 <<move_by char1 -500 200 35>>
+<<rotate_to char1 90 15>>
 
 <<fade_in Noya>>
 <<shot_to 1 200 30>>

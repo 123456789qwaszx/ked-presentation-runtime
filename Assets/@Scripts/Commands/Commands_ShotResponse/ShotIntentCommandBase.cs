@@ -16,11 +16,15 @@ public abstract class ShotIntentCommandSpecBase : CommandSpecBase
 public abstract class ShotIntentCommandBase<TSpec> : CommandBase
     where TSpec : ShotIntentCommandSpecBase
 {
+    private const float StepFinishSpeedUpMultiplier = 1.8f;
+
     protected readonly PresentationResponseRig rig;
     protected readonly TSpec spec;
 
     private PresentationIntentState _fromState;
     private PresentationIntentState _toState;
+
+    private Tween _tween;
 
     private bool HasClaimedRig { get; set; }
 
@@ -42,7 +46,7 @@ public abstract class ShotIntentCommandBase<TSpec> : CommandBase
             yield break;
         }
 
-        Tween tween = DOTween
+        _tween = DOTween
             .To(
                 () => 0f,
                 t =>
@@ -60,7 +64,7 @@ public abstract class ShotIntentCommandBase<TSpec> : CommandBase
             .OnComplete(CommitFinalState);
 
         if (spec.wait)
-            yield return tween.WaitForCompletion();
+            yield return _tween.WaitForCompletion();
     }
 
     protected override void OnSkip(CommandRunScope scope)
@@ -74,7 +78,6 @@ public abstract class ShotIntentCommandBase<TSpec> : CommandBase
     protected abstract PresentationIntentState BuildTargetState(
         in PresentationIntentState from,
         CommandRunScope scope);
-    
 
     private void ClaimRig(CommandRunScope scope)
     {
@@ -91,5 +94,89 @@ public abstract class ShotIntentCommandBase<TSpec> : CommandBase
         rig.ApplyToAllBindings(_toState);
 
         HasClaimedRig = false;
+        _tween = null;
     }
+
+    #region StepLifetimeHook
+
+    protected override void OnStepLifetimeFinished(CommandRunScope scope)
+    {
+        _tween.Kill(false);
+
+        PresentationIntentState currentState = rig.CurrentState;
+        float duration = CalculateAcceleratedRemainingDuration(in currentState);
+
+        _fromState = currentState;
+
+        _tween = DOTween
+            .To(
+                () => 0f,
+                t =>
+                {
+                    PresentationIntentState state =
+                        PresentationShotIntentMath.Interpolate(_fromState, _toState, t);
+
+                    rig.ApplyToAllBindings(state);
+                },
+                1f,
+                duration)
+            .SetEase(spec.ease)
+            .SetUpdate(true)
+            .SetTarget(rig)
+            .OnComplete(CommitFinalState);
+    }
+
+    private float CalculateAcceleratedRemainingDuration(
+        in PresentationIntentState currentState)
+    {
+        float zoomRatio = CalculateScalarRemainingRatio(
+            _fromState.zoom,
+            _toState.zoom,
+            currentState.zoom);
+
+        float panRatio = CalculateVectorRemainingRatio(
+            _fromState.panInRigSpace,
+            _toState.panInRigSpace,
+            currentState.panInRigSpace);
+
+        float focusRatio = CalculateVectorRemainingRatio(
+            _fromState.focusPointInRigSpace,
+            _toState.focusPointInRigSpace,
+            currentState.focusPointInRigSpace);
+
+        float remainingRatio = Mathf.Max(zoomRatio, panRatio, focusRatio);
+        float remainingDuration = spec.duration * remainingRatio;
+
+        return Mathf.Max(0.01f, remainingDuration / StepFinishSpeedUpMultiplier);
+    }
+
+    private static float CalculateScalarRemainingRatio(
+        float from,
+        float to,
+        float current)
+    {
+        float originalDistance = Mathf.Abs(to - from);
+        float remainingDistance = Mathf.Abs(to - current);
+
+        if (originalDistance <= 0.001f || remainingDistance <= 0.001f)
+            return 0f;
+
+        return Mathf.Clamp01(remainingDistance / originalDistance);
+    }
+
+    private static float CalculateVectorRemainingRatio(
+        Vector2 from,
+        Vector2 to,
+        Vector2 current)
+    {
+        float originalDistance = Vector2.Distance(from, to);
+        float remainingDistance = Vector2.Distance(current, to);
+
+        if (originalDistance <= 0.001f || remainingDistance <= 0.001f)
+            return 0f;
+
+        return Mathf.Clamp01(remainingDistance / originalDistance);
+    }
+
+    #endregion
 }

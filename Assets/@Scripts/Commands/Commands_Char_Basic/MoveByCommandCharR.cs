@@ -102,12 +102,10 @@ public sealed class MoveByCommandCharR : CommandBase
 
     private void CommitFinalState()
     {
-        if (_rect != null)
-            _rect.anchoredPosition = _destPos;
+        _rect.anchoredPosition = _destPos;
 
         HasClaimedTarget = false;
         _tween = null;
-        _rect = null;
     }
     
     #region StepLifetimeHook

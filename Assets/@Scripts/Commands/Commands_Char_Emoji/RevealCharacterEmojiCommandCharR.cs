@@ -32,6 +32,8 @@ public sealed class RevealCharacterEmojiCommandSpecCharR : CharacterRigCommandSp
 
 public sealed class RevealCharacterEmojiCommandCharR : CommandBase
 {
+    private const float StepFinishSpeedUpMultiplier = 2f;
+
     private readonly RevealCharacterEmojiCommandSpecCharR _spec;
 
     private Image _image;
@@ -41,6 +43,8 @@ public sealed class RevealCharacterEmojiCommandCharR : CommandBase
     private float _toReveal;
     private float _duration;
     private Ease _ease;
+
+    private Tween _tween;
 
     private bool _resolveAttempted;
 
@@ -74,21 +78,21 @@ public sealed class RevealCharacterEmojiCommandCharR : CommandBase
             yield break;
         }
 
-        Tween tween = _materialRuntime.TweenReveal(
+        _tween = _materialRuntime.TweenReveal(
             _fromReveal,
             _toReveal,
             _duration,
             _ease,
             useUnscaledTime: true);
 
-        if (tween == null)
+        if (_tween == null)
         {
             CommitFinalState();
             yield break;
         }
 
         if (_spec.wait)
-            yield return tween.WaitForCompletion();
+            yield return _tween.WaitForCompletion();
     }
 
     protected override void OnSkip(CommandRunScope scope)
@@ -131,7 +135,54 @@ public sealed class RevealCharacterEmojiCommandCharR : CommandBase
         _materialRuntime.SetReveal(_toReveal);
 
         HasClaimedTarget = false;
+        _tween = null;
     }
+
+    #region StepLifetimeHook
+
+    protected override void OnStepLifetimeFinished(CommandRunScope scope)
+    {
+        _materialRuntime.KillTween(false);
+
+        float currentReveal = CaptureCurrentReveal();
+        float duration = CalculateAcceleratedRemainingDuration(currentReveal);
+
+        _fromReveal = currentReveal;
+
+        _tween = _materialRuntime.TweenReveal(
+            _fromReveal,
+            _toReveal,
+            duration,
+            _ease,
+            useUnscaledTime: true);
+
+        if (_tween == null)
+            CommitFinalState();
+    }
+
+    private float CalculateAcceleratedRemainingDuration(float currentReveal)
+    {
+        float originalDistance = Mathf.Abs(_toReveal - _fromReveal);
+        float remainingDistance = Mathf.Abs(_toReveal - currentReveal);
+
+        if (originalDistance <= 0.001f || remainingDistance <= 0.001f)
+            return 0f;
+
+        float remainingRatio = Mathf.Clamp01(remainingDistance / originalDistance);
+        float remainingDuration = _duration * remainingRatio;
+
+        return Mathf.Max(0.01f, remainingDuration / StepFinishSpeedUpMultiplier);
+    }
+
+    private float CaptureCurrentReveal()
+    {
+        if (_materialRuntime == null || _materialRuntime.RuntimeMaterial == null)
+            return _toReveal;
+
+        return _materialRuntime.RuntimeMaterial.GetFloat(CharacterEmojiShaderIds.Reveal);
+    }
+
+    #endregion
 
     private bool PrepareMaterial()
     {

@@ -44,14 +44,21 @@ public sealed class SoloShotCommandSpecCharR : CharacterRigCommandSpecBase
 
 public sealed class SoloShotCommandCharR : CommandBase
 {
+    private const float StepFinishSpeedUpMultiplier = 30f;
+
     private readonly SoloShotCommandSpecCharR _spec;
     private readonly CharacterFocusTuningDBSO _focusTuningDb;
 
     private RectTransform _moveRect;
     private RectTransform _scaleRect;
 
+    private Vector2 _startPosition;
     private Vector2 _destination;
+
+    private Vector2 _startScale;
     private Vector2 _targetScale;
+
+    private Sequence _sequence;
 
     private bool _resolveAttempted;
 
@@ -80,32 +87,11 @@ public sealed class SoloShotCommandCharR : CommandBase
             yield break;
         }
 
-        Sequence sequence = DOTween.Sequence()
-            .SetUpdate(true)
-            .SetTarget(_moveRect);
-
-        sequence.Join(
-            _moveRect
-                .DOAnchorPos(_destination, _spec.duration)
-                .SetEase(_spec.ease)
-                .SetUpdate(true)
-                .SetTarget(_moveRect));
-
-        Vector3 endScale = _scaleRect.localScale;
-        endScale.x = _targetScale.x;
-        endScale.y = _targetScale.y;
-
-        sequence.Join(
-            _scaleRect
-            .DOScale(endScale, _spec.duration)
-            .SetEase(_spec.ease)
-            .SetUpdate(true)
-            .SetTarget(_scaleRect));
-        
-        sequence.OnComplete(CommitFinalState);
+        _sequence = CreateSequence(_spec.duration)
+            .OnComplete(CommitFinalState);
 
         if (_spec.wait)
-            yield return sequence.WaitForCompletion();
+            yield return _sequence.WaitForCompletion();
     }
 
     protected override void OnSkip(CommandRunScope scope)
@@ -113,7 +99,7 @@ public sealed class SoloShotCommandCharR : CommandBase
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (!HasClaimedTargets) 
+        if (!HasClaimedTargets)
             ClaimTargets(scope);
 
         CommitFinalState();
@@ -124,7 +110,7 @@ public sealed class SoloShotCommandCharR : CommandBase
         CharacterRigRefs rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
         _moveRect = rig.GetRect(_spec.moveTarget);
         _scaleRect = rig.GetRect(_spec.scaleTarget);
-        
+
         _resolveAttempted = true;
     }
 
@@ -132,6 +118,11 @@ public sealed class SoloShotCommandCharR : CommandBase
     {
         _moveRect.DOKill(true);
         _scaleRect.DOKill(true);
+
+        _startPosition = _moveRect.anchoredPosition;
+
+        Vector3 currentScale = _scaleRect.localScale;
+        _startScale = new Vector2(currentScale.x, currentScale.y);
 
         ComputeDestination(scope);
 
@@ -143,19 +134,46 @@ public sealed class SoloShotCommandCharR : CommandBase
         _targetScale = _spec.targetScale;
 
         CharacterFocusPlacementSolver.TryCalculateFocusPlacement(
-                scope,
-                _spec.slotKey,
-                _moveRect,
-                _spec.focusPreset,
-                _spec.poseKey,
-                _spec.customFocusKey,
-                _spec.focusOffset,
-                _focusTuningDb,
-                _spec.screenPoint,
-                _spec.screenOffset,
-                out Vector2 destPos);
+            scope,
+            _spec.slotKey,
+            _moveRect,
+            _spec.focusPreset,
+            _spec.poseKey,
+            _spec.customFocusKey,
+            _spec.focusOffset,
+            _focusTuningDb,
+            _spec.screenPoint,
+            _spec.screenOffset,
+            out Vector2 destPos);
 
         _destination = destPos;
+    }
+
+    private Sequence CreateSequence(float duration)
+    {
+        Sequence sequence = DOTween.Sequence()
+            .SetUpdate(true)
+            .SetTarget(this);
+
+        sequence.Join(
+            _moveRect
+                .DOAnchorPos(_destination, duration)
+                .SetEase(_spec.ease)
+                .SetUpdate(true)
+                .SetTarget(_moveRect));
+
+        Vector3 endScale = _scaleRect.localScale;
+        endScale.x = _targetScale.x;
+        endScale.y = _targetScale.y;
+
+        sequence.Join(
+            _scaleRect
+                .DOScale(endScale, duration)
+                .SetEase(_spec.ease)
+                .SetUpdate(true)
+                .SetTarget(_scaleRect));
+
+        return sequence;
     }
 
     private void CommitFinalState()
@@ -168,5 +186,56 @@ public sealed class SoloShotCommandCharR : CommandBase
         _scaleRect.localScale = scale;
 
         HasClaimedTargets = false;
+        _sequence = null;
     }
+
+    #region StepLifetimeHook
+
+    protected override void OnStepLifetimeFinished(CommandRunScope scope)
+    {
+        _sequence.Kill(false);
+
+        float duration = CalculateAcceleratedRemainingDuration();
+
+        _sequence = CreateSequence(duration)
+            .OnComplete(CommitFinalState);
+    }
+
+    private float CalculateAcceleratedRemainingDuration()
+    {
+        float moveRatio = CalculateMoveRemainingRatio();
+        float scaleRatio = CalculateScaleRemainingRatio();
+
+        float remainingRatio = Mathf.Max(moveRatio, scaleRatio);
+        float remainingDuration = _spec.duration * remainingRatio;
+
+        return Mathf.Max(0.01f, remainingDuration / StepFinishSpeedUpMultiplier);
+    }
+
+    private float CalculateMoveRemainingRatio()
+    {
+        float originalDistance = Vector2.Distance(_startPosition, _destination);
+        float remainingDistance = Vector2.Distance(_moveRect.anchoredPosition, _destination);
+
+        if (originalDistance <= 0.001f || remainingDistance <= 0.001f)
+            return 0f;
+
+        return Mathf.Clamp01(remainingDistance / originalDistance);
+    }
+
+    private float CalculateScaleRemainingRatio()
+    {
+        Vector3 currentScale3 = _scaleRect.localScale;
+        Vector2 currentScale = new(currentScale3.x, currentScale3.y);
+
+        float originalDistance = Vector2.Distance(_startScale, _targetScale);
+        float remainingDistance = Vector2.Distance(currentScale, _targetScale);
+
+        if (originalDistance <= 0.001f || remainingDistance <= 0.001f)
+            return 0f;
+
+        return Mathf.Clamp01(remainingDistance / originalDistance);
+    }
+
+    #endregion
 }

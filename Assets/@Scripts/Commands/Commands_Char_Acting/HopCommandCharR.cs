@@ -37,10 +37,14 @@ public sealed class HopCommandSpecCharR : CharacterRigCommandSpecBase
 
 public sealed class HopCommandCharR : CommandBase
 {
+    private const float StepFinishSpeedUpMultiplier = 30f;
+
     private readonly HopCommandSpecCharR _spec;
 
     private RectTransform _rect;
     private Vector2 _basePos;
+
+    private Tween _tween;
 
     private bool _resolveAttempted;
 
@@ -76,7 +80,7 @@ public sealed class HopCommandCharR : CommandBase
             ? Mathf.Clamp(_spec.lastAirWidth, 0.05f, 1f)
             : mainAirW;
 
-        Tween tween = DOTween
+        _tween = DOTween
             .To(
                 () => 0f,
                 t =>
@@ -104,7 +108,7 @@ public sealed class HopCommandCharR : CommandBase
             .OnComplete(CommitFinalState);
 
         if (_spec.wait)
-            yield return tween.WaitForCompletion();
+            yield return _tween.WaitForCompletion();
     }
 
     protected override void OnSkip(CommandRunScope scope)
@@ -139,7 +143,50 @@ public sealed class HopCommandCharR : CommandBase
         _rect.anchoredPosition = _basePos;
 
         HasClaimedTarget = false;
+        _tween = null;
     }
+
+    #region StepLifetimeHook
+
+    protected override void OnStepLifetimeFinished(CommandRunScope scope)
+    {
+        _tween.Kill(false);
+
+        float duration = CalculateAcceleratedRemainingDuration();
+
+        _tween = _rect
+            .DOAnchorPos(_basePos, duration)
+            .SetEase(_spec.ease)
+            .SetUpdate(true)
+            .SetTarget(_rect)
+            .OnComplete(CommitFinalState);
+    }
+
+    private float CalculateAcceleratedRemainingDuration()
+    {
+        float originalDistance = CalculateReferenceHeight();
+        float remainingDistance = Vector2.Distance(_rect.anchoredPosition, _basePos);
+
+        if (originalDistance <= 0.001f || remainingDistance <= 0.001f)
+            return 0f;
+
+        float remainingRatio = Mathf.Clamp01(remainingDistance / originalDistance);
+        float remainingDuration = _spec.duration * remainingRatio;
+
+        return Mathf.Max(0.01f, remainingDuration / StepFinishSpeedUpMultiplier);
+    }
+
+    private float CalculateReferenceHeight()
+    {
+        float mainH = Mathf.Abs(_spec.height);
+        float lastH = _spec.lastArcHeight >= 0f
+            ? Mathf.Abs(_spec.lastArcHeight)
+            : mainH;
+
+        return Mathf.Max(mainH, lastH);
+    }
+
+    #endregion
 
     private static float HopHeight(float u, float height, float airW)
     {

@@ -26,10 +26,15 @@ public sealed class SlideInCommandSpecCharR : CharacterRigCommandSpecBase
 
 public sealed class SlideInCommandCharR : CommandBase
 {
+    private const float StepFinishSpeedUpMultiplier = 30f;
+
     private readonly SlideInCommandSpecCharR _spec;
 
     private RectTransform _rect;
+    private Vector2 _startPos;
     private Vector2 _destPos;
+
+    private Tween _tween;
 
     private bool _resolveAttempted;
 
@@ -55,9 +60,10 @@ public sealed class SlideInCommandCharR : CommandBase
             yield break;
         }
 
+        Vector2 start = _startPos;
         Vector2 dest = _destPos;
+
         Vector2 fromDir = GetDir(_spec.direction);
-        Vector2 start = dest + fromDir * _spec.distance;
 
         Vector2 slideDir = dest - start;
         slideDir = slideDir.sqrMagnitude > 0f
@@ -66,7 +72,7 @@ public sealed class SlideInCommandCharR : CommandBase
 
         _rect.anchoredPosition = start;
 
-        Tween tween = DOTween
+        _tween = DOTween
             .To(
                 () => 0f,
                 t =>
@@ -88,7 +94,7 @@ public sealed class SlideInCommandCharR : CommandBase
             .OnComplete(CommitFinalState);
 
         if (_spec.wait)
-            yield return tween.WaitForCompletion();
+            yield return _tween.WaitForCompletion();
     }
 
     protected override void OnSkip(CommandRunScope scope)
@@ -113,7 +119,9 @@ public sealed class SlideInCommandCharR : CommandBase
     private void ClaimTarget()
     {
         _rect.DOKill(true);
+
         _destPos = _rect.anchoredPosition;
+        _startPos = _destPos + GetDir(_spec.direction) * _spec.distance;
 
         HasClaimedTarget = true;
     }
@@ -123,7 +131,40 @@ public sealed class SlideInCommandCharR : CommandBase
         _rect.anchoredPosition = _destPos;
 
         HasClaimedTarget = false;
+        _tween = null;
     }
+
+    #region StepLifetimeHook
+
+    protected override void OnStepLifetimeFinished(CommandRunScope scope)
+    {
+        _tween.Kill(false);
+
+        float duration = CalculateAcceleratedRemainingDuration();
+
+        _tween = _rect
+            .DOAnchorPos(_destPos, duration)
+            .SetEase(_spec.ease)
+            .SetUpdate(true)
+            .SetTarget(_rect)
+            .OnComplete(CommitFinalState);
+    }
+
+    private float CalculateAcceleratedRemainingDuration()
+    {
+        float originalDistance = Vector2.Distance(_startPos, _destPos);
+        float remainingDistance = Vector2.Distance(_rect.anchoredPosition, _destPos);
+
+        if (originalDistance <= 0.001f || remainingDistance <= 0.001f)
+            return 0f;
+
+        float remainingRatio = Mathf.Clamp01(remainingDistance / originalDistance);
+        float remainingDuration = _spec.duration * remainingRatio;
+
+        return Mathf.Max(0.01f, remainingDuration / StepFinishSpeedUpMultiplier);
+    }
+
+    #endregion
 
     private static Vector2 GetDir(CharRigDirection from) => from switch
     {
