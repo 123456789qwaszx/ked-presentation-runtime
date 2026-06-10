@@ -1,7 +1,7 @@
 ﻿title: Beat_Screen_Vignette
 ---
 
-<<tx_focus_curtain_in>>
+<<slot char1>>
 //<<screen_flash 1 22>>
 //<<screen_flash_hit>>
 
@@ -31,5 +31,5 @@
 
 //LetterBox형 상하 암막:
 //<<screen_letterbox 0.55 0.45>>
-<<screen_letterbox 0.85 10>>
+//<<screen_letterbox 0.85 10>>
 ===

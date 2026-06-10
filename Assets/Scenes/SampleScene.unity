@@ -6389,8 +6389,8 @@ MonoBehaviour:
   vnAdvanceInputPoller: {fileID: 1315566987}
   dialogueAdvanceDispatcher: {fileID: 307625745}
   vnFeatureController: {fileID: 775605347}
-  rigPrefab: {fileID: 5409551162114272258, guid: a8a089dede6a6084d8eac1369e77b04c, type: 3}
-  backgroundRigPrefab: {fileID: 8760496663469689268, guid: 18f0ce8dac4b54f44a88bdcceac48012, type: 3}
+  rigPrefab: {fileID: 3927703185018977784, guid: b2fd39c267f1bfc448ff910d29840d43, type: 3}
+  backgroundRigPrefab: {fileID: 5015033696719687441, guid: 18f0ce8dac4b54f44a88bdcceac48012, type: 3}
   chapterCardPrefab: {fileID: 2410623267660482620, guid: 60640956e3866b44e9e8c9df1a45dbd3, type: 3}
   nodeRigPrefab: {fileID: 8432584506347833489, guid: 5a92676ae0261c54188d2a64469a3787, type: 3}
   chapterCardFactory: {fileID: 767435430}

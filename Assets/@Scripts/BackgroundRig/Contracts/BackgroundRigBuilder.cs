@@ -175,6 +175,9 @@ public sealed class BackgroundRigBuilder
             RawImage rawImage = rt.gameObject.AddComponent<RawImage>();
             rawImage.raycastTarget = false;
         }
+
+        if (node.NeedsMask && !rt.TryGetComponent<Mask>(out _))
+            rt.gameObject.AddComponent<Mask>();
     }
 
     private RectTransform EnsureRect(RectTransform parent, string name)
@@ -290,9 +293,6 @@ public sealed class BackgroundRigBuilder
 
         // Object slots
         refs.Background_ObjectSlotRoot = GetRt(BackgroundRigSchema.Refs.Background_ObjectSlotRoot);
-        refs.Background_ObjectSlot00 = GetRt(BackgroundRigSchema.Refs.Background_ObjectSlot00);
-        refs.Background_ObjectSlot01 = GetRt(BackgroundRigSchema.Refs.Background_ObjectSlot01);
-        refs.Background_ObjectSlot02 = GetRt(BackgroundRigSchema.Refs.Background_ObjectSlot02);
 
         // Front layer
         refs.Background_FrontLayer_Root = GetRt(BackgroundRigSchema.Refs.Background_FrontLayer_Root);

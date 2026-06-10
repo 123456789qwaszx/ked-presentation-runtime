@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -33,6 +32,47 @@ public static class CharacterRigSchema
         CharacterPortrait_Rotation,
         CharacterPortrait_SwayPivot,
         CharacterPortrait_Shake,
+
+        // Emoji00
+        CharacterEmojiSlot00_Root,
+        CharacterEmojiSlot00_CastTransform,
+        CharacterEmojiSlot00_Effect,
+
+        EmojiSlot00_Track,
+        EmojiSlot00_Track_Move,
+        EmojiSlot00_Track_X,
+        EmojiSlot00_Track_Y,
+        EmojiSlot00_Scale,
+        EmojiSlot00_Rotation,
+        EmojiSlot00_Image,
+
+        // Emoji01
+        CharacterEmojiSlot01_Root,
+        CharacterEmojiSlot01_CastTransform,
+        CharacterEmojiSlot01_Effect,
+
+        EmojiSlot01_Track,
+        EmojiSlot01_Track_Move,
+        EmojiSlot01_Track_X,
+        EmojiSlot01_Track_Y,
+        EmojiSlot01_Scale,
+        EmojiSlot01_Rotation,
+        EmojiSlot01_Image,
+
+        // Emoji02
+        CharacterEmojiSlot02_Root,
+        CharacterEmojiSlot02_CastTransform,
+        CharacterEmojiSlot02_Effect,
+
+        EmojiSlot02_Track,
+        EmojiSlot02_Track_Move,
+        EmojiSlot02_Track_X,
+        EmojiSlot02_Track_Y,
+        EmojiSlot02_Scale,
+        EmojiSlot02_Rotation,
+        EmojiSlot02_Image,
+
+        // Portrait acting axis
         CharacterPortrait_ActingScale,
         CharacterPortrait_ActingScale_X,
         CharacterPortrait_ActingScale_Y,
@@ -46,46 +86,6 @@ public static class CharacterRigSchema
         
         // Portrait extension / preserved systems
         Character_ExtensionsRoot,
-        
-        // Emoji00 casting/effect axis
-        CharacterEmojiSlot00_Root,
-        CharacterEmojiSlot00_CastTransform,
-        CharacterEmojiSlot00_Effect,
-        
-        // Emoji00 sprite motion axis
-        EmojiSlot00_Track,
-        EmojiSlot00_Track_Move,
-        EmojiSlot00_Track_X,
-        EmojiSlot00_Track_Y,
-        EmojiSlot00_Scale,
-        EmojiSlot00_Rotation,
-        EmojiSlot00_Image,
-        
-        // Emoji01
-        CharacterEmojiSlot01_Root,
-        CharacterEmojiSlot01_CastTransform,
-        CharacterEmojiSlot01_Effect,
-        
-        EmojiSlot01_Track,
-        EmojiSlot01_Track_Move,
-        EmojiSlot01_Track_X,
-        EmojiSlot01_Track_Y,
-        EmojiSlot01_Scale,
-        EmojiSlot01_Rotation,
-        EmojiSlot01_Image,
-        
-        // Emoji02
-        CharacterEmojiSlot02_Root,
-        CharacterEmojiSlot02_CastTransform,
-        CharacterEmojiSlot02_Effect,
-        
-        EmojiSlot02_Track,
-        EmojiSlot02_Track_Move,
-        EmojiSlot02_Track_X,
-        EmojiSlot02_Track_Y,
-        EmojiSlot02_Scale,
-        EmojiSlot02_Rotation,
-        EmojiSlot02_Image
     }
     
     public sealed class NodeDef 
@@ -103,13 +103,13 @@ public static class CharacterRigSchema
     public static readonly NodeDef[] Nodes =
     {
         // Slot axis - stage placement
-        new() { Id = Refs.CharSlot_Anchor,      Parent = null },
-        new() { Id = Refs.CharSlot_Track,       Parent = Refs.CharSlot_Anchor },
-        new() { Id = Refs.CharSlot_Track_X,     Parent = Refs.CharSlot_Track },
-        new() { Id = Refs.CharSlot_Track_Y,     Parent = Refs.CharSlot_Track_X },
-        new() { Id = Refs.CharSlot_Rotation,    Parent = Refs.CharSlot_Track_Y },
-        new() { Id = Refs.CharSlot_SwayPivot,    Parent = Refs.CharSlot_Rotation },
-        new() { Id = Refs.CharSlot_Scale,       Parent = Refs.CharSlot_SwayPivot, NeedsBottomPivot = true },
+        new() { Id = Refs.CharSlot_Anchor,    Parent = null },
+        new() { Id = Refs.CharSlot_Track,     Parent = Refs.CharSlot_Anchor },
+        new() { Id = Refs.CharSlot_Track_X,   Parent = Refs.CharSlot_Track },
+        new() { Id = Refs.CharSlot_Track_Y,   Parent = Refs.CharSlot_Track_X },
+        new() { Id = Refs.CharSlot_Rotation,  Parent = Refs.CharSlot_Track_Y },
+        new() { Id = Refs.CharSlot_SwayPivot, Parent = Refs.CharSlot_Rotation },
+        new() { Id = Refs.CharSlot_Scale,     Parent = Refs.CharSlot_SwayPivot, NeedsBottomPivot = true },
     
         // Framing axis - pseudo camera / focus response
         new() { Id = Refs.CharSlot_FramingTransform, Parent = Refs.CharSlot_Scale },
@@ -122,30 +122,32 @@ public static class CharacterRigSchema
         new() { Id = Refs.Character_CastTransform, Parent = Refs.Character_Root, NeedsBottomPivot = true },
     
         // Portrait acting axis
-        new() { Id = Refs.CharacterPortrait_Track,          Parent = Refs.Character_CastTransform,},
-        new() { Id = Refs.CharacterPortrait_Track_Move,     Parent = Refs.CharacterPortrait_Track },
-        new() { Id = Refs.CharacterPortrait_Track_X,        Parent = Refs.CharacterPortrait_Track_Move },
-        new() { Id = Refs.CharacterPortrait_Track_Y,        Parent = Refs.CharacterPortrait_Track_X },
-        new() { Id = Refs.CharacterPortrait_Rotation,       Parent = Refs.CharacterPortrait_Track_Y },
-        new() { Id = Refs.CharacterPortrait_SwayPivot,      Parent = Refs.CharacterPortrait_Rotation, NeedsBottomPivot = true },
-        new() { Id = Refs.CharacterPortrait_Shake,          Parent = Refs.CharacterPortrait_SwayPivot },
+        new() { Id = Refs.CharacterPortrait_Track,      Parent = Refs.Character_CastTransform },
+        new() { Id = Refs.CharacterPortrait_Track_Move, Parent = Refs.CharacterPortrait_Track },
+        new() { Id = Refs.CharacterPortrait_Track_X,    Parent = Refs.CharacterPortrait_Track_Move },
+        new() { Id = Refs.CharacterPortrait_Track_Y,    Parent = Refs.CharacterPortrait_Track_X },
+        new() { Id = Refs.CharacterPortrait_Rotation,   Parent = Refs.CharacterPortrait_Track_Y },
+        new() { Id = Refs.CharacterPortrait_SwayPivot,  Parent = Refs.CharacterPortrait_Rotation, NeedsBottomPivot = true },
+        new() { Id = Refs.CharacterPortrait_Shake,      Parent = Refs.CharacterPortrait_SwayPivot },
+        
+        // Portrait acting axis
         new() { Id = Refs.CharacterPortrait_ActingScale,    Parent = Refs.CharacterPortrait_Shake },
         new() { Id = Refs.CharacterPortrait_ActingScale_X,  Parent = Refs.CharacterPortrait_ActingScale },
         new() { Id = Refs.CharacterPortrait_ActingScale_Y,  Parent = Refs.CharacterPortrait_ActingScale_X },
     
         // Portrait sprite
-        new() { Id = Refs.CharacterPortraitSprite_Root,  Parent = Refs.CharacterPortrait_ActingScale_Y, NeedsCanvasGroup = true },
+        new() { Id = Refs.CharacterPortraitSprite_Root,  Parent = Refs.CharacterPortrait_ActingScale_Y, NeedsCanvasGroup = true, InitialCanvasGroupAlpha = 0f},
         new() { Id = Refs.CharacterPortraitSprite_Image, Parent = Refs.CharacterPortraitSprite_Root, NeedsImage = true },
     
         // Portrait sprite overlay
         new() { Id = Refs.CharacterPortraitSpriteOverlay_Root,  Parent = Refs.CharacterPortrait_ActingScale_Y, NeedsCanvasGroup = true, InitialCanvasGroupAlpha = 0f },
         new() { Id = Refs.CharacterPortraitSpriteOverlay_Image, Parent = Refs.CharacterPortraitSpriteOverlay_Root, NeedsImage = true },
-    
+        
         // Portrait extension / preserved systems
         new() { Id = Refs.Character_ExtensionsRoot, Parent = Refs.CharacterPortrait_ActingScale_Y },
-    
+        
         // Emoji00 casting/effect axis
-        new() { Id = Refs.CharacterEmojiSlot00_Root,          Parent = Refs.Character_CastTransform, NeedsCanvasGroup = true, InitialCanvasGroupAlpha = 0f },
+        new() { Id = Refs.CharacterEmojiSlot00_Root,          Parent = Refs.CharacterPortrait_Shake, NeedsCanvasGroup = true, InitialCanvasGroupAlpha = 0f },
         new() { Id = Refs.CharacterEmojiSlot00_CastTransform, Parent = Refs.CharacterEmojiSlot00_Root },
         new() { Id = Refs.CharacterEmojiSlot00_Effect,        Parent = Refs.CharacterEmojiSlot00_CastTransform },
     
@@ -159,7 +161,7 @@ public static class CharacterRigSchema
         new() { Id = Refs.EmojiSlot00_Image,      Parent = Refs.EmojiSlot00_Rotation, NeedsImage = true },
     
         // Emoji01 casting/effect axis
-        new() { Id = Refs.CharacterEmojiSlot01_Root,          Parent = Refs.Character_CastTransform, NeedsCanvasGroup = true, InitialCanvasGroupAlpha = 0f },
+        new() { Id = Refs.CharacterEmojiSlot01_Root,          Parent = Refs.CharacterPortrait_Shake, NeedsCanvasGroup = true, InitialCanvasGroupAlpha = 0f },
         new() { Id = Refs.CharacterEmojiSlot01_CastTransform, Parent = Refs.CharacterEmojiSlot01_Root },
         new() { Id = Refs.CharacterEmojiSlot01_Effect,        Parent = Refs.CharacterEmojiSlot01_CastTransform },
     
@@ -173,7 +175,7 @@ public static class CharacterRigSchema
         new() { Id = Refs.EmojiSlot01_Image,      Parent = Refs.EmojiSlot01_Rotation, NeedsImage = true },
     
         // Emoji02 casting/effect axis
-        new() { Id = Refs.CharacterEmojiSlot02_Root,          Parent = Refs.Character_CastTransform, NeedsCanvasGroup = true, InitialCanvasGroupAlpha = 0f },
+        new() { Id = Refs.CharacterEmojiSlot02_Root,          Parent = Refs.CharacterPortrait_Shake, NeedsCanvasGroup = true, InitialCanvasGroupAlpha = 0f },
         new() { Id = Refs.CharacterEmojiSlot02_CastTransform, Parent = Refs.CharacterEmojiSlot02_Root },
         new() { Id = Refs.CharacterEmojiSlot02_Effect,        Parent = Refs.CharacterEmojiSlot02_CastTransform },
     
@@ -217,6 +219,8 @@ public enum CharacterRigTarget
     CharacterPortrait_Rotation,
     CharacterPortrait_SwayPivot,
     CharacterPortrait_Shake,
+    
+    // Portrait acting axis
     CharacterPortrait_ActingScale,
     CharacterPortrait_ActingScale_X,
     CharacterPortrait_ActingScale_Y,
@@ -230,13 +234,12 @@ public enum CharacterRigTarget
 
     // Portrait extension / preserved systems
     Character_ExtensionsRoot,
-
-    // Emoji00 casting/effect axis
+    
+    // Emoji00
     CharacterEmojiSlot00_Root,
     CharacterEmojiSlot00_CastTransform,
     CharacterEmojiSlot00_Effect,
 
-    // Emoji00 sprite motion axis
     EmojiSlot00_Track,
     EmojiSlot00_Track_Move,
     EmojiSlot00_Track_X,
@@ -269,7 +272,7 @@ public enum CharacterRigTarget
     EmojiSlot02_Track_Y,
     EmojiSlot02_Scale,
     EmojiSlot02_Rotation,
-    EmojiSlot02_Image
+    EmojiSlot02_Image,
 }
 
 public sealed class CharacterRigRefs

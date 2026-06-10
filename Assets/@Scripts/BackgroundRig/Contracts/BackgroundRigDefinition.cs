@@ -35,9 +35,6 @@ public static class BackgroundRigSchema
 
         // Object slots
         Background_ObjectSlotRoot,
-        Background_ObjectSlot00,
-        Background_ObjectSlot01,
-        Background_ObjectSlot02,
 
         // Front layer
         Background_FrontLayer_Root,
@@ -58,6 +55,7 @@ public static class BackgroundRigSchema
 
         public bool NeedsImage;
         public bool NeedsRawImage;
+        public bool NeedsMask;
         public bool NeedsCanvasGroup;
         public bool NeedsCenterPivot;
         public bool NeedsBottomPivot;
@@ -89,7 +87,7 @@ public static class BackgroundRigSchema
         new() { Id = Refs.Background_ActingScale_Y, Parent = Refs.Background_ActingScale_X },
 
         // Layer stack
-        new() { Id = Refs.Background_LayerRoot, Parent = Refs.Background_ActingScale_Y },
+        new() { Id = Refs.Background_LayerRoot, Parent = Refs.Background_ActingScale_Y, NeedsImage = true, NeedsMask = true },
 
         // Back layer
         new() { Id = Refs.Background_BackLayer_Root, Parent = Refs.Background_LayerRoot, NeedsCanvasGroup = true },
@@ -97,9 +95,6 @@ public static class BackgroundRigSchema
 
         // Object slots
         new() { Id = Refs.Background_ObjectSlotRoot, Parent = Refs.Background_LayerRoot, NeedsCanvasGroup = true, InitialCanvasGroupAlpha = 0f },
-        new() { Id = Refs.Background_ObjectSlot00, Parent = Refs.Background_ObjectSlotRoot },
-        new() { Id = Refs.Background_ObjectSlot01, Parent = Refs.Background_ObjectSlotRoot },
-        new() { Id = Refs.Background_ObjectSlot02, Parent = Refs.Background_ObjectSlotRoot },
 
         // Front layer
         new() { Id = Refs.Background_FrontLayer_Root, Parent = Refs.Background_LayerRoot, NeedsCanvasGroup = true, InitialCanvasGroupAlpha = 0f },
@@ -147,9 +142,6 @@ public enum BackgroundRigTarget
 
     // Object slots
     Background_ObjectSlotRoot,
-    Background_ObjectSlot00,
-    Background_ObjectSlot01,
-    Background_ObjectSlot02,
 
     // Front layer
     Background_FrontLayer_Root,
@@ -202,9 +194,6 @@ public sealed class BackgroundRigRefs
 
     // Object slots
     public RectTransform Background_ObjectSlotRoot;
-    public RectTransform Background_ObjectSlot00;
-    public RectTransform Background_ObjectSlot01;
-    public RectTransform Background_ObjectSlot02;
 
     // Front layer
     public RectTransform Background_FrontLayer_Root;
@@ -277,9 +266,6 @@ public static class BackgroundRigRefsExtensions
 
             // Object slots
             BackgroundRigTarget.Background_ObjectSlotRoot => refs.Background_ObjectSlotRoot,
-            BackgroundRigTarget.Background_ObjectSlot00 => refs.Background_ObjectSlot00,
-            BackgroundRigTarget.Background_ObjectSlot01 => refs.Background_ObjectSlot01,
-            BackgroundRigTarget.Background_ObjectSlot02 => refs.Background_ObjectSlot02,
 
             // Front layer
             BackgroundRigTarget.Background_FrontLayer_Root => refs.Background_FrontLayer_Root,

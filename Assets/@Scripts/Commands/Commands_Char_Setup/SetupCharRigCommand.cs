@@ -89,7 +89,6 @@ public sealed class SetupCharRigCommand : CommandBase
         Material sourceMaterial = Resources.Load<Material>(VisualEffectMaterialPath);
         refs.VisualEffect = new CharacterRigVisualEffectController(refs.CharacterPortraitSprite_Image, sourceMaterial);
         
-        
         scope.characterRigs.Register(rigKey, refs);
         
         // Optional bake helper:
