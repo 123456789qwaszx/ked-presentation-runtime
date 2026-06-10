@@ -1,10 +1,11 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public sealed class ScreenFocusGridOverlay : MonoBehaviour
 {
     [Header("Frame")]
-    [SerializeField] private RectTransform _frameRoot;
-    [SerializeField] private Camera _uiCamera;
+    [SerializeField] private RectTransform StageShot_Root;
+    private Camera _uiCamera;
 
     [Header("Visible")]
     [SerializeField] private bool _show = true;
@@ -16,15 +17,28 @@ public sealed class ScreenFocusGridOverlay : MonoBehaviour
 
     [Header("Style")]
     [SerializeField] private Color _lineColor = new Color(1f, 0.85f, 0f, 0.65f);
+    [SerializeField] private Color _innerLineColor = new Color(1f, 0.95f, 0f, 0.35f);
     [SerializeField] private Color _pointColor = new Color(1f, 0.95f, 0f, 1f);
+    [SerializeField] private Color _innerPointColor = new Color(0.65f, 1f, 1f, 1f);
     [SerializeField] private Color _labelColor = new Color(1f, 0.95f, 0f, 1f);
 
     [SerializeField] private float _lineThickness = 2f;
+    [SerializeField] private float _innerLineThickness = 1f;
     [SerializeField] private float _pointSize = 9f;
+    [SerializeField] private float _innerPointSize = 7f;
     [SerializeField] private int _labelFontSize = 12;
 
     private Texture2D _pixel;
     private GUIStyle _labelStyle;
+
+    // ScreenFocusPointResolver와 반드시 같은 값으로 유지.
+    // Outer: 9-point focus zone
+    // Inner: thirds 계열 보조 focus zone
+    private const float OuterXRatio = 0.24f;
+    private const float OuterYRatio = 0.16f;
+
+    private const float InnerXRatio = 0.14f;
+    private const float InnerYRatio = 0.09f;
 
     private void Awake()
     {
@@ -39,13 +53,13 @@ public sealed class ScreenFocusGridOverlay : MonoBehaviour
         EnsurePixel();
         EnsureGuiStyle();
 
-        if (_frameRoot == null)
+        if (StageShot_Root == null)
         {
             DrawFallbackScreenGrid();
             return;
         }
 
-        DrawRectTransformGrid(_frameRoot);
+        DrawRectTransformGrid(StageShot_Root);
     }
 
     public void SetVisible(bool visible)
@@ -67,56 +81,88 @@ public sealed class ScreenFocusGridOverlay : MonoBehaviour
         float bottom = rect.yMin;
         float top = rect.yMax;
 
-        float xLeft = -rect.width / 3f;
-        float xRight = rect.width / 3f;
-        float yTop = rect.height / 3f;
-        float yBottom = -rect.height / 3f;
+        float outerXLeft = -rect.width * OuterXRatio;
+        float outerXRight = rect.width * OuterXRatio;
+        float outerYTop = rect.height * OuterYRatio;
+        float outerYBottom = -rect.height * OuterYRatio;
+
+        float innerXLeft = -rect.width * InnerXRatio;
+        float innerXRight = rect.width * InnerXRatio;
+        float innerYTop = rect.height * InnerYRatio;
+        float innerYBottom = -rect.height * InnerYRatio;
 
         Color oldColor = GUI.color;
 
         if (_showGridLines)
         {
-            GUI.color = _lineColor;
-
-            DrawLine(
-                LocalToGuiPoint(frameRoot, new Vector2(xLeft, bottom)),
-                LocalToGuiPoint(frameRoot, new Vector2(xLeft, top)),
+            DrawGridLines(
+                frameRoot,
+                left,
+                right,
+                bottom,
+                top,
+                outerXLeft,
+                outerXRight,
+                outerYTop,
+                outerYBottom,
+                _lineColor,
                 _lineThickness);
 
-            DrawLine(
-                LocalToGuiPoint(frameRoot, new Vector2(xRight, bottom)),
-                LocalToGuiPoint(frameRoot, new Vector2(xRight, top)),
-                _lineThickness);
-
-            DrawLine(
-                LocalToGuiPoint(frameRoot, new Vector2(left, yTop)),
-                LocalToGuiPoint(frameRoot, new Vector2(right, yTop)),
-                _lineThickness);
-
-            DrawLine(
-                LocalToGuiPoint(frameRoot, new Vector2(left, yBottom)),
-                LocalToGuiPoint(frameRoot, new Vector2(right, yBottom)),
-                _lineThickness);
+            DrawGridLines(
+                frameRoot,
+                left,
+                right,
+                bottom,
+                top,
+                innerXLeft,
+                innerXRight,
+                innerYTop,
+                innerYBottom,
+                _innerLineColor,
+                _innerLineThickness);
         }
 
         if (_showFocusPoints)
         {
-            DrawFocusPoint("top_left", LocalToGuiPoint(frameRoot, new Vector2(xLeft, yTop)));
-            DrawFocusPoint("top", LocalToGuiPoint(frameRoot, new Vector2(0f, yTop)));
-            DrawFocusPoint("top_right", LocalToGuiPoint(frameRoot, new Vector2(xRight, yTop)));
+            DrawFocusPoint("top_left", LocalToGuiPoint(frameRoot, new Vector2(outerXLeft, outerYTop)));
+            DrawFocusPoint("top", LocalToGuiPoint(frameRoot, new Vector2(0f, outerYTop)));
+            DrawFocusPoint("top_right", LocalToGuiPoint(frameRoot, new Vector2(outerXRight, outerYTop)));
 
-            DrawFocusPoint("left", LocalToGuiPoint(frameRoot, new Vector2(xLeft, 0f)));
+            DrawFocusPoint("left", LocalToGuiPoint(frameRoot, new Vector2(outerXLeft, 0f)));
             DrawFocusPoint("center", LocalToGuiPoint(frameRoot, Vector2.zero));
-            DrawFocusPoint("right", LocalToGuiPoint(frameRoot, new Vector2(xRight, 0f)));
+            DrawFocusPoint("right", LocalToGuiPoint(frameRoot, new Vector2(outerXRight, 0f)));
 
-            DrawFocusPoint("bottom_left", LocalToGuiPoint(frameRoot, new Vector2(xLeft, yBottom)));
-            DrawFocusPoint("bottom", LocalToGuiPoint(frameRoot, new Vector2(0f, yBottom)));
-            DrawFocusPoint("bottom_right", LocalToGuiPoint(frameRoot, new Vector2(xRight, yBottom)));
+            DrawFocusPoint("bottom_left", LocalToGuiPoint(frameRoot, new Vector2(outerXLeft, outerYBottom)));
+            DrawFocusPoint("bottom", LocalToGuiPoint(frameRoot, new Vector2(0f, outerYBottom)));
+            DrawFocusPoint("bottom_right", LocalToGuiPoint(frameRoot, new Vector2(outerXRight, outerYBottom)));
 
-            DrawFocusPoint("third_ul", LocalToGuiPoint(frameRoot, new Vector2(xLeft, yTop)), new Vector2(0f, -18f));
-            DrawFocusPoint("third_ur", LocalToGuiPoint(frameRoot, new Vector2(xRight, yTop)), new Vector2(0f, -18f));
-            DrawFocusPoint("third_ll", LocalToGuiPoint(frameRoot, new Vector2(xLeft, yBottom)), new Vector2(0f, 18f));
-            DrawFocusPoint("third_lr", LocalToGuiPoint(frameRoot, new Vector2(xRight, yBottom)), new Vector2(0f, 18f));
+            DrawFocusPoint(
+                "third_ul",
+                LocalToGuiPoint(frameRoot, new Vector2(innerXLeft, innerYTop)),
+                new Vector2(0f, -18f),
+                _innerPointColor,
+                _innerPointSize);
+
+            DrawFocusPoint(
+                "third_ur",
+                LocalToGuiPoint(frameRoot, new Vector2(innerXRight, innerYTop)),
+                new Vector2(0f, -18f),
+                _innerPointColor,
+                _innerPointSize);
+
+            DrawFocusPoint(
+                "third_ll",
+                LocalToGuiPoint(frameRoot, new Vector2(innerXLeft, innerYBottom)),
+                new Vector2(0f, 18f),
+                _innerPointColor,
+                _innerPointSize);
+
+            DrawFocusPoint(
+                "third_lr",
+                LocalToGuiPoint(frameRoot, new Vector2(innerXRight, innerYBottom)),
+                new Vector2(0f, 18f),
+                _innerPointColor,
+                _innerPointSize);
         }
 
         GUI.color = oldColor;
@@ -127,48 +173,142 @@ public sealed class ScreenFocusGridOverlay : MonoBehaviour
         float w = Screen.width;
         float h = Screen.height;
 
-        // This fallback mirrors RectTransform center-origin coordinates.
-        float xLeft = w * 0.5f - w / 3f;
-        float xRight = w * 0.5f + w / 3f;
-        float yTop = h * 0.5f - h / 3f;
-        float yBottom = h * 0.5f + h / 3f;
-
         float xCenter = w * 0.5f;
         float yCenter = h * 0.5f;
+
+        float outerXLeft = xCenter - w * OuterXRatio;
+        float outerXRight = xCenter + w * OuterXRatio;
+        float outerYTop = yCenter - h * OuterYRatio;
+        float outerYBottom = yCenter + h * OuterYRatio;
+
+        float innerXLeft = xCenter - w * InnerXRatio;
+        float innerXRight = xCenter + w * InnerXRatio;
+        float innerYTop = yCenter - h * InnerYRatio;
+        float innerYBottom = yCenter + h * InnerYRatio;
 
         Color oldColor = GUI.color;
 
         if (_showGridLines)
         {
-            GUI.color = _lineColor;
+            DrawScreenGridLines(
+                w,
+                h,
+                outerXLeft,
+                outerXRight,
+                outerYTop,
+                outerYBottom,
+                _lineColor,
+                _lineThickness);
 
-            DrawLine(new Vector2(xLeft, 0f), new Vector2(xLeft, h), _lineThickness);
-            DrawLine(new Vector2(xRight, 0f), new Vector2(xRight, h), _lineThickness);
-            DrawLine(new Vector2(0f, yTop), new Vector2(w, yTop), _lineThickness);
-            DrawLine(new Vector2(0f, yBottom), new Vector2(w, yBottom), _lineThickness);
+            DrawScreenGridLines(
+                w,
+                h,
+                innerXLeft,
+                innerXRight,
+                innerYTop,
+                innerYBottom,
+                _innerLineColor,
+                _innerLineThickness);
         }
 
         if (_showFocusPoints)
         {
-            DrawFocusPoint("top_left", new Vector2(xLeft, yTop));
-            DrawFocusPoint("top", new Vector2(xCenter, yTop));
-            DrawFocusPoint("top_right", new Vector2(xRight, yTop));
+            DrawFocusPoint("top_left", new Vector2(outerXLeft, outerYTop));
+            DrawFocusPoint("top", new Vector2(xCenter, outerYTop));
+            DrawFocusPoint("top_right", new Vector2(outerXRight, outerYTop));
 
-            DrawFocusPoint("left", new Vector2(xLeft, yCenter));
+            DrawFocusPoint("left", new Vector2(outerXLeft, yCenter));
             DrawFocusPoint("center", new Vector2(xCenter, yCenter));
-            DrawFocusPoint("right", new Vector2(xRight, yCenter));
+            DrawFocusPoint("right", new Vector2(outerXRight, yCenter));
 
-            DrawFocusPoint("bottom_left", new Vector2(xLeft, yBottom));
-            DrawFocusPoint("bottom", new Vector2(xCenter, yBottom));
-            DrawFocusPoint("bottom_right", new Vector2(xRight, yBottom));
+            DrawFocusPoint("bottom_left", new Vector2(outerXLeft, outerYBottom));
+            DrawFocusPoint("bottom", new Vector2(xCenter, outerYBottom));
+            DrawFocusPoint("bottom_right", new Vector2(outerXRight, outerYBottom));
 
-            DrawFocusPoint("third_ul", new Vector2(xLeft, yTop), new Vector2(0f, -18f));
-            DrawFocusPoint("third_ur", new Vector2(xRight, yTop), new Vector2(0f, -18f));
-            DrawFocusPoint("third_ll", new Vector2(xLeft, yBottom), new Vector2(0f, 18f));
-            DrawFocusPoint("third_lr", new Vector2(xRight, yBottom), new Vector2(0f, 18f));
+            DrawFocusPoint(
+                "third_ul",
+                new Vector2(innerXLeft, innerYTop),
+                new Vector2(0f, -18f),
+                _innerPointColor,
+                _innerPointSize);
+
+            DrawFocusPoint(
+                "third_ur",
+                new Vector2(innerXRight, innerYTop),
+                new Vector2(0f, -18f),
+                _innerPointColor,
+                _innerPointSize);
+
+            DrawFocusPoint(
+                "third_ll",
+                new Vector2(innerXLeft, innerYBottom),
+                new Vector2(0f, 18f),
+                _innerPointColor,
+                _innerPointSize);
+
+            DrawFocusPoint(
+                "third_lr",
+                new Vector2(innerXRight, innerYBottom),
+                new Vector2(0f, 18f),
+                _innerPointColor,
+                _innerPointSize);
         }
 
         GUI.color = oldColor;
+    }
+
+    private void DrawGridLines(
+        RectTransform frameRoot,
+        float left,
+        float right,
+        float bottom,
+        float top,
+        float xLeft,
+        float xRight,
+        float yTop,
+        float yBottom,
+        Color color,
+        float thickness)
+    {
+        GUI.color = color;
+
+        DrawLine(
+            LocalToGuiPoint(frameRoot, new Vector2(xLeft, bottom)),
+            LocalToGuiPoint(frameRoot, new Vector2(xLeft, top)),
+            thickness);
+
+        DrawLine(
+            LocalToGuiPoint(frameRoot, new Vector2(xRight, bottom)),
+            LocalToGuiPoint(frameRoot, new Vector2(xRight, top)),
+            thickness);
+
+        DrawLine(
+            LocalToGuiPoint(frameRoot, new Vector2(left, yTop)),
+            LocalToGuiPoint(frameRoot, new Vector2(right, yTop)),
+            thickness);
+
+        DrawLine(
+            LocalToGuiPoint(frameRoot, new Vector2(left, yBottom)),
+            LocalToGuiPoint(frameRoot, new Vector2(right, yBottom)),
+            thickness);
+    }
+
+    private void DrawScreenGridLines(
+        float width,
+        float height,
+        float xLeft,
+        float xRight,
+        float yTop,
+        float yBottom,
+        Color color,
+        float thickness)
+    {
+        GUI.color = color;
+
+        DrawLine(new Vector2(xLeft, 0f), new Vector2(xLeft, height), thickness);
+        DrawLine(new Vector2(xRight, 0f), new Vector2(xRight, height), thickness);
+        DrawLine(new Vector2(0f, yTop), new Vector2(width, yTop), thickness);
+        DrawLine(new Vector2(0f, yBottom), new Vector2(width, yBottom), thickness);
     }
 
     private Vector2 LocalToGuiPoint(RectTransform frameRoot, Vector2 localPoint)
@@ -193,7 +333,10 @@ public sealed class ScreenFocusGridOverlay : MonoBehaviour
     private void EnsureGuiStyle()
     {
         if (_labelStyle != null && _labelStyle.fontSize == _labelFontSize)
+        {
+            _labelStyle.normal.textColor = _labelColor;
             return;
+        }
 
         _labelStyle = new GUIStyle(GUI.skin.label)
         {
@@ -207,20 +350,32 @@ public sealed class ScreenFocusGridOverlay : MonoBehaviour
 
     private void DrawFocusPoint(string label, Vector2 screenPoint)
     {
-        DrawFocusPoint(label, screenPoint, Vector2.zero);
+        DrawFocusPoint(label, screenPoint, Vector2.zero, _pointColor, _pointSize);
     }
 
     private void DrawFocusPoint(string label, Vector2 screenPoint, Vector2 labelOffset)
     {
-        GUI.color = _pointColor;
+        DrawFocusPoint(label, screenPoint, labelOffset, _pointColor, _pointSize);
+    }
 
-        float half = _pointSize * 0.5f;
+    private void DrawFocusPoint(
+        string label,
+        Vector2 screenPoint,
+        Vector2 labelOffset,
+        Color pointColor,
+        float pointSize)
+    {
+        GUI.color = pointColor;
+
+        float size = Mathf.Max(1f, pointSize);
+        float half = size * 0.5f;
+
         GUI.DrawTexture(
             new Rect(
                 screenPoint.x - half,
                 screenPoint.y - half,
-                _pointSize,
-                _pointSize),
+                size,
+                size),
             _pixel);
 
         if (!_showLabels)

@@ -19,6 +19,6 @@ public sealed class CharacterRigResponseTarget : IResponseTarget
             PositionRect.anchoredPosition = response.anchoredPosition;
 
         if (ScaleRect != null)
-            ScaleRect.localScale = new Vector3(response.scale.x, response.scale.y, 1f);
+            ScaleRect.localScale = new Vector3(1+ response.scale.x * 0.05f, 1 + response.scale.y * 0.05f, 1f);
     }
 }

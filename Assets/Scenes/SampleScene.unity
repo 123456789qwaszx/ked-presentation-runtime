@@ -18732,17 +18732,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5995e693da0a5b4dbeed2cebed61c48, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ScreenFocusGridOverlay
-  _frameRoot: {fileID: 0}
-  _uiCamera: {fileID: 0}
+  StageShot_Root: {fileID: 187108361}
   _show: 1
   _showGridLines: 1
   _showFocusPoints: 1
   _showLabels: 1
   _lineColor: {r: 1, g: 0.85, b: 0, a: 0.75}
+  _innerLineColor: {r: 1, g: 0.95, b: 0, a: 0.35}
   _pointColor: {r: 1, g: 0.95, b: 0, a: 1}
+  _innerPointColor: {r: 0.65, g: 1, b: 1, a: 1}
   _labelColor: {r: 1, g: 0.95, b: 0, a: 1}
   _lineThickness: 2
+  _innerLineThickness: 1
   _pointSize: 8
+  _innerPointSize: 7
   _labelFontSize: 12
 --- !u!4 &1928200880
 Transform:

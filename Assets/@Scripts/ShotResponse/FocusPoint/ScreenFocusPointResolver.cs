@@ -24,6 +24,17 @@ public enum ScreenFocusPoint
 
 public static class ScreenFocusPointResolver
 {
+    // 기존 w / 3, h / 3은 VN shot composition 기준으로 너무 외곽에 가까웠다.
+    // 화면 안쪽의 실사용 가능한 focus zone으로 모으되,
+    // 정사각형 그리드가 아니라 납작한 직사각형 구도로 잡는다.
+    private const float OuterXRatio = 0.24f;
+    private const float OuterYRatio = 0.16f;
+
+    // thirds 계열은 더 미묘한 구도 보정용.
+    // 바깥 9점보다 더 중앙에 가까운 보조 포인트로 둔다.
+    private const float InnerXRatio = 0.14f;
+    private const float InnerYRatio = 0.09f;
+
     public static Vector2 Resolve(RectTransform frameRoot, ScreenFocusPoint point)
     {
         if (frameRoot == null)
@@ -33,50 +44,55 @@ public static class ScreenFocusPointResolver
         float w = rect.width;
         float h = rect.height;
 
+        float outerX = w * OuterXRatio;
+        float outerY = h * OuterYRatio;
+
+        float innerX = w * InnerXRatio;
+        float innerY = h * InnerYRatio;
+
         switch (point)
         {
             case ScreenFocusPoint.TopLeft:
-                return new Vector2(-w / 3f, h / 3f);
+                return new Vector2(-outerX, outerY);
 
             case ScreenFocusPoint.Top:
-                return new Vector2(0f, h / 3f);
+                return new Vector2(0f, outerY);
 
             case ScreenFocusPoint.TopRight:
-                return new Vector2(w / 3f, h / 3f);
+                return new Vector2(outerX, outerY);
 
             case ScreenFocusPoint.Left:
-                return new Vector2(-w / 3f, 0f);
+                return new Vector2(-outerX, 0f);
 
             case ScreenFocusPoint.Right:
-                return new Vector2(w / 3f, 0f);
+                return new Vector2(outerX, 0f);
 
             case ScreenFocusPoint.BottomLeft:
-                return new Vector2(-w / 3f, -h / 3f);
+                return new Vector2(-outerX, -outerY);
 
             case ScreenFocusPoint.Bottom:
-                return new Vector2(0f, -h / 3f);
+                return new Vector2(0f, -outerY);
 
             case ScreenFocusPoint.BottomRight:
-                return new Vector2(w / 3f, -h / 3f);
+                return new Vector2(outerX, -outerY);
 
             case ScreenFocusPoint.ThirdsUpperLeft:
-                return new Vector2(-w / 6f, h / 6f);
+                return new Vector2(-innerX, innerY);
 
             case ScreenFocusPoint.ThirdsUpperRight:
-                return new Vector2(w / 6f, h / 6f);
+                return new Vector2(innerX, innerY);
 
             case ScreenFocusPoint.ThirdsLowerLeft:
-                return new Vector2(-w / 6f, -h / 6f);
+                return new Vector2(-innerX, -innerY);
 
             case ScreenFocusPoint.ThirdsLowerRight:
-                return new Vector2(w / 6f, -h / 6f);
+                return new Vector2(innerX, -innerY);
 
             default:
                 return Vector2.zero;
         }
     }
 }
-
 public static class ScreenFocusPointParser
 {
     public static bool TryParse(string raw, out ScreenFocusPoint point)
@@ -86,59 +102,97 @@ public static class ScreenFocusPointParser
         if (string.IsNullOrWhiteSpace(raw))
             return false;
 
-        string s = raw.Trim().ToLowerInvariant();
-        s = s.Replace("-", "_");
-        s = s.Replace(".", "_");
+        string s = Normalize(raw);
 
         switch (s)
         {
             case "center":
             case "c":
             case "middle":
+            case "mid":
+            case "b2":
+            case "22":
+            case "5":
                 point = ScreenFocusPoint.Center;
                 return true;
 
             case "top_left":
             case "topleft":
             case "tl":
+            case "upper_left":
+            case "ul":
+            case "a1":
+            case "11":
+            case "1":
                 point = ScreenFocusPoint.TopLeft;
                 return true;
 
             case "top":
             case "t":
+            case "upper":
+            case "up":
+            case "a2":
+            case "12":
+            case "2":
                 point = ScreenFocusPoint.Top;
                 return true;
 
             case "top_right":
             case "topright":
             case "tr":
+            case "upper_right":
+            case "ur":
+            case "a3":
+            case "13":
+            case "3":
                 point = ScreenFocusPoint.TopRight;
                 return true;
 
             case "left":
             case "l":
+            case "b1":
+            case "21":
+            case "4":
                 point = ScreenFocusPoint.Left;
                 return true;
 
             case "right":
             case "r":
+            case "b3":
+            case "23":
+            case "6":
                 point = ScreenFocusPoint.Right;
                 return true;
 
             case "bottom_left":
             case "bottomleft":
             case "bl":
+            case "lower_left":
+            case "ll":
+            case "c1":
+            case "31":
+            case "7":
                 point = ScreenFocusPoint.BottomLeft;
                 return true;
 
             case "bottom":
             case "b":
+            case "lower":
+            case "down":
+            case "c2":
+            case "32":
+            case "8":
                 point = ScreenFocusPoint.Bottom;
                 return true;
 
             case "bottom_right":
             case "bottomright":
             case "br":
+            case "lower_right":
+            case "lr":
+            case "c3":
+            case "33":
+            case "9":
                 point = ScreenFocusPoint.BottomRight;
                 return true;
 
@@ -147,6 +201,10 @@ public static class ScreenFocusPointParser
             case "rule_upper_left":
             case "rule_ul":
             case "third_ul":
+            case "thirds_ul":
+            case "inner_ul":
+            case "inner_a1":
+            case "ab1":
                 point = ScreenFocusPoint.ThirdsUpperLeft;
                 return true;
 
@@ -155,6 +213,10 @@ public static class ScreenFocusPointParser
             case "rule_upper_right":
             case "rule_ur":
             case "third_ur":
+            case "thirds_ur":
+            case "inner_ur":
+            case "inner_a3":
+            case "ab2":
                 point = ScreenFocusPoint.ThirdsUpperRight;
                 return true;
 
@@ -163,6 +225,10 @@ public static class ScreenFocusPointParser
             case "rule_lower_left":
             case "rule_ll":
             case "third_ll":
+            case "thirds_ll":
+            case "inner_ll":
+            case "inner_c1":
+            case "bc1":
                 point = ScreenFocusPoint.ThirdsLowerLeft;
                 return true;
 
@@ -171,10 +237,25 @@ public static class ScreenFocusPointParser
             case "rule_lower_right":
             case "rule_lr":
             case "third_lr":
+            case "thirds_lr":
+            case "inner_lr":
+            case "inner_c3":
+            case "bc2":
                 point = ScreenFocusPoint.ThirdsLowerRight;
                 return true;
         }
 
         return Enum.TryParse(raw.Trim(), true, out point);
+    }
+
+    private static string Normalize(string raw)
+    {
+        string s = raw.Trim().ToLowerInvariant();
+
+        s = s.Replace("-", "_");
+        s = s.Replace(".", "_");
+        s = s.Replace(" ", "_");
+
+        return s;
     }
 }
