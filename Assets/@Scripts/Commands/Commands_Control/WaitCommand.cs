@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using UnityEngine;
 
 [Serializable]
 [CommandMenuHint(
@@ -25,6 +26,17 @@ public sealed class WaitCommand : CommandBase
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
-        yield return Wait(scope, _spec.duration);
+        float seconds = Mathf.Max(0f, _spec.duration);
+        float elapsed = 0f;
+        
+        while (elapsed < seconds)
+        {
+            if (scope.Token.IsCancellationRequested)
+                yield break;
+
+            elapsed += Time.unscaledDeltaTime * scope.TimeScale;
+
+            yield return null;
+        }
     }
 }

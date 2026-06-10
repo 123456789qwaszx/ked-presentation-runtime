@@ -37,7 +37,6 @@ public sealed class VnFeatureController : MonoBehaviour
     private bool _speedUpHeld;
 
     public bool IsAuto => _sessionContext != null && _sessionContext.IsAutoMode;
-    public bool IsSpeedup => _sessionContext != null && _sessionContext.IsSpeedUpMode;
 
     private bool LineFullyShown => _linePresentationAdvanceState.IsLineFullyShown;
 

@@ -74,39 +74,6 @@ public abstract class CommandBase : ISequenceCommand, IStepScopedCommand
     {
     }
     
-    protected IEnumerator Wait(CommandRunScope scope, float seconds)
-    {
-        float elapsed = 0f;
-        while (elapsed < seconds)
-        {
-            if (scope.Token.IsCancellationRequested)
-                yield break;
-
-            if (scope.IsSpeedUpMode)
-            {
-                if (SkipPolicy == SkipPolicy.CompleteImmediately)
-                {
-                    try
-                    {
-                        OnSkip(scope);
-                    }
-                    catch (System.Exception e)
-                    {
-                        Debug.LogException(e);
-                    }
-                }
-
-                yield break;
-            }
-
-            elapsed += Time.unscaledDeltaTime * scope.TimeScale;
-
-            yield return null;
-        }
-    }
-
-    
-    
     // Default (step) binding: every command gets this. Routine is stopped — and OnCommandCompleted
     // fired on Finish — at the next step boundary.
     public virtual void RegisterStepLifetime(CommandRunScope scope, MonoBehaviour host, IEnumerator routine)
