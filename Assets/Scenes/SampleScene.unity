@@ -8264,7 +8264,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VnFeatureController
   _vnPlaybackSettings:
-    maxLogCount: 100
     speedupModeMultiplier: 12
     autoModeDelaySeconds: 1.5
     userAdvanceCooldownSec: 0.13

@@ -62,7 +62,7 @@ public sealed class CharRigCommandFactory : INodeCommandFactory
             DuoShotCommandSpecCharR s => new DuoShotCommandCharR(s, _characterFocusTuningDb),
 
             // Visual State
-            SetColorCommandSpecCharR s => new SetColorCommandCharR(s),
+            ColorToCommandSpecCharR s => new ColorToCommandCharR(s),
             SetSpriteCommandSpecCharR s => new SetSpriteCommandCharR(s),
             
             CharVisualFocusCommandSpecCharR s => new CharVisualFocusCommandCharR(s),

@@ -67,7 +67,6 @@ public sealed partial class YarnCommandBridge
         // BlackBook= 4
         runner.AddCommandHandler<string>("box_named", SetNamedLineBoxKind);
         runner.AddCommandHandler<string>("box_protagonist", SetProtagonistLineBoxKind);
-        runner.AddCommandHandler<string, string>("box_defaults", SetDefaultLineBoxKinds);
         runner.AddCommandHandler("box_reset", ResetDefaultLineBoxKinds);
     }
 
@@ -92,9 +91,9 @@ public sealed partial class YarnCommandBridge
         BindCharRigActing(runner);
         BindCharRigIdle(runner);
         BindCharRigPreset(runner);
+        BindCharRigComposition(runner);
 
         BindCharRigEmote(runner);
-        BindCharRigVisual(runner);
 
         BindBackgroundRig(runner);
         BindShotResponse(runner);
@@ -126,7 +125,6 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler<string, string>("size", EnqueueSetOriginSizeSpec);
         
         runner.AddCommandHandler<string, int, int>("place_offset", EnqueueSetAnchorOffsetSpecs);
-        
     }
 
     private void BindCharRigBasic(DialogueRunner runner)
@@ -149,9 +147,6 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler<string, int, float>("flip_horizontal", EnqueueFlipHorizontalSpec);
         runner.AddCommandHandler<string, int, float>("flip_vertical", EnqueueFlipVerticalSpec);
     
-        runner.AddCommandHandler<string, string, string, float>("char_place", EnqueuePlaceCharacterFocusSpec);
-        runner.AddCommandHandler<string, float>("solo_shot", EnqueueSoloShotSpec);
-        runner.AddCommandHandler<string, string, string, float>("duo_shot", EnqueueDuoShotSpec);
     }
     
     private void BindCharRigActing(DialogueRunner runner)
@@ -188,6 +183,26 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler<string>("sway_away", EnqueueSwaySpecAway);
     }
     
+    private void BindCharRigComposition(DialogueRunner runner)
+    {
+        runner.AddCommandHandler<string, string, string, float>("char_place", EnqueuePlaceCharacterFocusSpec);
+        runner.AddCommandHandler<string, float>("solo_shot", EnqueueSoloShotSpec);
+        runner.AddCommandHandler<string, string, string, float>("duo_shot", EnqueueDuoShotSpec);
+        
+        runner.AddCommandHandler<string, float, float>("char_focus", EnqueueCharFocusSpec);
+        runner.AddCommandHandler<string, float, float, float>("char_defocus", EnqueueCharDefocusSpec);
+        runner.AddCommandHandler<string, float>("char_clear_focus", EnqueueCharClearFocusSpec);
+        
+        runner.AddCommandHandler<string, float, float>("char_dim", EnqueueCharDimSpec);
+        runner.AddCommandHandler<string, float, float>("char_silhouette", EnqueueCharSilhouetteSpec);
+        runner.AddCommandHandler<string, float, float>("char_inner_rim", EnqueueCharInnerRimSpec);
+        runner.AddCommandHandler<string, float, float>("char_outer_rim", EnqueueCharOuterRimSpec);
+        
+        runner.AddCommandHandler<string, float, float, float, float>("char_visual", EnqueueCharVisualSpec);
+        runner.AddCommandHandler<string, float, float, float, float, float, float, float>("char_visual_color",
+            EnqueueCharVisualRimColorSpec);
+    }
+    
     private void BindCharRigEmote(DialogueRunner runner)
     {
         // Default Pop preset.
@@ -201,23 +216,6 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler<string, string>("emoji_tremble", EnqueueEmojiTrembleSpec);
         
         runner.AddCommandHandler<string, string>("emoji_set", EnqueueEmojiSetSpec); // Raw set only.
-    }
-    
-    private void BindCharRigVisual(DialogueRunner runner)
-    {
-        runner.AddCommandHandler<string, float, float>("char_focus", EnqueueCharFocusSpec);
-        runner.AddCommandHandler<string, float, float, float>("char_defocus", EnqueueCharDefocusSpec);
-        runner.AddCommandHandler<string, float>("char_clear_focus", EnqueueCharClearFocusSpec);
-        
-        runner.AddCommandHandler<string, float, float>("char_dim", EnqueueCharDimSpec);
-        runner.AddCommandHandler<string, float, float>("char_silhouette", EnqueueCharSilhouetteSpec);
-        runner.AddCommandHandler<string, float, float>("char_inner_rim", EnqueueCharInnerRimSpec);
-        runner.AddCommandHandler<string, float, float>("char_outer_rim", EnqueueCharOuterRimSpec);
-        
-        runner.AddCommandHandler<string, float, float, float, float>("char_visual", EnqueueCharVisualSpec);
-        runner.AddCommandHandler<string, float, float, float, float, float, float, float>("char_visual_color",
-            EnqueueCharVisualRimColorSpec);
-        
     }
     
     private void BindBackgroundRig(DialogueRunner runner)

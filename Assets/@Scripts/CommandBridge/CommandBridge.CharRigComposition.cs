@@ -2,6 +2,76 @@ using UnityEngine;
 
 public sealed partial class YarnCommandBridge
 {
+    private void EnqueuePlaceCharacterFocusSpec(
+        string roleKey,
+        string focus = "face",
+        string screenPoint = "center",
+        float duration = 0.4f)
+    {
+        CharacterFocusPreset focusPreset = CharacterFocusPresetParser.Parse(focus, CharacterFocusPreset.Face);
+
+        ScreenFocusPoint screen = 
+            ScreenFocusPointParser.TryParse(screenPoint, out ScreenFocusPoint parsed) 
+            ? parsed 
+            : ScreenFocusPoint.Center;
+
+        var spec = new PlaceCharacterFocusCommandSpecCharR
+        {
+            slotKey = roleKey,
+            focusPreset = focusPreset,
+            screenPoint = screen,
+            moveTarget = CharacterRigTarget.CharSlot_Track,
+            duration = duration,
+            wait = false
+        };
+
+        Collect(spec);
+    }
+    
+    private void EnqueueSoloShotSpec(string roleKey, float duration = 0.45f)
+    {
+        var spec = new SoloShotCommandSpecCharR
+        {
+            slotKey = roleKey,
+
+            focusPreset = CharacterFocusPreset.Face,
+            screenPoint = ScreenFocusPoint.Center,
+            screenOffset = new Vector2(0f, 80f),
+
+            moveTarget = CharacterRigTarget.CharSlot_Track,
+            scaleTarget = CharacterRigTarget.CharSlot_Scale,
+            targetScale = new Vector2(1.08f, 1.08f),
+
+            duration = duration,
+            wait = false
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueDuoShotSpec(
+        string leftRoleKey,
+        string rightRoleKey,
+        string presetName = "balanced",
+        float duration = 0.45f)
+    {
+        CharacterDuoShotPreset preset = CharacterDuoShotPresetParser.Parse(presetName, CharacterDuoShotPreset.Balanced);
+
+        var spec = new DuoShotCommandSpecCharR
+        {
+            leftRoleKey = leftRoleKey,
+            rightRoleKey = rightRoleKey,
+            preset = preset,
+            moveTarget = CharacterRigTarget.CharSlot_Track,
+            scaleTarget = CharacterRigTarget.CharSlot_Scale,
+            duration = duration,
+            wait = false
+        };
+
+        Collect(spec);
+    }
+    
+    
     private void EnqueueCharFocusSpec(
         string roleKey,
         float intensity = 1f,
@@ -53,9 +123,6 @@ public sealed partial class YarnCommandBridge
         Collect(spec);
     }
 
-    // Existing compatibility:
-    // char_visual role dim rim blur duration
-    // Here "rim" maps to Outer Rim.
     private void EnqueueCharVisualSpec(
         string roleKey,
         float dim,
@@ -80,9 +147,6 @@ public sealed partial class YarnCommandBridge
         Collect(spec);
     }
 
-    // Existing compatibility:
-    // char_visual_color role dim rim blur r g b duration
-    // Here color maps to Outer Rim color.
     private void EnqueueCharVisualRimColorSpec(
         string roleKey,
         float dim,
@@ -165,16 +229,12 @@ public sealed partial class YarnCommandBridge
             slotKey = roleKey.Trim(),
             mode = CharacterVisualFocusMode.Custom,
 
-            // 실루엣 전용.
-            // _DimTintColor를 black으로 바꿔 정보량을 강하게 줄인다.
             dim = dim,
             dimTintColor = Color.black,
 
-            // 실루엣에서는 rim 계열을 끈다.
             rim = 0f,
             innerRim = 0f,
 
-            // 형태는 남기되 디테일만 살짝 뭉개는 정도.
             blur = 0.08f,
 
             rimColor = Color.white,

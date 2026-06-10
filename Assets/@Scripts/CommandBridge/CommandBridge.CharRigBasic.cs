@@ -28,7 +28,7 @@ public sealed partial class YarnCommandBridge
     
     private void EnqueueColorToSpec(string roleKey, float r, float g, float b, float duration = 0.35f)
     {
-        var spec = new SetColorCommandSpecCharR
+        var spec = new ColorToCommandSpecCharR
         {
             slotKey = roleKey,
             target = CharacterRigTarget.CharacterPortraitSprite_Image,
@@ -156,75 +156,6 @@ public sealed partial class YarnCommandBridge
             target = CharacterRigTarget.CharacterPortrait_Rotation,
             toEuler = new Vector3(angle, 0f, 0f),
             duration = duration
-        };
-
-        Collect(spec);
-    }
-    
-    private void EnqueuePlaceCharacterFocusSpec(
-        string roleKey,
-        string focus = "face",
-        string screenPoint = "center",
-        float duration = 0.4f)
-    {
-        CharacterFocusPreset focusPreset = CharacterFocusPresetParser.Parse(focus, CharacterFocusPreset.Face);
-
-        ScreenFocusPoint screen = 
-            ScreenFocusPointParser.TryParse(screenPoint, out ScreenFocusPoint parsed) 
-            ? parsed 
-            : ScreenFocusPoint.Center;
-
-        var spec = new PlaceCharacterFocusCommandSpecCharR
-        {
-            slotKey = roleKey,
-            focusPreset = focusPreset,
-            screenPoint = screen,
-            moveTarget = CharacterRigTarget.CharSlot_Track,
-            duration = duration,
-            wait = false
-        };
-
-        Collect(spec);
-    }
-    
-    private void EnqueueSoloShotSpec(string roleKey, float duration = 0.45f)
-    {
-        var spec = new SoloShotCommandSpecCharR
-        {
-            slotKey = roleKey,
-
-            focusPreset = CharacterFocusPreset.Face,
-            screenPoint = ScreenFocusPoint.Center,
-            screenOffset = new Vector2(0f, 80f),
-
-            moveTarget = CharacterRigTarget.CharSlot_Track,
-            scaleTarget = CharacterRigTarget.CharSlot_Scale,
-            targetScale = new Vector2(1.08f, 1.08f),
-
-            duration = duration,
-            wait = false
-        };
-
-        Collect(spec);
-    }
-
-    private void EnqueueDuoShotSpec(
-        string leftRoleKey,
-        string rightRoleKey,
-        string presetName = "balanced",
-        float duration = 0.45f)
-    {
-        CharacterDuoShotPreset preset = CharacterDuoShotPresetParser.Parse(presetName, CharacterDuoShotPreset.Balanced);
-
-        var spec = new DuoShotCommandSpecCharR
-        {
-            leftRoleKey = leftRoleKey,
-            rightRoleKey = rightRoleKey,
-            preset = preset,
-            moveTarget = CharacterRigTarget.CharSlot_Track,
-            scaleTarget = CharacterRigTarget.CharSlot_Scale,
-            duration = duration,
-            wait = false
         };
 
         Collect(spec);

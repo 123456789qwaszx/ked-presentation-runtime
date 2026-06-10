@@ -10,7 +10,7 @@ using UnityEngine.UI;
     "Set Color (Z)",
     Order = 870
 )]
-public class SetColorCommandSpecCharR : CharacterRigCommandSpecBase
+public class ColorToCommandSpecCharR : CharacterRigCommandSpecBase
 {
     [Header("Target")]
     public CharacterRigTarget target = CharacterRigTarget.CharacterPortraitSprite_Image;
@@ -28,9 +28,9 @@ public class SetColorCommandSpecCharR : CharacterRigCommandSpecBase
     public Ease ease = Ease.OutCubic;
 }
 
-public sealed class SetColorCommandCharR : CommandBase
+public sealed class ColorToCommandCharR : CommandBase
 {
-    private readonly SetColorCommandSpecCharR _spec;
+    private readonly ColorToCommandSpecCharR _spec;
 
     private Image _image;
     private Color _destColor;
@@ -41,7 +41,7 @@ public sealed class SetColorCommandCharR : CommandBase
 
     public override bool WaitForCompletion => _spec.wait;
 
-    public SetColorCommandCharR(SetColorCommandSpecCharR spec)
+    public ColorToCommandCharR(ColorToCommandSpecCharR spec)
     {
         _spec = spec;
     }
