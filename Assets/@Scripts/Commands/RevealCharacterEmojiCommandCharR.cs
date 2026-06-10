@@ -68,7 +68,7 @@ public sealed class RevealCharacterEmojiCommandCharR : CommandBase
         ResolveTweenValues();
         ClaimTarget();
 
-        if (_duration <= 0f || scope.ShouldCompressTime)
+        if (_duration <= 0f)
         {
             CommitFinalState();
             yield break;

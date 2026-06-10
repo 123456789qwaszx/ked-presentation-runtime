@@ -16,16 +16,11 @@ public sealed class PresentationPlaybackSettings
     private float _timeScale = DefaultTimeScale;
     private float _autoAdvanceDelay = DefaultAutoAdvanceDelay;
 
-    private VnPlayMode _playMode = VnPlayMode.Manual;
+    private bool _autoModeEnabled;
+    private bool _speedUpModeEnabled;
 
-    public VnPlayMode PlayMode
-    {
-        get => _playMode;
-        set => _playMode = value;
-    }
-
-    public bool IsAutoMode => _playMode == VnPlayMode.Auto;
-    public bool IsSpeedUpMode => _playMode == VnPlayMode.Speedup;
+    public bool IsAutoMode => _autoModeEnabled;
+    public bool IsSpeedUpMode => _speedUpModeEnabled;
 
     public float TimeScale
     {
@@ -39,15 +34,24 @@ public sealed class PresentationPlaybackSettings
         set => _autoAdvanceDelay = value > 0f ? value : DefaultAutoAdvanceDelay;
     }
 
+    public void SetAutoModeEnabled(bool enabled)
+    {
+        _autoModeEnabled = enabled;
+    }
+
+    public void SetSpeedUpModeEnabled(bool enabled)
+    {
+        _speedUpModeEnabled = enabled;
+    }
+
     public void ResetDefaults()
     {
-        _playMode = VnPlayMode.Manual;
+        _autoModeEnabled = false;
+        _speedUpModeEnabled = false;
+
         _timeScale = DefaultTimeScale;
         _autoAdvanceDelay = DefaultAutoAdvanceDelay;
     }
-
-    public bool enableDebugStart;
-    public string debugStartStepName;
 }
 
 [Serializable]
@@ -63,42 +67,40 @@ public sealed class PresentationSessionContext
     public bool IsBlockingInput => _isBlockingInput;
     public bool CloseRequested => _closeRequested;
 
-    public VnPlayMode PlayMode => _playback.PlayMode;
-
     public bool IsAutoMode => _playback.IsAutoMode;
     public bool IsSpeedUpMode => _playback.IsSpeedUpMode;
 
     public float TimeScale => _playback.TimeScale;
     public float AutoAdvanceDelay => _playback.AutoAdvanceDelay;
 
-    public bool IsDebugStartEnabled => _playback.enableDebugStart;
-    public string DebugStartStepName => _playback.debugStartStepName;
-
-    public void SetPlayMode(VnPlayMode mode)
+    public void SetAutoModeEnabled(bool enabled)
     {
-        _playback.PlayMode = mode;
+        _playback.SetAutoModeEnabled(enabled);
+    }
+
+    public void SetSpeedUpModeEnabled(bool enabled)
+    {
+        _playback.SetSpeedUpModeEnabled(enabled);
     }
 
     public void EnterAutoMode()
     {
-        _playback.PlayMode = VnPlayMode.Auto;
+        SetAutoModeEnabled(true);
     }
 
     public void ExitAutoMode()
     {
-        if (_playback.PlayMode == VnPlayMode.Auto)
-            _playback.PlayMode = VnPlayMode.Manual;
+        SetAutoModeEnabled(false);
     }
 
-    public void EnterSpeedUpHeld()
+    public void EnterSpeedUp()
     {
-        _playback.PlayMode = VnPlayMode.Speedup;
+        SetSpeedUpModeEnabled(true);
     }
 
-    public void ExitSpeedUpHeld()
+    public void ExitSpeedUp()
     {
-        if (_playback.PlayMode == VnPlayMode.Speedup)
-            _playback.PlayMode = VnPlayMode.Manual;
+        SetSpeedUpModeEnabled(false);
     }
 
     /// <summary>

@@ -43,11 +43,6 @@ public sealed class CastCharacterCommand : CommandBase
         ApplyBinding(scope);
     }
 
-    protected override void OnRollbackSeek(CommandRunScope scope)
-    {
-        OnSkip(scope);
-    }
-
     private void ApplyBinding(CommandRunScope scope)
     {
         string slotKey = _spec.slotKey;

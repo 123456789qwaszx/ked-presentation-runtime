@@ -46,19 +46,19 @@ public sealed class FastForwardController
 
     private void OnHoldBegin()
     {
-        _typewriter.SetSpeedMultiplier(_settings.speedupModeMultiplier);
-        _presentationSessionContext.EnterSpeedUpHeld();
+        // _typewriter.SetSpeedMultiplier(_settings.speedupModeMultiplier);
+        // _presentationSessionContext.EnterSpeedUpHeld();
     }
 
     private void OnHolding()
     {
-        //if(_isLineFullyShown())
+        if(_isLineFullyShown())
             _dispatcher.DispatchAdvance();
     }
 
     private void OnHoldEnd()
     {
-        _typewriter.SetSpeedMultiplier(1f);
-        _presentationSessionContext.ExitSpeedUpHeld();
+        // _typewriter.SetSpeedMultiplier(1f);
+        // _presentationSessionContext.ExitSpeedUpHeld();
     }
 }

@@ -48,7 +48,7 @@ public sealed class SequencePlayer
                 if (!hasMore)
                     continue;
 
-                if (command.WaitForCompletion && scope.ShouldRespectCommandWait)
+                if (command.WaitForCompletion && !scope.ShouldCompressCommandExecution)
                 {
                     yield return RunAfterFirstYield(routine, firstYield, scope, isValid);
                 }

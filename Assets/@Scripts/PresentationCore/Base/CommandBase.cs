@@ -29,7 +29,7 @@ public abstract class CommandBase : ISequenceCommand, IStepScopedCommand
             yield break;
         }
 
-        if (scope.IsSpeedUpMode)
+        if (scope.ShouldCompressCommandExecution)
         {
             switch (SkipPolicy)
             {
@@ -53,12 +53,6 @@ public abstract class CommandBase : ISequenceCommand, IStepScopedCommand
             }
         }
 
-        if (scope.IsSeekPassThrough)
-        {
-            OnRollbackSeek(scope);
-            yield break;
-        }
-
         IEnumerator inner = null;
         try
         {
@@ -70,18 +64,14 @@ public abstract class CommandBase : ISequenceCommand, IStepScopedCommand
             yield break;
         }
 
-        if (inner != null) yield return inner;
+        if (inner != null)
+            yield return inner;
     }
 
     protected abstract IEnumerator ExecuteInner(CommandRunScope scope);
 
     protected virtual void OnSkip(CommandRunScope scope)
     {
-    }
-
-    protected virtual void OnRollbackSeek(CommandRunScope scope)
-    {
-        OnSkip(scope);
     }
     
     protected IEnumerator Wait(CommandRunScope scope, float seconds)

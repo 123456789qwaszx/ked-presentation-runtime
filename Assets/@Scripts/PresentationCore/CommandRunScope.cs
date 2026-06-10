@@ -14,16 +14,7 @@ public sealed class CommandRunScope
     public BackgroundRigRegistry backgroundRigs => Stage.backgroundRigs;
     public CastRegistry castRegistry => Stage.castRegistry;
     
-    /// <summary>
-    /// Lifetime for resources spawned by commands within the current step.
-    /// Cleaned up when the step boundary is crossed.
-    /// </summary>
     private LifetimeScope StepLifetime { get; } = new();
-
-    /// <summary>
-    /// Lifetime for resources that must outlive a single step (e.g., BGM).
-    /// Cleaned up when the run/session ends.
-    /// </summary>
     private LifetimeScope RunLifetime { get; } = new();
 
     public CommandRunScope(
@@ -43,11 +34,10 @@ public sealed class CommandRunScope
     public bool IsAutoMode => _context != null && _context.IsAutoMode;
     public float TimeScale => _context != null ? _context.TimeScale : 1f;
     public bool IsNodeBusy => _context != null && _context.IsNodeBusy;
+    
     public bool IsSeekPassThrough => _linePresentationAdvanceState != null && _linePresentationAdvanceState.IsSeekingActive;
-
-    public bool ShouldRespectCommandWait => 
-        _context == null || !IsSeekPassThrough || !IsSpeedUpMode;
-    public bool ShouldCompressTime => IsSeekPassThrough;
+    public bool ShouldCompressCommandExecution => IsSpeedUpMode || IsSeekPassThrough;
+    
     
     // 메인 레인만 공유 컨텍스트의 NodeBusy를 토글한다.
     // 서브 레인(reportsNodeBusy=false)은 no-op → 공유 NodeBusy/AdvanceGate를 메인 기준으로 보존.
