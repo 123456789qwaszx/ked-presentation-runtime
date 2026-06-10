@@ -322,10 +322,7 @@ public sealed partial class YarnCommandBridge
     
     private void EnqueueClearAllTransitionsSpec()
     {
-        Collect(new ClearAllTransitionsCommandSpec
-        {
-            wait = false
-        });
+        Collect(new ClearAllTransitionsCommandSpec { });
     }
 
     private void EnqueueRevealWithTransitionSpec(string kind, float duration = 0.4f)
@@ -334,10 +331,7 @@ public sealed partial class YarnCommandBridge
         {
             kind = ParseRevealTransitionKind(kind),
             duration = duration,
-            wait = true,
-            killTween = true,
-            clearOthersBeforeReveal = true,
-            clearAllAfterReveal = true
+            wait = true
         };
 
         Collect(spec);
@@ -393,11 +387,6 @@ public sealed partial class YarnCommandBridge
 
         pullPixels = 0f,
         pullEnd = 0.28f,
-
-        wait = false,
-        killTween = true,
-        clearOthersBeforeOut = true,
-        clearAllAfterOut = true,
     };
 
     Collect(spec);
@@ -413,12 +402,6 @@ private void EnqueueTransitionOutFocusFadeSpec(float duration = 0.35f)
 
         duration = duration,
         ease = Ease.InOutCubic,
-
-        wait = true,
-        killTween = true,
-        clearOthersBeforeOut = true,
-        clearAllAfterOut = true,
-        blockRaycastWhenVisible = false,
     };
 
     Collect(spec);
@@ -444,12 +427,6 @@ private void EnqueueTransitionOutFocusCurtainSpec(float duration = 0.42f)
 
         duration = duration,
         ease = Ease.InOutCubic,
-
-        wait = true,
-        killTween = true,
-        clearOthersBeforeOut = true,
-        clearAllAfterOut = true,
-        blockRaycastWhenClosed = false,
     };
 
     Collect(spec);
@@ -476,12 +453,6 @@ private void EnqueueTransitionOutDazeFadeSpec(float duration = 0.65f)
 
         duration = duration,
         ease = Ease.InOutSine,
-
-        wait = true,
-        killTween = true,
-        clearOthersBeforeOut = true,
-        clearAllAfterOut = true,
-        blockRaycastWhenClosed = false,
     };
 
     Collect(spec);
@@ -503,12 +474,6 @@ private void EnqueueTransitionOutShutterSpec(float duration = 0.32f)
 
         duration = duration,
         ease = Ease.InCubic,
-
-        wait = true,
-        killTween = true,
-        clearOthersBeforeOut = true,
-        clearAllAfterOut = true,
-        blockRaycastWhileClosed = false,
     };
 
     Collect(spec);
@@ -528,11 +493,6 @@ private void EnqueueTransitionOutStripSpec(float duration = 0.4f)
 
         duration = duration,
         ease = Ease.Linear,
-
-        wait = true,
-        killTween = true,
-        clearOthersBeforeOut = true,
-        clearAllAfterOut = true,
     };
 
     Collect(spec);

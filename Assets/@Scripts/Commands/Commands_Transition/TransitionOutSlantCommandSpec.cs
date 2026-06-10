@@ -27,11 +27,6 @@ public sealed class TransitionOutSlantCommandSpec : CommandSpecBase
 
     [Range(0.01f, 0.99f)]
     public float pullEnd = 0.28f;
-
-    [Header("Options")]
-    public bool killTween = true;
-    public bool clearOthersBeforeOut = true;
-    public bool clearAllAfterOut = true;
 }
 
 public sealed class TransitionOutSlantCommand : CommandBase
@@ -39,12 +34,12 @@ public sealed class TransitionOutSlantCommand : CommandBase
     private readonly TransitionOutSlantCommandSpec _spec;
 
     private SlantedMaskGraphic _maskGraphic;
-    private Tween _tween;
-    private bool _resolveAttempted;
-    private bool _canCommitFinalState;
 
-    public override bool WaitForCompletion => _spec.wait;
-    protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
+    private bool _resolveAttempted;
+
+    private bool HasClaimedTarget { get; set; }
+
+    public override bool WaitForCompletion => true;
 
     public TransitionOutSlantCommand(TransitionOutSlantCommandSpec spec)
     {
@@ -56,18 +51,7 @@ public sealed class TransitionOutSlantCommand : CommandBase
         if (!_resolveAttempted)
             ResolveRefs();
 
-        if (_maskGraphic == null)
-            yield break;
-
-        if (_spec.killTween)
-            DOTween.Kill(_maskGraphic, false);
-
-        PrepareCoveredState();
-
-        if (_spec.clearOthersBeforeOut)
-            PresentationTransitionClearUtility.ClearAllExcept(PresentationTransitionLayer.SlantedMask);
-
-        _canCommitFinalState = true;
+        ClaimTarget();
 
         if (scope.IsSeekPassThrough || _spec.duration <= 0f)
         {
@@ -83,14 +67,11 @@ public sealed class TransitionOutSlantCommand : CommandBase
             ? moveDir.normalized
             : Vector2.left;
 
-        _tween = DOTween
+        Tween tween = DOTween
             .To(
                 () => 0f,
                 t =>
                 {
-                    if (!_canCommitFinalState || _maskGraphic == null)
-                        return;
-
                     float e = DOVirtual.EasedValue(0f, 1f, t, _spec.ease);
                     Vector2 baseOffset = Vector2.LerpUnclamped(start, dest, e);
                     float pull = RubberPullStart(e, _spec.pullEnd);
@@ -103,16 +84,10 @@ public sealed class TransitionOutSlantCommand : CommandBase
             .SetEase(Ease.Linear)
             .SetUpdate(true)
             .SetTarget(_maskGraphic)
-            .OnComplete(() =>
-            {
-                if (!_canCommitFinalState)
-                    return;
-
-                CommitFinalState();
-            });
+            .OnComplete(CommitFinalState);
 
         if (_spec.wait)
-            yield return _tween.WaitForCompletion();
+            yield return tween.WaitForCompletion();
     }
 
     protected override void OnSkip(CommandRunScope scope)
@@ -120,13 +95,8 @@ public sealed class TransitionOutSlantCommand : CommandBase
         if (!_resolveAttempted)
             ResolveRefs();
 
-        CommitFinalState();
-    }
-
-    protected override void OnCommandCompleted(CommandRunScope scope)
-    {
-        if (!_canCommitFinalState)
-            return;
+        if (!HasClaimedTarget)
+            ClaimTarget();
 
         CommitFinalState();
     }
@@ -135,20 +105,23 @@ public sealed class TransitionOutSlantCommand : CommandBase
     {
         _resolveAttempted = true;
 
-        IPresentationTransitionSlotProvider provider =
-            UIManager.Instance.GetUI<PresentationUIRoot>();
-
-        if (provider == null || provider.SlantedMaskEdgeGraphic == null)
-            return;
-
+        IPresentationTransitionSlotProvider provider = UIManager.Instance.GetUI<PresentationUIRoot>();
         _maskGraphic = provider.SlantedMaskEdgeGraphic.GetComponent<SlantedMaskGraphic>();
+    }
+
+    private void ClaimTarget()
+    {
+        DOTween.Kill(_maskGraphic, true);
+
+        PrepareCoveredState();
+
+        PresentationTransitionClearUtility.ClearAllExcept(PresentationTransitionLayer.SlantedMask);
+
+        HasClaimedTarget = true;
     }
 
     private void PrepareCoveredState()
     {
-        if (_maskGraphic == null)
-            return;
-
         _maskGraphic.SlantToRight = _spec.slantToRight;
         _maskGraphic.FlipVertical = _spec.flipVertical;
         _maskGraphic.ShapeOffsetPixels = _spec.fromOffset;
@@ -156,25 +129,13 @@ public sealed class TransitionOutSlantCommand : CommandBase
 
     private void CommitFinalState()
     {
-        if (_tween != null)
-        {
-            _tween.Kill(false);
-            _tween = null;
-        }
+        _maskGraphic.SlantToRight = _spec.slantToRight;
+        _maskGraphic.FlipVertical = _spec.flipVertical;
+        _maskGraphic.ShapeOffsetPixels = _spec.toOffset;
 
-        if (_maskGraphic != null)
-        {
-            DOTween.Kill(_maskGraphic, false);
-            _maskGraphic.SlantToRight = _spec.slantToRight;
-            _maskGraphic.FlipVertical = _spec.flipVertical;
-            _maskGraphic.ShapeOffsetPixels = _spec.toOffset;
-        }
+        PresentationTransitionClearUtility.ClearAll();
 
-        if (_spec.clearAllAfterOut)
-            PresentationTransitionClearUtility.ClearAll();
-
-        _canCommitFinalState = false;
-        _maskGraphic = null;
+        HasClaimedTarget = false;
     }
 
     private static float RubberPullStart(float e, float pullEnd)

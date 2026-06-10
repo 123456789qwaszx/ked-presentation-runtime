@@ -22,7 +22,7 @@ public sealed class PresentationTransitionCommandFactory : INodeCommandFactory
             // Daze
             FocusBlurCurtainCommandSpec s => new FocusBlurCurtainCommand(s),
             
-            ClearAllTransitionsCommandSpec s => new ClearAllTransitionsCommand(s),
+            ClearAllTransitionsCommandSpec s => new ClearAllTransitionsCommand(),
             RevealWithTransitionCommandSpec s => new RevealWithTransitionCommand(s),
             
             TransitionOutShutterCommandSpec s => new TransitionOutShutterCommand(s),

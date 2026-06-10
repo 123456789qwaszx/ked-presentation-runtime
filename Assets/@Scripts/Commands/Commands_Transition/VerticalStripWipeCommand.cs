@@ -60,13 +60,12 @@ public sealed class VerticalStripWipeCommand : CommandBase
     private VerticalStripWipeGraphic _graphic;
     private float _startProgress;
     private float _finalProgress;
-    private float _duration;
 
     private bool _resolveAttempted;
 
     private bool HasClaimedTarget { get; set; }
 
-    public override bool WaitForCompletion => _spec.wait;
+    public override bool WaitForCompletion => true;
 
     public VerticalStripWipeCommand(VerticalStripWipeCommandSpec spec)
     {
@@ -83,7 +82,7 @@ public sealed class VerticalStripWipeCommand : CommandBase
 
         ClaimTarget();
 
-        if (scope.IsSeekPassThrough || _duration <= 0f)
+        if (_spec.duration <= 0f)
         {
             CommitFinalState();
             yield break;
@@ -100,7 +99,7 @@ public sealed class VerticalStripWipeCommand : CommandBase
                     _graphic.Progress01 = value;
                 },
                 _finalProgress,
-                _duration)
+                _spec.duration)
             .SetEase(_spec.ease)
             .SetUpdate(true)
             .SetTarget(_graphic)
@@ -143,11 +142,7 @@ public sealed class VerticalStripWipeCommand : CommandBase
 
         _startProgress = _spec.mode == VerticalStripWipeMode.Cover ? 0f : 1f;
         _finalProgress = _spec.mode == VerticalStripWipeMode.Cover ? 1f : 0f;
-
-        _duration = _spec.duration > 0f
-            ? _spec.duration
-            : _graphic.TotalDuration;
-
+        
         HasClaimedTarget = true;
     }
 

@@ -34,36 +34,6 @@ public sealed class VerticalStripWipeGraphic : Graphic
         }
     }
 
-    public float StripDelay
-    {
-        get => _stripDelay;
-        set
-        {
-            _stripDelay = Mathf.Max(0f, value);
-            SetVerticesDirty();
-        }
-    }
-
-    public float StripFillDuration
-    {
-        get => _stripFillDuration;
-        set
-        {
-            _stripFillDuration = Mathf.Max(0.001f, value);
-            SetVerticesDirty();
-        }
-    }
-
-    public VerticalStripWipeOrder Order
-    {
-        get => _order;
-        set
-        {
-            _order = value;
-            SetVerticesDirty();
-        }
-    }
-
     public float Progress01
     {
         get => _progress01;

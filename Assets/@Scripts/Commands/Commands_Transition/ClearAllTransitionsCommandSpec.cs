@@ -7,21 +7,10 @@ using System.Collections;
     "Clear All Transitions",
     Order = -840)]
 public sealed class ClearAllTransitionsCommandSpec : CommandSpecBase
-{
-}
+{ }
 
 public sealed class ClearAllTransitionsCommand : CommandBase
 {
-    private readonly ClearAllTransitionsCommandSpec _spec;
-
-    public override bool WaitForCompletion => _spec.wait;
-    protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
-
-    public ClearAllTransitionsCommand(ClearAllTransitionsCommandSpec spec)
-    {
-        _spec = spec;
-    }
-
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
         PresentationTransitionClearUtility.ClearAll();
@@ -29,11 +18,6 @@ public sealed class ClearAllTransitionsCommand : CommandBase
     }
 
     protected override void OnSkip(CommandRunScope scope)
-    {
-        PresentationTransitionClearUtility.ClearAll();
-    }
-
-    protected override void OnCommandCompleted(CommandRunScope scope)
     {
         PresentationTransitionClearUtility.ClearAll();
     }

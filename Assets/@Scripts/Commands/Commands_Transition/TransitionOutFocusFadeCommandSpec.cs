@@ -22,12 +22,6 @@ public sealed class TransitionOutFocusFadeCommandSpec : CommandSpecBase
     [Header("Tween")]
     public float duration = 0.35f;
     public Ease ease = Ease.InOutCubic;
-
-    [Header("Options")]
-    public bool killTween = true;
-    public bool clearOthersBeforeOut = true;
-    public bool clearAllAfterOut = true;
-    public bool blockRaycastWhenVisible = false;
 }
 
 public sealed class TransitionOutFocusFadeCommand : CommandBase
@@ -35,12 +29,12 @@ public sealed class TransitionOutFocusFadeCommand : CommandBase
     private readonly TransitionOutFocusFadeCommandSpec _spec;
 
     private FocusBlurFadeOverlay _overlay;
-    private Tween _tween;
-    private bool _resolveAttempted;
-    private bool _canCommitFinalState;
 
-    public override bool WaitForCompletion => _spec.wait;
-    protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
+    private bool _resolveAttempted;
+
+    private bool HasClaimedTarget { get; set; }
+
+    public override bool WaitForCompletion => true;
 
     public TransitionOutFocusFadeCommand(TransitionOutFocusFadeCommandSpec spec)
     {
@@ -52,18 +46,7 @@ public sealed class TransitionOutFocusFadeCommand : CommandBase
         if (!_resolveAttempted)
             ResolveRefs();
 
-        if (_overlay == null)
-            yield break;
-
-        if (_spec.killTween)
-            DOTween.Kill(_overlay, false);
-
-        PrepareCoveredState();
-
-        if (_spec.clearOthersBeforeOut)
-            PresentationTransitionClearUtility.ClearAllExcept(PresentationTransitionLayer.FocusBlurFade);
-
-        _canCommitFinalState = true;
+        ClaimTarget();
 
         if (scope.IsSeekPassThrough || _spec.duration <= 0f)
         {
@@ -71,14 +54,11 @@ public sealed class TransitionOutFocusFadeCommand : CommandBase
             yield break;
         }
 
-        _tween = DOTween
+        Tween tween = DOTween
             .To(
                 () => 1f,
                 value =>
                 {
-                    if (!_canCommitFinalState || _overlay == null)
-                        return;
-
                     _overlay.SetAlpha(_spec.maxAlpha * value);
                     _overlay.SetZoomAmount(_spec.zoomAmount * value);
                 },
@@ -87,16 +67,10 @@ public sealed class TransitionOutFocusFadeCommand : CommandBase
             .SetEase(_spec.ease)
             .SetUpdate(true)
             .SetTarget(_overlay)
-            .OnComplete(() =>
-            {
-                if (!_canCommitFinalState)
-                    return;
-
-                CommitFinalState();
-            });
+            .OnComplete(CommitFinalState);
 
         if (_spec.wait)
-            yield return _tween.WaitForCompletion();
+            yield return tween.WaitForCompletion();
     }
 
     protected override void OnSkip(CommandRunScope scope)
@@ -104,13 +78,8 @@ public sealed class TransitionOutFocusFadeCommand : CommandBase
         if (!_resolveAttempted)
             ResolveRefs();
 
-        CommitFinalState();
-    }
-
-    protected override void OnCommandCompleted(CommandRunScope scope)
-    {
-        if (!_canCommitFinalState)
-            return;
+        if (!HasClaimedTarget)
+            ClaimTarget();
 
         CommitFinalState();
     }
@@ -119,44 +88,34 @@ public sealed class TransitionOutFocusFadeCommand : CommandBase
     {
         _resolveAttempted = true;
 
-        IPresentationTransitionSlotProvider provider =
-            UIManager.Instance.GetUI<PresentationUIRoot>();
-
-        if (provider == null || provider.FocusBlurFade == null)
-            return;
-
+        IPresentationTransitionSlotProvider provider = UIManager.Instance.GetUI<PresentationUIRoot>();
         _overlay = provider.FocusBlurFade.GetComponent<FocusBlurFadeOverlay>();
+    }
+
+    private void ClaimTarget()
+    {
+        DOTween.Kill(_overlay, true);
+
+        PrepareCoveredState();
+
+        PresentationTransitionClearUtility.ClearAllExcept(PresentationTransitionLayer.FocusBlurFade);
+        HasClaimedTarget = true;
     }
 
     private void PrepareCoveredState()
     {
-        if (_overlay == null)
-            return;
-
         _overlay.gameObject.SetActive(true);
         _overlay.SetColor(_spec.color);
-        _overlay.BlockRaycastWhenVisible = _spec.blockRaycastWhenVisible;
+        _overlay.BlockRaycastWhenVisible = false;
         _overlay.CoverImmediate(_spec.maxAlpha, _spec.zoomAmount);
     }
 
     private void CommitFinalState()
     {
-        if (_tween != null)
-        {
-            _tween.Kill(false);
-            _tween = null;
-        }
+        _overlay.ClearImmediate();
 
-        if (_overlay != null)
-        {
-            DOTween.Kill(_overlay, false);
-            _overlay.ClearImmediate();
-        }
+        PresentationTransitionClearUtility.ClearAll();
 
-        if (_spec.clearAllAfterOut)
-            PresentationTransitionClearUtility.ClearAll();
-
-        _canCommitFinalState = false;
-        _overlay = null;
+        HasClaimedTarget = false;
     }
 }

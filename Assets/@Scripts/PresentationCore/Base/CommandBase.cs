@@ -106,5 +106,7 @@ public abstract class CommandBase : ISequenceCommand, IStepScopedCommand
     
     // Completion hook tied to step cleanup (CleanupPolicy.Finish).
     // Called when the step finishes (normal end / finish-all), not on Cancel-only cleanup.
-    protected virtual void OnCommandCompleted(CommandRunScope scope) { }
+    protected virtual void OnCommandCompleted(CommandRunScope scope)
+    {
+    }
 }

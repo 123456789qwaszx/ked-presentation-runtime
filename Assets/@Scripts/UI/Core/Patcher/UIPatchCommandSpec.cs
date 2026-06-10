@@ -2,11 +2,6 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-public enum UIPatchTargetKind
-{
-    CurrentRoot = 0,
-}
-
 [Serializable]
 [CommandMenuHint(
     "UI",
@@ -14,14 +9,10 @@ public enum UIPatchTargetKind
     Order = 500)]
 public sealed class UIPatchCommandSpec : CommandSpecBase
 {
-    [Header("Target")]
-    public UIPatchTargetKind targetKind = UIPatchTargetKind.CurrentRoot;
-
     [Header("Context")]
     public string themeId = "default";
     public string localeId = "ko-KR";
 }
-
 
 public sealed class UIPatchCommand : CommandBase
 {
@@ -34,48 +25,14 @@ public sealed class UIPatchCommand : CommandBase
         _spec = spec;
     }
 
-    public override bool WaitForCompletion => _spec.wait;
-    protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
+    public override bool WaitForCompletion => true;
+    protected override SkipPolicy SkipPolicy => SkipPolicy.ExecuteEvenIfSkipping;
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
-        if (_uiPatchService == null)
-            yield break;
-
-        Component targetRoot = ResolveTargetRoot();
-        if (targetRoot == null)
-        {
-            Debug.LogWarning($"[UIPatchCommand] Target UI not found. targetKind={_spec.targetKind}");
-            yield break;
-        }
-
+        var targetRoot = UIManager.Instance.CurSceneRoot;
         UIContext context = new UIContext(_spec.themeId, _spec.localeId);
 
         yield return _uiPatchService.PatchUIInHierarchy(targetRoot, context);
-    }
-
-    protected override void OnSkip(CommandRunScope scope)
-    {
-        OnCommandCompleted(scope);
-    }
-
-    protected override void OnCommandCompleted(CommandRunScope scope)
-    {
-    }
-
-    private Component ResolveTargetRoot()
-    {
-        switch (_spec.targetKind)
-        {
-            case UIPatchTargetKind.CurrentRoot:
-                return ResolveCurrentRoot();
-        }
-
-        return null;
-    }
-
-    private static Component ResolveCurrentRoot()
-    {
-        return UIManager.Instance.CurSceneRoot;
     }
 }

@@ -30,12 +30,6 @@ public sealed class TransitionOutShutterCommandSpec : CommandSpecBase
     [Header("Tween")]
     public float duration = 0.32f;
     public Ease ease = Ease.InCubic;
-
-    [Header("Options")]
-    public bool killTween = true;
-    public bool clearOthersBeforeOut = true;
-    public bool clearAllAfterOut = true;
-    public bool blockRaycastWhileClosed = false;
 }
 
 public sealed class TransitionOutShutterCommand : CommandBase
@@ -43,12 +37,12 @@ public sealed class TransitionOutShutterCommand : CommandBase
     private readonly TransitionOutShutterCommandSpec _spec;
 
     private SlantedShutterGraphic _graphic;
-    private Tween _tween;
-    private bool _resolveAttempted;
-    private bool _canCommitFinalState;
 
-    public override bool WaitForCompletion => _spec.wait;
-    protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
+    private bool _resolveAttempted;
+
+    private bool HasClaimedTarget { get; set; }
+
+    public override bool WaitForCompletion => true;
 
     public TransitionOutShutterCommand(TransitionOutShutterCommandSpec spec)
     {
@@ -60,52 +54,31 @@ public sealed class TransitionOutShutterCommand : CommandBase
         if (!_resolveAttempted)
             ResolveRefs();
 
-        if (_graphic == null)
-            yield break;
+        ClaimTarget();
 
-        if (_spec.killTween)
-            DOTween.Kill(_graphic, false);
-
-        PrepareCoveredState();
-
-        if (_spec.clearOthersBeforeOut)
-            PresentationTransitionClearUtility.ClearAllExcept(PresentationTransitionLayer.SlantedShutter);
-
-        _canCommitFinalState = true;
-
-        if (scope.IsSeekPassThrough || _spec.duration <= 0f)
+        if (_spec.duration <= 0f)
         {
             CommitFinalState();
             yield break;
         }
 
-        _tween = DOTween
+        Tween tween = DOTween
             .To(
                 () => 1f,
                 value =>
                 {
-                    if (!_canCommitFinalState || _graphic == null)
-                        return;
-
                     _graphic.Progress01 = value;
-                    _graphic.RaycastBlocking =
-                        _spec.blockRaycastWhileClosed && value >= 0.98f;
+                    _graphic.RaycastBlocking = value >= 0.98f;
                 },
                 0f,
                 _spec.duration)
             .SetEase(_spec.ease)
             .SetUpdate(true)
             .SetTarget(_graphic)
-            .OnComplete(() =>
-            {
-                if (!_canCommitFinalState)
-                    return;
-
-                CommitFinalState();
-            });
+            .OnComplete(CommitFinalState);
 
         if (_spec.wait)
-            yield return _tween.WaitForCompletion();
+            yield return tween.WaitForCompletion();
     }
 
     protected override void OnSkip(CommandRunScope scope)
@@ -113,13 +86,11 @@ public sealed class TransitionOutShutterCommand : CommandBase
         if (!_resolveAttempted)
             ResolveRefs();
 
-        CommitFinalState();
-    }
-
-    protected override void OnCommandCompleted(CommandRunScope scope)
-    {
-        if (!_canCommitFinalState)
+        if (_graphic == null)
             return;
+
+        if (!HasClaimedTarget)
+            ClaimTarget();
 
         CommitFinalState();
     }
@@ -137,11 +108,19 @@ public sealed class TransitionOutShutterCommand : CommandBase
         _graphic = provider.SlantedShutter.GetComponent<SlantedShutterGraphic>();
     }
 
+    private void ClaimTarget()
+    {
+        DOTween.Kill(_graphic, true);
+
+        PrepareCoveredState();
+
+        PresentationTransitionClearUtility.ClearAllExcept(PresentationTransitionLayer.SlantedShutter);
+
+        HasClaimedTarget = true;
+    }
+
     private void PrepareCoveredState()
     {
-        if (_graphic == null)
-            return;
-
         _graphic.gameObject.SetActive(true);
         _graphic.color = _spec.color;
 
@@ -154,29 +133,17 @@ public sealed class TransitionOutShutterCommand : CommandBase
             _spec.centerEndAlpha);
 
         _graphic.Progress01 = 1f;
-        _graphic.RaycastBlocking = _spec.blockRaycastWhileClosed;
+        _graphic.RaycastBlocking = false;
     }
 
     private void CommitFinalState()
     {
-        if (_tween != null)
-        {
-            _tween.Kill(false);
-            _tween = null;
-        }
+        _graphic.Progress01 = 0f;
+        _graphic.RaycastBlocking = false;
+        _graphic.gameObject.SetActive(false);
 
-        if (_graphic != null)
-        {
-            DOTween.Kill(_graphic, false);
-            _graphic.Progress01 = 0f;
-            _graphic.RaycastBlocking = false;
-            _graphic.gameObject.SetActive(false);
-        }
+        PresentationTransitionClearUtility.ClearAll();
 
-        if (_spec.clearAllAfterOut)
-            PresentationTransitionClearUtility.ClearAll();
-
-        _canCommitFinalState = false;
-        _graphic = null;
+        HasClaimedTarget = false;
     }
 }

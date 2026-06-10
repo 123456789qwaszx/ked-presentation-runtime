@@ -38,12 +38,6 @@ public sealed class TransitionOutFocusCurtainCommandSpec : CommandSpecBase
     [Header("Tween")]
     public float duration = 0.42f;
     public Ease ease = Ease.InOutCubic;
-
-    [Header("Options")]
-    public bool killTween = true;
-    public bool clearOthersBeforeOut = true;
-    public bool clearAllAfterOut = true;
-    public bool blockRaycastWhenClosed = false;
 }
 
 public sealed class TransitionOutFocusCurtainCommand : CommandBase
@@ -51,12 +45,12 @@ public sealed class TransitionOutFocusCurtainCommand : CommandBase
     private readonly TransitionOutFocusCurtainCommandSpec _spec;
 
     private FocusBlurCurtainGraphic _graphic;
-    private Tween _tween;
-    private bool _resolveAttempted;
-    private bool _canCommitFinalState;
 
-    public override bool WaitForCompletion => _spec.wait;
-    protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
+    private bool _resolveAttempted;
+
+    private bool HasClaimedTarget { get; set; }
+
+    public override bool WaitForCompletion => true;
 
     public TransitionOutFocusCurtainCommand(TransitionOutFocusCurtainCommandSpec spec)
     {
@@ -68,18 +62,7 @@ public sealed class TransitionOutFocusCurtainCommand : CommandBase
         if (!_resolveAttempted)
             ResolveRefs();
 
-        if (_graphic == null)
-            yield break;
-
-        if (_spec.killTween)
-            DOTween.Kill(_graphic, false);
-
-        PrepareCoveredState();
-
-        if (_spec.clearOthersBeforeOut)
-            PresentationTransitionClearUtility.ClearAllExcept(PresentationTransitionLayer.FocusBlurCurtain);
-
-        _canCommitFinalState = true;
+        ClaimTarget();
 
         if (scope.IsSeekPassThrough || _spec.duration <= 0f)
         {
@@ -87,33 +70,23 @@ public sealed class TransitionOutFocusCurtainCommand : CommandBase
             yield break;
         }
 
-        _tween = DOTween
+        Tween tween = DOTween
             .To(
                 () => 1f,
                 value =>
                 {
-                    if (!_canCommitFinalState || _graphic == null)
-                        return;
-
                     _graphic.Progress01 = value;
-                    _graphic.RaycastBlocking =
-                        _spec.blockRaycastWhenClosed && value >= 0.98f;
+                    _graphic.RaycastBlocking = value >= 0.98f;
                 },
                 0f,
                 _spec.duration)
             .SetEase(_spec.ease)
             .SetUpdate(true)
             .SetTarget(_graphic)
-            .OnComplete(() =>
-            {
-                if (!_canCommitFinalState)
-                    return;
-
-                CommitFinalState();
-            });
+            .OnComplete(CommitFinalState);
 
         if (_spec.wait)
-            yield return _tween.WaitForCompletion();
+            yield return tween.WaitForCompletion();
     }
 
     protected override void OnSkip(CommandRunScope scope)
@@ -121,13 +94,8 @@ public sealed class TransitionOutFocusCurtainCommand : CommandBase
         if (!_resolveAttempted)
             ResolveRefs();
 
-        CommitFinalState();
-    }
-    
-    protected override void OnCommandCompleted(CommandRunScope scope)
-    {
-        if (!_canCommitFinalState)
-            return;
+        if (!HasClaimedTarget)
+            ClaimTarget();
 
         CommitFinalState();
     }
@@ -136,20 +104,23 @@ public sealed class TransitionOutFocusCurtainCommand : CommandBase
     {
         _resolveAttempted = true;
 
-        IPresentationTransitionSlotProvider provider =
-            UIManager.Instance.GetUI<PresentationUIRoot>();
-
-        if (provider == null || provider.FocusBlurCurtain == null)
-            return;
-
+        IPresentationTransitionSlotProvider provider = UIManager.Instance.GetUI<PresentationUIRoot>();
         _graphic = provider.FocusBlurCurtain.GetComponent<FocusBlurCurtainGraphic>();
+    }
+
+    private void ClaimTarget()
+    {
+        DOTween.Kill(_graphic, true);
+
+        PrepareCoveredState();
+
+        PresentationTransitionClearUtility.ClearAllExcept(PresentationTransitionLayer.FocusBlurCurtain);
+
+        HasClaimedTarget = true;
     }
 
     private void PrepareCoveredState()
     {
-        if (_graphic == null)
-            return;
-
         _graphic.gameObject.SetActive(true);
         _graphic.color = _spec.color;
 
@@ -165,27 +136,15 @@ public sealed class TransitionOutFocusCurtainCommand : CommandBase
             _spec.centerBlurSlices);
 
         _graphic.Progress01 = 1f;
-        _graphic.RaycastBlocking = _spec.blockRaycastWhenClosed;
+        _graphic.RaycastBlocking = false;
     }
 
     private void CommitFinalState()
     {
-        if (_tween != null)
-        {
-            _tween.Kill(false);
-            _tween = null;
-        }
+        _graphic.ClearImmediate();
 
-        if (_graphic != null)
-        {
-            DOTween.Kill(_graphic, false);
-            _graphic.ClearImmediate();
-        }
+        PresentationTransitionClearUtility.ClearAll();
 
-        if (_spec.clearAllAfterOut)
-            PresentationTransitionClearUtility.ClearAll();
-
-        _canCommitFinalState = false;
-        _graphic = null;
+        HasClaimedTarget = false;
     }
 }
