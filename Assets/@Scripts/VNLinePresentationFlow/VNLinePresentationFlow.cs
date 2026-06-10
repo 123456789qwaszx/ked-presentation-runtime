@@ -45,6 +45,89 @@ public sealed class VNLinePresentationFlow
         _sideRunnerSyncHub = vnSideRunnerSyncHub;
         _playbackDriver = playbackDriver;
     }
+    
+    // ---- Shared front-matter ----
+    // LineReceived -> commit meta/backlog/rollback -> consume + enqueue sub advance -> PlayCollected
+    // -> seek decision -> (seek pass-through OR resume policy) -> forward settle wait -> begin visual run.
+    private async YarnTask<LineEntryOutcome> EnterLineAndResolveSeekAsync(
+        VNLinePresentationContext ctx,
+        Func<LinePresentationRun> beginRun)
+    {
+        SetPhase(ctx, VNLinePresentationPhase.LineReceived);
+
+        _advanceState.MarkLineEntered();
+        ctx.Meta = _vnYarnLineBoundary.BuildLineMeta(ctx.Line, ctx.NodeName);
+        _vnYarnLineBoundary.CommitLineEntered(ctx.Meta);
+
+        // Capture the forward-settle baseline BEFORE dispatching, then expect exactly
+        // subAdvanceCount more sub-beat settles. Main waits for those before any visual,
+        // so sub holds (wait=true beats) are respected. No sub running => count 0 => no-op.
+        int forwardSettleBaseline = _sideRunnerSyncHub.ForwardSettleEpoch;
+
+        int subAdvanceCount = _advanceState.IsSeekingActive
+            ? _sideRunnerSyncHub.ConsumePresentationSeekResyncCount()   // 시크: base 재동기화
+            : _sideRunnerSyncHub.ConsumePresentationAutoAdvanceCount(); // 정방향: hold/extra/suppress 적용
+
+        for (int i = 0; i < subAdvanceCount; i++)
+            _playbackDriver.Enqueue(new SubPresentationAdvanceCommandSpec());
+
+        ctx.CommandTicket = _playbackDriver.PlayCollected();
+
+        int forwardSettleTarget = forwardSettleBaseline + subAdvanceCount;
+
+        SetPhase(ctx, VNLinePresentationPhase.LineEnteredCommitted);
+
+        // Phase: LineRuntimeStateResolved (seek decision)
+        VNSeekLineDecision enteredDecision;
+
+        if (_advanceState.IsSeekingActive) {
+            VNSeekKind seekKind = _advanceState.SeekKind;
+
+            enteredDecision = _advanceState.IsSeekTargetLine(ctx.Meta)
+                ? VNSeekLineDecision.TargetLineReachedAndResumePresentation(seekKind)
+                : VNSeekLineDecision.SkipVisualAndDispatchSeekNext(seekKind);
+        }
+        else enteredDecision = VNSeekLineDecision.NotSeeking();
+
+        ctx.SeekDecision = enteredDecision;
+        SetPhase(ctx, VNLinePresentationPhase.LineRuntimeStateResolved);
+
+        if (ctx.ShouldSkipVisual) {
+            await RunSeekPassThroughAsync(ctx);
+            return LineEntryOutcome.PassedThrough;
+        }
+
+        // Phase: ResumePolicyResolved
+        VNSeekLineDecision presentationSeekDecision;
+
+        if (ctx.IsPendingSeekTargetLine) {
+            VNSeekKind seekKind = _advanceState.SeekKind;
+            _advanceState.ClearSeek();
+
+            presentationSeekDecision = seekKind == VNSeekKind.Rollback
+                ? VNSeekLineDecision.TargetLineVisualResumeImmediate(seekKind)
+                : VNSeekLineDecision.TargetLineVisualResumeNormal(seekKind);
+
+            if (seekKind == VNSeekKind.Load)
+                _loadSeekDriver?.Complete();
+        }
+        else presentationSeekDecision = VNSeekLineDecision.NotSeeking();
+
+        ctx.SeekDecision = presentationSeekDecision;
+        SetPhase(ctx, VNLinePresentationPhase.ResumePolicyResolved);
+
+        // Forward path: respect sub holds before any visual work. Breaks early if the sub
+        // lane cannot produce the expected settles (completed / paused / line cancelled).
+        await _sideRunnerSyncHub.WaitUntilForwardSettledAsync(
+            forwardSettleTarget,
+            ctx.Token.NextContentToken);
+
+        // Phase: VisualRunStarted
+        ctx.Run = beginRun();
+        SetPhase(ctx, VNLinePresentationPhase.VisualRunStarted);
+
+        return LineEntryOutcome.Proceed;
+    }
 
     // ---- Normal dialogue line ----
     public async YarnTask RunAsync(
@@ -147,89 +230,6 @@ public sealed class VNLinePresentationFlow
         // else: auto-advance by simply returning (the runner proceeds to the next content).
 
         SetPhase(ctx, VNLinePresentationPhase.Completed);
-    }
-
-    // ---- Shared front-matter ----
-    // LineReceived -> commit meta/backlog/rollback -> consume + enqueue sub advance -> PlayCollected
-    // -> seek decision -> (seek pass-through OR resume policy) -> forward settle wait -> begin visual run.
-    private async YarnTask<LineEntryOutcome> EnterLineAndResolveSeekAsync(
-        VNLinePresentationContext ctx,
-        Func<LinePresentationRun> beginRun)
-    {
-        SetPhase(ctx, VNLinePresentationPhase.LineReceived);
-
-        _advanceState.MarkLineEntered();
-        ctx.Meta = _vnYarnLineBoundary.BuildLineMeta(ctx.Line, ctx.NodeName);
-        _vnYarnLineBoundary.CommitLineEntered(ctx.Meta);
-
-        // Capture the forward-settle baseline BEFORE dispatching, then expect exactly
-        // subAdvanceCount more sub-beat settles. Main waits for those before any visual,
-        // so sub holds (wait=true beats) are respected. No sub running => count 0 => no-op.
-        int forwardSettleBaseline = _sideRunnerSyncHub.ForwardSettleEpoch;
-
-        int subAdvanceCount = _advanceState.IsSeekingActive
-            ? _sideRunnerSyncHub.ConsumePresentationSeekResyncCount()   // 시크: base 재동기화
-            : _sideRunnerSyncHub.ConsumePresentationAutoAdvanceCount(); // 정방향: hold/extra/suppress 적용
-
-        for (int i = 0; i < subAdvanceCount; i++)
-            _playbackDriver.Enqueue(new SubPresentationAdvanceCommandSpec());
-
-        ctx.CommandTicket = _playbackDriver.PlayCollected();
-
-        int forwardSettleTarget = forwardSettleBaseline + subAdvanceCount;
-
-        SetPhase(ctx, VNLinePresentationPhase.LineEnteredCommitted);
-
-        // Phase: LineRuntimeStateResolved (seek decision)
-        VNSeekLineDecision enteredDecision;
-
-        if (_advanceState.IsSeekingActive) {
-            VNSeekKind seekKind = _advanceState.SeekKind;
-
-            enteredDecision = _advanceState.IsSeekTargetLine(ctx.Meta)
-                ? VNSeekLineDecision.TargetLineReachedAndResumePresentation(seekKind)
-                : VNSeekLineDecision.SkipVisualAndDispatchSeekNext(seekKind);
-        }
-        else enteredDecision = VNSeekLineDecision.NotSeeking();
-
-        ctx.SeekDecision = enteredDecision;
-        SetPhase(ctx, VNLinePresentationPhase.LineRuntimeStateResolved);
-
-        if (ctx.ShouldSkipVisual) {
-            await RunSeekPassThroughAsync(ctx);
-            return LineEntryOutcome.PassedThrough;
-        }
-
-        // Phase: ResumePolicyResolved
-        VNSeekLineDecision presentationSeekDecision;
-
-        if (ctx.IsPendingSeekTargetLine) {
-            VNSeekKind seekKind = _advanceState.SeekKind;
-            _advanceState.ClearSeek();
-
-            presentationSeekDecision = seekKind == VNSeekKind.Rollback
-                ? VNSeekLineDecision.TargetLineVisualResumeImmediate(seekKind)
-                : VNSeekLineDecision.TargetLineVisualResumeNormal(seekKind);
-
-            if (seekKind == VNSeekKind.Load)
-                _loadSeekDriver?.Complete();
-        }
-        else presentationSeekDecision = VNSeekLineDecision.NotSeeking();
-
-        ctx.SeekDecision = presentationSeekDecision;
-        SetPhase(ctx, VNLinePresentationPhase.ResumePolicyResolved);
-
-        // Forward path: respect sub holds before any visual work. Breaks early if the sub
-        // lane cannot produce the expected settles (completed / paused / line cancelled).
-        await _sideRunnerSyncHub.WaitUntilForwardSettledAsync(
-            forwardSettleTarget,
-            ctx.Token.NextContentToken);
-
-        // Phase: VisualRunStarted
-        ctx.Run = beginRun();
-        SetPhase(ctx, VNLinePresentationPhase.VisualRunStarted);
-
-        return LineEntryOutcome.Proceed;
     }
 
     private async YarnTask WaitUntilCommandTicketSettledAsync(VNLinePresentationContext ctx)

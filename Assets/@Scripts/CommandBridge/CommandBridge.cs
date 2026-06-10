@@ -124,7 +124,7 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler<string, string, bool, bool>("place", EnqueueSetAnchorSpecs);
         runner.AddCommandHandler<string, string>("size", EnqueueSetOriginSizeSpec);
         
-        runner.AddCommandHandler<string, int, int>("place_offset", EnqueueSetAnchorOffsetSpecs);
+        runner.AddCommandHandler<string, int, int, float>("place_offset", EnqueueSetAnchorOffsetSpecs);
     }
 
     private void BindCharRigBasic(DialogueRunner runner)

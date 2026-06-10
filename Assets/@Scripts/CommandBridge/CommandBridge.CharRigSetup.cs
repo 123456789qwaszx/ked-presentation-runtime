@@ -98,14 +98,14 @@ public sealed partial class YarnCommandBridge
         Collect(spec);
     }
     
-    private void EnqueueSetAnchorOffsetSpecs(string slotKey, int x = 0, int y = 0)
+    private void EnqueueSetAnchorOffsetSpecs(string slotKey, int x = 0, int y = 0, float duration = 0f)
     {
         var slotOffsetSpec = new MoveByCommandSpecCharR
         {
             slotKey = slotKey,
             target = CharacterRigTarget.CharSlot_Anchor,
             delta = new Vector2(x, y),
-            duration = 0f
+            duration = duration
         };
         
         Collect(slotOffsetSpec);
