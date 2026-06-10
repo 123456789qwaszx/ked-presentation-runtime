@@ -157,6 +157,7 @@ public sealed class SetEmotionPortraitWipeCommand : CommandBase
         _portraitCanvasGroup.alpha = 1f;
         _overlayCanvasGroup.alpha = 0f;
 
+        _overlayImage.enabled = true;
         _overlayImage.sprite = _targetSprite;
         ApplySizing(_overlayImage, _targetSprite);
     }
@@ -168,6 +169,8 @@ public sealed class SetEmotionPortraitWipeCommand : CommandBase
 
         _portraitCanvasGroup.alpha = 1f;
         _overlayCanvasGroup.alpha = 0f;
+
+        _overlayImage.enabled = false;
 
         HasClaimedTarget = false;
     }

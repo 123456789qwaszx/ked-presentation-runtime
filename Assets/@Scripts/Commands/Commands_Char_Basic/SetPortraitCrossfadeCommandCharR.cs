@@ -117,7 +117,7 @@ public sealed class SetPortraitCrossfadeCommandCharR : CommandBase
         _overlayImage = rigRefs.CharacterPortraitSpriteOverlay_Image;
 
         _portraitCanvasGroup = _portraitRoot.GetComponent<CanvasGroup>();
-        _overlayCanvasGroup =_overlayRoot.GetComponent<CanvasGroup>();
+        _overlayCanvasGroup = _overlayRoot.GetComponent<CanvasGroup>();
     }
 
     private void ResolveTargetSprite(CommandRunScope scope)
@@ -143,6 +143,7 @@ public sealed class SetPortraitCrossfadeCommandCharR : CommandBase
 
     private void PrepareTransitionState()
     {
+        _overlayImage.enabled = true;
         _overlayImage.sprite = _targetSprite;
         ApplySizing(_overlayImage, _targetSprite);
 
@@ -157,6 +158,8 @@ public sealed class SetPortraitCrossfadeCommandCharR : CommandBase
 
         _portraitCanvasGroup.alpha = 1f;
         _overlayCanvasGroup.alpha = 0f;
+
+        _overlayImage.enabled = false;
 
         HasClaimedTarget = false;
     }

@@ -52,8 +52,8 @@ public sealed class FastForwardController
 
     private void OnHolding()
     {
-        if(_isLineFullyShown())
-            _dispatcher.DispatchAdvance();
+        // if(_isLineFullyShown())
+        //     _dispatcher.DispatchAdvance();
     }
 
     private void OnHoldEnd()

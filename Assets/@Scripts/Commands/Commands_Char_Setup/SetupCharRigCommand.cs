@@ -87,7 +87,10 @@ public sealed class SetupCharRigCommand : CommandBase
 
         // Visual effect controller: rig 1개당 1개. runtime material을 Instantiate하여 보관.
         Material sourceMaterial = Resources.Load<Material>(VisualEffectMaterialPath);
-        refs.VisualEffect = new CharacterRigVisualEffectController(refs.CharacterPortraitSprite_Image, sourceMaterial);
+        refs.VisualEffect = new CharacterRigVisualEffectController(
+            refs.CharacterPortraitSprite_Image,
+            refs.CharacterPortraitSpriteOverlay_Image,
+            sourceMaterial);
         
         scope.characterRigs.Register(rigKey, refs);
         

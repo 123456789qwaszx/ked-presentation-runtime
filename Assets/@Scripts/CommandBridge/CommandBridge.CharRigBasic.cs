@@ -106,7 +106,7 @@ public sealed partial class YarnCommandBridge
         Collect(spec);
     }
     
-    private void EnqueueSetEmotionPortraitWipeSpec(string targetKey, string emotion)
+    private void EnqueueSetEmotionPortraitWipeSpec(string targetKey, string emotion, float duration = 0.4f)
     {
         var spec = new SetEmotionPortraitWipeCommandSpec
         {
@@ -114,13 +114,14 @@ public sealed partial class YarnCommandBridge
             portrait = new PortraitIdentity
             {
                 emotion = emotion,
-            }
+            },
+            duration = duration
         };
 
         Collect(spec);
     }
     
-    private void EnqueueSetPortraitCrossfadeSpec(string roleKey, string character)
+    private void EnqueueSetPortraitCrossfadeSpec(string roleKey, string character, float duration = 0.4f)
     {
         var portraitIdentity = new PortraitIdentity
         {
@@ -130,7 +131,8 @@ public sealed partial class YarnCommandBridge
         var spec = new SetPortraitCrossfadeCommandSpecCharR
         {
             slotKey = roleKey,
-            portrait = portraitIdentity
+            portrait = portraitIdentity,
+            duration = duration
         };
 
         Collect(spec);

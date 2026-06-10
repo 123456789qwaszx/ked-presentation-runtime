@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
-// Runtime material owner for a single character portrait Image.
+// Runtime material owner for character portrait Images.
 // POCO (not MonoBehaviour): created by SetupCharRigCommand, held in CharacterRigRefs.VisualEffect,
 // disposed by CharacterRigRegistry.DestroyRig.
 // 주의: runtime material은 rig마다 Instantiate되므로 Dispose가 누락되면 teardown(롤백/seek 리빌드)마다 누수됩니다.
@@ -62,26 +62,42 @@ public sealed class CharacterRigVisualEffectController : IDisposable
     public Color OuterRimColor => _outerRimColor;
     public Color InnerRimColor => _innerRimColor;
 
-    public CharacterRigVisualEffectController(Image portraitImage, Material sourceMaterial)
+    public CharacterRigVisualEffectController(
+        Image portraitImage,
+        Image portraitOverlayImage,
+        Material sourceMaterial)
     {
-        if (portraitImage == null)
+        if (portraitImage == null && portraitOverlayImage == null)
         {
-            Debug.LogWarning("[CharacterRigVisualEffectController] portraitImage is null.");
+            Debug.LogWarning("[CharacterRigVisualEffectController] portraitImage and portraitOverlayImage are null.");
             return;
         }
 
         if (sourceMaterial == null)
         {
+            Object context = portraitImage != null
+                ? portraitImage
+                : portraitOverlayImage;
+
             Debug.LogWarning(
                 "[CharacterRigVisualEffectController] sourceMaterial is null. " +
                 "Check the Resources path in SetupCharRigCommand.",
-                portraitImage);
+                context);
             return;
         }
 
+        Image runtimeNameSource = portraitImage != null
+            ? portraitImage
+            : portraitOverlayImage;
+
         _runtimeMaterial = Object.Instantiate(sourceMaterial);
-        _runtimeMaterial.name = $"{sourceMaterial.name}_Runtime_{portraitImage.name}";
-        portraitImage.material = _runtimeMaterial;
+        _runtimeMaterial.name = $"{sourceMaterial.name}_Runtime_{runtimeNameSource.name}";
+
+        if (portraitImage != null)
+            portraitImage.material = _runtimeMaterial;
+
+        if (portraitOverlayImage != null)
+            portraitOverlayImage.material = _runtimeMaterial;
 
         _dimAmount = 0f;
         _blurAmount = 0f;

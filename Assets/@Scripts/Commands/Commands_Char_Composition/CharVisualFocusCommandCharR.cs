@@ -31,8 +31,8 @@ public sealed class CharVisualFocusCommandSpecCharR : CharacterRigCommandSpecBas
 
     [Header("Focus / Defocus Preset Amounts")]
     [Tooltip("프로젝트 고정값. 한번 정하면 완료까지 바뀌지 않으므로 spec 기본값으로 둔다.")]
-    [Range(0f, 1f)] public float focusOuterRimAmount = 0f;
-    [Range(0f, 1f)] public float focusInnerRimAmount = 0.25f;
+    [Range(0f, 1f)] public float focusOuterRimAmount = 0.4f;
+    [Range(0f, 1f)] public float focusInnerRimAmount = 0.09f;
     [Range(0f, 1f)] public float defocusDimAmount = 0.45f;
     [Range(0f, 1f)] public float defocusBlurAmount = 0.25f;
 
@@ -57,7 +57,7 @@ public sealed class CharVisualFocusCommandSpecCharR : CharacterRigCommandSpecBas
 
 public sealed class CharVisualFocusCommandCharR : CommandBase
 {
-    private const float StepFinishSpeedUpMultiplier = 30f;
+    private const float StepFinishSpeedUpMultiplier = 1.5f;
 
     private readonly CharVisualFocusCommandSpecCharR _spec;
 

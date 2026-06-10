@@ -26,7 +26,7 @@ public class MoveByCommandSpecCharR : CharacterRigCommandSpecBase
 
 public sealed class MoveByCommandCharR : CommandBase
 {
-    private const float StepFinishSpeedUpMultiplier = 30f;
+    private const float StepFinishSpeedUpMultiplier = 0.2f;
 
     private readonly MoveByCommandSpecCharR _spec;
 
