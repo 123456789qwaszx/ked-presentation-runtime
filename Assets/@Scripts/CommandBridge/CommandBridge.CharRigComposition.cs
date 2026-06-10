@@ -100,7 +100,6 @@ public sealed partial class YarnCommandBridge
             slotKey = roleKey.Trim(),
             mode = CharacterVisualFocusMode.Defocus,
             intensity = intensity,
-            defocusBlurAmount = blur,
             duration = duration,
             wait = false
         };

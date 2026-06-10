@@ -29,12 +29,9 @@ public sealed class CharVisualFocusCommandSpecCharR : CharacterRigCommandSpecBas
     [Range(0f, 1f)]
     public float intensity = 1f;
 
-    [Header("Focus / Defocus Preset Amounts")]
-    [Tooltip("프로젝트 고정값. 한번 정하면 완료까지 바뀌지 않으므로 spec 기본값으로 둔다.")]
-    [Range(0f, 1f)] public float focusOuterRimAmount = 0.4f;
-    [Range(0f, 1f)] public float focusInnerRimAmount = 0.09f;
-    [Range(0f, 1f)] public float defocusDimAmount = 0.45f;
-    [Range(0f, 1f)] public float defocusBlurAmount = 0.25f;
+    [Header("Preset")]
+    public CharacterVisualFocusPreset focusPreset = CharacterVisualFocusPreset.Focus;
+    public CharacterVisualFocusPreset defocusPreset = CharacterVisualFocusPreset.Defocus;
 
     [Header("Custom Values")]
     [Range(0f, 3f)] public float dim = 0f;
@@ -60,6 +57,7 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
     private const float StepFinishSpeedUpMultiplier = 1.5f;
 
     private readonly CharVisualFocusCommandSpecCharR _spec;
+    private readonly CharacterVisualFocusPresetDBSO _presetDb;
 
     private CharacterRigVisualEffectController _controller;
 
@@ -74,9 +72,12 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
 
     public override bool WaitForCompletion => _spec.wait;
 
-    public CharVisualFocusCommandCharR(CharVisualFocusCommandSpecCharR spec)
+    public CharVisualFocusCommandCharR(
+        CharVisualFocusCommandSpecCharR spec,
+        CharacterVisualFocusPresetDBSO presetDb)
     {
         _spec = spec;
+        _presetDb = presetDb;
     }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
@@ -227,24 +228,10 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
         switch (_spec.mode)
         {
             case CharacterVisualFocusMode.Focus:
-                return new VisualState(
-                    0f,
-                    _controller.DimTintColor,
-                    _spec.focusOuterRimAmount * intensity,
-                    _spec.focusInnerRimAmount * intensity,
-                    0f,
-                    _controller.OuterRimColor,
-                    _controller.InnerRimColor);
+                return BuildPresetState(_spec.focusPreset, intensity);
 
             case CharacterVisualFocusMode.Defocus:
-                return new VisualState(
-                    _spec.defocusDimAmount * intensity,
-                    _controller.DimTintColor,
-                    0f,
-                    0f,
-                    _spec.defocusBlurAmount * intensity,
-                    _controller.OuterRimColor,
-                    _controller.InnerRimColor);
+                return BuildPresetState(_spec.defocusPreset, intensity);
 
             case CharacterVisualFocusMode.Clear:
                 return new VisualState(
@@ -276,6 +263,28 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
                     _controller.OuterRimColor,
                     _controller.InnerRimColor);
         }
+    }
+
+    private VisualState BuildPresetState(CharacterVisualFocusPreset preset, float intensity)
+    {
+        CharacterVisualFocusPresetDBSO.Entry entry = preset switch
+        {
+            CharacterVisualFocusPreset.Focus => CharacterVisualFocusPresetDBSO.DefaultFocus(),
+            CharacterVisualFocusPreset.Defocus => CharacterVisualFocusPresetDBSO.DefaultDefocus(),
+            _ => CharacterVisualFocusPresetDBSO.DefaultFocus()
+        };
+
+        if (_presetDb != null && _presetDb.TryGet(preset, out CharacterVisualFocusPresetDBSO.Entry dbEntry))
+            entry = dbEntry;
+
+        return new VisualState(
+            entry.dim * intensity,
+            entry.dimTintColor,
+            entry.outerRim * intensity,
+            entry.innerRim * intensity,
+            entry.blur * intensity,
+            entry.outerRimColor,
+            entry.innerRimColor);
     }
 
     private void ApplyState(VisualState state)

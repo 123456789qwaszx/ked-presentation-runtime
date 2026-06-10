@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 409c733eeabdc144682c62e2999834ef, type: 3}
+  m_Name: CharacterVisualFocusPresetDB
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterVisualFocusPresetDBSO
+  entries:
+  - preset: 0
+    dim: 0
+    dimTintColor: {r: 0.45, g: 0.48, b: 0.55, a: 1}
+    outerRim: 0.4
+    innerRim: 0.09
+    outerRimColor: {r: 1, g: 1, b: 1, a: 1}
+    innerRimColor: {r: 1, g: 0.96, b: 0.86, a: 1}
+    blur: 0
+  - preset: 1
+    dim: 0.45
+    dimTintColor: {r: 0.45, g: 0.48, b: 0.55, a: 1}
+    outerRim: 0
+    innerRim: 0
+    outerRimColor: {r: 1, g: 1, b: 1, a: 1}
+    innerRimColor: {r: 1, g: 0.96, b: 0.86, a: 1}
+    blur: 0.25

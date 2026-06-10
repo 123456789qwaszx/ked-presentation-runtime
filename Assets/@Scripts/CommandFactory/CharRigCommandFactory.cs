@@ -9,6 +9,8 @@ public sealed class CharRigCommandFactory : INodeCommandFactory
     private readonly RoleAnchorTuningDBSO _roleTuningDb;
     
     private readonly CharacterFocusTuningDBSO _characterFocusTuningDb;
+    private readonly CharacterVisualFocusPresetDBSO _characterVisualFocusPresetDb;
+    
 
     public CharRigCommandFactory(
         CharRigSlotResolver charRigSlotResolver,
@@ -17,7 +19,8 @@ public sealed class CharRigCommandFactory : INodeCommandFactory
         CharacterEmojiResolver emojiResolver,
         CharStageTuningSO globalTuning,
         RoleAnchorTuningDBSO roleTuningDb,
-        CharacterFocusTuningDBSO characterFocusTuningDb)
+        CharacterFocusTuningDBSO characterFocusTuningDb,
+        CharacterVisualFocusPresetDBSO characterVisualFocusPresetDb)
     {
         _rigSlotResolver = charRigSlotResolver;
         _rigBuilder = charRigBuilder;
@@ -26,6 +29,7 @@ public sealed class CharRigCommandFactory : INodeCommandFactory
         _globalTuning = globalTuning;
         _roleTuningDb = roleTuningDb;
         _characterFocusTuningDb = characterFocusTuningDb;
+        _characterVisualFocusPresetDb = characterVisualFocusPresetDb;
     }
 
     public bool TryCreate(CommandSpecBase spec, out ISequenceCommand command)
@@ -65,7 +69,7 @@ public sealed class CharRigCommandFactory : INodeCommandFactory
             ColorToCommandSpecCharR s => new ColorToCommandCharR(s),
             SetSpriteCommandSpecCharR s => new SetSpriteCommandCharR(s),
             
-            CharVisualFocusCommandSpecCharR s => new CharVisualFocusCommandCharR(s),
+            CharVisualFocusCommandSpecCharR s => new CharVisualFocusCommandCharR(s, _characterVisualFocusPresetDb),
             
             SetPortraitSpriteCommandSpecCharR s => new SetPortraitSpriteCommandCharR(s, _portraitResolver),
             SetEmotionPortraitWipeCommandSpec s => new SetEmotionPortraitWipeCommand(s, _portraitResolver),

@@ -12,17 +12,17 @@ public sealed class CharacterRigVisualEffectController : IDisposable
 {
     private const float DimBrightness = 0.62f;
     private const float DimSaturation = 0.70f;
-    private static readonly Color DefaultDimTintColor = new(0.45f, 0.48f, 0.55f, 1f);
+    private static readonly Color DefaultDimTintColor = new(0.50f, 0.50f, 0.78f, 1f);
 
     private static readonly Color DefaultOuterRimColor = Color.white;
-    private const float OuterRimWidth = 0.006f;
-    private const float OuterRimSoftness = 0.02f;
+    private const float OuterRimWidth = 0.0025f;
+    private const float OuterRimSoftness = 0.8f;
 
-    private static readonly Color DefaultInnerRimColor = new(1f, 0.96f, 0.86f, 1f);
-    private const float InnerRimWidth = 0.004f;
-    private const float InnerRimSoftness = 0.02f;
+    private static readonly Color DefaultInnerRimColor = Color.white;
+    private const float InnerRimWidth = 0.003f;
+    private const float InnerRimSoftness = 0.8f;
 
-    private const float BlurSize = 0.004f;
+    private const float BlurSize = 0.001f;
 
     private static readonly int DimAmountId = Shader.PropertyToID("_DimAmount");
     private static readonly int DimBrightnessId = Shader.PropertyToID("_DimBrightness");

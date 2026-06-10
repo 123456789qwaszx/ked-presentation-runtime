@@ -42,6 +42,7 @@ public class VnAppBootstrap : MonoBehaviour
     
     [SerializeField] private PortraitGeneratedDbSo portraitGeneratedDbSo;
     [SerializeField] private CharacterFocusTuningDBSO characterFocusTuningDb;
+    [SerializeField] private CharacterVisualFocusPresetDBSO characterVisualFocusPresetDb;
 
     [SerializeField] private UnitySignalBus unitySignalBus;
     
@@ -216,7 +217,8 @@ public class VnAppBootstrap : MonoBehaviour
             emojiResolver,
             globalTuning,
             roleTuningDb,
-            characterFocusTuningDb);
+            characterFocusTuningDb,
+            characterVisualFocusPresetDb);
 
         // Background Rig
         BackgroundRigSlotResolver backgroundRigSlotResolver = new();

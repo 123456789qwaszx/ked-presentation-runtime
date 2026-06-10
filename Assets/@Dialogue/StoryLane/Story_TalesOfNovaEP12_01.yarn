@@ -58,9 +58,9 @@ title: Story_TalesOfNovaEP12_01
 <<char_focus Willow>>
 
 
-<<pause 1>>
-<<face_crossfade Willow 5 2>>
-<<pause 3>>
+//<<pause 1>>
+//<<face_crossfade Willow 5 2>>
+//<<pause 3>>
 <<face Willow 12>>
 //d:s #beat
 윌로: 죄송합니다만, 이번 의뢰는 보수의 3분의 1밖에 드릴 수 없겠군요. #boxhide
