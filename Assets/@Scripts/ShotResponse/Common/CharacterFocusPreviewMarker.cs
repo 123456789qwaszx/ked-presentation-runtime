@@ -143,7 +143,7 @@ public sealed class CharacterFocusPreviewMarker : MonoBehaviour
     /// focus 계산 기준 노드 이름. CharacterFocusPointResolver가 측정에 쓰는 MeasureRect(CharSlot_Scale)와
     /// 반드시 동일해야 프리뷰가 실제 focus point와 일치한다. (framing response보다 위, response 중립 노드)
     /// </summary>
-    private const string FocusBasisNodeName = "CharSlot_Scale";
+    private const string FocusBasisNodeName = "CharSlot_Size";
 
     private void Reset()
     {

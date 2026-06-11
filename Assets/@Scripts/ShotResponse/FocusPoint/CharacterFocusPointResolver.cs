@@ -6,7 +6,6 @@ public static class CharacterFocusPointResolver
         CommandRunScope scope,
         string roleKey,
         CharacterFocusPreset preset,
-        string poseKey,
         string customPointKey,
         Vector2 commandOffset,
         CharacterFocusTuningDBSO tuningDb,
@@ -22,8 +21,8 @@ public static class CharacterFocusPointResolver
         if (!scope.CharacterRigs.TryGetRig(resolvedRigKey, out CharacterRigRefs rigRefs))
             return false;
 
-        if (rigRefs == null)
-            return false;
+        
+        string tuningKey = CharacterRigTargetResolver.ResolveCharacterKeyFromTargetKey(scope, roleKey);
 
         // Focus는 "캐릭터의 논리적 위치"를 가리켜야 한다.
         // 측정 기준은 반드시 framing response 출력(FramingTransform / FramingScale)보다 위,
@@ -36,25 +35,8 @@ public static class CharacterFocusPointResolver
         // 롤백 재시크마다 값이 누적으로 흘러간다(비멱등).
         RectTransform measureRect = rigRefs.CharSlot_Size;
 
-        if (measureRect == null)
-            return false;
-
-        IPresentationRigSpaceRootProvider stageRootProvider =
-            UIManager.Instance.GetUI<PresentationUIRoot>();
-
-        if (stageRootProvider == null || stageRootProvider.RigSpaceRoot == null)
-            return false;
-
+        IPresentationRigSpaceRootProvider stageRootProvider = UIManager.Instance.GetUI<PresentationUIRoot>();
         RectTransform stageRoot = stageRootProvider.RigSpaceRoot;
-
-        // 마커 표시용 부모. focus 계산과는 무관하므로 기존대로 둔다.
-        RectTransform previewRoot = rigRefs.Character_ExtensionsRoot != null
-            ? rigRefs.Character_ExtensionsRoot
-            : rigRefs.Character_CastTransform;
-
-        string tuningKey = CharacterFocusTuningResolver.BuildTuningKey(
-            roleKey,
-            poseKey);
 
         Vector2 focusOffset =
             CharacterFocusTuningResolver.ResolveOffset(
@@ -64,10 +46,9 @@ public static class CharacterFocusPointResolver
                 customPointKey,
                 commandOffset);
 
-        // offset은 CharSlot_Scale 로컬 공간 기준.
+        // offset은 CharSlot_Size 로컬 공간 기준.
         // 캐릭터 placement 스케일에는 반응하지만 framing response에는 반응하지 않는다.
-        Vector3 focusWorld = measureRect.TransformPoint(
-            new Vector3(focusOffset.x, focusOffset.y, 0f));
+        Vector3 focusWorld = measureRect.TransformPoint(new Vector3(focusOffset.x, focusOffset.y, 0f));
 
         Vector3 focusInStage = stageRoot.InverseTransformPoint(focusWorld);
 
@@ -75,7 +56,6 @@ public static class CharacterFocusPointResolver
         {
             StageRoot = stageRoot,
             FocusRect = measureRect,
-            PreviewRoot = previewRoot,
             FocusOffsetInFocusRectSpace = focusOffset,
             FocusPointInStageSpace = new Vector2(focusInStage.x, focusInStage.y)
         };
