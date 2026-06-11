@@ -6,38 +6,38 @@ using UnityEngine;
 [Serializable]
 [CommandMenuHint(
     "Char Rig Motion",
-    "Move By (XY)",
-    Order = -200)]
-public class MoveByCommandSpecCharR : CharacterRigCommandSpecBase
+    "Place To",
+    Order = -199)]
+public sealed class PlaceToCommandSpecCharR : CharacterRigCommandSpecBase
 {
-    [Header("Target (Track or Rig)")]
-    public CharacterRigTarget target = CharacterRigTarget.CharSlot_Track;
+    [Header("Target (Anchor only)")]
+    public CharacterRigTarget target = CharacterRigTarget.CharSlot_Anchor;
 
-    [Header("Move")]
-    [Tooltip(
-        "false: delta를 현재 anchoredPosition 기준 상대 오프셋으로 사용.\n" +
-        "true: delta를 목표 anchoredPosition 절대값으로 사용.")]
-    public bool useAbsolutePosition = false;
+    [Header("Preset")]
+    public CharAnchorPreset preset = CharAnchorPreset.Center;
 
-    [Tooltip(
-        "useAbsolutePosition=false: 현재 anchoredPosition에 더해질 오프셋.\n" +
-        "useAbsolutePosition=true: 이동할 목표 anchoredPosition.")]
-    public Vector2 delta = Vector2.zero;
+    [Tooltip("StageSlot 폭 대비 상대 위치. 0.33이면 좌/우가 화면폭의 약 1/3 지점.")]
+    [Range(0f, 0.5f)]
+    public float baseRatioX = 0.33f;
+
+    [Header("Offset (after tuning)")]
+    public Vector2 offset = Vector2.zero;
 
     [Header("Tween")]
-    [Tooltip("트윈 시간. <= 0이면 즉시 dest로 스냅")]
     public float duration = 0.4f;
-
     public Ease ease = Ease.OutCubic;
 }
 
-public sealed class MoveByCommandCharR : CommandBase
+public sealed class PlaceToCommandCharR : CommandBase
 {
-    private const float StepFinishSpeedUpMultiplier = 0.2f;
+    private const float StepFinishSpeedUpMultiplier = 30f;
 
-    private readonly MoveByCommandSpecCharR _spec;
+    private readonly PlaceToCommandSpecCharR _spec;
+    private readonly CharStageTuningSO _globalTuning;
+    private readonly RoleAnchorTuningDBSO _roleTuningDb;
 
     private RectTransform _rect;
+
     private Vector2 _startPos;
     private Vector2 _destPos;
 
@@ -49,9 +49,14 @@ public sealed class MoveByCommandCharR : CommandBase
 
     public override bool WaitForCompletion => _spec.wait;
 
-    public MoveByCommandCharR(MoveByCommandSpecCharR spec)
+    public PlaceToCommandCharR(
+        PlaceToCommandSpecCharR spec,
+        CharStageTuningSO globalTuning,
+        RoleAnchorTuningDBSO roleTuningDb)
     {
         _spec = spec;
+        _globalTuning = globalTuning;
+        _roleTuningDb = roleTuningDb;
     }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
@@ -59,7 +64,7 @@ public sealed class MoveByCommandCharR : CommandBase
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        ClaimTarget();
+        ClaimTarget(scope);
 
         if (_spec.duration <= 0f)
         {
@@ -84,7 +89,7 @@ public sealed class MoveByCommandCharR : CommandBase
             ResolveRefs(scope);
 
         if (!HasClaimedTarget)
-            ClaimTarget();
+            ClaimTarget(scope);
 
         CommitFinalState();
     }
@@ -93,26 +98,32 @@ public sealed class MoveByCommandCharR : CommandBase
     {
         _resolveAttempted = true;
 
-        CharacterRigRefs rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
-        _rect = rig.GetRect(_spec.target);
+        CharacterRigRefs rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
+        _rect = rigRefs.GetRect(_spec.target);
     }
 
-    private void ClaimTarget()
+    private void ClaimTarget(CommandRunScope scope)
     {
         _rect.DOKill(true);
 
         _startPos = _rect.anchoredPosition;
-        _destPos = CalculateDestinationPosition();
+        _destPos = ResolveDestination(scope);
 
         HasClaimedTarget = true;
     }
 
-    private Vector2 CalculateDestinationPosition()
+    private Vector2 ResolveDestination(CommandRunScope scope)
     {
-        if (_spec.useAbsolutePosition)
-            return _spec.delta;
+        string tuningKey = CharacterRigTargetResolver.ResolveCharacterKeyFromTargetKey(scope, _spec.slotKey);
 
-        return _startPos + _spec.delta;
+        return CharAnchorPlacementResolver.ResolveAnchoredPosition(
+            _rect,
+            _spec.preset,
+            _spec.baseRatioX,
+            _globalTuning,
+            _roleTuningDb,
+            tuningKey,
+            _spec.offset);
     }
 
     private void CommitFinalState()
@@ -129,16 +140,10 @@ public sealed class MoveByCommandCharR : CommandBase
     {
         if (!HasClaimedTarget)
             return;
-
-        _tween?.Kill(false);
+        
+        _tween.Kill(false);
 
         float duration = CalculateAcceleratedRemainingDuration();
-
-        if (duration <= 0f)
-        {
-            CommitFinalState();
-            return;
-        }
 
         _tween = _rect
             .DOAnchorPos(_destPos, duration)

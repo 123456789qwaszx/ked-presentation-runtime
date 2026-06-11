@@ -69,6 +69,24 @@ public sealed partial class YarnCommandBridge
         Collect(anchorSpec);
     }
     
+    private void EnqueuePlaceToSpec(
+        string slotKey,
+        string positionPreset,
+        float duration = 0.4f)
+    {
+        CharAnchorPreset preset = CharAnchorPresetParser.Parse(positionPreset);
+
+        var spec = new PlaceToCommandSpecCharR
+        {
+            slotKey = slotKey,
+            target = CharacterRigTarget.CharSlot_Anchor,
+            preset = preset,
+            duration = duration
+        };
+
+        Collect(spec);
+    }
+    
     private void EnqueueSetOriginSizeSpec(string roleKey, string scaleArg)
     {
         if (YarnNumberParser.TryParseFloat(scaleArg, out float absoluteScale))
@@ -76,6 +94,7 @@ public sealed partial class YarnCommandBridge
             var absoluteScaleSpec = new SetOriginSizeCommandSpecCharR
             {
                 slotKey = roleKey,
+                target = CharacterRigTarget.CharSlot_Scale,
 
                 overrideScale = true,
                 scaleOverride = new Vector3(absoluteScale, absoluteScale, absoluteScale),
@@ -92,13 +111,14 @@ public sealed partial class YarnCommandBridge
         
         var spec = new SetOriginSizeCommandSpecCharR
         {
+            target = CharacterRigTarget.CharSlot_Scale,
             slotKey = roleKey, preset = preset,
         };
 
         Collect(spec);
     }
     
-    private void EnqueueSetAnchorOffsetSpecs(string slotKey, int x = 0, int y = 0, float duration = 0f)
+    private void EnqueueSetAnchorOffsetSpecs(string slotKey, int x = 0, int y = 0, float duration = 0.4f)
     {
         var slotOffsetSpec = new MoveByCommandSpecCharR
         {
@@ -109,5 +129,81 @@ public sealed partial class YarnCommandBridge
         };
         
         Collect(slotOffsetSpec);
+    }
+    
+    private void EnqueueSizeBySpec(string roleKey, float multiplier, float duration = 0.4f)
+    {
+        var spec = new ScaleToCommandSpecCharR
+        {
+            slotKey = roleKey,
+            target = CharacterRigTarget.CharSlot_Scale,
+
+            toScale = new Vector2(multiplier, multiplier),
+            relativeToCurrent = true,
+
+            duration = duration
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueRotateBySpec(string roleKey, float degree, float duration = 0.4f)
+    {
+        var spec = new RotateToCommandSpecCharR
+        {
+            slotKey = roleKey,
+            target = CharacterRigTarget.CharSlot_SwayPivot,
+
+            toEuler = new Vector3(0f, 0f, degree),
+            relativeToCurrent = true,
+
+            duration = duration
+        };
+
+        Collect(spec);
+    }
+    
+    private void EnqueueSetPlaceResetSpecs(string slotKey, float duration = 0.4f)
+    {
+        var slotOffsetSpec = new MoveByCommandSpecCharR
+        {
+            slotKey = slotKey,
+            target = CharacterRigTarget.CharSlot_Track,
+            useAbsolutePosition = true,
+            delta = new Vector2(0, 0),
+            duration = duration
+        };
+        
+        Collect(slotOffsetSpec);
+    }
+    
+    private void EnqueueSizeResetSpec(string roleKey, float duration = 0.4f)
+    {
+        var spec = new ScaleToCommandSpecCharR
+        {
+            slotKey = roleKey,
+            target = CharacterRigTarget.CharSlot_Scale,
+
+            toScale = new Vector2(1, 1),
+
+            duration = duration
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueRotateResetSpec(string roleKey, float duration = 0.4f)
+    {
+        var spec = new RotateToCommandSpecCharR
+        {
+            slotKey = roleKey,
+            target = CharacterRigTarget.CharSlot_SwayPivot,
+
+            toEuler = new Vector3(0f, 0f, 0f),
+
+            duration = duration
+        };
+
+        Collect(spec);
     }
 }

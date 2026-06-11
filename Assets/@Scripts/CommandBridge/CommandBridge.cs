@@ -122,9 +122,16 @@ public sealed partial class YarnCommandBridge
         
         runner.AddCommandHandler<string, string, string, string>("pose", EnqueueSetPortraitSpriteSpec);
         runner.AddCommandHandler<string, string, bool, bool>("place", EnqueueSetAnchorSpecs);
+        runner.AddCommandHandler<string, string, float>("place_to", EnqueuePlaceToSpec);
         runner.AddCommandHandler<string, string>("size", EnqueueSetOriginSizeSpec);
         
-        runner.AddCommandHandler<string, int, int, float>("place_to", EnqueueSetAnchorOffsetSpecs);
+        runner.AddCommandHandler<string, int, int, float>("position_by", EnqueueSetAnchorOffsetSpecs);
+        runner.AddCommandHandler<string, float, float>("size_by", EnqueueSizeBySpec);
+        runner.AddCommandHandler<string, float, float>("rotate_by", EnqueueRotateBySpec);
+        
+        runner.AddCommandHandler<string, float>("position_reset", EnqueueSetPlaceResetSpecs);
+        runner.AddCommandHandler<string, float>("size_reset", EnqueueSizeResetSpec);
+        runner.AddCommandHandler<string, float>("rotate_reset", EnqueueRotateResetSpec);
     }
 
     private void BindCharRigBasic(DialogueRunner runner)
@@ -143,7 +150,7 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler<string, float, float, float>("move_by", EnqueueMoveByCharSpec);
         runner.AddCommandHandler<string, float, float>("scale_to", EnqueueScaleToSpec);
         
-        runner.AddCommandHandler<string, int, float>("rotate_to", EnqueuePivotRotateToSpec);
+        runner.AddCommandHandler<string, int, float>("tilt_to", EnqueuePivotRotateToSpec);
         runner.AddCommandHandler<string, int, float>("flip_horizontal", EnqueueFlipHorizontalSpec);
         runner.AddCommandHandler<string, int, float>("flip_vertical", EnqueueFlipVerticalSpec);
     

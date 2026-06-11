@@ -17,6 +17,10 @@ public class RotateToCommandSpecCharR : CharacterRigCommandSpecBase
     [Header("Rotation (localEulerAngles)")]
     public Vector3 toEuler = Vector3.zero;
 
+    [Header("Mode")]
+    [Tooltip("false면 toEuler를 절대 localEulerAngles로 사용합니다. true면 현재 localEulerAngles에 toEuler를 더합니다.")]
+    public bool relativeToCurrent = false;
+
     [Header("From")]
     public bool overrideFromEuler = false;
     public Vector3 fromEuler = Vector3.zero;
@@ -85,7 +89,14 @@ public sealed class RotateToCommandCharR : CommandBase
             ResolveRefs(scope);
 
         if (!HasClaimedTarget)
+        {
             ClaimTarget();
+
+            if (_spec.overrideFromEuler)
+                _rect.localEulerAngles = _spec.fromEuler;
+
+            CaptureTweenEndpoints();
+        }
 
         CommitFinalState();
     }
@@ -101,16 +112,21 @@ public sealed class RotateToCommandCharR : CommandBase
     private void ClaimTarget()
     {
         _rect.DOKill(true);
-
-        _targetEuler = _spec.toEuler;
-
         HasClaimedTarget = true;
     }
 
     private void CaptureTweenEndpoints()
     {
         _startEuler = _rect.localEulerAngles;
-        _targetEuler = _spec.toEuler;
+        _targetEuler = ResolveTargetEuler(_startEuler);
+    }
+
+    private Vector3 ResolveTargetEuler(Vector3 startEuler)
+    {
+        if (!_spec.relativeToCurrent)
+            return _spec.toEuler;
+
+        return startEuler + _spec.toEuler;
     }
 
     private void CommitFinalState()

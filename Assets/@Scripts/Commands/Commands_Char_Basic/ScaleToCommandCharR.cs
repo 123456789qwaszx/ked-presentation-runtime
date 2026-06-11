@@ -17,6 +17,10 @@ public class ScaleToCommandSpecCharR : CharacterRigCommandSpecBase
     [Header("Scale (XY)")]
     public Vector2 toScale = Vector2.one;
 
+    [Header("Mode")]
+    [Tooltip("false면 toScale을 절대 scale로 사용합니다. true면 현재 scale에 toScale을 곱한 값을 목표로 사용합니다.")]
+    public bool relativeToCurrent = false;
+
     [Header("From")]
     public bool overrideFromScale = false;
     public Vector2 fromScale = Vector2.one;
@@ -86,7 +90,14 @@ public sealed class ScaleToCommandCharR : CommandBase
             ResolveRefs(scope);
 
         if (!HasClaimedTarget)
+        {
             ClaimTarget();
+
+            if (_spec.overrideFromScale)
+                ApplyScaleXY(_rect, _spec.fromScale);
+
+            CaptureTweenEndpoints();
+        }
 
         CommitFinalState();
     }
@@ -102,9 +113,6 @@ public sealed class ScaleToCommandCharR : CommandBase
     private void ClaimTarget()
     {
         _rect.DOKill(true);
-
-        _targetScale = _spec.toScale;
-
         HasClaimedTarget = true;
     }
 
@@ -113,11 +121,21 @@ public sealed class ScaleToCommandCharR : CommandBase
         Vector3 currentScale = _rect.localScale;
 
         _startScale = new Vector2(currentScale.x, currentScale.y);
-        _targetScale = _spec.toScale;
+        _targetScale = ResolveTargetScale(currentScale);
 
         _endScale = currentScale;
         _endScale.x = _targetScale.x;
         _endScale.y = _targetScale.y;
+    }
+
+    private Vector2 ResolveTargetScale(Vector3 currentScale)
+    {
+        if (!_spec.relativeToCurrent)
+            return _spec.toScale;
+
+        return new Vector2(
+            currentScale.x * _spec.toScale.x,
+            currentScale.y * _spec.toScale.y);
     }
 
     private void CommitFinalState()

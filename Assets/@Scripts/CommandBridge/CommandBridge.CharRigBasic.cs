@@ -99,6 +99,7 @@ public sealed partial class YarnCommandBridge
         var spec = new PivotRotateToCommandSpecCharR()
         {
             slotKey = roleKey,
+            target = CharacterRigTarget.CharacterPortrait_SwayPivot,
             degree = angle,
             duration = duration
         };

@@ -1062,36 +1062,34 @@ MonoBehaviour:
   previewRoot: {fileID: 3119065722377472987}
   focusTuningDb: {fileID: 11400000, guid: b77af4e295606b446ae4f74dad106f5f, type: 2}
   roleKey: Leafia
-  poseKey: 
-  autoResolveRoleKeyFromName: 1
   points:
   - enabled: 1
     label: Feet
     focusPreset: 0
     customFocusKey: 
     color: {r: 0.4, g: 0.8, b: 1, a: 0.9}
-    radius: 8
+    radius: 6
     finalOffset: {x: 0, y: 0}
   - enabled: 1
     label: Body
     focusPreset: 10
     customFocusKey: 
     color: {r: 0.4, g: 1, b: 0.4, a: 0.9}
-    radius: 10
+    radius: 6
     finalOffset: {x: 0, y: 0}
   - enabled: 1
     label: Bust
     focusPreset: 20
     customFocusKey: 
     color: {r: 1, g: 0.8, b: 0.25, a: 0.9}
-    radius: 11
+    radius: 6
     finalOffset: {x: 0, y: 0}
   - enabled: 1
     label: Face
     focusPreset: 30
     customFocusKey: 
     color: {r: 1, g: 0.35, b: 0.35, a: 0.95}
-    radius: 13
+    radius: 6
     finalOffset: {x: 0, y: 0}
   drawInGameView: 1
   hideInPlayMode: 0

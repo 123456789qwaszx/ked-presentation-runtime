@@ -12,8 +12,12 @@ public sealed class PivotRotateToCommandSpecCharR : CharacterRigCommandSpecBase
     public CharacterRigTarget target = CharacterRigTarget.CharacterPortrait_SwayPivot;
 
     [Header("Target Rotation")]
-    [Tooltip("목표 절대 Z 각도.")]
+    [Tooltip("목표 Z 각도. relativeToCurrent=false면 절대값, true면 현재 각도에 더할 값입니다.")]
     public float degree = 24f;
+
+    [Header("Mode")]
+    [Tooltip("false면 degree를 절대 Z 각도로 사용합니다. true면 현재 Z 각도에 degree를 더합니다.")]
+    public bool relativeToCurrent = false;
 
     [Header("Anticipation")]
     [Tooltip("시작 전에 반대 방향으로 살짝 당기는 양(도). 0이면 비활성.")]
@@ -184,7 +188,11 @@ public sealed class PivotRotateToCommandCharR : CommandBase
         _rect.DOKill(true);
 
         _startRotationZ = NormalizeAngle(_rect.localEulerAngles.z);
-        _finalRotationZ = ResolveNearestEquivalentAngle(_startRotationZ, _spec.degree);
+
+        if (_spec.relativeToCurrent)
+            _finalRotationZ = _startRotationZ + _spec.degree;
+        else
+            _finalRotationZ = ResolveNearestEquivalentAngle(_startRotationZ, _spec.degree);
 
         HasClaimedTarget = true;
     }
