@@ -103,7 +103,7 @@ public sealed partial class YarnCommandBridge
         var slotOffsetSpec = new MoveByCommandSpecCharR
         {
             slotKey = slotKey,
-            target = CharacterRigTarget.CharSlot_Anchor,
+            target = CharacterRigTarget.CharSlot_Track,
             delta = new Vector2(x, y),
             duration = duration
         };

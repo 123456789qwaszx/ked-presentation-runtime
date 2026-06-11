@@ -76,7 +76,7 @@ MonoBehaviour:
   - key: Mercurio
     defaultOffset: {x: 280, y: 80}
     offsets:
-      left: {x: 0, y: 0}
+      left: {x: 900, y: 0}
       center: {x: 0, y: 0}
       right: {x: 0, y: 0}
       duoLeft: {x: 0, y: 0}
@@ -85,6 +85,26 @@ MonoBehaviour:
       exp1: {x: 0, y: 0}
       exp2: {x: 0, y: 0}
     defaultScale: 1
+    scales:
+      normal: 0
+      small: 0
+      large: 0
+      far: 0
+      close: 0
+      exp1: 0
+      exp2: 0
+  - key: jeoseungsaja
+    defaultOffset: {x: -100, y: 380}
+    offsets:
+      left: {x: 0, y: 0}
+      center: {x: 0, y: 0}
+      right: {x: 0, y: 0}
+      duoLeft: {x: 0, y: 0}
+      duoRight: {x: 0, y: 0}
+      boxSide: {x: 0, y: 0}
+      exp1: {x: 0, y: 0}
+      exp2: {x: 0, y: 0}
+    defaultScale: 0.8
     scales:
       normal: 0
       small: 0

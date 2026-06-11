@@ -13,7 +13,7 @@
 
 <<slot c1>>
 <<slot c2>>
-<<slot jeoseungsaja>>
+<<slot c3>>
 <<slot c4>>
 
 
@@ -24,13 +24,13 @@
 <<pose c2 jangsanbeom a 4>>
 <<size c2 close>>
 
-<<cast jeoseungsaja jeoseungsaja center>>
+<<cast c3 Mercurio center>>
 //<<pose c3 jeoseungsaja a 7>>
 //<<size c3 small>>
 
 <<cast c4 serpentscholar>>
 <<pose c4 serpentscholar a 2>>
-<<place_offset c4 0 180>>
+<<place_to c4 0 180>>
 
 <<attach_to_bg c4 bg2>>
 ===
@@ -45,7 +45,7 @@ title: Story_YomaEP06_01
 분명 악귀를 내쫒아 낼거라고.
 
 <<fade_in c1>>
-<<place_offset c1 200 200 3>>
+<<place_to c1 200 200 3>>
 하지만 그날밤 나는 가위에 눌린채, 커다란 호랑이가 나오는 꿈을 꾸기 시작했다.
 
 
@@ -72,10 +72,10 @@ title: Story_YomaEP06_02
 
 <<beat Setup_YomaEP06_01>>
 
-<<fade_in jeoseungsaja>>
+<<fade_in c3>>
 학도운: 너 지금 뭘 키우고 있는거야?
 
-<<place jeoseungsaja left>>
+<<place c3 left>>
 //<<solo_shot c3 2>>
 소영: 키우다니 뭘?
 ..

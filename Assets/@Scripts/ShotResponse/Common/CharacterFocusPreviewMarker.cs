@@ -67,17 +67,8 @@ public sealed class CharacterFocusPreviewMarker : MonoBehaviour
     [SerializeField] private CharacterFocusTuningDBSO focusTuningDb;
 
     [Header("Tuning Key")]
-    [Tooltip("예: leafia. autoResolveRoleKeyFromName이 true이면 런타임에 오브젝트 이름에서 자동 추출됩니다.")]
+    [Tooltip("CharacterFocusTuningDBSO 조회에 사용할 캐릭터 키입니다. 런타임에서는 CastCharacterCommand가 characterKey를 주입합니다.")]
     [SerializeField] private string roleKey = "";
-
-    [Tooltip("예: pose_wide. 비워두면 roleKey만 사용합니다.")]
-    [SerializeField] private string poseKey = "";
-
-    [Tooltip(
-        "true이면 런타임 생성 시 오브젝트 이름의 '_FocusMarker' 앞 접두사를 roleKey로 자동 적용합니다.\n" +
-        "예) Albedo_FocusMarker → albedo / Leafia_FocusMarker → leafia\n" +
-        "false이면 Inspector에 입력된 roleKey를 그대로 사용합니다.")]
-    [SerializeField] private bool autoResolveRoleKeyFromName = true;
 
     [Header("Points")]
     [SerializeField] private List<Point> points = new List<Point>
@@ -130,12 +121,11 @@ public sealed class CharacterFocusPreviewMarker : MonoBehaviour
     /// </summary>
     private bool _isDirty = true;
 
-    /// <summary>roleKey + poseKey로 만든 tuning key 캐시.</summary>
+    /// <summary>roleKey로 만든 tuning key 캐시.</summary>
     private string _cachedTuningKey;
 
     /// <summary>마커 GameObject 이름 → RectTransform 맵.</summary>
-    private readonly Dictionary<string, RectTransform> _markerMap =
-        new Dictionary<string, RectTransform>(StringComparer.Ordinal);
+    private readonly Dictionary<string, RectTransform> _markerMap = new (StringComparer.Ordinal);
 
     // ── Editor-only cache ──────────────────────────────────────────
 #if UNITY_EDITOR
@@ -146,13 +136,6 @@ public sealed class CharacterFocusPreviewMarker : MonoBehaviour
     private GUIStyle _cachedLabelStyle;
 #endif
 
-    // ═══════════════════════════════════════════════════════════════
-    //  Constants
-    // ═══════════════════════════════════════════════════════════════
-
-    /// <summary>런타임 오브젝트 이름에서 roleKey를 추출할 때 기준이 되는 접미사.</summary>
-    private const string FocusMarkerSuffix = "_FocusMarker";
-
     /// <summary>생성되는 프리뷰 마커 GameObject 이름의 공통 토큰.</summary>
     private const string MarkerNameToken = "__FocusPoint_";
 
@@ -161,23 +144,6 @@ public sealed class CharacterFocusPreviewMarker : MonoBehaviour
     /// 반드시 동일해야 프리뷰가 실제 focus point와 일치한다. (framing response보다 위, response 중립 노드)
     /// </summary>
     private const string FocusBasisNodeName = "CharSlot_Scale";
-
-    // ═══════════════════════════════════════════════════════════════
-    //  Unity Messages
-    // ═══════════════════════════════════════════════════════════════
-
-    // private void Awake()
-    // {
-    //     // 런타임 생성 시 오브젝트 이름에서 roleKey를 자동으로 추출합니다.
-    //     // Awake는 OnEnable보다 먼저 호출되므로 이후 로직이 올바른 키를 사용합니다.
-    //     if (Application.isPlaying && autoResolveRoleKeyFromName)
-    //         TryResolveRoleKeyFromName();
-    // }
-    private void Start()
-    {
-        if (Application.isPlaying && autoResolveRoleKeyFromName)
-            TryResolveRoleKeyFromName();
-    }
 
     private void Reset()
     {
@@ -204,7 +170,7 @@ public sealed class CharacterFocusPreviewMarker : MonoBehaviour
 
     private void OnValidate()
     {
-        // 튜닝 키 캐시 무효화 (roleKey / poseKey가 바뀌었을 수 있음)
+        // 튜닝 키 캐시 무효화 (roleKey가 바뀌었을 수 있음)
         _cachedTuningKey = null;
 
         // GUIStyle 캐시 무효화 (drawLabels, color 등이 바뀌었을 수 있음)
@@ -261,52 +227,22 @@ public sealed class CharacterFocusPreviewMarker : MonoBehaviour
     // ═══════════════════════════════════════════════════════════════
 
     private void MarkDirty() => _isDirty = true;
-
-    // ═══════════════════════════════════════════════════════════════
-    //  Role Key Auto-Resolution
-    // ═══════════════════════════════════════════════════════════════
-
-    /// <summary>
-    /// 오브젝트 이름의 <c>_FocusMarker</c> 앞 접두사를 소문자로 변환해 <see cref="roleKey"/>에 적용합니다.<br/>
-    /// 예) <c>Albedo_FocusMarker</c> → <c>albedo</c><br/>
-    /// 예) <c>Leafia_FocusMarker</c> → <c>leafia</c><br/>
-    /// 이름에 접미사가 없으면 아무 것도 하지 않습니다.
-    /// </summary>
-    private void TryResolveRoleKeyFromName()
+    
+    public void SetRoleKey(string newRoleKey)
     {
-        string objName = gameObject.name;
+        newRoleKey = newRoleKey?.Trim();
 
-        int suffixIndex = objName.IndexOf(
-            FocusMarkerSuffix,
-            StringComparison.OrdinalIgnoreCase);
-
-        // 접미사가 없거나 맨 앞에 붙어있는 경우(접두사가 빈 문자열)는 무시
-        if (suffixIndex <= 0)
+        if (string.IsNullOrWhiteSpace(newRoleKey))
             return;
 
-        // string extracted = objName
-        //     .Substring(0, suffixIndex)
-        //     .ToLowerInvariant();
-        
-        string extracted = objName
-            .Substring(0, suffixIndex);
-
-        // 이미 같은 값이면 dirty / cache 무효화 생략
-        if (string.Equals(roleKey, extracted, StringComparison.Ordinal))
+        if (string.Equals(roleKey, newRoleKey, StringComparison.Ordinal))
             return;
 
-        roleKey          = extracted;
-        _cachedTuningKey = null; // tuning key 캐시 무효화
+        roleKey = newRoleKey;
+        _cachedTuningKey = null;
         MarkDirty();
-
-// #if UNITY_EDITOR
-//         Debug.Log(
-//             $"[CharacterFocusPreviewMarker] roleKey auto-resolved: \"{objName}\" → \"{roleKey}\"",
-//             this);
-// #endif
     }
-
-
+    
 
     /// <summary>
     /// null인 ref만 탐색합니다. 이미 할당된 ref는 건드리지 않습니다.
@@ -337,7 +273,7 @@ public sealed class CharacterFocusPreviewMarker : MonoBehaviour
     private string GetOrBuildTuningKey()
     {
         if (_cachedTuningKey == null)
-            _cachedTuningKey = CharacterFocusTuningResolver.BuildTuningKey(roleKey, poseKey);
+            _cachedTuningKey = (roleKey ?? "").Trim();
 
         return _cachedTuningKey;
     }
@@ -774,18 +710,4 @@ public sealed class CharacterFocusPreviewMarker : MonoBehaviour
 
         return null;
     }
-    
-    /// <summary>
-    /// 스포너에서 이름을 세팅한 직후 명시적으로 호출할 수 있습니다.
-    /// Start() 타이밍보다 늦게 이름이 결정되는 경우에 사용합니다.
-    /// </summary>
-    public void RefreshRoleKeyFromName()
-    {
-        if (autoResolveRoleKeyFromName)
-            TryResolveRoleKeyFromName();
-    }
-    
-    // var go = Instantiate(focusMarkerPrefab);
-    // go.name = "Albedo_FocusMarker";
-    // go.GetComponent<CharacterFocusPreviewMarker>().RefreshRoleKeyFromName();
 }

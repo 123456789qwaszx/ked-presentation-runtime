@@ -41,7 +41,7 @@ MonoBehaviour:
       handRight: {x: 0, y: 0}
     customPoints: []
   - key: jeoseungsaja
-    defaultOffset: {x: 0, y: 80}
+    defaultOffset: {x: 180, y: 0}
     offsets:
       feet: {x: 0, y: 0}
       body: {x: 0, y: 0}

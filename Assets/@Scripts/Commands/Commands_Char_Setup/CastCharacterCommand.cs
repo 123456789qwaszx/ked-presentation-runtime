@@ -50,5 +50,31 @@ public sealed class CastCharacterCommand : CommandBase
         string variantKey = _spec.variantKey;
 
         scope.CastRegistry.CastCharRig(slotKey, characterKey, variantKey);
+        
+        
+        ApplyFocusPreviewMarkerRoleKey(scope, slotKey, characterKey);
+    }
+    
+    private static void ApplyFocusPreviewMarkerRoleKey(
+        CommandRunScope scope,
+        string slotKey,
+        string characterKey)
+    {
+        CharacterRigRefs rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, slotKey);
+        RectTransform extensionsRoot = rigRefs.GetRect(CharacterRigTarget.Character_ExtensionsRoot);
+
+        CharacterFocusPreviewMarker[] markers =
+            extensionsRoot.GetComponentsInChildren<CharacterFocusPreviewMarker>(true);
+
+        if (markers == null || markers.Length == 0)
+            return;
+
+        for (int i = 0; i < markers.Length; i++)
+        {
+            if (markers[i] == null)
+                continue;
+
+            markers[i].SetRoleKey(characterKey);
+        }
     }
 }
