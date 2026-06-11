@@ -14,34 +14,22 @@ public sealed partial class YarnCommandBridge
         Collect(spec);
     }
 
-    private void EnqueueRegisterCharacterResponseBindingSpec(string targetKey)
+    private void EnqueueRegisterCharacterResponseBindingSpec0(string targetKey)
     {
         var spec = new RegisterCharacterResponseBindingCommandSpec
         {
             targetKey = targetKey,
-            responseProfile = PresentationResponseProfile.CharacterSlot
+            responseProfile = PresentationResponseProfile.CharacterSlot0
         };
 
         Collect(spec);
     }
-    
-    private void EnqueueRegisterCharacterResponseBindingSpec2(string targetKey)
+    private void EnqueueRegisterCharacterResponseBindingSpec1(string targetKey)
     {
         var spec = new RegisterCharacterResponseBindingCommandSpec
         {
             targetKey = targetKey,
-            responseProfile = PresentationResponseProfile.CharacterSlot2
-        };
-
-        Collect(spec);
-    }
-    
-    private void EnqueueRegisterCharacterResponseBindingSpec3(string targetKey)
-    {
-        var spec = new RegisterCharacterResponseBindingCommandSpec
-        {
-            targetKey = targetKey,
-            responseProfile = PresentationResponseProfile.CharacterSlot3
+            responseProfile = PresentationResponseProfile.CharacterSlot1
         };
 
         Collect(spec);

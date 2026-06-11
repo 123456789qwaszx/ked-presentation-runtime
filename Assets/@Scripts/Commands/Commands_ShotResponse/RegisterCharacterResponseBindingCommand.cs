@@ -17,7 +17,7 @@ public sealed class RegisterCharacterResponseBindingCommandSpec : CommandSpecBas
     public string targetKey;
 
     [Tooltip("CharacterRig가 shot intent에 반응하는 방식.")]
-    public PresentationResponseProfile responseProfile = PresentationResponseProfile.CharacterSlot;
+    public PresentationResponseProfile responseProfile = PresentationResponseProfile.CharacterSlot0;
 }
 
 public sealed class RegisterCharacterResponseBindingCommand : CommandBase

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 public sealed class PresentationResponseRig
 {
@@ -120,10 +121,25 @@ public sealed class PresentationResponseRig
                 binding.profile,
                 in binding.baseMeasure);
 
-        responseInRigSpace.anchoredPosition =
-            _coordinateMapper.ConvertPositionFromRigSpaceToTargetParentSpace(
-                responseInRigSpace.anchoredPosition,
+        // 핵심:
+        // Math가 돌려준 anchoredPosition = basePositionInRigSpace + offset (절대 rig-space 위치).
+        // 이 절대 위치를 다시 꽂으면(re-pin) 안 된다.
+        // 그러면 profile이 0이어도 base를 MeasureRect에서 떠서 world 경유로 PositionRect에
+        // 다시 꽂게 되고, 카메라 zoom 중 그 변환이 흔들려 Y가 떨린다.
+        //
+        // 대신 offset(= focusSpread + pan, profile=0이면 0)만 떼어내 벡터로 변환하고,
+        // 중립 anchoredPosition에 "더한다". offset=0이면 anchoredPosition은
+        // baseAnchoredPosition 그대로 → binding 안 한 것과 완전히 동일하게 카메라만 따라간다.
+        Vector2 offsetInRigSpace =
+            responseInRigSpace.anchoredPosition - binding.baseMeasure.basePositionInRigSpace;
+
+        Vector2 offsetInParentSpace =
+            _coordinateMapper.ConvertOffsetFromRigSpaceToTargetParentSpace(
+                offsetInRigSpace,
                 binding.target);
+
+        responseInRigSpace.anchoredPosition =
+            binding.baseMeasure.baseAnchoredPosition + offsetInParentSpace;
 
         return responseInRigSpace;
     }

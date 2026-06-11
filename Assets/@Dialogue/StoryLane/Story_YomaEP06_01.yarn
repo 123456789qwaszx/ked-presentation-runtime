@@ -12,10 +12,10 @@
 <<slot c3>>
 <<slot c4>>
 
-<<cast c1 Mercurio left>>
+<<cast c1 Leafia left>>
 <<char_dim c1 0.8>>
-<<cast c2 Mercurio right>>
-<<cast c3 Mercurio center>>
+<<cast c2 Willow right>>
+<<cast c3 Amber center>>
 ===
 
 title: Setup_YomaEP06_02
@@ -80,31 +80,49 @@ title: Story_YomaEP06_02
 //<<char_place c3 bust b2 0>>
 
 //<<shot_reset>>
-<<bind_response_char2 c1>>
-<<bind_response_char c2>> 
-//<<shot_reset>>
+<<bind_response_char1 c1>>
+<<bind_response_char1 c2>> 
+<<shot_reset>>
 
+<<char_visual c1 1 0 0.7>>
+<<char_visual c2 1 0 0.7>>
 //<<char_place c3 p2 ab2>>
 ????
-<<shot_zoom_focus c3 bust b2 0.2 3>>
+<<shot_zoom_focus c3 bust center 6 1.2>>
+//<<char_focus c3>>
+//<<scale_to c3 1.2 1.2>>
+//<<position_by c3 0 -180 1.2>>
 
 ?????
-//<<shot_zoom 1>> 
+<<shot_reset>>
 ?????d
 
-<<shot_track 200 0>>
+<<shot_zoom 10 2.2>> 
+Sasd
+<<shot_zoom_focus c3 face center 10 2.2>>
+
 ?????dd
-<<shot_track -400 0 2>>
+<<shot_track 200 0>>
 학도운: 너 지금 뭘 키우고 있는거야?
+
+<<shot_track -300 0 1>>
+
+??
+
+<<shot_zoom_focus c3 bust center 2 1.4>>
+??
+<<shot_reset>>
+????
 
 <<position_by c3 200 -700>>
 <<size_by c3 1.4>>
 <<rotate_by c3 3>>
 소영: 키우다니 뭘?
-
 <<place_to c3 left>>
+<<char_place c3 bust center>>
 ..
-<<size_reset c3>>
+<<position_by c3 500 0>>
+..
 
 ...
 <<size_by c3 1.4>>

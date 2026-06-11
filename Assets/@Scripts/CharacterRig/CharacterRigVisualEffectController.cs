@@ -22,7 +22,7 @@ public sealed class CharacterRigVisualEffectController : IDisposable
     private const float InnerRimWidth = 0.003f;
     private const float InnerRimSoftness = 0.8f;
 
-    private const float BlurSize = 0.001f;
+    private const float BlurSize = 0.003f;
 
     private static readonly int DimAmountId = Shader.PropertyToID("_DimAmount");
     private static readonly int DimBrightnessId = Shader.PropertyToID("_DimBrightness");

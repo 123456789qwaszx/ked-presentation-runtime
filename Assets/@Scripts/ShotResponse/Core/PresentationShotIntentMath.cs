@@ -3,7 +3,7 @@ using UnityEngine;
 public static class PresentationShotIntentMath
 {
     // Camera scale conversion used by the camera root.
-    private const float DefaultZoomToScaleFactor = 1f;
+    private const float DefaultZoomToScaleFactor = 0.05f;
 
     public static float EvaluateCameraScale(
         float zoom) 

@@ -256,10 +256,9 @@ public sealed partial class YarnCommandBridge
     private void BindShotResponse(DialogueRunner runner)
     {
         runner.AddCommandHandler<string>("shot_bind_bg_response", EnqueueRegisterBackgroundResponseBindingSpec);
-        runner.AddCommandHandler<string>("bind_response_char", EnqueueRegisterCharacterResponseBindingSpec);
-        runner.AddCommandHandler<string>("bind_response_char2", EnqueueRegisterCharacterResponseBindingSpec2);
-        runner.AddCommandHandler<string>("bind_response_char3", EnqueueRegisterCharacterResponseBindingSpec3);
-
+        runner.AddCommandHandler<string>("bind_response_char0", EnqueueRegisterCharacterResponseBindingSpec0);
+        runner.AddCommandHandler<string>("bind_response_char1", EnqueueRegisterCharacterResponseBindingSpec1);
+        
         runner.AddCommandHandler<string, string>("shot_unbind_bg_response", EnqueueRemoveBackgroundResponseBindingSpec);
         runner.AddCommandHandler<string, string>("shot_unbind_char_response", EnqueueRemoveCharacterResponseBindingSpec);
 

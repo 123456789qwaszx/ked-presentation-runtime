@@ -15,12 +15,12 @@ MonoBehaviour:
   entries:
   - preset: 0
     dim: 0
-    dimTintColor: {r: 0.45, g: 0.48, b: 0.55, a: 1}
-    outerRim: 0.4
-    innerRim: 0.09
+    dimTintColor: {r: 1, g: 1, b: 1, a: 1}
+    outerRim: 0.268
+    innerRim: 0.155
     outerRimColor: {r: 1, g: 1, b: 1, a: 1}
     innerRimColor: {r: 1, g: 0.96, b: 0.86, a: 1}
-    blur: 0
+    blur: 0.071
   - preset: 1
     dim: 0.45
     dimTintColor: {r: 0.45, g: 0.48, b: 0.55, a: 1}
