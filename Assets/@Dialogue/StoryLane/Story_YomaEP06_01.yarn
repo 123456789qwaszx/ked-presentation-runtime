@@ -1,0 +1,85 @@
+﻿title: Setup_YomaEP06_01
+---
+
+<<shot_reset>>
+<<screen_vignette_clear>>
+
+<<bg_spawn bg1 ep12_01>>
+<<bg_size bg1 1.5>>
+
+<<bg_spawn bg2 bgslot_01 02>>
+<<bg_place bg2 -40 200>>
+
+
+<<slot c1>>
+<<slot c2>>
+<<slot jeoseungsaja>>
+<<slot c4>>
+
+
+<<cast c1 soyeong center>>
+<<pose c1 soyeong a 4>>
+
+<<cast c2 jangsanbeom duoright>>
+<<pose c2 jangsanbeom a 4>>
+<<size c2 close>>
+
+<<cast jeoseungsaja jeoseungsaja center>>
+//<<pose c3 jeoseungsaja a 7>>
+//<<size c3 small>>
+
+<<cast c4 serpentscholar>>
+<<pose c4 serpentscholar a 2>>
+<<place_offset c4 0 180>>
+
+<<attach_to_bg c4 bg2>>
+===
+ 
+
+title: Story_YomaEP06_01
+---
+
+<<beat Setup_YomaEP06_01>>
+예전의 일이다.
+나는 크게 앓아 감기에 누워있었고, 그것을 보던 할아버지가 커다란 호랑이 그림을 사오셨다.
+분명 악귀를 내쫒아 낼거라고.
+
+<<fade_in c1>>
+<<place_offset c1 200 200 3>>
+하지만 그날밤 나는 가위에 눌린채, 커다란 호랑이가 나오는 꿈을 꾸기 시작했다.
+
+
+<<fade_in c2>>
+<<face c2 6>>
+<<move_by c2 -300 0 4>>
+첫날에는 현관문 밖을 어슬렁 거렸고,
+둘쨋날 밤에는 현관문을 너머 집앞을 돌아다니기 시작했으며,
+세번째 날에는 내가 있는 방문 앞까지도 들어왔다.
+
+네번째 날,
+나는 초췌한 모습으로, 할아버지에게 말을 했고, 할아버지는 내 말을 듣고는 얼굴이 새빨개진채 걸린 그림을 떼어내, 그림을 판 화가에게로 돌아갔다.
+
+만약 그 날, 호랑이가 내 방으로 들어왔다면, 정말 상상도 하기 힘든 일이 일어났을거야.
+그렇지?
+...
+산범아.
+
+===
+
+
+title: Story_YomaEP06_02
+---
+
+<<beat Setup_YomaEP06_01>>
+
+<<fade_in jeoseungsaja>>
+학도운: 너 지금 뭘 키우고 있는거야?
+
+<<place jeoseungsaja left>>
+//<<solo_shot c3 2>>
+소영: 키우다니 뭘?
+..
+...
+....
+
+===

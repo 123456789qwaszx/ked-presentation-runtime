@@ -100,14 +100,10 @@ public static class CharAnchorPlacementResolver
         Vector2 commandOffset)
     {
         // 1) Find the parent RectTransform.
-        RectTransform parentRect = null;
-        if (anchorRect != null)
-            parentRect = anchorRect.parent as RectTransform;
+        RectTransform parentRect = anchorRect.parent as RectTransform;
 
         // 2) Read the parent width in pixels.
-        float parentWidth = 0f;
-        if (parentRect != null)
-            parentWidth = parentRect.rect.width;
+        float parentWidth = parentRect.rect.width;
 
         // 3) Compute base anchor X position from parent width and preset.
         // Y starts at 0 and is adjusted by tuning/command offsets.

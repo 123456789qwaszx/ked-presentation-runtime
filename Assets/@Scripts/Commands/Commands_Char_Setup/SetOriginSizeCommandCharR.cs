@@ -21,10 +21,6 @@ public sealed class SetOriginSizeCommandSpecCharR : CharacterRigCommandSpecBase
     [Header("Scale Preset")]
     public CharScalePreset preset = CharScalePreset.Normal;
 
-    [Tooltip("선택: 같은 캐릭터라도 포즈/의상에 따라 크기 보정을 다르게 하고 싶을 때.\n" +
-             "예: roleKey=seina, poseKey=outfit_dressWide => DB key 'seina:outfit_dressWide'")]
-    public string poseKey = "";
-
     [Header("Command Multiplier")]
     [Tooltip("최종 스케일에 곱해지는 커맨드 단위 배율. 1이면 그대로.")]
     public float multiplier = 1f;
@@ -49,8 +45,8 @@ public sealed class SetOriginSizeCommandSpecCharR : CharacterRigCommandSpecBase
 public sealed class SetOriginSizeCommandCharR : CommandBase
 {
     private readonly SetOriginSizeCommandSpecCharR _spec;
-    private readonly  CharStageTuningSO _globalTuning;
-    private readonly  RoleAnchorTuningDBSO _roleTuningDb;
+    private readonly CharStageTuningSO _globalTuning;
+    private readonly RoleAnchorTuningDBSO _roleTuningDb;
 
     private RectTransform _rect;
     private bool _resolveAttempted;
@@ -70,7 +66,7 @@ public sealed class SetOriginSizeCommandCharR : CommandBase
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        Apply();
+        Apply(scope);
         yield break;
     }
 
@@ -79,10 +75,10 @@ public sealed class SetOriginSizeCommandCharR : CommandBase
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        Apply();
+        Apply(scope);
     }
     
-    private void Apply()
+    private void Apply(CommandRunScope scope)
     {
         if (_spec.overrideScale)
         {
@@ -90,12 +86,13 @@ public sealed class SetOriginSizeCommandCharR : CommandBase
             return;
         }
 
+        string tuningKey = CharacterRigTargetResolver.ResolveCharacterKeyFromTargetKey(scope, _spec.slotKey);
+
         float scale = CharScaleResolver.ResolveScale(
             _spec.preset,
             _globalTuning,
             _roleTuningDb,
-            _spec.slotKey,
-            _spec.poseKey,
+            tuningKey,
             _spec.multiplier);
 
         if (_spec.uniformScale)
@@ -106,17 +103,17 @@ public sealed class SetOriginSizeCommandCharR : CommandBase
 
         _rect.localScale = new Vector3(
             scale,
-            scale * _spec.yMultiplier,
-            scale * _spec.zMultiplier);
+            scale * SafeMultiplier(_spec.yMultiplier),
+            scale * SafeMultiplier(_spec.zMultiplier));
     }
+
+    private static float SafeMultiplier(float value) => value == 0f ? 1f : value;
 
     private void ResolveRefs(CommandRunScope scope)
     {
-        _resolveAttempted = true;
-
-        CharacterRigRefs rigRefs =
-            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
-        
+        CharacterRigRefs rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
         _rect = rigRefs.GetRect(_spec.target);
+        
+        _resolveAttempted = true;
     }
 }

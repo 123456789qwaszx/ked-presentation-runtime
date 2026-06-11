@@ -72,17 +72,14 @@ public static class CharScaleResolver
         CharStageTuningSO stageTuning,
         RoleAnchorTuningDBSO roleTuningDb,
         string roleKey,
-        string poseKey,
         float commandMultiplier)
     {
-        string tuneKey = BuildTuneKey(roleKey, poseKey);
-
         float scale = 1f;
 
         RoleAnchorTuningDBSO.Entry roleEntry = null;
 
         if (roleTuningDb != null)
-            roleTuningDb.TryGet(tuneKey, out roleEntry);
+            roleTuningDb.TryGet(roleKey, out roleEntry);
 
         if (roleEntry != null)
             scale *= Mathf.Max(0.0001f, roleEntry.defaultScale);
@@ -97,16 +94,5 @@ public static class CharScaleResolver
             scale *= commandMultiplier;
 
         return scale;
-    }
-
-    private static string BuildTuneKey(string roleKey, string poseKey)
-    {
-        roleKey = roleKey ?? "";
-        poseKey = poseKey ?? "";
-
-        if (string.IsNullOrWhiteSpace(poseKey))
-            return roleKey.Trim();
-
-        return $"{roleKey.Trim()}:{poseKey.Trim()}";
     }
 }

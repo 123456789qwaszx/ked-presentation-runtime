@@ -40,3 +40,13 @@ MonoBehaviour:
       handLeft: {x: 0, y: 0}
       handRight: {x: 0, y: 0}
     customPoints: []
+  - key: jeoseungsaja
+    defaultOffset: {x: 0, y: 80}
+    offsets:
+      feet: {x: 0, y: 0}
+      body: {x: 0, y: 0}
+      bust: {x: 0, y: 0}
+      face: {x: 0, y: 0}
+      handLeft: {x: 0, y: 0}
+      handRight: {x: 0, y: 0}
+    customPoints: []

@@ -2378,6 +2378,496 @@ MonoBehaviour:
     emotionKey: 25
     sprite: {fileID: 21300000, guid: fa016e6dd45713d4fa93b7db79de3c7c, type: 3}
     assetPath: Assets/Art/Portraits/Willow/Willow_a_25.png
+  - characterId: dokkaebi
+    variantKey: dokkaebi_a
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: 4af231c057780c94ea7bc614c5cc1909, type: 3}
+    assetPath: Assets/Art/Portraits/dokkaebi/dokkaebi_a_1.png
+  - characterId: dokkaebi
+    variantKey: dokkaebi_a
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: 6a82af68fd5ce154f8ce832ada742349, type: 3}
+    assetPath: Assets/Art/Portraits/dokkaebi/dokkaebi_a_2.png
+  - characterId: dokkaebi
+    variantKey: dokkaebi_a
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: 0648d91df89a2c841945ba834f8db86b, type: 3}
+    assetPath: Assets/Art/Portraits/dokkaebi/dokkaebi_a_3.png
+  - characterId: dokkaebi
+    variantKey: dokkaebi_a
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: 1839a3d78716902498b93711687440b2, type: 3}
+    assetPath: Assets/Art/Portraits/dokkaebi/dokkaebi_a_4.png
+  - characterId: dokkaebi
+    variantKey: dokkaebi_a
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: 94f7b0eaf97839242b639a7748f10cf5, type: 3}
+    assetPath: Assets/Art/Portraits/dokkaebi/dokkaebi_a_5.png
+  - characterId: dokkaebi
+    variantKey: dokkaebi_a
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: d9b90cb70c6c345479f50becf0099cda, type: 3}
+    assetPath: Assets/Art/Portraits/dokkaebi/dokkaebi_a_6.png
+  - characterId: dokkaebi
+    variantKey: dokkaebi_a
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: abfc4527f1d92d94085dc8344d0cc22d, type: 3}
+    assetPath: Assets/Art/Portraits/dokkaebi/dokkaebi_a_7.png
+  - characterId: dokkaebi
+    variantKey: dokkaebi_a
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: a9cc56c80708cdd47970e5cd21f85611, type: 3}
+    assetPath: Assets/Art/Portraits/dokkaebi/dokkaebi_a_8.png
+  - characterId: dokkaebi
+    variantKey: dokkaebi_a
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: ee94346231d0ca14abdf12b9656ab137, type: 3}
+    assetPath: Assets/Art/Portraits/dokkaebi/dokkaebi_a_9.png
+  - characterId: dokkaebi
+    variantKey: dokkaebi_a
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: e89b281d2f6891348aeba9c78b1e82b6, type: 3}
+    assetPath: Assets/Art/Portraits/dokkaebi/dokkaebi_a_10.png
+  - characterId: dokkaebi
+    variantKey: dokkaebi_a
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: 4fce6f4281300854a9c53b24abda35c4, type: 3}
+    assetPath: Assets/Art/Portraits/dokkaebi/dokkaebi_a_11.png
+  - characterId: dokkaebi
+    variantKey: dokkaebi_a
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: ddb864f365577494b802b2a5ab6c3ac7, type: 3}
+    assetPath: Assets/Art/Portraits/dokkaebi/dokkaebi_a_12.png
+  - characterId: dokkaebi
+    variantKey: dokkaebi_b
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: 9012c46a7514d94429be98024ceeac94, type: 3}
+    assetPath: Assets/Art/Portraits/dokkaebi/dokkaebi_b_1.png
+  - characterId: dokkaebi
+    variantKey: dokkaebi_b
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: db3063201b3d3d7438a18c6380c52841, type: 3}
+    assetPath: Assets/Art/Portraits/dokkaebi/dokkaebi_b_2.png
+  - characterId: dokkaebi
+    variantKey: dokkaebi_b
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: 86ed4b543431c994694d9d1c6d614c35, type: 3}
+    assetPath: Assets/Art/Portraits/dokkaebi/dokkaebi_b_3.png
+  - characterId: dokkaebi
+    variantKey: dokkaebi_b
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: acc2e26329b58934db0935d9a4dc8099, type: 3}
+    assetPath: Assets/Art/Portraits/dokkaebi/dokkaebi_b_4.png
+  - characterId: dokkaebi
+    variantKey: dokkaebi_b
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: e6f06e2d379f27142ab7ba55c447b587, type: 3}
+    assetPath: Assets/Art/Portraits/dokkaebi/dokkaebi_b_5.png
+  - characterId: dokkaebi
+    variantKey: dokkaebi_b
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: c2d7e717e0aec0f4e9d78eebdef074bb, type: 3}
+    assetPath: Assets/Art/Portraits/dokkaebi/dokkaebi_b_6.png
+  - characterId: dokkaebi
+    variantKey: dokkaebi_b
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: 125e4bbb29e557c44aefa6326aaa4310, type: 3}
+    assetPath: Assets/Art/Portraits/dokkaebi/dokkaebi_b_7.png
+  - characterId: dokkaebi
+    variantKey: dokkaebi_b
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: e5f674ca9a4229042a80555f0f2cfb45, type: 3}
+    assetPath: Assets/Art/Portraits/dokkaebi/dokkaebi_b_8.png
+  - characterId: dokkaebi
+    variantKey: dokkaebi_b
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: 4e9eeada1c499684bacd25f44bed97b4, type: 3}
+    assetPath: Assets/Art/Portraits/dokkaebi/dokkaebi_b_9.png
+  - characterId: dokkaebi
+    variantKey: dokkaebi_b
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: fca67528d694acf49a04334622457522, type: 3}
+    assetPath: Assets/Art/Portraits/dokkaebi/dokkaebi_b_10.png
+  - characterId: hyeongsuk
+    variantKey: hyeongsuk_a
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: ece28af1fb3105c4495bf128f52ffa95, type: 3}
+    assetPath: Assets/Art/Portraits/hyeongsuk/hyeongsuk_a_1.png
+  - characterId: hyeongsuk
+    variantKey: hyeongsuk_a
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: 8bcc75d3736fccc4781d18e4492ca7b0, type: 3}
+    assetPath: Assets/Art/Portraits/hyeongsuk/hyeongsuk_a_2.png
+  - characterId: hyeongsuk
+    variantKey: hyeongsuk_a
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: ba76f8cf1cd107b4fbdba6991ff64025, type: 3}
+    assetPath: Assets/Art/Portraits/hyeongsuk/hyeongsuk_a_3.png
+  - characterId: hyeongsuk
+    variantKey: hyeongsuk_a
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: d3720a2b0aaffb0419ac067caa199408, type: 3}
+    assetPath: Assets/Art/Portraits/hyeongsuk/hyeongsuk_a_4.png
+  - characterId: hyeongsuk
+    variantKey: hyeongsuk_a
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: ccd2e5d667bde7846a0faedec57e9aba, type: 3}
+    assetPath: Assets/Art/Portraits/hyeongsuk/hyeongsuk_a_5.png
+  - characterId: hyeongsuk
+    variantKey: hyeongsuk_a
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: af4f77418316d9d43993d0b3d42ee874, type: 3}
+    assetPath: Assets/Art/Portraits/hyeongsuk/hyeongsuk_a_6.png
+  - characterId: hyeongsuk
+    variantKey: hyeongsuk_a
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: 1956092faab8a0f408059c79d6e629be, type: 3}
+    assetPath: Assets/Art/Portraits/hyeongsuk/hyeongsuk_a_7.png
+  - characterId: hyeongsuk
+    variantKey: hyeongsuk_a
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: 57d8a280b7eb8fd4e981d6d7d8181be2, type: 3}
+    assetPath: Assets/Art/Portraits/hyeongsuk/hyeongsuk_a_8.png
+  - characterId: hyeongsuk
+    variantKey: hyeongsuk_b
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: c44b1f951a18a64458ae61ad3c92a685, type: 3}
+    assetPath: Assets/Art/Portraits/hyeongsuk/hyeongsuk_b_1.png
+  - characterId: hyeongsuk
+    variantKey: hyeongsuk_b
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: 03370ee20bf65c74e8ad2478ea411112, type: 3}
+    assetPath: Assets/Art/Portraits/hyeongsuk/hyeongsuk_b_2.png
+  - characterId: hyeongsuk
+    variantKey: hyeongsuk_b
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: 115a9691e86a6534e8a209f2ec2fc4d9, type: 3}
+    assetPath: Assets/Art/Portraits/hyeongsuk/hyeongsuk_b_3.png
+  - characterId: hyeongsuk
+    variantKey: hyeongsuk_b
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: a47f28e2f3600d44d9856dfd6c3a2610, type: 3}
+    assetPath: Assets/Art/Portraits/hyeongsuk/hyeongsuk_b_4.png
+  - characterId: hyeongsuk
+    variantKey: hyeongsuk_b
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: 563a3e253d93c7d4ca6b56449ac08307, type: 3}
+    assetPath: Assets/Art/Portraits/hyeongsuk/hyeongsuk_b_5.png
+  - characterId: hyeongsuk
+    variantKey: hyeongsuk_b
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: f53ddb28534ca3a4cb5e92ccc128b232, type: 3}
+    assetPath: Assets/Art/Portraits/hyeongsuk/hyeongsuk_b_6.png
+  - characterId: hyeongsuk
+    variantKey: hyeongsuk_b
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: c9ca5463bf955634fb4eb77d2a397091, type: 3}
+    assetPath: Assets/Art/Portraits/hyeongsuk/hyeongsuk_b_7.png
+  - characterId: hyeongsuk
+    variantKey: hyeongsuk_b
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: f3c5629c403a3fd49a70c9770a222b30, type: 3}
+    assetPath: Assets/Art/Portraits/hyeongsuk/hyeongsuk_b_8.png
+  - characterId: jangsanbeom
+    variantKey: jangsanbeom_a
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: 34f8dcbb78fbbdf40b8313d69d52a5aa, type: 3}
+    assetPath: Assets/Art/Portraits/jangsanbeom/jangsanbeom_a_1.png
+  - characterId: jangsanbeom
+    variantKey: jangsanbeom_a
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: 15cb50a7ad8a46044a28d913a0184dbd, type: 3}
+    assetPath: Assets/Art/Portraits/jangsanbeom/jangsanbeom_a_2.png
+  - characterId: jangsanbeom
+    variantKey: jangsanbeom_a
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: 3441a2d2d88741a42b61fdb96a051ab1, type: 3}
+    assetPath: Assets/Art/Portraits/jangsanbeom/jangsanbeom_a_3.png
+  - characterId: jangsanbeom
+    variantKey: jangsanbeom_a
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: 1b422bfc859114c419cdbfe16a37bf5f, type: 3}
+    assetPath: Assets/Art/Portraits/jangsanbeom/jangsanbeom_a_4.png
+  - characterId: jangsanbeom
+    variantKey: jangsanbeom_a
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: eb8df8f837de24447810cfc1dd4ba9cf, type: 3}
+    assetPath: Assets/Art/Portraits/jangsanbeom/jangsanbeom_a_5.png
+  - characterId: jangsanbeom
+    variantKey: jangsanbeom_a
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: 9d3bed76ca8ece8468f98521e7fe52bb, type: 3}
+    assetPath: Assets/Art/Portraits/jangsanbeom/jangsanbeom_a_6.png
+  - characterId: jangsanbeom
+    variantKey: jangsanbeom_a
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: e89426789a2e9684dbe0df64fa416f8b, type: 3}
+    assetPath: Assets/Art/Portraits/jangsanbeom/jangsanbeom_a_7.png
+  - characterId: jangsanbeom
+    variantKey: jangsanbeom_a
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: a1d9e417a6bac0d41ac49901f2fac12f, type: 3}
+    assetPath: Assets/Art/Portraits/jangsanbeom/jangsanbeom_a_8.png
+  - characterId: jangsanbeom
+    variantKey: jangsanbeom_a
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: 11fdcc1645e0c1f4680bae4e40788f12, type: 3}
+    assetPath: Assets/Art/Portraits/jangsanbeom/jangsanbeom_a_9.png
+  - characterId: jangsanbeom
+    variantKey: jangsanbeom_a
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: 45afba03e87c74a4fbef43f17789a7c1, type: 3}
+    assetPath: Assets/Art/Portraits/jangsanbeom/jangsanbeom_a_10.png
+  - characterId: jangsanbeom
+    variantKey: jangsanbeom_a
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: 2fb5544b8622bb147b05d61c6778abb0, type: 3}
+    assetPath: Assets/Art/Portraits/jangsanbeom/jangsanbeom_a_11.png
+  - characterId: jangsanbeom
+    variantKey: jangsanbeom_a
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: e9cdfb0415a779440b1821fa7b16b106, type: 3}
+    assetPath: Assets/Art/Portraits/jangsanbeom/jangsanbeom_a_12.png
+  - characterId: jangsanbeom
+    variantKey: jangsanbeom_a
+    emotionKey: 13
+    sprite: {fileID: 21300000, guid: 6ded48a73cc29f041acd50b22eccf86e, type: 3}
+    assetPath: Assets/Art/Portraits/jangsanbeom/jangsanbeom_a_13.png
+  - characterId: jangsanbeom
+    variantKey: jangsanbeom_a
+    emotionKey: 14
+    sprite: {fileID: 21300000, guid: 01403d33ca80a314b8e196efa6d76c72, type: 3}
+    assetPath: Assets/Art/Portraits/jangsanbeom/jangsanbeom_a_14.png
+  - characterId: jangsanbeom
+    variantKey: jangsanbeom_a
+    emotionKey: 15
+    sprite: {fileID: 21300000, guid: 92ac6bde955c6804f8bb80a1e4dd6231, type: 3}
+    assetPath: Assets/Art/Portraits/jangsanbeom/jangsanbeom_a_15.png
+  - characterId: jangsanbeom
+    variantKey: jangsanbeom_b
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: 60701db7532e0434588dbe2ac3213eb9, type: 3}
+    assetPath: Assets/Art/Portraits/jangsanbeom/jangsanbeom_b_1.png
+  - characterId: jangsanbeom
+    variantKey: jangsanbeom_b
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: 75f4a764a19712d448fe8a36ce2de6a9, type: 3}
+    assetPath: Assets/Art/Portraits/jangsanbeom/jangsanbeom_b_2.png
+  - characterId: jangsanbeom
+    variantKey: jangsanbeom_b
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: 95532603977518043beed46acdb629b0, type: 3}
+    assetPath: Assets/Art/Portraits/jangsanbeom/jangsanbeom_b_3.png
+  - characterId: jangsanbeom
+    variantKey: jangsanbeom_b
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: 3e3fd2f5de4ebf6448cef61f06f2e3a5, type: 3}
+    assetPath: Assets/Art/Portraits/jangsanbeom/jangsanbeom_b_4.png
+  - characterId: jangsanbeom
+    variantKey: jangsanbeom_b
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: e461878fe0957544bba65f8cac1c0b38, type: 3}
+    assetPath: Assets/Art/Portraits/jangsanbeom/jangsanbeom_b_5.png
+  - characterId: jangsanbeom
+    variantKey: jangsanbeom_b
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: d8a8f714b855c0b40be41d57a35e6f23, type: 3}
+    assetPath: Assets/Art/Portraits/jangsanbeom/jangsanbeom_b_6.png
+  - characterId: jangsanbeom
+    variantKey: jangsanbeom_b
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: d877420109179fd419495391dc26735f, type: 3}
+    assetPath: Assets/Art/Portraits/jangsanbeom/jangsanbeom_b_7.png
+  - characterId: jangsanbeom
+    variantKey: jangsanbeom_b
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: ff1c4c365da15654fb127d4f0402dc5a, type: 3}
+    assetPath: Assets/Art/Portraits/jangsanbeom/jangsanbeom_b_8.png
+  - characterId: jangsanbeom
+    variantKey: jangsanbeom_b
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: bd4cacbaf023b8548a00c252f312053d, type: 3}
+    assetPath: Assets/Art/Portraits/jangsanbeom/jangsanbeom_b_9.png
+  - characterId: jangsanbeom
+    variantKey: jangsanbeom_b
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: d06f2eba902a5d04aa38a2524a53b41c, type: 3}
+    assetPath: Assets/Art/Portraits/jangsanbeom/jangsanbeom_b_10.png
+  - characterId: jangsanbeom
+    variantKey: jangsanbeom_b
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: 19d322b89b2129f4caec1706d45747f4, type: 3}
+    assetPath: Assets/Art/Portraits/jangsanbeom/jangsanbeom_b_11.png
+  - characterId: jangsanbeom
+    variantKey: jangsanbeom_b
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: c92ae38c0b8919d4d9f679808d787c1c, type: 3}
+    assetPath: Assets/Art/Portraits/jangsanbeom/jangsanbeom_b_12.png
+  - characterId: jangsanbeom
+    variantKey: jangsanbeom_b
+    emotionKey: 13
+    sprite: {fileID: 21300000, guid: 6358eb5f510711b4a889e4ee40dd85e3, type: 3}
+    assetPath: Assets/Art/Portraits/jangsanbeom/jangsanbeom_b_13.png
+  - characterId: jangsanbeom
+    variantKey: jangsanbeom_b
+    emotionKey: 14
+    sprite: {fileID: 21300000, guid: 6694dd37af42304479392152138fad09, type: 3}
+    assetPath: Assets/Art/Portraits/jangsanbeom/jangsanbeom_b_14.png
+  - characterId: jangsanbeom
+    variantKey: jangsanbeom_b
+    emotionKey: 15
+    sprite: {fileID: 21300000, guid: 767828df13779de489602111f78257b4, type: 3}
+    assetPath: Assets/Art/Portraits/jangsanbeom/jangsanbeom_b_15.png
+  - characterId: jangsanbeom
+    variantKey: jangsanbeom_c
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: cf8feed6a1268d740a45fc7c93db2ff5, type: 3}
+    assetPath: Assets/Art/Portraits/jangsanbeom/jangsanbeom_c_1.png
+  - characterId: jeoseungsaja
+    variantKey: jeoseungsaja_a
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: 10a26a80c52ad2646b96c9fd4dd408f9, type: 3}
+    assetPath: Assets/Art/Portraits/jeoseungsaja/jeoseungsaja_a_1.png
+  - characterId: jeoseungsaja
+    variantKey: jeoseungsaja_a
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: 64cb9cf13a0915949ae89437fe7f093d, type: 3}
+    assetPath: Assets/Art/Portraits/jeoseungsaja/jeoseungsaja_a_2.png
+  - characterId: jeoseungsaja
+    variantKey: jeoseungsaja_a
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: b2611974d6cb7d241a7a19cbc251fb2b, type: 3}
+    assetPath: Assets/Art/Portraits/jeoseungsaja/jeoseungsaja_a_3.png
+  - characterId: jeoseungsaja
+    variantKey: jeoseungsaja_a
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: 7b971c59b86a46e448575f8104503267, type: 3}
+    assetPath: Assets/Art/Portraits/jeoseungsaja/jeoseungsaja_a_4.png
+  - characterId: jeoseungsaja
+    variantKey: jeoseungsaja_a
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: 98549798388ee004993433d078a9e3eb, type: 3}
+    assetPath: Assets/Art/Portraits/jeoseungsaja/jeoseungsaja_a_5.png
+  - characterId: jeoseungsaja
+    variantKey: jeoseungsaja_a
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: 19fccfcdb3d311e42886d64b3463ca92, type: 3}
+    assetPath: Assets/Art/Portraits/jeoseungsaja/jeoseungsaja_a_6.png
+  - characterId: jeoseungsaja
+    variantKey: jeoseungsaja_a
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: 004363d67bedcfb41943d4427b4d37d2, type: 3}
+    assetPath: Assets/Art/Portraits/jeoseungsaja/jeoseungsaja_a_7.png
+  - characterId: jeoseungsaja
+    variantKey: jeoseungsaja_a
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: 0da7419e9e4094446b774c5da1d9db11, type: 3}
+    assetPath: Assets/Art/Portraits/jeoseungsaja/jeoseungsaja_a_8.png
+  - characterId: jeoseungsaja
+    variantKey: jeoseungsaja_a
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: b7ca3d0fe4e87fa4d81b2725fb5a637d, type: 3}
+    assetPath: Assets/Art/Portraits/jeoseungsaja/jeoseungsaja_a_9.png
+  - characterId: jeoseungsaja
+    variantKey: jeoseungsaja_a
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: 9e834513d43313747b1d54f8f12dcc70, type: 3}
+    assetPath: Assets/Art/Portraits/jeoseungsaja/jeoseungsaja_a_10.png
+  - characterId: jeoseungsaja
+    variantKey: jeoseungsaja_a
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: 397b8be8ab0d0ba41b75116b0c3022fb, type: 3}
+    assetPath: Assets/Art/Portraits/jeoseungsaja/jeoseungsaja_a_11.png
+  - characterId: jeoseungsaja
+    variantKey: jeoseungsaja_a
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: 4431b09b3aab64b4890a4ef3a50373e4, type: 3}
+    assetPath: Assets/Art/Portraits/jeoseungsaja/jeoseungsaja_a_12.png
+  - characterId: jeoseungsaja
+    variantKey: jeoseungsaja_a
+    emotionKey: 13
+    sprite: {fileID: 21300000, guid: bb6cb32dc8fb53f4d988d367d73da1a6, type: 3}
+    assetPath: Assets/Art/Portraits/jeoseungsaja/jeoseungsaja_a_13.png
+  - characterId: jeoseungsaja
+    variantKey: jeoseungsaja_a
+    emotionKey: 14
+    sprite: {fileID: 21300000, guid: 2ea7e5a6da2745543b9c1ed763627209, type: 3}
+    assetPath: Assets/Art/Portraits/jeoseungsaja/jeoseungsaja_a_14.png
+  - characterId: jeoseungsaja
+    variantKey: jeoseungsaja_b
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: 1776ed97473e926449a16f9523956cc5, type: 3}
+    assetPath: Assets/Art/Portraits/jeoseungsaja/jeoseungsaja_b_1.png
+  - characterId: jeoseungsaja
+    variantKey: jeoseungsaja_b
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: 48876016558630e4498a2858a35cf446, type: 3}
+    assetPath: Assets/Art/Portraits/jeoseungsaja/jeoseungsaja_b_2.png
+  - characterId: jeoseungsaja
+    variantKey: jeoseungsaja_b
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: fc49fd24293b89a4c88f2596bd983838, type: 3}
+    assetPath: Assets/Art/Portraits/jeoseungsaja/jeoseungsaja_b_3.png
+  - characterId: jeoseungsaja
+    variantKey: jeoseungsaja_b
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: eb1d545d6cc587e48918f75876851a35, type: 3}
+    assetPath: Assets/Art/Portraits/jeoseungsaja/jeoseungsaja_b_4.png
+  - characterId: jeoseungsaja
+    variantKey: jeoseungsaja_b
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: cb417d9ced1921b4a839f7b36f555946, type: 3}
+    assetPath: Assets/Art/Portraits/jeoseungsaja/jeoseungsaja_b_5.png
+  - characterId: jeoseungsaja
+    variantKey: jeoseungsaja_b
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: d434ac170201f234193f48fe3a4777a1, type: 3}
+    assetPath: Assets/Art/Portraits/jeoseungsaja/jeoseungsaja_b_6.png
+  - characterId: jeoseungsaja
+    variantKey: jeoseungsaja_b
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: b6a077b90eb5c3041a13c83db79c5411, type: 3}
+    assetPath: Assets/Art/Portraits/jeoseungsaja/jeoseungsaja_b_7.png
+  - characterId: jeoseungsaja
+    variantKey: jeoseungsaja_b
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: ea7db36ef900b794884b77bbe4bcf38b, type: 3}
+    assetPath: Assets/Art/Portraits/jeoseungsaja/jeoseungsaja_b_8.png
+  - characterId: jeoseungsaja
+    variantKey: jeoseungsaja_b
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: 8eb83c74452f2164a83ccf387f6f558b, type: 3}
+    assetPath: Assets/Art/Portraits/jeoseungsaja/jeoseungsaja_b_9.png
+  - characterId: jeoseungsaja
+    variantKey: jeoseungsaja_b
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: 65f6f872f103dd64f93a89465bcb21c7, type: 3}
+    assetPath: Assets/Art/Portraits/jeoseungsaja/jeoseungsaja_b_10.png
+  - characterId: jeoseungsaja
+    variantKey: jeoseungsaja_b
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: e80c8377b261d6b45b94071709e076fb, type: 3}
+    assetPath: Assets/Art/Portraits/jeoseungsaja/jeoseungsaja_b_11.png
+  - characterId: jeoseungsaja
+    variantKey: jeoseungsaja_b
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: a8fc86f042730434cbad46bc6b94deba, type: 3}
+    assetPath: Assets/Art/Portraits/jeoseungsaja/jeoseungsaja_b_12.png
+  - characterId: jeoseungsaja
+    variantKey: jeoseungsaja_b
+    emotionKey: 13
+    sprite: {fileID: 21300000, guid: ca3c250d184653e498a191a39e1f5b96, type: 3}
+    assetPath: Assets/Art/Portraits/jeoseungsaja/jeoseungsaja_b_13.png
+  - characterId: jeoseungsaja
+    variantKey: jeoseungsaja_b
+    emotionKey: 14
+    sprite: {fileID: 21300000, guid: ead92ea5c16ed45428d355d1536c74e5, type: 3}
+    assetPath: Assets/Art/Portraits/jeoseungsaja/jeoseungsaja_b_14.png
+  - characterId: jeoseungsaja
+    variantKey: jeoseungsaja_c
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: 7270973c255522a47b61da0466c7b274, type: 3}
+    assetPath: Assets/Art/Portraits/jeoseungsaja/jeoseungsaja_c_1.png
   - characterId: kuonji
     variantKey: kuonji_a
     emotionKey: 02
@@ -2393,5 +2883,760 @@ MonoBehaviour:
     emotionKey: 02
     sprite: {fileID: 21300000, guid: 2c5e83a3f43fc544fa622f82902d7d2d, type: 3}
     assetPath: Assets/Art/Portraits/reira/reira_a_02.png
-  generatedTicksUtc: 639166879133226213
-  generatedTimeReadable: 2026-06-10 20:31:53
+  - characterId: serpentscholar
+    variantKey: serpentscholar_a
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: f561682b5cdb6034e98df600fa89014f, type: 3}
+    assetPath: Assets/Art/Portraits/serpentscholar/serpentscholar_a_1.png
+  - characterId: serpentscholar
+    variantKey: serpentscholar_a
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: 84c06ca20aff663498aebab83267b55a, type: 3}
+    assetPath: Assets/Art/Portraits/serpentscholar/serpentscholar_a_2.png
+  - characterId: serpentscholar
+    variantKey: serpentscholar_a
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: 3545a49976857564fa46871174aee15c, type: 3}
+    assetPath: Assets/Art/Portraits/serpentscholar/serpentscholar_a_3.png
+  - characterId: serpentscholar
+    variantKey: serpentscholar_a
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: ac5367518d5b5134da9995b0fec4a08d, type: 3}
+    assetPath: Assets/Art/Portraits/serpentscholar/serpentscholar_a_4.png
+  - characterId: serpentscholar
+    variantKey: serpentscholar_a
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: 1db522b4407349e4ea58cbff82db15c4, type: 3}
+    assetPath: Assets/Art/Portraits/serpentscholar/serpentscholar_a_5.png
+  - characterId: serpentscholar
+    variantKey: serpentscholar_a
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: 350df4aff06b44d45a3f97a79c8fa019, type: 3}
+    assetPath: Assets/Art/Portraits/serpentscholar/serpentscholar_a_6.png
+  - characterId: serpentscholar
+    variantKey: serpentscholar_a
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: 6b22ec30df4af5c4ea830c79299b41fa, type: 3}
+    assetPath: Assets/Art/Portraits/serpentscholar/serpentscholar_a_7.png
+  - characterId: serpentscholar
+    variantKey: serpentscholar_a
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: 1b09c3fc3628a68428fdce97a7b85211, type: 3}
+    assetPath: Assets/Art/Portraits/serpentscholar/serpentscholar_a_8.png
+  - characterId: serpentscholar
+    variantKey: serpentscholar_a
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: 06c90dc776a295e499e46ef1a41d6480, type: 3}
+    assetPath: Assets/Art/Portraits/serpentscholar/serpentscholar_a_9.png
+  - characterId: serpentscholar
+    variantKey: serpentscholar_a
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: a28c0582809c6a6409a47b1d99d9a5ac, type: 3}
+    assetPath: Assets/Art/Portraits/serpentscholar/serpentscholar_a_10.png
+  - characterId: serpentscholar
+    variantKey: serpentscholar_a
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: fabc287e214594b4e81be941ada74453, type: 3}
+    assetPath: Assets/Art/Portraits/serpentscholar/serpentscholar_a_11.png
+  - characterId: serpentscholar
+    variantKey: serpentscholar_b
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: dd12ed1377e763141860518656963bab, type: 3}
+    assetPath: Assets/Art/Portraits/serpentscholar/serpentscholar_b_1.png
+  - characterId: serpentscholar
+    variantKey: serpentscholar_b
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: d969eb23e87b9d3499d25744933cdc57, type: 3}
+    assetPath: Assets/Art/Portraits/serpentscholar/serpentscholar_b_2.png
+  - characterId: serpentscholar
+    variantKey: serpentscholar_b
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: 27cede96739bd294eaaed0158b7c97b4, type: 3}
+    assetPath: Assets/Art/Portraits/serpentscholar/serpentscholar_b_3.png
+  - characterId: serpentscholar
+    variantKey: serpentscholar_b
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: 0c78ddbe72dfc7640acd97a71459ee63, type: 3}
+    assetPath: Assets/Art/Portraits/serpentscholar/serpentscholar_b_4.png
+  - characterId: serpentscholar
+    variantKey: serpentscholar_b
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: 54298b41ce0b89945a6b975b99bb9253, type: 3}
+    assetPath: Assets/Art/Portraits/serpentscholar/serpentscholar_b_5.png
+  - characterId: serpentscholar
+    variantKey: serpentscholar_b
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: 2809dffdea28c7c48bce01536842ab0c, type: 3}
+    assetPath: Assets/Art/Portraits/serpentscholar/serpentscholar_b_6.png
+  - characterId: serpentscholar
+    variantKey: serpentscholar_b
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: 0fe38936ea7f87d45903d85fdadca96d, type: 3}
+    assetPath: Assets/Art/Portraits/serpentscholar/serpentscholar_b_7.png
+  - characterId: serpentscholar
+    variantKey: serpentscholar_b
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: 8a6f1278a4271e84a92ed4de530d74ab, type: 3}
+    assetPath: Assets/Art/Portraits/serpentscholar/serpentscholar_b_8.png
+  - characterId: serpentscholar
+    variantKey: serpentscholar_b
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: f1d9a940c2d9cfd42b3a787a7eaee00b, type: 3}
+    assetPath: Assets/Art/Portraits/serpentscholar/serpentscholar_b_9.png
+  - characterId: serpentscholar
+    variantKey: serpentscholar_b
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: 4240fabcbbfe114479f29478868be829, type: 3}
+    assetPath: Assets/Art/Portraits/serpentscholar/serpentscholar_b_10.png
+  - characterId: serpentscholar
+    variantKey: serpentscholar_b
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: 2382109c0c9b58442a59eb2821b21d33, type: 3}
+    assetPath: Assets/Art/Portraits/serpentscholar/serpentscholar_b_11.png
+  - characterId: serpentscholar
+    variantKey: serpentscholar_b
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: 7ad7870133f41904fa056d0763cb181f, type: 3}
+    assetPath: Assets/Art/Portraits/serpentscholar/serpentscholar_b_12.png
+  - characterId: serpentscholar
+    variantKey: serpentscholar_b
+    emotionKey: 13
+    sprite: {fileID: 21300000, guid: 4f3cff83534c6824fb450e4ba77195bf, type: 3}
+    assetPath: Assets/Art/Portraits/serpentscholar/serpentscholar_b_13.png
+  - characterId: serpentscholar
+    variantKey: serpentscholar_b
+    emotionKey: 14
+    sprite: {fileID: 21300000, guid: 3c578b613d57fbb42a4f5134f6982908, type: 3}
+    assetPath: Assets/Art/Portraits/serpentscholar/serpentscholar_b_14.png
+  - characterId: serpentscholar
+    variantKey: serpentscholar_b
+    emotionKey: 15
+    sprite: {fileID: 21300000, guid: 97e1ea58dbaf89b40ab759c2d08f76bd, type: 3}
+    assetPath: Assets/Art/Portraits/serpentscholar/serpentscholar_b_15.png
+  - characterId: serpentscholar
+    variantKey: serpentscholar_b
+    emotionKey: 16
+    sprite: {fileID: 21300000, guid: 2f63c582a67f37b4d9d3fe00703092f7, type: 3}
+    assetPath: Assets/Art/Portraits/serpentscholar/serpentscholar_b_16.png
+  - characterId: serpentscholar
+    variantKey: serpentscholar_b
+    emotionKey: 17
+    sprite: {fileID: 21300000, guid: 6c0152f3ae6ae05418f0699e0aa55890, type: 3}
+    assetPath: Assets/Art/Portraits/serpentscholar/serpentscholar_b_17.png
+  - characterId: serpentscholar
+    variantKey: serpentscholar_c
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: d70d038b4339437488b77f43d7b5fb16, type: 3}
+    assetPath: Assets/Art/Portraits/serpentscholar/serpentscholar_c_1.png
+  - characterId: serpentscholar
+    variantKey: serpentscholar_c
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: 0c9249610727bb547822cf6c66bd38f9, type: 3}
+    assetPath: Assets/Art/Portraits/serpentscholar/serpentscholar_c_2.png
+  - characterId: serpentscholar
+    variantKey: serpentscholar_c
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: c07a636878c7ec749a17ea7c44319d09, type: 3}
+    assetPath: Assets/Art/Portraits/serpentscholar/serpentscholar_c_3.png
+  - characterId: serpentscholar
+    variantKey: serpentscholar_c
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: 7e7f28f6fdfd91541b23e9c0a88eb623, type: 3}
+    assetPath: Assets/Art/Portraits/serpentscholar/serpentscholar_c_4.png
+  - characterId: serpentscholar
+    variantKey: serpentscholar_c
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: 7aa8d26bc8494e445ad3bf84d1b5a40c, type: 3}
+    assetPath: Assets/Art/Portraits/serpentscholar/serpentscholar_c_5.png
+  - characterId: serpentscholar
+    variantKey: serpentscholar_c
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: 50b66f85d45cb444f9d869bc18680de5, type: 3}
+    assetPath: Assets/Art/Portraits/serpentscholar/serpentscholar_c_6.png
+  - characterId: serpentscholar
+    variantKey: serpentscholar_c
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: 832be15541eed764aa9218a8c88bbc6a, type: 3}
+    assetPath: Assets/Art/Portraits/serpentscholar/serpentscholar_c_7.png
+  - characterId: serpentscholar
+    variantKey: serpentscholar_c
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: acf6645f4f7b94d42bc83dc85b599431, type: 3}
+    assetPath: Assets/Art/Portraits/serpentscholar/serpentscholar_c_8.png
+  - characterId: serpentscholar
+    variantKey: serpentscholar_c
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: edf86af9261bd8a479719289addd3f56, type: 3}
+    assetPath: Assets/Art/Portraits/serpentscholar/serpentscholar_c_9.png
+  - characterId: serpentscholar
+    variantKey: serpentscholar_c
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: be7978033fec9a34685f2fb3f2f0630b, type: 3}
+    assetPath: Assets/Art/Portraits/serpentscholar/serpentscholar_c_10.png
+  - characterId: serpentscholar
+    variantKey: serpentscholar_c
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: 1b1a20bd834bbae4e8c88ae28036c19a, type: 3}
+    assetPath: Assets/Art/Portraits/serpentscholar/serpentscholar_c_11.png
+  - characterId: serpentscholar
+    variantKey: serpentscholar_c
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: 412d525e9e1a2f4459a862b52ae46033, type: 3}
+    assetPath: Assets/Art/Portraits/serpentscholar/serpentscholar_c_12.png
+  - characterId: serpentscholar
+    variantKey: serpentscholar_c
+    emotionKey: 13
+    sprite: {fileID: 21300000, guid: 665d44ed13201724ca0f6a521a16b261, type: 3}
+    assetPath: Assets/Art/Portraits/serpentscholar/serpentscholar_c_13.png
+  - characterId: serpentscholar
+    variantKey: serpentscholar_c
+    emotionKey: 14
+    sprite: {fileID: 21300000, guid: 412f5eb7668774b46bc17f3819cfe40a, type: 3}
+    assetPath: Assets/Art/Portraits/serpentscholar/serpentscholar_c_14.png
+  - characterId: serpentscholar
+    variantKey: serpentscholar_c
+    emotionKey: 15
+    sprite: {fileID: 21300000, guid: 8d9aef05734aa4f45a0c23f2751de257, type: 3}
+    assetPath: Assets/Art/Portraits/serpentscholar/serpentscholar_c_15.png
+  - characterId: serpentscholar
+    variantKey: serpentscholar_c
+    emotionKey: 16
+    sprite: {fileID: 21300000, guid: 28410f31391b4154dba472e9f81a4094, type: 3}
+    assetPath: Assets/Art/Portraits/serpentscholar/serpentscholar_c_16.png
+  - characterId: serpentscholar
+    variantKey: serpentscholar_c
+    emotionKey: 17
+    sprite: {fileID: 21300000, guid: 1dbca1242dc3c6842b0e6d38f3a43460, type: 3}
+    assetPath: Assets/Art/Portraits/serpentscholar/serpentscholar_c_17.png
+  - characterId: serpentscholar
+    variantKey: serpentscholar_c
+    emotionKey: 18
+    sprite: {fileID: 21300000, guid: 669010bbb746e0941b642224c86dd83f, type: 3}
+    assetPath: Assets/Art/Portraits/serpentscholar/serpentscholar_c_18.png
+  - characterId: serpentscholar
+    variantKey: serpentscholar_c
+    emotionKey: 19
+    sprite: {fileID: 21300000, guid: 8ba2e2029f24cb84baba7a7437c86a2f, type: 3}
+    assetPath: Assets/Art/Portraits/serpentscholar/serpentscholar_c_19.png
+  - characterId: serpentscholar
+    variantKey: serpentscholar_d
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: 7d192fac1c1190c4c8b639243de7cc67, type: 3}
+    assetPath: Assets/Art/Portraits/serpentscholar/serpentscholar_d_1.png
+  - characterId: serpentscholar
+    variantKey: serpentscholar_d
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: 659dec9ebb6a6aa40b9c13c71e3f318b, type: 3}
+    assetPath: Assets/Art/Portraits/serpentscholar/serpentscholar_d_2.png
+  - characterId: serpentscholar
+    variantKey: serpentscholar_d
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: 5a18e2650ed6d1040914e785c6793c19, type: 3}
+    assetPath: Assets/Art/Portraits/serpentscholar/serpentscholar_d_3.png
+  - characterId: serpentscholar
+    variantKey: serpentscholar_d
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: 474591270e0d37648ba95f23f9b69c97, type: 3}
+    assetPath: Assets/Art/Portraits/serpentscholar/serpentscholar_d_4.png
+  - characterId: serpentscholar
+    variantKey: serpentscholar_d
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: 558f185ddc7e48d438519c05019ca889, type: 3}
+    assetPath: Assets/Art/Portraits/serpentscholar/serpentscholar_d_5.png
+  - characterId: serpentscholar
+    variantKey: serpentscholar_d
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: 88f06ed416e035d4ea28b475cd806557, type: 3}
+    assetPath: Assets/Art/Portraits/serpentscholar/serpentscholar_d_6.png
+  - characterId: serpentscholar
+    variantKey: serpentscholar_d
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: 22cac7bb0ce23974e9548ad82708f08e, type: 3}
+    assetPath: Assets/Art/Portraits/serpentscholar/serpentscholar_d_7.png
+  - characterId: serpentscholar
+    variantKey: serpentscholar_d
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: 8c0ddee1337b90a48a9044c947650734, type: 3}
+    assetPath: Assets/Art/Portraits/serpentscholar/serpentscholar_d_8.png
+  - characterId: serpentscholar
+    variantKey: serpentscholar_d
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: c6107e584a7225448949ed17360beb99, type: 3}
+    assetPath: Assets/Art/Portraits/serpentscholar/serpentscholar_d_9.png
+  - characterId: serpentscholar
+    variantKey: serpentscholar_d
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: 4c071a3533eae3c49a157adc85151b48, type: 3}
+    assetPath: Assets/Art/Portraits/serpentscholar/serpentscholar_d_10.png
+  - characterId: serpentscholar
+    variantKey: serpentscholar_d
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: 3f2839619947afe48879f17274feef01, type: 3}
+    assetPath: Assets/Art/Portraits/serpentscholar/serpentscholar_d_11.png
+  - characterId: serpentscholar
+    variantKey: serpentscholar_d
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: c70a817e39f7f8e4aa5e2a9ce5782103, type: 3}
+    assetPath: Assets/Art/Portraits/serpentscholar/serpentscholar_d_12.png
+  - characterId: soyeong
+    variantKey: soyeong_a
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: 5439ae1279259234687801a086be572c, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_a_1.png
+  - characterId: soyeong
+    variantKey: soyeong_a
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: 631ec3f69d331b8458b75f644c20e07b, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_a_2.png
+  - characterId: soyeong
+    variantKey: soyeong_a
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: ca6626795eba3d14b9c66953aedca1e7, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_a_3.png
+  - characterId: soyeong
+    variantKey: soyeong_a
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: 5468c62f689a5b64bab887cb9cf105ac, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_a_4.png
+  - characterId: soyeong
+    variantKey: soyeong_a
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: 8b9417a185e17ec4e9992d5b62b20238, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_a_5.png
+  - characterId: soyeong
+    variantKey: soyeong_a
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: cdc645a8820bbbe468eea84b80bbdd4d, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_a_6.png
+  - characterId: soyeong
+    variantKey: soyeong_a
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: 0b2f4ce58ed8fe942b97d21bab567b84, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_a_7.png
+  - characterId: soyeong
+    variantKey: soyeong_a
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: da54cdb72c7071b47bdf58880046268a, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_a_8.png
+  - characterId: soyeong
+    variantKey: soyeong_a
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: 3b91d65c2b0de9a4094dd7313fe8aac4, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_a_9.png
+  - characterId: soyeong
+    variantKey: soyeong_a
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: 183da3947ebb48f409e740997fb20632, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_a_10.png
+  - characterId: soyeong
+    variantKey: soyeong_a
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: 97ba829d5c6548c42b334bdec6f6b1b2, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_a_11.png
+  - characterId: soyeong
+    variantKey: soyeong_a
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: 8e0282ef7c61b26429870969d6109f14, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_a_12.png
+  - characterId: soyeong
+    variantKey: soyeong_a
+    emotionKey: 13
+    sprite: {fileID: 21300000, guid: 77fcf29512a06884eb9292daf76acfa2, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_a_13.png
+  - characterId: soyeong
+    variantKey: soyeong_a
+    emotionKey: 14
+    sprite: {fileID: 21300000, guid: 6fe46d6b27113ad4e96e2928c9ef373c, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_a_14.png
+  - characterId: soyeong
+    variantKey: soyeong_a
+    emotionKey: 15
+    sprite: {fileID: 21300000, guid: aa692c80bb1efd045aacdc989d604987, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_a_15.png
+  - characterId: soyeong
+    variantKey: soyeong_b
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: 99013d047c8dbfa43b0eb1d675f82629, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_b_1.png
+  - characterId: soyeong
+    variantKey: soyeong_b
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: 07759b8324051754f966819fefd50846, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_b_2.png
+  - characterId: soyeong
+    variantKey: soyeong_b
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: a4518421d334196459dfab01b0e15fc5, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_b_3.png
+  - characterId: soyeong
+    variantKey: soyeong_b
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: 1f0eb8e801eba8e46964cf789c49caad, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_b_4.png
+  - characterId: soyeong
+    variantKey: soyeong_b
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: 232dc4c836953d54cac7d0a52dc3b9d7, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_b_5.png
+  - characterId: soyeong
+    variantKey: soyeong_b
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: 69824f2d648db604faf9c3f902f0869e, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_b_6.png
+  - characterId: soyeong
+    variantKey: soyeong_b
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: 6f8e34d7929d11848a9319ad3bf6f738, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_b_7.png
+  - characterId: soyeong
+    variantKey: soyeong_b
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: df0c729940cf7fd4b9fc5557bbb9c77e, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_b_8.png
+  - characterId: soyeong
+    variantKey: soyeong_b
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: 95a18c386de2d0c4abf371c052ec6561, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_b_9.png
+  - characterId: soyeong
+    variantKey: soyeong_b
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: 3f5b9bf5f0e490c449fc3caed66666ed, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_b_10.png
+  - characterId: soyeong
+    variantKey: soyeong_b
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: 3a8cb74ffbe293a43b4bad80ce9c7cf1, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_b_11.png
+  - characterId: soyeong
+    variantKey: soyeong_b
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: 75b4f5d04ed8a9c46b4142d723e756fb, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_b_12.png
+  - characterId: soyeong
+    variantKey: soyeong_b
+    emotionKey: 13
+    sprite: {fileID: 21300000, guid: 497a549732205864f8cb61cc9a13d6cd, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_b_13.png
+  - characterId: soyeong
+    variantKey: soyeong_b
+    emotionKey: 14
+    sprite: {fileID: 21300000, guid: 572b5442e976d8145ba9d5df21a847df, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_b_14.png
+  - characterId: soyeong
+    variantKey: soyeong_c
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: 8806af585ae39eb45bda237b0913f8dc, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_c_1.png
+  - characterId: soyeong
+    variantKey: soyeong_c
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: 3c92bf9cc46f0114191429d752deefa1, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_c_2.png
+  - characterId: soyeong
+    variantKey: soyeong_c
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: 460d9c4b3758d944092a866cb83633a0, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_c_3.png
+  - characterId: soyeong
+    variantKey: soyeong_c
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: d827db17a2eef584dafbb3473a8c4ac5, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_c_4.png
+  - characterId: soyeong
+    variantKey: soyeong_c
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: 053ebeef6000d6349964dddf0eb17b05, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_c_5.png
+  - characterId: soyeong
+    variantKey: soyeong_c
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: 0eecd40c9de40b14b925f0953478b608, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_c_6.png
+  - characterId: soyeong
+    variantKey: soyeong_c
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: 7120125f910fdb84681b2f3f8b1d9c01, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_c_7.png
+  - characterId: soyeong
+    variantKey: soyeong_c
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: e063e199ec60f2e42a3b8768deb26435, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_c_8.png
+  - characterId: soyeong
+    variantKey: soyeong_c
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: a47acc5b756b638458cc7de9c718bbd0, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_c_9.png
+  - characterId: soyeong
+    variantKey: soyeong_c
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: fff05e00d8ab13646b7772aa26f9fc9b, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_c_10.png
+  - characterId: soyeong
+    variantKey: soyeong_c
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: 20a5908ebc0bf9846841182dc09e39e9, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_c_11.png
+  - characterId: soyeong
+    variantKey: soyeong_c
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: 0a35fb8b38467d444b43c0402c02527b, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_c_12.png
+  - characterId: soyeong
+    variantKey: soyeong_c
+    emotionKey: 13
+    sprite: {fileID: 21300000, guid: 96b7d305c2989fe4e93bb14c6f7c10e2, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_c_13.png
+  - characterId: soyeong
+    variantKey: soyeong_c
+    emotionKey: 14
+    sprite: {fileID: 21300000, guid: 3bff349f7793af2459de36ee5810de13, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_c_14.png
+  - characterId: soyeong
+    variantKey: soyeong_c
+    emotionKey: 15
+    sprite: {fileID: 21300000, guid: 47b92d034277d6248a9ddf6ec13cdc7c, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_c_15.png
+  - characterId: soyeong
+    variantKey: soyeong_c
+    emotionKey: 16
+    sprite: {fileID: 21300000, guid: e52448681af62e345a4774acd18f11d5, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_c_16.png
+  - characterId: soyeong
+    variantKey: soyeong_d
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: 86ecf7a700d899d4c8553c7d2bafc64a, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_d_1.png
+  - characterId: soyeong
+    variantKey: soyeong_d
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: a00dde0340182af4c88924977bb08cb5, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_d_2.png
+  - characterId: soyeong
+    variantKey: soyeong_d
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: 95127f525fea2a148943aa9f4f633002, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_d_3.png
+  - characterId: soyeong
+    variantKey: soyeong_d
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: 7e6f90ae84a82de44aae771c56de9fad, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_d_4.png
+  - characterId: soyeong
+    variantKey: soyeong_d
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: 83745a588308e0240980ba04705a34c8, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_d_5.png
+  - characterId: soyeong
+    variantKey: soyeong_d
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: 6a9d80d8ce0d25045b2d2b4206e89ccc, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_d_6.png
+  - characterId: soyeong
+    variantKey: soyeong_d
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: ca432ad439d82cf42a4044764a2830c9, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_d_7.png
+  - characterId: soyeong
+    variantKey: soyeong_d
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: 666977ca3f94e4849909b4b869d35de0, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_d_8.png
+  - characterId: soyeong
+    variantKey: soyeong_d
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: ab8d98f3e813f614fa77eb5c473c2063, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_d_9.png
+  - characterId: soyeong
+    variantKey: soyeong_d
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: 7017469ef89c56141a00c269fdc2902d, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_d_10.png
+  - characterId: soyeong
+    variantKey: soyeong_d
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: 895d440719edd144bbc8fd3b0ba49a12, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_d_11.png
+  - characterId: soyeong
+    variantKey: soyeong_d
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: be7082b9d057e32469c6ce6e7d74f44c, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_d_12.png
+  - characterId: soyeong
+    variantKey: soyeong_d
+    emotionKey: 13
+    sprite: {fileID: 21300000, guid: ee81f7a8b3554b04e98e5697cdaa67db, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_d_13.png
+  - characterId: soyeong
+    variantKey: soyeong_d
+    emotionKey: 14
+    sprite: {fileID: 21300000, guid: 67e03d7d3661cf0499768013b6dcaf91, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_d_14.png
+  - characterId: soyeong
+    variantKey: soyeong_d
+    emotionKey: 15
+    sprite: {fileID: 21300000, guid: ce2b4548fcb76b34599ddace10794c6d, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_d_15.png
+  - characterId: soyeong
+    variantKey: soyeong_e
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: 85e32968bc1563b4eb81c7a6cc7d7cd5, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_e_1.png
+  - characterId: soyeong
+    variantKey: soyeong_e
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: cfedc868870f03a4296f6dabccb4ef10, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_e_2.png
+  - characterId: soyeong
+    variantKey: soyeong_e
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: 8046d04fd66cb5040973dba86ae433e9, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_e_3.png
+  - characterId: soyeong
+    variantKey: soyeong_e
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: 43a34826ea4df3c41843e82aa7028554, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_e_4.png
+  - characterId: soyeong
+    variantKey: soyeong_e
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: daa9a08f47de0a247a3063337ca50e67, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_e_5.png
+  - characterId: soyeong
+    variantKey: soyeong_e
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: 7ef168b248777ff44837e7bfa049d6eb, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_e_6.png
+  - characterId: soyeong
+    variantKey: soyeong_e
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: a2453558c881dd745840c53b72fa8d9c, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_e_7.png
+  - characterId: soyeong
+    variantKey: soyeong_e
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: 90e241242a9c14748a3c21714adc73e2, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_e_8.png
+  - characterId: soyeong
+    variantKey: soyeong_e
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: d9fae30839102df4bb8bace43d56d5b4, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_e_9.png
+  - characterId: soyeong
+    variantKey: soyeong_e
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: 2cf82a2a3f299954a85aebfa75e5ef4f, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_e_10.png
+  - characterId: soyeong
+    variantKey: soyeong_e
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: b6336cb68a1aadc499371036855369fb, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_e_11.png
+  - characterId: soyeong
+    variantKey: soyeong_e
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: 953ff6c97d0ed384babbf2152573a7ac, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_e_12.png
+  - characterId: soyeong
+    variantKey: soyeong_e
+    emotionKey: 13
+    sprite: {fileID: 21300000, guid: 14804555641095a4e9612f0af7d2092b, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_e_13.png
+  - characterId: soyeong
+    variantKey: soyeong_e
+    emotionKey: 14
+    sprite: {fileID: 21300000, guid: 9b03a2b4db5c12f439b7fd2988239f66, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_e_14.png
+  - characterId: soyeong
+    variantKey: soyeong_e
+    emotionKey: 15
+    sprite: {fileID: 21300000, guid: 640fe1e4a2b451149b85e958afe689fc, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_e_15.png
+  - characterId: soyeong
+    variantKey: soyeong_f
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: 0cf7ff9a3987c2f4e97b74cd5e87fdd0, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_f_1.png
+  - characterId: soyeong
+    variantKey: soyeong_f
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: d0baa01d6471dab4ba637a812774f9b5, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_f_2.png
+  - characterId: soyeong
+    variantKey: soyeong_f
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: c8f7b352a2780d84299b211b05e71861, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_f_3.png
+  - characterId: soyeong
+    variantKey: soyeong_f
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: bc72f50feb87f4147bc726147b53ca3b, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_f_4.png
+  - characterId: soyeong
+    variantKey: soyeong_f
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: 03e31527160dc3742a7a50dc72c39151, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_f_5.png
+  - characterId: soyeong
+    variantKey: soyeong_f
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: 7f11979adcacae04e8f93b6c20cfcf69, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_f_6.png
+  - characterId: soyeong
+    variantKey: soyeong_f
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: 489f48ab82217a441a1de3a24e064ea2, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_f_7.png
+  - characterId: soyeong
+    variantKey: soyeong_f
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: 12d07909a792832469eaf4c501160f3c, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_f_8.png
+  - characterId: soyeong
+    variantKey: soyeong_f
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: 98c3c329b25714e48adb9e9e82fe448e, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_f_9.png
+  - characterId: soyeong
+    variantKey: soyeong_f
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: 8174407c4564fca48999992c3fff4e55, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_f_10.png
+  - characterId: soyeong
+    variantKey: soyeong_f
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: bc7f1fb16263feb46a440a273da1afa1, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_f_11.png
+  - characterId: soyeong
+    variantKey: soyeong_f
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: 1e85e8ba06e8b964b854f9669afe742f, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_f_12.png
+  - characterId: soyeong
+    variantKey: soyeong_f
+    emotionKey: 13
+    sprite: {fileID: 21300000, guid: 12ff52afc7b5ccb4b9f4e3c5639435d5, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_f_13.png
+  - characterId: soyeong
+    variantKey: soyeong_f
+    emotionKey: 14
+    sprite: {fileID: 21300000, guid: 57786a3a94bd00c40aa4a226698bdc37, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_f_14.png
+  - characterId: soyeong
+    variantKey: soyeong_f
+    emotionKey: 15
+    sprite: {fileID: 21300000, guid: 7c8c5e5b12113d240af1b4c8bd593a09, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_f_15.png
+  - characterId: soyeong
+    variantKey: soyeong_g
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: 882207a5745ef4f4d953474b1ca4c794, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_g_1.png
+  - characterId: soyeong
+    variantKey: soyeong_i
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: b172580fb3d04244d8bfbe141afa6326, type: 3}
+    assetPath: Assets/Art/Portraits/soyeong/soyeong_i_1.png
+  generatedTicksUtc: 639167372173780448
+  generatedTimeReadable: 2026-06-11 10:13:37

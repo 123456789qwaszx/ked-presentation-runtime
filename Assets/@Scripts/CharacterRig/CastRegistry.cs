@@ -6,13 +6,11 @@ public sealed class CastRegistry
 {
     private readonly struct CastBinding
     {
-        public readonly string slot;
         public readonly string character;
         public readonly string variant;
 
-        public CastBinding(string slot, string character, string variant)
+        public CastBinding(string character, string variant)
         {
-            this.slot = slot;
             this.character = character;
             this.variant = variant;
         }
@@ -29,7 +27,7 @@ public sealed class CastRegistry
         if(IsCast(slotKey))
             UncastCharRig(slotKey);
 
-        _slotToBinding[slotKey] = new CastBinding(slotKey, characterKey, variantKey);
+        _slotToBinding[slotKey] = new CastBinding(characterKey, variantKey);
         _characterToSlot[characterKey] = slotKey;
     }
 

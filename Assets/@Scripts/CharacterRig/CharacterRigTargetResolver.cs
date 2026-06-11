@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 public static class CharacterRigTargetResolver
@@ -26,5 +25,20 @@ public static class CharacterRigTargetResolver
             return characterSlotKey;
 
         return targetKey;
+    }
+    
+    public static string ResolveCharacterKeyFromTargetKey(CommandRunScope scope, string targetKey)
+    {
+        string resolvedRigKey = ResolveRigKeyByPolicy(scope, targetKey);
+
+        if (!scope.CastRegistry.TryGetCharacter(resolvedRigKey, out string characterKey))
+        {
+            Debug.LogWarning(
+                $"[CharacterRigTargetResolver] Failed to get characterKey. return slotKey as fallback. " +
+                $"targetKey='{targetKey}', resolvedRigKey='{resolvedRigKey}'.");
+            return targetKey;
+        }
+        
+        return characterKey;
     }
 }

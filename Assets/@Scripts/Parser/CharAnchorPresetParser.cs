@@ -1,3 +1,5 @@
+using UnityEngine;
+
 public static class CharAnchorPresetParser
 {
     public static CharAnchorPreset Parse(string value)
@@ -5,7 +7,10 @@ public static class CharAnchorPresetParser
         if (TryParse(value, out CharAnchorPreset preset))
             return preset;
 
-        return CharAnchorPreset.None;
+        Debug.LogWarning(
+            $"[CharAnchorPresetParser] Unknown anchor preset '{value}'. Fallback to '{CharAnchorPreset.Center}'.");
+
+        return CharAnchorPreset.Center;
     }
 
     public static bool TryParse(string value, out CharAnchorPreset preset)
@@ -59,12 +64,11 @@ public static class CharAnchorPresetParser
                 return true;
 
             case "none":
-            case "":
                 preset = CharAnchorPreset.None;
                 return true;
 
             default:
-                preset = CharAnchorPreset.None;
+                preset = CharAnchorPreset.Center;
                 return false;
         }
     }

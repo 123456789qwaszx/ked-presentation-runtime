@@ -72,15 +72,15 @@ public sealed class SetAnchorCommandCharR : CommandBase
     
     private void Apply(CommandRunScope scope)
     {
-        string characterKey = CharacterRigTargetResolver.ResolveRigKeyByPolicy(scope, _spec.slotKey);
-        
+        string tuningKey = CharacterRigTargetResolver.ResolveCharacterKeyFromTargetKey(scope, _spec.slotKey);
+    
         Vector2 anchoredPosition = CharAnchorPlacementResolver.ResolveAnchoredPosition(
             _rect,
             _spec.preset,
             _spec.baseRatioX,
             _globalTuning,
             _roleTuningDb,
-            characterKey,
+            tuningKey,
             _spec.offset);
 
         _rect.anchoredPosition = anchoredPosition;
