@@ -23,6 +23,7 @@ public static class CharacterFocusPresetParser
 
         switch (s)
         {
+            case "p4":
             case "feet":
             case "foot":
             case "base":
@@ -32,6 +33,7 @@ public static class CharacterFocusPresetParser
                 preset = CharacterFocusPreset.Feet;
                 return true;
 
+            case "p3":
             case "body":
             case "torso":
             case "mid":
@@ -41,6 +43,7 @@ public static class CharacterFocusPresetParser
                 preset = CharacterFocusPreset.Body;
                 return true;
 
+            case "p2":
             case "bust":
             case "chest":
             case "upper":
@@ -49,6 +52,7 @@ public static class CharacterFocusPresetParser
                 preset = CharacterFocusPreset.Bust;
                 return true;
 
+            case "p1":
             case "face":
             case "head":
             case "eye":
@@ -58,6 +62,7 @@ public static class CharacterFocusPresetParser
                 preset = CharacterFocusPreset.Face;
                 return true;
 
+            case "p5":
             case "hand_left":
             case "left_hand":
             case "lefthand":
@@ -67,6 +72,7 @@ public static class CharacterFocusPresetParser
                 preset = CharacterFocusPreset.HandLeft;
                 return true;
 
+            case "p6":
             case "hand_right":
             case "right_hand":
             case "righthand":

@@ -172,7 +172,6 @@ public sealed class DuoShotCommandCharR : CommandBase
             side.RoleKey,
             side.MoveRect,
             layout.focusPreset,
-            side.PoseKey,
             layout.customFocusKey,
             layout.focusOffset,
             _focusTuningDb,

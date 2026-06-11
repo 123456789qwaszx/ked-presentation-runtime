@@ -54,7 +54,6 @@ public sealed class ShotZoomFocusCommand : ShotIntentCommandBase<ShotZoomFocusCo
                 scope,
                 spec.focusRoleKey,
                 spec.focusPreset,
-                spec.poseKey,
                 spec.customFocusKey,
                 spec.focusOffset,
                 _focusTuningDB,

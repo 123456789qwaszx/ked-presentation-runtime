@@ -332,7 +332,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 9112289059733369898}
+  - {fileID: 3303845773531442716}
   m_Father: {fileID: 8436429572956471960}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -1058,7 +1058,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b9cb9bb491a50b545a840fe1cad0f351, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CharacterFocusPreviewMarker
-  focusRect: {fileID: 4713872706909961509}
+  focusRect: {fileID: 2807209374107197717}
   previewRoot: {fileID: 3119065722377472987}
   focusTuningDb: {fileID: 11400000, guid: b77af4e295606b446ae4f74dad106f5f, type: 2}
   roleKey: Leafia
@@ -1068,28 +1068,28 @@ MonoBehaviour:
     focusPreset: 0
     customFocusKey: 
     color: {r: 0.4, g: 0.8, b: 1, a: 0.9}
-    radius: 6
+    radius: 12
     finalOffset: {x: 0, y: 0}
   - enabled: 1
     label: Body
     focusPreset: 10
     customFocusKey: 
     color: {r: 0.4, g: 1, b: 0.4, a: 0.9}
-    radius: 6
+    radius: 12
     finalOffset: {x: 0, y: 0}
   - enabled: 1
     label: Bust
     focusPreset: 20
     customFocusKey: 
     color: {r: 1, g: 0.8, b: 0.25, a: 0.9}
-    radius: 6
+    radius: 12
     finalOffset: {x: 0, y: 0}
   - enabled: 1
     label: Face
     focusPreset: 30
     customFocusKey: 
     color: {r: 1, g: 0.35, b: 0.35, a: 0.95}
-    radius: 6
+    radius: 12
     finalOffset: {x: 0, y: 0}
   drawInGameView: 1
   hideInPlayMode: 0
@@ -1721,13 +1721,13 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5837551529065250107}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8400262731641959534}
-  m_Father: {fileID: 6029827640114018213}
+  m_Father: {fileID: 3303845773531442716}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -2490,6 +2490,42 @@ RectTransform:
   m_Children:
   - {fileID: 70602818711318188}
   m_Father: {fileID: 3257687810923200049}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &9021886528537444409
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3303845773531442716}
+  m_Layer: 0
+  m_Name: CharSlot_Track_Focus
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &3303845773531442716
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9021886528537444409}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 9112289059733369898}
+  m_Father: {fileID: 6029827640114018213}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}

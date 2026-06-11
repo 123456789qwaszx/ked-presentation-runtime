@@ -222,6 +222,7 @@ public sealed class CharacterRigBuilder
         // Slot axis - stage placement
         refs.CharSlot_Anchor = GetRt(CharacterRigSchema.Refs.CharSlot_Anchor);
         refs.CharSlot_Track = GetRt(CharacterRigSchema.Refs.CharSlot_Track);
+        refs.CharSlot_Track_Focus = GetRt(CharacterRigSchema.Refs.CharSlot_Track_Focus);
         refs.CharSlot_Track_X = GetRt(CharacterRigSchema.Refs.CharSlot_Track_X);
         refs.CharSlot_Track_Y = GetRt(CharacterRigSchema.Refs.CharSlot_Track_Y);
         refs.CharSlot_Rotation = GetRt(CharacterRigSchema.Refs.CharSlot_Rotation);

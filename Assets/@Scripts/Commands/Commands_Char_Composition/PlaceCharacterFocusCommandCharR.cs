@@ -16,9 +16,6 @@ public sealed class PlaceCharacterFocusCommandSpecCharR : CharacterRigCommandSpe
     [Tooltip("focusPreset이 Custom일 때 사용할 custom point key입니다. 예: hand_left, weapon, phone")]
     public string customFocusKey = "";
 
-    [Tooltip("비워두면 roleKey만 tuning key로 사용합니다. 입력하면 roleKey:poseKey로 DB를 찾습니다.")]
-    public string poseKey = "";
-
     [Tooltip("선택한 focus preset에 추가로 더할 command-time offset입니다.")]
     public Vector2 focusOffset = Vector2.zero;
 
@@ -126,7 +123,6 @@ public sealed class PlaceCharacterFocusCommandCharR : CommandBase
             _spec.slotKey,
             _moveRect,
             _spec.focusPreset,
-            _spec.poseKey,
             _spec.customFocusKey,
             _spec.focusOffset,
             _focusTuningDb,

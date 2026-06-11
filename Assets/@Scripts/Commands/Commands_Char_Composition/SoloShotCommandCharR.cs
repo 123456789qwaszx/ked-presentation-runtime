@@ -138,7 +138,6 @@ public sealed class SoloShotCommandCharR : CommandBase
             _spec.slotKey,
             _moveRect,
             _spec.focusPreset,
-            _spec.poseKey,
             _spec.customFocusKey,
             _spec.focusOffset,
             _focusTuningDb,

@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: CharacterFocusTuningDB
   m_EditorClassIdentifier: Assembly-CSharp::CharacterFocusTuningDBSO
   baseOffsets:
-    feet: {x: 0, y: 120}
-    body: {x: 0, y: 1100}
-    bust: {x: 0, y: 1350}
-    face: {x: 0, y: 1600}
+    feet: {x: 0, y: 0}
+    body: {x: 0, y: 700}
+    bust: {x: 0, y: 820}
+    face: {x: 0, y: 950}
     handLeft: {x: -220, y: 520}
     handRight: {x: 220, y: 520}
   entries:
@@ -51,12 +51,12 @@ MonoBehaviour:
       handRight: {x: 0, y: 0}
     customPoints: []
   - key: Mercurio
-    defaultOffset: {x: -300, y: 0}
+    defaultOffset: {x: -180, y: 0}
     offsets:
       feet: {x: 0, y: 0}
       body: {x: 0, y: 0}
       bust: {x: 0, y: 0}
-      face: {x: 0, y: 0}
+      face: {x: 30, y: 0}
       handLeft: {x: 0, y: 0}
       handRight: {x: 0, y: 0}
     customPoints: []

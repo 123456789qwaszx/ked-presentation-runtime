@@ -40,12 +40,4 @@ public static class CharacterFocusTuningResolver
 
         return offset;
     }
-
-    public static string BuildTuningKey(string roleKey, string poseKey)
-    {
-        if (string.IsNullOrWhiteSpace(poseKey))
-            return roleKey;
-
-        return $"{roleKey}:{poseKey}";
-    }
 }

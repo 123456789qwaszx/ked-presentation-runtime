@@ -20,7 +20,7 @@ public sealed partial class YarnCommandBridge
             slotKey = roleKey,
             focusPreset = focusPreset,
             screenPoint = screen,
-            moveTarget = CharacterRigTarget.CharSlot_Track,
+            moveTarget = CharacterRigTarget.CharSlot_Track_Focus,
             duration = duration,
             wait = false
         };
@@ -38,7 +38,7 @@ public sealed partial class YarnCommandBridge
             screenPoint = ScreenFocusPoint.Center,
             screenOffset = new Vector2(0f, 80f),
 
-            moveTarget = CharacterRigTarget.CharSlot_Track,
+            moveTarget = CharacterRigTarget.CharSlot_Track_Focus,
             scaleTarget = CharacterRigTarget.CharSlot_Scale,
             targetScale = new Vector2(1.08f, 1.08f),
 
@@ -62,7 +62,7 @@ public sealed partial class YarnCommandBridge
             leftRoleKey = leftRoleKey,
             rightRoleKey = rightRoleKey,
             preset = preset,
-            moveTarget = CharacterRigTarget.CharSlot_Track,
+            moveTarget = CharacterRigTarget.CharSlot_Track_Focus,
             scaleTarget = CharacterRigTarget.CharSlot_Scale,
             duration = duration,
             wait = false

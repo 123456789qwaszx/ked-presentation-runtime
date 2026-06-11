@@ -174,7 +174,17 @@ public sealed partial class YarnCommandBridge
             duration = duration
         };
         
+        var spec2 = new MoveByCommandSpecCharR
+        {
+            slotKey = slotKey,
+            target = CharacterRigTarget.CharSlot_Track_Focus,
+            useAbsolutePosition = true,
+            delta = new Vector2(0, 0),
+            duration = duration
+        };
+        
         Collect(slotOffsetSpec);
+        Collect(spec2);
     }
     
     private void EnqueueSizeResetSpec(string roleKey, float duration = 0.4f)
