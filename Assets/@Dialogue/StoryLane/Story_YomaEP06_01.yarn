@@ -25,7 +25,7 @@
 
 <<cast c3 Mercurio center>>
 //<<pose c3 jeoseungsaja a 7>>
-//<<size c3 small>>
+<<size c3 small>>
 
 <<cast c4 serpentscholar>>
 <<pose c4 serpentscholar a 2>>
@@ -85,5 +85,17 @@ title: Story_YomaEP06_02
 ...
 <<size_by c3 1.4>>
 ....
+<<rotate_reset c3>>
+<<position_reset c3>>
+
+<<fade_in c1>>
+??
+<<duo_shot c3 c1>>
+
+???
+
+????
+
+?????
 
 ===

@@ -94,7 +94,7 @@ public sealed partial class YarnCommandBridge
             var absoluteScaleSpec = new SetOriginSizeCommandSpecCharR
             {
                 slotKey = roleKey,
-                target = CharacterRigTarget.CharSlot_Scale,
+                target = CharacterRigTarget.CharSlot_Size,
 
                 overrideScale = true,
                 scaleOverride = new Vector3(absoluteScale, absoluteScale, absoluteScale),
@@ -111,7 +111,7 @@ public sealed partial class YarnCommandBridge
         
         var spec = new SetOriginSizeCommandSpecCharR
         {
-            target = CharacterRigTarget.CharSlot_Scale,
+            target = CharacterRigTarget.CharSlot_Size,
             slotKey = roleKey, preset = preset,
         };
 

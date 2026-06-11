@@ -34,7 +34,7 @@ public static class CharacterFocusPointResolver
         // zoomSpread, framing scale)은 섞이지 않는다.
         // CastTransform처럼 response 아래에서 재면 pan/zoom 결과가 측정에 되먹임되어
         // 롤백 재시크마다 값이 누적으로 흘러간다(비멱등).
-        RectTransform measureRect = rigRefs.CharSlot_Scale;
+        RectTransform measureRect = rigRefs.CharSlot_Size;
 
         if (measureRect == null)
             return false;

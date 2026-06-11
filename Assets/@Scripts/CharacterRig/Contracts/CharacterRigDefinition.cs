@@ -13,6 +13,7 @@ public static class CharacterRigSchema
         CharSlot_Rotation,
         CharSlot_SwayPivot,
         CharSlot_Scale,
+        CharSlot_Size,
         
         // Framing axis - pseudo camera / focus response
         CharSlot_FramingTransform,
@@ -109,10 +110,11 @@ public static class CharacterRigSchema
         new() { Id = Refs.CharSlot_Track_Y,   Parent = Refs.CharSlot_Track_X },
         new() { Id = Refs.CharSlot_Rotation,  Parent = Refs.CharSlot_Track_Y },
         new() { Id = Refs.CharSlot_SwayPivot, Parent = Refs.CharSlot_Rotation },
-        new() { Id = Refs.CharSlot_Scale,     Parent = Refs.CharSlot_SwayPivot, NeedsBottomPivot = true },
-    
+        new() { Id = Refs.CharSlot_Scale,     Parent = Refs.CharSlot_SwayPivot,},
+        new() { Id = Refs.CharSlot_Size,      Parent = Refs.CharSlot_Scale,     NeedsBottomPivot = true },
+
         // Framing axis - pseudo camera / focus response
-        new() { Id = Refs.CharSlot_FramingTransform, Parent = Refs.CharSlot_Scale },
+        new() { Id = Refs.CharSlot_FramingTransform, Parent = Refs.CharSlot_Size },
         new() { Id = Refs.CharSlot_FramingScale,     Parent = Refs.CharSlot_FramingTransform },
         new() { Id = Refs.CharSlot_FramingScale_X,   Parent = Refs.CharSlot_FramingScale },
         new() { Id = Refs.CharSlot_FramingScale_Y,   Parent = Refs.CharSlot_FramingScale_X },
@@ -200,6 +202,7 @@ public enum CharacterRigTarget
     CharSlot_Rotation,
     CharSlot_SwayPivot,
     CharSlot_Scale,
+    CharSlot_Size,
 
     // Framing axis - pseudo camera / focus response
     CharSlot_FramingTransform,
@@ -296,6 +299,7 @@ public sealed class CharacterRigRefs
     public RectTransform CharSlot_Rotation;
     public RectTransform CharSlot_SwayPivot;
     public RectTransform CharSlot_Scale;
+    public RectTransform CharSlot_Size;
 
     // Framing axis - pseudo camera / focus response
     public RectTransform CharSlot_FramingTransform;
@@ -412,6 +416,7 @@ public static class CharacterRigRefsExtensions
             CharacterRigTarget.CharSlot_Rotation  => refs.CharSlot_Rotation,
             CharacterRigTarget.CharSlot_SwayPivot => refs.CharSlot_SwayPivot,
             CharacterRigTarget.CharSlot_Scale     => refs.CharSlot_Scale,
+            CharacterRigTarget.CharSlot_Size      => refs.CharSlot_Size,
 
             // Framing axis - pseudo camera / focus response
             CharacterRigTarget.CharSlot_FramingTransform => refs.CharSlot_FramingTransform,
