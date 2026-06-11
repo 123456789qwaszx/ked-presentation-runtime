@@ -3,7 +3,7 @@ using UnityEngine;
 
 public sealed partial class YarnCommandBridge
 {
-    private void EnqueueRegisterBackgroundResponseBindingSpec(string rigKey, string stageKey = "0")
+    private void EnqueueRegisterBackgroundResponseBindingSpec(string rigKey)
     {
         var spec = new RegisterBackgroundResponseBindingCommandSpec
         {
@@ -14,7 +14,7 @@ public sealed partial class YarnCommandBridge
         Collect(spec);
     }
 
-    private void EnqueueRegisterCharacterResponseBindingSpec(string targetKey, string stageKey = "0")
+    private void EnqueueRegisterCharacterResponseBindingSpec(string targetKey)
     {
         var spec = new RegisterCharacterResponseBindingCommandSpec
         {

@@ -28,50 +28,6 @@ public sealed partial class YarnCommandBridge
         Collect(spec);
     }
     
-    private void EnqueueSoloShotSpec(string roleKey, float duration = 0.45f)
-    {
-        var spec = new SoloShotCommandSpecCharR
-        {
-            slotKey = roleKey,
-
-            focusPreset = CharacterFocusPreset.Face,
-            screenPoint = ScreenFocusPoint.Center,
-            screenOffset = new Vector2(0f, 80f),
-
-            moveTarget = CharacterRigTarget.CharSlot_Track_Focus,
-            scaleTarget = CharacterRigTarget.CharSlot_Scale,
-            targetScale = new Vector2(1.08f, 1.08f),
-
-            duration = duration,
-            wait = false
-        };
-
-        Collect(spec);
-    }
-
-    private void EnqueueDuoShotSpec(
-        string leftRoleKey,
-        string rightRoleKey,
-        string presetName = "balanced",
-        float duration = 0.45f)
-    {
-        CharacterDuoShotPreset preset = CharacterDuoShotPresetParser.Parse(presetName, CharacterDuoShotPreset.Balanced);
-
-        var spec = new DuoShotCommandSpecCharR
-        {
-            leftRoleKey = leftRoleKey,
-            rightRoleKey = rightRoleKey,
-            preset = preset,
-            moveTarget = CharacterRigTarget.CharSlot_Track_Focus,
-            scaleTarget = CharacterRigTarget.CharSlot_Scale,
-            duration = duration,
-            wait = false
-        };
-
-        Collect(spec);
-    }
-    
-    
     private void EnqueueCharFocusSpec(
         string roleKey,
         float intensity = 1f,

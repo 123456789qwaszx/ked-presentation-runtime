@@ -193,8 +193,6 @@ public sealed partial class YarnCommandBridge
     private void BindCharRigComposition(DialogueRunner runner)
     {
         runner.AddCommandHandler<string, string, string, float>("char_place", EnqueuePlaceCharacterFocusSpec);
-        runner.AddCommandHandler<string, float>("solo_shot", EnqueueSoloShotSpec);
-        runner.AddCommandHandler<string, string, string, float>("duo_shot", EnqueueDuoShotSpec);
         
         runner.AddCommandHandler<string, float, float>("char_focus", EnqueueCharFocusSpec);
         runner.AddCommandHandler<string, float, float, float>("char_defocus", EnqueueCharDefocusSpec);
@@ -257,8 +255,8 @@ public sealed partial class YarnCommandBridge
     
     private void BindShotResponse(DialogueRunner runner)
     {
-        runner.AddCommandHandler<string, string>("shot_bind_bg_response", EnqueueRegisterBackgroundResponseBindingSpec);
-        runner.AddCommandHandler<string, string>("shot_bind_char_response", EnqueueRegisterCharacterResponseBindingSpec);
+        runner.AddCommandHandler<string>("shot_bind_bg_response", EnqueueRegisterBackgroundResponseBindingSpec);
+        runner.AddCommandHandler<string>("shot_bind_char_response", EnqueueRegisterCharacterResponseBindingSpec);
 
         runner.AddCommandHandler<string, string>("shot_unbind_bg_response", EnqueueRemoveBackgroundResponseBindingSpec);
         runner.AddCommandHandler<string, string>("shot_unbind_char_response", EnqueueRemoveCharacterResponseBindingSpec);

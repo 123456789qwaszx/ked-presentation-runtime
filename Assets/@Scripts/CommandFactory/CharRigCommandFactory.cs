@@ -63,8 +63,6 @@ public sealed class CharRigCommandFactory : INodeCommandFactory
             
             // Composition / Focus-aware Placement
             PlaceCharacterFocusCommandSpecCharR s => new PlaceCharacterFocusCommandCharR(s, _characterFocusTuningDb),
-            SoloShotCommandSpecCharR s => new SoloShotCommandCharR(s, _characterFocusTuningDb),
-            DuoShotCommandSpecCharR s => new DuoShotCommandCharR(s, _characterFocusTuningDb),
 
             // Visual State
             ColorToCommandSpecCharR s => new ColorToCommandCharR(s),
