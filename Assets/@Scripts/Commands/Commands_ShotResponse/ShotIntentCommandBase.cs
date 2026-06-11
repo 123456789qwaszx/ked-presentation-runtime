@@ -16,7 +16,7 @@ public abstract class ShotIntentCommandSpecBase : CommandSpecBase
 public abstract class ShotIntentCommandBase<TSpec> : CommandBase
     where TSpec : ShotIntentCommandSpecBase
 {
-    private const float StepFinishSpeedUpMultiplier = 0.2f;
+    private const float StepFinishSpeedUpMultiplier = 20f;
 
     protected readonly PresentationResponseRig rig;
     protected readonly TSpec spec;

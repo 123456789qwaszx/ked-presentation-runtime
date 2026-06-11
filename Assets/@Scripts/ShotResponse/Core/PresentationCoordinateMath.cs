@@ -14,7 +14,7 @@ public sealed class PresentationResponseCoordinateMapper
 {
     private IPresentationRigSpaceRootProvider _stageRootProvider;
 
-    public PresentationResponseMeasure CaptureCurrentMeasure(IResponseTarget target)
+    public PresentationResponseMeasure CaptureBaseMeasure(IResponseTarget target)
     {
         RectTransform rigSpaceRoot = GetRigSpaceRoot();
 
@@ -25,11 +25,18 @@ public sealed class PresentationResponseCoordinateMapper
 
         Vector2 baseLocalScale =
             PresentationCoordinateMath.CaptureNeutralScale(
-                target.MeasureRect);
+                target.ScaleRect);
 
         return new PresentationResponseMeasure(
             basePositionInRigSpace,
             baseLocalScale);
+    }
+
+    // 구버전 호출부가 남아있어도 컴파일 깨지지 않게 남겨둔 호환 메서드.
+    // 의미상으로는 CaptureBaseMeasure를 쓰는 게 맞다.
+    public PresentationResponseMeasure CaptureCurrentMeasure(IResponseTarget target)
+    {
+        return CaptureBaseMeasure(target);
     }
 
     public Vector2 ConvertPositionFromRigSpaceToTargetParentSpace(
@@ -66,22 +73,27 @@ public static class PresentationCoordinateMath
 
         return new Vector2(localPivot.x, localPivot.y);
     }
-    
+
     public static Vector2 CaptureNeutralScale(
         RectTransform neutralScaleSource)
     {
         Vector3 scale = neutralScaleSource.localScale;
+
         return new Vector2(scale.x, scale.y);
     }
-    
+
     public static Vector2 ConvertPointFromRigSpaceToTargetPositionParentSpace(
         Vector2 pointInRigSpace,
         RectTransform rigSpaceRoot,
         RectTransform targetParent)
     {
-        Vector3 worldPosition = rigSpaceRoot.TransformPoint(new Vector3(pointInRigSpace.x, pointInRigSpace.y, 0f));
-        Vector3 positionInParentSpace = targetParent.InverseTransformPoint(worldPosition);
-        
+        Vector3 worldPosition =
+            rigSpaceRoot.TransformPoint(
+                new Vector3(pointInRigSpace.x, pointInRigSpace.y, 0f));
+
+        Vector3 positionInParentSpace =
+            targetParent.InverseTransformPoint(worldPosition);
+
         return new Vector2(positionInParentSpace.x, positionInParentSpace.y);
     }
 }

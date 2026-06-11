@@ -2,36 +2,38 @@
 ---
 
 <<shot_reset>>
-<<screen_vignette_clear>>
+// <<screen_vignette_clear>>
 
 <<bg_spawn bg1 ep12_01>>
 <<bg_size bg1 1.5>>
-
-<<bg_spawn bg2 bgslot_01 02>>
-<<bg_place bg2 -40 200>>
-
 
 <<slot c1>>
 <<slot c2>>
 <<slot c3>>
 <<slot c4>>
 
-<<cast c1 soyeong center>>
-<<pose c1 soyeong a 4>>
-
-<<cast c2 jangsanbeom duoright>>
-<<pose c2 jangsanbeom a 4>>
-<<size c2 close>>
-
+<<cast c1 Mercurio left>>
+<<char_dim c1 0.8>>
+<<cast c2 Mercurio right>>
 <<cast c3 Mercurio center>>
-//<<pose c3 jeoseungsaja a 7>>
-//<<size c3 small>>
-
-<<cast c4 serpentscholar>>
-<<pose c4 serpentscholar a 2>>
-
-<<attach_to_bg c4 bg2>>
 ===
+
+title: Setup_YomaEP06_02
+---
+
+<<shot_reset>>
+<<screen_vignette_clear>>
+
+<<bg_spawn bg1 ep12_01>>
+<<bg_size bg1 1.5>>
+
+
+<<slot c3>>
+<<cast c3 Willow center>>
+
+===
+
+
  
 
 title: Story_YomaEP06_01
@@ -70,7 +72,29 @@ title: Story_YomaEP06_02
 
 <<beat Setup_YomaEP06_01>>
 
+<<fade_in c1>>
+<<fade_in c2>>
+ 
 <<fade_in c3>>
+//<<bind_response_char c3>>
+//<<char_place c3 bust b2 0>>
+
+//<<shot_reset>>
+<<bind_response_char2 c1>>
+<<bind_response_char c2>> 
+//<<shot_reset>>
+
+//<<char_place c3 p2 ab2>>
+????
+<<shot_zoom_focus c3 bust b2 0.2 3>>
+
+?????
+//<<shot_zoom 1>> 
+?????d
+
+<<shot_track 200 0>>
+?????dd
+<<shot_track -400 0 2>>
 학도운: 너 지금 뭘 키우고 있는거야?
 
 <<position_by c3 200 -700>>
@@ -88,13 +112,9 @@ title: Story_YomaEP06_02
 <<rotate_reset c3>>
 <<position_reset c3>>
 
-<<fade_in c1>>
 ??
-<<char_place c3>>
-<<position_by c3 80>>
 
 ???
-<<shot_zoom_focus c3 bust center 8 0.4>>
 
 ????
 

@@ -3,7 +3,7 @@ using UnityEngine;
 public static class PresentationShotIntentMath
 {
     // Camera scale conversion used by the camera root.
-    private const float DefaultZoomToScaleFactor = 0.05f;
+    private const float DefaultZoomToScaleFactor = 1f;
 
     public static float EvaluateCameraScale(
         float zoom) 
@@ -14,8 +14,9 @@ public static class PresentationShotIntentMath
         Vector2 focusPointInStageSpace, 
         Vector2 currentPan, 
         float currentScale)
-        => (focusPointInStageSpace + currentPan) / currentScale;
-
+        //=> (focusPointInStageSpace + currentPan) / currentScale;
+        => (focusPointInStageSpace - currentPan) / currentScale;
+    
     // 캐릭터 얼굴이 원하는 화면 위치에 보이도록 authored screen-pan 값을 역산.
     // Positive pan means the visible presentation moves in that direction,
     // while the camera root applies the inverse transform.
@@ -23,8 +24,8 @@ public static class PresentationShotIntentMath
         Vector2 logicalFocusPointInStageSpace, 
         Vector2 desiredPointInStageSpace, 
         float targetScale)
-        => logicalFocusPointInStageSpace * targetScale - desiredPointInStageSpace;
-    
+        //=> logicalFocusPointInStageSpace * targetScale - desiredPointInStageSpace;
+        => desiredPointInStageSpace - logicalFocusPointInStageSpace * targetScale;
 
     // This interpolates authored intent values, not final Transform values.
     // Each frame re-solves the final response from the current interpolated intent.

@@ -14,6 +14,8 @@ public sealed partial class PresentationUIRoot : IPresentationCameraRootProvider
 
 public sealed class PresentationCameraRootApplier
 {
+    private const float DefaultPanResponse = 0.1f;
+    
     private IPresentationCameraRootProvider _cameraRootProvider;
 
     public void Apply(in PresentationIntentState state)
@@ -24,7 +26,8 @@ public sealed class PresentationCameraRootApplier
         float scale = PresentationShotIntentMath.EvaluateCameraScale(state.zoom);
 
         _cameraRootProvider.StageZoomRoot.localScale = new Vector3(scale, scale, 1f);
-        _cameraRootProvider.StagePanRoot.anchoredPosition = -state.panInRigSpace;
+        _cameraRootProvider.StagePanRoot.anchoredPosition = state.panInRigSpace;
+        //_cameraRootProvider.StagePanRoot.anchoredPosition = -state.panInRigSpace;
     }
 
     private bool TryEnsureCameraRootProvider()
