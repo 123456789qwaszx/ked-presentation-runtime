@@ -5,7 +5,7 @@ using UnityEngine;
 
 [Serializable]
 [CommandMenuHint(
-    "Char Rig Motion",
+    "Char Rig Composition",
     "Place To",
     Order = -199)]
 public sealed class PlaceToCommandSpecCharR : CharacterRigCommandSpecBase
@@ -36,6 +36,7 @@ public sealed class PlaceToCommandCharR : CommandBase
     private readonly CharStageTuningSO _globalTuning;
     private readonly RoleAnchorTuningDBSO _roleTuningDb;
 
+    private CharacterRigRefs _rigRefs;
     private RectTransform _rect;
 
     private Vector2 _startPos;
@@ -61,8 +62,8 @@ public sealed class PlaceToCommandCharR : CommandBase
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
-        if (!_resolveAttempted)
-            ResolveRefs(scope);
+        if (!TryResolveRefs(scope))
+            yield break;
 
         ClaimTarget(scope);
 
@@ -85,8 +86,8 @@ public sealed class PlaceToCommandCharR : CommandBase
 
     protected override void OnSkip(CommandRunScope scope)
     {
-        if (!_resolveAttempted)
-            ResolveRefs(scope);
+        if (!TryResolveRefs(scope))
+            return;
 
         if (!HasClaimedTarget)
             ClaimTarget(scope);
@@ -94,27 +95,48 @@ public sealed class PlaceToCommandCharR : CommandBase
         CommitFinalState();
     }
 
-    private void ResolveRefs(CommandRunScope scope)
+    private bool TryResolveRefs(CommandRunScope scope)
     {
+        if (_resolveAttempted)
+            return _rigRefs != null && _rect != null;
+
         _resolveAttempted = true;
 
-        CharacterRigRefs rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
-        _rect = rigRefs.GetRect(_spec.target);
+        _rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(
+            scope,
+            _spec.slotKey);
+
+        if (_rigRefs == null)
+            return false;
+
+        _rect = _rigRefs.GetRect(_spec.target);
+
+        return _rect != null;
     }
 
     private void ClaimTarget(CommandRunScope scope)
     {
+        // 기존 PlaceTo/placement tween이 있으면 최종상태로 커밋하고 이어받는다.
+        // 이때 이전 커맨드의 OnComplete가 ledger clear까지 처리할 수 있다.
         _rect.DOKill(true);
 
         _startPos = _rect.anchoredPosition;
         _destPos = ResolveDestination(scope);
+
+        // 중요:
+        // 이 커맨드는 duration 동안 CharSlot_Anchor를 움직이는 placement writer다.
+        // FocusPoint solver가 라이브 위치가 아니라 "정착 목표"를 알 수 있도록 게시한다.
+        PublishSettledTarget();
 
         HasClaimedTarget = true;
     }
 
     private Vector2 ResolveDestination(CommandRunScope scope)
     {
-        string tuningKey = CharacterRigTargetResolver.ResolveCharacterKeyFromTargetKey(scope, _spec.slotKey);
+        string tuningKey =
+            CharacterRigTargetResolver.ResolveCharacterKeyFromTargetKey(
+                scope,
+                _spec.slotKey);
 
         return CharAnchorPlacementResolver.ResolveAnchoredPosition(
             _rect,
@@ -126,9 +148,28 @@ public sealed class PlaceToCommandCharR : CommandBase
             _spec.offset);
     }
 
+    private void PublishSettledTarget()
+    {
+        if (_rigRefs == null || _rect == null)
+            return;
+
+        _rigRefs.PlacementTargets.Publish(_rect, _destPos);
+    }
+
+    private void ClearSettledTarget()
+    {
+        if (_rigRefs == null || _rect == null)
+            return;
+
+        _rigRefs.PlacementTargets.Clear(_rect);
+    }
+
     private void CommitFinalState()
     {
-        _rect.anchoredPosition = _destPos;
+        if (_rect != null)
+            _rect.anchoredPosition = _destPos;
+
+        ClearSettledTarget();
 
         HasClaimedTarget = false;
         _tween = null;
@@ -140,10 +181,17 @@ public sealed class PlaceToCommandCharR : CommandBase
     {
         if (!HasClaimedTarget)
             return;
-        
-        _tween.Kill(false);
+
+        if (_tween != null && _tween.IsActive())
+            _tween.Kill(false);
 
         float duration = CalculateAcceleratedRemainingDuration();
+
+        if (duration <= 0f)
+        {
+            CommitFinalState();
+            return;
+        }
 
         _tween = _rect
             .DOAnchorPos(_destPos, duration)
@@ -164,7 +212,9 @@ public sealed class PlaceToCommandCharR : CommandBase
         float remainingRatio = Mathf.Clamp01(remainingDistance / originalDistance);
         float remainingDuration = _spec.duration * remainingRatio;
 
-        return Mathf.Max(0.01f, remainingDuration / StepFinishSpeedUpMultiplier);
+        return Mathf.Max(
+            0.01f,
+            remainingDuration / StepFinishSpeedUpMultiplier);
     }
 
     #endregion

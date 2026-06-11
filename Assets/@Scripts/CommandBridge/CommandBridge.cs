@@ -264,7 +264,7 @@ public sealed partial class YarnCommandBridge
 
         runner.AddCommandHandler<string, string, string, float, float>("shot_zoom_focus", EnqueueShotZoomFocusSpec);
         runner.AddCommandHandler<float, float, float, float>("shot_to", EnqueueShotToSpec);
-        runner.AddCommandHandler("shot_reset", (Action<float>)EnqueueShotResetSpec);
+        runner.AddCommandHandler<float>("shot_reset", EnqueueShotResetSpec);
 
         runner.AddCommandHandler<float, float>("shot_zoom", EnqueueShotZoomSpec);
         runner.AddCommandHandler<float, float, float>("shot_track", EnqueueShotTrackSpec);

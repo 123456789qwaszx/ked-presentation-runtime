@@ -38,6 +38,7 @@ public sealed class MoveByCommandCharR : CommandBase
     private readonly MoveByCommandSpecCharR _spec;
 
     private RectTransform _rect;
+    private CharacterRigRefs _rigRefs;
     private Vector2 _startPos;
     private Vector2 _destPos;
 
@@ -93,8 +94,8 @@ public sealed class MoveByCommandCharR : CommandBase
     {
         _resolveAttempted = true;
 
-        CharacterRigRefs rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
-        _rect = rig.GetRect(_spec.target);
+        _rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
+        _rect = _rigRefs.GetRect(_spec.target);
     }
 
     private void ClaimTarget()
@@ -103,6 +104,7 @@ public sealed class MoveByCommandCharR : CommandBase
 
         _startPos = _rect.anchoredPosition;
         _destPos = CalculateDestinationPosition();
+        _rigRefs.PlacementTargets.Publish(_rect, _destPos);
 
         HasClaimedTarget = true;
     }
@@ -118,6 +120,7 @@ public sealed class MoveByCommandCharR : CommandBase
     private void CommitFinalState()
     {
         _rect.anchoredPosition = _destPos;
+        _rigRefs.PlacementTargets.Clear(_rect);
 
         HasClaimedTarget = false;
         _tween = null;

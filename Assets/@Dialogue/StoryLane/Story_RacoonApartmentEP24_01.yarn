@@ -28,17 +28,17 @@ position: -96,-298
 <<cast char2 Noya duoright>>
 <<pose char2 Noya a 15>>
 <<size char2 close>>
-<<place_offset char2 0 -800>>
+<<position_by char2 0 -800>>
 
 
 <<cast char3 Iris duoleft>>
 <<pose char3 Iris a 7>>
 <<size char3 close>>
-<<place_offset char3 0 -800>>
+<<position_by char3 0 -800>>
 
 <<cast char4 kuonji>>
 <<pose char4 kuonji a 2>>
-<<place_offset kuonji 0 180>>
+<<position_by kuonji 0 180>>
 
 <<cast char5 Leafia>>
 <<pose char5 Leafia a 2>>
@@ -70,7 +70,7 @@ title: Story_RacoonApartmentEP24_01
 
 이상한 층에 도착해 버리는 것이다.
 <<fade_in Willow>>
-<<place_offset Willow 200 200 3>>
+<<position_by Willow 200 200 3>>
 그, 그만두는 것이다. 분명히 그건 아라이 씨의 층이 아닌 것이다.
 
 <<shot_zoom_focus Willow x1 b2 -2 2>>

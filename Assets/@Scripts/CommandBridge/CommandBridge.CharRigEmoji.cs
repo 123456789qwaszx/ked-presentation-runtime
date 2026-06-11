@@ -28,6 +28,12 @@ public sealed partial class YarnCommandBridge : InlineEventMarkupHandler.IInline
     // <<emoji igna 19>>
     private void EnqueueEmojiPopSpec(string roleKey, string emojiKey)
     {
+        Collect(new ShowRootLayersCommandSpecCharR
+        {
+            slotKey = roleKey,
+            targetMask = CharRigRootMask.CharacterEmoji_Root
+        });
+        
         Collect(BuildSetEmojiSpec(
             roleKey,
             emojiKey,

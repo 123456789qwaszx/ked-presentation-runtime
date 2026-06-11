@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using DG.Tweening;
 using UnityEngine;
 
 [Serializable]
@@ -27,11 +28,11 @@ public sealed class SetAnchorCommandSpecCharR : CharacterRigCommandSpecBase
 
     [Header("Offset (after tuning)")]
     public Vector2 offset = Vector2.zero;
-    
+
     [Header("Reset")]
     [Tooltip("체크하면 Anchor 설정 후 CharSlot_Track / Move / X / Y / Rotation / Scale 축을 기본값으로 초기화합니다.")]
     public bool resetSlotPos = true;
-    
+
     [Tooltip("체크하면 Anchor 설정 후 CharacterPortrait_Track / Move / X / Y / Rotation / SwayPivot / Shake / ActingScale 축을 기본값으로 초기화합니다.")]
     public bool resetCharacterPos = true;
 }
@@ -41,12 +42,16 @@ public sealed class SetAnchorCommandCharR : CommandBase
     private readonly SetAnchorCommandSpecCharR _spec;
     private readonly CharStageTuningSO _globalTuning;
     private readonly RoleAnchorTuningDBSO _roleTuningDb;
-    
+
     private CharacterRigRefs _rigRefs;
     private RectTransform _rect;
+
     private bool _resolveAttempted;
 
-    public SetAnchorCommandCharR(SetAnchorCommandSpecCharR spec, CharStageTuningSO globalTuning, RoleAnchorTuningDBSO roleTuningDb)
+    public SetAnchorCommandCharR(
+        SetAnchorCommandSpecCharR spec,
+        CharStageTuningSO globalTuning,
+        RoleAnchorTuningDBSO roleTuningDb)
     {
         _spec = spec;
         _globalTuning = globalTuning;
@@ -55,81 +60,155 @@ public sealed class SetAnchorCommandCharR : CommandBase
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
-        if (!_resolveAttempted)
-            ResolveRefs(scope);
-        
+        if (!TryResolveRefs(scope))
+            yield break;
+
         Apply(scope);
         yield break;
     }
-    
+
     protected override void OnSkip(CommandRunScope scope)
     {
-        if (!_resolveAttempted)
-            ResolveRefs(scope);
+        if (!TryResolveRefs(scope))
+            return;
 
         Apply(scope);
     }
-    
+
+    private bool TryResolveRefs(CommandRunScope scope)
+    {
+        if (_resolveAttempted)
+            return _rigRefs != null && _rect != null;
+
+        _resolveAttempted = true;
+
+        _rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(
+            scope,
+            _spec.slotKey);
+
+        if (_rigRefs == null)
+            return false;
+
+        _rect = _rigRefs.GetRect(_spec.target);
+
+        return _rect != null;
+    }
+
     private void Apply(CommandRunScope scope)
     {
-        string tuningKey = CharacterRigTargetResolver.ResolveCharacterKeyFromTargetKey(scope, _spec.slotKey);
-    
-        Vector2 anchoredPosition = CharAnchorPlacementResolver.ResolveAnchoredPosition(
-            _rect,
-            _spec.preset,
-            _spec.baseRatioX,
-            _globalTuning,
-            _roleTuningDb,
-            tuningKey,
-            _spec.offset);
+        // SetAnchor는 즉시 확정 command다.
+        // 이전 PlaceTo tween/ledger가 남아 있으면 새 anchor 값과 싸우므로 먼저 정리한다.
+        KillTweenAndClearPlacementTarget(_rect);
+
+        string tuningKey =
+            CharacterRigTargetResolver.ResolveCharacterKeyFromTargetKey(
+                scope,
+                _spec.slotKey);
+
+        Vector2 anchoredPosition =
+            CharAnchorPlacementResolver.ResolveAnchoredPosition(
+                _rect,
+                _spec.preset,
+                _spec.baseRatioX,
+                _globalTuning,
+                _roleTuningDb,
+                tuningKey,
+                _spec.offset);
 
         _rect.anchoredPosition = anchoredPosition;
-        
+
+        // 즉시 적용이므로 Publish하지 않는다.
+        // live transform이 이미 settled target이다.
+        ClearPlacementTarget(_rect);
+
         if (_spec.resetSlotPos)
             ResetSlotLayers();
-        
+
         if (_spec.resetCharacterPos)
             ResetCharacterLayers();
     }
-    
+
     private void ResetSlotLayers()
     {
-        _rigRefs.CharSlot_Track.anchoredPosition = Vector2.zero;
-        _rigRefs.CharSlot_Track_X.anchoredPosition = Vector2.zero;
-        _rigRefs.CharSlot_Track_Y.anchoredPosition = Vector2.zero;
-        
-        _rigRefs.CharSlot_Rotation.localEulerAngles= Vector3.zero;
-        
-        _rigRefs.CharSlot_Scale.localScale = Vector3.one;
+        ResetAnchoredPosition(_rigRefs.CharSlot_Track);
+        ResetAnchoredPosition(_rigRefs.CharSlot_Track_X);
+        ResetAnchoredPosition(_rigRefs.CharSlot_Track_Y);
+
+        ResetEulerAngles(_rigRefs.CharSlot_Rotation);
+
+        ResetLocalScale(_rigRefs.CharSlot_Scale);
     }
-    
+
     private void ResetCharacterLayers()
     {
-        _rigRefs.CharacterPortrait_Track.anchoredPosition = Vector2.zero;
-        _rigRefs.CharacterPortrait_Track_Move.anchoredPosition = Vector2.zero;
-        _rigRefs.CharacterPortrait_Track_X.anchoredPosition = Vector2.zero;
-        _rigRefs.CharacterPortrait_Track_Y.anchoredPosition = Vector2.zero;
+        ResetAnchoredPosition(_rigRefs.CharacterPortrait_Track);
+        ResetAnchoredPosition(_rigRefs.CharacterPortrait_Track_Move);
+        ResetAnchoredPosition(_rigRefs.CharacterPortrait_Track_X);
+        ResetAnchoredPosition(_rigRefs.CharacterPortrait_Track_Y);
 
-        _rigRefs.CharacterPortrait_Rotation.localEulerAngles = Vector3.zero;
+        ResetEulerAngles(_rigRefs.CharacterPortrait_Rotation);
 
-        _rigRefs.CharacterPortrait_SwayPivot.anchoredPosition = Vector2.zero;
-        _rigRefs.CharacterPortrait_SwayPivot.localEulerAngles = Vector3.zero;
-        _rigRefs.CharacterPortrait_SwayPivot.localScale = Vector3.one;
+        ResetAnchoredPosition(_rigRefs.CharacterPortrait_SwayPivot);
+        ResetEulerAngles(_rigRefs.CharacterPortrait_SwayPivot);
+        ResetLocalScale(_rigRefs.CharacterPortrait_SwayPivot);
 
-        _rigRefs.CharacterPortrait_Shake.anchoredPosition = Vector2.zero;
-        _rigRefs.CharacterPortrait_Shake.localEulerAngles = Vector3.zero;
-        _rigRefs.CharacterPortrait_Shake.localScale = Vector3.one;
+        ResetAnchoredPosition(_rigRefs.CharacterPortrait_Shake);
+        ResetEulerAngles(_rigRefs.CharacterPortrait_Shake);
+        ResetLocalScale(_rigRefs.CharacterPortrait_Shake);
 
-        _rigRefs.CharacterPortrait_ActingScale.localScale = Vector3.one;
-        _rigRefs.CharacterPortrait_ActingScale_X.localScale = Vector3.one;
-        _rigRefs.CharacterPortrait_ActingScale_Y.localScale = Vector3.one;
+        ResetLocalScale(_rigRefs.CharacterPortrait_ActingScale);
+        ResetLocalScale(_rigRefs.CharacterPortrait_ActingScale_X);
+        ResetLocalScale(_rigRefs.CharacterPortrait_ActingScale_Y);
     }
 
-    private void ResolveRefs(CommandRunScope scope)
+    private void ResetAnchoredPosition(RectTransform rect)
     {
-        _resolveAttempted = true;
+        if (rect == null)
+            return;
 
-        _rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
-        _rect = _rigRefs.GetRect(_spec.target);
+        KillTweenAndClearPlacementTarget(rect);
+
+        rect.anchoredPosition = Vector2.zero;
+    }
+
+    private void ResetEulerAngles(RectTransform rect)
+    {
+        if (rect == null)
+            return;
+
+        KillTweenAndClearPlacementTarget(rect);
+
+        rect.localEulerAngles = Vector3.zero;
+    }
+
+    private void ResetLocalScale(RectTransform rect)
+    {
+        if (rect == null)
+            return;
+
+        KillTweenAndClearPlacementTarget(rect);
+
+        rect.localScale = Vector3.one;
+    }
+
+    private void KillTweenAndClearPlacementTarget(RectTransform rect)
+    {
+        if (rect == null)
+            return;
+
+        // true:
+        // 기존 command가 target을 claim하고 있었다면 OnComplete/Commit 경로를 태워서
+        // 그 command의 HasClaimedTarget / tween 상태가 정리되도록 한다.
+        rect.DOKill(true);
+
+        ClearPlacementTarget(rect);
+    }
+
+    private void ClearPlacementTarget(RectTransform rect)
+    {
+        if (_rigRefs == null || rect == null)
+            return;
+
+        _rigRefs.PlacementTargets.Clear(rect);
     }
 }

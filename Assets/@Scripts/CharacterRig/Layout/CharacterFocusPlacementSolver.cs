@@ -16,7 +16,13 @@ public static class CharacterFocusPlacementSolver
     {
         destinationAnchoredPosition = default;
 
+        if (moveRect == null)
+            return false;
+
         RectTransform targetParent = moveRect.parent as RectTransform;
+
+        if (targetParent == null)
+            return false;
 
         bool resolved = CharacterFocusPointResolver.TryResolve(
             scope,
@@ -25,6 +31,7 @@ public static class CharacterFocusPlacementSolver
             customFocusKey,
             focusOffset,
             focusTuningDb,
+            useSettledPlacementTargets: true,
             out CharacterFocusPointResult focus);
 
         if (!resolved)

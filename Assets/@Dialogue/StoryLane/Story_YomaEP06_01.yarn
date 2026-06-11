@@ -87,12 +87,14 @@ title: Story_YomaEP06_02
 <<char_visual c1 1 0 0.7>>
 <<char_visual c2 1 0 0.7>>
 //<<char_place c3 p2 ab2>>
-????
+<<emoji c3 21>>
+엠버: ???? 여기가 어디지? 처음 오는 것 같은데... 왠지 낯이 익네.
 <<shot_zoom_focus c3 bust center 6 1.2>>
 //<<char_focus c3>>
 //<<scale_to c3 1.2 1.2>>
 //<<position_by c3 0 -180 1.2>>
 
+<<emoji c3 12>>
 ?????
 <<shot_reset>>
 ?????d
@@ -102,36 +104,47 @@ Sasd
 <<shot_zoom_focus c3 face center 10 2.2>>
 
 ?????dd
+//<<shot_unbind_char_response c2>>
+//<<shot_unbind_char_response c1>>
+..
 <<shot_track 200 0>>
 학도운: 너 지금 뭘 키우고 있는거야?
 
 <<shot_track -300 0 1>>
 
 ??
+<<shake c2>>
+<<idle_breathe c1 99>>
+<<pause 0.1>>
+<<idle_breathe c2 99>>
 
-<<shot_zoom_focus c3 bust center 2 1.4>>
+<<shot_zoom_focus c1 bust center 2 1.4>>
 ??
-<<shot_reset>>
+<<shot_zoom_focus c2 bust center 2 1.4>>
 ????
 
 <<position_by c3 200 -700>>
 <<size_by c3 1.4>>
 <<rotate_by c3 3>>
 소영: 키우다니 뭘?
-<<place_to c3 left>>
-<<char_place c3 bust center>>
-..
-<<position_by c3 500 0>>
-..
+//<<place_to c3 left>>
+<<position_by c3 -160 -240>>
+<<char_place c3 bust center 1.1>>
+,,,j
+<<position_by c3 -500 0 1.4>>
+<<shot_zoom_focus c3 bust center 2 1.4>>
 
-...
-<<size_by c3 1.4>>
-....
+..
+<<position_by c3 -500 0 1.4>>
+<<shot_zoom_focus c3 bust center 2 1.4>>
+..
+<<size_reset c3>>
 <<rotate_reset c3>>
 <<position_reset c3>>
-
+...
 ??
-
+<<position_by c3 500 0 1.1>>
+<<shot_zoom_focus c3 bust center 10 1.4>>
 ???
 
 ????

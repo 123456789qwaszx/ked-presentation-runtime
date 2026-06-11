@@ -26,8 +26,8 @@ public sealed class PlaceCharacterFocusCommandSpecCharR : CharacterRigCommandSpe
     public Vector2 screenOffset = Vector2.zero;
 
     [Header("Placement Target")]
-    [Tooltip("보통 CharSlot_Track을 사용합니다. focus 측정은 CharSlot_Scale 기준으로 하고, 이동은 이 target에 적용합니다.")]
-    public CharacterRigTarget moveTarget = CharacterRigTarget.CharSlot_Track;
+    [Tooltip("Focus placement 전용 축. 보통 CharSlot_Track_Focus를 사용합니다.")]
+    public CharacterRigTarget moveTarget = CharacterRigTarget.CharSlot_Track_Focus;
 
     [Header("Tween")]
     public float duration = 0.4f;
@@ -41,6 +41,7 @@ public sealed class PlaceCharacterFocusCommandCharR : CommandBase
     private readonly PlaceCharacterFocusCommandSpecCharR _spec;
     private readonly CharacterFocusTuningDBSO _focusTuningDb;
 
+    private CharacterRigRefs _rigRefs;
     private RectTransform _moveRect;
 
     private Vector2 _startPosition;
@@ -64,10 +65,11 @@ public sealed class PlaceCharacterFocusCommandCharR : CommandBase
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
-        if (!_resolveAttempted)
-            ResolveRefs(scope);
+        if (!TryResolveRefs(scope))
+            yield break;
 
-        ClaimTarget(scope);
+        if (!TryClaimTarget(scope))
+            yield break;
 
         if (_spec.duration <= 0f)
         {
@@ -88,37 +90,60 @@ public sealed class PlaceCharacterFocusCommandCharR : CommandBase
 
     protected override void OnSkip(CommandRunScope scope)
     {
-        if (!_resolveAttempted)
-            ResolveRefs(scope);
+        if (!TryResolveRefs(scope))
+            return;
 
         if (!HasClaimedTarget)
-            ClaimTarget(scope);
+        {
+            if (!TryClaimTarget(scope))
+                return;
+        }
 
         CommitFinalState();
     }
 
-    private void ResolveRefs(CommandRunScope scope)
+    private bool TryResolveRefs(CommandRunScope scope)
     {
-        CharacterRigRefs rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
-        _moveRect = rig.GetRect(_spec.moveTarget);
+        if (_resolveAttempted)
+            return _rigRefs != null && _moveRect != null;
 
         _resolveAttempted = true;
+
+        _rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(
+            scope,
+            _spec.slotKey);
+
+        if (_rigRefs == null)
+            return false;
+
+        _moveRect = _rigRefs.GetRect(_spec.moveTarget);
+
+        return _moveRect != null;
     }
 
-    private void ClaimTarget(CommandRunScope scope)
+    private bool TryClaimTarget(CommandRunScope scope)
     {
+        if (_moveRect == null)
+            return false;
+
+        // 같은 moveRect에 걸린 이전 placement/focus tween은 최종 상태로 커밋하고 이어받는다.
+        // 외부 placement 조상(place_to 등)의 잔여 이동량은 CharacterPlacementTargetLedger가 보정한다.
         _moveRect.DOKill(true);
 
         _startPosition = _moveRect.anchoredPosition;
 
-        ComputeDestination(scope);
+        if (!TryComputeDestination(scope))
+            return false;
+
+        PublishSettledTarget();
 
         HasClaimedTarget = true;
+        return true;
     }
 
-    private void ComputeDestination(CommandRunScope scope)
+    private bool TryComputeDestination(CommandRunScope scope)
     {
-        CharacterFocusPlacementSolver.TryCalculateFocusPlacement(
+        return CharacterFocusPlacementSolver.TryCalculateFocusPlacement(
             scope,
             _spec.slotKey,
             _moveRect,
@@ -128,14 +153,31 @@ public sealed class PlaceCharacterFocusCommandCharR : CommandBase
             _focusTuningDb,
             _spec.screenPoint,
             _spec.screenOffset,
-            out Vector2 destPos);
+            out _destination);
+    }
 
-        _destination = destPos;
+    private void PublishSettledTarget()
+    {
+        if (_rigRefs == null || _moveRect == null)
+            return;
+
+        _rigRefs.PlacementTargets.Publish(_moveRect, _destination);
+    }
+
+    private void ClearSettledTarget()
+    {
+        if (_rigRefs == null || _moveRect == null)
+            return;
+
+        _rigRefs.PlacementTargets.Clear(_moveRect);
     }
 
     private void CommitFinalState()
     {
-        _moveRect.anchoredPosition = _destination;
+        if (_moveRect != null)
+            _moveRect.anchoredPosition = _destination;
+
+        ClearSettledTarget();
 
         HasClaimedTarget = false;
         _tween = null;
@@ -147,10 +189,17 @@ public sealed class PlaceCharacterFocusCommandCharR : CommandBase
     {
         if (!HasClaimedTarget)
             return;
-        
-        _tween.Kill(false);
+
+        if (_tween != null && _tween.IsActive())
+            _tween.Kill(false);
 
         float duration = CalculateAcceleratedRemainingDuration();
+
+        if (duration <= 0f)
+        {
+            CommitFinalState();
+            return;
+        }
 
         _tween = _moveRect
             .DOAnchorPos(_destination, duration)
@@ -162,16 +211,24 @@ public sealed class PlaceCharacterFocusCommandCharR : CommandBase
 
     private float CalculateAcceleratedRemainingDuration()
     {
-        float originalDistance = Vector2.Distance(_startPosition, _destination);
-        float remainingDistance = Vector2.Distance(_moveRect.anchoredPosition, _destination);
+        float originalDistance =
+            Vector2.Distance(_startPosition, _destination);
+
+        float remainingDistance =
+            Vector2.Distance(_moveRect.anchoredPosition, _destination);
 
         if (originalDistance <= 0.001f || remainingDistance <= 0.001f)
             return 0f;
 
-        float remainingRatio = Mathf.Clamp01(remainingDistance / originalDistance);
-        float remainingDuration = _spec.duration * remainingRatio;
+        float remainingRatio =
+            Mathf.Clamp01(remainingDistance / originalDistance);
 
-        return Mathf.Max(0.01f, remainingDuration / StepFinishSpeedUpMultiplier);
+        float remainingDuration =
+            _spec.duration * remainingRatio;
+
+        return Mathf.Max(
+            0.01f,
+            remainingDuration / StepFinishSpeedUpMultiplier);
     }
 
     #endregion
