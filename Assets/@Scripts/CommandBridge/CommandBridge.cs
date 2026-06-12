@@ -87,6 +87,7 @@ public sealed partial class YarnCommandBridge
         BindControl(runner);
 
         BindCharRigSetup(runner);
+        BindCharRigStaging(runner);
         BindCharRigBasic(runner);
         BindCharRigActing(runner);
         BindCharRigIdle(runner);
@@ -96,7 +97,7 @@ public sealed partial class YarnCommandBridge
         BindCharRigEmote(runner);
 
         BindBackgroundRig(runner);
-        BindShotResponse(runner);
+        BindShotStaging(runner);
 
         BindTransition(runner);
         BindAudio(runner);
@@ -104,7 +105,6 @@ public sealed partial class YarnCommandBridge
         BindScreenEffects(runner);
     }
     
-
     private void BindControl(DialogueRunner runner)
     {
         runner.AddCommandHandler<float>("pause", EnqueueWaitSpec);
@@ -112,28 +112,56 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler<string>("debug_log", LogImmediate);
         runner.AddCommandHandler<string, string, string>("attach_to_bg", EnqueueAttachCharRigToBackgroundObjectSlotSpec);
     }
-    
 
     private void BindCharRigSetup(DialogueRunner runner)
     {
         runner.AddCommandHandler<string, string>("slot", EnqueueSetupCharRigSpec);
-        
         runner.AddCommandHandler<string, string, string, string, string>("cast", EnqueueCastCharacterSpec);
-        
         runner.AddCommandHandler<string, string, string, string>("pose", EnqueueSetPortraitSpriteSpec);
+        runner.AddCommandHandler<string, string>("fit", EnqueueSetOriginSizeCommandSpec);
+    }
+    
+    private void BindCharRigStaging(DialogueRunner runner)
+    {
         runner.AddCommandHandler<string, string, bool, bool>("place", EnqueueSetAnchorSpecs);
         runner.AddCommandHandler<string, string, float>("place_to", EnqueuePlaceToSpec);
-        runner.AddCommandHandler<string, string>("size", EnqueueSetOriginSizeSpec);
         
-        runner.AddCommandHandler<string, int, int, float>("position_by", EnqueueSetAnchorOffsetSpecs);
-        runner.AddCommandHandler<string, float, float>("size_by", EnqueueSizeBySpec);
+        runner.AddCommandHandler<string, int, int, float>("move_by", EnqueueSetAnchorOffsetSpecs);
+        runner.AddCommandHandler<string, float, float>("scale_by", EnqueueSizeBySpec);
         runner.AddCommandHandler<string, float, float>("rotate_by", EnqueueRotateBySpec);
-        
-        runner.AddCommandHandler<string, float>("position_reset", EnqueueSetPlaceResetSpecs);
-        runner.AddCommandHandler<string, float>("size_reset", EnqueueSizeResetSpec);
-        runner.AddCommandHandler<string, float>("rotate_reset", EnqueueRotateResetSpec);
-    }
 
+        runner.AddCommandHandler<string, float>("move_reset", EnqueueSetPlaceResetSpecs);
+        runner.AddCommandHandler<string, float>("scale_reset", EnqueueSizeResetSpec);
+        runner.AddCommandHandler<string, float>("rotate_reset", EnqueueRotateResetSpec);
+
+        runner.AddCommandHandler<string, string, string, float>("focus_to", EnqueuePlaceCharacterFocusSpec);
+    }
+    
+    private void BindShotStaging(DialogueRunner runner)
+    {
+        runner.AddCommandHandler<string, string, string, float, float>("shot_focus_to", EnqueueShotZoomFocusSpec);
+        runner.AddCommandHandler<float, float, float, float>          ("shot_to",       EnqueueShotToSpec);
+        runner.AddCommandHandler<float, float>                        ("shot_zoom",     EnqueueShotZoomSpec);
+        runner.AddCommandHandler<float, float, float>                 ("shot_track",    EnqueueShotTrackSpec);
+        runner.AddCommandHandler<float>                               ("shot_reset",    EnqueueShotResetSpec);
+        
+        runner.AddCommandHandler<string>("shot_bind_bg", EnqueueRegisterBackgroundResponseBindingSpec);
+        runner.AddCommandHandler<string>("shot_bind_char_far", EnqueueRegisterCharacterResponseBindingSpec0);
+        runner.AddCommandHandler<string>("shot_bind_char_close", EnqueueRegisterCharacterResponseBindingSpec1);
+        
+        runner.AddCommandHandler<string, string>("shot_unbind_bg", EnqueueRemoveBackgroundResponseBindingSpec);
+        runner.AddCommandHandler<string, string>("shot_unbind_char", EnqueueRemoveCharacterResponseBindingSpec);
+    }
+    
+    private void BindCharRigActing(DialogueRunner runner)
+    {
+        runner.AddCommandHandler<string, string>("dip", EnqueueDipInOutSpec);
+        runner.AddCommandHandler<string, int, float, float, float>("hop", EnqueueHopSpec);
+        runner.AddCommandHandler<string, string, float, float, int>("shake", EnqueueJoltSpecShake);
+        runner.AddCommandHandler<string, float, float, float, string>("tremble", EnqueueTrembleSpec);
+        runner.AddCommandHandler<string>("sway", EnqueueSwaySpec);
+    }
+    
     private void BindCharRigBasic(DialogueRunner runner)
     {
         runner.AddCommandHandler<string, float>("fade_in", EnqueueFadeInSpec);
@@ -144,38 +172,17 @@ public sealed partial class YarnCommandBridge
         
         runner.AddCommandHandler<string, float, float, float, float>("color_to", EnqueueColorToSpec);
         
-        runner.AddCommandHandler<string, string, float>("slide_in", EnqueueSlideInSpec);
-        runner.AddCommandHandler<string, string, float>("slide_out", EnqueueSlideOutSpec);
+        runner.AddCommandHandler<string, string, float>("char_slide_in", EnqueueSlideInSpec);
+        runner.AddCommandHandler<string, string, float>("char_slide_out", EnqueueSlideOutSpec);
         
-        runner.AddCommandHandler<string, float, float, float>("move_by", EnqueueMoveByCharSpec);
-        runner.AddCommandHandler<string, float, float>("scale_to", EnqueueScaleToSpec);
+        runner.AddCommandHandler<string, float, float, float>("char_move_to", EnqueueMoveByCharSpec);
+        runner.AddCommandHandler<string, float, float>("char_scale_to", EnqueueScaleToSpec);
         
-        runner.AddCommandHandler<string, int, float>("tilt_to", EnqueuePivotRotateToSpec);
-        runner.AddCommandHandler<string, int, float>("flip_horizontal", EnqueueFlipHorizontalSpec);
-        runner.AddCommandHandler<string, int, float>("flip_vertical", EnqueueFlipVerticalSpec);
-    
+        runner.AddCommandHandler<string, int, float>("char_rotate_to", EnqueuePivotRotateToSpec);
+        runner.AddCommandHandler<string, int, float>("char_flip_horizontal", EnqueueFlipHorizontalSpec);
+        runner.AddCommandHandler<string, int, float>("char_flip_vertical", EnqueueFlipVerticalSpec);
     }
     
-    private void BindCharRigActing(DialogueRunner runner)
-    {
-        runner.AddCommandHandler<string, string>("dip", EnqueueDipInOutSpec);
-        
-        runner.AddCommandHandler<string, int, float, float, float>("hop", EnqueueHopSpec);
-        
-        runner.AddCommandHandler<string, string, float, float, int>("shake", EnqueueJoltSpecShake);
-        runner.AddCommandHandler<string, float, float, float, string>("tremble", EnqueueTrembleSpec);
-        
-        runner.AddCommandHandler<string>("sway", EnqueueSwaySpec);
-    }
-    
-    private void BindCharRigIdle(DialogueRunner runner)
-    {
-        runner.AddCommandHandler<string, float, float, float, float>("idle_bounce", EnqueueBounceInPlaceSpec);
-        runner.AddCommandHandler<string, float, float, float>("idle_breathe", EnqueueBreathInPlaceSpec);
-        runner.AddCommandHandler<string, float, float, float, float, float, string>("idle_flinch", EnqueueTremblePulseSpec);
-        runner.AddCommandHandler<string, float, float, float, float>("idle_walk", EnqueueWalkInPlaceSpec);
-    }
-
     private void BindCharRigPreset(DialogueRunner runner)
     {
         runner.AddCommandHandler<string, string>("jolt", EnqueueJoltSpec);
@@ -192,8 +199,6 @@ public sealed partial class YarnCommandBridge
     
     private void BindCharRigComposition(DialogueRunner runner)
     {
-        runner.AddCommandHandler<string, string, string, float>("char_place", EnqueuePlaceCharacterFocusSpec);
-        
         runner.AddCommandHandler<string, float, float>("char_focus", EnqueueCharFocusSpec);
         runner.AddCommandHandler<string, float, float, float>("char_defocus", EnqueueCharDefocusSpec);
         runner.AddCommandHandler<string, float>("char_clear_focus", EnqueueCharClearFocusSpec);
@@ -221,6 +226,14 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler<string, string>("emoji_tremble", EnqueueEmojiTrembleSpec);
         
         runner.AddCommandHandler<string, string>("emoji_set", EnqueueEmojiSetSpec); // Raw set only.
+    }
+    
+    private void BindCharRigIdle(DialogueRunner runner)
+    {
+        runner.AddCommandHandler<string, float, float, float, float>("idle_bounce", EnqueueBounceInPlaceSpec);
+        runner.AddCommandHandler<string, float, float, float>("idle_breathe", EnqueueBreathInPlaceSpec);
+        runner.AddCommandHandler<string, float, float, float, float, float, string>("idle_flinch", EnqueueTremblePulseSpec);
+        runner.AddCommandHandler<string, float, float, float, float>("idle_walk", EnqueueWalkInPlaceSpec);
     }
     
     private void BindBackgroundRig(DialogueRunner runner)
@@ -251,23 +264,6 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler<string, float, float>("bg_defocus", EnqueueBackgroundDefocusSpec);
         runner.AddCommandHandler<string, float, float, int, string, float>("bg_defocus_custom", EnqueueBackgroundDefocusCustomSpec);
         runner.AddCommandHandler<string, float>("bg_defocus_clear", EnqueueBackgroundDefocusClearSpec);
-    }
-    
-    private void BindShotResponse(DialogueRunner runner)
-    {
-        runner.AddCommandHandler<string>("shot_bind_bg_response", EnqueueRegisterBackgroundResponseBindingSpec);
-        runner.AddCommandHandler<string>("bind_response_char0", EnqueueRegisterCharacterResponseBindingSpec0);
-        runner.AddCommandHandler<string>("bind_response_char1", EnqueueRegisterCharacterResponseBindingSpec1);
-        
-        runner.AddCommandHandler<string, string>("shot_unbind_bg_response", EnqueueRemoveBackgroundResponseBindingSpec);
-        runner.AddCommandHandler<string, string>("shot_unbind_char_response", EnqueueRemoveCharacterResponseBindingSpec);
-
-        runner.AddCommandHandler<string, string, string, float, float>("shot_zoom_focus", EnqueueShotZoomFocusSpec);
-        runner.AddCommandHandler<float, float, float, float>("shot_to", EnqueueShotToSpec);
-        runner.AddCommandHandler<float>("shot_reset", EnqueueShotResetSpec);
-
-        runner.AddCommandHandler<float, float>("shot_zoom", EnqueueShotZoomSpec);
-        runner.AddCommandHandler<float, float, float>("shot_track", EnqueueShotTrackSpec);
     }
     
     private void BindTransition(DialogueRunner runner)

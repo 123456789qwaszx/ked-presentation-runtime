@@ -24,21 +24,21 @@ position: -2,-160
 <<cast char2 Noya duoright>>
 <<pose char2 Noya a 15>>
 <<size char2 close>>
-<<place_offset char2 0 -800>>
+<<position_by char2 0 -800>>
 
 
 <<cast char3 Iris duoleft>>
 <<pose char3 Iris a 7>>
 <<size char3 close>>
-<<place_offset char3 0 -800>>
+<<place_by char3 0 -800>>
 
 <<cast char4 Amber>>
 <<pose char4 Amber a 12>>
 
 <<attach_to_bg char4 bg2>>
 
-<<shot_bind_char_response char2>>
-<<shot_bind_char_response char3>>
+<<bind_response_char0 char2>>
+<<bind_response_char0 char3>>
 
 === 
 

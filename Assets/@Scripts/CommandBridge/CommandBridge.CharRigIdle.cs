@@ -53,7 +53,8 @@ public sealed partial class YarnCommandBridge
     {
         var spec = new BounceInPlaceCommandSpecCharR
         {
-            slotKey = roleKey.Trim(),
+            slotKey = roleKey,
+            target = CharacterRigTarget.CharSlot_Track_Idle,
             duration = duration,
             bouncesPerSecond = bouncesPerSecond,
             height = height,
@@ -77,8 +78,8 @@ public sealed partial class YarnCommandBridge
     {
         var spec = new BreathInPlaceCommandSpecCharR
         {
-            slotKey = roleKey.Trim(),
-            target = CharacterRigTarget.CharacterPortrait_Track_Y,
+            slotKey = roleKey,
+            target = CharacterRigTarget.CharSlot_Track_Idle,
             duration = duration,
             breathsPerSecond = breathsPerSecond,
             height = height,
@@ -108,8 +109,8 @@ public sealed partial class YarnCommandBridge
 
         var spec = new TrembleCommandSpecCharR
         {
-            slotKey = roleKey.Trim(),
-            target = CharacterRigTarget.CharacterPortrait_Shake,
+            slotKey = roleKey,
+            target = CharacterRigTarget.CharSlot_Track_Idle,
             direction = dir,
             duration = duration,
             strength = strength,
@@ -136,7 +137,8 @@ public sealed partial class YarnCommandBridge
     {
         var spec = new WalkInPlaceCommandSpecCharR
         {
-            slotKey = roleKey.Trim(),
+            slotKey = roleKey,
+            target = CharacterRigTarget.CharSlot_Track_Idle,
             duration = duration,
             stepsPerSecond = stepsPerSecond,
             arcHeight = arcHeight,

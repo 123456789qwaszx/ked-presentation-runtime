@@ -33,7 +33,7 @@ public sealed partial class YarnCommandBridge
 
         EnqueueSetPortraitSpriteSpec(slotKey, characterKey, variantKey, "2");
         EnqueueSetAnchorSpecs(slotKey, positionPreset);
-        EnqueueSetOriginSizeSpec(slotKey, scaleArg);
+        EnqueueSetOriginSizeCommandSpec(slotKey, scaleArg);
     }
     
     private void EnqueueSetPortraitSpriteSpec(string slotKey, 
@@ -87,7 +87,7 @@ public sealed partial class YarnCommandBridge
         Collect(spec);
     }
     
-    private void EnqueueSetOriginSizeSpec(string roleKey, string scaleArg)
+    private void EnqueueSetOriginSizeCommandSpec(string roleKey, string scaleArg)
     {
         if (YarnNumberParser.TryParseFloat(scaleArg, out float absoluteScale))
         {
@@ -124,6 +124,7 @@ public sealed partial class YarnCommandBridge
         {
             slotKey = slotKey,
             target = CharacterRigTarget.CharSlot_Track,
+            useAbsolutePosition = true,
             delta = new Vector2(x, y),
             duration = duration
         };

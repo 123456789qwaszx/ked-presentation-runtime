@@ -8,7 +8,7 @@ using UnityEngine;
 public sealed class TrembleCommandSpecCharR : CharacterRigCommandSpecBase
 {
     [Header("Target")]
-    public CharacterRigTarget target = CharacterRigTarget.CharacterPortrait_Shake;
+    public CharacterRigTarget target = CharacterRigTarget.CharSlot_Track_Idle;
 
     [Header("Tremble")]
     [Tooltip("흔들림 강도. 픽셀 단위.")]
