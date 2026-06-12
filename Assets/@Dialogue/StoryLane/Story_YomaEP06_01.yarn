@@ -25,25 +25,27 @@ title: Story_YomaEP06_01
 ---
 
 <<beat Setup_YomaEP06_01>>
-<<move_by c2 0 -420 2>>
 <<fade_in c1>>
-<<fade_in c2>>
 예전의 일이다.
 <<focus_to c1 face center>>
-//<<move_by c1 0 -200>>
 나는 크게 앓아 감기에 누워있었고, 그것을 보던 할아버지가 커다란 호랑이 그림을 사오셨다.
-<<scale_by c1 1.7>>
+<<scale_by c1 1.7 3>>
+<<focus_to c1 bust left>>
 
 
-//<<shot_focus_to c1 bust center 7>>
 분명 악귀를 내쫒아 낼거라고.
-<<move_by c1 303 00 3>>
+<<shot_focus_to c1 bust left 7>>
 하지만 그날밤 나는 가위에 눌린채, 커다란 호랑이가 나오는 꿈을 꾸기 시작했다.
 
+<<move_by c1 -330 80 >>
+<<focus_to c1 bust bottom 2>>
 
-<<move_by c2 -300 0 4>>
 첫날에는 현관문 밖을 어슬렁 거렸고,
+<<scale_reset c1>>
+<<focus_to c1 face left 2>>
 둘쨋날 밤에는 현관문을 너머 집앞을 돌아다니기 시작했으며,
+<<pres_start Pres_Hop>>
+
 세번째 날에는 내가 있는 방문 앞까지도 들어왔다.
 
 네번째 날,

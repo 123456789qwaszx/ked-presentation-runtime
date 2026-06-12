@@ -18737,16 +18737,16 @@ MonoBehaviour:
   _showGridLines: 1
   _showFocusPoints: 1
   _showLabels: 1
-  _lineColor: {r: 1, g: 0.85, b: 0, a: 0.75}
+  _lineColor: {r: 0.95512486, g: 1, b: 0, a: 0.75}
   _innerLineColor: {r: 1, g: 0.95, b: 0, a: 0.35}
   _pointColor: {r: 1, g: 0.95, b: 0, a: 1}
   _innerPointColor: {r: 0.65, g: 1, b: 1, a: 1}
-  _labelColor: {r: 1, g: 0.95, b: 0, a: 1}
-  _lineThickness: 2
-  _innerLineThickness: 1
-  _pointSize: 8
-  _innerPointSize: 7
-  _labelFontSize: 12
+  _labelColor: {r: 0.01886791, g: 0.017906018, b: 0, a: 1}
+  _lineThickness: 3
+  _innerLineThickness: 2
+  _pointSize: 12
+  _innerPointSize: 8
+  _labelFontSize: 14
 --- !u!4 &1928200880
 Transform:
   m_ObjectHideFlags: 0

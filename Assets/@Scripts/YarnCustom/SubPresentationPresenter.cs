@@ -1,16 +1,19 @@
+using System;
 using System.Threading;
 using UnityEngine;
 using Yarn.Unity;
 
 public sealed class SubPresentationPresenter : DialoguePresenterBase
 {
+    private const string MainFree = "main_free";
+    
     private YarnBridgePlaybackDriver _playbackDriver;
     private VNSideRunnerSyncHub _syncHub;
     private IYarnLaneDebugSink _debugSink;
     
     private string _currentNodeName;
     
-    private CancellationTokenSource _presenterLifetimeCts = new CancellationTokenSource();
+    private CancellationTokenSource _presenterLifetimeCts = new ();
 
     
     public void Initialize(
@@ -46,32 +49,32 @@ public sealed class SubPresentationPresenter : DialoguePresenterBase
     public override async YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token)
     {
         _debugSink?.SetPresentation(_currentNodeName, line.TextWithoutCharacterName.Text);
-        
+
+        bool blockMain = ShouldBlockMain(line);
+
         CommandRunTicket ticket = _playbackDriver.PlayCollected();
 
+        if (!blockMain)
+            _syncHub.NotifyPresentationForwardSettled();
+        
         bool cancelledDuringEntry = await WaitUntilCommandEntryClosedAsync(ticket, token);
 
-        // Forward settle handshake (Phase 2):
-        // The command entry phase for this beat has resolved. For wait=true commands this
-        // is the completion point, so a held beat naturally delays this signal. Raise it
-        // once per beat — before the ready/released branch — so main forward flow can wait
-        // for sub holds without coupling to the seek-only ready signal. This is decoupled
-        // from NotifyPresentationLaneReady on purpose.
-        _syncHub?.NotifyPresentationForwardSettled();
+        // For wait=true commands this is the completion point, so a held beat naturally delays this signal.
+        // Raise it once per beat — before the ready/released branch.
+        // so main forward flow can wait for sub holds without coupling to the seek-only ready signal.
+        if (blockMain)
+            _syncHub.NotifyPresentationForwardSettled();
+
+        bool tornDown = cancelledDuringEntry || token.NextContentToken.IsCancellationRequested;
 
         // 취소(rollback / stop / 직전 라인의 RequestNextLine)로 무너진 라인은
         // "완료된 advance"로 취급하면 안 된다. 그러면 pending을 소모하고
         // RequestNextLine을 한 번 더 쳐서 질주한다.
         // 대신 main 대기만 풀어준다.
-        bool tornDown = cancelledDuringEntry || token.NextContentToken.IsCancellationRequested;
-
-        if (_syncHub != null)
-        {
-            if (tornDown)
-                _syncHub.NotifyPresentationLaneReleased();
-            else
-                _syncHub.NotifyPresentationLaneReady();
-        }
+        if (tornDown) 
+            _syncHub.NotifyPresentationLaneReleased();
+        else
+            _syncHub.NotifyPresentationLaneReady();
 
         try
         {
@@ -107,16 +110,10 @@ public sealed class SubPresentationPresenter : DialoguePresenterBase
         if (ticket.EntryCompletedSuccessfully)
             return;
 
+        // Normal case
         if (ticket.EntryInterruptedNormally)
-        {
-            // Normal case:
-            // Rollback/load/stop interrupted the batch while a wait=true command
-            // was still holding the SequencePlayer entry loop.
-            //
-            // Do not warn here. This is not a command failure.
             return;
-        }
-
+        
         if (ticket.EntryFailed)
         {
             Debug.LogWarning(
@@ -167,5 +164,16 @@ public sealed class SubPresentationPresenter : DialoguePresenterBase
         }
 
         _presenterLifetimeCts = new CancellationTokenSource();
+    }
+    
+    private static bool ShouldBlockMain(LocalizedLine line)
+    {
+        foreach (string metadata in line.Metadata)
+        {
+            if (string.Equals(metadata, MainFree, StringComparison.OrdinalIgnoreCase))
+                return false;
+        }
+
+        return true;
     }
 }
