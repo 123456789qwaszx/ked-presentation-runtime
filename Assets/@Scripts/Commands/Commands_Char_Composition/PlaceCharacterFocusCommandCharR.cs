@@ -65,11 +65,10 @@ public sealed class PlaceCharacterFocusCommandCharR : CommandBase
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
-        if (!TryResolveRefs(scope))
-            yield break;
+        if(!_resolveAttempted)
+            ResolveRefs(scope);
 
-        if (!TryClaimTarget(scope))
-            yield break;
+        ClaimTarget(scope);
 
         if (_spec.duration <= 0f)
         {
@@ -90,60 +89,37 @@ public sealed class PlaceCharacterFocusCommandCharR : CommandBase
 
     protected override void OnSkip(CommandRunScope scope)
     {
-        if (!TryResolveRefs(scope))
-            return;
+        if(!_resolveAttempted)
+            ResolveRefs(scope);
 
         if (!HasClaimedTarget)
-        {
-            if (!TryClaimTarget(scope))
-                return;
-        }
+            ClaimTarget(scope);
 
         CommitFinalState();
     }
 
-    private bool TryResolveRefs(CommandRunScope scope)
+    private void ResolveRefs(CommandRunScope scope)
     {
-        if (_resolveAttempted)
-            return _rigRefs != null && _moveRect != null;
-
-        _resolveAttempted = true;
-
-        _rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(
-            scope,
-            _spec.slotKey);
-
-        if (_rigRefs == null)
-            return false;
-
+        _rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
         _moveRect = _rigRefs.GetRect(_spec.moveTarget);
-
-        return _moveRect != null;
+        
+        _resolveAttempted = true;
     }
 
-    private bool TryClaimTarget(CommandRunScope scope)
+    private void ClaimTarget(CommandRunScope scope)
     {
-        if (_moveRect == null)
-            return false;
-
-        // 같은 moveRect에 걸린 이전 placement/focus tween은 최종 상태로 커밋하고 이어받는다.
-        // 외부 placement 조상(place_to 등)의 잔여 이동량은 CharacterPlacementTargetLedger가 보정한다.
         _moveRect.DOKill(true);
 
         _startPosition = _moveRect.anchoredPosition;
+        CalculateFocusPlacement(scope);
 
-        if (!TryComputeDestination(scope))
-            return false;
-
-        PublishSettledTarget();
-
+        _rigRefs.PlacementTargets.Publish(_moveRect, _destination);
         HasClaimedTarget = true;
-        return true;
     }
 
-    private bool TryComputeDestination(CommandRunScope scope)
+    private void CalculateFocusPlacement(CommandRunScope scope)
     {
-        return CharacterFocusPlacementSolver.TryCalculateFocusPlacement(
+        CharacterFocusPlacementSolver.TryCalculateFocusPlacement(
             scope,
             _spec.slotKey,
             _moveRect,
@@ -156,28 +132,10 @@ public sealed class PlaceCharacterFocusCommandCharR : CommandBase
             out _destination);
     }
 
-    private void PublishSettledTarget()
-    {
-        if (_rigRefs == null || _moveRect == null)
-            return;
-
-        _rigRefs.PlacementTargets.Publish(_moveRect, _destination);
-    }
-
-    private void ClearSettledTarget()
-    {
-        if (_rigRefs == null || _moveRect == null)
-            return;
-
-        _rigRefs.PlacementTargets.Clear(_moveRect);
-    }
-
     private void CommitFinalState()
     {
-        if (_moveRect != null)
-            _moveRect.anchoredPosition = _destination;
-
-        ClearSettledTarget();
+        _moveRect.anchoredPosition = _destination;
+        _rigRefs.PlacementTargets.Clear(_moveRect);
 
         HasClaimedTarget = false;
         _tween = null;
@@ -195,12 +153,6 @@ public sealed class PlaceCharacterFocusCommandCharR : CommandBase
 
         float duration = CalculateAcceleratedRemainingDuration();
 
-        if (duration <= 0f)
-        {
-            CommitFinalState();
-            return;
-        }
-
         _tween = _moveRect
             .DOAnchorPos(_destination, duration)
             .SetEase(_spec.ease)
@@ -211,24 +163,13 @@ public sealed class PlaceCharacterFocusCommandCharR : CommandBase
 
     private float CalculateAcceleratedRemainingDuration()
     {
-        float originalDistance =
-            Vector2.Distance(_startPosition, _destination);
-
-        float remainingDistance =
-            Vector2.Distance(_moveRect.anchoredPosition, _destination);
-
-        if (originalDistance <= 0.001f || remainingDistance <= 0.001f)
-            return 0f;
-
-        float remainingRatio =
-            Mathf.Clamp01(remainingDistance / originalDistance);
-
-        float remainingDuration =
-            _spec.duration * remainingRatio;
-
-        return Mathf.Max(
-            0.01f,
-            remainingDuration / StepFinishSpeedUpMultiplier);
+        float originalDistance = Vector2.Distance(_startPosition, _destination);
+        float remainingDistance = Vector2.Distance(_moveRect.anchoredPosition, _destination);
+        
+        float remainingRatio = Mathf.Clamp01(remainingDistance / originalDistance);
+        float remainingDuration = _spec.duration * remainingRatio;
+        
+        return Mathf.Max(0.01f, remainingDuration / StepFinishSpeedUpMultiplier);
     }
 
     #endregion

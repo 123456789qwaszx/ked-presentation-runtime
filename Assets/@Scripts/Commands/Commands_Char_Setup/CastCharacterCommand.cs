@@ -19,9 +19,6 @@ public sealed class CastCharacterCommandSpec : CommandSpecBase
     [Header("Character Identity")]
     [Tooltip("이 slotKey에 바인딩할 캐릭터 키.")]
     public string characterKey;
-
-    [Tooltip("의상/변형 키. 예: a, b. 비우면 emotion command에서 기본 a로 처리합니다.")]
-    public string variantKey = "";
 }
 public sealed class CastCharacterCommand : CommandBase
 {
@@ -47,14 +44,12 @@ public sealed class CastCharacterCommand : CommandBase
     {
         string slotKey = _spec.slotKey;
         string characterKey = _spec.characterKey;
-        string variantKey = _spec.variantKey;
 
-        scope.CastRegistry.CastCharRig(slotKey, characterKey, variantKey);
-        
-        
+        scope.CastRegistry.CastCharRig(slotKey, characterKey);
+
         ApplyFocusPreviewMarkerRoleKey(scope, slotKey, characterKey);
     }
-    
+
     private static void ApplyFocusPreviewMarkerRoleKey(
         CommandRunScope scope,
         string slotKey,
@@ -62,9 +57,7 @@ public sealed class CastCharacterCommand : CommandBase
     {
         CharacterRigRefs rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, slotKey);
         RectTransform extensionsRoot = rigRefs.GetRect(CharacterRigTarget.Character_ExtensionsRoot);
-
-        CharacterFocusPreviewMarker[] markers =
-            extensionsRoot.GetComponentsInChildren<CharacterFocusPreviewMarker>(true);
+        CharacterFocusPreviewMarker[] markers = extensionsRoot.GetComponentsInChildren<CharacterFocusPreviewMarker>();
 
         if (markers == null || markers.Length == 0)
             return;

@@ -14,21 +14,42 @@ public sealed class CastRegistry
             this.character = character;
             this.variant = variant;
         }
+
+        public CastBinding WithVariant(string newVariant)
+        {
+            return new CastBinding(character, newVariant);
+        }
     }
-    
+
     private readonly Dictionary<string, CastBinding> _slotToBinding = new(StringComparer.Ordinal);
     private readonly Dictionary<string, string> _characterToSlot = new(StringComparer.Ordinal);
-    
-    public void CastCharRig(string slotKey, string characterKey, string variantKey)
+
+    public void CastCharRig(string slotKey, string characterKey)
     {
         if (string.IsNullOrEmpty(slotKey) || string.IsNullOrEmpty(characterKey))
             return;
-        
-        if(IsCast(slotKey))
+
+        if (IsCast(slotKey))
             UncastCharRig(slotKey);
 
-        _slotToBinding[slotKey] = new CastBinding(characterKey, variantKey);
+        _slotToBinding[slotKey] = new CastBinding(characterKey, "");
         _characterToSlot[characterKey] = slotKey;
+    }
+
+    public bool SetVariant(string slotKey, string variantKey)
+    {
+        if (!_slotToBinding.TryGetValue(slotKey, out CastBinding binding))
+        {
+            Debug.LogWarning(
+                $"[CastRegistry] SetVariant failed. Binding not found. " +
+                $"slotKey='{slotKey}', variantKey='{variantKey}'. " +
+                $"Expected order: SetupCommand -> CastCommand -> PoseCommand.");
+
+            return false;
+        }
+
+        _slotToBinding[slotKey] = binding.WithVariant(variantKey);
+        return true;
     }
 
     public bool UncastCharRig(string slotKey)
@@ -47,13 +68,14 @@ public sealed class CastRegistry
     {
         if (!_slotToBinding.TryGetValue(slotKey, out CastBinding binding))
         {
-            Debug.LogWarning($"[CastRegistry] Binding not found. slotKey='{slotKey}'." +
-                             $" Expected order: SetupCommand -> CastCommand -> PortraitCommand.");
-            
+            Debug.LogWarning(
+                $"[CastRegistry] Binding not found. slotKey='{slotKey}'. " +
+                $"Expected order: SetupCommand -> CastCommand -> PortraitCommand.");
+
             characterKey = null;
             return false;
         }
-        
+
         characterKey = binding.character;
         return true;
     }
@@ -62,9 +84,10 @@ public sealed class CastRegistry
     {
         if (!_slotToBinding.TryGetValue(slotKey, out CastBinding binding))
         {
-            Debug.LogWarning($"[CastRegistry] Binding not found. slotKey='{slotKey}'." +
-                             $" Expected order: SetupCommand -> CastCommand -> PortraitCommand.");
-            
+            Debug.LogWarning(
+                $"[CastRegistry] Binding not found. slotKey='{slotKey}'. " +
+                $"Expected order: SetupCommand -> CastCommand -> PoseCommand.");
+
             variantKey = null;
             return false;
         }
@@ -72,19 +95,18 @@ public sealed class CastRegistry
         variantKey = binding.variant;
         return true;
     }
-    
+
     public bool TryGetSlotKey(string characterKey, out string slotKey)
     {
         return _characterToSlot.TryGetValue(characterKey, out slotKey);
     }
-    
+
     public void Clear()
     {
         _slotToBinding.Clear();
         _characterToSlot.Clear();
     }
-    
-    
+
     private bool IsCast(string targetKey)
     {
         if (_characterToSlot.ContainsKey(targetKey))

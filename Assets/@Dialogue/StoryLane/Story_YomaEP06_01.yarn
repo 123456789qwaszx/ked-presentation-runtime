@@ -2,55 +2,45 @@
 ---
 
 <<shot_reset>>
-// <<screen_vignette_clear>>
 
 <<bg_spawn bg1 ep12_01>>
-<<bg_size bg1 1.5>>
 
 <<slot c1>>
+<<cast c1 Leafia>>
+<<pose c1 a>>
+<<face c1 7>>
+<<size c1 normal>>
+
 <<slot c2>>
-<<slot c3>>
-<<slot c4>>
+<<cast c2 Willow>>
+<<pose c2 a>>
+<<face c2 5>>
+<<size c2 Close>>
 
-<<cast c1 Leafia left>>
-<<char_dim c1 0.8>>
-<<cast c2 Willow right>>
-<<cast c3 Amber center>>
+<<place c1 left>>
+<<place c2 right>>
 ===
-
-title: Setup_YomaEP06_02
----
-
-<<shot_reset>>
-<<screen_vignette_clear>>
-
-<<bg_spawn bg1 ep12_01>>
-<<bg_size bg1 1.5>>
-
-
-<<slot c3>>
-<<cast c3 Willow center>>
-
-===
-
-
  
-
 title: Story_YomaEP06_01
 ---
 
 <<beat Setup_YomaEP06_01>>
-예전의 일이다.
-나는 크게 앓아 감기에 누워있었고, 그것을 보던 할아버지가 커다란 호랑이 그림을 사오셨다.
-분명 악귀를 내쫒아 낼거라고.
-
+<<move_by c2 0 -420 2>>
 <<fade_in c1>>
-<<place_by c1 200 200 3>>
+<<fade_in c2>>
+예전의 일이다.
+<<focus_to c1 face center>>
+//<<move_by c1 0 -200>>
+나는 크게 앓아 감기에 누워있었고, 그것을 보던 할아버지가 커다란 호랑이 그림을 사오셨다.
+<<scale_by c1 1.7>>
+
+
+//<<shot_focus_to c1 bust center 7>>
+분명 악귀를 내쫒아 낼거라고.
+<<move_by c1 303 00 3>>
 하지만 그날밤 나는 가위에 눌린채, 커다란 호랑이가 나오는 꿈을 꾸기 시작했다.
 
 
-<<fade_in c2>>
-<<face c2 6>>
 <<move_by c2 -300 0 4>>
 첫날에는 현관문 밖을 어슬렁 거렸고,
 둘쨋날 밤에는 현관문을 너머 집앞을 돌아다니기 시작했으며,
@@ -76,23 +66,20 @@ title: Story_YomaEP06_02
 <<fade_in c2>>
  
 <<fade_in c3>>
-//<<bind_response_char c3>>
-//<<char_place c3 bust b2 0>>
 
 //<<shot_reset>>
-<<bind_response_char1 c1>>
-<<bind_response_char1 c2>> 
+<<shot_bind_char_far c1>>
+<<shot_bind_char_far c2>> 
 <<shot_reset>>
 
 <<char_visual c1 1 0 0.7>>
 <<char_visual c2 1 0 0.7>>
-//<<char_place c3 p2 ab2>>
 <<emoji c3 21>>
 엠버: ???? 여기가 어디지? 처음 오는 것 같은데... 왠지 낯이 익네.
-<<shot_zoom_focus c3 bust center 6 1.2>>
+<<shot_focus_to c3 bust center 6 1.2>>
 //<<char_focus c3>>
 //<<scale_to c3 1.2 1.2>>
-//<<position_by c3 0 -180 1.2>>
+//<<move_by c3 0 -180 1.2>>
 
 <<emoji c3 12>>
 ?????
@@ -101,7 +88,7 @@ title: Story_YomaEP06_02
 
 <<shot_zoom 10 2.2>> 
 Sasd
-<<shot_zoom_focus c3 face center 10 2.2>>
+<<shot_focus_to c3 face center 10 2.2>>
 
 ?????dd
 //<<shot_unbind_char_response c2>>
@@ -118,33 +105,33 @@ Sasd
 <<pause 0.1>>
 <<idle_breathe c2 99>>
 
-<<shot_zoom_focus c1 bust center 2 1.4>>
+<<shot_focus_to c1 bust center 2 1.4>>
 ??
-<<shot_zoom_focus c2 bust center 2 1.4>>
+<<shot_focus_to c2 bust center 2 1.4>>
 ????
 
-<<position_by c3 200 -700>>
-<<size_by c3 1.4>>
+<<move_by c3 200 -700>>
+<<scale_by c3 1.4>>
 <<rotate_by c3 3>>
 소영: 키우다니 뭘?
 //<<place_to c3 left>>
-<<position_by c3 -160 -240>>
+<<move_by c3 -160 -240>>
 <<char_place c3 bust center 1.1>>
 ,,,j
-<<position_by c3 -500 0 1.4>>
-<<shot_zoom_focus c3 bust center 2 1.4>>
+<<move_by c3 -500 0 1.4>>
+<<shot_focus_to c3 bust center 2 1.4>>
 
 ..
-<<position_by c3 -500 0 1.4>>
-<<shot_zoom_focus c3 bust center 2 1.4>>
+<<move_by c3 -500 0 1.4>>
+<<shot_focus_to c3 bust center 2 1.4>>
 ..
-<<size_reset c3>>
+<<scale_reset c3>>
 <<rotate_reset c3>>
-<<position_reset c3>>
+<<move_reset c3>>
 ...
 ??
-<<position_by c3 500 0 1.1>>
-<<shot_zoom_focus c3 bust center 10 1.4>>
+<<move_by c3 500 0 1.1>>
+<<shot_focus_to c3 bust center 10 1.4>>
 ???
 
 ????

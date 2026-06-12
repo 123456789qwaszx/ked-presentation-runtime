@@ -17,21 +17,24 @@ public sealed partial class YarnCommandBridge
         Collect(spec);
     }
     
-    private void EnqueueCastCharacterSpec(string slotKey, string characterKey, 
+    private void EnqueueCastCharacterSpec(
+        string slotKey,
+        string characterKey,
+        string variantKey = "a",
+        string emotionKey = "2",
         string positionPreset = "center",
-        string scaleArg = "normal",
-        string variantKey = "a")
+        string scaleArg = "normal")
     {
         var castSpec = new CastCharacterCommandSpec
         {
             slotKey = slotKey,
-            characterKey = characterKey,
-            variantKey = variantKey
+            characterKey = characterKey
         };
-        
+
         Collect(castSpec);
 
-        EnqueueSetPortraitSpriteSpec(slotKey, characterKey, variantKey, "2");
+        EnqueueSetPortraitPoseSpec(slotKey, variantKey);
+        EnqueueSetPortraitFaceSpec(slotKey, emotionKey);
         EnqueueSetAnchorSpecs(slotKey, positionPreset);
         EnqueueSetOriginSizeCommandSpec(slotKey, scaleArg);
     }
@@ -113,6 +116,34 @@ public sealed partial class YarnCommandBridge
         {
             target = CharacterRigTarget.CharSlot_Size,
             slotKey = roleKey, preset = preset,
+        };
+
+        Collect(spec);
+    }
+    
+    private void EnqueueSetPortraitPoseSpec(string slotKey, string variantKey)
+    {
+        var spec = new SetPortraitPoseCommandSpecCharR
+        {
+            slotKey = slotKey,
+            variantKey = variantKey,
+            defaultEmotionKey = PortraitResolver.DefaultEmotion
+        };
+
+        Collect(spec);
+    }
+    
+    private void EnqueueSetPortraitFaceSpec(string slotKey, string emotionKey)
+    {
+        var spec = new SetPortraitSpriteCommandSpecCharR
+        {
+            slotKey = slotKey,
+            portrait = new PortraitIdentity
+            {
+                character = "",
+                variant = "",
+                emotion = emotionKey
+            }
         };
 
         Collect(spec);

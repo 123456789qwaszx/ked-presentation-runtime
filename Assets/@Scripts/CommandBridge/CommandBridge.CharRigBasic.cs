@@ -26,7 +26,7 @@ public sealed partial class YarnCommandBridge
         Collect(spec);
     }
     
-    private void EnqueueColorToSpec(string roleKey, float r, float g, float b, float duration = 0.35f)
+    private void EnqueueSpriteColorToSpec(string roleKey, float r, float g, float b, float duration = 0.35f)
     {
         var spec = new ColorToCommandSpecCharR
         {
