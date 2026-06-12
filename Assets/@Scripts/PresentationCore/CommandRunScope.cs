@@ -14,7 +14,7 @@ public sealed class CommandRunScope
     public BackgroundRigRegistry BackgroundRigs => _stage.backgroundRigs;
     public CastRegistry CastRegistry => _stage.castRegistry;
 
-    public CharacterRigTargetAliasRegistry CharacterTargetAliases { get; } = new();
+    public CharacterRigTargetAliasRegistry CharacterTargetAliases => _stage.characterTargetAliases;
     
     private LifetimeScope StepLifetime { get; } = new();
     private LifetimeScope RunLifetime { get; } = new();
@@ -52,8 +52,6 @@ public sealed class CommandRunScope
     {
         CleanupStep(policy);
         CleanupRun(policy);
-
-        CharacterTargetAliases.Clear();
 
         Token = CancellationToken.None;
         SetNodeBusy(false);

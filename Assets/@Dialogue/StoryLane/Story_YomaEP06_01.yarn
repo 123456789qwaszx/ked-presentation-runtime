@@ -44,6 +44,10 @@ title: Story_YomaEP06_01
 <<scale_reset c1>>
 <<focus_to c1 face left 2>>
 둘쨋날 밤에는 현관문을 너머 집앞을 돌아다니기 시작했으며,
+
+
+<<pres_actor leafia>>
+<<pres_actor @2 willow>>
 <<pres_start Pres_Hop>>
 <<pres_pause>>
 

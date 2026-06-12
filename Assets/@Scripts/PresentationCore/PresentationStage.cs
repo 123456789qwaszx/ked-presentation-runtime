@@ -7,6 +7,9 @@ public sealed class PresentationStage
     public readonly CharacterRigRegistry characterRigs = new();
     public readonly BackgroundRigRegistry backgroundRigs = new();
     public readonly CastRegistry castRegistry = new();
+    
+    public readonly CharacterRigTargetAliasRegistry characterTargetAliases = new();
+
 
     // 무대 위 모든 오브젝트(rig/배경)를 파괴하고 cast를 비운다.
     // route/session 경계(로드·롤백 재시작, 에피소드 종료)에서만 호출.
@@ -16,5 +19,6 @@ public sealed class PresentationStage
         characterRigs.Clear();
         backgroundRigs.Clear();
         castRegistry.Clear();
+        characterTargetAliases.Clear();
     }
 }
