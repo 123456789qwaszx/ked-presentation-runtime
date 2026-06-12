@@ -155,7 +155,7 @@ public sealed partial class YarnCommandBridge
         {
             slotKey = slotKey,
             target = CharacterRigTarget.CharSlot_Track,
-            useAbsolutePosition = true,
+            useAbsolutePosition = false,
             delta = new Vector2(x, y),
             duration = duration
         };

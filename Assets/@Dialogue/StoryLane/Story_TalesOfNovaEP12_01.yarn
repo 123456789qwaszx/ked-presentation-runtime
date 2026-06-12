@@ -54,30 +54,114 @@ title: Story_TalesOfNovaEP12_01
 //이건 내가 처음으로 그녀의 영혼에 닿았을 때의 이야기다. #box=onlytext
 
 <<pres_advance>>
+_#beat #stay
+
+<<pres_advance>>
 윌로: 죄송합니다만, 이번 의뢰는 보수의 3분의 1밖에 드릴 수 없겠군요.
 
-<<char_defocus c1>>
+
+<<face_swap willow 11>>
+<<pause 0.6>>
+
+<<shot_track -80 40 0.6>>
+
+<<size c2 large>>
+<<scale_by c2 0.9>>
+<<move_by c2 0 -400>>
 
 <<fade_in c2>>
 <<hop c2 1 60 10>>
 <<slide_in c2 right>>
-<<emoji c2 18>>
-<<jolt c2>>
+<<move_by c2 40 0>>
+<<pause 0.28>>
+
+<<char_visual willow 0 0 1>>
+<<move_by willow -180 0 0.8>>
+<<pause 0.4>>
+_#beat #stay
+
+<<shake c2>>
 세이나: 안 돼! 이 신기를 얻으려고 우리가 성해를 얼마나 많이 물리쳤는데...... <br>검날이 다 무뎌질 정도였다고!
 
+
+<<size c3 large>>
+<<scale_by c3 0.9>>
+<<move_by c3 0 -400>>
 
 <<fade_in c3>>
 <<hop c3 1 60 10>>
 <<slide_in c3 left>>
-<<emoji c3 6>>
+<<pause 0.06>>
+
+<<move_by c1 240 0 0.6>>
+<<face c1 25>>
+_#beat #stay
+
+<<shake c3>>
 아야메: 이번에 돌아와서 물자를 보충하는 것만으로도 기존에 약속했던 보수의 절반을 사용해야 해요. 3분의 1만 받는다면, 우린 적자예요.
+
+<<scale_by c1 0.8>>
+<<char_silhouette c1 1>>
+_#beat #stay
+
+<<bg_fade_in bg2>>
+<<fade_in c4>>
+<<move_by c4 0 -280>>
 
 코하쿠: 심상석에 은혜도 없어.
 
+<<move_by c2 120 0 0.8>>
+<<fade_out c2 0.8>>
+<<move_by c3 -120 0 0.8>>
+<<fade_out c3 0.8>>
+
+<<bg_scale bg2 0.001 0.6>>
+<<pause 0.4>>
+<<bg_fade_out bg2 0.2>>
+
+<<pause 0.2>>
+<<char_silhouette c1 0 1.4>>
+<<focus_to c1 bust c2 0.5>>
+<<scale_by c1 1.4 1.2>>
+<<face_swap c1 11>>
+<<pause 0.12>>
+<<move_by c1 0 160 0.8>>
+
+_#beat #stay
+
 윌로: 여러분이 고생하신 건 잘 알지만......
+
+<<move_by c1 80 0 0.8>>
+<<face c1 12>>
+
 윌로: 이번에 소원을 빌어서 나온 신기는 너무 많이 망가져 있어요. 아무래도 의뢰인이 만족하지 않을 거라서요.
 
+<<fade_out c1>>
+_#beat #stay
+
+<<slot c5>>
+<<cast c5 amber a 5 center normal>>
+
+<<move_by c5 0 -200 0.6>>
+<<fade_in c5>>
+<<pause 0.5>>
+<<shake c5>>
 코하쿠: 어제 성해가 너무 많았어.
+
+
+<<scale_reset c2>>
+<<size c2 normal>>
+<<face c2 6>>
+<<focus_to c2 bust left>>
+<<slide_in c2>>
+<<fade_in c2>>
+
+<<pause 0.1>>
+<<focus_to c5 bust right 1.2>>
+<<move_by c5 -100 0 1.4>>
+_#beat #stay
+
+
 세이나: 신기가 너무 커서 둘이 들어야 했어. 그 엄청난 성해 무리의 습격을 막아내기는 무리였다고.
 윌로: 무슨 사정인지는 잘 알고 있습니다. 최근 몇 주간 아모르 25호 별의 탑으로 가는 여행가가 적어서, 성해 개체 수가 많이 쌓였죠.
 아야메: 그래서......
