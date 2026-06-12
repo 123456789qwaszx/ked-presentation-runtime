@@ -5,15 +5,22 @@
 
 
 <<focus_to c1 bust center 0>>
-<<fade_in willow 0.8>>
-
-<<face c1 16>>
-
-<<emoji willow 2>>
-<<dip willow down>>
-윌로: 죄송합니다만, 이번 의뢰는 보수의 3분의 1밖에 드릴 수 없겠군요.
+<<face c1 11>>
+<<fade_in c1 0.6>>
+_#beat #stay
 
 
+<<face_swap c1 16>>
+<<move_by c1 0 -80 0.7>>
+<<pause 0.4>>
+<<focus_to c1 bust center 0.7>>
+윌로: 죄송합니다만, 이번 의뢰는 보수의 3분의 1밖에 드릴 수 없겠군요.#main_free
+
+
+
+//<<shot_focus_to c2 3 0.8>>
+
+세이나: 안 돼! 이 신기를 얻으려고 우리가 성해를
 .. 
 
 
