@@ -12,7 +12,7 @@ using UnityEngine;
 public class ScaleToCommandSpecCharR : CharacterRigCommandSpecBase
 {
     [Header("Target")]
-    public CharacterRigTarget target = CharacterRigTarget.CharacterPortrait_ActingScale;
+    public CharacterRigTarget target = CharacterRigTarget.CharSlot_Scale;
 
     [Header("Scale (XY)")]
     public Vector2 toScale = Vector2.one;
@@ -36,6 +36,7 @@ public sealed class ScaleToCommandCharR : CommandBase
 
     private readonly ScaleToCommandSpecCharR _spec;
 
+    private CharacterRigRefs _rigRefs;
     private RectTransform _rect;
 
     private Vector2 _startScale;
@@ -67,6 +68,11 @@ public sealed class ScaleToCommandCharR : CommandBase
 
         CaptureTweenEndpoints();
 
+        // 중요:
+        // 이 커맨드는 duration 동안 _rect의 localScale을 바꾸는 placement(scale) writer다.
+        // FocusPoint solver가 라이브 scale이 아니라 "정착 scale"을 알 수 있도록 게시한다.
+        PublishSettledTarget();
+
         if (_spec.duration <= 0f)
         {
             CommitFinalState();
@@ -97,6 +103,7 @@ public sealed class ScaleToCommandCharR : CommandBase
                 ApplyScaleXY(_rect, _spec.fromScale);
 
             CaptureTweenEndpoints();
+            PublishSettledTarget();
         }
 
         CommitFinalState();
@@ -106,8 +113,8 @@ public sealed class ScaleToCommandCharR : CommandBase
     {
         _resolveAttempted = true;
 
-        CharacterRigRefs rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
-        _rect = rig.GetRect(_spec.target);
+        _rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
+        _rect = _rigRefs.GetRect(_spec.target);
     }
 
     private void ClaimTarget()
@@ -138,9 +145,26 @@ public sealed class ScaleToCommandCharR : CommandBase
             currentScale.y * _spec.toScale.y);
     }
 
+    private void PublishSettledTarget()
+    {
+        if (_rigRefs == null || _rect == null)
+            return;
+
+        _rigRefs.PlacementTargets.PublishLocalScale(_rect, _targetScale);
+    }
+
+    private void ClearSettledTarget()
+    {
+        if (_rigRefs == null || _rect == null)
+            return;
+
+        _rigRefs.PlacementTargets.Clear(_rect);
+    }
+
     private void CommitFinalState()
     {
         ApplyScaleXY(_rect, _targetScale);
+        ClearSettledTarget();
 
         HasClaimedTarget = false;
         _tween = null;
@@ -160,8 +184,9 @@ public sealed class ScaleToCommandCharR : CommandBase
     {
         if (!HasClaimedTarget)
             return;
-        
-        _tween.Kill(false);
+
+        if (_tween != null && _tween.IsActive())
+            _tween.Kill(false);
 
         float duration = CalculateAcceleratedRemainingDuration();
 

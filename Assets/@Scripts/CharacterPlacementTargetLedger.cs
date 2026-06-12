@@ -2,24 +2,70 @@ using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
 
-// Character placement 계열 커맨드들이 "도달할 최종 anchoredPosition"을 게시.
+// placement 계열 커맨드가 "도달할 최종 transform 값(settled target)"을 게시.
+// focus/placement solver가 라이브 transform이 아니라 정착 상태 기준으로 풀 수 있게 한다.
 //
-// - FocusPoint 계열 solver가 라이브 transform만 보고 계산하지 않게 한다.
-// - 움직이는 placement 노드가 있으면, 현재 focus point에 "아직 남은 이동량"을 더해
-//   settled 상태의 focus point를 예측한다.
-// - SetAnchor / PlaceTo / PlaceCharacterFocus 같은 composition placement만 게시.
+// 메커니즘: 측정 직전, 움직이는 조상 노드들을 "잠깐 target 값으로 세팅 → 측정 → 즉시 원복".
+//   - 동기 호출이라 프레임 경계가 없어 시각적 부작용이 없다.
+//   - Unity 실제 계층 변환을 쓰므로 translation/scale/rotation, 다중 노드 합성이 전부 정확하다.
+//   - translation의 경우 기존 "잔여 world 벡터 더하기"와 결과가 동일하다(회귀 없음).
 public sealed class CharacterPlacementTargetLedger
 {
-    private const float ResidualSqrEpsilon = 0.0001f;
+    private enum TargetKind
+    {
+        AnchoredPosition,
+        LocalScale,
+        LocalEuler, // 회전도 동일 메커니즘으로 준비. publisher만 연결하면 즉시 동작.
+    }
 
-    private readonly Dictionary<RectTransform, Vector2> _settledTargets = new();
+    private readonly struct Entry
+    {
+        public readonly TargetKind kind;
+        public readonly Vector3 value;
 
-    public void Publish(RectTransform node, Vector2 settledAnchoredPosition)
+        public Entry(TargetKind kind, Vector3 value)
+        {
+            this.kind = kind;
+            this.value = value;
+        }
+    }
+
+    private readonly Dictionary<RectTransform, Entry> _targets = new();
+
+    // 재사용 스크래치(할당 회피). 메인 스레드 / 비재진입 전제.
+    private readonly List<RectTransform> _scratchNodes = new(16);
+    private readonly List<Entry> _scratchSaved = new(16);
+
+    // 호환: 기존 호출부의 Publish(node, Vector2)는 anchoredPosition 게시를 의미한다.
+    public void Publish(RectTransform node, Vector2 targetAnchoredPosition)
+        => PublishAnchoredPosition(node, targetAnchoredPosition);
+
+    public void PublishAnchoredPosition(RectTransform node, Vector2 targetAnchoredPosition)
     {
         if (node == null)
             return;
 
-        _settledTargets[node] = settledAnchoredPosition;
+        _targets[node] = new Entry(
+            TargetKind.AnchoredPosition,
+            new Vector3(targetAnchoredPosition.x, targetAnchoredPosition.y, 0f));
+    }
+
+    public void PublishLocalScale(RectTransform node, Vector2 targetLocalScaleXY)
+    {
+        if (node == null)
+            return;
+
+        _targets[node] = new Entry(
+            TargetKind.LocalScale,
+            new Vector3(targetLocalScaleXY.x, targetLocalScaleXY.y, 0f));
+    }
+
+    public void PublishLocalEuler(RectTransform node, Vector3 targetLocalEuler)
+    {
+        if (node == null)
+            return;
+
+        _targets[node] = new Entry(TargetKind.LocalEuler, targetLocalEuler);
     }
 
     public void Clear(RectTransform node)
@@ -27,84 +73,94 @@ public sealed class CharacterPlacementTargetLedger
         if (node == null)
             return;
 
-        _settledTargets.Remove(node);
+        _targets.Remove(node);
     }
 
     public void ClearAll()
     {
-        _settledTargets.Clear();
+        _targets.Clear();
     }
 
-    public bool TryGetTarget(RectTransform node, out Vector2 settledAnchoredPosition)
-    {
-        settledAnchoredPosition = default;
-
-        if (node == null)
-            return false;
-
-        return _settledTargets.TryGetValue(node, out settledAnchoredPosition);
-    }
-
-    // measureRect의 상위 계층 중 현재 tween 중인 placement target들의 잔여 이동량을 world vector로 합산.
-    //
-    // 예:
-    // CharSlot_Anchor가 place_to로 이동 중이고,
-    // CharSlot_Size가 그 하위에 있으면,
-    // CharSlot_Size.TransformPoint(...)로 얻은 focusWorld는 아직 중간 위치.
-    //
-    // 이 때,
-    // CharSlot_Anchor.targetAnchoredPosition - CharSlot_Anchor.anchoredPosition을 world vector로 변환해서 더하면,
-    // "CharSlot_Anchor가 최종 위치에 도착했을 때의 focusWorld"가 됨.
-    public Vector3 AccumulateResidualWorldDisplacement(
+    // measureRect.TransformPoint(localOffset)을, 조상 체인의 "tween 중 + target 게시" 노드를
+    // 일시적으로 target 값으로 세팅한 상태에서 측정해 돌려준다. 측정 후 즉시 원복한다.
+    public Vector3 MeasureSettledWorldPoint(
         RectTransform measureRect,
+        Vector3 localOffset,
         RectTransform stopRoot)
     {
-        Vector3 residualWorld = Vector3.zero;
+        if (measureRect == null)
+            return Vector3.zero;
 
-        if (measureRect == null || _settledTargets.Count == 0)
-            return residualWorld;
+        if (_targets.Count == 0)
+            return measureRect.TransformPoint(localOffset);
 
+        _scratchNodes.Clear();
+        _scratchSaved.Clear();
+
+        // 1) 보정 대상 수집 + 라이브 값 백업 + target 적용.
         Transform current = measureRect;
 
         while (current != null && current != stopRoot)
         {
-            if (current is RectTransform rect &&
-                _settledTargets.TryGetValue(rect, out Vector2 targetAnchoredPosition) &&
-                DOTween.IsTweening(rect))
+            if (current is RectTransform rect && _targets.TryGetValue(rect, out Entry entry))
             {
-                Vector2 residualLocal =
-                    targetAnchoredPosition - rect.anchoredPosition;
-
-                if (residualLocal.sqrMagnitude > ResidualSqrEpsilon)
-                {
-                    residualWorld += ConvertAnchoredDeltaToWorldVector(
-                        rect,
-                        residualLocal);
-                }
+                _scratchNodes.Add(rect);
+                _scratchSaved.Add(CaptureLive(rect, entry.kind));
+                ApplyEntry(rect, entry);
             }
 
             current = current.parent;
         }
 
-        return residualWorld;
+        // 2) settled 상태에서 측정.
+        Vector3 settledWorld = measureRect.TransformPoint(localOffset);
+
+        // 3) 라이브 값 원복(적용 역순).
+        for (int i = _scratchNodes.Count - 1; i >= 0; i--)
+            ApplyEntry(_scratchNodes[i], _scratchSaved[i]);
+
+        _scratchNodes.Clear();
+        _scratchSaved.Clear();
+
+        return settledWorld;
     }
 
-    private static Vector3 ConvertAnchoredDeltaToWorldVector(
-        RectTransform rect,
-        Vector2 anchoredDelta)
+    private static Entry CaptureLive(RectTransform rect, TargetKind kind)
     {
-        if (rect == null)
-            return Vector3.zero;
+        switch (kind)
+        {
+            case TargetKind.AnchoredPosition:
+                Vector2 ap = rect.anchoredPosition;
+                return new Entry(kind, new Vector3(ap.x, ap.y, 0f));
 
-        RectTransform parent = rect.parent as RectTransform;
+            case TargetKind.LocalScale:
+                return new Entry(kind, rect.localScale);
 
-        Vector3 localVector = new(anchoredDelta.x, anchoredDelta.y, 0f);
+            case TargetKind.LocalEuler:
+                return new Entry(kind, rect.localEulerAngles);
 
-        if (parent == null)
-            return localVector;
+            default:
+                return new Entry(kind, Vector3.zero);
+        }
+    }
 
-        // anchoredPosition의 delta는 parent local 기준의 translation vector를 봄.
-        // 점 변환이 아니라 vector 변환이므로 translation 성분은 섞지 않음.
-        return parent.TransformVector(localVector);
+    private static void ApplyEntry(RectTransform rect, Entry entry)
+    {
+        switch (entry.kind)
+        {
+            case TargetKind.AnchoredPosition:
+                rect.anchoredPosition = new Vector2(entry.value.x, entry.value.y);
+                break;
+
+            case TargetKind.LocalScale:
+                // target은 xy만 지정. z는 라이브 값을 유지한다(원복 시에도 z 불변).
+                Vector3 s = rect.localScale;
+                rect.localScale = new Vector3(entry.value.x, entry.value.y, s.z);
+                break;
+
+            case TargetKind.LocalEuler:
+                rect.localEulerAngles = entry.value;
+                break;
+        }
     }
 }

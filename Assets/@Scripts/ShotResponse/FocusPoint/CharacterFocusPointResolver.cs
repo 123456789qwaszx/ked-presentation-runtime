@@ -67,22 +67,20 @@ public static class CharacterFocusPointResolver
                 customPointKey,
                 commandOffset);
 
-        // 1. 현재 라이브 transform 기준 focusWorld.
+        Vector3 focusLocalOffset = new(focusOffset.x, focusOffset.y, 0f);
+
+        // 움직이는 placement 조상(translation/scale/rotation)이 있으면,
+        // 그들이 settled target에 도착했을 때의 focusWorld로 보정해 측정한다.
+        // 아무도 안 움직이면 라이브 측정과 동일하다.
         Vector3 focusWorld =
-            measureRect.TransformPoint(
-                new Vector3(focusOffset.x, focusOffset.y, 0f));
+            useSettledPlacementTargets && rigRefs.PlacementTargets != null
+                ? rigRefs.PlacementTargets.MeasureSettledWorldPoint(
+                    measureRect,
+                    focusLocalOffset,
+                    stageRoot)
+                : measureRect.TransformPoint(focusLocalOffset);
 
-        // 2. 현재 움직이는 placement 조상들이 있다면,
-        //    그 조상들이 settled target에 도착했을 때의 focusWorld로 보정한다.
-        if (useSettledPlacementTargets && rigRefs.PlacementTargets != null)
-        {
-            focusWorld += rigRefs.PlacementTargets.AccumulateResidualWorldDisplacement(
-                measureRect,
-                stageRoot);
-        }
-
-        Vector3 focusInStage =
-            stageRoot.InverseTransformPoint(focusWorld);
+        Vector3 focusInStage = stageRoot.InverseTransformPoint(focusWorld);
 
         result = new CharacterFocusPointResult
         {
