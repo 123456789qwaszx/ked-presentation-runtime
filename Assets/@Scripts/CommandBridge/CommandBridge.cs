@@ -1,12 +1,9 @@
-using System;
 using System.Collections;
 using UnityEngine;
 using Yarn.Unity;
 
 public sealed partial class YarnCommandBridge
 {
-    private readonly DialogueRunner _runner;
-
     private readonly YarnBridgePlaybackDriver _playbackDriver;
     private readonly VNRuntimeStateProvider _vnRuntimeStateProvider;
     private readonly RectTransform _charRigPrefab;
@@ -27,7 +24,6 @@ public sealed partial class YarnCommandBridge
         DialogueBoxPresentationController dialogueBoxPresentation,
         bool bindMainLaneCommands)
     {
-        _runner = runner;
         _playbackDriver = playbackDriver;
         _vnRuntimeStateProvider = vnRuntimeStateProvider;
         _sideRunnerSyncHub = sideRunnerSyncHub;
@@ -36,40 +32,12 @@ public sealed partial class YarnCommandBridge
         _oneShotPresentationLane = oneShotPresentationLane;
         _dialogueBoxPresentation = dialogueBoxPresentation;
         
-        BindRunnerCommands(_runner);
+        BindRunnerCommands(runner);
 
         if (bindMainLaneCommands)
-            BindMainLaneCommands(_runner);
-        
+            BindMainLaneCommands(runner);
     }
     
-    private void BindMainLaneCommands(DialogueRunner runner)
-    {
-        // Main Runner only commands.
-        runner.AddCommandHandler<string>("pres_start", StartSubPresentationNode);
-        runner.AddCommandHandler("pres_end", StopSubPresentationNode);
-        
-        runner.AddCommandHandler("pres_pause",  PauseSubPresentation);  // 일시정지
-        runner.AddCommandHandler("pres_resume", ResumeSubPresentation); // 재개
-
-        // 자동 진행 제어 (재호출 시 마지막 값으로 덮어씀)
-        runner.AddCommandHandler<int>("pres_hold", HoldSubPresentation);                        // N라인 멈춤
-        runner.AddCommandHandler<int>("pres_advance", AdvanceSubPresentationExtra);             // 이번 라인 N개 추가
-        runner.AddCommandHandler<bool>("pres_suppress_first", SetSubPresentationSuppressFirst); // 시작 첫 라인 suppress on/off
-        
-        runner.AddCommandHandler<string>("beat", RunOneShotNode); // One-Shot Node 재생. 커맨드로만 이루어졌기에 즉시 재생 및 자동 종료
-        
-        
-        // Portrait = 0,
-        // Speaker = 1,
-        // LetterBox = 2,
-        // OnlyText = 3,
-        // BlackBook= 4
-        runner.AddCommandHandler<string>("box_named", SetNamedLineBoxKind);
-        runner.AddCommandHandler<string>("box_protagonist", SetProtagonistLineBoxKind);
-        runner.AddCommandHandler("box_reset", ResetDefaultLineBoxKinds);
-    }
-
     // Lane registration is explicitly handled by bootstrap:
     // hub.RegisterPresentationLane(subRunner).
     private IEnumerator StartSubPresentationNode(string nodeName) => _sideRunnerSyncHub.StartPresentationLaneCoroutine(nodeName);
@@ -113,6 +81,43 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler<string, string, string>("attach_to_bg", EnqueueAttachCharRigToBackgroundObjectSlotSpec);
         runner.AddCommandHandler<string, string>("pres_actor", SetPresentationActor);
     }
+    
+    private void BindMainLaneCommands(DialogueRunner runner)
+    {
+        // Main Runner only commands.
+        runner.AddCommandHandler<string>(
+            "pres_start", StartSubPresentationNode);
+        runner.AddCommandHandler(
+            "pres_end", StopSubPresentationNode);
+        
+        runner.AddCommandHandler(
+            "pres_pause",  PauseSubPresentation);  // 일시정지
+        runner.AddCommandHandler(
+            "pres_resume", ResumeSubPresentation); // 재개
+
+        // 자동 진행 제어 (재호출 시 마지막 값으로 덮어씀)
+        runner.AddCommandHandler<int>(
+            "pres_hold", HoldSubPresentation);                        // N라인 멈춤
+        runner.AddCommandHandler<int>(
+            "pres_advance", AdvanceSubPresentationExtra);             // 이번 라인 N개 추가
+        runner.AddCommandHandler<bool>(
+            "pres_suppress_first", SetSubPresentationSuppressFirst);
+        
+        runner.AddCommandHandler<string>(
+            "beat", RunOneShotNode); // One-Shot Node 재생. 커맨드로만 이루어졌기에 즉시 재생 및 자동 종료
+        
+        // Portrait = 0,
+        // Speaker = 1,
+        // LetterBox = 2,
+        // OnlyText = 3,
+        // BlackBook= 4
+        runner.AddCommandHandler<string>(
+            "box_named", SetNamedLineBoxKind);
+        runner.AddCommandHandler<string>(
+            "box_protagonist", SetProtagonistLineBoxKind);
+        runner.AddCommandHandler(
+            "box_reset", ResetDefaultLineBoxKinds);
+    }
 
     private void BindCharRigSetup(DialogueRunner runner)
     {
@@ -132,6 +137,32 @@ public sealed partial class YarnCommandBridge
             "size", 
             EnqueueSetOriginSizeCommandSpec);
     }
+    
+    private void BindCharRigStaging(DialogueRunner runner)
+    {
+        runner.AddCommandHandler<string, string, string, float>(
+            "focus_to", EnqueuePlaceCharacterFocusSpec);
+        
+        runner.AddCommandHandler<string, string, bool, bool>
+            ("place", EnqueueSetAnchorSpecs);
+        runner.AddCommandHandler<string, string, float>     
+            ("place_to", EnqueuePlaceToSpec);
+        
+        runner.AddCommandHandler<string, int, int, float>(
+            "move_by", EnqueueSetAnchorOffsetSpecs);
+        runner.AddCommandHandler<string, float, float>(
+            "rotate_by", EnqueueRotateBySpec);
+        runner.AddCommandHandler<string, float, float>(
+            "scale_by", EnqueueSizeBySpec);
+
+        runner.AddCommandHandler<string, float>(
+            "move_reset", EnqueueSetPlaceResetSpecs);
+        runner.AddCommandHandler<string, float>(
+            "rotate_reset", EnqueueRotateResetSpec);
+        runner.AddCommandHandler<string, float>(
+            "scale_reset", EnqueueSizeResetSpec);
+    }
+    
     private void BindCharRigAppearance(DialogueRunner runner)
     {
         runner.AddCommandHandler<string, float>(
@@ -151,31 +182,6 @@ public sealed partial class YarnCommandBridge
         
         runner.AddCommandHandler<string, string>(
             "emoji", EnqueueEmojiPopSpec);
-    }
-    
-    private void BindCharRigStaging(DialogueRunner runner)
-    {
-        runner.AddCommandHandler<string, string, bool, bool>
-            ("place", EnqueueSetAnchorSpecs);
-        runner.AddCommandHandler<string, string, float>     
-            ("place_to", EnqueuePlaceToSpec);
-        
-        runner.AddCommandHandler<string, string, string, float>(
-            "focus_to", EnqueuePlaceCharacterFocusSpec);
-        
-        runner.AddCommandHandler<string, int, int, float>(
-            "move_by", EnqueueSetAnchorOffsetSpecs);
-        runner.AddCommandHandler<string, float, float>(
-            "rotate_by", EnqueueRotateBySpec);
-        runner.AddCommandHandler<string, float, float>(
-            "scale_by", EnqueueSizeBySpec);
-
-        runner.AddCommandHandler<string, float>(
-            "move_reset", EnqueueSetPlaceResetSpecs);
-        runner.AddCommandHandler<string, float>(
-            "rotate_reset", EnqueueRotateResetSpec);
-        runner.AddCommandHandler<string, float>(
-            "scale_reset", EnqueueSizeResetSpec);
     }
     
     private void BindShotStaging(DialogueRunner runner)

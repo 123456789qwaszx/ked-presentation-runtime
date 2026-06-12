@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CharacterFocusTuningDBSO
   baseOffsets:
     feet: {x: 0, y: -800}
-    body: {x: 0, y: -120}
-    bust: {x: 0, y: -50}
-    face: {x: 0, y: 20}
+    body: {x: 0, y: -130}
+    bust: {x: 0, y: -60}
+    face: {x: -10, y: 40}
     handLeft: {x: -220, y: 520}
     handRight: {x: 220, y: 520}
   entries:
@@ -52,6 +52,26 @@ MonoBehaviour:
     customPoints: []
   - key: Mercurio
     defaultOffset: {x: -180, y: 0}
+    offsets:
+      feet: {x: 0, y: 0}
+      body: {x: 0, y: 0}
+      bust: {x: 0, y: 0}
+      face: {x: 30, y: 0}
+      handLeft: {x: 0, y: 0}
+      handRight: {x: 0, y: 0}
+    customPoints: []
+  - key: Willow
+    defaultOffset: {x: 0, y: 0}
+    offsets:
+      feet: {x: 0, y: 0}
+      body: {x: 0, y: 0}
+      bust: {x: 0, y: 0}
+      face: {x: 0, y: 0}
+      handLeft: {x: 0, y: 0}
+      handRight: {x: 0, y: 0}
+    customPoints: []
+  - key: _
+    defaultOffset: {x: 0, y: 0}
     offsets:
       feet: {x: 0, y: 0}
       body: {x: 0, y: 0}

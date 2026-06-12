@@ -4,9 +4,9 @@ public sealed partial class YarnCommandBridge
 {
     private void EnqueuePlaceCharacterFocusSpec(
         string roleKey,
-        string focus = "face",
+        string focus = "bust",
         string screenPoint = "center",
-        float duration = 0.4f)
+        float duration = 0f)
     {
         CharacterFocusPreset focusPreset = CharacterFocusPresetParser.Parse(focus, CharacterFocusPreset.Face);
 

@@ -22,7 +22,7 @@ MonoBehaviour:
     exp1: {x: 0, y: 0}
     exp2: {x: 0, y: 0}
   scales:
-    normal: 1.7
+    normal: 1.6
     small: 1.4
     large: 2.4
     far: 0.66
