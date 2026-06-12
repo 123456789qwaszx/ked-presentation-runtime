@@ -80,4 +80,14 @@ public sealed class YarnBridgePlaybackDriver : MonoBehaviour
         ticket.CloseEntry(CommandRunTicketCloseReason.Completed);
         return ticket;
     }
+    
+    public void SetPresentationActor(string actorKey)
+    {
+        CurrentScope?.CharacterTargetAliases.SetPresentationActor(actorKey);
+    }
+    
+    public void RegisterPresentationActorAlias(string aliasSymbol, string targetKey)
+    {
+        CurrentScope?.CharacterTargetAliases.Register(aliasSymbol, targetKey);
+    }
 }

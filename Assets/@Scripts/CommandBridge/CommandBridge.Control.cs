@@ -126,4 +126,17 @@ public sealed partial class YarnCommandBridge
         Collect(spec9);
         Collect(spec10);
     }
+    
+    private void SetPresentationActor(string aliasOrActor, string actorKey = null)
+    {
+        if (string.IsNullOrEmpty(actorKey))
+        {
+            // 1-arg: <<pres_actor c1>> → 기본 alias '@' → c1
+            _playbackDriver.SetPresentationActor(aliasOrActor);
+            return;
+        }
+
+        // 2-arg: <<pres_actor @2 c2>> → alias '@2' → c2
+        _playbackDriver.RegisterPresentationActorAlias(aliasOrActor, actorKey);
+    }
 }

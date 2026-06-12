@@ -111,6 +111,7 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler<string>("ui_patch", EnqueueUIPatchSpec);
         runner.AddCommandHandler<string>("debug_log", LogImmediate);
         runner.AddCommandHandler<string, string, string>("attach_to_bg", EnqueueAttachCharRigToBackgroundObjectSlotSpec);
+        runner.AddCommandHandler<string, string>("pres_actor", SetPresentationActor);
     }
 
     private void BindCharRigSetup(DialogueRunner runner)

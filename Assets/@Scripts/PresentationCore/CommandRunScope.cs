@@ -13,6 +13,8 @@ public sealed class CommandRunScope
     public CharacterRigRegistry CharacterRigs => _stage.characterRigs;
     public BackgroundRigRegistry BackgroundRigs => _stage.backgroundRigs;
     public CastRegistry CastRegistry => _stage.castRegistry;
+
+    public CharacterRigTargetAliasRegistry CharacterTargetAliases { get; } = new();
     
     private LifetimeScope StepLifetime { get; } = new();
     private LifetimeScope RunLifetime { get; } = new();
@@ -38,9 +40,6 @@ public sealed class CommandRunScope
     public bool IsSeekPassThrough => _linePresentationAdvanceState != null && _linePresentationAdvanceState.IsSeekingActive;
     public bool ShouldCompressCommandExecution => IsSpeedUpMode || IsSeekPassThrough;
     
-    
-    // 메인 레인만 공유 컨텍스트의 NodeBusy를 토글한다.
-    // 서브 레인(reportsNodeBusy=false)은 no-op → 공유 NodeBusy/AdvanceGate를 메인 기준으로 보존.
     public void SetNodeBusy(bool busy)
     {
         if (!_reportsNodeBusy)
@@ -54,13 +53,15 @@ public sealed class CommandRunScope
         CleanupStep(policy);
         CleanupRun(policy);
 
+        CharacterTargetAliases.Clear();
+
         Token = CancellationToken.None;
         SetNodeBusy(false);
     }
 
     public void TrackStep(Action cancel, Action finish = null) => StepLifetime.Track(cancel, finish);
-    public void TrackRun (Action cancel, Action finish = null) => RunLifetime.Track(cancel, finish);
+    public void TrackRun(Action cancel, Action finish = null) => RunLifetime.Track(cancel, finish);
     
     public void CleanupStep(CleanupPolicy policy) => StepLifetime.Cleanup(policy);
-    public void CleanupRun (CleanupPolicy policy) => RunLifetime.Cleanup(policy);
+    public void CleanupRun(CleanupPolicy policy) => RunLifetime.Cleanup(policy);
 }

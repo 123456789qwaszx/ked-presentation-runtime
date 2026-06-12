@@ -26,6 +26,9 @@ public sealed class CastRegistry
 
     public void CastCharRig(string slotKey, string characterKey)
     {
+        slotKey = (slotKey ?? "").Trim();
+        characterKey = PresentationKeyNormalizer.NormalizeCharacterKey(characterKey);
+
         if (string.IsNullOrEmpty(slotKey) || string.IsNullOrEmpty(characterKey))
             return;
 
@@ -38,6 +41,9 @@ public sealed class CastRegistry
 
     public bool SetVariant(string slotKey, string variantKey)
     {
+        slotKey = (slotKey ?? "").Trim();
+        variantKey = PresentationKeyNormalizer.NormalizeVariantKey(variantKey);
+
         if (!_slotToBinding.TryGetValue(slotKey, out CastBinding binding))
         {
             Debug.LogWarning(
@@ -54,6 +60,8 @@ public sealed class CastRegistry
 
     public bool UncastCharRig(string slotKey)
     {
+        slotKey = (slotKey ?? "").Trim();
+
         if (!_slotToBinding.Remove(slotKey, out CastBinding binding))
         {
             Debug.LogWarning($"[CastRegistry] Uncast failed. Binding not found. slotKey='{slotKey}'.");
@@ -66,6 +74,8 @@ public sealed class CastRegistry
 
     public bool TryGetCharacter(string slotKey, out string characterKey)
     {
+        slotKey = (slotKey ?? "").Trim();
+
         if (!_slotToBinding.TryGetValue(slotKey, out CastBinding binding))
         {
             Debug.LogWarning(
@@ -82,6 +92,8 @@ public sealed class CastRegistry
 
     public bool TryGetVariant(string slotKey, out string variantKey)
     {
+        slotKey = (slotKey ?? "").Trim();
+
         if (!_slotToBinding.TryGetValue(slotKey, out CastBinding binding))
         {
             Debug.LogWarning(
@@ -98,6 +110,7 @@ public sealed class CastRegistry
 
     public bool TryGetSlotKey(string characterKey, out string slotKey)
     {
+        characterKey = PresentationKeyNormalizer.NormalizeCharacterKey(characterKey);
         return _characterToSlot.TryGetValue(characterKey, out slotKey);
     }
 
@@ -109,9 +122,12 @@ public sealed class CastRegistry
 
     private bool IsCast(string targetKey)
     {
-        if (_characterToSlot.ContainsKey(targetKey))
+        targetKey = (targetKey ?? "").Trim();
+
+        if (_slotToBinding.ContainsKey(targetKey))
             return true;
 
-        return _slotToBinding.ContainsKey(targetKey);
+        string characterKey = PresentationKeyNormalizer.NormalizeCharacterKey(targetKey);
+        return _characterToSlot.ContainsKey(characterKey);
     }
 }
