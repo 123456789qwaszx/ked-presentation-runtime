@@ -36,23 +36,27 @@ public sealed class PortraitResolver
         string character = portrait.character;
         string variant = portrait.variant;
         string emotion = portrait.emotion;
-        
-        // Empty character/variant are resolved from the character cast to this slot.
-        if (string.IsNullOrEmpty(character) || string.IsNullOrEmpty(variant))
+    
+        if (string.IsNullOrEmpty(character))
         {
-            scope.CastRegistry.TryGetCharacter(roleKey, out string characterKey);
+            if (scope.CastRegistry.TryGetCharacter(roleKey, out string characterKey))
                 character = characterKey;
-                
-            scope.CastRegistry.TryGetVariant(roleKey, out string variantKey);
+        }
+
+        if (string.IsNullOrEmpty(variant))
+        {
+            if (scope.CastRegistry.TryGetVariant(roleKey, out string variantKey))
                 variant = variantKey;
         }
-        
-        // Character-only portrait calls fall back to the default variant.
+    
         if (string.IsNullOrEmpty(variant))
             variant = DefaultVariant;
-        
+    
         if (string.IsNullOrEmpty(emotion))
             emotion = DefaultEmotion;
+
+        character = PresentationKeyNormalizer.NormalizeCharacterKey(character);
+        variant = PresentationKeyNormalizer.NormalizeVariantKey(variant);
 
         var key = MakeKey(character, variant, emotion);
 
@@ -66,23 +70,22 @@ public sealed class PortraitResolver
 
             if (_map.TryGetValue(MakeKey(character, DefaultVariant, FallbackEmotion), out sprite))
                 return sprite;
-            
+        
             return null;
         }
 
         return sprite;
     }
 
-    private static (string characterId, char variantSuffix, string emotionKey) MakeKey(string characterId, string variantKey, string emotionKey)
+    private static (string characterId, char variantSuffix, string emotionKey) MakeKey(
+        string characterId,
+        string variantKey,
+        string emotionKey)
     {
-        characterId = (characterId ?? "").Trim();
-        variantKey = (variantKey ?? "").Trim();
+        characterId = PresentationKeyNormalizer.NormalizeCharacterKey(characterId);
+        char suffix = PresentationKeyNormalizer.NormalizeVariantSuffix(variantKey);
         emotionKey = NormalizeEmotionCode(emotionKey);
 
-        char suffix = (variantKey.Length > 0) 
-            ? variantKey[^1]
-            : '\0';
-        
         return (characterId, suffix, emotionKey);
     }
 

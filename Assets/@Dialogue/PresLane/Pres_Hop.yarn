@@ -2,11 +2,16 @@
 ---
 This is an example of a Yarn Spinner script. Write your dialogue here!
 
-<<pres_actor c1>>
+<<pres_actor leafia>>
+<<pres_actor @2 willow>>
+
 
 <<hop @ 1 22 12 0.8>>
 <<char_move_to @ 80 0 0.5>>
 <<pause 0.35>> 
+
+<<focus_to @2>>
+
 <<hop @ 1 22 12 0.8>>
 <<char_move_to @ 80 0 0.5>>
 <<pause 0.35>>
