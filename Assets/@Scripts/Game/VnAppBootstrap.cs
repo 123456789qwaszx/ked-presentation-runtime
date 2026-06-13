@@ -42,6 +42,9 @@ public class VnAppBootstrap : MonoBehaviour
     [SerializeField] private PortraitGeneratedDbSo portraitGeneratedDbSo;
     [SerializeField] private CharacterFocusTuningDBSO characterFocusTuningDb;
     [SerializeField] private CharacterVisualFocusPresetDBSO characterVisualFocusPresetDb;
+    
+    [SerializeField] private CharacterDepthTuningSO characterDepthTuning;
+    [SerializeField] private RoleDepthTuningDBSO roleDepthTuningDb;
 
     [SerializeField] private UnitySignalBus unitySignalBus;
     
@@ -217,7 +220,9 @@ public class VnAppBootstrap : MonoBehaviour
             globalTuning,
             roleTuningDb,
             characterFocusTuningDb,
-            characterVisualFocusPresetDb);
+            characterVisualFocusPresetDb,
+            characterDepthTuning,
+            roleDepthTuningDb);
 
         // Background Rig
         BackgroundRigSlotResolver backgroundRigSlotResolver = new();

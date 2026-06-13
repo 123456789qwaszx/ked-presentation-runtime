@@ -143,6 +143,22 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler<string, string, string, float>(
             "focus_to", EnqueuePlaceCharacterFocusSpec);
         
+        runner.AddCommandHandler<string, string>(
+            "depth",
+            EnqueueSetDepthSpec);
+
+        runner.AddCommandHandler<string, string, float>(
+            "depth_to",
+            EnqueueSetDepthSpec);
+
+        runner.AddCommandHandler<string, string, string, float>(
+            "depth_focus_to",
+            EnqueueSetDepthFocusSpec);
+
+        runner.AddCommandHandler<string, float>(
+            "depth_reset",
+            EnqueueDepthResetSpec);
+        
         runner.AddCommandHandler<string, string, bool, bool>
             ("place", EnqueueSetAnchorSpecs);
         runner.AddCommandHandler<string, string, float>     

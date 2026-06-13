@@ -11,6 +11,9 @@ public sealed class CharRigCommandFactory : INodeCommandFactory
     private readonly CharacterFocusTuningDBSO _characterFocusTuningDb;
     private readonly CharacterVisualFocusPresetDBSO _characterVisualFocusPresetDb;
     
+    private readonly CharacterDepthTuningSO _characterDepthTuning;
+    private readonly RoleDepthTuningDBSO _roleDepthTuningDb;
+    
 
     public CharRigCommandFactory(
         CharRigSlotResolver charRigSlotResolver,
@@ -20,7 +23,9 @@ public sealed class CharRigCommandFactory : INodeCommandFactory
         CharStageTuningSO globalTuning,
         RoleAnchorTuningDBSO roleTuningDb,
         CharacterFocusTuningDBSO characterFocusTuningDb,
-        CharacterVisualFocusPresetDBSO characterVisualFocusPresetDb)
+        CharacterVisualFocusPresetDBSO characterVisualFocusPresetDb,
+        CharacterDepthTuningSO characterDepthTuning,
+        RoleDepthTuningDBSO roleDepthTuningDb)
     {
         _rigSlotResolver = charRigSlotResolver;
         _rigBuilder = charRigBuilder;
@@ -30,6 +35,8 @@ public sealed class CharRigCommandFactory : INodeCommandFactory
         _roleTuningDb = roleTuningDb;
         _characterFocusTuningDb = characterFocusTuningDb;
         _characterVisualFocusPresetDb = characterVisualFocusPresetDb;
+        _characterDepthTuning = characterDepthTuning;
+        _roleDepthTuningDb = roleDepthTuningDb;
     }
 
     public bool TryCreate(CommandSpecBase spec, out ISequenceCommand command)
@@ -49,6 +56,12 @@ public sealed class CharRigCommandFactory : INodeCommandFactory
             PlaceToCommandSpecCharR s => new PlaceToCommandCharR(s, _globalTuning, _roleTuningDb),
             SetOriginSizeCommandSpecCharR s => new SetOriginSizeCommandCharR(s, _globalTuning, _roleTuningDb),
             ApplyTrackOffsetCommandSpecCharR s => new ApplyTrackOffsetCommandCharR(s),
+            
+            SetDepthCommandSpecCharR s => new SetDepthCommandCharR(
+                s,
+                _characterDepthTuning,
+                _roleDepthTuningDb,
+                _characterFocusTuningDb),
 
             // Visibility / Root Layers
             FadeInCommandSpecCharR s => new FadeInCommandCharR(s),

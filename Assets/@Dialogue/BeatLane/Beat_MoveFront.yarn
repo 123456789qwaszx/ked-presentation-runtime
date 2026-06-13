@@ -1,0 +1,16 @@
+﻿title: Beat_MoveFront
+---
+
+<<slot @>>
+<<cast @ Willow>>
+
+
+<<focus_to @ bust center 0>>
+<<fade_in @ 0>>
+
+
+<<focus_to @ face left 0.8>>
+<<move_by @ 200 0 0.92>>
+<<depth_focus_to @ 8 face 1.1>>
+<<pause 1.1>>
+===

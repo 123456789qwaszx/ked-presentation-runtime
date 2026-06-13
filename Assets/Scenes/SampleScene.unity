@@ -6439,6 +6439,8 @@ MonoBehaviour:
   portraitGeneratedDbSo: {fileID: 11400000, guid: 9a31d992344284d4f8ff35f5e9be5ae9, type: 2}
   characterFocusTuningDb: {fileID: 11400000, guid: b77af4e295606b446ae4f74dad106f5f, type: 2}
   characterVisualFocusPresetDb: {fileID: 11400000, guid: 7d597f4590720364ca38093f67d868f6, type: 2}
+  characterDepthTuning: {fileID: 11400000, guid: e3a8987f7d373d2479069557356adab4, type: 2}
+  roleDepthTuningDb: {fileID: 11400000, guid: 55213dad82d5df64793aa599f78b6837, type: 2}
   unitySignalBus: {fileID: 552181530}
   commandExecutor: {fileID: 1257280952}
   mainYarnBridgePlaybackDriver: {fileID: 720935691}
