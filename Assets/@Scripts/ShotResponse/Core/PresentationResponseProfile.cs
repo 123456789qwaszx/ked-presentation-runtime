@@ -49,11 +49,39 @@ public sealed class PresentationResponseProfile
         panResponse = new Vector2(0.2f, 0.01f),
         zoomScaleResponse = -0.36f,
     };
-
-    public static PresentationResponseProfile Foreground => new()
+    
+    public static PresentationResponseProfile DepthFar => new()
     {
-        focusSpreadPixelsPerZoom = new Vector2(16f, 4f),
-        panResponse = new Vector2(0.25f, 0.08f),
-        zoomScaleResponse = 1f,
+        focusSpreadPixelsPerZoom = new Vector2(-3f, -0.1f),
+        panResponse = new Vector2(0.2f, 0.01f),
+        zoomScaleResponse = -0.36f,
+    };
+
+    public static PresentationResponseProfile DepthBack => new()
+    {
+        focusSpreadPixelsPerZoom = new Vector2(-3f, -0.1f),
+        panResponse = new Vector2(0.2f, 0.01f),
+        zoomScaleResponse = -0.36f,
+    };
+
+    public static PresentationResponseProfile DepthMid => new()
+    {
+        focusSpreadPixelsPerZoom = new Vector2(-3f, -0.1f),
+        panResponse = new Vector2(0.2f, 0.01f),
+        zoomScaleResponse = -0.36f,
+    };
+
+    public static PresentationResponseProfile DepthFront => new()
+    {
+        focusSpreadPixelsPerZoom = new Vector2(-3f, -0.1f),
+        panResponse = new Vector2(0.2f, 0.01f),
+        zoomScaleResponse = -0.36f,
+    };
+
+    public static PresentationResponseProfile DepthClose => new()
+    {
+        focusSpreadPixelsPerZoom = new Vector2(-3f, -0.1f),
+        panResponse = new Vector2(0.2f, 0.01f),
+        zoomScaleResponse = -0.36f,
     };
 }
