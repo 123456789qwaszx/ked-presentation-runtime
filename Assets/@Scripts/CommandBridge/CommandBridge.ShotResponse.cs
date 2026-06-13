@@ -3,58 +3,6 @@ using UnityEngine;
 
 public sealed partial class YarnCommandBridge
 {
-    private void EnqueueRegisterBackgroundResponseBindingSpec(string rigKey)
-    {
-        var spec = new RegisterBackgroundResponseBindingCommandSpec
-        {
-            rigKey = rigKey,
-            responseProfile = PresentationResponseProfile.Background
-        };
-
-        Collect(spec);
-    }
-
-    private void EnqueueRegisterCharacterResponseBindingSpec0(string targetKey)
-    {
-        var spec = new RegisterCharacterResponseBindingCommandSpec
-        {
-            targetKey = targetKey,
-            responseProfile = PresentationResponseProfile.CharacterSlot0
-        };
-
-        Collect(spec);
-    }
-    private void EnqueueRegisterCharacterResponseBindingSpec1(string targetKey)
-    {
-        var spec = new RegisterCharacterResponseBindingCommandSpec
-        {
-            targetKey = targetKey,
-            responseProfile = PresentationResponseProfile.CharacterSlot1
-        };
-
-        Collect(spec);
-    }
-    
-    private void EnqueueRemoveBackgroundResponseBindingSpec(string rigKey, string stageKey = "0")
-    {
-        var spec = new RemoveBackgroundResponseBindingCommandSpec
-        {
-            rigKey = rigKey
-        };
-
-        Collect(spec);
-    }
-
-    private void EnqueueRemoveCharacterResponseBindingSpec(string targetKey, string stageKey = "0")
-    {
-        var spec = new RemoveCharacterResponseBindingCommandSpec
-        {
-            targetKey = targetKey
-        };
-
-        Collect(spec);
-    }
-    
     private void EnqueueShotZoomFocusSpec(
         string roleKey,
         string focusName = "body",

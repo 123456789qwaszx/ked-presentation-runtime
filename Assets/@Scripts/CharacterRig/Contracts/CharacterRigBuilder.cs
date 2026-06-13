@@ -231,12 +231,6 @@ public sealed class CharacterRigBuilder
         refs.CharSlot_Scale = GetRt(CharacterRigSchema.Refs.CharSlot_Scale);
         refs.CharSlot_Size = GetRt(CharacterRigSchema.Refs.CharSlot_Size);
 
-        // Framing axis - pseudo camera / focus response
-        refs.CharSlot_FramingTransform = GetRt(CharacterRigSchema.Refs.CharSlot_FramingTransform);
-        refs.CharSlot_FramingScale = GetRt(CharacterRigSchema.Refs.CharSlot_FramingScale);
-        refs.CharSlot_FramingScale_X = GetRt(CharacterRigSchema.Refs.CharSlot_FramingScale_X);
-        refs.CharSlot_FramingScale_Y = GetRt(CharacterRigSchema.Refs.CharSlot_FramingScale_Y);
-
         // Character casting axis - per-character defaults
         refs.Character_Root = GetRt(CharacterRigSchema.Refs.Character_Root);
         refs.Character_CastTransform = GetRt(CharacterRigSchema.Refs.Character_CastTransform);

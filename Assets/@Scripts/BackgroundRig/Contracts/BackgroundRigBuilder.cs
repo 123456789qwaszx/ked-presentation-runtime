@@ -266,10 +266,6 @@ public sealed class BackgroundRigBuilder
         // Background base axis - response-neutral placement / measurement
         refs.Background_Root = GetRt(BackgroundRigSchema.Refs.Background_Root);
 
-        // Framing axis - pseudo camera / focus response
-        refs.Background_FramingTransform = GetRt(BackgroundRigSchema.Refs.Background_FramingTransform);
-        refs.Background_FramingScale = GetRt(BackgroundRigSchema.Refs.Background_FramingScale);
-
         // Background casting axis - per-background defaults
         refs.Background_CastTransform = GetRt(BackgroundRigSchema.Refs.Background_CastTransform);
 

@@ -27,10 +27,6 @@ public sealed class SetAnchorCommandSpecBgR : BackgroundRigCommandSpecBase
     [Header("Scale")]
     public Vector2 scale = Vector2.one;
 
-    [Header("Reset")]
-    [Tooltip("체크하면 Anchor 설정 후 Background_FramingTransform / Background_FramingScale 축을 기본값으로 초기화합니다.")]
-    public bool resetFraming = false;
-
     [Tooltip("체크하면 Anchor 설정 후 Background_Track / Move / X / Y / Rotation / Shake / ActingScale 축을 기본값으로 초기화합니다.")]
     public bool resetActing = true;
 }
@@ -71,24 +67,8 @@ public sealed class SetAnchorCommandBgR : CommandBase
         _rect.localEulerAngles = new Vector3(0f, 0f, _spec.rotationZ);
         _rect.localScale = new Vector3(_spec.scale.x, _spec.scale.y, 1f);
 
-        if (_spec.resetFraming)
-            ResetFramingLayers();
-
         if (_spec.resetActing)
             ResetActingLayers();
-    }
-
-    private void ResetFramingLayers()
-    {
-        if (_rigRefs.Background_FramingTransform != null)
-        {
-            _rigRefs.Background_FramingTransform.anchoredPosition = Vector2.zero;
-            _rigRefs.Background_FramingTransform.localEulerAngles = Vector3.zero;
-            _rigRefs.Background_FramingTransform.localScale = Vector3.one;
-        }
-
-        if (_rigRefs.Background_FramingScale != null)
-            _rigRefs.Background_FramingScale.localScale = Vector3.one;
     }
 
     private void ResetActingLayers()

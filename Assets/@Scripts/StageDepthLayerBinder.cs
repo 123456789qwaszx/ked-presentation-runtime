@@ -1,6 +1,5 @@
 // depth 레이어는 캐릭터/배경처럼 생성·소멸하는 대상이 아니라 무대 고정 인프라.
 // 현재는 ResetVisualState() → PresentationResponseRig.Clear()가 binding 장부를 비우는 중.
-// 고정 값으로 변경 할지, 런타임 중 새롭게 등록을 할 지 선택 할 것.
 public sealed class StageDepthLayerBinder
 {
     private IStageDepthLayerProvider _provider;
