@@ -37,6 +37,34 @@ public partial class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
         Stage00CharSlotRig_Root,
 
         Stage00Foreground_Root,
+        
+        Stage00DepthSystem_Root,
+        Stage00Depth_Far_Root,
+        Stage00Depth_Far_FramingTransform,
+        Stage00Depth_Far_FramingScale,
+        Stage00Depth_Far_Content,
+        
+        Stage00Depth_Back_Root,
+        Stage00Depth_Back_FramingTransform,
+        Stage00Depth_Back_FramingScale,
+        Stage00Depth_Back_Content,
+        
+        Stage00Depth_Mid_Root,
+        Stage00Depth_Mid_FramingTransform,
+        Stage00Depth_Mid_FramingScale,
+        Stage00Depth_Mid_Content,
+        
+        Stage00Depth_Front_Root,
+        Stage00Depth_Front_FramingTransform,
+        Stage00Depth_Front_FramingScale,
+        Stage00Depth_Front_Content,
+        
+        Stage00Depth_Close_Root,
+        Stage00Depth_Close_FramingTransform,
+        Stage00Depth_Close_FramingScale,
+        Stage00Depth_Close_Content,
+        
+        
 
         Stage01_Root,
         Stage01BackgroundSystem_Root,

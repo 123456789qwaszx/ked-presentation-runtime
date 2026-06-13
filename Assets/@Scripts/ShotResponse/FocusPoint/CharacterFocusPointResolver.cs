@@ -85,8 +85,6 @@ public static class CharacterFocusPointResolver
         result = new CharacterFocusPointResult
         {
             StageRoot = stageRoot,
-            FocusRect = measureRect,
-            FocusOffsetInFocusRectSpace = focusOffset,
             FocusPointInStageSpace = new Vector2(focusInStage.x, focusInStage.y),
         };
 
