@@ -1,5 +1,3 @@
-// depth 레이어는 캐릭터/배경처럼 생성·소멸하는 대상이 아니라 무대 고정 인프라.
-// 현재는 ResetVisualState() → PresentationResponseRig.Clear()가 binding 장부를 비우는 중.
 public sealed class StageDepthLayerBinder
 {
     private IStageDepthLayerProvider _provider;
@@ -26,6 +24,9 @@ public sealed class StageDepthLayerBinder
 
     public void EnsureBindings(PresentationResponseRig rig)
     {
+        if (rig == null)
+            return;
+
         if (!TryEnsureProvider())
             return;
 
@@ -36,15 +37,27 @@ public sealed class StageDepthLayerBinder
         Bind(rig, StageDepthLayer.Close, _close);
     }
 
-    private void Bind(PresentationResponseRig rig, StageDepthLayer layer, PresentationResponseProfile profile)
+    private void Bind(
+        PresentationResponseRig rig,
+        StageDepthLayer layer,
+        PresentationResponseProfile profile)
     {
+        if (profile == null)
+            return;
+
+        string key = ResponseBindingKeys.StageDepthLayer(layer);
+
+        // 이미 살아있는 binding이 있으면 profile만 갱신하고 종료.
+        if (rig.TryUpdateBindingProfile(key, profile))
+            return;
+
         if (!_provider.TryGetLayerRects(layer, out var measure, out var position, out var scale))
             return;
 
         var target = new StageDepthResponseTarget(measure, position, scale);
 
         rig.RegisterRuntimeBinding(
-            ResponseBindingKeys.StageDepthLayer(layer),
+            key,
             target,
             profile);
     }

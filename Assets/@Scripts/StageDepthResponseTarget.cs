@@ -1,11 +1,21 @@
 using UnityEngine;
 
-// 캐릭터 리그 내부 framing 노드를 target으로 삼던 기존 방식(CharacterRigResponseTarget)을 대체.
-// 카메라 반응은 캐릭터 속성이 아니라 무대 깊이 레이어의 속성으로 정의.
+// StageDepth layer 구조:
 //
-// MeasureRect(Root)는 position, scale보다 상위 계층.(Response의 영향이 없는 중립 기준점)
-// PresentationResponseCoordinateMapper가 매 적용마다 MeasureRect의 pivot을 다시 측정 함.
-// 따라서 만약 MeasureRect가 응답을 받으면 base가 누적 드리프트 됨.
+// Root
+// └─ FramingTransform
+//    └─ FramingScale
+//       └─ Content
+//
+// MeasureRect(Root)
+// - response 영향을 받지 않는 중립 기준점.
+// - bind 시점에 PresentationResponseCoordinateMapper.CaptureBaseMeasure()로 한 번만 측정되어야 한다.
+//
+// PositionRect(FramingTransform)
+// - pan-follow + focus-spread offset을 anchoredPosition으로 받는 노드.
+//
+// ScaleRect(FramingScale)
+// - zoomScaleResponse를 localScale로 받는 노드.
 public sealed class StageDepthResponseTarget : IResponseTarget
 {
     private readonly RectTransform _measure;

@@ -66,12 +66,11 @@ _#beat #stay
 윌로: 죄송합니다만, 이번 의뢰는 보수의 3분의 1밖에 드릴 수 없겠군요.
 
 
-<<face_swap willow 11>>
-<<pause 0.6>>
+// <<face_swap willow 11>>
+// <<pause 0.6>>
 
-<<shot_track -80>>
-
-
+<<shot_to 8 -80 80 1>>
+qwe
 
 <<size c2 large>>
 <<scale_by c2 0.9>>
