@@ -55,7 +55,9 @@ title: Story_TalesOfNovaEP12_01
 
 // <<pres_actor c1>>
 // <<beat Beat_MoveFront>>
-//asd
+// asd
+<<depth_focus_to c1 close face 0.6>>
+
 <<focus_to c1 bust center 0>>
 <<face c1 11>>
 <<fade_in c1 0.6>>
@@ -65,10 +67,16 @@ title: Story_TalesOfNovaEP12_01
 <<depth_focus_to c1 8 bust 1.1>>
 _#beat #stay
 
-<<face_swap c1 16>>
+//<<face_swap c1 16>>
 <<move_by c1 0 -80 0.7>>
-<<pause 0.4>>
+<<4fr>>
 <<focus_to c1 bust center 0.7>>
+<<nudge c1 l6 0.4>>
+<<4fr>>
+<<nudge c1 l6 0.4>>
+<<2fr>>
+<<nudge c1 l6 0.4>>
+<<nudge c1 u3 0.4>>
 윌로: 죄송합니다만, 이번 의뢰는 보수의 3분의 1밖에 드릴 수 없겠군요.
 
 

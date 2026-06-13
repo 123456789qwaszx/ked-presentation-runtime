@@ -1,3 +1,4 @@
+using DG.Tweening;
 using UnityEngine;
 
 public sealed partial class YarnCommandBridge
@@ -160,6 +161,55 @@ public sealed partial class YarnCommandBridge
             target = CharacterRigTarget.CharacterPortrait_Rotation,
             toEuler = new Vector3(angle, 0f, 0f),
             duration = duration
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueNudgeCharSpec(string roleKey, string nudgeToken, float duration = 0.4f)
+    {
+        EnqueueNudgeSpec(
+            roleKey,
+            nudgeToken,
+            duration,
+            CharRigNudgeTargetSpace.SlotTrack);
+    }
+
+    private void EnqueueCharNudgeSpec(string roleKey, string nudgeToken, float duration = 0.4f)
+    {
+        EnqueueNudgeSpec(
+            roleKey,
+            nudgeToken,
+            duration,
+            CharRigNudgeTargetSpace.PortraitTrack);
+    }
+
+    private void EnqueueNudgeSpec(
+        string roleKey,
+        string nudgeToken,
+        float duration,
+        CharRigNudgeTargetSpace targetSpace)
+    {
+        CharRigNudgeResult nudge = CharRigNudgeParser.Parse(
+            nudgeToken,
+            targetSpace);
+
+        if (!nudge.IsValid)
+        {
+            Debug.LogWarning(
+                $"[YarnCommandBridge] Invalid nudge token '{nudgeToken}'. " +
+                "Expected format: l1, r1, u1, d1, r2.5, etc.");
+            return;
+        }
+
+        var spec = new MoveByCommandSpecCharR
+        {
+            slotKey = roleKey,
+            target = nudge.Target,
+            useAbsolutePosition = false,
+            delta = nudge.Delta,
+            duration = duration,
+            ease = Ease.OutCubic
         };
 
         Collect(spec);
