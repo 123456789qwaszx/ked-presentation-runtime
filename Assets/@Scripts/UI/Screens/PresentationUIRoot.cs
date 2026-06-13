@@ -25,18 +25,6 @@ public partial class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
         StageZoom_Root,
 
         Stage00_Root,
-        Stage00BackgroundSystem_Root,
-        Stage00BGShot_Root,
-        Stage00BGContent_Root,
-
-        Stage00BGOverlay_Root,
-
-        Stage00CharacterSystem_Root,
-        Stage00CharSlot_Root,
-        Stage00CharSlotFocus_Root,
-        Stage00CharSlotRig_Root,
-
-        Stage00Foreground_Root,
         
         Stage00DepthSystem_Root,
         Stage00Depth_Far_Root,

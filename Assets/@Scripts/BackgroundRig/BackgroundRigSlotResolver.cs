@@ -16,9 +16,9 @@ public interface IStageBackgroundRigSlotProvider
 
 public sealed partial class PresentationUIRoot : IStageBackgroundRigSlotProvider
 {
-    public RectTransform Stage00BackgroundSlot => View.Rect(Refs.Stage00BGContent_Root);
-    public RectTransform Stage01BackgroundSlot => View.Rect(Refs.Stage01BGContent_Root);
-    public RectTransform Stage02BackgroundSlot => View.Rect(Refs.Stage02BGContent_Root);
+    public RectTransform Stage00BackgroundSlot => View.Rect(Refs.Stage00Depth_Far_Content);
+    public RectTransform Stage01BackgroundSlot => View.Rect(Refs.Stage00Depth_Far_Content);
+    public RectTransform Stage02BackgroundSlot => View.Rect(Refs.Stage00Depth_Far_Content);
 }
 
 public sealed class BackgroundRigSlotResolver
