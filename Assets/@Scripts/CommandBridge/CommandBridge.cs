@@ -75,6 +75,8 @@ public sealed partial class YarnCommandBridge
     
     private void BindControl(DialogueRunner runner)
     {
+        BindFramePauseAliases(runner);
+        
         runner.AddCommandHandler<float>("pause", EnqueueWaitSpec);
         runner.AddCommandHandler<string>("ui_patch", EnqueueUIPatchSpec);
         runner.AddCommandHandler<string>("debug_log", LogImmediate);
@@ -177,6 +179,9 @@ public sealed partial class YarnCommandBridge
             "rotate_reset", EnqueueRotateResetSpec);
         runner.AddCommandHandler<string, float>(
             "scale_reset", EnqueueSizeResetSpec);
+        
+        runner.AddCommandHandler<string, string, float>(
+            "nudge", EnqueueNudgeCharSpec);
     }
     
     private void BindCharRigAppearance(DialogueRunner runner)
@@ -227,6 +232,9 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler<string>(
             "sway", EnqueueSwaySpec);
         
+        runner.AddCommandHandler<string, string, float>(
+            "char_nudge", EnqueueCharNudgeSpec);
+        
         runner.AddCommandHandler<string, float, float, float>(
             "char_move_to", EnqueueMoveByCharSpec);
         runner.AddCommandHandler<string, float, float>(
@@ -244,9 +252,9 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler<string, string>(
             "jolt", EnqueueJoltSpec);
         runner.AddCommandHandler<string, string>(
-            "nudge", EnqueueJoltSpecTap);
+            "tap", EnqueueJoltSpecTap);
         runner.AddCommandHandler<string, string>(
-            "nudge_hard", EnqueueJoltSpecTapHard);
+            "tap_hard", EnqueueJoltSpecTapHard);
         
         runner.AddCommandHandler<string>(
             "slide_in_sway", EnqueueSlideInSwayCombo);

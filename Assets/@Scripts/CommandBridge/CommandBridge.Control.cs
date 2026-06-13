@@ -1,8 +1,30 @@
 using System;
 using UnityEngine;
+using Yarn.Unity;
 
 public sealed partial class YarnCommandBridge
 {
+    private const float PauseFramesPerSecond = 24f;
+    private const int FramePauseAliasMaxFrame = 48;
+
+    
+    // Animator-style frame wait aliases.
+    // 24fps basis: <<24fr>> = 1 second.
+    // Registered up to <<48fr>> = 2 seconds.
+    // Longer or precise waits should use <<pause seconds>>.
+    private void BindFramePauseAliases(DialogueRunner runner)
+    {
+        for (int i = 1; i <= FramePauseAliasMaxFrame; i++)
+        {
+            int frame = i;
+            float seconds = frame / PauseFramesPerSecond;
+
+            runner.AddCommandHandler(
+                $"{frame}fr",
+                () => EnqueueWaitSpec(seconds));
+        }
+    }
+    
     private void EnqueueWaitSpec(float duration = 0.18f)
         => Collect(new WaitCommandSpec() { duration = duration });
 
