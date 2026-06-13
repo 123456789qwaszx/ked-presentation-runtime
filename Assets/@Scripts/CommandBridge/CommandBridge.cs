@@ -196,18 +196,6 @@ public sealed partial class YarnCommandBridge
             "shot_track", EnqueueShotTrackSpec);
         runner.AddCommandHandler<float>(
             "shot_reset", EnqueueShotResetSpec);
-        
-        runner.AddCommandHandler<string>(
-            "shot_bind_bg", EnqueueRegisterBackgroundResponseBindingSpec);
-        runner.AddCommandHandler<string>(
-            "shot_bind_char_far", EnqueueRegisterCharacterResponseBindingSpec0);
-        runner.AddCommandHandler<string>(
-            "shot_bind_char_close", EnqueueRegisterCharacterResponseBindingSpec1);
-        
-        runner.AddCommandHandler<string, string>(
-            "shot_unbind_bg", EnqueueRemoveBackgroundResponseBindingSpec);
-        runner.AddCommandHandler<string, string>(
-            "shot_unbind_char", EnqueueRemoveCharacterResponseBindingSpec);
     }
     
     private void BindCharRigActing(DialogueRunner runner)

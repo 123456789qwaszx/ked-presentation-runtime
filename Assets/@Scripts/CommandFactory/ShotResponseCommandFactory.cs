@@ -16,13 +16,7 @@ public sealed class ShotResponseCommandFactory : INodeCommandFactory
         command = spec switch
         {
             null => null,
-
-            RegisterBackgroundResponseBindingCommandSpec s => new RegisterBackgroundResponseBindingCommand(s, _presentationResponseRig),
-            RegisterCharacterResponseBindingCommandSpec s => new RegisterCharacterResponseBindingCommand(s, _presentationResponseRig),
-
-            RemoveBackgroundResponseBindingCommandSpec s => new RemoveBackgroundResponseBindingCommand(s, _presentationResponseRig),
-            RemoveCharacterResponseBindingCommandSpec s => new RemoveCharacterResponseBindingCommand(s, _presentationResponseRig),
-
+            
             ShotResetCommandSpec s => new ShotResetCommand(_presentationResponseRig, s),
 
             ShotZoomFocusCommandSpec s => new ShotZoomFocusCommand(_presentationResponseRig, s, _focusTuningDB),

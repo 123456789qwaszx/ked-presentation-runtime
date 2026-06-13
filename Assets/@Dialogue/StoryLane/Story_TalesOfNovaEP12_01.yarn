@@ -69,7 +69,7 @@ _#beat #stay
 <<face_swap willow 11>>
 <<pause 0.6>>
 
-<<shot_track -80 40 0.6>>
+<<shot_track -80>>
 
 
 
