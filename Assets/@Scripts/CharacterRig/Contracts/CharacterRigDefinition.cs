@@ -7,6 +7,7 @@ public static class CharacterRigSchema
     {
         // Slot axis - stage placement
         CharSlot_Anchor,
+        CharSlot_DepthY,
         CharSlot_Track,
         CharSlot_Track_Focus,
         CharSlot_Track_Idle,
@@ -14,6 +15,7 @@ public static class CharacterRigSchema
         CharSlot_Track_Y,
         CharSlot_Rotation,
         CharSlot_SwayPivot,
+        CharSlot_DepthScale,
         CharSlot_Scale,
         CharSlot_Size,
         
@@ -101,14 +103,16 @@ public static class CharacterRigSchema
     {
         // Slot axis - stage placement
         new() { Id = Refs.CharSlot_Anchor,    Parent = null },
-        new() { Id = Refs.CharSlot_Track,     Parent = Refs.CharSlot_Anchor },
+        new() { Id = Refs.CharSlot_DepthY,    Parent = Refs.CharSlot_Anchor },
+        new() { Id = Refs.CharSlot_Track,     Parent = Refs.CharSlot_DepthY },
         new() { Id = Refs.CharSlot_Track_Focus,   Parent = Refs.CharSlot_Track },
         new() { Id = Refs.CharSlot_Track_Idle,   Parent = Refs.CharSlot_Track_Focus },
         new() { Id = Refs.CharSlot_Track_X,   Parent = Refs.CharSlot_Track_Idle },
         new() { Id = Refs.CharSlot_Track_Y,   Parent = Refs.CharSlot_Track_X },
         new() { Id = Refs.CharSlot_Rotation,  Parent = Refs.CharSlot_Track_Y },
         new() { Id = Refs.CharSlot_SwayPivot, Parent = Refs.CharSlot_Rotation },
-        new() { Id = Refs.CharSlot_Scale,     Parent = Refs.CharSlot_SwayPivot,},
+        new() { Id = Refs.CharSlot_DepthScale, Parent = Refs.CharSlot_SwayPivot },
+        new() { Id = Refs.CharSlot_Scale,     Parent = Refs.CharSlot_DepthScale,},
         new() { Id = Refs.CharSlot_Size,      Parent = Refs.CharSlot_Scale,     NeedsBottomPivot = true },
     
         // Character casting axis - per-character defaults
@@ -188,6 +192,7 @@ public enum CharacterRigTarget
 {
     // Slot axis - stage placement
     CharSlot_Anchor,
+    CharSlot_DepthY,
     CharSlot_Track,
     CharSlot_Track_Focus,
     CharSlot_Track_Idle,
@@ -195,6 +200,7 @@ public enum CharacterRigTarget
     CharSlot_Track_Y,
     CharSlot_Rotation,
     CharSlot_SwayPivot,
+    CharSlot_DepthScale,
     CharSlot_Scale,
     CharSlot_Size,
 
@@ -283,6 +289,7 @@ public sealed class CharacterRigRefs
 
     // Slot axis - stage placement
     public RectTransform CharSlot_Anchor;
+    public RectTransform CharSlot_DepthY;
     public RectTransform CharSlot_Track;
     public RectTransform CharSlot_Track_Focus;
     public RectTransform CharSlot_Track_Idle;
@@ -290,6 +297,7 @@ public sealed class CharacterRigRefs
     public RectTransform CharSlot_Track_Y;
     public RectTransform CharSlot_Rotation;
     public RectTransform CharSlot_SwayPivot;
+    public RectTransform CharSlot_DepthScale;
     public RectTransform CharSlot_Scale;
     public RectTransform CharSlot_Size;
 
@@ -396,6 +404,7 @@ public static class CharacterRigRefsExtensions
         {
             // Slot axis - stage placement
             CharacterRigTarget.CharSlot_Anchor      => refs.CharSlot_Anchor,
+            CharacterRigTarget.CharSlot_DepthY      => refs.CharSlot_DepthY,
             CharacterRigTarget.CharSlot_Track       => refs.CharSlot_Track,
             CharacterRigTarget.CharSlot_Track_Focus => refs.CharSlot_Track_Focus,
             CharacterRigTarget.CharSlot_Track_Idle => refs.CharSlot_Track_Idle,
@@ -403,6 +412,7 @@ public static class CharacterRigRefsExtensions
             CharacterRigTarget.CharSlot_Track_Y   => refs.CharSlot_Track_Y,
             CharacterRigTarget.CharSlot_Rotation  => refs.CharSlot_Rotation,
             CharacterRigTarget.CharSlot_SwayPivot => refs.CharSlot_SwayPivot,
+            CharacterRigTarget.CharSlot_DepthScale => refs.CharSlot_DepthScale,
             CharacterRigTarget.CharSlot_Scale     => refs.CharSlot_Scale,
             CharacterRigTarget.CharSlot_Size      => refs.CharSlot_Size,
 
