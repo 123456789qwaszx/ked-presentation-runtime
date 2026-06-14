@@ -52,6 +52,10 @@ public sealed partial class YarnCommandBridge
     
     private void BindRunnerCommands(DialogueRunner runner)
     {
+        RegisterDirectionalNudgeCommands(runner);
+        RegisterFocusPlacementCommands(runner);
+        RegisterDepthFocusCommands(runner);
+        
         BindControl(runner);
 
         BindCharRigSetup(runner);
@@ -143,7 +147,7 @@ public sealed partial class YarnCommandBridge
     private void BindCharRigStaging(DialogueRunner runner)
     {
         runner.AddCommandHandler<string, string, string, float>(
-            "focus_to", EnqueuePlaceCharacterFocusSpec);
+            "to", EnqueuePlaceCharacterFocusSpec);
         
         runner.AddCommandHandler<string, string>(
             "depth",

@@ -53,30 +53,23 @@ title: Story_TalesOfNovaEP12_01
 
 //이건 내가 처음으로 그녀의 영혼에 닿았을 때의 이야기다. #box=onlytext
 
-// <<pres_actor c1>>
-// <<beat Beat_MoveFront>>
-// asd
-<<depth_focus_to c1 close face 0.6>>
 
-<<focus_to c1 bust center 0>>
-<<face c1 11>>
+<<face c1 4>>
 <<fade_in c1 0.6>>
+<<place_to c1 right>>
 
-<<focus_to c1 bust center 0.8>>
-<<move_by c1 0 -40 0.92>>
-<<depth_focus_to c1 8 bust 1.1>>
+<<to_inner_bl c1 face 18fr>>
+<<at_bust c1 8 28fr>>
+<<left c1 1u 22fr>>
+
 _#beat #stay
 
 //<<face_swap c1 16>>
-<<move_by c1 0 -80 0.7>>
+<<down c1 2u 4fr>>
 <<4fr>>
-<<focus_to c1 bust center 0.7>>
-<<nudge c1 l6 0.4>>
+<<to c1 bust center 0.7>>
 <<4fr>>
-<<nudge c1 l6 0.4>>
-<<8fr>>
-<<nudge c1 l6 0.4>>
-<<nudge c1 u3 0.4>>
+//<<left c1 2u 24fr>>
 윌로: 죄송합니다만, 이번 의뢰는 보수의 3분의 1밖에 드릴 수 없겠군요.
 
 
