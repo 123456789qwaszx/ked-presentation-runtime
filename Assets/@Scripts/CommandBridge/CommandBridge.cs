@@ -55,6 +55,7 @@ public sealed partial class YarnCommandBridge
         RegisterDirectionalNudgeCommands(runner);
         RegisterFocusPlacementCommands(runner);
         RegisterDepthFocusCommands(runner);
+        RegisterShowCommands(runner);
         
         BindControl(runner);
 
