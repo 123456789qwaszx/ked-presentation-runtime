@@ -2,42 +2,205 @@ using Yarn.Unity;
 
 public sealed partial class YarnCommandBridge
 {
+    private const string DefaultFocusPlacementFocusToken = "face";
+    private const string DefaultFocusPlacementDurationToken = "0fr";
+
     private void RegisterFocusPlacementCommands(DialogueRunner runner)
     {
-        RegisterFocusPlacementCommand(runner, "to_left", ScreenFocusPoint.Left);
-        RegisterFocusPlacementCommand(runner, "to_center", ScreenFocusPoint.Center);
-        RegisterFocusPlacementCommand(runner, "to_right", ScreenFocusPoint.Right);
+        runner.AddCommandHandler<string, string, string>(
+            "to_left", EnqueueFocusToLeftSpec);
 
-        RegisterFocusPlacementCommand(runner, "to_top_left", ScreenFocusPoint.TopLeft);
-        RegisterFocusPlacementCommand(runner, "to_top", ScreenFocusPoint.Top);
-        RegisterFocusPlacementCommand(runner, "to_top_right", ScreenFocusPoint.TopRight);
-        
-        RegisterFocusPlacementCommand(runner, "to_bottom_left", ScreenFocusPoint.BottomLeft);
-        RegisterFocusPlacementCommand(runner, "to_bottom", ScreenFocusPoint.Bottom);
-        RegisterFocusPlacementCommand(runner, "to_bottom_right", ScreenFocusPoint.BottomRight);
+        runner.AddCommandHandler<string, string, string>(
+            "to_center", EnqueueFocusToCenterSpec);
 
-        RegisterFocusPlacementCommand(runner, "to_inner_tl", ScreenFocusPoint.ThirdsUpperLeft);
-        RegisterFocusPlacementCommand(runner, "to_inner_tr", ScreenFocusPoint.ThirdsUpperRight);
+        runner.AddCommandHandler<string, string, string>(
+            "to_right", EnqueueFocusToRightSpec);
 
-        RegisterFocusPlacementCommand(runner, "to_inner_bl", ScreenFocusPoint.ThirdsLowerLeft);
-        RegisterFocusPlacementCommand(runner, "to_inner_br", ScreenFocusPoint.ThirdsLowerRight);
+        runner.AddCommandHandler<string, string, string>(
+            "to_tl", EnqueueFocusToTopLeftSpec);
+
+        runner.AddCommandHandler<string, string, string>(
+            "to_top", EnqueueFocusToTopSpec);
+
+        runner.AddCommandHandler<string, string, string>(
+            "to_tr", EnqueueFocusToTopRightSpec);
+
+        runner.AddCommandHandler<string, string, string>(
+            "to_bl", EnqueueFocusToBottomLeftSpec);
+
+        runner.AddCommandHandler<string, string, string>(
+            "to_bottom", EnqueueFocusToBottomSpec);
+
+        runner.AddCommandHandler<string, string, string>(
+            "to_br", EnqueueFocusToBottomRightSpec);
+
+        runner.AddCommandHandler<string, string, string>(
+            "to_inner_tl", EnqueueFocusToInnerTopLeftSpec);
+
+        runner.AddCommandHandler<string, string, string>(
+            "to_inner_tr", EnqueueFocusToInnerTopRightSpec);
+
+        runner.AddCommandHandler<string, string, string>(
+            "to_inner_bl", EnqueueFocusToInnerBottomLeftSpec);
+
+        runner.AddCommandHandler<string, string, string>(
+            "to_inner_br", EnqueueFocusToInnerBottomRightSpec);
     }
 
-    private void RegisterFocusPlacementCommand(
-        DialogueRunner runner,
-        string commandName,
-        ScreenFocusPoint screenPoint)
+    private void EnqueueFocusToLeftSpec(
+        string roleKey,
+        string focus = DefaultFocusPlacementFocusToken,
+        string durationToken = DefaultFocusPlacementDurationToken)
     {
-        runner.AddCommandHandler<string, string, string>(
-            commandName,
-            (roleKey, focus, durationToken) =>
-            {
-                EnqueuePlaceCharacterFocusToSpec(
-                    roleKey,
-                    focus,
-                    screenPoint,
-                    durationToken);
-            });
+        EnqueuePlaceCharacterFocusToSpec(
+            roleKey,
+            focus,
+            ScreenFocusPoint.Left,
+            durationToken);
+    }
+
+    private void EnqueueFocusToCenterSpec(
+        string roleKey,
+        string focus = DefaultFocusPlacementFocusToken,
+        string durationToken = DefaultFocusPlacementDurationToken)
+    {
+        EnqueuePlaceCharacterFocusToSpec(
+            roleKey,
+            focus,
+            ScreenFocusPoint.Center,
+            durationToken);
+    }
+
+    private void EnqueueFocusToRightSpec(
+        string roleKey,
+        string focus = DefaultFocusPlacementFocusToken,
+        string durationToken = DefaultFocusPlacementDurationToken)
+    {
+        EnqueuePlaceCharacterFocusToSpec(
+            roleKey,
+            focus,
+            ScreenFocusPoint.Right,
+            durationToken);
+    }
+
+    private void EnqueueFocusToTopLeftSpec(
+        string roleKey,
+        string focus = DefaultFocusPlacementFocusToken,
+        string durationToken = DefaultFocusPlacementDurationToken)
+    {
+        EnqueuePlaceCharacterFocusToSpec(
+            roleKey,
+            focus,
+            ScreenFocusPoint.TopLeft,
+            durationToken);
+    }
+
+    private void EnqueueFocusToTopSpec(
+        string roleKey,
+        string focus = DefaultFocusPlacementFocusToken,
+        string durationToken = DefaultFocusPlacementDurationToken)
+    {
+        EnqueuePlaceCharacterFocusToSpec(
+            roleKey,
+            focus,
+            ScreenFocusPoint.Top,
+            durationToken);
+    }
+
+    private void EnqueueFocusToTopRightSpec(
+        string roleKey,
+        string focus = DefaultFocusPlacementFocusToken,
+        string durationToken = DefaultFocusPlacementDurationToken)
+    {
+        EnqueuePlaceCharacterFocusToSpec(
+            roleKey,
+            focus,
+            ScreenFocusPoint.TopRight,
+            durationToken);
+    }
+
+    private void EnqueueFocusToBottomLeftSpec(
+        string roleKey,
+        string focus = DefaultFocusPlacementFocusToken,
+        string durationToken = DefaultFocusPlacementDurationToken)
+    {
+        EnqueuePlaceCharacterFocusToSpec(
+            roleKey,
+            focus,
+            ScreenFocusPoint.BottomLeft,
+            durationToken);
+    }
+
+    private void EnqueueFocusToBottomSpec(
+        string roleKey,
+        string focus = DefaultFocusPlacementFocusToken,
+        string durationToken = DefaultFocusPlacementDurationToken)
+    {
+        EnqueuePlaceCharacterFocusToSpec(
+            roleKey,
+            focus,
+            ScreenFocusPoint.Bottom,
+            durationToken);
+    }
+
+    private void EnqueueFocusToBottomRightSpec(
+        string roleKey,
+        string focus = DefaultFocusPlacementFocusToken,
+        string durationToken = DefaultFocusPlacementDurationToken)
+    {
+        EnqueuePlaceCharacterFocusToSpec(
+            roleKey,
+            focus,
+            ScreenFocusPoint.BottomRight,
+            durationToken);
+    }
+
+    private void EnqueueFocusToInnerTopLeftSpec(
+        string roleKey,
+        string focus = DefaultFocusPlacementFocusToken,
+        string durationToken = DefaultFocusPlacementDurationToken)
+    {
+        EnqueuePlaceCharacterFocusToSpec(
+            roleKey,
+            focus,
+            ScreenFocusPoint.ThirdsUpperLeft,
+            durationToken);
+    }
+
+    private void EnqueueFocusToInnerTopRightSpec(
+        string roleKey,
+        string focus = DefaultFocusPlacementFocusToken,
+        string durationToken = DefaultFocusPlacementDurationToken)
+    {
+        EnqueuePlaceCharacterFocusToSpec(
+            roleKey,
+            focus,
+            ScreenFocusPoint.ThirdsUpperRight,
+            durationToken);
+    }
+
+    private void EnqueueFocusToInnerBottomLeftSpec(
+        string roleKey,
+        string focus = DefaultFocusPlacementFocusToken,
+        string durationToken = DefaultFocusPlacementDurationToken)
+    {
+        EnqueuePlaceCharacterFocusToSpec(
+            roleKey,
+            focus,
+            ScreenFocusPoint.ThirdsLowerLeft,
+            durationToken);
+    }
+
+    private void EnqueueFocusToInnerBottomRightSpec(
+        string roleKey,
+        string focus = DefaultFocusPlacementFocusToken,
+        string durationToken = DefaultFocusPlacementDurationToken)
+    {
+        EnqueuePlaceCharacterFocusToSpec(
+            roleKey,
+            focus,
+            ScreenFocusPoint.ThirdsLowerRight,
+            durationToken);
     }
 
     private void EnqueuePlaceCharacterFocusToSpec(
@@ -46,7 +209,7 @@ public sealed partial class YarnCommandBridge
         ScreenFocusPoint screenPoint,
         string durationToken)
     {
-        float duration = YarnDurationParser.Parse(durationToken, 0f);
+        float duration = YarnDurationParser.Parse(durationToken);
 
         EnqueuePlaceCharacterFocusToSpec(
             roleKey,
@@ -61,10 +224,7 @@ public sealed partial class YarnCommandBridge
         ScreenFocusPoint screenPoint,
         float duration)
     {
-        CharacterFocusPreset focusPreset =
-            CharacterFocusPresetParser.Parse(
-                focus,
-                CharacterFocusPreset.Face);
+        CharacterFocusPreset focusPreset = CharacterFocusPresetParser.Parse(focus);
 
         var spec = new PlaceCharacterFocusCommandSpecCharR
         {

@@ -2,75 +2,120 @@ using Yarn.Unity;
 
 public sealed partial class YarnCommandBridge
 {
+    private const string DefaultShowFaceToken = "e2";
     private const string DefaultShowDurationToken = "14fr";
 
     private void RegisterShowCommands(DialogueRunner runner)
     {
-        RegisterShowAtCommand(runner, "show_at_l", "left");
-        RegisterShowAtCommand(runner, "show_at_c", "center");
-        RegisterShowAtCommand(runner, "show_at_r", "right");
-
-        RegisterShowAtCommand(runner, "show_at_dl", "duoleft");
-        RegisterShowAtCommand(runner, "show_at_dr", "duoright");
-        
-        runner.AddCommandHandler<string, string, string, string>("show", EnqueueShowSpec);
-    }
-
-    private void RegisterShowAtCommand(
-        DialogueRunner runner,
-        string commandName,
-        string positionPreset)
-    {
         runner.AddCommandHandler<string, string, string>(
-            commandName,
-            (roleKey, faceToken, durationToken) =>
-            {
-                EnqueueShowAtSpec(
-                    roleKey,
-                    positionPreset,
-                    faceToken,
-                    durationToken);
-            });
+            "show_at_left",
+            EnqueueShowAtLeftSpec);
+
+        runner.AddCommandHandler<string, string, string>(
+            "show_at_center",
+            EnqueueShowAtCenterSpec);
+
+        runner.AddCommandHandler<string, string, string>(
+            "show_at_right",
+            EnqueueShowAtRightSpec);
+
+        runner.AddCommandHandler<string, string, string>(
+            "show_at_dl",
+            EnqueueShowAtDuoLeftSpec);
+
+        runner.AddCommandHandler<string, string, string>(
+            "show_at_dr",
+            EnqueueShowAtDuoRightSpec);
+
+        runner.AddCommandHandler<string, string, string, string>(
+            "show",
+            EnqueueShowSpec);
     }
 
-    private void EnqueueShowAtSpec(
+    private void EnqueueShowAtLeftSpec(
         string roleKey,
-        string positionPreset,
-        string faceToken = "face2",
+        string faceToken = DefaultShowFaceToken,
         string durationToken = DefaultShowDurationToken)
     {
-        string emotionKey = ShowFaceAliasParser.Parse(faceToken);
-
-        float duration = YarnDurationParser.Parse(
-            durationToken,
-            YarnDurationParser.FramesToSeconds(14f));
-
-        EnqueueSetAnchorSpecs(
+        EnqueueShowAtSpec(
             roleKey,
-            positionPreset,
-            resetSlotPos: true,
-            resetCharPos: true);
+            faceToken,
+            "left",
+            durationToken);
+    }
 
-        EnqueueSetPortraitFaceSpec(
+    private void EnqueueShowAtCenterSpec(
+        string roleKey,
+        string faceToken = DefaultShowFaceToken,
+        string durationToken = DefaultShowDurationToken)
+    {
+        EnqueueShowAtSpec(
             roleKey,
-            emotionKey);
+            faceToken,
+            "center",
+            durationToken);
+    }
 
-        EnqueueFadeInSpec(
+    private void EnqueueShowAtRightSpec(
+        string roleKey,
+        string faceToken = DefaultShowFaceToken,
+        string durationToken = DefaultShowDurationToken)
+    {
+        EnqueueShowAtSpec(
             roleKey,
-            duration);
+            faceToken,
+            "right",
+            durationToken);
+    }
+
+    private void EnqueueShowAtDuoLeftSpec(
+        string roleKey,
+        string faceToken = DefaultShowFaceToken,
+        string durationToken = DefaultShowDurationToken)
+    {
+        EnqueueShowAtSpec(
+            roleKey,
+            faceToken,
+            "duoleft",
+            durationToken);
+    }
+
+    private void EnqueueShowAtDuoRightSpec(
+        string roleKey,
+        string faceToken = DefaultShowFaceToken,
+        string durationToken = DefaultShowDurationToken)
+    {
+        EnqueueShowAtSpec(
+            roleKey,
+            faceToken,
+            "duoright",
+            durationToken);
     }
 
     private void EnqueueShowSpec(
         string roleKey,
-        string positionToken = "center",
-        string faceToken = "face2",
+        string faceToken = DefaultShowFaceToken,
+        string positionPreset = "center",
         string durationToken = DefaultShowDurationToken)
     {
-        string positionPreset = ShowPositionAliasParser.Parse(positionToken);
-        string emotionKey = ShowFaceAliasParser.Parse(faceToken);
+        EnqueueShowAtSpec(
+            roleKey,
+            faceToken,
+            positionPreset,
+            durationToken);
+    }
+
+    private void EnqueueShowAtSpec(
+        string roleKey,
+        string faceToken = DefaultShowFaceToken,
+        string positionPreset = "center",
+        string durationToken = DefaultShowDurationToken)
+    {
         float duration = YarnDurationParser.Parse(
             durationToken,
             YarnDurationParser.FramesToSeconds(14f));
+        
+        string emotionKey = ShowFaceAliasParser.Parse(faceToken);
 
         EnqueueSetAnchorSpecs(
             roleKey,
@@ -81,9 +126,10 @@ public sealed partial class YarnCommandBridge
         EnqueueSetPortraitFaceSpec(
             roleKey,
             emotionKey);
-
-        EnqueueFadeInSpec(
-            roleKey,
-            duration);
+        
+        // if (durationToken.TrimStart().StartsWith("-"))
+        //     EnqueueFadeOutSpec(roleKey, 0);
+        // else
+            EnqueueFadeInSpec(roleKey, duration);
     }
 }

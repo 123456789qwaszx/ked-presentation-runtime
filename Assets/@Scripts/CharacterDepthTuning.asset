@@ -27,7 +27,7 @@ MonoBehaviour:
       preserveFocusOffset: {x: 0, y: 0}
     close:
       depthY: {x: 0, y: -320}
-      depthScale: 1.9
+      depthScale: 1.18
       preserveFocusPreset: 20
       preserveCustomFocusKey: 
       preserveFocusOffset: {x: 0, y: 0}

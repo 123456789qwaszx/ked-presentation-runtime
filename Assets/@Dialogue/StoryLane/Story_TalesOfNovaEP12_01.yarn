@@ -41,80 +41,66 @@ title: Story_TalesOfNovaEP12_01
 <<pres_suppress_first true>>
 <<pres_pause>>
 
+
 //이건 내가 처음으로 그녀의 영혼에 닿았을 때의 이야기다. #box=onlytext
 
-
-<<show_at_r willow e8 12fr>>
-
-<<to_inner_bl c1 face 18fr>>
-<<at_body c1 8 28fr>>
-<<left c1 1u 22fr>>
-<<up c1 2u>>
+<<actor @1 willow>>
+<<show      @1 e21>>
+<<to_center @1 face 8fr>>
+<<at_close  @1 bust 12fr>>
+<<left      @1 1u 10fr>>
 _#beat #stay
 
-<<show_at_r c2 e4 0.6>>
-
-<<to_inner_br c2 face 18fr>>
-<<at_body c2 8 28fr>>
-<<left c2 1u 22fr>>
-<<up c2 2u>>
-
-_#beat #stay
-
-
-//<<face_swap c1 16>>
-<<down c1 2u 4fr>>
-<<4fr>>
-<<to c1 bust center 0.7>>
-<<4fr>>
-//<<left c1 2u 24fr>>
 윌로: 죄송합니다만, 이번 의뢰는 보수의 3분의 1밖에 드릴 수 없겠군요.
 
-
-<<face_swap willow 11>>
+<<actor @1 willow>>
+<<face_swap @1 11>>
+<<14fr>>
+<<shot_to 0 -80 80>>
 <<14fr>>
 
-<<shot_to 0 -80 80 1>>
+<<actor @2 noya>>
+<<show     @2 e8 right 0>>
+<<to_br    @2 bust -1>>
+<<at_front @2 bust -1>>
+<<down     @2 3u>>
+<<left     @2 1.2u>>
 
-<<to c2 bust right 0>>
-<<move_by c2 0 -400 0>>
-<<depth_focus_to c2 222 bust 0>>
-<<pause 0.1>>
+<<slide_in @2 right>>
+<<hop      @2>>
+<<6fr>>
 
-<<fade_in c2>>
-<<slide_in c2 right>>
-<<pause 0.074>>
-<<hop c2 1 90 10>>
-<<move_by c2 40 0>>
-<<pause 0.28>>
-
-<<char_visual willow 0 0 1>>
-<<move_by willow -180 0 0.8>>
-<<pause 0.4>>
+<<actor @1 willow>>
+<<left @1 4.5u 20fr>>
 _#beat #stay
 
-<<shake c2>>
+<<actor @2 noya>>
+<<shake @2>>
 세이나: 안 돼! 이 신기를 얻으려고 우리가 성해를 얼마나 많이 물리쳤는데...... <br>검날이 다 무뎌질 정도였다고!
 
+<<actor @3 iris>>
+<<show     @3 e5 left 0>>
+<<to_bl    @3 bust -1>>
+<<at_front @3 bust -1>>
+<<down     @3 3u>>
+<<right    @3 1.2u>>
 
-<<size c3 large>>
-<<scale_by c3 0.9>>
-<<move_by c3 0 -400>>
+<<hop      @3 1 60 10>>
+<<slide_in @3 left>>
+<<2fr>>
 
-<<fade_in c3>>
-<<hop c3 1 60 10>>
-<<slide_in c3 left>>
-<<pause 0.06>>
-
-<<move_by c1 240 0 0.6>>
-<<face c1 25>>
+<<actor @1 willow>>
+<<face  @1 25>>
+<<right @1 8.5u 14fr>>
 _#beat #stay
 
-<<shake c3>>
+<<actor @3 iris>>
+<<shake @3>>
 아야메: 이번에 돌아와서 물자를 보충하는 것만으로도 기존에 약속했던 보수의 절반을 사용해야 해요. 3분의 1만 받는다면, 우린 적자예요.
 
-<<scale_by c1 0.8>>
-<<char_silhouette c1 1>>
+<<actor @1 willow>>
+<<at_far          @1 bust>>
+<<char_silhouette @1 1>>
 _#beat #stay
 
 <<bg_fade_in bg2>>
@@ -134,7 +120,7 @@ _#beat #stay
 
 <<pause 0.2>>
 <<char_silhouette c1 0 1.4>>
-<<focus_to c1 bust c2 0.5>>
+<<to c1 bust c2 0.5>>
 <<scale_by c1 1.4 1.2>>
 <<face_swap c1 11>>
 <<pause 0.12>>
@@ -165,12 +151,12 @@ _#beat #stay
 <<scale_reset c2>>
 <<size c2 normal>>
 <<face c2 6>>
-<<focus_to c2 bust left>>
+<<to c2 bust left>>
 <<slide_in c2>>
 <<fade_in c2>>
 
 <<pause 0.1>>
-<<focus_to c5 bust right 1.2>>
+<<to c5 bust right 1.2>>
 <<move_by c5 -100 0 1.4>>
 _#beat #stay
 

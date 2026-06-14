@@ -3,95 +3,106 @@ using Yarn.Unity;
 
 public sealed partial class YarnCommandBridge
 {
+    private const string DefaultDepthFocusPresetToken = "bust";
     private const string DefaultDepthFocusDurationToken = "10fr";
 
     private void RegisterDepthFocusCommands(DialogueRunner runner)
     {
         runner.AddCommandHandler<string, string, string>(
-            "at_face",
-            EnqueueDepthFocusFaceSpec);
+            "at_close", EnqueueDepthAtCloseSpec);
 
         runner.AddCommandHandler<string, string, string>(
-            "at_bust",
-            EnqueueDepthFocusBustSpec);
+            "at_front", EnqueueDepthAtFrontSpec);
 
         runner.AddCommandHandler<string, string, string>(
-            "at_body",
-            EnqueueDepthFocusBodySpec);
+            "at_mid", EnqueueDepthAtMidSpec);
 
         runner.AddCommandHandler<string, string, string>(
-            "at_feet",
-            EnqueueDepthFocusFeetSpec);
+            "at_back", EnqueueDepthAtBackSpec);
+
+        runner.AddCommandHandler<string, string, string>(
+            "at_far", EnqueueDepthAtFarSpec);
     }
 
-    private void EnqueueDepthFocusFaceSpec(
+    private void EnqueueDepthAtCloseSpec(
         string roleKey,
-        string depthArg,
+        string preserveFocusArg = DefaultDepthFocusPresetToken,
         string durationToken = DefaultDepthFocusDurationToken)
     {
-        EnqueueDepthFocusPresetSpec(
+        EnqueueDepthAtPresetSpec(
             roleKey,
-            depthArg,
-            CharacterFocusPreset.Face,
+            "close",
+            preserveFocusArg,
             durationToken);
     }
 
-    private void EnqueueDepthFocusBustSpec(
+    private void EnqueueDepthAtFrontSpec(
         string roleKey,
-        string depthArg,
+        string preserveFocusArg = DefaultDepthFocusPresetToken,
         string durationToken = DefaultDepthFocusDurationToken)
     {
-        EnqueueDepthFocusPresetSpec(
+        EnqueueDepthAtPresetSpec(
             roleKey,
-            depthArg,
-            CharacterFocusPreset.Bust,
+            "front",
+            preserveFocusArg,
             durationToken);
     }
 
-    private void EnqueueDepthFocusBodySpec(
+    private void EnqueueDepthAtMidSpec(
         string roleKey,
-        string depthArg,
+        string preserveFocusArg = DefaultDepthFocusPresetToken,
         string durationToken = DefaultDepthFocusDurationToken)
     {
-        EnqueueDepthFocusPresetSpec(
+        EnqueueDepthAtPresetSpec(
             roleKey,
-            depthArg,
-            CharacterFocusPreset.Body,
+            "mid",
+            preserveFocusArg,
             durationToken);
     }
 
-    private void EnqueueDepthFocusFeetSpec(
+    private void EnqueueDepthAtBackSpec(
         string roleKey,
-        string depthArg,
+        string preserveFocusArg = DefaultDepthFocusPresetToken,
         string durationToken = DefaultDepthFocusDurationToken)
     {
-        EnqueueDepthFocusPresetSpec(
+        EnqueueDepthAtPresetSpec(
             roleKey,
-            depthArg,
-            CharacterFocusPreset.Feet,
+            "back",
+            preserveFocusArg,
             durationToken);
     }
 
-    private void EnqueueDepthFocusPresetSpec(
+    private void EnqueueDepthAtFarSpec(
+        string roleKey,
+        string preserveFocusArg = DefaultDepthFocusPresetToken,
+        string durationToken = DefaultDepthFocusDurationToken)
+    {
+        EnqueueDepthAtPresetSpec(
+            roleKey,
+            "far",
+            preserveFocusArg,
+            durationToken);
+    }
+
+    private void EnqueueDepthAtPresetSpec(
         string roleKey,
         string depthArg,
-        CharacterFocusPreset preserveFocusPreset,
+        string preserveFocusArg,
         string durationToken)
     {
-        float duration = YarnDurationParser.Parse(
-            durationToken);
+        float duration = YarnDurationParser.Parse(durationToken);
 
-        EnqueueDepthFocusPresetSpec(
+        EnqueueDepthAtPresetSpec(
             roleKey,
             depthArg,
-            preserveFocusPreset,
+            preserveFocusArg,
             duration);
     }
 
-    private void EnqueueDepthFocusPresetSpec(
+    private void EnqueueDepthAtPresetSpec(
         string roleKey,
         string depthArg,
-        CharacterFocusPreset preserveFocusPreset,
+        string preserveFocusArg,
         float duration)
     {
         duration = Mathf.Max(0f, duration);
@@ -102,13 +113,11 @@ public sealed partial class YarnCommandBridge
             duration = duration,
 
             overridePreserveFocus = true,
-            preserveFocusPreset = preserveFocusPreset,
-            preserveCustomFocusKey = "",
-
             wait = false
         };
 
         ApplyDepthArg(spec, depthArg);
+        ApplyPreserveFocusArg(spec, preserveFocusArg);
 
         Collect(spec);
     }

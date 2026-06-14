@@ -28,9 +28,6 @@ public static class ShowPositionAliasParser
             "duo_right" => "duoright",
             "dr" => "duoright",
 
-            // 현재 CharAnchorPreset에 Trio 전용 값이 없으므로
-            // trioleft/trioright는 저작 alias로 left/right에 매핑한다.
-            // 나중에 trio 전용 간격이 필요해지면 CharAnchorPreset에 TrioLeft/TrioRight를 추가하면 됨.
             "trioleft" => "left",
             "trio_left" => "left",
             "tl" => "left",
