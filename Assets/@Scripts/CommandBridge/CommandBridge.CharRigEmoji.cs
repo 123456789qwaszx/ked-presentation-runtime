@@ -5,9 +5,7 @@ public sealed partial class YarnCommandBridge : InlineEventMarkupHandler.IInline
 {
     public void PlayEmojiCue(string cue)
     {
-        string characterKey = _vnRuntimeStateProvider != null
-            ? _vnRuntimeStateProvider.CurrentCharacterKey
-            : "";
+        string characterKey = _vnRuntimeStateProvider.CurrentCharacterKey;
         
         if (string.IsNullOrWhiteSpace(characterKey))
             return;
@@ -21,9 +19,6 @@ public sealed partial class YarnCommandBridge : InlineEventMarkupHandler.IInline
         EnqueueEmojiPopSpec(characterKey, cue);
     }
 
-    // ----------------------------------------------------------------------
-    // Public Yarn command handlers
-    // ----------------------------------------------------------------------
 
     // <<emoji igna 19>>
     private void EnqueueEmojiPopSpec(string roleKey, string emojiKey)
@@ -232,10 +227,6 @@ public sealed partial class YarnCommandBridge : InlineEventMarkupHandler.IInline
             "",
             initialReveal: 0f));
     }
-
-    // ----------------------------------------------------------------------
-    // Spec builders - EmojiSlot00 only
-    // ----------------------------------------------------------------------
 
     private SetCharacterEmojiCommandSpecCharR BuildSetEmojiSpec(
         string roleKey,

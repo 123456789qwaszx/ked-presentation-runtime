@@ -1,4 +1,3 @@
-using DG.Tweening;
 using UnityEngine;
 using Yarn.Unity;
 
@@ -7,41 +6,47 @@ public sealed partial class YarnCommandBridge
     private void BindCharRigAppearance(DialogueRunner runner)
     {
         runner.AddCommandHandler<string, string>(
-            "fade_in",
-            EnqueueFadeInDslSpec);
+            "fade_in", EnqueueFadeInDslSpec);
 
         runner.AddCommandHandler<string, string>(
-            "fade_out",
-            EnqueueFadeOutDslSpec);
+            "fade_out", EnqueueFadeOutDslSpec);
 
         runner.AddCommandHandler<string, string, string>(
-            "face_swap",
-            EnqueueSetEmotionPortraitWipeDslSpec);
+            "face_swap", EnqueueSetEmotionPortraitWipeDslSpec);
 
         runner.AddCommandHandler<string, string, string>(
-            "face_crossfade",
-            EnqueueSetPortraitCrossfadeDslSpec);
+            "face_crossfade", EnqueueSetPortraitCrossfadeDslSpec);
 
         runner.AddCommandHandler<string, string, string, string>(
-            "slide_in",
-            EnqueueSlideInDslSpec);
+            "slide_in", EnqueueSlideInDslSpec);
 
         runner.AddCommandHandler<string, string, string, string>(
-            "slide_out",
-            EnqueueSlideOutDslSpec);
+            "slide_out", EnqueueSlideOutDslSpec);
 
         runner.AddCommandHandler<string, string>(
-            "emoji",
-            EnqueueEmojiPopSpec);
+            "emoji", EnqueueEmojiPopSpec);
+        
+        runner.AddCommandHandler<string, string, string, string>(
+            "char_move_to", EnqueueMoveByUnitCharSpec);
+        
+        runner.AddCommandHandler<string, float, string>(
+            "char_scale_to", EnqueueScaleToDslSpec);
+        
+        runner.AddCommandHandler<string, int, string>(
+            "char_rotate_to", EnqueuePivotRotateToDslSpec);
+        
+        runner.AddCommandHandler<string, int, string>(
+            "char_flip_horizontal", EnqueueFlipHorizontalDslSpec);
+        
+        runner.AddCommandHandler<string, int, string>(
+            "char_flip_vertical", EnqueueFlipVerticalDslSpec);
     }
 
     private void EnqueueFadeInDslSpec(
         string roleKey,
         string durationToken = "14fr")
     {
-        float duration = YarnDurationParser.Parse(
-            durationToken,
-            fallbackSeconds: 0.6f);
+        float duration = YarnDurationParser.Parse(durationToken);
 
         var spec = new FadeInCommandSpecCharR
         {
@@ -57,9 +62,7 @@ public sealed partial class YarnCommandBridge
         string roleKey,
         string durationToken = "14fr")
     {
-        float duration = YarnDurationParser.Parse(
-            durationToken,
-            fallbackSeconds: 0.6f);
+        float duration = YarnDurationParser.Parse(durationToken);
 
         var spec = new FadeOutCommandSpecCharR
         {
@@ -76,9 +79,7 @@ public sealed partial class YarnCommandBridge
         string emotion,
         string durationToken = "10fr")
     {
-        float duration = YarnDurationParser.Parse(
-            durationToken,
-            fallbackSeconds: 0.4f);
+        float duration = YarnDurationParser.Parse(durationToken);
 
         var spec = new SetEmotionPortraitWipeCommandSpec
         {
@@ -98,9 +99,7 @@ public sealed partial class YarnCommandBridge
         string character,
         string durationToken = "10fr")
     {
-        float duration = YarnDurationParser.Parse(
-            durationToken,
-            fallbackSeconds: 0.4f);
+        float duration = YarnDurationParser.Parse(durationToken);
 
         var portraitIdentity = new PortraitIdentity
         {
@@ -123,17 +122,9 @@ public sealed partial class YarnCommandBridge
         string distanceToken = "12u",
         string durationToken = "10fr")
     {
-        CharRigDirection from = CharRigDirectionParser.ParseSlideDirection(
-            direction,
-            CharRigDirection.Left);
-
-        float distance = YarnUnitParser.Parse(
-            distanceToken,
-            fallbackUnits: 12f);
-
-        float duration = YarnDurationParser.Parse(
-            durationToken,
-            fallbackSeconds: 0.4f);
+        CharRigDirection from = CharRigDirectionParser.ParseSlideDirection(direction);
+        float distance = YarnUnitParser.Parse(distanceToken);
+        float duration = YarnDurationParser.Parse(durationToken);
 
         var spec = new SlideInCommandSpecCharR
         {
@@ -152,17 +143,9 @@ public sealed partial class YarnCommandBridge
         string distanceToken = "12u",
         string durationToken = "10fr")
     {
-        CharRigDirection to = CharRigDirectionParser.ParseSlideDirection(
-            direction,
-            CharRigDirection.Right);
-
-        float distance = YarnUnitParser.Parse(
-            distanceToken,
-            fallbackUnits: 12f);
-
-        float duration = YarnDurationParser.Parse(
-            durationToken,
-            fallbackSeconds: 0.4f);
+        CharRigDirection to = CharRigDirectionParser.ParseSlideDirection(direction);
+        float distance = YarnUnitParser.Parse(distanceToken);
+        float duration = YarnDurationParser.Parse(durationToken);
 
         var spec = new SlideOutCommandSpecCharR
         {
@@ -175,29 +158,16 @@ public sealed partial class YarnCommandBridge
         Collect(spec);
     }
 
-    // 새 DSL 전용 move.
-    // 기존 move_by c1 120 0 0.8 같은 픽셀 기반 명령은 그대로 둔다.
-    //
-    // 사용 예:
-    // <<move_by_u @1 2u 0u 10fr>>
-    // <<move_by_u @1 -2u 4u 12fr>>
     private void EnqueueMoveByUnitCharSpec(
         string roleKey,
         string xToken,
         string yToken,
         string durationToken = "10fr")
     {
-        float x = ParseSignedYarnUnit(
-            xToken,
-            fallbackUnits: 0f);
-
-        float y = ParseSignedYarnUnit(
-            yToken,
-            fallbackUnits: 0f);
-
-        float duration = YarnDurationParser.Parse(
-            durationToken,
-            fallbackSeconds: 0.4f);
+        
+        float x = YarnUnitParser.Parse(xToken);
+        float y = YarnUnitParser.Parse(yToken);
+        float duration = YarnDurationParser.Parse(durationToken);
 
         var spec = new MoveByCommandSpecCharR
         {
@@ -205,7 +175,6 @@ public sealed partial class YarnCommandBridge
             target = CharacterRigTarget.CharacterPortrait_Track,
             delta = new Vector2(x, y),
             duration = duration,
-            ease = Ease.OutCubic
         };
 
         Collect(spec);
@@ -216,9 +185,7 @@ public sealed partial class YarnCommandBridge
         float xyValue,
         string durationToken = "10fr")
     {
-        float duration = YarnDurationParser.Parse(
-            durationToken,
-            fallbackSeconds: 0.4f);
+        float duration = YarnDurationParser.Parse(durationToken);
 
         var spec = new ScaleToCommandSpecCharR
         {
@@ -236,9 +203,7 @@ public sealed partial class YarnCommandBridge
         int angle,
         string durationToken = "10fr")
     {
-        float duration = YarnDurationParser.Parse(
-            durationToken,
-            fallbackSeconds: 0.4f);
+        float duration = YarnDurationParser.Parse(durationToken);
 
         var spec = new PivotRotateToCommandSpecCharR
         {
@@ -256,9 +221,7 @@ public sealed partial class YarnCommandBridge
         int angle,
         string durationToken = "6fr")
     {
-        float duration = YarnDurationParser.Parse(
-            durationToken,
-            fallbackSeconds: 0.25f);
+        float duration = YarnDurationParser.Parse(durationToken);
 
         var spec = new RotateToCommandSpecCharR
         {
@@ -276,9 +239,7 @@ public sealed partial class YarnCommandBridge
         int angle,
         string durationToken = "6fr")
     {
-        float duration = YarnDurationParser.Parse(
-            durationToken,
-            fallbackSeconds: 0.25f);
+        float duration = YarnDurationParser.Parse(durationToken);
 
         var spec = new RotateToCommandSpecCharR
         {
@@ -289,29 +250,5 @@ public sealed partial class YarnCommandBridge
         };
 
         Collect(spec);
-    }
-
-    private static float ParseSignedYarnUnit(
-        string token,
-        float fallbackUnits = 0f)
-    {
-        if (string.IsNullOrWhiteSpace(token))
-            return YarnUnitParser.Parse("0u", fallbackUnits);
-
-        string trimmed = token.Trim();
-
-        if (trimmed.StartsWith("-", System.StringComparison.Ordinal))
-        {
-            string unsignedToken = trimmed[1..];
-            return -YarnUnitParser.Parse(unsignedToken, Mathf.Abs(fallbackUnits));
-        }
-
-        if (trimmed.StartsWith("+", System.StringComparison.Ordinal))
-        {
-            string unsignedToken = trimmed[1..];
-            return YarnUnitParser.Parse(unsignedToken, Mathf.Abs(fallbackUnits));
-        }
-
-        return YarnUnitParser.Parse(trimmed, fallbackUnits);
     }
 }

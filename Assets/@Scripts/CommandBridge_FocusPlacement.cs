@@ -45,6 +45,12 @@ public sealed partial class YarnCommandBridge
 
         runner.AddCommandHandler<string, string, string>(
             "to_inner_br", EnqueueFocusToInnerBottomRightSpec);
+        
+        runner.AddCommandHandler<string, string, string, string>(
+            "to", EnqueuePlaceCharacterFocusSpec);
+
+        runner.AddCommandHandler<string, float>(
+            "depth_reset", EnqueueDepthResetSpec);
     }
 
     private void EnqueueFocusToLeftSpec(
@@ -234,6 +240,46 @@ public sealed partial class YarnCommandBridge
             moveTarget = CharacterRigTarget.CharSlot_Track_Focus,
             duration = duration,
             wait = false
+        };
+
+        Collect(spec);
+    }
+    
+    
+    private void EnqueuePlaceCharacterFocusSpec(
+        string roleKey,
+        string focus = "bust",
+        string screenPoint = "center",
+        string durationToken = "0fr")
+    {
+        CharacterFocusPreset focusPreset = CharacterFocusPresetParser.Parse(focus);
+
+        ScreenFocusPoint screen =
+            ScreenFocusPointParser.TryParse(screenPoint, out ScreenFocusPoint parsed)
+                ? parsed
+                : ScreenFocusPoint.Center;
+
+        var spec = new PlaceCharacterFocusCommandSpecCharR
+        {
+            slotKey = roleKey,
+            focusPreset = focusPreset,
+            screenPoint = screen,
+            moveTarget = CharacterRigTarget.CharSlot_Track_Focus,
+            duration = YarnDurationParser.Parse(durationToken, 0f),
+            wait = false
+        };
+
+        Collect(spec);
+    }
+    
+    private void EnqueueDepthResetSpec(string roleKey, float duration)
+    {
+        var spec = new SetDepthCommandSpecCharR
+        {
+            slotKey = roleKey,
+            preset = CharacterDepthPreset.Mid,
+            useLevel = false,
+            duration = duration,
         };
 
         Collect(spec);

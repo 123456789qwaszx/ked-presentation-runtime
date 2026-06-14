@@ -21,7 +21,8 @@ public static class CharacterDepthResolver
 
         if (useLevel)
             globalTuning.ResolveLevel(level);
-        else globalTuning.ResolvePreset(preset);
+        else 
+            globalTuning.ResolvePreset(preset);
         
         CharacterDepthPresetValue value =
             ResolveBaseValue(

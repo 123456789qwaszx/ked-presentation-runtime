@@ -38,23 +38,6 @@ public sealed partial class YarnCommandBridge
         EnqueueSetOriginSizeCommandSpec(slotKey, scaleArg);
     }
     
-    private void EnqueueSetPortraitSpriteSpec(string slotKey, 
-        string characterKey, string variantKey, string emotionKey)
-    {
-        var spec = new SetPortraitSpriteCommandSpecCharR
-        {
-            slotKey = slotKey,
-            portrait = new PortraitIdentity
-            {
-                character = characterKey,
-                variant = variantKey,
-                emotion = emotionKey
-            }
-        };
-
-        Collect(spec);
-    }
-    
     private void EnqueueSetAnchorSpecs(string slotKey, string positionPreset, bool resetSlotPos = true, bool resetCharPos = true)
     {
         CharAnchorPreset preset = CharAnchorPresetParser.Parse(positionPreset);
@@ -69,24 +52,6 @@ public sealed partial class YarnCommandBridge
         };
 
         Collect(anchorSpec);
-    }
-    
-    private void EnqueuePlaceToSpec(
-        string slotKey,
-        string positionPreset,
-        float duration = 0.4f)
-    {
-        CharAnchorPreset preset = CharAnchorPresetParser.Parse(positionPreset);
-
-        var spec = new PlaceToCommandSpecCharR
-        {
-            slotKey = slotKey,
-            target = CharacterRigTarget.CharSlot_Anchor,
-            preset = preset,
-            duration = duration
-        };
-
-        Collect(spec);
     }
     
     private void EnqueueSetOriginSizeCommandSpec(string roleKey, string scaleArg)

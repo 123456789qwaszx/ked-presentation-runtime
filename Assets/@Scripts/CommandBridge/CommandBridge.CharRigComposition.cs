@@ -2,34 +2,6 @@ using UnityEngine;
 
 public sealed partial class YarnCommandBridge
 {
-    private void EnqueuePlaceCharacterFocusSpec(
-        string roleKey,
-        string focus = "bust",
-        string screenPoint = "center",
-        string durationToken = "0fr")
-    {
-        CharacterFocusPreset focusPreset = CharacterFocusPresetParser.Parse(
-            focus,
-            CharacterFocusPreset.Face);
-
-        ScreenFocusPoint screen =
-            ScreenFocusPointParser.TryParse(screenPoint, out ScreenFocusPoint parsed)
-                ? parsed
-                : ScreenFocusPoint.Center;
-
-        var spec = new PlaceCharacterFocusCommandSpecCharR
-        {
-            slotKey = roleKey,
-            focusPreset = focusPreset,
-            screenPoint = screen,
-            moveTarget = CharacterRigTarget.CharSlot_Track_Focus,
-            duration = YarnDurationParser.Parse(durationToken, 0f),
-            wait = false
-        };
-
-        Collect(spec);
-    }
-
     private void EnqueueCharFocusSpec(
         string roleKey,
         float intensity = 1f,
@@ -221,6 +193,25 @@ public sealed partial class YarnCommandBridge
             innerRimColor = new Color(1f, 0.96f, 0.86f, 1f),
             duration = YarnDurationParser.Parse(durationToken, 0.25f),
             wait = false
+        };
+
+        Collect(spec);
+    }
+    
+    private void EnqueueSpriteColorToDslSpec(
+        string roleKey,
+        float r,
+        float g,
+        float b,
+        string durationToken = "8fr")
+    {
+        var spec = new ColorToCommandSpecCharR
+        {
+            slotKey = roleKey,
+            target = CharacterRigTarget.CharacterPortraitSprite_Image,
+            color = new Color(r, g, b, 1f),
+            keepAlpha = true,
+            duration = YarnDurationParser.Parse(durationToken, 0.35f)
         };
 
         Collect(spec);

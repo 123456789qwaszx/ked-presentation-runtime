@@ -8,28 +8,22 @@ public sealed partial class YarnCommandBridge
     private void RegisterShowCommands(DialogueRunner runner)
     {
         runner.AddCommandHandler<string, string, string>(
-            "show_at_left",
-            EnqueueShowAtLeftSpec);
+            "show_at_left", EnqueueShowAtLeftSpec);
 
         runner.AddCommandHandler<string, string, string>(
-            "show_at_center",
-            EnqueueShowAtCenterSpec);
+            "show_at_center", EnqueueShowAtCenterSpec);
 
         runner.AddCommandHandler<string, string, string>(
-            "show_at_right",
-            EnqueueShowAtRightSpec);
+            "show_at_right", EnqueueShowAtRightSpec);
 
         runner.AddCommandHandler<string, string, string>(
-            "show_at_dl",
-            EnqueueShowAtDuoLeftSpec);
+            "show_at_dl", EnqueueShowAtDuoLeftSpec);
 
         runner.AddCommandHandler<string, string, string>(
-            "show_at_dr",
-            EnqueueShowAtDuoRightSpec);
+            "show_at_dr", EnqueueShowAtDuoRightSpec);
 
         runner.AddCommandHandler<string, string, string, string>(
-            "show",
-            EnqueueShowSpec);
+            "show", EnqueueShowSpec);
     }
 
     private void EnqueueShowAtLeftSpec(
@@ -127,9 +121,13 @@ public sealed partial class YarnCommandBridge
             roleKey,
             emotionKey);
         
-        // if (durationToken.TrimStart().StartsWith("-"))
-        //     EnqueueFadeOutSpec(roleKey, 0);
-        // else
-            EnqueueFadeInSpec(roleKey, duration);
+        var spec = new FadeInCommandSpecCharR
+        {
+            target = CharacterRigTarget.CharacterPortraitSprite_Root,
+            slotKey = roleKey,
+            duration = duration
+        };
+
+        Collect(spec);
     }
 }

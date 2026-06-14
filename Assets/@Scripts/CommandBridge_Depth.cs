@@ -117,8 +117,36 @@ public sealed partial class YarnCommandBridge
         };
 
         ApplyDepthArg(spec, depthArg);
-        ApplyPreserveFocusArg(spec, preserveFocusArg);
 
+        if (CharacterFocusPresetParser.TryParse(preserveFocusArg, out CharacterFocusPreset focusPreset))
+        {
+            spec.overridePreserveFocus = true;
+            spec.preserveFocusPreset = focusPreset;
+            return;
+        }
         Collect(spec);
+    }
+    
+    private static void ApplyDepthArg(SetDepthCommandSpecCharR spec, string depthArg)
+    {
+        if (YarnNumberParser.TryParseFloat(depthArg, out float level))
+        {
+            spec.useLevel = true;
+            spec.level = Mathf.Clamp(level, 0f, 10f);
+            spec.preset = CharacterDepthPreset.Mid;
+            return;
+        }
+
+        if (!CharacterDepthPresetParser.TryParse(depthArg, out CharacterDepthPreset preset))
+        {
+            Debug.LogWarning(
+                $"[YarnCommandBridge] Unknown depth preset '{depthArg}'. " +
+                $"Fallback to '{CharacterDepthPreset.Mid}'.");
+
+            preset = CharacterDepthPreset.Mid;
+        }
+
+        spec.useLevel = false;
+        spec.preset = preset;
     }
 }

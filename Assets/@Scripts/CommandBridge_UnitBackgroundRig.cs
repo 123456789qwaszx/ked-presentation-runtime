@@ -7,76 +7,108 @@ public sealed partial class YarnCommandBridge
     private void BindBackgroundRigDsl(DialogueRunner runner)
     {
         runner.AddCommandHandler<string, string, string>(
-            "bg_spawn",
-            EnqueueSpawnBackgroundRigSpec);
+            "bg_spawn", EnqueueSpawnBackgroundRigSpec);
 
         runner.AddCommandHandler<string, string, string, float>(
-            "bg_place",
-            EnqueueSetBackgroundAnchorDslSpec);
+            "bg_place", EnqueueSetBackgroundAnchorDslSpec);
 
         runner.AddCommandHandler<string, string, string>(
-            "bg_sprite",
-            EnqueueSetBackgroundSpriteSpec);
+            "bg_sprite", EnqueueSetBackgroundSpriteSpec);
 
         runner.AddCommandHandler<string, string>(
-            "bg_size",
-            EnqueueSetBackgroundOriginSizeSpec);
+            "bg_size", EnqueueSetBackgroundOriginSizeSpec);
 
         runner.AddCommandHandler<string, string>(
-            "bg_fade_in",
-            EnqueueFadeInBackgroundDslSpec);
+            "bg_fade_in", EnqueueFadeInBackgroundDslSpec);
 
         runner.AddCommandHandler<string, string>(
-            "bg_fade_out",
-            EnqueueFadeOutBackgroundDslSpec);
+            "bg_fade_out", EnqueueFadeOutBackgroundDslSpec);
 
         runner.AddCommandHandler<string, string>(
-            "bg_hide_layers",
-            EnqueueHideBackgroundRootLayersSpec);
+            "bg_hide_layers", EnqueueHideBackgroundRootLayersSpec);
 
         runner.AddCommandHandler<string, string>(
-            "bg_show_layers",
-            EnqueueShowBackgroundRootLayersSpec);
+            "bg_show_layers", EnqueueShowBackgroundRootLayersSpec);
 
         runner.AddCommandHandler<string, string, string, string>(
-            "bg_move",
-            EnqueueMoveBackgroundDslSpec);
+            "bg_move", EnqueueMoveBackgroundDslSpec);
 
         runner.AddCommandHandler<string, float, string>(
-            "bg_scale",
-            EnqueueScaleBackgroundDslSpec);
+            "bg_scale", EnqueueScaleBackgroundDslSpec);
 
         runner.AddCommandHandler<string, string, string, string>(
-            "bg_slide_in",
-            EnqueueSlideInBackgroundDslSpec);
+            "bg_slide_in", EnqueueSlideInBackgroundDslSpec);
 
         runner.AddCommandHandler<string, string, string, string>(
-            "bg_slide_out",
-            EnqueueSlideOutBackgroundDslSpec);
+            "bg_slide_out", EnqueueSlideOutBackgroundDslSpec);
 
         runner.AddCommandHandler<string, string, string, string>(
-            "bg_jolt",
-            EnqueueJoltBackgroundDslSpec);
+            "bg_jolt", EnqueueJoltBackgroundDslSpec);
 
         runner.AddCommandHandler<string, string, string, string>(
-            "bg_idle_tremble",
-            EnqueueTrembleBackgroundDslSpec);
+            "bg_idle_tremble", EnqueueTrembleBackgroundDslSpec);
 
         runner.AddCommandHandler<string, string, string, float>(
-            "bg_idle_breath",
-            EnqueueBreathBackgroundDslSpec);
+            "bg_idle_breath", EnqueueBreathBackgroundDslSpec);
 
         runner.AddCommandHandler<string, float, string>(
-            "bg_defocus",
-            EnqueueBackgroundDefocusDslSpec);
+            "bg_defocus", EnqueueBackgroundDefocusDslSpec);
 
         runner.AddCommandHandler<string, float, float, int, string, string>(
-            "bg_defocus_custom",
-            EnqueueBackgroundDefocusCustomDslSpec);
+            "bg_defocus_custom", EnqueueBackgroundDefocusCustomDslSpec);
 
         runner.AddCommandHandler<string, string>(
-            "bg_defocus_clear",
-            EnqueueBackgroundDefocusClearDslSpec);
+            "bg_defocus_clear", EnqueueBackgroundDefocusClearDslSpec);
+    }
+    
+    private void EnqueueSpawnBackgroundRigSpec(
+        string rigKey, 
+        string spriteKey,
+        string parentSlotKey = "stage00")
+    {
+        EnqueueSetupBackgroundRigSpec(rigKey, parentSlotKey);
+        EnqueueSetBackgroundSpriteSpec(rigKey, spriteKey);
+    }
+
+    private void EnqueueSetupBackgroundRigSpec(string rigKey, string parentSlotKey)
+    {
+        var spec = new SetupBackgroundRigCommandSpec
+        {
+            rigKey = rigKey,
+            rigPrefab = _backgroundRigPrefab,
+            parentSlot = BackgroundRigSlotParser.Parse(parentSlotKey, BackgroundRigSlot.Stage00BackgroundSlot)
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueSetBackgroundSpriteSpec(string rigKey, string spriteKey = "", string layerKey = "back")
+    {
+        var spec = new SetBackgroundSpriteCommandSpecBgR
+        {
+            rigKey = rigKey,
+            spriteKey = spriteKey,
+            target = BackgroundRigLayerParser.ParseImageTarget(layerKey)
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueSetBackgroundOriginSizeSpec(string rigKey, string scaleArg = "1")
+    {
+        if (!YarnNumberParser.TryParseFloat(scaleArg, out float absoluteScale))
+            absoluteScale = 1f;
+
+        var spec = new SetOriginSizeCommandSpecBgR
+        {
+            rigKey = rigKey,
+            target = BackgroundRigTarget.Background_CastTransform,
+
+            overrideScale = true,
+            scaleOverride = new Vector3(absoluteScale, absoluteScale, absoluteScale)
+        };
+
+        Collect(spec);
     }
 
     private void EnqueueSetBackgroundAnchorDslSpec(
@@ -121,6 +153,28 @@ public sealed partial class YarnCommandBridge
             rigKey = rigKey,
             target = BackgroundRigTarget.Background_Root,
             duration = YarnDurationParser.Parse(durationToken, 0.4f),
+        };
+
+        Collect(spec);
+    }
+    
+    private void EnqueueHideBackgroundRootLayersSpec(string rigKey, string mask = "visual")
+    {
+        var spec = new HideRootLayersCommandSpecBgR
+        {
+            rigKey = rigKey,
+            targetMask = BackgroundRigRootMaskParser.Parse(mask),
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueShowBackgroundRootLayersSpec(string rigKey, string mask = "visual")
+    {
+        var spec = new ShowRootLayersCommandSpecBgR
+        {
+            rigKey = rigKey,
+            targetMask = BackgroundRigRootMaskParser.Parse(mask),
         };
 
         Collect(spec);
@@ -318,5 +372,40 @@ public sealed partial class YarnCommandBridge
             return YarnUnitParser.Parse(trimmed[1..], Mathf.Abs(fallbackUnits));
 
         return YarnUnitParser.Parse(trimmed, fallbackUnits);
+    }
+    
+    private UIStageBlurDownsample ParseBlurDownsample(string value)
+    {
+        if (string.IsNullOrEmpty(value))
+            return UIStageBlurDownsample.Quarter;
+
+        switch (value.Trim().ToLowerInvariant())
+        {
+            case "full":
+            case "1":
+            case "x1":
+                return UIStageBlurDownsample.Full;
+
+            case "half":
+            case "2":
+            case "x2":
+                return UIStageBlurDownsample.Half;
+
+            case "quarter":
+            case "4":
+            case "x4":
+                return UIStageBlurDownsample.Quarter;
+
+            case "eighth":
+            case "8":
+            case "x8":
+                return UIStageBlurDownsample.Eighth;
+
+            default:
+                UnityEngine.Debug.LogWarning(
+                    $"[YarnCommandBridge] Unknown blur downsample '{value}'. Fallback to Quarter.");
+
+                return UIStageBlurDownsample.Quarter;
+        }
     }
 }

@@ -19,9 +19,6 @@ public static class CharacterDepthPresetParser
     {
         preset = CharacterDepthPreset.Mid;
 
-        if (string.IsNullOrWhiteSpace(raw))
-            return false;
-
         string s = Normalize(raw);
 
         switch (s)
