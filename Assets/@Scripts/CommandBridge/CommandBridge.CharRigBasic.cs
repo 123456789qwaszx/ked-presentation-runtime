@@ -27,7 +27,12 @@ public sealed partial class YarnCommandBridge
         Collect(spec);
     }
     
-    private void EnqueueSpriteColorToSpec(string roleKey, float r, float g, float b, float duration = 0.35f)
+    private void EnqueueSpriteColorToDslSpec(
+        string roleKey,
+        float r,
+        float g,
+        float b,
+        string durationToken = "8fr")
     {
         var spec = new ColorToCommandSpecCharR
         {
@@ -35,11 +40,25 @@ public sealed partial class YarnCommandBridge
             target = CharacterRigTarget.CharacterPortraitSprite_Image,
             color = new Color(r, g, b, 1f),
             keepAlpha = true,
-            duration = duration
+            duration = YarnDurationParser.Parse(durationToken, 0.35f)
         };
 
         Collect(spec);
     }
+    
+    // private void EnqueueSpriteColorToSpec(string roleKey, float r, float g, float b, float duration = 0.35f)
+    // {
+    //     var spec = new ColorToCommandSpecCharR
+    //     {
+    //         slotKey = roleKey,
+    //         target = CharacterRigTarget.CharacterPortraitSprite_Image,
+    //         color = new Color(r, g, b, 1f),
+    //         keepAlpha = true,
+    //         duration = duration
+    //     };
+    //
+    //     Collect(spec);
+    // }
     
     private void EnqueueSlideInSpec(string roleKey, string direction = "left", float duration = 0.4f)
     {

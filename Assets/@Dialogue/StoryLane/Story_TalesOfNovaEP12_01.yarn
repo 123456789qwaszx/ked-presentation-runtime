@@ -7,10 +7,8 @@ position: -2,-160
 <<bg_spawn bg1 ep12_01>>
 <<bg_size bg1 1.5>>
 
-<<bg_spawn bg2 bgslot_01 02>>
-<<bg_place bg2 40 200>>
-
-<<bg_spawn bg3 ep12_01>>
+<<bg_spawn bg2 bgslot_01>>
+//<<bg_place bg2 40 200>>
 
 
 <<slot c1>>
@@ -60,7 +58,7 @@ _#beat #stay
 <<14fr>>
 
 <<actor @2 noya>>
-<<show     @2 e8 right 0>>
+<<show     @2 e8 right -1>>
 <<to_br    @2 bust -1>>
 <<at_front @2 bust -1>>
 <<down     @2 3u>>
@@ -79,7 +77,7 @@ _#beat #stay
 세이나: 안 돼! 이 신기를 얻으려고 우리가 성해를 얼마나 많이 물리쳤는데...... <br>검날이 다 무뎌질 정도였다고!
 
 <<actor @3 iris>>
-<<show     @3 e5 left 0>>
+<<show     @3 e5 left -1>>
 <<to_bl    @3 bust -1>>
 <<at_front @3 bust -1>>
 <<down     @3 3u>>
@@ -103,65 +101,78 @@ _#beat #stay
 <<char_silhouette @1 1>>
 _#beat #stay
 
+
+
+
 <<bg_fade_in bg2>>
-<<fade_in c4>>
-<<move_by c4 0 -280>>
+
+<<actor @4 amber>>
+<<fade_in @4>>
+<<down    @4 7u>>
 
 코하쿠: 심상석에 은혜도 없어.
 
-<<move_by c2 120 0 0.8>>
-<<fade_out c2 0.8>>
-<<move_by c3 -120 0 0.8>>
-<<fade_out c3 0.8>>
+<<actor @2 noya>>
+<<right    @2 3u 19fr>>
+<<fade_out @2 19fr>>
 
-<<bg_scale bg2 0.001 0.6>>
-<<pause 0.4>>
-<<bg_fade_out bg2 0.2>>
+<<actor @3 iris>>
+<<left     @3 3u 19fr>>
+<<fade_out @3 19fr>>
 
-<<pause 0.2>>
-<<char_silhouette c1 0 1.4>>
-<<to c1 bust c2 0.5>>
-<<scale_by c1 1.4 1.2>>
-<<face_swap c1 11>>
-<<pause 0.12>>
-<<move_by c1 0 160 0.8>>
+<<bg_scale bg2 1 14fr>>
+<<10fr>>
+<<bg_fade_out bg2 5fr>>
+<<5fr>>
+
+<<actor @1 willow>>
+<<to_center       @1 bust 12fr>>
+<<at_close        @1 bust 29fr>>
+<<left            @1 4u 19fr>>
+
+<<char_silhouette @1 0 34fr>>
+<<face_swap       @1 11>>
 
 _#beat #stay
 
 윌로: 여러분이 고생하신 건 잘 알지만......
 
-<<move_by c1 80 0 0.8>>
-<<face c1 12>>
+<<actor @1 willow>>
+<<right @1 2u 19fr>>
+<<face  @1 12>>
 
 윌로: 이번에 소원을 빌어서 나온 신기는 너무 많이 망가져 있어요. 아무래도 의뢰인이 만족하지 않을 거라서요.
 
-<<fade_out c1>>
+<<actor @1 willow>>
+<<fade_out @1>>
 _#beat #stay
 
-<<slot c5>>
-<<cast c5 amber a 5 center normal>>
+<<actor @4 amber>>
+<<show  @4 e5 center 14fr>>
+<<down  @4 5u 14fr>>
+<<12fr>>
+<<shake @4>>
 
-<<move_by c5 0 -200 0.6>>
-<<fade_in c5>>
-<<pause 0.5>>
-<<shake c5>>
 코하쿠: 어제 성해가 너무 많았어.
 
+<<actor @2 noya>>
+<<show     @2 e6 left -1>>
+<<to_bl    @2 bust -1>>
+<<at_front @2 bust -1>>
+<<slide_in @2 left>>
 
-<<scale_reset c2>>
-<<size c2 normal>>
-<<face c2 6>>
-<<to c2 bust left>>
-<<slide_in c2>>
-<<fade_in c2>>
+<<2fr>>
 
-<<pause 0.1>>
-<<to c5 bust right 1.2>>
-<<move_by c5 -100 0 1.4>>
+<<actor @4 amber>>
+<<to_br @4 bust 29fr>>
+<<left  @4 2.5u 34fr>>
 _#beat #stay
+
+
 
 
 세이나: 신기가 너무 커서 둘이 들어야 했어. 그 엄청난 성해 무리의 습격을 막아내기는 무리였다고.
+
 윌로: 무슨 사정인지는 잘 알고 있습니다. 최근 몇 주간 아모르 25호 별의 탑으로 가는 여행가가 적어서, 성해 개체 수가 많이 쌓였죠.
 아야메: 그래서......
 윌로: 하지만 의뢰는 의뢰니까요. 지리 협회도 고객에게 책임을 져야 하고요.
