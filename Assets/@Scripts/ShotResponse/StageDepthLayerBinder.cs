@@ -1,5 +1,7 @@
 public sealed class StageDepthLayerBinder
 {
+    private const string StageDepthPrefix = "depth:";
+    
     private IStageDepthLayerProvider _provider;
 
     private PresentationResponseProfile _far   = PresentationResponseProfile.DepthFar;
@@ -8,6 +10,9 @@ public sealed class StageDepthLayerBinder
     private PresentationResponseProfile _slot3 = PresentationResponseProfile.DepthFront;
     private PresentationResponseProfile _close = PresentationResponseProfile.DepthClose;
 
+    
+    public static string StageDepthLayerKey(StageDepthLayer layer) => StageDepthPrefix + layer;
+    
     public void ConfigureProfiles(
         PresentationResponseProfile far,
         PresentationResponseProfile slot1,
@@ -45,7 +50,7 @@ public sealed class StageDepthLayerBinder
         if (profile == null)
             return;
 
-        string key = ResponseBindingKeys.StageDepthLayer(layer);
+        string key = StageDepthLayerKey(layer);
 
         // 이미 살아있는 binding이 있으면 profile만 갱신하고 종료.
         if (rig.TryUpdateBindingProfile(key, profile))
