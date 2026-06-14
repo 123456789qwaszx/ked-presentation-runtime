@@ -8,16 +8,6 @@ using UnityEngine;
 public sealed class CharacterFocusTuningDBSO : ScriptableObject
 {
     [Serializable]
-    public sealed class NamedFocusPoint
-    {
-        [Tooltip("예: hand_left, hand_right, weapon, phone, eye, custom_a")]
-        public string key;
-
-        [Tooltip("Character_CastTransform 기준 local offset입니다.")]
-        public Vector2 offset = Vector2.zero;
-    }
-
-    [Serializable]
     public sealed class Entry
     {
         [Tooltip("예: leafia 또는 leafia:pose_wide")]
@@ -30,46 +20,6 @@ public sealed class CharacterFocusTuningDBSO : ScriptableObject
         [Header("Preset Offsets")]
         [Tooltip("Feet/Body/Bust/Face 등 프리셋별 캐릭터 보정값입니다.")]
         public CharacterFocusOffsetSet offsets;
-
-        [Header("Custom Focus Points")]
-        [Tooltip("손, 무기, 휴대폰, 눈 등 프로젝트별 focus point입니다.")]
-        public List<NamedFocusPoint> customPoints = new();
-
-        private Dictionary<string, Vector2> _customMap;
-
-        public bool TryGetCustomPoint(string customKey, out Vector2 offset)
-        {
-            if (_customMap == null)
-                BuildCustomMap();
-
-            if (string.IsNullOrWhiteSpace(customKey))
-            {
-                offset = Vector2.zero;
-                return false;
-            }
-
-            return _customMap.TryGetValue(customKey.Trim(), out offset);
-        }
-
-        private void BuildCustomMap()
-        {
-            _customMap = new Dictionary<string, Vector2>(StringComparer.Ordinal);
-
-            for (int i = 0; i < customPoints.Count; i++)
-            {
-                NamedFocusPoint point = customPoints[i];
-
-                if (point == null || string.IsNullOrWhiteSpace(point.key))
-                    continue;
-
-                _customMap[point.key.Trim()] = point.offset;
-            }
-        }
-
-        public void InvalidateCache()
-        {
-            _customMap = null;
-        }
     }
 
     [Header("Global Base Offsets")]
@@ -98,13 +48,11 @@ public sealed class CharacterFocusTuningDBSO : ScriptableObject
     private void OnEnable()
     {
         _map = null;
-        InvalidateEntryCaches();
     }
 
     private void OnValidate()
     {
         _map = null;
-        InvalidateEntryCaches();
     }
 
     private void Build()
@@ -126,15 +74,6 @@ public sealed class CharacterFocusTuningDBSO : ScriptableObject
 #endif
 
             _map[key] = entry;
-        }
-    }
-
-    private void InvalidateEntryCaches()
-    {
-        for (int i = 0; i < entries.Count; i++)
-        {
-            if (entries[i] != null)
-                entries[i].InvalidateCache();
         }
     }
 }

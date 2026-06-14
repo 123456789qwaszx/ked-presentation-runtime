@@ -12,4 +12,32 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eb6189e6a3de43b44b141af3b95d878a, type: 3}
   m_Name: RoleDepthTuningDB
   m_EditorClassIdentifier: Assembly-CSharp::RoleDepthTuningDBSO
-  entries: []
+  entries:
+  - key: 
+    defaultYOffsetAdd: {x: 0, y: 0}
+    defaultScaleMultiplier: 0
+    corrections:
+      far:
+        yOffsetAdd: {x: 0, y: 0}
+        scaleMultiplier: 0
+        preserveFocusOffsetAdd: {x: 0, y: 0}
+      mid:
+        yOffsetAdd: {x: 0, y: 0}
+        scaleMultiplier: 0
+        preserveFocusOffsetAdd: {x: 0, y: 0}
+      close:
+        yOffsetAdd: {x: 0, y: 0}
+        scaleMultiplier: 0
+        preserveFocusOffsetAdd: {x: 0, y: 0}
+      front:
+        yOffsetAdd: {x: 0, y: 0}
+        scaleMultiplier: 0
+        preserveFocusOffsetAdd: {x: 0, y: 0}
+      exp1:
+        yOffsetAdd: {x: 0, y: 0}
+        scaleMultiplier: 0
+        preserveFocusOffsetAdd: {x: 0, y: 0}
+      exp2:
+        yOffsetAdd: {x: 0, y: 0}
+        scaleMultiplier: 0
+        preserveFocusOffsetAdd: {x: 0, y: 0}

@@ -12,15 +12,8 @@ public sealed class ShotZoomFocusCommandSpec : ShotIntentCommandSpecBase
     [Tooltip("캐릭터 focus 예상 프리셋입니다. Transform anchor가 아니라 Character_CastTransform 기준 offset입니다.")]
     public CharacterFocusPreset focusPreset = CharacterFocusPreset.Face;
 
-    [Tooltip("focusPreset이 Custom일 때 사용할 custom point key입니다. 예: hand_left, weapon, phone")]
-    public string customFocusKey = "";
-
     [Tooltip("선택한 focus preset에 추가로 더할 최종 command-time offset입니다.")]
     public Vector2 focusOffset = Vector2.zero;
-
-    [Header("Optional Pose Tuning")]
-    [Tooltip("비워두면 focusRoleKey만 tuning key로 사용합니다. 입력하면 roleKey:poseKey로 DB를 찾습니다.")]
-    public string poseKey = "";
 
     [Header("Screen Focus")]
     public ScreenFocusPoint screenPoint = ScreenFocusPoint.Center;
@@ -50,17 +43,14 @@ public sealed class ShotZoomFocusCommand : ShotIntentCommandBase<ShotZoomFocusCo
         in PresentationIntentState from,
         CommandRunScope scope)
     {
-        if (!CharacterFocusPointResolver.TryResolve(
-                scope,
-                spec.focusRoleKey,
-                spec.focusPreset,
-                spec.customFocusKey,
-                spec.focusOffset,
-                _focusTuningDB,
-                out CharacterFocusPointResult focus))
-        {
-            return from;
-        }
+        CharacterFocusPointResolver.TryResolve(
+            scope,
+            spec.focusRoleKey,
+            spec.focusPreset,
+            spec.focusOffset,
+            _focusTuningDB,
+            useSettledPlacementTargets: true,
+            out CharacterFocusPointResult focus);
 
         // 1. 이번에 원하는 zoom 값을 정한다.
         float targetZoom = spec.zoom;

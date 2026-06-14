@@ -38,9 +38,6 @@ public sealed class SetDepthCommandSpecCharR : CharacterRigCommandSpecBase
 
     public CharacterFocusPreset preserveFocusPreset = CharacterFocusPreset.Bust;
 
-    [Tooltip("preserveFocusPreset이 Custom일 때 사용할 custom point key입니다.")]
-    public string preserveCustomFocusKey = "";
-
     [Tooltip("preserve focus point에 추가로 더할 command-time offset입니다.")]
     public Vector2 preserveFocusOffset = Vector2.zero;
 
@@ -179,7 +176,6 @@ public sealed class SetDepthCommandCharR : CommandBase
                 _roleTuningDb,
                 _spec.overridePreserveFocus,
                 _spec.preserveFocusPreset,
-                _spec.preserveCustomFocusKey,
                 _spec.preserveFocusOffset,
                 _spec.yOffsetAdd,
                 _spec.scaleMultiplier,
@@ -199,7 +195,6 @@ public sealed class SetDepthCommandCharR : CommandBase
                 _destRawDepthY,
                 _destDepthScale,
                 rawDepth.PreserveFocusPreset,
-                rawDepth.PreserveCustomFocusKey,
                 rawDepth.PreserveFocusOffset,
                 _focusTuningDb,
                 out _destFinalDepthY))

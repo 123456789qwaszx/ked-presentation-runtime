@@ -5,23 +5,21 @@ using UnityEngine;
 public struct CharacterDepthPresetValue
 {
     [Header("Depth Transform")]
-    [Tooltip("CharSlot_DepthY에 적용될 기준 위치입니다. 보통 X는 0, Y만 사용합니다.")]
+    // CharSlot_DepthY에 적용될 기준 위치입니다. 보통 X는 0, Y만 사용.
     public Vector2 depthY;
 
-    [Tooltip("CharSlot_DepthScale에 적용될 기준 배율입니다.")]
+    //CharSlot_DepthScale에 적용될 기준 배율.
     public float depthScale;
 
     [Header("Focus-Preserving Scale Pivot")]
-    [Tooltip("DepthScale이 이 FocusPoint를 기준으로 scale되는 것처럼 DepthY 보정을 계산합니다.")]
+    //DepthScale이 이 FocusPoint를 기준으로 scale되는 것처럼 DepthY 보정을 계산합니다.
     public CharacterFocusPreset preserveFocusPreset;
 
-    [Tooltip("preserveFocusPreset이 Custom일 때 사용할 custom point key입니다.")]
+    // preserveFocusPreset이 Custom일 때 사용할 custom point key.
     public string preserveCustomFocusKey;
 
-    [Tooltip("preserveFocusPreset에 추가로 더할 command/global offset입니다.")]
+    // preserveFocusPreset에 추가로 더할 command/global offset.
     public Vector2 preserveFocusOffset;
-
-    public float SafeScale => depthScale <= 0f ? 1f : depthScale;
 
     public static CharacterDepthPresetValue Far => new()
     {
@@ -130,14 +128,9 @@ public sealed class CharacterDepthTuningSO : ScriptableObject
 
         return new CharacterDepthPresetValue
         {
-            depthY = new Vector2(
-                0f,
-                levelYCurve != null ? levelYCurve.Evaluate(clampedLevel) : 0f),
+            depthY = new Vector2(0f, levelYCurve.Evaluate(clampedLevel)),
 
-            depthScale =
-                levelScaleCurve != null
-                    ? Mathf.Max(0.0001f, levelScaleCurve.Evaluate(clampedLevel))
-                    : 1f,
+            depthScale =Mathf.Max(0.0001f, levelScaleCurve.Evaluate(clampedLevel)),
 
             preserveFocusPreset = preserveFocus,
             preserveCustomFocusKey = "",

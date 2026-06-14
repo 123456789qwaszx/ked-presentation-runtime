@@ -7,7 +7,6 @@ public static class CharacterFocusPlacementSolver
         string roleKey,
         RectTransform moveRect,
         CharacterFocusPreset focusPreset,
-        string customFocusKey,
         Vector2 focusOffset,
         CharacterFocusTuningDBSO focusTuningDb,
         ScreenFocusPoint screenPoint,
@@ -24,18 +23,14 @@ public static class CharacterFocusPlacementSolver
         if (targetParent == null)
             return false;
 
-        bool resolved = CharacterFocusPointResolver.TryResolve(
+        CharacterFocusPointResolver.TryResolve(
             scope,
             roleKey,
             focusPreset,
-            customFocusKey,
             focusOffset,
             focusTuningDb,
             useSettledPlacementTargets: true,
             out CharacterFocusPointResult focus);
-
-        if (!resolved)
-            return false;
 
         Vector2 desiredFocusInRigSpace =
             ScreenFocusPointResolver.Resolve(focus.StageRoot, screenPoint) + screenOffset;

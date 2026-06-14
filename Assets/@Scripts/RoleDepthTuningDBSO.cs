@@ -12,18 +12,8 @@ public struct CharacterDepthPresetCorrection
     [Tooltip("Global depthScale에 곱할 캐릭터/포즈별 보정 배율입니다. 0 이하이면 1로 처리됩니다.")]
     public float scaleMultiplier;
 
-    [Header("Focus Pivot Override")]
-    public bool overridePreserveFocus;
-
-    public CharacterFocusPreset preserveFocusPreset;
-
-    [Tooltip("preserveFocusPreset이 Custom일 때 사용할 custom point key입니다.")]
-    public string preserveCustomFocusKey;
-
     [Tooltip("preserve focus point에 추가로 더할 캐릭터/포즈별 offset입니다.")]
     public Vector2 preserveFocusOffsetAdd;
-
-    public float SafeScaleMultiplier => scaleMultiplier <= 0f ? 1f : scaleMultiplier;
 }
 
 [Serializable]

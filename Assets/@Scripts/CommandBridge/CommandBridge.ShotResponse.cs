@@ -10,19 +10,8 @@ public sealed partial class YarnCommandBridge
         float zoom = 2.5f,
         float duration = 1.2f)
     {
-        CharacterFocusPreset focusPreset;
-        string customFocusKey = "";
-
-        if (CharacterFocusPresetParser.TryParse(focusName, out CharacterFocusPreset parsedPreset))
-        {
-            focusPreset = parsedPreset;
-        }
-        else
-        {
-            focusPreset = CharacterFocusPreset.Custom;
-            customFocusKey = focusName;
-        }
-
+        CharacterFocusPresetParser.TryParse(focusName, out CharacterFocusPreset focusPreset);
+        
         if (!ScreenFocusPointParser.TryParse(screenPointName, out ScreenFocusPoint screenPoint))
             screenPoint = ScreenFocusPoint.Center;
 
@@ -30,7 +19,6 @@ public sealed partial class YarnCommandBridge
         {
             focusRoleKey = roleKey,
             focusPreset = focusPreset,
-            customFocusKey = customFocusKey,
             screenPoint = screenPoint,
             zoom = Mathf.Clamp(zoom, -10f, 10f),
             duration = duration,

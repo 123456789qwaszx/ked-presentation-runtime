@@ -4,7 +4,6 @@ public sealed partial class YarnCommandBridge
 {
     private void EnqueueSetDepthSpec(string roleKey, string depthArg)
     {
-        // 즉시 상태 세팅.
         EnqueueSetDepthSpec(roleKey, depthArg, 0f);
     }
 
@@ -16,9 +15,6 @@ public sealed partial class YarnCommandBridge
         {
             slotKey = roleKey,
             duration = duration,
-
-            // duration이 명시된 depth_to는 실제로 그 시간 동안 line을 붙잡는다.
-            wait = duration > 0f,
         };
 
         ApplyDepthArg(spec, depthArg);
@@ -38,9 +34,6 @@ public sealed partial class YarnCommandBridge
         {
             slotKey = roleKey,
             duration = duration,
-
-            // <<depth_focus_to c1 8 face 3>> 이 3초 동안 유지되도록 한다.
-            //wait = duration > 0f,
         };
 
         ApplyDepthArg(spec, depthArg);
@@ -69,9 +62,6 @@ public sealed partial class YarnCommandBridge
         SetDepthCommandSpecCharR spec,
         string depthArg)
     {
-        if (spec == null)
-            return;
-
         if (YarnNumberParser.TryParseFloat(depthArg, out float level))
         {
             spec.useLevel = true;
@@ -97,25 +87,13 @@ public sealed partial class YarnCommandBridge
         SetDepthCommandSpecCharR spec,
         string preserveFocusArg)
     {
-        if (spec == null)
-            return;
-
-        if (string.IsNullOrWhiteSpace(preserveFocusArg))
-            return;
-
         if (CharacterFocusPresetParser.TryParse(
                 preserveFocusArg,
                 out CharacterFocusPreset focusPreset))
         {
             spec.overridePreserveFocus = true;
             spec.preserveFocusPreset = focusPreset;
-            spec.preserveCustomFocusKey = "";
             return;
         }
-
-        // 알 수 없는 focusArg는 custom point key로 취급한다.
-        spec.overridePreserveFocus = true;
-        spec.preserveFocusPreset = CharacterFocusPreset.Custom;
-        spec.preserveCustomFocusKey = preserveFocusArg.Trim();
     }
 }

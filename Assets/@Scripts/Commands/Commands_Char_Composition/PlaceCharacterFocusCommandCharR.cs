@@ -13,9 +13,6 @@ public sealed class PlaceCharacterFocusCommandSpecCharR : CharacterRigCommandSpe
     [Header("Focus")]
     public CharacterFocusPreset focusPreset = CharacterFocusPreset.Face;
 
-    [Tooltip("focusPreset이 Custom일 때 사용할 custom point key입니다. 예: hand_left, weapon, phone")]
-    public string customFocusKey = "";
-
     [Tooltip("선택한 focus preset에 추가로 더할 command-time offset입니다.")]
     public Vector2 focusOffset = Vector2.zero;
 
@@ -124,7 +121,6 @@ public sealed class PlaceCharacterFocusCommandCharR : CommandBase
             _spec.slotKey,
             _moveRect,
             _spec.focusPreset,
-            _spec.customFocusKey,
             _spec.focusOffset,
             _focusTuningDb,
             _spec.screenPoint,

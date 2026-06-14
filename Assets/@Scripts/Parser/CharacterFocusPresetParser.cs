@@ -81,11 +81,6 @@ public static class CharacterFocusPresetParser
             case "v2":
                 preset = CharacterFocusPreset.HandRight;
                 return true;
-
-            case "custom":
-            case "c":
-                preset = CharacterFocusPreset.Custom;
-                return true;
         }
 
         return Enum.TryParse(raw.Trim(), true, out preset);

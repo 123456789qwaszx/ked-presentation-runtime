@@ -1026,7 +1026,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &6781001881294543747
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1066,28 +1066,24 @@ MonoBehaviour:
   - enabled: 1
     label: Feet
     focusPreset: 0
-    customFocusKey: 
     color: {r: 0.4, g: 0.8, b: 1, a: 0.9}
     radius: 12
     finalOffset: {x: 0, y: 0}
   - enabled: 1
     label: Body
     focusPreset: 10
-    customFocusKey: 
     color: {r: 0.4, g: 1, b: 0.4, a: 0.9}
     radius: 12
     finalOffset: {x: 0, y: 0}
   - enabled: 1
     label: Bust
     focusPreset: 20
-    customFocusKey: 
     color: {r: 1, g: 0.8, b: 0.25, a: 0.9}
     radius: 12
     finalOffset: {x: 0, y: 0}
   - enabled: 1
     label: Face
     focusPreset: 30
-    customFocusKey: 
     color: {r: 1, g: 0.35, b: 0.35, a: 0.95}
     radius: 12
     finalOffset: {x: 0, y: 0}

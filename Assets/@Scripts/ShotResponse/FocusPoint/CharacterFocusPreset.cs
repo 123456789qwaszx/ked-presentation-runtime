@@ -8,6 +8,4 @@ public enum CharacterFocusPreset
 
     HandLeft = 40,
     HandRight = 41,
-
-    Custom = 100
 }

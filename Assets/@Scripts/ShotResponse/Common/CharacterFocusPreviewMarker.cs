@@ -26,9 +26,6 @@ public sealed class CharacterFocusPreviewMarker : MonoBehaviour
         [Header("Focus")]
         public CharacterFocusPreset focusPreset = CharacterFocusPreset.Face;
 
-        [Tooltip("focusPreset이 Custom일 때 사용할 custom point key입니다. 예: hand_right, phone, weapon")]
-        public string customFocusKey = "";
-
         [Header("Visual")]
         public Color color = Color.white;
         public float radius = 12f;
@@ -43,9 +40,6 @@ public sealed class CharacterFocusPreviewMarker : MonoBehaviour
             {
                 if (!string.IsNullOrWhiteSpace(label))
                     return label.Trim();
-
-                if (focusPreset == CharacterFocusPreset.Custom && !string.IsNullOrWhiteSpace(customFocusKey))
-                    return customFocusKey.Trim();
 
                 return focusPreset.ToString();
             }
@@ -326,7 +320,6 @@ public sealed class CharacterFocusPreviewMarker : MonoBehaviour
                 focusTuningDb,
                 tuningKey,
                 point.focusPreset,
-                point.customFocusKey,
                 point.finalOffset);
 
             Vector3 world = focusRect.TransformPoint(
@@ -574,7 +567,6 @@ public sealed class CharacterFocusPreviewMarker : MonoBehaviour
                 focusTuningDb,
                 tuningKey,
                 point.focusPreset,
-                point.customFocusKey,
                 point.finalOffset);
 
             Vector3 world = focusRect.TransformPoint(

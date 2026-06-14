@@ -12,7 +12,6 @@ public static class CharacterDepthResolver
         RoleDepthTuningDBSO roleTuningDb,
         bool overridePreserveFocus,
         CharacterFocusPreset preserveFocusPresetOverride,
-        string preserveCustomFocusKeyOverride,
         Vector2 preserveFocusOffsetOverride,
         Vector2 commandYOffsetAdd,
         float commandScaleMultiplier,
@@ -20,9 +19,10 @@ public static class CharacterDepthResolver
     {
         result = default;
 
-        if (scope == null)
-            return false;
-
+        if (useLevel)
+            globalTuning.ResolveLevel(level);
+        else globalTuning.ResolvePreset(preset);
+        
         CharacterDepthPresetValue value =
             ResolveBaseValue(
                 preset,
@@ -44,7 +44,6 @@ public static class CharacterDepthResolver
         if (overridePreserveFocus)
         {
             value.preserveFocusPreset = preserveFocusPresetOverride;
-            value.preserveCustomFocusKey = preserveCustomFocusKeyOverride ?? "";
             value.preserveFocusOffset = preserveFocusOffsetOverride;
         }
 
@@ -73,54 +72,36 @@ public static class CharacterDepthResolver
         Vector2 rawDepthY,
         Vector2 targetDepthScale,
         CharacterFocusPreset preserveFocusPreset,
-        string preserveCustomFocusKey,
         Vector2 preserveFocusOffset,
         CharacterFocusTuningDBSO focusTuningDb,
         out Vector2 finalDepthY)
     {
         finalDepthY = rawDepthY;
 
-        if (scope == null || depthYRect == null || depthScaleRect == null)
-            return false;
-
-        if (preserveFocusPreset == CharacterFocusPreset.Custom &&
-            string.IsNullOrWhiteSpace(preserveCustomFocusKey))
-        {
-            return false;
-        }
-
         // 1. baseline은 targetDepthY가 아니라 현재/settled FocusPoint다.
         //    따라서 place_focus가 이미 잡아둔 위치를 기준으로 보존한다.
-        if (!CharacterFocusPointResolver.TryResolve(
-                scope,
-                roleKey,
-                preserveFocusPreset,
-                preserveCustomFocusKey,
-                preserveFocusOffset,
-                focusTuningDb,
-                useSettledPlacementTargets: true,
-                out CharacterFocusPointResult currentFocus))
-        {
-            return false;
-        }
+        CharacterFocusPointResolver.TryResolve(
+            scope,
+            roleKey,
+            preserveFocusPreset,
+            preserveFocusOffset,
+            focusTuningDb,
+            useSettledPlacementTargets: true,
+            out CharacterFocusPointResult currentFocus);
 
         // 2. rawDepthY + targetDepthScale을 잠깐 실제 transform에 적용해 target focus를 측정한다.
         //    이 함수는 호출 후 즉시 원복한다.
-        if (!TryMeasureFocusWithTemporaryDepthTransform(
-                scope,
-                roleKey,
-                depthYRect,
-                depthScaleRect,
-                rawDepthY,
-                targetDepthScale,
-                preserveFocusPreset,
-                preserveCustomFocusKey,
-                preserveFocusOffset,
-                focusTuningDb,
-                out CharacterFocusPointResult targetFocus))
-        {
-            return false;
-        }
+        TryMeasureFocusWithTemporaryDepthTransform(
+            scope,
+            roleKey,
+            depthYRect,
+            depthScaleRect,
+            rawDepthY,
+            targetDepthScale,
+            preserveFocusPreset,
+            preserveFocusOffset,
+            focusTuningDb,
+            out CharacterFocusPointResult targetFocus);
 
         RectTransform stageRoot = currentFocus.StageRoot;
         RectTransform depthYParent = depthYRect.parent as RectTransform;
@@ -142,7 +123,7 @@ public static class CharacterDepthResolver
         return true;
     }
 
-    private static bool TryMeasureFocusWithTemporaryDepthTransform(
+    private static void TryMeasureFocusWithTemporaryDepthTransform(
         CommandRunScope scope,
         string roleKey,
         RectTransform depthYRect,
@@ -150,15 +131,11 @@ public static class CharacterDepthResolver
         Vector2 depthYTarget,
         Vector2 depthScaleTarget,
         CharacterFocusPreset preserveFocusPreset,
-        string preserveCustomFocusKey,
         Vector2 preserveFocusOffset,
         CharacterFocusTuningDBSO focusTuningDb,
         out CharacterFocusPointResult result)
     {
         result = default;
-
-        if (scope == null || depthYRect == null || depthScaleRect == null)
-            return false;
 
         Vector2 savedDepthY = depthYRect.anchoredPosition;
         Vector3 savedDepthScale = depthScaleRect.localScale;
@@ -169,21 +146,17 @@ public static class CharacterDepthResolver
             depthScaleTarget.y,
             savedDepthScale.z);
 
-        bool success =
-            CharacterFocusPointResolver.TryResolve(
-                scope,
-                roleKey,
-                preserveFocusPreset,
-                preserveCustomFocusKey,
-                preserveFocusOffset,
-                focusTuningDb,
-                useSettledPlacementTargets: true,
-                out result);
+        CharacterFocusPointResolver.TryResolve(
+            scope,
+            roleKey,
+            preserveFocusPreset,
+            preserveFocusOffset,
+            focusTuningDb,
+            useSettledPlacementTargets: true,
+            out result);
 
         depthScaleRect.localScale = savedDepthScale;
         depthYRect.anchoredPosition = savedDepthY;
-
-        return success;
     }
 
     private static CharacterDepthPresetValue ResolveBaseValue(
@@ -192,41 +165,9 @@ public static class CharacterDepthResolver
         float level,
         CharacterDepthTuningSO globalTuning)
     {
-        if (globalTuning == null)
-        {
-            if (useLevel)
-                return ResolveDefaultLevel(level);
-
-            return CharacterDepthTuningSet.Default.Get(preset);
-        }
-
         return useLevel
             ? globalTuning.ResolveLevel(level)
             : globalTuning.ResolvePreset(preset);
-    }
-
-    private static CharacterDepthPresetValue ResolveDefaultLevel(float level)
-    {
-        float t = Mathf.Clamp01(level / 10f);
-
-        float y = Mathf.Lerp(120f, -440f, t);
-        float scale = Mathf.Lerp(0.86f, 1.38f, t);
-
-        CharacterFocusPreset preserveFocus =
-            level <= 2.5f
-                ? CharacterFocusPreset.Feet
-                : level <= 8.5f
-                    ? CharacterFocusPreset.Bust
-                    : CharacterFocusPreset.Face;
-
-        return new CharacterDepthPresetValue
-        {
-            depthY = new Vector2(0f, y),
-            depthScale = scale,
-            preserveFocusPreset = preserveFocus,
-            preserveCustomFocusKey = "",
-            preserveFocusOffset = Vector2.zero,
-        };
     }
 
     private static void ApplyRoleCorrection(
@@ -235,32 +176,16 @@ public static class CharacterDepthResolver
         RoleDepthTuningDBSO roleTuningDb,
         string tuningKey)
     {
-        if (roleTuningDb == null)
-            return;
-
         if (!roleTuningDb.TryGet(tuningKey, out RoleDepthTuningDBSO.Entry entry))
             return;
 
-        if (entry == null)
-            return;
-
         value.depthY += entry.defaultYOffsetAdd;
+        value.depthScale *= entry.defaultScaleMultiplier;
 
-        if (entry.defaultScaleMultiplier > 0f)
-            value.depthScale *= entry.defaultScaleMultiplier;
-
-        CharacterDepthPresetCorrection correction =
-            entry.corrections.Get(preset);
+        CharacterDepthPresetCorrection correction = entry.corrections.Get(preset);
 
         value.depthY += correction.yOffsetAdd;
-        value.depthScale *= correction.SafeScaleMultiplier;
-
-        if (correction.overridePreserveFocus)
-        {
-            value.preserveFocusPreset = correction.preserveFocusPreset;
-            value.preserveCustomFocusKey = correction.preserveCustomFocusKey ?? "";
-        }
-
+        value.depthScale *= correction.scaleMultiplier;
         value.preserveFocusOffset += correction.preserveFocusOffsetAdd;
     }
 }
