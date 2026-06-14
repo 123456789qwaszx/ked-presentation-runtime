@@ -60,6 +60,14 @@ public sealed class CharacterRigRegistry
 
         _rigs.Clear();
     }
+    
+    public bool TryPeekRig(string rigKey, out CharacterRigRefs rigRefs)
+    {
+        if (!_rigs.TryGetValue(rigKey, out rigRefs))
+            return false;
+
+        return true;
+    }
 
     private static void DestroyRig(CharacterRigRefs rigRefs)
     {

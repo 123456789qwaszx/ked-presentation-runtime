@@ -1,12 +1,5 @@
 using UnityEngine;
 
-// StageDepth layer 구조:
-//
-// Root
-// └─ FramingTransform
-//    └─ FramingScale
-//       └─ Content
-//
 // MeasureRect(Root)
 // - response 영향을 받지 않는 중립 기준점.
 // - bind 시점에 PresentationResponseCoordinateMapper.CaptureBaseMeasure()로 한 번만 측정되어야 한다.

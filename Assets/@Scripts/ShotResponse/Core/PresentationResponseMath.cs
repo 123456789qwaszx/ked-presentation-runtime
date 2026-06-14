@@ -8,11 +8,7 @@ public static class PresentationResponseMath
         in PresentationResponseMeasure measure)
     {
         float cameraScale = PresentationShotIntentMath.EvaluateCameraScale(state.zoom);
-        float safeCameraScale = Mathf.Max(0.0001f, cameraScale);
-
-        // 실제 카메라 스케일 변화량을 response 기준으로 사용.
-        // 예: zoom=8, cameraScale=1.4라면 zoomAmount=0.4.
-        float zoomAmount = safeCameraScale - 1f;
+        float zoomAmount = cameraScale - 1f;
 
         Vector2 focusSpreadOffset =
             CalculateAxisSeparatedFocusSpreadOffset(
@@ -31,14 +27,8 @@ public static class PresentationResponseMath
             focusSpreadOffset +
             panOffset;
 
-        // StageDepth layer는 이미 StageZoom_Root 아래에 있다.
-        // 따라서 layer scale response는 "카메라 스케일을 얼마나 상쇄/강조할지"로 해석.
-        // 음수 = 상쇄, 양수 = 조금 더 반응
-        float responseScaleMultiplier =
-            Mathf.Pow(safeCameraScale, profile.zoomScaleResponse);
-
-        Vector2 destScale =
-            measure.baseLocalScale * responseScaleMultiplier;
+        float responseScaleMultiplier = Mathf.Pow(cameraScale, profile.zoomScaleResponse);
+        Vector2 destScale = measure.baseLocalScale * responseScaleMultiplier;
 
         return new PresentationTargetResponse
         {

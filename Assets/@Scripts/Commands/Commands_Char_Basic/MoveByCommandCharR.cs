@@ -104,7 +104,7 @@ public sealed class MoveByCommandCharR : CommandBase
 
         _startPos = _rect.anchoredPosition;
         _destPos = CalculateDestinationPosition();
-        _rigRefs.PlacementTargets.Publish(_rect, _destPos);
+        _rigRefs.PlacementTargets.PublishAnchoredPosition(_rect, _destPos);
 
         HasClaimedTarget = true;
     }

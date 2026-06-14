@@ -10,7 +10,6 @@ public sealed class CharacterFocusTuningDBSO : ScriptableObject
     [Serializable]
     public sealed class Entry
     {
-        [Tooltip("예: leafia 또는 leafia:pose_wide")]
         public string key;
 
         [Header("Default Offset")]
@@ -31,46 +30,72 @@ public sealed class CharacterFocusTuningDBSO : ScriptableObject
 
     private Dictionary<string, Entry> _map;
 
+    public Vector2 ResolveOffset(
+        string tuningKey,
+        CharacterFocusPreset preset,
+        Vector2 commandOffset)
+    {
+        Vector2 offset = Vector2.zero;
+
+        offset += baseOffsets.Get(preset);
+
+        if (TryGet(tuningKey, out Entry entry))
+        {
+            offset += entry.defaultOffset;
+            offset += entry.offsets.Get(preset);
+        }
+
+        offset += commandOffset;
+
+        return offset;
+    }
+
     public bool TryGet(string key, out Entry entry)
     {
         if (_map == null)
             Build();
 
-        if (string.IsNullOrWhiteSpace(key))
+        key = (key ?? "").Trim();
+
+        if (string.IsNullOrEmpty(key))
         {
             entry = null;
             return false;
         }
 
-        return _map.TryGetValue(key.Trim(), out entry) && entry != null;
+        return _map.TryGetValue(key, out entry) && entry != null;
     }
 
-    private void OnEnable()
-    {
-        _map = null;
-    }
-
-    private void OnValidate()
-    {
-        _map = null;
-    }
+    private void OnEnable() => _map = null;
+    private void OnValidate() => _map = null;
 
     private void Build()
     {
-        _map = new Dictionary<string, Entry>(StringComparer.Ordinal);
+        // 캐릭터 키는 대소문자를 구분하지 않는다.
+        // 예: "Willow", "willow", "WILLOW"는 같은 key로 취급한다.
+        _map = new Dictionary<string, Entry>(StringComparer.OrdinalIgnoreCase);
 
         for (int i = 0; i < entries.Count; i++)
         {
             Entry entry = entries[i];
 
-            if (entry == null || string.IsNullOrWhiteSpace(entry.key))
+            if (entry == null)
                 continue;
 
-            string key = entry.key.Trim();
+            string key = (entry.key ?? "").Trim();
+
+            if (string.IsNullOrEmpty(key))
+                continue;
 
 #if UNITY_EDITOR
-            if (_map.TryGetValue(key, out Entry prev) && prev != null && !ReferenceEquals(prev, entry))
-                Debug.LogWarning($"[CharacterFocusTuningDB] Duplicate key: '{key}'", this);
+            if (_map.TryGetValue(key, out Entry prev) &&
+                prev != null &&
+                !ReferenceEquals(prev, entry))
+            {
+                Debug.LogWarning(
+                    $"[CharacterFocusTuningDB] Duplicate key ignoring case: '{key}'",
+                    this);
+            }
 #endif
 
             _map[key] = entry;

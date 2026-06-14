@@ -24,14 +24,9 @@ public enum ScreenFocusPoint
 
 public static class ScreenFocusPointResolver
 {
-    // 기존 w / 3, h / 3은 VN shot composition 기준으로 너무 외곽에 가까웠다.
-    // 화면 안쪽의 실사용 가능한 focus zone으로 모으되,
-    // 정사각형 그리드가 아니라 납작한 직사각형 구도로 잡는다.
     private const float OuterXRatio = 0.24f;
     private const float OuterYRatio = 0.16f;
 
-    // thirds 계열은 더 미묘한 구도 보정용.
-    // 바깥 9점보다 더 중앙에 가까운 보조 포인트로 둔다.
     private const float InnerXRatio = 0.14f;
     private const float InnerYRatio = 0.09f;
 

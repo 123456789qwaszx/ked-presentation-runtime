@@ -259,8 +259,7 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 6781001881294543747}
+  m_Children: []
   m_Father: {fileID: 3873051706276761097}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -1009,96 +1008,6 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
---- !u!1 &4012876724791172025
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 6781001881294543747}
-  - component: {fileID: 1189519358194206135}
-  - component: {fileID: 5162490325847171053}
-  m_Layer: 0
-  m_Name: FocusMarker
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &6781001881294543747
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4012876724791172025}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 3119065722377472987}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1189519358194206135
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4012876724791172025}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b9cb9bb491a50b545a840fe1cad0f351, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CharacterFocusPreviewMarker
-  focusRect: {fileID: 2807209374107197717}
-  previewRoot: {fileID: 3119065722377472987}
-  focusTuningDb: {fileID: 11400000, guid: b77af4e295606b446ae4f74dad106f5f, type: 2}
-  roleKey: Leafia
-  points:
-  - enabled: 1
-    label: Feet
-    focusPreset: 0
-    color: {r: 0.4, g: 0.8, b: 1, a: 0.9}
-    radius: 12
-    finalOffset: {x: 0, y: 0}
-  - enabled: 1
-    label: Body
-    focusPreset: 10
-    color: {r: 0.4, g: 1, b: 0.4, a: 0.9}
-    radius: 12
-    finalOffset: {x: 0, y: 0}
-  - enabled: 1
-    label: Bust
-    focusPreset: 20
-    color: {r: 1, g: 0.8, b: 0.25, a: 0.9}
-    radius: 12
-    finalOffset: {x: 0, y: 0}
-  - enabled: 1
-    label: Face
-    focusPreset: 30
-    color: {r: 1, g: 0.35, b: 0.35, a: 0.95}
-    radius: 12
-    finalOffset: {x: 0, y: 0}
-  drawInGameView: 1
-  hideInPlayMode: 0
-  drawInSceneView: 1
-  drawLabels: 1
---- !u!222 &5162490325847171053
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4012876724791172025}
-  m_CullTransparentMesh: 1
 --- !u!1 &4066616708040140106
 GameObject:
   m_ObjectHideFlags: 0

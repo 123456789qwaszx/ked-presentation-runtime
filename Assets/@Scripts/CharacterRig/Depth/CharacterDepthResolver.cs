@@ -104,15 +104,15 @@ public static class CharacterDepthResolver
             focusTuningDb,
             out CharacterFocusPointResult targetFocus);
 
-        RectTransform stageRoot = currentFocus.StageRoot;
+        RectTransform stageRoot = currentFocus.RigSpaceRoot;
         RectTransform depthYParent = depthYRect.parent as RectTransform;
 
         if (stageRoot == null || depthYParent == null)
             return false;
 
         Vector2 compensationInStageSpace =
-            currentFocus.FocusPointInStageSpace -
-            targetFocus.FocusPointInStageSpace;
+            currentFocus.FocusPointInRigSpace -
+            targetFocus.FocusPointInRigSpace;
 
         Vector2 compensationInDepthYParentSpace =
             PresentationCoordinateMath.ConvertVectorFromRigSpaceToTargetPositionParentSpace(

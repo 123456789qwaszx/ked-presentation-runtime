@@ -1,3 +1,4 @@
+
 using UnityEngine;
 
 public static class PresentationShotIntentMath
@@ -14,7 +15,6 @@ public static class PresentationShotIntentMath
         Vector2 focusPointInStageSpace, 
         Vector2 currentPan, 
         float currentScale)
-        //=> (focusPointInStageSpace + currentPan) / currentScale;
         => (focusPointInStageSpace - currentPan) / currentScale;
     
     // 캐릭터 얼굴이 원하는 화면 위치에 보이도록 authored screen-pan 값을 역산.
@@ -24,7 +24,6 @@ public static class PresentationShotIntentMath
         Vector2 logicalFocusPointInStageSpace, 
         Vector2 desiredPointInStageSpace, 
         float targetScale)
-        //=> logicalFocusPointInStageSpace * targetScale - desiredPointInStageSpace;
         => desiredPointInStageSpace - logicalFocusPointInStageSpace * targetScale;
 
     // This interpolates authored intent values, not final Transform values.

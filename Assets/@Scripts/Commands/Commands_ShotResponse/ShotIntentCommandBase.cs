@@ -18,7 +18,7 @@ public abstract class ShotIntentCommandBase<TSpec> : CommandBase
 {
     private const float StepFinishSpeedUpMultiplier = 20f;
 
-    protected readonly PresentationResponseRig rig;
+    protected readonly PresentationShotResponseSystem rig;
     protected readonly TSpec spec;
 
     private PresentationIntentState _fromState;
@@ -30,7 +30,7 @@ public abstract class ShotIntentCommandBase<TSpec> : CommandBase
 
     public override bool WaitForCompletion => spec.wait;
 
-    protected ShotIntentCommandBase(PresentationResponseRig rig, TSpec spec)
+    protected ShotIntentCommandBase(PresentationShotResponseSystem rig, TSpec spec)
     {
         this.rig = rig;
         this.spec = spec;

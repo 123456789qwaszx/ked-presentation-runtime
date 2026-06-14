@@ -1,18 +1,8 @@
 using UnityEngine;
 
-public interface IPresentationRigSpaceRootProvider
-{
-    RectTransform RigSpaceRoot { get; }
-}
-
-public sealed partial class PresentationUIRoot : IPresentationRigSpaceRootProvider
-{
-    public RectTransform RigSpaceRoot => View.Rect(Refs.StageShot_Root);
-}
-
 public sealed class PresentationResponseCoordinateMapper
 {
-    private IPresentationRigSpaceRootProvider _stageRootProvider;
+    private IShotResponseStageProvider _stageRootProvider;
 
     public PresentationResponseMeasure CaptureBaseMeasure(IResponseTarget target)
     {
@@ -23,28 +13,15 @@ public sealed class PresentationResponseCoordinateMapper
                 target.MeasureRect,
                 rigSpaceRoot);
 
-        // 적용 기준은 PositionRect 자신의 중립 anchoredPosition이다.
-        // MeasureRect와 다른 노드여도 상관없다 — 우리는 절대 위치를 다시 꽂지 않고
-        // 이 중립값에 offset만 더하기 때문이다.
-        Vector2 baseAnchoredPosition =
-            target.PositionRect != null
-                ? target.PositionRect.anchoredPosition
-                : Vector2.zero;
-
-        Vector2 baseLocalScale =
-            PresentationCoordinateMath.CaptureNeutralScale(
-                target.ScaleRect);
+        // 적용 기준은 PositionRect 자신의 중립 anchoredPosition.
+        // 이 중립값에 offset만 더함.
+        Vector2 baseAnchoredPosition = target.PositionRect.anchoredPosition;
+        Vector2 baseLocalScale = new(target.ScaleRect.localScale.x, target.ScaleRect.localScale.y);
 
         return new PresentationResponseMeasure(
             basePositionInRigSpace,
             baseAnchoredPosition,
             baseLocalScale);
-    }
-
-    // 구버전 호출부 호환용. 의미상으로는 CaptureBaseMeasure를 쓰는 게 맞다.
-    public PresentationResponseMeasure CaptureCurrentMeasure(IResponseTarget target)
-    {
-        return CaptureBaseMeasure(target);
     }
 
     // rig-space "오프셋(벡터)"을 target PositionRect 부모 공간의 벡터로 변환한다.
@@ -85,38 +62,26 @@ public static class PresentationCoordinateMath
         return new Vector2(localPivot.x, localPivot.y);
     }
 
-    public static Vector2 CaptureNeutralScale(RectTransform neutralScaleSource)
-    {
-        if (neutralScaleSource == null)
-            return Vector2.one;
-
-        Vector3 scale = neutralScaleSource.localScale;
-        return new Vector2(scale.x, scale.y);
-    }
-
-    // 점 변환. (현재는 직접 안 쓰지만 호환을 위해 남겨둠.)
     public static Vector2 ConvertPointFromRigSpaceToTargetPositionParentSpace(
         Vector2 pointInRigSpace,
         RectTransform rigSpaceRoot,
         RectTransform targetParent)
     {
-        Vector3 worldPosition =
-            rigSpaceRoot.TransformPoint(new Vector3(pointInRigSpace.x, pointInRigSpace.y, 0f));
+        Vector3 worldPosition = rigSpaceRoot.TransformPoint(new Vector3(pointInRigSpace.x, pointInRigSpace.y, 0f));
         Vector3 positionInParentSpace = targetParent.InverseTransformPoint(worldPosition);
 
         return new Vector2(positionInParentSpace.x, positionInParentSpace.y);
     }
 
-    // 벡터(오프셋) 변환. origin을 빼서 translation을 제거한다.
-    // rigSpaceRoot↔targetParent의 상대 스케일/회전만 반영되므로 공통 카메라는 상쇄된다.
+    // 벡터(오프셋) 변환. origin을 빼서 translation을 제거.
+    // rigSpaceRoot 간의 targetParent의 상대 스케일/회전만 반영되므로 공통 카메라는 상쇄됨.
     public static Vector2 ConvertVectorFromRigSpaceToTargetPositionParentSpace(
         Vector2 vectorInRigSpace,
         RectTransform rigSpaceRoot,
         RectTransform targetParent)
     {
         Vector3 worldOrigin = rigSpaceRoot.TransformPoint(Vector3.zero);
-        Vector3 worldTip =
-            rigSpaceRoot.TransformPoint(new Vector3(vectorInRigSpace.x, vectorInRigSpace.y, 0f));
+        Vector3 worldTip = rigSpaceRoot.TransformPoint(new Vector3(vectorInRigSpace.x, vectorInRigSpace.y, 0f));
 
         Vector3 parentOrigin = targetParent.InverseTransformPoint(worldOrigin);
         Vector3 parentTip = targetParent.InverseTransformPoint(worldTip);

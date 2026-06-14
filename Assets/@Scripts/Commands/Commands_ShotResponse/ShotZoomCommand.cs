@@ -13,7 +13,7 @@ public sealed class ShotZoomCommandSpec : ShotIntentCommandSpecBase
 
 public sealed class ShotZoomCommand : ShotIntentCommandBase<ShotZoomCommandSpec>
 {
-    public ShotZoomCommand(PresentationResponseRig rig, ShotZoomCommandSpec spec)
+    public ShotZoomCommand(PresentationShotResponseSystem rig, ShotZoomCommandSpec spec)
         : base(rig, spec)
     { }
 

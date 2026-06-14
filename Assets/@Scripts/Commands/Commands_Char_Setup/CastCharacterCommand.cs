@@ -23,6 +23,7 @@ public sealed class CastCharacterCommandSpec : CommandSpecBase
 public sealed class CastCharacterCommand : CommandBase
 {
     private readonly CastCharacterCommandSpec _spec;
+    protected override SkipPolicy SkipPolicy => SkipPolicy.ExecuteEvenIfSkipping;
 
     public CastCharacterCommand(CastCharacterCommandSpec spec)
     {
@@ -31,43 +32,7 @@ public sealed class CastCharacterCommand : CommandBase
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
-        ApplyBinding(scope);
+        scope.CastRegistry.CastCharRig(_spec.slotKey, _spec.characterKey);
         yield break;
-    }
-
-    protected override void OnSkip(CommandRunScope scope)
-    {
-        ApplyBinding(scope);
-    }
-
-    private void ApplyBinding(CommandRunScope scope)
-    {
-        string slotKey = _spec.slotKey;
-        string characterKey = _spec.characterKey;
-
-        scope.CastRegistry.CastCharRig(slotKey, characterKey);
-
-        ApplyFocusPreviewMarkerRoleKey(scope, slotKey, characterKey);
-    }
-
-    private static void ApplyFocusPreviewMarkerRoleKey(
-        CommandRunScope scope,
-        string slotKey,
-        string characterKey)
-    {
-        CharacterRigRefs rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, slotKey);
-        RectTransform extensionsRoot = rigRefs.GetRect(CharacterRigTarget.Character_ExtensionsRoot);
-        CharacterFocusPreviewMarker[] markers = extensionsRoot.GetComponentsInChildren<CharacterFocusPreviewMarker>();
-
-        if (markers == null || markers.Length == 0)
-            return;
-
-        for (int i = 0; i < markers.Length; i++)
-        {
-            if (markers[i] == null)
-                continue;
-
-            markers[i].SetRoleKey(characterKey);
-        }
     }
 }

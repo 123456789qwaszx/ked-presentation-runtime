@@ -31,7 +31,7 @@ public sealed class ShotZoomFocusCommand : ShotIntentCommandBase<ShotZoomFocusCo
     CharacterFocusTuningDBSO _focusTuningDB;
     
     public ShotZoomFocusCommand(
-        PresentationResponseRig rig, 
+        PresentationShotResponseSystem rig, 
         ShotZoomFocusCommandSpec spec, 
         CharacterFocusTuningDBSO focusTuningDB)
         : base(rig, spec)
@@ -64,12 +64,12 @@ public sealed class ShotZoomFocusCommand : ShotIntentCommandBase<ShotZoomFocusCo
         // 4. 현재 측정된 캐릭터 focus 위치에서 현재 pan/scale을 제거해서 논리 focusPoint로 되돌린다.
         Vector2 logicalFocusPoint =
             PresentationShotIntentMath.RemoveCurrentCameraTransformFromFocusPoint(
-                focus.FocusPointInStageSpace, 
+                focus.FocusPointInRigSpace, 
                 from.panInRigSpace, fromScale);
 
         // 5. 화면의 어느 지점에 focus를 두고 싶은지 구한다. 예: Center, Left, Right, Upper 등
         Vector2 desiredPoint =
-            ScreenFocusPointResolver.Resolve(focus.StageRoot, spec.screenPoint) + spec.screenOffset;
+            ScreenFocusPointResolver.Resolve(focus.RigSpaceRoot, spec.screenPoint) + spec.screenOffset;
 
         // 6. targetScale에서 logicalFocusPoint가 desiredPoint에 오도록 필요한 targetPan을 계산한다.
         Vector2 targetPan =

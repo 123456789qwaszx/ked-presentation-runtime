@@ -7,7 +7,7 @@ public sealed class ShotResetCommandSpec : ShotIntentCommandSpecBase
 
 public sealed class ShotResetCommand : ShotIntentCommandBase<ShotResetCommandSpec>
 {
-    public ShotResetCommand(PresentationResponseRig rig, ShotResetCommandSpec spec) 
+    public ShotResetCommand(PresentationShotResponseSystem rig, ShotResetCommandSpec spec) 
         : base(rig, spec) 
     { }
 

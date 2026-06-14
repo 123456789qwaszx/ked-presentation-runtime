@@ -110,7 +110,7 @@ public sealed class PlaceCharacterFocusCommandCharR : CommandBase
         _startPosition = _moveRect.anchoredPosition;
         CalculateFocusPlacement(scope);
 
-        _rigRefs.PlacementTargets.Publish(_moveRect, _destination);
+        _rigRefs.PlacementTargets.PublishAnchoredPosition(_moveRect, _destination);
         HasClaimedTarget = true;
     }
 

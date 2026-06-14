@@ -2,7 +2,37 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public sealed class PresentationResponseRig
+public struct PresentationTargetResponse
+{
+    public Vector2 anchoredPosition;
+    public Vector2 scale;
+}
+
+public readonly struct PresentationResponseMeasure
+{
+    // focus-side 판정용. MeasureRect 기준으로 잰 rig-space 위치.
+    // (대상이 focusPoint의 좌/우, 위/아래 어느 쪽인지 부호를 보는 데만 사용.)
+    public readonly Vector2 basePositionInRigSpace;
+
+    // 적용 기준. PositionRect의 중립(bind 시점) anchoredPosition (부모 로컬 공간).
+    // 실제 위치 적용은, 이 값에 offset을 더하는 방식. 
+    public readonly Vector2 baseAnchoredPosition;
+
+    // ScaleRect의 중립(bind 시점) localScale.
+    public readonly Vector2 baseLocalScale;
+
+    public PresentationResponseMeasure(
+        Vector2 basePositionInRigSpace,
+        Vector2 baseAnchoredPosition,
+        Vector2 baseLocalScale)
+    {
+        this.basePositionInRigSpace = basePositionInRigSpace;
+        this.baseAnchoredPosition = baseAnchoredPosition;
+        this.baseLocalScale = baseLocalScale;
+    }
+}
+
+public sealed class PresentationShotResponseSystem
 {
     private sealed class RuntimeBinding
     {
@@ -33,12 +63,6 @@ public sealed class PresentationResponseRig
         IResponseTarget target,
         PresentationResponseProfile presetProfile)
     {
-        if (string.IsNullOrWhiteSpace(bindingKey))
-            return;
-
-        if (!IsValidTarget(target))
-            return;
-
         if (presetProfile == null)
             return;
 
@@ -48,7 +72,7 @@ public sealed class PresentationResponseRig
             target = target,
             profile = presetProfile,
 
-            // 반드시 등록 시점에만 캡처.
+            // 등록 시점에만 캡처.
             baseMeasure = _coordinateMapper.CaptureBaseMeasure(target),
         };
 
@@ -93,58 +117,6 @@ public sealed class PresentationResponseRig
         return false;
     }
 
-    public bool HasLiveBinding(string bindingKey)
-    {
-        if (string.IsNullOrWhiteSpace(bindingKey))
-            return false;
-
-        for (int i = _bindings.Count - 1; i >= 0; i--)
-        {
-            RuntimeBinding binding = _bindings[i];
-
-            if (binding == null)
-            {
-                _bindings.RemoveAt(i);
-                continue;
-            }
-
-            if (!string.Equals(binding.key, bindingKey, StringComparison.Ordinal))
-                continue;
-
-            if (binding.IsAlive)
-                return true;
-
-            _bindings.RemoveAt(i);
-            return false;
-        }
-
-        return false;
-    }
-
-    public bool RemoveBinding(string bindingKey)
-    {
-        bool removed = false;
-
-        if (string.IsNullOrWhiteSpace(bindingKey))
-            return false;
-
-        for (int i = _bindings.Count - 1; i >= 0; i--)
-        {
-            RuntimeBinding binding = _bindings[i];
-
-            if (binding == null)
-                continue;
-
-            if (string.Equals(binding.key, bindingKey, StringComparison.Ordinal))
-            {
-                _bindings.RemoveAt(i);
-                removed = true;
-            }
-        }
-
-        return removed;
-    }
-
     public void ApplyToAllBindings(in PresentationIntentState state)
     {
         _currentState = state;
@@ -174,14 +146,11 @@ public sealed class PresentationResponseRig
     public void Clear()
     {
         _currentState = PresentationIntentState.Default;
-
-        // 살아있는 binding이 있다면 default response를 한 번 적용해서 중립 상태로 되돌린다.
-        ApplyToAllBindings(_currentState);
-
+        
+        ApplyToAllBindings(_currentState); // default response를 한 번 적용. 중립상태로 보정.
         _bindings.Clear();
-
-        // binding이 모두 제거된 뒤에도 camera root는 반드시 default로 보정.
-        _cameraRootApplier.Apply(in _currentState);
+        
+        _cameraRootApplier.Apply(in _currentState); // binding이 모두 제거된 뒤, camera root 역시 default로 보정.
     }
 
     private PresentationTargetResponse BuildTargetSpaceResponse(
@@ -195,8 +164,7 @@ public sealed class PresentationResponseRig
                 binding.profile,
                 in binding.baseMeasure);
 
-        // 계산 결과는 rig space상의 "목표점" 형태로 나오지만,
-        // 실제 PositionRect에는 절대 위치를 꽂지 않음.
+        // 계산 결과는 rig space상의 "목표점" 형태로 나오지만, 직접 사용하는 대신,
         // basePosition에서 얼마나 벗어났는지 offset만 추출해서 target parent space로 변환.
         Vector2 offsetInRigSpace =
             responseInRigSpace.anchoredPosition -
@@ -230,13 +198,5 @@ public sealed class PresentationResponseRig
         }
 
         _bindings.Add(newBinding);
-    }
-
-    private static bool IsValidTarget(IResponseTarget target)
-    {
-        return target != null &&
-               target.MeasureRect != null &&
-               target.PositionRect != null &&
-               target.ScaleRect != null;
     }
 }

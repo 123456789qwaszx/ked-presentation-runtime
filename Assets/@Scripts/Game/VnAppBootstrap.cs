@@ -118,15 +118,14 @@ public class VnAppBootstrap : MonoBehaviour
     [Header("UI")] 
     [SerializeField] private EpisodePlayer episodePlayer;
     
-    [Header("NodeDebug")] 
-    [SerializeField] private YarnLaneDebugView yarnLaneDebugView;
-    
     [SerializeField] private UIBackgroundRigBlurRuntime uiBackgroundRigBlurRuntime;
     [SerializeField] private ScreenNoisePresetDBSO screenNoisePresetDbso;
     [SerializeField] private ScreenVignettePresetDBSO screenVignettePresetDbso;
     [SerializeField] private ScreenFlashPresetDBSO screenFlashPresetDbso;
     
-
+    [Header("NodeDebug")] 
+    [SerializeField] private YarnLaneDebugView yarnLaneDebugView;
+    [SerializeField] private CharacterFocusDebugView characterFocusDebugView;
     
     private PresentationSessionBridge _presentationSessionBridge;
     private UIPatchService _uiPatchService;
@@ -136,7 +135,7 @@ public class VnAppBootstrap : MonoBehaviour
     private DialogueBoxPresentationController  _dialogueBoxPresentationController;
     
     private VNRuntimeStateProvider _vnRuntimeStateProvider;
-    private PresentationResponseRig _presentationResponseRig;
+    private PresentationShotResponseSystem _presentationResponseRig;
     
     
     private void Awake()
@@ -145,7 +144,15 @@ public class VnAppBootstrap : MonoBehaviour
         
         _vnRuntimeStateProvider = new VNRuntimeStateProvider(_rollbackHistory, _choiceHistory, vnPlaytimeTracker);
         rollbackHistoryDebugView.Bind(_rollbackHistory);
-        _presentationResponseRig = new PresentationResponseRig();
+        _presentationResponseRig = new PresentationShotResponseSystem();
+        
+        IShotResponseStageProvider shotResponseStageProvider =
+            UIManager.Instance.GetUI<PresentationUIRoot>();
+        
+        characterFocusDebugView.Initialize(
+            _presentationStage,
+            shotResponseStageProvider,
+            characterFocusTuningDb);
 
         BootstrapAudioSystem();
         ConnectAudioSystemToYarn();

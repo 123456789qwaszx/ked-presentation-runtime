@@ -11,7 +11,7 @@ public sealed class EpisodePlayer : MonoBehaviour
     private BacklogRecorder _backlogRecorder;
     private ChoiceHistory _choiceHistory;
     private VNSideRunnerSyncHub _sideRunnerSyncHub;
-    private PresentationResponseRig _presentationResponseRig;
+    private PresentationShotResponseSystem _presentationResponseRig;
 
     [Header("Yarn")]
     [SerializeField] private DialogueRunner dialogueRunner;
@@ -44,7 +44,7 @@ public sealed class EpisodePlayer : MonoBehaviour
         BacklogRecorder backlogRecorder,
         ChoiceHistory choiceHistory,
         VNSideRunnerSyncHub sideRunnerSyncHub,
-        PresentationResponseRig presentationResponseRig)
+        PresentationShotResponseSystem presentationResponseRig)
     {
         _vnScreenBindings = vnScreenBindings;
         _nodeRollbackHistory = nodeRollbackHistory;

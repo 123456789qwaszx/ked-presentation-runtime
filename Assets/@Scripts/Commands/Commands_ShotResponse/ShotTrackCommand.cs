@@ -12,7 +12,7 @@ public sealed class ShotTrackCommandSpec : ShotIntentCommandSpecBase
 
 public sealed class ShotTrackCommand : ShotIntentCommandBase<ShotTrackCommandSpec>
 {
-    public ShotTrackCommand(PresentationResponseRig rig, ShotTrackCommandSpec spec)
+    public ShotTrackCommand(PresentationShotResponseSystem rig, ShotTrackCommandSpec spec)
         : base(rig, spec)
     { }
 

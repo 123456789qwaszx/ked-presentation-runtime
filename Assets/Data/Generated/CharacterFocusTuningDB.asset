@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CharacterFocusTuningDBSO
   baseOffsets:
     feet: {x: 0, y: 0}
-    body: {x: 0, y: 670}
-    bust: {x: 0, y: 740}
-    face: {x: -10, y: 840}
+    body: {x: 0, y: 700}
+    bust: {x: 0, y: 800}
+    face: {x: -10, y: 1000}
     handLeft: {x: -220, y: 520}
     handRight: {x: 220, y: 520}
   entries:
@@ -56,7 +56,7 @@ MonoBehaviour:
       face: {x: 30, y: 0}
       handLeft: {x: 0, y: 0}
       handRight: {x: 0, y: 0}
-  - key: Willow
+  - key: willow
     defaultOffset: {x: 0, y: 0}
     offsets:
       feet: {x: 0, y: 0}

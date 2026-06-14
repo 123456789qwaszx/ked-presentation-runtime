@@ -1,10 +1,10 @@
 public sealed class ShotResponseCommandFactory : INodeCommandFactory
 {
-    private readonly PresentationResponseRig _presentationResponseRig;
+    private readonly PresentationShotResponseSystem _presentationResponseRig;
     private readonly CharacterFocusTuningDBSO _focusTuningDB;
 
     public ShotResponseCommandFactory(
-        PresentationResponseRig presentationResponseRig,
+        PresentationShotResponseSystem presentationResponseRig,
         CharacterFocusTuningDBSO focusTuningDB)
     {
         _presentationResponseRig = presentationResponseRig;

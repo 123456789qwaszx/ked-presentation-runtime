@@ -33,18 +33,18 @@ public static class CharacterFocusPlacementSolver
             out CharacterFocusPointResult focus);
 
         Vector2 desiredFocusInRigSpace =
-            ScreenFocusPointResolver.Resolve(focus.StageRoot, screenPoint) + screenOffset;
+            ScreenFocusPointResolver.Resolve(focus.RigSpaceRoot, screenPoint) + screenOffset;
 
         Vector2 currentFocusInParentSpace =
             PresentationCoordinateMath.ConvertPointFromRigSpaceToTargetPositionParentSpace(
-                focus.FocusPointInStageSpace,
-                focus.StageRoot,
+                focus.FocusPointInRigSpace,
+                focus.RigSpaceRoot,
                 targetParent);
 
         Vector2 desiredFocusInParentSpace =
             PresentationCoordinateMath.ConvertPointFromRigSpaceToTargetPositionParentSpace(
                 desiredFocusInRigSpace,
-                focus.StageRoot,
+                focus.RigSpaceRoot,
                 targetParent);
 
         Vector2 deltaInParentSpace =

@@ -50,6 +50,8 @@ public sealed class SetupCharRigCommand : CommandBase
     private readonly CharacterRigBuilder _rigBuilder;
     private readonly SetupCharRigCommandSpec _spec;
 
+    protected override SkipPolicy SkipPolicy => SkipPolicy.ExecuteEvenIfSkipping;
+    
     public SetupCharRigCommand(
         CharRigSlotResolver slotResolver,
         CharacterRigBuilder rigBuilder,
@@ -61,14 +63,6 @@ public sealed class SetupCharRigCommand : CommandBase
     }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
-    {
-        Apply(scope);
-        yield break;
-    }
-
-    protected override void OnSkip(CommandRunScope scope) => Apply(scope);
-    
-    private void Apply(CommandRunScope scope)
     {
         SetupCharRigCommandSpec spec = _spec;
 
@@ -97,6 +91,7 @@ public sealed class SetupCharRigCommand : CommandBase
         // Optional bake helper:
         // Enable after refs registration when saving the generated rig as a reusable prefab.
         //StripRolePrefixForBake(rigRoot, rolePrefix, spec.rigRootName);
+        yield break;
     }
     
     #region Helpers

@@ -119,6 +119,18 @@ public sealed class CastRegistry
         _slotToBinding.Clear();
         _characterToSlot.Clear();
     }
+    
+    public bool TryPeekCharacter(string slotKey, out string characterKey)
+    {
+        if (!_slotToBinding.TryGetValue(slotKey, out CastBinding binding))
+        {
+            characterKey = null;
+            return false;
+        }
+
+        characterKey = binding.character;
+        return true;
+    }
 
     private bool IsCast(string targetKey)
     {

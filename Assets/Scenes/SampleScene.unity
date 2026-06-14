@@ -6479,11 +6479,12 @@ MonoBehaviour:
   rollbackHistoryDebugView: {fileID: 969122867}
   characterEmojiLibrarySo: {fileID: 11400000, guid: 50cc0df71f2e038468df66d0c632ebdd, type: 2}
   episodePlayer: {fileID: 1924806292}
-  yarnLaneDebugView: {fileID: 2086870835}
   uiBackgroundRigBlurRuntime: {fileID: 392095358}
   screenNoisePresetDbso: {fileID: 11400000, guid: afb4892f90a1eff46b623bfa3c11a55d, type: 2}
   screenVignettePresetDbso: {fileID: 11400000, guid: 53356775219299c42981714a7e8b025e, type: 2}
   screenFlashPresetDbso: {fileID: 11400000, guid: fd8b0b7eceef6c549952782158c076ed, type: 2}
+  yarnLaneDebugView: {fileID: 2086870835}
+  characterFocusDebugView: {fileID: 1719686628}
 --- !u!1 &608895336
 GameObject:
   m_ObjectHideFlags: 0
@@ -9848,6 +9849,7 @@ Transform:
   - {fileID: 739385217}
   - {fileID: 1928200880}
   - {fileID: 2086870836}
+  - {fileID: 1719686629}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &920056453
@@ -17273,6 +17275,85 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AlbumUIRoot
   _slotButtonPrefab: {fileID: 1076230574}
+--- !u!1 &1719686627
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1719686629}
+  - component: {fileID: 1719686628}
+  m_Layer: 0
+  m_Name: CharacterFocusDebugView
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1719686628
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1719686627}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 64ea7ef0e2cee1f4b8199f75102bdaeb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterFocusDebugView
+  markerRoot: {fileID: 99511076}
+  observedSlotKeys:
+  - c1
+  - c2
+  - c3
+  focusTuningDb: {fileID: 11400000, guid: b77af4e295606b446ae4f74dad106f5f, type: 2}
+  points:
+  - enabled: 1
+    label: Feet
+    focusPreset: 0
+    color: {r: 0.4, g: 0.8, b: 1, a: 0.9}
+    radius: 8
+    finalOffset: {x: 0, y: 0}
+  - enabled: 1
+    label: Body
+    focusPreset: 10
+    color: {r: 0.4, g: 1, b: 0.4, a: 0.9}
+    radius: 10
+    finalOffset: {x: 0, y: 0}
+  - enabled: 1
+    label: Bust
+    focusPreset: 20
+    color: {r: 1, g: 0.8, b: 0.25, a: 0.9}
+    radius: 11
+    finalOffset: {x: 0, y: 0}
+  - enabled: 1
+    label: Face
+    focusPreset: 30
+    color: {r: 1, g: 0.35, b: 0.35, a: 0.95}
+    radius: 13
+    finalOffset: {x: 0, y: 0}
+  drawInGameView: 1
+  hideInPlayMode: 0
+  drawInSceneView: 1
+  drawLabels: 1
+--- !u!4 &1719686629
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1719686627}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -920.9429, y: 540, z: -418.4626}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 909332830}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1722667209
 GameObject:
   m_ObjectHideFlags: 0

@@ -153,7 +153,7 @@ public sealed class PlaceToCommandCharR : CommandBase
         if (_rigRefs == null || _rect == null)
             return;
 
-        _rigRefs.PlacementTargets.Publish(_rect, _destPos);
+        _rigRefs.PlacementTargets.PublishAnchoredPosition(_rect, _destPos);
     }
 
     private void ClearSettledTarget()
