@@ -41,7 +41,7 @@ public sealed class InitCharacterEmojiCommandSpecCharR : CharacterRigCommandSpec
     public bool resetMotionAxes = true;
 }
 
-public sealed class InitCharacterEmojiCommandCharR : CommandBase
+public sealed class InitCharacterEmojiCommandCharR : CharacterEmojiCommandBase
 {
     private const string EmojiMaterialInstanceSuffix = " (Emoji Instance)";
 
@@ -74,6 +74,11 @@ public sealed class InitCharacterEmojiCommandCharR : CommandBase
             yield break;
 
         _resolver.TryResolvePlacement(_spec.emojiKey, out CharacterEmojiPlacement placement);
+        CharacterEmojiMirrorContext mirrorContext = ResolveEmojiMirrorContext(
+            scope,
+            _resolver,
+            _spec.slotKey,
+            _spec.emojiKey);
 
         RectTransform root = _rigRefs.GetRect(_spec.rootTarget);
         RectTransform castTransform = _rigRefs.GetRect(_spec.castTarget);
@@ -91,13 +96,15 @@ public sealed class InitCharacterEmojiCommandCharR : CommandBase
         if (_spec.setNativeSize)
             image.SetNativeSize();
 
+        ApplySpriteMirror(image, mirrorContext);
         ApplyMaterial(image);
         ApplyPlacement(
             scope,
             castTransform,
             baseSizeTransform,
             baseRotationTransform,
-            placement);
+            placement,
+            mirrorContext);
 
         if (_spec.resetMotionAxes)
             ResetMotionAxes();
@@ -171,12 +178,14 @@ public sealed class InitCharacterEmojiCommandCharR : CommandBase
         RectTransform castTransform,
         RectTransform baseSizeTransform,
         RectTransform baseRotationTransform,
-        CharacterEmojiPlacement placement)
+        CharacterEmojiPlacement placement,
+        CharacterEmojiMirrorContext mirrorContext)
     {
         TryResolveFocusAnchoredPosition(
             scope,
             castTransform,
             placement,
+            mirrorContext,
             out Vector2 anchoredPosition);
 
         // CastTransform은 이제 "어디에 뜨는가"만 담당한다.
@@ -192,16 +201,21 @@ public sealed class InitCharacterEmojiCommandCharR : CommandBase
         baseSizeTransform.localRotation = Quaternion.identity;
 
         // emoji별 기본 기울기는 BaseRotation에만 적용한다.
+        // placement mirror가 켜져 있으면 위치 offset과 같은 계약으로 rotationZ도 좌우 대칭한다.
+        // 예: Right-facing 기준 +16도는 Left-facing에서 -16도가 된다.
+        float rotationZ = mirrorContext.MirrorPlacementRotationZ(placement.rotationZ);
+
         baseRotationTransform.DOKill(true);
         baseRotationTransform.anchoredPosition = Vector2.zero;
         baseRotationTransform.localScale = Vector3.one;
-        baseRotationTransform.localRotation = Quaternion.Euler(0f, 0f, placement.rotationZ);
+        baseRotationTransform.localRotation = Quaternion.Euler(0f, 0f, rotationZ);
     }
 
     private bool TryResolveFocusAnchoredPosition(
         CommandRunScope scope,
         RectTransform castTransform,
         CharacterEmojiPlacement placement,
+        CharacterEmojiMirrorContext mirrorContext,
         out Vector2 anchoredPosition)
     {
         anchoredPosition = Vector2.zero;
@@ -214,6 +228,10 @@ public sealed class InitCharacterEmojiCommandCharR : CommandBase
                 scope,
                 _spec.slotKey);
 
+        bool mirrorPlacementOffset =
+            mirrorContext.profile != null &&
+            mirrorContext.profile.placementMirror == CharacterEmojiPlacementMirrorPolicy.MirrorWithCharacterFacing;
+
         CharacterFocusPointResolver.TryResolveFromRigRefs(
             _rigRefs,
             stageProvider.RigSpaceRoot,
@@ -222,6 +240,8 @@ public sealed class InitCharacterEmojiCommandCharR : CommandBase
             placement.offsetFromFocusInRigSpace,
             _focusTuningDb,
             true,
+            mirrorContext.facing,
+            mirrorPlacementOffset,
             out CharacterFocusPointResult focusResult);
 
         Vector3 targetWorld =

@@ -16,7 +16,7 @@ public sealed class PlaceCharacterEmojiCommandSpecCharR : CharacterRigCommandSpe
     public CharacterRigTarget castTarget = CharacterRigTarget.CharacterEmojiSlot00_CastTransform;
 }
 
-public sealed class PlaceCharacterEmojiCommandCharR : CommandBase
+public sealed class PlaceCharacterEmojiCommandCharR : CharacterEmojiCommandBase
 {
     private readonly PlaceCharacterEmojiCommandSpecCharR _spec;
     private readonly CharacterEmojiResolver _resolver;
@@ -27,6 +27,7 @@ public sealed class PlaceCharacterEmojiCommandCharR : CommandBase
     private Image _image;
 
     private CharacterEmojiPlacement _resolvedPlacement;
+    private CharacterEmojiMirrorContext _mirrorContext;
 
     private bool _resolveAttempted;
     private bool HasClaimedTarget { get; set; }
@@ -79,17 +80,27 @@ public sealed class PlaceCharacterEmojiCommandCharR : CommandBase
         
         if(_resolver.TryResolvePlacement(_spec.emojiKey, out CharacterEmojiPlacement resolvedPlacement))
             _resolvedPlacement = resolvedPlacement;
-        
+
         HasClaimedTarget = true;
     }
 
     private void CommitFinalState(CommandRunScope scope)
     {
+        _mirrorContext = ResolveEmojiMirrorContext(
+            scope,
+            _resolver,
+            _spec.slotKey,
+            _spec.emojiKey);
+
         TryResolveFocusAnchoredPosition(scope, out Vector2 anchoredPosition);
         _castTransform.anchoredPosition = anchoredPosition;
 
         _castTransform.localScale = _resolvedPlacement.localScale;
-        _castTransform.localRotation = Quaternion.Euler(0f, 0f, _resolvedPlacement.rotationZ);
+
+        // placement mirror가 켜져 있으면 static placement rotation도 좌우 대칭한다.
+        // InitCharacterEmojiCommandCharR의 BaseRotation 처리와 같은 계약이다.
+        float rotationZ = _mirrorContext.MirrorPlacementRotationZ(_resolvedPlacement.rotationZ);
+        _castTransform.localRotation = Quaternion.Euler(0f, 0f, rotationZ);
 
         HasClaimedTarget = false;
     }
@@ -101,6 +112,10 @@ public sealed class PlaceCharacterEmojiCommandCharR : CommandBase
         IShotResponseStageProvider stageProvider = UIManager.Instance.GetUI<PresentationUIRoot>();
         string tuningKey = CharacterRigTargetResolver.ResolveCharacterKeyFromTargetKey(scope, _spec.slotKey);
 
+        bool mirrorPlacementOffset =
+            _mirrorContext.profile != null &&
+            _mirrorContext.profile.placementMirror == CharacterEmojiPlacementMirrorPolicy.MirrorWithCharacterFacing;
+
         CharacterFocusPointResolver.TryResolveFromRigRefs(
                 _rigRefs,
                 stageProvider.RigSpaceRoot,
@@ -108,7 +123,9 @@ public sealed class PlaceCharacterEmojiCommandCharR : CommandBase
                 _resolvedPlacement.focusPreset,
                 _resolvedPlacement.offsetFromFocusInRigSpace,
                 _focusTuningDb,
-               true,
+                true,
+                _mirrorContext.facing,
+                mirrorPlacementOffset,
                 out CharacterFocusPointResult focusResult);
 
         Vector3 targetWorld = focusResult.RigSpaceRoot.TransformPoint(

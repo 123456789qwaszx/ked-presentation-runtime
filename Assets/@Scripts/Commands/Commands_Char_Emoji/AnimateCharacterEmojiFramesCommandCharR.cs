@@ -38,7 +38,7 @@ public sealed class AnimateCharacterEmojiFramesCommandSpecCharR : CharacterRigCo
     public bool setNativeSize = false;
 }
 
-public sealed class AnimateCharacterEmojiFramesCommandCharR : CommandBase
+public sealed class AnimateCharacterEmojiFramesCommandCharR : CharacterEmojiCommandBase
 {
     private readonly AnimateCharacterEmojiFramesCommandSpecCharR _spec;
     private readonly CharacterEmojiResolver _resolver;
@@ -48,6 +48,7 @@ public sealed class AnimateCharacterEmojiFramesCommandCharR : CommandBase
     private Image _image;
 
     private readonly List<Sprite> _frames = new();
+    private CharacterEmojiMirrorContext _mirrorContext;
 
     private bool _resolveAttempted;
     private bool HasClaimedTarget { get; set; }
@@ -70,6 +71,12 @@ public sealed class AnimateCharacterEmojiFramesCommandCharR : CommandBase
         if (!TryResolveFrames())
             yield break;
 
+        _mirrorContext = ResolveEmojiMirrorContext(
+            scope,
+            _resolver,
+            _spec.slotKey,
+            ResolveMirrorKey());
+
         ClaimTarget();
 
         if (_spec.loopUntilStepEnd)
@@ -89,7 +96,15 @@ public sealed class AnimateCharacterEmojiFramesCommandCharR : CommandBase
             ResolveRefs(scope);
 
         if (!HasClaimedTarget)
+        {
+            _mirrorContext = ResolveEmojiMirrorContext(
+                scope,
+                _resolver,
+                _spec.slotKey,
+                ResolveMirrorKey());
+
             ClaimTarget();
+        }
 
         Cleanup();
     }
@@ -180,6 +195,8 @@ public sealed class AnimateCharacterEmojiFramesCommandCharR : CommandBase
         if (_frames.Count > 0)
             ApplyFrame(0);
 
+        ApplySpriteMirror(_image, _mirrorContext);
+
         HasClaimedTarget = true;
     }
 
@@ -210,6 +227,16 @@ public sealed class AnimateCharacterEmojiFramesCommandCharR : CommandBase
 
         if (_spec.setNativeSize)
             _image.SetNativeSize();
+
+        ApplySpriteMirror(_image, _mirrorContext);
+    }
+
+    private string ResolveMirrorKey()
+    {
+        if (_spec.frameKeys != null && _spec.frameKeys.Count > 0)
+            return _spec.frameKeys[0];
+
+        return string.Empty;
     }
 
     private IEnumerator WaitUnscaled(float duration)

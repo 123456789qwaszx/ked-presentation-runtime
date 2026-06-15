@@ -10,6 +10,9 @@ using UnityEngine;
     Order = -700)]
 public sealed class SpringAppearCommandSpecCharR : CharacterRigCommandSpecBase
 {
+    [Header("Emoji Identity")]
+    public string emojiKey;
+
     [Header("Targets")]
     public CharacterRigTarget scaleTarget = CharacterRigTarget.EmojiSlot00_Scale;
     public CharacterRigTarget effectTarget = CharacterRigTarget.CharacterEmojiSlot00_Effect;
@@ -32,9 +35,10 @@ public sealed class SpringAppearCommandSpecCharR : CharacterRigCommandSpecBase
     public Ease ease = Ease.Linear;
 }
 
-public sealed class SpringAppearCommandCharR : CommandBase
+public sealed class SpringAppearCommandCharR : CharacterEmojiCommandBase
 {
     private readonly SpringAppearCommandSpecCharR _spec;
+    private readonly CharacterEmojiResolver _resolver;
 
     private RectTransform _scaleRect;
     private RectTransform _effectRect;
@@ -42,6 +46,9 @@ public sealed class SpringAppearCommandCharR : CommandBase
 
     private Vector2 _baseEffectPos;
     private Quaternion _baseRotation;
+    private CharacterEmojiMirrorContext _mirrorContext;
+    private Vector2 _resolvedLiftOffset;
+    private float _resolvedTiltDegrees;
 
     private Tween _tween;
 
@@ -50,15 +57,24 @@ public sealed class SpringAppearCommandCharR : CommandBase
 
     public override bool WaitForCompletion => _spec.wait;
 
-    public SpringAppearCommandCharR(SpringAppearCommandSpecCharR spec)
+    public SpringAppearCommandCharR(
+        SpringAppearCommandSpecCharR spec,
+        CharacterEmojiResolver resolver)
     {
         _spec = spec;
+        _resolver = resolver;
     }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
         if (!_resolveAttempted)
             ResolveRefs(scope);
+
+        _mirrorContext = ResolveEmojiMirrorContext(
+            scope,
+            _resolver,
+            _spec.slotKey,
+            _spec.emojiKey);
 
         ClaimTarget();
 
@@ -89,7 +105,15 @@ public sealed class SpringAppearCommandCharR : CommandBase
             ResolveRefs(scope);
 
         if (!HasClaimedTarget)
+        {
+            _mirrorContext = ResolveEmojiMirrorContext(
+                scope,
+                _resolver,
+                _spec.slotKey,
+                _spec.emojiKey);
+
             ClaimTarget();
+        }
 
         CommitFinalState();
     }
@@ -125,6 +149,9 @@ public sealed class SpringAppearCommandCharR : CommandBase
 
         _baseEffectPos = _effectRect.anchoredPosition;
         _baseRotation = _rotationRect.localRotation;
+
+        _resolvedLiftOffset = _mirrorContext.MirrorMotionVector(_spec.liftOffset);
+        _resolvedTiltDegrees = _mirrorContext.MirrorRotationZ(_spec.tiltDegrees);
 
         _scaleRect.localScale = new Vector3(_spec.fromScale.x, _spec.fromScale.y, 1f);
         _effectRect.anchoredPosition = _baseEffectPos;
@@ -162,14 +189,14 @@ public sealed class SpringAppearCommandCharR : CommandBase
             (1f - 0.25f * u);
 
         _effectRect.anchoredPosition =
-            _baseEffectPos + (_spec.liftOffset * liftEnvelope);
+            _baseEffectPos + (_resolvedLiftOffset * liftEnvelope);
 
         // 기울어짐도 한 번의 호흡 안에서만 생겼다가 자연스럽게 0으로 사라진다.
         float tiltEnvelope =
             Mathf.Sin(Mathf.PI * u) *
             Mathf.Pow(1f - u, 0.65f);
 
-        float z = _spec.tiltDegrees * tiltEnvelope;
+        float z = _resolvedTiltDegrees * tiltEnvelope;
 
         _rotationRect.localRotation =
             _baseRotation * Quaternion.Euler(0f, 0f, z);

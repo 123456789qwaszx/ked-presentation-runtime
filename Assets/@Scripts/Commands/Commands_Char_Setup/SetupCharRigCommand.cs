@@ -90,7 +90,7 @@ public sealed class SetupCharRigCommand : CommandBase
         
         // Optional bake helper:
         // Enable after refs registration when saving the generated rig as a reusable prefab.
-        StripRolePrefixForBake(rigRoot, rolePrefix, spec.rigRootName);
+        //StripRolePrefixForBake(rigRoot, rolePrefix, spec.rigRootName);
         yield break;
     }
     

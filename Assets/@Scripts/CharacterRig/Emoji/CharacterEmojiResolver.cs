@@ -53,6 +53,19 @@ public sealed class CharacterEmojiResolver
         return true;
     }
 
+    public bool TryResolveMirrorProfile(
+        string emojiKey,
+        out CharacterEmojiMirrorProfile mirrorProfile)
+    {
+        mirrorProfile = CharacterEmojiMirrorProfile.Default;
+
+        if (!TryResolveEntry(emojiKey, out CharacterEmojiEntry entry))
+            return false;
+
+        mirrorProfile = entry.mirror ?? CharacterEmojiMirrorProfile.Default;
+        return true;
+    }
+
     public bool TryResolve(
         string emojiKey,
         out Sprite sprite,
@@ -66,6 +79,25 @@ public sealed class CharacterEmojiResolver
 
         sprite = entry.sprite;
         placement = entry.placement;
+        return true;
+    }
+
+    public bool TryResolve(
+        string emojiKey,
+        out Sprite sprite,
+        out CharacterEmojiPlacement placement,
+        out CharacterEmojiMirrorProfile mirrorProfile)
+    {
+        sprite = null;
+        placement = CharacterEmojiPlacement.Default;
+        mirrorProfile = CharacterEmojiMirrorProfile.Default;
+
+        if (!TryResolveEntry(emojiKey, out CharacterEmojiEntry entry))
+            return false;
+
+        sprite = entry.sprite;
+        placement = entry.placement;
+        mirrorProfile = entry.mirror ?? CharacterEmojiMirrorProfile.Default;
         return true;
     }
 

@@ -28,6 +28,8 @@ public static class CharacterFocusPointResolver
         scope.CharacterRigs.TryGetRig(resolvedRigKey, out CharacterRigRefs rigRefs);
         string tuningKey = CharacterRigTargetResolver.ResolveCharacterKeyFromTargetKey(scope, roleKey);
 
+        CharacterFacing facing = ResolveFacing(scope, roleKey);
+
         IShotResponseStageProvider stageProvider = UIManager.Instance.GetUI<PresentationUIRoot>();
 
         TryResolveFromRigRefs(
@@ -38,6 +40,30 @@ public static class CharacterFocusPointResolver
             commandOffset,
             tuningDb,
             useSettledPlacementTargets,
+            facing,
+            out result);
+    }
+
+    // Backward-compatible overload. Callers that do not know the character state keep using Right-facing logic.
+    public static bool TryResolveFromRigRefs(
+        CharacterRigRefs rigRefs,
+        RectTransform rigSpaceRoot,
+        string tuningKey,
+        CharacterFocusPreset preset,
+        Vector2 commandOffset,
+        CharacterFocusTuningDBSO tuningDb,
+        bool useSettledPlacementTargets,
+        out CharacterFocusPointResult result)
+    {
+        return TryResolveFromRigRefs(
+            rigRefs,
+            rigSpaceRoot,
+            tuningKey,
+            preset,
+            commandOffset,
+            tuningDb,
+            useSettledPlacementTargets,
+            CharacterFacing.Right,
             out result);
     }
 
@@ -49,16 +75,60 @@ public static class CharacterFocusPointResolver
         Vector2 commandOffset,
         CharacterFocusTuningDBSO tuningDb,
         bool useSettledPlacementTargets,
+        CharacterFacing facing,
+        out CharacterFocusPointResult result)
+    {
+        return TryResolveFromRigRefs(
+            rigRefs,
+            rigSpaceRoot,
+            tuningKey,
+            preset,
+            commandOffset,
+            tuningDb,
+            useSettledPlacementTargets,
+            facing,
+            mirrorCommandOffset: true,
+            out result);
+    }
+
+    public static bool TryResolveFromRigRefs(
+        CharacterRigRefs rigRefs,
+        RectTransform rigSpaceRoot,
+        string tuningKey,
+        CharacterFocusPreset preset,
+        Vector2 commandOffset,
+        CharacterFocusTuningDBSO tuningDb,
+        bool useSettledPlacementTargets,
+        CharacterFacing facing,
+        bool mirrorCommandOffset,
         out CharacterFocusPointResult result)
     {
         result = default;
+
+        if (rigRefs == null || rigSpaceRoot == null || tuningDb == null)
+            return false;
 
         // Focus는 "캐릭터의 논리적 위치"를 가리켜야 한다.
         // 측정 기준은 framing response 출력보다 위,
         // 즉 placement 축 마지막 노드인 CharSlot_Size를 사용한다.
         RectTransform measureRect = rigRefs.CharSlot_Size;
 
-        Vector2 focusOffset = tuningDb.ResolveOffset(tuningKey, preset, commandOffset);
+        if (measureRect == null)
+            return false;
+
+        // FocusPoint 자체는 캐릭터 facing을 따른다.
+        // 하지만 commandOffset은 용도에 따라 mirror 여부가 달라진다.
+        // 예: 카메라 focus offset은 mirror되는 편이 자연스럽지만,
+        //     일부 emoji placement offset은 screen-space 보정처럼 유지되어야 할 수 있다.
+        Vector2 focusOffset = tuningDb.ResolveOffset(tuningKey, preset, Vector2.zero);
+        focusOffset = facing.MirrorX(focusOffset);
+
+        Vector2 effectiveCommandOffset = mirrorCommandOffset
+            ? facing.MirrorX(commandOffset)
+            : commandOffset;
+
+        focusOffset += effectiveCommandOffset;
+
         Vector3 focusLocalOffset = new(focusOffset.x, focusOffset.y, 0f);
 
         // 움직이는 placement 조상(translation/scale/rotation)이 있으면,
@@ -84,5 +154,17 @@ public static class CharacterFocusPointResolver
         };
 
         return true;
+    }
+
+    private static CharacterFacing ResolveFacing(CommandRunScope scope, string roleKey)
+    {
+        if (scope != null &&
+            scope.CastRegistry != null &&
+            scope.CastRegistry.TryGetFacing(roleKey, out CharacterFacing facing))
+        {
+            return facing;
+        }
+
+        return CharacterFacing.Right;
     }
 }

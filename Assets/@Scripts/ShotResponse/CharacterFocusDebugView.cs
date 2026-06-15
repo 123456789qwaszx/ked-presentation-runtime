@@ -239,11 +239,14 @@ public sealed class CharacterFocusDebugView : MonoBehaviour
             if (!_stage.characterRigs.TryPeekRig(slotKey, out CharacterRigRefs rigRefs))
                 continue;
 
+            _stage.castRegistry.TryPeekFacing(slotKey, out CharacterFacing facing);
+
             UpdateCharacterFocusMarkers(
                 slotKey,
                 characterKey.Trim(),
                 rigRefs,
-                rigSpaceRoot);
+                rigSpaceRoot,
+                facing);
         }
 
         HideStaleMarkers();
@@ -253,7 +256,8 @@ public sealed class CharacterFocusDebugView : MonoBehaviour
         string slotKey,
         string characterKey,
         CharacterRigRefs rigRefs,
-        RectTransform rigSpaceRoot)
+        RectTransform rigSpaceRoot,
+        CharacterFacing facing)
     {
         for (int i = 0; i < points.Count; i++)
         {
@@ -270,7 +274,8 @@ public sealed class CharacterFocusDebugView : MonoBehaviour
                     point.finalOffset,
                     focusTuningDb,
                     useSettledPlacementTargets: true,
-                    out CharacterFocusPointResult focus))
+                    facing: facing,
+                    result: out CharacterFocusPointResult focus))
             {
                 continue;
             }

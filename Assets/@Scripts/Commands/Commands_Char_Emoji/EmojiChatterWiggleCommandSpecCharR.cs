@@ -10,6 +10,9 @@ using UnityEngine;
     Order = -697)]
 public sealed class EmojiChatterWiggleCommandSpecCharR : CharacterRigCommandSpecBase
 {
+    [Header("Emoji Identity")]
+    public string emojiKey;
+
     [Header("Targets")]
     public CharacterRigTarget rootTarget = CharacterRigTarget.CharacterEmojiSlot00_Root;
     public CharacterRigTarget pivotTarget = CharacterRigTarget.EmojiSlot00_SwayPivot;
@@ -43,9 +46,10 @@ public sealed class EmojiChatterWiggleCommandSpecCharR : CharacterRigCommandSpec
     public Ease ease = Ease.Linear;
 }
 
-public sealed class EmojiChatterWiggleCommandCharR : CommandBase
+public sealed class EmojiChatterWiggleCommandCharR : CharacterEmojiCommandBase
 {
     private readonly EmojiChatterWiggleCommandSpecCharR _spec;
+    private readonly CharacterEmojiResolver _resolver;
 
     private CanvasGroup _rootCanvasGroup;
     private RectTransform _pivotRect;
@@ -55,6 +59,12 @@ public sealed class EmojiChatterWiggleCommandCharR : CommandBase
     private Vector2 _baseEffectPos;
     private Quaternion _basePivotRotation;
 
+    private CharacterEmojiMirrorContext _mirrorContext;
+    private Vector2 _resolvedPivot;
+    private Vector2 _resolvedSettleOffset;
+    private float _resolvedBaseTiltDegrees;
+    private float _resolvedAmplitude;
+
     private Tween _tween;
 
     private bool _resolveAttempted;
@@ -62,15 +72,24 @@ public sealed class EmojiChatterWiggleCommandCharR : CommandBase
 
     public override bool WaitForCompletion => _spec.wait;
 
-    public EmojiChatterWiggleCommandCharR(EmojiChatterWiggleCommandSpecCharR spec)
+    public EmojiChatterWiggleCommandCharR(
+        EmojiChatterWiggleCommandSpecCharR spec,
+        CharacterEmojiResolver resolver)
     {
         _spec = spec;
+        _resolver = resolver;
     }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
         if (!_resolveAttempted)
             ResolveRefs(scope);
+
+        _mirrorContext = ResolveEmojiMirrorContext(
+            scope,
+            _resolver,
+            _spec.slotKey,
+            _spec.emojiKey);
 
         ClaimTarget();
 
@@ -101,7 +120,15 @@ public sealed class EmojiChatterWiggleCommandCharR : CommandBase
             ResolveRefs(scope);
 
         if (!HasClaimedTarget)
+        {
+            _mirrorContext = ResolveEmojiMirrorContext(
+                scope,
+                _resolver,
+                _spec.slotKey,
+                _spec.emojiKey);
+
             ClaimTarget();
+        }
 
         HideAndReset();
     }
@@ -168,11 +195,16 @@ public sealed class EmojiChatterWiggleCommandCharR : CommandBase
 
         _rootCanvasGroup.alpha = 0f;
 
-        _pivotRect.pivot = _spec.pivot;
-        _pivotRect.localRotation =
-            _basePivotRotation * Quaternion.Euler(0f, 0f, _spec.baseTiltDegrees);
+        _resolvedPivot = _mirrorContext.MirrorPivot(_spec.pivot);
+        _resolvedSettleOffset = _mirrorContext.MirrorMotionVector(_spec.settleOffset);
+        _resolvedBaseTiltDegrees = _mirrorContext.MirrorRotationZ(_spec.baseTiltDegrees);
+        _resolvedAmplitude = _mirrorContext.MirrorRotationZ(_spec.amplitude);
 
-        _effectRect.anchoredPosition = _baseEffectPos + _spec.settleOffset;
+        _pivotRect.pivot = _resolvedPivot;
+        _pivotRect.localRotation =
+            _basePivotRotation * Quaternion.Euler(0f, 0f, _resolvedBaseTiltDegrees);
+
+        _effectRect.anchoredPosition = _baseEffectPos + _resolvedSettleOffset;
 
         HasClaimedTarget = true;
     }
@@ -192,8 +224,8 @@ public sealed class EmojiChatterWiggleCommandCharR : CommandBase
         float swing = Mathf.Sin(2f * Mathf.PI * _spec.cycles * u);
 
         float angle =
-            _spec.baseTiltDegrees +
-            (_spec.amplitude * envelope * swing);
+            _resolvedBaseTiltDegrees +
+            (_resolvedAmplitude * envelope * swing);
 
         _pivotRect.localRotation =
             _basePivotRotation * Quaternion.Euler(0f, 0f, angle);
@@ -208,13 +240,13 @@ public sealed class EmojiChatterWiggleCommandCharR : CommandBase
 
         if (_pivotRect != null)
         {
-            _pivotRect.pivot = _spec.pivot;
+            _pivotRect.pivot = _resolvedPivot;
             _pivotRect.localRotation =
-                _basePivotRotation * Quaternion.Euler(0f, 0f, _spec.baseTiltDegrees);
+                _basePivotRotation * Quaternion.Euler(0f, 0f, _resolvedBaseTiltDegrees);
         }
 
         if (_effectRect != null)
-            _effectRect.anchoredPosition = _baseEffectPos + _spec.settleOffset;
+            _effectRect.anchoredPosition = _baseEffectPos + _resolvedSettleOffset;
 
         // 중요:
         // 자연 완료 후에도 HasClaimedTarget은 true로 유지한다.

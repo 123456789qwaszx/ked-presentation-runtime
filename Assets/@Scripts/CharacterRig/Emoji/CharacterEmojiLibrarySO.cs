@@ -9,6 +9,9 @@ public sealed class CharacterEmojiEntry
     public Sprite sprite;
 
     public CharacterEmojiPlacement placement = CharacterEmojiPlacement.Default;
+
+    [Header("Mirror Policy")]
+    public CharacterEmojiMirrorProfile mirror = CharacterEmojiMirrorProfile.Default;
 }
 
 // 에디터용 Emoji 배치 프리셋

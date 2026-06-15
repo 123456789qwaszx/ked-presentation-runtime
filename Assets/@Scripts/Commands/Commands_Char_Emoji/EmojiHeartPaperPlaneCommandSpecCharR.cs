@@ -10,6 +10,9 @@ using UnityEngine;
     Order = -698)]
 public sealed class EmojiHeartPaperPlaneCommandSpecCharR : CharacterRigCommandSpecBase
 {
+    [Header("Emoji Identity")]
+    public string emojiKey;
+
     [Header("Targets")]
     public CharacterRigTarget rootTarget = CharacterRigTarget.CharacterEmojiSlot00_Root;
     public CharacterRigTarget moveTarget = CharacterRigTarget.EmojiSlot00_Track_Move;
@@ -47,9 +50,10 @@ public sealed class EmojiHeartPaperPlaneCommandSpecCharR : CharacterRigCommandSp
     public Ease ease = Ease.InOutSine;
 }
 
-public sealed class EmojiHeartPaperPlaneCommandCharR : CommandBase
+public sealed class EmojiHeartPaperPlaneCommandCharR : CharacterEmojiCommandBase
 {
     private readonly EmojiHeartPaperPlaneCommandSpecCharR _spec;
+    private readonly CharacterEmojiResolver _resolver;
 
     private CanvasGroup _rootCanvasGroup;
     private RectTransform _moveRect;
@@ -61,21 +65,31 @@ public sealed class EmojiHeartPaperPlaneCommandCharR : CommandBase
     private Quaternion _baseRotation;
 
     private Tween _tween;
+    private CharacterEmojiMirrorContext _mirrorContext;
 
     private bool _resolveAttempted;
     private bool HasClaimedTarget { get; set; }
 
     public override bool WaitForCompletion => _spec.wait;
 
-    public EmojiHeartPaperPlaneCommandCharR(EmojiHeartPaperPlaneCommandSpecCharR spec)
+    public EmojiHeartPaperPlaneCommandCharR(
+        EmojiHeartPaperPlaneCommandSpecCharR spec,
+        CharacterEmojiResolver resolver)
     {
         _spec = spec;
+        _resolver = resolver;
     }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
         if (!_resolveAttempted)
             ResolveRefs(scope);
+
+        _mirrorContext = ResolveEmojiMirrorContext(
+            scope,
+            _resolver,
+            _spec.slotKey,
+            _spec.emojiKey);
 
         ClaimTarget();
 
@@ -106,7 +120,15 @@ public sealed class EmojiHeartPaperPlaneCommandCharR : CommandBase
             ResolveRefs(scope);
 
         if (!HasClaimedTarget)
+        {
+            _mirrorContext = ResolveEmojiMirrorContext(
+                scope,
+                _resolver,
+                _spec.slotKey,
+                _spec.emojiKey);
+
             ClaimTarget();
+        }
 
         CommitFinalState();
     }
@@ -174,7 +196,7 @@ public sealed class EmojiHeartPaperPlaneCommandCharR : CommandBase
 
         _rootCanvasGroup.alpha = 0f;
 
-        _moveRect.anchoredPosition = _baseMovePos + _spec.startOffset;
+        _moveRect.anchoredPosition = _baseMovePos + _mirrorContext.MirrorMotionVector(_spec.startOffset);
         _scaleRect.localScale = _baseScale * _spec.startScale;
         _rotationRect.localRotation = _baseRotation;
 
@@ -185,18 +207,20 @@ public sealed class EmojiHeartPaperPlaneCommandCharR : CommandBase
     {
         u = Mathf.Clamp01(u);
 
-        float dir = _spec.direction == CharRigDirection.Left ? -1f : 1f;
+        CharRigDirection effectiveDirection = _mirrorContext.MirrorDirection(_spec.direction);
+        float dir = effectiveDirection == CharRigDirection.Left ? -1f : 1f;
+        Vector2 startOffset = _mirrorContext.MirrorMotionVector(_spec.startOffset);
 
-        Vector2 p0 = _baseMovePos + _spec.startOffset;
+        Vector2 p0 = _baseMovePos + startOffset;
 
         Vector2 p2 =
             _baseMovePos +
-            _spec.startOffset +
+            startOffset +
             new Vector2(dir * _spec.travelDistance, _spec.endYOffset);
 
         Vector2 p1 =
             _baseMovePos +
-            _spec.startOffset +
+            startOffset +
             new Vector2(
                 dir * _spec.travelDistance * _spec.controlForwardRatio,
                 _spec.arcHeight);

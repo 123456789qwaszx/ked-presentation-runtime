@@ -18,7 +18,7 @@ public sealed class SetCharacterEmojiCommandSpecCharR : CharacterRigCommandSpecB
     public bool setNativeSize = false;
 }
 
-public sealed class SetCharacterEmojiCommandCharR : CommandBase
+public sealed class SetCharacterEmojiCommandCharR : CharacterEmojiCommandBase
 {
     private readonly SetCharacterEmojiCommandSpecCharR _spec;
     private readonly CharacterEmojiResolver _resolver;
@@ -46,6 +46,14 @@ public sealed class SetCharacterEmojiCommandCharR : CommandBase
 
         if (_spec.setNativeSize)
             image.SetNativeSize();
+
+        CharacterEmojiMirrorContext mirrorContext = ResolveEmojiMirrorContext(
+            scope,
+            _resolver,
+            _spec.slotKey,
+            _spec.emojiKey);
+
+        ApplySpriteMirror(image, mirrorContext);
     }
 
     private bool TryResolveSprite(out Sprite sprite)

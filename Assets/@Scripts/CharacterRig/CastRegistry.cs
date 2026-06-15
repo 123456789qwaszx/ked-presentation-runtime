@@ -2,22 +2,67 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum CharacterFacing
+{
+    Right = 1,
+    Left = -1,
+}
+
+public static class CharacterFacingExtensions
+{
+    public static int Sign(this CharacterFacing facing)
+    {
+        return facing == CharacterFacing.Left ? -1 : 1;
+    }
+
+    public static CharacterFacing Opposite(this CharacterFacing facing)
+    {
+        return facing == CharacterFacing.Left
+            ? CharacterFacing.Right
+            : CharacterFacing.Left;
+    }
+
+    public static Vector2 MirrorX(this CharacterFacing facing, Vector2 value)
+    {
+        return facing == CharacterFacing.Left
+            ? new Vector2(-value.x, value.y)
+            : value;
+    }
+
+    public static Vector3 MirrorX(this CharacterFacing facing, Vector3 value)
+    {
+        return facing == CharacterFacing.Left
+            ? new Vector3(-value.x, value.y, value.z)
+            : value;
+    }
+}
+
 public sealed class CastRegistry
 {
     private readonly struct CastBinding
     {
         public readonly string character;
         public readonly string variant;
+        public readonly CharacterFacing facing;
 
-        public CastBinding(string character, string variant)
+        public CastBinding(
+            string character,
+            string variant,
+            CharacterFacing facing = CharacterFacing.Right)
         {
             this.character = character;
             this.variant = variant;
+            this.facing = facing;
         }
 
         public CastBinding WithVariant(string newVariant)
         {
-            return new CastBinding(character, newVariant);
+            return new CastBinding(character, newVariant, facing);
+        }
+
+        public CastBinding WithFacing(CharacterFacing newFacing)
+        {
+            return new CastBinding(character, variant, newFacing);
         }
     }
 
@@ -32,10 +77,17 @@ public sealed class CastRegistry
         if (string.IsNullOrEmpty(slotKey) || string.IsNullOrEmpty(characterKey))
             return;
 
-        if (IsCast(slotKey))
-            UncastCharRig(slotKey);
+        CharacterFacing previousFacing = CharacterFacing.Right;
 
-        _slotToBinding[slotKey] = new CastBinding(characterKey, "");
+        if (IsCast(slotKey))
+        {
+            if (TryGetFacing(slotKey, out CharacterFacing existingFacing))
+                previousFacing = existingFacing;
+
+            UncastCharRig(slotKey);
+        }
+
+        _slotToBinding[slotKey] = new CastBinding(characterKey, "", previousFacing);
         _characterToSlot[characterKey] = slotKey;
     }
 
@@ -55,6 +107,54 @@ public sealed class CastRegistry
         }
 
         _slotToBinding[slotKey] = binding.WithVariant(variantKey);
+        return true;
+    }
+
+    public bool SetFacing(string targetKey, CharacterFacing facing)
+    {
+        if (!TryResolveSlotKey(targetKey, out string slotKey))
+        {
+            Debug.LogWarning(
+                $"[CastRegistry] SetFacing failed. Binding not found. " +
+                $"targetKey='{targetKey}'. Expected slot key or cast character key.");
+
+            return false;
+        }
+
+        _slotToBinding[slotKey] = _slotToBinding[slotKey].WithFacing(facing);
+        return true;
+    }
+
+    public bool ToggleFacing(string targetKey, out CharacterFacing newFacing)
+    {
+        newFacing = CharacterFacing.Right;
+
+        if (!TryGetFacing(targetKey, out CharacterFacing currentFacing))
+            return false;
+
+        newFacing = currentFacing.Opposite();
+        return SetFacing(targetKey, newFacing);
+    }
+
+    public bool TryGetFacing(string targetKey, out CharacterFacing facing)
+    {
+        facing = CharacterFacing.Right;
+
+        if (!TryResolveSlotKey(targetKey, out string slotKey))
+            return false;
+
+        facing = _slotToBinding[slotKey].facing;
+        return true;
+    }
+
+    public bool TryPeekFacing(string targetKey, out CharacterFacing facing)
+    {
+        facing = CharacterFacing.Right;
+
+        if (!TryResolveSlotKey(targetKey, out string slotKey))
+            return false;
+
+        facing = _slotToBinding[slotKey].facing;
         return true;
     }
 
@@ -141,5 +241,27 @@ public sealed class CastRegistry
 
         string characterKey = PresentationKeyNormalizer.NormalizeCharacterKey(targetKey);
         return _characterToSlot.ContainsKey(characterKey);
+    }
+
+    private bool TryResolveSlotKey(string targetKey, out string slotKey)
+    {
+        slotKey = (targetKey ?? "").Trim();
+
+        if (string.IsNullOrEmpty(slotKey))
+            return false;
+
+        if (_slotToBinding.ContainsKey(slotKey))
+            return true;
+
+        string characterKey = PresentationKeyNormalizer.NormalizeCharacterKey(slotKey);
+
+        if (_characterToSlot.TryGetValue(characterKey, out string resolvedSlotKey))
+        {
+            slotKey = resolvedSlotKey;
+            return true;
+        }
+
+        slotKey = null;
+        return false;
     }
 }
