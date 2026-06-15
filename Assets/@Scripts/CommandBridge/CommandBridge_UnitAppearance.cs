@@ -22,9 +22,6 @@ public sealed partial class YarnCommandBridge
 
         runner.AddCommandHandler<string, string, string, string>(
             "slide_out", EnqueueSlideOutDslSpec);
-
-        runner.AddCommandHandler<string, string>(
-            "emoji", EnqueueEmojiPopSpec);
         
         runner.AddCommandHandler<string, string, string, string>(
             "char_move_to", EnqueueMoveByUnitCharSpec);

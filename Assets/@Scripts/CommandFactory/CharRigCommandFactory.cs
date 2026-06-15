@@ -103,11 +103,9 @@ public sealed class CharRigCommandFactory : INodeCommandFactory
             JoltCommandSpec s => new JoltCommand(s),
             TrembleCommandSpecCharR s => new TrembleCommandCharR(s),
 
-            // Emote
-            SetCharacterEmojiCommandSpecCharR s => new SetCharacterEmojiCommandCharR(
-                s,
-                _emojiResolver,
-                _characterFocusTuningDb),
+            // Emoji
+            SetCharacterEmojiCommandSpecCharR s => new SetCharacterEmojiCommandCharR(s, _emojiResolver),
+            PlaceCharacterEmojiCommandSpecCharR s => new PlaceCharacterEmojiCommandCharR(s, _emojiResolver, _characterFocusTuningDb),
             RevealCharacterEmojiCommandSpecCharR s => new RevealCharacterEmojiCommandCharR(s),
             
             // AttachCharRigToBackgroundObjectSlot

@@ -57,6 +57,7 @@ public sealed partial class YarnCommandBridge
         RegisterDepthFocusCommands(runner);
         RegisterShowCommands(runner);
         BindBackgroundRigDsl(runner);
+        BindCharRigEmoji(runner);
         
         BindControl(runner);
 
@@ -257,11 +258,6 @@ public sealed partial class YarnCommandBridge
             "emoji_sway", EnqueueEmojiSwaySpec);
         runner.AddCommandHandler<string, string>(
             "emoji_tremble", EnqueueEmojiTrembleSpec);
-        
-        runner.AddCommandHandler<string, string>(
-            "emoji_set", EnqueueEmojiSetSpec);
-        runner.AddCommandHandler<string>(
-            "emoji_hide", EnqueueEmojiHideSpec);
     }
     
     private void BindCharRigIdle(DialogueRunner runner)

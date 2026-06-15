@@ -1,49 +1,78 @@
 using DG.Tweening;
 using UnityEngine;
+using Yarn.Unity;
 
 public sealed partial class YarnCommandBridge : InlineEventMarkupHandler.IInlineEmojiHost
 {
+    private const float EmojiDefaultRevealDuration = 0.8f;
+    private const float EmojiDefaultHoldDuration = 0.5f;
+    private const float EmojiDefaultFadeOutDuration = 0.4f;
+
     public void PlayEmojiCue(string cue)
     {
         string characterKey = _vnRuntimeStateProvider.CurrentCharacterKey;
-        
+
         if (string.IsNullOrWhiteSpace(characterKey))
             return;
-        
+
         if (string.IsNullOrWhiteSpace(cue))
         {
             EnqueueEmojiHideSpec(characterKey);
             return;
         }
-        
+
         EnqueueEmojiPopSpec(characterKey, cue);
     }
 
+    private void BindCharRigEmoji(DialogueRunner runner)
+    {
+        runner.AddCommandHandler<string, string>(
+            "emoji", EnqueueEmojiPopSpec);
+        
+        runner.AddCommandHandler<string, string>(
+            "emoji_place", EnqueueEmojiPlaceSpec);
+
+        runner.AddCommandHandler<string, string, string, string>(
+            "emoji_place_offset", EnqueueEmojiPlaceOffsetSpec);
+
+        runner.AddCommandHandler<string, float, string>(
+            "emoji_reveal", EnqueueEmojiRevealToSpec);
+
+        runner.AddCommandHandler<string, float, string>(
+            "emoji_scale", EnqueueEmojiScaleToSpec);
+
+        runner.AddCommandHandler<string, int, string>(
+            "emoji_rotate", EnqueueEmojiRotateToSpec);
+        
+        
+        runner.AddCommandHandler<string, string>(
+            "emoji_set", EnqueueEmojiSetSpec);
+        
+        runner.AddCommandHandler<string>(
+            "emoji_hide", EnqueueEmojiHideSpec);
+    }
+
+    // ---------------------------------------------------------------------
+    // Presets
+    // ---------------------------------------------------------------------
 
     // <<emoji igna 19>>
     private void EnqueueEmojiPopSpec(string roleKey, string emojiKey)
     {
-        Collect(new ShowRootLayersCommandSpecCharR
-        {
-            slotKey = roleKey,
-            targetMask = CharRigRootMask.CharacterEmoji_Root
-        });
-        
-        Collect(BuildSetEmojiSpec(
+        EnqueueEmojiPrepareSpec(
             roleKey,
             emojiKey,
-            initialReveal: 0f));
+            initialReveal: 0f,
+            resetMotionAxes: true);
 
-        // Reveal과 scale overshoot를 동시에 시작한다.
         Collect(BuildRevealEmojiSpec(
             roleKey,
             fromReveal: 0f,
             toReveal: 1f,
-            duration: 0.8f,
+            duration: EmojiDefaultRevealDuration,
             ease: Ease.OutCubic,
             wait: false));
 
-        // 한 번 부드럽게 커졌다가 돌아오는 기본 Pop.
         Collect(BuildEmojiScaleToSpec(
             roleKey,
             xyScale: 1.18f,
@@ -57,27 +86,21 @@ public sealed partial class YarnCommandBridge : InlineEventMarkupHandler.IInline
             duration: 0.52f,
             ease: Ease.OutCubic,
             wait: true));
-        
-        Collect(new WaitCommandSpec
-        {
-            duration = 0.5f
-        });
-        
-        Collect(new FadeOutCommandSpecCharR
-        {
-            slotKey = roleKey,
-            target = CharacterRigTarget.CharacterEmojiSlot00_Root,
-            duration = 0.4f
-        });
+
+        EnqueueEmojiAutoHideSpec(
+            roleKey,
+            holdDuration: EmojiDefaultHoldDuration,
+            fadeDuration: EmojiDefaultFadeOutDuration);
     }
 
     // <<emoji_drop igna 19>>
     private void EnqueueEmojiDropSpec(string roleKey, string emojiKey)
     {
-        Collect(BuildSetEmojiSpec(
+        EnqueueEmojiPrepareSpec(
             roleKey,
             emojiKey,
-            initialReveal: 0f));
+            initialReveal: 0f,
+            resetMotionAxes: true);
 
         Collect(BuildRevealEmojiSpec(
             roleKey,
@@ -87,7 +110,6 @@ public sealed partial class YarnCommandBridge : InlineEventMarkupHandler.IInline
             ease: Ease.OutCubic,
             wait: false));
 
-        // 위에서 툭 내려오며 정착.
         Collect(BuildEmojiSlideInSpec(
             roleKey,
             direction: CharRigDirection.Up,
@@ -101,10 +123,11 @@ public sealed partial class YarnCommandBridge : InlineEventMarkupHandler.IInline
     // <<emoji_shock igna 19>>
     private void EnqueueEmojiShockSpec(string roleKey, string emojiKey)
     {
-        Collect(BuildSetEmojiSpec(
+        EnqueueEmojiPrepareSpec(
             roleKey,
             emojiKey,
-            initialReveal: 0f));
+            initialReveal: 0f,
+            resetMotionAxes: true);
 
         Collect(BuildRevealEmojiSpec(
             roleKey,
@@ -114,7 +137,6 @@ public sealed partial class YarnCommandBridge : InlineEventMarkupHandler.IInline
             ease: Ease.OutCubic,
             wait: false));
 
-        // 위치 jolt와 scale overshoot를 동시에 시작한다.
         Collect(BuildEmojiJoltSpec(
             roleKey,
             strength: 20f,
@@ -139,10 +161,11 @@ public sealed partial class YarnCommandBridge : InlineEventMarkupHandler.IInline
     // <<emoji_hop igna 19>>
     private void EnqueueEmojiHopSpec(string roleKey, string emojiKey)
     {
-        Collect(BuildSetEmojiSpec(
+        EnqueueEmojiPrepareSpec(
             roleKey,
             emojiKey,
-            initialReveal: 0f));
+            initialReveal: 0f,
+            resetMotionAxes: true);
 
         Collect(BuildRevealEmojiSpec(
             roleKey,
@@ -152,7 +175,6 @@ public sealed partial class YarnCommandBridge : InlineEventMarkupHandler.IInline
             ease: Ease.OutCubic,
             wait: false));
 
-        // 작은 감정표현이 머리 위에서 통 하고 한 번 뜨는 느낌.
         Collect(BuildEmojiHopSpec(
             roleKey,
             height: 54f,
@@ -163,10 +185,11 @@ public sealed partial class YarnCommandBridge : InlineEventMarkupHandler.IInline
     // <<emoji_sway igna 19>>
     private void EnqueueEmojiSwaySpec(string roleKey, string emojiKey)
     {
-        Collect(BuildSetEmojiSpec(
+        EnqueueEmojiPrepareSpec(
             roleKey,
             emojiKey,
-            initialReveal: 0f));
+            initialReveal: 0f,
+            resetMotionAxes: true);
 
         Collect(BuildRevealEmojiSpec(
             roleKey,
@@ -176,7 +199,6 @@ public sealed partial class YarnCommandBridge : InlineEventMarkupHandler.IInline
             ease: Ease.OutCubic,
             wait: false));
 
-        // 당황/고민/물음표 계열에 어울리는 기울기 흔들림.
         Collect(BuildEmojiSwaySpec(
             roleKey,
             strength: 9f,
@@ -188,10 +210,11 @@ public sealed partial class YarnCommandBridge : InlineEventMarkupHandler.IInline
     // <<emoji_tremble igna 19>>
     private void EnqueueEmojiTrembleSpec(string roleKey, string emojiKey)
     {
-        Collect(BuildSetEmojiSpec(
+        EnqueueEmojiPrepareSpec(
             roleKey,
             emojiKey,
-            initialReveal: 0f));
+            initialReveal: 0f,
+            resetMotionAxes: true);
 
         Collect(BuildRevealEmojiSpec(
             roleKey,
@@ -201,7 +224,6 @@ public sealed partial class YarnCommandBridge : InlineEventMarkupHandler.IInline
             ease: Ease.OutCubic,
             wait: false));
 
-        // 공포/분노/불안 계열의 달달 떨림.
         Collect(BuildEmojiTrembleSpec(
             roleKey,
             strength: 6f,
@@ -210,13 +232,18 @@ public sealed partial class YarnCommandBridge : InlineEventMarkupHandler.IInline
             wait: true));
     }
 
+    // ---------------------------------------------------------------------
+    // Low level DSL / composition-ready commands
+    // ---------------------------------------------------------------------
+
     // <<emoji_set igna 19>>
     private void EnqueueEmojiSetSpec(string roleKey, string emojiKey)
     {
-        Collect(BuildSetEmojiSpec(
+        EnqueueEmojiPrepareSpec(
             roleKey,
             emojiKey,
-            initialReveal: 1f));
+            initialReveal: 1f,
+            resetMotionAxes: true);
     }
 
     // <<emoji_hide igna>>
@@ -232,6 +259,164 @@ public sealed partial class YarnCommandBridge : InlineEventMarkupHandler.IInline
         });
     }
 
+    // Optional command hook candidate:
+    // <<emoji_place igna 19>>
+    private void EnqueueEmojiPlaceSpec(string roleKey, string emojiKey)
+    {
+        Collect(BuildPlaceEmojiSpec(
+            roleKey,
+            emojiKey,
+            Vector2.zero,
+            wait: false));
+    }
+
+    // Optional command hook candidate:
+    // <<emoji_place_offset igna 19 1u 2u>>
+    private void EnqueueEmojiPlaceOffsetSpec(
+        string roleKey,
+        string emojiKey,
+        string xToken,
+        string yToken)
+    {
+        Collect(BuildPlaceEmojiSpec(
+            roleKey,
+            emojiKey,
+            new Vector2(
+                YarnUnitParser.ParseAllowNegative(xToken),
+                YarnUnitParser.ParseAllowNegative(yToken)),
+            wait: false));
+    }
+
+    // Optional command hook candidate:
+    // <<emoji_reveal igna 1 8fr>>
+    private void EnqueueEmojiRevealToSpec(
+        string roleKey,
+        float toReveal = 1f,
+        string durationToken = "8fr")
+    {
+        Collect(new FadeInCommandSpecCharR
+        {
+            slotKey = roleKey,
+            target = CharacterRigTarget.CharacterEmojiSlot00_Root,
+            duration = -1f,
+            ease = Ease.OutCubic,
+            wait = false
+        });
+        
+        Collect(BuildRevealEmojiSpec(
+            roleKey,
+            fromReveal: 0f,
+            toReveal: Mathf.Clamp01(toReveal),
+            duration: YarnDurationParser.Parse(durationToken),
+            ease: Ease.OutCubic,
+            wait: false));
+    }
+
+    // Optional command hook candidate:
+    // <<emoji_scale igna 1.15 8fr>>
+    private void EnqueueEmojiScaleToSpec(
+        string roleKey,
+        float xyScale,
+        string durationToken = "8fr")
+    {
+        Collect(BuildEmojiScaleToSpec(
+            roleKey,
+            xyScale,
+            YarnDurationParser.Parse(durationToken),
+            Ease.OutCubic,
+            wait: false));
+    }
+
+    // Optional command hook candidate:
+    // <<emoji_rotate igna 12 8fr>>
+    private void EnqueueEmojiRotateToSpec(
+        string roleKey,
+        int angle,
+        string durationToken = "8fr")
+    {
+        Collect(BuildEmojiRotateToSpec(
+            roleKey,
+            angle,
+            YarnDurationParser.Parse(durationToken),
+            Ease.OutCubic,
+            wait: false));
+    }
+
+    // ---------------------------------------------------------------------
+    // Shared preset building blocks
+    // ---------------------------------------------------------------------
+
+    private void EnqueueEmojiPrepareSpec(
+        string roleKey,
+        string emojiKey,
+        float initialReveal,
+        bool resetMotionAxes)
+    {
+        Collect(new ShowRootLayersCommandSpecCharR
+        {
+            slotKey = roleKey,
+            targetMask = CharRigRootMask.CharacterEmoji_Root
+        });
+
+        Collect(BuildSetEmojiSpec(
+            roleKey,
+            emojiKey,
+            initialReveal));
+
+        Collect(BuildPlaceEmojiSpec(
+            roleKey,
+            emojiKey,
+            Vector2.zero,
+            wait: false));
+
+        if (resetMotionAxes)
+            EnqueueEmojiResetMotionAxesSpec(roleKey);
+    }
+
+    private void EnqueueEmojiAutoHideSpec(
+        string roleKey,
+        float holdDuration,
+        float fadeDuration)
+    {
+        if (holdDuration > 0f)
+        {
+            Collect(new WaitCommandSpec
+            {
+                duration = holdDuration
+            });
+        }
+
+        Collect(new FadeOutCommandSpecCharR
+        {
+            slotKey = roleKey,
+            target = CharacterRigTarget.CharacterEmojiSlot00_Root,
+            duration = fadeDuration,
+            ease = Ease.OutCubic,
+            wait = false
+        });
+    }
+
+    private void EnqueueEmojiResetMotionAxesSpec(string roleKey)
+    {
+        Collect(BuildEmojiMoveToOriginSpec(roleKey, CharacterRigTarget.EmojiSlot00_Track_Move));
+        Collect(BuildEmojiMoveToOriginSpec(roleKey, CharacterRigTarget.EmojiSlot00_Track_X));
+        Collect(BuildEmojiMoveToOriginSpec(roleKey, CharacterRigTarget.EmojiSlot00_Track_Y));
+
+        Collect(BuildEmojiScaleToSpec(
+            roleKey,
+            xyScale: 1f,
+            duration: 0f,
+            ease: Ease.Linear,
+            wait: false));
+
+        Collect(BuildEmojiRotateToSpec(
+            roleKey,
+            angle: 0f,
+            duration: 0f,
+            ease: Ease.Linear,
+            wait: false));
+    }
+
     private SetCharacterEmojiCommandSpecCharR BuildSetEmojiSpec(
         string roleKey,
         string emojiKey,
@@ -243,18 +428,40 @@ public sealed partial class YarnCommandBridge : InlineEventMarkupHandler.IInline
             emojiKey = emojiKey,
 
             rootTarget = CharacterRigTarget.CharacterEmojiSlot00_Root,
+            imageTarget = CharacterRigTarget.EmojiSlot00_Image,
+
+            useResolvedVisualPreset = true,
+            overrideVisualPreset = false,
+
+            initialReveal = initialReveal,
+            wait = false
+        };
+    }
+
+    private PlaceCharacterEmojiCommandSpecCharR BuildPlaceEmojiSpec(
+        string roleKey,
+        string emojiKey,
+        Vector2 commandOffsetInRigSpace,
+        bool wait)
+    {
+        return new PlaceCharacterEmojiCommandSpecCharR
+        {
+            slotKey = roleKey,
+            emojiKey = emojiKey,
+
             castTarget = CharacterRigTarget.CharacterEmojiSlot00_CastTransform,
             imageTarget = CharacterRigTarget.EmojiSlot00_Image,
 
             useResolvedPlacement = true,
             overridePlacement = false,
-            commandOffsetInRigSpace = Vector2.zero,
+            commandOffsetInRigSpace = commandOffsetInRigSpace,
             useSettledPlacementTargets = true,
 
-            alpha = 1f,
-            initialReveal = initialReveal,
+            resetCastTransform = true,
+            applyScaleAndRotation = true,
+            applyImageSettings = true,
 
-            wait = false
+            wait = wait
         };
     }
 
@@ -272,13 +479,28 @@ public sealed partial class YarnCommandBridge : InlineEventMarkupHandler.IInline
             imageTarget = CharacterRigTarget.EmojiSlot00_Image,
 
             usePresetReveal = false,
-
             fromReveal = fromReveal,
             toReveal = toReveal,
             duration = duration,
             ease = ease,
 
             wait = wait
+        };
+    }
+
+    private MoveByCommandSpecCharR BuildEmojiMoveToOriginSpec(
+        string roleKey,
+        CharacterRigTarget target)
+    {
+        return new MoveByCommandSpecCharR
+        {
+            slotKey = roleKey,
+            target = target,
+            useAbsolutePosition = true,
+            delta = Vector2.zero,
+            duration = 0f,
+            ease = Ease.Linear,
+            wait = false
         };
     }
 
@@ -297,6 +519,25 @@ public sealed partial class YarnCommandBridge : InlineEventMarkupHandler.IInline
             toScale = new Vector2(xyScale, xyScale),
             duration = duration,
             ease = ease,
+
+            wait = wait,
+        };
+    }
+
+    private RotateToCommandSpecCharR BuildEmojiRotateToSpec(
+        string roleKey,
+        float angle,
+        float duration,
+        Ease ease,
+        bool wait)
+    {
+        return new RotateToCommandSpecCharR
+        {
+            slotKey = roleKey,
+            target = CharacterRigTarget.EmojiSlot00_Rotation,
+
+            toEuler = new Vector3(0f, 0f, angle),
+            duration = duration,
 
             wait = wait,
         };

@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 [Serializable]
-[CommandMenuHint("Char Rig Emoji", "Reveal Character Emoji", Order = -699)]
+[CommandMenuHint("Char Rig Emoji", "Reveal Character Emoji", Order = -698)]
 public sealed class RevealCharacterEmojiCommandSpecCharR : CharacterRigCommandSpecBase
 {
     [Header("Rig Targets")]
@@ -30,6 +30,9 @@ public sealed class RevealCharacterEmojiCommandSpecCharR : CharacterRigCommandSp
     public Ease ease = Ease.OutCubic;
 }
 
+// Responsibility:
+// - 이미 준비된 Emoji runtime material의 _Reveal 값만 tween한다.
+// - sprite/placement/alpha/scale/hop/sway 등은 다른 command가 담당한다.
 public sealed class RevealCharacterEmojiCommandCharR : CommandBase
 {
     private const float StepFinishSpeedUpMultiplier = 2f;
@@ -45,9 +48,7 @@ public sealed class RevealCharacterEmojiCommandCharR : CommandBase
     private Ease _ease;
 
     private Tween _tween;
-
     private bool _resolveAttempted;
-
     private bool HasClaimedTarget { get; set; }
 
     public override bool WaitForCompletion => _spec.wait;
@@ -119,32 +120,32 @@ public sealed class RevealCharacterEmojiCommandCharR : CommandBase
         _resolveAttempted = true;
 
         CharacterRigRefs rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
+        if (rigRefs == null)
+            return;
+
         _image = rigRefs.GetImage(_spec.imageTarget);
         _materialRuntime = rigRefs.GetEmojiMaterialRuntime(_spec.imageTarget);
     }
 
     private void ClaimTarget()
     {
-        _materialRuntime.KillTween(true);
-
+        _materialRuntime?.KillTween(true);
         HasClaimedTarget = true;
     }
 
     private void CommitFinalState()
     {
-        _materialRuntime.SetReveal(_toReveal);
+        _materialRuntime?.SetReveal(_toReveal);
 
         HasClaimedTarget = false;
         _tween = null;
     }
 
-    #region StepLifetimeHook
-
     protected override void OnStepLifetimeFinished(CommandRunScope scope)
     {
-        if (!HasClaimedTarget)
+        if (!HasClaimedTarget || _materialRuntime == null)
             return;
-        
+
         _materialRuntime.KillTween(false);
 
         float currentReveal = CaptureCurrentReveal();
@@ -184,8 +185,6 @@ public sealed class RevealCharacterEmojiCommandCharR : CommandBase
 
         return _materialRuntime.RuntimeMaterial.GetFloat(CharacterEmojiShaderIds.Reveal);
     }
-
-    #endregion
 
     private bool PrepareMaterial()
     {

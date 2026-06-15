@@ -73,7 +73,17 @@ _#beat #stay
 
 <<actor @2 noya>>
 <<shake @2>>
-<<emoji @2 19>>
+
+//<<emoji @2 19>>    
+
+<<emoji_set c1 09>>
+<<emoji_place_offset c1 09 1u -1u>>
+<<12fr>>
+<<emoji_hide c1>>
+<<12fr>>
+<<emoji_reveal c1 1 8fr>>
+<<emoji_scale c1 1.4 6fr>>
+<<emoji_rotate c1 -8 6fr>>
 세이나: 안 돼! 이 신기를 얻으려고 우리가 성해를 얼마나 많이 물리쳤는데...... <br>검날이 다 무뎌질 정도였다고!
 
 <<actor @3 iris>>

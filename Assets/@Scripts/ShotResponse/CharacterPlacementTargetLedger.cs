@@ -49,6 +49,49 @@ public sealed class CharacterPlacementTargetLedger
     {
         _targets[node] = new Entry(TargetKind.LocalEuler, targetLocalEuler);
     }
+    
+    public Vector2 WorldPointToSettledParentLocalPoint(
+        RectTransform parentRect,
+        Vector3 worldPoint,
+        RectTransform stopRoot)
+    {
+        if (parentRect == null)
+            return Vector2.zero;
+
+        if (_targets.Count == 0)
+        {
+            Vector3 liveLocal = parentRect.InverseTransformPoint(worldPoint);
+            return new Vector2(liveLocal.x, liveLocal.y);
+        }
+
+        _scratchNodes.Clear();
+        _scratchSaved.Clear();
+
+        Transform current = parentRect;
+
+        while (current != null && current != stopRoot)
+        {
+            if (current is RectTransform rect &&
+                _targets.TryGetValue(rect, out Entry entry))
+            {
+                _scratchNodes.Add(rect);
+                _scratchSaved.Add(CaptureLive(rect, entry.kind));
+                ApplyEntry(rect, entry);
+            }
+
+            current = current.parent;
+        }
+
+        Vector3 settledLocal = parentRect.InverseTransformPoint(worldPoint);
+
+        for (int i = _scratchNodes.Count - 1; i >= 0; i--)
+            ApplyEntry(_scratchNodes[i], _scratchSaved[i]);
+
+        _scratchNodes.Clear();
+        _scratchSaved.Clear();
+
+        return new Vector2(settledLocal.x, settledLocal.y);
+    }
 
     public void Clear(RectTransform node)
     {

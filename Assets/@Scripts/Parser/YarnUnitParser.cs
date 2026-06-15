@@ -32,4 +32,31 @@ public static class YarnUnitParser
 
         return fallbackUnits * UnitPixels;
     }
+    public static float ParseAllowNegative(string token, float fallbackUnits = 0f)
+    {
+        if (string.IsNullOrWhiteSpace(token))
+            return fallbackUnits * UnitPixels;
+
+        string originalToken = token;
+
+        token = token.Trim().ToLowerInvariant();
+
+        if (token.EndsWith("u"))
+            token = token[..^1];
+
+        if (float.TryParse(
+                token,
+                NumberStyles.Float,
+                CultureInfo.InvariantCulture,
+                out float units))
+        {
+            return units * UnitPixels;
+        }
+
+        Debug.LogWarning(
+            $"[YarnUnitParser] Invalid signed unit token '{originalToken}'. " +
+            $"Fallback to {fallbackUnits:0.###}u.");
+
+        return fallbackUnits * UnitPixels;
+    }
 }
