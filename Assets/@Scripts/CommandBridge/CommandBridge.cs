@@ -48,7 +48,15 @@ public sealed partial class YarnCommandBridge
     private void AdvanceSubPresentationExtra(int steps = 1) => _sideRunnerSyncHub.StepPresentationOnce(steps);
     private void SetSubPresentationSuppressFirst(bool suppress) => _sideRunnerSyncHub.SetPresentationSuppressFirstAutoAdvance(suppress);
     
-    private IEnumerator RunOneShotNode(string nodeName) => _oneShotPresentationLane.RunNodeCoroutine(nodeName);
+    private IEnumerator RunOneShotNode(string nodeName)
+    {
+        return _oneShotPresentationLane.RunNodeCoroutine(nodeName, blockMain: true);
+    }
+
+    private IEnumerator RunOneShotNodeFree(string nodeName)
+    {
+        return _oneShotPresentationLane.RunNodeCoroutine(nodeName, blockMain: false);
+    }
     
     private void BindRunnerCommands(DialogueRunner runner)
     {
@@ -113,6 +121,10 @@ public sealed partial class YarnCommandBridge
         
         runner.AddCommandHandler<string>(
             "beat", RunOneShotNode); // One-Shot Node 재생. 커맨드로만 이루어졌기에 즉시 재생 및 자동 종료
+        
+        runner.AddCommandHandler<string>(
+            "beat_free",
+            RunOneShotNodeFree); // main non-block
         
         // Portrait = 0,
         // Speaker = 1,

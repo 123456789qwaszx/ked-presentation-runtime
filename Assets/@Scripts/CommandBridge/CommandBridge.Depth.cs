@@ -8,6 +8,13 @@ public sealed partial class YarnCommandBridge
 
     private void RegisterDepthFocusCommands(DialogueRunner runner)
     {
+        // Generic form:
+        // <<at c1 close bust 12fr>>
+        // <<at c1 front>>
+        // <<at c1 7 face 8fr>>
+        runner.AddCommandHandler<string, string, string, string>(
+            "at", EnqueueDepthAtSpec);
+
         runner.AddCommandHandler<string, string, string>(
             "at_close", EnqueueDepthAtCloseSpec);
 
@@ -22,6 +29,19 @@ public sealed partial class YarnCommandBridge
 
         runner.AddCommandHandler<string, string, string>(
             "at_far", EnqueueDepthAtFarSpec);
+    }
+
+    private void EnqueueDepthAtSpec(
+        string roleKey,
+        string depthArg,
+        string preserveFocusArg = DefaultDepthFocusPresetToken,
+        string durationToken = DefaultDepthFocusDurationToken)
+    {
+        EnqueueDepthAtPresetSpec(
+            roleKey,
+            depthArg,
+            preserveFocusArg,
+            durationToken);
     }
 
     private void EnqueueDepthAtCloseSpec(
@@ -117,22 +137,17 @@ public sealed partial class YarnCommandBridge
         };
 
         ApplyDepthArg(spec, depthArg);
+        ApplyPreserveFocusArg(spec, preserveFocusArg);
 
-        if (CharacterFocusPresetParser.TryParse(preserveFocusArg, out CharacterFocusPreset focusPreset))
-        {
-            spec.overridePreserveFocus = true;
-            spec.preserveFocusPreset = focusPreset;
-            return;
-        }
         Collect(spec);
     }
-    
+
     private static void ApplyDepthArg(SetDepthCommandSpecCharR spec, string depthArg)
     {
         if (YarnNumberParser.TryParseFloat(depthArg, out float level))
         {
             spec.useLevel = true;
-            spec.level = Mathf.Clamp(level, 0f, 10f);
+            spec.level = level;
             spec.preset = CharacterDepthPreset.Mid;
             return;
         }
@@ -148,5 +163,33 @@ public sealed partial class YarnCommandBridge
 
         spec.useLevel = false;
         spec.preset = preset;
+    }
+
+    private static void ApplyPreserveFocusArg(
+        SetDepthCommandSpecCharR spec,
+        string preserveFocusArg)
+    {
+        if (string.IsNullOrWhiteSpace(preserveFocusArg))
+        {
+            spec.overridePreserveFocus = true;
+            spec.preserveFocusPreset = CharacterFocusPreset.Bust;
+            return;
+        }
+
+        if (CharacterFocusPresetParser.TryParse(
+                preserveFocusArg,
+                out CharacterFocusPreset focusPreset))
+        {
+            spec.overridePreserveFocus = true;
+            spec.preserveFocusPreset = focusPreset;
+            return;
+        }
+
+        Debug.LogWarning(
+            $"[YarnCommandBridge] Unknown preserve focus preset '{preserveFocusArg}'. " +
+            $"Fallback to '{CharacterFocusPreset.Bust}'.");
+
+        spec.overridePreserveFocus = true;
+        spec.preserveFocusPreset = CharacterFocusPreset.Bust;
     }
 }

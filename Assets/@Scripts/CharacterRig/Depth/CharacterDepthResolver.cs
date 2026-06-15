@@ -19,11 +19,6 @@ public static class CharacterDepthResolver
     {
         result = default;
 
-        if (useLevel)
-            globalTuning.ResolveLevel(level);
-        else 
-            globalTuning.ResolvePreset(preset);
-        
         CharacterDepthPresetValue value =
             ResolveBaseValue(
                 preset,
@@ -39,6 +34,7 @@ public static class CharacterDepthResolver
         ApplyRoleCorrection(
             ref value,
             preset,
+            useLevel,
             roleTuningDb,
             tuningKey);
 
@@ -174,6 +170,7 @@ public static class CharacterDepthResolver
     private static void ApplyRoleCorrection(
         ref CharacterDepthPresetValue value,
         CharacterDepthPreset preset,
+        bool useLevel,
         RoleDepthTuningDBSO roleTuningDb,
         string tuningKey)
     {
@@ -182,6 +179,9 @@ public static class CharacterDepthResolver
 
         value.depthY += entry.defaultYOffsetAdd;
         value.depthScale *= entry.defaultScaleMultiplier;
+
+        if (useLevel)
+            return;
 
         CharacterDepthPresetCorrection correction = entry.corrections.Get(preset);
 

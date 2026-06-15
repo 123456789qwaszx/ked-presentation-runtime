@@ -65,7 +65,7 @@ _#beat #stay
 <<down     @2 3u>>
 <<left     @2 1.2u>>
 
-<<slide_in @2 right>>
+<<slide_in @2 right>> 
 <<hop      @2>>
 <<6fr>>
 
@@ -74,29 +74,16 @@ _#beat #stay
 _#beat #stay
 
 <<actor @2 noya>>
-<<shake @2>>
+<<shake @2>>   
 
-//<<emoji @2 19>>    
-
+<<at c1 24 bust 10fr>>
+<<idle_walk @1>>
+<<face_swap @1 25>>
 <<emoji c1 09>>
-emoji_spring
-<<emoji_heartfly c1 1>>
-emoji_pinwheel
-<<emoji_spit c1 19>>
-hop
-<<emoji_pinwheel c1 16>>
-drop
-<<emoji_spring c1 12>>
-tremble
-<<emoji_spring c1 11>>
-shock
-<<emoji_spring c1 19>>
-spring
-<<face_swap c1 25 10fr>>
-<<2fr>>
-<<emoji_spring c1 18>>
-spring
-<<emoji_hide c1>>
+<<beat_free Beat_EmojiSet>>
+
+<<actor willow>>
+<<beat Beat_Dip>>
 세이나: 안 돼! 이 신기를 얻으려고 우리가 성해를 얼마나 많이 물리쳤는데...... <br>검날이 다 무뎌질 정도였다고!
 
 <<actor @3 iris>>

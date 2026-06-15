@@ -22,7 +22,6 @@ public sealed class SetDepthCommandSpecCharR : CharacterRigCommandSpecBase
     [Tooltip("true이면 preset 대신 level을 사용합니다.")]
     public bool useLevel = false;
 
-    [Range(0f, 10f)]
     public float level = 5f;
 
     [Header("Command Correction")]
