@@ -466,9 +466,8 @@ public sealed partial class YarnCommandBridge : InlineEventMarkupHandler.IInline
         return new RevealCharacterEmojiCommandSpecCharR
         {
             slotKey = roleKey,
-            imageTarget = CharacterRigTarget.EmojiSlot00_Image,
+            target = CharacterRigTarget.EmojiSlot00_Image,
 
-            usePresetReveal = false,
             fromReveal = fromReveal,
             toReveal = toReveal,
             duration = duration,

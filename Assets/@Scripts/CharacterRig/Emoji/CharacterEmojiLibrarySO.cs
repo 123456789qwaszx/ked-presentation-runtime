@@ -9,8 +9,6 @@ public sealed class CharacterEmojiEntry
     public Sprite sprite;
 
     public CharacterEmojiPlacement placement = CharacterEmojiPlacement.Default;
-
-    public CharacterEmojiVisualPresetSO defaultVisualPreset;
 }
 
 // 에디터용 Emoji 배치 프리셋

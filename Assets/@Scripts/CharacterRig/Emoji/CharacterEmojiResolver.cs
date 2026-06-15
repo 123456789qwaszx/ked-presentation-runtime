@@ -53,35 +53,19 @@ public sealed class CharacterEmojiResolver
         return true;
     }
 
-    public bool TryResolveVisualPreset(
-        string emojiKey,
-        out CharacterEmojiVisualPresetSO visualPreset)
-    {
-        visualPreset = null;
-
-        if (!TryResolveEntry(emojiKey, out CharacterEmojiEntry entry))
-            return false;
-
-        visualPreset = entry.defaultVisualPreset;
-        return visualPreset != null;
-    }
-
     public bool TryResolve(
         string emojiKey,
         out Sprite sprite,
-        out CharacterEmojiPlacement placement,
-        out CharacterEmojiVisualPresetSO visualPreset)
+        out CharacterEmojiPlacement placement)
     {
         sprite = null;
         placement = CharacterEmojiPlacement.Default;
-        visualPreset = null;
 
         if (!TryResolveEntry(emojiKey, out CharacterEmojiEntry entry))
             return false;
 
         sprite = entry.sprite;
         placement = entry.placement;
-        visualPreset = entry.defaultVisualPreset;
         return true;
     }
 

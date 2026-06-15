@@ -6478,6 +6478,7 @@ MonoBehaviour:
   episodeProgressionSo: {fileID: 11400000, guid: 6b6dcda1ce02f5141a876245e3c88c7e, type: 2}
   rollbackHistoryDebugView: {fileID: 969122867}
   characterEmojiLibrarySo: {fileID: 11400000, guid: 50cc0df71f2e038468df66d0c632ebdd, type: 2}
+  characterEmojiVisualPresetSo: {fileID: 11400000, guid: e00fbe47d88401f458328299b0b76437, type: 2}
   episodePlayer: {fileID: 1924806292}
   uiBackgroundRigBlurRuntime: {fileID: 392095358}
   screenNoisePresetDbso: {fileID: 11400000, guid: afb4892f90a1eff46b623bfa3c11a55d, type: 2}

@@ -34,9 +34,29 @@ public sealed class SetCharacterEmojiMaterialCommandCharR : CommandBase
         CharacterRigRefs rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
         CharacterEmojiMaterialRuntime materialRuntime = rigRefs.GetEmojiMaterialRuntime(_spec.imageTarget);
         
-        materialRuntime.KillTween(true);
-        materialRuntime.EnsureMaterial(_characterEmojiVisualPresetSo.baseMaterial);
-        materialRuntime.ApplyPresetStatic(_characterEmojiVisualPresetSo, _spec.initialReveal);
+        ApplyPresetStatic(materialRuntime.RuntimeMaterial, _characterEmojiVisualPresetSo, _spec.initialReveal);
+
         yield break;
+    }
+
+    private static void ApplyPresetStatic(Material material, CharacterEmojiVisualPresetSO preset, float reveal)
+    {
+        material.SetFloat(CharacterEmojiShaderIds.Reveal, reveal);
+        material.SetFloat(CharacterEmojiShaderIds.RevealSoftness, preset.revealSoftness);
+        material.SetFloat(CharacterEmojiShaderIds.RevealDirection, GetDirectionValue(preset));
+
+        material.SetFloat(CharacterEmojiShaderIds.EdgeRimAmount, preset.edgeRimAmount);
+        material.SetFloat(CharacterEmojiShaderIds.EdgeRimWidth, preset.edgeRimWidth);
+        material.SetColor(CharacterEmojiShaderIds.EdgeRimColor, preset.edgeRimColor);
+
+        material.SetFloat(CharacterEmojiShaderIds.GlowAmount, preset.glowAmount);
+        material.SetColor(CharacterEmojiShaderIds.GlowColor, preset.glowColor);
+    }
+
+    private static float GetDirectionValue(CharacterEmojiVisualPresetSO preset)
+    {
+        return preset.revealDirection == CharacterEmojiRevealDirection.BottomToTop
+            ? 1f
+            : 0f;
     }
 }
