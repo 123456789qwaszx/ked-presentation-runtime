@@ -316,6 +316,7 @@ public sealed class CharacterEmojiLibrarySOEditor : Editor
             SerializedProperty emojiKey = entry.FindPropertyRelative("emojiKey");
             SerializedProperty sprite = entry.FindPropertyRelative("sprite");
             SerializedProperty placement = FindPlacementProperty(entry);
+            SerializedProperty mirror = FindMirrorProperty(entry);
 
             using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
             {
@@ -330,6 +331,10 @@ public sealed class CharacterEmojiLibrarySOEditor : Editor
                         DrawSpritePreview(sprite);
                         DrawEntryFields(emojiKey, sprite);
                     }
+
+                    EditorGUILayout.Space(4);
+
+                    DrawMirrorProperty(mirror, "Mirror Policy");
 
                     EditorGUILayout.Space(4);
 
@@ -351,6 +356,210 @@ public sealed class CharacterEmojiLibrarySOEditor : Editor
         if (removeIndex >= 0)
             RemoveEntry(removeIndex);
     }
+
+    private void DrawMirrorProperty(SerializedProperty mirror, string title)
+    {
+        if (mirror == null)
+        {
+            EditorGUILayout.HelpBox(
+                "Failed to find mirror property. CharacterEmojiEntry must have a 'mirror' field.",
+                MessageType.Warning);
+            return;
+        }
+
+        using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
+        {
+            GUIStyle mirrorTitleStyle = new(EditorStyles.label)
+            {
+                fontSize = 13,
+                fontStyle = FontStyle.Bold,
+            };
+
+            Rect headerRect = EditorGUILayout.GetControlRect(
+                false,
+                EditorGUIUtility.singleLineHeight + 4f);
+
+            Rect summaryRect = headerRect;
+            summaryRect.xMin = Mathf.Max(summaryRect.xMin, summaryRect.xMax - 210f);
+
+            Rect foldoutRect = headerRect;
+            foldoutRect.xMin += 2f;
+            foldoutRect.xMax = summaryRect.xMin - 4f;
+
+            mirror.isExpanded = DrawWideFoldoutInRect(
+                foldoutRect,
+                mirror.isExpanded,
+                title,
+                mirrorTitleStyle);
+
+            DrawMirrorSummaryInRect(summaryRect, mirror);
+
+            if (!mirror.isExpanded)
+                return;
+
+            SerializedProperty placementMirror = mirror.FindPropertyRelative("placementMirror");
+            SerializedProperty motionMirror = mirror.FindPropertyRelative("motionMirror");
+            SerializedProperty spriteMirror = mirror.FindPropertyRelative("spriteMirror");
+
+            if (placementMirror == null || motionMirror == null || spriteMirror == null)
+            {
+                EditorGUILayout.HelpBox(
+                    "Mirror profile fields are missing. Expected placementMirror, motionMirror, spriteMirror.",
+                    MessageType.Error);
+                return;
+            }
+
+            using (new EditorGUI.IndentLevelScope())
+            {
+                EditorGUILayout.HelpBox(
+                    "Character facing이 Left가 되었을 때 이 emoji가 무엇을 대칭할지 정합니다.\n" +
+                    "Placement는 위치 offset과 placement rotationZ, Motion은 이동/방향/동작 rotation/pivot, Sprite는 이미지 자체의 좌우반전입니다.",
+                    MessageType.None);
+
+                bool placementFlip = placementMirror.intValue ==
+                                     (int)CharacterEmojiPlacementMirrorPolicy.MirrorWithCharacterFacing;
+
+                bool motionFlip = motionMirror.intValue ==
+                                  (int)CharacterEmojiMotionMirrorPolicy.MirrorWithCharacterFacing;
+
+                bool spriteFlip = spriteMirror.intValue ==
+                                  (int)CharacterEmojiSpriteMirrorPolicy.MirrorWithCharacterFacing;
+
+                EditorGUI.BeginChangeCheck();
+
+                placementFlip = EditorGUILayout.ToggleLeft(
+                    new GUIContent(
+                        "Flip Placement Offset X / Rotation Z",
+                        "캐릭터가 mirror 상태일 때 FocusPoint 기준 emoji 위치 offset.x와 placement rotationZ 부호를 반전합니다. 대부분의 emoji는 켜두는 것이 자연스럽습니다."),
+                    placementFlip);
+
+                motionFlip = EditorGUILayout.ToggleLeft(
+                    new GUIContent(
+                        "Flip Movement / Direction",
+                        "캐릭터가 mirror 상태일 때 이동 delta.x, Left/Right 방향, rotationZ, pivot.x 같은 motion 값을 반전합니다. 하트비행기/침 튀기기 같은 방향성 연출에 사용합니다."),
+                    motionFlip);
+
+                spriteFlip = EditorGUILayout.ToggleLeft(
+                    new GUIContent(
+                        "Flip Image Sprite",
+                        "캐릭터가 mirror 상태일 때 emoji sprite 이미지 자체도 좌우반전합니다. 느낌표/물음표/말줄임표처럼 기호형 이미지는 보통 끕니다."),
+                    spriteFlip);
+
+                if (EditorGUI.EndChangeCheck())
+                {
+                    placementMirror.intValue = placementFlip
+                        ? (int)CharacterEmojiPlacementMirrorPolicy.MirrorWithCharacterFacing
+                        : (int)CharacterEmojiPlacementMirrorPolicy.None;
+
+                    motionMirror.intValue = motionFlip
+                        ? (int)CharacterEmojiMotionMirrorPolicy.MirrorWithCharacterFacing
+                        : (int)CharacterEmojiMotionMirrorPolicy.None;
+
+                    spriteMirror.intValue = spriteFlip
+                        ? (int)CharacterEmojiSpriteMirrorPolicy.MirrorWithCharacterFacing
+                        : (int)CharacterEmojiSpriteMirrorPolicy.KeepUpright;
+
+                    EditorUtility.SetDirty(target);
+                }
+
+                EditorGUILayout.Space(4);
+                DrawMirrorPresetButtons(mirror);
+            }
+        }
+    }
+
+    private void DrawMirrorPresetButtons(SerializedProperty mirror)
+    {
+        EditorGUILayout.LabelField("Mirror Presets", EditorStyles.miniBoldLabel);
+
+        using (new EditorGUILayout.HorizontalScope())
+        {
+            if (GUILayout.Button(
+                    new GUIContent(
+                        "Default",
+                        "위치 offset과 placement rotation만 캐릭터 facing에 맞춰 대칭합니다. 대부분의 emoji 기본값입니다.")))
+            {
+                WriteMirror(mirror, CharacterEmojiMirrorProfile.Default);
+            }
+
+            if (GUILayout.Button(
+                    new GUIContent(
+                        "Directional",
+                        "위치/placement rotation, 이동/방향, 이미지 모두 캐릭터 facing에 맞춰 대칭합니다. 하트비행기/침 튀기기처럼 방향성이 강한 emoji에 사용합니다.")))
+            {
+                WriteMirror(mirror, new CharacterEmojiMirrorProfile
+                {
+                    placementMirror = CharacterEmojiPlacementMirrorPolicy.MirrorWithCharacterFacing,
+                    motionMirror = CharacterEmojiMotionMirrorPolicy.MirrorWithCharacterFacing,
+                    spriteMirror = CharacterEmojiSpriteMirrorPolicy.MirrorWithCharacterFacing,
+                });
+            }
+
+            if (GUILayout.Button(
+                    new GUIContent(
+                        "Motion Only",
+                        "위치/placement rotation과 이동/방향만 대칭하고, 이미지는 upright로 유지합니다.")))
+            {
+                WriteMirror(mirror, new CharacterEmojiMirrorProfile
+                {
+                    placementMirror = CharacterEmojiPlacementMirrorPolicy.MirrorWithCharacterFacing,
+                    motionMirror = CharacterEmojiMotionMirrorPolicy.MirrorWithCharacterFacing,
+                    spriteMirror = CharacterEmojiSpriteMirrorPolicy.KeepUpright,
+                });
+            }
+
+            if (GUILayout.Button(
+                    new GUIContent(
+                        "No Mirror",
+                        "위치/placement rotation, 이동, 이미지를 모두 대칭하지 않습니다.")))
+            {
+                WriteMirror(mirror, new CharacterEmojiMirrorProfile
+                {
+                    placementMirror = CharacterEmojiPlacementMirrorPolicy.None,
+                    motionMirror = CharacterEmojiMotionMirrorPolicy.None,
+                    spriteMirror = CharacterEmojiSpriteMirrorPolicy.KeepUpright,
+                });
+            }
+        }
+    }
+
+    private void DrawMirrorSummaryInRect(Rect rect, SerializedProperty mirror)
+    {
+        string summary = BuildMirrorSummary(mirror);
+
+        GUIStyle style = new(EditorStyles.miniLabel)
+        {
+            alignment = TextAnchor.MiddleRight,
+            fontStyle = FontStyle.Italic,
+        };
+
+        EditorGUI.LabelField(rect, summary, style);
+    }
+
+    private static string BuildMirrorSummary(SerializedProperty mirror)
+    {
+        if (mirror == null)
+            return "Mirror: missing";
+
+        SerializedProperty placementMirror = mirror.FindPropertyRelative("placementMirror");
+        SerializedProperty motionMirror = mirror.FindPropertyRelative("motionMirror");
+        SerializedProperty spriteMirror = mirror.FindPropertyRelative("spriteMirror");
+
+        if (placementMirror == null || motionMirror == null || spriteMirror == null)
+            return "Mirror: invalid";
+
+        bool placement = placementMirror.intValue ==
+                         (int)CharacterEmojiPlacementMirrorPolicy.MirrorWithCharacterFacing;
+
+        bool motion = motionMirror.intValue ==
+                      (int)CharacterEmojiMotionMirrorPolicy.MirrorWithCharacterFacing;
+
+        bool sprite = spriteMirror.intValue ==
+                      (int)CharacterEmojiSpriteMirrorPolicy.MirrorWithCharacterFacing;
+
+        return $"Mirror: Pos {(placement ? "✓" : "–")} / Move {(motion ? "✓" : "–")} / Img {(sprite ? "✓" : "–")}";
+    }
+
 
     private void DrawPlacementProperty(SerializedProperty placement, string title)
     {
@@ -679,6 +888,7 @@ public sealed class CharacterEmojiLibrarySOEditor : Editor
         entry.FindPropertyRelative("sprite").objectReferenceValue = null;
 
         WritePlacement(FindPlacementProperty(entry), CharacterEmojiPlacement.Default);
+        WriteMirror(FindMirrorProperty(entry), CharacterEmojiMirrorProfile.Default);
 
         _scroll = Vector2.zero;
 
@@ -747,6 +957,7 @@ public sealed class CharacterEmojiLibrarySOEditor : Editor
             SerializedProperty emojiKey = entry.FindPropertyRelative("emojiKey");
             SerializedProperty sprite = entry.FindPropertyRelative("sprite");
             SerializedProperty placement = FindPlacementProperty(entry);
+            SerializedProperty mirror = FindMirrorProperty(entry);
             SerializedProperty localScale = placement?.FindPropertyRelative("localScale");
             SerializedProperty offset = placement?.FindPropertyRelative("offsetFromFocusInRigSpace");
 
@@ -775,6 +986,12 @@ public sealed class CharacterEmojiLibrarySOEditor : Editor
             if (placement == null)
             {
                 Debug.LogWarning($"[CharacterEmojiLibrarySOEditor] Entry '{key}' has no placement property.", target);
+                hasIssue = true;
+            }
+
+            if (mirror == null)
+            {
+                Debug.LogWarning($"[CharacterEmojiLibrarySOEditor] Entry '{key}' has no mirror profile.", target);
                 hasIssue = true;
             }
 
@@ -816,7 +1033,8 @@ public sealed class CharacterEmojiLibrarySOEditor : Editor
             {
                 emojiKey = entry.FindPropertyRelative("emojiKey").stringValue,
                 sprite = entry.FindPropertyRelative("sprite").objectReferenceValue as Sprite,
-                placement = ReadPlacement(FindPlacementProperty(entry))
+                placement = ReadPlacement(FindPlacementProperty(entry)),
+                mirror = ReadMirror(FindMirrorProperty(entry))
             };
 
             snapshots.Add(snapshot);
@@ -836,9 +1054,18 @@ public sealed class CharacterEmojiLibrarySOEditor : Editor
             entry.FindPropertyRelative("sprite").objectReferenceValue = snapshots[i].sprite;
 
             WritePlacement(FindPlacementProperty(entry), snapshots[i].placement);
+            WriteMirror(FindMirrorProperty(entry), snapshots[i].mirror);
         }
 
         EditorUtility.SetDirty(target);
+    }
+
+    private static SerializedProperty FindMirrorProperty(SerializedProperty owner)
+    {
+        if (owner == null)
+            return null;
+
+        return owner.FindPropertyRelative("mirror");
     }
 
     private static SerializedProperty FindPlacementProperty(SerializedProperty owner)
@@ -850,6 +1077,53 @@ public sealed class CharacterEmojiLibrarySOEditor : Editor
         return owner.FindPropertyRelative("placement") ??
                owner.FindPropertyRelative("layout");
     }
+
+    private CharacterEmojiMirrorProfile ReadMirror(SerializedProperty mirror)
+    {
+        CharacterEmojiMirrorProfile value = CharacterEmojiMirrorProfile.Default;
+
+        if (mirror == null)
+            return value;
+
+        SerializedProperty placementMirror = mirror.FindPropertyRelative("placementMirror");
+        SerializedProperty motionMirror = mirror.FindPropertyRelative("motionMirror");
+        SerializedProperty spriteMirror = mirror.FindPropertyRelative("spriteMirror");
+
+        if (placementMirror != null)
+            value.placementMirror = (CharacterEmojiPlacementMirrorPolicy)placementMirror.intValue;
+
+        if (motionMirror != null)
+            value.motionMirror = (CharacterEmojiMotionMirrorPolicy)motionMirror.intValue;
+
+        if (spriteMirror != null)
+            value.spriteMirror = (CharacterEmojiSpriteMirrorPolicy)spriteMirror.intValue;
+
+        return value;
+    }
+
+    private void WriteMirror(
+        SerializedProperty mirror,
+        CharacterEmojiMirrorProfile value)
+    {
+        if (mirror == null || value == null)
+            return;
+
+        SerializedProperty placementMirror = mirror.FindPropertyRelative("placementMirror");
+        SerializedProperty motionMirror = mirror.FindPropertyRelative("motionMirror");
+        SerializedProperty spriteMirror = mirror.FindPropertyRelative("spriteMirror");
+
+        if (placementMirror != null)
+            placementMirror.intValue = (int)value.placementMirror;
+
+        if (motionMirror != null)
+            motionMirror.intValue = (int)value.motionMirror;
+
+        if (spriteMirror != null)
+            spriteMirror.intValue = (int)value.spriteMirror;
+
+        EditorUtility.SetDirty(target);
+    }
+
 
     private CharacterEmojiPlacement ReadPlacement(SerializedProperty placement)
     {
@@ -951,5 +1225,6 @@ public sealed class CharacterEmojiLibrarySOEditor : Editor
         public string emojiKey;
         public Sprite sprite;
         public CharacterEmojiPlacement placement;
+        public CharacterEmojiMirrorProfile mirror;
     }
 }

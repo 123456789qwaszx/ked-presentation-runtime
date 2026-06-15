@@ -60,6 +60,7 @@ public sealed class CharacterRigCommandFactory : INodeCommandFactory
             PlaceToCommandSpecCharR s => new PlaceToCommandCharR(s, _globalTuning, _roleTuningDb),
             SetOriginSizeCommandSpecCharR s => new SetOriginSizeCommandCharR(s, _globalTuning, _roleTuningDb),
             ApplyTrackOffsetCommandSpecCharR s => new ApplyTrackOffsetCommandCharR(s),
+            MirrorCharacterCommandSpecCharR s => new MirrorCharacterCommandCharR(s),
             
             SetDepthCommandSpecCharR s => new SetDepthCommandCharR(
                 s,
@@ -109,6 +110,14 @@ public sealed class CharacterRigCommandFactory : INodeCommandFactory
             TrembleCommandSpecCharR s => new TrembleCommandCharR(s),
 
             // Emoji
+            EmojiMoveByCommandSpecCharR s => new EmojiMoveByCommandCharR(s, _emojiResolver),
+            EmojiRotateToCommandSpecCharR s => new EmojiRotateToCommandCharR(s, _emojiResolver),
+            EmojiRotateByCommandSpecCharR s => new EmojiRotateByCommandCharR(s, _emojiResolver),
+            EmojiSwayCommandSpecCharR s => new EmojiSwayCommandCharR(s, _emojiResolver),
+            EmojiJoltCommandSpec s => new EmojiJoltCommand(s, _emojiResolver),
+            EmojiTrembleCommandSpecCharR s => new EmojiTrembleCommandCharR(s, _emojiResolver),
+            EmojiSlideInCommandSpecCharR s => new EmojiSlideInCommandCharR(s, _emojiResolver),
+
             SetCharacterEmojiCommandSpecCharR s => new SetCharacterEmojiCommandCharR(s, _emojiResolver),
             PlaceCharacterEmojiCommandSpecCharR s => new PlaceCharacterEmojiCommandCharR(s, _emojiResolver, _characterFocusTuningDb),
             RevealCharacterEmojiCommandSpecCharR s => new RevealCharacterEmojiCommandCharR(s),
@@ -116,9 +125,9 @@ public sealed class CharacterRigCommandFactory : INodeCommandFactory
             InitCharacterEmojiCommandSpecCharR s => new InitCharacterEmojiCommandCharR(s, _emojiResolver, _characterEmojiVisualPresetSo, _characterFocusTuningDb),
             
             AnimateCharacterEmojiFramesCommandSpecCharR s => new AnimateCharacterEmojiFramesCommandCharR(s, _emojiResolver),
-            SpringAppearCommandSpecCharR s => new SpringAppearCommandCharR(s),
-            EmojiHeartPaperPlaneCommandSpecCharR s => new EmojiHeartPaperPlaneCommandCharR(s),
-            EmojiChatterWiggleCommandSpecCharR s => new EmojiChatterWiggleCommandCharR(s),
+            SpringAppearCommandSpecCharR s => new SpringAppearCommandCharR(s, _emojiResolver),
+            EmojiHeartPaperPlaneCommandSpecCharR s => new EmojiHeartPaperPlaneCommandCharR(s, _emojiResolver),
+            EmojiChatterWiggleCommandSpecCharR s => new EmojiChatterWiggleCommandCharR(s, _emojiResolver),
             EmojiIdleDoublePulseCommandSpecCharR s => new EmojiIdleDoublePulseCommandCharR(s),
             
             // AttachCharRigToBackgroundObjectSlot

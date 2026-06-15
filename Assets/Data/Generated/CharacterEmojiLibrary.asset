@@ -13,6 +13,24 @@ MonoBehaviour:
   m_Name: CharacterEmojiLibrary
   m_EditorClassIdentifier: Assembly-CSharp::CharacterEmojiLibrarySO
   entries:
+  - emojiKey: 16
+    sprite: {fileID: 21300000, guid: 96de83b90e17de649b4060fa02479c31, type: 3}
+    placement:
+      focusPreset: 30
+      offsetFromFocusInRigSpace: {x: 80, y: -80}
+      localScale: {x: 0.06, y: 0.06, z: 0.06}
+      rotationZ: 0
+      preserveAspect: 1
+      setNativeSize: 0
+  - emojiKey: 12
+    sprite: {fileID: 21300000, guid: 8d9553837cc88864a9c5f1cedbfeb233, type: 3}
+    placement:
+      focusPreset: 30
+      offsetFromFocusInRigSpace: {x: 88, y: 50}
+      localScale: {x: 0.128, y: 0.128, z: 0.128}
+      rotationZ: -16
+      preserveAspect: 1
+      setNativeSize: 0
   - emojiKey: 14-1
     sprite: {fileID: 21300000, guid: 4d9d9a605ad23f044853df10c30ed53f, type: 3}
     placement:
@@ -193,26 +211,8 @@ MonoBehaviour:
       rotationZ: 0
       preserveAspect: 1
       setNativeSize: 0
-  - emojiKey: 12
-    sprite: {fileID: 21300000, guid: 8d9553837cc88864a9c5f1cedbfeb233, type: 3}
-    placement:
-      focusPreset: 30
-      offsetFromFocusInRigSpace: {x: -50, y: 40}
-      localScale: {x: 0.1, y: 0.1, z: 0.1}
-      rotationZ: 0
-      preserveAspect: 1
-      setNativeSize: 0
   - emojiKey: 13
     sprite: {fileID: 21300000, guid: 69af4c88f62481742a213361d2d90f0f, type: 3}
-    placement:
-      focusPreset: 30
-      offsetFromFocusInRigSpace: {x: -50, y: 40}
-      localScale: {x: 0.1, y: 0.1, z: 0.1}
-      rotationZ: 0
-      preserveAspect: 1
-      setNativeSize: 0
-  - emojiKey: 16
-    sprite: {fileID: 21300000, guid: 96de83b90e17de649b4060fa02479c31, type: 3}
     placement:
       focusPreset: 30
       offsetFromFocusInRigSpace: {x: -50, y: 40}
@@ -234,7 +234,7 @@ MonoBehaviour:
     placement:
       focusPreset: 30
       offsetFromFocusInRigSpace: {x: -50, y: 40}
-      localScale: {x: 0.1, y: 0.1, z: 0.1}
+      localScale: {x: 0.12, y: 0.12, z: 0.12}
       rotationZ: 0
       preserveAspect: 1
       setNativeSize: 0

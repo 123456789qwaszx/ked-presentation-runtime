@@ -131,9 +131,10 @@ public sealed partial class YarnCommandBridge
             wait = false
         };
 
-        var spec2DropSlideInSpec = new SlideInCommandSpecCharR
+        var spec2DropSlideInSpec = new EmojiSlideInCommandSpecCharR
         {
             slotKey = roleKey,
+            emojiKey = emojiKey,
             target = CharacterRigTarget.EmojiSlot00_Track_Move,
             direction = CharRigDirection.Up,
             distance = 90f,
@@ -172,9 +173,10 @@ public sealed partial class YarnCommandBridge
             wait = false
         };
 
-        var spec2ShockJoltSpec = new JoltCommandSpec
+        var spec2ShockJoltSpec = new EmojiJoltCommandSpec
         {
             slotKey = roleKey,
+            emojiKey = emojiKey,
             target = CharacterRigTarget.EmojiSlot00_Track_Move,
             strength = 20f,
             direction = CharRigDirection.Right,
@@ -329,9 +331,10 @@ public sealed partial class YarnCommandBridge
             wait = false
         };
 
-        var spec2TrembleSpec = new TrembleCommandSpecCharR
+        var spec2TrembleSpec = new EmojiTrembleCommandSpecCharR
         {
             slotKey = roleKey,
+            emojiKey = emojiKey,
             target = CharacterRigTarget.EmojiSlot00_Track_Move,
             strength = 6f,
             direction = CharRigDirection.Right,
@@ -382,9 +385,10 @@ public sealed partial class YarnCommandBridge
 
         // 크기가 확 생길 때 아주 살짝만 위로 뜸.
         // 존재감이 강하지 않도록 이동량을 줄임.
-        var spec2SpringLiftSpec = new MoveByCommandSpecCharR
+        var spec2SpringLiftSpec = new EmojiMoveByCommandSpecCharR
         {
             slotKey = roleKey,
+            emojiKey = emojiKey,
             target = CharacterRigTarget.CharacterEmojiSlot00_Effect,
             delta = new Vector2(1f, 6f),
             duration = 0.16f,
@@ -393,9 +397,10 @@ public sealed partial class YarnCommandBridge
         };
 
         // 아주 작은 비틀림만.
-        var spec3SpringKickRotateSpec = new RotateToCommandSpecCharR
+        var spec3SpringKickRotateSpec = new EmojiRotateToCommandSpecCharR
         {
             slotKey = roleKey,
+            emojiKey = emojiKey,
             target = CharacterRigTarget.EmojiSlot00_Rotation,
             toEuler = new Vector3(0f, 0f, -4f),
             duration = 0.16f,
@@ -415,9 +420,10 @@ public sealed partial class YarnCommandBridge
 
         // 원점으로 부드럽게 안착.
         // OutBack 대신 OutCubic으로 과한 튐을 줄임.
-        var spec5SpringSettlePositionSpec = new MoveByCommandSpecCharR
+        var spec5SpringSettlePositionSpec = new EmojiMoveByCommandSpecCharR
         {
             slotKey = roleKey,
+            emojiKey = emojiKey,
             target = CharacterRigTarget.CharacterEmojiSlot00_Effect,
             useAbsolutePosition = true,
             delta = Vector2.zero,
@@ -443,9 +449,10 @@ public sealed partial class YarnCommandBridge
         };
         
         // 반대 방향 회전도 아주 작게.
-        var spec8SpringCounterRotateSpec = new RotateToCommandSpecCharR
+        var spec8SpringCounterRotateSpec = new EmojiRotateToCommandSpecCharR
         {
             slotKey = roleKey,
+            emojiKey = emojiKey,
             target = CharacterRigTarget.EmojiSlot00_Rotation,
             toEuler = new Vector3(0f, 0f, 1f),
             duration = 0.22f,
@@ -502,9 +509,10 @@ public sealed partial class YarnCommandBridge
         };
 
         // 오른쪽으로 더 천천히 튀어나감.
-        var spec2SpitMoveRightSpec = new MoveByCommandSpecCharR
+        var spec2SpitMoveRightSpec = new EmojiMoveByCommandSpecCharR
         {
             slotKey = roleKey,
+            emojiKey = emojiKey,
             target = CharacterRigTarget.EmojiSlot00_Track_X,
             delta = new Vector2(165f, 0f),
             duration = 0.88f,
@@ -514,9 +522,10 @@ public sealed partial class YarnCommandBridge
 
         // 최종 도착점은 시작점보다 낮아야 하므로 Track_Y는 아래로 계속 drift.
         // 이 값이 최종 도착 Y 높이를 결정하므로 유지한다.
-        var spec3SpitDriftDownSpec = new MoveByCommandSpecCharR
+        var spec3SpitDriftDownSpec = new EmojiMoveByCommandSpecCharR
         {
             slotKey = roleKey,
+            emojiKey = emojiKey,
             target = CharacterRigTarget.EmojiSlot00_Track_Y,
             delta = new Vector2(0f, -56f),
             duration = 1.08f,
@@ -540,9 +549,10 @@ public sealed partial class YarnCommandBridge
             wait = false
         };
 
-        var spec5SpitRotateSpec = new RotateToCommandSpecCharR
+        var spec5SpitRotateSpec = new EmojiRotateToCommandSpecCharR
         {
             slotKey = roleKey,
+            emojiKey = emojiKey,
             target = CharacterRigTarget.EmojiSlot00_Rotation,
             toEuler = new Vector3(0f, 0f, -22f),
             duration = 0.98f,
@@ -610,9 +620,10 @@ public sealed partial class YarnCommandBridge
 
         // 회전은 처음부터 시작한다.
         // 더 이상 중간 가속/감속을 만들지 않고, 하나의 부드러운 흐름으로 계속 돈다.
-        var spec3PinwheelSpinSpec = new RotateByCommandSpecCharR
+        var spec3PinwheelSpinSpec = new EmojiRotateByCommandSpecCharR
         {
             slotKey = roleKey,
+            emojiKey = emojiKey,
             target = CharacterRigTarget.EmojiSlot00_Rotation,
             deltaEuler = new Vector3(0f, 0f, 600f),
             duration = 5.4f,
@@ -622,9 +633,10 @@ public sealed partial class YarnCommandBridge
 
         // 초반에만 살짝 떠오른 뒤 그 자리에 멈춘다.
         // 풍선처럼 계속 올라가지 않게 duration을 짧게 잡는다.
-        var spec4PinwheelRiseSpec = new MoveByCommandSpecCharR
+        var spec4PinwheelRiseSpec = new EmojiMoveByCommandSpecCharR
         {
             slotKey = roleKey,
+            emojiKey = emojiKey,
             target = CharacterRigTarget.CharacterEmojiSlot00_Effect,
             delta = new Vector2(-8f, 20f),
             duration = 1.05f,
@@ -677,9 +689,10 @@ public sealed partial class YarnCommandBridge
         };
 
         // 사라질 때 공기 중으로 살짝 더 떠오름.
-        var spec10PinwheelFadeDriftSpec = new MoveByCommandSpecCharR
+        var spec10PinwheelFadeDriftSpec = new EmojiMoveByCommandSpecCharR
         {
             slotKey = roleKey,
+            emojiKey = emojiKey,
             target = CharacterRigTarget.CharacterEmojiSlot00_Effect,
             delta = new Vector2(-2f, 6f),
             duration = 0.95f,
@@ -723,6 +736,7 @@ public sealed partial class YarnCommandBridge
 
         var spec1HeartPaperPlaneSpec = new EmojiHeartPaperPlaneCommandSpecCharR {
             slotKey = roleKey,
+            emojiKey = emojiKey,
             rootTarget = CharacterRigTarget.CharacterEmojiSlot00_Root,
             moveTarget = CharacterRigTarget.EmojiSlot00_Track_Move,
             scaleTarget = CharacterRigTarget.EmojiSlot00_Scale,
@@ -767,6 +781,7 @@ public sealed partial class YarnCommandBridge
 
         var spec1ChatterWiggleSpec = new EmojiChatterWiggleCommandSpecCharR {
             slotKey = roleKey,
+            emojiKey = emojiKey,
             rootTarget = CharacterRigTarget.CharacterEmojiSlot00_Root,
             pivotTarget = CharacterRigTarget.EmojiSlot00_SwayPivot,
             effectTarget = CharacterRigTarget.CharacterEmojiSlot00_Effect,
@@ -822,6 +837,7 @@ public sealed partial class YarnCommandBridge
 
         var spec1SoftAppearSpec = new SpringAppearCommandSpecCharR {
             slotKey = roleKey,
+            emojiKey = emojiKey,
             scaleTarget = CharacterRigTarget.EmojiSlot00_Scale,
             effectTarget = CharacterRigTarget.CharacterEmojiSlot00_Effect,
             rotationTarget = CharacterRigTarget.EmojiSlot00_Rotation,

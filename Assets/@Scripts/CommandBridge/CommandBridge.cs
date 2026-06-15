@@ -130,22 +130,33 @@ public sealed partial class YarnCommandBridge
     private void BindCharRigSetup(DialogueRunner runner)
     {
         runner.AddCommandHandler<string, string>(
-            "slot",
-            EnqueueSetupCharRigSpec);
+            "slot", EnqueueSetupCharRigSpec);
         
         runner.AddCommandHandler<string, string, string, string, string, string>(
-            "cast",
-            EnqueueCastCharacterSpec);
+            "cast", EnqueueCastCharacterSpec);
         runner.AddCommandHandler<string, string>(
             "pose", EnqueueSetPortraitPoseSpec);
         runner.AddCommandHandler<string, string>(
-            "face", 
-            EnqueueSetPortraitFaceSpec);
+            "face", EnqueueSetPortraitFaceSpec);
         runner.AddCommandHandler<string, string>(
-            "size", 
-            EnqueueSetOriginSizeCommandSpec);
+            "size", EnqueueSetOriginSizeCommandSpec);
+
+        runner.AddCommandHandler<string, string>(
+            "mirror", EnqueueMirrorSetSpec);
     }
-    
+
+    private void EnqueueMirrorSetSpec(
+        string roleKey,
+        string directionToken = "")
+        => Collect(new MirrorCharacterCommandSpecCharR
+        {
+            slotKey = roleKey,
+            mode = CharacterMirrorModeParser.Parse(directionToken),
+            target = CharacterRigTarget.CharacterPortrait_ActingScale_X,
+            duration = 0f,
+        });
+
+
     private void BindCharRigStaging(DialogueRunner runner)
     {
         runner.AddCommandHandler<string, int, int, float>(

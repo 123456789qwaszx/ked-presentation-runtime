@@ -46,6 +46,8 @@ title: Story_TalesOfNovaEP12_01
 <<to_center @1 bust 8fr>>
 <<at_close  @1 bust 12fr>>
 <<left      @1 1u 10fr>>
+
+<<mirror c1>>
 _#beat #stay
 
 윌로: 죄송합니다만, 이번 의뢰는 보수의 3분의 1밖에 드릴 수 없겠군요.
