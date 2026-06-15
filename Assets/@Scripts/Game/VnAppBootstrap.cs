@@ -114,6 +114,7 @@ public class VnAppBootstrap : MonoBehaviour
     
     [Header("Emoji")] 
     [SerializeField] private CharacterEmojiLibrarySO characterEmojiLibrarySo;
+    [SerializeField] private CharacterEmojiVisualPresetSO characterEmojiVisualPresetSo;
     
     [Header("UI")] 
     [SerializeField] private EpisodePlayer episodePlayer;
@@ -219,7 +220,7 @@ public class VnAppBootstrap : MonoBehaviour
         PortraitResolver portraitResolver = new(portraitGeneratedDbSo);
         CharacterEmojiResolver emojiResolver = new(characterEmojiLibrarySo);
 
-        CharRigCommandFactory charRigFactory = new(
+        CharacterRigCommandFactory charRigFactory = new(
             charRigSlotResolver,
             characterRigBuilder,
             portraitResolver,
@@ -229,7 +230,8 @@ public class VnAppBootstrap : MonoBehaviour
             characterFocusTuningDb,
             characterVisualFocusPresetDb,
             characterDepthTuning,
-            roleDepthTuningDb);
+            roleDepthTuningDb,
+            characterEmojiVisualPresetSo);
 
         // Background Rig
         BackgroundRigSlotResolver backgroundRigSlotResolver = new();

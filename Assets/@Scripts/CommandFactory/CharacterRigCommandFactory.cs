@@ -1,4 +1,4 @@
-public sealed class CharRigCommandFactory : INodeCommandFactory
+public sealed class CharacterRigCommandFactory : INodeCommandFactory
 {
     private readonly CharRigSlotResolver _rigSlotResolver;
     private readonly CharacterRigBuilder _rigBuilder;
@@ -13,9 +13,11 @@ public sealed class CharRigCommandFactory : INodeCommandFactory
     
     private readonly CharacterDepthTuningSO _characterDepthTuning;
     private readonly RoleDepthTuningDBSO _roleDepthTuningDb;
+    private readonly CharacterEmojiVisualPresetSO _characterEmojiVisualPresetSo;
+    
     
 
-    public CharRigCommandFactory(
+    public CharacterRigCommandFactory(
         CharRigSlotResolver charRigSlotResolver,
         CharacterRigBuilder charRigBuilder,
         PortraitResolver portraitResolver,
@@ -25,7 +27,8 @@ public sealed class CharRigCommandFactory : INodeCommandFactory
         CharacterFocusTuningDBSO characterFocusTuningDb,
         CharacterVisualFocusPresetDBSO characterVisualFocusPresetDb,
         CharacterDepthTuningSO characterDepthTuning,
-        RoleDepthTuningDBSO roleDepthTuningDb)
+        RoleDepthTuningDBSO roleDepthTuningDb,
+        CharacterEmojiVisualPresetSO characterEmojiVisualPresetSo)
     {
         _rigSlotResolver = charRigSlotResolver;
         _rigBuilder = charRigBuilder;
@@ -37,6 +40,7 @@ public sealed class CharRigCommandFactory : INodeCommandFactory
         _characterVisualFocusPresetDb = characterVisualFocusPresetDb;
         _characterDepthTuning = characterDepthTuning;
         _roleDepthTuningDb = roleDepthTuningDb;
+        _characterEmojiVisualPresetSo = characterEmojiVisualPresetSo;
     }
 
     public bool TryCreate(CommandSpecBase spec, out ISequenceCommand command)
@@ -107,6 +111,8 @@ public sealed class CharRigCommandFactory : INodeCommandFactory
             SetCharacterEmojiCommandSpecCharR s => new SetCharacterEmojiCommandCharR(s, _emojiResolver),
             PlaceCharacterEmojiCommandSpecCharR s => new PlaceCharacterEmojiCommandCharR(s, _emojiResolver, _characterFocusTuningDb),
             RevealCharacterEmojiCommandSpecCharR s => new RevealCharacterEmojiCommandCharR(s),
+            
+            SetCharacterEmojiMaterialCommandSpecCharR s => new SetCharacterEmojiMaterialCommandCharR(s, _characterEmojiVisualPresetSo),
             
             // AttachCharRigToBackgroundObjectSlot
             AttachCharRigToBackgroundObjectSlotCommandSpec s => new AttachCharRigToBackgroundObjectSlotCommand(s),

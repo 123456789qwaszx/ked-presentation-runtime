@@ -265,9 +265,7 @@ public sealed partial class YarnCommandBridge : InlineEventMarkupHandler.IInline
     {
         Collect(BuildPlaceEmojiSpec(
             roleKey,
-            emojiKey,
-            Vector2.zero,
-            wait: false));
+            emojiKey));
     }
 
     // Optional command hook candidate:
@@ -280,11 +278,7 @@ public sealed partial class YarnCommandBridge : InlineEventMarkupHandler.IInline
     {
         Collect(BuildPlaceEmojiSpec(
             roleKey,
-            emojiKey,
-            new Vector2(
-                YarnUnitParser.ParseAllowNegative(xToken),
-                YarnUnitParser.ParseAllowNegative(yToken)),
-            wait: false));
+            emojiKey));
     }
 
     // Optional command hook candidate:
@@ -358,16 +352,13 @@ public sealed partial class YarnCommandBridge : InlineEventMarkupHandler.IInline
             targetMask = CharRigRootMask.CharacterEmoji_Root
         });
 
-        Collect(BuildSetEmojiSpec(
-            roleKey,
-            emojiKey,
-            initialReveal));
+        Collect(BuildSetEmojiImageSpec(roleKey, emojiKey));
+        Collect(BuildSetEmojiMaterialSpec(roleKey, initialReveal: 0f));
+        Collect(BuildRevealEmojiSpec(roleKey, 0f, 1f, 0.8f, Ease.OutCubic, false));
 
         Collect(BuildPlaceEmojiSpec(
             roleKey,
-            emojiKey,
-            Vector2.zero,
-            wait: false));
+            emojiKey));
 
         if (resetMotionAxes)
             EnqueueEmojiResetMotionAxesSpec(roleKey);
@@ -417,32 +408,43 @@ public sealed partial class YarnCommandBridge : InlineEventMarkupHandler.IInline
             wait: false));
     }
 
-    private SetCharacterEmojiCommandSpecCharR BuildSetEmojiSpec(
+    private SetCharacterEmojiCommandSpecCharR BuildSetEmojiImageSpec(
         string roleKey,
-        string emojiKey,
-        float initialReveal)
+        string emojiKey)
     {
         return new SetCharacterEmojiCommandSpecCharR
         {
             slotKey = roleKey,
             emojiKey = emojiKey,
 
-            rootTarget = CharacterRigTarget.CharacterEmojiSlot00_Root,
             imageTarget = CharacterRigTarget.EmojiSlot00_Image,
 
-            useResolvedVisualPreset = true,
-            overrideVisualPreset = false,
+            preserveAspect = true,
+            setNativeSize = false,
+
+            wait = false
+        };
+    }
+    
+    private SetCharacterEmojiMaterialCommandSpecCharR BuildSetEmojiMaterialSpec(
+        string roleKey,
+        float initialReveal)
+    {
+        return new SetCharacterEmojiMaterialCommandSpecCharR
+        {
+            slotKey = roleKey,
+
+            imageTarget = CharacterRigTarget.EmojiSlot00_Image,
 
             initialReveal = initialReveal,
+
             wait = false
         };
     }
 
     private PlaceCharacterEmojiCommandSpecCharR BuildPlaceEmojiSpec(
         string roleKey,
-        string emojiKey,
-        Vector2 commandOffsetInRigSpace,
-        bool wait)
+        string emojiKey)
     {
         return new PlaceCharacterEmojiCommandSpecCharR
         {
@@ -450,18 +452,6 @@ public sealed partial class YarnCommandBridge : InlineEventMarkupHandler.IInline
             emojiKey = emojiKey,
 
             castTarget = CharacterRigTarget.CharacterEmojiSlot00_CastTransform,
-            imageTarget = CharacterRigTarget.EmojiSlot00_Image,
-
-            useResolvedPlacement = true,
-            overridePlacement = false,
-            commandOffsetInRigSpace = commandOffsetInRigSpace,
-            useSettledPlacementTargets = true,
-
-            resetCastTransform = true,
-            applyScaleAndRotation = true,
-            applyImageSettings = true,
-
-            wait = wait
         };
     }
 

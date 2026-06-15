@@ -9,6 +9,63 @@ public sealed class CharacterEmojiResolver
         _library = library;
     }
 
+    public bool TryResolveEntry(
+        string emojiKey,
+        out CharacterEmojiEntry entry)
+    {
+        entry = null;
+
+        if (_library == null)
+            return false;
+
+        string normalizedKey = NormalizeEmojiKey(emojiKey);
+
+        return _library.TryGet(normalizedKey, out entry) &&
+               entry != null;
+    }
+
+    public bool TryResolveSprite(
+        string emojiKey,
+        out Sprite sprite)
+    {
+        sprite = null;
+
+        if (!TryResolveEntry(emojiKey, out CharacterEmojiEntry entry))
+            return false;
+
+        if (entry.sprite == null)
+            return false;
+
+        sprite = entry.sprite;
+        return true;
+    }
+
+    public bool TryResolvePlacement(
+        string emojiKey,
+        out CharacterEmojiPlacement placement)
+    {
+        placement = CharacterEmojiPlacement.Default;
+
+        if (!TryResolveEntry(emojiKey, out CharacterEmojiEntry entry))
+            return false;
+
+        placement = entry.placement;
+        return true;
+    }
+
+    public bool TryResolveVisualPreset(
+        string emojiKey,
+        out CharacterEmojiVisualPresetSO visualPreset)
+    {
+        visualPreset = null;
+
+        if (!TryResolveEntry(emojiKey, out CharacterEmojiEntry entry))
+            return false;
+
+        visualPreset = entry.defaultVisualPreset;
+        return visualPreset != null;
+    }
+
     public bool TryResolve(
         string emojiKey,
         out Sprite sprite,
@@ -19,15 +76,7 @@ public sealed class CharacterEmojiResolver
         placement = CharacterEmojiPlacement.Default;
         visualPreset = null;
 
-        if (_library == null)
-            return false;
-
-        string normalizedKey = NormalizeEmojiKey(emojiKey);
-
-        if (!_library.TryGet(normalizedKey, out CharacterEmojiEntry entry))
-            return false;
-
-        if (entry.sprite == null)
+        if (!TryResolveEntry(emojiKey, out CharacterEmojiEntry entry))
             return false;
 
         sprite = entry.sprite;
@@ -43,9 +92,6 @@ public sealed class CharacterEmojiResolver
 
         string trimmed = emojiKey.Trim();
 
-        // Authoring shortcut:
-        // "1", "9" resolve to "01", "09".
-        // Existing keys like "07", "10" are preserved.
         if (trimmed.Length == 1 && trimmed[0] >= '1' && trimmed[0] <= '9')
             return "0" + trimmed;
 
