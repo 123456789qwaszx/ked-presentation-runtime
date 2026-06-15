@@ -222,10 +222,14 @@ public sealed partial class YarnCommandBridge : InlineEventMarkupHandler.IInline
     // <<emoji_hide igna>>
     private void EnqueueEmojiHideSpec(string roleKey)
     {
-        Collect(BuildSetEmojiSpec(
-            roleKey,
-            "",
-            initialReveal: 0f));
+        Collect(new FadeOutCommandSpecCharR
+        {
+            slotKey = roleKey,
+            target = CharacterRigTarget.CharacterEmojiSlot00_Root,
+            duration = 0.16f,
+            ease = Ease.OutCubic,
+            wait = false
+        });
     }
 
     private SetCharacterEmojiCommandSpecCharR BuildSetEmojiSpec(
@@ -241,6 +245,11 @@ public sealed partial class YarnCommandBridge : InlineEventMarkupHandler.IInline
             rootTarget = CharacterRigTarget.CharacterEmojiSlot00_Root,
             castTarget = CharacterRigTarget.CharacterEmojiSlot00_CastTransform,
             imageTarget = CharacterRigTarget.EmojiSlot00_Image,
+
+            useResolvedPlacement = true,
+            overridePlacement = false,
+            commandOffsetInRigSpace = Vector2.zero,
+            useSettledPlacementTargets = true,
 
             alpha = 1f,
             initialReveal = initialReveal,

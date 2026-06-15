@@ -12,11 +12,11 @@ public sealed class CharacterEmojiResolver
     public bool TryResolve(
         string emojiKey,
         out Sprite sprite,
-        out CharacterEmojiLayout layout,
+        out CharacterEmojiPlacement placement,
         out CharacterEmojiVisualPresetSO visualPreset)
     {
         sprite = null;
-        layout = CharacterEmojiLayout.Default;
+        placement = CharacterEmojiPlacement.Default;
         visualPreset = null;
 
         if (_library == null)
@@ -31,7 +31,7 @@ public sealed class CharacterEmojiResolver
             return false;
 
         sprite = entry.sprite;
-        layout = entry.layout;
+        placement = entry.placement;
         visualPreset = entry.defaultVisualPreset;
         return true;
     }
@@ -44,7 +44,7 @@ public sealed class CharacterEmojiResolver
         string trimmed = emojiKey.Trim();
 
         // Authoring shortcut:
-        // "1", "9" resolve to "01","09".
+        // "1", "9" resolve to "01", "09".
         // Existing keys like "07", "10" are preserved.
         if (trimmed.Length == 1 && trimmed[0] >= '1' && trimmed[0] <= '9')
             return "0" + trimmed;

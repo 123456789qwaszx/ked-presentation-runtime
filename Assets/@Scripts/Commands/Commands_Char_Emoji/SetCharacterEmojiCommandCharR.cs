@@ -11,18 +11,22 @@ public sealed class SetCharacterEmojiCommandSpecCharR : CharacterRigCommandSpecB
     [Header("Emoji Identity")]
     public string emojiKey;
 
-    [Tooltip("Resolver를 거치지 않고 직접 스프라이트를 넣고 싶을 때 사용합니다.")]
-    public Sprite directSprite;
-
     [Header("Rig Targets")]
     public CharacterRigTarget rootTarget = CharacterRigTarget.CharacterEmojiSlot00_Root;
     public CharacterRigTarget castTarget = CharacterRigTarget.CharacterEmojiSlot00_CastTransform;
     public CharacterRigTarget imageTarget = CharacterRigTarget.EmojiSlot00_Image;
 
-    [Header("Layout")]
-    public bool useResolvedLayout = true;
-    public bool overrideLayout = false;
-    public CharacterEmojiLayout layout = CharacterEmojiLayout.Default;
+    [Header("Placement")]
+    public bool useResolvedPlacement = true;
+    public bool overridePlacement = false;
+
+    public CharacterEmojiPlacement placement = CharacterEmojiPlacement.Default;
+
+    [Tooltip("Library/override placement 위에 추가로 더하는 임시 RigSpace 오프셋입니다.")]
+    public Vector2 commandOffsetInRigSpace = Vector2.zero;
+
+    [Tooltip("진행 중인 place/depth 계열 커맨드가 있으면 settled target 기준으로 focus point를 측정합니다.")]
+    public bool useSettledPlacementTargets = true;
 
     [Header("Visibility")]
     [Tooltip("배치 직후 Emoji slot Root의 CanvasGroup alpha입니다. Fade 연출이 아니라 즉시 상태값입니다.")]
@@ -47,7 +51,9 @@ public sealed class SetCharacterEmojiCommandCharR : CommandBase
 {
     private readonly SetCharacterEmojiCommandSpecCharR _spec;
     private readonly CharacterEmojiResolver _resolver;
+    private readonly CharacterFocusTuningDBSO _focusTuningDb;
 
+    private CharacterRigRefs _rigRefs;
     private RectTransform _root;
     private RectTransform _castTransform;
     private Image _image;
@@ -55,11 +61,11 @@ public sealed class SetCharacterEmojiCommandCharR : CommandBase
     private CharacterEmojiMaterialRuntime _materialRuntime;
 
     private Sprite _resolvedSprite;
-    private CharacterEmojiLayout _resolvedLayout;
+    private CharacterEmojiPlacement _resolvedPlacement;
     private CharacterEmojiVisualPresetSO _resolvedVisualPreset;
 
+    private bool _hasResolvedEmoji;
     private bool _resolveAttempted;
-    private bool _isHideRequest;
 
     private bool HasClaimedTarget { get; set; }
 
@@ -68,10 +74,12 @@ public sealed class SetCharacterEmojiCommandCharR : CommandBase
 
     public SetCharacterEmojiCommandCharR(
         SetCharacterEmojiCommandSpecCharR spec,
-        CharacterEmojiResolver resolver)
+        CharacterEmojiResolver resolver,
+        CharacterFocusTuningDBSO focusTuningDb)
     {
         _spec = spec;
         _resolver = resolver;
+        _focusTuningDb = focusTuningDb;
     }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
@@ -79,11 +87,11 @@ public sealed class SetCharacterEmojiCommandCharR : CommandBase
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (!HasValidTargets())
+        if (!HasValidRefs() || !_hasResolvedEmoji)
             yield break;
 
         ClaimTarget();
-        CommitFinalState();
+        CommitFinalState(scope);
 
         yield break;
     }
@@ -93,38 +101,28 @@ public sealed class SetCharacterEmojiCommandCharR : CommandBase
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (!HasValidTargets())
+        if (!HasValidRefs() || !_hasResolvedEmoji)
             return;
 
         if (!HasClaimedTarget)
             ClaimTarget();
-        else
-            KillCurrentTween();
 
-        CommitFinalState();
+        CommitFinalState(scope);
     }
 
     private void ResolveRefs(CommandRunScope scope)
     {
         _resolveAttempted = true;
 
-        CharacterRigRefs rigRefs =
-            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(
-                scope,
-                _spec.slotKey);
+        _rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
 
-        if (rigRefs == null)
-        {
-            Debug.LogWarning(
-                $"[SetCharacterEmojiCommandCharR] Failed to resolve CharacterRigRefs. " +
-                $"targetKey='{_spec.slotKey}', emojiKey='{_spec.emojiKey}'.");
+        if (_rigRefs == null)
             return;
-        }
 
-        _root = rigRefs.GetRect(_spec.rootTarget);
-        _castTransform = rigRefs.GetRect(_spec.castTarget);
-        _image = rigRefs.GetImage(_spec.imageTarget);
-        _materialRuntime = rigRefs.GetEmojiMaterialRuntime(_spec.imageTarget);
+        _root = _rigRefs.GetRect(_spec.rootTarget);
+        _castTransform = _rigRefs.GetRect(_spec.castTarget);
+        _image = _rigRefs.GetImage(_spec.imageTarget);
+        _materialRuntime = _rigRefs.GetEmojiMaterialRuntime(_spec.imageTarget);
 
         if (_root != null)
             _root.TryGetComponent(out _rootCanvasGroup);
@@ -134,101 +132,53 @@ public sealed class SetCharacterEmojiCommandCharR : CommandBase
 
     private void ClaimTarget()
     {
-        KillPreviousTween();
+        _materialRuntime?.KillTween(true);
+        _rootCanvasGroup?.DOKill(true);
+        _castTransform?.DOKill(true);
 
         HasClaimedTarget = true;
     }
 
-    private void KillPreviousTween()
+    private void CommitFinalState(CommandRunScope scope)
     {
-        _materialRuntime?.KillTween(true);
-
-        if (_rootCanvasGroup != null)
-            _rootCanvasGroup.DOKill(true);
-
-        if (_castTransform != null)
-            _castTransform.DOKill(true);
-    }
-
-    private void KillCurrentTween()
-    {
-        _materialRuntime?.KillTween(false);
-
-        if (_rootCanvasGroup != null)
-            _rootCanvasGroup.DOKill(false);
-
-        if (_castTransform != null)
-            _castTransform.DOKill(false);
-    }
-
-    private void CommitFinalState()
-    {
-        if (!HasValidTargets())
-        {
-            HasClaimedTarget = false;
-            return;
-        }
-
-        if (_isHideRequest)
-        {
-            ApplyHiddenState();
-            HasClaimedTarget = false;
-            return;
-        }
-
-        if (_resolvedSprite == null)
-        {
-            HasClaimedTarget = false;
-            return;
-        }
-
-        ApplySpriteAndLayout();
+        ApplySpriteAndPlacement(scope);
         ApplyEmojiMaterialInitialState();
 
-        _rootCanvasGroup.alpha = _spec.alpha;
+        if (_rootCanvasGroup != null)
+        {
+            _rootCanvasGroup.alpha = _spec.alpha;
+            _rootCanvasGroup.interactable = true;
+            _rootCanvasGroup.blocksRaycasts = true;
+        }
 
         HasClaimedTarget = false;
     }
 
     private void ResolveEmoji()
     {
+        _hasResolvedEmoji = false;
         _resolvedSprite = null;
-        _resolvedLayout = CharacterEmojiLayout.Default;
+        _resolvedPlacement = CharacterEmojiPlacement.Default;
         _resolvedVisualPreset = null;
-        _isHideRequest = false;
-
-        if (_spec.directSprite == null && string.IsNullOrWhiteSpace(_spec.emojiKey))
-        {
-            _isHideRequest = true;
-            return;
-        }
-
-        if (_spec.directSprite != null)
-        {
-            _resolvedSprite = _spec.directSprite;
-            _resolvedLayout = _spec.overrideLayout
-                ? _spec.layout
-                : CharacterEmojiLayout.Default;
-
-            return;
-        }
 
         if (_resolver != null &&
             _resolver.TryResolve(
                 _spec.emojiKey,
                 out Sprite sprite,
-                out CharacterEmojiLayout resolvedLayout,
+                out CharacterEmojiPlacement resolvedPlacement,
                 out _resolvedVisualPreset))
         {
+            _hasResolvedEmoji = true;
             _resolvedSprite = sprite;
 
-            if (_spec.overrideLayout)
-                _resolvedLayout = _spec.layout;
-            else if (_spec.useResolvedLayout)
-                _resolvedLayout = resolvedLayout;
+            if (_spec.overridePlacement)
+                _resolvedPlacement = _spec.placement;
+            else if (_spec.useResolvedPlacement)
+                _resolvedPlacement = resolvedPlacement;
             else
-                _resolvedLayout = CharacterEmojiLayout.Default;
+                _resolvedPlacement = CharacterEmojiPlacement.Default;
 
+            _resolvedPlacement.offsetFromFocusInRigSpace += _spec.commandOffsetInRigSpace;
             return;
         }
 
@@ -237,25 +187,22 @@ public sealed class SetCharacterEmojiCommandCharR : CommandBase
             $"emojiKey='{_spec.emojiKey}', targetKey='{_spec.slotKey}'.");
     }
 
-    private void ApplySpriteAndLayout()
+    private void ApplySpriteAndPlacement(CommandRunScope scope)
     {
-        if (!HasValidTargets() || _resolvedSprite == null)
-            return;
-
-        if (!_root.gameObject.activeSelf)
+        if (_root != null && !_root.gameObject.activeSelf)
             _root.gameObject.SetActive(true);
 
         _image.gameObject.SetActive(true);
         _image.enabled = true;
         _image.sprite = _resolvedSprite;
-        _image.preserveAspect = _resolvedLayout.preserveAspect;
+        _image.preserveAspect = _resolvedPlacement.preserveAspect;
 
         if (_spec.resetCastTransform)
             ResetCastTransform();
 
-        ApplyLayout();
+        ApplyPlacement(scope);
 
-        if (_resolvedLayout.setNativeSize && _image.sprite != null)
+        if (_resolvedPlacement.setNativeSize && _image.sprite != null)
             _image.SetNativeSize();
     }
 
@@ -263,24 +210,8 @@ public sealed class SetCharacterEmojiCommandCharR : CommandBase
     {
         CharacterEmojiVisualPresetSO preset = ResolveVisualPreset();
 
-        if (preset == null)
+        if (preset == null || preset.baseMaterial == null || _materialRuntime == null)
             return;
-
-        if (preset.baseMaterial == null)
-        {
-            Debug.LogWarning(
-                $"[SetCharacterEmojiCommandCharR] Emoji visual preset has no baseMaterial. " +
-                $"targetKey='{_spec.slotKey}', emojiKey='{_spec.emojiKey}', preset='{preset.name}'.");
-            return;
-        }
-
-        if (_materialRuntime == null)
-        {
-            Debug.LogWarning(
-                $"[SetCharacterEmojiCommandCharR] Failed to resolve emoji material runtime. " +
-                $"targetKey='{_spec.slotKey}', imageTarget='{_spec.imageTarget}'.");
-            return;
-        }
 
         if (!_materialRuntime.EnsureMaterial(preset.baseMaterial))
             return;
@@ -302,11 +233,58 @@ public sealed class SetCharacterEmojiCommandCharR : CommandBase
         return null;
     }
 
-    private void ApplyLayout()
+    private void ApplyPlacement(CommandRunScope scope)
     {
-        _castTransform.anchoredPosition = _resolvedLayout.anchoredPosition;
-        _castTransform.localScale = _resolvedLayout.localScale;
-        _castTransform.localRotation = Quaternion.Euler(0f, 0f, _resolvedLayout.rotationZ);
+        if (TryResolveFocusAnchoredPosition(scope, out Vector2 anchoredPosition))
+            _castTransform.anchoredPosition = anchoredPosition;
+        else
+            _castTransform.anchoredPosition = Vector2.zero;
+
+        _castTransform.localScale = _resolvedPlacement.localScale;
+        _castTransform.localRotation = Quaternion.Euler(0f, 0f, _resolvedPlacement.rotationZ);
+    }
+
+    private bool TryResolveFocusAnchoredPosition(CommandRunScope scope, out Vector2 anchoredPosition)
+    {
+        anchoredPosition = Vector2.zero;
+
+        if (_focusTuningDb == null || _castTransform == null || _castTransform.parent == null)
+            return false;
+
+        IShotResponseStageProvider stageProvider = UIManager.Instance.GetUI<PresentationUIRoot>();
+
+        if (stageProvider == null || stageProvider.RigSpaceRoot == null)
+            return false;
+
+        string tuningKey = CharacterRigTargetResolver.ResolveCharacterKeyFromTargetKey(scope, _spec.slotKey);
+
+        if (!CharacterFocusPointResolver.TryResolveFromRigRefs(
+                _rigRefs,
+                stageProvider.RigSpaceRoot,
+                tuningKey,
+                _resolvedPlacement.focusPreset,
+                _resolvedPlacement.offsetFromFocusInRigSpace,
+                _focusTuningDb,
+                _spec.useSettledPlacementTargets,
+                out CharacterFocusPointResult focusResult))
+        {
+            return false;
+        }
+
+        if (focusResult.RigSpaceRoot == null)
+            return false;
+
+        Vector3 targetWorld = focusResult.RigSpaceRoot.TransformPoint(
+            new Vector3(
+                focusResult.FocusPointInRigSpace.x,
+                focusResult.FocusPointInRigSpace.y,
+                0f));
+
+        RectTransform parent = _castTransform.parent as RectTransform;
+        Vector3 targetInParentLocal = parent.InverseTransformPoint(targetWorld);
+
+        anchoredPosition = new Vector2(targetInParentLocal.x, targetInParentLocal.y);
+        return true;
     }
 
     private void ResetCastTransform()
@@ -316,17 +294,12 @@ public sealed class SetCharacterEmojiCommandCharR : CommandBase
         _castTransform.localRotation = Quaternion.identity;
     }
 
-    private void ApplyHiddenState()
+    private bool HasValidRefs()
     {
-        _image.sprite = null;
-        _image.enabled = false;
-        _rootCanvasGroup.alpha = 0f;
-
-        _materialRuntime?.KillTween(false);
-    }
-
-    private bool HasValidTargets()
-    {
-        return _root != null && _rootCanvasGroup != null && _castTransform != null && _image != null;
+        return
+            _rigRefs != null &&
+            _root != null &&
+            _castTransform != null &&
+            _image != null;
     }
 }
