@@ -77,6 +77,7 @@ public sealed class CharacterRigCommandFactory : INodeCommandFactory
             MoveByCommandSpecCharR s => new MoveByCommandCharR(s),
             ScaleToCommandSpecCharR s => new ScaleToCommandCharR(s),
             RotateToCommandSpecCharR s => new RotateToCommandCharR(s),
+            RotateByCommandSpecCharR s => new RotateByCommandCharR(s),
             PivotRotateToCommandSpecCharR s => new PivotRotateToCommandCharR(s),
             
             // Composition / Focus-aware Placement
@@ -113,6 +114,12 @@ public sealed class CharacterRigCommandFactory : INodeCommandFactory
             RevealCharacterEmojiCommandSpecCharR s => new RevealCharacterEmojiCommandCharR(s),
             
             InitCharacterEmojiCommandSpecCharR s => new InitCharacterEmojiCommandCharR(s, _emojiResolver, _characterEmojiVisualPresetSo, _characterFocusTuningDb),
+            
+            AnimateCharacterEmojiFramesCommandSpecCharR s => new AnimateCharacterEmojiFramesCommandCharR(s, _emojiResolver),
+            SpringAppearCommandSpecCharR s => new SpringAppearCommandCharR(s),
+            EmojiHeartPaperPlaneCommandSpecCharR s => new EmojiHeartPaperPlaneCommandCharR(s),
+            EmojiChatterWiggleCommandSpecCharR s => new EmojiChatterWiggleCommandCharR(s),
+            EmojiIdleDoublePulseCommandSpecCharR s => new EmojiIdleDoublePulseCommandCharR(s),
             
             // AttachCharRigToBackgroundObjectSlot
             AttachCharRigToBackgroundObjectSlotCommandSpec s => new AttachCharRigToBackgroundObjectSlotCommand(s),

@@ -260,6 +260,7 @@ public sealed class CharacterRigBuilder
         refs.EmojiSlot00_SwayPivot = GetRt(CharacterRigSchema.Refs.EmojiSlot00_SwayPivot);
         refs.EmojiSlot00_BaseRotation = GetRt(CharacterRigSchema.Refs.EmojiSlot00_BaseRotation);
         refs.EmojiSlot00_Rotation = GetRt(CharacterRigSchema.Refs.EmojiSlot00_Rotation);
+        refs.EmojiSlot00_Rotation_Offset = GetRt(CharacterRigSchema.Refs.EmojiSlot00_Rotation_Offset);
         refs.EmojiSlot00_Image = GetImg(CharacterRigSchema.Refs.EmojiSlot00_Image);
         
         // Emoji01 casting/effect axis
@@ -276,6 +277,7 @@ public sealed class CharacterRigBuilder
         refs.EmojiSlot01_SwayPivot = GetRt(CharacterRigSchema.Refs.EmojiSlot01_SwayPivot);
         refs.EmojiSlot01_BaseRotation = GetRt(CharacterRigSchema.Refs.EmojiSlot01_BaseRotation);
         refs.EmojiSlot01_Rotation = GetRt(CharacterRigSchema.Refs.EmojiSlot01_Rotation);
+        refs.EmojiSlot01_Rotation_Offset = GetRt(CharacterRigSchema.Refs.EmojiSlot01_Rotation_Offset);
         refs.EmojiSlot01_Image = GetImg(CharacterRigSchema.Refs.EmojiSlot01_Image);
         
         // Emoji02 casting/effect axis
@@ -292,6 +294,7 @@ public sealed class CharacterRigBuilder
         refs.EmojiSlot02_SwayPivot = GetRt(CharacterRigSchema.Refs.EmojiSlot02_SwayPivot);
         refs.EmojiSlot02_BaseRotation = GetRt(CharacterRigSchema.Refs.EmojiSlot02_BaseRotation);
         refs.EmojiSlot02_Rotation = GetRt(CharacterRigSchema.Refs.EmojiSlot02_Rotation);
+        refs.EmojiSlot02_Rotation_Offset = GetRt(CharacterRigSchema.Refs.EmojiSlot02_Rotation_Offset);
         refs.EmojiSlot02_Image = GetImg(CharacterRigSchema.Refs.EmojiSlot02_Image);
         
         refs.CharacterPortrait_ActingScale = GetRt(CharacterRigSchema.Refs.CharacterPortrait_ActingScale);

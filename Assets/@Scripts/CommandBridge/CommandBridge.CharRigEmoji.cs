@@ -26,6 +26,12 @@ public sealed partial class YarnCommandBridge : InlineEventMarkupHandler.IInline
     private void BindCharRigEmoji(DialogueRunner runner)
     {
         runner.AddCommandHandler<string, string>(
+            "emoji_show", EnqueueEmojiSetSpec);
+
+        runner.AddCommandHandler<string>(
+            "emoji_hide", EnqueueEmojiHideSpec);
+        
+        runner.AddCommandHandler<string, string>(
             "emoji_place", EnqueueEmojiPlaceSpec);
 
         runner.AddCommandHandler<string, float, string>(
@@ -36,12 +42,6 @@ public sealed partial class YarnCommandBridge : InlineEventMarkupHandler.IInline
 
         runner.AddCommandHandler<string, int, string>(
             "emoji_rotate", EnqueueEmojiRotateToSpec);
-
-        runner.AddCommandHandler<string, string>(
-            "emoji_show", EnqueueEmojiSetSpec);
-
-        runner.AddCommandHandler<string>(
-            "emoji_hide", EnqueueEmojiHideSpec);
     }
     
     private void EnqueueEmojiSetSpec(

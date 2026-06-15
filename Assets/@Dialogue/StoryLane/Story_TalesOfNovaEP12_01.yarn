@@ -77,17 +77,23 @@ _#beat #stay
 //<<emoji @2 19>>    
 
 <<emoji c1 09>>
-qwe
-<<emoji_hop c1 19>>
+emoji_spring
+<<emoji_heartfly c1 1>>
+emoji_pinwheel
+<<emoji_spit c1 19>>
 hop
-<<emoji_drop c1 14>>
+<<emoji_pinwheel c1 16>>
 drop
-<<emoji_tremble c1 12>>
+<<emoji_spring c1 12>>
 tremble
-<<emoji_shock c1 11>>
+<<emoji_spring c1 11>>
 shock
-<<emoji_sway c1 4>>
-sway
+<<emoji_spring c1 19>>
+spring
+<<face_swap c1 25 10fr>>
+<<2fr>>
+<<emoji_spring c1 18>>
+spring
 <<emoji_hide c1>>
 세이나: 안 돼! 이 신기를 얻으려고 우리가 성해를 얼마나 많이 물리쳤는데...... <br>검날이 다 무뎌질 정도였다고!
 

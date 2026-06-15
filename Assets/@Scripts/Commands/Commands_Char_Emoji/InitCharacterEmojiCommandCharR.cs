@@ -27,6 +27,7 @@ public sealed class InitCharacterEmojiCommandSpecCharR : CharacterRigCommandSpec
     public CharacterRigTarget scaleTarget = CharacterRigTarget.EmojiSlot00_Scale;
     public CharacterRigTarget swayPivotTarget = CharacterRigTarget.EmojiSlot00_SwayPivot;
     public CharacterRigTarget rotationTarget = CharacterRigTarget.EmojiSlot00_Rotation;
+    public CharacterRigTarget rotationOffsetTarget = CharacterRigTarget.EmojiSlot00_Rotation_Offset;
 
     [Header("Image")]
     public bool preserveAspect = true;
@@ -252,6 +253,7 @@ public sealed class InitCharacterEmojiCommandCharR : CommandBase
         ResetScale(_rigRefs.GetRect(_spec.scaleTarget));
         ResetRotation(_rigRefs.GetRect(_spec.swayPivotTarget));
         ResetRotation(_rigRefs.GetRect(_spec.rotationTarget));
+        ResetRotation(_rigRefs.GetRect(_spec.rotationOffsetTarget));
     }
 
     private static void ResetAnchoredPosition(RectTransform rect)
