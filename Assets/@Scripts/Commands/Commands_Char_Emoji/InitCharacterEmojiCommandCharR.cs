@@ -15,13 +15,17 @@ public sealed class InitCharacterEmojiCommandSpecCharR : CharacterRigCommandSpec
     [Header("Rig Targets")]
     public CharacterRigTarget rootTarget = CharacterRigTarget.CharacterEmojiSlot00_Root;
     public CharacterRigTarget castTarget = CharacterRigTarget.CharacterEmojiSlot00_CastTransform;
+    public CharacterRigTarget baseSizeTarget = CharacterRigTarget.EmojiSlot00_BaseSize;
+    public CharacterRigTarget baseRotationTarget = CharacterRigTarget.EmojiSlot00_BaseRotation;
     public CharacterRigTarget imageTarget = CharacterRigTarget.EmojiSlot00_Image;
 
     [Header("Motion Reset Targets")]
     public CharacterRigTarget trackMoveTarget = CharacterRigTarget.EmojiSlot00_Track_Move;
     public CharacterRigTarget trackXTarget = CharacterRigTarget.EmojiSlot00_Track_X;
     public CharacterRigTarget trackYTarget = CharacterRigTarget.EmojiSlot00_Track_Y;
+    public CharacterRigTarget effectTarget = CharacterRigTarget.CharacterEmojiSlot00_Effect;
     public CharacterRigTarget scaleTarget = CharacterRigTarget.EmojiSlot00_Scale;
+    public CharacterRigTarget swayPivotTarget = CharacterRigTarget.EmojiSlot00_SwayPivot;
     public CharacterRigTarget rotationTarget = CharacterRigTarget.EmojiSlot00_Rotation;
 
     [Header("Image")]
@@ -36,9 +40,6 @@ public sealed class InitCharacterEmojiCommandSpecCharR : CharacterRigCommandSpec
     public bool resetMotionAxes = true;
 }
 
-// Responsibility:
-// - Emoji 표시를 위한 기본 상태를 한 번에 초기화.
-// - root 표시, sprite, material preset, reveal 초기값, placement, motion axis reset 등.
 public sealed class InitCharacterEmojiCommandCharR : CommandBase
 {
     private const string EmojiMaterialInstanceSuffix = " (Emoji Instance)";
@@ -75,20 +76,27 @@ public sealed class InitCharacterEmojiCommandCharR : CommandBase
 
         RectTransform root = _rigRefs.GetRect(_spec.rootTarget);
         RectTransform castTransform = _rigRefs.GetRect(_spec.castTarget);
+        RectTransform baseSizeTransform = _rigRefs.GetRect(_spec.baseSizeTarget);
+        RectTransform baseRotationTransform = _rigRefs.GetRect(_spec.baseRotationTarget);
         Image image = _rigRefs.GetImage(_spec.imageTarget);
 
         DOTween.Kill(image, true);
 
         root.GetComponent<CanvasGroup>().alpha = 1f;
-        
+
         image.sprite = sprite;
         image.preserveAspect = _spec.preserveAspect;
 
         if (_spec.setNativeSize)
             image.SetNativeSize();
-        
+
         ApplyMaterial(image);
-        ApplyPlacement(scope, castTransform, placement);
+        ApplyPlacement(
+            scope,
+            castTransform,
+            baseSizeTransform,
+            baseRotationTransform,
+            placement);
 
         if (_spec.resetMotionAxes)
             ResetMotionAxes();
@@ -132,7 +140,7 @@ public sealed class InitCharacterEmojiCommandCharR : CommandBase
 
         if (IsEmojiMaterialInstance(currentMaterial) && currentMaterial.shader == baseMaterial.shader)
             return currentMaterial;
-        
+
         if (IsEmojiMaterialInstance(currentMaterial))
             Object.Destroy(currentMaterial);
 
@@ -160,6 +168,8 @@ public sealed class InitCharacterEmojiCommandCharR : CommandBase
     private void ApplyPlacement(
         CommandRunScope scope,
         RectTransform castTransform,
+        RectTransform baseSizeTransform,
+        RectTransform baseRotationTransform,
         CharacterEmojiPlacement placement)
     {
         TryResolveFocusAnchoredPosition(
@@ -168,9 +178,23 @@ public sealed class InitCharacterEmojiCommandCharR : CommandBase
             placement,
             out Vector2 anchoredPosition);
 
+        // CastTransform은 이제 "어디에 뜨는가"만 담당한다.
+        castTransform.DOKill(true);
         castTransform.anchoredPosition = anchoredPosition;
-        castTransform.localScale = placement.localScale;
-        castTransform.localRotation = Quaternion.Euler(0f, 0f, placement.rotationZ);
+        castTransform.localScale = Vector3.one;
+        castTransform.localRotation = Quaternion.identity;
+
+        // emoji별 기본 크기는 BaseSize에만 적용한다.
+        baseSizeTransform.DOKill(true);
+        baseSizeTransform.anchoredPosition = Vector2.zero;
+        baseSizeTransform.localScale = placement.localScale;
+        baseSizeTransform.localRotation = Quaternion.identity;
+
+        // emoji별 기본 기울기는 BaseRotation에만 적용한다.
+        baseRotationTransform.DOKill(true);
+        baseRotationTransform.anchoredPosition = Vector2.zero;
+        baseRotationTransform.localScale = Vector3.one;
+        baseRotationTransform.localRotation = Quaternion.Euler(0f, 0f, placement.rotationZ);
     }
 
     private bool TryResolveFocusAnchoredPosition(
@@ -223,7 +247,10 @@ public sealed class InitCharacterEmojiCommandCharR : CommandBase
         ResetAnchoredPosition(_rigRefs.GetRect(_spec.trackXTarget));
         ResetAnchoredPosition(_rigRefs.GetRect(_spec.trackYTarget));
 
+        ResetLocalTransform(_rigRefs.GetRect(_spec.effectTarget));
+
         ResetScale(_rigRefs.GetRect(_spec.scaleTarget));
+        ResetRotation(_rigRefs.GetRect(_spec.swayPivotTarget));
         ResetRotation(_rigRefs.GetRect(_spec.rotationTarget));
     }
 
@@ -242,6 +269,14 @@ public sealed class InitCharacterEmojiCommandCharR : CommandBase
     private static void ResetRotation(RectTransform rect)
     {
         rect.DOKill(true);
+        rect.localRotation = Quaternion.identity;
+    }
+
+    private static void ResetLocalTransform(RectTransform rect)
+    {
+        rect.DOKill(true);
+        rect.anchoredPosition = Vector2.zero;
+        rect.localScale = Vector3.one;
         rect.localRotation = Quaternion.identity;
     }
 }

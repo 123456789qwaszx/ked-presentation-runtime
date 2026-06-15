@@ -243,7 +243,7 @@ public sealed partial class YarnCommandBridge
 
         var spec2SwaySpec = new SwayCommandSpecCharR {
             slotKey = roleKey,
-            target = CharacterRigTarget.EmojiSlot00_Rotation,
+            target = CharacterRigTarget.EmojiSlot00_SwayPivot,
             strength = 9f,
             duration = 0.8f,
             cycles = 1,

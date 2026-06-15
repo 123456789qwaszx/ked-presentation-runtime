@@ -47,7 +47,7 @@ public sealed class BreathInPlaceCommandSpecCharR : CharacterRigCommandSpecBase
     public float blendOut = 0.25f;
 }
 
-public sealed class BreathInPlaceCommandCharR : CommandBase, IRunScopedCommand
+public sealed class BreathInPlaceCommandCharR : CommandBase
 {
     private readonly BreathInPlaceCommandSpecCharR _spec;
 

@@ -77,19 +77,17 @@ _#beat #stay
 //<<emoji @2 19>>    
 
 <<emoji c1 09>>
-<<emoji_place c1 09>>
-<<12fr>>
-<<emoji_hide c1>>
-<<12fr>>
-<<emoji_reveal c1 1 8fr>>
-<<emoji_scale c1 1.4 6fr>>
-<<4fr>>
-<<emoji_rotate c1 -8 6fr>>
-<<8fr>>
+qwe
 <<emoji_hop c1 19>>
-<<8fr>>
-<<emoji_tremble c1 14>>
-<<8fr>>
+hop
+<<emoji_drop c1 14>>
+drop
+<<emoji_tremble c1 12>>
+tremble
+<<emoji_shock c1 11>>
+shock
+<<emoji_sway c1 4>>
+sway
 <<emoji_hide c1>>
 세이나: 안 돼! 이 신기를 얻으려고 우리가 성해를 얼마나 많이 물리쳤는데...... <br>검날이 다 무뎌질 정도였다고!
 
