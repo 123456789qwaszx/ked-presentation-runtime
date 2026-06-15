@@ -7,6 +7,9 @@ public sealed partial class YarnCommandBridge
     private void BindCharRigEmote(DialogueRunner runner)
     {
         runner.AddCommandHandler<string, string>(
+            "emoji", EnqueueEmojiPopSpec);
+        
+        runner.AddCommandHandler<string, string>(
             "emoji_drop", EnqueueEmojiDropSpec);
 
         runner.AddCommandHandler<string, string>(
@@ -21,96 +24,77 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler<string, string>(
             "emoji_tremble", EnqueueEmojiTrembleSpec);
     }
-
-    private void EnqueueEmojiDropSpec(string roleKey, string emojiKey)
+    
+    private void EnqueueEmojiPopSpec(string roleKey, string emojiKey)
     {
-        var spec0_showEmojiRootSpec = new ShowRootLayersCommandSpecCharR
-        {
-            slotKey = roleKey,
-            targetMask = CharRigRootMask.CharacterEmoji_Root
-        };
-
-        var spec1_setEmojiImageSpec = new SetCharacterEmojiCommandSpecCharR
-        {
+        var spec0InitEmojiSpec = new InitCharacterEmojiCommandSpecCharR {
             slotKey = roleKey,
             emojiKey = emojiKey,
+            rootTarget = CharacterRigTarget.CharacterEmojiSlot00_Root,
+            castTarget = CharacterRigTarget.CharacterEmojiSlot00_CastTransform,
             imageTarget = CharacterRigTarget.EmojiSlot00_Image,
-            preserveAspect = true,
-            setNativeSize = false,
-            wait = false
+            initialReveal = 0f,
+            resetMotionAxes = true
         };
 
-        var spec2_setEmojiMaterialSpec = new SetCharacterEmojiMaterialCommandSpecCharR
-        {
+        var spec1PopRevealSpec = new RevealCharacterEmojiCommandSpecCharR {
             slotKey = roleKey,
             target = CharacterRigTarget.EmojiSlot00_Image,
-            initialReveal = 0f,
-            wait = false
+            fromReveal = 0f,
+            toReveal = 1f,
+            duration = 0.8f,
+            ease = Ease.OutCubic
         };
 
-        var spec3_placeEmojiSpec = new PlaceCharacterEmojiCommandSpecCharR
-        {
+        var spec2PopScaleUpSpec = new ScaleToCommandSpecCharR {
             slotKey = roleKey,
-            emojiKey = emojiKey,
-            castTarget = CharacterRigTarget.CharacterEmojiSlot00_CastTransform,
-            wait = false
+            target = CharacterRigTarget.EmojiSlot00_Scale,
+            toScale = new Vector2(1.18f, 1.18f),
+            duration = 0.28f,
+            ease = Ease.OutBack,
+            wait = true
         };
 
-        var spec4_resetTrackMoveSpec = new MoveByCommandSpecCharR
-        {
-            slotKey = roleKey,
-            target = CharacterRigTarget.EmojiSlot00_Track_Move,
-            useAbsolutePosition = true,
-            delta = Vector2.zero,
-            duration = 0f,
-            ease = Ease.Linear,
-            wait = false
-        };
-
-        var spec5_resetTrackXSpec = new MoveByCommandSpecCharR
-        {
-            slotKey = roleKey,
-            target = CharacterRigTarget.EmojiSlot00_Track_X,
-            useAbsolutePosition = true,
-            delta = Vector2.zero,
-            duration = 0f,
-            ease = Ease.Linear,
-            wait = false
-        };
-
-        var spec6_resetTrackYSpec = new MoveByCommandSpecCharR
-        {
-            slotKey = roleKey,
-            target = CharacterRigTarget.EmojiSlot00_Track_Y,
-            useAbsolutePosition = true,
-            delta = Vector2.zero,
-            duration = 0f,
-            ease = Ease.Linear,
-            wait = false
-        };
-
-        var spec7_resetScaleSpec = new ScaleToCommandSpecCharR
-        {
+        var spec3PopScaleBackSpec = new ScaleToCommandSpecCharR {
             slotKey = roleKey,
             target = CharacterRigTarget.EmojiSlot00_Scale,
             toScale = Vector2.one,
-            duration = 0f,
-            ease = Ease.Linear,
-            wait = false
+            duration = 0.52f,
+            ease = Ease.OutCubic,
+            wait = true
         };
 
-        var spec8_resetRotationSpec = new RotateToCommandSpecCharR
-        {
+        var spec4HoldSpec = new WaitCommandSpec {
+            duration = 0.5f
+        };
+
+        var spec5AutoFadeOutSpec = new FadeOutCommandSpecCharR {
             slotKey = roleKey,
-            target = CharacterRigTarget.EmojiSlot00_Rotation,
-            toEuler = Vector3.zero,
-            duration = 0f,
-            ease = Ease.Linear,
-            wait = false
+            target = CharacterRigTarget.CharacterEmojiSlot00_Root,
+            duration = 0.4f
         };
 
-        var spec9_revealEmojiSpec = new RevealCharacterEmojiCommandSpecCharR
-        {
+        Collect(spec0InitEmojiSpec);
+        Collect(spec1PopRevealSpec);
+        Collect(spec2PopScaleUpSpec);
+        Collect(spec3PopScaleBackSpec);
+        Collect(spec4HoldSpec);
+        Collect(spec5AutoFadeOutSpec);
+    }
+
+    private void EnqueueEmojiDropSpec(string roleKey, string emojiKey)
+    {
+        var spec0InitEmojiSpec = new InitCharacterEmojiCommandSpecCharR {
+            slotKey = roleKey,
+            emojiKey = emojiKey,
+            rootTarget = CharacterRigTarget.CharacterEmojiSlot00_Root,
+            castTarget = CharacterRigTarget.CharacterEmojiSlot00_CastTransform,
+            imageTarget = CharacterRigTarget.EmojiSlot00_Image,
+            initialReveal = 0f,
+            resetMotionAxes = true
+        };
+
+        var spec1RevealEmojiSpec = new RevealCharacterEmojiCommandSpecCharR {
             slotKey = roleKey,
             target = CharacterRigTarget.EmojiSlot00_Image,
             fromReveal = 0f,
@@ -120,8 +104,7 @@ public sealed partial class YarnCommandBridge
             wait = false
         };
 
-        var spec10_dropSlideInSpec = new SlideInCommandSpecCharR
-        {
+        var spec2DropSlideInSpec = new SlideInCommandSpecCharR {
             slotKey = roleKey,
             target = CharacterRigTarget.EmojiSlot00_Track_Move,
             direction = CharRigDirection.Up,
@@ -132,108 +115,24 @@ public sealed partial class YarnCommandBridge
             wait = true
         };
 
-        Collect(spec0_showEmojiRootSpec);
-        Collect(spec1_setEmojiImageSpec);
-        Collect(spec2_setEmojiMaterialSpec);
-        Collect(spec3_placeEmojiSpec);
-        Collect(spec4_resetTrackMoveSpec);
-        Collect(spec5_resetTrackXSpec);
-        Collect(spec6_resetTrackYSpec);
-        Collect(spec7_resetScaleSpec);
-        Collect(spec8_resetRotationSpec);
-        Collect(spec9_revealEmojiSpec);
-        Collect(spec10_dropSlideInSpec);
+        Collect(spec0InitEmojiSpec);
+        Collect(spec1RevealEmojiSpec);
+        Collect(spec2DropSlideInSpec);
     }
 
     private void EnqueueEmojiShockSpec(string roleKey, string emojiKey)
     {
-        var spec0_showEmojiRootSpec = new ShowRootLayersCommandSpecCharR
-        {
-            slotKey = roleKey,
-            targetMask = CharRigRootMask.CharacterEmoji_Root
-        };
-
-        var spec1_setEmojiImageSpec = new SetCharacterEmojiCommandSpecCharR
-        {
+        var spec0InitEmojiSpec = new InitCharacterEmojiCommandSpecCharR {
             slotKey = roleKey,
             emojiKey = emojiKey,
-            imageTarget = CharacterRigTarget.EmojiSlot00_Image,
-            preserveAspect = true,
-            setNativeSize = false,
-            wait = false
-        };
-
-        var spec2_setEmojiMaterialSpec = new SetCharacterEmojiMaterialCommandSpecCharR
-        {
-            slotKey = roleKey,
-            target = CharacterRigTarget.EmojiSlot00_Image,
-            initialReveal = 0f,
-            wait = false
-        };
-
-        var spec3_placeEmojiSpec = new PlaceCharacterEmojiCommandSpecCharR
-        {
-            slotKey = roleKey,
-            emojiKey = emojiKey,
+            rootTarget = CharacterRigTarget.CharacterEmojiSlot00_Root,
             castTarget = CharacterRigTarget.CharacterEmojiSlot00_CastTransform,
-            wait = false
+            imageTarget = CharacterRigTarget.EmojiSlot00_Image,
+            initialReveal = 0f,
+            resetMotionAxes = true
         };
 
-        var spec4_resetTrackMoveSpec = new MoveByCommandSpecCharR
-        {
-            slotKey = roleKey,
-            target = CharacterRigTarget.EmojiSlot00_Track_Move,
-            useAbsolutePosition = true,
-            delta = Vector2.zero,
-            duration = 0f,
-            ease = Ease.Linear,
-            wait = false
-        };
-
-        var spec5_resetTrackXSpec = new MoveByCommandSpecCharR
-        {
-            slotKey = roleKey,
-            target = CharacterRigTarget.EmojiSlot00_Track_X,
-            useAbsolutePosition = true,
-            delta = Vector2.zero,
-            duration = 0f,
-            ease = Ease.Linear,
-            wait = false
-        };
-
-        var spec6_resetTrackYSpec = new MoveByCommandSpecCharR
-        {
-            slotKey = roleKey,
-            target = CharacterRigTarget.EmojiSlot00_Track_Y,
-            useAbsolutePosition = true,
-            delta = Vector2.zero,
-            duration = 0f,
-            ease = Ease.Linear,
-            wait = false
-        };
-
-        var spec7_resetScaleSpec = new ScaleToCommandSpecCharR
-        {
-            slotKey = roleKey,
-            target = CharacterRigTarget.EmojiSlot00_Scale,
-            toScale = Vector2.one,
-            duration = 0f,
-            ease = Ease.Linear,
-            wait = false
-        };
-
-        var spec8_resetRotationSpec = new RotateToCommandSpecCharR
-        {
-            slotKey = roleKey,
-            target = CharacterRigTarget.EmojiSlot00_Rotation,
-            toEuler = Vector3.zero,
-            duration = 0f,
-            ease = Ease.Linear,
-            wait = false
-        };
-
-        var spec9_revealEmojiSpec = new RevealCharacterEmojiCommandSpecCharR
-        {
+        var spec1RevealEmojiSpec = new RevealCharacterEmojiCommandSpecCharR {
             slotKey = roleKey,
             target = CharacterRigTarget.EmojiSlot00_Image,
             fromReveal = 0f,
@@ -243,8 +142,7 @@ public sealed partial class YarnCommandBridge
             wait = false
         };
 
-        var spec10_shockJoltSpec = new JoltCommandSpec
-        {
+        var spec2ShockJoltSpec = new JoltCommandSpec {
             slotKey = roleKey,
             target = CharacterRigTarget.EmojiSlot00_Track_Move,
             strength = 20f,
@@ -256,8 +154,7 @@ public sealed partial class YarnCommandBridge
             wait = false
         };
 
-        var spec11_shockScaleUpSpec = new ScaleToCommandSpecCharR
-        {
+        var spec3ShockScaleUpSpec = new ScaleToCommandSpecCharR {
             slotKey = roleKey,
             target = CharacterRigTarget.EmojiSlot00_Scale,
             toScale = new Vector2(1.28f, 1.28f),
@@ -266,8 +163,7 @@ public sealed partial class YarnCommandBridge
             wait = true
         };
 
-        var spec12_shockScaleBackSpec = new ScaleToCommandSpecCharR
-        {
+        var spec4ShockScaleBackSpec = new ScaleToCommandSpecCharR {
             slotKey = roleKey,
             target = CharacterRigTarget.EmojiSlot00_Scale,
             toScale = Vector2.one,
@@ -276,110 +172,26 @@ public sealed partial class YarnCommandBridge
             wait = true
         };
 
-        Collect(spec0_showEmojiRootSpec);
-        Collect(spec1_setEmojiImageSpec);
-        Collect(spec2_setEmojiMaterialSpec);
-        Collect(spec3_placeEmojiSpec);
-        Collect(spec4_resetTrackMoveSpec);
-        Collect(spec5_resetTrackXSpec);
-        Collect(spec6_resetTrackYSpec);
-        Collect(spec7_resetScaleSpec);
-        Collect(spec8_resetRotationSpec);
-        Collect(spec9_revealEmojiSpec);
-        Collect(spec10_shockJoltSpec);
-        Collect(spec11_shockScaleUpSpec);
-        Collect(spec12_shockScaleBackSpec);
+        Collect(spec0InitEmojiSpec);
+        Collect(spec1RevealEmojiSpec);
+        Collect(spec2ShockJoltSpec);
+        Collect(spec3ShockScaleUpSpec);
+        Collect(spec4ShockScaleBackSpec);
     }
 
     private void EnqueueEmojiHopSpec(string roleKey, string emojiKey)
     {
-        var spec0_showEmojiRootSpec = new ShowRootLayersCommandSpecCharR
-        {
-            slotKey = roleKey,
-            targetMask = CharRigRootMask.CharacterEmoji_Root
-        };
-
-        var spec1_setEmojiImageSpec = new SetCharacterEmojiCommandSpecCharR
-        {
+        var spec0InitEmojiSpec = new InitCharacterEmojiCommandSpecCharR {
             slotKey = roleKey,
             emojiKey = emojiKey,
-            imageTarget = CharacterRigTarget.EmojiSlot00_Image,
-            preserveAspect = true,
-            setNativeSize = false,
-            wait = false
-        };
-
-        var spec2_setEmojiMaterialSpec = new SetCharacterEmojiMaterialCommandSpecCharR
-        {
-            slotKey = roleKey,
-            target = CharacterRigTarget.EmojiSlot00_Image,
-            initialReveal = 0f,
-            wait = false
-        };
-
-        var spec3_placeEmojiSpec = new PlaceCharacterEmojiCommandSpecCharR
-        {
-            slotKey = roleKey,
-            emojiKey = emojiKey,
+            rootTarget = CharacterRigTarget.CharacterEmojiSlot00_Root,
             castTarget = CharacterRigTarget.CharacterEmojiSlot00_CastTransform,
-            wait = false
+            imageTarget = CharacterRigTarget.EmojiSlot00_Image,
+            initialReveal = 0f,
+            resetMotionAxes = true
         };
 
-        var spec4_resetTrackMoveSpec = new MoveByCommandSpecCharR
-        {
-            slotKey = roleKey,
-            target = CharacterRigTarget.EmojiSlot00_Track_Move,
-            useAbsolutePosition = true,
-            delta = Vector2.zero,
-            duration = 0f,
-            ease = Ease.Linear,
-            wait = false
-        };
-
-        var spec5_resetTrackXSpec = new MoveByCommandSpecCharR
-        {
-            slotKey = roleKey,
-            target = CharacterRigTarget.EmojiSlot00_Track_X,
-            useAbsolutePosition = true,
-            delta = Vector2.zero,
-            duration = 0f,
-            ease = Ease.Linear,
-            wait = false
-        };
-
-        var spec6_resetTrackYSpec = new MoveByCommandSpecCharR
-        {
-            slotKey = roleKey,
-            target = CharacterRigTarget.EmojiSlot00_Track_Y,
-            useAbsolutePosition = true,
-            delta = Vector2.zero,
-            duration = 0f,
-            ease = Ease.Linear,
-            wait = false
-        };
-
-        var spec7_resetScaleSpec = new ScaleToCommandSpecCharR
-        {
-            slotKey = roleKey,
-            target = CharacterRigTarget.EmojiSlot00_Scale,
-            toScale = Vector2.one,
-            duration = 0f,
-            ease = Ease.Linear,
-            wait = false
-        };
-
-        var spec8_resetRotationSpec = new RotateToCommandSpecCharR
-        {
-            slotKey = roleKey,
-            target = CharacterRigTarget.EmojiSlot00_Rotation,
-            toEuler = Vector3.zero,
-            duration = 0f,
-            ease = Ease.Linear,
-            wait = false
-        };
-
-        var spec9_revealEmojiSpec = new RevealCharacterEmojiCommandSpecCharR
-        {
+        var spec1RevealEmojiSpec = new RevealCharacterEmojiCommandSpecCharR {
             slotKey = roleKey,
             target = CharacterRigTarget.EmojiSlot00_Image,
             fromReveal = 0f,
@@ -389,8 +201,7 @@ public sealed partial class YarnCommandBridge
             wait = false
         };
 
-        var spec10_hopSpec = new HopCommandSpecCharR
-        {
+        var spec2HopSpec = new HopCommandSpecCharR {
             slotKey = roleKey,
             target = CharacterRigTarget.EmojiSlot00_Track_Y,
             duration = 0.8f,
@@ -403,108 +214,24 @@ public sealed partial class YarnCommandBridge
             wait = true
         };
 
-        Collect(spec0_showEmojiRootSpec);
-        Collect(spec1_setEmojiImageSpec);
-        Collect(spec2_setEmojiMaterialSpec);
-        Collect(spec3_placeEmojiSpec);
-        Collect(spec4_resetTrackMoveSpec);
-        Collect(spec5_resetTrackXSpec);
-        Collect(spec6_resetTrackYSpec);
-        Collect(spec7_resetScaleSpec);
-        Collect(spec8_resetRotationSpec);
-        Collect(spec9_revealEmojiSpec);
-        Collect(spec10_hopSpec);
+        Collect(spec0InitEmojiSpec);
+        Collect(spec1RevealEmojiSpec);
+        Collect(spec2HopSpec);
     }
 
     private void EnqueueEmojiSwaySpec(string roleKey, string emojiKey)
     {
-        var spec0_showEmojiRootSpec = new ShowRootLayersCommandSpecCharR
-        {
-            slotKey = roleKey,
-            targetMask = CharRigRootMask.CharacterEmoji_Root
-        };
-
-        var spec1_setEmojiImageSpec = new SetCharacterEmojiCommandSpecCharR
-        {
+        var spec0InitEmojiSpec = new InitCharacterEmojiCommandSpecCharR {
             slotKey = roleKey,
             emojiKey = emojiKey,
-            imageTarget = CharacterRigTarget.EmojiSlot00_Image,
-            preserveAspect = true,
-            setNativeSize = false,
-            wait = false
-        };
-
-        var spec2_setEmojiMaterialSpec = new SetCharacterEmojiMaterialCommandSpecCharR
-        {
-            slotKey = roleKey,
-            target = CharacterRigTarget.EmojiSlot00_Image,
-            initialReveal = 0f,
-            wait = false
-        };
-
-        var spec3_placeEmojiSpec = new PlaceCharacterEmojiCommandSpecCharR
-        {
-            slotKey = roleKey,
-            emojiKey = emojiKey,
+            rootTarget = CharacterRigTarget.CharacterEmojiSlot00_Root,
             castTarget = CharacterRigTarget.CharacterEmojiSlot00_CastTransform,
-            wait = false
+            imageTarget = CharacterRigTarget.EmojiSlot00_Image,
+            initialReveal = 0f,
+            resetMotionAxes = true
         };
 
-        var spec4_resetTrackMoveSpec = new MoveByCommandSpecCharR
-        {
-            slotKey = roleKey,
-            target = CharacterRigTarget.EmojiSlot00_Track_Move,
-            useAbsolutePosition = true,
-            delta = Vector2.zero,
-            duration = 0f,
-            ease = Ease.Linear,
-            wait = false
-        };
-
-        var spec5_resetTrackXSpec = new MoveByCommandSpecCharR
-        {
-            slotKey = roleKey,
-            target = CharacterRigTarget.EmojiSlot00_Track_X,
-            useAbsolutePosition = true,
-            delta = Vector2.zero,
-            duration = 0f,
-            ease = Ease.Linear,
-            wait = false
-        };
-
-        var spec6_resetTrackYSpec = new MoveByCommandSpecCharR
-        {
-            slotKey = roleKey,
-            target = CharacterRigTarget.EmojiSlot00_Track_Y,
-            useAbsolutePosition = true,
-            delta = Vector2.zero,
-            duration = 0f,
-            ease = Ease.Linear,
-            wait = false
-        };
-
-        var spec7_resetScaleSpec = new ScaleToCommandSpecCharR
-        {
-            slotKey = roleKey,
-            target = CharacterRigTarget.EmojiSlot00_Scale,
-            toScale = Vector2.one,
-            duration = 0f,
-            ease = Ease.Linear,
-            wait = false
-        };
-
-        var spec8_resetRotationSpec = new RotateToCommandSpecCharR
-        {
-            slotKey = roleKey,
-            target = CharacterRigTarget.EmojiSlot00_Rotation,
-            toEuler = Vector3.zero,
-            duration = 0f,
-            ease = Ease.Linear,
-            wait = false
-        };
-
-        var spec9_revealEmojiSpec = new RevealCharacterEmojiCommandSpecCharR
-        {
+        var spec1RevealEmojiSpec = new RevealCharacterEmojiCommandSpecCharR {
             slotKey = roleKey,
             target = CharacterRigTarget.EmojiSlot00_Image,
             fromReveal = 0f,
@@ -514,8 +241,7 @@ public sealed partial class YarnCommandBridge
             wait = false
         };
 
-        var spec10_swaySpec = new SwayCommandSpecCharR
-        {
+        var spec2SwaySpec = new SwayCommandSpecCharR {
             slotKey = roleKey,
             target = CharacterRigTarget.EmojiSlot00_Rotation,
             strength = 9f,
@@ -529,108 +255,24 @@ public sealed partial class YarnCommandBridge
             wait = true
         };
 
-        Collect(spec0_showEmojiRootSpec);
-        Collect(spec1_setEmojiImageSpec);
-        Collect(spec2_setEmojiMaterialSpec);
-        Collect(spec3_placeEmojiSpec);
-        Collect(spec4_resetTrackMoveSpec);
-        Collect(spec5_resetTrackXSpec);
-        Collect(spec6_resetTrackYSpec);
-        Collect(spec7_resetScaleSpec);
-        Collect(spec8_resetRotationSpec);
-        Collect(spec9_revealEmojiSpec);
-        Collect(spec10_swaySpec);
+        Collect(spec0InitEmojiSpec);
+        Collect(spec1RevealEmojiSpec);
+        Collect(spec2SwaySpec);
     }
 
     private void EnqueueEmojiTrembleSpec(string roleKey, string emojiKey)
     {
-        var spec0_showEmojiRootSpec = new ShowRootLayersCommandSpecCharR
-        {
-            slotKey = roleKey,
-            targetMask = CharRigRootMask.CharacterEmoji_Root
-        };
-
-        var spec1_setEmojiImageSpec = new SetCharacterEmojiCommandSpecCharR
-        {
+        var spec0InitEmojiSpec = new InitCharacterEmojiCommandSpecCharR {
             slotKey = roleKey,
             emojiKey = emojiKey,
-            imageTarget = CharacterRigTarget.EmojiSlot00_Image,
-            preserveAspect = true,
-            setNativeSize = false,
-            wait = false
-        };
-
-        var spec2_setEmojiMaterialSpec = new SetCharacterEmojiMaterialCommandSpecCharR
-        {
-            slotKey = roleKey,
-            target = CharacterRigTarget.EmojiSlot00_Image,
-            initialReveal = 0f,
-            wait = false
-        };
-
-        var spec3_placeEmojiSpec = new PlaceCharacterEmojiCommandSpecCharR
-        {
-            slotKey = roleKey,
-            emojiKey = emojiKey,
+            rootTarget = CharacterRigTarget.CharacterEmojiSlot00_Root,
             castTarget = CharacterRigTarget.CharacterEmojiSlot00_CastTransform,
-            wait = false
+            imageTarget = CharacterRigTarget.EmojiSlot00_Image,
+            initialReveal = 0f,
+            resetMotionAxes = true
         };
 
-        var spec4_resetTrackMoveSpec = new MoveByCommandSpecCharR
-        {
-            slotKey = roleKey,
-            target = CharacterRigTarget.EmojiSlot00_Track_Move,
-            useAbsolutePosition = true,
-            delta = Vector2.zero,
-            duration = 0f,
-            ease = Ease.Linear,
-            wait = false
-        };
-
-        var spec5_resetTrackXSpec = new MoveByCommandSpecCharR
-        {
-            slotKey = roleKey,
-            target = CharacterRigTarget.EmojiSlot00_Track_X,
-            useAbsolutePosition = true,
-            delta = Vector2.zero,
-            duration = 0f,
-            ease = Ease.Linear,
-            wait = false
-        };
-
-        var spec6_resetTrackYSpec = new MoveByCommandSpecCharR
-        {
-            slotKey = roleKey,
-            target = CharacterRigTarget.EmojiSlot00_Track_Y,
-            useAbsolutePosition = true,
-            delta = Vector2.zero,
-            duration = 0f,
-            ease = Ease.Linear,
-            wait = false
-        };
-
-        var spec7_resetScaleSpec = new ScaleToCommandSpecCharR
-        {
-            slotKey = roleKey,
-            target = CharacterRigTarget.EmojiSlot00_Scale,
-            toScale = Vector2.one,
-            duration = 0f,
-            ease = Ease.Linear,
-            wait = false
-        };
-
-        var spec8_resetRotationSpec = new RotateToCommandSpecCharR
-        {
-            slotKey = roleKey,
-            target = CharacterRigTarget.EmojiSlot00_Rotation,
-            toEuler = Vector3.zero,
-            duration = 0f,
-            ease = Ease.Linear,
-            wait = false
-        };
-
-        var spec9_revealEmojiSpec = new RevealCharacterEmojiCommandSpecCharR
-        {
+        var spec1RevealEmojiSpec = new RevealCharacterEmojiCommandSpecCharR {
             slotKey = roleKey,
             target = CharacterRigTarget.EmojiSlot00_Image,
             fromReveal = 0f,
@@ -640,8 +282,7 @@ public sealed partial class YarnCommandBridge
             wait = false
         };
 
-        var spec10_trembleSpec = new TrembleCommandSpecCharR
-        {
+        var spec2TrembleSpec = new TrembleCommandSpecCharR {
             slotKey = roleKey,
             target = CharacterRigTarget.EmojiSlot00_Track_Move,
             strength = 6f,
@@ -658,16 +299,8 @@ public sealed partial class YarnCommandBridge
             wait = true
         };
 
-        Collect(spec0_showEmojiRootSpec);
-        Collect(spec1_setEmojiImageSpec);
-        Collect(spec2_setEmojiMaterialSpec);
-        Collect(spec3_placeEmojiSpec);
-        Collect(spec4_resetTrackMoveSpec);
-        Collect(spec5_resetTrackXSpec);
-        Collect(spec6_resetTrackYSpec);
-        Collect(spec7_resetScaleSpec);
-        Collect(spec8_resetRotationSpec);
-        Collect(spec9_revealEmojiSpec);
-        Collect(spec10_trembleSpec);
+        Collect(spec0InitEmojiSpec);
+        Collect(spec1RevealEmojiSpec);
+        Collect(spec2TrembleSpec);
     }
 }

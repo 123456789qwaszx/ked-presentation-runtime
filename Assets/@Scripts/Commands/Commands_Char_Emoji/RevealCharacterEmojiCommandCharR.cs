@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using DG.Tweening;
 using UnityEngine;
+using UnityEngine.UI;
 
 [Serializable]
 [CommandMenuHint("Char Rig Emoji", "Reveal Character Emoji", Order = -698)]
@@ -21,16 +22,13 @@ public sealed class RevealCharacterEmojiCommandSpecCharR : CharacterRigCommandSp
     public Ease ease = Ease.OutCubic;
 }
 
-// Responsibility:
-// - 이미 준비된 Emoji runtime material의 _Reveal 값만 tween한다.
-// - sprite/placement/alpha/scale/hop/sway 등은 다른 command가 담당한다.
 public sealed class RevealCharacterEmojiCommandCharR : CommandBase
 {
     private const float StepFinishSpeedUpMultiplier = 2f;
 
     private readonly RevealCharacterEmojiCommandSpecCharR _spec;
 
-    private CharacterEmojiMaterialRuntime _materialRuntime;
+    private Image _image;
     private Material _material;
 
     private float _fromReveal;
@@ -72,7 +70,7 @@ public sealed class RevealCharacterEmojiCommandCharR : CommandBase
                 _duration)
             .SetEase(_ease)
             .SetUpdate(true)
-            .SetTarget(_materialRuntime)
+            .SetTarget(_image)
             .OnComplete(CommitFinalState);
 
         if (_spec.wait)
@@ -94,14 +92,20 @@ public sealed class RevealCharacterEmojiCommandCharR : CommandBase
     {
         _resolveAttempted = true;
 
-        CharacterRigRefs rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
-        _materialRuntime = rigRefs.GetEmojiMaterialRuntime(_spec.target);
-        _material = _materialRuntime.RuntimeMaterial;
+        CharacterRigRefs rig =
+            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(
+                scope,
+                _spec.slotKey);
+
+        _image = rig.GetImage(_spec.target);
+        _material = _image.material;
     }
 
     private void ClaimTarget()
     {
-        DOTween.Kill(_materialRuntime, true);
+        DOTween.Kill(_image, true);
+
+        _material = _image.material;
 
         _fromReveal = _spec.fromReveal;
         _toReveal = _spec.toReveal;
@@ -121,6 +125,11 @@ public sealed class RevealCharacterEmojiCommandCharR : CommandBase
         _tween = null;
     }
 
+    private void SetReveal(float reveal)
+    {
+        _material.SetFloat(CharacterEmojiShaderIds.Reveal, reveal);
+    }
+
     #region StepLifetimeHook
 
     protected override void OnStepLifetimeFinished(CommandRunScope scope)
@@ -130,7 +139,7 @@ public sealed class RevealCharacterEmojiCommandCharR : CommandBase
 
         _tween.Kill(false);
 
-        float currentReveal = _material.GetFloat(CharacterEmojiShaderIds.Reveal);
+        float currentReveal =  _material.GetFloat(CharacterEmojiShaderIds.Reveal);
         float duration = CalculateAcceleratedRemainingDuration(currentReveal);
 
         if (duration <= 0f)
@@ -149,7 +158,7 @@ public sealed class RevealCharacterEmojiCommandCharR : CommandBase
                 duration)
             .SetEase(_ease)
             .SetUpdate(true)
-            .SetTarget(_materialRuntime)
+            .SetTarget(_image)
             .OnComplete(CommitFinalState);
     }
 
@@ -166,11 +175,6 @@ public sealed class RevealCharacterEmojiCommandCharR : CommandBase
 
         return Mathf.Max(0.01f, remainingDuration / StepFinishSpeedUpMultiplier);
     }
-    
-    #endregion
 
-    private void SetReveal(float reveal)
-    {
-        _material.SetFloat(CharacterEmojiShaderIds.Reveal, reveal);
-    }
+    #endregion
 }

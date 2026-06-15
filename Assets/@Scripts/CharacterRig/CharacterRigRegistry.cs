@@ -77,10 +77,6 @@ public sealed class CharacterRigRegistry
         // runtime material 명시적 회수. RigRoot가 이미 파괴됐어도 material 누수를 막기 위해 먼저 처리.
         rigRefs.VisualEffect?.Dispose();
         rigRefs.VisualEffect = null;
-        
-        rigRefs.EmojiSlot00_MaterialRuntime?.DestroyRuntimeMaterial();
-        rigRefs.EmojiSlot01_MaterialRuntime?.DestroyRuntimeMaterial();
-        rigRefs.EmojiSlot02_MaterialRuntime?.DestroyRuntimeMaterial();
 
         if (rigRefs.RigRoot == null)
             return;

@@ -112,7 +112,7 @@ public sealed class CharacterRigCommandFactory : INodeCommandFactory
             PlaceCharacterEmojiCommandSpecCharR s => new PlaceCharacterEmojiCommandCharR(s, _emojiResolver, _characterFocusTuningDb),
             RevealCharacterEmojiCommandSpecCharR s => new RevealCharacterEmojiCommandCharR(s),
             
-            SetCharacterEmojiMaterialCommandSpecCharR s => new SetCharacterEmojiMaterialCommandCharR(s, _characterEmojiVisualPresetSo),
+            InitCharacterEmojiCommandSpecCharR s => new InitCharacterEmojiCommandCharR(s, _emojiResolver, _characterEmojiVisualPresetSo, _characterFocusTuningDb),
             
             // AttachCharRigToBackgroundObjectSlot
             AttachCharRigToBackgroundObjectSlotCommandSpec s => new AttachCharRigToBackgroundObjectSlotCommand(s),
