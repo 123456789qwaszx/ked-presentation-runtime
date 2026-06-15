@@ -77,6 +77,7 @@ _#beat #stay
 //<<emoji @2 19>>    
 
 <<emoji_set c1 09>>
+<<emoji_material c1>>
 <<emoji_place_offset c1 09 1u -1u>>
 <<12fr>>
 <<emoji_hide c1>>

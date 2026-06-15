@@ -1,15 +1,14 @@
 using System;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 [Serializable]
 [CommandMenuHint("Char Rig Emoji", "Set Character Emoji Material", Order = -699)]
 public sealed class SetCharacterEmojiMaterialCommandSpecCharR : CharacterRigCommandSpecBase
 {
-    [Header("Rig Targets")]
-    public CharacterRigTarget imageTarget = CharacterRigTarget.EmojiSlot00_Image;
+    public CharacterRigTarget target = CharacterRigTarget.EmojiSlot00_Image;
 
-    [Header("Reveal Initial State")]
     [Range(0f, 1f)]
     public float initialReveal = 1f;
 }
@@ -32,7 +31,7 @@ public sealed class SetCharacterEmojiMaterialCommandCharR : CommandBase
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
         CharacterRigRefs rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
-        CharacterEmojiMaterialRuntime materialRuntime = rigRefs.GetEmojiMaterialRuntime(_spec.imageTarget);
+        CharacterEmojiMaterialRuntime materialRuntime = rigRefs.GetEmojiMaterialRuntime(_spec.target);
         
         ApplyPresetStatic(materialRuntime.RuntimeMaterial, _characterEmojiVisualPresetSo, _spec.initialReveal);
 

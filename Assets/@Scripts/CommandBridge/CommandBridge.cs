@@ -246,20 +246,6 @@ public sealed partial class YarnCommandBridge
             "char_color_to", EnqueueSpriteColorToDslSpec);
     }
     
-    private void BindCharRigEmote(DialogueRunner runner)
-    {
-        runner.AddCommandHandler<string, string>(
-            "emoji_drop", EnqueueEmojiDropSpec);
-        runner.AddCommandHandler<string, string>(
-            "emoji_shock", EnqueueEmojiShockSpec);
-        runner.AddCommandHandler<string, string>(
-            "emoji_hop", EnqueueEmojiHopSpec);
-        runner.AddCommandHandler<string, string>(
-            "emoji_sway", EnqueueEmojiSwaySpec);
-        runner.AddCommandHandler<string, string>(
-            "emoji_tremble", EnqueueEmojiTrembleSpec);
-    }
-    
     private void BindCharRigIdle(DialogueRunner runner)
     {
         runner.AddCommandHandler<string, float, float, float, float>(
