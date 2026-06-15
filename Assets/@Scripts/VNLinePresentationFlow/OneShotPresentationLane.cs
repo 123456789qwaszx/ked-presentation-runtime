@@ -1,34 +1,40 @@
 using System.Collections;
 using Yarn.Unity;
 
-// 노드 하나를 처음부터 끝까지 실행하고 멈추는 단발 실행기.
-// command-only 노드를 돌려 커맨드를 모은 뒤, 한 번 flush하고 entry까지 (메인을) 블로킹한다.
+// command-only 노드를 돌려 커맨드를 모은 뒤, 한 번 flush 한 뒤,
+// blockMain일 시, entry까지 (메인을) 블로킹한다.
 public sealed class OneShotPresentationLane
 {
     private readonly DialogueRunner _oneShotDialogueRunner;
     private readonly YarnBridgePlaybackDriver _oneShotPlaybackDriver;
 
-    public OneShotPresentationLane(DialogueRunner oneShotDliaogueRunner, YarnBridgePlaybackDriver oneShotPlaybackDriver)
+    private CommandRunTicket _currentTicket;
+
+    public OneShotPresentationLane(
+        DialogueRunner oneShotDialogueRunner,
+        YarnBridgePlaybackDriver oneShotPlaybackDriver)
     {
-        _oneShotDialogueRunner = oneShotDliaogueRunner;
+        _oneShotDialogueRunner = oneShotDialogueRunner;
         _oneShotPlaybackDriver = oneShotPlaybackDriver;
     }
 
-    public IEnumerator RunNodeCoroutine(string nodeName)
+    public IEnumerator RunNodeCoroutine(string nodeName, bool blockMain = true)
     {
         if (_oneShotDialogueRunner == null || string.IsNullOrEmpty(nodeName))
             yield break;
 
-        if (_oneShotDialogueRunner.IsDialogueRunning)               // 직전 one-shot 잔여 정리
+        if (_oneShotDialogueRunner.IsDialogueRunning)
         {
             YarnTask stopTask = _oneShotDialogueRunner.Stop();
+
             while (!stopTask.IsCompletedSuccessfully())
                 yield return null;
         }
 
-        _oneShotPlaybackDriver.Clear();                              // 잔여 spec 방어 제거
+        _oneShotPlaybackDriver.Clear();
 
         YarnTask startTask = _oneShotDialogueRunner.StartDialogue(nodeName);
+
         while (!startTask.IsCompletedSuccessfully())
             yield return null;
 
@@ -36,10 +42,18 @@ public sealed class OneShotPresentationLane
         // command-only라 RunLineAsync로 멈추지 않으므로 곧바로 끝난다.
         while (_oneShotDialogueRunner.IsDialogueRunning)
             yield return null;
-
+        
         // 한 번에 flush → one-shot executor 실행. entry 적용까지 대기(메인 블로킹).
-        CommandRunTicket ticket = _oneShotPlaybackDriver.PlayCollected();
-        while (ticket != null && !ticket.EntryClosed)
+        _currentTicket = _oneShotPlaybackDriver.PlayCollected();
+
+        // beat_free:
+        // command batch를 시작만 하고 main runner에게 즉시 제어권을 돌려준다.
+        if (!blockMain)
+            yield break;
+
+        // beat:
+        // wait=true 커맨드가 있으면 EntryClosed가 늦게 닫히므로 main도 그만큼 기다린다.
+        while (_currentTicket != null && !_currentTicket.EntryClosed)
             yield return null;
     }
 }

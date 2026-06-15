@@ -123,8 +123,8 @@ public sealed partial class YarnCommandBridge
             "beat", RunOneShotNode); // One-Shot Node 재생. 커맨드로만 이루어졌기에 즉시 재생 및 자동 종료
         
         runner.AddCommandHandler<string>(
-            "beat_free",
-            RunOneShotNodeFree); // main non-block
+            "beat_fx",
+            RunOneShotNodeFree); // non-blocking decorative effect beat
         
         // Portrait = 0,
         // Speaker = 1,

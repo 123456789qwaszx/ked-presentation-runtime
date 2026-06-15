@@ -80,7 +80,7 @@ _#beat #stay
 <<idle_walk @1>>
 <<face_swap @1 25>>
 <<emoji c1 09>>
-<<beat_free Beat_EmojiSet>>
+<<beat_fx Beat_EmojiSet>>
 
 <<actor willow>>
 <<beat Beat_Dip>>
