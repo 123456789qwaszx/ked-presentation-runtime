@@ -2,13 +2,6 @@ using System;
 using Yarn.Unity;
 
 // Runs one line presentation transaction through its explicit phase sequence.
-// This class owns the transaction order, seek decision flow, but not the domain commit rules or presenter lifetime.
-// Domain commits are handled by VNLineEntryCommitter.
-// CustomLinePresenter remains the owner of presenter lifetime, generation, and cancellation tokens.
-//
-// Two tails share one front-matter (EnterLineAndResolveSeekAsync):
-//   RunAsync                -> normal dialogue line (box + typewriter + wait-for-advance)
-//   RunPresentationBeatAsync -> staging-only beat (no box/typewriter, auto-advance)
 public sealed class VNLinePresentationFlow
 {
     private readonly VNYarnLineBoundary _vnYarnLineBoundary;
@@ -46,9 +39,6 @@ public sealed class VNLinePresentationFlow
         _playbackDriver = playbackDriver;
     }
     
-    // ---- Shared front-matter ----
-    // LineReceived -> commit meta/backlog/rollback -> consume + enqueue sub advance -> PlayCollected
-    // -> seek decision -> (seek pass-through OR resume policy) -> forward settle wait -> begin visual run.
     private async YarnTask<LineEntryOutcome> EnterLineAndResolveSeekAsync(
         VNLinePresentationContext ctx,
         Func<LinePresentationRun> beginRun)
@@ -59,14 +49,16 @@ public sealed class VNLinePresentationFlow
         ctx.Meta = _vnYarnLineBoundary.BuildLineMeta(ctx.Line, ctx.NodeName);
         _vnYarnLineBoundary.CommitLineEntered(ctx.Meta);
 
-        // Capture the forward-settle baseline BEFORE dispatching, then expect exactly
-        // subAdvanceCount more sub-beat settles. Main waits for those before any visual,
-        // so sub holds (wait=true beats) are respected. No sub running => count 0 => no-op.
+        // Capture the forward-settle baseline BEFORE dispatching,
+        // then expect exactly subAdvanceCount more sub-beat settles.
+        // Main waits for those before any visual, so sub holds (wait=true beats) are respected.
         int forwardSettleBaseline = _sideRunnerSyncHub.ForwardSettleEpoch;
 
-        int subAdvanceCount = _advanceState.IsSeekingActive
-            ? _sideRunnerSyncHub.ConsumePresentationSeekResyncCount()   // 시크: base 재동기화
-            : _sideRunnerSyncHub.ConsumePresentationAutoAdvanceCount(); // 정방향: hold/extra/suppress 적용
+        // int subAdvanceCount = _advanceState.IsSeekingActive
+        //     ? _sideRunnerSyncHub.ConsumePresentationSeekResyncCount()   // 시크: base 재동기화
+        //     : _sideRunnerSyncHub.ConsumePresentationAutoAdvanceCount(); // 정방향: hold/extra/suppress 적용
+        
+        int subAdvanceCount = _sideRunnerSyncHub.ConsumePresentationAutoAdvanceCount();
 
         for (int i = 0; i < subAdvanceCount; i++)
             _playbackDriver.Enqueue(new SubPresentationAdvanceCommandSpec());

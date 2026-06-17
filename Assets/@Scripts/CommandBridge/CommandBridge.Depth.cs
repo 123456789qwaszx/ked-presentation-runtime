@@ -16,16 +16,17 @@ public sealed partial class YarnCommandBridge
             "at", EnqueueDepthAtSpec);
 
         runner.AddCommandHandler<string, string, string>(
+            "at_back", EnqueueDepthAtBackSpec);
+        
+        runner.AddCommandHandler<string, string, string>(
+            "at_mid", EnqueueDepthAtMidSpec);
+        
+        runner.AddCommandHandler<string, string, string>(
             "at_close", EnqueueDepthAtCloseSpec);
 
         runner.AddCommandHandler<string, string, string>(
             "at_front", EnqueueDepthAtFrontSpec);
-
-        runner.AddCommandHandler<string, string, string>(
-            "at_mid", EnqueueDepthAtMidSpec);
-
-        runner.AddCommandHandler<string, string, string>(
-            "at_back", EnqueueDepthAtBackSpec);
+        
 
         runner.AddCommandHandler<string, string, string>(
             "at_far", EnqueueDepthAtFarSpec);

@@ -44,10 +44,9 @@ title: Story_TalesOfNovaEP12_01
 <<actor @1 willow>>
 <<show      @1 e21>>
 <<to_center @1 bust 8fr>>
-<<at_close  @1 bust 12fr>>
+<<at_mid  @1 bust 12fr>>
 <<left      @1 1u 10fr>>
 
-<<mirror c1>>
 _#beat #stay
 
 윌로: 죄송합니다만, 이번 의뢰는 보수의 3분의 1밖에 드릴 수 없겠군요.
@@ -76,14 +75,7 @@ _#beat #stay
 <<actor @2 noya>>
 <<shake @2>>   
 
-<<at c1 24 bust 10fr>>
-<<idle_walk @1>>
-<<face_swap @1 25>>
-<<emoji c1 09>>
-<<beat_fx Beat_EmojiSet>>
-
-<<actor willow>>
-<<beat Beat_Dip>>
+<<emoji_spring c1 09>>
 세이나: 안 돼! 이 신기를 얻으려고 우리가 성해를 얼마나 많이 물리쳤는데...... <br>검날이 다 무뎌질 정도였다고!
 
 <<actor @3 iris>>

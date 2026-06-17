@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Threading;
-using UnityEngine;
 using Yarn.Unity;
 
 public sealed class VNSideRunnerSyncHub
