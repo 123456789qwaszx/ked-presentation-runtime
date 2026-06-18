@@ -1,6 +1,6 @@
 ﻿public sealed class VNSaveLoadSystem
 {
-    private int saveSlotCount = 6;
+    private const int SaveSlotCount = 120;
     
     private readonly JsonVNSaveRepository _saveRepository;
     private readonly JsonVNGlobalProgressRepository _globalRepository;
@@ -18,7 +18,7 @@
 
     public VNSaveLoadSystem()
     {
-        _saveRepository = new JsonVNSaveRepository(saveSlotCount);
+        _saveRepository = new JsonVNSaveRepository(SaveSlotCount);
         _globalRepository = new JsonVNGlobalProgressRepository();
         _globalData = _globalRepository.LoadOrCreate();
     }

@@ -12,6 +12,7 @@ public sealed partial class VnScreenBindings
         {
             BindPanel(panel, ApplyBindings);
             Refresh(panel);
+            panel.ResetPage();
         });
     }
 
@@ -20,6 +21,10 @@ public sealed partial class VnScreenBindings
         AddBinding(panel,
             p => p.SlotClicked += HandleSlotClicked,
             p => p.SlotClicked -= HandleSlotClicked);
+
+        AddBinding(panel,
+            p => p.ModeChanged += HandleSaveLoadModeChanged,
+            p => p.ModeChanged -= HandleSaveLoadModeChanged);
 
         AddBinding(panel,
             p => p.CloseClicked += ClosePanel,
@@ -42,6 +47,16 @@ public sealed partial class VnScreenBindings
             CloseAllPanels();
             return;
         }
+
+        Refresh(UIManager.Instance.GetUI<SaveLoadMenuUIPanel>());
+    }
+    
+    private void HandleSaveLoadModeChanged(SaveLoadMenuMode mode)
+    {
+        if (_currentSaveLoadMode == mode)
+            return;
+
+        _currentSaveLoadMode = mode;
 
         Refresh(UIManager.Instance.GetUI<SaveLoadMenuUIPanel>());
     }
