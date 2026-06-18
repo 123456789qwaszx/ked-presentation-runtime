@@ -4,7 +4,7 @@ using UnityEngine;
 public sealed class VNAlbumUnlockService
 {
     private readonly VNGlobalProgressData _globalData;
-    private readonly IVNGlobalProgressRepository _globalRepo;
+    private readonly JsonVNGlobalProgressRepository _globalRepo;
     private readonly VNAlbumDatabaseSO _database;
 
     private readonly HashSet<string> _unlockedCgSet;
@@ -12,7 +12,7 @@ public sealed class VNAlbumUnlockService
 
     public VNAlbumUnlockService(
         VNGlobalProgressData globalData,
-        IVNGlobalProgressRepository globalRepo,
+        JsonVNGlobalProgressRepository globalRepo,
         VNAlbumDatabaseSO database)
     {
         _globalData = globalData;
@@ -25,9 +25,6 @@ public sealed class VNAlbumUnlockService
 
     public bool IsUnlocked(string key)
     {
-        if (string.IsNullOrWhiteSpace(key))
-            return false;
-
         return _unlockedCgSet.Contains(key);
     }
 
@@ -99,7 +96,7 @@ public sealed class VNAlbumUnlockService
 
     public IReadOnlyList<VNAlbumItemSO> GetAllItems()
     {
-        return _database != null ? _database.Items : new List<VNAlbumItemSO>();
+        return _database.Items;
     }
     
 #if UNITY_EDITOR || DEVELOPMENT_BUILD

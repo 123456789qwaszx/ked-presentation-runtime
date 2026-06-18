@@ -1,20 +1,12 @@
 using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 public sealed partial class VnScreenBindings : IDisposable
 {
     private static UIManager UI => UIManager.Instance;
+    private bool HasPanel => UI.HasPanel;
     
-    private readonly Dictionary<UIBase, List<Action>> _cleanupByOwner = new();
-    
-    private UIBase _boundMain;
-
-    public void OpenTitleMenu()
-    {
-        GoToTitle();
-    }
-
+    public void OpenTitleMenu() => GoToTitle();
     
     /// <summary>
     /// Closes the top panel and releases its VnScreenBindings cleanup entries.
@@ -29,8 +21,12 @@ public sealed partial class VnScreenBindings : IDisposable
         UI.PopAllPanels(Unbind);
     }
     
-    private bool HasPanel => UI.HasPanel;
-
+    #region UIContext
+    
+    private readonly Dictionary<UIBase, List<Action>> _cleanupByOwner = new();
+    
+    private UIBase _boundMain;
+    
     private void BindMain<T>(T owner, Action<T> apply)
         where T : UIBase
     {
@@ -89,20 +85,13 @@ public sealed partial class VnScreenBindings : IDisposable
     private static void RunCleanups(List<Action> cleanups)
     {
         for (int i = cleanups.Count - 1; i >= 0; i--)
-        {
-            try
-            {
-                cleanups[i]?.Invoke();
-            }
-            catch (Exception e)
-            {
-                Debug.LogException(e);
-            }
-        }
+            cleanups[i]?.Invoke();
     }
 
     public void Dispose()
     {
         UnbindAll();
     }
+    
+    #endregion
 }

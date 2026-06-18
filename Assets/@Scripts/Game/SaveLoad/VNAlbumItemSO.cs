@@ -13,10 +13,6 @@ public sealed class VNAlbumItemSO : ScriptableObject
     public Sprite thumbnailSprite;
 
     public string title;
-    public string chapterLabel;
-
-    [Min(1)]
-    public int variantCount = 1;
 
     public Sprite GetThumbnail()
     {

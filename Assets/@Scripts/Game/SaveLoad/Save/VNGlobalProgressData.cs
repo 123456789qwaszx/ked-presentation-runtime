@@ -4,9 +4,9 @@ using System.Collections.Generic;
 [Serializable]
 public sealed class VNGlobalProgressData
 {
-    public List<string> unlockedCgKeys = new List<string>();
-    public List<string> unlockedEndingKeys = new List<string>();
-    public List<string> readLineIds = new List<string>();
+    public List<string> unlockedCgKeys = new();
+    public List<string> unlockedEndingKeys = new();
+    public List<string> readLineIds = new();
 
     // Continue 버튼이 최종적으로 참조하는 슬롯. AutoSave도 Continue 대상으로 갱신한다.
     public string continueSlotId = "";
@@ -16,12 +16,12 @@ public sealed class VNGlobalProgressData
     
     public void Normalize()
     {
-        if (unlockedCgKeys == null) unlockedCgKeys = new List<string>();
+        if (unlockedCgKeys == null)     unlockedCgKeys = new List<string>();
         if (unlockedEndingKeys == null) unlockedEndingKeys = new List<string>();
-        if (readLineIds == null) readLineIds = new List<string>();
+        if (readLineIds == null)        readLineIds = new List<string>();
 
-        if (continueSlotId == null) continueSlotId = "";
+        if (continueSlotId == null)     continueSlotId = "";
         if (latestManualSlotId == null) latestManualSlotId = "";
-        if (latestAutoSlotId == null) latestAutoSlotId = "";
+        if (latestAutoSlotId == null)   latestAutoSlotId = "";
     }
 }

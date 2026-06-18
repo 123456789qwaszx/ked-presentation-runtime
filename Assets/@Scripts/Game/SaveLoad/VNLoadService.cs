@@ -3,10 +3,9 @@ using UnityEngine;
 
 public sealed class VNLoadService
 {
-    private readonly IVNSaveRepository _saveRepo;
+    private readonly JsonVNSaveRepository _saveRepo;
     private readonly VNLoadSeekDriver _seekDriver;
     private readonly IVNFlagStore _flagStore;
-    private readonly IVNSaveSafetyPolicy _safetyPolicy;
     private readonly VNTraceStream _trace;
 
     private bool _isLoading;
@@ -14,16 +13,14 @@ public sealed class VNLoadService
     public bool IsLoading => _isLoading;
 
     public VNLoadService(
-        IVNSaveRepository saveRepo,
+        JsonVNSaveRepository saveRepo,
         VNLoadSeekDriver seekDriver,
         IVNFlagStore flagStore,
-        IVNSaveSafetyPolicy safetyPolicy,
         VNTraceStream trace = null)
     {
         _saveRepo = saveRepo;
         _seekDriver = seekDriver;
         _flagStore = flagStore;
-        _safetyPolicy = safetyPolicy;
         _trace = trace;
     }
 
@@ -37,19 +34,8 @@ public sealed class VNLoadService
     {
         // if (_isLoading)
         //     return false;
-        
-        if (!_safetyPolicy.CanLoadNow(out string reason))
-        {
-            Trace("LoadRejected", $"safetyPolicy={reason}");
-            return false;
-        }
 
         if (!_saveRepo.TryLoad(slotId, out VNSaveData data))
-            return false;
-
-        data.Normalize();
-
-        if (!data.HasValidTarget())
             return false;
 
         BeginLoad(data);

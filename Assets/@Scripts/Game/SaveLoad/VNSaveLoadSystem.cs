@@ -2,14 +2,13 @@
 {
     private int saveSlotCount = 6;
     
-    private readonly IVNSaveRepository _saveRepository;
-    private readonly IVNGlobalProgressRepository _globalRepository;
+    private readonly JsonVNSaveRepository _saveRepository;
+    private readonly JsonVNGlobalProgressRepository _globalRepository;
     private readonly VNGlobalProgressData _globalData;
 
     private IVNRuntimeStateProvider _stateProvider;
     private VNLoadSeekDriver _seekDriver;
     private IVNFlagStore _flagStore;
-    private IVNSaveSafetyPolicy _safetyPolicy;
     
     public VNSaveService SaveService { get; private set; }
     public VNLoadService LoadService { get; private set; }
@@ -28,18 +27,16 @@
         IVNRuntimeStateProvider stateProvider,
         VNLoadSeekDriver seekDriver,
         IVNFlagStore flagStore,
-        IVNSaveSafetyPolicy safetyPolicy,
         VNAlbumDatabaseSO albumDatabase,
         VNTraceStream traceStream)
     {
         _stateProvider = stateProvider;
         _seekDriver = seekDriver;
         _flagStore = flagStore;
-        _safetyPolicy = safetyPolicy;
         
         AlbumService = new VNAlbumUnlockService(_globalData, _globalRepository, albumDatabase);
-        LoadService = new VNLoadService(_saveRepository, _seekDriver, _flagStore, _safetyPolicy, traceStream);
-        SaveService = new VNSaveService(_saveRepository, _globalRepository, _globalData, _stateProvider, _flagStore, _safetyPolicy);
+        LoadService = new VNLoadService(_saveRepository, _seekDriver, _flagStore, traceStream);
+        SaveService = new VNSaveService(_saveRepository, _globalRepository, _globalData, _stateProvider, _flagStore);
         
         IsInitialized = true;
     }

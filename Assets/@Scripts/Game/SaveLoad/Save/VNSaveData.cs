@@ -29,28 +29,21 @@ public sealed class VNSaveData
 
     public int playtimeSeconds = 0;
 
-    public List<VNFlagEntry> flags = new List<VNFlagEntry>();
+    public List<VNFlagEntry> flags = new();
 
-    /// <summary>
-    /// 현재 save target line까지 도달하기 위해 재현해야 하는 선택 기록.
-    /// Load/Rollback seek 중 option set을 만나면 이 기록을 사용해 UI 없이 자동 선택한다.
-    /// </summary>
-    public List<VNChoiceRecord> choices = new List<VNChoiceRecord>();
+    // 현재 save target line까지 도달하기 위해 재현해야 하는 선택 기록.
+    // Load/Rollback seek 중 option set을 만나면 이 기록을 사용해 UI 없이 자동 선택.
+    public List<VNChoiceRecord> choices = new();
 
     public void Normalize()
     {
-        if (slotId == null) slotId = "";
-        if (nodeName == null) nodeName = "";
-        if (lineId == null) lineId = "";
+        if (slotId == null)       slotId = "";
+        if (nodeName == null)     nodeName = "";
+        if (lineId == null)       lineId = "";
         if (chapterLabel == null) chapterLabel = "";
-        if (linePreview == null) linePreview = "";
-        if (savedAt == null) savedAt = "";
-        if (flags == null) flags = new List<VNFlagEntry>();
-        if (choices == null) choices = new List<VNChoiceRecord>();
-    }
-
-    public bool HasValidTarget()
-    {
-        return !string.IsNullOrWhiteSpace(nodeName);
+        if (linePreview == null)  linePreview = "";
+        if (savedAt == null)      savedAt = "";
+        if (flags == null)        flags = new List<VNFlagEntry>();
+        if (choices == null)      choices = new List<VNChoiceRecord>();
     }
 }

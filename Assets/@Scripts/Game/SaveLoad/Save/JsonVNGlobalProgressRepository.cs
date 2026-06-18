@@ -2,7 +2,7 @@
 using System.IO;
 using UnityEngine;
 
-public sealed class JsonVNGlobalProgressRepository : IVNGlobalProgressRepository
+public sealed class JsonVNGlobalProgressRepository
 {
     private const string FileName = "global.json";
 
@@ -11,54 +11,44 @@ public sealed class JsonVNGlobalProgressRepository : IVNGlobalProgressRepository
     public JsonVNGlobalProgressRepository()
     {
         _filePath = Path.Combine(Application.persistentDataPath, FileName);
+        // Debug.Log($"[GlobalProgress] filePath: {_filePath}");
     }
 
     public VNGlobalProgressData LoadOrCreate()
     {
-        if (!File.Exists(_filePath))
-        {
-            var created = new VNGlobalProgressData();
-            created.Normalize();
-            Save(created);
-            return created;
-        }
-
         if (TryLoadFromPath(_filePath, out VNGlobalProgressData data))
             return data;
 
-        string backupPath = GetBackupPath();
-
-        if (File.Exists(backupPath) && TryLoadFromPath(backupPath, out data))
+        if (TryLoadFromPath(GetBackupPath(), out data))
         {
             Debug.LogWarning("[JsonVNGlobalProgressRepository] Loaded global data from backup.");
             return data;
         }
 
         Debug.LogWarning("[JsonVNGlobalProgressRepository] Failed to load global data. Using default.");
+
         data = new VNGlobalProgressData();
         data.Normalize();
+        Save(data);
         return data;
     }
 
     public bool Save(VNGlobalProgressData data)
     {
         if (data == null)
-        {
-            Debug.LogError("[JsonVNGlobalProgressRepository] Cannot save null global data.");
             return false;
-        }
+
+        data.Normalize();
 
         try
         {
-            data.Normalize();
-
             string json = JsonUtility.ToJson(data, prettyPrint: true);
             WriteTextWithBackup(_filePath, json);
             return true;
         }
         catch (Exception e)
         {
-            Debug.LogError($"[JsonVNGlobalProgressRepository] Save failed: {e.Message}");
+            Debug.LogWarning($"[JsonVNGlobalProgressRepository] Save failed. path='{_filePath}', error='{e.Message}'");
             return false;
         }
     }
@@ -66,6 +56,9 @@ public sealed class JsonVNGlobalProgressRepository : IVNGlobalProgressRepository
     private bool TryLoadFromPath(string path, out VNGlobalProgressData data)
     {
         data = null;
+
+        if (!File.Exists(path))
+            return false;
 
         try
         {
@@ -81,6 +74,7 @@ public sealed class JsonVNGlobalProgressRepository : IVNGlobalProgressRepository
         catch (Exception e)
         {
             Debug.LogWarning($"[JsonVNGlobalProgressRepository] Load failed. path='{path}', error='{e.Message}'");
+            data = null;
             return false;
         }
     }
@@ -96,7 +90,9 @@ public sealed class JsonVNGlobalProgressRepository : IVNGlobalProgressRepository
             File.Copy(path, backupPath, true);
 
         File.Copy(tempPath, path, true);
-        File.Delete(tempPath);
+
+        if (File.Exists(tempPath))
+            File.Delete(tempPath);
     }
 
     private string GetBackupPath()

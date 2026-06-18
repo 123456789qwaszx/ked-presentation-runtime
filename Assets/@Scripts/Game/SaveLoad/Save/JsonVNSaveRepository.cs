@@ -2,11 +2,12 @@
 using System.IO;
 using UnityEngine;
 
-public sealed class JsonVNSaveRepository : IVNSaveRepository
+public sealed class JsonVNSaveRepository
 {
     private const string SlotPrefix = "slot_";
     private const string AutoSlotId = "auto";
     private const string SaveSubDir = "saves";
+    private const string SlotIdFormatSample = "slot_001";
 
     private readonly string _saveDir;
     private readonly int _slotCount;
@@ -19,13 +20,29 @@ public sealed class JsonVNSaveRepository : IVNSaveRepository
         _slotCount = Mathf.Max(1, slotCount);
         _saveDir = Path.Combine(Application.persistentDataPath, SaveSubDir);
 
-        EnsureDirectory();
+        EnsureSaveDirectory();
     }
 
+    // Slot Id
     public string GetSlotId(int slotIndex)
     {
         int safeIndex = Mathf.Clamp(slotIndex, 1, _slotCount);
         return $"{SlotPrefix}{safeIndex:D3}";
+    }
+
+    // Save / Load
+    public bool Save(VNSaveData data)
+    {
+        if (!IsValidSlotId(data.slotId))
+            return false;
+
+        EnsureSaveDirectory();
+
+        string json = JsonUtility.ToJson(data, prettyPrint: true);
+        string path = GetPath(data.slotId);
+
+        WriteTextWithBackup(path, json);
+        return true;
     }
 
     public bool TryLoad(string slotId, out VNSaveData data)
@@ -33,87 +50,36 @@ public sealed class JsonVNSaveRepository : IVNSaveRepository
         data = null;
 
         if (!IsValidSlotId(slotId))
-        {
-            Debug.LogWarning($"[JsonVNSaveRepository] Invalid slotId: '{slotId}'");
             return false;
-        }
 
         string path = GetPath(slotId);
-
-        if (!File.Exists(path))
-            return TryLoadBackup(path, out data);
 
         if (TryLoadFromPath(path, out data))
             return true;
 
-        Debug.LogWarning($"[JsonVNSaveRepository] Main save failed. Trying backup. slot='{slotId}'");
         return TryLoadBackup(path, out data);
-    }
-
-    public bool Save(VNSaveData data)
-    {
-        if (data == null)
-        {
-            Debug.LogError("[JsonVNSaveRepository] Cannot save null VNSaveData.");
-            return false;
-        }
-
-        data.Normalize();
-
-        if (!IsValidSlotId(data.slotId))
-        {
-            Debug.LogError($"[JsonVNSaveRepository] Invalid slotId: '{data.slotId}'");
-            return false;
-        }
-
-        try
-        {
-            EnsureDirectory();
-
-            string json = JsonUtility.ToJson(data, prettyPrint: true);
-            string path = GetPath(data.slotId);
-
-            WriteTextWithBackup(path, json);
-            return true;
-        }
-        catch (Exception e)
-        {
-            Debug.LogError($"[JsonVNSaveRepository] Save failed. slot='{data.slotId}', error='{e.Message}'");
-            return false;
-        }
     }
 
     public bool Delete(string slotId)
     {
         if (!IsValidSlotId(slotId))
-        {
-            Debug.LogWarning($"[JsonVNSaveRepository] Invalid slotId: '{slotId}'");
             return false;
-        }
 
         string path = GetPath(slotId);
         string backupPath = GetBackupPath(path);
 
         bool deleted = false;
 
-        try
+        if (File.Exists(path))
         {
-            if (File.Exists(path))
-            {
-                File.Delete(path);
-                deleted = true;
-            }
-
-            if (File.Exists(backupPath))
-                File.Delete(backupPath);
-
-            return deleted;
+            File.Delete(path);
+            deleted = true;
         }
-        catch (Exception e)
-        {
-            Debug.LogError($"[JsonVNSaveRepository] Delete failed. slot='{slotId}', error='{e.Message}'");
-            return false;
-        }
+
+        if (File.Exists(backupPath))
+            File.Delete(backupPath);
+
+        return deleted;
     }
 
     public bool Exists(string slotId)
@@ -125,9 +91,9 @@ public sealed class JsonVNSaveRepository : IVNSaveRepository
         return File.Exists(path) || File.Exists(GetBackupPath(path));
     }
 
+    // Metadata
     public VNSaveSlotMeta GetMeta(int slotIndex)
     {
-        //Debug.Log($"{GetSlotId(slotIndex)}");
         return GetMeta(GetSlotId(slotIndex));
     }
 
@@ -149,22 +115,19 @@ public sealed class JsonVNSaveRepository : IVNSaveRepository
         return result;
     }
 
+    // Load Internals
     private bool TryLoadBackup(string mainPath, out VNSaveData data)
     {
         string backupPath = GetBackupPath(mainPath);
-
-        if (!File.Exists(backupPath))
-        {
-            data = null;
-            return false;
-        }
-
         return TryLoadFromPath(backupPath, out data);
     }
 
     private bool TryLoadFromPath(string path, out VNSaveData data)
     {
         data = null;
+
+        if (!File.Exists(path))
+            return false;
 
         try
         {
@@ -180,10 +143,12 @@ public sealed class JsonVNSaveRepository : IVNSaveRepository
         catch (Exception e)
         {
             Debug.LogWarning($"[JsonVNSaveRepository] Load failed. path='{path}', error='{e.Message}'");
+            data = null;
             return false;
         }
     }
 
+    // Save Internals
     private void WriteTextWithBackup(string path, string text)
     {
         string tempPath = path + ".tmp";
@@ -198,7 +163,8 @@ public sealed class JsonVNSaveRepository : IVNSaveRepository
         File.Delete(tempPath);
     }
 
-    private void EnsureDirectory()
+    // Path
+    private void EnsureSaveDirectory()
     {
         if (!Directory.Exists(_saveDir))
             Directory.CreateDirectory(_saveDir);
@@ -214,6 +180,7 @@ public sealed class JsonVNSaveRepository : IVNSaveRepository
         return mainPath + ".bak";
     }
 
+    // Validation
     private bool IsValidSlotId(string slotId)
     {
         if (string.IsNullOrWhiteSpace(slotId))
@@ -225,15 +192,14 @@ public sealed class JsonVNSaveRepository : IVNSaveRepository
         if (!slotId.StartsWith(SlotPrefix))
             return false;
 
-        if (slotId.Length != "slot_001".Length)
+        if (slotId.Length != SlotIdFormatSample.Length)
             return false;
 
-        for (int i = SlotPrefix.Length; i < slotId.Length; i++)
-        {
-            if (!char.IsDigit(slotId[i]))
-                return false;
-        }
+        string numberText = slotId.Substring(SlotPrefix.Length);
 
-        return true;
+        if (!int.TryParse(numberText, out int slotNumber))
+            return false;
+
+        return slotNumber >= 1 && slotNumber <= _slotCount;
     }
 }

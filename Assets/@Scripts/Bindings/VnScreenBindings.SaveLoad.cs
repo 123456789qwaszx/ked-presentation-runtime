@@ -32,18 +32,12 @@ public sealed partial class VnScreenBindings
         if (_currentSaveLoadMode == SaveLoadMenuMode.Save)
         {
             if (!_vnSaveLoadSystem.SaveService.SaveManual(slotIndex))
-            {
-                Debug.LogWarning($"[VnScreenBindings] Save failed. slotIndex={slotIndex}");
                 return;
-            }
         }
         else
         {
             if (!_vnSaveLoadSystem.LoadService.Load(slotIndex))
-            {
-                Debug.LogWarning($"[VnScreenBindings] Load failed. slotIndex={slotIndex}");
                 return;
-            }
             
             CloseAllPanels();
             return;

@@ -1,5 +1,22 @@
 using System.Collections.Generic;
 
+public interface IVNRuntimeStateProvider
+{
+    string CurrentNodeName { get; }
+    string CurrentLineId { get; }
+    string CurrentCharacterKey { get; }
+
+    int CurrentVisitedIndex { get; }
+    int CurrentLineVisitCountInNode { get; }
+
+    string CurrentChapterLabel { get; }
+    string CurrentLinePreview { get; }
+
+    int CurrentPlaytimeSeconds { get; }
+
+    List<VNChoiceRecord> CreateChoiceSnapshot();
+}
+
 public sealed class VNRuntimeStateProvider : IVNRuntimeStateProvider
 {
     private readonly RollbackHistory _rollbackHistory;
