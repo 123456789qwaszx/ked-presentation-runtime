@@ -5,7 +5,7 @@ public sealed class VNAlbumUnlockService
 {
     private readonly VNGlobalProgressData _globalData;
     private readonly JsonVNGlobalProgressRepository _globalRepo;
-    private readonly VNAlbumDatabaseSO _database;
+    private readonly VNAlbumDatabaseSO _vnAlbumData;
 
     private readonly HashSet<string> _unlockedCgSet;
     private readonly HashSet<string> _unlockedEndingSet;
@@ -17,86 +17,55 @@ public sealed class VNAlbumUnlockService
     {
         _globalData = globalData;
         _globalRepo = globalRepo;
-        _database = database;
+        _vnAlbumData = database;
         
         _unlockedCgSet = new HashSet<string>(_globalData.unlockedCgKeys);
         _unlockedEndingSet = new HashSet<string>(_globalData.unlockedEndingKeys);
     }
 
-    public bool IsUnlocked(string key)
-    {
-        return _unlockedCgSet.Contains(key);
-    }
+    public IReadOnlyList<VNAlbumItemSO> GetAllItems() => _vnAlbumData.Items;
+    
+    public bool IsUnlocked(string key) => _unlockedCgSet.Contains(key);
+    public bool IsEndingUnlocked(string key) => _unlockedEndingSet.Contains(key);
 
     public bool Unlock(string key)
     {
-        if (string.IsNullOrWhiteSpace(key))
-        {
-            Debug.LogWarning("[VNAlbumUnlockService] Unlock called with empty key.");
-            return false;
-        }
-
-        if (_database != null && _database.FindByKey(key) == null)
+        if (_vnAlbumData.FindByKey(key) == null)
             Debug.LogWarning($"[VNAlbumUnlockService] Key '{key}' not found in album database. Unlocking anyway.");
 
-        if (_unlockedCgSet.Contains(key))
+        if (!_unlockedCgSet.Add(key))
             return false;
 
-        _unlockedCgSet.Add(key);
         _globalData.unlockedCgKeys.Add(key);
-
-        _globalRepo.Save(_globalData);
-
-        Debug.Log($"[VNAlbumUnlockService] Unlocked CG: '{key}'");
-        return true;
+        
+        return _globalRepo.Save(_globalData);
     }
-
-    public bool IsEndingUnlocked(string key)
-    {
-        if (string.IsNullOrWhiteSpace(key))
-            return false;
-
-        return _unlockedEndingSet.Contains(key);
-    }
-
+    
     public bool UnlockEnding(string key)
     {
-        if (string.IsNullOrWhiteSpace(key))
+        if (!_unlockedEndingSet.Add(key))
             return false;
 
-        if (_unlockedEndingSet.Contains(key))
-            return false;
-
-        _unlockedEndingSet.Add(key);
         _globalData.unlockedEndingKeys.Add(key);
-
-        _globalRepo.Save(_globalData);
-
-        Debug.Log($"[VNAlbumUnlockService] Unlocked ending: '{key}'");
-        return true;
+        
+        return _globalRepo.Save(_globalData);
     }
 
     public List<VNAlbumItemSO> GetUnlockedItems()
     {
         var result = new List<VNAlbumItemSO>();
 
-        if (_database == null)
-            return result;
-
-        for (int i = 0; i < _database.Items.Count; i++)
+        for (int i = 0; i < _vnAlbumData.Items.Count; i++)
         {
-            VNAlbumItemSO item = _database.Items[i];
+            VNAlbumItemSO item = _vnAlbumData.Items[i];
+            if(item == null) 
+                continue;
 
-            if (item != null && _unlockedCgSet.Contains(item.key))
+            if (_unlockedCgSet.Contains(item.key))
                 result.Add(item);
         }
 
         return result;
-    }
-
-    public IReadOnlyList<VNAlbumItemSO> GetAllItems()
-    {
-        return _database.Items;
     }
     
 #if UNITY_EDITOR || DEVELOPMENT_BUILD

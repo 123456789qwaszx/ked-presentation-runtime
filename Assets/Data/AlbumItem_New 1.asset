@@ -13,8 +13,6 @@ MonoBehaviour:
   m_Name: AlbumItem_New 1
   m_EditorClassIdentifier: Assembly-CSharp::VNAlbumItemSO
   key: cg_test_02
-  cgSprite: {fileID: 21300006, guid: bad6c0f0bf6c3aa4690d400a757fa284, type: 3}
-  thumbnailSprite: {fileID: 21300022, guid: bad6c0f0bf6c3aa4690d400a757fa284, type: 3}
+  cgSprite: {fileID: 21300000, guid: 2574b6215b9b2204a82e603f935a8b16, type: 3}
+  thumbnailSprite: {fileID: 21300000, guid: cd74c78445ac55a4ea3ef250be17b753, type: 3}
   title: title1
-  chapterLabel: 1
-  variantCount: 1

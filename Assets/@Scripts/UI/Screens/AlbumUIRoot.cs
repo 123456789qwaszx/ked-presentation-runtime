@@ -12,8 +12,9 @@ public sealed class AlbumMenuPanel : UIPanel<AlbumMenuPanel.Refs>
 
     public enum Refs
     {
-        AlbumBG_Image,
+        Preview_Root,
         Preview_Image,
+        Preview_Button,
 
         ContentRoot_Rect,
 
@@ -24,6 +25,8 @@ public sealed class AlbumMenuPanel : UIPanel<AlbumMenuPanel.Refs>
     [SerializeField] private VNAlbumSlotButton _slotButtonPrefab;
 
     private Image _albumBg;
+
+    private CanvasGroup _previewGroup;
     private Image _previewImage;
 
     private RectTransform _contentRoot;
@@ -36,7 +39,7 @@ public sealed class AlbumMenuPanel : UIPanel<AlbumMenuPanel.Refs>
 
     protected override void OnInitialize()
     {
-        _albumBg = View.Image(Refs.AlbumBG_Image);
+        _previewGroup = View.CanvasGroup(Refs.Preview_Root);
         _previewImage = View.Image(Refs.Preview_Image);
 
         _contentRoot = View.Rect(Refs.ContentRoot_Rect);
@@ -55,21 +58,19 @@ public sealed class AlbumMenuPanel : UIPanel<AlbumMenuPanel.Refs>
         _close.OnClicked -= HandleClose;
         _close.OnClicked += HandleClose;
 
-        _previewImage.sprite = null;
-        _previewImage.enabled = false;
-    }
+        View.Button(Refs.Preview_Button).onClick.RemoveListener(HidePreview);
+        View.Button(Refs.Preview_Button).onClick.AddListener(HidePreview);
 
+        HidePreview();
+    }
 
     public void Rebuild(IReadOnlyList<VNAlbumItemSO> items, Func<string, bool> isUnlocked)
     {
         if (!_valid)
             return;
 
-        for (int i = _contentRoot.childCount - 1; i >= 0; i--)
-            Destroy(_contentRoot.GetChild(i).gameObject);
-        
-        _previewImage.sprite = null;
-        _previewImage.enabled = false;
+        ClearSlots();
+        HidePreview();
 
         if (items == null)
             return;
@@ -77,33 +78,67 @@ public sealed class AlbumMenuPanel : UIPanel<AlbumMenuPanel.Refs>
         for (int i = 0; i < items.Count; i++)
         {
             VNAlbumItemSO item = items[i];
-            
+
             if (item == null || item.key == null)
                 continue;
 
-            bool unlocked = isUnlocked(item.key);
+            bool unlocked = isUnlocked != null && isUnlocked(item.key);
 
             VNAlbumSlotButton button = Instantiate(_slotButtonPrefab, _contentRoot);
             button.Bind(item, unlocked, HandleAlbumItemClicked);
         }
     }
-    
-    private void HandleClose() => CloseClicked?.Invoke();
+
+    private void ClearSlots()
+    {
+        for (int i = _contentRoot.childCount - 1; i >= 0; i--)
+            Destroy(_contentRoot.GetChild(i).gameObject);
+    }
+
+    private void ShowPreview(Sprite sprite)
+    {
+        if (sprite == null)
+        {
+            HidePreview();
+            return;
+        }
+
+        _previewImage.sprite = sprite;
+        _previewImage.enabled = true;
+
+        _previewGroup.alpha = 1f;
+        _previewGroup.interactable = true;
+        _previewGroup.blocksRaycasts = true;
+    }
+
+    private void HidePreview()
+    {
+        _previewImage.sprite = null;
+        _previewImage.enabled = false;
+
+        _previewGroup.alpha = 0f;
+        _previewGroup.interactable = false;
+        _previewGroup.blocksRaycasts = false;
+    }
+
+    private void HandleClose()
+    {
+        CloseClicked?.Invoke();
+    }
 
     private void HandleAlbumItemClicked(VNAlbumItemSO item)
     {
         if (!_valid)
             return;
 
-        _previewImage.sprite = item.cgSprite;
-        _previewImage.enabled = item.cgSprite != null;
+        ShowPreview(item != null ? item.cgSprite : null);
     }
-    
+
     private bool ValidateRefs()
     {
         string missing = "";
 
-        AppendMissing(ref missing, _albumBg, Refs.AlbumBG_Image);
+        AppendMissing(ref missing, _previewGroup, Refs.Preview_Root);
         AppendMissing(ref missing, _previewImage, Refs.Preview_Image);
 
         AppendMissing(ref missing, _contentRoot, Refs.ContentRoot_Rect);
