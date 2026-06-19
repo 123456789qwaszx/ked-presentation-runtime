@@ -21,8 +21,6 @@ public sealed class DialogueBoxPresentationController
     private float _fadeUpDuration = 0.25f;
     private float _fadeDownDuration = 0.1f;
 
-    public DialogueBoxPresentationPhase CurrentPhase { get; private set; } = DialogueBoxPresentationPhase.None;
-
     public DialogueBoxPresentationController(DialogueBoxHost host, DialogueBoxMetadataResolver metadataResolver)
     {
         _host = host;
@@ -31,33 +29,21 @@ public sealed class DialogueBoxPresentationController
 
     public async YarnTask<DialogueBoxPresentationResult> ShowLineAsync(VNDialogueLine line, DialogueBoxPresentationOptions options)
     {
-        SetPhase(DialogueBoxPresentationPhase.LineReceived);
-
         DialogueBoxTransitionPlan plan = BuildPlan(line, options);
-        SetPhase(DialogueBoxPresentationPhase.PlanBuilt);
 
         ResetBoxTransform(plan.NextBox);
         PrimeText(plan.NextBox, line);
-        SetPhase(DialogueBoxPresentationPhase.TextPrimed);
-
         PrepareTransition(plan);
-        SetPhase(DialogueBoxPresentationPhase.TransitionPrepared);
 
-        SetPhase(DialogueBoxPresentationPhase.TransitionApplying);
         if (plan.UseImmediate)
             ApplyImmediate(plan);
         else
             await ApplyAsync(plan, _fadeUpDuration, _fadeDownDuration, options.Run);
 
-        if (!options.Run.IsValid) {
-            SetPhase(DialogueBoxPresentationPhase.Stale);
+        if (!options.Run.IsValid)
             return DialogueBoxPresentationResult.Stale(plan);
-        }
 
         Commit(plan);
-        SetPhase(DialogueBoxPresentationPhase.Committed);
-        
-        SetPhase(DialogueBoxPresentationPhase.Completed);
 
         return DialogueBoxPresentationResult.Completed(plan);
     }
@@ -66,16 +52,12 @@ public sealed class DialogueBoxPresentationController
     {
         HideAll();
         _boxState.Reset();
-
-        SetPhase(DialogueBoxPresentationPhase.None);
     }
 
     public void CloseAll()
     {
         HideAll();
         _boxState.Reset();
-
-        SetPhase(DialogueBoxPresentationPhase.None);
     }
 
     public void CleanupStale(DialogueBoxPresentationResult result)
@@ -359,11 +341,6 @@ public sealed class DialogueBoxPresentationController
         
         rect.localPosition = Vector3.zero;
         rect.anchoredPosition = Vector2.zero;
-    }
-
-    private void SetPhase(DialogueBoxPresentationPhase phase)
-    {
-        CurrentPhase = phase;
     }
     
     public void SetProtagonistLineBoxKind(DialogueBoxKind kind)
