@@ -3,14 +3,21 @@ using System.Collections.Generic;
 using UnityEngine;
 using Yarn.Unity;
 
+public enum VNOptionSelectionMode
+{
+    NoOptionAvailable = 0,
+    ReplayRecordedChoiceDuringSeek = 1,
+    PresentInteractive = 2,
+}
+
+// Runs one option-set presentation transaction.
+// Owns choice replay/commit ordering, but not item instances or selection input.
 public sealed class VNOptionsPresentationFlow
 {
     private readonly VNOptionsBoxPresentationController _boxPresentation;
     private readonly VNLinePresentationState _advanceState;
     private readonly VNChoiceBoundary _choiceBoundary;
     private readonly VnUxState _uxState;
-
-    public VNOptionsPresentationPhase CurrentPhase { get; private set; } = VNOptionsPresentationPhase.None;
 
     public VNOptionsPresentationFlow(
         VNOptionsBoxPresentationController boxPresentation,
@@ -31,105 +38,98 @@ public sealed class VNOptionsPresentationFlow
         Func<VNOptionsPresentationContext, YarnTask> cleanup,
         Func<bool> shouldFastForward)
     {
-        // Phase: OptionsReceived -> OptionSetCommitted
-        SetPhase(ctx, VNOptionsPresentationPhase.OptionsReceived);
-
         ctx.ChoiceIndexInNode = _choiceBoundary.ReserveChoiceIndex();
-        SetPhase(ctx, VNOptionsPresentationPhase.OptionSetCommitted);
 
-        // Phase: SelectionPolicyResolved
-        VNOptionSelectionDecision enteredDecision;
+        VNOptionSelectionMode mode = ResolveSelectionMode(ctx);
 
-        if (ctx.HasAnyAvailableOption) {
-            enteredDecision = _advanceState.IsSeekingActive
-                ? VNOptionSelectionDecision.ReplayRecordedChoiceDuringSeek()
-                : VNOptionSelectionDecision.PresentInteractive();
+        switch (mode)
+        {
+            case VNOptionSelectionMode.NoOptionAvailable:
+                return null;
+
+            case VNOptionSelectionMode.ReplayRecordedChoiceDuringSeek:
+                return ResolveReplayOption(ctx);
+
+            case VNOptionSelectionMode.PresentInteractive:
+                return await RunInteractiveAsync(
+                    ctx,
+                    prepareItems,
+                    awaitSelection,
+                    cleanup,
+                    shouldFastForward);
+
+            default:
+                Debug.LogWarning($"[VNOptionsPresentationFlow] Unknown selection mode: {mode}");
+                return null;
         }
-        else enteredDecision = VNOptionSelectionDecision.NoOptionAvailable();
+    }
 
-        ctx.SelectionDecision = enteredDecision;
-        SetPhase(ctx, VNOptionsPresentationPhase.SelectionPolicyResolved);
+    private VNOptionSelectionMode ResolveSelectionMode(VNOptionsPresentationContext ctx)
+    {
+        if (!ctx.HasAnyAvailableOption)
+            return VNOptionSelectionMode.NoOptionAvailable;
 
-        if (ctx.NoOptionsAvailable) {
-            Debug.Log("no option selected");
-            SetPhase(ctx, VNOptionsPresentationPhase.Completed);
-            return null;
-        }
+        if (_advanceState.IsSeekingActive)
+            return VNOptionSelectionMode.ReplayRecordedChoiceDuringSeek;
 
-        if (ctx.ShouldReplayRecordedChoice) {
-            ctx.IsReplay = _choiceBoundary.TryResolveReplayOption(
-                ctx.ChoiceIndexInNode,
-                ctx.SourceOptions,
-                out DialogueOption replayOption);
+        return VNOptionSelectionMode.PresentInteractive;
+    }
 
-            ctx.ReplayOption = replayOption;
-            ctx.SelectedOption = ctx.IsReplay ? ctx.ReplayOption : null;
+    private DialogueOption ResolveReplayOption(VNOptionsPresentationContext ctx)
+    {
+        bool resolved = _choiceBoundary.TryResolveReplayOption(
+            ctx.ChoiceIndexInNode,
+            ctx.SourceOptions,
+            out DialogueOption replayOption);
 
-            SetPhase(ctx, VNOptionsPresentationPhase.ReplayResolved);
-            SetPhase(ctx, VNOptionsPresentationPhase.Completed);
-            return ctx.SelectedOption;
-        }
+        return resolved ? replayOption : null;
+    }
 
-        // Phase: ViewModelsBuilt
+    private async YarnTask<DialogueOption> RunInteractiveAsync(
+        VNOptionsPresentationContext ctx,
+        Action<VNOptionsPresentationContext> prepareItems,
+        Func<VNOptionsPresentationContext, YarnTask<VNOptionViewModel>> awaitSelection,
+        Func<VNOptionsPresentationContext, YarnTask> cleanup,
+        Func<bool> shouldFastForward)
+    {
         ctx.ViewModels = BuildViewModels(ctx);
 
-        if (ctx.ViewModels.Count == 0) {
-            SetPhase(ctx, VNOptionsPresentationPhase.Completed);
+        if (ctx.ViewModels.Count == 0)
             return null;
-        }
-        SetPhase(ctx, VNOptionsPresentationPhase.ViewModelsBuilt);
 
-        try {
+        try
+        {
             _uxState.SetChoicesVisible(true);
 
-            // Phase: BoxTransitioning -> BoxReady
-            SetPhase(ctx, VNOptionsPresentationPhase.BoxTransitioning);
-
             ctx.BoxResult = await _boxPresentation.ShowOptionsAsync(
-                new VNOptionsBoxPresentationOptions {
+                new VNOptionsBoxPresentationOptions
+                {
                     UseImmediateTransition = shouldFastForward(),
                     Style = VNOptionsBoxStyle.Default,
                 });
-            SetPhase(ctx, VNOptionsPresentationPhase.BoxReady);
 
-            if (ctx.BoxResult == null || !ctx.BoxResult.IsValid) {
-                await AbortAsync(ctx);
+            if (ctx.BoxResult == null || !ctx.BoxResult.IsValid)
+            {
+                Abort(ctx);
                 return null;
             }
 
-            // Phase: ItemsPrepared
             prepareItems(ctx);
-            SetPhase(ctx, VNOptionsPresentationPhase.ItemsPrepared);
 
-            // Phase: WaitingForSelection
-            SetPhase(ctx, VNOptionsPresentationPhase.WaitingForSelection);
             VNOptionViewModel selected = await awaitSelection(ctx);
 
-            if (ctx.Token.IsNextContentRequested || selected == null) {
-                await AbortAsync(ctx);
+            if (ctx.Token.IsNextContentRequested || selected == null)
+            {
+                Abort(ctx);
                 return null;
             }
 
-            // Phase: SelectionCommitted
-            
-            _choiceBoundary.CommitSelection(
-                ctx.NodeName,
-                selected.ChoiceIndexInNode,
-                selected.SourceOptionIndex,
-                selected.SourceOption.Line.TextID);
+            CommitSelection(ctx, selected);
 
-            ctx.SelectedOption = selected.SourceOption;
-            
-            SetPhase(ctx, VNOptionsPresentationPhase.SelectionCommitted);
-
-            SetPhase(ctx, VNOptionsPresentationPhase.Completed);
             return ctx.SelectedOption;
         }
-        catch {
-            SetPhase(ctx, VNOptionsPresentationPhase.Aborted);
-            throw;
-        }
-        finally {
+        finally
+        {
             _uxState.SetChoicesVisible(false);
             await cleanup(ctx);
         }
@@ -155,18 +155,19 @@ public sealed class VNOptionsPresentationFlow
         return result;
     }
 
-    private async YarnTask AbortAsync(VNOptionsPresentationContext ctx)
+    private void CommitSelection(VNOptionsPresentationContext ctx, VNOptionViewModel selected)
     {
-        SetPhase(ctx, VNOptionsPresentationPhase.Aborted);
+        _choiceBoundary.CommitSelection(
+            ctx.NodeName,
+            selected.ChoiceIndexInNode,
+            selected.SourceOptionIndex,
+            selected.SourceOption.Line.TextID);
 
-        _boxPresentation.CleanupAborted(ctx.BoxResult);
-
-        await YarnTask.CompletedTask;
+        ctx.SelectedOption = selected.SourceOption;
     }
 
-    private void SetPhase(VNOptionsPresentationContext ctx, VNOptionsPresentationPhase phase)
+    private void Abort(VNOptionsPresentationContext ctx)
     {
-        ctx.Phase = phase;
-        CurrentPhase = phase;
+        _boxPresentation.CleanupAborted(ctx.BoxResult);
     }
 }
