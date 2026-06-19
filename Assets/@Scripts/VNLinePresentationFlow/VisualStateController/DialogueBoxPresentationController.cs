@@ -2,9 +2,7 @@ using TMPro;
 using UnityEngine;
 using Yarn.Unity;
 
-// Coordinates dialogue box selection, text priming, transition playback,
-// stale-run cleanup, and current-box state commit for one VN line.
-// This class owns dialogue box visual state, but not the full VN line lifecycle.
+// Coordinates dialogue box selection, text priming, transition playback.
 public sealed class DialogueBoxPresentationController
 {
     private const DialogueBoxKind DefaultProtagonistLineBoxKind = DialogueBoxKind.Portrait;
@@ -29,35 +27,56 @@ public sealed class DialogueBoxPresentationController
 
     public async YarnTask<DialogueBoxPresentationResult> ShowLineAsync(VNDialogueLine line, DialogueBoxPresentationOptions options)
     {
-        DialogueBoxTransitionPlan plan = BuildPlan(line, options);
+        IDialogueTextTarget currentBox = _boxState.Box;
+        DialogueBoxKind? currentBoxKind = _boxState.BoxKind;
+        bool currentBoxIsVisible = _boxState.IsVisible;
+
+        // ResolveBoxKind
+        DialogueBoxKind nextBoxKind;
+        
+        if (_metadataResolver.TryResolveBoxKind(line.Metadata, out DialogueBoxKind metadataBoxKind))
+            nextBoxKind = metadataBoxKind;
+        else if (line.HasCharacterName)
+            nextBoxKind = _namedLineBoxKind;
+        else nextBoxKind = _protagonistLineBoxKind;
+        
+        IDialogueTextTarget nextBox = _host.ResolveTarget(nextBoxKind);
+        
+        // ResolveTransitionKind
+        DialogueBoxTransitionKind transitionKind;
+        
+        bool shouldFastForward = !options.IsSeekTargetLine && options.UseImmediateTransition;
+
+        if (shouldFastForward)
+            transitionKind = DialogueBoxTransitionKind.Cut;
+        else if (_metadataResolver.TryResolveTransitionKind(line.Metadata, out DialogueBoxTransitionKind metadataTransition))
+            transitionKind = metadataTransition;
+        else if (!currentBoxIsVisible || currentBoxKind.HasValue == false)
+            transitionKind = DialogueBoxTransitionKind.FadeIn;
+        else if (currentBoxKind.Value == nextBoxKind)
+            transitionKind = DialogueBoxTransitionKind.Keep;
+        else
+            transitionKind = DialogueBoxTransitionKind.FadeOutIn;
+        
+        // PlanBuilt
+        DialogueBoxTransitionPlan plan = new DialogueBoxTransitionPlan(
+            nextBoxKind,
+            currentBox,
+            nextBox,
+            transitionKind,
+            options.UseImmediateTransition);
 
         ResetBoxTransform(plan.NextBox);
         PrimeText(plan.NextBox, line);
-        PrepareTransition(plan);
 
-        if (plan.UseImmediate)
-            ApplyImmediate(plan);
-        else
-            await ApplyAsync(plan, _fadeUpDuration, _fadeDownDuration, options.Run);
+        await ApplyTransitionAsync(plan, plan.UseImmediate, options.Run);
 
         if (!options.Run.IsValid)
             return DialogueBoxPresentationResult.Stale(plan);
 
-        Commit(plan);
+        _boxState.Commit(plan.NextKind, plan.NextBox, plan.TransitionKind);
 
         return DialogueBoxPresentationResult.Completed(plan);
-    }
-
-    public void HideAllForSeek()
-    {
-        HideAll();
-        _boxState.Reset();
-    }
-
-    public void CloseAll()
-    {
-        HideAll();
-        _boxState.Reset();
     }
 
     public void CleanupStale(DialogueBoxPresentationResult result)
@@ -70,76 +89,22 @@ public sealed class DialogueBoxPresentationController
 
         if (previousBox != null && !ReferenceEquals(previousBox, _boxState.Box) && !ReferenceEquals(previousBox, nextBox))
             SetVisibleImmediate(previousBox, false);
-        
+
         if (_boxState.IsVisible && _boxState.Box != null)
             SetVisibleImmediate(_boxState.Box, true);
     }
-
-    private DialogueBoxTransitionPlan BuildPlan(VNDialogueLine line, DialogueBoxPresentationOptions options)
+    
+    public void CloseAll()
     {
-        IDialogueTextTarget currentBox = _boxState.Box;
-        DialogueBoxKind? currentBoxKind = _boxState.BoxKind;
-        bool currentBoxIsVisible = _boxState.IsVisible;
-
-        DialogueBoxKind nextBoxKind = ResolveBoxKind(line.Metadata, line.HasCharacterName);
-        IDialogueTextTarget nextBox = _host.ResolveTarget(nextBoxKind);
-
-        bool shouldFastForward = !options.IsSeekTargetLine && options.UseImmediateTransition;
-
-        DialogueBoxTransitionKind transitionKind = ResolveTransitionKind(
-            currentBoxKind,
-            currentBoxIsVisible,
-            nextBoxKind,
-            line.Metadata,
-            shouldFastForward);
-
-        DialogueBoxTransitionPlan plan = new DialogueBoxTransitionPlan(
-            nextBoxKind,
-            currentBox,
-            nextBox,
-            transitionKind,
-            options.UseImmediateTransition);
-
-        return plan;
+        _host.HideAll();
+        _boxState.Reset();
     }
-
-    private DialogueBoxKind ResolveBoxKind(string[] metadata, bool hasCharacterName)
-    {
-        if (_metadataResolver.TryResolveBoxKind(metadata, out DialogueBoxKind metadataBoxKind))
-            return metadataBoxKind;
-        
-        else if (hasCharacterName)
-            return _namedLineBoxKind;
-        else 
-            return _protagonistLineBoxKind;
-    }
-
-    private DialogueBoxTransitionKind ResolveTransitionKind(
-        DialogueBoxKind? currentBoxKind,
-        bool isBoxVisible,
-        DialogueBoxKind nextBoxKind,
-        string[] metadata,
-        bool consumeSilently)
-    {
-        if (consumeSilently)
-            return DialogueBoxTransitionKind.Cut;
-
-        if (_metadataResolver.TryResolveTransitionKind(metadata, out DialogueBoxTransitionKind metadataTransition))
-            return metadataTransition;
-
-        if (!isBoxVisible || currentBoxKind.HasValue == false)
-            return DialogueBoxTransitionKind.FadeIn;
-
-        if (currentBoxKind.Value == nextBoxKind)
-            return DialogueBoxTransitionKind.Keep;
-
-        return DialogueBoxTransitionKind.FadeOutIn;
-    }
+    
 
     private void PrimeText(IDialogueTextTarget target, VNDialogueLine line)
     {
         TMP_Text lineText = target.LineText;
-        if (lineText != null)
+        if (lineText != null) 
         {
             lineText.text = line.Text;
             lineText.maxVisibleCharacters = 0;
@@ -159,99 +124,70 @@ public sealed class DialogueBoxPresentationController
         }
     }
 
-    private void PrepareTransition(DialogueBoxTransitionPlan plan)
-    {
-        IDialogueTextTarget nextBox = plan.NextBox;
-
-        switch (plan.TransitionKind)
-        {
-            case DialogueBoxTransitionKind.Keep:
-                break;
-
-            case DialogueBoxTransitionKind.Cut:
-                HideAllExcept(nextBox);
-                SetVisibleImmediate(nextBox, true);
-                break;
-
-            case DialogueBoxTransitionKind.FadeIn:
-                HideAllExcept(nextBox);
-                PrepareHidden(nextBox);
-                break;
-
-            case DialogueBoxTransitionKind.FadeOutIn:
-                PrepareHidden(nextBox);
-                break;
-
-            case DialogueBoxTransitionKind.Hide:
-                break;
-        }
-    }
-
-    private async YarnTask ApplyAsync(DialogueBoxTransitionPlan plan, float fadeUpDuration, float fadeDownDuration, LinePresentationRun run)
+    // DialogueBoxTransitionKind를 실제 동작으로 바꾸는 유일한 지점.
+    // 각 case 안에서 immediate 처리와 animated 처리를 나란히 두어, 전환별 전체 흐름을 한 곳에서 정리.
+    private async YarnTask ApplyTransitionAsync(DialogueBoxTransitionPlan plan, bool immediate, LinePresentationRun run)
     {
         switch (plan.TransitionKind)
         {
             case DialogueBoxTransitionKind.Keep:
-                if (run.IsValid)
+                if (immediate || run.IsValid)
                     SetVisibleImmediate(plan.NextBox, true);
                 break;
 
             case DialogueBoxTransitionKind.Cut:
-                if (run.IsValid)
-                    ApplyImmediate(plan);
+                if (immediate || run.IsValid) {
+                    HideAllExcept(plan.NextBox);
+                    SetVisibleImmediate(plan.NextBox, true);
+                }
                 break;
 
             case DialogueBoxTransitionKind.FadeIn:
-                await FadeInBoxAsync(plan.NextBox, fadeUpDuration, run);
+                if (immediate) {
+                    HideAllExcept(plan.NextBox);
+                    SetVisibleImmediate(plan.NextBox, true);
+                }
+                else {
+                    HideAllExcept(plan.NextBox);
+                    PrepareHidden(plan.NextBox);
+                    await FadeInBoxAsync(plan.NextBox, _fadeUpDuration, run);
+                }
                 break;
 
             case DialogueBoxTransitionKind.FadeOutIn:
-                if (plan.PreviousBox != null && !ReferenceEquals(plan.PreviousBox, plan.NextBox))
-                    await FadeOutBoxAsync(plan.PreviousBox, fadeDownDuration, run);
+                if (immediate) {
+                    if (plan.PreviousBox != null && !ReferenceEquals(plan.PreviousBox, plan.NextBox))
+                        SetVisibleImmediate(plan.PreviousBox, false);
 
-                if (!run.IsValid)
-                    break;
+                    HideAllExcept(plan.NextBox);
+                    SetVisibleImmediate(plan.NextBox, true);
+                }
+                else {
+                    PrepareHidden(plan.NextBox);
 
-                SetVisibleImmediate(plan.PreviousBox, false);
-                PrepareHidden(plan.NextBox);
+                    if (plan.PreviousBox != null && !ReferenceEquals(plan.PreviousBox, plan.NextBox))
+                        await FadeOutBoxAsync(plan.PreviousBox, _fadeDownDuration, run);
 
-                await FadeInBoxAsync(plan.NextBox, fadeUpDuration, run);
-                break;
+                    if (!run.IsValid)
+                        break;
 
-            case DialogueBoxTransitionKind.Hide:
-                if (plan.NextBox != null)
-                    await FadeOutBoxAsync(plan.NextBox, fadeDownDuration, run);
-
-                if (run.IsValid)
-                    SetVisibleImmediate(plan.NextBox, false);
-                break;
-        }
-    }
-
-    private void ApplyImmediate(DialogueBoxTransitionPlan plan)
-    {
-        switch (plan.TransitionKind)
-        {
-            case DialogueBoxTransitionKind.Keep:
-                SetVisibleImmediate(plan.NextBox, true);
-                break;
-
-            case DialogueBoxTransitionKind.Cut:
-            case DialogueBoxTransitionKind.FadeIn:
-                HideAllExcept(plan.NextBox);
-                SetVisibleImmediate(plan.NextBox, true);
-                break;
-
-            case DialogueBoxTransitionKind.FadeOutIn:
-                if (plan.PreviousBox != null && !ReferenceEquals(plan.PreviousBox, plan.NextBox))
                     SetVisibleImmediate(plan.PreviousBox, false);
-
-                HideAllExcept(plan.NextBox);
-                SetVisibleImmediate(plan.NextBox, true);
+                    PrepareHidden(plan.NextBox);
+                    await FadeInBoxAsync(plan.NextBox, _fadeUpDuration, run);
+                }
                 break;
 
             case DialogueBoxTransitionKind.Hide:
-                SetVisibleImmediate(plan.NextBox, false);
+                if (immediate) {
+                    SetVisibleImmediate(plan.NextBox, false);
+                }
+                else {
+                    if (plan.NextBox != null)
+                        await FadeOutBoxAsync(plan.NextBox, _fadeDownDuration, run);
+
+                    if (run.IsValid)
+                        SetVisibleImmediate(plan.NextBox, false);
+                }
                 break;
         }
     }
@@ -290,21 +226,8 @@ public sealed class DialogueBoxPresentationController
 
         if (!run.IsValid)
             return;
-        
+
         SetCanvas(canvasGroup, false);
-    }
-
-    private void Commit(DialogueBoxTransitionPlan plan)
-    {
-        if (plan == null)
-            return;
-
-        _boxState.Commit(plan.NextKind, plan.NextBox, plan.TransitionKind);
-    }
-    
-    private void HideAll()
-    {
-        _host.HideAll();
     }
 
     private void HideAllExcept(IDialogueTextTarget keep)
@@ -324,8 +247,7 @@ public sealed class DialogueBoxPresentationController
     private void SetVisibleImmediate(IDialogueTextTarget box, bool visible)
     {
         IPresentationDialogueBoxView view = box as IPresentationDialogueBoxView;
-        if (view != null)
-        {
+        if (view != null) {
             view.SetVisible(visible);
             SetCanvas(view.CanvasGroup, visible);
             return;
@@ -337,12 +259,17 @@ public sealed class DialogueBoxPresentationController
     private void ResetBoxTransform(IDialogueTextTarget box)
     {
         MonoBehaviour behaviour = box as MonoBehaviour;
+        if (!behaviour)
+            return;
+
         RectTransform rect = behaviour?.transform as RectTransform;
-        
+        if (rect == null)
+            return;
+
         rect.localPosition = Vector3.zero;
         rect.anchoredPosition = Vector2.zero;
     }
-    
+
     public void SetProtagonistLineBoxKind(DialogueBoxKind kind)
     {
         _protagonistLineBoxKind = kind;
@@ -358,7 +285,7 @@ public sealed class DialogueBoxPresentationController
         _protagonistLineBoxKind = DefaultProtagonistLineBoxKind;
         _namedLineBoxKind = DefaultNamedLineBoxKind;
     }
-    
+
     private static void SetCanvas(CanvasGroup canvasGroup, bool visible)
     {
         if (canvasGroup == null)

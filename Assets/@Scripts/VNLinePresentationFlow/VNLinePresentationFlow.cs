@@ -247,7 +247,7 @@ public sealed class VNLinePresentationFlow
     {
         SetPhase(ctx, VNLinePresentationPhase.SeekPassThrough);
 
-        _boxPresentation.HideAllForSeek();
+        _boxPresentation.CloseAll();
         _advanceState.MarkLineDisplayCompleted(ctx.Meta, "passThrough");
 
         SetPhase(ctx, VNLinePresentationPhase.WaitingForAdvance);
