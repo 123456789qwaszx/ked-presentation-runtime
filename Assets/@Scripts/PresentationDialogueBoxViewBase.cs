@@ -13,6 +13,8 @@ public abstract class PresentationDialogueBoxViewBase<TRefs>
     public abstract TMP_Text NameText { get; }
 
     public virtual bool HasName => NameText != null;
+    
+    public virtual TMP_Text GetLineText() => LineText;
 
     public virtual void ResetPresentationTransform()
     {
@@ -112,15 +114,6 @@ public abstract class PresentationDialogueBoxViewBase<TRefs>
             return;
 
         SetCanvas(canvasGroup, false);
-    }
-
-    public virtual void ClearText()
-    {
-        if (LineText != null)
-            LineText.text = string.Empty;
-
-        if (NameText != null)
-            NameText.text = string.Empty;
     }
 
     private static void SetCanvas(CanvasGroup canvasGroup, bool visible)

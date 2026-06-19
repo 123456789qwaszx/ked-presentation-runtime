@@ -85,9 +85,6 @@ public partial class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
         Stage02Foreground_Root,
 
         DialogueUI_Root,
-        DialogueBox_Root,
-        NameBox_Root,
-        NarrationBox_Root,
 
         Choice_Root,
         SystemUI_Root,
@@ -329,13 +326,7 @@ public partial class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
     {
         SetLayerVisible(cg, false);
     }
-
-    public void ShowDialogueBoxUI(bool show)
-    {
-        SetLayerVisible(View.CanvasGroup(Refs.DialogueBox_Root), show);
-    }
-
-
+    
     private static void SetLayerVisible(CanvasGroup cg, bool visible)
     {
         if (cg == null)
