@@ -33,7 +33,7 @@ public sealed class DialogueBoxPresentationController
 
     public void CloseAll()
     {
-        _host.HideAll();
+        _host.HideAllDialogueBoxes();
         _boxState.Reset();
     }
 
@@ -56,10 +56,8 @@ public sealed class DialogueBoxPresentationController
 
         // Resolve transition kind
         DialogueBoxTransitionKind transitionKind;
-
-        bool shouldCutSilently = !ctx.IsSeekTargetLine && ctx.UseImmediateTransition;
-
-        if (shouldCutSilently)
+        
+        if (ctx.UseImmediateTransition)
             transitionKind = DialogueBoxTransitionKind.Cut;
         else if (_metadataResolver.TryResolveTransitionKind(ctx.Metadata, out DialogueBoxTransitionKind metadataTransition))
             transitionKind = metadataTransition;
@@ -111,7 +109,7 @@ public sealed class DialogueBoxPresentationController
             case DialogueBoxTransitionKind.Cut:
                 if (immediate || run.IsValid)
                 {
-                    _host.HideAllExcept(nextBox);
+                    _host.HideAllDialogueBoxesExcept(nextBox);
                     nextBox.SetVisibleImmediate(true);
                 }
 
@@ -120,12 +118,12 @@ public sealed class DialogueBoxPresentationController
             case DialogueBoxTransitionKind.FadeIn:
                 if (immediate)
                 {
-                    _host.HideAllExcept(nextBox);
+                    _host.HideAllDialogueBoxesExcept(nextBox);
                     nextBox.SetVisibleImmediate(true);
                 }
                 else
                 {
-                    _host.HideAllExcept(nextBox);
+                    _host.HideAllDialogueBoxesExcept(nextBox);
                     nextBox.PrepareHidden();
                     await nextBox.FadeInAsync(_fadeUpDuration, run);
                 }
@@ -138,7 +136,7 @@ public sealed class DialogueBoxPresentationController
                     if (previousBox != null && !ReferenceEquals(previousBox, nextBox))
                         previousBox.SetVisibleImmediate(false);
 
-                    _host.HideAllExcept(nextBox);
+                    _host.HideAllDialogueBoxesExcept(nextBox);
                     nextBox.SetVisibleImmediate(true);
                 }
                 else

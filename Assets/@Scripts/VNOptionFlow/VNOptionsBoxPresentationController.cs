@@ -1,50 +1,64 @@
-using UnityEngine;
 using Yarn.Unity;
 
-// Owns the option-box visual lifetime (show transition, hide, abort cleanup), kept separate from the
-// flow exactly as DialogueBoxPresentationController is for lines.
-//
-// This stub establishes the contract and the await points. The actual transition work
-// (fade, box variant, character anchoring) is intentionally left for the project to fill in.
-
-public sealed class VNOptionsBoxPresentationController : MonoBehaviour
+public sealed class VNOptionsBoxPresentationController
 {
-    [SerializeField] private CanvasGroup _canvasGroup;
-    [SerializeField] private RectTransform _itemContainer;
+    private readonly DialogueBoxHost _dialogueBoxHost;
+    
+    private OptionsBoxKind _defaultKind = OptionsBoxKind.Default;
+    private float _fadeDuration = 0.12f;
 
-    public async YarnTask<VNOptionsBoxPresentationResult> ShowOptionsAsync(VNOptionsBoxPresentationOptions options)
+    private IPresentationOptionsBoxView _currentView;
+
+    public VNOptionsBoxPresentationController(DialogueBoxHost host)
     {
-        if (_itemContainer == null)
-            return VNOptionsBoxPresentationResult.Invalid();
+        _dialogueBoxHost = host;
+    }
 
-        // TODO: branch on options.Style / options.AnchorCharacterName to resolve the target box + container.
-        // TODO: run the fade-in (or cut, when options.UseImmediateTransition) and await its completion here.
-        if (_canvasGroup != null)
+    public async YarnTask<VNOptionsBoxPresentationResult> ShowOptionsAsync(
+        VNOptionsBoxPresentationOptions options)
+    {
+        IPresentationOptionsBoxView nextView = _dialogueBoxHost.ResolveOptionsTarget(_defaultKind);
+
+        _dialogueBoxHost.HideAllOptionsBoxesExcept(nextView);
+
+        _currentView = nextView;
+        _currentView.ResetPresentationTransform();
+        _currentView.PrepareHidden();
+        _currentView.SetInputEnabled(false);
+
+        if (options != null && options.UseImmediateTransition)
         {
-            _canvasGroup.alpha = 1f;
-            _canvasGroup.interactable = false;
-            _canvasGroup.blocksRaycasts = false;
+            _currentView.SetVisibleImmediate(true);
+            _currentView.SetInputEnabled(false);
+        }
+        else
+        {
+            await _currentView.FadeInAsync(_fadeDuration, default);
         }
 
-        await YarnTask.Yield();
+        return new VNOptionsBoxPresentationResult(_currentView);
+    }
 
-        return VNOptionsBoxPresentationResult.Ready(_itemContainer);
+    public void CleanupAborted(VNOptionsBoxPresentationResult result)
+    {
+        if (result == null || result.View == null)
+            return;
+
+        result.View.SetInputEnabled(false);
+        result.View.SetVisibleImmediate(false);
+
+        if (ReferenceEquals(_currentView, result.View))
+            _currentView = null;
     }
 
     public void HideImmediate()
     {
-        if (_canvasGroup == null)
-            return;
+        if (_currentView != null)
+        {
+            _currentView.SetInputEnabled(false);
+            _currentView.SetVisibleImmediate(false);
+        }
 
-        _canvasGroup.alpha = 0f;
-        _canvasGroup.interactable = false;
-        _canvasGroup.blocksRaycasts = false;
-    }
-
-    // Called when the run aborts after the box was shown but before a normal selection commit.
-    public void CleanupAborted(VNOptionsBoxPresentationResult result)
-    {
-        // TODO: cancel any in-flight transition tied to this result before hiding.
-        HideImmediate();
+        _currentView = null;
     }
 }

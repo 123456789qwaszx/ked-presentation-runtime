@@ -3,10 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using Yarn.Unity;
 
-// Runs one option-set presentation transaction through its explicit phase sequence.
-// This class owns the transaction order, selection decision flow, and the choice commit,
-// but not the item pool, UI lifetime, or cancellation tokens.
-// VNOptionsPresenter remains the owner of pool lifetime, item binding, and the selection source.
 public sealed class VNOptionsPresentationFlow
 {
     private readonly VNOptionsBoxPresentationController _boxPresentation;
@@ -93,7 +89,6 @@ public sealed class VNOptionsPresentationFlow
                 new VNOptionsBoxPresentationOptions {
                     UseImmediateTransition = shouldFastForward(),
                     Style = VNOptionsBoxStyle.Default,
-                    AnchorCharacterName = null,
                 });
             SetPhase(ctx, VNOptionsPresentationPhase.BoxReady);
 

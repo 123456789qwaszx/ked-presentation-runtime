@@ -7,7 +7,12 @@ public enum DialogueBoxKind
     Speaker = 1,
     LetterBox = 2,
     OnlyText = 3,
-    BlackBook= 4
+    BlackBook = 4
+}
+
+public enum OptionsBoxKind
+{
+    Default = 0,
 }
 
 [Serializable]
@@ -19,11 +24,23 @@ public struct DialogueBoxHostEntry
     public MonoBehaviour view;
 }
 
+[Serializable]
+public struct OptionsBoxHostEntry
+{
+    public OptionsBoxKind kind;
+
+    [Tooltip("IPresentationOptionsBoxView 구현체")]
+    public MonoBehaviour view;
+}
+
 public sealed class DialogueBoxHost : MonoBehaviour
 {
     [Header("Dialogue Box Entries")]
     [SerializeField] private DialogueBoxHostEntry[] entries;
-    
+
+    [Header("Options Box Entries")]
+    [SerializeField] private OptionsBoxHostEntry[] optionEntries;
+
     public IPresentationDialogueBoxView ResolveTarget(DialogueBoxKind kind)
     {
         if (entries == null || entries.Length == 0)
@@ -37,19 +54,21 @@ public sealed class DialogueBoxHost : MonoBehaviour
             if (entries[i].kind != kind)
                 continue;
 
-            if (entries[i].view == null)
+            MonoBehaviour behaviour = entries[i].view;
+
+            if (!behaviour)
             {
                 Debug.LogWarning($"[DialogueBoxHost] View is null. kind={entries[i].kind}", this);
                 return null;
             }
 
-            IPresentationDialogueBoxView view = entries[i].view as IPresentationDialogueBoxView;
+            IPresentationDialogueBoxView view = behaviour as IPresentationDialogueBoxView;
 
             if (view == null)
             {
                 Debug.LogWarning(
-                    $"[DialogueBoxHost] View must implement IPresentationDialogueBoxView. kind={entries[i].kind}, go={entries[i].view.name}",
-                    entries[i].view);
+                    $"[DialogueBoxHost] View must implement IPresentationDialogueBoxView. kind={entries[i].kind}, go={behaviour.name}",
+                    behaviour);
 
                 return null;
             }
@@ -60,39 +79,75 @@ public sealed class DialogueBoxHost : MonoBehaviour
         Debug.LogWarning($"[DialogueBoxHost] Entry not found. kind={kind}", this);
         return null;
     }
-    
-    public void HideAll()
+
+    public IPresentationOptionsBoxView ResolveOptionsTarget(OptionsBoxKind kind)
+    {
+        if (optionEntries == null || optionEntries.Length == 0)
+        {
+            Debug.LogWarning($"[DialogueBoxHost] No options box entries are assigned. kind={kind}", this);
+            return null;
+        }
+
+        for (int i = 0; i < optionEntries.Length; i++)
+        {
+            if (optionEntries[i].kind != kind)
+                continue;
+
+            MonoBehaviour behaviour = optionEntries[i].view;
+
+            if (!behaviour)
+            {
+                Debug.LogWarning($"[DialogueBoxHost] Options view is null. kind={optionEntries[i].kind}", this);
+                return null;
+            }
+
+            IPresentationOptionsBoxView view = behaviour as IPresentationOptionsBoxView;
+
+            if (view == null)
+            {
+                Debug.LogWarning(
+                    $"[DialogueBoxHost] Options view must implement IPresentationOptionsBoxView. kind={optionEntries[i].kind}, go={behaviour.name}",
+                    behaviour);
+
+                return null;
+            }
+
+            return view;
+        }
+
+        Debug.LogWarning($"[DialogueBoxHost] Options entry not found. kind={kind}", this);
+        return null;
+    }
+
+    public void HideAllDialogueBoxes()
     {
         if (entries == null)
             return;
-        
+
         for (int i = 0; i < entries.Length; i++)
         {
-            // Unity-destroyed views can remain as C# references.
-            // Check as MonoBehaviour before casting to an interface.
             MonoBehaviour behaviour = entries[i].view;
-            if (!behaviour) 
+            if (!behaviour)
                 continue;
 
             IPresentationDialogueBoxView view = behaviour as IPresentationDialogueBoxView;
-            if (view == null) 
+            if (view == null)
                 continue;
 
             view.SetVisibleImmediate(false);
         }
     }
 
-    public void HideAllExcept(IPresentationDialogueBoxView target)
+    public void HideAllDialogueBoxesExcept(IPresentationDialogueBoxView target)
     {
         if (entries == null)
             return;
 
         for (int i = 0; i < entries.Length; i++)
         {
-            // Unity-destroyed views can remain as C# references.
-            // Check as MonoBehaviour before casting to an interface.
             MonoBehaviour behaviour = entries[i].view;
-            if (!behaviour) continue;
+            if (!behaviour)
+                continue;
 
             IPresentationDialogueBoxView view = behaviour as IPresentationDialogueBoxView;
             if (view == null)
@@ -104,17 +159,61 @@ public sealed class DialogueBoxHost : MonoBehaviour
             view.SetVisibleImmediate(false);
         }
     }
-    
+
+    public void HideAllOptionsBoxes()
+    {
+        if (optionEntries == null)
+            return;
+
+        for (int i = 0; i < optionEntries.Length; i++)
+        {
+            MonoBehaviour behaviour = optionEntries[i].view;
+            if (!behaviour)
+                continue;
+
+            IPresentationOptionsBoxView view = behaviour as IPresentationOptionsBoxView;
+            if (view == null)
+                continue;
+
+            view.SetVisibleImmediate(false);
+        }
+    }
+
+    public void HideAllOptionsBoxesExcept(IPresentationOptionsBoxView target)
+    {
+        if (optionEntries == null)
+            return;
+
+        for (int i = 0; i < optionEntries.Length; i++)
+        {
+            MonoBehaviour behaviour = optionEntries[i].view;
+            if (!behaviour)
+                continue;
+
+            IPresentationOptionsBoxView view = behaviour as IPresentationOptionsBoxView;
+            if (view == null)
+                continue;
+
+            if (ReferenceEquals(view, target))
+                continue;
+
+            view.SetVisibleImmediate(false);
+        }
+    }
+
     #region Validate
-    
+
     private void OnValidate()
+    {
+        ValidateDialogueEntries();
+        ValidateOptionsEntries();
+    }
+
+    private void ValidateDialogueEntries()
     {
         if (entries == null)
         {
-            Debug.LogWarning(
-                "[DialogueBoxHost] entries is null.",
-                this);
-
+            Debug.LogWarning("[DialogueBoxHost] entries is null.", this);
             return;
         }
 
@@ -127,12 +226,21 @@ public sealed class DialogueBoxHost : MonoBehaviour
             return;
         }
 
-        ValidateAllKindsAssigned();
-        ValidateDuplicateKinds();
-        ValidateEntryViews();
+        ValidateAllDialogueKindsAssigned();
+        ValidateDuplicateDialogueKinds();
+        ValidateDialogueEntryViews();
     }
 
-    private void ValidateAllKindsAssigned()
+    private void ValidateOptionsEntries()
+    {
+        if (optionEntries == null || optionEntries.Length == 0)
+            return;
+
+        ValidateDuplicateOptionsKinds();
+        ValidateOptionsEntryViews();
+    }
+
+    private void ValidateAllDialogueKindsAssigned()
     {
         Array values = Enum.GetValues(typeof(DialogueBoxKind));
 
@@ -159,8 +267,8 @@ public sealed class DialogueBoxHost : MonoBehaviour
             }
         }
     }
-    
-    private void ValidateDuplicateKinds()
+
+    private void ValidateDuplicateDialogueKinds()
     {
         for (int i = 0; i < entries.Length; i++)
         {
@@ -175,8 +283,24 @@ public sealed class DialogueBoxHost : MonoBehaviour
             }
         }
     }
-    
-    private void ValidateEntryViews()
+
+    private void ValidateDuplicateOptionsKinds()
+    {
+        for (int i = 0; i < optionEntries.Length; i++)
+        {
+            for (int j = i + 1; j < optionEntries.Length; j++)
+            {
+                if (optionEntries[i].kind != optionEntries[j].kind)
+                    continue;
+
+                Debug.LogWarning(
+                    $"[DialogueBoxHost] Duplicate entry for OptionsBoxKind.{optionEntries[i].kind}. indices={i}, {j}",
+                    this);
+            }
+        }
+    }
+
+    private void ValidateDialogueEntryViews()
     {
         for (int i = 0; i < entries.Length; i++)
         {
@@ -199,6 +323,30 @@ public sealed class DialogueBoxHost : MonoBehaviour
                 behaviour);
         }
     }
-    
+
+    private void ValidateOptionsEntryViews()
+    {
+        for (int i = 0; i < optionEntries.Length; i++)
+        {
+            MonoBehaviour behaviour = optionEntries[i].view;
+
+            if (behaviour == null)
+            {
+                Debug.LogWarning(
+                    $"[DialogueBoxHost] Options entry view is null. index={i}, kind={optionEntries[i].kind}",
+                    this);
+
+                continue;
+            }
+
+            if (behaviour is IPresentationOptionsBoxView)
+                continue;
+
+            Debug.LogWarning(
+                $"[DialogueBoxHost] Options entry view must implement IPresentationOptionsBoxView. index={i}, kind={optionEntries[i].kind}, go={behaviour.name}",
+                behaviour);
+        }
+    }
+
     #endregion
 }

@@ -79,8 +79,8 @@ public class VnAppBootstrap : MonoBehaviour
     [SerializeField] private SubPresentationPresenter subPresentationPresenter;
     [SerializeField] private OneShotPresentationPresenter oneShotPresentationPresenter;
     [SerializeField] private AutoAdvanceScheduler autoAdvanceScheduler;
+    [SerializeField] private VNOptionItem optionItem;
     [SerializeField] private VNOptionsPresenter vnOptionsPresenter;
-    [SerializeField] private VNOptionsBoxPresentationController vnOptionsBoxPresentationController;
     [SerializeField] private EllipsisBreathTypewriter ellipsisBreathTypewriter;
     
     [Header("VnAdvanceGate")]
@@ -403,13 +403,15 @@ public class VnAppBootstrap : MonoBehaviour
         
         VNChoiceBoundary vnChoiceBoundary = new(_choiceHistory, _rollbackHistory);
 
+        VNOptionsBoxPresentationController optionsBoxPresentationController = new(dialogueBoxHost);
+        
         VNOptionsPresentationFlow flow = new VNOptionsPresentationFlow(
-            vnOptionsBoxPresentationController,
+            optionsBoxPresentationController,
             _linePresentationAdvanceState,
             vnChoiceBoundary,
             _vnUxState);
-
-        vnOptionsPresenter.Initialize(dialogueRunner, flow);
+        
+        vnOptionsPresenter.Initialize(dialogueRunner, flow, optionItem, optionsBoxPresentationController);
         
         vnOptionsPresenter.AttachDialogueRunner(dialogueRunner);
     }
