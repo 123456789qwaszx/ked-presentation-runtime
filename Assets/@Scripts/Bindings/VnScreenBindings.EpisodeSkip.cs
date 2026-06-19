@@ -40,8 +40,5 @@ public sealed partial class VnScreenBindings
 
         _vnRuntimeBridge.ForceCompleteEpisodeNow(episodeId);
         _episodeSelectionSystem.MarkEpisodeCompleted(episodeId);
-
-        // 임시
-        GoToLobby();
     }
 }
