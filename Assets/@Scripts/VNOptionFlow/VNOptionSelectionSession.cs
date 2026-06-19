@@ -21,9 +21,6 @@ public sealed class VNOptionSelectionSession : IDisposable
         if (_disposed)
             return false;
 
-        if (viewModel == null)
-            return false;
-
         return _source.TrySetResult(viewModel);
     }
 

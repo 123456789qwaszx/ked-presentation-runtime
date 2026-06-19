@@ -9,7 +9,6 @@ public sealed class EpisodePlayer : MonoBehaviour
     private RollbackHistory _nodeRollbackHistory;
     private IVNLineAborter _linePresentationAborter;
     private BacklogRecorder _backlogRecorder;
-    private ChoiceHistory _choiceHistory;
     private VNSideRunnerSyncHub _sideRunnerSyncHub;
     private PresentationShotResponseSystem _presentationResponseRig;
 
@@ -42,7 +41,6 @@ public sealed class EpisodePlayer : MonoBehaviour
         RollbackHistory nodeRollbackHistory,
         IVNLineAborter linePresentationAborter,
         BacklogRecorder backlogRecorder,
-        ChoiceHistory choiceHistory,
         VNSideRunnerSyncHub sideRunnerSyncHub,
         PresentationShotResponseSystem presentationResponseRig)
     {
@@ -50,7 +48,6 @@ public sealed class EpisodePlayer : MonoBehaviour
         _nodeRollbackHistory = nodeRollbackHistory;
         _linePresentationAborter = linePresentationAborter;
         _backlogRecorder = backlogRecorder;
-        _choiceHistory = choiceHistory;
         _sideRunnerSyncHub = sideRunnerSyncHub;
         _presentationResponseRig = presentationResponseRig;
     }

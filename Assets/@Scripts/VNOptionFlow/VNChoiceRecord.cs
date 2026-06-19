@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 [Serializable]
 public struct VNChoiceRecord
@@ -9,11 +8,6 @@ public struct VNChoiceRecord
     public string nodeName;
     public int choiceIndexInNode;
     public int selectedOptionIndex;
-
-    // Line ID of the selected option. Recorded alongside the index so a selection can still be
-    // identified if option ordering changes between authoring sessions. Index remains the primary
-    // replay key today; lineId is the more durable fallback to migrate toward.
-    public string selectedOptionLineId;
 
     public VNChoiceRecord(
         int anchorHistoryIndex,
@@ -26,7 +20,6 @@ public struct VNChoiceRecord
         this.nodeName = nodeName ?? "";
         this.choiceIndexInNode = choiceIndexInNode;
         this.selectedOptionIndex = selectedOptionIndex;
-        this.selectedOptionLineId = selectedOptionLineId ?? "";
     }
 }
 
@@ -85,7 +78,7 @@ public class ChoiceHistory
         return false;
     }
 
-    public void RestoreChoiceSnapshot(IReadOnlyList<VNChoiceRecord> choices)
+    public void RestoreChoices(IReadOnlyList<VNChoiceRecord> choices)
     {
         for (int i = 0; i < choices.Count; i++)
         {

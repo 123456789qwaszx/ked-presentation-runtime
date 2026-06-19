@@ -15,23 +15,13 @@ public sealed class VNLoadSeekDriver
     private Action _onComplete;
     private Action _onFail;
 
-    public bool IsActive
-    {
-        get { return _target != null; }
-    }
-
-    public VNSaveData Target
-    {
-        get { return _target; }
-    }
-
     public VNLoadSeekDriver(
         EpisodePlayer restarter,
         VNLinePresentationState lineAdvanceState,
         VNPlaytimeTracker playtimeTracker,
         RollbackHistory rollbackHistory,
         ChoiceHistory choiceHistory,
-        VNSideRunnerSyncHub sideRunnerSyncHub,        // NEW
+        VNSideRunnerSyncHub sideRunnerSyncHub,
         VNTraceStream trace = null)
     {
         _restarter = restarter;
@@ -39,46 +29,23 @@ public sealed class VNLoadSeekDriver
         _playtimeTracker = playtimeTracker;
         _rollbackHistory = rollbackHistory;
         _choiceHistory = choiceHistory;
-        _sideRunnerSyncHub = sideRunnerSyncHub;        // NEW
+        _sideRunnerSyncHub = sideRunnerSyncHub;
         _trace = trace;
     }
 
     public void BeginSeek(VNSaveData saveData, Action onComplete, Action onFail)
     {
-        BeginSeekAsync(saveData, onComplete, onFail);
-    }
-
-    public void BeginSeekAsync(VNSaveData saveData, Action onComplete, Action onFail)
-    {
-        if (saveData == null)
-        {
-            Fail(onFail);
-            return;
-        }
-
-        saveData.Normalize();
-
         _target = saveData;
         _onComplete = onComplete;
         _onFail = onFail;
 
         Trace("BeginSeek", $"target={saveData.nodeName}/{saveData.lineId}, choices={saveData.choices.Count}");
-
         
         _choiceHistory.ClearChoiceRecords();
-        _choiceHistory.RestoreChoiceSnapshot(saveData.choices);
+        _choiceHistory.RestoreChoices(saveData.choices);
 
         _lineAdvanceState.BeginLoadSeek(saveData.nodeName, saveData.lineId);
 
-        if (_restarter == null)
-        {
-            Trace("BeginSeekFailed", "reason=RestarterNull");
-            Fail(onFail);
-            return;
-        }
-
-        // Load는 새 지점으로 점프하므로, 이전 연결된 sub 레인을 하드 컷한다.
-        // (로드된 노드가 재생 중 sub_table을 다시 만나면 거기서 새로 시작됨)
         _sideRunnerSyncHub.ResetPresentationLane();
 
         _restarter.StartGame(saveData.nodeName);
@@ -100,11 +67,6 @@ public sealed class VNLoadSeekDriver
         Trace("Complete", $"target={completedTarget.nodeName}/{completedTarget.lineId}");
 
         callback?.Invoke();
-    }
-
-    public void Fail()
-    {
-        Fail(null);
     }
 
     private void Fail(Action fallback)

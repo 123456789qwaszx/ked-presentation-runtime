@@ -1,10 +1,5 @@
-using UnityEngine;
 using Yarn.Unity;
 
-// Owns reads and writes against the choice history and rollback history for one option set.
-// The options flow goes through this boundary instead of touching ChoiceHistory / RollbackController
-// directly. Unlike VNYarnLineBoundary there is no meta carrier: an option set only touches the
-// choice history, so the boundary exposes those reads and writes directly.
 public sealed class VNChoiceBoundary
 {
     private readonly ChoiceHistory _choiceHistory;
@@ -27,8 +22,6 @@ public sealed class VNChoiceBoundary
         return choiceIndexInNode;
     }
 
-    // Resolves a recorded choice into a usable option against the current option set.
-    // Fails when no record exists, the record points outside the set, or the option is unavailable.
     public bool TryResolveReplayOption(int choiceIndexInNode, DialogueOption[] sourceOptions, out DialogueOption option)
     {
         option = null;

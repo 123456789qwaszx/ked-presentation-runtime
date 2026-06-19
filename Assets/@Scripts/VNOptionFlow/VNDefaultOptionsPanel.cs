@@ -1,7 +1,7 @@
 using UnityEngine;
 
-public sealed class VNDefaultOptionsBoxView
-    : PresentationOptionsBoxViewBase<VNDefaultOptionsBoxView.Refs>
+public sealed class VNDefaultOptionsPanel
+    : PresentationOptionsBoxViewBase<VNDefaultOptionsPanel.Refs>
 {
     public enum Refs
     {

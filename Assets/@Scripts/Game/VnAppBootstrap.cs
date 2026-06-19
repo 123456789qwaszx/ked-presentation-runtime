@@ -498,8 +498,7 @@ public class VnAppBootstrap : MonoBehaviour
             _screenBindings, 
             _rollbackHistory, 
             customLinePresenter,
-            _backlogRecorder, 
-            _choiceHistory,
+            _backlogRecorder,
             _vnSideRunnerSyncHub,
             _presentationResponseRig
             );
