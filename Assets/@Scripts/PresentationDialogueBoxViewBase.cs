@@ -16,8 +16,7 @@ public abstract class PresentationDialogueBoxViewBase<TRefs>
 
     public virtual void ResetPresentationTransform()
     {
-        RectTransform rect = Root;
-
+        RectTransform rect = gameObject.GetComponent<RectTransform>();
         if (rect == null)
             return;
 
@@ -50,8 +49,11 @@ public abstract class PresentationDialogueBoxViewBase<TRefs>
         }
     }
 
-    public virtual void SetVisible(bool visible)
+    public virtual void SetVisibleImmediate(bool visible)
     {
+        if (visible && gameObject != null && !gameObject.activeSelf)
+            gameObject.SetActive(true);
+
         SetCanvas(CanvasGroup, visible);
     }
 
@@ -70,7 +72,7 @@ public abstract class PresentationDialogueBoxViewBase<TRefs>
 
         CanvasGroup canvasGroup = CanvasGroup;
 
-        SetVisible(true);
+        SetVisibleImmediate(true);
 
         if (canvasGroup == null)
             return;

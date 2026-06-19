@@ -24,7 +24,7 @@ public sealed class DialogueBoxHost : MonoBehaviour
     [Header("Dialogue Box Entries")]
     [SerializeField] private DialogueBoxHostEntry[] entries;
     
-    public IDialogueTextTarget ResolveTarget(DialogueBoxKind kind)
+    public IPresentationDialogueBoxView ResolveTarget(DialogueBoxKind kind)
     {
         if (entries == null || entries.Length == 0)
         {
@@ -44,9 +44,13 @@ public sealed class DialogueBoxHost : MonoBehaviour
             }
 
             IPresentationDialogueBoxView view = entries[i].view as IPresentationDialogueBoxView;
+
             if (view == null)
             {
-                Debug.LogWarning($"[DialogueBoxHost] View must implement IPresentationDialogueBoxView. kind={entries[i].kind}, go={entries[i].view.name}", entries[i].view);
+                Debug.LogWarning(
+                    $"[DialogueBoxHost] View must implement IPresentationDialogueBoxView. kind={entries[i].kind}, go={entries[i].view.name}",
+                    entries[i].view);
+
                 return null;
             }
 
@@ -74,11 +78,11 @@ public sealed class DialogueBoxHost : MonoBehaviour
             if (view == null) 
                 continue;
 
-            view.SetVisible(false);
+            view.SetVisibleImmediate(false);
         }
     }
 
-    public void HideAllExcept(IDialogueTextTarget target)
+    public void HideAllExcept(IPresentationDialogueBoxView target)
     {
         if (entries == null)
             return;
@@ -97,7 +101,7 @@ public sealed class DialogueBoxHost : MonoBehaviour
             if (ReferenceEquals(view, target))
                 continue;
 
-            view.SetVisible(false);
+            view.SetVisibleImmediate(false);
         }
     }
     
