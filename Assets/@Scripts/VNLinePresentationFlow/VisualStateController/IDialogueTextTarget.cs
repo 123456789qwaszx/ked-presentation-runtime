@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using Yarn.Unity;
 
 public interface IDialogueTextTarget
 {
@@ -11,5 +12,15 @@ public interface IDialogueTextTarget
 
 public interface IPresentationDialogueBoxView : IDialogueTextTarget
 {
+    void ResetPresentationTransform();
+
+    void PrimeText(VNDialogueLine line);
+
     void SetVisible(bool visible);
+
+    void PrepareHidden();
+
+    YarnTask FadeInAsync(float duration, LinePresentationRun run);
+
+    YarnTask FadeOutAsync(float duration, LinePresentationRun run);
 }
