@@ -401,18 +401,21 @@ public class VnAppBootstrap : MonoBehaviour
             trace: null,
             yarnLaneDebugView);
         
-        VNChoiceBoundary vnChoiceBoundary = new(_choiceHistory, _rollbackHistory);
+        VNChoiceBoundary vnChoiceBoundary = new(
+            _choiceHistory,
+            _rollbackHistory);
 
-        VNOptionsBoxPresentationController optionsBoxPresentationController = new(dialogueBoxHost);
-        
-        VNOptionsPresentationFlow flow = new VNOptionsPresentationFlow(
-            optionsBoxPresentationController,
-            _linePresentationAdvanceState,
+        VNOptionsPresentationFlow optionsPresentationFlow = new(
+            dialogueBoxHost,
             vnChoiceBoundary,
+            _linePresentationAdvanceState,
             _vnUxState);
-        
-        vnOptionsPresenter.Initialize(dialogueRunner, flow, optionItem, optionsBoxPresentationController);
-        
+
+        vnOptionsPresenter.Initialize(
+            dialogueRunner,
+            optionsPresentationFlow,
+            optionItem);
+
         vnOptionsPresenter.AttachDialogueRunner(dialogueRunner);
     }
     

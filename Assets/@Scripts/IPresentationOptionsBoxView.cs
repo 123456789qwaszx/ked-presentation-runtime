@@ -14,5 +14,4 @@ public interface IPresentationOptionsBoxView
     void PrepareHidden();
 
     YarnTask FadeInAsync(float duration, CancellationToken token);
-    YarnTask FadeOutAsync(float duration, CancellationToken token);
 }

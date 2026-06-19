@@ -1,161 +1,86 @@
-using System;
 using System.Collections.Generic;
-using UnityEngine;
 using Yarn.Unity;
 
-public enum VNOptionSelectionMode
+public enum VNOptionsPresentationBeginResult
 {
-    NoOptionAvailable = 0,
-    ReplayRecordedChoiceDuringSeek = 1,
-    PresentInteractive = 2,
+    NoOption = 0,
+    ReplayResolved = 1,
+    InteractiveReady = 2,
 }
 
-// Runs one option-set presentation transaction.
-// Owns choice replay/commit ordering, but not item instances or selection input.
 public sealed class VNOptionsPresentationFlow
 {
-    private readonly VNOptionsBoxPresentationController _boxPresentation;
-    private readonly VNLinePresentationState _advanceState;
+    private readonly DialogueBoxHost _dialogueBoxHost;
     private readonly VNChoiceBoundary _choiceBoundary;
+    private readonly VNLinePresentationState _advanceState;
     private readonly VnUxState _uxState;
 
+    private readonly OptionsBoxKind _defaultBoxKind;
+    private readonly float _fadeDuration;
+
+    private IPresentationOptionsBoxView _currentView;
+
     public VNOptionsPresentationFlow(
-        VNOptionsBoxPresentationController boxPresentation,
-        VNLinePresentationState advanceState,
+        DialogueBoxHost dialogueBoxHost,
         VNChoiceBoundary choiceBoundary,
-        VnUxState uxState)
+        VNLinePresentationState advanceState,
+        VnUxState uxState,
+        OptionsBoxKind defaultBoxKind = OptionsBoxKind.Default,
+        float fadeDuration = 0.12f)
     {
-        _boxPresentation = boxPresentation;
-        _advanceState = advanceState;
+        _dialogueBoxHost = dialogueBoxHost;
         _choiceBoundary = choiceBoundary;
+        _advanceState = advanceState;
         _uxState = uxState;
+        _defaultBoxKind = defaultBoxKind;
+        _fadeDuration = fadeDuration;
     }
 
-    public async YarnTask<DialogueOption> RunAsync(
-        VNOptionsPresentationContext ctx,
-        Action<VNOptionsPresentationContext> prepareItems,
-        Func<VNOptionsPresentationContext, YarnTask<VNOptionViewModel>> awaitSelection,
-        Func<VNOptionsPresentationContext, YarnTask> cleanup,
-        Func<bool> shouldFastForward)
+    public async YarnTask<VNOptionsPresentationBeginResult> BeginAsync(
+        VNOptionsPresentationContext ctx)
     {
         ctx.ChoiceIndexInNode = _choiceBoundary.ReserveChoiceIndex();
 
-        VNOptionSelectionMode mode = ResolveSelectionMode(ctx);
-
-        switch (mode)
-        {
-            case VNOptionSelectionMode.NoOptionAvailable:
-                return null;
-
-            case VNOptionSelectionMode.ReplayRecordedChoiceDuringSeek:
-                return ResolveReplayOption(ctx);
-
-            case VNOptionSelectionMode.PresentInteractive:
-                return await RunInteractiveAsync(
-                    ctx,
-                    prepareItems,
-                    awaitSelection,
-                    cleanup,
-                    shouldFastForward);
-
-            default:
-                Debug.LogWarning($"[VNOptionsPresentationFlow] Unknown selection mode: {mode}");
-                return null;
-        }
-    }
-
-    private VNOptionSelectionMode ResolveSelectionMode(VNOptionsPresentationContext ctx)
-    {
         if (!ctx.HasAnyAvailableOption)
-            return VNOptionSelectionMode.NoOptionAvailable;
+            return VNOptionsPresentationBeginResult.NoOption;
 
         if (_advanceState.IsSeekingActive)
-            return VNOptionSelectionMode.ReplayRecordedChoiceDuringSeek;
+        {
+            bool resolved = _choiceBoundary.TryResolveReplayOption(
+                ctx.ChoiceIndexInNode,
+                ctx.SourceOptions,
+                out DialogueOption replayOption);
 
-        return VNOptionSelectionMode.PresentInteractive;
-    }
+            ctx.SelectedOption = resolved ? replayOption : null;
 
-    private DialogueOption ResolveReplayOption(VNOptionsPresentationContext ctx)
-    {
-        bool resolved = _choiceBoundary.TryResolveReplayOption(
-            ctx.ChoiceIndexInNode,
+            return resolved
+                ? VNOptionsPresentationBeginResult.ReplayResolved
+                : VNOptionsPresentationBeginResult.NoOption;
+        }
+
+        ctx.ViewModels = BuildViewModels(
             ctx.SourceOptions,
-            out DialogueOption replayOption);
-
-        return resolved ? replayOption : null;
-    }
-
-    private async YarnTask<DialogueOption> RunInteractiveAsync(
-        VNOptionsPresentationContext ctx,
-        Action<VNOptionsPresentationContext> prepareItems,
-        Func<VNOptionsPresentationContext, YarnTask<VNOptionViewModel>> awaitSelection,
-        Func<VNOptionsPresentationContext, YarnTask> cleanup,
-        Func<bool> shouldFastForward)
-    {
-        ctx.ViewModels = BuildViewModels(ctx);
+            ctx.ChoiceIndexInNode);
 
         if (ctx.ViewModels.Count == 0)
-            return null;
+            return VNOptionsPresentationBeginResult.NoOption;
 
-        try
+        _uxState.SetChoicesVisible(true);
+
+        ctx.OptionsBoxView = await ShowOptionsBoxAsync(
+            useImmediateTransition: false,
+            ctx);
+
+        if (ctx.OptionsBoxView == null || ctx.OptionsBoxView.ItemContainer == null)
         {
-            _uxState.SetChoicesVisible(true);
-
-            ctx.BoxResult = await _boxPresentation.ShowOptionsAsync(
-                new VNOptionsBoxPresentationOptions
-                {
-                    UseImmediateTransition = shouldFastForward(),
-                    Style = VNOptionsBoxStyle.Default,
-                });
-
-            if (ctx.BoxResult == null || !ctx.BoxResult.IsValid)
-            {
-                Abort(ctx);
-                return null;
-            }
-
-            prepareItems(ctx);
-
-            VNOptionViewModel selected = await awaitSelection(ctx);
-
-            if (ctx.Token.IsNextContentRequested || selected == null)
-            {
-                Abort(ctx);
-                return null;
-            }
-
-            CommitSelection(ctx, selected);
-
-            return ctx.SelectedOption;
+            EndInteractiveImmediate();
+            return VNOptionsPresentationBeginResult.NoOption;
         }
-        finally
-        {
-            _uxState.SetChoicesVisible(false);
-            await cleanup(ctx);
-        }
+
+        return VNOptionsPresentationBeginResult.InteractiveReady;
     }
 
-    private List<VNOptionViewModel> BuildViewModels(VNOptionsPresentationContext ctx)
-    {
-        var result = new List<VNOptionViewModel>();
-
-        for (int i = 0; i < ctx.SourceOptions.Length; i++)
-        {
-            DialogueOption option = ctx.SourceOptions[i];
-
-            if (!option.IsAvailable)
-                continue;
-
-            result.Add(VNOptionViewModelBuilder.Build(
-                option,
-                sourceOptionIndex: i,
-                choiceIndexInNode: ctx.ChoiceIndexInNode));
-        }
-
-        return result;
-    }
-
-    private void CommitSelection(VNOptionsPresentationContext ctx, VNOptionViewModel selected)
+    public void CommitSelection(VNOptionsPresentationContext ctx, VNOptionViewModel selected)
     {
         _choiceBoundary.CommitSelection(
             ctx.NodeName,
@@ -166,8 +91,76 @@ public sealed class VNOptionsPresentationFlow
         ctx.SelectedOption = selected.SourceOption;
     }
 
-    private void Abort(VNOptionsPresentationContext ctx)
+    public void EndInteractiveImmediate()
     {
-        _boxPresentation.CleanupAborted(ctx.BoxResult);
+        _uxState.SetChoicesVisible(false);
+        
+        if (_currentView != null)
+        {
+            _currentView.SetInputEnabled(false);
+            _currentView.SetVisibleImmediate(false);
+        }
+
+        _currentView = null;
+    }
+
+    private async YarnTask<IPresentationOptionsBoxView> ShowOptionsBoxAsync(
+        bool useImmediateTransition,
+        VNOptionsPresentationContext ctx)
+    {
+        IPresentationOptionsBoxView nextView = _dialogueBoxHost.ResolveOptionsTarget(_defaultBoxKind);
+        
+        _dialogueBoxHost.HideAllOptionsBoxesExcept(nextView);
+        _currentView = nextView;
+        
+        _currentView.ResetPresentationTransform();
+        _currentView.PrepareHidden();
+        _currentView.SetInputEnabled(false);
+
+        if (useImmediateTransition)
+        {
+            _currentView.SetVisibleImmediate(true);
+            _currentView.SetInputEnabled(false);
+            return _currentView;
+        }
+
+        await _currentView
+            .FadeInAsync(_fadeDuration, ctx.Token.NextContentToken)
+            .SuppressCancellationThrow();
+
+        if (ctx.Token.IsNextContentRequested)
+            return null;
+
+        _currentView.SetInputEnabled(false);
+
+        return _currentView;
+    }
+
+    private static List<VNOptionViewModel> BuildViewModels(
+        DialogueOption[] options,
+        int choiceIndexInNode)
+    {
+        var result = new List<VNOptionViewModel>();
+
+        if (options == null)
+            return result;
+
+        for (int i = 0; i < options.Length; i++)
+        {
+            DialogueOption option = options[i];
+
+            if (option == null)
+                continue;
+
+            if (!option.IsAvailable)
+                continue;
+
+            result.Add(VNOptionViewModelBuilder.Build(
+                option,
+                sourceOptionIndex: i,
+                choiceIndexInNode: choiceIndexInNode));
+        }
+
+        return result;
     }
 }

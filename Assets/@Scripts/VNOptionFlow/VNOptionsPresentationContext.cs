@@ -10,7 +10,7 @@ public sealed class VNOptionsPresentationContext
     public int ChoiceIndexInNode;
 
     public List<VNOptionViewModel> ViewModels;
-    public VNOptionsBoxPresentationResult BoxResult;
+    public IPresentationOptionsBoxView OptionsBoxView;
 
     public DialogueOption SelectedOption;
 

@@ -71,25 +71,6 @@ public abstract class PresentationOptionsBoxViewBase<TRefs>
         SetInputEnabled(false);
     }
 
-    public virtual async YarnTask FadeOutAsync(float duration, CancellationToken token)
-    {
-        CanvasGroup canvasGroup = CanvasGroup;
-
-        if (canvasGroup == null)
-            return;
-
-        float fromAlpha = canvasGroup.alpha;
-
-        await Effects
-            .FadeAlphaAsync(canvasGroup, fromAlpha, 0f, duration, token)
-            .SuppressCancellationThrow();
-
-        if (token.IsCancellationRequested)
-            return;
-
-        SetCanvasVisible(canvasGroup, false);
-    }
-
     private static void SetCanvasVisible(CanvasGroup canvasGroup, bool visible)
     {
         if (canvasGroup == null)

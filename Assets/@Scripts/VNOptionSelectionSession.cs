@@ -1,13 +1,11 @@
 using System;
-using System.Threading;
 using Yarn.Unity;
 
 public sealed class VNOptionSelectionSession : IDisposable
 {
     private readonly YarnTaskCompletionSource<VNOptionViewModel> _source = new();
-    private readonly CancellationTokenSource _lifetimeCts = new();
-
     private readonly LineCancellationToken _lineToken;
+
     private bool _disposed;
 
     public YarnTask<VNOptionViewModel> Task => _source.Task;
@@ -23,9 +21,6 @@ public sealed class VNOptionSelectionSession : IDisposable
         if (_disposed)
             return false;
 
-        if (_lifetimeCts.IsCancellationRequested)
-            return false;
-
         if (viewModel == null)
             return false;
 
@@ -38,16 +33,12 @@ public sealed class VNOptionSelectionSession : IDisposable
             return;
 
         _disposed = true;
-
         _source.TrySetResult(null);
-
-        _lifetimeCts.Cancel();
-        _lifetimeCts.Dispose();
     }
 
     private async YarnTask WatchCancellationAsync()
     {
-        while (!_lifetimeCts.IsCancellationRequested)
+        while (!_disposed)
         {
             if (_lineToken.IsNextContentRequested)
             {

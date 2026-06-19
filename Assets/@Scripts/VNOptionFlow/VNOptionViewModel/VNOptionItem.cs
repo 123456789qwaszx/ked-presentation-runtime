@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public sealed class VNOptionItem : Selectable, ISubmitHandler, IPointerClickHandler, IPointerEnterHandler
+public sealed class VNOptionItem : Selectable, ISubmitHandler, IPointerClickHandler
 {
     [Header("Text")]
     [SerializeField] private TextMeshProUGUI _label;
@@ -110,12 +110,13 @@ public sealed class VNOptionItem : Selectable, ISubmitHandler, IPointerClickHand
 
     public override void OnPointerEnter(PointerEventData eventData)
     {
+        base.OnPointerEnter(eventData);
+
         if (!IsInteractable())
             return;
 
         Select();
     }
-
     public void OnSubmit(BaseEventData eventData)
     {
         TrySubmit();
@@ -123,6 +124,9 @@ public sealed class VNOptionItem : Selectable, ISubmitHandler, IPointerClickHand
 
     public void OnPointerClick(PointerEventData eventData)
     {
+        if (eventData.button != PointerEventData.InputButton.Left)
+            return;
+
         TrySubmit();
     }
 

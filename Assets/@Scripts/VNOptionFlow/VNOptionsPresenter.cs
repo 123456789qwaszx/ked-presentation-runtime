@@ -2,14 +2,13 @@ using System.Collections.Generic;
 using Yarn.Unity;
 using UnityEngine;
 
-// Owns option item instances, interactive selection session, and DialoguePresenterBase adapter work.
-// Transaction ordering, seek replay, and choice commit live in VNOptionsPresentationFlow.
-public sealed partial class VNOptionsPresenter : DialoguePresenterBase
+// Owns option item instances, the interactive selection session,
+// and DialoguePresenterBase adapter work.
+// Transaction ordering lives in VNOptionsPresentationFlow.
+public sealed partial class VNOptionsPresenter
+    : DialoguePresenterBase
 {
-    [Header("References")]
-    [SerializeField] private VNOptionItem _optionItemPrefab;
-    private VNOptionsBoxPresentationController _boxPresentation;
-
+    private VNOptionItem _optionItemPrefab;
     private VNOptionsPresentationFlow _flow;
 
     private readonly List<VNOptionItem> _activeItems = new();
@@ -20,20 +19,21 @@ public sealed partial class VNOptionsPresenter : DialoguePresenterBase
     public void Initialize(
         DialogueRunner dialogueRunner,
         VNOptionsPresentationFlow flow,
-        VNOptionItem optionItem,
-        VNOptionsBoxPresentationController boxPresentation)
+        VNOptionItem optionItem)
     {
         _flow = flow;
         _optionItemPrefab = optionItem;
-        _boxPresentation = boxPresentation;
+
         dialogueRunner.onNodeStart?.AddListener(HandleNodeStarted);
     }
+    
+    private void HandleNodeStarted(string nodeName) => _currentNodeName = nodeName;
 
     public override YarnTask OnDialogueStartedAsync()
     {
         EndSelectionSession();
         DestroyActiveItems();
-        _boxPresentation.HideImmediate();
+        _flow?.EndInteractiveImmediate();
 
         return YarnTask.CompletedTask;
     }
@@ -42,13 +42,17 @@ public sealed partial class VNOptionsPresenter : DialoguePresenterBase
     {
         EndSelectionSession();
         DestroyActiveItems();
-        _boxPresentation.HideImmediate();
+        _flow?.EndInteractiveImmediate();
 
         return YarnTask.CompletedTask;
     }
 
-    public override YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token) 
-    { return YarnTask.CompletedTask; }
+    public override YarnTask RunLineAsync(
+        LocalizedLine line,
+        LineCancellationToken token)
+    {
+        return YarnTask.CompletedTask;
+    }
 
     public override async YarnTask<DialogueOption> RunOptionsAsync(
         DialogueOption[] dialogueOptions,
@@ -61,78 +65,77 @@ public sealed partial class VNOptionsPresenter : DialoguePresenterBase
             NodeName = _currentNodeName,
         };
 
+        VNOptionsPresentationBeginResult beginResult = await _flow.BeginAsync(ctx);
+
+        if (beginResult == VNOptionsPresentationBeginResult.NoOption)
+            return await DialogueRunner.NoOptionSelected;
+
+        if (beginResult == VNOptionsPresentationBeginResult.ReplayResolved)
+            return ctx.SelectedOption ?? await DialogueRunner.NoOptionSelected;
+
         try
         {
-            DialogueOption selected = await _flow.RunAsync(
-                ctx,
-                prepareItems: PrepareInteractiveItems,
-                awaitSelection: AwaitInteractiveSelectionAsync,
-                cleanup: CleanupInteractiveAsync,
-                shouldFastForward: () => false);
-
-            if (selected == null)
+            if (!PrepareInteractiveItems(ctx))
                 return await DialogueRunner.NoOptionSelected;
 
-            return selected;
+            VNOptionViewModel selected = await AwaitSelectionAsync(ctx);
+
+            if (cancellationToken.IsNextContentRequested || selected == null)
+                return await DialogueRunner.NoOptionSelected;
+
+            _flow.CommitSelection(ctx, selected);
+
+            return ctx.SelectedOption ?? await DialogueRunner.NoOptionSelected;
         }
         finally
         {
-            EndSelectionSession();
+            await CleanupInteractiveAsync(ctx);
+            _flow.EndInteractiveImmediate();
         }
     }
 
-    private void HandleNodeStarted(string nodeName)
-    {
-        _currentNodeName = nodeName;
-    }
-
-    private void PrepareInteractiveItems(VNOptionsPresentationContext ctx)
+    private bool PrepareInteractiveItems(VNOptionsPresentationContext ctx)
     {
         EndSelectionSession();
         DestroyActiveItems();
 
-        if (ctx.BoxResult == null || !ctx.BoxResult.IsValid)
-            return;
+        IPresentationOptionsBoxView boxView = ctx.OptionsBoxView;
 
-        IPresentationOptionsBoxView boxView = ctx.BoxResult.View;
         boxView.SetInputEnabled(false);
 
         _selectionSession = new VNOptionSelectionSession(ctx.Token);
 
-        CreateItems(ctx.ViewModels, ctx.BoxResult.ItemContainer);
+        CreateItems(ctx.ViewModels, boxView.ItemContainer);
 
         boxView.SetInputEnabled(true);
         SelectFirstAvailableItem();
+
+        return true;
     }
 
-    private async YarnTask<VNOptionViewModel> AwaitInteractiveSelectionAsync(VNOptionsPresentationContext ctx)
+    private async YarnTask<VNOptionViewModel> AwaitSelectionAsync(VNOptionsPresentationContext ctx)
     {
         if (_selectionSession == null)
             return null;
 
         VNOptionViewModel selected = await _selectionSession.Task;
 
-        if (ctx.BoxResult != null && ctx.BoxResult.View != null)
-            ctx.BoxResult.View.SetInputEnabled(false);
+        ctx.OptionsBoxView?.SetInputEnabled(false);
 
         return selected;
     }
 
     private async YarnTask CleanupInteractiveAsync(VNOptionsPresentationContext ctx)
     {
+        ctx.OptionsBoxView?.SetInputEnabled(false);
+
         EndSelectionSession();
         DestroyActiveItems();
-
-        if (ctx.BoxResult != null && ctx.BoxResult.View != null)
-        {
-            ctx.BoxResult.View.SetInputEnabled(false);
-            ctx.BoxResult.View.SetVisibleImmediate(false);
-        }
 
         await YarnTask.Yield();
     }
 
-    private void CreateItems(List<VNOptionViewModel> viewModels, RectTransform container)
+    private bool CreateItems(List<VNOptionViewModel> viewModels, RectTransform container)
     {
         for (int i = 0; i < viewModels.Count; i++)
         {
@@ -144,6 +147,8 @@ public sealed partial class VNOptionsPresenter : DialoguePresenterBase
 
             _activeItems.Add(item);
         }
+
+        return _activeItems.Count > 0;
     }
 
     private void DestroyActiveItems()
