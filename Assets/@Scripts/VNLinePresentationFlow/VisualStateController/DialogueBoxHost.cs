@@ -56,15 +56,6 @@ public sealed class DialogueBoxHost : MonoBehaviour
         Debug.LogWarning($"[DialogueBoxHost] Entry not found. kind={kind}", this);
         return null;
     }
-
-    public void ShowOnly(IDialogueTextTarget target)
-    {
-        HideAll();
-
-        IPresentationDialogueBoxView view = target as IPresentationDialogueBoxView;
-        view?.SetVisible(true);
-    }
-
     
     public void HideAll()
     {
@@ -84,42 +75,6 @@ public sealed class DialogueBoxHost : MonoBehaviour
                 continue;
 
             view.SetVisible(false);
-        }
-    }
-
-    public void ShowImmediate(IDialogueTextTarget target)
-    {
-        IPresentationDialogueBoxView view = target as IPresentationDialogueBoxView;
-
-        view.SetVisible(true);
-        view.CanvasGroup.alpha = 1f;
-    }
-
-    public void HideImmediate(IDialogueTextTarget target)
-    {
-        IPresentationDialogueBoxView view = target as IPresentationDialogueBoxView;
-        if (view == null)
-            return;
-
-        view.SetVisible(false);
-
-        if (view.CanvasGroup != null)
-            view.CanvasGroup.alpha = 0f;
-    }
-
-    public void PrepareHidden(IDialogueTextTarget target)
-    {
-        IPresentationDialogueBoxView view = target as IPresentationDialogueBoxView;
-        if (view == null)
-            return;
-
-        view.SetVisible(true);
-
-        if (view.CanvasGroup != null)
-        {
-            view.CanvasGroup.alpha = 0f;
-            view.CanvasGroup.interactable = false;
-            view.CanvasGroup.blocksRaycasts = false;
         }
     }
 
