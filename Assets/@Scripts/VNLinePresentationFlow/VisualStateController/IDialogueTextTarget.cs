@@ -13,7 +13,7 @@ public interface IDialogueTextTarget
 public interface IPresentationDialogueBoxView : IDialogueTextTarget
 {
     void ResetPresentationTransform();
-    void PrimeText(VNDialogueLine line);
+    void PrimeText(string text, string characterName, bool hasCharacterName);
     
     void SetVisibleImmediate(bool visible);
     

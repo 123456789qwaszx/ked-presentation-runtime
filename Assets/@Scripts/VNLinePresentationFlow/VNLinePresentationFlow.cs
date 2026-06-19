@@ -134,24 +134,23 @@ public sealed class VNLinePresentationFlow
 
         // Phase: BoxTransitioning -> BoxReady
         SetPhase(ctx, VNLinePresentationPhase.BoxTransitioning);
-        bool useImmediateTransition = ctx.ShouldUseImmediateTransition || shouldFastForward();
 
-        ctx.BoxResult = await _boxPresentation.ShowLineAsync(
-            VNDialogueLine.FromLocalizedLine(ctx.Line),
-            new DialogueBoxPresentationOptions {
-                IsSeekTargetLine = ctx.IsPendingSeekTargetLine,
-                UseImmediateTransition = useImmediateTransition,
-                Run = ctx.Run,
-            });
+        DialogueBoxPresentationContext boxCtx = new(
+            ctx.Line,
+            ctx.Run,
+            isSeekTargetLine: ctx.IsPendingSeekTargetLine,
+            useImmediateTransition: ctx.ShouldUseImmediateTransition || shouldFastForward());
+
+        ctx.BoxResult = await _boxPresentation.ShowLineAsync(boxCtx);
         SetPhase(ctx, VNLinePresentationPhase.BoxReady);
 
-        if (!ctx.Run.IsValid || !ctx.BoxResult.IsValid) {
+        if (!ctx.Run.IsValid) {
             await CompleteStaleAfterBoxAsync(ctx, waitForAdvance);
             return;
         }
 
         // Phase: TypewriterReady
-        ctx.LineText = ctx.BoxResult?.LineText;
+        ctx.LineText = ctx.BoxResult.NextBox.LineText;
         _typewriter.SetTextView(ctx.LineText);
 
         ctx.Text = ctx.Line.TextWithoutCharacterName;

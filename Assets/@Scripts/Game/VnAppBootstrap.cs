@@ -14,6 +14,7 @@ public class VnAppBootstrap : MonoBehaviour
     private readonly ChoiceHistory _choiceHistory = new();
     private readonly VNLinePresentationState _linePresentationAdvanceState = new();
     private readonly PresentationSessionContext _presentationSessionContext = new();
+    private readonly DialogueBoxCurrentState _dialogueBoxState = new();
     
     private readonly PresentationStage _presentationStage = new();
     
@@ -316,9 +317,9 @@ public class VnAppBootstrap : MonoBehaviour
         _vnSideRunnerSyncHub.RegisterPresentationLane(subPresentationRunner);
 
         OneShotPresentationLane oneShotPresentationLane = new(subOneShotRunner, oneShotYarnBridgePlaybackDriver);
-        
+
         DialogueBoxMetadataResolver metadataResolver = new();
-        _dialogueBoxPresentationController = new(dialogueBoxHost, metadataResolver);
+        _dialogueBoxPresentationController = new(_dialogueBoxState, dialogueBoxHost, metadataResolver);
         
         YarnCommandBridge yarnCommandBridge = new(
             dialogueRunner,

@@ -24,13 +24,16 @@ public abstract class PresentationDialogueBoxViewBase<TRefs>
         rect.anchoredPosition = Vector2.zero;
     }
 
-    public virtual void PrimeText(VNDialogueLine line)
+    public virtual void PrimeText(
+        string text,
+        string characterName,
+        bool hasCharacterName)
     {
         TMP_Text lineText = LineText;
 
         if (lineText != null)
         {
-            lineText.text = line != null ? line.Text : string.Empty;
+            lineText.text = text ?? string.Empty;
             lineText.maxVisibleCharacters = 0;
             lineText.ForceMeshUpdate();
         }
@@ -39,10 +42,10 @@ public abstract class PresentationDialogueBoxViewBase<TRefs>
 
         if (nameText != null)
         {
-            bool showName = line != null && line.HasCharacterName;
+            bool showName = hasCharacterName;
 
             nameText.text = showName
-                ? line.CharacterName
+                ? characterName ?? string.Empty
                 : string.Empty;
 
             nameText.gameObject.SetActive(showName);
