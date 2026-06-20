@@ -54,7 +54,7 @@ _#beat #stay
 
 <<bg_spawn bg5 bgslot_01>>
 <<bg_cutin bg5>>
-//<<attach_to_bg c1 bg5>>
+<<attach_to_bg c1 bg5>>
 <<bg_fade_in bg5>>
 <<blur mid 0.1>>
 

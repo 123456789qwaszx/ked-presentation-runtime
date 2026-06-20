@@ -14,6 +14,9 @@ public sealed partial class UIStageDepthLayerBlurRuntime
         if (!_proxyPools.TryGetValue(state.Key, out ProxyPool proxyPool) || proxyPool == null)
             return false;
 
+        DisableAllProxyPools();
+        _currentBakeProxies.Clear();
+
         _sourceCollector.Collect(
             state.Target.SourceContentRoot,
             state.CharacterRigs,
@@ -22,12 +25,9 @@ public sealed partial class UIStageDepthLayerBlurRuntime
 
         if (_sourceImageBuffer.Count <= 0)
         {
-            StopTrackingAndHideImmediate(state);
+            HideOverlayUntilSourceReturns(state);
             return false;
         }
-
-        DisableAllProxyPools();
-        _currentBakeProxies.Clear();
 
         bool changed = false;
 
@@ -77,6 +77,11 @@ public sealed partial class UIStageDepthLayerBlurRuntime
         RestoreForeignCaptureContent();
 
         return true;
+    }
+
+    private static void HideOverlayUntilSourceReturns(LayerState state)
+    {
+        state.Target.OverlayRawImage.enabled = false;
     }
 
     // ── proxy 동기화 ────────────────────────────────────────────────────────────

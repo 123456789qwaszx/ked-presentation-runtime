@@ -64,7 +64,7 @@ public sealed partial class YarnCommandBridge
             backgroundRigKey = backgroundRigKey,
             parentTarget = ParseBackgroundRigTargetOrDefault(parentTarget),
             worldPositionStays = false,
-            setAsLastSibling = true,
+            setAsLastSibling = false,
             wait = true
         };
 
