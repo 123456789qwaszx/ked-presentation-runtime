@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -21,21 +20,20 @@ public sealed class VNOptionItem : Selectable, ISubmitHandler, IPointerClickHand
     [SerializeField] private float _hoveredAlpha = 1.0f;
 
     private VNOptionViewModel _viewModel;
-    private bool _hasViewModel;
     private bool _hasSubmitted;
+
+    private float _revealAlpha;
+    private float _stateAlpha;
 
     public event Action<VNOptionItem> Submitted;
 
-    public bool HasViewModel
-    {
-        get { return _hasViewModel; }
-    }
+    public bool HasViewModel => _viewModel != null;
 
     public VNOptionViewModel ViewModel
     {
         get
         {
-            if (!_hasViewModel)
+            if (_viewModel == null)
                 throw new InvalidOperationException("VNOptionItem has no bound view model.");
 
             return _viewModel;
@@ -50,73 +48,71 @@ public sealed class VNOptionItem : Selectable, ISubmitHandler, IPointerClickHand
 
     public void Bind(VNOptionViewModel viewModel)
     {
+        if (viewModel == null)
+        {
+            ResetView();
+            return;
+        }
+
         _viewModel = viewModel;
-        _hasViewModel = true;
         _hasSubmitted = false;
 
-        if (_label != null)
-            _label.text = viewModel.Label;
-
-        ApplyEffectText(viewModel);
+        SetText(_label, viewModel.Label);
+        SetEffectText(viewModel.EffectText);
 
         interactable = viewModel.IsAvailable;
 
-        SetSelectionIndicator(false);
-        ApplyStateAlpha();
+        _revealAlpha = 1f;
+        SetHighlighted(false);
     }
 
     public void ResetView()
     {
-        _hasViewModel = false;
+        _viewModel = null;
         _hasSubmitted = false;
+
         interactable = false;
 
-        if (_label != null)
-            _label.text = string.Empty;
+        SetText(_label, string.Empty);
+        ClearEffectText();
 
-        if (_effectText != null)
-        {
-            _effectText.text = string.Empty;
-            _effectText.gameObject.SetActive(false);
-        }
+        _revealAlpha = 0f;
+        _stateAlpha = 0f;
 
         SetSelectionIndicator(false);
-        SetAlpha(0f);
+        ApplyAlpha();
     }
 
     public void SetRevealAlpha(float alpha)
     {
-        SetAlpha(alpha);
+        _revealAlpha = Mathf.Clamp01(alpha);
+        ApplyAlpha();
     }
 
     public override void OnSelect(BaseEventData eventData)
     {
         base.OnSelect(eventData);
 
-        if (_hasViewModel && ViewModel.IsAvailable)
-        {
-            SetAlpha(_hoveredAlpha);
-            SetSelectionIndicator(true);
-        }
+        if (!CanInteract())
+            return;
+
+        SetHighlighted(true);
     }
 
     public override void OnDeselect(BaseEventData eventData)
     {
         base.OnDeselect(eventData);
-
-        ApplyStateAlpha();
-        SetSelectionIndicator(false);
+        SetHighlighted(false);
     }
 
     public override void OnPointerEnter(PointerEventData eventData)
     {
         base.OnPointerEnter(eventData);
 
-        if (!IsInteractable())
-            return;
-
-        Select();
+        if (CanInteract())
+            Select();
     }
+
     public void OnSubmit(BaseEventData eventData)
     {
         TrySubmit();
@@ -132,68 +128,72 @@ public sealed class VNOptionItem : Selectable, ISubmitHandler, IPointerClickHand
 
     private void TrySubmit()
     {
-        if (!IsInteractable())
-            return;
-
-        if (!_hasViewModel)
+        if (!CanInteract())
             return;
 
         if (_hasSubmitted)
             return;
 
         _hasSubmitted = true;
-
-        if (Submitted != null)
-            Submitted.Invoke(this);
+        Submitted?.Invoke(this);
     }
 
-    private void ApplyEffectText(VNOptionViewModel viewModel)
+    private bool CanInteract()
+    {
+        return _viewModel != null &&
+               _viewModel.IsAvailable &&
+               IsInteractable();
+    }
+
+    private void SetHighlighted(bool highlighted)
+    {
+        bool canShowSelection = _viewModel != null && _viewModel.IsAvailable;
+
+        SetSelectionIndicator(highlighted && canShowSelection);
+
+        _stateAlpha = highlighted && canShowSelection
+            ? _hoveredAlpha
+            : GetRestingStateAlpha();
+
+        ApplyAlpha();
+    }
+
+    private float GetRestingStateAlpha()
+    {
+        if (_viewModel == null)
+            return 0f;
+
+        return _viewModel.IsAvailable
+            ? _normalAlpha
+            : _disabledAlpha;
+    }
+
+    private void ApplyAlpha()
+    {
+        if (_canvasGroup != null)
+            _canvasGroup.alpha = _revealAlpha * _stateAlpha;
+    }
+
+    private static void SetText(TMP_Text text, string value)
+    {
+        if (text != null)
+            text.text = value ?? string.Empty;
+    }
+
+    private void SetEffectText(string effectText)
     {
         if (_effectText == null)
             return;
 
-        string effectText = BuildEffectText(viewModel);
+        effectText ??= string.Empty;
 
         _effectText.text = effectText;
         _effectText.gameObject.SetActive(!string.IsNullOrEmpty(effectText));
     }
 
-    private static string BuildEffectText(VNOptionViewModel viewModel)
+    private void ClearEffectText()
     {
-        if (viewModel == null)
-            return string.Empty;
-
-        if (viewModel.Effects == null || viewModel.Effects.Count == 0)
-            return string.Empty;
-
-        var parts = new List<string>();
-
-        for (int i = 0; i < viewModel.Effects.Count; i++)
-        {
-            string text = viewModel.Effects[i].ToDisplayText();
-
-            if (!string.IsNullOrEmpty(text))
-                parts.Add(text);
-        }
-
-        return string.Join(" / ", parts);
-    }
-
-    private void ApplyStateAlpha()
-    {
-        if (!_hasViewModel)
-        {
-            SetAlpha(0f);
-            return;
-        }
-
-        SetAlpha(ViewModel.IsAvailable ? _normalAlpha : _disabledAlpha);
-    }
-
-    private void SetAlpha(float alpha)
-    {
-        if (_canvasGroup != null)
-            _canvasGroup.alpha = alpha;
+        SetEffectText(string.Empty);
     }
 
     private void SetSelectionIndicator(bool active)

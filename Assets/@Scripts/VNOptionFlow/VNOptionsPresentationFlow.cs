@@ -15,6 +15,8 @@ public sealed class VNOptionsPresentationFlow
     private readonly VNLinePresentationState _advanceState;
     private readonly VnUxState _uxState;
 
+    private readonly VNOptionEffectPreviewResolver _effectResolver = new();
+
     private readonly OptionsBoxKind _defaultBoxKind;
     private readonly float _fadeDuration;
 
@@ -94,7 +96,7 @@ public sealed class VNOptionsPresentationFlow
     public void EndInteractiveImmediate()
     {
         _uxState.SetChoicesVisible(false);
-        
+
         if (_currentView != null)
         {
             _currentView.SetInputEnabled(false);
@@ -109,10 +111,10 @@ public sealed class VNOptionsPresentationFlow
         VNOptionsPresentationContext ctx)
     {
         IPresentationOptionsBoxView nextView = _dialogueBoxHost.ResolveOptionsTarget(_defaultBoxKind);
-        
+
         _dialogueBoxHost.HideAllOptionsBoxesExcept(nextView);
         _currentView = nextView;
-        
+
         _currentView.ResetPresentationTransform();
         _currentView.PrepareHidden();
         _currentView.SetInputEnabled(false);
@@ -136,7 +138,7 @@ public sealed class VNOptionsPresentationFlow
         return _currentView;
     }
 
-    private static List<VNOptionViewModel> BuildViewModels(
+    private List<VNOptionViewModel> BuildViewModels(
         DialogueOption[] options,
         int choiceIndexInNode)
     {
@@ -155,12 +157,29 @@ public sealed class VNOptionsPresentationFlow
             if (!option.IsAvailable)
                 continue;
 
-            result.Add(VNOptionViewModelBuilder.Build(
+            result.Add(BuildViewModel(
                 option,
                 sourceOptionIndex: i,
                 choiceIndexInNode: choiceIndexInNode));
         }
 
         return result;
+    }
+
+    private VNOptionViewModel BuildViewModel(
+        DialogueOption option,
+        int sourceOptionIndex,
+        int choiceIndexInNode)
+    {
+        string label = option.Line.TextWithoutCharacterName.Text;
+        List<VNOptionEffectPreview> effects = _effectResolver.Resolve(option.Line.Metadata);
+
+        return new VNOptionViewModel(
+            sourceOption: option,
+            sourceOptionIndex: sourceOptionIndex,
+            choiceIndexInNode: choiceIndexInNode,
+            label: label,
+            isAvailable: option.IsAvailable,
+            effects: effects);
     }
 }

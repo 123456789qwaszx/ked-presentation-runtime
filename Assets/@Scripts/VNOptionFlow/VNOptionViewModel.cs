@@ -1,8 +1,11 @@
 using System.Collections.Generic;
+using System.Text;
 using Yarn.Unity;
 
 public sealed class VNOptionViewModel
 {
+    private const string EffectSeparator = " / ";
+
     public DialogueOption SourceOption { get; private set; }
 
     // 원본 dialogueOptions 배열 기준 index.
@@ -14,7 +17,11 @@ public sealed class VNOptionViewModel
 
     public string Label { get; private set; }
     public bool IsAvailable { get; private set; }
+
     public List<VNOptionEffectPreview> Effects { get; private set; }
+    public string EffectText { get; private set; }
+
+    public bool HasEffectText => !string.IsNullOrEmpty(EffectText);
 
     public VNOptionViewModel(
         DialogueOption sourceOption,
@@ -27,8 +34,38 @@ public sealed class VNOptionViewModel
         SourceOption = sourceOption;
         SourceOptionIndex = sourceOptionIndex;
         ChoiceIndexInNode = choiceIndexInNode;
+
         Label = label ?? string.Empty;
         IsAvailable = isAvailable;
+
         Effects = effects ?? new List<VNOptionEffectPreview>();
+        EffectText = BuildEffectText(Effects);
+    }
+
+    private static string BuildEffectText(IReadOnlyList<VNOptionEffectPreview> effects)
+    {
+        if (effects == null || effects.Count == 0)
+            return string.Empty;
+
+        StringBuilder builder = null;
+
+        for (int i = 0; i < effects.Count; i++)
+        {
+            VNOptionEffectPreview effect = effects[i];
+
+            string text = effect.ToDisplayText();
+
+            if (string.IsNullOrEmpty(text))
+                continue;
+
+            if (builder == null)
+                builder = new StringBuilder(text);
+            else
+                builder.Append(EffectSeparator).Append(text);
+        }
+
+        return builder == null
+            ? string.Empty
+            : builder.ToString();
     }
 }
