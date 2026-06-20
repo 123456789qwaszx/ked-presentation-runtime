@@ -22,6 +22,8 @@ public sealed class UIStageBlurController : MonoBehaviour
     [SerializeField] private UIStageBlurDownsample downsample = UIStageBlurDownsample.Quarter;
     [SerializeField, Range(1, 6)] private int iterations = 2;
     [SerializeField, Range(0f, 8f)] private float blurRadius = 3f;
+    
+    [SerializeField] private Color transparentClearColor = new(0f, 0f, 0f, 0f);
 
     [Header("Runtime")]
     // 캡처 카메라를 이 컨트롤러가 수동으로 구동한다(평소엔 렌더하지 않음).
@@ -53,6 +55,7 @@ public sealed class UIStageBlurController : MonoBehaviour
         blurRadius = Mathf.Max(0f, radius);
         iterations = Mathf.Clamp(iterationCount, 1, 6);
     }
+    
 
     public void SetDownsample(UIStageBlurDownsample value)
     {
@@ -63,17 +66,38 @@ public sealed class UIStageBlurController : MonoBehaviour
         RecreateRenderTextures();
     }
 
+    private void ClearCaptureTarget()
+    {
+        if (captureCamera == null || captureCamera.targetTexture == null)
+            return;
+
+        RenderTexture prev = RenderTexture.active;
+        RenderTexture.active = captureCamera.targetTexture;
+
+        GL.Clear(
+            clearDepth: true,
+            clearColor: true,
+            backgroundColor: Color.clear);
+
+        RenderTexture.active = prev;
+    }
+
     // 온디맨드 구동 진입점: 캡처 카메라를 한 번 렌더한 뒤 블러를 굽는다.
     public void RenderBlur()
     {
-        // 수동 구동이면 이 시점에만 캡처 카메라를 렌더해 source RT를 갱신한다.
-        if (controlCaptureCamera && captureCamera != null)
-            captureCamera.Render();
+        if (captureCamera == null)
+            return;
 
         RenderTexture source = captureCamera.targetTexture;
 
         if (source == null || M_UISeparableBlur == null)
             return;
+
+        if (controlCaptureCamera)
+        {
+            ClearCaptureTarget();
+            captureCamera.Render();
+        }
 
         EnsureRenderTextures();
 
@@ -102,11 +126,14 @@ public sealed class UIStageBlurController : MonoBehaviour
 
     private void ApplyCaptureCameraControl()
     {
-        if (!controlCaptureCamera || captureCamera == null)
+        if (captureCamera == null)
             return;
 
-        // 평소엔 매 프레임 렌더하지 않도록 비활성화하고, RenderBlur에서 수동 Render()로만 구동한다.
-        captureCamera.enabled = false;
+        captureCamera.clearFlags = CameraClearFlags.SolidColor;
+        captureCamera.backgroundColor = transparentClearColor;
+
+        if (controlCaptureCamera)
+            captureCamera.enabled = false;
     }
 
     private void EnsureRenderTextures()
