@@ -9,7 +9,7 @@ using UnityEngine;
 public interface IStageDepthLayerBlurRuntime
 {
     // Command가 overlay handle을 resolve한다. (provider 단일 접근점은 Baker가 캡슐화.)
-    bool TryResolveTarget(
+    void ResolveTarget(
         PresentationStageKey stage,
         PresentationDepthLayerKey layer,
         out PresentationDepthDefocusTarget target);

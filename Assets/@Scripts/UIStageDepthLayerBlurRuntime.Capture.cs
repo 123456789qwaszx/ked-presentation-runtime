@@ -8,21 +8,9 @@ using UnityEngine;
 public sealed partial class UIStageDepthLayerBlurRuntime
 {
     // ── capture graph 구성 ─────────────────────────────────────────────────────
-
-    private void EnsureOverlayProvider()
-    {
-        if (_overlayProvider != null)
-            return;
-
-        _overlayProvider = UIManager.Instance.GetUI<PresentationUIRoot>();
-    }
-
     private void EnsureCaptureGraph()
     {
         if (_captureGraphBuilt)
-            return;
-
-        if (captureRoot == null)
             return;
 
         // proxy 좌표는 "스크린 좌표"다. captureRoot가 화면 전체와 1:1로 겹쳐야
@@ -42,9 +30,6 @@ public sealed partial class UIStageDepthLayerBlurRuntime
 
     private void ForceCaptureRootFullScreen()
     {
-        if (captureRoot == null)
-            return;
-
         captureRoot.anchorMin = Vector2.zero;
         captureRoot.anchorMax = Vector2.one;
         captureRoot.pivot = new Vector2(0.5f, 0.5f);
@@ -70,8 +55,7 @@ public sealed partial class UIStageDepthLayerBlurRuntime
 
         if (!_captureRefs.TryGetRoot(stage, layer, out RectTransform root) || root == null)
         {
-            if (warnMissingProxyRoot)
-                Debug.LogWarning($"[UIStageDepthLayerBlurRuntime] Missing proxy root. stage='{stage}' layer='{layer}'.");
+            Debug.LogWarning($"[UIStageDepthLayerBlurRuntime] Missing proxy root. stage='{stage}' layer='{layer}'.");
 
             return;
         }
@@ -102,10 +86,7 @@ public sealed partial class UIStageDepthLayerBlurRuntime
                 "capture camera/RT를 화면 종횡비 1:1로 맞춰라. off-center rig가 거리 비례로 어긋난다.");
         }
     }
-
-
-    // ── helpers ────────────────────────────────────────────────────────────────
-
+    
     private static void SetLayerRecursive(Transform root, int layer)
     {
         if (root == null)

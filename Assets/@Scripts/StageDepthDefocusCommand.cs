@@ -131,14 +131,7 @@ public sealed class StageDepthDefocusCommand : CommandBase
     {
         _resolveAttempted = true;
 
-        if (!_runtime.TryResolveTarget(_spec.stage, _spec.layer, out _target) || !_target.IsValid)
-        {
-            Debug.LogWarning(
-                $"[StageDepthDefocusCommand] depth defocus target resolve 실패. " +
-                $"PresentationUIRoot의 depth overlay refs가 바인딩됐는지 확인하세요. " +
-                $"stage='{_spec.stage}' layer='{_spec.layer}'.");
-            return;
-        }
+        _runtime.ResolveTarget(_spec.stage, _spec.layer, out _target);
 
         _canvasGroup = _target.OverlayCanvasGroup;
         _targetResolved = true;

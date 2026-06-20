@@ -43,9 +43,6 @@ public sealed partial class UIStageDepthLayerBlurRuntime : MonoBehaviour, IStage
     [Header("Blur (BG 경로와 공유)")]
     [SerializeField] private UIStageBlurController blurController;
 
-    [Header("Debug")]
-    [SerializeField] private bool warnMissingProxyRoot = true;
-
     private readonly UIStageDepthBlurCaptureBuilder _captureBuilder = new();
     private UIStageDepthBlurCaptureRefs _captureRefs;
 
@@ -91,17 +88,6 @@ public sealed partial class UIStageDepthLayerBlurRuntime : MonoBehaviour, IStage
         DisableAllProxyPools();
     }
 
-#if UNITY_EDITOR
-    [ContextMenu("Rebuild Capture Proxy Graph")]
-    private void ContextRebuildCaptureProxyGraph()
-    {
-        _captureGraphBuilt = false;
-        _captureFramingValidated = false;
-        EnsureCaptureGraph();
-        DisableAllProxyPools();
-    }
-#endif
-
     private void LateUpdate()
     {
         // 추적 중인 layer만 매 프레임 다시 굽는다(rig 이동/스케일/회전 추종).
@@ -120,7 +106,7 @@ public sealed partial class UIStageDepthLayerBlurRuntime : MonoBehaviour, IStage
 
             if (baked)
                 ApplyBlurTextureToOverlay(state);
-            else if (state.Target.IsValid)
+            else
                 SyncOverlayUvRectToScreen(state.Target.OverlayRawImage);
         }
 
@@ -130,45 +116,20 @@ public sealed partial class UIStageDepthLayerBlurRuntime : MonoBehaviour, IStage
     private void OnDestroy()
     {
         foreach (KeyValuePair<LayerKey, LayerState> pair in _states)
-        {
-            LayerState state = pair.Value;
-
-            ResetOverlayCoveragePadding(state);
-            ReleaseBakedTexture(state);
-        }
-
+            ReleaseBakedTexture(pair.Value);
+        
         _states.Clear();
-
-        foreach (KeyValuePair<LayerKey, ProxyPool> pair in _proxyPools)
-            pair.Value?.DisableAll();
-
-        _proxyPools.Clear();
-
-        _sourceImageBuffer.Clear();
-        _currentBakeProxies.Clear();
-        _captureImageScan.Clear();
-        _foreignDisabledBuffer.Clear();
-
-        _captureGraphBuilt = false;
-        _captureFramingValidated = false;
     }
 
     // ── public API (IStageDepthLayerBlurRuntime) ───────────────────────────────
 
-    public bool TryResolveTarget(
+    public void ResolveTarget(
         PresentationStageKey stage,
         PresentationDepthLayerKey layer,
         out PresentationDepthDefocusTarget target)
     {
-        target = default;
-
         EnsureOverlayProvider();
-
-        if (_overlayProvider == null)
-            return false;
-
-        return _overlayProvider.TryGetDepthDefocusTarget(stage, layer, out target)
-               && target.IsValid;
+        _overlayProvider.GetDepthDefocusTarget(stage, layer, out target);
     }
 
     public void BeginLayer(
@@ -179,10 +140,7 @@ public sealed partial class UIStageDepthLayerBlurRuntime : MonoBehaviour, IStage
         in StageDepthBlurParams blurParams)
     {
         EnsureCaptureGraph();
-
-        if (scope == null || !target.IsValid)
-            return;
-
+        
         LayerKey key = new(stage, layer);
 
         if (!_states.TryGetValue(key, out LayerState state))
@@ -226,7 +184,15 @@ public sealed partial class UIStageDepthLayerBlurRuntime : MonoBehaviour, IStage
 
         ResetOverlayCoveragePadding(state);
 
-        if (state.Target.IsValid)
-            state.Target.OverlayRawImage.enabled = false;
+        state.Target.OverlayRawImage.enabled = false;
+    }
+    
+    
+    private void EnsureOverlayProvider()
+    {
+        if (_overlayProvider != null)
+            return;
+
+        _overlayProvider = UIManager.Instance.GetUI<PresentationUIRoot>();
     }
 }

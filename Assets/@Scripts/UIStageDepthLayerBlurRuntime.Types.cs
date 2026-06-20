@@ -3,6 +3,22 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+public enum PresentationStageKey
+{
+    Stage00 = 0,
+    Stage01 = 1,
+    Stage02 = 2
+}
+
+public enum PresentationDepthLayerKey
+{
+    Far = 0,
+    Back = 1,
+    Mid = 2,
+    Front = 3,
+    Close = 4
+}
+
 // - StageKeys / LayerKeys
 // - LayerKey
 // - LayerState
@@ -55,7 +71,6 @@ public sealed partial class UIStageDepthLayerBlurRuntime
     }
 
     // ── nested types ───────────────────────────────────────────────────────────
-
     private readonly struct LayerKey : IEquatable<LayerKey>
     {
         public readonly PresentationStageKey Stage;
@@ -107,7 +122,7 @@ public sealed partial class UIStageDepthLayerBlurRuntime
         public LayerState(LayerKey key) => Key = key;
     }
 
-    // layer root 아래 proxy Image를 필요한 만큼 늘려 재사용(매 프레임 생성/파괴 금지).
+    // layer root 아래 proxy Image를 필요한 만큼 늘려 재사용
     private sealed class ProxyPool
     {
         private readonly PresentationStageKey _stage;

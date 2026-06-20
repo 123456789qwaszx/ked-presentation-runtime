@@ -8,14 +8,9 @@ using UnityEngine.UI;
 // - StopTrackingAndHideImmediate
 public sealed partial class UIStageDepthLayerBlurRuntime
 {
-    // ── overlay ────────────────────────────────────────────────────────────────
-
     // RawImage의 texture/uvRect/enabled는 Baker가 소유한다. alpha는 Command가 소유한다.
     private void ApplyBlurTextureToOverlay(LayerState state)
     {
-        if (!state.Target.IsValid)
-            return;
-
         RawImage rawImage = state.Target.OverlayRawImage;
 
         if (rawImage.texture != state.BakedTexture)
@@ -71,7 +66,7 @@ public sealed partial class UIStageDepthLayerBlurRuntime
 
     private void ApplyOverlayCoveragePadding(LayerState state)
     {
-        if (state == null || !state.Target.IsValid)
+        if (state == null)
             return;
 
         RectTransform overlayRect = state.Target.OverlayCanvasGroup.transform as RectTransform;
@@ -103,14 +98,14 @@ public sealed partial class UIStageDepthLayerBlurRuntime
 
     private void ResetOverlayCoveragePadding(LayerState state)
     {
-        if (state == null || !state.Target.IsValid)
+        if (state == null)
             return;
 
         if (!state.OverlayPaddingCaptured)
             return;
 
-        RectTransform overlayRect = state.Target.OverlayCanvasGroup.transform as RectTransform;
-        RectTransform rawImageRect = state.Target.OverlayRawImage.rectTransform;
+        RectTransform overlayRect = state.Target.OverlayCanvasGroup?.transform as RectTransform;
+        RectTransform rawImageRect = state.Target.OverlayRawImage?.rectTransform;
 
         if (overlayRect != null)
         {
@@ -168,7 +163,6 @@ public sealed partial class UIStageDepthLayerBlurRuntime
 
         ResetOverlayCoveragePadding(state);
 
-        if (state.Target.IsValid)
-            state.Target.OverlayRawImage.enabled = false;
+        state.Target.OverlayRawImage.enabled = false;
     }
 }

@@ -6,7 +6,6 @@ using UnityEngine.UI;
 // Baker(UIStageDepthLayerBlurRuntime)에서 분리한 순수 수집 책임:
 //   - 레지스트리 기반으로 살아있는 rig의 표시 Image만 허용집합에 넣고,
 //   - content 하위를 계층 순서로 훑어 누적 CanvasGroup alpha까지 반영한 entry를 만든다.
-// Unity lifecycle/렌더에 의존하지 않으므로 단독 테스트가 쉽다.
 public sealed class UIStageDepthLayerSourceCollector
 {
     private readonly List<CharacterRigRefs> _characterRigBuffer = new();

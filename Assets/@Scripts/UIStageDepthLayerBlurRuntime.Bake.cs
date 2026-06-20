@@ -10,22 +10,11 @@ using UnityEngine.UI;
 // - DisableAllProxyPools
 public sealed partial class UIStageDepthLayerBlurRuntime
 {
-    // ── bake ───────────────────────────────────────────────────────────────────
-
     private bool BakeLayerBlur(LayerState state, bool force)
     {
-        if (state == null)
-            return false;
-
-        if (blurController == null)
-            return false;
-
         ValidateCaptureFramingOnce();
 
         if (captureCanvas == null || captureRoot == null)
-            return false;
-
-        if (!state.Target.IsValid)
             return false;
 
         if (state.CharacterRigs == null && state.BackgroundRigs == null)
@@ -100,17 +89,14 @@ public sealed partial class UIStageDepthLayerBlurRuntime
     }
 
     // ── proxy 동기화 ────────────────────────────────────────────────────────────
-
-    // 스프라이트/색/fill 등 표시 속성만 복사. material은 복사하지 않는다
-    // (캐릭터 runtime effect material을 캡처에 끌고 오면 블러 파이프라인과 충돌). plain 스프라이트를 블러.
     private static bool SyncGraphicState(SourceImageEntry source, Image proxy)
     {
         Image src = source.Image;
         bool changed = false;
 
-        if (proxy.material != null)
+        if (proxy.material != src.material)
         {
-            proxy.material = null;
+            proxy.material = src.material;
             changed = true;
         }
 
@@ -232,7 +218,6 @@ public sealed partial class UIStageDepthLayerBlurRuntime
     }
 
     // ── 공유 캡처 격리 ──────────────────────────────────────────────────────────
-
     private void IsolateForeignCaptureContent(HashSet<Image> keepEnabled)
     {
         _foreignDisabledBuffer.Clear();
@@ -266,7 +251,6 @@ public sealed partial class UIStageDepthLayerBlurRuntime
     }
 
     // ── proxy pool 비활성 ──────────────────────────────────────────────────────
-
     private void DisableAllProxyPools()
     {
         foreach (KeyValuePair<LayerKey, ProxyPool> pair in _proxyPools)
@@ -274,7 +258,6 @@ public sealed partial class UIStageDepthLayerBlurRuntime
     }
 
     // ── baked texture(layer 전용 스냅샷) ───────────────────────────────────────
-
     private static void EnsureBakedTexture(LayerState state, RenderTexture source)
     {
         bool valid =
@@ -302,17 +285,19 @@ public sealed partial class UIStageDepthLayerBlurRuntime
 
     private static void ReleaseBakedTexture(LayerState state)
     {
-        if (state.BakedTexture == null)
+        RenderTexture bakedTexture = state.BakedTexture;
+
+        if (bakedTexture == null)
             return;
 
-        if (state.BakedTexture.IsCreated())
-            state.BakedTexture.Release();
+        state.BakedTexture = null;
+
+        if (bakedTexture.IsCreated())
+            bakedTexture.Release();
 
         if (Application.isPlaying)
-            Destroy(state.BakedTexture);
+            Destroy(bakedTexture);
         else
-            DestroyImmediate(state.BakedTexture);
-
-        state.BakedTexture = null;
+            DestroyImmediate(bakedTexture);
     }
 }
