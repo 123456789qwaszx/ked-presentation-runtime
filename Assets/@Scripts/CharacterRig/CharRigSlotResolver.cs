@@ -1,17 +1,11 @@
 using UnityEngine;
 
-public interface IStageCharRigSlotProvider
+public enum CharRigSlot
 {
-    RectTransform Stage00CharacterSlot { get; }
-    RectTransform Stage01CharacterSlot { get; }
-    RectTransform Stage02CharacterSlot { get; }
-}
-
-public sealed partial class PresentationUIRoot : IStageCharRigSlotProvider
-{
-    public RectTransform Stage00CharacterSlot => View.Rect(Refs.Stage00Depth_Mid_Content);
-    public RectTransform Stage01CharacterSlot => View.Rect(Refs.Stage01Depth_Mid_Content);
-    public RectTransform Stage02CharacterSlot => View.Rect(Refs.Stage02Depth_Mid_Content);
+    Stage00CharacterSlot = 1,
+    Stage01CharacterSlot = 2,
+    Stage02CharacterSlot = 3,
+    ProtagonistSlot = 10
 }
 
 public interface IProtagonistCharRigSlotProvider
@@ -24,59 +18,106 @@ public sealed partial class DialogueBox00_Portrait : IProtagonistCharRigSlotProv
     public RectTransform ProtagonistSlot => View.Rect(Refs.DialogueBox00ProtagonistCutinViewport_Mask);
 }
 
-public enum CharRigSlot
-{
-    Stage00CharacterSlot = 1,
-    Stage01CharacterSlot = 2,
-    Stage02CharacterSlot = 3,
-    ProtagonistSlot = 10
-}
-
 public sealed class CharRigSlotResolver
 {
-    private IStageCharRigSlotProvider _stageSlots;
+    private IStageDepthContentSlotProvider _stageSlots;
     private IProtagonistCharRigSlotProvider _protagonistSlot;
-    
-    private bool _init;
-    
-    public bool TryResolve(CharRigSlot slot, out RectTransform rect)
+
+    public bool TryResolve(
+        PresentationStageKey stage,
+        PresentationDepthLayerKey layer,
+        out RectTransform rect)
     {
-        rect = null;
-        
-        if (!_init)
-            EnsureProviders();
+        EnsureProviders();
 
-        rect = slot switch
+        if (_stageSlots == null)
         {
-            CharRigSlot.Stage00CharacterSlot => _stageSlots?.Stage00CharacterSlot,
-            CharRigSlot.Stage01CharacterSlot => _stageSlots?.Stage01CharacterSlot,
-            CharRigSlot.Stage02CharacterSlot => _stageSlots?.Stage02CharacterSlot,
-            CharRigSlot.ProtagonistSlot => _protagonistSlot?.ProtagonistSlot,
+            rect = null;
+            Debug.LogWarning(
+                $"[CharRigSlotResolver] Failed to resolve stage depth slot provider. " +
+                $"stage='{stage}', layer='{layer}'.");
+            return false;
+        }
 
-            _ => null
-        };
+        rect = _stageSlots.GetDepthContent(stage, layer);
 
         if (rect == null)
         {
-            Debug.LogWarning($"[CharRigSlotResolver] Missing slot '{slot}'.");
+            Debug.LogWarning(
+                $"[CharRigSlotResolver] Resolved slot is null. " +
+                $"stage='{stage}', layer='{layer}'.");
             return false;
         }
 
         return true;
     }
-    
-    
+
+    // Legacy path. Character used to default to Mid.
+    public bool TryResolve(CharRigSlot slot, out RectTransform rect)
+    {
+        switch (slot)
+        {
+            case CharRigSlot.Stage00CharacterSlot:
+                return TryResolve(
+                    PresentationStageKey.Stage00,
+                    PresentationDepthLayerKey.Mid,
+                    out rect);
+
+            case CharRigSlot.Stage01CharacterSlot:
+                return TryResolve(
+                    PresentationStageKey.Stage01,
+                    PresentationDepthLayerKey.Mid,
+                    out rect);
+
+            case CharRigSlot.Stage02CharacterSlot:
+                return TryResolve(
+                    PresentationStageKey.Stage02,
+                    PresentationDepthLayerKey.Mid,
+                    out rect);
+
+            case CharRigSlot.ProtagonistSlot:
+                return TryResolveProtagonist(out rect);
+
+            default:
+                rect = null;
+                Debug.LogWarning($"[CharRigSlotResolver] Unknown slot. slot='{slot}'.");
+                return false;
+        }
+    }
+
+    private bool TryResolveProtagonist(out RectTransform rect)
+    {
+        EnsureProviders();
+
+        if (_protagonistSlot == null)
+        {
+            rect = null;
+            Debug.LogWarning("[CharRigSlotResolver] Missing protagonist slot provider.");
+            return false;
+        }
+
+        rect = _protagonistSlot.ProtagonistSlot;
+
+        if (rect == null)
+        {
+            Debug.LogWarning("[CharRigSlotResolver] Protagonist slot is null.");
+            return false;
+        }
+
+        return true;
+    }
+
     private void EnsureProviders()
     {
         UIManager ui = UIManager.Instance;
 
-        if (ui != null)
-        {
-            _stageSlots = ui.GetUI<PresentationUIRoot>();
-            _protagonistSlot = ui.GetUI<DialogueBox00_Portrait>();
-        }
+        if (ui == null)
+            return;
 
-        if (_stageSlots != null && _protagonistSlot != null)
-            _init = true;
+        if (_stageSlots == null)
+            _stageSlots = ui.GetUI<PresentationUIRoot>();
+
+        if (_protagonistSlot == null)
+            _protagonistSlot = ui.GetUI<DialogueBox00_Portrait>();
     }
 }
