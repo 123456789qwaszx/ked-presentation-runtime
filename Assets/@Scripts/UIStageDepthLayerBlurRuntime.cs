@@ -1,42 +1,39 @@
 using System;
 using System.Collections.Generic;
-using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
 
 // ─────────────────────────────────────────────────────────────────────────────
-// UIStageDepthLayerBlurRuntime
+// UIStageDepthLayerBlurRuntime  (Baker / 메커니즘)
 //
 // 역할:
-//   PresentationStage 의 (Stage00~02) x (Far/Back/Mid/Front/Close) depth layer 별
-//   defocus(블러) 오버레이를 만든다. bg_defocus 와 동일한 철학을 유지한다.
-//     - 원본 rig 를 직접 블러하지 않는다.
-//     - captureRoot(캡처 캔버스) 아래 proxy Image 를 구성한다.
-//     - 공유 UICaptureCamera 로 source RT 에 렌더하고, UIStageBlurController 로 블러한다.
-//     - 결과를 각 layer 의 FrostedGlass overlay(RawImage)에 표시한다.
+//   PresentationStage (Stage00~02) x (Far/Back/Mid/Front/Close) depth layer 별
+//   defocus 블러를 매 프레임 굽고 결과를 각 layer의 FrostedGlass overlay(RawImage)에 쓴다.
+//     - 원본 rig를 직접 블러하지 않는다. captureRoot 아래 proxy Image를 구성한다.
+//     - 공유 UICaptureCamera로 source RT에 렌더하고, UIStageBlurController로 블러한다.
+//     - 결과를 layer 전용 BakedTexture로 스냅샷해 overlay RawImage에 표시한다.
 //
-// 좌표계 계약(BG 경로와 동일하게 보존):
-//   source rig image 의 world corners
-//     → WorldToScreenPoint(null)                         [스크린 px]
-//     → ScreenPointToLocalPointInRectangle(captureRoot)  [captureRoot local]
-//     → proxy 를 captureRoot local 에 배치
-//     → captureCamera 가 captureRoot(풀스크린)를 source RT 에 1:1 렌더
-//     → 각 depth layer 안쪽의 overlay RawImage 가 현재 화면 rect 기준 uvRect 로 표시
-//   GetWorldCorners 는 rig 의 모든 상위 축(slot/depth/track/scale/framing 등) 합성을
-//   포함하므로, command 로 무엇을 움직이든 화면 위치와 어긋나지 않는다.
+// 소유권 경계 (StageDepthDefocusCommand와의 계약):
+//   Baker   : RawImage(texture/uvRect/enabled), coverage padding 기하, 캡처·블러·스냅샷, 추적 재bake.
+//   Command : OverlayCanvasGroup.alpha + 캐릭터 edge hide 전이/최종값.
+//   → 이 클래스는 alpha/visibility tween을 더 이상 소유하지 않는다(과거 SetOverlayVisible 제거).
+//   "이 layer가 defocus 상태"는 BeginLayer~EndLayer 사이 IsTracking으로 표현되는 지속 상태이며,
+//   Command tween이 끝나도 LateUpdate가 계속 추적 재bake한다.
 //
-// 이 재작성에서 바로잡은 핵심:
-//   (1) 런타임 생성 캡처 오브젝트의 layer 를 captureRoot.layer 로 강제한다.
-//       Builder 의 new GameObject 는 Default layer 라, 캡처 카메라 culling mask 가
-//       UI layer 로 좁혀져 있으면 컬링되어 렌더되지 않는다(= 빈 캡처 = 안 보임).
-//   (2) 캐릭터 runtime effect material 을 캡처에 끌고 오지 않는다(plain 스프라이트를 블러).
+// 좌표계 계약(BG 경로와 동일):
+//   source rig image world corners → WorldToScreenPoint → ScreenPointToLocalPointInRectangle(captureRoot)
+//   → proxy 배치 → captureCamera가 captureRoot(풀스크린)를 source RT에 1:1 렌더
+//   → overlay RawImage가 현재 화면 rect 기준 uvRect로 표시.
+//
+// 유지되는 핵심 수정:
+//   (1) 런타임 생성 캡처 오브젝트의 layer를 captureRoot.layer로 강제(컬링 방지).
+//   (2) 캐릭터 runtime effect material을 캡처에 끌고 오지 않는다(plain 스프라이트를 블러).
 //   (3) captureRoot 풀스크린 강제 + source RT 종횡비 1:1 검증.
-//   (3-1) overlay 는 depth 렌더 순서 안에 두고, screen-space RT 샘플링은 uvRect 로 보정한다.
-//   (3-2) defocus 중에는 원본 sharp Image 를 bake 직후 숨겨 edge bleed-through 를 막는다.
-//   (3-3) overlay coverage padding 으로 layer 경계에서 blur 가 잘리는 문제를 완화한다.
-//   (4) 같은 blurController/RT 를 BG 경로와 공유하므로:
-//         - bake 동안 외부 캡처 콘텐츠 격리(오염 방지),
-//         - 결과를 layer 전용 BakedTexture 로 스냅샷(라이브 _blurA 에일리어싱 방지).
+//   (3-1) overlay는 depth 렌더 순서 안에 두고 screen-space RT 샘플링은 uvRect로 보정.
+//   (3-3) coverage padding으로 layer 경계 잘림 완화.
+//   (4) 공유 blurController/RT: bake 동안 외부 콘텐츠 격리 + layer 전용 BakedTexture 스냅샷.
+//
+// SoC: source image 수집 책임은 UIStageDepthLayerSourceCollector로 분리.
 // ─────────────────────────────────────────────────────────────────────────────
 public sealed class UIStageDepthLayerBlurRuntime : MonoBehaviour, IStageDepthLayerBlurRuntime
 {
@@ -53,29 +50,23 @@ public sealed class UIStageDepthLayerBlurRuntime : MonoBehaviour, IStageDepthLay
     private readonly UIStageDepthBlurCaptureBuilder _captureBuilder = new();
     private UIStageDepthBlurCaptureRefs _captureRefs;
 
+    private readonly UIStageDepthLayerSourceCollector _sourceCollector = new();
+
     private readonly Dictionary<LayerKey, LayerState> _states = new();
     private readonly Dictionary<LayerKey, ProxyPool> _proxyPools = new();
 
-    // 레지스트리에서 살아있는 rig 를 받아오는 스크래치 버퍼.
-    private readonly List<CharacterRigRefs> _characterRigBuffer = new();
-    private readonly List<BackgroundRigRefs> _backgroundRigBuffer = new();
-
-    // 해당 layer content 아래에 속한 "캡처 허용" 이미지 집합 / 계층 순서 수집 버퍼.
-    private readonly HashSet<Image> _allowedSourceImages = new();
+    // 수집된 source(그리기 순서) 버퍼.
     private readonly List<SourceImageEntry> _sourceImageBuffer = new();
 
     // 좌표 매핑용 코너 버퍼.
     private readonly Vector3[] _sourceWorldCorners = new Vector3[4];
     private readonly Vector2[] _captureLocalCorners = new Vector2[4];
-
-    // Overlay RawImage 는 depth layer 안쪽에서 렌더 순서를 지키되,
-    // texture 는 screen-space RT 를 샘플링하므로 현재 화면 rect 에 맞춰 uvRect 를 보정한다.
     private readonly Vector3[] _overlayWorldCorners = new Vector3[4];
 
-    // 이번 bake 에서 켠 depth proxy 집합(공유 캡처 격리 시 "유지 대상" 판정).
+    // 이번 bake에서 켠 depth proxy 집합(공유 캡처 격리 시 "유지 대상" 판정).
     private readonly HashSet<Image> _currentBakeProxies = new();
 
-    // 공유 캡처 격리용 스크래치(비할당 GetComponentsInChildren / 복원 목록).
+    // 공유 캡처 격리용 스크래치.
     private readonly List<Image> _captureImageScan = new();
     private readonly List<Image> _foreignDisabledBuffer = new();
 
@@ -114,9 +105,9 @@ public sealed class UIStageDepthLayerBlurRuntime : MonoBehaviour, IStageDepthLay
 
     private void LateUpdate()
     {
-        // 추적 중인 layer 만 매 프레임 다시 굽는다(rig 이동/스케일/회전 추종).
-        // bake 가 생략된 프레임에도 overlay 는 StagePan/StageZoom/depth root 아래에서
-        // 움직일 수 있으므로, screen-space RT 샘플링용 uvRect 는 매 프레임 갱신한다.
+        // 추적 중인 layer만 매 프레임 다시 굽는다(rig 이동/스케일/회전 추종).
+        // bake가 생략된 프레임에도 overlay는 StagePan/StageZoom/depth root 아래에서 움직일 수 있으므로,
+        // screen-space RT 샘플링용 uvRect는 매 프레임 갱신한다.
         foreach (KeyValuePair<LayerKey, LayerState> pair in _states)
         {
             LayerState state = pair.Value;
@@ -144,10 +135,6 @@ public sealed class UIStageDepthLayerBlurRuntime : MonoBehaviour, IStageDepthLay
             LayerState state = pair.Value;
 
             ResetOverlayCoveragePadding(state);
-
-            state.Tween?.Kill();
-            state.Tween = null;
-
             ReleaseBakedTexture(state);
         }
 
@@ -158,9 +145,6 @@ public sealed class UIStageDepthLayerBlurRuntime : MonoBehaviour, IStageDepthLay
 
         _proxyPools.Clear();
 
-        _characterRigBuffer.Clear();
-        _backgroundRigBuffer.Clear();
-        _allowedSourceImages.Clear();
         _sourceImageBuffer.Clear();
         _currentBakeProxies.Clear();
         _captureImageScan.Clear();
@@ -172,27 +156,32 @@ public sealed class UIStageDepthLayerBlurRuntime : MonoBehaviour, IStageDepthLay
 
     // ── public API (IStageDepthLayerBlurRuntime) ───────────────────────────────
 
-    public void ShowDefocus(
-        CommandRunScope scope,
+    public bool TryResolveTarget(
         PresentationStageKey stage,
         PresentationDepthLayerKey layer,
-        float alpha,
-        float duration,
-        float blurRadius,
-        int iterations,
-        UIStageBlurDownsample downsample,
-        float coveragePaddingPixels)
+        out PresentationDepthDefocusTarget target)
     {
+        target = default;
+
         EnsureOverlayProvider();
+
+        if (_overlayProvider == null)
+            return false;
+
+        return _overlayProvider.TryGetDepthDefocusTarget(stage, layer, out target)
+               && target.IsValid;
+    }
+
+    public void BeginLayer(
+        PresentationStageKey stage,
+        PresentationDepthLayerKey layer,
+        in PresentationDepthDefocusTarget target,
+        CommandRunScope scope,
+        in StageDepthBlurParams blurParams)
+    {
         EnsureCaptureGraph();
 
-        if (scope == null || _overlayProvider == null)
-            return;
-
-        if (!_overlayProvider.TryGetDepthDefocusTarget(stage, layer, out PresentationDepthDefocusTarget target))
-            return;
-
-        if (!target.IsValid)
+        if (scope == null || !target.IsValid)
             return;
 
         LayerKey key = new(stage, layer);
@@ -207,33 +196,27 @@ public sealed class UIStageDepthLayerBlurRuntime : MonoBehaviour, IStageDepthLay
         state.CharacterRigs = scope.CharacterRigs;
         state.BackgroundRigs = scope.BackgroundRigs;
 
-        state.Alpha = Mathf.Clamp01(alpha);
-        state.BlurRadius = Mathf.Max(0f, blurRadius);
-        state.Iterations = Mathf.Clamp(iterations, 1, 6);
-        state.Downsample = downsample;
-        state.CoveragePaddingPixels = Mathf.Max(0f, coveragePaddingPixels);
-        state.IsTracking = state.Alpha > 0.001f;
+        state.BlurRadius = blurParams.BlurRadius;
+        state.Iterations = blurParams.Iterations;
+        state.Downsample = blurParams.Downsample;
+        state.CoveragePaddingPixels = blurParams.CoveragePaddingPixels;
+
+        state.IsTracking = true;
 
         ApplyOverlayCoveragePadding(state);
 
+        // 즉시 force-bake로 텍스처를 선준비(Command가 alpha를 올리기 전에 내용이 있어야 한다).
         bool baked = BakeLayerBlur(state, force: true);
 
         if (baked)
             ApplyBlurTextureToOverlay(state);
 
         DisableAllProxyPools();
-
-        SetOverlayVisible(
-            state,
-            visible: baked && state.IsTracking,
-            duration: duration,
-            visibleAlpha: state.Alpha);
     }
 
-    public void HideDefocus(
+    public void EndLayer(
         PresentationStageKey stage,
-        PresentationDepthLayerKey layer,
-        float duration)
+        PresentationDepthLayerKey layer)
     {
         LayerKey key = new(stage, layer);
 
@@ -244,11 +227,8 @@ public sealed class UIStageDepthLayerBlurRuntime : MonoBehaviour, IStageDepthLay
 
         ResetOverlayCoveragePadding(state);
 
-        SetOverlayVisible(
-            state,
-            visible: false,
-            duration: duration,
-            visibleAlpha: 0f);
+        if (state.Target.IsValid)
+            state.Target.OverlayRawImage.enabled = false;
     }
 
     // ── capture graph 구성 ─────────────────────────────────────────────────────
@@ -269,22 +249,21 @@ public sealed class UIStageDepthLayerBlurRuntime : MonoBehaviour, IStageDepthLay
         if (captureRoot == null)
             return;
 
-        // proxy 가 들고 다니는 좌표는 "스크린 좌표"다. captureRoot 가 화면 전체와 1:1 로
-        // 겹쳐야 source RT 가 화면과 동일 기준이 되고 overlay(default uvRect)가 맞는다.
+        // proxy 좌표는 "스크린 좌표"다. captureRoot가 화면 전체와 1:1로 겹쳐야
+        // source RT가 화면 기준이 되고 overlay(default uvRect)가 맞는다.
         ForceCaptureRootFullScreen();
 
         _captureBuilder.EnsureAndBind(captureRoot, out _captureRefs);
         BuildProxyPools();
 
         // (핵심) 런타임 생성 캡처 오브젝트가 캡처 카메라 culling mask 밖(Default layer)으로
-        // 떨어져 컬링되는 것을 막는다. captureRoot 의 layer 로 서브트리 전체를 통일한다.
+        // 떨어져 컬링되는 것을 막는다. captureRoot의 layer로 서브트리 전체를 통일한다.
         _captureLayer = captureRoot.gameObject.layer;
         SetLayerRecursive(captureRoot, _captureLayer);
 
         _captureGraphBuilt = true;
     }
 
-    // captureRoot 를 부모 전체를 덮는 stretch + identity 로 강제(BG 와 공유, idempotent).
     private void ForceCaptureRootFullScreen()
     {
         if (captureRoot == null)
@@ -324,8 +303,7 @@ public sealed class UIStageDepthLayerBlurRuntime : MonoBehaviour, IStageDepthLay
         _proxyPools[new LayerKey(stage, layer)] = new ProxyPool(stage, layer, root, _captureBuilder);
     }
 
-    // 공유 source RT 의 종횡비가 화면과 어긋나면 off-center rig 가 한 축으로 거리 비례로 밀린다.
-    // 조용한 드리프트 대신 1회 경고. RT 준비 전이면 래치를 올리지 않고 다음 bake 때 재시도.
+    // 공유 source RT 종횡비가 화면과 어긋나면 off-center rig가 한 축으로 거리 비례로 밀린다. 1회 경고.
     private void ValidateCaptureFramingOnce()
     {
         if (_captureFramingValidated || blurController == null)
@@ -345,11 +323,12 @@ public sealed class UIStageDepthLayerBlurRuntime : MonoBehaviour, IStageDepthLay
         {
             Debug.LogWarning(
                 $"[UIStageDepthLayerBlurRuntime] Capture RT aspect({rtAspect:F3}) != screen aspect({screenAspect:F3}). " +
-                "capture camera/RT 를 화면 종횡비 1:1 로 맞춰라. off-center rig 가 거리 비례로 어긋난다.");
+                "capture camera/RT를 화면 종횡비 1:1로 맞춰라. off-center rig가 거리 비례로 어긋난다.");
         }
     }
 
     // ── bake ───────────────────────────────────────────────────────────────────
+
     private bool BakeLayerBlur(LayerState state, bool force)
     {
         if (state == null)
@@ -372,7 +351,11 @@ public sealed class UIStageDepthLayerBlurRuntime : MonoBehaviour, IStageDepthLay
         if (!_proxyPools.TryGetValue(state.Key, out ProxyPool proxyPool) || proxyPool == null)
             return false;
 
-        CollectSourceImagesForLayer(state);
+        _sourceCollector.Collect(
+            state.Target.SourceContentRoot,
+            state.CharacterRigs,
+            state.BackgroundRigs,
+            _sourceImageBuffer);
 
         if (_sourceImageBuffer.Count <= 0)
         {
@@ -433,149 +416,10 @@ public sealed class UIStageDepthLayerBlurRuntime : MonoBehaviour, IStageDepthLay
         return true;
     }
 
-    // ── source 수집(레지스트리 기반) ────────────────────────────────────────────
-
-    private void CollectSourceImagesForLayer(LayerState state)
-    {
-        _allowedSourceImages.Clear();
-        _sourceImageBuffer.Clear();
-
-        RectTransform contentRoot = state.Target.SourceContentRoot;
-
-        if (contentRoot == null)
-            return;
-
-        _characterRigBuffer.Clear();
-        _backgroundRigBuffer.Clear();
-
-        state.CharacterRigs?.CollectAliveRigs(_characterRigBuffer);
-        state.BackgroundRigs?.CollectAliveRigs(_backgroundRigBuffer);
-
-        // 해당 depth content 아래에 mount 된 살아있는 rig 의 "실제 표시 Image" 만 허용집합에 넣는다.
-        for (int i = 0; i < _backgroundRigBuffer.Count; i++)
-        {
-            BackgroundRigRefs refs = _backgroundRigBuffer[i];
-
-            if (refs == null || refs.RigRoot == null || !IsDescendantOf(refs.RigRoot, contentRoot))
-                continue;
-
-            AddAllowedImage(refs.Background_BackLayer_Image);
-            AddAllowedImage(refs.Background_FrontLayer_Image);
-        }
-
-        for (int i = 0; i < _characterRigBuffer.Count; i++)
-        {
-            CharacterRigRefs refs = _characterRigBuffer[i];
-
-            if (refs == null || refs.RigRoot == null || !IsDescendantOf(refs.RigRoot, contentRoot))
-                continue;
-
-            AddAllowedImage(refs.CharacterPortraitSprite_Image);
-            AddAllowedImage(refs.CharacterPortraitSpriteOverlay_Image);
-
-            AddAllowedImage(refs.EmojiSlot00_Image);
-            AddAllowedImage(refs.EmojiSlot01_Image);
-            AddAllowedImage(refs.EmojiSlot02_Image);
-        }
-
-        // content 하위를 계층 순서로 훑어, 허용집합에 든 Image 만 그리기 순서대로 수집한다.
-        CollectAllowedImagesInHierarchyOrder(contentRoot, contentRoot);
-    }
-
-    private void AddAllowedImage(Image image)
-    {
-        if (image != null)
-            _allowedSourceImages.Add(image);
-    }
-
-    private void CollectAllowedImagesInHierarchyOrder(RectTransform contentRoot, Transform current)
-    {
-        if (current == null)
-            return;
-
-        if (current.TryGetComponent(out Image image) && _allowedSourceImages.Contains(image))
-        {
-            if (TryBuildSourceEntry(contentRoot, image, out SourceImageEntry entry))
-                _sourceImageBuffer.Add(entry);
-        }
-
-        for (int i = 0; i < current.childCount; i++)
-            CollectAllowedImagesInHierarchyOrder(contentRoot, current.GetChild(i));
-    }
-
-    private static bool TryBuildSourceEntry(RectTransform contentRoot, Image image, out SourceImageEntry entry)
-    {
-        entry = default;
-
-        if (!IsSourceImageAlive(image))
-            return false;
-
-        // content 까지 누적된 CanvasGroup alpha 를 반영(스프라이트 Root 는 초기 alpha 0).
-        float canvasGroupAlpha = EvaluateCanvasGroupAlpha(image.transform, contentRoot);
-
-        if (canvasGroupAlpha <= 0.001f)
-            return false;
-
-        Color effectiveColor = image.color;
-        effectiveColor.a *= canvasGroupAlpha;
-
-        if (effectiveColor.a <= 0.001f)
-            return false;
-
-        entry = new SourceImageEntry(image, effectiveColor);
-        return true;
-    }
-
-    private static float EvaluateCanvasGroupAlpha(Transform leaf, Transform stopRoot)
-    {
-        float alpha = 1f;
-        Transform current = leaf;
-
-        while (current != null)
-        {
-            if (current.TryGetComponent(out CanvasGroup canvasGroup))
-                alpha *= canvasGroup.alpha;
-
-            if (current == stopRoot)
-                break;
-
-            current = current.parent;
-        }
-
-        return alpha;
-    }
-
-    private static bool IsSourceImageAlive(Image source)
-    {
-        return source != null
-            && source.enabled
-            && source.gameObject.activeInHierarchy
-            && source.sprite != null;
-    }
-
-    private static bool IsDescendantOf(RectTransform child, RectTransform parent)
-    {
-        if (child == null || parent == null)
-            return false;
-
-        Transform t = child;
-
-        while (t != null)
-        {
-            if (t == parent)
-                return true;
-
-            t = t.parent;
-        }
-
-        return false;
-    }
-
     // ── proxy 동기화 ────────────────────────────────────────────────────────────
 
-    // 스프라이트/색/fill 등 표시 속성만 복사한다.
-    // material 은 복사하지 않는다: 캐릭터 portrait 에 바인딩된 runtime effect material 을
-    // 캡처에 끌고 오면 블러 파이프라인과 충돌하거나 잘못 렌더된다. defocus 는 "plain 스프라이트"를 블러한다.
+    // 스프라이트/색/fill 등 표시 속성만 복사. material은 복사하지 않는다
+    // (캐릭터 runtime effect material을 캡처에 끌고 오면 블러 파이프라인과 충돌). plain 스프라이트를 블러.
     private static bool SyncGraphicState(SourceImageEntry source, Image proxy)
     {
         Image src = source.Image;
@@ -650,7 +494,7 @@ public sealed class UIStageDepthLayerBlurRuntime : MonoBehaviour, IStageDepthLay
         return changed;
     }
 
-    // source 의 최종 화면 footprint(4 corners)를 captureRoot local 로 옮겨 proxy 에 그대로 적용.
+    // source의 최종 화면 footprint(4 corners)를 captureRoot local로 옮겨 proxy에 그대로 적용.
     private bool SyncProxyRectToSource(RectTransform sourceRect, RectTransform proxyRect)
     {
         if (sourceRect == null || proxyRect == null)
@@ -738,10 +582,9 @@ public sealed class UIStageDepthLayerBlurRuntime : MonoBehaviour, IStageDepthLay
         _foreignDisabledBuffer.Clear();
     }
 
-
-    // ── sharp source visibility ───────────────────────────────────────────────
     // ── overlay ────────────────────────────────────────────────────────────────
 
+    // RawImage의 texture/uvRect/enabled는 Baker가 소유한다. alpha는 Command가 소유한다.
     private void ApplyBlurTextureToOverlay(LayerState state)
     {
         if (!state.Target.IsValid)
@@ -752,12 +595,17 @@ public sealed class UIStageDepthLayerBlurRuntime : MonoBehaviour, IStageDepthLay
         if (rawImage.texture != state.BakedTexture)
             rawImage.texture = state.BakedTexture;
 
+        // 텍스처가 준비된 시점에만 켠다(빈 RawImage 흰색 번쩍임 방지).
+        if (!rawImage.enabled)
+            rawImage.enabled = true;
+
+        rawImage.raycastTarget = false;
+
         SyncOverlayUvRectToScreen(rawImage);
     }
 
-    // BakedTexture 는 화면 전체를 기준으로 구운 screen-space RT 다.
-    // 하지만 FrostedGlassRawImage 는 각 depth layer 안쪽에 두어 렌더 순서를 지켜야 한다.
-    // 따라서 RawImage geometry 가 현재 화면에서 차지하는 영역만 RT 에서 샘플링하도록 uvRect 를 맞춘다.
+    // BakedTexture는 화면 전체 기준 screen-space RT다. RawImage는 depth layer 안쪽 렌더 순서를 지키되,
+    // 현재 화면에서 차지하는 영역만 RT에서 샘플링하도록 uvRect를 맞춘다.
     private void SyncOverlayUvRectToScreen(RawImage rawImage)
     {
         if (rawImage == null)
@@ -777,9 +625,7 @@ public sealed class UIStageDepthLayerBlurRuntime : MonoBehaviour, IStageDepthLay
 
         for (int i = 0; i < _overlayWorldCorners.Length; i++)
         {
-            Vector2 screen = RectTransformUtility.WorldToScreenPoint(
-                null,
-                _overlayWorldCorners[i]);
+            Vector2 screen = RectTransformUtility.WorldToScreenPoint(null, _overlayWorldCorners[i]);
 
             minX = Mathf.Min(minX, screen.x);
             minY = Mathf.Min(minY, screen.y);
@@ -796,7 +642,6 @@ public sealed class UIStageDepthLayerBlurRuntime : MonoBehaviour, IStageDepthLay
             (maxX - minX) * invScreenWidth,
             (maxY - minY) * invScreenHeight);
     }
-
 
     private void ApplyOverlayCoveragePadding(LayerState state)
     {
@@ -889,52 +734,16 @@ public sealed class UIStageDepthLayerBlurRuntime : MonoBehaviour, IStageDepthLay
             Mathf.Abs(delta.y));
     }
 
-    private void SetOverlayVisible(LayerState state, bool visible, float duration, float visibleAlpha)
-    {
-        if (!state.Target.IsValid)
-            return;
-
-        CanvasGroup canvasGroup = state.Target.OverlayCanvasGroup;
-        RawImage rawImage = state.Target.OverlayRawImage;
-
-        state.Tween?.Kill();
-        state.Tween = null;
-
-        float targetAlpha = visible ? Mathf.Clamp01(visibleAlpha) : 0f;
-
-        rawImage.raycastTarget = false;
-        canvasGroup.blocksRaycasts = false;
-        canvasGroup.interactable = false;
-
-        if (visible)
-            rawImage.enabled = true;
-
-        if (duration <= 0f)
-        {
-            canvasGroup.alpha = targetAlpha;
-
-            if (targetAlpha <= 0.001f)
-                rawImage.enabled = false;
-
-            return;
-        }
-
-        state.Tween = canvasGroup
-            .DOFade(targetAlpha, duration)
-            .SetEase(Ease.OutCubic)
-            .OnComplete(() =>
-            {
-                if (targetAlpha <= 0.001f)
-                    rawImage.enabled = false;
-            });
-    }
-
+    // source가 비어 추적할 게 없으면 추적 중단 + overlay 끔.
+    // (alpha는 Command 소유이므로 여기서 건드리지 않는다. RawImage만 끈다.)
     private void StopTrackingAndHideImmediate(LayerState state)
     {
+        state.IsTracking = false;
+
         ResetOverlayCoveragePadding(state);
 
-        state.IsTracking = false;
-        SetOverlayVisible(state, visible: false, duration: 0f, visibleAlpha: 0f);
+        if (state.Target.IsValid)
+            state.Target.OverlayRawImage.enabled = false;
     }
 
     // ── proxy pool 비활성 ──────────────────────────────────────────────────────
@@ -1070,19 +879,8 @@ public sealed class UIStageDepthLayerBlurRuntime : MonoBehaviour, IStageDepthLay
             }
         }
     }
-    
-    private readonly struct SourceImageEntry
-    {
-        public readonly Image Image;
-        public readonly Color EffectiveColor;
 
-        public SourceImageEntry(Image image, Color effectiveColor)
-        {
-            Image = image;
-            EffectiveColor = effectiveColor;
-        }
-    }
-
+    // 한 layer의 지속 bake 상태. alpha/tween은 Command 소유이므로 여기 없다.
     private sealed class LayerState
     {
         public readonly LayerKey Key;
@@ -1094,7 +892,6 @@ public sealed class UIStageDepthLayerBlurRuntime : MonoBehaviour, IStageDepthLay
 
         public bool IsTracking;
 
-        public float Alpha;
         public float BlurRadius;
         public int Iterations;
         public UIStageBlurDownsample Downsample;
@@ -1107,12 +904,11 @@ public sealed class UIStageDepthLayerBlurRuntime : MonoBehaviour, IStageDepthLay
         public Vector2 BaseRawImageOffsetMax;
 
         public RenderTexture BakedTexture;
-        public Tween Tween;
 
         public LayerState(LayerKey key) => Key = key;
     }
 
-    // layer root 아래 proxy Image 를 필요한 만큼 늘려 재사용한다(매 프레임 생성/파괴 금지).
+    // layer root 아래 proxy Image를 필요한 만큼 늘려 재사용(매 프레임 생성/파괴 금지).
     private sealed class ProxyPool
     {
         private readonly PresentationStageKey _stage;
