@@ -157,16 +157,6 @@ public sealed partial class YarnCommandBridge
             "mirror", EnqueueMirrorSetSpec);
     }
 
-    private void EnqueueMirrorSetSpec(
-        string roleKey,
-        string directionToken = "")
-        => Collect(new MirrorCharacterCommandSpecCharR
-        {
-            slotKey = roleKey,
-            mode = CharacterMirrorModeParser.Parse(directionToken),
-            target = CharacterRigTarget.CharacterPortrait_ActingScale_X,
-            duration = 0f,
-        });
 
 
     private void BindCharRigStaging(DialogueRunner runner)

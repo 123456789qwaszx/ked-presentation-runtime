@@ -311,8 +311,8 @@ public sealed partial class YarnCommandBridge
 
     private void EnqueueBackgroundDefocusDslSpec(
         string rigKey,
-        float alpha,
-        string durationToken)
+        float alpha = 1f,
+        string durationToken = "4fr")
     {
         Collect(new BackgroundDefocusCommandSpecBgR
         {

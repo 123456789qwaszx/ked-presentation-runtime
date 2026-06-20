@@ -4,8 +4,8 @@ position: -2,-160
 <<shot_reset>>
 
 
-<<bg_spawn bg1 ep12_01>>
-<<bg_size bg1 1.5>>
+<<bg_spawn bg1 ep08_5>>
+<<bg_size bg1 1>>
 
 <<bg_spawn bg2 bgslot_01>>
 //<<bg_place bg2 40 200>>
@@ -49,6 +49,7 @@ title: Story_TalesOfNovaEP12_01
 
 _#beat #stay
 
+//<<bg_defocus bg1>>
 윌로: 죄송합니다만, 이번 의뢰는 보수의 3분의 1밖에 드릴 수 없겠군요.
 
 -> 안돼 그건 싫어

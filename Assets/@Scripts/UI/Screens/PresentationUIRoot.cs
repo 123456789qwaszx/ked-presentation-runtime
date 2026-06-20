@@ -31,58 +31,121 @@ public partial class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
         Stage00Depth_Far_FramingTransform,
         Stage00Depth_Far_FramingScale,
         Stage00Depth_Far_Content,
+        Stage00FarFrostedGlassMask,
+        Stage00FarFrostedGlassRawImage,
         
         Stage00Depth_Back_Root,
         Stage00Depth_Back_FramingTransform,
         Stage00Depth_Back_FramingScale,
         Stage00Depth_Back_Content,
+        Stage00BackFrostedGlassMask,
+        Stage00BackFrostedGlassRawImage,
         
         Stage00Depth_Mid_Root,
         Stage00Depth_Mid_FramingTransform,
         Stage00Depth_Mid_FramingScale,
         Stage00Depth_Mid_Content,
+        Stage00MidFrostedGlassMask,
+        Stage00MidFrostedGlassRawImage,
         
         Stage00Depth_Front_Root,
         Stage00Depth_Front_FramingTransform,
         Stage00Depth_Front_FramingScale,
         Stage00Depth_Front_Content,
+        Stage00FrontFrostedGlassMask,
+        Stage00FrontFrostedGlassRawImage,
         
         Stage00Depth_Close_Root,
         Stage00Depth_Close_FramingTransform,
         Stage00Depth_Close_FramingScale,
         Stage00Depth_Close_Content,
+        Stage00CloseFrostedGlassMask,
+        Stage00CloseFrostedGlassRawImage,
         
+        Stage00Overlay_Root,
         
 
         Stage01_Root,
-        Stage01BackgroundSystem_Root,
-        Stage01BGShot_Root,
-        Stage01BGContent_Root,
-        
+
+        Stage01DepthSystem_Root,
+        Stage01Depth_Far_Root,
+        Stage01Depth_Far_FramingTransform,
+        Stage01Depth_Far_FramingScale,
+        Stage01Depth_Far_Content,
+        Stage01FarFrostedGlassMask,
+        Stage01FarFrostedGlassRawImage,
+
+        Stage01Depth_Back_Root,
+        Stage01Depth_Back_FramingTransform,
+        Stage01Depth_Back_FramingScale,
+        Stage01Depth_Back_Content,
+        Stage01BackFrostedGlassMask,
+        Stage01BackFrostedGlassRawImage,
+
+        Stage01Depth_Mid_Root,
+        Stage01Depth_Mid_FramingTransform,
+        Stage01Depth_Mid_FramingScale,
+        Stage01Depth_Mid_Content,
+        Stage01MidFrostedGlassMask,
+        Stage01MidFrostedGlassRawImage,
+
+        Stage01Depth_Front_Root,
+        Stage01Depth_Front_FramingTransform,
+        Stage01Depth_Front_FramingScale,
+        Stage01Depth_Front_Content,
+        Stage01FrontFrostedGlassMask,
+        Stage01FrontFrostedGlassRawImage,
+
+        Stage01Depth_Close_Root,
+        Stage01Depth_Close_FramingTransform,
+        Stage01Depth_Close_FramingScale,
+        Stage01Depth_Close_Content,
+        Stage01CloseFrostedGlassMask,
+        Stage01CloseFrostedGlassRawImage,
+
+        Stage01Overlay_Root,
         SlantedMaskEdgeGraphic,
 
-        Stage01BGOverlay_Root,
-
-        Stage01CharacterSystem_Root,
-        Stage01CharSlot_Root,
-        Stage01CharSlotFocus_Root,
-        Stage01CharSlotRig_Root,
-
-        Stage01Foreground_Root,
 
         Stage02_Root,
-        Stage02BackgroundSystem_Root,
-        Stage02BGShot_Root,
-        Stage02BGContent_Root,
 
-        Stage02BGOverlay_Root,
+        Stage02DepthSystem_Root,
+        Stage02Depth_Far_Root,
+        Stage02Depth_Far_FramingTransform,
+        Stage02Depth_Far_FramingScale,
+        Stage02Depth_Far_Content,
+        Stage02FarFrostedGlassMask,
+        Stage02FarFrostedGlassRawImage,
 
-        Stage02CharacterSystem_Root,
-        Stage02CharSlot_Root,
-        Stage02CharSlotFocus_Root,
-        Stage02CharSlotRig_Root,
+        Stage02Depth_Back_Root,
+        Stage02Depth_Back_FramingTransform,
+        Stage02Depth_Back_FramingScale,
+        Stage02Depth_Back_Content,
+        Stage02BackFrostedGlassMask,
+        Stage02BackFrostedGlassRawImage,
 
-        Stage02Foreground_Root,
+        Stage02Depth_Mid_Root,
+        Stage02Depth_Mid_FramingTransform,
+        Stage02Depth_Mid_FramingScale,
+        Stage02Depth_Mid_Content,
+        Stage02MidFrostedGlassMask,
+        Stage02MidFrostedGlassRawImage,
+
+        Stage02Depth_Front_Root,
+        Stage02Depth_Front_FramingTransform,
+        Stage02Depth_Front_FramingScale,
+        Stage02Depth_Front_Content,
+        Stage02FrontFrostedGlassMask,
+        Stage02FrontFrostedGlassRawImage,
+
+        Stage02Depth_Close_Root,
+        Stage02Depth_Close_FramingTransform,
+        Stage02Depth_Close_FramingScale,
+        Stage02Depth_Close_Content,
+        Stage02CloseFrostedGlassMask,
+        Stage02CloseFrostedGlassRawImage,
+
+        Stage02Overlay_Root,
 
         DialogueUI_Root,
 
@@ -164,9 +227,6 @@ public partial class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
         ScreenFlashOverlay_Image,
         ScreenVignetteOverlay_Image,
         ScreenNoiseOverlay_Image,
-        
-        FrostedGlassMask,
-        FrostedGlassRawImage
     }
 
     [SerializeField] private DialogueBoxHost dialogueBoxHost;

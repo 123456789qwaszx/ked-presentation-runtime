@@ -10,8 +10,8 @@ public interface IPresentationDefocusOverlayProvider
 
 public sealed partial class PresentationUIRoot : IPresentationDefocusOverlayProvider
 {
-    public CanvasGroup FrostedGlassMaskCanvasGroup => View.Rect(Refs.FrostedGlassMask).GetComponent<CanvasGroup>();
-    public RawImage FrostedGlassRawImage => View.Rect(Refs.FrostedGlassRawImage).GetComponent<RawImage>();
+    public CanvasGroup FrostedGlassMaskCanvasGroup => View.Rect(Refs.Stage00MidFrostedGlassMask).GetComponent<CanvasGroup>();
+    public RawImage FrostedGlassRawImage => View.Rect(Refs.Stage00MidFrostedGlassRawImage).GetComponent<RawImage>();
 }
 
 public sealed class UIBackgroundRigBlurRuntime : MonoBehaviour, IBackgroundRigBlurRuntime

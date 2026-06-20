@@ -10,8 +10,8 @@ public interface IStageCharRigSlotProvider
 public sealed partial class PresentationUIRoot : IStageCharRigSlotProvider
 {
     public RectTransform Stage00CharacterSlot => View.Rect(Refs.Stage00Depth_Mid_Content);
-    public RectTransform Stage01CharacterSlot => View.Rect(Refs.Stage00Depth_Mid_Content);
-    public RectTransform Stage02CharacterSlot => View.Rect(Refs.Stage00Depth_Mid_Content);
+    public RectTransform Stage01CharacterSlot => View.Rect(Refs.Stage01Depth_Mid_Content);
+    public RectTransform Stage02CharacterSlot => View.Rect(Refs.Stage02Depth_Mid_Content);
 }
 
 public interface IProtagonistCharRigSlotProvider

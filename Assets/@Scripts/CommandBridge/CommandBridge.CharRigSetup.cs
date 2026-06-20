@@ -85,6 +85,17 @@ public sealed partial class YarnCommandBridge
         Collect(spec);
     }
     
+    private void EnqueueMirrorSetSpec(
+        string roleKey,
+        string directionToken = "")
+        => Collect(new MirrorCharacterCommandSpecCharR
+        {
+            slotKey = roleKey,
+            mode = CharacterMirrorModeParser.Parse(directionToken),
+            target = CharacterRigTarget.CharacterPortrait_ActingScale_X,
+            duration = 0f,
+        });
+    
     private void EnqueueSetPortraitPoseSpec(string slotKey, string variantKey)
     {
         var spec = new SetPortraitPoseCommandSpecCharR
