@@ -43,6 +43,20 @@ public sealed class StageDepthDefocusCommandSpec : CommandSpecBase
 // The command only asks IStageDepthLayerBlurRuntime to start or stop baking this layer.
 public sealed class StageDepthDefocusCommand : CommandBase
 {
+    private struct EdgeHideBinding
+    {
+        public CharacterRigVisualEffectController Controller;
+        public float FromValue;
+
+        public EdgeHideBinding(
+            CharacterRigVisualEffectController controller,
+            float fromValue)
+        {
+            Controller = controller;
+            FromValue = fromValue;
+        }
+    }
+    
     private const float StepFinishSpeedUpMultiplier = 1.5f;
 
     private readonly StageDepthDefocusCommandSpec _spec;
@@ -52,12 +66,12 @@ public sealed class StageDepthDefocusCommand : CommandBase
     private bool _targetResolved;
     private PresentationDepthDefocusTarget _target;
     private CanvasGroup _canvasGroup;
-
-    private readonly List<CharacterRigVisualEffectController> _edgeHideControllers = new();
+    
+    private readonly List<EdgeHideBinding> _edgeHideBindings = new();
     private readonly List<CharacterRigRefs> _rigScratch = new();
 
-    private DefocusState _fromState;
-    private DefocusState _destState;
+    private OverlayState _fromState;
+    private OverlayState _destState;
 
     private Tween _tween;
 
@@ -94,8 +108,8 @@ public sealed class StageDepthDefocusCommand : CommandBase
                 () => 0f,
                 t =>
                 {
-                    DefocusState state = DefocusState.Lerp(_fromState, _destState, t);
-                    ApplyState(state);
+                    OverlayState state = OverlayState.Lerp(_fromState, _destState, t);
+                    ApplyState(state, t);
                 },
                 1f,
                 _spec.duration)
@@ -132,10 +146,11 @@ public sealed class StageDepthDefocusCommand : CommandBase
         _targetResolved = true;
     }
 
-    // Rigs mounted later during defocus are not tracked dynamically.
+    // Captures edge-hide targets under the content root at claim time.
+    // Later-mounted rigs are intentionally not included.
     private void CollectEdgeHideControllers(CommandRunScope scope)
     {
-        _edgeHideControllers.Clear();
+        _edgeHideBindings.Clear();
 
         RectTransform contentRoot = _target.SourceContentRoot;
         CharacterRigRegistry rigs = scope.CharacterRigs;
@@ -156,7 +171,11 @@ public sealed class StageDepthDefocusCommand : CommandBase
             if (!IsDescendantOf(refs.RigRoot, contentRoot))
                 continue;
 
-            _edgeHideControllers.Add(refs.VisualEffect);
+            CharacterRigVisualEffectController controller = refs.VisualEffect;
+
+            _edgeHideBindings.Add(new EdgeHideBinding(
+                controller,
+                controller.StageBlurEdgeHide));
         }
     }
 
@@ -188,7 +207,7 @@ public sealed class StageDepthDefocusCommand : CommandBase
     {
         DOTween.Kill(_canvasGroup, false);
 
-        ApplyState(_destState);
+        ApplyState(_destState, 1f);
 
         if (!_spec.visible)
             _runtime.EndLayer(_spec.stage, _spec.layer);
@@ -206,18 +225,19 @@ public sealed class StageDepthDefocusCommand : CommandBase
 
         _tween.Kill(false);
 
-        DefocusState currentState = CaptureCurrentState();
+        OverlayState currentState = CaptureCurrentState();
         float duration = CalculateAcceleratedRemainingDuration(currentState);
 
         _fromState = currentState;
+        RefreshEdgeHideFromValues();
 
         _tween = DOTween
             .To(
                 () => 0f,
                 t =>
                 {
-                    DefocusState state = DefocusState.Lerp(_fromState, _destState, t);
-                    ApplyState(state);
+                    OverlayState state = OverlayState.Lerp(_fromState, _destState, t);
+                    ApplyState(state, t);
                 },
                 1f,
                 duration)
@@ -227,10 +247,10 @@ public sealed class StageDepthDefocusCommand : CommandBase
             .OnComplete(CommitFinalState);
     }
 
-    private float CalculateAcceleratedRemainingDuration(DefocusState currentState)
+    private float CalculateAcceleratedRemainingDuration(OverlayState currentState)
     {
-        float originalDistance = DefocusState.Distance(_fromState, _destState);
-        float remainingDistance = DefocusState.Distance(currentState, _destState);
+        float originalDistance = OverlayState.Distance(_fromState, _destState);
+        float remainingDistance = OverlayState.Distance(currentState, _destState);
 
         if (originalDistance <= 0.001f || remainingDistance <= 0.001f)
             return 0f;
@@ -242,43 +262,58 @@ public sealed class StageDepthDefocusCommand : CommandBase
     }
 
     #endregion
-
-    private DefocusState CaptureCurrentState()
+    
+    private void RefreshEdgeHideFromValues()
     {
-        float alpha = _canvasGroup.alpha;
-
-        // Edge hide is synchronized across collected controllers.
-        // Use the first valid controller as the current shared value.
-        float edgeHide = 0f;
-        for (int i = 0; i < _edgeHideControllers.Count; i++)
+        for (int i = 0; i < _edgeHideBindings.Count; i++)
         {
-            CharacterRigVisualEffectController controller = _edgeHideControllers[i];
+            EdgeHideBinding binding = _edgeHideBindings[i];
 
-            if (controller != null)
-            {
-                edgeHide = controller.StageBlurEdgeHide;
-                break;
-            }
+            if (binding.Controller == null)
+                continue;
+
+            binding.FromValue = binding.Controller.StageBlurEdgeHide;
+            _edgeHideBindings[i] = binding;
         }
-
-        return new DefocusState(alpha, edgeHide);
     }
 
-    private DefocusState BuildDestState()
+    private OverlayState CaptureCurrentState()
+    {
+        return new OverlayState(_canvasGroup.alpha);
+    }
+
+    private OverlayState BuildDestState()
     {
         if (_spec.visible)
-            return new DefocusState(Mathf.Clamp01(_spec.alpha), Mathf.Clamp01(_spec.edgeHide));
+            return new OverlayState(Mathf.Clamp01(_spec.alpha));
 
-        return new DefocusState(0f, 0f);
+        return new OverlayState(0f);
     }
-
-    private void ApplyState(DefocusState state)
+    
+    private void ApplyState(
+        OverlayState state,
+        float t)
     {
-        if (_canvasGroup != null)
-            _canvasGroup.alpha = state.Alpha;
+        _canvasGroup.alpha = state.Alpha;
 
-        for (int i = 0; i < _edgeHideControllers.Count; i++)
-            _edgeHideControllers[i]?.SetStageBlurEdgeHideImmediate(state.EdgeHide);
+        float targetEdgeHide = _spec.visible
+            ? Mathf.Clamp01(_spec.edgeHide)
+            : 0f;
+
+        for (int i = 0; i < _edgeHideBindings.Count; i++)
+        {
+            EdgeHideBinding binding = _edgeHideBindings[i];
+
+            if (binding.Controller == null)
+                continue;
+
+            float edgeHide = Mathf.Lerp(
+                binding.FromValue,
+                targetEdgeHide,
+                Mathf.Clamp01(t));
+
+            binding.Controller.SetStageBlurEdgeHideImmediate(edgeHide);
+        }
     }
 
     private StageDepthBlurParams BuildBlurParams()
@@ -308,30 +343,31 @@ public sealed class StageDepthDefocusCommand : CommandBase
         return false;
     }
 
-    private readonly struct DefocusState
+    private readonly struct OverlayState
     {
         public readonly float Alpha;
-        public readonly float EdgeHide;
 
-        public DefocusState(float alpha, float edgeHide)
+        public OverlayState(float alpha)
         {
             Alpha = Mathf.Clamp01(alpha);
-            EdgeHide = Mathf.Clamp01(edgeHide);
         }
 
-        public static DefocusState Lerp(DefocusState from, DefocusState to, float t)
+        public static OverlayState Lerp(
+            OverlayState from,
+            OverlayState to,
+            float t)
         {
             t = Mathf.Clamp01(t);
 
-            return new DefocusState(
-                Mathf.Lerp(from.Alpha, to.Alpha, t),
-                Mathf.Lerp(from.EdgeHide, to.EdgeHide, t));
+            return new OverlayState(
+                Mathf.Lerp(from.Alpha, to.Alpha, t));
         }
 
-        public static float Distance(DefocusState from, DefocusState to)
+        public static float Distance(
+            OverlayState from,
+            OverlayState to)
         {
-            return Mathf.Abs(to.Alpha - from.Alpha) +
-                   Mathf.Abs(to.EdgeHide - from.EdgeHide);
+            return Mathf.Abs(to.Alpha - from.Alpha);
         }
     }
 }
