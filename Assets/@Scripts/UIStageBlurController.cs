@@ -35,6 +35,10 @@ public sealed class UIStageBlurController : MonoBehaviour
 
     public RenderTexture BlurredTexture => _blurA;
 
+    // 캡처 카메라가 렌더 대상으로 잡고 있는 source RT.
+    // 프레이밍 1:1 검증(종횡비 비교) 용도로만 외부에서 읽는다. 저수준 blur 역할은 그대로다.
+    public RenderTexture SourceTexture => captureCamera != null ? captureCamera.targetTexture : null;
+
     private void OnEnable()
     {
         EnsureRenderTextures();

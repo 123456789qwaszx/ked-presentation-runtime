@@ -85,6 +85,7 @@ public sealed partial class YarnCommandBridge
         BindAudio(runner);
         
         BindScreenEffects(runner);
+        BindStageDepthDefocus(runner);
     }
     
     private void BindControl(DialogueRunner runner)
@@ -366,6 +367,26 @@ public sealed partial class YarnCommandBridge
             "screen_noise_clear", EnqueueScreenNoiseClearSpec);
         runner.AddCommandHandler<float, float, float, float, float, float>(
             "screen_noise_custom", EnqueueScreenNoiseCustomSpec);
+    }
+    
+    private void BindStageDepthDefocus(DialogueRunner runner)
+    {
+        runner.AddCommandHandler<string>(
+            "depth_blur", EnqueueStageDepthBlurSpec);
+        runner.AddCommandHandler<string>(
+            "depth_blur_clear", EnqueueStageDepthBlurClearSpec);
+
+        runner.AddCommandHandler<string, string>(
+            "depth_blur_layer", EnqueueStageDepthBlurLayerSpec);
+        runner.AddCommandHandler<string, string, float, float>(
+            "depth_blur_layer_t", EnqueueStageDepthBlurLayerTimedSpec);
+        runner.AddCommandHandler<string, string, float, float, float>(
+            "depth_blur_layer_a", EnqueueStageDepthBlurLayerAlphaSpec);
+
+        runner.AddCommandHandler<string, string, float, float, int, string, float>(
+            "depth_defocus", EnqueueStageDepthDefocusSpec);
+        runner.AddCommandHandler<string, string, float>(
+            "depth_defocus_off", EnqueueStageDepthDefocusOffSpec);
     }
 
     private void Collect(CommandSpecBase spec)

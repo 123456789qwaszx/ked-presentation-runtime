@@ -68,6 +68,23 @@ public sealed class CharacterRigRegistry
 
         return true;
     }
+    
+    public void CollectAliveRigs(List<CharacterRigRefs> results)
+    {
+        if (results == null)
+            return;
+
+        foreach (CharacterRigRefs rigRefs in _rigs.Values)
+        {
+            if (rigRefs == null)
+                continue;
+
+            if (rigRefs.RigRoot == null)
+                continue;
+
+            results.Add(rigRefs);
+        }
+    }
 
     private static void DestroyRig(CharacterRigRefs rigRefs)
     {

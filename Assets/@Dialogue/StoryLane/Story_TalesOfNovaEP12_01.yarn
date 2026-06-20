@@ -1,6 +1,7 @@
 ﻿title: Setup_TalesOfNovaEP12_01
 position: -2,-160
 ---
+<<depth_blur_clear stage00>>
 <<shot_reset>>
 
 
@@ -52,6 +53,7 @@ _#beat #stay
 //<<bg_defocus bg1>>
 윌로: 죄송합니다만, 이번 의뢰는 보수의 3분의 1밖에 드릴 수 없겠군요.
 
+<<depth_blur stage00>>
 -> 안돼 그건 싫어
     그레이: ... 너의 선택이라면
 -> 나쁘지 않네

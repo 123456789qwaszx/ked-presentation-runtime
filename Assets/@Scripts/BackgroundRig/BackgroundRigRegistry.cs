@@ -68,6 +68,23 @@ public sealed class BackgroundRigRegistry
 
         return true;
     }
+    
+    public void CollectAliveRigs(List<BackgroundRigRefs> results)
+    {
+        if (results == null)
+            return;
+
+        foreach (BackgroundRigRefs rigRefs in _rigs.Values)
+        {
+            if (rigRefs == null)
+                continue;
+
+            if (rigRefs.RigRoot == null)
+                continue;
+
+            results.Add(rigRefs);
+        }
+    }
 
     public void RegisterExternalChild(string rigKey, RectTransform childRoot, RectTransform restoreParent)
     {

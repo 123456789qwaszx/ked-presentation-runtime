@@ -124,6 +124,8 @@ public class VnAppBootstrap : MonoBehaviour
     [SerializeField] private ScreenNoisePresetDBSO screenNoisePresetDbso;
     [SerializeField] private ScreenVignettePresetDBSO screenVignettePresetDbso;
     [SerializeField] private ScreenFlashPresetDBSO screenFlashPresetDbso;
+    [SerializeField] private UIStageDepthLayerBlurRuntime uiStageDepthLayerBlurRuntime;
+    
     
     [Header("NodeDebug")] 
     [SerializeField] private YarnLaneDebugView yarnLaneDebugView;
@@ -266,7 +268,8 @@ public class VnAppBootstrap : MonoBehaviour
         ScreenEffectCommandFactory screenEffectFactory = new(
             screenFlashPresetDbso,
             screenNoisePresetDbso, 
-            screenVignettePresetDbso);
+            screenVignettePresetDbso,
+            uiStageDepthLayerBlurRuntime);
 
         CompositeCommandFactory factory = new(
             charRigFactory,
