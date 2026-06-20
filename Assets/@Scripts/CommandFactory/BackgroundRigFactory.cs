@@ -3,18 +3,15 @@ public sealed class BackgroundRigCommandFactory : INodeCommandFactory
     private readonly BackgroundRigSlotResolver _rigSlotResolver;
     private readonly BackgroundRigBuilder _rigBuilder;
     private readonly BackgroundSpriteResolver _spriteResolver;
-    private readonly IBackgroundRigBlurRuntime _blurRuntime;
 
     public BackgroundRigCommandFactory(
         BackgroundRigSlotResolver backgroundRigSlotResolver,
         BackgroundRigBuilder backgroundRigBuilder,
-        BackgroundSpriteResolver backgroundSpriteResolver,
-        IBackgroundRigBlurRuntime blurRuntime)
+        BackgroundSpriteResolver backgroundSpriteResolver)
     {
         _rigSlotResolver = backgroundRigSlotResolver;
         _rigBuilder = backgroundRigBuilder;
         _spriteResolver = backgroundSpriteResolver;
-        _blurRuntime = blurRuntime;
     }
 
     public bool TryCreate(CommandSpecBase spec, out ISequenceCommand command)
@@ -47,10 +44,6 @@ public sealed class BackgroundRigCommandFactory : INodeCommandFactory
             JoltCommandSpecBgR s => new JoltCommandBgR(s),
             TrembleCommandSpecBgR s => new TrembleCommandBgR(s),
             BreathInPlaceCommandSpecBgR s => new BreathInPlaceCommandBgR(s),
-
-            // Defocus / Blur
-            BackgroundDefocusCommandSpecBgR s => new BackgroundDefocusCommandBgR(s, _blurRuntime),
-            BackgroundDefocusClearCommandSpecBgR s => new BackgroundDefocusClearCommandBgR(s, _blurRuntime),
 
             _ => null
         };

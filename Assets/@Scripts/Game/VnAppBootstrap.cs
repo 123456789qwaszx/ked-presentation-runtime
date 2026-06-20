@@ -120,7 +120,6 @@ public class VnAppBootstrap : MonoBehaviour
     [Header("UI")] 
     [SerializeField] private EpisodePlayer episodePlayer;
     
-    [SerializeField] private UIBackgroundRigBlurRuntime uiBackgroundRigBlurRuntime;
     [SerializeField] private ScreenNoisePresetDBSO screenNoisePresetDbso;
     [SerializeField] private ScreenVignettePresetDBSO screenVignettePresetDbso;
     [SerializeField] private ScreenFlashPresetDBSO screenFlashPresetDbso;
@@ -244,8 +243,7 @@ public class VnAppBootstrap : MonoBehaviour
         BackgroundRigCommandFactory backgroundRigFactory = new(
             backgroundRigSlotResolver,
             backgroundRigBuilder,
-            backgroundSpriteResolver,
-            uiBackgroundRigBlurRuntime);
+            backgroundSpriteResolver);
 
         ShotResponseCommandFactory presentationShotFactory = new(
             _presentationResponseRig, characterFocusTuningDb);

@@ -50,15 +50,6 @@ public sealed partial class YarnCommandBridge
 
         runner.AddCommandHandler<string, string, string, float>(
             "bg_idle_breath", EnqueueBreathBackgroundDslSpec);
-
-        runner.AddCommandHandler<string, float, string>(
-            "bg_defocus", EnqueueBackgroundDefocusDslSpec);
-
-        runner.AddCommandHandler<string, float, float, int, string, string>(
-            "bg_defocus_custom", EnqueueBackgroundDefocusCustomDslSpec);
-
-        runner.AddCommandHandler<string, string>(
-            "bg_defocus_clear", EnqueueBackgroundDefocusClearDslSpec);
     }
     
     private void EnqueueSpawnBackgroundRigSpec(
@@ -307,53 +298,6 @@ public sealed partial class YarnCommandBridge
         };
 
         Collect(spec);
-    }
-
-    private void EnqueueBackgroundDefocusDslSpec(
-        string rigKey,
-        float alpha = 1f,
-        string durationToken = "4fr")
-    {
-        Collect(new BackgroundDefocusCommandSpecBgR
-        {
-            rigKey = rigKey,
-            alpha = alpha,
-            duration = YarnDurationParser.Parse(durationToken, 0.4f),
-
-            blurRadius = 0.5f,
-            iterations = 1,
-            downsample = UIStageBlurDownsample.Quarter
-        });
-    }
-
-    private void EnqueueBackgroundDefocusCustomDslSpec(
-        string rigKey,
-        float alpha,
-        float blurRadius,
-        int iterations,
-        string downsample,
-        string durationToken)
-    {
-        Collect(new BackgroundDefocusCommandSpecBgR
-        {
-            rigKey = rigKey,
-            alpha = alpha,
-            duration = YarnDurationParser.Parse(durationToken, 0.4f),
-            blurRadius = blurRadius,
-            iterations = iterations,
-            downsample = ParseBlurDownsample(downsample)
-        });
-    }
-
-    private void EnqueueBackgroundDefocusClearDslSpec(
-        string rigKey,
-        string durationToken = "10fr")
-    {
-        Collect(new BackgroundDefocusClearCommandSpecBgR
-        {
-            rigKey = rigKey,
-            duration = YarnDurationParser.Parse(durationToken, 0.4f)
-        });
     }
 
     private static float ParseSignedUnit(

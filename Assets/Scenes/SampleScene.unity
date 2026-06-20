@@ -3542,7 +3542,6 @@ Transform:
   - {fileID: 503880673}
   - {fileID: 1502696758}
   - {fileID: 1341519456}
-  - {fileID: 392095357}
   - {fileID: 1612507018}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -4683,55 +4682,6 @@ CanvasGroup:
   m_Interactable: 0
   m_BlocksRaycasts: 0
   m_IgnoreParentGroups: 0
---- !u!1 &392095356
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 392095357}
-  - component: {fileID: 392095358}
-  m_Layer: 0
-  m_Name: UIBackgroundRigBlurRuntime
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &392095357
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 392095356}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 3185.104, y: -130.99669, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 290204081}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &392095358
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 392095356}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4d5376d8a233f2b4796aefe1dce9fdb3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::UIBackgroundRigBlurRuntime
-  captureCanvas: {fileID: 1502696761}
-  captureRoot: {fileID: 624934887}
-  captureBackLayerImage: {fileID: 0}
-  captureFrontLayerImage: {fileID: 0}
-  blurController: {fileID: 1341519457}
 --- !u!1 &393200575
 GameObject:
   m_ObjectHideFlags: 0
@@ -7925,7 +7875,6 @@ MonoBehaviour:
   characterEmojiLibrarySo: {fileID: 11400000, guid: 50cc0df71f2e038468df66d0c632ebdd, type: 2}
   characterEmojiVisualPresetSo: {fileID: 11400000, guid: e00fbe47d88401f458328299b0b76437, type: 2}
   episodePlayer: {fileID: 1924806292}
-  uiBackgroundRigBlurRuntime: {fileID: 392095358}
   screenNoisePresetDbso: {fileID: 11400000, guid: afb4892f90a1eff46b623bfa3c11a55d, type: 2}
   screenVignettePresetDbso: {fileID: 11400000, guid: 53356775219299c42981714a7e8b025e, type: 2}
   screenFlashPresetDbso: {fileID: 11400000, guid: fd8b0b7eceef6c549952782158c076ed, type: 2}
@@ -21424,7 +21373,6 @@ MonoBehaviour:
   captureCanvas: {fileID: 1502696761}
   captureRoot: {fileID: 624934887}
   blurController: {fileID: 1341519457}
-  warnMissingProxyRoot: 1
 --- !u!1 &1612859461
 GameObject:
   m_ObjectHideFlags: 0
