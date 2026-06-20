@@ -1,10 +1,5 @@
 using UnityEngine;
 
-// - EnsureCaptureGraph
-// - proxy root/pool registration
-// - captureRoot fullscreen 강제
-// - capture RT framing 검증
-// - SetLayerRecursive
 public sealed partial class UIStageDepthLayerBlurRuntime
 {
     // ── capture graph 구성 ─────────────────────────────────────────────────────
@@ -50,29 +45,17 @@ public sealed partial class UIStageDepthLayerBlurRuntime
 
     private void RegisterProxyPool(PresentationStageKey stage, PresentationDepthLayerKey layer)
     {
-        if (_captureRefs == null)
-            return;
-
-        if (!_captureRefs.TryGetRoot(stage, layer, out RectTransform root) || root == null)
-        {
-            Debug.LogWarning($"[UIStageDepthLayerBlurRuntime] Missing proxy root. stage='{stage}' layer='{layer}'.");
-
-            return;
-        }
-
+        _captureRefs.TryGetRoot(stage, layer, out RectTransform root);
         _proxyPools[new LayerKey(stage, layer)] = new ProxyPool(stage, layer, root, _captureBuilder);
     }
 
     // 공유 source RT 종횡비가 화면과 어긋나면 off-center rig가 한 축으로 거리 비례로 밀린다. 1회 경고.
     private void ValidateCaptureFramingOnce()
     {
-        if (_captureFramingValidated || blurController == null)
+        if (_captureFramingValidated)
             return;
 
         RenderTexture sourceRt = blurController.SourceTexture;
-
-        if (sourceRt == null)
-            return;
 
         _captureFramingValidated = true;
 

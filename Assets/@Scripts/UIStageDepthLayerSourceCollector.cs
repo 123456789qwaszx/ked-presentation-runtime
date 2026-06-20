@@ -2,10 +2,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-// 한 depth layer content 아래에서 "캡처 허용된 실제 표시 Image"를 그리기 순서대로 수집한다.
-// Baker(UIStageDepthLayerBlurRuntime)에서 분리한 순수 수집 책임:
-//   - 레지스트리 기반으로 살아있는 rig의 표시 Image만 허용집합에 넣고,
-//   - content 하위를 계층 순서로 훑어 누적 CanvasGroup alpha까지 반영한 entry를 만든다.
+// 레지스트리 기반으로 살아있는 rig의 표시 Image만 집합에 넣고,
+// content 하위를 계층 순서로 훑어 누적 CanvasGroup alpha까지 반영한 entry를 만든다.
 public sealed class UIStageDepthLayerSourceCollector
 {
     private readonly List<CharacterRigRefs> _characterRigBuffer = new();
@@ -30,7 +28,7 @@ public sealed class UIStageDepthLayerSourceCollector
         characterRigs?.CollectAliveRigs(_characterRigBuffer);
         backgroundRigs?.CollectAliveRigs(_backgroundRigBuffer);
 
-        // 해당 depth content 아래에 mount된 살아있는 rig의 "실제 표시 Image"만 허용집합에 넣는다.
+        // 해당 depth content 아래에 현재 mount된 살아있는 rig의 "실제 표시 Image"만 집합에 넣는다.
         for (int i = 0; i < _backgroundRigBuffer.Count; i++)
         {
             BackgroundRigRefs refs = _backgroundRigBuffer[i];
@@ -57,7 +55,7 @@ public sealed class UIStageDepthLayerSourceCollector
             AddAllowedImage(refs.EmojiSlot02_Image);
         }
 
-        // content 하위를 계층 순서로 훑어, 허용집합에 든 Image만 그리기 순서대로 수집한다.
+        // content 하위를 계층 순서로 훑어, 집합에 든 Image만 그리기 순서대로 수집한다.
         CollectAllowedImagesInHierarchyOrder(contentRoot, contentRoot, results);
     }
 

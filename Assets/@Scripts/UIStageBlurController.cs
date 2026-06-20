@@ -2,12 +2,14 @@ using UnityEngine;
 
 public enum UIStageBlurDownsample
 {
-    Full = 1,
-    Half = 2,
-    Quarter = 4,
-    Eighth = 8
+    Full = 1,    // 1920x1080
+    Half = 2,    // 960x540
+    Quarter = 4, // 480x270
+    Eighth = 8   // 240x135
 }
 
+// UICapture 카메라가 찍은 RenderTexture를 받아서,
+// separable blur shader로 블러 처리한 결과를 _blurA에 만들어두는 컨트롤러
 public sealed class UIStageBlurController : MonoBehaviour
 {
     private static readonly int BlurRadiusId = Shader.PropertyToID("_BlurRadius");
@@ -25,7 +27,7 @@ public sealed class UIStageBlurController : MonoBehaviour
     [SerializeField] private Color transparentClearColor = new(0f, 0f, 0f, 0f);
 
     [Header("Runtime")]
-    // 캡처 카메라를 이 컨트롤러가 수동으로 구동한다(평소엔 렌더하지 않음).
+    // When true, the capture camera is disabled and rendered manually only during RenderBlur().
     [SerializeField] private bool controlCaptureCamera = true;
 
     private RenderTexture _blurA;
@@ -36,9 +38,8 @@ public sealed class UIStageBlurController : MonoBehaviour
 
     public RenderTexture BlurredTexture => _blurA;
 
-    // 캡처 카메라가 렌더 대상으로 잡고 있는 source RT.
-    // 프레이밍 1:1 검증(종횡비 비교) 용도로만 외부에서 읽는다. 저수준 blur 역할은 그대로다.
-    public RenderTexture SourceTexture => captureCamera != null ? captureCamera.targetTexture : null;
+    // Exposed only for framing validation, such as checking source aspect ratio.
+    public RenderTexture SourceTexture => captureCamera.targetTexture;
 
     private void OnEnable()
     {
@@ -55,7 +56,6 @@ public sealed class UIStageBlurController : MonoBehaviour
         iterations = Mathf.Clamp(iterationCount, 1, 6);
     }
     
-
     public void SetDownsample(UIStageBlurDownsample value)
     {
         if (downsample == value)
@@ -67,30 +67,22 @@ public sealed class UIStageBlurController : MonoBehaviour
 
     private void ClearCaptureTarget()
     {
-        if (captureCamera == null || captureCamera.targetTexture == null)
-            return;
-
         RenderTexture prev = RenderTexture.active;
         RenderTexture.active = captureCamera.targetTexture;
 
         GL.Clear(
             clearDepth: true,
             clearColor: true,
-            backgroundColor: Color.clear);
+            backgroundColor: transparentClearColor);
 
         RenderTexture.active = prev;
     }
 
-    // 온디맨드 구동 진입점: 캡처 카메라를 한 번 렌더한 뒤 블러를 굽는다.
+    // Renders the capture camera on demand and writes the blurred output to BlurredTexture.
+    // Final output is stored in _blurA.
     public void RenderBlur()
     {
-        if (captureCamera == null)
-            return;
-
         RenderTexture source = captureCamera.targetTexture;
-
-        if (source == null || M_UISeparableBlur == null)
-            return;
 
         if (controlCaptureCamera)
         {
@@ -125,9 +117,6 @@ public sealed class UIStageBlurController : MonoBehaviour
 
     private void ApplyCaptureCameraControl()
     {
-        if (captureCamera == null)
-            return;
-
         captureCamera.clearFlags = CameraClearFlags.SolidColor;
         captureCamera.backgroundColor = transparentClearColor;
 
@@ -138,9 +127,6 @@ public sealed class UIStageBlurController : MonoBehaviour
     private void EnsureRenderTextures()
     {
         RenderTexture source = captureCamera.targetTexture;
-
-        if (source == null)
-            return;
 
         int downsampleValue = Mathf.Max(1, (int)downsample);
 

@@ -1,14 +1,8 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-// - ApplyBlurTextureToOverlay
-// - overlay uvRect sync
-// - coverage padding apply/reset
-// - screen pixel → parent local padding 변환
-// - StopTrackingAndHideImmediate
 public sealed partial class UIStageDepthLayerBlurRuntime
 {
-    // RawImage의 texture/uvRect/enabled는 Baker가 소유한다. alpha는 Command가 소유한다.
     private void ApplyBlurTextureToOverlay(LayerState state)
     {
         RawImage rawImage = state.Target.OverlayRawImage;

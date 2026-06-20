@@ -19,10 +19,6 @@ public enum PresentationDepthLayerKey
     Close = 4
 }
 
-// - StageKeys / LayerKeys
-// - LayerKey
-// - LayerState
-// - ProxyPool
 public sealed partial class UIStageDepthLayerBlurRuntime
 {
     private static readonly PresentationStageKey[] StageKeys =
@@ -70,7 +66,6 @@ public sealed partial class UIStageDepthLayerBlurRuntime
         return $"Slot{StageToIndex(stage):00}_{LayerToKey(layer)}_";
     }
 
-    // ── nested types ───────────────────────────────────────────────────────────
     private readonly struct LayerKey : IEquatable<LayerKey>
     {
         public readonly PresentationStageKey Stage;
@@ -94,7 +89,7 @@ public sealed partial class UIStageDepthLayerBlurRuntime
         }
     }
 
-    // 한 layer의 지속 bake 상태. alpha/tween은 Command 소유이므로 여기 없다.
+    // 한 layer의 지속 bake 상태. alpha/tween은 Command 소유이므로 여기 없음.
     private sealed class LayerState
     {
         public readonly LayerKey Key;

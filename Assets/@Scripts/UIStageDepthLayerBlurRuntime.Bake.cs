@@ -2,20 +2,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-// - BakeLayerBlur
-// - proxy graphic sync
-// - source rect → capture proxy rect sync
-// - capture isolation
-// - baked texture lifecycle
-// - DisableAllProxyPools
 public sealed partial class UIStageDepthLayerBlurRuntime
 {
     private bool BakeLayerBlur(LayerState state, bool force)
     {
         ValidateCaptureFramingOnce();
-
-        if (captureCanvas == null || captureRoot == null)
-            return false;
 
         if (state.CharacterRigs == null && state.BackgroundRigs == null)
             return false;

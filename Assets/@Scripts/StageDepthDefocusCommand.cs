@@ -37,13 +37,10 @@ public sealed class StageDepthDefocusCommandSpec : CommandSpecBase
     public Ease ease = Ease.OutCubic;
 }
 
-//   - Command가 target handle을 resolve하고, from/dest visual state를 들고, DOTween을 만든다.
-//   - CommitFinalState에서 overlay alpha와 edge hide 최종값을 직접 쓴다(세 경로 수렴점).
-//   - Baker(IStageDepthLayerBlurRuntime)에는 "이 layer를 굽고 있어라/멈춰라"만 위임.
-//
-// 소유권:
-//   Command  : OverlayCanvasGroup.alpha + 캐릭터 edge hide (single-writer: canvasGroup.DOKill(true)).
-//   Baker    : RawImage(texture/uvRect/enabled), coverage 기하, 캡처·블러, 매 프레임 추적 재bake.
+// Ownership boundary:
+//   Command : presentation state, including overlay alpha and character edge hide.
+//   Runtime : baked image state, including RawImage binding, coverage, capture, blur, and rebakes.
+// The command only asks IStageDepthLayerBlurRuntime to start or stop baking this layer.
 public sealed class StageDepthDefocusCommand : CommandBase
 {
     private const float StepFinishSpeedUpMultiplier = 1.5f;
@@ -51,13 +48,11 @@ public sealed class StageDepthDefocusCommand : CommandBase
     private readonly StageDepthDefocusCommandSpec _spec;
     private readonly IStageDepthLayerBlurRuntime _runtime;
 
-    // resolve 결과(한 번만). rig는 run 사이에 파괴/재빌드되므로 run 간 캐싱하지 않는다.
     private bool _resolveAttempted;
     private bool _targetResolved;
     private PresentationDepthDefocusTarget _target;
     private CanvasGroup _canvasGroup;
 
-    // edge hide 대상: 해당 layer content 아래 살아있는 캐릭터 rig의 visual effect 컨트롤러.
     private readonly List<CharacterRigVisualEffectController> _edgeHideControllers = new();
     private readonly List<CharacterRigRefs> _rigScratch = new();
 
@@ -137,10 +132,7 @@ public sealed class StageDepthDefocusCommand : CommandBase
         _targetResolved = true;
     }
 
-    // content root 아래 살아있는 캐릭터 rig의 visual effect 컨트롤러만 수집(edge hide 쓰기 대상).
-    // 주의: defocus가 지속되는 동안 새로 mount된 rig는 이 set에 없다(claim 시점 스냅샷).
-    //       blur 자체는 Baker가 매 프레임 재수집하므로 흐려지지만, 그 rig의 외곽 edge hide는 적용되지 않는다.
-    //       이는 지속 defocus 모델의 알려진 한계이며, 필요 시 별도 처리한다.
+    // Rigs mounted later during defocus are not tracked dynamically.
     private void CollectEdgeHideControllers(CommandRunScope scope)
     {
         _edgeHideControllers.Clear();
@@ -170,7 +162,6 @@ public sealed class StageDepthDefocusCommand : CommandBase
 
     private void ClaimTarget(CommandRunScope scope)
     {
-        // 단일 라이터: 같은 overlay CanvasGroup을 쓰던 이전 defocus tween을 즉시 final로 커밋.
         _canvasGroup.DOKill(true);
 
         CollectEdgeHideControllers(scope);
@@ -178,9 +169,8 @@ public sealed class StageDepthDefocusCommand : CommandBase
         _fromState = CaptureCurrentState();
         _destState = BuildDestState();
 
-        // visible이면 Baker가 추적/굽기를 시작해 텍스처를 즉시 준비한다.
-        // hidden은 여기서 끄지 않는다. fade가 끝난 뒤 CommitFinalState에서 EndLayer한다
-        // (fade 동안 Baker가 계속 굽고 있어야 텍스처가 살아있다).
+        // Begin baking before fade-in so the overlay already has a texture.
+        // Runtime keeps rebaking until EndLayer.
         if (_spec.visible)
         {
             _runtime.BeginLayer(
@@ -255,9 +245,10 @@ public sealed class StageDepthDefocusCommand : CommandBase
 
     private DefocusState CaptureCurrentState()
     {
-        float alpha = _canvasGroup != null ? _canvasGroup.alpha : 0f;
+        float alpha = _canvasGroup.alpha;
 
-        // edge hide는 layer 내 컨트롤러들이 항상 함께 설정되므로 첫 유효 컨트롤러 값을 대표로 읽는다.
+        // Edge hide is synchronized across collected controllers.
+        // Use the first valid controller as the current shared value.
         float edgeHide = 0f;
         for (int i = 0; i < _edgeHideControllers.Count; i++)
         {
@@ -317,7 +308,6 @@ public sealed class StageDepthDefocusCommand : CommandBase
         return false;
     }
 
-    // overlay alpha + edge hide 두 축의 visual state.
     private readonly struct DefocusState
     {
         public readonly float Alpha;

@@ -23,7 +23,7 @@ public sealed partial class YarnCommandBridge
     {
         if (!PresentationCommandKeyParser.TryParseDepthLayerKey(
                 layerKey,
-                out PresentationDepthLayerKey layer))
+                out PresentationDepthLayerKey layer)) 
             return;
 
         var spec = new StageDepthDefocusCommandSpec
