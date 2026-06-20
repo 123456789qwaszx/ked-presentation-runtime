@@ -32,6 +32,8 @@ using UnityEngine.UI;
 //   (2) 캐릭터 runtime effect material 을 캡처에 끌고 오지 않는다(plain 스프라이트를 블러).
 //   (3) captureRoot 풀스크린 강제 + source RT 종횡비 1:1 검증.
 //   (3-1) overlay 는 depth 렌더 순서 안에 두고, screen-space RT 샘플링은 uvRect 로 보정한다.
+//   (3-2) defocus 중에는 원본 sharp Image 를 bake 직후 숨겨 edge bleed-through 를 막는다.
+//   (3-3) overlay coverage padding 으로 layer 경계에서 blur 가 잘리는 문제를 완화한다.
 //   (4) 같은 blurController/RT 를 BG 경로와 공유하므로:
 //         - bake 동안 외부 캡처 콘텐츠 격리(오염 방지),
 //         - 결과를 layer 전용 BakedTexture 로 스냅샷(라이브 _blurA 에일리어싱 방지).
@@ -122,6 +124,8 @@ public sealed class UIStageDepthLayerBlurRuntime : MonoBehaviour, IStageDepthLay
             if (!state.IsTracking)
                 continue;
 
+            ApplyOverlayCoveragePadding(state);
+
             bool baked = BakeLayerBlur(state, force: false);
 
             if (baked)
@@ -138,6 +142,8 @@ public sealed class UIStageDepthLayerBlurRuntime : MonoBehaviour, IStageDepthLay
         foreach (KeyValuePair<LayerKey, LayerState> pair in _states)
         {
             LayerState state = pair.Value;
+
+            ResetOverlayCoveragePadding(state);
 
             state.Tween?.Kill();
             state.Tween = null;
@@ -174,7 +180,8 @@ public sealed class UIStageDepthLayerBlurRuntime : MonoBehaviour, IStageDepthLay
         float duration,
         float blurRadius,
         int iterations,
-        UIStageBlurDownsample downsample)
+        UIStageBlurDownsample downsample,
+        float coveragePaddingPixels)
     {
         EnsureOverlayProvider();
         EnsureCaptureGraph();
@@ -204,7 +211,10 @@ public sealed class UIStageDepthLayerBlurRuntime : MonoBehaviour, IStageDepthLay
         state.BlurRadius = Mathf.Max(0f, blurRadius);
         state.Iterations = Mathf.Clamp(iterations, 1, 6);
         state.Downsample = downsample;
+        state.CoveragePaddingPixels = Mathf.Max(0f, coveragePaddingPixels);
         state.IsTracking = state.Alpha > 0.001f;
+
+        ApplyOverlayCoveragePadding(state);
 
         bool baked = BakeLayerBlur(state, force: true);
 
@@ -231,6 +241,8 @@ public sealed class UIStageDepthLayerBlurRuntime : MonoBehaviour, IStageDepthLay
             return;
 
         state.IsTracking = false;
+
+        ResetOverlayCoveragePadding(state);
 
         SetOverlayVisible(
             state,
@@ -338,9 +350,11 @@ public sealed class UIStageDepthLayerBlurRuntime : MonoBehaviour, IStageDepthLay
     }
 
     // ── bake ───────────────────────────────────────────────────────────────────
-
     private bool BakeLayerBlur(LayerState state, bool force)
     {
+        if (state == null)
+            return false;
+
         if (blurController == null)
             return false;
 
@@ -362,7 +376,6 @@ public sealed class UIStageDepthLayerBlurRuntime : MonoBehaviour, IStageDepthLay
 
         if (_sourceImageBuffer.Count <= 0)
         {
-            // 이 layer 에 캡처할 살아있는 rig 가 없으면 즉시 숨긴다.
             StopTrackingAndHideImmediate(state);
             return false;
         }
@@ -381,7 +394,6 @@ public sealed class UIStageDepthLayerBlurRuntime : MonoBehaviour, IStageDepthLay
             if (proxy == null)
                 continue;
 
-            // 새로 늘어난 proxy 도 캡처 카메라에 보이도록 layer 통일.
             if (proxy.gameObject.layer != _captureLayer)
                 proxy.gameObject.layer = _captureLayer;
 
@@ -394,15 +406,12 @@ public sealed class UIStageDepthLayerBlurRuntime : MonoBehaviour, IStageDepthLay
             _currentBakeProxies.Add(proxy);
         }
 
-        // LateUpdate 경로에서 변화가 없으면 다시 굽지 않는다(force=true 인 Show 시엔 항상 굽는다).
         if (!force && !changed)
             return false;
 
         blurController.SetDownsample(state.Downsample);
         blurController.SetBlur(state.BlurRadius, state.Iterations);
 
-        // 같은 captureCamera/RT 를 BG 경로와 공유한다. 이 bake 동안 captureRoot 아래의
-        // "이 레이어 proxy 가 아닌" 켜진 Image 를 일시적으로 꺼서 depth 블러 오염을 막는다.
         IsolateForeignCaptureContent(_currentBakeProxies);
 
         Canvas.ForceUpdateCanvases();
@@ -416,11 +425,11 @@ public sealed class UIStageDepthLayerBlurRuntime : MonoBehaviour, IStageDepthLay
             return false;
         }
 
-        // _blurA 는 공유 라이브 버퍼다. 다음 writer 가 덮어쓰기 전에 layer 전용 RT 로 스냅샷.
         EnsureBakedTexture(state, blurredTexture);
         Graphics.Blit(blurredTexture, state.BakedTexture);
 
         RestoreForeignCaptureContent();
+
         return true;
     }
 
@@ -729,6 +738,8 @@ public sealed class UIStageDepthLayerBlurRuntime : MonoBehaviour, IStageDepthLay
         _foreignDisabledBuffer.Clear();
     }
 
+
+    // ── sharp source visibility ───────────────────────────────────────────────
     // ── overlay ────────────────────────────────────────────────────────────────
 
     private void ApplyBlurTextureToOverlay(LayerState state)
@@ -786,6 +797,98 @@ public sealed class UIStageDepthLayerBlurRuntime : MonoBehaviour, IStageDepthLay
             (maxY - minY) * invScreenHeight);
     }
 
+
+    private void ApplyOverlayCoveragePadding(LayerState state)
+    {
+        if (state == null || !state.Target.IsValid)
+            return;
+
+        RectTransform overlayRect = state.Target.OverlayCanvasGroup.transform as RectTransform;
+        RectTransform rawImageRect = state.Target.OverlayRawImage.rectTransform;
+
+        if (overlayRect == null || rawImageRect == null)
+            return;
+
+        if (!state.OverlayPaddingCaptured)
+        {
+            state.BaseOverlayOffsetMin = overlayRect.offsetMin;
+            state.BaseOverlayOffsetMax = overlayRect.offsetMax;
+            state.BaseRawImageOffsetMin = rawImageRect.offsetMin;
+            state.BaseRawImageOffsetMax = rawImageRect.offsetMax;
+            state.OverlayPaddingCaptured = true;
+        }
+
+        float padding = Mathf.Max(0f, state.CoveragePaddingPixels);
+
+        Vector2 overlayPadding = ConvertScreenPixelsToParentLocalPadding(overlayRect, padding);
+        Vector2 rawPadding = ConvertScreenPixelsToParentLocalPadding(rawImageRect, padding);
+
+        overlayRect.offsetMin = state.BaseOverlayOffsetMin - overlayPadding;
+        overlayRect.offsetMax = state.BaseOverlayOffsetMax + overlayPadding;
+
+        rawImageRect.offsetMin = state.BaseRawImageOffsetMin - rawPadding;
+        rawImageRect.offsetMax = state.BaseRawImageOffsetMax + rawPadding;
+    }
+
+    private void ResetOverlayCoveragePadding(LayerState state)
+    {
+        if (state == null || !state.Target.IsValid)
+            return;
+
+        if (!state.OverlayPaddingCaptured)
+            return;
+
+        RectTransform overlayRect = state.Target.OverlayCanvasGroup.transform as RectTransform;
+        RectTransform rawImageRect = state.Target.OverlayRawImage.rectTransform;
+
+        if (overlayRect != null)
+        {
+            overlayRect.offsetMin = state.BaseOverlayOffsetMin;
+            overlayRect.offsetMax = state.BaseOverlayOffsetMax;
+        }
+
+        if (rawImageRect != null)
+        {
+            rawImageRect.offsetMin = state.BaseRawImageOffsetMin;
+            rawImageRect.offsetMax = state.BaseRawImageOffsetMax;
+        }
+    }
+
+    private static Vector2 ConvertScreenPixelsToParentLocalPadding(RectTransform rect, float pixels)
+    {
+        if (rect == null || pixels <= 0f)
+            return Vector2.zero;
+
+        RectTransform parent = rect.parent as RectTransform;
+
+        if (parent == null)
+            return new Vector2(pixels, pixels);
+
+        Camera camera = null;
+
+        Canvas canvas = rect.GetComponentInParent<Canvas>();
+        if (canvas != null && canvas.renderMode != RenderMode.ScreenSpaceOverlay)
+            camera = canvas.worldCamera;
+
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(
+            parent,
+            Vector2.zero,
+            camera,
+            out Vector2 localA);
+
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(
+            parent,
+            new Vector2(pixels, pixels),
+            camera,
+            out Vector2 localB);
+
+        Vector2 delta = localB - localA;
+
+        return new Vector2(
+            Mathf.Abs(delta.x),
+            Mathf.Abs(delta.y));
+    }
+
     private void SetOverlayVisible(LayerState state, bool visible, float duration, float visibleAlpha)
     {
         if (!state.Target.IsValid)
@@ -828,6 +931,8 @@ public sealed class UIStageDepthLayerBlurRuntime : MonoBehaviour, IStageDepthLay
 
     private void StopTrackingAndHideImmediate(LayerState state)
     {
+        ResetOverlayCoveragePadding(state);
+
         state.IsTracking = false;
         SetOverlayVisible(state, visible: false, duration: 0f, visibleAlpha: 0f);
     }
@@ -965,7 +1070,7 @@ public sealed class UIStageDepthLayerBlurRuntime : MonoBehaviour, IStageDepthLay
             }
         }
     }
-
+    
     private readonly struct SourceImageEntry
     {
         public readonly Image Image;
@@ -993,6 +1098,13 @@ public sealed class UIStageDepthLayerBlurRuntime : MonoBehaviour, IStageDepthLay
         public float BlurRadius;
         public int Iterations;
         public UIStageBlurDownsample Downsample;
+        public float CoveragePaddingPixels;
+
+        public bool OverlayPaddingCaptured;
+        public Vector2 BaseOverlayOffsetMin;
+        public Vector2 BaseOverlayOffsetMax;
+        public Vector2 BaseRawImageOffsetMin;
+        public Vector2 BaseRawImageOffsetMax;
 
         public RenderTexture BakedTexture;
         public Tween Tween;

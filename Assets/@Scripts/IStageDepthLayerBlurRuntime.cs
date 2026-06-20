@@ -8,7 +8,8 @@ public interface IStageDepthLayerBlurRuntime
         float duration,
         float blurRadius,
         int iterations,
-        UIStageBlurDownsample downsample);
+        UIStageBlurDownsample downsample,
+        float coveragePaddingPixels);
 
     void HideDefocus(
         PresentationStageKey stage,

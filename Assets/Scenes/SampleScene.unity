@@ -17442,6 +17442,7 @@ MonoBehaviour:
   downsample: 2
   iterations: 2
   blurRadius: 2
+  transparentClearColor: {r: 0, g: 0, b: 0, a: 0}
   controlCaptureCamera: 1
 --- !u!1 &1352969736
 GameObject:

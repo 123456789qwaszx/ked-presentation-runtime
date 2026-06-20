@@ -22,6 +22,10 @@ public sealed class StageDepthDefocusCommandSpec : CommandSpecBase
     [Range(1, 6)] public int iterations = 2;
     public UIStageBlurDownsample downsample = UIStageBlurDownsample.Quarter;
 
+    [Header("Coverage")]
+    [Tooltip("Blur overlay가 원본 depth layer bounds보다 더 넓게 덮는 화면 픽셀 여백. 경계에서 sharp source가 노출되는 것을 줄인다.")]
+    [Min(0f)] public float coveragePaddingPixels = 48f;
+
     [Header("Tween")]
     public float duration = 0.35f;
 }
@@ -66,7 +70,8 @@ public sealed class StageDepthDefocusCommand : CommandBase
                 duration,
                 _spec.blurRadius,
                 _spec.iterations,
-                _spec.downsample);
+                _spec.downsample,
+                _spec.coveragePaddingPixels);
         }
         else
         {
