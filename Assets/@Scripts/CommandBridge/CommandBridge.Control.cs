@@ -58,95 +58,83 @@ public sealed partial class YarnCommandBridge
         string backgroundRigKey,
         string parentTarget = "Background_ObjectSlotRoot")
     {
-        if (!Enum.TryParse(parentTarget, out BackgroundRigTarget parsedTarget))
-        {
-            Debug.LogWarning(
-                $"[YarnCommandBridge] Invalid BackgroundRigTarget '{parentTarget}'. " +
-                "Fallback to Background_ObjectSlotRoot.");
-
-            parsedTarget = BackgroundRigTarget.Background_ObjectSlotRoot;
-        }
-
         var spec = new AttachCharRigToBackgroundObjectSlotCommandSpec
         {
             charRigKey = charRigKey,
             backgroundRigKey = backgroundRigKey,
-            parentTarget = parsedTarget,
+            parentTarget = ParseBackgroundRigTargetOrDefault(parentTarget),
             worldPositionStays = false,
             setAsLastSibling = true,
             wait = true
         };
 
-        var spec2 = new ScaleToCommandSpecBgR
+        Collect(spec);
+    }
+    
+    private void EnqueueBackgroundCutInSpec(
+        string backgroundRigKey,
+        string parentTarget = "Background_ObjectSlotRoot")
+    {
+        Collect(new ScaleToCommandSpecBgR
         {
             rigKey = backgroundRigKey,
             target = BackgroundRigTarget.Background_CastTransform,
             toScale = new Vector2(0.5f, 0.5f),
             duration = 0
-        };
+        });
 
-        var spec4 = new ScaleToCommandSpecBgR
+        Collect(new ScaleToCommandSpecBgR
         {
             rigKey = backgroundRigKey,
             target = BackgroundRigTarget.Background_ObjectSlotRoot,
             toScale = new Vector2(2f, 2f),
             duration = 0
-        };
+        });
 
-        var spec5 = new MoveByCommandSpecBgR
+        Collect(new MoveByCommandSpecBgR
         {
             rigKey = backgroundRigKey,
             target = BackgroundRigTarget.Background_ObjectSlotRoot,
             delta = new Vector2(0, -380),
             duration = 0
-        };
+        });
 
-        var spec6 = new SetBackgroundSpriteCommandSpecBgR
+        Collect(new SetBackgroundSpriteCommandSpecBgR
         {
             rigKey = backgroundRigKey,
             spriteKey = "slot3bg",
             target = BackgroundRigTarget.Background_LayerRoot
-        };
+        });
 
-        var spec7 = new SetBackgroundSpriteCommandSpecBgR
+        Collect(new SetBackgroundSpriteCommandSpecBgR
         {
             rigKey = backgroundRigKey,
             spriteKey = "slot3bg2",
             target = BackgroundRigTarget.Background_BackLayer_Image
-        };
+        });
 
-        // CutInSlot layer visibility setup:
-        // front hide, root hide, object show.
-        var spec8 = new HideRootLayersCommandSpecBgR
+        // Cut-in slot visibility:
+        // hide front/root layers, show object slot layer.
+        Collect(new HideRootLayersCommandSpecBgR
         {
             rigKey = backgroundRigKey,
             targetMask = BackgroundRigRootMask.Background_FrontLayer_Root,
             wait = false
-        };
+        });
 
-        var spec9 = new HideRootLayersCommandSpecBgR
+        Collect(new HideRootLayersCommandSpecBgR
         {
             rigKey = backgroundRigKey,
             targetMask = BackgroundRigRootMask.Background_Root,
             wait = false
-        };
+        });
 
-        var spec10 = new ShowRootLayersCommandSpecBgR
+        Collect(new ShowRootLayersCommandSpecBgR
         {
             rigKey = backgroundRigKey,
             targetMask = BackgroundRigRootMask.Background_ObjectSlotRoot,
             wait = false
-        };
-
-        Collect(spec);
-        Collect(spec2);
-        Collect(spec4);
-        Collect(spec5);
-        Collect(spec6);
-        Collect(spec7);
-        Collect(spec8);
-        Collect(spec9);
-        Collect(spec10);
+        });
     }
     
     private void SetPresentationActor(string aliasOrActor, string actorKey = null)
@@ -160,5 +148,17 @@ public sealed partial class YarnCommandBridge
 
         // 2-arg: <<pres_actor @2 c2>> → alias '@2' → c2
         _playbackDriver.RegisterPresentationActorAlias(aliasOrActor, actorKey);
+    }
+    
+    private BackgroundRigTarget ParseBackgroundRigTargetOrDefault(string parentTarget)
+    {
+        if (Enum.TryParse(parentTarget, out BackgroundRigTarget parsedTarget))
+            return parsedTarget;
+
+        Debug.LogWarning(
+            $"[YarnCommandBridge] Invalid BackgroundRigTarget '{parentTarget}'. " +
+            "Fallback to Background_ObjectSlotRoot.");
+
+        return BackgroundRigTarget.Background_ObjectSlotRoot;
     }
 }

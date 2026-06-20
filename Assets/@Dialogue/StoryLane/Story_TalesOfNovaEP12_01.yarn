@@ -23,6 +23,7 @@ position: -2,-160
 <<slot c4>>
 <<cast c4 Amber a>>
 
+<<bg_cutin bg2>>
 <<attach_to_bg c4 bg2>>
 
 <<fade_out c2 0>>
@@ -51,7 +52,14 @@ _#beat #stay
 
 윌로: 죄송합니다만, 이번 의뢰는 보수의 3분의 1밖에 드릴 수 없겠군요.
 
+<<bg_spawn bg5 bgslot_01>>
+<<bg_cutin bg5>>
+<<attach_to_bg c1 bg5>>
+<<bg_fade_in bg5>>
 <<blur mid 0.1>>
+
+<<bg_fade_in bg2>>
+<<bg_move bg2 3u 3u 12fr>>
 //<<depth_blur_layer s0 mid>>
 //<<depth_blur stage00>>
 -> 안돼 그건 싫어
@@ -289,7 +297,6 @@ _#beat #stay
 
 윌로: 사실 저희 쪽에 성해를 소탕하는 특별 의뢰가 하나 더 있어요. 다들 아시겠지만 성해가 너무 많이 쌓이면, 별의 탑에 재앙이 일어나잖아요.
 
-<<bg_defocus bg1 0.35 10fr>>
 <<shot_to 0 -90 70>>
 <<10fr>>
 
