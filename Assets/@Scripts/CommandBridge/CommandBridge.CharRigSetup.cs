@@ -16,6 +16,56 @@ public sealed partial class YarnCommandBridge
         Collect(spec);
     }
     
+    private void EnqueueSetupCharRigStage00Spec(
+        string slotKey,
+        string layerKey = "mid")
+    {
+        EnqueueSetupCharRigAtDepthSpec(
+            slotKey,
+            PresentationStageKey.Stage00,
+            layerKey);
+    }
+
+    private void EnqueueSetupCharRigStage01Spec(
+        string slotKey,
+        string layerKey = "mid")
+    {
+        EnqueueSetupCharRigAtDepthSpec(
+            slotKey,
+            PresentationStageKey.Stage01,
+            layerKey);
+    }
+
+    private void EnqueueSetupCharRigStage02Spec(
+        string slotKey,
+        string layerKey = "mid")
+    {
+        EnqueueSetupCharRigAtDepthSpec(
+            slotKey,
+            PresentationStageKey.Stage02,
+            layerKey);
+    }
+
+    private void EnqueueSetupCharRigAtDepthSpec(
+        string slotKey,
+        PresentationStageKey stage,
+        string layerKey)
+    {
+        var spec = new SetupCharRigCommandSpec
+        {
+            roleKey = slotKey,
+            rigPrefab = _charRigPrefab,
+
+            useStageDepthSlot = true,
+            stage = stage,
+            layer = PresentationDepthLayerKeyParser.Parse(
+                layerKey,
+                PresentationDepthLayerKey.Mid)
+        };
+
+        Collect(spec);
+    }
+    
     private void EnqueueCastCharacterSpec(
         string slotKey,
         string characterKey,

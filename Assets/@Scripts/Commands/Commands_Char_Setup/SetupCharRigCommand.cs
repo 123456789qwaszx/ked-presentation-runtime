@@ -23,6 +23,11 @@ public sealed class SetupCharRigCommandSpec : CommandSpecBase
 
     [Tooltip("Slot to attach this rig to.")]
     public CharRigSlot parentSlot = CharRigSlot.Stage00CharacterSlot;
+    
+    [Header("Stage Depth Slot")]
+    public bool useStageDepthSlot = false;
+    public PresentationStageKey stage = PresentationStageKey.Stage00;
+    public PresentationDepthLayerKey layer = PresentationDepthLayerKey.Mid;
 
     [Tooltip("Base root name. Final name is '{rolePrefix}{rigRootName}'.")]
     public string rigRootName = "CharacterRig";
@@ -74,7 +79,12 @@ public sealed class SetupCharRigCommand : CommandBase
             rolePrefix,
             spec.rigRootName);
         
-        if (_slotResolver.TryResolve(spec.parentSlot, out RectTransform parent))
+
+        bool resolved = _spec.useStageDepthSlot
+            ? _slotResolver.TryResolve(_spec.stage, _spec.layer, out RectTransform parent)
+            : _slotResolver.TryResolve(_spec.parentSlot, out parent);
+
+        if (resolved)
             rigRoot.SetParent(parent, false);
         
         _rigBuilder.BindRefsFromRoot(rigRoot, rolePrefix, out CharacterRigRefs refs);

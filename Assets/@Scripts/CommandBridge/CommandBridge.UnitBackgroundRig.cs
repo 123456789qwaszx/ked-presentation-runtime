@@ -8,6 +8,13 @@ public sealed partial class YarnCommandBridge
     {
         runner.AddCommandHandler<string, string, string>(
             "bg_spawn", EnqueueSpawnBackgroundRigSpec);
+        
+        runner.AddCommandHandler<string, string, string>(
+            "bg_slot00", EnqueueSpawnBackgroundRigStage00Spec);
+        runner.AddCommandHandler<string, string, string>(
+            "bg_slot01", EnqueueSpawnBackgroundRigStage01Spec);
+        runner.AddCommandHandler<string, string, string>(
+            "bg_slot02", EnqueueSpawnBackgroundRigStage02Spec);
 
         runner.AddCommandHandler<string, string, string, float>(
             "bg_place", EnqueueSetBackgroundAnchorDslSpec);
@@ -68,6 +75,75 @@ public sealed partial class YarnCommandBridge
             rigKey = rigKey,
             rigPrefab = _backgroundRigPrefab,
             parentSlot = BackgroundRigSlotParser.Parse(parentSlotKey, BackgroundRigSlot.Stage00BackgroundSlot)
+        };
+
+        Collect(spec);
+    }
+    private void EnqueueSpawnBackgroundRigStage00Spec(
+        string rigKey,
+        string spriteKey,
+        string layerKey = "far")
+    {
+        EnqueueSpawnBackgroundRigAtDepthSpec(
+            rigKey,
+            spriteKey,
+            PresentationStageKey.Stage00,
+            layerKey);
+    }
+
+    private void EnqueueSpawnBackgroundRigStage01Spec(
+        string rigKey,
+        string spriteKey,
+        string layerKey = "far")
+    {
+        EnqueueSpawnBackgroundRigAtDepthSpec(
+            rigKey,
+            spriteKey,
+            PresentationStageKey.Stage01,
+            layerKey);
+    }
+
+    private void EnqueueSpawnBackgroundRigStage02Spec(
+        string rigKey,
+        string spriteKey,
+        string layerKey = "far")
+    {
+        EnqueueSpawnBackgroundRigAtDepthSpec(
+            rigKey,
+            spriteKey,
+            PresentationStageKey.Stage02,
+            layerKey);
+    }
+
+    private void EnqueueSpawnBackgroundRigAtDepthSpec(
+        string rigKey,
+        string spriteKey,
+        PresentationStageKey stage,
+        string layerKey)
+    {
+        EnqueueSetupBackgroundRigAtDepthSpec(
+            rigKey,
+            stage,
+            PresentationDepthLayerKeyParser.Parse(
+                layerKey,
+                PresentationDepthLayerKey.Far));
+
+        EnqueueSetBackgroundSpriteSpec(rigKey, spriteKey);
+    }
+
+    private void EnqueueSetupBackgroundRigAtDepthSpec(
+        string rigKey,
+        PresentationStageKey stage,
+        PresentationDepthLayerKey layer)
+    {
+        var spec = new SetupBackgroundRigCommandSpec
+        {
+            rigKey = rigKey,
+            rigPrefab = _backgroundRigPrefab,
+
+            useStageDepthSlot = true,
+            stage = stage,
+            layer = layer
         };
 
         Collect(spec);

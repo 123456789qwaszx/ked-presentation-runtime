@@ -153,6 +153,13 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler<string, string>(
             "slot", EnqueueSetupCharRigSpec);
         
+        runner.AddCommandHandler<string, string>(
+            "slot00", EnqueueSetupCharRigStage00Spec);
+        runner.AddCommandHandler<string, string>(
+            "slot01", EnqueueSetupCharRigStage01Spec);
+        runner.AddCommandHandler<string, string>(
+            "slot02", EnqueueSetupCharRigStage02Spec);
+        
         runner.AddCommandHandler<string, string, string, string, string, string>(
             "cast", EnqueueCastCharacterSpec);
         runner.AddCommandHandler<string, string>(
