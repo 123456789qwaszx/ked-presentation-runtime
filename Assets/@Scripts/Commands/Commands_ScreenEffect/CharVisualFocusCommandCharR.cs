@@ -23,32 +23,27 @@ public enum CharacterVisualFocusMode
     SetOrder = -850)]
 public sealed class CharVisualFocusCommandSpecCharR : CharacterRigCommandSpecBase
 {
-    [Header("Mode")]
-    public CharacterVisualFocusMode mode = CharacterVisualFocusMode.Focus;
+    [Header("Mode")] public CharacterVisualFocusMode mode = CharacterVisualFocusMode.Focus;
 
-    [Range(0f, 1f)]
-    public float intensity = 1f;
+    [Range(0f, 1f)] public float intensity = 1f;
 
-    [Header("Preset")]
-    public CharacterVisualFocusPreset focusPreset = CharacterVisualFocusPreset.Focus;
+    [Header("Preset")] public CharacterVisualFocusPreset focusPreset = CharacterVisualFocusPreset.Focus;
     public CharacterVisualFocusPreset defocusPreset = CharacterVisualFocusPreset.Defocus;
 
-    [Header("Custom Values")]
-    [Range(0f, 3f)] public float dim = 0f;
-    
+    [Header("Custom Values")] [Range(0f, 3f)]
+    public float dim = 0f;
+
     public Color dimTintColor = new Color(0.45f, 0.48f, 0.55f, 1f);
 
-    [Tooltip("Legacy/custom rim amount. In the new UI shader this maps to Outer Rim.")]
-    [Range(0f, 1f)] public float rim = 0f;
+    [Tooltip("Legacy/custom rim amount. In the new UI shader this maps to Outer Rim.")] [Range(0f, 1f)]
+    public float rim = 0f;
 
     [Range(0f, 1f)] public float innerRim = 0f;
-    [Range(0f, 1f)] public float blur = 0f;
 
     public Color rimColor = Color.white;
     public Color innerRimColor = new Color(1f, 0.96f, 0.86f, 1f);
 
-    [Header("Tween")]
-    public float duration = 0.25f;
+    [Header("Tween")] public float duration = 0.25f;
     public Ease ease = Ease.OutCubic;
 }
 
@@ -172,7 +167,7 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
     {
         if (!HasClaimedController)
             return;
-        
+
         _tween.Kill(false);
 
         VisualState currentState = CaptureCurrentState();
@@ -219,7 +214,6 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
             _controller.DimTintColor,
             _controller.OuterRimAmount,
             _controller.InnerRimAmount,
-            _controller.BlurAmount,
             _controller.OuterRimColor,
             _controller.InnerRimColor);
     }
@@ -242,7 +236,6 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
                     _controller.DimTintColor,
                     0f,
                     0f,
-                    0f,
                     _controller.OuterRimColor,
                     _controller.InnerRimColor);
 
@@ -252,7 +245,6 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
                     _spec.dimTintColor,
                     _spec.rim,
                     _spec.innerRim,
-                    _spec.blur,
                     _spec.rimColor,
                     _spec.innerRimColor);
 
@@ -260,7 +252,6 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
                 return new VisualState(
                     0f,
                     _controller.DimTintColor,
-                    0f,
                     0f,
                     0f,
                     _controller.OuterRimColor,
@@ -285,7 +276,6 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
             entry.dimTintColor,
             entry.outerRim * intensity,
             entry.innerRim * intensity,
-            entry.blur * intensity,
             entry.outerRimColor,
             entry.innerRimColor);
     }
@@ -297,7 +287,6 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
             state.DimTintColor,
             state.OuterRim,
             state.InnerRim,
-            state.Blur,
             state.OuterRimColor,
             state.InnerRimColor);
     }
@@ -308,7 +297,6 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
         public readonly Color DimTintColor;
         public readonly float OuterRim;
         public readonly float InnerRim;
-        public readonly float Blur;
         public readonly Color OuterRimColor;
         public readonly Color InnerRimColor;
 
@@ -317,7 +305,6 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
             Color dimTintColor,
             float outerRim,
             float innerRim,
-            float blur,
             Color outerRimColor,
             Color innerRimColor)
         {
@@ -325,7 +312,6 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
             DimTintColor = dimTintColor;
             OuterRim = Mathf.Clamp01(outerRim);
             InnerRim = Mathf.Clamp01(innerRim);
-            Blur = Mathf.Clamp01(blur);
             OuterRimColor = outerRimColor;
             InnerRimColor = innerRimColor;
         }
@@ -339,7 +325,6 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
                 Color.Lerp(from.DimTintColor, to.DimTintColor, t),
                 Mathf.Lerp(from.OuterRim, to.OuterRim, t),
                 Mathf.Lerp(from.InnerRim, to.InnerRim, t),
-                Mathf.Lerp(from.Blur, to.Blur, t),
                 Color.Lerp(from.OuterRimColor, to.OuterRimColor, t),
                 Color.Lerp(from.InnerRimColor, to.InnerRimColor, t));
         }
@@ -349,7 +334,6 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
             float dim = Mathf.Abs(to.Dim - from.Dim);
             float outerRim = Mathf.Abs(to.OuterRim - from.OuterRim);
             float innerRim = Mathf.Abs(to.InnerRim - from.InnerRim);
-            float blur = Mathf.Abs(to.Blur - from.Blur);
 
             float dimTint = ColorDistance(from.DimTintColor, to.DimTintColor);
             float outerRimColor = ColorDistance(from.OuterRimColor, to.OuterRimColor);
@@ -358,7 +342,6 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
             return dim +
                    outerRim +
                    innerRim +
-                   blur +
                    dimTint +
                    outerRimColor +
                    innerRimColor;

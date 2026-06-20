@@ -232,7 +232,7 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler<string, float, string>(
             "char_focus", EnqueueCharFocusSpec);
 
-        runner.AddCommandHandler<string, float, float, string>(
+        runner.AddCommandHandler<string, float, string>(
             "char_defocus", EnqueueCharDefocusSpec);
 
         runner.AddCommandHandler<string, string>(

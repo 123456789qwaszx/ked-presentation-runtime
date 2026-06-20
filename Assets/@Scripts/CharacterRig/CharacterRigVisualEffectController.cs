@@ -22,7 +22,9 @@ public sealed class CharacterRigVisualEffectController : IDisposable
     private const float InnerRimWidth = 0.003f;
     private const float InnerRimSoftness = 0.8f;
 
-    private const float BlurSize = 0.003f;
+    private const float DefaultStageBlurEdgeHide = 0f;
+    private const float DefaultStageBlurEdgeWidth = 2.88f;
+    private const float DefaultStageBlurEdgeSoftness = 0.88f;
 
     private static readonly int DimAmountId = Shader.PropertyToID("_DimAmount");
     private static readonly int DimBrightnessId = Shader.PropertyToID("_DimBrightness");
@@ -39,24 +41,25 @@ public sealed class CharacterRigVisualEffectController : IDisposable
     private static readonly int InnerRimWidthId = Shader.PropertyToID("_InnerRimWidth");
     private static readonly int InnerRimSoftnessId = Shader.PropertyToID("_InnerRimSoftness");
 
-    private static readonly int BlurAmountId = Shader.PropertyToID("_BlurAmount");
-    private static readonly int BlurSizeId = Shader.PropertyToID("_BlurSize");
+    private static readonly int StageBlurEdgeHideId = Shader.PropertyToID("_StageBlurEdgeHide");
+    private static readonly int StageBlurEdgeWidthId = Shader.PropertyToID("_StageBlurEdgeWidth");
+    private static readonly int StageBlurEdgeSoftnessId = Shader.PropertyToID("_StageBlurEdgeSoftness");
 
     private Material _runtimeMaterial;
 
     private float _dimAmount;
-    private float _blurAmount;
     private float _outerRimAmount;
     private float _innerRimAmount;
+    private float _stageBlurEdgeHide;
 
     private Color _dimTintColor;
     private Color _outerRimColor;
     private Color _innerRimColor;
 
     public float DimAmount => _dimAmount;
-    public float BlurAmount => _blurAmount;
     public float OuterRimAmount => _outerRimAmount;
     public float InnerRimAmount => _innerRimAmount;
+    public float StageBlurEdgeHide => _stageBlurEdgeHide;
 
     public Color DimTintColor => _dimTintColor;
     public Color OuterRimColor => _outerRimColor;
@@ -100,9 +103,9 @@ public sealed class CharacterRigVisualEffectController : IDisposable
             portraitOverlayImage.material = _runtimeMaterial;
 
         _dimAmount = 0f;
-        _blurAmount = 0f;
         _outerRimAmount = 0f;
         _innerRimAmount = 0f;
+        _stageBlurEdgeHide = DefaultStageBlurEdgeHide;
 
         _dimTintColor = DefaultDimTintColor;
         _outerRimColor = DefaultOuterRimColor;
@@ -110,13 +113,13 @@ public sealed class CharacterRigVisualEffectController : IDisposable
 
         ApplyStaticStyle();
         ApplyDynamicValues();
+        ApplyStageBlurEdgeValues();
     }
 
     public void ApplyImmediate(
         float dim,
         float outerRim,
         float innerRim,
-        float blur,
         Color outerColor,
         Color innerColor)
     {
@@ -125,7 +128,6 @@ public sealed class CharacterRigVisualEffectController : IDisposable
             _dimTintColor,
             outerRim,
             innerRim,
-            blur,
             outerColor,
             innerColor);
     }
@@ -135,7 +137,6 @@ public sealed class CharacterRigVisualEffectController : IDisposable
         Color dimTintColor,
         float outerRim,
         float innerRim,
-        float blur,
         Color outerColor,
         Color innerColor)
     {
@@ -146,11 +147,19 @@ public sealed class CharacterRigVisualEffectController : IDisposable
         _dimTintColor = dimTintColor;
         _outerRimAmount = Mathf.Clamp01(outerRim);
         _innerRimAmount = Mathf.Clamp01(innerRim);
-        _blurAmount = Mathf.Clamp01(blur);
         _outerRimColor = outerColor;
         _innerRimColor = innerColor;
 
         ApplyDynamicValues();
+    }
+
+    public void SetStageBlurEdgeHideImmediate(float value)
+    {
+        if (_runtimeMaterial == null)
+            return;
+
+        _stageBlurEdgeHide = Mathf.Clamp01(value);
+        ApplyStageBlurEdgeValues();
     }
 
     public void ClearImmediate()
@@ -158,7 +167,6 @@ public sealed class CharacterRigVisualEffectController : IDisposable
         ApplyImmediate(
             0f,
             DefaultDimTintColor,
-            0f,
             0f,
             0f,
             DefaultOuterRimColor,
@@ -180,7 +188,8 @@ public sealed class CharacterRigVisualEffectController : IDisposable
         _runtimeMaterial.SetFloat(InnerRimWidthId, InnerRimWidth);
         _runtimeMaterial.SetFloat(InnerRimSoftnessId, InnerRimSoftness);
 
-        _runtimeMaterial.SetFloat(BlurSizeId, BlurSize);
+        _runtimeMaterial.SetFloat(StageBlurEdgeWidthId, DefaultStageBlurEdgeWidth);
+        _runtimeMaterial.SetFloat(StageBlurEdgeSoftnessId, DefaultStageBlurEdgeSoftness);
     }
 
     private void ApplyDynamicValues()
@@ -196,8 +205,14 @@ public sealed class CharacterRigVisualEffectController : IDisposable
 
         _runtimeMaterial.SetFloat(InnerRimAmountId, _innerRimAmount);
         _runtimeMaterial.SetColor(InnerRimColorId, _innerRimColor);
+    }
 
-        _runtimeMaterial.SetFloat(BlurAmountId, _blurAmount);
+    private void ApplyStageBlurEdgeValues()
+    {
+        if (_runtimeMaterial == null)
+            return;
+
+        _runtimeMaterial.SetFloat(StageBlurEdgeHideId, _stageBlurEdgeHide);
     }
 
     public void Dispose()

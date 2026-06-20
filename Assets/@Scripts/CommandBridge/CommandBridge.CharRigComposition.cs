@@ -22,7 +22,6 @@ public sealed partial class YarnCommandBridge
     private void EnqueueCharDefocusSpec(
         string roleKey,
         float intensity = 1f,
-        float blur = 0.5f,
         string durationToken = "17fr")
     {
         var spec = new CharVisualFocusCommandSpecCharR
@@ -56,7 +55,7 @@ public sealed partial class YarnCommandBridge
         string roleKey,
         float dim,
         float rim,
-        float blur,
+        float innerRim,
         string durationToken = "6fr")
     {
         var spec = new CharVisualFocusCommandSpecCharR
@@ -65,8 +64,7 @@ public sealed partial class YarnCommandBridge
             mode = CharacterVisualFocusMode.Custom,
             dim = dim,
             rim = rim,
-            innerRim = 0f,
-            blur = blur,
+            innerRim = innerRim,
             rimColor = Color.white,
             innerRimColor = new Color(1f, 0.96f, 0.86f, 1f),
             duration = YarnDurationParser.Parse(durationToken, 0.25f),
@@ -80,7 +78,7 @@ public sealed partial class YarnCommandBridge
         string roleKey,
         float dim,
         float rim,
-        float blur,
+        float innerRim,
         float r,
         float g,
         float b,
@@ -92,8 +90,7 @@ public sealed partial class YarnCommandBridge
             mode = CharacterVisualFocusMode.Custom,
             dim = dim,
             rim = rim,
-            innerRim = 0f,
-            blur = blur,
+            innerRim = innerRim,
             rimColor = new Color(r, g, b, 1f),
             innerRimColor = new Color(1f, 0.96f, 0.86f, 1f),
             duration = YarnDurationParser.Parse(durationToken, 0.25f),
@@ -116,7 +113,6 @@ public sealed partial class YarnCommandBridge
             dimTintColor = new Color(0.45f, 0.48f, 0.55f, 1f),
             rim = 0f,
             innerRim = 0f,
-            blur = 0f,
             rimColor = Color.white,
             innerRimColor = new Color(1f, 0.96f, 0.86f, 1f),
             duration = YarnDurationParser.Parse(durationToken, 0.25f),
@@ -138,7 +134,6 @@ public sealed partial class YarnCommandBridge
             dim = 0f,
             rim = 0f,
             innerRim = amount,
-            blur = 0f,
             rimColor = Color.white,
             innerRimColor = new Color(1f, 0.96f, 0.86f, 1f),
             duration = YarnDurationParser.Parse(durationToken, 0.25f),
@@ -164,8 +159,6 @@ public sealed partial class YarnCommandBridge
             rim = 0f,
             innerRim = 0f,
 
-            blur = 0.08f,
-
             rimColor = Color.white,
             innerRimColor = new Color(1f, 0.96f, 0.86f, 1f),
 
@@ -188,7 +181,6 @@ public sealed partial class YarnCommandBridge
             dim = 0f,
             rim = amount,
             innerRim = 0f,
-            blur = 0f,
             rimColor = Color.white,
             innerRimColor = new Color(1f, 0.96f, 0.86f, 1f),
             duration = YarnDurationParser.Parse(durationToken, 0.25f),

@@ -27,9 +27,6 @@ public sealed class CharacterVisualFocusPresetDBSO : ScriptableObject
         [Range(0f, 1f)] public float innerRim;
         public Color outerRimColor;
         public Color innerRimColor;
-
-        [Header("Blur")]
-        [Range(0f, 1f)] public float blur;
     }
 
     [SerializeField] private List<Entry> entries = new();
@@ -58,8 +55,6 @@ public sealed class CharacterVisualFocusPresetDBSO : ScriptableObject
 
             outerRimColor = Color.white,
             innerRimColor = new Color(1f, 0.96f, 0.86f, 1f),
-
-            blur = 0f
         };
     }
 
@@ -77,8 +72,6 @@ public sealed class CharacterVisualFocusPresetDBSO : ScriptableObject
 
             outerRimColor = Color.white,
             innerRimColor = new Color(1f, 0.96f, 0.86f, 1f),
-
-            blur = 0.25f
         };
     }
 
