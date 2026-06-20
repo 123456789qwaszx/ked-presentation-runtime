@@ -21,7 +21,7 @@ using UnityEngine.UI;
 //     → ScreenPointToLocalPointInRectangle(captureRoot)  [captureRoot local]
 //     → proxy 를 captureRoot local 에 배치
 //     → captureCamera 가 captureRoot(풀스크린)를 source RT 에 1:1 렌더
-//     → overlay RawImage(화면 정렬, default uvRect)가 그대로 표시
+//     → 각 depth layer 안쪽의 overlay RawImage 가 현재 화면 rect 기준 uvRect 로 표시
 //   GetWorldCorners 는 rig 의 모든 상위 축(slot/depth/track/scale/framing 등) 합성을
 //   포함하므로, command 로 무엇을 움직이든 화면 위치와 어긋나지 않는다.
 //
@@ -31,6 +31,7 @@ using UnityEngine.UI;
 //       UI layer 로 좁혀져 있으면 컬링되어 렌더되지 않는다(= 빈 캡처 = 안 보임).
 //   (2) 캐릭터 runtime effect material 을 캡처에 끌고 오지 않는다(plain 스프라이트를 블러).
 //   (3) captureRoot 풀스크린 강제 + source RT 종횡비 1:1 검증.
+//   (3-1) overlay 는 depth 렌더 순서 안에 두고, screen-space RT 샘플링은 uvRect 로 보정한다.
 //   (4) 같은 blurController/RT 를 BG 경로와 공유하므로:
 //         - bake 동안 외부 캡처 콘텐츠 격리(오염 방지),
 //         - 결과를 layer 전용 BakedTexture 로 스냅샷(라이브 _blurA 에일리어싱 방지).
@@ -64,6 +65,10 @@ public sealed class UIStageDepthLayerBlurRuntime : MonoBehaviour, IStageDepthLay
     // 좌표 매핑용 코너 버퍼.
     private readonly Vector3[] _sourceWorldCorners = new Vector3[4];
     private readonly Vector2[] _captureLocalCorners = new Vector2[4];
+
+    // Overlay RawImage 는 depth layer 안쪽에서 렌더 순서를 지키되,
+    // texture 는 screen-space RT 를 샘플링하므로 현재 화면 rect 에 맞춰 uvRect 를 보정한다.
+    private readonly Vector3[] _overlayWorldCorners = new Vector3[4];
 
     // 이번 bake 에서 켠 depth proxy 집합(공유 캡처 격리 시 "유지 대상" 판정).
     private readonly HashSet<Image> _currentBakeProxies = new();
@@ -108,6 +113,8 @@ public sealed class UIStageDepthLayerBlurRuntime : MonoBehaviour, IStageDepthLay
     private void LateUpdate()
     {
         // 추적 중인 layer 만 매 프레임 다시 굽는다(rig 이동/스케일/회전 추종).
+        // bake 가 생략된 프레임에도 overlay 는 StagePan/StageZoom/depth root 아래에서
+        // 움직일 수 있으므로, screen-space RT 샘플링용 uvRect 는 매 프레임 갱신한다.
         foreach (KeyValuePair<LayerKey, LayerState> pair in _states)
         {
             LayerState state = pair.Value;
@@ -115,10 +122,12 @@ public sealed class UIStageDepthLayerBlurRuntime : MonoBehaviour, IStageDepthLay
             if (!state.IsTracking)
                 continue;
 
-            if (!BakeLayerBlur(state, force: false))
-                continue;
+            bool baked = BakeLayerBlur(state, force: false);
 
-            ApplyBlurTextureToOverlay(state);
+            if (baked)
+                ApplyBlurTextureToOverlay(state);
+            else if (state.Target.IsValid)
+                SyncOverlayUvRectToScreen(state.Target.OverlayRawImage);
         }
 
         DisableAllProxyPools();
@@ -731,6 +740,50 @@ public sealed class UIStageDepthLayerBlurRuntime : MonoBehaviour, IStageDepthLay
 
         if (rawImage.texture != state.BakedTexture)
             rawImage.texture = state.BakedTexture;
+
+        SyncOverlayUvRectToScreen(rawImage);
+    }
+
+    // BakedTexture 는 화면 전체를 기준으로 구운 screen-space RT 다.
+    // 하지만 FrostedGlassRawImage 는 각 depth layer 안쪽에 두어 렌더 순서를 지켜야 한다.
+    // 따라서 RawImage geometry 가 현재 화면에서 차지하는 영역만 RT 에서 샘플링하도록 uvRect 를 맞춘다.
+    private void SyncOverlayUvRectToScreen(RawImage rawImage)
+    {
+        if (rawImage == null)
+            return;
+
+        RectTransform rt = rawImage.rectTransform;
+
+        if (rt == null)
+            return;
+
+        rt.GetWorldCorners(_overlayWorldCorners);
+
+        float minX = float.PositiveInfinity;
+        float minY = float.PositiveInfinity;
+        float maxX = float.NegativeInfinity;
+        float maxY = float.NegativeInfinity;
+
+        for (int i = 0; i < _overlayWorldCorners.Length; i++)
+        {
+            Vector2 screen = RectTransformUtility.WorldToScreenPoint(
+                null,
+                _overlayWorldCorners[i]);
+
+            minX = Mathf.Min(minX, screen.x);
+            minY = Mathf.Min(minY, screen.y);
+            maxX = Mathf.Max(maxX, screen.x);
+            maxY = Mathf.Max(maxY, screen.y);
+        }
+
+        float invScreenWidth = 1f / Mathf.Max(1, Screen.width);
+        float invScreenHeight = 1f / Mathf.Max(1, Screen.height);
+
+        rawImage.uvRect = new Rect(
+            minX * invScreenWidth,
+            minY * invScreenHeight,
+            (maxX - minX) * invScreenWidth,
+            (maxY - minY) * invScreenHeight);
     }
 
     private void SetOverlayVisible(LayerState state, bool visible, float duration, float visibleAlpha)
