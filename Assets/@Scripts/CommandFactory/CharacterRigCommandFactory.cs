@@ -14,8 +14,6 @@ public sealed class CharacterRigCommandFactory : INodeCommandFactory
     private readonly CharacterDepthTuningSO _characterDepthTuning;
     private readonly RoleDepthTuningDBSO _roleDepthTuningDb;
     private readonly CharacterEmojiVisualPresetSO _characterEmojiVisualPresetSo;
-    
-    
 
     public CharacterRigCommandFactory(
         CharRigSlotResolver charRigSlotResolver,
@@ -61,6 +59,9 @@ public sealed class CharacterRigCommandFactory : INodeCommandFactory
             SetOriginSizeCommandSpecCharR s => new SetOriginSizeCommandCharR(s, _globalTuning, _roleTuningDb),
             ApplyTrackOffsetCommandSpecCharR s => new ApplyTrackOffsetCommandCharR(s),
             MirrorCharacterCommandSpecCharR s => new MirrorCharacterCommandCharR(s),
+
+            SetCharacterSiblingOrderCommandSpecCharR s => new SetCharacterSiblingOrderCommandCharR(s),
+            MoveCharacterRigToStageLayerCommandSpecCharR s => new MoveCharacterRigToStageLayerCommandCharR(s, _rigSlotResolver),
             
             SetDepthCommandSpecCharR s => new SetDepthCommandCharR(
                 s,

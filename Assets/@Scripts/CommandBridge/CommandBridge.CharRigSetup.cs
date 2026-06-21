@@ -263,6 +263,21 @@ public sealed partial class YarnCommandBridge
         Collect(spec2);
     }
     
+    private void EnqueueRotateResetSpec(string roleKey, float duration = 0.4f)
+    {
+        var spec = new RotateToCommandSpecCharR
+        {
+            slotKey = roleKey,
+            target = CharacterRigTarget.CharSlot_SwayPivot,
+
+            toEuler = new Vector3(0f, 0f, 0f),
+
+            duration = duration
+        };
+
+        Collect(spec);
+    }
+    
     private void EnqueueSizeResetSpec(string roleKey, float duration = 0.4f)
     {
         var spec = new ScaleToCommandSpecCharR
@@ -278,18 +293,78 @@ public sealed partial class YarnCommandBridge
         Collect(spec);
     }
 
-    private void EnqueueRotateResetSpec(string roleKey, float duration = 0.4f)
+    private void EnqueueCharacterSiblingFrontSpec(string roleKey)
     {
-        var spec = new RotateToCommandSpecCharR
+        var spec = new SetCharacterSiblingOrderCommandSpecCharR
         {
             slotKey = roleKey,
-            target = CharacterRigTarget.CharSlot_SwayPivot,
-
-            toEuler = new Vector3(0f, 0f, 0f),
-
-            duration = duration
+            mode = CharacterRigSiblingOrderMode.Front
         };
 
         Collect(spec);
+    }
+
+    private void EnqueueCharacterSiblingBackSpec(string roleKey)
+    {
+        var spec = new SetCharacterSiblingOrderCommandSpecCharR
+        {
+            slotKey = roleKey,
+            mode = CharacterRigSiblingOrderMode.Back
+        };
+
+        Collect(spec);
+    }
+    
+    private void EnqueueMoveCharacterRigToStageLayerSpec(
+        string roleKey,
+        string stageKey = "stage00",
+        string layerKey = "mid")
+    {
+        var spec = new MoveCharacterRigToStageLayerCommandSpecCharR
+        {
+            slotKey = roleKey,
+
+            stage = PresentationStageKeyParser.Parse(
+                stageKey,
+                PresentationStageKey.Stage00),
+
+            layer = PresentationDepthLayerKeyParser.Parse(
+                layerKey,
+                PresentationDepthLayerKey.Mid),
+
+            siblingMode = CharacterRigReparentSiblingMode.Front
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueMoveCharacterRigToStage00LayerSpec(
+        string roleKey,
+        string layerKey = "mid")
+    {
+        EnqueueMoveCharacterRigToStageLayerSpec(
+            roleKey,
+            "stage00",
+            layerKey);
+    }
+
+    private void EnqueueMoveCharacterRigToStage01LayerSpec(
+        string roleKey,
+        string layerKey = "mid")
+    {
+        EnqueueMoveCharacterRigToStageLayerSpec(
+            roleKey,
+            "stage01",
+            layerKey);
+    }
+
+    private void EnqueueMoveCharacterRigToStage02LayerSpec(
+        string roleKey,
+        string layerKey = "mid")
+    {
+        EnqueueMoveCharacterRigToStageLayerSpec(
+            roleKey,
+            "stage02",
+            layerKey);
     }
 }

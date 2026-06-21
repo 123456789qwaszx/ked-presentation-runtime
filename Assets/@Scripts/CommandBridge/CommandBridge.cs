@@ -189,6 +189,25 @@ public sealed partial class YarnCommandBridge
             "rotate_reset", EnqueueRotateResetSpec);
         runner.AddCommandHandler<string, float>(
             "scale_reset", EnqueueSizeResetSpec);
+        
+        runner.AddCommandHandler<string>(
+            "sibling_front", EnqueueCharacterSiblingFrontSpec);
+
+        runner.AddCommandHandler<string>(
+            "sibling_back", EnqueueCharacterSiblingBackSpec);
+        
+        
+        runner.AddCommandHandler<string, string, string>(
+            "char_to", EnqueueMoveCharacterRigToStageLayerSpec);
+
+        runner.AddCommandHandler<string, string>(
+            "char_to_s0", EnqueueMoveCharacterRigToStage00LayerSpec);
+
+        runner.AddCommandHandler<string, string>(
+            "char_to_s1", EnqueueMoveCharacterRigToStage01LayerSpec);
+
+        runner.AddCommandHandler<string, string>(
+            "char_to_s2", EnqueueMoveCharacterRigToStage02LayerSpec);
     }
     
     private void BindShotStaging(DialogueRunner runner)
