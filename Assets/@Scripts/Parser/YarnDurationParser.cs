@@ -67,6 +67,38 @@ public static class YarnDurationParser
     {
         return Mathf.Max(0f, frames / FramesPerSecond);
     }
+    
+    public static float ParseFrames(string token, float fallbackFrames = 8f)
+    {
+        if (string.IsNullOrWhiteSpace(token))
+            return Mathf.Max(0f, fallbackFrames);
+
+        string originalToken = token;
+        token = token.Trim().ToLowerInvariant();
+
+        if (token.EndsWith("frames"))
+            token = token[..^6];
+        else if (token.EndsWith("frame"))
+            token = token[..^5];
+        else if (token.EndsWith("fr"))
+            token = token[..^2];
+
+        if (float.TryParse(
+                token,
+                NumberStyles.Float,
+                CultureInfo.InvariantCulture,
+                out float frames))
+        {
+            return Mathf.Max(0f, frames);
+        }
+
+        Debug.LogWarning(
+            $"[YarnDurationParser] Invalid frame token '{originalToken}'. " +
+            $"Expected format: 4fr, 12fr, 12frame, 12frames, or 12. " +
+            $"Fallback to {fallbackFrames:0.###} frames.");
+
+        return Mathf.Max(0f, fallbackFrames);
+    }
 
     private static void WarnInvalid(string token, float fallbackSeconds)
     {
