@@ -21,13 +21,12 @@ public sealed class SetupCharRigCommandSpec : CommandSpecBase
              "Prefab the baked result when you need performance setup, external systems, response targets, or shot helpers.")]
     public RectTransform rigPrefab;
 
-    [Tooltip("Slot to attach this rig to.")]
-    public CharRigSlot parentSlot = CharRigSlot.Stage00CharacterSlot;
-    
     [Header("Stage Depth Slot")]
-    public bool useStageDepthSlot = false;
     public PresentationStageKey stage = PresentationStageKey.Stage00;
     public PresentationDepthLayerKey layer = PresentationDepthLayerKey.Mid;
+
+    [Header("Special Parent")]
+    public bool useProtagonistSlot = false;
 
     [Tooltip("Base root name. Final name is '{rolePrefix}{rigRootName}'.")]
     public string rigRootName = "CharacterRig";
@@ -48,15 +47,14 @@ public sealed class SetupCharRigCommandSpec : CommandSpecBase
 
 public sealed class SetupCharRigCommand : CommandBase
 {
-    // Resources 내 머터리얼 경로. (예: Assets/Resources/VisualEffects/CharRigVisualEffect.mat)
     private const string VisualEffectMaterialPath = "VisualEffects/M_UICharacterVisual";
-    
+
     private readonly CharRigSlotResolver _slotResolver;
     private readonly CharacterRigBuilder _rigBuilder;
     private readonly SetupCharRigCommandSpec _spec;
 
     protected override SkipPolicy SkipPolicy => SkipPolicy.ExecuteEvenIfSkipping;
-    
+
     public SetupCharRigCommand(
         CharRigSlotResolver slotResolver,
         CharacterRigBuilder rigBuilder,
@@ -78,36 +76,29 @@ public sealed class SetupCharRigCommand : CommandBase
             spec.rigPrefab,
             rolePrefix,
             spec.rigRootName);
-        
 
-        bool resolved = _spec.useStageDepthSlot
-            ? _slotResolver.TryResolve(_spec.stage, _spec.layer, out RectTransform parent)
-            : _slotResolver.TryResolve(_spec.parentSlot, out parent);
+        bool resolved = spec.useProtagonistSlot
+            ? _slotResolver.TryResolveProtagonist(out RectTransform parent)
+            : _slotResolver.TryResolve(spec.stage, spec.layer, out parent);
 
         if (resolved)
             rigRoot.SetParent(parent, false);
-        
+
         _rigBuilder.BindRefsFromRoot(rigRoot, rolePrefix, out CharacterRigRefs refs);
 
-        // Visual effect controller: rig 1개당 1개. runtime material을 Instantiate하여 보관.
         Material sourceMaterial = Resources.Load<Material>(VisualEffectMaterialPath);
         refs.VisualEffect = new CharacterRigVisualEffectController(
             refs.CharacterPortraitSprite_Image,
             refs.CharacterPortraitSpriteOverlay_Image,
             sourceMaterial);
-        
+
         scope.CharacterRigs.Register(rigKey, refs);
-        
-        // Optional bake helper:
-        // Enable after refs registration when saving the generated rig as a reusable prefab.
-        //StripRolePrefixForBake(rigRoot, rolePrefix, spec.rigRootName);
+
         yield break;
     }
-    
+
     #region Helpers
-    // For prefab baking: turns 'Caramel_CharSlot_Anchor' back into 'CharSlot_Anchor'.
-    // Safe only after refs are already bound.
-    // Do not call before BuildRefMap/BindRefs.
+
     private static void StripRolePrefixForBake(RectTransform rigRoot, string rolePrefix, string rigRootName)
     {
         if (rigRoot == null)
@@ -117,7 +108,7 @@ public sealed class SetupCharRigCommand : CommandBase
             return;
 
         StripPrefixRecursive(rigRoot, rolePrefix);
-        
+
         rigRoot.name = rigRootName;
     }
 
@@ -129,5 +120,6 @@ public sealed class SetupCharRigCommand : CommandBase
         for (int i = 0; i < root.childCount; i++)
             StripPrefixRecursive(root.GetChild(i), rolePrefix);
     }
+
     #endregion
 }

@@ -2,17 +2,25 @@ using UnityEngine;
 
 public sealed partial class YarnCommandBridge
 {
-    private void EnqueueSetupCharRigSpec(string slotKey, string parentKey = "0")
+    private void EnqueueSetupCharRigSpec(
+        string slotKey,
+        string stageKey = "stage00",
+        string layerKey = "mid")
     {
         var spec = new SetupCharRigCommandSpec
         {
             roleKey = slotKey,
-            rigPrefab =_charRigPrefab
+            rigPrefab = _charRigPrefab,
+
+            stage = PresentationStageKeyParser.Parse(
+                stageKey,
+                PresentationStageKey.Stage00),
+
+            layer = PresentationDepthLayerKeyParser.Parse(
+                layerKey,
+                PresentationDepthLayerKey.Mid)
         };
-        
-        if (CharRigSlotParser.TryParse(parentKey, out CharRigSlot parentSlot))
-            spec.parentSlot = parentSlot;
-        
+
         Collect(spec);
     }
     
@@ -56,11 +64,22 @@ public sealed partial class YarnCommandBridge
             roleKey = slotKey,
             rigPrefab = _charRigPrefab,
 
-            useStageDepthSlot = true,
             stage = stage,
             layer = PresentationDepthLayerKeyParser.Parse(
                 layerKey,
                 PresentationDepthLayerKey.Mid)
+        };
+
+        Collect(spec);
+    }
+    
+    private void EnqueueSetupProtagonistCharRigSpec(string slotKey)
+    {
+        var spec = new SetupCharRigCommandSpec
+        {
+            roleKey = slotKey,
+            rigPrefab = _charRigPrefab,
+            useProtagonistSlot = true
         };
 
         Collect(spec);

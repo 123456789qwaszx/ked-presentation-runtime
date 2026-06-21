@@ -151,7 +151,7 @@ public sealed partial class YarnCommandBridge
 
     private void BindCharRigSetup(DialogueRunner runner)
     {
-        runner.AddCommandHandler<string, string>(
+        runner.AddCommandHandler<string, string, string>(
             "slot", EnqueueSetupCharRigSpec);
         
         runner.AddCommandHandler<string, string>(
@@ -173,9 +173,7 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler<string, string>(
             "mirror", EnqueueMirrorSetSpec);
     }
-
-
-
+    
     private void BindCharRigStaging(DialogueRunner runner)
     {
         runner.AddCommandHandler<string, int, int, float>(

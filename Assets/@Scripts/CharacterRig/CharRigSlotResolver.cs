@@ -1,13 +1,5 @@
 using UnityEngine;
 
-public enum CharRigSlot
-{
-    Stage00CharacterSlot = 1,
-    Stage01CharacterSlot = 2,
-    Stage02CharacterSlot = 3,
-    ProtagonistSlot = 10
-}
-
 public interface IProtagonistCharRigSlotProvider
 {
     RectTransform ProtagonistSlot { get; }
@@ -34,7 +26,7 @@ public sealed class CharRigSlotResolver
         {
             rect = null;
             Debug.LogWarning(
-                $"[CharRigSlotResolver] Failed to resolve stage depth slot provider. " +
+                $"[CharRigSlotResolver] Missing stage depth slot provider. " +
                 $"stage='{stage}', layer='{layer}'.");
             return false;
         }
@@ -44,7 +36,7 @@ public sealed class CharRigSlotResolver
         if (rect == null)
         {
             Debug.LogWarning(
-                $"[CharRigSlotResolver] Resolved slot is null. " +
+                $"[CharRigSlotResolver] Stage depth slot is null. " +
                 $"stage='{stage}', layer='{layer}'.");
             return false;
         }
@@ -52,40 +44,7 @@ public sealed class CharRigSlotResolver
         return true;
     }
 
-    // Legacy path. Character used to default to Mid.
-    public bool TryResolve(CharRigSlot slot, out RectTransform rect)
-    {
-        switch (slot)
-        {
-            case CharRigSlot.Stage00CharacterSlot:
-                return TryResolve(
-                    PresentationStageKey.Stage00,
-                    PresentationDepthLayerKey.Mid,
-                    out rect);
-
-            case CharRigSlot.Stage01CharacterSlot:
-                return TryResolve(
-                    PresentationStageKey.Stage01,
-                    PresentationDepthLayerKey.Mid,
-                    out rect);
-
-            case CharRigSlot.Stage02CharacterSlot:
-                return TryResolve(
-                    PresentationStageKey.Stage02,
-                    PresentationDepthLayerKey.Mid,
-                    out rect);
-
-            case CharRigSlot.ProtagonistSlot:
-                return TryResolveProtagonist(out rect);
-
-            default:
-                rect = null;
-                Debug.LogWarning($"[CharRigSlotResolver] Unknown slot. slot='{slot}'.");
-                return false;
-        }
-    }
-
-    private bool TryResolveProtagonist(out RectTransform rect)
+    public bool TryResolveProtagonist(out RectTransform rect)
     {
         EnsureProviders();
 
