@@ -1,15 +1,11 @@
-title: Setup_TalesOfNovaEP12_01
+﻿title: Setup_TalesOfNovaEP12_01
 position: -2,-160
 ---
 <<shot_reset>>
-
+<<blur_reset>>
 
 <<bg_spawn bg1 ep08_5>>
 <<bg_size bg1 1>>
-
-<<bg_spawn bg2 bgslot_01>>
-//<<bg_place bg2 40 200>>
-
 
 <<slot c1>>
 <<cast c1 Willow a>>
@@ -23,13 +19,19 @@ position: -2,-160
 <<slot c4>>
 <<cast c4 Amber a>>
 
-<<bg_cutin bg2>>
+<<bg_slot_cutin bg2>>
 <<attach_to_bg c4 bg2>>
-
-<<fade_out c2 0>>
 
 === 
 
+
+
+title: Beat_wait6fr_shake
+---
+<<6fr>>
+<<shake @ up 16 0.6>>
+
+=== 
 
 title: Story_TalesOfNovaEP12_01
 ---
@@ -52,14 +54,18 @@ _#beat #stay
 
 윌로: 죄송합니다만, 이번 의뢰는 보수의 3분의 1밖에 드릴 수 없겠군요.
 
-<<bg_spawn bg5 bgslot_01>>
-<<bg_cutin bg5>>
-<<attach_to_bg c1 bg5>>
-<<bg_fade_in bg5>>
+<<bg_slot_cutin bg15>>
+<<bg_move bg15 -8u 12u 0>>
+<<attach_to_bg c1 bg15>>
+<<bg_fade_in bg15 0>>
+<<bg_cutin_in2 bg15>>
+
 <<blur mid 0.1>>
 
-<<bg_fade_in bg2>>
-<<bg_move bg2 3u 3u 12fr>>
+
+
+// <<bg_fade_in bg2>>
+// <<bg_move bg2 3u 3u 12fr>>
 //<<depth_blur_layer s0 mid>>
 //<<depth_blur stage00>>
 -> 안돼 그건 싫어
@@ -217,6 +223,8 @@ _#beat #stay
 
 윌로: 무슨 사정인지는 잘 알고 있습니다. 최근 몇 주간 아모르 25호 별의 탑으로 가는 여행가가 적어서, 성해 개체 수가 많이 쌓였죠.
 
+<<blur_reset>>
+
 <<actor @3 iris>>
 <<fade_in @3 8fr>>
 <<to_bl @3 bust 12fr>>
@@ -224,6 +232,7 @@ _#beat #stay
 <<right @3 0.8u 10fr>>
 <<face @3 5>>
 <<6fr>>
+
 
 아야메: 그래서......
 

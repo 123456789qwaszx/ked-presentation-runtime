@@ -4,7 +4,7 @@ using Yarn.Unity;
 
 public sealed partial class YarnCommandBridge
 {
-    private void BindBackgroundRigDsl(DialogueRunner runner)
+    private void BindBackgroundRig(DialogueRunner runner)
     {
         runner.AddCommandHandler<string, string, string>(
             "bg_spawn", EnqueueSpawnBackgroundRigSpec);
@@ -57,6 +57,15 @@ public sealed partial class YarnCommandBridge
 
         runner.AddCommandHandler<string, string, string, float>(
             "bg_idle_breath", EnqueueBreathBackgroundDslSpec);
+        
+        runner.AddCommandHandler<string>(
+            "bg_slot_cutin", EnqueueBackgroundCutInSpec);
+        
+        runner.AddCommandHandler<string, string, string, string>(
+            "bg_cutin_in", EnqueueBackgroundCutInMotionSpec);
+        
+        runner.AddCommandHandler<string, string, string, string>(
+            "bg_cutin_in2", EnqueueBackgroundCutInMotionSpec2);
     }
     
     private void EnqueueSpawnBackgroundRigSpec(
@@ -394,38 +403,452 @@ public sealed partial class YarnCommandBridge
         return YarnUnitParser.Parse(trimmed, fallbackUnits);
     }
     
-    private UIStageBlurDownsample ParseBlurDownsample(string value)
+    private void EnqueueBackgroundCutInSpec(
+        string backgroundRigKey)
     {
-        if (string.IsNullOrEmpty(value))
-            return UIStageBlurDownsample.Quarter;
-
-        switch (value.Trim().ToLowerInvariant())
+        Collect( new SetupBackgroundRigCommandSpec
         {
-            case "full":
-            case "1":
-            case "x1":
-                return UIStageBlurDownsample.Full;
+            rigKey = backgroundRigKey,
+            rigPrefab = _backgroundRigPrefab,
+            parentSlot = BackgroundRigSlotParser.Parse("stage02", BackgroundRigSlot.Stage02BackgroundSlot)
+        });
+        
+        Collect(new ScaleToCommandSpecBgR
+        {
+            rigKey = backgroundRigKey,
+            target = BackgroundRigTarget.Background_CastTransform,
+            toScale = new Vector2(0.5f, 0.5f),
+            duration = 0
+        });
 
-            case "half":
-            case "2":
-            case "x2":
-                return UIStageBlurDownsample.Half;
+        Collect(new ScaleToCommandSpecBgR
+        {
+            rigKey = backgroundRigKey,
+            target = BackgroundRigTarget.Background_ObjectSlotRoot,
+            toScale = new Vector2(2f, 2f),
+            duration = 0
+        });
 
-            case "quarter":
-            case "4":
-            case "x4":
-                return UIStageBlurDownsample.Quarter;
+        Collect(new MoveByCommandSpecBgR
+        {
+            rigKey = backgroundRigKey,
+            target = BackgroundRigTarget.Background_ObjectSlotRoot,
+            delta = new Vector2(0, -380),
+            duration = 0
+        });
 
-            case "eighth":
-            case "8":
-            case "x8":
-                return UIStageBlurDownsample.Eighth;
+        Collect(new SetBackgroundSpriteCommandSpecBgR
+        {
+            rigKey = backgroundRigKey,
+            spriteKey = "slot3bg",
+            target = BackgroundRigTarget.Background_LayerRoot
+        });
 
-            default:
-                UnityEngine.Debug.LogWarning(
-                    $"[YarnCommandBridge] Unknown blur downsample '{value}'. Fallback to Quarter.");
+        Collect(new SetBackgroundSpriteCommandSpecBgR
+        {
+            rigKey = backgroundRigKey,
+            spriteKey = "slot3bg2",
+            target = BackgroundRigTarget.Background_BackLayer_Image
+        });
 
-                return UIStageBlurDownsample.Quarter;
-        }
+        // Cut-in slot visibility:
+        // hide front/root layers, show object slot layer.
+        Collect(new HideRootLayersCommandSpecBgR
+        {
+            rigKey = backgroundRigKey,
+            targetMask = BackgroundRigRootMask.Background_FrontLayer_Root,
+            wait = false
+        });
+
+        Collect(new HideRootLayersCommandSpecBgR
+        {
+            rigKey = backgroundRigKey,
+            targetMask = BackgroundRigRootMask.Background_Root,
+            wait = false
+        });
+
+        Collect(new ShowRootLayersCommandSpecBgR
+        {
+            rigKey = backgroundRigKey,
+            targetMask = BackgroundRigRootMask.Background_ObjectSlotRoot,
+            wait = false
+        });
+    }
+    
+    private void EnqueueBackgroundCutInMotionSpec(
+        string rigKey,
+        string xToken = "1.2u",
+        string yToken = "0u",
+        string durationToken = "16fr")
+    {
+        Vector2 travel = new(
+            ParseSignedUnit(xToken, 1.2f),
+            ParseSignedUnit(yToken, 0f));
+
+        float duration = YarnDurationParser.Parse(durationToken, 0.66f);
+
+        float burstDuration = duration * 0.52f;
+        float recoilDuration = duration * 0.20f;
+        float settleDuration = duration * 0.28f;
+
+        float fadeDuration = Mathf.Clamp(duration * 0.22f, 0.08f, 0.18f);
+
+        Vector2 startOffset = -travel;
+        Vector2 burstDelta = travel * 1.10f;
+        Vector2 recoilDelta = -travel * 0.13f;
+        Vector2 settleDelta = travel * 0.03f;
+
+        // --------------------------------------------------------------------
+        // 0. Initial pose
+        // --------------------------------------------------------------------
+        // bg_cutin이 만든 cut-in slot을 실제 연출 시작 전 숨겨둔다.
+        // 현재 위치를 최종 착지 위치로 보고, Track만 뒤로 빼서 시작점을 만든다.
+
+        Collect(new FadeOutCommandSpecBgR
+        {
+            rigKey = rigKey,
+            target = BackgroundRigTarget.Background_ObjectSlotRoot,
+            duration = 0f,
+            wait = true
+        });
+
+        Collect(new MoveByCommandSpecBgR
+        {
+            rigKey = rigKey,
+            target = BackgroundRigTarget.Background_Track,
+            delta = startOffset,
+            duration = 0f,
+            wait = true
+        });
+
+        Collect(new RotateToCommandSpecBgR
+        {
+            rigKey = rigKey,
+            target = BackgroundRigTarget.Background_Rotation,
+            toEuler = new Vector3(0f, 0f, -7.5f),
+            duration = 0f,
+            wait = true
+        });
+
+        Collect(new ScaleToCommandSpecBgR
+        {
+            rigKey = rigKey,
+            target = BackgroundRigTarget.Background_ActingScale,
+            toScale = new Vector2(0.035f, 0.035f),
+            duration = 0f,
+            wait = true
+        });
+
+
+        // --------------------------------------------------------------------
+        // 1. Burst in
+        // --------------------------------------------------------------------
+        // 작은 점에서 커지면서 좌 -> 우로 튀어나온다.
+        // scale은 살짝 가로로 늘어나는 느낌을 준다.
+
+        Collect(new FadeInCommandSpecBgR
+        {
+            rigKey = rigKey,
+            target = BackgroundRigTarget.Background_ObjectSlotRoot,
+            duration = fadeDuration,
+            wait = false
+        });
+
+        Collect(new MoveByCommandSpecBgR
+        {
+            rigKey = rigKey,
+            target = BackgroundRigTarget.Background_Track,
+            delta = burstDelta,
+            duration = burstDuration,
+            ease = Ease.OutCubic,
+            wait = false
+        });
+
+        Collect(new RotateToCommandSpecBgR
+        {
+            rigKey = rigKey,
+            target = BackgroundRigTarget.Background_Rotation,
+            toEuler = new Vector3(0f, 0f, 4f),
+            duration = burstDuration * 0.86f,
+            ease = Ease.OutCubic,
+            wait = false
+        });
+
+        Collect(new ScaleToCommandSpecBgR
+        {
+            rigKey = rigKey,
+            target = BackgroundRigTarget.Background_ActingScale,
+            toScale = new Vector2(1.12f, 0.96f),
+            duration = burstDuration,
+            ease = Ease.OutBack,
+            wait = true
+        });
+
+
+        // --------------------------------------------------------------------
+        // 2. Sticky recoil
+        // --------------------------------------------------------------------
+        // 지나친 힘을 살짝 되감는다.
+        // 여기서 쫀득쫀득한 느낌이 생긴다.
+
+        Collect(new MoveByCommandSpecBgR
+        {
+            rigKey = rigKey,
+            target = BackgroundRigTarget.Background_Track,
+            delta = recoilDelta,
+            duration = recoilDuration,
+            ease = Ease.InOutSine,
+            wait = false
+        });
+
+        Collect(new RotateToCommandSpecBgR
+        {
+            rigKey = rigKey,
+            target = BackgroundRigTarget.Background_Rotation,
+            toEuler = new Vector3(0f, 0f, -1.5f),
+            duration = recoilDuration,
+            ease = Ease.InOutSine,
+            wait = false
+        });
+
+        Collect(new ScaleToCommandSpecBgR
+        {
+            rigKey = rigKey,
+            target = BackgroundRigTarget.Background_ActingScale,
+            toScale = new Vector2(0.985f, 1.035f),
+            duration = recoilDuration,
+            ease = Ease.InOutSine,
+            wait = true
+        });
+
+
+        // --------------------------------------------------------------------
+        // 3. Settle
+        // --------------------------------------------------------------------
+        // 최종 위치, 회전, 스케일로 부드럽게 착지한다.
+
+        Collect(new MoveByCommandSpecBgR
+        {
+            rigKey = rigKey,
+            target = BackgroundRigTarget.Background_Track,
+            delta = settleDelta,
+            duration = settleDuration,
+            ease = Ease.OutCubic,
+            wait = false
+        });
+
+        Collect(new RotateToCommandSpecBgR
+        {
+            rigKey = rigKey,
+            target = BackgroundRigTarget.Background_Rotation,
+            toEuler = Vector3.zero,
+            duration = settleDuration,
+            ease = Ease.OutCubic,
+            wait = false
+        });
+
+        Collect(new ScaleToCommandSpecBgR
+        {
+            rigKey = rigKey,
+            target = BackgroundRigTarget.Background_ActingScale,
+            toScale = Vector2.one,
+            duration = settleDuration,
+            ease = Ease.OutCubic,
+            wait = true
+        });
+    }
+    
+    private void EnqueueBackgroundCutInMotionSpec2(
+        string rigKey,
+        string xToken = "0.18u",
+        string yToken = "9.65u",
+        string durationToken = "12fr")
+    {
+        float sideDrift = ParseSignedUnit(xToken, 0.18f);
+
+        float riseDistance = Mathf.Abs(ParseSignedUnit(yToken, 2.65f));
+        if (riseDistance <= 0.001f)
+            riseDistance = YarnUnitParser.Parse("2.65u", 2.65f);
+
+        float duration = YarnDurationParser.Parse(durationToken, 0.75f);
+
+        float burstDuration = duration * 0.50f;
+        float recoilDuration = duration * 0.22f;
+        float settleDuration = duration * 0.28f;
+
+        float fadeDuration = Mathf.Clamp(duration * 0.18f, 0.07f, 0.16f);
+
+        // 아래쪽의 작은 점에서 시작한다.
+        // x는 크게 밀지 않고, 생각이 튀어나오면서 살짝 옆으로 새는 정도만 준다.
+        Vector2 startOffset = new Vector2(-sideDrift * 0.45f, -riseDistance);
+
+        // 최종 위치보다 살짝 위까지 튀어나온다.
+        Vector2 burstDelta = new Vector2(sideDrift * 1.25f, riseDistance * 1.10f);
+
+        // 착지 직전 살짝 아래로 되눌린다.
+        Vector2 recoilDelta = new Vector2(-sideDrift * 0.55f, -riseDistance * 0.14f);
+
+        // 누적 오차 없이 정확히 원래 위치로 돌아오게 한다.
+        Vector2 settleDelta = -(startOffset + burstDelta + recoilDelta);
+
+        // --------------------------------------------------------------------
+        // 0. Initial pose
+        // --------------------------------------------------------------------
+        // 완전히 아래쪽의 작은 점.
+        // 내면의 생각이 화면 아래에서 응축되어 있다가 튀어나오는 시작 상태.
+
+        Collect(new FadeOutCommandSpecBgR
+        {
+            rigKey = rigKey,
+            target = BackgroundRigTarget.Background_ObjectSlotRoot,
+            duration = 0f,
+            wait = true
+        });
+
+        Collect(new MoveByCommandSpecBgR
+        {
+            rigKey = rigKey,
+            target = BackgroundRigTarget.Background_Track,
+            delta = startOffset,
+            duration = 0f,
+            wait = true
+        });
+
+        Collect(new RotateToCommandSpecBgR
+        {
+            rigKey = rigKey,
+            target = BackgroundRigTarget.Background_Rotation,
+            toEuler = new Vector3(0f, 0f, -3.5f),
+            duration = 0f,
+            wait = true
+        });
+
+        Collect(new ScaleToCommandSpecBgR
+        {
+            rigKey = rigKey,
+            target = BackgroundRigTarget.Background_ActingScale,
+            toScale = new Vector2(0.001f, 0.001f),
+            duration = 0f,
+            wait = true
+        });
+
+
+        // --------------------------------------------------------------------
+        // 1. Pop up
+        // --------------------------------------------------------------------
+        // 아래쪽 점에서 위로 툭 솟아오른다.
+        // 이동은 위쪽이 주축이고, x는 살짝만 섞는다.
+        // scale은 살짝 세로로 늘어나며 튀어나오는 느낌.
+
+        Collect(new FadeInCommandSpecBgR
+        {
+            rigKey = rigKey,
+            target = BackgroundRigTarget.Background_ObjectSlotRoot,
+            duration = fadeDuration,
+            wait = false
+        });
+
+        Collect(new MoveByCommandSpecBgR
+        {
+            rigKey = rigKey,
+            target = BackgroundRigTarget.Background_Track,
+            delta = burstDelta,
+            duration = burstDuration,
+            ease = Ease.OutCubic,
+            wait = false
+        });
+
+        Collect(new RotateToCommandSpecBgR
+        {
+            rigKey = rigKey,
+            target = BackgroundRigTarget.Background_Rotation,
+            toEuler = new Vector3(0f, 0f, 2.2f),
+            duration = burstDuration,
+            ease = Ease.OutCubic,
+            wait = false
+        });
+
+        Collect(new ScaleToCommandSpecBgR
+        {
+            rigKey = rigKey,
+            target = BackgroundRigTarget.Background_ActingScale,
+            toScale = new Vector2(0.94f, 1.16f),
+            duration = burstDuration,
+            ease = Ease.OutBack,
+            wait = true
+        });
+
+
+        // --------------------------------------------------------------------
+        // 2. Thought bubble squash
+        // --------------------------------------------------------------------
+        // 위로 튀어나온 힘이 살짝 눌리면서 말랑하게 반동한다.
+        // "툭" 나온 뒤에 한 박자 씹히는 느낌.
+
+        Collect(new MoveByCommandSpecBgR
+        {
+            rigKey = rigKey,
+            target = BackgroundRigTarget.Background_Track,
+            delta = recoilDelta,
+            duration = recoilDuration,
+            ease = Ease.InOutSine,
+            wait = false
+        });
+
+        Collect(new RotateToCommandSpecBgR
+        {
+            rigKey = rigKey,
+            target = BackgroundRigTarget.Background_Rotation,
+            toEuler = new Vector3(0f, 0f, -0.8f),
+            duration = recoilDuration,
+            ease = Ease.InOutSine,
+            wait = false
+        });
+
+        Collect(new ScaleToCommandSpecBgR
+        {
+            rigKey = rigKey,
+            target = BackgroundRigTarget.Background_ActingScale,
+            toScale = new Vector2(1.075f, 0.965f),
+            duration = recoilDuration,
+            ease = Ease.InOutSine,
+            wait = true
+        });
+
+
+        // --------------------------------------------------------------------
+        // 3. Settle
+        // --------------------------------------------------------------------
+        // 생각 컷인이 제자리에 부드럽게 안착한다.
+
+        Collect(new MoveByCommandSpecBgR
+        {
+            rigKey = rigKey,
+            target = BackgroundRigTarget.Background_Track,
+            delta = settleDelta,
+            duration = settleDuration,
+            ease = Ease.OutCubic,
+            wait = false
+        });
+
+        Collect(new RotateToCommandSpecBgR
+        {
+            rigKey = rigKey,
+            target = BackgroundRigTarget.Background_Rotation,
+            toEuler = Vector3.zero,
+            duration = settleDuration,
+            ease = Ease.OutCubic,
+            wait = false
+        });
+
+        Collect(new ScaleToCommandSpecBgR
+        {
+            rigKey = rigKey,
+            target = BackgroundRigTarget.Background_ActingScale,
+            toScale = Vector2.one,
+            duration = settleDuration,
+            ease = Ease.OutCubic,
+            wait = true
+        });
     }
 }

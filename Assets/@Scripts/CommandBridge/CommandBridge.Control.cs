@@ -65,76 +65,10 @@ public sealed partial class YarnCommandBridge
             parentTarget = ParseBackgroundRigTargetOrDefault(parentTarget),
             worldPositionStays = false,
             setAsLastSibling = false,
-            wait = true
+            //wait = true
         };
 
         Collect(spec);
-    }
-    
-    private void EnqueueBackgroundCutInSpec(
-        string backgroundRigKey,
-        string parentTarget = "Background_ObjectSlotRoot")
-    {
-        Collect(new ScaleToCommandSpecBgR
-        {
-            rigKey = backgroundRigKey,
-            target = BackgroundRigTarget.Background_CastTransform,
-            toScale = new Vector2(0.5f, 0.5f),
-            duration = 0
-        });
-
-        Collect(new ScaleToCommandSpecBgR
-        {
-            rigKey = backgroundRigKey,
-            target = BackgroundRigTarget.Background_ObjectSlotRoot,
-            toScale = new Vector2(2f, 2f),
-            duration = 0
-        });
-
-        Collect(new MoveByCommandSpecBgR
-        {
-            rigKey = backgroundRigKey,
-            target = BackgroundRigTarget.Background_ObjectSlotRoot,
-            delta = new Vector2(0, -380),
-            duration = 0
-        });
-
-        Collect(new SetBackgroundSpriteCommandSpecBgR
-        {
-            rigKey = backgroundRigKey,
-            spriteKey = "slot3bg",
-            target = BackgroundRigTarget.Background_LayerRoot
-        });
-
-        Collect(new SetBackgroundSpriteCommandSpecBgR
-        {
-            rigKey = backgroundRigKey,
-            spriteKey = "slot3bg2",
-            target = BackgroundRigTarget.Background_BackLayer_Image
-        });
-
-        // Cut-in slot visibility:
-        // hide front/root layers, show object slot layer.
-        Collect(new HideRootLayersCommandSpecBgR
-        {
-            rigKey = backgroundRigKey,
-            targetMask = BackgroundRigRootMask.Background_FrontLayer_Root,
-            wait = false
-        });
-
-        Collect(new HideRootLayersCommandSpecBgR
-        {
-            rigKey = backgroundRigKey,
-            targetMask = BackgroundRigRootMask.Background_Root,
-            wait = false
-        });
-
-        Collect(new ShowRootLayersCommandSpecBgR
-        {
-            rigKey = backgroundRigKey,
-            targetMask = BackgroundRigRootMask.Background_ObjectSlotRoot,
-            wait = false
-        });
     }
     
     private void SetPresentationActor(string aliasOrActor, string actorKey = null)

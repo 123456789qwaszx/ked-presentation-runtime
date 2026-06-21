@@ -14,7 +14,7 @@ public sealed partial class YarnCommandBridge
             "blur_s2", EnqueueStage02DepthBlurSpec);
 
         runner.AddCommandHandler(
-            "blur_clear", EnqueueStageDepthBlurClearSpec);
+            "blur_reset", EnqueueStageDepthBlurClearSpec);
     }
 
     private void EnqueueStage00DepthBlurSpec(

@@ -64,7 +64,7 @@ public sealed partial class YarnCommandBridge
         RegisterFocusPlacementCommands(runner);
         RegisterDepthFocusCommands(runner);
         RegisterShowCommands(runner);
-        BindBackgroundRigDsl(runner);
+        BindBackgroundRig(runner);
         BindCharRigEmoji(runner);
         
         BindControl(runner);
@@ -92,19 +92,20 @@ public sealed partial class YarnCommandBridge
     {
         BindFramePauseAliases(runner);
         
-        runner.AddCommandHandler<float>("pause", EnqueueWaitSpec);
-        runner.AddCommandHandler<string>("ui_patch", EnqueueUIPatchSpec);
-        runner.AddCommandHandler<string>("debug_log", LogImmediate);
+        runner.AddCommandHandler<float>(
+            "pause", EnqueueWaitSpec);
         
-        runner.AddCommandHandler<string, string>(
-            "bg_cutin", EnqueueBackgroundCutInSpec);
+        runner.AddCommandHandler<string>(
+            "ui_patch", EnqueueUIPatchSpec);
+        
+        runner.AddCommandHandler<string>(
+            "debug_log", LogImmediate);
         
         runner.AddCommandHandler<string, string, string>(
             "attach_to_bg", EnqueueAttachCharRigToBackgroundObjectSlotSpec);
         
-        runner.AddCommandHandler<string, string>("actor", SetPresentationActor);
-        
-        //runner.AddCommandHandler<string, string, string>("attach_to_bg", EnqueueAttachCharRigToBackgroundObjectSlotSpec);
+        runner.AddCommandHandler<string, string>(
+            "actor", SetPresentationActor);
     }
     
     private void BindMainLaneCommands(DialogueRunner runner)
