@@ -25540,7 +25540,7 @@ MonoBehaviour:
   subPresentationRunner: {fileID: 8309902628667094135}
   oneShotRunner: {fileID: 3345179612585509291}
   presentationRouteEntry: {fileID: 1433866633}
-  yarnEntryKey: Story_TalesOfNovaEP12_01
+  yarnEntryKey: Story_TalesOfNovaEP12_02
   presentationEntryKey: emo
   runYarnKey: 50
 --- !u!4 &1924806293

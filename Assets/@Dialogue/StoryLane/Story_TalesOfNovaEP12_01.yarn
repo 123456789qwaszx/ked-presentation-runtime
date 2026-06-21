@@ -50,14 +50,16 @@ title: Story_TalesOfNovaEP12_01
 <<at_mid    @1 bust 12fr>>
 <<left      @1 1u 10fr>>
 
-_#beat #stay
+_#beat
 <<emoji_spring @1 15>>
 
 윌로: 죄송합니다만, 이번 의뢰는 보수의 3분의 1밖에 드릴 수 없겠군요.
 
 <<bg_slot_cutin bg15>>
 <<bg_move bg15 -8u 12u 0>>
+
 <<attach_to_bg c1 bg15>>
+
 <<bg_fade_in bg15 0>>
 <<bg_cutin_in2 bg15>>
 
@@ -106,7 +108,8 @@ _#beat #stay
 
 <<actor @1 willow>>
 <<left @1 4.5u 20fr>>
-_#beat #stay
+<<20fr>>
+_#beat
 
 <<actor @2 noya>>
 <<shake @2>>   
@@ -171,7 +174,12 @@ _#beat #stay
 <<char_silhouette @1 0 34fr>>
 <<face_swap       @1 11>>
 
-_#beat #stay
+<<34fr>>
+_#beat
+
+<<blur_reset>>
+<<bg_fade_out bg15 -1>>
+<<char_to_s0 @1>>
 
 윌로: 여러분이 고생하신 건 잘 알지만......
 
@@ -224,7 +232,6 @@ _#beat #stay
 
 윌로: 무슨 사정인지는 잘 알고 있습니다. 최근 몇 주간 아모르 25호 별의 탑으로 가는 여행가가 적어서, 성해 개체 수가 많이 쌓였죠.
 
-<<blur_reset>>
 
 <<actor @3 iris>>
 <<fade_in @3 8fr>>

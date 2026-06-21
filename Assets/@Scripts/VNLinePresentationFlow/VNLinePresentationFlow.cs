@@ -38,16 +38,22 @@ public partial class VNLinePresentationFlow
         _sideRunnerSyncHub = vnSideRunnerSyncHub;
         _playbackDriver = playbackDriver;
     }
-    
+
+    // recordToHistory:
+    //  - true  : 일반 대사 라인. backlog + rollback point에 기록한다.
+    //  - false : 연출 비트(staging-only beat). 대사가 없는 라인이므로 backlog/rollback에
+    //            남기지 않는다. 단, ctx.Meta는 seek 판정·MarkLineDisplayCompleted가 쓰므로
+    //            항상 빌드한다.
     private async YarnTask<LineEntryOutcome> EnterLineAndResolveSeekAsync(
         VNLinePresentationContext ctx,
-        Func<LinePresentationRun> beginRun)
+        Func<LinePresentationRun> beginRun,
+        bool recordToHistory)
     {
         SetPhase(ctx, VNLinePresentationPhase.LineReceived);
 
         _advanceState.MarkLineEntered();
         ctx.Meta = _vnYarnLineBoundary.BuildLineMeta(ctx.Line, ctx.NodeName);
-        _vnYarnLineBoundary.CommitLineEntered(ctx.Meta);
+        _vnYarnLineBoundary.CommitLineEntered(ctx.Meta, recordToHistory);
 
         // Capture the forward-settle baseline BEFORE dispatching,
         // then expect exactly subAdvanceCount more sub-beat settles.
@@ -128,7 +134,9 @@ public partial class VNLinePresentationFlow
         Func<LineCancellationToken, YarnTask> waitForAdvance,
         Func<bool> shouldFastForward)
     {
-        LineEntryOutcome outcome = await EnterLineAndResolveSeekAsync(ctx, beginRun);
+        // 일반 대사 라인: backlog + rollback에 기록한다.
+        LineEntryOutcome outcome = await EnterLineAndResolveSeekAsync(
+            ctx, beginRun, recordToHistory: true);
         if (outcome == LineEntryOutcome.PassedThrough)
             return;
 

@@ -4,16 +4,18 @@ using Yarn.Unity;
 public partial class VNLinePresentationFlow
 {
     // ---- Staging-only beat ----
-    // No dialogue box / typewriter. The line still commits meta (backlog + rollback) and
-    // consumes a sub advance via the shared front-matter. It auto-advances once its own
-    // staging (this line's wait=true commands) and the dispatched sub beat have settled.
-    // A #stay marker keeps it on screen waiting for player advance instead of auto-advancing.
+    // No dialogue box / typewriter. 대사가 없는 연출 전용 라인이므로 backlog/rollback에는
+    // 기록하지 않는다(recordToHistory: false). 다만 shared front-matter를 통해 sub advance는
+    // 그대로 소비하고, 자신의 staging(this line's wait=true commands)과 dispatch된 sub beat가
+    // settle되면 auto-advance한다. #stay 마커가 있으면 auto-advance 대신 플레이어 입력을 기다린다.
     public async YarnTask RunPresentationBeatAsync(
         VNLinePresentationContext ctx,
         Func<LinePresentationRun> beginRun,
         Func<LineCancellationToken, YarnTask> waitForAdvance)
     {
-        LineEntryOutcome outcome = await EnterLineAndResolveSeekAsync(ctx, beginRun);
+        // 연출 비트: backlog/rollback에 기록하지 않는다.
+        LineEntryOutcome outcome = await EnterLineAndResolveSeekAsync(
+            ctx, beginRun, recordToHistory: false);
         if (outcome == LineEntryOutcome.PassedThrough)
             return;
 

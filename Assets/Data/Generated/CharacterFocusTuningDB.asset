@@ -17,6 +17,7 @@ MonoBehaviour:
     body: {x: 0, y: 700}
     bust: {x: 0, y: 800}
     face: {x: -10, y: 1000}
+    faceAura: {x: 0, y: 1000}
     handLeft: {x: -220, y: 520}
     handRight: {x: 220, y: 520}
   entries:
@@ -27,6 +28,7 @@ MonoBehaviour:
       body: {x: 0, y: 0}
       bust: {x: 0, y: 0}
       face: {x: 0, y: 0}
+      faceAura: {x: 0, y: 0}
       handLeft: {x: 0, y: 0}
       handRight: {x: 0, y: 0}
   - key: Albedo
@@ -36,6 +38,7 @@ MonoBehaviour:
       body: {x: 0, y: 0}
       bust: {x: 0, y: 0}
       face: {x: 0, y: 0}
+      faceAura: {x: 0, y: 0}
       handLeft: {x: 0, y: 0}
       handRight: {x: 0, y: 0}
   - key: jeoseungsaja
@@ -45,6 +48,7 @@ MonoBehaviour:
       body: {x: 0, y: 0}
       bust: {x: 0, y: 0}
       face: {x: 0, y: 0}
+      faceAura: {x: 0, y: 0}
       handLeft: {x: 0, y: 0}
       handRight: {x: 0, y: 0}
   - key: Mercurio
@@ -54,6 +58,7 @@ MonoBehaviour:
       body: {x: 0, y: 0}
       bust: {x: 0, y: 0}
       face: {x: 30, y: 0}
+      faceAura: {x: 0, y: 0}
       handLeft: {x: 0, y: 0}
       handRight: {x: 0, y: 0}
   - key: willow
@@ -63,6 +68,7 @@ MonoBehaviour:
       body: {x: 0, y: 0}
       bust: {x: 0, y: 0}
       face: {x: 0, y: 0}
+      faceAura: {x: 0, y: 0}
       handLeft: {x: 0, y: 0}
       handRight: {x: 0, y: 0}
   - key: _
@@ -72,5 +78,6 @@ MonoBehaviour:
       body: {x: 0, y: 0}
       bust: {x: 0, y: 0}
       face: {x: 30, y: 0}
+      faceAura: {x: 0, y: 0}
       handLeft: {x: 0, y: 0}
       handRight: {x: 0, y: 0}

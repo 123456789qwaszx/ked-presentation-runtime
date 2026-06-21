@@ -41,9 +41,17 @@ public sealed class VNYarnLineBoundary
             line.TextWithoutCharacterName.Text);
     }
 
-    public void CommitLineEntered(YarnLineMeta meta)
+    // recordToHistory:
+    //  - true  : 일반 대사 라인. backlog + rollback point에 기록한다.
+    //  - false : 연출 비트(staging-only beat). 대사가 없는 라인이므로 backlog 항목으로도, rollback 네비게이션 대상으로도 남기지 않는다.
+    public void CommitLineEntered(YarnLineMeta meta, bool recordToHistory)
     {
+        // 런타임 '현재 라인' 포인터는 항상 갱신한다.
+        // (seek 타겟/저장 위치가 참조하는 현재 위치)
         _runtimeStateProvider.UpdateCurrentLineMeta(meta);
+
+        if (!recordToHistory)
+            return;
 
         _backlogRecorder.Record(meta);
         _rollbackHistory.AddRollbackPoint(meta);
