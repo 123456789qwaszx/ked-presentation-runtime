@@ -44,9 +44,12 @@ public sealed class CharacterRigVisualEffectController : IDisposable
     private static readonly int StageBlurEdgeHideId = Shader.PropertyToID("_StageBlurEdgeHide");
     private static readonly int StageBlurEdgeWidthId = Shader.PropertyToID("_StageBlurEdgeWidth");
     private static readonly int StageBlurEdgeSoftnessId = Shader.PropertyToID("_StageBlurEdgeSoftness");
-
+    
+    private readonly Image _portraitImage;
+    private readonly Image _portraitOverlayImage;
+    
     private Material _runtimeMaterial;
-
+    
     private float _dimAmount;
     private float _outerRimAmount;
     private float _innerRimAmount;
@@ -70,6 +73,9 @@ public sealed class CharacterRigVisualEffectController : IDisposable
         Image portraitOverlayImage,
         Material sourceMaterial)
     {
+        _portraitImage = portraitImage;
+        _portraitOverlayImage = portraitOverlayImage;
+
         if (portraitImage == null && portraitOverlayImage == null)
         {
             Debug.LogWarning("[CharacterRigVisualEffectController] portraitImage and portraitOverlayImage are null.");
@@ -114,22 +120,8 @@ public sealed class CharacterRigVisualEffectController : IDisposable
         ApplyStaticStyle();
         ApplyDynamicValues();
         ApplyStageBlurEdgeValues();
-    }
 
-    public void ApplyImmediate(
-        float dim,
-        float outerRim,
-        float innerRim,
-        Color outerColor,
-        Color innerColor)
-    {
-        ApplyImmediate(
-            dim,
-            _dimTintColor,
-            outerRim,
-            innerRim,
-            outerColor,
-            innerColor);
+        MarkMaterialDirty();
     }
 
     public void ApplyImmediate(
@@ -151,6 +143,7 @@ public sealed class CharacterRigVisualEffectController : IDisposable
         _innerRimColor = innerColor;
 
         ApplyDynamicValues();
+        MarkMaterialDirty();
     }
 
     public void SetStageBlurEdgeHideImmediate(float value)
@@ -160,6 +153,7 @@ public sealed class CharacterRigVisualEffectController : IDisposable
 
         _stageBlurEdgeHide = Mathf.Clamp01(value);
         ApplyStageBlurEdgeValues();
+        MarkMaterialDirty();
     }
 
     public void ClearImmediate()
@@ -179,17 +173,8 @@ public sealed class CharacterRigVisualEffectController : IDisposable
         if (_runtimeMaterial == null)
             return;
 
-        _runtimeMaterial.SetFloat(DimBrightnessId, DimBrightness);
-        _runtimeMaterial.SetFloat(DimSaturationId, DimSaturation);
-
-        _runtimeMaterial.SetFloat(RimWidthId, OuterRimWidth);
-        _runtimeMaterial.SetFloat(RimSoftnessId, OuterRimSoftness);
-
-        _runtimeMaterial.SetFloat(InnerRimWidthId, InnerRimWidth);
-        _runtimeMaterial.SetFloat(InnerRimSoftnessId, InnerRimSoftness);
-
-        _runtimeMaterial.SetFloat(StageBlurEdgeWidthId, DefaultStageBlurEdgeWidth);
-        _runtimeMaterial.SetFloat(StageBlurEdgeSoftnessId, DefaultStageBlurEdgeSoftness);
+        ApplyStaticStyleTo(_runtimeMaterial);
+        PushMaterialToGraphics();
     }
 
     private void ApplyDynamicValues()
@@ -197,14 +182,8 @@ public sealed class CharacterRigVisualEffectController : IDisposable
         if (_runtimeMaterial == null)
             return;
 
-        _runtimeMaterial.SetFloat(DimAmountId, _dimAmount);
-        _runtimeMaterial.SetColor(DimTintColorId, _dimTintColor);
-
-        _runtimeMaterial.SetFloat(RimAmountId, _outerRimAmount);
-        _runtimeMaterial.SetColor(RimColorId, _outerRimColor);
-
-        _runtimeMaterial.SetFloat(InnerRimAmountId, _innerRimAmount);
-        _runtimeMaterial.SetColor(InnerRimColorId, _innerRimColor);
+        ApplyDynamicValuesTo(_runtimeMaterial);
+        PushMaterialToGraphics();
     }
 
     private void ApplyStageBlurEdgeValues()
@@ -212,7 +191,8 @@ public sealed class CharacterRigVisualEffectController : IDisposable
         if (_runtimeMaterial == null)
             return;
 
-        _runtimeMaterial.SetFloat(StageBlurEdgeHideId, _stageBlurEdgeHide);
+        ApplyStageBlurEdgeValuesTo(_runtimeMaterial);
+        PushMaterialToGraphics();
     }
 
     public void Dispose()
@@ -226,5 +206,70 @@ public sealed class CharacterRigVisualEffectController : IDisposable
             Object.Destroy(_runtimeMaterial);
             _runtimeMaterial = null;
         }
+    }
+    
+    private void MarkMaterialDirty()
+    {
+        if (_portraitImage != null)
+            _portraitImage.SetMaterialDirty();
+
+        if (_portraitOverlayImage != null)
+            _portraitOverlayImage.SetMaterialDirty();
+    }
+    
+    private void ApplyDynamicValuesTo(Material material)
+    {
+        material.SetFloat(DimAmountId, _dimAmount);
+        material.SetColor(DimTintColorId, _dimTintColor);
+
+        material.SetFloat(RimAmountId, _outerRimAmount);
+        material.SetColor(RimColorId, _outerRimColor);
+
+        material.SetFloat(InnerRimAmountId, _innerRimAmount);
+        material.SetColor(InnerRimColorId, _innerRimColor);
+    }
+
+    private void ApplyStaticStyleTo(Material material)
+    {
+        material.SetFloat(DimBrightnessId, DimBrightness);
+        material.SetFloat(DimSaturationId, DimSaturation);
+
+        material.SetFloat(RimWidthId, OuterRimWidth);
+        material.SetFloat(RimSoftnessId, OuterRimSoftness);
+
+        material.SetFloat(InnerRimWidthId, InnerRimWidth);
+        material.SetFloat(InnerRimSoftnessId, InnerRimSoftness);
+
+        material.SetFloat(StageBlurEdgeWidthId, DefaultStageBlurEdgeWidth);
+        material.SetFloat(StageBlurEdgeSoftnessId, DefaultStageBlurEdgeSoftness);
+    }
+
+    private void ApplyStageBlurEdgeValuesTo(Material material)
+    {
+        material.SetFloat(StageBlurEdgeHideId, _stageBlurEdgeHide);
+    }
+    
+    private void PushMaterialToGraphics()
+    {
+        PushMaterialToGraphic(_portraitImage);
+        PushMaterialToGraphic(_portraitOverlayImage);
+    }
+
+    private void PushMaterialToGraphic(Image image)
+    {
+        if (image == null)
+            return;
+
+        image.SetMaterialDirty();
+
+        Material renderingMaterial = image.materialForRendering;
+        if (renderingMaterial == null)
+            return;
+
+        ApplyStaticStyleTo(renderingMaterial);
+        ApplyDynamicValuesTo(renderingMaterial);
+        ApplyStageBlurEdgeValuesTo(renderingMaterial);
+
+        image.canvasRenderer.SetMaterial(renderingMaterial, image.mainTexture);
     }
 }

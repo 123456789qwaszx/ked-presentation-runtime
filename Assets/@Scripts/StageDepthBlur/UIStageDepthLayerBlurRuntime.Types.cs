@@ -3,22 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public enum PresentationStageKey
-{
-    Stage00 = 0,
-    Stage01 = 1,
-    Stage02 = 2
-}
-
-public enum PresentationDepthLayerKey
-{
-    Far = 0,
-    Back = 1,
-    Mid = 2,
-    Front = 3,
-    Close = 4
-}
-
 public sealed partial class UIStageDepthLayerBlurRuntime
 {
     private static readonly PresentationStageKey[] StageKeys =

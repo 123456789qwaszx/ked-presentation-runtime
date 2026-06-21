@@ -37,9 +37,7 @@ public sealed class StageDepthDefocusCommandSpec : CommandSpecBase
     public Ease ease = Ease.OutCubic;
 }
 
-// Ownership boundary:
-//   Command : presentation state, including overlay alpha and character edge hide.
-//   Runtime : baked image state, including RawImage binding, coverage, capture, blur, and rebakes.
+// own presentation state, including overlay alpha and character edge hide.
 // The command only asks IStageDepthLayerBlurRuntime to start or stop baking this layer.
 public sealed class StageDepthDefocusCommand : CommandBase
 {
@@ -63,7 +61,6 @@ public sealed class StageDepthDefocusCommand : CommandBase
     private readonly IStageDepthLayerBlurRuntime _runtime;
 
     private bool _resolveAttempted;
-    private bool _targetResolved;
     private PresentationDepthDefocusTarget _target;
     private CanvasGroup _canvasGroup;
     
@@ -91,10 +88,7 @@ public sealed class StageDepthDefocusCommand : CommandBase
     {
         if (!_resolveAttempted)
             ResolveRefs(scope);
-
-        if (!_targetResolved)
-            yield break;
-
+        
         ClaimTarget(scope);
 
         if (_spec.duration <= 0f)
@@ -127,9 +121,6 @@ public sealed class StageDepthDefocusCommand : CommandBase
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (!_targetResolved)
-            return;
-
         if (!HasClaimed)
             ClaimTarget(scope);
 
@@ -138,12 +129,10 @@ public sealed class StageDepthDefocusCommand : CommandBase
 
     private void ResolveRefs(CommandRunScope scope)
     {
-        _resolveAttempted = true;
-
         _runtime.ResolveTarget(_spec.stage, _spec.layer, out _target);
-
         _canvasGroup = _target.OverlayCanvasGroup;
-        _targetResolved = true;
+        
+        _resolveAttempted = true;
     }
 
     // Captures edge-hide targets under the content root at claim time.
@@ -155,9 +144,6 @@ public sealed class StageDepthDefocusCommand : CommandBase
         RectTransform contentRoot = _target.SourceContentRoot;
         CharacterRigRegistry rigs = scope.CharacterRigs;
 
-        if (contentRoot == null || rigs == null)
-            return;
-
         _rigScratch.Clear();
         rigs.CollectAliveRigs(_rigScratch);
 
@@ -165,17 +151,12 @@ public sealed class StageDepthDefocusCommand : CommandBase
         {
             CharacterRigRefs refs = _rigScratch[i];
 
-            if (refs?.RigRoot == null || refs.VisualEffect == null)
-                continue;
-
             if (!IsDescendantOf(refs.RigRoot, contentRoot))
                 continue;
 
-            CharacterRigVisualEffectController controller = refs.VisualEffect;
-
             _edgeHideBindings.Add(new EdgeHideBinding(
-                controller,
-                controller.StageBlurEdgeHide));
+                refs.VisualEffect, 
+                refs.VisualEffect.StageBlurEdgeHide));
         }
     }
 
@@ -290,9 +271,7 @@ public sealed class StageDepthDefocusCommand : CommandBase
         return new OverlayState(0f);
     }
     
-    private void ApplyState(
-        OverlayState state,
-        float t)
+    private void ApplyState(OverlayState state, float t)
     {
         _canvasGroup.alpha = state.Alpha;
 

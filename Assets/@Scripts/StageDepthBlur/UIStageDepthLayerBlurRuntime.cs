@@ -2,38 +2,17 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-// ─────────────────────────────────────────────────────────────────────────────
-// UIStageDepthLayerBlurRuntime  (Baker / 메커니즘)
+
+// - (원본 rig를 직접 블러하지 않는다)
+// - captureRoot 아래 proxy Image를 구성.
+// - 공유 UICaptureCamera로 source RT에 렌더하고, UIStageBlurController로 블러.
+// - 결과를 layer 전용 BakedTexture로 스냅샷해 overlay RawImage에 표시.
 //
-// 역할:
-//   PresentationStage (Stage00~02) x (Far/Back/Mid/Front/Close) depth layer 별
-//   defocus 블러를 매 프레임 굽고 결과를 각 layer의 FrostedGlass overlay(RawImage)에 쓴다.
-//     - 원본 rig를 직접 블러하지 않는다. captureRoot 아래 proxy Image를 구성한다.
-//     - 공유 UICaptureCamera로 source RT에 렌더하고, UIStageBlurController로 블러한다.
-//     - 결과를 layer 전용 BakedTexture로 스냅샷해 overlay RawImage에 표시한다.
-//
-// 소유권 경계 (StageDepthDefocusCommand와의 계약):
-//   Baker   : RawImage(texture/uvRect/enabled), coverage padding 기하, 캡처·블러·스냅샷, 추적 재bake.
-//   Command : OverlayCanvasGroup.alpha + 캐릭터 edge hide 전이/최종값.
-//   → 이 클래스는 alpha/visibility tween을 더 이상 소유하지 않는다(과거 SetOverlayVisible 제거).
-//   "이 layer가 defocus 상태"는 BeginLayer~EndLayer 사이 IsTracking으로 표현되는 지속 상태이며,
-//   Command tween이 끝나도 LateUpdate가 계속 추적 재bake한다.
-//
-// 좌표계 계약(BG 경로와 동일):
-//   source rig image world corners → WorldToScreenPoint → ScreenPointToLocalPointInRectangle(captureRoot)
-//   → proxy 배치 → captureCamera가 captureRoot(풀스크린)를 source RT에 1:1 렌더
-//   → overlay RawImage가 현재 화면 rect 기준 uvRect로 표시.
-//
-// 유지되는 핵심 수정:
-//   (1) 런타임 생성 캡처 오브젝트의 layer를 captureRoot.layer로 강제(컬링 방지).
-//   (2) 캐릭터 runtime effect material을 캡처에 끌고 오지 않는다(plain 스프라이트를 블러).
-//   (3) captureRoot 풀스크린 강제 + source RT 종횡비 1:1 검증.
-//   (3-1) overlay는 depth 렌더 순서 안에 두고 screen-space RT 샘플링은 uvRect로 보정.
-//   (3-3) coverage padding으로 layer 경계 잘림 완화.
-//   (4) 공유 blurController/RT: bake 동안 외부 콘텐츠 격리 + layer 전용 BakedTexture 스냅샷.
-//
-// SoC: source image 수집 책임은 UIStageDepthLayerSourceCollector로 분리.
-// ─────────────────────────────────────────────────────────────────────────────
+// 좌표계 계약:
+// -> source rig image world corners -> WorldToScreenPoint
+// -> ScreenPointToLocalPointInRectangle(captureRoot)
+// -> proxy 배치                      -> captureCamera가 captureRoot(풀스크린)를 source RT에 1:1 렌더
+// -> overlay RawImage가 현재 화면 rect 기준 uvRect로 표시.
 public sealed partial class UIStageDepthLayerBlurRuntime : MonoBehaviour, IStageDepthLayerBlurRuntime
 {
     [Header("Capture Canvas")]

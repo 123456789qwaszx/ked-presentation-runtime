@@ -84,7 +84,6 @@ public sealed partial class UIStageDepthLayerBlurRuntime
         state.Target.OverlayRawImage.enabled = false;
     }
 
-    // ── proxy 동기화 ────────────────────────────────────────────────────────────
     private static bool SyncGraphicState(SourceImageEntry source, Image proxy)
     {
         Image src = source.Image;
@@ -213,7 +212,6 @@ public sealed partial class UIStageDepthLayerBlurRuntime
         return changed;
     }
 
-    // ── 공유 캡처 격리 ──────────────────────────────────────────────────────────
     private void IsolateForeignCaptureContent(HashSet<Image> keepEnabled)
     {
         _foreignDisabledBuffer.Clear();
@@ -246,14 +244,13 @@ public sealed partial class UIStageDepthLayerBlurRuntime
         _foreignDisabledBuffer.Clear();
     }
 
-    // ── proxy pool 비활성 ──────────────────────────────────────────────────────
     private void DisableAllProxyPools()
     {
         foreach (KeyValuePair<LayerKey, ProxyPool> pair in _proxyPools)
             pair.Value?.DisableAll();
     }
 
-    // ── baked texture(layer 전용 스냅샷) ───────────────────────────────────────
+    // baked texture(layer 전용 스냅샷)
     private static void EnsureBakedTexture(LayerState state, RenderTexture source)
     {
         bool valid =

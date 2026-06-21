@@ -62,7 +62,8 @@ public sealed class UIStageBlurController : MonoBehaviour
             return;
 
         downsample = value;
-        RecreateRenderTextures();
+        ReleaseRenderTextures();
+        EnsureRenderTextures();
     }
 
     private void ClearCaptureTarget()
@@ -166,12 +167,6 @@ public sealed class UIStageBlurController : MonoBehaviour
 
         rt.Create();
         return rt;
-    }
-
-    private void RecreateRenderTextures()
-    {
-        ReleaseRenderTextures();
-        EnsureRenderTextures();
     }
 
     private void ReleaseRenderTextures()

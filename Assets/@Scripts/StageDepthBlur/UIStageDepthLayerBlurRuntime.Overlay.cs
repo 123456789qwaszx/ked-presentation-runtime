@@ -19,8 +19,9 @@ public sealed partial class UIStageDepthLayerBlurRuntime
         SyncOverlayUvRectToScreen(rawImage);
     }
 
-    // BakedTexture는 화면 전체 기준 screen-space RT다. RawImage는 depth layer 안쪽 렌더 순서를 지키되,
-    // 현재 화면에서 차지하는 영역만 RT에서 샘플링하도록 uvRect를 맞춘다.
+    // BakedTexture는 화면 전체 기준 screen-space RT다.
+    // RawImage는 depth layer 안쪽 렌더 순서를 지키되,
+    // 현재 화면에서 차지하는 영역만 RT에서 샘플링하도록 uvRect를 맞춤.
     private void SyncOverlayUvRectToScreen(RawImage rawImage)
     {
         if (rawImage == null)
@@ -147,16 +148,5 @@ public sealed partial class UIStageDepthLayerBlurRuntime
         return new Vector2(
             Mathf.Abs(delta.x),
             Mathf.Abs(delta.y));
-    }
-
-    // source가 비어 추적할 게 없으면 추적 중단 + overlay 끔.
-    // (alpha는 Command 소유이므로 여기서 건드리지 않는다. RawImage만 끈다.)
-    private void StopTrackingAndHideImmediate(LayerState state)
-    {
-        state.IsTracking = false;
-
-        ResetOverlayCoveragePadding(state);
-
-        state.Target.OverlayRawImage.enabled = false;
     }
 }
