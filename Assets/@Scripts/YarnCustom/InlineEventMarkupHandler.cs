@@ -16,18 +16,15 @@ public sealed class InlineEventMarkupHandler : ActionMarkupHandler
     private IInlineSignalHost _inlineSignalHost;
     private IInlineAudioHost _inlineAudioHost;
     private IInlineEmojiHost _inlineEmojiHost;
-    private IInlinePresentationHost _inlinePresentationHost;
 
     public void Initialize(
         IInlineSignalHost inlineSignalHost, 
         IInlineAudioHost inlineAudioHost, 
-        IInlineEmojiHost inlineEmojiHost,
-        IInlinePresentationHost inlinePresentationHost)
+        IInlineEmojiHost inlineEmojiHost)
     {
         _inlineSignalHost = inlineSignalHost;
         _inlineAudioHost = inlineAudioHost;
         _inlineEmojiHost = inlineEmojiHost;
-        _inlinePresentationHost = inlinePresentationHost;
     }
 
     public interface IInlineSignalHost
@@ -45,14 +42,6 @@ public sealed class InlineEventMarkupHandler : ActionMarkupHandler
         void PlayEmojiCue(string cue);
     }
 
-    // 대사 진행 중 subPresentationLane을 추가로 진행시킨다.
-    // 커맨드 "pres_advance"(= VNSideRunnerSyncHub.StepPresentationOnce)와 동일한 효과.
-    // 구현체는 _sideRunnerSyncHub.StepPresentationOnce(steps)를 호출하면 된다.
-    public interface IInlinePresentationHost
-    {
-        void AdvanceSubPresentation(int steps = 1);
-    }
-
     [Serializable]
     public sealed class StringEvent : UnityEvent<string>
     {
@@ -64,8 +53,7 @@ public sealed class InlineEventMarkupHandler : ActionMarkupHandler
         Signal = 1,
         Move = 2,
         Sfx = 3,
-        Emoji = 4,
-        Advance = 5
+        Emoji = 4
     }
 
     private struct InlineAction
@@ -79,8 +67,6 @@ public sealed class InlineEventMarkupHandler : ActionMarkupHandler
         public float sfxGain;
 
         public string emojiCue;
-
-        public int advanceSteps;
     }
 
     private struct ActionBucket
@@ -126,38 +112,14 @@ public sealed class InlineEventMarkupHandler : ActionMarkupHandler
     private bool _suppressMoves;
     private bool _suppressSfx;
     private bool _suppressEmoji;
-    private bool _suppressAdvance;
     
     public void SetPauseIgnored(bool ignored)
     {
         _ignorePause = ignored;
     }
 
-    // suppressAdvance 기본값은 false다.
-    // seek/rollback의 pass-through 라인은 타이프라이터 자체가 돌지 않아 인라인 advance가
-    // 발화되지 않으므로(= OnCharacterWillAppear 미호출), 정방향/스킵에서는 항상 발화시켜
-    // 서브 레인 동기를 유지하는 것이 안전하다. 굳이 억제가 필요한 호출부에서만 명시적으로 true.
-    public void SetReplaySuppressed(
-        bool suppressSignals,
-        bool suppressMoves,
-        bool suppressSfx = true,
-        bool suppressEmoji = false,
-        bool suppressAdvance = false)
-    {
-        _suppressSignals = suppressSignals;
-        _suppressMoves = suppressMoves;
-        _suppressSfx = suppressSfx;
-        _suppressEmoji = suppressEmoji;
-        _suppressAdvance = suppressAdvance;
-    }
-
-    /// <summary>
-    /// Force-fires any pending point-actions that must still take effect on HurryUp/skip:
-    /// signals(always) and sub-presentation advances(unless suppressed).
-    /// pause/move/sfx/emoji are skipped.
-    /// advance를 함께 flush하는 이유: 스킵 경로가 정상 재생과 동일한 서브 레인 위치로 수렴해야
-    /// 하기 때문(라인 중간 [advance]를 건너뛰고 hurry-up하면 서브 레인이 한 칸 뒤처져 desync).
-    /// </summary>
+    // Force-fires any pending point-actions that must still take effect on HurryUp/skip:
+    // signals(always) and sub-presentation advances(unless suppressed).
     public void FlushPendingSignals()
     {
         if (string.IsNullOrEmpty(_plainText)) return;
@@ -176,35 +138,22 @@ public sealed class InlineEventMarkupHandler : ActionMarkupHandler
             ActionBucket bucket = kvp.Value;
 
             if (bucket.hasSingle)
-                FlushActionOnSkip(bucket.single);
+            {
+                if (bucket.single.type == InlineActionType.Signal)
+                    _inlineSignalHost?.RaiseSignal(bucket.single.signalKey);
+            }
 
             if (bucket.many != null)
             {
                 foreach (InlineAction action in bucket.many)
-                    FlushActionOnSkip(action);
+                {
+                    if (action.type == InlineActionType.Signal)
+                        _inlineSignalHost?.RaiseSignal(action.signalKey);
+                }
             }
         }
 
         _lastProcessedCharIndex = textLength;
-    }
-
-    // hurry-up/skip 시 "반드시 일어나야 하는" point action만 즉시 발화.
-    private void FlushActionOnSkip(in InlineAction action)
-    {
-        switch (action.type)
-        {
-            case InlineActionType.Signal:
-                // 기존 동작 유지: signal은 억제 여부와 무관하게 flush.
-                _inlineSignalHost?.RaiseSignal(action.signalKey);
-                return;
-
-            case InlineActionType.Advance:
-                if (_suppressAdvance)
-                    return;
-
-                _inlinePresentationHost?.AdvanceSubPresentation(action.advanceSteps);
-                return;
-        }
     }
 
     public override void OnPrepareForLine(MarkupParseResult line, TMP_Text text)
@@ -226,10 +175,6 @@ public sealed class InlineEventMarkupHandler : ActionMarkupHandler
                 case "move": RegisterMove(attr); break;
                 case "sfx": RegisterSfx(attr); break;
                 case "emoji": RegisterEmoji(attr); break;
-                case "advance":
-                case "pres_advance":
-                    RegisterAdvance(attr);
-                    break;
             }
         }
     }
@@ -309,15 +254,6 @@ public sealed class InlineEventMarkupHandler : ActionMarkupHandler
 
                 if (!string.IsNullOrWhiteSpace(action.emojiCue))
                     _inlineEmojiHost?.PlayEmojiCue(action.emojiCue);
-                return;
-
-            case InlineActionType.Advance:
-                if (_suppressAdvance)
-                    return;
-
-                // 라인 커밋 이후(타이프라이터 단계)에만 호출되므로 서브 레인을 직접 진행시켜도 안전.
-                // 커맨드 "pres_advance"와 동일 경로(StepPresentationOnce).
-                _inlinePresentationHost?.AdvanceSubPresentation(action.advanceSteps);
                 return;
         }
     }
@@ -420,31 +356,6 @@ public sealed class InlineEventMarkupHandler : ActionMarkupHandler
         {
             type = InlineActionType.Emoji,
             emojiCue = cue,
-        });
-    }
-
-    private void RegisterAdvance(MarkupAttribute attr)
-    {
-        // [advance/]            -> 1 step
-        // [advance n=2/]        -> 2 steps
-        // [advance =2/]         -> 2 steps (shorthand)
-        // [pres_advance =2/]    -> 동일 (커맨드 vocabulary와 맞춤)
-        int steps = 1;
-
-        if (TryGetFloatSmart(attr, "n", out float n) ||
-            TryGetFloatSmart(attr, "steps", out n) ||
-            TryGetFloatSmart(attr, "advance", out n) ||       // [advance =2/] shorthand
-            TryGetFloatSmart(attr, "pres_advance", out n))    // [pres_advance =2/] shorthand
-        {
-            steps = Mathf.Max(1, Mathf.RoundToInt(n));
-        }
-
-        int idx = NormalizeIndexFast(attr.Position);
-
-        AddAction(idx, new InlineAction
-        {
-            type = InlineActionType.Advance,
-            advanceSteps = steps,
         });
     }
 

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
 
-public sealed class CommandExecutor : MonoBehaviour
+public partial class CommandExecutor : MonoBehaviour
 {
     private SequencePlayer _sequencePlayer;
     private CompositeCommandFactory _factory;
@@ -20,29 +20,7 @@ public sealed class CommandExecutor : MonoBehaviour
         _sequencePlayer = new SequencePlayer(this);
         _factory = factory;
     }
-
-    public void PlayStep(NodeSpec node, int stepIndex, CommandRunScope scope)
-    {
-        CloseActiveTicketIfOpen(CommandRunTicketCloseReason.Superseded);
-
-        int runId = _runId;
-        _activeScope = scope;
-
-        CleanupPolicy policy = DecideCleanupPolicy(_activeScope);
-        _activeScope.CleanupStep(policy);
-
-        List<ISequenceCommand> commands = BuildCommandsFromStep(node, stepIndex);
-        int commandCount = commands.Count;
-
-        var ticket = new CommandRunTicket(commandCount);
-        _activeTicket = ticket;
-
-        ResetToken();
-        _activeScope.Token = _cts.Token;
-
-        _mainRoutine = StartCoroutine(RunNode(commands, _activeScope, runId, ticket));
-    }
-
+    
     public CommandRunTicket PlaySpecs(IReadOnlyList<CommandSpecBase> specs, CommandRunScope scope)
     {
         CloseActiveTicketIfOpen(CommandRunTicketCloseReason.Superseded);
@@ -65,43 +43,6 @@ public sealed class CommandExecutor : MonoBehaviour
         _mainRoutine = StartCoroutine(RunNode(commands, _activeScope, runId, ticket));
 
         return ticket;
-    }
-
-    public IEnumerator PlaySpecsBlocking(IReadOnlyList<CommandSpecBase> specs, CommandRunScope scope)
-    {
-        CloseActiveTicketIfOpen(CommandRunTicketCloseReason.Superseded);
-
-        int runId = _runId;
-        _activeScope = scope;
-
-        CleanupPolicy policy = DecideCleanupPolicy(_activeScope);
-        _activeScope.CleanupStep(policy);
-
-        List<ISequenceCommand> commands = BuildCommandsFromSpecs(specs);
-        int commandCount = commands.Count;
-
-        var ticket = new CommandRunTicket(commandCount);
-        _activeTicket = ticket;
-
-        ResetToken();
-        _activeScope.Token = _cts.Token;
-
-        yield return RunNode(commands, _activeScope, runId, ticket);
-    }
-
-    private List<ISequenceCommand> BuildCommandsFromStep(NodeSpec node, int stepIndex)
-    {
-        var list = new List<ISequenceCommand>();
-
-        if (node == null || node.steps == null || node.steps.Count == 0)
-            return list;
-
-        if (stepIndex < 0 || stepIndex >= node.steps.Count)
-            return list;
-
-        StepSpec step = node.steps[stepIndex];
-
-        return BuildCommandsFromSpecs(step.compiled);
     }
 
     private List<ISequenceCommand> BuildCommandsFromSpecs(IReadOnlyList<CommandSpecBase> specs)

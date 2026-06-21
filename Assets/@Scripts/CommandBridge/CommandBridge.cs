@@ -2,7 +2,7 @@ using System.Collections;
 using UnityEngine;
 using Yarn.Unity;
 
-public sealed partial class YarnCommandBridge : InlineEventMarkupHandler.IInlinePresentationHost
+public sealed partial class YarnCommandBridge
 {
     private readonly YarnBridgePlaybackDriver _playbackDriver;
     private readonly VNRuntimeStateProvider _vnRuntimeStateProvider;
@@ -47,9 +47,6 @@ public sealed partial class YarnCommandBridge : InlineEventMarkupHandler.IInline
     private void HoldSubPresentation(int lines = 1) => _sideRunnerSyncHub.HoldPresentation(lines);
     private void AdvanceSubPresentationExtra(int steps = 1) => _sideRunnerSyncHub.StepPresentationOnce(steps);
     private void SetSubPresentationSuppressFirst(bool suppress) => _sideRunnerSyncHub.SetPresentationSuppressFirstAutoAdvance(suppress);
-    
-    // inlineEventMarkup전용
-    public void AdvanceSubPresentation(int steps = 1) => _sideRunnerSyncHub.StepPresentationOnce(steps);
     
     private IEnumerator RunOneShotNode(string nodeName)
     {

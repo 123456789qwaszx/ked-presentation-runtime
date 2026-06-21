@@ -23,17 +23,10 @@ public sealed class CommandRunTicket
     private int _enteredCount;
     private int _failedCount;
 
-    public int TotalCount => _totalCount;
-    public int EnteredCount => _enteredCount;
-    public int FailedCount => _failedCount;
-
     public bool EntryClosed { get; private set; }
     public CommandRunTicketCloseReason CloseReason { get; private set; } =
         CommandRunTicketCloseReason.None;
 
-    // 기존 코드 호환용.
-    // 이제 의미상 "정상 완료"만 true다.
-    public bool EntrySatisfied => EntryCompletedSuccessfully;
 
     public bool EntryCompletedSuccessfully =>
         EntryClosed &&
@@ -83,11 +76,6 @@ public sealed class CommandRunTicket
             return;
 
         _failedCount++;
-    }
-
-    public void CloseEntry()
-    {
-        CloseEntry(CommandRunTicketCloseReason.Completed);
     }
 
     public void CloseEntry(CommandRunTicketCloseReason reason)

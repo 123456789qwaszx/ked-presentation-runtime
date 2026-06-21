@@ -359,7 +359,7 @@ public class VnAppBootstrap : MonoBehaviour
         
         oneShotPresentationPresenter.Initialize(subOneShotRunner, yarnLaneDebugView);
         
-        inlineEventMarkupHandler.Initialize(_presentationSessionBridge, inlineSfxHost, yarnCommandBridge, yarnCommandBridge);
+        inlineEventMarkupHandler.Initialize(_presentationSessionBridge, inlineSfxHost, yarnCommandBridge);
     }
     
     private void BootstrapDialogueAdvanceInput()

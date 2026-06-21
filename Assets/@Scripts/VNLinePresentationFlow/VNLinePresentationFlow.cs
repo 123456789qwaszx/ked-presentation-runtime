@@ -39,11 +39,6 @@ public partial class VNLinePresentationFlow
         _playbackDriver = playbackDriver;
     }
 
-    // recordToHistory:
-    //  - true  : 일반 대사 라인. backlog + rollback point에 기록한다.
-    //  - false : 연출 비트(staging-only beat). 대사가 없는 라인이므로 backlog/rollback에
-    //            남기지 않는다. 단, ctx.Meta는 seek 판정·MarkLineDisplayCompleted가 쓰므로
-    //            항상 빌드한다.
     private async YarnTask<LineEntryOutcome> EnterLineAndResolveSeekAsync(
         VNLinePresentationContext ctx,
         Func<LinePresentationRun> beginRun,
