@@ -8,6 +8,8 @@ public enum CharacterFocusPreset
     Body = 10,
     Bust = 20,
     Face = 30,
+    
+    FaceAura = 31,
 
     HandLeft = 40,
     HandRight = 41,
@@ -22,6 +24,9 @@ public struct CharacterFocusOffsetSet
     public Vector2 body;
     public Vector2 bust;
     public Vector2 face;
+    
+    [Header("Expression / Emoji Focus Offsets")]
+    public Vector2 faceAura;
 
     [Header("Extra Focus Offsets")]
     public Vector2 handLeft;
@@ -42,6 +47,9 @@ public struct CharacterFocusOffsetSet
 
             case CharacterFocusPreset.Face:
                 return face;
+            
+            case CharacterFocusPreset.FaceAura:
+                return faceAura;
 
             case CharacterFocusPreset.HandLeft:
                 return handLeft;
@@ -60,6 +68,8 @@ public struct CharacterFocusOffsetSet
         body = new Vector2(0f, 400f),
         bust = new Vector2(0f, 600f),
         face = new Vector2(0f, 850f),
+        
+        faceAura = new Vector2(0f, 1000f),
 
         handLeft = new Vector2(-220f, 520f),
         handRight = new Vector2(220f, 520f),
