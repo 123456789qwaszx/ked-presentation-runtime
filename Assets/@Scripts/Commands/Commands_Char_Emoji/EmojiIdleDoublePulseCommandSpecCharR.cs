@@ -11,6 +11,7 @@ using UnityEngine;
 public sealed class EmojiIdleDoublePulseCommandSpecCharR : CharacterRigCommandSpecBase
 {
     [Header("Target")]
+    public CharacterRigTarget rootTarget = CharacterRigTarget.CharacterEmojiSlot00_Root;
     public CharacterRigTarget target = CharacterRigTarget.EmojiSlot00_Scale;
 
     [Header("Timing")]
@@ -33,20 +34,32 @@ public sealed class EmojiIdleDoublePulseCommandSpecCharR : CharacterRigCommandSp
 
     public Ease upEase = Ease.OutSine;
     public Ease downEase = Ease.InOutSine;
+
+    [Header("Step Cleanup")]
+    [Tooltip("다음 Line/Step으로 넘어갈 때 이모지 Root를 숨긴다.")]
+    public bool hideRootOnStepFinished = true;
 }
 
 public sealed class EmojiIdleDoublePulseCommandCharR : CommandBase
 {
+    private const float StepFinishSpeedUpMultiplier = 30f;
+
     private readonly EmojiIdleDoublePulseCommandSpecCharR _spec;
+
+    private RectTransform _root;
+    private CanvasGroup _rootCanvasGroup;
 
     private RectTransform _rect;
     private Vector3 _baseScale;
-    private Sequence _sequence;
+
+    private Tween _tween;
 
     private bool _resolveAttempted;
+
     private bool HasClaimedTarget { get; set; }
 
     // 이 command는 항상 background idle이다.
+    // wait=true가 되면 infinite loop 때문에 step 진행이 막힐 수 있으므로 spec.wait를 보지 않는다.
     public override bool WaitForCompletion => false;
 
     public EmojiIdleDoublePulseCommandCharR(EmojiIdleDoublePulseCommandSpecCharR spec)
@@ -60,11 +73,13 @@ public sealed class EmojiIdleDoublePulseCommandCharR : CommandBase
             ResolveRefs(scope);
 
         ClaimTarget();
+
+        if (_spec.initialDelay > 0f)
+            yield return WaitUnscaled(_spec.initialDelay);
+
         PlayLoop();
 
-        // SequencePlayer가 이 coroutine을 background lifetime에 묶을 수 있도록
-        // 끝나지 않는 tween completion yield를 반환한다.
-        yield return _sequence.WaitForCompletion();
+        yield return _tween.WaitForCompletion();
     }
 
     protected override void OnSkip(CommandRunScope scope)
@@ -75,36 +90,7 @@ public sealed class EmojiIdleDoublePulseCommandCharR : CommandBase
         if (!HasClaimedTarget)
             ClaimTarget();
 
-        CommitFinalState();
-    }
-
-    public override void RegisterStepLifetime(
-        CommandRunScope scope,
-        MonoBehaviour host,
-        IEnumerator routine)
-    {
-        scope.TrackStep(
-            cancel: () =>
-            {
-                if (routine != null)
-                    host.StopCoroutine(routine);
-
-                CommitFinalState();
-            },
-            finish: () =>
-            {
-                if (routine != null)
-                    host.StopCoroutine(routine);
-
-                OnStepLifetimeFinished(scope);
-            });
-    }
-
-    protected override void OnStepLifetimeFinished(CommandRunScope scope)
-    {
-        if (!HasClaimedTarget)
-            return;
-
+        KillActiveTween();
         CommitFinalState();
     }
 
@@ -116,6 +102,9 @@ public sealed class EmojiIdleDoublePulseCommandCharR : CommandBase
             CharacterRigTargetResolver.ResolveCharRigFromTargetKey(
                 scope,
                 _spec.slotKey);
+
+        _root = rigRefs.GetRect(_spec.rootTarget);
+        _rootCanvasGroup = _root.GetComponent<CanvasGroup>();
 
         _rect = rigRefs.GetRect(_spec.target);
     }
@@ -131,28 +120,18 @@ public sealed class EmojiIdleDoublePulseCommandCharR : CommandBase
 
     private void PlayLoop()
     {
-        KillSequence();
+        KillActiveTween();
 
-        float pulseDuration =
-            _spec.firstUpDuration +
-            _spec.firstDownDuration +
-            _spec.pulseGap +
-            _spec.secondUpDuration +
-            _spec.secondDownDuration;
+        float pulseDuration = CalculatePulseDuration();
+        float restDuration = Mathf.Max(0f, _spec.interval - pulseDuration);
 
-        float restDuration =
-            Mathf.Max(0f, _spec.interval - pulseDuration);
-
-        _sequence = DOTween.Sequence()
+        Sequence sequence = DOTween.Sequence()
             .SetUpdate(true)
             .SetTarget(_rect);
 
-        if (_spec.initialDelay > 0f)
-            _sequence.AppendInterval(_spec.initialDelay);
+        AppendDoublePulse(sequence, restDuration);
 
-        AppendDoublePulse(_sequence, restDuration);
-
-        _sequence.SetLoops(-1, LoopType.Restart);
+        _tween = sequence.SetLoops(-1, LoopType.Restart);
     }
 
     private void AppendDoublePulse(Sequence sequence, float restDuration)
@@ -178,23 +157,109 @@ public sealed class EmojiIdleDoublePulseCommandCharR : CommandBase
 
     private void CommitFinalState()
     {
-        KillSequence();
-
-        if (_rect != null)
-        {
-            _rect.DOKill(false);
-            _rect.localScale = _baseScale;
-        }
+        _rect.localScale = _baseScale;
+        HideRootOnStepFinished();
 
         HasClaimedTarget = false;
+        _tween = null;
     }
 
-    private void KillSequence()
+    private void KillActiveTween()
     {
-        if (_sequence != null && _sequence.IsActive())
-            _sequence.Kill(false);
+        if (_tween != null && _tween.IsActive())
+            _tween.Kill(false);
 
-        _sequence = null;
+        _tween = null;
+    }
+
+    #region StepLifetimeHook
+
+    protected override void OnStepLifetimeFinished(CommandRunScope scope)
+    {
+        if (!HasClaimedTarget)
+            return;
+
+        KillActiveTween();
+
+        HideRootOnStepFinished();
+
+        float duration = CalculateAcceleratedRemainingDuration();
+
+        if (duration <= 0f)
+        {
+            CommitFinalState();
+            return;
+        }
+
+        _tween = _rect
+            .DOScale(_baseScale, duration)
+            .SetEase(Ease.OutCubic)
+            .SetUpdate(true)
+            .SetTarget(_rect)
+            .OnComplete(CommitFinalState);
+    }
+
+    private void HideRootOnStepFinished()
+    {
+        if (!_spec.hideRootOnStepFinished)
+            return;
+
+        DOTween.Kill(_rootCanvasGroup, false);
+        _rootCanvasGroup.alpha = 0f;
+    }
+
+    private float CalculateAcceleratedRemainingDuration()
+    {
+        float originalDistance = CalculateReferenceScaleDistance();
+        float remainingDistance = Vector3.Distance(_rect.localScale, _baseScale);
+
+        if (originalDistance <= 0.001f || remainingDistance <= 0.001f)
+            return 0f;
+
+        float remainingRatio = Mathf.Clamp01(remainingDistance / originalDistance);
+        float remainingDuration = CalculatePulseDuration() * remainingRatio;
+
+        return Mathf.Max(0.01f, remainingDuration / StepFinishSpeedUpMultiplier);
+    }
+
+    private float CalculateReferenceScaleDistance()
+    {
+        Vector3 firstPulseScale = MultiplyScale(_baseScale, _spec.firstPulseScale);
+        Vector3 secondPulseScale = MultiplyScale(_baseScale, _spec.secondPulseScale);
+
+        float firstDistance = Vector3.Distance(firstPulseScale, _baseScale);
+        float secondDistance = Vector3.Distance(secondPulseScale, _baseScale);
+
+        return Mathf.Max(
+            Mathf.Max(firstDistance, secondDistance),
+            0.001f);
+    }
+
+    #endregion
+
+    private float CalculatePulseDuration()
+    {
+        return Mathf.Max(
+            0.01f,
+            _spec.firstUpDuration +
+            _spec.firstDownDuration +
+            _spec.pulseGap +
+            _spec.secondUpDuration +
+            _spec.secondDownDuration);
+    }
+
+    private IEnumerator WaitUnscaled(float duration)
+    {
+        if (duration <= 0f)
+            yield break;
+
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            yield return null;
+        }
     }
 
     private static Vector3 MultiplyScale(Vector3 baseScale, Vector2 multiplier)
