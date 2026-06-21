@@ -19,7 +19,7 @@ public sealed class PresentationControlCommandFactory : INodeCommandFactory
 
             UIPatchCommandSpec s => new UIPatchCommand(_uiPatchService, s),
 
-            SubPresentationAdvanceCommandSpec s => new SubPresentationAdvanceCommand(_vnSideRunnerSyncHub),
+            SubPresentationAdvanceCommandSpec s => new SubPresentationAdvanceCommand(_vnSideRunnerSyncHub, s),
 
             _ => null
         };

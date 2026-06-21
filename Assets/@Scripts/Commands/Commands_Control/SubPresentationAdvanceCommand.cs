@@ -10,15 +10,43 @@ using System.Collections;
     },
     SetOrder = -909)]
 public sealed class SubPresentationAdvanceCommandSpec : CommandSpecBase
-{ }
+{
+    public SyncAdvanceKind Kind = SyncAdvanceKind.Scripted;
+
+    public static SubPresentationAdvanceCommandSpec Scripted()
+    {
+        return new SubPresentationAdvanceCommandSpec
+        {
+            Kind = SyncAdvanceKind.Scripted,
+        };
+    }
+
+    public static SubPresentationAdvanceCommandSpec SeekResync()
+    {
+        return new SubPresentationAdvanceCommandSpec
+        {
+            Kind = SyncAdvanceKind.SeekResync,
+        };
+    }
+
+    public static SubPresentationAdvanceCommandSpec ManualBypassPause()
+    {
+        return new SubPresentationAdvanceCommandSpec
+        {
+            Kind = SyncAdvanceKind.ManualBypassPause,
+        };
+    }
+}
 
 public sealed class SubPresentationAdvanceCommand : CommandBase
 {
     private readonly VNSideRunnerSyncHub _syncHub;
+    private readonly SubPresentationAdvanceCommandSpec _spec;
 
-    public SubPresentationAdvanceCommand(VNSideRunnerSyncHub syncHub)
+    public SubPresentationAdvanceCommand(VNSideRunnerSyncHub syncHub, SubPresentationAdvanceCommandSpec spec)
     {
         _syncHub = syncHub;
+        _spec = spec;
     }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
@@ -44,6 +72,6 @@ public sealed class SubPresentationAdvanceCommand : CommandBase
         //     -> CommitLineEntered updates current meta / backlog / rollback state
         //     -> PlayCollected runs this command
         //     -> DispatchPresentationAdvance
-        _syncHub.DispatchPresentationAdvance();
+        _syncHub.DispatchPresentationAdvance(_spec.Kind);
     }
 }

@@ -50,23 +50,33 @@ public partial class VNLinePresentationFlow
         ctx.Meta = _vnYarnLineBoundary.BuildLineMeta(ctx.Line, ctx.NodeName);
         _vnYarnLineBoundary.CommitLineEntered(ctx.Meta, recordToHistory);
 
-        // Capture the forward-settle baseline BEFORE dispatching,
-        // then expect exactly subAdvanceCount more sub-beat settles.
-        // Main waits for those before any visual, so sub holds (wait=true beats) are respected.
         int forwardSettleBaseline = _sideRunnerSyncHub.ForwardSettleEpoch;
-
-        // int subAdvanceCount = _advanceState.IsSeekingActive
-        //     ? _sideRunnerSyncHub.ConsumePresentationSeekResyncCount()   // 시크: base 재동기화
-        //     : _sideRunnerSyncHub.ConsumePresentationAutoAdvanceCount(); // 정방향: hold/extra/suppress 적용
         
-        int subAdvanceCount = _sideRunnerSyncHub.ConsumePresentationAutoAdvanceCount();
+        bool isSeekResyncAdvance = _advanceState.IsSeekingActive;
+
+        int subAdvanceCount = isSeekResyncAdvance
+            ? _sideRunnerSyncHub.ConsumePresentationSeekResyncCount()
+            : _sideRunnerSyncHub.ConsumePresentationAutoAdvanceCount();
+
+        SyncAdvanceKind subAdvanceKind = isSeekResyncAdvance
+            ? SyncAdvanceKind.SeekResync
+            : SyncAdvanceKind.Scripted;
 
         for (int i = 0; i < subAdvanceCount; i++)
-            _playbackDriver.Enqueue(new SubPresentationAdvanceCommandSpec());
+        {
+            SubPresentationAdvanceCommandSpec spec = subAdvanceKind == SyncAdvanceKind.SeekResync
+                ? SubPresentationAdvanceCommandSpec.SeekResync()
+                : SubPresentationAdvanceCommandSpec.Scripted();
+
+            _playbackDriver.Enqueue(spec);
+        }
 
         ctx.CommandTicket = _playbackDriver.PlayCollected();
 
-        int forwardSettleTarget = forwardSettleBaseline + subAdvanceCount;
+        int forwardSettleTarget = forwardSettleBaseline;
+
+        if (subAdvanceKind == SyncAdvanceKind.Scripted)
+            forwardSettleTarget += subAdvanceCount;
         
         SetPhase(ctx, VNLinePresentationPhase.LineEnteredCommitted);
 
@@ -111,9 +121,17 @@ public partial class VNLinePresentationFlow
 
         // Forward path: respect sub holds before any visual work. Breaks early if the sub
         // lane cannot produce the expected settles (completed / paused / line cancelled).
-        await _sideRunnerSyncHub.WaitUntilForwardSettledAsync(
-            forwardSettleTarget,
-            ctx.Token.NextContentToken);
+        if (subAdvanceKind == SyncAdvanceKind.Scripted)
+        {
+            await _sideRunnerSyncHub.WaitUntilForwardSettledAsync(
+                forwardSettleTarget,
+                ctx.Token.NextContentToken);
+        }
+        else
+        {
+            await _sideRunnerSyncHub.WaitUntilPresentationLaneReadyAsync(
+                ctx.Token.NextContentToken);
+        }
 
         // Phase: VisualRunStarted
         ctx.Run = beginRun();

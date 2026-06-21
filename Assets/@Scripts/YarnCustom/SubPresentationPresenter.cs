@@ -12,10 +12,10 @@ public sealed class SubPresentationPresenter : DialoguePresenterBase
     private IYarnLaneDebugSink _debugSink;
     
     private string _currentNodeName;
+    private PresentationLaneRunToken _currentRun;
     
-    private CancellationTokenSource _presenterLifetimeCts = new ();
+    private CancellationTokenSource _presenterLifetimeCts = new();
 
-    
     public void Initialize(
         DialogueRunner dialogueRunner,
         YarnBridgePlaybackDriver playbackDriver,
@@ -32,6 +32,7 @@ public sealed class SubPresentationPresenter : DialoguePresenterBase
 
     public override YarnTask OnDialogueStartedAsync()
     {
+        _currentRun = _syncHub.CurrentPresentationRun;
         return YarnTask.CompletedTask;
     }
 
@@ -39,42 +40,45 @@ public sealed class SubPresentationPresenter : DialoguePresenterBase
     {
         CancelPresenterLifetimeWaiters();
 
-        _syncHub.NotifyPresentationLaneCompleted();
+        _syncHub.NotifyPresentationLaneCompleted(_currentRun);
         
         _debugSink?.ClearPresentation();
         
         return YarnTask.CompletedTask;
     }
 
-    public override async YarnTask RunLineAsync(LocalizedLine line, LineCancellationToken token)
+    public override async YarnTask RunLineAsync(
+        LocalizedLine line,
+        LineCancellationToken token)
     {
-        _debugSink?.SetPresentation(_currentNodeName, line.TextWithoutCharacterName.Text);
+        PresentationLaneRunToken run = _currentRun;
+
+        _debugSink?.SetPresentation(
+            _currentNodeName,
+            line.TextWithoutCharacterName.Text);
 
         bool blockMain = ShouldBlockMain(line);
 
         CommandRunTicket ticket = _playbackDriver.PlayCollected();
 
         if (!blockMain)
-            _syncHub.NotifyPresentationForwardSettled();
+            _syncHub.NotifyPresentationForwardSettled(run);
         
-        bool cancelledDuringEntry = await WaitUntilCommandEntryClosedAsync(ticket, token);
+        bool cancelledDuringEntry = await WaitUntilCommandEntryClosedAsync(
+            ticket,
+            token);
 
-        // For wait=true commands this is the completion point, so a held beat naturally delays this signal.
-        // Raise it once per beat — before the ready/released branch.
-        // so main forward flow can wait for sub holds without coupling to the seek-only ready signal.
         if (blockMain)
-            _syncHub.NotifyPresentationForwardSettled();
+            _syncHub.NotifyPresentationForwardSettled(run);
 
-        bool tornDown = cancelledDuringEntry || token.NextContentToken.IsCancellationRequested;
+        bool tornDown =
+            cancelledDuringEntry ||
+            token.NextContentToken.IsCancellationRequested;
 
-        // 취소(rollback / stop / 직전 라인의 RequestNextLine)로 무너진 라인은
-        // "완료된 advance"로 취급하면 안 된다. 그러면 pending을 소모하고
-        // RequestNextLine을 한 번 더 쳐서 질주한다.
-        // 대신 main 대기만 풀어준다.
-        if (tornDown) 
-            _syncHub.NotifyPresentationLaneReleased();
+        if (tornDown)
+            _syncHub.NotifyPresentationLaneReleased(run);
         else
-            _syncHub.NotifyPresentationLaneReady();
+            _syncHub.NotifyPresentationLaneReady(run);
 
         try
         {
@@ -82,13 +86,13 @@ public sealed class SubPresentationPresenter : DialoguePresenterBase
         }
         finally
         {
-            if (_syncHub != null)
-                _syncHub.NotifyPresentationLaneNotReady();
+            _syncHub.NotifyPresentationLaneNotReady(run);
         }
     }
 
-    // entry가 닫히기 전에 라인 취소로 빠져나왔으면 true.
-    private async YarnTask<bool> WaitUntilCommandEntryClosedAsync(CommandRunTicket ticket, LineCancellationToken token)
+    private async YarnTask<bool> WaitUntilCommandEntryClosedAsync(
+        CommandRunTicket ticket,
+        LineCancellationToken token)
     {
         if (ticket == null)
             return token.NextContentToken.IsCancellationRequested;
@@ -110,7 +114,6 @@ public sealed class SubPresentationPresenter : DialoguePresenterBase
         if (ticket.EntryCompletedSuccessfully)
             return;
 
-        // Normal case
         if (ticket.EntryInterruptedNormally)
             return;
         
@@ -130,10 +133,6 @@ public sealed class SubPresentationPresenter : DialoguePresenterBase
         }
     }
 
-    // A sub-presentation line does not complete by itself.
-    // After its command batch has entered or has been normally interrupted,
-    // it marks the lane as ready/released and waits until the hub/main runner
-    // requests the next sub line, which cancels the current Yarn line token.
     private async YarnTask WaitForLineAdvanceAsync(LineCancellationToken token)
     {
         CancellationTokenSource lineWaitCts = null;
