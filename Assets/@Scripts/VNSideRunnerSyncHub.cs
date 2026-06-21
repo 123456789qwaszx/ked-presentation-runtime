@@ -6,19 +6,14 @@ public enum SyncGateRunResult
 {
     Completed,
     Cancelled,
+    Superseded,
+    AlreadyRunning,
     LaneCompleted,
     LanePaused,
     LaneUnavailable,
 }
 
-/// <summary>
-/// Main lane과 side presentation lane 사이의 진행 가능 여부를 조율한다.
-///
-/// 이 클래스는 직접 진행 조건을 흩뿌리지 않는다.
-/// 모든 동기화 진행은 SyncGatePlan으로 표현되고,
-/// SyncGateAdvancer가 현재 SyncGateToken을 소비할 수 있을 때만 진행한다.
-/// </summary>
-public partial class VNSideRunnerSyncHub
+public class VNSideRunnerSyncHub
 {
     private readonly PresentationLaneState _lane = new();
     private readonly SyncGatePlanBuilder _planBuilder = new();
@@ -28,7 +23,10 @@ public partial class VNSideRunnerSyncHub
     public int ForwardSettleEpoch => _lane.ForwardSettleEpoch;
     public PresentationLaneRunToken CurrentPresentationRun => _lane.CurrentRun;
 
-    public void RegisterPresentationLane(DialogueRunner runner) => _lane.Register(runner);
+    public void RegisterPresentationLane(DialogueRunner runner)
+    {
+        _lane.Register(runner);
+    }
 
     public IEnumerator StartPresentationLaneCoroutine(string nodeName)
     {
@@ -53,6 +51,7 @@ public partial class VNSideRunnerSyncHub
     public IEnumerator StopPresentationLaneCoroutine()
     {
         _lane.CompleteRun();
+        _syncGate.Clear();
 
         if (_lane.IsDialogueRunning)
         {
@@ -77,7 +76,6 @@ public partial class VNSideRunnerSyncHub
         _planBuilder.ClearForReplayBoundary();
     }
 
-    // Side lane signals
     public void NotifyPresentationLaneReady(PresentationLaneRunToken run)
     {
         _lane.NotifyReady(run);
@@ -107,55 +105,81 @@ public partial class VNSideRunnerSyncHub
         PumpSyncGate();
     }
 
-    // gate-plan
-    public SyncGatePlan BuildForwardSyncGatePlan()
+    public async YarnTask<SyncGateRunResult> RunForwardSyncGatePlanAsync(
+        CancellationToken cancel)
     {
-        return _planBuilder.BuildForwardPlan(
+        SyncGatePlan plan = _planBuilder.ConsumeForwardPlan(
             _lane.CanReceiveScriptedAdvance,
             _lane.ForwardSettleEpoch);
+
+        return await RunSyncGatePlanAsync(plan, cancel);
     }
 
-    public SyncGatePlan BuildSeekResyncGatePlan()
+    public async YarnTask<SyncGateRunResult> RunSeekResyncGatePlanAsync(
+        CancellationToken cancel)
     {
-        return _planBuilder.BuildSeekResyncPlan(
+        SyncGatePlan plan = _planBuilder.ConsumeSeekResyncPlan(
             _lane.CanReceiveSeekResyncAdvance);
+
+        return await RunSyncGatePlanAsync(plan, cancel);
     }
 
-    public SyncGatePlan BuildManualStepGatePlan(int steps = 1)
+    /// <summary>
+    /// 미래 inline [advance]가 타야 할 정규 scripted 경로.
+    /// ManualBypass가 아니라 Scripted dispatch + ForwardSettled wait를 사용한다.
+    /// </summary>
+    public async YarnTask<SyncGateRunResult> RunInlineScriptedAdvanceAsync(
+        int steps,
+        CancellationToken cancel)
     {
-        return _planBuilder.BuildManualStepPlan(
-            _lane.CanReceiveManualAdvance,
+        SyncGatePlan plan = _planBuilder.BuildInlineScriptedAdvancePlan(
+            _lane.CanReceiveScriptedAdvance,
+            _lane.ForwardSettleEpoch,
             steps);
-    }
 
-    public void EnqueueSyncGatePlan(SyncGatePlan plan)
-    {
-        _syncGate.Enqueue(plan);
-        PumpSyncGate();
+        return await RunSyncGatePlanAsync(plan, cancel);
     }
 
     public async YarnTask<SyncGateRunResult> RunSyncGatePlanAsync(
         SyncGatePlan plan,
         CancellationToken cancel)
     {
-        _syncGate.Enqueue(plan);
+        if (plan == null || plan.IsEmpty)
+            return SyncGateRunResult.Completed;
+
+        if (!_syncGate.TryBegin(plan))
+            return SyncGateRunResult.AlreadyRunning;
+
+        PresentationLaneRunToken run = _lane.CurrentRun;
 
         while (!_syncGate.IsCompleted)
         {
             if (cancel.IsCancellationRequested)
+            {
+                _syncGate.Clear();
                 return SyncGateRunResult.Cancelled;
+            }
+
+            if (!_lane.IsCurrent(run))
+            {
+                _syncGate.Clear();
+                return SyncGateRunResult.Superseded;
+            }
 
             SyncGateAdvanceResult result = PumpSyncGate();
 
             switch (result)
             {
                 case SyncGateAdvanceResult.LaneCompleted:
+                    _syncGate.Clear();
                     return SyncGateRunResult.LaneCompleted;
 
                 case SyncGateAdvanceResult.LanePaused:
+                    _syncGate.Clear();
                     return SyncGateRunResult.LanePaused;
 
                 case SyncGateAdvanceResult.LaneUnavailable:
+                    _syncGate.Clear();
                     return SyncGateRunResult.LaneUnavailable;
             }
 
@@ -168,76 +192,17 @@ public partial class VNSideRunnerSyncHub
         return SyncGateRunResult.Completed;
     }
 
-    public YarnTask<SyncGateRunResult> RunForwardSyncGatePlanAsync(
-        CancellationToken cancel)
+    /// <summary>
+    /// 디버그/강제 진행 전용.
+    /// inline advance는 이 경로를 쓰면 안 된다.
+    /// </summary>
+    public void StepPresentationOnce(int steps = 1)
     {
-        SyncGatePlan plan = BuildForwardSyncGatePlan();
-        return RunSyncGatePlanAsync(plan, cancel);
-    }
+        SyncGatePlan plan = _planBuilder.BuildDebugManualBypassPlan(
+            _lane.CanReceiveManualAdvance,
+            steps);
 
-    public YarnTask<SyncGateRunResult> RunSeekResyncGatePlanAsync(
-        CancellationToken cancel)
-    {
-        SyncGatePlan plan = BuildSeekResyncGatePlan();
-        return RunSyncGatePlanAsync(plan, cancel);
-    }
-
-    // Transitional compatibility
-
-    // 기존 forward count API 호환용.
-    // 새 구조에서는 RunForwardSyncGatePlanAsync 사용을 권장한다.
-    public int ConsumePresentationAutoAdvanceCount()
-    {
-        SyncGatePlan plan = BuildForwardSyncGatePlan();
-        return plan.DispatchAdvanceCount;
-    }
-
-    // 기존 seek count API 호환용.
-    // 새 구조에서는 RunSeekResyncGatePlanAsync 사용을 권장한다.
-    public int ConsumePresentationSeekResyncCount()
-    {
-        SyncGatePlan plan = BuildSeekResyncGatePlan();
-        return plan.DispatchAdvanceCount;
-    }
-
-    public void DispatchPresentationAdvance(SyncAdvanceKind kind)
-    {
-        if (!CanReceiveAdvanceKind(kind))
-            return;
-
-        SyncGatePlan plan = SyncGatePlan.Single(
-            SyncGateToken.DispatchAdvance(kind));
-
-        _syncGate.Enqueue(plan);
-        PumpSyncGate();
-    }
-
-    private bool CanReceiveAdvanceKind(SyncAdvanceKind kind)
-    {
-        switch (kind)
-        {
-            case SyncAdvanceKind.Scripted:
-                return _lane.CanReceiveScriptedAdvance;
-
-            case SyncAdvanceKind.SeekResync:
-                return _lane.CanReceiveSeekResyncAdvance;
-
-            case SyncAdvanceKind.ManualBypassPause:
-                return _lane.CanReceiveManualAdvance;
-
-            default:
-                return false;
-        }
-    }
-
-    // 명시적 수동 진행 전용.
-    // pause를 우회할 수 있으므로 scripted flow와 이름부터 분리한다.
-    public void QueueManualPresentationStepBypassingPause(int steps = 1)
-    {
-        SyncGatePlan plan = BuildManualStepGatePlan(steps);
-
-        _syncGate.Enqueue(plan);
-        PumpSyncGate();
+        RunDebugManualPlan(plan);
     }
 
     public void HoldPresentation(int lines)
@@ -266,6 +231,17 @@ public partial class VNSideRunnerSyncHub
     public void ResumePresentation()
     {
         _lane.Resume();
+        PumpSyncGate();
+    }
+
+    private void RunDebugManualPlan(SyncGatePlan plan)
+    {
+        if (plan == null || plan.IsEmpty)
+            return;
+
+        if (!_syncGate.TryBegin(plan))
+            return;
+
         PumpSyncGate();
     }
 

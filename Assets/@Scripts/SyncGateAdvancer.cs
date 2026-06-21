@@ -8,10 +8,11 @@ public enum SyncGateAdvanceResult
     LaneUnavailable,
 }
 
-// 이 클래스만 Presentation lane의 RequestNextLine을 호출한다.
 public sealed class SyncGateAdvancer
 {
-    public SyncGateAdvanceResult TryAdvanceCurrent(SyncGateState gate, PresentationLaneState lane)
+    public SyncGateAdvanceResult TryAdvanceCurrent(
+        SyncGateState gate,
+        PresentationLaneState lane)
     {
         SyncGateToken? tokenOpt = gate.CurrentToken;
 
@@ -33,20 +34,28 @@ public sealed class SyncGateAdvancer
                 return TryConsumeDispatchAdvance(gate, lane, token);
 
             case SyncGateTokenType.WaitPresentationForwardSettled:
-                return TryConsumeWaitForwardSettled(gate, lane, token.TargetForwardSettleEpoch);
+                return TryConsumeWaitForwardSettled(
+                    gate,
+                    lane,
+                    token.TargetForwardSettleEpoch);
 
             default:
                 return SyncGateAdvanceResult.Blocked;
         }
     }
 
-    private SyncGateAdvanceResult TryConsumeWaitLaneOpen(SyncGateState gate, PresentationLaneState lane)
+    private SyncGateAdvanceResult TryConsumeWaitLaneOpen(
+        SyncGateState gate,
+        PresentationLaneState lane)
     {
         if (lane.IsCompleted)
             return SyncGateAdvanceResult.LaneCompleted;
 
         if (!lane.IsAvailable)
             return SyncGateAdvanceResult.LaneUnavailable;
+
+        if (lane.IsPaused)
+            return SyncGateAdvanceResult.LanePaused;
 
         if (!lane.IsOpenForMain)
             return SyncGateAdvanceResult.Blocked;
@@ -55,7 +64,10 @@ public sealed class SyncGateAdvancer
         return SyncGateAdvanceResult.Progressed;
     }
 
-    private SyncGateAdvanceResult TryConsumeDispatchAdvance(SyncGateState gate, PresentationLaneState lane, SyncGateToken token)
+    private SyncGateAdvanceResult TryConsumeDispatchAdvance(
+        SyncGateState gate,
+        PresentationLaneState lane,
+        SyncGateToken token)
     {
         if (lane.IsCompleted)
             return SyncGateAdvanceResult.LaneCompleted;
@@ -84,7 +96,10 @@ public sealed class SyncGateAdvancer
         return SyncGateAdvanceResult.Progressed;
     }
 
-    private SyncGateAdvanceResult TryConsumeWaitForwardSettled(SyncGateState gate, PresentationLaneState lane, int targetEpoch)
+    private SyncGateAdvanceResult TryConsumeWaitForwardSettled(
+        SyncGateState gate,
+        PresentationLaneState lane,
+        int targetEpoch)
     {
         if (lane.ForwardSettleEpoch >= targetEpoch)
         {

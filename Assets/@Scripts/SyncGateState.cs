@@ -1,42 +1,97 @@
-/// <summary>
-/// 현재 in-flight 중인 SyncGatePlan의 runtime cursor.
-/// 
-/// StepGateState의 Tokens + Cursor와 같은 역할이다.
-/// </summary>
+using System.Collections.Generic;
+
 public sealed class SyncGateState
 {
-    private readonly SyncGatePlan _plan = new();
+    private readonly List<SyncGateToken> _tokens = new();
+
+    private int _cursor;
+    private bool _isRunning;
+
+    public bool IsRunning => _isRunning;
 
     public bool IsCompleted
     {
-        get { return _plan.IsCompleted; }
+        get
+        {
+            if (!_isRunning)
+                return true;
+
+            return _cursor >= _tokens.Count;
+        }
     }
 
     public SyncGateToken? CurrentToken
     {
-        get { return _plan.CurrentToken; }
+        get
+        {
+            if (!_isRunning)
+                return null;
+
+            if (_cursor < 0)
+                return null;
+
+            if (_cursor >= _tokens.Count)
+                return null;
+
+            return _tokens[_cursor];
+        }
     }
 
-    public void Enqueue(SyncGatePlan plan)
+    public bool TryBegin(SyncGatePlan plan)
     {
-        if (_plan.IsCompleted)
-            _plan.Clear();
+        if (_isRunning && !IsCompleted)
+            return false;
 
-        _plan.AppendRemaining(plan);
+        _tokens.Clear();
+        _cursor = 0;
+
+        if (plan != null)
+        {
+            IReadOnlyList<SyncGateToken> source = plan.Tokens;
+
+            for (int i = 0; i < source.Count; i++)
+                _tokens.Add(source[i]);
+        }
+
+        _isRunning = true;
+
+        if (_tokens.Count == 0)
+            _isRunning = false;
+
+        return true;
     }
 
     public void ConsumeCurrent()
     {
-        _plan.ConsumeCurrent();
+        if (!_isRunning)
+            return;
+
+        if (_cursor < _tokens.Count)
+            _cursor++;
+
+        if (_cursor >= _tokens.Count)
+            Clear();
     }
 
     public bool TryConsumeCurrent(out SyncGateToken token)
     {
-        return _plan.TryConsumeCurrent(out token);
+        SyncGateToken? current = CurrentToken;
+
+        if (!current.HasValue)
+        {
+            token = default;
+            return false;
+        }
+
+        token = current.Value;
+        ConsumeCurrent();
+        return true;
     }
 
     public void Clear()
     {
-        _plan.Clear();
+        _tokens.Clear();
+        _cursor = 0;
+        _isRunning = false;
     }
 }

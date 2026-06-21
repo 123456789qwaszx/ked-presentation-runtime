@@ -1,78 +1,86 @@
-/// <summary>
-/// SyncGatePlan을 만든다.
-///
-/// 이 클래스는 forward modifier를 소유한다.
-/// - hold
-/// - extra advance
-/// - suppress next base advance
-///
-/// DialogueRunner, RequestNextLine, lane ready 여부는 직접 다루지 않는다.
-/// </summary>
+using System.Collections.Generic;
+
 public sealed class SyncGatePlanBuilder
 {
     private int _holdRemainingLines;
     private int _extraAdvanceCount;
     private bool _suppressNextBaseAdvance;
 
-    public SyncGatePlan BuildForwardPlan(
+    public SyncGatePlan ConsumeForwardPlan(
         bool canAdvance,
         int currentForwardSettleEpoch)
     {
-        SyncGatePlan plan = new();
-
         if (!canAdvance)
-            return plan;
+            return SyncGatePlan.Empty();
 
         int advanceCount = ConsumeForwardAdvanceCount();
 
         if (advanceCount <= 0)
-        {
-            plan.Add(SyncGateToken.Immediately());
-            return plan;
-        }
+            return SyncGatePlan.Single(SyncGateToken.Immediately());
 
-        plan.AddRepeated(
-            SyncGateToken.DispatchAdvance(SyncAdvanceKind.Scripted),
-            advanceCount);
+        List<SyncGateToken> tokens = new();
+
+        for (int i = 0; i < advanceCount; i++)
+            tokens.Add(SyncGateToken.DispatchAdvance(SyncAdvanceKind.Scripted));
 
         int targetEpoch = currentForwardSettleEpoch + advanceCount;
+        tokens.Add(SyncGateToken.WaitForwardSettled(targetEpoch));
 
-        plan.Add(SyncGateToken.WaitForwardSettled(targetEpoch));
-
-        return plan;
+        return new SyncGatePlan(tokens);
     }
 
-    public SyncGatePlan BuildSeekResyncPlan(bool canAdvance)
+    public SyncGatePlan ConsumeSeekResyncPlan(bool canAdvance)
     {
-        SyncGatePlan plan = new();
-
         if (!canAdvance)
-            return plan;
+            return SyncGatePlan.Empty();
 
         ClearForwardOnlyModifiers();
 
-        plan.Add(SyncGateToken.DispatchAdvance(SyncAdvanceKind.SeekResync));
-
-        return plan;
+        return new SyncGatePlan(new[]
+        {
+            SyncGateToken.DispatchAdvance(SyncAdvanceKind.SeekResync),
+            SyncGateToken.WaitLaneOpen(),
+        });
     }
 
-    public SyncGatePlan BuildManualStepPlan(
+    public SyncGatePlan BuildInlineScriptedAdvancePlan(
         bool canAdvance,
+        int currentForwardSettleEpoch,
         int steps)
     {
-        SyncGatePlan plan = new();
-
         if (!canAdvance)
-            return plan;
+            return SyncGatePlan.Empty();
 
         if (steps <= 0)
             steps = 1;
 
-        plan.AddRepeated(
-            SyncGateToken.DispatchAdvance(SyncAdvanceKind.ManualBypassPause),
-            steps);
+        List<SyncGateToken> tokens = new();
 
-        return plan;
+        for (int i = 0; i < steps; i++)
+            tokens.Add(SyncGateToken.DispatchAdvance(SyncAdvanceKind.Scripted));
+
+        int targetEpoch = currentForwardSettleEpoch + steps;
+        tokens.Add(SyncGateToken.WaitForwardSettled(targetEpoch));
+
+        return new SyncGatePlan(tokens);
+    }
+
+    public SyncGatePlan BuildDebugManualBypassPlan(
+        bool canAdvance,
+        int steps)
+    {
+        if (!canAdvance)
+            return SyncGatePlan.Empty();
+
+        if (steps <= 0)
+            steps = 1;
+
+        List<SyncGateToken> tokens = new();
+
+        for (int i = 0; i < steps; i++)
+            tokens.Add(SyncGateToken.DispatchAdvance(SyncAdvanceKind.ManualBypassPause));
+
+        return new SyncGatePlan(tokens);
     }
 
     public void Hold(int lines)

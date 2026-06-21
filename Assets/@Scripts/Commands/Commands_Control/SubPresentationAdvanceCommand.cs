@@ -59,19 +59,19 @@ public sealed class SubPresentationAdvanceCommand : CommandBase
 
     private void Apply()
     {
-        // This signal must be emitted only after the main line has been committed.
-        //
-        // Yarn command callbacks may run before VNLineEntryCommitter has updated the current YarnLineMeta.
-        // Therefore, those callbacks only collect this command spec;
-        // they must not advance the sub lane directly.
-        //
-        // The valid flow is:
-        //   Yarn command callback
-        //     -> collect SubPresentationAdvanceCommandSpec
-        //   Main line entered
-        //     -> CommitLineEntered updates current meta / backlog / rollback state
-        //     -> PlayCollected runs this command
-        //     -> DispatchPresentationAdvance
-        _syncHub.DispatchPresentationAdvance(_spec.Kind);
+        // // This signal must be emitted only after the main line has been committed.
+        // //
+        // // Yarn command callbacks may run before VNLineEntryCommitter has updated the current YarnLineMeta.
+        // // Therefore, those callbacks only collect this command spec;
+        // // they must not advance the sub lane directly.
+        // //
+        // // The valid flow is:
+        // //   Yarn command callback
+        // //     -> collect SubPresentationAdvanceCommandSpec
+        // //   Main line entered
+        // //     -> CommitLineEntered updates current meta / backlog / rollback state
+        // //     -> PlayCollected runs this command
+        // //     -> DispatchPresentationAdvance
+        // _syncHub.DispatchPresentationAdvance(_spec.Kind);
     }
 }

@@ -1,33 +1,18 @@
 public enum SyncGateTokenType
 {
-    // No wait. Consumed immediately.
     Immediately,
-
-    // Wait until the presentation lane is ready or released.
-    // Ready means the side lane can receive RequestNextLine.
-    // Released means the current side line was torn down and main should not remain blocked.
     WaitPresentationLaneOpen,
-
-    // Dispatch one side-lane advance.
-    // This token is only consumed when the lane gate allows it.
     DispatchPresentationAdvance,
-
-    // Wait until ForwardSettleEpoch reaches the target epoch.
     WaitPresentationForwardSettled,
 }
 
 public enum SyncAdvanceKind
 {
-    // Deterministic forward-play advance.
-    // Counts for forward-settle accounting.
     Scripted,
-
-    // Seek/pass-through resync advance.
-    // Moves the side lane but does not count as normal forward-play settle.
     SeekResync,
 
-    // Explicit manual advance.
-    // May bypass pause. Does not count for forward-settle accounting.
+    // 디버그/강제 진행 전용.
+    // inline advance는 이걸 쓰면 안 된다.
     ManualBypassPause,
 }
 
