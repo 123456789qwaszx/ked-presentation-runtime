@@ -96,9 +96,6 @@ _#beat #stay
 
 
 
-
-<<bg_fade_in bg2>>
-
 <<actor @4 amber>>
 <<fade_in @4>>
 <<down    @4 7u>>
@@ -113,9 +110,6 @@ _#beat #stay
 <<left     @3 3u 19fr>>
 <<fade_out @3 19fr>>
 
-<<bg_scale bg2 1 14fr>>
-<<10fr>>
-<<bg_fade_out bg2 5fr>>
 <<5fr>>
 
 <<actor @1 willow>>
@@ -271,10 +265,6 @@ _#beat #stay
 
 윌로: 마침 어제 후원을 받았는데, 이 의뢰를 수락하시겠어요? 자, 여기 의뢰 내용이에요.
 
-<<bg_fade_in bg2 8fr>>
-<<bg_scale bg2 1 10fr>>
-<<10fr>>
-
 <<actor @3 iris>>
 <<char_dim @3 0 6fr>>
 <<to_bl @3 bust 10fr>>
@@ -302,7 +292,6 @@ _#beat #stay
 <<face @1 12>>
 <<at_close @1 face 10fr>>
 <<shot_to 0 -120 80>>
-<<bg_defocus_clear bg1 8fr>>
 _#beat #stay
 
 윌로: 다들 진정하세요. 이 의뢰에는 조건이 하나 있어요.
