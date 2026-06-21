@@ -18,6 +18,8 @@ public sealed class CommandRunScope
     
     private LifetimeScope StepLifetime { get; } = new();
     private LifetimeScope RunLifetime { get; } = new();
+    
+    private bool _isCancelled;
 
     public CommandRunScope(
         PresentationSessionContext context,
@@ -31,6 +33,8 @@ public sealed class CommandRunScope
         _reportsNodeBusy = reportsNodeBusy;
         Token = CancellationToken.None;
     }
+    public bool IsCancelled => _isCancelled;
+    public void MarkCancelled() => _isCancelled = true;
 
     public bool IsSpeedUpMode => _context != null && _context.IsSpeedUpMode;
     public bool IsAutoMode => _context != null && _context.IsAutoMode;

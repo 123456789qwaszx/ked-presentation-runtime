@@ -168,6 +168,9 @@ public sealed class CommandExecutor : MonoBehaviour
     {
         _runId++;
 
+        if(policy == CleanupPolicy.Cancel)
+            _activeScope?.MarkCancelled();
+        
         CommandRunTicketCloseReason reason = policy == CleanupPolicy.Cancel
             ? CommandRunTicketCloseReason.Cancelled
             : CommandRunTicketCloseReason.Finished;

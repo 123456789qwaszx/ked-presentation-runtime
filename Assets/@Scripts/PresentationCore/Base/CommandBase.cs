@@ -1,4 +1,5 @@
 using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 
 // Cleanup at the STEP boundary (when the next step/line starts) — the shorter, default lifetime.
@@ -23,6 +24,9 @@ public abstract class CommandBase : ISequenceCommand, IStepScopedCommand
     
     public IEnumerator Execute(CommandRunScope scope)
     {
+        if (scope.IsCancelled)
+            yield break;
+        
         if (scope.ShouldCompressCommandExecution)
         {
             switch (SkipPolicy)
