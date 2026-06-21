@@ -24,6 +24,33 @@ public sealed class DialogueBoxPresentationController
 
     public void SetProtagonistLineBoxKind(DialogueBoxKind kind) => _protagonistLineBoxKind = kind;
     public void SetNamedLineBoxKind(DialogueBoxKind kind) => _namedLineBoxKind = kind;
+    
+    public void HideCurrentImmediate()
+    {
+        IPresentationDialogueBoxView currentBox = _boxState.Box;
+
+        if (currentBox == null)
+        {
+            _host.HideAllDialogueBoxes();
+            _boxState.MarkHidden();
+            return;
+        }
+
+        currentBox.SetVisibleImmediate(false);
+        _boxState.MarkHidden();
+    }
+
+    public void ShowCurrentImmediate()
+    {
+        IPresentationDialogueBoxView currentBox = _boxState.Box;
+
+        if (currentBox == null)
+            return;
+
+        _host.HideAllDialogueBoxesExcept(currentBox);
+        currentBox.SetVisibleImmediate(true);
+        _boxState.TryMarkVisible();
+    }
 
     public void ResetDefaultLineBoxKinds()
     {

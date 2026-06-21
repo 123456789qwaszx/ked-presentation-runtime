@@ -109,6 +109,14 @@ public sealed partial class YarnCommandBridge : InlineEventMarkupHandler.IInline
         
         runner.AddCommandHandler<string, string>(
             "actor", SetPresentationActor);
+        
+        runner.AddCommandHandler(
+            "box_hide", HideDialogueBox);
+        runner.AddCommandHandler(
+            "box_show", ShowDialogueBox);
+        
+        runner.AddCommandHandler(
+            "box_close", CloseDialogueBox);
     }
     
     private void BindMainLaneCommands(DialogueRunner runner)

@@ -16,9 +16,9 @@ public sealed class PresentationStage
     // per-run 커맨드 정리에서는 호출하지 않음.
     public void Clear()
     {
+        characterTargetAliases.Clear();
+        castRegistry.Clear();
         characterRigs.Clear();
         backgroundRigs.Clear();
-        castRegistry.Clear();
-        characterTargetAliases.Clear();
     }
 }

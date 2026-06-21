@@ -1,20 +1,37 @@
 public sealed class DialogueBoxCurrentState
 {
+    public IPresentationDialogueBoxView Box { get; private set; }
     public DialogueBoxKind? BoxKind { get; private set; }
-    public IPresentationDialogueBoxView Box { get; private set; } = null;
     public bool IsVisible { get; private set; }
 
-    public void Commit(DialogueBoxKind kind, IPresentationDialogueBoxView box, DialogueBoxTransitionKind transitionKind)
+    public void Commit(
+        DialogueBoxKind boxKind,
+        IPresentationDialogueBoxView box,
+        DialogueBoxTransitionKind transitionKind)
     {
-        BoxKind = kind;
+        BoxKind = boxKind;
         Box = box;
         IsVisible = transitionKind != DialogueBoxTransitionKind.Hide;
     }
 
+    public void MarkHidden()
+    {
+        IsVisible = false;
+    }
+
+    public bool TryMarkVisible()
+    {
+        if (Box == null || BoxKind.HasValue == false)
+            return false;
+
+        IsVisible = true;
+        return true;
+    }
+
     public void Reset()
     {
-        BoxKind = null;
         Box = null;
+        BoxKind = null;
         IsVisible = false;
     }
 }

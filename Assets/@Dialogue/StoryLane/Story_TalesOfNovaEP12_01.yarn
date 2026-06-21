@@ -19,8 +19,8 @@ position: -2,-160
 <<slot c4>>
 <<cast c4 Amber a>>
 
-<<bg_slot_cutin bg2>>
-<<attach_to_bg c4 bg2>>
+// <<bg_slot_cutin bg2>>
+// <<attach_to_bg c4 bg2>>
 
 === 
 

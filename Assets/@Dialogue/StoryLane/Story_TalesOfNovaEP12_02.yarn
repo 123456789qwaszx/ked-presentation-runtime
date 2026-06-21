@@ -6,9 +6,10 @@
 <<pres_start Pres_TalesOfNovaEP12_01>>
 <<pres_suppress_first true>>
 <<pres_pause>>
-
 아야메: 빙결!
-세이나: 잘했어, [advance/][pau = 0.8/]아야메. 여기 성해는 내가 맡을게.
+//세이나: [pau = 0.4/]잘했어, [advance/][pau = 0.8/]아야메.[advance/][pau = 0.8/] 여기 성해는 [advance/][pau = 0.8/]내가 맡을게.
+
+<<pres_advance >>
 
 세이나: 1마리 더 있어. 코하쿠! 네 쪽으로 가고 있어!
 <<pres_resume>>

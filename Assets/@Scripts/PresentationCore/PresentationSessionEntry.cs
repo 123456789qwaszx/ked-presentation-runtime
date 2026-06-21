@@ -40,6 +40,7 @@ public sealed class PresentationSessionEntry : MonoBehaviour, ICommandRunScopePr
         
         if (!TryResolveRoute(routeKey, out Route route, out SequenceSpecSO sequence))
             return;
+        
         PresentationSession.ClearStage();
         PresentationSession.Start(route, sequence);
     }
