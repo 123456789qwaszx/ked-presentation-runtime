@@ -406,12 +406,12 @@ public sealed partial class YarnCommandBridge
     private void EnqueueBackgroundCutInSpec(
         string backgroundRigKey)
     {
-        Collect( new SetupBackgroundRigCommandSpec
-        {
-            rigKey = backgroundRigKey,
-            rigPrefab = _backgroundRigPrefab,
-            parentSlot = BackgroundRigSlotParser.Parse("stage02", BackgroundRigSlot.Stage02BackgroundSlot)
-        });
+        // Collect( new SetupBackgroundRigCommandSpec
+        // {
+        //     rigKey = backgroundRigKey,
+        //     rigPrefab = _backgroundRigPrefab,
+        //     parentSlot = BackgroundRigSlotParser.Parse("stage02", BackgroundRigSlot.Stage02BackgroundSlot)
+        // });
         
         Collect(new ScaleToCommandSpecBgR
         {
@@ -702,7 +702,7 @@ public sealed partial class YarnCommandBridge
             rigKey = rigKey,
             target = BackgroundRigTarget.Background_ObjectSlotRoot,
             duration = 0f,
-            wait = true
+            wait = false
         });
 
         Collect(new MoveByCommandSpecBgR
@@ -711,7 +711,7 @@ public sealed partial class YarnCommandBridge
             target = BackgroundRigTarget.Background_Track,
             delta = startOffset,
             duration = 0f,
-            wait = true
+            wait = false
         });
 
         Collect(new RotateToCommandSpecBgR
@@ -720,7 +720,7 @@ public sealed partial class YarnCommandBridge
             target = BackgroundRigTarget.Background_Rotation,
             toEuler = new Vector3(0f, 0f, -3.5f),
             duration = 0f,
-            wait = true
+            wait = false
         });
 
         Collect(new ScaleToCommandSpecBgR
@@ -729,7 +729,7 @@ public sealed partial class YarnCommandBridge
             target = BackgroundRigTarget.Background_ActingScale,
             toScale = new Vector2(0.001f, 0.001f),
             duration = 0f,
-            wait = true
+            wait = false
         });
 
 
