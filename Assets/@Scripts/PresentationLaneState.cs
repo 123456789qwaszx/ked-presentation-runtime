@@ -2,7 +2,7 @@ using Yarn.Unity;
 
 public sealed class PresentationLaneState
 {
-    private DialogueRunner _runner;
+    private readonly DialogueRunner _runner;
 
     private int _runVersion;
     private PresentationLanePhase _phase = PresentationLanePhase.Stopped;
@@ -38,26 +38,15 @@ public sealed class PresentationLaneState
     public bool CanReceiveSeekResyncAdvance => IsAvailable;
     public bool CanReceiveForwardModifier => IsAvailable;
 
-    public void Register(DialogueRunner runner)
+    public PresentationLaneState(DialogueRunner runner)
     {
         _runner = runner;
     }
 
-    public YarnTask StartDialogue(string nodeName)
-    {
-        return _runner.StartDialogue(nodeName);
-    }
-
-    public YarnTask StopDialogue()
-    {
-        return _runner.Stop();
-    }
-
-    public void RequestNextLine()
-    {
-        _runner.RequestNextLine();
-    }
-
+    public YarnTask StartDialogue(string nodeName) => _runner.StartDialogue(nodeName);
+    public YarnTask StopDialogue() =>_runner.Stop();
+    public void RequestNextLine() => _runner.RequestNextLine();
+    
     public void BeginRun()
     {
         _runVersion++;
@@ -83,16 +72,6 @@ public sealed class PresentationLaneState
         _runVersion++;
 
         _phase = PresentationLanePhase.Stopped;
-        _gate = PresentationLaneGate.Blocked;
-        _isPaused = false;
-
-        _settleClock.ClearInFlightSettles();
-    }
-
-    public void ClearForDeterministicReplay()
-    {
-        _runVersion++;
-
         _gate = PresentationLaneGate.Blocked;
         _isPaused = false;
 

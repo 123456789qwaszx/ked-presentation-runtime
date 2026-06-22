@@ -314,7 +314,7 @@ public class VnAppBootstrap : MonoBehaviour
         subYarnBridgePlaybackDriver.Initialize(subCommandExecutor, new SubPresentationScopeProvider(presentationSessionEntry));
         oneShotYarnBridgePlaybackDriver.Initialize(oneShotCommandExecutor, presentationSessionEntry);
 
-        _vnSideRunnerSyncHub.RegisterPresentationLane(subPresentationRunner);
+        _vnSideRunnerSyncHub.Initialize(subPresentationRunner);
 
         OneShotPresentationLane oneShotPresentationLane = new(subOneShotRunner, oneShotYarnBridgePlaybackDriver);
 
@@ -381,7 +381,6 @@ public class VnAppBootstrap : MonoBehaviour
             _backlogRecorder,
             _rollbackHistory,
             _vnRuntimeStateProvider);
-
         
         VNLinePresentationFlow vnLinePresentationFlow = new(
             vnYarnLineBoundary,

@@ -136,9 +136,7 @@ public sealed class EpisodePlayer : MonoBehaviour
         if (tasks.Count > 0)
             await YarnTask.WhenAll(tasks);
 
-        // 러너가 멈춘 뒤, hub lane 장부를 초기화한다.
-        // → 직전 세션의 stale pending/ready가 재시작된 세션으로 새지 않게 한다.
-        _sideRunnerSyncHub.ClearAllForSeekOrLoad();
+        _sideRunnerSyncHub.ResetPresentationLane();
     }
 
     private void ResetVisualState()

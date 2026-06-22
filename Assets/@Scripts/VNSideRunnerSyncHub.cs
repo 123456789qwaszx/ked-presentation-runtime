@@ -1,59 +1,57 @@
 using System.Collections;
 using System.Threading;
+using UnityEngine;
 using Yarn.Unity;
 
 public enum SyncGateRunResult
 {
     Completed,
-    Cancelled,
-    Superseded,
-    AlreadyRunning,
-    LaneCompleted,
-    LaneUnavailable,
+    Cancelled
 }
 
 public class VNSideRunnerSyncHub
 {
-    private readonly PresentationLaneState _lane = new();
-    private readonly SyncGatePlanBuilder _planBuilder = new();
-    private readonly SyncGateState _syncGate = new();
-    private readonly SyncGateAdvancer _advancer = new();
+    private SyncGatePlanBuilder _syncGatePlanBuilder;
+    private SyncGateState _syncGateState;
+    private SyncGateAdvancer _syncGateAdvancer;
+    private PresentationLaneState _laneState;
 
-    public PresentationLaneRunToken CurrentPresentationRun => _lane.CurrentRun;
+    public PresentationLaneRunToken CurrentPresentationRun => _laneState.CurrentRun;
 
-    public void RegisterPresentationLane(DialogueRunner runner)
+    public void Initialize(DialogueRunner runner)
     {
-        _lane.Register(runner);
+        _syncGatePlanBuilder = new();
+        _syncGateState = new();
+        _syncGateAdvancer = new();
+        
+        _laneState = new(runner);
     }
+    
+    public void HoldPresentation(int lines) => _syncGatePlanBuilder.Hold(lines);
+    public void AdvancePresentationExtra(int steps) => _syncGatePlanBuilder.AddExtraAdvance(steps);
+    public void PausePresentation() => _laneState.Pause();
+    public void ResumePresentation() => _laneState.Resume();
+    
+    public void NotifyLaneReady(PresentationLaneRunToken run) => _laneState.NotifyReady(run);
+    public void NotifyLaneNotReady(PresentationLaneRunToken run) => _laneState.NotifyNotReady(run);
+    public void NotifyLaneReleased(PresentationLaneRunToken run) => _laneState.NotifyReleased(run);
+    public void NotifyLaneCompleted(PresentationLaneRunToken run) => _laneState.NotifyCompleted(run);
+    public void NotifyForwardSettled(PresentationLaneRunToken run) => _laneState.NotifyForwardSettled(run);
 
-    public IEnumerator StartPresentationLaneCoroutine(string nodeName)
+    public void StartPresentationLaneCoroutine(string nodeName)
     {
-        if (_lane.IsDialogueRunning)
-        {
-            YarnTask stopTask = _lane.StopDialogue();
-
-            while (!stopTask.IsCompletedSuccessfully())
-                yield return null;
-        }
-
-        _lane.BeginRun();
-
-        YarnTask startTask = _lane.StartDialogue(nodeName);
-
-        while (!startTask.IsCompletedSuccessfully())
-            yield return null;
-
-        PumpSyncGate();
+        _laneState.BeginRun();
+        _laneState.StartDialogue(nodeName);
     }
 
     public IEnumerator StopPresentationLaneCoroutine()
     {
-        _lane.CompleteRun();
-        _syncGate.Clear();
+        _laneState.CompleteRun();
+        _syncGateState.Clear();
 
-        if (_lane.IsDialogueRunning)
+        if (_laneState.IsDialogueRunning)
         {
-            YarnTask stopTask = _lane.StopDialogue();
+            YarnTask stopTask = _laneState.StopDialogue();
 
             while (!stopTask.IsCompletedSuccessfully())
                 yield return null;
@@ -62,53 +60,17 @@ public class VNSideRunnerSyncHub
 
     public void ResetPresentationLane()
     {
-        _lane.ResetAll();
-        _syncGate.Clear();
-        _planBuilder.Reset();
-    }
-
-    public void ClearAllForSeekOrLoad()
-    {
-        _lane.ClearForDeterministicReplay();
-        _syncGate.Clear();
-        _planBuilder.ClearForReplayBoundary();
-    }
-
-    public void NotifyPresentationLaneReady(PresentationLaneRunToken run)
-    {
-        _lane.NotifyReady(run);
-        PumpSyncGate();
-    }
-
-    public void NotifyPresentationLaneNotReady(PresentationLaneRunToken run)
-    {
-        _lane.NotifyNotReady(run);
-    }
-
-    public void NotifyPresentationLaneReleased(PresentationLaneRunToken run)
-    {
-        _lane.NotifyReleased(run);
-        PumpSyncGate();
-    }
-
-    public void NotifyPresentationLaneCompleted(PresentationLaneRunToken run)
-    {
-        _lane.NotifyCompleted(run);
-        PumpSyncGate();
-    }
-
-    public void NotifyPresentationForwardSettled(PresentationLaneRunToken run)
-    {
-        _lane.NotifyForwardSettled(run);
-        PumpSyncGate();
+        _laneState.ResetAll();
+        _syncGateState.Clear();
+        _syncGatePlanBuilder.Reset();
     }
     
     public async YarnTask<SyncGateRunResult> RunForwardSyncGatePlanAsync(
         CancellationToken cancel)
     {
-        SyncGatePlan plan = _planBuilder.ConsumeForwardPlan(
-            _lane.CanReceiveScriptedAdvance,
-            _lane.ForwardSettleEpoch);
+        SyncGatePlan plan = _syncGatePlanBuilder.ConsumeForwardPlan(
+            _laneState.CanReceiveScriptedAdvance, 
+            _laneState.ForwardSettleEpoch);
 
         return await RunSyncGatePlanAsync(plan, cancel);
     }
@@ -116,19 +78,20 @@ public class VNSideRunnerSyncHub
     public async YarnTask<SyncGateRunResult> RunSeekResyncGatePlanAsync(
         CancellationToken cancel)
     {
-        SyncGatePlan plan = _planBuilder.ConsumeSeekResyncPlan(
-            _lane.CanReceiveSeekResyncAdvance);
+        SyncGatePlan plan = _syncGatePlanBuilder.ConsumeSeekResyncPlan(
+            _laneState.CanReceiveSeekResyncAdvance);
 
         return await RunSyncGatePlanAsync(plan, cancel);
     }
 
     // inline [advance]용 경로.
     public async YarnTask<SyncGateRunResult> RunInlineScriptedAdvanceAsync(
-        int steps, CancellationToken cancel)
+        int steps, 
+        CancellationToken cancel)
     {
-        SyncGatePlan plan = _planBuilder.BuildInlineScriptedAdvancePlan(
-            _lane.CanReceiveScriptedAdvance,
-            _lane.ForwardSettleEpoch,
+        SyncGatePlan plan = _syncGatePlanBuilder.BuildInlineScriptedAdvancePlan(
+            _laneState.CanReceiveScriptedAdvance,
+            _laneState.ForwardSettleEpoch,
             steps);
 
         return await RunSyncGatePlanAsync(plan, cancel);
@@ -138,26 +101,29 @@ public class VNSideRunnerSyncHub
         SyncGatePlan plan,
         CancellationToken cancel)
     {
-        if (plan == null || plan.IsEmpty)
+        if (plan.IsEmpty)
             return SyncGateRunResult.Completed;
 
-        if (!_syncGate.TryBegin(plan))
-            return SyncGateRunResult.AlreadyRunning;
+        if (!_syncGateState.Begin(plan))
+        {
+            Debug.LogError("[VNSideRunnerSyncHub] SyncGatePlan overlap detected.");
+            return SyncGateRunResult.Cancelled;
+        }
 
-        PresentationLaneRunToken run = _lane.CurrentRun;
+        PresentationLaneRunToken run = _laneState.CurrentRun;
 
-        while (!_syncGate.IsCompleted)
+        while (!_syncGateState.IsCompleted)
         {
             if (cancel.IsCancellationRequested)
             {
-                _syncGate.Clear();
+                _syncGateState.Clear();
                 return SyncGateRunResult.Cancelled;
             }
 
-            if (!_lane.IsCurrent(run))
+            if (!_laneState.IsCurrent(run))
             {
-                _syncGate.Clear();
-                return SyncGateRunResult.Superseded;
+                _syncGateState.Clear();
+                return SyncGateRunResult.Cancelled;
             }
 
             SyncGateAdvanceResult result = PumpSyncGate();
@@ -165,15 +131,12 @@ public class VNSideRunnerSyncHub
             switch (result)
             {
                 case SyncGateAdvanceResult.LaneCompleted:
-                    _syncGate.Clear();
-                    return SyncGateRunResult.LaneCompleted;
-
                 case SyncGateAdvanceResult.LaneUnavailable:
-                    _syncGate.Clear();
-                    return SyncGateRunResult.LaneUnavailable;
+                    _syncGateState.Clear();
+                    return SyncGateRunResult.Completed;
             }
 
-            if (_syncGate.IsCompleted)
+            if (_syncGateState.IsCompleted)
                 break;
 
             await YarnTask.Yield();
@@ -181,49 +144,18 @@ public class VNSideRunnerSyncHub
 
         return SyncGateRunResult.Completed;
     }
-
-    public void HoldPresentation(int lines)
-    {
-        _planBuilder.Hold(lines);
-    }
-
-    public void AdvancePresentationExtra(int steps)
-    {
-        if (!_lane.CanReceiveForwardModifier)
-            return;
-
-        _planBuilder.AddExtraAdvance(steps);
-    }
-
-    public void SetPresentationSuppressFirstAutoAdvance(bool suppress)
-    {
-        _planBuilder.SetSuppressNextBaseAdvance(suppress);
-    }
-
-    public void PausePresentation()
-    {
-        _lane.Pause();
-    }
-
-    public void ResumePresentation()
-    {
-        _lane.Resume();
-        PumpSyncGate();
-    }
-
+    
     private SyncGateAdvanceResult PumpSyncGate()
     {
-        SyncGateAdvanceResult lastResult = SyncGateAdvanceResult.Completed;
-
-        while (!_syncGate.IsCompleted)
+        while (!_syncGateState.IsCompleted)
         {
-            SyncGateAdvanceResult result = _advancer.TryAdvanceCurrent(_syncGate, _lane);
-            lastResult = result;
+            SyncGateAdvanceResult result =
+                _syncGateAdvancer.TryAdvanceCurrent(_syncGateState, _laneState);
 
             if (result != SyncGateAdvanceResult.Progressed)
                 return result;
         }
 
-        return lastResult;
+        return SyncGateAdvanceResult.Completed;
     }
 }

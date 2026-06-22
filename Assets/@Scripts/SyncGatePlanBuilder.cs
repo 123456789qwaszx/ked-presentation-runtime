@@ -4,7 +4,7 @@ public sealed class SyncGatePlanBuilder
 {
     private int _holdRemainingLines;
     private int _extraAdvanceCount;
-    private bool _suppressNextBaseAdvance;
+    private bool _suppressNextBaseAdvance = true;
 
     public SyncGatePlan ConsumeForwardPlan(
         bool canAdvance, 
@@ -50,7 +50,7 @@ public sealed class SyncGatePlanBuilder
     }
 
     public SyncGatePlan BuildInlineScriptedAdvancePlan(
-        bool canAdvance,
+        bool canAdvance, 
         int currentForwardSettleEpoch,
         int steps)
     {
@@ -85,16 +85,6 @@ public sealed class SyncGatePlanBuilder
             return;
 
         _extraAdvanceCount += steps;
-    }
-
-    public void SetSuppressNextBaseAdvance(bool suppress)
-    {
-        _suppressNextBaseAdvance = suppress;
-    }
-
-    public void ClearForReplayBoundary()
-    {
-        ClearForwardOnlyModifiers();
     }
 
     public void Reset()

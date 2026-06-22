@@ -65,7 +65,7 @@ public partial class VNLinePresentationFlow
         else 
             syncResult = await _sideRunnerSyncHub.RunForwardSyncGatePlanAsync(ctx.Token.NextContentToken);
 
-        if (syncResult == SyncGateRunResult.Cancelled || syncResult == SyncGateRunResult.Superseded) {
+        if (syncResult == SyncGateRunResult.Cancelled) {
             SetPhase(ctx, VNLinePresentationPhase.Stale);
             return false;
         }

@@ -40,7 +40,7 @@ public sealed partial class YarnCommandBridge
     
     // Lane registration is explicitly handled by bootstrap:
     // hub.RegisterPresentationLane(subRunner).
-    private IEnumerator StartSubPresentationNode(string nodeName) 
+    private void StartSubPresentationNode(string nodeName) 
         => _sideRunnerSyncHub.StartPresentationLaneCoroutine(nodeName);
     
     private IEnumerator StopSubPresentationNode() 
@@ -57,9 +57,6 @@ public sealed partial class YarnCommandBridge
     
     private void AddSubPresentationForwardAdvance(int steps = 1) 
         => _sideRunnerSyncHub.AdvancePresentationExtra(steps);
-    
-    private void SetSubPresentationSuppressFirst(bool suppress) 
-        => _sideRunnerSyncHub.SetPresentationSuppressFirstAutoAdvance(suppress);
     
     private IEnumerator RunOneShotNode(string nodeName)
     {
@@ -144,11 +141,9 @@ public sealed partial class YarnCommandBridge
 
         // 자동 진행 제어 (재호출 시 마지막 값으로 덮어씀)
         runner.AddCommandHandler<int>(
-            "pres_hold", HoldSubPresentation);                        // N라인 멈춤
+            "pres_hold", HoldSubPresentation); // N라인 멈춤
         runner.AddCommandHandler<int>(
-            "pres_advance", AddSubPresentationForwardAdvance);             // 이번 라인 N개 추가
-        runner.AddCommandHandler<bool>(
-            "pres_suppress_first", SetSubPresentationSuppressFirst);
+            "pres_advance", AddSubPresentationForwardAdvance); // 이번 라인 N개 추가
         
         runner.AddCommandHandler<string>(
             "beat", RunOneShotNode); // One-Shot Node 재생. 커맨드로만 이루어졌기에 즉시 재생 및 자동 종료

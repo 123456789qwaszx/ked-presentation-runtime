@@ -39,7 +39,7 @@ public sealed class SubPresentationPresenter : DialoguePresenterBase
     {
         CancelPresenterLifetimeWaiters();
 
-        _syncHub.NotifyPresentationLaneCompleted(_currentRun);
+        _syncHub.NotifyLaneCompleted(_currentRun);
         
         _debugSink?.ClearPresentation();
         
@@ -61,23 +61,23 @@ public sealed class SubPresentationPresenter : DialoguePresenterBase
         CommandRunTicket ticket = _playbackDriver.PlayCollected();
 
         if (!blockMain)
-            _syncHub.NotifyPresentationForwardSettled(_currentRun);
+            _syncHub.NotifyForwardSettled(_currentRun);
         
         bool cancelledDuringEntry = await WaitUntilCommandEntryClosedAsync(
             ticket,
             token);
 
         if (blockMain)
-            _syncHub.NotifyPresentationForwardSettled(_currentRun);
+            _syncHub.NotifyForwardSettled(_currentRun);
 
         bool tornDown =
             cancelledDuringEntry ||
             token.NextContentToken.IsCancellationRequested;
 
         if (tornDown)
-            _syncHub.NotifyPresentationLaneReleased(_currentRun);
+            _syncHub.NotifyLaneReleased(_currentRun);
         else
-            _syncHub.NotifyPresentationLaneReady(_currentRun);
+            _syncHub.NotifyLaneReady(_currentRun);
 
         try
         {
@@ -85,7 +85,7 @@ public sealed class SubPresentationPresenter : DialoguePresenterBase
         }
         finally
         {
-            _syncHub.NotifyPresentationLaneNotReady(_currentRun);
+            _syncHub.NotifyLaneNotReady(_currentRun);
         }
     }
 

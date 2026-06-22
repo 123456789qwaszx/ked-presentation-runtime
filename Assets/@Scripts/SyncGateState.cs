@@ -35,21 +35,16 @@ public sealed class SyncGateState
         }
     }
 
-    public bool TryBegin(SyncGatePlan plan)
+    public bool Begin(SyncGatePlan plan)
     {
         if (_isRunning && !IsCompleted)
             return false;
 
         _tokens.Clear();
         _cursor = 0;
-
-        if (plan != null)
-        {
-            IReadOnlyList<SyncGateToken> source = plan.Tokens;
-
-            for (int i = 0; i < source.Count; i++)
-                _tokens.Add(source[i]);
-        }
+        
+        for (int i = 0; i < plan.Tokens.Count; i++)
+            _tokens.Add(plan.Tokens[i]);
 
         _isRunning = true;
 
