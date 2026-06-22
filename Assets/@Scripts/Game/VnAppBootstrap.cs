@@ -253,8 +253,7 @@ public class VnAppBootstrap : MonoBehaviour
 
         // Presentation Control
         PresentationControlCommandFactory presentationControlFactory = new(
-            _uiPatchService,
-            _vnSideRunnerSyncHub);
+            _uiPatchService);
 
         // Audio
         ResourcesAudioClipResolver audioClipResolver = new();

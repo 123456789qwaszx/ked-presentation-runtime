@@ -32,7 +32,6 @@ public sealed class SubPresentationPresenter : DialoguePresenterBase
 
     public override YarnTask OnDialogueStartedAsync()
     {
-        _currentRun = _syncHub.CurrentPresentationRun;
         return YarnTask.CompletedTask;
     }
 
@@ -51,7 +50,7 @@ public sealed class SubPresentationPresenter : DialoguePresenterBase
         LocalizedLine line,
         LineCancellationToken token)
     {
-        PresentationLaneRunToken run = _currentRun;
+        _currentRun = _syncHub.CurrentPresentationRun;
 
         _debugSink?.SetPresentation(
             _currentNodeName,
@@ -62,23 +61,23 @@ public sealed class SubPresentationPresenter : DialoguePresenterBase
         CommandRunTicket ticket = _playbackDriver.PlayCollected();
 
         if (!blockMain)
-            _syncHub.NotifyPresentationForwardSettled(run);
+            _syncHub.NotifyPresentationForwardSettled(_currentRun);
         
         bool cancelledDuringEntry = await WaitUntilCommandEntryClosedAsync(
             ticket,
             token);
 
         if (blockMain)
-            _syncHub.NotifyPresentationForwardSettled(run);
+            _syncHub.NotifyPresentationForwardSettled(_currentRun);
 
         bool tornDown =
             cancelledDuringEntry ||
             token.NextContentToken.IsCancellationRequested;
 
         if (tornDown)
-            _syncHub.NotifyPresentationLaneReleased(run);
+            _syncHub.NotifyPresentationLaneReleased(_currentRun);
         else
-            _syncHub.NotifyPresentationLaneReady(run);
+            _syncHub.NotifyPresentationLaneReady(_currentRun);
 
         try
         {
@@ -86,7 +85,7 @@ public sealed class SubPresentationPresenter : DialoguePresenterBase
         }
         finally
         {
-            _syncHub.NotifyPresentationLaneNotReady(run);
+            _syncHub.NotifyPresentationLaneNotReady(_currentRun);
         }
     }
 

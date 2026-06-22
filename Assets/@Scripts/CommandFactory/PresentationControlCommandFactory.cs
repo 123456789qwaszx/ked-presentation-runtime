@@ -1,14 +1,11 @@
 public sealed class PresentationControlCommandFactory : INodeCommandFactory
 {
     private readonly UIPatchService _uiPatchService;
-    private readonly VNSideRunnerSyncHub _vnSideRunnerSyncHub;
 
     public PresentationControlCommandFactory(
-        UIPatchService uiPatchService,
-        VNSideRunnerSyncHub vnSideRunnerSyncHub)
+        UIPatchService uiPatchService)
     {
         _uiPatchService = uiPatchService;
-        _vnSideRunnerSyncHub = vnSideRunnerSyncHub;
     }
 
     public bool TryCreate(CommandSpecBase spec, out ISequenceCommand command)
@@ -18,8 +15,6 @@ public sealed class PresentationControlCommandFactory : INodeCommandFactory
             null => null,
 
             UIPatchCommandSpec s => new UIPatchCommand(_uiPatchService, s),
-
-            SubPresentationAdvanceCommandSpec s => new SubPresentationAdvanceCommand(_vnSideRunnerSyncHub, s),
 
             _ => null
         };
