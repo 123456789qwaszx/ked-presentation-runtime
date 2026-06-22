@@ -4,15 +4,13 @@
 <<beat Setup_TalesOfNovaEP12_01>>
 
 <<pres_start Pres_TalesOfNovaEP12_01>>
-<<pres_suppress_first true>>
-<<pres_pause>>
+<<pres_suppress_first false>>
 아야메: 빙결!
 //세이나: [pau = 0.4/]잘했어, [advance/][pau = 0.8/]아야메.[advance/][pau = 0.8/] 여기 성해는 [advance/][pau = 0.8/]내가 맡을게.
 
 <<pres_advance >>
 
 세이나: 1마리 더 있어. 코하쿠! 네 쪽으로 가고 있어!
-<<pres_resume>>
 코하쿠: 알겠어.
 
 별의 탑에 들어선 우리는 곧바로 성해 소탕 작전에 돌입했다. 나는 휴대폰을 들고 증거용으로 성해를 처치하는 장면을 하나하나 촬영했다.

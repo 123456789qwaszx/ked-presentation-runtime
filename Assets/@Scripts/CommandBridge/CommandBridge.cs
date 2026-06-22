@@ -40,13 +40,26 @@ public sealed partial class YarnCommandBridge
     
     // Lane registration is explicitly handled by bootstrap:
     // hub.RegisterPresentationLane(subRunner).
-    private IEnumerator StartSubPresentationNode(string nodeName) => _sideRunnerSyncHub.StartPresentationLaneCoroutine(nodeName);
-    private IEnumerator StopSubPresentationNode() => _sideRunnerSyncHub.StopPresentationLaneCoroutine();
-    private void PauseSubPresentation()  => _sideRunnerSyncHub.PausePresentation();
-    private void ResumeSubPresentation() => _sideRunnerSyncHub.ResumePresentation();
-    private void HoldSubPresentation(int lines = 1) => _sideRunnerSyncHub.HoldPresentation(lines);
-    private void AdvanceSubPresentationExtra(int steps = 1) => _sideRunnerSyncHub.StepPresentationOnce(steps);
-    private void SetSubPresentationSuppressFirst(bool suppress) => _sideRunnerSyncHub.SetPresentationSuppressFirstAutoAdvance(suppress);
+    private IEnumerator StartSubPresentationNode(string nodeName) 
+        => _sideRunnerSyncHub.StartPresentationLaneCoroutine(nodeName);
+    
+    private IEnumerator StopSubPresentationNode() 
+        => _sideRunnerSyncHub.StopPresentationLaneCoroutine();
+    
+    private void PauseSubPresentation() 
+        => _sideRunnerSyncHub.PausePresentation();
+    
+    private void ResumeSubPresentation() 
+        => _sideRunnerSyncHub.ResumePresentation();
+    
+    private void HoldSubPresentation(int lines = 1) 
+        => _sideRunnerSyncHub.HoldPresentation(lines);
+    
+    private void AddSubPresentationForwardAdvance(int steps = 1) 
+        => _sideRunnerSyncHub.AdvancePresentationExtra(steps);
+    
+    private void SetSubPresentationSuppressFirst(bool suppress) 
+        => _sideRunnerSyncHub.SetPresentationSuppressFirstAutoAdvance(suppress);
     
     private IEnumerator RunOneShotNode(string nodeName)
     {
@@ -133,7 +146,7 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler<int>(
             "pres_hold", HoldSubPresentation);                        // N라인 멈춤
         runner.AddCommandHandler<int>(
-            "pres_advance", AdvanceSubPresentationExtra);             // 이번 라인 N개 추가
+            "pres_advance", AddSubPresentationForwardAdvance);             // 이번 라인 N개 추가
         runner.AddCommandHandler<bool>(
             "pres_suppress_first", SetSubPresentationSuppressFirst);
         

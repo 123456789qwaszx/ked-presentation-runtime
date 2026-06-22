@@ -1,3 +1,9 @@
+public enum SyncGatePausePolicy
+{
+    RespectPause,
+    IgnorePause,
+}
+
 public enum SyncGateTokenType
 {
     Immediately,
@@ -21,26 +27,48 @@ public readonly struct SyncGateToken
     public readonly SyncGateTokenType Type;
     public readonly SyncAdvanceKind AdvanceKind;
     public readonly int TargetForwardSettleEpoch;
+    public readonly SyncGatePausePolicy PausePolicy;
 
     private SyncGateToken(
         SyncGateTokenType type,
         SyncAdvanceKind advanceKind,
-        int targetForwardSettleEpoch)
+        int targetForwardSettleEpoch,
+        SyncGatePausePolicy pausePolicy)
     {
         Type = type;
         AdvanceKind = advanceKind;
         TargetForwardSettleEpoch = targetForwardSettleEpoch;
+        PausePolicy = pausePolicy;
     }
 
-    public bool CanBypassPause => AdvanceKind == SyncAdvanceKind.ManualBypassPause;
-    public bool CountsForForwardSettle => AdvanceKind == SyncAdvanceKind.Scripted;
+    public bool IgnoresPause => PausePolicy == SyncGatePausePolicy.IgnorePause;
+
+    public bool CanBypassPause
+    {
+        get
+        {
+            return Type == SyncGateTokenType.DispatchPresentationAdvance &&
+                   (AdvanceKind == SyncAdvanceKind.ManualBypassPause ||
+                    AdvanceKind == SyncAdvanceKind.SeekResync);
+        }
+    }
+
+    public bool CountsForForwardSettle
+    {
+        get
+        {
+            return Type == SyncGateTokenType.DispatchPresentationAdvance &&
+                   AdvanceKind == SyncAdvanceKind.Scripted;
+        }
+    }
 
     public static SyncGateToken Immediately()
     {
         return new SyncGateToken(
             SyncGateTokenType.Immediately,
             default,
-            0);
+            0,
+            SyncGatePausePolicy.RespectPause);
     }
 
     public static SyncGateToken WaitLaneOpen()
@@ -48,15 +76,32 @@ public readonly struct SyncGateToken
         return new SyncGateToken(
             SyncGateTokenType.WaitPresentationLaneOpen,
             default,
-            0);
+            0,
+            SyncGatePausePolicy.RespectPause);
+    }
+
+    public static SyncGateToken WaitLaneOpenIgnoringPause()
+    {
+        return new SyncGateToken(
+            SyncGateTokenType.WaitPresentationLaneOpen,
+            default,
+            0,
+            SyncGatePausePolicy.IgnorePause);
     }
 
     public static SyncGateToken DispatchAdvance(SyncAdvanceKind kind)
     {
+        SyncGatePausePolicy pausePolicy =
+            kind == SyncAdvanceKind.SeekResync ||
+            kind == SyncAdvanceKind.ManualBypassPause
+                ? SyncGatePausePolicy.IgnorePause
+                : SyncGatePausePolicy.RespectPause;
+
         return new SyncGateToken(
             SyncGateTokenType.DispatchPresentationAdvance,
             kind,
-            0);
+            0,
+            pausePolicy);
     }
 
     public static SyncGateToken WaitForwardSettled(int targetEpoch)
@@ -64,6 +109,7 @@ public readonly struct SyncGateToken
         return new SyncGateToken(
             SyncGateTokenType.WaitPresentationForwardSettled,
             default,
-            targetEpoch);
+            targetEpoch,
+            SyncGatePausePolicy.RespectPause);
     }
 }

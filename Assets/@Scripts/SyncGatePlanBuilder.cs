@@ -34,13 +34,19 @@ public sealed class SyncGatePlanBuilder
         if (!canAdvance)
             return SyncGatePlan.Empty();
 
-        ClearForwardOnlyModifiers();
+        int advanceCount = ConsumeForwardAdvanceCount();
 
-        return new SyncGatePlan(new[]
-        {
-            SyncGateToken.DispatchAdvance(SyncAdvanceKind.SeekResync),
-            SyncGateToken.WaitLaneOpen(),
-        });
+        if (advanceCount <= 0)
+            return SyncGatePlan.Single(SyncGateToken.Immediately());
+
+        List<SyncGateToken> tokens = new();
+
+        for (int i = 0; i < advanceCount; i++)
+            tokens.Add(SyncGateToken.DispatchAdvance(SyncAdvanceKind.SeekResync));
+
+        tokens.Add(SyncGateToken.WaitLaneOpenIgnoringPause());
+
+        return new SyncGatePlan(tokens);
     }
 
     public SyncGatePlan BuildInlineScriptedAdvancePlan(
@@ -61,24 +67,6 @@ public sealed class SyncGatePlanBuilder
 
         int targetEpoch = currentForwardSettleEpoch + steps;
         tokens.Add(SyncGateToken.WaitForwardSettled(targetEpoch));
-
-        return new SyncGatePlan(tokens);
-    }
-
-    public SyncGatePlan BuildDebugManualBypassPlan(
-        bool canAdvance,
-        int steps)
-    {
-        if (!canAdvance)
-            return SyncGatePlan.Empty();
-
-        if (steps <= 0)
-            steps = 1;
-
-        List<SyncGateToken> tokens = new();
-
-        for (int i = 0; i < steps; i++)
-            tokens.Add(SyncGateToken.DispatchAdvance(SyncAdvanceKind.ManualBypassPause));
 
         return new SyncGatePlan(tokens);
     }

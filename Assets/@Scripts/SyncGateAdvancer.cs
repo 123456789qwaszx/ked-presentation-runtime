@@ -28,7 +28,7 @@ public sealed class SyncGateAdvancer
                 return SyncGateAdvanceResult.Progressed;
 
             case SyncGateTokenType.WaitPresentationLaneOpen:
-                return TryConsumeWaitLaneOpen(gate, lane);
+                return TryConsumeWaitLaneOpen(gate, lane, token);
 
             case SyncGateTokenType.DispatchPresentationAdvance:
                 return TryConsumeDispatchAdvance(gate, lane, token);
@@ -46,7 +46,8 @@ public sealed class SyncGateAdvancer
 
     private SyncGateAdvanceResult TryConsumeWaitLaneOpen(
         SyncGateState gate,
-        PresentationLaneState lane)
+        PresentationLaneState lane,
+        SyncGateToken token)
     {
         if (lane.IsCompleted)
             return SyncGateAdvanceResult.LaneCompleted;
@@ -54,7 +55,7 @@ public sealed class SyncGateAdvancer
         if (!lane.IsAvailable)
             return SyncGateAdvanceResult.LaneUnavailable;
 
-        if (lane.IsPaused)
+        if (lane.IsPaused && !token.IgnoresPause)
             return SyncGateAdvanceResult.LanePaused;
 
         if (!lane.IsOpenForMain)

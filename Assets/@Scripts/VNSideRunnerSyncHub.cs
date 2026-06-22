@@ -192,19 +192,6 @@ public class VNSideRunnerSyncHub
         return SyncGateRunResult.Completed;
     }
 
-    /// <summary>
-    /// 디버그/강제 진행 전용.
-    /// inline advance는 이 경로를 쓰면 안 된다.
-    /// </summary>
-    public void StepPresentationOnce(int steps = 1)
-    {
-        SyncGatePlan plan = _planBuilder.BuildDebugManualBypassPlan(
-            _lane.CanReceiveManualAdvance,
-            steps);
-
-        RunDebugManualPlan(plan);
-    }
-
     public void HoldPresentation(int lines)
     {
         _planBuilder.Hold(lines);
@@ -231,17 +218,6 @@ public class VNSideRunnerSyncHub
     public void ResumePresentation()
     {
         _lane.Resume();
-        PumpSyncGate();
-    }
-
-    private void RunDebugManualPlan(SyncGatePlan plan)
-    {
-        if (plan == null || plan.IsEmpty)
-            return;
-
-        if (!_syncGate.TryBegin(plan))
-            return;
-
         PumpSyncGate();
     }
 
