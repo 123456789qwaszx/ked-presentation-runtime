@@ -1,10 +1,3 @@
-public enum PresentationLanePhase
-{
-    Stopped,
-    Running,
-    Completed,
-}
-
 public enum PresentationLaneGate
 {
     /// <summary>

@@ -129,12 +129,10 @@ public class VNSideRunnerSyncHub
 
             SyncGateAdvanceResult result = PumpSyncGate();
 
-            switch (result)
+            if (result == SyncGateAdvanceResult.LaneClosed)
             {
-                case SyncGateAdvanceResult.LaneCompleted:
-                case SyncGateAdvanceResult.LaneUnavailable:
-                    _syncGateState.Clear();
-                    return SyncGateRunResult.Completed;
+                _syncGateState.Clear();
+                return SyncGateRunResult.Completed;
             }
 
             if (_syncGateState.IsCompleted)

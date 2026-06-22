@@ -31,9 +31,6 @@ public readonly struct SyncGateToken
     public bool CountsForForwardSettle 
         => Type == SyncGateTokenType.DispatchPresentationAdvance && 
            AdvanceKind == SyncAdvanceKind.Scripted;
-
-    public static SyncGateToken Immediately()
-    => new(SyncGateTokenType.Immediately, default, 0);
     
     public static SyncGateToken WaitLaneOpen()
     => new(SyncGateTokenType.WaitPresentationLaneOpen, default, 0);

@@ -22,9 +22,4 @@ public sealed class SyncGatePlan
     {
         return EmptyPlan;
     }
-
-    public static SyncGatePlan Single(SyncGateToken token)
-    {
-        return new SyncGatePlan(new[] { token });
-    }
 }

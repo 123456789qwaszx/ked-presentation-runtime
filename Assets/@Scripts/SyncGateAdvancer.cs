@@ -3,8 +3,7 @@ public enum SyncGateAdvanceResult
     Completed,
     Progressed,
     Blocked,
-    LaneCompleted,
-    LaneUnavailable,
+    LaneClosed
 }
 
 public sealed class SyncGateAdvancer
@@ -27,7 +26,7 @@ public sealed class SyncGateAdvancer
                 return SyncGateAdvanceResult.Progressed;
 
             case SyncGateTokenType.WaitPresentationLaneOpen:
-                return TryConsumeWaitLaneOpen(gate, lane, token);
+                return TryConsumeWaitLaneOpen(gate, lane);
 
             case SyncGateTokenType.DispatchPresentationAdvance:
                 return TryConsumeDispatchAdvance(gate, lane, token);
@@ -45,14 +44,10 @@ public sealed class SyncGateAdvancer
 
     private SyncGateAdvanceResult TryConsumeWaitLaneOpen(
         SyncGateState gate,
-        PresentationLaneState lane,
-        SyncGateToken token)
+        PresentationLaneState lane)
     {
-        if (lane.IsCompleted)
-            return SyncGateAdvanceResult.LaneCompleted;
-
         if (!lane.IsAvailable)
-            return SyncGateAdvanceResult.LaneUnavailable;
+            return SyncGateAdvanceResult.LaneClosed;
 
         if (!lane.IsOpenForMain)
             return SyncGateAdvanceResult.Blocked;
@@ -66,11 +61,8 @@ public sealed class SyncGateAdvancer
         PresentationLaneState lane,
         SyncGateToken token)
     {
-        if (lane.IsCompleted)
-            return SyncGateAdvanceResult.LaneCompleted;
-
         if (!lane.IsAvailable)
-            return SyncGateAdvanceResult.LaneUnavailable;
+            return SyncGateAdvanceResult.LaneClosed;
 
         if (!lane.IsReadyForAdvance)
             return SyncGateAdvanceResult.Blocked;
@@ -84,7 +76,7 @@ public sealed class SyncGateAdvancer
         if (!lane.IsDialogueRunning)
         {
             lane.CompleteRun();
-            return SyncGateAdvanceResult.LaneCompleted;
+            return SyncGateAdvanceResult.LaneClosed;
         }
 
         lane.RequestNextLine();
@@ -102,11 +94,8 @@ public sealed class SyncGateAdvancer
             return SyncGateAdvanceResult.Progressed;
         }
 
-        if (lane.IsCompleted)
-            return SyncGateAdvanceResult.LaneCompleted;
-
         if (!lane.IsAvailable)
-            return SyncGateAdvanceResult.LaneUnavailable;
+            return SyncGateAdvanceResult.LaneClosed;
 
         return SyncGateAdvanceResult.Blocked;
     }

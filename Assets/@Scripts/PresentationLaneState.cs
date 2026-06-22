@@ -5,7 +5,7 @@ public sealed class PresentationLaneState
     private readonly DialogueRunner _runner;
 
     private int _runVersion;
-    private PresentationLanePhase _phase = PresentationLanePhase.Stopped;
+    private bool _isRunning;
     private PresentationLaneGate _gate = PresentationLaneGate.Blocked;
     private bool _isPaused;
 
@@ -16,26 +16,18 @@ public sealed class PresentationLaneState
     public int ForwardSettleEpoch => _settleClock.Epoch;
     public bool IsPaused => _isPaused;
 
-    public bool IsCompleted => _phase == PresentationLanePhase.Completed;
-    public bool IsAvailable => _phase == PresentationLanePhase.Running;
-    public bool IsReadyForAdvance => IsAvailable && _gate == PresentationLaneGate.Ready;
+    public bool IsAvailable => _isRunning;
 
-    public bool IsOpenForMain
-    {
-        get
-        {
-            if (!IsAvailable)
-                return false;
+    public bool IsReadyForAdvance =>
+        IsAvailable && _gate == PresentationLaneGate.Ready;
 
-            return _gate == PresentationLaneGate.Ready ||
-                   _gate == PresentationLaneGate.Released;
-        }
-    }
+    public bool IsOpenForMain =>
+        IsAvailable && _gate is PresentationLaneGate.Ready or PresentationLaneGate.Released;
 
     public bool IsDialogueRunning => _runner.IsDialogueRunning;
 
     public bool CanReceiveScriptedAdvance => IsAvailable && !_isPaused;
-    public bool CanReceiveSeekResyncAdvance => IsAvailable;
+    public bool CanReceiveSeekResyncAdvance => IsAvailable && !_isPaused;
     public bool CanReceiveForwardModifier => IsAvailable;
 
     public PresentationLaneState(DialogueRunner runner)
@@ -44,14 +36,14 @@ public sealed class PresentationLaneState
     }
 
     public YarnTask StartDialogue(string nodeName) => _runner.StartDialogue(nodeName);
-    public YarnTask StopDialogue() =>_runner.Stop();
+    public YarnTask StopDialogue() => _runner.Stop();
     public void RequestNextLine() => _runner.RequestNextLine();
-    
+
     public void BeginRun()
     {
         _runVersion++;
 
-        _phase = PresentationLanePhase.Running;
+        _isRunning = true;
         _gate = PresentationLaneGate.Blocked;
         _isPaused = false;
 
@@ -60,7 +52,7 @@ public sealed class PresentationLaneState
 
     public void CompleteRun()
     {
-        _phase = PresentationLanePhase.Completed;
+        _isRunning = false;
         _gate = PresentationLaneGate.Blocked;
         _isPaused = false;
 
@@ -71,7 +63,7 @@ public sealed class PresentationLaneState
     {
         _runVersion++;
 
-        _phase = PresentationLanePhase.Stopped;
+        _isRunning = false;
         _gate = PresentationLaneGate.Blocked;
         _isPaused = false;
 
@@ -94,7 +86,7 @@ public sealed class PresentationLaneState
         if (!IsCurrent(run))
             return;
 
-        if (_phase == PresentationLanePhase.Completed)
+        if (!IsAvailable)
             return;
 
         _gate = PresentationLaneGate.Blocked;
