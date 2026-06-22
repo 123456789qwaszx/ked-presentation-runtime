@@ -1,43 +1,47 @@
+// The work this token performs.
 public enum SyncGateTokenType
 {
-    Immediately,
-    WaitPresentationLaneOpen,
+    // Wait until the presentation lane is open to receive a main advance.
+    WaitPresentationLaneOpen, 
+    
+    // Check that the lane is ready for advance, then call RequestNextLine().
     DispatchPresentationAdvance,
+    
+    // After dispatching a forward advance, wait until the forward settle epoch reaches the target.
     WaitPresentationForwardSettled,
 }
 
 public enum SyncAdvanceKind
 {
-    Scripted,
+    None = 0,
+    ScriptedForward,
     SeekResync,
 }
 
 public readonly struct SyncGateToken
 {
+    private const int NoTargetEpoch = -1;
+    
     public readonly SyncGateTokenType Type;
-    public readonly SyncAdvanceKind AdvanceKind;
-    public readonly int TargetForwardSettleEpoch;
+    public readonly SyncAdvanceKind AdvanceKind; // Meaningful only when Type is DispatchPresentationAdvance.
+    public readonly int TargetEpoch; // Meaningful only when Type is WaitPresentationForwardSettled.
 
     private SyncGateToken(
         SyncGateTokenType type,
         SyncAdvanceKind advanceKind,
-        int targetForwardSettleEpoch)
+        int targetEpoch)
     {
         Type = type;
         AdvanceKind = advanceKind;
-        TargetForwardSettleEpoch = targetForwardSettleEpoch;
+        TargetEpoch = targetEpoch;
     }
-
-    public bool CountsForForwardSettle 
-        => Type == SyncGateTokenType.DispatchPresentationAdvance && 
-           AdvanceKind == SyncAdvanceKind.Scripted;
     
     public static SyncGateToken WaitLaneOpen()
-    => new(SyncGateTokenType.WaitPresentationLaneOpen, default, 0);
+        => new(SyncGateTokenType.WaitPresentationLaneOpen, SyncAdvanceKind.None, NoTargetEpoch);
+    
+    public static SyncGateToken DispatchAdvance(SyncAdvanceKind kind) 
+        => new(SyncGateTokenType.DispatchPresentationAdvance, kind, NoTargetEpoch);
 
-    public static SyncGateToken DispatchAdvance(SyncAdvanceKind kind)
-    => new(SyncGateTokenType.DispatchPresentationAdvance, kind, 0);
-
-    public static SyncGateToken WaitForwardSettled(int targetEpoch)
-    => new(SyncGateTokenType.WaitPresentationForwardSettled, default, targetEpoch);
+    public static SyncGateToken WaitForwardSettled(int targetEpoch) 
+        => new(SyncGateTokenType.WaitPresentationForwardSettled, SyncAdvanceKind.None, targetEpoch);
 }

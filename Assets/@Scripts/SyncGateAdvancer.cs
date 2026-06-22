@@ -21,21 +21,14 @@ public sealed class SyncGateAdvancer
 
         switch (token.Type)
         {
-            case SyncGateTokenType.Immediately:
-                gate.ConsumeCurrent();
-                return SyncGateAdvanceResult.Progressed;
-
             case SyncGateTokenType.WaitPresentationLaneOpen:
                 return TryConsumeWaitLaneOpen(gate, lane);
 
             case SyncGateTokenType.DispatchPresentationAdvance:
-                return TryConsumeDispatchAdvance(gate, lane, token);
+                return TryConsumeDispatchAdvance(gate, lane, token.AdvanceKind);
 
             case SyncGateTokenType.WaitPresentationForwardSettled:
-                return TryConsumeWaitForwardSettled(
-                    gate,
-                    lane,
-                    token.TargetForwardSettleEpoch);
+                return TryConsumeWaitForwardSettled(gate, lane, token.TargetEpoch);
 
             default:
                 return SyncGateAdvanceResult.Blocked;
@@ -59,7 +52,7 @@ public sealed class SyncGateAdvancer
     private SyncGateAdvanceResult TryConsumeDispatchAdvance(
         SyncGateState gate,
         PresentationLaneState lane,
-        SyncGateToken token)
+        SyncAdvanceKind advanceKind)
     {
         if (!lane.IsAvailable)
             return SyncGateAdvanceResult.LaneClosed;
@@ -67,11 +60,11 @@ public sealed class SyncGateAdvancer
         if (!lane.IsReadyForAdvance)
             return SyncGateAdvanceResult.Blocked;
 
-        if (lane.IsPaused && token.AdvanceKind != SyncAdvanceKind.SeekResync)
+        if (lane.IsPaused && advanceKind != SyncAdvanceKind.SeekResync)
             return SyncGateAdvanceResult.Blocked;
 
         gate.ConsumeCurrent();
-        lane.MarkAdvanceDispatched(token);
+        lane.MarkAdvanceDispatched(advanceKind);
 
         if (!lane.IsDialogueRunning)
         {

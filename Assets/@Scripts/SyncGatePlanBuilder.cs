@@ -4,7 +4,11 @@ public sealed class SyncGatePlanBuilder
 {
     private int _holdRemainingLines;
     private int _extraAdvanceCount;
-
+    
+    public void Hold(int lines) => _holdRemainingLines = lines;
+    public void AddExtraAdvance(int steps) => _extraAdvanceCount += steps;
+    
+    
     public SyncGatePlan ConsumeForwardPlan(
         bool canAdvance,
         int currentForwardSettleEpoch)
@@ -20,7 +24,7 @@ public sealed class SyncGatePlanBuilder
         List<SyncGateToken> tokens = new();
 
         for (int i = 0; i < advanceCount; i++)
-            tokens.Add(SyncGateToken.DispatchAdvance(SyncAdvanceKind.Scripted));
+            tokens.Add(SyncGateToken.DispatchAdvance(SyncAdvanceKind.ScriptedForward));
 
         int targetEpoch = currentForwardSettleEpoch + advanceCount;
         tokens.Add(SyncGateToken.WaitForwardSettled(targetEpoch));
@@ -62,31 +66,12 @@ public sealed class SyncGatePlanBuilder
         List<SyncGateToken> tokens = new();
 
         for (int i = 0; i < steps; i++)
-            tokens.Add(SyncGateToken.DispatchAdvance(SyncAdvanceKind.Scripted));
+            tokens.Add(SyncGateToken.DispatchAdvance(SyncAdvanceKind.ScriptedForward));
 
         int targetEpoch = currentForwardSettleEpoch + steps;
         tokens.Add(SyncGateToken.WaitForwardSettled(targetEpoch));
 
         return new SyncGatePlan(tokens);
-    }
-
-    public void Hold(int lines)
-    {
-        _holdRemainingLines = lines;
-    }
-
-    public void AddExtraAdvance(int steps)
-    {
-        if (steps <= 0)
-            return;
-
-        _extraAdvanceCount += steps;
-    }
-
-    public void Reset()
-    {
-        _holdRemainingLines = 0;
-        _extraAdvanceCount = 0;
     }
 
     private int ConsumeForwardAdvanceCount()
@@ -109,5 +94,11 @@ public sealed class SyncGatePlanBuilder
         _extraAdvanceCount = 0;
 
         return count;
+    }
+    
+    public void Reset()
+    {
+        _holdRemainingLines = 0;
+        _extraAdvanceCount = 0;
     }
 }

@@ -2,29 +2,42 @@ using Yarn.Unity;
 
 public sealed class PresentationLaneState
 {
+    private enum Gate
+    {
+        // Side lane is inside a line or not ready to receive RequestNextLine.
+        // Main must wait.
+        Blocked,
+
+        // Side lane is waiting at a stable line boundary.
+        // Main may dispatch RequestNextLine.
+        Ready,
+
+        // Side lane was torn down before reaching the normal ready boundary.
+        // Main wait may be released, but RequestNextLine must not be dispatched.
+        Released,
+    }
+
     private readonly DialogueRunner _runner;
+    private readonly ForwardSettleClock _settleClock = new();
 
     private int _runVersion;
     private bool _isRunning;
-    private PresentationLaneGate _gate = PresentationLaneGate.Blocked;
+    private Gate _gate = Gate.Blocked;
     private bool _isPaused;
-
-    private readonly ForwardSettleClock _settleClock = new();
 
     public PresentationLaneRunToken CurrentRun => new(_runVersion);
 
-    public int ForwardSettleEpoch => _settleClock.Epoch;
+    public bool IsAvailable => _isRunning;
+    public bool IsDialogueRunning => _runner.IsDialogueRunning;
     public bool IsPaused => _isPaused;
 
-    public bool IsAvailable => _isRunning;
+    public int ForwardSettleEpoch => _settleClock.Epoch;
 
-    public bool IsReadyForAdvance =>
-        IsAvailable && _gate == PresentationLaneGate.Ready;
-
-    public bool IsOpenForMain =>
-        IsAvailable && _gate is PresentationLaneGate.Ready or PresentationLaneGate.Released;
-
-    public bool IsDialogueRunning => _runner.IsDialogueRunning;
+    public bool IsReadyForAdvance => 
+        IsAvailable && _gate == Gate.Ready;
+    
+    public bool IsOpenForMain => 
+        IsAvailable && (_gate == Gate.Ready || _gate == Gate.Released);
 
     public bool CanReceiveScriptedAdvance => IsAvailable && !_isPaused;
     public bool CanReceiveSeekResyncAdvance => IsAvailable && !_isPaused;
@@ -35,7 +48,7 @@ public sealed class PresentationLaneState
         _runner = runner;
     }
 
-    public YarnTask StartDialogue(string nodeName) => _runner.StartDialogue(nodeName);
+    public void StartDialogue(string nodeName) => _runner.StartDialogue(nodeName);
     public YarnTask StopDialogue() => _runner.Stop();
     public void RequestNextLine() => _runner.RequestNextLine();
 
@@ -44,7 +57,7 @@ public sealed class PresentationLaneState
         _runVersion++;
 
         _isRunning = true;
-        _gate = PresentationLaneGate.Blocked;
+        _gate = Gate.Blocked;
         _isPaused = false;
 
         _settleClock.ClearInFlightSettles();
@@ -53,7 +66,7 @@ public sealed class PresentationLaneState
     public void CompleteRun()
     {
         _isRunning = false;
-        _gate = PresentationLaneGate.Blocked;
+        _gate = Gate.Blocked;
         _isPaused = false;
 
         _settleClock.ClearInFlightSettles();
@@ -64,7 +77,7 @@ public sealed class PresentationLaneState
         _runVersion++;
 
         _isRunning = false;
-        _gate = PresentationLaneGate.Blocked;
+        _gate = Gate.Blocked;
         _isPaused = false;
 
         _settleClock.ClearInFlightSettles();
@@ -78,7 +91,7 @@ public sealed class PresentationLaneState
         if (!IsAvailable)
             return;
 
-        _gate = PresentationLaneGate.Ready;
+        _gate = Gate.Ready;
     }
 
     public void NotifyNotReady(PresentationLaneRunToken run)
@@ -89,7 +102,7 @@ public sealed class PresentationLaneState
         if (!IsAvailable)
             return;
 
-        _gate = PresentationLaneGate.Blocked;
+        _gate = Gate.Blocked;
     }
 
     public void NotifyReleased(PresentationLaneRunToken run)
@@ -100,7 +113,7 @@ public sealed class PresentationLaneState
         if (!IsAvailable)
             return;
 
-        _gate = PresentationLaneGate.Released;
+        _gate = Gate.Released;
     }
 
     public void NotifyCompleted(PresentationLaneRunToken run)
@@ -122,11 +135,11 @@ public sealed class PresentationLaneState
         _settleClock.NotifySettled();
     }
 
-    public void MarkAdvanceDispatched(SyncGateToken token)
+    public void MarkAdvanceDispatched(SyncAdvanceKind advanceKind)
     {
-        _gate = PresentationLaneGate.Blocked;
-
-        if (token.CountsForForwardSettle)
+        _gate = Gate.Blocked;
+        
+        if (advanceKind == SyncAdvanceKind.ScriptedForward)
             _settleClock.BeginForwardSettle();
     }
 

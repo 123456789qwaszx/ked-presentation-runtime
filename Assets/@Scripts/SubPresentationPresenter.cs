@@ -22,8 +22,7 @@ public sealed class SubPresentationPresenter : DialoguePresenterBase
         VNSideRunnerSyncHub syncHub,
         IYarnLaneDebugSink debugSink = null)
     {
-        if (dialogueRunner != null)
-            dialogueRunner.onNodeStart?.AddListener(nodeName => _currentNodeName = nodeName);
+        dialogueRunner.onNodeStart?.AddListener(nodeName => _currentNodeName = nodeName);
 
         _playbackDriver = playbackDriver;
         _syncHub = syncHub;
@@ -63,9 +62,7 @@ public sealed class SubPresentationPresenter : DialoguePresenterBase
         if (!blockMain)
             _syncHub.NotifyForwardSettled(_currentRun);
         
-        bool cancelledDuringEntry = await WaitUntilCommandEntryClosedAsync(
-            ticket,
-            token);
+        bool cancelledDuringEntry = await WaitUntilCommandEntryClosedAsync(ticket, token);
 
         if (blockMain)
             _syncHub.NotifyForwardSettled(_currentRun);
@@ -93,9 +90,6 @@ public sealed class SubPresentationPresenter : DialoguePresenterBase
         CommandRunTicket ticket,
         LineCancellationToken token)
     {
-        if (ticket == null)
-            return token.NextContentToken.IsCancellationRequested;
-
         while (!ticket.EntryClosed)
         {
             if (token.NextContentToken.IsCancellationRequested)
