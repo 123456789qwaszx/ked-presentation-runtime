@@ -34,7 +34,7 @@ public sealed class PresentationLaneState
 
     public bool IsDialogueRunning => _runner.IsDialogueRunning;
 
-    public bool CanReceiveScriptedAdvance => IsAvailable;
+    public bool CanReceiveScriptedAdvance => IsAvailable && !_isPaused;
     public bool CanReceiveSeekResyncAdvance => IsAvailable;
     public bool CanReceiveForwardModifier => IsAvailable;
 
