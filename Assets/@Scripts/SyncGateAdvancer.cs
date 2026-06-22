@@ -60,9 +60,6 @@ public sealed class SyncGateAdvancer
         if (!lane.IsReadyForAdvance)
             return SyncGateAdvanceResult.Blocked;
 
-        if (lane.IsPaused && advanceKind != SyncAdvanceKind.SeekResync)
-            return SyncGateAdvanceResult.Blocked;
-
         gate.ConsumeCurrent();
         lane.MarkAdvanceDispatched(advanceKind);
 

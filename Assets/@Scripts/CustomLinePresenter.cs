@@ -13,7 +13,6 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, IVNLineAborter
     private VNLinePresentationFlow _vnLinePresentationFlow;
 
     private EllipsisBreathTypewriter _typewriter;
-    private DialogueBoxPresentationController _boxPresentation;
     private VNLinePresentationState _vnLinePresentationState;
     private PresentationSessionContext _presentationSessionContext;
     private VNTraceStream _trace;
@@ -125,12 +124,10 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, IVNLineAborter
     {
         _presenterGeneration++;
         CancelLineVisualToken();
-        CloseAll();
     }
     
     public override YarnTask OnDialogueStartedAsync()
     {
-        CloseAll();
         return YarnTask.CompletedTask;
     }
 
@@ -138,16 +135,10 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, IVNLineAborter
     {
         CancelLineVisualToken();
         CancelPresenterLifetimeWaiters();
-        CloseAll();
         _debugSink?.ClearMain();
         return YarnTask.CompletedTask;
     }
     
-    private void CloseAll()
-    {
-        _boxPresentation?.CloseAll();
-        _typewriter?.SetTextView(null);
-    }
     
     private void CancelPresenterLifetimeWaiters()
     {

@@ -29,7 +29,6 @@ public sealed class PresentationLaneState
 
     public bool IsAvailable => _isRunning;
     public bool IsDialogueRunning => _runner.IsDialogueRunning;
-    public bool IsPaused => _isPaused;
 
     public int ForwardSettleEpoch => _settleClock.Epoch;
 

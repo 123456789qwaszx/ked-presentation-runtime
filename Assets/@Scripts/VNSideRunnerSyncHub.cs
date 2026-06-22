@@ -49,6 +49,7 @@ public class VNSideRunnerSyncHub
     {
         _laneState.CompleteRun();
         _syncGateState.Clear();
+        _syncGatePlanBuilder.Reset();
 
         if (_laneState.IsDialogueRunning)
         {
