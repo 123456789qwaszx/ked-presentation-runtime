@@ -4,10 +4,9 @@ public sealed class SyncGatePlanBuilder
 {
     private int _holdRemainingLines;
     private int _extraAdvanceCount;
-    private bool _suppressNextBaseAdvance = true;
 
     public SyncGatePlan ConsumeForwardPlan(
-        bool canAdvance, 
+        bool canAdvance,
         int currentForwardSettleEpoch)
     {
         if (!canAdvance)
@@ -15,8 +14,8 @@ public sealed class SyncGatePlanBuilder
 
         int advanceCount = ConsumeForwardAdvanceCount();
 
-        if (advanceCount <= 0)
-            return SyncGatePlan.Single(SyncGateToken.Immediately());
+        if (advanceCount == 0)
+            return SyncGatePlan.Empty();
 
         List<SyncGateToken> tokens = new();
 
@@ -36,8 +35,8 @@ public sealed class SyncGatePlanBuilder
 
         int advanceCount = ConsumeForwardAdvanceCount();
 
-        if (advanceCount <= 0)
-            return SyncGatePlan.Single(SyncGateToken.Immediately());
+        if (advanceCount == 0)
+            return SyncGatePlan.Empty();
 
         List<SyncGateToken> tokens = new();
 
@@ -50,7 +49,7 @@ public sealed class SyncGatePlanBuilder
     }
 
     public SyncGatePlan BuildInlineScriptedAdvancePlan(
-        bool canAdvance, 
+        bool canAdvance,
         int currentForwardSettleEpoch,
         int steps)
     {
@@ -73,9 +72,6 @@ public sealed class SyncGatePlanBuilder
 
     public void Hold(int lines)
     {
-        if (lines < 0)
-            lines = 0;
-
         _holdRemainingLines = lines;
     }
 
@@ -89,17 +85,12 @@ public sealed class SyncGatePlanBuilder
 
     public void Reset()
     {
-        ClearForwardOnlyModifiers();
+        _holdRemainingLines = 0;
+        _extraAdvanceCount = 0;
     }
 
     private int ConsumeForwardAdvanceCount()
     {
-        if (_suppressNextBaseAdvance)
-        {
-            _suppressNextBaseAdvance = false;
-            return ConsumeExtraAdvanceOnly();
-        }
-
         if (_holdRemainingLines > 0)
         {
             _holdRemainingLines--;
@@ -118,12 +109,5 @@ public sealed class SyncGatePlanBuilder
         _extraAdvanceCount = 0;
 
         return count;
-    }
-
-    private void ClearForwardOnlyModifiers()
-    {
-        _holdRemainingLines = 0;
-        _extraAdvanceCount = 0;
-        _suppressNextBaseAdvance = false;
     }
 }

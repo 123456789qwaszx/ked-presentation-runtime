@@ -41,6 +41,7 @@ public class VNSideRunnerSyncHub
     public void StartPresentationLaneCoroutine(string nodeName)
     {
         _laneState.BeginRun();
+        _syncGatePlanBuilder.Hold(1);
         _laneState.StartDialogue(nodeName);
     }
 

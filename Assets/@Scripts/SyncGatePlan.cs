@@ -2,6 +2,8 @@ using System.Collections.Generic;
 
 public sealed class SyncGatePlan
 {
+    private static readonly SyncGatePlan EmptyPlan = new(System.Array.Empty<SyncGateToken>());
+
     private readonly SyncGateToken[] _tokens;
 
     public IReadOnlyList<SyncGateToken> Tokens => _tokens;
@@ -10,12 +12,6 @@ public sealed class SyncGatePlan
 
     public SyncGatePlan(IReadOnlyList<SyncGateToken> tokens)
     {
-        if (tokens == null || tokens.Count == 0)
-        {
-            _tokens = System.Array.Empty<SyncGateToken>();
-            return;
-        }
-
         _tokens = new SyncGateToken[tokens.Count];
 
         for (int i = 0; i < tokens.Count; i++)
@@ -24,7 +20,7 @@ public sealed class SyncGatePlan
 
     public static SyncGatePlan Empty()
     {
-        return new SyncGatePlan(System.Array.Empty<SyncGateToken>());
+        return EmptyPlan;
     }
 
     public static SyncGatePlan Single(SyncGateToken token)

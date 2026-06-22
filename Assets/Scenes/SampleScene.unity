@@ -13064,25 +13064,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cf1a2edb12e1f3742b6561b60e1b67a0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RollbackHistoryDebugView
-  isBound: 0
-  autoRefresh: 1
-  refreshInterval: 0.25
   count: 0
   canRollbackOneStep: 0
-  latestListIndex: -1
-  nextRollbackTargetListIndex: -1
-  latestPoint:
-    listIndex: 0
-    historyIndex: 0
-    nodeName: 
-    lineId: 
-    rawText: 
-  nextRollbackTarget:
-    listIndex: 0
-    historyIndex: 0
-    nodeName: 
-    lineId: 
-    rawText: 
   points: []
 --- !u!4 &969122868
 Transform:
