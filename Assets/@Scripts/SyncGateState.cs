@@ -7,8 +7,6 @@ public sealed class SyncGateState
     private int _cursor;
     private bool _isRunning;
 
-    public bool IsRunning => _isRunning;
-
     public bool IsCompleted
     {
         get

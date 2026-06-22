@@ -4,7 +4,6 @@ public enum SyncGateAdvanceResult
     Progressed,
     Blocked,
     LaneCompleted,
-    LanePaused,
     LaneUnavailable,
 }
 
@@ -55,9 +54,6 @@ public sealed class SyncGateAdvancer
         if (!lane.IsAvailable)
             return SyncGateAdvanceResult.LaneUnavailable;
 
-        if (lane.IsPaused && !token.IgnoresPause)
-            return SyncGateAdvanceResult.LanePaused;
-
         if (!lane.IsOpenForMain)
             return SyncGateAdvanceResult.Blocked;
 
@@ -79,7 +75,7 @@ public sealed class SyncGateAdvancer
         if (!lane.IsReadyForAdvance)
             return SyncGateAdvanceResult.Blocked;
 
-        if (lane.IsPaused && !token.CanBypassPause)
+        if (lane.IsPaused && token.AdvanceKind != SyncAdvanceKind.SeekResync)
             return SyncGateAdvanceResult.Blocked;
 
         if (!gate.TryConsumeCurrent(out SyncGateToken consumed))
@@ -113,9 +109,6 @@ public sealed class SyncGateAdvancer
 
         if (!lane.IsAvailable)
             return SyncGateAdvanceResult.LaneUnavailable;
-
-        if (lane.IsPaused)
-            return SyncGateAdvanceResult.LanePaused;
 
         return SyncGateAdvanceResult.Blocked;
     }

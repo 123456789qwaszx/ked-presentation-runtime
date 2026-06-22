@@ -44,7 +44,7 @@ public sealed class SyncGatePlanBuilder
         for (int i = 0; i < advanceCount; i++)
             tokens.Add(SyncGateToken.DispatchAdvance(SyncAdvanceKind.SeekResync));
 
-        tokens.Add(SyncGateToken.WaitLaneOpenIgnoringPause());
+        tokens.Add(SyncGateToken.WaitLaneOpen());
 
         return new SyncGatePlan(tokens);
     }

@@ -9,7 +9,6 @@ public enum SyncGateRunResult
     Superseded,
     AlreadyRunning,
     LaneCompleted,
-    LanePaused,
     LaneUnavailable,
 }
 
@@ -20,7 +19,6 @@ public class VNSideRunnerSyncHub
     private readonly SyncGateState _syncGate = new();
     private readonly SyncGateAdvancer _advancer = new();
 
-    public int ForwardSettleEpoch => _lane.ForwardSettleEpoch;
     public PresentationLaneRunToken CurrentPresentationRun => _lane.CurrentRun;
 
     public void RegisterPresentationLane(DialogueRunner runner)
@@ -173,10 +171,6 @@ public class VNSideRunnerSyncHub
                 case SyncGateAdvanceResult.LaneCompleted:
                     _syncGate.Clear();
                     return SyncGateRunResult.LaneCompleted;
-
-                case SyncGateAdvanceResult.LanePaused:
-                    _syncGate.Clear();
-                    return SyncGateRunResult.LanePaused;
 
                 case SyncGateAdvanceResult.LaneUnavailable:
                     _syncGate.Clear();

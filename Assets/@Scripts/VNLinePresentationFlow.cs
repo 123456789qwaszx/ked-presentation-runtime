@@ -82,12 +82,6 @@ public partial class VNLinePresentationFlow
             return LineEntryOutcome.PassedThrough;
         }
 
-        if (syncResult == SyncGateRunResult.LanePaused ||
-            syncResult == SyncGateRunResult.LaneCompleted ||
-            syncResult == SyncGateRunResult.LaneUnavailable) {
-            // WaitUntilForwardSettledAsync의 "기다릴 수 없으면 빠져나온다"
-        }
-
         if (ctx.ShouldSkipVisual) {
             await RunSeekPassThroughAsync(ctx);
             return LineEntryOutcome.PassedThrough;
