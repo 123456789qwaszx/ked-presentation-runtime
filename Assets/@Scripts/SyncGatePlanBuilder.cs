@@ -7,7 +7,7 @@ public sealed class SyncGatePlanBuilder
     private bool _suppressNextBaseAdvance;
 
     public SyncGatePlan ConsumeForwardPlan(
-        bool canAdvance,
+        bool canAdvance, 
         int currentForwardSettleEpoch)
     {
         if (!canAdvance)

@@ -102,7 +102,7 @@ public class VNSideRunnerSyncHub
         _lane.NotifyForwardSettled(run);
         PumpSyncGate();
     }
-
+    
     public async YarnTask<SyncGateRunResult> RunForwardSyncGatePlanAsync(
         CancellationToken cancel)
     {
@@ -112,7 +112,7 @@ public class VNSideRunnerSyncHub
 
         return await RunSyncGatePlanAsync(plan, cancel);
     }
-
+    
     public async YarnTask<SyncGateRunResult> RunSeekResyncGatePlanAsync(
         CancellationToken cancel)
     {
@@ -122,13 +122,9 @@ public class VNSideRunnerSyncHub
         return await RunSyncGatePlanAsync(plan, cancel);
     }
 
-    /// <summary>
-    /// 미래 inline [advance]가 타야 할 정규 scripted 경로.
-    /// ManualBypass가 아니라 Scripted dispatch + ForwardSettled wait를 사용한다.
-    /// </summary>
+    // inline [advance]용 경로.
     public async YarnTask<SyncGateRunResult> RunInlineScriptedAdvanceAsync(
-        int steps,
-        CancellationToken cancel)
+        int steps, CancellationToken cancel)
     {
         SyncGatePlan plan = _planBuilder.BuildInlineScriptedAdvancePlan(
             _lane.CanReceiveScriptedAdvance,
@@ -138,7 +134,7 @@ public class VNSideRunnerSyncHub
         return await RunSyncGatePlanAsync(plan, cancel);
     }
 
-    public async YarnTask<SyncGateRunResult> RunSyncGatePlanAsync(
+    private async YarnTask<SyncGateRunResult> RunSyncGatePlanAsync(
         SyncGatePlan plan,
         CancellationToken cancel)
     {

@@ -100,7 +100,8 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, IVNLineAborter
             _lineVisualCts.Token);
     }
 
-
+    // NextContentToken cancellation = 다음 라인으로 넘어가라는 신호.
+    // _presenterLifetimeCts cancellation = presenter 종료 신호.
     private async YarnTask WaitForLineAdvanceAsync(LineCancellationToken token)
     {
         CancellationTokenSource cts = null;

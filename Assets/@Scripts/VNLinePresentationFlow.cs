@@ -14,12 +14,6 @@ public partial class VNLinePresentationFlow
 
     public VNLinePresentationPhase CurrentPhase { get; private set; } = VNLinePresentationPhase.None;
 
-    private enum LineEntryOutcome
-    {
-        Proceed,
-        PassedThrough,
-    }
-
     public VNLinePresentationFlow(
         VNYarnLineBoundary vnYarnLineBoundary,
         VNLinePresentationState advanceState,
@@ -38,10 +32,8 @@ public partial class VNLinePresentationFlow
         _sideRunnerSyncHub = vnSideRunnerSyncHub;
         _playbackDriver = playbackDriver;
     }
-
-    private async YarnTask<LineEntryOutcome> EnterLineAndResolveSeekAsync(
+    private async YarnTask<bool> TryEnterLineAndResolveSeekAsync(
         VNLinePresentationContext ctx,
-        Func<LinePresentationRun> beginRun,
         bool recordToHistory)
     {
         SetPhase(ctx, VNLinePresentationPhase.LineReceived);
@@ -50,99 +42,81 @@ public partial class VNLinePresentationFlow
         ctx.Meta = _vnYarnLineBoundary.BuildLineMeta(ctx.Line, ctx.NodeName);
         _vnYarnLineBoundary.CommitLineEntered(ctx.Meta, recordToHistory);
 
-        bool isSeekResync = _advanceState.IsSeekingActive;
-
         ctx.CommandTicket = _playbackDriver.PlayCollected();
-
         SetPhase(ctx, VNLinePresentationPhase.LineEnteredCommitted);
 
-        VNSeekLineDecision enteredDecision;
+        bool isSeekingActive = _advanceState.IsSeekingActive;
+        VNSeekKind seekKind = default;
 
-        if (_advanceState.IsSeekingActive) {
-            VNSeekKind seekKind = _advanceState.SeekKind;
+        if (isSeekingActive)
+            seekKind = _advanceState.SeekKind;
 
-            enteredDecision = _advanceState.IsSeekTargetLine(ctx.Meta)
+        if (isSeekingActive) {
+            ctx.SeekDecision = _advanceState.IsSeekTargetLine(ctx.Meta)
                 ? VNSeekLineDecision.TargetLineReachedAndResumePresentation(seekKind)
                 : VNSeekLineDecision.SkipVisualAndDispatchSeekNext(seekKind);
         }
-        else {
-            enteredDecision = VNSeekLineDecision.NotSeeking();
-        }
-
-        ctx.SeekDecision = enteredDecision;
+        else ctx.SeekDecision = VNSeekLineDecision.NotSeeking();
         SetPhase(ctx, VNLinePresentationPhase.LineRuntimeStateResolved);
 
-        SyncGateRunResult syncResult = isSeekResync
-            ? await _sideRunnerSyncHub.RunSeekResyncGatePlanAsync(ctx.Token.NextContentToken)
-            : await _sideRunnerSyncHub.RunForwardSyncGatePlanAsync(ctx.Token.NextContentToken);
+        SyncGateRunResult syncResult;
+        if (isSeekingActive) 
+            syncResult = await _sideRunnerSyncHub.RunSeekResyncGatePlanAsync(ctx.Token.NextContentToken);
+        else 
+            syncResult = await _sideRunnerSyncHub.RunForwardSyncGatePlanAsync(ctx.Token.NextContentToken);
 
-        if (syncResult == SyncGateRunResult.Cancelled ||
-            syncResult == SyncGateRunResult.Superseded) {
+        if (syncResult == SyncGateRunResult.Cancelled || syncResult == SyncGateRunResult.Superseded) {
             SetPhase(ctx, VNLinePresentationPhase.Stale);
-            return LineEntryOutcome.PassedThrough;
+            return false;
         }
 
         if (ctx.ShouldSkipVisual) {
-            await RunSeekPassThroughAsync(ctx);
-            return LineEntryOutcome.PassedThrough;
+            RunSeekPassThroughAsync(ctx);
+            return false;
         }
 
-        VNSeekLineDecision presentationSeekDecision;
-
         if (ctx.IsPendingSeekTargetLine) {
-            VNSeekKind seekKind = _advanceState.SeekKind;
             _advanceState.ClearSeek();
 
-            presentationSeekDecision = seekKind == VNSeekKind.Rollback
+            ctx.SeekDecision = seekKind == VNSeekKind.Rollback
                 ? VNSeekLineDecision.TargetLineVisualResumeImmediate(seekKind)
                 : VNSeekLineDecision.TargetLineVisualResumeNormal(seekKind);
 
             if (seekKind == VNSeekKind.Load)
                 _loadSeekDriver?.Complete();
         }
-        else {
-            presentationSeekDecision = VNSeekLineDecision.NotSeeking();
-        }
-
-        ctx.SeekDecision = presentationSeekDecision;
+        else ctx.SeekDecision = VNSeekLineDecision.NotSeeking();
+        
         SetPhase(ctx, VNLinePresentationPhase.ResumePolicyResolved);
 
-        ctx.Run = beginRun();
-        SetPhase(ctx, VNLinePresentationPhase.VisualRunStarted);
-
-        return LineEntryOutcome.Proceed;
+        return true;
     }
 
-    // ---- Normal dialogue line ----
     public async YarnTask RunAsync(
         VNLinePresentationContext ctx,
         Func<LinePresentationRun> beginRun,
         Func<LineCancellationToken, YarnTask> waitForAdvance,
         Func<bool> shouldFastForward)
     {
-        // 일반 대사 라인: backlog + rollback에 기록한다.
-        LineEntryOutcome outcome = await EnterLineAndResolveSeekAsync(
-            ctx, beginRun, recordToHistory: true);
-        if (outcome == LineEntryOutcome.PassedThrough)
+        if (!await TryEnterLineAndResolveSeekAsync(ctx, recordToHistory: true))
             return;
-
-        // Phase: BoxTransitioning -> BoxReady
-        SetPhase(ctx, VNLinePresentationPhase.BoxTransitioning);
+        
+        ctx.Run = beginRun();
+        SetPhase(ctx, VNLinePresentationPhase.VisualRunStarted);
 
         DialogueBoxPresentationContext boxCtx = new(
-            ctx.Line,
-            ctx.Run,
+            ctx.Line, 
+            ctx.Run, 
             useImmediateTransition: ctx.ShouldUseImmediateTransition || shouldFastForward());
-
+        
         ctx.BoxResult = await _boxPresentation.ShowLineAsync(boxCtx);
-        SetPhase(ctx, VNLinePresentationPhase.BoxReady);
+        SetPhase(ctx, VNLinePresentationPhase.DialogueSurfaceResolved);
 
         if (!ctx.Run.IsValid) {
             await CompleteStaleAfterBoxAsync(ctx, waitForAdvance);
             return;
         }
 
-        // Phase: TypewriterReady
         ctx.LineText = ctx.BoxResult.NextBox.GetLineText();
         _typewriter.SetTextView(ctx.LineText);
 
@@ -150,7 +124,6 @@ public partial class VNLinePresentationFlow
         _typewriter.PrepareForContent(ctx.Text);
         SetPhase(ctx, VNLinePresentationPhase.TypewriterReady);
 
-        // Phase: TypewriterCompleted
         await _typewriter
             .RunTypewriter(ctx.Text, ctx.Token.HurryUpToken)
             .SuppressCancellationThrow();
@@ -161,31 +134,23 @@ public partial class VNLinePresentationFlow
             return;
         }
 
-        // Phase: DisplayCommitted
         _advanceState.MarkLineDisplayCompleted(ctx.Meta, "normal");
         _typewriter.ContentWillDismiss();
         SetPhase(ctx, VNLinePresentationPhase.DisplayCommitted);
 
-        // Phase: WaitingForAdvance -> Completed
         SetPhase(ctx, VNLinePresentationPhase.WaitingForAdvance);
         await waitForAdvance(ctx.Token);
 
         SetPhase(ctx, VNLinePresentationPhase.Completed);
     }
 
-    private async YarnTask RunSeekPassThroughAsync(
-        VNLinePresentationContext ctx)
+    
+    private void RunSeekPassThroughAsync(VNLinePresentationContext ctx)
     {
         SetPhase(ctx, VNLinePresentationPhase.SeekPassThrough);
 
         _boxPresentation.CloseAll();
         _advanceState.MarkLineDisplayCompleted(ctx.Meta, "passThrough");
-
-        SetPhase(ctx, VNLinePresentationPhase.WaitingForAdvance);
-
-        // EnterLineAndResolveSeekAsync에서 이미 seek resync plan을 실행함.
-        // 여기서는 별도 ready wait를 반복하지 않음.
-        await YarnTask.Yield();
 
         SetPhase(ctx, VNLinePresentationPhase.Completed);
     }

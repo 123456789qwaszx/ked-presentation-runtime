@@ -28,12 +28,9 @@ public enum VNLinePresentationPhase
     // The previous visual run has been cancelled by the presenter owner.
     VisualRunStarted = 40,
 
-    // The dialogue box is transitioning into the required state.
-    // This may include fade-in, fade-out-in, cut, or immediate transition.
-    BoxTransitioning = 50,
-
-    // The dialogue box is ready and the target TMP_Text has been resolved.
-    BoxReady = 60,
+    // The dialogue presentation route for this line has been resolved.
+    // A visible dialogue surface may have been prepared, or dialogue presentation may have been suppressed.
+    DialogueSurfaceResolved = 60,
 
     // The typewriter has been bound to the resolved text view and prepared with line content.
     // No visible character reveal has started yet.
