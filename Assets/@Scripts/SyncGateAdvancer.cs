@@ -78,10 +78,8 @@ public sealed class SyncGateAdvancer
         if (lane.IsPaused && token.AdvanceKind != SyncAdvanceKind.SeekResync)
             return SyncGateAdvanceResult.Blocked;
 
-        if (!gate.TryConsumeCurrent(out SyncGateToken consumed))
-            return SyncGateAdvanceResult.Blocked;
-
-        lane.MarkAdvanceDispatched(consumed);
+        gate.ConsumeCurrent();
+        lane.MarkAdvanceDispatched(token);
 
         if (!lane.IsDialogueRunning)
         {

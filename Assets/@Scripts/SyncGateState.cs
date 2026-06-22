@@ -7,78 +7,31 @@ public sealed class SyncGateState
     private int _cursor;
     private bool _isRunning;
 
-    public bool IsCompleted
-    {
-        get
-        {
-            if (!_isRunning)
-                return true;
+    public bool IsCompleted => !_isRunning;
 
-            return _cursor >= _tokens.Count;
-        }
-    }
-
-    public SyncGateToken? CurrentToken
-    {
-        get
-        {
-            if (!_isRunning)
-                return null;
-
-            if (_cursor < 0)
-                return null;
-
-            if (_cursor >= _tokens.Count)
-                return null;
-
-            return _tokens[_cursor];
-        }
-    }
+    public SyncGateToken? CurrentToken => _tokens[_cursor];
 
     public bool Begin(SyncGatePlan plan)
     {
-        if (_isRunning && !IsCompleted)
+        if (_isRunning)
             return false;
 
         _tokens.Clear();
         _cursor = 0;
-        
+
         for (int i = 0; i < plan.Tokens.Count; i++)
             _tokens.Add(plan.Tokens[i]);
 
         _isRunning = true;
-
-        if (_tokens.Count == 0)
-            _isRunning = false;
-
         return true;
     }
 
     public void ConsumeCurrent()
     {
-        if (!_isRunning)
-            return;
-
-        if (_cursor < _tokens.Count)
-            _cursor++;
+        _cursor++;
 
         if (_cursor >= _tokens.Count)
             Clear();
-    }
-
-    public bool TryConsumeCurrent(out SyncGateToken token)
-    {
-        SyncGateToken? current = CurrentToken;
-
-        if (!current.HasValue)
-        {
-            token = default;
-            return false;
-        }
-
-        token = current.Value;
-        ConsumeCurrent();
-        return true;
     }
 
     public void Clear()
