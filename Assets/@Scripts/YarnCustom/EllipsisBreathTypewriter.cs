@@ -10,16 +10,17 @@ using Random = UnityEngine.Random;
 public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
 {
     // ---- Yarn Commands ----
-    [YarnCommand("SetSpeedPerSec")] public void SetTypeSpeed(float speed) => unitsPerSecond = Mathf.Max(0f, speed);
-    [YarnCommand("SetSpeedMul")] public void SetSpeedMultiplierCommand(float multiplier) => SetSpeedMultiplier(multiplier);
-    
-    
+    [YarnCommand("SetSpeedPerSec")]
+    public void SetTypeSpeed(float speed) => unitsPerSecond = Mathf.Max(0f, speed);
+
+    [YarnCommand("SetSpeedMul")]
+    public void SetSpeedMultiplierCommand(float multiplier) => SetSpeedMultiplier(multiplier);
+
     // ---- Inspector / Tuning ----
     [Header("Speed")]
     [Min(0f)] public float unitsPerSecond = 30f;
-    
 
-    [Header("Breath Multipliers")] 
+    [Header("Breath Multipliers")]
     [Min(0f)] public float multWhitespace      = 0.35f;
     [Min(0f)] public float multComma           = 1.7f;
     [Min(0f)] public float multColonSemicolon  = 2.0f;
@@ -36,21 +37,32 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
 
     [Tooltip("Extra delay multiplier at the beginning (1 = no extra delay). Higher = slower start.")]
     [Range(1f, 2f)] public float startSlowdownMultiplier = 1.25f;
-    
+
     [Header("Delay Cap")]
     [Min(0f)] [SerializeField] private float normalDelayCap = 0.35f;
     [Min(0f)] [SerializeField] private float speedupDelayCap = 0.08f;
-    
+
     public List<IActionMarkupHandler> ActionMarkupHandlers { get; set; } = new();
-    
+
     // ---- Runtime Binding ----
     public TMP_Text TextElement
     {
         get => _typewriterText;
         set => _typewriterText = value;
     }
+
     private TMP_Text _typewriterText;
-    
+
+    private float _speedMultiplier = 1f;
+    private int _runId;
+
+    public void SetSpeedMultiplier(float multiplier) =>
+        _speedMultiplier = Mathf.Clamp(multiplier, 0.05f, 20f);
+
+    public void SetTextView(TMP_Text textView) => _typewriterText = textView;
+
+    public void AbortRun() => _runId++;
+
     public void ContentDidDismiss()
     {
         AbortRun();
@@ -60,14 +72,7 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
 
         _typewriterText.maxVisibleCharacters = 0;
     }
-    
-    private float _speedMultiplier = 1f;
-    private int _runId;
-    
-    public void SetSpeedMultiplier(float multiplier) => _speedMultiplier = Mathf.Clamp(multiplier, 0.05f, 20f);
-    public void SetTextView(TMP_Text textView) => _typewriterText = textView;
-    public void AbortRun() => _runId++;
-    
+
     public void PrepareForContent(Yarn.Markup.MarkupParseResult line)
     {
         if (_typewriterText == null)
@@ -79,30 +84,55 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
         _typewriterText.maxVisibleCharacters = 0;
         _typewriterText.SetText(line.Text);
         _typewriterText.ForceMeshUpdate(true, true);
-        
-        //Debug.Log($"textInfo.characterCount={_typewriterText.textInfo.characterCount}, text='{line.Text}'");
 
         InvokeHandlers(h => h.OnPrepareForLine(line, _typewriterText));
     }
 
-    public async YarnTask RunTypewriter(Yarn.Markup.MarkupParseResult line, CancellationToken cancellationToken)
+    // IAsyncTypewriter 호환 진입점.
+    // Legacy 경로에서는 기존처럼 cancellationToken을 hurry/reveal-all 신호로만 본다.
+    // hard-cancel 개념이 필요한 VN flow는 아래 2-token overload를 직접 호출한다.
+    public YarnTask RunTypewriter(
+        Yarn.Markup.MarkupParseResult line,
+        CancellationToken cancellationToken)
     {
-        if (_typewriterText == null) return;
+        return RunTypewriter(line, cancellationToken, CancellationToken.None);
+    }
+
+    // hurryToken:
+    //  - 텍스트를 빨리 보여달라는 신호.
+    //  - reveal-all 직전 pending inline advance를 flush한다.
+    //
+    // hardCancelToken:
+    //  - 이 line visual run 자체가 무효화됐다는 신호.
+    //  - reveal-all 하지 않고 즉시 중단한다.
+    public async YarnTask RunTypewriter(
+        Yarn.Markup.MarkupParseResult line,
+        CancellationToken hurryToken,
+        CancellationToken hardCancelToken)
+    {
+        if (_typewriterText == null)
+            return;
 
         int myRunId = ++_runId;
         int totalLineCharacterCount = 0;
 
         try
         {
-            float charsPerSecond = Mathf.Max(0f, unitsPerSecond) * Mathf.Max(0.01f, _speedMultiplier);
-            double secondPerChar = (charsPerSecond > 0f) ? (1.0 / charsPerSecond) : 0.0;
+            float charsPerSecond =
+                Mathf.Max(0f, unitsPerSecond) *
+                Mathf.Max(0.01f, _speedMultiplier);
+
+            double secondPerChar = charsPerSecond > 0f
+                ? 1.0 / charsPerSecond
+                : 0.0;
 
             InvokeHandlers(h => h.OnLineDisplayBegin(line, _typewriterText));
 
             TMP_TextInfo textInfo = _typewriterText.textInfo;
             totalLineCharacterCount = textInfo.characterCount;
 
-            List<int> revealCounts = BuildRevealCountsFromTMP(textInfo, totalLineCharacterCount);
+            List<int> revealCounts =
+                BuildRevealCountsFromTMP(textInfo, totalLineCharacterCount);
 
             int prevVisibleCount = 0;
 
@@ -111,24 +141,39 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
                 if (myRunId != _runId)
                     return;
 
-                if (cancellationToken.IsCancellationRequested)
+                if (hardCancelToken.IsCancellationRequested)
+                    return;
+
+                if (hurryToken.IsCancellationRequested)
                 {
-                    RevealAllAndComplete(line, totalLineCharacterCount, myRunId);
-                    //Debug.Log("IsCancellationRequested1");
+                    await RevealAllWithFlushAsync(
+                        line,
+                        totalLineCharacterCount,
+                        myRunId,
+                        hardCancelToken);
                     return;
                 }
 
-                int targetVisibleCount = Mathf.Clamp(revealCounts[unit], 0, totalLineCharacterCount);
+                int targetVisibleCount =
+                    Mathf.Clamp(revealCounts[unit], 0, totalLineCharacterCount);
 
-                for (int visibleCount = prevVisibleCount; visibleCount < targetVisibleCount; visibleCount++)
+                for (int visibleCount = prevVisibleCount;
+                     visibleCount < targetVisibleCount;
+                     visibleCount++)
                 {
                     if (myRunId != _runId)
                         return;
 
-                    if (cancellationToken.IsCancellationRequested)
+                    if (hardCancelToken.IsCancellationRequested)
+                        return;
+
+                    if (hurryToken.IsCancellationRequested)
                     {
-                        RevealAllAndComplete(line, totalLineCharacterCount, myRunId);
-                        //Debug.Log("IsCancellationRequested2");
+                        await RevealAllWithFlushAsync(
+                            line,
+                            totalLineCharacterCount,
+                            myRunId,
+                            hardCancelToken);
                         return;
                     }
 
@@ -141,11 +186,20 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
                     {
                         try
                         {
-                            await ActionMarkupHandlers[i].OnCharacterWillAppear(plainIndex, line, cancellationToken);
+                            await ActionMarkupHandlers[i]
+                                .OnCharacterWillAppear(plainIndex, line, hurryToken);
                         }
-                        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+                        catch (OperationCanceledException) when (hardCancelToken.IsCancellationRequested)
                         {
-                            RevealAllAndComplete(line, totalLineCharacterCount, myRunId);
+                            return;
+                        }
+                        catch (OperationCanceledException) when (hurryToken.IsCancellationRequested)
+                        {
+                            await RevealAllWithFlushAsync(
+                                line,
+                                totalLineCharacterCount,
+                                myRunId,
+                                hardCancelToken);
                             return;
                         }
                         catch (Exception ex)
@@ -158,9 +212,15 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
 
                         if (myRunId != _runId || _typewriterText == null)
                             return;
+
+                        if (hardCancelToken.IsCancellationRequested)
+                            return;
                     }
 
                     if (myRunId != _runId || _typewriterText == null)
+                        return;
+
+                    if (hardCancelToken.IsCancellationRequested)
                         return;
 
                     _typewriterText.maxVisibleCharacters = visibleCount + 1;
@@ -177,28 +237,42 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
                         textInfo,
                         totalLineCharacterCount,
                         secondPerChar);
-                    
+
                     double cap = GetCurrentDelayCap();
                     delay = Math.Max(0.0, Math.Min(delay, cap));
-                    
+
                     double waited = 0;
-                    
-                    while (myRunId == _runId && !cancellationToken.IsCancellationRequested && waited < delay)
+
+                    while (myRunId == _runId &&
+                           !hardCancelToken.IsCancellationRequested &&
+                           !hurryToken.IsCancellationRequested &&
+                           waited < delay)
                     {
                         double t0 = Time.timeAsDouble;
                         await YarnTask.Yield();
                         double t1 = Time.timeAsDouble;
-                        
-                        waited += (t1 - t0); // Accumulate actual elapsed time
+
+                        waited += t1 - t0;
                     }
                 }
             }
 
+            if (hardCancelToken.IsCancellationRequested)
+                return;
+
             RevealAllAndComplete(line, totalLineCharacterCount, myRunId);
         }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        catch (OperationCanceledException) when (hardCancelToken.IsCancellationRequested)
         {
-            RevealAllAndComplete(line, totalLineCharacterCount, myRunId);
+            return;
+        }
+        catch (OperationCanceledException) when (hurryToken.IsCancellationRequested)
+        {
+            await RevealAllWithFlushAsync(
+                line,
+                totalLineCharacterCount,
+                myRunId,
+                hardCancelToken);
         }
         catch (Exception ex)
         {
@@ -211,13 +285,12 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
             }
         }
     }
-    
+
     public void ContentWillDismiss()
     {
         InvokeHandlers(h => h.OnLineWillDismiss());
     }
-    
-    
+
     private void InvokeHandlers(Action<IActionMarkupHandler> action)
     {
         for (int i = 0; i < ActionMarkupHandlers.Count; i++)
@@ -232,8 +305,53 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
             }
         }
     }
-    
-    private void RevealAllAndComplete(Yarn.Markup.MarkupParseResult line, int count, int runId)
+
+    // hurry/fast-forward reveal-all 직전, 아직 도달하지 못한 inline advance를 flush한다.
+    // hard cancel 상태에서는 reveal-all 하지 않는다.
+    private async YarnTask RevealAllWithFlushAsync(
+        Yarn.Markup.MarkupParseResult line,
+        int count,
+        int runId,
+        CancellationToken hardCancelToken)
+    {
+        if (runId != _runId)
+            return;
+
+        if (hardCancelToken.IsCancellationRequested)
+            return;
+
+        for (int i = 0; i < ActionMarkupHandlers.Count; i++)
+        {
+            if (ActionMarkupHandlers[i] is not ITypewriterRevealAllFlushHandler flushHandler)
+                continue;
+
+            try
+            {
+                await flushHandler.OnTypewriterWillRevealAll(line, hardCancelToken);
+            }
+            catch (OperationCanceledException) when (hardCancelToken.IsCancellationRequested)
+            {
+                return;
+            }
+            catch (Exception ex)
+            {
+                Debug.LogException(ex);
+            }
+
+            if (runId != _runId)
+                return;
+
+            if (hardCancelToken.IsCancellationRequested)
+                return;
+        }
+
+        RevealAllAndComplete(line, count, runId);
+    }
+
+    private void RevealAllAndComplete(
+        Yarn.Markup.MarkupParseResult line,
+        int count,
+        int runId)
     {
         if (runId != _runId || _typewriterText == null)
             return;
@@ -242,7 +360,7 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
 
         InvokeHandlers(h => h.OnLineDisplayComplete());
     }
-    
+
     private double CalculateDelayForRevealUnit(
         int unit,
         int targetVisibleCount,
@@ -256,15 +374,13 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
         if (targetVisibleCount <= 0)
             return delay;
 
-        // How many chars were visible at the end of the previous unit
-        int prevUnitTargetCount = (unit > 0) ?
-            Mathf.Clamp(revealCounts[unit - 1], 0, totalLineCharacterCount)
+        int prevUnitTargetCount = unit > 0
+            ? Mathf.Clamp(revealCounts[unit - 1], 0, totalLineCharacterCount)
             : 0;
 
-        // Number of chars revealed in this unit (e.g. 3 for "...")
-        int tokenLength = Mathf.Clamp(targetVisibleCount - prevUnitTargetCount, 1, 8);
+        int tokenLength =
+            Mathf.Clamp(targetVisibleCount - prevUnitTargetCount, 1, 8);
 
-        // Last character revealed in this unit
         char lastChar = '\0';
         int lastIndex = targetVisibleCount - 1;
 
@@ -276,20 +392,25 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
         if (tokenLength == 3 && lastChar == '.')
             multiplier = Mathf.Max((float)multiplier, multTripleDotToken);
 
-        if (startRampUnits > 0 && startSlowdownMultiplier > 1f && unit < startRampUnits)
+        if (startRampUnits > 0 &&
+            startSlowdownMultiplier > 1f &&
+            unit < startRampUnits)
         {
-            float rampProgress = (startRampUnits <= 1)
+            float rampProgress = startRampUnits <= 1
                 ? 1f
                 : unit / (float)(startRampUnits - 1);
 
-            float ramp = Mathf.Lerp(startSlowdownMultiplier, 1f, rampProgress);
+            float ramp = Mathf.Lerp(
+                startSlowdownMultiplier,
+                1f,
+                rampProgress);
 
             multiplier *= ramp;
         }
 
         if (_speedMultiplier > 1.01f)
             multiplier = 1.0 + (multiplier - 1.0) * 0.2;
-        
+
         delay *= multiplier;
 
         if (jitterRatio > 0f)
@@ -300,7 +421,7 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
 
         return delay;
     }
-    
+
     private double GetCurrentDelayCap()
     {
         return _speedMultiplier > 1.01f
@@ -308,32 +429,32 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
             : Mathf.Max(0f, normalDelayCap);
     }
 
-    // ===== Breath Timing Rules =====
     private double GetDelayMultiplier(char c)
     {
-        // Whitespace: avoid stopping; let it flow
-        if (c == ' ' || c == '\t' || c == '\u00A0') return multWhitespace;
+        if (c == ' ' || c == '\t' || c == '\u00A0')
+            return multWhitespace;
 
-        // Comma-ish
-        if (c == ',' || c == '，') return multComma;
+        if (c == ',' || c == '，')
+            return multComma;
 
-        // Colon / semicolon
-        if (c == ':' || c == ';') return multColonSemicolon;
+        if (c == ':' || c == ';')
+            return multColonSemicolon;
 
-        // Strong stops
-        if (c == '.' || c == '。') return multPeriod;
-        if (c == '?' || c == '？' || c == '!' || c == '！') return multQuestionExclaim;
+        if (c == '.' || c == '。')
+            return multPeriod;
 
-        // Ellipsis char
-        if (c == '…') return multEllipsisChar;
+        if (c == '?' || c == '？' || c == '!' || c == '！')
+            return multQuestionExclaim;
 
-        // Default
+        if (c == '…')
+            return multEllipsisChar;
+
         return 1.0;
     }
 
-    // Builds a list of maxVisibleCharacters targets by grouping "..." as a single reveal unit.
-    // Each value represents the visible character count at the end of a unit.
-    private static List<int> BuildRevealCountsFromTMP(TMP_TextInfo info, int visibleCharacterCount)
+    private static List<int> BuildRevealCountsFromTMP(
+        TMP_TextInfo info,
+        int visibleCharacterCount)
     {
         var result = new List<int>(Mathf.Max(8, visibleCharacterCount));
         int lastAdded = 0;
@@ -343,7 +464,7 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
             count = Mathf.Clamp(count, 0, visibleCharacterCount);
             if (count <= lastAdded)
                 return;
-            
+
             result.Add(count);
             lastAdded = count;
         }
@@ -358,11 +479,11 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
 
             char c0 = info.characterInfo[i].character;
 
-            // "..."
             if (c0 == '.' && i + 2 < visibleCharacterCount)
             {
                 char c1 = info.characterInfo[i + 1].character;
                 char c2 = info.characterInfo[i + 2].character;
+
                 if (c1 == '.' && c2 == '.')
                     tokenLen = 3;
             }
@@ -373,12 +494,11 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
 
         return result;
     }
-    
+
     #region ResetSettings
 
-    // ===== Default tuning values =====
     private const float DefaultUnitsPerSecond = 30f;
-    
+
     private const float DefaultMultWhitespace = 0.35f;
     private const float DefaultMultComma = 1.7f;
     private const float DefaultMultColonSemicolon = 2.0f;
@@ -386,11 +506,11 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
     private const float DefaultMultQuestionExclaim = 3.6f;
     private const float DefaultMultEllipsisChar = 5.2f;
     private const float DefaultMultTripleDotToken = 0.8f;
-    
+
     private const float DefaultJitterRatio = 0.08f;
-    private const int   DefaultStartRampUnits = 10;
+    private const int DefaultStartRampUnits = 10;
     private const float DefaultStartSlowdownMultiplier = 1.25f;
-    
+
     private const float DefaultNormalDelayCap = 0.35f;
     private const float DefaultSpeedupDelayCap = 0.08f;
 
@@ -410,9 +530,9 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
         jitterRatio             = DefaultJitterRatio;
         startRampUnits          = DefaultStartRampUnits;
         startSlowdownMultiplier = DefaultStartSlowdownMultiplier;
-        
-        normalDelayCap = DefaultNormalDelayCap;
-        speedupDelayCap = DefaultSpeedupDelayCap;
+
+        normalDelayCap          = DefaultNormalDelayCap;
+        speedupDelayCap         = DefaultSpeedupDelayCap;
 
 #if UNITY_EDITOR
         UnityEditor.EditorUtility.SetDirty(this);

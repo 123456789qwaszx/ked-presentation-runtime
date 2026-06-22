@@ -1,8 +1,9 @@
 using System;
+using System.Threading;
 using Yarn.Unity;
 
 // Runs one line presentation transaction through its explicit phase sequence.
-public partial class VNLinePresentationFlow
+public partial class VNLinePresentationFlow : IInlinePresentationAdvanceHost
 {
     private readonly VNYarnLineBoundary _vnYarnLineBoundary;
     private readonly VNLinePresentationState _advanceState;
@@ -12,7 +13,15 @@ public partial class VNLinePresentationFlow
     private readonly VNSideRunnerSyncHub _sideRunnerSyncHub;
     private readonly YarnBridgePlaybackDriver _playbackDriver;
 
-    public VNLinePresentationPhase CurrentPhase { get; private set; } = VNLinePresentationPhase.None;
+    public VNLinePresentationPhase CurrentPhase { get; private set; } =
+        VNLinePresentationPhase.None;
+
+    // ---- inline [advance/] host ----
+    private LinePresentationRun _inlineAdvanceRun;
+    private CancellationToken _inlineAdvanceCancel;
+    private bool _inlineAdvanceRunValid;
+
+    public IInlinePresentationAdvanceHost InlineAdvanceHost => this;
 
     public VNLinePresentationFlow(
         VNYarnLineBoundary vnYarnLineBoundary,
@@ -21,8 +30,7 @@ public partial class VNLinePresentationFlow
         EllipsisBreathTypewriter typewriter,
         VNLoadSeekDriver loadSeekDriver,
         VNSideRunnerSyncHub vnSideRunnerSyncHub,
-        YarnBridgePlaybackDriver playbackDriver
-        )
+        YarnBridgePlaybackDriver playbackDriver)
     {
         _vnYarnLineBoundary = vnYarnLineBoundary;
         _advanceState = advanceState;
@@ -32,6 +40,7 @@ public partial class VNLinePresentationFlow
         _sideRunnerSyncHub = vnSideRunnerSyncHub;
         _playbackDriver = playbackDriver;
     }
+
     private async YarnTask<bool> TryEnterLineAndResolveSeekAsync(
         VNLinePresentationContext ctx,
         bool recordToHistory)
@@ -51,31 +60,45 @@ public partial class VNLinePresentationFlow
         if (isSeekingActive)
             seekKind = _advanceState.SeekKind;
 
-        if (isSeekingActive) {
+        if (isSeekingActive)
+        {
             ctx.SeekDecision = _advanceState.IsSeekTargetLine(ctx.Meta)
                 ? VNSeekLineDecision.TargetLineReachedAndResumePresentation(seekKind)
                 : VNSeekLineDecision.SkipVisualAndDispatchSeekNext(seekKind);
         }
-        else ctx.SeekDecision = VNSeekLineDecision.NotSeeking();
+        else
+        {
+            ctx.SeekDecision = VNSeekLineDecision.NotSeeking();
+        }
+
         SetPhase(ctx, VNLinePresentationPhase.LineRuntimeStateResolved);
 
         SyncGateRunResult syncResult;
-        if (isSeekingActive) 
-            syncResult = await _sideRunnerSyncHub.RunSeekResyncGatePlanAsync(ctx.Token.NextContentToken);
-        else 
-            syncResult = await _sideRunnerSyncHub.RunForwardSyncGatePlanAsync(ctx.Token.NextContentToken);
+        if (isSeekingActive)
+        {
+            syncResult = await _sideRunnerSyncHub
+                .RunSeekResyncGatePlanAsync(ctx.Token.NextContentToken);
+        }
+        else
+        {
+            syncResult = await _sideRunnerSyncHub
+                .RunForwardSyncGatePlanAsync(ctx.Token.NextContentToken);
+        }
 
-        if (syncResult == SyncGateRunResult.Cancelled) {
+        if (syncResult == SyncGateRunResult.Cancelled)
+        {
             SetPhase(ctx, VNLinePresentationPhase.Stale);
             return false;
         }
 
-        if (ctx.ShouldSkipVisual) {
-            RunSeekPassThroughAsync(ctx);
+        if (ctx.ShouldSkipVisual)
+        {
+            await RunSeekPassThroughAsync(ctx);
             return false;
         }
 
-        if (ctx.IsPendingSeekTargetLine) {
+        if (ctx.IsPendingSeekTargetLine)
+        {
             _advanceState.ClearSeek();
 
             ctx.SeekDecision = seekKind == VNSeekKind.Rollback
@@ -85,8 +108,11 @@ public partial class VNLinePresentationFlow
             if (seekKind == VNSeekKind.Load)
                 _loadSeekDriver?.Complete();
         }
-        else ctx.SeekDecision = VNSeekLineDecision.NotSeeking();
-        
+        else
+        {
+            ctx.SeekDecision = VNSeekLineDecision.NotSeeking();
+        }
+
         SetPhase(ctx, VNLinePresentationPhase.ResumePolicyResolved);
 
         return true;
@@ -100,19 +126,21 @@ public partial class VNLinePresentationFlow
     {
         if (!await TryEnterLineAndResolveSeekAsync(ctx, recordToHistory: true))
             return;
-        
+
         ctx.Run = beginRun();
         SetPhase(ctx, VNLinePresentationPhase.VisualRunStarted);
 
         DialogueBoxPresentationContext boxCtx = new(
-            ctx.Line, 
-            ctx.Run, 
-            useImmediateTransition: ctx.ShouldUseImmediateTransition || shouldFastForward());
-        
+            ctx.Line,
+            ctx.Run,
+            useImmediateTransition:
+                ctx.ShouldUseImmediateTransition || shouldFastForward());
+
         ctx.BoxResult = await _boxPresentation.ShowLineAsync(boxCtx);
         SetPhase(ctx, VNLinePresentationPhase.DialogueSurfaceResolved);
 
-        if (!ctx.Run.IsValid) {
+        if (!ctx.Run.IsValid)
+        {
             await CompleteStaleAfterBoxAsync(ctx, waitForAdvance);
             return;
         }
@@ -124,12 +152,22 @@ public partial class VNLinePresentationFlow
         _typewriter.PrepareForContent(ctx.Text);
         SetPhase(ctx, VNLinePresentationPhase.TypewriterReady);
 
-        await _typewriter
-            .RunTypewriter(ctx.Text, ctx.Token.HurryUpToken)
-            .SuppressCancellationThrow();
+        BeginInlineAdvance(ctx.Run, ctx.Token.NextContentToken);
+        try
+        {
+            await _typewriter
+                .RunTypewriter(ctx.Text, ctx.Token.HurryUpToken, ctx.Token.NextContentToken)
+                .SuppressCancellationThrow();
+        }
+        finally
+        {
+            EndInlineAdvance();
+        }
+
         SetPhase(ctx, VNLinePresentationPhase.TypewriterCompleted);
 
-        if (!ctx.Run.IsValid) {
+        if (!ctx.Run.IsValid)
+        {
             await CompleteStaleAfterTypewriterAsync(ctx, waitForAdvance);
             return;
         }
@@ -144,15 +182,49 @@ public partial class VNLinePresentationFlow
         SetPhase(ctx, VNLinePresentationPhase.Completed);
     }
 
-    
-    private void RunSeekPassThroughAsync(VNLinePresentationContext ctx)
+    private async YarnTask RunSeekPassThroughAsync(VNLinePresentationContext ctx)
     {
         SetPhase(ctx, VNLinePresentationPhase.SeekPassThrough);
 
         _boxPresentation.CloseAll();
+
+        SyncGateRunResult inlineResult =
+            await DrainInlineAdvancesForSeekPassThroughAsync(ctx);
+
+        if (inlineResult == SyncGateRunResult.Cancelled)
+        {
+            SetPhase(ctx, VNLinePresentationPhase.Stale);
+            return;
+        }
+
         _advanceState.MarkLineDisplayCompleted(ctx.Meta, "passThrough");
 
         SetPhase(ctx, VNLinePresentationPhase.Completed);
+    }
+
+    private async YarnTask<SyncGateRunResult> DrainInlineAdvancesForSeekPassThroughAsync(
+        VNLinePresentationContext ctx)
+    {
+        InlineAdvanceManifest manifest =
+            InlineAdvanceManifest.Build(ctx.Line.TextWithoutCharacterName);
+
+        int count = manifest.DrainRemaining();
+
+        for (int i = 0; i < count; i++)
+        {
+            if (ctx.Token.NextContentToken.IsCancellationRequested)
+                return SyncGateRunResult.Cancelled;
+
+            SyncGateRunResult result =
+                await _sideRunnerSyncHub.RunInlineScriptedAdvanceAsync(
+                    1,
+                    ctx.Token.NextContentToken);
+
+            if (result == SyncGateRunResult.Cancelled)
+                return SyncGateRunResult.Cancelled;
+        }
+
+        return SyncGateRunResult.Completed;
     }
 
     private async YarnTask CompleteStaleAfterBoxAsync(
@@ -189,5 +261,45 @@ public partial class VNLinePresentationFlow
     {
         ctx.Phase = phase;
         CurrentPhase = phase;
+    }
+
+    // ──────────────────────────────────────────────────────────────────────
+    // inline [advance/] host
+    // ──────────────────────────────────────────────────────────────────────
+
+    private void BeginInlineAdvance(
+        LinePresentationRun run,
+        CancellationToken cancel)
+    {
+        _inlineAdvanceRun = run;
+        _inlineAdvanceCancel = cancel;
+        _inlineAdvanceRunValid = true;
+    }
+
+    private void EndInlineAdvance()
+    {
+        _inlineAdvanceRunValid = false;
+        _inlineAdvanceRun = default;
+        _inlineAdvanceCancel = default;
+    }
+
+    async YarnTask IInlinePresentationAdvanceHost.AdvanceOneAsync(int ordinal)
+    {
+        if (!_inlineAdvanceRunValid)
+            return;
+
+        LinePresentationRun run = _inlineAdvanceRun;
+        CancellationToken cancel = _inlineAdvanceCancel;
+
+        if (run == null)
+            return;
+
+        if (!run.IsValid)
+            return;
+
+        if (cancel.IsCancellationRequested)
+            return;
+
+        await _sideRunnerSyncHub.RunInlineScriptedAdvanceAsync(1, cancel);
     }
 }

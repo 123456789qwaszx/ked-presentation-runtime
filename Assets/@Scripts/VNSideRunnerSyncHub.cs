@@ -16,27 +16,41 @@ public class VNSideRunnerSyncHub
     private SyncGateAdvancer _syncGateAdvancer;
     private PresentationLaneState _laneState;
 
-    public PresentationLaneRunToken CurrentPresentationRun => _laneState.CurrentRun;
+    public PresentationLaneRunToken CurrentPresentationRun =>
+        _laneState.CurrentRun;
 
     public void Initialize(DialogueRunner runner)
     {
         _syncGatePlanBuilder = new();
         _syncGateState = new();
         _syncGateAdvancer = new();
-        
+
         _laneState = new(runner);
     }
-    
-    public void HoldPresentation(int lines) => _syncGatePlanBuilder.Hold(lines);
-    public void AdvancePresentationExtra(int steps) => _syncGatePlanBuilder.AddExtraAdvance(steps);
+
+    public void HoldPresentation(int lines) =>
+        _syncGatePlanBuilder.Hold(lines);
+
+    public void AdvancePresentationExtra(int steps) =>
+        _syncGatePlanBuilder.AddExtraAdvance(steps);
+
     public void PausePresentation() => _laneState.Pause();
     public void ResumePresentation() => _laneState.Resume();
-    
-    public void NotifyLaneReady(PresentationLaneRunToken run) => _laneState.NotifyReady(run);
-    public void NotifyLaneNotReady(PresentationLaneRunToken run) => _laneState.NotifyNotReady(run);
-    public void NotifyLaneReleased(PresentationLaneRunToken run) => _laneState.NotifyReleased(run);
-    public void NotifyLaneCompleted(PresentationLaneRunToken run) => _laneState.NotifyCompleted(run);
-    public void NotifyForwardSettled(PresentationLaneRunToken run) => _laneState.NotifyForwardSettled(run);
+
+    public void NotifyLaneReady(PresentationLaneRunToken run) =>
+        _laneState.NotifyReady(run);
+
+    public void NotifyLaneNotReady(PresentationLaneRunToken run) =>
+        _laneState.NotifyNotReady(run);
+
+    public void NotifyLaneReleased(PresentationLaneRunToken run) =>
+        _laneState.NotifyReleased(run);
+
+    public void NotifyLaneCompleted(PresentationLaneRunToken run) =>
+        _laneState.NotifyCompleted(run);
+
+    public void NotifyForwardSettled(PresentationLaneRunToken run) =>
+        _laneState.NotifyForwardSettled(run);
 
     public void StartPresentationLaneCoroutine(string nodeName)
     {
@@ -66,17 +80,17 @@ public class VNSideRunnerSyncHub
         _syncGateState.Clear();
         _syncGatePlanBuilder.Reset();
     }
-    
+
     public async YarnTask<SyncGateRunResult> RunForwardSyncGatePlanAsync(
         CancellationToken cancel)
     {
         SyncGatePlan plan = _syncGatePlanBuilder.ConsumeForwardPlan(
-            _laneState.CanReceiveScriptedAdvance, 
+            _laneState.CanReceiveScriptedAdvance,
             _laneState.ForwardSettleEpoch);
 
         return await RunSyncGatePlanAsync(plan, cancel);
     }
-    
+
     public async YarnTask<SyncGateRunResult> RunSeekResyncGatePlanAsync(
         CancellationToken cancel)
     {
@@ -86,15 +100,33 @@ public class VNSideRunnerSyncHub
         return await RunSyncGatePlanAsync(plan, cancel);
     }
 
-    // inline [advance]용 경로.
+    // inline [advance/]용 경로.
+    //
+    // CanReceiveScriptedAdvance는 readiness가 아니라 availability / pause guard다.
+    // 따라서 여기서 false면 "아직 Ready가 아님"이 아니라 "러너 없음 / paused"라는
+    // 이상 상태다.
+    //
+    // Ready 대기는 SyncGateAdvancer.TryConsumeDispatchAdvance 안의
+    // lane.IsReadyForAdvance 검사에서 계속 수행된다.
     public async YarnTask<SyncGateRunResult> RunInlineScriptedAdvanceAsync(
-        int steps, 
+        int steps,
         CancellationToken cancel)
     {
-        SyncGatePlan plan = _syncGatePlanBuilder.BuildInlineScriptedAdvancePlan(
-            _laneState.CanReceiveScriptedAdvance,
-            _laneState.ForwardSettleEpoch,
-            steps);
+        if (!_laneState.CanReceiveScriptedAdvance)
+        {
+            Debug.Log(
+                "[VNSideRunnerSyncHub] Inline advance requested while " +
+                "presentation lane cannot receive scripted advance. " +
+                $"available={_laneState.IsAvailable}, paused={_laneState.IsPaused}");
+
+            return SyncGateRunResult.Cancelled;
+        }
+
+        SyncGatePlan plan =
+            _syncGatePlanBuilder.BuildInlineScriptedAdvancePlan(
+                canAdvance: true,
+                currentForwardSettleEpoch: _laneState.ForwardSettleEpoch,
+                steps: steps);
 
         return await RunSyncGatePlanAsync(plan, cancel);
     }
@@ -144,13 +176,15 @@ public class VNSideRunnerSyncHub
 
         return SyncGateRunResult.Completed;
     }
-    
+
     private SyncGateAdvanceResult PumpSyncGate()
     {
         while (!_syncGateState.IsCompleted)
         {
             SyncGateAdvanceResult result =
-                _syncGateAdvancer.TryAdvanceCurrent(_syncGateState, _laneState);
+                _syncGateAdvancer.TryAdvanceCurrent(
+                    _syncGateState,
+                    _laneState);
 
             if (result != SyncGateAdvanceResult.Progressed)
                 return result;
