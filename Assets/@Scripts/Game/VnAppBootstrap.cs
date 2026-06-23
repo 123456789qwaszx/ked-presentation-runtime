@@ -161,7 +161,6 @@ public class VnAppBootstrap : MonoBehaviour
         BootstrapPresentationSession();
         
         BootstrapYarn();
-        BootstrapDialogueAdvanceInput();
         
         BootstrapVnSaveLoadRuntime();
         BootstrapLinePresentationRuntime();
@@ -341,19 +340,6 @@ public class VnAppBootstrap : MonoBehaviour
         oneShotPresentationPresenter.Initialize(subOneShotRunner, yarnLaneDebugView);
     }
     
-    private void BootstrapDialogueAdvanceInput()
-    {
-        AdvanceGate advanceGate = new(
-            _vnPlaybackSettings,
-            _linePresentationAdvanceState,
-            presentationSessionEntry,
-            vnTrace
-        );
-
-        dialogueAdvanceDispatcher.Initialize(advanceGate, dialogueRunner, _linePresentationAdvanceState);
-        vnAdvanceInputPoller.Initialize(dialogueAdvanceDispatcher);
-    }
-    
     private void BootstrapLinePresentationRuntime()
     {
         VNYarnLineBoundary vnYarnLineBoundary = new (
@@ -398,17 +384,20 @@ public class VnAppBootstrap : MonoBehaviour
     
     private void BootstrapPlaybackControls()
     {
+        
         autoAdvanceScheduler.Initialize(
             _vnPlaybackSettings,
             dialogueAdvanceDispatcher,
             () => Time.unscaledTimeAsDouble);
 
-        FastForwardController holdSkipController = new(
-            _vnPlaybackSettings,
-            ellipsisBreathTypewriter,
-            dialogueAdvanceDispatcher,
-            _presentationSessionContext,
-            () => _linePresentationAdvanceState.IsLineFullyShown);
+        // FastForwardController holdSkipController = new(
+        //     _vnPlaybackSettings,
+        //     ellipsisBreathTypewriter,
+        //     dialogueAdvanceDispatcher,
+        //     _presentationSessionContext,
+        //     () => _linePresentationAdvanceState.IsLineFullyShown);
+
+        RapidSkipController rapidSkipController = new(dialogueAdvanceDispatcher);
 
         vnFeatureController.Initialize(
             _vnPlaybackSettings,
@@ -417,10 +406,27 @@ public class VnAppBootstrap : MonoBehaviour
             ellipsisBreathTypewriter,
             _backlogRecorder,
             autoAdvanceScheduler,
-            holdSkipController,
+            rapidSkipController,
             _rollbackHistory,
             _linePresentationAdvanceState,
             _choiceHistory);
+        
+        AdvanceGate advanceGate = new(
+            _vnPlaybackSettings,
+            _linePresentationAdvanceState,
+            presentationSessionEntry,
+            vnTrace
+        );
+        
+        VnAdvanceInputBindings vnAdvanceInputBindings = new();
+
+        dialogueAdvanceDispatcher.Initialize(advanceGate, dialogueRunner, _linePresentationAdvanceState);
+        vnAdvanceInputPoller.Initialize(
+            dialogueAdvanceDispatcher, 
+            vnFeatureController, 
+            vnAdvanceInputBindings,
+            _linePresentationAdvanceState,
+            episodePlayer);
     }
     
     private void BootstrapVnSaveLoadRuntime()

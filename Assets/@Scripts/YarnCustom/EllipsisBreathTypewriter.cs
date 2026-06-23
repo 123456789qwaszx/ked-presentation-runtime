@@ -57,7 +57,7 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
     private int _runId;
 
     public void SetSpeedMultiplier(float multiplier) =>
-        _speedMultiplier = Mathf.Clamp(multiplier, 0.05f, 20f);
+        _speedMultiplier = Mathf.Clamp(multiplier, 0.05f, 32f);
 
     public void SetTextView(TMP_Text textView) => _typewriterText = textView;
 
@@ -118,13 +118,13 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
 
         try
         {
-            float charsPerSecond =
-                Mathf.Max(0f, unitsPerSecond) *
-                Mathf.Max(0.01f, _speedMultiplier);
-
-            double secondPerChar = charsPerSecond > 0f
-                ? 1.0 / charsPerSecond
-                : 0.0;
+            // float charsPerSecond =
+            //     Mathf.Max(0f, unitsPerSecond) *
+            //     Mathf.Max(0.01f, _speedMultiplier);
+            //
+            // double secondPerChar = charsPerSecond > 0f
+            //     ? 1.0 / charsPerSecond
+            //     : 0.0;
 
             InvokeHandlers(h => h.OnLineDisplayBegin(line, _typewriterText));
 
@@ -227,6 +227,8 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
                 }
 
                 prevVisibleCount = targetVisibleCount;
+
+                double secondPerChar = CalculateSecondPerChar();
 
                 if (secondPerChar > 0)
                 {
@@ -427,6 +429,17 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
         return _speedMultiplier > 1.01f
             ? Mathf.Max(0f, speedupDelayCap)
             : Mathf.Max(0f, normalDelayCap);
+    }
+    
+    private double CalculateSecondPerChar()
+    {
+        float charsPerSecond =
+            Mathf.Max(0f, unitsPerSecond) *
+            Mathf.Max(0.01f, _speedMultiplier);
+
+        return charsPerSecond > 0f
+            ? 1.0 / charsPerSecond
+            : 0.0;
     }
 
     private double GetDelayMultiplier(char c)

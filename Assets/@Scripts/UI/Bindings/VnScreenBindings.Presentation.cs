@@ -85,12 +85,12 @@ public sealed partial class VnScreenBindings
 
     private void HandleFastForwardDown()
     {
-        _vnFeatures.BeginFastForward();
+        _vnFeatures.BeginRapidSkip();
     }
 
     private void HandleFastForwardUp()
     {
-        _vnFeatures.EndFastForward();
+        _vnFeatures.EndRapidSkip();
     }
 
     private void HandleHurryUpClicked()
@@ -108,7 +108,7 @@ public sealed partial class VnScreenBindings
 
     private void HandlePlaybackSpeedClicked()
     {
-        _vnFeatures.TogglePlaybackSpeed();
+        _vnFeatures.ToggleSpeedUpMode();
     }
 
     private void HandleRollbackClicked()

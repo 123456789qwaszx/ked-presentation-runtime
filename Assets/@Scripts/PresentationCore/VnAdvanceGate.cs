@@ -1,21 +1,18 @@
+using System;
 using UnityEngine;
 
 public sealed class AdvanceGate
 {
+    private const int AdvanceRequestKindCount = 4;
+
     private readonly VnPlaybackSettings _vnPlaybackSettings;
     private readonly VNLinePresentationState _lineState;
     private ICommandRunScopeProvider _scopeProvider;
     private readonly VNTraceStream _trace;
 
     private CommandRunScope CurrentScope => _scopeProvider?.CurrentScope;
-    
-    private float UserAdvanceCooldownSec => _vnPlaybackSettings.userAdvanceCooldownSec;
-    private float AutoPulseCooldownSec => _vnPlaybackSettings.autoAdvanceRateLimitSec;
-    public float CooldownAfterHurryUpSec => _vnPlaybackSettings.cooldownAfterHurryUpSec;
-    public float CooldownAfterNextLineSec => _vnPlaybackSettings.cooldownAfterNextLineSec;
 
-    private double _lastAcceptedUserAdvanceAt = double.NegativeInfinity;
-    private double _lastAcceptedAutoPulseAt = double.NegativeInfinity;
+    private readonly double[] _lastAcceptedAt = new double[AdvanceRequestKindCount];
     private double _cooldownUntilUnscaled = double.NegativeInfinity;
 
     private string _lastRejectTraceKey;
@@ -31,6 +28,8 @@ public sealed class AdvanceGate
         _lineState = lineState;
         _scopeProvider = scopeProvider;
         _trace = trace;
+
+        ResetAcceptedTimes();
     }
 
     public bool IsLineFullyShown
@@ -58,8 +57,8 @@ public sealed class AdvanceGate
 
     public void Reset()
     {
-        _lastAcceptedUserAdvanceAt = double.NegativeInfinity;
-        _lastAcceptedAutoPulseAt = double.NegativeInfinity;
+        ResetAcceptedTimes();
+
         _cooldownUntilUnscaled = double.NegativeInfinity;
 
         _lastRejectTraceKey = null;
@@ -68,88 +67,152 @@ public sealed class AdvanceGate
         Trace("Reset");
     }
 
+    private void ResetAcceptedTimes()
+    {
+        for (int i = 0; i < _lastAcceptedAt.Length; i++)
+            _lastAcceptedAt[i] = double.NegativeInfinity;
+    }
+
     public bool TryAcceptUserAdvance()
     {
-        return TryEnter(isUser: true);
+        return TryAccept(AdvanceRequestKind.User);
     }
 
     public bool TryAcceptAutoPulse()
     {
-        return TryEnter(isUser: false);
+        return TryAccept(AdvanceRequestKind.Auto);
     }
 
-    private bool TryEnter(bool isUser)
+    public bool TryAcceptSpeedUpModePulse()
+    {
+        return TryAccept(AdvanceRequestKind.SpeedUpMode);
+    }
+
+    public bool TryAcceptRapidSkipPulse()
+    {
+        return TryAccept(AdvanceRequestKind.RapidSkip);
+    }
+
+    public bool TryAccept(AdvanceRequestKind kind)
     {
         if (_lineState.IsSeekingActive)
-            return Reject(isUser, "seek_active");
+            return Reject(kind, "seek_active");
 
-        if (CurrentScope != null && CurrentScope.IsNodeBusy)
+        if (ShouldRejectNodeBusy(kind) &&
+            CurrentScope != null &&
+            CurrentScope.IsNodeBusy)
         {
-            // Debug.Log("executorDispose");
-            // _commandExecutor.CancelAndDisposeToken();
-            return Reject(isUser, "cps_node_busy");
+            return Reject(kind, "cps_node_busy");
         }
 
         double unscaledNow = Time.unscaledTimeAsDouble;
 
         if (unscaledNow < _cooldownUntilUnscaled)
+        {
             return Reject(
-                isUser,
+                kind,
                 "cooldown",
                 $"now={unscaledNow:0.000}, until={_cooldownUntilUnscaled:0.000}");
+        }
 
-        if (!PassRateLimit(isUser, unscaledNow))
-            return Reject(isUser, "rate_limit", $"now={unscaledNow:0.000}");
+        if (!PassRateLimit(kind, unscaledNow))
+            return Reject(kind, "rate_limit", $"now={unscaledNow:0.000}");
 
-        Trace(
-            isUser ? "AcceptUserAdvance" : "AcceptAutoPulse",
-            $"now={unscaledNow:0.000}");
-        
+        Trace($"Accept{kind}", $"now={unscaledNow:0.000}");
         return true;
     }
 
-    private bool PassRateLimit(bool isUserInitiated, double currentTime)
+    private bool ShouldRejectNodeBusy(AdvanceRequestKind kind)
     {
-        ref double lastAcceptedAt = ref isUserInitiated
-            ? ref _lastAcceptedUserAdvanceAt
-            : ref _lastAcceptedAutoPulseAt;
+        return kind != AdvanceRequestKind.RapidSkip;
+    }
 
-        float cooldown = isUserInitiated
-            ? UserAdvanceCooldownSec
-            : AutoPulseCooldownSec;
+    private bool PassRateLimit(AdvanceRequestKind kind, double currentTime)
+    {
+        int index = (int)kind;
+        float cooldown = GetRateLimitSeconds(kind);
 
-        if (currentTime - lastAcceptedAt < cooldown)
+        if (currentTime - _lastAcceptedAt[index] < cooldown)
             return false;
 
-        lastAcceptedAt = currentTime;
+        _lastAcceptedAt[index] = currentTime;
         return true;
     }
 
-    private bool Reject(bool isUser, string reason, string note = null)
+    private float GetRateLimitSeconds(AdvanceRequestKind kind)
     {
-        // User input rejection is useful.
-        // Auto rejection can spam, so trace it only when the reason changes or enough frames pass.
-        bool shouldTrace = isUser || ShouldTraceAutoReject(reason);
+        switch (kind)
+        {
+            case AdvanceRequestKind.Auto:
+                return _vnPlaybackSettings.autoAdvanceRateLimitSec;
+
+            case AdvanceRequestKind.SpeedUpMode:
+                return _vnPlaybackSettings.speedupAdvanceRateLimitSec;
+
+            case AdvanceRequestKind.RapidSkip:
+                return _vnPlaybackSettings.rapidSkipAdvanceRateLimitSec;
+
+            case AdvanceRequestKind.User:
+            default:
+                return _vnPlaybackSettings.userAdvanceCooldownSec;
+        }
+    }
+
+    public float GetCooldownAfterHurryUp(AdvanceRequestKind kind)
+    {
+        switch (kind)
+        {
+            case AdvanceRequestKind.SpeedUpMode:
+                return _vnPlaybackSettings.speedupCooldownAfterHurryUpSec;
+
+            case AdvanceRequestKind.RapidSkip:
+                return _vnPlaybackSettings.rapidSkipCooldownAfterHurryUpSec;
+
+            case AdvanceRequestKind.Auto:
+            case AdvanceRequestKind.User:
+            default:
+                return _vnPlaybackSettings.cooldownAfterHurryUpSec;
+        }
+    }
+
+    public float GetCooldownAfterNextLine(AdvanceRequestKind kind)
+    {
+        switch (kind)
+        {
+            case AdvanceRequestKind.SpeedUpMode:
+                return _vnPlaybackSettings.speedupCooldownAfterNextLineSec;
+
+            case AdvanceRequestKind.RapidSkip:
+                return _vnPlaybackSettings.rapidSkipCooldownAfterNextLineSec;
+
+            case AdvanceRequestKind.Auto:
+            case AdvanceRequestKind.User:
+            default:
+                return _vnPlaybackSettings.cooldownAfterNextLineSec;
+        }
+    }
+
+    private bool Reject(AdvanceRequestKind kind, string reason, string note = null)
+    {
+        bool shouldTrace = kind == AdvanceRequestKind.User ||
+                           kind == AdvanceRequestKind.RapidSkip ||
+                           ShouldTraceRepeatedReject(kind, reason);
 
         if (shouldTrace)
         {
-            string evt = isUser
-                ? "RejectUserAdvance"
-                : "RejectAutoPulse";
-
             string detail = string.IsNullOrWhiteSpace(note)
-                ? $"reason={reason}"
-                : $"reason={reason}, {note}";
+                ? $"kind={kind}, reason={reason}"
+                : $"kind={kind}, reason={reason}, {note}";
 
-            Trace(evt, detail);
+            Trace("RejectAdvance", detail);
         }
 
         return false;
     }
 
-    private bool ShouldTraceAutoReject(string reason)
+    private bool ShouldTraceRepeatedReject(AdvanceRequestKind kind, string reason)
     {
-        string key = "auto:" + reason;
+        string key = kind + ":" + reason;
 
         if (_lastRejectTraceKey != key)
         {
@@ -158,7 +221,6 @@ public sealed class AdvanceGate
             return true;
         }
 
-        // Prevent per-frame spam while still showing long stalls.
         if (Time.frameCount - _lastRejectTraceFrame >= 60)
         {
             _lastRejectTraceFrame = Time.frameCount;

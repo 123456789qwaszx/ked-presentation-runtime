@@ -1,59 +1,5 @@
 using System;
 
-public enum VnPlayMode
-{
-    Manual = 0,
-    Auto = 1,
-    Speedup = 2
-}
-
-[Serializable]
-public sealed class PresentationPlaybackSettings
-{
-    public const float DefaultTimeScale = 1f;
-    public const float DefaultAutoAdvanceDelay = 0.6f;
-
-    private float _timeScale = DefaultTimeScale;
-    private float _autoAdvanceDelay = DefaultAutoAdvanceDelay;
-
-    private bool _autoModeEnabled;
-    private bool _speedUpModeEnabled;
-
-    public bool IsAutoMode => _autoModeEnabled;
-    public bool IsSpeedUpMode => _speedUpModeEnabled;
-
-    public float TimeScale
-    {
-        get => _timeScale;
-        set => _timeScale = value < 0f ? 0f : value;
-    }
-
-    public float AutoAdvanceDelay
-    {
-        get => _autoAdvanceDelay;
-        set => _autoAdvanceDelay = value > 0f ? value : DefaultAutoAdvanceDelay;
-    }
-
-    public void SetAutoModeEnabled(bool enabled)
-    {
-        _autoModeEnabled = enabled;
-    }
-
-    public void SetSpeedUpModeEnabled(bool enabled)
-    {
-        _speedUpModeEnabled = enabled;
-    }
-
-    public void ResetDefaults()
-    {
-        _autoModeEnabled = false;
-        _speedUpModeEnabled = false;
-
-        _timeScale = DefaultTimeScale;
-        _autoAdvanceDelay = DefaultAutoAdvanceDelay;
-    }
-}
-
 [Serializable]
 public sealed class PresentationSessionContext
 {
@@ -69,6 +15,7 @@ public sealed class PresentationSessionContext
 
     public bool IsAutoMode => _playback.IsAutoMode;
     public bool IsSpeedUpMode => _playback.IsSpeedUpMode;
+    public bool IsRapidSkipMode => _playback.IsRapidSkipMode;
 
     public float TimeScale => _playback.TimeScale;
     public float AutoAdvanceDelay => _playback.AutoAdvanceDelay;
@@ -81,6 +28,16 @@ public sealed class PresentationSessionContext
     public void SetSpeedUpModeEnabled(bool enabled)
     {
         _playback.SetSpeedUpModeEnabled(enabled);
+    }
+
+    public void SetRapidSkipModeEnabled(bool enabled)
+    {
+        _playback.SetRapidSkipModeEnabled(enabled);
+    }
+
+    public void SetTimeScale(float timeScale)
+    {
+        _playback.TimeScale = timeScale;
     }
 
     public void EnterAutoMode()
@@ -101,6 +58,16 @@ public sealed class PresentationSessionContext
     public void ExitSpeedUp()
     {
         SetSpeedUpModeEnabled(false);
+    }
+
+    public void EnterRapidSkip()
+    {
+        SetRapidSkipModeEnabled(true);
+    }
+
+    public void ExitRapidSkip()
+    {
+        SetRapidSkipModeEnabled(false);
     }
 
     /// <summary>

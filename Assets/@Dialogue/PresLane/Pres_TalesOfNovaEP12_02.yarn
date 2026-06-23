@@ -26,13 +26,13 @@
 <<12fr>>
 _
 
-<<tx_focus_curtain_in>>
+//<<tx_focus_curtain_in>>
 <<4fr>>
 
 <<fade_out @2>>
 <<fade_out @3>>
 <<8fr>>
-<<tx_focus_curtain_out 0.1>>
+//<<tx_focus_curtain_out 0.1>>
 
 <<attach_to_bg c2 bg4>>
 <<fade_in @2 -1>>

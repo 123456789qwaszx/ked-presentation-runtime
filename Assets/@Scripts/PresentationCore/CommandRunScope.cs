@@ -33,17 +33,35 @@ public sealed class CommandRunScope
         _reportsNodeBusy = reportsNodeBusy;
         Token = CancellationToken.None;
     }
+
     public bool IsCancelled => _isCancelled;
     public void MarkCancelled() => _isCancelled = true;
 
     public bool IsSpeedUpMode => _context != null && _context.IsSpeedUpMode;
+    public bool IsRapidSkipMode => _context != null && _context.IsRapidSkipMode;
     public bool IsAutoMode => _context != null && _context.IsAutoMode;
+
     public float TimeScale => _context != null ? _context.TimeScale : 1f;
     public bool IsNodeBusy => _context != null && _context.IsNodeBusy;
     
-    public bool IsSeekPassThrough => _linePresentationAdvanceState != null && _linePresentationAdvanceState.IsSeekingActive;
-    public bool ShouldCompressCommandExecution => IsSpeedUpMode || IsSeekPassThrough;
-    
+    public bool IsSeekPassThrough =>
+        _linePresentationAdvanceState != null &&
+        _linePresentationAdvanceState.IsSeekingActive;
+
+    public bool ShouldCompressCommandExecution =>
+        IsRapidSkipMode || IsSeekPassThrough;
+
+    public float ScalePresentationDuration(float duration)
+    {
+        if (duration <= 0f)
+            return duration;
+
+        if (!IsSpeedUpMode)
+            return duration;
+
+        return duration / Math.Max(1f, TimeScale);
+    }
+
     public void SetNodeBusy(bool busy)
     {
         if (!_reportsNodeBusy)

@@ -1,19 +1,5 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
-
-[Serializable]
-public class VnPlaybackSettings
-{
-    public float speedupModeMultiplier = 12f;
-    public float autoModeDelaySeconds = 1.5f;
-
-    public float userAdvanceCooldownSec = 0.13f;
-    public float autoAdvanceRateLimitSec = 0.13f;
-
-    public float cooldownAfterHurryUpSec = 0.18f;
-    public float cooldownAfterNextLineSec = 0.1f; // Prevent double skip
-}
 
 public sealed class VnFeatureController : MonoBehaviour
 {
@@ -26,13 +12,14 @@ public sealed class VnFeatureController : MonoBehaviour
 
     private BacklogRecorder _backlogRecorder;
     private AutoAdvanceScheduler _autoAdvanceScheduler;
-    private FastForwardController _holdSpeedUpController;
+    private RapidSkipController _rapidSkipController;
     private RollbackHistory _rollbackController;
     private VNLinePresentationState _vnLinePresentationState;
     private ChoiceHistory _choiceHistory;
 
     private bool _speedUpToggled;
     private bool _speedUpHeld;
+    private bool _rapidSkipHeld;
 
     public bool IsAuto => _sessionContext != null && _sessionContext.IsAutoMode;
 
@@ -49,7 +36,7 @@ public sealed class VnFeatureController : MonoBehaviour
         EllipsisBreathTypewriter ellipsisBreathTypewriter,
         BacklogRecorder backlogRecorder,
         AutoAdvanceScheduler autoAdvanceScheduler,
-        FastForwardController holdSpeedUpController,
+        RapidSkipController rapidSkipController,
         RollbackHistory rollbackController,
         VNLinePresentationState vnLinePresentationState,
         ChoiceHistory choiceHistory)
@@ -64,13 +51,17 @@ public sealed class VnFeatureController : MonoBehaviour
 
         _backlogRecorder = backlogRecorder;
         _autoAdvanceScheduler = autoAdvanceScheduler;
-        _holdSpeedUpController = holdSpeedUpController;
+        _rapidSkipController = rapidSkipController;
         _rollbackController = rollbackController;
         _vnLinePresentationState = vnLinePresentationState;
         _choiceHistory = choiceHistory;
 
         _speedUpToggled = false;
         _speedUpHeld = false;
+        _rapidSkipHeld = false;
+
+        ApplySpeedUpModeState();
+        ApplyRapidSkipState();
 
         _init = true;
     }
@@ -83,7 +74,10 @@ public sealed class VnFeatureController : MonoBehaviour
         if (IsAuto && LineFullyShown)
             _autoAdvanceScheduler.Tick();
 
-        _holdSpeedUpController.Tick();
+        if (_sessionContext.IsSpeedUpMode && LineFullyShown)
+            _autoAdvanceScheduler.ResetAutoAdvanceTimer();
+
+        _rapidSkipController.Tick();
     }
 
     public void ToggleAuto()
@@ -99,37 +93,49 @@ public sealed class VnFeatureController : MonoBehaviour
             _autoAdvanceScheduler.ResetAutoAdvanceTimer();
     }
 
-    public void TogglePlaybackSpeed()
+    public void ToggleSpeedUpMode()
     {
         if (!_init)
             return;
 
         _speedUpToggled = !_speedUpToggled;
-        ApplySpeedUpState();
+        ApplySpeedUpModeState();
     }
 
-    public void BeginFastForward()
+    public void BeginSpeedUpMode()
     {
         if (!_init)
             return;
 
         _speedUpHeld = true;
-
-        _holdSpeedUpController.SetHeld(true);
-
-        ApplySpeedUpState();
+        ApplySpeedUpModeState();
     }
 
-    public void EndFastForward()
+    public void EndSpeedUpMode()
     {
         if (!_init)
             return;
 
         _speedUpHeld = false;
+        ApplySpeedUpModeState();
+    }
 
-        _holdSpeedUpController.SetHeld(false);
+    public void BeginRapidSkip()
+    {
+        if (!_init)
+            return;
 
-        ApplySpeedUpState();
+        _rapidSkipHeld = true;
+        ApplyRapidSkipState();
+    }
+
+    public void EndRapidSkip()
+    {
+        if (!_init)
+            return;
+
+        _rapidSkipHeld = false;
+        ApplyRapidSkipState();
     }
 
     public bool RequestRollbackOneStep()
@@ -148,35 +154,50 @@ public sealed class VnFeatureController : MonoBehaviour
         _rollbackController.ClearRollbackPoints();
         _vnLinePresentationState.BeginRollbackSeek(target.nodeName, target.lineId);
 
-        DisableAutoAndSpeedUpForSeek();
+        DisablePlaybackModifiersForSeek();
 
         _autoAdvanceScheduler.ResetAutoAdvanceTimer();
 
         return true;
     }
 
-    private void DisableAutoAndSpeedUpForSeek()
+    private void DisablePlaybackModifiersForSeek()
     {
         _sessionContext.SetAutoModeEnabled(false);
 
         _speedUpToggled = false;
         _speedUpHeld = false;
+        _rapidSkipHeld = false;
 
-        _holdSpeedUpController.SetHeld(false);
+        _rapidSkipController.SetHeld(false);
 
-        ApplySpeedUpState();
+        ApplySpeedUpModeState();
+        ApplyRapidSkipState();
     }
 
-    private void ApplySpeedUpState()
+    private void ApplySpeedUpModeState()
     {
         bool speedUp = _speedUpToggled || _speedUpHeld;
 
-        _sessionContext.SetSpeedUpModeEnabled(speedUp);
+        float multiplier = 1f;
 
-        float multiplier = speedUp
-            ? _vnPlaybackSettings.speedupModeMultiplier
-            : 1f;
+        if (speedUp)
+        {
+            multiplier = Mathf.Clamp(
+                _vnPlaybackSettings.speedupModeMultiplier,
+                _vnPlaybackSettings.speedupModeMinMultiplier,
+                _vnPlaybackSettings.speedupModeMaxMultiplier);
+        }
+
+        _sessionContext.SetSpeedUpModeEnabled(speedUp);
+        _sessionContext.SetTimeScale(multiplier);
 
         _typewriter.SetSpeedMultiplier(multiplier);
+    }
+
+    private void ApplyRapidSkipState()
+    {
+        _sessionContext.SetRapidSkipModeEnabled(_rapidSkipHeld);
+        _rapidSkipController.SetHeld(_rapidSkipHeld);
     }
 }
