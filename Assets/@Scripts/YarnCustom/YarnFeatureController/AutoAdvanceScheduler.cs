@@ -20,14 +20,14 @@ public sealed class AutoAdvanceScheduler : ActionMarkupHandler
         _playbackSettings = vnPlaybackSettings;
         _dialogueAdvanceDispatcher = dialogueAdvanceDispatcher;
         _getNow = getNow;
-        _nextAutoAdvanceAt = double.PositiveInfinity;
+        Disarm();
     }
 
     public override void OnPrepareForLine(MarkupParseResult line, TMP_Text text) { }
 
     public override void OnLineDisplayBegin(MarkupParseResult line, TMP_Text text)
     {
-        _nextAutoAdvanceAt = double.PositiveInfinity;
+        Disarm();
     }
 
     public override YarnTask OnCharacterWillAppear(
@@ -40,13 +40,7 @@ public sealed class AutoAdvanceScheduler : ActionMarkupHandler
 
     public override void OnLineDisplayComplete()
     {
-        if (_playbackSettings == null || _getNow == null)
-        {
-            _nextAutoAdvanceAt = double.PositiveInfinity;
-            return;
-        }
-
-        _nextAutoAdvanceAt = _getNow() + _playbackSettings.autoModeDelaySeconds;
+        ArmAutoAdvance();
     }
 
     public override void OnLineWillDismiss() { }
@@ -56,32 +50,33 @@ public sealed class AutoAdvanceScheduler : ActionMarkupHandler
         if (_dialogueAdvanceDispatcher == null || _getNow == null)
             return;
 
-        double t = _getNow();
-
-        if (t < _nextAutoAdvanceAt)
+        if (_getNow() < _nextAutoAdvanceAt)
             return;
 
-        _nextAutoAdvanceAt = double.PositiveInfinity;
-        _dialogueAdvanceDispatcher.DispatchAdvance();
+        // dispatch 실행 전 예약.
+        // 하지만 dispatch가 no-op이면(표시 중인 라인 뷰가 없어 hurry-up이 무시되는 경우)
+        // 사전에 예약된 것을 활용 해 Auto 복구.
+        ArmAutoAdvance();
+        _dialogueAdvanceDispatcher.DispatchAutoAdvance();
     }
 
     public void ResetAutoAdvanceTimer()
     {
+        ArmAutoAdvance();
+    }
+
+    private void ArmAutoAdvance()
+    {
         if (_playbackSettings == null || _getNow == null)
         {
-            _nextAutoAdvanceAt = double.PositiveInfinity;
+            Disarm();
             return;
         }
 
         _nextAutoAdvanceAt = _getNow() + _playbackSettings.autoModeDelaySeconds;
     }
 
-    public void NotifyChoicesPresented()
-    {
-        _nextAutoAdvanceAt = double.PositiveInfinity;
-    }
-
-    public void NotifyBacklogOpened()
+    private void Disarm()
     {
         _nextAutoAdvanceAt = double.PositiveInfinity;
     }
