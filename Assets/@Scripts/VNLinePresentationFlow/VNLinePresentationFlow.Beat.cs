@@ -11,11 +11,12 @@ public partial class VNLinePresentationFlow
     public async YarnTask RunPresentationBeatAsync(
         VNLinePresentationContext ctx,
         Func<LinePresentationRun> beginRun,
-        Func<LineCancellationToken, YarnTask> waitForAdvance)
+        Func<LineCancellationToken, YarnTask> waitForAdvance,
+        Func<bool> shouldFastForward)
     {
         if (!await TryEnterLineAndResolveSeekAsync(ctx, recordToHistory: false))
             return;
-        
+    
         ctx.Run = beginRun();
         SetPhase(ctx, VNLinePresentationPhase.VisualRunStarted);
 
@@ -23,7 +24,9 @@ public partial class VNLinePresentationFlow
         _typewriter.SetTextView(null);
         SetPhase(ctx, VNLinePresentationPhase.DialogueSurfaceResolved);
 
-        await WaitUntilBeatStagingSettledAsync(ctx);
+        await WaitUntilBeatStagingSettledAsync(
+            ctx,
+            shouldFastForward != null && shouldFastForward());
 
         if (!ctx.Run.IsValid) {
             _advanceState.MarkLineDisplayCompleted(ctx.Meta, "beatStale");
@@ -36,7 +39,7 @@ public partial class VNLinePresentationFlow
         SetPhase(ctx, VNLinePresentationPhase.DisplayCommitted);
 
         SetPhase(ctx, VNLinePresentationPhase.WaitingForAdvance);
-        
+    
         if (DialogueBoxMetadataResolver.IsBeatStay(ctx.Line.Metadata))
             await waitForAdvance(ctx.Token);
 
@@ -45,17 +48,32 @@ public partial class VNLinePresentationFlow
 
     // Waits until this beat's staging commands stop blocking the line.
     // Ends early if the line is cancelled or the current run becomes stale.
-    private async YarnTask WaitUntilBeatStagingSettledAsync(VNLinePresentationContext ctx)
+    private async YarnTask WaitUntilBeatStagingSettledAsync(
+        VNLinePresentationContext ctx,
+        bool startFast)
     {
-        while (!ctx.CommandTicket.EntryClosed)
+        if (startFast)
+            EnterLineHurrySpeed();
+
+        try
         {
-            if (ctx.Token.NextContentToken.IsCancellationRequested)
-                return;
+            while (!ctx.CommandTicket.EntryClosed)
+            {
+                if (ctx.Token.NextContentToken.IsCancellationRequested)
+                    return;
 
-            if (!ctx.Run.IsValid)
-                return;
+                if (!ctx.Run.IsValid)
+                    return;
 
-            await YarnTask.Yield();
+                if (ctx.Token.HurryUpToken.IsCancellationRequested)
+                    EnterLineHurrySpeed();
+
+                await YarnTask.Yield();
+            }
+        }
+        finally
+        {
+            ExitLineHurrySpeed();
         }
     }
 }

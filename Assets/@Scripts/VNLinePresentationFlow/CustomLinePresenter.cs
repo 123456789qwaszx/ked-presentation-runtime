@@ -91,7 +91,8 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, IVNLineAborter
             await _vnLinePresentationFlow.RunPresentationBeatAsync(
                 ctx,
                 beginRun: BeginLinePresentationRun,
-                waitForAdvance: WaitForLineAdvanceAsync);
+                waitForAdvance: WaitForLineAdvanceAsync,
+                shouldFastForward: ShouldFastForwardLine);
             return;
         }
 
