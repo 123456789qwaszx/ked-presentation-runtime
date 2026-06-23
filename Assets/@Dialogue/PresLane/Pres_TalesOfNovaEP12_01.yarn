@@ -15,14 +15,14 @@
 
 눈빛이 너무 무서워...... 성해 소탕을 감시하러 온 거라고 하지 않았나? 대체 왜 나만 저렇게 뚫어지게 쳐다보는 거지......#main_free
 
-<<bg_slot_cutin bg15>>
-<<bg_move bg15 -8u 12u 0>>
+// <<bg_slot_cutin bg15>>
+// <<bg_move bg15 -8u 12u 0>>
 
-<<attach_to_bg c1 bg15>>
+// <<attach_to_bg c1 bg15>>
 
-<<bg_fade_in bg15 0>>
-<<bg_cutin_in2 bg15>>
-<<6fr>>
+// <<bg_fade_in bg15 0>>
+// <<bg_cutin_in2 bg15>>
+//<<6fr>>
 그레이: 음~ 여기는 안전 구역이네. 꼬마 여행가들, 수고했어~ #main_free
 
 <<blur mid 0.1>>
@@ -123,7 +123,7 @@ _#beat #stay
 _#beat
 
 <<blur_reset>>
-<<bg_fade_out bg15 -1>>
+//<<bg_fade_out bg15 -1>>
 <<char_to_s0 @1>>
 
 윌로: 여러분이 고생하신 건 잘 알지만......

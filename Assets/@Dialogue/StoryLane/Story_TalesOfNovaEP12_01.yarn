@@ -52,13 +52,13 @@ _#beat
 
 윌로: 죄송합니다만, 이번 의뢰는 보수의 3분의 1밖에 드릴 수 없겠군요.
 
-<<bg_slot_cutin bg15>>
-<<bg_move bg15 -8u 12u 0>>
+// <<bg_slot_cutin bg15>>
+// <<bg_move bg15 -8u 12u 0>>
 
-<<attach_to_bg c1 bg15>>
+// <<attach_to_bg c1 bg15>>
 
-<<bg_fade_in bg15 0>>
-<<bg_cutin_in2 bg15>>
+// <<bg_fade_in bg15 0>>
+// <<bg_cutin_in2 bg15>>
 
 <<blur mid 0.1>>
 

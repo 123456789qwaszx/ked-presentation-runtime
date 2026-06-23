@@ -28,20 +28,20 @@ position: -2,-160
 title: Story_TalesOfNovaEP12_02
 ---
 
-<<beat Setup_TalesOfNovaEP12_02>>
-<<pres_start Pres_TalesOfNovaEP12_02>>
+<<beat Setup_TalesOfNovaEP12_01>>
+<<pres_start Pres_TalesOfNovaEP12_01>>
 아야메: 빙결!
-세이나: 잘했어, [advance/]아야메. [advance/]여기 성해는 내가 맡을게.
+// 세이나: 잘했어, 아야메. 여기 성해는 내가 맡을게.
 
-_#beat
-세이나: 1마리 더 있어. 코하쿠! 네 쪽으로 가고 있어!
+// _#beat
+// 세이나: 1마리 더 있어. 코하쿠! 네 쪽으로 가고 있어!
 
 
-코하쿠: 알겠어.
+// 코하쿠: 알겠어.
 
-별의 탑에 들어선 우리는 곧바로 성해 소탕 작전에 돌입했다. 나는 휴대폰을 들고 증거용으로 성해를 처치하는 장면을 하나하나 촬영했다.
+별의 탑에 [advance/]들어선 우리는 [advance/]곧바로[advance/] 성해 소탕[advance/] 작전에[advance/] 돌입했다.[advance/] 나는 [advance/]휴대폰을 들고 증거용으로 성해를 처치하는 장면을 하나하나 촬영했다.
 
-이대로라면 지난 의뢰의 적자를 메우는 건 물론이고, 다음 달 생활비 걱정도 없겠어. 그런데......
+이대로라면 지난 [advance/]의뢰의 적자를 메우는 건[advance/] 물론이고, 다음 [advance/]달 생활비 걱정도[advance/] 없겠어. 그런데......
 
 그레이:......
 

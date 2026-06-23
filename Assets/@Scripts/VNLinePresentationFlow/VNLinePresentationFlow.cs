@@ -1,4 +1,5 @@
 using System;
+using DG.Tweening;
 using Yarn.Unity;
 
 // Runs one line presentation transaction through its explicit phase sequence.
@@ -11,6 +12,12 @@ public partial class VNLinePresentationFlow
     private readonly VNLoadSeekDriver _loadSeekDriver;
     private readonly VNSideRunnerSyncHub _sideRunnerSyncHub;
     private readonly YarnBridgePlaybackDriver _playbackDriver;
+
+    private const float LineHurrySpeedMultiplier = 30f;
+
+    private bool _lineHurrySpeedActive;
+    private float _lineHurryRestoreTypewriterMultiplier = 1f;
+    private float _lineHurryRestoreDotweenUnscaledTimeScale = 1f;
 
     public VNLinePresentationPhase CurrentPhase { get; private set; } =
         VNLinePresentationPhase.None;
@@ -156,11 +163,16 @@ public partial class VNLinePresentationFlow
         try
         {
             await _typewriter
-                .RunTypewriter(ctx.Text, ctx.Token.HurryUpToken, ctx.Token.NextContentToken)
+                .RunTypewriter(
+                    ctx.Text,
+                    ctx.Token.HurryUpToken,
+                    ctx.Token.NextContentToken,
+                    EnterLineHurrySpeed)
                 .SuppressCancellationThrow();
         }
         finally
         {
+            ExitLineHurrySpeed();
             _inlineAdvanceHost.End();
         }
 
@@ -255,6 +267,33 @@ public partial class VNLinePresentationFlow
         await waitForAdvance(ctx.Token);
 
         SetPhase(ctx, VNLinePresentationPhase.Completed);
+    }
+
+    private void EnterLineHurrySpeed()
+    {
+        if (_lineHurrySpeedActive)
+            return;
+
+        _lineHurryRestoreTypewriterMultiplier = _typewriter.SpeedMultiplier;
+        _lineHurryRestoreDotweenUnscaledTimeScale = DOTween.unscaledTimeScale;
+
+        _typewriter.SetSpeedMultiplier(
+            _lineHurryRestoreTypewriterMultiplier * LineHurrySpeedMultiplier);
+
+        DOTween.unscaledTimeScale = LineHurrySpeedMultiplier;
+
+        _lineHurrySpeedActive = true;
+    }
+
+    private void ExitLineHurrySpeed()
+    {
+        if (!_lineHurrySpeedActive)
+            return;
+
+        _typewriter.SetSpeedMultiplier(_lineHurryRestoreTypewriterMultiplier);
+        DOTween.unscaledTimeScale = _lineHurryRestoreDotweenUnscaledTimeScale;
+
+        _lineHurrySpeedActive = false;
     }
 
     private void SetPhase(VNLinePresentationContext ctx, VNLinePresentationPhase phase)

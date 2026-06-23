@@ -56,6 +56,8 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
     private float _speedMultiplier = 1f;
     private int _runId;
 
+    public float SpeedMultiplier => _speedMultiplier;
+
     public void SetSpeedMultiplier(float multiplier) =>
         _speedMultiplier = Mathf.Clamp(multiplier, 0.05f, 32f);
 
@@ -99,16 +101,47 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
     }
 
     // hurryToken:
-    //  - 텍스트를 빨리 보여달라는 신호.
-    //  - reveal-all 직전 pending inline advance를 flush한다.
+    //  - Legacy 경로에서는 텍스트를 즉시 reveal-all 하는 신호로 본다.
+    //  - VN line flow는 아래 overload를 사용해 reveal-all 대신 line-local hurry speed latch로 처리한다.
     //
     // hardCancelToken:
     //  - 이 line visual run 자체가 무효화됐다는 신호.
     //  - reveal-all 하지 않고 즉시 중단한다.
-    public async YarnTask RunTypewriter(
+    public YarnTask RunTypewriter(
         Yarn.Markup.MarkupParseResult line,
         CancellationToken hurryToken,
         CancellationToken hardCancelToken)
+    {
+        return RunTypewriter(
+            line,
+            hurryToken,
+            hardCancelToken,
+            onHurryStarted: null,
+            revealAllOnHurry: true);
+    }
+
+    // VN presentation flow용 진입점.
+    // hurryToken cancel을 reveal-all/flush가 아니라 "현재 라인 끝까지 가속"으로 해석한다.
+    public YarnTask RunTypewriter(
+        Yarn.Markup.MarkupParseResult line,
+        CancellationToken hurryToken,
+        CancellationToken hardCancelToken,
+        Action onHurryStarted)
+    {
+        return RunTypewriter(
+            line,
+            hurryToken,
+            hardCancelToken,
+            onHurryStarted,
+            revealAllOnHurry: false);
+    }
+
+    private async YarnTask RunTypewriter(
+        Yarn.Markup.MarkupParseResult line,
+        CancellationToken hurryToken,
+        CancellationToken hardCancelToken,
+        Action onHurryStarted,
+        bool revealAllOnHurry)
     {
         if (_typewriterText == null)
             return;
@@ -116,16 +149,31 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
         int myRunId = ++_runId;
         int totalLineCharacterCount = 0;
 
+        bool hurryActive = false;
+        CancellationTokenRegistration hurryRegistration = default;
+
+        void ActivateHurry()
+        {
+            if (hurryActive)
+                return;
+
+            hurryActive = true;
+
+            try
+            {
+                onHurryStarted?.Invoke();
+            }
+            catch (Exception ex)
+            {
+                Debug.LogException(ex);
+            }
+        }
+
+        if (!revealAllOnHurry && hurryToken.CanBeCanceled)
+            hurryRegistration = hurryToken.Register(ActivateHurry);
+
         try
         {
-            // float charsPerSecond =
-            //     Mathf.Max(0f, unitsPerSecond) *
-            //     Mathf.Max(0.01f, _speedMultiplier);
-            //
-            // double secondPerChar = charsPerSecond > 0f
-            //     ? 1.0 / charsPerSecond
-            //     : 0.0;
-
             InvokeHandlers(h => h.OnLineDisplayBegin(line, _typewriterText));
 
             TMP_TextInfo textInfo = _typewriterText.textInfo;
@@ -146,12 +194,17 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
 
                 if (hurryToken.IsCancellationRequested)
                 {
-                    await RevealAllWithFlushAsync(
-                        line,
-                        totalLineCharacterCount,
-                        myRunId,
-                        hardCancelToken);
-                    return;
+                    if (revealAllOnHurry)
+                    {
+                        await RevealAllWithFlushAsync(
+                            line,
+                            totalLineCharacterCount,
+                            myRunId,
+                            hardCancelToken);
+                        return;
+                    }
+
+                    ActivateHurry();
                 }
 
                 int targetVisibleCount =
@@ -169,12 +222,17 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
 
                     if (hurryToken.IsCancellationRequested)
                     {
-                        await RevealAllWithFlushAsync(
-                            line,
-                            totalLineCharacterCount,
-                            myRunId,
-                            hardCancelToken);
-                        return;
+                        if (revealAllOnHurry)
+                        {
+                            await RevealAllWithFlushAsync(
+                                line,
+                                totalLineCharacterCount,
+                                myRunId,
+                                hardCancelToken);
+                            return;
+                        }
+
+                        ActivateHurry();
                     }
 
                     if ((uint)visibleCount >= (uint)totalLineCharacterCount)
@@ -182,18 +240,23 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
 
                     int plainIndex = visibleCount;
 
+                    CancellationToken handlerToken =
+                        revealAllOnHurry
+                            ? hurryToken
+                            : hardCancelToken;
+
                     for (int i = 0; i < ActionMarkupHandlers.Count; i++)
                     {
                         try
                         {
                             await ActionMarkupHandlers[i]
-                                .OnCharacterWillAppear(plainIndex, line, hurryToken);
+                                .OnCharacterWillAppear(plainIndex, line, handlerToken);
                         }
                         catch (OperationCanceledException) when (hardCancelToken.IsCancellationRequested)
                         {
                             return;
                         }
-                        catch (OperationCanceledException) when (hurryToken.IsCancellationRequested)
+                        catch (OperationCanceledException) when (revealAllOnHurry && hurryToken.IsCancellationRequested)
                         {
                             await RevealAllWithFlushAsync(
                                 line,
@@ -247,9 +310,24 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
 
                     while (myRunId == _runId &&
                            !hardCancelToken.IsCancellationRequested &&
-                           !hurryToken.IsCancellationRequested &&
                            waited < delay)
                     {
+                        if (hurryToken.IsCancellationRequested)
+                        {
+                            if (revealAllOnHurry)
+                            {
+                                await RevealAllWithFlushAsync(
+                                    line,
+                                    totalLineCharacterCount,
+                                    myRunId,
+                                    hardCancelToken);
+                                return;
+                            }
+
+                            ActivateHurry();
+                            break;
+                        }
+
                         double t0 = Time.timeAsDouble;
                         await YarnTask.Yield();
                         double t1 = Time.timeAsDouble;
@@ -268,7 +346,7 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
         {
             return;
         }
-        catch (OperationCanceledException) when (hurryToken.IsCancellationRequested)
+        catch (OperationCanceledException) when (revealAllOnHurry && hurryToken.IsCancellationRequested)
         {
             await RevealAllWithFlushAsync(
                 line,
@@ -285,6 +363,10 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
                 _typewriterText.maxVisibleCharacters = int.MaxValue;
                 InvokeHandlers(h => h.OnLineDisplayComplete());
             }
+        }
+        finally
+        {
+            hurryRegistration.Dispose();
         }
     }
 
