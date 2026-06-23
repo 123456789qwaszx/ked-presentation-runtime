@@ -8,7 +8,7 @@ using UnityEngine;
 public sealed class BreathInPlaceCommandSpecBgR : BackgroundRigCommandSpecBase
 {
     [Header("Target")]
-    public BackgroundRigTarget target = BackgroundRigTarget.Background_Track;
+    public BackgroundRigTarget target = BackgroundRigTarget.Background_Track_Move;
 
     [Header("Timing")]
     [Tooltip("전체 숨쉬기 지속 시간.")]

@@ -32,15 +32,15 @@ _
 <<fade_out @3>>
 <<8fr>>
 
+<<bg_slot_cutin bg4>>
 <<attach_to_bg c2 bg4>>
 <<fade_in @2 -1>>
 <<right @2 10u -1>>
 <<face @2 12>>
 
 <<bg_fade_in bg4 -1>>
-<<bg_move bg4 -18u 6u -1>>
-<<bg_size bg4 0.7>>
-<<bg_cutin_in2 bg4>>
+<<bg_move bg4 -8u 3u -1>>
+<<bg_cutin_in bg4>>
 
 
 

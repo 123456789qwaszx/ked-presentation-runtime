@@ -16,7 +16,7 @@ public sealed class SetAnchorCommandSpecBgR : BackgroundRigCommandSpecBase
 {
     [Header("Target")]
     [Tooltip("Usually Background_CastTransform. This is the per-background default transform axis.")]
-    public BackgroundRigTarget target = BackgroundRigTarget.Background_CastTransform;
+    public BackgroundRigTarget target = BackgroundRigTarget.Background_Anchor;
 
     [Header("Position")]
     public Vector2 anchoredPosition = Vector2.zero;
@@ -73,9 +73,6 @@ public sealed class SetAnchorCommandBgR : CommandBase
 
     private void ResetActingLayers()
     {
-        if (_rigRefs.Background_Track != null)
-            _rigRefs.Background_Track.anchoredPosition = Vector2.zero;
-
         if (_rigRefs.Background_Track_Move != null)
             _rigRefs.Background_Track_Move.anchoredPosition = Vector2.zero;
 
@@ -95,8 +92,8 @@ public sealed class SetAnchorCommandBgR : CommandBase
             _rigRefs.Background_Shake.localScale = Vector3.one;
         }
 
-        if (_rigRefs.Background_ActingScale != null)
-            _rigRefs.Background_ActingScale.localScale = Vector3.one;
+        if (_rigRefs.Background_Scale != null)
+            _rigRefs.Background_Scale.localScale = Vector3.one;
 
         if (_rigRefs.Background_ActingScale_X != null)
             _rigRefs.Background_ActingScale_X.localScale = Vector3.one;

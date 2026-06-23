@@ -11,7 +11,7 @@ using UnityEngine;
 public sealed class ScaleToCommandSpecBgR : BackgroundRigCommandSpecBase
 {
     [Header("Target")]
-    public BackgroundRigTarget target = BackgroundRigTarget.Background_ActingScale;
+    public BackgroundRigTarget target = BackgroundRigTarget.Background_Scale;
 
     [Header("Scale (XY)")]
     public Vector2 toScale = Vector2.one;

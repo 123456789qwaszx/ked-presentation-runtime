@@ -36,8 +36,7 @@ public sealed class UIStageDepthLayerSourceCollector
             if (refs == null || refs.RigRoot == null || !IsDescendantOf(refs.RigRoot, contentRoot))
                 continue;
 
-            AddAllowedImage(refs.Background_BackLayer_Image);
-            AddAllowedImage(refs.Background_FrontLayer_Image);
+            AddAllowedImage(refs.BackgroundSprite_Image);
         }
 
         for (int i = 0; i < _characterRigBuffer.Count; i++)

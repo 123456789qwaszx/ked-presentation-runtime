@@ -15,7 +15,7 @@ using UnityEngine;
 public sealed class SetOriginSizeCommandSpecBgR : BackgroundRigCommandSpecBase
 {
     [Header("Target")]
-    public BackgroundRigTarget target = BackgroundRigTarget.Background_CastTransform;
+    public BackgroundRigTarget target = BackgroundRigTarget.Background_Anchor;
 
     [Header("Scale")]
     public float scale = 1f;

@@ -60,8 +60,6 @@ public sealed class BackgroundRigBuilder
             $"rigRoot='{rigRoot.name}', rolePrefix='{rolePrefix}'.",
             rigRoot);
 
-        RectTransform preservedExtensionsRoot = DetachPreservedExtensionsRoot(rigRoot, rolePrefix);
-
         for (int i = rigRoot.childCount - 1; i >= 0; i--)
         {
             Transform child = rigRoot.GetChild(i);
@@ -71,67 +69,7 @@ public sealed class BackgroundRigBuilder
 
         EnsureGraph(rigRoot, rolePrefix);
 
-        ReattachPreservedExtensionsRoot(rigRoot, rolePrefix, preservedExtensionsRoot);
-
         map = CollectRefMap(rigRoot, rolePrefix);
-    }
-
-    private RectTransform DetachPreservedExtensionsRoot(RectTransform rigRoot, string rolePrefix)
-    {
-        string extensionRootName = WithRole(rolePrefix, nameof(BackgroundRigSchema.Refs.Background_ExtensionsRoot));
-
-        RectTransform extensionsRoot = FindByName(rigRoot, extensionRootName) as RectTransform;
-
-        if (extensionsRoot == null)
-            return null;
-
-        extensionsRoot.SetParent(null, false);
-
-        return extensionsRoot;
-    }
-
-    private void ReattachPreservedExtensionsRoot(
-        RectTransform rigRoot,
-        string rolePrefix,
-        RectTransform preservedExtensionsRoot)
-    {
-        if (preservedExtensionsRoot == null)
-            return;
-
-        string extensionRootName = WithRole(rolePrefix, nameof(BackgroundRigSchema.Refs.Background_ExtensionsRoot));
-        string extensionParentName = WithRole(rolePrefix, nameof(BackgroundRigSchema.Refs.Background_LayerRoot));
-
-        RectTransform newExtensionsRoot = FindByName(rigRoot, extensionRootName) as RectTransform;
-        RectTransform extensionParent = FindByName(rigRoot, extensionParentName) as RectTransform;
-
-        if (extensionParent == null)
-        {
-            Debug.LogWarning(
-                $"[BackgroundRigBuilder] Failed to find extension parent '{extensionParentName}'. " +
-                $"Reattaching preserved extensions root under rigRoot. " +
-                $"rigRoot='{rigRoot.name}'.",
-                rigRoot);
-
-            extensionParent = rigRoot;
-        }
-
-        int siblingIndex = -1;
-
-        if (newExtensionsRoot != null && newExtensionsRoot != preservedExtensionsRoot)
-        {
-            siblingIndex = newExtensionsRoot.GetSiblingIndex();
-
-            newExtensionsRoot.SetParent(null, false);
-            Object.Destroy(newExtensionsRoot.gameObject);
-        }
-
-        preservedExtensionsRoot.name = extensionRootName;
-        preservedExtensionsRoot.SetParent(extensionParent, false);
-
-        if (siblingIndex >= 0)
-            preservedExtensionsRoot.SetSiblingIndex(siblingIndex);
-
-        StretchFull(preservedExtensionsRoot);
     }
     #endregion
 
@@ -247,59 +185,36 @@ public sealed class BackgroundRigBuilder
             return img;
         }
 
-        RawImage GetRawImg(BackgroundRigSchema.Refs key)
-        {
-            RectTransform rt = GetRt(key);
-            if (rt == null)
-                return null;
-
-            RawImage rawImg = rt.GetComponent<RawImage>();
-            if (rawImg == null)
-            {
-                Debug.LogWarning($"[BackgroundRigBuilder] Missing RawImage on '{rt.name}'.");
-                return null;
-            }
-
-            return rawImg;
-        }
-
         // Background base axis - response-neutral placement / measurement
         refs.Background_Root = GetRt(BackgroundRigSchema.Refs.Background_Root);
 
         // Background casting axis - per-background defaults
-        refs.Background_CastTransform = GetRt(BackgroundRigSchema.Refs.Background_CastTransform);
+        refs.Background_Anchor = GetRt(BackgroundRigSchema.Refs.Background_Anchor);
 
         // Background acting axis
-        refs.Background_Track = GetRt(BackgroundRigSchema.Refs.Background_Track);
         refs.Background_Track_Move = GetRt(BackgroundRigSchema.Refs.Background_Track_Move);
         refs.Background_Track_X = GetRt(BackgroundRigSchema.Refs.Background_Track_X);
         refs.Background_Track_Y = GetRt(BackgroundRigSchema.Refs.Background_Track_Y);
+        refs.Background_Original_Rotation = GetRt(BackgroundRigSchema.Refs.Background_Original_Rotation);
         refs.Background_Rotation = GetRt(BackgroundRigSchema.Refs.Background_Rotation);
         refs.Background_Shake = GetRt(BackgroundRigSchema.Refs.Background_Shake);
+
+        refs.Background_Size = GetRt(BackgroundRigSchema.Refs.Background_Size);
+        refs.Background_Scale = GetRt(BackgroundRigSchema.Refs.Background_Scale);
+        refs.Background_DepthScale = GetRt(BackgroundRigSchema.Refs.Background_DepthScale);
+
+        refs.Background_Mask = GetRt(BackgroundRigSchema.Refs.Background_Mask);
+
         refs.Background_ActingScale = GetRt(BackgroundRigSchema.Refs.Background_ActingScale);
         refs.Background_ActingScale_X = GetRt(BackgroundRigSchema.Refs.Background_ActingScale_X);
         refs.Background_ActingScale_Y = GetRt(BackgroundRigSchema.Refs.Background_ActingScale_Y);
 
-        // Layer stack
-        refs.Background_LayerRoot = GetRt(BackgroundRigSchema.Refs.Background_LayerRoot);
-
-        // Back layer
-        refs.Background_BackLayer_Root = GetRt(BackgroundRigSchema.Refs.Background_BackLayer_Root);
-        refs.Background_BackLayer_Image = GetImg(BackgroundRigSchema.Refs.Background_BackLayer_Image);
+        // Background sprite
+        refs.BackgroundSprite_Root = GetRt(BackgroundRigSchema.Refs.BackgroundSprite_Root);
+        refs.BackgroundSprite_Image = GetImg(BackgroundRigSchema.Refs.BackgroundSprite_Image);
 
         // Object slots
         refs.Background_ObjectSlotRoot = GetRt(BackgroundRigSchema.Refs.Background_ObjectSlotRoot);
-
-        // Front layer
-        refs.Background_FrontLayer_Root = GetRt(BackgroundRigSchema.Refs.Background_FrontLayer_Root);
-        refs.Background_FrontLayer_Image = GetImg(BackgroundRigSchema.Refs.Background_FrontLayer_Image);
-
-        // Defocus overlay
-        refs.Background_DefocusOverlay_Root = GetRt(BackgroundRigSchema.Refs.Background_DefocusOverlay_Root);
-        refs.Background_DefocusOverlay_RawImage = GetRawImg(BackgroundRigSchema.Refs.Background_DefocusOverlay_RawImage);
-
-        // Extension / preserved systems
-        refs.Background_ExtensionsRoot = GetRt(BackgroundRigSchema.Refs.Background_ExtensionsRoot);
 
         return refs;
     }

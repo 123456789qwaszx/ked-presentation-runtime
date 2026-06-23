@@ -8,26 +8,13 @@ public enum BackgroundRigRootMask
     None = 0,
 
     Background_Root           = 1 << 0,
-    Background_LayerRoot      = 1 << 1,
-
-    Background_BackLayer_Root = 1 << 2,
-    Background_ObjectSlotRoot = 1 << 3,
-    Background_FrontLayer_Root = 1 << 4,
-
-    Background_ExtensionsRoot = 1 << 5,
-
-    VisualLayers =
-        Background_BackLayer_Root |
-        Background_ObjectSlotRoot |
-        Background_FrontLayer_Root,
-
+    BackgroundSprite_Root      = 1 << 1,
+    Background_ObjectSlotRoot = 1 << 2,
+    
     All =
         Background_Root |
-        Background_LayerRoot |
-        Background_BackLayer_Root |
-        Background_ObjectSlotRoot |
-        Background_FrontLayer_Root |
-        Background_ExtensionsRoot,
+        BackgroundSprite_Root |
+        Background_ObjectSlotRoot
 }
 
 public static class BackgroundRigRootSelector
@@ -35,11 +22,8 @@ public static class BackgroundRigRootSelector
     private static readonly (BackgroundRigRootMask flag, Func<BackgroundRigRefs, RectTransform> get)[] Map =
     {
         (BackgroundRigRootMask.Background_Root,            r => r.Background_Root),
-        (BackgroundRigRootMask.Background_LayerRoot,       r => r.Background_LayerRoot),
-        (BackgroundRigRootMask.Background_BackLayer_Root,  r => r.Background_BackLayer_Root),
+        (BackgroundRigRootMask.BackgroundSprite_Root,  r => r.BackgroundSprite_Root),
         (BackgroundRigRootMask.Background_ObjectSlotRoot,  r => r.Background_ObjectSlotRoot),
-        (BackgroundRigRootMask.Background_FrontLayer_Root, r => r.Background_FrontLayer_Root),
-        (BackgroundRigRootMask.Background_ExtensionsRoot,  r => r.Background_ExtensionsRoot),
     };
 
     public static void CollectRects(

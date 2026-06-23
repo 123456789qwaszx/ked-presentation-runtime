@@ -6,8 +6,7 @@ position: -2,-160
 
 <<bg_spawn bg1 ep12_02_1>>
 
-<<bg_spawn bg4 bgslot_01 02>>
-<<bg_slot_cutin bg4>>
+//<<bg_spawn bg4 bgslot_01 02>>
 //<<bg_slot_cutin bg3>>
 
 <<slot c1>>

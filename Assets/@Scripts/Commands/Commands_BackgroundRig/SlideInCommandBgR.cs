@@ -8,7 +8,7 @@ using UnityEngine;
 public sealed class SlideInCommandSpecBgR : BackgroundRigCommandSpecBase
 {
     [Header("Target")]
-    public BackgroundRigTarget target = BackgroundRigTarget.Background_Track;
+    public BackgroundRigTarget target = BackgroundRigTarget.Background_Track_Move;
 
     [Header("Slide")]
     public CharRigDirection direction = CharRigDirection.Left;

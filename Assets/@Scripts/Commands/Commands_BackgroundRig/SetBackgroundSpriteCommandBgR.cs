@@ -19,7 +19,7 @@ public sealed class SetBackgroundSpriteCommandSpecBgR : BackgroundRigCommandSpec
     public string spriteKey;
 
     [Header("Target")]
-    public BackgroundRigTarget target = BackgroundRigTarget.Background_BackLayer_Image;
+    public BackgroundRigTarget target = BackgroundRigTarget.BackgroundSprite_Image;
 
     [Header("Sizing Policy")]
     public CharRigImageSizingMode sizingMode = CharRigImageSizingMode.HeightFitPreserveAspect;

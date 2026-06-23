@@ -8,7 +8,7 @@ using UnityEngine;
 public sealed class SlideOutCommandSpecBgR : BackgroundRigCommandSpecBase
 {
     [Header("Target")]
-    public BackgroundRigTarget target = BackgroundRigTarget.Background_Track;
+    public BackgroundRigTarget target = BackgroundRigTarget.Background_Track_Move;
 
     [Header("Slide")]
     public CharRigDirection to = CharRigDirection.Right;

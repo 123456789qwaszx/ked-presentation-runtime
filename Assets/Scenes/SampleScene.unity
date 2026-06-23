@@ -7903,7 +7903,7 @@ MonoBehaviour:
   dialogueAdvanceDispatcher: {fileID: 307625745}
   vnFeatureController: {fileID: 775605347}
   rigPrefab: {fileID: 5996910553677253352, guid: b79d79e03178ae948a22f262c3f9b975, type: 3}
-  backgroundRigPrefab: {fileID: 5015033696719687441, guid: 18f0ce8dac4b54f44a88bdcceac48012, type: 3}
+  backgroundRigPrefab: {fileID: 6323253774795375343, guid: 18f0ce8dac4b54f44a88bdcceac48012, type: 3}
   chapterCardPrefab: {fileID: 2410623267660482620, guid: 60640956e3866b44e9e8c9df1a45dbd3, type: 3}
   nodeRigPrefab: {fileID: 8432584506347833489, guid: 5a92676ae0261c54188d2a64469a3787, type: 3}
   chapterCardFactory: {fileID: 767435430}
@@ -10718,9 +10718,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::VnFeatureController
   _vnPlaybackSettings:
     speedupModeMultiplier: 12
+    speedupModeMinMultiplier: 2
+    speedupModeMaxMultiplier: 32
+    speedupAdvanceRateLimitSec: 0.05
+    speedupCooldownAfterHurryUpSec: 0.04
+    speedupCooldownAfterNextLineSec: 0.05
+    rapidSkipAdvanceRateLimitSec: 0.04
+    rapidSkipCooldownAfterHurryUpSec: 0.04
+    rapidSkipCooldownAfterNextLineSec: 0.04
     autoModeDelaySeconds: 1.5
-    userAdvanceCooldownSec: 0.13
     autoAdvanceRateLimitSec: 0.13
+    userAdvanceCooldownSec: 0.13
     cooldownAfterHurryUpSec: 0.28
     cooldownAfterNextLineSec: 0
 --- !u!4 &775605348
@@ -16925,6 +16933,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4310ec07d61999d43a0170e44b5db950, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VnRawInputPoller
+  _bindings:
+    advance: 32
+    rapidSkipLeft: 306
+    rapidSkipRight: 305
+    speedUpHold: 0
+    speedUpToggle: 115
+    autoToggle: 97
+    rollback: 114
 --- !u!4 &1315566988
 Transform:
   m_ObjectHideFlags: 0

@@ -31,12 +31,6 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler<string, string>(
             "bg_fade_out", EnqueueFadeOutBackgroundDslSpec);
 
-        runner.AddCommandHandler<string, string>(
-            "bg_hide_layers", EnqueueHideBackgroundRootLayersSpec);
-
-        runner.AddCommandHandler<string, string>(
-            "bg_show_layers", EnqueueShowBackgroundRootLayersSpec);
-
         runner.AddCommandHandler<string, string, string, string>(
             "bg_move", EnqueueMoveBackgroundDslSpec);
 
@@ -63,9 +57,6 @@ public sealed partial class YarnCommandBridge
         
         runner.AddCommandHandler<string, string, string, string>(
             "bg_cutin_in", EnqueueBackgroundCutInMotionSpec);
-        
-        runner.AddCommandHandler<string, string, string, string>(
-            "bg_cutin_in2", EnqueueBackgroundCutInMotionSpec2);
     }
     
     private void EnqueueSpawnBackgroundRigSpec(
@@ -164,7 +155,6 @@ public sealed partial class YarnCommandBridge
         {
             rigKey = rigKey,
             spriteKey = spriteKey,
-            target = BackgroundRigLayerParser.ParseImageTarget(layerKey)
         };
 
         Collect(spec);
@@ -178,7 +168,7 @@ public sealed partial class YarnCommandBridge
         var spec = new SetOriginSizeCommandSpecBgR
         {
             rigKey = rigKey,
-            target = BackgroundRigTarget.Background_CastTransform,
+            target = BackgroundRigTarget.Background_Size,
 
             overrideScale = true,
             scaleOverride = new Vector3(absoluteScale, absoluteScale, absoluteScale)
@@ -196,7 +186,7 @@ public sealed partial class YarnCommandBridge
         var spec = new SetAnchorCommandSpecBgR
         {
             rigKey = rigKey,
-            target = BackgroundRigTarget.Background_CastTransform,
+            target = BackgroundRigTarget.Background_Anchor,
             anchoredPosition = new Vector2(
                 ParseSignedUnit(xToken, 0f),
                 ParseSignedUnit(yToken, 0f)),
@@ -234,27 +224,27 @@ public sealed partial class YarnCommandBridge
         Collect(spec);
     }
     
-    private void EnqueueHideBackgroundRootLayersSpec(string rigKey, string mask = "visual")
-    {
-        var spec = new HideRootLayersCommandSpecBgR
-        {
-            rigKey = rigKey,
-            targetMask = BackgroundRigRootMaskParser.Parse(mask),
-        };
-
-        Collect(spec);
-    }
-
-    private void EnqueueShowBackgroundRootLayersSpec(string rigKey, string mask = "visual")
-    {
-        var spec = new ShowRootLayersCommandSpecBgR
-        {
-            rigKey = rigKey,
-            targetMask = BackgroundRigRootMaskParser.Parse(mask),
-        };
-
-        Collect(spec);
-    }
+    // private void EnqueueHideBackgroundRootLayersSpec(string rigKey, string mask = "visual")
+    // {
+    //     var spec = new HideRootLayersCommandSpecBgR
+    //     {
+    //         rigKey = rigKey,
+    //         targetMask = BackgroundRigRootMaskParser.Parse(mask),
+    //     };
+    //
+    //     Collect(spec);
+    // }
+    //
+    // private void EnqueueShowBackgroundRootLayersSpec(string rigKey, string mask = "visual")
+    // {
+    //     var spec = new ShowRootLayersCommandSpecBgR
+    //     {
+    //         rigKey = rigKey,
+    //         targetMask = BackgroundRigRootMaskParser.Parse(mask),
+    //     };
+    //
+    //     Collect(spec);
+    // }
 
     private void EnqueueMoveBackgroundDslSpec(
         string rigKey,
@@ -265,7 +255,7 @@ public sealed partial class YarnCommandBridge
         var spec = new MoveByCommandSpecBgR
         {
             rigKey = rigKey,
-            target = BackgroundRigTarget.Background_Track,
+            target = BackgroundRigTarget.Background_Track_Move,
             delta = new Vector2(
                 ParseSignedUnit(xToken, 0f),
                 ParseSignedUnit(yToken, 0f)),
@@ -284,7 +274,7 @@ public sealed partial class YarnCommandBridge
         var spec = new ScaleToCommandSpecBgR
         {
             rigKey = rigKey,
-            target = BackgroundRigTarget.Background_ActingScale,
+            target = BackgroundRigTarget.Background_Scale,
             toScale = new Vector2(scale, scale),
             duration = YarnDurationParser.Parse(durationToken, 0.4f)
         };
@@ -301,7 +291,7 @@ public sealed partial class YarnCommandBridge
         var spec = new SlideInCommandSpecBgR
         {
             rigKey = rigKey,
-            target = BackgroundRigTarget.Background_Track,
+            target = BackgroundRigTarget.Background_Track_Move,
             direction = BgRigDirectionParser.Parse(directionKey, CharRigDirection.Left),
             distance = YarnUnitParser.Parse(distanceToken, 12f),
             duration = YarnDurationParser.Parse(durationToken, 0.55f)
@@ -319,7 +309,7 @@ public sealed partial class YarnCommandBridge
         var spec = new SlideOutCommandSpecBgR
         {
             rigKey = rigKey,
-            target = BackgroundRigTarget.Background_Track,
+            target = BackgroundRigTarget.Background_Track_Move,
             to = BgRigDirectionParser.Parse(directionKey, CharRigDirection.Right),
             distance = YarnUnitParser.Parse(distanceToken, 12f),
             duration = YarnDurationParser.Parse(durationToken, 0.45f)
@@ -376,7 +366,7 @@ public sealed partial class YarnCommandBridge
         var spec = new BreathInPlaceCommandSpecBgR
         {
             rigKey = rigKey,
-            target = BackgroundRigTarget.Background_Track,
+            target = BackgroundRigTarget.Background_Track_Move,
             duration = YarnDurationParser.Parse(durationToken, 99f),
             height = YarnUnitParser.Parse(heightToken, 0.15f),
             breathsPerSecond = breathsPerSecond
@@ -406,26 +396,18 @@ public sealed partial class YarnCommandBridge
     private void EnqueueBackgroundCutInSpec(
         string backgroundRigKey)
     {
-        // Collect( new SetupBackgroundRigCommandSpec
-        // {
-        //     rigKey = backgroundRigKey,
-        //     rigPrefab = _backgroundRigPrefab,
-        //     parentSlot = BackgroundRigSlotParser.Parse("stage02", BackgroundRigSlot.Stage02BackgroundSlot)
-        // });
+        Collect( new SetupBackgroundRigCommandSpec
+        {
+            rigKey = backgroundRigKey,
+            rigPrefab = _backgroundRigPrefab,
+            parentSlot = BackgroundRigSlotParser.Parse("stage02", BackgroundRigSlot.Stage02BackgroundSlot)
+        });
         
         Collect(new ScaleToCommandSpecBgR
         {
             rigKey = backgroundRigKey,
-            target = BackgroundRigTarget.Background_CastTransform,
-            toScale = new Vector2(0.5f, 0.5f),
-            duration = 0
-        });
-
-        Collect(new ScaleToCommandSpecBgR
-        {
-            rigKey = backgroundRigKey,
-            target = BackgroundRigTarget.Background_ObjectSlotRoot,
-            toScale = new Vector2(2f, 2f),
+            target = BackgroundRigTarget.Background_Scale,
+            toScale = new Vector2(0.68f, 0.68f),
             duration = 0
         });
 
@@ -441,224 +423,18 @@ public sealed partial class YarnCommandBridge
         {
             rigKey = backgroundRigKey,
             spriteKey = "slot3bg",
-            target = BackgroundRigTarget.Background_LayerRoot
+            target = BackgroundRigTarget.Background_Mask
         });
 
         Collect(new SetBackgroundSpriteCommandSpecBgR
         {
             rigKey = backgroundRigKey,
             spriteKey = "slot3bg2",
-            target = BackgroundRigTarget.Background_BackLayer_Image
-        });
-
-        // Cut-in slot visibility:
-        // hide front/root layers, show object slot layer.
-        Collect(new HideRootLayersCommandSpecBgR
-        {
-            rigKey = backgroundRigKey,
-            targetMask = BackgroundRigRootMask.Background_FrontLayer_Root,
-            wait = false
-        });
-
-        Collect(new HideRootLayersCommandSpecBgR
-        {
-            rigKey = backgroundRigKey,
-            targetMask = BackgroundRigRootMask.Background_Root,
-            wait = false
-        });
-
-        Collect(new ShowRootLayersCommandSpecBgR
-        {
-            rigKey = backgroundRigKey,
-            targetMask = BackgroundRigRootMask.Background_ObjectSlotRoot,
-            wait = false
+            target = BackgroundRigTarget.BackgroundSprite_Image
         });
     }
     
     private void EnqueueBackgroundCutInMotionSpec(
-        string rigKey,
-        string xToken = "1.2u",
-        string yToken = "0u",
-        string durationToken = "16fr")
-    {
-        Vector2 travel = new(
-            ParseSignedUnit(xToken, 1.2f),
-            ParseSignedUnit(yToken, 0f));
-
-        float duration = YarnDurationParser.Parse(durationToken, 0.66f);
-
-        float burstDuration = duration * 0.52f;
-        float recoilDuration = duration * 0.20f;
-        float settleDuration = duration * 0.28f;
-
-        float fadeDuration = Mathf.Clamp(duration * 0.22f, 0.08f, 0.18f);
-
-        Vector2 startOffset = -travel;
-        Vector2 burstDelta = travel * 1.10f;
-        Vector2 recoilDelta = -travel * 0.13f;
-        Vector2 settleDelta = travel * 0.03f;
-
-        // --------------------------------------------------------------------
-        // 0. Initial pose
-        // --------------------------------------------------------------------
-        // bg_cutin이 만든 cut-in slot을 실제 연출 시작 전 숨겨둔다.
-        // 현재 위치를 최종 착지 위치로 보고, Track만 뒤로 빼서 시작점을 만든다.
-
-        Collect(new FadeOutCommandSpecBgR
-        {
-            rigKey = rigKey,
-            target = BackgroundRigTarget.Background_ObjectSlotRoot,
-            duration = 0f,
-            wait = true
-        });
-
-        Collect(new MoveByCommandSpecBgR
-        {
-            rigKey = rigKey,
-            target = BackgroundRigTarget.Background_Track,
-            delta = startOffset,
-            duration = 0f,
-            wait = true
-        });
-
-        Collect(new RotateToCommandSpecBgR
-        {
-            rigKey = rigKey,
-            target = BackgroundRigTarget.Background_Rotation,
-            toEuler = new Vector3(0f, 0f, -7.5f),
-            duration = 0f,
-            wait = true
-        });
-
-        Collect(new ScaleToCommandSpecBgR
-        {
-            rigKey = rigKey,
-            target = BackgroundRigTarget.Background_ActingScale,
-            toScale = new Vector2(0.035f, 0.035f),
-            duration = 0f,
-            wait = true
-        });
-
-
-        // --------------------------------------------------------------------
-        // 1. Burst in
-        // --------------------------------------------------------------------
-        // 작은 점에서 커지면서 좌 -> 우로 튀어나온다.
-        // scale은 살짝 가로로 늘어나는 느낌을 준다.
-
-        Collect(new FadeInCommandSpecBgR
-        {
-            rigKey = rigKey,
-            target = BackgroundRigTarget.Background_ObjectSlotRoot,
-            duration = fadeDuration,
-            wait = false
-        });
-
-        Collect(new MoveByCommandSpecBgR
-        {
-            rigKey = rigKey,
-            target = BackgroundRigTarget.Background_Track,
-            delta = burstDelta,
-            duration = burstDuration,
-            ease = Ease.OutCubic,
-            wait = false
-        });
-
-        Collect(new RotateToCommandSpecBgR
-        {
-            rigKey = rigKey,
-            target = BackgroundRigTarget.Background_Rotation,
-            toEuler = new Vector3(0f, 0f, 4f),
-            duration = burstDuration * 0.86f,
-            ease = Ease.OutCubic,
-            wait = false
-        });
-
-        Collect(new ScaleToCommandSpecBgR
-        {
-            rigKey = rigKey,
-            target = BackgroundRigTarget.Background_ActingScale,
-            toScale = new Vector2(1.12f, 0.96f),
-            duration = burstDuration,
-            ease = Ease.OutBack,
-            wait = true
-        });
-
-
-        // --------------------------------------------------------------------
-        // 2. Sticky recoil
-        // --------------------------------------------------------------------
-        // 지나친 힘을 살짝 되감는다.
-        // 여기서 쫀득쫀득한 느낌이 생긴다.
-
-        Collect(new MoveByCommandSpecBgR
-        {
-            rigKey = rigKey,
-            target = BackgroundRigTarget.Background_Track,
-            delta = recoilDelta,
-            duration = recoilDuration,
-            ease = Ease.InOutSine,
-            wait = false
-        });
-
-        Collect(new RotateToCommandSpecBgR
-        {
-            rigKey = rigKey,
-            target = BackgroundRigTarget.Background_Rotation,
-            toEuler = new Vector3(0f, 0f, -1.5f),
-            duration = recoilDuration,
-            ease = Ease.InOutSine,
-            wait = false
-        });
-
-        Collect(new ScaleToCommandSpecBgR
-        {
-            rigKey = rigKey,
-            target = BackgroundRigTarget.Background_ActingScale,
-            toScale = new Vector2(0.985f, 1.035f),
-            duration = recoilDuration,
-            ease = Ease.InOutSine,
-            wait = true
-        });
-
-
-        // --------------------------------------------------------------------
-        // 3. Settle
-        // --------------------------------------------------------------------
-        // 최종 위치, 회전, 스케일로 부드럽게 착지한다.
-
-        Collect(new MoveByCommandSpecBgR
-        {
-            rigKey = rigKey,
-            target = BackgroundRigTarget.Background_Track,
-            delta = settleDelta,
-            duration = settleDuration,
-            ease = Ease.OutCubic,
-            wait = false
-        });
-
-        Collect(new RotateToCommandSpecBgR
-        {
-            rigKey = rigKey,
-            target = BackgroundRigTarget.Background_Rotation,
-            toEuler = Vector3.zero,
-            duration = settleDuration,
-            ease = Ease.OutCubic,
-            wait = false
-        });
-
-        Collect(new ScaleToCommandSpecBgR
-        {
-            rigKey = rigKey,
-            target = BackgroundRigTarget.Background_ActingScale,
-            toScale = Vector2.one,
-            duration = settleDuration,
-            ease = Ease.OutCubic,
-            wait = true
-        });
-    }
-    
-    private void EnqueueBackgroundCutInMotionSpec2(
         string rigKey,
         string xToken = "0.18u",
         string yToken = "9.65u",
@@ -708,7 +484,7 @@ public sealed partial class YarnCommandBridge
         Collect(new MoveByCommandSpecBgR
         {
             rigKey = rigKey,
-            target = BackgroundRigTarget.Background_Track,
+            target = BackgroundRigTarget.Background_Track_Move,
             delta = startOffset,
             duration = 0f,
             wait = false
@@ -751,7 +527,7 @@ public sealed partial class YarnCommandBridge
         Collect(new MoveByCommandSpecBgR
         {
             rigKey = rigKey,
-            target = BackgroundRigTarget.Background_Track,
+            target = BackgroundRigTarget.Background_Track_Move,
             delta = burstDelta,
             duration = burstDuration,
             ease = Ease.OutCubic,
@@ -788,7 +564,7 @@ public sealed partial class YarnCommandBridge
         Collect(new MoveByCommandSpecBgR
         {
             rigKey = rigKey,
-            target = BackgroundRigTarget.Background_Track,
+            target = BackgroundRigTarget.Background_Track_Move,
             delta = recoilDelta,
             duration = recoilDuration,
             ease = Ease.InOutSine,
@@ -824,7 +600,7 @@ public sealed partial class YarnCommandBridge
         Collect(new MoveByCommandSpecBgR
         {
             rigKey = rigKey,
-            target = BackgroundRigTarget.Background_Track,
+            target = BackgroundRigTarget.Background_Track_Move,
             delta = settleDelta,
             duration = settleDuration,
             ease = Ease.OutCubic,

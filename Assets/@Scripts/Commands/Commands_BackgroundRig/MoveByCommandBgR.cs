@@ -11,7 +11,7 @@ using UnityEngine;
 public sealed class MoveByCommandSpecBgR : BackgroundRigCommandSpecBase
 {
     [Header("Target")]
-    public BackgroundRigTarget target = BackgroundRigTarget.Background_Track;
+    public BackgroundRigTarget target = BackgroundRigTarget.Background_Track_Move;
 
     [Header("Delta (relative offset)")]
     [Tooltip("현재 anchoredPosition 기준으로 더해질 오프셋(픽셀 단위).")]
