@@ -461,9 +461,11 @@ public sealed partial class YarnCommandBridge
 
         // 최종 위치보다 살짝 위까지 튀어나온다.
         Vector2 burstDelta = new Vector2(sideDrift * 1.25f, riseDistance * 1.10f);
+        Vector2 burstCharDelta = new Vector2(-sideDrift * 0.25f, -riseDistance * 0.22f);
 
         // 착지 직전 살짝 아래로 되눌린다.
         Vector2 recoilDelta = new Vector2(-sideDrift * 0.55f, -riseDistance * 0.14f);
+        Vector2 recoilCharDelta = new Vector2(sideDrift * 0.11f, riseDistance * 0.028f);
 
         // 누적 오차 없이 정확히 원래 위치로 돌아오게 한다.
         Vector2 settleDelta = -(startOffset + burstDelta + recoilDelta);
@@ -504,7 +506,16 @@ public sealed partial class YarnCommandBridge
         {
             rigKey = rigKey,
             target = BackgroundRigTarget.Background_ActingScale,
-            toScale = new Vector2(0.001f, 0.001f),
+            toScale = new Vector2(0.001f, 1f),
+            duration = 0f,
+            wait = false
+        });
+        
+        Collect(new ScaleToCommandSpecBgR
+        {
+            rigKey = rigKey,
+            target = BackgroundRigTarget.Background_ActingScale_Y,
+            toScale = new Vector2(1f, 0.001f),
             duration = 0f,
             wait = false
         });
@@ -534,6 +545,16 @@ public sealed partial class YarnCommandBridge
             ease = Ease.OutCubic,
             wait = false
         });
+        
+        Collect(new MoveByCommandSpecBgR
+        {
+            rigKey = rigKey,
+            target = BackgroundRigTarget.Background_ObjectSlotRoot,
+            delta = burstCharDelta,
+            duration = burstDuration,
+            ease = Ease.OutCubic,
+            wait = false
+        });
 
         Collect(new RotateToCommandSpecBgR
         {
@@ -544,12 +565,22 @@ public sealed partial class YarnCommandBridge
             ease = Ease.OutCubic,
             wait = false
         });
+        
+        Collect(new ScaleToCommandSpecBgR
+        {
+            rigKey = rigKey,
+            target = BackgroundRigTarget.Background_ActingScale_Y,
+            toScale = new Vector2(1.02f, 1.24f),
+            duration = burstDuration,
+            ease = Ease.OutBack,
+            wait = false
+        });
 
         Collect(new ScaleToCommandSpecBgR
         {
             rigKey = rigKey,
             target = BackgroundRigTarget.Background_ActingScale,
-            toScale = new Vector2(0.94f, 1.16f),
+            toScale = new Vector2(0.88f, 1.02f),
             duration = burstDuration,
             ease = Ease.OutBack,
             wait = true
@@ -571,7 +602,17 @@ public sealed partial class YarnCommandBridge
             ease = Ease.InOutSine,
             wait = false
         });
-
+        
+        Collect(new MoveByCommandSpecBgR
+        {
+            rigKey = rigKey,
+            target = BackgroundRigTarget.Background_ObjectSlotRoot,
+            delta = recoilCharDelta,
+            duration = recoilDuration,
+            ease = Ease.InOutSine,
+            wait = false
+        });
+        
         Collect(new RotateToCommandSpecBgR
         {
             rigKey = rigKey,
@@ -581,12 +622,22 @@ public sealed partial class YarnCommandBridge
             ease = Ease.InOutSine,
             wait = false
         });
+        
+        Collect(new ScaleToCommandSpecBgR
+        {
+            rigKey = rigKey,
+            target = BackgroundRigTarget.Background_ActingScale_Y,
+            toScale = new Vector2(1f, 0.93f),
+            duration = burstDuration,
+            ease = Ease.InOutSine,
+            wait = false
+        });
 
         Collect(new ScaleToCommandSpecBgR
         {
             rigKey = rigKey,
             target = BackgroundRigTarget.Background_ActingScale,
-            toScale = new Vector2(1.075f, 0.965f),
+            toScale = new Vector2(1.075f, 1f),
             duration = recoilDuration,
             ease = Ease.InOutSine,
             wait = true
@@ -598,6 +649,16 @@ public sealed partial class YarnCommandBridge
         // --------------------------------------------------------------------
         // 생각 컷인이 제자리에 부드럽게 안착한다.
 
+        Collect(new MoveByCommandSpecBgR
+        {
+            rigKey = rigKey,
+            target = BackgroundRigTarget.Background_ObjectSlotRoot,
+            delta = settleDelta,
+            duration = settleDuration,
+            ease = Ease.OutCubic,
+            wait = false
+        });
+        
         Collect(new MoveByCommandSpecBgR
         {
             rigKey = rigKey,
@@ -613,6 +674,16 @@ public sealed partial class YarnCommandBridge
             rigKey = rigKey,
             target = BackgroundRigTarget.Background_Rotation,
             toEuler = Vector3.zero,
+            duration = settleDuration,
+            ease = Ease.OutCubic,
+            wait = false
+        });
+        
+        Collect(new ScaleToCommandSpecBgR
+        {
+            rigKey = rigKey,
+            target = BackgroundRigTarget.Background_ActingScale_Y,
+            toScale = Vector2.one,
             duration = settleDuration,
             ease = Ease.OutCubic,
             wait = false

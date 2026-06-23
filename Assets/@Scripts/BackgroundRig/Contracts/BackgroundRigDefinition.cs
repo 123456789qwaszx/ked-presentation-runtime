@@ -85,7 +85,7 @@ public static class BackgroundRigSchema
         new() { Id = Refs.BackgroundSprite_Image, Parent = Refs.BackgroundSprite_Root, NeedsImage = true },
 
         // Object slots
-        new() { Id = Refs.Background_ObjectSlotRoot, Parent = Refs.Background_Mask, NeedsCanvasGroup = true, InitialCanvasGroupAlpha = 0f },
+        new() { Id = Refs.Background_ObjectSlotRoot, Parent = Refs.Background_ActingScale, NeedsCanvasGroup = true, InitialCanvasGroupAlpha = 0f },
     };
 }
 
