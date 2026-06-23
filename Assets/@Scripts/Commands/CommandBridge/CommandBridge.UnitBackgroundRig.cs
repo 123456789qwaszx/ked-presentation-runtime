@@ -6,7 +6,7 @@ public sealed partial class YarnCommandBridge
 {
     private void BindBackgroundRig(DialogueRunner runner)
     {
-        runner.AddCommandHandler<string, string, string>(
+        runner.AddCommandHandler<string, string>(
             "bg_spawn", EnqueueSpawnBackgroundRigSpec);
         
         runner.AddCommandHandler<string, string, string>(
@@ -61,20 +61,21 @@ public sealed partial class YarnCommandBridge
     
     private void EnqueueSpawnBackgroundRigSpec(
         string rigKey, 
-        string spriteKey,
-        string parentSlotKey = "stage00")
+        string spriteKey)
     {
-        EnqueueSetupBackgroundRigSpec(rigKey, parentSlotKey);
+        EnqueueSetupBackgroundRigSpec(rigKey);
         EnqueueSetBackgroundSpriteSpec(rigKey, spriteKey);
     }
 
-    private void EnqueueSetupBackgroundRigSpec(string rigKey, string parentSlotKey)
+    private void EnqueueSetupBackgroundRigSpec(string rigKey)
     {
         var spec = new SetupBackgroundRigCommandSpec
         {
             rigKey = rigKey,
             rigPrefab = _backgroundRigPrefab,
-            parentSlot = BackgroundRigSlotParser.Parse(parentSlotKey, BackgroundRigSlot.Stage00BackgroundSlot)
+            
+            stage = PresentationStageKey.Stage00,
+            layer = PresentationDepthLayerKey.Far,
         };
 
         Collect(spec);
@@ -141,7 +142,6 @@ public sealed partial class YarnCommandBridge
             rigKey = rigKey,
             rigPrefab = _backgroundRigPrefab,
 
-            useStageDepthSlot = true,
             stage = stage,
             layer = layer
         };
@@ -400,7 +400,8 @@ public sealed partial class YarnCommandBridge
         {
             rigKey = backgroundRigKey,
             rigPrefab = _backgroundRigPrefab,
-            parentSlot = BackgroundRigSlotParser.Parse("stage02", BackgroundRigSlot.Stage02BackgroundSlot)
+            stage = PresentationStageKey.Stage02,
+            layer = PresentationDepthLayerKey.Mid
         });
         
         Collect(new ScaleToCommandSpecBgR
