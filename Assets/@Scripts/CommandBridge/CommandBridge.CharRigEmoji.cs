@@ -1,28 +1,8 @@
 using UnityEngine;
 using Yarn.Unity;
 
-public sealed partial class YarnCommandBridge : InlineEventMarkupHandler.IInlineEmojiHost
+public sealed partial class YarnCommandBridge
 {
-    #region InlineEventMarkupHandler
-    
-    public void PlayEmojiCue(string cue)
-    {
-        string characterKey = _vnRuntimeStateProvider.CurrentCharacterKey;
-
-        if (string.IsNullOrWhiteSpace(characterKey))
-            return;
-
-        if (string.IsNullOrWhiteSpace(cue))
-        {
-            EnqueueEmojiHideSpec(characterKey);
-            return;
-        }
-
-        EnqueueEmojiPopSpec(characterKey, cue);
-    }
-    
-    #endregion
-
     private void BindCharRigEmoji(DialogueRunner runner)
     {
         runner.AddCommandHandler<string, string>(

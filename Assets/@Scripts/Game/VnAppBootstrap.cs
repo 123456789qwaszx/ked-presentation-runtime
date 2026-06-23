@@ -73,8 +73,6 @@ public class VnAppBootstrap : MonoBehaviour
     [SerializeField] private DialogueRunner subOneShotRunner;
     
     [SerializeField] private LinePresenter linePresenter;
-    [SerializeField] private VnRuntimeBridge vnRuntimeBridge;
-    [SerializeField] private InlineEventMarkupHandler inlineEventMarkupHandler;
     [SerializeField] private CustomLinePresenter customLinePresenter;
     [SerializeField] private SubPresentationPresenter subPresentationPresenter;
     [SerializeField] private OneShotPresentationPresenter oneShotPresentationPresenter;
@@ -130,7 +128,6 @@ public class VnAppBootstrap : MonoBehaviour
     [SerializeField] private YarnLaneDebugView yarnLaneDebugView;
     [SerializeField] private CharacterFocusDebugView characterFocusDebugView;
     
-    private PresentationSessionBridge _presentationSessionBridge;
     private UIPatchService _uiPatchService;
     private VNLoadSeekDriver _vnLoadSeekDriver;
     private VNSaveLoadSystem _vnSaveLoadSystem;
@@ -162,7 +159,6 @@ public class VnAppBootstrap : MonoBehaviour
 
 
         BootstrapPresentationSession();
-        ConnectPresentationSessionToYarn();
         
         BootstrapYarn();
         BootstrapDialogueAdvanceInput();
@@ -296,20 +292,9 @@ public class VnAppBootstrap : MonoBehaviour
             presentationSession,
             routeCatalogSo);
     }
-
-    private void ConnectPresentationSessionToYarn()
-    {
-        PresentationSession session = presentationSessionEntry.PresentationSession;
-        _presentationSessionBridge = new(session, unitySignalBus);
-    }
     
     private void BootstrapYarn()
     {
-        vnRuntimeBridge.Initialize(dialogueRunner, presentationSessionEntry, _presentationSessionBridge);
-
-        YarnCommandRegistry yarnCommandRegistry = new YarnCommandRegistry(dialogueRunner, vnRuntimeBridge);
-
-        yarnCommandRegistry.Initialize();
         mainYarnBridgePlaybackDriver.Initialize(commandExecutor, presentationSessionEntry);
         subYarnBridgePlaybackDriver.Initialize(subCommandExecutor, new SubPresentationScopeProvider(presentationSessionEntry));
         oneShotYarnBridgePlaybackDriver.Initialize(oneShotCommandExecutor, presentationSessionEntry);
@@ -324,7 +309,6 @@ public class VnAppBootstrap : MonoBehaviour
         YarnCommandBridge yarnCommandBridge = new(
             dialogueRunner,
             mainYarnBridgePlaybackDriver,
-            _vnRuntimeStateProvider,
             _vnSideRunnerSyncHub,
             rigPrefab,
             backgroundRigPrefab,
@@ -335,7 +319,6 @@ public class VnAppBootstrap : MonoBehaviour
         YarnCommandBridge subYarnCommandBridge = new YarnCommandBridge(
             subPresentationRunner, 
             subYarnBridgePlaybackDriver,
-            _vnRuntimeStateProvider,
             _vnSideRunnerSyncHub, 
             rigPrefab, 
             backgroundRigPrefab,
@@ -346,7 +329,6 @@ public class VnAppBootstrap : MonoBehaviour
         YarnCommandBridge subOneShotYarnCommandBridge = new YarnCommandBridge(
             subOneShotRunner, 
             oneShotYarnBridgePlaybackDriver,
-            _vnRuntimeStateProvider,
             _vnSideRunnerSyncHub, 
             rigPrefab, 
             backgroundRigPrefab,
@@ -357,8 +339,6 @@ public class VnAppBootstrap : MonoBehaviour
         subPresentationPresenter.Initialize(subPresentationRunner, subYarnBridgePlaybackDriver, _vnSideRunnerSyncHub, yarnLaneDebugView);
         
         oneShotPresentationPresenter.Initialize(subOneShotRunner, yarnLaneDebugView);
-        
-        inlineEventMarkupHandler.Initialize(_presentationSessionBridge, inlineSfxHost, yarnCommandBridge);
     }
     
     private void BootstrapDialogueAdvanceInput()
@@ -371,7 +351,7 @@ public class VnAppBootstrap : MonoBehaviour
             vnTrace
         );
 
-        dialogueAdvanceDispatcher.Initialize(advanceGate, dialogueRunner, inlineEventMarkupHandler, _linePresentationAdvanceState);
+        dialogueAdvanceDispatcher.Initialize(advanceGate, dialogueRunner, _linePresentationAdvanceState);
         vnAdvanceInputPoller.Initialize(dialogueAdvanceDispatcher);
     }
     
@@ -438,7 +418,6 @@ public class VnAppBootstrap : MonoBehaviour
             _presentationSessionContext,
             _linePresentationAdvanceState,
             ellipsisBreathTypewriter,
-            inlineEventMarkupHandler,
             _backlogRecorder,
             autoAdvanceScheduler,
             holdSkipController,
@@ -508,7 +487,6 @@ public class VnAppBootstrap : MonoBehaviour
         _screenBindings.ConfigurePresentationView(
             vnFeatureController,
             _vnUxState,
-            vnRuntimeBridge,
             dialogueAdvanceDispatcher,
             _linePresentationAdvanceState);
 

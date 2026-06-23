@@ -5,7 +5,6 @@ using Yarn.Unity;
 public sealed partial class YarnCommandBridge
 {
     private readonly YarnBridgePlaybackDriver _playbackDriver;
-    private readonly VNRuntimeStateProvider _vnRuntimeStateProvider;
     private readonly RectTransform _charRigPrefab;
     private readonly RectTransform _backgroundRigPrefab;
 
@@ -16,7 +15,6 @@ public sealed partial class YarnCommandBridge
     public YarnCommandBridge(
         DialogueRunner runner,
         YarnBridgePlaybackDriver playbackDriver,
-        VNRuntimeStateProvider vnRuntimeStateProvider,
         VNSideRunnerSyncHub sideRunnerSyncHub,
         RectTransform charRigPrefab,
         RectTransform backgroundRigPrefab,
@@ -25,7 +23,6 @@ public sealed partial class YarnCommandBridge
         bool bindMainLaneCommands)
     {
         _playbackDriver = playbackDriver;
-        _vnRuntimeStateProvider = vnRuntimeStateProvider;
         _sideRunnerSyncHub = sideRunnerSyncHub;
         _charRigPrefab = charRigPrefab;
         _backgroundRigPrefab = backgroundRigPrefab;

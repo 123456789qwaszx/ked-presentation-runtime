@@ -24,7 +24,6 @@ public sealed class VnFeatureController : MonoBehaviour
 
     private EllipsisBreathTypewriter _typewriter;
     private VNLinePresentationState _linePresentationAdvanceState;
-    private InlineEventMarkupHandler _inlineEventMarkupHandler;
 
     private BacklogRecorder _backlogRecorder;
     private AutoAdvanceScheduler _autoAdvanceScheduler;
@@ -50,7 +49,6 @@ public sealed class VnFeatureController : MonoBehaviour
         PresentationSessionContext sessionContext,
         VNLinePresentationState yarnLineLifecycleBridge,
         EllipsisBreathTypewriter ellipsisBreathTypewriter,
-        InlineEventMarkupHandler inlineEventMarkupHandler,
         BacklogRecorder backlogRecorder,
         AutoAdvanceScheduler autoAdvanceScheduler,
         FastForwardController holdSpeedUpController,
@@ -66,7 +64,6 @@ public sealed class VnFeatureController : MonoBehaviour
         _sessionContext = sessionContext;
         _linePresentationAdvanceState = yarnLineLifecycleBridge;
         _typewriter = ellipsisBreathTypewriter;
-        _inlineEventMarkupHandler = inlineEventMarkupHandler;
 
         _backlogRecorder = backlogRecorder;
         _autoAdvanceScheduler = autoAdvanceScheduler;
@@ -128,7 +125,6 @@ public sealed class VnFeatureController : MonoBehaviour
         _speedUpHeld = true;
 
         _holdSpeedUpController.SetHeld(true);
-        _inlineEventMarkupHandler.SetPauseIgnored(true);
 
         ApplySpeedUpState();
     }
@@ -141,7 +137,6 @@ public sealed class VnFeatureController : MonoBehaviour
         _speedUpHeld = false;
 
         _holdSpeedUpController.SetHeld(false);
-        _inlineEventMarkupHandler.SetPauseIgnored(false);
 
         ApplySpeedUpState();
     }
@@ -177,7 +172,6 @@ public sealed class VnFeatureController : MonoBehaviour
         _speedUpHeld = false;
 
         _holdSpeedUpController.SetHeld(false);
-        _inlineEventMarkupHandler.SetPauseIgnored(false);
 
         ApplySpeedUpState();
     }

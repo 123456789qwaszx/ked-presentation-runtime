@@ -2,7 +2,6 @@ public sealed partial class VnScreenBindings
 {
     private VnFeatureController _vnFeatures;
     private VnUxState _uxState;
-    private VnRuntimeBridge _vnRuntimeBridge;
     private DialogueAdvanceDispatcher _dialogueAdvanceDispatcher;
     private VNLinePresentationState _linePresentationAdvanceState;
     
@@ -11,13 +10,11 @@ public sealed partial class VnScreenBindings
     public void ConfigurePresentationView(
         VnFeatureController vnFeatures,
         VnUxState uxState,
-        VnRuntimeBridge vnRuntimeBridge,
         DialogueAdvanceDispatcher dialogueAdvanceDispatcher,
         VNLinePresentationState linePresentationAdvanceState)
     {
         _vnFeatures = vnFeatures;
         _uxState = uxState;
-        _vnRuntimeBridge = vnRuntimeBridge;
         _dialogueAdvanceDispatcher = dialogueAdvanceDispatcher;
         _linePresentationAdvanceState = linePresentationAdvanceState;
     }

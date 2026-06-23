@@ -6,9 +6,6 @@ public sealed class PresentationSessionEntry : MonoBehaviour, ICommandRunScopePr
 
     private RouteCatalogSO _routeCatalog;
 
-    public bool IsInitialized => PresentationSession != null && _routeCatalog != null;
-    public bool IsRunning => PresentationSession != null && PresentationSession.IsRunning;
-
     public CommandRunScope CurrentScope
     {
         get
@@ -36,21 +33,11 @@ public sealed class PresentationSessionEntry : MonoBehaviour, ICommandRunScopePr
     
     public void RestartRoute(string routeKey)
     {
-        //EndRouteNow();
-        
         if (!TryResolveRoute(routeKey, out Route route, out SequenceSpecSO sequence))
             return;
         
         PresentationSession.ClearStage();
         PresentationSession.Start(route, sequence);
-    }
-
-    public void RequestEnd()
-    {
-        if (PresentationSession == null)
-            return;
-
-        PresentationSession.RequestEnd();
     }
 
     public void EndRouteNow()

@@ -38,7 +38,6 @@ public sealed partial class VnScreenBindings
         if(episodeId == null)
             Debug.LogWarning("[VN] Episode skip confirmed but selected episode id is empty.");
 
-        _vnRuntimeBridge.ForceCompleteEpisodeNow(episodeId);
         _episodeSelectionSystem.MarkEpisodeCompleted(episodeId);
     }
 }

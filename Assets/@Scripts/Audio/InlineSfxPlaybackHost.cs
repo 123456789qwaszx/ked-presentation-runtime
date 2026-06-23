@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public sealed class InlineSfxPlaybackHost : MonoBehaviour, InlineEventMarkupHandler.IInlineAudioHost
+public sealed class InlineSfxPlaybackHost : MonoBehaviour
 {
     [Serializable]
     private struct CueMapEntry
