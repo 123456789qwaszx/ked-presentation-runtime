@@ -247,8 +247,7 @@ public class VnAppBootstrap : MonoBehaviour
         PresentationTransitionCommandFactory presentationTransitionFactory = new();
 
         // Presentation Control
-        PresentationControlCommandFactory presentationControlFactory = new(
-            _uiPatchService);
+        PresentationControlCommandFactory presentationControlFactory = new(_uiPatchService);
 
         // Audio
         ResourcesAudioClipResolver audioClipResolver = new();
@@ -384,18 +383,10 @@ public class VnAppBootstrap : MonoBehaviour
     
     private void BootstrapPlaybackControls()
     {
-        
         autoAdvanceScheduler.Initialize(
             _vnPlaybackSettings,
             dialogueAdvanceDispatcher,
             () => Time.unscaledTimeAsDouble);
-
-        // FastForwardController holdSkipController = new(
-        //     _vnPlaybackSettings,
-        //     ellipsisBreathTypewriter,
-        //     dialogueAdvanceDispatcher,
-        //     _presentationSessionContext,
-        //     () => _linePresentationAdvanceState.IsLineFullyShown);
 
         RapidSkipController rapidSkipController = new(dialogueAdvanceDispatcher);
 
@@ -414,9 +405,7 @@ public class VnAppBootstrap : MonoBehaviour
         AdvanceGate advanceGate = new(
             _vnPlaybackSettings,
             _linePresentationAdvanceState,
-            presentationSessionEntry,
-            vnTrace
-        );
+            presentationSessionEntry);
         
         VnAdvanceInputBindings vnAdvanceInputBindings = new();
 

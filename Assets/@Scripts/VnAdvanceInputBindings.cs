@@ -19,35 +19,13 @@ public sealed class VnAdvanceInputBindings
     public KeyCode autoToggle = KeyCode.A;
     public KeyCode rollback = KeyCode.R;
 
-    public bool IsRapidSkipHeld()
-    {
-        return IsHeld(rapidSkipLeft) || IsHeld(rapidSkipRight);
-    }
-
-    public bool IsSpeedUpHeld()
-    {
-        return IsHeld(speedUpHold);
-    }
-
-    public bool IsSpeedUpTogglePressed()
-    {
-        return IsPressed(speedUpToggle);
-    }
-
-    public bool IsAutoTogglePressed()
-    {
-        return IsPressed(autoToggle);
-    }
-
-    public bool IsRollbackPressed()
-    {
-        return IsPressed(rollback);
-    }
-
-    public bool IsAdvancePressed()
-    {
-        return IsPressed(advance);
-    }
+    public bool IsRapidSkipHeld() => IsHeld(rapidSkipLeft) || IsHeld(rapidSkipRight);
+    public bool IsSpeedUpHeld() => IsHeld(speedUpHold);
+    public bool IsSpeedUpTogglePressed() => IsPressed(speedUpToggle);
+    public bool IsAutoTogglePressed() => IsPressed(autoToggle);
+    public bool IsRollbackPressed() => IsPressed(rollback);
+    public bool IsAdvancePressed() => IsPressed(advance);
+    
 
     private static bool IsHeld(KeyCode key)
     {

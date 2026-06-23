@@ -82,9 +82,6 @@ public sealed class VnFeatureController : MonoBehaviour
 
     public void ToggleAuto()
     {
-        if (!_init)
-            return;
-
         bool next = !IsAuto;
 
         _sessionContext.SetAutoModeEnabled(next);
@@ -95,54 +92,36 @@ public sealed class VnFeatureController : MonoBehaviour
 
     public void ToggleSpeedUpMode()
     {
-        if (!_init)
-            return;
-
         _speedUpToggled = !_speedUpToggled;
         ApplySpeedUpModeState();
     }
 
     public void BeginSpeedUpMode()
     {
-        if (!_init)
-            return;
-
         _speedUpHeld = true;
         ApplySpeedUpModeState();
     }
 
     public void EndSpeedUpMode()
     {
-        if (!_init)
-            return;
-
         _speedUpHeld = false;
         ApplySpeedUpModeState();
     }
 
     public void BeginRapidSkip()
     {
-        if (!_init)
-            return;
-
         _rapidSkipHeld = true;
         ApplyRapidSkipState();
     }
 
     public void EndRapidSkip()
     {
-        if (!_init)
-            return;
-
         _rapidSkipHeld = false;
         ApplyRapidSkipState();
     }
 
     public bool RequestRollbackOneStep()
     {
-        if (!_init)
-            return false;
-
         if (_vnLinePresentationState.IsSeekingActive)
             return false;
 
