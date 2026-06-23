@@ -1,20 +1,15 @@
 public sealed partial class VnScreenBindings
 {
     private VnFeatureController _vnFeatures;
-    private VnUxState _uxState;
     private DialogueAdvanceDispatcher _dialogueAdvanceDispatcher;
     private VNLinePresentationState _linePresentationAdvanceState;
     
-    private bool ChoicesVisible => _uxState.ChoicesVisible;
-    
     public void ConfigurePresentationView(
         VnFeatureController vnFeatures,
-        VnUxState uxState,
         DialogueAdvanceDispatcher dialogueAdvanceDispatcher,
         VNLinePresentationState linePresentationAdvanceState)
     {
         _vnFeatures = vnFeatures;
-        _uxState = uxState;
         _dialogueAdvanceDispatcher = dialogueAdvanceDispatcher;
         _linePresentationAdvanceState = linePresentationAdvanceState;
     }
@@ -80,25 +75,16 @@ public sealed partial class VnScreenBindings
 
     private void HandleAutoClicked()
     {
-        if (ChoicesVisible)
-            return;
-
         _vnFeatures.ToggleAuto();
     }
 
     private void HandleBackLogClicked()
     {
-        if (ChoicesVisible)
-            return;
-
         OpenBacklogPanel();
     }
 
     private void HandleFastForwardDown()
     {
-        if (ChoicesVisible)
-            return;
-
         _vnFeatures.BeginFastForward();
     }
 
@@ -109,15 +95,12 @@ public sealed partial class VnScreenBindings
 
     private void HandleHurryUpClicked()
     {
-        if (ChoicesVisible)
-            return;
-
         _dialogueAdvanceDispatcher.DispatchAdvance();
     }
 
     private void HandleLoadMenuClicked()
     {
-        if (ChoicesVisible || HasPanel)
+        if (HasPanel)
             return;
 
         OpenSaveLoadMenu(SaveLoadMenuMode.Load);
@@ -125,17 +108,11 @@ public sealed partial class VnScreenBindings
 
     private void HandlePlaybackSpeedClicked()
     {
-        if (ChoicesVisible)
-            return;
-
         _vnFeatures.TogglePlaybackSpeed();
     }
 
     private void HandleRollbackClicked()
     {
-        if (ChoicesVisible)
-            return;
-
         if (!_vnFeatures.RequestRollbackOneStep())
             return;
 
@@ -154,7 +131,7 @@ public sealed partial class VnScreenBindings
 
     private void HandleSaveMenuClicked()
     {
-        if (ChoicesVisible || HasPanel)
+        if (HasPanel)
             return;
 
         OpenSaveLoadMenu(SaveLoadMenuMode.Save);
@@ -162,9 +139,6 @@ public sealed partial class VnScreenBindings
 
     private void HandleSkipMenuClicked()
     {
-        if (ChoicesVisible)
-            return;
-
         OpenEpisodeSkipConfirmPanel();
     }
 }

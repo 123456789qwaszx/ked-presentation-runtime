@@ -13,7 +13,6 @@ public sealed class VNOptionsPresentationFlow
     private readonly DialogueBoxHost _dialogueBoxHost;
     private readonly VNChoiceBoundary _choiceBoundary;
     private readonly VNLinePresentationState _advanceState;
-    private readonly VnUxState _uxState;
 
     private readonly VNOptionEffectPreviewResolver _effectResolver = new();
 
@@ -26,14 +25,12 @@ public sealed class VNOptionsPresentationFlow
         DialogueBoxHost dialogueBoxHost,
         VNChoiceBoundary choiceBoundary,
         VNLinePresentationState advanceState,
-        VnUxState uxState,
         OptionsBoxKind defaultBoxKind = OptionsBoxKind.Default,
         float fadeDuration = 0.12f)
     {
         _dialogueBoxHost = dialogueBoxHost;
         _choiceBoundary = choiceBoundary;
         _advanceState = advanceState;
-        _uxState = uxState;
         _defaultBoxKind = defaultBoxKind;
         _fadeDuration = fadeDuration;
     }
@@ -67,8 +64,6 @@ public sealed class VNOptionsPresentationFlow
         if (ctx.ViewModels.Count == 0)
             return VNOptionsPresentationBeginResult.NoOption;
 
-        _uxState.SetChoicesVisible(true);
-
         ctx.OptionsBoxView = await ShowOptionsBoxAsync(
             useImmediateTransition: false,
             ctx);
@@ -95,8 +90,6 @@ public sealed class VNOptionsPresentationFlow
 
     public void EndInteractiveImmediate()
     {
-        _uxState.SetChoicesVisible(false);
-
         if (_currentView != null)
         {
             _currentView.SetInputEnabled(false);

@@ -344,7 +344,6 @@ public class VnAppBootstrap : MonoBehaviour
     private void BootstrapDialogueAdvanceInput()
     {
         AdvanceGate advanceGate = new(
-            _vnUxState,
             _vnPlaybackSettings,
             _linePresentationAdvanceState,
             presentationSessionEntry,
@@ -387,8 +386,7 @@ public class VnAppBootstrap : MonoBehaviour
         VNOptionsPresentationFlow optionsPresentationFlow = new(
             dialogueBoxHost,
             vnChoiceBoundary,
-            _linePresentationAdvanceState,
-            _vnUxState);
+            _linePresentationAdvanceState);
 
         vnOptionsPresenter.Initialize(
             dialogueRunner,
@@ -413,7 +411,6 @@ public class VnAppBootstrap : MonoBehaviour
             () => _linePresentationAdvanceState.IsLineFullyShown);
 
         vnFeatureController.Initialize(
-            _vnUxState,
             _vnPlaybackSettings,
             _presentationSessionContext,
             _linePresentationAdvanceState,
@@ -486,7 +483,6 @@ public class VnAppBootstrap : MonoBehaviour
     {
         _screenBindings.ConfigurePresentationView(
             vnFeatureController,
-            _vnUxState,
             dialogueAdvanceDispatcher,
             _linePresentationAdvanceState);
 

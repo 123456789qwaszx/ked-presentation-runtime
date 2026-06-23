@@ -4,8 +4,6 @@ public sealed partial class VnScreenBindings
 {
     private void OpenChoicePanel(IReadOnlyList<string> choices)
     {
-        _uxState.SetChoicesVisible(true);
-
         ChoicePanel existing = UI.GetUI<ChoicePanel>();
 
         if (existing != null)

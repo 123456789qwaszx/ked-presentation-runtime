@@ -17,7 +17,6 @@ public class VnPlaybackSettings
 
 public sealed class VnFeatureController : MonoBehaviour
 {
-    private VnUxState _vnUxState;
     [SerializeField] private VnPlaybackSettings _vnPlaybackSettings;
 
     private PresentationSessionContext _sessionContext;
@@ -44,7 +43,6 @@ public sealed class VnFeatureController : MonoBehaviour
     private bool _init;
 
     public void Initialize(
-        VnUxState uxState,
         VnPlaybackSettings vnPlaybackSettings,
         PresentationSessionContext sessionContext,
         VNLinePresentationState yarnLineLifecycleBridge,
@@ -59,7 +57,6 @@ public sealed class VnFeatureController : MonoBehaviour
         if (_init)
             return;
 
-        _vnUxState = uxState;
         _vnPlaybackSettings = vnPlaybackSettings;
         _sessionContext = sessionContext;
         _linePresentationAdvanceState = yarnLineLifecycleBridge;
@@ -81,12 +78,6 @@ public sealed class VnFeatureController : MonoBehaviour
     private void Update()
     {
         if (!_init)
-            return;
-
-        if (_vnUxState.BacklogVisible)
-            return;
-
-        if (_vnUxState.ChoicesVisible)
             return;
 
         if (IsAuto && LineFullyShown)
