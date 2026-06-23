@@ -1,9 +1,8 @@
 using System;
-using System.Threading;
 using Yarn.Unity;
 
 // Runs one line presentation transaction through its explicit phase sequence.
-public partial class VNLinePresentationFlow : IInlinePresentationAdvanceHost
+public partial class VNLinePresentationFlow
 {
     private readonly VNYarnLineBoundary _vnYarnLineBoundary;
     private readonly VNLinePresentationState _advanceState;
@@ -16,12 +15,11 @@ public partial class VNLinePresentationFlow : IInlinePresentationAdvanceHost
     public VNLinePresentationPhase CurrentPhase { get; private set; } =
         VNLinePresentationPhase.None;
 
-    // ---- inline [advance/] host ----
-    private LinePresentationRun _inlineAdvanceRun;
-    private CancellationToken _inlineAdvanceCancel;
-    private bool _inlineAdvanceRunValid;
+    // inline [advance/] 디스패치는 per-line, run-scoped 책임이므로 전용 host로 격리한다.
+    // flow는 타입라이터 phase 동안 Begin/End로 이 host를 구동만 한다.
+    private readonly InlineAdvanceDispatchHost _inlineAdvanceHost;
 
-    public IInlinePresentationAdvanceHost InlineAdvanceHost => this;
+    public IInlinePresentationAdvanceHost InlineAdvanceHost => _inlineAdvanceHost;
 
     public VNLinePresentationFlow(
         VNYarnLineBoundary vnYarnLineBoundary,
@@ -39,6 +37,8 @@ public partial class VNLinePresentationFlow : IInlinePresentationAdvanceHost
         _loadSeekDriver = loadSeekDriver;
         _sideRunnerSyncHub = vnSideRunnerSyncHub;
         _playbackDriver = playbackDriver;
+
+        _inlineAdvanceHost = new InlineAdvanceDispatchHost(vnSideRunnerSyncHub);
     }
 
     private async YarnTask<bool> TryEnterLineAndResolveSeekAsync(
@@ -152,7 +152,7 @@ public partial class VNLinePresentationFlow : IInlinePresentationAdvanceHost
         _typewriter.PrepareForContent(ctx.Text);
         SetPhase(ctx, VNLinePresentationPhase.TypewriterReady);
 
-        BeginInlineAdvance(ctx.Run, ctx.Token.NextContentToken);
+        _inlineAdvanceHost.Begin(ctx.Run);
         try
         {
             await _typewriter
@@ -161,7 +161,7 @@ public partial class VNLinePresentationFlow : IInlinePresentationAdvanceHost
         }
         finally
         {
-            EndInlineAdvance();
+            _inlineAdvanceHost.End();
         }
 
         SetPhase(ctx, VNLinePresentationPhase.TypewriterCompleted);
@@ -261,45 +261,5 @@ public partial class VNLinePresentationFlow : IInlinePresentationAdvanceHost
     {
         ctx.Phase = phase;
         CurrentPhase = phase;
-    }
-
-    // ──────────────────────────────────────────────────────────────────────
-    // inline [advance/] host
-    // ──────────────────────────────────────────────────────────────────────
-
-    private void BeginInlineAdvance(
-        LinePresentationRun run,
-        CancellationToken cancel)
-    {
-        _inlineAdvanceRun = run;
-        _inlineAdvanceCancel = cancel;
-        _inlineAdvanceRunValid = true;
-    }
-
-    private void EndInlineAdvance()
-    {
-        _inlineAdvanceRunValid = false;
-        _inlineAdvanceRun = default;
-        _inlineAdvanceCancel = default;
-    }
-
-    async YarnTask IInlinePresentationAdvanceHost.AdvanceOneAsync(int ordinal)
-    {
-        if (!_inlineAdvanceRunValid)
-            return;
-
-        LinePresentationRun run = _inlineAdvanceRun;
-        CancellationToken cancel = _inlineAdvanceCancel;
-
-        if (run == null)
-            return;
-
-        if (!run.IsValid)
-            return;
-
-        if (cancel.IsCancellationRequested)
-            return;
-
-        await _sideRunnerSyncHub.RunInlineScriptedAdvanceAsync(1, cancel);
     }
 }

@@ -20,7 +20,7 @@
 <<to_right @3 bust 8fr>>
 세이나: 잘했어, 아야메. 여기 성해는 내가 맡을게.
 
-<<box_hide>>
+//<<box_hide>>
 <<18fr>>
 <<dip @3>>
 <<12fr>>

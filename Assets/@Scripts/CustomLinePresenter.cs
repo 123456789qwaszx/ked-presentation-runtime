@@ -45,11 +45,9 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, IVNLineAborter
         VNTraceStream trace = null,
         IYarnLaneDebugSink debugSink = null)
     {
-        dialogueRunner.onNodeStart?.AddListener(
-            nodeName => _currentNodeName = nodeName);
-
+        dialogueRunner.onNodeStart?.AddListener(nodeName => _currentNodeName = nodeName);
         RegisterPresenter(dialogueRunner);
-
+        
         _vnLinePresentationFlow = vnLinePresentationFlow;
 
         WireInlineAdvanceHandlers(vnLinePresentationFlow.InlineAdvanceHost);
