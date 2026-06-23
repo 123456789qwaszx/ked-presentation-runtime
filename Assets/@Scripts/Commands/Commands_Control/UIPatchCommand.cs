@@ -19,14 +19,14 @@ public sealed class UIPatchCommand : CommandBase
     private readonly UIPatchService _uiPatchService;
     private readonly UIPatchCommandSpec _spec;
 
+    protected override SkipPolicy SkipPolicy => SkipPolicy.ExecuteEvenIfSkipping;
+    
     public UIPatchCommand(UIPatchService uiPatchService, UIPatchCommandSpec spec)
     {
         _uiPatchService = uiPatchService;
         _spec = spec;
     }
 
-    public override bool WaitForCompletion => true;
-    protected override SkipPolicy SkipPolicy => SkipPolicy.ExecuteEvenIfSkipping;
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {

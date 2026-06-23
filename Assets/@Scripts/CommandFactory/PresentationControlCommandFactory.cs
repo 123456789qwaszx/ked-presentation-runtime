@@ -15,6 +15,9 @@ public sealed class PresentationControlCommandFactory : INodeCommandFactory
             null => null,
 
             UIPatchCommandSpec s => new UIPatchCommand(_uiPatchService, s),
+            
+            // ActorAlias
+            SetPresentationActorAliasCommandSpec s => new SetPresentationActorAliasCommand(s),
 
             _ => null
         };

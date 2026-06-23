@@ -112,7 +112,7 @@ public sealed partial class YarnCommandBridge
             "attach_to_bg", EnqueueAttachCharRigToBackgroundObjectSlotSpec);
         
         runner.AddCommandHandler<string, string>(
-            "actor", SetPresentationActor);
+            "actor", EnqueuePresentationActorAliasSpec);
         
         runner.AddCommandHandler(
             "box_hide", HideDialogueBox);

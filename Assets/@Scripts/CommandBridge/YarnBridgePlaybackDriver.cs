@@ -35,7 +35,6 @@ public sealed class YarnBridgePlaybackDriver : MonoBehaviour
         return _executor.PlaySpecs(specs, CurrentScope);
     }
     
-    
     private CommandRunTicket CreateCompletedEmptyTicket()
     {
         var ticket = new CommandRunTicket(0);
@@ -44,15 +43,5 @@ public sealed class YarnBridgePlaybackDriver : MonoBehaviour
 
         ticket.CloseEntry(CommandRunTicketCloseReason.Completed);
         return ticket;
-    }
-    
-    public void SetPresentationActor(string actorKey)
-    {
-        CurrentScope?.CharacterTargetAliases.SetPresentationActor(actorKey);
-    }
-    
-    public void RegisterPresentationActorAlias(string aliasSymbol, string targetKey)
-    {
-        CurrentScope?.CharacterTargetAliases.Register(aliasSymbol, targetKey);
     }
 }

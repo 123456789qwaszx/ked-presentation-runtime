@@ -6,12 +6,8 @@ using UnityEngine;
 // 다중 alias 사용 시, 노드 시작 부에서 필요한 것들 전부 직접 다시 선언할 것.
 public sealed class CharacterRigTargetAliasRegistry
 {
-    private const string DefaultActorAlias = "@";
-
     // @Actor 와 @actor을 다르게 봄.
     private readonly Dictionary<string, string> _aliases = new(StringComparer.Ordinal);
-
-    public void SetPresentationActor(string targetKey) => Register(DefaultActorAlias, targetKey);
     
     public void Register(string aliasSymbol, string targetKey)
     {
