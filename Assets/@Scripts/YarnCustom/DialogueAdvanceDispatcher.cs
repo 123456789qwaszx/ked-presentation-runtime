@@ -46,12 +46,15 @@ public sealed class DialogueAdvanceDispatcher : MonoBehaviour
 
         if (!_gate.TryAccept(kind))
         {
-            Trace("DispatchAdvanceRejected", $"kind={kind}, reason=GateRejected");
+            Debug.Log( $"DispatchAdvanceRejected kind={kind} reason=GateRejected");
             return;
         }
 
         if (TryDispatchToYarn(kind))
+        {
+            Debug.Log( $"DispatchAdvanceRejected kind={kind} reason=TryDispatchToYarn");
             return;
+        }
 
         _gate.AddCooldownSeconds(_gate.GetCooldownAfterNextLine(kind));
     }
@@ -82,13 +85,16 @@ public sealed class DialogueAdvanceDispatcher : MonoBehaviour
         {
             _dialogueRunner.RequestHurryUpLine();
             _gate.AddCooldownSeconds(_gate.GetCooldownAfterHurryUp(kind));
-            Trace("TryDispatchToYarnHurryUp", $"kind={kind}");
+            
+            Debug.Log( $"TryDispatchToYarnHurryUp");
+            //Trace("TryDispatchToYarnHurryUp", $"kind={kind}");
         }
         else
         {
             _dialogueRunner.RequestNextLine();
             _gate.AddCooldownSeconds(_gate.GetCooldownAfterNextLine(kind));
-            Trace("TryDispatchToYarnNextLine", $"kind={kind}");
+            Debug.Log( $"TryDispatchToYarnNextLine");
+            //Trace("TryDispatchToYarnNextLine", $"kind={kind}");
         }
 
         return true;

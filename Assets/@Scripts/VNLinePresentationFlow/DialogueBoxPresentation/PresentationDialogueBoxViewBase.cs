@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using TMPro;
 using UnityEngine;
 using Yarn.Unity;
@@ -68,6 +69,55 @@ public abstract class PresentationDialogueBoxViewBase<TRefs>
             gameObject.SetActive(true);
 
         SetCanvas(CanvasGroup, false);
+    }
+
+    public virtual async YarnTask FadeInAsync(float duration, CancellationToken token)
+    {
+        if (token.IsCancellationRequested)
+            return;
+
+        CanvasGroup canvasGroup = CanvasGroup;
+
+        SetVisibleImmediate(true);
+
+        if (canvasGroup == null)
+            return;
+
+        canvasGroup.alpha = 0f;
+
+        await Effects
+            .FadeAlphaAsync(canvasGroup, 0f, 1f, duration, token)
+            .SuppressCancellationThrow();
+
+        if (token.IsCancellationRequested)
+            return;
+
+        SetCanvas(canvasGroup, true);
+    }
+
+    public virtual async YarnTask FadeOutAsync(float duration, CancellationToken token)
+    {
+        if (token.IsCancellationRequested)
+            return;
+
+        CanvasGroup canvasGroup = CanvasGroup;
+
+        if (canvasGroup == null)
+            return;
+
+        if (gameObject != null && !gameObject.activeSelf)
+            gameObject.SetActive(true);
+
+        float fromAlpha = canvasGroup.alpha;
+
+        await Effects
+            .FadeAlphaAsync(canvasGroup, fromAlpha, 0f, duration, token)
+            .SuppressCancellationThrow();
+
+        if (token.IsCancellationRequested)
+            return;
+
+        SetCanvas(canvasGroup, false);
     }
 
     public virtual async YarnTask FadeInAsync(float duration, LinePresentationRun run)

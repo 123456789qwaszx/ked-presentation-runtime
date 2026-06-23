@@ -93,16 +93,15 @@ public sealed partial class YarnCommandBridge
         return BackgroundRigTarget.Background_ObjectSlotRoot;
     }
     
-    private void HideDialogueBox()
+    private YarnTask HideDialogueBox()
     {
-        _dialogueBoxPresentation.HideCurrentImmediate();
+        return _dialogueBoxPresentation.HideCurrentAsync();
     }
 
-    private void ShowDialogueBox()
+    private YarnTask ShowDialogueBox()
     {
-        _dialogueBoxPresentation.ShowCurrentImmediate();
+        return _dialogueBoxPresentation.ShowCurrentAsync();
     }
-
     
     // 대사창을 닫고 현재 대사창 상태도 버리는 것.
     // 이후 box_show를 하더라도 켤 대상이 없기에 무시됨.

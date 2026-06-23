@@ -53,9 +53,8 @@ public sealed class AttachCharRigToBackgroundObjectSlotCommand : CommandBase
 
     private void Apply(CommandRunScope scope)
     {
-
-        if (!scope.CharacterRigs.TryGetRig(_spec.charRigKey, out CharacterRigRefs charRefs))
-            return;
+        CharacterRigRefs charRefs = 
+            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.charRigKey);
 
         if (!scope.BackgroundRigs.TryGetRig(_spec.backgroundRigKey, out BackgroundRigRefs backgroundRefs))
             return;

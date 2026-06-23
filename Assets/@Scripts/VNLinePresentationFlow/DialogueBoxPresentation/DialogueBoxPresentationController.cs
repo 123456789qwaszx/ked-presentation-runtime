@@ -1,6 +1,7 @@
+using System.Threading;
 using Yarn.Unity;
 
-public sealed class DialogueBoxPresentationController
+public partial class DialogueBoxPresentationController
 {
     private const DialogueBoxKind DefaultProtagonistLineBoxKind = DialogueBoxKind.Portrait;
     private const DialogueBoxKind DefaultNamedLineBoxKind = DialogueBoxKind.Speaker;
@@ -14,58 +15,21 @@ public sealed class DialogueBoxPresentationController
 
     private float _fadeUpDuration = 0.25f;
     private float _fadeDownDuration = 0.1f;
-
-    public DialogueBoxPresentationController(DialogueBoxCurrentState dialogueBoxState, DialogueBoxHost host, DialogueBoxMetadataResolver metadataResolver)
+    
+    public DialogueBoxPresentationController(
+        DialogueBoxCurrentState dialogueBoxState,
+        DialogueBoxHost host, 
+        DialogueBoxMetadataResolver metadataResolver)
     {
         _boxState = dialogueBoxState;
         _host = host;
         _metadataResolver = metadataResolver;
     }
 
-    public void SetProtagonistLineBoxKind(DialogueBoxKind kind) => _protagonistLineBoxKind = kind;
-    public void SetNamedLineBoxKind(DialogueBoxKind kind) => _namedLineBoxKind = kind;
-    
-    public void HideCurrentImmediate()
-    {
-        IPresentationDialogueBoxView currentBox = _boxState.Box;
-
-        if (currentBox == null)
-        {
-            _host.HideAllDialogueBoxes();
-            _boxState.MarkHidden();
-            return;
-        }
-
-        currentBox.SetVisibleImmediate(false);
-        _boxState.MarkHidden();
-    }
-
-    public void ShowCurrentImmediate()
-    {
-        IPresentationDialogueBoxView currentBox = _boxState.Box;
-
-        if (currentBox == null)
-            return;
-
-        _host.HideAllDialogueBoxesExcept(currentBox);
-        currentBox.SetVisibleImmediate(true);
-        _boxState.TryMarkVisible();
-    }
-
-    public void ResetDefaultLineBoxKinds()
-    {
-        _protagonistLineBoxKind = DefaultProtagonistLineBoxKind;
-        _namedLineBoxKind = DefaultNamedLineBoxKind;
-    }
-
-    public void CloseAll()
-    {
-        _host.HideAllDialogueBoxes();
-        _boxState.Reset();
-    }
-
     public async YarnTask<DialogueBoxPresentationResult> ShowLineAsync(DialogueBoxPresentationContext ctx)
     {
+        InvalidateVisibilityTransition();
+
         IPresentationDialogueBoxView currentBox = _boxState.Box;
         DialogueBoxKind? currentBoxKind = _boxState.BoxKind;
 
@@ -203,9 +167,19 @@ public sealed class DialogueBoxPresentationController
                 break;
         }
     }
+    
+    public void CloseAll()
+    {
+        InvalidateVisibilityTransition();
+
+        _host.HideAllDialogueBoxes();
+        _boxState.Reset();
+    }
 
     public void CleanupStale(DialogueBoxPresentationResult result)
     {
+        InvalidateVisibilityTransition();
+
         IPresentationDialogueBoxView abortedTarget = result.NextBox;
         
         bool IsCurrentBox(IPresentationDialogueBoxView box) 

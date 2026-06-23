@@ -204,6 +204,7 @@ public sealed class AdvanceGate
                 ? $"kind={kind}, reason={reason}"
                 : $"kind={kind}, reason={reason}, {note}";
 
+            Debug.Log(detail);
             Trace("RejectAdvance", detail);
         }
 

@@ -26,13 +26,11 @@
 <<12fr>>
 _
 
-//<<tx_focus_curtain_in>>
 <<4fr>>
 
 <<fade_out @2>>
 <<fade_out @3>>
 <<8fr>>
-//<<tx_focus_curtain_out 0.1>>
 
 <<attach_to_bg c2 bg4>>
 <<fade_in @2 -1>>
@@ -46,11 +44,6 @@ _
 <<22fr>>
 
 
-<<actor @1 willow>>
-<<face_swap @1 11>>
-<<14fr>>
-<<shot_to 0 -80 80>>
-<<14fr>>
 
 세이나: 1마리 더 있어. 코하쿠! 네 쪽으로 가고 있어!
 <<actor @2 noya>>
