@@ -3,13 +3,14 @@ using Yarn.Unity;
 public partial class DialogueBoxPresentationController
 {
     private const DialogueBoxKind DefaultProtagonistLineBoxKind = DialogueBoxKind.Surface;
-    private const DialogueBoxKind DefaultNamedLineBoxKind = DialogueBoxKind.Surface;
+    private const DialogueBoxKind DefaultNamedLineBoxKind = DialogueBoxKind.Speaker;
 
     private readonly DialogueBoxHost _host;
     private readonly DialogueBoxMetadataResolver _metadataResolver;
     private readonly DialogueBoxCurrentState _boxState;
     private readonly DialogueSurfaceState _surfaceState;
     private readonly DialogueSurfaceLayoutPresetDBSO _surfaceLayoutDb;
+    private readonly DialogueSpeakerPresentationPolicyDBSO _speakerPolicyDb;
 
     private DialogueBoxKind _protagonistLineBoxKind = DefaultProtagonistLineBoxKind;
     private DialogueBoxKind _namedLineBoxKind = DefaultNamedLineBoxKind;
@@ -22,13 +23,15 @@ public partial class DialogueBoxPresentationController
         DialogueBoxHost host,
         DialogueBoxMetadataResolver metadataResolver,
         DialogueSurfaceState surfaceState,
-        DialogueSurfaceLayoutPresetDBSO surfaceLayoutDb)
+        DialogueSurfaceLayoutPresetDBSO surfaceLayoutDb,
+        DialogueSpeakerPresentationPolicyDBSO speakerPolicyDb)
     {
         _boxState = dialogueBoxState;
         _host = host;
         _metadataResolver = metadataResolver;
         _surfaceState = surfaceState;
         _surfaceLayoutDb = surfaceLayoutDb;
+        _speakerPolicyDb = speakerPolicyDb;
     }
 
     public async YarnTask<DialogueBoxPresentationResult> ShowLineAsync(
@@ -39,7 +42,21 @@ public partial class DialogueBoxPresentationController
         IPresentationDialogueBoxView currentBox = _boxState.Box;
         DialogueBoxKind? currentBoxKind = _boxState.BoxKind;
 
-        DialogueBoxKind nextBoxKind = ResolveNextBoxKind(ctx);
+        DialogueSpeakerPresentationPolicyDBSO.Entry speakerPolicy = default;
+        bool hasSpeakerPolicy = false;
+
+        if (ctx.HasCharacterName)
+        {
+            hasSpeakerPolicy = _speakerPolicyDb.TryFind(
+                ctx.CharacterName,
+                out speakerPolicy);
+        }
+
+        DialogueBoxKind nextBoxKind = ResolveNextBoxKind(
+            ctx,
+            hasSpeakerPolicy,
+            speakerPolicy);
+
         IPresentationDialogueBoxView nextBox = _host.ResolveTarget(nextBoxKind);
 
         DialogueBoxTransitionKind transitionKind = ResolveTransitionKind(
@@ -47,13 +64,23 @@ public partial class DialogueBoxPresentationController
             currentBoxKind,
             nextBoxKind);
 
-        // Layout must be applied before PrimeText because PrimeText needs to know
-        // whether the current layout allows the name label to be visible.
+        string displayCharacterName = ctx.CharacterName;
+
+        if (ctx.HasCharacterName &&
+            hasSpeakerPolicy &&
+            !string.IsNullOrWhiteSpace(speakerPolicy.fallbackDisplayName))
+        {
+            displayCharacterName = speakerPolicy.fallbackDisplayName;
+        }
+
         nextBox.ResetPresentationTransform();
-        ApplyCurrentSurfaceLayout(nextBox);
+
+        if (nextBoxKind == DialogueBoxKind.Surface)
+            ApplyCurrentSurfaceLayout(nextBox);
+
         nextBox.PrimeText(
             ctx.Text,
-            ctx.CharacterName,
+            displayCharacterName,
             ctx.HasCharacterName);
 
         await ApplyTransitionAsync(
@@ -71,10 +98,17 @@ public partial class DialogueBoxPresentationController
     }
 
     private DialogueBoxKind ResolveNextBoxKind(
-        DialogueBoxPresentationContext ctx)
+        DialogueBoxPresentationContext ctx,
+        bool hasSpeakerPolicy,
+        DialogueSpeakerPresentationPolicyDBSO.Entry speakerPolicy)
     {
-        if (_metadataResolver.TryResolveBoxKind(ctx.Metadata, out DialogueBoxKind metadataBoxKind))
+        if (_metadataResolver.TryResolveBoxKind(
+                ctx.Metadata,
+                out DialogueBoxKind metadataBoxKind))
             return metadataBoxKind;
+
+        if (hasSpeakerPolicy && speakerPolicy.useBoxKindOverride)
+            return speakerPolicy.boxKind;
 
         return ctx.HasCharacterName
             ? _namedLineBoxKind

@@ -38,8 +38,8 @@ public class VnAppBootstrap : MonoBehaviour
     
     [Header("DialogueBox")] 
     [SerializeField] private DialogueBoxHost dialogueBoxHost;
-    [SerializeField] private DialogueSurfaceLayoutPresetDBSO  surfaceLayoutPresetDbSo;
-
+    [SerializeField] private DialogueSurfaceLayoutPresetDBSO surfaceLayoutPresetDbSo;
+    [SerializeField] private DialogueSpeakerPresentationPolicyDBSO _dialogueSpeakerPresentationPolicyDbSo;
     
     [Header("Presentation")] 
     [SerializeField] private CharStageTuningSO globalTuning;
@@ -339,7 +339,8 @@ public class VnAppBootstrap : MonoBehaviour
             dialogueBoxHost,
             metadataResolver, 
             _dialogueSurfaceState, 
-            surfaceLayoutPresetDbSo);
+            surfaceLayoutPresetDbSo,
+            _dialogueSpeakerPresentationPolicyDbSo);
         
         YarnCommandBridge yarnCommandBridge = new(
             dialogueRunner,

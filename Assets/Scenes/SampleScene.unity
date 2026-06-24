@@ -7804,6 +7804,7 @@ MonoBehaviour:
   inlineSfxHost: {fileID: 1571925710}
   dialogueBoxHost: {fileID: 1332040255}
   surfaceLayoutPresetDbSo: {fileID: 11400000, guid: 780b3dcf88c7af0488eeb036319c7d27, type: 2}
+  _dialogueSpeakerPresentationPolicyDbSo: {fileID: 11400000, guid: b3c354f8ae9671f47880c5bb9b74e4f9, type: 2}
   globalTuning: {fileID: 11400000, guid: db30a92a6d8545a41b703c2585f4013d, type: 2}
   roleTuningDb: {fileID: 11400000, guid: c49265a67487bce458b734a0473b75b5, type: 2}
   portraitGeneratedDbSo: {fileID: 11400000, guid: 9a31d992344284d4f8ff35f5e9be5ae9, type: 2}
