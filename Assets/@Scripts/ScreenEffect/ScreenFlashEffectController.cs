@@ -4,7 +4,9 @@ using UnityEngine.UI;
 
 [DisallowMultipleComponent]
 [RequireComponent(typeof(Image))]
-public sealed class ScreenFlashEffectController : MonoBehaviour
+public sealed class ScreenFlashEffectController :
+    MonoBehaviour,
+    IScreenEffectController
 {
     [Header("Target")]
     [SerializeField] private Image targetImage;
@@ -16,6 +18,8 @@ public sealed class ScreenFlashEffectController : MonoBehaviour
     [SerializeField] private Color defaultFlashColor = Color.white;
 
     private UiEffectMaterialBinding _material;
+
+    private bool _stateInitialized;
 
     private float _flashAmount;
     private Color _flashColor;
@@ -31,10 +35,8 @@ public sealed class ScreenFlashEffectController : MonoBehaviour
     private void Awake()
     {
         EnsureTarget();
+        InitializeStateIfNeeded();
         EnsureMaterial();
-
-        _flashAmount = 0f;
-        _flashColor = defaultFlashColor;
 
         ApplyMaterialValues();
 
@@ -45,12 +47,30 @@ public sealed class ScreenFlashEffectController : MonoBehaviour
     private void OnDestroy()
     {
         KillTween(false);
-        _material?.Dispose();
-        _material = null;
+        DisposeMaterial();
+    }
+
+    public void Bind(Image image, Material material)
+    {
+        if (image != null)
+            targetImage = image;
+
+        if (material != null)
+            sourceMaterial = material;
+
+        EnsureTarget();
+        InitializeStateIfNeeded();
+        RebuildMaterial();
+
+        if (targetImage != null)
+            targetImage.raycastTarget = false;
+
+        ApplyMaterialValues();
     }
 
     public void ApplyImmediate(float amount, Color color)
     {
+        InitializeStateIfNeeded();
         EnsureMaterial();
 
         if (_material == null || !_material.IsValid)
@@ -66,10 +86,27 @@ public sealed class ScreenFlashEffectController : MonoBehaviour
 
     public void KillTween(bool complete) => transform.DOKill(complete);
 
+    private void InitializeStateIfNeeded()
+    {
+        if (_stateInitialized)
+            return;
+
+        _flashAmount = 0f;
+        _flashColor = defaultFlashColor;
+
+        _stateInitialized = true;
+    }
+
     private void EnsureTarget()
     {
         if (targetImage == null)
             targetImage = GetComponent<Image>();
+    }
+
+    private void RebuildMaterial()
+    {
+        DisposeMaterial();
+        EnsureMaterial();
     }
 
     private void EnsureMaterial()
@@ -95,5 +132,11 @@ public sealed class ScreenFlashEffectController : MonoBehaviour
 
         _material.SetFloat(FlashAmountId, _flashAmount);
         _material.SetColor(FlashColorId, _flashColor);
+    }
+
+    private void DisposeMaterial()
+    {
+        _material?.Dispose();
+        _material = null;
     }
 }

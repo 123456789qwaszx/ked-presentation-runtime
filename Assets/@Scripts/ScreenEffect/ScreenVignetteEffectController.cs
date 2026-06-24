@@ -4,7 +4,9 @@ using UnityEngine.UI;
 
 [DisallowMultipleComponent]
 [RequireComponent(typeof(Image))]
-public sealed class ScreenVignetteEffectController : MonoBehaviour
+public sealed class ScreenVignetteEffectController :
+    MonoBehaviour,
+    IScreenEffectController
 {
     [Header("Target")]
     [SerializeField] private Image targetImage;
@@ -20,6 +22,8 @@ public sealed class ScreenVignetteEffectController : MonoBehaviour
     [SerializeField, Min(0f)] private float defaultAspect = 1.777f;
 
     private UiEffectMaterialBinding _material;
+
+    private bool _stateInitialized;
 
     private float _amount;
     private Color _color;
@@ -44,13 +48,8 @@ public sealed class ScreenVignetteEffectController : MonoBehaviour
     private void Awake()
     {
         EnsureTarget();
+        InitializeStateIfNeeded();
         EnsureMaterial();
-
-        _amount = Mathf.Clamp01(defaultAmount);
-        _color = defaultColor;
-        _radius = Mathf.Clamp01(defaultRadius);
-        _softness = Mathf.Max(0.001f, defaultSoftness);
-        _aspect = Mathf.Max(0f, defaultAspect);
 
         ApplyMaterialValues();
 
@@ -61,8 +60,25 @@ public sealed class ScreenVignetteEffectController : MonoBehaviour
     private void OnDestroy()
     {
         KillTween(false);
-        _material?.Dispose();
-        _material = null;
+        DisposeMaterial();
+    }
+
+    public void Bind(Image image, Material material)
+    {
+        if (image != null)
+            targetImage = image;
+
+        if (material != null)
+            sourceMaterial = material;
+
+        EnsureTarget();
+        InitializeStateIfNeeded();
+        RebuildMaterial();
+
+        if (targetImage != null)
+            targetImage.raycastTarget = false;
+
+        ApplyMaterialValues();
     }
 
     public void ApplyImmediate(
@@ -72,6 +88,7 @@ public sealed class ScreenVignetteEffectController : MonoBehaviour
         float softness,
         float aspect)
     {
+        InitializeStateIfNeeded();
         EnsureMaterial();
 
         if (_material == null || !_material.IsValid)
@@ -93,10 +110,30 @@ public sealed class ScreenVignetteEffectController : MonoBehaviour
 
     public void KillTween(bool complete) => transform.DOKill(complete);
 
+    private void InitializeStateIfNeeded()
+    {
+        if (_stateInitialized)
+            return;
+
+        _amount = Mathf.Clamp01(defaultAmount);
+        _color = defaultColor;
+        _radius = Mathf.Clamp01(defaultRadius);
+        _softness = Mathf.Max(0.001f, defaultSoftness);
+        _aspect = Mathf.Max(0f, defaultAspect);
+
+        _stateInitialized = true;
+    }
+
     private void EnsureTarget()
     {
         if (targetImage == null)
             targetImage = GetComponent<Image>();
+    }
+
+    private void RebuildMaterial()
+    {
+        DisposeMaterial();
+        EnsureMaterial();
     }
 
     private void EnsureMaterial()
@@ -125,5 +162,11 @@ public sealed class ScreenVignetteEffectController : MonoBehaviour
         _material.SetFloat(VignetteRadiusId, _radius);
         _material.SetFloat(VignetteSoftnessId, _softness);
         _material.SetFloat(AspectId, _aspect);
+    }
+
+    private void DisposeMaterial()
+    {
+        _material?.Dispose();
+        _material = null;
     }
 }

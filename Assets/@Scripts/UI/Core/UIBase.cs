@@ -130,6 +130,8 @@ public abstract partial class UIBase<TRefs> : UIBase
         public Button Button(TRefs key) => _ui.GetCached<Button>(key);
         public CanvasGroup CanvasGroup(TRefs key) => _ui.GetOrAddCanvasGroupCached(key);
         
+        public T Component<T>(TRefs key) where T : Component =>_ui.GetCached<T>(key);
+        
         public T Widget<T>(TRefs key) where T : UIBase => _ui.GetCached<T>(key);
     }
 

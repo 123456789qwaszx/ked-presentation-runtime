@@ -4,7 +4,9 @@ using UnityEngine.UI;
 
 [DisallowMultipleComponent]
 [RequireComponent(typeof(Image))]
-public sealed class ScreenNoiseEffectController : MonoBehaviour
+public sealed class ScreenNoiseEffectController :
+    MonoBehaviour,
+    IScreenEffectController
 {
     [Header("Target")]
     [SerializeField] private Image targetImage;
@@ -21,6 +23,8 @@ public sealed class ScreenNoiseEffectController : MonoBehaviour
     [SerializeField, Min(0f)] private float defaultContrast = 1f;
 
     private UiEffectMaterialBinding _material;
+
+    private bool _stateInitialized;
 
     private float _amount;
     private Color _color;
@@ -48,14 +52,8 @@ public sealed class ScreenNoiseEffectController : MonoBehaviour
     private void Awake()
     {
         EnsureTarget();
+        InitializeStateIfNeeded();
         EnsureMaterial();
-
-        _amount = Mathf.Clamp01(defaultAmount);
-        _color = defaultColor;
-        _scale = Mathf.Max(0f, defaultScale);
-        _speedX = defaultSpeedX;
-        _speedY = defaultSpeedY;
-        _contrast = Mathf.Max(0f, defaultContrast);
 
         ApplyMaterialValues();
 
@@ -66,8 +64,25 @@ public sealed class ScreenNoiseEffectController : MonoBehaviour
     private void OnDestroy()
     {
         KillTween(false);
-        _material?.Dispose();
-        _material = null;
+        DisposeMaterial();
+    }
+
+    public void Bind(Image image, Material material)
+    {
+        if (image != null)
+            targetImage = image;
+
+        if (material != null)
+            sourceMaterial = material;
+
+        EnsureTarget();
+        InitializeStateIfNeeded();
+        RebuildMaterial();
+
+        if (targetImage != null)
+            targetImage.raycastTarget = false;
+
+        ApplyMaterialValues();
     }
 
     public void ApplyImmediate(
@@ -78,6 +93,7 @@ public sealed class ScreenNoiseEffectController : MonoBehaviour
         float speedY,
         float contrast)
     {
+        InitializeStateIfNeeded();
         EnsureMaterial();
 
         if (_material == null || !_material.IsValid)
@@ -100,10 +116,31 @@ public sealed class ScreenNoiseEffectController : MonoBehaviour
 
     public void KillTween(bool complete) => transform.DOKill(complete);
 
+    private void InitializeStateIfNeeded()
+    {
+        if (_stateInitialized)
+            return;
+
+        _amount = Mathf.Clamp01(defaultAmount);
+        _color = defaultColor;
+        _scale = Mathf.Max(0f, defaultScale);
+        _speedX = defaultSpeedX;
+        _speedY = defaultSpeedY;
+        _contrast = Mathf.Max(0f, defaultContrast);
+
+        _stateInitialized = true;
+    }
+
     private void EnsureTarget()
     {
         if (targetImage == null)
             targetImage = GetComponent<Image>();
+    }
+
+    private void RebuildMaterial()
+    {
+        DisposeMaterial();
+        EnsureMaterial();
     }
 
     private void EnsureMaterial()
@@ -133,5 +170,11 @@ public sealed class ScreenNoiseEffectController : MonoBehaviour
         _material.SetFloat(NoiseSpeedXId, _speedX);
         _material.SetFloat(NoiseSpeedYId, _speedY);
         _material.SetFloat(NoiseContrastId, _contrast);
+    }
+
+    private void DisposeMaterial()
+    {
+        _material?.Dispose();
+        _material = null;
     }
 }

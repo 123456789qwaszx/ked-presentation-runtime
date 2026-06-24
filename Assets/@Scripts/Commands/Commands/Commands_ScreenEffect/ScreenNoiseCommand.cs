@@ -99,7 +99,7 @@ public sealed class ScreenNoiseCommand : CommandBase
                 _spec.duration)
             .SetEase(_spec.ease)
             .SetUpdate(true)
-            .SetTarget(_controller.transform)
+            .SetTarget(_controller)
             .OnComplete(CommitFinalState);
 
         if (_spec.wait)
@@ -127,7 +127,6 @@ public sealed class ScreenNoiseCommand : CommandBase
 
     private void ClaimController()
     {
-        DOTween.Kill(_controller.transform, true);
         _controller.KillTween(true);
 
         _fromState = CaptureCurrentState();
@@ -138,7 +137,6 @@ public sealed class ScreenNoiseCommand : CommandBase
 
     private void CommitFinalState()
     {
-        DOTween.Kill(_controller.transform, false);
         _controller.KillTween(false);
         
         ApplyState(_destState);

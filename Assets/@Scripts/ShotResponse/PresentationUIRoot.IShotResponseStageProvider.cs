@@ -4,9 +4,9 @@ using UnityEngine;
 public enum StageDepthLayer
 {
     Far,
-    Slot1,
-    Slot2,
-    Slot3,
+    Back,
+    Mid,
+    Front,
     Close,
 }
 
@@ -64,19 +64,19 @@ public sealed partial class PresentationUIRoot : IShotResponseStageProvider
                     View.Rect(Refs.Stage00Depth_Far_FramingTransform),
                     View.Rect(Refs.Stage00Depth_Far_FramingScale));
 
-            case StageDepthLayer.Slot1:
+            case StageDepthLayer.Back:
                 return new StageDepthLayerRects(
                     View.Rect(Refs.Stage00Depth_Back_Root),
                     View.Rect(Refs.Stage00Depth_Back_FramingTransform),
                     View.Rect(Refs.Stage00Depth_Back_FramingScale));
 
-            case StageDepthLayer.Slot2:
+            case StageDepthLayer.Mid:
                 return new StageDepthLayerRects(
                     View.Rect(Refs.Stage00Depth_Mid_Root),
                     View.Rect(Refs.Stage00Depth_Mid_FramingTransform),
                     View.Rect(Refs.Stage00Depth_Mid_FramingScale));
 
-            case StageDepthLayer.Slot3:
+            case StageDepthLayer.Front:
                 return new StageDepthLayerRects(
                     View.Rect(Refs.Stage00Depth_Front_Root),
                     View.Rect(Refs.Stage00Depth_Front_FramingTransform),

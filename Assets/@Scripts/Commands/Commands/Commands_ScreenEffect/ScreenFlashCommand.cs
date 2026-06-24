@@ -76,9 +76,6 @@ public sealed class ScreenFlashCommand : CommandBase
         if (!_resolveAttempted)
             ResolveRefs();
 
-        if (_controller == null)
-            yield break;
-
         ClaimController();
 
         if (_settings.AttackDuration <= 0f &&
@@ -109,7 +106,7 @@ public sealed class ScreenFlashCommand : CommandBase
                     _settings.Amount,
                     _settings.AttackDuration)
                 .SetEase(_settings.AttackEase)
-                .SetTarget(_controller.transform));
+                .SetTarget(_controller));
         }
         else
         {
@@ -179,7 +176,6 @@ public sealed class ScreenFlashCommand : CommandBase
 
     private void ClaimController()
     {
-        DOTween.Kill(_controller.transform, true);
         _controller.KillTween(true);
 
         _settings = BuildSettings();
@@ -189,7 +185,6 @@ public sealed class ScreenFlashCommand : CommandBase
 
     private void CommitFinalState()
     {
-        DOTween.Kill(_controller.transform, false);
         _controller.KillTween(false);
         
         _controller.ApplyImmediate(0f, _settings.Color);

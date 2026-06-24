@@ -14,9 +14,9 @@ public sealed class StageDepthLayerBinder
             return;
 
         Bind(rig, StageDepthLayer.Far,   _far);
-        Bind(rig, StageDepthLayer.Slot1, _slot1);
-        Bind(rig, StageDepthLayer.Slot2, _slot2);
-        Bind(rig, StageDepthLayer.Slot3, _slot3);
+        Bind(rig, StageDepthLayer.Back, _slot1);
+        Bind(rig, StageDepthLayer.Mid, _slot2);
+        Bind(rig, StageDepthLayer.Front, _slot3);
         Bind(rig, StageDepthLayer.Close, _close);
     }
 
