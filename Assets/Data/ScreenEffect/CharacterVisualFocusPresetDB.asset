@@ -13,19 +13,52 @@ MonoBehaviour:
   m_Name: CharacterVisualFocusPresetDB
   m_EditorClassIdentifier: Assembly-CSharp::CharacterVisualFocusPresetDBSO
   entries:
-  - preset: 0
+  - key: clear
     dim: 0
-    dimTintColor: {r: 1, g: 1, b: 1, a: 1}
-    outerRim: 0.268
-    innerRim: 0.155
+    dimTintColor: {r: 0.45, g: 0.48, b: 0.55, a: 1}
+    outerRim: 0
+    innerRim: 0
     outerRimColor: {r: 1, g: 1, b: 1, a: 1}
     innerRimColor: {r: 1, g: 0.96, b: 0.86, a: 1}
-    blur: 0.071
-  - preset: 1
+  - key: focus
+    dim: 0
+    dimTintColor: {r: 0.45, g: 0.48, b: 0.55, a: 1}
+    outerRim: 0
+    innerRim: 0.07
+    outerRimColor: {r: 1, g: 1, b: 1, a: 1}
+    innerRimColor: {r: 1, g: 0.96, b: 0.86, a: 1}
+  - key: defocus
     dim: 0.45
     dimTintColor: {r: 0.45, g: 0.48, b: 0.55, a: 1}
     outerRim: 0
     innerRim: 0
     outerRimColor: {r: 1, g: 1, b: 1, a: 1}
     innerRimColor: {r: 1, g: 0.96, b: 0.86, a: 1}
-    blur: 0.25
+  - key: dim
+    dim: 0.55
+    dimTintColor: {r: 0.45, g: 0.48, b: 0.55, a: 1}
+    outerRim: 0
+    innerRim: 0
+    outerRimColor: {r: 1, g: 1, b: 1, a: 1}
+    innerRimColor: {r: 1, g: 0.96, b: 0.86, a: 1}
+  - key: silhouette
+    dim: 1
+    dimTintColor: {r: 0, g: 0, b: 0, a: 1}
+    outerRim: 0
+    innerRim: 0
+    outerRimColor: {r: 1, g: 1, b: 1, a: 1}
+    innerRimColor: {r: 1, g: 0.96, b: 0.86, a: 1}
+  - key: inner_rim
+    dim: 0
+    dimTintColor: {r: 0.45, g: 0.48, b: 0.55, a: 1}
+    outerRim: 0
+    innerRim: 0.4
+    outerRimColor: {r: 1, g: 1, b: 1, a: 1}
+    innerRimColor: {r: 1, g: 0.96, b: 0.86, a: 1}
+  - key: outer_rim
+    dim: 0
+    dimTintColor: {r: 0.45, g: 0.48, b: 0.55, a: 1}
+    outerRim: 0.4
+    innerRim: 0
+    outerRimColor: {r: 1, g: 1, b: 1, a: 1}
+    innerRimColor: {r: 1, g: 0.96, b: 0.86, a: 1}

@@ -14,11 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ScreenVignettePresetDBSO
   entries:
   - key: clear
-    amount: 0
+    amount: 1
     color: {r: 0, g: 0, b: 0, a: 1}
-    radius: 0.45
-    softness: 0.35
-    aspect: 1.777
+    radius: 1
+    softness: 0.001
+    aspect: 1
   - key: focus
     amount: 0.35
     color: {r: 0, g: 0, b: 0, a: 1}

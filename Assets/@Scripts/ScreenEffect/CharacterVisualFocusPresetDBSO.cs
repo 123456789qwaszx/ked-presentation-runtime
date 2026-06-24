@@ -2,21 +2,18 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum CharacterVisualFocusPreset
-{
-    Focus = 0,
-    Defocus = 1
-}
-
 [CreateAssetMenu(
     menuName = "CPS/CharRig/Visual Focus Preset DB",
     fileName = "CharacterVisualFocusPresetDB")]
 public sealed class CharacterVisualFocusPresetDBSO : ScriptableObject
 {
+    public const string DefaultPresetKey = "focus";
+
     [Serializable]
     public struct Entry
     {
-        public CharacterVisualFocusPreset preset;
+        [Tooltip("Yarn/Command에서 사용할 preset key. ex) clear, focus, defocus, dim, silhouette, outer_rim")]
+        public string key;
 
         [Header("Dim")]
         [Range(0f, 1f)] public float dim;
@@ -31,67 +28,168 @@ public sealed class CharacterVisualFocusPresetDBSO : ScriptableObject
 
     [SerializeField] private List<Entry> entries = new();
 
-    private Dictionary<CharacterVisualFocusPreset, Entry> _map;
+    private Dictionary<string, Entry> _map;
 
-    public bool TryGet(CharacterVisualFocusPreset preset, out Entry entry)
+    public bool TryGet(string key, out Entry entry)
     {
         if (_map == null)
             Build();
 
-        return _map.TryGetValue(preset, out entry);
+        return _map.TryGetValue(NormalizeKey(key), out entry);
     }
 
-    public static Entry DefaultFocus()
+    public static string NormalizeKey(string key)
     {
-        return new Entry
-        {
-            preset = CharacterVisualFocusPreset.Focus,
+        key = (key ?? "").Trim();
 
-            dim = 0f,
-            dimTintColor = new Color(0.45f, 0.48f, 0.55f, 1f),
+        if (string.IsNullOrEmpty(key))
+            return DefaultPresetKey;
 
-            outerRim = 0.4f,
-            innerRim = 0.09f,
+        key = key.ToLowerInvariant();
+        key = key.Replace(" ", "_");
+        key = key.Replace("-", "_");
 
-            outerRimColor = Color.white,
-            innerRimColor = new Color(1f, 0.96f, 0.86f, 1f),
-        };
-    }
+        if (key == "default")
+            return DefaultPresetKey;
 
-    public static Entry DefaultDefocus()
-    {
-        return new Entry
-        {
-            preset = CharacterVisualFocusPreset.Defocus,
+        if (key == "none" || key == "off" || key == "reset")
+            return "clear";
 
-            dim = 0.45f,
-            dimTintColor = new Color(0.45f, 0.48f, 0.55f, 1f),
+        if (key == "de_focus")
+            return "defocus";
 
-            outerRim = 0f,
-            innerRim = 0f,
+        if (key == "rim" || key == "outer" || key == "outerrim")
+            return "outer_rim";
 
-            outerRimColor = Color.white,
-            innerRimColor = new Color(1f, 0.96f, 0.86f, 1f),
-        };
+        if (key == "inner" || key == "innerrim")
+            return "inner_rim";
+
+        if (key == "sil" || key == "black" || key == "shadow")
+            return "silhouette";
+
+        return key;
     }
 
     private void OnEnable() => _map = null;
-    private void OnValidate() => _map = null; // 플레이 모드 인스펙터 수정 → 캐시 무효화 → 다음 발화에 반영.
+
+    // 플레이 모드 인스펙터 수정 → 캐시 무효화 → 다음 발화에 반영.
+    private void OnValidate() => _map = null;
 
     private void Build()
     {
-        _map = new Dictionary<CharacterVisualFocusPreset, Entry>();
+        _map = new Dictionary<string, Entry>(StringComparer.Ordinal);
 
         for (int i = 0; i < entries.Count; i++)
-            _map[entries[i].preset] = entries[i];
+        {
+            Entry entry = entries[i];
+            string key = NormalizeKey(entry.key);
+
+            if (string.IsNullOrEmpty(key))
+                continue;
+
+            entry.key = key;
+            _map[key] = entry;
+        }
     }
 
     private void Reset()
     {
+        Color defaultDimTint = new(0.45f, 0.48f, 0.55f, 1f);
+        Color defaultInnerRim = new(1f, 0.96f, 0.86f, 1f);
+
         entries = new List<Entry>
         {
-            DefaultFocus(),
-            DefaultDefocus()
+            new()
+            {
+                key = "clear",
+
+                dim = 0f,
+                dimTintColor = defaultDimTint,
+
+                outerRim = 0f,
+                innerRim = 0f,
+
+                outerRimColor = Color.white,
+                innerRimColor = defaultInnerRim,
+            },
+            new()
+            {
+                key = "focus",
+
+                dim = 0f,
+                dimTintColor = defaultDimTint,
+
+                outerRim = 0.4f,
+                innerRim = 0.09f,
+
+                outerRimColor = Color.white,
+                innerRimColor = defaultInnerRim,
+            },
+            new()
+            {
+                key = "defocus",
+
+                dim = 0.45f,
+                dimTintColor = defaultDimTint,
+
+                outerRim = 0f,
+                innerRim = 0f,
+
+                outerRimColor = Color.white,
+                innerRimColor = defaultInnerRim,
+            },
+            new()
+            {
+                key = "dim",
+
+                dim = 0.55f,
+                dimTintColor = defaultDimTint,
+
+                outerRim = 0f,
+                innerRim = 0f,
+
+                outerRimColor = Color.white,
+                innerRimColor = defaultInnerRim,
+            },
+            new()
+            {
+                key = "silhouette",
+
+                dim = 1f,
+                dimTintColor = Color.black,
+
+                outerRim = 0f,
+                innerRim = 0f,
+
+                outerRimColor = Color.white,
+                innerRimColor = defaultInnerRim,
+            },
+            new()
+            {
+                key = "inner_rim",
+
+                dim = 0f,
+                dimTintColor = defaultDimTint,
+
+                outerRim = 0f,
+                innerRim = 0.4f,
+
+                outerRimColor = Color.white,
+                innerRimColor = defaultInnerRim,
+            },
+            new()
+            {
+                key = "outer_rim",
+
+                dim = 0f,
+                dimTintColor = defaultDimTint,
+
+                outerRim = 0.4f,
+                innerRim = 0f,
+
+                outerRimColor = Color.white,
+                innerRimColor = defaultInnerRim,
+            },
         };
     }
 }

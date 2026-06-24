@@ -2,15 +2,6 @@ using System;
 using System.Collections;
 using DG.Tweening;
 using UnityEngine;
-using UnityEngine.UI;
-
-public enum CharacterVisualFocusMode
-{
-    Focus = 0,
-    Defocus = 1,
-    Clear = 2,
-    Custom = 3
-}
 
 [Serializable]
 [CommandMenuHint(
@@ -24,27 +15,15 @@ public enum CharacterVisualFocusMode
     SetOrder = -850)]
 public sealed class CharVisualFocusCommandSpecCharR : CharacterRigCommandSpecBase
 {
-    [Header("Mode")] public CharacterVisualFocusMode mode = CharacterVisualFocusMode.Focus;
+    [Header("Preset")]
+    [Tooltip("CharacterVisualFocusPresetDBSO entry key. ex) clear, focus, defocus, dim, silhouette, outer_rim")]
+    public string presetKey = CharacterVisualFocusPresetDBSO.DefaultPresetKey;
 
-    [Range(0f, 1f)] public float intensity = 1f;
+    [Range(0f, 1f)]
+    public float intensity = 1f;
 
-    [Header("Preset")] public CharacterVisualFocusPreset focusPreset = CharacterVisualFocusPreset.Focus;
-    public CharacterVisualFocusPreset defocusPreset = CharacterVisualFocusPreset.Defocus;
-
-    [Header("Custom Values")] [Range(0f, 3f)]
-    public float dim = 0f;
-
-    public Color dimTintColor = new Color(0.45f, 0.48f, 0.55f, 1f);
-
-    [Tooltip("Legacy/custom rim amount. In the new UI shader this maps to Outer Rim.")] [Range(0f, 1f)]
-    public float rim = 0f;
-
-    [Range(0f, 1f)] public float innerRim = 0f;
-
-    public Color rimColor = Color.white;
-    public Color innerRimColor = new Color(1f, 0.96f, 0.86f, 1f);
-
-    [Header("Tween")] public float duration = 0.25f;
+    [Header("Tween")]
+    public float duration = 0.25f;
     public Ease ease = Ease.OutCubic;
 }
 
@@ -129,7 +108,8 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
     {
         _resolveAttempted = true;
 
-        CharacterRigRefs rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
+        CharacterRigRefs rigRefs =
+            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
 
         _controller = rigRefs?.VisualEffect;
 
@@ -222,56 +202,40 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
     private VisualState BuildDestState()
     {
         float intensity = Mathf.Clamp01(_spec.intensity);
-
-        switch (_spec.mode)
-        {
-            case CharacterVisualFocusMode.Focus:
-                return BuildPresetState(_spec.focusPreset, intensity);
-
-            case CharacterVisualFocusMode.Defocus:
-                return BuildPresetState(_spec.defocusPreset, intensity);
-
-            case CharacterVisualFocusMode.Clear:
-                return new VisualState(
-                    0f,
-                    _controller.DimTintColor,
-                    0f,
-                    0f,
-                    _controller.OuterRimColor,
-                    _controller.InnerRimColor);
-
-            case CharacterVisualFocusMode.Custom:
-                return new VisualState(
-                    _spec.dim,
-                    _spec.dimTintColor,
-                    _spec.rim,
-                    _spec.innerRim,
-                    _spec.rimColor,
-                    _spec.innerRimColor);
-
-            default:
-                return new VisualState(
-                    0f,
-                    _controller.DimTintColor,
-                    0f,
-                    0f,
-                    _controller.OuterRimColor,
-                    _controller.InnerRimColor);
-        }
+        return BuildPresetState(_spec.presetKey, intensity);
     }
 
-    private VisualState BuildPresetState(CharacterVisualFocusPreset preset, float intensity)
+    private VisualState BuildPresetState(string presetKey, float intensity)
     {
-        CharacterVisualFocusPresetDBSO.Entry entry = preset switch
+        if (_presetDb != null &&
+            _presetDb.TryGet(presetKey, out CharacterVisualFocusPresetDBSO.Entry entry))
         {
-            CharacterVisualFocusPreset.Focus => CharacterVisualFocusPresetDBSO.DefaultFocus(),
-            CharacterVisualFocusPreset.Defocus => CharacterVisualFocusPresetDBSO.DefaultDefocus(),
-            _ => CharacterVisualFocusPresetDBSO.DefaultFocus()
-        };
+            return EntryToState(entry, intensity);
+        }
 
-        if (_presetDb != null && _presetDb.TryGet(preset, out CharacterVisualFocusPresetDBSO.Entry dbEntry))
-            entry = dbEntry;
+        Debug.LogWarning(
+            $"[CharVisualFocusCommandCharR] Visual focus preset not found. " +
+            $"presetKey='{presetKey}'. Using fallback.");
 
+        if (_presetDb != null &&
+            _presetDb.TryGet(CharacterVisualFocusPresetDBSO.DefaultPresetKey, out entry))
+        {
+            return EntryToState(entry, intensity);
+        }
+
+        return new VisualState(
+            0f,
+            new Color(0.45f, 0.48f, 0.55f, 1f),
+            0.4f * intensity,
+            0.09f * intensity,
+            Color.white,
+            new Color(1f, 0.96f, 0.86f, 1f));
+    }
+
+    private static VisualState EntryToState(
+        CharacterVisualFocusPresetDBSO.Entry entry,
+        float intensity)
+    {
         return new VisualState(
             entry.dim * intensity,
             entry.dimTintColor,
@@ -309,7 +273,7 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
             Color outerRimColor,
             Color innerRimColor)
         {
-            Dim = dim;
+            Dim = Mathf.Clamp01(dim);
             DimTintColor = dimTintColor;
             OuterRim = Mathf.Clamp01(outerRim);
             InnerRim = Mathf.Clamp01(innerRim);

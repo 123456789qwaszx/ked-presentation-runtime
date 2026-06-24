@@ -2,6 +2,24 @@ using UnityEngine;
 
 public sealed partial class YarnCommandBridge
 {
+    private void EnqueueCharVisualPresetSpec(
+        string roleKey,
+        string presetKey,
+        float intensity = 1f,
+        string durationToken = "6fr")
+    {
+        var spec = new CharVisualFocusCommandSpecCharR
+        {
+            slotKey = roleKey.Trim(),
+            presetKey = CharacterVisualFocusPresetDBSO.NormalizeKey(presetKey),
+            intensity = Mathf.Clamp01(intensity),
+            duration = YarnDurationParser.Parse(durationToken, 0.25f),
+            wait = false
+        };
+
+        Collect(spec);
+    }
+
     private void EnqueueCharFocusSpec(
         string roleKey,
         float intensity = 1f,
@@ -10,8 +28,8 @@ public sealed partial class YarnCommandBridge
         var spec = new CharVisualFocusCommandSpecCharR
         {
             slotKey = roleKey.Trim(),
-            mode = CharacterVisualFocusMode.Focus,
-            intensity = intensity,
+            presetKey = "focus",
+            intensity = Mathf.Clamp01(intensity),
             duration = YarnDurationParser.Parse(durationToken, 0.4f),
             wait = false
         };
@@ -27,8 +45,8 @@ public sealed partial class YarnCommandBridge
         var spec = new CharVisualFocusCommandSpecCharR
         {
             slotKey = roleKey.Trim(),
-            mode = CharacterVisualFocusMode.Defocus,
-            intensity = intensity,
+            presetKey = "defocus",
+            intensity = Mathf.Clamp01(intensity),
             duration = YarnDurationParser.Parse(durationToken, 0.7f),
             wait = false
         };
@@ -43,56 +61,8 @@ public sealed partial class YarnCommandBridge
         var spec = new CharVisualFocusCommandSpecCharR
         {
             slotKey = roleKey.Trim(),
-            mode = CharacterVisualFocusMode.Clear,
-            duration = YarnDurationParser.Parse(durationToken, 0.25f),
-            wait = false
-        };
-
-        Collect(spec);
-    }
-
-    private void EnqueueCharVisualSpec(
-        string roleKey,
-        float dim,
-        float rim,
-        float innerRim,
-        string durationToken = "6fr")
-    {
-        var spec = new CharVisualFocusCommandSpecCharR
-        {
-            slotKey = roleKey.Trim(),
-            mode = CharacterVisualFocusMode.Custom,
-            dim = dim,
-            rim = rim,
-            innerRim = innerRim,
-            rimColor = Color.white,
-            innerRimColor = new Color(1f, 0.96f, 0.86f, 1f),
-            duration = YarnDurationParser.Parse(durationToken, 0.25f),
-            wait = false
-        };
-
-        Collect(spec);
-    }
-
-    private void EnqueueCharVisualRimColorSpec(
-        string roleKey,
-        float dim,
-        float rim,
-        float innerRim,
-        float r,
-        float g,
-        float b,
-        string durationToken = "6fr")
-    {
-        var spec = new CharVisualFocusCommandSpecCharR
-        {
-            slotKey = roleKey.Trim(),
-            mode = CharacterVisualFocusMode.Custom,
-            dim = dim,
-            rim = rim,
-            innerRim = innerRim,
-            rimColor = new Color(r, g, b, 1f),
-            innerRimColor = new Color(1f, 0.96f, 0.86f, 1f),
+            presetKey = "clear",
+            intensity = 1f,
             duration = YarnDurationParser.Parse(durationToken, 0.25f),
             wait = false
         };
@@ -102,40 +72,14 @@ public sealed partial class YarnCommandBridge
 
     private void EnqueueCharDimSpec(
         string roleKey,
-        float dim,
+        float intensity = 1f,
         string durationToken = "6fr")
     {
         var spec = new CharVisualFocusCommandSpecCharR
         {
             slotKey = roleKey.Trim(),
-            mode = CharacterVisualFocusMode.Custom,
-            dim = dim,
-            dimTintColor = new Color(0.45f, 0.48f, 0.55f, 1f),
-            rim = 0f,
-            innerRim = 0f,
-            rimColor = Color.white,
-            innerRimColor = new Color(1f, 0.96f, 0.86f, 1f),
-            duration = YarnDurationParser.Parse(durationToken, 0.25f),
-            wait = false
-        };
-
-        Collect(spec);
-    }
-
-    private void EnqueueCharInnerRimSpec(
-        string roleKey,
-        float amount,
-        string durationToken = "6fr")
-    {
-        var spec = new CharVisualFocusCommandSpecCharR
-        {
-            slotKey = roleKey.Trim(),
-            mode = CharacterVisualFocusMode.Custom,
-            dim = 0f,
-            rim = 0f,
-            innerRim = amount,
-            rimColor = Color.white,
-            innerRimColor = new Color(1f, 0.96f, 0.86f, 1f),
+            presetKey = "dim",
+            intensity = Mathf.Clamp01(intensity),
             duration = YarnDurationParser.Parse(durationToken, 0.25f),
             wait = false
         };
@@ -145,23 +89,31 @@ public sealed partial class YarnCommandBridge
 
     private void EnqueueCharSilhouetteSpec(
         string roleKey,
-        float dim = 1f,
+        float intensity = 1f,
         string durationToken = "6fr")
     {
         var spec = new CharVisualFocusCommandSpecCharR
         {
             slotKey = roleKey.Trim(),
-            mode = CharacterVisualFocusMode.Custom,
+            presetKey = "silhouette",
+            intensity = Mathf.Clamp01(intensity),
+            duration = YarnDurationParser.Parse(durationToken, 0.25f),
+            wait = false
+        };
 
-            dim = dim,
-            dimTintColor = Color.black,
+        Collect(spec);
+    }
 
-            rim = 0f,
-            innerRim = 0f,
-
-            rimColor = Color.white,
-            innerRimColor = new Color(1f, 0.96f, 0.86f, 1f),
-
+    private void EnqueueCharInnerRimSpec(
+        string roleKey,
+        float intensity = 1f,
+        string durationToken = "6fr")
+    {
+        var spec = new CharVisualFocusCommandSpecCharR
+        {
+            slotKey = roleKey.Trim(),
+            presetKey = "inner_rim",
+            intensity = Mathf.Clamp01(intensity),
             duration = YarnDurationParser.Parse(durationToken, 0.25f),
             wait = false
         };
@@ -171,39 +123,16 @@ public sealed partial class YarnCommandBridge
 
     private void EnqueueCharOuterRimSpec(
         string roleKey,
-        float amount,
+        float intensity = 1f,
         string durationToken = "6fr")
     {
         var spec = new CharVisualFocusCommandSpecCharR
         {
             slotKey = roleKey.Trim(),
-            mode = CharacterVisualFocusMode.Custom,
-            dim = 0f,
-            rim = amount,
-            innerRim = 0f,
-            rimColor = Color.white,
-            innerRimColor = new Color(1f, 0.96f, 0.86f, 1f),
+            presetKey = "outer_rim",
+            intensity = Mathf.Clamp01(intensity),
             duration = YarnDurationParser.Parse(durationToken, 0.25f),
             wait = false
-        };
-
-        Collect(spec);
-    }
-    
-    private void EnqueueSpriteColorToDslSpec(
-        string roleKey,
-        float r,
-        float g,
-        float b,
-        string durationToken = "8fr")
-    {
-        var spec = new ColorToCommandSpecCharR
-        {
-            slotKey = roleKey,
-            target = CharacterRigTarget.CharacterPortraitSprite_Image,
-            color = new Color(r, g, b, 1f),
-            keepAlpha = true,
-            duration = YarnDurationParser.Parse(durationToken, 0.35f)
         };
 
         Collect(spec);

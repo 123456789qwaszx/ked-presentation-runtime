@@ -178,6 +178,9 @@ public sealed partial class YarnCommandBridge
             "face", EnqueueSetPortraitFaceSpec);
         runner.AddCommandHandler<string, string>(
             "size", EnqueueSetOriginSizeCommandSpec);
+        
+        runner.AddCommandHandler<string, float, float, float, string>(
+            "char_color_to", EnqueueSpriteColorToDslSpec);
 
         runner.AddCommandHandler<string, string>(
             "mirror", EnqueueMirrorSetSpec);
@@ -271,6 +274,9 @@ public sealed partial class YarnCommandBridge
     
     private void BindCharRigComposition(DialogueRunner runner)
     {
+        runner.AddCommandHandler<string, string, float, string>(
+            "char_visual", EnqueueCharVisualPresetSpec);
+        
         runner.AddCommandHandler<string, float, string>(
             "char_focus", EnqueueCharFocusSpec);
 
@@ -291,15 +297,6 @@ public sealed partial class YarnCommandBridge
 
         runner.AddCommandHandler<string, float, string>(
             "char_outer_rim", EnqueueCharOuterRimSpec);
-
-        runner.AddCommandHandler<string, float, float, float, string>(
-            "char_visual", EnqueueCharVisualSpec);
-
-        runner.AddCommandHandler<string, float, float, float, float, float, float, string>(
-            "char_visual_color", EnqueueCharVisualRimColorSpec);
-
-        runner.AddCommandHandler<string, float, float, float, string>(
-            "char_color_to", EnqueueSpriteColorToDslSpec);
     }
     
     private void BindCharRigIdle(DialogueRunner runner)

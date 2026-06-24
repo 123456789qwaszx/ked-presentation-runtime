@@ -4,16 +4,13 @@
 <<bg_spawn bg1 ep12_02_1>>
 
 <<slot c1>>
-<<cast c1 Willow a>>
+<<cast c1 Noya a>>
 
-<<slot c2 01>>
-<<cast c2 Noya a>>
+<<slot c2>>
+<<cast c2 Iris a>>
 
 <<slot c3>>
-<<cast c3 Iris a>>
-
-<<slot c4>>
-<<cast c4 Amber a>>
+<<cast c3 Amber a>>
 
 
 === 
@@ -25,11 +22,16 @@ title: Story_StellaEvent01_01
 <<beat Setup_Clear>>
 <<beat Setup_StellaEvent01_01>>
 
+<<actor @1 Noya>>
+<<fade_in  @1>>
+<<slide_in @1>>
+<<char_visual @1 outer_rim>>
 
-<<screen_vignette letterbox 9 -1>>
+<<screen_vignette focus>>
 하늘이 뚫린 듯 비가 쏟아지는 밤이었다. 칠흑 같은 파도가 너울대는 바다를 멍하니 바라보던 중, [br/]순간 연한 녹색 빛이 수면 위로 올라오는 게 보였다.
 
 
+<<screen_vignette clear 1 2>>
 빛의 정체는 한 척의 배였다. 망망대해를 얼마나 떠다녔는지 선체는 심하게 녹슬었고, [br/]갑판에는 돛이나 노도 없이 허연 백골만 무수히 쌓여 있었다.
 
 그뿐 아니라 배 위에는 십여 명의 사람이 있었다. 그들은 파도를 뒤집어쓰면서도 하나같이 뻣뻣한 자세로 서 있었다.
