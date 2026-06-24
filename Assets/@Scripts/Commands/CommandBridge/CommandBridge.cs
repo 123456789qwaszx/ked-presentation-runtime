@@ -91,6 +91,12 @@ public sealed partial class YarnCommandBridge
         
         runner.AddCommandHandler(
             "box_close", CloseDialogueBox);
+        
+        runner.AddCommandHandler<string>(
+            "surface_layout", SetSurfaceLayout);
+
+        runner.AddCommandHandler(
+            "surface_reset", ResetSurfaceLayout);
     }
     
     private void BindMainLaneCommands(DialogueRunner runner)

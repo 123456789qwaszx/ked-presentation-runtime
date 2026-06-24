@@ -17,6 +17,8 @@ public class VnAppBootstrap : MonoBehaviour
     private readonly PresentationSessionContext _presentationSessionContext = new();
     private readonly DialogueBoxCurrentState _dialogueBoxState = new();
     
+    private DialogueSurfaceState _dialogueSurfaceState = new();
+    
     private readonly PresentationStage _presentationStage = new();
     
     private readonly VNSideRunnerSyncHub _vnSideRunnerSyncHub = new();
@@ -33,8 +35,10 @@ public class VnAppBootstrap : MonoBehaviour
     [Header("Sound")] 
     [SerializeField] private AudioSystem audioSystem;
     [SerializeField] private InlineSfxPlaybackHost inlineSfxHost;
-
+    
+    [Header("DialogueBox")] 
     [SerializeField] private DialogueBoxHost dialogueBoxHost;
+    [SerializeField] private DialogueSurfaceLayoutPresetDBSO  surfaceLayoutPresetDbSo;
 
     
     [Header("Presentation")] 
@@ -330,7 +334,12 @@ public class VnAppBootstrap : MonoBehaviour
         OneShotPresentationLane oneShotPresentationLane = new(subOneShotRunner, oneShotYarnBridgePlaybackDriver);
 
         DialogueBoxMetadataResolver metadataResolver = new();
-        _dialogueBoxPresentationController = new(_dialogueBoxState, dialogueBoxHost, metadataResolver);
+        _dialogueBoxPresentationController = new(
+            _dialogueBoxState, 
+            dialogueBoxHost,
+            metadataResolver, 
+            _dialogueSurfaceState, 
+            surfaceLayoutPresetDbSo);
         
         YarnCommandBridge yarnCommandBridge = new(
             dialogueRunner,

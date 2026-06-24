@@ -110,4 +110,14 @@ public sealed partial class YarnCommandBridge
     {
         _dialogueBoxPresentation.CloseAll();
     }
+    
+    private void SetSurfaceLayout(string presetKey)
+    {
+        _dialogueBoxPresentation.SetSurfaceLayout(presetKey);
+    }
+
+    private void ResetSurfaceLayout()
+    {
+        _dialogueBoxPresentation.ResetSurfaceLayout();
+    }
 }

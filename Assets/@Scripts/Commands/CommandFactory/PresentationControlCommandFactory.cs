@@ -1,7 +1,6 @@
 public sealed class PresentationControlCommandFactory : INodeCommandFactory
 {
     private readonly UIPatchService _uiPatchService;
-
     public PresentationControlCommandFactory(
         UIPatchService uiPatchService)
     {

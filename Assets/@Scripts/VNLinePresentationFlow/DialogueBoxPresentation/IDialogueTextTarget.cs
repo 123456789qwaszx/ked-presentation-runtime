@@ -5,14 +5,15 @@ using Yarn.Unity;
 public interface IPresentationDialogueBoxView
 {
     TMP_Text GetLineText();
-    
+    TMP_Text GetNameText();
+
+    void ApplySurfaceLayout(DialogueSurfaceLayoutPresetDBSO.Entry entry);
+
     void ResetPresentationTransform();
     void PrimeText(string text, string characterName, bool hasCharacterName);
-    
-    void SetVisibleImmediate(bool visible);
-    
-    void PrepareHidden();
 
+    void SetVisibleImmediate(bool visible);
+    void PrepareHidden();
 
     // Manual box visibility fade.
     // Used by box_hide / box_show.

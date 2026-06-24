@@ -7,7 +7,8 @@ public enum DialogueBoxKind
     Speaker = 1,
     LetterBox = 2,
     OnlyText = 3,
-    BlackBook = 4
+    BlackBook = 4,
+    Surface = 5,
 }
 
 public enum OptionsBoxKind
@@ -226,7 +227,6 @@ public sealed class DialogueBoxHost : MonoBehaviour
             return;
         }
 
-        ValidateAllDialogueKindsAssigned();
         ValidateDuplicateDialogueKinds();
         ValidateDialogueEntryViews();
     }
@@ -238,34 +238,6 @@ public sealed class DialogueBoxHost : MonoBehaviour
 
         ValidateDuplicateOptionsKinds();
         ValidateOptionsEntryViews();
-    }
-
-    private void ValidateAllDialogueKindsAssigned()
-    {
-        Array values = Enum.GetValues(typeof(DialogueBoxKind));
-
-        for (int i = 0; i < values.Length; i++)
-        {
-            DialogueBoxKind kind = (DialogueBoxKind)values.GetValue(i);
-
-            bool found = false;
-
-            for (int j = 0; j < entries.Length; j++)
-            {
-                if (entries[j].kind == kind)
-                {
-                    found = true;
-                    break;
-                }
-            }
-
-            if (!found)
-            {
-                Debug.LogWarning(
-                    $"[DialogueBoxHost] Missing entry for DialogueBoxKind.{kind}.",
-                    this);
-            }
-        }
     }
 
     private void ValidateDuplicateDialogueKinds()

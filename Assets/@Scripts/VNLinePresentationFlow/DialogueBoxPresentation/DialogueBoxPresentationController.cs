@@ -1,85 +1,112 @@
-using System.Threading;
 using Yarn.Unity;
 
 public partial class DialogueBoxPresentationController
 {
-    private const DialogueBoxKind DefaultProtagonistLineBoxKind = DialogueBoxKind.Portrait;
-    private const DialogueBoxKind DefaultNamedLineBoxKind = DialogueBoxKind.Speaker;
+    private const DialogueBoxKind DefaultProtagonistLineBoxKind = DialogueBoxKind.Surface;
+    private const DialogueBoxKind DefaultNamedLineBoxKind = DialogueBoxKind.Surface;
 
     private readonly DialogueBoxHost _host;
     private readonly DialogueBoxMetadataResolver _metadataResolver;
     private readonly DialogueBoxCurrentState _boxState;
+    private readonly DialogueSurfaceState _surfaceState;
+    private readonly DialogueSurfaceLayoutPresetDBSO _surfaceLayoutDb;
 
     private DialogueBoxKind _protagonistLineBoxKind = DefaultProtagonistLineBoxKind;
     private DialogueBoxKind _namedLineBoxKind = DefaultNamedLineBoxKind;
 
     private float _fadeUpDuration = 0.25f;
     private float _fadeDownDuration = 0.1f;
-    
+
     public DialogueBoxPresentationController(
         DialogueBoxCurrentState dialogueBoxState,
-        DialogueBoxHost host, 
-        DialogueBoxMetadataResolver metadataResolver)
+        DialogueBoxHost host,
+        DialogueBoxMetadataResolver metadataResolver,
+        DialogueSurfaceState surfaceState,
+        DialogueSurfaceLayoutPresetDBSO surfaceLayoutDb)
     {
         _boxState = dialogueBoxState;
         _host = host;
         _metadataResolver = metadataResolver;
+        _surfaceState = surfaceState;
+        _surfaceLayoutDb = surfaceLayoutDb;
     }
 
-    public async YarnTask<DialogueBoxPresentationResult> ShowLineAsync(DialogueBoxPresentationContext ctx)
+    public async YarnTask<DialogueBoxPresentationResult> ShowLineAsync(
+        DialogueBoxPresentationContext ctx)
     {
         InvalidateVisibilityTransition();
 
         IPresentationDialogueBoxView currentBox = _boxState.Box;
         DialogueBoxKind? currentBoxKind = _boxState.BoxKind;
 
-        // Resolve box kind
-        DialogueBoxKind nextBoxKind;
-
-        if (_metadataResolver.TryResolveBoxKind(ctx.Metadata, out DialogueBoxKind metadataBoxKind))
-            nextBoxKind = metadataBoxKind;
-        else if (ctx.HasCharacterName)
-            nextBoxKind = _namedLineBoxKind;
-        else 
-            nextBoxKind = _protagonistLineBoxKind;
-
+        DialogueBoxKind nextBoxKind = ResolveNextBoxKind(ctx);
         IPresentationDialogueBoxView nextBox = _host.ResolveTarget(nextBoxKind);
 
-        // Resolve transition kind
-        DialogueBoxTransitionKind transitionKind;
-        
-        if (ctx.UseImmediateTransition)
-            transitionKind = DialogueBoxTransitionKind.Cut;
-        else if (_metadataResolver.TryResolveTransitionKind(ctx.Metadata, out DialogueBoxTransitionKind metadataTransition))
-            transitionKind = metadataTransition;
-        else if (!_boxState.IsVisible || currentBoxKind.HasValue == false)
-            transitionKind = DialogueBoxTransitionKind.FadeIn;
-        else if (currentBoxKind.Value == nextBoxKind)
-            transitionKind = DialogueBoxTransitionKind.Keep;
-        else
-            transitionKind = DialogueBoxTransitionKind.FadeOutIn;
+        DialogueBoxTransitionKind transitionKind = ResolveTransitionKind(
+            ctx,
+            currentBoxKind,
+            nextBoxKind);
 
-        // Prime target box
+        // Layout must be applied before PrimeText because PrimeText needs to know
+        // whether the current layout allows the name label to be visible.
         nextBox.ResetPresentationTransform();
+        ApplyCurrentSurfaceLayout(nextBox);
         nextBox.PrimeText(
             ctx.Text,
             ctx.CharacterName,
             ctx.HasCharacterName);
 
-        // Apply transition
         await ApplyTransitionAsync(
             transitionKind,
             currentBox,
             nextBox,
             ctx.UseImmediateTransition,
             ctx.Run);
-        
-        // Commit.
+
         // Only the still-valid run is allowed to commit the current box state.
         if (ctx.Run.IsValid)
             _boxState.Commit(nextBoxKind, nextBox, transitionKind);
-        
+
         return new DialogueBoxPresentationResult(nextBox);
+    }
+
+    private DialogueBoxKind ResolveNextBoxKind(
+        DialogueBoxPresentationContext ctx)
+    {
+        if (_metadataResolver.TryResolveBoxKind(ctx.Metadata, out DialogueBoxKind metadataBoxKind))
+            return metadataBoxKind;
+
+        return ctx.HasCharacterName
+            ? _namedLineBoxKind
+            : _protagonistLineBoxKind;
+    }
+
+    private DialogueBoxTransitionKind ResolveTransitionKind(
+        DialogueBoxPresentationContext ctx,
+        DialogueBoxKind? currentBoxKind,
+        DialogueBoxKind nextBoxKind)
+    {
+        if (ctx.UseImmediateTransition)
+            return DialogueBoxTransitionKind.Cut;
+
+        if (_metadataResolver.TryResolveTransitionKind(ctx.Metadata, out DialogueBoxTransitionKind metadataTransition))
+            return metadataTransition;
+
+        if (!_boxState.IsVisible || currentBoxKind.HasValue == false)
+            return DialogueBoxTransitionKind.FadeIn;
+
+        if (currentBoxKind.Value == nextBoxKind)
+            return DialogueBoxTransitionKind.Keep;
+
+        return DialogueBoxTransitionKind.FadeOutIn;
+    }
+
+    private void ApplyCurrentSurfaceLayout(IPresentationDialogueBoxView box)
+    {
+        DialogueSurfaceLayoutPresetDBSO.Entry entry =
+            _surfaceLayoutDb.FindOrDefault(_surfaceState.CurrentLayoutKey);
+
+        box.ApplySurfaceLayout(entry);
     }
 
     private async YarnTask ApplyTransitionAsync(
@@ -167,7 +194,7 @@ public partial class DialogueBoxPresentationController
                 break;
         }
     }
-    
+
     public void CloseAll()
     {
         InvalidateVisibilityTransition();
@@ -181,8 +208,8 @@ public partial class DialogueBoxPresentationController
         InvalidateVisibilityTransition();
 
         IPresentationDialogueBoxView abortedTarget = result.NextBox;
-        
-        bool IsCurrentBox(IPresentationDialogueBoxView box) 
+
+        bool IsCurrentBox(IPresentationDialogueBoxView box)
             => ReferenceEquals(box, _boxState.Box);
 
         // Hide the stale box left behind by the aborted transition.

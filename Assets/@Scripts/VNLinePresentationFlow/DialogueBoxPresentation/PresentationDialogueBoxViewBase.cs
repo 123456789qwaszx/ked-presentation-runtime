@@ -13,9 +13,71 @@ public abstract class PresentationDialogueBoxViewBase<TRefs>
     public abstract TMP_Text LineText { get; }
     public abstract TMP_Text NameText { get; }
 
+    private bool _currentLayoutUsesName = true;
+    private bool _clearNameWhenHidden = true;
+
     public virtual bool HasName => NameText != null;
-    
+
     public virtual TMP_Text GetLineText() => LineText;
+    public virtual TMP_Text GetNameText() => NameText;
+
+    public virtual void ApplySurfaceLayout(
+        DialogueSurfaceLayoutPresetDBSO.Entry entry)
+    {
+        ApplyLineLayout(entry);
+        ApplyNameLayout(entry);
+    }
+
+    private void ApplyLineLayout(
+        DialogueSurfaceLayoutPresetDBSO.Entry entry)
+    {
+        TMP_Text text = LineText;
+        RectTransform rect = text.rectTransform;
+
+        rect.anchorMin = entry.lineAnchorMin;
+        rect.anchorMax = entry.lineAnchorMax;
+        rect.pivot = entry.linePivot;
+        rect.anchoredPosition = entry.lineAnchoredPosition;
+        rect.sizeDelta = entry.lineSizeDelta;
+
+        text.alignment = entry.lineAlignment;
+        text.fontSize = entry.lineFontSize;
+        text.lineSpacing = entry.lineSpacing;
+        text.paragraphSpacing = entry.paragraphSpacing;
+        text.margin = entry.lineMargin;
+        text.overflowMode = entry.lineOverflowMode;
+        text.textWrappingMode = entry.lineTextWrappingMode;
+    }
+
+    private void ApplyNameLayout(
+        DialogueSurfaceLayoutPresetDBSO.Entry entry)
+    {
+        _currentLayoutUsesName = entry.useName && HasName;
+        _clearNameWhenHidden = entry.clearNameWhenHidden;
+
+        TMP_Text nameText = NameText;
+        if (nameText == null)
+            return;
+
+        nameText.gameObject.SetActive(_currentLayoutUsesName);
+
+        if (!_currentLayoutUsesName)
+            return;
+
+        RectTransform rect = nameText.rectTransform;
+
+        rect.anchorMin = entry.nameAnchorMin;
+        rect.anchorMax = entry.nameAnchorMax;
+        rect.pivot = entry.namePivot;
+        rect.anchoredPosition = entry.nameAnchoredPosition;
+        rect.sizeDelta = entry.nameSizeDelta;
+
+        nameText.alignment = entry.nameAlignment;
+        nameText.fontSize = entry.nameFontSize;
+        nameText.margin = entry.nameMargin;
+        nameText.overflowMode = entry.nameOverflowMode;
+        nameText.textWrappingMode = entry.nameTextWrappingMode;
+    }
 
     public virtual void ResetPresentationTransform()
     {
@@ -34,25 +96,27 @@ public abstract class PresentationDialogueBoxViewBase<TRefs>
     {
         TMP_Text lineText = LineText;
 
-        if (lineText != null)
-        {
-            lineText.text = text ?? string.Empty;
-            lineText.maxVisibleCharacters = 0;
-            lineText.ForceMeshUpdate();
-        }
+        lineText.text = text ?? string.Empty;
+        lineText.maxVisibleCharacters = 0;
+        lineText.ForceMeshUpdate();
 
         TMP_Text nameText = NameText;
+        if (nameText == null)
+            return;
 
-        if (nameText != null)
+        bool showName = _currentLayoutUsesName && hasCharacterName;
+
+        if (showName)
         {
-            bool showName = hasCharacterName;
-
-            nameText.text = showName
-                ? characterName ?? string.Empty
-                : string.Empty;
-
-            nameText.gameObject.SetActive(showName);
+            nameText.text = characterName ?? string.Empty;
+            nameText.gameObject.SetActive(true);
+            return;
         }
+
+        if (_clearNameWhenHidden)
+            nameText.text = string.Empty;
+
+        nameText.gameObject.SetActive(false);
     }
 
     public virtual void SetVisibleImmediate(bool visible)

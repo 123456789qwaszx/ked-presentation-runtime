@@ -101,6 +101,14 @@ public sealed class DialogueBoxMetadataResolver
 
         switch (tag)
         {
+            case "surface":
+            case "surfacebox":
+            case "surface_box":
+            case "box:surface":
+            case "box=surface":
+                kind = DialogueBoxKind.Surface;
+                return true;
+
             case "portrait":
             case "box:portrait":
             case "box=portrait":

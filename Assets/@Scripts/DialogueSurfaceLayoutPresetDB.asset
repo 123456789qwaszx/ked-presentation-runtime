@@ -1,0 +1,115 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 41cb88f2462723045b22e81a2f30452b, type: 3}
+  m_Name: DialogueSurfaceLayoutPresetDB
+  m_EditorClassIdentifier: Assembly-CSharp::DialogueSurfaceLayoutPresetDBSO
+  entries:
+  - key: bottom
+    lineAnchorMin: {x: 0.2, y: 0.02}
+    lineAnchorMax: {x: 0.92, y: 0.24}
+    linePivot: {x: 0.5, y: 0.5}
+    lineAnchoredPosition: {x: 0, y: 0}
+    lineSizeDelta: {x: 0, y: 0}
+    lineAlignment: 514
+    lineFontSize: 38
+    lineSpacing: 0
+    paragraphSpacing: 0
+    lineMargin: {x: 0, y: 0, z: 0, w: 0}
+    lineOverflowMode: 0
+    lineTextWrappingMode: 1
+    useName: 1
+    clearNameWhenHidden: 1
+    nameAnchorMin: {x: 0.08, y: 0.3}
+    nameAnchorMax: {x: 0.35, y: 0.36}
+    namePivot: {x: 0, y: 0.5}
+    nameAnchoredPosition: {x: 0, y: 0}
+    nameSizeDelta: {x: 0, y: 0}
+    nameAlignment: 513
+    nameFontSize: 28
+    nameMargin: {x: 0, y: 0, z: 0, w: 0}
+    nameOverflowMode: 0
+    nameTextWrappingMode: 0
+  - key: letterbox_bottom
+    lineAnchorMin: {x: 0.12, y: 0.04}
+    lineAnchorMax: {x: 0.88, y: 0.17}
+    linePivot: {x: 0.5, y: 0.5}
+    lineAnchoredPosition: {x: 0, y: 0}
+    lineSizeDelta: {x: 0, y: 0}
+    lineAlignment: 4097
+    lineFontSize: 32
+    lineSpacing: 0
+    paragraphSpacing: 0
+    lineMargin: {x: 0, y: 0, z: 0, w: 0}
+    lineOverflowMode: 0
+    lineTextWrappingMode: 1
+    useName: 0
+    clearNameWhenHidden: 1
+    nameAnchorMin: {x: 0.12, y: 0.18}
+    nameAnchorMax: {x: 0.35, y: 0.23}
+    namePivot: {x: 0, y: 0.5}
+    nameAnchoredPosition: {x: 0, y: 0}
+    nameSizeDelta: {x: 0, y: 0}
+    nameAlignment: 513
+    nameFontSize: 26
+    nameMargin: {x: 0, y: 0, z: 0, w: 0}
+    nameOverflowMode: 0
+    nameTextWrappingMode: 0
+  - key: blackbook_page
+    lineAnchorMin: {x: 0.22, y: 0.18}
+    lineAnchorMax: {x: 0.78, y: 0.82}
+    linePivot: {x: 0.5, y: 0.5}
+    lineAnchoredPosition: {x: 0, y: 0}
+    lineSizeDelta: {x: 0, y: 0}
+    lineAlignment: 257
+    lineFontSize: 34
+    lineSpacing: 12
+    paragraphSpacing: 18
+    lineMargin: {x: 8, y: 8, z: 8, w: 8}
+    lineOverflowMode: 0
+    lineTextWrappingMode: 1
+    useName: 0
+    clearNameWhenHidden: 1
+    nameAnchorMin: {x: 0.22, y: 0.83}
+    nameAnchorMax: {x: 0.45, y: 0.89}
+    namePivot: {x: 0, y: 0.5}
+    nameAnchoredPosition: {x: 0, y: 0}
+    nameSizeDelta: {x: 0, y: 0}
+    nameAlignment: 513
+    nameFontSize: 26
+    nameMargin: {x: 0, y: 0, z: 0, w: 0}
+    nameOverflowMode: 0
+    nameTextWrappingMode: 0
+  - key: full_top_left
+    lineAnchorMin: {x: 0.08, y: 0.1}
+    lineAnchorMax: {x: 0.92, y: 0.9}
+    linePivot: {x: 0, y: 1}
+    lineAnchoredPosition: {x: 0, y: 0}
+    lineSizeDelta: {x: 0, y: 0}
+    lineAlignment: 257
+    lineFontSize: 32
+    lineSpacing: 8
+    paragraphSpacing: 16
+    lineMargin: {x: 0, y: 0, z: 0, w: 0}
+    lineOverflowMode: 0
+    lineTextWrappingMode: 1
+    useName: 0
+    clearNameWhenHidden: 1
+    nameAnchorMin: {x: 0.08, y: 0.91}
+    nameAnchorMax: {x: 0.32, y: 0.96}
+    namePivot: {x: 0, y: 0.5}
+    nameAnchoredPosition: {x: 0, y: 0}
+    nameSizeDelta: {x: 0, y: 0}
+    nameAlignment: 513
+    nameFontSize: 26
+    nameMargin: {x: 0, y: 0, z: 0, w: 0}
+    nameOverflowMode: 0
+    nameTextWrappingMode: 0
