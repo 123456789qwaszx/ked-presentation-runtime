@@ -175,6 +175,9 @@ public sealed partial class YarnCommandBridge
             "slot01", EnqueueSetupCharRigStage01Spec);
         runner.AddCommandHandler<string, string>(
             "slot02", EnqueueSetupCharRigStage02Spec);
+
+        runner.AddCommandHandler(
+            "slot_tyrant", EnqueueSetupTyrantProtagonistSpec);
         
         runner.AddCommandHandler<string, string, string, string, string, string>(
             "cast", EnqueueCastCharacterSpec);

@@ -23,7 +23,7 @@ public sealed partial class YarnCommandBridge
 
         Collect(spec);
     }
-    
+
     private void EnqueueSetupCharRigStage00Spec(
         string slotKey,
         string layerKey = "mid")
@@ -72,7 +72,38 @@ public sealed partial class YarnCommandBridge
 
         Collect(spec);
     }
-    
+
+    private const string TyrantProtagonistSlotKey = "tyrant";
+
+    private const string DefaultTyrantScale = "5";
+    private const string DefaultTyrantDownUnit = "4u";
+    private const string DefaultTyrantRightUnit = "0.6u";
+
+    private void EnqueueSetupTyrantProtagonistSpec()
+    {
+        EnqueueSetupProtagonistCharRigSpec(TyrantProtagonistSlotKey);
+
+        EnqueueCastCharacterSpec(
+            TyrantProtagonistSlotKey,
+            "Tyrant",
+            "a",
+            emotionKey: "2",
+            positionPreset: "center",
+            scaleArg: DefaultTyrantScale);
+
+        EnqueueFadeInDslSpec(
+            TyrantProtagonistSlotKey,
+            "-1s");
+
+        EnqueueNudgeDownSpec(
+            TyrantProtagonistSlotKey,
+            DefaultTyrantDownUnit);
+
+        EnqueueNudgeRightSpec(
+            TyrantProtagonistSlotKey,
+            DefaultTyrantRightUnit);
+    }
+
     private void EnqueueSetupProtagonistCharRigSpec(string slotKey)
     {
         var spec = new SetupCharRigCommandSpec
@@ -84,7 +115,7 @@ public sealed partial class YarnCommandBridge
 
         Collect(spec);
     }
-    
+
     private void EnqueueCastCharacterSpec(
         string slotKey,
         string characterKey,
@@ -106,8 +137,9 @@ public sealed partial class YarnCommandBridge
         EnqueueSetAnchorSpecs(slotKey, positionPreset);
         EnqueueSetOriginSizeCommandSpec(slotKey, scaleArg);
     }
-    
-    private void EnqueueSetAnchorSpecs(string slotKey, string positionPreset, bool resetSlotPos = true, bool resetCharPos = true)
+
+    private void EnqueueSetAnchorSpecs(string slotKey, string positionPreset, bool resetSlotPos = true,
+        bool resetCharPos = true)
     {
         CharAnchorPreset preset = CharAnchorPresetParser.Parse(positionPreset);
 
@@ -117,12 +149,12 @@ public sealed partial class YarnCommandBridge
             target = CharacterRigTarget.CharSlot_Anchor,
             preset = preset,
             resetSlotPos = resetSlotPos,
-            resetCharacterPos =  resetCharPos
+            resetCharacterPos = resetCharPos
         };
 
         Collect(anchorSpec);
     }
-    
+
     private void EnqueueSetOriginSizeCommandSpec(string roleKey, string scaleArg)
     {
         if (YarnNumberParser.TryParseFloat(scaleArg, out float absoluteScale))
@@ -141,10 +173,11 @@ public sealed partial class YarnCommandBridge
             Collect(absoluteScaleSpec);
             return;
         }
-        
+
         if (!CharScalePresetParser.TryParse(scaleArg, out CharScalePreset preset))
-            Debug.LogWarning($"[YarnCommandBridge] Unknown scale preset '{scaleArg}'. Fallback to '{CharScalePreset.Normal}' roleKey='{roleKey}'.");
-        
+            Debug.LogWarning(
+                $"[YarnCommandBridge] Unknown scale preset '{scaleArg}'. Fallback to '{CharScalePreset.Normal}' roleKey='{roleKey}'.");
+
         var spec = new SetOriginSizeCommandSpecCharR
         {
             target = CharacterRigTarget.CharSlot_Size,
@@ -153,7 +186,7 @@ public sealed partial class YarnCommandBridge
 
         Collect(spec);
     }
-    
+
     private void EnqueueMirrorSetSpec(
         string roleKey,
         string directionToken = "")
@@ -164,7 +197,7 @@ public sealed partial class YarnCommandBridge
             target = CharacterRigTarget.CharacterPortrait_ActingScale_X,
             duration = 0f,
         });
-    
+
     private void EnqueueSetPortraitPoseSpec(string slotKey, string variantKey)
     {
         var spec = new SetPortraitPoseCommandSpecCharR
@@ -176,7 +209,7 @@ public sealed partial class YarnCommandBridge
 
         Collect(spec);
     }
-    
+
     private void EnqueueSetPortraitFaceSpec(string slotKey, string emotionKey)
     {
         var spec = new SetPortraitSpriteCommandSpecCharR
@@ -192,7 +225,7 @@ public sealed partial class YarnCommandBridge
 
         Collect(spec);
     }
-    
+
     private void EnqueueSetAnchorOffsetSpecs(string slotKey, int x = 0, int y = 0, float duration = 0.4f)
     {
         var slotOffsetSpec = new MoveByCommandSpecCharR
@@ -203,10 +236,10 @@ public sealed partial class YarnCommandBridge
             delta = new Vector2(x, y),
             duration = duration
         };
-        
+
         Collect(slotOffsetSpec);
     }
-    
+
     private void EnqueueSizeBySpec(string roleKey, float multiplier, float duration = 0.4f)
     {
         var spec = new ScaleToCommandSpecCharR
@@ -238,7 +271,7 @@ public sealed partial class YarnCommandBridge
 
         Collect(spec);
     }
-    
+
     private void EnqueueSetPlaceResetSpecs(string slotKey, float duration = 0.4f)
     {
         var slotOffsetSpec = new MoveByCommandSpecCharR
@@ -249,7 +282,7 @@ public sealed partial class YarnCommandBridge
             delta = new Vector2(0, 0),
             duration = duration
         };
-        
+
         var spec2 = new MoveByCommandSpecCharR
         {
             slotKey = slotKey,
@@ -258,11 +291,11 @@ public sealed partial class YarnCommandBridge
             delta = new Vector2(0, 0),
             duration = duration
         };
-        
+
         Collect(slotOffsetSpec);
         Collect(spec2);
     }
-    
+
     private void EnqueueRotateResetSpec(string roleKey, float duration = 0.4f)
     {
         var spec = new RotateToCommandSpecCharR
@@ -277,7 +310,7 @@ public sealed partial class YarnCommandBridge
 
         Collect(spec);
     }
-    
+
     private void EnqueueSizeResetSpec(string roleKey, float duration = 0.4f)
     {
         var spec = new ScaleToCommandSpecCharR
@@ -292,7 +325,7 @@ public sealed partial class YarnCommandBridge
 
         Collect(spec);
     }
-    
+
     private void EnqueueSpriteColorToDslSpec(
         string roleKey,
         float r,
@@ -333,7 +366,7 @@ public sealed partial class YarnCommandBridge
 
         Collect(spec);
     }
-    
+
     private void EnqueueMoveCharacterRigToStageLayerSpec(
         string roleKey,
         string stageKey = "stage00",

@@ -8,8 +8,8 @@ public sealed class VnAdvanceInputBindings
     public KeyCode advance = KeyCode.Space;
 
     [Header("Rapid Skip")]
-    public KeyCode rapidSkipLeft = KeyCode.LeftAlt;
-    public KeyCode rapidSkipRight = KeyCode.RightAlt;
+    public KeyCode rapidSkipLeft = KeyCode.LeftControl;
+    public KeyCode rapidSkipRight = KeyCode.RightControl;
 
     [Header("SpeedUp Mode")]
     public KeyCode speedUpHold = KeyCode.None;
