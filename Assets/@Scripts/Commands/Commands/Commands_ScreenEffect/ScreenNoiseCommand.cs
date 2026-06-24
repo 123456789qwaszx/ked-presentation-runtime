@@ -3,23 +3,6 @@ using System.Collections;
 using DG.Tweening;
 using UnityEngine;
 
-public enum ScreenNoiseMode
-{
-    Custom = 0,
-    Preset = 1,
-    Clear = 2
-}
-
-public enum ScreenNoisePreset
-{
-    Default = 0,
-    Memory = 1,
-    Horror = 2,
-    Broadcast = 3,
-    Dream = 4,
-    RainMood = 5
-}
-
 [Serializable]
 [CommandMenuHint(
     "Screen Effect",
@@ -32,20 +15,12 @@ public enum ScreenNoisePreset
     SetOrder = -680)]
 public sealed class ScreenNoiseCommandSpec : CommandSpecBase
 {
-    [Header("Mode")]
-    public ScreenNoiseMode mode = ScreenNoiseMode.Preset;
-    public ScreenNoisePreset preset = ScreenNoisePreset.Default;
+    [Header("Preset")]
+    [Tooltip("ScreenNoisePresetDBSO entry key. ex) clear, default, memory, horror, broadcast, dream, rain_mood")]
+    public string presetKey = ScreenNoisePresetDBSO.DefaultPresetKey;
 
     [Range(0f, 1f)]
     public float intensity = 1f;
-
-    [Header("Custom")]
-    [Range(0f, 1f)] public float amount = 1f;
-    public Color color = Color.white;
-    [Min(0f)] public float scale = 0.8f;
-    public float speedX = 0.015f;
-    public float speedY = 0.012f;
-    [Min(0f)] public float contrast = 1f;
 
     [Header("Tween")]
     public float duration = 0.35f;
@@ -147,38 +122,13 @@ public sealed class ScreenNoiseCommand : CommandBase
     private NoiseState BuildDestState()
     {
         float intensity = Mathf.Clamp01(_spec.intensity);
-
-        switch (_spec.mode)
-        {
-            case ScreenNoiseMode.Custom:
-                return new NoiseState(
-                    _spec.amount * intensity,
-                    _spec.color,
-                    _spec.scale,
-                    _spec.speedX,
-                    _spec.speedY,
-                    _spec.contrast);
-
-            case ScreenNoiseMode.Preset:
-                return BuildPresetState(_spec.preset, intensity);
-
-            case ScreenNoiseMode.Clear:
-                return new NoiseState(
-                    0f,
-                    _controller.Color,
-                    _controller.Scale,
-                    _controller.SpeedX,
-                    _controller.SpeedY,
-                    _controller.Contrast);
-
-            default:
-                return new NoiseState(0f, Color.white, 0.8f, 0.015f, 0.012f, 1f);
-        }
+        return BuildPresetState(_spec.presetKey, intensity);
     }
 
-    private NoiseState BuildPresetState(ScreenNoisePreset preset, float intensity)
+    private NoiseState BuildPresetState(string presetKey, float intensity)
     {
-        if (_presetDb != null && _presetDb.TryGet(preset, out ScreenNoisePresetDBSO.Entry e))
+        if (_presetDb != null &&
+            _presetDb.TryGet(presetKey, out ScreenNoisePresetDBSO.Entry e))
         {
             return new NoiseState(
                 e.amount * intensity,
@@ -189,7 +139,30 @@ public sealed class ScreenNoiseCommand : CommandBase
                 e.contrast);
         }
 
-        return new NoiseState(1f * intensity, Color.white, 0.8f, 0.015f, 0.012f, 1f);
+        Debug.LogWarning(
+            $"[ScreenNoiseCommand] Noise preset not found. " +
+            $"presetKey='{presetKey}'. Using fallback.",
+            _controller);
+
+        if (_presetDb != null &&
+            _presetDb.TryGet(ScreenNoisePresetDBSO.DefaultPresetKey, out e))
+        {
+            return new NoiseState(
+                e.amount * intensity,
+                e.color,
+                e.scale,
+                e.speedX,
+                e.speedY,
+                e.contrast);
+        }
+
+        return new NoiseState(
+            1f * intensity,
+            Color.white,
+            0.8f,
+            0.015f,
+            0.012f,
+            1f);
     }
 
     private void ApplyState(NoiseState state)

@@ -13,7 +13,15 @@ MonoBehaviour:
   m_Name: ScreenFlashPresetDB
   m_EditorClassIdentifier: Assembly-CSharp::ScreenFlashPresetDBSO
   entries:
-  - preset: 0
+  - key: clear
+    color: {r: 1, g: 1, b: 1, a: 1}
+    amount: 0
+    attackDuration: 0
+    holdDuration: 0
+    releaseDuration: 0
+    attackEase: 9
+    releaseEase: 9
+  - key: default
     color: {r: 1, g: 1, b: 1, a: 1}
     amount: 1
     attackDuration: 0.02
@@ -21,7 +29,7 @@ MonoBehaviour:
     releaseDuration: 0.16
     attackEase: 9
     releaseEase: 9
-  - preset: 1
+  - key: soft
     color: {r: 1, g: 1, b: 1, a: 1}
     amount: 0.5
     attackDuration: 0.06
@@ -29,7 +37,7 @@ MonoBehaviour:
     releaseDuration: 0.3
     attackEase: 9
     releaseEase: 9
-  - preset: 2
+  - key: hit
     color: {r: 1, g: 0.16, b: 0.1, a: 1}
     amount: 0.45
     attackDuration: 0.015
@@ -37,7 +45,7 @@ MonoBehaviour:
     releaseDuration: 0.18
     attackEase: 9
     releaseEase: 9
-  - preset: 3
+  - key: camera
     color: {r: 1, g: 1, b: 1, a: 1}
     amount: 1
     attackDuration: 0.01

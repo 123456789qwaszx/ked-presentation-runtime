@@ -13,42 +13,49 @@ MonoBehaviour:
   m_Name: ScreenNoisePresetDB
   m_EditorClassIdentifier: Assembly-CSharp::ScreenNoisePresetDBSO
   entries:
-  - preset: 0
+  - key: clear
+    amount: 0
+    color: {r: 1, g: 1, b: 1, a: 1}
+    scale: 0.8
+    speedX: 0.015
+    speedY: 0.012
+    contrast: 1
+  - key: default
     amount: 1
     color: {r: 1, g: 1, b: 1, a: 1}
     scale: 0.8
     speedX: 0.015
     speedY: 0.012
     contrast: 1
-  - preset: 1
+  - key: memory
     amount: 0.32
     color: {r: 0.72, g: 0.78, b: 0.9, a: 1}
     scale: 0.85
     speedX: 0.01
     speedY: 0.008
     contrast: 1.15
-  - preset: 2
+  - key: horror
     amount: 0.55
     color: {r: 0.62, g: 0.62, b: 0.66, a: 1}
     scale: 1.25
     speedX: 0.03
     speedY: 0.045
     contrast: 1.8
-  - preset: 3
+  - key: broadcast
     amount: 0.5
     color: {r: 0.8, g: 0.9, b: 1, a: 1}
     scale: 1.8
     speedX: 0.08
     speedY: 0.012
     contrast: 2.2
-  - preset: 4
+  - key: dream
     amount: 0.22
     color: {r: 0.76, g: 0.7, b: 0.95, a: 1}
     scale: 0.65
     speedX: 0.006
     speedY: 0.01
     contrast: 0.9
-  - preset: 5
+  - key: rain_mood
     amount: 0.28
     color: {r: 0.7, g: 0.78, b: 0.9, a: 1}
     scale: 1

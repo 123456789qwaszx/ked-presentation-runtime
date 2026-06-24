@@ -3,20 +3,6 @@ using System.Collections;
 using DG.Tweening;
 using UnityEngine;
 
-public enum ScreenFlashMode
-{
-    Custom = 0,
-    Preset = 1
-}
-
-public enum ScreenFlashPreset
-{
-    Default = 0,
-    Soft = 1,
-    Hit = 2,
-    Camera = 3
-}
-
 [Serializable]
 [CommandMenuHint(
     "Screen Effect",
@@ -29,26 +15,12 @@ public enum ScreenFlashPreset
     SetOrder = -700)]
 public sealed class ScreenFlashCommandSpec : CommandSpecBase
 {
-    [Header("Mode")]
-    public ScreenFlashMode mode = ScreenFlashMode.Preset;
-    public ScreenFlashPreset preset = ScreenFlashPreset.Default;
+    [Header("Preset")]
+    [Tooltip("ScreenFlashPresetDBSO entry key. ex) clear, default, soft, hit, camera")]
+    public string presetKey = ScreenFlashPresetDBSO.DefaultPresetKey;
 
     [Range(0f, 1f)]
     public float intensity = 1f;
-
-    [Header("Custom - Flash")]
-    public Color color = Color.white;
-
-    [Range(0f, 1f)]
-    public float amount = 1f;
-
-    [Header("Custom - Timing")]
-    [Min(0f)] public float attackDuration = 0.03f;
-    [Min(0f)] public float holdDuration = 0.02f;
-    [Min(0f)] public float releaseDuration = 0.14f;
-
-    public Ease attackEase = Ease.OutCubic;
-    public Ease releaseEase = Ease.OutCubic;
 }
 
 public sealed class ScreenFlashCommand : CommandBase
@@ -166,42 +138,50 @@ public sealed class ScreenFlashCommand : CommandBase
     private FlashSettings BuildSettings()
     {
         float intensity = Mathf.Clamp01(_spec.intensity);
+        return BuildPresetSettings(_spec.presetKey, intensity);
+    }
 
-        switch (_spec.mode)
+    private FlashSettings BuildPresetSettings(string presetKey, float intensity)
+    {
+        if (_presetDb != null &&
+            _presetDb.TryGet(presetKey, out ScreenFlashPresetDBSO.Entry e))
         {
-            case ScreenFlashMode.Preset:
-                if (_presetDb != null && _presetDb.TryGet(_spec.preset, out ScreenFlashPresetDBSO.Entry e))
-                {
-                    return new FlashSettings(
-                        e.color,
-                        e.amount * intensity,
-                        e.attackDuration,
-                        e.holdDuration,
-                        e.releaseDuration,
-                        e.attackEase,
-                        e.releaseEase);
-                }
-
-                return new FlashSettings(
-                    Color.white,
-                    1f * intensity,
-                    0.02f,
-                    0.01f,
-                    0.16f,
-                    Ease.OutCubic,
-                    Ease.OutCubic);
-
-            case ScreenFlashMode.Custom:
-            default:
-                return new FlashSettings(
-                    _spec.color,
-                    _spec.amount * intensity,
-                    _spec.attackDuration,
-                    _spec.holdDuration,
-                    _spec.releaseDuration,
-                    _spec.attackEase,
-                    _spec.releaseEase);
+            return new FlashSettings(
+                e.color,
+                e.amount * intensity,
+                e.attackDuration,
+                e.holdDuration,
+                e.releaseDuration,
+                e.attackEase,
+                e.releaseEase);
         }
+
+        Debug.LogWarning(
+            $"[ScreenFlashCommand] Flash preset not found. " +
+            $"presetKey='{presetKey}'. Using fallback.",
+            _controller);
+
+        if (_presetDb != null &&
+            _presetDb.TryGet(ScreenFlashPresetDBSO.DefaultPresetKey, out e))
+        {
+            return new FlashSettings(
+                e.color,
+                e.amount * intensity,
+                e.attackDuration,
+                e.holdDuration,
+                e.releaseDuration,
+                e.attackEase,
+                e.releaseEase);
+        }
+
+        return new FlashSettings(
+            Color.white,
+            1f * intensity,
+            0.02f,
+            0.01f,
+            0.16f,
+            Ease.OutCubic,
+            Ease.OutCubic);
     }
 
     private readonly struct FlashSettings

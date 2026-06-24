@@ -359,14 +359,10 @@ public sealed partial class YarnCommandBridge
     
     private void BindScreenEffects(DialogueRunner runner)
     {
-        runner.AddCommandHandler<float, float>(
-            "screen_flash", EnqueueScreenFlashSpec);
-        runner.AddCommandHandler<float, float, float, float, float>(
-            "screen_flash_rgb", EnqueueScreenFlashRgbSpec);
-        runner.AddCommandHandler(
-            "screen_flash_hit", EnqueueScreenFlashHitSpec);
         runner.AddCommandHandler<string, float>(
-            "screen_flash_preset", EnqueueScreenFlashPresetSpec);
+            "screen_flash", EnqueueScreenFlashPresetSpec);
+        runner.AddCommandHandler(
+            "screen_flash_clear", EnqueueScreenFlashClearSpec);
 
         runner.AddCommandHandler<string, float, float>(
             "screen_vignette", EnqueueScreenVignettePresetSpec);
@@ -377,8 +373,6 @@ public sealed partial class YarnCommandBridge
             "screen_noise", EnqueueScreenNoisePresetSpec);
         runner.AddCommandHandler<float>(
             "screen_noise_clear", EnqueueScreenNoiseClearSpec);
-        runner.AddCommandHandler<float, float, float, float, float, float>(
-            "screen_noise_custom", EnqueueScreenNoiseCustomSpec);
     }
 
     private void Collect(CommandSpecBase spec)
