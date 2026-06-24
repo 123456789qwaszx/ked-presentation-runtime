@@ -71,6 +71,7 @@ public sealed class ScreenVignetteCommandSpec : CommandSpecBase
 public sealed class ScreenVignetteCommand : CommandBase
 {
     private readonly ScreenVignetteCommandSpec _spec;
+    private readonly ScreenEffectRig _screenEffects;
     private readonly ScreenVignettePresetDBSO _presetDb;
 
     private ScreenVignetteEffectController _controller;
@@ -78,23 +79,22 @@ public sealed class ScreenVignetteCommand : CommandBase
     private VignetteState _fromState;
     private VignetteState _destState;
 
-    private bool _resolveAttempted;
-
     private bool HasClaimedController { get; set; }
 
     public override bool WaitForCompletion => _spec.wait;
 
-    public ScreenVignetteCommand(ScreenVignetteCommandSpec spec, ScreenVignettePresetDBSO presetDb)
+    public ScreenVignetteCommand(
+        ScreenVignetteCommandSpec spec,
+        ScreenEffectRig screenEffects,
+        ScreenVignettePresetDBSO presetDb)
     {
         _spec = spec;
+        _screenEffects = screenEffects;
         _presetDb = presetDb;
     }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
-        if (!_resolveAttempted)
-            ResolveRefs();
-
         ClaimController();
 
         if (_spec.duration <= 0f)
@@ -115,7 +115,7 @@ public sealed class ScreenVignetteCommand : CommandBase
                 _spec.duration)
             .SetEase(_spec.ease)
             .SetUpdate(true)
-            .SetTarget(_controller)
+            .SetTarget(_controller.transform)
             .OnComplete(CommitFinalState);
 
         if (_spec.wait)
@@ -124,25 +124,15 @@ public sealed class ScreenVignetteCommand : CommandBase
 
     protected override void OnSkip(CommandRunScope scope)
     {
-        if (!_resolveAttempted)
-            ResolveRefs();
-
         if (!HasClaimedController)
             ClaimController();
 
         CommitFinalState();
     }
 
-    private void ResolveRefs()
-    {
-        _resolveAttempted = true;
-
-        PresentationUIRoot root = UIManager.Instance.GetUI<PresentationUIRoot>();
-        _controller = root.GetScreenVignetteEffect();
-    }
-
     private void ClaimController()
     {
+        _controller = _screenEffects.Vignette;
         _controller.KillTween(true);
 
         _fromState = CaptureCurrentState();
@@ -154,7 +144,6 @@ public sealed class ScreenVignetteCommand : CommandBase
     private void CommitFinalState()
     {
         _controller.KillTween(false);
-        
         ApplyState(_destState);
 
         HasClaimedController = false;
@@ -190,10 +179,10 @@ public sealed class ScreenVignetteCommand : CommandBase
             case ScreenVignetteMode.Clear:
                 return new VignetteState(
                     0f,
-                    _controller != null ? _controller.Color : Color.black,
-                    _controller != null ? _controller.Radius : 0.45f,
-                    _controller != null ? _controller.Softness : 0.35f,
-                    _controller != null ? _controller.Aspect : 1.777f);
+                    _controller.Color,
+                    _controller.Radius,
+                    _controller.Softness,
+                    _controller.Aspect);
 
             case ScreenVignetteMode.LetterBox:
                 return BuildLetterBoxState(_spec.letterBoxAmount, intensity);

@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 using Yarn.Unity;
 
@@ -123,6 +124,9 @@ public class VnAppBootstrap : MonoBehaviour
     [SerializeField] private ScreenFlashPresetDBSO screenFlashPresetDbso;
     [SerializeField] private UIStageDepthLayerBlurRuntime uiStageDepthLayerBlurRuntime;
     
+    [Header("Screen Effect Rig")]
+    [SerializeField] private RectTransform screenEffectRigMount;
+    [SerializeField] private RectTransform screenEffectRigPrefab;
     
     [Header("NodeDebug")] 
     [SerializeField] private YarnLaneDebugView yarnLaneDebugView;
@@ -153,6 +157,7 @@ public class VnAppBootstrap : MonoBehaviour
             _presentationStage,
             shotResponseStageProvider,
             characterFocusTuningDb);
+        
 
         BootstrapAudioSystem();
         ConnectAudioSystemToYarn();
@@ -255,8 +260,11 @@ public class VnAppBootstrap : MonoBehaviour
         AudioCommandFactory audioFactory = new(
             audioSystem,
             audioClipResolver);
+        
+        ScreenEffectRig screenEffectRig = EnsureScreenEffectRig();
 
         ScreenEffectCommandFactory screenEffectFactory = new(
+            screenEffectRig,
             screenFlashPresetDbso,
             screenNoisePresetDbso, 
             screenVignettePresetDbso,
@@ -289,6 +297,26 @@ public class VnAppBootstrap : MonoBehaviour
         presentationSessionEntry.Initialize(
             presentationSession,
             routeCatalogSo);
+    }
+    
+    private ScreenEffectRig EnsureScreenEffectRig()
+    {
+        ScreenEffectRig screenEffectRig = screenEffectRigMount.GetComponentInChildren<ScreenEffectRig>(true);
+
+        if (screenEffectRig == null)
+        {
+            ScreenEffectRigBuilder screenEffectRigBuilder = new();
+            
+            RectTransform rigRoot = screenEffectRigBuilder.BuildRigRoot(
+                screenEffectRigPrefab);
+
+            rigRoot.SetParent(screenEffectRigMount, false); 
+            screenEffectRig = rigRoot.gameObject.GetOrAddComponent<ScreenEffectRig>();
+        }
+
+        screenEffectRig.Initialize();
+
+        return screenEffectRig;
     }
     
     private void BootstrapYarn()

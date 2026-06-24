@@ -2,7 +2,7 @@ using UnityEngine;
 
 [DisallowMultipleComponent]
 [RequireComponent(typeof(RectTransform))]
-public sealed class ScreenEffectRig : MonoBehaviour, IScreenEffectHost
+public sealed class ScreenEffectRig : MonoBehaviour
 {
     private readonly ScreenEffectRigBuilder _builder = new();
 

@@ -55,6 +55,7 @@ public sealed class ScreenNoiseCommandSpec : CommandSpecBase
 public sealed class ScreenNoiseCommand : CommandBase
 {
     private readonly ScreenNoiseCommandSpec _spec;
+    private readonly ScreenEffectRig _screenEffects;
     private readonly ScreenNoisePresetDBSO _presetDb;
 
     private ScreenNoiseEffectController _controller;
@@ -62,23 +63,22 @@ public sealed class ScreenNoiseCommand : CommandBase
     private NoiseState _fromState;
     private NoiseState _destState;
 
-    private bool _resolveAttempted;
-
     private bool HasClaimedController { get; set; }
 
     public override bool WaitForCompletion => _spec.wait;
 
-    public ScreenNoiseCommand(ScreenNoiseCommandSpec spec, ScreenNoisePresetDBSO presetDb)
+    public ScreenNoiseCommand(
+        ScreenNoiseCommandSpec spec,
+        ScreenEffectRig screenEffects,
+        ScreenNoisePresetDBSO presetDb)
     {
         _spec = spec;
+        _screenEffects = screenEffects;
         _presetDb = presetDb;
     }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
-        if (!_resolveAttempted)
-            ResolveRefs();
-
         ClaimController();
 
         if (_spec.duration <= 0f)
@@ -99,7 +99,7 @@ public sealed class ScreenNoiseCommand : CommandBase
                 _spec.duration)
             .SetEase(_spec.ease)
             .SetUpdate(true)
-            .SetTarget(_controller)
+            .SetTarget(_controller.transform)
             .OnComplete(CommitFinalState);
 
         if (_spec.wait)
@@ -108,25 +108,15 @@ public sealed class ScreenNoiseCommand : CommandBase
 
     protected override void OnSkip(CommandRunScope scope)
     {
-        if (!_resolveAttempted)
-            ResolveRefs();
-
         if (!HasClaimedController)
             ClaimController();
 
         CommitFinalState();
     }
 
-    private void ResolveRefs()
-    {
-        _resolveAttempted = true;
-
-        PresentationUIRoot root = UIManager.Instance.GetUI<PresentationUIRoot>();
-        _controller = root.GetScreenNoiseEffect();
-    }
-
     private void ClaimController()
     {
+        _controller = _screenEffects.Noise;
         _controller.KillTween(true);
 
         _fromState = CaptureCurrentState();
@@ -138,7 +128,6 @@ public sealed class ScreenNoiseCommand : CommandBase
     private void CommitFinalState()
     {
         _controller.KillTween(false);
-        
         ApplyState(_destState);
 
         HasClaimedController = false;
@@ -176,11 +165,11 @@ public sealed class ScreenNoiseCommand : CommandBase
             case ScreenNoiseMode.Clear:
                 return new NoiseState(
                     0f,
-                    _controller != null ? _controller.Color : Color.white,
-                    _controller != null ? _controller.Scale : 0.8f,
-                    _controller != null ? _controller.SpeedX : 0.015f,
-                    _controller != null ? _controller.SpeedY : 0.012f,
-                    _controller != null ? _controller.Contrast : 1f);
+                    _controller.Color,
+                    _controller.Scale,
+                    _controller.SpeedX,
+                    _controller.SpeedY,
+                    _controller.Contrast);
 
             default:
                 return new NoiseState(0f, Color.white, 0.8f, 0.015f, 0.012f, 1f);

@@ -54,28 +54,28 @@ public sealed class ScreenFlashCommandSpec : CommandSpecBase
 public sealed class ScreenFlashCommand : CommandBase
 {
     private readonly ScreenFlashCommandSpec _spec;
+    private readonly ScreenEffectRig _screenEffects;
     private readonly ScreenFlashPresetDBSO _presetDb;
 
     private ScreenFlashEffectController _controller;
     private FlashSettings _settings;
 
-    private bool _resolveAttempted;
-
     private bool HasClaimedController { get; set; }
 
     public override bool WaitForCompletion => _spec.wait;
 
-    public ScreenFlashCommand(ScreenFlashCommandSpec spec, ScreenFlashPresetDBSO presetDb)
+    public ScreenFlashCommand(
+        ScreenFlashCommandSpec spec,
+        ScreenEffectRig screenEffects,
+        ScreenFlashPresetDBSO presetDb)
     {
         _spec = spec;
+        _screenEffects = screenEffects;
         _presetDb = presetDb;
     }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
-        if (!_resolveAttempted)
-            ResolveRefs();
-
         ClaimController();
 
         if (_settings.AttackDuration <= 0f &&
@@ -95,26 +95,17 @@ public sealed class ScreenFlashCommand : CommandBase
         if (_settings.AttackDuration > 0f)
         {
             sequence.Append(DOTween.To(
-                    () => _controller != null ? _controller.FlashAmount : 0f,
-                    value =>
-                    {
-                        if (_controller == null)
-                            return;
-
-                        _controller.ApplyImmediate(value, _settings.Color);
-                    },
+                    () => _controller.FlashAmount,
+                    value => _controller.ApplyImmediate(value, _settings.Color),
                     _settings.Amount,
                     _settings.AttackDuration)
                 .SetEase(_settings.AttackEase)
-                .SetTarget(_controller));
+                .SetTarget(_controller.transform));
         }
         else
         {
             sequence.AppendCallback(() =>
             {
-                if (_controller == null)
-                    return;
-
                 _controller.ApplyImmediate(_settings.Amount, _settings.Color);
             });
         }
@@ -125,14 +116,8 @@ public sealed class ScreenFlashCommand : CommandBase
         if (_settings.ReleaseDuration > 0f)
         {
             sequence.Append(DOTween.To(
-                    () => _controller != null ? _controller.FlashAmount : _settings.Amount,
-                    value =>
-                    {
-                        if (_controller == null)
-                            return;
-
-                        _controller.ApplyImmediate(value, _settings.Color);
-                    },
+                    () => _controller.FlashAmount,
+                    value => _controller.ApplyImmediate(value, _settings.Color),
                     0f,
                     _settings.ReleaseDuration)
                 .SetEase(_settings.ReleaseEase)
@@ -142,9 +127,6 @@ public sealed class ScreenFlashCommand : CommandBase
         {
             sequence.AppendCallback(() =>
             {
-                if (_controller == null)
-                    return;
-
                 _controller.ApplyImmediate(0f, _settings.Color);
             });
         }
@@ -157,25 +139,15 @@ public sealed class ScreenFlashCommand : CommandBase
 
     protected override void OnSkip(CommandRunScope scope)
     {
-        if (!_resolveAttempted)
-            ResolveRefs();
-
         if (!HasClaimedController)
             ClaimController();
 
         CommitFinalState();
     }
 
-    private void ResolveRefs()
-    {
-        _resolveAttempted = true;
-
-        PresentationUIRoot root = UIManager.Instance.GetUI<PresentationUIRoot>();
-        _controller = root.GetScreenFlashEffect();
-    }
-
     private void ClaimController()
     {
+        _controller = _screenEffects.Flash;
         _controller.KillTween(true);
 
         _settings = BuildSettings();
@@ -186,7 +158,6 @@ public sealed class ScreenFlashCommand : CommandBase
     private void CommitFinalState()
     {
         _controller.KillTween(false);
-        
         _controller.ApplyImmediate(0f, _settings.Color);
 
         HasClaimedController = false;
