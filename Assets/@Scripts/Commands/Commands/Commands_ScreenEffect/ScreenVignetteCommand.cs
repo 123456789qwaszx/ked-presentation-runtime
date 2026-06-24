@@ -3,24 +3,6 @@ using System.Collections;
 using DG.Tweening;
 using UnityEngine;
 
-public enum ScreenVignetteMode
-{
-    Custom = 0,
-    Preset = 1,
-    Clear = 2,
-    LetterBox = 3
-}
-
-public enum ScreenVignettePreset
-{
-    DefaultFocus = 0,
-    Tension = 1,
-    Horror = 2,
-    Danger = 3,
-    Memory = 4,
-    Dream = 5
-}
-
 [Serializable]
 [CommandMenuHint(
     "Screen Effect",
@@ -33,35 +15,12 @@ public enum ScreenVignettePreset
     SetOrder = -690)]
 public sealed class ScreenVignetteCommandSpec : CommandSpecBase
 {
-    [Header("Mode")]
-    public ScreenVignetteMode mode = ScreenVignetteMode.Preset;
-    public ScreenVignettePreset preset = ScreenVignettePreset.DefaultFocus;
+    [Header("Preset")]
+    [Tooltip("ScreenVignettePresetDBSO entry key. ex) clear, focus, tension, horror, danger, memory, dream, letterbox")]
+    public string presetKey = ScreenVignettePresetDBSO.DefaultPresetKey;
 
     [Range(0f, 1f)]
     public float intensity = 1f;
-
-    [Header("Custom")]
-    public Color color = Color.black;
-
-    [Range(0f, 1f)]
-    public float amount = 0.4f;
-
-    [Range(0f, 1f)]
-    public float radius = 0.45f;
-
-    [Range(0.001f, 1f)]
-    public float softness = 0.35f;
-
-    [Min(0f)]
-    public float aspect = 1.777f;
-
-    [Header("LetterBox")]
-    [Tooltip("0이면 암막 없음, 1이면 상하 암막이 많이 내려옵니다.")]
-    [Range(0f, 1f)]
-    public float letterBoxAmount = 0.5f;
-
-    [Range(0.001f, 0.2f)]
-    public float letterBoxSoftness = 0.025f;
 
     [Header("Tween")]
     public float duration = 0.35f;
@@ -162,39 +121,13 @@ public sealed class ScreenVignetteCommand : CommandBase
     private VignetteState BuildDestState()
     {
         float intensity = Mathf.Clamp01(_spec.intensity);
-
-        switch (_spec.mode)
-        {
-            case ScreenVignetteMode.Custom:
-                return new VignetteState(
-                    _spec.amount * intensity,
-                    _spec.color,
-                    _spec.radius,
-                    _spec.softness,
-                    _spec.aspect);
-
-            case ScreenVignetteMode.Preset:
-                return BuildPresetState(_spec.preset, intensity);
-
-            case ScreenVignetteMode.Clear:
-                return new VignetteState(
-                    0f,
-                    _controller.Color,
-                    _controller.Radius,
-                    _controller.Softness,
-                    _controller.Aspect);
-
-            case ScreenVignetteMode.LetterBox:
-                return BuildLetterBoxState(_spec.letterBoxAmount, intensity);
-
-            default:
-                return new VignetteState(0f, Color.black, 0.45f, 0.35f, 1.777f);
-        }
+        return BuildPresetState(_spec.presetKey, intensity);
     }
 
-    private VignetteState BuildPresetState(ScreenVignettePreset preset, float intensity)
+    private VignetteState BuildPresetState(string presetKey, float intensity)
     {
-        if (_presetDb != null && _presetDb.TryGet(preset, out ScreenVignettePresetDBSO.Entry e))
+        if (_presetDb != null &&
+            _presetDb.TryGet(presetKey, out ScreenVignettePresetDBSO.Entry e))
         {
             return new VignetteState(
                 e.amount * intensity,
@@ -204,25 +137,28 @@ public sealed class ScreenVignetteCommand : CommandBase
                 e.aspect);
         }
 
-        return new VignetteState(0.35f * intensity, Color.black, 0.25f, 0.10f, 1.2f);
-    }
+        Debug.LogWarning(
+            $"[ScreenVignetteCommand] Vignette preset not found. " +
+            $"presetKey='{presetKey}'. Using fallback.",
+            _controller);
 
-    private VignetteState BuildLetterBoxState(float amount, float intensity)
-    {
-        float t = Mathf.Clamp01(amount) * intensity;
-
-        ScreenVignettePresetDBSO.LetterBoxConfig lb = _presetDb != null
-            ? _presetDb.LetterBox
-            : ScreenVignettePresetDBSO.DefaultLetterBox();
-
-        float radius = Mathf.Lerp(lb.radiusOpen, lb.radiusClosed, t);
+        if (_presetDb != null &&
+            _presetDb.TryGet(ScreenVignettePresetDBSO.DefaultPresetKey, out e))
+        {
+            return new VignetteState(
+                e.amount * intensity,
+                e.color,
+                e.radius,
+                e.softness,
+                e.aspect);
+        }
 
         return new VignetteState(
-            1f,
-            lb.color,
-            radius,
-            Mathf.Max(0.001f, _spec.letterBoxSoftness),
-            0f);
+            0.35f * intensity,
+            Color.black,
+            0.25f,
+            0.10f,
+            1.2f);
     }
 
     private void ApplyState(VignetteState state)

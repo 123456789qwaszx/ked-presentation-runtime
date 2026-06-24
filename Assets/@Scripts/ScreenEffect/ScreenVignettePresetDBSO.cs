@@ -7,10 +7,13 @@ using UnityEngine;
     fileName = "ScreenVignettePresetDB")]
 public sealed class ScreenVignettePresetDBSO : ScriptableObject
 {
+    public const string DefaultPresetKey = "focus";
+
     [Serializable]
     public struct Entry
     {
-        public ScreenVignettePreset preset;
+        [Tooltip("Yarn/Command에서 사용할 preset key. ex) clear, focus, horror, dream, letterbox")]
+        public string key;
 
         [Range(0f, 1f)] public float amount;
         public Color color;
@@ -19,66 +22,136 @@ public sealed class ScreenVignettePresetDBSO : ScriptableObject
         [Min(0f)] public float aspect;
     }
 
-    [Serializable]
-    public struct LetterBoxConfig
-    {
-        public Color color;
-
-        [Tooltip("amount=0 (열림). 클수록 바가 안 보인다.")]
-        [Range(0f, 1f)] public float radiusOpen;
-
-        [Tooltip("amount=1 (닫힘). 작을수록 바가 안쪽으로 들어온다.")]
-        [Range(0f, 1f)] public float radiusClosed;
-    }
-
     [SerializeField] private List<Entry> entries = new();
-    [SerializeField] private LetterBoxConfig letterBox = DefaultLetterBox();
 
-    private Dictionary<ScreenVignettePreset, Entry> _map;
+    private Dictionary<string, Entry> _map;
 
-    public LetterBoxConfig LetterBox => letterBox;
-
-    public bool TryGet(ScreenVignettePreset preset, out Entry entry)
+    public bool TryGet(string key, out Entry entry)
     {
         if (_map == null)
             Build();
 
-        return _map.TryGetValue(preset, out entry);
+        return _map.TryGetValue(NormalizeKey(key), out entry);
     }
 
-    public static LetterBoxConfig DefaultLetterBox()
+    public static string NormalizeKey(string key)
     {
-        return new LetterBoxConfig
-        {
-            color = Color.black,
-            radiusOpen = 0.52f,
-            radiusClosed = 0.23f
-        };
+        key = (key ?? "").Trim();
+
+        if (string.IsNullOrEmpty(key))
+            return DefaultPresetKey;
+
+        key = key.ToLowerInvariant();
+        key = key.Replace(" ", "_");
+        key = key.Replace("-", "_");
+
+        if (key == "default" || key == "default_focus")
+            return DefaultPresetKey;
+
+        if (key == "lb" || key == "letter_box")
+            return "letterbox";
+
+        return key;
     }
 
     private void OnEnable() => _map = null;
-    private void OnValidate() => _map = null; // 플레이 모드 인스펙터 수정 → 캐시 무효화 → 다음 발화에 반영.
+
+    // 플레이 모드 인스펙터 수정 → 캐시 무효화 → 다음 발화에 반영.
+    private void OnValidate() => _map = null;
 
     private void Build()
     {
-        _map = new Dictionary<ScreenVignettePreset, Entry>();
+        _map = new Dictionary<string, Entry>(StringComparer.Ordinal);
 
         for (int i = 0; i < entries.Count; i++)
-            _map[entries[i].preset] = entries[i];
+        {
+            Entry entry = entries[i];
+            string key = NormalizeKey(entry.key);
+
+            if (string.IsNullOrEmpty(key))
+                continue;
+
+            entry.key = key;
+            _map[key] = entry;
+        }
     }
 
     private void Reset()
     {
         entries = new List<Entry>
         {
-            new() { preset = ScreenVignettePreset.DefaultFocus, amount = 0.35f, color = Color.black,                            radius = 0.25f, softness = 0.10f, aspect = 1.2f },
-            new() { preset = ScreenVignettePreset.Tension,      amount = 0.55f, color = Color.black,                            radius = 0.15f, softness = 0.22f, aspect = 1.2f },
-            new() { preset = ScreenVignettePreset.Horror,       amount = 0.78f, color = new Color(0.02f, 0.015f, 0.018f, 1f),   radius = 0.14f, softness = 0.36f, aspect = 1.2f },
-            new() { preset = ScreenVignettePreset.Danger,       amount = 0.58f, color = new Color(0.35f, 0.02f, 0.015f, 1f),    radius = 0.14f, softness = 0.34f, aspect = 1.2f },
-            new() { preset = ScreenVignettePreset.Memory,       amount = 0.36f, color = new Color(0.34f, 0.38f, 0.48f, 1f),     radius = 0.10f, softness = 0.36f, aspect = 1.2f },
-            new() { preset = ScreenVignettePreset.Dream,        amount = 0.32f, color = new Color(0.38f, 0.32f, 0.52f, 1f),     radius = 0.34f, softness = 0.12f, aspect = 1.2f },
+            new()
+            {
+                key = "clear",
+                amount = 0f,
+                color = Color.black,
+                radius = 0.45f,
+                softness = 0.35f,
+                aspect = 1.777f
+            },
+            new()
+            {
+                key = "focus",
+                amount = 0.35f,
+                color = Color.black,
+                radius = 0.25f,
+                softness = 0.10f,
+                aspect = 1.2f
+            },
+            new()
+            {
+                key = "tension",
+                amount = 0.55f,
+                color = Color.black,
+                radius = 0.15f,
+                softness = 0.22f,
+                aspect = 1.2f
+            },
+            new()
+            {
+                key = "horror",
+                amount = 0.78f,
+                color = new Color(0.02f, 0.015f, 0.018f, 1f),
+                radius = 0.14f,
+                softness = 0.36f,
+                aspect = 1.2f
+            },
+            new()
+            {
+                key = "danger",
+                amount = 0.58f,
+                color = new Color(0.35f, 0.02f, 0.015f, 1f),
+                radius = 0.14f,
+                softness = 0.34f,
+                aspect = 1.2f
+            },
+            new()
+            {
+                key = "memory",
+                amount = 0.36f,
+                color = new Color(0.34f, 0.38f, 0.48f, 1f),
+                radius = 0.10f,
+                softness = 0.36f,
+                aspect = 1.2f
+            },
+            new()
+            {
+                key = "dream",
+                amount = 0.32f,
+                color = new Color(0.38f, 0.32f, 0.52f, 1f),
+                radius = 0.34f,
+                softness = 0.12f,
+                aspect = 1.2f
+            },
+            new()
+            {
+                key = "letterbox",
+                amount = 1f,
+                color = Color.black,
+                radius = 0.288f,
+                softness = 0.001f,
+                aspect = 0f
+            },
         };
-
-        letterBox = DefaultLetterBox();
     }
 }

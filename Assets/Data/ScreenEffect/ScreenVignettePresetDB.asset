@@ -13,43 +13,51 @@ MonoBehaviour:
   m_Name: ScreenVignettePresetDB
   m_EditorClassIdentifier: Assembly-CSharp::ScreenVignettePresetDBSO
   entries:
-  - preset: 0
+  - key: clear
+    amount: 0
+    color: {r: 0, g: 0, b: 0, a: 1}
+    radius: 0.45
+    softness: 0.35
+    aspect: 1.777
+  - key: focus
     amount: 0.35
     color: {r: 0, g: 0, b: 0, a: 1}
     radius: 0.25
     softness: 0.1
     aspect: 1.2
-  - preset: 1
-    amount: 0.96
+  - key: tension
+    amount: 0.55
     color: {r: 0, g: 0, b: 0, a: 1}
-    radius: 0.351
-    softness: 0.193
+    radius: 0.15
+    softness: 0.22
     aspect: 1.2
-  - preset: 2
-    amount: 1
+  - key: horror
+    amount: 0.78
     color: {r: 0.02, g: 0.015, b: 0.018, a: 1}
-    radius: 0
-    softness: 0.248
-    aspect: 1.48
-  - preset: 3
+    radius: 0.14
+    softness: 0.36
+    aspect: 1.2
+  - key: danger
     amount: 0.58
     color: {r: 0.35, g: 0.02, b: 0.015, a: 1}
     radius: 0.14
     softness: 0.34
     aspect: 1.2
-  - preset: 4
+  - key: memory
     amount: 0.36
     color: {r: 0.34, g: 0.38, b: 0.48, a: 1}
     radius: 0.1
     softness: 0.36
     aspect: 1.2
-  - preset: 5
+  - key: dream
     amount: 0.32
     color: {r: 0.38, g: 0.32, b: 0.52, a: 1}
     radius: 0.34
     softness: 0.12
     aspect: 1.2
-  letterBox:
+  - key: letterbox
+    amount: 1
     color: {r: 0, g: 0, b: 0, a: 1}
-    radiusOpen: 0.52
-    radiusClosed: 0.23
+    radius: 0.288
+    softness: 0.001
+    aspect: 0

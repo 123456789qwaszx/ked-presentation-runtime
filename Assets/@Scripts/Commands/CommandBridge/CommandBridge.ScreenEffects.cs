@@ -68,13 +68,12 @@ public sealed partial class YarnCommandBridge
     private void EnqueueScreenVignettePresetSpec(
         string presetKey,
         float intensity = 1f,
-        float duration = 55f)
+        float duration = 0.35f)
     {
         var spec = new ScreenVignetteCommandSpec
         {
-            mode = ScreenVignetteMode.Preset,
-            preset = PresentationScreenEffectKeyParser.ParseVignettePreset(presetKey),
-            intensity = intensity,
+            presetKey = ScreenVignettePresetDBSO.NormalizeKey(presetKey),
+            intensity = Mathf.Clamp01(intensity),
             duration = Mathf.Max(0f, duration),
             wait = false
         };
@@ -86,48 +85,9 @@ public sealed partial class YarnCommandBridge
     {
         var spec = new ScreenVignetteCommandSpec
         {
-            mode = ScreenVignetteMode.Clear,
+            presetKey = "clear",
+            intensity = 1f,
             duration = Mathf.Max(0f, duration),
-            wait = false
-        };
-
-        Collect(spec);
-    }
-
-    private void EnqueueScreenLetterBoxSpec(
-        float amount = 0.5f,
-        float duration = 0.35f)
-    {
-        var spec = new ScreenVignetteCommandSpec
-        {
-            mode = ScreenVignetteMode.LetterBox,
-            letterBoxAmount = Mathf.Clamp01(amount),
-            letterBoxSoftness = 0.025f,
-            duration = Mathf.Max(0f, duration),
-            wait = false
-        };
-
-        Collect(spec);
-    }
-
-    private void EnqueueScreenVignetteCustomSpec(
-        float amount,
-        float radius,
-        float softness,
-        float aspect,
-        float r,
-        float g,
-        float b)
-    {
-        var spec = new ScreenVignetteCommandSpec
-        {
-            mode = ScreenVignetteMode.Custom,
-            amount = amount,
-            radius = radius,
-            softness = softness,
-            aspect = aspect,
-            color = new Color(r, g, b, 1f),
-            duration = 0.35f,
             wait = false
         };
 

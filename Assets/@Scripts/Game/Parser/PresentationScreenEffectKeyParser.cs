@@ -33,45 +33,45 @@ public static class PresentationScreenEffectKeyParser
         }
     }
 
-    public static ScreenVignettePreset ParseVignettePreset(string key)
-    {
-        if (string.IsNullOrWhiteSpace(key))
-            return ScreenVignettePreset.DefaultFocus;
-
-        switch (key.Trim().ToLowerInvariant())
-        {
-            case "focus":
-            case "default":
-            case "default_focus":
-                return ScreenVignettePreset.DefaultFocus;
-
-            case "tension":
-            case "tense":
-                return ScreenVignettePreset.Tension;
-
-            case "horror":
-            case "fear":
-                return ScreenVignettePreset.Horror;
-
-            case "danger":
-            case "warning":
-            case "red":
-                return ScreenVignettePreset.Danger;
-
-            case "memory":
-            case "recall":
-            case "flashback":
-                return ScreenVignettePreset.Memory;
-
-            case "dream":
-            case "dreamy":
-                return ScreenVignettePreset.Dream;
-
-            default:
-                Debug.LogWarning($"[PresentationScreenEffectKeyParser] Unknown screen vignette preset '{key}'. Fallback to DefaultFocus.");
-                return ScreenVignettePreset.DefaultFocus;
-        }
-    }
+    // public static ScreenVignettePreset ParseVignettePreset(string key)
+    // {
+    //     if (string.IsNullOrWhiteSpace(key))
+    //         return ScreenVignettePreset.DefaultFocus;
+    //
+    //     switch (key.Trim().ToLowerInvariant())
+    //     {
+    //         case "focus":
+    //         case "default":
+    //         case "default_focus":
+    //             return ScreenVignettePreset.DefaultFocus;
+    //
+    //         case "tension":
+    //         case "tense":
+    //             return ScreenVignettePreset.Tension;
+    //
+    //         case "horror":
+    //         case "fear":
+    //             return ScreenVignettePreset.Horror;
+    //
+    //         case "danger":
+    //         case "warning":
+    //         case "red":
+    //             return ScreenVignettePreset.Danger;
+    //
+    //         case "memory":
+    //         case "recall":
+    //         case "flashback":
+    //             return ScreenVignettePreset.Memory;
+    //
+    //         case "dream":
+    //         case "dreamy":
+    //             return ScreenVignettePreset.Dream;
+    //
+    //         default:
+    //             Debug.LogWarning($"[PresentationScreenEffectKeyParser] Unknown screen vignette preset '{key}'. Fallback to DefaultFocus.");
+    //             return ScreenVignettePreset.DefaultFocus;
+    //     }
+    // }
 
     public static ScreenNoisePreset ParseNoisePreset(string key)
     {
