@@ -26,11 +26,11 @@ MonoBehaviour:
     softness: 0.193
     aspect: 1.2
   - preset: 2
-    amount: 0.78
+    amount: 1
     color: {r: 0.02, g: 0.015, b: 0.018, a: 1}
-    radius: 0.14
-    softness: 0.36
-    aspect: 1.2
+    radius: 0
+    softness: 0.248
+    aspect: 1.48
   - preset: 3
     amount: 0.58
     color: {r: 0.35, g: 0.02, b: 0.015, a: 1}

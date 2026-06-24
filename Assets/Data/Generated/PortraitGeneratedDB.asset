@@ -1243,6 +1243,421 @@ MonoBehaviour:
     emotionKey: 13
     sprite: {fileID: 21300000, guid: 0c9c6b4f96961424fba466f5b42fbd9d, type: 3}
     assetPath: Assets/Art/Portraits/Iris/Iris_e_13.png
+  - characterId: Karin
+    variantKey: Karin_a
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: c941c789b10a6dd4782a4ea41a85195c, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_a_02.png
+  - characterId: Karin
+    variantKey: Karin_a
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: 4046eea899d69d24d9313b3baa7838d3, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_a_03.png
+  - characterId: Karin
+    variantKey: Karin_a
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: 9ea827e82c090a4418fd09ddea0b4567, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_a_04.png
+  - characterId: Karin
+    variantKey: Karin_a
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: 958d85096bd4c854293f0dcbaa8df6f2, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_a_05.png
+  - characterId: Karin
+    variantKey: Karin_a
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: 5421835c5ccb53b4bb4c854ada7c3445, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_a_06.png
+  - characterId: Karin
+    variantKey: Karin_a
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: 81dd5cc9221e11c4cad162775b26fe87, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_a_07.png
+  - characterId: Karin
+    variantKey: Karin_a
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: b2859c433e2d168468f8315a506114ec, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_a_08.png
+  - characterId: Karin
+    variantKey: Karin_a
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: 60bf41347cf43f347b0fa5e7ad9780b8, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_a_09.png
+  - characterId: Karin
+    variantKey: Karin_a
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: c85d3650f9b888a4ba7f7140f63faf8e, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_a_10.png
+  - characterId: Karin
+    variantKey: Karin_a
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: ad24720f835116f409f50dbcaad5142c, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_a_12.png
+  - characterId: Karin
+    variantKey: Karin_a
+    emotionKey: 13
+    sprite: {fileID: 21300000, guid: 9ffebb4fdf0aaae4f88de14eb0a5b8a7, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_a_13.png
+  - characterId: Karin
+    variantKey: Karin_a
+    emotionKey: 14
+    sprite: {fileID: 21300000, guid: 2c3ae1ea9d9ffa4489d641314a146fb5, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_a_14.png
+  - characterId: Karin
+    variantKey: Karin_a
+    emotionKey: 15
+    sprite: {fileID: 21300000, guid: 249254f47dca4894ba6c4b32c9610def, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_a_15.png
+  - characterId: Karin
+    variantKey: Karin_a
+    emotionKey: 16
+    sprite: {fileID: 21300000, guid: cce9963f41c966c46b997a7b380142fc, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_a_16.png
+  - characterId: Karin
+    variantKey: Karin_a
+    emotionKey: 17
+    sprite: {fileID: 21300000, guid: 5bf2c0f1b339da547b6d8266cceb0b19, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_a_17.png
+  - characterId: Karin
+    variantKey: Karin_a
+    emotionKey: 18
+    sprite: {fileID: 21300000, guid: fa8db7056a0abc7419ff1b5419d435ea, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_a_18.png
+  - characterId: Karin
+    variantKey: Karin_a
+    emotionKey: 19
+    sprite: {fileID: 21300000, guid: 215527192f6555e4c87ac4e92d8c67c5, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_a_19.png
+  - characterId: Karin
+    variantKey: Karin_a
+    emotionKey: 20
+    sprite: {fileID: 21300000, guid: abdde4426534e7a43a0aad665bbc34b6, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_a_20.png
+  - characterId: Karin
+    variantKey: Karin_a
+    emotionKey: 21
+    sprite: {fileID: 21300000, guid: ee63c372101cb1a4baeb1fa752613191, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_a_21.png
+  - characterId: Karin
+    variantKey: Karin_a
+    emotionKey: 22
+    sprite: {fileID: 21300000, guid: a9f87bbdf4b47244392a0079d4c20c91, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_a_22.png
+  - characterId: Karin
+    variantKey: Karin_b
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: 1b81e64055c47ad44842f6858d29519f, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_b_02.png
+  - characterId: Karin
+    variantKey: Karin_b
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: 7feff20c9c044d84b82d111f2435027f, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_b_03.png
+  - characterId: Karin
+    variantKey: Karin_b
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: 35f3ccfb2ac173a4aa296a37bb8bb5b4, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_b_04.png
+  - characterId: Karin
+    variantKey: Karin_b
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: c5be3028441ba054bb516e2a265d8b52, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_b_05.png
+  - characterId: Karin
+    variantKey: Karin_b
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: 0070657f948e65e499dce591aa249d1a, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_b_06.png
+  - characterId: Karin
+    variantKey: Karin_b
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: 78a03a7c84214dc4981df47f1a8fa5fe, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_b_07.png
+  - characterId: Karin
+    variantKey: Karin_b
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: 2b8a0a0ec906869428f2e7bda99b773d, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_b_08.png
+  - characterId: Karin
+    variantKey: Karin_b
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: 412cd80b7b0f9334ebd0d746f3ba088d, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_b_09.png
+  - characterId: Karin
+    variantKey: Karin_b
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: d86c4258722aa8b43b4631770177ca08, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_b_10.png
+  - characterId: Karin
+    variantKey: Karin_b
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: 6f1e4d9903541aa47a235e728f9c9178, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_b_11.png
+  - characterId: Karin
+    variantKey: Karin_b
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: 0016a90c9b7f7ad43973a0244efd2992, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_b_12.png
+  - characterId: Karin
+    variantKey: Karin_b
+    emotionKey: 13
+    sprite: {fileID: 21300000, guid: ec35a63de1707b44bbd5722ceec889c0, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_b_13.png
+  - characterId: Karin
+    variantKey: Karin_b
+    emotionKey: 14
+    sprite: {fileID: 21300000, guid: 00e73262ae3cd214cac8d1e4439de2e3, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_b_14.png
+  - characterId: Karin
+    variantKey: Karin_b
+    emotionKey: 15
+    sprite: {fileID: 21300000, guid: 7c8b0ae50f1bf2941935149b06d5f194, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_b_15.png
+  - characterId: Karin
+    variantKey: Karin_b
+    emotionKey: 16
+    sprite: {fileID: 21300000, guid: ad4b418487d943a44aaff18fc62a75a6, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_b_16.png
+  - characterId: Karin
+    variantKey: Karin_b
+    emotionKey: 17
+    sprite: {fileID: 21300000, guid: 8fcbe12f0153884419e85110da8c2782, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_b_17.png
+  - characterId: Karin
+    variantKey: Karin_b
+    emotionKey: 18
+    sprite: {fileID: 21300000, guid: b4a91a3b7a3f9a84f8d14c397e6825ba, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_b_18.png
+  - characterId: Karin
+    variantKey: Karin_b
+    emotionKey: 19
+    sprite: {fileID: 21300000, guid: 63d6a6261086c4f42875cd2530857e35, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_b_19.png
+  - characterId: Karin
+    variantKey: Karin_b
+    emotionKey: 20
+    sprite: {fileID: 21300000, guid: ce85751e297779c49bbd260867253fbe, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_b_20.png
+  - characterId: Karin
+    variantKey: Karin_b
+    emotionKey: 21
+    sprite: {fileID: 21300000, guid: 86fc48dd9e02cee4aaa15452d37241d9, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_b_21.png
+  - characterId: Karin
+    variantKey: Karin_b
+    emotionKey: 22
+    sprite: {fileID: 21300000, guid: c34a43325a832e84385cc2fe192f2a41, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_b_22.png
+  - characterId: Karin
+    variantKey: Karin_c
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: e9ab47b0aa4ab3b40a307d07e8f022fa, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_c_02.png
+  - characterId: Karin
+    variantKey: Karin_c
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: 10790d60bfc23544b9611990d6447c3c, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_c_03.png
+  - characterId: Karin
+    variantKey: Karin_c
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: 463b1da6ac875ab40927b704499105fa, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_c_04.png
+  - characterId: Karin
+    variantKey: Karin_c
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: eb16c3d4d9af1444caf018dc469a165e, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_c_05.png
+  - characterId: Karin
+    variantKey: Karin_c
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: ad9a634c73ba07c438f6bcc4f8d35c3c, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_c_06.png
+  - characterId: Karin
+    variantKey: Karin_c
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: 6a544111cdf82494caa801c13622a4ce, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_c_07.png
+  - characterId: Karin
+    variantKey: Karin_c
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: c0bc6982a8cbef541b195e42db02461c, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_c_08.png
+  - characterId: Karin
+    variantKey: Karin_c
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: 4e87a827a2ca2b9458d8ce7d9771a345, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_c_09.png
+  - characterId: Karin
+    variantKey: Karin_c
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: 23baaa0083a049f4c9993965fc74ec30, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_c_10.png
+  - characterId: Karin
+    variantKey: Karin_c
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: 20296d07feecc8441ae0375972acad78, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_c_11.png
+  - characterId: Karin
+    variantKey: Karin_c
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: d32a933bde8934f40bf26a155e8d572b, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_c_12.png
+  - characterId: Karin
+    variantKey: Karin_c
+    emotionKey: 13
+    sprite: {fileID: 21300000, guid: a6fee2b94c94ca849a60d97f1176ea8f, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_c_13.png
+  - characterId: Karin
+    variantKey: Karin_c
+    emotionKey: 14
+    sprite: {fileID: 21300000, guid: ce890af149c975843836f8bcd7895252, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_c_14.png
+  - characterId: Karin
+    variantKey: Karin_c
+    emotionKey: 15
+    sprite: {fileID: 21300000, guid: fd85682a06e7f1f40b4efad26f8f1001, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_c_15.png
+  - characterId: Karin
+    variantKey: Karin_c
+    emotionKey: 16
+    sprite: {fileID: 21300000, guid: 7f543aee13fe8a849844be0dde504f94, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_c_16.png
+  - characterId: Karin
+    variantKey: Karin_c
+    emotionKey: 17
+    sprite: {fileID: 21300000, guid: f0a164e6f5db2b742af28f944600d042, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_c_17.png
+  - characterId: Karin
+    variantKey: Karin_c
+    emotionKey: 18
+    sprite: {fileID: 21300000, guid: 97f43e8df69511b4bb7c23922edf3c8b, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_c_18.png
+  - characterId: Karin
+    variantKey: Karin_c
+    emotionKey: 19
+    sprite: {fileID: 21300000, guid: 15187b4f4ae0bab46a69dcbeda8a9f96, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_c_19.png
+  - characterId: Karin
+    variantKey: Karin_c
+    emotionKey: 20
+    sprite: {fileID: 21300000, guid: d1670731511689e43855699c1eaf0fe8, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_c_20.png
+  - characterId: Karin
+    variantKey: Karin_c
+    emotionKey: 21
+    sprite: {fileID: 21300000, guid: 223920b87675d78409df5fce391912cd, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_c_21.png
+  - characterId: Karin
+    variantKey: Karin_c
+    emotionKey: 22
+    sprite: {fileID: 21300000, guid: ebe2728c2771c7945a1332fe09a7a70b, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_c_22.png
+  - characterId: Karin
+    variantKey: Karin_d
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: e7e44ec3cce417b41a608bd558fb643e, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_d_02.png
+  - characterId: Karin
+    variantKey: Karin_d
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: e162c4e0a212a5e45b2dd831aaba74ca, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_d_03.png
+  - characterId: Karin
+    variantKey: Karin_d
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: e037ef297b1630c43b17f0f0f21fe631, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_d_04.png
+  - characterId: Karin
+    variantKey: Karin_d
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: 03e4beeccbf558741a38c8a091c39740, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_d_05.png
+  - characterId: Karin
+    variantKey: Karin_d
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: fea86b1aa1064834db0a0905ede51580, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_d_06.png
+  - characterId: Karin
+    variantKey: Karin_d
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: d75b1a691f32a9c4ba7f6fd3e85363c8, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_d_07.png
+  - characterId: Karin
+    variantKey: Karin_d
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: a249333a816c6dc4a8ad3446304a3e1f, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_d_08.png
+  - characterId: Karin
+    variantKey: Karin_d
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: 770086c2330c3d84aaea149aff0f9686, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_d_09.png
+  - characterId: Karin
+    variantKey: Karin_d
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: 75534a3b5acb36540b87a06f57af1a4b, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_d_10.png
+  - characterId: Karin
+    variantKey: Karin_d
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: e338c12c53369bc44ba141507a43c160, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_d_11.png
+  - characterId: Karin
+    variantKey: Karin_d
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: 163966ceed5223f4296caf5057ac7e65, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_d_12.png
+  - characterId: Karin
+    variantKey: Karin_d
+    emotionKey: 13
+    sprite: {fileID: 21300000, guid: 480ede292f61d1740aab5c8c70435cea, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_d_13.png
+  - characterId: Karin
+    variantKey: Karin_d
+    emotionKey: 14
+    sprite: {fileID: 21300000, guid: 09deec3cf05eefc4cb98b8da7d567b88, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_d_14.png
+  - characterId: Karin
+    variantKey: Karin_d
+    emotionKey: 15
+    sprite: {fileID: 21300000, guid: 71d319a6352f5854d94b666d48fca25e, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_d_15.png
+  - characterId: Karin
+    variantKey: Karin_d
+    emotionKey: 16
+    sprite: {fileID: 21300000, guid: 7bb0266ec4052a84ea47ddf968a14c0e, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_d_16.png
+  - characterId: Karin
+    variantKey: Karin_d
+    emotionKey: 17
+    sprite: {fileID: 21300000, guid: d62abe79bd4cc7643bffe95d878cfebe, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_d_17.png
+  - characterId: Karin
+    variantKey: Karin_d
+    emotionKey: 18
+    sprite: {fileID: 21300000, guid: 6d02774e089ca84409ed187350ac0106, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_d_18.png
+  - characterId: Karin
+    variantKey: Karin_d
+    emotionKey: 19
+    sprite: {fileID: 21300000, guid: 6eed162eb062ad3438a933908543279c, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_d_19.png
+  - characterId: Karin
+    variantKey: Karin_d
+    emotionKey: 20
+    sprite: {fileID: 21300000, guid: 9b42219a38b7ba94d87ea65fc830199c, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_d_20.png
+  - characterId: Karin
+    variantKey: Karin_d
+    emotionKey: 21
+    sprite: {fileID: 21300000, guid: 1085ef7c34d9be149ac3d9b9b45a6b25, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_d_21.png
+  - characterId: Karin
+    variantKey: Karin_d
+    emotionKey: 22
+    sprite: {fileID: 21300000, guid: 162474b15a58b344b86be044f1f7cb6f, type: 3}
+    assetPath: Assets/Art/Portraits/Karin/Karin_d_22.png
   - characterId: Laru
     variantKey: Laru_a
     emotionKey: 02
@@ -1593,6 +2008,406 @@ MonoBehaviour:
     emotionKey: 12
     sprite: {fileID: 21300000, guid: 7b56f4adf77f8ff48b8cc2bd3228a2e0, type: 3}
     assetPath: Assets/Art/Portraits/Mercurio/Mercurio_a_12.png
+  - characterId: Mistique
+    variantKey: Mistique_a
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: e5103e4885950754f9ee4a456a47b96b, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_a_02.png
+  - characterId: Mistique
+    variantKey: Mistique_a
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: 33de85e15e78bc44297b522e6c79d982, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_a_03.png
+  - characterId: Mistique
+    variantKey: Mistique_a
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: 63dcef203a27a5a45bbdfcb695436caf, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_a_04.png
+  - characterId: Mistique
+    variantKey: Mistique_a
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: 95f2d018301ac914ab121d88c0b1625c, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_a_05.png
+  - characterId: Mistique
+    variantKey: Mistique_a
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: 53f808be80cea7149b306b33b375da20, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_a_06.png
+  - characterId: Mistique
+    variantKey: Mistique_a
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: 35e95479d74d4944794c71482a16c64d, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_a_07.png
+  - characterId: Mistique
+    variantKey: Mistique_a
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: fa89062b854efbc4888d6acdd1aac086, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_a_08.png
+  - characterId: Mistique
+    variantKey: Mistique_a
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: 596aa3a9bb870144ebd02199eb6a5893, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_a_09.png
+  - characterId: Mistique
+    variantKey: Mistique_a
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: 8c1841dc0bce7fe4ab3e3c6063841273, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_a_10.png
+  - characterId: Mistique
+    variantKey: Mistique_a
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: 7d15d21e901ebe94b99f1b3e7c0e3b06, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_a_11.png
+  - characterId: Mistique
+    variantKey: Mistique_a
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: 8fa988f99d09e484a81f4da34c34b01b, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_a_12.png
+  - characterId: Mistique
+    variantKey: Mistique_a
+    emotionKey: 13
+    sprite: {fileID: 21300000, guid: b417fd0ec46ce034fb01a20ecc474b9c, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_a_13.png
+  - characterId: Mistique
+    variantKey: Mistique_a
+    emotionKey: 14
+    sprite: {fileID: 21300000, guid: ace99153f956aec4082dd1b8b305d082, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_a_14.png
+  - characterId: Mistique
+    variantKey: Mistique_a
+    emotionKey: 15
+    sprite: {fileID: 21300000, guid: 2eb6ec9260817664a86309f26c4b993b, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_a_15.png
+  - characterId: Mistique
+    variantKey: Mistique_a
+    emotionKey: 16
+    sprite: {fileID: 21300000, guid: e446396e04a6f1e439a3f736a7f7f2bf, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_a_16.png
+  - characterId: Mistique
+    variantKey: Mistique_a
+    emotionKey: 17
+    sprite: {fileID: 21300000, guid: c58fa46266f008845933dcea5a8abcec, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_a_17.png
+  - characterId: Mistique
+    variantKey: Mistique_a
+    emotionKey: 18
+    sprite: {fileID: 21300000, guid: b37949c565b38204e9e968f0d9a1fcc4, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_a_18.png
+  - characterId: Mistique
+    variantKey: Mistique_a
+    emotionKey: 19
+    sprite: {fileID: 21300000, guid: 988096ecc77796c44935e22945a734b9, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_a_19.png
+  - characterId: Mistique
+    variantKey: Mistique_b
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: b15ea94b7df5eb149974af77140ce224, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_b_02.png
+  - characterId: Mistique
+    variantKey: Mistique_b
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: cb451dc75abf9c14ca9e591630f3985d, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_b_03.png
+  - characterId: Mistique
+    variantKey: Mistique_b
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: e16be55a2150903469b289c7fa3f1f4c, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_b_04.png
+  - characterId: Mistique
+    variantKey: Mistique_b
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: 170ca77cf783cb84398897d4364ee452, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_b_05.png
+  - characterId: Mistique
+    variantKey: Mistique_b
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: 5827757713db50b46b1ed2fab36a1d2f, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_b_06.png
+  - characterId: Mistique
+    variantKey: Mistique_b
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: d7af69753e093ea47bba0fa6bd0e227b, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_b_07.png
+  - characterId: Mistique
+    variantKey: Mistique_b
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: 886d8dca1b6981a44b3cb84e43674fba, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_b_08.png
+  - characterId: Mistique
+    variantKey: Mistique_b
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: 03a6eba8fcd319d4cbc00c802a30cfd9, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_b_09.png
+  - characterId: Mistique
+    variantKey: Mistique_b
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: 03c646968ff08754185533628618b802, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_b_10.png
+  - characterId: Mistique
+    variantKey: Mistique_b
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: 3b8e1a37c85dd1442bf477d12ee1f32d, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_b_11.png
+  - characterId: Mistique
+    variantKey: Mistique_b
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: e277f4afddd402d46882f0b4dfc262de, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_b_12.png
+  - characterId: Mistique
+    variantKey: Mistique_b
+    emotionKey: 13
+    sprite: {fileID: 21300000, guid: 550d15adf0495a941b21a40d02a93977, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_b_13.png
+  - characterId: Mistique
+    variantKey: Mistique_b
+    emotionKey: 14
+    sprite: {fileID: 21300000, guid: b7f86636ffdf650448fa0c45e239e059, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_b_14.png
+  - characterId: Mistique
+    variantKey: Mistique_b
+    emotionKey: 15
+    sprite: {fileID: 21300000, guid: df2043c1899d5ee4981842e53a0e8ec0, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_b_15.png
+  - characterId: Mistique
+    variantKey: Mistique_b
+    emotionKey: 16
+    sprite: {fileID: 21300000, guid: 7ef7565ca99378542802cd6292f5a23e, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_b_16.png
+  - characterId: Mistique
+    variantKey: Mistique_b
+    emotionKey: 17
+    sprite: {fileID: 21300000, guid: b38a56ce1554cf0409b4bc7a05e4c1fb, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_b_17.png
+  - characterId: Mistique
+    variantKey: Mistique_b
+    emotionKey: 18
+    sprite: {fileID: 21300000, guid: 586e48ed36df59d40a2a59a44160238f, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_b_18.png
+  - characterId: Mistique
+    variantKey: Mistique_b
+    emotionKey: 19
+    sprite: {fileID: 21300000, guid: 5f424447452f8f647a8c14355e02d1c6, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_b_19.png
+  - characterId: Mistique
+    variantKey: Mistique_b
+    emotionKey: 20
+    sprite: {fileID: 21300000, guid: 85281fba0e7df494db9292972389608d, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_b_20.png
+  - characterId: Mistique
+    variantKey: Mistique_b
+    emotionKey: 21
+    sprite: {fileID: 21300000, guid: 5e8f4d1c0fbe3e045a937dd9049b79b4, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_b_21.png
+  - characterId: Mistique
+    variantKey: Mistique_c
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: a4422009f5a77474e9ce0eac4c550ee0, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_c_02.png
+  - characterId: Mistique
+    variantKey: Mistique_c
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: 6048e17c1f560e14aa83334e8fae919b, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_c_03.png
+  - characterId: Mistique
+    variantKey: Mistique_c
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: 8d7d8384fd8770f43b54857127e50b25, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_c_04.png
+  - characterId: Mistique
+    variantKey: Mistique_c
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: f82be2091cb7d004ab95c1626bc8491c, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_c_05.png
+  - characterId: Mistique
+    variantKey: Mistique_c
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: 1678f84949c84584fb80868cd8b2d75d, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_c_06.png
+  - characterId: Mistique
+    variantKey: Mistique_c
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: a8c2a7f43ebec594badd07971337484c, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_c_07.png
+  - characterId: Mistique
+    variantKey: Mistique_c
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: 0826be87513cf3d4a825ba5f14162f81, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_c_08.png
+  - characterId: Mistique
+    variantKey: Mistique_c
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: 0ae86815052b7984f9df7b0aa156dd4e, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_c_09.png
+  - characterId: Mistique
+    variantKey: Mistique_c
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: a2d438d89d5d9864fb2557721664aacd, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_c_10.png
+  - characterId: Mistique
+    variantKey: Mistique_c
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: 2d1ed1706f2ffe44cb9e433e5fc9c54e, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_c_11.png
+  - characterId: Mistique
+    variantKey: Mistique_d
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: 534f032561fde3c4bb0c8beed2a63906, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_d_02.png
+  - characterId: Mistique
+    variantKey: Mistique_d
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: e1dc5df6ca0d8ee40b5f620b390bebdf, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_d_03.png
+  - characterId: Mistique
+    variantKey: Mistique_d
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: c4f67ab93eafaba44a2ae51ee11a248f, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_d_04.png
+  - characterId: Mistique
+    variantKey: Mistique_d
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: 8e32c26f898746b4d9cdd6e57046ef58, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_d_05.png
+  - characterId: Mistique
+    variantKey: Mistique_d
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: 1038dab00c5c06c4fac1904a621080c8, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_d_06.png
+  - characterId: Mistique
+    variantKey: Mistique_d
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: 6a6e605345dddbf4e9a59f975c2612f1, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_d_07.png
+  - characterId: Mistique
+    variantKey: Mistique_d
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: c45175c687697264c8ec2fbcd81d9564, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_d_08.png
+  - characterId: Mistique
+    variantKey: Mistique_d
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: 871704e35ef7e9d4aacd262c27d42169, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_d_09.png
+  - characterId: Mistique
+    variantKey: Mistique_d
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: 705e01a1781c518489ac36e5fb882f6b, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_d_10.png
+  - characterId: Mistique
+    variantKey: Mistique_d
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: b31e561117df37a49ba5cfe3fc8ddf3e, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_d_11.png
+  - characterId: Mistique
+    variantKey: Mistique_d
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: 8dd58a1b47b8dc44e9abec24c6f41326, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_d_12.png
+  - characterId: Mistique
+    variantKey: Mistique_d
+    emotionKey: 13
+    sprite: {fileID: 21300000, guid: bf5e0bb2573f4d84f8504b62253d6aa5, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_d_13.png
+  - characterId: Mistique
+    variantKey: Mistique_d
+    emotionKey: 14
+    sprite: {fileID: 21300000, guid: e1def96f734e03e409e81098abfb7896, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_d_14.png
+  - characterId: Mistique
+    variantKey: Mistique_d
+    emotionKey: 15
+    sprite: {fileID: 21300000, guid: a60623fe96fcadc43b7d3111dbbcdd72, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_d_15.png
+  - characterId: Mistique
+    variantKey: Mistique_e
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: 2d4965b495271ac4ab24389986361bac, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_e_02.png
+  - characterId: Mistique
+    variantKey: Mistique_e
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: 13a5c3bb79e39244abdceb2f0bad4be1, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_e_03.png
+  - characterId: Mistique
+    variantKey: Mistique_e
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: c2460a97c0ada2245b48ddda8465670c, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_e_04.png
+  - characterId: Mistique
+    variantKey: Mistique_e
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: 76b2b1be7fbba354aa3fcf2432f4ea73, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_e_05.png
+  - characterId: Mistique
+    variantKey: Mistique_e
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: c4bb2bd59447b3843952e931da69db01, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_e_06.png
+  - characterId: Mistique
+    variantKey: Mistique_e
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: 7bae10847e47fce438fea22e225541ce, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_e_07.png
+  - characterId: Mistique
+    variantKey: Mistique_e
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: 5ce53789205b26745840aad64da4e111, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_e_08.png
+  - characterId: Mistique
+    variantKey: Mistique_e
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: 22078f34af8beab40b32b1c580667870, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_e_09.png
+  - characterId: Mistique
+    variantKey: Mistique_e
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: 6412504b4b8c3b84088f5517e98b5211, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_e_10.png
+  - characterId: Mistique
+    variantKey: Mistique_e
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: f9cd3bf5accd6ac4ba529255957a68df, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_e_11.png
+  - characterId: Mistique
+    variantKey: Mistique_e
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: b750146e0f019a04aa966d421845f708, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_e_12.png
+  - characterId: Mistique
+    variantKey: Mistique_e
+    emotionKey: 13
+    sprite: {fileID: 21300000, guid: 58117ba3423978546a1672d0853648a6, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_e_13.png
+  - characterId: Mistique
+    variantKey: Mistique_e
+    emotionKey: 14
+    sprite: {fileID: 21300000, guid: cbc803c756feeac46a45ddc94559e6b9, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_e_14.png
+  - characterId: Mistique
+    variantKey: Mistique_e
+    emotionKey: 15
+    sprite: {fileID: 21300000, guid: 971aab21708c30242a607ff88223e556, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_e_15.png
+  - characterId: Mistique
+    variantKey: Mistique_e
+    emotionKey: 16
+    sprite: {fileID: 21300000, guid: 84c34150c2d3bf046ac26746c9eac84c, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_e_16.png
+  - characterId: Mistique
+    variantKey: Mistique_e
+    emotionKey: 17
+    sprite: {fileID: 21300000, guid: 8d39e7d997032ba48b82aaac577bb5b0, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_e_17.png
+  - characterId: Mistique
+    variantKey: Mistique_e
+    emotionKey: 18
+    sprite: {fileID: 21300000, guid: bfe91b5e1bfbee249a0d1307047ce622, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_e_18.png
+  - characterId: Mistique
+    variantKey: Mistique_e
+    emotionKey: 19
+    sprite: {fileID: 21300000, guid: 917b65fda7fb0dc4e8013d8af9e61096, type: 3}
+    assetPath: Assets/Art/Portraits/Mistique/Mistique_e_19.png
   - characterId: Noya
     variantKey: Noya_a
     emotionKey: 02
@@ -2258,6 +3073,1311 @@ MonoBehaviour:
     emotionKey: 13
     sprite: {fileID: 21300000, guid: 9f0e629a1577be1489da03205b5ac299, type: 3}
     assetPath: Assets/Art/Portraits/Sapphire/Sapphire_a_13.png
+  - characterId: Shia
+    variantKey: Shia_a
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: 51d4110d746124844bab6bf57c2fbecf, type: 3}
+    assetPath: Assets/Art/Portraits/Shia/Shia_a_02.png
+  - characterId: Shia
+    variantKey: Shia_a
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: e465bfa111a037349bfd45094e3f2f22, type: 3}
+    assetPath: Assets/Art/Portraits/Shia/Shia_a_03.png
+  - characterId: Shia
+    variantKey: Shia_a
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: b8297bcee3ca7b94282936a1ec288f84, type: 3}
+    assetPath: Assets/Art/Portraits/Shia/Shia_a_04.png
+  - characterId: Shia
+    variantKey: Shia_a
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: 97238d1ea2e7a054ca2d0bf24f565512, type: 3}
+    assetPath: Assets/Art/Portraits/Shia/Shia_a_05.png
+  - characterId: Shia
+    variantKey: Shia_a
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: 64c696ac4658d7c43b0ac2e50f610ef6, type: 3}
+    assetPath: Assets/Art/Portraits/Shia/Shia_a_06.png
+  - characterId: Shia
+    variantKey: Shia_a
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: 33314215646ec81488b7eb77a07d8cb6, type: 3}
+    assetPath: Assets/Art/Portraits/Shia/Shia_a_07.png
+  - characterId: Shia
+    variantKey: Shia_a
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: e076a68c5d473944b9bb925430922d6f, type: 3}
+    assetPath: Assets/Art/Portraits/Shia/Shia_a_08.png
+  - characterId: Shia
+    variantKey: Shia_a
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: 7c40ffa2310d3444a887d191ad48dde0, type: 3}
+    assetPath: Assets/Art/Portraits/Shia/Shia_a_09.png
+  - characterId: Shia
+    variantKey: Shia_a
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: bccd600e1589cd743bf7627280a3a06e, type: 3}
+    assetPath: Assets/Art/Portraits/Shia/Shia_a_10.png
+  - characterId: Shia
+    variantKey: Shia_a
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: a7b76478987230b4195734d011b8aef7, type: 3}
+    assetPath: Assets/Art/Portraits/Shia/Shia_a_11.png
+  - characterId: Shia
+    variantKey: Shia_a
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: 46d614cabb71ac94fbe983ad7327954c, type: 3}
+    assetPath: Assets/Art/Portraits/Shia/Shia_a_12.png
+  - characterId: Shia
+    variantKey: Shia_a
+    emotionKey: 13
+    sprite: {fileID: 21300000, guid: 1d0464302c66b334f90d25ab1909ee6e, type: 3}
+    assetPath: Assets/Art/Portraits/Shia/Shia_a_13.png
+  - characterId: Shia
+    variantKey: Shia_a
+    emotionKey: 14
+    sprite: {fileID: 21300000, guid: b02541ba6db1dc84a9d6eebf206e1710, type: 3}
+    assetPath: Assets/Art/Portraits/Shia/Shia_a_14.png
+  - characterId: Shia
+    variantKey: Shia_a
+    emotionKey: 15
+    sprite: {fileID: 21300000, guid: 76561772b6374c2439910c22fb0df90c, type: 3}
+    assetPath: Assets/Art/Portraits/Shia/Shia_a_15.png
+  - characterId: Shia
+    variantKey: Shia_a
+    emotionKey: 16
+    sprite: {fileID: 21300000, guid: 038366c4fe5717e4ea216292c7d64612, type: 3}
+    assetPath: Assets/Art/Portraits/Shia/Shia_a_16.png
+  - characterId: Shia
+    variantKey: Shia_a
+    emotionKey: 17
+    sprite: {fileID: 21300000, guid: ede0c9323d86a3d44a43dcc3b6c9c5b8, type: 3}
+    assetPath: Assets/Art/Portraits/Shia/Shia_a_17.png
+  - characterId: Shia
+    variantKey: Shia_a
+    emotionKey: 18
+    sprite: {fileID: 21300000, guid: 228099d71a5e057408ae46bb72a22602, type: 3}
+    assetPath: Assets/Art/Portraits/Shia/Shia_a_18.png
+  - characterId: Shia
+    variantKey: Shia_a
+    emotionKey: 19
+    sprite: {fileID: 21300000, guid: 7be123cb277125842b5f5d661de46c69, type: 3}
+    assetPath: Assets/Art/Portraits/Shia/Shia_a_19.png
+  - characterId: Shia
+    variantKey: Shia_b
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: 467556a46b77e1a4ca234ef4526dbe7f, type: 3}
+    assetPath: Assets/Art/Portraits/Shia/Shia_b_02.png
+  - characterId: Shia
+    variantKey: Shia_b
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: c73168dc3d159c44a874449eadaae50f, type: 3}
+    assetPath: Assets/Art/Portraits/Shia/Shia_b_03.png
+  - characterId: Shia
+    variantKey: Shia_b
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: 5a234c193972b73409790ed82e1ff179, type: 3}
+    assetPath: Assets/Art/Portraits/Shia/Shia_b_04.png
+  - characterId: Shia
+    variantKey: Shia_b
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: e9135eb39e1e3a44a8a43527b152dc65, type: 3}
+    assetPath: Assets/Art/Portraits/Shia/Shia_b_05.png
+  - characterId: Shia
+    variantKey: Shia_b
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: c1e16248f6e1cbe44890f966493fd944, type: 3}
+    assetPath: Assets/Art/Portraits/Shia/Shia_b_06.png
+  - characterId: Shia
+    variantKey: Shia_b
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: f9e328a918ebec84d93858bd24fbc22a, type: 3}
+    assetPath: Assets/Art/Portraits/Shia/Shia_b_07.png
+  - characterId: Shia
+    variantKey: Shia_b
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: 1336a11a7f350f947acce7ada00bdea3, type: 3}
+    assetPath: Assets/Art/Portraits/Shia/Shia_b_08.png
+  - characterId: Shia
+    variantKey: Shia_b
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: 88cc1c1b36ae49c4a87445ed51d04d06, type: 3}
+    assetPath: Assets/Art/Portraits/Shia/Shia_b_09.png
+  - characterId: Shia
+    variantKey: Shia_b
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: afd0393aa1b17f9448d269a479109b00, type: 3}
+    assetPath: Assets/Art/Portraits/Shia/Shia_b_10.png
+  - characterId: Shia
+    variantKey: Shia_b
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: 3af01729eb2878948b2bd9821d03006b, type: 3}
+    assetPath: Assets/Art/Portraits/Shia/Shia_b_11.png
+  - characterId: Shia
+    variantKey: Shia_b
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: a8723c5d89605344a9c8aea280334cc5, type: 3}
+    assetPath: Assets/Art/Portraits/Shia/Shia_b_12.png
+  - characterId: Shia
+    variantKey: Shia_b
+    emotionKey: 13
+    sprite: {fileID: 21300000, guid: e7efbd17fa3378c49b86979528879b82, type: 3}
+    assetPath: Assets/Art/Portraits/Shia/Shia_b_13.png
+  - characterId: Shia
+    variantKey: Shia_b
+    emotionKey: 14
+    sprite: {fileID: 21300000, guid: 792c7ac9c50945c448f2d12bf368f16f, type: 3}
+    assetPath: Assets/Art/Portraits/Shia/Shia_b_14.png
+  - characterId: Shia
+    variantKey: Shia_b
+    emotionKey: 15
+    sprite: {fileID: 21300000, guid: 6991ac3c775c7b14480841caf8657cd5, type: 3}
+    assetPath: Assets/Art/Portraits/Shia/Shia_b_15.png
+  - characterId: Shia
+    variantKey: Shia_b
+    emotionKey: 16
+    sprite: {fileID: 21300000, guid: 4d3b2e88f4d6fe24ea559ae336091147, type: 3}
+    assetPath: Assets/Art/Portraits/Shia/Shia_b_16.png
+  - characterId: Shia
+    variantKey: Shia_b
+    emotionKey: 17
+    sprite: {fileID: 21300000, guid: 07152ef9ba8b4b9488cf1ba1978fae39, type: 3}
+    assetPath: Assets/Art/Portraits/Shia/Shia_b_17.png
+  - characterId: Shia
+    variantKey: Shia_b
+    emotionKey: 18
+    sprite: {fileID: 21300000, guid: e80d343a4ed5be84ebaf996d934f0518, type: 3}
+    assetPath: Assets/Art/Portraits/Shia/Shia_b_18.png
+  - characterId: Shia
+    variantKey: Shia_b
+    emotionKey: 19
+    sprite: {fileID: 21300000, guid: db7665a340e9b33408ca14861eab5f8e, type: 3}
+    assetPath: Assets/Art/Portraits/Shia/Shia_b_19.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_a
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: 4a0ccfec612d28e4db8b535e29bb0a82, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_a_02.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_a
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: 935ffd65dbc0fab49a7c4807943cb520, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_a_03.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_a
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: f7916d01954017547a668ef4998b824b, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_a_04.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_a
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: 5d5f3ccf4b7168542aad728ebf2aaa37, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_a_05.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_a
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: 67180dde46fd9564da44b38c841a9222, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_a_06.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_a
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: f06b3936c1720f547a152657aadf8627, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_a_07.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_a
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: 001b171fc643bb048b3df143f6883d2a, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_a_08.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_a
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: b8b3b6a6aac82154d93228836c46dbc1, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_a_09.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_a
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: c813cc2ecbf78e946a65308f78111251, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_a_10.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_a
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: 856a511e8d25cba448d23f183bfcb57b, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_a_11.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_a
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: 082b8397ff514fe41836903adcdb7529, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_a_12.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_a
+    emotionKey: 13
+    sprite: {fileID: 21300000, guid: 3656e34f957b64943878f466124cc98e, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_a_13.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_a
+    emotionKey: 14
+    sprite: {fileID: 21300000, guid: effd1ac7bbda29749bcc489382bbf8f7, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_a_14.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_a
+    emotionKey: 15
+    sprite: {fileID: 21300000, guid: 0ad81306f030a8e48b571711b96df6ca, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_a_15.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_a
+    emotionKey: 16
+    sprite: {fileID: 21300000, guid: 6f8f5573159f15043912d574a0dcde6f, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_a_16.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_a
+    emotionKey: 17
+    sprite: {fileID: 21300000, guid: 28410d0bb65a9db4dbc34769550ad708, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_a_17.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_a
+    emotionKey: 18
+    sprite: {fileID: 21300000, guid: 4ad6c278ac34ce847b59db201e96dd41, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_a_18.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_a
+    emotionKey: 19
+    sprite: {fileID: 21300000, guid: 684b2b0bcde3d964d85554bc4acd0aa8, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_a_19.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_a
+    emotionKey: 20
+    sprite: {fileID: 21300000, guid: 9e19fa3ca80b49247bf83f9dd985f0bd, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_a_20.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_a
+    emotionKey: 21
+    sprite: {fileID: 21300000, guid: 1f2b58808e3d78248acac3ecc19257bc, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_a_21.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_a
+    emotionKey: 22
+    sprite: {fileID: 21300000, guid: eb7cf6f3b9e91b94990c41937ffe41c5, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_a_22.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_a
+    emotionKey: 23
+    sprite: {fileID: 21300000, guid: 7cda908984e2b174fa502411826016e6, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_a_23.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_a
+    emotionKey: 24
+    sprite: {fileID: 21300000, guid: baa726092044dc34cba517bd1bbbe4cd, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_a_24.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_a
+    emotionKey: 25
+    sprite: {fileID: 21300000, guid: 410ba5d1f479549489dbc272260b0a03, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_a_25.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_a
+    emotionKey: 26
+    sprite: {fileID: 21300000, guid: 7f11259bd858c89468223549cfc38e53, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_a_26.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_b
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: 2a8324008065bb6449d3a63f4791efa8, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_b_02.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_b
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: 71e68940c9884e241970c1d664921eef, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_b_03.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_b
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: 18ec3180864500a42a90f80c8540f6e1, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_b_04.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_b
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: 0de78d358cdcc4e43934b111b8c12049, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_b_05.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_b
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: 870fcd772698324439ac4ecb0d4e6ae0, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_b_06.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_b
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: 939b007d4d3c9d54f888ec9b0e57f988, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_b_07.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_b
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: 309a3126eeb09b344b66a5bbca1d63c4, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_b_08.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_b
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: 8d3f8f801946e9a41ab4596a21342698, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_b_09.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_b
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: f4341e52db207b34097ee5eae293bb07, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_b_10.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_b
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: cff37e5d9f968304f9d529ed3d7ea496, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_b_11.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_b
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: 6beeb52668221594997a7538ebdf2d3e, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_b_12.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_b
+    emotionKey: 13
+    sprite: {fileID: 21300000, guid: 9aa52e02f4d017e458b8664e9ae528b7, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_b_13.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_b
+    emotionKey: 14
+    sprite: {fileID: 21300000, guid: 1bfc56a1bf72a174189339e1526e516e, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_b_14.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_b
+    emotionKey: 15
+    sprite: {fileID: 21300000, guid: b8b5a595835fa714c98fc067d253d97f, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_b_15.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_b
+    emotionKey: 16
+    sprite: {fileID: 21300000, guid: 3f48f068093db854ea55ff8d1e744274, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_b_16.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_b
+    emotionKey: 17
+    sprite: {fileID: 21300000, guid: 3c5e74fcb224eb34185bae91a4e4b279, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_b_17.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_b
+    emotionKey: 18
+    sprite: {fileID: 21300000, guid: 8550b0b537731054dbd6b2df4daa2e4c, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_b_18.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_b
+    emotionKey: 19
+    sprite: {fileID: 21300000, guid: 12b1c93a0eb78cc479466d73d06049c2, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_b_19.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_b
+    emotionKey: 20
+    sprite: {fileID: 21300000, guid: 1d70df720ea924447a8b0606718e2f43, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_b_20.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_b
+    emotionKey: 21
+    sprite: {fileID: 21300000, guid: ebcb88a05543dd243be5740b57071fa8, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_b_21.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_b
+    emotionKey: 22
+    sprite: {fileID: 21300000, guid: e97a5d6421de36e4e941a2c9f7cbb260, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_b_22.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_b
+    emotionKey: 23
+    sprite: {fileID: 21300000, guid: b64d86587f023204394eae133b61f1de, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_b_23.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_b
+    emotionKey: 24
+    sprite: {fileID: 21300000, guid: 4e3bc971c11adb940878ed63f57a774c, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_b_24.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_b
+    emotionKey: 25
+    sprite: {fileID: 21300000, guid: 4f4355305888ce441b5b9e4220b60245, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_b_25.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_b
+    emotionKey: 26
+    sprite: {fileID: 21300000, guid: 4a5cbdb5d00a4ff45b8c8953e0f5ad8c, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_b_26.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_c
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: 2f2b252fe929b524aab8782689ea62ea, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_c_02.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_c
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: 42e8d80bfe4a18148b1169728941625c, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_c_03.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_c
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: 3caaa395e4c3cc144840053f06092d9c, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_c_04.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_c
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: cb673b841b4a3424398885230c8d8390, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_c_05.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_c
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: 43d91fb99b657ab49ad5fc59b0b7a6c0, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_c_06.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_c
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: 5c74e03c092b6be44b568ae90db3c9af, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_c_07.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_c
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: 2161dc05189a09240bef05adc6b27a47, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_c_08.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_c
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: 26b2aa9253152374b98c2b4c14164ca5, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_c_09.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_c
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: c23e05db2d542994d81a8d83a29f02d0, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_c_10.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_c
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: 94accd773592eb7458721d28c19abccd, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_c_11.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_c
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: ced2c539277980e46bdd78f8d9dd425e, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_c_12.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_c
+    emotionKey: 13
+    sprite: {fileID: 21300000, guid: 24e613ec7c34d9c40a24584fdce673ff, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_c_13.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_c
+    emotionKey: 14
+    sprite: {fileID: 21300000, guid: 16647aa971a195f448c2e86b5e3ea28c, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_c_14.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_c
+    emotionKey: 15
+    sprite: {fileID: 21300000, guid: 229237eea405dcb41810303c19ae9dcd, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_c_15.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_c
+    emotionKey: 16
+    sprite: {fileID: 21300000, guid: 46dec6b2c0572324e88faf5e80b2a55a, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_c_16.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_c
+    emotionKey: 17
+    sprite: {fileID: 21300000, guid: 705bd104a6885b544893296377658a8b, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_c_17.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_c
+    emotionKey: 18
+    sprite: {fileID: 21300000, guid: 7b9997b3e7dcd1049a4343d855853a47, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_c_18.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_c
+    emotionKey: 19
+    sprite: {fileID: 21300000, guid: 4c8c5e12c6356c842864e02bff17e9e5, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_c_19.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_c
+    emotionKey: 20
+    sprite: {fileID: 21300000, guid: dc9eaf11726579c4ab59bc23bab39537, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_c_20.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_c
+    emotionKey: 21
+    sprite: {fileID: 21300000, guid: cc2f4a3ae002e954ca91336e590e19c0, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_c_21.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_c
+    emotionKey: 22
+    sprite: {fileID: 21300000, guid: 26bfa0633e685c3498cec31039bb3a8d, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_c_22.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_c
+    emotionKey: 23
+    sprite: {fileID: 21300000, guid: f4cb47c5ef82a604c8bbb2391e2e0dce, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_c_23.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_c
+    emotionKey: 24
+    sprite: {fileID: 21300000, guid: 629fa14418356504a8eaf4d6ee2a69e6, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_c_24.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_c
+    emotionKey: 25
+    sprite: {fileID: 21300000, guid: 2733a48132411cf4c9d64b4163a24711, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_c_25.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_c
+    emotionKey: 26
+    sprite: {fileID: 21300000, guid: 591df4a23fae1bc40aaa2ffc4811af1c, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_c_26.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_d
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: 722a41e1fde3e6748bd13a23bec8b45f, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_d_02.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_d
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: a84e0bbad28ba174dbee05ee9693b47b, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_d_03.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_d
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: f7cf737ebb28c9d4983a6543e18ed3d3, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_d_04.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_d
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: 014557a1220f8c74cb00f75029065458, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_d_05.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_d
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: 2a0a53e594bbda240aba094ecd19bb14, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_d_06.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_d
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: 10ad3f7bf4e9f4a49a72114b85d12598, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_d_07.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_d
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: 583575d792dbd9e45a56873f2a0df8ea, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_d_08.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_d
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: e4544859cdf18194b881cb6189c922b9, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_d_09.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_d
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: 450b8aa322eec214c84abb9b184d156e, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_d_10.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_d
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: 1c63c3a43da038a41b1ce38853acd6a2, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_d_11.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_d
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: a6573aa5832c1934596c803abe920be1, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_d_12.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_d
+    emotionKey: 13
+    sprite: {fileID: 21300000, guid: 7003bdad0a9e7cf4c8992ade4586bcab, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_d_13.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_d
+    emotionKey: 14
+    sprite: {fileID: 21300000, guid: 746d00726319b3846b9937de144b6c03, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_d_14.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_d
+    emotionKey: 15
+    sprite: {fileID: 21300000, guid: 658bfb5e2883dd841af1d26136af0ed5, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_d_15.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_d
+    emotionKey: 16
+    sprite: {fileID: 21300000, guid: fea91f29e4404444eae8414deb48d053, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_d_16.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_d
+    emotionKey: 17
+    sprite: {fileID: 21300000, guid: 1483275bbcf7a1640b6bd8255f1c5b2c, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_d_17.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_d
+    emotionKey: 18
+    sprite: {fileID: 21300000, guid: dbde4c8723945894fae6cd223da5faf0, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_d_18.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_d
+    emotionKey: 19
+    sprite: {fileID: 21300000, guid: 70bdb129f5c9d6247a8652c66af25e3d, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_d_19.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_d
+    emotionKey: 20
+    sprite: {fileID: 21300000, guid: 4c28664960c694e4cbbe52b7497757db, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_d_20.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_d
+    emotionKey: 21
+    sprite: {fileID: 21300000, guid: eb162a0dd19f6584aa7eb9140ee1ea3c, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_d_21.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_d
+    emotionKey: 22
+    sprite: {fileID: 21300000, guid: b2084953f5536e34e95058cc2e3cd6ae, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_d_22.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_d
+    emotionKey: 23
+    sprite: {fileID: 21300000, guid: 03c136fbb8f97b04ab19681d290c1e0a, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_d_23.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_d
+    emotionKey: 24
+    sprite: {fileID: 21300000, guid: dbcc224fa6f25d94b893d27555099879, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_d_24.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_d
+    emotionKey: 25
+    sprite: {fileID: 21300000, guid: 96a34ee555abe1749a8669390b3a21e0, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_d_25.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_d
+    emotionKey: 26
+    sprite: {fileID: 21300000, guid: 4db65370fdd11e848ab0a82e8f8216df, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_d_26.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_e
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: 38c86d64166ee2d4dbf93642d3b492a0, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_e_02.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_e
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: 2a33f6ad2bcd7194f9a3457841186c85, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_e_03.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_e
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: 7bde0084d332d4b47b441176c5d9ffd8, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_e_04.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_e
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: c36a044d623bd84438bc5b56dd59b5b2, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_e_05.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_e
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: 77b1565fb70a75f4ba228fb0b567dea2, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_e_06.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_e
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: c0c4107b34ae6a041880fce79247e18d, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_e_07.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_e
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: ec334347deb79e9438cfa45470001b7a, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_e_08.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_e
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: f5f21a2857cd47f49a98b5f3e193c78e, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_e_09.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_e
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: 77ec98cd6783aff42a42b5a7b0ac041b, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_e_10.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_e
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: 921219dc5b7bb694c8e33e9202239600, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_e_11.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_e
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: a1e7be6bbe32c0d468ef7d7cb74ce526, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_e_12.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_e
+    emotionKey: 13
+    sprite: {fileID: 21300000, guid: d852f7e23ba363043b0d5f61d2124ba9, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_e_13.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_e
+    emotionKey: 14
+    sprite: {fileID: 21300000, guid: 415d8fcb8aa567c41a2b0e4c89f56fd8, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_e_14.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_e
+    emotionKey: 15
+    sprite: {fileID: 21300000, guid: d06822bb55a485848b898debef77291e, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_e_15.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_e
+    emotionKey: 16
+    sprite: {fileID: 21300000, guid: 65cbeb10f545ac24a92ec0e4dd473864, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_e_16.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_e
+    emotionKey: 17
+    sprite: {fileID: 21300000, guid: 74fffb311fbdbcb44bc45027486db7f2, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_e_17.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_e
+    emotionKey: 18
+    sprite: {fileID: 21300000, guid: 18733416453a6d34f932f919f54126e4, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_e_18.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_e
+    emotionKey: 19
+    sprite: {fileID: 21300000, guid: 339fadb1579e35d4899bc7240d092658, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_e_19.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_e
+    emotionKey: 20
+    sprite: {fileID: 21300000, guid: 124b08891c19dff4b88f4e2e179570cd, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_e_20.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_e
+    emotionKey: 21
+    sprite: {fileID: 21300000, guid: df9b459b2f45a4f4c8659ba135a489de, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_e_21.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_e
+    emotionKey: 22
+    sprite: {fileID: 21300000, guid: e4e49df5d9a6eb743bb90b9170c3580b, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_e_22.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_e
+    emotionKey: 23
+    sprite: {fileID: 21300000, guid: 18181c88da3c7b849a2c34cbb6cdfe85, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_e_23.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_e
+    emotionKey: 24
+    sprite: {fileID: 21300000, guid: e101bbc12a15c66478986ff9e6c96bda, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_e_24.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_e
+    emotionKey: 25
+    sprite: {fileID: 21300000, guid: 32d7d77ff1b47cd4694f9aa028ca0a82, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_e_25.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_e
+    emotionKey: 26
+    sprite: {fileID: 21300000, guid: f501575e45d34e44bb5e49a7aca78236, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_e_26.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_f
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: c2902dbcbcc31d34f9889215114d06b6, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_f_02.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_f
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: 67be2256d66efdc4c976d237e3f567c5, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_f_03.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_f
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: 720b040175ae8154eb703e2a988e8f40, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_f_04.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_f
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: d854e28c91e0a9046a67b9ab7fba6c86, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_f_05.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_f
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: 0e4ce50b8d5151948a30eeaa8692e27a, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_f_06.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_f
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: 4dde92062f9957d459db5e69b4e61055, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_f_07.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_f
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: 21a15c9649ef6994b9181defd1361f30, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_f_08.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_f
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: 6da74e113d419af459b7faa751d6d6a3, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_f_09.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_f
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: 2c4346f216bec0846b5b5e86aa73cd02, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_f_10.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_f
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: d95394059d795b743b63640c64f449df, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_f_11.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_f
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: c4f57126c48d823449650ecfcb9fec49, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_f_12.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_f
+    emotionKey: 13
+    sprite: {fileID: 21300000, guid: 42bc4ad7055912e44ac59dc1c4f72fa7, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_f_13.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_f
+    emotionKey: 14
+    sprite: {fileID: 21300000, guid: e4e1d953b06a3a44d8d0508badc4c7cd, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_f_14.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_f
+    emotionKey: 15
+    sprite: {fileID: 21300000, guid: 576d42dfaa3fe4140a7d1fb82342dac6, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_f_15.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_f
+    emotionKey: 16
+    sprite: {fileID: 21300000, guid: 61f82c4ab86737f4cbe1432c1075f79b, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_f_16.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_f
+    emotionKey: 17
+    sprite: {fileID: 21300000, guid: 7045078ed2c9e0b4ebbe5f668545c4d3, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_f_17.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_f
+    emotionKey: 18
+    sprite: {fileID: 21300000, guid: 2eb15617fe22ab44c84e5f880f1d56de, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_f_18.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_f
+    emotionKey: 19
+    sprite: {fileID: 21300000, guid: cbc033734ea20424e9e71dba96467516, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_f_19.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_f
+    emotionKey: 20
+    sprite: {fileID: 21300000, guid: 5c688af12b988e74d896fb28dd06fb1c, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_f_20.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_f
+    emotionKey: 21
+    sprite: {fileID: 21300000, guid: d808433621957fc41aae61bdedb49359, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_f_21.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_f
+    emotionKey: 22
+    sprite: {fileID: 21300000, guid: a109861f9877af34dbc8d2b646d2f5cc, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_f_22.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_f
+    emotionKey: 23
+    sprite: {fileID: 21300000, guid: 78f15ac96e6168443b27f7353cb8bd6e, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_f_23.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_f
+    emotionKey: 24
+    sprite: {fileID: 21300000, guid: 6c3f6c1893b4d7d4e89b7f3337f57d51, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_f_24.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_f
+    emotionKey: 25
+    sprite: {fileID: 21300000, guid: 98dc51b050fd2bc4caddb0a9cd792cde, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_f_25.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_f
+    emotionKey: 26
+    sprite: {fileID: 21300000, guid: f51533a881a555545a2c3a4b4732f3b8, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_f_26.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_g
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: 965a40b0ddbf6d94793aa5f9d2501b40, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_g_02.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_g
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: d4ccfbfd7e6434448933238f1d6de154, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_g_03.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_g
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: 42308084950ae5d46b3026b504674d4c, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_g_04.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_g
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: 1b6c147833eee87408812f7f0868d088, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_g_05.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_g
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: 95e44c01b3b12604aa779597b3dbe6fc, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_g_06.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_g
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: e3007eb6919a7d04485324712f897c87, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_g_07.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_g
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: a0788c14a51311349b3cacb3881ddd72, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_g_08.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_g
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: 9b412ed86939db04f88732224c491441, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_g_09.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_g
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: f54907f13bc1917438242d472b726e57, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_g_10.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_g
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: f510a1091fa0aa746b477528c4f28a9f, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_g_11.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_g
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: 333cddc17f7aed347a51304ab6ba2540, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_g_12.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_g
+    emotionKey: 13
+    sprite: {fileID: 21300000, guid: fc83a5c5bf2f548458209c29721bd98a, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_g_13.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_g
+    emotionKey: 14
+    sprite: {fileID: 21300000, guid: 0e3aaac8fd69c914a9bb0dc52b947714, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_g_14.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_g
+    emotionKey: 15
+    sprite: {fileID: 21300000, guid: 6bb7cfe7c2afe1d4cb2ab9e8644f191e, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_g_15.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_g
+    emotionKey: 16
+    sprite: {fileID: 21300000, guid: 059e9781259fe784fae9ecebdf00b526, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_g_16.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_g
+    emotionKey: 17
+    sprite: {fileID: 21300000, guid: 3762f80da1c5a3f4baddbcad64d38d75, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_g_17.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_g
+    emotionKey: 18
+    sprite: {fileID: 21300000, guid: 6dd118d256b678346806f13d4bbd16c6, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_g_18.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_g
+    emotionKey: 19
+    sprite: {fileID: 21300000, guid: 04e3891e128ffa9489ffb51d2f7eec51, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_g_19.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_g
+    emotionKey: 20
+    sprite: {fileID: 21300000, guid: f2746f882fcd94a4883f2ff026ed49bd, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_g_20.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_g
+    emotionKey: 21
+    sprite: {fileID: 21300000, guid: 66882f476cec7794bbe731f06c8e18f9, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_g_21.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_g
+    emotionKey: 22
+    sprite: {fileID: 21300000, guid: 1b990f3b01b3b204a85b79c0ebe4c91c, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_g_22.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_g
+    emotionKey: 23
+    sprite: {fileID: 21300000, guid: 650f27f78e47cf947800ac95bc286048, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_g_23.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_g
+    emotionKey: 24
+    sprite: {fileID: 21300000, guid: 655ed63daee364645b7f2b71f4aeb2cd, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_g_24.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_g
+    emotionKey: 25
+    sprite: {fileID: 21300000, guid: 1ec4c60ed65984e44925d4a78055673e, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_g_25.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_g
+    emotionKey: 26
+    sprite: {fileID: 21300000, guid: 8db1e5470c4c7544286465088d695df4, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_g_26.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_h
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: a5ccbbfa45daae645afd92c6f95ed1ba, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_h_02.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_h
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: 2fb050531697fb34b93a39eb1e8c1f7d, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_h_03.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_h
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: 24df021265a9d2c43ad5ec77472c3bcb, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_h_04.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_h
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: 1f59c36975ae978438d1b730d654d7f2, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_h_05.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_h
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: 12b20c7fabbf06f4ebd47d2775d468a9, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_h_06.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_h
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: 43aeee041a922134b9c27a909f8bceb1, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_h_07.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_h
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: 28801b35f5ebe7548b28db8a00a9fa77, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_h_08.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_h
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: 00fbb122a24d9334abba5764f8c0b4bf, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_h_09.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_h
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: 0f3fd984a3b58704d998571ff8c9c9f9, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_h_10.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_h
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: 5d132e1add2410546aac8b3a8453e406, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_h_11.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_h
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: 405aabb895ae0064bae62a9473cc1c39, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_h_12.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_h
+    emotionKey: 13
+    sprite: {fileID: 21300000, guid: e564f2d6a979048408ddf586f2f04ae3, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_h_13.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_h
+    emotionKey: 14
+    sprite: {fileID: 21300000, guid: feb752606eb7d2b42965c327954c0a94, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_h_14.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_h
+    emotionKey: 15
+    sprite: {fileID: 21300000, guid: 58d779209232c6d4284fa0f126996008, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_h_15.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_h
+    emotionKey: 16
+    sprite: {fileID: 21300000, guid: 1b68f636e15d1c743a3087b2d2b26a73, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_h_16.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_h
+    emotionKey: 17
+    sprite: {fileID: 21300000, guid: fc4c7b46f2c7eee438a0e006f2f061b0, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_h_17.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_h
+    emotionKey: 18
+    sprite: {fileID: 21300000, guid: dd820fb601b887a45b42e87d95f9ff7a, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_h_18.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_h
+    emotionKey: 19
+    sprite: {fileID: 21300000, guid: 8909d2fb82f96e8438c001d6f6dda614, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_h_19.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_h
+    emotionKey: 20
+    sprite: {fileID: 21300000, guid: c94c4e196005a024f96680dd5e703b90, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_h_20.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_h
+    emotionKey: 21
+    sprite: {fileID: 21300000, guid: 38c4ae91b595dfd4697a45b5804e7abe, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_h_21.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_h
+    emotionKey: 22
+    sprite: {fileID: 21300000, guid: a63d9246e38a8014898bae81c6c0bbb5, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_h_22.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_h
+    emotionKey: 23
+    sprite: {fileID: 21300000, guid: 808b8f6a171a7914ba9adfdcb5dc62dc, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_h_23.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_h
+    emotionKey: 24
+    sprite: {fileID: 21300000, guid: 5daf7ba9529f975409ebd2826d31dcbe, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_h_24.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_h
+    emotionKey: 25
+    sprite: {fileID: 21300000, guid: 2fb34731627ceb84c8e48a854cab2c7a, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_h_25.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_h
+    emotionKey: 26
+    sprite: {fileID: 21300000, guid: 09c419e2ecc496141979aadc645b5822, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_h_26.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_i
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: 85da79738bfba7944a6db482fe0b31c5, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_i_02.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_i
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: 9990f594cda213e499b2161ae64cd922, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_i_03.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_i
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: 639089fbd2e5f9647a51498c3227ee82, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_i_04.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_i
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: 61f360543a7d5634e9f1fbee7058917a, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_i_05.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_i
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: b42599a723a3bca419a2e603218ba6d3, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_i_06.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_i
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: e09a6a51586c5d149896825e4a054a49, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_i_07.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_i
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: 67ff5c53f7ea94e45acb80591ba7b76a, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_i_08.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_i
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: f57a482313d1d3b4fa8832a02a0ff4b6, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_i_09.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_i
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: f37c89cbe6cd199488a027ed9088a3ab, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_i_10.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_i
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: 56b52745d5c2e1844b3e3ed18b917951, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_i_11.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_i
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: 4351f9c4a4257e44480ce995e885bc32, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_i_12.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_i
+    emotionKey: 13
+    sprite: {fileID: 21300000, guid: 10dacb987bc4f3f4d886a0aa742b8650, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_i_13.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_i
+    emotionKey: 14
+    sprite: {fileID: 21300000, guid: cfe8be38794f91840a38ca8f9dd798ca, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_i_14.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_i
+    emotionKey: 15
+    sprite: {fileID: 21300000, guid: 359f2e3658ccef34ba01b85889096aae, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_i_15.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_i
+    emotionKey: 16
+    sprite: {fileID: 21300000, guid: b5d3cab9018cef84f9baac0a9eab70fe, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_i_16.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_i
+    emotionKey: 17
+    sprite: {fileID: 21300000, guid: ae3ae0d51ae6fa549bf008f87eb13dd6, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_i_17.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_i
+    emotionKey: 18
+    sprite: {fileID: 21300000, guid: 389b4257becadfd4a86172a354ea9bb1, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_i_18.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_i
+    emotionKey: 19
+    sprite: {fileID: 21300000, guid: 08149b9505e35b84d9bf622ae3407589, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_i_19.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_i
+    emotionKey: 20
+    sprite: {fileID: 21300000, guid: 54bfc2188cbe0ac4190e40f3ce5066e8, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_i_20.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_i
+    emotionKey: 21
+    sprite: {fileID: 21300000, guid: 49c6d9a2caa656c499f39529e7431377, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_i_21.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_i
+    emotionKey: 22
+    sprite: {fileID: 21300000, guid: c21c5af415187f540bfda2e5a38704e2, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_i_22.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_i
+    emotionKey: 23
+    sprite: {fileID: 21300000, guid: a6ee9a20f320c314cbc0d6f42ab16390, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_i_23.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_i
+    emotionKey: 24
+    sprite: {fileID: 21300000, guid: 22a28fcc0d2b2e84986084a58d39ca9e, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_i_24.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_i
+    emotionKey: 25
+    sprite: {fileID: 21300000, guid: e882a7f4aa4775b479557732e6e20705, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_i_25.png
+  - characterId: Tyrant
+    variantKey: Female_tyrant_i
+    emotionKey: 26
+    sprite: {fileID: 21300000, guid: e6507988a85f5034999e635bcc2106a2, type: 3}
+    assetPath: Assets/Art/Portraits/Tyrant/Female_tyrant_i_26.png
   - characterId: Willow
     variantKey: Willow_a
     emotionKey: 02
@@ -3638,5 +5758,5 @@ MonoBehaviour:
     emotionKey: 01
     sprite: {fileID: 21300000, guid: b172580fb3d04244d8bfbe141afa6326, type: 3}
     assetPath: Assets/Art/Portraits/soyeong/soyeong_i_1.png
-  generatedTicksUtc: 639167372173780448
-  generatedTimeReadable: 2026-06-11 10:13:37
+  generatedTicksUtc: 639178719620594523
+  generatedTimeReadable: 2026-06-24 13:26:02

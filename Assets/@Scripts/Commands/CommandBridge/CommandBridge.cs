@@ -373,7 +373,7 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler<float>(
             "screen_vignette_clear", EnqueueScreenVignetteClearSpec);
         runner.AddCommandHandler<float, float>(
-            "screen_letterbox", EnqueueScreenLetterBoxSpec);
+            "screen_vignette_letterbox", EnqueueScreenLetterBoxSpec);
         runner.AddCommandHandler<float, float, float, float, float, float, float>(
             "screen_vignette_custom", EnqueueScreenVignetteCustomSpec);
 

@@ -9055,9 +9055,6 @@ RectTransform:
   m_Children:
   - {fileID: 1488734123}
   - {fileID: 1313345013}
-  - {fileID: 706371900}
-  - {fileID: 2092969290}
-  - {fileID: 1464669696}
   m_Father: {fileID: 1239989732}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -9475,12 +9472,12 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 706371899}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 666171939}
+  m_Father: {fileID: 2078215624}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -18656,7 +18653,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 666171939}
+  m_Father: {fileID: 2078215624}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -25498,7 +25495,7 @@ MonoBehaviour:
   subPresentationRunner: {fileID: 8309902628667094135}
   oneShotRunner: {fileID: 3345179612585509291}
   presentationRouteEntry: {fileID: 1433866633}
-  yarnEntryKey: Story_TalesOfNovaEP12_01
+  yarnEntryKey: Story_StellaEvent01_01
   presentationEntryKey: emo
   runYarnKey: 50
 --- !u!4 &1924806293
@@ -27243,7 +27240,10 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 706371900}
+  - {fileID: 2092969290}
+  - {fileID: 1464669696}
   m_Father: {fileID: 1246457708}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -27564,12 +27564,12 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2092969289}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 666171939}
+  m_Father: {fileID: 2078215624}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}

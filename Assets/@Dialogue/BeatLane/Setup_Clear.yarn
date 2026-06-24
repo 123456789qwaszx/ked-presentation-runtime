@@ -1,0 +1,9 @@
+﻿title: Setup_Clear
+---
+<<shot_reset>>
+<<blur_reset>>
+
+<<screen_vignette_clear -1>>
+<<screen_noise_clear -1>>
+<<screen_flash 0 -1>>
+===
