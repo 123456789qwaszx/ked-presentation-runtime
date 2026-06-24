@@ -35,36 +35,6 @@ public sealed partial class YarnCommandBridge
             BindMainLaneCommands(runner);
     }
     
-    // Lane registration is explicitly handled by bootstrap:
-    // hub.RegisterPresentationLane(subRunner).
-    private void StartSubPresentationNode(string nodeName) 
-        => _sideRunnerSyncHub.StartPresentationLaneCoroutine(nodeName);
-    
-    private IEnumerator StopSubPresentationNode() 
-        => _sideRunnerSyncHub.StopPresentationLaneCoroutine();
-    
-    private void PauseSubPresentation() 
-        => _sideRunnerSyncHub.PausePresentation();
-    
-    private void ResumeSubPresentation() 
-        => _sideRunnerSyncHub.ResumePresentation();
-    
-    private void HoldSubPresentation(int lines = 1) 
-        => _sideRunnerSyncHub.HoldPresentation(lines);
-    
-    private void AddSubPresentationForwardAdvance(int steps = 1) 
-        => _sideRunnerSyncHub.AdvancePresentationExtra(steps);
-    
-    private IEnumerator RunOneShotNode(string nodeName)
-    {
-        return _oneShotPresentationLane.RunNodeCoroutine(nodeName, blockMain: true);
-    }
-
-    private IEnumerator RunOneShotNodeFree(string nodeName)
-    {
-        return _oneShotPresentationLane.RunNodeCoroutine(nodeName, blockMain: false);
-    }
-    
     private void BindRunnerCommands(DialogueRunner runner)
     {
         RegisterDirectionalNudgeCommands(runner);
@@ -161,6 +131,32 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler(
             "box_reset", ResetDefaultLineBoxKinds);
     }
+    
+    // Lane registration is explicitly handled by bootstrap:
+    // hub.RegisterPresentationLane(subRunner).
+    private void StartSubPresentationNode(string nodeName) 
+        => _sideRunnerSyncHub.StartPresentationLaneCoroutine(nodeName);
+    
+    private IEnumerator StopSubPresentationNode() 
+        => _sideRunnerSyncHub.StopPresentationLaneCoroutine();
+    
+    private void PauseSubPresentation() 
+        => _sideRunnerSyncHub.PausePresentation();
+    
+    private void ResumeSubPresentation() 
+        => _sideRunnerSyncHub.ResumePresentation();
+    
+    private void HoldSubPresentation(int lines = 1) 
+        => _sideRunnerSyncHub.HoldPresentation(lines);
+    
+    private void AddSubPresentationForwardAdvance(int steps = 1) 
+        => _sideRunnerSyncHub.AdvancePresentationExtra(steps);
+    
+    private IEnumerator RunOneShotNode(string nodeName)
+        => _oneShotPresentationLane.RunNodeCoroutine(nodeName, blockMain: true);
+
+    private IEnumerator RunOneShotNodeFree(string nodeName)
+        => _oneShotPresentationLane.RunNodeCoroutine(nodeName, blockMain: false);
 
     private void BindCharRigSetup(DialogueRunner runner)
     {
@@ -324,47 +320,21 @@ public sealed partial class YarnCommandBridge
             "tx_slant_in", EnqueueSlantedMaskCutInSpec);
         runner.AddCommandHandler<float>(
             "tx_slant_out", EnqueueSlantedMaskCutOutSpec);
-        runner.AddCommandHandler<float>(
-            "tx_out_slant", EnqueueTransitionOutSlantSpec);
 
         runner.AddCommandHandler<float>(
-            "tx_strip_in", EnqueueVerticalStripCoverSpec);
+            "tx_strip", EnqueueVerticalStripCoverSpec);
         runner.AddCommandHandler<float>(
-            "tx_strip_out", EnqueueVerticalStripClearSpec);
-
+            "tx_shutter", EnqueueFocusBlurCurtainCloseSpec);
         runner.AddCommandHandler<float>(
-            "tx_shutter_in", EnqueueSlantedShutterCloseSpec);
-        runner.AddCommandHandler<float>(
-            "tx_shutter_out", EnqueueSlantedShutterOpenSpec);
-
-        runner.AddCommandHandler<float>(
-            "tx_focus_fade_in", EnqueueFocusBlurFadeOutSpec);
-        runner.AddCommandHandler<float>(
-            "tx_focus_fade_out", EnqueueFocusBlurFadeInSpec);
-
-        runner.AddCommandHandler<float>(
-            "tx_focus_curtain_in", EnqueueFocusBlurCurtainCloseSpec);
-        runner.AddCommandHandler<float>(
-            "tx_focus_curtain_out", EnqueueFocusBlurCurtainOpenSpec);
-
-        runner.AddCommandHandler<float>(
-            "tx_daze_fade_in", EnqueueDazeFadeCloseSpec);
-        runner.AddCommandHandler<float>(
-            "tx_daze_fade_out", EnqueueDazeFadeOpenSpec);
+            "tx_daze", EnqueueDazeFadeCloseSpec);
         
         runner.AddCommandHandler(
             "tx_clear_all", EnqueueClearAllTransitionsSpec);
-        runner.AddCommandHandler<string, float>(
-            "tx_reveal", EnqueueRevealWithTransitionSpec);
         
-        runner.AddCommandHandler<float>(
-            "tx_out_shutter", EnqueueTransitionOutShutterSpec);
         runner.AddCommandHandler<float>(
             "tx_out_strip", EnqueueTransitionOutStripSpec);
         runner.AddCommandHandler<float>(
-            "tx_out_focus_fade", EnqueueTransitionOutFocusFadeSpec);
-        runner.AddCommandHandler<float>(
-            "tx_out_focus_curtain", EnqueueTransitionOutFocusCurtainSpec);
+            "tx_out_shutter", EnqueueTransitionOutFocusCurtainSpec);
         runner.AddCommandHandler<float>(
             "tx_out_daze", EnqueueTransitionOutDazeFadeSpec);
     }
@@ -414,34 +384,6 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler<float, float, float, float, float, float>(
             "screen_noise_custom", EnqueueScreenNoiseCustomSpec);
     }
-    
-    // private void BindStageDepthDefocus(DialogueRunner runner)
-    // {
-    //     runner.AddCommandHandler<string>(
-    //         "depth_blur", EnqueueStageDepthBlurSpec);
-    //     runner.AddCommandHandler<string>(
-    //         "depth_blur_clear", EnqueueStageDepthBlurClearSpec);
-    //
-    //     runner.AddCommandHandler<string, string>(
-    //         "depth_blur_layer", EnqueueStageDepthBlurLayerSpec);
-    //     runner.AddCommandHandler<string, string, float, float>(
-    //         "depth_blur_layer_t", EnqueueStageDepthBlurLayerTimedSpec);
-    //     runner.AddCommandHandler<string, string, float, float, float>(
-    //         "depth_blur_layer_a", EnqueueStageDepthBlurLayerAlphaSpec);
-    //
-    //     runner.AddCommandHandler<string, string, float, float, int, string, float>(
-    //         "depth_defocus", EnqueueStageDepthDefocusSpec);
-    //     runner.AddCommandHandler<string, string, float>(
-    //         "depth_defocus_off", EnqueueStageDepthDefocusOffSpec);
-    //     
-    //     runner.AddCommandHandler<string, string, float, float, float, float>(
-    //         "depth_blur_layer_ap",
-    //         EnqueueStageDepthBlurLayerAlphaCoverageSpec);
-    //
-    //     runner.AddCommandHandler<string, string, float, float, int, string, float, float>(
-    //         "depth_defocus_p",
-    //         EnqueueStageDepthDefocusSpec);
-    // }
 
     private void Collect(CommandSpecBase spec)
     {

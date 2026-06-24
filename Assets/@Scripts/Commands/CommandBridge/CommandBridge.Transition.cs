@@ -40,38 +40,6 @@ public sealed partial class YarnCommandBridge
         Collect(spec);
     }
 
-    private void EnqueueDazeFadeOpenSpec(float duration = 0.65f)
-    {
-        var spec = new FocusBlurCurtainCommandSpec
-        {
-
-            mode = FocusBlurCurtainMode.Open,
-
-            openGapHeight = 680f,
-            finalGapHeight = 0f,
-            slantPixels = 36f,
-
-            edgeFeatherHeight = 240f,
-            edgeFeatherAlpha = 0.42f,
-
-            centerBlurHeight = 520f,
-            centerStartAlpha = 0.08f,
-            centerEndAlpha = 0.72f,
-            centerBlurSlices = 28,
-
-            color = Color.black,
-
-            duration = duration,
-            ease = Ease.InOutSine,
-
-            wait = true,
-            disableWhenOpen = true,
-            blockRaycastWhenClosed = false,
-        };
-
-        Collect(spec);
-    }
-
     private void EnqueueFocusBlurCurtainCloseSpec(float duration = 0.55f)
     {
         var spec = new FocusBlurCurtainCommandSpec
@@ -103,140 +71,10 @@ public sealed partial class YarnCommandBridge
         Collect(spec);
     }
 
-    private void EnqueueFocusBlurCurtainOpenSpec(float duration = 0.42f)
-    {
-        var spec = new FocusBlurCurtainCommandSpec
-        {
-            mode = FocusBlurCurtainMode.Open,
-
-            openGapHeight = 520f,
-            finalGapHeight = 0f,
-            slantPixels = 90f,
-
-            edgeFeatherHeight = 140f,
-            edgeFeatherAlpha = 0.55f,
-
-            centerBlurHeight = 320f,
-            centerStartAlpha = 0.12f,
-            centerEndAlpha = 0.82f,
-            centerBlurSlices = 18,
-
-            color = Color.black,
-
-            duration = duration,
-            ease = Ease.InOutCubic,
-
-            wait = true,
-            disableWhenOpen = true,
-            blockRaycastWhenClosed = false,
-        };
-
-        Collect(spec);
-    }
-
-
-    private void EnqueueFocusBlurFadeOutSpec(float duration = 0.45f)
-    {
-        var spec = new FocusBlurFadeCommandSpec
-        {
-            mode = FocusBlurFadeMode.FadeOut,
-
-            color = Color.black,
-            maxAlpha = 1f,
-            zoomAmount = 0.035f,
-
-            duration = duration,
-            ease = Ease.InOutCubic,
-
-            wait = true,
-            disableWhenClear = true,
-            blockRaycastWhenVisible = false,
-        };
-
-        Collect(spec);
-    }
-
-    private void EnqueueFocusBlurFadeInSpec(float duration = 0.35f)
-    {
-        var spec = new FocusBlurFadeCommandSpec
-        {
-
-            mode = FocusBlurFadeMode.FadeIn,
-
-            color = Color.black,
-            maxAlpha = 1f,
-            zoomAmount = 0.035f,
-
-            duration = duration,
-            ease = Ease.InOutCubic,
-
-            wait = true,
-            disableWhenClear = true,
-            blockRaycastWhenVisible = false,
-        };
-
-        Collect(spec);
-    }
-
-    private void EnqueueSlantedShutterCloseSpec(float duration = 0.38f)
-    {
-        var spec = new SlantedShutterCommandSpec
-        {
-            mode = SlantedShutterMode.Close,
-
-            slantPixels = 140f,
-            openGapHeight = 460f,
-            finalGapHeight = 0f,
-
-            centerBandHeight = 280f,
-            centerStartAlpha = 0.25f,
-            centerEndAlpha = 1f,
-
-            color = Color.black,
-
-            duration = duration,
-            ease = Ease.OutCubic,
-
-            wait = true,
-            disableWhenOpen = true,
-            blockRaycastWhileClosed = false,
-        };
-
-        Collect(spec);
-    }
-
-    private void EnqueueSlantedShutterOpenSpec(float duration = 0.32f)
-    {
-        var spec = new SlantedShutterCommandSpec
-        {
-            mode = SlantedShutterMode.Open,
-
-            slantPixels = 140f,
-            openGapHeight = 460f,
-            finalGapHeight = 0f,
-
-            centerBandHeight = 280f,
-            centerStartAlpha = 0.25f,
-            centerEndAlpha = 1f,
-
-            color = Color.black,
-
-            duration = duration,
-            ease = Ease.InCubic,
-
-            wait = true,
-            disableWhenOpen = true,
-            blockRaycastWhileClosed = false,
-        };
-
-        Collect(spec);
-    }
-
     private void EnqueueVerticalStripCoverSpec(float duration = 0.4f)
     {
         var spec = new VerticalStripWipeCommandSpec
         {
-            mode = VerticalStripWipeMode.Cover,
             order = VerticalStripWipeOrder.LeftToRight,
 
             stripCount = 20,
@@ -254,28 +92,6 @@ public sealed partial class YarnCommandBridge
         Collect(spec);
     }
 
-    private void EnqueueVerticalStripClearSpec(float duration = 0.4f)
-    {
-        var spec = new VerticalStripWipeCommandSpec
-        {
-            mode = VerticalStripWipeMode.Clear,
-            order = VerticalStripWipeOrder.RightToLeft,
-
-            stripCount = 20,
-            stripDelay = 0.02f,
-            stripFillDuration = 0.08f,
-
-            color = Color.black,
-
-            duration = duration,
-            ease = Ease.Linear,
-
-            wait = true
-        };
-
-        Collect(spec);
-    }
-    
     private void EnqueueSlantedMaskCutInSpec(float duration = 0.65f)
     {
         var spec = new SlantedMaskSlideInCommandSpec
@@ -319,182 +135,79 @@ public sealed partial class YarnCommandBridge
 
         Collect(spec);
     }
-    
+
     private void EnqueueClearAllTransitionsSpec()
     {
         Collect(new ClearAllTransitionsCommandSpec { });
     }
-
-    private void EnqueueRevealWithTransitionSpec(string kind, float duration = 0.4f)
+    
+    private void EnqueueTransitionOutFocusCurtainSpec(float duration = 0.42f)
     {
-        var spec = new RevealWithTransitionCommandSpec
+        var spec = new TransitionOutFocusCurtainCommandSpec
         {
-            kind = ParseRevealTransitionKind(kind),
+            openGapHeight = 520f,
+            finalGapHeight = 0f,
+            slantPixels = 90f,
+
+            edgeFeatherHeight = 140f,
+            edgeFeatherAlpha = 0.55f,
+
+            centerBlurHeight = 320f,
+            centerStartAlpha = 0.12f,
+            centerEndAlpha = 0.82f,
+            centerBlurSlices = 18,
+
+            color = Color.black,
+
             duration = duration,
-            wait = true
+            ease = Ease.InOutCubic,
         };
 
         Collect(spec);
     }
 
-    private static PresentationRevealTransitionKind ParseRevealTransitionKind(string raw)
+    private void EnqueueTransitionOutDazeFadeSpec(float duration = 0.65f)
     {
-        if (string.IsNullOrWhiteSpace(raw))
-            return PresentationRevealTransitionKind.VerticalStrip;
-
-        string s = raw.Trim().ToLowerInvariant();
-        s = s.Replace("-", "_");
-        s = s.Replace(".", "_");
-
-        switch (s)
+        var spec = new TransitionOutFocusCurtainCommandSpec
         {
-            case "strip":
-            case "vertical_strip":
-            case "wipe":
-                return PresentationRevealTransitionKind.VerticalStrip;
+            openGapHeight = 680f,
+            finalGapHeight = 0f,
 
-            case "shutter":
-            case "slanted_shutter":
-                return PresentationRevealTransitionKind.SlantedShutter;
+            slantPixels = 36f,
 
-            case "fade":
-            case "blur_fade":
-            case "focus_fade":
-                return PresentationRevealTransitionKind.FocusBlurFade;
+            edgeFeatherHeight = 240f,
+            edgeFeatherAlpha = 0.42f,
 
-            case "curtain":
-            case "blur_curtain":
-            case "focus_curtain":
-                return PresentationRevealTransitionKind.FocusBlurCurtain;
+            centerBlurHeight = 520f,
+            centerStartAlpha = 0.08f,
+            centerEndAlpha = 0.72f,
+            centerBlurSlices = 28,
 
-            default:
-                return PresentationRevealTransitionKind.VerticalStrip;
-        }
+            color = Color.black,
+
+            duration = duration,
+            ease = Ease.InOutSine,
+        };
+
+        Collect(spec);
     }
-    
-    private void EnqueueTransitionOutSlantSpec(float duration = 0.45f)
-{
-    var spec = new TransitionOutSlantCommandSpec
+
+    private void EnqueueTransitionOutStripSpec(float duration = 0.4f)
     {
-        fromOffset = new Vector2(-770f, 0f),
-        toOffset = new Vector2(-2200f, 0f),
+        var spec = new TransitionOutStripCommandSpec
+        {
+            order = VerticalStripWipeOrder.RightToLeft,
 
-        slantToRight = false,
-        flipVertical = true,
+            stripCount = 20,
+            stripDelay = 0.02f,
+            stripFillDuration = 0.08f,
 
-        duration = duration,
-        ease = Ease.InCubic,
+            color = Color.black,
 
-        pullPixels = 0f,
-        pullEnd = 0.28f,
-    };
+            duration = duration,
+            ease = Ease.Linear,
+        };
 
-    Collect(spec);
-}
-
-private void EnqueueTransitionOutFocusFadeSpec(float duration = 0.35f)
-{
-    var spec = new TransitionOutFocusFadeCommandSpec
-    {
-        color = Color.black,
-        maxAlpha = 1f,
-        zoomAmount = 0.035f,
-
-        duration = duration,
-        ease = Ease.InOutCubic,
-    };
-
-    Collect(spec);
-}
-
-private void EnqueueTransitionOutFocusCurtainSpec(float duration = 0.42f)
-{
-    var spec = new TransitionOutFocusCurtainCommandSpec
-    {
-        openGapHeight = 520f,
-        finalGapHeight = 0f,
-        slantPixels = 90f,
-
-        edgeFeatherHeight = 140f,
-        edgeFeatherAlpha = 0.55f,
-
-        centerBlurHeight = 320f,
-        centerStartAlpha = 0.12f,
-        centerEndAlpha = 0.82f,
-        centerBlurSlices = 18,
-
-        color = Color.black,
-
-        duration = duration,
-        ease = Ease.InOutCubic,
-    };
-
-    Collect(spec);
-}
-
-private void EnqueueTransitionOutDazeFadeSpec(float duration = 0.65f)
-{
-    var spec = new TransitionOutFocusCurtainCommandSpec
-    {
-        openGapHeight = 680f,
-        finalGapHeight = 0f,
-
-        slantPixels = 36f,
-
-        edgeFeatherHeight = 240f,
-        edgeFeatherAlpha = 0.42f,
-
-        centerBlurHeight = 520f,
-        centerStartAlpha = 0.08f,
-        centerEndAlpha = 0.72f,
-        centerBlurSlices = 28,
-
-        color = Color.black,
-
-        duration = duration,
-        ease = Ease.InOutSine,
-    };
-
-    Collect(spec);
-}
-
-private void EnqueueTransitionOutShutterSpec(float duration = 0.32f)
-{
-    var spec = new TransitionOutShutterCommandSpec
-    {
-        slantPixels = 140f,
-        openGapHeight = 460f,
-        finalGapHeight = 0f,
-
-        centerBandHeight = 280f,
-        centerStartAlpha = 0.25f,
-        centerEndAlpha = 1f,
-
-        color = Color.black,
-
-        duration = duration,
-        ease = Ease.InCubic,
-    };
-
-    Collect(spec);
-}
-
-private void EnqueueTransitionOutStripSpec(float duration = 0.4f)
-{
-    var spec = new TransitionOutStripCommandSpec
-    {
-        order = VerticalStripWipeOrder.RightToLeft,
-
-        stripCount = 20,
-        stripDelay = 0.02f,
-        stripFillDuration = 0.08f,
-
-        color = Color.black,
-
-        duration = duration,
-        ease = Ease.Linear,
-    };
-
-    Collect(spec);
-}
+        Collect(spec);
+    }
 }

@@ -50,15 +50,9 @@ title: Story_TalesOfNovaEP12_01
 _#beat
 <<emoji_spring @1 15>>
 
+<<tx_daze>>
 윌로: 죄송합니다만, 이번 의뢰는 보수의 3분의 1밖에 드릴 수 없겠군요.
-
-// <<bg_slot_cutin bg15>>
-// <<bg_move bg15 -8u 12u 0>>
-
-// <<attach_to_bg c1 bg15>>
-
-// <<bg_fade_in bg15 0>>
-// <<bg_cutin_in2 bg15>>
+<<tx_out_shutter>>
 
 <<blur mid 0.1>>
 
@@ -168,7 +162,6 @@ _#beat #stay
 _#beat
 
 <<blur_reset>>
-<<bg_fade_out bg15 -1>>
 <<char_to_s0 @1>>
 
 윌로: 여러분이 고생하신 건 잘 알지만......

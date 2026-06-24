@@ -153,8 +153,6 @@ public partial class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
         SystemUI_Root,
         
         VerticalStripWipe,
-        SlantedShutter,
-        FocusBlurFade,
         FocusBlurCurtain,
 
         ToggleBottomRight,

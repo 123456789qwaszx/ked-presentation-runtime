@@ -13,22 +13,13 @@ public sealed class PresentationTransitionCommandFactory : INodeCommandFactory
             // Strip 
             VerticalStripWipeCommandSpec s => new VerticalStripWipeCommand(s),
             
-            // Shutter
-            SlantedShutterCommandSpec s => new SlantedShutterCommand(s),
-
-            // Focus 
-            FocusBlurFadeCommandSpec s => new FocusBlurFadeCommand(s),
-            
             // Daze
             FocusBlurCurtainCommandSpec s => new FocusBlurCurtainCommand(s),
             
             ClearAllTransitionsCommandSpec s => new ClearAllTransitionsCommand(),
-            RevealWithTransitionCommandSpec s => new RevealWithTransitionCommand(s),
             
-            TransitionOutShutterCommandSpec s => new TransitionOutShutterCommand(s),
             TransitionOutStripCommandSpec s => new TransitionOutStripCommand(s),
             TransitionOutSlantCommandSpec s => new TransitionOutSlantCommand(s),
-            TransitionOutFocusFadeCommandSpec s => new TransitionOutFocusFadeCommand(s),
             TransitionOutFocusCurtainCommandSpec s => new TransitionOutFocusCurtainCommand(s),
 
             _ => null

@@ -6,8 +6,6 @@ using UnityEngine;
 public interface IPresentationTransitionSlotProvider
 {
     RectTransform VerticalStripWipe { get; }
-    RectTransform SlantedShutter { get; }
-    RectTransform FocusBlurFade { get; }
     RectTransform FocusBlurCurtain { get; }
     RectTransform SlantedMaskEdgeGraphic { get; }
 }
@@ -15,16 +13,8 @@ public interface IPresentationTransitionSlotProvider
 public sealed partial class PresentationUIRoot : IPresentationTransitionSlotProvider
 {
     public RectTransform VerticalStripWipe => View.Rect(Refs.VerticalStripWipe);
-    public RectTransform SlantedShutter => View.Rect(Refs.SlantedShutter);
-    public RectTransform FocusBlurFade => View.Rect(Refs.FocusBlurFade);
     public RectTransform FocusBlurCurtain => View.Rect(Refs.FocusBlurCurtain);
     public RectTransform SlantedMaskEdgeGraphic => View.Rect(Refs.Stage01_Root);
-}
-
-public enum VerticalStripWipeMode
-{
-    Cover = 0,
-    Clear = 1
 }
 
 [Serializable]
@@ -35,7 +25,6 @@ public enum VerticalStripWipeMode
 public sealed class VerticalStripWipeCommandSpec : CommandSpecBase
 {
     [Header("Wipe")]
-    public VerticalStripWipeMode mode = VerticalStripWipeMode.Cover;
     public VerticalStripWipeOrder order = VerticalStripWipeOrder.LeftToRight;
 
     [Header("Strips")]
@@ -140,8 +129,8 @@ public sealed class VerticalStripWipeCommand : CommandBase
 
         ApplyConfig();
 
-        _startProgress = _spec.mode == VerticalStripWipeMode.Cover ? 0f : 1f;
-        _finalProgress = _spec.mode == VerticalStripWipeMode.Cover ? 1f : 0f;
+        _startProgress = 0f;
+        _finalProgress = 1f;
         
         HasClaimedTarget = true;
     }

@@ -12,8 +12,6 @@ public static class PresentationTransitionClearUtility
             return;
 
         ClearVerticalStrip(provider.VerticalStripWipe);
-        ClearSlantedShutter(provider.SlantedShutter);
-        ClearFocusBlurFade(provider.FocusBlurFade);
         ClearFocusBlurCurtain(provider.FocusBlurCurtain);
         ClearSlantedMasks(provider.SlantedMaskEdgeGraphic);
     }
@@ -28,12 +26,6 @@ public static class PresentationTransitionClearUtility
 
         if (except != PresentationTransitionLayer.VerticalStripWipe)
             ClearVerticalStrip(provider.VerticalStripWipe);
-
-        if (except != PresentationTransitionLayer.SlantedShutter)
-            ClearSlantedShutter(provider.SlantedShutter);
-
-        if (except != PresentationTransitionLayer.FocusBlurFade)
-            ClearFocusBlurFade(provider.FocusBlurFade);
 
         if (except != PresentationTransitionLayer.FocusBlurCurtain)
             ClearFocusBlurCurtain(provider.FocusBlurCurtain);
@@ -55,36 +47,6 @@ public static class PresentationTransitionClearUtility
 
         DOTween.Kill(graphic, false);
         graphic.ClearImmediate();
-    }
-
-    private static void ClearSlantedShutter(RectTransform rect)
-    {
-        if (rect == null)
-            return;
-
-        rect.DOKill(false);
-
-        SlantedShutterGraphic graphic = rect.GetComponent<SlantedShutterGraphic>();
-        if (graphic == null)
-            return;
-
-        DOTween.Kill(graphic, false);
-        graphic.ClearImmediate();
-    }
-
-    private static void ClearFocusBlurFade(RectTransform rect)
-    {
-        if (rect == null)
-            return;
-
-        rect.DOKill(false);
-
-        FocusBlurFadeOverlay overlay = rect.GetComponent<FocusBlurFadeOverlay>();
-        if (overlay == null)
-            return;
-
-        DOTween.Kill(overlay, false);
-        overlay.ClearImmediate();
     }
 
     private static void ClearFocusBlurCurtain(RectTransform rect)
