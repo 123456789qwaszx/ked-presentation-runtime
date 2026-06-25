@@ -322,10 +322,10 @@ public sealed partial class YarnCommandBridge
     
     private void BindTransition(DialogueRunner runner)
     {
-        runner.AddCommandHandler<float>(
-            "tx_slant_in", EnqueueSlantedMaskCutInSpec);
-        runner.AddCommandHandler<float>(
-            "tx_slant_out", EnqueueSlantedMaskCutOutSpec);
+        // runner.AddCommandHandler<float>(
+        //     "tx_slant_in", EnqueueSlantedMaskCutInSpec);
+        // runner.AddCommandHandler<float>(
+        //     "tx_slant_out", EnqueueSlantedMaskCutOutSpec);
 
         runner.AddCommandHandler<float>(
             "tx_strip", EnqueueVerticalStripCoverSpec);

@@ -34,6 +34,9 @@ public partial class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
 
         Stage00_Root,
         
+        Stage00Mask_Root,
+        
+        
         Stage00DepthSystem_Root,
         Stage00Depth_Far_Root,
         Stage00Depth_Far_FramingTransform,
@@ -73,6 +76,8 @@ public partial class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
         Stage00Overlay_Root,
         
         Stage01_Root,
+        
+        Stage01Mask_Root,
 
         Stage01DepthSystem_Root,
         Stage01Depth_Far_Root,
@@ -115,6 +120,8 @@ public partial class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
 
 
         Stage02_Root,
+        
+        Stage02Mask_Root,
 
         Stage02DepthSystem_Root,
         Stage02Depth_Far_Root,
@@ -281,6 +288,7 @@ public partial class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
         CacheShotResponseStageProviderRefs();
         CacheDepthDefocusOverlayProviderRefs();
         CacheStageDepthContentSlotProviderRefs();
+        CacheStageMaskProviderRefs();
         
         BindHandlers();
         

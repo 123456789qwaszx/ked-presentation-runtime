@@ -13,7 +13,6 @@ public static class PresentationTransitionClearUtility
 
         ClearVerticalStrip(provider.VerticalStripWipe);
         ClearFocusBlurCurtain(provider.FocusBlurCurtain);
-        ClearSlantedMasks(provider.SlantedMaskEdgeGraphic);
     }
 
     public static void ClearAllExcept(PresentationTransitionLayer except)
@@ -29,9 +28,6 @@ public static class PresentationTransitionClearUtility
 
         if (except != PresentationTransitionLayer.FocusBlurCurtain)
             ClearFocusBlurCurtain(provider.FocusBlurCurtain);
-
-        if (except != PresentationTransitionLayer.SlantedMask)
-            ClearSlantedMasks(provider.SlantedMaskEdgeGraphic);
     }
 
     private static void ClearVerticalStrip(RectTransform rect)
@@ -63,25 +59,6 @@ public static class PresentationTransitionClearUtility
         DOTween.Kill(graphic, false);
         graphic.ClearImmediate();
     }
-
-    private static void ClearSlantedMasks(RectTransform root)
-    {
-        if (root == null)
-            return;
-
-        SlantedMaskGraphic[] masks = root.GetComponentsInChildren<SlantedMaskGraphic>(true);
-
-        for (int i = 0; i < masks.Length; i++)
-        {
-            SlantedMaskGraphic mask = masks[i];
-
-            if (mask == null)
-                continue;
-
-            DOTween.Kill(mask, false);
-            mask.ResetToHiddenOffset();
-        }
-    }
 }
 
 public enum PresentationTransitionLayer
@@ -89,5 +66,4 @@ public enum PresentationTransitionLayer
     None = 0,
     VerticalStripWipe = 10,
     FocusBlurCurtain = 40,
-    SlantedMask = 50
 }

@@ -7,8 +7,8 @@ public sealed class PresentationTransitionCommandFactory : INodeCommandFactory
             null => null,
 
             // Slanted Mask
-            SlantedMaskSlideInCommandSpec s => new SlantedMaskSlideInCommand(s),
-            SlantedMaskSlideOutCommandSpec s => new SlantedMaskSlideOutCommand(s),
+            // SlantedMaskSlideInCommandSpec s => new SlantedMaskSlideInCommand(s),
+            // SlantedMaskSlideOutCommandSpec s => new SlantedMaskSlideOutCommand(s),
 
             // Strip 
             VerticalStripWipeCommandSpec s => new VerticalStripWipeCommand(s),
@@ -19,7 +19,6 @@ public sealed class PresentationTransitionCommandFactory : INodeCommandFactory
             ClearAllTransitionsCommandSpec s => new ClearAllTransitionsCommand(),
             
             TransitionOutStripCommandSpec s => new TransitionOutStripCommand(s),
-            TransitionOutSlantCommandSpec s => new TransitionOutSlantCommand(s),
             TransitionOutFocusCurtainCommandSpec s => new TransitionOutFocusCurtainCommand(s),
 
             _ => null

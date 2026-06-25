@@ -144,7 +144,7 @@ public sealed class EpisodePlayer : MonoBehaviour
         _presentationResponseRig.Clear();
         
         IPresentationTransitionSlotProvider provider = UIManager.Instance.GetUI<PresentationUIRoot>();
-        SlantedMaskGraphic mask = provider.SlantedMaskEdgeGraphic.GetComponent<SlantedMaskGraphic>();
-        mask?.ResetToHiddenOffset();
+        //SlantedMaskGraphic mask = provider.SlantedMaskEdgeGraphic.GetComponent<SlantedMaskGraphic>();
+        //mask?.ResetToHiddenOffset();
     }
 }

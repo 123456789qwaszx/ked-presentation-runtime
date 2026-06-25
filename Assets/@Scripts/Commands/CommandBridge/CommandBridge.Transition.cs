@@ -92,50 +92,6 @@ public sealed partial class YarnCommandBridge
         Collect(spec);
     }
 
-    private void EnqueueSlantedMaskCutInSpec(float duration = 0.65f)
-    {
-        var spec = new SlantedMaskSlideInCommandSpec
-        {
-            fromOffset = new Vector2(-2200f, 0f),
-            toOffset = new Vector2(-770f, 0f),
-
-            slantToRight = false,
-            flipVertical = true,
-
-            duration = duration,
-            ease = Ease.OutCubic,
-
-            overshootPixels = 72f,
-            overshootStart = 0.72f,
-
-            wait = false
-        };
-
-        Collect(spec);
-    }
-
-    private void EnqueueSlantedMaskCutOutSpec(float duration = 0.45f)
-    {
-        var spec = new SlantedMaskSlideOutCommandSpec
-        {
-            fromOffset = new Vector2(-770f, 0f),
-            toOffset = new Vector2(-2200f, 0f),
-
-            slantToRight = false,
-            flipVertical = true,
-
-            duration = duration,
-            ease = Ease.InCubic,
-
-            pullPixels = 0f,
-            pullEnd = 0.28f,
-
-            wait = false
-        };
-
-        Collect(spec);
-    }
-
     private void EnqueueClearAllTransitionsSpec()
     {
         Collect(new ClearAllTransitionsCommandSpec { });
