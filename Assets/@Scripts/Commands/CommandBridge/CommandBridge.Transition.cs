@@ -3,6 +3,343 @@ using UnityEngine;
 
 public sealed partial class YarnCommandBridge
 {
+    private void EnqueueSlantedMaskCutInSpec(string stage = "01", float duration = 0.65f)
+    {
+        var spec = new StageMaskMotionCommandSpec
+        {
+            stage = PresentationStageKeyParser.Parse(stage, PresentationStageKey.Stage01),
+            kind = StageMaskKind.Slanted,
+
+            fromOffset = new Vector2(-2200f, 0f),
+            toOffset = new Vector2(-770f, 0f),
+
+            slantPixels = 220f,
+            slantToRight = false,
+            flipVertical = true,
+
+            showEdge = true,
+            edgeMode = StageMaskEdgeMode.Leading,
+            edgeColor = new Color(1f, 1f, 1f, 0.92f),
+            edgeThickness = 6f,
+            hideEdgeOnComplete = false,
+
+            duration = duration,
+            ease = Ease.OutCubic,
+
+            rubberMode = StageMaskRubberMode.OvershootEnd,
+            overshootPixels = 72f,
+            overshootStart = 0.72f,
+
+            wait = false
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueSlantedMaskCutOutSpec(string stage = "01", float duration = 0.45f)
+    {
+        var spec = new StageMaskMotionCommandSpec
+        {
+            stage = PresentationStageKeyParser.Parse(stage, PresentationStageKey.Stage01),
+            kind = StageMaskKind.Slanted,
+
+            fromOffset = new Vector2(-770f, 0f),
+            toOffset = new Vector2(-2200f, 0f),
+
+            slantPixels = 220f,
+            slantToRight = false,
+            flipVertical = true,
+
+            showEdge = true,
+            edgeMode = StageMaskEdgeMode.Leading,
+            edgeColor = new Color(1f, 1f, 1f, 0.86f),
+            edgeThickness = 6f,
+            hideEdgeOnComplete = true,
+
+            duration = duration,
+            ease = Ease.InCubic,
+
+            rubberMode = StageMaskRubberMode.PullStart,
+            pullPixels = 24f,
+            pullEnd = 0.28f,
+
+            wait = false
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueHorizontalStripCutInSpec(string stage = "01", float duration = 0.45f)
+    {
+        var spec = new StageMaskMotionCommandSpec
+        {
+            stage = PresentationStageKeyParser.Parse(stage, PresentationStageKey.Stage01),
+            kind = StageMaskKind.HorizontalStrip,
+
+            fromOffset = new Vector2(-2200f, 0f),
+            toOffset = Vector2.zero,
+
+            stripHeightPixels = 360f,
+            horizontalBleedPixels = 96f,
+
+            showEdge = true,
+            edgeMode = StageMaskEdgeMode.Both,
+            edgeColor = new Color(1f, 1f, 1f, 0.82f),
+            edgeThickness = 4f,
+            hideEdgeOnComplete = false,
+
+            duration = duration,
+            ease = Ease.OutCubic,
+
+            rubberMode = StageMaskRubberMode.OvershootEnd,
+            overshootPixels = 48f,
+            overshootStart = 0.74f,
+
+            wait = false
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueHorizontalStripCutOutSpec(string stage = "01", float duration = 0.34f)
+    {
+        var spec = new StageMaskMotionCommandSpec
+        {
+            stage = PresentationStageKeyParser.Parse(stage, PresentationStageKey.Stage01),
+            kind = StageMaskKind.HorizontalStrip,
+
+            fromOffset = Vector2.zero,
+            toOffset = new Vector2(2200f, 0f),
+
+            stripHeightPixels = 360f,
+            horizontalBleedPixels = 96f,
+
+            showEdge = true,
+            edgeMode = StageMaskEdgeMode.Both,
+            edgeColor = new Color(1f, 1f, 1f, 0.72f),
+            edgeThickness = 4f,
+            hideEdgeOnComplete = true,
+
+            duration = duration,
+            ease = Ease.InCubic,
+
+            rubberMode = StageMaskRubberMode.PullStart,
+            pullPixels = 18f,
+            pullEnd = 0.25f,
+
+            wait = false
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueVerticalStripCutInSpec(string stage = "01", float duration = 0.42f)
+    {
+        var spec = new StageMaskMotionCommandSpec
+        {
+            stage = PresentationStageKeyParser.Parse(stage, PresentationStageKey.Stage01),
+            kind = StageMaskKind.VerticalStrip,
+
+            fromOffset = new Vector2(2200f, 0f),
+            toOffset = Vector2.zero,
+
+            verticalStripWidthPixels = 520f,
+            verticalBleedPixels = 96f,
+
+            showEdge = true,
+            edgeMode = StageMaskEdgeMode.Both,
+            edgeColor = new Color(1f, 1f, 1f, 0.78f),
+            edgeThickness = 4f,
+            hideEdgeOnComplete = false,
+
+            duration = duration,
+            ease = Ease.OutCubic,
+
+            rubberMode = StageMaskRubberMode.OvershootEnd,
+            overshootPixels = 42f,
+            overshootStart = 0.72f,
+
+            wait = false
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueVerticalStripCutOutSpec(string stage = "01", float duration = 0.32f)
+    {
+        var spec = new StageMaskMotionCommandSpec
+        {
+            stage = PresentationStageKeyParser.Parse(stage, PresentationStageKey.Stage01),
+            kind = StageMaskKind.VerticalStrip,
+
+            fromOffset = Vector2.zero,
+            toOffset = new Vector2(2200f, 0f),
+
+            verticalStripWidthPixels = 520f,
+            verticalBleedPixels = 96f,
+
+            showEdge = true,
+            edgeMode = StageMaskEdgeMode.Both,
+            edgeColor = new Color(1f, 1f, 1f, 0.72f),
+            edgeThickness = 4f,
+            hideEdgeOnComplete = true,
+
+            duration = duration,
+            ease = Ease.InCubic,
+
+            rubberMode = StageMaskRubberMode.PullStart,
+            pullPixels = 18f,
+            pullEnd = 0.25f,
+
+            wait = false
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueDiagonalBandCutInSpec(string stage = "01", float duration = 0.38f)
+    {
+        var spec = new StageMaskMotionCommandSpec
+        {
+            stage = PresentationStageKeyParser.Parse(stage, PresentationStageKey.Stage01),
+            kind = StageMaskKind.DiagonalBand,
+
+            fromOffset = new Vector2(-2600f, 0f),
+            toOffset = Vector2.zero,
+
+            diagonalBandWidthPixels = 760f,
+            diagonalBandSlantPixels = 520f,
+            diagonalBandBleedPixels = 320f,
+            diagonalBandToRight = true,
+
+            showEdge = true,
+            edgeMode = StageMaskEdgeMode.Both,
+            edgeColor = new Color(1f, 1f, 1f, 0.88f),
+            edgeThickness = 5f,
+            hideEdgeOnComplete = false,
+
+            duration = duration,
+            ease = Ease.OutQuart,
+
+            rubberMode = StageMaskRubberMode.OvershootEnd,
+            overshootPixels = 64f,
+            overshootStart = 0.70f,
+
+            wait = false
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueDiagonalBandCutOutSpec(string stage = "01", float duration = 0.28f)
+    {
+        var spec = new StageMaskMotionCommandSpec
+        {
+            stage = PresentationStageKeyParser.Parse(stage, PresentationStageKey.Stage01),
+            kind = StageMaskKind.DiagonalBand,
+
+            fromOffset = Vector2.zero,
+            toOffset = new Vector2(2600f, 0f),
+
+            diagonalBandWidthPixels = 760f,
+            diagonalBandSlantPixels = 520f,
+            diagonalBandBleedPixels = 320f,
+            diagonalBandToRight = true,
+
+            showEdge = true,
+            edgeMode = StageMaskEdgeMode.Both,
+            edgeColor = new Color(1f, 1f, 1f, 0.78f),
+            edgeThickness = 5f,
+            hideEdgeOnComplete = true,
+
+            duration = duration,
+            ease = Ease.InQuart,
+
+            rubberMode = StageMaskRubberMode.PullStart,
+            pullPixels = 18f,
+            pullEnd = 0.22f,
+
+            wait = false
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueCircleIrisInSpec(string stage = "01", float duration = 0.5f)
+    {
+        var spec = new StageMaskMotionCommandSpec
+        {
+            stage = PresentationStageKeyParser.Parse(stage, PresentationStageKey.Stage01),
+            kind = StageMaskKind.CircleIris,
+
+            fromOffset = Vector2.zero,
+            toOffset = Vector2.zero,
+
+            fromIrisRadiusPixels = 0f,
+            toIrisRadiusPixels = 1280f,
+            irisAspect = 1.777f,
+            irisSegments = 72,
+
+            showEdge = true,
+            edgeMode = StageMaskEdgeMode.Outline,
+            edgeColor = new Color(1f, 1f, 1f, 0.66f),
+            edgeThickness = 3f,
+            hideEdgeOnComplete = true,
+
+            duration = duration,
+            ease = Ease.OutCubic,
+
+            rubberMode = StageMaskRubberMode.None,
+
+            wait = false
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueCircleIrisOutSpec(string stage = "01", float duration = 0.42f)
+    {
+        var spec = new StageMaskMotionCommandSpec
+        {
+            stage = PresentationStageKeyParser.Parse(stage, PresentationStageKey.Stage01),
+            kind = StageMaskKind.CircleIris,
+
+            fromOffset = Vector2.zero,
+            toOffset = Vector2.zero,
+
+            fromIrisRadiusPixels = 1280f,
+            toIrisRadiusPixels = 0f,
+            irisAspect = 1.777f,
+            irisSegments = 72,
+
+            showEdge = true,
+            edgeMode = StageMaskEdgeMode.Outline,
+            edgeColor = new Color(1f, 1f, 1f, 0.66f),
+            edgeThickness = 3f,
+            hideEdgeOnComplete = true,
+
+            duration = duration,
+            ease = Ease.InCubic,
+
+            rubberMode = StageMaskRubberMode.None,
+
+            wait = false
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueStageMaskClearSpec(string stage = "01")
+    {
+        Collect(new StageMaskClearCommandSpec
+        {
+            stage = PresentationStageKeyParser.Parse(stage, PresentationStageKey.Stage01),
+            mode = StageMaskClearMode.FullVisible,
+            hideEdge = true
+        });
+    }
+
+
     private void EnqueueDazeFadeCloseSpec(float duration = 0.85f)
     {
         var spec = new FocusBlurCurtainCommandSpec
@@ -96,7 +433,7 @@ public sealed partial class YarnCommandBridge
     {
         Collect(new ClearAllTransitionsCommandSpec { });
     }
-    
+
     private void EnqueueTransitionOutFocusCurtainSpec(float duration = 0.42f)
     {
         var spec = new TransitionOutFocusCurtainCommandSpec

@@ -6,9 +6,9 @@ public sealed class PresentationTransitionCommandFactory : INodeCommandFactory
         {
             null => null,
 
-            // Slanted Mask
-            // SlantedMaskSlideInCommandSpec s => new SlantedMaskSlideInCommand(s),
-            // SlantedMaskSlideOutCommandSpec s => new SlantedMaskSlideOutCommand(s),
+            // Stage-local Mask
+            StageMaskMotionCommandSpec s => new StageMaskMotionCommand(s),
+            StageMaskClearCommandSpec s => new StageMaskClearCommand(s),
 
             // Strip 
             VerticalStripWipeCommandSpec s => new VerticalStripWipeCommand(s),

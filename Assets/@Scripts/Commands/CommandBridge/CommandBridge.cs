@@ -322,10 +322,52 @@ public sealed partial class YarnCommandBridge
     
     private void BindTransition(DialogueRunner runner)
     {
-        // runner.AddCommandHandler<float>(
-        //     "tx_slant_in", EnqueueSlantedMaskCutInSpec);
-        // runner.AddCommandHandler<float>(
-        //     "tx_slant_out", EnqueueSlantedMaskCutOutSpec);
+        runner.AddCommandHandler<string, float>(
+            "tx_slant_in", EnqueueSlantedMaskCutInSpec);
+        runner.AddCommandHandler<string, float>(
+            "tx_slant_out", EnqueueSlantedMaskCutOutSpec);
+        
+        
+        runner.AddCommandHandler<string, float>(
+            "tx_hstrip_in",
+            EnqueueHorizontalStripCutInSpec);
+
+        runner.AddCommandHandler<string, float>(
+            "tx_hstrip_out",
+            EnqueueHorizontalStripCutOutSpec);
+
+        runner.AddCommandHandler<string, float>(
+            "tx_vstrip_in",
+            EnqueueVerticalStripCutInSpec);
+
+        runner.AddCommandHandler<string, float>(
+            "tx_vstrip_out",
+            EnqueueVerticalStripCutOutSpec);
+
+        runner.AddCommandHandler<string, float>(
+            "tx_band_in",
+            EnqueueDiagonalBandCutInSpec);
+
+        runner.AddCommandHandler<string, float>(
+            "tx_band_out",
+            EnqueueDiagonalBandCutOutSpec);
+
+        runner.AddCommandHandler<string, float>(
+            "tx_iris_in",
+            EnqueueCircleIrisInSpec);
+
+        runner.AddCommandHandler<string, float>(
+            "tx_iris_out",
+            EnqueueCircleIrisOutSpec);
+
+        runner.AddCommandHandler<string>(
+            "tx_stage_mask_clear",
+            EnqueueStageMaskClearSpec);
+        
+        
+        
+        
+        
 
         runner.AddCommandHandler<float>(
             "tx_strip", EnqueueVerticalStripCoverSpec);

@@ -36,7 +36,6 @@ public partial class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
         
         Stage00Mask_Root,
         
-        
         Stage00DepthSystem_Root,
         Stage00Depth_Far_Root,
         Stage00Depth_Far_FramingTransform,
@@ -73,7 +72,6 @@ public partial class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
         Stage00CloseFrostedGlassMask,
         Stage00CloseFrostedGlassRawImage,
         
-        Stage00Overlay_Root,
         
         Stage01_Root,
         
@@ -115,8 +113,6 @@ public partial class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
         Stage01CloseFrostedGlassMask,
         Stage01CloseFrostedGlassRawImage,
 
-        Stage01Overlay_Root,
-        SlantedMaskEdgeGraphic,
 
 
         Stage02_Root,
@@ -158,8 +154,6 @@ public partial class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
         Stage02Depth_Close_Content,
         Stage02CloseFrostedGlassMask,
         Stage02CloseFrostedGlassRawImage,
-
-        Stage02Overlay_Root,
         
         #endregion
         

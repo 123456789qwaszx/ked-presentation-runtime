@@ -56,8 +56,6 @@ public partial class PresentationUIRoot
     private RectTransform _stage00CloseFrostedGlassMask;
     private RawImage _stage00CloseFrostedGlassRawImage;
 
-    private RectTransform _stage00OverlayRoot;
-
     private RectTransform _stage01Root;
 
     private RectTransform _stage01DepthSystemRoot;
@@ -96,9 +94,6 @@ public partial class PresentationUIRoot
     private RectTransform _stage01CloseFrostedGlassMask;
     private RawImage _stage01CloseFrostedGlassRawImage;
 
-    private RectTransform _stage01OverlayRoot;
-    private Graphic _slantedMaskEdgeGraphic;
-
     private RectTransform _stage02Root;
 
     private RectTransform _stage02DepthSystemRoot;
@@ -136,8 +131,6 @@ public partial class PresentationUIRoot
     private RectTransform _stage02DepthCloseContent;
     private RectTransform _stage02CloseFrostedGlassMask;
     private RawImage _stage02CloseFrostedGlassRawImage;
-
-    private RectTransform _stage02OverlayRoot;
 
     #endregion
 
@@ -312,8 +305,6 @@ public partial class PresentationUIRoot
         _stage00CloseFrostedGlassMask = View.Rect(Refs.Stage00CloseFrostedGlassMask);
         _stage00CloseFrostedGlassRawImage = View.Component<RawImage>(Refs.Stage00CloseFrostedGlassRawImage);
 
-        _stage00OverlayRoot = View.Rect(Refs.Stage00Overlay_Root);
-
         _stage01Root = View.Rect(Refs.Stage01_Root);
 
         _stage01DepthSystemRoot = View.Rect(Refs.Stage01DepthSystem_Root);
@@ -352,9 +343,6 @@ public partial class PresentationUIRoot
         _stage01CloseFrostedGlassMask = View.Rect(Refs.Stage01CloseFrostedGlassMask);
         _stage01CloseFrostedGlassRawImage = View.Component<RawImage>(Refs.Stage01CloseFrostedGlassRawImage);
 
-        _stage01OverlayRoot = View.Rect(Refs.Stage01Overlay_Root);
-        _slantedMaskEdgeGraphic = View.Graphic(Refs.SlantedMaskEdgeGraphic);
-
         _stage02Root = View.Rect(Refs.Stage02_Root);
 
         _stage02DepthSystemRoot = View.Rect(Refs.Stage02DepthSystem_Root);
@@ -392,8 +380,6 @@ public partial class PresentationUIRoot
         _stage02DepthCloseContent = View.Rect(Refs.Stage02Depth_Close_Content);
         _stage02CloseFrostedGlassMask = View.Rect(Refs.Stage02CloseFrostedGlassMask);
         _stage02CloseFrostedGlassRawImage = View.Component<RawImage>(Refs.Stage02CloseFrostedGlassRawImage);
-
-        _stage02OverlayRoot = View.Rect(Refs.Stage02Overlay_Root);
     }
 
     private bool ValidateStageViewportRefs()
@@ -443,8 +429,6 @@ public partial class PresentationUIRoot
         AppendMissing(ref missing, _stage00CloseFrostedGlassMask, Refs.Stage00CloseFrostedGlassMask);
         AppendMissing(ref missing, _stage00CloseFrostedGlassRawImage, Refs.Stage00CloseFrostedGlassRawImage);
 
-        AppendMissing(ref missing, _stage00OverlayRoot, Refs.Stage00Overlay_Root);
-
         AppendMissing(ref missing, _stage01Root, Refs.Stage01_Root);
         AppendMissing(ref missing, _stage01DepthSystemRoot, Refs.Stage01DepthSystem_Root);
         AppendMissing(ref missing, _stage01DepthFarRoot, Refs.Stage01Depth_Far_Root);
@@ -482,9 +466,6 @@ public partial class PresentationUIRoot
         AppendMissing(ref missing, _stage01CloseFrostedGlassMask, Refs.Stage01CloseFrostedGlassMask);
         AppendMissing(ref missing, _stage01CloseFrostedGlassRawImage, Refs.Stage01CloseFrostedGlassRawImage);
 
-        AppendMissing(ref missing, _stage01OverlayRoot, Refs.Stage01Overlay_Root);
-        AppendMissing(ref missing, _slantedMaskEdgeGraphic, Refs.SlantedMaskEdgeGraphic);
-
         AppendMissing(ref missing, _stage02Root, Refs.Stage02_Root);
         AppendMissing(ref missing, _stage02DepthSystemRoot, Refs.Stage02DepthSystem_Root);
         AppendMissing(ref missing, _stage02DepthFarRoot, Refs.Stage02Depth_Far_Root);
@@ -521,8 +502,6 @@ public partial class PresentationUIRoot
         AppendMissing(ref missing, _stage02DepthCloseContent, Refs.Stage02Depth_Close_Content);
         AppendMissing(ref missing, _stage02CloseFrostedGlassMask, Refs.Stage02CloseFrostedGlassMask);
         AppendMissing(ref missing, _stage02CloseFrostedGlassRawImage, Refs.Stage02CloseFrostedGlassRawImage);
-
-        AppendMissing(ref missing, _stage02OverlayRoot, Refs.Stage02Overlay_Root);
 
         return LogMissingRefs("StageViewport Layer", missing);
     }

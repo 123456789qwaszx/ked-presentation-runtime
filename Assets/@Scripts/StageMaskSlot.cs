@@ -5,9 +5,11 @@ using UnityEngine.UI;
 public sealed class StageMaskSlot : MonoBehaviour
 {
     [SerializeField] private StageMaskGraphic _graphic;
+    [SerializeField] private StageMaskEdgeGraphic _edgeGraphic;
     [SerializeField] private Mask _mask;
 
     public StageMaskGraphic Graphic => _graphic;
+    public StageMaskEdgeGraphic EdgeGraphic => _edgeGraphic;
     public Mask Mask => _mask;
 
     public bool HasMask => _graphic != null && _mask != null;
@@ -15,21 +17,24 @@ public sealed class StageMaskSlot : MonoBehaviour
     private void Awake()
     {
         CacheRefs();
+        AutoBindEdgeSource();
     }
 
 #if UNITY_EDITOR
     private void OnValidate()
     {
         CacheRefs();
+        AutoBindEdgeSource();
     }
 #endif
 
-    public void SetKind(StageMaskKind kind)
+    public void ActivateMasked()
     {
-        if (_graphic == null)
+        if (!HasMask)
             return;
 
-        _graphic.Kind = kind;
+        _graphic.enabled = true;
+        _mask.enabled = true;
     }
 
     public void SetFullVisible()
@@ -39,6 +44,8 @@ public sealed class StageMaskSlot : MonoBehaviour
 
         if (_graphic != null)
             _graphic.enabled = false;
+
+        SetEdgeVisible(false);
     }
 
     public void SetMaskedFullRectVisible()
@@ -46,10 +53,9 @@ public sealed class StageMaskSlot : MonoBehaviour
         if (!HasMask)
             return;
 
-        _graphic.enabled = true;
-        _mask.enabled = true;
+        ActivateMasked();
 
-        _graphic.Kind = StageMaskKind.FullRect;
+        _graphic.SetFullRect();
         _graphic.SetShapeOffsetImmediate(Vector2.zero);
     }
 
@@ -58,9 +64,7 @@ public sealed class StageMaskSlot : MonoBehaviour
         if (!HasMask)
             return;
 
-        _graphic.enabled = true;
-        _mask.enabled = true;
-
+        ActivateMasked();
         _graphic.SetShapeOffsetImmediate(Vector2.zero);
     }
 
@@ -69,28 +73,8 @@ public sealed class StageMaskSlot : MonoBehaviour
         if (!HasMask)
             return;
 
-        _graphic.enabled = true;
-        _mask.enabled = true;
-
+        ActivateMasked();
         _graphic.ResetToHiddenOffset();
-    }
-
-    public void SetMaskedVisible(StageMaskKind kind)
-    {
-        if (!HasMask)
-            return;
-
-        _graphic.Kind = kind;
-        SetMaskedVisible();
-    }
-
-    public void SetMaskedHidden(StageMaskKind kind)
-    {
-        if (!HasMask)
-            return;
-
-        _graphic.Kind = kind;
-        SetMaskedHidden();
     }
 
     public void SetMaskOffsetImmediate(Vector2 offset)
@@ -98,36 +82,30 @@ public sealed class StageMaskSlot : MonoBehaviour
         if (!HasMask)
             return;
 
-        _graphic.enabled = true;
-        _mask.enabled = true;
-
+        ActivateMasked();
         _graphic.SetShapeOffsetImmediate(offset);
     }
 
-    public void SetSlanted(
-        float slantPixels,
-        bool slantToRight,
-        bool flipVertical)
+    public void SetEdgeVisible(bool visible)
     {
-        if (_graphic == null)
+        if (_edgeGraphic == null)
             return;
 
-        _graphic.SetSlanted(
-            slantPixels,
-            slantToRight,
-            flipVertical);
+        _edgeGraphic.enabled = visible;
     }
 
-    public void SetHorizontalStrip(
-        float heightPixels,
-        float horizontalBleedPixels)
+    public void ConfigureEdge(
+        StageMaskEdgeMode mode,
+        Color color,
+        float thickness)
     {
-        if (_graphic == null)
+        if (_edgeGraphic == null)
             return;
 
-        _graphic.SetHorizontalStrip(
-            heightPixels,
-            horizontalBleedPixels);
+        _edgeGraphic.Source = _graphic;
+        _edgeGraphic.EdgeMode = mode;
+        _edgeGraphic.color = color;
+        _edgeGraphic.Thickness = thickness;
     }
 
     private void CacheRefs()
@@ -137,5 +115,16 @@ public sealed class StageMaskSlot : MonoBehaviour
 
         if (_mask == null)
             _mask = GetComponent<Mask>();
+    }
+
+    private void AutoBindEdgeSource()
+    {
+        if (_edgeGraphic == null)
+            return;
+
+        if (_graphic == null)
+            return;
+
+        _edgeGraphic.Source = _graphic;
     }
 }

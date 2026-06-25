@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,6 +9,8 @@ public sealed class StageMaskEdgeGraphic : Graphic
     [SerializeField] private StageMaskEdgeMode _edgeMode = StageMaskEdgeMode.Leading;
     [SerializeField] private float _thickness = 6f;
 
+    private readonly List<StageMaskLineSegment> _segments = new();
+
     private StageMaskKind _lastKind;
     private Vector2 _lastOffset;
     private float _lastSlantPixels;
@@ -15,6 +18,15 @@ public sealed class StageMaskEdgeGraphic : Graphic
     private bool _lastFlipVertical;
     private float _lastStripHeightPixels;
     private float _lastHorizontalBleedPixels;
+    private float _lastVerticalStripWidthPixels;
+    private float _lastVerticalBleedPixels;
+    private float _lastDiagonalBandWidthPixels;
+    private float _lastDiagonalBandSlantPixels;
+    private float _lastDiagonalBandBleedPixels;
+    private bool _lastDiagonalBandToRight;
+    private float _lastIrisRadiusPixels;
+    private float _lastIrisAspect;
+    private int _lastIrisSegments;
 
     public StageMaskGraphic Source
     {
@@ -32,6 +44,9 @@ public sealed class StageMaskEdgeGraphic : Graphic
         get => _edgeMode;
         set
         {
+            if (_edgeMode == value)
+                return;
+
             _edgeMode = value;
             SetVerticesDirty();
         }
@@ -42,7 +57,12 @@ public sealed class StageMaskEdgeGraphic : Graphic
         get => _thickness;
         set
         {
-            _thickness = Mathf.Max(0f, value);
+            value = Mathf.Max(0f, value);
+
+            if (Mathf.Approximately(_thickness, value))
+                return;
+
+            _thickness = value;
             SetVerticesDirty();
         }
     }
@@ -90,25 +110,13 @@ public sealed class StageMaskEdgeGraphic : Graphic
         if (_edgeMode == StageMaskEdgeMode.None)
             return;
 
-        if (_edgeMode == StageMaskEdgeMode.Leading ||
-            _edgeMode == StageMaskEdgeMode.Both)
+        _source.CollectEdgeSegments(_edgeMode, _segments);
+
+        for (int i = 0; i < _segments.Count; i++)
         {
-            AddEdge(vh, StageMaskEdge.Leading);
+            StageMaskLineSegment segment = _segments[i];
+            AddLineQuad(vh, segment.A, segment.B, _thickness);
         }
-
-        if (_edgeMode == StageMaskEdgeMode.Trailing ||
-            _edgeMode == StageMaskEdgeMode.Both)
-        {
-            AddEdge(vh, StageMaskEdge.Trailing);
-        }
-    }
-
-    private void AddEdge(VertexHelper vh, StageMaskEdge edge)
-    {
-        if (!_source.TryGetEdge(edge, out Vector2 a, out Vector2 b))
-            return;
-
-        AddLineQuad(vh, a, b, _thickness);
     }
 
     private void AddLineQuad(
@@ -127,7 +135,7 @@ public sealed class StageMaskEdgeGraphic : Graphic
 
         dir.Normalize();
 
-        Vector2 normal = new Vector2(-dir.y, dir.x);
+        Vector2 normal = new(-dir.y, dir.x);
         Vector2 half = normal * (thickness * 0.5f);
 
         Vector2 p0 = a - half;
@@ -167,7 +175,16 @@ public sealed class StageMaskEdgeGraphic : Graphic
                _lastSlantToRight != _source.SlantToRight ||
                _lastFlipVertical != _source.FlipVertical ||
                !Mathf.Approximately(_lastStripHeightPixels, _source.StripHeightPixels) ||
-               !Mathf.Approximately(_lastHorizontalBleedPixels, _source.HorizontalBleedPixels);
+               !Mathf.Approximately(_lastHorizontalBleedPixels, _source.HorizontalBleedPixels) ||
+               !Mathf.Approximately(_lastVerticalStripWidthPixels, _source.VerticalStripWidthPixels) ||
+               !Mathf.Approximately(_lastVerticalBleedPixels, _source.VerticalBleedPixels) ||
+               !Mathf.Approximately(_lastDiagonalBandWidthPixels, _source.DiagonalBandWidthPixels) ||
+               !Mathf.Approximately(_lastDiagonalBandSlantPixels, _source.DiagonalBandSlantPixels) ||
+               !Mathf.Approximately(_lastDiagonalBandBleedPixels, _source.DiagonalBandBleedPixels) ||
+               _lastDiagonalBandToRight != _source.DiagonalBandToRight ||
+               !Mathf.Approximately(_lastIrisRadiusPixels, _source.IrisRadiusPixels) ||
+               !Mathf.Approximately(_lastIrisAspect, _source.IrisAspect) ||
+               _lastIrisSegments != _source.IrisSegments;
     }
 
     private void CacheSourceState()
@@ -182,5 +199,14 @@ public sealed class StageMaskEdgeGraphic : Graphic
         _lastFlipVertical = _source.FlipVertical;
         _lastStripHeightPixels = _source.StripHeightPixels;
         _lastHorizontalBleedPixels = _source.HorizontalBleedPixels;
+        _lastVerticalStripWidthPixels = _source.VerticalStripWidthPixels;
+        _lastVerticalBleedPixels = _source.VerticalBleedPixels;
+        _lastDiagonalBandWidthPixels = _source.DiagonalBandWidthPixels;
+        _lastDiagonalBandSlantPixels = _source.DiagonalBandSlantPixels;
+        _lastDiagonalBandBleedPixels = _source.DiagonalBandBleedPixels;
+        _lastDiagonalBandToRight = _source.DiagonalBandToRight;
+        _lastIrisRadiusPixels = _source.IrisRadiusPixels;
+        _lastIrisAspect = _source.IrisAspect;
+        _lastIrisSegments = _source.IrisSegments;
     }
 }
