@@ -2,10 +2,10 @@ public sealed class StageDepthLayerBinder
 {
     private IShotResponseStageProvider _provider;
 
-    private readonly PresentationResponseProfile _far   = PresentationResponseProfile.DepthFar;
-    private readonly PresentationResponseProfile _slot1 = PresentationResponseProfile.DepthBack;
-    private readonly PresentationResponseProfile _slot2 = PresentationResponseProfile.DepthMid;
-    private readonly PresentationResponseProfile _slot3 = PresentationResponseProfile.DepthFront;
+    private readonly PresentationResponseProfile _far = PresentationResponseProfile.DepthFar;
+    private readonly PresentationResponseProfile _back = PresentationResponseProfile.DepthBack;
+    private readonly PresentationResponseProfile _mid = PresentationResponseProfile.DepthMid;
+    private readonly PresentationResponseProfile _front = PresentationResponseProfile.DepthFront;
     private readonly PresentationResponseProfile _close = PresentationResponseProfile.DepthClose;
 
     public void EnsureBindings(PresentationShotResponseSystem rig)
@@ -13,25 +13,34 @@ public sealed class StageDepthLayerBinder
         if (!TryEnsureProvider())
             return;
 
-        Bind(rig, StageDepthLayer.Far,   _far);
-        Bind(rig, StageDepthLayer.Back, _slot1);
-        Bind(rig, StageDepthLayer.Mid, _slot2);
-        Bind(rig, StageDepthLayer.Front, _slot3);
-        Bind(rig, StageDepthLayer.Close, _close);
+        BindStage(rig, PresentationStageKey.Stage00);
+        BindStage(rig, PresentationStageKey.Stage01);
+        BindStage(rig, PresentationStageKey.Stage02);
+    }
+
+    private void BindStage(
+        PresentationShotResponseSystem rig,
+        PresentationStageKey root)
+    {
+        Bind(rig, root, PresentationDepthLayerKey.Far, _far);
+        Bind(rig, root, PresentationDepthLayerKey.Back, _back);
+        Bind(rig, root, PresentationDepthLayerKey.Mid, _mid);
+        Bind(rig, root, PresentationDepthLayerKey.Front, _front);
+        Bind(rig, root, PresentationDepthLayerKey.Close, _close);
     }
 
     private void Bind(
         PresentationShotResponseSystem rig,
-        StageDepthLayer layer,
+        PresentationStageKey root,
+        PresentationDepthLayerKey layer,
         PresentationResponseProfile profile)
     {
-        string key = layer.ToString();
+        string key = $"{root}/{layer}";
 
-        // 이미 살아있는 binding이 있으면 profile만 갱신하고 종료.
         if (rig.TryUpdateBindingProfile(key, profile))
             return;
 
-        StageDepthLayerRects rects = _provider.GetLayerRects(layer);
+        StageDepthLayerRects rects = _provider.GetLayerRects(root, layer);
 
         var target = new StageDepthResponseTarget(
             rects.Measure,

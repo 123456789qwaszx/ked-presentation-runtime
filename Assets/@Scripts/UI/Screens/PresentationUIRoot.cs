@@ -278,6 +278,7 @@ public partial class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
     {
         CacheRefs();
         ValidateRefs();
+        CacheShotResponseStageProviderRefs();
         
         BindHandlers();
         
