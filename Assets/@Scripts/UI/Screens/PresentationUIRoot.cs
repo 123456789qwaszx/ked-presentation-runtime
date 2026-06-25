@@ -21,7 +21,6 @@ public partial class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
     public event Action SaveMenuClicked;
     public event Action LoadMenuClicked;
     
-
     #region Refs
     
     public enum Refs
@@ -278,7 +277,10 @@ public partial class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
     {
         CacheRefs();
         ValidateRefs();
+        
         CacheShotResponseStageProviderRefs();
+        CacheDepthDefocusOverlayProviderRefs();
+        CacheStageDepthContentSlotProviderRefs();
         
         BindHandlers();
         

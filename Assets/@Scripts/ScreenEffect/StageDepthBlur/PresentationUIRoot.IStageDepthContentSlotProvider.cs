@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 public interface IStageDepthContentSlotProvider
@@ -10,95 +9,63 @@ public interface IStageDepthContentSlotProvider
 
 public sealed partial class PresentationUIRoot : IStageDepthContentSlotProvider
 {
+    private RectTransform[][] _stageDepthContentSlots;
+
     public RectTransform GetDepthContent(
         PresentationStageKey stage,
         PresentationDepthLayerKey layer)
+        => _stageDepthContentSlots[(int)stage][(int)layer];
+
+    private void CacheStageDepthContentSlotProviderRefs()
     {
-        switch (stage)
-        {
-            case PresentationStageKey.Stage00:
-                return GetStage00DepthContent(layer);
+        _stageDepthContentSlots = new RectTransform[PresentationStageCount][];
 
-            case PresentationStageKey.Stage01:
-                return GetStage01DepthContent(layer);
+        _stageDepthContentSlots[(int)PresentationStageKey.Stage00] =
+            BuildStage00DepthContentSlots();
 
-            case PresentationStageKey.Stage02:
-                return GetStage02DepthContent(layer);
+        _stageDepthContentSlots[(int)PresentationStageKey.Stage01] =
+            BuildStage01DepthContentSlots();
 
-            default:
-                throw new ArgumentOutOfRangeException(nameof(stage), stage, null);
-        }
+        _stageDepthContentSlots[(int)PresentationStageKey.Stage02] =
+            BuildStage02DepthContentSlots();
     }
 
-    private RectTransform GetStage00DepthContent(PresentationDepthLayerKey layer)
+    private RectTransform[] BuildStage00DepthContentSlots()
     {
-        switch (layer)
-        {
-            case PresentationDepthLayerKey.Far:
-                return View.Rect(Refs.Stage00Depth_Far_Content);
+        var slots = new RectTransform[PresentationDepthLayerCount];
 
-            case PresentationDepthLayerKey.Back:
-                return View.Rect(Refs.Stage00Depth_Back_Content);
+        slots[(int)PresentationDepthLayerKey.Far] = _stage00DepthFarContent;
+        slots[(int)PresentationDepthLayerKey.Back] = _stage00DepthBackContent;
+        slots[(int)PresentationDepthLayerKey.Mid] = _stage00DepthMidContent;
+        slots[(int)PresentationDepthLayerKey.Front] = _stage00DepthFrontContent;
+        slots[(int)PresentationDepthLayerKey.Close] = _stage00DepthCloseContent;
 
-            case PresentationDepthLayerKey.Mid:
-                return View.Rect(Refs.Stage00Depth_Mid_Content);
-
-            case PresentationDepthLayerKey.Front:
-                return View.Rect(Refs.Stage00Depth_Front_Content);
-
-            case PresentationDepthLayerKey.Close:
-                return View.Rect(Refs.Stage00Depth_Close_Content);
-
-            default:
-                throw new ArgumentOutOfRangeException(nameof(layer), layer, null);
-        }
+        return slots;
     }
 
-    private RectTransform GetStage01DepthContent(PresentationDepthLayerKey layer)
+    private RectTransform[] BuildStage01DepthContentSlots()
     {
-        switch (layer)
-        {
-            case PresentationDepthLayerKey.Far:
-                return View.Rect(Refs.Stage01Depth_Far_Content);
+        var slots = new RectTransform[PresentationDepthLayerCount];
 
-            case PresentationDepthLayerKey.Back:
-                return View.Rect(Refs.Stage01Depth_Back_Content);
+        slots[(int)PresentationDepthLayerKey.Far] = _stage01DepthFarContent;
+        slots[(int)PresentationDepthLayerKey.Back] = _stage01DepthBackContent;
+        slots[(int)PresentationDepthLayerKey.Mid] = _stage01DepthMidContent;
+        slots[(int)PresentationDepthLayerKey.Front] = _stage01DepthFrontContent;
+        slots[(int)PresentationDepthLayerKey.Close] = _stage01DepthCloseContent;
 
-            case PresentationDepthLayerKey.Mid:
-                return View.Rect(Refs.Stage01Depth_Mid_Content);
-
-            case PresentationDepthLayerKey.Front:
-                return View.Rect(Refs.Stage01Depth_Front_Content);
-
-            case PresentationDepthLayerKey.Close:
-                return View.Rect(Refs.Stage01Depth_Close_Content);
-
-            default:
-                throw new ArgumentOutOfRangeException(nameof(layer), layer, null);
-        }
+        return slots;
     }
 
-    private RectTransform GetStage02DepthContent(PresentationDepthLayerKey layer)
+    private RectTransform[] BuildStage02DepthContentSlots()
     {
-        switch (layer)
-        {
-            case PresentationDepthLayerKey.Far:
-                return View.Rect(Refs.Stage02Depth_Far_Content);
+        var slots = new RectTransform[PresentationDepthLayerCount];
 
-            case PresentationDepthLayerKey.Back:
-                return View.Rect(Refs.Stage02Depth_Back_Content);
+        slots[(int)PresentationDepthLayerKey.Far] = _stage02DepthFarContent;
+        slots[(int)PresentationDepthLayerKey.Back] = _stage02DepthBackContent;
+        slots[(int)PresentationDepthLayerKey.Mid] = _stage02DepthMidContent;
+        slots[(int)PresentationDepthLayerKey.Front] = _stage02DepthFrontContent;
+        slots[(int)PresentationDepthLayerKey.Close] = _stage02DepthCloseContent;
 
-            case PresentationDepthLayerKey.Mid:
-                return View.Rect(Refs.Stage02Depth_Mid_Content);
-
-            case PresentationDepthLayerKey.Front:
-                return View.Rect(Refs.Stage02Depth_Front_Content);
-
-            case PresentationDepthLayerKey.Close:
-                return View.Rect(Refs.Stage02Depth_Close_Content);
-
-            default:
-                throw new ArgumentOutOfRangeException(nameof(layer), layer, null);
-        }
+        return slots;
     }
 }

@@ -35,7 +35,6 @@ public interface IShotResponseStageProvider
     //  Root            : 중립 측정점 (IResponseTarget.MeasureRect)
     //  FramingTransform: pan-follow + focus-spread를 anchoredPosition으로 받는 노드 (PositionRect)
     //  FramingScale    : zoom을 localScale로 받는 노드 (ScaleRect)
-    
     StageDepthLayerRects GetLayerRects(
         PresentationStageKey root, 
         PresentationDepthLayerKey layer);
@@ -43,32 +42,20 @@ public interface IShotResponseStageProvider
 
 public sealed partial class PresentationUIRoot : IShotResponseStageProvider
 {
-    private const int PresentationStageKeyCount = (int)PresentationStageKey.Count;
-    private const int PresentationDepthLayerKeyCount = (int)PresentationDepthLayerKey.Count;
-
     private StageDepthLayerRects[][] _shotResponseStageLayerRects;
 
-    private RectTransform _shotResponseRigSpaceRoot;
-    private RectTransform _shotResponseStagePanRoot;
-    private RectTransform _shotResponseStageZoomRoot;
-
-    public RectTransform RigSpaceRoot => _shotResponseRigSpaceRoot;
-    public RectTransform StagePanRoot => _shotResponseStagePanRoot;
-    public RectTransform StageZoomRoot => _shotResponseStageZoomRoot;
+    public RectTransform RigSpaceRoot => _stageShotRoot;
+    public RectTransform StagePanRoot => _stagePanRoot;
+    public RectTransform StageZoomRoot => _stageZoomRoot;
 
     public StageDepthLayerRects GetLayerRects(
         PresentationStageKey root,
         PresentationDepthLayerKey layer) 
         => _shotResponseStageLayerRects[(int)root][(int)layer];
-    
 
     private void CacheShotResponseStageProviderRefs()
     {
-        _shotResponseRigSpaceRoot = View.Rect(Refs.StageShot_Root);
-        _shotResponseStagePanRoot = View.Rect(Refs.StagePan_Root);
-        _shotResponseStageZoomRoot = View.Rect(Refs.StageZoom_Root);
-
-        _shotResponseStageLayerRects = new StageDepthLayerRects[PresentationStageKeyCount][];
+        _shotResponseStageLayerRects = new StageDepthLayerRects[PresentationStageCount][];
 
         _shotResponseStageLayerRects[(int)PresentationStageKey.Stage00] =
             BuildStage00LayerRects();
@@ -82,96 +69,96 @@ public sealed partial class PresentationUIRoot : IShotResponseStageProvider
 
     private StageDepthLayerRects[] BuildStage00LayerRects()
     {
-        var rects = new StageDepthLayerRects[PresentationDepthLayerKeyCount];
+        var rects = new StageDepthLayerRects[PresentationDepthLayerCount];
 
         rects[(int)PresentationDepthLayerKey.Far] = new StageDepthLayerRects(
-            View.Rect(Refs.Stage00Depth_Far_Root),
-            View.Rect(Refs.Stage00Depth_Far_FramingTransform),
-            View.Rect(Refs.Stage00Depth_Far_FramingScale));
+            _stage00DepthFarRoot,
+            _stage00DepthFarFramingTransform,
+            _stage00DepthFarFramingScale);
 
         rects[(int)PresentationDepthLayerKey.Back] = new StageDepthLayerRects(
-            View.Rect(Refs.Stage00Depth_Back_Root),
-            View.Rect(Refs.Stage00Depth_Back_FramingTransform),
-            View.Rect(Refs.Stage00Depth_Back_FramingScale));
+            _stage00DepthBackRoot,
+            _stage00DepthBackFramingTransform,
+            _stage00DepthBackFramingScale);
 
         rects[(int)PresentationDepthLayerKey.Mid] = new StageDepthLayerRects(
-            View.Rect(Refs.Stage00Depth_Mid_Root),
-            View.Rect(Refs.Stage00Depth_Mid_FramingTransform),
-            View.Rect(Refs.Stage00Depth_Mid_FramingScale));
+            _stage00DepthMidRoot,
+            _stage00DepthMidFramingTransform,
+            _stage00DepthMidFramingScale);
 
         rects[(int)PresentationDepthLayerKey.Front] = new StageDepthLayerRects(
-            View.Rect(Refs.Stage00Depth_Front_Root),
-            View.Rect(Refs.Stage00Depth_Front_FramingTransform),
-            View.Rect(Refs.Stage00Depth_Front_FramingScale));
+            _stage00DepthFrontRoot,
+            _stage00DepthFrontFramingTransform,
+            _stage00DepthFrontFramingScale);
 
         rects[(int)PresentationDepthLayerKey.Close] = new StageDepthLayerRects(
-            View.Rect(Refs.Stage00Depth_Close_Root),
-            View.Rect(Refs.Stage00Depth_Close_FramingTransform),
-            View.Rect(Refs.Stage00Depth_Close_FramingScale));
+            _stage00DepthCloseRoot,
+            _stage00DepthCloseFramingTransform,
+            _stage00DepthCloseFramingScale);
 
         return rects;
     }
 
     private StageDepthLayerRects[] BuildStage01LayerRects()
     {
-        var rects = new StageDepthLayerRects[PresentationDepthLayerKeyCount];
+        var rects = new StageDepthLayerRects[PresentationDepthLayerCount];
 
         rects[(int)PresentationDepthLayerKey.Far] = new StageDepthLayerRects(
-            View.Rect(Refs.Stage01Depth_Far_Root),
-            View.Rect(Refs.Stage01Depth_Far_FramingTransform),
-            View.Rect(Refs.Stage01Depth_Far_FramingScale));
+            _stage01DepthFarRoot,
+            _stage01DepthFarFramingTransform,
+            _stage01DepthFarFramingScale);
 
         rects[(int)PresentationDepthLayerKey.Back] = new StageDepthLayerRects(
-            View.Rect(Refs.Stage01Depth_Back_Root),
-            View.Rect(Refs.Stage01Depth_Back_FramingTransform),
-            View.Rect(Refs.Stage01Depth_Back_FramingScale));
+            _stage01DepthBackRoot,
+            _stage01DepthBackFramingTransform,
+            _stage01DepthBackFramingScale);
 
         rects[(int)PresentationDepthLayerKey.Mid] = new StageDepthLayerRects(
-            View.Rect(Refs.Stage01Depth_Mid_Root),
-            View.Rect(Refs.Stage01Depth_Mid_FramingTransform),
-            View.Rect(Refs.Stage01Depth_Mid_FramingScale));
+            _stage01DepthMidRoot,
+            _stage01DepthMidFramingTransform,
+            _stage01DepthMidFramingScale);
 
         rects[(int)PresentationDepthLayerKey.Front] = new StageDepthLayerRects(
-            View.Rect(Refs.Stage01Depth_Front_Root),
-            View.Rect(Refs.Stage01Depth_Front_FramingTransform),
-            View.Rect(Refs.Stage01Depth_Front_FramingScale));
+            _stage01DepthFrontRoot,
+            _stage01DepthFrontFramingTransform,
+            _stage01DepthFrontFramingScale);
 
         rects[(int)PresentationDepthLayerKey.Close] = new StageDepthLayerRects(
-            View.Rect(Refs.Stage01Depth_Close_Root),
-            View.Rect(Refs.Stage01Depth_Close_FramingTransform),
-            View.Rect(Refs.Stage01Depth_Close_FramingScale));
+            _stage01DepthCloseRoot,
+            _stage01DepthCloseFramingTransform,
+            _stage01DepthCloseFramingScale);
 
         return rects;
     }
 
     private StageDepthLayerRects[] BuildStage02LayerRects()
     {
-        var rects = new StageDepthLayerRects[PresentationDepthLayerKeyCount];
+        var rects = new StageDepthLayerRects[PresentationDepthLayerCount];
 
         rects[(int)PresentationDepthLayerKey.Far] = new StageDepthLayerRects(
-            View.Rect(Refs.Stage02Depth_Far_Root),
-            View.Rect(Refs.Stage02Depth_Far_FramingTransform),
-            View.Rect(Refs.Stage02Depth_Far_FramingScale));
+            _stage02DepthFarRoot,
+            _stage02DepthFarFramingTransform,
+            _stage02DepthFarFramingScale);
 
         rects[(int)PresentationDepthLayerKey.Back] = new StageDepthLayerRects(
-            View.Rect(Refs.Stage02Depth_Back_Root),
-            View.Rect(Refs.Stage02Depth_Back_FramingTransform),
-            View.Rect(Refs.Stage02Depth_Back_FramingScale));
+            _stage02DepthBackRoot,
+            _stage02DepthBackFramingTransform,
+            _stage02DepthBackFramingScale);
 
         rects[(int)PresentationDepthLayerKey.Mid] = new StageDepthLayerRects(
-            View.Rect(Refs.Stage02Depth_Mid_Root),
-            View.Rect(Refs.Stage02Depth_Mid_FramingTransform),
-            View.Rect(Refs.Stage02Depth_Mid_FramingScale));
+            _stage02DepthMidRoot,
+            _stage02DepthMidFramingTransform,
+            _stage02DepthMidFramingScale);
 
         rects[(int)PresentationDepthLayerKey.Front] = new StageDepthLayerRects(
-            View.Rect(Refs.Stage02Depth_Front_Root),
-            View.Rect(Refs.Stage02Depth_Front_FramingTransform),
-            View.Rect(Refs.Stage02Depth_Front_FramingScale));
+            _stage02DepthFrontRoot,
+            _stage02DepthFrontFramingTransform,
+            _stage02DepthFrontFramingScale);
 
         rects[(int)PresentationDepthLayerKey.Close] = new StageDepthLayerRects(
-            View.Rect(Refs.Stage02Depth_Close_Root),
-            View.Rect(Refs.Stage02Depth_Close_FramingTransform),
-            View.Rect(Refs.Stage02Depth_Close_FramingScale));
+            _stage02DepthCloseRoot,
+            _stage02DepthCloseFramingTransform,
+            _stage02DepthCloseFramingScale);
 
         return rects;
     }

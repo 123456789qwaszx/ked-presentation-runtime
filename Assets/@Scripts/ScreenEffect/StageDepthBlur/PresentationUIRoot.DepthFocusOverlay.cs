@@ -28,195 +28,134 @@ public interface IPresentationDepthDefocusOverlayProvider
 
 public sealed partial class PresentationUIRoot : IPresentationDepthDefocusOverlayProvider
 {
+    private PresentationDepthDefocusTarget[][] _depthDefocusTargets;
+
     public void GetDepthDefocusTarget(
         PresentationStageKey stage,
         PresentationDepthLayerKey layer,
         out PresentationDepthDefocusTarget target)
+        => target = _depthDefocusTargets[(int)stage][(int)layer];
+
+    private void CacheDepthDefocusOverlayProviderRefs()
     {
-        target = default;
+        _depthDefocusTargets = new PresentationDepthDefocusTarget[PresentationStageCount][];
 
-        ResolveDepthDefocusRefs(
-            stage,
-            layer, 
-            out Refs contentRef,
-            out Refs maskRef,
-            out Refs rawImageRef);
+        _depthDefocusTargets[(int)PresentationStageKey.Stage00] =
+            BuildStage00DepthDefocusTargets();
 
-        RectTransform contentRoot = View.Rect(contentRef);
-        CanvasGroup canvasGroup = View.Rect(maskRef).GetComponent<CanvasGroup>();
-        RawImage rawImage = View.Rect(rawImageRef).GetComponent<RawImage>();
+        _depthDefocusTargets[(int)PresentationStageKey.Stage01] =
+            BuildStage01DepthDefocusTargets();
 
-        target = new PresentationDepthDefocusTarget(
+        _depthDefocusTargets[(int)PresentationStageKey.Stage02] =
+            BuildStage02DepthDefocusTargets();
+    }
+
+    private PresentationDepthDefocusTarget[] BuildStage00DepthDefocusTargets()
+    {
+        var targets = new PresentationDepthDefocusTarget[PresentationDepthLayerCount];
+
+        targets[(int)PresentationDepthLayerKey.Far] = BuildDepthDefocusTarget(
+            _stage00DepthFarContent,
+            _stage00FarFrostedGlassMask,
+            _stage00FarFrostedGlassRawImage);
+
+        targets[(int)PresentationDepthLayerKey.Back] = BuildDepthDefocusTarget(
+            _stage00DepthBackContent,
+            _stage00BackFrostedGlassMask,
+            _stage00BackFrostedGlassRawImage);
+
+        targets[(int)PresentationDepthLayerKey.Mid] = BuildDepthDefocusTarget(
+            _stage00DepthMidContent,
+            _stage00MidFrostedGlassMask,
+            _stage00MidFrostedGlassRawImage);
+
+        targets[(int)PresentationDepthLayerKey.Front] = BuildDepthDefocusTarget(
+            _stage00DepthFrontContent,
+            _stage00FrontFrostedGlassMask,
+            _stage00FrontFrostedGlassRawImage);
+
+        targets[(int)PresentationDepthLayerKey.Close] = BuildDepthDefocusTarget(
+            _stage00DepthCloseContent,
+            _stage00CloseFrostedGlassMask,
+            _stage00CloseFrostedGlassRawImage);
+
+        return targets;
+    }
+
+    private PresentationDepthDefocusTarget[] BuildStage01DepthDefocusTargets()
+    {
+        var targets = new PresentationDepthDefocusTarget[PresentationDepthLayerCount];
+
+        targets[(int)PresentationDepthLayerKey.Far] = BuildDepthDefocusTarget(
+            _stage01DepthFarContent,
+            _stage01FarFrostedGlassMask,
+            _stage01FarFrostedGlassRawImage);
+
+        targets[(int)PresentationDepthLayerKey.Back] = BuildDepthDefocusTarget(
+            _stage01DepthBackContent,
+            _stage01BackFrostedGlassMask,
+            _stage01BackFrostedGlassRawImage);
+
+        targets[(int)PresentationDepthLayerKey.Mid] = BuildDepthDefocusTarget(
+            _stage01DepthMidContent,
+            _stage01MidFrostedGlassMask,
+            _stage01MidFrostedGlassRawImage);
+
+        targets[(int)PresentationDepthLayerKey.Front] = BuildDepthDefocusTarget(
+            _stage01DepthFrontContent,
+            _stage01FrontFrostedGlassMask,
+            _stage01FrontFrostedGlassRawImage);
+
+        targets[(int)PresentationDepthLayerKey.Close] = BuildDepthDefocusTarget(
+            _stage01DepthCloseContent,
+            _stage01CloseFrostedGlassMask,
+            _stage01CloseFrostedGlassRawImage);
+
+        return targets;
+    }
+
+    private PresentationDepthDefocusTarget[] BuildStage02DepthDefocusTargets()
+    {
+        var targets = new PresentationDepthDefocusTarget[PresentationDepthLayerCount];
+
+        targets[(int)PresentationDepthLayerKey.Far] = BuildDepthDefocusTarget(
+            _stage02DepthFarContent,
+            _stage02FarFrostedGlassMask,
+            _stage02FarFrostedGlassRawImage);
+
+        targets[(int)PresentationDepthLayerKey.Back] = BuildDepthDefocusTarget(
+            _stage02DepthBackContent,
+            _stage02BackFrostedGlassMask,
+            _stage02BackFrostedGlassRawImage);
+
+        targets[(int)PresentationDepthLayerKey.Mid] = BuildDepthDefocusTarget(
+            _stage02DepthMidContent,
+            _stage02MidFrostedGlassMask,
+            _stage02MidFrostedGlassRawImage);
+
+        targets[(int)PresentationDepthLayerKey.Front] = BuildDepthDefocusTarget(
+            _stage02DepthFrontContent,
+            _stage02FrontFrostedGlassMask,
+            _stage02FrontFrostedGlassRawImage);
+
+        targets[(int)PresentationDepthLayerKey.Close] = BuildDepthDefocusTarget(
+            _stage02DepthCloseContent,
+            _stage02CloseFrostedGlassMask,
+            _stage02CloseFrostedGlassRawImage);
+
+        return targets;
+    }
+
+    private static PresentationDepthDefocusTarget BuildDepthDefocusTarget(
+        RectTransform contentRoot,
+        RectTransform maskRoot,
+        RawImage rawImage)
+    {
+        CanvasGroup canvasGroup = maskRoot.GetComponent<CanvasGroup>();
+
+        return new PresentationDepthDefocusTarget(
             contentRoot,
             canvasGroup,
             rawImage);
-    }
-
-    private static void ResolveDepthDefocusRefs(
-        PresentationStageKey stage,
-        PresentationDepthLayerKey layer,
-        out Refs contentRef,
-        out Refs maskRef,
-        out Refs rawImageRef)
-    {
-        contentRef = default;
-        maskRef = default;
-        rawImageRef = default;
-
-        switch (stage)
-        {
-            case PresentationStageKey.Stage00:
-                 ResolveStage00DepthDefocusRefs(layer, out contentRef, out maskRef, out rawImageRef);
-                 return;
-
-            case PresentationStageKey.Stage01:
-                 ResolveStage01DepthDefocusRefs(layer, out contentRef, out maskRef, out rawImageRef);
-                 return;
-
-            case PresentationStageKey.Stage02:
-                 ResolveStage02DepthDefocusRefs(layer, out contentRef, out maskRef, out rawImageRef);
-                 return;
-
-            default:
-                return;
-        }
-    }
-
-    private static void ResolveStage00DepthDefocusRefs(
-        PresentationDepthLayerKey layer,
-        out Refs contentRef,
-        out Refs maskRef,
-        out Refs rawImageRef)
-    {
-        switch (layer)
-        {
-            case PresentationDepthLayerKey.Far:
-                contentRef = Refs.Stage00Depth_Far_Content;
-                maskRef = Refs.Stage00FarFrostedGlassMask;
-                rawImageRef = Refs.Stage00FarFrostedGlassRawImage;
-                return;
-
-            case PresentationDepthLayerKey.Back:
-                contentRef = Refs.Stage00Depth_Back_Content;
-                maskRef = Refs.Stage00BackFrostedGlassMask;
-                rawImageRef = Refs.Stage00BackFrostedGlassRawImage;
-                return;
-
-            case PresentationDepthLayerKey.Mid:
-                contentRef = Refs.Stage00Depth_Mid_Content;
-                maskRef = Refs.Stage00MidFrostedGlassMask;
-                rawImageRef = Refs.Stage00MidFrostedGlassRawImage;
-                return;
-
-            case PresentationDepthLayerKey.Front:
-                contentRef = Refs.Stage00Depth_Front_Content;
-                maskRef = Refs.Stage00FrontFrostedGlassMask;
-                rawImageRef = Refs.Stage00FrontFrostedGlassRawImage;
-                return;
-
-            case PresentationDepthLayerKey.Close:
-                contentRef = Refs.Stage00Depth_Close_Content;
-                maskRef = Refs.Stage00CloseFrostedGlassMask;
-                rawImageRef = Refs.Stage00CloseFrostedGlassRawImage;
-                return;
-
-            default:
-                contentRef = default;
-                maskRef = default;
-                rawImageRef = default;
-                return;
-        }
-    }
-
-    private static void ResolveStage01DepthDefocusRefs(
-        PresentationDepthLayerKey layer,
-        out Refs contentRef,
-        out Refs maskRef,
-        out Refs rawImageRef)
-    {
-        switch (layer)
-        {
-            case PresentationDepthLayerKey.Far:
-                contentRef = Refs.Stage01Depth_Far_Content;
-                maskRef = Refs.Stage01FarFrostedGlassMask;
-                rawImageRef = Refs.Stage01FarFrostedGlassRawImage;
-                return;
-
-            case PresentationDepthLayerKey.Back:
-                contentRef = Refs.Stage01Depth_Back_Content;
-                maskRef = Refs.Stage01BackFrostedGlassMask;
-                rawImageRef = Refs.Stage01BackFrostedGlassRawImage;
-                return;
-
-            case PresentationDepthLayerKey.Mid:
-                contentRef = Refs.Stage01Depth_Mid_Content;
-                maskRef = Refs.Stage01MidFrostedGlassMask;
-                rawImageRef = Refs.Stage01MidFrostedGlassRawImage;
-                return;
-
-            case PresentationDepthLayerKey.Front:
-                contentRef = Refs.Stage01Depth_Front_Content;
-                maskRef = Refs.Stage01FrontFrostedGlassMask;
-                rawImageRef = Refs.Stage01FrontFrostedGlassRawImage;
-                return;
-
-            case PresentationDepthLayerKey.Close:
-                contentRef = Refs.Stage01Depth_Close_Content;
-                maskRef = Refs.Stage01CloseFrostedGlassMask;
-                rawImageRef = Refs.Stage01CloseFrostedGlassRawImage;
-                return;
-            
-            default:
-                contentRef = default;
-                maskRef = default;
-                rawImageRef = default;
-                return;
-        }
-    }
-
-    private static void ResolveStage02DepthDefocusRefs(
-        PresentationDepthLayerKey layer,
-        out Refs contentRef,
-        out Refs maskRef,
-        out Refs rawImageRef)
-    {
-        switch (layer)
-        {
-            case PresentationDepthLayerKey.Far:
-                contentRef = Refs.Stage02Depth_Far_Content;
-                maskRef = Refs.Stage02FarFrostedGlassMask;
-                rawImageRef = Refs.Stage02FarFrostedGlassRawImage;
-                return;
-
-            case PresentationDepthLayerKey.Back:
-                contentRef = Refs.Stage02Depth_Back_Content;
-                maskRef = Refs.Stage02BackFrostedGlassMask;
-                rawImageRef = Refs.Stage02BackFrostedGlassRawImage;
-                return;
-
-            case PresentationDepthLayerKey.Mid:
-                contentRef = Refs.Stage02Depth_Mid_Content;
-                maskRef = Refs.Stage02MidFrostedGlassMask;
-                rawImageRef = Refs.Stage02MidFrostedGlassRawImage;
-                return;
-
-            case PresentationDepthLayerKey.Front:
-                contentRef = Refs.Stage02Depth_Front_Content;
-                maskRef = Refs.Stage02FrontFrostedGlassMask;
-                rawImageRef = Refs.Stage02FrontFrostedGlassRawImage;
-                return;
-
-            case PresentationDepthLayerKey.Close:
-                contentRef = Refs.Stage02Depth_Close_Content;
-                maskRef = Refs.Stage02CloseFrostedGlassMask;
-                rawImageRef = Refs.Stage02CloseFrostedGlassRawImage;
-                return;
-
-            default:
-                contentRef = default;
-                maskRef = default;
-                rawImageRef = default;
-                return;
-        }
     }
 }
