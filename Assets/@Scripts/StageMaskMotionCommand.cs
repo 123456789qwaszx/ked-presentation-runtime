@@ -28,10 +28,14 @@ public sealed class StageMaskMotionCommandSpec : CommandSpecBase
     [Header("Horizontal Strip")]
     public float stripHeightPixels = 360f;
     public float horizontalBleedPixels = 80f;
+    public bool animateStripHeight;
+    public float fromStripHeightPixels = 0f;
 
     [Header("Vertical Strip")]
     public float verticalStripWidthPixels = 460f;
     public float verticalBleedPixels = 80f;
+    public bool animateStripWidth;
+    public float fromVerticalStripWidthPixels = 0f;
 
     [Header("Diagonal Band")]
     public float diagonalBandWidthPixels = 680f;
@@ -235,13 +239,17 @@ public sealed class StageMaskMotionCommand : CommandBase
 
             case StageMaskKind.HorizontalStrip:
                 _graphic.SetHorizontalStrip(
-                    _spec.stripHeightPixels,
+                    _spec.animateStripHeight
+                        ? _spec.fromStripHeightPixels
+                        : _spec.stripHeightPixels,
                     _spec.horizontalBleedPixels);
                 break;
 
             case StageMaskKind.VerticalStrip:
                 _graphic.SetVerticalStrip(
-                    _spec.verticalStripWidthPixels,
+                    _spec.animateStripWidth
+                        ? _spec.fromVerticalStripWidthPixels
+                        : _spec.verticalStripWidthPixels,
                     _spec.verticalBleedPixels);
                 break;
 
@@ -266,18 +274,54 @@ public sealed class StageMaskMotionCommand : CommandBase
     {
         t = Mathf.Clamp01(t);
 
-        if (_spec.kind != StageMaskKind.CircleIris)
-            return;
+        switch (_spec.kind)
+        {
+            case StageMaskKind.CircleIris:
+            {
+                float radius = Mathf.LerpUnclamped(
+                    _spec.fromIrisRadiusPixels,
+                    _spec.toIrisRadiusPixels,
+                    t);
 
-        float radius = Mathf.LerpUnclamped(
-            _spec.fromIrisRadiusPixels,
-            _spec.toIrisRadiusPixels,
-            t);
+                _graphic.SetCircleIris(
+                    radius,
+                    _spec.irisAspect,
+                    _spec.irisSegments);
+                break;
+            }
 
-        _graphic.SetCircleIris(
-            radius,
-            _spec.irisAspect,
-            _spec.irisSegments);
+            case StageMaskKind.HorizontalStrip:
+            {
+                if (!_spec.animateStripHeight)
+                    return;
+
+                float height = Mathf.LerpUnclamped(
+                    _spec.fromStripHeightPixels,
+                    _spec.stripHeightPixels,
+                    t);
+
+                _graphic.SetHorizontalStrip(
+                    height,
+                    _spec.horizontalBleedPixels);
+                break;
+            }
+
+            case StageMaskKind.VerticalStrip:
+            {
+                if (!_spec.animateStripWidth)
+                    return;
+
+                float width = Mathf.LerpUnclamped(
+                    _spec.fromVerticalStripWidthPixels,
+                    _spec.verticalStripWidthPixels,
+                    t);
+
+                _graphic.SetVerticalStrip(
+                    width,
+                    _spec.verticalBleedPixels);
+                break;
+            }
+        }
     }
 
     private void ConfigureEdge()

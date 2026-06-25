@@ -6,4 +6,6 @@
 <<screen_vignette_clear -1>>
 <<screen_noise_clear -1>>
 <<screen_flash_clear>>
+
+<<tx_stage_mask_clear>>
 ===

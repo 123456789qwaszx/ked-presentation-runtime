@@ -329,17 +329,29 @@ public sealed partial class YarnCommandBridge
         
         
         runner.AddCommandHandler<string, float>(
+            "tx_hstrip_open",
+            EnqueueHorizontalStripOpenInSpec);
+        runner.AddCommandHandler<string, float>(
+            "tx_hstrip_close",
+            EnqueueHorizontalStripCloseOutSpec);
+        
+        runner.AddCommandHandler<string, float>(
             "tx_hstrip_in",
             EnqueueHorizontalStripCutInSpec);
-
         runner.AddCommandHandler<string, float>(
             "tx_hstrip_out",
             EnqueueHorizontalStripCutOutSpec);
 
         runner.AddCommandHandler<string, float>(
+            "tx_vstrip_open",
+            EnqueueVerticalStripOpenInSpec);
+        runner.AddCommandHandler<string, float>(
+            "tx_vstrip_close",
+            EnqueueVerticalStripCloseOutSpec);
+        
+        runner.AddCommandHandler<string, float>(
             "tx_vstrip_in",
             EnqueueVerticalStripCutInSpec);
-
         runner.AddCommandHandler<string, float>(
             "tx_vstrip_out",
             EnqueueVerticalStripCutOutSpec);
@@ -347,7 +359,6 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler<string, float>(
             "tx_band_in",
             EnqueueDiagonalBandCutInSpec);
-
         runner.AddCommandHandler<string, float>(
             "tx_band_out",
             EnqueueDiagonalBandCutOutSpec);
@@ -355,12 +366,11 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler<string, float>(
             "tx_iris_in",
             EnqueueCircleIrisInSpec);
-
         runner.AddCommandHandler<string, float>(
             "tx_iris_out",
             EnqueueCircleIrisOutSpec);
 
-        runner.AddCommandHandler<string>(
+        runner.AddCommandHandler(
             "tx_stage_mask_clear",
             EnqueueStageMaskClearSpec);
         

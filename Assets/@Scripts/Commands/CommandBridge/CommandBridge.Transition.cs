@@ -68,7 +68,76 @@ public sealed partial class YarnCommandBridge
 
         Collect(spec);
     }
+    
+    private void EnqueueHorizontalStripOpenInSpec(string stage = "01", float duration = 0.45f)
+    {
+        var spec = new StageMaskMotionCommandSpec
+        {
+            stage = PresentationStageKeyParser.Parse(stage, PresentationStageKey.Stage01),
+            kind = StageMaskKind.HorizontalStrip,
 
+            // 가로 이동 없음 — 목표 지점에서 제자리로 벌어진다.
+            fromOffset = Vector2.zero,
+            toOffset = Vector2.zero,
+
+            // 중앙선(0)에서 위아래로 풀 높이까지 벌어짐.
+            animateStripHeight = true,
+            fromStripHeightPixels = 0f,
+            stripHeightPixels = 360f,
+            horizontalBleedPixels = 96f,
+
+            showEdge = true,
+            edgeMode = StageMaskEdgeMode.Both,   // top/bottom 엣지가 벌어짐
+            edgeColor = new Color(1f, 1f, 1f, 0.82f),
+            edgeThickness = 4f,
+            hideEdgeOnComplete = false,
+
+            duration = duration,
+            ease = Ease.OutCubic,
+
+            // rubber는 offset 기반이라 이동이 0이면 가로로만 흔들림 → 끈다.
+            rubberMode = StageMaskRubberMode.None,
+
+            wait = false
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueHorizontalStripCloseOutSpec(string stage = "01", float duration = 0.34f)
+    {
+        var spec = new StageMaskMotionCommandSpec
+        {
+            stage = PresentationStageKeyParser.Parse(stage, PresentationStageKey.Stage01),
+            kind = StageMaskKind.HorizontalStrip,
+
+            // 가로 이동 없음 — 제자리에서 중앙선으로 닫힌다.
+            fromOffset = Vector2.zero,
+            toOffset = Vector2.zero,
+
+            // 풀 높이 → 중앙선(0). 위아래 엣지가 가운데로 모인다.
+            animateStripHeight = true,
+            fromStripHeightPixels = 360f,
+            stripHeightPixels = 0f,
+            horizontalBleedPixels = 96f,
+
+            showEdge = true,
+            edgeMode = StageMaskEdgeMode.Both,
+            edgeColor = new Color(1f, 1f, 1f, 0.72f),
+            edgeThickness = 4f,
+            hideEdgeOnComplete = true,
+
+            duration = duration,
+            ease = Ease.InCubic,
+
+            rubberMode = StageMaskRubberMode.None,
+
+            wait = false
+        };
+
+        Collect(spec);
+    }
+    
     private void EnqueueHorizontalStripCutInSpec(string stage = "01", float duration = 0.45f)
     {
         var spec = new StageMaskMotionCommandSpec
@@ -132,7 +201,73 @@ public sealed partial class YarnCommandBridge
 
         Collect(spec);
     }
+    
+    private void EnqueueVerticalStripOpenInSpec(string stage = "01", float duration = 0.42f)
+    {
+        var spec = new StageMaskMotionCommandSpec
+        {
+            stage = PresentationStageKeyParser.Parse(stage, PresentationStageKey.Stage01),
+            kind = StageMaskKind.VerticalStrip,
 
+            fromOffset = Vector2.zero,
+            toOffset = Vector2.zero,
+
+            // 중앙선(0)에서 좌우로 풀 폭까지 벌어짐.
+            animateStripWidth = true,
+            fromVerticalStripWidthPixels = 0f,
+            verticalStripWidthPixels = 520f,
+            verticalBleedPixels = 96f,
+
+            showEdge = true,
+            edgeMode = StageMaskEdgeMode.Both,   // left/right 엣지가 벌어짐
+            edgeColor = new Color(1f, 1f, 1f, 0.78f),
+            edgeThickness = 4f,
+            hideEdgeOnComplete = false,
+
+            duration = duration,
+            ease = Ease.OutCubic,
+
+            rubberMode = StageMaskRubberMode.None,
+
+            wait = false
+        };
+
+        Collect(spec);
+    }
+
+    private void EnqueueVerticalStripCloseOutSpec(string stage = "01", float duration = 0.32f)
+    {
+        var spec = new StageMaskMotionCommandSpec
+        {
+            stage = PresentationStageKeyParser.Parse(stage, PresentationStageKey.Stage01),
+            kind = StageMaskKind.VerticalStrip,
+
+            fromOffset = Vector2.zero,
+            toOffset = Vector2.zero,
+
+            // 풀 폭 → 중앙선(0). 좌우 엣지가 가운데로 모인다.
+            animateStripWidth = true,
+            fromVerticalStripWidthPixels = 520f,
+            verticalStripWidthPixels = 0f,
+            verticalBleedPixels = 96f,
+
+            showEdge = true,
+            edgeMode = StageMaskEdgeMode.Both,
+            edgeColor = new Color(1f, 1f, 1f, 0.72f),
+            edgeThickness = 4f,
+            hideEdgeOnComplete = true,
+
+            duration = duration,
+            ease = Ease.InCubic,
+
+            rubberMode = StageMaskRubberMode.None,
+
+            wait = false
+        };
+
+        Collect(spec);
+    }
+    
     private void EnqueueVerticalStripCutInSpec(string stage = "01", float duration = 0.42f)
     {
         var spec = new StageMaskMotionCommandSpec
@@ -329,17 +464,28 @@ public sealed partial class YarnCommandBridge
         Collect(spec);
     }
 
-    private void EnqueueStageMaskClearSpec(string stage = "01")
+    private void EnqueueStageMaskClearSpec()
     {
         Collect(new StageMaskClearCommandSpec
         {
-            stage = PresentationStageKeyParser.Parse(stage, PresentationStageKey.Stage01),
+            stage = PresentationStageKey.Stage00,
+            mode = StageMaskClearMode.FullVisible,
+            hideEdge = true
+        });
+        Collect(new StageMaskClearCommandSpec
+        {
+            stage = PresentationStageKey.Stage01,
+            mode = StageMaskClearMode.FullVisible,
+            hideEdge = true
+        });
+        Collect(new StageMaskClearCommandSpec
+        {
+            stage = PresentationStageKey.Stage02,
             mode = StageMaskClearMode.FullVisible,
             hideEdge = true
         });
     }
-
-
+    
     private void EnqueueDazeFadeCloseSpec(float duration = 0.85f)
     {
         var spec = new FocusBlurCurtainCommandSpec
