@@ -1,20 +1,13 @@
 ﻿title: stellasora_5_000
 ---
 
-<<beat>>
 깊은 밤, 수상쩍은 그림자가 외딴 골목으로 몰래 숨어든다. #line:05d6280 
  
-<<beat>>
-<<wait 0.2>>
-
-<<beat>>
 수상한 사람 = [h1]물건은[/] 가져왔어? #line:0477536 
 
-<<beat>>
 의심스러운 사람 = 물론이지. 제대로 가져왔는지 확인해 볼 거야? #line:0d9aa55 
 
 
-<<beat>>
 수상한 사람: 쩝쩝쩝...... #line:08862b8 
 수상한 사람: 맞아, 바로 이 맛이야. #line:05d3a12 
 의심스러운 사람: 내가 부탁했던 건? #line:06fc4b2 
@@ -37,10 +30,6 @@
 수상한 사람: 지금처럼 보스가 평소에 너희랑 지지고 볶는 모습을 보고 싶기도 했고 말이야~ #line:0c44d6d 
 미스티: 우리 마녀들은 진실로 먹고 사니까! #line:02988f3 
 
-
-
-<<episode_end "ch05_ep000">>
-<<dialogue_complete>>
 ===
 
 title: stellasora_5_000_1
@@ -228,8 +217,4 @@ title: stellasora_5_000_6
 
 이번 면접...... 무사히 넘길 수 있을까? #line:0cb38a1 
 
-
-
-<<episode_end "ch05_ep000">>
-<<dialogue_complete>>
 ===

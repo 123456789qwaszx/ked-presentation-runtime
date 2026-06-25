@@ -14,11 +14,15 @@ public sealed partial class YarnCommandBridge
         Collect(spec);
     }
     
+    // int hopCount = 2,
+    // float height = 48f,
+    // float airWidth = 0.85f,
+    // float duration = 0.4f)
     private void EnqueueHopSpec(string roleKey,
-        int hopCount = 2,
-        float height = 48f,
-        float airWidth = 0.85f,
-        float duration = 0.4f)
+        int hopCount = 1,
+        float height = 22f,
+        float airWidth = 12f,
+        float duration = 0.8f)
     {
         var spec = new HopCommandSpecCharR
         {

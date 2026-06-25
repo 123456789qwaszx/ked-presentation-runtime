@@ -15,11 +15,11 @@ MonoBehaviour:
   entries:
   - speakerKey: tyrant
     displayNameKey: 
-    fallbackDisplayName: 
+    fallbackDisplayName: "\uB098"
     useBoxKindOverride: 1
     boxKind: 0
   - speakerKey: iris
     displayNameKey: char_name_iris
     fallbackDisplayName: "\uC544\uC57C\uBA54"
     useBoxKindOverride: 0
-    boxKind: 0
+    boxKind: 1

@@ -88,8 +88,6 @@ public enum PresentationTransitionLayer
 {
     None = 0,
     VerticalStripWipe = 10,
-    SlantedShutter = 20,
-    FocusBlurFade = 30,
     FocusBlurCurtain = 40,
     SlantedMask = 50
 }

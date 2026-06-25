@@ -23006,7 +23006,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1681412452}
   m_Layer: 0
-  m_Name: StageUILayer
+  m_Name: FeatureUILayer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -23707,8 +23707,8 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 144827249}
-  - {fileID: 403422306}
   - {fileID: 1239989732}
+  - {fileID: 403422306}
   - {fileID: 1681412452}
   m_Father: {fileID: 8103127889455306347}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
