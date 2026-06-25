@@ -33,20 +33,20 @@ public sealed partial class VnScreenBindings
             r => r.BackLogClicked -= HandleBackLogClicked);
         
         AddBinding(root, 
-            r => r.FastForwardDown += HandleFastForwardDown,
-            r => r.FastForwardDown -= HandleFastForwardDown);
+            r => r.RapidSkipDown += HandleFastForwardDown,
+            r => r.RapidSkipDown -= HandleFastForwardDown);
         
         AddBinding(root,
-            r => r.FastForwardUp += HandleFastForwardUp,
-            r => r.FastForwardUp -= HandleFastForwardUp);
+            r => r.RapidSkipUp += HandleFastForwardUp,
+            r => r.RapidSkipUp -= HandleFastForwardUp);
         
         AddBinding(root,
             r => r.ExpandClicked += HandleExpandClicked,
             r => r.ExpandClicked -= HandleExpandClicked);
         
         AddBinding(root,
-            r => r.HurryUpClicked += HandleHurryUpClicked,
-            r => r.HurryUpClicked -= HandleHurryUpClicked);
+            r => r.StepNextClicked += HandleHurryUpClicked,
+            r => r.StepNextClicked -= HandleHurryUpClicked);
         
         AddBinding(root,
             r => r.LoadMenuClicked += HandleLoadMenuClicked,
@@ -69,8 +69,8 @@ public sealed partial class VnScreenBindings
             r => r.SaveMenuClicked -= HandleSaveMenuClicked);
         
         AddBinding(root,
-            r => r.SkipMenuClicked += HandleSkipMenuClicked,
-            r => r.SkipMenuClicked -= HandleSkipMenuClicked);
+            r => r.OpenSkipPanelClicked += HandleSkipMenuClicked,
+            r => r.OpenSkipPanelClicked -= HandleSkipMenuClicked);
     }
 
     private void HandleAutoClicked()

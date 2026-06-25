@@ -4,22 +4,31 @@ using UnityEngine.EventSystems;
 
 public partial class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
 {
-    public event Action FastForwardDown;
-    public event Action FastForwardUp;
-    public event Action RollbackClicked;
-    public event Action SkipMenuClicked;
+    public event Action StepNextClicked;
+    
     public event Action AutoClicked;
     public event Action QuickMenuClicked;
+    
     public event Action ExpandClicked;
     public event Action BackLogClicked;
     public event Action PlaybackSpeedClicked;
+    
+    public event Action RapidSkipDown;
+    public event Action RapidSkipUp;
+    public event Action RollbackClicked;
+    public event Action OpenSkipPanelClicked;
+    
     public event Action SaveMenuClicked;
     public event Action LoadMenuClicked;
     
-    public event Action HurryUpClicked;
 
+    #region Refs
+    
     public enum Refs
     {
+        #region StageViewport Layer
+        StageViewportLayer,
+        
         StageShot_Root,
         StagePan_Root,
         StageZoom_Root,
@@ -64,7 +73,6 @@ public partial class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
         
         Stage00Overlay_Root,
         
-
         Stage01_Root,
 
         Stage01DepthSystem_Root,
@@ -146,26 +154,50 @@ public partial class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
         Stage02CloseFrostedGlassRawImage,
 
         Stage02Overlay_Root,
-
-        DialogueUI_Root,
-
-        Choice_Root,
-        SystemUI_Root,
+        
+        #endregion
+        
+        #region ScreenEffect Layer
+        ScreenEffectLayer,
         
         VerticalStripWipe,
         FocusBlurCurtain,
+        
+        // ScreenEffectRig
+        
+        #endregion
 
-        ToggleBottomRight,
-        ToggleTopRight,
-        ToggleTopLeft,
+        #region DialogueUI Layer
+        DialogueUILayer,
+        
+        DialogueBox_Root,
+        //DialogueBox00
+        //DialogueBox01
+        //DialogueBox02
+        //DialogueBox03
+        //DialogueBox04
+        //DialogueBox_Surface
+        
+        OptionsBox_Root,
+        //VNDefaultOptionsPanel
 
-        StepNextToggle_Root,
-        StepNextToggle_Text,
-        StepNextToggleHotKey_Root,
-        StepNextToggleHotKey_Image,
-        StepNextToggleHotKey_Text,
-        StepNextToggle_Button,
-
+        #endregion
+        
+        #region Button Layer
+        ButtonLayer,
+        
+        StepNext_Button,
+        
+        Buttons_BottomRight,
+        
+        StepNext_Root,
+        StepNext_Text,
+        StepNextHotKey_Root,
+        StepNextHotKey_Image,
+        StepNextHotKey_Text,
+        
+        Buttons_TopRight,
+        
         QuickMenuToggle_Root,
         QuickMenuToggle_Image,
         QuickMenuToggleKey_Text,
@@ -174,222 +206,177 @@ public partial class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
         QuickMenu_Root,
         QuickMenuBG_Image,
 
-        QuickSaveMenu_Root,
-        QuickSaveMenu_Text,
-        QuickSaveMenu_Button,
+        ExpandToggle_Root,
+        ExpandToggle_Image,
+        ExpandToggle_Text,
+        ExpandToggleHotkey_Text,
+        ExpandToggle_Button,
 
-        QuickLoadMenu_Root,
-        QuickLoadMenu_Text,
-        QuickLoadMenu_Button,
+        BackLog_Root,
+        BackLog_Image,
+        BackLog_Text,
+        BackLogHotkey_Text,
+        BackLog_Button,
 
-        QuickExpandToggle_Root,
-        QuickExpandToggle_Image,
-        QuickExpandToggleHotkey_Text,
-        QuickExpandToggle_Button,
-
-        QuickDialogueLog_Root,
-        QuickDialogueLog_Image,
-        QuickDialogueLogHotkey_Text,
-        QuickDialogueLog_Button,
-
-        QuickSpeedToggle_Root,
-        QuickSpeedToggle_Image,
-        QuickSpeedToggle_Text,
-        QuickSpeedToggle_Button,
+        PlaybackSpeedToggle_Root,
+        PlaybackSpeedToggle_Image,
+        PlaybackSpeedToggle_Text,
+        PlaybackSpeedToggleDegree_Text,
+        PlaybackSpeedToggleHotKey_Text,
+        PlaybackSpeedToggle_Button,
 
         AutoToggle_Root,
         AutoToggleIcon_Image,
         AutoToggleHotKey_Root,
+        AutoToggleHotKey_Image,
         AutoToggleHotKey_Text,
-        AutoToggleHotKey_Button,
+        AutoToggle_Button,
 
-        SpeedUpToggle_Root,
-        SpeedUpToggleIcon_Image,
-        SpeedUpToggleHotKey_Button,
+        RapidSkip_Root,
+        RapidSkipIcon_Image,
+        RapidSkipIcon_Text,
+        RapidSkipHotKey_Root,
+        RapidSkipHotKey_Image,
+        RapidSkipHotKey_Text,
+        RapidSkip_Button,
 
-        RollbackToggleHotKey_Button,
-
-        SkipToggleHotKey_Root,
-        SkipToggleHotKey_Text,
-        SkipToggle_Text,
-        SkipToggleIcon_Root,
-        SkipToggleIcon_Image,
-        SkipToggle_Button,
+        Rollback_Root,
+        RollbackIcon_Image,
+        RollbackIcon_Text,
+        RollbackHotKey_Root,
+        RollbackHotKeyBG,
+        RollbackHotKey_Text,
+        Rollback_Button,
         
-        ScreenEffectLayer,
-        FullscreenFade_Root,
-        Letterbox_Root,
-        Flash_Root,
-        ScreenOverlay_Root,
+        Buttons_TopLeft,
         
-        ScreenFlashOverlay_Image,
-        ScreenVignetteOverlay_Image,
-        ScreenNoiseOverlay_Image,
+        OpenSkipPanel_Root,
+        OpenSkipPanel_Text,
+        
+        OpenSkipPanelIcon_Root,
+        OpenSkipPanelIcon_Image,
+        OpenSkipPanelHotKey_Root,
+        OpenSkipPanelHotKey_Text,
+        OpenSkipPanel_Button,
+        
+        // temp
+        SaveMenu_Text,
+        SaveMenu_Button,
+
+        LoadMenu_Text,
+        LoadMenu_Button,
+        
+        #endregion
     }
-
-    [SerializeField] private DialogueBoxHost dialogueBoxHost;
+    
+    #endregion
 
     private bool _isExpanded;
+    private bool _isQuickMenuOpen;
 
     protected override void OnInitialize()
     {
         BindHandlers();
-        CloseCanvasGroup(View.CanvasGroup(Refs.QuickMenu_Root));
-        ApplyToggleVisibility();
+        
+        SetQuickMenuOpen(false);
+        SetExpanded(false);
     }
     
-
     private void BindHandlers()
     {
-        BindEvent(View.Button(Refs.AutoToggleHotKey_Button), PressAutoButton);
-        BindEvent(View.Button(Refs.StepNextToggle_Button), PressStepNextButton);
+        BindEvent(View.Button(Refs.StepNext_Button), PressStepNextButton);
         BindEvent(View.Button(Refs.QuickMenuToggle_Button), PressQuickMenuToggleButton);
-        BindEvent(View.Button(Refs.QuickExpandToggle_Button), PressExpandButton);
-        BindEvent(View.Button(Refs.QuickDialogueLog_Button), PressLogButton);
-        BindEvent(View.Button(Refs.QuickSpeedToggle_Button), PressSpeedButton);
-        BindEvent(View.Button(Refs.SkipToggle_Button), PressSkipButton);
-        BindEvent(View.Button(Refs.QuickSaveMenu_Button), PressSaveMenuButton);
-        BindEvent(View.Button(Refs.QuickLoadMenu_Button), PressLoadMenuButton);
-        BindEvent(View.Button(Refs.SpeedUpToggleHotKey_Button), _ => FastForwardDown?.Invoke(), ETouchEvent.PointerDown);
-        BindEvent(View.Button(Refs.SpeedUpToggleHotKey_Button), _ => FastForwardUp?.Invoke(), ETouchEvent.PointerUp);
-        BindEvent(View.Button(Refs.RollbackToggleHotKey_Button), _ => RollbackClicked?.Invoke(), ETouchEvent.Click);
+        BindEvent(View.Button(Refs.AutoToggle_Button), PressAutoButton);
+        BindEvent(View.Button(Refs.ExpandToggle_Button), PressExpandButton);
+        BindEvent(View.Button(Refs.BackLog_Button), PressBackLogButton);
+        BindEvent(View.Button(Refs.PlaybackSpeedToggle_Button), PressPlaybackSpeedButton);
+        BindEvent(View.Button(Refs.OpenSkipPanel_Button), PressOpenSkipPanelButton);
+        BindEvent(View.Button(Refs.SaveMenu_Button), PressSaveMenuButton);
+        BindEvent(View.Button(Refs.LoadMenu_Button), PressLoadMenuButton);
+        
+        BindEvent(View.Button(Refs.RapidSkip_Button), _ 
+            => RapidSkipDown?.Invoke(), ETouchEvent.PointerDown);
+        BindEvent(View.Button(Refs.RapidSkip_Button), _ 
+            => RapidSkipUp?.Invoke(), ETouchEvent.PointerUp);
+        
+        BindEvent(View.Button(Refs.Rollback_Button), _ 
+            => RollbackClicked?.Invoke(), ETouchEvent.Click);
     }
-
+    
+    #region Handlers
+    
+    private void PressStepNextButton(PointerEventData _)
+    {
+        SetExpanded(!_isExpanded);
+        StepNextClicked?.Invoke();
+    }
+    
     private void PressAutoButton(PointerEventData _)
     {
         AutoClicked?.Invoke();
-    }
-
-    private void PressStepNextButton(PointerEventData _)
-    {
-        if (_isExpanded)
-        {
-            SetExpanded(false);
-            return;
-        }
-
-        HurryUpClicked?.Invoke();
     }
 
     private void PressQuickMenuToggleButton(PointerEventData _)
     {
         QuickMenuClicked?.Invoke();
 
-        SetQuickMenuOpen(!IsQuickMenuOpen());
+        SetQuickMenuOpen(!_isQuickMenuOpen);
     }
-
+    
     private void PressExpandButton(PointerEventData _)
     {
-        ToggleExpand();
+        SetExpanded(!_isExpanded);
         ExpandClicked?.Invoke();
     }
 
-    private void PressLogButton(PointerEventData _)
+    private void PressBackLogButton(PointerEventData _)
     {
         BackLogClicked?.Invoke();
     }
 
-    private void PressSpeedButton(PointerEventData _)
+    private void PressPlaybackSpeedButton(PointerEventData _)
     {
         PlaybackSpeedClicked?.Invoke();
     }
 
-    private void PressSkipButton(PointerEventData _)
+    private void PressOpenSkipPanelButton(PointerEventData _)
     {
-        SkipMenuClicked?.Invoke();
+        OpenSkipPanelClicked?.Invoke();
     }
 
     private void PressSaveMenuButton(PointerEventData _)
     {
-        SetQuickMenuOpen(false);
+        SetExpanded(false);
         SaveMenuClicked?.Invoke();
     }
 
     private void PressLoadMenuButton(PointerEventData _)
     {
-        SetQuickMenuOpen(false);
+        SetExpanded(false);
         LoadMenuClicked?.Invoke();
     }
-
-    public void SetQuickMenuOpen(bool open)
+    
+    #endregion
+    
+    
+    private void SetQuickMenuOpen(bool open)
     {
-        CanvasGroup quickMenu = View.CanvasGroup(Refs.QuickMenu_Root);
+        _isQuickMenuOpen = open;
 
-        if (open)
-            OpenCanvasGroup(quickMenu);
-        else
-            CloseCanvasGroup(quickMenu);
+        SetCanvasGroupVisible(View.CanvasGroup(Refs.QuickMenu_Root), open);
     }
 
-    public bool IsQuickMenuOpen()
+    private void SetExpanded(bool expanded)
     {
-        CanvasGroup quickMenu = View.CanvasGroup(Refs.QuickMenu_Root);
-        return quickMenu != null && quickMenu.alpha > 0.5f;
-    }
-
-    public void SetAutoModeActive(bool active)
-    {
-        View.Image(Refs.AutoToggleIcon_Image).enabled = true;
-        View.Rect(Refs.AutoToggle_Root).gameObject.SetActive(true);
-        View.Text(Refs.AutoToggleHotKey_Text).text = active ? "AUTO ON" : "AUTO";
-    }
-
-    public void SetSkipModeActive(bool active)
-    {
-        View.Text(Refs.SkipToggle_Text).text = active ? "SKIP ON" : "SKIP";
-    }
-
-    public void SetBacklogOpen(bool open)
-    {
-        View.Text(Refs.QuickDialogueLogHotkey_Text).text = open ? "LOG (OPEN)" : "LOG";
-    }
-
-    public void SetInputBlocked(bool blocked)
-    {
-        View.Button(Refs.StepNextToggle_Button).interactable = !blocked;
-        View.Button(Refs.SkipToggle_Button).interactable = !blocked;
-        View.Button(Refs.AutoToggleHotKey_Button).interactable = !blocked;
-    }
-
-    public void ToggleExpand()
-    {
-        SetExpanded(!_isExpanded);
-    }
-
-    public void SetExpanded(bool expanded)
-    {
-        if (_isExpanded == expanded)
-            return;
-
         _isExpanded = expanded;
 
-        ApplyToggleVisibility();
-    }
-
-    private void ApplyToggleVisibility()
-    {
-        bool visible = !_isExpanded;
-
-        SetLayerVisible(View.CanvasGroup(Refs.ToggleBottomRight), visible);
-        SetLayerVisible(View.CanvasGroup(Refs.ToggleTopRight), visible);
-        SetLayerVisible(View.CanvasGroup(Refs.ToggleTopLeft), visible);
-    }
-
-    private static void OpenCanvasGroup(CanvasGroup cg)
-    {
-        SetLayerVisible(cg, true);
-    }
-
-    private static void CloseCanvasGroup(CanvasGroup cg)
-    {
-        SetLayerVisible(cg, false);
+        SetCanvasGroupVisible(View.CanvasGroup(Refs.Buttons_BottomRight), !expanded);
+        SetCanvasGroupVisible(View.CanvasGroup(Refs.Buttons_TopRight), !expanded);
+        SetCanvasGroupVisible(View.CanvasGroup(Refs.Buttons_TopLeft), !expanded);
     }
     
-    private static void SetLayerVisible(CanvasGroup cg, bool visible)
+    private static void SetCanvasGroupVisible(CanvasGroup cg, bool visible)
     {
-        if (cg == null)
-            return;
-
         cg.alpha = visible ? 1f : 0f;
         cg.interactable = visible;
         cg.blocksRaycasts = visible;
