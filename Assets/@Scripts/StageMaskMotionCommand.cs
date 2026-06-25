@@ -1,9 +1,8 @@
-using System;
 using System.Collections;
 using DG.Tweening;
 using UnityEngine;
 
-[Serializable]
+[System.Serializable]
 [CommandMenuHint(
     "Presentation Motion",
     "Stage Mask Motion",
@@ -13,75 +12,22 @@ public sealed class StageMaskMotionCommandSpec : CommandSpecBase
     [Header("Target")]
     public PresentationStageKey stage = PresentationStageKey.Stage01;
 
-    [Header("Shape")]
-    public StageMaskKind kind = StageMaskKind.Slanted;
+    [Header("Preset")]
+    [Tooltip("StageMaskMotionPresetDBSO entry key. ex) hstrip_open, hstrip_in, iris_in")]
+    public string presetKey = StageMaskMotionPresetDBSO.DefaultPresetKey;
 
-    [Header("Motion")]
-    public Vector2 fromOffset = new(-2200f, 0f);
-    public Vector2 toOffset = Vector2.zero;
-
-    [Header("Slanted")]
-    public float slantPixels = 220f;
-    public bool slantToRight = false;
-    public bool flipVertical = true;
-
-    [Header("Horizontal Strip")]
-    public float stripHeightPixels = 360f;
-    public float horizontalBleedPixels = 80f;
-    public bool animateStripHeight;
-    public float fromStripHeightPixels = 0f;
-
-    [Header("Vertical Strip")]
-    public float verticalStripWidthPixels = 460f;
-    public float verticalBleedPixels = 80f;
-    public bool animateStripWidth;
-    public float fromVerticalStripWidthPixels = 0f;
-
-    [Header("Diagonal Band")]
-    public float diagonalBandWidthPixels = 680f;
-    public float diagonalBandSlantPixels = 420f;
-    public float diagonalBandBleedPixels = 260f;
-    public bool diagonalBandToRight = true;
-
-    [Header("Circle Iris")]
-    public float fromIrisRadiusPixels = 0f;
-    public float toIrisRadiusPixels = 1280f;
-    public float irisAspect = 1f;
-    [Range(12, 128)] public int irisSegments = 64;
-
-    [Header("Edge")]
-    public bool showEdge = true;
-    public StageMaskEdgeMode edgeMode = StageMaskEdgeMode.Leading;
-    public Color edgeColor = Color.white;
-    public float edgeThickness = 6f;
-    public bool hideEdgeOnComplete;
-
-    [Header("Tween")]
-    public float duration = 0.65f;
-    public Ease ease = Ease.OutCubic;
-
-    [Header("Rubber")]
-    public StageMaskRubberMode rubberMode = StageMaskRubberMode.OvershootEnd;
-
-    [Tooltip("OvershootEnd일 때 마지막 구간에서 진행 방향으로 더 밀리는 거리입니다.")]
-    public float overshootPixels = 72f;
-
-    [Range(0.01f, 0.99f)]
-    public float overshootStart = 0.72f;
-
-    [Tooltip("PullStart일 때 시작 구간에서 반대 방향으로 당기는 거리입니다.")]
-    public float pullPixels = 24f;
-
-    [Range(0.01f, 0.99f)]
-    public float pullEnd = 0.28f;
-
-    [Header("Completion")]
-    public bool fullVisibleOnComplete;
+    [Header("Tween Override")]
+    [Tooltip("음수이면 preset의 duration을 사용합니다. 0이면 즉시 커밋.")]
+    public float durationOverride = -1f;
 }
 
 public sealed class StageMaskMotionCommand : CommandBase
 {
     private readonly StageMaskMotionCommandSpec _spec;
+    private readonly StageMaskMotionPresetDBSO _presetDb;
+
+    private StageMaskMotionPresetDBSO.Entry _entry;
+    private float _duration;
 
     private StageMaskSlot _slot;
     private StageMaskGraphic _graphic;
@@ -95,9 +41,12 @@ public sealed class StageMaskMotionCommand : CommandBase
 
     public override bool WaitForCompletion => _spec.wait;
 
-    public StageMaskMotionCommand(StageMaskMotionCommandSpec spec)
+    public StageMaskMotionCommand(
+        StageMaskMotionCommandSpec spec,
+        StageMaskMotionPresetDBSO presetDb)
     {
         _spec = spec;
+        _presetDb = presetDb;
     }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
@@ -110,14 +59,14 @@ public sealed class StageMaskMotionCommand : CommandBase
 
         ClaimTarget();
 
-        if (scope.IsSeekPassThrough || _spec.duration <= 0f)
+        if (scope.IsSeekPassThrough || _duration <= 0f)
         {
             CommitFinalState();
             yield break;
         }
 
-        Vector2 start = _spec.fromOffset;
-        Vector2 dest = _spec.toOffset;
+        Vector2 start = _entry.fromOffset;
+        Vector2 dest = _entry.toOffset;
 
         Vector2 moveDir = dest - start;
         moveDir = moveDir.sqrMagnitude > 0f
@@ -132,7 +81,7 @@ public sealed class StageMaskMotionCommand : CommandBase
                 () => 0f,
                 t =>
                 {
-                    float e = DOVirtual.EasedValue(0f, 1f, t, _spec.ease);
+                    float e = DOVirtual.EasedValue(0f, 1f, t, _entry.ease);
 
                     Vector2 baseOffset = Vector2.LerpUnclamped(start, dest, e);
                     Vector2 rubberOffset = CalculateRubberOffset(e, moveDir);
@@ -141,7 +90,7 @@ public sealed class StageMaskMotionCommand : CommandBase
                     ApplyShapeAt(e);
                 },
                 1f,
-                _spec.duration)
+                _duration)
             .SetEase(Ease.Linear)
             .SetUpdate(true)
             .SetTarget(_graphic)
@@ -169,6 +118,11 @@ public sealed class StageMaskMotionCommand : CommandBase
     {
         _resolveAttempted = true;
 
+        _entry = ResolvePresetEntry();
+        _duration = _spec.durationOverride >= 0f
+            ? _spec.durationOverride
+            : _entry.duration;
+
         IStageMaskProvider provider = UIManager.Instance.GetUI<PresentationUIRoot>();
 
         if (!provider.TryGetStageMaskSlot(_spec.stage, out _slot) || _slot == null)
@@ -188,6 +142,52 @@ public sealed class StageMaskMotionCommand : CommandBase
                 $"[StageMaskMotionCommand] StageMaskGraphic is missing. " +
                 $"stage='{_spec.stage}'.");
         }
+    }
+
+    private StageMaskMotionPresetDBSO.Entry ResolvePresetEntry()
+    {
+        if (_presetDb != null &&
+            _presetDb.TryGet(_spec.presetKey, out StageMaskMotionPresetDBSO.Entry entry))
+        {
+            return entry;
+        }
+
+        Debug.LogWarning(
+            $"[StageMaskMotionCommand] Stage mask preset not found. " +
+            $"presetKey='{_spec.presetKey}'. Using fallback.");
+
+        if (_presetDb != null &&
+            _presetDb.TryGet(StageMaskMotionPresetDBSO.DefaultPresetKey, out entry))
+        {
+            return entry;
+        }
+
+        return BuildHardcodedFallbackEntry();
+    }
+
+    private static StageMaskMotionPresetDBSO.Entry BuildHardcodedFallbackEntry()
+    {
+        return new StageMaskMotionPresetDBSO.Entry
+        {
+            key = "fallback",
+            kind = StageMaskKind.HorizontalStrip,
+            fromOffset = Vector2.zero,
+            toOffset = Vector2.zero,
+            animateStripHeight = true,
+            fromStripHeightPixels = 0f,
+            stripHeightPixels = 360f,
+            horizontalBleedPixels = 96f,
+            showEdge = true,
+            edgeMode = StageMaskEdgeMode.Both,
+            edgeColor = new Color(1f, 1f, 1f, 0.82f),
+            edgeThickness = 4f,
+            hideEdgeOnComplete = false,
+            duration = 0.45f,
+            ease = Ease.OutCubic,
+            rubberMode = StageMaskRubberMode.None,
+            irisAspect = 1f,
+            irisSegments = 64,
+        };
     }
 
     private void ClaimTarget()
@@ -210,12 +210,12 @@ public sealed class StageMaskMotionCommand : CommandBase
         ApplyFixedShapeOptions();
         ApplyShapeAt(1f);
 
-        _graphic.ShapeOffsetPixels = _spec.toOffset;
+        _graphic.ShapeOffsetPixels = _entry.toOffset;
 
-        if (_spec.fullVisibleOnComplete)
+        if (_entry.fullVisibleOnComplete)
             _slot.SetFullVisible();
 
-        if (_spec.hideEdgeOnComplete)
+        if (_entry.hideEdgeOnComplete)
             _slot.SetEdgeVisible(false);
 
         HasClaimedTarget = false;
@@ -224,7 +224,7 @@ public sealed class StageMaskMotionCommand : CommandBase
 
     private void ApplyFixedShapeOptions()
     {
-        switch (_spec.kind)
+        switch (_entry.kind)
         {
             case StageMaskKind.FullRect:
                 _graphic.SetFullRect();
@@ -232,40 +232,40 @@ public sealed class StageMaskMotionCommand : CommandBase
 
             case StageMaskKind.Slanted:
                 _graphic.SetSlanted(
-                    _spec.slantPixels,
-                    _spec.slantToRight,
-                    _spec.flipVertical);
+                    _entry.slantPixels,
+                    _entry.slantToRight,
+                    _entry.flipVertical);
                 break;
 
             case StageMaskKind.HorizontalStrip:
                 _graphic.SetHorizontalStrip(
-                    _spec.animateStripHeight
-                        ? _spec.fromStripHeightPixels
-                        : _spec.stripHeightPixels,
-                    _spec.horizontalBleedPixels);
+                    _entry.animateStripHeight
+                        ? _entry.fromStripHeightPixels
+                        : _entry.stripHeightPixels,
+                    _entry.horizontalBleedPixels);
                 break;
 
             case StageMaskKind.VerticalStrip:
                 _graphic.SetVerticalStrip(
-                    _spec.animateStripWidth
-                        ? _spec.fromVerticalStripWidthPixels
-                        : _spec.verticalStripWidthPixels,
-                    _spec.verticalBleedPixels);
+                    _entry.animateStripWidth
+                        ? _entry.fromVerticalStripWidthPixels
+                        : _entry.verticalStripWidthPixels,
+                    _entry.verticalBleedPixels);
                 break;
 
             case StageMaskKind.DiagonalBand:
                 _graphic.SetDiagonalBand(
-                    _spec.diagonalBandWidthPixels,
-                    _spec.diagonalBandSlantPixels,
-                    _spec.diagonalBandBleedPixels,
-                    _spec.diagonalBandToRight);
+                    _entry.diagonalBandWidthPixels,
+                    _entry.diagonalBandSlantPixels,
+                    _entry.diagonalBandBleedPixels,
+                    _entry.diagonalBandToRight);
                 break;
 
             case StageMaskKind.CircleIris:
                 _graphic.SetCircleIris(
-                    _spec.fromIrisRadiusPixels,
-                    _spec.irisAspect,
-                    _spec.irisSegments);
+                    _entry.fromIrisRadiusPixels,
+                    _entry.irisAspect,
+                    _entry.irisSegments);
                 break;
         }
     }
@@ -274,51 +274,51 @@ public sealed class StageMaskMotionCommand : CommandBase
     {
         t = Mathf.Clamp01(t);
 
-        switch (_spec.kind)
+        switch (_entry.kind)
         {
             case StageMaskKind.CircleIris:
             {
                 float radius = Mathf.LerpUnclamped(
-                    _spec.fromIrisRadiusPixels,
-                    _spec.toIrisRadiusPixels,
+                    _entry.fromIrisRadiusPixels,
+                    _entry.toIrisRadiusPixels,
                     t);
 
                 _graphic.SetCircleIris(
                     radius,
-                    _spec.irisAspect,
-                    _spec.irisSegments);
+                    _entry.irisAspect,
+                    _entry.irisSegments);
                 break;
             }
 
             case StageMaskKind.HorizontalStrip:
             {
-                if (!_spec.animateStripHeight)
+                if (!_entry.animateStripHeight)
                     return;
 
                 float height = Mathf.LerpUnclamped(
-                    _spec.fromStripHeightPixels,
-                    _spec.stripHeightPixels,
+                    _entry.fromStripHeightPixels,
+                    _entry.stripHeightPixels,
                     t);
 
                 _graphic.SetHorizontalStrip(
                     height,
-                    _spec.horizontalBleedPixels);
+                    _entry.horizontalBleedPixels);
                 break;
             }
 
             case StageMaskKind.VerticalStrip:
             {
-                if (!_spec.animateStripWidth)
+                if (!_entry.animateStripWidth)
                     return;
 
                 float width = Mathf.LerpUnclamped(
-                    _spec.fromVerticalStripWidthPixels,
-                    _spec.verticalStripWidthPixels,
+                    _entry.fromVerticalStripWidthPixels,
+                    _entry.verticalStripWidthPixels,
                     t);
 
                 _graphic.SetVerticalStrip(
                     width,
-                    _spec.verticalBleedPixels);
+                    _entry.verticalBleedPixels);
                 break;
             }
         }
@@ -330,35 +330,29 @@ public sealed class StageMaskMotionCommand : CommandBase
             return;
 
         _slot.ConfigureEdge(
-            _spec.edgeMode,
-            _spec.edgeColor,
-            _spec.edgeThickness);
+            _entry.edgeMode,
+            _entry.edgeColor,
+            _entry.edgeThickness);
 
-        _slot.SetEdgeVisible(_spec.showEdge);
+        _slot.SetEdgeVisible(_entry.showEdge);
     }
 
     private Vector2 CalculateRubberOffset(
         float easedProgress,
         Vector2 moveDir)
     {
-        switch (_spec.rubberMode)
+        switch (_entry.rubberMode)
         {
             case StageMaskRubberMode.OvershootEnd:
             {
-                float rubber = RubberOvershootEnd(
-                    easedProgress,
-                    _spec.overshootStart);
-
-                return moveDir * (_spec.overshootPixels * rubber);
+                float rubber = RubberOvershootEnd(easedProgress, _entry.overshootStart);
+                return moveDir * (_entry.overshootPixels * rubber);
             }
 
             case StageMaskRubberMode.PullStart:
             {
-                float pull = RubberPullStart(
-                    easedProgress,
-                    _spec.pullEnd);
-
-                return -moveDir * (_spec.pullPixels * pull);
+                float pull = RubberPullStart(easedProgress, _entry.pullEnd);
+                return -moveDir * (_entry.pullPixels * pull);
             }
 
             case StageMaskRubberMode.None:
@@ -367,9 +361,7 @@ public sealed class StageMaskMotionCommand : CommandBase
         }
     }
 
-    private static float RubberOvershootEnd(
-        float e,
-        float overshootStart)
+    private static float RubberOvershootEnd(float e, float overshootStart)
     {
         e = Mathf.Clamp01(e);
         overshootStart = Mathf.Clamp(overshootStart, 0.01f, 0.99f);
@@ -381,9 +373,7 @@ public sealed class StageMaskMotionCommand : CommandBase
         return Mathf.Sin(t * Mathf.PI);
     }
 
-    private static float RubberPullStart(
-        float e,
-        float pullEnd)
+    private static float RubberPullStart(float e, float pullEnd)
     {
         e = Mathf.Clamp01(e);
         pullEnd = Mathf.Clamp(pullEnd, 0.01f, 0.99f);

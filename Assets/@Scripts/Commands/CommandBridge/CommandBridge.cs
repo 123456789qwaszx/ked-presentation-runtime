@@ -369,32 +369,21 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler<string, float>(
             "tx_iris_out",
             EnqueueCircleIrisOutSpec);
-
+        
+        runner.AddCommandHandler<string, float>(
+            "tx_daze_in", EnqueueDazeFadeCloseSpec);
+        runner.AddCommandHandler<string, float>(
+            "tx_daze_out", EnqueueTransitionOutDazeFadeSpec);
+        
+        runner.AddCommandHandler<string, float>(
+            "tx_strip_in", EnqueueVerticalStripCoverSpec);
+        runner.AddCommandHandler<string, float>(
+            "tx_strip_out", EnqueueTransitionOutStripSpec);
+        
         runner.AddCommandHandler(
             "tx_stage_mask_clear",
             EnqueueStageMaskClearSpec);
-        
-        
-        
-        
-        
 
-        runner.AddCommandHandler<float>(
-            "tx_strip", EnqueueVerticalStripCoverSpec);
-        runner.AddCommandHandler<float>(
-            "tx_shutter", EnqueueFocusBlurCurtainCloseSpec);
-        runner.AddCommandHandler<float>(
-            "tx_daze", EnqueueDazeFadeCloseSpec);
-        
-        runner.AddCommandHandler(
-            "tx_clear_all", EnqueueClearAllTransitionsSpec);
-        
-        runner.AddCommandHandler<float>(
-            "tx_out_strip", EnqueueTransitionOutStripSpec);
-        runner.AddCommandHandler<float>(
-            "tx_out_shutter", EnqueueTransitionOutFocusCurtainSpec);
-        runner.AddCommandHandler<float>(
-            "tx_out_daze", EnqueueTransitionOutDazeFadeSpec);
     }
     
     private void BindAudio(DialogueRunner runner)

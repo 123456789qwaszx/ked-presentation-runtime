@@ -7892,6 +7892,7 @@ MonoBehaviour:
   screenVignettePresetDbso: {fileID: 11400000, guid: 53356775219299c42981714a7e8b025e, type: 2}
   screenFlashPresetDbso: {fileID: 11400000, guid: fd8b0b7eceef6c549952782158c076ed, type: 2}
   uiStageDepthLayerBlurRuntime: {fileID: 1612507019}
+  stageMaskMotionPresetDbSo: {fileID: 11400000, guid: 5e92252f243dfe94fbce20f08a326a2b, type: 2}
   screenEffectRigMount: {fileID: 1239989732}
   screenEffectRigPrefab: {fileID: 4422593765165483704, guid: 83cb0b3e799522c4f8dc6d87cce85f30, type: 3}
   yarnLaneDebugView: {fileID: 2086870835}

@@ -5,7 +5,7 @@ using UnityEngine;
 
 public enum StageMaskClearMode
 {
-    FullVisible = 0,
+    UnmaskedFullVisible = 0,
     MaskedHidden = 1,
     MaskedFullRectVisible = 2,
 }
@@ -21,7 +21,7 @@ public sealed class StageMaskClearCommandSpec : CommandSpecBase
     public PresentationStageKey stage = PresentationStageKey.Stage01;
 
     [Header("Clear")]
-    public StageMaskClearMode mode = StageMaskClearMode.FullVisible;
+    public StageMaskClearMode mode = StageMaskClearMode.UnmaskedFullVisible;
     public bool hideEdge = true;
 }
 
@@ -92,7 +92,7 @@ public sealed class StageMaskClearCommand : CommandBase
 
         switch (_spec.mode)
         {
-            case StageMaskClearMode.FullVisible:
+            case StageMaskClearMode.UnmaskedFullVisible:
                 _slot.SetFullVisible();
                 break;
 

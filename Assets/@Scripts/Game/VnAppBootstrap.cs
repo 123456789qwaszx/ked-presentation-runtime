@@ -128,6 +128,8 @@ public class VnAppBootstrap : MonoBehaviour
     [SerializeField] private ScreenFlashPresetDBSO screenFlashPresetDbso;
     [SerializeField] private UIStageDepthLayerBlurRuntime uiStageDepthLayerBlurRuntime;
     
+    [SerializeField] private StageMaskMotionPresetDBSO stageMaskMotionPresetDbSo;
+    
     [Header("Screen Effect Rig")]
     [SerializeField] private RectTransform screenEffectRigMount;
     [SerializeField] private RectTransform screenEffectRigPrefab;
@@ -253,7 +255,7 @@ public class VnAppBootstrap : MonoBehaviour
             _presentationResponseRig, characterFocusTuningDb);
 
         // Presentation Transition
-        PresentationTransitionCommandFactory presentationTransitionFactory = new();
+        PresentationTransitionCommandFactory presentationTransitionFactory = new(stageMaskMotionPresetDbSo);
 
         // Presentation Control
         PresentationControlCommandFactory presentationControlFactory = new(_uiPatchService);
