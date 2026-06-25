@@ -159,10 +159,6 @@ public partial class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
         
         #region ScreenEffect Layer
         ScreenEffectLayer,
-        
-        VerticalStripWipe,
-        FocusBlurCurtain,
-        
         // ScreenEffectRig
         
         #endregion

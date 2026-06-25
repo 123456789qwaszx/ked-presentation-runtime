@@ -116,7 +116,8 @@ public sealed class EpisodePlayer : MonoBehaviour
         _backlogRecorder.ClearBacklog();
         await StopYarnRunnersAsync();
         _linePresentationAborter?.AbortCurrentVnLine();
-        ResetVisualState();
+        
+        _presentationResponseRig.Clear();
         presentationRouteEntry.EndRouteNow();
     }
 
@@ -137,14 +138,5 @@ public sealed class EpisodePlayer : MonoBehaviour
             await YarnTask.WhenAll(tasks);
 
         _sideRunnerSyncHub.ResetPresentationLane();
-    }
-
-    private void ResetVisualState()
-    {
-        _presentationResponseRig.Clear();
-        
-        IPresentationTransitionSlotProvider provider = UIManager.Instance.GetUI<PresentationUIRoot>();
-        //SlantedMaskGraphic mask = provider.SlantedMaskEdgeGraphic.GetComponent<SlantedMaskGraphic>();
-        //mask?.ResetToHiddenOffset();
     }
 }

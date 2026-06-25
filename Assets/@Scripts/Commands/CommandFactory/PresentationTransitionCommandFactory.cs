@@ -17,17 +17,6 @@ public sealed class PresentationTransitionCommandFactory : INodeCommandFactory
             StageMaskMotionCommandSpec s => new StageMaskMotionCommand(s, _stageMaskMotionPresetDbSo),
             StageMaskClearCommandSpec s => new StageMaskClearCommand(s),
 
-            // Strip 
-            VerticalStripWipeCommandSpec s => new VerticalStripWipeCommand(s),
-            
-            // Daze
-            FocusBlurCurtainCommandSpec s => new FocusBlurCurtainCommand(s),
-            
-            ClearAllTransitionsCommandSpec s => new ClearAllTransitionsCommand(),
-            
-            TransitionOutStripCommandSpec s => new TransitionOutStripCommand(s),
-            TransitionOutFocusCurtainCommandSpec s => new TransitionOutFocusCurtainCommand(s),
-
             _ => null
         };
 

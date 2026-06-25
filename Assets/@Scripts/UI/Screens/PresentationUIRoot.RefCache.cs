@@ -513,8 +513,6 @@ public partial class PresentationUIRoot
     private void CacheScreenEffectRefs()
     {
         _screenEffectLayer = View.Rect(Refs.ScreenEffectLayer);
-        _verticalStripWipe = View.Rect(Refs.VerticalStripWipe);
-        _focusBlurCurtain = View.Rect(Refs.FocusBlurCurtain);
     }
 
     private bool ValidateScreenEffectRefs()
@@ -522,8 +520,6 @@ public partial class PresentationUIRoot
         string missing = "";
 
         AppendMissing(ref missing, _screenEffectLayer, Refs.ScreenEffectLayer);
-        AppendMissing(ref missing, _verticalStripWipe, Refs.VerticalStripWipe);
-        AppendMissing(ref missing, _focusBlurCurtain, Refs.FocusBlurCurtain);
 
         return LogMissingRefs("ScreenEffect Layer", missing);
     }

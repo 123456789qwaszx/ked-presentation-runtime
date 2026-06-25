@@ -76,25 +76,25 @@ public sealed class SetPortraitPoseCommandCharR : CommandBase
 
         scope.CastRegistry.SetVariant(resolvedSlotKey, variantKey);
 
-        var portrait = new PortraitIdentity
-        {
-            character = "",
-            variant = variantKey,
-            emotion = _spec.defaultEmotionKey
-        };
-
-        Sprite sprite = _resolver.Resolve(
-            scope,
-            resolvedSlotKey,
-            portrait,
-            nameof(SetPortraitPoseCommandCharR));
-
-        _image.sprite = sprite;
-        CharRigImageSizingPolicy.Apply(
-            _image,
-            sprite,
-            _spec.sizingMode,
-            _spec.horizontalAlign);
+        // var portrait = new PortraitIdentity
+        // {
+        //     character = "",
+        //     variant = variantKey,
+        //     emotion = _spec.defaultEmotionKey
+        // };
+        //
+        // Sprite sprite = _resolver.Resolve(
+        //     scope,
+        //     resolvedSlotKey,
+        //     portrait,
+        //     nameof(SetPortraitPoseCommandCharR));
+        //
+        // _image.sprite = sprite;
+        // CharRigImageSizingPolicy.Apply(
+        //     _image,
+        //     sprite,
+        //     _spec.sizingMode,
+        //     _spec.horizontalAlign);
     }
 
     private void ResolveRefs(CommandRunScope scope)

@@ -14,7 +14,7 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler<string, string, string>(
             "face_swap", EnqueueSetEmotionPortraitWipeDslSpec);
 
-        runner.AddCommandHandler<string, string, string>(
+        runner.AddCommandHandler<string, string, string, string>(
             "face_crossfade", EnqueueSetPortraitCrossfadeDslSpec);
 
         runner.AddCommandHandler<string, string, string, string>(
@@ -94,13 +94,15 @@ public sealed partial class YarnCommandBridge
     private void EnqueueSetPortraitCrossfadeDslSpec(
         string roleKey,
         string character,
+        string emotionKey,
         string durationToken = "10fr")
     {
         float duration = YarnDurationParser.Parse(durationToken);
 
         var portraitIdentity = new PortraitIdentity
         {
-            character = character
+            character = character,
+            emotion = emotionKey
         };
 
         var spec = new SetPortraitCrossfadeCommandSpecCharR

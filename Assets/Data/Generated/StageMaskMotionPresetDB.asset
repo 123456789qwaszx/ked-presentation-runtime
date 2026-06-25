@@ -376,7 +376,7 @@ MonoBehaviour:
   - key: band_in
     kind: 4
     fromOffset: {x: -2600, y: 0}
-    toOffset: {x: 0, y: 0}
+    toOffset: {x: 1100, y: 0}
     slantPixels: 0
     slantToRight: 0
     flipVertical: 0
@@ -403,15 +403,15 @@ MonoBehaviour:
     hideEdgeOnComplete: 0
     duration: 0.38
     ease: 12
-    rubberMode: 1
-    overshootPixels: 64
-    overshootStart: 0.7
+    rubberMode: 0
+    overshootPixels: 32
+    overshootStart: 0.968
     pullPixels: 0
-    pullEnd: 0
+    pullEnd: 0.01
     fullVisibleOnComplete: 0
   - key: band_out
     kind: 4
-    fromOffset: {x: 0, y: 0}
+    fromOffset: {x: 1100, y: 0}
     toOffset: {x: 2600, y: 0}
     slantPixels: 0
     slantToRight: 0
@@ -439,10 +439,10 @@ MonoBehaviour:
     hideEdgeOnComplete: 1
     duration: 0.28
     ease: 11
-    rubberMode: 2
+    rubberMode: 0
     overshootPixels: 0
     overshootStart: 0
-    pullPixels: 18
+    pullPixels: 0
     pullEnd: 0.22
     fullVisibleOnComplete: 0
   - key: iris_in
@@ -654,7 +654,7 @@ MonoBehaviour:
     edgeThickness: 2
     hideEdgeOnComplete: 1
     duration: 0.65
-    ease: 4
+    ease: 10
     rubberMode: 0
     overshootPixels: 0
     overshootStart: 0
@@ -690,7 +690,7 @@ MonoBehaviour:
     edgeThickness: 4
     hideEdgeOnComplete: 1
     duration: 0.4
-    ease: 1
+    ease: 10
     rubberMode: 0
     overshootPixels: 0
     overshootStart: 0

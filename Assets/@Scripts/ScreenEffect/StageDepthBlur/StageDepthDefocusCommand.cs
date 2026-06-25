@@ -26,14 +26,14 @@ public sealed class StageDepthDefocusCommandSpec : CommandSpecBase
 
     [Header("Edge Hide")]
     [Tooltip("defocus 동안 원본 캐릭터 외곽을 셰이더(EdgeHide)로 지우는 양. blur overlay와 sharp source의 경계 노출을 줄인다.")]
-    [Range(0f, 1f)] public float edgeHide = 1f;
+    [Range(0f, 10f)] public float edgeHide = 8f;
 
     [Header("Coverage")]
     [Tooltip("Blur overlay가 원본 depth layer bounds보다 더 넓게 덮는 화면 픽셀 여백. 경계에서 sharp source가 노출되는 것을 줄인다.")]
-    [Min(0f)] public float coveragePaddingPixels = 48f;
+    [Min(0f)] public float coveragePaddingPixels = 400f;
 
     [Header("Tween")]
-    public float duration = 0.35f;
+    public float duration = 0.8f;
     public Ease ease = Ease.OutCubic;
 }
 
