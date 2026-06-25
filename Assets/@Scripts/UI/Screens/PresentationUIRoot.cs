@@ -276,6 +276,9 @@ public partial class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
 
     protected override void OnInitialize()
     {
+        CacheRefs();
+        ValidateRefs();
+        
         BindHandlers();
         
         SetQuickMenuOpen(false);
@@ -377,6 +380,9 @@ public partial class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
     
     private static void SetCanvasGroupVisible(CanvasGroup cg, bool visible)
     {
+        if (!cg)
+            return;
+        
         cg.alpha = visible ? 1f : 0f;
         cg.interactable = visible;
         cg.blocksRaycasts = visible;
