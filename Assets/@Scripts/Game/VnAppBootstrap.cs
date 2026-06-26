@@ -26,6 +26,10 @@ public class VnAppBootstrap : MonoBehaviour
     
     private readonly VnScreenBindings _screenBindings = new();
     
+    [Header("Overlay PresentationSession")]
+    [SerializeField] private CommandExecutor overlayCommandExecutor;
+    [SerializeField] private OverlaySequenceRunner overlaySequenceRunner;
+    
     [Header("VN Trace")]
     [SerializeField] private VNTraceStream vnTrace = new ();
 
@@ -299,19 +303,55 @@ public class VnAppBootstrap : MonoBehaviour
         subCommandExecutor.Initialize(factory);
         oneShotCommandExecutor.Initialize(factory);
         
-        PresentationSession presentationSession = new(
-            gatePlanner,
-            gateAdvancer,
+        // PresentationSession presentationSession = new(
+        //     gatePlanner,
+        //     gateAdvancer,
+        //     commandExecutor,
+        //     subCommandExecutor,
+        //     oneShotCommandExecutor,
+        //     _presentationSessionContext,
+        //     _linePresentationAdvanceState,
+        //     _presentationStage);
+        
+        PresentationLaneScopeSession laneScopes = new(
             commandExecutor,
             subCommandExecutor,
             oneShotCommandExecutor,
             _presentationSessionContext,
             _linePresentationAdvanceState,
             _presentationStage);
-
+        
         presentationSessionEntry.Initialize(
-            presentationSession,
-            routeCatalogSo);
+            laneScopes);
+        
+        
+        
+        
+        overlayCommandExecutor.Initialize(factory);
+
+        PresentationSessionContext overlayContext = new();
+
+        SignalLatch overlaySignalLatch = new();
+        unitySignalBus.OnSignal += overlaySignalLatch.Latch;
+
+        StepGatePlanBuilder overlayGatePlanner = new();
+        StepGateAdvancer overlayGateAdvancer = new(
+            new NullInputSource(),
+            _unityTimeSource,
+            unitySignalBus,
+            overlaySignalLatch);
+
+        PresentationSession overlaySession = new(
+            overlayGatePlanner,
+            overlayGateAdvancer,
+            overlayCommandExecutor,
+            null,
+            null,
+            overlayContext,
+            _linePresentationAdvanceState,
+            _presentationStage);
+
+        overlaySequenceRunner.Initialize(overlaySession);
     }
     
     private ScreenEffectRig EnsureScreenEffectRig()

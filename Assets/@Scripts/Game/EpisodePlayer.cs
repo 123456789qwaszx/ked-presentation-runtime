@@ -22,7 +22,6 @@ public sealed class EpisodePlayer : MonoBehaviour
 
     [Header("Entry Keys")]
     [SerializeField] private string yarnEntryKey;
-    [SerializeField] private string presentationEntryKey;
 
     [Header("Debug Input")]
     [Tooltip("Yarn 실행")]
@@ -89,7 +88,7 @@ public sealed class EpisodePlayer : MonoBehaviour
         }
 
         _vnScreenBindings.GoToPresentationView();
-        presentationRouteEntry.RestartRoute(presentationEntryKey);
+        presentationRouteEntry.RestartRoute();
 
         YarnTask startTask = dialogueRunner.StartDialogue(nodeName);
         yield return WaitForYarnTask(startTask);

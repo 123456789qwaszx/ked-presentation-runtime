@@ -6040,6 +6040,50 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 460299324}
   m_CullTransparentMesh: 1
+--- !u!1 &461075910
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 461075911}
+  - component: {fileID: 461075912}
+  m_Layer: 0
+  m_Name: OverlaySequenceRunner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &461075911
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 461075910}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 596868909}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &461075912
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 461075910}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: babf0354f5181c74987c8102742a7d4d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::OverlaySequenceRunner
 --- !u!114 &464953511
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7854,6 +7898,8 @@ Transform:
   - {fileID: 1315566988}
   - {fileID: 307625744}
   - {fileID: 451477691}
+  - {fileID: 1334588233}
+  - {fileID: 461075911}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &596868910
@@ -7868,6 +7914,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 355984e90625bb24fbaa9aa39f39f63f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VnAppBootstrap
+  overlayCommandExecutor: {fileID: 1334588234}
+  overlaySequenceRunner: {fileID: 461075912}
   vnTrace:
     enableTrace: 1
     logTraceStreaming: 0
@@ -17570,6 +17618,50 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1334588232
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1334588233}
+  - component: {fileID: 1334588234}
+  m_Layer: 0
+  m_Name: OverlayCommandExecutor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1334588233
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1334588232}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 596868909}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1334588234
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1334588232}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a3f81eaca50f144ab19e60b4c29c1c9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CommandExecutor
 --- !u!1 &1337232879
 GameObject:
   m_ObjectHideFlags: 0

@@ -2,90 +2,29 @@ using UnityEngine;
 
 public sealed class PresentationSessionEntry : MonoBehaviour, ICommandRunScopeProvider
 {
-    public PresentationSession PresentationSession { get; private set; }
+    public PresentationLaneScopeSession LaneScopes { get; private set; }
 
-    private RouteCatalogSO _routeCatalog;
+    public CommandRunScope CurrentScope => LaneScopes?.CurrentScope;
+    public CommandRunScope SubScope => LaneScopes?.SubScope;
 
-    public CommandRunScope CurrentScope
+    public void Initialize(PresentationLaneScopeSession laneScopes)
     {
-        get
+        LaneScopes = laneScopes;
+    }
+
+    // routeKey는 더 이상 쓰이지 않는다(Route/SequenceSpecSO 기반 메인 흐름의 잔재).
+    // 호출부(EpisodePlayer) 시그니처를 안 건드리려고 파라미터만 유지.
+    public void RestartRoute()
+    {
+        if (LaneScopes == null)
         {
-            if (PresentationSession == null)
-                return null;
-
-            return PresentationSession.CurrentScope;
-        }
-    }
-    
-    public CommandRunScope SubScope => PresentationSession != null ? PresentationSession.SubScope : null;
-
-    public void Initialize(PresentationSession presentationSession, RouteCatalogSO routeCatalogSo)
-    {
-        PresentationSession = presentationSession;
-        _routeCatalog = routeCatalogSo;
-    }
-
-    private void Update()
-    {
-        if (PresentationSession != null)
-            PresentationSession.Tick();
-    }
-    
-    public void RestartRoute(string routeKey)
-    {
-        if (!TryResolveRoute(routeKey, out Route route, out SequenceSpecSO sequence))
+            Debug.LogWarning("[PresentationSessionEntry] LaneScopes is null.", this);
             return;
-        
-        PresentationSession.ClearStage();
-        PresentationSession.Start(route, sequence);
+        }
+
+        LaneScopes.ClearStage();
+        LaneScopes.Start();
     }
 
-    public void EndRouteNow()
-    {
-        if (PresentationSession == null)
-            return;
-
-        PresentationSession.EndImmediately();
-    }
-
-    private bool TryResolveRoute(
-        string routeKey,
-        out Route route,
-        out SequenceSpecSO sequence)
-    {
-        route = default;
-        sequence = null;
-
-        if (PresentationSession == null)
-        {
-            Debug.LogWarning("[PresentationSessionEntry] Cannot start route. PresentationSession is null.", this);
-            return false;
-        }
-
-        if (_routeCatalog == null)
-        {
-            Debug.LogWarning("[PresentationSessionEntry] Cannot start route. RouteCatalog is null.", this);
-            return false;
-        }
-
-        if (string.IsNullOrWhiteSpace(routeKey))
-        {
-            Debug.LogWarning("[PresentationSessionEntry] Cannot start route. routeKey is null or empty.", this);
-            return false;
-        }
-
-        if (!_routeCatalog.TryResolve(routeKey, out route, out sequence))
-        {
-            Debug.LogWarning($"[PresentationSessionEntry] Failed to resolve routeKey='{routeKey}'", this);
-            return false;
-        }
-
-        if (sequence == null)
-        {
-            Debug.LogWarning($"[PresentationSessionEntry] Resolved routeKey='{routeKey}', but sequence is null.", this);
-            return false;
-        }
-
-        return true;
-    }
+    public void EndRouteNow() => LaneScopes?.EndImmediately();
 }
