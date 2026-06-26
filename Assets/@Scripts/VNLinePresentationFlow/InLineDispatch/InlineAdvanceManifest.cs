@@ -27,7 +27,7 @@ using Yarn.Markup;
 // ─────────────────────────────────────────────────────────────────────────────
 public sealed class InlineAdvanceManifest
 {
-    public const string DefaultMarkerName = "advance";
+    public const string DefaultMarkerName = "adv";
 
     private readonly int[] _positions; // 오름차순. 같은 위치 중복 보존.
     private int _cursor;               // 다음 소비 ordinal. [0, Count].

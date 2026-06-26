@@ -12,6 +12,8 @@ public sealed partial class YarnCommandBridge
     private readonly VNSideRunnerSyncHub _sideRunnerSyncHub;
     private readonly OneShotPresentationLane _oneShotPresentationLane;
     private readonly DialogueBoxPresentationController _dialogueBoxPresentation;
+    private readonly OverlaySequenceRunner _overlaySequenceRunner;
+    private readonly SequenceCatalogSO _overlaySequenceCatalog;
     
     public YarnCommandBridge(
         DialogueRunner runner,
@@ -22,6 +24,8 @@ public sealed partial class YarnCommandBridge
         RectTransform overlayRigPrefab,
         OneShotPresentationLane oneShotPresentationLane,
         DialogueBoxPresentationController dialogueBoxPresentation,
+        OverlaySequenceRunner overlaySequenceRunner,
+        SequenceCatalogSO overlaySequenceCatalog,
         bool bindMainLaneCommands)
     {
         _playbackDriver = playbackDriver;
@@ -31,6 +35,8 @@ public sealed partial class YarnCommandBridge
         _overlayRigPrefab = overlayRigPrefab;
         _oneShotPresentationLane = oneShotPresentationLane;
         _dialogueBoxPresentation = dialogueBoxPresentation;
+        _overlaySequenceRunner = overlaySequenceRunner;
+        _overlaySequenceCatalog = overlaySequenceCatalog;
         
         BindRunnerCommands(runner);
 
@@ -73,6 +79,9 @@ public sealed partial class YarnCommandBridge
     private void BindControl(DialogueRunner runner)
     {
         BindFramePauseAliases(runner);
+        
+        runner.AddCommandHandler<string>(
+            "seq", PlayOverlaySequence);
         
         runner.AddCommandHandler<float>(
             "pause", EnqueueWaitSpec);
@@ -142,6 +151,9 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler(
             "box_reset", ResetDefaultLineBoxKinds);
     }
+    
+    private void PlayOverlaySequence(string sequenceKey)
+        => _overlaySequenceRunner.Play(sequenceKey, _overlaySequenceCatalog);
     
     // Lane registration is explicitly handled by bootstrap:
     // hub.RegisterPresentationLane(subRunner).

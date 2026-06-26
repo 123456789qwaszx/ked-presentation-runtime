@@ -18,19 +18,7 @@ public sealed class OverlaySequenceRunner : MonoBehaviour
         _session?.Tick();
     }
 
-    public void Play(SequenceSpecSO sequence)
-    {
-        if (sequence == null)
-        {
-            Debug.LogWarning("[OverlaySequenceRunner] sequence is null.");
-            return;
-        }
-
-        // Route는 디버그 표기용 메타데이터일 뿐, 실제로 무엇을 resolve하지 않는다.
-        _session.Play(sequence);
-    }
-
-    public void PlayByKey(string sequenceKey, SequenceCatalogSO catalog)
+    public void Play(string sequenceKey, SequenceCatalogSO catalog)
     {
         if (catalog == null || !catalog.TryGetSequence(sequenceKey, out SequenceSpecSO sequence))
         {
@@ -38,7 +26,13 @@ public sealed class OverlaySequenceRunner : MonoBehaviour
             return;
         }
 
-        Play(sequence);
+        if (sequence == null)
+        {
+            Debug.LogWarning("[OverlaySequenceRunner] sequence is null.");
+            return;
+        }
+
+        _session.Play(sequence);
     }
 
     public void EndImmediately() => _session?.EndImmediately();

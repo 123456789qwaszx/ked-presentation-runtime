@@ -10,9 +10,6 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "SequenceCatalog", menuName = "CPS/Command/Sequence Catalog")]
 public sealed class SequenceCatalogSO : ScriptableObject
 {
-    [Header("Optional metadata")]
-    public string catalogId;
-
     [Header("Entries")]
     [SerializeField] private List<SequenceSpecSO> sequences = new();
 

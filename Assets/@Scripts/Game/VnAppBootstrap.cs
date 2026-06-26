@@ -28,6 +28,7 @@ public class VnAppBootstrap : MonoBehaviour
     [Header("Overlay PresentationSession")]
     [SerializeField] private CommandExecutor overlayCommandExecutor;
     [SerializeField] private OverlaySequenceRunner overlaySequenceRunner;
+    [SerializeField] private SequenceCatalogSO overlaySequenceCatalog;
     
     [Header("VN Trace")]
     [SerializeField] private VNTraceStream vnTrace = new ();
@@ -373,6 +374,8 @@ public class VnAppBootstrap : MonoBehaviour
             overlayRigPrefab,
             oneShotPresentationLane,
             _dialogueBoxPresentationController,
+            overlaySequenceRunner,
+            overlaySequenceCatalog,
             bindMainLaneCommands: true);
         
         YarnCommandBridge subYarnCommandBridge = new YarnCommandBridge(
@@ -384,6 +387,8 @@ public class VnAppBootstrap : MonoBehaviour
             overlayRigPrefab,
             oneShotPresentationLane,
             _dialogueBoxPresentationController,
+            overlaySequenceRunner,
+            overlaySequenceCatalog,
             bindMainLaneCommands: false);
         
         YarnCommandBridge subOneShotYarnCommandBridge = new YarnCommandBridge(
@@ -395,6 +400,8 @@ public class VnAppBootstrap : MonoBehaviour
             overlayRigPrefab,
             oneShotPresentationLane,
             _dialogueBoxPresentationController,
+            overlaySequenceRunner,
+            overlaySequenceCatalog,
             bindMainLaneCommands: false);
         
         subPresentationPresenter.Initialize(subPresentationRunner, subYarnBridgePlaybackDriver, _vnSideRunnerSyncHub, yarnLaneDebugView);
