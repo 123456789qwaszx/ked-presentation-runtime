@@ -1,0 +1,8 @@
+﻿title: Beat_FocusFace
+---
+<<shot_focus_to @1 bust center 6 2>>
+<<at @1 8 face 40fr>>
+<<down @1 2u 32fr>>
+
+<<48fr>>
+===

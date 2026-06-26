@@ -44,29 +44,6 @@ public static class CharacterFocusPointResolver
             out result);
     }
 
-    // Backward-compatible overload. Callers that do not know the character state keep using Right-facing logic.
-    public static bool TryResolveFromRigRefs(
-        CharacterRigRefs rigRefs,
-        RectTransform rigSpaceRoot,
-        string tuningKey,
-        CharacterFocusPreset preset,
-        Vector2 commandOffset,
-        CharacterFocusTuningDBSO tuningDb,
-        bool useSettledPlacementTargets,
-        out CharacterFocusPointResult result)
-    {
-        return TryResolveFromRigRefs(
-            rigRefs,
-            rigSpaceRoot,
-            tuningKey,
-            preset,
-            commandOffset,
-            tuningDb,
-            useSettledPlacementTargets,
-            CharacterFacing.Right,
-            out result);
-    }
-
     public static bool TryResolveFromRigRefs(
         CharacterRigRefs rigRefs,
         RectTransform rigSpaceRoot,

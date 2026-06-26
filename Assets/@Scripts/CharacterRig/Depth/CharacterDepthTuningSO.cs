@@ -18,9 +18,18 @@ public struct CharacterDepthPresetValue
 
     public static CharacterDepthPresetValue Far => new()
     {
-        depthY = new Vector2(0f, 120f),
-        depthScale = 0.86f,
+        depthY = new Vector2(0f, 480f),
+        depthScale = 0.68f,
         preserveFocusPreset = CharacterFocusPreset.Feet,
+        preserveCustomFocusKey = "",
+        preserveFocusOffset = Vector2.zero,
+    };
+    
+    public static CharacterDepthPresetValue Back => new()
+    {
+        depthY = new Vector2(0f, 240f),
+        depthScale = 0.86f,
+        preserveFocusPreset = CharacterFocusPreset.Bust,
         preserveCustomFocusKey = "",
         preserveFocusOffset = Vector2.zero,
     };
@@ -34,32 +43,34 @@ public struct CharacterDepthPresetValue
         preserveFocusOffset = Vector2.zero,
     };
 
-    public static CharacterDepthPresetValue Close => new()
+    public static CharacterDepthPresetValue Front => new()
     {
         depthY = new Vector2(0f, -320f),
-        depthScale = 1.22f,
+        depthScale = 1.18f,
         preserveFocusPreset = CharacterFocusPreset.Bust,
         preserveCustomFocusKey = "",
         preserveFocusOffset = Vector2.zero,
     };
-
-    public static CharacterDepthPresetValue Front => new()
+    
+    public static CharacterDepthPresetValue Close => new()
     {
-        depthY = new Vector2(0f, -440f),
+        depthY = new Vector2(0f, 440f),
         depthScale = 1.38f,
         preserveFocusPreset = CharacterFocusPreset.Face,
         preserveCustomFocusKey = "",
         preserveFocusOffset = Vector2.zero,
     };
+
 }
 
 [Serializable]
 public struct CharacterDepthTuningSet
 {
     public CharacterDepthPresetValue far;
+    public CharacterDepthPresetValue back;
     public CharacterDepthPresetValue mid;
-    public CharacterDepthPresetValue close;
     public CharacterDepthPresetValue front;
+    public CharacterDepthPresetValue close;
 
     public CharacterDepthPresetValue exp1;
     public CharacterDepthPresetValue exp2;
@@ -69,9 +80,10 @@ public struct CharacterDepthTuningSet
         CharacterDepthPreset.None => mid,
 
         CharacterDepthPreset.Far => far,
+        CharacterDepthPreset.Back => back,
         CharacterDepthPreset.Mid => mid,
-        CharacterDepthPreset.Close => close,
         CharacterDepthPreset.Front => front,
+        CharacterDepthPreset.Close => close,
 
         CharacterDepthPreset.Exp1 => exp1,
         CharacterDepthPreset.Exp2 => exp2,
@@ -82,9 +94,10 @@ public struct CharacterDepthTuningSet
     public static CharacterDepthTuningSet Default => new()
     {
         far = CharacterDepthPresetValue.Far,
+        back = CharacterDepthPresetValue.Back,
         mid = CharacterDepthPresetValue.Mid,
-        close = CharacterDepthPresetValue.Close,
         front = CharacterDepthPresetValue.Front,
+        close = CharacterDepthPresetValue.Close,
 
         exp1 = CharacterDepthPresetValue.Mid,
         exp2 = CharacterDepthPresetValue.Mid,

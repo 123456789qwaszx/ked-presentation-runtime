@@ -5,6 +5,7 @@ public enum CharacterDepthPreset
     None = 0,
 
     Far = 10,
+    Back = 16,
     Mid = 20,
     Close = 30,
     Front = 40,
@@ -30,9 +31,12 @@ public static class CharacterDepthPresetParser
 
             case "far":
             case "f":
+                preset = CharacterDepthPreset.Far;
+                return true;
+            
             case "back":
             case "b":
-                preset = CharacterDepthPreset.Far;
+                preset = CharacterDepthPreset.Back;
                 return true;
 
             case "mid":
@@ -43,17 +47,18 @@ public static class CharacterDepthPresetParser
                 preset = CharacterDepthPreset.Mid;
                 return true;
 
+            case "front":
+            case "fore":
+            case "foreground":
+                preset = CharacterDepthPreset.Front;
+                return true;
+            
             case "close":
             case "near":
             case "c":
                 preset = CharacterDepthPreset.Close;
                 return true;
 
-            case "front":
-            case "fore":
-            case "foreground":
-                preset = CharacterDepthPreset.Front;
-                return true;
 
             case "exp1":
             case "experimental1":
