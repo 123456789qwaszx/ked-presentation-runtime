@@ -3,9 +3,7 @@ using UnityEngine;
 
 public sealed class VnFeatureController : MonoBehaviour
 {
-    [SerializeField] private VnPlaybackSettings _vnPlaybackSettings;
-
-    private PresentationSessionContext _sessionContext;
+    private VnPlaybackRuntimeState _vnPlaybackSettings;
 
     private EllipsisBreathTypewriter _typewriter;
     private VNLinePresentationState _linePresentationAdvanceState;
@@ -21,7 +19,7 @@ public sealed class VnFeatureController : MonoBehaviour
     private bool _speedUpHeld;
     private bool _rapidSkipHeld;
 
-    public bool IsAuto => _sessionContext != null && _sessionContext.IsAutoMode;
+    public bool IsAuto => _vnPlaybackSettings != null && _vnPlaybackSettings.IsAutoMode;
 
     private bool LineFullyShown => _linePresentationAdvanceState.IsLineFullyShown;
 
@@ -30,8 +28,7 @@ public sealed class VnFeatureController : MonoBehaviour
     private bool _init;
 
     public void Initialize(
-        VnPlaybackSettings vnPlaybackSettings,
-        PresentationSessionContext sessionContext,
+        VnPlaybackRuntimeState vnPlaybackSettings,
         VNLinePresentationState yarnLineLifecycleBridge,
         EllipsisBreathTypewriter ellipsisBreathTypewriter,
         BacklogRecorder backlogRecorder,
@@ -45,7 +42,6 @@ public sealed class VnFeatureController : MonoBehaviour
             return;
 
         _vnPlaybackSettings = vnPlaybackSettings;
-        _sessionContext = sessionContext;
         _linePresentationAdvanceState = yarnLineLifecycleBridge;
         _typewriter = ellipsisBreathTypewriter;
 
@@ -74,7 +70,7 @@ public sealed class VnFeatureController : MonoBehaviour
         if (IsAuto && LineFullyShown)
             _autoAdvanceScheduler.Tick();
 
-        if (_sessionContext.IsSpeedUpMode && LineFullyShown)
+        if (_vnPlaybackSettings.IsSpeedUpMode && LineFullyShown)
             _autoAdvanceScheduler.ResetAutoAdvanceTimer();
 
         _rapidSkipController.Tick();
@@ -84,7 +80,7 @@ public sealed class VnFeatureController : MonoBehaviour
     {
         bool next = !IsAuto;
 
-        _sessionContext.SetAutoModeEnabled(next);
+        _vnPlaybackSettings.SetAutoModeEnabled(next);
 
         if (next && LineFullyShown)
             _autoAdvanceScheduler.ResetAutoAdvanceTimer();
@@ -142,7 +138,7 @@ public sealed class VnFeatureController : MonoBehaviour
 
     private void DisablePlaybackModifiersForSeek()
     {
-        _sessionContext.SetAutoModeEnabled(false);
+        _vnPlaybackSettings.SetAutoModeEnabled(false);
 
         _speedUpToggled = false;
         _speedUpHeld = false;
@@ -163,20 +159,20 @@ public sealed class VnFeatureController : MonoBehaviour
         if (speedUp)
         {
             multiplier = Mathf.Clamp(
-                _vnPlaybackSettings.speedupModeMultiplier,
-                _vnPlaybackSettings.speedupModeMinMultiplier,
-                _vnPlaybackSettings.speedupModeMaxMultiplier);
+                _vnPlaybackSettings.PlaybackSettings.speedupModeMultiplier,
+                _vnPlaybackSettings.PlaybackSettings.speedupModeMinMultiplier,
+                _vnPlaybackSettings.PlaybackSettings.speedupModeMaxMultiplier);
         }
 
-        _sessionContext.SetSpeedUpModeEnabled(speedUp);
-        _sessionContext.SetTimeScale(multiplier);
+        _vnPlaybackSettings.SetSpeedUpModeEnabled(speedUp);
+        _vnPlaybackSettings.SetTimeScale(multiplier);
 
         _typewriter.SetSpeedMultiplier(multiplier);
     }
 
     private void ApplyRapidSkipState()
     {
-        _sessionContext.SetRapidSkipModeEnabled(_rapidSkipHeld);
+        _vnPlaybackSettings.SetRapidSkipModeEnabled(_rapidSkipHeld);
         _rapidSkipController.SetHeld(_rapidSkipHeld);
     }
 }

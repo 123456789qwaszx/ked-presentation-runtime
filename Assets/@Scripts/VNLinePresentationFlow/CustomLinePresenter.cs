@@ -14,7 +14,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, IVNLineAborter
 
     private EllipsisBreathTypewriter _typewriter;
     private VNLinePresentationState _vnLinePresentationState;
-    private PresentationSessionContext _presentationSessionContext;
+    private VnPlaybackRuntimeState _vnPlaybackRuntimeState;
     private VNTraceStream _trace;
     private IYarnLaneDebugSink _debugSink;
 
@@ -41,7 +41,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, IVNLineAborter
         VNLinePresentationFlow vnLinePresentationFlow,
         EllipsisBreathTypewriter typewriter,
         VNLinePresentationState vnLinePresentationState,
-        PresentationSessionContext presentationSessionContext,
+        VnPlaybackRuntimeState vnPlaybackRuntimeState,
         VNTraceStream trace = null,
         IYarnLaneDebugSink debugSink = null)
     {
@@ -56,7 +56,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, IVNLineAborter
         _typewriter.ActionMarkupHandlers = ActionMarkupHandlers;
 
         _vnLinePresentationState = vnLinePresentationState;
-        _presentationSessionContext = presentationSessionContext;
+        _vnPlaybackRuntimeState = vnPlaybackRuntimeState;
 
         _trace = trace;
         _debugSink = debugSink;
@@ -140,7 +140,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, IVNLineAborter
     private bool ShouldFastForwardLine()
     {
         return _vnLinePresentationState.IsSeekingActive ||
-               _presentationSessionContext.IsSpeedUpMode;
+               _vnPlaybackRuntimeState.IsSpeedUpMode;
     }
 
     public void AbortCurrentVnLine()

@@ -77,7 +77,7 @@ public partial class CommandExecutor : MonoBehaviour
         int runId,
         CommandRunTicket ticket)
     {
-        scope.SetNodeBusy(true);
+        scope.SetCommandIsPlaying(true);
 
         try
         {
@@ -101,7 +101,7 @@ public partial class CommandExecutor : MonoBehaviour
                     _activeTicket = null;
             }
 
-            scope.SetNodeBusy(false);
+            scope.SetCommandIsPlaying(false);
         }
     }
 

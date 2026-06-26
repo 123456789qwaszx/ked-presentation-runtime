@@ -7,17 +7,17 @@ public class VnAppBootstrap : MonoBehaviour
     private readonly UnityInputSource _unityInputSource = new();
     private readonly UnityTimeSource _unityTimeSource = new();
     
-    private readonly VnPlaybackSettings _vnPlaybackSettings = new();
+    
+    private readonly VnPlaybackRuntimeState _playbackState = new();
     
     private readonly VnUxState _vnUxState = new();
     private readonly EpisodeSelectionStateData _episodeSelectionStateData = new();
     private readonly RollbackHistory _rollbackHistory = new();
     private readonly ChoiceHistory _choiceHistory = new();
     private readonly VNLinePresentationState _linePresentationAdvanceState = new();
-    private readonly PresentationSessionContext _presentationSessionContext = new();
     private readonly DialogueBoxCurrentState _dialogueBoxState = new();
     
-    private DialogueSurfaceState _dialogueSurfaceState = new();
+    private readonly DialogueSurfaceState _dialogueSurfaceState = new();
     
     private readonly PresentationStage _presentationStage = new();
     
@@ -296,11 +296,13 @@ public class VnAppBootstrap : MonoBehaviour
         subCommandExecutor.Initialize(factory);
         oneShotCommandExecutor.Initialize(factory);
         
+        PresentationSessionContext presentationSessionContext = new(_playbackState);
+        
         PresentationLaneScopeSession laneScopes = new(
             commandExecutor,
             subCommandExecutor,
             oneShotCommandExecutor,
-            _presentationSessionContext,
+            presentationSessionContext,
             _linePresentationAdvanceState,
             _presentationStage);
         
@@ -310,7 +312,7 @@ public class VnAppBootstrap : MonoBehaviour
         
         overlayCommandExecutor.Initialize(factory);
 
-        PresentationSessionContext overlayContext = new();
+        PresentationSessionContext overlayContext = new(_playbackState);
 
         SignalLatch overlaySignalLatch = new();
         unitySignalBus.OnSignal += overlaySignalLatch.Latch;
@@ -431,7 +433,7 @@ public class VnAppBootstrap : MonoBehaviour
             vnLinePresentationFlow,
             ellipsisBreathTypewriter,
             _linePresentationAdvanceState,
-            _presentationSessionContext,
+            _playbackState,
             trace: null,
             yarnLaneDebugView);
         
@@ -455,15 +457,14 @@ public class VnAppBootstrap : MonoBehaviour
     private void BootstrapPlaybackControls()
     {
         autoAdvanceScheduler.Initialize(
-            _vnPlaybackSettings,
+            _playbackState,
             dialogueAdvanceDispatcher,
             () => Time.unscaledTimeAsDouble);
 
         RapidSkipController rapidSkipController = new(dialogueAdvanceDispatcher);
 
         vnFeatureController.Initialize(
-            _vnPlaybackSettings,
-            _presentationSessionContext,
+            _playbackState,
             _linePresentationAdvanceState,
             ellipsisBreathTypewriter,
             _backlogRecorder,
@@ -474,7 +475,7 @@ public class VnAppBootstrap : MonoBehaviour
             _choiceHistory);
         
         AdvanceGate advanceGate = new(
-            _vnPlaybackSettings,
+            _playbackState,
             _linePresentationAdvanceState,
             presentationSessionEntry);
         

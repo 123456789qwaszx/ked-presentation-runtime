@@ -64,12 +64,12 @@ public sealed class CommandRunScope
         return duration / Math.Max(1f, TimeScale);
     }
 
-    public void SetNodeBusy(bool busy)
+    public void SetCommandIsPlaying(bool busy)
     {
         if (!_reportsNodeBusy)
             return;
 
-        _context?.SetNodeBusy(busy);
+        CommandIsPlaying = busy;
     }
     
     public void ClearRuntimeState(CleanupPolicy policy = CleanupPolicy.Cancel)
@@ -78,7 +78,7 @@ public sealed class CommandRunScope
         CleanupRun(policy);
 
         Token = CancellationToken.None;
-        SetNodeBusy(false);
+        SetCommandIsPlaying(false);
     }
 
     public void TrackStep(Action cancel, Action finish = null) => StepLifetime.Track(cancel, finish);

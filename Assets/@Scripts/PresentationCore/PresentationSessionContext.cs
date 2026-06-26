@@ -3,7 +3,7 @@ using System;
 [Serializable]
 public sealed class PresentationSessionContext
 {
-    private readonly PresentationPlaybackSettings _playback = new();
+    private VnPlaybackRuntimeState _playback;
 
     private bool _isStepCommandBusy;
     private bool _isBlockingInput;
@@ -13,69 +13,29 @@ public sealed class PresentationSessionContext
     public bool IsBlockingInput => _isBlockingInput;
     public bool CloseRequested => _closeRequested;
 
-    public bool IsAutoMode => _playback.IsAutoMode;
-    public bool IsSpeedUpMode => _playback.IsSpeedUpMode;
-    public bool IsRapidSkipMode => _playback.IsRapidSkipMode;
+    public bool IsAutoMode => _playback != null && _playback.IsAutoMode;
+    public bool IsSpeedUpMode => _playback != null && _playback.IsSpeedUpMode;
+    public bool IsRapidSkipMode => _playback != null && _playback.IsRapidSkipMode;
 
-    public float TimeScale => _playback.TimeScale;
-    public float AutoAdvanceDelay => _playback.AutoAdvanceDelay;
+    public float TimeScale => _playback != null ? _playback.TimeScale : 1f;
+    public float AutoAdvanceDelay => _playback != null ? _playback.AutoAdvanceDelay : 1.5f;
 
-    public void SetAutoModeEnabled(bool enabled)
+    public PresentationSessionContext(VnPlaybackRuntimeState playback)
     {
-        _playback.SetAutoModeEnabled(enabled);
-    }
-
-    public void SetSpeedUpModeEnabled(bool enabled)
-    {
-        _playback.SetSpeedUpModeEnabled(enabled);
-    }
-
-    public void SetRapidSkipModeEnabled(bool enabled)
-    {
-        _playback.SetRapidSkipModeEnabled(enabled);
-    }
-
-    public void SetTimeScale(float timeScale)
-    {
-        _playback.TimeScale = timeScale;
-    }
-
-    public void EnterAutoMode()
-    {
-        SetAutoModeEnabled(true);
-    }
-
-    public void ExitAutoMode()
-    {
-        SetAutoModeEnabled(false);
-    }
-
-    public void EnterSpeedUp()
-    {
-        SetSpeedUpModeEnabled(true);
-    }
-
-    public void ExitSpeedUp()
-    {
-        SetSpeedUpModeEnabled(false);
-    }
-
-    public void EnterRapidSkip()
-    {
-        SetRapidSkipModeEnabled(true);
-    }
-
-    public void ExitRapidSkip()
-    {
-        SetRapidSkipModeEnabled(false);
+        _playback = playback;
     }
 
     /// <summary>
-    /// Must be called only by the CommandRunScope to toggle busy state.
+    /// Must be called only by CommandRunScope.
     /// </summary>
-    public void SetNodeBusy(bool busy)
+    public void SetStepCommandBusy(bool busy)
     {
         _isStepCommandBusy = busy;
+    }
+
+    public void SetBlockingInput(bool blocking)
+    {
+        _isBlockingInput = blocking;
     }
 
     public void RequestClose()
@@ -88,7 +48,5 @@ public sealed class PresentationSessionContext
         _isStepCommandBusy = false;
         _isBlockingInput = false;
         _closeRequested = false;
-
-        _playback.ResetDefaults();
     }
 }
