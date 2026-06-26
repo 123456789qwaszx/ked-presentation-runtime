@@ -83,10 +83,16 @@ public static class OverlayRigSchema
             InitialCanvasGroupAlpha = 0f,
         },
 
+        // Point-based screen overlay spine.
+        // Root is full screen, but from Anchor to Rotation these nodes behave
+        // like lightweight transform points.
         new() { Id = Refs.Overlay_Anchor, Parent = Refs.Overlay_Root },
 
+        // Screen-space / overlay-space track.
+        // Unaffected by BaseRotation.
         new() { Id = Refs.Overlay_Track, Parent = Refs.Overlay_Anchor },
 
+        // Rotated movement basis root.
         new() { Id = Refs.Overlay_BaseRotation, Parent = Refs.Overlay_Track },
 
         new() { Id = Refs.Overlay_Track_Move, Parent = Refs.Overlay_BaseRotation },
@@ -95,14 +101,42 @@ public static class OverlayRigSchema
         new() { Id = Refs.Overlay_Track_Y, Parent = Refs.Overlay_Track_X_Offset },
         new() { Id = Refs.Overlay_Track_Y_Offset, Parent = Refs.Overlay_Track_Y },
 
+        // Final visual rotation.
+        // This does not affect Track_Move / Track_X / Track_Y movement direction.
         new() { Id = Refs.Overlay_Rotation, Parent = Refs.Overlay_Track_Y_Offset },
 
+        // Explicit content rect.
+        // This is not StretchFull. Commands or setup operations decide its size.
         new() { Id = Refs.Overlay_Size, Parent = Refs.Overlay_Rotation },
-        new() { Id = Refs.Overlay_Scale, Parent = Refs.Overlay_Size },
 
-        new() { Id = Refs.Overlay_ActingScale, Parent = Refs.Overlay_Scale },
-        new() { Id = Refs.Overlay_ActingScale_X, Parent = Refs.Overlay_ActingScale },
-        new() { Id = Refs.Overlay_ActingScale_Y, Parent = Refs.Overlay_ActingScale_X },
+        // From here downward, the rig should inherit Overlay_Size's rect.
+        new()
+        {
+            Id = Refs.Overlay_Scale,
+            Parent = Refs.Overlay_Size,
+            StretchFull = true,
+        },
+
+        new()
+        {
+            Id = Refs.Overlay_ActingScale,
+            Parent = Refs.Overlay_Scale,
+            StretchFull = true,
+        },
+
+        new()
+        {
+            Id = Refs.Overlay_ActingScale_X,
+            Parent = Refs.Overlay_ActingScale,
+            StretchFull = true,
+        },
+
+        new()
+        {
+            Id = Refs.Overlay_ActingScale_Y,
+            Parent = Refs.Overlay_ActingScale_X,
+            StretchFull = true,
+        },
 
         new()
         {
