@@ -12,6 +12,7 @@ public sealed class CommandRunScope
     
     public CharacterRigRegistry CharacterRigs => _stage.characterRigs;
     public BackgroundRigRegistry BackgroundRigs => _stage.backgroundRigs;
+    public SpriteImageRegistry SpriteImages => _stage.spriteImages;
     public CastRegistry CastRegistry => _stage.castRegistry;
 
     public CharacterRigTargetAliasRegistry CharacterTargetAliases => _stage.characterTargetAliases;
