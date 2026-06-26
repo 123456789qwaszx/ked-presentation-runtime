@@ -1,11 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public interface ICommandRunScopeProvider
-{
-    CommandRunScope CurrentScope { get; }
-}
-
 public sealed class YarnBridgePlaybackDriver : MonoBehaviour
 {
     private CommandExecutor _executor;

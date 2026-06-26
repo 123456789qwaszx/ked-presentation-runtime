@@ -1,9 +1,26 @@
+public interface ICommandRunScopeProvider
+{
+    CommandRunScope CurrentScope { get; }
+}
+
+public sealed class SubPresentationScopeProvider : ICommandRunScopeProvider
+{
+    private readonly PresentationLaneScopeSession _laneScopeSession;
+
+    public SubPresentationScopeProvider(PresentationLaneScopeSession entry)
+    {
+        _laneScopeSession = entry;
+    }
+
+    public CommandRunScope CurrentScope => _laneScopeSession.SubScope;
+}
+
 // Yarn 메인 흐름이 PresentationSession으로부터 실제로 빌려 쓰는 것은
 // "세 레인의 CommandRunScope를 만들고(Start), 멈추고 정리하는(End)" 생애주기뿐이다.
 // Node/Step Gate 진행(Tick/PlayStep/StepGatePlanBuilder/StepGateAdvancer)은
 // SequenceSpecSO를 직접 재생하는 PresentationSession(OverlaySequenceRunner 등)의 책임이며,
 // Yarn 메인 흐름은 여기에 의존하지 않는다.
-public sealed class PresentationLaneScopeSession
+public sealed class PresentationLaneScopeSession : ICommandRunScopeProvider
 {
     private readonly PresentationSessionContext _context;
     private readonly VNLinePresentationState _linePresentationAdvanceState;
@@ -42,9 +59,6 @@ public sealed class PresentationLaneScopeSession
 
     public void Start()
     {
-        if (IsRunning)
-            EndImmediately();
-
         _sessionScope = new CommandRunScope(_context, _linePresentationAdvanceState, _stage);
         _subScope = new CommandRunScope(_context, _linePresentationAdvanceState, _stage, reportsNodeBusy: false);
         _subOneShotScope = new CommandRunScope(_context, _linePresentationAdvanceState, _stage, reportsNodeBusy: false);
@@ -52,9 +66,7 @@ public sealed class PresentationLaneScopeSession
         _context.ResetSessionFlagsForStart();
     }
 
-    public void EndImmediately() => End();
-
-    private void End()
+    public void End()
     {
         _executor.Stop(CleanupPolicy.Cancel);
         _subExecutor?.Stop(CleanupPolicy.Cancel);

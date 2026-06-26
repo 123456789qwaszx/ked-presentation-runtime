@@ -11,14 +11,13 @@ public sealed class EpisodePlayer : MonoBehaviour
     private BacklogRecorder _backlogRecorder;
     private VNSideRunnerSyncHub _sideRunnerSyncHub;
     private PresentationShotResponseSystem _presentationResponseRig;
+    private PresentationLaneScopeSession _presentationLaneScopeSession;
 
     [Header("Yarn")]
     [SerializeField] private DialogueRunner dialogueRunner;
     [SerializeField] private DialogueRunner subPresentationRunner;
     [SerializeField] private DialogueRunner oneShotRunner;
 
-    [Header("Presentation")]
-    [SerializeField] private PresentationSessionEntry presentationRouteEntry;
 
     [Header("Entry Keys")]
     [SerializeField] private string yarnEntryKey;
@@ -41,7 +40,8 @@ public sealed class EpisodePlayer : MonoBehaviour
         IVNLineAborter linePresentationAborter,
         BacklogRecorder backlogRecorder,
         VNSideRunnerSyncHub sideRunnerSyncHub,
-        PresentationShotResponseSystem presentationResponseRig)
+        PresentationShotResponseSystem presentationResponseRig,
+        PresentationLaneScopeSession presentationLaneScopeSession)
     {
         _vnScreenBindings = vnScreenBindings;
         _nodeRollbackHistory = nodeRollbackHistory;
@@ -49,6 +49,7 @@ public sealed class EpisodePlayer : MonoBehaviour
         _backlogRecorder = backlogRecorder;
         _sideRunnerSyncHub = sideRunnerSyncHub;
         _presentationResponseRig = presentationResponseRig;
+        _presentationLaneScopeSession = presentationLaneScopeSession;
     }
 
     private void Update()
@@ -88,7 +89,8 @@ public sealed class EpisodePlayer : MonoBehaviour
         }
 
         _vnScreenBindings.GoToPresentationView();
-        presentationRouteEntry.RestartRoute();
+        _presentationLaneScopeSession.ClearStage();
+        _presentationLaneScopeSession.Start();
 
         YarnTask startTask = dialogueRunner.StartDialogue(nodeName);
         yield return WaitForYarnTask(startTask);
@@ -117,7 +119,7 @@ public sealed class EpisodePlayer : MonoBehaviour
         _linePresentationAborter?.AbortCurrentVnLine();
         
         _presentationResponseRig.Clear();
-        presentationRouteEntry.EndRouteNow();
+        _presentationLaneScopeSession.End();
     }
 
     private async YarnTask StopYarnRunnersAsync()

@@ -7,7 +7,6 @@ public class VnAppBootstrap : MonoBehaviour
     private readonly UnityInputSource _unityInputSource = new();
     private readonly UnityTimeSource _unityTimeSource = new();
     
-    
     private readonly VnPlaybackRuntimeState _playbackState = new();
     
     private readonly VnUxState _vnUxState = new();
@@ -70,12 +69,6 @@ public class VnAppBootstrap : MonoBehaviour
     [SerializeField] private CommandExecutor oneShotCommandExecutor;
     [SerializeField] private YarnBridgePlaybackDriver oneShotYarnBridgePlaybackDriver;
     
-
-    [Header("PresentationEntry")] 
-    //[SerializeField] private RouteCatalogSO routeCatalogSo;
-    [SerializeField] private PresentationSessionEntry presentationSessionEntry;
-
-
     [Header("Yarn")] 
     [SerializeField] private DialogueRunner dialogueRunner;
     [SerializeField] private DialogueRunner subPresentationRunner;
@@ -151,6 +144,7 @@ public class VnAppBootstrap : MonoBehaviour
     
     private VNRuntimeStateProvider _vnRuntimeStateProvider;
     private PresentationShotResponseSystem _presentationResponseRig;
+    private PresentationLaneScopeSession _presentationLaneScopeSession;
     
     
     private void Awake()
@@ -298,17 +292,13 @@ public class VnAppBootstrap : MonoBehaviour
         
         PresentationSessionContext presentationSessionContext = new(_playbackState);
         
-        PresentationLaneScopeSession laneScopes = new(
+        _presentationLaneScopeSession = new(
             commandExecutor,
             subCommandExecutor,
             oneShotCommandExecutor,
             presentationSessionContext,
             _linePresentationAdvanceState,
             _presentationStage);
-        
-        presentationSessionEntry.Initialize(
-            laneScopes);
-        
         
         overlayCommandExecutor.Initialize(factory);
 
@@ -357,9 +347,9 @@ public class VnAppBootstrap : MonoBehaviour
     
     private void BootstrapYarn()
     {
-        mainYarnBridgePlaybackDriver.Initialize(commandExecutor, presentationSessionEntry);
-        subYarnBridgePlaybackDriver.Initialize(subCommandExecutor, new SubPresentationScopeProvider(presentationSessionEntry));
-        oneShotYarnBridgePlaybackDriver.Initialize(oneShotCommandExecutor, presentationSessionEntry);
+        mainYarnBridgePlaybackDriver.Initialize(commandExecutor, _presentationLaneScopeSession);
+        subYarnBridgePlaybackDriver.Initialize(subCommandExecutor, new SubPresentationScopeProvider(_presentationLaneScopeSession));
+        oneShotYarnBridgePlaybackDriver.Initialize(oneShotCommandExecutor, _presentationLaneScopeSession);
 
         _vnSideRunnerSyncHub.Initialize(subPresentationRunner);
 
@@ -477,7 +467,7 @@ public class VnAppBootstrap : MonoBehaviour
         AdvanceGate advanceGate = new(
             _playbackState,
             _linePresentationAdvanceState,
-            presentationSessionEntry);
+            _presentationLaneScopeSession);
         
         VnAdvanceInputBindings vnAdvanceInputBindings = new();
 
@@ -542,8 +532,8 @@ public class VnAppBootstrap : MonoBehaviour
             customLinePresenter,
             _backlogRecorder,
             _vnSideRunnerSyncHub,
-            _presentationResponseRig
-            );
+            _presentationResponseRig,
+            _presentationLaneScopeSession);
     }
     
     private void BootstrapScreenBindings()

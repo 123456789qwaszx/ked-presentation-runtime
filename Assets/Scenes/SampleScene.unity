@@ -7894,7 +7894,6 @@ Transform:
   - {fileID: 7985477256251313780}
   - {fileID: 3741609527537220520}
   - {fileID: 552181529}
-  - {fileID: 1433866632}
   - {fileID: 1315566988}
   - {fileID: 307625744}
   - {fileID: 451477691}
@@ -7941,7 +7940,6 @@ MonoBehaviour:
   subYarnBridgePlaybackDriver: {fileID: 2117089917}
   oneShotCommandExecutor: {fileID: 120896623}
   oneShotYarnBridgePlaybackDriver: {fileID: 850452611}
-  presentationSessionEntry: {fileID: 1433866633}
   dialogueRunner: {fileID: 8309902628538800288}
   subPresentationRunner: {fileID: 8309902628667094135}
   subOneShotRunner: {fileID: 3345179612585509291}
@@ -10887,21 +10885,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ed44926351ce81f41bd0f46c2700a97e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VnFeatureController
-  _vnPlaybackSettings:
-    speedupModeMultiplier: 12
-    speedupModeMinMultiplier: 2
-    speedupModeMaxMultiplier: 32
-    speedupAdvanceRateLimitSec: 0.05
-    speedupCooldownAfterHurryUpSec: 0.04
-    speedupCooldownAfterNextLineSec: 0.05
-    rapidSkipAdvanceRateLimitSec: 0.04
-    rapidSkipCooldownAfterHurryUpSec: 0.04
-    rapidSkipCooldownAfterNextLineSec: 0.04
-    autoModeDelaySeconds: 1.5
-    autoAdvanceRateLimitSec: 0.13
-    userAdvanceCooldownSec: 0.13
-    cooldownAfterHurryUpSec: 0.28
-    cooldownAfterNextLineSec: 0
 --- !u!4 &775605348
 Transform:
   m_ObjectHideFlags: 0
@@ -19082,50 +19065,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1433833494}
   m_CullTransparentMesh: 1
---- !u!1 &1433866631
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1433866632}
-  - component: {fileID: 1433866633}
-  m_Layer: 0
-  m_Name: PresentationSessionEntry
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1433866632
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1433866631}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -271.8101, y: -90.016785, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 596868909}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1433866633
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1433866631}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 95b338b669d2b774ab39adb42f94550e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CpsRouteEntry
 --- !u!1 &1448341557
 GameObject:
   m_ObjectHideFlags: 0
@@ -26109,7 +26048,6 @@ MonoBehaviour:
   dialogueRunner: {fileID: 8309902628538800288}
   subPresentationRunner: {fileID: 8309902628667094135}
   oneShotRunner: {fileID: 3345179612585509291}
-  presentationRouteEntry: {fileID: 1433866633}
   yarnEntryKey: Story_StellaEvent01_01
   runYarnKey: 50
 --- !u!4 &1924806293
