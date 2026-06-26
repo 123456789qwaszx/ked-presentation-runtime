@@ -50,7 +50,7 @@ public sealed class AdvanceGate
             return Reject(kind, "seek_active");
 
         if (kind != AdvanceRequestKind.RapidSkip)
-            if (CurrentScope != null && CurrentScope.IsNodeBusy)
+            if (CurrentScope != null && CurrentScope.CommandIsPlaying)
                 return Reject(kind, "cps_node_busy");
         
         double unscaledNow = Time.unscaledTimeAsDouble;

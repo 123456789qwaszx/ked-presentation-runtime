@@ -5,11 +5,11 @@ public sealed class PresentationSessionContext
 {
     private readonly PresentationPlaybackSettings _playback = new();
 
-    private bool _isNodeBusy;
+    private bool _isStepCommandBusy;
     private bool _isBlockingInput;
     private bool _closeRequested;
 
-    public bool IsNodeBusy => _isNodeBusy;
+    public bool IsStepCommandBusy => _isStepCommandBusy;
     public bool IsBlockingInput => _isBlockingInput;
     public bool CloseRequested => _closeRequested;
 
@@ -75,7 +75,7 @@ public sealed class PresentationSessionContext
     /// </summary>
     public void SetNodeBusy(bool busy)
     {
-        _isNodeBusy = busy;
+        _isStepCommandBusy = busy;
     }
 
     public void RequestClose()
@@ -85,7 +85,7 @@ public sealed class PresentationSessionContext
 
     public void ResetSessionFlagsForStart()
     {
-        _isNodeBusy = false;
+        _isStepCommandBusy = false;
         _isBlockingInput = false;
         _closeRequested = false;
 

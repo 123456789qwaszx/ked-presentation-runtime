@@ -43,8 +43,9 @@ public sealed class CommandRunScope
     public bool IsAutoMode => _context != null && _context.IsAutoMode;
 
     public float TimeScale => _context != null ? _context.TimeScale : 1f;
-    public bool IsNodeBusy => _context != null && _context.IsNodeBusy;
     
+    public bool CommandIsPlaying { get; set; }
+
     public bool IsSeekPassThrough =>
         _linePresentationAdvanceState != null &&
         _linePresentationAdvanceState.IsSeekingActive;

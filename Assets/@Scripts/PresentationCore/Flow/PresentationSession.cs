@@ -46,14 +46,6 @@ public sealed class PresentationSession
         _stage = presentationStage;
     }
 
-    public bool IsNodeBusy()
-    {
-        if (!IsRunning)
-            return false;
-
-        return _scope.IsNodeBusy;
-    }
-
     public void Play(SequenceSpecSO sequence)
     {
         if (sequence == null)

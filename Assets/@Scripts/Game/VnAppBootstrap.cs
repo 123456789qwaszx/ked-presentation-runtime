@@ -214,13 +214,6 @@ public class VnAppBootstrap : MonoBehaviour
         SignalLatch signalLatch = new();
         unitySignalBus.OnSignal += signalLatch.Latch;
 
-        StepGatePlanBuilder gatePlanner = new();
-        StepGateAdvancer gateAdvancer = new(
-            _unityInputSource,
-            _unityTimeSource,
-            unitySignalBus,
-            signalLatch);
-
         // Signal / Timing
         SignalCommandFactory signalFactory = new(
             _unityTimeSource,
@@ -303,16 +296,6 @@ public class VnAppBootstrap : MonoBehaviour
         subCommandExecutor.Initialize(factory);
         oneShotCommandExecutor.Initialize(factory);
         
-        // PresentationSession presentationSession = new(
-        //     gatePlanner,
-        //     gateAdvancer,
-        //     commandExecutor,
-        //     subCommandExecutor,
-        //     oneShotCommandExecutor,
-        //     _presentationSessionContext,
-        //     _linePresentationAdvanceState,
-        //     _presentationStage);
-        
         PresentationLaneScopeSession laneScopes = new(
             commandExecutor,
             subCommandExecutor,
@@ -323,8 +306,6 @@ public class VnAppBootstrap : MonoBehaviour
         
         presentationSessionEntry.Initialize(
             laneScopes);
-        
-        
         
         
         overlayCommandExecutor.Initialize(factory);
