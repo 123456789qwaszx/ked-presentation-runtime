@@ -20,6 +20,7 @@ MonoBehaviour:
       compiled:
       - rid: 5301155771391934527
       - rid: 5301155771391934528
+      - rid: 7153598061717225533
       gate:
         type: 3
         seconds: 0
@@ -128,7 +129,9 @@ MonoBehaviour:
         wait: 0
         roleKey: sub
         rigPrefab: {fileID: 0}
-        parentSlot: 0
+        stage: 0
+        layer: 2
+        useProtagonistSlot: 0
         rigRootName: CharacterRig
     - rid: 5301155771391934528
       type: {class: SetAnchorCommandSpecCharR, ns: , asm: Assembly-CSharp}
@@ -147,7 +150,9 @@ MonoBehaviour:
         wait: 0
         roleKey: sub
         rigPrefab: {fileID: 0}
-        parentSlot: 0
+        stage: 0
+        layer: 2
+        useProtagonistSlot: 0
         rigRootName: CharacterRig
     - rid: 5301155771391934530
       type: {class: CastCharacterCommandSpec, ns: , asm: Assembly-CSharp}
@@ -155,7 +160,6 @@ MonoBehaviour:
         wait: 0
         slotKey: 
         characterKey: 
-        variantKey: 
     - rid: 5301155771391934532
       type: {class: SetPortraitSpriteCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:
@@ -168,13 +172,25 @@ MonoBehaviour:
         target: 10
         sizingMode: 1
         horizontalAlign: 1
+    - rid: 7153598061717225533
+      type: {class: OverlayMoveCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        wait: 0
+        rigKey: 
+        target: 2
+        useAbsolutePosition: 1
+        delta: {x: 0, y: 0}
+        duration: 0
+        ease: 9
     - rid: 8483491179373002942
       type: {class: SetupCharRigCommandSpec, ns: , asm: Assembly-CSharp}
       data:
         wait: 0
         roleKey: sub
         rigPrefab: {fileID: 8529412948266249186, guid: 01c9b93a77829ef438fc74c4ef4c5004, type: 3}
-        parentSlot: 0
+        stage: 0
+        layer: 2
+        useProtagonistSlot: 0
         rigRootName: CharacterRig
     - rid: 8483491179373002944
       type: {class: SetPortraitSpriteCommandSpecCharR, ns: , asm: Assembly-CSharp}
@@ -193,25 +209,23 @@ MonoBehaviour:
       data:
         wait: 0
         slotKey: 
-        targetMask: 5
+        target: 12
         duration: 0.47
         ease: 9
-        EnableInteraction: 1
     - rid: 8483491179373002946
       type: {class: MoveByCommandSpecCharR, ns: , asm: Assembly-CSharp}
       data:
         wait: 0
         slotKey: 
         target: 1
+        useAbsolutePosition: 0
         delta: {x: 200, y: 0}
         duration: 0.4
         ease: 9
-        killTween: 1
     - rid: 8483491315577782332
       type: {class: UIPatchCommandSpec, ns: , asm: Assembly-CSharp}
       data:
         wait: 1
-        targetKind: 0
         themeId: theme1
         localeId: ko-KR
     - rid: 8483491315577782333
@@ -225,7 +239,6 @@ MonoBehaviour:
       type: {class: UIPatchCommandSpec, ns: , asm: Assembly-CSharp}
       data:
         wait: 1
-        targetKind: 0
         themeId: theme1
         localeId: ko-KR
     - rid: 8483491315577782335
@@ -245,14 +258,12 @@ MonoBehaviour:
       type: {class: UIPatchCommandSpec, ns: , asm: Assembly-CSharp}
       data:
         wait: 1
-        targetKind: 0
         themeId: black
         localeId: ko-KR
     - rid: 8483491315577782340
       type: {class: UIPatchCommandSpec, ns: , asm: Assembly-CSharp}
       data:
         wait: 1
-        targetKind: 0
         themeId: theme1
         localeId: ko-KR
     - rid: 8483491315577782341
@@ -272,6 +283,5 @@ MonoBehaviour:
       type: {class: UIPatchCommandSpec, ns: , asm: Assembly-CSharp}
       data:
         wait: 1
-        targetKind: 0
         themeId: black
         localeId: ko-KR

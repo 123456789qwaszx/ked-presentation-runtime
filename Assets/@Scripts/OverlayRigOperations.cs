@@ -32,6 +32,80 @@ public static class OverlayRigOperations
 
         refs.Overlay_Text.text = text ?? string.Empty;
     }
+    
+    public static void SetRootAlphaImmediate(
+        this OverlayRigRefs refs,
+        float alpha)
+    {
+        if (refs?.Overlay_RootCanvasGroup == null)
+            return;
+
+        refs.Overlay_RootCanvasGroup.alpha = alpha;
+        refs.Overlay_RootCanvasGroup.interactable = false;
+        refs.Overlay_RootCanvasGroup.blocksRaycasts = false;
+    }
+
+    public static void SetAnchoredPositionImmediate(
+        this OverlayRigRefs refs,
+        OverlayRigTarget target,
+        Vector2 position)
+    {
+        RectTransform rt = refs.GetRect(target);
+
+        if (rt == null)
+            return;
+
+        rt.anchoredPosition = position;
+    }
+
+    public static void SetSizeDeltaImmediate(
+        this OverlayRigRefs refs,
+        OverlayRigTarget target,
+        Vector2 sizeDelta)
+    {
+        RectTransform rt = refs.GetRect(target);
+
+        if (rt == null)
+            return;
+
+        rt.sizeDelta = sizeDelta;
+    }
+
+    public static void SetLocalScaleImmediate(
+        this OverlayRigRefs refs,
+        OverlayRigTarget target,
+        Vector3 scale)
+    {
+        RectTransform rt = refs.GetRect(target);
+
+        if (rt == null)
+            return;
+
+        rt.localScale = scale;
+    }
+
+    public static void KillTween(
+        this OverlayRigRefs refs,
+        OverlayRigTarget target,
+        bool complete)
+    {
+        RectTransform rt = refs.GetRect(target);
+
+        if (rt == null)
+            return;
+
+        rt.DOKill(complete);
+    }
+
+    public static void KillRootCanvasTween(
+        this OverlayRigRefs refs,
+        bool complete)
+    {
+        if (refs?.Overlay_RootCanvasGroup == null)
+            return;
+
+        refs.Overlay_RootCanvasGroup.DOKill(complete);
+    }
 
     public static void SetVisibleImmediate(
         this OverlayRigRefs refs,

@@ -34,7 +34,14 @@ title: Story_StellaEvent01_01
 <<fade_in  @1>>
 <<slide_in @1>>
 
-<<overlay_rig o1>>
+<<sprite_rig cutin>>
+<<overlay_size cutin 600 180>>
+<<overlay_move cutin 0 160>>
+<<overlay_scale cutin 1 1>>
+
+<<overlay_move_by cutin 80 0 8fr>>
+<<overlay_size_by cutin 40 20 8fr>>
+<<overlay_scale_by cutin 1.2 1.2 8fr>>
 
 하늘이 뚫린 듯 비가 쏟아지는 밤이었다. 칠흑 같은 파도가 너울대는 바다를 멍하니 바라보던 중, [br/]순간 연한 녹색 빛이 수면 위로 올라오는 게 보였다.
 

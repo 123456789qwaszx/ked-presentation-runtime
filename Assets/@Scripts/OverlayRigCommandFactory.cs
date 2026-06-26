@@ -1,5 +1,3 @@
-using UnityEngine;
-
 public sealed class OverlayRigCommandFactory : INodeCommandFactory
 {
     private readonly StageOverlayRigSlotResolver _slotResolver;
@@ -19,11 +17,18 @@ public sealed class OverlayRigCommandFactory : INodeCommandFactory
         {
             null => null,
 
-            // Setup
             SetupOverlayRigCommandSpec s => new SetupOverlayRigCommand(
                 _slotResolver,
                 _builder,
                 s),
+
+            OverlayMoveCommandSpec s => new OverlayMoveCommand(s),
+            OverlaySizeCommandSpec s => new OverlaySizeCommand(s),
+            OverlayScaleCommandSpec s => new OverlayScaleCommand(s),
+            OverlayShowCommandSpec s => new OverlayShowCommand(s),
+            OverlayHideCommandSpec s => new OverlayHideCommand(s),
+            OverlaySpriteCommandSpec s => new OverlaySpriteCommand(s),
+            OverlayTextCommandSpec s => new OverlayTextCommand(s),
 
             _ => null
         };

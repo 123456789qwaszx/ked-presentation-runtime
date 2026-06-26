@@ -17,7 +17,11 @@ MonoBehaviour:
   - editorName: 
     steps:
     - editorName: 
-      compiled: []
+      compiled:
+      - rid: 7153598061717225534
+      - rid: 7153598061717225535
+      - rid: 7153598061717225536
+      - rid: 7153598061717225537
       gate:
         type: 3
         seconds: 0
@@ -50,4 +54,40 @@ MonoBehaviour:
         signalKey: beat
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: 7153598061717225534
+      type: {class: SetupOverlayRigCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        wait: 0
+        overlayKey: o2o2
+        rootKind: 0
+        sprite: {fileID: 0}
+        setNativeSize: 1
+        text: 
+        prefab: {fileID: 0}
+        rootName: OverlayRig
+    - rid: 7153598061717225535
+      type: {class: OverlaySpriteCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        wait: 0
+        rigKey: o2o2
+        sprite: {fileID: 21300000, guid: 9cb37221d55af5a46a5a4c06d8537a9e, type: 3}
+        resourcesPath: 
+        setNativeSize: 1
+    - rid: 7153598061717225536
+      type: {class: OverlaySizeCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        wait: 0
+        rigKey: o2o2
+        target: 10
+        relativeToCurrent: 0
+        sizeDelta: {x: 200, y: 300}
+        duration: 0
+        ease: 9
+    - rid: 7153598061717225537
+      type: {class: OverlayShowCommandSpec, ns: , asm: Assembly-CSharp}
+      data:
+        wait: 1
+        rigKey: o2o2
+        duration: 3
+        ease: 9
