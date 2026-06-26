@@ -27,7 +27,7 @@ public sealed class OverlaySequenceRunner : MonoBehaviour
         }
 
         // Route는 디버그 표기용 메타데이터일 뿐, 실제로 무엇을 resolve하지 않는다.
-        _session.Start(default, sequence);
+        _session.Play(sequence);
     }
 
     public void PlayByKey(string sequenceKey, SequenceCatalogSO catalog)

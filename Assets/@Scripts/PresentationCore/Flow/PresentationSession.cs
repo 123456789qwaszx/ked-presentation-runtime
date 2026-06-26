@@ -1,54 +1,39 @@
-// PresentationSession is the sole owner of dialogue time progression.
-// All other components may report state or perform execution,
-// but only Tick() is allowed to advance steps or nodes.
+using System;
 
-using System.Collections.Generic;
-using UnityEngine;
+public enum PresentationPointerEndReason
+{
+    Completed,
+    Cancelled
+}
 
+// 완성도 높은 특정 연출(컷인 등)을 재생하는 "포인터" 전용 엔진.
+// 단일 소유자: Play()가 다시 호출되면 진행 중인 이전 재생은 강제 종료(Cancel).
+// 자연 종료(시퀀스 끝에 도달)는 Finish로 정리되어 OnStepLifetimeFinished/
+// OnRunLifetimeFinished를 통한 최종 상태 커밋을 보장.
 public sealed class PresentationSession
 {
-    // ---- Dependencies (injected) ----
     private readonly StepGatePlanBuilder _gatePlanner;
     private readonly StepGateAdvancer _gateAdvancer;
     private readonly CommandExecutor _executor;
-    private readonly CommandExecutor _subExecutor;
-    private readonly CommandExecutor _subOneShotExecutor;
-    
-    // ---- Session-owned context ----
+
     private readonly PresentationSessionContext _context;
     private readonly VNLinePresentationState _linePresentationAdvanceState;
-    private PresentationStage _stage;
-    
-    // ---- CommandRunScope (per-Lane) ----
-    private CommandRunScope _sessionScope;
-    public CommandRunScope CurrentScope => _sessionScope;
-    
-    private CommandRunScope _subScope;
-    public CommandRunScope SubScope => _subScope;
-    
-    private CommandRunScope _subOneShotScope;
-    public  CommandRunScope SubOneShotScope => _subOneShotScope;
-    
-    // ---- Runtime state ----
+    private readonly PresentationStage _stage;
+
+    private CommandRunScope _scope;
     private SequenceProgressState _state;
     private SequenceSpecSO _sequence;
-    
-    public bool IsRunning => _sequence != null && _state != null && _sessionScope != null;
 
-    public bool IsNodeBusy()
-    {
-        if (!IsRunning)
-            return false;
-        
-        return _sessionScope.IsNodeBusy;;
-    }
-    
+    public CommandRunScope CurrentScope => _scope;
+
+    public bool IsRunning => _sequence != null && _state != null && _scope != null;
+
+    public event Action<PresentationPointerEndReason> Ended;
+
     public PresentationSession(
         StepGatePlanBuilder gatePlanner,
         StepGateAdvancer gateAdvancer,
         CommandExecutor executor,
-        CommandExecutor subExecutor,
-        CommandExecutor subOneShotExecutor,
         PresentationSessionContext presentationSessionContext,
         VNLinePresentationState linePresentationAdvanceState,
         PresentationStage presentationStage)
@@ -56,14 +41,20 @@ public sealed class PresentationSession
         _gatePlanner = gatePlanner;
         _gateAdvancer = gateAdvancer;
         _executor = executor;
-        _subExecutor = subExecutor;
-        _subOneShotExecutor = subOneShotExecutor;
         _context = presentationSessionContext;
         _linePresentationAdvanceState = linePresentationAdvanceState;
         _stage = presentationStage;
     }
-    
-    public void Start(Route route, SequenceSpecSO sequence)
+
+    public bool IsNodeBusy()
+    {
+        if (!IsRunning)
+            return false;
+
+        return _scope.IsNodeBusy;
+    }
+
+    public void Play(SequenceSpecSO sequence)
     {
         if (sequence == null)
             return;
@@ -71,34 +62,25 @@ public sealed class PresentationSession
         if (IsRunning)
             EndImmediately();
 
-        _gateAdvancer.ClearLatchedSignals();
-        //_executor.Stop();
-        
-        _state = new SequenceProgressState(route);
+        _state = new SequenceProgressState();
         _sequence = sequence;
-        _sessionScope = new CommandRunScope(_context, _linePresentationAdvanceState, _stage);
-        _subScope = new CommandRunScope(_context, _linePresentationAdvanceState, _stage, reportsNodeBusy: false);
-        _subOneShotScope = new CommandRunScope(_context, _linePresentationAdvanceState, _stage, reportsNodeBusy: false);
-        
+        _scope = new CommandRunScope(_context, _linePresentationAdvanceState, _stage);
+
         _context.ResetSessionFlagsForStart();
-        
+
         _gatePlanner.BuildForCurrentNode(_sequence, _state);
-        
-        PlayStep(
-            nodeIndex: _state.NodeIndex,
-            stepIndex: _state.StepGate.Cursor);
-        
-        // if (TryApplyDebugStartStepName())
-        //     return;
+
+        PlayStep(_state.NodeIndex, _state.StepGate.Cursor);
     }
 
     public void Tick()
     {
-        if (_sequence == null || _state == null) return;
-        
-        if (_context == null || _context.CloseRequested)
+        if (!IsRunning)
+            return;
+
+        if (_context != null && _context.CloseRequested)
         {
-            End();
+            EndImmediately();
             return;
         }
 
@@ -107,82 +89,72 @@ public sealed class PresentationSession
             bool advanced = _gateAdvancer.TryAdvanceStepGate(_state, _context);
             if (!advanced)
                 break;
-            
+
             if (_state.IsNodeCompleted)
             {
-                // ---- Node boundary ----
                 _state.NodeIndex++;
-                int nextNodeIndex = _state.NodeIndex;
 
-                // if (_state.NodeIndex >= _sequence.nodes.Count)
-                // {
-                //     End();
-                //     return;
-                // }
-
-                if (_context == null || _context.CloseRequested)
+                if (_state.NodeIndex >= _sequence.nodes.Count)
                 {
-                    End();
+                    Complete();
+                    return;
+                }
+
+                if (_context != null && _context.CloseRequested)
+                {
+                    EndImmediately();
                     return;
                 }
 
                 _gateAdvancer.ClearLatchedSignals();
                 _gatePlanner.BuildForCurrentNode(_sequence, _state);
 
-                int firstStep = _state.StepGate.Cursor;
-                PlayStep(nextNodeIndex, firstStep);
+                PlayStep(_state.NodeIndex, _state.StepGate.Cursor);
                 return;
             }
 
-            // ---- Step boundary ----
             int currentNodeIndex = _state.NodeIndex;
             int currentStep = _state.StepGate.Cursor;
             PlayStep(currentNodeIndex, currentStep);
-        } 
+        }
     }
-    
-    public void RequestEnd()
-    {
-        _context.RequestClose();
-    }
+
+    public void RequestEnd() => _context?.RequestClose();
 
     public void EndImmediately()
     {
-        End();
-    }
-    
-    
-    private void PlayStep(int nodeIndex, int stepIndex)
-    {
-        if (nodeIndex < 0 || nodeIndex >= _sequence.nodes.Count) return;
+        if (!IsRunning)
+            return;
 
-        NodeSpec node = _sequence.nodes[nodeIndex];
-        _executor.PlayStep(node, stepIndex, _sessionScope);
+        Stop(CleanupPolicy.Cancel);
+        Ended?.Invoke(PresentationPointerEndReason.Cancelled);
     }
-    
-    private void End()
+
+    private void Complete()
+    {
+        Stop(CleanupPolicy.Finish);
+        Ended?.Invoke(PresentationPointerEndReason.Completed);
+    }
+
+    private void Stop(CleanupPolicy policy)
     {
         _gateAdvancer.ClearLatchedSignals();
-        
-        _executor.Stop(CleanupPolicy.Cancel); // clear the session scope. 실행 중인 커맨드 정지
-        _subExecutor?.Stop(CleanupPolicy.Cancel);    // 서브 레인 정지/정리
-        _subOneShotExecutor?.Stop(CleanupPolicy.Cancel);
-        
-        //_stage?.Clear(); // 두 레인 모두 멈춘 뒤 공유 무대 파괴
-        
-        _sessionScope = null;
-        _subScope = null;
-        _subOneShotScope = null;
-        
+        _executor.Stop(policy);
+
+        _scope = null;
         _sequence = null;
         _state = null;
     }
 
-    public void ClearStage()
+    private void PlayStep(int nodeIndex, int stepIndex)
     {
-        _stage?.Clear(); // 두 레인 모두 멈춘 뒤 공유 무대 파괴
-    }
+        if (nodeIndex < 0 || nodeIndex >= _sequence.nodes.Count)
+            return;
 
+        NodeSpec node = _sequence.nodes[nodeIndex];
+        _executor.PlayStep(node, stepIndex, _scope);
+    }
+    
     // #region Editor
     // private bool TryApplyDebugStartStepName()
     // {

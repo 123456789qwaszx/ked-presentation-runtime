@@ -7941,7 +7941,6 @@ MonoBehaviour:
   subYarnBridgePlaybackDriver: {fileID: 2117089917}
   oneShotCommandExecutor: {fileID: 120896623}
   oneShotYarnBridgePlaybackDriver: {fileID: 850452611}
-  routeCatalogSo: {fileID: 11400000, guid: 0a509c33b083b264c8262b318a84b25f, type: 2}
   presentationSessionEntry: {fileID: 1433866633}
   dialogueRunner: {fileID: 8309902628538800288}
   subPresentationRunner: {fileID: 8309902628667094135}
@@ -26112,7 +26111,6 @@ MonoBehaviour:
   oneShotRunner: {fileID: 3345179612585509291}
   presentationRouteEntry: {fileID: 1433866633}
   yarnEntryKey: Story_StellaEvent01_01
-  presentationEntryKey: emo
   runYarnKey: 50
 --- !u!4 &1924806293
 Transform:

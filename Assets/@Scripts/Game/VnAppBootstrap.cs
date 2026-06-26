@@ -72,7 +72,7 @@ public class VnAppBootstrap : MonoBehaviour
     
 
     [Header("PresentationEntry")] 
-    [SerializeField] private RouteCatalogSO routeCatalogSo;
+    //[SerializeField] private RouteCatalogSO routeCatalogSo;
     [SerializeField] private PresentationSessionEntry presentationSessionEntry;
 
 
@@ -345,8 +345,6 @@ public class VnAppBootstrap : MonoBehaviour
             overlayGatePlanner,
             overlayGateAdvancer,
             overlayCommandExecutor,
-            null,
-            null,
             overlayContext,
             _linePresentationAdvanceState,
             _presentationStage);
