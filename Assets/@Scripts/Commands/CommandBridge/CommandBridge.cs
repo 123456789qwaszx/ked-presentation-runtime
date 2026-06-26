@@ -7,6 +7,7 @@ public sealed partial class YarnCommandBridge
     private readonly YarnBridgePlaybackDriver _playbackDriver;
     private readonly RectTransform _charRigPrefab;
     private readonly RectTransform _backgroundRigPrefab;
+    private readonly RectTransform _overlayRigPrefab;
 
     private readonly VNSideRunnerSyncHub _sideRunnerSyncHub;
     private readonly OneShotPresentationLane _oneShotPresentationLane;
@@ -18,6 +19,7 @@ public sealed partial class YarnCommandBridge
         VNSideRunnerSyncHub sideRunnerSyncHub,
         RectTransform charRigPrefab,
         RectTransform backgroundRigPrefab,
+        RectTransform overlayRigPrefab,
         OneShotPresentationLane oneShotPresentationLane,
         DialogueBoxPresentationController dialogueBoxPresentation,
         bool bindMainLaneCommands)
@@ -26,6 +28,7 @@ public sealed partial class YarnCommandBridge
         _sideRunnerSyncHub = sideRunnerSyncHub;
         _charRigPrefab = charRigPrefab;
         _backgroundRigPrefab = backgroundRigPrefab;
+        _overlayRigPrefab = overlayRigPrefab;
         _oneShotPresentationLane = oneShotPresentationLane;
         _dialogueBoxPresentation = dialogueBoxPresentation;
         
@@ -63,6 +66,8 @@ public sealed partial class YarnCommandBridge
         
         BindScreenEffects(runner);
         BindStageDepthDefocus(runner);
+
+        BindOverlayRig(runner);
     }
     
     private void BindControl(DialogueRunner runner)

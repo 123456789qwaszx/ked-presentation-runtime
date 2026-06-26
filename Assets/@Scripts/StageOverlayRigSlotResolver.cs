@@ -10,7 +10,22 @@ public sealed class StageOverlayRigSlotResolver
     {
         EnsureProvider();
 
+        if (_slotProvider == null)
+        {
+            rect = null;
+            Debug.LogWarning(
+                $"[StageOverlayRigSlotResolver] Missing overlay rig slot provider. kind='{kind}'.");
+            return false;
+        }
+
         rect = _slotProvider.GetStageOverlayRigRoot(kind);
+
+        if (rect == null)
+        {
+            Debug.LogWarning(
+                $"[StageOverlayRigSlotResolver] Overlay rig root is null. kind='{kind}'.");
+            return false;
+        }
 
         return true;
     }
@@ -18,6 +33,9 @@ public sealed class StageOverlayRigSlotResolver
     private void EnsureProvider()
     {
         UIManager ui = UIManager.Instance;
+
+        if (ui == null)
+            return;
 
         if (_slotProvider == null)
             _slotProvider = ui.GetUI<PresentationUIRoot>();

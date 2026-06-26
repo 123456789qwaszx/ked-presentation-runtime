@@ -99,6 +99,7 @@ public class VnAppBootstrap : MonoBehaviour
                                    "Prefab the baked result when you need performance setup, external systems, response targets, or shot helpers.")] 
     [SerializeField] private RectTransform rigPrefab;
     [SerializeField] private RectTransform backgroundRigPrefab;
+    [SerializeField] private RectTransform overlayRigPrefab;
     
     [Header("ChapterButtonCard")] 
     [SerializeField] private RectTransform chapterCardPrefab;
@@ -275,6 +276,13 @@ public class VnAppBootstrap : MonoBehaviour
             screenNoisePresetDbso, 
             screenVignettePresetDbso,
             uiStageDepthLayerBlurRuntime);
+        
+        StageOverlayRigSlotResolver stageOverlayRigSlotResolver = new();
+        OverlayRigBuilder overlayRigBuilder = new();
+        
+        OverlayRigCommandFactory overlayRigCommandFactory = new(
+            stageOverlayRigSlotResolver, 
+            overlayRigBuilder);
 
         CompositeCommandFactory factory = new(
             charRigFactory,
@@ -284,7 +292,8 @@ public class VnAppBootstrap : MonoBehaviour
             presentationControlFactory,
             audioFactory,
             signalFactory,
-            screenEffectFactory);
+            screenEffectFactory,
+            overlayRigCommandFactory);
 
         commandExecutor.Initialize(factory);
         subCommandExecutor.Initialize(factory);
@@ -350,6 +359,7 @@ public class VnAppBootstrap : MonoBehaviour
             _vnSideRunnerSyncHub,
             rigPrefab,
             backgroundRigPrefab,
+            overlayRigPrefab,
             oneShotPresentationLane,
             _dialogueBoxPresentationController,
             bindMainLaneCommands: true);
@@ -360,6 +370,7 @@ public class VnAppBootstrap : MonoBehaviour
             _vnSideRunnerSyncHub, 
             rigPrefab, 
             backgroundRigPrefab,
+            overlayRigPrefab,
             oneShotPresentationLane,
             _dialogueBoxPresentationController,
             bindMainLaneCommands: false);
@@ -370,6 +381,7 @@ public class VnAppBootstrap : MonoBehaviour
             _vnSideRunnerSyncHub, 
             rigPrefab, 
             backgroundRigPrefab,
+            overlayRigPrefab,
             oneShotPresentationLane,
             _dialogueBoxPresentationController,
             bindMainLaneCommands: false);
