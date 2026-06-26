@@ -157,6 +157,14 @@ public partial class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
         
         #endregion
         
+        #region StageOverlay Layer
+        StageOverlayLayer,
+        SpriteRig_Root,
+        TextRig_Root,
+        
+        
+        #endregion
+        
         #region ScreenEffect Layer
         ScreenEffectLayer,
         // ScreenEffectRig

@@ -1,15 +1,16 @@
 using System;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
-public sealed class SpriteImageRigBuilder
+public sealed class OverlayRigBuilder
 {
-    public RectTransform BuildSpriteImageRoot(
+    public RectTransform BuildOverlayRoot(
         RectTransform prefab = null,
         string rolePrefix = "",
-        string rootName = "SpriteImage")
+        string rootName = "OverlayRig")
     {
         RectTransform root;
 
@@ -36,9 +37,9 @@ public sealed class SpriteImageRigBuilder
     public void BindRefsFromRoot(
         RectTransform root,
         string rolePrefix,
-        out SpriteImageRigRefs refs)
+        out OverlayRigRefs refs)
     {
-        Dictionary<SpriteImageRigSchema.Refs, RectTransform> map =
+        Dictionary<OverlayRigSchema.Refs, RectTransform> map =
             CollectRefMap(root, rolePrefix);
 
         EnsureValidGraphMap(root, rolePrefix, ref map);
@@ -49,16 +50,16 @@ public sealed class SpriteImageRigBuilder
     private void EnsureValidGraphMap(
         RectTransform root,
         string rolePrefix,
-        ref Dictionary<SpriteImageRigSchema.Refs, RectTransform> map)
+        ref Dictionary<OverlayRigSchema.Refs, RectTransform> map)
     {
-        int expectedCount = Enum.GetValues(typeof(SpriteImageRigSchema.Refs)).Length;
+        int expectedCount = Enum.GetValues(typeof(OverlayRigSchema.Refs)).Length;
 
         if (map.Count >= expectedCount)
             return;
 
         Debug.LogWarning(
-            $"[SpriteImageBuilder] Invalid graph. " +
-            $"Rebuilding from SpriteImageSchema. " +
+            $"[OverlayRigBuilder] Invalid graph. " +
+            $"Rebuilding from OverlayRigSchema. " +
             $"root='{root.name}', rolePrefix='{rolePrefix}'.",
             root);
 
@@ -75,7 +76,7 @@ public sealed class SpriteImageRigBuilder
 
     private void EnsureGraph(RectTransform root, string rolePrefix)
     {
-        foreach (SpriteImageRigSchema.NodeDef node in SpriteImageRigSchema.Nodes)
+        foreach (OverlayRigSchema.NodeDef node in OverlayRigSchema.Nodes)
             EnsureNode(root, rolePrefix, node);
 
         NormalizeSiblingOrder(root, rolePrefix);
@@ -84,7 +85,7 @@ public sealed class SpriteImageRigBuilder
     private void EnsureNode(
         RectTransform root,
         string rolePrefix,
-        SpriteImageRigSchema.NodeDef node)
+        OverlayRigSchema.NodeDef node)
     {
         RectTransform parent = node.Parent.HasValue
             ? FindByName(root, WithRole(rolePrefix, node.Parent.Value.ToString())) as RectTransform
@@ -102,24 +103,51 @@ public sealed class SpriteImageRigBuilder
             node.NeedsCenterPivot);
 
         if (node.NeedsCanvasGroup)
-        {
-            if (!rt.TryGetComponent(out CanvasGroup canvasGroup))
-                canvasGroup = rt.gameObject.AddComponent<CanvasGroup>();
-
-            canvasGroup.alpha = node.InitialCanvasGroupAlpha;
-            canvasGroup.interactable = false;
-            canvasGroup.blocksRaycasts = false;
-        }
+            EnsureCanvasGroup(rt, node.InitialCanvasGroupAlpha);
 
         if (node.NeedsImage)
-        {
-            if (!rt.TryGetComponent(out Image image))
-                image = rt.gameObject.AddComponent<Image>();
+            EnsureImage(rt, node.InitialGraphicColor, node.RaycastTarget);
 
-            image.color = node.InitialImageColor;
-            image.raycastTarget = node.RaycastTarget;
-            image.preserveAspect = true;
-        }
+        if (node.NeedsText)
+            EnsureText(rt, node.InitialGraphicColor, node.RaycastTarget);
+    }
+
+    private static void EnsureCanvasGroup(RectTransform rt, float alpha)
+    {
+        if (!rt.TryGetComponent(out CanvasGroup canvasGroup))
+            canvasGroup = rt.gameObject.AddComponent<CanvasGroup>();
+
+        canvasGroup.alpha = alpha;
+        canvasGroup.interactable = false;
+        canvasGroup.blocksRaycasts = false;
+    }
+
+    private static void EnsureImage(
+        RectTransform rt,
+        Color color,
+        bool raycastTarget)
+    {
+        if (!rt.TryGetComponent(out Image image))
+            image = rt.gameObject.AddComponent<Image>();
+
+        image.color = color;
+        image.raycastTarget = raycastTarget;
+        image.preserveAspect = true;
+    }
+
+    private static void EnsureText(
+        RectTransform rt,
+        Color color,
+        bool raycastTarget)
+    {
+        if (!rt.TryGetComponent(out TextMeshProUGUI text))
+            text = rt.gameObject.AddComponent<TextMeshProUGUI>();
+
+        text.text = string.Empty;
+        text.color = color;
+        text.raycastTarget = raycastTarget;
+        text.alignment = TextAlignmentOptions.Center;
+        text.textWrappingMode = TextWrappingModes.NoWrap;
     }
 
     private RectTransform EnsureRect(
@@ -165,14 +193,14 @@ public sealed class SpriteImageRigBuilder
         return existing;
     }
 
-    private Dictionary<SpriteImageRigSchema.Refs, RectTransform> CollectRefMap(
+    private Dictionary<OverlayRigSchema.Refs, RectTransform> CollectRefMap(
         RectTransform root,
         string rolePrefix)
     {
-        Dictionary<SpriteImageRigSchema.Refs, RectTransform> map = new();
+        Dictionary<OverlayRigSchema.Refs, RectTransform> map = new();
 
-        foreach (SpriteImageRigSchema.Refs id in
-                 Enum.GetValues(typeof(SpriteImageRigSchema.Refs)))
+        foreach (OverlayRigSchema.Refs id in
+                 Enum.GetValues(typeof(OverlayRigSchema.Refs)))
         {
             string nodeName = WithRole(rolePrefix, id.ToString());
             Transform t = FindByName(root, nodeName);
@@ -184,54 +212,70 @@ public sealed class SpriteImageRigBuilder
         return map;
     }
 
-    private SpriteImageRigRefs BuildRefs(
+    private OverlayRigRefs BuildRefs(
         RectTransform root,
-        Dictionary<SpriteImageRigSchema.Refs, RectTransform> map)
+        Dictionary<OverlayRigSchema.Refs, RectTransform> map)
     {
-        SpriteImageRigRefs refs = new(root);
+        OverlayRigRefs refs = new(root);
 
-        RectTransform GetRt(SpriteImageRigSchema.Refs key)
+        RectTransform GetRt(OverlayRigSchema.Refs key)
         {
             if (!map.TryGetValue(key, out RectTransform rt) || rt == null)
             {
-                Debug.LogWarning($"[SpriteImageBuilder] Missing ref '{key}'.");
+                Debug.LogWarning($"[OverlayRigBuilder] Missing ref '{key}'.");
                 return null;
             }
 
             return rt;
         }
 
-        Image GetImg(SpriteImageRigSchema.Refs key)
+        Image GetImg(OverlayRigSchema.Refs key)
         {
             RectTransform rt = GetRt(key);
             return rt != null ? rt.GetComponent<Image>() : null;
         }
 
-        refs.Sprite_Root = GetRt(SpriteImageRigSchema.Refs.Sprite_Root);
-        refs.Sprite_RootCanvasGroup = refs.Sprite_Root != null
-            ? refs.Sprite_Root.GetComponent<CanvasGroup>()
+        TextMeshProUGUI GetText(OverlayRigSchema.Refs key)
+        {
+            RectTransform rt = GetRt(key);
+            return rt != null ? rt.GetComponent<TextMeshProUGUI>() : null;
+        }
+
+        refs.Overlay_Root = GetRt(OverlayRigSchema.Refs.Overlay_Root);
+        refs.Overlay_RootCanvasGroup = refs.Overlay_Root != null
+            ? refs.Overlay_Root.GetComponent<CanvasGroup>()
             : null;
 
-        refs.Sprite_Anchor = GetRt(SpriteImageRigSchema.Refs.Sprite_Anchor);
+        refs.Overlay_Anchor = GetRt(OverlayRigSchema.Refs.Overlay_Anchor);
 
-        refs.Sprite_BaseRotation = GetRt(SpriteImageRigSchema.Refs.Sprite_BaseRotation);
+        refs.Overlay_Track = GetRt(OverlayRigSchema.Refs.Overlay_Track);
 
-        refs.Sprite_Track_Move = GetRt(SpriteImageRigSchema.Refs.Sprite_Track_Move);
-        refs.Sprite_Track_X = GetRt(SpriteImageRigSchema.Refs.Sprite_Track_X);
-        refs.Sprite_Track_X_Offset = GetRt(SpriteImageRigSchema.Refs.Sprite_Track_X_Offset);
-        refs.Sprite_Track_Y = GetRt(SpriteImageRigSchema.Refs.Sprite_Track_Y);
-        refs.Sprite_Track_Y_Offset = GetRt(SpriteImageRigSchema.Refs.Sprite_Track_Y_Offset);
+        refs.Overlay_BaseRotation = GetRt(OverlayRigSchema.Refs.Overlay_BaseRotation);
 
-        refs.Sprite_Rotation = GetRt(SpriteImageRigSchema.Refs.Sprite_Rotation);
+        refs.Overlay_Track_Move = GetRt(OverlayRigSchema.Refs.Overlay_Track_Move);
+        refs.Overlay_Track_X = GetRt(OverlayRigSchema.Refs.Overlay_Track_X);
+        refs.Overlay_Track_X_Offset = GetRt(OverlayRigSchema.Refs.Overlay_Track_X_Offset);
+        refs.Overlay_Track_Y = GetRt(OverlayRigSchema.Refs.Overlay_Track_Y);
+        refs.Overlay_Track_Y_Offset = GetRt(OverlayRigSchema.Refs.Overlay_Track_Y_Offset);
 
-        refs.Sprite_Size = GetRt(SpriteImageRigSchema.Refs.Sprite_Size);
-        refs.Sprite_Scale = GetRt(SpriteImageRigSchema.Refs.Sprite_Scale);
+        refs.Overlay_Rotation = GetRt(OverlayRigSchema.Refs.Overlay_Rotation);
 
-        refs.Sprite_ActingScale = GetRt(SpriteImageRigSchema.Refs.Sprite_ActingScale);
-        refs.Sprite_ActingScale_X = GetRt(SpriteImageRigSchema.Refs.Sprite_ActingScale_X);
-        refs.Sprite_ActingScale_Y = GetRt(SpriteImageRigSchema.Refs.Sprite_ActingScale_Y);
+        refs.Overlay_Size = GetRt(OverlayRigSchema.Refs.Overlay_Size);
+        refs.Overlay_Scale = GetRt(OverlayRigSchema.Refs.Overlay_Scale);
 
-        refs.Sprite_Image = GetImg(SpriteImageRigSchema.Refs.Sprite_Image);
+        refs.Overlay_ActingScale = GetRt(OverlayRigSchema.Refs.Overlay_ActingScale);
+        refs.Overlay_ActingScale_X = GetRt(OverlayRigSchema.Refs.Overlay_ActingScale_X);
+        refs.Overlay_ActingScale_Y = GetRt(OverlayRigSchema.Refs.Overlay_ActingScale_Y);
+
+        refs.Overlay_Content = GetRt(OverlayRigSchema.Refs.Overlay_Content);
+
+        refs.Overlay_ImageBox = GetRt(OverlayRigSchema.Refs.Overlay_ImageBox);
+        refs.Overlay_ImagePad = GetRt(OverlayRigSchema.Refs.Overlay_ImagePad);
+        refs.Overlay_Image = GetImg(OverlayRigSchema.Refs.Overlay_Image);
+
+        refs.Overlay_TextBox = GetRt(OverlayRigSchema.Refs.Overlay_TextBox);
+        refs.Overlay_TextPad = GetRt(OverlayRigSchema.Refs.Overlay_TextPad);
+        refs.Overlay_Text = GetText(OverlayRigSchema.Refs.Overlay_Text);
 
         return refs;
     }
@@ -240,7 +284,7 @@ public sealed class SpriteImageRigBuilder
     {
         Dictionary<Transform, int> nextIndexByParent = new();
 
-        foreach (SpriteImageRigSchema.NodeDef node in SpriteImageRigSchema.Nodes)
+        foreach (OverlayRigSchema.NodeDef node in OverlayRigSchema.Nodes)
         {
             RectTransform rt =
                 FindByName(root, WithRole(rolePrefix, node.Id.ToString())) as RectTransform;
