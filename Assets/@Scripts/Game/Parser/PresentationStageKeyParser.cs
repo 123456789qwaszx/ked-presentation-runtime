@@ -52,7 +52,7 @@ public static class PresentationStageKeyParser
 
     public static PresentationStageKey Parse(
         string raw,
-        PresentationStageKey fallback)
+        PresentationStageKey fallback = PresentationStageKey.Stage00)
     {
         if (TryParse(raw, out PresentationStageKey stage))
             return stage;
@@ -119,7 +119,7 @@ public static class PresentationDepthLayerKeyParser
 
     public static PresentationDepthLayerKey Parse(
         string raw,
-        PresentationDepthLayerKey fallback)
+        PresentationDepthLayerKey fallback = PresentationDepthLayerKey.Far)
     {
         if (TryParse(raw, out PresentationDepthLayerKey layer))
             return layer;

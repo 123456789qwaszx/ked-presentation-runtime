@@ -212,18 +212,18 @@ public sealed partial class YarnCommandBridge
     
     private void BindCharRigStaging(DialogueRunner runner)
     {
-        runner.AddCommandHandler<string, int, int, float>(
+        runner.AddCommandHandler<string, string, string, string>(
             "move_by", EnqueueSetAnchorOffsetSpecs);
-        runner.AddCommandHandler<string, float, float>(
+        runner.AddCommandHandler<string, float, string>(
             "rotate_by", EnqueueRotateBySpec);
-        runner.AddCommandHandler<string, float, float>(
+        runner.AddCommandHandler<string, float, string>(
             "scale_by", EnqueueSizeBySpec);
 
-        runner.AddCommandHandler<string, float>(
+        runner.AddCommandHandler<string, string>(
             "move_reset", EnqueueSetPlaceResetSpecs);
-        runner.AddCommandHandler<string, float>(
+        runner.AddCommandHandler<string, string>(
             "rotate_reset", EnqueueRotateResetSpec);
-        runner.AddCommandHandler<string, float>(
+        runner.AddCommandHandler<string, string>(
             "scale_reset", EnqueueSizeResetSpec);
         
         runner.AddCommandHandler<string>(
@@ -248,17 +248,17 @@ public sealed partial class YarnCommandBridge
     
     private void BindShotStaging(DialogueRunner runner)
     {
-        runner.AddCommandHandler<string, string, string, float, float>(
+        runner.AddCommandHandler<string, string, string, float, string>(
             "shot_focus_to", EnqueueShotZoomFocusSpec);
-        runner.AddCommandHandler<float, float, float, float>(
+        runner.AddCommandHandler<float, string, string, string>(
             "shot_to", EnqueueShotToSpec);
         
-        runner.AddCommandHandler<float, float>(
+        runner.AddCommandHandler<float, string>(
             "shot_zoom", EnqueueShotZoomSpec);
-        runner.AddCommandHandler<float, float, float>(
+        runner.AddCommandHandler<string, string, string>(
             "shot_track", EnqueueShotTrackSpec);
         
-        runner.AddCommandHandler<float>(
+        runner.AddCommandHandler<string>(
             "shot_reset", EnqueueShotResetSpec);
     }
     
@@ -494,63 +494,118 @@ public sealed partial class YarnCommandBridge
             "idle_walk", EnqueueWalkInPlaceSpec);
     }
     
+    private void BindBackgroundRig(DialogueRunner runner)
+    {
+        runner.AddCommandHandler<string, string>(
+            "bg_spawn", EnqueueSpawnBackgroundRigSpec);
+        
+        runner.AddCommandHandler<string, string, string>(
+            "bg_slot00", EnqueueSpawnBackgroundRigStage00Spec);
+        runner.AddCommandHandler<string, string, string>(
+            "bg_slot01", EnqueueSpawnBackgroundRigStage01Spec);
+        runner.AddCommandHandler<string, string, string>(
+            "bg_slot02", EnqueueSpawnBackgroundRigStage02Spec);
+
+        runner.AddCommandHandler<string, string, string, float>(
+            "bg_place", EnqueueSetBackgroundAnchorDslSpec);
+
+        runner.AddCommandHandler<string, string, string>(
+            "bg_sprite", EnqueueSetBackgroundSpriteSpec);
+
+        runner.AddCommandHandler<string, string>(
+            "bg_size", EnqueueSetBackgroundOriginSizeSpec);
+
+        runner.AddCommandHandler<string, string>(
+            "bg_fade_in", EnqueueFadeInBackgroundDslSpec);
+
+        runner.AddCommandHandler<string, string>(
+            "bg_fade_out", EnqueueFadeOutBackgroundDslSpec);
+
+        runner.AddCommandHandler<string, string, string, string>(
+            "bg_move", EnqueueMoveBackgroundDslSpec);
+
+        runner.AddCommandHandler<string, float, string>(
+            "bg_scale", EnqueueScaleBackgroundDslSpec);
+
+        runner.AddCommandHandler<string, string, string, string>(
+            "bg_slide_in", EnqueueSlideInBackgroundDslSpec);
+
+        runner.AddCommandHandler<string, string, string, string>(
+            "bg_slide_out", EnqueueSlideOutBackgroundDslSpec);
+
+        runner.AddCommandHandler<string, string, string, string>(
+            "bg_jolt", EnqueueJoltBackgroundDslSpec);
+
+        runner.AddCommandHandler<string, string, string, string>(
+            "bg_idle_tremble", EnqueueTrembleBackgroundDslSpec);
+
+        runner.AddCommandHandler<string, string, string, float>(
+            "bg_idle_breath", EnqueueBreathBackgroundDslSpec);
+        
+        runner.AddCommandHandler<string>(
+            "bg_slot_cutin", EnqueueBackgroundCutInSpec);
+        
+        runner.AddCommandHandler<string, string, string, string>(
+            "bg_cutin_in", EnqueueBackgroundCutInMotionSpec);
+    }
+    
     private void BindTransition(DialogueRunner runner)
     {
-        runner.AddCommandHandler<string, float>(
+        runner.AddCommandHandler<string, string>(
             "tx_slant_in", EnqueueSlantedMaskCutInSpec);
-        runner.AddCommandHandler<string, float>(
+        runner.AddCommandHandler<string, string>(
             "tx_slant_out", EnqueueSlantedMaskCutOutSpec);
         
-        runner.AddCommandHandler<string, float>(
+        runner.AddCommandHandler<string, string>(
             "tx_hstrip_open",
             EnqueueHorizontalStripOpenInSpec);
-        runner.AddCommandHandler<string, float>(
+        runner.AddCommandHandler<string, string>(
             "tx_hstrip_close",
             EnqueueHorizontalStripCloseOutSpec);
         
-        runner.AddCommandHandler<string, float>(
+        runner.AddCommandHandler<string, string>(
             "tx_hstrip_in",
             EnqueueHorizontalStripCutInSpec);
-        runner.AddCommandHandler<string, float>(
+        runner.AddCommandHandler<string, string>(
             "tx_hstrip_out",
             EnqueueHorizontalStripCutOutSpec);
 
-        runner.AddCommandHandler<string, float>(
+        runner.AddCommandHandler<string, string>(
             "tx_vstrip_open",
             EnqueueVerticalStripOpenInSpec);
-        runner.AddCommandHandler<string, float>(
+        runner.AddCommandHandler<string, string>(
             "tx_vstrip_close",
             EnqueueVerticalStripCloseOutSpec);
         
-        runner.AddCommandHandler<string, float>(
+        runner.AddCommandHandler<string, string>(
             "tx_vstrip_in",
             EnqueueVerticalStripCutInSpec);
-        runner.AddCommandHandler<string, float>(
+        runner.AddCommandHandler<string, string>(
             "tx_vstrip_out",
             EnqueueVerticalStripCutOutSpec);
 
-        runner.AddCommandHandler<string, float>(
+        runner.AddCommandHandler<string, string>(
             "tx_band_in",
             EnqueueDiagonalBandCutInSpec);
-        runner.AddCommandHandler<string, float>(
+        runner.AddCommandHandler<string, string>(
             "tx_band_out",
             EnqueueDiagonalBandCutOutSpec);
 
-        runner.AddCommandHandler<string, float>(
+        runner.AddCommandHandler<string, string>(
             "tx_iris_in",
             EnqueueCircleIrisInSpec);
-        runner.AddCommandHandler<string, float>(
+        runner.AddCommandHandler<string, string>(
             "tx_iris_out",
             EnqueueCircleIrisOutSpec);
         
-        runner.AddCommandHandler<string, float>(
+        runner.AddCommandHandler<string, string>(
             "tx_daze_in", EnqueueDazeFadeCloseSpec);
-        runner.AddCommandHandler<string, float>(
+        runner.AddCommandHandler<string, string>(
             "tx_daze_out", EnqueueTransitionOutDazeFadeSpec);
         
-        runner.AddCommandHandler<string, float>(
+        runner.AddCommandHandler<string, string>(
             "tx_strip_in", EnqueueVerticalStripCoverSpec);
-        runner.AddCommandHandler<string, float>(
+        runner.AddCommandHandler<string, string>(
             "tx_strip_out", EnqueueTransitionOutStripSpec);
         
         runner.AddCommandHandler(
@@ -561,9 +616,9 @@ public sealed partial class YarnCommandBridge
     
     private void BindAudio(DialogueRunner runner)
     {
-        runner.AddCommandHandler<string, float>(
+        runner.AddCommandHandler<string, string>(
             "bgm", EnqueuePlayBgmSpec);
-        runner.AddCommandHandler<float>(
+        runner.AddCommandHandler<string>(
             "stop_bgm", EnqueueStopBgmSpec);
 
         runner.AddCommandHandler<string>(
@@ -584,14 +639,14 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler(
             "screen_flash_clear", EnqueueScreenFlashClearSpec);
 
-        runner.AddCommandHandler<string, float, float>(
+        runner.AddCommandHandler<string, float, string>(
             "screen_vignette", EnqueueScreenVignettePresetSpec);
-        runner.AddCommandHandler<float>(
+        runner.AddCommandHandler<string>(
             "screen_vignette_clear", EnqueueScreenVignetteClearSpec);
 
-        runner.AddCommandHandler<string, float, float>(
+        runner.AddCommandHandler<string, float, string>(
             "screen_noise", EnqueueScreenNoisePresetSpec);
-        runner.AddCommandHandler<float>(
+        runner.AddCommandHandler<string>(
             "screen_noise_clear", EnqueueScreenNoiseClearSpec);
     }
 

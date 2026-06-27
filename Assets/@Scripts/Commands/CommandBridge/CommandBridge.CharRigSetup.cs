@@ -17,8 +17,8 @@ public sealed partial class YarnCommandBridge
             roleKey = slotKey,
             rigPrefab = _charRigPrefab,
 
-            stage = PresentationStageKeyParser.Parse(stageKey, PresentationStageKey.Stage00),
-            layer = PresentationDepthLayerKeyParser.Parse(layerKey, PresentationDepthLayerKey.Mid)
+            stage = PresentationStageKeyParser.Parse(stageKey),
+            layer = PresentationDepthLayerKeyParser.Parse(layerKey)
         });
 
     private void EnqueueSetupCharRigStage00Spec(string slotKey, string layerKey = "mid")
@@ -40,7 +40,7 @@ public sealed partial class YarnCommandBridge
             rigPrefab = _charRigPrefab,
 
             stage = stage,
-            layer = PresentationDepthLayerKeyParser.Parse(layerKey, PresentationDepthLayerKey.Mid)
+            layer = PresentationDepthLayerKeyParser.Parse(layerKey)
         });
 
     private void EnqueueSetupTyrantProtagonistSpec()
@@ -172,17 +172,21 @@ public sealed partial class YarnCommandBridge
             }
         });
 
-    private void EnqueueSetAnchorOffsetSpecs(string slotKey, int x = 0, int y = 0, float duration = 0.4f)
+    private void EnqueueSetAnchorOffsetSpecs(
+        string slotKey,
+        string xToken = "0u",
+        string yToken = "0u",
+        string durationToken = "0.4s")
         => Collect(new MoveByCommandSpecCharR
         {
             slotKey = slotKey,
             target = CharacterRigTarget.CharSlot_Track,
             useAbsolutePosition = false,
-            delta = new Vector2(x, y),
-            duration = duration
+            delta = new Vector2(ParseSignedUnit(xToken), ParseSignedUnit(yToken)),
+            duration = YarnDurationParser.Parse(durationToken)
         });
 
-    private void EnqueueSizeBySpec(string roleKey, float multiplier, float duration = 0.4f)
+    private void EnqueueSizeBySpec(string roleKey, float multiplier, string durationToken = "0.4s")
         => Collect(new ScaleToCommandSpecCharR
         {
             slotKey = roleKey,
@@ -191,10 +195,10 @@ public sealed partial class YarnCommandBridge
             toScale = new Vector2(multiplier, multiplier),
             relativeToCurrent = true,
 
-            duration = duration
+            duration = YarnDurationParser.Parse(durationToken)
         });
 
-    private void EnqueueRotateBySpec(string roleKey, float degree, float duration = 0.4f)
+    private void EnqueueRotateBySpec(string roleKey, float degree, string durationToken = "0.4s")
         => Collect(new RotateToCommandSpecCharR
         {
             slotKey = roleKey,
@@ -203,11 +207,13 @@ public sealed partial class YarnCommandBridge
             toEuler = new Vector3(0f, 0f, degree),
             relativeToCurrent = true,
 
-            duration = duration
+            duration = YarnDurationParser.Parse(durationToken)
         });
 
-    private void EnqueueSetPlaceResetSpecs(string slotKey, float duration = 0.4f)
+    private void EnqueueSetPlaceResetSpecs(string slotKey, string durationToken = "0.4s")
     {
+        float duration = YarnDurationParser.Parse(durationToken);
+
         var slotOffsetSpec = new MoveByCommandSpecCharR
         {
             slotKey = slotKey,
@@ -230,7 +236,7 @@ public sealed partial class YarnCommandBridge
         Collect(spec2);
     }
 
-    private void EnqueueRotateResetSpec(string roleKey, float duration = 0.4f)
+    private void EnqueueRotateResetSpec(string roleKey, string durationToken = "0.4s")
         => Collect(new RotateToCommandSpecCharR
         {
             slotKey = roleKey,
@@ -238,10 +244,10 @@ public sealed partial class YarnCommandBridge
 
             toEuler = new Vector3(0f, 0f, 0f),
 
-            duration = duration
+            duration = YarnDurationParser.Parse(durationToken)
         });
 
-    private void EnqueueSizeResetSpec(string roleKey, float duration = 0.4f)
+    private void EnqueueSizeResetSpec(string roleKey, string durationToken = "0.4s")
         => Collect(new ScaleToCommandSpecCharR
         {
             slotKey = roleKey,
@@ -249,7 +255,7 @@ public sealed partial class YarnCommandBridge
 
             toScale = new Vector2(1, 1),
 
-            duration = duration
+            duration = YarnDurationParser.Parse(durationToken)
         });
 
     private void EnqueueSpriteColorToDslSpec(
@@ -289,8 +295,8 @@ public sealed partial class YarnCommandBridge
         {
             slotKey = roleKey,
 
-            stage = PresentationStageKeyParser.Parse(stageKey, PresentationStageKey.Stage00),
-            layer = PresentationDepthLayerKeyParser.Parse(layerKey, PresentationDepthLayerKey.Mid),
+            stage = PresentationStageKeyParser.Parse(stageKey),
+            layer = PresentationDepthLayerKeyParser.Parse(layerKey),
 
             siblingMode = CharacterRigReparentSiblingMode.Front
         });

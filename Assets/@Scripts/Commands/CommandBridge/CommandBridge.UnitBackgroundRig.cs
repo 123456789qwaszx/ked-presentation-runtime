@@ -1,64 +1,8 @@
 using DG.Tweening;
 using UnityEngine;
-using Yarn.Unity;
 
 public sealed partial class YarnCommandBridge
 {
-    private void BindBackgroundRig(DialogueRunner runner)
-    {
-        runner.AddCommandHandler<string, string>(
-            "bg_spawn", EnqueueSpawnBackgroundRigSpec);
-        
-        runner.AddCommandHandler<string, string, string>(
-            "bg_slot00", EnqueueSpawnBackgroundRigStage00Spec);
-        runner.AddCommandHandler<string, string, string>(
-            "bg_slot01", EnqueueSpawnBackgroundRigStage01Spec);
-        runner.AddCommandHandler<string, string, string>(
-            "bg_slot02", EnqueueSpawnBackgroundRigStage02Spec);
-
-        runner.AddCommandHandler<string, string, string, float>(
-            "bg_place", EnqueueSetBackgroundAnchorDslSpec);
-
-        runner.AddCommandHandler<string, string, string>(
-            "bg_sprite", EnqueueSetBackgroundSpriteSpec);
-
-        runner.AddCommandHandler<string, string>(
-            "bg_size", EnqueueSetBackgroundOriginSizeSpec);
-
-        runner.AddCommandHandler<string, string>(
-            "bg_fade_in", EnqueueFadeInBackgroundDslSpec);
-
-        runner.AddCommandHandler<string, string>(
-            "bg_fade_out", EnqueueFadeOutBackgroundDslSpec);
-
-        runner.AddCommandHandler<string, string, string, string>(
-            "bg_move", EnqueueMoveBackgroundDslSpec);
-
-        runner.AddCommandHandler<string, float, string>(
-            "bg_scale", EnqueueScaleBackgroundDslSpec);
-
-        runner.AddCommandHandler<string, string, string, string>(
-            "bg_slide_in", EnqueueSlideInBackgroundDslSpec);
-
-        runner.AddCommandHandler<string, string, string, string>(
-            "bg_slide_out", EnqueueSlideOutBackgroundDslSpec);
-
-        runner.AddCommandHandler<string, string, string, string>(
-            "bg_jolt", EnqueueJoltBackgroundDslSpec);
-
-        runner.AddCommandHandler<string, string, string, string>(
-            "bg_idle_tremble", EnqueueTrembleBackgroundDslSpec);
-
-        runner.AddCommandHandler<string, string, string, float>(
-            "bg_idle_breath", EnqueueBreathBackgroundDslSpec);
-        
-        runner.AddCommandHandler<string>(
-            "bg_slot_cutin", EnqueueBackgroundCutInSpec);
-        
-        runner.AddCommandHandler<string, string, string, string>(
-            "bg_cutin_in", EnqueueBackgroundCutInMotionSpec);
-    }
-    
     private void EnqueueSpawnBackgroundRigSpec(
         string rigKey, 
         string spriteKey)
@@ -68,53 +12,31 @@ public sealed partial class YarnCommandBridge
     }
 
     private void EnqueueSetupBackgroundRigSpec(string rigKey)
-    {
-        var spec = new SetupBackgroundRigCommandSpec
+        => Collect(new SetupBackgroundRigCommandSpec
         {
             rigKey = rigKey,
             rigPrefab = _backgroundRigPrefab,
             
             stage = PresentationStageKey.Stage00,
             layer = PresentationDepthLayerKey.Far,
-        };
-
-        Collect(spec);
-    }
+        });
     private void EnqueueSpawnBackgroundRigStage00Spec(
         string rigKey,
         string spriteKey,
         string layerKey = "far")
-    {
-        EnqueueSpawnBackgroundRigAtDepthSpec(
-            rigKey,
-            spriteKey,
-            PresentationStageKey.Stage00,
-            layerKey);
-    }
+        => EnqueueSpawnBackgroundRigAtDepthSpec(rigKey, spriteKey, PresentationStageKey.Stage00, layerKey);
 
     private void EnqueueSpawnBackgroundRigStage01Spec(
         string rigKey,
         string spriteKey,
         string layerKey = "far")
-    {
-        EnqueueSpawnBackgroundRigAtDepthSpec(
-            rigKey,
-            spriteKey,
-            PresentationStageKey.Stage01,
-            layerKey);
-    }
+        => EnqueueSpawnBackgroundRigAtDepthSpec(rigKey, spriteKey, PresentationStageKey.Stage01, layerKey);
 
     private void EnqueueSpawnBackgroundRigStage02Spec(
         string rigKey,
         string spriteKey,
         string layerKey = "far")
-    {
-        EnqueueSpawnBackgroundRigAtDepthSpec(
-            rigKey,
-            spriteKey,
-            PresentationStageKey.Stage02,
-            layerKey);
-    }
+        => EnqueueSpawnBackgroundRigAtDepthSpec(rigKey, spriteKey, PresentationStageKey.Stage02, layerKey);
 
     private void EnqueueSpawnBackgroundRigAtDepthSpec(
         string rigKey,
@@ -125,9 +47,7 @@ public sealed partial class YarnCommandBridge
         EnqueueSetupBackgroundRigAtDepthSpec(
             rigKey,
             stage,
-            PresentationDepthLayerKeyParser.Parse(
-                layerKey,
-                PresentationDepthLayerKey.Far));
+            PresentationDepthLayerKeyParser.Parse(layerKey));
 
         EnqueueSetBackgroundSpriteSpec(rigKey, spriteKey);
     }
@@ -136,29 +56,21 @@ public sealed partial class YarnCommandBridge
         string rigKey,
         PresentationStageKey stage,
         PresentationDepthLayerKey layer)
-    {
-        var spec = new SetupBackgroundRigCommandSpec
+        => Collect(new SetupBackgroundRigCommandSpec
         {
             rigKey = rigKey,
             rigPrefab = _backgroundRigPrefab,
 
             stage = stage,
             layer = layer
-        };
-
-        Collect(spec);
-    }
+        });
 
     private void EnqueueSetBackgroundSpriteSpec(string rigKey, string spriteKey = "", string layerKey = "back")
-    {
-        var spec = new SetBackgroundSpriteCommandSpecBgR
+        => Collect(new SetBackgroundSpriteCommandSpecBgR
         {
             rigKey = rigKey,
             spriteKey = spriteKey,
-        };
-
-        Collect(spec);
-    }
+        });
 
     private void EnqueueSetBackgroundOriginSizeSpec(string rigKey, string scaleArg = "1")
     {
@@ -182,149 +94,94 @@ public sealed partial class YarnCommandBridge
         string xToken = "0u",
         string yToken = "0u",
         float rotationZ = 0f)
-    {
-        var spec = new SetAnchorCommandSpecBgR
+        => Collect(new SetAnchorCommandSpecBgR
         {
             rigKey = rigKey,
             target = BackgroundRigTarget.Background_Anchor,
-            anchoredPosition = new Vector2(
-                ParseSignedUnit(xToken, 0f),
-                ParseSignedUnit(yToken, 0f)),
+            anchoredPosition = new Vector2(ParseSignedUnit(xToken), ParseSignedUnit(yToken)),
             rotationZ = rotationZ
-        };
-
-        Collect(spec);
-    }
+        });
 
     private void EnqueueFadeInBackgroundDslSpec(
         string rigKey,
         string durationToken = "10fr")
-    {
-        var spec = new FadeInCommandSpecBgR
+        => Collect(new FadeInCommandSpecBgR
         {
             rigKey = rigKey,
             target = BackgroundRigTarget.Background_Root,
             duration = YarnDurationParser.Parse(durationToken, 0.4f),
-        };
-
-        Collect(spec);
-    }
+        });
 
     private void EnqueueFadeOutBackgroundDslSpec(
         string rigKey,
         string durationToken = "10fr")
-    {
-        var spec = new FadeOutCommandSpecBgR
+        => Collect(new FadeOutCommandSpecBgR
         {
             rigKey = rigKey,
             target = BackgroundRigTarget.Background_Root,
             duration = YarnDurationParser.Parse(durationToken, 0.4f),
-        };
-
-        Collect(spec);
-    }
+        });
     
-    // private void EnqueueHideBackgroundRootLayersSpec(string rigKey, string mask = "visual")
-    // {
-    //     var spec = new HideRootLayersCommandSpecBgR
-    //     {
-    //         rigKey = rigKey,
-    //         targetMask = BackgroundRigRootMaskParser.Parse(mask),
-    //     };
-    //
-    //     Collect(spec);
-    // }
-    //
-    // private void EnqueueShowBackgroundRootLayersSpec(string rigKey, string mask = "visual")
-    // {
-    //     var spec = new ShowRootLayersCommandSpecBgR
-    //     {
-    //         rigKey = rigKey,
-    //         targetMask = BackgroundRigRootMaskParser.Parse(mask),
-    //     };
-    //
-    //     Collect(spec);
-    // }
-
     private void EnqueueMoveBackgroundDslSpec(
         string rigKey,
         string xToken,
         string yToken,
         string durationToken = "10fr")
-    {
-        var spec = new MoveByCommandSpecBgR
+        => Collect(new MoveByCommandSpecBgR
         {
             rigKey = rigKey,
             target = BackgroundRigTarget.Background_Track_Move,
-            delta = new Vector2(
-                ParseSignedUnit(xToken, 0f),
-                ParseSignedUnit(yToken, 0f)),
+            delta = new Vector2(ParseSignedUnit(xToken), ParseSignedUnit(yToken)),
             duration = YarnDurationParser.Parse(durationToken, 0.4f),
             ease = Ease.OutCubic
-        };
-
-        Collect(spec);
-    }
+        });
 
     private void EnqueueScaleBackgroundDslSpec(
         string rigKey,
         float scale,
         string durationToken = "10fr")
-    {
-        var spec = new ScaleToCommandSpecBgR
+        => Collect(new ScaleToCommandSpecBgR
         {
             rigKey = rigKey,
             target = BackgroundRigTarget.Background_Scale,
             toScale = new Vector2(scale, scale),
             duration = YarnDurationParser.Parse(durationToken, 0.4f)
-        };
-
-        Collect(spec);
-    }
+        });
 
     private void EnqueueSlideInBackgroundDslSpec(
         string rigKey,
         string directionKey = "left",
         string distanceToken = "12u",
         string durationToken = "13fr")
-    {
-        var spec = new SlideInCommandSpecBgR
+        => Collect(new SlideInCommandSpecBgR
         {
             rigKey = rigKey,
             target = BackgroundRigTarget.Background_Track_Move,
             direction = BgRigDirectionParser.Parse(directionKey, CharRigDirection.Left),
             distance = YarnUnitParser.Parse(distanceToken, 12f),
             duration = YarnDurationParser.Parse(durationToken, 0.55f)
-        };
-
-        Collect(spec);
-    }
+        });
 
     private void EnqueueSlideOutBackgroundDslSpec(
         string rigKey,
         string directionKey = "right",
         string distanceToken = "12u",
         string durationToken = "11fr")
-    {
-        var spec = new SlideOutCommandSpecBgR
+        => Collect(new SlideOutCommandSpecBgR
         {
             rigKey = rigKey,
             target = BackgroundRigTarget.Background_Track_Move,
             to = BgRigDirectionParser.Parse(directionKey, CharRigDirection.Right),
             distance = YarnUnitParser.Parse(distanceToken, 12f),
             duration = YarnDurationParser.Parse(durationToken, 0.45f)
-        };
-
-        Collect(spec);
-    }
+        });
 
     private void EnqueueJoltBackgroundDslSpec(
         string rigKey,
         string directionKey = "right",
         string strengthToken = "0.55u",
         string durationToken = "21fr")
-    {
-        var spec = new JoltCommandSpecBgR
+        => Collect(new JoltCommandSpecBgR
         {
             rigKey = rigKey,
             target = BackgroundRigTarget.Background_Track_Y,
@@ -334,50 +191,39 @@ public sealed partial class YarnCommandBridge
             taps = 3,
             damping = 6f,
             anticipation = 3f
-        };
-
-        Collect(spec);
-    }
+        });
 
     private void EnqueueTrembleBackgroundDslSpec(
         string rigKey,
         string directionKey = "right",
         string strengthToken = "0.2u",
         string durationToken = "29fr")
-    {
-        var spec = new TrembleCommandSpecBgR
+        => Collect(new TrembleCommandSpecBgR
         {
             rigKey = rigKey,
             target = BackgroundRigTarget.Background_Shake,
             direction = BgRigDirectionParser.Parse(directionKey, CharRigDirection.Right),
             strength = YarnUnitParser.Parse(strengthToken, 0.2f),
             duration = YarnDurationParser.Parse(durationToken, 1.2f)
-        };
-
-        Collect(spec);
-    }
+        });
 
     private void EnqueueBreathBackgroundDslSpec(
         string rigKey,
         string durationToken = "99s",
         string heightToken = "0.15u",
         float breathsPerSecond = 0.2f)
-    {
-        var spec = new BreathInPlaceCommandSpecBgR
+        => Collect(new BreathInPlaceCommandSpecBgR
         {
             rigKey = rigKey,
             target = BackgroundRigTarget.Background_Track_Move,
             duration = YarnDurationParser.Parse(durationToken, 99f),
             height = YarnUnitParser.Parse(heightToken, 0.15f),
             breathsPerSecond = breathsPerSecond
-        };
-
-        Collect(spec);
-    }
+        });
 
     private static float ParseSignedUnit(
         string token,
-        float fallbackUnits)
+        float fallbackUnits = 0f)
     {
         if (string.IsNullOrWhiteSpace(token))
             return YarnUnitParser.Parse(token, fallbackUnits);

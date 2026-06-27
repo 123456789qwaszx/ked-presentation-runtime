@@ -6,7 +6,6 @@ public sealed partial class YarnCommandBridge
 {
     private const float PauseFramesPerSecond = 24f;
     private const int FramePauseAliasMaxFrame = 48;
-
     
     // Animator-style frame wait aliases.
     // 24fps basis: <<24fr>> = 1 second.
@@ -46,8 +45,7 @@ public sealed partial class YarnCommandBridge
 
     private void ResetDefaultLineBoxKinds()
         => _dialogueBoxPresentation.ResetDefaultLineBoxKinds();
-
-
+    
     private void LogImmediate(string message)
     {
         Debug.Log($"[YarnCommandBridge] {message}");
@@ -57,19 +55,14 @@ public sealed partial class YarnCommandBridge
         string charRigKey,
         string backgroundRigKey,
         string parentTarget = "Background_ObjectSlotRoot")
-    {
-        var spec = new AttachCharRigToBackgroundObjectSlotCommandSpec
+        => Collect(new AttachCharRigToBackgroundObjectSlotCommandSpec
         {
             charRigKey = charRigKey,
             backgroundRigKey = backgroundRigKey,
             parentTarget = ParseBackgroundRigTargetOrDefault(parentTarget),
             worldPositionStays = false,
             setAsLastSibling = false,
-            //wait = true
-        };
-
-        Collect(spec);
-    }
+        });
 
     private void EnqueuePresentationActorAliasSpec(
         string aliasSymbol,

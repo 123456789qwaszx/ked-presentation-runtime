@@ -14,38 +14,41 @@ public sealed partial class YarnCommandBridge
             intensity = 1f,
         });
 
-    private void EnqueueScreenVignettePresetSpec(string presetKey, float intensity = 1f, float duration = 0.35f)
+    private void EnqueueScreenVignettePresetSpec(
+        string presetKey,
+        float intensity = 1f,
+        string durationToken = "0.35s")
         => Collect(new ScreenVignetteCommandSpec
         {
             presetKey = ScreenVignettePresetDBSO.NormalizeKey(presetKey),
             intensity = intensity,
-            duration = duration,
+            duration = YarnDurationParser.Parse(durationToken),
         });
 
-    private void EnqueueScreenVignetteClearSpec(float duration = 0.35f)
+    private void EnqueueScreenVignetteClearSpec(string durationToken = "0.35s")
         => Collect(new ScreenVignetteCommandSpec
         {
             presetKey = "clear",
             intensity = 1f,
-            duration = duration,
+            duration = YarnDurationParser.Parse(durationToken),
         });
 
     private void EnqueueScreenNoisePresetSpec(
         string presetKey = ScreenNoisePresetDBSO.DefaultPresetKey,
         float intensity = 1f,
-        float duration = 0.35f)
+        string durationToken = "0.35s")
         => Collect(new ScreenNoiseCommandSpec
         {
             presetKey = ScreenNoisePresetDBSO.NormalizeKey(presetKey),
             intensity = intensity,
-            duration = duration,
+            duration = YarnDurationParser.Parse(durationToken),
         });
 
-    private void EnqueueScreenNoiseClearSpec(float duration = 0.35f)
+    private void EnqueueScreenNoiseClearSpec(string durationToken = "0.35s")
         => Collect(new ScreenNoiseCommandSpec
         {
             presetKey = "clear",
             intensity = 1f,
-            duration = duration,
+            duration = YarnDurationParser.Parse(durationToken),
         });
 }

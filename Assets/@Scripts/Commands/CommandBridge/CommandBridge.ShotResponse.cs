@@ -7,7 +7,7 @@ public sealed partial class YarnCommandBridge
         string focusName = "body",
         string screenPointName = "center",
         float zoom = 2.5f,
-        float duration = 1.2f)
+        string durationToken = "1.2s")
     {
         CharacterFocusPresetParser.TryParse(focusName, out CharacterFocusPreset focusPreset);
         
@@ -20,37 +20,44 @@ public sealed partial class YarnCommandBridge
             focusPreset = focusPreset,
             screenPoint = screenPoint,
             zoom = zoom,
-            duration = duration,
+            duration = YarnDurationParser.Parse(durationToken),
         };
 
         Collect(spec);
     }
     
-    private void EnqueueShotToSpec(float zoom = 1f, float x = 100f, float y = 0f, float duration = 0.45f)
+    private void EnqueueShotToSpec(
+        float zoom = 1f,
+        string xToken = "2.5u",
+        string yToken = "0u",
+        string durationToken = "0.45s")
         => Collect(new ShotToCommandSpec
         {
             zoom = zoom,
-            pan = new Vector2(x, y),
-            duration = duration,
+            pan = new Vector2(ParseSignedUnit(xToken, 2.5f), ParseSignedUnit(yToken)),
+            duration = YarnDurationParser.Parse(durationToken),
         });
 
-    private void EnqueueShotZoomSpec(float zoom = 1f, float duration = 0.45f)
+    private void EnqueueShotZoomSpec(float zoom = 1f, string durationToken = "0.45s")
         => Collect(new ShotZoomCommandSpec
         {
             zoom = zoom,
-            duration = duration,
+            duration = YarnDurationParser.Parse(durationToken),
         });
 
-    private void EnqueueShotTrackSpec(float x = 100f, float y = 0f, float duration = 0.35f)
+    private void EnqueueShotTrackSpec(
+        string xToken = "2.5u",
+        string yToken = "0u",
+        string durationToken = "0.35s")
         => Collect(new ShotTrackCommandSpec
         {
-            pan = new Vector2(x, y),
-            duration = duration,
+            pan = new Vector2(ParseSignedUnit(xToken, 2.5f), ParseSignedUnit(yToken)),
+            duration = YarnDurationParser.Parse(durationToken),
         });
     
-    private void EnqueueShotResetSpec(float duration = 0.3f)
+    private void EnqueueShotResetSpec(string durationToken = "0.3s")
         => Collect(new ShotResetCommandSpec
         {
-            duration = duration,
+            duration = YarnDurationParser.Parse(durationToken),
         });
 }

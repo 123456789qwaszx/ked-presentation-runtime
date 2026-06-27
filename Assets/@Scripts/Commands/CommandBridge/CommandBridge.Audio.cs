@@ -1,10 +1,17 @@
 public sealed partial class YarnCommandBridge
 {
-    private void EnqueuePlayBgmSpec(string clipKey, float fadeDuration = 1f)
-        => Collect(new PlayBgmCommandSpec { clipKey = clipKey, fadeDuration = fadeDuration });
+    private void EnqueuePlayBgmSpec(string clipKey, string fadeDurationToken = "1s")
+        => Collect(new PlayBgmCommandSpec
+        {
+            clipKey = clipKey,
+            fadeDuration = YarnDurationParser.Parse(fadeDurationToken)
+        });
 
-    private void EnqueueStopBgmSpec(float fadeDuration = 1f)
-        => Collect(new StopBgmCommandSpec { fadeDuration = fadeDuration });
+    private void EnqueueStopBgmSpec(string fadeDurationToken = "1s")
+        => Collect(new StopBgmCommandSpec
+        {
+            fadeDuration = YarnDurationParser.Parse(fadeDurationToken)
+        });
 
     private void EnqueuePlaySfxSpec(string clipKey)
         => Collect(new PlaySfxCommandSpec { clipKey = clipKey });
