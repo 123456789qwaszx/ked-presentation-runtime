@@ -207,12 +207,6 @@ public class VnAppBootstrap : MonoBehaviour
         SignalLatch signalLatch = new();
         unitySignalBus.OnSignal += signalLatch.Latch;
 
-        // Signal / Timing
-        SignalCommandFactory signalFactory = new(
-            _unityTimeSource,
-            unitySignalBus,
-            signalLatch);
-
         // Character Rig
         CharRigSlotResolver charRigSlotResolver = new();
         CharacterRigBuilder characterRigBuilder = new();
@@ -240,11 +234,12 @@ public class VnAppBootstrap : MonoBehaviour
         ShotResponseCommandFactory presentationShotFactory = new(
             _presentationResponseRig, characterFocusTuningDb);
 
-        // Presentation Transition
-        PresentationTransitionCommandFactory presentationTransitionFactory = new(stageMaskMotionPresetDbSo);
-
         // Presentation Control
-        PresentationControlCommandFactory presentationControlFactory = new(_uiPatchService);
+        PresentationControlCommandFactory presentationControlFactory = new(
+            _uiPatchService,
+            _unityTimeSource,
+            unitySignalBus,
+            signalLatch);
 
         // Audio
         AudioCommandFactory audioFactory = new(audioSystem);
@@ -256,7 +251,8 @@ public class VnAppBootstrap : MonoBehaviour
             screenFlashPresetDbso,
             screenNoisePresetDbso, 
             screenVignettePresetDbso,
-            uiStageDepthLayerBlurRuntime);
+            uiStageDepthLayerBlurRuntime,
+            stageMaskMotionPresetDbSo);
         
         StageOverlayRigSlotResolver stageOverlayRigSlotResolver = new();
         OverlayRigBuilder overlayRigBuilder = new();
@@ -269,10 +265,8 @@ public class VnAppBootstrap : MonoBehaviour
             charRigFactory,
             backgroundRigFactory,
             presentationShotFactory,
-            presentationTransitionFactory,
             presentationControlFactory,
             audioFactory,
-            signalFactory,
             screenEffectFactory,
             overlayRigCommandFactory);
 
