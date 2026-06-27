@@ -1,4 +1,3 @@
-using DG.Tweening;
 using UnityEngine;
 
 public sealed partial class YarnCommandBridge
@@ -20,64 +19,38 @@ public sealed partial class YarnCommandBridge
             focusRoleKey = roleKey,
             focusPreset = focusPreset,
             screenPoint = screenPoint,
-            zoom = Mathf.Clamp(zoom, -10f, 10f),
+            zoom = zoom,
             duration = duration,
-            ease = Ease.OutCubic,
-            wait = false
         };
 
-        Collect(spec);
-    }
-    
-    private void EnqueueShotResetSpec(float duration = 0.3f)
-    {
-        var spec = new ShotResetCommandSpec
-        {
-            duration = duration,
-            ease = Ease.OutCubic,
-            wait = false
-        };
-        
         Collect(spec);
     }
     
     private void EnqueueShotToSpec(float zoom = 1f, float x = 100f, float y = 0f, float duration = 0.45f)
-    {
-        var spec = new ShotToCommandSpec
+        => Collect(new ShotToCommandSpec
         {
-            zoom = Mathf.Clamp(zoom, -10f, 10f),
+            zoom = zoom,
             pan = new Vector2(x, y),
             duration = duration,
-            ease = Ease.OutCubic,
-            wait = false
-        };
-        
-        Collect(spec);
-    }
+        });
 
     private void EnqueueShotZoomSpec(float zoom = 1f, float duration = 0.45f)
-    {
-        var spec = new ShotZoomCommandSpec
+        => Collect(new ShotZoomCommandSpec
         {
-            zoom = Mathf.Clamp(zoom, -10f, 10f),
+            zoom = zoom,
             duration = duration,
-            ease = Ease.OutCubic,
-            wait = false
-        };
-        
-        Collect(spec);
-    }
+        });
 
     private void EnqueueShotTrackSpec(float x = 100f, float y = 0f, float duration = 0.35f)
-    {
-        var spec = new ShotTrackCommandSpec
+        => Collect(new ShotTrackCommandSpec
         {
             pan = new Vector2(x, y),
             duration = duration,
-            ease = Ease.OutCubic,
-            wait = false
-        };
-        
-        Collect(spec);
-    }
+        });
+    
+    private void EnqueueShotResetSpec(float duration = 0.3f)
+        => Collect(new ShotResetCommandSpec
+        {
+            duration = duration,
+        });
 }
