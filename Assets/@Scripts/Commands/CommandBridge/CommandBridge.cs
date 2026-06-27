@@ -351,13 +351,13 @@ public sealed partial class YarnCommandBridge
     
     private void BindCharRigIdle(DialogueRunner runner)
     {
-        runner.AddCommandHandler<string, float, float, float, float>(
+        runner.AddCommandHandler<string>(
             "idle_bounce", EnqueueBounceInPlaceSpec);
-        runner.AddCommandHandler<string, float, float, float>(
+        runner.AddCommandHandler<string>(
             "idle_breathe", EnqueueBreathInPlaceSpec);
-        runner.AddCommandHandler<string, float, float, float, float, float, string>(
+        runner.AddCommandHandler<string, string>(
             "idle_flinch", EnqueueTremblePulseSpec);
-        runner.AddCommandHandler<string, float, float, float, float>(
+        runner.AddCommandHandler<string>(
             "idle_walk", EnqueueWalkInPlaceSpec);
     }
     

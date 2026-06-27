@@ -1,5 +1,4 @@
 using DG.Tweening;
-using UnityEngine;
 
 #region DoTween 효과 정리 주석
 // Ease.InQuad 
@@ -45,110 +44,81 @@ using UnityEngine;
 public sealed partial class YarnCommandBridge
 {
     private void EnqueueBounceInPlaceSpec(
-        string roleKey,
-        float duration = 99f,
-        float bouncesPerSecond = 2.5f,
-        float height = 32f,
-        float riseRatio = 0.18f)
-    {
-        var spec = new BounceInPlaceCommandSpecCharR
+        string rigKey)
+        => Collect(new BounceInPlaceCommandSpecCharR
         {
-            slotKey = roleKey,
             target = CharacterRigTarget.CharSlot_Track_Idle,
-            duration = duration,
-            bouncesPerSecond = bouncesPerSecond,
-            height = height,
-            riseRatio = Mathf.Clamp(riseRatio, 0.05f, 0.8f),
+            
+            slotKey = rigKey,
+            
+            duration = 99f,
+            bouncesPerSecond = 2.5f,
+            height = 32f,
+            riseRatio = 0.18f,
             sideSway = 0.2f,
             riseEase = Ease.InQuart,
             fallEase = Ease.InOutSine,
             blendIn = 0.04f,
             blendOut = 0.08f,
             wait = false
-        };
+        });
 
-        Collect(spec);
-    }
-    
     private void EnqueueBreathInPlaceSpec(
-        string roleKey,
-        float duration = 99f,
-        float height = 8f,
-        float breathsPerSecond = 0.35f)
-    {
-        var spec = new BreathInPlaceCommandSpecCharR
+        string rigKey)
+        => Collect(new BreathInPlaceCommandSpecCharR
         {
-            slotKey = roleKey,
             target = CharacterRigTarget.CharSlot_Track_Idle,
-            duration = duration,
-            breathsPerSecond = breathsPerSecond,
-            height = height,
+            
+            slotKey = rigKey,
+            
+            duration = 99f,
+            breathsPerSecond = 0.35f,
+            height = 8f,
             sideSway = 0f,
             useScalePulse = false,
             scaleAmount = 0.015f,
             ease = Ease.InOutSine,
             phaseOffset = 0f,
             blendIn = 0.25f,
-            blendOut = 0.25f,
-            wait = false
-        };
+            blendOut = 0.25f
+        });
 
-        Collect(spec);
-    }
-    
     private void EnqueueTremblePulseSpec(
-        string roleKey,
-        float duration = 99.0f,
-        float strength = 5f,
-        float frequency = 28f,
-        float pulseInterval = 1.0f,
-        float pulseDuration = 0.16f,
+        string rigKey,
         string direction = "right")
-    {
-        CharRigDirection dir = CharRigDirectionParser.ParseSlideDirection(direction);
-
-        var spec = new TrembleCommandSpecCharR
+        => Collect(new TrembleCommandSpecCharR
         {
-            slotKey = roleKey,
             target = CharacterRigTarget.CharSlot_Track_Idle,
-            direction = dir,
-            duration = duration,
-            strength = strength,
-            frequency = frequency,
+            
+            slotKey = rigKey,
+            direction = CharRigDirectionParser.ParseSlideDirection(direction),
+            
+            duration = 99.0f,
+            strength = 5f,
+            frequency = 28f,
             crossAxisRatio = 0.25f,
             noiseRatio = 0.25f,
             blendIn = 0.025f,
             blendOut = 0.06f,
             usePulse = true,
-            pulseInterval = pulseInterval,
-            pulseDuration = pulseDuration,
-            wait = false
-        };
-
-        Collect(spec);
-    }
+            pulseInterval = 1.0f,
+            pulseDuration = 0.16f
+        });
 
     private void EnqueueWalkInPlaceSpec(
-        string roleKey,
-        float duration = 99f,
-        float stepsPerSecond = 1.9f,
-        float arcHeight = 18f,
-        float airWidth = 0.95f)
-    {
-        var spec = new WalkInPlaceCommandSpecCharR
+        string rigKey)
+        => Collect(new WalkInPlaceCommandSpecCharR
         {
-            slotKey = roleKey,
             target = CharacterRigTarget.CharSlot_Track_Idle,
-            duration = duration,
-            stepsPerSecond = stepsPerSecond,
-            arcHeight = arcHeight,
-            airWidth = Mathf.Clamp(airWidth, 0.05f, 1f),
+            
+            slotKey = rigKey,
+            
+            duration = 99f,
+            stepsPerSecond = 1.9f,
+            arcHeight = 18f,
+            airWidth = 0.95f,
             sideSway = 0.3f,
             blendIn = 0.08f,
             blendOut = 0.08f,
-            wait = false
-        };
-
-        Collect(spec);
-    }
+        });
 }
