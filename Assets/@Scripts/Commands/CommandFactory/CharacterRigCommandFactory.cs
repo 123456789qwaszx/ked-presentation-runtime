@@ -71,8 +71,6 @@ public sealed class CharacterRigCommandFactory : INodeCommandFactory
             // Visibility / Root Layers
             FadeInCommandSpecCharR s => new FadeInCommandCharR(s),
             FadeOutCommandSpecCharR s => new FadeOutCommandCharR(s),
-            HideRootLayersCommandSpecCharR s => new HideRootLayersCommandCharR(s),
-            ShowRootLayersCommandSpecCharR s => new ShowRootLayersCommandCharR(s),
 
             // Basic Transform
             MoveByCommandSpecCharR s => new MoveByCommandCharR(s),

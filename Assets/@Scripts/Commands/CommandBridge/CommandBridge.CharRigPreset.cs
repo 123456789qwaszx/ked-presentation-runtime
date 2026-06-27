@@ -58,10 +58,11 @@ public sealed partial class YarnCommandBridge
     
     private void EnqueueSlideInSwayCombo(string roleKey)
     {
-        var spec = new HideRootLayersCommandSpecCharR
+        var spec = new FadeInCommandSpecCharR()
         {
             slotKey = roleKey,
-            targetMask = CharRigRootMask.CharacterPortrait_Root
+            target = CharacterRigTarget.CharacterPortraitSprite_Root,
+            duration = -1f
         };
 
         var spec1 = new FadeInCommandSpecCharR()
