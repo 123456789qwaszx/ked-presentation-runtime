@@ -46,7 +46,6 @@ public sealed partial class YarnCommandBridge
     
     private void BindRunnerCommands(DialogueRunner runner)
     {
-        RegisterDirectionalNudgeCommands(runner);
         RegisterFocusPlacementCommands(runner);
         RegisterDepthFocusCommands(runner);
         RegisterCharRigPlacementCommands(runner);
@@ -266,6 +265,7 @@ public sealed partial class YarnCommandBridge
     
     private void RegisterCharRigPlacementCommands(DialogueRunner runner)
     {
+        // Show
         runner.AddCommandHandler<string, string, string, string>(
             "show", EnqueueShowSpec);
         
@@ -283,6 +283,32 @@ public sealed partial class YarnCommandBridge
 
         runner.AddCommandHandler<string, string, string>(
             "show_at_dr", EnqueueShowAtDuoRightSpec);
+        
+        // Nudge
+        runner.AddCommandHandler<string, string, string>(
+            "left", EnqueueNudgeLeftSpec);
+
+        runner.AddCommandHandler<string, string, string>(
+            "right", EnqueueNudgeRightSpec);
+
+        runner.AddCommandHandler<string, string, string>(
+            "up", EnqueueNudgeUpSpec);
+
+        runner.AddCommandHandler<string, string, string>(
+            "down", EnqueueNudgeDownSpec);
+        
+        // MoveOneUnitPerFrame
+        runner.AddCommandHandler<string, string>(
+            "left_per", EnqueueMoveLeftOneUnitPerFrameSpec);
+
+        runner.AddCommandHandler<string, string>(
+            "right_per", EnqueueMoveRightOneUnitPerFrameSpec);
+
+        runner.AddCommandHandler<string, string>(
+            "up_per", EnqueueMoveUpOneUnitPerFrameSpec);
+
+        runner.AddCommandHandler<string, string>(
+            "down_per", EnqueueMoveDownOneUnitPerFrameSpec);
     }
     
     private void BindCharRigActing(DialogueRunner runner)
