@@ -28,13 +28,6 @@ public static class CharacterFacingExtensions
             ? new Vector2(-value.x, value.y)
             : value;
     }
-
-    public static Vector3 MirrorX(this CharacterFacing facing, Vector3 value)
-    {
-        return facing == CharacterFacing.Left
-            ? new Vector3(-value.x, value.y, value.z)
-            : value;
-    }
 }
 
 public sealed class CastRegistry

@@ -128,6 +128,7 @@ public sealed partial class YarnCommandBridge
         var spec = new SlideInCommandSpecCharR
         {
             slotKey = roleKey,
+            target = CharacterRigTarget.CharSlot_Track,
             direction = from,
             distance = distance,
             duration = duration
@@ -149,6 +150,7 @@ public sealed partial class YarnCommandBridge
         var spec = new SlideOutCommandSpecCharR
         {
             slotKey = roleKey,
+            target = CharacterRigTarget.CharSlot_Track,
             to = to,
             distance = distance,
             duration = duration

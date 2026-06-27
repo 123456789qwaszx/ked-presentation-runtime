@@ -17,24 +17,6 @@ public sealed class CharacterRigRegistry
         _rigs[rigKey] = rigRefs;
     }
 
-    public bool Unregister(string rigKey)
-    {
-        if (!_rigs.Remove(rigKey, out CharacterRigRefs rigRefs))
-        {
-            Debug.LogWarning($"[CharacterRigRegistry] Unregister failed. Rig not found. rigKey='{rigKey}'.");
-            return false;
-        }
-
-        DestroyRig(rigRefs);
-        return true;
-    }
-
-    public bool HasRig(string rigKey)
-    {
-        return _rigs.TryGetValue(rigKey, out CharacterRigRefs rigRefs)
-               && rigRefs?.RigRoot != null;
-    }
-
     public bool TryGetRig(string rigKey, out CharacterRigRefs rigRefs)
     {
         if (!_rigs.TryGetValue(rigKey, out rigRefs))

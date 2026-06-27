@@ -108,14 +108,7 @@ public sealed class PlaceCharacterFocusCommandCharR : CommandBase
         _moveRect.DOKill(true);
 
         _startPosition = _moveRect.anchoredPosition;
-        CalculateFocusPlacement(scope);
-
-        _rigRefs.PlacementTargets.PublishAnchoredPosition(_moveRect, _destination);
-        HasClaimedTarget = true;
-    }
-
-    private void CalculateFocusPlacement(CommandRunScope scope)
-    {
+        
         CharacterFocusPlacementSolver.TryCalculateFocusPlacement(
             scope,
             _spec.slotKey,
@@ -125,7 +118,13 @@ public sealed class PlaceCharacterFocusCommandCharR : CommandBase
             _focusTuningDb,
             _spec.screenPoint,
             _spec.screenOffset,
-            out _destination);
+            out Vector2 destination);
+        
+        _destination = destination;
+        
+        _rigRefs.PlacementTargets.PublishAnchoredPosition(_moveRect, _destination);
+        
+        HasClaimedTarget = true;
     }
 
     private void CommitFinalState()

@@ -18,17 +18,17 @@ public static class CharacterRigTargetResolver
     
     public static string ResolveRigKeyByPolicy(CommandRunScope scope, string targetKey)
     {
-        targetKey = ResolveAlias(scope, targetKey);
+        string resolvedTargetKey = scope.CharacterTargetAliases.Resolve(targetKey);
 
-        if (scope.CastRegistry.TryGetSlotKey(targetKey, out string characterSlotKey))
+        if (scope.CastRegistry.TryGetSlotKey(resolvedTargetKey, out string characterSlotKey))
             return characterSlotKey;
 
-        return targetKey;
+        return resolvedTargetKey;
     }
     
     public static string ResolveCharacterKeyFromTargetKey(CommandRunScope scope, string targetKey)
     {
-        string resolvedTargetKey = ResolveAlias(scope, targetKey);
+        string resolvedTargetKey = scope.CharacterTargetAliases.Resolve(targetKey);
         string resolvedRigKey = ResolveRigKeyByPolicy(scope, resolvedTargetKey);
 
         if (!scope.CastRegistry.TryGetCharacter(resolvedRigKey, out string characterKey))
@@ -41,10 +41,5 @@ public static class CharacterRigTargetResolver
         }
         
         return characterKey;
-    }
-
-    private static string ResolveAlias(CommandRunScope scope, string targetKey)
-    {
-        return scope.CharacterTargetAliases.Resolve(targetKey);
     }
 }

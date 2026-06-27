@@ -156,18 +156,7 @@ public sealed class CharacterRigVisualEffectController : IDisposable
         MarkMaterialDirty();
     }
 
-    public void ClearImmediate()
-    {
-        ApplyImmediate(
-            0f,
-            DefaultDimTintColor,
-            0f,
-            0f,
-            DefaultOuterRimColor,
-            DefaultInnerRimColor);
-    }
-
-    // 정적 스타일은 균일·불변이므로 생성 시 한 번만 기록. tween 프레임마다 다시 쓰지 않는다.
+    // 스타일은 생성 시 한 번만 기록. tween마다 반복하지 않음.
     private void ApplyStaticStyle()
     {
         if (_runtimeMaterial == null)
@@ -249,6 +238,7 @@ public sealed class CharacterRigVisualEffectController : IDisposable
         material.SetFloat(StageBlurEdgeHideId, _stageBlurEdgeHide);
     }
     
+    // Mask 등에 의해 Canvas가 서브 Material을 생성했을 때, 실제 사용하는 것과 Image의 Material을 같게 함.
     private void PushMaterialToGraphics()
     {
         PushMaterialToGraphic(_portraitImage);

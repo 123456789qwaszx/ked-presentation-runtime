@@ -22,7 +22,6 @@ public sealed class CharacterRigTargetAliasRegistry
         _aliases[aliasSymbol.Trim()] = targetKey.Trim();
     }
     
-    public void Unregister(string aliasSymbol) => _aliases.Remove(aliasSymbol);
     
     // raw가 등록된 alias면 target key로 치환, 아니면 그대로 반환.
     public string Resolve(string raw)

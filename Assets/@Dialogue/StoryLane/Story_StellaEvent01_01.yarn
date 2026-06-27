@@ -32,10 +32,15 @@ title: Story_StellaEvent01_01
 
 <<actor @1 Noya>>
 <<fade_in  @1>>
+<<left @1 5>>
 <<slide_in @1>>
+<<right @1 5>>
+<<14fr>>
+<<right @1 15>>
 
 <<seq cutin>>
-
+<<mirror @1>>
+<<emoji @1 3>>
 하늘이 뚫린 듯 비가 쏟아지는 밤이었다. 칠흑 같은 파도가 너울대는 바다를 멍하니 바라보던 중, [br/]순간 연한 녹색 빛이 수면 위로 올라오는 게 보였다.
 
 <<seq cutin>>

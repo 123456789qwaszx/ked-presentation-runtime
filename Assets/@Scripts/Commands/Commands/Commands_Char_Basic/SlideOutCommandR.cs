@@ -7,8 +7,8 @@ using UnityEngine;
 [CommandMenuHint("Char Rig Motion", "Slide Out", Order = -772)]
 public sealed class SlideOutCommandSpecCharR : CharacterRigCommandSpecBase
 {
-    [Header("Target (Track)")]
-    public CharacterRigTarget target = CharacterRigTarget.CharacterPortrait_Track;
+    [Header("Target (Track)")] 
+    public CharacterRigTarget target = CharacterRigTarget.CharSlot_Track;
 
     [Header("Slide")]
     public CharRigDirection to = CharRigDirection.Right;
