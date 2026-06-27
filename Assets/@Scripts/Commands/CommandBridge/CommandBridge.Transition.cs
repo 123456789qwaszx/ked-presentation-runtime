@@ -1,23 +1,16 @@
 public sealed partial class YarnCommandBridge
 {
-    // 공통 진입점 — char_visual의 EnqueueCharVisualPresetSpec에 대응.
     private void EnqueueStageMaskMotionPresetSpec(
         string presetKey,
         string stage = "01",
         float duration = -1f)
-    {
-        var spec = new StageMaskMotionCommandSpec
+        => Collect(new StageMaskMotionCommandSpec
         {
             stage = PresentationStageKeyParser.Parse(stage, PresentationStageKey.Stage01),
             presetKey = StageMaskMotionPresetDBSO.NormalizeKey(presetKey),
-            durationOverride = duration,
-            wait = false
-        };
+            durationOverride = duration
+        });
 
-        Collect(spec);
-    }
-
-// 개별 트랜지션 = preset key만 고정하는 얇은 래퍼.
     private void EnqueueSlantedMaskCutInSpec(string stage = "01", float duration = -1f)
         => EnqueueStageMaskMotionPresetSpec("slant_in", stage, duration);
 
@@ -60,6 +53,19 @@ public sealed partial class YarnCommandBridge
     private void EnqueueCircleIrisOutSpec(string stage = "01", float duration = -1f)
         => EnqueueStageMaskMotionPresetSpec("iris_out", stage, duration);
 
+    // preset
+    private void EnqueueDazeFadeCloseSpec(string stage = "00", float duration = -1f)
+        => EnqueueStageMaskMotionPresetSpec("daze_close", stage, duration);
+
+    private void EnqueueVerticalStripCoverSpec(string stage = "00", float duration = -1f)
+        => EnqueueStageMaskMotionPresetSpec("strip_cover", stage, duration);
+
+    private void EnqueueTransitionOutDazeFadeSpec(string stage = "00", float duration = -1f)
+        => EnqueueStageMaskMotionPresetSpec("daze_open", stage, duration);
+
+    private void EnqueueTransitionOutStripSpec(string stage = "00", float duration = -1f)
+        => EnqueueStageMaskMotionPresetSpec("strip_clear", stage, duration);
+    
     private void EnqueueStageMaskClearSpec()
     {
         Collect(new StageMaskClearCommandSpec
@@ -81,16 +87,4 @@ public sealed partial class YarnCommandBridge
             hideEdge = true
         });
     }
-
-    private void EnqueueDazeFadeCloseSpec(string stage = "00", float duration = -1f)        // tx_daze
-        => EnqueueStageMaskMotionPresetSpec("daze_close", stage, duration);
-
-    private void EnqueueVerticalStripCoverSpec(string stage = "00", float duration = -1f)   // tx_strip
-        => EnqueueStageMaskMotionPresetSpec("strip_cover", stage, duration);
-
-    private void EnqueueTransitionOutDazeFadeSpec(string stage = "00", float duration = -1f) // tx_out_daze
-        => EnqueueStageMaskMotionPresetSpec("daze_open", stage, duration);
-
-    private void EnqueueTransitionOutStripSpec(string stage = "00", float duration = -1f)    // tx_out_strip
-        => EnqueueStageMaskMotionPresetSpec("strip_clear", stage, duration);
 }

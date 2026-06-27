@@ -346,7 +346,6 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler<string, float>(
             "tx_slant_out", EnqueueSlantedMaskCutOutSpec);
         
-        
         runner.AddCommandHandler<string, float>(
             "tx_hstrip_open",
             EnqueueHorizontalStripOpenInSpec);
