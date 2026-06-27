@@ -1,26 +1,15 @@
 using System;
 
-public enum CharacterDepthKey
-{
-    None = 0,
-
-    Far = 10,
-    Back = 16,
-    Mid = 20,
-    Close = 30,
-    Front = 40,
-
-    Exp1 = 100,
-    Exp2 = 101,
-}
-
 public static class CharacterDepthPresetParser
 {
     public static bool TryParse(string raw, out CharacterDepthKey preset)
     {
         preset = CharacterDepthKey.Mid;
-
-        string s = Normalize(raw);
+        
+        if (string.IsNullOrWhiteSpace(raw))
+            return false;
+        
+        string s = raw.Trim().ToLowerInvariant();
 
         switch (s)
         {
@@ -72,16 +61,5 @@ public static class CharacterDepthPresetParser
         }
 
         return Enum.TryParse(raw.Trim(), true, out preset);
-    }
-
-    private static string Normalize(string raw)
-    {
-        string s = raw.Trim().ToLowerInvariant();
-
-        s = s.Replace("-", "_");
-        s = s.Replace(".", "_");
-        s = s.Replace(" ", "_");
-
-        return s;
     }
 }

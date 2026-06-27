@@ -1,5 +1,25 @@
 using UnityEngine;
 
+public readonly struct CharacterDepthResult
+{
+    public readonly Vector2 RawDepthYAnchoredPosition;
+    public readonly Vector2 DepthScale;
+    public readonly CharacterFocusPreset PreserveFocusPreset;
+    public readonly Vector2 PreserveFocusOffset;
+
+    public CharacterDepthResult(
+        Vector2 rawDepthYAnchoredPosition,
+        Vector2 depthScale,
+        CharacterFocusPreset preserveFocusPreset,
+        Vector2 preserveFocusOffset)
+    {
+        RawDepthYAnchoredPosition = rawDepthYAnchoredPosition;
+        DepthScale = depthScale;
+        PreserveFocusPreset = preserveFocusPreset;
+        PreserveFocusOffset = preserveFocusOffset;
+    }
+}
+
 public static class CharacterDepthResolver
 {
     public static void ResolveRawDepth(
@@ -25,7 +45,7 @@ public static class CharacterDepthResolver
             value.preserveFocusOffset);
     }
 
-    public static bool CalculateDepthYThatPreservesCurrentFocus(
+    public static void CalculateDepthYThatPreservesCurrentFocus(
         CommandRunScope scope,
         string roleKey,
         RectTransform depthYRect,
@@ -67,8 +87,6 @@ public static class CharacterDepthResolver
         RectTransform stageRoot = currentFocus.RigSpaceRoot;
         RectTransform depthYParent = depthYRect.parent as RectTransform;
 
-        if (stageRoot == null || depthYParent == null)
-            return false;
 
         Vector2 compensationInStageSpace =
             currentFocus.FocusPointInRigSpace -
@@ -81,7 +99,6 @@ public static class CharacterDepthResolver
                 depthYParent);
 
         finalDepthY = rawDepthY + compensationInDepthYParentSpace;
-        return true;
     }
 
     private static void TryMeasureFocusWithTemporaryDepthTransform(

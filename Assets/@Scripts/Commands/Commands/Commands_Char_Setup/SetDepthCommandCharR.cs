@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using DG.Tweening;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 [Serializable]
 [CommandMenuHint(
@@ -79,8 +78,7 @@ public sealed class SetDepthCommandCharR : CommandBase
         if (!_resolveAttempted)
             ResolveRefs(scope);
 
-        if (!ClaimTarget(scope))
-            yield break;
+        ClaimTarget(scope);
 
         if (_spec.duration <= 0f)
         {
@@ -88,7 +86,25 @@ public sealed class SetDepthCommandCharR : CommandBase
             yield break;
         }
 
-        StartTween(_spec.duration);
+        _sequence = DOTween.Sequence()
+            .SetUpdate(true)
+            .SetTarget(_depthYRect);
+
+        _sequence.Join(
+            _depthYRect
+                .DOAnchorPos(_destFinalDepthY, _spec.duration)
+                .SetEase(_spec.ease)
+                .SetUpdate(true)
+                .SetTarget(_depthYRect));
+
+        _sequence.Join(
+            _depthScaleRect
+                .DOScale(new Vector3(_destDepthScale.x, _destDepthScale.y, 1f), _spec.duration)
+                .SetEase(_spec.ease)
+                .SetUpdate(true)
+                .SetTarget(_depthScaleRect));
+
+        _sequence.OnComplete(CommitFinalState);
 
         if (_spec.wait && _sequence != null)
             yield return _sequence.WaitForCompletion();
@@ -100,47 +116,29 @@ public sealed class SetDepthCommandCharR : CommandBase
             ResolveRefs(scope);
 
         if (!HasClaimedTarget)
-        {
-            if (!ClaimTarget(scope))
-                return;
-        }
+            ClaimTarget(scope);
 
         CommitFinalState();
     }
 
     private void ResolveRefs(CommandRunScope scope)
     {
-        _resolveAttempted = true;
-
         _rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
         
         _depthYRect = _rigRefs.GetRect(_spec.depthYTarget);
         _depthScaleRect = _rigRefs.GetRect(_spec.depthScaleTarget);
+        
+        _resolveAttempted = true;
     }
 
-    private bool ClaimTarget(CommandRunScope scope)
+    private void ClaimTarget(CommandRunScope scope)
     {
-        // 이전 depth tween이 있으면 final state로 커밋하고 이어받는다.
         _depthYRect.DOKill(true);
         _depthScaleRect.DOKill(true);
 
-        if (_sequence != null && _sequence.IsActive())
-            _sequence.Kill(false);
-
         _startDepthY = _depthYRect.anchoredPosition;
-        _startDepthScale = CaptureScaleXY(_depthScaleRect);
-
-        if (!ResolveDestination(scope))
-            return false;
-
-        PublishSettledTargets();
-
-        HasClaimedTarget = true;
-        return true;
-    }
-
-    private bool ResolveDestination(CommandRunScope scope)
-    {
+        _startDepthScale = new Vector2(_depthScaleRect.localScale.x, _depthScaleRect.localScale.y);
+        
         CharacterDepthResolver.ResolveRawDepth(
             _spec.preset,
             _spec.useLevel,
@@ -152,33 +150,65 @@ public sealed class SetDepthCommandCharR : CommandBase
 
         _destRawDepthY = rawDepth.RawDepthYAnchoredPosition;
         _destDepthScale = rawDepth.DepthScale;
+        
+        CharacterDepthResolver.CalculateDepthYThatPreservesCurrentFocus(
+            scope,
+            _spec.slotKey,
+            _depthYRect,
+            _depthScaleRect,
+            _destRawDepthY,
+            _destDepthScale,
+            rawDepth.PreserveFocusPreset,
+            rawDepth.PreserveFocusOffset,
+            _focusTuningDb,
+            out Vector2 destFinalDepthY);
+        
+        _destFinalDepthY = destFinalDepthY;
+        
+        PublishSettledTargets();
 
-        if (!CharacterDepthResolver.CalculateDepthYThatPreservesCurrentFocus(
-                scope,
-                _spec.slotKey,
-                _depthYRect,
-                _depthScaleRect,
-                _destRawDepthY,
-                _destDepthScale,
-                rawDepth.PreserveFocusPreset,
-                rawDepth.PreserveFocusOffset,
-                _focusTuningDb,
-                out _destFinalDepthY))
-        {
-            Debug.LogWarning(
-                $"[SetDepthCommandCharR] Failed to preserve focus. " +
-                $"Fallback to raw depthY. slotKey='{_spec.slotKey}', " +
-                $"focus='{rawDepth.PreserveFocusPreset}'.");
+        HasClaimedTarget = true;
+    }
+    
+    private void CommitFinalState()
+    {
+        _depthYRect.anchoredPosition = _destFinalDepthY;
+        _depthScaleRect.localScale = new Vector3(_destDepthScale.x, _destDepthScale.y, 1f);
 
-            _destFinalDepthY = _destRawDepthY;
-        }
+        ClearSettledTargets();
 
-        return true;
+        HasClaimedTarget = false;
     }
 
-    private void StartTween(float duration)
+    private void PublishSettledTargets()
     {
-        KillSequenceWithoutCompleting();
+        _rigRefs.PlacementTargets.PublishAnchoredPosition(_depthYRect, _destFinalDepthY);
+        _rigRefs.PlacementTargets.PublishLocalScale(_depthScaleRect, _destDepthScale);
+    }
+
+    private void ClearSettledTargets()
+    {
+        _rigRefs.PlacementTargets.Clear(_depthYRect);
+        _rigRefs.PlacementTargets.Clear(_depthScaleRect);
+    }
+
+    #region StepLifetimeHook
+
+    protected override void OnStepLifetimeFinished(CommandRunScope scope)
+    {
+        if (!HasClaimedTarget)
+            return;
+
+        if (_sequence.IsActive())
+            _sequence.Kill(false);
+
+        float duration = CalculateAcceleratedRemainingDuration();
+
+        if (duration <= 0f)
+        {
+            CommitFinalState();
+            return;
+        }
 
         _sequence = DOTween.Sequence()
             .SetUpdate(true)
@@ -201,121 +231,22 @@ public sealed class SetDepthCommandCharR : CommandBase
         _sequence.OnComplete(CommitFinalState);
     }
 
-    private void CommitFinalState()
-    {
-        if (_depthYRect != null)
-            _depthYRect.anchoredPosition = _destFinalDepthY;
-
-        if (_depthScaleRect != null)
-            _depthScaleRect.localScale = new Vector3(
-                _destDepthScale.x,
-                _destDepthScale.y,
-                1f);
-
-        ClearSettledTargets();
-
-        HasClaimedTarget = false;
-        _sequence = null;
-    }
-
-    private void PublishSettledTargets()
-    {
-        if (_rigRefs == null || _rigRefs.PlacementTargets == null)
-            return;
-
-        _rigRefs.PlacementTargets.PublishAnchoredPosition(
-            _depthYRect,
-            _destFinalDepthY);
-
-        _rigRefs.PlacementTargets.PublishLocalScale(
-            _depthScaleRect,
-            _destDepthScale);
-    }
-
-    private void ClearSettledTargets()
-    {
-        if (_rigRefs == null || _rigRefs.PlacementTargets == null)
-            return;
-
-        _rigRefs.PlacementTargets.Clear(_depthYRect);
-        _rigRefs.PlacementTargets.Clear(_depthScaleRect);
-    }
-
-    private void KillSequenceWithoutCompleting()
-    {
-        if (_sequence != null && _sequence.IsActive())
-            _sequence.Kill(false);
-
-        _sequence = null;
-    }
-
-    private static Vector2 CaptureScaleXY(RectTransform rect)
-    {
-        if (rect == null)
-            return Vector2.one;
-
-        Vector3 s = rect.localScale;
-        return new Vector2(s.x, s.y);
-    }
-
-    #region StepLifetimeHook
-
-    protected override void OnStepLifetimeFinished(CommandRunScope scope)
-    {
-        if (!HasClaimedTarget)
-            return;
-
-        KillSequenceWithoutCompleting();
-
-        float duration = CalculateAcceleratedRemainingDuration();
-
-        if (duration <= 0f)
-        {
-            CommitFinalState();
-            return;
-        }
-
-        StartTween(duration);
-    }
-
     private float CalculateAcceleratedRemainingDuration()
     {
-        float posOriginalDistance =
-            Vector2.Distance(_startDepthY, _destFinalDepthY);
-
-        float posRemainingDistance =
-            _depthYRect != null
-                ? Vector2.Distance(_depthYRect.anchoredPosition, _destFinalDepthY)
-                : 0f;
-
-        float scaleOriginalDistance =
-            Vector2.Distance(_startDepthScale, _destDepthScale);
-
-        float scaleRemainingDistance =
-            _depthScaleRect != null
-                ? Vector2.Distance(CaptureScaleXY(_depthScaleRect), _destDepthScale)
-                : 0f;
-
-        float posRatio =
-            posOriginalDistance <= 0.001f
-                ? 0f
-                : Mathf.Clamp01(posRemainingDistance / posOriginalDistance);
-
-        float scaleRatio =
-            scaleOriginalDistance <= 0.001f
-                ? 0f
-                : Mathf.Clamp01(scaleRemainingDistance / scaleOriginalDistance);
-
+        float posOriginalDistance = Vector2.Distance(_startDepthY, _destFinalDepthY);
+        float posRemainingDistance =Vector2.Distance(_depthYRect.anchoredPosition, _destFinalDepthY);
+        
+        float scaleOriginalDistance = Vector2.Distance(_startDepthScale, _destDepthScale);
+        float scaleRemainingDistance = 
+            Vector2.Distance(new Vector2(_depthScaleRect.localScale.x, _depthScaleRect.localScale.y), _destDepthScale);
+        
+        float posRatio = Mathf.Clamp01(posRemainingDistance / posOriginalDistance);
+        float scaleRatio = Mathf.Clamp01(scaleRemainingDistance / scaleOriginalDistance);
+        
         float remainingRatio = Mathf.Max(posRatio, scaleRatio);
-
-        if (remainingRatio <= 0.001f)
-            return 0f;
-
         float remainingDuration = _spec.duration * remainingRatio;
 
-        return Mathf.Max(
-            0.01f,
-            remainingDuration / StepFinishSpeedUpMultiplier);
+        return remainingDuration / StepFinishSpeedUpMultiplier;
     }
 
     #endregion
