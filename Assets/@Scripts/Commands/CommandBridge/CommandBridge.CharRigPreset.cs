@@ -2,7 +2,7 @@ public sealed partial class YarnCommandBridge
 {
     private void EnqueueJoltSpec(string roleKey, string direction = "right")
     {
-        CharRigDirection dir = CharRigDirectionParser.ParseSlideDirection(direction, CharRigDirection.Right);
+        CharRigDirection dir = CharRigDirectionParser.ParseSlideDirection(direction);
 
         var spec = new JoltCommandSpec
         {
@@ -21,7 +21,7 @@ public sealed partial class YarnCommandBridge
     
     private void EnqueueJoltSpecTap(string roleKey, string direction = "right")
     {
-        CharRigDirection dir = CharRigDirectionParser.ParseSlideDirection(direction, CharRigDirection.Right);
+        CharRigDirection dir = CharRigDirectionParser.ParseSlideDirection(direction);
 
         var spec = new JoltCommandSpec
         {
@@ -40,7 +40,7 @@ public sealed partial class YarnCommandBridge
     
     private void EnqueueJoltSpecTapHard(string roleKey, string direction = "down")
     {
-        CharRigDirection dir = CharRigDirectionParser.ParseSlideDirection(direction, CharRigDirection.Down);
+        CharRigDirection dir = CharRigDirectionParser.ParseSlideDirection(direction);
 
         var spec = new JoltCommandSpec
         {
@@ -151,7 +151,7 @@ public sealed partial class YarnCommandBridge
     
     private void EnqueueSlideInJoltCombo(string roleKey, string direction = "right")
     {
-        CharRigDirection dir = CharRigDirectionParser.ParseSlideDirection(direction, CharRigDirection.Right);
+        CharRigDirection dir = CharRigDirectionParser.ParseSlideDirection(direction);
 
         var juicySlideIn = new SlideInCommandSpecCharR
         {

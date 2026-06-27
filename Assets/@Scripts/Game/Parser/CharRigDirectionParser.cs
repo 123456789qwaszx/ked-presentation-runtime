@@ -1,48 +1,32 @@
 public static class CharRigDirectionParser
 {
     public static CharRigDirection ParseSlideDirection(
-        string direction,
-        CharRigDirection fallback = CharRigDirection.Left)
-    {
-        if (TryParseSlideDirection(direction, out CharRigDirection result))
-            return result;
-
-        return fallback;
-    }
-
-    public static bool TryParseSlideDirection(
-        string direction,
-        out CharRigDirection result)
+        string direction)
     {
         switch (direction?.Trim().ToLowerInvariant())
         {
             case "left":
             case "l":
-                result = CharRigDirection.Left;
-                return true;
+                return CharRigDirection.Left;
 
             case "right":
             case "r":
-                result = CharRigDirection.Right;
-                return true;
+                return CharRigDirection.Right;
 
             case "up":
             case "u":
             case "top":
             case "t":
-                result = CharRigDirection.Up;
-                return true;
+                return CharRigDirection.Up;
 
             case "down":
             case "d":
             case "bottom":
             case "b":
-                result = CharRigDirection.Down;
-                return true;
+                return CharRigDirection.Down;
 
             default:
-                result = default;
-                return false;
+                return CharRigDirection.Left;
         }
     }
 }

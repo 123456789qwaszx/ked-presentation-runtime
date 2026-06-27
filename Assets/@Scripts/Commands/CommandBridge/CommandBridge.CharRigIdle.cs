@@ -105,7 +105,7 @@ public sealed partial class YarnCommandBridge
         float pulseDuration = 0.16f,
         string direction = "right")
     {
-        CharRigDirection dir = CharRigDirectionParser.ParseSlideDirection(direction, CharRigDirection.Right);
+        CharRigDirection dir = CharRigDirectionParser.ParseSlideDirection(direction);
 
         var spec = new TrembleCommandSpecCharR
         {

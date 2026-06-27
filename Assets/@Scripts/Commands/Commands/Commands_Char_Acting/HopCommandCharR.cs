@@ -11,21 +11,22 @@ public sealed class HopCommandSpecCharR : CharacterRigCommandSpecBase
     [Header("Target")]
     public CharacterRigTarget target = CharacterRigTarget.CharacterPortrait_Track_Y;
 
-    [Header("Timing")]
-    public float duration = 0.95f;
-    public Ease ease = Ease.OutCubic;
 
     [Header("Hop")]
     [Min(1)]
     public int hopCount = 1;
 
     [Tooltip("Arc height in pixels. Positive value hops upward.")]
-    public float height = 48f;
+    public float height = 22f;
 
     [Range(0.05f, 1f)]
     [Tooltip("How much of each hop segment is airborne. 1=arc spans whole segment, 0.2=short/narrow arc.")]
     public float airWidth = 0.85f;
-
+    
+    [Header("Timing")]
+    public float duration = 0.8f;
+    public Ease ease = Ease.OutCubic;
+    
     [Header("Last hop override (optional)")]
     [Tooltip("If < 0, uses arcHeight.")]
     public float lastArcHeight = -1f;

@@ -268,11 +268,11 @@ public sealed partial class YarnCommandBridge
     {
         runner.AddCommandHandler<string, string>(
             "dip", EnqueueDipInOutSpec);
-        runner.AddCommandHandler<string, int, float, float, float>(
+        runner.AddCommandHandler<string>(
             "hop", EnqueueHopSpec);
-        runner.AddCommandHandler<string, string, float, float, int>(
-            "shake", EnqueueJoltSpecShake);
-        runner.AddCommandHandler<string, float, float, float, string>(
+        runner.AddCommandHandler<string, string>(
+            "shake", EnqueueShakeJoltSpec);
+        runner.AddCommandHandler<string, string>(
             "tremble", EnqueueTrembleSpec);
         runner.AddCommandHandler<string>(
             "sway", EnqueueSwaySpec);

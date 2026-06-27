@@ -1,104 +1,77 @@
 public sealed partial class YarnCommandBridge
 {
-    private void EnqueueDipInOutSpec(string roleKey, 
+    private void EnqueueDipInOutSpec(
+        string roleKey,
         string direction = "down")
-    {
-        CharRigDirection dir = CharRigDirectionParser.ParseSlideDirection(direction, CharRigDirection.Down);
-
-        var spec = new DipInOutCommandSpecCharR
+        => Collect(new DipInOutCommandSpecCharR
         {
+            target = CharacterRigTarget.CharacterPortrait_Track_Y,
+            
             slotKey = roleKey,
-            dir = dir
-        };
+            dir = CharRigDirectionParser.ParseSlideDirection(direction)
+        });
 
-        Collect(spec);
-    }
-    
-    // int hopCount = 2,
-    // float height = 48f,
-    // float airWidth = 0.85f,
-    // float duration = 0.4f)
-    private void EnqueueHopSpec(string roleKey,
-        int hopCount = 1,
-        float height = 22f,
-        float airWidth = 12f,
-        float duration = 0.8f)
-    {
-        var spec = new HopCommandSpecCharR
+    private void EnqueueHopSpec(
+        string roleKey)
+        => Collect(new HopCommandSpecCharR
         {
+            target = CharacterRigTarget.CharacterPortrait_Track_Y,
+            
             slotKey = roleKey,
-            hopCount = hopCount,
-            height = height,
-            airWidth = airWidth,
-            duration = duration
-        };
+            
+            hopCount = 1,
+            height = 22,
+            airWidth = 0.88f,
+            duration = 0.6f
+        });
 
-        Collect(spec);
-    }
-    
-    private void EnqueueJoltSpecShake(string roleKey,
-        string direction = "right",
-        float strength = 44f,
-        float duration = 1.2f,
-        int taps = 4)
-    {
-        CharRigDirection dir = CharRigDirectionParser.ParseSlideDirection(direction, CharRigDirection.Right);
-
-        var spec = new JoltCommandSpec
-        {
-            target = CharacterRigTarget.CharacterPortrait_Shake,
-            slotKey = roleKey,
-            direction = dir,
-            strength = strength,
-            duration = duration,
-            taps = taps
-        };
-
-        Collect(spec);
-    }
-    
-    private void EnqueueTrembleSpec(string roleKey,
-        float duration = 1.2f,
-        float strength = 8f,
-        float frequency = 24f,
+    private void EnqueueShakeJoltSpec(
+        string roleKey, 
         string direction = "right")
-    {
-        CharRigDirection dir = CharRigDirectionParser.ParseSlideDirection(direction, CharRigDirection.Right);
-
-        var spec = new TrembleCommandSpecCharR
+        => Collect(new JoltCommandSpec
         {
-            slotKey = roleKey.Trim(),
             target = CharacterRigTarget.CharacterPortrait_Shake,
-            direction = dir,
-            duration = duration,
-            strength = strength,
-            frequency = frequency,
+            
+            direction = CharRigDirectionParser.ParseSlideDirection(direction),
+            slotKey = roleKey,
+            
+            strength = 44f,
+            taps = 4,
+            duration = 1.2f
+        });
+
+    private void EnqueueTrembleSpec(
+        string roleKey,
+        string direction = "right")
+        => Collect(new TrembleCommandSpecCharR
+        {
+            target = CharacterRigTarget.CharacterPortrait_Shake,
+            
+            slotKey = roleKey,
+            direction = CharRigDirectionParser.ParseSlideDirection(direction),
+            
+            strength = 8f,
+            frequency = 24f,
             crossAxisRatio = 0.35f,
             noiseRatio = 0.25f,
             blendIn = 0.04f,
             blendOut = 0.08f,
-            wait = false
-        };
+            duration = 1.2f
+        });
 
-        Collect(spec);
-    }
-    
-    private void EnqueueSwaySpec(string roleKey)
-    {
-        var spec = new SwayCommandSpecCharR
+    private void EnqueueSwaySpec(
+        string roleKey)
+        => Collect(new SwayCommandSpecCharR
         {
-            slotKey = roleKey,
             target = CharacterRigTarget.CharacterPortrait_SwayPivot,
+            
+            slotKey = roleKey,
 
             strength = 12f,
-            duration = 1.15f,
             cycles = 2,
             damping = 1.9f,
             speed = 1.2f,
             anticipation = 0.45f,
-            wait = false
-        };
-
-        Collect(spec);
-    }
+            duration = 1.15f,
+        });
 }
