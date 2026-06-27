@@ -16,13 +16,11 @@ public sealed class InlineSfxPlaybackHost : MonoBehaviour
     [Header("Cue -> ClipKey")]
     [SerializeField] private List<CueMapEntry> cueMap = new();
 
-    private IAudioClipResolver _clipResolver;
     private Dictionary<string, string> _cueToClipKey;
 
-    public void Initialize(AudioSystem audioSystem, IAudioClipResolver clipResolver)
+    public void Initialize(AudioSystem audioSystem)
     {
         _audioSystem = audioSystem;
-        _clipResolver = clipResolver;
 
         RebuildCueLookup();
     }
@@ -44,7 +42,7 @@ public sealed class InlineSfxPlaybackHost : MonoBehaviour
 
         string clipKey = ResolveCueToClipKey(cue);
 
-        if (!_clipResolver.TryResolve(clipKey, out AudioClip clip) || clip == null)
+        if (!ResourcesAudioClipResolver.TryResolve(clipKey, out AudioClip clip))
         {
             Debug.LogWarning($"[InlineSfxPlaybackHost] Failed to resolve SFX cue. cue={cue}, clipKey={clipKey}", this);
             return;

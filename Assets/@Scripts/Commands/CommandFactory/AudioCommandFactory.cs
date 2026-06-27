@@ -3,12 +3,10 @@ using UnityEngine;
 public sealed class AudioCommandFactory : INodeCommandFactory
 {
     private readonly AudioSystem _audio;
-    private readonly IAudioClipResolver _clipResolver;
 
-    public AudioCommandFactory(AudioSystem audio, IAudioClipResolver clipResolver)
+    public AudioCommandFactory(AudioSystem audio)
     {
         _audio = audio;
-        _clipResolver = clipResolver;
     }
 
     public bool TryCreate(CommandSpecBase spec, out ISequenceCommand command)
@@ -37,11 +35,12 @@ public sealed class AudioCommandFactory : INodeCommandFactory
         if (directClip != null)
             return directClip;
 
-        if (_clipResolver != null &&
-            _clipResolver.TryResolve(clipKey, out AudioClip resolved))
-            return resolved;
-
-        Debug.LogWarning($"[AudioCommandFactory] Failed to resolve AudioClip. clipKey={clipKey}");
-        return null;
+        if(!ResourcesAudioClipResolver.TryResolve(clipKey, out AudioClip resolved))
+        {
+            Debug.LogWarning($"[AudioCommandFactory] Failed to resolve AudioClip. clipKey={clipKey}");
+            return null;
+        }
+        
+        return resolved;
     }
 }

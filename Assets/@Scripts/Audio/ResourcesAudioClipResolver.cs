@@ -1,8 +1,8 @@
 using UnityEngine;
 
-public sealed class ResourcesAudioClipResolver : IAudioClipResolver
+public static class ResourcesAudioClipResolver
 {
-    public bool TryResolve(string clipKey, out AudioClip clip)
+    public static bool TryResolve(string clipKey, out AudioClip clip)
     {
         clip = null;
 

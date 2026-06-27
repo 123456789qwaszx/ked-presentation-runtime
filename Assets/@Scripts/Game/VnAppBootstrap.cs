@@ -189,8 +189,7 @@ public class VnAppBootstrap : MonoBehaviour
 
     private void ConnectAudioSystemToYarn()
     {
-        ResourcesAudioClipResolver audioClipResolver = new();
-        inlineSfxHost.Initialize(audioSystem, audioClipResolver);
+        inlineSfxHost.Initialize(audioSystem);
     }
 
     private void BootstrapUIManager()
@@ -250,11 +249,7 @@ public class VnAppBootstrap : MonoBehaviour
         PresentationControlCommandFactory presentationControlFactory = new(_uiPatchService);
 
         // Audio
-        ResourcesAudioClipResolver audioClipResolver = new();
-
-        AudioCommandFactory audioFactory = new(
-            audioSystem,
-            audioClipResolver);
+        AudioCommandFactory audioFactory = new(audioSystem);
         
         ScreenEffectRig screenEffectRig = EnsureScreenEffectRig();
 
