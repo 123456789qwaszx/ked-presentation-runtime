@@ -1,88 +1,51 @@
-using UnityEngine;
-
 public sealed partial class YarnCommandBridge
 {
-    private void EnqueueScreenFlashPresetSpec(
-        string presetKey,
-        float intensity = 1f)
-    {
-        var spec = new ScreenFlashCommandSpec
+    private void EnqueueScreenFlashPresetSpec(string presetKey, float intensity = 1f)
+        => Collect(new ScreenFlashCommandSpec
         {
             presetKey = ScreenFlashPresetDBSO.NormalizeKey(presetKey),
-            intensity = Mathf.Clamp01(intensity),
-            wait = false
-        };
-
-        Collect(spec);
-    }
+            intensity = intensity,
+        });
 
     private void EnqueueScreenFlashClearSpec()
-    {
-        var spec = new ScreenFlashCommandSpec
+        => Collect(new ScreenFlashCommandSpec
         {
             presetKey = "clear",
             intensity = 1f,
-            wait = false
-        };
+        });
 
-        Collect(spec);
-    }
-
-    private void EnqueueScreenVignettePresetSpec(
-        string presetKey,
-        float intensity = 1f,
-        float duration = 0.35f)
-    {
-        var spec = new ScreenVignetteCommandSpec
+    private void EnqueueScreenVignettePresetSpec(string presetKey, float intensity = 1f, float duration = 0.35f)
+        => Collect(new ScreenVignetteCommandSpec
         {
             presetKey = ScreenVignettePresetDBSO.NormalizeKey(presetKey),
-            intensity = Mathf.Clamp01(intensity),
-            duration = Mathf.Max(0f, duration),
-            wait = false
-        };
-
-        Collect(spec);
-    }
+            intensity = intensity,
+            duration = duration,
+        });
 
     private void EnqueueScreenVignetteClearSpec(float duration = 0.35f)
-    {
-        var spec = new ScreenVignetteCommandSpec
+        => Collect(new ScreenVignetteCommandSpec
         {
             presetKey = "clear",
             intensity = 1f,
-            duration = Mathf.Max(0f, duration),
-            wait = false
-        };
-
-        Collect(spec);
-    }
+            duration = duration,
+        });
 
     private void EnqueueScreenNoisePresetSpec(
         string presetKey = ScreenNoisePresetDBSO.DefaultPresetKey,
         float intensity = 1f,
         float duration = 0.35f)
-    {
-        var spec = new ScreenNoiseCommandSpec
+        => Collect(new ScreenNoiseCommandSpec
         {
             presetKey = ScreenNoisePresetDBSO.NormalizeKey(presetKey),
-            intensity = Mathf.Clamp01(intensity),
-            duration = Mathf.Max(0f, duration),
-            wait = false
-        };
-
-        Collect(spec);
-    }
+            intensity = intensity,
+            duration = duration,
+        });
 
     private void EnqueueScreenNoiseClearSpec(float duration = 0.35f)
-    {
-        var spec = new ScreenNoiseCommandSpec
+        => Collect(new ScreenNoiseCommandSpec
         {
             presetKey = "clear",
             intensity = 1f,
-            duration = Mathf.Max(0f, duration),
-            wait = false
-        };
-
-        Collect(spec);
-    }
+            duration = duration,
+        });
 }
