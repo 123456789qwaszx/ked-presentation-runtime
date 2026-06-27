@@ -1,7 +1,10 @@
 using System;
 using UnityEngine;
-using UnityEngine.UI;
 
+// 각 enum의 0 = 해당 축의 Default 동작.
+// 따라서 세 0이 모두 모이면 CharacterEmojiMirrorProfile.Default와 동일함.
+// (Default profile은 직렬화 시 (0,0,0)이 됨.)
+// 새 mirror 축을 추가할 때도 0번 멤버를 "Default 동작"으로 두면 기존 에셋이 마이그레이션 없이 동일하게 동작.
 public enum CharacterEmojiPlacementMirrorPolicy
 {
     MirrorWithCharacterFacing = 0,

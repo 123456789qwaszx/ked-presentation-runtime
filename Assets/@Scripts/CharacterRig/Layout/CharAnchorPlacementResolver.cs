@@ -16,13 +16,6 @@ public enum CharAnchorPreset
     // These are closer to center than Left/Right.
     DuoLeft = 10,
     DuoRight = 11,
-
-    // Special composition anchor.
-    BoxSide = 20,
-
-    // Experimental / project-specific anchors.
-    Exp1 = 100,
-    Exp2 = 101
 }
 
 // Per-anchor offset container.
@@ -36,11 +29,6 @@ public struct CharPlacementTuningSet
     public Vector2 duoLeft;
     public Vector2 duoRight;
 
-    public Vector2 boxSide;
-
-    public Vector2 exp1;
-    public Vector2 exp2;
-
     public Vector2 Get(CharAnchorPreset preset) => preset switch
     {
         CharAnchorPreset.None => Vector2.zero,
@@ -51,11 +39,6 @@ public struct CharPlacementTuningSet
 
         CharAnchorPreset.DuoLeft => duoLeft,
         CharAnchorPreset.DuoRight => duoRight,
-
-        CharAnchorPreset.BoxSide => boxSide,
-
-        CharAnchorPreset.Exp1 => exp1,
-        CharAnchorPreset.Exp2 => exp2,
 
         _ => Vector2.zero,
     };
@@ -81,11 +64,6 @@ public static class CharAnchorPlacementResolver
 
         CharAnchorPreset.DuoLeft => -baseRatioX * DuoRatioScale,
         CharAnchorPreset.DuoRight => +baseRatioX * DuoRatioScale,
-
-        CharAnchorPreset.BoxSide => 0f,
-
-        CharAnchorPreset.Exp1 => 0f,
-        CharAnchorPreset.Exp2 => 0f,
 
         _ => 0f,
     };

@@ -47,26 +47,6 @@ public static class CharAnchorPresetParser
                 preset = CharAnchorPreset.DuoRight;
                 return true;
 
-            case "boxside":
-            case "box_side":
-            case "box":
-                preset = CharAnchorPreset.BoxSide;
-                return true;
-
-            case "exp1":
-            case "e1":
-                preset = CharAnchorPreset.Exp1;
-                return true;
-
-            case "exp2":
-            case "e2":
-                preset = CharAnchorPreset.Exp2;
-                return true;
-
-            case "none":
-                preset = CharAnchorPreset.None;
-                return true;
-
             default:
                 preset = CharAnchorPreset.Center;
                 return false;
