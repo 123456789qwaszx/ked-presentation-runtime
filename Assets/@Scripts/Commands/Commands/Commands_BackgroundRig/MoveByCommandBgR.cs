@@ -86,7 +86,7 @@ public sealed class MoveByCommandBgR : CommandBase
     {
         _resolveAttempted = true;
 
-        BackgroundRigRefs rig = BackgroundRigTargetResolver.ResolveBackgroundRigFromTargetKey(scope, _spec.rigKey);
+        scope.BackgroundRigs.TryGetRig(_spec.rigKey, out BackgroundRigRefs rig);
         _rect = rig.GetRect(_spec.target);
     }
 

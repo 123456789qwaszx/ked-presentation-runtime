@@ -59,18 +59,18 @@ public sealed class AttachCharRigToBackgroundObjectSlotCommand : CommandBase
         if (!scope.BackgroundRigs.TryGetRig(_spec.backgroundRigKey, out BackgroundRigRefs backgroundRefs))
             return;
 
-        RectTransform childRoot = charRefs.RigRoot;
+        RectTransform rigRoot = charRefs.RigRoot;
         RectTransform parent = backgroundRefs.GetRect(_spec.parentTarget);
-        RectTransform restoreParent = childRoot.parent as RectTransform;
+        RectTransform restoreParent = rigRoot.parent as RectTransform;
 
         scope.BackgroundRigs.RegisterExternalChild(
             _spec.backgroundRigKey,
-            childRoot,
+            rigRoot,
             restoreParent);
 
-        childRoot.SetParent(parent, _spec.worldPositionStays);
+        rigRoot.SetParent(parent, _spec.worldPositionStays);
 
         if (_spec.setAsLastSibling)
-            childRoot.SetAsLastSibling();
+            rigRoot.SetAsLastSibling();
     }
 }

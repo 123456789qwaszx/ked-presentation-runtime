@@ -33,24 +33,6 @@ public sealed class BackgroundRigRegistry
         _rigs[rigKey] = rigRefs;
     }
 
-    public bool Unregister(string rigKey)
-    {
-        if (!_rigs.Remove(rigKey, out BackgroundRigRefs rigRefs))
-        {
-            Debug.LogWarning($"[BackgroundRigRegistry] Unregister failed. Rig not found. rigKey='{rigKey}'.");
-            return false;
-        }
-
-        DetachExternalChildren(rigKey);
-        DestroyRig(rigRefs);
-        return true;
-    }
-
-    public bool HasRig(string rigKey)
-    {
-        return _rigs.TryGetValue(rigKey, out BackgroundRigRefs rigRefs) && rigRefs?.RigRoot != null;
-    }
-
     public bool TryGetRig(string rigKey, out BackgroundRigRefs rigRefs)
     {
         if (!_rigs.TryGetValue(rigKey, out rigRefs))
@@ -59,14 +41,26 @@ public sealed class BackgroundRigRegistry
             return false;
         }
 
-        if (rigRefs?.RigRoot == null)
+        return true;
+    }
+    
+    public void Clear()
+    {
+        List<string> rigKeys = new List<string>(_rigs.Keys);
+
+        for (int i = 0; i < rigKeys.Count; i++)
         {
-            Debug.LogWarning($"[BackgroundRigRegistry] Rig is registered but invalid or destroyed. rigKey='{rigKey}'.");
-            rigRefs = null;
-            return false;
+            string rigKey = rigKeys[i];
+
+            if (!_rigs.TryGetValue(rigKey, out BackgroundRigRefs rigRefs))
+                continue;
+
+            DetachExternalChildren(rigKey);
+            DestroyRig(rigRefs);
         }
 
-        return true;
+        _rigs.Clear();
+        _externalChildrenByRigKey.Clear();
     }
     
     public void CollectAliveRigs(List<BackgroundRigRefs> results)
@@ -88,18 +82,6 @@ public sealed class BackgroundRigRegistry
 
     public void RegisterExternalChild(string rigKey, RectTransform childRoot, RectTransform restoreParent)
     {
-        if (string.IsNullOrEmpty(rigKey))
-        {
-            Debug.LogWarning("[BackgroundRigRegistry] RegisterExternalChild failed. rigKey is empty.");
-            return;
-        }
-
-        if (childRoot == null)
-        {
-            Debug.LogWarning($"[BackgroundRigRegistry] RegisterExternalChild failed. childRoot is null. rigKey='{rigKey}'.");
-            return;
-        }
-
         if (!_rigs.ContainsKey(rigKey))
         {
             Debug.LogWarning($"[BackgroundRigRegistry] RegisterExternalChild failed. Background rig not found. rigKey='{rigKey}'.");
@@ -119,36 +101,10 @@ public sealed class BackgroundRigRegistry
 
         records.Add(new ExternalChildRecord(childRoot, restoreParent));
     }
-
-    public void UnregisterExternalChild(RectTransform childRoot)
-    {
-        RemoveExternalChildRecord(childRoot);
-    }
-
-    public void Clear()
-    {
-        List<string> rigKeys = new List<string>(_rigs.Keys);
-
-        for (int i = 0; i < rigKeys.Count; i++)
-        {
-            string rigKey = rigKeys[i];
-
-            if (!_rigs.TryGetValue(rigKey, out BackgroundRigRefs rigRefs))
-                continue;
-
-            DetachExternalChildren(rigKey);
-            DestroyRig(rigRefs);
-        }
-
-        _rigs.Clear();
-        _externalChildrenByRigKey.Clear();
-    }
+    
 
     private RectTransform RemoveExternalChildRecord(RectTransform childRoot)
     {
-        if (childRoot == null)
-            return null;
-
         RectTransform preservedRestoreParent = null;
         List<string> emptyKeys = null;
 

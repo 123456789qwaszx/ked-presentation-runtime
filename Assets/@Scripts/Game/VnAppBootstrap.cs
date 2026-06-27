@@ -235,14 +235,10 @@ public class VnAppBootstrap : MonoBehaviour
             characterEmojiVisualPresetSo);
 
         // Background Rig
-        BackgroundRigSlotResolver backgroundRigSlotResolver = new();
         BackgroundRigBuilder backgroundRigBuilder = new();
-        BackgroundSpriteResolver backgroundSpriteResolver = new();
         
         BackgroundRigCommandFactory backgroundRigFactory = new(
-            backgroundRigSlotResolver,
-            backgroundRigBuilder,
-            backgroundSpriteResolver);
+            backgroundRigBuilder);
 
         ShotResponseCommandFactory presentationShotFactory = new(
             _presentationResponseRig, characterFocusTuningDb);

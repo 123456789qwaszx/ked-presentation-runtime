@@ -1,17 +1,10 @@
 public sealed class BackgroundRigCommandFactory : INodeCommandFactory
 {
-    private readonly BackgroundRigSlotResolver _rigSlotResolver;
     private readonly BackgroundRigBuilder _rigBuilder;
-    private readonly BackgroundSpriteResolver _spriteResolver;
 
-    public BackgroundRigCommandFactory(
-        BackgroundRigSlotResolver backgroundRigSlotResolver,
-        BackgroundRigBuilder backgroundRigBuilder,
-        BackgroundSpriteResolver backgroundSpriteResolver)
+    public BackgroundRigCommandFactory(BackgroundRigBuilder backgroundRigBuilder)
     {
-        _rigSlotResolver = backgroundRigSlotResolver;
         _rigBuilder = backgroundRigBuilder;
-        _spriteResolver = backgroundSpriteResolver;
     }
 
     public bool TryCreate(CommandSpecBase spec, out ISequenceCommand command)
@@ -21,11 +14,11 @@ public sealed class BackgroundRigCommandFactory : INodeCommandFactory
             null => null,
 
             // Setup
-            SetupBackgroundRigCommandSpec s => new SetupBackgroundRigCommand(s, _rigSlotResolver, _rigBuilder),
+            SetupBackgroundRigCommandSpec s => new SetupBackgroundRigCommand(s, _rigBuilder),
 
             // Basic State
             SetAnchorCommandSpecBgR s => new SetAnchorCommandBgR(s),
-            SetBackgroundSpriteCommandSpecBgR s => new SetBackgroundSpriteCommandBgR(s, _spriteResolver),
+            SetBackgroundSpriteCommandSpecBgR s => new SetBackgroundSpriteCommandBgR(s),
             SetOriginSizeCommandSpecBgR s => new SetOriginSizeCommandBgR(s),
 
             // Visibility

@@ -86,7 +86,7 @@ public sealed class FadeInCommandBgR : CommandBase
     {
         _resolveAttempted = true;
 
-        BackgroundRigRefs rig = BackgroundRigTargetResolver.ResolveBackgroundRigFromTargetKey(scope, _spec.rigKey);
+        scope.BackgroundRigs.TryGetRig(_spec.rigKey, out BackgroundRigRefs rig);
         RectTransform target = rig.GetRect(_spec.target);
         _canvasGroup = GetOrAddCanvasGroup(target);
     }

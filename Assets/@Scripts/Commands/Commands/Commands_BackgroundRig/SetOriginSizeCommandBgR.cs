@@ -96,8 +96,8 @@ public sealed class SetOriginSizeCommandBgR : CommandBase
     private void ResolveRefs(CommandRunScope scope)
     {
         _resolveAttempted = true;
-
-        BackgroundRigRefs rigRefs = BackgroundRigTargetResolver.ResolveBackgroundRigFromTargetKey(scope, _spec.rigKey);
-        _rect = rigRefs.GetRect(_spec.target);
+        
+        scope.BackgroundRigs.TryGetRig(_spec.rigKey, out BackgroundRigRefs rig);
+        _rect = rig.GetRect(_spec.target);
     }
 }

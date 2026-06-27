@@ -1,30 +1,17 @@
 using UnityEngine;
 
-public sealed class BackgroundSpriteResolver
+public static class BackgroundSpriteResolver
 {
-    private readonly string _resourcesRoot;
+    private const string ResourcesRoot = "Backgrounds";
 
-    public BackgroundSpriteResolver(string resourcesRoot = "Backgrounds")
+    public static Sprite Resolve(string spriteKey)
     {
-        _resourcesRoot = resourcesRoot;
-    }
-
-    public Sprite Resolve(string spriteKey, string caller)
-    {
-        if (string.IsNullOrEmpty(spriteKey))
-        {
-            Debug.LogWarning($"[{caller}] spriteKey is null or empty.");
-            return null;
-        }
-
-        string path = string.IsNullOrEmpty(_resourcesRoot)
-            ? spriteKey
-            : $"{_resourcesRoot}/{spriteKey}";
+        string path = $"{ResourcesRoot}/{spriteKey}";
 
         Sprite sprite = Resources.Load<Sprite>(path);
 
         if (sprite == null)
-            Debug.LogWarning($"[{caller}] Failed to resolve background sprite. path='{path}'.");
+            Debug.LogWarning($"Failed to resolve background sprite. path='{path}'.");
 
         return sprite;
     }

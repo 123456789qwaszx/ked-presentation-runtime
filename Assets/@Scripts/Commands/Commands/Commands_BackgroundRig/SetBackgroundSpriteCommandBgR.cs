@@ -31,17 +31,14 @@ public sealed class SetBackgroundSpriteCommandSpecBgR : BackgroundRigCommandSpec
 public sealed class SetBackgroundSpriteCommandBgR : CommandBase
 {
     private readonly SetBackgroundSpriteCommandSpecBgR _spec;
-    private readonly BackgroundSpriteResolver _resolver;
 
     private Image _image;
     private bool _resolveAttempted;
 
     public SetBackgroundSpriteCommandBgR(
-        SetBackgroundSpriteCommandSpecBgR spec,
-        BackgroundSpriteResolver resolver)
+        SetBackgroundSpriteCommandSpecBgR spec)
     {
         _spec = spec;
-        _resolver = resolver;
     }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
@@ -63,7 +60,7 @@ public sealed class SetBackgroundSpriteCommandBgR : CommandBase
 
     private void Apply()
     {
-        Sprite sprite = _resolver.Resolve(_spec.spriteKey, nameof(SetBackgroundSpriteCommandBgR));
+        Sprite sprite = BackgroundSpriteResolver.Resolve(_spec.spriteKey);
 
         _image.sprite = sprite;
         CharRigImageSizingPolicy.Apply(
@@ -76,8 +73,8 @@ public sealed class SetBackgroundSpriteCommandBgR : CommandBase
     private void ResolveRefs(CommandRunScope scope)
     {
         _resolveAttempted = true;
-
-        BackgroundRigRefs rigRefs = BackgroundRigTargetResolver.ResolveBackgroundRigFromTargetKey(scope, _spec.rigKey);
-        _image = rigRefs.GetRect(_spec.target).GetComponent<Image>();
+        
+        scope.BackgroundRigs.TryGetRig(_spec.rigKey, out BackgroundRigRefs rig);
+        _image = rig.GetRect(_spec.target).GetComponent<Image>();
     }
 }

@@ -42,12 +42,9 @@ public static class BackgroundRigSchema
         public Refs Id;
         public Refs? Parent;
 
-        public bool NeedsImage;
-        public bool NeedsRawImage;
-        public bool NeedsMask;
         public bool NeedsCanvasGroup;
-        public bool NeedsCenterPivot;
-        public bool NeedsBottomPivot;
+        public bool NeedsImage;
+        public bool NeedsMask;
 
         public float InitialCanvasGroupAlpha = 1f;
     }

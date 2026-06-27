@@ -88,12 +88,6 @@ public sealed class BackgroundRigBuilder
 
         RectTransform rt = EnsureRect(parentRt, WithRole(rolePrefix, node.Id.ToString()));
 
-        if (node.NeedsCenterPivot)
-            rt.pivot = new Vector2(0.5f, 0.5f);
-
-        if (node.NeedsBottomPivot)
-            rt.pivot = new Vector2(0.5f, 0f);
-
         if (node.NeedsCanvasGroup)
         {
             if (!rt.TryGetComponent<CanvasGroup>(out CanvasGroup canvasGroup))
@@ -106,12 +100,6 @@ public sealed class BackgroundRigBuilder
         {
             Image image = rt.gameObject.AddComponent<Image>();
             image.raycastTarget = false;
-        }
-
-        if (node.NeedsRawImage && !rt.TryGetComponent<RawImage>(out _))
-        {
-            RawImage rawImage = rt.gameObject.AddComponent<RawImage>();
-            rawImage.raycastTarget = false;
         }
 
         if (node.NeedsMask && !rt.TryGetComponent<Mask>(out _))

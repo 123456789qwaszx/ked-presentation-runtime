@@ -105,8 +105,8 @@ public sealed class SetAnchorCommandBgR : CommandBase
     private void ResolveRefs(CommandRunScope scope)
     {
         _resolveAttempted = true;
-
-        _rigRefs = BackgroundRigTargetResolver.ResolveBackgroundRigFromTargetKey(scope, _spec.rigKey);
+        
+        scope.BackgroundRigs.TryGetRig(_spec.rigKey, out BackgroundRigRefs rig);
         _rect = _rigRefs.GetRect(_spec.target);
     }
 }
