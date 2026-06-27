@@ -134,7 +134,6 @@ public sealed partial class YarnCommandBridge
             slotKey = roleKey,
             duration = duration,
 
-            overridePreserveFocus = true,
             wait = false
         };
 
@@ -146,24 +145,15 @@ public sealed partial class YarnCommandBridge
 
     private static void ApplyDepthArg(SetDepthCommandSpecCharR spec, string depthArg)
     {
-        if (YarnNumberParser.TryParseFloat(depthArg, out float level))
-        {
-            spec.useLevel = true;
-            spec.level = level;
-            spec.preset = CharacterDepthPreset.Mid;
-            return;
-        }
-
-        if (!CharacterDepthPresetParser.TryParse(depthArg, out CharacterDepthPreset preset))
+        if (!CharacterDepthPresetParser.TryParse(depthArg, out CharacterDepthKey preset))
         {
             Debug.LogWarning(
                 $"[YarnCommandBridge] Unknown depth preset '{depthArg}'. " +
-                $"Fallback to '{CharacterDepthPreset.Mid}'.");
+                $"Fallback to '{CharacterDepthKey.Mid}'.");
 
-            preset = CharacterDepthPreset.Mid;
+            preset = CharacterDepthKey.Mid;
         }
 
-        spec.useLevel = false;
         spec.preset = preset;
     }
 
@@ -173,8 +163,7 @@ public sealed partial class YarnCommandBridge
     {
         if (string.IsNullOrWhiteSpace(preserveFocusArg))
         {
-            spec.overridePreserveFocus = true;
-            spec.preserveFocusPreset = CharacterFocusPreset.Bust;
+            spec.focusPreset = CharacterFocusPreset.Bust;
             return;
         }
 
@@ -182,8 +171,7 @@ public sealed partial class YarnCommandBridge
                 preserveFocusArg,
                 out CharacterFocusPreset focusPreset))
         {
-            spec.overridePreserveFocus = true;
-            spec.preserveFocusPreset = focusPreset;
+            spec.focusPreset = focusPreset;
             return;
         }
 
@@ -191,7 +179,6 @@ public sealed partial class YarnCommandBridge
             $"[YarnCommandBridge] Unknown preserve focus preset '{preserveFocusArg}'. " +
             $"Fallback to '{CharacterFocusPreset.Bust}'.");
 
-        spec.overridePreserveFocus = true;
-        spec.preserveFocusPreset = CharacterFocusPreset.Bust;
+        spec.focusPreset = CharacterFocusPreset.Bust;
     }
 }

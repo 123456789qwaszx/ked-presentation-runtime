@@ -2,48 +2,27 @@ using UnityEngine;
 
 public static class CharacterDepthResolver
 {
-    public static bool TryResolveRawDepth(
-        CharacterDepthPreset preset,
+    public static void ResolveRawDepth(
+        CharacterDepthKey depthKey,
         bool useLevel,
         float level,
         CharacterDepthTuningSO globalTuning,
-        bool overridePreserveFocus,
-        CharacterFocusPreset preserveFocusPresetOverride,
-        Vector2 preserveFocusOffsetOverride,
-        Vector2 commandYOffsetAdd,
-        float commandScaleMultiplier,
+        CharacterFocusPreset focusPreset,
+        Vector2 focusOffset,
         out CharacterDepthResult result)
     {
-        result = default;
+        CharacterDepthPresetValue value = useLevel
+            ? globalTuning.ResolveLevel(level)
+            : globalTuning.ResolvePreset(depthKey);
 
-        CharacterDepthPresetValue value =
-            ResolveBaseValue(
-                preset,
-                useLevel,
-                level,
-                globalTuning);
-
-        if (overridePreserveFocus)
-        {
-            value.preserveFocusPreset = preserveFocusPresetOverride;
-            value.preserveFocusOffset = preserveFocusOffsetOverride;
-        }
-
-        value.depthY += commandYOffsetAdd;
-
-        if (commandScaleMultiplier > 0f)
-            value.depthScale *= commandScaleMultiplier;
-
-        value.depthScale = Mathf.Max(0.0001f, value.depthScale);
+        value.preserveFocusPreset = focusPreset;
+        value.preserveFocusOffset = focusOffset;
 
         result = new CharacterDepthResult(
             value.depthY,
             new Vector2(value.depthScale, value.depthScale),
             value.preserveFocusPreset,
-            value.preserveCustomFocusKey ?? "",
             value.preserveFocusOffset);
-
-        return true;
     }
 
     public static bool CalculateDepthYThatPreservesCurrentFocus(
@@ -139,16 +118,5 @@ public static class CharacterDepthResolver
 
         depthScaleRect.localScale = savedDepthScale;
         depthYRect.anchoredPosition = savedDepthY;
-    }
-
-    private static CharacterDepthPresetValue ResolveBaseValue(
-        CharacterDepthPreset preset,
-        bool useLevel,
-        float level,
-        CharacterDepthTuningSO globalTuning)
-    {
-        return useLevel
-            ? globalTuning.ResolveLevel(level)
-            : globalTuning.ResolvePreset(preset);
     }
 }

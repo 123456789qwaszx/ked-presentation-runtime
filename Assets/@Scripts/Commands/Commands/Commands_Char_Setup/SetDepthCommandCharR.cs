@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using DG.Tweening;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 [Serializable]
 [CommandMenuHint(
@@ -17,28 +18,16 @@ using UnityEngine;
 public sealed class SetDepthCommandSpecCharR : CharacterRigCommandSpecBase
 {
     [Header("Depth")]
-    public CharacterDepthPreset preset = CharacterDepthPreset.Mid;
+    public CharacterDepthKey preset = CharacterDepthKey.Mid;
 
+    public CharacterFocusPreset focusPreset = CharacterFocusPreset.Bust;
+    
     [Tooltip("true이면 preset 대신 level을 사용합니다.")]
     public bool useLevel = false;
-
     public float level = 5f;
 
-    [Header("Command Correction")]
-    [Tooltip("최종 DepthY에 추가로 더할 command-time offset입니다.")]
-    public Vector2 yOffsetAdd = Vector2.zero;
-
-    [Tooltip("최종 DepthScale에 곱할 command-time multiplier입니다. 1이면 그대로입니다.")]
-    public float scaleMultiplier = 1f;
-
-    [Header("Preserve Focus Override")]
-    [Tooltip("true이면 depth preset이 가진 preserve focus 대신 아래 값을 사용합니다.")]
-    public bool overridePreserveFocus = false;
-
-    public CharacterFocusPreset preserveFocusPreset = CharacterFocusPreset.Bust;
-
-    [Tooltip("preserve focus point에 추가로 더할 command-time offset입니다.")]
-    public Vector2 preserveFocusOffset = Vector2.zero;
+    [Tooltip("preserve focus point에 추가로 더할 offset.")]
+    public Vector2 focusOffset = Vector2.zero;
 
     [Header("Targets")]
     public CharacterRigTarget depthYTarget = CharacterRigTarget.CharSlot_DepthY;
@@ -87,8 +76,8 @@ public sealed class SetDepthCommandCharR : CommandBase
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
-        if (!TryResolveRefs(scope))
-            yield break;
+        if (!_resolveAttempted)
+            ResolveRefs(scope);
 
         if (!ClaimTarget(scope))
             yield break;
@@ -107,8 +96,8 @@ public sealed class SetDepthCommandCharR : CommandBase
 
     protected override void OnSkip(CommandRunScope scope)
     {
-        if (!TryResolveRefs(scope))
-            return;
+        if (!_resolveAttempted)
+            ResolveRefs(scope);
 
         if (!HasClaimedTarget)
         {
@@ -119,24 +108,14 @@ public sealed class SetDepthCommandCharR : CommandBase
         CommitFinalState();
     }
 
-    private bool TryResolveRefs(CommandRunScope scope)
+    private void ResolveRefs(CommandRunScope scope)
     {
-        if (_resolveAttempted)
-            return _rigRefs != null && _depthYRect != null && _depthScaleRect != null;
-
         _resolveAttempted = true;
 
-        _rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(
-            scope,
-            _spec.slotKey);
-
-        if (_rigRefs == null)
-            return false;
-
+        _rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
+        
         _depthYRect = _rigRefs.GetRect(_spec.depthYTarget);
         _depthScaleRect = _rigRefs.GetRect(_spec.depthScaleTarget);
-
-        return _depthYRect != null && _depthScaleRect != null;
     }
 
     private bool ClaimTarget(CommandRunScope scope)
@@ -162,20 +141,14 @@ public sealed class SetDepthCommandCharR : CommandBase
 
     private bool ResolveDestination(CommandRunScope scope)
     {
-        if (!CharacterDepthResolver.TryResolveRawDepth(
-                _spec.preset,
-                _spec.useLevel,
-                _spec.level,
-                _globalTuning,
-                _spec.overridePreserveFocus,
-                _spec.preserveFocusPreset,
-                _spec.preserveFocusOffset,
-                _spec.yOffsetAdd,
-                _spec.scaleMultiplier,
-                out CharacterDepthResult rawDepth))
-        {
-            return false;
-        }
+        CharacterDepthResolver.ResolveRawDepth(
+            _spec.preset,
+            _spec.useLevel,
+            _spec.level,
+            _globalTuning,
+            _spec.focusPreset,
+            _spec.focusOffset,
+            out CharacterDepthResult rawDepth);
 
         _destRawDepthY = rawDepth.RawDepthYAnchoredPosition;
         _destDepthScale = rawDepth.DepthScale;
@@ -195,7 +168,7 @@ public sealed class SetDepthCommandCharR : CommandBase
             Debug.LogWarning(
                 $"[SetDepthCommandCharR] Failed to preserve focus. " +
                 $"Fallback to raw depthY. slotKey='{_spec.slotKey}', " +
-                $"focus='{rawDepth.PreserveFocusPreset}', custom='{rawDepth.PreserveCustomFocusKey}'.");
+                $"focus='{rawDepth.PreserveFocusPreset}'.");
 
             _destFinalDepthY = _destRawDepthY;
         }

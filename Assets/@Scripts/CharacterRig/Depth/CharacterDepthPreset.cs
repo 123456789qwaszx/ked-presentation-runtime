@@ -1,6 +1,6 @@
 using System;
 
-public enum CharacterDepthPreset
+public enum CharacterDepthKey
 {
     None = 0,
 
@@ -16,9 +16,9 @@ public enum CharacterDepthPreset
 
 public static class CharacterDepthPresetParser
 {
-    public static bool TryParse(string raw, out CharacterDepthPreset preset)
+    public static bool TryParse(string raw, out CharacterDepthKey preset)
     {
-        preset = CharacterDepthPreset.Mid;
+        preset = CharacterDepthKey.Mid;
 
         string s = Normalize(raw);
 
@@ -26,17 +26,17 @@ public static class CharacterDepthPresetParser
         {
             case "none":
             case "n":
-                preset = CharacterDepthPreset.None;
+                preset = CharacterDepthKey.None;
                 return true;
 
             case "far":
             case "f":
-                preset = CharacterDepthPreset.Far;
+                preset = CharacterDepthKey.Far;
                 return true;
             
             case "back":
             case "b":
-                preset = CharacterDepthPreset.Back;
+                preset = CharacterDepthKey.Back;
                 return true;
 
             case "mid":
@@ -44,30 +44,30 @@ public static class CharacterDepthPresetParser
             case "normal":
             case "default":
             case "m":
-                preset = CharacterDepthPreset.Mid;
+                preset = CharacterDepthKey.Mid;
                 return true;
 
             case "front":
             case "fore":
             case "foreground":
-                preset = CharacterDepthPreset.Front;
+                preset = CharacterDepthKey.Front;
                 return true;
             
             case "close":
             case "near":
             case "c":
-                preset = CharacterDepthPreset.Close;
+                preset = CharacterDepthKey.Close;
                 return true;
 
 
             case "exp1":
             case "experimental1":
-                preset = CharacterDepthPreset.Exp1;
+                preset = CharacterDepthKey.Exp1;
                 return true;
 
             case "exp2":
             case "experimental2":
-                preset = CharacterDepthPreset.Exp2;
+                preset = CharacterDepthKey.Exp2;
                 return true;
         }
 

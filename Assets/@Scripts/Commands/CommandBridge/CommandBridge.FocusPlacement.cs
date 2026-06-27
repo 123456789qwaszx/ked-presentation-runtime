@@ -277,8 +277,7 @@ public sealed partial class YarnCommandBridge
         var spec = new SetDepthCommandSpecCharR
         {
             slotKey = roleKey,
-            preset = CharacterDepthPreset.Mid,
-            useLevel = false,
+            preset = CharacterDepthKey.Mid,
             duration = duration,
         };
 

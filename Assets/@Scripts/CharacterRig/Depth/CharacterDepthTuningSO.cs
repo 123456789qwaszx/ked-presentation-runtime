@@ -12,8 +12,6 @@ public struct CharacterDepthPresetValue
     [Header("Focus-Preserving Scale Pivot")]
     public CharacterFocusPreset preserveFocusPreset;
 
-    public string preserveCustomFocusKey;
-
     public Vector2 preserveFocusOffset;
 
     public static CharacterDepthPresetValue Far => new()
@@ -21,16 +19,14 @@ public struct CharacterDepthPresetValue
         depthY = new Vector2(0f, 480f),
         depthScale = 0.68f,
         preserveFocusPreset = CharacterFocusPreset.Feet,
-        preserveCustomFocusKey = "",
         preserveFocusOffset = Vector2.zero,
     };
-    
+
     public static CharacterDepthPresetValue Back => new()
     {
         depthY = new Vector2(0f, 240f),
         depthScale = 0.86f,
         preserveFocusPreset = CharacterFocusPreset.Bust,
-        preserveCustomFocusKey = "",
         preserveFocusOffset = Vector2.zero,
     };
 
@@ -39,7 +35,6 @@ public struct CharacterDepthPresetValue
         depthY = Vector2.zero,
         depthScale = 1f,
         preserveFocusPreset = CharacterFocusPreset.Bust,
-        preserveCustomFocusKey = "",
         preserveFocusOffset = Vector2.zero,
     };
 
@@ -48,19 +43,16 @@ public struct CharacterDepthPresetValue
         depthY = new Vector2(0f, -320f),
         depthScale = 1.18f,
         preserveFocusPreset = CharacterFocusPreset.Bust,
-        preserveCustomFocusKey = "",
         preserveFocusOffset = Vector2.zero,
     };
-    
+
     public static CharacterDepthPresetValue Close => new()
     {
         depthY = new Vector2(0f, 440f),
         depthScale = 1.38f,
         preserveFocusPreset = CharacterFocusPreset.Face,
-        preserveCustomFocusKey = "",
         preserveFocusOffset = Vector2.zero,
     };
-
 }
 
 [Serializable]
@@ -75,18 +67,18 @@ public struct CharacterDepthTuningSet
     public CharacterDepthPresetValue exp1;
     public CharacterDepthPresetValue exp2;
 
-    public CharacterDepthPresetValue Get(CharacterDepthPreset preset) => preset switch
+    public CharacterDepthPresetValue Get(CharacterDepthKey preset) => preset switch
     {
-        CharacterDepthPreset.None => mid,
+        CharacterDepthKey.None => mid,
 
-        CharacterDepthPreset.Far => far,
-        CharacterDepthPreset.Back => back,
-        CharacterDepthPreset.Mid => mid,
-        CharacterDepthPreset.Front => front,
-        CharacterDepthPreset.Close => close,
+        CharacterDepthKey.Far => far,
+        CharacterDepthKey.Back => back,
+        CharacterDepthKey.Mid => mid,
+        CharacterDepthKey.Front => front,
+        CharacterDepthKey.Close => close,
 
-        CharacterDepthPreset.Exp1 => exp1,
-        CharacterDepthPreset.Exp2 => exp2,
+        CharacterDepthKey.Exp1 => exp1,
+        CharacterDepthKey.Exp2 => exp2,
 
         _ => mid,
     };
@@ -104,36 +96,29 @@ public struct CharacterDepthTuningSet
     };
 }
 
-[CreateAssetMenu(menuName = "CPS/CharRig/Tuning/Character Depth Tuning", fileName = "CharacterDepthTuning")]
-public sealed class CharacterDepthTuningSO : ScriptableObject
+// 연속 numeric level(0~10 커브) 입력 모델. preset과 동일한 CharacterDepthPresetValue를 산출.
+[Serializable]
+public struct CharacterDepthLevelTuningSet
 {
-    [Header("Preset Values")]
-    public CharacterDepthTuningSet presets = CharacterDepthTuningSet.Default;
-
-    [Header("Numeric Level")]
+    [Header("Level Curves")]
     [Tooltip("depth level에 대한 Y 커브입니다. 키 범위 밖의 값은 끝 키의 기울기로 외삽됩니다.")]
-    public AnimationCurve levelYCurve = AnimationCurve.Linear(0f, 120f, 10f, -440f);
+    public AnimationCurve yCurve;
 
     [Tooltip("depth level에 대한 Scale 커브입니다. 키 범위 밖의 값은 끝 키의 기울기로 외삽됩니다.")]
-    public AnimationCurve levelScaleCurve = AnimationCurve.Linear(0f, 0.86f, 10f, 1.38f);
+    public AnimationCurve scaleCurve;
 
-    [Header("Numeric Level Focus Pivot")]
-    public CharacterFocusPreset levelFarPreserveFocus = CharacterFocusPreset.Feet;
-    public CharacterFocusPreset levelMidPreserveFocus = CharacterFocusPreset.Bust;
-    public CharacterFocusPreset levelClosePreserveFocus = CharacterFocusPreset.Bust;
-    public CharacterFocusPreset levelFrontPreserveFocus = CharacterFocusPreset.Face;
+    [Header("Focus Pivot")]
+    public CharacterFocusPreset farPreserveFocus;
+    public CharacterFocusPreset midPreserveFocus;
+    public CharacterFocusPreset closePreserveFocus;
+    public CharacterFocusPreset frontPreserveFocus;
 
-    public CharacterDepthPresetValue ResolvePreset(CharacterDepthPreset preset)
+    public CharacterDepthPresetValue Resolve(float level)
     {
-        return presets.Get(preset);
-    }
+        CharacterFocusPreset preserveFocus = ResolvePreserveFocus(level);
 
-    public CharacterDepthPresetValue ResolveLevel(float level)
-    {
-        CharacterFocusPreset preserveFocus = ResolvePreserveFocusForLevel(level);
-
-        float depthY = EvaluateCurveUnclamped(levelYCurve, level);
-        float depthScale = EvaluateCurveUnclamped(levelScaleCurve, level);
+        float depthY = EvaluateUnclamped(yCurve, level);
+        float depthScale = EvaluateUnclamped(scaleCurve, level);
 
         return new CharacterDepthPresetValue
         {
@@ -141,26 +126,37 @@ public sealed class CharacterDepthTuningSO : ScriptableObject
             depthScale = Mathf.Max(0.0001f, depthScale),
 
             preserveFocusPreset = preserveFocus,
-            preserveCustomFocusKey = "",
             preserveFocusOffset = Vector2.zero,
         };
     }
 
-    private CharacterFocusPreset ResolvePreserveFocusForLevel(float level)
+    private CharacterFocusPreset ResolvePreserveFocus(float level)
     {
         if (level <= 2.5f)
-            return levelFarPreserveFocus;
+            return farPreserveFocus;
 
         if (level <= 6.5f)
-            return levelMidPreserveFocus;
+            return midPreserveFocus;
 
         if (level <= 8.5f)
-            return levelClosePreserveFocus;
+            return closePreserveFocus;
 
-        return levelFrontPreserveFocus;
+        return frontPreserveFocus;
     }
 
-    private static float EvaluateCurveUnclamped(AnimationCurve curve, float time)
+    public static CharacterDepthLevelTuningSet Default => new()
+    {
+        yCurve = AnimationCurve.Linear(0f, 120f, 10f, -440f),
+        scaleCurve = AnimationCurve.Linear(0f, 0.86f, 10f, 1.38f),
+
+        farPreserveFocus = CharacterFocusPreset.Feet,
+        midPreserveFocus = CharacterFocusPreset.Bust,
+        closePreserveFocus = CharacterFocusPreset.Bust,
+        frontPreserveFocus = CharacterFocusPreset.Face,
+    };
+
+    #region Curve Math
+    private static float EvaluateUnclamped(AnimationCurve curve, float time)
     {
         if (curve == null || curve.length <= 0)
             return 0f;
@@ -196,5 +192,26 @@ public sealed class CharacterDepthTuningSO : ScriptableObject
             return 0f;
 
         return (b.value - a.value) / dt;
+    }
+    #endregion
+}
+
+[CreateAssetMenu(menuName = "CPS/CharRig/Tuning/Character Depth Tuning", fileName = "CharacterDepthTuning")]
+public sealed class CharacterDepthTuningSO : ScriptableObject
+{
+    [Header("Preset")]
+    public CharacterDepthTuningSet presets = CharacterDepthTuningSet.Default;
+
+    [Header("Numeric Level")]
+    public CharacterDepthLevelTuningSet level = CharacterDepthLevelTuningSet.Default;
+
+    public CharacterDepthPresetValue ResolvePreset(CharacterDepthKey preset)
+    {
+        return presets.Get(preset);
+    }
+
+    public CharacterDepthPresetValue ResolveLevel(float levelValue)
+    {
+        return level.Resolve(levelValue);
     }
 }
