@@ -55,7 +55,6 @@ public sealed class SetDepthCommandCharR : CommandBase
 
     private readonly SetDepthCommandSpecCharR _spec;
     private readonly CharacterDepthTuningSO _globalTuning;
-    private readonly RoleDepthTuningDBSO _roleTuningDb;
     private readonly CharacterFocusTuningDBSO _focusTuningDb;
 
     private CharacterRigRefs _rigRefs;
@@ -79,12 +78,10 @@ public sealed class SetDepthCommandCharR : CommandBase
     public SetDepthCommandCharR(
         SetDepthCommandSpecCharR spec,
         CharacterDepthTuningSO globalTuning,
-        RoleDepthTuningDBSO roleTuningDb,
         CharacterFocusTuningDBSO focusTuningDb)
     {
         _spec = spec;
         _globalTuning = globalTuning;
-        _roleTuningDb = roleTuningDb;
         _focusTuningDb = focusTuningDb;
     }
 
@@ -166,13 +163,10 @@ public sealed class SetDepthCommandCharR : CommandBase
     private bool ResolveDestination(CommandRunScope scope)
     {
         if (!CharacterDepthResolver.TryResolveRawDepth(
-                scope,
-                _spec.slotKey,
                 _spec.preset,
                 _spec.useLevel,
                 _spec.level,
                 _globalTuning,
-                _roleTuningDb,
                 _spec.overridePreserveFocus,
                 _spec.preserveFocusPreset,
                 _spec.preserveFocusOffset,

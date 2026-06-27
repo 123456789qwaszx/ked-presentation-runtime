@@ -3,13 +3,10 @@ using UnityEngine;
 public static class CharacterDepthResolver
 {
     public static bool TryResolveRawDepth(
-        CommandRunScope scope,
-        string roleKey,
         CharacterDepthPreset preset,
         bool useLevel,
         float level,
         CharacterDepthTuningSO globalTuning,
-        RoleDepthTuningDBSO roleTuningDb,
         bool overridePreserveFocus,
         CharacterFocusPreset preserveFocusPresetOverride,
         Vector2 preserveFocusOffsetOverride,
@@ -25,18 +22,6 @@ public static class CharacterDepthResolver
                 useLevel,
                 level,
                 globalTuning);
-
-        string tuningKey =
-            CharacterRigTargetResolver.ResolveCharacterKeyFromTargetKey(
-                scope,
-                roleKey);
-
-        ApplyRoleCorrection(
-            ref value,
-            preset,
-            useLevel,
-            roleTuningDb,
-            tuningKey);
 
         if (overridePreserveFocus)
         {
@@ -165,28 +150,5 @@ public static class CharacterDepthResolver
         return useLevel
             ? globalTuning.ResolveLevel(level)
             : globalTuning.ResolvePreset(preset);
-    }
-
-    private static void ApplyRoleCorrection(
-        ref CharacterDepthPresetValue value,
-        CharacterDepthPreset preset,
-        bool useLevel,
-        RoleDepthTuningDBSO roleTuningDb,
-        string tuningKey)
-    {
-        if (!roleTuningDb.TryGet(tuningKey, out RoleDepthTuningDBSO.Entry entry))
-            return;
-
-        value.depthY += entry.defaultYOffsetAdd;
-        value.depthScale *= entry.defaultScaleMultiplier;
-
-        if (useLevel)
-            return;
-
-        CharacterDepthPresetCorrection correction = entry.corrections.Get(preset);
-
-        value.depthY += correction.yOffsetAdd;
-        value.depthScale *= correction.scaleMultiplier;
-        value.preserveFocusOffset += correction.preserveFocusOffsetAdd;
     }
 }

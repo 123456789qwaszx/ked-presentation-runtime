@@ -12,7 +12,6 @@ public sealed class CharacterRigCommandFactory : INodeCommandFactory
     private readonly CharacterVisualFocusPresetDBSO _characterVisualFocusPresetDb;
     
     private readonly CharacterDepthTuningSO _characterDepthTuning;
-    private readonly RoleDepthTuningDBSO _roleDepthTuningDb;
     private readonly CharacterEmojiVisualPresetSO _characterEmojiVisualPresetSo;
 
     public CharacterRigCommandFactory(
@@ -25,7 +24,6 @@ public sealed class CharacterRigCommandFactory : INodeCommandFactory
         CharacterFocusTuningDBSO characterFocusTuningDb,
         CharacterVisualFocusPresetDBSO characterVisualFocusPresetDb,
         CharacterDepthTuningSO characterDepthTuning,
-        RoleDepthTuningDBSO roleDepthTuningDb,
         CharacterEmojiVisualPresetSO characterEmojiVisualPresetSo)
     {
         _rigSlotResolver = charRigSlotResolver;
@@ -37,7 +35,6 @@ public sealed class CharacterRigCommandFactory : INodeCommandFactory
         _characterFocusTuningDb = characterFocusTuningDb;
         _characterVisualFocusPresetDb = characterVisualFocusPresetDb;
         _characterDepthTuning = characterDepthTuning;
-        _roleDepthTuningDb = roleDepthTuningDb;
         _characterEmojiVisualPresetSo = characterEmojiVisualPresetSo;
     }
 
@@ -65,7 +62,6 @@ public sealed class CharacterRigCommandFactory : INodeCommandFactory
             SetDepthCommandSpecCharR s => new SetDepthCommandCharR(
                 s,
                 _characterDepthTuning,
-                _roleDepthTuningDb,
                 _characterFocusTuningDb),
 
             // Visibility / Root Layers
