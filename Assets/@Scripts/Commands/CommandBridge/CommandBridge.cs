@@ -311,6 +311,31 @@ public sealed partial class YarnCommandBridge
             "down_per", EnqueueMoveDownOneUnitPerFrameSpec);
     }
     
+    private void RegisterDepthFocusCommands(DialogueRunner runner)
+    {
+        // Generic form:
+        // <<at c1 close bust 12fr>>
+        // <<at c1 front>>
+        // <<at c1 7 face 8fr>>
+        runner.AddCommandHandler<string, string, string, string>(
+            "at", EnqueueDepthAtSpec);
+
+        runner.AddCommandHandler<string, string, string>(
+            "at_far", EnqueueDepthAtFarSpec);
+        
+        runner.AddCommandHandler<string, string, string>(
+            "at_back", EnqueueDepthAtBackSpec);
+        
+        runner.AddCommandHandler<string, string, string>(
+            "at_mid", EnqueueDepthAtMidSpec);
+
+        runner.AddCommandHandler<string, string, string>(
+            "at_front", EnqueueDepthAtFrontSpec);
+        
+        runner.AddCommandHandler<string, string, string>(
+            "at_close", EnqueueDepthAtCloseSpec);
+    }
+    
     private void BindCharRigActing(DialogueRunner runner)
     {
         runner.AddCommandHandler<string, string>(
