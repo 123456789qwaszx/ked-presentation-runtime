@@ -49,7 +49,7 @@ public sealed partial class YarnCommandBridge
         RegisterDirectionalNudgeCommands(runner);
         RegisterFocusPlacementCommands(runner);
         RegisterDepthFocusCommands(runner);
-        RegisterShowCommands(runner);
+        RegisterCharRigPlacementCommands(runner);
         BindBackgroundRig(runner);
         BindCharRigEmoji(runner);
         
@@ -262,6 +262,27 @@ public sealed partial class YarnCommandBridge
         
         runner.AddCommandHandler<float>(
             "shot_reset", EnqueueShotResetSpec);
+    }
+    
+    private void RegisterCharRigPlacementCommands(DialogueRunner runner)
+    {
+        runner.AddCommandHandler<string, string, string, string>(
+            "show", EnqueueShowSpec);
+        
+        runner.AddCommandHandler<string, string, string>(
+            "show_at_left", EnqueueShowAtLeftSpec);
+
+        runner.AddCommandHandler<string, string, string>(
+            "show_at_center", EnqueueShowAtCenterSpec);
+
+        runner.AddCommandHandler<string, string, string>(
+            "show_at_right", EnqueueShowAtRightSpec);
+
+        runner.AddCommandHandler<string, string, string>(
+            "show_at_dl", EnqueueShowAtDuoLeftSpec);
+
+        runner.AddCommandHandler<string, string, string>(
+            "show_at_dr", EnqueueShowAtDuoRightSpec);
     }
     
     private void BindCharRigActing(DialogueRunner runner)
