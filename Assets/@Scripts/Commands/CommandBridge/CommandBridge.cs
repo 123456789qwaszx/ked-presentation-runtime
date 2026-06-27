@@ -55,7 +55,7 @@ public sealed partial class YarnCommandBridge
         BindControl(runner);
 
         BindCharRigSetup(runner);
-        BindCharRigAppearance(runner);
+        BindCharRigPresentation(runner);
         BindCharRigStaging(runner);
         BindCharRigActing(runner);
         BindCharRigIdle(runner);
@@ -334,6 +334,42 @@ public sealed partial class YarnCommandBridge
         
         runner.AddCommandHandler<string, string, string>(
             "at_close", EnqueueDepthAtCloseSpec);
+    }
+    
+    private void BindCharRigPresentation(DialogueRunner runner)
+    {
+        runner.AddCommandHandler<string, string>(
+            "fade_in", EnqueueFadeInDslSpec);
+
+        runner.AddCommandHandler<string, string>(
+            "fade_out", EnqueueFadeOutDslSpec);
+
+        runner.AddCommandHandler<string, string, string>(
+            "face_swap", EnqueueSetEmotionPortraitWipeDslSpec);
+
+        runner.AddCommandHandler<string, string, string, string>(
+            "face_crossfade", EnqueueSetPortraitCrossfadeDslSpec);
+
+        runner.AddCommandHandler<string, string, string, string>(
+            "slide_in", EnqueueSlideInDslSpec);
+
+        runner.AddCommandHandler<string, string, string, string>(
+            "slide_out", EnqueueSlideOutDslSpec);
+        
+        runner.AddCommandHandler<string, string, string, string>(
+            "char_move_to", EnqueueMoveByUnitCharSpec);
+        
+        runner.AddCommandHandler<string, float, string>(
+            "char_scale_to", EnqueueScaleToDslSpec);
+        
+        runner.AddCommandHandler<string, int, string>(
+            "char_rotate_to", EnqueuePivotRotateToDslSpec);
+        
+        runner.AddCommandHandler<string, int, string>(
+            "char_flip_horizontal", EnqueueFlipHorizontalDslSpec);
+        
+        runner.AddCommandHandler<string, int, string>(
+            "char_flip_vertical", EnqueueFlipVerticalDslSpec);
     }
     
     private void BindCharRigActing(DialogueRunner runner)
