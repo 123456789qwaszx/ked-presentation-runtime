@@ -7,7 +7,7 @@ using UnityEngine;
     fileName = "CharacterVisualFocusPresetDB")]
 public sealed class CharacterVisualFocusPresetDBSO : ScriptableObject
 {
-    public const string DefaultPresetKey = "focus";
+    public const string DefaultPresetKey = CharacterVisualFocusPresetKeyParser.DefaultPresetKey;
 
     [Serializable]
     public struct Entry
@@ -35,39 +35,8 @@ public sealed class CharacterVisualFocusPresetDBSO : ScriptableObject
         if (_map == null)
             Build();
 
-        return _map.TryGetValue(NormalizeKey(key), out entry);
-    }
-
-    public static string NormalizeKey(string key)
-    {
-        key = (key ?? "").Trim();
-
-        if (string.IsNullOrEmpty(key))
-            return DefaultPresetKey;
-
-        key = key.ToLowerInvariant();
-        key = key.Replace(" ", "_");
-        key = key.Replace("-", "_");
-
-        if (key == "default")
-            return DefaultPresetKey;
-
-        if (key == "none" || key == "off" || key == "reset")
-            return "clear";
-
-        if (key == "de_focus")
-            return "defocus";
-
-        if (key == "rim" || key == "outer" || key == "outerrim")
-            return "outer_rim";
-
-        if (key == "inner" || key == "innerrim")
-            return "inner_rim";
-
-        if (key == "sil" || key == "black" || key == "shadow")
-            return "silhouette";
-
-        return key;
+        string parsedKey = CharacterVisualFocusPresetKeyParser.Parse(key);
+        return _map.TryGetValue(parsedKey, out entry);
     }
 
     private void OnEnable() => _map = null;
@@ -82,7 +51,8 @@ public sealed class CharacterVisualFocusPresetDBSO : ScriptableObject
         for (int i = 0; i < entries.Count; i++)
         {
             Entry entry = entries[i];
-            string key = NormalizeKey(entry.key);
+
+            string key = CharacterVisualFocusPresetKeyParser.Parse(entry.key);
 
             if (string.IsNullOrEmpty(key))
                 continue;

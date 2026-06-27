@@ -327,25 +327,26 @@ public sealed partial class YarnCommandBridge
             "char_visual", EnqueueCharVisualPresetSpec);
         
         runner.AddCommandHandler<string, float, string>(
-            "char_focus", EnqueueCharFocusSpec);
+            "char_visual_focus", EnqueueCharFocusSpec);
 
         runner.AddCommandHandler<string, float, string>(
-            "char_defocus", EnqueueCharDefocusSpec);
+            "char_visual_defocus", EnqueueCharDefocusSpec);
 
+
+        runner.AddCommandHandler<string, float, string>(
+            "char_visual_dim", EnqueueCharDimSpec);
+
+        runner.AddCommandHandler<string, float, string>(
+            "char_visual_silhouette", EnqueueCharSilhouetteSpec);
+
+        runner.AddCommandHandler<string, float, string>(
+            "char_visual_inner_rim", EnqueueCharInnerRimSpec);
+
+        runner.AddCommandHandler<string, float, string>(
+            "char_visual_outer_rim", EnqueueCharOuterRimSpec);
+        
         runner.AddCommandHandler<string, string>(
-            "char_clear_focus", EnqueueCharClearFocusSpec);
-
-        runner.AddCommandHandler<string, float, string>(
-            "char_dim", EnqueueCharDimSpec);
-
-        runner.AddCommandHandler<string, float, string>(
-            "char_silhouette", EnqueueCharSilhouetteSpec);
-
-        runner.AddCommandHandler<string, float, string>(
-            "char_inner_rim", EnqueueCharInnerRimSpec);
-
-        runner.AddCommandHandler<string, float, string>(
-            "char_outer_rim", EnqueueCharOuterRimSpec);
+            "char_visual_clear", EnqueueCharRigVisualClearSpec);
     }
     
     private void BindCharRigIdle(DialogueRunner runner)
