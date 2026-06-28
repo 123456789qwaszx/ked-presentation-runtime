@@ -1,3 +1,4 @@
+using System.Globalization;
 using UnityEngine;
 
 public sealed partial class YarnCommandBridge
@@ -150,29 +151,55 @@ public sealed partial class YarnCommandBridge
             duration = duration,
         };
 
-        if (!CharacterDepthPresetParser.TryParse(depthArg, out CharacterDepthKey preset))
+        if (TryParseDepthLevel(depthArg, out float level))
         {
-            Debug.LogWarning(
-                $"[YarnCommandBridge] Unknown depth preset '{depthArg}'. " +
-                $"Fallback to '{CharacterDepthKey.Mid}'.");
-
-            preset = CharacterDepthKey.Mid;
+            spec.useLevel = true;
+            spec.level = level;
         }
-        
-        spec.preset = preset;
-        
+        else
+        {
+            spec.useLevel = false;
+
+            if (!CharacterDepthPresetParser.TryParse(depthArg, out CharacterDepthKey preset))
+            {
+                Debug.LogWarning(
+                    $"[YarnCommandBridge] Unknown depth preset '{depthArg}'. " +
+                    $"Fallback to '{CharacterDepthKey.Mid}'.");
+
+                preset = CharacterDepthKey.Mid;
+            }
+
+            spec.preset = preset;
+        }
+
         if (!CharacterFocusPresetParser.TryParse(preserveFocusArg, out CharacterFocusPreset focusPreset))
         {
             Debug.LogWarning(
                 $"[YarnCommandBridge] Unknown preserve focus preset '{preserveFocusArg}'. " +
                 $"Fallback to '{CharacterFocusPreset.Bust}'.");
-            
+
             focusPreset = CharacterFocusPreset.Bust;
         }
-        
+
         spec.focusPreset = focusPreset;
 
         Collect(spec);
+    }
+    
+    private static bool TryParseDepthLevel(string raw, out float level)
+    {
+        string s = (raw ?? string.Empty).Trim();
+
+        if (!float.TryParse(
+                s,
+                NumberStyles.Float,
+                CultureInfo.InvariantCulture,
+                out level))
+        {
+            return false;
+        }
+
+        return !float.IsNaN(level) && !float.IsInfinity(level);
     }
     
     private void EnqueueDepthAtSpec(
