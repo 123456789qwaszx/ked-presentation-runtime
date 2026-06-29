@@ -51,8 +51,7 @@ public sealed partial class YarnCommandBridge
             TyrantProtagonistSlotKey,
             "Tyrant",
             "a",
-            emotionKey: "2",
-            positionPreset: "center");
+            emotionKey: "2");
 
         EnqueueFadeInDslSpec(
             TyrantProtagonistSlotKey,
@@ -79,8 +78,7 @@ public sealed partial class YarnCommandBridge
         string slotKey,
         string characterKey,
         string variantKey = "a",
-        string emotionKey = "2",
-        string positionPreset = "center")
+        string emotionKey = "2")
     {
         var castSpec = new CastCharacterCommandSpec
         {
@@ -92,10 +90,12 @@ public sealed partial class YarnCommandBridge
 
         EnqueueSetPortraitPoseSpec(slotKey, variantKey);
         EnqueueSetPortraitFaceSpec(slotKey, emotionKey);
-        EnqueueSetAnchorSpecs(slotKey, positionPreset);
+        EnqueueSetAnchorSpecs(slotKey);
+        
+        
     }
 
-    private void EnqueueSetAnchorSpecs(string slotKey, string positionPreset, bool resetSlotPos = true,
+    private void EnqueueSetAnchorSpecs(string slotKey, bool resetSlotPos = true,
         bool resetCharPos = true)
         => Collect(new SetAnchorCommandSpecCharR
         {

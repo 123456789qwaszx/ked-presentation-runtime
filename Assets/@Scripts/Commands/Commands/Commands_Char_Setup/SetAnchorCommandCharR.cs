@@ -84,7 +84,7 @@ public sealed class SetAnchorCommandCharR : CommandBase
     private void Apply(CommandRunScope scope)
     {
         // SetAnchor는 즉시 확정 command다.
-        // 이전 PlaceTo tween/ledger가 남아 있으면 새 anchor 값과 싸우므로 먼저 정리한다.
+        // 이전 PlaceTo tween/ledger가 남아 있으면 새 anchor 값과 싸우므로 먼저 정리.
         KillTweenAndClearPlacementTarget(_rect);
 
         string tuningKey =
@@ -93,17 +93,21 @@ public sealed class SetAnchorCommandCharR : CommandBase
         Vector2 anchoredPosition =
             CharAnchorPlacementResolver.ResolveAnchoredPosition(_roleTuningDb, tuningKey);
 
-        _rect.anchoredPosition = anchoredPosition;
-
-        // 즉시 적용이므로 Publish하지 않는다.
-        // live transform이 이미 settled target이다.
-        ClearPlacementTarget(_rect);
+        float visualScale =
+            CharScaleResolver.ResolveScale(_roleTuningDb, tuningKey);
 
         if (_spec.resetSlotPos)
             ResetSlotLayers();
 
         if (_spec.resetCharacterPos)
             ResetCharacterLayers();
+
+        _rect.anchoredPosition = anchoredPosition;
+        _rect.localScale = new Vector3(visualScale, visualScale, 1f);
+
+        // 즉시 적용이므로 Publish하지 않는다.
+        // live transform이 이미 settled target.
+        ClearPlacementTarget(_rect);
     }
 
     private void ResetSlotLayers()

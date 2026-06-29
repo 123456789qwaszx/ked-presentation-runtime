@@ -1,8 +1,5 @@
-using System;
-using UnityEngine;
 using Vector2 = UnityEngine.Vector2;
 
-// Final composition resolution logic.
 public static class CharAnchorPlacementResolver
 {
     public static Vector2 ResolveAnchoredPosition(RoleAnchorTuningDBSO roleTuningDb, string roleKey)
@@ -15,7 +12,6 @@ public static class CharAnchorPlacementResolver
             pos += entry.offset;
         }
 
-        // 7) Return the final anchored position.
         return pos;
     }
 }

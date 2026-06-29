@@ -46,7 +46,6 @@ public class VnAppBootstrap : MonoBehaviour
     [SerializeField] private DialogueSpeakerPresentationPolicyDBSO _dialogueSpeakerPresentationPolicyDbSo;
     
     [Header("Presentation")] 
-    [SerializeField] private CharStageTuningSO globalTuning;
     [SerializeField] private RoleAnchorTuningDBSO roleTuningDb;
     
     [SerializeField] private PortraitGeneratedDbSo portraitGeneratedDbSo;

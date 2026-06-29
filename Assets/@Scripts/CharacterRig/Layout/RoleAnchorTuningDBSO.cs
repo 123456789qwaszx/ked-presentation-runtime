@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 [CreateAssetMenu(menuName = "CPS/CharRig/Tuning/Role Anchor Tuning DB", fileName = "RoleAnchorTuningDB")]
 public sealed class RoleAnchorTuningDBSO : ScriptableObject
@@ -24,7 +23,7 @@ public sealed class RoleAnchorTuningDBSO : ScriptableObject
         public float defaultScale = 1f;
 
         [Tooltip("프리셋별 캐릭터 추가 배율")]
-        public CharScaleTuningSet scales = CharScaleTuningSet.Default;
+        public float visualScale = 1f;
     }
 
     public List<Entry> entries = new();
