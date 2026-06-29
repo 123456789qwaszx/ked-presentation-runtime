@@ -16,7 +16,6 @@ public static class CharacterRigSchema
         CharSlot_Rotation,
         CharSlot_SwayPivot,
         CharSlot_Scale,
-        CharSlot_Size,
 
         // Character casting axis - per-character defaults
         CharacterPortrait_VisualOffset,
@@ -121,10 +120,9 @@ public static class CharacterRigSchema
         new() { Id = Refs.CharSlot_Rotation, Parent = Refs.CharSlot_Track_Y },
         new() { Id = Refs.CharSlot_SwayPivot, Parent = Refs.CharSlot_Rotation, NeedsBottomPivot = true },
         new() { Id = Refs.CharSlot_Scale, Parent = Refs.CharSlot_SwayPivot, NeedsBottomPivot = true },
-        new() { Id = Refs.CharSlot_Size, Parent = Refs.CharSlot_Scale, NeedsBottomPivot = true },
 
         // Character casting axis - per-character defaults
-        new() { Id = Refs.CharacterPortrait_VisualOffset, Parent = Refs.CharSlot_Size, NeedsBottomPivot = true},
+        new() { Id = Refs.CharacterPortrait_VisualOffset, Parent = Refs.CharSlot_Scale, NeedsBottomPivot = true},
 
         // Portrait acting axis
         new() { Id = Refs.CharacterPortrait_Track, Parent = Refs.CharacterPortrait_VisualOffset },
@@ -217,7 +215,6 @@ public enum CharacterRigTarget
     CharSlot_Rotation,
     CharSlot_SwayPivot,
     CharSlot_Scale,
-    CharSlot_Size,
 
     // Character casting axis - per-character defaults
     CharacterPortrait_VisualOffset,
@@ -319,7 +316,6 @@ public sealed class CharacterRigRefs
     public RectTransform CharSlot_Rotation;
     public RectTransform CharSlot_SwayPivot;
     public RectTransform CharSlot_Scale;
-    public RectTransform CharSlot_Size;
 
     // Character casting axis - per-character defaults
     public RectTransform CharacterPortrait_VisualOffset;
@@ -432,7 +428,6 @@ public static class CharacterRigRefsExtensions
             CharacterRigTarget.CharSlot_Rotation => refs.CharSlot_Rotation,
             CharacterRigTarget.CharSlot_SwayPivot => refs.CharSlot_SwayPivot,
             CharacterRigTarget.CharSlot_Scale => refs.CharSlot_Scale,
-            CharacterRigTarget.CharSlot_Size => refs.CharSlot_Size,
 
             // Character casting axis - per-character defaults
             CharacterRigTarget.CharacterPortrait_VisualOffset => refs.CharacterPortrait_VisualOffset,

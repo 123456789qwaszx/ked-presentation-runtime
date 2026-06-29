@@ -194,10 +194,7 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler(
             "slot_tyrant", EnqueueSetupTyrantProtagonistSpec);
         
-        runner.AddCommandHandler<string, string>(
-            "slot_size", EnqueueSetOriginSizeCommandSpec);
-        
-        runner.AddCommandHandler<string, string, string, string, string, string>(
+        runner.AddCommandHandler<string, string, string, string, string>(
             "cast", EnqueueCastCharacterSpec);
         runner.AddCommandHandler<string, string>(
             "pose", EnqueueSetPortraitPoseSpec);

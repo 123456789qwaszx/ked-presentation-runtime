@@ -277,7 +277,6 @@ public sealed class CharacterRigBuilder
         refs.CharSlot_Rotation = GetRt(CharacterRigSchema.Refs.CharSlot_Rotation);
         refs.CharSlot_SwayPivot = GetRt(CharacterRigSchema.Refs.CharSlot_SwayPivot);
         refs.CharSlot_Scale = GetRt(CharacterRigSchema.Refs.CharSlot_Scale);
-        refs.CharSlot_Size = GetRt(CharacterRigSchema.Refs.CharSlot_Size);
 
         // Character casting axis - per-character defaults
         refs.CharacterPortrait_VisualOffset = GetRt(CharacterRigSchema.Refs.CharacterPortrait_VisualOffset);

@@ -52,8 +52,7 @@ public sealed partial class YarnCommandBridge
             "Tyrant",
             "a",
             emotionKey: "2",
-            positionPreset: "center",
-            scaleArg: DefaultTyrantScale);
+            positionPreset: "center");
 
         EnqueueFadeInDslSpec(
             TyrantProtagonistSlotKey,
@@ -81,8 +80,7 @@ public sealed partial class YarnCommandBridge
         string characterKey,
         string variantKey = "a",
         string emotionKey = "2",
-        string positionPreset = "center",
-        string scaleArg = "normal")
+        string positionPreset = "center")
     {
         var castSpec = new CastCharacterCommandSpec
         {
@@ -95,7 +93,6 @@ public sealed partial class YarnCommandBridge
         EnqueueSetPortraitPoseSpec(slotKey, variantKey);
         EnqueueSetPortraitFaceSpec(slotKey, emotionKey);
         EnqueueSetAnchorSpecs(slotKey, positionPreset);
-        EnqueueSetOriginSizeCommandSpec(slotKey, scaleArg);
     }
 
     private void EnqueueSetAnchorSpecs(string slotKey, string positionPreset, bool resetSlotPos = true,
@@ -108,38 +105,6 @@ public sealed partial class YarnCommandBridge
             resetSlotPos = resetSlotPos,
             resetCharacterPos = resetCharPos
         });
-
-    private void EnqueueSetOriginSizeCommandSpec(string roleKey, string scaleArg)
-    {
-        if (YarnNumberParser.TryParseFloat(scaleArg, out float absoluteScale))
-        {
-            var absoluteScaleSpec = new SetOriginSizeCommandSpecCharR
-            {
-                slotKey = roleKey,
-                target = CharacterRigTarget.CharSlot_Size,
-
-                overrideScale = true,
-                scaleOverride = new Vector3(absoluteScale, absoluteScale, absoluteScale),
-
-                preset = CharScalePreset.None,
-            };
-
-            Collect(absoluteScaleSpec);
-            return;
-        }
-
-        if (!CharScalePresetParser.TryParse(scaleArg, out CharScalePreset preset))
-            Debug.LogWarning(
-                $"[YarnCommandBridge] Unknown scale preset '{scaleArg}'. Fallback to '{CharScalePreset.Normal}' roleKey='{roleKey}'.");
-
-        var spec = new SetOriginSizeCommandSpecCharR
-        {
-            target = CharacterRigTarget.CharSlot_Size,
-            slotKey = roleKey, preset = preset,
-        };
-
-        Collect(spec);
-    }
 
     private void EnqueueMirrorSetSpec(
         string roleKey,

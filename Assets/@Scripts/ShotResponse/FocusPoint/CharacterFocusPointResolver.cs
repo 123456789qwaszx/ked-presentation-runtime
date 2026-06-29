@@ -86,9 +86,8 @@ public static class CharacterFocusPointResolver
             return false;
 
         // Focus는 "캐릭터의 논리적 위치"를 가리켜야 한다.
-        // 측정 기준은 framing response 출력보다 위,
-        // 즉 placement 축 마지막 노드인 CharSlot_Size를 사용한다.
-        RectTransform measureRect = rigRefs.CharSlot_Size;
+        // 즉 CharacterPortrait_VisualOffset를 사용한다.
+        RectTransform measureRect = rigRefs.CharSlot_Scale;
 
         if (measureRect == null)
             return false;
