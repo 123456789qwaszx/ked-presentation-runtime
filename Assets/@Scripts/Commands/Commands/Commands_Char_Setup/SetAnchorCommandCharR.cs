@@ -19,16 +19,6 @@ public sealed class SetAnchorCommandSpecCharR : CharacterRigCommandSpecBase
     [Header("Target (Anchor only)")]
     public CharacterRigTarget target = CharacterRigTarget.CharacterPortrait_VisualOffset;
 
-    [Header("Preset")]
-    public CharAnchorPreset preset = CharAnchorPreset.Center;
-
-    [Tooltip("StageSlot 폭 대비 상대 위치. 0.33이면 좌/우가 화면폭의 약 1/3 지점.")]
-    [Range(0f, 0.5f)]
-    public float baseRatioX = 0.33f;
-
-    [Header("Offset (after tuning)")]
-    public Vector2 offset = Vector2.zero;
-
     [Header("Reset")]
     [Tooltip("체크하면 Anchor 설정 후 CharSlot_Track / Move / X / Y / Rotation / Scale 축을 기본값으로 초기화합니다.")]
     public bool resetSlotPos = true;
@@ -40,7 +30,6 @@ public sealed class SetAnchorCommandSpecCharR : CharacterRigCommandSpecBase
 public sealed class SetAnchorCommandCharR : CommandBase
 {
     private readonly SetAnchorCommandSpecCharR _spec;
-    private readonly CharStageTuningSO _globalTuning;
     private readonly RoleAnchorTuningDBSO _roleTuningDb;
 
     private CharacterRigRefs _rigRefs;
@@ -50,11 +39,9 @@ public sealed class SetAnchorCommandCharR : CommandBase
 
     public SetAnchorCommandCharR(
         SetAnchorCommandSpecCharR spec,
-        CharStageTuningSO globalTuning,
         RoleAnchorTuningDBSO roleTuningDb)
     {
         _spec = spec;
-        _globalTuning = globalTuning;
         _roleTuningDb = roleTuningDb;
     }
 
@@ -101,19 +88,10 @@ public sealed class SetAnchorCommandCharR : CommandBase
         KillTweenAndClearPlacementTarget(_rect);
 
         string tuningKey =
-            CharacterRigTargetResolver.ResolveCharacterKeyFromTargetKey(
-                scope,
-                _spec.slotKey);
+            CharacterRigTargetResolver.ResolveCharacterKeyFromTargetKey(scope, _spec.slotKey);
 
         Vector2 anchoredPosition =
-            CharAnchorPlacementResolver.ResolveAnchoredPosition(
-                _rect,
-                _spec.preset,
-                _spec.baseRatioX,
-                _globalTuning,
-                _roleTuningDb,
-                tuningKey,
-                _spec.offset);
+            CharAnchorPlacementResolver.ResolveAnchoredPosition(_roleTuningDb, tuningKey);
 
         _rect.anchoredPosition = anchoredPosition;
 

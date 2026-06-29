@@ -218,7 +218,6 @@ public class VnAppBootstrap : MonoBehaviour
             characterRigBuilder,
             portraitResolver,
             emojiResolver,
-            globalTuning,
             roleTuningDb,
             characterFocusTuningDb,
             characterVisualFocusPresetDb,

@@ -5,7 +5,6 @@ public sealed class CharacterRigCommandFactory : INodeCommandFactory
     private readonly PortraitResolver _portraitResolver;
     private readonly CharacterEmojiResolver _emojiResolver;
 
-    private readonly CharStageTuningSO _globalTuning;
     private readonly RoleAnchorTuningDBSO _roleTuningDb;
     
     private readonly CharacterFocusTuningDBSO _characterFocusTuningDb;
@@ -19,7 +18,6 @@ public sealed class CharacterRigCommandFactory : INodeCommandFactory
         CharacterRigBuilder charRigBuilder,
         PortraitResolver portraitResolver,
         CharacterEmojiResolver emojiResolver,
-        CharStageTuningSO globalTuning,
         RoleAnchorTuningDBSO roleTuningDb,
         CharacterFocusTuningDBSO characterFocusTuningDb,
         CharacterVisualFocusPresetDBSO characterVisualFocusPresetDb,
@@ -30,7 +28,6 @@ public sealed class CharacterRigCommandFactory : INodeCommandFactory
         _rigBuilder = charRigBuilder;
         _portraitResolver = portraitResolver;
         _emojiResolver = emojiResolver;
-        _globalTuning = globalTuning;
         _roleTuningDb = roleTuningDb;
         _characterFocusTuningDb = characterFocusTuningDb;
         _characterVisualFocusPresetDb = characterVisualFocusPresetDb;
@@ -50,7 +47,7 @@ public sealed class CharacterRigCommandFactory : INodeCommandFactory
             SetPortraitPoseCommandSpecCharR s => new SetPortraitPoseCommandCharR(s, _portraitResolver),
 
             // Layout / Base State
-            SetAnchorCommandSpecCharR s => new SetAnchorCommandCharR(s, _globalTuning, _roleTuningDb),
+            SetAnchorCommandSpecCharR s => new SetAnchorCommandCharR(s, _roleTuningDb),
             ApplyTrackOffsetCommandSpecCharR s => new ApplyTrackOffsetCommandCharR(s),
             MirrorCharacterCommandSpecCharR s => new MirrorCharacterCommandCharR(s),
 

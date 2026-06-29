@@ -263,23 +263,8 @@ public sealed partial class YarnCommandBridge
     private void RegisterCharRigPlacementCommands(DialogueRunner runner)
     {
         // Show
-        runner.AddCommandHandler<string, string, string, string>(
-            "show", EnqueueShowSpec);
-        
         runner.AddCommandHandler<string, string, string>(
-            "show_at_left", EnqueueShowAtLeftSpec);
-
-        runner.AddCommandHandler<string, string, string>(
-            "show_at_center", EnqueueShowAtCenterSpec);
-
-        runner.AddCommandHandler<string, string, string>(
-            "show_at_right", EnqueueShowAtRightSpec);
-
-        runner.AddCommandHandler<string, string, string>(
-            "show_at_dl", EnqueueShowAtDuoLeftSpec);
-
-        runner.AddCommandHandler<string, string, string>(
-            "show_at_dr", EnqueueShowAtDuoRightSpec);
+            "show", EnqueueShowAtSpec);
         
         // Nudge
         runner.AddCommandHandler<string, string, string>(

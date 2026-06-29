@@ -87,7 +87,7 @@ public static class CharacterFocusPointResolver
 
         // Focus는 "캐릭터의 논리적 위치"를 가리켜야 한다.
         // 즉 CharacterPortrait_VisualOffset를 사용한다.
-        RectTransform measureRect = rigRefs.CharSlot_Scale;
+        RectTransform measureRect = rigRefs.CharacterPortrait_VisualOffset;
 
         if (measureRect == null)
             return false;

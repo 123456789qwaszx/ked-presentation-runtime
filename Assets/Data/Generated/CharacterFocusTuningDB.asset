@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: CharacterFocusTuningDB
   m_EditorClassIdentifier: Assembly-CSharp::CharacterFocusTuningDBSO
   baseOffsets:
-    feet: {x: 0, y: -380}
-    body: {x: 0, y: -150}
-    bust: {x: 0, y: 0}
-    face: {x: 0, y: 150}
-    faceAura: {x: 0, y: 150}
+    feet: {x: 0, y: 480}
+    body: {x: 0, y: 680}
+    bust: {x: 0, y: 820}
+    face: {x: 0, y: 950}
+    faceAura: {x: 0, y: 950}
     handLeft: {x: -80, y: 0}
     handRight: {x: 80, y: 0}
   entries:

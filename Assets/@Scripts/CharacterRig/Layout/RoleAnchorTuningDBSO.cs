@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 [CreateAssetMenu(menuName = "CPS/CharRig/Tuning/Role Anchor Tuning DB", fileName = "RoleAnchorTuningDB")]
 public sealed class RoleAnchorTuningDBSO : ScriptableObject
@@ -16,7 +17,7 @@ public sealed class RoleAnchorTuningDBSO : ScriptableObject
         public Vector2 defaultOffset = Vector2.zero;
         
         [Header("Anchor Offsets")]
-        public CharPlacementTuningSet offsets;
+        public Vector2 offset;
 
         [Header("Scale")]
         [Tooltip("캐릭터/리소스 정규화용 기본 스케일")]

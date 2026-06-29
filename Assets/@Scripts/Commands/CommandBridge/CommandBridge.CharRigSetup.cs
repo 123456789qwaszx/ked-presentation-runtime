@@ -101,7 +101,6 @@ public sealed partial class YarnCommandBridge
         {
             slotKey = slotKey,
             target = CharacterRigTarget.CharacterPortrait_VisualOffset,
-            preset = CharAnchorPresetParser.Parse(positionPreset),
             resetSlotPos = resetSlotPos,
             resetCharacterPos = resetCharPos
         });
