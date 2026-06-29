@@ -99,7 +99,6 @@ public sealed partial class YarnCommandBridge
             screenPoint = screenPoint,
             moveTarget = CharacterRigTarget.CharSlot_Track_Focus,
             duration = YarnDurationParser.Parse(durationToken),
-            wait = false
         });
 
     private void EnqueuePlaceCharacterFocusSpec(
@@ -115,8 +114,7 @@ public sealed partial class YarnCommandBridge
                 ? parsed
                 : ScreenFocusPoint.Center,
             moveTarget = CharacterRigTarget.CharSlot_Track_Focus,
-            duration = YarnDurationParser.Parse(durationToken, 0f),
-            wait = false
+            duration = YarnDurationParser.Parse(durationToken),
         });
     #endregion
     
