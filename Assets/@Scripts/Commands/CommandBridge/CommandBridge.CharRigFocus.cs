@@ -1,4 +1,3 @@
-using System.Globalization;
 using UnityEngine;
 
 public sealed partial class YarnCommandBridge
@@ -93,20 +92,13 @@ public sealed partial class YarnCommandBridge
         string focus,
         ScreenFocusPoint screenPoint,
         string durationToken)
-        => EnqueuePlaceCharacterFocusToSpec(roleKey, focus, screenPoint, YarnDurationParser.Parse(durationToken));
-
-    private void EnqueuePlaceCharacterFocusToSpec(
-        string roleKey,
-        string focus,
-        ScreenFocusPoint screenPoint,
-        float duration)
         => Collect(new PlaceCharacterFocusCommandSpecCharR
         {
             slotKey = roleKey,
             focusPreset = CharacterFocusPresetParser.Parse(focus),
             screenPoint = screenPoint,
             moveTarget = CharacterRigTarget.CharSlot_Track_Focus,
-            duration = duration,
+            duration = YarnDurationParser.Parse(durationToken),
             wait = false
         });
 
@@ -126,15 +118,6 @@ public sealed partial class YarnCommandBridge
             duration = YarnDurationParser.Parse(durationToken, 0f),
             wait = false
         });
-
-    private void EnqueueDepthResetSpec(string roleKey, float duration)
-        => Collect(new SetDepthCommandSpecCharR
-        {
-            slotKey = roleKey,
-            preset = CharacterDepthKey.Mid,
-            useLevel = false,
-            duration = duration,
-        });
     #endregion
     
     
@@ -142,16 +125,16 @@ public sealed partial class YarnCommandBridge
     private void EnqueueDepthAtPresetSpec(
         string roleKey,
         string depthArg,
-        string preserveFocusArg,
-        float duration)
+        string preserveFocusArg = DefaultFocusDepthPresetToken,
+        string durationToken = DefaultFocusDepthDurationToken)
     {
         var spec = new SetDepthCommandSpecCharR
         {
             slotKey = roleKey,
-            duration = duration,
+            duration = YarnDurationParser.Parse(durationToken),
         };
 
-        if (TryParseDepthLevel(depthArg, out float level))
+        if (CharacterDepthPresetParser.TryParseDepthLevel(depthArg, out float level))
         {
             spec.useLevel = true;
             spec.level = level;
@@ -185,29 +168,6 @@ public sealed partial class YarnCommandBridge
 
         Collect(spec);
     }
-    
-    private static bool TryParseDepthLevel(string raw, out float level)
-    {
-        string s = (raw ?? string.Empty).Trim();
-
-        if (!float.TryParse(
-                s,
-                NumberStyles.Float,
-                CultureInfo.InvariantCulture,
-                out level))
-        {
-            return false;
-        }
-
-        return !float.IsNaN(level) && !float.IsInfinity(level);
-    }
-    
-    private void EnqueueDepthAtSpec(
-        string roleKey,
-        string depthArg,
-        string preserveFocusArg = DefaultFocusDepthPresetToken,
-        string durationToken = DefaultFocusDepthDurationToken)
-        => EnqueueDepthAtPresetSpec(roleKey, depthArg, preserveFocusArg, durationToken);
 
     private void EnqueueDepthAtCloseSpec(
         string roleKey,
@@ -238,12 +198,14 @@ public sealed partial class YarnCommandBridge
         string preserveFocusArg = DefaultFocusDepthPresetToken,
         string durationToken = DefaultFocusDepthDurationToken)
         => EnqueueDepthAtPresetSpec(roleKey, "far", preserveFocusArg, durationToken);
-
-    private void EnqueueDepthAtPresetSpec(
-        string roleKey,
-        string depthArg,
-        string preserveFocusArg,
-        string durationToken)
-        => EnqueueDepthAtPresetSpec(roleKey, depthArg, preserveFocusArg, YarnDurationParser.Parse(durationToken));
+    
+    private void EnqueueDepthResetSpec(string roleKey, float duration)
+        => Collect(new SetDepthCommandSpecCharR
+        {
+            slotKey = roleKey,
+            preset = CharacterDepthKey.Mid,
+            useLevel = false,
+            duration = duration,
+        });
     #endregion
 }

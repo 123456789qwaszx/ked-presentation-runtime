@@ -4993,11 +4993,61 @@ MonoBehaviour:
     emotionKey: 02
     sprite: {fileID: 21300000, guid: 5400a22ba5aa20042897f8eff80d6cfa, type: 3}
     assetPath: Assets/Art/Portraits/kuonji/kuonji_a_02.png
+  - characterId: kuonji
+    variantKey: kuonji_a
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: 9a46fcf1116706e408441cde9b548d18, type: 3}
+    assetPath: Assets/Art/Portraits/kuonji/kuonji_a_03.png
+  - characterId: kuonji
+    variantKey: kuonji_a
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: b5e2c71f63930214ba91ba448c548fe4, type: 3}
+    assetPath: Assets/Art/Portraits/kuonji/kuonji_a_04.png
+  - characterId: kuonji
+    variantKey: kuonji_a
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: 72fce7fb802b1804b967b4a563023d3d, type: 3}
+    assetPath: Assets/Art/Portraits/kuonji/kuonji_a_05.png
+  - characterId: kuonji
+    variantKey: kuonji_a
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: 3f1074ad4dda85b41a9d5b4b33de618d, type: 3}
+    assetPath: Assets/Art/Portraits/kuonji/kuonji_a_06.png
+  - characterId: kuonji
+    variantKey: kuonji_a
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: 0ef760e45fc14d94c9018473c40c6b81, type: 3}
+    assetPath: Assets/Art/Portraits/kuonji/kuonji_a_07.png
+  - characterId: kuonji
+    variantKey: kuonji_a
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: 7e4fa2e9aa63fdc4695a36753cd9e299, type: 3}
+    assetPath: Assets/Art/Portraits/kuonji/kuonji_a_08.png
   - characterId: momoka
     variantKey: momoka_a
     emotionKey: 02
     sprite: {fileID: 21300000, guid: f0006a933c433794787fa34a377bd1b4, type: 3}
     assetPath: Assets/Art/Portraits/momoka/momoka_a_02.png
+  - characterId: momoka
+    variantKey: momoka_a
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: a9149c9e96b915545925400b3d6df15d, type: 3}
+    assetPath: Assets/Art/Portraits/momoka/momoka_a_03.png
+  - characterId: momoka
+    variantKey: momoka_a
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: 6b5a42d66ed7b6f49981af1803f3e63e, type: 3}
+    assetPath: Assets/Art/Portraits/momoka/momoka_a_04.png
+  - characterId: momoka
+    variantKey: momoka_a
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: 79211400b4d60da499063a261c2b3aa4, type: 3}
+    assetPath: Assets/Art/Portraits/momoka/momoka_a_05.png
+  - characterId: momoka
+    variantKey: momoka_a
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: 427388273b175ee4799686c3cae08c15, type: 3}
+    assetPath: Assets/Art/Portraits/momoka/momoka_a_06.png
   - characterId: reira
     variantKey: reira_a
     emotionKey: 02
@@ -5758,5 +5808,5 @@ MonoBehaviour:
     emotionKey: 01
     sprite: {fileID: 21300000, guid: b172580fb3d04244d8bfbe141afa6326, type: 3}
     assetPath: Assets/Art/Portraits/soyeong/soyeong_i_1.png
-  generatedTicksUtc: 639178719620594523
-  generatedTimeReadable: 2026-06-24 13:26:02
+  generatedTicksUtc: 639182424433057627
+  generatedTimeReadable: 2026-06-28 20:20:43

@@ -6,8 +6,8 @@
 
 <<actor @1 willow>>
 <<show      @1 e21>>
-<<to_center @1 bust 8fr>>
-<<at_mid    @1 bust 12fr>>
+<<place_center @1 bust 8fr>>
+<<size_mid    @1 bust 12fr>>
 <<left      @1 1u 10fr>>
 
 <<emoji_spring @1 18>>
@@ -37,8 +37,8 @@
 
 <<actor @2 noya>>
 <<show     @2 e8 right -1>>
-<<to_br    @2 bust -1>>
-<<at_front @2 bust -1>>
+<<place_br    @2 bust -1>>
+<<size_front @2 bust -1>>
 <<down     @2 3u>>
 <<left     @2 1.2u>>
 
@@ -70,8 +70,8 @@ actor
 
 <<actor @3 iris>>
 <<show     @3 e5 left -1>>
-<<to_bl    @3 bust -1>>
-<<at_front @3 bust -1>>
+<<place_bl    @3 bust -1>>
+<<size_front @3 bust -1>>
 <<down     @3 3u>>
 <<right    @3 1.2u>>
 
@@ -89,7 +89,7 @@ _#beat #stay
 아야메: 이번에 돌아와서 물자를 보충하는 것만으로도 기존에 약속했던 보수의 절반을 사용해야 해요. 3분의 1만 받는다면, 우린 적자예요.
 
 <<actor @1 willow>>
-<<at_far          @1 bust>>
+<<size_far          @1 bust>>
 <<char_silhouette @1 1>>
 _#beat #stay
 
@@ -112,8 +112,8 @@ _#beat #stay
 <<5fr>>
 
 <<actor @1 willow>>
-<<to_center       @1 bust 12fr>>
-<<at_close        @1 bust 29fr>>
+<<place_center       @1 bust 12fr>>
+<<size_close        @1 bust 29fr>>
 <<left            @1 4u 19fr>>
 
 <<char_silhouette @1 0 34fr>>
@@ -148,14 +148,14 @@ _#beat #stay
 
 <<actor @2 noya>>
 <<show     @2 e6 right -1>>
-<<to_br    @2 bust -1>>
-<<at_front @2 bust -1>>
+<<place_br    @2 bust -1>>
+<<size_front @2 bust -1>>
 <<slide_in @2 right>>
 
 <<2fr>>
 
 <<actor @4 amber>>
-<<to_br @4 bust 29fr>>
+<<place_br @4 bust 29fr>>
 <<left  @4 2.5u 34fr>>
 _#beat #stay
 
@@ -169,8 +169,8 @@ _#beat #stay
 
 <<actor @1 willow>>
 <<fade_in @1 10fr>>
-<<to_center @1 bust 14fr>>
-<<at_close @1 bust 14fr>>
+<<place_center @1 bust 14fr>>
+<<size_close @1 bust 14fr>>
 <<char_silhouette @1 0 12fr>>
 <<face @1 11>>
 _#beat #stay
@@ -180,8 +180,8 @@ _#beat #stay
 
 <<actor @3 iris>>
 <<fade_in @3 8fr>>
-<<to_bl @3 bust 12fr>>
-<<at_front @3 bust 12fr>>
+<<place_bl @3 bust 12fr>>
+<<size_front @3 bust 12fr>>
 <<right @3 0.8u 10fr>>
 <<face @3 5>>
 <<6fr>>
@@ -213,7 +213,7 @@ _#beat #stay
 <<char_dim @4 0.25 8fr>>
 
 <<actor @1 willow>>
-<<at_far @1 bust 12fr>>
+<<size_far @1 bust 12fr>>
 <<char_dim @1 0.2 8fr>>
 _#beat #stay
 
@@ -231,7 +231,7 @@ _#beat #stay
 
 <<actor @1 willow>>
 <<char_dim @1 0 8fr>>
-<<at_close @1 bust 12fr>>
+<<size_close @1 bust 12fr>>
 <<face @1 25>>
 <<shot_to 0 -70 60>>
 <<6fr>>
@@ -252,8 +252,8 @@ _#beat #stay
 응?
 
 <<actor @1 willow>>
-<<to_center @1 bust 12fr>>
-<<at_close @1 bust 12fr>>
+<<place_center @1 bust 12fr>>
+<<size_close @1 bust 12fr>>
 <<face_swap @1 11 8fr>>
 _#beat #stay
 
@@ -266,7 +266,7 @@ _#beat #stay
 
 <<actor @3 iris>>
 <<char_dim @3 0 6fr>>
-<<to_bl @3 bust 10fr>>
+<<place_bl @3 bust 10fr>>
 <<right @3 0.5u 10fr>>
 <<face @3 5>>
 _#beat #stay
@@ -289,7 +289,7 @@ _#beat #stay
 
 <<actor @1 willow>>
 <<face @1 12>>
-<<at_close @1 face 10fr>>
+<<size_close @1 face 10fr>>
 <<shot_to 0 -120 80>>
 _#beat #stay
 

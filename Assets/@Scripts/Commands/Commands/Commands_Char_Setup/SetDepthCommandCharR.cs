@@ -234,19 +234,49 @@ public sealed class SetDepthCommandCharR : CommandBase
     private float CalculateAcceleratedRemainingDuration()
     {
         float posOriginalDistance = Vector2.Distance(_startDepthY, _destFinalDepthY);
-        float posRemainingDistance =Vector2.Distance(_depthYRect.anchoredPosition, _destFinalDepthY);
-        
+        float posRemainingDistance = Vector2.Distance(
+            _depthYRect.anchoredPosition,
+            _destFinalDepthY);
+
         float scaleOriginalDistance = Vector2.Distance(_startDepthScale, _destDepthScale);
-        float scaleRemainingDistance = 
-            Vector2.Distance(new Vector2(_depthScaleRect.localScale.x, _depthScaleRect.localScale.y), _destDepthScale);
-        
-        float posRatio = Mathf.Clamp01(posRemainingDistance / posOriginalDistance);
-        float scaleRatio = Mathf.Clamp01(scaleRemainingDistance / scaleOriginalDistance);
-        
+        float scaleRemainingDistance = Vector2.Distance(
+            new Vector2(_depthScaleRect.localScale.x, _depthScaleRect.localScale.y),
+            _destDepthScale);
+
+        float posRatio = CalculateRemainingRatio(
+            posRemainingDistance,
+            posOriginalDistance);
+
+        float scaleRatio = CalculateRemainingRatio(
+            scaleRemainingDistance,
+            scaleOriginalDistance);
+
         float remainingRatio = Mathf.Max(posRatio, scaleRatio);
+
+        if (!float.IsFinite(remainingRatio))
+            return 0f;
+
         float remainingDuration = _spec.duration * remainingRatio;
 
+        if (!float.IsFinite(remainingDuration))
+            return 0f;
+
         return remainingDuration / StepFinishSpeedUpMultiplier;
+    }
+
+    private static float CalculateRemainingRatio(
+        float remainingDistance,
+        float originalDistance)
+    {
+        if (originalDistance <= Mathf.Epsilon)
+            return 0f;
+
+        float ratio = remainingDistance / originalDistance;
+
+        if (!float.IsFinite(ratio))
+            return 0f;
+
+        return Mathf.Clamp01(ratio);
     }
 
     #endregion

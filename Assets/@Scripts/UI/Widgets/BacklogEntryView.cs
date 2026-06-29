@@ -1,20 +1,6 @@
-using System;
 using TMPro;
 using UnityEngine;
 using static UIRefValidation;
-
-[Serializable]
-public struct DialogueLogEntry
-{
-    public string lineId;
-    public int lineSerial;
-    public string nodeName;
-    public string rawText;
-    public double timestamp;
-
-    // 표시된 최종 텍스트(마크업 제거/치환 결과)를 별도 저장하고 싶으면 필드 추가
-    // public string renderedText;
-}
 
 public sealed class BacklogEntryView : UIBase<BacklogEntryView.Refs>
 {
@@ -32,8 +18,6 @@ public sealed class BacklogEntryView : UIBase<BacklogEntryView.Refs>
     private TMP_Text _bodyText;
     
     #endregion
-
-    public DialogueLogEntry Entry { get; private set; }
 
     private bool _valid;
 
@@ -54,15 +38,11 @@ public sealed class BacklogEntryView : UIBase<BacklogEntryView.Refs>
     
     public void Present(in DialogueLogEntry entry)
     {
-        if (!_valid) return;
-
-        Entry = entry;
-
-        string raw = entry.rawText ?? "";
-        SplitSpeakerBody(raw, out string speaker, out string body);
-
-        _speakerText.text = speaker;
-        _bodyText.text = body;
+        if (!_valid) 
+            return;
+        
+        _speakerText.text = "";
+        _bodyText.text = entry.rawText;
     }
 
     #endregion
@@ -81,25 +61,5 @@ public sealed class BacklogEntryView : UIBase<BacklogEntryView.Refs>
         }
 
         return true;
-    }
-
-    private static void SplitSpeakerBody(string raw, out string speaker, out string body)
-    {
-        speaker = "";
-        body = "";
-
-        if (string.IsNullOrWhiteSpace(raw))
-            return;
-
-        int idx = raw.IndexOf(':');
-
-        if (idx > 0 && idx <= 24)
-        {
-            speaker = raw.Substring(0, idx).Trim();
-            body = (idx + 1 < raw.Length) ? raw.Substring(idx + 1).Trim() : "";
-            return;
-        }
-
-        body = raw.Trim();
     }
 }

@@ -3,7 +3,7 @@
 
 <<down @ 2u 7fr>>
 <<4fr>>
-<<to_center @ bust 14fr>>
+<<place_center @ bust 14fr>>
 <<3fr>>
 <<down @ 1.5u 15fr>>
 <<left @ 0.2u 15fr>>

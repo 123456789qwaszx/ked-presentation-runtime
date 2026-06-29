@@ -19,7 +19,7 @@ public sealed class VnFeatureController : MonoBehaviour
     private bool _speedUpHeld;
     private bool _rapidSkipHeld;
 
-    public bool IsAuto => _vnPlaybackSettings != null && _vnPlaybackSettings.IsAutoMode;
+    private bool IsAuto => _vnPlaybackSettings.IsAutoMode;
 
     private bool LineFullyShown => _linePresentationAdvanceState.IsLineFullyShown;
 

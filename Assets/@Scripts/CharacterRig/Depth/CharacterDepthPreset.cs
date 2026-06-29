@@ -1,7 +1,24 @@
 using System;
+using System.Globalization;
 
 public static class CharacterDepthPresetParser
 {
+    public static bool TryParseDepthLevel(string raw, out float level)
+    {
+        string s = (raw ?? string.Empty).Trim();
+
+        if (!float.TryParse(
+                s,
+                NumberStyles.Float,
+                CultureInfo.InvariantCulture,
+                out level))
+        {
+            return false;
+        }
+
+        return !float.IsNaN(level) && !float.IsInfinity(level);
+    }
+    
     public static bool TryParse(string raw, out CharacterDepthKey preset)
     {
         preset = CharacterDepthKey.Mid;

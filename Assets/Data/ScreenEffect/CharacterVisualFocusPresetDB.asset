@@ -22,10 +22,10 @@ MonoBehaviour:
     innerRimColor: {r: 1, g: 0.96, b: 0.86, a: 1}
   - key: focus
     dim: 0
-    dimTintColor: {r: 0.45, g: 0.48, b: 0.55, a: 1}
+    dimTintColor: {r: 0.57087797, g: 0.5754717, b: 0.54561234, a: 1}
     outerRim: 0
-    innerRim: 0.07
-    outerRimColor: {r: 1, g: 1, b: 1, a: 1}
+    innerRim: 0.099
+    outerRimColor: {r: 0, g: 0, b: 0, a: 1}
     innerRimColor: {r: 1, g: 0.96, b: 0.86, a: 1}
   - key: defocus
     dim: 0.45
@@ -62,3 +62,10 @@ MonoBehaviour:
     innerRim: 0
     outerRimColor: {r: 1, g: 1, b: 1, a: 1}
     innerRimColor: {r: 1, g: 0.96, b: 0.86, a: 1}
+  - key: test
+    dim: 0
+    dimTintColor: {r: 0.45, g: 0.48, b: 0.55, a: 1}
+    outerRim: 0
+    innerRim: 0
+    outerRimColor: {r: 0.6886792, g: 0.6886792, b: 0.6886792, a: 1}
+    innerRimColor: {r: 1, g: 1, b: 1, a: 1}

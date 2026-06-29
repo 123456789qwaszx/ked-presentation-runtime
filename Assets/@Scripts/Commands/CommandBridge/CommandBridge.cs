@@ -194,14 +194,15 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler(
             "slot_tyrant", EnqueueSetupTyrantProtagonistSpec);
         
+        runner.AddCommandHandler<string, string>(
+            "slot_size", EnqueueSetOriginSizeCommandSpec);
+        
         runner.AddCommandHandler<string, string, string, string, string, string>(
             "cast", EnqueueCastCharacterSpec);
         runner.AddCommandHandler<string, string>(
             "pose", EnqueueSetPortraitPoseSpec);
         runner.AddCommandHandler<string, string>(
             "face", EnqueueSetPortraitFaceSpec);
-        runner.AddCommandHandler<string, string>(
-            "size", EnqueueSetOriginSizeCommandSpec);
         
         runner.AddCommandHandler<string, float, float, float, string>(
             "char_color_to", EnqueueSpriteColorToDslSpec);
@@ -313,50 +314,47 @@ public sealed partial class YarnCommandBridge
     private void RegisterCharFocusPlacementCommands(DialogueRunner runner)
     {
         // Char focus placement
-        runner.AddCommandHandler<string, string, string>(
-            "to_left", EnqueueFocusToLeftSpec);
-
-        runner.AddCommandHandler<string, string, string>(
-            "to_center", EnqueueFocusToCenterSpec);
-
-        runner.AddCommandHandler<string, string, string>(
-            "to_right", EnqueueFocusToRightSpec);
-
-        runner.AddCommandHandler<string, string, string>(
-            "to_tl", EnqueueFocusToTopLeftSpec);
-
-        runner.AddCommandHandler<string, string, string>(
-            "to_top", EnqueueFocusToTopSpec);
-
-        runner.AddCommandHandler<string, string, string>(
-            "to_tr", EnqueueFocusToTopRightSpec);
-
-        runner.AddCommandHandler<string, string, string>(
-            "to_bl", EnqueueFocusToBottomLeftSpec);
-
-        runner.AddCommandHandler<string, string, string>(
-            "to_bottom", EnqueueFocusToBottomSpec);
-
-        runner.AddCommandHandler<string, string, string>(
-            "to_br", EnqueueFocusToBottomRightSpec);
-
-        runner.AddCommandHandler<string, string, string>(
-            "to_inner_tl", EnqueueFocusToInnerTopLeftSpec);
-
-        runner.AddCommandHandler<string, string, string>(
-            "to_inner_tr", EnqueueFocusToInnerTopRightSpec);
-
-        runner.AddCommandHandler<string, string, string>(
-            "to_inner_bl", EnqueueFocusToInnerBottomLeftSpec);
-
-        runner.AddCommandHandler<string, string, string>(
-            "to_inner_br", EnqueueFocusToInnerBottomRightSpec);
-        
         runner.AddCommandHandler<string, string, string, string>(
-            "to", EnqueuePlaceCharacterFocusSpec);
+            "place", EnqueuePlaceCharacterFocusSpec);
+        
+        runner.AddCommandHandler<string, string, string>(
+            "place_left", EnqueueFocusToLeftSpec);
 
-        runner.AddCommandHandler<string, float>(
-            "depth_reset", EnqueueDepthResetSpec);
+        runner.AddCommandHandler<string, string, string>(
+            "place_center", EnqueueFocusToCenterSpec);
+
+        runner.AddCommandHandler<string, string, string>(
+            "place_right", EnqueueFocusToRightSpec);
+
+        runner.AddCommandHandler<string, string, string>(
+            "place_tl", EnqueueFocusToTopLeftSpec);
+
+        runner.AddCommandHandler<string, string, string>(
+            "place_top", EnqueueFocusToTopSpec);
+
+        runner.AddCommandHandler<string, string, string>(
+            "place_tr", EnqueueFocusToTopRightSpec);
+
+        runner.AddCommandHandler<string, string, string>(
+            "place_bl", EnqueueFocusToBottomLeftSpec);
+
+        runner.AddCommandHandler<string, string, string>(
+            "place_bottom", EnqueueFocusToBottomSpec);
+
+        runner.AddCommandHandler<string, string, string>(
+            "place_br", EnqueueFocusToBottomRightSpec);
+
+        runner.AddCommandHandler<string, string, string>(
+            "place_inner_tl", EnqueueFocusToInnerTopLeftSpec);
+
+        runner.AddCommandHandler<string, string, string>(
+            "place_inner_tr", EnqueueFocusToInnerTopRightSpec);
+
+        runner.AddCommandHandler<string, string, string>(
+            "place_inner_bl", EnqueueFocusToInnerBottomLeftSpec);
+
+        runner.AddCommandHandler<string, string, string>(
+            "place_inner_br", EnqueueFocusToInnerBottomRightSpec);
         
         // Char focus depth
         // Generic form:
@@ -364,22 +362,25 @@ public sealed partial class YarnCommandBridge
         // <<at c1 front>>
         // <<at c1 7 face 8fr>>
         runner.AddCommandHandler<string, string, string, string>(
-            "at", EnqueueDepthAtSpec);
+            "size", EnqueueDepthAtPresetSpec);
 
         runner.AddCommandHandler<string, string, string>(
-            "at_far", EnqueueDepthAtFarSpec);
+            "size_far", EnqueueDepthAtFarSpec);
         
         runner.AddCommandHandler<string, string, string>(
-            "at_back", EnqueueDepthAtBackSpec);
+            "size_back", EnqueueDepthAtBackSpec);
         
         runner.AddCommandHandler<string, string, string>(
-            "at_mid", EnqueueDepthAtMidSpec);
+            "size_mid", EnqueueDepthAtMidSpec);
 
         runner.AddCommandHandler<string, string, string>(
-            "at_front", EnqueueDepthAtFrontSpec);
+            "size_front", EnqueueDepthAtFrontSpec);
         
         runner.AddCommandHandler<string, string, string>(
-            "at_close", EnqueueDepthAtCloseSpec);
+            "size_close", EnqueueDepthAtCloseSpec);
+        
+        runner.AddCommandHandler<string, float>(
+            "size_reset", EnqueueDepthResetSpec);
     }
     
     private void BindCharRigPresentation(DialogueRunner runner)

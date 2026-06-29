@@ -3,21 +3,21 @@
 
 <<actor @3 Iris>>
 <<show      @3 emo17>>
-<<to_center @3 bust 8fr>>
-<<at_mid    @3 bust 12fr>>
+<<place_center @3 bust 8fr>>
+<<size_mid    @3 bust 12fr>>
 아야메: 빙결!
 
 <<bg_slot01 bg2 ep12_02_1>>
 
 <<actor @2 Noya>>
 <<show      @2 emo5>>
-<<to_left @2 bust 8fr>>
-<<at_mid    @2 bust 12fr>>
+<<place_left @2 bust 8fr>>
+<<size_mid    @2 bust 12fr>>
 
 <<bg_fade_in bg2>>
 <<tx_slant_in>>
 <<2fr>>
-<<to_right @3 bust 8fr>>
+<<place_right @3 bust 8fr>>
 세이나: 잘했어, 아야메. 여기 성해는 내가 맡을게.
 
 //<<box_hide>>

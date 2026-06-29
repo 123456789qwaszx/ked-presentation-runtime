@@ -1,4 +1,15 @@
+using System;
 using System.Collections.Generic;
+
+[Serializable]
+public struct DialogueLogEntry
+{
+    public string lineId;
+    public int lineSerial;
+    public string nodeName;
+    public string rawText;
+    public double timestamp;
+}
 
 public sealed class BacklogRecorder
 {
