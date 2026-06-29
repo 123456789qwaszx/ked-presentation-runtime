@@ -10,17 +10,9 @@ public sealed class RoleAnchorTuningDBSO : ScriptableObject
     {
         [Tooltip("예: seina 또는 seina:pose_wide")]
         public string key;
-
-        [Header("Default Offset")]
-        [Tooltip("이 캐릭터/포즈에 항상 적용되는 기본 위치 보정값입니다.")]
-        public Vector2 defaultOffset = Vector2.zero;
         
         [Header("Anchor Offsets")]
         public Vector2 offset;
-
-        [Header("Scale")]
-        [Tooltip("캐릭터/리소스 정규화용 기본 스케일")]
-        public float defaultScale = 1f;
 
         [Tooltip("프리셋별 캐릭터 추가 배율")]
         public float visualScale = 1f;
@@ -49,7 +41,7 @@ public sealed class RoleAnchorTuningDBSO : ScriptableObject
 
     private void Build()
     {
-        _map = new Dictionary<string, Entry>(StringComparer.Ordinal);
+        _map = new Dictionary<string, Entry>(StringComparer.OrdinalIgnoreCase);
 
         for (int i = 0; i < entries.Count; i++)
         {

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using Yarn.Unity;
@@ -74,46 +75,10 @@ public sealed partial class YarnCommandBridge
         BindOverlayRig(runner);
     }
     
-    private void BindControl(DialogueRunner runner)
-    {
-        BindFramePauseAliases(runner);
-        
-        runner.AddCommandHandler<string>(
-            "seq", PlayOverlaySequence);
-        
-        runner.AddCommandHandler<float>(
-            "pause", EnqueueWaitSpec);
-        
-        runner.AddCommandHandler<string>(
-            "ui_patch", EnqueueUIPatchSpec);
-        
-        runner.AddCommandHandler<string>(
-            "debug_log", LogImmediate);
-        
-        runner.AddCommandHandler<string, string, string>(
-            "attach_to_bg", EnqueueAttachCharRigToBackgroundObjectSlotSpec);
-        
-        runner.AddCommandHandler<string, string>(
-            "actor", EnqueuePresentationActorAliasSpec);
-        
-        runner.AddCommandHandler(
-            "box_hide", HideDialogueBox);
-        runner.AddCommandHandler(
-            "box_show", ShowDialogueBox);
-        
-        runner.AddCommandHandler(
-            "box_close", CloseDialogueBox);
-        
-        runner.AddCommandHandler<string>(
-            "surface_layout", SetSurfaceLayout);
-
-        runner.AddCommandHandler(
-            "surface_reset", ResetSurfaceLayout);
-    }
-    
+    // Main Runner only commands.
     private void BindMainLaneCommands(DialogueRunner runner)
     {
-        // Main Runner only commands.
+        // 자동 진행 제어
         runner.AddCommandHandler<string>(
             "pres_start", StartSubPresentationNode);
         runner.AddCommandHandler(
@@ -124,9 +89,11 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler(
             "pres_resume", ResumeSubPresentation); // 재개
 
-        // 자동 진행 제어 (재호출 시 마지막 값으로 덮어씀)
+        // (재호출 시 마지막 값으로 덮어씀)
         runner.AddCommandHandler<int>(
             "pres_hold", HoldSubPresentation); // N라인 멈춤
+        
+        // (재호출 시 누적)
         runner.AddCommandHandler<int>(
             "pres_advance", AddSubPresentationForwardAdvance); // 이번 라인 N개 추가
         
@@ -178,7 +145,59 @@ public sealed partial class YarnCommandBridge
 
     private IEnumerator RunOneShotNodeFree(string nodeName)
         => _oneShotPresentationLane.RunNodeCoroutine(nodeName, blockMain: false);
+    
+    private void SetNamedLineBoxKind(string key)
+    {
+        Enum.TryParse(key, true, out DialogueBoxKind kind);
+        _dialogueBoxPresentation.SetNamedLineBoxKind(kind);
+    }
 
+    private void SetProtagonistLineBoxKind(string key)
+    {
+        Enum.TryParse(key, true, out DialogueBoxKind kind);
+        _dialogueBoxPresentation.SetProtagonistLineBoxKind(kind);
+    }
+
+    private void ResetDefaultLineBoxKinds()
+        => _dialogueBoxPresentation.ResetDefaultLineBoxKinds();
+
+    private void BindControl(DialogueRunner runner)
+    {
+        BindFramePauseAliases(runner);
+        
+        runner.AddCommandHandler<string>(
+            "seq", PlayOverlaySequence);
+        
+        runner.AddCommandHandler<float>(
+            "pause", EnqueueWaitSpec);
+        
+        runner.AddCommandHandler<string>(
+            "ui_patch", EnqueueUIPatchSpec);
+        
+        runner.AddCommandHandler<string>(
+            "debug_log", LogImmediate);
+        
+        runner.AddCommandHandler<string, string, string>(
+            "attach_to_bg", EnqueueAttachCharRigToBackgroundObjectSlotSpec);
+        
+        runner.AddCommandHandler<string, string>(
+            "actor", EnqueuePresentationActorAliasSpec);
+        
+        runner.AddCommandHandler(
+            "box_hide", HideDialogueBox);
+        runner.AddCommandHandler(
+            "box_show", ShowDialogueBox);
+        
+        runner.AddCommandHandler(
+            "box_close", CloseDialogueBox);
+        
+        runner.AddCommandHandler<string>(
+            "surface_layout", SetSurfaceLayout);
+
+        runner.AddCommandHandler(
+            "surface_reset", ResetSurfaceLayout);
+    }
+    
     private void BindCharRigSetup(DialogueRunner runner)
     {
         runner.AddCommandHandler<string, string, string>(

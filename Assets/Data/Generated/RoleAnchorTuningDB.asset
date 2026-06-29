@@ -15,181 +15,45 @@ MonoBehaviour:
   entries:
   - key: Albedo
     defaultOffset: {x: 0, y: 0}
-    offsets:
-      left: {x: 0, y: 0}
-      center: {x: 0, y: 0}
-      right: {x: 0, y: 0}
-      duoLeft: {x: 0, y: 0}
-      duoRight: {x: 0, y: 0}
-      boxSide: {x: 0, y: 0}
-      exp1: {x: 0, y: 0}
-      exp2: {x: 0, y: 0}
-    defaultScale: 1
-    scales:
-      normal: 0
-      small: 0
-      large: 0
-      far: 0
-      close: 0
-      exp1: 0
-      exp2: 0
+    offset: {x: 0, y: 0}
+    visualScale: 1
   - key: Laru
     defaultOffset: {x: 0, y: 0}
-    offsets:
-      left: {x: 0, y: 0}
-      center: {x: 0, y: 0}
-      right: {x: 0, y: 0}
-      duoLeft: {x: 0, y: 0}
-      duoRight: {x: 0, y: 0}
-      boxSide: {x: 0, y: 0}
-      exp1: {x: 0, y: 0}
-      exp2: {x: 0, y: 0}
-    defaultScale: 1
-    scales:
-      normal: 0
-      small: 0
-      large: 0
-      far: 0
-      close: 0
-      exp1: 0
-      exp2: 0
+    offset: {x: 0, y: 0}
+    visualScale: 1
   - key: Bastelina
     defaultOffset: {x: 0, y: 0}
-    offsets:
-      left: {x: 0, y: 0}
-      center: {x: 0, y: 0}
-      right: {x: 0, y: 0}
-      duoLeft: {x: 0, y: 0}
-      duoRight: {x: 0, y: 0}
-      boxSide: {x: 0, y: 0}
-      exp1: {x: 0, y: 0}
-      exp2: {x: 0, y: 0}
-    defaultScale: 1
-    scales:
-      normal: 0
-      small: 0
-      large: 0
-      far: 0
-      close: 0
-      exp1: 0
-      exp2: 0
+    offset: {x: 0, y: 0}
+    visualScale: 1
   - key: Mercurio
     defaultOffset: {x: 280, y: 0}
-    offsets:
-      left: {x: 0, y: 0}
-      center: {x: 0, y: 0}
-      right: {x: 0, y: 0}
-      duoLeft: {x: 0, y: 0}
-      duoRight: {x: 0, y: 0}
-      boxSide: {x: 0, y: 0}
-      exp1: {x: 0, y: 0}
-      exp2: {x: 0, y: 0}
-    defaultScale: 1
-    scales:
-      normal: 0
-      small: 0
-      large: 0
-      far: 0
-      close: 0
-      exp1: 0
-      exp2: 0
+    offset: {x: 0, y: 0}
+    visualScale: 1
   - key: jeoseungsaja
     defaultOffset: {x: 0, y: 0}
-    offsets:
-      left: {x: 0, y: 0}
-      center: {x: 0, y: 0}
-      right: {x: 0, y: 0}
-      duoLeft: {x: 0, y: 0}
-      duoRight: {x: 0, y: 0}
-      boxSide: {x: 0, y: 0}
-      exp1: {x: 0, y: 0}
-      exp2: {x: 0, y: 0}
-    defaultScale: 1
-    scales:
-      normal: 0
-      small: 0
-      large: 0
-      far: 0
-      close: 0
-      exp1: 0
-      exp2: 0
+    offset: {x: 0, y: 0}
+    visualScale: 1
   - key: soyeong
     defaultOffset: {x: 0, y: 0}
-    offsets:
-      left: {x: 0, y: 0}
-      center: {x: 0, y: 0}
-      right: {x: 0, y: 0}
-      duoLeft: {x: 0, y: 0}
-      duoRight: {x: 0, y: 0}
-      boxSide: {x: 0, y: 0}
-      exp1: {x: 0, y: 0}
-      exp2: {x: 0, y: 0}
-    defaultScale: 1
-    scales:
-      normal: 0
-      small: 0
-      large: 0
-      far: 0
-      close: 0
-      exp1: 0
-      exp2: 0
+    offset: {x: 0, y: 0}
+    visualScale: 1
   - key: jangsanbeom
     defaultOffset: {x: 0, y: 0}
-    offsets:
-      left: {x: 0, y: 0}
-      center: {x: 0, y: 0}
-      right: {x: 0, y: 0}
-      duoLeft: {x: 0, y: 0}
-      duoRight: {x: 0, y: 0}
-      boxSide: {x: 0, y: 0}
-      exp1: {x: 0, y: 0}
-      exp2: {x: 0, y: 0}
-    defaultScale: 1
-    scales:
-      normal: 0
-      small: 0
-      large: 0
-      far: 0
-      close: 0
-      exp1: 0
-      exp2: 0
+    offset: {x: 0, y: 0}
+    visualScale: 1
   - key: Willow
     defaultOffset: {x: 0, y: 0}
-    offsets:
-      left: {x: 0, y: 0}
-      center: {x: 0, y: 0}
-      right: {x: 0, y: 0}
-      duoLeft: {x: 0, y: 0}
-      duoRight: {x: 0, y: 0}
-      boxSide: {x: 0, y: 0}
-      exp1: {x: 0, y: 0}
-      exp2: {x: 0, y: 0}
-    defaultScale: 1
-    scales:
-      normal: 0
-      small: 0
-      large: 0
-      far: 0
-      close: 0
-      exp1: 0
-      exp2: 0
+    offset: {x: 0, y: 0}
+    visualScale: 1
   - key: Leafia
     defaultOffset: {x: 0, y: 0}
-    offsets:
-      left: {x: 0, y: 0}
-      center: {x: 0, y: 0}
-      right: {x: 0, y: 0}
-      duoLeft: {x: 0, y: 0}
-      duoRight: {x: 0, y: 0}
-      boxSide: {x: 0, y: 0}
-      exp1: {x: 0, y: 0}
-      exp2: {x: 0, y: 0}
-    defaultScale: 1
-    scales:
-      normal: 0
-      small: 0
-      large: 0
-      far: 0
-      close: 0
-      exp1: 0
-      exp2: 0
+    offset: {x: 0, y: 0}
+    visualScale: 1
+  - key: tyrant
+    defaultOffset: {x: 0, y: 0}
+    offset: {x: -30, y: -800}
+    visualScale: 5
+  - key: Amber
+    defaultOffset: {x: 550, y: 0}
+    offset: {x: 330, y: 0}
+    visualScale: 10

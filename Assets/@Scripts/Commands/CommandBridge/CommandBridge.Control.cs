@@ -31,20 +31,6 @@ public sealed partial class YarnCommandBridge
         => Collect(new UIPatchCommandSpec { themeId = themeId });
 
 
-    private void SetNamedLineBoxKind(string key)
-    {
-        Enum.TryParse(key, true, out DialogueBoxKind kind);
-        _dialogueBoxPresentation.SetNamedLineBoxKind(kind);
-    }
-
-    private void SetProtagonistLineBoxKind(string key)
-    {
-        Enum.TryParse(key, true, out DialogueBoxKind kind);
-        _dialogueBoxPresentation.SetProtagonistLineBoxKind(kind);
-    }
-
-    private void ResetDefaultLineBoxKinds()
-        => _dialogueBoxPresentation.ResetDefaultLineBoxKinds();
     
     private void LogImmediate(string message)
     {

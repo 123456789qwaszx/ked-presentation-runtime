@@ -46,7 +46,7 @@ public sealed partial class YarnCommandBridge
     private void EnqueueSetupTyrantProtagonistSpec()
     {
         EnqueueSetupProtagonistCharRigSpec(TyrantProtagonistSlotKey);
-
+        
         EnqueueCastCharacterSpec(
             TyrantProtagonistSlotKey,
             "Tyrant",
@@ -91,8 +91,6 @@ public sealed partial class YarnCommandBridge
         EnqueueSetPortraitPoseSpec(slotKey, variantKey);
         EnqueueSetPortraitFaceSpec(slotKey, emotionKey);
         EnqueueSetAnchorSpecs(slotKey);
-        
-        
     }
 
     private void EnqueueSetAnchorSpecs(string slotKey, bool resetSlotPos = true,

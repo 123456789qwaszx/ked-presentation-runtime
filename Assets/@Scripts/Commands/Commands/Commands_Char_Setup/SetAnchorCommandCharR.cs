@@ -87,20 +87,23 @@ public sealed class SetAnchorCommandCharR : CommandBase
         // 이전 PlaceTo tween/ledger가 남아 있으면 새 anchor 값과 싸우므로 먼저 정리.
         KillTweenAndClearPlacementTarget(_rect);
 
-        string tuningKey =
-            CharacterRigTargetResolver.ResolveCharacterKeyFromTargetKey(scope, _spec.slotKey);
-
-        Vector2 anchoredPosition =
-            CharAnchorPlacementResolver.ResolveAnchoredPosition(_roleTuningDb, tuningKey);
-
-        float visualScale =
-            CharScaleResolver.ResolveScale(_roleTuningDb, tuningKey);
-
         if (_spec.resetSlotPos)
             ResetSlotLayers();
 
         if (_spec.resetCharacterPos)
             ResetCharacterLayers();
+
+        string tuningKey =
+            CharacterRigTargetResolver.ResolveCharacterKeyFromTargetKey(scope, _spec.slotKey);
+
+        Vector2 anchoredPosition = Vector2.zero;
+        float visualScale = 1f;
+
+        if (_roleTuningDb != null && _roleTuningDb.TryGet(tuningKey, out var entry))
+        {
+            anchoredPosition += entry.offset;
+            visualScale *= Mathf.Max(0.0001f, entry.visualScale);
+        }
 
         _rect.anchoredPosition = anchoredPosition;
         _rect.localScale = new Vector3(visualScale, visualScale, 1f);
