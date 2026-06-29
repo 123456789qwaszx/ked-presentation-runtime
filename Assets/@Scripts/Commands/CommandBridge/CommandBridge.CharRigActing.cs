@@ -5,7 +5,7 @@ public sealed partial class YarnCommandBridge
         string direction = "down")
         => Collect(new DipInOutCommandSpecCharR
         {
-            target = CharacterRigTarget.CharacterPortrait_Track_Y,
+            target = CharacterRigTarget.CharacterPortrait_Track_Move_Y,
             
             slotKey = roleKey,
             dir = CharRigDirectionParser.ParseSlideDirection(direction)
@@ -15,7 +15,7 @@ public sealed partial class YarnCommandBridge
         string roleKey)
         => Collect(new HopCommandSpecCharR
         {
-            target = CharacterRigTarget.CharacterPortrait_Track_Y,
+            target = CharacterRigTarget.CharacterPortrait_Track_Move_Y,
             
             slotKey = roleKey,
             

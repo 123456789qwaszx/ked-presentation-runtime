@@ -94,6 +94,7 @@ public sealed class SetupCharRigCommand : CommandBase
 
         scope.CharacterRigs.Register(rigKey, refs);
 
+        //StripRolePrefixForBake(rigRoot, rolePrefix, spec.rigRootName);
         yield break;
     }
 

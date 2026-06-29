@@ -13,21 +13,20 @@ public sealed class InitCharacterEmojiCommandSpecCharR : CharacterRigCommandSpec
     public string emojiKey;
 
     [Header("Rig Targets")]
-    public CharacterRigTarget rootTarget = CharacterRigTarget.CharacterEmojiSlot00_Root;
-    public CharacterRigTarget castTarget = CharacterRigTarget.CharacterEmojiSlot00_CastTransform;
-    public CharacterRigTarget baseSizeTarget = CharacterRigTarget.EmojiSlot00_BaseSize;
+    public CharacterRigTarget rootTarget = CharacterRigTarget.EmojiSlot00_Root;
+    public CharacterRigTarget castTarget = CharacterRigTarget.EmojiSlot00_VisualOffset;
+    public CharacterRigTarget baseSizeTarget = CharacterRigTarget.EmojiSlot00_Size;
     public CharacterRigTarget baseRotationTarget = CharacterRigTarget.EmojiSlot00_BaseRotation;
     public CharacterRigTarget imageTarget = CharacterRigTarget.EmojiSlot00_Image;
 
     [Header("Motion Reset Targets")]
     public CharacterRigTarget trackMoveTarget = CharacterRigTarget.EmojiSlot00_Track_Move;
-    public CharacterRigTarget trackXTarget = CharacterRigTarget.EmojiSlot00_Track_X;
-    public CharacterRigTarget trackYTarget = CharacterRigTarget.EmojiSlot00_Track_Y;
-    public CharacterRigTarget effectTarget = CharacterRigTarget.CharacterEmojiSlot00_Effect;
+    public CharacterRigTarget trackXTarget = CharacterRigTarget.EmojiSlot00_Track_Move_X;
+    public CharacterRigTarget trackYTarget = CharacterRigTarget.EmojiSlot00_Track_Move_Y;
+    public CharacterRigTarget effectTarget = CharacterRigTarget.EmojiSlot00_Effect;
     public CharacterRigTarget scaleTarget = CharacterRigTarget.EmojiSlot00_Scale;
     public CharacterRigTarget swayPivotTarget = CharacterRigTarget.EmojiSlot00_SwayPivot;
     public CharacterRigTarget rotationTarget = CharacterRigTarget.EmojiSlot00_Rotation;
-    public CharacterRigTarget rotationOffsetTarget = CharacterRigTarget.EmojiSlot00_Rotation_Offset;
 
     [Header("Image")]
     public bool preserveAspect = true;
@@ -273,7 +272,6 @@ public sealed class InitCharacterEmojiCommandCharR : CharacterEmojiCommandBase
         ResetScale(_rigRefs.GetRect(_spec.scaleTarget));
         ResetRotation(_rigRefs.GetRect(_spec.swayPivotTarget));
         ResetRotation(_rigRefs.GetRect(_spec.rotationTarget));
-        ResetRotation(_rigRefs.GetRect(_spec.rotationOffsetTarget));
     }
 
     private static void ResetAnchoredPosition(RectTransform rect)

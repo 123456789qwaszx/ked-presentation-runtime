@@ -29,13 +29,23 @@ public static class CharacterEmojiSlotParser
 
         switch (normalized)
         {
+            case EmojiSlot00:
+            case "slot0":
+            case "slot00":
+            case "emoji0":
+            case "emoji00":
+                rootTarget = CharacterRigTarget.EmojiSlot00_Root;
+                castTarget = CharacterRigTarget.EmojiSlot00_VisualOffset;
+                imageTarget = CharacterRigTarget.EmojiSlot00_Image;
+                return true;
+            
             case EmojiSlot01:
             case "slot1":
             case "slot01":
             case "emoji1":
             case "emoji01":
-                rootTarget = CharacterRigTarget.CharacterEmojiSlot01_Root;
-                castTarget = CharacterRigTarget.CharacterEmojiSlot01_CastTransform;
+                rootTarget = CharacterRigTarget.EmojiSlot01_Root;
+                castTarget = CharacterRigTarget.EmojiSlot01_VisualOffset;
                 imageTarget = CharacterRigTarget.EmojiSlot01_Image;
                 return true;
 
@@ -44,24 +54,14 @@ public static class CharacterEmojiSlotParser
             case "slot02":
             case "emoji2":
             case "emoji02":
-                rootTarget = CharacterRigTarget.CharacterEmojiSlot02_Root;
-                castTarget = CharacterRigTarget.CharacterEmojiSlot02_CastTransform;
+                rootTarget = CharacterRigTarget.EmojiSlot02_Root;
+                castTarget = CharacterRigTarget.EmojiSlot02_VisualOffset;
                 imageTarget = CharacterRigTarget.EmojiSlot02_Image;
                 return true;
 
-            case EmojiSlot00:
-            case "slot0":
-            case "slot00":
-            case "emoji0":
-            case "emoji00":
-                rootTarget = CharacterRigTarget.CharacterEmojiSlot00_Root;
-                castTarget = CharacterRigTarget.CharacterEmojiSlot00_CastTransform;
-                imageTarget = CharacterRigTarget.EmojiSlot00_Image;
-                return true;
-
             default:
-                rootTarget = CharacterRigTarget.CharacterEmojiSlot00_Root;
-                castTarget = CharacterRigTarget.CharacterEmojiSlot00_CastTransform;
+                rootTarget = CharacterRigTarget.EmojiSlot00_Root;
+                castTarget = CharacterRigTarget.EmojiSlot00_VisualOffset;
                 imageTarget = CharacterRigTarget.EmojiSlot00_Image;
                 return false;
         }

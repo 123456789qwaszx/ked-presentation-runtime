@@ -51,7 +51,6 @@ public sealed class CharacterRigCommandFactory : INodeCommandFactory
 
             // Layout / Base State
             SetAnchorCommandSpecCharR s => new SetAnchorCommandCharR(s, _globalTuning, _roleTuningDb),
-            PlaceToCommandSpecCharR s => new PlaceToCommandCharR(s, _globalTuning, _roleTuningDb),
             SetOriginSizeCommandSpecCharR s => new SetOriginSizeCommandCharR(s, _globalTuning, _roleTuningDb),
             ApplyTrackOffsetCommandSpecCharR s => new ApplyTrackOffsetCommandCharR(s),
             MirrorCharacterCommandSpecCharR s => new MirrorCharacterCommandCharR(s),

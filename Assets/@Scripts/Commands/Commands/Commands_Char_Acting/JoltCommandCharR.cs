@@ -8,7 +8,7 @@ using UnityEngine;
 public sealed class JoltCommandSpec : CharacterRigCommandSpecBase
 {
     [Header("Target")]
-    public CharacterRigTarget target = CharacterRigTarget.CharacterPortrait_Track_Y;
+    public CharacterRigTarget target = CharacterRigTarget.CharacterPortrait_Track_Move_Y;
 
     [Header("Nudge")]
     public float strength = 22f;

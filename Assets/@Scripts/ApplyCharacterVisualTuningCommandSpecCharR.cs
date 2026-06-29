@@ -19,10 +19,10 @@ public sealed class ApplyCharacterVisualTuningCommandSpecCharR
 {
     [Header("Targets")]
     public CharacterRigTarget offsetTarget =
-        CharacterRigTarget.CharSlot_Anchor;
+        CharacterRigTarget.CharacterPortrait_VisualOffset;
 
     public CharacterRigTarget scaleTarget =
-        CharacterRigTarget.CharSlot_Anchor;
+        CharacterRigTarget.CharacterPortrait_VisualOffset;
 
     [Header("Command Override")]
     public Vector2 offset = Vector2.zero;
@@ -137,8 +137,8 @@ public sealed class ApplyCharacterVisualTuningCommandCharR : CommandBase
     {
         ResetAnchoredPosition(_rigRefs.CharacterPortrait_Track);
         ResetAnchoredPosition(_rigRefs.CharacterPortrait_Track_Move);
-        ResetAnchoredPosition(_rigRefs.CharacterPortrait_Track_X);
-        ResetAnchoredPosition(_rigRefs.CharacterPortrait_Track_Y);
+        ResetAnchoredPosition(_rigRefs.CharacterPortrait_Track_Move_X);
+        ResetAnchoredPosition(_rigRefs.CharacterPortrait_Track_Move_Y);
 
         ResetEulerAngles(_rigRefs.CharacterPortrait_Rotation);
 

@@ -11,7 +11,7 @@ using UnityEngine;
 public sealed class EmojiIdleDoublePulseCommandSpecCharR : CharacterRigCommandSpecBase
 {
     [Header("Target")]
-    public CharacterRigTarget rootTarget = CharacterRigTarget.CharacterEmojiSlot00_Root;
+    public CharacterRigTarget rootTarget = CharacterRigTarget.EmojiSlot00_Root;
     public CharacterRigTarget target = CharacterRigTarget.EmojiSlot00_Scale;
 
     [Header("Timing")]

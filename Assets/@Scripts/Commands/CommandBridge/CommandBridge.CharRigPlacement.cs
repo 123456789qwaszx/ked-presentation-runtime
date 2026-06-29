@@ -31,7 +31,15 @@ public sealed partial class YarnCommandBridge
             portrait = new PortraitIdentity { emotion = ShowFaceAliasParser.Parse(faceToken) }
         };
         
-        var spec2FadeInPortraitSprite = new FadeInCommandSpecCharR
+        var spec2FadeInCharRigRoot = new FadeInCommandSpecCharR
+        {
+            target = CharacterRigTarget.RigRoot,
+            
+            slotKey = roleKey,
+            duration = YarnDurationParser.Parse(durationToken)
+        };
+        
+        var spec3FadeInPortraitSprite = new FadeInCommandSpecCharR
         {
             target = CharacterRigTarget.CharacterPortraitSprite_Root,
             
@@ -41,7 +49,8 @@ public sealed partial class YarnCommandBridge
 
         Collect(spec0SetAnchor);
         Collect(spec1SetPortraitSprite);
-        Collect(spec2FadeInPortraitSprite);
+        Collect(spec2FadeInCharRigRoot);
+        Collect(spec3FadeInPortraitSprite);
     }
 
     private void EnqueueShowAtLeftSpec(

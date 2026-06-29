@@ -12,7 +12,7 @@ using UnityEngine.UI;
 public sealed class AnimateCharacterEmojiFramesCommandSpecCharR : CharacterRigCommandSpecBase
 {
     [Header("Target")]
-    public CharacterRigTarget rootTarget = CharacterRigTarget.CharacterEmojiSlot00_Root;
+    public CharacterRigTarget rootTarget = CharacterRigTarget.EmojiSlot00_Root;
     public CharacterRigTarget imageTarget = CharacterRigTarget.EmojiSlot00_Image;
 
     [Header("Frame Keys")]

@@ -14,9 +14,9 @@ public sealed class EmojiChatterWiggleCommandSpecCharR : CharacterRigCommandSpec
     public string emojiKey;
 
     [Header("Targets")]
-    public CharacterRigTarget rootTarget = CharacterRigTarget.CharacterEmojiSlot00_Root;
+    public CharacterRigTarget rootTarget = CharacterRigTarget.EmojiSlot00_Root;
     public CharacterRigTarget pivotTarget = CharacterRigTarget.EmojiSlot00_SwayPivot;
-    public CharacterRigTarget effectTarget = CharacterRigTarget.CharacterEmojiSlot00_Effect;
+    public CharacterRigTarget effectTarget = CharacterRigTarget.EmojiSlot00_Effect;
 
     [Header("Pivot")]
     [Tooltip("가로 잡담 이모지의 오른쪽 곡선 중심 쪽 pivot입니다. 1보다 큰 값도 가능합니다.")]

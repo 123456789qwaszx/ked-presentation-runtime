@@ -7,7 +7,7 @@ public sealed partial class YarnCommandBridge
         var spec = new JoltCommandSpec
         {
             slotKey = roleKey,
-            target = CharacterRigTarget.CharacterPortrait_Track_Y,
+            target = CharacterRigTarget.CharacterPortrait_Track_Move_Y,
             direction = dir,
             strength = 340f,
             duration = 0.6f,
@@ -156,14 +156,14 @@ public sealed partial class YarnCommandBridge
         var juicySlideIn = new SlideInCommandSpecCharR
         {
             slotKey = roleKey,
-            target = CharacterRigTarget.CharacterPortrait_Track_X,
+            target = CharacterRigTarget.CharacterPortrait_Track_Move_X,
             direction = dir
         };
 
         var spec = new JoltCommandSpec
         {
             slotKey = roleKey,
-            target = CharacterRigTarget.CharacterPortrait_Track_Y,
+            target = CharacterRigTarget.CharacterPortrait_Track_Move_Y,
             direction = CharRigDirection.Up,
             strength = 340f,
             duration = 0.6f,

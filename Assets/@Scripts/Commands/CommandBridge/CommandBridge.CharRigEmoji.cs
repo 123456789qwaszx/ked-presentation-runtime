@@ -30,8 +30,8 @@ public sealed partial class YarnCommandBridge
         => Collect(new InitCharacterEmojiCommandSpecCharR {
             slotKey = roleKey,
             emojiKey = emojiKey,
-            rootTarget = CharacterRigTarget.CharacterEmojiSlot00_Root,
-            castTarget = CharacterRigTarget.CharacterEmojiSlot00_CastTransform,
+            rootTarget = CharacterRigTarget.EmojiSlot00_Root,
+            castTarget = CharacterRigTarget.EmojiSlot00_VisualOffset,
             imageTarget = CharacterRigTarget.EmojiSlot00_Image,
             initialReveal = 1f,
             resetMotionAxes = true });
@@ -41,7 +41,7 @@ public sealed partial class YarnCommandBridge
         string roleKey)
         => Collect(new FadeOutCommandSpecCharR {
             slotKey = roleKey,
-            target = CharacterRigTarget.CharacterEmojiSlot00_Root,
+            target = CharacterRigTarget.EmojiSlot00_Root,
             duration = 0.16f });
     
     private void EnqueueEmojiPlaceSpec(
@@ -50,7 +50,7 @@ public sealed partial class YarnCommandBridge
         => Collect(new PlaceCharacterEmojiCommandSpecCharR {
             slotKey = roleKey,
             emojiKey = emojiKey,
-            castTarget = CharacterRigTarget.CharacterEmojiSlot00_CastTransform });
+            castTarget = CharacterRigTarget.EmojiSlot00_VisualOffset,});
     
     private void EnqueueEmojiRevealToSpec(
         string roleKey,
@@ -59,7 +59,7 @@ public sealed partial class YarnCommandBridge
     {
         FadeInCommandSpecCharR spec0ShowEmojiRootSpec = new() {
             slotKey = roleKey,
-            target = CharacterRigTarget.CharacterEmojiSlot00_Root,
+            target = CharacterRigTarget.EmojiSlot00_Root,
             duration = 0f,
         };
 

@@ -15,7 +15,7 @@ public sealed class SpringAppearCommandSpecCharR : CharacterRigCommandSpecBase
 
     [Header("Targets")]
     public CharacterRigTarget scaleTarget = CharacterRigTarget.EmojiSlot00_Scale;
-    public CharacterRigTarget effectTarget = CharacterRigTarget.CharacterEmojiSlot00_Effect;
+    public CharacterRigTarget effectTarget = CharacterRigTarget.EmojiSlot00_Effect;
     public CharacterRigTarget rotationTarget = CharacterRigTarget.EmojiSlot00_Rotation;
 
     [Header("Scale")]

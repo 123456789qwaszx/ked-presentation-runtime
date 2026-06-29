@@ -8,7 +8,7 @@ using UnityEngine;
 public sealed class EmojiMoveByCommandSpecCharR : CharacterRigCommandSpecBase
 {
     public string emojiKey;
-    public CharacterRigTarget target = CharacterRigTarget.CharacterEmojiSlot00_Effect;
+    public CharacterRigTarget target = CharacterRigTarget.EmojiSlot00_Effect;
     public bool useAbsolutePosition = false;
     public Vector2 delta = Vector2.zero;
     public float duration = 0.4f;

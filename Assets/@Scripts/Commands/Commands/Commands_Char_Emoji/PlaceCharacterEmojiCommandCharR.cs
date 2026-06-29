@@ -13,7 +13,7 @@ public sealed class PlaceCharacterEmojiCommandSpecCharR : CharacterRigCommandSpe
     public string emojiKey;
 
     [Header("Rig Targets")]
-    public CharacterRigTarget castTarget = CharacterRigTarget.CharacterEmojiSlot00_CastTransform;
+    public CharacterRigTarget castTarget = CharacterRigTarget.EmojiSlot00_VisualOffset;
 }
 
 public sealed class PlaceCharacterEmojiCommandCharR : CharacterEmojiCommandBase

@@ -103,7 +103,7 @@ public sealed partial class YarnCommandBridge
         => Collect(new SetAnchorCommandSpecCharR
         {
             slotKey = slotKey,
-            target = CharacterRigTarget.CharSlot_Anchor,
+            target = CharacterRigTarget.CharacterPortrait_VisualOffset,
             preset = CharAnchorPresetParser.Parse(positionPreset),
             resetSlotPos = resetSlotPos,
             resetCharacterPos = resetCharPos

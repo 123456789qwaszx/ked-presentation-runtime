@@ -25,22 +25,22 @@ position: -2,-160
 
 title: Story_TalesOfNovaEP12_01
 ---
-
 <<beat Setup_TalesOfNovaEP12_01>>
 
 <<pres_start Pres_TalesOfNovaEP12_01>>
 <<pres_pause>>
 
-이건 내가 처음으로 그녀의 영혼에 닿았을 때의 이야기다.
+//이건 내가 처음으로 그녀의 영혼에 닿았을 때의 이야기다.
 
 <<actor @1 willow>>
 <<show      @1 e21>>
-<<place_center @1 bust 8fr>>
+//<<place_center @1 bust 8fr>>
 <<size_mid    @1 bust 12fr>>
 <<left      @1 1u 10fr>>
+<<up @1 12u>>
 
-_#beat
 <<emoji_spring @1 15>>
+_#beat
 
 윌로: 죄송합니다만, 이번 의뢰는 보수의 3분의 1밖에 드릴 수 없겠군요.
 

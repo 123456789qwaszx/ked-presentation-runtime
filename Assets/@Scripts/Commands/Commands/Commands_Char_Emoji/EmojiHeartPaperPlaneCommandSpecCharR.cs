@@ -14,7 +14,7 @@ public sealed class EmojiHeartPaperPlaneCommandSpecCharR : CharacterRigCommandSp
     public string emojiKey;
 
     [Header("Targets")]
-    public CharacterRigTarget rootTarget = CharacterRigTarget.CharacterEmojiSlot00_Root;
+    public CharacterRigTarget rootTarget = CharacterRigTarget.EmojiSlot00_Root;
     public CharacterRigTarget moveTarget = CharacterRigTarget.EmojiSlot00_Track_Move;
     public CharacterRigTarget scaleTarget = CharacterRigTarget.EmojiSlot00_Scale;
     public CharacterRigTarget rotationTarget = CharacterRigTarget.EmojiSlot00_Rotation;

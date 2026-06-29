@@ -17,7 +17,7 @@ using UnityEngine;
 public sealed class SetAnchorCommandSpecCharR : CharacterRigCommandSpecBase
 {
     [Header("Target (Anchor only)")]
-    public CharacterRigTarget target = CharacterRigTarget.CharSlot_Anchor;
+    public CharacterRigTarget target = CharacterRigTarget.CharacterPortrait_VisualOffset;
 
     [Header("Preset")]
     public CharAnchorPreset preset = CharAnchorPreset.Center;
@@ -143,8 +143,8 @@ public sealed class SetAnchorCommandCharR : CommandBase
     {
         ResetAnchoredPosition(_rigRefs.CharacterPortrait_Track);
         ResetAnchoredPosition(_rigRefs.CharacterPortrait_Track_Move);
-        ResetAnchoredPosition(_rigRefs.CharacterPortrait_Track_X);
-        ResetAnchoredPosition(_rigRefs.CharacterPortrait_Track_Y);
+        ResetAnchoredPosition(_rigRefs.CharacterPortrait_Track_Move_X);
+        ResetAnchoredPosition(_rigRefs.CharacterPortrait_Track_Move_Y);
 
         ResetEulerAngles(_rigRefs.CharacterPortrait_Rotation);
 
@@ -196,9 +196,6 @@ public sealed class SetAnchorCommandCharR : CommandBase
         if (rect == null)
             return;
 
-        // true:
-        // 기존 command가 target을 claim하고 있었다면 OnComplete/Commit 경로를 태워서
-        // 그 command의 HasClaimedTarget / tween 상태가 정리되도록 한다.
         rect.DOKill(true);
 
         ClearPlacementTarget(rect);

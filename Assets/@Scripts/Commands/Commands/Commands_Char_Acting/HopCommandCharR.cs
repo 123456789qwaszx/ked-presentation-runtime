@@ -9,7 +9,7 @@ using RectTransform = UnityEngine.RectTransform;
 public sealed class HopCommandSpecCharR : CharacterRigCommandSpecBase
 {
     [Header("Target")]
-    public CharacterRigTarget target = CharacterRigTarget.CharacterPortrait_Track_Y;
+    public CharacterRigTarget target = CharacterRigTarget.CharacterPortrait_Track_Move_Y;
 
 
     [Header("Hop")]

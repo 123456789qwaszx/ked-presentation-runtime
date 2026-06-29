@@ -50,8 +50,8 @@ public sealed partial class YarnCommandBridge
         {
             slotKey = roleKey,
             emojiKey = emojiKey,
-            rootTarget = CharacterRigTarget.CharacterEmojiSlot00_Root,
-            castTarget = CharacterRigTarget.CharacterEmojiSlot00_CastTransform,
+            rootTarget = CharacterRigTarget.EmojiSlot00_Root,
+            castTarget = CharacterRigTarget.EmojiSlot00_VisualOffset,
             imageTarget = CharacterRigTarget.EmojiSlot00_Image,
             initialReveal = 0f,
             resetMotionAxes = true
@@ -95,7 +95,7 @@ public sealed partial class YarnCommandBridge
         var spec5AutoFadeOutSpec = new FadeOutCommandSpecCharR
         {
             slotKey = roleKey,
-            target = CharacterRigTarget.CharacterEmojiSlot00_Root,
+            target = CharacterRigTarget.EmojiSlot00_Root,
             duration = 0.4f
         };
 
@@ -113,8 +113,8 @@ public sealed partial class YarnCommandBridge
         {
             slotKey = roleKey,
             emojiKey = emojiKey,
-            rootTarget = CharacterRigTarget.CharacterEmojiSlot00_Root,
-            castTarget = CharacterRigTarget.CharacterEmojiSlot00_CastTransform,
+            rootTarget = CharacterRigTarget.EmojiSlot00_Root,
+            castTarget = CharacterRigTarget.EmojiSlot00_VisualOffset,
             imageTarget = CharacterRigTarget.EmojiSlot00_Image,
             initialReveal = 0f,
             resetMotionAxes = true
@@ -155,8 +155,8 @@ public sealed partial class YarnCommandBridge
         {
             slotKey = roleKey,
             emojiKey = emojiKey,
-            rootTarget = CharacterRigTarget.CharacterEmojiSlot00_Root,
-            castTarget = CharacterRigTarget.CharacterEmojiSlot00_CastTransform,
+            rootTarget = CharacterRigTarget.EmojiSlot00_Root,
+            castTarget = CharacterRigTarget.EmojiSlot00_VisualOffset,
             imageTarget = CharacterRigTarget.EmojiSlot00_Image,
             initialReveal = 0f,
             resetMotionAxes = true
@@ -222,8 +222,8 @@ public sealed partial class YarnCommandBridge
         {
             slotKey = roleKey,
             emojiKey = emojiKey,
-            rootTarget = CharacterRigTarget.CharacterEmojiSlot00_Root,
-            castTarget = CharacterRigTarget.CharacterEmojiSlot00_CastTransform,
+            rootTarget = CharacterRigTarget.EmojiSlot00_Root,
+            castTarget = CharacterRigTarget.EmojiSlot00_VisualOffset,
             imageTarget = CharacterRigTarget.EmojiSlot00_Image,
             initialReveal = 0f,
             resetMotionAxes = true
@@ -243,7 +243,7 @@ public sealed partial class YarnCommandBridge
         var spec2HopSpec = new HopCommandSpecCharR
         {
             slotKey = roleKey,
-            target = CharacterRigTarget.EmojiSlot00_Track_Y,
+            target = CharacterRigTarget.EmojiSlot00_Track_Move_Y,
             duration = 0.8f,
             ease = Ease.OutCubic,
             hopCount = 1,
@@ -267,8 +267,8 @@ public sealed partial class YarnCommandBridge
         {
             slotKey = roleKey,
             emojiKey = emojiKey,
-            rootTarget = CharacterRigTarget.CharacterEmojiSlot00_Root,
-            castTarget = CharacterRigTarget.CharacterEmojiSlot00_CastTransform,
+            rootTarget = CharacterRigTarget.EmojiSlot00_Root,
+            castTarget = CharacterRigTarget.EmojiSlot00_VisualOffset,
             imageTarget = CharacterRigTarget.EmojiSlot00_Image,
             initialReveal = 0f,
             resetMotionAxes = true
@@ -313,8 +313,8 @@ public sealed partial class YarnCommandBridge
         {
             slotKey = roleKey,
             emojiKey = emojiKey,
-            rootTarget = CharacterRigTarget.CharacterEmojiSlot00_Root,
-            castTarget = CharacterRigTarget.CharacterEmojiSlot00_CastTransform,
+            rootTarget = CharacterRigTarget.EmojiSlot00_Root,
+            castTarget = CharacterRigTarget.EmojiSlot00_VisualOffset,
             imageTarget = CharacterRigTarget.EmojiSlot00_Image,
             initialReveal = 0f,
             resetMotionAxes = true
@@ -363,8 +363,8 @@ public sealed partial class YarnCommandBridge
         {
             slotKey = roleKey,
             emojiKey = emojiKey,
-            rootTarget = CharacterRigTarget.CharacterEmojiSlot00_Root,
-            castTarget = CharacterRigTarget.CharacterEmojiSlot00_CastTransform,
+            rootTarget = CharacterRigTarget.EmojiSlot00_Root,
+            castTarget = CharacterRigTarget.EmojiSlot00_VisualOffset,
             imageTarget = CharacterRigTarget.EmojiSlot00_Image,
             initialReveal = 1f,
             resetMotionAxes = true
@@ -389,7 +389,7 @@ public sealed partial class YarnCommandBridge
         {
             slotKey = roleKey,
             emojiKey = emojiKey,
-            target = CharacterRigTarget.CharacterEmojiSlot00_Effect,
+            target = CharacterRigTarget.EmojiSlot00_Effect,
             delta = new Vector2(1f, 6f),
             duration = 0.16f,
             ease = Ease.OutCubic,
@@ -424,7 +424,7 @@ public sealed partial class YarnCommandBridge
         {
             slotKey = roleKey,
             emojiKey = emojiKey,
-            target = CharacterRigTarget.CharacterEmojiSlot00_Effect,
+            target = CharacterRigTarget.EmojiSlot00_Effect,
             useAbsolutePosition = true,
             delta = Vector2.zero,
             duration = 0.24f,
@@ -489,8 +489,8 @@ public sealed partial class YarnCommandBridge
         {
             slotKey = roleKey,
             emojiKey = emojiKey,
-            rootTarget = CharacterRigTarget.CharacterEmojiSlot00_Root,
-            castTarget = CharacterRigTarget.CharacterEmojiSlot00_CastTransform,
+            rootTarget = CharacterRigTarget.EmojiSlot00_Root,
+            castTarget = CharacterRigTarget.EmojiSlot00_VisualOffset,
             imageTarget = CharacterRigTarget.EmojiSlot00_Image,
             initialReveal = 1f,
             resetMotionAxes = true
@@ -513,7 +513,7 @@ public sealed partial class YarnCommandBridge
         {
             slotKey = roleKey,
             emojiKey = emojiKey,
-            target = CharacterRigTarget.EmojiSlot00_Track_X,
+            target = CharacterRigTarget.EmojiSlot00_Track_Move_X,
             delta = new Vector2(165f, 0f),
             duration = 0.88f,
             ease = Ease.OutCubic,
@@ -526,7 +526,7 @@ public sealed partial class YarnCommandBridge
         {
             slotKey = roleKey,
             emojiKey = emojiKey,
-            target = CharacterRigTarget.EmojiSlot00_Track_Y,
+            target = CharacterRigTarget.EmojiSlot00_Track_Move_Y,
             delta = new Vector2(0f, -56f),
             duration = 1.08f,
             ease = Ease.InCubic,
@@ -538,7 +538,7 @@ public sealed partial class YarnCommandBridge
         var spec4SpitArcSpec = new HopCommandSpecCharR
         {
             slotKey = roleKey,
-            target = CharacterRigTarget.CharacterEmojiSlot00_Effect,
+            target = CharacterRigTarget.EmojiSlot00_Effect,
             duration = 0.92f,
             ease = Ease.OutCubic,
             hopCount = 1,
@@ -569,7 +569,7 @@ public sealed partial class YarnCommandBridge
         var spec7SpitFadeOutSpec = new FadeOutCommandSpecCharR
         {
             slotKey = roleKey,
-            target = CharacterRigTarget.CharacterEmojiSlot00_Root,
+            target = CharacterRigTarget.EmojiSlot00_Root,
             duration = 0.56f,
             wait = true
         };
@@ -590,8 +590,8 @@ public sealed partial class YarnCommandBridge
         {
             slotKey = roleKey,
             emojiKey = emojiKey,
-            rootTarget = CharacterRigTarget.CharacterEmojiSlot00_Root,
-            castTarget = CharacterRigTarget.CharacterEmojiSlot00_CastTransform,
+            rootTarget = CharacterRigTarget.EmojiSlot00_Root,
+            castTarget = CharacterRigTarget.EmojiSlot00_VisualOffset,
             imageTarget = CharacterRigTarget.EmojiSlot00_Image,
 
             // Shader reveal은 쓰지 않는다.
@@ -604,7 +604,7 @@ public sealed partial class YarnCommandBridge
         var spec1PrepareRootAlphaSpec = new FadeOutCommandSpecCharR
         {
             slotKey = roleKey,
-            target = CharacterRigTarget.CharacterEmojiSlot00_Root,
+            target = CharacterRigTarget.EmojiSlot00_Root,
             duration = 0f,
             wait = true
         };
@@ -613,7 +613,7 @@ public sealed partial class YarnCommandBridge
         var spec2PinwheelFadeInSpec = new FadeInCommandSpecCharR
         {
             slotKey = roleKey,
-            target = CharacterRigTarget.CharacterEmojiSlot00_Root,
+            target = CharacterRigTarget.EmojiSlot00_Root,
             duration = 0.74f,
             wait = false
         };
@@ -637,7 +637,7 @@ public sealed partial class YarnCommandBridge
         {
             slotKey = roleKey,
             emojiKey = emojiKey,
-            target = CharacterRigTarget.CharacterEmojiSlot00_Effect,
+            target = CharacterRigTarget.EmojiSlot00_Effect,
             delta = new Vector2(-8f, 20f),
             duration = 1.05f,
             ease = Ease.OutSine,
@@ -693,7 +693,7 @@ public sealed partial class YarnCommandBridge
         {
             slotKey = roleKey,
             emojiKey = emojiKey,
-            target = CharacterRigTarget.CharacterEmojiSlot00_Effect,
+            target = CharacterRigTarget.EmojiSlot00_Effect,
             delta = new Vector2(-2f, 6f),
             duration = 0.95f,
             ease = Ease.InOutSine,
@@ -704,7 +704,7 @@ public sealed partial class YarnCommandBridge
         var spec11PinwheelFadeOutSpec = new FadeOutCommandSpecCharR
         {
             slotKey = roleKey,
-            target = CharacterRigTarget.CharacterEmojiSlot00_Root,
+            target = CharacterRigTarget.EmojiSlot00_Root,
             duration = 0.95f,
             wait = true
         };
@@ -727,8 +727,8 @@ public sealed partial class YarnCommandBridge
         var spec0InitEmojiSpec = new InitCharacterEmojiCommandSpecCharR {
             slotKey = roleKey,
             emojiKey = emojiKey,
-            rootTarget = CharacterRigTarget.CharacterEmojiSlot00_Root,
-            castTarget = CharacterRigTarget.CharacterEmojiSlot00_CastTransform,
+            rootTarget = CharacterRigTarget.EmojiSlot00_Root,
+            castTarget = CharacterRigTarget.EmojiSlot00_VisualOffset,
             imageTarget = CharacterRigTarget.EmojiSlot00_Image,
             initialReveal = 1f,
             resetMotionAxes = true
@@ -737,7 +737,7 @@ public sealed partial class YarnCommandBridge
         var spec1HeartPaperPlaneSpec = new EmojiHeartPaperPlaneCommandSpecCharR {
             slotKey = roleKey,
             emojiKey = emojiKey,
-            rootTarget = CharacterRigTarget.CharacterEmojiSlot00_Root,
+            rootTarget = CharacterRigTarget.EmojiSlot00_Root,
             moveTarget = CharacterRigTarget.EmojiSlot00_Track_Move,
             scaleTarget = CharacterRigTarget.EmojiSlot00_Scale,
             rotationTarget = CharacterRigTarget.EmojiSlot00_Rotation,
@@ -772,8 +772,8 @@ public sealed partial class YarnCommandBridge
         var spec0InitEmojiSpec = new InitCharacterEmojiCommandSpecCharR {
             slotKey = roleKey,
             emojiKey = emojiKey,
-            rootTarget = CharacterRigTarget.CharacterEmojiSlot00_Root,
-            castTarget = CharacterRigTarget.CharacterEmojiSlot00_CastTransform,
+            rootTarget = CharacterRigTarget.EmojiSlot00_Root,
+            castTarget = CharacterRigTarget.EmojiSlot00_VisualOffset,
             imageTarget = CharacterRigTarget.EmojiSlot00_Image,
             initialReveal = 1f,
             resetMotionAxes = true
@@ -782,9 +782,9 @@ public sealed partial class YarnCommandBridge
         var spec1ChatterWiggleSpec = new EmojiChatterWiggleCommandSpecCharR {
             slotKey = roleKey,
             emojiKey = emojiKey,
-            rootTarget = CharacterRigTarget.CharacterEmojiSlot00_Root,
+            rootTarget = CharacterRigTarget.EmojiSlot00_Root,
             pivotTarget = CharacterRigTarget.EmojiSlot00_SwayPivot,
-            effectTarget = CharacterRigTarget.CharacterEmojiSlot00_Effect,
+            effectTarget = CharacterRigTarget.EmojiSlot00_Effect,
 
             // 오른쪽 곡선의 중심을 잡는 느낌.
             pivot = new Vector2(1.08f, 0.52f),
@@ -813,7 +813,7 @@ public sealed partial class YarnCommandBridge
         var spec4FadeOutSpec = new FadeOutCommandSpecCharR
         {
             slotKey = roleKey,
-            target = CharacterRigTarget.CharacterEmojiSlot00_Root,
+            target = CharacterRigTarget.EmojiSlot00_Root,
             duration = 0.65f,
         };
         
@@ -828,8 +828,8 @@ public sealed partial class YarnCommandBridge
         var spec0InitEmojiSpec = new InitCharacterEmojiCommandSpecCharR {
             slotKey = roleKey,
             emojiKey = emojiKey + "-1",
-            rootTarget = CharacterRigTarget.CharacterEmojiSlot00_Root,
-            castTarget = CharacterRigTarget.CharacterEmojiSlot00_CastTransform,
+            rootTarget = CharacterRigTarget.EmojiSlot00_Root,
+            castTarget = CharacterRigTarget.EmojiSlot00_VisualOffset,
             imageTarget = CharacterRigTarget.EmojiSlot00_Image,
             initialReveal = 1f,
             resetMotionAxes = true
@@ -839,7 +839,7 @@ public sealed partial class YarnCommandBridge
             slotKey = roleKey,
             emojiKey = emojiKey,
             scaleTarget = CharacterRigTarget.EmojiSlot00_Scale,
-            effectTarget = CharacterRigTarget.CharacterEmojiSlot00_Effect,
+            effectTarget = CharacterRigTarget.EmojiSlot00_Effect,
             rotationTarget = CharacterRigTarget.EmojiSlot00_Rotation,
 
             fromScale = new Vector2(0.82f, 0.82f),
@@ -854,7 +854,7 @@ public sealed partial class YarnCommandBridge
 
         var spec2FrameAnimationSpec = new AnimateCharacterEmojiFramesCommandSpecCharR {
             slotKey = roleKey,
-            rootTarget = CharacterRigTarget.CharacterEmojiSlot00_Root,
+            rootTarget = CharacterRigTarget.EmojiSlot00_Root,
             imageTarget = CharacterRigTarget.EmojiSlot00_Image,
 
             frameKeys = new List<string> {
@@ -877,7 +877,7 @@ public sealed partial class YarnCommandBridge
         var spec4FadeOutSpec = new FadeOutCommandSpecCharR
         {
             slotKey = roleKey,
-            target = CharacterRigTarget.CharacterEmojiSlot00_Root,
+            target = CharacterRigTarget.EmojiSlot00_Root,
             duration = 0.65f,
         };
 

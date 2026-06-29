@@ -12,7 +12,7 @@ using UnityEngine;
 public class FadeInCommandSpecCharR : CharacterRigCommandSpecBase
 {
     [Header("Target")]
-    public CharacterRigTarget target = CharacterRigTarget.Character_Root;
+    public CharacterRigTarget target = CharacterRigTarget.RigRoot;
 
     [Tooltip("페이드 시간(초). 0 이하이면 즉시 스냅합니다.")]
     public float duration = 0.4f;

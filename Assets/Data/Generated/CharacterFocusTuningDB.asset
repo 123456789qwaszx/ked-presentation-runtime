@@ -13,13 +13,13 @@ MonoBehaviour:
   m_Name: CharacterFocusTuningDB
   m_EditorClassIdentifier: Assembly-CSharp::CharacterFocusTuningDBSO
   baseOffsets:
-    feet: {x: 0, y: 0}
-    body: {x: 0, y: 700}
-    bust: {x: 0, y: 800}
-    face: {x: -10, y: 1000}
-    faceAura: {x: 0, y: 1000}
-    handLeft: {x: -220, y: 520}
-    handRight: {x: 220, y: 520}
+    feet: {x: 0, y: -380}
+    body: {x: 0, y: -150}
+    bust: {x: 0, y: 0}
+    face: {x: 0, y: 150}
+    faceAura: {x: 0, y: 150}
+    handLeft: {x: -80, y: 0}
+    handRight: {x: 80, y: 0}
   entries:
   - key: Leafia
     defaultOffset: {x: 0, y: 0}
