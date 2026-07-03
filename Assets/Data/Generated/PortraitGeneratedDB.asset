@@ -4498,6 +4498,101 @@ MonoBehaviour:
     emotionKey: 25
     sprite: {fileID: 21300000, guid: fa016e6dd45713d4fa93b7db79de3c7c, type: 3}
     assetPath: Assets/Art/Portraits/Willow/Willow_a_25.png
+  - characterId: ayane
+    variantKey: ayane_a
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: e8f677901d2272e489d0368bd0cdedb5, type: 3}
+    assetPath: Assets/Art/Portraits/ayane/ayane_a_01.png
+  - characterId: ayane
+    variantKey: ayane_a
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: 653595ac360a2aa4f970ee6d8d631b78, type: 3}
+    assetPath: Assets/Art/Portraits/ayane/ayane_a_02.png
+  - characterId: ayane
+    variantKey: ayane_a
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: 8ef0e0d259504d2488840876836c507d, type: 3}
+    assetPath: Assets/Art/Portraits/ayane/ayane_a_03.png
+  - characterId: ayane
+    variantKey: ayane_a
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: f4681134c3822b94f92f20848fe26e88, type: 3}
+    assetPath: Assets/Art/Portraits/ayane/ayane_a_04.png
+  - characterId: ayane
+    variantKey: ayane_a
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: 85d490bfe5bb3e3468cb41e7276a93d9, type: 3}
+    assetPath: Assets/Art/Portraits/ayane/ayane_a_05.png
+  - characterId: ayane
+    variantKey: ayane_a
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: 8ad6163e6d5cc504e911ca652bb434bb, type: 3}
+    assetPath: Assets/Art/Portraits/ayane/ayane_a_06.png
+  - characterId: ayane
+    variantKey: ayane_a
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: 5c37c29fbe57f0d4eb542d3604a0b435, type: 3}
+    assetPath: Assets/Art/Portraits/ayane/ayane_a_07.png
+  - characterId: ayane
+    variantKey: ayane_a
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: bc8356bdc62c25f4e82b528ce77d6fbc, type: 3}
+    assetPath: Assets/Art/Portraits/ayane/ayane_a_08.png
+  - characterId: ayane
+    variantKey: ayane_a
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: 91615ba37e9088544a490de46c46b572, type: 3}
+    assetPath: Assets/Art/Portraits/ayane/ayane_a_09.png
+  - characterId: ayane
+    variantKey: ayane_a
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: fdf4e07792378f441873b6a75fcc1114, type: 3}
+    assetPath: Assets/Art/Portraits/ayane/ayane_a_10.png
+  - characterId: ayane
+    variantKey: ayane_a
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: df9f4cdf6437aac49b2d4e8298415e1f, type: 3}
+    assetPath: Assets/Art/Portraits/ayane/ayane_a_11.png
+  - characterId: ayane
+    variantKey: ayane_a
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: 0c394a446aec0b34e970f72c343f2c74, type: 3}
+    assetPath: Assets/Art/Portraits/ayane/ayane_a_12.png
+  - characterId: ayane
+    variantKey: ayane_a
+    emotionKey: 13
+    sprite: {fileID: 21300000, guid: 3ffaae7560b74794e9218a8e39ee79e7, type: 3}
+    assetPath: Assets/Art/Portraits/ayane/ayane_a_13.png
+  - characterId: ayane
+    variantKey: ayane_a
+    emotionKey: 14
+    sprite: {fileID: 21300000, guid: 448f4944436752c48bd86c74e3c41c3a, type: 3}
+    assetPath: Assets/Art/Portraits/ayane/ayane_a_14.png
+  - characterId: ayane
+    variantKey: ayane_a
+    emotionKey: 15
+    sprite: {fileID: 21300000, guid: 1c09a3d46c99398408d1b2f8cf5f231f, type: 3}
+    assetPath: Assets/Art/Portraits/ayane/ayane_a_15.png
+  - characterId: ayane
+    variantKey: ayane_a
+    emotionKey: 17
+    sprite: {fileID: 21300000, guid: 65961a8ba4727764f915a69e426ae1b4, type: 3}
+    assetPath: Assets/Art/Portraits/ayane/ayane_a_17.png
+  - characterId: ayane
+    variantKey: ayane_a
+    emotionKey: 18
+    sprite: {fileID: 21300000, guid: 752f58e87e872ec4cb95cc28ab2e2055, type: 3}
+    assetPath: Assets/Art/Portraits/ayane/ayane_a_18.png
+  - characterId: ayane
+    variantKey: ayane_a
+    emotionKey: 19
+    sprite: {fileID: 21300000, guid: 8f32d603d83047d4c89cf6eb589dd9c5, type: 3}
+    assetPath: Assets/Art/Portraits/ayane/ayane_a_19.png
+  - characterId: ayane
+    variantKey: ayane_a
+    emotionKey: 20
+    sprite: {fileID: 21300000, guid: 2209a6e08fa368d48a909ff5ab603226, type: 3}
+    assetPath: Assets/Art/Portraits/ayane/ayane_a_20.png
   - characterId: bandi
     variantKey: bandi_a
     emotionKey: 00
@@ -4858,5 +4953,540 @@ MonoBehaviour:
     emotionKey: 03
     sprite: {fileID: 21300000, guid: 4deb947bda60ad244a1774823adc4d28, type: 3}
     assetPath: Assets/Art/Portraits/bandi/bandi_d_03.png
-  generatedTicksUtc: 639187040210599337
-  generatedTimeReadable: 2026-07-04 04:33:41
+  - characterId: haruka
+    variantKey: haruka_a
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: 1922c3bfee0c83842ae461976bf0eacc, type: 3}
+    assetPath: Assets/Art/Portraits/haruka/haruka_a_01.png
+  - characterId: haruka
+    variantKey: haruka_a
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: bd62a83e0f7f2d04eb17343474a1be3f, type: 3}
+    assetPath: Assets/Art/Portraits/haruka/haruka_a_02.png
+  - characterId: haruka
+    variantKey: haruka_a
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: 89fceadc583e8ac479c1a39548da20af, type: 3}
+    assetPath: Assets/Art/Portraits/haruka/haruka_a_03.png
+  - characterId: haruka
+    variantKey: haruka_a
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: 878abe6fc3b25bf41b50071dab1b9174, type: 3}
+    assetPath: Assets/Art/Portraits/haruka/haruka_a_04.png
+  - characterId: haruka
+    variantKey: haruka_a
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: b879f955576f940459726bef18238d07, type: 3}
+    assetPath: Assets/Art/Portraits/haruka/haruka_a_05.png
+  - characterId: haruka
+    variantKey: haruka_a
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: 2aa42ca50e9a8774aa5a2483e1df94be, type: 3}
+    assetPath: Assets/Art/Portraits/haruka/haruka_a_06.png
+  - characterId: haruka
+    variantKey: haruka_a
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: c3353bcadf6626b449ca00211f42b276, type: 3}
+    assetPath: Assets/Art/Portraits/haruka/haruka_a_07.png
+  - characterId: haruka
+    variantKey: haruka_a
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: 9e9fb71f433e99441bebe0d16a2a6f10, type: 3}
+    assetPath: Assets/Art/Portraits/haruka/haruka_a_08.png
+  - characterId: haruka
+    variantKey: haruka_a
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: 486df7bcbb58bc348a2ddd172f7cc554, type: 3}
+    assetPath: Assets/Art/Portraits/haruka/haruka_a_09.png
+  - characterId: haruka
+    variantKey: haruka_a
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: b18fcae8baccf6341975fd03285ab0db, type: 3}
+    assetPath: Assets/Art/Portraits/haruka/haruka_a_10.png
+  - characterId: haruka
+    variantKey: haruka_a
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: 7f0678b86895a8346a32e5268272e91a, type: 3}
+    assetPath: Assets/Art/Portraits/haruka/haruka_a_11.png
+  - characterId: haruka
+    variantKey: haruka_a
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: 57bd9e318727b004794d39761dfdadd1, type: 3}
+    assetPath: Assets/Art/Portraits/haruka/haruka_a_12.png
+  - characterId: haruka
+    variantKey: haruka_a
+    emotionKey: 13
+    sprite: {fileID: 21300000, guid: 7161c660d777b4a48aedaf7b63d34b1e, type: 3}
+    assetPath: Assets/Art/Portraits/haruka/haruka_a_13.png
+  - characterId: haruka
+    variantKey: haruka_a
+    emotionKey: 14
+    sprite: {fileID: 21300000, guid: e3049d936a4369f4ca65c46f1c960a43, type: 3}
+    assetPath: Assets/Art/Portraits/haruka/haruka_a_14.png
+  - characterId: haruka
+    variantKey: haruka_a
+    emotionKey: 15
+    sprite: {fileID: 21300000, guid: a6663ac19e3358b468659edf6c96b8ce, type: 3}
+    assetPath: Assets/Art/Portraits/haruka/haruka_a_15.png
+  - characterId: haruka
+    variantKey: haruka_a
+    emotionKey: 16
+    sprite: {fileID: 21300000, guid: 58a940240e3d43346a0bef70a1fc30fe, type: 3}
+    assetPath: Assets/Art/Portraits/haruka/haruka_a_16.png
+  - characterId: haruka
+    variantKey: haruka_a
+    emotionKey: 17
+    sprite: {fileID: 21300000, guid: 0aba5e7225b580b4e9ec8bf806fec8ef, type: 3}
+    assetPath: Assets/Art/Portraits/haruka/haruka_a_17.png
+  - characterId: haruka
+    variantKey: haruka_b
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: 8e8ad5a75ccacb94bb4dce447701ef41, type: 3}
+    assetPath: Assets/Art/Portraits/haruka/haruka_b_01.png
+  - characterId: haruka
+    variantKey: haruka_b
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: 94476ce74e0624949a07f2b23c2655a4, type: 3}
+    assetPath: Assets/Art/Portraits/haruka/haruka_b_02.png
+  - characterId: haruka
+    variantKey: haruka_b
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: 1337f6e25812b2b4cabf485cb98724ed, type: 3}
+    assetPath: Assets/Art/Portraits/haruka/haruka_b_03.png
+  - characterId: haruka
+    variantKey: haruka_b
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: 22a2f82221d761a48844259ff5cfa102, type: 3}
+    assetPath: Assets/Art/Portraits/haruka/haruka_b_04.png
+  - characterId: haruka
+    variantKey: haruka_b
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: 978ff987229de2742937808da50a99e5, type: 3}
+    assetPath: Assets/Art/Portraits/haruka/haruka_b_05.png
+  - characterId: haruka
+    variantKey: haruka_b
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: 3c5d0ec5d5781494095fa8c98954b081, type: 3}
+    assetPath: Assets/Art/Portraits/haruka/haruka_b_06.png
+  - characterId: haruka
+    variantKey: haruka_b
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: 87b285dad06f81549a011ae6a33e93b7, type: 3}
+    assetPath: Assets/Art/Portraits/haruka/haruka_b_07.png
+  - characterId: haruka
+    variantKey: haruka_b
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: f2ecddf977d0e534684fa409ef1269e3, type: 3}
+    assetPath: Assets/Art/Portraits/haruka/haruka_b_08.png
+  - characterId: haruka
+    variantKey: haruka_b
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: 8d88646a3a39b9044be3217d4bfa9057, type: 3}
+    assetPath: Assets/Art/Portraits/haruka/haruka_b_09.png
+  - characterId: haruka
+    variantKey: haruka_b
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: b339db2dd8755dd4398729e019bb1c51, type: 3}
+    assetPath: Assets/Art/Portraits/haruka/haruka_b_10.png
+  - characterId: haruka
+    variantKey: haruka_b
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: 86f976517c6039445a87cffa2e33d5b3, type: 3}
+    assetPath: Assets/Art/Portraits/haruka/haruka_b_11.png
+  - characterId: haruka
+    variantKey: haruka_b
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: 65ac7d4187148b54fac6696dbf84f046, type: 3}
+    assetPath: Assets/Art/Portraits/haruka/haruka_b_12.png
+  - characterId: haruka
+    variantKey: haruka_b
+    emotionKey: 13
+    sprite: {fileID: 21300000, guid: f9bc966d7353ea140b13d121fffcdf5a, type: 3}
+    assetPath: Assets/Art/Portraits/haruka/haruka_b_13.png
+  - characterId: haruka
+    variantKey: haruka_b
+    emotionKey: 14
+    sprite: {fileID: 21300000, guid: 72bcf2616fa5d6b4eb1a3823f6bf487b, type: 3}
+    assetPath: Assets/Art/Portraits/haruka/haruka_b_14.png
+  - characterId: haruka
+    variantKey: haruka_b
+    emotionKey: 15
+    sprite: {fileID: 21300000, guid: 2ea4f3d671edcec4cb6c548c600c1e8d, type: 3}
+    assetPath: Assets/Art/Portraits/haruka/haruka_b_15.png
+  - characterId: haruka
+    variantKey: haruka_b
+    emotionKey: 16
+    sprite: {fileID: 21300000, guid: ccdf2a1cabc181d43bb4672de8a8d05c, type: 3}
+    assetPath: Assets/Art/Portraits/haruka/haruka_b_16.png
+  - characterId: kikyou
+    variantKey: kikyou_a
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: 3d3d021dc94164548b239c7f4d62ca28, type: 3}
+    assetPath: Assets/Art/Portraits/kikyou/kikyou_a_01.png
+  - characterId: kikyou
+    variantKey: kikyou_a
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: f3493a27fd6fbc542ac57ce93f219cdc, type: 3}
+    assetPath: Assets/Art/Portraits/kikyou/kikyou_a_02.png
+  - characterId: kikyou
+    variantKey: kikyou_a
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: 6d4c1194252ac06498ba5a0bce78481c, type: 3}
+    assetPath: Assets/Art/Portraits/kikyou/kikyou_a_03.png
+  - characterId: kikyou
+    variantKey: kikyou_a
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: eff6c685c0f2267428f95066df59c2ad, type: 3}
+    assetPath: Assets/Art/Portraits/kikyou/kikyou_a_04.png
+  - characterId: kikyou
+    variantKey: kikyou_a
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: 2938f1b25ee01bd46952127be090212b, type: 3}
+    assetPath: Assets/Art/Portraits/kikyou/kikyou_a_05.png
+  - characterId: kikyou
+    variantKey: kikyou_a
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: 7ec02910f36df494e8fd15190996466c, type: 3}
+    assetPath: Assets/Art/Portraits/kikyou/kikyou_a_06.png
+  - characterId: kikyou
+    variantKey: kikyou_a
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: d2f9b1d7c0b1b9e44a11a0a44ca3f336, type: 3}
+    assetPath: Assets/Art/Portraits/kikyou/kikyou_a_07.png
+  - characterId: kikyou
+    variantKey: kikyou_a
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: 043c1b83e434da14f847dad6130ff6bc, type: 3}
+    assetPath: Assets/Art/Portraits/kikyou/kikyou_a_08.png
+  - characterId: kikyou
+    variantKey: kikyou_a
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: 0459472a724f2684088fce3726b8badc, type: 3}
+    assetPath: Assets/Art/Portraits/kikyou/kikyou_a_09.png
+  - characterId: kikyou
+    variantKey: kikyou_a
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: 4e36f0f8084781f419d9bfbb0428e991, type: 3}
+    assetPath: Assets/Art/Portraits/kikyou/kikyou_a_10.png
+  - characterId: kikyou
+    variantKey: kikyou_a
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: d5e73b8e98d8f99419d5acc06eb8954a, type: 3}
+    assetPath: Assets/Art/Portraits/kikyou/kikyou_a_11.png
+  - characterId: kikyou
+    variantKey: kikyou_a
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: a0e050b2eeaa76e41b129df150130af7, type: 3}
+    assetPath: Assets/Art/Portraits/kikyou/kikyou_a_12.png
+  - characterId: kikyou
+    variantKey: kikyou_a
+    emotionKey: 13
+    sprite: {fileID: 21300000, guid: 043abee9b261ed641ae1633d58bc0f3c, type: 3}
+    assetPath: Assets/Art/Portraits/kikyou/kikyou_a_13.png
+  - characterId: kikyou
+    variantKey: kikyou_a
+    emotionKey: 14
+    sprite: {fileID: 21300000, guid: d4a8234573d06be428cd32a0084c11e0, type: 3}
+    assetPath: Assets/Art/Portraits/kikyou/kikyou_a_14.png
+  - characterId: kikyou
+    variantKey: kikyou_a
+    emotionKey: 15
+    sprite: {fileID: 21300000, guid: 3113bbefc39d6114aa0bddc108dc78a0, type: 3}
+    assetPath: Assets/Art/Portraits/kikyou/kikyou_a_15.png
+  - characterId: kikyou
+    variantKey: kikyou_a
+    emotionKey: 16
+    sprite: {fileID: 21300000, guid: 7787b1ee768465345a9fe677a2a76a38, type: 3}
+    assetPath: Assets/Art/Portraits/kikyou/kikyou_a_16.png
+  - characterId: kikyou
+    variantKey: kikyou_a
+    emotionKey: 17
+    sprite: {fileID: 21300000, guid: 07b75895000f6134793524a7d78f0fbd, type: 3}
+    assetPath: Assets/Art/Portraits/kikyou/kikyou_a_17.png
+  - characterId: kikyou
+    variantKey: kikyou_a
+    emotionKey: 18
+    sprite: {fileID: 21300000, guid: d36e17286e157fd4a91e5ffdcc4bf0af, type: 3}
+    assetPath: Assets/Art/Portraits/kikyou/kikyou_a_18.png
+  - characterId: kikyou
+    variantKey: kikyou_a
+    emotionKey: 19
+    sprite: {fileID: 21300000, guid: 7fe5c424dcb2c1c4382dbd29ec66ed44, type: 3}
+    assetPath: Assets/Art/Portraits/kikyou/kikyou_a_19.png
+  - characterId: kikyou
+    variantKey: kikyou_a
+    emotionKey: 20
+    sprite: {fileID: 21300000, guid: 71d88d5525b1db347961e2caf3b5dcad, type: 3}
+    assetPath: Assets/Art/Portraits/kikyou/kikyou_a_20.png
+  - characterId: yuuka
+    variantKey: yuuka_a
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: 2810b9a20ce0b9f4c97d507ce2ea99cf, type: 3}
+    assetPath: Assets/Art/Portraits/yuuka/yuuka_a_01.png
+  - characterId: yuuka
+    variantKey: yuuka_a
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: 45a30a8948686e54eb2095a6fbf2f7a2, type: 3}
+    assetPath: Assets/Art/Portraits/yuuka/yuuka_a_02.png
+  - characterId: yuuka
+    variantKey: yuuka_a
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: edac8e0dcc58e2642a31633aa3a57c38, type: 3}
+    assetPath: Assets/Art/Portraits/yuuka/yuuka_a_03.png
+  - characterId: yuuka
+    variantKey: yuuka_a
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: 25e8b73b24ac0954a9389f5349290557, type: 3}
+    assetPath: Assets/Art/Portraits/yuuka/yuuka_a_04.png
+  - characterId: yuuka
+    variantKey: yuuka_a
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: 2fc8d246d141d6a4daf3fb7a0bd9cc26, type: 3}
+    assetPath: Assets/Art/Portraits/yuuka/yuuka_a_05.png
+  - characterId: yuuka
+    variantKey: yuuka_a
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: 59c631d3f9e21be4e8075bff505a813a, type: 3}
+    assetPath: Assets/Art/Portraits/yuuka/yuuka_a_06.png
+  - characterId: yuuka
+    variantKey: yuuka_a
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: 9ba182a4a86d10e44bb08c0171dec44d, type: 3}
+    assetPath: Assets/Art/Portraits/yuuka/yuuka_a_07.png
+  - characterId: yuuka
+    variantKey: yuuka_a
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: eff19621e20cd9f44950bbb067f12ed3, type: 3}
+    assetPath: Assets/Art/Portraits/yuuka/yuuka_a_08.png
+  - characterId: yuuka
+    variantKey: yuuka_a
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: 92eeb5f378dc92d43b7aa2bb37bbd8e6, type: 3}
+    assetPath: Assets/Art/Portraits/yuuka/yuuka_a_09.png
+  - characterId: yuuka
+    variantKey: yuuka_a
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: b852042e8eeefde4e80f4ebb6fdb6977, type: 3}
+    assetPath: Assets/Art/Portraits/yuuka/yuuka_a_10.png
+  - characterId: yuuka
+    variantKey: yuuka_a
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: ad4e7ce2ed5f3d54c88d1abf16ff60d4, type: 3}
+    assetPath: Assets/Art/Portraits/yuuka/yuuka_a_11.png
+  - characterId: yuuka
+    variantKey: yuuka_b
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: 04c30341aab25ba4fb1057354b45427b, type: 3}
+    assetPath: Assets/Art/Portraits/yuuka/yuuka_b_01.png
+  - characterId: yuuka
+    variantKey: yuuka_b
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: 754c6a18ad3dded4bb69cf0d973ef729, type: 3}
+    assetPath: Assets/Art/Portraits/yuuka/yuuka_b_02.png
+  - characterId: yuuka
+    variantKey: yuuka_b
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: dbda9fdf3c7650b479c260ae409c8aff, type: 3}
+    assetPath: Assets/Art/Portraits/yuuka/yuuka_b_03.png
+  - characterId: yuuka
+    variantKey: yuuka_b
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: a407707095a416e4a85f99a24075f4c1, type: 3}
+    assetPath: Assets/Art/Portraits/yuuka/yuuka_b_04.png
+  - characterId: yuuka
+    variantKey: yuuka_b
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: 6622b31c5c060884883112dde8505329, type: 3}
+    assetPath: Assets/Art/Portraits/yuuka/yuuka_b_05.png
+  - characterId: yuuka
+    variantKey: yuuka_b
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: 0a4d6e4a468b29c4c8a59b5882e82fed, type: 3}
+    assetPath: Assets/Art/Portraits/yuuka/yuuka_b_06.png
+  - characterId: yuuka
+    variantKey: yuuka_b
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: 0e2c7cc321f40984681185556878a2c0, type: 3}
+    assetPath: Assets/Art/Portraits/yuuka/yuuka_b_07.png
+  - characterId: yuuka
+    variantKey: yuuka_b
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: 5e1980a802e9e924a9425301d4214075, type: 3}
+    assetPath: Assets/Art/Portraits/yuuka/yuuka_b_08.png
+  - characterId: yuuka
+    variantKey: yuuka_b
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: d3a611d77cad469468d26ac632095d8f, type: 3}
+    assetPath: Assets/Art/Portraits/yuuka/yuuka_b_09.png
+  - characterId: yuuka
+    variantKey: yuuka_b
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: c06968ce50146d54992048caa403eda8, type: 3}
+    assetPath: Assets/Art/Portraits/yuuka/yuuka_b_10.png
+  - characterId: yuuka
+    variantKey: yuuka_b
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: 882359388f6061b43a52fde3f6dbac4a, type: 3}
+    assetPath: Assets/Art/Portraits/yuuka/yuuka_b_11.png
+  - characterId: yuuka
+    variantKey: yuuka_b
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: a67e2941393f7484699103c1d41512da, type: 3}
+    assetPath: Assets/Art/Portraits/yuuka/yuuka_b_12.png
+  - characterId: yuuka
+    variantKey: yuuka_b
+    emotionKey: 13
+    sprite: {fileID: 21300000, guid: e44a9a972c28bfd4b80b7424aa872e86, type: 3}
+    assetPath: Assets/Art/Portraits/yuuka/yuuka_b_13.png
+  - characterId: yuuka
+    variantKey: yuuka_b
+    emotionKey: 14
+    sprite: {fileID: 21300000, guid: 7d27476f3cfa98441bd3b89685674531, type: 3}
+    assetPath: Assets/Art/Portraits/yuuka/yuuka_b_14.png
+  - characterId: yuuka
+    variantKey: yuuka_b
+    emotionKey: 15
+    sprite: {fileID: 21300000, guid: cdda40f6ff0253f4784799f2d9a99613, type: 3}
+    assetPath: Assets/Art/Portraits/yuuka/yuuka_b_15.png
+  - characterId: yuuka
+    variantKey: yuuka_b
+    emotionKey: 16
+    sprite: {fileID: 21300000, guid: 96695ddd8c507d44dafcbbca0d822c0f, type: 3}
+    assetPath: Assets/Art/Portraits/yuuka/yuuka_b_16.png
+  - characterId: yuuka
+    variantKey: yuuka_b
+    emotionKey: 17
+    sprite: {fileID: 21300000, guid: 75a9fee9ef2875a4bace8ab55765aeda, type: 3}
+    assetPath: Assets/Art/Portraits/yuuka/yuuka_b_17.png
+  - characterId: yuuka
+    variantKey: yuuka_b
+    emotionKey: 18
+    sprite: {fileID: 21300000, guid: dbf1d69b808c67d4bb0d20dd7b45ac5c, type: 3}
+    assetPath: Assets/Art/Portraits/yuuka/yuuka_b_18.png
+  - characterId: yuuka
+    variantKey: yuuka_b
+    emotionKey: 19
+    sprite: {fileID: 21300000, guid: 26a77e9c622ad39438a278e385e37e9c, type: 3}
+    assetPath: Assets/Art/Portraits/yuuka/yuuka_b_19.png
+  - characterId: yuuka
+    variantKey: yuuka_c
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: 7bbf17ecbc94689478fe0532ec66cf91, type: 3}
+    assetPath: Assets/Art/Portraits/yuuka/yuuka_c_01.png
+  - characterId: yuuka
+    variantKey: yuuka_c
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: 7d28731020e4c884cbcb02a18515cfe6, type: 3}
+    assetPath: Assets/Art/Portraits/yuuka/yuuka_c_02.png
+  - characterId: yuuka
+    variantKey: yuuka_c
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: 5cc100aaf45754b4e941672eb58a4267, type: 3}
+    assetPath: Assets/Art/Portraits/yuuka/yuuka_c_03.png
+  - characterId: yuuka
+    variantKey: yuuka_c
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: d06b975d2d0d6e245a0f1a2537727712, type: 3}
+    assetPath: Assets/Art/Portraits/yuuka/yuuka_c_04.png
+  - characterId: yuuka
+    variantKey: yuuka_c
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: 7af37f246a647b54aa2c9377fd89e220, type: 3}
+    assetPath: Assets/Art/Portraits/yuuka/yuuka_c_05.png
+  - characterId: yuuka
+    variantKey: yuuka_c
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: a23697d4d54fbbd418b78752c2b127bc, type: 3}
+    assetPath: Assets/Art/Portraits/yuuka/yuuka_c_06.png
+  - characterId: yuuka
+    variantKey: yuuka_c
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: fe593b57f30183d4bb0682b6b8bc0b73, type: 3}
+    assetPath: Assets/Art/Portraits/yuuka/yuuka_c_07.png
+  - characterId: yuuka
+    variantKey: yuuka_c
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: 02f42e00969fdcd4ba04d28235b1e9ff, type: 3}
+    assetPath: Assets/Art/Portraits/yuuka/yuuka_c_08.png
+  - characterId: yuuka
+    variantKey: yuuka_c
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: 7985d4b278cf04e4b96df5fde82249e5, type: 3}
+    assetPath: Assets/Art/Portraits/yuuka/yuuka_c_09.png
+  - characterId: yuuka
+    variantKey: yuuka_c
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: 77f001e0e656fe740a271276e626eaaf, type: 3}
+    assetPath: Assets/Art/Portraits/yuuka/yuuka_c_10.png
+  - characterId: yuuka
+    variantKey: yuuka_c
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: 4f22837ecf19ade47b93917407718498, type: 3}
+    assetPath: Assets/Art/Portraits/yuuka/yuuka_c_11.png
+  - characterId: yuuka
+    variantKey: yuuka_c
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: 80c46393b243c4e49b7f454809d83aca, type: 3}
+    assetPath: Assets/Art/Portraits/yuuka/yuuka_c_12.png
+  - characterId: yuuka
+    variantKey: yuuka_c
+    emotionKey: 13
+    sprite: {fileID: 21300000, guid: 72a264342b9c778479a551b3751112b6, type: 3}
+    assetPath: Assets/Art/Portraits/yuuka/yuuka_c_13.png
+  - characterId: yuuka
+    variantKey: yuuka_c
+    emotionKey: 14
+    sprite: {fileID: 21300000, guid: e97728ccd8c8f5840807296386add354, type: 3}
+    assetPath: Assets/Art/Portraits/yuuka/yuuka_c_14.png
+  - characterId: yuuka
+    variantKey: yuuka_c
+    emotionKey: 15
+    sprite: {fileID: 21300000, guid: c582fb8a6e48327439c16d718b913325, type: 3}
+    assetPath: Assets/Art/Portraits/yuuka/yuuka_c_15.png
+  - characterId: yuuka
+    variantKey: yuuka_c
+    emotionKey: 16
+    sprite: {fileID: 21300000, guid: 6a56f806cd631a449b5d0b8e6b523f8c, type: 3}
+    assetPath: Assets/Art/Portraits/yuuka/yuuka_c_16.png
+  - characterId: yuuka
+    variantKey: yuuka_c
+    emotionKey: 17
+    sprite: {fileID: 21300000, guid: bac1220dd0d167a4b98dfe0e055555d2, type: 3}
+    assetPath: Assets/Art/Portraits/yuuka/yuuka_c_17.png
+  - characterId: yuuka
+    variantKey: yuuka_c
+    emotionKey: 18
+    sprite: {fileID: 21300000, guid: c7f7a3fd9fdf62e4780b11b70d87ce7b, type: 3}
+    assetPath: Assets/Art/Portraits/yuuka/yuuka_c_18.png
+  - characterId: yuuka
+    variantKey: yuuka_c
+    emotionKey: 19
+    sprite: {fileID: 21300000, guid: 46c673e6b4a49ff49a7c5610e7b53fa2, type: 3}
+    assetPath: Assets/Art/Portraits/yuuka/yuuka_c_19.png
+  - characterId: yuuka
+    variantKey: yuuka_c
+    emotionKey: 20
+    sprite: {fileID: 21300000, guid: aff6f65d2ded631458046db40fd821a7, type: 3}
+    assetPath: Assets/Art/Portraits/yuuka/yuuka_c_20.png
+  - characterId: yuuka
+    variantKey: yuuka_c
+    emotionKey: 21
+    sprite: {fileID: 21300000, guid: 578179dc18cc3cc40bd1bd3638f7f9df, type: 3}
+    assetPath: Assets/Art/Portraits/yuuka/yuuka_c_21.png
+  - characterId: yuuka
+    variantKey: yuuka_c
+    emotionKey: 22
+    sprite: {fileID: 21300000, guid: 49f4491032cd3dc408eae1e504e13ed4, type: 3}
+    assetPath: Assets/Art/Portraits/yuuka/yuuka_c_22.png
+  - characterId: yuuka
+    variantKey: yuuka_c
+    emotionKey: 23
+    sprite: {fileID: 21300000, guid: 77a54e59162169d43be48bdd103f4f43, type: 3}
+    assetPath: Assets/Art/Portraits/yuuka/yuuka_c_23.png
+  - characterId: yuuka
+    variantKey: yuuka_c
+    emotionKey: 24
+    sprite: {fileID: 21300000, guid: e7e1f3ec67cb15040848de33fb076c48, type: 3}
+    assetPath: Assets/Art/Portraits/yuuka/yuuka_c_24.png
+  generatedTicksUtc: 639187044657546069
+  generatedTimeReadable: 2026-07-04 04:41:05
