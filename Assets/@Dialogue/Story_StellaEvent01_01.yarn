@@ -10,16 +10,6 @@
 <<down tyrant 4u>>
 <<right tyrant 0.6u>>
 
-<<slot c2>>
-<<cast c2 Iris a>>
-<<left c2 20u -1>>
-
-<<slot c3>>
-<<cast c3 Amber a>>
-<<right c3 20u -1>>
-
-
-
 
 === 
 
@@ -31,65 +21,24 @@ title: Story_StellaEvent01_01
 <<beat Setup_StellaEvent01_01>>
 
 <<slot c4>>
-<<cast c4 bandi d 3>>
+<<cast c4 bandi a 3>>
 
 <<actor @4 c4>>
-<<mirror       @4>>
+
+//<<mirror       @4>>
 <<char_visual  @4 focus >>
-<<place_center @4 bust -1>>
-<<up           @4 3u>>
-<<idle_breathe @4>>
+<<place_center @4 bust 24fr>>
+<<left         @4 3u>>
 <<size         @4 14 bust -1>>
 <<fade_in      @4>>
 
-<<slot c8>>
-<<cast c8 bandi d 1>>
-
-<<actor @8 c8>>
-<<mirror       @8>>
-<<char_visual  @8 focus >>
-<<place_left   @8 bust -1>>
-<<up           @8 3u>>
-<<idle_breathe @8>>
-<<size         @8 14 bust -1>>
-<<fade_in      @8>>
-
-<<slot c9>>
-<<cast c9 bandi d 2>>
-
-<<actor @9 c9>>
-<<mirror       @9>>
-<<char_visual  @9 focus >>
-<<place_right  @9 bust -1>>
-<<up           @9 3u>>
-<<idle_breathe @9>>
-<<size         @9 14 bust -1>>
-<<fade_in      @9>>
-
-책임이야앗! #beat
-->어디가 좋아보여?
-->중앙이 아야메다
-    땡~~ 중앙은 아야메가 아니였습니다!
-->세이나가 피망을 먹을리가 없어!
-    <<jolt @4 up>>
-    <<shake @4 left>>
-    <<emoji @4 11>>
-    세이나:호엣!! 너무해 평소에 나를 그렇게 봤던거야? 
-
-iris: 이제 그만! 밤에 잠 못 자면 다 네 책임이야앗! #beat #stay
+<<36fr>>
+<<screen_blur 2 0.001>>
+<<char_visual_dim @4>>
+<<size_back @4>>
+<<place_left @4 bust 12fr>>
 
 
-세이나: 태양! 해변! 그리고 바다! 역시 여름 하면 이거지!
-
-
-세이나: 그리고 군것질 노점에...... 차가운 음료수까지! 더 이상 바랄 게 없어!
-
-iris: 으으...... 눈도 부시고, 햇빛도 따갑고...... 그냥 평소에 입던 대로 입는 게 나을 것 같은데.
-
-세이나: 무슨 소리야! 바다에 와서 수영복을 안 입으면 언제 또 입겠어? 그리고 아야메, 그거 진짜 잘 어울려. 그치, 마왕님?
-Tyrant: 응, 내가 봐도 잘 어울려.
-
-아야메: 저, 정말요......? 두 사람이 그렇다면야 뭐...... 잠깐, 코하쿠 넌 팔이 왜 이렇게 차가워?
 하늘이 뚫린 듯 비가 쏟아지는 밤이었다. 칠흑 같은 파도가 너울대는 바다를 멍하니 바라보던 중, [br/]순간 연한 녹색 빛이 수면 위로 올라오는 게 보였다.
 
 빛의 정체는 한 척의 배였다. 망망대해를 얼마나 떠다녔는지 선체는 심하게 녹슬었고, [br/]갑판에는 돛이나 노도 없이 허연 백골만 무수히 쌓여 있었다.

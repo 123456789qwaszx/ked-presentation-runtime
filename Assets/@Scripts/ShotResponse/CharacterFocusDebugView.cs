@@ -84,28 +84,28 @@ public sealed class CharacterFocusDebugView : MonoBehaviour
             label = "Feet",
             focusPreset = CharacterFocusPreset.Feet,
             color = new Color(0.4f, 0.8f, 1f, 0.9f),
-            radius = 8f,
+            radius = 13f,
         },
         new Point
         {
             label = "Body",
             focusPreset = CharacterFocusPreset.Body,
             color = new Color(0.4f, 1f, 0.4f, 0.9f),
-            radius = 10f,
+            radius = 14f,
         },
         new Point
         {
             label = "Bust",
             focusPreset = CharacterFocusPreset.Bust,
             color = new Color(1f, 0.8f, 0.25f, 0.9f),
-            radius = 11f,
+            radius = 15f,
         },
         new Point
         {
             label = "Face",
             focusPreset = CharacterFocusPreset.Face,
             color = new Color(1f, 0.35f, 0.35f, 0.95f),
-            radius = 13f,
+            radius = 16f,
         },
     };
 

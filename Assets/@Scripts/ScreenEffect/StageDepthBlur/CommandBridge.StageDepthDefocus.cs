@@ -1,22 +1,5 @@
-using Yarn.Unity;
-
 public sealed partial class YarnCommandBridge
 {
-    private void BindStageDepthDefocus(DialogueRunner runner)
-    {
-        runner.AddCommandHandler<string, float>(
-            "blur", EnqueueStage00DepthBlurSpec);
-
-        runner.AddCommandHandler<string, float>(
-            "blur_s1", EnqueueStage01DepthBlurSpec);
-
-        runner.AddCommandHandler<string, float>(
-            "blur_s2", EnqueueStage02DepthBlurSpec);
-
-        runner.AddCommandHandler(
-            "blur_reset", EnqueueStageDepthBlurClearSpec);
-    }
-
     private void EnqueueStage00DepthBlurSpec(
         string layerKey = "mid",
         float blurRadius = 1f)

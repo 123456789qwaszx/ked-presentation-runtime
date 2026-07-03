@@ -651,6 +651,21 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler<string>(
             "screen_noise_clear", EnqueueScreenNoiseClearSpec);
     }
+    
+    private void BindStageDepthDefocus(DialogueRunner runner)
+    {
+        runner.AddCommandHandler<string, float>(
+            "screen_blur", EnqueueStage00DepthBlurSpec);
+
+        runner.AddCommandHandler<string, float>(
+            "screen_blur_s1", EnqueueStage01DepthBlurSpec);
+
+        runner.AddCommandHandler<string, float>(
+            "screen_blur_s2", EnqueueStage02DepthBlurSpec);
+
+        runner.AddCommandHandler(
+            "screen_blur_reset", EnqueueStageDepthBlurClearSpec);
+    }
 
     private void Collect(CommandSpecBase spec)
     {
