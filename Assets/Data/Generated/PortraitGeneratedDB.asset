@@ -4498,6 +4498,366 @@ MonoBehaviour:
     emotionKey: 25
     sprite: {fileID: 21300000, guid: fa016e6dd45713d4fa93b7db79de3c7c, type: 3}
     assetPath: Assets/Art/Portraits/Willow/Willow_a_25.png
+  - characterId: bandi
+    variantKey: bandi_a
+    emotionKey: 00
+    sprite: {fileID: 21300000, guid: 2b9afb889d943c045a1988d53f238968, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_a_00.png
+  - characterId: bandi
+    variantKey: bandi_a
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: 01d17f77169e481458eb59d556e208f1, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_a_01.png
+  - characterId: bandi
+    variantKey: bandi_a
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: 0c90c4c4d1b2def4e8a0d81d5973e594, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_a_02.png
+  - characterId: bandi
+    variantKey: bandi_a
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: 848c9f32794e2b042ab2b9a838cbbaba, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_a_03.png
+  - characterId: bandi
+    variantKey: bandi_a
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: 9d7ec77f03084344bbe1e6fe4d40c08f, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_a_04.png
+  - characterId: bandi
+    variantKey: bandi_a
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: 4ddbc95d4731fb048bcad8aee493bef9, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_a_05.png
+  - characterId: bandi
+    variantKey: bandi_a
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: 6995551588dc6a947ae04dcc11f9501c, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_a_06.png
+  - characterId: bandi
+    variantKey: bandi_a
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: eb22424e4e6f64e449a7e187b2eb8f64, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_a_07.png
+  - characterId: bandi
+    variantKey: bandi_a
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: 8eb827fbe7d0e5d44a3746ea4bb3b8a6, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_a_08.png
+  - characterId: bandi
+    variantKey: bandi_a
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: 7f3361e1a7e57c740b8f9aefc31c0eeb, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_a_09.png
+  - characterId: bandi
+    variantKey: bandi_a
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: 198ea16fdbbf9ac43b29da687b7474b5, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_a_10.png
+  - characterId: bandi
+    variantKey: bandi_a
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: e415a8b9ade0b3c4d8df315165393422, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_a_11.png
+  - characterId: bandi
+    variantKey: bandi_a
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: de843dacaa4184e4089320661212ccc4, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_a_12.png
+  - characterId: bandi
+    variantKey: bandi_a
+    emotionKey: 13
+    sprite: {fileID: 21300000, guid: d1ec6e89323fda7499b6ada30e5c442e, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_a_13.png
+  - characterId: bandi
+    variantKey: bandi_a
+    emotionKey: 14
+    sprite: {fileID: 21300000, guid: 81732b4a60fb4a54195d35e6203dcf43, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_a_14.png
+  - characterId: bandi
+    variantKey: bandi_a
+    emotionKey: 15
+    sprite: {fileID: 21300000, guid: 0cfbdfc228a21334ba3088f9d78acfdd, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_a_15.png
+  - characterId: bandi
+    variantKey: bandi_a
+    emotionKey: 16
+    sprite: {fileID: 21300000, guid: 64c266caf4001a947b116f10cf99b182, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_a_16.png
+  - characterId: bandi
+    variantKey: bandi_a
+    emotionKey: 17
+    sprite: {fileID: 21300000, guid: 6f38700e907b79f41a67465c1caf86bb, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_a_17.png
+  - characterId: bandi
+    variantKey: bandi_a
+    emotionKey: 18
+    sprite: {fileID: 21300000, guid: 58fa4570b8e551441a8df1277cd77d01, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_a_18.png
+  - characterId: bandi
+    variantKey: bandi_a
+    emotionKey: 19
+    sprite: {fileID: 21300000, guid: 58780e1e80a655a4a8fe616357e94f7c, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_a_19.png
+  - characterId: bandi
+    variantKey: bandi_a
+    emotionKey: 20
+    sprite: {fileID: 21300000, guid: bf13cb6a26b3f5d4299f6025b8ea58d9, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_a_20.png
+  - characterId: bandi
+    variantKey: bandi_a
+    emotionKey: 21
+    sprite: {fileID: 21300000, guid: 02190ffd7cf19b74aa7a3fc75b6ba634, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_a_21.png
+  - characterId: bandi
+    variantKey: bandi_a
+    emotionKey: 22
+    sprite: {fileID: 21300000, guid: a6f973357f4f75a468ce27c36c7c85ca, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_a_22.png
+  - characterId: bandi
+    variantKey: bandi_b
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: 0746f7c20fbf4534ea1a9bc97fc71bb9, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_b_01.png
+  - characterId: bandi
+    variantKey: bandi_b
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: 924729ca918af7245a03fac870c87eb4, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_b_02.png
+  - characterId: bandi
+    variantKey: bandi_b
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: c30b8a1c99b1dce489c931ed5345c3cb, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_b_03.png
+  - characterId: bandi
+    variantKey: bandi_b
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: a72c38949b9f91c4198f556efb48a3b0, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_b_04.png
+  - characterId: bandi
+    variantKey: bandi_b
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: 21e627ceb0f457e4db107e270476c10d, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_b_05.png
+  - characterId: bandi
+    variantKey: bandi_b
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: 09c00aa78d8979945831b52735ed5e01, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_b_06.png
+  - characterId: bandi
+    variantKey: bandi_b
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: 7739bd54de141ee49a2b00cd59d69c52, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_b_07.png
+  - characterId: bandi
+    variantKey: bandi_b
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: 1453b3a4a7d0a4c48ba4759a15cd3b09, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_b_08.png
+  - characterId: bandi
+    variantKey: bandi_b
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: b19fe276a7baac341a705e5f2798978f, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_b_09.png
+  - characterId: bandi
+    variantKey: bandi_b
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: 7f1556bb79cb5e346bb035899c066ddf, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_b_10.png
+  - characterId: bandi
+    variantKey: bandi_b
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: a49edc40d8b71674fabc9434d0689a99, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_b_11.png
+  - characterId: bandi
+    variantKey: bandi_b
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: fc767d965aa255847885ee45b22d1ebd, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_b_12.png
+  - characterId: bandi
+    variantKey: bandi_b
+    emotionKey: 13
+    sprite: {fileID: 21300000, guid: c19ac369b7e1afb42a7486d4086a1e51, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_b_13.png
+  - characterId: bandi
+    variantKey: bandi_b
+    emotionKey: 14
+    sprite: {fileID: 21300000, guid: f22307e40cdd0c444ba428764fdeb8d2, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_b_14.png
+  - characterId: bandi
+    variantKey: bandi_b
+    emotionKey: 15
+    sprite: {fileID: 21300000, guid: 15f0def2ad9e02f479b0ac4e7c5eb4d6, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_b_15.png
+  - characterId: bandi
+    variantKey: bandi_b
+    emotionKey: 16
+    sprite: {fileID: 21300000, guid: 5c08e7bb52f17c441b04d5e7abd40bbe, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_b_16.png
+  - characterId: bandi
+    variantKey: bandi_b
+    emotionKey: 17
+    sprite: {fileID: 21300000, guid: d60e6b7d8fc917d45ba19c8eb967b90b, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_b_17.png
+  - characterId: bandi
+    variantKey: bandi_b
+    emotionKey: 18
+    sprite: {fileID: 21300000, guid: f357e8f04cb84b34cb950e7bc03e22c8, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_b_18.png
+  - characterId: bandi
+    variantKey: bandi_b
+    emotionKey: 19
+    sprite: {fileID: 21300000, guid: 1e7b6d5b5460cee4fad2fb5aa9f5eeb9, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_b_19.png
+  - characterId: bandi
+    variantKey: bandi_b
+    emotionKey: 20
+    sprite: {fileID: 21300000, guid: 261f41395a8b93f42a0c05e7d4760116, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_b_20.png
+  - characterId: bandi
+    variantKey: bandi_b
+    emotionKey: 21
+    sprite: {fileID: 21300000, guid: a34174cca619ce04d9b49cee18f731e0, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_b_21.png
+  - characterId: bandi
+    variantKey: bandi_b
+    emotionKey: 22
+    sprite: {fileID: 21300000, guid: e18f88969449a58419aeae83de866a43, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_b_22.png
+  - characterId: bandi
+    variantKey: bandi_b
+    emotionKey: 23
+    sprite: {fileID: 21300000, guid: 05c16da7e2ea8b84baa9a3370bacc363, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_b_23.png
+  - characterId: bandi
+    variantKey: bandi_c
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: 48216443836818b4b8bc915c0b4f153a, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_c_01.png
+  - characterId: bandi
+    variantKey: bandi_c
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: b96b0a276e09adc48a51608a0bb6e53f, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_c_02.png
+  - characterId: bandi
+    variantKey: bandi_c
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: ab9b2e8a5dbb78544927e3378f843118, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_c_03.png
+  - characterId: bandi
+    variantKey: bandi_c
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: f14777cd795e7414aa0f06c8107a799b, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_c_04.png
+  - characterId: bandi
+    variantKey: bandi_c
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: 36c1ad7b05186194889f06dae19692c8, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_c_05.png
+  - characterId: bandi
+    variantKey: bandi_c
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: 265726404cd31db4dbc28c1d9708c138, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_c_06.png
+  - characterId: bandi
+    variantKey: bandi_c
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: 9d6208ce2e4d71f4492f4436f11e6e7b, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_c_07.png
+  - characterId: bandi
+    variantKey: bandi_c
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: 9419525ea1641d34c9ec54956e773b0a, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_c_08.png
+  - characterId: bandi
+    variantKey: bandi_c
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: 36c0297babaf4264c898c7104a5c0737, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_c_09.png
+  - characterId: bandi
+    variantKey: bandi_c
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: 6baea9ea787d88046b8c6347038bc96e, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_c_10.png
+  - characterId: bandi
+    variantKey: bandi_c
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: 87dfae139f5a15c4aa97bf338f40b49b, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_c_11.png
+  - characterId: bandi
+    variantKey: bandi_c
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: 62f4f72355ab660439bee45fbd468d29, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_c_12.png
+  - characterId: bandi
+    variantKey: bandi_c
+    emotionKey: 13
+    sprite: {fileID: 21300000, guid: c460e0555d9046c46840bbf8fe5d8243, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_c_13.png
+  - characterId: bandi
+    variantKey: bandi_c
+    emotionKey: 14
+    sprite: {fileID: 21300000, guid: 4470b00959b579c4ea7bf34f738a506b, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_c_14.png
+  - characterId: bandi
+    variantKey: bandi_c
+    emotionKey: 15
+    sprite: {fileID: 21300000, guid: 498810e5ddb6151458d7c1a555957920, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_c_15.png
+  - characterId: bandi
+    variantKey: bandi_c
+    emotionKey: 16
+    sprite: {fileID: 21300000, guid: fab6d304ba2902d429d66f790d5ec30c, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_c_16.png
+  - characterId: bandi
+    variantKey: bandi_c
+    emotionKey: 17
+    sprite: {fileID: 21300000, guid: c0b6cb2c3a76db84d9f5fc877e688d78, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_c_17.png
+  - characterId: bandi
+    variantKey: bandi_c
+    emotionKey: 18
+    sprite: {fileID: 21300000, guid: c6f66929b1ee2f640bed3f5c5bcee825, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_c_18.png
+  - characterId: bandi
+    variantKey: bandi_c
+    emotionKey: 19
+    sprite: {fileID: 21300000, guid: 23936fbc61a45554e8ab1505958ffea6, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_c_19.png
+  - characterId: bandi
+    variantKey: bandi_c
+    emotionKey: 20
+    sprite: {fileID: 21300000, guid: 69b8b988cfc53a44488df906ddad6a62, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_c_20.png
+  - characterId: bandi
+    variantKey: bandi_c
+    emotionKey: 21
+    sprite: {fileID: 21300000, guid: b38c4950ccc5e4449b53085a9a463522, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_c_21.png
+  - characterId: bandi
+    variantKey: bandi_c
+    emotionKey: 22
+    sprite: {fileID: 21300000, guid: 641a9862f61760c4484faaa120127627, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_c_22.png
+  - characterId: bandi
+    variantKey: bandi_c
+    emotionKey: 23
+    sprite: {fileID: 21300000, guid: 388b2abdcf189db4bb08d889a3e0ce59, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_c_23.png
+  - characterId: bandi
+    variantKey: bandi_d
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: ec769cb22579eee4caa07f56750589b8, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_d_01.png
+  - characterId: bandi
+    variantKey: bandi_d
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: a093e60ff516a4f48928d8032a6bab8e, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_d_02.png
+  - characterId: bandi
+    variantKey: bandi_d
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: 4deb947bda60ad244a1774823adc4d28, type: 3}
+    assetPath: Assets/Art/Portraits/bandi/bandi_d_03.png
   - characterId: dokkaebi
     variantKey: dokkaebi_a
     emotionKey: 01
@@ -5025,29 +5385,239 @@ MonoBehaviour:
     assetPath: Assets/Art/Portraits/kuonji/kuonji_a_08.png
   - characterId: momoka
     variantKey: momoka_a
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: 6140951ab15a4c1458330c46d16dc89c, type: 3}
+    assetPath: Assets/Art/Portraits/momoka/momoka_a_01.png
+  - characterId: momoka
+    variantKey: momoka_a
     emotionKey: 02
-    sprite: {fileID: 21300000, guid: f0006a933c433794787fa34a377bd1b4, type: 3}
+    sprite: {fileID: 21300000, guid: 685d86ac1e483454c9230e378974845c, type: 3}
     assetPath: Assets/Art/Portraits/momoka/momoka_a_02.png
   - characterId: momoka
     variantKey: momoka_a
     emotionKey: 03
-    sprite: {fileID: 21300000, guid: a9149c9e96b915545925400b3d6df15d, type: 3}
+    sprite: {fileID: 21300000, guid: 6b7654f12caf6214f97fcdacddd3c9e8, type: 3}
     assetPath: Assets/Art/Portraits/momoka/momoka_a_03.png
   - characterId: momoka
     variantKey: momoka_a
     emotionKey: 04
-    sprite: {fileID: 21300000, guid: 6b5a42d66ed7b6f49981af1803f3e63e, type: 3}
+    sprite: {fileID: 21300000, guid: b01e4b1e398b18946bb34c3cea31a473, type: 3}
     assetPath: Assets/Art/Portraits/momoka/momoka_a_04.png
   - characterId: momoka
     variantKey: momoka_a
     emotionKey: 05
-    sprite: {fileID: 21300000, guid: 79211400b4d60da499063a261c2b3aa4, type: 3}
+    sprite: {fileID: 21300000, guid: 7e2b3ffd8b53096499c4bf9fb39b29cd, type: 3}
     assetPath: Assets/Art/Portraits/momoka/momoka_a_05.png
   - characterId: momoka
     variantKey: momoka_a
     emotionKey: 06
-    sprite: {fileID: 21300000, guid: 427388273b175ee4799686c3cae08c15, type: 3}
+    sprite: {fileID: 21300000, guid: a021c9c70cb34bd41b67b593f12e8ade, type: 3}
     assetPath: Assets/Art/Portraits/momoka/momoka_a_06.png
+  - characterId: momoka
+    variantKey: momoka_a
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: 14e855a0e9ce2c546bfe077023feb81a, type: 3}
+    assetPath: Assets/Art/Portraits/momoka/momoka_a_07.png
+  - characterId: momoka
+    variantKey: momoka_a
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: efd2643734285f14ebf042c3c70e64a2, type: 3}
+    assetPath: Assets/Art/Portraits/momoka/momoka_a_08.png
+  - characterId: momoka
+    variantKey: momoka_a
+    emotionKey: 22
+    sprite: {fileID: 21300000, guid: a4a7903f04fdf1a4cb81a4a875ee1e0a, type: 3}
+    assetPath: Assets/Art/Portraits/momoka/momoka_a_22.png
+  - characterId: momoka
+    variantKey: momoka_a
+    emotionKey: 23
+    sprite: {fileID: 21300000, guid: c324c748d69be0b40b96e3b3f748be3a, type: 3}
+    assetPath: Assets/Art/Portraits/momoka/momoka_a_23.png
+  - characterId: momoka
+    variantKey: momoka_a
+    emotionKey: 24
+    sprite: {fileID: 21300000, guid: 17caafaba49639846874a96083f347b1, type: 3}
+    assetPath: Assets/Art/Portraits/momoka/momoka_a_24.png
+  - characterId: momoka
+    variantKey: momoka_a
+    emotionKey: 25
+    sprite: {fileID: 21300000, guid: 6e73c3bb42265834bbcefc3adacb7b96, type: 3}
+    assetPath: Assets/Art/Portraits/momoka/momoka_a_25.png
+  - characterId: momoka
+    variantKey: momoka_a
+    emotionKey: 26
+    sprite: {fileID: 21300000, guid: 54bfcc0298da53d46add07228bf46970, type: 3}
+    assetPath: Assets/Art/Portraits/momoka/momoka_a_26.png
+  - characterId: momoka
+    variantKey: momoka_b
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: 7931a9aca24b225468a200195a2108b7, type: 3}
+    assetPath: Assets/Art/Portraits/momoka/momoka_b_01.png
+  - characterId: momoka
+    variantKey: momoka_b
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: 7ed9f0ac6309e6149816b16fe7fb60f2, type: 3}
+    assetPath: Assets/Art/Portraits/momoka/momoka_b_02.png
+  - characterId: momoka
+    variantKey: momoka_b
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: bc99d294bc8bba747a28f52a4fe42c5a, type: 3}
+    assetPath: Assets/Art/Portraits/momoka/momoka_b_03.png
+  - characterId: momoka
+    variantKey: momoka_b
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: f9902b15debc70c42bbd2fc0c6840895, type: 3}
+    assetPath: Assets/Art/Portraits/momoka/momoka_b_04.png
+  - characterId: momoka
+    variantKey: momoka_c
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: 779b446f38dd9764bb52148a09c32650, type: 3}
+    assetPath: Assets/Art/Portraits/momoka/momoka_c_01.png
+  - characterId: momoka
+    variantKey: momoka_c
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: 7cd65c2abf1376a479170ab77c04331c, type: 3}
+    assetPath: Assets/Art/Portraits/momoka/momoka_c_02.png
+  - characterId: momoka
+    variantKey: momoka_c
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: 211fe7af4853f034daab9392c8861bb6, type: 3}
+    assetPath: Assets/Art/Portraits/momoka/momoka_c_03.png
+  - characterId: momoka
+    variantKey: momoka_d
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: cc808ac2657f23942b6083e55f15cdfc, type: 3}
+    assetPath: Assets/Art/Portraits/momoka/momoka_d_01.png
+  - characterId: momoka
+    variantKey: momoka_d
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: 94a0b8125a8558144a0b9b07b03a627a, type: 3}
+    assetPath: Assets/Art/Portraits/momoka/momoka_d_02.png
+  - characterId: momoka
+    variantKey: momoka_d
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: 29234ba58f5086f4c9c7c220c012b973, type: 3}
+    assetPath: Assets/Art/Portraits/momoka/momoka_d_03.png
+  - characterId: momoka
+    variantKey: momoka_e
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: 184bd7787bcc1b146bfc25a4f2e23c29, type: 3}
+    assetPath: Assets/Art/Portraits/momoka/momoka_e_01.png
+  - characterId: momoka
+    variantKey: momoka_e
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: c6de7721537da314d97958be6aaf5d48, type: 3}
+    assetPath: Assets/Art/Portraits/momoka/momoka_e_02.png
+  - characterId: momoka
+    variantKey: momoka_e
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: 90d9bdf81e11f354c935960a9a54f890, type: 3}
+    assetPath: Assets/Art/Portraits/momoka/momoka_e_03.png
+  - characterId: momoka
+    variantKey: momoka_f
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: ee5a3a010acf5804bb30a84e32c6a631, type: 3}
+    assetPath: Assets/Art/Portraits/momoka/momoka_f_01.png
+  - characterId: momoka
+    variantKey: momoka_f
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: 0b70d3572fe34be43b29830b4c7e4d26, type: 3}
+    assetPath: Assets/Art/Portraits/momoka/momoka_f_02.png
+  - characterId: momoka
+    variantKey: momoka_f
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: 8e171a4aaa237e6459a8b00b5d1db44d, type: 3}
+    assetPath: Assets/Art/Portraits/momoka/momoka_f_03.png
+  - characterId: momoka
+    variantKey: momoka_f
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: 2b44ac6eac6329241ac089b398d68712, type: 3}
+    assetPath: Assets/Art/Portraits/momoka/momoka_f_04.png
+  - characterId: momoka
+    variantKey: momoka_g
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: 81344829432554c45845e8d7a77abb20, type: 3}
+    assetPath: Assets/Art/Portraits/momoka/momoka_g_01.png
+  - characterId: momoka
+    variantKey: momoka_h
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: a29fcd3a3b211ca4cacd34781dfaa7dc, type: 3}
+    assetPath: Assets/Art/Portraits/momoka/momoka_h_01.png
+  - characterId: momoka
+    variantKey: momoka_h
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: 4e9be949ed4957541a9d5c14dbfd3f28, type: 3}
+    assetPath: Assets/Art/Portraits/momoka/momoka_h_02.png
+  - characterId: momoka
+    variantKey: momoka_h
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: 8b20daa8a4f5cb24a953f7d19b6c0e17, type: 3}
+    assetPath: Assets/Art/Portraits/momoka/momoka_h_03.png
+  - characterId: momoka
+    variantKey: momoka_h
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: 66680f7390b5eda4186edf7faa4cf427, type: 3}
+    assetPath: Assets/Art/Portraits/momoka/momoka_h_04.png
+  - characterId: momoka
+    variantKey: momoka_i
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: d8caee32d96ee894f986fe039dc480dc, type: 3}
+    assetPath: Assets/Art/Portraits/momoka/momoka_i_01.png
+  - characterId: momoka
+    variantKey: momoka_i
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: 11809de259d2a09458d99f4d68459966, type: 3}
+    assetPath: Assets/Art/Portraits/momoka/momoka_i_02.png
+  - characterId: momoka
+    variantKey: momoka_i
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: c3b71233a91530f45aef2f4c058f73fe, type: 3}
+    assetPath: Assets/Art/Portraits/momoka/momoka_i_03.png
+  - characterId: momoka
+    variantKey: momoka_i
+    emotionKey: 04
+    sprite: {fileID: 21300000, guid: ba36d7363de93614fb41fec413d439a8, type: 3}
+    assetPath: Assets/Art/Portraits/momoka/momoka_i_04.png
+  - characterId: momoka
+    variantKey: momoka_i
+    emotionKey: 05
+    sprite: {fileID: 21300000, guid: 488c42113ecaa7d4cada2abb82506325, type: 3}
+    assetPath: Assets/Art/Portraits/momoka/momoka_i_05.png
+  - characterId: momoka
+    variantKey: momoka_i
+    emotionKey: 06
+    sprite: {fileID: 21300000, guid: d019b5055e4c91d418795f839084cb4a, type: 3}
+    assetPath: Assets/Art/Portraits/momoka/momoka_i_06.png
+  - characterId: momoka
+    variantKey: momoka_i
+    emotionKey: 07
+    sprite: {fileID: 21300000, guid: c268c6890ff10f74aa9f14d950675e21, type: 3}
+    assetPath: Assets/Art/Portraits/momoka/momoka_i_07.png
+  - characterId: momoka
+    variantKey: momoka_i
+    emotionKey: 08
+    sprite: {fileID: 21300000, guid: 32f57d4c4f4fdd540a94800f78bef889, type: 3}
+    assetPath: Assets/Art/Portraits/momoka/momoka_i_08.png
+  - characterId: momoka
+    variantKey: momoka_i
+    emotionKey: 09
+    sprite: {fileID: 21300000, guid: c73e001e0626feb4e86e88755f594199, type: 3}
+    assetPath: Assets/Art/Portraits/momoka/momoka_i_09.png
+  - characterId: momoka
+    variantKey: momoka_i
+    emotionKey: 10
+    sprite: {fileID: 21300000, guid: 7d0557ccbe4ce26409989dfc444c4d90, type: 3}
+    assetPath: Assets/Art/Portraits/momoka/momoka_i_10.png
+  - characterId: momoka
+    variantKey: momoka_i
+    emotionKey: 11
+    sprite: {fileID: 21300000, guid: aff6cc60c104c4b4685b9e533ecd3c0a, type: 3}
+    assetPath: Assets/Art/Portraits/momoka/momoka_i_11.png
+  - characterId: momoka
+    variantKey: momoka_i
+    emotionKey: 12
+    sprite: {fileID: 21300000, guid: 788852366f607e140a26ade8d18d8eb2, type: 3}
+    assetPath: Assets/Art/Portraits/momoka/momoka_i_12.png
   - characterId: reira
     variantKey: reira_a
     emotionKey: 02
@@ -5808,5 +6378,5 @@ MonoBehaviour:
     emotionKey: 01
     sprite: {fileID: 21300000, guid: b172580fb3d04244d8bfbe141afa6326, type: 3}
     assetPath: Assets/Art/Portraits/soyeong/soyeong_i_1.png
-  generatedTicksUtc: 639182424433057627
-  generatedTimeReadable: 2026-06-28 20:20:43
+  generatedTicksUtc: 639186647812806433
+  generatedTimeReadable: 2026-07-03 17:39:41

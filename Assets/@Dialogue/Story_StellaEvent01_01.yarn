@@ -10,15 +10,6 @@
 <<down tyrant 4u>>
 <<right tyrant 0.6u>>
 
-<<slot c1>>
-<<cast c1 momoka a>>
-
-<<slot c5>>
-<<cast c5 kuonji a>>
-
-<<slot c6>>
-<<cast c6 kuonji a>>
-
 <<slot c2>>
 <<cast c2 Iris a>>
 <<left c2 20u -1>>
@@ -26,6 +17,8 @@
 <<slot c3>>
 <<cast c3 Amber a>>
 <<right c3 20u -1>>
+
+
 
 
 === 
@@ -37,48 +30,63 @@ title: Story_StellaEvent01_01
 <<beat Setup_Clear>>
 <<beat Setup_StellaEvent01_01>>
 
+<<slot c4>>
+<<cast c4 bandi d 3>>
 
+<<actor @4 c4>>
+<<mirror       @4>>
+<<char_visual  @4 focus >>
+<<place_center @4 bust -1>>
+<<up           @4 3u>>
+<<idle_breathe @4>>
+<<size         @4 14 bust -1>>
+<<fade_in      @4>>
 
-<<actor @6 c6>>
-<<face @6 4>>
-<<fade_in @6>>
-<<char_visual @6 focus >>
-<<size @6 16 face>>
-<<place_left @6 bust>>
-<<down @6 5u>>
-<<idle_breathe @6>>
-<<shot_track -5u>>
+<<slot c8>>
+<<cast c8 bandi d 1>>
 
+<<actor @8 c8>>
+<<mirror       @8>>
+<<char_visual  @8 focus >>
+<<place_left   @8 bust -1>>
+<<up           @8 3u>>
+<<idle_breathe @8>>
+<<size         @8 14 bust -1>>
+<<fade_in      @8>>
 
+<<slot c9>>
+<<cast c9 bandi d 2>>
 
-<<actor @1 c1>>
-<<face @1 6>>
-<<fade_in @1>>
-<<mirror @1>>
-<<char_visual @1 focus >>
-<<size @1 Mid bust>>
-<<place_right @1 bust>>
-<<up @1 1.5u>>
-<<blur far 0.08>>
-<<2fr>>
-<<idle_breathe @1>>
+<<actor @9 c9>>
+<<mirror       @9>>
+<<char_visual  @9 focus >>
+<<place_right  @9 bust -1>>
+<<up           @9 3u>>
+<<idle_breathe @9>>
+<<size         @9 14 bust -1>>
+<<fade_in      @9>>
 
+책임이야앗! #beat
+->어디가 좋아보여?
+->중앙이 아야메다
+    땡~~ 중앙은 아야메가 아니였습니다!
+->세이나가 피망을 먹을리가 없어!
+    <<jolt @4 up>>
+    <<shake @4 left>>
+    <<emoji @4 11>>
+    세이나:호엣!! 너무해 평소에 나를 그렇게 봤던거야? 
 
 iris: 이제 그만! 밤에 잠 못 자면 다 네 책임이야앗! #beat #stay
 
-<<actor @5 c5>>
-<<shot_focus_to @5 bust center 10 8s>>
+
 세이나: 태양! 해변! 그리고 바다! 역시 여름 하면 이거지!
-<<shot_reset>>
+
+
 세이나: 그리고 군것질 노점에...... 차가운 음료수까지! 더 이상 바랄 게 없어!
-<<shake @5>>
+
 iris: 으으...... 눈도 부시고, 햇빛도 따갑고...... 그냥 평소에 입던 대로 입는 게 나을 것 같은데.
-<<left @1 1u>>
-<<idle_walk @5>>
 
 세이나: 무슨 소리야! 바다에 와서 수영복을 안 입으면 언제 또 입겠어? 그리고 아야메, 그거 진짜 잘 어울려. 그치, 마왕님?
-<<idle_breathe @6>>
-<<left_per @1 2fr>>
 Tyrant: 응, 내가 봐도 잘 어울려.
 
 아야메: 저, 정말요......? 두 사람이 그렇다면야 뭐...... 잠깐, 코하쿠 넌 팔이 왜 이렇게 차가워?
