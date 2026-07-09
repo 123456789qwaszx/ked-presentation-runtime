@@ -70,7 +70,7 @@ MonoBehaviour:
     lineAnchoredPosition: {x: 0, y: 0}
     lineSizeDelta: {x: 0, y: 0}
     lineAlignment: 257
-    lineFontSize: 34
+    lineFontSize: 48
     lineSpacing: 12
     paragraphSpacing: 18
     lineMargin: {x: 8, y: 8, z: 8, w: 8}
@@ -96,6 +96,31 @@ MonoBehaviour:
     lineSizeDelta: {x: 0, y: 0}
     lineAlignment: 257
     lineFontSize: 32
+    lineSpacing: 8
+    paragraphSpacing: 16
+    lineMargin: {x: 0, y: 0, z: 0, w: 0}
+    lineOverflowMode: 0
+    lineTextWrappingMode: 1
+    useName: 0
+    clearNameWhenHidden: 1
+    nameAnchorMin: {x: 0.08, y: 0.91}
+    nameAnchorMax: {x: 0.32, y: 0.96}
+    namePivot: {x: 0, y: 0.5}
+    nameAnchoredPosition: {x: 0, y: 0}
+    nameSizeDelta: {x: 0, y: 0}
+    nameAlignment: 513
+    nameFontSize: 26
+    nameMargin: {x: 0, y: 0, z: 0, w: 0}
+    nameOverflowMode: 0
+    nameTextWrappingMode: 0
+  - key: middle
+    lineAnchorMin: {x: 0.08, y: 0.5}
+    lineAnchorMax: {x: 0.92, y: 0.5}
+    linePivot: {x: 0, y: 1}
+    lineAnchoredPosition: {x: 0, y: 0}
+    lineSizeDelta: {x: 0, y: 0}
+    lineAlignment: 4098
+    lineFontSize: 48
     lineSpacing: 8
     paragraphSpacing: 16
     lineMargin: {x: 0, y: 0, z: 0, w: 0}
