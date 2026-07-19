@@ -26048,7 +26048,7 @@ MonoBehaviour:
   dialogueRunner: {fileID: 8309902628538800288}
   subPresentationRunner: {fileID: 8309902628667094135}
   oneShotRunner: {fileID: 3345179612585509291}
-  yarnEntryKey: Story_DungeonDinner
+  yarnEntryKey: Story_AyameRoute
   runYarnKey: 50
 --- !u!4 &1924806293
 Transform:

@@ -3,7 +3,7 @@ using UnityEngine;
 
 public sealed partial class YarnCommandBridge
 {
-    private const string DefaultShowFaceToken = "e2";
+    private const string DefaultShowFaceToken = "e1";
     private const string DefaultShowDurationToken = "14fr";
     
     private const string DefaultNudgeDurationToken = "8fr";

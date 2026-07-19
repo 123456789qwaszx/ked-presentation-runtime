@@ -494,6 +494,9 @@ public sealed partial class YarnCommandBridge
             "idle_flinch", EnqueueTremblePulseSpec);
         runner.AddCommandHandler<string>(
             "idle_walk", EnqueueWalkInPlaceSpec);
+        
+        runner.AddCommandHandler<string>(
+            "idle_stop", IdleStop);
     }
     
     private void BindBackgroundRig(DialogueRunner runner)

@@ -121,4 +121,15 @@ public sealed partial class YarnCommandBridge
             blendIn = 0.08f,
             blendOut = 0.08f,
         });
+    
+    private void IdleStop(
+        string rigKey)
+        => Collect(new WalkInPlaceCommandSpecCharR
+        {
+            target = CharacterRigTarget.CharSlot_Track_Idle,
+            
+            slotKey = rigKey,
+            
+            duration = -1f
+        });
 }

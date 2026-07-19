@@ -78,7 +78,7 @@ public sealed partial class YarnCommandBridge
         string slotKey,
         string characterKey,
         string variantKey = "a",
-        string emotionKey = "2")
+        string emotionKey = "1")
     {
         var castSpec = new CastCharacterCommandSpec
         {
