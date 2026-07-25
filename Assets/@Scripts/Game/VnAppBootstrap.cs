@@ -542,7 +542,7 @@ public class VnAppBootstrap : MonoBehaviour
         vnAlbumUnlockDebugList.Initialize(_vnSaveLoadSystem);
         _screenBindings.ConfigureAlbumView(_vnSaveLoadSystem);
         
-        OpenInitialScreen();
+        //OpenInitialScreen();
     }
     
     private void OpenInitialScreen()
