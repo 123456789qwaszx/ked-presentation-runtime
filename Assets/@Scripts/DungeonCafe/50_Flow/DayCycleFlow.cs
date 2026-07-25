@@ -1,11 +1,7 @@
 using System.Collections.Generic;
 using Yarn.Unity;
 
-/// <summary>
-/// 하루 진행.
-///   게시판 → 예약 확정 통화 → 담당 메이드 배정 → 접객 → 결산  (3회 반복)
-///   → 하루 리포트 → 밤
-/// </summary>
+// (하루 진행) 게시판 → 예약 확정 통화 → 담당 메이드 배정 → 접객 → 결산  (3회 반복) → 하루 리포트 → 밤
 public sealed class DayCycleFlow
 {
     private readonly GuesthouseContentDB _content;

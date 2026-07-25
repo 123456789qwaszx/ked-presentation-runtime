@@ -14,31 +14,19 @@ public sealed class CampaignFlow
     public CampaignEndingResult Ending { get; private set; }
 
     public CampaignFlow(
-        GuesthouseContentDB content,
+        CampaignState campaignState,
         DayCycleFlow dayFlow,
         IServicePresentationPort presentation,
-        EndingResolver endingResolver = null)
+        EndingResolver endingResolver)
     {
-        _content = content;
+        State = campaignState;
         _dayFlow = dayFlow;
         _presentation = presentation;
-        _endingResolver = endingResolver
-                          ?? new EndingResolver(content.Tuning, content.ProtocolBySpecies);
-    }
-
-    public CampaignState BeginCampaign()
-    {
-        State = new CampaignState(_content.Tuning, _content.Maids);
-        Ending = null;
-
-        return State;
+        _endingResolver = endingResolver;
     }
 
     public async YarnTask<CampaignEndingResult> RunAsync()
     {
-        if (State == null)
-            BeginCampaign();
-
         while (!State.IsFinished)
             await _dayFlow.RunDayAsync(State);
 
