@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEngine;
 using Yarn.Unity;
 
 /// <summary>
@@ -20,6 +21,17 @@ public sealed partial class VnScreenBindings : IGuesthouseScreenBindings
 
     private bool _hasConfirmResult;
 
+    private bool _hasBoardResult;
+    private bool _isBoardOpen;
+
+    private bool _hasCodexResult;
+    private bool _hasEndingResult;
+
+    // 리포트/엔딩이 참조하는 누적값. HUD 갱신 때마다 함께 받아 둔다.
+    private int _hudTotalEnergy;
+    private int _hudEnergyQuota;
+    private CampaignState _endingCampaign;
+
     // 승인 패널은 한 접객 동안 열린 채로 유지되므로, 스택 상태가 아니라 자체 플래그로 추적한다.
     private bool _isApprovalPanelOpen;
 
@@ -29,42 +41,65 @@ public sealed partial class VnScreenBindings : IGuesthouseScreenBindings
         int dayNumber,
         IReadOnlyList<ServiceBookingState> bookings)
     {
-        string body = BuildReservationBoardBody(bookings);
+        _hasBoardResult = false;
 
-        await PresentConfirmAsync(
-            title: $"{dayNumber}일차 예약 문의",
-            body: body,
-            confirmLabel: "전화 걸기");
+        UI.PushPanel<ReservationBoardPanel>(panel =>
+        {
+            BindPanel(panel, board =>
+            {
+                AddBinding(board,
+                    p => p.OnBookingSelected += HandleBookingSelected,
+                    p => p.OnBookingSelected -= HandleBookingSelected);
+            });
+
+            panel.Present(dayNumber, bookings);
+        });
+
+        _isBoardOpen = true;
+
+        await YarnWait.UntilAsync(() => _hasBoardResult);
+
+        Debug.Log("ShowResult");
+        
+        // 여기서 닫지 않는다. 이어지는 통화 노드가 재생되는 동안 게시판이 떠 있어야 한다.
+        // 실제 닫기는 배정 요청 시점에 한다.
+    }
+
+    private void HandleBookingSelected(int index)
+    {
+        _hasBoardResult = true;
+        Debug.Log("Booking selected");
+    }
+
+    /// <summary>게시판이 열려 있으면 닫는다. 통화 노드가 끝난 뒤 호출된다.</summary>
+    private void CloseBoardIfOpen()
+    {
+        if (!_isBoardOpen)
+            return;
+
+        _isBoardOpen = false;
+        ClosePanel();
     }
 
     public async YarnTask PresentDayReportAsync(DayCycleState day)
     {
-        string body =
-            $"확보 에너지: {day.EnergyEarned}\n" +
-            $"성사 실패: {day.CountFailedBookings()}건\n" +
-            $"통제 상실: {day.CountIncidents()}건";
+        _hasConfirmResult = false;
 
-        await PresentConfirmAsync(
-            title: $"{day.DayNumber}일차 업무 종료",
-            body: body,
-            confirmLabel: "밤으로");
-    }
-
-    private static string BuildReservationBoardBody(IReadOnlyList<ServiceBookingState> bookings)
-    {
-        System.Text.StringBuilder builder = new();
-
-        for (int i = 0; i < bookings.Count; i++)
+        UI.PushPanel<DayReportPanel>(panel =>
         {
-            MonsterProfile monster = bookings[i].Monster;
+            BindPanel(panel, report =>
+            {
+                AddBinding(report,
+                    p => p.OnConfirmed += HandleSettlementConfirmed,
+                    p => p.OnConfirmed -= HandleSettlementConfirmed);
+            });
 
-            if (builder.Length > 0)
-                builder.Append('\n');
+            panel.Present(day, _hudTotalEnergy, _hudEnergyQuota);
+        });
 
-            builder.Append($"[{monster.Species}] {monster.DisplayName}\n{monster.ReservationPostText}\n");
-        }
+        await YarnWait.UntilAsync(() => _hasConfirmResult);
 
-        return builder.ToString();
+        ClosePanel();
     }
 
     #endregion
@@ -73,6 +108,8 @@ public sealed partial class VnScreenBindings : IGuesthouseScreenBindings
 
     public async YarnTask<string> RequestMaidAssignmentAsync(MaidAssignmentRequest request)
     {
+        CloseBoardIfOpen();
+
         _hasAssignmentResult = false;
         _pendingMaidId = null;
 
@@ -235,6 +272,109 @@ public sealed partial class VnScreenBindings : IGuesthouseScreenBindings
         _pendingNightPlan = plan;
         _hasNightPlanResult = true;
     }
+
+    #endregion
+
+    #region Hud
+
+    /// <summary>
+    /// 캠페인이 시작될 때 한 번 올린다.
+    /// 오버레이 레이어는 blocksRaycasts=false 로 올라가므로 대사 진행 입력을 가로채지 않는다.
+    /// </summary>
+    public void ShowGuesthouseHud()
+    {
+        UI.ShowOverlay<GuesthouseStatusOverlay>();
+    }
+
+    public void HideGuesthouseHud()
+    {
+        UI.HideOverlay<GuesthouseStatusOverlay>();
+    }
+
+    /// <summary>
+    /// 노드를 재생하기 직전에 호출된다. 동기 갱신이므로 대사 시작이 밀리지 않는다.
+    /// 오버레이가 아직 올라오지 않았으면 조용히 넘어간다.
+    /// </summary>
+    public void UpdateGuesthouseHud(in GuesthouseHudSnapshot snapshot)
+    {
+        _hudTotalEnergy = snapshot.EnergyTotal;
+        _hudEnergyQuota = snapshot.EnergyQuota;
+
+        GuesthouseStatusOverlay overlay = UI.GetUI<GuesthouseStatusOverlay>();
+
+        if (overlay == null)
+            return;
+
+        overlay.Apply(snapshot);
+    }
+
+    #endregion
+
+    #region Codex
+
+    public async YarnTask PresentCodexAsync(IReadOnlyList<ServiceBookingState> bookings)
+    {
+        _hasCodexResult = false;
+
+        UI.PushPanel<MonsterCodexPanel>(panel =>
+        {
+            BindPanel(panel, codex =>
+            {
+                AddBinding(codex,
+                    p => p.OnCloseRequested += HandleCodexClosed,
+                    p => p.OnCloseRequested -= HandleCodexClosed);
+            });
+
+            panel.Present(bookings);
+        });
+
+        await YarnWait.UntilAsync(() => _hasCodexResult);
+
+        ClosePanel();
+    }
+
+    private void HandleCodexClosed() => _hasCodexResult = true;
+
+    #endregion
+
+    #region Ending
+
+    /// <summary>
+    /// 엔딩 노드 재생과 '함께' 떠 있어야 하므로 표시와 대기를 분리한다.
+    /// 여기서 await 하면 노드가 끝날 때까지 화면이 비어 있게 된다.
+    /// </summary>
+    public void PresentEnding(CampaignEndingResult ending, CampaignState campaignState)
+    {
+        _hasEndingResult = false;
+
+        UI.PushPanel<CampaignEndingPanel>(panel =>
+        {
+            BindPanel(panel, view =>
+            {
+                AddBinding(view,
+                    p => p.OnDismissed += HandleEndingDismissed,
+                    p => p.OnDismissed -= HandleEndingDismissed);
+            });
+
+            panel.Present(ending, _endingCampaign);
+        });
+    }
+
+    /// <summary>엔딩 노드가 끝난 뒤에 확인 버튼을 연다.</summary>
+    public async YarnTask WaitEndingDismissAsync()
+    {
+        CampaignEndingPanel panel = UI.GetUI<CampaignEndingPanel>();
+
+        if (panel != null)
+            panel.AllowDismiss();
+
+        await YarnWait.UntilAsync(() => _hasEndingResult);
+
+        ClosePanel();
+        HideGuesthouseHud();
+    }
+
+    private void HandleEndingDismissed() => _hasEndingResult = true;
 
     #endregion
 

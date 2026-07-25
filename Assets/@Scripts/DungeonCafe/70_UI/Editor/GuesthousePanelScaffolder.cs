@@ -20,7 +20,7 @@ public static class GuesthousePanelScaffolder
 {
     private const string MenuRoot = "Tools/Guesthouse/패널 계층 생성";
 
-    [MenuItem(MenuRoot + "/4종 모두", priority = 0)]
+    [MenuItem(MenuRoot + "/전체 생성", priority = 0)]
     private static void CreateAll()
     {
         GameObject parent = ResolveParent();
@@ -28,29 +28,61 @@ public static class GuesthousePanelScaffolder
         if (parent == null)
             return;
 
+        // 진행 순서대로 만든다. 계층을 훑어볼 때 흐름이 그대로 읽힌다.
+        Build<ReservationBoardPanel, ReservationBoardPanel.Refs>(parent);
+        Build<MonsterCodexPanel, MonsterCodexPanel.Refs>(parent);
         Build<MaidAssignmentPanel, MaidAssignmentPanel.Refs>(parent);
         Build<MaidActionApprovalPanel, MaidActionApprovalPanel.Refs>(parent);
         Build<ServiceSettlementPanel, ServiceSettlementPanel.Refs>(parent);
+        Build<DayReportPanel, DayReportPanel.Refs>(parent);
         Build<NightProgramPanel, NightProgramPanel.Refs>(parent);
+        Build<CampaignEndingPanel, CampaignEndingPanel.Refs>(parent);
 
-        Debug.Log("[GuesthousePanelScaffolder] 4종 생성 완료. 프리팹 슬롯은 인스펙터에서 직접 지정해야 한다.");
+        Debug.LogWarning(
+            "[GuesthousePanelScaffolder] 패널 8종 생성 완료. "
+            + "상태 오버레이는 별도 메뉴로 오버레이 레이어 아래에 만들어야 한다. "
+            + "프리합 슬롯은 인스펙터에서 직접 지정한다.");
     }
 
-    [MenuItem(MenuRoot + "/메이드 배정", priority = 11)]
+    /// <summary>
+    /// 오버레이는 패널 스택과 다른 레이어에 산다.
+    /// UIManager 의 오버레이 레이어를 선택한 상태로 실행해야 한다.
+    /// </summary>
+    [MenuItem(MenuRoot + "/상태 오버레이", priority = 1)]
+    private static void CreateOverlay()
+        => BuildSingle<GuesthouseStatusOverlay, GuesthouseStatusOverlay.Refs>();
+
+    [MenuItem(MenuRoot + "/예약 게시판", priority = 11)]
+    private static void CreateBoard()
+        => BuildSingle<ReservationBoardPanel, ReservationBoardPanel.Refs>();
+
+    [MenuItem(MenuRoot + "/업무수첲", priority = 12)]
+    private static void CreateCodex()
+        => BuildSingle<MonsterCodexPanel, MonsterCodexPanel.Refs>();
+
+    [MenuItem(MenuRoot + "/메이드 배정", priority = 13)]
     private static void CreateAssignment()
         => BuildSingle<MaidAssignmentPanel, MaidAssignmentPanel.Refs>();
 
-    [MenuItem(MenuRoot + "/행동 승인", priority = 12)]
+    [MenuItem(MenuRoot + "/행동 승인", priority = 14)]
     private static void CreateApproval()
         => BuildSingle<MaidActionApprovalPanel, MaidActionApprovalPanel.Refs>();
 
-    [MenuItem(MenuRoot + "/접객 결산", priority = 13)]
+    [MenuItem(MenuRoot + "/접객 결산", priority = 15)]
     private static void CreateSettlement()
         => BuildSingle<ServiceSettlementPanel, ServiceSettlementPanel.Refs>();
 
-    [MenuItem(MenuRoot + "/밤 처리", priority = 14)]
+    [MenuItem(MenuRoot + "/하루 리포트", priority = 16)]
+    private static void CreateDayReport()
+        => BuildSingle<DayReportPanel, DayReportPanel.Refs>();
+
+    [MenuItem(MenuRoot + "/밤 처리", priority = 17)]
     private static void CreateNight()
         => BuildSingle<NightProgramPanel, NightProgramPanel.Refs>();
+
+    [MenuItem(MenuRoot + "/엔딩", priority = 18)]
+    private static void CreateEnding()
+        => BuildSingle<CampaignEndingPanel, CampaignEndingPanel.Refs>();
 
     // ------------------------------------------------------------
     // 생성
@@ -147,7 +179,23 @@ public static class GuesthousePanelScaffolder
         if (member.EndsWith("_Image", StringComparison.Ordinal))
         {
             Image image = EnsureComponent<Image>(go);
-            image.color = new Color(0f, 0f, 0f, 0.75f);
+
+            // 게이지는 fillAmount 로 그려야 하므로 Filled 타입이 필요하다.
+            // Simple 이면 GuesthouseStatusOverlay.SetGauge 가 조용히 무시된다.
+            bool isGauge = member.EndsWith("_Gauge_Image", StringComparison.Ordinal);
+
+            if (isGauge)
+            {
+                image.type = Image.Type.Filled;
+                image.fillMethod = Image.FillMethod.Horizontal;
+                image.fillAmount = 0f;
+                image.color = new Color(0.85f, 0.25f, 0.3f, 0.9f);
+            }
+            else
+            {
+                image.color = new Color(0f, 0f, 0f, 0.75f);
+            }
+
             Stretch(go);
             return;
         }

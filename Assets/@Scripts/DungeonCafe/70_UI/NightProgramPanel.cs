@@ -35,9 +35,10 @@ public sealed class NightProgramPanel : UIPanel<NightProgramPanel.Refs>, IManage
     private TMP_Text _summaryText;
     private RectTransform _content;
 
-    [SerializeField] private ChoiceBoxView _planPrefab;
+    [SerializeField] private VNOptionItem _planPrefab;
 
-    private readonly List<ChoiceBoxView> _spawned = new();
+    private readonly GuesthouseOptionItemList _list = new();
+    private readonly List<GuesthouseOptionEntry> _entries = new();
     private readonly List<NightPlan> _plans = new();
     private bool _valid;
     #endregion
@@ -56,14 +57,18 @@ public sealed class NightProgramPanel : UIPanel<NightProgramPanel.Refs>, IManage
         _valid = true;
 #endif
 
-        if (_planPrefab != null)
-            _planPrefab.gameObject.SetActive(false);
+        _list.Configure(_planPrefab, _content);
+
+        _list.OnSubmitted -= HandlePlanSubmitted;
+        _list.OnSubmitted += HandlePlanSubmitted;
     }
 
     protected override void OnDestroy()
     {
         base.OnDestroy();
-        ClearPlans();
+
+        _list.OnSubmitted -= HandlePlanSubmitted;
+        _list.Clear();
     }
 
     public void Present(NightPlanRequest request)
@@ -82,9 +87,10 @@ public sealed class NightProgramPanel : UIPanel<NightProgramPanel.Refs>, IManage
 
     private void BuildPlans(NightPlanRequest request)
     {
-        ClearPlans();
+        _entries.Clear();
+        _plans.Clear();
 
-        if (_planPrefab == null || _content == null)
+        if (!_list.IsReady)
             return;
 
         for (int i = 0; i < request.Maids.Count; i++)
@@ -107,18 +113,13 @@ public sealed class NightProgramPanel : UIPanel<NightProgramPanel.Refs>, IManage
                     AddPlan(new NightPlan(NightProgramKind.ManagedRelease, maid.MaidId, axis), maid, request);
             }
         }
+
+        _list.Rebuild(_entries);
     }
 
     private void AddPlan(NightPlan plan, MaidRuntimeState maid, NightPlanRequest request)
     {
-        ChoiceBoxView view = UnityEngine.Object.Instantiate(_planPrefab, _content);
-        view.gameObject.SetActive(true);
-        view.Present(index: _plans.Count, label: BuildLabel(plan, maid, request));
-
-        view.OnClicked -= HandlePlanClicked;
-        view.OnClicked += HandlePlanClicked;
-
-        _spawned.Add(view);
+        _entries.Add(new GuesthouseOptionEntry(BuildLabel(plan, maid, request)));
         _plans.Add(plan);
     }
 
@@ -139,29 +140,12 @@ public sealed class NightProgramPanel : UIPanel<NightProgramPanel.Refs>, IManage
                $"{current} → {released}   숙련 +{request.Tuning.ManagedReleaseExperience}";
     }
 
-    private void HandlePlanClicked(int index)
+    private void HandlePlanSubmitted(int index)
     {
         if (index < 0 || index >= _plans.Count)
             return;
 
         OnPlanSelected?.Invoke(_plans[index]);
-    }
-
-    private void ClearPlans()
-    {
-        for (int i = 0; i < _spawned.Count; i++)
-        {
-            ChoiceBoxView view = _spawned[i];
-
-            if (view == null)
-                continue;
-
-            view.OnClicked -= HandlePlanClicked;
-            UnityEngine.Object.Destroy(view.gameObject);
-        }
-
-        _spawned.Clear();
-        _plans.Clear();
     }
 
     private bool ValidateRefs()

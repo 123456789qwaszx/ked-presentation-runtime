@@ -36,9 +36,10 @@ public sealed class MaidAssignmentPanel : UIPanel<MaidAssignmentPanel.Refs>, IMa
 
     private RectTransform _content;
 
-    [SerializeField] private ChoiceBoxView _maidCardPrefab;
+    [SerializeField] private VNOptionItem _maidCardPrefab;
 
-    private readonly List<ChoiceBoxView> _spawned = new();
+    private readonly GuesthouseOptionItemList _list = new();
+    private readonly List<GuesthouseOptionEntry> _entries = new();
     private readonly List<string> _maidIds = new();
     private bool _valid;
     #endregion
@@ -60,14 +61,18 @@ public sealed class MaidAssignmentPanel : UIPanel<MaidAssignmentPanel.Refs>, IMa
         _valid = true;
 #endif
 
-        if (_maidCardPrefab != null)
-            _maidCardPrefab.gameObject.SetActive(false);
+        _list.Configure(_maidCardPrefab, _content);
+
+        _list.OnSubmitted -= HandleCardSubmitted;
+        _list.OnSubmitted += HandleCardSubmitted;
     }
 
     protected override void OnDestroy()
     {
         base.OnDestroy();
-        ClearCards();
+
+        _list.OnSubmitted -= HandleCardSubmitted;
+        _list.Clear();
     }
 
     public void Present(MaidAssignmentRequest request)
@@ -100,25 +105,22 @@ public sealed class MaidAssignmentPanel : UIPanel<MaidAssignmentPanel.Refs>, IMa
 
     private void ApplyCandidates(MaidAssignmentRequest request)
     {
-        ClearCards();
-
-        if (_maidCardPrefab == null || _content == null)
-            return;
+        _entries.Clear();
+        _maidIds.Clear();
 
         for (int i = 0; i < request.Candidates.Count; i++)
         {
             MaidRuntimeState maid = request.Candidates[i];
 
-            ChoiceBoxView view = UnityEngine.Object.Instantiate(_maidCardPrefab, _content);
-            view.gameObject.SetActive(true);
-            view.Present(index: i, label: BuildLabel(maid));
+            // 이탈한 인원은 목록에 남기되 고를 수 없게 한다. 사라지면 왜 없는지 알 수 없다.
+            _entries.Add(new GuesthouseOptionEntry(
+                BuildLabel(maid),
+                isAvailable: maid.CanBeAssigned));
 
-            view.OnClicked -= HandleCardClicked;
-            view.OnClicked += HandleCardClicked;
-
-            _spawned.Add(view);
             _maidIds.Add(maid.MaidId);
         }
+
+        _list.Rebuild(_entries);
     }
 
     private static string BuildLabel(MaidRuntimeState maid)
@@ -131,29 +133,12 @@ public sealed class MaidAssignmentPanel : UIPanel<MaidAssignmentPanel.Refs>, IMa
                $"상처 {burden.Physical}  스트레스 {burden.Mental}  충동 {burden.Empathic}";
     }
 
-    private void HandleCardClicked(int index)
+    private void HandleCardSubmitted(int index)
     {
         if (index < 0 || index >= _maidIds.Count)
             return;
 
         OnMaidSelected?.Invoke(_maidIds[index]);
-    }
-
-    private void ClearCards()
-    {
-        for (int i = 0; i < _spawned.Count; i++)
-        {
-            ChoiceBoxView view = _spawned[i];
-
-            if (view == null)
-                continue;
-
-            view.OnClicked -= HandleCardClicked;
-            UnityEngine.Object.Destroy(view.gameObject);
-        }
-
-        _spawned.Clear();
-        _maidIds.Clear();
     }
 
     private bool ValidateRefs()

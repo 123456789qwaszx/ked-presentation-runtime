@@ -25,15 +25,27 @@ public sealed class NightPhaseFlow
     public async YarnTask RunNightAsync(CampaignState campaign, int dayNumber)
     {
         NightPlanRequest request = new(dayNumber, campaign.Maids, Tuning);
+        _presentation.NotifyHud(
+            GuesthouseHudSnapshot.ForNight(campaign, dayNumber, null, "밤 처리"));
+
         NightPlan plan = await _presentation.RequestNightPlanAsync(request);
 
         if (plan.IsValid && campaign.TryFindMaid(plan.MaidId, out MaidRuntimeState maid))
         {
             NightProgramResult result = RunProgram(maid, plan);
+            campaign.TryFindMaid(plan.MaidId, out MaidRuntimeState programMaid);
+
+            _presentation.NotifyHud(
+                GuesthouseHudSnapshot.ForNight(
+                    campaign,
+                    dayNumber,
+                    programMaid,
+                    plan.Kind == NightProgramKind.ManagedRelease ? "관리된 붕괴" : "회복 처리"));
+
             await _presentation.PlayNightProgramAsync(plan, result);
         }
 
-        await RunMasteryEventsAsync(campaign);
+        await RunMasteryEventsAsync(campaign, dayNumber);
 
         await _presentation.PlayMaidConversationAsync(dayNumber);
     }
@@ -56,7 +68,7 @@ public sealed class NightPhaseFlow
     /// 경험치가 기준을 넘긴 트랙은 자동으로 레벨이 오르지 않는다.
     /// 여기서 이벤트를 실제로 소화해야 레벨업이 확정된다.
     /// </summary>
-    private async YarnTask RunMasteryEventsAsync(CampaignState campaign)
+    private async YarnTask RunMasteryEventsAsync(CampaignState campaign, int dayNumber)
     {
         IReadOnlyList<MaidRuntimeState> maids = campaign.Maids;
 
@@ -79,6 +91,9 @@ public sealed class NightPhaseFlow
 
                 if (!result.IsLevelUpCommitted)
                     break;
+
+                _presentation.NotifyHud(
+                    GuesthouseHudSnapshot.ForNight(campaign, dayNumber, maid, "업무 숙련"));
 
                 await _presentation.PlayMasteryEventAsync(result);
             }

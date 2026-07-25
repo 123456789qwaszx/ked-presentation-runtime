@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using Yarn.Unity;
 
 /// <summary>하루 진행이 필요로 하는 표현 계층 접점.</summary>
-public interface IDayPresentationPort
+public interface IDayPresentationPort : IGuesthouseHudPort
 {
     /// <summary>게시판에 오늘의 예약 문의를 띄우고 확인 입력을 기다린다.</summary>
     YarnTask PresentReservationBoardAsync(int dayNumber, IReadOnlyList<ServiceBookingState> bookings);

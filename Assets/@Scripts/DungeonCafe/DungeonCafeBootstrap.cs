@@ -12,24 +12,23 @@ public class DungeonCafeBootstrap : MonoBehaviour
     private CampaignState _campaignState; 
 
     private GuesthouseRuntime _guesthouseRuntime;
-    void Awake()
+    public void DungeonCafeStart(VnScreenBindings vnScreenBindings)
     {
-        BootstrapGuesthouseRuntime();
+        BootstrapGuesthouseRuntime(vnScreenBindings);
 
         RunCampaign();
     }
 
-    private void BootstrapGuesthouseRuntime()
+
+    private void BootstrapGuesthouseRuntime(VnScreenBindings vnScreenBindings)
     {
         GuesthouseContentDB content = contentBundle.BuildContentDB();
         
-        IGuesthouseScreenBindings screens = new HeadlessGuesthouseScreens();
-
         ScenarioNodeRunner scenarioNodeRunner = new(dialogueRunner);
         
         GuesthousePresentationPort port = new(
             scenarioNodeRunner,
-            screens,
+            vnScreenBindings,
             ResolveYarnContext());
         
         ServiceSessionFlow session = new ServiceSessionFlow(content, port);

@@ -10,6 +10,8 @@ using static UIRefValidation;
 /// - 메이드가 제안한 행동 후보를 나열한다
 /// - 대응력 초과/한계 돌파 가능성을 후보별로 표시한다
 /// - 통제 신호가 거부된 뒤에는 입력을 막는다
+///
+/// 후보 목록은 VNOptionItem 으로 그린다. Yarn 선택지와 조작감이 같아야 하기 때문이다.
 /// </summary>
 public sealed class MaidActionApprovalPanel : UIPanel<MaidActionApprovalPanel.Refs>, IManagedUI
 {
@@ -32,6 +34,7 @@ public sealed class MaidActionApprovalPanel : UIPanel<MaidActionApprovalPanel.Re
 
         OptionList_Root,
         OptionList_Content,
+
         OptionPrefab,
     }
 
@@ -45,9 +48,11 @@ public sealed class MaidActionApprovalPanel : UIPanel<MaidActionApprovalPanel.Re
 
     private RectTransform _content;
 
-    [SerializeField] private ChoiceBoxView _optionPrefab;
+    [SerializeField] private VNOptionItem _optionPrefab;
 
-    private readonly List<ChoiceBoxView> _spawned = new();
+    private readonly GuesthouseOptionItemList _list = new();
+    private readonly List<GuesthouseOptionEntry> _entries = new();
+
     private bool _valid;
     private bool _locked;
     #endregion
@@ -72,14 +77,18 @@ public sealed class MaidActionApprovalPanel : UIPanel<MaidActionApprovalPanel.Re
         _valid = true;
 #endif
 
-        if (_optionPrefab != null)
-            _optionPrefab.gameObject.SetActive(false);
+        _list.Configure(_optionPrefab, _content);
+
+        _list.OnSubmitted -= HandleOptionSubmitted;
+        _list.OnSubmitted += HandleOptionSubmitted;
     }
 
     protected override void OnDestroy()
     {
         base.OnDestroy();
-        ClearOptions();
+
+        _list.OnSubmitted -= HandleOptionSubmitted;
+        _list.Clear();
     }
 
     public void Present(ServiceApprovalRequest request)
@@ -92,12 +101,15 @@ public sealed class MaidActionApprovalPanel : UIPanel<MaidActionApprovalPanel.Re
         ApplyHeader(request);
         ApplyBurden(request.Maid);
         ApplyOptions(request);
+
+        _list.SetLocked(_locked);
     }
 
     /// <summary>통제 상실 이후에는 남아 있는 목록을 그대로 두되 입력만 차단한다.</summary>
     public void LockForControlLoss()
     {
         _locked = true;
+        _list.SetLocked(true);
 
         if (_controlStatusText != null)
             _controlStatusText.text = "관리자 통제 신호가 거부되었습니다";
@@ -136,24 +148,18 @@ public sealed class MaidActionApprovalPanel : UIPanel<MaidActionApprovalPanel.Re
 
     private void ApplyOptions(ServiceApprovalRequest request)
     {
-        ClearOptions();
-
-        if (_optionPrefab == null || _content == null)
-            return;
+        _entries.Clear();
 
         for (int i = 0; i < request.Options.Count; i++)
-        {
-            ChoiceBoxView view = UnityEngine.Object.Instantiate(_optionPrefab, _content);
-            view.gameObject.SetActive(true);
-            view.Present(index: i, label: BuildLabel(request, i));
+            _entries.Add(new GuesthouseOptionEntry(BuildLabel(request, i)));
 
-            view.OnClicked -= HandleOptionClicked;
-            view.OnClicked += HandleOptionClicked;
-
-            _spawned.Add(view);
-        }
+        _list.Rebuild(_entries);
     }
 
+    /// <summary>
+    /// 위험 표시는 라벨에 붙인다.
+    /// 후보를 선택 불가로 만들지는 않는다. 위험을 감수할지는 관리자가 정할 몫이다.
+    /// </summary>
     private static string BuildLabel(ServiceApprovalRequest request, int index)
     {
         ServiceActionOption option = request.Options[index];
@@ -161,36 +167,20 @@ public sealed class MaidActionApprovalPanel : UIPanel<MaidActionApprovalPanel.Re
         string suffix = string.Empty;
 
         if (request.WouldBreachLimit(index))
-            suffix = "  [한계 초과 위험]";
+            suffix = "\n[한계 초과 위험]";
         else if (request.IsBeyondAptitude(index))
-            suffix = "  [대응력 부족]";
+            suffix = "\n[대응력 부족]";
 
         return $"{option.ProposalText}{suffix}";
     }
 
-    private void HandleOptionClicked(int index)
+    private void HandleOptionSubmitted(int index)
     {
         if (_locked)
             return;
 
         _locked = true;
         OnOptionApproved?.Invoke(index);
-    }
-
-    private void ClearOptions()
-    {
-        for (int i = 0; i < _spawned.Count; i++)
-        {
-            ChoiceBoxView view = _spawned[i];
-
-            if (view == null)
-                continue;
-
-            view.OnClicked -= HandleOptionClicked;
-            UnityEngine.Object.Destroy(view.gameObject);
-        }
-
-        _spawned.Clear();
     }
 
     private bool ValidateRefs()

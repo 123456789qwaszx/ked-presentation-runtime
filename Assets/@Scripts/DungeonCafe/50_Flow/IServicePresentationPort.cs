@@ -4,7 +4,7 @@ using Yarn.Unity;
 /// 접객 세션이 필요로 하는 표현 계층 접점.
 /// 플로우가 Yarn/UI 구현을 직접 알지 않도록 분리한다. 테스트에서는 즉시 응답하는 더미로 교체한다.
 /// </summary>
-public interface IServicePresentationPort
+public interface IServicePresentationPort : IGuesthouseHudPort
 {
     /// <summary>
     /// 세션 상황이 갱신되었음을 알린다. 표현 계층은 표시용 문맥만 동기화한다.
@@ -21,6 +21,12 @@ public interface IServicePresentationPort
 
     /// <summary>통제 신호가 거부되었음을 알린다. 이후 승인 입력은 무시된다.</summary>
     void NotifyControlLost(ServiceSessionState session);
+
+    /// <summary>엔딩 화면을 띄운다. 엔딩 노드 재생과 겹쳤야 하므로 기다리지 않는다.</summary>
+    void PresentEnding(CampaignEndingResult ending, CampaignState campaign);
+
+    /// <summary>엔딩 노드가 끝난 뒤 확인 입력을 기다린다.</summary>
+    YarnTask WaitEndingDismissAsync();
 
     /// <summary>결산 결과를 표시하고 확인 입력을 기다린다.</summary>
     YarnTask PresentSettlementAsync(ServiceSettlementResult result);

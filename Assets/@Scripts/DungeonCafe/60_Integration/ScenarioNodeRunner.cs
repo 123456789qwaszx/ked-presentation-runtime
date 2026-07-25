@@ -34,7 +34,7 @@ public sealed class ScenarioNodeRunner
         if (_runner.IsDialogueRunning)
             await _runner.Stop();
 
-        _runner.StartDialogue(nodeName);
+        await _runner.StartDialogue(nodeName);
 
         // 러너가 실제로 기동할 때까지 한 프레임 양보한다.
         await YarnTask.Yield();

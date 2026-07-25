@@ -149,4 +149,30 @@ public sealed class HeadlessGuesthouseScreens : IGuesthouseScreenBindings
 
         return new NightPlan(kind, target.MaidId, targetAxis);
     }
+
+    // ------------------------------------------------------------
+    // 상시 표시 / 열람 화면
+    //
+    // UI 없이 밸런스를 확인하는 경로이므로 전부 빈 구현이다.
+    // 다만 호출 자체는 실제 경로와 동일하게 일어난다.
+    // 스냅숷 생성이 터지면 헤드리스 구동에서 바로 드러난다.
+    // ------------------------------------------------------------
+
+    public void ShowGuesthouseHud() { }
+
+    public void HideGuesthouseHud() { }
+
+    public void UpdateGuesthouseHud(in GuesthouseHudSnapshot snapshot) { }
+
+    public async YarnTask PresentCodexAsync(IReadOnlyList<ServiceBookingState> bookings)
+    {
+        await YarnTask.Yield();
+    }
+
+    public void PresentEnding(CampaignEndingResult ending, CampaignState campaign) { }
+
+    public async YarnTask WaitEndingDismissAsync()
+    {
+        await YarnTask.Yield();
+    }
 }

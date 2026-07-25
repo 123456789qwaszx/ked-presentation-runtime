@@ -18,6 +18,9 @@ public sealed partial class ServiceSessionFlow
     private readonly ServiceSettlementCalculator _settlementCalculator;
     private readonly IServicePresentationPort _presentation;
 
+    /// <summary>표시용 문맥을 잡기 위해서만 참조한다. 판정에는 쓰지 않는다.</summary>
+    public CampaignState Campaign { get; set; }
+
     private readonly List<ServiceActionOption> _offerBuffer = new();
 
     private int _runVersion;
@@ -67,6 +70,7 @@ public sealed partial class ServiceSessionFlow
         ServiceSessionToken token = CurrentRun;
 
         _presentation.NotifySessionContext(session);
+        NotifyHud(session, "입실 준비");
 
         await _presentation.PlayNodeAsync(ResolveBriefingNode(session));
 
@@ -112,12 +116,26 @@ public sealed partial class ServiceSessionFlow
         return result;
     }
 
+    /// <summary>
+    /// 상시 표시용 갱신. 노드를 재생하기 직전에만 불린다.
+    /// 진행 문맥(일차/에너지)은 DayCycleFlow 가 세션 진입 전에 주입해 둔다.
+    /// </summary>
+    private void NotifyHud(ServiceSessionState session, string phaseLabel)
+    {
+        if (Campaign == null)
+            return;
+
+        _presentation.NotifyHud(
+            GuesthouseHudSnapshot.ForSession(Campaign, Campaign.CurrentDay, session, phaseLabel));
+    }
+
     /// <summary>다음 비트로 계속 진행할지 여부를 반환한다.</summary>
     private async YarnTask<bool> RunBeatAsync(ServiceSessionState session, ServiceSessionToken token)
     {
         ServiceBeat beat = session.CurrentBeat;
 
         _presentation.NotifySessionContext(session);
+        NotifyHud(session, "접객 진행");
 
         await _presentation.PlayNodeAsync(beat.SituationNodeName);
 

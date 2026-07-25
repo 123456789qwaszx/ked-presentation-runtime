@@ -36,6 +36,11 @@ public sealed class DayCycleFlow
     {
         DayCycleState day = campaign.BeginDay();
 
+        _sessionFlow.Campaign = campaign;
+
+        _presentation.NotifyHud(
+            GuesthouseHudSnapshot.ForDay(campaign, day, "예약 게시판"));
+
         await RunReservationPhaseAsync(campaign, day);
 
         while (day.HasRemainingSlot)
@@ -45,6 +50,9 @@ public sealed class DayCycleFlow
         }
 
         day.SetPhase(DayPhaseKind.DayReport);
+        _presentation.NotifyHud(
+            GuesthouseHudSnapshot.ForDay(campaign, day, "업무 종료"));
+
         await _presentation.PresentDayReportAsync(day);
 
         day.SetPhase(DayPhaseKind.Night);
@@ -71,6 +79,9 @@ public sealed class DayCycleFlow
         for (int i = 0; i < day.Bookings.Count; i++)
         {
             ServiceBookingState booking = day.Bookings[i];
+
+            _presentation.NotifyHud(
+                GuesthouseHudSnapshot.ForDay(campaign, day, "예약 확정 통화"));
 
             await _presentation.PresentReservationCallAsync(booking);
 

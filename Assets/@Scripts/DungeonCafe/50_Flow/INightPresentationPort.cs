@@ -1,7 +1,7 @@
 using Yarn.Unity;
 
 /// <summary>밤 진행이 필요로 하는 표현 계층 접점.</summary>
-public interface INightPresentationPort
+public interface INightPresentationPort : IGuesthouseHudPort
 {
     /// <summary>회복/관리 붕괴 중 무엇을 누구에게 적용할지 선택받는다.</summary>
     YarnTask<NightPlan> RequestNightPlanAsync(NightPlanRequest request);

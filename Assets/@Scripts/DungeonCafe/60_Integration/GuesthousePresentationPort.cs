@@ -26,6 +26,23 @@ public sealed class GuesthousePresentationPort :
 
     // ---- IServicePresentationPort ----
 
+    // ---- IGuesthouseHudPort ----
+
+    public void ShowHud() => _screens.ShowGuesthouseHud();
+
+    public void HideHud() => _screens.HideGuesthouseHud();
+
+    public void NotifyHud(in GuesthouseHudSnapshot snapshot)
+        => _screens.UpdateGuesthouseHud(snapshot);
+
+    // ---- 엔딩 ----
+
+    public void PresentEnding(CampaignEndingResult ending, CampaignState campaign)
+        => _screens.PresentEnding(ending, campaign);
+
+    public YarnTask WaitEndingDismissAsync()
+        => _screens.WaitEndingDismissAsync();
+
     public void NotifySessionContext(ServiceSessionState session)
     {
         // 변수 저장소가 연결되지 않은 구성에서도 흐름은 그대로 진행되어야 한다.
