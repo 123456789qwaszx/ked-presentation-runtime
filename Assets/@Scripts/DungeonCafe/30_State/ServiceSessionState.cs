@@ -38,7 +38,7 @@ public sealed class ServiceSessionState
 
     public bool IsScenarioExhausted => ConsumedBeatCount >= Scenario.BeatBudget;
 
-    public MonsterProfile Monster => Encounter.Profile;
+    public MonsterProfile Monster => Encounter.Monster;
 
     public ServiceSessionState(
         ServiceSessionToken token,

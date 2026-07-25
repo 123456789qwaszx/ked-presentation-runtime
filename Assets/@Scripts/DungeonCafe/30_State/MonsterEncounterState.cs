@@ -4,19 +4,19 @@
 /// </summary>
 public sealed class MonsterEncounterState
 {
-    public MonsterProfile Profile { get; }
+    public MonsterProfile Monster { get; }
 
     public int Satisfaction { get; private set; }
 
     public MonsterEncounterState(MonsterProfile profile)
     {
-        Profile = profile;
+        Monster = profile;
     }
 
-    public int RequiredSatisfaction => Profile.RequiredSatisfaction;
-    public int MaxSatisfaction => Profile.MaxSatisfaction;
+    public int RequiredSatisfaction => Monster.RequiredSatisfaction;
+    public int MaxSatisfaction => Monster.MaxSatisfaction;
 
-    public bool IsRequirementMet => Satisfaction >= Profile.RequiredSatisfaction;
+    public bool IsRequirementMet => Satisfaction >= Monster.RequiredSatisfaction;
 
     public int SatisfactionPercent
         => MaxSatisfaction <= 0 ? 0 : Satisfaction * 100 / MaxSatisfaction;
@@ -24,7 +24,7 @@ public sealed class MonsterEncounterState
     /// <summary>실제로 차오른 만족도를 반환한다.</summary>
     public int ApplyReaction(MonsterReactionGrade reaction, int bonus)
     {
-        int gain = reaction.ToReactionScore() * Profile.SatisfactionPerScore + bonus;
+        int gain = reaction.ToReactionScore() * Monster.SatisfactionPerScore + bonus;
 
         if (gain <= 0)
             return 0;

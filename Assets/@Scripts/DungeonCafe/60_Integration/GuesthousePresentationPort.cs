@@ -12,16 +12,28 @@ public sealed class GuesthousePresentationPort :
 {
     private readonly ScenarioNodeRunner _nodeRunner;
     private readonly IGuesthouseScreenBindings _screens;
+    private readonly GuesthouseYarnContext _yarnContext;
 
     public GuesthousePresentationPort(
         ScenarioNodeRunner nodeRunner,
-        IGuesthouseScreenBindings screens)
+        IGuesthouseScreenBindings screens,
+        GuesthouseYarnContext yarnContext = null)
     {
         _nodeRunner = nodeRunner;
         _screens = screens;
+        _yarnContext = yarnContext;
     }
 
     // ---- IServicePresentationPort ----
+
+    public void NotifySessionContext(ServiceSessionState session)
+    {
+        // 변수 저장소가 연결되지 않은 구성에서도 흐름은 그대로 진행되어야 한다.
+        if (_yarnContext == null)
+            return;
+
+        _yarnContext.PushSession(session);
+    }
 
     public YarnTask PlayNodeAsync(string nodeName)
         => _nodeRunner.PlayNodeAsync(nodeName);

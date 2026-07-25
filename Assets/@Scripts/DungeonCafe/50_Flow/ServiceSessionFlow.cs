@@ -66,6 +66,8 @@ public sealed partial class ServiceSessionFlow
 
         ServiceSessionToken token = CurrentRun;
 
+        _presentation.NotifySessionContext(session);
+
         await _presentation.PlayNodeAsync(ResolveBriefingNode(session));
 
         if (!IsCurrent(token))
@@ -114,6 +116,8 @@ public sealed partial class ServiceSessionFlow
     private async YarnTask<bool> RunBeatAsync(ServiceSessionState session, ServiceSessionToken token)
     {
         ServiceBeat beat = session.CurrentBeat;
+
+        _presentation.NotifySessionContext(session);
 
         await _presentation.PlayNodeAsync(beat.SituationNodeName);
 

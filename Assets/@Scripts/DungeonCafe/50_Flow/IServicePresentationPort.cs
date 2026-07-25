@@ -6,6 +6,13 @@ using Yarn.Unity;
 /// </summary>
 public interface IServicePresentationPort
 {
+    /// <summary>
+    /// 세션 상황이 갱신되었음을 알린다. 표현 계층은 표시용 문맥만 동기화한다.
+    /// 접객 노드는 배정 메이드와 무관하게 공유되므로, 대본이 배정 결과를 알려면 이 통지가 필요하다.
+    /// 여기서 게임 상태를 바꾸어서는 안 된다.
+    /// </summary>
+    void NotifySessionContext(ServiceSessionState session);
+
     /// <summary>지정한 Yarn 노드를 끝까지 재생한다. 노드 이름이 비어 있으면 즉시 반환한다.</summary>
     YarnTask PlayNodeAsync(string nodeName);
 
