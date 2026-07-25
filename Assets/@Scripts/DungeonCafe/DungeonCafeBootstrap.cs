@@ -26,7 +26,11 @@ public class DungeonCafeBootstrap : MonoBehaviour
         IGuesthouseScreenBindings screens = new HeadlessGuesthouseScreens();
 
         ScenarioNodeRunner scenarioNodeRunner = new(dialogueRunner);
-        GuesthousePresentationPort port = new(scenarioNodeRunner, screens);
+        
+        GuesthousePresentationPort port = new(
+            scenarioNodeRunner,
+            screens,
+            ResolveYarnContext());
         
         ServiceSessionFlow session = new ServiceSessionFlow(content, port);
         
@@ -52,5 +56,18 @@ public class DungeonCafeBootstrap : MonoBehaviour
     {
         CampaignEndingResult ending = await _guesthouseRuntime.Campaign.RunAsync();
         Debug.Log($"[GuesthouseRuntime] Ending={ending.EndingKey} ({ending.Title}) : {ending.Reason}");
+    }
+    
+    
+    /// <summary>
+    /// 대본이 참조할 표시용 변수를 밀어 넣을 통로를 만든다.
+    /// 변수 저장소가 없으면 null 을 반환하고, 이 경우 문맥 주입만 생략된다.
+    /// </summary>
+    private GuesthouseYarnContext ResolveYarnContext()
+    {
+        if (dialogueRunner == null || dialogueRunner.VariableStorage == null)
+            return null;
+
+        return new GuesthouseYarnContext(dialogueRunner.VariableStorage);
     }
 }

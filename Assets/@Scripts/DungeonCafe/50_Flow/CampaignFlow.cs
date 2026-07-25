@@ -20,6 +20,8 @@ public sealed class CampaignFlow
         EndingResolver endingResolver)
     {
         State = campaignState;
+        Ending = null;
+        
         _dayFlow = dayFlow;
         _presentation = presentation;
         _endingResolver = endingResolver;

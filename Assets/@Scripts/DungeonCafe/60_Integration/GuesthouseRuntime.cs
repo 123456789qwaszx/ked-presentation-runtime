@@ -1,4 +1,5 @@
 using UnityEngine;
+using Yarn.Unity;
 
 // 상위(에피소드 플레이어, 세이브 시스템)에서는 CampaignFlow 만 잡으면 된다.
 public sealed class GuesthouseRuntime
