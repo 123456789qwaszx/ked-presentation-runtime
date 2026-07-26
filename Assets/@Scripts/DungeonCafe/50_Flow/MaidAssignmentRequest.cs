@@ -4,16 +4,13 @@ public sealed class MaidAssignmentRequest
 {
     public ServiceBookingState Booking { get; }
     public IReadOnlyList<MaidRuntimeState> Candidates { get; }
-    public ProgressionTuning Tuning { get; }
 
     public MaidAssignmentRequest(
         ServiceBookingState booking,
-        IReadOnlyList<MaidRuntimeState> candidates,
-        ProgressionTuning tuning)
+        IReadOnlyList<MaidRuntimeState> candidates)
     {
         Booking = booking;
         Candidates = candidates;
-        Tuning = tuning;
     }
 
     public MonsterProfile Monster => Booking.Monster;

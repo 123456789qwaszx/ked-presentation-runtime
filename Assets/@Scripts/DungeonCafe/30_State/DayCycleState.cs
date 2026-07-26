@@ -19,9 +19,7 @@ public sealed class DayCycleState
 
     /// <summary>아직 접객하지 않은 예약이 남아 있는가.</summary>
     public bool HasPendingBooking => _settlements.Count < _bookings.Count;
-
-    public DayPhaseKind Phase { get; private set; } = DayPhaseKind.None;
-
+    
     public int EnergyEarned { get; private set; }
 
     public IReadOnlyList<ServiceBookingState> Bookings => _bookings;
@@ -42,20 +40,6 @@ public sealed class DayCycleState
         _settlements.Add(result);
 
         EnergyEarned += result.Energy;
-    }
-
-    /// <summary>요구 만족도를 채우지 못한 예약 수.</summary>
-    public int CountFailedBookings()
-    {
-        int count = 0;
-
-        for (int i = 0; i < _bookings.Count; i++)
-        {
-            if (!_bookings[i].IsSuccessful)
-                count++;
-        }
-
-        return count;
     }
 
     public int CountIncidents()

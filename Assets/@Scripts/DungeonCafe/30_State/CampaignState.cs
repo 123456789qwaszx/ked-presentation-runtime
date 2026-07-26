@@ -47,14 +47,12 @@ public sealed class CampaignState
     { 
         CurrentDay = new DayCycleState(NextDayNumber, bookings);
     }
-       
-
+    
     public void CompleteDay()
     {
         if (CurrentDay == null)
             return;
 
-        //CurrentDay.SetPhase(DayPhaseKind.DayClosed);
         TotalEnergy += CurrentDay.EnergyEarned;
 
         _completedDays.Add(CurrentDay);

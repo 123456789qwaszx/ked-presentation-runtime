@@ -34,7 +34,6 @@ public class DungeonCafeBootstrap : MonoBehaviour
         BookingPlanner bookingPlanner = new(content);
 
         DayCycleFlow dayFlow = new(
-            content,
             bookingPlanner,
             session,
             nightFlow,

@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 
-/// <summary>밤 처리 대상 선택 요청.</summary>
 public sealed class NightPlanRequest
 {
     public int DayNumber { get; }

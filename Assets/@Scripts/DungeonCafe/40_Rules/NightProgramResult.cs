@@ -15,8 +15,7 @@ public sealed class NightProgramResult
     public int CollapseAfter { get; private set; }
 
     public int ExperienceGain { get; private set; }
-
-    public bool IsSuccess { get; private set; }
+    
     public string FailureReason { get; private set; }
 
     /// <summary>이 처리 직후 숙련 이벤트가 준비되었는지 여부.</summary>
@@ -33,7 +32,6 @@ public sealed class NightProgramResult
             Kind = kind,
             MaidId = maidId,
             Axis = axis,
-            IsSuccess = false,
             FailureReason = reason,
         };
     }
@@ -57,13 +55,10 @@ public sealed class NightProgramResult
             CollapsePeak = collapsePeak,
             CollapseAfter = collapseAfter,
             ExperienceGain = experienceGain,
-            IsMasteryEventReady = isMasteryEventReady,
-            IsSuccess = true,
+            IsMasteryEventReady = isMasteryEventReady
         };
     }
 
     public string ToSummaryLine()
-        => IsSuccess
-            ? $"{BurdenAxes.ToBurdenLabel(Axis)} {CollapseBefore} → {CollapseAfter} / 경험 +{ExperienceGain}"
-            : $"실패: {FailureReason}";
+        => $"{BurdenAxes.ToBurdenLabel(Axis)} {CollapseBefore} → {CollapseAfter} / 경험 +{ExperienceGain}";
 }

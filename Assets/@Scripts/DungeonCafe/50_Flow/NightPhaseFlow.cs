@@ -1,14 +1,8 @@
 using System.Collections.Generic;
 using Yarn.Unity;
 
-/// <summary>
-/// 밤 진행.
-///   상태 확인 → 한 명에게 회복 또는 관리 붕괴 적용 → 준비된 숙련 이벤트 소화 → 메이드 간 대화
-///
-/// 회복은 안전하지만 낮에 쌓인 긴장을 그대로 버린다.
-/// 관리 붕괴는 통제된 상태에서 끝까지 완료시켜, 붕괴도를 회수하면서 숙련으로 전환한다.
-/// 어느 쪽을 고르는지가 다음 날의 배율과 성장 속도를 동시에 결정한다.
-/// </summary>
+// (밤 진행)
+// 상태 확인 → 한 명에게 회복 또는 붕괴 유도 → 준비된 행동 이벤트 출력 → 메이드 간 대화
 public sealed class NightPhaseFlow
 {
     private readonly GuesthouseContentDB _content;
@@ -35,27 +29,16 @@ public sealed class NightPhaseFlow
             GuesthouseHudSnapshot.ForNight(campaign, dayNumber, null, "밤 처리"));
 
         NightPlan plan = await _screens.RequestNightPlanAsync(request);
+        
+        campaign.TryFindMaid(plan.MaidId, out MaidRuntimeState maid);
+        NightProgramResult result = RunProgram(maid, plan);
 
-        if (plan.IsValid && campaign.TryFindMaid(plan.MaidId, out MaidRuntimeState maid))
-        {
-            NightProgramResult result = RunProgram(maid, plan);
-            campaign.TryFindMaid(plan.MaidId, out MaidRuntimeState programMaid);
+        _screens.UpdateGuesthouseHud(
+            GuesthouseHudSnapshot.ForNight(campaign, dayNumber, maid,
+                plan.Kind == NightProgramKind.ManagedRelease ? "관리된 붕괴" : "회복 처리"));
 
-            _screens.UpdateGuesthouseHud(
-                GuesthouseHudSnapshot.ForNight(
-                    campaign,
-                    dayNumber,
-                    programMaid,
-                    plan.Kind == NightProgramKind.ManagedRelease ? "관리된 붕괴" : "회복 처리"));
-
-            // 처리가 실패하면 재생할 본편이 없다. 노드 이름을 만들지 않고 그대로 넘어간다.
-            if (result.IsSuccess)
-            {
-                await _nodes.PlayNodeAsync(
-                    GuesthouseNodeNaming.NightProgram(plan.MaidId, plan.Kind, plan.Axis));
-            }
-        }
-
+        await _nodes.PlayNodeAsync(GuesthouseNodeNaming.NightProgram(plan.MaidId, plan.Kind, plan.Axis));
+        
         await RunMasteryEventsAsync(campaign, dayNumber);
 
         await _nodes.PlayNodeAsync(GuesthouseNodeNaming.MaidConversation(dayNumber));

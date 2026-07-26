@@ -1,10 +1,4 @@
-/// <summary>
-/// 게시판에 올라온 예약 문의 한 건.
-/// 게시판 단계에서는 종족과 겉모습만, 통화 확정 이후에 대응 타입이 공개된다.
-///
-/// 슬롯이 끝나면 반드시 Settlement 또는 SkipReason 중 하나가 채워진다.
-/// 둘 다 비어 있으면 아직 처리되지 않은 예약이다.
-/// </summary>
+// Settlement가 비어 있으면 아직 처리되지 않은 예약이다.
 public sealed class ServiceBookingState
 {
     public MonsterProfile Monster { get; }
