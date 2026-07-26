@@ -61,8 +61,6 @@ public sealed class DayCycleFlow
 
             campaign.TryFindMaid(maidId, out MaidRuntimeState maid);
 
-            dayCycle.AssignMaid(booking, maid);
-
             // 격리실 접객 -> 반응 점수 × 붕괴 배율 결산
             ServiceSettlementResult result = await _sessionFlow.RunAsync(campaign, booking, maid);
             dayCycle.CompleteSlot(booking, result);

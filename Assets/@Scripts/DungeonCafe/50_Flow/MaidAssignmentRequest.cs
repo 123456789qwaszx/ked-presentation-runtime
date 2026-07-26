@@ -19,5 +19,5 @@ public sealed class MaidAssignmentRequest
     public MonsterProfile Monster => Booking.Monster;
 
     // 예약 확정 전에는 대응 타입이 수첩에 기재되지 않는다.
-    public bool IsDemandAxisKnown => Booking.IsCodexRevealed;
+    public bool IsDemandAxisKnown => Booking.IsConfirmed;
 }

@@ -1,21 +1,22 @@
-using System;
 using System.Threading.Tasks;
 
 public sealed partial class VnScreenBindings
 {
-    private TaskCompletionSource<string> _maidAssignmentCompletion;
+    private bool _hasAssignmentResult;
+    private string _pendingMaidId;
 
-    public Task<string> RequestMaidAssignmentAsync(MaidAssignmentRequest request)
+    public async Task<string> RequestMaidAssignmentAsync(MaidAssignmentRequest request)
     {
-        if (_maidAssignmentCompletion != null)
-            throw new InvalidOperationException("메이드 배정 결과를 이미 기다리고 있습니다.");
-        
-        _maidAssignmentCompletion =
-            new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
+        _hasAssignmentResult = false;
+        _pendingMaidId = null;
 
         OpenMaidAssignmentPanel(request);
 
-        return _maidAssignmentCompletion.Task;
+        await AsyncWait.UntilAsync(() => _hasAssignmentResult);
+
+        ClosePanel();
+
+        return _pendingMaidId;
     }
 
     private void OpenMaidAssignmentPanel(MaidAssignmentRequest request)
@@ -36,12 +37,7 @@ public sealed partial class VnScreenBindings
 
     private void HandleMaidSelected(string maidId)
     {
-        if (_maidAssignmentCompletion == null)
-            return;
-
-        _maidAssignmentCompletion.TrySetResult(maidId);
-
-        ClosePanel();
-        _maidAssignmentCompletion = null;
+        _pendingMaidId = maidId;
+        _hasAssignmentResult = true;
     }
 }

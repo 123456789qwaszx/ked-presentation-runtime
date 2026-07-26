@@ -274,8 +274,7 @@ public sealed partial class ServiceSessionFlow
             new MonsterEncounterState(monster),
             scenario,
             protocol,
-            dayNumber,
-            booking.SlotIndex);
+            dayNumber);
 
         Current = session;
 

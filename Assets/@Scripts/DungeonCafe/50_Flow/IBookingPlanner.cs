@@ -25,7 +25,7 @@ public sealed class BookingPlanner
 
         // 목록 끝을 넘으면 처음으로 돌아간다
         for (int slot = 0; slot < count; slot++)
-            bookings[slot] = new ServiceBookingState(monsters[(offset + slot) % monsters.Count], slot);
+            bookings[slot] = new ServiceBookingState(monsters[(offset + slot) % monsters.Count]);
 
         return bookings;
     }

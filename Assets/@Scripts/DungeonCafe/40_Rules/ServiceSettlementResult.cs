@@ -63,7 +63,6 @@ public sealed class ServiceSettlementResult
             Species = session.Monster.Species,
 
             DayNumber = session.DayNumber,
-            SlotIndex = session.SlotIndex,
 
             GreatlySatisfiedCount = greatlySatisfiedCount,
             SatisfiedCount = satisfiedCount,

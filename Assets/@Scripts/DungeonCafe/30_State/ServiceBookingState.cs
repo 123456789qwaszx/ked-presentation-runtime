@@ -8,20 +8,14 @@
 public sealed class ServiceBookingState
 {
     public MonsterProfile Monster { get; }
-    public int SlotIndex { get; }
 
     public bool IsConfirmed { get; private set; }
 
-    public bool IsCodexRevealed { get; private set; }
-
-    public string AssignedMaidId { get; private set; }
-
     public ServiceSettlementResult Settlement { get; private set; }
 
-    public ServiceBookingState(MonsterProfile monster, int slotIndex)
+    public ServiceBookingState(MonsterProfile monster)
     {
         Monster = monster;
-        SlotIndex = slotIndex;
     }
 
     public bool IsSuccessful => Settlement != null && Settlement.IsSatisfactionMet;
@@ -29,12 +23,6 @@ public sealed class ServiceBookingState
     public void ConfirmByPhone()
     {
         IsConfirmed = true;
-        IsCodexRevealed = true;
-    }
-
-    public void AssignMaid(string maidId)
-    {
-        AssignedMaidId = maidId;
     }
 
     public void MarkServed(ServiceSettlementResult result) => Settlement = result;

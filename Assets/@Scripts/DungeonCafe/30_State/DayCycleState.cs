@@ -35,13 +35,6 @@ public sealed class DayCycleState
 
     public ServiceBookingState GetBooking(int index) => _bookings[index];
 
-    // 몬스터 예약과 담당 메이드를 확정.
-    public void AssignMaid(ServiceBookingState booking, MaidRuntimeState maid)
-    {
-        booking.AssignMaid(maid.MaidId);
-        maid.MarkAssigned(DayNumber);
-    }
-
     // 접객을 결산까지 마쳤다. 결과 기록과 슬롯 소비가 함께 일어난다.
     public void CompleteSlot(ServiceBookingState booking, ServiceSettlementResult result)
     {

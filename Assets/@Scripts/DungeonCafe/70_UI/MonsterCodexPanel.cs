@@ -12,7 +12,7 @@ using static UIRefValidation;
 /// 비밀 해금물이 아니라 업무 기록이다. 통화로 확정된 개체만 실린다.
 /// 열람 전용이며 여기서 배정이나 승인을 하지 않는다.
 /// </summary>
-public sealed class MonsterCodexPanel : UIPanel<MonsterCodexPanel.Refs>, IManagedUI
+public sealed class MonsterCodexPanel : UIPanel<MonsterCodexPanel.Refs>
 {
     public event Action OnCloseRequested;
 
@@ -140,7 +140,7 @@ public sealed class MonsterCodexPanel : UIPanel<MonsterCodexPanel.Refs>, IManage
 
         for (int i = 0; i < bookings.Count; i++)
         {
-            if (!bookings[i].IsCodexRevealed)
+            if (!bookings[i].IsConfirmed)
                 continue;
 
             _monsters.Add(bookings[i].Monster);
