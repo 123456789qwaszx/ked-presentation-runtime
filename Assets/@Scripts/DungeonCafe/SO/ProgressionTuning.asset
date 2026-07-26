@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4f7cfc2b2bfb48d44905ab69043e85cd, type: 3}
+  m_Script: {fileID: 11500000, guid: 8802e43e70ed8504e9b84a75f787a038, type: 3}
   m_Name: ProgressionTuning
   m_EditorClassIdentifier: Assembly-CSharp::ProgressionTuningSO
   multiplierBands:

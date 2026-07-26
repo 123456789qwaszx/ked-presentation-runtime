@@ -5,13 +5,14 @@ public class DungeonCafeBootstrap : MonoBehaviour
 {
     [Header("Content")]
     [SerializeField] private GuesthouseContentBundleSO contentBundle;
-    
+
     [Header("Dialogue")]
     [SerializeField] private DialogueRunner dialogueRunner;
-    
-    private CampaignState _campaignState; 
+
+    private CampaignState _campaignState;
 
     private GuesthouseRuntime _guesthouseRuntime;
+
     public void DungeonCafeStart(VnScreenBindings vnScreenBindings)
     {
         BootstrapGuesthouseRuntime(vnScreenBindings);
@@ -19,45 +20,47 @@ public class DungeonCafeBootstrap : MonoBehaviour
         RunCampaign();
     }
 
-
-    private void BootstrapGuesthouseRuntime(VnScreenBindings vnScreenBindings)
+    private void BootstrapGuesthouseRuntime(VnScreenBindings screens)
     {
         GuesthouseContentDB content = contentBundle.BuildContentDB();
-        
-        ScenarioNodeRunner scenarioNodeRunner = new(dialogueRunner);
-        
-        GuesthousePresentationPort port = new(
-            scenarioNodeRunner,
-            vnScreenBindings,
-            ResolveYarnContext());
-        
-        ServiceSessionFlow session = new ServiceSessionFlow(content, port);
-        
-        NightPhaseFlow nightFlow = new(content, port);
 
-        RotatingBookingPlanner rotatingBookingPlanner = new(content);
+        ScenarioNodeRunner nodes = new(dialogueRunner);
+        GuesthouseYarnContext yarnContext = ResolveYarnContext();
+
+        ServiceSessionFlow session = new(content, screens, nodes, yarnContext);
+
+        NightPhaseFlow nightFlow = new(content, screens, nodes);
+
+        RotatingBookingPlanner bookingPlanner = new(content);
+
         DayCycleFlow dayFlow = new(
             content,
-            rotatingBookingPlanner,
+            bookingPlanner,
             session,
             nightFlow,
-            port);
-        
-        _campaignState = new (content.Tuning, content.Maids);
-        EndingResolver endingResolver = new (content.Tuning, content.ProtocolBySpecies);
-        
-        CampaignFlow campaign = new CampaignFlow(_campaignState, dayFlow, port, endingResolver);
+            screens,
+            nodes);
+
+        _campaignState = new(content.Tuning, content.Maids);
+        EndingResolver endingResolver = new(content.Tuning, content.ProtocolBySpecies);
+
+        CampaignFlow campaign = new(
+            content,
+            _campaignState,
+            dayFlow,
+            screens,
+            nodes,
+            endingResolver);
 
         _guesthouseRuntime = new(content, session, campaign);
     }
-    
+
     public async void RunCampaign()
     {
         CampaignEndingResult ending = await _guesthouseRuntime.Campaign.RunAsync();
         Debug.Log($"[GuesthouseRuntime] Ending={ending.EndingKey} ({ending.Title}) : {ending.Reason}");
     }
-    
-    
+
     /// <summary>
     /// 대본이 참조할 표시용 변수를 밀어 넣을 통로를 만든다.
     /// 변수 저장소가 없으면 null 을 반환하고, 이 경우 문맥 주입만 생략된다.

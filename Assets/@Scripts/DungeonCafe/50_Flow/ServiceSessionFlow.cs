@@ -16,7 +16,10 @@ public sealed partial class ServiceSessionFlow
     private readonly GuesthouseContentDB _content;
     private readonly ServiceOptionSelector _optionSelector;
     private readonly ServiceSettlementCalculator _settlementCalculator;
-    private readonly IServicePresentationPort _presentation;
+
+    private readonly VnScreenBindings _screens;
+    private readonly ScenarioNodeRunner _nodes;
+    private readonly GuesthouseYarnContext _yarnContext;
 
     /// <summary>표시용 문맥을 잡기 위해서만 참조한다. 판정에는 쓰지 않는다.</summary>
     public CampaignState Campaign { get; set; }
@@ -33,12 +36,16 @@ public sealed partial class ServiceSessionFlow
 
     public ServiceSessionFlow(
         GuesthouseContentDB content,
-        IServicePresentationPort presentation,
+        VnScreenBindings screens,
+        ScenarioNodeRunner nodes,
+        GuesthouseYarnContext yarnContext = null,
         ServiceOptionSelector optionSelector = null,
         ServiceSettlementCalculator settlementCalculator = null)
     {
         _content = content;
-        _presentation = presentation;
+        _screens = screens;
+        _nodes = nodes;
+        _yarnContext = yarnContext;
         _optionSelector = optionSelector ?? new ServiceOptionSelector();
         _settlementCalculator = settlementCalculator ?? new ServiceSettlementCalculator(content.Tuning);
     }
@@ -69,10 +76,10 @@ public sealed partial class ServiceSessionFlow
 
         ServiceSessionToken token = CurrentRun;
 
-        _presentation.NotifySessionContext(session);
+        PushYarnContext(session);
         NotifyHud(session, "입실 준비");
 
-        await _presentation.PlayNodeAsync(ResolveBriefingNode(session));
+        await _nodes.PlayNodeAsync(ResolveBriefingNode(session));
 
         if (!IsCurrent(token))
             return AbortSession(session);
@@ -96,7 +103,7 @@ public sealed partial class ServiceSessionFlow
         if (!session.IsControlLost)
         {
             session.SetPhase(ServiceSessionPhase.ScenarioCompleted);
-            await _presentation.PlayNodeAsync(session.Scenario.CompletionNodeName);
+            await _nodes.PlayNodeAsync(session.Scenario.CompletionNodeName);
 
             if (!IsCurrent(token))
                 return AbortSession(session);
@@ -105,7 +112,7 @@ public sealed partial class ServiceSessionFlow
         ServiceSettlementResult result = _settlementCalculator.Settle(session);
         session.SetPhase(ServiceSessionPhase.Settled);
 
-        await _presentation.PresentSettlementAsync(result);
+        await _screens.PresentSettlementAsync(result);
 
         if (!IsCurrent(token))
             return AbortSession(session);
@@ -117,6 +124,13 @@ public sealed partial class ServiceSessionFlow
     }
 
     /// <summary>
+    /// 접객 노드는 배정 메이드와 무관하게 공유되므로, 대본이 배정 결과를 알려면 이 통지가 필요하다.
+    /// 변수 저장소가 연결되지 않은 구성에서도 흐름은 그대로 진행되어야 한다.
+    /// </summary>
+    private void PushYarnContext(ServiceSessionState session)
+        => _yarnContext?.PushSession(session);
+
+    /// <summary>
     /// 상시 표시용 갱신. 노드를 재생하기 직전에만 불린다.
     /// 진행 문맥(일차/에너지)은 DayCycleFlow 가 세션 진입 전에 주입해 둔다.
     /// </summary>
@@ -125,7 +139,7 @@ public sealed partial class ServiceSessionFlow
         if (Campaign == null)
             return;
 
-        _presentation.NotifyHud(
+        _screens.UpdateGuesthouseHud(
             GuesthouseHudSnapshot.ForSession(Campaign, Campaign.CurrentDay, session, phaseLabel));
     }
 
@@ -134,10 +148,10 @@ public sealed partial class ServiceSessionFlow
     {
         ServiceBeat beat = session.CurrentBeat;
 
-        _presentation.NotifySessionContext(session);
+        PushYarnContext(session);
         NotifyHud(session, "접객 진행");
 
-        await _presentation.PlayNodeAsync(beat.SituationNodeName);
+        await _nodes.PlayNodeAsync(beat.SituationNodeName);
 
         if (!IsCurrent(token))
             return false;
@@ -153,7 +167,7 @@ public sealed partial class ServiceSessionFlow
         session.SetPhase(ServiceSessionPhase.OptionsOffered);
 
         ServiceApprovalRequest request = new(session, beat, options, Tuning);
-        int approvedIndex = await _presentation.RequestActionApprovalAsync(request);
+        int approvedIndex = await _screens.RequestActionApprovalAsync(request);
 
         if (!IsCurrent(token))
             return false;
@@ -164,7 +178,7 @@ public sealed partial class ServiceSessionFlow
         ServiceActionOption approved = options[approvedIndex];
         session.SetPhase(ServiceSessionPhase.OptionApproved);
 
-        await _presentation.PlayNodeAsync(approved.ApprovalNodeName);
+        await _nodes.PlayNodeAsync(approved.ApprovalNodeName);
 
         if (!IsCurrent(token))
             return false;

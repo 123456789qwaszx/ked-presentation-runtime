@@ -8,7 +8,7 @@ using Yarn.Unity;
 /// 플로우는 await 로 결과를 기다리고, 패널은 이벤트로 결과를 밀어 넣는다.
 /// 대기는 기존 프레젠테이션 레이어와 동일하게 프레임 폴링으로 처리한다.
 /// </summary>
-public sealed partial class VnScreenBindings : IGuesthouseScreenBindings
+public sealed partial class VnScreenBindings
 {
     private int _pendingApprovalIndex = -1;
     private bool _hasApprovalResult;

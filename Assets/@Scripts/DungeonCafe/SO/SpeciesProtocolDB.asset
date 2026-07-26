@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 921d8c7d317493b47b360a9147895271, type: 3}
+  m_Script: {fileID: 11500000, guid: 36c1db8fbe6a4d3428ab64dc4ae1bc41, type: 3}
   m_Name: SpeciesProtocolDB
   m_EditorClassIdentifier: Assembly-CSharp::SpeciesProtocolDBSO
   entries: []

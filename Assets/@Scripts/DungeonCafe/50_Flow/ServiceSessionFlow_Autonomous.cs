@@ -14,14 +14,14 @@ public sealed partial class ServiceSessionFlow
         ServiceSessionToken token)
     {
         session.SetPhase(ServiceSessionPhase.ControlLost);
-        _presentation.NotifyControlLost(session);
+        _screens.NotifyControlLost(session);
 
         SpeciesProtocol protocol = session.SpeciesProtocol;
 
         if (protocol == null)
             return;
 
-        await _presentation.PlayNodeAsync(protocol.ControlLossNodeName);
+        await _nodes.PlayNodeAsync(protocol.ControlLossNodeName);
 
         if (!IsCurrent(token))
             return;
@@ -36,7 +36,7 @@ public sealed partial class ServiceSessionFlow
                 return;
         }
 
-        await _presentation.PlayNodeAsync(protocol.CollapseEndingNodeName);
+        await _nodes.PlayNodeAsync(protocol.CollapseEndingNodeName);
     }
 
     private void RunAutonomousBeat(ServiceSessionState session, SpeciesProtocol protocol)

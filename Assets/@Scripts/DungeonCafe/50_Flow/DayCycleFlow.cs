@@ -12,7 +12,9 @@ public sealed class DayCycleFlow
     private readonly IBookingPlanner _bookingPlanner;
     private readonly ServiceSessionFlow _sessionFlow;
     private readonly NightPhaseFlow _nightFlow;
-    private readonly IDayPresentationPort _presentation;
+
+    private readonly VnScreenBindings _screens;
+    private readonly ScenarioNodeRunner _nodes;
 
     private readonly List<MaidRuntimeState> _candidateBuffer = new();
 
@@ -23,13 +25,15 @@ public sealed class DayCycleFlow
         IBookingPlanner bookingPlanner,
         ServiceSessionFlow sessionFlow,
         NightPhaseFlow nightFlow,
-        IDayPresentationPort presentation)
+        VnScreenBindings screens,
+        ScenarioNodeRunner nodes)
     {
         _content = content;
         _bookingPlanner = bookingPlanner;
         _sessionFlow = sessionFlow;
         _nightFlow = nightFlow;
-        _presentation = presentation;
+        _screens = screens;
+        _nodes = nodes;
     }
 
     public async YarnTask RunDayAsync(CampaignState campaign)
@@ -38,7 +42,7 @@ public sealed class DayCycleFlow
 
         _sessionFlow.Campaign = campaign;
 
-        _presentation.NotifyHud(
+        _screens.UpdateGuesthouseHud(
             GuesthouseHudSnapshot.ForDay(campaign, day, "예약 게시판"));
 
         await RunReservationPhaseAsync(campaign, day);
@@ -50,10 +54,10 @@ public sealed class DayCycleFlow
         }
 
         day.SetPhase(DayPhaseKind.DayReport);
-        _presentation.NotifyHud(
+        _screens.UpdateGuesthouseHud(
             GuesthouseHudSnapshot.ForDay(campaign, day, "업무 종료"));
 
-        await _presentation.PresentDayReportAsync(day);
+        await _screens.PresentDayReportAsync(day);
 
         day.SetPhase(DayPhaseKind.Night);
         await _nightFlow.RunNightAsync(campaign, day.DayNumber);
@@ -71,7 +75,7 @@ public sealed class DayCycleFlow
 
         day.PostBookings(monsters);
 
-        await _presentation.PresentReservationBoardAsync(day.DayNumber, day.Bookings);
+        await _screens.PresentReservationBoardAsync(day.DayNumber, day.Bookings);
 
         // 전화로 확정하는 시점에 종족 외의 대응 타입 정보가 업무 수첩에 기재된다.
         day.SetPhase(DayPhaseKind.ReservationCall);
@@ -80,10 +84,10 @@ public sealed class DayCycleFlow
         {
             ServiceBookingState booking = day.Bookings[i];
 
-            _presentation.NotifyHud(
+            _screens.UpdateGuesthouseHud(
                 GuesthouseHudSnapshot.ForDay(campaign, day, "예약 확정 통화"));
 
-            await _presentation.PresentReservationCallAsync(booking);
+            await _nodes.PlayNodeAsync(booking.Monster.PhoneCallNodeName);
 
             booking.ConfirmByPhone();
             campaign.MarkSpeciesEncountered(booking.Monster.Species);
@@ -137,7 +141,7 @@ public sealed class DayCycleFlow
             return null;
 
         MaidAssignmentRequest request = new(booking, candidates, Tuning);
-        string maidId = await _presentation.RequestMaidAssignmentAsync(request);
+        string maidId = await _screens.RequestMaidAssignmentAsync(request);
 
         if (campaign.TryFindMaid(maidId, out MaidRuntimeState maid) && maid.CanBeAssigned)
             return maid;
