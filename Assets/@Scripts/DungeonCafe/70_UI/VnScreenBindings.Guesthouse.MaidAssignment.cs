@@ -1,10 +1,5 @@
 using Yarn.Unity;
 
-/// <summary>
-/// 담당 메이드 배정. 접객 슬롯마다 한 번 열린다.
-///
-/// 여는 시점에 예약 게시판을 걷어낸다. 통화 노드가 끝난 뒤 게시판이 남아 있을 수 있기 때문이다.
-/// </summary>
 public sealed partial class VnScreenBindings
 {
     private string _pendingMaidId;
@@ -23,8 +18,6 @@ public sealed partial class VnScreenBindings
 
         await AsyncWait.UntilAsync(() => _hasAssignmentResult);
 
-        ClosePanel();
-
         return _pendingMaidId;
     }
 
@@ -39,5 +32,7 @@ public sealed partial class VnScreenBindings
     {
         _pendingMaidId = maidId;
         _hasAssignmentResult = true;
+
+        ClosePanel();
     }
 }
