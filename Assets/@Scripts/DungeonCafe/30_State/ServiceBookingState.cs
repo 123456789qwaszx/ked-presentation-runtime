@@ -18,7 +18,6 @@ public sealed class ServiceBookingState
     public string AssignedMaidId { get; private set; }
 
     public ServiceSettlementResult Settlement { get; private set; }
-    public string SkipReason { get; private set; }
 
     public ServiceBookingState(MonsterProfile monster, int slotIndex)
     {
@@ -26,14 +25,6 @@ public sealed class ServiceBookingState
         SlotIndex = slotIndex;
     }
 
-    public bool HasAssignment => !string.IsNullOrEmpty(AssignedMaidId);
-
-    public bool IsResolved => Settlement != null || SkipReason != null;
-
-    /// <summary>접객까지 도달하지 못했다.</summary>
-    public bool IsSkipped => SkipReason != null;
-
-    /// <summary>접객을 마쳤고 요구 만족도를 채웠다.</summary>
     public bool IsSuccessful => Settlement != null && Settlement.IsSatisfactionMet;
 
     public void ConfirmByPhone()

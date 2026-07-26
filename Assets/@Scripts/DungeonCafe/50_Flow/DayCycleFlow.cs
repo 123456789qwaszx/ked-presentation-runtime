@@ -7,7 +7,7 @@ using Yarn.Unity;
 public sealed class DayCycleFlow
 {
     private readonly GuesthouseContentDB _content;
-    private readonly IBookingPlanner _bookingPlanner;
+    private readonly BookingPlanner _bookingPlanner;
     private readonly ServiceSessionFlow _sessionFlow;
     private readonly NightPhaseFlow _nightFlow;
 
@@ -20,7 +20,7 @@ public sealed class DayCycleFlow
 
     public DayCycleFlow(
         GuesthouseContentDB content,
-        IBookingPlanner bookingPlanner,
+        BookingPlanner bookingPlanner,
         ServiceSessionFlow sessionFlow,
         NightPhaseFlow nightFlow,
         VnScreenBindings screens,
@@ -36,24 +36,23 @@ public sealed class DayCycleFlow
 
     public async YarnTask RunDayAsync(CampaignState campaign)
     {
-        campaign.BeginDay();
-        DayCycleState day = campaign.CurrentDay;
-
         // 인터넷 게시판에 오늘 방문 희망 몬스터 예약 목록 출력
-        day.PostBookings(_bookingPlanner.PlanBookings(campaign, day.DayNumber, Tuning.ServicesPerDay));
-        await _screens.RequestReservationSelectionAsync(day.DayNumber, day.Bookings);
+        campaign.BeginDay(_bookingPlanner.CreateDailyBookings(campaign.NextDayNumber));
+        DayCycleState dayCycle = campaign.CurrentDay;
+
+        await _screens.RequestReservationSelectionAsync(dayCycle.DayNumber, dayCycle.Bookings);
 
         // 예약 확정. 수첩 정보 갱신
-        for (int i = 0; i < day.Bookings.Count; i++)
+        for (int i = 0; i < dayCycle.Bookings.Count; i++)
         {
-            ServiceBookingState booking = day.Bookings[i];
+            ServiceBookingState booking = dayCycle.Bookings[i];
 
             await _nodes.PlayNodeAsync(booking.Monster.PhoneCallNodeName);
             campaign.ConfirmBookingByPhone(booking);
         }
 
         // 접객 3회: 담당 메이드를 배정 -> 격리실 접객 진행 -> 반응 점수 × 붕괴 배율 결산
-        while (day.TryGetPendingSlot(out ServiceBookingState pending))
+        while (dayCycle.TryGetPendingSlot(out ServiceBookingState pending))
         {
             IReadOnlyList<MaidRuntimeState> candidates =
                 campaign.CollectAssignableMaids(_candidateBuffer);
@@ -63,17 +62,17 @@ public sealed class DayCycleFlow
 
             campaign.TryFindMaid(maidId, out MaidRuntimeState maid);
 
-            day.AssignMaid(pending, maid);
+            dayCycle.AssignMaid(pending, maid);
 
             ServiceSettlementResult result = await _sessionFlow.RunAsync(campaign, pending, maid);
-            day.CompleteSlot(result);
+            dayCycle.CompleteSlot(result);
         }
 
         // 오늘 3회 접객 종료
-        await _screens.PresentDayReportAsync(day);
-        
+        await _screens.PresentDayReportAsync(dayCycle);
+
         // 밤: 메이드 회복 또는 붕괴 유도
-        await _nightFlow.RunNightAsync(campaign, day.DayNumber);
+        await _nightFlow.RunNightAsync(campaign, dayCycle.DayNumber);
 
         campaign.CompleteDay();
     }

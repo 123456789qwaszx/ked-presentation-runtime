@@ -43,14 +43,18 @@ public sealed class CampaignState
     public bool TryFindMaid(string maidId, out MaidRuntimeState maid)
         => _maidById.TryGetValue(maidId ?? string.Empty, out maid);
 
-    public void BeginDay() => CurrentDay = new DayCycleState(NextDayNumber);
+    public void BeginDay(IReadOnlyList<ServiceBookingState> bookings)
+    { 
+        CurrentDay = new DayCycleState(NextDayNumber, bookings);
+    }
+       
 
     public void CompleteDay()
     {
         if (CurrentDay == null)
             return;
 
-        CurrentDay.SetPhase(DayPhaseKind.DayClosed);
+        //CurrentDay.SetPhase(DayPhaseKind.DayClosed);
         TotalEnergy += CurrentDay.EnergyEarned;
 
         _completedDays.Add(CurrentDay);
