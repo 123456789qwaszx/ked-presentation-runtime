@@ -1,39 +1,51 @@
-using Yarn.Unity;
+using System;
+using System.Threading.Tasks;
 
-/// <summary>
-/// 캠페인 엔딩. 표시와 대기를 분리한 유일한 화면이다.
-///
-/// 엔딩 노드 재생과 '함께' 떠 있어야 하므로 PresentEnding 은 await 하지 않는다.
-/// 여기서 대기하면 노드가 끝날 때까지 화면이 비어 있게 된다.
-/// 노드가 끝난 뒤 WaitEndingDismissAsync 가 확인 버튼을 열고 입력을 기다린다.
-/// </summary>
 public sealed partial class VnScreenBindings
 {
+    private bool _isWaitingEndingDismiss;
     private bool _hasEndingResult;
 
-    public void PresentEnding(CampaignEndingResult ending, CampaignState campaignState)
+    public void PresentEnding(CampaignEndingResult ending, CampaignState campaign)
     {
         _hasEndingResult = false;
 
-        UI.PushPanel<CampaignEndingPanel>(panel =>
-        {
-            BindPanel(panel, ApplyEndingBindings);
-            panel.Present(ending, campaignState);
-        });
+        OpenEndingPanel(ending, campaign);
     }
 
-    /// <summary>엔딩 노드가 끝난 뒤에 확인 버튼을 연다.</summary>
-    public async YarnTask WaitEndingDismissAsync()
+    // 엔딩 노드가 끝난 뒤에 확인 버튼을 연다.
+    public async Task WaitEndingDismissAsync()
     {
-        CampaignEndingPanel panel = UI.GetUI<CampaignEndingPanel>();
+        if (_isWaitingEndingDismiss)
+            throw new InvalidOperationException("엔딩 확인을 이미 기다리고 있습니다.");
 
-        if (panel != null)
-            panel.AllowDismiss();
+        _isWaitingEndingDismiss = true;
+
+        AllowEndingDismiss();
 
         await AsyncWait.UntilAsync(() => _hasEndingResult);
 
         ClosePanel();
         HideGuesthouseHud();
+
+        _isWaitingEndingDismiss = false;
+    }
+
+    private void OpenEndingPanel(CampaignEndingResult ending, CampaignState campaign)
+    {
+        UI.PushPanel<CampaignEndingPanel>(panel =>
+        {
+            BindPanel(panel, ApplyEndingBindings);
+            panel.Present(ending, campaign);
+        });
+    }
+
+    private void AllowEndingDismiss()
+    {
+        CampaignEndingPanel panel = UI.GetUI<CampaignEndingPanel>();
+
+        if (panel != null)
+            panel.AllowDismiss();
     }
 
     private void ApplyEndingBindings(CampaignEndingPanel panel)

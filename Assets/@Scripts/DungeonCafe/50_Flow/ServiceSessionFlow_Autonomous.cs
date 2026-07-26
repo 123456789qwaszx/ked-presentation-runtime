@@ -15,7 +15,7 @@ public sealed partial class ServiceSessionFlow
     {
         SpeciesProtocol protocol = session.SpeciesProtocol;
 
-        _screens.NotifyControlLost(session);
+        _screens.NotifyControlLost();
 
         await _nodes.PlayNodeAsync(protocol.ControlLossNodeName);
 

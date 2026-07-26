@@ -8,8 +8,6 @@ public sealed class ServiceSessionState
 {
     private readonly List<ServiceReactionRecord> _records = new();
 
-    public ServiceSessionToken Token { get; }
-
     public MaidRuntimeState Maid { get; }
     public MonsterEncounterState Encounter { get; }
     public ServiceScenario Scenario { get; }
@@ -51,11 +49,6 @@ public sealed class ServiceSessionState
         Scenario = scenario;
         SpeciesProtocol = speciesProtocol;
         DayNumber = dayNumber;
-    }
-
-    public void SetPhase(ServiceSessionPhase phase)
-    {
-        Phase = phase;
     }
 
     public void SetCurrentBeat(ServiceBeat beat)

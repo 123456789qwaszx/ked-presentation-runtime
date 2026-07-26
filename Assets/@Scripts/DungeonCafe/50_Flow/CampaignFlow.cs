@@ -47,11 +47,9 @@ public sealed class CampaignFlow
         _screens.UpdateGuesthouseHud(
             GuesthouseHudSnapshot.ForDay(State, State.CurrentDay, Ending.Title));
 
-        // 엔딩 화면을 먼저 띄운 뒤 노드를 재생한다. 순서를 바꾸면 노드가 끝날 때까지 화면이 빈다.
+        // 엔딩 화면을 먼저 띄운 뒤 노드를 재생한다.
         _screens.PresentEnding(Ending, State);
-
         await _nodes.PlayNodeAsync(Ending.NodeName);
-
         await _screens.WaitEndingDismissAsync();
 
         return Ending;

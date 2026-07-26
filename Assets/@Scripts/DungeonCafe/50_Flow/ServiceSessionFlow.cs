@@ -37,7 +37,7 @@ public sealed partial class ServiceSessionFlow
     {
         ServiceSessionState session = OpenSession(booking, maid, campaign.CurrentDay.DayNumber);
 
-        // 입실. 격리실이 봉인되고 이후 개입은 승인으로만 가능하다
+        // 입실 브리핑 재생
         await _nodes.PlayNodeAsync(ResolveBriefingNode(session));
 
         session.SetCurrentBeat(session.Scenario.EntryBeat);
@@ -46,24 +46,25 @@ public sealed partial class ServiceSessionFlow
         {
             ServiceBeat beat = session.CurrentBeat;
 
-            // 상황 재생
+            // 현재 상황 재생
             await _nodes.PlayNodeAsync(beat.SituationNodeName);
 
-            // 메이드가 능력치대로 제안하고, 관리자가 그중 하나를 승인한다
+            // 메이드가 선택지를 제안
             IReadOnlyList<ServiceActionOption> options =
                 _optionSelector.Select(beat, session.Maid, _offerBuffer);
-
+            
+            // 플레이어의 승인 대기
             ServiceApprovalRequest request = new(session, beat, options, _content.Tuning);
             int approvedIndex = await _screens.RequestActionApprovalAsync(request);
 
+            // 승인된 행동의 연출 재생
             ServiceActionOption approved = options[approvedIndex];
-
             await _nodes.PlayNodeAsync(approved.ApprovalNodeName);
 
-            // 부담 누적과 몬스터 반응을 함께 기록한다
+            // 부담과 몬스터 반응 적용
             ApplyApprovedOption(session, beat, approved);
 
-            // 통제 신호가 거부되면 여기서 개입이 끝난다
+            // 통제권을 잃을 시 자동 진행
             if (HasLostControl(session))
             {
                 await RunAutonomousCollapseAsync(session);
@@ -73,19 +74,19 @@ public sealed partial class ServiceSessionFlow
             session.SetCurrentBeat(ResolveNextBeat(session, beat, approved));
         }
 
-        // 통제를 지킨 접객만 마무리 대사를 받는다
+        // 정상 완료 대사 재생
         if (!session.IsControlLost)
             await _nodes.PlayNodeAsync(session.Scenario.CompletionNodeName);
 
-        // 반응 점수 × 붕괴 배율 결산
+        // 결산 화면 계산 및 표시
         ServiceSettlementResult result = _settlementCalculator.Settle(session);
-
         await _screens.PresentSettlementAsync(result);
 
         return result;
     }
 
-    /// <summary>다음 비트. null 이면 시나리오가 끝났다는 뜻이다.</summary>
+    // 다음 비트 재생.
+    // null은 시나리오가 종료됐다는 의미
     private static ServiceBeat ResolveNextBeat(
         ServiceSessionState session,
         ServiceBeat current,
@@ -124,7 +125,7 @@ public sealed partial class ServiceSessionFlow
         session.MarkBeatConsumed();
     }
 
-    /// <summary>붕괴 한계를 넘겨 통제 신호가 거부되었는가.</summary>
+    // 붕괴한계 초과 및 통제권 상실
     private bool HasLostControl(ServiceSessionState session)
     {
         ControlAuthorityStatus status = ControlAuthorityRule.Evaluate(
@@ -137,7 +138,7 @@ public sealed partial class ServiceSessionFlow
         return status == ControlAuthorityStatus.Lost;
     }
 
-    /// <summary>시나리오와 종족 규약을 묶어 세션을 연다. 콘텐츠가 어긋나면 그대로 터진다.</summary>
+    // 시나리오와 종족 규약을 묶어 세션을 연다. 콘텐츠가 어긋나면 그대로 터뜨림.
     private ServiceSessionState OpenSession(
         ServiceBookingState booking,
         MaidRuntimeState maid,
