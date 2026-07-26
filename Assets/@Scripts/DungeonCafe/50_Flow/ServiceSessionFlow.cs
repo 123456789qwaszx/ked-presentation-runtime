@@ -20,12 +20,8 @@ public sealed partial class ServiceSessionFlow
 
     private readonly VnScreenBindings _screens;
     private readonly ScenarioNodeRunner _nodes;
-    private readonly GuesthouseYarnContext _yarnContext;
-
+    
     private readonly List<ServiceActionOption> _offerBuffer = new();
-
-    /// <summary>표시용 문맥. 판정에는 쓰지 않는다.</summary>
-    private CampaignState _campaign;
 
     private int _runVersion;
 
@@ -39,14 +35,12 @@ public sealed partial class ServiceSessionFlow
         GuesthouseContentDB content,
         VnScreenBindings screens,
         ScenarioNodeRunner nodes,
-        GuesthouseYarnContext yarnContext = null,
         ServiceOptionSelector optionSelector = null,
         ServiceSettlementCalculator settlementCalculator = null)
     {
         _content = content;
         _screens = screens;
         _nodes = nodes;
-        _yarnContext = yarnContext;
         _optionSelector = optionSelector ?? new ServiceOptionSelector();
         _settlementCalculator = settlementCalculator ?? new ServiceSettlementCalculator(content.Tuning);
     }
@@ -70,17 +64,11 @@ public sealed partial class ServiceSessionFlow
         ServiceBookingState booking,
         MaidRuntimeState maid)
     {
-        _campaign = campaign;
-
         if (!TryBuildSession(booking, maid, campaign.CurrentDay.DayNumber, out ServiceSessionState session))
             return null;
 
-        Enter(session, ServiceSessionPhase.AssignmentCommitted);
-
         if (!await TryPlayNodeAsync(session, ResolveBriefingNode(session)))
             return Abort(session);
-
-        Enter(session, ServiceSessionPhase.RoomSealed);
 
         session.SetCurrentBeat(session.Scenario.EntryBeat);
 
@@ -97,8 +85,6 @@ public sealed partial class ServiceSessionFlow
 
         if (!session.IsControlLost)
         {
-            Enter(session, ServiceSessionPhase.ScenarioCompleted);
-
             if (!await TryPlayNodeAsync(session, session.Scenario.CompletionNodeName))
                 return Abort(session);
         }
@@ -110,7 +96,6 @@ public sealed partial class ServiceSessionFlow
     {
         ServiceSettlementResult result = _settlementCalculator.Settle(session);
 
-        Enter(session, ServiceSessionPhase.Settled);
         await _screens.PresentSettlementAsync(result);
 
         if (!IsCurrent(session))
@@ -126,8 +111,6 @@ public sealed partial class ServiceSessionFlow
     private async YarnTask<bool> RunBeatAsync(ServiceSessionState session)
     {
         ServiceBeat beat = session.CurrentBeat;
-
-        Enter(session, ServiceSessionPhase.BeatSituationPlayed);
 
         if (!await TryPlayNodeAsync(session, beat.SituationNodeName))
             return false;
@@ -296,27 +279,6 @@ public sealed partial class ServiceSessionFlow
 
     /// <summary>세션이 아직 유효한가. 토큰은 세션이 들고 있으므로 따로 넘기지 않는다.</summary>
     private bool IsCurrent(ServiceSessionState session) => IsCurrent(session.Token);
-
-    /// <summary>
-    /// 단계 진입. 페이즈 기록 · 대본 변수 주입 · 표시 갱신이 항상 함께 일어난다.
-    /// 노드를 재생하기 '직전'에 불려야 대사와 표시가 같은 프레임에 나타난다.
-    /// </summary>
-    private void Enter(ServiceSessionState session, ServiceSessionPhase phase)
-    {
-        session.SetPhase(phase);
-
-        _yarnContext?.PushSession(session);
-
-        if (_campaign == null)
-            return;
-
-        _screens.UpdateGuesthouseHud(
-            GuesthouseHudSnapshot.ForSession(
-                _campaign,
-                _campaign.CurrentDay,
-                session,
-                ServiceSessionPhaseLabels.Of(phase)));
-    }
 
     /// <summary>노드를 재생한다. 재생 도중 세션이 무효화되지 않았으면 true.</summary>
     private async YarnTask<bool> TryPlayNodeAsync(ServiceSessionState session, string nodeName)

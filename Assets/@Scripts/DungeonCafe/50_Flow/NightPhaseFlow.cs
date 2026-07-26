@@ -10,8 +10,6 @@ public sealed class NightPhaseFlow
     private readonly VnScreenBindings _screens;
     private readonly ScenarioNodeRunner _nodes;
 
-    public ProgressionTuning Tuning => _content.Tuning;
-
     public NightPhaseFlow(
         GuesthouseContentDB content,
         VnScreenBindings screens,
@@ -24,24 +22,19 @@ public sealed class NightPhaseFlow
 
     public async YarnTask RunNightAsync(CampaignState campaign, int dayNumber)
     {
-        NightPlanRequest request = new(dayNumber, campaign.Maids, Tuning);
-        _screens.UpdateGuesthouseHud(
-            GuesthouseHudSnapshot.ForNight(campaign, dayNumber, null, "밤 처리"));
-
+        NightPlanRequest request = new(dayNumber, campaign.Maids, _content.Tuning);
         NightPlan plan = await _screens.RequestNightPlanAsync(request);
         
         campaign.TryFindMaid(plan.MaidId, out MaidRuntimeState maid);
         NightProgramResult result = RunProgram(maid, plan);
 
-        _screens.UpdateGuesthouseHud(
-            GuesthouseHudSnapshot.ForNight(campaign, dayNumber, maid,
-                plan.Kind == NightProgramKind.ManagedRelease ? "관리된 붕괴" : "회복 처리"));
-
-        await _nodes.PlayNodeAsync(GuesthouseNodeNaming.NightProgram(plan.MaidId, plan.Kind, plan.Axis));
+        await _nodes.PlayNodeAsync(
+            GuesthouseNodeNaming.NightProgram(plan.MaidId, plan.Kind, plan.Axis));
         
         await RunMasteryEventsAsync(campaign, dayNumber);
 
-        await _nodes.PlayNodeAsync(GuesthouseNodeNaming.MaidConversation(dayNumber));
+        await _nodes.PlayNodeAsync(
+            GuesthouseNodeNaming.MaidConversation(dayNumber));
     }
 
     private NightProgramResult RunProgram(MaidRuntimeState maid, NightPlan plan)
@@ -49,19 +42,17 @@ public sealed class NightPhaseFlow
         return plan.Kind switch
         {
             NightProgramKind.ManagedRelease =>
-                NightConversionRule.RunManagedRelease(maid, plan.Axis, Tuning),
+                NightConversionRule.RunManagedRelease(maid, plan.Axis, _content.Tuning),
 
             NightProgramKind.Care =>
-                NightConversionRule.RunCare(maid, plan.Axis, Tuning),
+                NightConversionRule.RunCare(maid, plan.Axis, _content.Tuning),
 
             _ => NightProgramResult.Failed(plan.Kind, maid.MaidId, plan.Axis, "지정되지 않은 처리"),
         };
     }
 
-    /// <summary>
-    /// 경험치가 기준을 넘긴 트랙은 자동으로 레벨이 오르지 않는다.
-    /// 여기서 이벤트를 실제로 소화해야 레벨업이 확정된다.
-    /// </summary>
+    // 경험치가 기준을 넘긴 트랙은 자동으로 레벨이 오르지 않는다.
+    // 여기서 이벤트를 실제로 소화해야 레벨업이 확정된다.
     private async YarnTask RunMasteryEventsAsync(CampaignState campaign, int dayNumber)
     {
         IReadOnlyList<MaidRuntimeState> maids = campaign.Maids;
@@ -73,14 +64,14 @@ public sealed class NightPhaseFlow
             if (maid.IsLost)
                 continue;
 
-            while (maid.TryFindReadyMasteryAxis(Tuning, out BurdenAxis axis))
+            while (maid.TryFindReadyMasteryAxis(_content.Tuning, out BurdenAxis axis))
             {
                 int levelAfter = maid.GetMastery(axis).Level + 1;
 
                 MasteryEventResult result = NightConversionRule.RunMasteryEvent(
                     maid,
                     axis,
-                    Tuning,
+                    _content.Tuning,
                     GuesthouseNodeNaming.MasteryEvent(maid.MaidId, axis, levelAfter));
 
                 if (!result.IsLevelUpCommitted)

@@ -11,7 +11,6 @@ public sealed partial class ServiceSessionFlow
     // 진행 자체는 종족 규약이 결정하고, 개체 시나리오는 더 이상 참조하지 않는다.
     private async YarnTask RunAutonomousCollapseAsync(ServiceSessionState session)
     {
-        Enter(session, ServiceSessionPhase.ControlLost);
         _screens.NotifyControlLost(session);
 
         SpeciesProtocol protocol = session.SpeciesProtocol;
@@ -21,8 +20,6 @@ public sealed partial class ServiceSessionFlow
 
         if (!await TryPlayNodeAsync(session, protocol.ControlLossNodeName))
             return;
-
-        Enter(session, ServiceSessionPhase.AutonomousRunning);
 
         for (int i = 0; i < protocol.AutonomousBeatCount; i++)
         {
