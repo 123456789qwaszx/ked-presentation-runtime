@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using Yarn.Unity;
 
 // 하루 진행.
-// 게시판 → 예약 확정 통화 3건 → (배정 → 접객 → 결산) 3회 → 하루 리포트 → 밤
+// 게시판 목록 → (손님 선택 → 통화 확정 → 배정 → 접객 → 결산) 3회 → 하루 리포트 → 밤
 // 상태 전이는 전부 DayCycleState 가 소유. 이 클래스는 순서와 대기만 담당.
 public sealed class DayCycleFlow
 {
@@ -36,36 +36,36 @@ public sealed class DayCycleFlow
 
     public async YarnTask RunDayAsync(CampaignState campaign)
     {
-        // 인터넷 게시판에 오늘 방문 희망 몬스터 예약 목록 출력
+        // 인터넷 게시판에 오늘 방문 희망 몬스터 목록이 올라온다. 종족과 겉모습만 보인다.
         campaign.BeginDay(_bookingPlanner.CreateDailyBookings(campaign.NextDayNumber));
         DayCycleState dayCycle = campaign.CurrentDay;
 
-        await _screens.RequestReservationSelectionAsync(dayCycle.DayNumber, dayCycle.Bookings);
-
-        // 예약 확정. 수첩 정보 갱신
-        for (int i = 0; i < dayCycle.Bookings.Count; i++)
+        while (dayCycle.HasPendingBooking)
         {
-            ServiceBookingState booking = dayCycle.Bookings[i];
+            // 게시판에서 오늘 받을 손님을 고른다
+            int bookingIndex = 
+                await _screens.RequestReservationSelectionAsync(dayCycle.DayNumber, dayCycle.Bookings);
 
+            ServiceBookingState booking = dayCycle.GetBooking(bookingIndex);
+
+            // 전화로 예약 확정. 이 시점에 대응 타입이 수첩에 기재된다
             await _nodes.PlayNodeAsync(booking.Monster.PhoneCallNodeName);
             campaign.ConfirmBookingByPhone(booking);
-        }
 
-        // 접객 3회: 담당 메이드를 배정 -> 격리실 접객 진행 -> 반응 점수 × 붕괴 배율 결산
-        while (dayCycle.TryGetPendingSlot(out ServiceBookingState pending))
-        {
+            // 담당 메이드 배정
             IReadOnlyList<MaidRuntimeState> candidates =
                 campaign.CollectAssignableMaids(_candidateBuffer);
 
-            MaidAssignmentRequest request = new(pending, candidates, Tuning);
+            var request = new MaidAssignmentRequest(booking, candidates, Tuning);
             string maidId = await _screens.RequestMaidAssignmentAsync(request);
 
             campaign.TryFindMaid(maidId, out MaidRuntimeState maid);
 
-            dayCycle.AssignMaid(pending, maid);
+            dayCycle.AssignMaid(booking, maid);
 
-            ServiceSettlementResult result = await _sessionFlow.RunAsync(campaign, pending, maid);
-            dayCycle.CompleteSlot(result);
+            // 격리실 접객 -> 반응 점수 × 붕괴 배율 결산
+            ServiceSettlementResult result = await _sessionFlow.RunAsync(campaign, booking, maid);
+            dayCycle.CompleteSlot(booking, result);
         }
 
         // 오늘 3회 접객 종료

@@ -61,18 +61,10 @@ public sealed class CampaignState
         CurrentDay = null;
     }
 
-    /// <summary>
-    /// 전화로 예약을 확정한다. 확정과 동시에 그 종족을 만난 것으로 기록된다.
-    /// 이 둘은 항상 함께 일어나므로 한 사건으로 묶는다.
-    /// </summary>
     public void ConfirmBookingByPhone(ServiceBookingState booking)
     {
         booking.ConfirmByPhone();
-
-        MonsterSpecies species = booking.Monster.Species;
-
-        if (species != MonsterSpecies.None)
-            _encounteredSpecies.Add(species);
+        _encounteredSpecies.Add(booking.Monster.Species);
     }
 
     public int CountLostMaids()

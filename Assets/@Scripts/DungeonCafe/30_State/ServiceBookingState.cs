@@ -12,7 +12,6 @@ public sealed class ServiceBookingState
 
     public bool IsConfirmed { get; private set; }
 
-    /// <summary>업무 수첩에 대응 타입이 기재되었는지 여부.</summary>
     public bool IsCodexRevealed { get; private set; }
 
     public string AssignedMaidId { get; private set; }

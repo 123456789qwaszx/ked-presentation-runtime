@@ -65,7 +65,6 @@ public sealed partial class ServiceSessionFlow
         Current = null;
     }
 
-    /// <summary>세션이 중간에 무효화되면 null 을 반환한다.</summary>
     public async YarnTask<ServiceSettlementResult> RunAsync(
         CampaignState campaign,
         ServiceBookingState booking,
@@ -248,9 +247,6 @@ public sealed partial class ServiceSessionFlow
         out ServiceSessionState session)
     {
         session = null;
-
-        if (maid == null || booking?.Monster == null)
-            return false;
 
         MonsterProfile monster = booking.Monster;
 

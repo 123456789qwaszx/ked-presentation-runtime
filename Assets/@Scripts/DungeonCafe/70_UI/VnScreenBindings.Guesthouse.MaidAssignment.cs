@@ -5,8 +5,7 @@ public sealed partial class VnScreenBindings
 {
     private TaskCompletionSource<string> _maidAssignmentCompletion;
 
-    public Task<string> RequestMaidAssignmentAsync(
-        MaidAssignmentRequest request)
+    public Task<string> RequestMaidAssignmentAsync(MaidAssignmentRequest request)
     {
         if (_maidAssignmentCompletion != null)
             throw new InvalidOperationException("메이드 배정 결과를 이미 기다리고 있습니다.");
