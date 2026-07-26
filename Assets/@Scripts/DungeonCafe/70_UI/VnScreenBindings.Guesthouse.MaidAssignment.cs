@@ -12,8 +12,6 @@ public sealed partial class VnScreenBindings
 
     public async YarnTask<string> RequestMaidAssignmentAsync(MaidAssignmentRequest request)
     {
-        CloseBoardIfOpen();
-
         _hasAssignmentResult = false;
         _pendingMaidId = null;
 
@@ -23,7 +21,7 @@ public sealed partial class VnScreenBindings
             panel.Present(request);
         });
 
-        await YarnWait.UntilAsync(() => _hasAssignmentResult);
+        await AsyncWait.UntilAsync(() => _hasAssignmentResult);
 
         ClosePanel();
 

@@ -20,7 +20,7 @@ public sealed partial class VnScreenBindings
             panel.Present(day, _hudTotalEnergy, _hudEnergyQuota);
         });
 
-        await YarnWait.UntilAsync(() => _hasDayReportResult);
+        await AsyncWait.UntilAsync(() => _hasDayReportResult);
 
         ClosePanel();
     }

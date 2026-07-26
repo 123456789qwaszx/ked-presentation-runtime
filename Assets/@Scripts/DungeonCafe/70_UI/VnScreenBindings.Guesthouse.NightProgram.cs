@@ -21,7 +21,7 @@ public sealed partial class VnScreenBindings
             panel.Present(request);
         });
 
-        await YarnWait.UntilAsync(() => _hasNightPlanResult);
+        await AsyncWait.UntilAsync(() => _hasNightPlanResult);
 
         ClosePanel();
 

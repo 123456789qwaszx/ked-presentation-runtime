@@ -20,7 +20,7 @@ public sealed partial class VnScreenBindings
             panel.Present(bookings);
         });
 
-        await YarnWait.UntilAsync(() => _hasCodexResult);
+        await AsyncWait.UntilAsync(() => _hasCodexResult);
 
         ClosePanel();
     }

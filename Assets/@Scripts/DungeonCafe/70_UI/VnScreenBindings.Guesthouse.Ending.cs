@@ -30,7 +30,7 @@ public sealed partial class VnScreenBindings
         if (panel != null)
             panel.AllowDismiss();
 
-        await YarnWait.UntilAsync(() => _hasEndingResult);
+        await AsyncWait.UntilAsync(() => _hasEndingResult);
 
         ClosePanel();
         HideGuesthouseHud();

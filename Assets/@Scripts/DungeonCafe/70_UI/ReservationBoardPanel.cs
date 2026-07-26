@@ -74,34 +74,31 @@ public sealed class ReservationBoardPanel : UIPanel<ReservationBoardPanel.Refs>,
 
     public void Present(int dayNumber, IReadOnlyList<ServiceBookingState> bookings)
     {
-        if (!_valid || bookings == null)
-            return;
-
         _locked = false;
 
-        if (_titleText != null)
+        if (_titleText != null) 
             _titleText.text = $"{dayNumber}일차 예약 문의";
-
-        if (_guideText != null)
+        
+        if (_guideText != null) 
             _guideText.text = "문의를 골라 전화를 걸면 상대가 확정됩니다.";
 
         _entries.Clear();
 
         for (int i = 0; i < bookings.Count; i++)
-            _entries.Add(new GuesthouseOptionEntry(BuildLabel(bookings[i])));
+        {// 확정 전에는 개체 이름과 종족을 감춘다. 게시 문구만 노출.
+            string bookingLabel;
+            
+            if (bookings[i].IsCodexRevealed)
+                bookingLabel = $"{bookings[i].Monster.DisplayName}\n{bookings[i].Monster.ReservationPostText}";
+            else
+                bookingLabel = $"미확인 문의\n{bookings[i].Monster.ReservationPostText}";
+            
+            _entries.Add(new GuesthouseOptionEntry(bookingLabel));
+        }
 
         _list.Rebuild(_entries);
     }
-
-    /// <summary>확정 전에는 개체 이름과 종족을 감춘다. 게시 문구만 노출한다.</summary>
-    private static string BuildLabel(ServiceBookingState booking)
-    {
-        if (booking.IsCodexRevealed)
-            return $"{booking.Monster.DisplayName}\n{booking.Monster.ReservationPostText}";
-
-        return $"미확인 문의\n{booking.Monster.ReservationPostText}";
-    }
-
+    
     private void HandleCardSubmitted(int index)
     {
         if (_locked)

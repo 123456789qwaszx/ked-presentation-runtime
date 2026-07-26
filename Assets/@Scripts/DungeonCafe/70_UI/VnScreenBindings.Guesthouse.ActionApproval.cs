@@ -37,7 +37,7 @@ public sealed partial class VnScreenBindings
             _isApprovalPanelOpen = true;
         }
 
-        await YarnWait.UntilAsync(() => _hasApprovalResult);
+        await AsyncWait.UntilAsync(() => _hasApprovalResult);
 
         return _pendingApprovalIndex;
     }

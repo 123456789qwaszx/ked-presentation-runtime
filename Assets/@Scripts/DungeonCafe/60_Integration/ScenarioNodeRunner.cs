@@ -38,7 +38,8 @@ public sealed class ScenarioNodeRunner
 
         // 러너가 실제로 기동할 때까지 한 프레임 양보한다.
         await YarnTask.Yield();
-        await YarnWait.UntilAsync(() => !_runner.IsDialogueRunning);
+        
+        await AsyncWait.UntilAsync(() => !_runner.IsDialogueRunning);
     }
 
     private bool NodeExists(string nodeName)
