@@ -1,0 +1,35 @@
+/// <summary>
+/// 게시판에 올라온 예약 문의 한 건.
+/// 게시판 단계에서는 종족과 겉모습만, 통화 확정 이후에 대응 타입이 공개된다.
+/// </summary>
+public sealed class ServiceBookingState
+{
+    public MonsterProfile Monster { get; }
+    public int SlotIndex { get; }
+
+    public bool IsConfirmed { get; private set; }
+
+    /// <summary>업무 수첩에 대응 타입이 기재되었는지 여부.</summary>
+    public bool IsCodexRevealed { get; private set; }
+
+    public string AssignedMaidId { get; private set; }
+
+    public ServiceBookingState(MonsterProfile monster, int slotIndex)
+    {
+        Monster = monster;
+        SlotIndex = slotIndex;
+    }
+
+    public bool HasAssignment => !string.IsNullOrEmpty(AssignedMaidId);
+
+    public void ConfirmByPhone()
+    {
+        IsConfirmed = true;
+        IsCodexRevealed = true;
+    }
+
+    public void AssignMaid(string maidId)
+    {
+        AssignedMaidId = maidId;
+    }
+}
