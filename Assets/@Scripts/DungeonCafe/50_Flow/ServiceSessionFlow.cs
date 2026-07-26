@@ -8,20 +8,24 @@ using Yarn.Unity;
 ///   상황 재생 → 메이드가 능력치대로 행동 제안 → 관리자 승인 → 부담/반응 반영 → 통제 권한 재판정
 /// 붕괴 한계를 넘으면 승인 흐름이 끊기고 종족 규약에 따른 자동 사건으로 넘어간다.
 ///
-/// 세션 도중 취소/재시작이 발생할 수 있으므로, await 이후에는 항상 토큰을 검사한 뒤에만
-/// 공유 상태(메이드 붕괴도, 숙련도)를 커밋한다.
+/// 세션은 언제든 Invalidate 로 무효화될 수 있다.
+/// 노드 재생과 화면 대기는 전부 TryPlayNodeAsync / IsCurrent 를 거치며,
+/// 무효화된 뒤에는 Abort 만 호출되고 결과는 커밋되지 않는다.
 /// </summary>
 public sealed partial class ServiceSessionFlow
 {
     private readonly GuesthouseContentDB _content;
     private readonly ServiceOptionSelector _optionSelector;
     private readonly ServiceSettlementCalculator _settlementCalculator;
-    private readonly IServicePresentationPort _presentation;
 
-    /// <summary>표시용 문맥을 잡기 위해서만 참조한다. 판정에는 쓰지 않는다.</summary>
-    public CampaignState Campaign { get; set; }
+    private readonly VnScreenBindings _screens;
+    private readonly ScenarioNodeRunner _nodes;
+    private readonly GuesthouseYarnContext _yarnContext;
 
     private readonly List<ServiceActionOption> _offerBuffer = new();
+
+    /// <summary>표시용 문맥. 판정에는 쓰지 않는다.</summary>
+    private CampaignState _campaign;
 
     private int _runVersion;
 
@@ -33,12 +37,16 @@ public sealed partial class ServiceSessionFlow
 
     public ServiceSessionFlow(
         GuesthouseContentDB content,
-        IServicePresentationPort presentation,
+        VnScreenBindings screens,
+        ScenarioNodeRunner nodes,
+        GuesthouseYarnContext yarnContext = null,
         ServiceOptionSelector optionSelector = null,
         ServiceSettlementCalculator settlementCalculator = null)
     {
         _content = content;
-        _presentation = presentation;
+        _screens = screens;
+        _nodes = nodes;
+        _yarnContext = yarnContext;
         _optionSelector = optionSelector ?? new ServiceOptionSelector();
         _settlementCalculator = settlementCalculator ?? new ServiceSettlementCalculator(content.Tuning);
     }
@@ -57,37 +65,31 @@ public sealed partial class ServiceSessionFlow
         Current = null;
     }
 
-    /// <summary>세션이 중간에 무효화되면 null 을 반환한다.</summary>
     public async YarnTask<ServiceSettlementResult> RunAsync(
-        MaidRuntimeState maid,
-        MonsterProfile monster,
-        int dayNumber,
-        int slotIndex)
+        CampaignState campaign,
+        ServiceBookingState booking,
+        MaidRuntimeState maid)
     {
-        if (!TryBuildSession(maid, monster, dayNumber, slotIndex, out ServiceSessionState session))
+        _campaign = campaign;
+
+        if (!TryBuildSession(booking, maid, campaign.CurrentDay.DayNumber, out ServiceSessionState session))
             return null;
 
-        ServiceSessionToken token = CurrentRun;
+        Enter(session, ServiceSessionPhase.AssignmentCommitted);
 
-        _presentation.NotifySessionContext(session);
-        NotifyHud(session, "입실 준비");
+        if (!await TryPlayNodeAsync(session, ResolveBriefingNode(session)))
+            return Abort(session);
 
-        await _presentation.PlayNodeAsync(ResolveBriefingNode(session));
-
-        if (!IsCurrent(token))
-            return AbortSession(session);
-
-        session.SetPhase(ServiceSessionPhase.BriefingPlayed);
-        session.SetPhase(ServiceSessionPhase.RoomSealed);
+        Enter(session, ServiceSessionPhase.RoomSealed);
 
         session.SetCurrentBeat(session.Scenario.EntryBeat);
 
         while (session.CurrentBeat != null)
         {
-            bool shouldContinue = await RunBeatAsync(session, token);
+            bool shouldContinue = await RunBeatAsync(session);
 
-            if (!IsCurrent(token))
-                return AbortSession(session);
+            if (!IsCurrent(session))
+                return Abort(session);
 
             if (!shouldContinue)
                 break;
@@ -95,20 +97,24 @@ public sealed partial class ServiceSessionFlow
 
         if (!session.IsControlLost)
         {
-            session.SetPhase(ServiceSessionPhase.ScenarioCompleted);
-            await _presentation.PlayNodeAsync(session.Scenario.CompletionNodeName);
+            Enter(session, ServiceSessionPhase.ScenarioCompleted);
 
-            if (!IsCurrent(token))
-                return AbortSession(session);
+            if (!await TryPlayNodeAsync(session, session.Scenario.CompletionNodeName))
+                return Abort(session);
         }
 
+        return await SettleAsync(session);
+    }
+
+    private async YarnTask<ServiceSettlementResult> SettleAsync(ServiceSessionState session)
+    {
         ServiceSettlementResult result = _settlementCalculator.Settle(session);
-        session.SetPhase(ServiceSessionPhase.Settled);
 
-        await _presentation.PresentSettlementAsync(result);
+        Enter(session, ServiceSessionPhase.Settled);
+        await _screens.PresentSettlementAsync(result);
 
-        if (!IsCurrent(token))
-            return AbortSession(session);
+        if (!IsCurrent(session))
+            return Abort(session);
 
         session.SetPhase(ServiceSessionPhase.Completed);
         Current = null;
@@ -116,33 +122,15 @@ public sealed partial class ServiceSessionFlow
         return result;
     }
 
-    /// <summary>
-    /// 상시 표시용 갱신. 노드를 재생하기 직전에만 불린다.
-    /// 진행 문맥(일차/에너지)은 DayCycleFlow 가 세션 진입 전에 주입해 둔다.
-    /// </summary>
-    private void NotifyHud(ServiceSessionState session, string phaseLabel)
-    {
-        if (Campaign == null)
-            return;
-
-        _presentation.NotifyHud(
-            GuesthouseHudSnapshot.ForSession(Campaign, Campaign.CurrentDay, session, phaseLabel));
-    }
-
     /// <summary>다음 비트로 계속 진행할지 여부를 반환한다.</summary>
-    private async YarnTask<bool> RunBeatAsync(ServiceSessionState session, ServiceSessionToken token)
+    private async YarnTask<bool> RunBeatAsync(ServiceSessionState session)
     {
         ServiceBeat beat = session.CurrentBeat;
 
-        _presentation.NotifySessionContext(session);
-        NotifyHud(session, "접객 진행");
+        Enter(session, ServiceSessionPhase.BeatSituationPlayed);
 
-        await _presentation.PlayNodeAsync(beat.SituationNodeName);
-
-        if (!IsCurrent(token))
+        if (!await TryPlayNodeAsync(session, beat.SituationNodeName))
             return false;
-
-        session.SetPhase(ServiceSessionPhase.BeatSituationPlayed);
 
         IReadOnlyList<ServiceActionOption> options =
             _optionSelector.Select(beat, session.Maid, _offerBuffer);
@@ -152,21 +140,12 @@ public sealed partial class ServiceSessionFlow
 
         session.SetPhase(ServiceSessionPhase.OptionsOffered);
 
-        ServiceApprovalRequest request = new(session, beat, options, Tuning);
-        int approvedIndex = await _presentation.RequestActionApprovalAsync(request);
+        ServiceActionOption approved = await ResolveApprovedOptionAsync(session, beat, options);
 
-        if (!IsCurrent(token))
+        if (approved == null)
             return false;
 
-        if (approvedIndex < 0 || approvedIndex >= options.Count)
-            approvedIndex = 0;
-
-        ServiceActionOption approved = options[approvedIndex];
-        session.SetPhase(ServiceSessionPhase.OptionApproved);
-
-        await _presentation.PlayNodeAsync(approved.ApprovalNodeName);
-
-        if (!IsCurrent(token))
+        if (!await TryPlayNodeAsync(session, approved.ApprovalNodeName))
             return false;
 
         ApplyApprovedOption(session, beat, approved);
@@ -174,7 +153,7 @@ public sealed partial class ServiceSessionFlow
 
         if (EvaluateControlAuthority(session))
         {
-            await RunAutonomousCollapseAsync(session, token);
+            await RunAutonomousCollapseAsync(session);
             return false;
         }
 
@@ -182,6 +161,27 @@ public sealed partial class ServiceSessionFlow
             return false;
 
         return TryAdvanceBeat(session, beat, approved);
+    }
+
+    /// <summary>승인 입력을 기다린다. 세션이 무효화되면 null 을 반환한다.</summary>
+    private async YarnTask<ServiceActionOption> ResolveApprovedOptionAsync(
+        ServiceSessionState session,
+        ServiceBeat beat,
+        IReadOnlyList<ServiceActionOption> options)
+    {
+        ServiceApprovalRequest request = new(session, beat, options, Tuning);
+        int index = await _screens.RequestActionApprovalAsync(request);
+
+        if (!IsCurrent(session))
+            return null;
+
+        // 패널이 취소나 범위 밖 값을 돌려주면 첫 번째 제안으로 진행한다.
+        if (index < 0 || index >= options.Count)
+            index = 0;
+
+        session.SetPhase(ServiceSessionPhase.OptionApproved);
+
+        return options[index];
     }
 
     private void ApplyApprovedOption(
@@ -241,16 +241,14 @@ public sealed partial class ServiceSessionFlow
     }
 
     private bool TryBuildSession(
+        ServiceBookingState booking,
         MaidRuntimeState maid,
-        MonsterProfile monster,
         int dayNumber,
-        int slotIndex,
         out ServiceSessionState session)
     {
         session = null;
 
-        if (maid == null || monster == null)
-            return false;
+        MonsterProfile monster = booking.Monster;
 
         if (!_content.TryFindScenarioForMonster(monster, out ServiceScenario scenario))
         {
@@ -277,9 +275,8 @@ public sealed partial class ServiceSessionFlow
             scenario,
             protocol,
             dayNumber,
-            slotIndex);
+            booking.SlotIndex);
 
-        session.SetPhase(ServiceSessionPhase.AssignmentCommitted);
         Current = session;
 
         return true;
@@ -294,7 +291,43 @@ public sealed partial class ServiceSessionFlow
             : authored;
     }
 
-    private ServiceSettlementResult AbortSession(ServiceSessionState session)
+    // ------------------------------------------------------------
+    // 진행 보조
+    // ------------------------------------------------------------
+
+    /// <summary>세션이 아직 유효한가. 토큰은 세션이 들고 있으므로 따로 넘기지 않는다.</summary>
+    private bool IsCurrent(ServiceSessionState session) => IsCurrent(session.Token);
+
+    /// <summary>
+    /// 단계 진입. 페이즈 기록 · 대본 변수 주입 · 표시 갱신이 항상 함께 일어난다.
+    /// 노드를 재생하기 '직전'에 불려야 대사와 표시가 같은 프레임에 나타난다.
+    /// </summary>
+    private void Enter(ServiceSessionState session, ServiceSessionPhase phase)
+    {
+        session.SetPhase(phase);
+
+        _yarnContext?.PushSession(session);
+
+        if (_campaign == null)
+            return;
+
+        _screens.UpdateGuesthouseHud(
+            GuesthouseHudSnapshot.ForSession(
+                _campaign,
+                _campaign.CurrentDay,
+                session,
+                ServiceSessionPhaseLabels.Of(phase)));
+    }
+
+    /// <summary>노드를 재생한다. 재생 도중 세션이 무효화되지 않았으면 true.</summary>
+    private async YarnTask<bool> TryPlayNodeAsync(ServiceSessionState session, string nodeName)
+    {
+        await _nodes.PlayNodeAsync(nodeName);
+
+        return IsCurrent(session);
+    }
+
+    private ServiceSettlementResult Abort(ServiceSessionState session)
     {
         session.SetPhase(ServiceSessionPhase.Aborted);
 

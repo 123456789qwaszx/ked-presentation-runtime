@@ -2,60 +2,57 @@ using Yarn.Unity;
 
 /// <summary>
 /// 캠페인 진행. 3일 × 3접객을 소화한 뒤 엔딩을 확정한다.
+///
+/// 화면 요청은 VnScreenBindings 로, 노드 재생은 ScenarioNodeRunner 로 직접 나간다.
+/// 표현 계층 포트는 두지 않는다. 두 번째 구현을 굴릴 계획이 없으므로 홉만 늘 뿐이다.
 /// </summary>
 public sealed class CampaignFlow
 {
     private readonly GuesthouseContentDB _content;
     private readonly DayCycleFlow _dayFlow;
     private readonly EndingResolver _endingResolver;
-    private readonly IServicePresentationPort _presentation;
+
+    private readonly VnScreenBindings _screens;
+    private readonly ScenarioNodeRunner _nodes;
 
     public CampaignState State { get; private set; }
     public CampaignEndingResult Ending { get; private set; }
 
     public CampaignFlow(
+        GuesthouseContentDB content,
         CampaignState campaignState,
         DayCycleFlow dayFlow,
-        IServicePresentationPort presentation,
-        EndingResolver endingResolver = null)
+        VnScreenBindings screens,
+        ScenarioNodeRunner nodes,
+        EndingResolver endingResolver)
     {
+        _content = content;
         State = campaignState;
         _dayFlow = dayFlow;
-        _presentation = presentation;
+        _screens = screens;
+        _nodes = nodes;
         _endingResolver = endingResolver;
-    }
-
-    public CampaignState BeginCampaign()
-    {
-        State = new CampaignState(_content.Tuning, _content.Maids);
-        Ending = null;
-
-        return State;
     }
 
     public async YarnTask<CampaignEndingResult> RunAsync()
     {
-        if (State == null)
-            BeginCampaign();
-
-        _presentation.ShowHud();
-        _presentation.NotifyHud(
-            GuesthouseHudSnapshot.ForDay(State, State.CurrentDay, "영업 준비"));
+        _screens.ShowGuesthouseHud();
+        _screens.UpdateGuesthouseHud(GuesthouseHudSnapshot.ForDay(State, State.CurrentDay, "영업 준비"));
 
         while (!State.IsFinished)
             await _dayFlow.RunDayAsync(State);
 
         Ending = _endingResolver.Resolve(State);
 
-        _presentation.NotifyHud(
+        _screens.UpdateGuesthouseHud(
             GuesthouseHudSnapshot.ForDay(State, State.CurrentDay, Ending.Title));
 
         // 엔딩 화면을 먼저 띄운 뒤 노드를 재생한다. 순서를 바꾸면 노드가 끝날 때까지 화면이 빈다.
-        _presentation.PresentEnding(Ending, State);
+        _screens.PresentEnding(Ending, State);
 
-        await _presentation.PlayNodeAsync(Ending.NodeName);
+        await _nodes.PlayNodeAsync(Ending.NodeName);
 
-        await _presentation.WaitEndingDismissAsync();
+        await _screens.WaitEndingDismissAsync();
 
         return Ending;
     }

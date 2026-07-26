@@ -2,65 +2,63 @@ using System.Collections.Generic;
 
 /// <summary>
 /// 하루 단위 상태. 예약 3건과 그 결산을 보관한다.
+///
+/// 예약은 생성 시점에 확정된다. '예약 없는 하루'는 존재하지 않는다.
+/// 접객 순서는 플레이어가 정하므로 슬롯은 순차가 아니라 지목으로 소비된다.
+/// 소비 경로는 CompleteSlot 하나뿐이고, 남은 슬롯 수는 결산 건수로만 판단한다.
 /// </summary>
 public sealed class DayCycleState
 {
-    private readonly List<ServiceBookingState> _bookings = new();
+    private readonly List<ServiceBookingState> _bookings;
     private readonly List<ServiceSettlementResult> _settlements = new();
 
     public int DayNumber { get; }
-    public DayPhaseKind Phase { get; private set; } = DayPhaseKind.None;
 
-    /// <summary>현재 처리 중인 예약 슬롯. 0부터 시작한다.</summary>
-    public int SlotCursor { get; private set; }
+    /// <summary>처리를 마친 슬롯 수. 진행 눈금에 쓴다.</summary>
+    public int ResolvedSlotCount => _settlements.Count;
+
+    /// <summary>아직 접객하지 않은 예약이 남아 있는가.</summary>
+    public bool HasPendingBooking => _settlements.Count < _bookings.Count;
+
+    public DayPhaseKind Phase { get; private set; } = DayPhaseKind.None;
 
     public int EnergyEarned { get; private set; }
 
     public IReadOnlyList<ServiceBookingState> Bookings => _bookings;
     public IReadOnlyList<ServiceSettlementResult> Settlements => _settlements;
 
-    public DayCycleState(int dayNumber)
+    public DayCycleState(int dayNumber, IReadOnlyList<ServiceBookingState> bookings)
     {
         DayNumber = dayNumber;
+        _bookings = new List<ServiceBookingState>(bookings);
     }
 
-    public bool HasRemainingSlot => SlotCursor < _bookings.Count;
+    public ServiceBookingState GetBooking(int index) => _bookings[index];
 
-    public ServiceBookingState CurrentBooking
-        => HasRemainingSlot ? _bookings[SlotCursor] : null;
-
-    public void SetPhase(DayPhaseKind phase)
+    // 몬스터 예약과 담당 메이드를 확정.
+    public void AssignMaid(ServiceBookingState booking, MaidRuntimeState maid)
     {
-        Phase = phase;
+        booking.AssignMaid(maid.MaidId);
+        maid.MarkAssigned(DayNumber);
     }
 
-    public void PostBookings(IReadOnlyList<MonsterProfile> monsters)
+    // 접객을 결산까지 마쳤다. 결과 기록과 슬롯 소비가 함께 일어난다.
+    public void CompleteSlot(ServiceBookingState booking, ServiceSettlementResult result)
     {
-        _bookings.Clear();
-        SlotCursor = 0;
-
-        for (int i = 0; i < monsters.Count; i++)
-            _bookings.Add(new ServiceBookingState(monsters[i], i));
-    }
-
-    public void CommitSettlement(ServiceSettlementResult result)
-    {
+        booking.MarkServed(result);
         _settlements.Add(result);
+
         EnergyEarned += result.Energy;
     }
 
-    public void AdvanceSlot()
-    {
-        SlotCursor++;
-    }
-
+    /// <summary>요구 만족도를 채우지 못한 예약 수.</summary>
     public int CountFailedBookings()
     {
         int count = 0;
 
-        for (int i = 0; i < _settlements.Count; i++)
+        for (int i = 0; i < _bookings.Count; i++)
         {
-            if (!_settlements[i].IsSatisfactionMet)
+            if (!_bookings[i].IsSuccessful)
                 count++;
         }
 

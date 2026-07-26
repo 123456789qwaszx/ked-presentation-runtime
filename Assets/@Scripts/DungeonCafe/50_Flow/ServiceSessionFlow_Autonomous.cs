@@ -9,34 +9,30 @@ public sealed partial class ServiceSessionFlow
     // 몬스터의 충동을 자신의 의지로 받아들이기 시작했다는 뜻이기 때문이다.
     //
     // 진행 자체는 종족 규약이 결정하고, 개체 시나리오는 더 이상 참조하지 않는다.
-    private async YarnTask RunAutonomousCollapseAsync(
-        ServiceSessionState session,
-        ServiceSessionToken token)
+    private async YarnTask RunAutonomousCollapseAsync(ServiceSessionState session)
     {
-        session.SetPhase(ServiceSessionPhase.ControlLost);
-        _presentation.NotifyControlLost(session);
+        Enter(session, ServiceSessionPhase.ControlLost);
+        _screens.NotifyControlLost(session);
 
         SpeciesProtocol protocol = session.SpeciesProtocol;
 
         if (protocol == null)
             return;
 
-        await _presentation.PlayNodeAsync(protocol.ControlLossNodeName);
-
-        if (!IsCurrent(token))
+        if (!await TryPlayNodeAsync(session, protocol.ControlLossNodeName))
             return;
 
-        session.SetPhase(ServiceSessionPhase.AutonomousRunning);
+        Enter(session, ServiceSessionPhase.AutonomousRunning);
 
         for (int i = 0; i < protocol.AutonomousBeatCount; i++)
         {
             RunAutonomousBeat(session, protocol);
 
-            if (!IsCurrent(token))
+            if (!IsCurrent(session))
                 return;
         }
 
-        await _presentation.PlayNodeAsync(protocol.CollapseEndingNodeName);
+        await TryPlayNodeAsync(session, protocol.CollapseEndingNodeName);
     }
 
     private void RunAutonomousBeat(ServiceSessionState session, SpeciesProtocol protocol)
@@ -51,8 +47,8 @@ public sealed partial class ServiceSessionFlow
         int satisfaction = session.Encounter.ApplyReaction(reaction, 0);
 
         session.RecordReaction(new ServiceReactionRecord(
-            beat?.BeatKey ?? "autonomous",
-            chosen?.OptionKey ?? "autonomous",
+            beat?.BeatKey ?? AutonomousKey,
+            chosen?.OptionKey ?? AutonomousKey,
             reaction,
             rawLoad,
             applied,
@@ -61,6 +57,8 @@ public sealed partial class ServiceSessionFlow
 
         session.MarkBeatConsumed();
     }
+
+    private const string AutonomousKey = "autonomous";
 
     private static ServiceActionOption PickStrongestReaction(IReadOnlyList<ServiceActionOption> pool)
     {

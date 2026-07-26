@@ -12,42 +12,53 @@ using Yarn.Unity;
 public sealed class NightPhaseFlow
 {
     private readonly GuesthouseContentDB _content;
-    private readonly INightPresentationPort _presentation;
+
+    private readonly VnScreenBindings _screens;
+    private readonly ScenarioNodeRunner _nodes;
 
     public ProgressionTuning Tuning => _content.Tuning;
 
-    public NightPhaseFlow(GuesthouseContentDB content, INightPresentationPort presentation)
+    public NightPhaseFlow(
+        GuesthouseContentDB content,
+        VnScreenBindings screens,
+        ScenarioNodeRunner nodes)
     {
         _content = content;
-        _presentation = presentation;
+        _screens = screens;
+        _nodes = nodes;
     }
 
     public async YarnTask RunNightAsync(CampaignState campaign, int dayNumber)
     {
         NightPlanRequest request = new(dayNumber, campaign.Maids, Tuning);
-        _presentation.NotifyHud(
+        _screens.UpdateGuesthouseHud(
             GuesthouseHudSnapshot.ForNight(campaign, dayNumber, null, "밤 처리"));
 
-        NightPlan plan = await _presentation.RequestNightPlanAsync(request);
+        NightPlan plan = await _screens.RequestNightPlanAsync(request);
 
         if (plan.IsValid && campaign.TryFindMaid(plan.MaidId, out MaidRuntimeState maid))
         {
             NightProgramResult result = RunProgram(maid, plan);
             campaign.TryFindMaid(plan.MaidId, out MaidRuntimeState programMaid);
 
-            _presentation.NotifyHud(
+            _screens.UpdateGuesthouseHud(
                 GuesthouseHudSnapshot.ForNight(
                     campaign,
                     dayNumber,
                     programMaid,
                     plan.Kind == NightProgramKind.ManagedRelease ? "관리된 붕괴" : "회복 처리"));
 
-            await _presentation.PlayNightProgramAsync(plan, result);
+            // 처리가 실패하면 재생할 본편이 없다. 노드 이름을 만들지 않고 그대로 넘어간다.
+            if (result.IsSuccess)
+            {
+                await _nodes.PlayNodeAsync(
+                    GuesthouseNodeNaming.NightProgram(plan.MaidId, plan.Kind, plan.Axis));
+            }
         }
 
         await RunMasteryEventsAsync(campaign, dayNumber);
 
-        await _presentation.PlayMaidConversationAsync(dayNumber);
+        await _nodes.PlayNodeAsync(GuesthouseNodeNaming.MaidConversation(dayNumber));
     }
 
     private NightProgramResult RunProgram(MaidRuntimeState maid, NightPlan plan)
@@ -92,10 +103,10 @@ public sealed class NightPhaseFlow
                 if (!result.IsLevelUpCommitted)
                     break;
 
-                _presentation.NotifyHud(
+                _screens.UpdateGuesthouseHud(
                     GuesthouseHudSnapshot.ForNight(campaign, dayNumber, maid, "업무 숙련"));
 
-                await _presentation.PlayMasteryEventAsync(result);
+                await _nodes.PlayNodeAsync(result.EventNodeName);
             }
         }
     }

@@ -9,8 +9,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 321575d785ce7a44e89f3d2c7634689e, type: 3}
-  m_Name: GuesthouseContentBundle_Demo
+  m_Script: {fileID: 11500000, guid: 4d73a6e2b39f5bd4180e32331db3d676, type: 3}
+  m_Name: GuesthouseContentBundle
   m_EditorClassIdentifier: Assembly-CSharp::GuesthouseContentBundleSO
   tuning: {fileID: 0}
   maidDb: {fileID: 0}

@@ -87,7 +87,7 @@ public readonly struct GuesthouseHudSnapshot
         return new GuesthouseHudSnapshot(
             dayNumber: day != null ? day.DayNumber : campaign.NextDayNumber,
             dayCount: campaign.Tuning.CampaignDayCount,
-            slotIndex: day != null ? day.SlotCursor : 0,
+            slotIndex: day != null ? day.ResolvedSlotCount : 0,
             slotCount: campaign.Tuning.ServicesPerDay,
             energyToday: day != null ? day.EnergyEarned : 0,
             energyTotal: campaign.TotalEnergy,
@@ -119,7 +119,7 @@ public readonly struct GuesthouseHudSnapshot
         return new GuesthouseHudSnapshot(
             dayNumber: day != null ? day.DayNumber : campaign.NextDayNumber,
             dayCount: campaign.Tuning.CampaignDayCount,
-            slotIndex: day != null ? day.SlotCursor : 0,
+            slotIndex: day != null ? day.ResolvedSlotCount : 0,
             slotCount: campaign.Tuning.ServicesPerDay,
             energyToday: day != null ? day.EnergyEarned : 0,
             energyTotal: campaign.TotalEnergy,

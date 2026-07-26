@@ -17,16 +17,10 @@ public sealed class ScenarioNodeRunner
         _runner = runner;
     }
 
-    public bool IsRunning => _runner != null && _runner.IsDialogueRunning;
-
     public async YarnTask PlayNodeAsync(string nodeName)
     {
-        if (_runner == null || string.IsNullOrWhiteSpace(nodeName))
-            return;
-
-        if (!NodeExists(nodeName))
+        if (!_runner.Dialogue.NodeExists(nodeName))
         {
-            // 데모 단계에서는 미작성 노드가 흐름을 끊지 않도록 경고만 남기고 통과시킨다.
             Debug.LogWarning($"[ScenarioNodeRunner] Node not found. node={nodeName}");
             return;
         }
@@ -35,14 +29,5 @@ public sealed class ScenarioNodeRunner
             await _runner.Stop();
 
         await _runner.StartDialogue(nodeName);
-
-        // 러너가 실제로 기동할 때까지 한 프레임 양보한다.
-        await YarnTask.Yield();
-        await YarnWait.UntilAsync(() => !_runner.IsDialogueRunning);
-    }
-
-    private bool NodeExists(string nodeName)
-    {
-        return _runner.Dialogue != null && _runner.Dialogue.NodeExists(nodeName);
     }
 }
