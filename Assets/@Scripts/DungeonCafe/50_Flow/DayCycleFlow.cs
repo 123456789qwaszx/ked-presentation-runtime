@@ -47,10 +47,8 @@ public sealed class DayCycleFlow
         while (day.TryGetPendingSlot(out ServiceBookingState booking))
             await RunSlotAsync(campaign, day, booking);
 
-        Enter(campaign, day, DayPhaseKind.DayReport);
         await _screens.PresentDayReportAsync(day);
 
-        Enter(campaign, day, DayPhaseKind.Night);
         await _nightFlow.RunNightAsync(campaign, day.DayNumber);
 
         campaign.CompleteDay();
@@ -58,12 +56,8 @@ public sealed class DayCycleFlow
 
     private async YarnTask RunReservationsAsync(CampaignState campaign, DayCycleState day)
     {
-        Enter(campaign, day, DayPhaseKind.ReservationBoard);
-
         day.PostBookings(_bookingPlanner.PlanBookings(campaign, day.DayNumber, Tuning.ServicesPerDay));
         await _screens.RequestReservationSelectionAsync(day.DayNumber, day.Bookings);
-
-        Enter(campaign, day, DayPhaseKind.ReservationCall);
 
         for (int i = 0; i < day.Bookings.Count; i++)
         {
@@ -79,18 +73,10 @@ public sealed class DayCycleFlow
         DayCycleState day,
         ServiceBookingState booking)
     {
-        Enter(campaign, day, DayPhaseKind.MaidAssignment);
-
         MaidRuntimeState maid = await ResolveAssignedMaidAsync(campaign, booking);
-
         day.AssignMaid(booking, maid);
 
-        Enter(campaign, day, DayPhaseKind.ServiceSession);
-
         ServiceSettlementResult result = await _sessionFlow.RunAsync(campaign, booking, maid);
-
-
-        Enter(campaign, day, DayPhaseKind.ServiceSettlement);
         day.CompleteSlot(result);
     }
 
@@ -111,14 +97,5 @@ public sealed class DayCycleFlow
             return maid;
 
         return candidates[0];
-    }
-
-    /// <summary>단계 진입. 페이즈 기록과 표시 갱신이 항상 함께 일어난다.</summary>
-    private void Enter(CampaignState campaign, DayCycleState day, DayPhaseKind phase)
-    {
-        day.SetPhase(phase);
-
-        _screens.UpdateGuesthouseHud(
-            GuesthouseHudSnapshot.ForDay(campaign, day, DayPhaseLabels.Of(phase)));
     }
 }
