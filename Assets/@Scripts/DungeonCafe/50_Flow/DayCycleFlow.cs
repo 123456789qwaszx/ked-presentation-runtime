@@ -6,7 +6,6 @@ using Yarn.Unity;
 // 상태 전이는 전부 DayCycleState 가 소유. 이 클래스는 순서와 대기만 담당.
 public sealed class DayCycleFlow
 {
-    private readonly GuesthouseContentDB _content;
     private readonly BookingPlanner _bookingPlanner;
     private readonly ServiceSessionFlow _sessionFlow;
     private readonly NightPhaseFlow _nightFlow;
@@ -16,17 +15,13 @@ public sealed class DayCycleFlow
 
     private readonly List<MaidRuntimeState> _candidateBuffer = new();
 
-    public ProgressionTuning Tuning => _content.Tuning;
-
     public DayCycleFlow(
-        GuesthouseContentDB content,
         BookingPlanner bookingPlanner,
         ServiceSessionFlow sessionFlow,
         NightPhaseFlow nightFlow,
         VnScreenBindings screens,
         ScenarioNodeRunner nodes)
     {
-        _content = content;
         _bookingPlanner = bookingPlanner;
         _sessionFlow = sessionFlow;
         _nightFlow = nightFlow;
@@ -56,12 +51,10 @@ public sealed class DayCycleFlow
             IReadOnlyList<MaidRuntimeState> candidates =
                 campaign.CollectAssignableMaids(_candidateBuffer);
 
-            var request = new MaidAssignmentRequest(booking, candidates, Tuning);
+            var request = new MaidAssignmentRequest(booking, candidates);
             string maidId = await _screens.RequestMaidAssignmentAsync(request);
 
             campaign.TryFindMaid(maidId, out MaidRuntimeState maid);
-
-            dayCycle.AssignMaid(booking, maid);
 
             // 격리실 접객 -> 반응 점수 × 붕괴 배율 결산
             ServiceSettlementResult result = await _sessionFlow.RunAsync(campaign, booking, maid);

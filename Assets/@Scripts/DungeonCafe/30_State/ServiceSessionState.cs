@@ -18,7 +18,6 @@ public sealed class ServiceSessionState
     public SpeciesProtocol SpeciesProtocol { get; }
 
     public int DayNumber { get; }
-    public int SlotIndex { get; }
 
     public ServiceSessionPhase Phase { get; private set; } = ServiceSessionPhase.None;
     public ControlAuthorityStatus ControlStatus { get; private set; } = ControlAuthorityStatus.Delegated;
@@ -46,8 +45,7 @@ public sealed class ServiceSessionState
         MonsterEncounterState encounter,
         ServiceScenario scenario,
         SpeciesProtocol speciesProtocol,
-        int dayNumber,
-        int slotIndex)
+        int dayNumber)
     {
         Token = token;
         Maid = maid;
@@ -55,7 +53,6 @@ public sealed class ServiceSessionState
         Scenario = scenario;
         SpeciesProtocol = speciesProtocol;
         DayNumber = dayNumber;
-        SlotIndex = slotIndex;
     }
 
     public void SetPhase(ServiceSessionPhase phase)

@@ -1,4 +1,5 @@
-using Yarn.Unity;
+using System;
+using System.Threading.Tasks;
 
 /// <summary>
 /// 밤 처리 선택. 회복과 관리 붕괴 중 하나를 고른다.
@@ -7,25 +8,37 @@ using Yarn.Unity;
 /// </summary>
 public sealed partial class VnScreenBindings
 {
-    private NightPlan _pendingNightPlan;
+    private bool _isWaitingNightPlan;
     private bool _hasNightPlanResult;
+    private NightPlan _pendingNightPlan;
 
-    public async YarnTask<NightPlan> RequestNightPlanAsync(NightPlanRequest request)
+    public async Task<NightPlan> RequestNightPlanAsync(NightPlanRequest request)
     {
-        _hasNightPlanResult = false;
-        _pendingNightPlan = NightPlan.None;
+        // 값 반환 패널만 검사를 둔다
+        if (_isWaitingNightPlan)
+            throw new InvalidOperationException("밤 처리 선택을 이미 기다리고 있습니다.");
 
+        _isWaitingNightPlan = true;
+        _hasNightPlanResult = false;
+        _pendingNightPlan = default;
+
+        OpenNightProgramPanel(request);
+
+        await AsyncWait.UntilAsync(() => _hasNightPlanResult);
+
+        ClosePanel();
+        _isWaitingNightPlan = false;
+
+        return _pendingNightPlan;
+    }
+
+    private void OpenNightProgramPanel(NightPlanRequest request)
+    {
         UI.PushPanel<NightProgramPanel>(panel =>
         {
             BindPanel(panel, ApplyNightProgramBindings);
             panel.Present(request);
         });
-
-        await AsyncWait.UntilAsync(() => _hasNightPlanResult);
-
-        ClosePanel();
-
-        return _pendingNightPlan;
     }
 
     private void ApplyNightProgramBindings(NightProgramPanel panel)

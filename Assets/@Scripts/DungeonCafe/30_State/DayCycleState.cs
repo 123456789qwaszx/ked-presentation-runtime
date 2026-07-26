@@ -19,9 +19,7 @@ public sealed class DayCycleState
 
     /// <summary>아직 접객하지 않은 예약이 남아 있는가.</summary>
     public bool HasPendingBooking => _settlements.Count < _bookings.Count;
-
-    public DayPhaseKind Phase { get; private set; } = DayPhaseKind.None;
-
+    
     public int EnergyEarned { get; private set; }
 
     public IReadOnlyList<ServiceBookingState> Bookings => _bookings;
@@ -35,13 +33,6 @@ public sealed class DayCycleState
 
     public ServiceBookingState GetBooking(int index) => _bookings[index];
 
-    // 몬스터 예약과 담당 메이드를 확정.
-    public void AssignMaid(ServiceBookingState booking, MaidRuntimeState maid)
-    {
-        booking.AssignMaid(maid.MaidId);
-        maid.MarkAssigned(DayNumber);
-    }
-
     // 접객을 결산까지 마쳤다. 결과 기록과 슬롯 소비가 함께 일어난다.
     public void CompleteSlot(ServiceBookingState booking, ServiceSettlementResult result)
     {
@@ -49,20 +40,6 @@ public sealed class DayCycleState
         _settlements.Add(result);
 
         EnergyEarned += result.Energy;
-    }
-
-    /// <summary>요구 만족도를 채우지 못한 예약 수.</summary>
-    public int CountFailedBookings()
-    {
-        int count = 0;
-
-        for (int i = 0; i < _bookings.Count; i++)
-        {
-            if (!_bookings[i].IsSuccessful)
-                count++;
-        }
-
-        return count;
     }
 
     public int CountIncidents()

@@ -4,11 +4,9 @@ using UnityEngine;
 using UnityEngine.UI;
 using static UIRefValidation;
 
-/// <summary>
-/// 하루 업무 종료 리포트.
-/// 결산 수치를 항목별로 분리해 보여주고, 밤 구간으로 넘어가는 확인만 받는다.
-/// </summary>
-public sealed class DayReportPanel : UIPanel<DayReportPanel.Refs>, IManagedUI
+// 하루 업무 종료 리포트.
+// 결산 수치를 항목별로 분리해 보여주고, 밤 구간으로 넘어가는 확인만 받는다.
+public sealed class DayReportPanel : UIPanel<DayReportPanel.Refs>
 {
     public event Action OnConfirmed;
 
@@ -21,7 +19,6 @@ public sealed class DayReportPanel : UIPanel<DayReportPanel.Refs>, IManagedUI
         Report_Title_Text,
         Report_Energy_Text,
         Report_Progress_Text,
-        Report_Failed_Text,
         Report_Incident_Text,
         Report_Note_Text,
 
@@ -32,7 +29,6 @@ public sealed class DayReportPanel : UIPanel<DayReportPanel.Refs>, IManagedUI
     private TMP_Text _titleText;
     private TMP_Text _energyText;
     private TMP_Text _progressText;
-    private TMP_Text _failedText;
     private TMP_Text _incidentText;
     private TMP_Text _noteText;
     private Button _confirmButton;
@@ -46,7 +42,6 @@ public sealed class DayReportPanel : UIPanel<DayReportPanel.Refs>, IManagedUI
         _titleText = View.Text(Refs.Report_Title_Text);
         _energyText = View.Text(Refs.Report_Energy_Text);
         _progressText = View.Text(Refs.Report_Progress_Text);
-        _failedText = View.Text(Refs.Report_Failed_Text);
         _incidentText = View.Text(Refs.Report_Incident_Text);
         _noteText = View.Text(Refs.Report_Note_Text);
         _confirmButton = View.Button(Refs.ReportConfirmButton);
@@ -75,7 +70,6 @@ public sealed class DayReportPanel : UIPanel<DayReportPanel.Refs>, IManagedUI
         if (!_valid || day == null)
             return;
 
-        int failed = day.CountFailedBookings();
         int incidents = day.CountIncidents();
 
         if (_titleText != null)
@@ -87,9 +81,6 @@ public sealed class DayReportPanel : UIPanel<DayReportPanel.Refs>, IManagedUI
         if (_progressText != null)
             _progressText.text = $"누적  {totalEnergy} / {energyQuota}";
 
-        if (_failedText != null)
-            _failedText.text = $"성사 실패  {failed}건";
-
         if (_incidentText != null)
             _incidentText.text = $"통제 상실  {incidents}건";
 
@@ -97,7 +88,6 @@ public sealed class DayReportPanel : UIPanel<DayReportPanel.Refs>, IManagedUI
             _noteText.text = BuildNote(incidents, totalEnergy, energyQuota);
     }
 
-    /// <summary>수치 나열만으로는 읽히지 않는 부분을 한 줄로 보완한다.</summary>
     private static string BuildNote(int incidents, int totalEnergy, int energyQuota)
     {
         if (incidents > 0)

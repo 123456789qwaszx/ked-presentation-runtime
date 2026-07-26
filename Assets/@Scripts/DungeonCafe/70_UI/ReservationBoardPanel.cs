@@ -88,7 +88,7 @@ public sealed class ReservationBoardPanel : UIPanel<ReservationBoardPanel.Refs>,
         {// 확정 전에는 개체 이름과 종족을 감춘다. 게시 문구만 노출.
             string bookingLabel;
             
-            if (bookings[i].IsCodexRevealed)
+            if (bookings[i].IsConfirmed)
                 bookingLabel = $"{bookings[i].Monster.DisplayName}\n{bookings[i].Monster.ReservationPostText}";
             else
                 bookingLabel = $"미확인 문의\n{bookings[i].Monster.ReservationPostText}";

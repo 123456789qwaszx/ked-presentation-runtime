@@ -15,12 +15,6 @@ public sealed class MaidRuntimeState
     public string DisplayName => Profile.DisplayName;
     public AxisTriple Aptitude => Profile.Aptitude;
 
-    /// <summary>이번 캠페인에서 배정된 횟수.</summary>
-    public int AssignmentCount { get; private set; }
-
-    /// <summary>마지막으로 배정된 날. 0이면 미배정.</summary>
-    public int LastAssignedDay { get; private set; }
-
     /// <summary>통제 상실까지 간 접객 횟수.</summary>
     public int IncidentCount { get; private set; }
 
@@ -45,12 +39,6 @@ public sealed class MaidRuntimeState
     /// 통제 상실 후 회수되지 못한 메이드는 배정 후보에서 제외한다.
     /// </summary>
     public bool CanBeAssigned => !IsLost;
-
-    public void MarkAssigned(int day)
-    {
-        AssignmentCount++;
-        LastAssignedDay = day;
-    }
 
     public void MarkIncident(bool recovered)
     {

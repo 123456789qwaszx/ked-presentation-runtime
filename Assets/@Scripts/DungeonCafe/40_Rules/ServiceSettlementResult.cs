@@ -11,7 +11,6 @@ public sealed class ServiceSettlementResult
     public MonsterSpecies Species { get; private set; }
 
     public int DayNumber { get; private set; }
-    public int SlotIndex { get; private set; }
 
     // ---- 반응 ----
     public int GreatlySatisfiedCount { get; private set; }
@@ -63,7 +62,6 @@ public sealed class ServiceSettlementResult
             Species = session.Monster.Species,
 
             DayNumber = session.DayNumber,
-            SlotIndex = session.SlotIndex,
 
             GreatlySatisfiedCount = greatlySatisfiedCount,
             SatisfiedCount = satisfiedCount,

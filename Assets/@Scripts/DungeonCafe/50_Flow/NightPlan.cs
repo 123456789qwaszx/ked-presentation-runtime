@@ -14,8 +14,4 @@ public readonly struct NightPlan
         MaidId = maidId;
         Axis = axis;
     }
-
-    public bool IsValid => Kind != NightProgramKind.None && !string.IsNullOrEmpty(MaidId);
-
-    public static NightPlan None => default;
 }

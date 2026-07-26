@@ -1,25 +1,25 @@
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 public sealed partial class VnScreenBindings
 {
-    private TaskCompletionSource<int> _boardSelectionCompletion;
+    private bool _hasBoardResult;
+    private int _pendingBoardIndex;
 
-    public Task<int> RequestReservationSelectionAsync(
+    public async Task<int> RequestReservationSelectionAsync(
         int dayNumber,
         IReadOnlyList<ServiceBookingState> bookings)
     {
-        if (_boardSelectionCompletion != null)
-            throw new InvalidOperationException("예약 게시판의 선택을 이미 기다리고 있습니다.");
-        
-        // TrySetResult()가 await 이후 코드를 그 자리에서 즉시 끼워 넣지 못하게 해서, 현재 HandleBookingSelected()를 끝까지 실행
-        _boardSelectionCompletion =
-            new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
+        _hasBoardResult = false;
+        _pendingBoardIndex = 0;
 
         OpenReservationBoardPanel(dayNumber, bookings);
 
-        return _boardSelectionCompletion.Task;
+        await AsyncWait.UntilAsync(() => _hasBoardResult);
+
+        ClosePanel();
+
+        return _pendingBoardIndex;
     }
 
     private void OpenReservationBoardPanel(
@@ -42,12 +42,7 @@ public sealed partial class VnScreenBindings
 
     private void HandleBookingSelected(int index)
     {
-        if (_boardSelectionCompletion == null)
-            return;
-        
-        _boardSelectionCompletion.TrySetResult(index);
-        
-        ClosePanel();
-        _boardSelectionCompletion = null;
+        _pendingBoardIndex = index;
+        _hasBoardResult = true;
     }
 }
