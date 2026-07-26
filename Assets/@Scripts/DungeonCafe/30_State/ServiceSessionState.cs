@@ -40,14 +40,12 @@ public sealed class ServiceSessionState
     public MonsterProfile Monster => Encounter.Monster;
 
     public ServiceSessionState(
-        ServiceSessionToken token,
         MaidRuntimeState maid,
         MonsterEncounterState encounter,
         ServiceScenario scenario,
         SpeciesProtocol speciesProtocol,
         int dayNumber)
     {
-        Token = token;
         Maid = maid;
         Encounter = encounter;
         Scenario = scenario;

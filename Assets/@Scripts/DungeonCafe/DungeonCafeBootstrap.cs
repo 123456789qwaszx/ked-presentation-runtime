@@ -26,7 +26,14 @@ public class DungeonCafeBootstrap : MonoBehaviour
 
         ScenarioNodeRunner nodes = new(dialogueRunner);
 
-        ServiceSessionFlow session = new(content, screens, nodes);
+        ServiceOptionSelector serviceOptionSelector = new();
+        ServiceSettlementCalculator settlementCalculator = new(content.Tuning);
+        ServiceSessionFlow session = new(
+            content, 
+            screens, 
+            nodes, 
+            serviceOptionSelector, 
+            settlementCalculator);
 
         NightPhaseFlow nightFlow = new(content, screens, nodes);
 

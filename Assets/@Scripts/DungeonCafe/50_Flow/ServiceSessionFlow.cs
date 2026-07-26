@@ -1,17 +1,10 @@
+using System;
 using System.Collections.Generic;
-using Yarn.Unity;
+using System.Threading.Tasks;
 
-/// <summary>
-/// 접객 1회(입실 ~ 결산)를 진행한다.
-///
-/// 흐름은 항상 다음 순서를 따른다.
-///   상황 재생 → 메이드가 능력치대로 행동 제안 → 관리자 승인 → 부담/반응 반영 → 통제 권한 재판정
-/// 붕괴 한계를 넘으면 승인 흐름이 끊기고 종족 규약에 따른 자동 사건으로 넘어간다.
-///
-/// 세션은 언제든 Invalidate 로 무효화될 수 있다.
-/// 노드 재생과 화면 대기는 전부 TryPlayNodeAsync / IsCurrent 를 거치며,
-/// 무효화된 뒤에는 Abort 만 호출되고 결과는 커밋되지 않는다.
-/// </summary>
+// 접객 1회. 입실 → 비트 반복 → 결산.
+// 비트 하나는 상황 재생 → 메이드 제안 → 관리자 승인 → 부담과 반응 반영이다.
+// 붕괴 한계를 넘으면 개입이 끊기고 종족 규약이 진행을 가져간다.
 public sealed partial class ServiceSessionFlow
 {
     private readonly GuesthouseContentDB _content;
@@ -20,151 +13,94 @@ public sealed partial class ServiceSessionFlow
 
     private readonly VnScreenBindings _screens;
     private readonly ScenarioNodeRunner _nodes;
-    
+
     private readonly List<ServiceActionOption> _offerBuffer = new();
-
-    private int _runVersion;
-
-    public ServiceSessionState Current { get; private set; }
-
-    public ProgressionTuning Tuning => _content.Tuning;
-
-    public ServiceSessionToken CurrentRun => new(_runVersion);
 
     public ServiceSessionFlow(
         GuesthouseContentDB content,
         VnScreenBindings screens,
         ScenarioNodeRunner nodes,
-        ServiceOptionSelector optionSelector = null,
-        ServiceSettlementCalculator settlementCalculator = null)
+        ServiceOptionSelector optionSelector,
+        ServiceSettlementCalculator settlementCalculator)
     {
         _content = content;
         _screens = screens;
         _nodes = nodes;
-        _optionSelector = optionSelector ?? new ServiceOptionSelector();
-        _settlementCalculator = settlementCalculator ?? new ServiceSettlementCalculator(content.Tuning);
+        _optionSelector = optionSelector;
+        _settlementCalculator = settlementCalculator;
     }
 
-    public bool IsCurrent(ServiceSessionToken token) => token.Version == _runVersion;
-
-    /// <summary>진행 중인 세션을 무효화한다. 이후 도착하는 콜백은 커밋되지 않는다.</summary>
-    public void Invalidate()
-    {
-        _runVersion++;
-
-        if (Current == null)
-            return;
-
-        Current.SetPhase(ServiceSessionPhase.Aborted);
-        Current = null;
-    }
-
-    public async YarnTask<ServiceSettlementResult> RunAsync(
+    public async Task<ServiceSettlementResult> RunAsync(
         CampaignState campaign,
         ServiceBookingState booking,
         MaidRuntimeState maid)
     {
-        if (!TryBuildSession(booking, maid, campaign.CurrentDay.DayNumber, out ServiceSessionState session))
-            return null;
+        ServiceSessionState session = OpenSession(booking, maid, campaign.CurrentDay.DayNumber);
 
-        if (!await TryPlayNodeAsync(session, ResolveBriefingNode(session)))
-            return Abort(session);
+        // 입실. 격리실이 봉인되고 이후 개입은 승인으로만 가능하다
+        await _nodes.PlayNodeAsync(ResolveBriefingNode(session));
 
         session.SetCurrentBeat(session.Scenario.EntryBeat);
 
         while (session.CurrentBeat != null)
         {
-            bool shouldContinue = await RunBeatAsync(session);
+            ServiceBeat beat = session.CurrentBeat;
 
-            if (!IsCurrent(session))
-                return Abort(session);
+            // 상황 재생
+            await _nodes.PlayNodeAsync(beat.SituationNodeName);
 
-            if (!shouldContinue)
+            // 메이드가 능력치대로 제안하고, 관리자가 그중 하나를 승인한다
+            IReadOnlyList<ServiceActionOption> options =
+                _optionSelector.Select(beat, session.Maid, _offerBuffer);
+
+            ServiceApprovalRequest request = new(session, beat, options, _content.Tuning);
+            int approvedIndex = await _screens.RequestActionApprovalAsync(request);
+
+            ServiceActionOption approved = options[approvedIndex];
+
+            await _nodes.PlayNodeAsync(approved.ApprovalNodeName);
+
+            // 부담 누적과 몬스터 반응을 함께 기록한다
+            ApplyApprovedOption(session, beat, approved);
+
+            // 통제 신호가 거부되면 여기서 개입이 끝난다
+            if (HasLostControl(session))
+            {
+                await RunAutonomousCollapseAsync(session);
                 break;
+            }
+
+            session.SetCurrentBeat(ResolveNextBeat(session, beat, approved));
         }
 
+        // 통제를 지킨 접객만 마무리 대사를 받는다
         if (!session.IsControlLost)
-        {
-            if (!await TryPlayNodeAsync(session, session.Scenario.CompletionNodeName))
-                return Abort(session);
-        }
+            await _nodes.PlayNodeAsync(session.Scenario.CompletionNodeName);
 
-        return await SettleAsync(session);
-    }
-
-    private async YarnTask<ServiceSettlementResult> SettleAsync(ServiceSessionState session)
-    {
+        // 반응 점수 × 붕괴 배율 결산
         ServiceSettlementResult result = _settlementCalculator.Settle(session);
 
         await _screens.PresentSettlementAsync(result);
 
-        if (!IsCurrent(session))
-            return Abort(session);
-
-        session.SetPhase(ServiceSessionPhase.Completed);
-        Current = null;
-
         return result;
     }
 
-    /// <summary>다음 비트로 계속 진행할지 여부를 반환한다.</summary>
-    private async YarnTask<bool> RunBeatAsync(ServiceSessionState session)
-    {
-        ServiceBeat beat = session.CurrentBeat;
-
-        if (!await TryPlayNodeAsync(session, beat.SituationNodeName))
-            return false;
-
-        IReadOnlyList<ServiceActionOption> options =
-            _optionSelector.Select(beat, session.Maid, _offerBuffer);
-
-        if (options.Count == 0)
-            return false;
-
-        session.SetPhase(ServiceSessionPhase.OptionsOffered);
-
-        ServiceActionOption approved = await ResolveApprovedOptionAsync(session, beat, options);
-
-        if (approved == null)
-            return false;
-
-        if (!await TryPlayNodeAsync(session, approved.ApprovalNodeName))
-            return false;
-
-        ApplyApprovedOption(session, beat, approved);
-        session.SetPhase(ServiceSessionPhase.OptionResolved);
-
-        if (EvaluateControlAuthority(session))
-        {
-            await RunAutonomousCollapseAsync(session);
-            return false;
-        }
-
-        if (approved.IsTerminalAction || beat.IsTerminal || session.IsScenarioExhausted)
-            return false;
-
-        return TryAdvanceBeat(session, beat, approved);
-    }
-
-    /// <summary>승인 입력을 기다린다. 세션이 무효화되면 null 을 반환한다.</summary>
-    private async YarnTask<ServiceActionOption> ResolveApprovedOptionAsync(
+    /// <summary>다음 비트. null 이면 시나리오가 끝났다는 뜻이다.</summary>
+    private static ServiceBeat ResolveNextBeat(
         ServiceSessionState session,
-        ServiceBeat beat,
-        IReadOnlyList<ServiceActionOption> options)
+        ServiceBeat current,
+        ServiceActionOption approved)
     {
-        ServiceApprovalRequest request = new(session, beat, options, Tuning);
-        int index = await _screens.RequestActionApprovalAsync(request);
-
-        if (!IsCurrent(session))
+        if (approved.IsTerminalAction || current.IsTerminal || session.IsScenarioExhausted)
             return null;
 
-        // 패널이 취소나 범위 밖 값을 돌려주면 첫 번째 제안으로 진행한다.
-        if (index < 0 || index >= options.Count)
-            index = 0;
+        if (approved.HasExplicitNextBeat &&
+            session.Scenario.TryFindBeat(approved.NextBeatKey, out ServiceBeat branched))
+            return branched;
 
-        session.SetPhase(ServiceSessionPhase.OptionApproved);
-
-        return options[index];
+        return session.Scenario.TryFindNextInOrder(current.BeatKey, out ServiceBeat next)
+            ? next
+            : null;
     }
 
     private void ApplyApprovedOption(
@@ -172,7 +108,7 @@ public sealed partial class ServiceSessionFlow
         ServiceBeat beat,
         ServiceActionOption option)
     {
-        AxisTriple applied = BurdenAccrualRule.Apply(session.Maid, option.Load, Tuning);
+        AxisTriple applied = BurdenAccrualRule.Apply(session.Maid, option.Load, _content.Tuning);
 
         int satisfaction = session.Encounter.ApplyReaction(option.Reaction, option.SatisfactionBonus);
 
@@ -188,12 +124,12 @@ public sealed partial class ServiceSessionFlow
         session.MarkBeatConsumed();
     }
 
-    /// <summary>통제 상실이 발생했으면 true.</summary>
-    private bool EvaluateControlAuthority(ServiceSessionState session)
+    /// <summary>붕괴 한계를 넘겨 통제 신호가 거부되었는가.</summary>
+    private bool HasLostControl(ServiceSessionState session)
     {
         ControlAuthorityStatus status = ControlAuthorityRule.Evaluate(
             session.Maid.Burden,
-            Tuning,
+            _content.Tuning,
             out BurdenAxis breachAxis);
 
         session.SetControlStatus(status, breachAxis);
@@ -201,67 +137,32 @@ public sealed partial class ServiceSessionFlow
         return status == ControlAuthorityStatus.Lost;
     }
 
-    private bool TryAdvanceBeat(
-        ServiceSessionState session,
-        ServiceBeat currentBeat,
-        ServiceActionOption approved)
-    {
-        if (approved.HasExplicitNextBeat &&
-            session.Scenario.TryFindBeat(approved.NextBeatKey, out ServiceBeat branched))
-        {
-            session.SetCurrentBeat(branched);
-            return true;
-        }
-
-        if (session.Scenario.TryFindNextInOrder(currentBeat.BeatKey, out ServiceBeat next))
-        {
-            session.SetCurrentBeat(next);
-            return true;
-        }
-
-        session.SetCurrentBeat(null);
-        return false;
-    }
-
-    private bool TryBuildSession(
+    /// <summary>시나리오와 종족 규약을 묶어 세션을 연다. 콘텐츠가 어긋나면 그대로 터진다.</summary>
+    private ServiceSessionState OpenSession(
         ServiceBookingState booking,
         MaidRuntimeState maid,
-        int dayNumber,
-        out ServiceSessionState session)
+        int dayNumber)
     {
-        session = null;
-
         MonsterProfile monster = booking.Monster;
 
         if (!_content.TryFindScenarioForMonster(monster, out ServiceScenario scenario))
-        {
-            UnityEngine.Debug.LogError(
-                $"[ServiceSessionFlow] Scenario not found. monster={monster.MonsterId}, key={monster.ScenarioKey}");
-            return false;
-        }
+            throw new InvalidOperationException(
+                $"시나리오를 찾지 못했습니다. monster={monster.MonsterId}, key={monster.ScenarioKey}");
 
         if (scenario.EntryBeat == null)
-        {
-            UnityEngine.Debug.LogError(
-                $"[ServiceSessionFlow] Scenario has no beat. key={scenario.ScenarioKey}");
-            return false;
-        }
+            throw new InvalidOperationException(
+                $"시나리오에 비트가 없습니다. key={scenario.ScenarioKey}");
 
-        _content.TryFindProtocol(monster.Species, out SpeciesProtocol protocol);
+        if (!_content.TryFindProtocol(monster.Species, out SpeciesProtocol protocol))
+            throw new InvalidOperationException(
+                $"종족 규약을 찾지 못했습니다. species={monster.Species}");
 
-        _runVersion++;
-
-        session = new ServiceSessionState(
-            CurrentRun,
+        return new ServiceSessionState(
             maid,
             new MonsterEncounterState(monster),
             scenario,
             protocol,
             dayNumber);
-
-        Current = session;
-
-        return true;
     }
 
     private static string ResolveBriefingNode(ServiceSessionState session)
@@ -271,30 +172,5 @@ public sealed partial class ServiceSessionFlow
         return string.IsNullOrWhiteSpace(authored)
             ? GuesthouseNodeNaming.ServiceBriefingFallback(session.Monster.MonsterId)
             : authored;
-    }
-
-    // ------------------------------------------------------------
-    // 진행 보조
-    // ------------------------------------------------------------
-
-    /// <summary>세션이 아직 유효한가. 토큰은 세션이 들고 있으므로 따로 넘기지 않는다.</summary>
-    private bool IsCurrent(ServiceSessionState session) => IsCurrent(session.Token);
-
-    /// <summary>노드를 재생한다. 재생 도중 세션이 무효화되지 않았으면 true.</summary>
-    private async YarnTask<bool> TryPlayNodeAsync(ServiceSessionState session, string nodeName)
-    {
-        await _nodes.PlayNodeAsync(nodeName);
-
-        return IsCurrent(session);
-    }
-
-    private ServiceSettlementResult Abort(ServiceSessionState session)
-    {
-        session.SetPhase(ServiceSessionPhase.Aborted);
-
-        if (ReferenceEquals(Current, session))
-            Current = null;
-
-        return null;
     }
 }

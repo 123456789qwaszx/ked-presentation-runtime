@@ -1,52 +1,44 @@
 using System.Collections.Generic;
-using Yarn.Unity;
+using System.Threading.Tasks;
 
+// ---- 통제 상실 이후 ----
+// 관리자 통제 신호가 거부된 뒤에는 플레이어가 개입하지 못한다.
+// 메이드가 스스로 행동을 선택하며, 그 선택은 '가장 강한 반응을 끌어내는 쪽'으로 고정된다.
+// 몬스터의 충동을 자신의 의지로 받아들이기 시작했다는 뜻이기 때문이다.
+//
+// 진행 횟수와 잔여 부담은 종족 규약이 정한다. 시나리오는 더 이상 분기하지 않는다.
 public sealed partial class ServiceSessionFlow
 {
-    // ---- 통제 상실 이후 ----
-    // 관리자 통제 신호가 거부된 뒤에는 플레이어가 개입하지 못한다.
-    // 메이드가 스스로 행동을 선택하며, 그 선택은 '가장 강한 반응을 끌어내는 쪽'으로 고정된다.
-    // 몬스터의 충동을 자신의 의지로 받아들이기 시작했다는 뜻이기 때문이다.
-    //
-    // 진행 자체는 종족 규약이 결정하고, 개체 시나리오는 더 이상 참조하지 않는다.
-    private async YarnTask RunAutonomousCollapseAsync(ServiceSessionState session)
-    {
-        _screens.NotifyControlLost(session);
+    private const string AutonomousKey = "autonomous";
 
+    private async Task RunAutonomousCollapseAsync(ServiceSessionState session)
+    {
         SpeciesProtocol protocol = session.SpeciesProtocol;
 
-        if (protocol == null)
-            return;
+        _screens.NotifyControlLost(session);
 
-        if (!await TryPlayNodeAsync(session, protocol.ControlLossNodeName))
-            return;
+        await _nodes.PlayNodeAsync(protocol.ControlLossNodeName);
 
         for (int i = 0; i < protocol.AutonomousBeatCount; i++)
-        {
             RunAutonomousBeat(session, protocol);
 
-            if (!IsCurrent(session))
-                return;
-        }
-
-        await TryPlayNodeAsync(session, protocol.CollapseEndingNodeName);
+        await _nodes.PlayNodeAsync(protocol.CollapseEndingNodeName);
     }
 
     private void RunAutonomousBeat(ServiceSessionState session, SpeciesProtocol protocol)
     {
         ServiceBeat beat = session.CurrentBeat;
-        ServiceActionOption chosen = beat != null ? PickStrongestReaction(beat.OptionPool) : null;
+        ServiceActionOption chosen = PickStrongestReaction(beat.OptionPool);
 
-        MonsterReactionGrade reaction = chosen?.Reaction ?? MonsterReactionGrade.GreatlySatisfied;
-        AxisTriple rawLoad = (chosen?.Load ?? AxisTriple.Zero) + protocol.AutonomousResidualLoad;
+        AxisTriple rawLoad = chosen.Load + protocol.AutonomousResidualLoad;
+        AxisTriple applied = BurdenAccrualRule.Apply(session.Maid, rawLoad, _content.Tuning);
 
-        AxisTriple applied = BurdenAccrualRule.Apply(session.Maid, rawLoad, Tuning);
-        int satisfaction = session.Encounter.ApplyReaction(reaction, 0);
+        int satisfaction = session.Encounter.ApplyReaction(chosen.Reaction, 0);
 
         session.RecordReaction(new ServiceReactionRecord(
-            beat?.BeatKey ?? AutonomousKey,
-            chosen?.OptionKey ?? AutonomousKey,
-            reaction,
+            beat.BeatKey,
+            AutonomousKey,
+            chosen.Reaction,
             rawLoad,
             applied,
             satisfaction,
@@ -55,18 +47,14 @@ public sealed partial class ServiceSessionFlow
         session.MarkBeatConsumed();
     }
 
-    private const string AutonomousKey = "autonomous";
-
     private static ServiceActionOption PickStrongestReaction(IReadOnlyList<ServiceActionOption> pool)
     {
-        ServiceActionOption best = null;
+        ServiceActionOption best = pool[0];
 
-        for (int i = 0; i < pool.Count; i++)
+        for (int i = 1; i < pool.Count; i++)
         {
-            if (best != null && pool[i].Reaction <= best.Reaction)
-                continue;
-
-            best = pool[i];
+            if (pool[i].Reaction > best.Reaction)
+                best = pool[i];
         }
 
         return best;
