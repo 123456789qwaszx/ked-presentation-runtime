@@ -10,7 +10,7 @@ public sealed partial class VnScreenBindings
         int dayNumber,
         IReadOnlyList<ServiceBookingState> bookings)
     {
-        if (_boardSelectionCompletion != null && !_boardSelectionCompletion.Task.IsCompleted)
+        if (_boardSelectionCompletion != null)
             throw new InvalidOperationException("예약 게시판의 선택을 이미 기다리고 있습니다.");
         
         // TrySetResult()가 await 이후 코드를 그 자리에서 즉시 끼워 넣지 못하게 해서, 현재 HandleBookingSelected()를 끝까지 실행
@@ -42,8 +42,12 @@ public sealed partial class VnScreenBindings
 
     private void HandleBookingSelected(int index)
     {
-         _boardSelectionCompletion?.TrySetResult(index);
-
-         ClosePanel();
+        if (_boardSelectionCompletion == null)
+            return;
+        
+        _boardSelectionCompletion.TrySetResult(index);
+        
+        ClosePanel();
+        _boardSelectionCompletion = null;
     }
 }
