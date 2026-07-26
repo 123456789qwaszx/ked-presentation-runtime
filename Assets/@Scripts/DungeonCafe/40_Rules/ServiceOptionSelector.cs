@@ -12,9 +12,33 @@ using System.Collections.Generic;
 /// </summary>
 public sealed class ServiceOptionSelector
 {
+    /// <summary>
+    /// 자격 충족 보너스. 나머지 항목을 전부 합쳐도 넘볼 수 없는 크기다.
+    /// 덕분에 '할 수 있는 행동'이 '못 하는 행동'보다 항상 먼저 제안된다.
+    /// </summary>
     private const int QualifiedBonus = 1000;
+
+    /// <summary>
+    /// 성향이 맞는 행동에 붙는 가산. 미달 약 13점어치를 상쇄한다(200 ÷ 15).
+    /// 자격선을 넘겨주지는 못하므로, 못 하는 행동들 사이의 우선순위만 바꾼다.
+    /// </summary>
     private const int TraitBonus = 200;
+
+    /// <summary>
+    /// 요구 대응력에 모자란 1점당 감점. 모자랄수록 선형으로 밀려난다.
+    /// 넘치는 쪽은 세지 않는다. 대응력은 자원이 아니라 문턱이다.
+    /// 
+    /// 올리면 못 하는 행동이 후보에서 빨리 사라져 메이드별 개성이 뚜렷해지고,
+    /// 내리면 위험한 제안이 자주 올라와 승인 판단이 매번 무거워진다.
+    /// </summary>
     private const int AptitudeGapPenalty = 15;
+
+    /// <summary>
+    /// 작가가 적어둔 순서를 지키기 위한 미세 감점. 능력치 차이를 뒤집지 못한다.
+    /// 다른 상수가 전부 5의 배수라 이 값(1~4)으로는 동점이 생기지 않는다.
+    /// List.Sort 는 불안정 정렬이므로, 동점이 생기면 제안 순서가 흔들릴 수 있다.
+    /// 상수를 조정할 때 이 조건이 깨지지 않는지 확인할 것.
+    /// </summary>
     private const int DeclarationOrderPenalty = 1;
 
     private readonly List<Scored> _scratch = new();
@@ -81,18 +105,31 @@ public sealed class ServiceOptionSelector
         return false;
     }
 
+    /// <summary>
+    /// 행동 하나의 제안 점수. 높을수록 먼저 제안된다.
+    ///
+    ///   자격 충족 → +1000, 미달 → 모자란 만큼 감점
+    ///   성향 일치 → +200
+    ///   선언 순서 → 뒤일수록 미세 감점
+    ///
+    /// 부담 누적과 현재 붕괴도는 일부러 보지 않는다.
+    /// 메이드는 자기가 무너질 행동을 걸러내지 못하고, 그걸 막는 것이 관리자의 역할이다.
+    /// </summary>
     private static int ScoreOption(ServiceActionOption option, MaidRuntimeState maid, int declaredIndex)
     {
+        // 동점일 때 위에 적힌 것이 앞서게 한다
         int score = -declaredIndex * DeclarationOrderPenalty;
 
         int aptitude = maid.Aptitude[option.RequiredAptitudeAxis];
         int gap = option.RequiredAptitude - aptitude;
 
+        // 문턱을 넘었으면 얼마나 넘었는지는 따지지 않는다
         if (gap <= 0)
             score += QualifiedBonus;
         else
             score -= gap * AptitudeGapPenalty;
 
+        // 성향은 '무엇에 끌리는가'를 정한다. 능력을 대신하지는 못한다
         if (maid.Profile.HasTrait(option.PreferredTraitKey))
             score += TraitBonus;
 
