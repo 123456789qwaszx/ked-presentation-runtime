@@ -32,8 +32,10 @@ public sealed class RotatingBookingPlanner : IBookingPlanner
         if (monsters.Count == 0)
             return _buffer;
 
+        // 오늘이 전체 몬스터 순서에서 몇 번째부터 시작하는지 계산
         int offset = (dayNumber - 1) * count;
 
+        // 목록 끝을 넘으면 처음으로 돌아가면서 몬스터 추가
         for (int i = 0; i < count; i++)
             _buffer.Add(monsters[(offset + i) % monsters.Count]);
 

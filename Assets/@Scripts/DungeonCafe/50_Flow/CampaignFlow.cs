@@ -34,22 +34,10 @@ public sealed class CampaignFlow
         _endingResolver = endingResolver;
     }
 
-    public CampaignState BeginCampaign()
-    {
-        State = new CampaignState(_content.Tuning, _content.Maids);
-        Ending = null;
-
-        return State;
-    }
-
     public async YarnTask<CampaignEndingResult> RunAsync()
     {
-        if (State == null)
-            BeginCampaign();
-
         _screens.ShowGuesthouseHud();
-        _screens.UpdateGuesthouseHud(
-            GuesthouseHudSnapshot.ForDay(State, State.CurrentDay, "영업 준비"));
+        _screens.UpdateGuesthouseHud(GuesthouseHudSnapshot.ForDay(State, State.CurrentDay, "영업 준비"));
 
         while (!State.IsFinished)
             await _dayFlow.RunDayAsync(State);

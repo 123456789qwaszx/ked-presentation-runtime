@@ -3,8 +3,9 @@ using Yarn.Unity;
 
 /// <summary>
 /// 하루 진행.
-///   게시판 → 예약 확정 통화 → 담당 메이드 배정 → 접객 → 결산  (3회 반복)
-///   → 하루 리포트 → 밤
+///   게시판 → 예약 확정 통화 3건 → (배정 → 접객 → 결산) 3회 → 하루 리포트 → 밤
+///
+/// 상태 전이는 전부 DayCycleState 가 소유한다. 이 클래스는 순서와 대기만 담당한다.
 /// </summary>
 public sealed class DayCycleFlow
 {
@@ -13,7 +14,7 @@ public sealed class DayCycleFlow
     private readonly ServiceSessionFlow _sessionFlow;
     private readonly NightPhaseFlow _nightFlow;
 
-    private readonly VnScreenBindings _screensBindings;
+    private readonly VnScreenBindings _screens;
     private readonly ScenarioNodeRunner _nodes;
 
     private readonly List<MaidRuntimeState> _candidateBuffer = new();
@@ -25,109 +26,72 @@ public sealed class DayCycleFlow
         IBookingPlanner bookingPlanner,
         ServiceSessionFlow sessionFlow,
         NightPhaseFlow nightFlow,
-        VnScreenBindings screensBindings,
+        VnScreenBindings screens,
         ScenarioNodeRunner nodes)
     {
         _content = content;
         _bookingPlanner = bookingPlanner;
         _sessionFlow = sessionFlow;
         _nightFlow = nightFlow;
-        _screensBindings = screensBindings;
+        _screens = screens;
         _nodes = nodes;
     }
 
     public async YarnTask RunDayAsync(CampaignState campaign)
     {
-        DayCycleState day = campaign.BeginDay();
+        campaign.BeginDay();
+        DayCycleState day = campaign.CurrentDay;
 
-        _sessionFlow.Campaign = campaign;
+        await RunReservationsAsync(campaign, day);
 
-        _screensBindings.UpdateGuesthouseHud(
-            GuesthouseHudSnapshot.ForDay(campaign, day, "예약 게시판"));
+        while (day.TryGetPendingSlot(out ServiceBookingState booking))
+            await RunSlotAsync(campaign, day, booking);
 
-        await RunReservationPhaseAsync(campaign, day);
+        Enter(campaign, day, DayPhaseKind.DayReport);
+        await _screens.PresentDayReportAsync(day);
 
-        while (day.HasRemainingSlot)
-        {
-            await RunSlotAsync(campaign, day);
-            day.AdvanceSlot();
-        }
-
-        day.SetPhase(DayPhaseKind.DayReport);
-        _screensBindings.UpdateGuesthouseHud(
-            GuesthouseHudSnapshot.ForDay(campaign, day, "업무 종료"));
-
-        await _screensBindings.PresentDayReportAsync(day);
-
-        day.SetPhase(DayPhaseKind.Night);
+        Enter(campaign, day, DayPhaseKind.Night);
         await _nightFlow.RunNightAsync(campaign, day.DayNumber);
 
-        day.SetPhase(DayPhaseKind.DayClosed);
         campaign.CompleteDay();
     }
 
-    private async YarnTask RunReservationPhaseAsync(CampaignState campaign, DayCycleState day)
+    private async YarnTask RunReservationsAsync(CampaignState campaign, DayCycleState day)
     {
-        day.SetPhase(DayPhaseKind.ReservationBoard);
+        Enter(campaign, day, DayPhaseKind.ReservationBoard);
 
-        IReadOnlyList<MonsterProfile> monsters =
-            _bookingPlanner.PlanBookings(campaign, day.DayNumber, Tuning.ServicesPerDay);
+        day.PostBookings(_bookingPlanner.PlanBookings(campaign, day.DayNumber, Tuning.ServicesPerDay));
+        await _screens.RequestReservationSelectionAsync(day.DayNumber, day.Bookings);
 
-        day.PostBookings(monsters);
-
-        await _screensBindings.RequestReservationSelectionAsync(day.DayNumber, day.Bookings);
-
-        // 전화로 확정하는 시점에 종족 외의 대응 타입 정보가 업무 수첩에 기재된다.
-        day.SetPhase(DayPhaseKind.ReservationCall);
+        Enter(campaign, day, DayPhaseKind.ReservationCall);
 
         for (int i = 0; i < day.Bookings.Count; i++)
         {
             ServiceBookingState booking = day.Bookings[i];
 
-            _screensBindings.UpdateGuesthouseHud(
-                GuesthouseHudSnapshot.ForDay(campaign, day, "예약 확정 통화"));
-
             await _nodes.PlayNodeAsync(booking.Monster.PhoneCallNodeName);
-
-            booking.ConfirmByPhone();
-            campaign.MarkSpeciesEncountered(booking.Monster.Species);
+            campaign.ConfirmBookingByPhone(booking);
         }
     }
 
-    private async YarnTask RunSlotAsync(CampaignState campaign, DayCycleState day)
+    private async YarnTask RunSlotAsync(
+        CampaignState campaign,
+        DayCycleState day,
+        ServiceBookingState booking)
     {
-        ServiceBookingState booking = day.CurrentBooking;
-
-        if (booking == null)
-            return;
-
-        day.SetPhase(DayPhaseKind.MaidAssignment);
+        Enter(campaign, day, DayPhaseKind.MaidAssignment);
 
         MaidRuntimeState maid = await ResolveAssignedMaidAsync(campaign, booking);
 
-        if (maid == null)
-        {
-            UnityEngine.Debug.LogWarning(
-                $"[DayCycleFlow] No assignable maid. day={day.DayNumber}, slot={booking.SlotIndex}");
-            return;
-        }
+        day.AssignMaid(booking, maid);
 
-        booking.AssignMaid(maid.MaidId);
-        maid.MarkAssigned(day.DayNumber);
+        Enter(campaign, day, DayPhaseKind.ServiceSession);
 
-        day.SetPhase(DayPhaseKind.ServiceSession);
+        ServiceSettlementResult result = await _sessionFlow.RunAsync(campaign, booking, maid);
 
-        ServiceSettlementResult result = await _sessionFlow.RunAsync(
-            maid,
-            booking.Monster,
-            day.DayNumber,
-            booking.SlotIndex);
 
-        if (result == null)
-            return;
-
-        day.SetPhase(DayPhaseKind.ServiceSettlement);
-        day.CommitSettlement(result);
+        Enter(campaign, day, DayPhaseKind.ServiceSettlement);
+        day.CompleteSlot(result);
     }
 
     private async YarnTask<MaidRuntimeState> ResolveAssignedMaidAsync(
@@ -141,11 +105,20 @@ public sealed class DayCycleFlow
             return null;
 
         MaidAssignmentRequest request = new(booking, candidates, Tuning);
-        string maidId = await _screensBindings.RequestMaidAssignmentAsync(request);
+        string maidId = await _screens.RequestMaidAssignmentAsync(request);
 
         if (campaign.TryFindMaid(maidId, out MaidRuntimeState maid) && maid.CanBeAssigned)
             return maid;
 
         return candidates[0];
+    }
+
+    /// <summary>단계 진입. 페이즈 기록과 표시 갱신이 항상 함께 일어난다.</summary>
+    private void Enter(CampaignState campaign, DayCycleState day, DayPhaseKind phase)
+    {
+        day.SetPhase(phase);
+
+        _screens.UpdateGuesthouseHud(
+            GuesthouseHudSnapshot.ForDay(campaign, day, DayPhaseLabels.Of(phase)));
     }
 }
