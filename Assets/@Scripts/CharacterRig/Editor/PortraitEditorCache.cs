@@ -73,10 +73,10 @@ public static class PortraitEditorCache
             string.IsNullOrEmpty(emotion))
             return null;
 
-        // Variant 해석 (예: "b" → "Amber_b")
+        // Variant 해석 (예: "b" -> "Amber_b")
         var resolvedVariant = ResolveVariant(character, variant);
         
-        // Emotion 해석 (예: "5" → "05")
+        // Emotion 해석 (예: "5" -> "05")
         var resolvedEmotion = ResolveEmotion(character, resolvedVariant, emotion);
 
         var entry = _db.entries.FirstOrDefault(e =>
@@ -90,7 +90,7 @@ public static class PortraitEditorCache
 
     /// <summary>
     /// Variant를 전체 형식으로 확장합니다.
-    /// 예: character="Amber", variant="b" → "Amber_b"
+    /// 예: character="Amber", variant="b" -> "Amber_b"
     /// </summary>
     private static string ResolveVariant(string character, string variant)
     {
@@ -122,7 +122,7 @@ public static class PortraitEditorCache
 
     /// <summary>
     /// Emotion을 전체 형식으로 확장합니다.
-    /// 예: "5" → "05"
+    /// 예: "5" -> "05"
     /// </summary>
     private static string ResolveEmotion(string character, string variant, string emotion)
     {

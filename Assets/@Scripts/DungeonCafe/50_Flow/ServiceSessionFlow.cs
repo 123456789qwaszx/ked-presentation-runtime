@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-// 접객 1회. 입실 → 비트 반복 → 결산.
-// 비트 하나는 상황 재생 → 메이드 제안 → 관리자 승인 → 부담과 반응 반영이다.
+// 접객 1회. 입실 -> 비트 반복 -> 결산.
+// 비트 하나는 상황 재생 -> 메이드 제안 -> 관리자 승인 -> 부담과 반응 반영이다.
 // 붕괴 한계를 넘으면 개입이 끊기고 종족 규약이 진행을 가져간다.
 public sealed partial class ServiceSessionFlow
 {

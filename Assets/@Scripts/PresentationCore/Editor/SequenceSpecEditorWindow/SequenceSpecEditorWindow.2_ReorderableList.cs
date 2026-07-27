@@ -119,7 +119,7 @@ public sealed partial class SequenceSpecEditorWindow
 
         _nodesList.onSelectCallback = list =>
         {
-            _navColumn = NavColumn.Nodes; // 마우스 선택 → 컬럼 포커스도 Nodes로
+            _navColumn = NavColumn.Nodes; // 마우스 선택 -> 컬럼 포커스도 Nodes로
 
             _selectedNode = list.index;
             _selectedStep = -1;
@@ -356,7 +356,7 @@ public sealed partial class SequenceSpecEditorWindow
 
         _stepsList.onSelectCallback = list =>
         {
-            _navColumn = NavColumn.Steps; // 마우스 선택 → 컬럼 포커스도 Steps로
+            _navColumn = NavColumn.Steps; // 마우스 선택 -> 컬럼 포커스도 Steps로
 
             _selectedStep = list.index;
             _stepsList.index = _selectedStep;

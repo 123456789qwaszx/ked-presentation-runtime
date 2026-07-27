@@ -5,7 +5,7 @@
 // 챕터 하나의 Episode 진행 관계 전체를 보관하는 Authoring Asset.
 //
 // 생성 방법:
-//   Project 뷰 우클릭 → Create → VN/Episode/Chapter Episode Progression
+//   Project 뷰 우클릭 -> Create -> VN/Episode/Chapter Episode Progression
 //
 // 사용 흐름:
 //   ChapterEpisodeProgressionSO   (이 파일 — Authoring)

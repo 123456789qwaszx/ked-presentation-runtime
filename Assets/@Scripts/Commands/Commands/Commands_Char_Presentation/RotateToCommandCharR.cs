@@ -6,7 +6,7 @@ using UnityEngine;
 [Serializable]
 [CommandMenuHint(
     "Char Rig Motion",
-    "Rotate (From → To)",
+    "Rotate (From -> To)",
     Order = -180
 )]
 public class RotateToCommandSpecCharR : CharacterRigCommandSpecBase

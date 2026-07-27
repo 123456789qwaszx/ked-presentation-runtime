@@ -94,7 +94,7 @@ public sealed class ProgressionTuning
         CampaignEnergyQuota = campaignEnergyQuota;
     }
 
-    /// <summary>해당 축에서 level → level+1 로 올라가기 위해 필요한 누적 경험치.</summary>
+    /// <summary>해당 축에서 level -> level+1 로 올라가기 위해 필요한 누적 경험치.</summary>
     public int GetMasteryThreshold(BurdenAxis axis, int level)
     {
         int[] thresholds = _masteryThresholdsByAxis[(int)axis];
@@ -116,7 +116,7 @@ public sealed class ProgressionTuning
 
     /// <summary>
     /// 버티컬 슬라이스 기본값. 배율 구간과 밤 처리 수치는 기획서 표기를 그대로 따른다.
-    /// 완화량과 관리 붕괴 진입선은 3일 9접객 안에서 ×2.0 구간과 관리 붕괴가 실제로 발생하도록 맞춘 값이다.
+    /// 완화량과 관리 붕괴 진입선은 3일 9접객 안에서 x2.0 구간과 관리 붕괴가 실제로 발생하도록 맞춘 값이다.
     /// 내장 콘텐츠 기준으로 무난한 플레이는 기준 에너지에 근소하게 미달한다.
     /// </summary>
     public static ProgressionTuning CreateDefault()

@@ -23,5 +23,5 @@ public struct CollapseMultiplierBand
         this.label = label;
     }
 
-    public override string ToString() => $"{minCollapse}+ ×{multiplier:0.0}";
+    public override string ToString() => $"{minCollapse}+ x{multiplier:0.0}";
 }

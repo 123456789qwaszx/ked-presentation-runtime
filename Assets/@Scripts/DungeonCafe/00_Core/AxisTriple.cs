@@ -45,7 +45,7 @@ public struct AxisTriple : IEquatable<AxisTriple>
 
     public bool IsZero => Total == 0;
 
-    /// <summary>가장 큰 축. 동률이면 Physical → Mental → Empathic 순으로 고정 선택한다.</summary>
+    /// <summary>가장 큰 축. 동률이면 Physical -> Mental -> Empathic 순으로 고정 선택한다.</summary>
     public BurdenAxis DominantAxis
     {
         get

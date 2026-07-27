@@ -25,7 +25,7 @@ public sealed class PresentationResponseCoordinateMapper
     }
 
     // rig-space "오프셋(벡터)"을 target PositionRect 부모 공간의 벡터로 변환한다.
-    // 점(point)이 아니라 벡터라 translation이 빠진다 → rigSpaceRoot와 targetParent가
+    // 점(point)이 아니라 벡터라 translation이 빠진다 -> rigSpaceRoot와 targetParent가
     // 같은 카메라 아래 있으면 카메라 zoom/pan이 상쇄되어 변환이 흔들리지 않는다.
     public Vector2 ConvertOffsetFromRigSpaceToTargetParentSpace(
         Vector2 offsetInRigSpace,

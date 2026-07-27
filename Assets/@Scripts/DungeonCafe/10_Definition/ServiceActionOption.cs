@@ -28,7 +28,7 @@ public sealed class ServiceActionOption
     /// <summary>
     /// 이 행동을 승인했을 때 이어지는 비트 키.
     /// 비어 있으면 시나리오의 선형 순서를 따른다.
-    /// (예: '검을 꺼낸다' → 검 사용 비트로 분기)
+    /// (예: '검을 꺼낸다' -> 검 사용 비트로 분기)
     /// </summary>
     public string NextBeatKey { get; }
 

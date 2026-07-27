@@ -14,7 +14,7 @@ public sealed class PlayBgmCommandSpec : CommandSpecBase
     public float fadeDuration = 1f;
 }
 
-// PlayBgmCommand / StopBgmCommand → CompleteImmediately
+// PlayBgmCommand / StopBgmCommand -> CompleteImmediately
 // skip 시 BGM은 즉시 스냅으로 전환. 무시하면 BGM이 안 바뀐 채로 씬이 넘어감.
 // OnSkip에서 isSkipping: true를 넘겨서 BgmPlayer가 페이드 없이 즉시 처리.
 public sealed class PlayBgmCommand : CommandBase

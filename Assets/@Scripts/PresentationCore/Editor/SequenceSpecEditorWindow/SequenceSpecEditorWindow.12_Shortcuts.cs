@@ -30,8 +30,8 @@ using UnityEngine;
 ///   - Commands:
 ///     - Ctrl+C: CopyCommandToClipboard()
 ///     - Ctrl+X: Copy 후 Delete
-///     - Ctrl+V: 클립보드 JSON → CreateCommandFromJson()로 생성 후 삽입
-///     - Ctrl+D: Copy→Paste로 "한 칸 아래 복제"
+///     - Ctrl+V: 클립보드 JSON -> CreateCommandFromJson()로 생성 후 삽입
+///     - Ctrl+D: Copy->Paste로 "한 칸 아래 복제"
 ///   - Steps:
 ///     - Ctrl+C: CopyStepToClipboard(step)
 ///     - Ctrl+V: CreateStepFromJson(json)로 생성 후 해당 노드 steps에 삽입

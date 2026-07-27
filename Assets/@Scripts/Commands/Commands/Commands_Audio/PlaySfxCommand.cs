@@ -11,7 +11,7 @@ public sealed class PlaySfxCommandSpec : CommandSpecBase
     public AudioClip directClip;
 }
 
-// PlaySfxCommand → Ignore
+// PlaySfxCommand -> Ignore
 // skip 중 효과음은 의미가 없음. 연출용 SFX가 skip 구간에서 쏟아지면 오히려 이상함.
 public sealed class PlaySfxCommand : CommandBase
 {

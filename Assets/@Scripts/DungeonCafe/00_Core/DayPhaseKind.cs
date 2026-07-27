@@ -17,7 +17,7 @@ public enum DayPhaseKind
     // 격리실 접객 진행.
     ServiceSession = 40,
 
-    // 반응 점수 × 붕괴 배율 결산.
+    // 반응 점수 x 붕괴 배율 결산.
     ServiceSettlement = 50,
 
     // 오늘 3회 접객이 모두 끝났다.

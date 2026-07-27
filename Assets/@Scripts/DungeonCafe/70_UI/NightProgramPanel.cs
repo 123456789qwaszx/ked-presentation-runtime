@@ -8,7 +8,7 @@ using static UIRefValidation;
 /// <summary>
 /// 밤 처리 선택 패널.
 ///
-/// 후보는 (메이드 × 축 × 처리 방식) 조합을 평탄화해서 보여준다.
+/// 후보는 (메이드 x 축 x 처리 방식) 조합을 평탄화해서 보여준다.
 /// 회복은 항상 가능하고, 관리 붕괴는 해당 축의 붕괴도가 기준 이상일 때만 목록에 오른다.
 /// 하루에 한 건만 적용되므로 목록에서 하나를 고르면 그대로 확정된다.
 /// </summary>
@@ -131,13 +131,13 @@ public sealed class NightProgramPanel : UIPanel<NightProgramPanel.Refs>, IManage
         if (plan.Kind == NightProgramKind.Care)
         {
             int after = Math.Max(0, current - request.Tuning.CareReduction);
-            return $"{maid.DisplayName} · {axisLabel} 회복\n{current} → {after}";
+            return $"{maid.DisplayName} · {axisLabel} 회복\n{current} -> {after}";
         }
 
         int released = current * request.Tuning.ManagedReleaseRetainPercent / 100;
 
         return $"{maid.DisplayName} · {axisLabel} 관리 붕괴\n" +
-               $"{current} → {released}   숙련 +{request.Tuning.ManagedReleaseExperience}";
+               $"{current} -> {released}   숙련 +{request.Tuning.ManagedReleaseExperience}";
     }
 
     private void HandlePlanSubmitted(int index)

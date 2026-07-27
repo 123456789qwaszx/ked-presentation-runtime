@@ -55,7 +55,7 @@
 //
 // 담당 기능(Responsibilities)
 // - DrawToolbar()
-//   - SequenceSpecSO 타겟 선택(ObjectField) → RebuildIfNeeded(force:true) + LoadFoldouts()
+//   - SequenceSpecSO 타겟 선택(ObjectField) -> RebuildIfNeeded(force:true) + LoadFoldouts()
 //   - 검색 필드(_searchField)
 //   - Ping 버튼(에셋 Ping)
 //   - 단축키 팝업(ShortcutsPopup)
@@ -160,7 +160,7 @@
 //
 // - Compiled Preview 표시 라인 생성
 //   - TryReadMeta(): meta(_meta/meta/Meta)에서 track/phase/blocking/infinite/duration 읽기
-//   - SummarizeCompiledLine(): meta vs origin 비교 → drift/missing 표시
+//   - SummarizeCompiledLine(): meta vs origin 비교 -> drift/missing 표시
 //
 // 주의/전제
 // - Command 리스트는 SerializeReference ManagedReference여야 managedReferenceId로 추적 가능
@@ -269,8 +269,8 @@
 // - SerializeReference 다형 타입을 안전하게 다루기 위해 Box ScriptableObject 래핑 사용
 //
 // 동작
-// - Copy: Box CreateInstance → box에 넣기 → ToJson → Prefix+json 저장 → DestroyImmediate
-// - Paste: prefix 확인 → json 추출 → Box CreateInstance → FromJsonOverwrite → spec/step 반환 → DestroyImmediate
+// - Copy: Box CreateInstance -> box에 넣기 -> ToJson -> Prefix+json 저장 -> DestroyImmediate
+// - Paste: prefix 확인 -> json 추출 -> Box CreateInstance -> FromJsonOverwrite -> spec/step 반환 -> DestroyImmediate
 //
 // 이 파트가 책임지는 것
 // - “클립보드 포맷”과 “직렬화/역직렬화”
@@ -342,7 +342,7 @@
 //
 // 역할
 // - 텍스트 입력 중 충돌 방지(EditingTextField 시 무시)
-// - ←→↑↓/Space/Ctrl(or Cmd)+E 같은 키로 3열 네비게이션 상태 업데이트
+// - ←->↑↓/Space/Ctrl(or Cmd)+E 같은 키로 3열 네비게이션 상태 업데이트
 // - Commands 컬럼에서는 트랙(_activeTrack) 좌/우 이동 포함
 // - 선택 이동 시 스크롤 자동 보정(EnsureSelectedCommandVisible)
 // - “컬럼 단위 삭제” 단축키는 데이터 삭제 유틸에 위임(권위 분리)
@@ -365,7 +365,7 @@
 //   - Ctrl+C/X/V/D: 복사/잘라내기/붙여넣기/복제
 //
 // 설계 메모
-// - 이 파트는 “입력 해석 → 유틸 호출”이 책임이고,
+// - 이 파트는 “입력 해석 -> 유틸 호출”이 책임이고,
 //   실제 데이터 수정(Undo/SerializedObject/Compile)은 CRUD 유틸 파트가 권위자다.
 //
 // -------------------------------------------------------------------------------------------------
@@ -411,7 +411,7 @@
 //
 // UI/UX(Preset Bar)
 // - Preset: [Dropdown] [Save] [Save As] [Delete]
-// - Dropdown 변경: 선택 프리셋 Load → 현재 상태 덮어쓰기 → Working Prefs 저장
+// - Dropdown 변경: 선택 프리셋 Load -> 현재 상태 덮어쓰기 -> Working Prefs 저장
 // - Save: 활성 프리셋에 현재 상태를 덮어쓰기 저장
 // - Save As: 새 이름으로 프리셋 생성(인라인 입력)
 // - Delete: 활성 프리셋 삭제(Default는 삭제 불가)

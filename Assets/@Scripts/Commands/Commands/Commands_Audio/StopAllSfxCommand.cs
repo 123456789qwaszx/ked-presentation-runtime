@@ -5,7 +5,7 @@ using System.Collections;
 public sealed class StopAllSfxCommandSpec : CommandSpecBase
 { }
 
-// StopAllSfxCommand → ExecuteEvenIfSkipping
+// StopAllSfxCommand -> ExecuteEvenIfSkipping
 // skip / scene transition / cut 중에도 반드시 남아있는 효과음을 정리해야 할 때 사용.
 // 특히 UI loop SFX, transition 잔재, 연속 효과음 정리에 유용하다.
 public sealed class StopAllSfxCommand : CommandBase

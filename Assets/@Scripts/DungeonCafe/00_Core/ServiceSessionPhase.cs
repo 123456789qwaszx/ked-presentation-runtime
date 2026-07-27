@@ -36,7 +36,7 @@ public enum ServiceSessionPhase
     // 시나리오 템플릿이 끝까지 소화되었다.
     ScenarioCompleted = 90,
 
-    // 반응 점수 × 붕괴 배율 결산이 커밋되었다.
+    // 반응 점수 x 붕괴 배율 결산이 커밋되었다.
     Settled = 100,
 
     // 세션 트랜잭션이 정상 종료되었다.

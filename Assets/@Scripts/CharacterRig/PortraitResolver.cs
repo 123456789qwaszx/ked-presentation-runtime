@@ -90,9 +90,9 @@ public sealed class PortraitResolver
     }
 
     // Normalizes the input into a 2-digit code in the form "02".
-    // - "2"  → "02"
-    // - "02" → "02"
-    // - otherwise → "" (unsupported)
+    // - "2"  -> "02"
+    // - "02" -> "02"
+    // - otherwise -> "" (unsupported)
     public static string NormalizeEmotionCode(string input)
     {
         if (string.IsNullOrWhiteSpace(input))

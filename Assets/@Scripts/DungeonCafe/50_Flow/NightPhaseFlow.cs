@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using Yarn.Unity;
 
 // (밤 진행)
-// 상태 확인 → 한 명에게 회복 또는 붕괴 유도 → 준비된 행동 이벤트 출력 → 메이드 간 대화
+// 상태 확인 -> 한 명에게 회복 또는 붕괴 유도 -> 준비된 행동 이벤트 출력 -> 메이드 간 대화
 public sealed class NightPhaseFlow
 {
     private readonly GuesthouseContentDB _content;

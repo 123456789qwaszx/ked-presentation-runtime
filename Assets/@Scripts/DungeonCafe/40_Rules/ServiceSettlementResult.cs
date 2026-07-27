@@ -90,6 +90,6 @@ public sealed class ServiceSettlementResult
 
     public string ToSummaryLine()
         => $"{MaidDisplayName} / {MonsterDisplayName} : " +
-           $"반응 {BaseReactionScore} × {BurdenAxes.ToBurdenLabel(DemandAxis)} {DemandCollapse} " +
-           $"(×{Multiplier:0.0}) = 에너지 {Energy}";
+           $"반응 {BaseReactionScore} x {BurdenAxes.ToBurdenLabel(DemandAxis)} {DemandCollapse} " +
+           $"(x{Multiplier:0.0}) = 에너지 {Energy}";
 }

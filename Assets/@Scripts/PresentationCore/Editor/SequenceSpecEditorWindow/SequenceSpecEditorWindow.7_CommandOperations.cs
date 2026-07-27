@@ -13,7 +13,7 @@ using UnityEngine;
 ///
 /// 핵심 아이디어:
 /// - SerializedProperty 기반([SerializeReference] List) 편집은 즉시 수정 대신 DelayModify로 래핑한다.
-///   → Undo/Dirty/Compile/Repaint를 한 번에 일관되게 처리하고, GUI 이벤트 충돌을 줄인다.
+///   -> Undo/Dirty/Compile/Repaint를 한 번에 일관되게 처리하고, GUI 이벤트 충돌을 줄인다.
 /// - 삽입 전/후에 Foldout 상태를 Snapshot/Restore 해서,
 ///   리스트 변경(Insert/Delete/Reorder)에도 기존 커맨드들의 펼침 상태가 최대한 유지되도록 한다.
 /// - 새로 추가된 커맨드는 기본적으로 접힌 상태(false)로 시작하며,
@@ -30,7 +30,7 @@ using UnityEngine;
 ///
 /// 2) InsertCommandFactoryAt
 ///    - 외부에서 “생성 함수(factory)”로 커맨드 인스턴스를 공급받아 Insert
-///      (예: 클립보드 JSON → CommandSpecBase 생성 후 삽입)
+///      (예: 클립보드 JSON -> CommandSpecBase 생성 후 삽입)
 ///    - expandNew로 신규 항목을 펼칠지 여부를 제어
 ///
 /// 3) ShowCommandAddMenu
@@ -46,7 +46,7 @@ using UnityEngine;
 /// 5) 메타 동기화(중요)
 ///    - NormalizeInsertedCommandMeta: SerializedProperty 상의 meta.track 값을 강제로 targetTrack으로 맞춤
 ///    - SyncMetaAfterInsert: 실제 managedReferenceValue(=CommandSpecBase)에도 Editor_SetMeta로 동기화
-///      → “프로퍼티 상의 meta”와 “객체 내부 meta”가 어긋나지 않게 하는 안전장치
+///      -> “프로퍼티 상의 meta”와 “객체 내부 meta”가 어긋나지 않게 하는 안전장치
 ///
 /// Look here when you want to change:
 /// - “어디에 삽입하나?” 정책: insertAt 계산 방식, 선택/스크롤 정책(_pendingCommandIndex/_scrollToNewCommand)

@@ -9,7 +9,7 @@ using UnityEngine;
 /// - 에디터 윈도우의 "키보드 조작 UX"를 한 곳에 모아둔 partial.
 /// - 텍스트 필드 편집 중이면(EditingTextField) 키 입력을 무시해서, 입력/네비게이션 충돌을 방지.
 /// - Nodes / Steps / Commands 3-컬럼 네비게이션 상태(_navColumn)와 선택 인덱스(_selectedNode/_selectedStep/_commandsList.index)를
-///   키 입력(←→↑↓/Space/Ctrl(or Cmd)+E)으로 일관되게 갱신.
+///   키 입력(←->↑↓/Space/Ctrl(or Cmd)+E)으로 일관되게 갱신.
 /// - Commands 컬럼에서는 트랙(_activeTrack) 이동까지 포함해서 "키보드만으로 편집"이 가능하게 함.
 /// - 선택 이동 시 스크롤을 자동 보정(EnsureSelectedCommandVisible)하여 현재 선택이 화면 밖으로 나가지 않게 유지.
 /// - "컬럼 단위 삭제" 단축키(Ctrl/Cmd+E)를 처리하고, 실제 삭제는 기존 삭제 유틸(DeleteCommandAt/DeleteSelectedStep/…)
@@ -17,11 +17,11 @@ using UnityEngine;
 ///
 /// 여기서 건드리면 좋은 것들(= 키보드 UX를 바꾸고 싶을 때)
 /// - 단축키 매핑/정책:
-///   - HandleArrowNavigation() : ←→↑↓/Space 처리의 메인 라우터.
+///   - HandleArrowNavigation() : ←->↑↓/Space 처리의 메인 라우터.
 ///   - HandleDeleteByActiveColumnShortcut() / TryDeleteByActiveColumn() : Ctrl/Cmd+E 정책 변경.
 /// - 컬럼 이동 정책:
 ///   - SyncSelectionAfterColumnChange() : Nodes/Steps/Commands로 이동할 때 선택 인덱스를 어떻게 유지/클램프할지.
-///   - CanEnterCommandsColumn_FromCurrentStep() : Steps→Commands 진입 조건(트랙 리스트 존재 여부 등).
+///   - CanEnterCommandsColumn_FromCurrentStep() : Steps->Commands 진입 조건(트랙 리스트 존재 여부 등).
 /// - Commands 컬럼 세부 UX:
 ///   - MoveTrack(int delta) : Commands 컬럼에서 트랙 좌/우 이동 규칙, 트랙 바꿀 때 선택 유지 정책.
 ///   - MoveCommandSelection(int delta) : 커맨드 선택 이동, 즉시 스크롤 보정/예약 플래그 정책.
@@ -41,7 +41,7 @@ using UnityEngine;
 /// - _scrollToCommandIndex/_scrollTargetCommandIndex, _lastCommandNavDelta
 ///
 /// 메모
-/// - 이 partial은 "입력 해석 → 선택/스크롤 상태 갱신"까지만 책임지고,
+/// - 이 partial은 "입력 해석 -> 선택/스크롤 상태 갱신"까지만 책임지고,
 ///   실제 생성/삭제/컴파일은 다른 partial의 유틸에 위임하는 구조를 유지하는 게 디버깅이 쉽다.
 /// </summary>
 public sealed partial class SequenceSpecEditorWindow

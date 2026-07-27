@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using Yarn.Unity;
 
 // 하루 진행.
-// 게시판 목록 → (손님 선택 → 통화 확정 → 배정 → 접객 → 결산) 3회 → 하루 리포트 → 밤
+// 게시판 목록 -> (손님 선택 -> 통화 확정 -> 배정 -> 접객 -> 결산) 3회 -> 하루 리포트 -> 밤
 // 상태 전이는 전부 DayCycleState 가 소유. 이 클래스는 순서와 대기만 담당.
 public sealed class DayCycleFlow
 {
@@ -56,7 +56,7 @@ public sealed class DayCycleFlow
 
             campaign.TryFindMaid(maidId, out MaidRuntimeState maid);
 
-            // 격리실 접객 -> 반응 점수 × 붕괴 배율 결산
+            // 격리실 접객 -> 반응 점수 x 붕괴 배율 결산
             ServiceSettlementResult result = await _sessionFlow.RunAsync(campaign, booking, maid);
             dayCycle.CompleteSlot(booking, result);
         }

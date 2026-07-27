@@ -723,7 +723,7 @@ public sealed class EpisodeProgressionEditorWindow : EditorWindow
                     Color oldBackground = GUI.backgroundColor;
                     GUI.backgroundColor = new Color(1f, 0.5f, 0.5f);
 
-                    if (GUILayout.Button("×", GUILayout.Width(20f)))
+                    if (GUILayout.Button("x", GUILayout.Width(20f)))
                         removeIndex = i;
 
                     GUI.backgroundColor = oldBackground;

@@ -60,5 +60,5 @@ public sealed class NightProgramResult
     }
 
     public string ToSummaryLine()
-        => $"{BurdenAxes.ToBurdenLabel(Axis)} {CollapseBefore} → {CollapseAfter} / 경험 +{ExperienceGain}";
+        => $"{BurdenAxes.ToBurdenLabel(Axis)} {CollapseBefore} -> {CollapseAfter} / 경험 +{ExperienceGain}";
 }

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-// alias→alias 체인은 단일 단계만 치환. (pres_actor @ @2)
+// alias->alias 체인은 단일 단계만 치환. (pres_actor @ @2)
 // 다중 alias 사용 시, 노드 시작 부에서 필요한 것들 전부 직접 다시 선언할 것.
 public sealed class CharacterRigTargetAliasRegistry
 {

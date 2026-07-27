@@ -6,7 +6,7 @@ using UnityEngine;
 [Serializable]
 [CommandMenuHint(
     "Background Rig Motion",
-    "Scale (From → To)",
+    "Scale (From -> To)",
     Order = -170)]
 public sealed class ScaleToCommandSpecBgR : BackgroundRigCommandSpecBase
 {

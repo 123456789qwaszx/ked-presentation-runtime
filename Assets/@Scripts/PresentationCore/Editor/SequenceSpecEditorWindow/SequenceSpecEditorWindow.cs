@@ -42,40 +42,40 @@ using UnityEngine;
 // "뭘 건드리고 싶을 때 어디를 보면 되나" (빠른 찾아보기)
 //
 // A) 창의 기본 동작/생명주기/초기화 순서 바꾸기
-//    → OnEnable / OnDisable / OnSelectionChange / OnGUI
+//    -> OnEnable / OnDisable / OnSelectionChange / OnGUI
 //      - 초기 세팅(캐시, 프리퍼런스 로드, 리빌드, 폴드아웃 로드) 순서 조정도 여기.
 //
 // B) 레이아웃(좌/우 비율, 최소 크기, 스크롤, 패널 배치) 바꾸기
-//    → OnGUI의 _nodesW/_stepsW 계산, DrawToolbar(), DrawHeader(),
+//    -> OnGUI의 _nodesW/_stepsW 계산, DrawToolbar(), DrawHeader(),
 //      DrawNodesPanel(), DrawRightPanel() 호출 순서/구성
 //
 // C) 단축키/키보드 네비게이션/삭제 정책 바꾸기
-//    → ToolbarShortcutsTooltip(문구), HandleArrowNavigation(),
+//    -> ToolbarShortcutsTooltip(문구), HandleArrowNavigation(),
 //      HandleDeleteByActiveColumnShortcut(), HandleGlobalCommandDeleteShortcut(),
 //      + _navColumn / _lastCommandNavDelta / _isDraggingSteps 등 상태 필드
 //
 // D) "트랙"을 추가/삭제/이름 변경하거나 트랙 필드 연결 바꾸기
-//    → TrackTabs / TrackFieldNames / TrackTypes
+//    -> TrackTabs / TrackFieldNames / TrackTypes
 //      - TrackFieldNames는 실제 SerializedProperty 필드명(예: "dialogue")과 1:1로 맞아야 함.
 //      - TrackToIndex / IndexToTrack은 탭 인덱스 매핑.
 //      - OnEnable에서 length mismatch 체크가 터지면 여기부터 확인.
 //
 // E) 선택 상태(노드/스텝/커맨드)와 바인딩 경로가 꼬일 때
-//    → _selectedNode / _selectedStep / _stepsPropPath / _commandsPropPath
+//    -> _selectedNode / _selectedStep / _stepsPropPath / _commandsPropPath
 //      + RebuildIfNeeded(force) 구현 쪽(다른 partial)에서 경로 구성 로직 확인.
 //
 // F) 커맨드 타입 목록(추가 메뉴/Quick Add에 뜨는 타입) 바꾸기
-//    → CacheCommandTypes()
+//    -> CacheCommandTypes()
 //      - TypeCache.GetTypesDerivedFrom<CommandSpecBase>()로 수집하며
 //        abstract/generic 제외 + 이름 정렬.
 //      - 필터링/정렬/그룹핑을 바꾸고 싶으면 여기.
 //
 // G) 자동 컴파일 정책을 바꾸기(너무 자주 컴파일된다/조건부로 하고 싶다)
-///   → OnGUI 마지막의 ApplyModifiedProperties() 처리 블록 + ForceCompileAll()
+///   -> OnGUI 마지막의 ApplyModifiedProperties() 처리 블록 + ForceCompileAll()
 //      - 예: 특정 변경에서만 컴파일, 디바운스, 예외 처리 정책 강화 등.
 //
 // H) 멀티 삭제(체크박스 기반 삭제 UX) 관련 손보기
-//    → _deleteMultiMode / _checkedNodes
+//    -> _deleteMultiMode / _checkedNodes
 //
 // -------------------------------------------------------------------------------------------------
 // 이 파일이 "하지 않는 일" (다른 partial에서 찾을 확률이 큼)
@@ -91,7 +91,7 @@ using UnityEngine;
 // -------------------------------------------------------------------------------------------------
 // 유지보수 팁(이 클래스의 안정성 포인트)
 // - TrackFieldNames/TrackTypes/TrackTabs는 '동일 개수 + 동일 순서'가 핵심 계약.
-// - OnGUI는 "전역 입력 처리 → 대상 체크 → _so.Update → 그리기 → ApplyModifiedProperties → 컴파일"
+// - OnGUI는 "전역 입력 처리 -> 대상 체크 -> _so.Update -> 그리기 -> ApplyModifiedProperties -> 컴파일"
 //   순서를 유지하면 버그가 덜 난다.
 // - selection/propPath는 RebuildIfNeeded()에서만 갱신되도록 '권위'를 단일화하면 꼬임이 줄어든다.
 // =================================================================================================

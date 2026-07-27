@@ -43,7 +43,7 @@ public sealed class OneShotPresentationLane
         while (_oneShotDialogueRunner.IsDialogueRunning)
             yield return null;
         
-        // 한 번에 flush → one-shot executor 실행. entry 적용까지 대기(메인 블로킹).
+        // 한 번에 flush -> one-shot executor 실행. entry 적용까지 대기(메인 블로킹).
         _currentTicket = _oneShotPlaybackDriver.PlayCollected();
 
         // beat_free:

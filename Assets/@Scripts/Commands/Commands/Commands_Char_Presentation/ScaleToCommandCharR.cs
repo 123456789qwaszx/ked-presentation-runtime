@@ -6,7 +6,7 @@ using UnityEngine;
 [Serializable]
 [CommandMenuHint(
     "Char Rig Motion",
-    "Scale (From → To)",
+    "Scale (From -> To)",
     Order = -170
 )]
 public class ScaleToCommandSpecCharR : CharacterRigCommandSpecBase

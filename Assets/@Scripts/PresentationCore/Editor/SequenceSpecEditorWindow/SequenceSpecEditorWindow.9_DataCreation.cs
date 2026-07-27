@@ -29,13 +29,13 @@ using UnityEditor;
 /// 
 /// 여기부터 보면 좋은 경우(수정 포인트):
 /// - “새 Step/Node 만들 때 기본값을 바꾸고 싶다”
-///   → CreateBlankStep / CreateBlankNode
+///   -> CreateBlankStep / CreateBlankNode
 /// - “기본 Gate의 정책(Immediate/Delay/Signal 초기값, null 처리)을 바꾸고 싶다”
-///   → SanitizeGate, CloneStepDeep의 Immediately 처리 분기
+///   -> SanitizeGate, CloneStepDeep의 Immediately 처리 분기
 /// - “Duplicate/Copy가 특정 필드를 복제하지 않게 하거나, 추가 후처리를 하고 싶다”
-///   → CloneStepDeep / CloneNodeDeep / CloneListInto
+///   -> CloneStepDeep / CloneNodeDeep / CloneListInto
 /// - “Command 복제 방식(JSON round-trip)을 바꾸고 싶다(성능/호환성/커스텀 복제)”
-///   → CloneCommandDeep
+///   -> CloneCommandDeep
 /// </summary>
 public sealed partial class SequenceSpecEditorWindow
 {

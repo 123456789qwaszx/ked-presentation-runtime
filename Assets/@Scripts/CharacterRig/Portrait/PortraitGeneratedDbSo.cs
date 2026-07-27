@@ -18,7 +18,7 @@ public sealed class PortraitGeneratedDbSo : ScriptableObject
         public string assetPath;
 
         public override string ToString()
-            => $"{characterId}|{variantKey}|{emotionKey} → {(sprite ? sprite.name : "NULL")}";
+            => $"{characterId}|{variantKey}|{emotionKey} -> {(sprite ? sprite.name : "NULL")}";
     }
 
     [Header("Generated (Read-only)")]

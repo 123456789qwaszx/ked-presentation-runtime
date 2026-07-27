@@ -97,7 +97,7 @@ public sealed class StageMaskMotionPresetDBSO : ScriptableObject
         key = key.Replace(" ", "_");
         key = key.Replace("-", "_");
 
-        // Yarn 커맨드 네임스페이스 접두사 흡수: "tx_hstrip_open" → "hstrip_open"
+        // Yarn 커맨드 네임스페이스 접두사 흡수: "tx_hstrip_open" -> "hstrip_open"
         if (key.StartsWith("tx_"))
             key = key.Substring(3);
 
@@ -106,7 +106,7 @@ public sealed class StageMaskMotionPresetDBSO : ScriptableObject
 
     private void OnEnable() => _map = null;
 
-    // 플레이 모드 인스펙터 수정 → 캐시 무효화 → 다음 발화에 반영.
+    // 플레이 모드 인스펙터 수정 -> 캐시 무효화 -> 다음 발화에 반영.
     private void OnValidate() => _map = null;
 
     private void Build()
@@ -364,7 +364,7 @@ public sealed class StageMaskMotionPresetDBSO : ScriptableObject
                 key = "strip_clear",
                 kind = StageMaskKind.FullRect,
                 fromOffset = new Vector2(2400f, 0f),
-                toOffset = Vector2.zero,                               // 우측에서 슬라이드 인 → 클리어
+                toOffset = Vector2.zero,                               // 우측에서 슬라이드 인 -> 클리어
                 showEdge = true, edgeMode = StageMaskEdgeMode.Leading,
                 edgeColor = new Color(1f, 1f, 1f, 0.4f), edgeThickness = 4f,
                 hideEdgeOnComplete = true,

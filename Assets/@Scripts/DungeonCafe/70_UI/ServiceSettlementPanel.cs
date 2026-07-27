@@ -94,7 +94,7 @@ public sealed class ServiceSettlementPanel : UIPanel<ServiceSettlementPanel.Refs
         {
             _multiplierText.text =
                 $"{BurdenAxes.ToBurdenLabel(result.DemandAxis)} {result.DemandCollapse} " +
-                $"→ {result.MultiplierLabel} ×{result.Multiplier:0.0}";
+                $"-> {result.MultiplierLabel} x {result.Multiplier:0.0}";
         }
 
         if (_energyText != null)

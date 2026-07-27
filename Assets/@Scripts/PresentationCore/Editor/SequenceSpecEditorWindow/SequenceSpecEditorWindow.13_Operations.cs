@@ -17,15 +17,15 @@ using UnityEngine;
 /// ─────────────────────────────────────────────────────────────
 /// 여기서 보면 좋은 경우(= 뭘 건드리고 싶을 때)
 /// - “Add Node/Step/Command”의 정책을 바꾸고 싶다
-///   → AddNode(), AddStep(...), (InsertSingleAt/InsertBatchAt는 다른 partial에 있을 가능성)
+///   -> AddNode(), AddStep(...), (InsertSingleAt/InsertBatchAt는 다른 partial에 있을 가능성)
 /// - 삭제 UX/정책(확인창, 삭제 후 선택 이동, 컬럼 이동)을 바꾸고 싶다
-///   → DeleteSelectedNodeWithConfirm(), DeleteCheckedNodesWithConfirm(), DeleteCommandAt(...)
+///   -> DeleteSelectedNodeWithConfirm(), DeleteCheckedNodesWithConfirm(), DeleteCommandAt(...)
 /// - 삭제 후 다음 선택 인덱스 규칙을 바꾸고 싶다
-///   → NextIndexAfterDelete(...)
+///   -> NextIndexAfterDelete(...)
 /// - 변경 적용 타이밍(즉시 vs 다음 프레임), Undo 라벨, 강제 리빌드 조건을 다듬고 싶다
-///   → DelayModify(...), DeleteArrayElementByPath(...)
+///   -> DelayModify(...), DeleteArrayElementByPath(...)
 /// - “현재 트랙의 커맨드 리스트” 해석/탐색 방식을 바꾸고 싶다(트랙 구조 변경, 필드명 변경)
-///   → FindActiveTrackList(...), FindTrackListOnStep(...)
+///   -> FindActiveTrackList(...), FindTrackListOnStep(...)
 ///
 /// ─────────────────────────────────────────────────────────────
 /// 설계 메모

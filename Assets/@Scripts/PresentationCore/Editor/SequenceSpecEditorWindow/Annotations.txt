@@ -31,7 +31,7 @@
 //   - ReorderableList uses propertyPath caching; invalidate (set to null) when needed to rebuild safely.
 //   - Foldout (expanded/collapsed) state is NOT trusted to SerializedProperty.isExpanded; stored separately.
 // - Prefer wrapping data mutations with DelayModify() to avoid GUI event conflicts.
-// - Keep a consistent “Undo → Dirty → Apply → Compile → Repaint” pipeline.
+// - Keep a consistent “Undo -> Dirty -> Apply -> Compile -> Repaint” pipeline.
 //
 // -------------------------------------------------------------------------------------------------
 // [0] Main Window (Authority) — Lifecycle / Binding / Global Policies
@@ -44,12 +44,12 @@
 //   - List caches: _nodesList / _stepsList / _commandsList, _stepsPropPath / _commandsPropPath
 //   - Scroll / jump: _nodesScroll / _rightScroll / _compiledScroll, _scrollToNewCommand, etc.
 // - Global input routing (keyboard navigation / delete shortcuts)
-// - “Recompile on changes” policy decision (ApplyModifiedProperties → ForceCompileAll)
+// - “Recompile on changes” policy decision (ApplyModifiedProperties -> ForceCompileAll)
 //
 // Good places to modify here
 // - Initialization order (LoadPreferences / LoadFoldouts / RebuildIfNeeded call order)
 // - Rebuild strength when targetSequence changes (force) + cache invalidation scope
-// - ApplyModifiedProperties → SetDirty / Compile policy (conditional compile, debouncing, etc.)
+// - ApplyModifiedProperties -> SetDirty / Compile policy (conditional compile, debouncing, etc.)
 // - Track system contract (TrackTabs / TrackFieldNames / TrackTypes)
 //
 // -------------------------------------------------------------------------------------------------
@@ -57,7 +57,7 @@
 //
 // Responsibilities
 // - DrawToolbar()
-//   - Target SequenceSpecSO picker (ObjectField) → RebuildIfNeeded(force:true) + LoadFoldouts()
+//   - Target SequenceSpecSO picker (ObjectField) -> RebuildIfNeeded(force:true) + LoadFoldouts()
 //   - Search field (_searchField)
 //   - Ping button (ping the asset)
 //   - Shortcuts popup (ShortcutsPopup)
@@ -162,7 +162,7 @@
 //
 // - Build compiled-preview display lines
 //   - TryReadMeta(): read track/phase/blocking/infinite/duration from meta (_meta/meta/Meta)
-//   - SummarizeCompiledLine(): compare origin vs meta → drift/missing indicators
+//   - SummarizeCompiledLine(): compare origin vs meta -> drift/missing indicators
 //
 // Assumptions / notes
 // - Command lists must be SerializeReference ManagedReference to track via managedReferenceId.
@@ -271,8 +271,8 @@
 // - Use Box ScriptableObject wrappers for stability with SerializeReference polymorphism.
 //
 // Flow
-// - Copy: CreateInstance(Box) → assign → ToJson → Prefix+json → DestroyImmediate
-// - Paste: check prefix → extract json → CreateInstance(Box) → FromJsonOverwrite → return → DestroyImmediate
+// - Copy: CreateInstance(Box) -> assign -> ToJson -> Prefix+json -> DestroyImmediate
+// - Paste: check prefix -> extract json -> CreateInstance(Box) -> FromJsonOverwrite -> return -> DestroyImmediate
 //
 // This part owns
 // - Clipboard format + serialization/deserialization only
@@ -294,8 +294,8 @@
 //   - tracks cloned into new StepTracks; compiled is created empty (expected to be rebuilt by compile)
 //
 // Policy notes
-// - if type != Delay → seconds=0; if type != Signal → signalKey=""; keep signalKey non-null
-// - if gate == Immediately during clone → replace with defaultGate to keep consistent editing defaults
+// - if type != Delay -> seconds=0; if type != Signal -> signalKey=""; keep signalKey non-null
+// - if gate == Immediately during clone -> replace with defaultGate to keep consistent editing defaults
 //
 // Good places to modify here
 // - Default values for newly created items
@@ -342,7 +342,7 @@
 //
 // Responsibilities
 // - Ignore navigation keys when typing in text fields (avoid input conflicts)
-// - Update 3-column navigation state via ←→↑↓/Space/Ctrl(or Cmd)+E
+// - Update 3-column navigation state via ←->↑↓/Space/Ctrl(or Cmd)+E
 // - Include track left/right switching in Commands column
 // - Auto-scroll to keep selection visible (EnsureSelectedCommandVisible)
 // - Delegate actual deletion to CRUD utilities (clear separation of authority)
@@ -413,7 +413,7 @@
 // UI / UX (Preset Bar)
 // - Preset: [Dropdown] [Save] [Save As] [Delete]
 // - Dropdown change:
-//   - Loads selected preset → overwrites current role slots state → writes working prefs
+//   - Loads selected preset -> overwrites current role slots state -> writes working prefs
 // - Save (overwrite active preset)
 // - Save As (inline name input; no modal)
 // - Delete (Default cannot be deleted)
@@ -437,5 +437,5 @@
 // End.
 // - This comment exists to “restore the editor’s structure” quickly.
 // - Even when implementations are split across partial files, use this as the map:
-//   responsibility → where to edit → what depends on what.
+//   responsibility -> where to edit -> what depends on what.
 // =================================================================================================

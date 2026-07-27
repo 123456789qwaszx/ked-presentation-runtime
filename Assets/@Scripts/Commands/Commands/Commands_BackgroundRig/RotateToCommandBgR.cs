@@ -6,7 +6,7 @@ using UnityEngine;
 [Serializable]
 [CommandMenuHint(
     "Background Rig Motion",
-    "Rotate (From → To)",
+    "Rotate (From -> To)",
     Order = -180)]
 public sealed class RotateToCommandSpecBgR : BackgroundRigCommandSpecBase
 {

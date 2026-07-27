@@ -56,7 +56,7 @@ public sealed class ScreenVignettePresetDBSO : ScriptableObject
 
     private void OnEnable() => _map = null;
 
-    // 플레이 모드 인스펙터 수정 → 캐시 무효화 → 다음 발화에 반영.
+    // 플레이 모드 인스펙터 수정 -> 캐시 무효화 -> 다음 발화에 반영.
     private void OnValidate() => _map = null;
 
     private void Build()
