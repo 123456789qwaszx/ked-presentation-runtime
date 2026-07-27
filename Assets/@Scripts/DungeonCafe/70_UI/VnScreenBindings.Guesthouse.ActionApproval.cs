@@ -2,11 +2,10 @@ using System;
 using System.Threading.Tasks;
 
 /// <summary>
-/// 행동 승인. 접객 세션 내내 열린 채로 유지되는 유일한 패널이다.
+/// 행동 승인.
 ///
-/// 다른 패널과 달리 열기와 닫기가 한 메서드에 있지 않다.
-/// 비트마다 닫았다 열면 화면이 깜빡이므로, 이미 떠 있으면 Present 만 다시 밀어 넣는다.
-/// 실제 닫기는 세션이 끝나 결산 패널이 열릴 때 CloseApprovalPanelIfOpen 으로 처리한다.
+/// 승인 요청마다 새로 열리고, 플레이어가 하나를 고르면 닫힌다.
+/// 승인 직후에는 연출 노드가 재생되므로 패널이 화면을 덮고 있으면 안 된다.
 /// </summary>
 public sealed partial class VnScreenBindings
 {
@@ -25,18 +24,27 @@ public sealed partial class VnScreenBindings
         _hasApprovalResult = false;
         _pendingApprovalIndex = 0;
 
-        PresentActionApprovalPanel(request);
+        OpenActionApprovalPanel(request);
 
-        await AsyncWait.UntilAsync(() => _hasApprovalResult);
-
-        _isWaitingApproval = false;
+        try
+        {
+            await AsyncWait.UntilAsync(() => _hasApprovalResult);
+        }
+        finally
+        {
+            // 정상 선택이든 세션 취소든 패널이 남지 않게 한다.
+            CloseApprovalPanelIfOpen();
+            _isWaitingApproval = false;
+        }
 
         return _pendingApprovalIndex;
     }
 
     /// <summary>
-    /// 통제 상실 통보. 패널을 닫지 않고 잠근다.
-    /// 이후 자동 사건이 재생되는 동안에도 무엇이 진행 중인지는 계속 보여야 한다.
+    /// 통제 상실 통보.
+    ///
+    /// 승인 패널은 이미 닫힌 뒤이므로 여기서는 할 일이 없다.
+    /// 자동 사건 동안의 상태 표시는 상시 HUD 가 담당한다.
     /// </summary>
     public void NotifyControlLost()
     {
@@ -49,7 +57,6 @@ public sealed partial class VnScreenBindings
             panel.LockForControlLoss();
     }
 
-    /// <summary>세션이 끝날 때 결산 패널이 호출한다.</summary>
     private void CloseApprovalPanelIfOpen()
     {
         if (!_isApprovalPanelOpen)
@@ -59,18 +66,10 @@ public sealed partial class VnScreenBindings
         ClosePanel();
     }
 
-    /// <summary>이미 떠 있으면 내용만 갈아 끼우고, 아니면 새로 올린다.</summary>
-    private void PresentActionApprovalPanel(ServiceApprovalRequest request)
+    private void OpenActionApprovalPanel(ServiceApprovalRequest request)
     {
-        if (_isApprovalPanelOpen)
-        {
-            MaidActionApprovalPanel opened = UI.GetUI<MaidActionApprovalPanel>();
-
-            if (opened != null)
-                opened.Present(request);
-
-            return;
-        }
+        // 앞선 요청이 어떤 이유로든 남아 있으면 먼저 정리한다.
+        CloseApprovalPanelIfOpen();
 
         UI.PushPanel<MaidActionApprovalPanel>(panel =>
         {
