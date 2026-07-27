@@ -6,7 +6,7 @@ using UnityEngine.UI;
 using static UIRefValidation;
 
 /// <summary>
-/// 밤 시작 상점·장착 패널. (v3 §11)
+/// 밤 시작 상점/장착 패널. (v3 §11)
 ///
 /// 구매 가능한 능력과 보유 능력을 한 목록에 보여준다.
 /// - 구매 가능 항목: 누르면 구매 예약 (비용 표시, 보유 욕구 초과분은 예약 불가)
@@ -94,7 +94,7 @@ public sealed class NightPrepPanel : UIPanel<NightPrepPanel.Refs>, IManagedUI
             _equipped.Add(request.Equipped[i]);
 
         if (_titleText != null)
-            _titleText.text = "밤 — 상점 · 장착";
+            _titleText.text = "밤 - 상점 / 장착";
 
         Rebuild();
         _list.SetLocked(false);
@@ -130,10 +130,10 @@ public sealed class NightPrepPanel : UIPanel<NightPrepPanel.Refs>, IManagedUI
 
         if (_summaryText != null)
             _summaryText.text =
-                $"보유 욕구 {_request.HeldDesire}  (구매 예약 −{cost})\n" +
+                $"보유 욕구 {_request.HeldDesire}  (구매 예약 -{cost})\n" +
                 $"장착 슬롯 {_equipped.Count} / {_request.SlotLimit}";
 
-        _entries.Add(new GuesthouseOptionEntry("▶ 이대로 확정"));
+        _entries.Add(new GuesthouseOptionEntry(" 이대로 확정"));
         _slots.Add((EntryKind.Confirm, null));
 
         // 구매 가능
@@ -144,13 +144,13 @@ public sealed class NightPrepPanel : UIPanel<NightPrepPanel.Refs>, IManagedUI
             bool affordable = reserved || _request.HeldDesire - cost >= def.DesireCost;
 
             _entries.Add(new GuesthouseOptionEntry(
-                $"{(reserved ? "◈" : "◇")} 구매: {def.DisplayName}  (욕구 {def.DesireCost})" +
+                $"{(reserved ? "(O)" : "(X)")} 구매: {def.DisplayName}  (욕구 {def.DesireCost})" +
                 (reserved ? "  [예약]" : string.Empty),
                 isAvailable: affordable && !_locked));
             _slots.Add((EntryKind.Purchase, def.Id));
         }
 
-        // 보유 → 장착 토글
+        // 보유 -> 장착 토글
         for (int i = 0; i < _request.Owned.Count; i++)
         {
             string id = _request.Owned[i];
@@ -158,7 +158,7 @@ public sealed class NightPrepPanel : UIPanel<NightPrepPanel.Refs>, IManagedUI
             bool slotFree = on || _equipped.Count < _request.SlotLimit;
 
             _entries.Add(new GuesthouseOptionEntry(
-                $"{(on ? "■" : "□")} 장착: {id}",
+                $"{(on ? "(O)" : "(X)")} 장착: {id}",
                 isAvailable: slotFree && !_locked));
             _slots.Add((EntryKind.Equip, id));
         }

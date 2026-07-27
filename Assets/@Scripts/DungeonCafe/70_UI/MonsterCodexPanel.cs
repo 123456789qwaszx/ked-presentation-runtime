@@ -181,7 +181,7 @@ public sealed class MonsterCodexPanel : UIPanel<MonsterCodexPanel.Refs>
             _detailNotesText.text = BuildNotes(monster, tier);
     }
 
-    /// <summary>이해도 4단계 공개. (§8.2: 일부=요구·만족 / 고도=범위·특이 / 완전=보정·심층)</summary>
+    /// <summary>이해도 4단계 공개. (§8.2: 일부=요구/만족 / 고도=범위/특이 / 완전=보정/심층)</summary>
     private string BuildNotes(MonsterProfileV3 monster, UnderstandingTier tier)
     {
         StringBuilder builder = new();
@@ -202,7 +202,7 @@ public sealed class MonsterCodexPanel : UIPanel<MonsterCodexPanel.Refs>
                 ? "부하 보정 없음"
                 : $"부하 보정 {monster.LoadModifier:+0;-0}{(monster.LoadModifierHeavyOnly ? " (강 옵션 한정)" : string.Empty)}";
             Append(builder, mod);
-            Append(builder, "완전 파악: 심층 주사위 −5 적용 중");
+            Append(builder, "완전 파악: 심층 주사위 -5 적용 중");
         }
 
         return builder.ToString();
@@ -216,7 +216,7 @@ public sealed class MonsterCodexPanel : UIPanel<MonsterCodexPanel.Refs>
         if (builder.Length > 0)
             builder.Append('\n');
 
-        builder.Append("· ").Append(line);
+        builder.Append("/ ").Append(line);
     }
 
     private static string ToTierLabel(UnderstandingTier tier) => tier switch
@@ -247,7 +247,7 @@ public sealed class MonsterCodexPanel : UIPanel<MonsterCodexPanel.Refs>
             MonsterSpecies.ParasiticEquipment => "기생 장비종",
             MonsterSpecies.MemoryDevourer => "기억 포식종",
             MonsterSpecies.ResonanceAmplifier => "감응 증폭종",
-            MonsterSpecies.PredatoryBinder => "포식·구속종",
+            MonsterSpecies.PredatoryBinder => "포식/구속종",
             _ => "미분류",
         };
     }

@@ -1,61 +1,127 @@
+using System;
 using UnityEngine;
 using Yarn.Unity;
 
-/// <summary>
-/// 씬 합성 루트 v3. 기존 GuesthouseRuntime 자리에 이 컴포넌트를 놓는다.
-/// UI 어댑터(IGuesthouseV3Screens 구현)가 준비되기 전에는 headlessSmoke 로 무UI 검증이 가능하다.
-/// </summary>
+// 게스트하우스 v3 합성 루트.
+// 이 클래스는 콘텐츠/상태/플로우를 조립하고 캠페인 실행을 시작하는 일만 담당한다.
 public sealed class GuesthouseV3Bootstrap : MonoBehaviour
 {
+    [Header("Content")]
     [SerializeField] private GuesthouseV3TuningSO tuningAsset;
+
+    [Header("Narrative")]
     [SerializeField] private DialogueRunner dialogueRunner;
-    [Tooltip("체크 시 Start 에서 헤드리스 캠페인 1회를 돌리고 로그를 남긴다.")]
-    [SerializeField] private bool headlessSmoke;
+    [SerializeField] private EpisodePlayer episodePlayer;
+
+    [Header("Campaign")]
     [SerializeField] private ulong seed = 20260727UL;
 
-    public CampaignStateV3 Campaign { get; private set; }
-    public CampaignFlowV3 Flow { get; private set; }
+    private GuesthouseV3Runtime _runtime;
+    private bool _isRunning;
 
-    /// <summary>UI 계층이 화면 구현을 주입하며 캠페인을 시작한다.</summary>
-    public void StartCampaign(IGuesthouseV3Screens screens, INodePlayerV3 nodes)
+    public GuesthouseV3Runtime Runtime => _runtime;
+    public CampaignStateV3 Campaign => _runtime?.State;
+
+    // VnScreenBindings가 캠페인 상태를 먼저 잡을 수 있도록,
+    // 객체 조립과 실제 실행을 분리한다.
+    public GuesthouseV3Runtime BuildRuntime(
+        VnScreenBindings screens,
+        INodePlayerV3 nodePlayer = null)
     {
-        GuesthouseTuningV3 tuning = tuningAsset != null
-            ? tuningAsset.BuildTuning() : GuesthouseTuningV3.CreateStandard();
+        if (screens == null)
+            throw new ArgumentNullException(nameof(screens));
 
-        Campaign = new CampaignStateV3(GuesthouseV3Content.Build(), tuning, seed);
-        Flow = new CampaignFlowV3(Campaign, screens, nodes ?? new DialogueRunnerNodePlayer(dialogueRunner));
-        _ = Flow.RunAsync();
+        GuesthouseTuningV3 tuning =
+            tuningAsset != null
+                ? tuningAsset.BuildTuning()
+                : GuesthouseTuningV3.CreateStandard();
+
+        GuesthouseV3ContentDB content =
+            GuesthouseV3Content.Build();
+
+        CampaignStateV3 state =
+            new(content, tuning, seed);
+
+        INodePlayerV3 nodes =
+            nodePlayer
+            ?? new ScenarioNodeRunner(episodePlayer);
+
+        ServiceSessionFlowV3 sessionFlow =
+            new(state, screens, nodes);
+
+        DailyMonsterSelectorV3 monsterSelector =
+            new(content);
+
+        NightPrepFlowV3 nightPrepFlow =
+            new(content, screens);
+
+        NightMaidFlowV3 nightMaidFlow =
+            new(
+                content,
+                sessionFlow,
+                screens,
+                nodes);
+
+        NightPhaseFlowV3 nightFlow =
+            new(
+                nightPrepFlow,
+                nightMaidFlow,
+                screens,
+                nodes);
+
+        DayCycleFlowV3 dayFlow =
+            new(
+                monsterSelector,
+                sessionFlow,
+                nightFlow,
+                screens,
+                nodes);
+
+        CampaignFlowV3 campaignFlow =
+            new(
+                state,
+                dayFlow,
+                screens);
+
+        _runtime = new GuesthouseV3Runtime(
+            content,
+            state,
+            sessionFlow,
+            nightFlow,
+            dayFlow,
+            campaignFlow);
+
+        return _runtime;
     }
 
-    private void Start()
+    public async void RunCampaign()
     {
-        if (!headlessSmoke) return;
-        var screens = new HeadlessV3Screens(HeadlessPolicyV3.Ideal);
-        StartCampaign(screens, new HeadlessNodePlayerV3());
-        Debug.Log($"[GuesthouseV3] smoke ending={Campaign.Ending} lifetime={Campaign.Ledger.Lifetime} " +
-                  $"services={screens.ServiceCount} landings={screens.LandingCount} depth={screens.DepthEntryCount}");
-        Campaign.ReleaseCounters();
-    }
-}
+        if (_runtime == null)
+            throw new InvalidOperationException(
+                "BuildRuntime()을 먼저 호출해야 합니다.");
 
-/// <summary>기존 DialogueRunner 를 INodePlayerV3 로 감싼다. 미작성 노드는 경고 후 통과 (기존 규칙 계승).</summary>
-public sealed class DialogueRunnerNodePlayer : INodePlayerV3
-{
-    private readonly DialogueRunner _runner;
-    public DialogueRunnerNodePlayer(DialogueRunner runner) { _runner = runner; }
+        if (_isRunning)
+            throw new InvalidOperationException(
+                "게스트하우스 캠페인이 이미 실행 중입니다.");
 
-    public async YarnTask PlayNodeAsync(string nodeName)
-    {
-        if (_runner == null || string.IsNullOrEmpty(nodeName)) return;
+        _isRunning = true;
 
-        if (_runner.Dialogue == null || !_runner.Dialogue.NodeExists(nodeName))
+        try
         {
-            Debug.LogWarning($"[GuesthouseV3] 미작성 노드 통과: {nodeName}");
-            return;
-        }
+            EndingKindV3 ending =
+                await _runtime.Campaign.RunAsync();
 
-        _runner.StartDialogue(nodeName);
-        while (_runner.IsDialogueRunning)
-            await YarnTask.Yield();
+            Debug.Log(
+                $"[GuesthouseV3] Ending={ending} " +
+                $"Lifetime={_runtime.State.Ledger.Lifetime}");
+        }
+        catch (Exception exception)
+        {
+            Debug.LogException(exception, this);
+        }
+        finally
+        {
+            _isRunning = false;
+        }
     }
 }

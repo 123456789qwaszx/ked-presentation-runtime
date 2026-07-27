@@ -4,6 +4,8 @@ using Yarn.Unity;
 
 public class VnAppBootstrap : MonoBehaviour
 {
+    [SerializeField]GuesthouseV3Bootstrap guesthouseV3;
+    
     private readonly UnityInputSource _unityInputSource = new();
     private readonly UnityTimeSource _unityTimeSource = new();
     
@@ -178,7 +180,8 @@ public class VnAppBootstrap : MonoBehaviour
         BootstrapEpisodeSelectionRuntime();
         InitializeEpisodePlayer();
         BootstrapScreenBindings();
-        
+
+        _screenBindings.StartGuesthouseCampaign(guesthouseV3);
         //dungeonCafeBootstrap.DungeonCafeStart(_screenBindings);
     }
 

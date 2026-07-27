@@ -78,7 +78,7 @@ public sealed class DayReportPanel : UIPanel<DayReportPanel.Refs>
 
         if (_progressText != null)
             _progressText.text =
-                $"보유 {campaign.Ledger.Held}  ·  누적 {campaign.Ledger.Lifetime}  ·  가게 Lv{campaign.ShopLevel}";
+                $"보유 {campaign.Ledger.Held}  /  누적 {campaign.Ledger.Lifetime}  /  가게 Lv{campaign.ShopLevel}";
 
         if (_incidentText != null)
             _incidentText.text = quotaMet

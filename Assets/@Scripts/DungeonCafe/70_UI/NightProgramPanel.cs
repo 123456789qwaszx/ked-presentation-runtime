@@ -9,7 +9,7 @@ using static UIRefValidation;
 /// 밤 처리 선택 패널. (v3 §5~§6)
 ///
 /// manageCount 명까지 (메이드, 안정/관리 붕괴) 를 지정하고, 나머지는 방치된다.
-/// 후보는 (메이드 × 처리 방식) 을 평탄화해 보여준다.
+/// 후보는 (메이드 x 처리 방식) 을 평탄화해 보여준다.
 /// - 안정: 항상 가능
 /// - 관리 붕괴: 최고 축 붕괴 80~99 일 때만 목록에 오른다 (§6.1)
 /// 항목을 누르면 계획에 담기고, [확정] 을 누르면 그대로 제출된다.
@@ -42,7 +42,7 @@ public sealed class NightProgramPanel : UIPanel<NightProgramPanel.Refs>, IManage
 
     private readonly GuesthouseOptionItemList _list = new();
     private readonly List<GuesthouseOptionEntry> _entries = new();
-    private readonly List<NightChoiceV3> _candidates = new();   // 목록 항목 → 선택지 (확정 항목은 Kind=None)
+    private readonly List<NightChoiceV3> _candidates = new();   // 목록 항목 -> 선택지 (확정 항목은 Kind=None)
     private readonly List<NightChoiceV3> _plan = new();
 
     private NightPlanRequestV3 _request;
@@ -174,7 +174,7 @@ public sealed class NightProgramPanel : UIPanel<NightProgramPanel.Refs>, IManage
         string aftereffect = maid.HasAftereffect ? "  후유증 1단계 해제" : string.Empty;
         string prefix = planned ? "✓ " : string.Empty;
 
-        return $"{prefix}{maid.DisplayName} · 안정\n" +
+        return $"{prefix}{maid.DisplayName} / 안정\n" +
                $"{BurdenAxes.ToBurdenLabel(axis)} {highest} -> 약 {after}{aftereffect}  관계(신뢰)+";
     }
 
@@ -184,7 +184,7 @@ public sealed class NightProgramPanel : UIPanel<NightProgramPanel.Refs>, IManage
         int retained = highest * _request.Tuning.ManagedReleaseRetainPercent / 100;
         string prefix = planned ? "✓ " : string.Empty;
 
-        return $"{prefix}{maid.DisplayName} · 관리 붕괴 (80~99 한정)\n" +
+        return $"{prefix}{maid.DisplayName} / 관리 붕괴 (80~99 한정)\n" +
                $"{BurdenAxes.ToBurdenLabel(axis)} {highest} -> 약 {retained}   " +
                $"밤 수입 +{_request.Tuning.ManagedReleaseNightEnergy}  관계(의존)+";
     }

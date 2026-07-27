@@ -20,9 +20,9 @@ public readonly struct DesireLedgerSnapshot
 /// <summary>
 /// 욕구의 3장부. (v3 §7.1)
 ///
-///   Today    — 오늘의 영업 목표(할당) 판정. 소비로 내려가지 않는다. (매출)
-///   Held     — 능력·시설에 실제 소비. (현금)
-///   Lifetime — 가게 레벨과 장기 진행도. 소비로 내려가지 않는다. (명성)
+///   Today    - 오늘의 영업 목표(할당) 판정. 소비로 내려가지 않는다. (매출)
+///   Held     - 능력/시설에 실제 소비. (현금)
+///   Lifetime - 가게 레벨과 장기 진행도. 소비로 내려가지 않는다. (명성)
 ///
 /// 계약: Earn 만이 세 장부를 동시에 올린다. EarnNight 는 Today 를 제외한다.
 /// Spend 는 Held 만 내린다. 개별 장부를 직접 수정하는 경로는 존재하지 않는다.
@@ -58,7 +58,7 @@ public sealed class DesireLedger
     }
 
     /// <summary>
-    /// 밤 수입 (관리 붕괴 +40 등). 오늘 장부 제외 — 당일 할당은 이미 판정 종료이며,
+    /// 밤 수입 (관리 붕괴 +40 등). 오늘 장부 제외 - 당일 할당은 이미 판정 종료이며,
     /// 밤 수입이 할당을 소급 구제하면 낮의 긴장이 죽는다. (v3 §6.1)
     /// </summary>
     public void EarnNight(int amount)

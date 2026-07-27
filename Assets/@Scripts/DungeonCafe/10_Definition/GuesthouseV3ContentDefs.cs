@@ -148,7 +148,7 @@ public sealed class AftereffectDefinition
     /// <summary>보유 중 태그 종족 심층 주사위 보정. (각인 +7)</summary>
     public int DepthDieModifier { get; }
     public MonsterSpecies TaggedSpecies { get; }
-    /// <summary>미해소 N일 후 영구화되는 기벽 id. (각인 → qk_acc_brand)</summary>
+    /// <summary>미해소 N일 후 영구화되는 기벽 id. (각인 -> qk_acc_brand)</summary>
     public string PermanentizeQuirkId { get; }
     /// <summary>공동: 안정하지 않은 밤마다 관계 감점.</summary>
     public bool PenalizesRelationWhenNeglected { get; }

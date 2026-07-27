@@ -16,6 +16,6 @@ public enum MonsterSpecies
     // 감응 증폭종: 메이드가 주입된 충동과 자신의 감정을 구분하지 못하게 된다.
     ResonanceAmplifier = 30,
 
-    // 포식·구속종: 철수해야 할 시점을 스스로 판단하지 못하고 접객을 계속한다.
+    // 포식/구속종: 철수해야 할 시점을 스스로 판단하지 못하고 접객을 계속한다.
     PredatoryBinder = 40,
 }

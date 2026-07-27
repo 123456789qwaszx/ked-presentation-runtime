@@ -93,14 +93,14 @@ public static class GuesthouseV3Content
             "ControlLoss_MemoryDevourer", "Ending_Collapse_MemoryDevourer"),
         new(MonsterSpecies.ResonanceAmplifier, "감응 증폭종",
             "ControlLoss_ResonanceAmplifier", "Ending_Collapse_ResonanceAmplifier"),
-        new(MonsterSpecies.PredatoryBinder, "포식·구속종",
+        new(MonsterSpecies.PredatoryBinder, "포식/구속종",
             "ControlLoss_PredatoryBinder", "Ending_Collapse_PredatoryBinder"),
     };
 
     // ---- 후유증 (§9) ----
     private static List<AftereffectDefinition> BuildAftereffects() => new()
     {
-        // 떨림은 배정을 막지 않는다 — 막으면 풀 고갈로 후반 경제가 연쇄 붕괴 (시뮬 검증).
+        // 떨림은 배정을 막지 않는다 - 막으면 풀 고갈로 후반 경제가 연쇄 붕괴 (시뮬 검증).
         // 대신 부하 판정 +2 로 '떨리는 손' 을 표현한다.
         new("se_tremor", "떨림", blocksAssignment: false, blockDays: 0,
             careCuresNeeded: 1, neglectHealDays: 2, depthDieModifier: 0,
@@ -206,7 +206,7 @@ public static class GuesthouseV3Content
     // ---- 캘린더 (§1) ----
     private static List<CampaignDayPlan> BuildCalendar() => new()
     {
-        // 시뮬 확정 곡선: 1주 완만 → 2주 상승 → 10일차부터 280 고원 (침면·감김상 주간 압박은 개체가 담당)
+        // 시뮬 확정 곡선: 1주 완만 -> 2주 상승 -> 10일차부터 280 고원 (침면/감김상 주간 압박은 개체가 담당)
         new(1, 2, 100), new(2, 3, 120), new(3, 3, 130), new(4, 3, 140), new(5, 3, 150),
         new(6, 3, 170), new(7, 3, 200), new(8, 3, 230), new(9, 3, 255), new(10, 3, 280),
         new(11, 3, 280), new(12, 3, 280), new(13, 3, 280), new(14, 3, 280), new(15, 3, 280),

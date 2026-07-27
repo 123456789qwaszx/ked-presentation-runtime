@@ -8,7 +8,7 @@
 //   Project 뷰 우클릭 -> Create -> VN/Episode/Chapter Episode Progression
 //
 // 사용 흐름:
-//   ChapterEpisodeProgressionSO   (이 파일 — Authoring)
+//   ChapterEpisodeProgressionSO   (이 파일 - Authoring)
 //       ↓
 //   EpisodeProgressionEvaluator   (런타임 조건 평가, 추후 구현)
 //       ↓

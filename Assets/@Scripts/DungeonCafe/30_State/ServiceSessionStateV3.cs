@@ -8,7 +8,7 @@ public sealed class ServiceSessionStateV3
     public SpeciesProtocolV3 Protocol { get; }
 
     public int BeatIndex { get; set; }
-    /// <summary>낮 반응 점수 (심층 제외 — 결산 산입분). (§7.2)</summary>
+    /// <summary>낮 반응 점수 (심층 제외 - 결산 산입분). (§7.2)</summary>
     public int DayReactionScore { get; set; }
     /// <summary>심층 중 발생 반응 (미산입, 기록용).</summary>
     public int DepthReactionScore { get; set; }

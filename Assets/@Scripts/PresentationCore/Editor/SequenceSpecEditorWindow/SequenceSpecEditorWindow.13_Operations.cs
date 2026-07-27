@@ -7,10 +7,10 @@ using UnityEngine;
 
 /// <summary>
 /// (Editor) SequenceSpec 편집기의 "데이터 변경(CRUD) + 안전한 적용 파이프라인" 파트.
-/// 이 partial은 UI를 그리는 쪽이 아니라, **노드/스텝/커맨드의 추가·삭제 같은 실제 데이터 변형**을 담당한다.
+/// 이 partial은 UI를 그리는 쪽이 아니라, **노드/스텝/커맨드의 추가/삭제 같은 실제 데이터 변형**을 담당한다.
 /// 핵심 목적은 3가지:
 /// 1) Undo/Dirty/SerializedObject 적용을 일관되게 처리한다.
-/// 2) ReorderableList/선택 상태/스크롤·네비게이션 상태를 “변경 후”에 자연스럽게 재동기화한다.
+/// 2) ReorderableList/선택 상태/스크롤/네비게이션 상태를 “변경 후”에 자연스럽게 재동기화한다.
 /// 3) SerializeReference(ManagedReference) 커맨드 리스트의 삭제/정리(두 번 Delete 필요 케이스 포함)와
 ///    foldout 상태 스냅샷/복원을 함께 보장한다.
 ///

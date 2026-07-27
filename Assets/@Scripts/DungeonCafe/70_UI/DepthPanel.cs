@@ -9,12 +9,12 @@ using static UIRefValidation;
 /// 붕괴심층 패널. (v3 §4)
 ///
 /// 심층 한 비트에서 세 국면을 같은 화면이 담당한다:
-/// 1) 개입 — 굴림 전 능력 토글 후 [주사위를 굴린다]
-/// 2) 굴림 제시 — 결과를 보여주고 재굴림/구간 하향 능력 또는 [받아들인다]
-/// 3) 회수 선택 — [지금 데리고 나온다](탈출 ×0.5) / [한 번 더 남긴다]
+/// 1) 개입 - 굴림 전 능력 토글 후 [주사위를 굴린다]
+/// 2) 굴림 제시 - 결과를 보여주고 재굴림/구간 하향 능력 또는 [받아들인다]
+/// 3) 회수 선택 - [지금 데리고 나온다](탈출 x0.5) / [한 번 더 남긴다]
 ///
 /// 여기가 게임에서 가장 극적인 화면이다. 구간표(회수/위험/치명/특수)는
-/// 공개 조건(고도 파악·능력·가게 Lv5)을 만족할 때만 수치가 보인다.
+/// 공개 조건(고도 파악/능력/가게 Lv5)을 만족할 때만 수치가 보인다.
 /// </summary>
 public sealed class DepthPanel : UIPanel<DepthPanel.Refs>, IManagedUI
 {
@@ -114,7 +114,7 @@ public sealed class DepthPanel : UIPanel<DepthPanel.Refs>, IManagedUI
     {
         BeginEntries();
 
-        AddEntry("▶ 주사위를 굴린다", () =>
+        AddEntry("주사위를 굴린다", () =>
         {
             Lock();
             OnInterventionConfirmed?.Invoke(new List<string>(_toggled));
@@ -124,7 +124,7 @@ public sealed class DepthPanel : UIPanel<DepthPanel.Refs>, IManagedUI
         {
             string id = _intervention.AvailableAbilityIds[i];
             bool on = _toggled.Contains(id);
-            AddEntry($"{(on ? "◈" : "◇")} 능력: {id}{(on ? "  (사용 예약)" : string.Empty)}", () =>
+            AddEntry($"{(on ? "(O)" : "(X)")} 능력: {id}{(on ? "  (사용 예약)" : string.Empty)}", () =>
             {
                 if (!_toggled.Add(id)) _toggled.Remove(id);
                 RebuildIntervention();
@@ -151,12 +151,12 @@ public sealed class DepthPanel : UIPanel<DepthPanel.Refs>, IManagedUI
             _rollText.text =
                 $"기본 {roll.BaseRoll}  보정 {roll.ClampedModifierSum:+0;-0;+0}" +
                 (roll.WasModifierClamped ? " (클램프 ±30)" : string.Empty) +
-                $"\n최종 {roll.FinalValue}  →  {ToBandLabel(roll.Band)}" +
+                $"\n최종 {roll.FinalValue}  ->  {ToBandLabel(roll.Band)}" +
                 (roll.CollapseGain > 0 ? $"  붕괴 +{roll.CollapseGain}" : string.Empty);
 
         BeginEntries();
 
-        AddEntry("▶ 받아들인다", () =>
+        AddEntry(" 받아들인다", () =>
         {
             Lock();
             OnRollDecided?.Invoke(null);
@@ -167,7 +167,7 @@ public sealed class DepthPanel : UIPanel<DepthPanel.Refs>, IManagedUI
             for (int i = 0; i < postRollAbilityIds.Count; i++)
             {
                 string id = postRollAbilityIds[i];
-                AddEntry($"◇ 능력 사용: {id}", () =>
+                AddEntry($"능력 사용: {id}", () =>
                 {
                     Lock();
                     OnRollDecided?.Invoke(id);
@@ -192,17 +192,17 @@ public sealed class DepthPanel : UIPanel<DepthPanel.Refs>, IManagedUI
         ApplyHeader(session, session.DepthBeatCount);
 
         if (_rollText != null)
-            _rollText.text = "회수 구간 — 손을 뻗을 수 있습니다.";
+            _rollText.text = "회수 구간 - 손을 뻗을 수 있습니다.";
 
         BeginEntries();
 
-        AddEntry($"▶ 지금 데리고 나온다\n결산 ×0.5 · 게이지 99 회수", () =>
+        AddEntry($"지금 데리고 나온다\n결산 x0.5 / 게이지 99 회수", () =>
         {
             Lock();
             OnRecoveryChosen?.Invoke(true);
         });
 
-        AddEntry($"◇ 한 번 더 남긴다\n반응은 계속 쌓이지만, 다음 굴림은 보장되지 않는다", () =>
+        AddEntry($" 한 번 더 남긴다\n반응은 계속 쌓이지만, 다음 굴림은 보장되지 않는다", () =>
         {
             Lock();
             OnRecoveryChosen?.Invoke(false);
@@ -221,8 +221,8 @@ public sealed class DepthPanel : UIPanel<DepthPanel.Refs>, IManagedUI
             return;
 
         _headerText.text =
-            $"붕괴심층 — {session.Maid.DisplayName} · {session.Monster.DisplayName}\n" +
-            $"{depthBeat}번째 굴림 · {BurdenAxes.ToBurdenLabel(session.DepthAxis)} " +
+            $"붕괴심층 - {session.Maid.DisplayName} / {session.Monster.DisplayName}\n" +
+            $"{depthBeat}번째 굴림 / {BurdenAxes.ToBurdenLabel(session.DepthAxis)} " +
             $"{session.Maid.Gauge.Get(session.DepthAxis)} / 200";
     }
 
@@ -234,8 +234,8 @@ public sealed class DepthPanel : UIPanel<DepthPanel.Refs>, IManagedUI
         string prediction = predicted.HasValue ? $"\n징후: {ToBandLabel(predicted.Value)} 구간이 짙다" : string.Empty;
 
         _bandText.text = revealed
-            ? $"회수 1~{layout.RecoveryMax} · 위험 ~{layout.RiskyMax} · 치명 ~{layout.FatalMax} · 특수 ~99{prediction}"
-            : $"결과표 비공개 — 고도 파악·능력·가게 Lv5 로 열린다{prediction}";
+            ? $"회수 1~{layout.RecoveryMax} / 위험 ~{layout.RiskyMax} / 치명 ~{layout.FatalMax} / 특수 ~99{prediction}"
+            : $"결과표 비공개 - 고도 파악/능력/가게 Lv5 로 열린다{prediction}";
     }
 
     private void BeginEntries()

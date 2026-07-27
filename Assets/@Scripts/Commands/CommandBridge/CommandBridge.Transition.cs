@@ -1,6 +1,6 @@
 public sealed partial class YarnCommandBridge
 {
-    // durationToken이 빈 문자열이면 override 없음 — 프리셋 자체 duration을 사용한다.
+    // durationToken이 빈 문자열이면 override 없음 - 프리셋 자체 duration을 사용한다.
     // (이전의 duration = -1f sentinel을 대체)
     private void EnqueueStageMaskMotionPresetSpec(
         string presetKey,

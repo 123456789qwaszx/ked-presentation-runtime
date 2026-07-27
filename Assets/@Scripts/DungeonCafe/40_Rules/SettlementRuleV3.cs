@@ -66,19 +66,19 @@ public readonly struct SettlementV3Result
 
     public override string ToString()
         => $"[{Kind}] 반응 {ReactionScore} 만족 {Satisfaction}/{RequiredSatisfaction} "
-           + $"붕괴 {EndCollapse} ×{AppliedMultiplier:0.0} = 욕구 {Energy}";
+           + $"붕괴 {EndCollapse} x{AppliedMultiplier:0.0} = 욕구 {Energy}";
 }
 
 /// <summary>
 /// v3 결산. (v3 §7.2)
 ///
-///   욕구 = 반응 점수 합 × 10 × 배율
-///   배율: 0~49 ×1.0 / 50~79 ×1.5 / 80~99 ×3.0 / 심층 탈출 ×0.5 / 200 결산 0
+///   욕구 = 반응 점수 합 x 10 x 배율
+///   배율: 0~49 x1.0 / 50~79 x1.5 / 80~99 x3.0 / 심층 탈출 x0.5 / 200 결산 0
 ///   만족도 미달 시 배율 사다리 1단 하향 (최저 = 심층 탈출 배율)
 ///
-/// 99 와 100 사이의 낙차(×3.0 → ×0.5)가 이 게임의 핵심 도박이다.
+/// 99 와 100 사이의 낙차(x3.0 -> x0.5)가 이 게임의 핵심 도박이다.
 /// 기존 ServiceSettlementCalculator 를 대체할 규칙이며, 이 단계에서는 나란히 존재한다.
-/// 순수 계산 — 숙련 경험·후유증·장부 기입은 호출부가 결과를 받아 수행한다.
+/// 순수 계산 - 숙련 경험/후유증/장부 기입은 호출부가 결과를 받아 수행한다.
 /// </summary>
 public static class SettlementRuleV3
 {
@@ -104,7 +104,7 @@ public static class SettlementRuleV3
 
         if (kind == SettlementOutcomeKind.DepthEscape || endCollapse >= tuning.ControlLossThreshold)
         {
-            // 통상 종료로 들어와도 붕괴가 100 이상이면 심층 탈출로 취급한다 — 방어적 처리.
+            // 통상 종료로 들어와도 붕괴가 100 이상이면 심층 탈출로 취급한다 - 방어적 처리.
             baseMultiplier = tuning.DepthEscapeMultiplier;
             label = "심층 탈출";
         }

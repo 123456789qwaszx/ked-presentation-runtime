@@ -44,7 +44,7 @@ public static class UnderstandingRule
             campaign.Understanding.AddPoints(monsterId, campaign.Tuning.UnderstandingPerPhoneCall);
     }
 
-    /// <summary>심층 목격: 첫 진입 시 +2, [각인 잔향] 태그 종족은 ×2. (§4.4, §10.2)</summary>
+    /// <summary>심층 목격: 첫 진입 시 +2, [각인 잔향] 태그 종족은 x2. (§4.4, §10.2)</summary>
     public static void GrantDepthWitness(
         CampaignStateV3 campaign, MonsterProfileV3 monster, MaidStateV3 maid)
     {

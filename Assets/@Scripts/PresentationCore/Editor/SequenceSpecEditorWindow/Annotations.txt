@@ -1,5 +1,5 @@
 // =================================================================================================
-// SequenceSpecEditorWindow — Integrated Comment Guide (English)
+// SequenceSpecEditorWindow - Integrated Comment Guide (English)
 //
 // Purpose
 // - This file is a “one-stop structural guide” for the Unity EditorWindow that edits SequenceSpecSO
@@ -34,7 +34,7 @@
 // - Keep a consistent “Undo -> Dirty -> Apply -> Compile -> Repaint” pipeline.
 //
 // -------------------------------------------------------------------------------------------------
-// [0] Main Window (Authority) — Lifecycle / Binding / Global Policies
+// [0] Main Window (Authority) - Lifecycle / Binding / Global Policies
 //
 // Responsibilities (the “owner” level)
 // - EditorWindow lifecycle: OnEnable / OnDisable / OnGUI / OnSelectionChange
@@ -53,7 +53,7 @@
 // - Track system contract (TrackTabs / TrackFieldNames / TrackTypes)
 //
 // -------------------------------------------------------------------------------------------------
-// [1] Layout / Drawing (Toolbar / Header / Panels) — “UI composition only”
+// [1] Layout / Drawing (Toolbar / Header / Panels) - “UI composition only”
 //
 // Responsibilities
 // - DrawToolbar()
@@ -89,7 +89,7 @@
 //   Keep actual data edits delegated to DelayModify/CRUD helpers to avoid instability.
 //
 // -------------------------------------------------------------------------------------------------
-// [2] ReorderableList Build & Lifetime — Nodes/Steps/Commands binding & caching
+// [2] ReorderableList Build & Lifetime - Nodes/Steps/Commands binding & caching
 //
 // Responsibilities
 // - RebuildIfNeeded(force)
@@ -121,7 +121,7 @@
 // - Rebuild conditions and cache invalidation scope (“when to rebuild”)
 //
 // -------------------------------------------------------------------------------------------------
-// [3] Step Detail (Right Panel) + Compiled Preview — “Step editing owner”
+// [3] Step Detail (Right Panel) + Compiled Preview - “Step editing owner”
 //
 // Responsibilities
 // - Render selected Step (StepSpec) details:
@@ -149,7 +149,7 @@
 // - TrackToIndex()/IndexToTrack(): tab index conversion
 //
 // -------------------------------------------------------------------------------------------------
-// [4] Summary & Utility — summary strings / origin mapping / compiled line generation
+// [4] Summary & Utility - summary strings / origin mapping / compiled line generation
 //
 // Responsibilities
 // - Generate summary strings for UI
@@ -174,7 +174,7 @@
 // - When track structure changes (field names/order), review TrackFieldNames/TrackTypes and origin scan logic
 //
 // -------------------------------------------------------------------------------------------------
-// [5] Commands Panel (ReorderableList) — row rendering / context menus / reorder
+// [5] Commands Panel (ReorderableList) - row rendering / context menus / reorder
 //
 // Responsibilities
 // - Build/cache a ReorderableList bound to the active track’s commandsProp (SerializeReference array)
@@ -199,7 +199,7 @@
 // - This editor expects SerializeReference polymorphic lists (validated via IsSerializeReferenceCommandList).
 //
 // -------------------------------------------------------------------------------------------------
-// [6] Foldout State Management — stable expand/collapse UI for SerializeReference lists
+// [6] Foldout State Management - stable expand/collapse UI for SerializeReference lists
 //
 // Goal
 // - SerializedProperty.isExpanded is unreliable when lists rebuild; treat foldout state as “editor UI state”
@@ -233,7 +233,7 @@
 // - “Expand/Collapse All” scope (list vs node vs entire sequence)
 //
 // -------------------------------------------------------------------------------------------------
-// [7] Command Insertion / Add Menu / Type Creation — “final insertion sink”
+// [7] Command Insertion / Add Menu / Type Creation - “final insertion sink”
 //
 // Responsibilities
 // - InsertSingleAt / InsertBatchAt / InsertCommandFactoryAt
@@ -264,7 +264,7 @@
 // - Menu grouping / batch presets / hook priority
 //
 // -------------------------------------------------------------------------------------------------
-// [8] Clipboard (Copy/Paste) — JSON round-trip for Commands/Steps
+// [8] Clipboard (Copy/Paste) - JSON round-trip for Commands/Steps
 //
 // Goal
 // - Store CommandSpecBase / StepSpec as JSON in systemCopyBuffer and restore later.
@@ -284,7 +284,7 @@
 // - Packaging extra metadata (extend Box types if needed)
 //
 // -------------------------------------------------------------------------------------------------
-// [9] Data Constructors & Deep Clone — blank defaults + safe duplicates
+// [9] Data Constructors & Deep Clone - blank defaults + safe duplicates
 //
 // Responsibilities
 // - CreateBlankNode / CreateBlankStep: default structures for “Add Node/Step”
@@ -303,7 +303,7 @@
 // - Command cloning mechanism (performance/custom cloning)
 //
 // -------------------------------------------------------------------------------------------------
-// [10] Gate Defaults + RoleKey Slots — default gate preset & roleKey autofill/bulk assign
+// [10] Gate Defaults + RoleKey Slots - default gate preset & roleKey autofill/bulk assign
 //
 // Goals
 // - Maintain a “global editor preset” gate for new steps (EditorPrefs)
@@ -338,7 +338,7 @@
 // - Role slot count UI + hotkeys (select auto target, apply slot via shortcuts)
 //
 // -------------------------------------------------------------------------------------------------
-// [11] Keyboard Navigation — 3 columns (Nodes/Steps/Commands) + track switching
+// [11] Keyboard Navigation - 3 columns (Nodes/Steps/Commands) + track switching
 //
 // Responsibilities
 // - Ignore navigation keys when typing in text fields (avoid input conflicts)
@@ -353,7 +353,7 @@
 // - Track switching + selection/scroll retention behavior in Commands column
 //
 // -------------------------------------------------------------------------------------------------
-// [12] Shortcut-driven Editing (Commands/Steps) — Copy/Paste/Duplicate/Delete/Quick Add
+// [12] Shortcut-driven Editing (Commands/Steps) - Copy/Paste/Duplicate/Delete/Quick Add
 //
 // Responsibilities
 // - Route list-context shortcuts into CRUD calls.
@@ -369,7 +369,7 @@
 //   Real data mutation ownership remains in the CRUD pipeline utilities.
 //
 // -------------------------------------------------------------------------------------------------
-// [13] CRUD (Data Mutation) Pipeline — Undo / Dirty / DelayModify / deletion rules
+// [13] CRUD (Data Mutation) Pipeline - Undo / Dirty / DelayModify / deletion rules
 //
 // Responsibilities
 // - Perform actual Add/Delete/Duplicate safely and consistently
@@ -383,7 +383,7 @@
 // - Track list discovery (when fields/structure change)
 //
 // -------------------------------------------------------------------------------------------------
-// [14] Role Slots Presets (EditorPrefs) — “9 hot slots + infinite preset sets”
+// [14] Role Slots Presets (EditorPrefs) - “9 hot slots + infinite preset sets”
 //
 // Purpose
 // - RoleKey 슬롯은 최대 9개(핫키/빠른 주입에 최적)로 고정한다.

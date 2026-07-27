@@ -2,7 +2,7 @@ using System.Collections;
 using Unity.VisualScripting;
 using UnityEngine;
 
-// Cleanup at the STEP boundary (when the next step/line starts) — the shorter, default lifetime.
+// Cleanup at the STEP boundary (when the next step/line starts) - the shorter, default lifetime.
 // CommandBase implements this, so every command is step-scoped by default: a background routine
 // is cleaned at the next step unless it opts into a longer lifetime.
 public interface IStepScopedCommand
@@ -11,7 +11,7 @@ public interface IStepScopedCommand
 }
 
 // Opt-in marker for background commands that must OUTLIVE a single step and live until the RUN
-// ends (session/episode) — e.g., BGM, ambient/idle loops. Overrides the step-scoped default.
+// ends (session/episode) - e.g., BGM, ambient/idle loops. Overrides the step-scoped default.
 public interface IRunScopedCommand
 {
     void RegisterRunLifetime(CommandRunScope scope, MonoBehaviour host, IEnumerator routine);

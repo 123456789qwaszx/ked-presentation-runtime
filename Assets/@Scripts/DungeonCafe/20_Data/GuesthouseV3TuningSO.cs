@@ -45,7 +45,7 @@ public sealed class GuesthouseV3TuningSO : ScriptableObject
     [Range(0, 100)] public int neglectQuirkRequestChancePercent = 25;
     [Min(1)] public int nightIncidentDepthBeats = 2;
 
-    [Header("숙련·관계·이해도 (§12, §8.2)")]
+    [Header("숙련/관계/이해도 (§12, §8.2)")]
     public int[] masteryThresholds = { 120, 300, 550 };
     [Min(0)] public int managedReleaseMasteryExperience = 20;
     public int[] relationStageThresholds = { 0, 6, 14, 27 };
@@ -53,7 +53,7 @@ public sealed class GuesthouseV3TuningSO : ScriptableObject
     [Min(0)] public int relationPointsRelease = 3;
     public int[] understandingTierThresholds = { 2, 5, 9 };
 
-    [Header("경제·가게 (§7.4/§8/§15)")]
+    [Header("경제/가게 (§7.4/§8/§15)")]
     [Min(1)] public int bankruptcyLimit = 3;
     public int[] shopLevelThresholds = { 0, 400, 900, 1600, 2400, 3300, 4300 };
     public int[] abilitySlotsByShopLevel = { 1, 1, 2, 2, 2, 2, 3 };

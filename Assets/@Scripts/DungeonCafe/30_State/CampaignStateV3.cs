@@ -32,7 +32,7 @@ public sealed class UnderstandingState
     public bool MarkDepthWitnessed(string monsterId) => _depthWitnessed.Add(monsterId);
     public int DepthWitnessTotal => _depthWitnessed.Count;
 
-    /// <summary>1회성 플래그 (심층 페이지·회상·사고 기벽 — 개체×메이드). 신규 등록 시 true. (§4.4)</summary>
+    /// <summary>1회성 플래그 (심층 페이지/회상/사고 기벽 - 개체x메이드). 신규 등록 시 true. (§4.4)</summary>
     public bool TryClaimOneTime(string flag, string monsterId, string maidId)
         => _oneTimeFlags.Add($"{flag}:{monsterId}:{maidId}");
 
@@ -66,7 +66,7 @@ public sealed class UnderstandingState
     public void RestoreFlag(string f) => _oneTimeFlags.Add(f);
 }
 
-/// <summary>플레이어 능력 보유·장착·사용 횟수. (§11)</summary>
+/// <summary>플레이어 능력 보유/장착/사용 횟수. (§11)</summary>
 public sealed class PlayerAbilityState
 {
     private readonly HashSet<string> _owned = new(StringComparer.Ordinal);
@@ -225,7 +225,7 @@ public sealed class CampaignStateV3
 
     public int ShopLevel => ShopLevelRule.Resolve(Ledger.Lifetime, Tuning);
 
-    /// <summary>커밋 원자 연산: rng 상태 기록 → 굴림 → 로그 → 절단. (§14)</summary>
+    /// <summary>커밋 원자 연산: rng 상태 기록 -> 굴림 -> 로그 -> 절단. (§14)</summary>
     public int CommitRoll(string kind, int min, int max)
     {
         ulong before = Rng.State;

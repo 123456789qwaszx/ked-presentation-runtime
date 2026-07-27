@@ -4,8 +4,8 @@ using System;
 /// 심층 주사위 1회분의 입력. (v3 §4.2)
 ///
 /// 각 보정의 산출 책임은 호출부(플로우/상태)에 있고,
-/// 이 규칙은 합산·클램프·구간 해석·가산만 담당한다.
-/// 값은 전부 "주사위에 더해질 최종 정수"로 넘긴다 (적성만 예외 — 포인트를 넘기면 규칙이 -3/점을 적용).
+/// 이 규칙은 합산/클램프/구간 해석/가산만 담당한다.
+/// 값은 전부 "주사위에 더해질 최종 정수"로 넘긴다 (적성만 예외 - 포인트를 넘기면 규칙이 -3/점을 적용).
 /// </summary>
 public readonly struct DepthRollInput
 {
@@ -44,7 +44,7 @@ public readonly struct DepthRollInput
 
 /// <summary>
 /// 심층 주사위 1회분의 판정 내역.
-/// 전 항목을 보존한다 — UI 의 판정 연출(기본 78 → 적성 -8 → ...)과 커밋 로그가 이 구조체를 그대로 쓴다.
+/// 전 항목을 보존한다 - UI 의 판정 연출(기본 78 -> 적성 -8 -> ...)과 커밋 로그가 이 구조체를 그대로 쓴다.
 /// </summary>
 public readonly struct DepthRollResult
 {
@@ -69,10 +69,10 @@ public readonly struct DepthRollResult
     /// <summary>붕괴 가산. 회수 구간은 0, 그 외 ⌈최종값/2⌉. (v3 §4.3)</summary>
     public int CollapseGain { get; }
 
-    /// <summary>특수 구간 → [각인] 부여 신호. 상태 반영은 호출부 책임.</summary>
+    /// <summary>특수 구간 -> [각인] 부여 신호. 상태 반영은 호출부 책임.</summary>
     public bool InflictsBrand => Band == DepthBand.Special;
 
-    /// <summary>회수 구간 → 탈출/잔류 선택 개방 신호.</summary>
+    /// <summary>회수 구간 -> 탈출/잔류 선택 개방 신호.</summary>
     public bool OpensRecoveryWindow => Band == DepthBand.Recovery;
 
     public DepthRollResult(
@@ -94,14 +94,14 @@ public readonly struct DepthRollResult
     }
 
     public override string ToString()
-        => $"기본 {BaseRoll} 보정 {ClampedModifierSum:+0;-0;+0} → 최종 {FinalValue} [{Band}] 가산 +{CollapseGain}";
+        => $"기본 {BaseRoll} 보정 {ClampedModifierSum:+0;-0;+0} -> 최종 {FinalValue} [{Band}] 가산 +{CollapseGain}";
 }
 
 /// <summary>
 /// 붕괴심층 주사위 해석. (v3 §4)
 ///
 /// 순수 계산이다. 굴림 소비 외에는 아무 상태도 건드리지 않는다.
-/// 붕괴 반영·200 판정·회수 선택은 3단계의 DepthDiceFlow 가 이 결과를 받아 수행한다.
+/// 붕괴 반영/200 판정/회수 선택은 3단계의 DepthDiceFlow 가 이 결과를 받아 수행한다.
 /// </summary>
 public static class DepthDiceRule
 {
@@ -115,7 +115,7 @@ public static class DepthDiceRule
         return Interpret(dice.RollDie99(), input, layout, tuning);
     }
 
-    /// <summary>이미 확정된 기본 굴림값을 해석한다. 커밋 로그 재생·테스트용.</summary>
+    /// <summary>이미 확정된 기본 굴림값을 해석한다. 커밋 로그 재생/테스트용.</summary>
     public static DepthRollResult Interpret(
         int baseRoll,
         in DepthRollInput input,

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 /// <summary>
 /// guesthouse_design_v3.md 수치 전체를 담는 밸런스 상수 묶음. 표준 난이도 단일.
 /// 1단계 필드는 전부 유지되며(기존 테스트 호환), 2단계 이후 상수가 추가되었다.
-/// 캘린더·개체 풀 같은 '콘텐츠'는 GuesthouseV3ContentDB 쪽이고, 여기는 '숫자'만 둔다.
+/// 캘린더/개체 풀 같은 '콘텐츠'는 GuesthouseV3ContentDB 쪽이고, 여기는 '숫자'만 둔다.
 /// </summary>
 public sealed class GuesthouseTuningV3
 {
@@ -70,21 +70,21 @@ public sealed class GuesthouseTuningV3
     public int UnderstandingPerAnalysis { get; }
 
     // ---- 후유증 (§9) ----
-    public int BrandPermanentizeDays { get; }        // 각인 미해소 3일 → 기벽 영구화
+    public int BrandPermanentizeDays { get; }        // 각인 미해소 3일 -> 기벽 영구화
     public int TremorNeglectHealDays { get; }        // 떨림 방치 2일
     public int TremorCareCures { get; }              // 1
     public int BrandCareCures { get; }               // 2
     public int HollowCareCures { get; }              // 3
 
-    // ---- 경제·가게 (§7.4, §8) ----
+    // ---- 경제/가게 (§7.4, §8) ----
     public int BankruptcyLimit { get; }
     public IReadOnlyList<int> ShopLevelThresholds => _shopLevelThresholds; // 누적: 0/400/900/1600/2400/3300/4300
     private readonly int[] _shopLevelThresholds;
     public IReadOnlyList<int> AbilitySlotsByShopLevel => _abilitySlots;    // Lv1:1 Lv3:2 Lv7:3
     private readonly int[] _abilitySlots;
-    public int NightManageCountShopLevel { get; }    // Lv6 → 밤 2회
-    public int CareUpgradeShopLevel { get; }         // Lv7 → 안정 45
-    public int AnalysisShopLevel { get; }            // Lv2 → 밤 수첩 분석
+    public int NightManageCountShopLevel { get; }    // Lv6 -> 밤 2회
+    public int CareUpgradeShopLevel { get; }         // Lv7 -> 안정 45
+    public int AnalysisShopLevel { get; }            // Lv2 -> 밤 수첩 분석
     public int AnalysisTwiceShopLevel { get; }       // Lv7
 
     // ---- 엔딩 (§15) ----
@@ -201,7 +201,7 @@ public sealed class GuesthouseTuningV3
             nightIncidentDepthBeats: 2,
             masteryThresholds: new[] { 120, 300, 550 },                            // §12.3
             managedReleaseMasteryExperience: 20,
-            relationStageThresholds: new[] { 0, 6, 14, 27 },                       // §12.2 (시뮬 보정: 24→27)
+            relationStageThresholds: new[] { 0, 6, 14, 27 },                       // §12.2 (시뮬 보정: 24->27)
             relationPointsCare: 2, relationPointsRelease: 3, relationPointsAutoEvent: 1,
             hollowNightlyRelationPenalty: 1,                                       // §9
             understandingTierThresholds: new[] { 2, 5, 9 },                        // §13.4

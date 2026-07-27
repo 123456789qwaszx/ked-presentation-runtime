@@ -20,7 +20,7 @@ public enum DepthBand
 /// 심층 결과 구간의 경계 3개 (회수 상한 / 위험 상한 / 치명 상한).
 /// 특수 구간은 치명 상한+1 ~ 99 로 항상 존재한다.
 ///
-/// 메이드 성향·기벽·능력은 이 레이아웃을 변형해서 개입한다 (v3 §12.1, §10, §11).
+/// 메이드 성향/기벽/능력은 이 레이아웃을 변형해서 개입한다 (v3 §12.1, §10, §11).
 /// 변형이 아무리 겹쳐도 4구간 구조는 유지된다:
 ///   구간 소멸 금지, 각 구간 최소 폭 보장 (기본 4).
 /// 변형은 항상 새 인스턴스를 반환한다.
@@ -70,7 +70,7 @@ public readonly struct DepthBandLayout : IEquatable<DepthBandLayout>
     public DepthBandLayout ShiftRecoveryMax(int delta, int minBandWidth)
         => Normalized(RecoveryMax + delta, RiskyMax, FatalMax, minBandWidth);
 
-    /// <summary>위험 상한을 delta 만큼 이동한다. (루이 성향: 치명 하한 61→58 은 -3)</summary>
+    /// <summary>위험 상한을 delta 만큼 이동한다. (루이 성향: 치명 하한 61->58 은 -3)</summary>
     public DepthBandLayout ShiftRiskyMax(int delta, int minBandWidth)
         => Normalized(RecoveryMax, RiskyMax + delta, FatalMax, minBandWidth);
 
@@ -81,7 +81,7 @@ public readonly struct DepthBandLayout : IEquatable<DepthBandLayout>
     /// <summary>
     /// 최소 폭 불변식을 강제한다.
     /// 앞 구간의 확장이 뒤 구간을 침식할 때, 뒤 구간은 최소 폭까지만 밀린다.
-    /// 순서: 회수부터 확정하고 위험·치명을 차례로 민다.
+    /// 순서: 회수부터 확정하고 위험/치명을 차례로 민다.
     /// </summary>
     private static DepthBandLayout Normalized(
         int recoveryMax,

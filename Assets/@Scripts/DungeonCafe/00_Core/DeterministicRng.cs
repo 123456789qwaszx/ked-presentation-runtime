@@ -17,7 +17,7 @@ public interface IDiceSource
 /// splitmix64 기반 결정론 난수원.
 ///
 /// v3 §0.1 판정 불가역 원칙의 구현 기반이다.
-///   - 같은 시드는 언제나 같은 수열을 낸다 (플랫폼/버전 무관 — System.Random 은 이 보장이 없다).
+///   - 같은 시드는 언제나 같은 수열을 낸다 (플랫폼/버전 무관 - System.Random 은 이 보장이 없다).
 ///   - State 를 세이브에 그대로 실으면, 로드 후에도 "다음 굴림"이 동일하다.
 ///     판정을 되감기로 재추첨하는 경로가 구조적으로 막힌다.
 ///
@@ -56,7 +56,7 @@ public sealed class DeterministicRng : IDiceSource
 
         ulong span = (ulong)((long)maxInclusive - minInclusive + 1);
 
-        // 판정 주사위의 span 은 최대 99 수준이라 모듈로 편향은 1/2^57 이하 — 무시한다.
+        // 판정 주사위의 span 은 최대 99 수준이라 모듈로 편향은 1/2^57 이하 - 무시한다.
         return minInclusive + (int)(NextUInt64() % span);
     }
 }

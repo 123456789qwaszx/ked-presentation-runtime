@@ -1430,7 +1430,7 @@ public sealed class EpisodeProgressionEditorWindow : EditorWindow
     }
 
     // ─────────────────────────────────────────────────────────
-    // 헬퍼 — 고유 ID 생성
+    // 헬퍼 - 고유 ID 생성
     // ─────────────────────────────────────────────────────────
 
     private string GenerateUniqueEpisodeId(string seed)
@@ -1507,7 +1507,7 @@ public sealed class EpisodeProgressionEditorWindow : EditorWindow
     }
 
     // ─────────────────────────────────────────────────────────
-    // 헬퍼 — 목록 수집
+    // 헬퍼 - 목록 수집
     // ─────────────────────────────────────────────────────────
 
     private string[] CollectAllEpisodeIds()
@@ -1547,7 +1547,7 @@ public sealed class EpisodeProgressionEditorWindow : EditorWindow
     }
 
     // ─────────────────────────────────────────────────────────
-    // 헬퍼 — 딥 클론
+    // 헬퍼 - 딥 클론
     // ─────────────────────────────────────────────────────────
 
     private static EpisodeCondition CloneCondition(EpisodeCondition src)
@@ -1632,7 +1632,7 @@ public sealed class EpisodeProgressionEditorWindow : EditorWindow
     }
 
     // ─────────────────────────────────────────────────────────
-    // 헬퍼 — 필드 드로어
+    // 헬퍼 - 필드 드로어
     // ─────────────────────────────────────────────────────────
 
     private static void DrawPropField(SerializedProperty parent, string propName, string label)

@@ -1,6 +1,6 @@
 using Yarn.Unity;
 
-public sealed class ScenarioNodeRunner
+public sealed class ScenarioNodeRunner : INodePlayerV3
 {
     private readonly EpisodePlayer _episodePlayer;
 

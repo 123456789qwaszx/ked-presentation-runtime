@@ -128,7 +128,7 @@ public sealed class MaidActionApprovalPanel : UIPanel<MaidActionApprovalPanel.Re
         MaidStateV3 maid = request.Session.Maid;
 
         if (_maidNameText != null)
-            _maidNameText.text = $"{maid.DisplayName} · {request.BeatIndex + 1}비트";
+            _maidNameText.text = $"{maid.DisplayName}/ {request.BeatIndex + 1}비트";
 
         if (_controlStatusText == null)
             return;
@@ -137,7 +137,7 @@ public sealed class MaidActionApprovalPanel : UIPanel<MaidActionApprovalPanel.Re
         int v = maid.Gauge.Get(request.Session.Monster.DemandAxis);
         _controlStatusText.text =
             v >= 100 ? "관리자 통제 신호가 거부되었습니다" :
-            v >= 80 ? "위험 착지 구간 — 결산 ×3.0, 한 발 더 나가면 심층" :
+            v >= 80 ? "위험 착지 구간 - 결산 x3.0, 한 발 더 나가면 심층" :
             "행동 승인권 위임 중";
     }
 
@@ -161,12 +161,12 @@ public sealed class MaidActionApprovalPanel : UIPanel<MaidActionApprovalPanel.Re
         _entries.Clear();
         _abilityIds.Clear();
 
-        // 옵션 3개 — 라벨에 강도·축·(이해도만큼의) 범위를 싣는다. 위험을 감출지는 시스템이,
+        // 옵션 3개 - 라벨에 강도/축/(이해도만큼의) 범위를 싣는다. 위험을 감출지는 시스템이,
         // 감수할지는 관리자가 정한다. 선택 불가로 만들지 않는다.
         for (int i = 0; i < _request.Options.Count; i++)
             _entries.Add(new GuesthouseOptionEntry(BuildOptionLabel(_request.Options[i])));
 
-        // 낮 능력 토글 — 승인과 같은 목록에 산다. 누르면 켜지고 다시 누르면 꺼진다.
+        // 낮 능력 토글 - 승인과 같은 목록에 산다. 누르면 켜지고 다시 누르면 꺼진다.
         for (int i = 0; i < _request.AvailableAbilityIds.Count; i++)
         {
             string id = _request.AvailableAbilityIds[i];
@@ -198,7 +198,7 @@ public sealed class MaidActionApprovalPanel : UIPanel<MaidActionApprovalPanel.Re
     private string BuildAbilityLabel(string abilityId)
     {
         bool on = _toggledAbilities.Contains(abilityId);
-        return $"{(on ? "◈" : "◇")} 능력: {abilityId}{(on ? "  (사용 예약)" : string.Empty)}";
+        return $"{(on ? "(O)" : "(X)")} 능력: {abilityId}{(on ? "  (사용 예약)" : string.Empty)}";
     }
 
     private void HandleOptionSubmitted(int index)

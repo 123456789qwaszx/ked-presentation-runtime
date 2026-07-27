@@ -87,14 +87,14 @@ public sealed class ServiceSettlementPanel : UIPanel<ServiceSettlementPanel.Refs
         {
             _reactionText.text =
                 $"반응 점수 {result.ReactionScore}" +
-                (session.DepthReactionScore > 0 ? $"  (심층 중 {session.DepthReactionScore} — 미산입)" : string.Empty);
+                (session.DepthReactionScore > 0 ? $"  (심층 중 {session.DepthReactionScore} - 미산입)" : string.Empty);
         }
 
         if (_multiplierText != null)
         {
             // 절벽 노출: 미달 하향이 있었으면 기준 배율과 함께 보여준다. (§2.4)
             string downgrade = result.WasDowngraded
-                ? $"  (미달 하향 ×{result.BaseMultiplier:0.0} → ×{result.AppliedMultiplier:0.0})"
+                ? $"  (미달 하향 x{result.BaseMultiplier:0.0} -> x{result.AppliedMultiplier:0.0})"
                 : string.Empty;
 
             _multiplierText.text =
@@ -148,11 +148,11 @@ public sealed class ServiceSettlementPanel : UIPanel<ServiceSettlementPanel.Refs
         return result.Kind switch
         {
             SettlementOutcomeKind.DepthEscape =>
-                $"붕괴심층 진입 ({axisLabel}) · {session.DepthBeatCount}비트 만에 회수 — 결산 ×0.5",
+                $"붕괴심층 진입 ({axisLabel}) / {session.DepthBeatCount}비트 만에 회수 - 결산 x0.5",
             SettlementOutcomeKind.TotalCollapse =>
                 session.Maid.IsLost
-                    ? $"완전 붕괴 ({axisLabel}) · 담당자 영구 이탈"
-                    : $"완전 붕괴 ({axisLabel}) · 생환권 사용 — 수입 0",
+                    ? $"완전 붕괴 ({axisLabel}) / 담당자 영구 이탈"
+                    : $"완전 붕괴 ({axisLabel}) / 생환권 사용 - 수입 0",
             _ => string.Empty,
         };
     }

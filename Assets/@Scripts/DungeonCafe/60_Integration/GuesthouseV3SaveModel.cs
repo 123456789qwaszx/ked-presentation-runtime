@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 
 /// <summary>
-/// v3 세이브 DTO. [Serializable] 공개 필드만 — JsonUtility/자체 직렬화 어느 쪽에도 물린다.
+/// v3 세이브 DTO. [Serializable] 공개 필드만 - JsonUtility/자체 직렬화 어느 쪽에도 물린다.
 /// Capture 는 저장 가능 국면(§14)에서만 성공한다.
 /// </summary>
 [Serializable]
@@ -63,7 +63,7 @@ public sealed class GuesthouseV3SaveModel
     public static bool TryCapture(CampaignStateV3 campaign, out GuesthouseV3SaveModel save)
     {
         save = null;
-        if (!campaign.CanSaveNow) return false;   // 접객·심층 중 저장 불가. (§14)
+        if (!campaign.CanSaveNow) return false;   // 접객/심층 중 저장 불가. (§14)
 
         save = new GuesthouseV3SaveModel
         {
@@ -141,7 +141,7 @@ public sealed class GuesthouseV3SaveModel
         campaign.BankruptcyCount = bankruptcyCount;
 
         var ledger = new DesireLedger(ledgerToday, ledgerHeld, ledgerLifetime);
-        // DesireLedger 는 캠페인 생성 시 고정 — 값 이식.
+        // DesireLedger 는 캠페인 생성 시 고정 - 값 이식.
         campaign.Ledger.Earn(0);
         RestoreLedger(campaign.Ledger, ledger);
 

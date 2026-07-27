@@ -143,7 +143,7 @@ public sealed class GuesthouseStatusOverlay : UIOverlay<GuesthouseStatusOverlay.
         // v3 3장부: 할당 판정은 [오늘] 장부만 본다. 게이지도 오늘/할당이다.
         if (_energyText != null)
             _energyText.text =
-                $"욕구 {snapshot.EnergyToday} / {snapshot.EnergyQuota}  (보유 {snapshot.EnergyHeld} · 누적 {snapshot.EnergyLifetime} · 가게 Lv{snapshot.ShopLevel})";
+                $"욕구 {snapshot.EnergyToday} / {snapshot.EnergyQuota}  (보유 {snapshot.EnergyHeld} / 누적 {snapshot.EnergyLifetime} / 가게 Lv{snapshot.ShopLevel})";
 
         SetGauge(_energyGauge, snapshot.EnergyToday, snapshot.EnergyQuota);
     }
@@ -173,7 +173,7 @@ public sealed class GuesthouseStatusOverlay : UIOverlay<GuesthouseStatusOverlay.
         in GuesthouseHudSnapshot snapshot,
         BurdenAxis axis)
     {
-        // v3: 0~200 단일 스케일. 100(통제 상실)·200(완전 붕괴) 눈금은 프리팹의 마커가 담당한다.
+        // v3: 0~200 단일 스케일. 100(통제 상실)/200(완전 붕괴) 눈금은 프리팹의 마커가 담당한다.
         int value = snapshot.Gauge[axis];
         int max = snapshot.TotalCollapseThreshold;
 

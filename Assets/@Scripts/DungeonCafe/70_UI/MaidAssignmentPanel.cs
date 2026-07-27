@@ -114,7 +114,7 @@ public sealed class MaidAssignmentPanel : UIPanel<MaidAssignmentPanel.Refs>, IMa
         {
             MaidStateV3 maid = candidates[i];
 
-            // 이탈·배정 차단 인원은 목록에 남기되 고를 수 없게 한다. 사라지면 왜 없는지 알 수 없다.
+            // 이탈/배정 차단 인원은 목록에 남기되 고를 수 없게 한다. 사라지면 왜 없는지 알 수 없다.
             _entries.Add(new GuesthouseOptionEntry(
                 BuildLabel(maid),
                 isAvailable: maid.CanBeAssigned(campaign.CurrentDayNumber)));

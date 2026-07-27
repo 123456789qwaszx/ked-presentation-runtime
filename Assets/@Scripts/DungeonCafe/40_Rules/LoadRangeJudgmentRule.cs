@@ -1,6 +1,6 @@
 using System;
 
-/// <summary>낮 행동 옵션의 부하 범위. (v3 §2.2 — 약 6~10 / 중 10~16 / 강 15~23)</summary>
+/// <summary>낮 행동 옵션의 부하 범위. (v3 §2.2 - 약 6~10 / 중 10~16 / 강 15~23)</summary>
 public readonly struct LoadRange
 {
     public int Min { get; }
@@ -29,7 +29,7 @@ public readonly struct LoadJudgmentResult
     /// <summary>범위 내 굴림값.</summary>
     public int RangeRoll { get; }
 
-    /// <summary>굴림 + 개체 부하 보정. 완화 전 원본 부하 — 숙련 경험치 기준.</summary>
+    /// <summary>굴림 + 개체 부하 보정. 완화 전 원본 부하 - 숙련 경험치 기준.</summary>
     public int RawLoad { get; }
 
     /// <summary>완화 후 실제 누적될 부하.</summary>
@@ -47,17 +47,17 @@ public readonly struct LoadJudgmentResult
     }
 
     public override string ToString()
-        => $"굴림 {RangeRoll} → 원본 {RawLoad} → 적용 {AppliedLoad}{(WasFloored ? " (바닥)" : "")}";
+        => $"굴림 {RangeRoll} -> 원본 {RawLoad} -> 적용 {AppliedLoad}{(WasFloored ? " (바닥)" : "")}";
 }
 
 /// <summary>
 /// 낮 접객의 부하 범위 판정. (v3 §2.3)
 ///
-///   적용 부하 = clamp( roll(범위) + 개체 보정 − 적성×2 − 숙련Lv×1, 최소 4 )
+///   적용 부하 = clamp( roll(범위) + 개체 보정 − 적성x2 − 숙련Lvx1, 최소 4 )
 ///
-/// 기존 BurdenAccrualRule(고정 부하·적성×1) 을 대체할 v3 규칙이지만,
+/// 기존 BurdenAccrualRule(고정 부하/적성x1) 을 대체할 v3 규칙이지만,
 /// 이 단계에서는 나란히 존재하며 기존 코드는 수정하지 않는다.
-/// 순수 계산 — 붕괴 반영은 호출부가 결과를 받아 수행한다.
+/// 순수 계산 - 붕괴 반영은 호출부가 결과를 받아 수행한다.
 /// </summary>
 public static class LoadRangeJudgmentRule
 {
@@ -74,7 +74,7 @@ public static class LoadRangeJudgmentRule
         return Interpret(roll, monsterLoadModifier, demandAxisAptitude, masteryLevel, tuning);
     }
 
-    /// <summary>확정 굴림값 해석. 커밋 로그 재생·테스트용.</summary>
+    /// <summary>확정 굴림값 해석. 커밋 로그 재생/테스트용.</summary>
     public static LoadJudgmentResult Interpret(
         int rangeRoll,
         int monsterLoadModifier,

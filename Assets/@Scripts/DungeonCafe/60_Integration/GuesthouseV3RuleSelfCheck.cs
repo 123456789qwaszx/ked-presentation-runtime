@@ -25,7 +25,7 @@ public static class GuesthouseV3RuleSelfCheck
 
         // ---- 심층 (§4) ----
 
-        Check(report, ref failed, "적성 -3/점 (기본78 적성4 → 66 치명 +33)", () =>
+        Check(report, ref failed, "적성 -3/점 (기본78 적성4 -> 66 치명 +33)", () =>
         {
             DepthRollResult r = DepthDiceRule.Interpret(
                 78, new DepthRollInput(4), DepthBandLayout.Standard, tuning);
@@ -82,7 +82,7 @@ public static class GuesthouseV3RuleSelfCheck
 
         // ---- 결산 (§7.2) ----
 
-        Check(report, ref failed, "문서 예시: 반응7 붕괴86 → 210 / 붕괴74 → 105", () =>
+        Check(report, ref failed, "문서 예시: 반응7 붕괴86 -> 210 / 붕괴74 -> 105", () =>
         {
             int at86 = SettlementRuleV3.Calculate(
                 SettlementOutcomeKind.Normal, 7, 70, 60, 86, tuning).Energy;
@@ -91,7 +91,7 @@ public static class GuesthouseV3RuleSelfCheck
             return at86 == 210 && at74 == 105;
         });
 
-        Check(report, ref failed, "99/100 절벽 (×3.0 vs ×0.5)", () =>
+        Check(report, ref failed, "99/100 절벽 (x3.0 vs x0.5)", () =>
         {
             SettlementV3Result at99 = SettlementRuleV3.Calculate(
                 SettlementOutcomeKind.Normal, 7, 70, 60, 99, tuning);
@@ -100,7 +100,7 @@ public static class GuesthouseV3RuleSelfCheck
             return at99.Energy == 210 && escaped.Energy == 35;
         });
 
-        Check(report, ref failed, "만족도 미달 → 배율 1단 하향", () =>
+        Check(report, ref failed, "만족도 미달 -> 배율 1단 하향", () =>
         {
             SettlementV3Result r = SettlementRuleV3.Calculate(
                 SettlementOutcomeKind.Normal, 5, 50, 60, 86, tuning);
@@ -189,7 +189,7 @@ public static class GuesthouseV3RuleSelfCheck
         });
 
         allPassed = failed == 0;
-        report.Insert(0, $"GuesthouseV3 자가 검증 — {(allPassed ? "전체 통과" : $"{failed}건 실패")}\n");
+        report.Insert(0, $"GuesthouseV3 자가 검증 - {(allPassed ? "전체 통과" : $"{failed}건 실패")}\n");
 
         return report.ToString();
     }

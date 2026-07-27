@@ -3,7 +3,7 @@
 ///
 /// 오버레이가 캠페인/세션 상태 객체를 직접 붙들면 표현 계층이 진행 상태에 결합된다.
 /// 그래서 매 갱신마다 값 복사본을 만들어 넘기고, UI 는 이 구조체 외에는 아무것도 모른다.
-/// Unity 무의존 — 헤드리스에서도 그대로 만들어진다.
+/// Unity 무의존 - 헤드리스에서도 그대로 만들어진다.
 ///
 /// v2 와의 차이: 붕괴 게이지는 0~200 단일 스케일이다. 한계(limit) 개념은 없다.
 /// 80~99 = 정답 구간(위험 착지), 100+ = 통제 상실(심층), 200 = 완전 붕괴.
@@ -59,7 +59,7 @@ public readonly struct GuesthouseHudSnapshot
         PhaseLabel = phaseLabel;
     }
 
-    /// <summary>접객 밖(게시판·배정·밤·리포트) 스냅숏.</summary>
+    /// <summary>접객 밖(게시판/배정/밤/리포트) 스냅숏.</summary>
     public static GuesthouseHudSnapshot FromCampaign(CampaignStateV3 campaign, string phaseLabel)
     {
         CampaignDayPlan plan = campaign.Content.GetDayPlan(campaign.CurrentDayNumber);
@@ -84,7 +84,7 @@ public readonly struct GuesthouseHudSnapshot
             phaseLabel: phaseLabel);
     }
 
-    /// <summary>접객 중 스냅숏. 세션의 메이드·개체·만족도를 함께 싣는다.</summary>
+    /// <summary>접객 중 스냅숏. 세션의 메이드/개체/만족도를 함께 싣는다.</summary>
     public static GuesthouseHudSnapshot FromSession(
         CampaignStateV3 campaign, ServiceSessionStateV3 session, int slotIndex, string phaseLabel)
     {
@@ -127,7 +127,7 @@ public readonly struct GuesthouseHudSnapshot
 
             if (v >= TotalCollapseThreshold) return "완전 붕괴";
             if (v >= ControlLossThreshold) return "관리자 통제 신호가 거부되었습니다";
-            if (v >= DangerBandFloor) return "위험 착지 구간 (결산 ×3.0)";
+            if (v >= DangerBandFloor) return "위험 착지 구간 (결산 x3.0)";
             return "행동 승인권 위임 중";
         }
     }

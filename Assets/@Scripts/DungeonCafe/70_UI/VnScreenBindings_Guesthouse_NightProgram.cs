@@ -17,7 +17,7 @@ public sealed partial class VnScreenBindings
         if (_isWaitingNightPlan)
             throw new InvalidOperationException("밤 처리 선택을 이미 기다리고 있습니다.");
 
-        RefreshGuesthouseHud("밤 — 처리 선택");
+        RefreshGuesthouseHud("밤 - 처리 선택");
 
         _isWaitingNightPlan = true;
         _hasNightPlanResult = false;

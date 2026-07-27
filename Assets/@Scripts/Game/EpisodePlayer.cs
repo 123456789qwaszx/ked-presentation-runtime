@@ -59,7 +59,7 @@ public sealed class EpisodePlayer : MonoBehaviour
     }
 
     /// <summary>
-    /// 디버그 키 · 타이틀 버튼 · 로드/롤백 seek 용 진입점.
+    /// 디버그 키 / 타이틀 버튼 / 로드/롤백 seek 용 진입점.
     /// 완료를 기다리지 않는다. 기다려야 하는 쪽은 StartGameAsync 를 직접 await 한다.
     /// </summary>
     public void StartGame(string nodeName)

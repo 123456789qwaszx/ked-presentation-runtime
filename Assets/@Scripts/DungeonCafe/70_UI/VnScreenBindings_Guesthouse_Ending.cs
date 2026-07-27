@@ -2,7 +2,7 @@ using Yarn.Unity;
 
 /// <summary>
 /// 캠페인 엔딩. (v3 §15)
-/// 엔딩 노드 연출은 CampaignFlowV3 이 이 호출 전에 끝낸다 — 패널을 올리고 즉시 확인을 연다.
+/// 엔딩 노드 연출은 CampaignFlowV3 이 이 호출 전에 끝낸다 - 패널을 올리고 즉시 확인을 연다.
 /// </summary>
 public sealed partial class VnScreenBindings
 {

@@ -1,11 +1,4 @@
 using System.Collections.Generic;
-using Yarn.Unity;
-
-/// <summary>노드 재생 접점. 기존 ScenarioNodeRunner 를 어댑터로 감싼다. 헤드리스는 no-op.</summary>
-public interface INodePlayerV3
-{
-    YarnTask PlayNodeAsync(string nodeName);
-}
 
 /// <summary>낮 옵션 1개의 표시 정보. 이해도에 따라 범위 노출이 달라진다. (§2.5)</summary>
 public readonly struct OptionDisplayV3
@@ -17,7 +10,7 @@ public readonly struct OptionDisplayV3
     public bool ShowsRange { get; }
     public int RangeMin { get; }
     public int RangeMax { get; }
-    /// <summary>강 등급으로 산정될 옵션인지 (특이 규칙·기벽 반영 예고).</summary>
+    /// <summary>강 등급으로 산정될 옵션인지 (특이 규칙/기벽 반영 예고).</summary>
     public bool UpgradedReaction { get; }
 
     public OptionDisplayV3(int index, OptionIntensity intensity, BurdenAxis displayAxis,
@@ -106,7 +99,7 @@ public readonly struct NightChoiceV3
     public NightChoiceV3(string maidId, NightChoiceKind kind) { MaidId = maidId; Kind = kind; }
 }
 
-/// <summary>밤 시작 상점: 구매·장착 결정.</summary>
+/// <summary>밤 시작 상점: 구매/장착 결정.</summary>
 public sealed class NightPrepRequestV3
 {
     public IReadOnlyList<PlayerAbilityDefinition> Purchasable { get; }
@@ -125,22 +118,4 @@ public readonly struct NightPrepResponseV3
     public IReadOnlyList<string> EquipIds { get; }
     public NightPrepResponseV3(IReadOnlyList<string> purchase, IReadOnlyList<string> equip)
     { PurchaseIds = purchase; EquipIds = equip; }
-}
-
-/// <summary>표현 계층 접점 v3. 기존 IGuesthouseScreenBindings 를 대체한다.</summary>
-public interface IGuesthouseV3Screens
-{
-    YarnTask PresentBoardAsync(int dayNumber, IReadOnlyList<MonsterProfileV3> bookings, CampaignStateV3 campaign);
-    YarnTask<string> RequestAssignmentAsync(MonsterProfileV3 monster, IReadOnlyList<MaidStateV3> candidates, CampaignStateV3 campaign);
-    YarnTask<ApprovalResponseV3> RequestApprovalAsync(ApprovalRequestV3 request);
-    YarnTask<IReadOnlyList<string>> RequestDepthInterventionAsync(DepthInterventionRequestV3 request);
-    YarnTask<DepthRollDecisionV3> PresentDepthRollAsync(ServiceSessionStateV3 session, DepthRollResult roll, IReadOnlyList<string> postRollAbilityIds);
-    /// <summary>회수 가능 상태: true = 지금 탈출 / false = 한 번 더 남긴다. (§3.3)</summary>
-    YarnTask<bool> RequestRecoveryChoiceAsync(ServiceSessionStateV3 session);
-    YarnTask PresentSettlementAsync(ServiceSessionStateV3 session, SettlementV3Result result);
-    YarnTask<NightPrepResponseV3> RequestNightPrepAsync(NightPrepRequestV3 request);
-    YarnTask<IReadOnlyList<NightChoiceV3>> RequestNightPlanAsync(NightPlanRequestV3 request);
-    YarnTask PresentNeglectAsync(MaidStateV3 maid, NeglectJudgment judgment);
-    YarnTask PresentDayReportAsync(CampaignStateV3 campaign, DayStateV3 day, bool quotaMet);
-    YarnTask PresentEndingAsync(CampaignStateV3 campaign, EndingKindV3 ending);
 }

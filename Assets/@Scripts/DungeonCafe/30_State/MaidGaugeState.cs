@@ -51,7 +51,7 @@ public sealed class MaidGaugeState
         if (clamped > _peaks[i]) _peaks[i] = clamped;
     }
 
-    /// <summary>전 축 중 최고값과 그 축. 동률이면 육→정→감. 밤 판정 기준. (§6)</summary>
+    /// <summary>전 축 중 최고값과 그 축. 동률이면 육->정->감. 밤 판정 기준. (§6)</summary>
     public BurdenAxis HighestAxis(out int value)
     {
         BurdenAxis axis = BurdenAxis.Physical;

@@ -8,7 +8,7 @@ using Yarn.Unity;
 /// 1) 굴림 전 개입 (능력 예약)
 /// 2) 굴림 제시 (재굴림/구간 하향/수용)
 /// 3) 회수 구간에서의 탈출/잔류 선택
-/// 판정 자체는 전부 시스템(ServiceSessionFlowV3)이 커밋한다 — 여기는 묻고 전달만 한다.
+/// 판정 자체는 전부 시스템(ServiceSessionFlowV3)이 커밋한다 - 여기는 묻고 전달만 한다.
 /// </summary>
 public sealed partial class VnScreenBindings
 {
@@ -34,19 +34,19 @@ public sealed partial class VnScreenBindings
 
         await AsyncWait.UntilAsync(() => _hasDepthResult);
 
-        // 선택이 끝나면 접는다 — 굴림·행동 노드가 화면을 쓴다. 다음 국면이 다시 연다.
+        // 선택이 끝나면 접는다 - 굴림/행동 노드가 화면을 쓴다. 다음 국면이 다시 연다.
         CloseDepthPanelIfOpen();
 
         return _pendingDepthAbilities;
     }
 
     // ------------------------------------------------------------
-    // 국면 2: 굴림 제시 — 재굴림/하향은 능력 효과로 판별해 응답을 만든다.
+    // 국면 2: 굴림 제시 - 재굴림/하향은 능력 효과로 판별해 응답을 만든다.
     // ------------------------------------------------------------
     public async YarnTask<DepthRollDecisionV3> PresentDepthRollAsync(
         ServiceSessionStateV3 session, DepthRollResult roll, IReadOnlyList<string> postRollAbilityIds)
     {
-        RefreshGuesthouseHud(session, "붕괴심층 — 굴림");
+        RefreshGuesthouseHud(session, "붕괴심층 - 굴림");
 
         _hasDepthResult = false;
         _pendingRollAbilityId = null;
@@ -70,11 +70,11 @@ public sealed partial class VnScreenBindings
     }
 
     // ------------------------------------------------------------
-    // 국면 3: 회수 선택 — Depth_Recover 노드 재생 직후에 열린다.
+    // 국면 3: 회수 선택 - Depth_Recover 노드 재생 직후에 열린다.
     // ------------------------------------------------------------
     public async YarnTask<bool> RequestRecoveryChoiceAsync(ServiceSessionStateV3 session)
     {
-        RefreshGuesthouseHud(session, "붕괴심층 — 회수");
+        RefreshGuesthouseHud(session, "붕괴심층 - 회수");
 
         _hasDepthResult = false;
         _pendingRecoveryEscape = true;
@@ -89,14 +89,14 @@ public sealed partial class VnScreenBindings
     }
 
     // ------------------------------------------------------------
-    // 방치 결과 통보. (v3 §6.2) — 범용 확인 창을 쓴다.
+    // 방치 결과 통보. (v3 §6.2) - 범용 확인 창을 쓴다.
     // ------------------------------------------------------------
     public async YarnTask PresentNeglectAsync(MaidStateV3 maid, NeglectJudgment judgment)
     {
         CloseDepthPanelIfOpen();
 
         await PresentConfirmAsync(
-            title: $"{maid.DisplayName} — 방치된 밤",
+            title: $"{maid.DisplayName} - 방치된 밤",
             body: BuildNeglectBody(judgment),
             confirmLabel: "확인");
     }
@@ -106,22 +106,22 @@ public sealed partial class VnScreenBindings
         switch (judgment.Outcome)
         {
             case NeglectCollapseOutcome.NaturalRecovery:
-                return $"조용히 잠들었습니다. 붕괴 {judgment.CollapseBefore} → {judgment.CollapseAfter}";
+                return $"조용히 잠들었습니다. 붕괴 {judgment.CollapseBefore} -> {judgment.CollapseAfter}";
 
             case NeglectCollapseOutcome.DangerHold:
                 return $"위험 구간에서 밤을 버텼습니다. 붕괴 {judgment.CollapseBefore} 유지";
 
             case NeglectCollapseOutcome.SelfRelease:
-                return $"혼자서 어떻게든 가라앉혔습니다. 붕괴 {judgment.CollapseBefore} → {judgment.CollapseAfter}" +
+                return $"혼자서 어떻게든 가라앉혔습니다. 붕괴 {judgment.CollapseBefore} -> {judgment.CollapseAfter}" +
                        (judgment.GainsAccidentQuirk ? "\n…무언가가 몸에 남았습니다. (사고성 기벽)" : string.Empty);
 
             default: // NightIncident
-                return $"심야, 방에서 소리가 났습니다. 붕괴 {judgment.CollapseBefore} — 자동 심층 {judgment.IncidentDepthBeats}비트";
+                return $"심야, 방에서 소리가 났습니다. 붕괴 {judgment.CollapseBefore} - 자동 심층 {judgment.IncidentDepthBeats}비트";
         }
     }
 
     // ------------------------------------------------------------
-    // 패널 관리 — 심층은 국면마다 같은 패널을 다시 그린다.
+    // 패널 관리 - 심층은 국면마다 같은 패널을 다시 그린다.
     // ------------------------------------------------------------
     private void OpenDepthPanel(System.Action<DepthPanel> present)
     {

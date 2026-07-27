@@ -1,4 +1,4 @@
-/// <summary>엔딩 판정. 평가 순서: 전멸 → 폐업 → (완주) S → A → B. (§15)</summary>
+/// <summary>엔딩 판정. 평가 순서: 전멸 -> 폐업 -> (완주) S -> A -> B. (§15)</summary>
 public static class EndingResolverV3
 {
     public static EndingKindV3 ResolveImmediate(CampaignStateV3 campaign)

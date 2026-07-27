@@ -103,18 +103,18 @@ public sealed class CampaignEndingPanel : UIPanel<CampaignEndingPanel.Refs>, IMa
 
     private static string ToTitle(EndingKindV3 ending) => ending switch
     {
-        EndingKindV3.FullHouseMorning => "S — 만실의 아침",
-        EndingKindV3.NormalBusiness => "A — 정상 영업",
-        EndingKindV3.ClosingTime => "B — 폐점 시간",
+        EndingKindV3.FullHouseMorning => "S - 만실의 아침",
+        EndingKindV3.NormalBusiness => "A - 정상 영업",
+        EndingKindV3.ClosingTime => "B - 폐점 시간",
         EndingKindV3.Bankruptcy => "폐업",
-        EndingKindV3.EmptyInn => "전멸 — 빈 객잔",
+        EndingKindV3.EmptyInn => "전멸 - 빈 객잔",
         _ => "…",
     };
 
     private static string ToReason(CampaignStateV3 campaign, EndingKindV3 ending) => ending switch
     {
-        EndingKindV3.FullHouseMorning => "15일 완주 · 전원 생존 · 관계 4단계 달성",
-        EndingKindV3.NormalBusiness => "15일 완주 · 전원 생존",
+        EndingKindV3.FullHouseMorning => "15일 완주 / 전원 생존 / 관계 4단계 달성",
+        EndingKindV3.NormalBusiness => "15일 완주 / 전원 생존",
         EndingKindV3.ClosingTime => "완주했으나 조건 미달",
         EndingKindV3.Bankruptcy => $"할당 미달 {campaign.Tuning.BankruptcyLimit}회 누적",
         EndingKindV3.EmptyInn => "가용 메이드 없음",

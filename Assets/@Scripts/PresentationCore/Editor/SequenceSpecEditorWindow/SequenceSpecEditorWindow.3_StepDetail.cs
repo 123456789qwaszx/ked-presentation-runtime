@@ -85,13 +85,13 @@ public sealed partial class SequenceSpecEditorWindow
             if (!_compiledFoldout)
             {
                 if (count == 0)
-                    EditorGUILayout.LabelField("— empty —", EditorStyles.centeredGreyMiniLabel);
+                    EditorGUILayout.LabelField("- empty -", EditorStyles.centeredGreyMiniLabel);
                 return;
             }
 
             if (count == 0)
             {
-                EditorGUILayout.LabelField("— empty —", EditorStyles.centeredGreyMiniLabel);
+                EditorGUILayout.LabelField("- empty -", EditorStyles.centeredGreyMiniLabel);
                 return;
             }
 

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 
 /// <summary>
-/// 타입별 접객·목격 카운트. 능력 게이트(§11)가 조회한다.
+/// 타입별 접객/목격 카운트. 능력 게이트(§11)가 조회한다.
 /// 상태에 필드를 늘리는 대신 캠페인이 보관하는 사전을 확장 메서드로 감싼다.
 /// </summary>
 public static class CampaignCounterExtensions

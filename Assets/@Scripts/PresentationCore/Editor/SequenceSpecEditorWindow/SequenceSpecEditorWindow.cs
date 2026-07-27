@@ -8,7 +8,7 @@ using UnityEditor.IMGUI.Controls;
 using UnityEngine;
 
 // =================================================================================================
-// SequenceSpecEditorWindow (EditorWindow) — 역할/책임/확장 포인트 가이드
+// SequenceSpecEditorWindow (EditorWindow) - 역할/책임/확장 포인트 가이드
 //
 // 이 파일은 "SequenceSpecSO를 편집하는 메인 에디터 창의 뼈대"다.
 // - Unity EditorWindow 생명주기(OnEnable/OnDisable/OnGUI/OnSelectionChange)와

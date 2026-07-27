@@ -9,16 +9,16 @@ public enum NeglectCollapseOutcome
     /// <summary>80~99: 유지 (60%).</summary>
     DangerHold = 1,
 
-    /// <summary>80~99: 자기해소 (25%) — 붕괴 60으로, 사고성 기벽 판정 1회.</summary>
+    /// <summary>80~99: 자기해소 (25%) - 붕괴 60으로, 사고성 기벽 판정 1회.</summary>
     SelfRelease = 2,
 
-    /// <summary>80~99: 심야 사건 (15%) — 자동 심층 2비트, 개입 불가.</summary>
+    /// <summary>80~99: 심야 사건 (15%) - 자동 심층 2비트, 개입 불가.</summary>
     NightIncident = 3,
 }
 
 /// <summary>
 /// 방치 판정 1인분의 결과.
-/// 수치 반영(붕괴 변경, 후유증 일수, 기벽 부여, 이벤트 예약)은 전부 호출부 책임 —
+/// 수치 반영(붕괴 변경, 후유증 일수, 기벽 부여, 이벤트 예약)은 전부 호출부 책임 -
 /// 이 구조체는 "무엇이 일어나는가"만 확정한다.
 /// </summary>
 public readonly struct NeglectJudgment
@@ -65,13 +65,13 @@ public readonly struct NeglectJudgment
 /// <summary>
 /// 방치(선택받지 않은 메이드) 자동 판정. (v3 §6.2)
 ///
-/// 판정 순서와 굴림 소비 순서를 고정한다 — 커밋 재현성의 전제:
+/// 판정 순서와 굴림 소비 순서를 고정한다 - 커밋 재현성의 전제:
 ///   1) 붕괴 구간 판정 (80~99 이면 1d100 소비)
 ///   2) 자기해소 시 기벽 판정 (1d100 소비)
 ///   3) 특수 기벽 보유 시 요구 이벤트 판정 (1d100 소비)
 /// 조건이 거짓이면 해당 굴림은 소비하지 않는다.
 ///
-/// 확률 재정의(qk_acc_nightowl 유지 60→50 등)는 호출부가 NeglectChances 로 넘긴다.
+/// 확률 재정의(qk_acc_nightowl 유지 60->50 등)는 호출부가 NeglectChances 로 넘긴다.
 /// </summary>
 public static class NeglectRule
 {

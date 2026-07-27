@@ -3,7 +3,7 @@ using Yarn.Unity;
 
 /// <summary>
 /// 예약 게시판. (v3 §1)
-/// 편성은 시스템이 확정한 뒤 넘어오므로 이 화면은 열람이다 — 어느 카드를 눌러도 닫힌다.
+/// 편성은 시스템이 확정한 뒤 넘어오므로 이 화면은 열람이다 - 어느 카드를 눌러도 닫힌다.
 /// </summary>
 public sealed partial class VnScreenBindings
 {

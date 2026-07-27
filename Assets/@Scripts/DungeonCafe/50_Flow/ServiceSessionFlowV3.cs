@@ -14,18 +14,18 @@ public sealed class CommittingDice : IDiceSource
 /// <summary>
 /// 접객 세션 플로우 v3. (§2~§5)
 /// 기존 ServiceSessionFlow + ServiceSessionFlow_Autonomous 를 대체한다.
-/// 낮 비트 루프 → (100 도달 시) 붕괴심층 루프 → 결산까지가 한 세션이다.
+/// 낮 비트 루프 -> (100 도달 시) 붕괴심층 루프 -> 결산까지가 한 세션이다.
 /// </summary>
 public sealed class ServiceSessionFlowV3
 {
     private readonly CampaignStateV3 _campaign;
-    private readonly IGuesthouseV3Screens _screens;
+    private readonly VnScreenBindings _screens;
     private readonly INodePlayerV3 _nodes;
 
     private GuesthouseTuningV3 Tuning => _campaign.Tuning;
     private GuesthouseV3ContentDB Content => _campaign.Content;
 
-    public ServiceSessionFlowV3(CampaignStateV3 campaign, IGuesthouseV3Screens screens, INodePlayerV3 nodes)
+    public ServiceSessionFlowV3(CampaignStateV3 campaign, VnScreenBindings screens, INodePlayerV3 nodes)
     {
         _campaign = campaign; _screens = screens; _nodes = nodes;
     }
@@ -262,7 +262,7 @@ public sealed class ServiceSessionFlowV3
         session.DepthAxis = axis;
     }
 
-    /// <summary>심층 루프. playerControlled=false 는 심야 사건(§6.2): 개입·회수 선택 없음, 비트 상한 존재.</summary>
+    /// <summary>심층 루프. playerControlled=false 는 심야 사건(§6.2): 개입/회수 선택 없음, 비트 상한 존재.</summary>
     public async YarnTask RunDepthAsync(ServiceSessionStateV3 session, bool playerControlled, int maxBeats = int.MaxValue)
     {
         MaidStateV3 maid = session.Maid;
@@ -271,7 +271,7 @@ public sealed class ServiceSessionFlowV3
         if (playerControlled && session.Protocol != null)
             await _nodes.PlayNodeAsync(session.Protocol.ControlLossNodeName);
 
-        // 첫 진입 보장: 즉시 탈출해도 목격 기록·이해도·회상 플래그. (§3.3, §4.4)
+        // 첫 진입 보장: 즉시 탈출해도 목격 기록/이해도/회상 플래그. (§3.3, §4.4)
         UnderstandingRule.GrantDepthWitness(_campaign, monster, maid);
         _campaign.CountWitness(monster.Species.ToResearchType());
         _campaign.Understanding.TryClaimOneTime("depthpage", monster.MonsterId, maid.MaidId);
@@ -354,7 +354,7 @@ public sealed class ServiceSessionFlowV3
                     new DepthRollInput(0), layout, Tuning);
             }
 
-            // 봉인·거절: 특수/치명 하향. (§11)
+            // 봉인/거절: 특수/치명 하향. (§11)
             DepthBand band = roll.Band;
             if (band == DepthBand.Special && session.SpecialSealed) band = DepthBand.Fatal;
             if (band == DepthBand.Fatal && session.RemovedActionNode == monster.DepthActions.FatalNodeKey)
@@ -480,9 +480,9 @@ public sealed class ServiceSessionFlowV3
 
     private void ApplyEscapeAftereffects(ServiceSessionStateV3 session)
     {
-        // 탈출 = 통제선 아래로 데리고 나온다: 게이지 99 회수. (§3.4 개정 — 시뮬 검증)
-        // 100+ 로 남기면 관리 붕괴(80~99) 대상이 못 되고 다음 접객 1비트째 재심층 → 수입 0 나선.
-        // 비용은 ×0.5 결산 + 떨림 + 관계 노선 플래그로 이미 지불된다. 99 는 여전히 벼랑 끝이다.
+        // 탈출 = 통제선 아래로 데리고 나온다: 게이지 99 회수. (§3.4 개정 - 시뮬 검증)
+        // 100+ 로 남기면 관리 붕괴(80~99) 대상이 못 되고 다음 접객 1비트째 재심층 -> 수입 0 나선.
+        // 비용은 x0.5 결산 + 떨림 + 관계 노선 플래그로 이미 지불된다. 99 는 여전히 벼랑 끝이다.
         MaidStateV3 maid = session.Maid;
         int cap = Tuning.ControlLossThreshold - 1;
         if (maid.Gauge.Get(session.DepthAxis) > cap)
