@@ -6,10 +6,11 @@ using UnityEngine.UI;
 using static UIRefValidation;
 
 /// <summary>
-/// 예약 게시판.
+/// 예약 게시판. (v3 §1)
 ///
-/// 아직 확정되지 않은 문의이므로 종족과 요구 유형을 밝히지 않는다.
-/// 플레이어가 게시 문구만 보고 추론하는 것이 이 화면의 목적이다.
+/// v3 에서 편성은 시스템이 결정론으로 확정한다 — 이 화면은 선택이 아니라 열람이다.
+/// 첫 방문 개체는 이름을 감추고 게시 문구만 노출한다. 플레이어가 문구로 추론하는 것이 목적.
+/// 어느 카드를 눌러도 게시판 확인으로 간주하고 닫힌다.
 /// </summary>
 public sealed class ReservationBoardPanel : UIPanel<ReservationBoardPanel.Refs>, IManagedUI
 {
@@ -72,27 +73,29 @@ public sealed class ReservationBoardPanel : UIPanel<ReservationBoardPanel.Refs>,
         _list.Clear();
     }
 
-    public void Present(int dayNumber, IReadOnlyList<ServiceBookingState> bookings)
+    public void Present(int dayNumber, IReadOnlyList<MonsterProfileV3> bookings, CampaignStateV3 campaign)
     {
         _locked = false;
 
-        if (_titleText != null) 
-            _titleText.text = $"{dayNumber}일차 예약 문의";
-        
-        if (_guideText != null) 
-            _guideText.text = "문의를 골라 전화를 걸면 상대가 확정됩니다.";
+        if (_titleText != null)
+            _titleText.text = $"{dayNumber}일차 예약 게시판";
+
+        if (_guideText != null)
+            _guideText.text = "오늘의 예약입니다. 확인하면 순서대로 통화가 이어집니다.";
 
         _entries.Clear();
 
         for (int i = 0; i < bookings.Count; i++)
-        {// 확정 전에는 개체 이름과 종족을 감춘다. 게시 문구만 노출.
-            string bookingLabel;
-            
-            if (bookings[i].IsConfirmed)
-                bookingLabel = $"{bookings[i].Monster.DisplayName}\n{bookings[i].Monster.ReservationPostText}";
-            else
-                bookingLabel = $"미확인 문의\n{bookings[i].Monster.ReservationPostText}";
-            
+        {
+            MonsterProfileV3 monster = bookings[i];
+
+            // 통화 이력이 있는 개체(이해도 일부 파악 이상)만 이름을 밝힌다. (§8.2)
+            UnderstandingTier tier = campaign.Understanding.GetTier(monster.MonsterId, campaign.Tuning);
+
+            string bookingLabel = tier >= UnderstandingTier.Partial
+                ? $"{monster.DisplayName}\n{monster.ReservationPostText}"
+                : $"미확인 문의\n{monster.ReservationPostText}";
+
             _entries.Add(new GuesthouseOptionEntry(bookingLabel));
         }
 

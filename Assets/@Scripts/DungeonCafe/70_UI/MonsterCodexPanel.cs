@@ -56,7 +56,8 @@ public sealed class MonsterCodexPanel : UIPanel<MonsterCodexPanel.Refs>
 
     private readonly GuesthouseOptionItemList _list = new();
     private readonly List<GuesthouseOptionEntry> _entries = new();
-    private readonly List<MonsterProfile> _monsters = new();
+    private readonly List<MonsterProfileV3> _monsters = new();
+    private CampaignStateV3 _campaign;
     private bool _valid;
     #endregion
 
@@ -109,15 +110,17 @@ public sealed class MonsterCodexPanel : UIPanel<MonsterCodexPanel.Refs>
         _list.Clear();
     }
 
-    public void Present(IReadOnlyList<ServiceBookingState> bookings)
+    public void Present(CampaignStateV3 campaign)
     {
-        if (!_valid)
+        if (!_valid || campaign == null)
             return;
+
+        _campaign = campaign;
 
         if (_titleText != null)
             _titleText.text = "업무수첩";
 
-        CollectRevealed(bookings);
+        CollectRevealed(campaign);
         ApplyEntries();
 
         if (_emptyText != null)
@@ -130,20 +133,17 @@ public sealed class MonsterCodexPanel : UIPanel<MonsterCodexPanel.Refs>
             ShowDetail(0);
     }
 
-    /// <summary>통화로 확정된 개체만 수첩에 남는다.</summary>
-    private void CollectRevealed(IReadOnlyList<ServiceBookingState> bookings)
+    /// <summary>통화로 확정된 개체(일부 파악 이상)만 수첩에 남는다. (§8.2)</summary>
+    private void CollectRevealed(CampaignStateV3 campaign)
     {
         _monsters.Clear();
 
-        if (bookings == null)
-            return;
-
-        for (int i = 0; i < bookings.Count; i++)
+        IReadOnlyList<MonsterProfileV3> all = campaign.Content.Monsters;
+        for (int i = 0; i < all.Count; i++)
         {
-            if (!bookings[i].IsConfirmed)
-                continue;
-
-            _monsters.Add(bookings[i].Monster);
+            UnderstandingTier tier = campaign.Understanding.GetTier(all[i].MonsterId, campaign.Tuning);
+            if (tier >= UnderstandingTier.Partial)
+                _monsters.Add(all[i]);
         }
     }
 
@@ -152,7 +152,10 @@ public sealed class MonsterCodexPanel : UIPanel<MonsterCodexPanel.Refs>
         _entries.Clear();
 
         for (int i = 0; i < _monsters.Count; i++)
-            _entries.Add(new GuesthouseOptionEntry(_monsters[i].DisplayName));
+        {
+            UnderstandingTier tier = _campaign.Understanding.GetTier(_monsters[i].MonsterId, _campaign.Tuning);
+            _entries.Add(new GuesthouseOptionEntry($"{_monsters[i].DisplayName}  ({ToTierLabel(tier)})"));
+        }
 
         _list.Rebuild(_entries);
     }
@@ -162,7 +165,8 @@ public sealed class MonsterCodexPanel : UIPanel<MonsterCodexPanel.Refs>
         if (index < 0 || index >= _monsters.Count)
             return;
 
-        MonsterProfile monster = _monsters[index];
+        MonsterProfileV3 monster = _monsters[index];
+        UnderstandingTier tier = _campaign.Understanding.GetTier(monster.MonsterId, _campaign.Tuning);
 
         if (_detailNameText != null)
             _detailNameText.text = monster.DisplayName;
@@ -174,24 +178,67 @@ public sealed class MonsterCodexPanel : UIPanel<MonsterCodexPanel.Refs>
             _detailDemandText.text = $"요구 유형: {BurdenAxes.ToAptitudeLabel(monster.DemandAxis)}";
 
         if (_detailNotesText != null)
-            _detailNotesText.text = BuildNotes(monster);
+            _detailNotesText.text = BuildNotes(monster, tier);
     }
 
-    private static string BuildNotes(MonsterProfile monster)
+    /// <summary>이해도 4단계 공개. (§8.2: 일부=요구·만족 / 고도=범위·특이 / 완전=보정·심층)</summary>
+    private string BuildNotes(MonsterProfileV3 monster, UnderstandingTier tier)
     {
         StringBuilder builder = new();
 
-        for (int i = 0; i < monster.CodexNotes.Count; i++)
-        {
-            if (builder.Length > 0)
-                builder.Append('\n');
+        Append(builder, monster.ReservationPostText);
+        Append(builder, $"요구 만족도 {monster.RequiredSatisfaction}");
 
-            builder.Append("· ");
-            builder.Append(monster.CodexNotes[i]);
+        if (tier >= UnderstandingTier.Advanced)
+        {
+            Append(builder, "부하 범위 공개: 승인 화면에서 옵션별 범위가 보입니다");
+            if (monster.SpecialRule != MonsterSpecialRule.None)
+                Append(builder, $"특이 규칙: {ToSpecialRuleLabel(monster.SpecialRule)}");
+        }
+
+        if (tier >= UnderstandingTier.Complete)
+        {
+            string mod = monster.LoadModifier == 0
+                ? "부하 보정 없음"
+                : $"부하 보정 {monster.LoadModifier:+0;-0}{(monster.LoadModifierHeavyOnly ? " (강 옵션 한정)" : string.Empty)}";
+            Append(builder, mod);
+            Append(builder, "완전 파악: 심층 주사위 −5 적용 중");
         }
 
         return builder.ToString();
     }
+
+    private static void Append(StringBuilder builder, string line)
+    {
+        if (string.IsNullOrEmpty(line))
+            return;
+
+        if (builder.Length > 0)
+            builder.Append('\n');
+
+        builder.Append("· ").Append(line);
+    }
+
+    private static string ToTierLabel(UnderstandingTier tier) => tier switch
+    {
+        UnderstandingTier.Complete => "완전 파악",
+        UnderstandingTier.Advanced => "고도 파악",
+        UnderstandingTier.Partial => "일부 파악",
+        _ => "미확인",
+    };
+
+    private static string ToSpecialRuleLabel(MonsterSpecialRule rule) => rule switch
+    {
+        MonsterSpecialRule.HeavyReactionEcho => "중 옵션의 반응이 강 등급으로 산정",
+        MonsterSpecialRule.TighteningGrip => "3비트째 부하 보정 +4",
+        MonsterSpecialRule.RepetitionBoredom => "같은 강도 연속 승인 시 반응 하향",
+        MonsterSpecialRule.AxisMasquerade => "요구축 위장 (고도 파악 시 해제)",
+        MonsterSpecialRule.Reverb => "적용 부하의 20%를 감응으로 반향",
+        MonsterSpecialRule.DangerCraving => "붕괴 80~99에서 반응 상향",
+        MonsterSpecialRule.Overstay => "종료 시 붕괴 ≥80이면 추가 비트 강제",
+        MonsterSpecialRule.OverstayVeil => "추가 비트 강제 + 심층 첫 회수 무효",
+        _ => rule.ToString(),
+    };
 
     private static string ToSpeciesLabel(MonsterSpecies species)
     {

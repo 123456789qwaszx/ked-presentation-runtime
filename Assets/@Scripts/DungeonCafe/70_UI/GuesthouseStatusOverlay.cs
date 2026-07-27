@@ -10,7 +10,7 @@ using static UIRefValidation;
 /// UIManager 는 오버레이를 interactable=false, blocksRaycasts=false 로 올리므로
 /// 대사 진행 입력을 가로채지 않는다. 여기에 버튼을 두어서는 안 된다.
 ///
-/// 값은 GuesthouseHudSnapshot 복사본으로만 받는다. 진행 상태 객체를 붙들지 않는다.
+/// 값은 GuesthouseHudSnapshot(v3) 복사본으로만 받는다. 진행 상태 객체를 붙들지 않는다.
 /// </summary>
 public sealed class GuesthouseStatusOverlay : UIOverlay<GuesthouseStatusOverlay.Refs>
 {
@@ -140,10 +140,12 @@ public sealed class GuesthouseStatusOverlay : UIOverlay<GuesthouseStatusOverlay.
 
     private void ApplyEnergy(in GuesthouseHudSnapshot snapshot)
     {
+        // v3 3장부: 할당 판정은 [오늘] 장부만 본다. 게이지도 오늘/할당이다.
         if (_energyText != null)
-            _energyText.text = $"에너지 {snapshot.EnergyTotal} / {snapshot.EnergyQuota}  (금일 {snapshot.EnergyToday})";
+            _energyText.text =
+                $"욕구 {snapshot.EnergyToday} / {snapshot.EnergyQuota}  (보유 {snapshot.EnergyHeld} · 누적 {snapshot.EnergyLifetime} · 가게 Lv{snapshot.ShopLevel})";
 
-        SetGauge(_energyGauge, snapshot.EnergyTotal, snapshot.EnergyQuota);
+        SetGauge(_energyGauge, snapshot.EnergyToday, snapshot.EnergyQuota);
     }
 
     private void ApplyMaid(in GuesthouseHudSnapshot snapshot)
@@ -158,14 +160,7 @@ public sealed class GuesthouseStatusOverlay : UIOverlay<GuesthouseStatusOverlay.
             _maidNameText.text = snapshot.MaidName;
 
         if (_controlText != null)
-        {
-            _controlText.text = snapshot.ControlStatus switch
-            {
-                ControlAuthorityStatus.Strained => "한계 근접",
-                ControlAuthorityStatus.Lost => "통제 상실",
-                _ => "승인권 위임 중",
-            };
-        }
+            _controlText.text = snapshot.ControlLabel;
 
         ApplyAxis(_physicalText, _physicalGauge, snapshot, BurdenAxis.Physical);
         ApplyAxis(_mentalText, _mentalGauge, snapshot, BurdenAxis.Mental);
@@ -178,13 +173,14 @@ public sealed class GuesthouseStatusOverlay : UIOverlay<GuesthouseStatusOverlay.
         in GuesthouseHudSnapshot snapshot,
         BurdenAxis axis)
     {
-        int value = snapshot.Burden[axis];
-        int limit = snapshot.BurdenLimit[axis];
+        // v3: 0~200 단일 스케일. 100(통제 상실)·200(완전 붕괴) 눈금은 프리팹의 마커가 담당한다.
+        int value = snapshot.Gauge[axis];
+        int max = snapshot.TotalCollapseThreshold;
 
         if (target != null)
-            target.text = $"{BurdenAxes.ToBurdenLabel(axis)} {value} / {limit}";
+            target.text = $"{BurdenAxes.ToBurdenLabel(axis)} {value} / {max}";
 
-        SetGauge(gauge, value, limit);
+        SetGauge(gauge, value, max);
     }
 
     private void ApplyMonster(in GuesthouseHudSnapshot snapshot)

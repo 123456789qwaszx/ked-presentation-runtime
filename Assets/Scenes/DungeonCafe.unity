@@ -2137,7 +2137,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 92598edcd7a365c4889524172e3e849b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GuesthouseV3Bootstrap
-  tuningAsset: {fileID: 0}
+  tuningAsset: {fileID: 11400000, guid: 6e98fa43544c2a94dbe6c3a367e5083f, type: 2}
   dialogueRunner: {fileID: 8309902628538800288}
   headlessSmoke: 0
   seed: 20260727
@@ -11381,7 +11381,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 355984e90625bb24fbaa9aa39f39f63f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VnAppBootstrap
-  dungeonCafeBootstrap: {fileID: 1943578252}
   overlayCommandExecutor: {fileID: 1334588234}
   overlaySequenceRunner: {fileID: 461075912}
   overlaySequenceCatalog: {fileID: 11400000, guid: f5c84b12e7c8a2140a5cecd428a8d63a, type: 2}
@@ -36598,52 +36597,6 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
---- !u!1 &1943578249
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1943578251}
-  - component: {fileID: 1943578252}
-  m_Layer: 0
-  m_Name: DungeonCafeBootstrap
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!4 &1943578251
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1943578249}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 442.22055, y: -776.4773, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1943578252
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1943578249}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b11ff6ceba932e146974f53f7d79327a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DungeonCafeBootstrap
-  contentBundle: {fileID: 11400000, guid: 5e89b944addffd14aabdff3e78681a7c, type: 2}
-  episodePlayer: {fileID: 1924806292}
 --- !u!1 &1944180269
 GameObject:
   m_ObjectHideFlags: 0
@@ -44118,7 +44071,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 3356120893837444203}
   m_Direction: 2
   m_Value: 0
-  m_Size: 0.99999607
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -46950,7 +46903,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.000017166138, y: 0.00033881603}
+  m_AnchoredPosition: {x: 0.000017166138, y: -0.00001391534}
   m_SizeDelta: {x: 0, y: 300}
   m_Pivot: {x: 0, y: 1}
 --- !u!222 &3549758765554785767
@@ -59964,7 +59917,6 @@ SceneRoots:
   - {fileID: 767435431}
   - {fileID: 634365939}
   - {fileID: 2081564916}
-  - {fileID: 1943578251}
+  - {fileID: 102681136}
   - {fileID: 297683114}
   - {fileID: 99511076}
-  - {fileID: 102681136}

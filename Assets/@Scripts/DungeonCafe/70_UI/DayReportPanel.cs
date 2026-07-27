@@ -65,38 +65,41 @@ public sealed class DayReportPanel : UIPanel<DayReportPanel.Refs>
             _confirmButton.onClick.RemoveListener(HandleConfirm);
     }
 
-    public void Present(DayCycleState day, int totalEnergy, int energyQuota)
+    public void Present(CampaignStateV3 campaign, DayStateV3 day, bool quotaMet)
     {
-        if (!_valid || day == null)
+        if (!_valid || campaign == null || day == null)
             return;
-
-        int incidents = day.CountIncidents();
 
         if (_titleText != null)
             _titleText.text = $"{day.DayNumber}일차 업무 종료";
 
         if (_energyText != null)
-            _energyText.text = $"금일 확보 에너지  {day.EnergyEarned}";
+            _energyText.text = $"금일 획득 욕구  {campaign.Ledger.Today} / {day.Plan.Quota}";
 
         if (_progressText != null)
-            _progressText.text = $"누적  {totalEnergy} / {energyQuota}";
+            _progressText.text =
+                $"보유 {campaign.Ledger.Held}  ·  누적 {campaign.Ledger.Lifetime}  ·  가게 Lv{campaign.ShopLevel}";
 
         if (_incidentText != null)
-            _incidentText.text = $"통제 상실  {incidents}건";
+            _incidentText.text = quotaMet
+                ? "할당 달성"
+                : $"할당 미달  (경고 {campaign.BankruptcyCount} / {campaign.Tuning.BankruptcyLimit})";
 
         if (_noteText != null)
-            _noteText.text = BuildNote(incidents, totalEnergy, energyQuota);
+            _noteText.text = BuildNote(campaign, quotaMet);
     }
 
-    private static string BuildNote(int incidents, int totalEnergy, int energyQuota)
+    private static string BuildNote(CampaignStateV3 campaign, bool quotaMet)
     {
-        if (incidents > 0)
-            return "통제를 잃은 접객이 있었습니다. 후유증은 밤에 처리해야 합니다.";
+        if (!quotaMet)
+        {
+            int remain = campaign.Tuning.BankruptcyLimit - campaign.BankruptcyCount;
+            return remain <= 1
+                ? "다음 미달이면 폐업입니다."
+                : $"기준에 미치지 못했습니다. 미달 {remain}회가 남았습니다.";
+        }
 
-        if (totalEnergy >= energyQuota)
-            return "기준 에너지를 확보했습니다.";
-
-        return "기준에 미치지 못했습니다. 남은 일수를 고려해 주십시오.";
+        return "기준 욕구를 확보했습니다. 밤 처리로 넘어갑니다.";
     }
 
     private void HandleConfirm() => OnConfirmed?.Invoke();

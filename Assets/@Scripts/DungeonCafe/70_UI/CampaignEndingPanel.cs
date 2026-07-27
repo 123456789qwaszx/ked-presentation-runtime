@@ -68,38 +68,72 @@ public sealed class CampaignEndingPanel : UIPanel<CampaignEndingPanel.Refs>, IMa
             _dismissButton.onClick.RemoveListener(HandleDismiss);
     }
 
-    public void Present(CampaignEndingResult ending, CampaignState campaign)
+    public void Present(CampaignStateV3 campaign, EndingKindV3 ending)
     {
-        if (!_valid || ending == null)
+        if (!_valid || campaign == null)
             return;
 
         if (_titleText != null)
-            _titleText.text = ending.Title;
+            _titleText.text = ToTitle(ending);
 
         if (_reasonText != null)
-            _reasonText.text = ending.Reason;
+            _reasonText.text = ToReason(campaign, ending);
 
         if (_speciesText != null)
         {
-            bool hasSpecies = ending.IsBadEnding && ending.CollapseSpecies != MonsterSpecies.None;
-
-            _speciesText.gameObject.SetActive(hasSpecies);
-
-            if (hasSpecies)
-                _speciesText.text = $"파멸 계열: {ending.CollapseSpecies}";
+            // v3 의 파국은 종족 단위 엔딩 노드로 연출되고, 여기서는 낙인 여부만 병기한다. (§15)
+            bool hasScar = HasRouteScar(campaign);
+            _speciesText.gameObject.SetActive(hasScar);
+            if (hasScar)
+                _speciesText.text = "루트 파국 낙인: 완전 붕괴가 있었습니다";
         }
 
-        if (_summaryText != null && campaign != null)
+        if (_summaryText != null)
         {
             _summaryText.text =
-                $"누적 에너지  {campaign.TotalEnergy} / {campaign.Tuning.CampaignEnergyQuota}\n" +
-                $"숙련 도달  {campaign.CountTotalMasteryLevels()}\n" +
-                $"통제 상실  {campaign.CountTotalIncidents()}건\n" +
-                $"이탈 인원  {campaign.CountLostMaids()}명";
+                $"누적 욕구  {campaign.Ledger.Lifetime}\n" +
+                $"가게 레벨  {campaign.ShopLevel}\n" +
+                $"할당 미달  {campaign.BankruptcyCount}회\n" +
+                $"이탈 인원  {CountLost(campaign)}명";
         }
 
         // 엔딩 노드가 재생되는 동안에는 확인 버튼을 숨긴다.
         SetDismissVisible(false);
+    }
+
+    private static string ToTitle(EndingKindV3 ending) => ending switch
+    {
+        EndingKindV3.FullHouseMorning => "S — 만실의 아침",
+        EndingKindV3.NormalBusiness => "A — 정상 영업",
+        EndingKindV3.ClosingTime => "B — 폐점 시간",
+        EndingKindV3.Bankruptcy => "폐업",
+        EndingKindV3.EmptyInn => "전멸 — 빈 객잔",
+        _ => "…",
+    };
+
+    private static string ToReason(CampaignStateV3 campaign, EndingKindV3 ending) => ending switch
+    {
+        EndingKindV3.FullHouseMorning => "15일 완주 · 전원 생존 · 관계 4단계 달성",
+        EndingKindV3.NormalBusiness => "15일 완주 · 전원 생존",
+        EndingKindV3.ClosingTime => "완주했으나 조건 미달",
+        EndingKindV3.Bankruptcy => $"할당 미달 {campaign.Tuning.BankruptcyLimit}회 누적",
+        EndingKindV3.EmptyInn => "가용 메이드 없음",
+        _ => string.Empty,
+    };
+
+    private static bool HasRouteScar(CampaignStateV3 campaign)
+    {
+        for (int i = 0; i < campaign.Maids.Count; i++)
+            if (campaign.Maids[i].TotalCollapseCount > 0) return true;
+        return false;
+    }
+
+    private static int CountLost(CampaignStateV3 campaign)
+    {
+        int n = 0;
+        for (int i = 0; i < campaign.Maids.Count; i++)
+            if (campaign.Maids[i].IsLost) n++;
+        return n;
     }
 
     /// <summary>엔딩 노드가 끝난 뒤 호출한다.</summary>

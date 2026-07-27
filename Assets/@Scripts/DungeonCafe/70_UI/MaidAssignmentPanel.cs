@@ -75,47 +75,49 @@ public sealed class MaidAssignmentPanel : UIPanel<MaidAssignmentPanel.Refs>, IMa
         _list.Clear();
     }
 
-    public void Present(MaidAssignmentRequest request)
+    public void Present(MonsterProfileV3 monster, IReadOnlyList<MaidStateV3> candidates, CampaignStateV3 campaign)
     {
-        if (!_valid || request == null)
+        if (!_valid || monster == null || candidates == null)
             return;
 
-        ApplyMonster(request);
-        ApplyCandidates(request);
+        ApplyMonster(monster, campaign);
+        ApplyCandidates(candidates, campaign);
     }
 
-    private void ApplyMonster(MaidAssignmentRequest request)
+    private void ApplyMonster(MonsterProfileV3 monster, CampaignStateV3 campaign)
     {
-        MonsterProfile monster = request.Monster;
+        UnderstandingTier tier = campaign.Understanding.GetTier(monster.MonsterId, campaign.Tuning);
 
         if (_monsterNameText != null)
-            _monsterNameText.text = monster.DisplayName;
+            _monsterNameText.text = tier >= UnderstandingTier.Partial ? monster.DisplayName : "미확인 손님";
 
         if (_monsterSpeciesText != null)
-            _monsterSpeciesText.text = monster.Species.ToString();
+            _monsterSpeciesText.text = tier >= UnderstandingTier.Partial
+                ? campaign.Content.GetProtocol(monster.Species)?.DisplayName ?? monster.Species.ToString()
+                : "계열: 미확인";
 
         if (_monsterDemandText == null)
             return;
 
-        // 게시판 단계에서는 종족과 겉모습만, 통화 확정 이후에 요구 타입이 공개된다.
-        _monsterDemandText.text = request.IsDemandAxisKnown
+        // 요구 유형은 통화 확정(일부 파악) 이후에 공개된다. (§8.2)
+        _monsterDemandText.text = tier >= UnderstandingTier.Partial
             ? $"요구 유형: {BurdenAxes.ToAptitudeLabel(monster.DemandAxis)}"
             : "요구 유형: 미확인";
     }
 
-    private void ApplyCandidates(MaidAssignmentRequest request)
+    private void ApplyCandidates(IReadOnlyList<MaidStateV3> candidates, CampaignStateV3 campaign)
     {
         _entries.Clear();
         _maidIds.Clear();
 
-        for (int i = 0; i < request.Candidates.Count; i++)
+        for (int i = 0; i < candidates.Count; i++)
         {
-            MaidRuntimeState maid = request.Candidates[i];
+            MaidStateV3 maid = candidates[i];
 
-            // 이탈한 인원은 목록에 남기되 고를 수 없게 한다. 사라지면 왜 없는지 알 수 없다.
+            // 이탈·배정 차단 인원은 목록에 남기되 고를 수 없게 한다. 사라지면 왜 없는지 알 수 없다.
             _entries.Add(new GuesthouseOptionEntry(
                 BuildLabel(maid),
-                isAvailable: maid.CanBeAssigned));
+                isAvailable: maid.CanBeAssigned(campaign.CurrentDayNumber)));
 
             _maidIds.Add(maid.MaidId);
         }
@@ -123,14 +125,14 @@ public sealed class MaidAssignmentPanel : UIPanel<MaidAssignmentPanel.Refs>, IMa
         _list.Rebuild(_entries);
     }
 
-    private static string BuildLabel(MaidRuntimeState maid)
+    private static string BuildLabel(MaidStateV3 maid)
     {
         AxisTriple aptitude = maid.Aptitude;
-        AxisTriple burden = maid.Burden.Snapshot();
+        AxisTriple gauge = maid.Gauge.Snapshot();
 
         return $"{maid.DisplayName}\n" +
                $"육체 {aptitude.Physical} / 정신 {aptitude.Mental} / 감응 {aptitude.Empathic}\n" +
-               $"상처 {burden.Physical}  스트레스 {burden.Mental}  충동 {burden.Empathic}";
+               $"상처 {gauge.Physical}  스트레스 {gauge.Mental}  충동 {gauge.Empathic}   (0~200)";
     }
 
     private void HandleCardSubmitted(int index)
