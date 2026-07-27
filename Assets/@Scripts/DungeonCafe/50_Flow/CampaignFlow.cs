@@ -8,25 +8,22 @@ using Yarn.Unity;
 /// </summary>
 public sealed class CampaignFlow
 {
-    private readonly GuesthouseContentDB _content;
     private readonly DayCycleFlow _dayFlow;
     private readonly EndingResolver _endingResolver;
 
     private readonly VnScreenBindings _screens;
     private readonly ScenarioNodeRunner _nodes;
 
-    public CampaignState State { get; private set; }
-    public CampaignEndingResult Ending { get; private set; }
+    private CampaignState State { get; }
+    private CampaignEndingResult Ending { get; set; }
 
     public CampaignFlow(
-        GuesthouseContentDB content,
         CampaignState campaignState,
         DayCycleFlow dayFlow,
         VnScreenBindings screens,
         ScenarioNodeRunner nodes,
         EndingResolver endingResolver)
     {
-        _content = content;
         State = campaignState;
         _dayFlow = dayFlow;
         _screens = screens;

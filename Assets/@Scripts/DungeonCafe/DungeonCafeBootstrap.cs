@@ -5,9 +5,8 @@ public class DungeonCafeBootstrap : MonoBehaviour
 {
     [Header("Content")]
     [SerializeField] private GuesthouseContentBundleSO contentBundle;
-
-    [Header("Dialogue")]
-    [SerializeField] private DialogueRunner dialogueRunner;
+    
+    [SerializeField] private EpisodePlayer episodePlayer;
 
     private CampaignState _campaignState;
 
@@ -24,7 +23,7 @@ public class DungeonCafeBootstrap : MonoBehaviour
     {
         GuesthouseContentDB content = contentBundle.BuildContentDB();
 
-        ScenarioNodeRunner nodes = new(dialogueRunner);
+        ScenarioNodeRunner nodes = new(episodePlayer);
 
         ServiceOptionSelector serviceOptionSelector = new();
         ServiceSettlementCalculator settlementCalculator = new(content.Tuning);
@@ -50,7 +49,6 @@ public class DungeonCafeBootstrap : MonoBehaviour
         EndingResolver endingResolver = new(content.Tuning, content.ProtocolBySpecies);
 
         CampaignFlow campaign = new(
-            content,
             _campaignState,
             dayFlow,
             screens,

@@ -31,8 +31,7 @@ public sealed class EpisodePlayer : MonoBehaviour
 
     public string YarnEntryKey => yarnEntryKey;
 
-    private bool _isRestarting;
-    private int _restartGeneration;
+    private int _runGeneration;
 
     public void Initialize(
         VnScreenBindings vnScreenBindings,
@@ -57,60 +56,40 @@ public sealed class EpisodePlayer : MonoBehaviour
         if (Input.GetKeyDown(runYarnKey))
             StartGame(yarnEntryKey);
     }
-
-    private Coroutine _restartCoroutine;
     
+    // 디버그 키/외부 트리거용
     public void StartGame(string nodeName)
     {
-        if (_restartCoroutine != null)
-            StopCoroutine(_restartCoroutine);
-
-        _restartCoroutine = StartCoroutine(RestartInternalCoroutine(nodeName));
+        StartGameAsync(nodeName).Forget();
     }
 
-    private IEnumerator RestartInternalCoroutine(string nodeName)
+    public async YarnTask StartGameAsync(string nodeName)
     {
-        if (_isRestarting)
-            yield break;
+        if (dialogueRunner == null)
+            return;
 
-        _isRestarting = true;
-        int generation = ++_restartGeneration;
-
-        YarnTask stopTask = StopDialogueInternalAsync();
-        yield return WaitForYarnTask(stopTask);
-
-        if (generation != _restartGeneration)
+        if (!dialogueRunner.Dialogue.NodeExists(nodeName))
         {
-            if (generation == _restartGeneration)
-                _isRestarting = false;
-
-            _restartCoroutine = null;
-            yield break;
+            Debug.LogWarning($"[EpisodePlayer] Node not found. node={nodeName}");
+            return;
         }
+        Debug.Log($"[EpisodePlayer] Running game {nodeName}");
+
+        int generation = ++_runGeneration;
+
+        await StopDialogueInternalAsync();
+
+        // 대기 중에 다른 노드 요청이 들어왔으면 이번 호출은 포기한다.
+        if (generation != _runGeneration)
+            return;
 
         _vnScreenBindings.GoToPresentationView();
         _presentationLaneScopeSession.ClearStage();
         _presentationLaneScopeSession.Start();
 
-        YarnTask startTask = dialogueRunner.StartDialogue(nodeName);
-        yield return WaitForYarnTask(startTask);
-
-        if (generation == _restartGeneration)
-            _isRestarting = false;
-
-        _restartCoroutine = null;
-    }
-    private static IEnumerator WaitForYarnTask(YarnTask task)
-    {
-        var awaiter = task.GetAwaiter();
-
-        while (!awaiter.IsCompleted)
-            yield return null;
-
-        awaiter.GetResult();
+        await dialogueRunner.StartDialogue(nodeName);
     }
     
-
     private async YarnTask StopDialogueInternalAsync()
     {
         _nodeRollbackHistory.ClearRollbackPoints();

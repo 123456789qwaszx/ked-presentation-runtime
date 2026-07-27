@@ -1,3 +1,5 @@
+using UnityEngine;
+
 public sealed partial class VnScreenBindings
 {
     private VnFeatureController _vnFeatures;
@@ -16,6 +18,7 @@ public sealed partial class VnScreenBindings
 
     public void GoToPresentationView()
     {
+        Debug.Log("GoToPresentationView");
         UI.SwitchRoot<PresentationUIRoot>(root =>
         {
             BindMain(root, ApplyBindings);
