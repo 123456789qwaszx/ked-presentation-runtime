@@ -2108,6 +2108,54 @@ Canvas:
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
+--- !u!1 &102681134
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 102681136}
+  - component: {fileID: 102681135}
+  m_Layer: 0
+  m_Name: GuesthouseV3Bootstrap
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &102681135
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 102681134}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 92598edcd7a365c4889524172e3e849b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GuesthouseV3Bootstrap
+  tuningAsset: {fileID: 0}
+  dialogueRunner: {fileID: 8309902628538800288}
+  headlessSmoke: 0
+  seed: 20260727
+--- !u!4 &102681136
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 102681134}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -407.4711, y: 528.681, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &110501395
 GameObject:
   m_ObjectHideFlags: 0
@@ -36566,7 +36614,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1943578251
 Transform:
   m_ObjectHideFlags: 0
@@ -44070,7 +44118,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 3356120893837444203}
   m_Direction: 2
   m_Value: 0
-  m_Size: 1
+  m_Size: 0.99999607
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -46902,7 +46950,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.000017166138, y: -0.000054117292}
+  m_AnchoredPosition: {x: 0.000017166138, y: 0.00033881603}
   m_SizeDelta: {x: 0, y: 300}
   m_Pivot: {x: 0, y: 1}
 --- !u!222 &3549758765554785767
@@ -59919,3 +59967,4 @@ SceneRoots:
   - {fileID: 1943578251}
   - {fileID: 297683114}
   - {fileID: 99511076}
+  - {fileID: 102681136}
