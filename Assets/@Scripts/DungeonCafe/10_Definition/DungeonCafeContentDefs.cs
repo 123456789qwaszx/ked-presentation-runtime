@@ -281,12 +281,23 @@ public sealed class DungeonCafeContentDB
         Calendar = calendar;
     }
 
-    public MaidProfile GetMaid(string id) => _maids.TryGetValue(id, out var v) ? v : null;
-    public MonsterProfile GetMonster(string id) => _monsters.TryGetValue(id, out var v) ? v : null;
-    public SpeciesProtocol GetProtocol(MonsterSpecies s) => _protocols.TryGetValue(s, out var v) ? v : null;
-    public AftereffectDefinition GetAftereffect(string id) => _aftereffects.TryGetValue(id, out var v) ? v : null;
-    public QuirkDefinition GetQuirk(string id) => _quirks.TryGetValue(id, out var v) ? v : null;
-    public PlayerAbilityDefinition GetAbility(string id) => _abilities.TryGetValue(id, out var v) ? v : null;
+    public MaidProfile GetMaid(string id) 
+        => _maids.TryGetValue(id, out var v) ? v : null;
+    
+    public MonsterProfile GetMonster(string id) 
+        => _monsters.TryGetValue(id, out var v) ? v : null;
+    
+    public SpeciesProtocol GetProtocol(MonsterSpecies s) 
+        => _protocols.TryGetValue(s, out var v) ? v : null;
+    
+    public AftereffectDefinition GetAftereffect(string id) 
+        => _aftereffects.TryGetValue(id, out var v) ? v : null;
+    
+    public QuirkDefinition GetQuirk(string id) 
+        => _quirks.TryGetValue(id, out var v) ? v : null;
+    
+    public PlayerAbilityDefinition GetAbility(string id) 
+        => _abilities.TryGetValue(id, out var v) ? v : null;
 
     public CampaignDayPlan GetDayPlan(int dayNumber)
     {

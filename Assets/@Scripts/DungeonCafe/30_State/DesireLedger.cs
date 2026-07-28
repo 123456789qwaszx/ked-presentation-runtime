@@ -18,7 +18,7 @@ public readonly struct DesireLedgerSnapshot
 }
 
 /// <summary>
-/// 욕구의 3장부. (v3 §7.1)
+/// 욕구의 3장부.
 ///
 ///   Today    - 오늘의 영업 목표(할당) 판정. 소비로 내려가지 않는다. (매출)
 ///   Held     - 능력/시설에 실제 소비. (현금)
@@ -58,8 +58,7 @@ public sealed class DesireLedger
     }
 
     /// <summary>
-    /// 밤 수입 (관리 붕괴 +40 등). 오늘 장부 제외 - 당일 할당은 이미 판정 종료이며,
-    /// 밤 수입이 할당을 소급 구제하면 낮의 긴장이 죽는다. (v3 §6.1)
+    /// 밤 수입 (관리 붕괴 +40 등). 오늘 장부 제외 - 당일 할당은 이미 판정 종료
     /// </summary>
     public void EarnNight(int amount)
     {
@@ -86,12 +85,12 @@ public sealed class DesireLedger
     /// <summary>세이브 복원 전용. 게임 규칙 코드에서 호출 금지.</summary>
     public void RestoreFrom(int today, int held, int lifetime)
     {
-        Today = System.Math.Max(0, today);
-        Held = System.Math.Max(0, held);
-        Lifetime = System.Math.Max(0, lifetime);
+        Today = Math.Max(0, today);
+        Held = Math.Max(0, held);
+        Lifetime = Math.Max(0, lifetime);
     }
 
-    /// <summary>할당 판정 직후, 다음 날 개시 시점에 호출한다.</summary>
+    /// <summary>할당 판정 직후, 다음 날 개시 시점에 호출.</summary>
     public void StartNewDay()
     {
         Today = 0;

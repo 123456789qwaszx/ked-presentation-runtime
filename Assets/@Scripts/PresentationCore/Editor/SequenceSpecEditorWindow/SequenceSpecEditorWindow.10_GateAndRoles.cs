@@ -278,7 +278,7 @@ public sealed partial class SequenceSpecEditorWindow
             using (new EditorGUI.DisabledScope(!_autoFillIdsOnAdd))
             {
                 bool isAuto = (_autoFillRoleSlotIndex == i);
-                string label = isAuto ? "✓ Auto    " : "   Auto   ";
+                string label = isAuto ? "V Auto    " : "   Auto   ";
 
                 using (new EditorGUILayout.HorizontalScope())
                 {

@@ -1,6 +1,6 @@
 using System;
 
-/// <summary>낮 행동 옵션의 부하 범위. (v3 §2.2 - 약 6~10 / 중 10~16 / 강 15~23)</summary>
+/// <summary>낮 행동 옵션의 부하 범위. (약 6~10 / 중 10~16 / 강 15~23)</summary>
 public readonly struct LoadRange
 {
     public int Min { get; }
@@ -12,7 +12,7 @@ public readonly struct LoadRange
         Max = Math.Max(Min, max);
     }
 
-    /// <summary>v3 §2.2 표준 3계층.</summary>
+    /// <summary>표준 3계층.</summary>
     public static LoadRange Light => new(6, 10);
     public static LoadRange Medium => new(10, 16);
     public static LoadRange Heavy => new(15, 23);
@@ -22,7 +22,7 @@ public readonly struct LoadRange
 
 /// <summary>
 /// 낮 부하 판정 1회분의 내역.
-/// RawLoad(완화 전)는 숙련 경험치의 기준이므로 반드시 보존한다 (기존 MasteryExperienceRule 계약).
+/// RawLoad(완화 전)는 숙련 경험치의 기준이므로 보존
 /// </summary>
 public readonly struct LoadJudgmentResult
 {
@@ -51,13 +51,9 @@ public readonly struct LoadJudgmentResult
 }
 
 /// <summary>
-/// 낮 접객의 부하 범위 판정. (v3 §2.3)
-///
-///   적용 부하 = clamp( roll(범위) + 개체 보정 − 적성x2 − 숙련Lvx1, 최소 4 )
-///
-/// 기존 BurdenAccrualRule(고정 부하/적성x1) 을 대체할 v3 규칙이지만,
-/// 이 단계에서는 나란히 존재하며 기존 코드는 수정하지 않는다.
-/// 순수 계산 - 붕괴 반영은 호출부가 결과를 받아 수행한다.
+/// 낮 접객의 부하 범위 판정.
+/// 적용 부하 = clamp( roll(범위) + 개체 보정 − 적성x2 − 숙련Lvx1, 최소 4 )
+/// 순수 계산 - 붕괴 반영은 호출부가 결과를 받아 수행.
 /// </summary>
 public static class LoadRangeJudgmentRule
 {

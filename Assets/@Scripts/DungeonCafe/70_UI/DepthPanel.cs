@@ -5,18 +5,16 @@ using UnityEngine;
 using UnityEngine.UI;
 using static UIRefValidation;
 
-/// <summary>
-/// 붕괴심층 패널. (v3 §4)
-///
-/// 심층 한 비트에서 세 국면을 같은 화면이 담당한다:
-/// 1) 개입 - 굴림 전 능력 토글 후 [주사위를 굴린다]
-/// 2) 굴림 제시 - 결과를 보여주고 재굴림/구간 하향 능력 또는 [받아들인다]
-/// 3) 회수 선택 - [지금 데리고 나온다](탈출 x0.5) / [한 번 더 남긴다]
-///
-/// 여기가 게임에서 가장 극적인 화면이다. 구간표(회수/위험/치명/특수)는
-/// 공개 조건(고도 파악/능력/가게 Lv5)을 만족할 때만 수치가 보인다.
-/// </summary>
-public sealed class DepthPanel : UIPanel<DepthPanel.Refs>, IManagedUI
+// 붕괴심층 패널.
+//
+// 심층 한 비트에서 세 국면을 같은 화면이 담당한다:
+// 1) 개입 - 굴림 전 능력 토글 후 [주사위를 굴린다]
+// 2) 굴림 제시 - 결과를 보여주고 재굴림/구간 하향 능력 또는 [받아들인다]
+// 3) 회수 선택 - [지금 데리고 나온다](탈출 x0.5) / [한 번 더 남긴다]
+//
+// 여기가 게임에서 가장 극적인 화면이다. 구간표(회수/위험/치명/특수)는
+// 공개 조건(고도 파악/능력/가게 Lv5)을 만족할 때만 수치가 보인다.
+public sealed class DepthPanel : UIPanel<DepthPanel.Refs>
 {
     /// <summary>개입 확정: 굴림 전 사용할 능력 id 목록.</summary>
     public event Action<IReadOnlyList<string>> OnInterventionConfirmed;

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Yarn.Unity;
 
 // 밤에 메이드 한 명에게 일어나는 처리를 담당한다.
@@ -102,7 +101,7 @@ public sealed class NightMaidFlow
         await _dungeonCafeNodes.PlayNodeAsync(
             $"Night_Release_{maid.MaidId}_{relationStage}");
         
-        //관리 붕괴로 각인 해소
+        // 관리 붕괴로 각인 해소
         AftereffectInstance brand = maid.FindAftereffect("se_brand");
 
         if (brand != null)

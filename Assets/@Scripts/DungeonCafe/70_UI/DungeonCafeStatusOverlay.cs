@@ -3,15 +3,10 @@ using UnityEngine;
 using UnityEngine.UI;
 using static UIRefValidation;
 
-/// <summary>
-/// 상시 표시 오버레이.
-///
-/// 패널과 달리 노드가 재생되는 동안에도 화면에 남는다.
-/// UIManager 는 오버레이를 interactable=false, blocksRaycasts=false 로 올리므로
-/// 대사 진행 입력을 가로채지 않는다. 여기에 버튼을 두어서는 안 된다.
-///
-/// 값은 DungeonCafeHudSnapshot(v3) 복사본으로만 받는다. 진행 상태 객체를 붙들지 않는다.
-/// </summary>
+// 패널과 달리 노드가 재생되는 동안에도 화면에 유지.
+// UIManager 는 오버레이를 interactable=false, blocksRaycasts=false 로 올리므로 버튼은 무시 됨.
+//
+// 값은 DungeonCafeHudSnapshot 복사본을 받는다.
 public sealed class DungeonCafeStatusOverlay : UIOverlay<DungeonCafeStatusOverlay.Refs>
 {
     #region Refs
@@ -114,7 +109,9 @@ public sealed class DungeonCafeStatusOverlay : UIOverlay<DungeonCafeStatusOverla
 #endif
     }
 
-    /// <summary>노드 재생 직전에 호출된다. 여기서 무거운 작업을 하면 대사 시작이 밀린다.</summary>
+    /// <summary>
+    /// 노드 재생 직전에 호출.
+    /// </summary>
     public void Apply(in DungeonCafeHudSnapshot snapshot)
     {
         if (!_valid)
@@ -140,7 +137,6 @@ public sealed class DungeonCafeStatusOverlay : UIOverlay<DungeonCafeStatusOverla
 
     private void ApplyEnergy(in DungeonCafeHudSnapshot snapshot)
     {
-        // v3 3장부: 할당 판정은 [오늘] 장부만 본다. 게이지도 오늘/할당이다.
         if (_energyText != null)
             _energyText.text =
                 $"욕구 {snapshot.EnergyToday} / {snapshot.EnergyQuota}  (보유 {snapshot.EnergyHeld} / 누적 {snapshot.EnergyLifetime} / 가게 Lv{snapshot.ShopLevel})";
@@ -173,7 +169,7 @@ public sealed class DungeonCafeStatusOverlay : UIOverlay<DungeonCafeStatusOverla
         in DungeonCafeHudSnapshot snapshot,
         BurdenAxis axis)
     {
-        // v3: 0~200 단일 스케일. 100(통제 상실)/200(완전 붕괴) 눈금은 프리팹의 마커가 담당한다.
+        // 0~200 단일 스케일. 100(통제 상실)/200(완전 붕괴) 눈금은 프리팹의 마커가 담당.
         int value = snapshot.Gauge[axis];
         int max = snapshot.TotalCollapseThreshold;
 
@@ -207,13 +203,18 @@ public sealed class DungeonCafeStatusOverlay : UIOverlay<DungeonCafeStatusOverla
         SetGauge(_satisfactionGauge, snapshot.Satisfaction, snapshot.RequiredSatisfaction);
     }
 
-    /// <summary>Image 가 Filled 타입일 때만 채움값이 보인다. 아니면 조용히 무시된다.</summary>
+    /// <summary>
+    /// Image 가 Filled 타입일 때만 채움값이 보인다.
+    /// 아니면 조용히 무시됨.
+    /// </summary>
     private static void SetGauge(Image gauge, int value, int max)
     {
         if (gauge == null)
             return;
 
-        gauge.fillAmount = max <= 0 ? 0f : Mathf.Clamp01((float)value / max);
+        gauge.fillAmount = max <= 0 
+            ? 0f 
+            : Mathf.Clamp01((float)value / max);
     }
 
     private bool ValidateRefs()

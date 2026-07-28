@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-/// <summary>접객이 어떤 방식으로 끝났는가. (v3 §3 상태 전이표)</summary>
+/// <summary>접객이 어떤 방식으로 끝났는가. (상태 전이표)</summary>
 public enum SettlementOutcomeKind
 {
     /// <summary>비트 소진, 붕괴 ≤ 99.</summary>
@@ -70,14 +70,10 @@ public readonly struct SettlementResult
 }
 
 /// <summary>
-/// v3 결산. (v3 §7.2)
+/// 결산.
 ///
 ///   욕구 = 반응 점수 합 x 10 x 배율
 ///   배율: 0~49 x1.0 / 50~79 x1.5 / 80~99 x3.0 / 심층 탈출 x0.5 / 200 결산 0
-///   만족도 미달 시 배율 사다리 1단 하향 (최저 = 심층 탈출 배율)
-///
-/// 99 와 100 사이의 낙차(x3.0 -> x0.5)가 이 게임의 핵심 도박이다.
-/// 기존 ServiceSettlementCalculator 를 대체할 규칙이며, 이 단계에서는 나란히 존재한다.
 /// 순수 계산 - 숙련 경험/후유증/장부 기입은 호출부가 결과를 받아 수행한다.
 /// </summary>
 public static class SettlementRule
@@ -104,7 +100,7 @@ public static class SettlementRule
 
         if (kind == SettlementOutcomeKind.DepthEscape || endCollapse >= tuning.ControlLossThreshold)
         {
-            // 통상 종료로 들어와도 붕괴가 100 이상이면 심층 탈출로 취급한다 - 방어적 처리.
+            // 통상 종료로 들어와도 붕괴가 100 이상이면 심층 탈출로 취급.
             baseMultiplier = tuning.DepthEscapeMultiplier;
             label = "심층 탈출";
         }

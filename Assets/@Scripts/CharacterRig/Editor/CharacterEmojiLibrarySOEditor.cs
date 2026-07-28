@@ -557,7 +557,7 @@ public sealed class CharacterEmojiLibrarySOEditor : Editor
         bool sprite = spriteMirror.intValue ==
                       (int)CharacterEmojiSpriteMirrorPolicy.MirrorWithCharacterFacing;
 
-        return $"Mirror: Pos {(placement ? "✓" : "–")} / Move {(motion ? "✓" : "–")} / Img {(sprite ? "✓" : "–")}";
+        return $"Mirror: Pos {(placement ? "V" : "–")} / Move {(motion ? "V" : "–")} / Img {(sprite ? "V" : "–")}";
     }
 
 

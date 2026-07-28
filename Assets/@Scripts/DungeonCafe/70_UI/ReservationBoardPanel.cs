@@ -5,14 +5,10 @@ using UnityEngine;
 using UnityEngine.UI;
 using static UIRefValidation;
 
-/// <summary>
-/// 예약 게시판. (v3 §1)
-///
-/// v3 에서 편성은 시스템이 결정론으로 확정한다 - 이 화면은 선택이 아니라 열람이다.
-/// 첫 방문 개체는 이름을 감추고 게시 문구만 노출한다. 플레이어가 문구로 추론하는 것이 목적.
-/// 어느 카드를 눌러도 게시판 확인으로 간주하고 닫힌다.
-/// </summary>
-public sealed class ReservationBoardPanel : UIPanel<ReservationBoardPanel.Refs>, IManagedUI
+// 예약 게시판.
+// 첫 방문 개체는 이름을 감추고 게시 문구만 노출.
+// 플레이어가 문구로 추론하는 것이 목적.
+public sealed class ReservationBoardPanel : UIPanel<ReservationBoardPanel.Refs>
 {
     public event Action<int> OnBookingSelected;
 
@@ -89,7 +85,7 @@ public sealed class ReservationBoardPanel : UIPanel<ReservationBoardPanel.Refs>,
         {
             MonsterProfile monster = bookings[i];
 
-            // 통화 이력이 있는 개체(이해도 일부 파악 이상)만 이름을 밝힌다.
+            // 이해도에 따른 정보 공개량 차등
             UnderstandingTier tier = campaign.Understanding.GetTier(monster.MonsterId, campaign.Tuning);
 
             string bookingLabel = tier >= UnderstandingTier.Partial

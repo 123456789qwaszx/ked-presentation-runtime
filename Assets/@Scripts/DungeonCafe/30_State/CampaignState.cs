@@ -32,7 +32,7 @@ public sealed class UnderstandingState
     public bool MarkDepthWitnessed(string monsterId) => _depthWitnessed.Add(monsterId);
     public int DepthWitnessTotal => _depthWitnessed.Count;
 
-    /// <summary>1회성 플래그 (심층 페이지/회상/사고 기벽 - 개체x메이드). 신규 등록 시 true. (§4.4)</summary>
+    /// <summary>1회성 플래그 (심층 페이지/회상/사고 기벽 - 개체x메이드). 신규 등록 시 true. </summary>
     public bool TryClaimOneTime(string flag, string monsterId, string maidId)
         => _oneTimeFlags.Add($"{flag}:{monsterId}:{maidId}");
 
@@ -150,7 +150,7 @@ public sealed class PlayerAbilityState
     public void RestoreCampaignUse(string id, int n) => _usedThisCampaign[id] = n;
 }
 
-/// <summary>판정 커밋 로그. 커밋마다 롤백 절단 버전이 오르고, 표현 계층이 이를 소비해 롤백을 자른다. </summary>
+/// <summary>판정 커밋 로그. 커밋마다 롤백 버전이 오르고, 표현 계층이 이를 소비해 롤백을 자른다. </summary>
 public sealed class JudgmentCommitLog
 {
     public readonly struct Entry
@@ -164,7 +164,7 @@ public sealed class JudgmentCommitLog
 
     private readonly List<Entry> _entries = new();
 
-    /// <summary>표현 계층(VNLoadSeekDriver 등)이 감시하는 절단 버전. 커밋마다 +1.</summary>
+    /// <summary>표현 계층(VNLoadSeekDriver 등)의 버전 확인 용. 커밋마다 +1.</summary>
     public int RollbackBarrierVersion { get; private set; }
 
     public IReadOnlyList<Entry> Entries => _entries;
@@ -200,7 +200,7 @@ public sealed class DayState
     }
 }
 
-/// <summary>캠페인 루트 상태 v3. 세이브의 단일 진입점.</summary>
+/// <summary>캠페인 루트 상태. 세이브의 단일 진입점.</summary>
 public sealed class CampaignState
 {
     private readonly List<MaidState> _maids = new();
@@ -241,14 +241,6 @@ public sealed class CampaignState
         
         return null;
     }
-
-    public List<MaidState> GetAssignable(int dayNumber)
-    {
-        var list = new List<MaidState>();
-        for (int i = 0; i < _maids.Count; i++)
-            if (_maids[i].CanBeAssigned(dayNumber)) list.Add(_maids[i]);
-        return list;
-    }
     
     public List<MaidState> GetPresent(int dayNumber)
     {
@@ -272,7 +264,7 @@ public sealed class CampaignState
 
     public int ShopLevel => ShopLevelRule.Resolve(Ledger.Lifetime, Tuning);
 
-    /// <summary>커밋 원자 연산: rng 상태 기록 -> 굴림 -> 로그 -> 절단. (§14)</summary>
+    /// <summary>커밋 원자 연산: rng 상태 기록 -> 굴림 -> 로그 -> 발행 및 기록 절단. </summary>
     public int CommitRoll(string kind, int min, int max)
     {
         ulong before = Rng.State;

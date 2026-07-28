@@ -6,16 +6,10 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
-/// <summary>
-/// 게스트하우스 패널들의 계층을 Refs enum 으로부터 생성한다.
-///
-/// UIBase.BindObjects() 는 enum 멤버 이름과 '완전히 같은 이름'의 자식 GameObject 를 재귀 탐색해 묶는다.
-/// 이름이 하나만 어긋나도 경고 없이 null 로 바인딩되므로, 손으로 만들면 오타 한 글자에 몇 시간이 날아간다.
-/// 그래서 이름의 출처를 enum 하나로 고정하고 계층을 코드로 찍어낸다.
-///
-/// enum 을 나중에 고쳐도 이 도구를 다시 돌리면 부족한 자식만 채워진다.
-/// 이미 있는 오브젝트는 건드리지 않으므로, 배치를 잡아 둔 뒤에 다시 실행해도 안전하다.
-/// </summary>
+// DungeonCafeUI들의 계층을 Refs enum 으로부터 생성.
+// enum 을 나중에 고쳐도 이 도구를 다시 돌리면 부족한 자식만 채워짐.
+// 이미 있는 오브젝트는 건드리지 않으므로,
+// 배치를 잡아 둔 뒤에 다시 실행해도 안전함.
 public static class DungeonCafePanelScaffolder
 {
     private const string MenuRoot = "Tools/Guesthouse/패널 계층 생성";
@@ -47,8 +41,8 @@ public static class DungeonCafePanelScaffolder
     }
 
     /// <summary>
-    /// 오버레이는 패널 스택과 다른 레이어에 산다.
-    /// UIManager 의 오버레이 레이어를 선택한 상태로 실행해야 한다.
+    /// 오버레이는 패널 스택과 다른 레이어.
+    /// UIManager 의 오버레이 레이어를 선택한 상태로 실행해야 함.
     /// </summary>
     [MenuItem(MenuRoot + "/상태 오버레이", priority = 1)]
     private static void CreateOverlay()

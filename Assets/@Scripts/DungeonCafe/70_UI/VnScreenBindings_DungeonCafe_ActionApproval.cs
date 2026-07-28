@@ -2,12 +2,9 @@ using System;
 using System.Collections.Generic;
 using Yarn.Unity;
 
-/// <summary>
-/// 행동 승인. (v3 §2)
-///
-/// 승인 요청마다 새로 열리고, 플레이어가 옵션 하나를 (능력 예약과 함께) 고르면 닫힌다.
-/// 승인 직후에는 연출 노드가 재생되므로 패널이 화면을 덮고 있으면 안 된다.
-/// </summary>
+// (행동 승인)
+// 승인 요청마다 새로 열리고, 플레이어가 옵션 하나를 (능력 예약과 함께) 고르면 닫힌다.
+// 승인 직후에는 연출 노드가 재생.
 public sealed partial class VnScreenBindings
 {
     private bool _isWaitingApproval;
@@ -45,10 +42,8 @@ public sealed partial class VnScreenBindings
         return new ApprovalResponse(_pendingApprovalIndex, _pendingApprovalAbilities);
     }
 
-    /// <summary>
-    /// 통제 상실(심층 진입) 통보. 승인 패널이 열려 있으면 입력만 막는다.
-    /// 자동 사건 동안의 상태 표시는 상시 HUD 가 담당한다.
-    /// </summary>
+    // 통제 상실 이벤트 통보. 승인 패널이 열려 있으면 입력만 차단.
+    // 자동 사건 동안의 상태 표시는 상시 HUD 가 담당.
     public void NotifyControlLost()
     {
         if (!_isApprovalPanelOpen)
@@ -71,7 +66,6 @@ public sealed partial class VnScreenBindings
 
     private void OpenActionApprovalPanel(ApprovalRequest request)
     {
-        // 앞선 요청이 어떤 이유로든 남아 있으면 먼저 정리한다.
         CloseApprovalPanelIfOpen();
 
         UI.PushPanel<MaidActionApprovalPanel>(panel =>

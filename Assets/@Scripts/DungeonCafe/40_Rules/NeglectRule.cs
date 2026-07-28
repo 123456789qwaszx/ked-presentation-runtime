@@ -1,6 +1,6 @@
 using System;
 
-/// <summary>방치된 메이드에게 일어나는 일의 종류. (v3 §6.2)</summary>
+/// <summary>방치된 메이드에게 일어나는 일의 종류. </summary>
 public enum NeglectCollapseOutcome
 {
     /// <summary>0~79: 자연 회복 −10.</summary>
@@ -19,7 +19,7 @@ public enum NeglectCollapseOutcome
 /// <summary>
 /// 방치 판정 1인분의 결과.
 /// 수치 반영(붕괴 변경, 후유증 일수, 기벽 부여, 이벤트 예약)은 전부 호출부 책임 -
-/// 이 구조체는 "무엇이 일어나는가"만 확정한다.
+/// 이 구조체는 "무엇이 일어나는가"만 확정.
 /// </summary>
 public readonly struct NeglectJudgment
 {
@@ -58,7 +58,7 @@ public readonly struct NeglectJudgment
 }
 
 /// <summary>
-/// 방치(선택받지 않은 메이드) 자동 판정. (v3 §6.2)
+/// 방치(선택받지 않은 메이드) 자동 판정.
 ///
 /// 판정 순서와 굴림 소비 순서를 고정한다 - 커밋 재현성의 전제:
 ///   1) 붕괴 구간 판정 (80~99 이면 1d100 소비)

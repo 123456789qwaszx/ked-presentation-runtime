@@ -1,6 +1,6 @@
 using System;
 
-/// <summary>심층 주사위 결과 구간. (v3 §4.3)</summary>
+/// <summary>심층 주사위 결과 구간. </summary>
 public enum DepthBand
 {
     /// <summary>1~회수상한. 메이드가 잠깐 정신을 차린다. 붕괴 가산 0.</summary>
@@ -12,7 +12,7 @@ public enum DepthBand
     /// <summary>치명 행동.</summary>
     Fatal = 2,
 
-    /// <summary>개체 고유 특수 행동. [각인] 부여.</summary>
+    /// <summary>개체 고유 특수 행동. [brand 후유증] 부여.</summary>
     Special = 3,
 }
 
@@ -20,7 +20,7 @@ public enum DepthBand
 /// 심층 결과 구간의 경계 3개 (회수 상한 / 위험 상한 / 치명 상한).
 /// 특수 구간은 치명 상한+1 ~ 99 로 항상 존재한다.
 ///
-/// 메이드 성향/기벽/능력은 이 레이아웃을 변형해서 개입한다 (v3 §12.1, §10, §11).
+/// 메이드 성향/기벽/능력은 이 레이아웃을 변형해서 개입.
 /// 변형이 아무리 겹쳐도 4구간 구조는 유지된다:
 ///   구간 소멸 금지, 각 구간 최소 폭 보장 (기본 4).
 /// 변형은 항상 새 인스턴스를 반환한다.
@@ -39,7 +39,7 @@ public readonly struct DepthBandLayout : IEquatable<DepthBandLayout>
     /// <summary>치명 구간 상한 (포함). 특수 구간은 이 값+1 부터.</summary>
     public int FatalMax { get; }
 
-    /// <summary>v3 §4.3 기본형: 1~20 회수 / 21~60 위험 / 61~94 치명 / 95~99 특수.</summary>
+    /// <summary> 기본형: 1~20 회수 / 21~60 위험 / 61~94 치명 / 95~99 특수.</summary>
     public static DepthBandLayout Standard => new(20, 60, 94);
 
     public DepthBandLayout(int recoveryMax, int riskyMax, int fatalMax)

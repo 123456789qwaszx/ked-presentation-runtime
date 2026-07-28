@@ -67,29 +67,35 @@ public enum QuirkEffectKind
 public enum AbilityEffectKind
 {
     None = 0,
-    DepthReroll = 1,            // 재굴림
-    DepthDelta = 2,             // 최종값 +magnitude (음수)
-    DepthBandDowngrade = 3,     // 구간 한 단계 하향
-    DepthMaxCap = 4,            // 최대값 magnitude
-    ForceRecoveryWindow = 5,    // 다음 비트 회수 강제
-    LoadRedirectPercent = 6,    // 부하 magnitude% 타 축 이전
-    LoadCap = 7,                // 부하 상한 magnitude
-    RevealDepthTable = 8,       // 심층 구간표 상시 공개 (패시브/정보)
-    PredictBand = 9,            // 굴림 전 최빈 구간 표시 (정보)
-    SealSpecialResult = 10,     // 특수 결과 봉인 -> 치명으로 흡수
-    NegateMonsterMods = 11,     // 개체 보정/구간 변형 무효
+    DepthReroll = 1,              // 재굴림
+    DepthDelta = 2,               // 최종값 +magnitude (음수)
+    DepthBandDowngrade = 3,       // 구간 한 단계 하향
+    DepthMaxCap = 4,              // 최대값 magnitude
+    ForceRecoveryWindow = 5,      // 다음 비트 회수 강제
+    LoadRedirectPercent = 6,      // 부하 magnitude% 타 축 이전
+    LoadCap = 7,                  // 부하 상한 magnitude
+    RevealDepthTable = 8,         // 심층 구간표 상시 공개 (패시브/정보)
+    PredictBand = 9,              // 굴림 전 최빈 구간 표시 (정보)
+    SealSpecialResult = 10,       // 특수 결과 봉인 -> 치명으로 흡수
+    NegateMonsterMods = 11,       // 개체 보정/구간 변형 무효
     ReactionUpgradePlusLoad = 12, // 옵션 반응 +1단계, 부하 +magnitude
-    ConvertLoadToReaction = 13, // 부하 절반 폐기, 반응 +magnitude
-    MaidDepthReroll = 14,       // 전용: 해당 메이드 재굴림
-    MaidPredictMinus = 15,      // 전용: 구간 공개 + 최종 +magnitude(음수)
-    RemoveWorstAction = 16,     // 전용: 결과표 행동 1 제거(치명->위험 흡수)
-    MaidRecoveryShift = 17,     // 전용: 회수 상한 +magnitude (패시브)
-    AutoCatchRecovery = 18,     // 전용: 첫 회수 자동 포착 (패시브)
-    StopAt199 = 19,             // 전용: 200 도달 시 1회 199 정지
+    ConvertLoadToReaction = 13,   // 부하 절반 폐기, 반응 +magnitude
+    MaidDepthReroll = 14,         // 전용: 해당 메이드 재굴림
+    MaidPredictMinus = 15,        // 전용: 구간 공개 + 최종 +magnitude(음수)
+    RemoveWorstAction = 16,       // 전용: 결과표 행동 1 제거(치명->위험 흡수)
+    MaidRecoveryShift = 17,       // 전용: 회수 상한 +magnitude (패시브)
+    AutoCatchRecovery = 18,       // 전용: 첫 회수 자동 포착 (패시브)
+    StopAt199 = 19,               // 전용: 200 도달 시 1회 199 정지
 }
 
 /// <summary>능력 사용 제한. </summary>
-public enum AbilityUseLimit { Passive = 0, PerDay = 1, PerService = 2, PerCampaign = 3 }
+public enum AbilityUseLimit
+{
+    Passive = 0,
+    PerDay = 1, 
+    PerService = 2,
+    PerCampaign = 3
+}
 
 /// <summary>능력 해금의 지식 조건 종류. </summary>
 public enum KnowledgeGateKind

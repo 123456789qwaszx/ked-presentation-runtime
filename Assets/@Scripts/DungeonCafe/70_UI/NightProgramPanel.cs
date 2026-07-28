@@ -5,17 +5,13 @@ using UnityEngine;
 using UnityEngine.UI;
 using static UIRefValidation;
 
-/// <summary>
-/// 밤 처리 선택 패널. (v3 §5~§6)
-///
-/// manageCount 명까지 (메이드, 안정/관리 붕괴) 를 지정하고, 나머지는 방치된다.
-/// 후보는 (메이드 x 처리 방식) 을 평탄화해 보여준다.
-/// - 안정: 항상 가능
-/// - 관리 붕괴: 최고 축 붕괴 80~99 일 때만 목록에 오른다 (§6.1)
-/// 항목을 누르면 계획에 담기고, [확정] 을 누르면 그대로 제출된다.
-/// 정원을 채우면 자동 확정한다. 아무도 고르지 않고 확정하면 전원 방치다.
-/// </summary>
-public sealed class NightProgramPanel : UIPanel<NightProgramPanel.Refs>, IManagedUI
+// 밤 처리 선택 패널.
+//
+// manageCount 명까지 (메이드, 안정/관리 붕괴) 를 지정하고, 나머지는 방치 처리.
+// 후보는 (메이드 x 처리 방식) 을 평탄화해 표시.
+// - 안정: 항상 가능
+// - 관리 붕괴: 최고 축 붕괴 80~99 일 때만 목록에 오른다
+public sealed class NightProgramPanel : UIPanel<NightProgramPanel.Refs>
 {
     public event Action<IReadOnlyList<NightChoice>> OnPlanConfirmed;
 
@@ -108,12 +104,16 @@ public sealed class NightProgramPanel : UIPanel<NightProgramPanel.Refs>, IManage
             _summaryText.text =
                 $"오늘 {_request.ManageCount}명까지 개입할 수 있습니다. ({_plan.Count}/{_request.ManageCount})\n" +
                 "선택하지 않은 인원은 방치 판정을 받습니다." +
-                (requests.Length > 0 ? $"\n{requests}" : string.Empty);
+                (requests.Length > 0 
+                    ? $"\n{requests}"
+                    : string.Empty);
         }
 
-        // 확정 항목이 맨 앞. 죄책감은 목록 아래(방치될 이름들)가 만든다.
         _entries.Add(new DungeonCafeOptionEntry(
-            _plan.Count == 0 ? "▶ 전원 방치하고 밤을 넘긴다" : "▶ 이대로 확정 (나머지 방치)"));
+            _plan.Count == 0 
+                ? "-> 전원 방치하고 밤을 넘긴다" 
+                : "-> 이대로 확정 (나머지 방치)"));
+        
         _candidates.Add(new NightChoice(null, NightChoiceKind.None));
 
         for (int i = 0; i < _request.Maids.Count; i++)
@@ -149,13 +149,14 @@ public sealed class NightProgramPanel : UIPanel<NightProgramPanel.Refs>, IManage
         for (int i = 0; i < _request.QuirkRequests.Count; i++)
             names.Add(_request.QuirkRequests[i].maidId);
 
-        return $"※ 먼저 요구하는 이벤트 예약: {string.Join(", ", names)}";
+        return $" [먼저 요구하는 이벤트 예약]: {string.Join(", ", names)}";
     }
 
     private bool IsPlanned(string maidId)
     {
         for (int i = 0; i < _plan.Count; i++)
             if (_plan[i].MaidId == maidId) return true;
+        
         return false;
     }
 
@@ -171,8 +172,13 @@ public sealed class NightProgramPanel : UIPanel<NightProgramPanel.Refs>, IManage
         int reduction = _request.Tuning.NightCareReduction;    // 가게 Lv7 상향분은 플로우가 실제 적용
         int after = Math.Max(0, highest - reduction);
 
-        string aftereffect = maid.HasAftereffect ? "  후유증 1단계 해제" : string.Empty;
-        string prefix = planned ? "✓ " : string.Empty;
+        string aftereffect = maid.HasAftereffect 
+            ? "  후유증 해제" 
+            : string.Empty;
+        
+        string prefix = planned 
+            ? "V " 
+            : string.Empty;
 
         return $"{prefix}{maid.DisplayName} / 안정\n" +
                $"{BurdenAxes.ToBurdenLabel(axis)} {highest} -> 약 {after}{aftereffect}  관계(신뢰)+";
@@ -182,7 +188,10 @@ public sealed class NightProgramPanel : UIPanel<NightProgramPanel.Refs>, IManage
     {
         BurdenAxis axis = maid.Gauge.HighestAxis(out _);
         int retained = highest * _request.Tuning.ManagedReleaseRetainPercent / 100;
-        string prefix = planned ? "✓ " : string.Empty;
+        
+        string prefix = planned 
+            ? "V " 
+            : string.Empty;
 
         return $"{prefix}{maid.DisplayName} / 관리 붕괴 (80~99 한정)\n" +
                $"{BurdenAxes.ToBurdenLabel(axis)} {highest} -> 약 {retained}   " +
@@ -196,7 +205,6 @@ public sealed class NightProgramPanel : UIPanel<NightProgramPanel.Refs>, IManage
 
         NightChoice choice = _candidates[index];
 
-        // 확정
         if (choice.Kind == NightChoiceKind.None)
         {
             Confirm();

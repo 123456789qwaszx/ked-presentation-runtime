@@ -1,17 +1,17 @@
 using System.Collections.Generic;
 
-/// <summary>낮 옵션 1개의 표시 정보. 이해도에 따라 범위 노출이 달라진다. (§2.5)</summary>
+// 낮 옵션 1개의 표시 정보. 이해도에 따라 범위 노출이 달라진다.
 public readonly struct OptionDisplay
 {
     public int Index { get; }
     public OptionIntensity Intensity { get; }
-    /// <summary>표시용 축. 이면잉크 위장이 반영된 값. (§13.2)</summary>
-    public BurdenAxis DisplayAxis { get; }
+    
+    public BurdenAxis DisplayAxis { get; } // 표시용 축. 이면잉크 위장이 반영된 값.
     public bool ShowsRange { get; }
     public int RangeMin { get; }
     public int RangeMax { get; }
-    /// <summary>강 등급으로 산정될 옵션인지 (특이 규칙/기벽 반영 예고).</summary>
-    public bool UpgradedReaction { get; }
+    
+    public bool UpgradedReaction { get; } // 강 등급으로 산정될 옵션인지 (특이 규칙/기벽 반영 예고).
 
     public OptionDisplay(int index, OptionIntensity intensity, BurdenAxis displayAxis,
         bool showsRange, int rangeMin, int rangeMax, bool upgradedReaction)
@@ -22,14 +22,14 @@ public readonly struct OptionDisplay
     }
 }
 
-/// <summary>낮 승인 요청.</summary>
+// 낮 승인 요청.
 public sealed class ApprovalRequest
 {
     public ServiceSessionState Session { get; }
     public int BeatIndex { get; }
     public IReadOnlyList<OptionDisplay> Options { get; }
-    /// <summary>이번 비트에 사용 가능한 낮 능력 id.</summary>
-    public IReadOnlyList<string> AvailableAbilityIds { get; }
+    
+    public IReadOnlyList<string> AvailableAbilityIds { get; } // 이번 비트에 사용 가능한 낮 능력 id.
     public ApprovalRequest(ServiceSessionState session, int beatIndex,
         IReadOnlyList<OptionDisplay> options, IReadOnlyList<string> abilities)
     { Session = session; BeatIndex = beatIndex; Options = options; AvailableAbilityIds = abilities; }
@@ -43,15 +43,15 @@ public readonly struct ApprovalResponse
     { OptionIndex = optionIndex; UsedAbilityIds = usedAbilityIds; }
 }
 
-/// <summary>심층 굴림 직전 개입 요청.</summary>
+// 심층 굴림 직전 개입 요청.
 public sealed class DepthInterventionRequest
 {
     public ServiceSessionState Session { get; }
     public int DepthBeatIndex { get; }
     public DepthBandLayout Layout { get; }
     public bool LayoutRevealed { get; }
-    /// <summary>징후 판독 등으로 공개된 최빈 구간. 미공개면 null.</summary>
-    public DepthBand? PredictedBand { get; }
+    
+    public DepthBand? PredictedBand { get; } // 징후 판독 등으로 공개된 최빈 구간. 미공개면 null.
     public IReadOnlyList<string> AvailableAbilityIds { get; }
     public DepthInterventionRequest(ServiceSessionState session, int depthBeatIndex,
         DepthBandLayout layout, bool layoutRevealed, DepthBand? predicted,
@@ -62,7 +62,7 @@ public sealed class DepthInterventionRequest
     }
 }
 
-/// <summary>굴림 결과 제시 후 결정: 재굴림/구간 하향 능력 사용 (없으면 null).</summary>
+// 굴림 결과 제시 후 결정: 재굴림/구간 하향 능력 사용
 public readonly struct DepthRollDecision
 {
     public string RerollAbilityId { get; }
@@ -97,7 +97,8 @@ public sealed class NightPlanRequest
 
     public bool CanRelease(MaidState maid)
     {
-        // 떨림 후유증 중엔 케어만
+        // 떨림 후유증 중엔 케어만 표시
+        // (관리 붕괴는 나오지 않음)
         if (maid.FindAftereffect("se_tremor") != null)
             return false;
         

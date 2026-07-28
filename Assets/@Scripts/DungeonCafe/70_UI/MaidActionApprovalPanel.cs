@@ -5,16 +5,14 @@ using UnityEngine;
 using UnityEngine.UI;
 using static UIRefValidation;
 
-/// <summary>
-/// 행동 승인 패널. (v3 §2)
+/// 행동 승인 패널.
 /// - 메이드가 제안한 3옵션(약/중/강)을 나열한다
-/// - 이해도에 따라 부하 범위를 옵션별로 표시한다 (§2.5: 고도=범위, 완전=개체 보정 포함)
-/// - 사용 가능한 낮 능력을 토글로 나열하고, 옵션 승인 시 함께 제출한다 (§11)
+/// - 이해도에 따라 부하 범위를 옵션별로 표시한다 (고도=범위, 완전=개체 보정 포함)
+/// - 사용 가능한 낮 능력을 토글로 나열하고, 옵션 승인 시 함께 제출한다
 /// - 통제 신호가 거부된 뒤에는 입력을 막는다
 ///
-/// 후보 목록은 VNOptionItem 으로 그린다. Yarn 선택지와 조작감이 같아야 하기 때문이다.
-/// </summary>
-public sealed class MaidActionApprovalPanel : UIPanel<MaidActionApprovalPanel.Refs>, IManagedUI
+/// 후보 목록은 VNOptionItem 으로 그린다. Yarn 선택지와 조작감이 같아야 하기 때문.
+public sealed class MaidActionApprovalPanel : UIPanel<MaidActionApprovalPanel.Refs>
 {
     /// <summary>(옵션 인덱스, 함께 사용할 능력 id 목록).</summary>
     public event Action<int, IReadOnlyList<string>> OnOptionApproved;
@@ -113,7 +111,7 @@ public sealed class MaidActionApprovalPanel : UIPanel<MaidActionApprovalPanel.Re
         _list.SetLocked(false);
     }
 
-    /// <summary>통제 상실 이후에는 남아 있는 목록을 그대로 두되 입력만 차단한다.</summary>
+    // 통제 상실 이후에는 남아 있는 목록을 그대로 두되 입력만 차단.
     public void LockForControlLoss()
     {
         _locked = true;
@@ -133,7 +131,6 @@ public sealed class MaidActionApprovalPanel : UIPanel<MaidActionApprovalPanel.Re
         if (_controlStatusText == null)
             return;
 
-        // 절벽 예고: 요구축 붕괴 구간이 곧 통제 상태다. (0~200)
         int v = maid.Gauge.Get(request.Session.Monster.DemandAxis);
         _controlStatusText.text =
             v >= 100 ? "관리자 통제 신호가 거부되었습니다" :
@@ -161,12 +158,12 @@ public sealed class MaidActionApprovalPanel : UIPanel<MaidActionApprovalPanel.Re
         _entries.Clear();
         _abilityIds.Clear();
 
-        // 옵션 3개 - 라벨에 강도/축/(이해도만큼의) 범위를 싣는다. 위험을 감출지는 시스템이,
-        // 감수할지는 관리자가 정한다. 선택 불가로 만들지 않는다.
+        // 옵션 3개 - 라벨에 강도/축/(이해도만큼의) 범위 표시.
+        // 위험을 감출지는 시스템에 의해 옵션.
         for (int i = 0; i < _request.Options.Count; i++)
             _entries.Add(new DungeonCafeOptionEntry(BuildOptionLabel(_request.Options[i])));
 
-        // 낮 능력 토글 - 승인과 같은 목록에 산다. 누르면 켜지고 다시 누르면 꺼진다.
+        // 낮 능력 토글
         for (int i = 0; i < _request.AvailableAbilityIds.Count; i++)
         {
             string id = _request.AvailableAbilityIds[i];
@@ -208,7 +205,7 @@ public sealed class MaidActionApprovalPanel : UIPanel<MaidActionApprovalPanel.Re
 
         int optionCount = _request.Options.Count;
 
-        // 능력 항목: 토글 후 목록만 다시 그린다.
+        // 능력 목록 표시
         if (index >= optionCount)
         {
             int abilityIndex = index - optionCount;

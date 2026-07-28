@@ -1,9 +1,8 @@
-using System;
 using System.Collections.Generic;
 
 /// <summary>
-/// 타입별 접객/목격 카운트. 능력 게이트(§11)가 조회한다.
-/// 상태에 필드를 늘리는 대신 캠페인이 보관하는 사전을 확장 메서드로 감싼다.
+/// 타입별 접객/목격 카운트. 능력 게이트가 조회한다.
+/// 상태에 필드를 늘리는 대신 캠페인이 보관하는 사전을 확장 메서드로 랩핑.
 /// </summary>
 public static class CampaignCounterExtensions
 {
@@ -36,9 +35,10 @@ public static class CampaignCounterExtensions
     }
 
     public static (int[] service, int[] witness) SnapshotCounters(this CampaignState c)
-        => ((int[])Book(ServiceCounts, c).Clone(), (int[])Book(WitnessCounts, c).Clone());
+        => ((int[])Book(ServiceCounts, c).Clone(),
+            (int[])Book(WitnessCounts, c).Clone());
 
-    /// <summary>캠페인 폐기 시 누수 방지.</summary>
+    // 캠페인 폐기 시 누수 방지.
     public static void ReleaseCounters(this CampaignState c)
     {
         ServiceCounts.Remove(c);

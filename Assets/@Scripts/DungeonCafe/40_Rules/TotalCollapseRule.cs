@@ -1,4 +1,4 @@
-/// <summary>완전 붕괴(200) 처리. (§5)</summary>
+/// <summary>완전 붕괴(200) 처리. </summary>
 public readonly struct TotalCollapseOutcome
 {
     public bool Rescued { get; }

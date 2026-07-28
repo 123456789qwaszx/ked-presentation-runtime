@@ -5,11 +5,9 @@ using UnityEngine;
 using UnityEngine.UI;
 using static UIRefValidation;
 
-/// <summary>
-/// 접객 결산 패널.
-/// 반응 점수 합계와 붕괴 배율을 분리해 보여주고, 곱셈 결과를 에너지로 제시한다.
-/// </summary>
-public sealed class ServiceSettlementPanel : UIPanel<ServiceSettlementPanel.Refs>, IManagedUI
+// 접객 결산 패널.
+// 반응 점수 합계와 붕괴 배율을 분리해 보여주고, 곱셈 결과를 에너지로 제시.
+public sealed class ServiceSettlementPanel : UIPanel<ServiceSettlementPanel.Refs>
 {
     public event Action OnConfirmed;
 
@@ -87,7 +85,9 @@ public sealed class ServiceSettlementPanel : UIPanel<ServiceSettlementPanel.Refs
         {
             _reactionText.text =
                 $"반응 점수 {result.ReactionScore}" +
-                (session.DepthReactionScore > 0 ? $"  (심층 중 {session.DepthReactionScore} - 미산입)" : string.Empty);
+                (session.DepthReactionScore > 0 
+                    ? $"  (심층 중 {session.DepthReactionScore} - 미산입)"
+                    : string.Empty);
         }
 
         if (_multiplierText != null)
@@ -109,7 +109,9 @@ public sealed class ServiceSettlementPanel : UIPanel<ServiceSettlementPanel.Refs
         {
             _satisfactionText.text =
                 $"만족도 {result.Satisfaction} / {result.RequiredSatisfaction} " +
-                (result.SatisfactionMet ? "(성사)" : "(미달)");
+                (result.SatisfactionMet 
+                    ? "(성사)" 
+                    : "(미달)");
         }
 
         if (_masteryText != null)
@@ -119,7 +121,7 @@ public sealed class ServiceSettlementPanel : UIPanel<ServiceSettlementPanel.Refs
             _incidentText.text = BuildOutcomeText(session, result);
     }
 
-    /// <summary>숙련 XP = 완화 전 원본 부하 누적. (§12.3)</summary>
+    // 숙련 XP = 완화 전 원본 부하 누적.
     private string BuildMasteryText(ServiceSessionState session)
     {
         _builder.Clear();
@@ -138,7 +140,9 @@ public sealed class ServiceSettlementPanel : UIPanel<ServiceSettlementPanel.Refs
             _builder.Append(BurdenAxes.ToMasteryLabel(axis)).Append(" +").Append(gain);
         }
 
-        return _builder.Length > 0 ? _builder.ToString() : "숙련 경험 없음";
+        return _builder.Length > 0 
+            ? _builder.ToString() 
+            : "숙련 경험 없음";
     }
 
     private static string BuildOutcomeText(ServiceSessionState session, in SettlementResult result)
@@ -149,10 +153,12 @@ public sealed class ServiceSettlementPanel : UIPanel<ServiceSettlementPanel.Refs
         {
             SettlementOutcomeKind.DepthEscape =>
                 $"붕괴심층 진입 ({axisLabel}) / {session.DepthBeatCount}비트 만에 회수 - 결산 x0.5",
+            
             SettlementOutcomeKind.TotalCollapse =>
                 session.Maid.IsLost
                     ? $"완전 붕괴 ({axisLabel}) / 담당자 영구 이탈"
                     : $"완전 붕괴 ({axisLabel}) / 생환권 사용 - 수입 0",
+            
             _ => string.Empty,
         };
     }

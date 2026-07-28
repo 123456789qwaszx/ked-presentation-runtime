@@ -1,9 +1,8 @@
 using System;
 
 /// <summary>
-/// v3 붕괴 게이지: 축당 0~200. (§1)
-/// 기존 MaidBurdenState(0~limit 클램프)를 대체한다.
-/// 100 은 한계가 아니라 통제 상실 문턱이고, 하드 캡은 200 뿐이다.
+/// 붕괴 게이지: 축당 0~200.
+/// 100 = 통제 상실 판정 / 200 = 완전 붕괴
 /// </summary>
 public sealed class MaidGaugeState
 {
@@ -51,7 +50,7 @@ public sealed class MaidGaugeState
         if (clamped > _peaks[i]) _peaks[i] = clamped;
     }
 
-    /// <summary>전 축 중 최고값과 그 축. 동률이면 육->정->감. 밤 판정 기준. (§6)</summary>
+    /// <summary>전 축 중 최고값과 그 축. 동률이면 육체->정신->감각. 밤 판정 기준.</summary>
     public BurdenAxis HighestAxis(out int value)
     {
         BurdenAxis axis = BurdenAxis.Physical;
@@ -61,7 +60,7 @@ public sealed class MaidGaugeState
         return axis;
     }
 
-    /// <summary>어떤 축이든 threshold 이상인 축 탐색. 심층 진입 판정. (§3)</summary>
+    /// <summary>어떤 축이든 threshold 이상인 축 탐색. 심층 진입 판정. </summary>
     public bool TryFindAxisAtOrAbove(int threshold, out BurdenAxis axis)
     {
         for (int i = 0; i < BurdenAxes.Count; i++)

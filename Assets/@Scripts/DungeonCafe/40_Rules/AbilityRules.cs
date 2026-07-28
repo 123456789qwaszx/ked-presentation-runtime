@@ -2,7 +2,7 @@
 // 사용 가능 여부는 PlayerAbilityState.CanUse.
 public static class AbilityRules
 {
-    // 지식/관계/가게레벨 조건 충족 여부 (비용 제외).
+    // 지식/관계/가게 레벨 조건 충족 여부 (비용 제외).
     public static bool MeetsConditions(CampaignState campaign, PlayerAbilityDefinition def)
     {
         if (campaign.ShopLevel < def.ShopLevelRequired)
@@ -50,12 +50,18 @@ public static class AbilityRules
         };
     }
 
-    /// <summary>구매: 조건 충족 + 보유 욕구 지불. 전용 능력은 비용 0 - 밤 이벤트로 습득. (§11.3)</summary>
+    /// <summary>구매: 조건 충족 + 보유 욕구 지불. 전용 능력은 비용 0 - 밤 이벤트로 습득. </summary>
     public static bool TryPurchase(CampaignState campaign, PlayerAbilityDefinition def)
     {
-        if (campaign.Abilities.Owns(def.Id)) return false;
-        if (!MeetsConditions(campaign, def)) return false;
-        if (!campaign.Ledger.TrySpend(def.DesireCost)) return false;
+        if (campaign.Abilities.Owns(def.Id))
+            return false;
+        
+        if (!MeetsConditions(campaign, def)) 
+            return false;
+        
+        if (!campaign.Ledger.TrySpend(def.DesireCost))
+            return false;
+        
         campaign.Abilities.Grant(def.Id);
         return true;
     }

@@ -1,9 +1,6 @@
 using Yarn.Unity;
 
-/// <summary>
-/// 접객 결산. 슬롯 하나가 끝날 때마다 열린다.
-/// 세션 내내 유지되던 승인 패널을 먼저 걷어낸 뒤 올린다.
-/// </summary>
+// 접객 결산. 슬롯 하나가 끝날 때마다 열림.
 public sealed partial class VnScreenBindings
 {
     private bool _hasSettlementResult;

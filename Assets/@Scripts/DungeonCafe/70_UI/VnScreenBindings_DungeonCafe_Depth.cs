@@ -1,15 +1,13 @@
 using System.Collections.Generic;
 using Yarn.Unity;
 
-/// <summary>
-/// 붕괴심층 3국면 + 방치 결과 통보. (v3 §4, §6.2)
-///
-/// 심층은 세 번 UI 로 돌아온다:
-/// 1) 굴림 전 개입 (능력 예약)
-/// 2) 굴림 제시 (재굴림/구간 하향/수용)
-/// 3) 회수 구간에서의 탈출/잔류 선택
-/// 판정 자체는 전부 시스템(ServiceSessionFlow)이 커밋한다 - 여기는 묻고 전달만 한다.
-/// </summary>
+// 붕괴심층 3국면 + 방치 결과 통보.
+//
+// 심층은 세 번 UI 과정
+// 1) 굴림 전 개입 (능력 예약)
+// 2) 굴림 제시 (재굴림/구간 하향/수용)
+// 3) 회수 구간에서의 탈출/잔류 선택
+// 판정 자체는 전부 시스템(ServiceSessionFlow)이 커밋. 이 곳에선 묻고 전달만 함.
 public sealed partial class VnScreenBindings
 {
     private bool _hasDepthResult;
@@ -89,7 +87,7 @@ public sealed partial class VnScreenBindings
     }
 
     // ------------------------------------------------------------
-    // 방치 결과 통보. (v3 §6.2) - 범용 확인 창을 쓴다.
+    // 방치 결과 통보.
     // ------------------------------------------------------------
     public async YarnTask PresentNeglectAsync(MaidState maid, NeglectJudgment judgment)
     {
@@ -121,7 +119,7 @@ public sealed partial class VnScreenBindings
     }
 
     // ------------------------------------------------------------
-    // 패널 관리 - 심층은 국면마다 같은 패널을 다시 그린다.
+    // 패널 관리 - 심층은 국면마다 같은 패널을 다시 그림.
     // ------------------------------------------------------------
     private void OpenDepthPanel(System.Action<DepthPanel> present)
     {

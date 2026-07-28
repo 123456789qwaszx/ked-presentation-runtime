@@ -185,7 +185,7 @@ public sealed class EpisodeProgressionEditorWindow : EditorWindow
                 ? $"  ✕ {errors} error(s)"
                 : warnings > 0
                     ? $"  ⚠ {warnings} warning(s)"
-                    : "  ✓ OK";
+                    : "  V OK";
 
             Color prevColor = GUI.contentColor;
 
@@ -626,7 +626,7 @@ public sealed class EpisodeProgressionEditorWindow : EditorWindow
 
         if (_lastValidationResult.Issues.Count == 0)
         {
-            GUILayout.Label("✓ No issues found.", _infoStyle);
+            GUILayout.Label("V No issues found.", _infoStyle);
             return;
         }
 

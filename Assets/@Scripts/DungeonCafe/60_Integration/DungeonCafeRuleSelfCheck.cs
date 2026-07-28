@@ -2,7 +2,7 @@ using System;
 using System.Text;
 
 /// <summary>
-/// v3 규칙 핵심 불변식의 자가 검증.
+/// 규칙 핵심 불변식의 자가 검증.
 ///
 /// NUnit/asmdef 구성과 무관하게 어디서든 호출할 수 있는 안전망이다.
 /// (프로젝트가 Assembly-CSharp 단일 구성이면 EditMode 테스트 어셈블리가

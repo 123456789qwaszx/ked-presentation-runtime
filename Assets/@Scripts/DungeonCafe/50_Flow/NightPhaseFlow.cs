@@ -33,10 +33,10 @@ public sealed class NightPhaseFlow
 
         campaign.Phase = CampaignPhase.InNight;
 
-        // 메이드 목록 제시. 후유증(배치불가) 상태여도 밤에는 나타남.
+        // 메이드 목록 제시.
         List<MaidState> present = campaign.GetPresent(dayState.DayNumber);
 
-        // 오늘 밤 플레이어가 직접 손댈 수 있는 메이드 수 조건 체크
+        // 오늘 밤 플레이어가 직접 손댈 수 있는 메이드 수 조건 판정.
         int manageCount = campaign.Tuning.GetNightManageCount(campaign.ShopLevel);
 
         NightPlanRequest request = new(
@@ -49,7 +49,7 @@ public sealed class NightPhaseFlow
         IReadOnlyList<NightChoice> choices = 
             await _screens.RequestNightPlanAsync(request);
         
-        // 직접 처리(안정 + 관리 붕괴)한 인원. 나머지는 방치로 넘어간다.
+        // 직접 처리(안정 + 관리 붕괴)한 인원. 나머지는 방치로 분류.
         var handledIds = new HashSet<string>(StringComparer.Ordinal);
 
         int used = 0;

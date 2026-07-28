@@ -1,4 +1,3 @@
-// 상시 표시 오버레이 (v3)
 public sealed partial class VnScreenBindings
 {
     public void DungeonCafeHud() => UI.ShowOverlay<DungeonCafeStatusOverlay>();

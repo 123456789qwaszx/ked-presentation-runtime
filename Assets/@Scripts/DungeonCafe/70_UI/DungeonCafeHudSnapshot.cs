@@ -1,13 +1,3 @@
-/// <summary>
-/// 상시 표시 UI 가 한 번에 필요로 하는 값의 스냅숏. (v3)
-///
-/// 오버레이가 캠페인/세션 상태 객체를 직접 붙들면 표현 계층이 진행 상태에 결합된다.
-/// 그래서 매 갱신마다 값 복사본을 만들어 넘기고, UI 는 이 구조체 외에는 아무것도 모른다.
-/// Unity 무의존 - 헤드리스에서도 그대로 만들어진다.
-///
-/// v2 와의 차이: 붕괴 게이지는 0~200 단일 스케일이다. 한계(limit) 개념은 없다.
-/// 80~99 = 정답 구간(위험 착지), 100+ = 통제 상실(심층), 200 = 완전 붕괴.
-/// </summary>
 public readonly struct DungeonCafeHudSnapshot
 {
     public readonly int DayNumber;
@@ -34,9 +24,8 @@ public readonly struct DungeonCafeHudSnapshot
     public readonly bool IsDemandKnown;         // 이해도 일부 파악 이상
     public readonly int Satisfaction;
     public readonly int RequiredSatisfaction;
-
-    /// <summary>지금 화면에서 진행 중인 구간. 오버레이 머리말에 그대로 쓴다.</summary>
-    public readonly string PhaseLabel;
+    
+    public readonly string PhaseLabel; // 지금 화면에서 진행 중인 구간. 오버레이 머리말에 그대로 쓴다.
 
     private DungeonCafeHudSnapshot(
         int dayNumber, int dayCount, int slotIndex, int slotCount,
@@ -59,7 +48,7 @@ public readonly struct DungeonCafeHudSnapshot
         PhaseLabel = phaseLabel;
     }
 
-    /// <summary>접객 밖(게시판/배정/밤/리포트) 스냅숏.</summary>
+    /// <summary>접객 밖(게시판/배정/밤/리포트) 스냅샷.</summary>
     public static DungeonCafeHudSnapshot FromCampaign(CampaignState campaign, string phaseLabel)
     {
         CampaignDayPlan plan = campaign.Content.GetDayPlan(campaign.CurrentDayNumber);
@@ -84,7 +73,7 @@ public readonly struct DungeonCafeHudSnapshot
             phaseLabel: phaseLabel);
     }
 
-    /// <summary>접객 중 스냅숏. 세션의 메이드/개체/만족도를 함께 싣는다.</summary>
+    /// <summary>접객 중 스냅샷. 세션의 메이드/개체/만족도를 함께 싣는다.</summary>
     public static DungeonCafeHudSnapshot FromSession(
         CampaignState campaign, ServiceSessionState session, int slotIndex, string phaseLabel)
     {
@@ -116,26 +105,36 @@ public readonly struct DungeonCafeHudSnapshot
             phaseLabel: phaseLabel);
     }
 
-    /// <summary>요구축 기준 붕괴 구간 문구. 절벽 전이를 오버레이 머리에 노출한다.</summary>
+    /// <summary>요구축 기준 붕괴 구간 문구. 전이를 오버레이 헤드에 노출.</summary>
     public string ControlLabel
     {
         get
         {
-            if (!HasMaid) return string.Empty;
+            if (!HasMaid) 
+                return string.Empty;
 
             int v = HasMonster ? Gauge[DemandAxis] : Highest();
 
             if (v >= TotalCollapseThreshold) return "완전 붕괴";
             if (v >= ControlLossThreshold) return "관리자 통제 신호가 거부되었습니다";
             if (v >= DangerBandFloor) return "위험 착지 구간 (결산 x3.0)";
+                
             return "행동 승인권 위임 중";
         }
     }
 
     private int Highest()
     {
-        int p = Gauge.Physical, m = Gauge.Mental, e = Gauge.Empathic;
-        int h = p > m ? p : m;
-        return h > e ? h : e;
+        int physical = Gauge.Physical,
+            mental = Gauge.Mental,
+            empathic = Gauge.Empathic;
+        
+        int h = physical > mental 
+            ? physical 
+            : mental;
+        
+        return h > empathic 
+            ? h 
+            : empathic;
     }
 }

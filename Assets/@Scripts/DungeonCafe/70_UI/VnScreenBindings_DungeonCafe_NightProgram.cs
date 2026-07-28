@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using Yarn.Unity;
 
 // (밤 처리 계획)
-// manageCount 명까지 (메이드, 안정/관리 붕괴) 를 담아 확정. 빈 목록 = 전원 방치.
+// manageCount 명까지 (메이드, 안정/관리 붕괴) 를 담아 확정.
+// 빈 목록 = 전원 방치.
 public sealed partial class VnScreenBindings
 {
     private bool _isWaitingNightPlan;

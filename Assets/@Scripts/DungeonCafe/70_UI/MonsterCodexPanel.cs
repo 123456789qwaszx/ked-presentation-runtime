@@ -6,12 +6,10 @@ using UnityEngine;
 using UnityEngine.UI;
 using static UIRefValidation;
 
-/// <summary>
-/// 업무수첩.
-///
-/// 비밀 해금물이 아니라 업무 기록이다. 통화로 확정된 개체만 실린다.
-/// 열람 전용이며 여기서 배정이나 승인을 하지 않는다.
-/// </summary>
+// 업무수첩.
+//
+// 비밀 해금물이 아니라 업무 기록이다. 통화로 확정된 개체만 실린다.
+// 열람 전용이며 여기서 배정이나 승인을 하지 않는다.
 public sealed class MonsterCodexPanel : UIPanel<MonsterCodexPanel.Refs>
 {
     public event Action OnCloseRequested;
@@ -91,7 +89,7 @@ public sealed class MonsterCodexPanel : UIPanel<MonsterCodexPanel.Refs>
             _closeButton.onClick.AddListener(HandleClose);
         }
 
-        // 항목을 눌러도 화면이 닫히지 않는다. 수첩은 골라 보는 화면이다.
+        // 항목을 눌러도 화면이 닫히지 않는다. 수첩은 골라 보는 화면.
         _list.LockOnSubmit = false;
         _list.Configure(_codexEntryPrefab, _content);
 
@@ -133,7 +131,7 @@ public sealed class MonsterCodexPanel : UIPanel<MonsterCodexPanel.Refs>
             ShowDetail(0);
     }
 
-    /// <summary>통화로 확정된 개체(일부 파악 이상)만 수첩에 남는다. (§8.2)</summary>
+    // 통화로 확정된 개체만 수첩에 남는다. 
     private void CollectRevealed(CampaignState campaign)
     {
         _monsters.Clear();
@@ -153,8 +151,11 @@ public sealed class MonsterCodexPanel : UIPanel<MonsterCodexPanel.Refs>
 
         for (int i = 0; i < _monsters.Count; i++)
         {
-            UnderstandingTier tier = _campaign.Understanding.GetTier(_monsters[i].MonsterId, _campaign.Tuning);
-            _entries.Add(new DungeonCafeOptionEntry($"{_monsters[i].DisplayName}  ({ToTierLabel(tier)})"));
+            UnderstandingTier tier = 
+                _campaign.Understanding.GetTier(_monsters[i].MonsterId, _campaign.Tuning);
+            
+            _entries.Add(
+                new DungeonCafeOptionEntry($"{_monsters[i].DisplayName} ({ToTierLabel(tier)})"));
         }
 
         _list.Rebuild(_entries);

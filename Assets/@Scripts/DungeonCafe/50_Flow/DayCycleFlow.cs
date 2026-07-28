@@ -36,18 +36,18 @@ public sealed class DayCycleFlow
         
         var dayState = new DayState(plan, bookings);
 
-        // 오늘의 예약 게시판을 확인한다.
+        // 오늘의 예약 게시판을 확인.
         int bookingIndex = 
             await _screens.PresentBoardAsync(dayState.DayNumber, dayState.Bookings, campaign);
         
-        // 전화로 예약 확정. 이 시점에 대응 타입이 수첩에 기재된다
+        // 전화로 예약 확정. 이 시점에 대응 타입이 수첩에 기재 됨.
         MonsterProfile monster = dayState.Bookings[bookingIndex];
 
         if (campaign.RegisterPhoneCall(monster.MonsterId))
             await _dungeonCafeNodes.PlayNodeAsync(monster.PhoneCallNodeName);
 
         // 담당 메이드 배정
-        List<MaidState> candidates = campaign.GetAssignable(dayState.DayNumber);
+        List<MaidState> candidates = campaign.GetPresent(dayState.DayNumber);
         
         string selectedMaidId =
             await _screens.RequestAssignmentAsync(monster, candidates, campaign);
@@ -78,7 +78,7 @@ public sealed class DayCycleFlow
         // if (EndingResolver.ResolveImmediate(campaign) == EndingKindV3.Bankruptcy)
         //     return;
 
-        // 밤: 메이드 회복 또는 붕괴 유도
+        // 밤: 메이드 케어 또는 붕괴 유도
         await _nightFlow.RunNightAsync(campaign, dayState);
     }
 }

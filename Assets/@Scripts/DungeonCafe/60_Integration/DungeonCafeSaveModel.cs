@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 
 /// <summary>
-/// v3 세이브 DTO. [Serializable] 공개 필드만 - JsonUtility/자체 직렬화 어느 쪽에도 물린다.
-/// Capture 는 저장 가능 국면(§14)에서만 성공한다.
+/// 세이브 DTO. [Serializable] 공개 필드만 - JsonUtility/자체 직렬화 어느 쪽에도 물린다.
+/// Capture 는 저장 가능 국면에서만 성공한다.
 /// </summary>
 [Serializable]
 public sealed class DungeonCafeSaveModel
@@ -62,7 +62,7 @@ public sealed class DungeonCafeSaveModel
     public static bool TryCapture(CampaignState campaign, out DungeonCafeSaveModel save)
     {
         save = null;
-        if (!campaign.CanSaveNow) return false;   // 접객/심층 중 저장 불가. (§14)
+        if (!campaign.CanSaveNow) return false;   // 접객/심층 중 저장 불가.
 
         save = new DungeonCafeSaveModel
         {
@@ -181,7 +181,7 @@ public sealed class DungeonCafeSaveModel
 
     private static void RestoreLedger(DesireLedger target, DesireLedger source)
     {
-        // DesireLedger 는 개별 setter 를 두지 않으므로(계약 §7.1) 리플렉션 대신 재구성이 정석이지만,
+        // DesireLedger 는 개별 setter 를 두지 않으므로 리플렉션 대신 재구성이 정석이지만,
         // CampaignState.Ledger 가 readonly 라 값 이식 헬퍼를 여기 둔다.
         target.RestoreFrom(source.Today, source.Held, source.Lifetime);
     }

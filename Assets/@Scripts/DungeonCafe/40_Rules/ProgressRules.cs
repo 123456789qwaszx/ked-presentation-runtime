@@ -65,6 +65,7 @@ public static class UnderstandingRule
         int amount = campaign.Tuning.UnderstandingPerDepthWitness;
         if (QuirkEffectResolver.HasSpeciesBrandEcho(campaign.Content, maid, monster.Species))
             amount *= 2;
+        
         campaign.Understanding.AddPoints(monster.MonsterId, amount);
     }
 

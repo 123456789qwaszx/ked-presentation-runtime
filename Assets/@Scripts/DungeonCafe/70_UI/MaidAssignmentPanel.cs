@@ -5,11 +5,9 @@ using UnityEngine;
 using UnityEngine.UI;
 using static UIRefValidation;
 
-/// <summary>
-/// 담당 메이드 배정 패널.
-/// 대응력 3종과 현재 누적 부담 3종을 나란히 보여주고, 예약 확정 이후에만 요구 타입을 노출한다.
-/// </summary>
-public sealed class MaidAssignmentPanel : UIPanel<MaidAssignmentPanel.Refs>, IManagedUI
+// 담당 메이드 배정 패널.
+// 대응력 3종과 현재 누적 부담 3종을 나란히 보여주고, 예약 확정 이후에만 요구 타입을 노출.
+public sealed class MaidAssignmentPanel : UIPanel<MaidAssignmentPanel.Refs>
 {
     public event Action<string> OnMaidSelected;
 
@@ -99,7 +97,6 @@ public sealed class MaidAssignmentPanel : UIPanel<MaidAssignmentPanel.Refs>, IMa
         if (_monsterDemandText == null)
             return;
 
-        // 요구 유형은 통화 확정(일부 파악) 이후에 공개된다. (§8.2)
         _monsterDemandText.text = tier >= UnderstandingTier.Partial
             ? $"요구 유형: {BurdenAxes.ToAptitudeLabel(monster.DemandAxis)}"
             : "요구 유형: 미확인";
@@ -114,10 +111,10 @@ public sealed class MaidAssignmentPanel : UIPanel<MaidAssignmentPanel.Refs>, IMa
         {
             MaidState maid = candidates[i];
 
-            // 이탈/배정 차단 인원은 목록에 남기되 고를 수 없게 한다. 사라지면 왜 없는지 알 수 없다.
+            // 이탈/배정 차단 인원은 목록에 남기되 고를 수 없도록 표시.
             _entries.Add(new DungeonCafeOptionEntry(
                 BuildLabel(maid),
-                isAvailable: maid.CanBeAssigned(campaign.CurrentDayNumber)));
+                isAvailable: maid.IsPresent(campaign.CurrentDayNumber)));
 
             _maidIds.Add(maid.MaidId);
         }

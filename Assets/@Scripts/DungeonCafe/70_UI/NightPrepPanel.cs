@@ -5,14 +5,11 @@ using UnityEngine;
 using UnityEngine.UI;
 using static UIRefValidation;
 
-/// <summary>
-/// 밤 시작 상점/장착 패널. (v3 §11)
-///
-/// 구매 가능한 능력과 보유 능력을 한 목록에 보여준다.
-/// - 구매 가능 항목: 누르면 구매 예약 (비용 표시, 보유 욕구 초과분은 예약 불가)
-/// - 보유 항목: 누르면 장착 토글 (슬롯 제한 표시. 전용 능력은 슬롯을 차지하지 않는다)
-/// [확정] 으로 제출한다. 아무것도 하지 않고 확정해도 된다.
-/// </summary>
+// 밤 시작 상점/장착 패널.
+//
+// 구매 가능한 능력과 보유 능력을 한 목록에 표시.
+// - 구매 가능 항목: 누르면 구매 예약 (비용 표시, 보유 욕구 초과분은 예약 불가)
+// - 보유 항목: 누르면 장착 토글 (슬롯 제한 표시. 전용 능력은 슬롯을 차지하지 않는다)
 public sealed class NightPrepPanel : UIPanel<NightPrepPanel.Refs>, IManagedUI
 {
     public event Action<IReadOnlyList<string>, IReadOnlyList<string>> OnPrepConfirmed;
@@ -108,6 +105,7 @@ public sealed class NightPrepPanel : UIPanel<NightPrepPanel.Refs>, IManagedUI
             PlayerAbilityDefinition def = Find(_purchases[i]);
             if (def != null) cost += def.DesireCost;
         }
+        
         return cost;
     }
 

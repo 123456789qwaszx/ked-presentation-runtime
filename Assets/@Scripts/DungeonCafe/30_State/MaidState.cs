@@ -28,14 +28,14 @@ public sealed class MasteryTrack
     public void Restore(int level, int experience) { Level = Math.Max(0, level); Experience = Math.Max(0, experience); }
 }
 
-/// <summary>후유증 보유 인스턴스. 해소는 붕괴 0 도달로만. (§9)</summary>
+/// <summary>후유증 보유 인스턴스.</summary>
 public sealed class AftereffectInstance
 {
     public AftereffectDefinition Definition { get; }
     public AftereffectInstance(AftereffectDefinition definition) { Definition = definition; }
 }
 
-/// <summary>캠페인 중 변하는 메이드 상태 v3 통합. (§12)</summary>
+/// <summary> 동적 메이드 상태 </summary>
 public sealed class MaidState
 {
     private readonly MasteryTrack[] _mastery = new MasteryTrack[BurdenAxes.Count];
@@ -49,7 +49,7 @@ public sealed class MaidState
     public string DisplayName => Profile.DisplayName;
     public AxisTriple Aptitude => Profile.Aptitude;
 
-    public bool HasRescueTicket { get; private set; } = true;   // §5: 메이드당 1
+    public bool HasRescueTicket { get; private set; } = true;   // 메이드당 1
     public int TotalCollapseCount { get; private set; }
     public bool IsLost { get; private set; }
 
@@ -57,7 +57,7 @@ public sealed class MaidState
     public int TrustCount { get; private set; }
     public int DependCount { get; private set; }
 
-    /// <summary>심층 탈출 등 관계 노선 비가역 플래그. (§3.4)</summary>
+    /// <summary>심층 탈출 등 관계 노선 비가역 플래그. </summary>
     public bool HasDepthScar { get; private set; }
 
     public IReadOnlyList<AftereffectInstance> Aftereffects => _aftereffects;
@@ -75,8 +75,6 @@ public sealed class MaidState
     public MasteryTrack GetMastery(BurdenAxis axis) => _mastery[(int)axis];
     
     public bool IsPresent(int dayNumber) => !IsLost && dayNumber >= Profile.UnlockDay;
-
-    public bool CanBeAssigned(int dayNumber) => IsPresent(dayNumber);
 
     public bool HasAftereffect => _aftereffects.Count > 0;
     public bool HasQuirk => _quirkIds.Count > 0;
@@ -97,7 +95,7 @@ public sealed class MaidState
 
     public void RemoveAftereffect(AftereffectInstance instance) => _aftereffects.Remove(instance);
 
-    /// <summary>기벽 추가. 사고성이 만석에 들어오면 안정 기벽 1개(evictId)를 밀어낸다. (§10)</summary>
+    /// <summary>기벽 추가. 사고성이 만석에 들어오면 안정 기벽 1개(evictId)를 밀어낸다. </summary>
     public bool AddQuirk(string quirkId, bool isAccident, string evictStableId = null)
     {
         if (string.IsNullOrEmpty(quirkId) || _quirkIds.Contains(quirkId)) return false;
@@ -127,7 +125,9 @@ public sealed class MaidState
     }
 
     public RelationDirection DominantDirection
-        => DependCount > TrustCount ? RelationDirection.Depend : RelationDirection.Trust;
+        => DependCount > TrustCount
+            ? RelationDirection.Depend 
+            : RelationDirection.Trust;
 
     public void MarkDepthScar() => HasDepthScar = true;
 

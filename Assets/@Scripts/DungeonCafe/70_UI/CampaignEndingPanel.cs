@@ -4,13 +4,10 @@ using UnityEngine;
 using UnityEngine.UI;
 using static UIRefValidation;
 
-/// <summary>
-/// 엔딩 표시.
-///
-/// 엔딩 노드가 재생되는 '동안' 떠 있어야 하므로, 표시와 확인 대기를 분리한다.
-/// Present 는 즉시 반환하고, 확인 버튼은 노드가 끝난 뒤에 열린다.
-/// </summary>
-public sealed class CampaignEndingPanel : UIPanel<CampaignEndingPanel.Refs>, IManagedUI
+// 엔딩 표시.
+// 엔딩 노드가 재생되는 동안 떠 있어야 하므로, 표시와 확인 대기를 분리.
+// Present 는 즉시 반환, 확인 버튼은 노드가 끝난 뒤에 열림.
+public sealed class CampaignEndingPanel : UIPanel<CampaignEndingPanel.Refs>
 {
     public event Action OnDismissed;
 
@@ -81,7 +78,7 @@ public sealed class CampaignEndingPanel : UIPanel<CampaignEndingPanel.Refs>, IMa
 
         if (_speciesText != null)
         {
-            // v3 의 파국은 종족 단위 엔딩 노드로 연출되고, 여기서는 낙인 여부만 병기한다. (§15)
+            // 파국 이벤트는 종족 단위 엔딩 노드로 연출되고, 여기서는 낙인 여부만 병기.
             bool hasScar = HasRouteScar(campaign);
             _speciesText.gameObject.SetActive(hasScar);
             if (hasScar)
@@ -136,7 +133,7 @@ public sealed class CampaignEndingPanel : UIPanel<CampaignEndingPanel.Refs>, IMa
         return n;
     }
 
-    /// <summary>엔딩 노드가 끝난 뒤 호출한다.</summary>
+    // 엔딩 노드가 끝난 뒤 호출
     public void AllowDismiss() => SetDismissVisible(true);
 
     private void SetDismissVisible(bool visible)

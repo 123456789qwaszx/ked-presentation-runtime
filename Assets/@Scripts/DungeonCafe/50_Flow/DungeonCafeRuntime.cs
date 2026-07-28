@@ -1,5 +1,4 @@
-// 게스트하우스 v3 런타임 묶음.
-// 상위 에피소드나 세이브 계층에서는 Campaign만 잡으면 전체 진행을 시작할 수 있다.
+// 상위 에피소드나 세이브 계층에서는 Campaign만 잡고 전체 진행 시작.
 public sealed class DungeonCafeRuntime
 {
     public DungeonCafeContentDB Content { get; }
