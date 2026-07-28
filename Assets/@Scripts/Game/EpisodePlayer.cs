@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Yarn.Unity;
 
-public sealed class EpisodePlayer : MonoBehaviour
+public sealed class EpisodePlayer : MonoBehaviour, INodePlayerV3
 {
     private VnScreenBindings _vnScreenBindings;
     private RollbackHistory _nodeRollbackHistory;
@@ -66,6 +66,9 @@ public sealed class EpisodePlayer : MonoBehaviour
     {
         StartGameAsync(nodeName).Forget();
     }
+
+    public YarnTask PlayNodeAsync(string nodeName)
+        => StartGameAsync(nodeName);
 
     /// <summary>
     /// 세션을 초기화한 뒤 노드를 재생한다.

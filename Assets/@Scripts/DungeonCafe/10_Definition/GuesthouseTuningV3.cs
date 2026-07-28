@@ -35,7 +35,7 @@ public sealed class GuesthouseTuningV3
     // ---- 밤 (§6.1) ----
     public int NightCareReduction { get; }
     public int NightCareReductionUpgraded { get; }
-    public int ManagedReleaseMinimumCollapse { get; }
+    public int ManagedReleaseMinimumCollapse { get; } // 기본 80 ~ 99
     public int ManagedReleaseRetainPercent { get; }
     public int ManagedReleaseNightEnergy { get; }
 

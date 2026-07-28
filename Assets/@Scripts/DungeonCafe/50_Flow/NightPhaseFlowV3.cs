@@ -59,8 +59,8 @@ public sealed class NightPhaseFlowV3
             NightChoiceV3 choice = choices[i];
             MaidStateV3 maid = campaign.GetMaid(choice.MaidId);
 
-            if (maid.IsLost || handledIds.Contains(maid.MaidId))
-                continue;
+            // if (maid.IsLost || handledIds.Contains(maid.MaidId))
+            //     continue;
 
             if (choice.Kind == NightChoiceKind.Care)
             {
@@ -86,14 +86,7 @@ public sealed class NightPhaseFlowV3
                 await _maidFlow.RunNeglectAsync(campaign, maid, dayState, dice);
         }
 
-        // 후유증 하루 경과.
-        for (int i = 0; i < present.Count; i++)
-        {
-            MaidStateV3 maid = present[i];
-            _maidFlow.AdvanceAftereffects(campaign, maid);
-        }
-
-        // 심야 대화 후, 오늘 손님 중 가장 모르는 쪽부터 분석한다.
+        // 심야 대화 후, 오늘 손님 중 가장 모르는 쪽부터 분석 및 수첩 기록.
         await _nodes.PlayNodeAsync($"Night_Talk_{dayState.DayNumber}");
 
         int analysisCount = campaign.Tuning.GetAnalysisCount(campaign.ShopLevel);

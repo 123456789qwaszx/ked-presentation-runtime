@@ -103,7 +103,10 @@ public sealed class NightMaidFlowV3
             $"Night_Release_{maid.MaidId}_{relationStage}");
         
         //관리 붕괴로 각인 해소
-        maid.RemoveAftereffect(maid.FindAftereffect("se_brand"));
+        AftereffectInstance brand = maid.FindAftereffect("se_brand");
+
+        if (brand != null)
+            maid.RemoveAftereffect(brand);
 
         return true;
     }
@@ -119,15 +122,11 @@ public sealed class NightMaidFlowV3
         maid.Gauge.HighestAxis(out int highest);
 
         NeglectRule.NeglectChances chances =
-            QuirkEffectResolver.NeglectChances(
-                _content,
-                maid,
-                tuning);
+            QuirkEffectResolver.NeglectChances(_content, maid, tuning);
 
         NeglectJudgment judgment = NeglectRule.Judge(
             dice,
             highest,
-            maid.HasAftereffect,
             maid.HasQuirk,
             chances,
             tuning);
@@ -167,20 +166,6 @@ public sealed class NightMaidFlowV3
         }
     }
 
-    public void AdvanceAftereffects(CampaignStateV3 campaign, MaidStateV3 maid)
-    {
-        if (maid.Aftereffects.Count == 0)
-            return;
-
-        maid.Gauge.HighestAxis(out int highest);
-        if (highest != 0)
-            return;
-
-        var snapshot = new List<AftereffectInstance>(maid.Aftereffects);
-        for (int i = 0; i < snapshot.Count; i++)
-            maid.RemoveAftereffect(snapshot[i]);
-    }
-
     private async YarnTask RunNaturalRecoveryAsync(
         CampaignStateV3 campaign,
         MaidStateV3 maid,
@@ -213,15 +198,12 @@ public sealed class NightMaidFlowV3
     {
         BurdenAxis axis = maid.Gauge.HighestAxis(out _);
 
-        maid.Gauge.SetValue(
-            axis,
-            Math.Min(highest, judgment.CollapseAfter));
+        maid.Gauge.SetValue(axis, Math.Min(highest, judgment.CollapseAfter));
 
         if (judgment.GainsAccidentQuirk)
             GrantNextAccidentQuirk(maid);
 
-        await _nodes.PlayNodeAsync(
-            $"Night_Auto_{maid.MaidId}_selfrelease");
+        await _nodes.PlayNodeAsync($"Night_Auto_{maid.MaidId}_selfrelease");
     }
 
     private async YarnTask RunDispositionAsync(

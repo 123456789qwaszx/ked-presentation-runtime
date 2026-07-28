@@ -117,11 +117,11 @@ public static class GuesthouseV3RuleSelfCheck
         {
             var chances = NeglectRule.NeglectChances.From(tuning);
             NeglectJudgment hold = NeglectRule.Judge(
-                new FixedDiceSource(60), 85, false, false, chances, tuning);
+                new FixedDiceSource(60), 85, false, chances, tuning);
             NeglectJudgment self = NeglectRule.Judge(
-                new FixedDiceSource(61, 100), 85, false, false, chances, tuning);
+                new FixedDiceSource(61, 100), 85, false, chances, tuning);
             NeglectJudgment incident = NeglectRule.Judge(
-                new FixedDiceSource(86), 85, false, false, chances, tuning);
+                new FixedDiceSource(86), 85, false, chances, tuning);
             return hold.Outcome == NeglectCollapseOutcome.DangerHold
                 && self.Outcome == NeglectCollapseOutcome.SelfRelease
                 && self.CollapseAfter == tuning.NeglectSelfReleaseTargetCollapse

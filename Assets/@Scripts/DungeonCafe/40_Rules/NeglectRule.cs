@@ -34,9 +34,6 @@ public readonly struct NeglectJudgment
     /// <summary>SelfRelease 에서 사고성 기벽 획득 판정(50%)에 성공했는지.</summary>
     public bool GainsAccidentQuirk { get; }
 
-    /// <summary>후유증 자연 회복 1일 진행 여부 (보유 시 항상 참).</summary>
-    public bool AdvancesAftereffectRecovery { get; }
-
     /// <summary>특수 기벽의 "먼저 요구하는 이벤트" 예약 여부 (보유 시 25%).</summary>
     public bool SchedulesQuirkRequest { get; }
 
@@ -48,7 +45,6 @@ public readonly struct NeglectJudgment
         int collapseBefore,
         int collapseAfter,
         bool gainsAccidentQuirk,
-        bool advancesAftereffectRecovery,
         bool schedulesQuirkRequest,
         int incidentDepthBeats)
     {
@@ -56,7 +52,6 @@ public readonly struct NeglectJudgment
         CollapseBefore = collapseBefore;
         CollapseAfter = collapseAfter;
         GainsAccidentQuirk = gainsAccidentQuirk;
-        AdvancesAftereffectRecovery = advancesAftereffectRecovery;
         SchedulesQuirkRequest = schedulesQuirkRequest;
         IncidentDepthBeats = incidentDepthBeats;
     }
@@ -94,7 +89,6 @@ public static class NeglectRule
     public static NeglectJudgment Judge(
         IDiceSource dice,
         int highestAxisCollapse,
-        bool hasAftereffect,
         bool hasSpecialQuirk,
         in NeglectChances chances,
         GuesthouseTuningV3 tuning)
@@ -144,7 +138,6 @@ public static class NeglectRule
             collapseBefore: highestAxisCollapse,
             collapseAfter: after,
             gainsAccidentQuirk: gainsQuirk,
-            advancesAftereffectRecovery: hasAftereffect,
             schedulesQuirkRequest: schedulesRequest,
             incidentDepthBeats: incidentBeats);
     }
