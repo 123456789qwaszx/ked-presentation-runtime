@@ -251,37 +251,43 @@ public sealed class NightPhaseFlowV3
 
         for (int i = 0;
              i < analysisCount
-             && i < dayState.BookedMonsterIds.Count;
+             && i < dayState.Bookings.Count;
              i++)
         {
             UnderstandingRule.GrantAnalysis(
                 campaign,
                 FindLeastUnderstood(
                     campaign,
-                    dayState.BookedMonsterIds));
+                    dayState.Bookings));
         }
     }
 
     private static string FindLeastUnderstood(
         CampaignStateV3 campaign,
-        IReadOnlyList<string> monsterIds)
+        IReadOnlyList<MonsterProfileV3> bookings)
     {
-        string selected = monsterIds[0];
-        int selectedPoints = int.MaxValue;
+        string selectedMonsterId =
+            bookings[0].MonsterId;
 
-        for (int i = 0; i < monsterIds.Count; i++)
+        int selectedPoints =
+            int.MaxValue;
+
+        for (int i = 0; i < bookings.Count; i++)
         {
+            string monsterId =
+                bookings[i].MonsterId;
+
             int points =
                 campaign.Understanding.GetPoints(
-                    monsterIds[i]);
+                    monsterId);
 
             if (points < selectedPoints)
             {
-                selected = monsterIds[i];
+                selectedMonsterId = monsterId;
                 selectedPoints = points;
             }
         }
 
-        return selected;
+        return selectedMonsterId;
     }
 }

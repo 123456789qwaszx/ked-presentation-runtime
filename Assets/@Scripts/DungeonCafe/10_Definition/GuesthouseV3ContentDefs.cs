@@ -272,13 +272,29 @@ public sealed class GuesthouseV3ContentDB
         IReadOnlyList<PlayerAbilityDefinition> abilities,
         IReadOnlyList<CampaignDayPlan> calendar)
     {
-        Maids = maids; Monsters = monsters; Quirks = quirks; Abilities = abilities; Calendar = calendar;
-        foreach (MaidProfileV3 m in maids) _maids[m.MaidId] = m;
-        foreach (MonsterProfileV3 m in monsters) _monsters[m.MonsterId] = m;
-        foreach (SpeciesProtocolV3 p in protocols) _protocols[p.Species] = p;
-        foreach (AftereffectDefinition a in aftereffects) _aftereffects[a.Id] = a;
-        foreach (QuirkDefinition q in quirks) _quirks[q.Id] = q;
-        foreach (PlayerAbilityDefinition a in abilities) _abilities[a.Id] = a;
+        Maids = maids; 
+        foreach (MaidProfileV3 m in maids)
+            _maids[m.MaidId] = m;
+        
+        Monsters = monsters; 
+        foreach (MonsterProfileV3 m in monsters)
+            _monsters[m.MonsterId] = m;
+        
+        foreach (SpeciesProtocolV3 p in protocols)
+            _protocols[p.Species] = p;
+        
+        foreach (AftereffectDefinition a in aftereffects)
+            _aftereffects[a.Id] = a;
+        
+        Quirks = quirks; 
+        foreach (QuirkDefinition q in quirks)
+            _quirks[q.Id] = q;
+        
+        Abilities = abilities;
+        foreach (PlayerAbilityDefinition a in abilities)
+            _abilities[a.Id] = a;
+        
+        Calendar = calendar;
     }
 
     public MaidProfileV3 GetMaid(string id) => _maids.TryGetValue(id, out var v) ? v : null;
@@ -291,7 +307,9 @@ public sealed class GuesthouseV3ContentDB
     public CampaignDayPlan GetDayPlan(int dayNumber)
     {
         for (int i = 0; i < Calendar.Count; i++)
-            if (Calendar[i].DayNumber == dayNumber) return Calendar[i];
+            if (Calendar[i].DayNumber == dayNumber)
+                return Calendar[i];
+        
         return null;
     }
 

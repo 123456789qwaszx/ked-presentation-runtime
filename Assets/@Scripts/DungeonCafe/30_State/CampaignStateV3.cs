@@ -157,12 +157,23 @@ public sealed class JudgmentCommitLog
 /// <summary>하루 진행 상태.</summary>
 public sealed class DayStateV3
 {
-    public int DayNumber { get; }
+    public int DayNumber => Plan.DayNumber;
     public CampaignDayPlan Plan { get; }
-    public int CompletedSlots { get; set; }
-    public List<string> BookedMonsterIds { get; } = new();
+    public IReadOnlyList<MonsterProfileV3> Bookings { get; }
 
-    public DayStateV3(int dayNumber, CampaignDayPlan plan) { DayNumber = dayNumber; Plan = plan; }
+    public int CompletedSlots { get; set; }
+
+    public DayStateV3(CampaignDayPlan plan, IReadOnlyList<MonsterProfileV3> bookings)
+    {
+        Plan = plan;
+
+        var snapshot = new MonsterProfileV3[bookings.Count];
+
+        for (int i = 0; i < bookings.Count; i++)
+            snapshot[i] = bookings[i];
+        
+        Bookings = snapshot;
+    }
 }
 
 /// <summary>캠페인 루트 상태 v3. 세이브의 단일 진입점.</summary>
@@ -188,6 +199,8 @@ public sealed class CampaignStateV3
     public List<(string maidId, string quirkId)> PendingQuirkRequests { get; } = new();
 
     public IReadOnlyList<MaidStateV3> Maids => _maids;
+    
+    public DayStateV3 CurrentDay { get; private set; }
 
     public CampaignStateV3(GuesthouseV3ContentDB content, GuesthouseTuningV3 tuning, ulong seed)
     {
@@ -244,4 +257,13 @@ public sealed class CampaignStateV3
 
     public bool CanSaveNow => Phase is CampaignPhaseV3.SlotBoundary
         or CampaignPhaseV3.NightStart or CampaignPhaseV3.DayEnd or CampaignPhaseV3.Finished;
+    
+    public void BeginDay(IReadOnlyList<MonsterProfileV3> bookings)
+    {
+        CampaignDayPlan plan = Content.GetDayPlan(CurrentDayNumber);
+        
+        CurrentDay = new DayStateV3(plan, bookings);
+        
+        Phase = CampaignPhaseV3.SlotBoundary;
+    }
 }

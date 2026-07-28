@@ -2,36 +2,54 @@ using System;
 using System.Collections.Generic;
 
 // 오늘 게시판에 올라올 몬스터를 고른다.
-// 신규 개체는 등장일 첫 슬롯에 보장하고, 나머지는 날짜와 슬롯으로 결정론 회전한다.
+// 신규 개체는 등장일 첫 슬롯에 보장하고,
+// 나머지는 날짜와 슬롯으로 결정론 회전한다.
 public sealed class DailyMonsterSelectorV3
 {
     private readonly GuesthouseV3ContentDB _content;
 
-    public DailyMonsterSelectorV3(GuesthouseV3ContentDB content)
+    public DailyMonsterSelectorV3(
+        GuesthouseV3ContentDB content)
     {
         _content = content;
     }
 
-    public List<MonsterProfileV3> SelectForDay(int dayNumber, int serviceCount)
+    public IReadOnlyList<MonsterProfileV3> CreateDailyBookings(
+        int dayNumber)
     {
-        List<MonsterProfileV3> pool = _content.GetMonsterPool(dayNumber);
+        CampaignDayPlan plan =
+            _content.GetDayPlan(dayNumber);
 
-        if (pool.Count == 0)
-            throw new InvalidOperationException(
-                $"예약 후보가 없습니다. day={dayNumber}");
+        int serviceCount =
+            plan.ServiceSlots;
 
-        var selected = new List<MonsterProfileV3>(serviceCount);
-        MonsterProfileV3 debutant = FindDebutant(pool, dayNumber);
+        List<MonsterProfileV3> pool =
+            _content.GetMonsterPool(dayNumber);
 
-        for (int slot = 0; slot < serviceCount; slot++)
-        {
-            MonsterProfileV3 monster = SelectSlot(
-                pool,
-                selected,
-                debutant,
-                dayNumber,
-                slot,
+        if (pool.Count == 0 || serviceCount <= 0)
+            return Array.Empty<MonsterProfileV3>();
+
+        var selected =
+            new List<MonsterProfileV3>(
                 serviceCount);
+
+        MonsterProfileV3 debutant =
+            FindDebutant(
+                pool,
+                dayNumber);
+
+        for (int slot = 0;
+             slot < serviceCount;
+             slot++)
+        {
+            MonsterProfileV3 monster =
+                SelectSlot(
+                    pool,
+                    selected,
+                    debutant,
+                    dayNumber,
+                    slot,
+                    serviceCount);
 
             selected.Add(monster);
         }
@@ -44,8 +62,10 @@ public sealed class DailyMonsterSelectorV3
         int dayNumber)
     {
         for (int i = 0; i < pool.Count; i++)
+        {
             if (pool[i].AppearDay == dayNumber)
                 return pool[i];
+        }
 
         return null;
     }
@@ -61,12 +81,20 @@ public sealed class DailyMonsterSelectorV3
         if (slot == 0 && debutant != null)
             return debutant;
 
-        int index = (dayNumber * 3 + slot * 5) % pool.Count;
-        MonsterProfileV3 pick = pool[index];
+        int index =
+            (dayNumber * 3 + slot * 5)
+            % pool.Count;
 
-        if (!selected.Contains(pick) || pool.Count <= serviceCount)
+        MonsterProfileV3 pick =
+            pool[index];
+
+        if (!selected.Contains(pick)
+            || pool.Count <= serviceCount)
+        {
             return pick;
+        }
 
-        return pool[(index + 1) % pool.Count];
+        return pool[
+            (index + 1) % pool.Count];
     }
 }

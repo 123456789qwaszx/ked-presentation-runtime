@@ -291,11 +291,11 @@ public sealed class NightMaidFlowV3
 
             // 아리에: 오늘 개체 이해도 +1, 정신 +4.
             case "archiving":
-                if (dayState.BookedMonsterIds.Count > 0)
+                if (dayState.Bookings.Count > 0)
                 {
                     UnderstandingRule.GrantAnalysis(
                         campaign,
-                        dayState.BookedMonsterIds[0]);
+                        dayState.Bookings[0].MonsterId);
                 }
 
                 maid.Gauge.Add(BurdenAxis.Mental, 4);
@@ -352,11 +352,11 @@ public sealed class NightMaidFlowV3
     private MonsterProfileV3 ResolveNightIncidentMonster(
         DayStateV3 dayState)
     {
-        if (dayState.BookedMonsterIds.Count > 0)
+        if (dayState.Bookings.Count > 0)
         {
             string monsterId =
-                dayState.BookedMonsterIds[
-                    dayState.BookedMonsterIds.Count - 1];
+                dayState.Bookings[
+                    dayState.Bookings.Count - 1].MonsterId;
 
             MonsterProfileV3 booked =
                 _content.GetMonster(monsterId);

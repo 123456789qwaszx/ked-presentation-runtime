@@ -89,7 +89,7 @@ public sealed class ReservationBoardPanel : UIPanel<ReservationBoardPanel.Refs>,
         {
             MonsterProfileV3 monster = bookings[i];
 
-            // 통화 이력이 있는 개체(이해도 일부 파악 이상)만 이름을 밝힌다. (§8.2)
+            // 통화 이력이 있는 개체(이해도 일부 파악 이상)만 이름을 밝힌다.
             UnderstandingTier tier = campaign.Understanding.GetTier(monster.MonsterId, campaign.Tuning);
 
             string bookingLabel = tier >= UnderstandingTier.Partial
