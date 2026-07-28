@@ -13,8 +13,21 @@
 title: Call_mon_bladeframe
 ---
 // 검틀 최초 예약 통화. 개체당 1회만 재생되고 이해도 +1.
+<<slot c1>>
+<<cast c1 harin>>
+
+<<actor @1 harin>>
+<<fade_in @1>>
+<<place @1 center>>
+<<size @1 22>>
+
 검틀: (수화기 너머에서 쇠가 탁자에 닿는다)
+
+<<left @1 3u>>
+
 메이드: 예약은 한 분으로 잡겠습니다.
+
+<<shake @1 >>
 검틀: (짧게 한 번 울린다)
 ===
 
