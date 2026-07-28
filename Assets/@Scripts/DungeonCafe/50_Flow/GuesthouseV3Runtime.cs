@@ -8,7 +8,7 @@ public sealed class GuesthouseV3Runtime
     public ServiceSessionFlowV3 Session { get; }
     public NightPhaseFlowV3 Night { get; }
     public DayCycleFlowV3 Day { get; }
-    public CampaignFlowV3 Campaign { get; }
+    public CampaignFlow Campaign { get; }
 
     public GuesthouseV3Runtime(
         GuesthouseV3ContentDB content,
@@ -16,7 +16,7 @@ public sealed class GuesthouseV3Runtime
         ServiceSessionFlowV3 session,
         NightPhaseFlowV3 night,
         DayCycleFlowV3 day,
-        CampaignFlowV3 campaign)
+        CampaignFlow campaign)
     {
         Content = content;
         State = state;

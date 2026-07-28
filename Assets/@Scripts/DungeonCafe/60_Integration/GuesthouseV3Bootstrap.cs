@@ -77,7 +77,7 @@ public sealed class GuesthouseV3Bootstrap : MonoBehaviour
                 screens,
                 nodes);
 
-        CampaignFlowV3 campaignFlow =
+        CampaignFlow campaignFlow =
             new(
                 state,
                 dayFlow,

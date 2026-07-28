@@ -1,10 +1,15 @@
-/// <summary>엔딩 판정. 평가 순서: 전멸 -> 폐업 -> (완주) S -> A -> B. (§15)</summary>
+// (엔딩 판정)
+// 평가 순서: 전멸 -> 폐업 -> 완주
 public static class EndingResolverV3
 {
     public static EndingKindV3 ResolveImmediate(CampaignStateV3 campaign)
     {
-        if (campaign.AliveMaidCount == 0) return EndingKindV3.EmptyInn;
-        if (campaign.BankruptcyCount >= campaign.Tuning.BankruptcyLimit) return EndingKindV3.Bankruptcy;
+        if (campaign.AliveMaidCount == 0)
+            return EndingKindV3.EmptyInn;
+        
+        if (campaign.BankruptcyCount >= campaign.Tuning.BankruptcyLimit)
+            return EndingKindV3.Bankruptcy;
+        
         return EndingKindV3.None;
     }
 
