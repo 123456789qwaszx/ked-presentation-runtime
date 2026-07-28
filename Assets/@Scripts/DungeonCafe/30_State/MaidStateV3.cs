@@ -114,9 +114,13 @@ public sealed class MaidStateV3
 
     public bool CanBeAssigned(int dayNumber)
     {
-        if (IsLost || dayNumber < Profile.UnlockDay) return false;
+        if (IsLost || dayNumber < Profile.UnlockDay) 
+            return false;
+        
         for (int i = 0; i < _aftereffects.Count; i++)
-            if (_aftereffects[i].BlocksAssignmentNow) return false;
+            if (_aftereffects[i].BlocksAssignmentNow)
+                return false;
+        
         return true;
     }
 

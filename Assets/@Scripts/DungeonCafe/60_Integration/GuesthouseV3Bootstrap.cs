@@ -69,6 +69,7 @@ public sealed class GuesthouseV3Bootstrap : MonoBehaviour
                 screens,
                 nodes);
 
+
         DayCycleFlowV3 dayFlow =
             new(
                 monsterSelector,

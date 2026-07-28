@@ -243,7 +243,9 @@ public sealed class CampaignDayPlan
     public int Quota { get; }
     public CampaignDayPlan(int dayNumber, int serviceSlots, int quota)
     {
-        DayNumber = dayNumber; ServiceSlots = serviceSlots; Quota = quota;
+        DayNumber = dayNumber; 
+        ServiceSlots = serviceSlots;
+        Quota = quota;
     }
 }
 

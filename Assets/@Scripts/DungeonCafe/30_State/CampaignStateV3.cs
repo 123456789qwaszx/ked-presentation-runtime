@@ -199,8 +199,6 @@ public sealed class CampaignStateV3
     public List<(string maidId, string quirkId)> PendingQuirkRequests { get; } = new();
 
     public IReadOnlyList<MaidStateV3> Maids => _maids;
-    
-    public DayStateV3 CurrentDay { get; private set; }
 
     public CampaignStateV3(GuesthouseV3ContentDB content, GuesthouseTuningV3 tuning, ulong seed)
     {
@@ -214,7 +212,9 @@ public sealed class CampaignStateV3
     public MaidStateV3 GetMaid(string maidId)
     {
         for (int i = 0; i < _maids.Count; i++)
-            if (_maids[i].MaidId == maidId) return _maids[i];
+            if (_maids[i].MaidId == maidId)
+                return _maids[i];
+        
         return null;
     }
 
@@ -254,16 +254,16 @@ public sealed class CampaignStateV3
         CommitLog.Commit(kind, before, ok ? 1 : 0);
         return ok;
     }
+    
+    public bool RegisterPhoneCall(string monsterId)
+    {
+        if (!Understanding.MarkPhoneCalled(monsterId))
+            return false;
+        
+        Understanding.AddPoints(monsterId, Tuning.UnderstandingPerPhoneCall);
+        return true;
+    }
 
     public bool CanSaveNow => Phase is CampaignPhaseV3.SlotBoundary
         or CampaignPhaseV3.NightStart or CampaignPhaseV3.DayEnd or CampaignPhaseV3.Finished;
-    
-    public void BeginDay(IReadOnlyList<MonsterProfileV3> bookings)
-    {
-        CampaignDayPlan plan = Content.GetDayPlan(CurrentDayNumber);
-        
-        CurrentDay = new DayStateV3(plan, bookings);
-        
-        Phase = CampaignPhaseV3.SlotBoundary;
-    }
 }
