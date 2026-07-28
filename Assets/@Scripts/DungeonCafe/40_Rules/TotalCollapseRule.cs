@@ -11,7 +11,6 @@ public readonly struct TotalCollapseOutcome
 
 public static class TotalCollapseRule
 {
-    public const string HollowId = "se_hollow";
     public const string HollowQuirkId = "qk_acc_hollowmark";
 
     public static TotalCollapseOutcome Resolve(
@@ -33,7 +32,7 @@ public static class TotalCollapseRule
             return new TotalCollapseOutcome(
                 rescued: true,
                 node: $"Rescue_{maid.MaidId}",
-                aftereffectId: HollowId,
+                aftereffectId: null,
                 quirkId: HollowQuirkId);
         }
 

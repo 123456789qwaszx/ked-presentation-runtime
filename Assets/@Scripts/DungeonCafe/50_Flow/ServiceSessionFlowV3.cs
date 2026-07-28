@@ -409,7 +409,6 @@ public sealed class ServiceSessionFlowV3
 
                 if (outcome.Rescued)
                 {
-                    maid.AddAftereffect(Content.GetAftereffect(outcome.AftereffectId));
                     maid.AddQuirk(outcome.AccidentQuirkId, isAccident: true);
                 }
                 else

@@ -82,12 +82,8 @@ public sealed class NightPhaseFlowV3
         for (int i = 0; i < present.Count; i++)
         {
             MaidStateV3 maid = present[i];
-
             if (!handledIds.Contains(maid.MaidId))
-            {
                 await _maidFlow.RunNeglectAsync(campaign, maid, dayState, dice);
-                _maidFlow.ApplyNeglectedRelationPenalty(campaign, maid);
-            }
         }
 
         // 후유증 하루 경과.

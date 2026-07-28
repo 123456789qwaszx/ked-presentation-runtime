@@ -134,43 +134,25 @@ public sealed class SpeciesProtocolV3
     }
 }
 
-/// <summary>후유증 정의. (§9)</summary>
+/// <summary>후유증 정의. tremor·brand. 붕괴 0(tremor) 또는 관리붕괴(brand)로 해소. (§9)</summary>
 public sealed class AftereffectDefinition
 {
     public string Id { get; }
     public string DisplayName { get; }
-    public bool BlocksAssignment { get; }
-    /// <summary>각인: 1일만 배정 불가.</summary>
-    public int BlockDays { get; }
-    public int CareCuresNeeded { get; }
-    /// <summary>방치 자연 회복 일수. 0이면 방치로 낫지 않는다.</summary>
-    public int NeglectHealDays { get; }
+    /// <summary>보유 중 낮 부하 판정에 더해지는 페널티. (떨림 +2)</summary>
+    public int DayLoadPenalty { get; }
     /// <summary>보유 중 태그 종족 심층 주사위 보정. (각인 +7)</summary>
     public int DepthDieModifier { get; }
     public MonsterSpecies TaggedSpecies { get; }
-    /// <summary>미해소 N일 후 영구화되는 기벽 id. (각인 -> qk_acc_brand)</summary>
-    public string PermanentizeQuirkId { get; }
-    /// <summary>공동: 안정하지 않은 밤마다 관계 감점.</summary>
-    public bool PenalizesRelationWhenNeglected { get; }
-
-    /// <summary>보유 중 낮 부하 판정에 더해지는 페널티. (떨림 +2)</summary>
-    public int DayLoadPenalty { get; }
 
     public AftereffectDefinition(
-        string id, string displayName, bool blocksAssignment, int blockDays,
-        int careCuresNeeded, int neglectHealDays, int depthDieModifier,
-        MonsterSpecies taggedSpecies, string permanentizeQuirkId, bool penalizesRelationWhenNeglected,
-        int dayLoadPenalty = 0)
+        string id, string displayName, int dayLoadPenalty,
+        int depthDieModifier, MonsterSpecies taggedSpecies)
     {
-        DayLoadPenalty = dayLoadPenalty;
-        Id = id; DisplayName = displayName; BlocksAssignment = blocksAssignment; BlockDays = blockDays;
-        CareCuresNeeded = careCuresNeeded; NeglectHealDays = neglectHealDays;
+        Id = id; DisplayName = displayName; DayLoadPenalty = dayLoadPenalty;
         DepthDieModifier = depthDieModifier; TaggedSpecies = taggedSpecies;
-        PermanentizeQuirkId = permanentizeQuirkId;
-        PenalizesRelationWhenNeglected = penalizesRelationWhenNeglected;
     }
 }
-
 /// <summary>기벽 정의. 계약 4필드: 효과 / 판정 보정 / 대사 세트 / 밤 이벤트. (§10)</summary>
 public sealed class QuirkDefinition
 {

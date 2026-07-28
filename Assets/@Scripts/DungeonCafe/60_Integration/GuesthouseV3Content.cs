@@ -97,21 +97,16 @@ public static class GuesthouseV3Content
             "ControlLoss_PredatoryBinder", "Ending_Collapse_PredatoryBinder"),
     };
 
-    // ---- 후유증 (§9) ----
+    // ---- 후유증  ----
     private static List<AftereffectDefinition> BuildAftereffects() => new()
     {
-        // 떨림은 배정을 막지 않는다 - 막으면 풀 고갈로 후반 경제가 연쇄 붕괴 (시뮬 검증).
-        // 대신 부하 판정 +2 로 '떨리는 손' 을 표현한다.
-        new("se_tremor", "떨림", blocksAssignment: false, blockDays: 0,
-            careCuresNeeded: 1, neglectHealDays: 2, depthDieModifier: 0,
-            MonsterSpecies.None, permanentizeQuirkId: null, penalizesRelationWhenNeglected: false,
-            dayLoadPenalty: 2),
-        new("se_brand", "각인", blocksAssignment: true, blockDays: 1,
-            careCuresNeeded: 2, neglectHealDays: 0, depthDieModifier: 7,
-            MonsterSpecies.None, permanentizeQuirkId: "qk_acc_brand", penalizesRelationWhenNeglected: false),
-        new("se_hollow", "공동", blocksAssignment: true, blockDays: 0,
-            careCuresNeeded: 3, neglectHealDays: 0, depthDieModifier: 0,
-            MonsterSpecies.None, permanentizeQuirkId: null, penalizesRelationWhenNeglected: true),
+        // 떨림: 부하 +2, 붕괴 0에서만 해소, 밤엔 케어 전용.
+        new("se_tremor", "떨림", dayLoadPenalty: 2,
+            depthDieModifier: 0, taggedSpecies: MonsterSpecies.None),
+
+        // 각인: 심층 Special에서 즉시 부여. 태그 종족 심층 +7. 관리붕괴로만 해소.
+        new("se_brand", "각인", dayLoadPenalty: 0,
+            depthDieModifier: 7, taggedSpecies: MonsterSpecies.None),
     };
 
     // ---- 기벽 (§10). TaggedSpecies.None = 전 종족. ----
@@ -147,9 +142,9 @@ public static class GuesthouseV3Content
         new("qk_acc_nightowl", "밤샘 버릇", null, true,
             QuirkEffectKind.NeglectChancesOverride, 50, 35, MonsterSpecies.None, BurdenAxis.Mental,
             null, "dlg_acc_nightowl", "Night_Request_any_qk_acc_nightowl"),
-        new("qk_acc_hollowmark", "공동의 흔적", null, true,
-            QuirkEffectKind.HollowMark, 5, 4, MonsterSpecies.None, BurdenAxis.Physical,
-            null, "dlg_acc_hollowmark", "Night_Request_any_qk_acc_hollowmark"),
+        new("qk_acc_hollowmark", "죽음의 낙인", null, true,
+            QuirkEffectKind.None, 0, 0, MonsterSpecies.None, BurdenAxis.Physical,
+            null, "dlg_acc_hollow", "Night_Request_any_qk_acc_hollowmark"),
     };
 
     // ---- 능력 (§11) ----

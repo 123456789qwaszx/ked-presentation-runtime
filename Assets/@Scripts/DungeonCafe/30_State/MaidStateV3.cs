@@ -28,47 +28,11 @@ public sealed class MasteryTrackV3
     public void Restore(int level, int experience) { Level = Math.Max(0, level); Experience = Math.Max(0, experience); }
 }
 
+/// <summary>후유증 보유 인스턴스. 해소는 붕괴 0 도달로만. (§9)</summary>
 public sealed class AftereffectInstance
 {
     public AftereffectDefinition Definition { get; }
-    public int CaresApplied { get; private set; }
-    public int DaysHeld { get; private set; }
-    public int BlockDaysLeft { get; private set; }
-
-    public AftereffectInstance(AftereffectDefinition definition)
-    {
-        Definition = definition;
-        BlockDaysLeft = definition.BlocksAssignment
-            ? (definition.BlockDays > 0 ? definition.BlockDays : int.MaxValue)
-            : 0;
-    }
-
-    public bool BlocksAssignmentNow => BlockDaysLeft > 0;
-
-    // 붕괴가 완전히 빠진 밤에 자연 해소되는 유형인가.
-    public bool HealsWhenCalm => Definition.NeglectHealDays > 0;
-
-    /// <summary>안정 1회 적용. 해소되면 true.</summary>
-    public bool ApplyCare()
-    {
-        CaresApplied++;
-        return CaresApplied >= Definition.CareCuresNeeded;
-    }
-
-    /// <summary>밤 시간 경과: 영구화 시계와 배정 차단만 진행. 영구화 도달이면 true.</summary>
-    public bool AdvanceNight(GuesthouseTuningV3 tuning)
-    {
-        DaysHeld++;
-        if (BlockDaysLeft > 0 && BlockDaysLeft != int.MaxValue) BlockDaysLeft--;
-
-        return !string.IsNullOrEmpty(Definition.PermanentizeQuirkId)
-               && DaysHeld >= tuning.BrandPermanentizeDays;
-    }
-
-    public void Restore(int cares, int daysHeld, int blockLeft)
-    {
-        CaresApplied = cares; DaysHeld = daysHeld; BlockDaysLeft = blockLeft;
-    }
+    public AftereffectInstance(AftereffectDefinition definition) { Definition = definition; }
 }
 
 /// <summary>캠페인 중 변하는 메이드 상태 v3 통합. (§12)</summary>
@@ -112,17 +76,7 @@ public sealed class MaidStateV3
     
     public bool IsPresent(int dayNumber) => !IsLost && dayNumber >= Profile.UnlockDay;
 
-    public bool CanBeAssigned(int dayNumber)
-    {
-        if (IsLost || dayNumber < Profile.UnlockDay) 
-            return false;
-        
-        for (int i = 0; i < _aftereffects.Count; i++)
-            if (_aftereffects[i].BlocksAssignmentNow)
-                return false;
-        
-        return true;
-    }
+    public bool CanBeAssigned(int dayNumber) => IsPresent(dayNumber);
 
     public bool HasAftereffect => _aftereffects.Count > 0;
     public bool HasQuirk => _quirkIds.Count > 0;

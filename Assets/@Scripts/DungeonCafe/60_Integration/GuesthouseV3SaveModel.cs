@@ -99,17 +99,10 @@ public sealed class GuesthouseV3SaveModel
                 ms.masteryXp[a] = m.GetMastery(axis).Experience;
             }
             ms.quirkIds.AddRange(m.QuirkIds);
+            
             for (int a = 0; a < m.Aftereffects.Count; a++)
-            {
-                AftereffectInstance inst = m.Aftereffects[a];
-                ms.aftereffects.Add(new AftereffectSave
-                {
-                    id = inst.Definition.Id,
-                    cares = inst.CaresApplied,
-                    daysHeld = inst.DaysHeld,
-                    blockDaysLeft = inst.BlockDaysLeft == int.MaxValue ? -1 : inst.BlockDaysLeft,
-                });
-            }
+                ms.aftereffects.Add(new AftereffectSave { id = m.Aftereffects[a].Definition.Id });
+            
             save.maids.Add(ms);
         }
 
@@ -165,11 +158,9 @@ public sealed class GuesthouseV3SaveModel
             for (int a = 0; a < ms.aftereffects.Count; a++)
             {
                 AftereffectSave es = ms.aftereffects[a];
-                AftereffectDefinition def = content.GetAftereffect(es.id);
-                if (def == null) continue;
-                m.AddAftereffect(def);
-                m.FindAftereffect(es.id)?.Restore(es.cares, es.daysHeld,
-                    es.blockDaysLeft < 0 ? int.MaxValue : es.blockDaysLeft);
+                AftereffectDefinition def = content.GetAftereffect(es.id) ;
+                if (def != null) 
+                    m.AddAftereffect(def);
             }
         }
 

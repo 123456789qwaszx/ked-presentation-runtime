@@ -97,10 +97,12 @@ public sealed class NightPlanRequestV3
 
     public bool CanRelease(MaidStateV3 maid)
     {
-        maid.Gauge.HighestAxis(out int v);
+        // 떨림 후유증 중엔 케어만
+        if (maid.FindAftereffect("se_tremor") != null)
+            return false;
         
-        return v >= Tuning.ManagedReleaseMinimumCollapse
-               && v < Tuning.ControlLossThreshold && !maid.IsLost;
+        maid.Gauge.HighestAxis(out int v);
+        return v >= Tuning.ManagedReleaseMinimumCollapse && v < Tuning.ControlLossThreshold && !maid.IsLost;
     }
 }
 

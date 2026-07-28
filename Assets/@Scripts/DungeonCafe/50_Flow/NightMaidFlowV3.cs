@@ -34,17 +34,11 @@ public sealed class NightMaidFlowV3
             tuning.GetCareReduction(campaign.ShopLevel)
             + QuirkEffectResolver.CareReductionDelta(_content, maid);
 
-        BurdenAxis axis = maid.Gauge.HighestAxis(out _);
-        maid.Gauge.Reduce(axis, Math.Max(0, reduction));
+        reduction = Math.Max(0, reduction);
 
-        // 후유증은 목록의 첫 항목부터 안정 단계를 진행한다.
-        if (maid.Aftereffects.Count > 0)
-        {
-            AftereffectInstance first = maid.Aftereffects[0];
-
-            if (first.ApplyCare())
-                maid.RemoveAftereffect(first);
-        }
+        // 케어는 전 축을 동시에 조금씩 낮춘다.
+        for (int i = 0; i < BurdenAxes.Count; i++)
+            maid.Gauge.Reduce(BurdenAxes.FromIndex(i), reduction);
 
         maid.AddRelation(
             tuning.RelationPointsCare,
@@ -61,6 +55,9 @@ public sealed class NightMaidFlowV3
         CampaignStateV3 campaign,
         MaidStateV3 maid)
     {
+        if (maid.FindAftereffect("se_tremor") != null)
+            return false;
+        
         GuesthouseTuningV3 tuning = campaign.Tuning;
 
         BurdenAxis axis = maid.Gauge.HighestAxis(out int entry);
@@ -71,18 +68,8 @@ public sealed class NightMaidFlowV3
             return false;
         }
 
-        // 100까지 끌어올린 뒤 진입 시점의 retain%로 회수한다.
-        maid.Gauge.SetValue(axis, tuning.ControlLossThreshold);
-
-        int retainPercent =
-            QuirkEffectResolver.ManagedRetainPercent(
-                _content,
-                maid,
-                tuning);
-
-        maid.Gauge.SetValue(
-            axis, 
-            entry * retainPercent / 100);
+        // 한 축을 완전히 비운다.
+        maid.Gauge.SetValue(axis, 0);
 
         campaign.Ledger.EarnNight(
             tuning.ManagedReleaseNightEnergy);
@@ -114,6 +101,9 @@ public sealed class NightMaidFlowV3
 
         await _nodes.PlayNodeAsync(
             $"Night_Release_{maid.MaidId}_{relationStage}");
+        
+        //관리 붕괴로 각인 해소
+        maid.RemoveAftereffect(maid.FindAftereffect("se_brand"));
 
         return true;
     }
@@ -177,56 +167,18 @@ public sealed class NightMaidFlowV3
         }
     }
 
-    public void ApplyNeglectedRelationPenalty(
-        CampaignStateV3 campaign,
-        MaidStateV3 maid)
-    {
-        for (int i = 0; i < maid.Aftereffects.Count; i++)
-        {
-            AftereffectDefinition effect =
-                maid.Aftereffects[i].Definition;
-
-            if (effect.PenalizesRelationWhenNeglected)
-            {
-                maid.AddRelation(
-                    -campaign.Tuning.HollowNightlyRelationPenalty,
-                    RelationDirection.Trust);
-            }
-        }
-    }
-
-    public void AdvanceAftereffects(
-        CampaignStateV3 campaign,
-        MaidStateV3 maid)
+    public void AdvanceAftereffects(CampaignStateV3 campaign, MaidStateV3 maid)
     {
         if (maid.Aftereffects.Count == 0)
             return;
 
         maid.Gauge.HighestAxis(out int highest);
+        if (highest != 0)
+            return;
 
-        var snapshot =
-            new List<AftereffectInstance>(maid.Aftereffects);
-
+        var snapshot = new List<AftereffectInstance>(maid.Aftereffects);
         for (int i = 0; i < snapshot.Count; i++)
-        {
-            AftereffectInstance instance = snapshot[i];
-
-            // 붕괴가 완전히 빠진 밤이면 자연 해소형은 낫는다.
-            if (instance.HealsWhenCalm && highest == 0)
-            {
-                maid.RemoveAftereffect(instance);
-                continue;
-            }
-
-            // 그 외에는 영구화 시계만 진행한다.
-            if (instance.AdvanceNight(campaign.Tuning))
-            {
-                maid.RemoveAftereffect(instance);
-                maid.AddQuirk(
-                    instance.Definition.PermanentizeQuirkId,
-                    isAccident: true);
-            }
-        }
+            maid.RemoveAftereffect(snapshot[i]);
     }
 
     private async YarnTask RunNaturalRecoveryAsync(
@@ -389,13 +341,12 @@ public sealed class NightMaidFlowV3
         for (int i = 0; i < _content.Quirks.Count; i++)
         {
             QuirkDefinition quirk = _content.Quirks[i];
-
+            
+            // 죽음의 낙인은 완전붕괴에서만 부여
             if (!quirk.IsAccident
-                || quirk.EffectKind == QuirkEffectKind.HollowMark
+                || quirk.Id == "qk_acc_hollowmark"
                 || maid.HasQuirkId(quirk.Id))
-            {
                 continue;
-            }
 
             maid.AddQuirk(quirk.Id, isAccident: true);
             return;
