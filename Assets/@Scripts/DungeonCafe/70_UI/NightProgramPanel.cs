@@ -17,7 +17,7 @@ using static UIRefValidation;
 /// </summary>
 public sealed class NightProgramPanel : UIPanel<NightProgramPanel.Refs>, IManagedUI
 {
-    public event Action<IReadOnlyList<NightChoiceV3>> OnPlanConfirmed;
+    public event Action<IReadOnlyList<NightChoice>> OnPlanConfirmed;
 
     #region Refs
     public enum Refs
@@ -40,12 +40,12 @@ public sealed class NightProgramPanel : UIPanel<NightProgramPanel.Refs>, IManage
 
     [SerializeField] private VNOptionItem _planPrefab;
 
-    private readonly GuesthouseOptionItemList _list = new();
-    private readonly List<GuesthouseOptionEntry> _entries = new();
-    private readonly List<NightChoiceV3> _candidates = new();   // 목록 항목 -> 선택지 (확정 항목은 Kind=None)
-    private readonly List<NightChoiceV3> _plan = new();
+    private readonly DungeonCafeOptionItemList _list = new();
+    private readonly List<DungeonCafeOptionEntry> _entries = new();
+    private readonly List<NightChoice> _candidates = new();   // 목록 항목 -> 선택지 (확정 항목은 Kind=None)
+    private readonly List<NightChoice> _plan = new();
 
-    private NightPlanRequestV3 _request;
+    private NightPlanRequest _request;
     private bool _valid;
     private bool _locked;
     #endregion
@@ -78,7 +78,7 @@ public sealed class NightProgramPanel : UIPanel<NightProgramPanel.Refs>, IManage
         _list.Clear();
     }
 
-    public void Present(NightPlanRequestV3 request)
+    public void Present(NightPlanRequest request)
     {
         if (!_valid || request == null)
             return;
@@ -112,13 +112,13 @@ public sealed class NightProgramPanel : UIPanel<NightProgramPanel.Refs>, IManage
         }
 
         // 확정 항목이 맨 앞. 죄책감은 목록 아래(방치될 이름들)가 만든다.
-        _entries.Add(new GuesthouseOptionEntry(
+        _entries.Add(new DungeonCafeOptionEntry(
             _plan.Count == 0 ? "▶ 전원 방치하고 밤을 넘긴다" : "▶ 이대로 확정 (나머지 방치)"));
-        _candidates.Add(new NightChoiceV3(null, NightChoiceKind.None));
+        _candidates.Add(new NightChoice(null, NightChoiceKind.None));
 
         for (int i = 0; i < _request.Maids.Count; i++)
         {
-            MaidStateV3 maid = _request.Maids[i];
+            MaidState maid = _request.Maids[i];
             if (maid.IsLost)
                 continue;
 
@@ -126,13 +126,13 @@ public sealed class NightProgramPanel : UIPanel<NightProgramPanel.Refs>, IManage
             maid.Gauge.HighestAxis(out int highest);
 
             AddCandidate(
-                new NightChoiceV3(maid.MaidId, NightChoiceKind.Care),
+                new NightChoice(maid.MaidId, NightChoiceKind.Care),
                 BuildCareLabel(maid, highest, alreadyPlanned),
                 available: !alreadyPlanned && !_locked);
 
             if (_request.CanRelease(maid))
                 AddCandidate(
-                    new NightChoiceV3(maid.MaidId, NightChoiceKind.ManagedRelease),
+                    new NightChoice(maid.MaidId, NightChoiceKind.ManagedRelease),
                     BuildReleaseLabel(maid, highest, alreadyPlanned),
                     available: !alreadyPlanned && !_locked);
         }
@@ -159,13 +159,13 @@ public sealed class NightProgramPanel : UIPanel<NightProgramPanel.Refs>, IManage
         return false;
     }
 
-    private void AddCandidate(in NightChoiceV3 choice, string label, bool available)
+    private void AddCandidate(in NightChoice choice, string label, bool available)
     {
-        _entries.Add(new GuesthouseOptionEntry(label, isAvailable: available));
+        _entries.Add(new DungeonCafeOptionEntry(label, isAvailable: available));
         _candidates.Add(choice);
     }
 
-    private string BuildCareLabel(MaidStateV3 maid, int highest, bool planned)
+    private string BuildCareLabel(MaidState maid, int highest, bool planned)
     {
         BurdenAxis axis = maid.Gauge.HighestAxis(out _);
         int reduction = _request.Tuning.NightCareReduction;    // 가게 Lv7 상향분은 플로우가 실제 적용
@@ -178,7 +178,7 @@ public sealed class NightProgramPanel : UIPanel<NightProgramPanel.Refs>, IManage
                $"{BurdenAxes.ToBurdenLabel(axis)} {highest} -> 약 {after}{aftereffect}  관계(신뢰)+";
     }
 
-    private string BuildReleaseLabel(MaidStateV3 maid, int highest, bool planned)
+    private string BuildReleaseLabel(MaidState maid, int highest, bool planned)
     {
         BurdenAxis axis = maid.Gauge.HighestAxis(out _);
         int retained = highest * _request.Tuning.ManagedReleaseRetainPercent / 100;
@@ -194,7 +194,7 @@ public sealed class NightProgramPanel : UIPanel<NightProgramPanel.Refs>, IManage
         if (_locked || index < 0 || index >= _candidates.Count)
             return;
 
-        NightChoiceV3 choice = _candidates[index];
+        NightChoice choice = _candidates[index];
 
         // 확정
         if (choice.Kind == NightChoiceKind.None)
@@ -224,7 +224,7 @@ public sealed class NightProgramPanel : UIPanel<NightProgramPanel.Refs>, IManage
 
         _locked = true;
         _list.SetLocked(true);
-        OnPlanConfirmed?.Invoke(new List<NightChoiceV3>(_plan));
+        OnPlanConfirmed?.Invoke(new List<NightChoice>(_plan));
     }
 
     private bool ValidateRefs()

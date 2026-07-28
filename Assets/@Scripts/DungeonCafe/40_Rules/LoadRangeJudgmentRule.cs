@@ -67,7 +67,7 @@ public static class LoadRangeJudgmentRule
         int monsterLoadModifier,
         int demandAxisAptitude,
         int masteryLevel,
-        GuesthouseTuningV3 tuning)
+        DungeonCafeTuning tuning)
     {
         int roll = dice.NextInclusive(range.Min, range.Max);
 
@@ -80,7 +80,7 @@ public static class LoadRangeJudgmentRule
         int monsterLoadModifier,
         int demandAxisAptitude,
         int masteryLevel,
-        GuesthouseTuningV3 tuning)
+        DungeonCafeTuning tuning)
     {
         int rawLoad = Math.Max(0, rangeRoll + monsterLoadModifier);
 

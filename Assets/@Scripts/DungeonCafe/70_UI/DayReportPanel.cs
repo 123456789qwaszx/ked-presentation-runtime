@@ -65,7 +65,7 @@ public sealed class DayReportPanel : UIPanel<DayReportPanel.Refs>
             _confirmButton.onClick.RemoveListener(HandleConfirm);
     }
 
-    public void Present(CampaignStateV3 campaign, DayStateV3 day, bool quotaMet)
+    public void Present(CampaignState campaign, DayState day, bool quotaMet)
     {
         if (!_valid || campaign == null || day == null)
             return;
@@ -89,7 +89,7 @@ public sealed class DayReportPanel : UIPanel<DayReportPanel.Refs>
             _noteText.text = BuildNote(campaign, quotaMet);
     }
 
-    private static string BuildNote(CampaignStateV3 campaign, bool quotaMet)
+    private static string BuildNote(CampaignState campaign, bool quotaMet)
     {
         if (!quotaMet)
         {

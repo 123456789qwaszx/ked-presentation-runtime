@@ -38,8 +38,8 @@ public sealed class MaidAssignmentPanel : UIPanel<MaidAssignmentPanel.Refs>, IMa
 
     [SerializeField] private VNOptionItem _maidCardPrefab;
 
-    private readonly GuesthouseOptionItemList _list = new();
-    private readonly List<GuesthouseOptionEntry> _entries = new();
+    private readonly DungeonCafeOptionItemList _list = new();
+    private readonly List<DungeonCafeOptionEntry> _entries = new();
     private readonly List<string> _maidIds = new();
     private bool _valid;
     #endregion
@@ -75,7 +75,7 @@ public sealed class MaidAssignmentPanel : UIPanel<MaidAssignmentPanel.Refs>, IMa
         _list.Clear();
     }
 
-    public void Present(MonsterProfileV3 monster, IReadOnlyList<MaidStateV3> candidates, CampaignStateV3 campaign)
+    public void Present(MonsterProfile monster, IReadOnlyList<MaidState> candidates, CampaignState campaign)
     {
         if (!_valid || monster == null || candidates == null)
             return;
@@ -84,7 +84,7 @@ public sealed class MaidAssignmentPanel : UIPanel<MaidAssignmentPanel.Refs>, IMa
         ApplyCandidates(candidates, campaign);
     }
 
-    private void ApplyMonster(MonsterProfileV3 monster, CampaignStateV3 campaign)
+    private void ApplyMonster(MonsterProfile monster, CampaignState campaign)
     {
         UnderstandingTier tier = campaign.Understanding.GetTier(monster.MonsterId, campaign.Tuning);
 
@@ -105,17 +105,17 @@ public sealed class MaidAssignmentPanel : UIPanel<MaidAssignmentPanel.Refs>, IMa
             : "요구 유형: 미확인";
     }
 
-    private void ApplyCandidates(IReadOnlyList<MaidStateV3> candidates, CampaignStateV3 campaign)
+    private void ApplyCandidates(IReadOnlyList<MaidState> candidates, CampaignState campaign)
     {
         _entries.Clear();
         _maidIds.Clear();
 
         for (int i = 0; i < candidates.Count; i++)
         {
-            MaidStateV3 maid = candidates[i];
+            MaidState maid = candidates[i];
 
             // 이탈/배정 차단 인원은 목록에 남기되 고를 수 없게 한다. 사라지면 왜 없는지 알 수 없다.
-            _entries.Add(new GuesthouseOptionEntry(
+            _entries.Add(new DungeonCafeOptionEntry(
                 BuildLabel(maid),
                 isAvailable: maid.CanBeAssigned(campaign.CurrentDayNumber)));
 
@@ -125,7 +125,7 @@ public sealed class MaidAssignmentPanel : UIPanel<MaidAssignmentPanel.Refs>, IMa
         _list.Rebuild(_entries);
     }
 
-    private static string BuildLabel(MaidStateV3 maid)
+    private static string BuildLabel(MaidState maid)
     {
         AxisTriple aptitude = maid.Aptitude;
         AxisTriple gauge = maid.Gauge.Snapshot();

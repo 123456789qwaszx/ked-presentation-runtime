@@ -38,8 +38,8 @@ public sealed class ReservationBoardPanel : UIPanel<ReservationBoardPanel.Refs>,
 
     [SerializeField] private VNOptionItem _boardCardPrefab;
 
-    private readonly GuesthouseOptionItemList _list = new();
-    private readonly List<GuesthouseOptionEntry> _entries = new();
+    private readonly DungeonCafeOptionItemList _list = new();
+    private readonly List<DungeonCafeOptionEntry> _entries = new();
 
     private bool _valid;
     private bool _locked;
@@ -73,7 +73,7 @@ public sealed class ReservationBoardPanel : UIPanel<ReservationBoardPanel.Refs>,
         _list.Clear();
     }
 
-    public void Present(int dayNumber, IReadOnlyList<MonsterProfileV3> bookings, CampaignStateV3 campaign)
+    public void Present(int dayNumber, IReadOnlyList<MonsterProfile> bookings, CampaignState campaign)
     {
         _locked = false;
 
@@ -87,7 +87,7 @@ public sealed class ReservationBoardPanel : UIPanel<ReservationBoardPanel.Refs>,
 
         for (int i = 0; i < bookings.Count; i++)
         {
-            MonsterProfileV3 monster = bookings[i];
+            MonsterProfile monster = bookings[i];
 
             // 통화 이력이 있는 개체(이해도 일부 파악 이상)만 이름을 밝힌다.
             UnderstandingTier tier = campaign.Understanding.GetTier(monster.MonsterId, campaign.Tuning);
@@ -96,7 +96,7 @@ public sealed class ReservationBoardPanel : UIPanel<ReservationBoardPanel.Refs>,
                 ? $"{monster.DisplayName}\n{monster.ReservationPostText}"
                 : $"미확인 문의\n{monster.ReservationPostText}";
 
-            _entries.Add(new GuesthouseOptionEntry(bookingLabel));
+            _entries.Add(new DungeonCafeOptionEntry(bookingLabel));
         }
 
         _list.Rebuild(_entries);

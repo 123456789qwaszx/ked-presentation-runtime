@@ -1,10 +1,11 @@
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Serialization;
 using Yarn.Unity;
 
 public class VnAppBootstrap : MonoBehaviour
 {
-    [SerializeField]GuesthouseV3Bootstrap guesthouseV3;
+    [SerializeField]DungeonCafeBootstrap dungeonCafe;
     
     private readonly UnityInputSource _unityInputSource = new();
     private readonly UnityTimeSource _unityTimeSource = new();
@@ -181,7 +182,7 @@ public class VnAppBootstrap : MonoBehaviour
         InitializeEpisodePlayer();
         BootstrapScreenBindings();
 
-        _screenBindings.StartGuesthouseCampaign(guesthouseV3);
+        _screenBindings.StartDungeonCafeCampaign(dungeonCafe);
         //dungeonCafeBootstrap.DungeonCafeStart(_screenBindings);
     }
 

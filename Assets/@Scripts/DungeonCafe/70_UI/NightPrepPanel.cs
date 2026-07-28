@@ -38,8 +38,8 @@ public sealed class NightPrepPanel : UIPanel<NightPrepPanel.Refs>, IManagedUI
 
     [SerializeField] private VNOptionItem _prepPrefab;
 
-    private readonly GuesthouseOptionItemList _list = new();
-    private readonly List<GuesthouseOptionEntry> _entries = new();
+    private readonly DungeonCafeOptionItemList _list = new();
+    private readonly List<DungeonCafeOptionEntry> _entries = new();
 
     private enum EntryKind { Confirm, Purchase, Equip }
     private readonly List<(EntryKind kind, string id)> _slots = new();
@@ -47,7 +47,7 @@ public sealed class NightPrepPanel : UIPanel<NightPrepPanel.Refs>, IManagedUI
     private readonly List<string> _purchases = new();
     private readonly List<string> _equipped = new();
 
-    private NightPrepRequestV3 _request;
+    private NightPrepRequest _request;
     private bool _valid;
     private bool _locked;
     #endregion
@@ -80,7 +80,7 @@ public sealed class NightPrepPanel : UIPanel<NightPrepPanel.Refs>, IManagedUI
         _list.Clear();
     }
 
-    public void Present(NightPrepRequestV3 request)
+    public void Present(NightPrepRequest request)
     {
         if (!_valid || request == null)
             return;
@@ -133,7 +133,7 @@ public sealed class NightPrepPanel : UIPanel<NightPrepPanel.Refs>, IManagedUI
                 $"보유 욕구 {_request.HeldDesire}  (구매 예약 -{cost})\n" +
                 $"장착 슬롯 {_equipped.Count} / {_request.SlotLimit}";
 
-        _entries.Add(new GuesthouseOptionEntry(" 이대로 확정"));
+        _entries.Add(new DungeonCafeOptionEntry(" 이대로 확정"));
         _slots.Add((EntryKind.Confirm, null));
 
         // 구매 가능
@@ -143,7 +143,7 @@ public sealed class NightPrepPanel : UIPanel<NightPrepPanel.Refs>, IManagedUI
             bool reserved = _purchases.Contains(def.Id);
             bool affordable = reserved || _request.HeldDesire - cost >= def.DesireCost;
 
-            _entries.Add(new GuesthouseOptionEntry(
+            _entries.Add(new DungeonCafeOptionEntry(
                 $"{(reserved ? "(O)" : "(X)")} 구매: {def.DisplayName}  (욕구 {def.DesireCost})" +
                 (reserved ? "  [예약]" : string.Empty),
                 isAvailable: affordable && !_locked));
@@ -157,7 +157,7 @@ public sealed class NightPrepPanel : UIPanel<NightPrepPanel.Refs>, IManagedUI
             bool on = _equipped.Contains(id);
             bool slotFree = on || _equipped.Count < _request.SlotLimit;
 
-            _entries.Add(new GuesthouseOptionEntry(
+            _entries.Add(new DungeonCafeOptionEntry(
                 $"{(on ? "(O)" : "(X)")} 장착: {id}",
                 isAvailable: slotFree && !_locked));
             _slots.Add((EntryKind.Equip, id));

@@ -110,7 +110,7 @@ public static class DepthDiceRule
         IDiceSource dice,
         in DepthRollInput input,
         in DepthBandLayout layout,
-        GuesthouseTuningV3 tuning)
+        DungeonCafeTuning tuning)
     {
         return Interpret(dice.RollDie99(), input, layout, tuning);
     }
@@ -120,7 +120,7 @@ public static class DepthDiceRule
         int baseRoll,
         in DepthRollInput input,
         in DepthBandLayout layout,
-        GuesthouseTuningV3 tuning)
+        DungeonCafeTuning tuning)
     {
         baseRoll = Math.Clamp(baseRoll, DepthBandLayout.DieMin, DepthBandLayout.DieMax);
 
@@ -160,7 +160,7 @@ public static class DepthDiceRule
     }
 
     /// <summary>회수 0, 그 외 ⌈최종값 / divisor⌉.</summary>
-    public static int CalculateCollapseGain(int finalValue, DepthBand band, GuesthouseTuningV3 tuning)
+    public static int CalculateCollapseGain(int finalValue, DepthBand band, DungeonCafeTuning tuning)
     {
         if (band == DepthBand.Recovery)
             return 0;

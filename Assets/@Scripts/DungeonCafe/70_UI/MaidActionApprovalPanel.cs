@@ -52,10 +52,10 @@ public sealed class MaidActionApprovalPanel : UIPanel<MaidActionApprovalPanel.Re
 
     [SerializeField] private VNOptionItem _optionPrefab;
 
-    private readonly GuesthouseOptionItemList _list = new();
-    private readonly List<GuesthouseOptionEntry> _entries = new();
+    private readonly DungeonCafeOptionItemList _list = new();
+    private readonly List<DungeonCafeOptionEntry> _entries = new();
 
-    private ApprovalRequestV3 _request;
+    private ApprovalRequest _request;
     private readonly List<string> _abilityIds = new();          // 목록 뒤에 붙는 능력 항목의 id
     private readonly HashSet<string> _toggledAbilities = new(StringComparer.Ordinal);
 
@@ -97,7 +97,7 @@ public sealed class MaidActionApprovalPanel : UIPanel<MaidActionApprovalPanel.Re
         _list.Clear();
     }
 
-    public void Present(ApprovalRequestV3 request)
+    public void Present(ApprovalRequest request)
     {
         if (!_valid || request == null)
             return;
@@ -123,9 +123,9 @@ public sealed class MaidActionApprovalPanel : UIPanel<MaidActionApprovalPanel.Re
             _controlStatusText.text = "관리자 통제 신호가 거부되었습니다";
     }
 
-    private void ApplyHeader(ApprovalRequestV3 request)
+    private void ApplyHeader(ApprovalRequest request)
     {
-        MaidStateV3 maid = request.Session.Maid;
+        MaidState maid = request.Session.Maid;
 
         if (_maidNameText != null)
             _maidNameText.text = $"{maid.DisplayName}/ {request.BeatIndex + 1}비트";
@@ -141,14 +141,14 @@ public sealed class MaidActionApprovalPanel : UIPanel<MaidActionApprovalPanel.Re
             "행동 승인권 위임 중";
     }
 
-    private void ApplyGauge(MaidStateV3 maid)
+    private void ApplyGauge(MaidState maid)
     {
         SetGaugeText(_physicalText, maid, BurdenAxis.Physical);
         SetGaugeText(_mentalText, maid, BurdenAxis.Mental);
         SetGaugeText(_empathicText, maid, BurdenAxis.Empathic);
     }
 
-    private static void SetGaugeText(TMP_Text target, MaidStateV3 maid, BurdenAxis axis)
+    private static void SetGaugeText(TMP_Text target, MaidState maid, BurdenAxis axis)
     {
         if (target == null)
             return;
@@ -164,20 +164,20 @@ public sealed class MaidActionApprovalPanel : UIPanel<MaidActionApprovalPanel.Re
         // 옵션 3개 - 라벨에 강도/축/(이해도만큼의) 범위를 싣는다. 위험을 감출지는 시스템이,
         // 감수할지는 관리자가 정한다. 선택 불가로 만들지 않는다.
         for (int i = 0; i < _request.Options.Count; i++)
-            _entries.Add(new GuesthouseOptionEntry(BuildOptionLabel(_request.Options[i])));
+            _entries.Add(new DungeonCafeOptionEntry(BuildOptionLabel(_request.Options[i])));
 
         // 낮 능력 토글 - 승인과 같은 목록에 산다. 누르면 켜지고 다시 누르면 꺼진다.
         for (int i = 0; i < _request.AvailableAbilityIds.Count; i++)
         {
             string id = _request.AvailableAbilityIds[i];
             _abilityIds.Add(id);
-            _entries.Add(new GuesthouseOptionEntry(BuildAbilityLabel(id)));
+            _entries.Add(new DungeonCafeOptionEntry(BuildAbilityLabel(id)));
         }
 
         _list.Rebuild(_entries);
     }
 
-    private string BuildOptionLabel(in OptionDisplayV3 option)
+    private string BuildOptionLabel(in OptionDisplay option)
     {
         string intensity = option.Intensity switch
         {

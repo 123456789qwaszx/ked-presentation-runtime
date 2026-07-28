@@ -68,7 +68,7 @@ public sealed class CampaignEndingPanel : UIPanel<CampaignEndingPanel.Refs>, IMa
             _dismissButton.onClick.RemoveListener(HandleDismiss);
     }
 
-    public void Present(CampaignStateV3 campaign, EndingKindV3 ending)
+    public void Present(CampaignState campaign, EndingKind ending)
     {
         if (!_valid || campaign == null)
             return;
@@ -101,34 +101,34 @@ public sealed class CampaignEndingPanel : UIPanel<CampaignEndingPanel.Refs>, IMa
         SetDismissVisible(false);
     }
 
-    private static string ToTitle(EndingKindV3 ending) => ending switch
+    private static string ToTitle(EndingKind ending) => ending switch
     {
-        EndingKindV3.FullHouseMorning => "S - 만실의 아침",
-        EndingKindV3.NormalBusiness => "A - 정상 영업",
-        EndingKindV3.ClosingTime => "B - 폐점 시간",
-        EndingKindV3.Bankruptcy => "폐업",
-        EndingKindV3.EmptyInn => "전멸 - 빈 객잔",
+        EndingKind.FullHouseMorning => "S - 만실의 아침",
+        EndingKind.NormalBusiness => "A - 정상 영업",
+        EndingKind.ClosingTime => "B - 폐점 시간",
+        EndingKind.Bankruptcy => "폐업",
+        EndingKind.EmptyInn => "전멸 - 빈 객잔",
         _ => "…",
     };
 
-    private static string ToReason(CampaignStateV3 campaign, EndingKindV3 ending) => ending switch
+    private static string ToReason(CampaignState campaign, EndingKind ending) => ending switch
     {
-        EndingKindV3.FullHouseMorning => "15일 완주 / 전원 생존 / 관계 4단계 달성",
-        EndingKindV3.NormalBusiness => "15일 완주 / 전원 생존",
-        EndingKindV3.ClosingTime => "완주했으나 조건 미달",
-        EndingKindV3.Bankruptcy => $"할당 미달 {campaign.Tuning.BankruptcyLimit}회 누적",
-        EndingKindV3.EmptyInn => "가용 메이드 없음",
+        EndingKind.FullHouseMorning => "15일 완주 / 전원 생존 / 관계 4단계 달성",
+        EndingKind.NormalBusiness => "15일 완주 / 전원 생존",
+        EndingKind.ClosingTime => "완주했으나 조건 미달",
+        EndingKind.Bankruptcy => $"할당 미달 {campaign.Tuning.BankruptcyLimit}회 누적",
+        EndingKind.EmptyInn => "가용 메이드 없음",
         _ => string.Empty,
     };
 
-    private static bool HasRouteScar(CampaignStateV3 campaign)
+    private static bool HasRouteScar(CampaignState campaign)
     {
         for (int i = 0; i < campaign.Maids.Count; i++)
             if (campaign.Maids[i].TotalCollapseCount > 0) return true;
         return false;
     }
 
-    private static int CountLost(CampaignStateV3 campaign)
+    private static int CountLost(CampaignState campaign)
     {
         int n = 0;
         for (int i = 0; i < campaign.Maids.Count; i++)

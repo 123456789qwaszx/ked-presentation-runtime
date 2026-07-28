@@ -54,10 +54,10 @@ public sealed class MonsterCodexPanel : UIPanel<MonsterCodexPanel.Refs>
 
     [SerializeField] private VNOptionItem _codexEntryPrefab;
 
-    private readonly GuesthouseOptionItemList _list = new();
-    private readonly List<GuesthouseOptionEntry> _entries = new();
-    private readonly List<MonsterProfileV3> _monsters = new();
-    private CampaignStateV3 _campaign;
+    private readonly DungeonCafeOptionItemList _list = new();
+    private readonly List<DungeonCafeOptionEntry> _entries = new();
+    private readonly List<MonsterProfile> _monsters = new();
+    private CampaignState _campaign;
     private bool _valid;
     #endregion
 
@@ -110,7 +110,7 @@ public sealed class MonsterCodexPanel : UIPanel<MonsterCodexPanel.Refs>
         _list.Clear();
     }
 
-    public void Present(CampaignStateV3 campaign)
+    public void Present(CampaignState campaign)
     {
         if (!_valid || campaign == null)
             return;
@@ -134,11 +134,11 @@ public sealed class MonsterCodexPanel : UIPanel<MonsterCodexPanel.Refs>
     }
 
     /// <summary>통화로 확정된 개체(일부 파악 이상)만 수첩에 남는다. (§8.2)</summary>
-    private void CollectRevealed(CampaignStateV3 campaign)
+    private void CollectRevealed(CampaignState campaign)
     {
         _monsters.Clear();
 
-        IReadOnlyList<MonsterProfileV3> all = campaign.Content.Monsters;
+        IReadOnlyList<MonsterProfile> all = campaign.Content.Monsters;
         for (int i = 0; i < all.Count; i++)
         {
             UnderstandingTier tier = campaign.Understanding.GetTier(all[i].MonsterId, campaign.Tuning);
@@ -154,7 +154,7 @@ public sealed class MonsterCodexPanel : UIPanel<MonsterCodexPanel.Refs>
         for (int i = 0; i < _monsters.Count; i++)
         {
             UnderstandingTier tier = _campaign.Understanding.GetTier(_monsters[i].MonsterId, _campaign.Tuning);
-            _entries.Add(new GuesthouseOptionEntry($"{_monsters[i].DisplayName}  ({ToTierLabel(tier)})"));
+            _entries.Add(new DungeonCafeOptionEntry($"{_monsters[i].DisplayName}  ({ToTierLabel(tier)})"));
         }
 
         _list.Rebuild(_entries);
@@ -165,7 +165,7 @@ public sealed class MonsterCodexPanel : UIPanel<MonsterCodexPanel.Refs>
         if (index < 0 || index >= _monsters.Count)
             return;
 
-        MonsterProfileV3 monster = _monsters[index];
+        MonsterProfile monster = _monsters[index];
         UnderstandingTier tier = _campaign.Understanding.GetTier(monster.MonsterId, _campaign.Tuning);
 
         if (_detailNameText != null)
@@ -182,7 +182,7 @@ public sealed class MonsterCodexPanel : UIPanel<MonsterCodexPanel.Refs>
     }
 
     /// <summary>이해도 4단계 공개. (§8.2: 일부=요구/만족 / 고도=범위/특이 / 완전=보정/심층)</summary>
-    private string BuildNotes(MonsterProfileV3 monster, UnderstandingTier tier)
+    private string BuildNotes(MonsterProfile monster, UnderstandingTier tier)
     {
         StringBuilder builder = new();
 

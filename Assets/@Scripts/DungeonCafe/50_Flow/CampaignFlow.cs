@@ -4,13 +4,13 @@ using Yarn.Unity;
 // 하루 사이클을 반복, 엔딩 체크.
 public sealed class CampaignFlow
 {
-    private readonly CampaignStateV3 _campaign;
-    private readonly DayCycleFlowV3 _dayFlow;
+    private readonly CampaignState _campaign;
+    private readonly DayCycleFlow _dayFlow;
     private readonly VnScreenBindings _screens;
 
     public CampaignFlow(
-        CampaignStateV3 campaign,
-        DayCycleFlowV3 dayFlow,
+        CampaignState campaign,
+        DayCycleFlow dayFlow,
         VnScreenBindings screens)
     {
         _campaign = campaign;
@@ -18,20 +18,20 @@ public sealed class CampaignFlow
         _screens = screens;
     }
 
-    public async YarnTask<EndingKindV3> RunAsync()
+    public async YarnTask<EndingKind> RunAsync()
     {
-        _screens.ShowGuesthouseHud();
-        _screens.UpdateGuesthouseHud(GuesthouseHudSnapshot.FromCampaign(_campaign, "개업 준비"));
+        _screens.DungeonCafeHud();
+        _screens.UpdateDungeonCafeHud(DungeonCafeHudSnapshot.FromCampaign(_campaign, "개업 준비"));
         
         while (_campaign.CurrentDayNumber <= _campaign.Content.CampaignDayCount 
-               && _campaign.Ending == EndingKindV3.None)
+               && _campaign.Ending == EndingKind.None)
         {
             await _dayFlow.RunDayAsync(_campaign);
 
-            EndingKindV3 ending = EndingResolverV3.ResolveImmediate(_campaign);
+            EndingKind ending = EndingResolver.ResolveImmediate(_campaign);
             _campaign.Ending = ending;
 
-            if (_campaign.Ending != EndingKindV3.None)
+            if (_campaign.Ending != EndingKind.None)
                 break;
             
             _campaign.Ledger.StartNewDay();
@@ -39,10 +39,10 @@ public sealed class CampaignFlow
             _campaign.CurrentDayNumber++;
         }
 
-        if (_campaign.Ending == EndingKindV3.None)
-            _campaign.Ending = EndingResolverV3.ResolveCampaignEnd(_campaign);
+        if (_campaign.Ending == EndingKind.None)
+            _campaign.Ending = EndingResolver.ResolveCampaignEnd(_campaign);
 
-        _campaign.Phase = CampaignPhaseV3.Finished;
+        _campaign.Phase = CampaignPhase.Finished;
         await _screens.PresentEndingAsync(_campaign, _campaign.Ending);
 
         return _campaign.Ending;

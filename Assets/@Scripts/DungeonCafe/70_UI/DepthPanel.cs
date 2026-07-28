@@ -48,11 +48,11 @@ public sealed class DepthPanel : UIPanel<DepthPanel.Refs>, IManagedUI
 
     [SerializeField] private VNOptionItem _depthPrefab;
 
-    private readonly GuesthouseOptionItemList _list = new();
-    private readonly List<GuesthouseOptionEntry> _entries = new();
+    private readonly DungeonCafeOptionItemList _list = new();
+    private readonly List<DungeonCafeOptionEntry> _entries = new();
     private readonly List<Action> _handlers = new();
 
-    private DepthInterventionRequestV3 _intervention;
+    private DepthInterventionRequest _intervention;
     private readonly HashSet<string> _toggled = new(StringComparer.Ordinal);
 
     private bool _valid;
@@ -91,7 +91,7 @@ public sealed class DepthPanel : UIPanel<DepthPanel.Refs>, IManagedUI
     // ------------------------------------------------------------
     // 국면 1: 개입
     // ------------------------------------------------------------
-    public void PresentIntervention(DepthInterventionRequestV3 request)
+    public void PresentIntervention(DepthInterventionRequest request)
     {
         if (!_valid || request == null)
             return;
@@ -138,7 +138,7 @@ public sealed class DepthPanel : UIPanel<DepthPanel.Refs>, IManagedUI
     // 국면 2: 굴림 제시
     // ------------------------------------------------------------
     public void PresentRoll(
-        ServiceSessionStateV3 session, in DepthRollResult roll, IReadOnlyList<string> postRollAbilityIds)
+        ServiceSessionState session, in DepthRollResult roll, IReadOnlyList<string> postRollAbilityIds)
     {
         if (!_valid || session == null)
             return;
@@ -182,7 +182,7 @@ public sealed class DepthPanel : UIPanel<DepthPanel.Refs>, IManagedUI
     // ------------------------------------------------------------
     // 국면 3: 회수 선택
     // ------------------------------------------------------------
-    public void PresentRecoveryChoice(ServiceSessionStateV3 session)
+    public void PresentRecoveryChoice(ServiceSessionState session)
     {
         if (!_valid || session == null)
             return;
@@ -215,7 +215,7 @@ public sealed class DepthPanel : UIPanel<DepthPanel.Refs>, IManagedUI
     // ------------------------------------------------------------
     // 공통
     // ------------------------------------------------------------
-    private void ApplyHeader(ServiceSessionStateV3 session, int depthBeat)
+    private void ApplyHeader(ServiceSessionState session, int depthBeat)
     {
         if (_headerText == null)
             return;
@@ -246,7 +246,7 @@ public sealed class DepthPanel : UIPanel<DepthPanel.Refs>, IManagedUI
 
     private void AddEntry(string label, Action handler)
     {
-        _entries.Add(new GuesthouseOptionEntry(label));
+        _entries.Add(new DungeonCafeOptionEntry(label));
         _handlers.Add(handler);
     }
 

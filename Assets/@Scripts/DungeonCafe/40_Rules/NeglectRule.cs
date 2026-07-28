@@ -82,7 +82,7 @@ public static class NeglectRule
             SelfReleasePercent = Math.Clamp(selfReleasePercent, 0, 100 - HoldPercent);
         }
 
-        public static NeglectChances From(GuesthouseTuningV3 tuning)
+        public static NeglectChances From(DungeonCafeTuning tuning)
             => new(tuning.NeglectHoldPercent, tuning.NeglectSelfReleasePercent);
     }
 
@@ -91,7 +91,7 @@ public static class NeglectRule
         int highestAxisCollapse,
         bool hasSpecialQuirk,
         in NeglectChances chances,
-        GuesthouseTuningV3 tuning)
+        DungeonCafeTuning tuning)
     {
         NeglectCollapseOutcome outcome;
         int after;

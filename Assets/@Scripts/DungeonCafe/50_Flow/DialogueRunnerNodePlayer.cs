@@ -3,7 +3,7 @@
 //
 // // DialogueRunner를 게스트하우스 v3 노드 재생기로 감싼다.
 // // 아직 작성되지 않은 노드는 경고만 남기고 시스템 진행을 계속한다.
-// public sealed class DialogueRunnerNodePlayer : INodePlayerV3
+// public sealed class DialogueRunnerNodePlayer : IDungeonCafeNodePlayer
 // {
 //     private readonly DialogueRunner _runner;
 //

@@ -14,7 +14,7 @@ public static class TotalCollapseRule
     public const string HollowQuirkId = "qk_acc_hollowmark";
 
     public static TotalCollapseOutcome Resolve(
-        MaidStateV3 maid, SpeciesProtocolV3 protocol, GuesthouseTuningV3 tuning)
+        MaidState maid, SpeciesProtocol protocol, DungeonCafeTuning tuning)
     {
         bool rescued = maid.HasRescueTicket;
         maid.MarkTotalCollapse(rescued);

@@ -2119,7 +2119,7 @@ GameObject:
   - component: {fileID: 102681136}
   - component: {fileID: 102681135}
   m_Layer: 0
-  m_Name: GuesthouseV3Bootstrap
+  m_Name: DungeonCafeBootstrap
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6696,7 +6696,7 @@ GameObject:
   - component: {fileID: 337008991}
   - component: {fileID: 337008990}
   m_Layer: 0
-  m_Name: GuesthouseStatusOverlay
+  m_Name: DungeonCafeStatusOverlay
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -11962,7 +11962,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 355984e90625bb24fbaa9aa39f39f63f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VnAppBootstrap
-  guesthouseV3: {fileID: 102681135}
+  dungeonCafe: {fileID: 102681135}
   overlayCommandExecutor: {fileID: 1334588234}
   overlaySequenceRunner: {fileID: 461075912}
   overlaySequenceCatalog: {fileID: 11400000, guid: f5c84b12e7c8a2140a5cecd428a8d63a, type: 2}
@@ -48412,7 +48412,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.000017166138, y: 0.000103891594}
+  m_AnchoredPosition: {x: 0.000017166138, y: -0.00015929586}
   m_SizeDelta: {x: 0, y: 300}
   m_Pivot: {x: 0, y: 1}
 --- !u!222 &3549758765554785767

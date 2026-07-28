@@ -75,7 +75,7 @@ public sealed class ServiceSettlementPanel : UIPanel<ServiceSettlementPanel.Refs
             _confirmButton.onClick.RemoveListener(HandleConfirmClicked);
     }
 
-    public void Present(ServiceSessionStateV3 session, in SettlementV3Result result)
+    public void Present(ServiceSessionState session, in SettlementResult result)
     {
         if (!_valid || session == null)
             return;
@@ -120,7 +120,7 @@ public sealed class ServiceSettlementPanel : UIPanel<ServiceSettlementPanel.Refs
     }
 
     /// <summary>숙련 XP = 완화 전 원본 부하 누적. (§12.3)</summary>
-    private string BuildMasteryText(ServiceSessionStateV3 session)
+    private string BuildMasteryText(ServiceSessionState session)
     {
         _builder.Clear();
 
@@ -141,7 +141,7 @@ public sealed class ServiceSettlementPanel : UIPanel<ServiceSettlementPanel.Refs
         return _builder.Length > 0 ? _builder.ToString() : "숙련 경험 없음";
     }
 
-    private static string BuildOutcomeText(ServiceSessionStateV3 session, in SettlementV3Result result)
+    private static string BuildOutcomeText(ServiceSessionState session, in SettlementResult result)
     {
         string axisLabel = BurdenAxes.ToBurdenLabel(session.DepthAxis);
 

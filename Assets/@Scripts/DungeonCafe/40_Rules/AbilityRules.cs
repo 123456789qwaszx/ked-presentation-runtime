@@ -3,7 +3,7 @@
 public static class AbilityRules
 {
     // 지식/관계/가게레벨 조건 충족 여부 (비용 제외).
-    public static bool MeetsConditions(CampaignStateV3 campaign, PlayerAbilityDefinition def)
+    public static bool MeetsConditions(CampaignState campaign, PlayerAbilityDefinition def)
     {
         if (campaign.ShopLevel < def.ShopLevelRequired)
             return false;
@@ -13,7 +13,7 @@ public static class AbilityRules
 
         if (def.OwnerMaidId != null)
         {
-            MaidStateV3 maid = campaign.GetMaid(def.OwnerMaidId);
+            MaidState maid = campaign.GetMaid(def.OwnerMaidId);
             if (maid == null)
                 return false;
             
@@ -25,11 +25,11 @@ public static class AbilityRules
         return true;
     }
 
-    private static bool MeetsKnowledge(CampaignStateV3 campaign, PlayerAbilityDefinition def)
+    private static bool MeetsKnowledge(CampaignState campaign, PlayerAbilityDefinition def)
     {
         UnderstandingState u = campaign.Understanding;
-        GuesthouseV3ContentDB c = campaign.Content;
-        GuesthouseTuningV3 t = campaign.Tuning;
+        DungeonCafeContentDB c = campaign.Content;
+        DungeonCafeTuning t = campaign.Tuning;
 
         return def.KnowledgeGate switch
         {
@@ -51,7 +51,7 @@ public static class AbilityRules
     }
 
     /// <summary>구매: 조건 충족 + 보유 욕구 지불. 전용 능력은 비용 0 - 밤 이벤트로 습득. (§11.3)</summary>
-    public static bool TryPurchase(CampaignStateV3 campaign, PlayerAbilityDefinition def)
+    public static bool TryPurchase(CampaignState campaign, PlayerAbilityDefinition def)
     {
         if (campaign.Abilities.Owns(def.Id)) return false;
         if (!MeetsConditions(campaign, def)) return false;
