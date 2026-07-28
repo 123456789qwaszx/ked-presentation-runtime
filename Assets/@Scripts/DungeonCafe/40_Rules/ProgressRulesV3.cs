@@ -38,10 +38,11 @@ public static class UnderstandingRule
         campaign.Understanding.AddPoints(monsterId, amount);
     }
 
-    public static void GrantPhoneCall(CampaignStateV3 campaign, string monsterId)
+    public static bool GrantPhoneCall(CampaignStateV3 campaign, string monsterId)
     {
-        if (campaign.Understanding.MarkPhoneCalled(monsterId))
-            campaign.Understanding.AddPoints(monsterId, campaign.Tuning.UnderstandingPerPhoneCall);
+        if (!campaign.Understanding.MarkPhoneCalled(monsterId)) return false;
+        campaign.Understanding.AddPoints(monsterId, campaign.Tuning.UnderstandingPerPhoneCall);
+        return true;
     }
 
     /// <summary>심층 목격: 첫 진입 시 +2, [각인 잔향] 태그 종족은 x2. (§4.4, §10.2)</summary>

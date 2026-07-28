@@ -55,6 +55,27 @@ public sealed class UnderstandingState
         }
         return count;
     }
+    
+    // 주어진 개체 중 이해도가 가장 낮은 하나.
+    public string FindLeastUnderstood(IReadOnlyList<MonsterProfileV3> monsters)
+    {
+        string selectedId = null;
+        int selectedPoints = int.MaxValue;
+
+        for (int i = 0; i < monsters.Count; i++)
+        {
+            string monsterId = monsters[i].MonsterId;
+            int points = GetPoints(monsterId);
+
+            if (points < selectedPoints)
+            {
+                selectedId = monsterId;
+                selectedPoints = points;
+            }
+        }
+
+        return selectedId;
+    }
 
     public IEnumerable<KeyValuePair<string, int>> AllPoints => _points;
     public IEnumerable<string> PhoneCalled => _phoneCalled;
@@ -225,6 +246,14 @@ public sealed class CampaignStateV3
             if (_maids[i].CanBeAssigned(dayNumber)) list.Add(_maids[i]);
         return list;
     }
+    
+    public List<MaidStateV3> GetPresent(int dayNumber)
+    {
+        var list = new List<MaidStateV3>();
+        for (int i = 0; i < _maids.Count; i++)
+            if (_maids[i].IsPresent(dayNumber)) list.Add(_maids[i]);
+        return list;
+    }
 
     public int AliveMaidCount
     {
@@ -256,12 +285,14 @@ public sealed class CampaignStateV3
     }
     
     public bool RegisterPhoneCall(string monsterId)
+        => UnderstandingRule.GrantPhoneCall(this, monsterId);
+    
+    // 예약된 "먼저 요구하는 이벤트"를 꺼내고 비운다
+    public List<(string maidId, string quirkId)> DrainPendingQuirkRequests()
     {
-        if (!Understanding.MarkPhoneCalled(monsterId))
-            return false;
-        
-        Understanding.AddPoints(monsterId, Tuning.UnderstandingPerPhoneCall);
-        return true;
+        var drained = new List<(string maidId, string quirkId)>(PendingQuirkRequests);
+        PendingQuirkRequests.Clear();
+        return drained;
     }
 
     public bool CanSaveNow => Phase is CampaignPhaseV3.SlotBoundary

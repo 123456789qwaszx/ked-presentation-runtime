@@ -111,6 +111,8 @@ public sealed class MaidStateV3
     }
 
     public MasteryTrackV3 GetMastery(BurdenAxis axis) => _mastery[(int)axis];
+    
+    public bool IsPresent(int dayNumber) => !IsLost && dayNumber >= Profile.UnlockDay;
 
     public bool CanBeAssigned(int dayNumber)
     {
