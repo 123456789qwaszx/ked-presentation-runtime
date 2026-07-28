@@ -81,7 +81,7 @@ public sealed class NightMaidFlowV3
                 tuning);
 
         maid.Gauge.SetValue(
-            axis,
+            axis, 
             entry * retainPercent / 100);
 
         campaign.Ledger.EarnNight(
@@ -197,11 +197,12 @@ public sealed class NightMaidFlowV3
 
     public void AdvanceAftereffects(
         CampaignStateV3 campaign,
-        MaidStateV3 maid,
-        bool caredTonight)
+        MaidStateV3 maid)
     {
         if (maid.Aftereffects.Count == 0)
             return;
+
+        maid.Gauge.HighestAxis(out int highest);
 
         var snapshot =
             new List<AftereffectInstance>(maid.Aftereffects);
@@ -210,23 +211,20 @@ public sealed class NightMaidFlowV3
         {
             AftereffectInstance instance = snapshot[i];
 
-            if (caredTonight && i == 0)
+            // 붕괴가 완전히 빠진 밤이면 자연 해소형은 낫는다.
+            if (instance.HealsWhenCalm && highest == 0)
+            {
+                maid.RemoveAftereffect(instance);
                 continue;
+            }
 
-            bool healed = instance.AdvanceNight(
-                campaign.Tuning,
-                out bool permanentize);
-
-            if (permanentize)
+            // 그 외에는 영구화 시계만 진행한다.
+            if (instance.AdvanceNight(campaign.Tuning))
             {
                 maid.RemoveAftereffect(instance);
                 maid.AddQuirk(
                     instance.Definition.PermanentizeQuirkId,
                     isAccident: true);
-            }
-            else if (healed)
-            {
-                maid.RemoveAftereffect(instance);
             }
         }
     }

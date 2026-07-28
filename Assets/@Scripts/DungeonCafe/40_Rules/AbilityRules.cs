@@ -1,20 +1,25 @@
-using System;
-
-/// <summary>능력 해금 4-튜플 판정과 구매. (§11) 사용 가능 여부는 PlayerAbilityState.CanUse.</summary>
+// 능력 해금 4-튜플 판정과 구매.
+// 사용 가능 여부는 PlayerAbilityState.CanUse.
 public static class AbilityRules
 {
-    /// <summary>지식/관계/가게레벨 조건 충족 여부 (비용 제외).</summary>
+    // 지식/관계/가게레벨 조건 충족 여부 (비용 제외).
     public static bool MeetsConditions(CampaignStateV3 campaign, PlayerAbilityDefinition def)
     {
-        if (campaign.ShopLevel < def.ShopLevelRequired) return false;
-        if (!MeetsKnowledge(campaign, def)) return false;
+        if (campaign.ShopLevel < def.ShopLevelRequired)
+            return false;
+        
+        if (!MeetsKnowledge(campaign, def))
+            return false;
 
         if (def.OwnerMaidId != null)
         {
             MaidStateV3 maid = campaign.GetMaid(def.OwnerMaidId);
-            if (maid == null) return false;
+            if (maid == null)
+                return false;
+            
             int stage = RelationRule.ResolveStage(maid.RelationPoints, campaign.Tuning);
-            if (stage < def.RelationStageRequired) return false;
+            if (stage < def.RelationStageRequired)
+                return false;
         }
 
         return true;
@@ -29,7 +34,7 @@ public static class AbilityRules
         return def.KnowledgeGate switch
         {
             KnowledgeGateKind.None => true,
-            KnowledgeGateKind.AnyPartialCount
+            KnowledgeGateKind.AnyPartialCount 
                 => u.CountAtTier(c, t, UnderstandingTier.Partial) >= def.KnowledgeCount,
             KnowledgeGateKind.AnyCompleteCount
                 => u.CountAtTier(c, t, UnderstandingTier.Complete) >= def.KnowledgeCount,

@@ -40,8 +40,11 @@ public sealed class UnderstandingState
     public int CountAtTier(GuesthouseV3ContentDB content, GuesthouseTuningV3 tuning, UnderstandingTier atLeast)
     {
         int count = 0;
+        
         for (int i = 0; i < content.Monsters.Count; i++)
-            if (GetTier(content.Monsters[i].MonsterId, tuning) >= atLeast) count++;
+            if (GetTier(content.Monsters[i].MonsterId, tuning) >= atLeast)
+                count++;
+        
         return count;
     }
 
@@ -250,8 +253,10 @@ public sealed class CampaignStateV3
     public List<MaidStateV3> GetPresent(int dayNumber)
     {
         var list = new List<MaidStateV3>();
+        
         for (int i = 0; i < _maids.Count; i++)
             if (_maids[i].IsPresent(dayNumber)) list.Add(_maids[i]);
+        
         return list;
     }
 

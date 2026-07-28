@@ -1,10 +1,6 @@
 using System.Collections.Generic;
 using Yarn.Unity;
 
-/// <summary>
-/// 밤 시작 상점/장착. (v3 §11)
-/// 구매 예약과 장착 구성을 한 번에 받아 그대로 시스템에 돌려준다.
-/// </summary>
 public sealed partial class VnScreenBindings
 {
     private bool _hasNightPrepResult;
@@ -29,7 +25,9 @@ public sealed partial class VnScreenBindings
 
         ClosePanel();
 
-        return new NightPrepResponseV3(_pendingPrepPurchases, _pendingPrepEquips);
+        return new NightPrepResponseV3(
+            purchase: _pendingPrepPurchases,
+            equip: _pendingPrepEquips);
     }
 
     private void ApplyNightPrepBindings(NightPrepPanel panel)
@@ -43,6 +41,7 @@ public sealed partial class VnScreenBindings
     {
         _pendingPrepPurchases = purchases;
         _pendingPrepEquips = equips;
+        
         _hasNightPrepResult = true;
     }
 }

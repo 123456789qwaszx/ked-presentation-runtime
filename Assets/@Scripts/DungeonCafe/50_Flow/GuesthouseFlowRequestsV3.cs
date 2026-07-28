@@ -72,23 +72,35 @@ public readonly struct DepthRollDecisionV3
     public static DepthRollDecisionV3 None => default;
 }
 
-/// <summary>밤 계획 요청. manageCount 명까지 (maidId, 처리) 지정, 나머지는 방치. (§5.1)</summary>
 public sealed class NightPlanRequestV3
 {
     public int DayNumber { get; }
     public int ManageCount { get; }
     public IReadOnlyList<MaidStateV3> Maids { get; }
     public GuesthouseTuningV3 Tuning { get; }
-    /// <summary>먼저 요구하는 이벤트 예약 (maidId, quirkId). (§6.2)</summary>
+    
     public IReadOnlyList<(string maidId, string quirkId)> QuirkRequests { get; }
-    public NightPlanRequestV3(int day, int manageCount, IReadOnlyList<MaidStateV3> maids,
-        GuesthouseTuningV3 tuning, IReadOnlyList<(string, string)> quirkRequests)
-    { DayNumber = day; ManageCount = manageCount; Maids = maids; Tuning = tuning; QuirkRequests = quirkRequests; }
+
+    public NightPlanRequestV3(
+        int day, 
+        int manageCount,
+        IReadOnlyList<MaidStateV3> maids,
+        GuesthouseTuningV3 tuning,
+        IReadOnlyList<(string, string)> quirkRequests)
+    {
+        DayNumber = day; 
+        ManageCount = manageCount;
+        Maids = maids; 
+        Tuning = tuning; 
+        QuirkRequests = quirkRequests;
+    }
 
     public bool CanRelease(MaidStateV3 maid)
     {
         maid.Gauge.HighestAxis(out int v);
-        return v >= Tuning.ManagedReleaseMinimumCollapse && v < Tuning.ControlLossThreshold && !maid.IsLost;
+        
+        return v >= Tuning.ManagedReleaseMinimumCollapse
+               && v < Tuning.ControlLossThreshold && !maid.IsLost;
     }
 }
 
@@ -99,7 +111,6 @@ public readonly struct NightChoiceV3
     public NightChoiceV3(string maidId, NightChoiceKind kind) { MaidId = maidId; Kind = kind; }
 }
 
-/// <summary>밤 시작 상점: 구매/장착 결정.</summary>
 public sealed class NightPrepRequestV3
 {
     public IReadOnlyList<PlayerAbilityDefinition> Purchasable { get; }
@@ -107,15 +118,30 @@ public sealed class NightPrepRequestV3
     public IReadOnlyList<string> Equipped { get; }
     public int SlotLimit { get; }
     public int HeldDesire { get; }
-    public NightPrepRequestV3(IReadOnlyList<PlayerAbilityDefinition> purchasable,
-        IReadOnlyList<string> owned, IReadOnlyList<string> equipped, int slotLimit, int held)
-    { Purchasable = purchasable; Owned = owned; Equipped = equipped; SlotLimit = slotLimit; HeldDesire = held; }
+
+    public NightPrepRequestV3(
+        IReadOnlyList<PlayerAbilityDefinition> purchasable, 
+        IReadOnlyList<string> owned,
+        IReadOnlyList<string> equipped,
+        int slotLimit, 
+        int held)
+    {
+        Purchasable = purchasable;
+        Owned = owned; 
+        Equipped = equipped;
+        SlotLimit = slotLimit; 
+        HeldDesire = held;
+    }
 }
 
 public readonly struct NightPrepResponseV3
 {
     public IReadOnlyList<string> PurchaseIds { get; }
     public IReadOnlyList<string> EquipIds { get; }
+
     public NightPrepResponseV3(IReadOnlyList<string> purchase, IReadOnlyList<string> equip)
-    { PurchaseIds = purchase; EquipIds = equip; }
+    {
+        PurchaseIds = purchase;
+        EquipIds = equip;
+    }
 }

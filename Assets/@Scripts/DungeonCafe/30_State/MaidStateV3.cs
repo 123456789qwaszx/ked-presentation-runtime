@@ -28,12 +28,10 @@ public sealed class MasteryTrackV3
     public void Restore(int level, int experience) { Level = Math.Max(0, level); Experience = Math.Max(0, experience); }
 }
 
-/// <summary>후유증 보유 인스턴스. (§9)</summary>
 public sealed class AftereffectInstance
 {
     public AftereffectDefinition Definition { get; }
     public int CaresApplied { get; private set; }
-    public int NeglectDaysPassed { get; private set; }
     public int DaysHeld { get; private set; }
     public int BlockDaysLeft { get; private set; }
 
@@ -47,6 +45,9 @@ public sealed class AftereffectInstance
 
     public bool BlocksAssignmentNow => BlockDaysLeft > 0;
 
+    // 붕괴가 완전히 빠진 밤에 자연 해소되는 유형인가.
+    public bool HealsWhenCalm => Definition.NeglectHealDays > 0;
+
     /// <summary>안정 1회 적용. 해소되면 true.</summary>
     public bool ApplyCare()
     {
@@ -54,22 +55,19 @@ public sealed class AftereffectInstance
         return CaresApplied >= Definition.CareCuresNeeded;
     }
 
-    /// <summary>방치 하루 경과. 해소되면 true, 영구화 도달이면 permanentize 로 알린다.</summary>
-    public bool AdvanceNight(GuesthouseTuningV3 tuning, out bool permanentize)
+    /// <summary>밤 시간 경과: 영구화 시계와 배정 차단만 진행. 영구화 도달이면 true.</summary>
+    public bool AdvanceNight(GuesthouseTuningV3 tuning)
     {
-        NeglectDaysPassed++;
         DaysHeld++;
         if (BlockDaysLeft > 0 && BlockDaysLeft != int.MaxValue) BlockDaysLeft--;
 
-        permanentize = !string.IsNullOrEmpty(Definition.PermanentizeQuirkId)
-                       && DaysHeld >= tuning.BrandPermanentizeDays;
-
-        return Definition.NeglectHealDays > 0 && NeglectDaysPassed >= Definition.NeglectHealDays;
+        return !string.IsNullOrEmpty(Definition.PermanentizeQuirkId)
+               && DaysHeld >= tuning.BrandPermanentizeDays;
     }
 
-    public void Restore(int cares, int neglectDays, int daysHeld, int blockLeft)
+    public void Restore(int cares, int daysHeld, int blockLeft)
     {
-        CaresApplied = cares; NeglectDaysPassed = neglectDays; DaysHeld = daysHeld; BlockDaysLeft = blockLeft;
+        CaresApplied = cares; DaysHeld = daysHeld; BlockDaysLeft = blockLeft;
     }
 }
 

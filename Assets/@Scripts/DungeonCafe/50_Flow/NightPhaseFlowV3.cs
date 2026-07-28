@@ -33,22 +33,25 @@ public sealed class NightPhaseFlowV3
 
         campaign.Phase = CampaignPhaseV3.InNight;
 
-        // 메이드 목록 제시. 배정 불가 상태여도 밤에는 나타남.
+        // 메이드 목록 제시. 후유증(배치불가) 상태여도 밤에는 나타남.
         List<MaidStateV3> present = campaign.GetPresent(dayState.DayNumber);
 
+        // 오늘 밤 플레이어가 직접 손댈 수 있는 메이드 수 조건 체크
         int manageCount = campaign.Tuning.GetNightManageCount(campaign.ShopLevel);
 
         NightPlanRequestV3 request = new(
-            dayState.DayNumber, manageCount, present,
-            campaign.Tuning, campaign.DrainPendingQuirkRequests());
+            dayState.DayNumber, 
+            manageCount, 
+            present,
+            campaign.Tuning,
+            campaign.DrainPendingQuirkRequests());
 
-        IReadOnlyList<NightChoiceV3> choices = await _screens.RequestNightPlanAsync(request);
-
-        // 직접 처리한 인원. 안정만 후유증 진행과 관계 판정에 따로 쓰이므로 둘로 나눈다.
-        var caredIds = new HashSet<string>(StringComparer.Ordinal);
+        IReadOnlyList<NightChoiceV3> choices = 
+            await _screens.RequestNightPlanAsync(request);
+        
+        // 직접 처리(안정 + 관리 붕괴)한 인원. 나머지는 방치로 넘어간다.
         var handledIds = new HashSet<string>(StringComparer.Ordinal);
 
-        // 지정 인원 처리. 관리 붕괴는 조건을 미만일 시 제시되지 않음.
         int used = 0;
 
         for (int i = 0; i < choices.Count && used < manageCount; i++)
@@ -56,14 +59,13 @@ public sealed class NightPhaseFlowV3
             NightChoiceV3 choice = choices[i];
             MaidStateV3 maid = campaign.GetMaid(choice.MaidId);
 
-            if (maid == null || maid.IsLost || handledIds.Contains(maid.MaidId))
+            if (maid.IsLost || handledIds.Contains(maid.MaidId))
                 continue;
 
             if (choice.Kind == NightChoiceKind.Care)
             {
                 await _maidFlow.RunCareAsync(campaign, maid);
 
-                caredIds.Add(maid.MaidId);
                 handledIds.Add(maid.MaidId);
                 used++;
             }
@@ -75,7 +77,6 @@ public sealed class NightPhaseFlowV3
             }
         }
 
-        // 남은 인원 방치. 메이드 순서가 곧 방치 판정의 난수 소비 순서다.
         var dice = new CommittingDice(campaign, "neglect");
 
         for (int i = 0; i < present.Count; i++)
@@ -83,18 +84,17 @@ public sealed class NightPhaseFlowV3
             MaidStateV3 maid = present[i];
 
             if (!handledIds.Contains(maid.MaidId))
+            {
                 await _maidFlow.RunNeglectAsync(campaign, maid, dayState, dice);
-
-            // 관리 붕괴로 처리했어도 안정을 준 것은 아니므로 공동의 흔적은 관계를 깎는다.
-            if (!caredIds.Contains(maid.MaidId))
                 _maidFlow.ApplyNeglectedRelationPenalty(campaign, maid);
+            }
         }
 
-        // 후유증 하루 경과. 오늘 안정을 받았다면 첫 항목은 이미 진행된 것으로 본다.
+        // 후유증 하루 경과.
         for (int i = 0; i < present.Count; i++)
         {
             MaidStateV3 maid = present[i];
-            _maidFlow.AdvanceAftereffects(campaign, maid, caredIds.Contains(maid.MaidId));
+            _maidFlow.AdvanceAftereffects(campaign, maid);
         }
 
         // 심야 대화 후, 오늘 손님 중 가장 모르는 쪽부터 분석한다.

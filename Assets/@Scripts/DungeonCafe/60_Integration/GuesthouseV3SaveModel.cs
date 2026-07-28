@@ -32,7 +32,6 @@ public sealed class GuesthouseV3SaveModel
     {
         public string id;
         public int cares;
-        public int neglectDays;
         public int daysHeld;
         public int blockDaysLeft;
     }
@@ -107,7 +106,6 @@ public sealed class GuesthouseV3SaveModel
                 {
                     id = inst.Definition.Id,
                     cares = inst.CaresApplied,
-                    neglectDays = inst.NeglectDaysPassed,
                     daysHeld = inst.DaysHeld,
                     blockDaysLeft = inst.BlockDaysLeft == int.MaxValue ? -1 : inst.BlockDaysLeft,
                 });
@@ -170,7 +168,7 @@ public sealed class GuesthouseV3SaveModel
                 AftereffectDefinition def = content.GetAftereffect(es.id);
                 if (def == null) continue;
                 m.AddAftereffect(def);
-                m.FindAftereffect(es.id)?.Restore(es.cares, es.neglectDays, es.daysHeld,
+                m.FindAftereffect(es.id)?.Restore(es.cares, es.daysHeld,
                     es.blockDaysLeft < 0 ? int.MaxValue : es.blockDaysLeft);
             }
         }
