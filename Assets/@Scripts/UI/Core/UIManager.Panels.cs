@@ -40,9 +40,11 @@ public partial class UIManager
 
         UIBase popped = _panelStack.Pop();
 
+        // 숨기기 전에 티켓을 무효화한다. 로더가 비동기가 되면 이미 숨긴 UI에 패치가 적용될 수 있다.
+        BumpShowVersion();
+
         HideManagedUI(popped);
 
-        BumpShowVersion();
         afterPopped?.Invoke(popped);
 
         ApplyPanelStackState();

@@ -1,6 +1,6 @@
 public sealed class StageDepthLayerBinder
 {
-    private IShotResponseStageProvider _provider;
+    private readonly IShotResponseStageProvider _provider;
 
     private readonly PresentationResponseProfile _far = PresentationResponseProfile.DepthFar;
     private readonly PresentationResponseProfile _back = PresentationResponseProfile.DepthBack;
@@ -8,11 +8,13 @@ public sealed class StageDepthLayerBinder
     private readonly PresentationResponseProfile _front = PresentationResponseProfile.DepthFront;
     private readonly PresentationResponseProfile _close = PresentationResponseProfile.DepthClose;
 
+    public StageDepthLayerBinder(IShotResponseStageProvider provider)
+    {
+        _provider = provider;
+    }
+
     public void EnsureBindings(PresentationShotResponseSystem rig)
     {
-        if (!TryEnsureProvider())
-            return;
-
         BindStage(rig, PresentationStageKey.Stage00);
         BindStage(rig, PresentationStageKey.Stage01);
         BindStage(rig, PresentationStageKey.Stage02);
@@ -51,15 +53,5 @@ public sealed class StageDepthLayerBinder
             key,
             target,
             profile);
-    }
-
-    private bool TryEnsureProvider()
-    {
-        if (_provider != null)
-            return true;
-
-        _provider = UIManager.Instance.GetUI<PresentationUIRoot>();
-
-        return _provider != null;
     }
 }

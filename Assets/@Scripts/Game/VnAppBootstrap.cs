@@ -155,10 +155,11 @@ public class VnAppBootstrap : MonoBehaviour
         
         _vnRuntimeStateProvider = new VNRuntimeStateProvider(_rollbackHistory, _choiceHistory, vnPlaytimeTracker);
         rollbackHistoryDebugView.Bind(_rollbackHistory);
-        _presentationResponseRig = new PresentationShotResponseSystem();
         
         IShotResponseStageProvider shotResponseStageProvider =
             UIManager.Instance.GetUI<PresentationUIRoot>();
+        
+        _presentationResponseRig = new PresentationShotResponseSystem(shotResponseStageProvider);
         
         characterFocusDebugView.Initialize(
             _presentationStage,

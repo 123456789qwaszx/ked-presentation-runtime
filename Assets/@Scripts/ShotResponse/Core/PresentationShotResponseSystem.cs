@@ -50,13 +50,20 @@ public sealed class PresentationShotResponseSystem
     }
 
     private readonly List<RuntimeBinding> _bindings = new();
-    private readonly PresentationCameraRootApplier _cameraRootApplier = new();
-    private readonly PresentationResponseCoordinateMapper _coordinateMapper = new();
-    private readonly StageDepthLayerBinder _stageDepthLayerBinder = new();
+    private readonly PresentationCameraRootApplier _cameraRootApplier;
+    private readonly PresentationResponseCoordinateMapper _coordinateMapper;
+    private readonly StageDepthLayerBinder _stageDepthLayerBinder;
 
     private PresentationIntentState _currentState = PresentationIntentState.Default;
 
     public PresentationIntentState CurrentState => _currentState;
+
+    public PresentationShotResponseSystem(IShotResponseStageProvider stageProvider)
+    {
+        _cameraRootApplier = new PresentationCameraRootApplier(stageProvider);
+        _coordinateMapper = new PresentationResponseCoordinateMapper(stageProvider);
+        _stageDepthLayerBinder = new StageDepthLayerBinder(stageProvider);
+    }
 
     public void RegisterRuntimeBinding(
         string bindingKey,

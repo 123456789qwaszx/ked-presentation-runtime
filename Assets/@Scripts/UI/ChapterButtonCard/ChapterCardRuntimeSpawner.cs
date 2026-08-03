@@ -27,6 +27,9 @@ public sealed class ChapterCardRuntimeSpawner
 
         RectTransform parent = RootProvider?.ChapterCardRoot;
 
+        if (parent == null)
+            Debug.LogError("[ChapterCardRuntimeSpawner] ChapterCardRoot is null.");
+
         for (int i = 0; i < count; i++)
         {
             ChapterButtonCard card = CreateCard(parent, prefab);

@@ -39,9 +39,10 @@ public partial class UIManager
     {
         T overlay = GetUI<T>();
 
-        HideManagedUI(overlay);
-
+        // 숨기기 전에 티켓을 무효화한다. 로더가 비동기가 되면 이미 숨긴 UI에 패치가 적용될 수 있다.
         BumpShowVersion();
+
+        HideManagedUI(overlay);
     }
 
     public void ClearOverlay()

@@ -2,7 +2,12 @@ using UnityEngine;
 
 public sealed class PresentationResponseCoordinateMapper
 {
-    private IShotResponseStageProvider _stageRootProvider;
+    private readonly IShotResponseStageProvider _stageRootProvider;
+
+    public PresentationResponseCoordinateMapper(IShotResponseStageProvider stageRootProvider)
+    {
+        _stageRootProvider = stageRootProvider;
+    }
 
     public PresentationResponseMeasure CaptureBaseMeasure(IResponseTarget target)
     {
@@ -39,9 +44,6 @@ public sealed class PresentationResponseCoordinateMapper
 
     private RectTransform GetRigSpaceRoot()
     {
-        if (_stageRootProvider == null)
-            _stageRootProvider = UIManager.Instance.GetUI<PresentationUIRoot>();
-
         return _stageRootProvider.RigSpaceRoot;
     }
 }
