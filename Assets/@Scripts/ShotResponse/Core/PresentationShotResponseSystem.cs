@@ -86,8 +86,8 @@ public sealed class PresentationShotResponseSystem
         AddOrReplaceBinding(bindingKey, binding);
     }
 
-    // StageDepthLayer처럼 고정 인프라 binding은 baseMeasure를 보존해야함.
-    // 따라서 이미 살아있는 binding이 있으면 재등록하지 않고 profile만 교체한다.
+    // StageDepthLayer 고정 인프라로써 첫 등록한 binding을 계속 보존해야함.
+    // 따라서 이미 binding이 있으면 재등록하지 않고 profile만 교체함.
     public bool TryUpdateBindingProfile(
         string bindingKey,
         PresentationResponseProfile profile)
@@ -128,7 +128,7 @@ public sealed class PresentationShotResponseSystem
     {
         _currentState = state;
 
-        // StageDepth는 무대 고정 인프라임에도 매 프레임 호출 중.
+        // 최초 1회와 Clear() 직후에만 실제로 바인딩. 그 외에는 bool 체크.
         _stageDepthLayerBinder.EnsureBindings(this);
 
         _cameraRootApplier.Apply(in state);
@@ -155,9 +155,8 @@ public sealed class PresentationShotResponseSystem
         _currentState = PresentationIntentState.Default;
         
         ApplyToAllBindings(_currentState); // default response를 한 번 적용. 중립상태로 보정.
-        _bindings.Clear();
         
-        _cameraRootApplier.Apply(in _currentState); // binding이 모두 제거된 뒤, camera root 역시 default로 보정.
+        _cameraRootApplier.Apply(in _currentState); // camera root 역시 default로 보정.
     }
 
     private PresentationTargetResponse BuildTargetSpaceResponse(
