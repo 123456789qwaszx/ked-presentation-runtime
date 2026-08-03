@@ -11,8 +11,6 @@ public static class UITypeCache<T>
 
 public partial class UIManager : MonoBehaviour
 {
-    public static UIManager Instance { get; set; }
-
     [SerializeField] private bool _dontDestroyOnLoad = true;
 
     // ---- UI registry / stack
@@ -40,14 +38,6 @@ public partial class UIManager : MonoBehaviour
     // ----------------------------
     public void Init()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-
-        Instance = this;
-
         if (_dontDestroyOnLoad)
             DontDestroyOnLoad(gameObject);
 
@@ -62,7 +52,8 @@ public partial class UIManager : MonoBehaviour
 
         RegisterLayer(transform);
 
-        // Init() 이후 등록되더라도, 준비 완료를 보장.
+        // Init() 이후 등록된 관리 UI는 준비 완료라는 사후조건을 보장한다.
+        // 씬의 관리 UI는 Awake에서 이미 초기화를 마쳤으므로 대개 no-op이다.
         UIInitializer.Run(_uiMap.Values);
     }
 

@@ -19,14 +19,8 @@ public sealed partial class EpisodeSelectionPanel : IEpisodeGraphScrollRootProvi
 
 public sealed class EpisodeGraphRenderer
 {
-    private IEpisodeGraphScrollRootProvider _rootProvider;
-    private IEpisodeGraphScrollRootProvider RootProvider => _rootProvider ??= ResolveRootProvider();
-
-    private IEpisodeGraphScrollRootProvider ResolveRootProvider()
-    {
-        _rootProvider = UIManager.Instance.GetUI<EpisodeSelectionPanel>();
-        return _rootProvider;
-    }
+    private readonly IEpisodeGraphScrollRootProvider _rootProvider;
+    private IEpisodeGraphScrollRootProvider RootProvider => _rootProvider;
     
     #region Handlers
     public void SetHandlers(Action<string> onMainClicked)
@@ -50,9 +44,12 @@ public sealed class EpisodeGraphRenderer
 
     private Action<string> _onMainClicked;
 
-    public EpisodeGraphRenderer(RectTransform nodeRigPrefab)
+    public EpisodeGraphRenderer(
+        RectTransform nodeRigPrefab,
+        IEpisodeGraphScrollRootProvider rootProvider)
     {
         _nodeRigPrefab = nodeRigPrefab;
+        _rootProvider = rootProvider;
     }
     
     public void Render(EpisodeGraphViewData viewData)

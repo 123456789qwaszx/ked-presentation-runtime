@@ -44,6 +44,7 @@ public sealed class SetDepthCommandCharR : CommandBase
     private readonly SetDepthCommandSpecCharR _spec;
     private readonly CharacterDepthTuningSO _globalTuning;
     private readonly CharacterFocusTuningDBSO _focusTuningDb;
+    private readonly IShotResponseStageProvider _stageProvider;
 
     private CharacterRigRefs _rigRefs;
     private RectTransform _depthYRect;
@@ -66,11 +67,13 @@ public sealed class SetDepthCommandCharR : CommandBase
     public SetDepthCommandCharR(
         SetDepthCommandSpecCharR spec,
         CharacterDepthTuningSO globalTuning,
-        CharacterFocusTuningDBSO focusTuningDb)
+        CharacterFocusTuningDBSO focusTuningDb,
+        IShotResponseStageProvider stageProvider)
     {
         _spec = spec;
         _globalTuning = globalTuning;
         _focusTuningDb = focusTuningDb;
+        _stageProvider = stageProvider;
     }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
@@ -153,6 +156,7 @@ public sealed class SetDepthCommandCharR : CommandBase
         
         CharacterDepthResolver.CalculateDepthYThatPreservesCurrentFocus(
             scope,
+            _stageProvider,
             _spec.slotKey,
             _depthYRect,
             _depthScaleRect,

@@ -13,7 +13,12 @@ public sealed partial class ChapterSelectionPanel : IChapterCardRootProvider
 
 public sealed class ChapterCardRuntimeSpawner
 {
-    private IChapterCardRootProvider RootProvider => UIManager.Instance.GetUI<ChapterSelectionPanel>();
+    private readonly IChapterCardRootProvider _rootProvider;
+
+    public ChapterCardRuntimeSpawner(IChapterCardRootProvider rootProvider)
+    {
+        _rootProvider = rootProvider;
+    }
     
     public List<ChapterButtonCard> CreateCards(RectTransform prefab, int count)
     {
@@ -25,7 +30,7 @@ public sealed class ChapterCardRuntimeSpawner
             return cards;
         }
 
-        RectTransform parent = RootProvider?.ChapterCardRoot;
+        RectTransform parent = _rootProvider?.ChapterCardRoot;
 
         if (parent == null)
             Debug.LogError("[ChapterCardRuntimeSpawner] ChapterCardRoot is null.");

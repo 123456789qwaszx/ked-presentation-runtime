@@ -25,6 +25,7 @@ public sealed class StageMaskMotionCommand : CommandBase
 {
     private readonly StageMaskMotionCommandSpec _spec;
     private readonly StageMaskMotionPresetDBSO _presetDb;
+    private readonly IStageMaskProvider _stageMaskProvider;
 
     private StageMaskMotionPresetDBSO.Entry _entry;
     private float _duration;
@@ -43,10 +44,12 @@ public sealed class StageMaskMotionCommand : CommandBase
 
     public StageMaskMotionCommand(
         StageMaskMotionCommandSpec spec,
-        StageMaskMotionPresetDBSO presetDb)
+        StageMaskMotionPresetDBSO presetDb,
+        IStageMaskProvider stageMaskProvider)
     {
         _spec = spec;
         _presetDb = presetDb;
+        _stageMaskProvider = stageMaskProvider;
     }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
@@ -123,7 +126,7 @@ public sealed class StageMaskMotionCommand : CommandBase
             ? _spec.durationOverride
             : _entry.duration;
 
-        IStageMaskProvider provider = UIManager.Instance.GetUI<PresentationUIRoot>();
+        IStageMaskProvider provider = _stageMaskProvider;
 
         if (!provider.TryGetStageMaskSlot(_spec.stage, out _slot) || _slot == null)
         {

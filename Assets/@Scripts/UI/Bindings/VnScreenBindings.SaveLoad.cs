@@ -48,7 +48,7 @@ public sealed partial class VnScreenBindings
             return;
         }
 
-        Refresh(UIManager.Instance.GetUI<SaveLoadMenuUIPanel>());
+        Refresh(UI.GetUI<SaveLoadMenuUIPanel>());
     }
     
     private void HandleSaveLoadModeChanged(SaveLoadMenuMode mode)
@@ -58,7 +58,7 @@ public sealed partial class VnScreenBindings
 
         _currentSaveLoadMode = mode;
 
-        Refresh(UIManager.Instance.GetUI<SaveLoadMenuUIPanel>());
+        Refresh(UI.GetUI<SaveLoadMenuUIPanel>());
     }
     
     private void Refresh(SaveLoadMenuUIPanel saveLoadPanel)

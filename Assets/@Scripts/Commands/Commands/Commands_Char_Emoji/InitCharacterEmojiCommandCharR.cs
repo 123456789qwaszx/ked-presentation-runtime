@@ -48,6 +48,7 @@ public sealed class InitCharacterEmojiCommandCharR : CharacterEmojiCommandBase
     private readonly CharacterEmojiResolver _resolver;
     private readonly CharacterEmojiVisualPresetSO _visualPreset;
     private readonly CharacterFocusTuningDBSO _focusTuningDb;
+    private readonly IShotResponseStageProvider _stageProvider;
 
     protected override SkipPolicy SkipPolicy => SkipPolicy.ExecuteEvenIfSkipping;
 
@@ -57,12 +58,14 @@ public sealed class InitCharacterEmojiCommandCharR : CharacterEmojiCommandBase
         InitCharacterEmojiCommandSpecCharR spec,
         CharacterEmojiResolver resolver,
         CharacterEmojiVisualPresetSO visualPreset,
-        CharacterFocusTuningDBSO focusTuningDb)
+        CharacterFocusTuningDBSO focusTuningDb,
+        IShotResponseStageProvider stageProvider)
     {
         _spec = spec;
         _resolver = resolver;
         _visualPreset = visualPreset;
         _focusTuningDb = focusTuningDb;
+        _stageProvider = stageProvider;
     }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
@@ -219,8 +222,7 @@ public sealed class InitCharacterEmojiCommandCharR : CharacterEmojiCommandBase
     {
         anchoredPosition = Vector2.zero;
 
-        IShotResponseStageProvider stageProvider =
-            UIManager.Instance.GetUI<PresentationUIRoot>();
+        IShotResponseStageProvider stageProvider = _stageProvider;
 
         string tuningKey =
             CharacterRigTargetResolver.ResolveCharacterKeyFromTargetKey(

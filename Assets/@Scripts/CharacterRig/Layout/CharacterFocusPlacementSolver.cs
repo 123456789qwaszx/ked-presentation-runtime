@@ -4,6 +4,7 @@ public static class CharacterFocusPlacementSolver
 {
     public static bool TryCalculateFocusPlacement(
         CommandRunScope scope,
+        IShotResponseStageProvider stageProvider,
         string roleKey,
         RectTransform moveRect,
         CharacterFocusPreset focusPreset,
@@ -25,6 +26,7 @@ public static class CharacterFocusPlacementSolver
 
         CharacterFocusPointResolver.TryResolve(
             scope,
+            stageProvider,
             roleKey,
             focusPreset,
             focusOffset,

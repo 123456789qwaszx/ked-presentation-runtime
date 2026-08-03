@@ -12,6 +12,7 @@ public sealed class CharacterRigCommandFactory : INodeCommandFactory
     
     private readonly CharacterDepthTuningSO _characterDepthTuning;
     private readonly CharacterEmojiVisualPresetSO _characterEmojiVisualPresetSo;
+    private readonly IShotResponseStageProvider _stageProvider;
 
     public CharacterRigCommandFactory(
         CharRigSlotResolver charRigSlotResolver,
@@ -22,7 +23,8 @@ public sealed class CharacterRigCommandFactory : INodeCommandFactory
         CharacterFocusTuningDBSO characterFocusTuningDb,
         CharacterVisualFocusPresetDBSO characterVisualFocusPresetDb,
         CharacterDepthTuningSO characterDepthTuning,
-        CharacterEmojiVisualPresetSO characterEmojiVisualPresetSo)
+        CharacterEmojiVisualPresetSO characterEmojiVisualPresetSo,
+        IShotResponseStageProvider stageProvider)
     {
         _rigSlotResolver = charRigSlotResolver;
         _rigBuilder = charRigBuilder;
@@ -33,6 +35,7 @@ public sealed class CharacterRigCommandFactory : INodeCommandFactory
         _characterVisualFocusPresetDb = characterVisualFocusPresetDb;
         _characterDepthTuning = characterDepthTuning;
         _characterEmojiVisualPresetSo = characterEmojiVisualPresetSo;
+        _stageProvider = stageProvider;
     }
 
     public bool TryCreate(CommandSpecBase spec, out ISequenceCommand command)
@@ -57,7 +60,8 @@ public sealed class CharacterRigCommandFactory : INodeCommandFactory
             SetDepthCommandSpecCharR s => new SetDepthCommandCharR(
                 s,
                 _characterDepthTuning,
-                _characterFocusTuningDb),
+                _characterFocusTuningDb,
+                _stageProvider),
 
             // Visibility / Root Layers
             FadeInCommandSpecCharR s => new FadeInCommandCharR(s),
@@ -71,7 +75,7 @@ public sealed class CharacterRigCommandFactory : INodeCommandFactory
             PivotRotateToCommandSpecCharR s => new PivotRotateToCommandCharR(s),
             
             // Composition / Focus-aware Placement
-            PlaceCharacterFocusCommandSpecCharR s => new PlaceCharacterFocusCommandCharR(s, _characterFocusTuningDb),
+            PlaceCharacterFocusCommandSpecCharR s => new PlaceCharacterFocusCommandCharR(s, _characterFocusTuningDb, _stageProvider),
 
             // Visual State
             ColorToCommandSpecCharR s => new ColorToCommandCharR(s),
@@ -108,10 +112,10 @@ public sealed class CharacterRigCommandFactory : INodeCommandFactory
             EmojiSlideInCommandSpecCharR s => new EmojiSlideInCommandCharR(s, _emojiResolver),
 
             SetCharacterEmojiCommandSpecCharR s => new SetCharacterEmojiCommandCharR(s, _emojiResolver),
-            PlaceCharacterEmojiCommandSpecCharR s => new PlaceCharacterEmojiCommandCharR(s, _emojiResolver, _characterFocusTuningDb),
+            PlaceCharacterEmojiCommandSpecCharR s => new PlaceCharacterEmojiCommandCharR(s, _emojiResolver, _characterFocusTuningDb, _stageProvider),
             RevealCharacterEmojiCommandSpecCharR s => new RevealCharacterEmojiCommandCharR(s),
             
-            InitCharacterEmojiCommandSpecCharR s => new InitCharacterEmojiCommandCharR(s, _emojiResolver, _characterEmojiVisualPresetSo, _characterFocusTuningDb),
+            InitCharacterEmojiCommandSpecCharR s => new InitCharacterEmojiCommandCharR(s, _emojiResolver, _characterEmojiVisualPresetSo, _characterFocusTuningDb, _stageProvider),
             
             AnimateCharacterEmojiFramesCommandSpecCharR s => new AnimateCharacterEmojiFramesCommandCharR(s, _emojiResolver),
             SpringAppearCommandSpecCharR s => new SpringAppearCommandCharR(s, _emojiResolver),

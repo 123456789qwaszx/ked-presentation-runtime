@@ -47,6 +47,7 @@ public static class CharacterDepthResolver
 
     public static void CalculateDepthYThatPreservesCurrentFocus(
         CommandRunScope scope,
+        IShotResponseStageProvider stageProvider,
         string roleKey,
         RectTransform depthYRect,
         RectTransform depthScaleRect,
@@ -63,6 +64,7 @@ public static class CharacterDepthResolver
         //    따라서 place_focus가 이미 잡아둔 위치를 기준으로 보존한다.
         CharacterFocusPointResolver.TryResolve(
             scope,
+            stageProvider,
             roleKey,
             preserveFocusPreset,
             preserveFocusOffset,
@@ -74,6 +76,7 @@ public static class CharacterDepthResolver
         //    이 함수는 호출 후 즉시 원복한다.
         TryMeasureFocusWithTemporaryDepthTransform(
             scope,
+            stageProvider,
             roleKey,
             depthYRect,
             depthScaleRect,
@@ -103,6 +106,7 @@ public static class CharacterDepthResolver
 
     private static void TryMeasureFocusWithTemporaryDepthTransform(
         CommandRunScope scope,
+        IShotResponseStageProvider stageProvider,
         string roleKey,
         RectTransform depthYRect,
         RectTransform depthScaleRect,
@@ -126,6 +130,7 @@ public static class CharacterDepthResolver
 
         CharacterFocusPointResolver.TryResolve(
             scope,
+            stageProvider,
             roleKey,
             preserveFocusPreset,
             preserveFocusOffset,

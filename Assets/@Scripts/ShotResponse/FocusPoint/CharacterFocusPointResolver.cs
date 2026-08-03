@@ -15,6 +15,7 @@ public static class CharacterFocusPointResolver
 {
     public static void TryResolve(
         CommandRunScope scope,
+        IShotResponseStageProvider stageProvider,
         string roleKey,
         CharacterFocusPreset preset,
         Vector2 commandOffset,
@@ -29,8 +30,6 @@ public static class CharacterFocusPointResolver
         string tuningKey = CharacterRigTargetResolver.ResolveCharacterKeyFromTargetKey(scope, roleKey);
 
         CharacterFacing facing = ResolveFacing(scope, roleKey);
-
-        IShotResponseStageProvider stageProvider = UIManager.Instance.GetUI<PresentationUIRoot>();
 
         TryResolveFromRigRefs(
             rigRefs,

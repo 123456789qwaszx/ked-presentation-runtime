@@ -21,6 +21,7 @@ public sealed class PlaceCharacterEmojiCommandCharR : CharacterEmojiCommandBase
     private readonly PlaceCharacterEmojiCommandSpecCharR _spec;
     private readonly CharacterEmojiResolver _resolver;
     private readonly CharacterFocusTuningDBSO _focusTuningDb;
+    private readonly IShotResponseStageProvider _stageProvider;
 
     private CharacterRigRefs _rigRefs;
     private RectTransform _castTransform;
@@ -38,11 +39,13 @@ public sealed class PlaceCharacterEmojiCommandCharR : CharacterEmojiCommandBase
     public PlaceCharacterEmojiCommandCharR(
         PlaceCharacterEmojiCommandSpecCharR spec,
         CharacterEmojiResolver resolver,
-        CharacterFocusTuningDBSO focusTuningDb)
+        CharacterFocusTuningDBSO focusTuningDb,
+        IShotResponseStageProvider stageProvider)
     {
         _spec = spec;
         _resolver = resolver;
         _focusTuningDb = focusTuningDb;
+        _stageProvider = stageProvider;
     }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
@@ -109,7 +112,7 @@ public sealed class PlaceCharacterEmojiCommandCharR : CharacterEmojiCommandBase
     {
         anchoredPosition = Vector2.zero;
 
-        IShotResponseStageProvider stageProvider = UIManager.Instance.GetUI<PresentationUIRoot>();
+        IShotResponseStageProvider stageProvider = _stageProvider;
         string tuningKey = CharacterRigTargetResolver.ResolveCharacterKeyFromTargetKey(scope, _spec.slotKey);
 
         bool mirrorPlacementOffset =

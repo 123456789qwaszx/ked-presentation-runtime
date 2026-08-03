@@ -26,7 +26,7 @@ public class VnAppBootstrap : MonoBehaviour
     private readonly VNSideRunnerSyncHub _vnSideRunnerSyncHub = new();
     private readonly BacklogRecorder _backlogRecorder = new ();
     
-    private readonly VnScreenBindings _screenBindings = new();
+    private VnScreenBindings _screenBindings;
     
     [Header("Overlay PresentationSession")]
     [SerializeField] private CommandExecutor overlayCommandExecutor;
@@ -159,8 +159,12 @@ public class VnAppBootstrap : MonoBehaviour
         _vnRuntimeStateProvider = new VNRuntimeStateProvider(_rollbackHistory, _choiceHistory, vnPlaytimeTracker);
         rollbackHistoryDebugView.Bind(_rollbackHistory);
         
-        _presentationUIRoot = UIManager.Instance.GetUI<PresentationUIRoot>();
-        _protagonistCharRigSlot = UIManager.Instance.GetUI<DialogueBox00_Portrait>();
+        _presentationUIRoot = uiManager.GetUI<PresentationUIRoot>();
+        _protagonistCharRigSlot = uiManager.GetUI<DialogueBox00_Portrait>();
+        
+        _screenBindings = new VnScreenBindings(uiManager);
+        
+        uiStageDepthLayerBlurRuntime.Initialize(_presentationUIRoot);
         
         IShotResponseStageProvider shotResponseStageProvider = _presentationUIRoot;
         
@@ -233,7 +237,8 @@ public class VnAppBootstrap : MonoBehaviour
             characterFocusTuningDb,
             characterVisualFocusPresetDb,
             characterDepthTuning,
-            characterEmojiVisualPresetSo);
+            characterEmojiVisualPresetSo,
+            _presentationUIRoot);
 
         // Background Rig
         BackgroundRigBuilder backgroundRigBuilder = new();
@@ -244,11 +249,12 @@ public class VnAppBootstrap : MonoBehaviour
             backgroundRigSlotResolver);
 
         ShotResponseCommandFactory presentationShotFactory = new(
-            _presentationResponseRig, characterFocusTuningDb);
+            _presentationResponseRig, characterFocusTuningDb, _presentationUIRoot);
 
         // Presentation Control
         PresentationControlCommandFactory presentationControlFactory = new(
             _uiPatchService,
+            uiManager,
             _unityTimeSource,
             unitySignalBus,
             signalLatch);
@@ -264,7 +270,8 @@ public class VnAppBootstrap : MonoBehaviour
             screenNoisePresetDbso, 
             screenVignettePresetDbso,
             uiStageDepthLayerBlurRuntime,
-            stageMaskMotionPresetDbSo);
+            stageMaskMotionPresetDbSo,
+            _presentationUIRoot);
         
         StageOverlayRigSlotResolver stageOverlayRigSlotResolver = new(_presentationUIRoot);
         OverlayRigBuilder overlayRigBuilder = new();
@@ -512,9 +519,12 @@ public class VnAppBootstrap : MonoBehaviour
         EpisodeProgressionGraphDataBuilder graphDataBuilder = new();
         EpisodeProgressionRuleDataBuilder ruleDataBuilder = new();
         EpisodeGraphLayoutOptions layoutOptions = EpisodeGraphLayoutOptions.Compact();
-        EpisodeGraphRenderer episodeGraphRenderer = new(nodeRigPrefab);
+        IEpisodeGraphScrollRootProvider episodeGraphScrollRoot =
+            uiManager.GetUI<EpisodeSelectionPanel>();
         
-        EpisodeGraphScrollController scrollController = new();
+        EpisodeGraphRenderer episodeGraphRenderer = new(nodeRigPrefab, episodeGraphScrollRoot);
+        
+        EpisodeGraphScrollController scrollController = new(episodeGraphScrollRoot);
 
         _episodeSelectionSystem = new EpisodeSelectionSystem(
             chapterEpisodeProgressionCatalog,

@@ -3,9 +3,13 @@ using UnityEngine.UI;
 
 public sealed class EpisodeGraphScrollController
 {
-    private IEpisodeGraphScrollRootProvider _rootProvider;
-    private IEpisodeGraphScrollRootProvider RootProvider => _rootProvider ??= ResolveRootProvider();
-    private IEpisodeGraphScrollRootProvider ResolveRootProvider() => UIManager.Instance.GetUI<EpisodeSelectionPanel>();
+    private readonly IEpisodeGraphScrollRootProvider _rootProvider;
+    private IEpisodeGraphScrollRootProvider RootProvider => _rootProvider;
+
+    public EpisodeGraphScrollController(IEpisodeGraphScrollRootProvider rootProvider)
+    {
+        _rootProvider = rootProvider;
+    }
     
     public void ScrollToLeft()
     {

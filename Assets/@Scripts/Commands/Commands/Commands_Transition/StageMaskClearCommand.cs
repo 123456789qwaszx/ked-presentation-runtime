@@ -28,6 +28,7 @@ public sealed class StageMaskClearCommandSpec : CommandSpecBase
 public sealed class StageMaskClearCommand : CommandBase
 {
     private readonly StageMaskClearCommandSpec _spec;
+    private readonly IStageMaskProvider _stageMaskProvider;
 
     private StageMaskSlot _slot;
     private StageMaskGraphic _graphic;
@@ -37,9 +38,12 @@ public sealed class StageMaskClearCommand : CommandBase
 
     public override bool WaitForCompletion => false;
 
-    public StageMaskClearCommand(StageMaskClearCommandSpec spec)
+    public StageMaskClearCommand(
+        StageMaskClearCommandSpec spec,
+        IStageMaskProvider stageMaskProvider)
     {
         _spec = spec;
+        _stageMaskProvider = stageMaskProvider;
     }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
@@ -68,7 +72,7 @@ public sealed class StageMaskClearCommand : CommandBase
     {
         _resolveAttempted = true;
         
-        IStageMaskProvider provider = UIManager.Instance.GetUI<PresentationUIRoot>();
+        IStageMaskProvider provider = _stageMaskProvider;
 
         if (!provider.TryGetStageMaskSlot(_spec.stage, out _slot) || _slot == null)
         {

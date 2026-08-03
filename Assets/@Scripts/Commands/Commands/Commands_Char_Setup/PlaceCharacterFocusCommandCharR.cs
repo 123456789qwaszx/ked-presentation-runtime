@@ -37,6 +37,7 @@ public sealed class PlaceCharacterFocusCommandCharR : CommandBase
 
     private readonly PlaceCharacterFocusCommandSpecCharR _spec;
     private readonly CharacterFocusTuningDBSO _focusTuningDb;
+    private readonly IShotResponseStageProvider _stageProvider;
 
     private CharacterRigRefs _rigRefs;
     private RectTransform _moveRect;
@@ -54,10 +55,12 @@ public sealed class PlaceCharacterFocusCommandCharR : CommandBase
 
     public PlaceCharacterFocusCommandCharR(
         PlaceCharacterFocusCommandSpecCharR spec,
-        CharacterFocusTuningDBSO focusTuningDb)
+        CharacterFocusTuningDBSO focusTuningDb,
+        IShotResponseStageProvider stageProvider)
     {
         _spec = spec;
         _focusTuningDb = focusTuningDb;
+        _stageProvider = stageProvider;
     }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
@@ -111,6 +114,7 @@ public sealed class PlaceCharacterFocusCommandCharR : CommandBase
         
         CharacterFocusPlacementSolver.TryCalculateFocusPlacement(
             scope,
+            _stageProvider,
             _spec.slotKey,
             _moveRect,
             _spec.focusPreset,

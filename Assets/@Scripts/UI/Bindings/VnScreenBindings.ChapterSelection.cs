@@ -3,7 +3,7 @@ using UnityEngine;
 
 public sealed partial class VnScreenBindings
 {
-    private readonly ChapterCardRuntimeSpawner _chapterCardSpawner = new();
+    private readonly ChapterCardRuntimeSpawner _chapterCardSpawner;
 
     private ChapterCardFactory _chapterCardFactory;
     private RectTransform _chapterCardPrefab;

@@ -29,14 +29,17 @@ public sealed class ShotZoomFocusCommandSpec : ShotIntentCommandSpecBase
 public sealed class ShotZoomFocusCommand : ShotIntentCommandBase<ShotZoomFocusCommandSpec>
 {
     CharacterFocusTuningDBSO _focusTuningDB;
+    private readonly IShotResponseStageProvider _stageProvider;
     
     public ShotZoomFocusCommand(
         PresentationShotResponseSystem rig, 
         ShotZoomFocusCommandSpec spec, 
-        CharacterFocusTuningDBSO focusTuningDB)
+        CharacterFocusTuningDBSO focusTuningDB,
+        IShotResponseStageProvider stageProvider)
         : base(rig, spec)
     {
         _focusTuningDB = focusTuningDB;
+        _stageProvider = stageProvider;
     }
 
     protected override PresentationIntentState BuildTargetState(
@@ -45,6 +48,7 @@ public sealed class ShotZoomFocusCommand : ShotIntentCommandBase<ShotZoomFocusCo
     {
         CharacterFocusPointResolver.TryResolve(
             scope,
+            _stageProvider,
             spec.focusRoleKey,
             spec.focusPreset,
             spec.focusOffset,

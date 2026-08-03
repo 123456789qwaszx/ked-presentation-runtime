@@ -53,7 +53,10 @@ public sealed partial class UIStageDepthLayerBlurRuntime : MonoBehaviour, IStage
     // 캡처 카메라에 보이도록, 런타임 생성 캡처 오브젝트에 강제할 layer.
     private int _captureLayer;
 
-    // ── lifecycle ────────────────────────────────────────────────────────────
+    public void Initialize(IPresentationDepthDefocusOverlayProvider overlayProvider)
+    {
+        _overlayProvider = overlayProvider;
+    }
 
     private void Awake()
     {
@@ -107,7 +110,6 @@ public sealed partial class UIStageDepthLayerBlurRuntime : MonoBehaviour, IStage
         PresentationDepthLayerKey layer,
         out PresentationDepthDefocusTarget target)
     {
-        EnsureOverlayProvider();
         _overlayProvider.GetDepthDefocusTarget(stage, layer, out target);
     }
 
@@ -167,11 +169,4 @@ public sealed partial class UIStageDepthLayerBlurRuntime : MonoBehaviour, IStage
     }
     
     
-    private void EnsureOverlayProvider()
-    {
-        if (_overlayProvider != null)
-            return;
-
-        _overlayProvider = UIManager.Instance.GetUI<PresentationUIRoot>();
-    }
 }
