@@ -33,6 +33,8 @@ title: Story_AyameRoute
 <<size_close   @10 face>>
 <<place_center @10 bust>>
 
+
+
 길드원: 최근 들어 주민들로부터 그곳의 몬스터가 점점 늘고 있다는 보고가 있었습니다. 아마 번식기가 다가와서 그렇겠죠.
 
 놔두더라도 알아서 개체수가 조절 되지 않을까? 길드에서 의뢰를 내 걸 정도라고?
@@ -43,12 +45,15 @@ title: Story_AyameRoute
 <<size_close @2 face>>
 <<place_left @2 bust>>
 
+<<shot_zoom 12 24fr>>
+
 
 <<actor @10 npc>>
 <<place_right @10 bust 12fr>>
 
 kasmi: 생태계가 바뀌면서, 몬스터들 무리가 이동을 하게 되는 경우도 있고, 또 풍부해진 생태계에 위험한 몬스터가 자리잡을 수도 있어요.
 
+<<shot_track 3u 2u 12fr>>
 길드원: 그것을 관리하고 탐험가에게 제공하는 것이 길드의 역할이죠. 의뢰를 맡으시겠나요?
 
 

@@ -50,9 +50,6 @@ public sealed class StageDepthLayerBinder
     {
         string key = $"{root}/{layer}";
 
-        if (rig.TryUpdateBindingProfile(key, profile))
-            return;
-
         StageDepthLayerRects rects = _provider.GetLayerRects(root, layer);
 
         var target = new StageDepthResponseTarget(

@@ -86,49 +86,11 @@ public sealed class PresentationShotResponseSystem
         AddOrReplaceBinding(bindingKey, binding);
     }
 
-    // StageDepthLayer 고정 인프라로써 첫 등록한 binding을 계속 보존해야함.
-    // 따라서 이미 binding이 있으면 재등록하지 않고 profile만 교체함.
-    public bool TryUpdateBindingProfile(
-        string bindingKey,
-        PresentationResponseProfile profile)
-    {
-        if (string.IsNullOrWhiteSpace(bindingKey))
-            return false;
-
-        if (profile == null)
-            return false;
-
-        for (int i = _bindings.Count - 1; i >= 0; i--)
-        {
-            RuntimeBinding binding = _bindings[i];
-
-            if (binding == null)
-            {
-                _bindings.RemoveAt(i);
-                continue;
-            }
-
-            if (!string.Equals(binding.key, bindingKey, StringComparison.Ordinal))
-                continue;
-
-            if (!binding.IsAlive)
-            {
-                _bindings.RemoveAt(i);
-                return false;
-            }
-
-            binding.profile = profile;
-            return true;
-        }
-
-        return false;
-    }
-
     public void ApplyToAllBindings(in PresentationIntentState state)
     {
         _currentState = state;
 
-        // 최초 1회와 Clear() 직후에만 실제로 바인딩. 그 외에는 bool 체크.
+        // 최초 1회와 Clear() 직후에만 실제로 바인딩한다. 그 외에는 bool 체크로 끝난다.
         _stageDepthLayerBinder.EnsureBindings(this);
 
         _cameraRootApplier.Apply(in state);
@@ -154,9 +116,8 @@ public sealed class PresentationShotResponseSystem
     {
         _currentState = PresentationIntentState.Default;
         
-        ApplyToAllBindings(_currentState); // default response를 한 번 적용. 중립상태로 보정.
-        
-        _cameraRootApplier.Apply(in _currentState); // camera root 역시 default로 보정.
+        // ApplyToAllBindings가 camera root까지 default로 보정.
+        ApplyToAllBindings(_currentState);
     }
 
     private PresentationTargetResponse BuildTargetSpaceResponse(
