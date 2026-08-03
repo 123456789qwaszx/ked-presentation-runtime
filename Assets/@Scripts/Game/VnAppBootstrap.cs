@@ -148,6 +148,9 @@ public class VnAppBootstrap : MonoBehaviour
     private PresentationShotResponseSystem _presentationResponseRig;
     private PresentationLaneScopeSession _presentationLaneScopeSession;
     
+    private PresentationUIRoot _presentationUIRoot;
+    private IProtagonistCharRigSlotProvider _protagonistCharRigSlot;
+    
     
     private void Awake()
     {
@@ -156,8 +159,10 @@ public class VnAppBootstrap : MonoBehaviour
         _vnRuntimeStateProvider = new VNRuntimeStateProvider(_rollbackHistory, _choiceHistory, vnPlaytimeTracker);
         rollbackHistoryDebugView.Bind(_rollbackHistory);
         
-        IShotResponseStageProvider shotResponseStageProvider =
-            UIManager.Instance.GetUI<PresentationUIRoot>();
+        _presentationUIRoot = UIManager.Instance.GetUI<PresentationUIRoot>();
+        _protagonistCharRigSlot = UIManager.Instance.GetUI<DialogueBox00_Portrait>();
+        
+        IShotResponseStageProvider shotResponseStageProvider = _presentationUIRoot;
         
         _presentationResponseRig = new PresentationShotResponseSystem(shotResponseStageProvider);
         
@@ -214,7 +219,7 @@ public class VnAppBootstrap : MonoBehaviour
         unitySignalBus.OnSignal += signalLatch.Latch;
 
         // Character Rig
-        CharRigSlotResolver charRigSlotResolver = new();
+        CharRigSlotResolver charRigSlotResolver = new(_presentationUIRoot, _protagonistCharRigSlot);
         CharacterRigBuilder characterRigBuilder = new();
         PortraitResolver portraitResolver = new(portraitGeneratedDbSo);
         CharacterEmojiResolver emojiResolver = new(characterEmojiLibrarySo);
@@ -232,9 +237,11 @@ public class VnAppBootstrap : MonoBehaviour
 
         // Background Rig
         BackgroundRigBuilder backgroundRigBuilder = new();
+        BackgroundRigSlotResolver backgroundRigSlotResolver = new(_presentationUIRoot);
         
         BackgroundRigCommandFactory backgroundRigFactory = new(
-            backgroundRigBuilder);
+            backgroundRigBuilder,
+            backgroundRigSlotResolver);
 
         ShotResponseCommandFactory presentationShotFactory = new(
             _presentationResponseRig, characterFocusTuningDb);
@@ -259,7 +266,7 @@ public class VnAppBootstrap : MonoBehaviour
             uiStageDepthLayerBlurRuntime,
             stageMaskMotionPresetDbSo);
         
-        StageOverlayRigSlotResolver stageOverlayRigSlotResolver = new();
+        StageOverlayRigSlotResolver stageOverlayRigSlotResolver = new(_presentationUIRoot);
         OverlayRigBuilder overlayRigBuilder = new();
         
         OverlayRigCommandFactory overlayRigCommandFactory = new(

@@ -2,14 +2,17 @@ using UnityEngine;
 
 public sealed class StageOverlayRigSlotResolver
 {
-    private IStageOverlayRigSlotProvider _slotProvider;
+    private readonly IStageOverlayRigSlotProvider _slotProvider;
+
+    public StageOverlayRigSlotResolver(IStageOverlayRigSlotProvider slotProvider)
+    {
+        _slotProvider = slotProvider;
+    }
 
     public bool TryResolve(
         StageOverlayRigRootKind kind,
         out RectTransform rect)
     {
-        EnsureProvider();
-
         if (_slotProvider == null)
         {
             rect = null;
@@ -28,16 +31,5 @@ public sealed class StageOverlayRigSlotResolver
         }
 
         return true;
-    }
-
-    private void EnsureProvider()
-    {
-        UIManager ui = UIManager.Instance;
-
-        if (ui == null)
-            return;
-
-        if (_slotProvider == null)
-            _slotProvider = ui.GetUI<PresentationUIRoot>();
     }
 }

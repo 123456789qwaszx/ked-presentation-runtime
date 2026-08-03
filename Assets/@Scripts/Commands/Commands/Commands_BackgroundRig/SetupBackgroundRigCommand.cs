@@ -44,14 +44,17 @@ public sealed class SetupBackgroundRigCommandSpec : CommandSpecBase
 public sealed class SetupBackgroundRigCommand : CommandBase
 {
     private readonly BackgroundRigBuilder _rigBuilder;
+    private readonly BackgroundRigSlotResolver _slotResolver;
     private readonly SetupBackgroundRigCommandSpec _spec;
 
     public SetupBackgroundRigCommand(
     SetupBackgroundRigCommandSpec spec,
-        BackgroundRigBuilder rigBuilder)
+        BackgroundRigBuilder rigBuilder,
+        BackgroundRigSlotResolver slotResolver)
     {
         _spec = spec;
         _rigBuilder = rigBuilder;
+        _slotResolver = slotResolver;
     }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
@@ -74,7 +77,7 @@ public sealed class SetupBackgroundRigCommand : CommandBase
             rolePrefix,
             spec.rigRootName);
         
-        if (BackgroundRigSlotResolver.TryResolve(_spec.stage, _spec.layer, out RectTransform parent))
+        if (_slotResolver.TryResolve(_spec.stage, _spec.layer, out RectTransform parent))
             rigRoot.SetParent(parent, false);
 
         _rigBuilder.BindRefsFromRoot(rigRoot, rolePrefix, out BackgroundRigRefs refs);

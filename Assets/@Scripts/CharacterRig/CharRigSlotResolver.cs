@@ -2,8 +2,16 @@ using UnityEngine;
 
 public sealed class CharRigSlotResolver
 {
-    private IStageDepthContentSlotProvider _stageSlots;
-    private IProtagonistCharRigSlotProvider _protagonistSlot;
+    private readonly IStageDepthContentSlotProvider _stageSlots;
+    private readonly IProtagonistCharRigSlotProvider _protagonistSlot;
+
+    public CharRigSlotResolver(
+        IStageDepthContentSlotProvider stageSlots,
+        IProtagonistCharRigSlotProvider protagonistSlot)
+    {
+        _stageSlots = stageSlots;
+        _protagonistSlot = protagonistSlot;
+    }
 
     public bool TryResolve(
         PresentationStageKey stage,
@@ -12,7 +20,7 @@ public sealed class CharRigSlotResolver
     {
         rect = null;
 
-        if (!TryEnsureStageSlotsProvider())
+        if (_stageSlots == null)
             return false;
 
         rect = _stageSlots.GetDepthContent(stage, layer);
@@ -24,31 +32,11 @@ public sealed class CharRigSlotResolver
     {
         rect = null;
 
-        if (!TryEnsureProtagonistSlotProvider())
+        if (_protagonistSlot == null)
             return false;
 
         rect = _protagonistSlot.ProtagonistSlot;
 
         return true;
-    }
-
-    private bool TryEnsureStageSlotsProvider()
-    {
-        if (_stageSlots != null)
-            return true;
-
-        _stageSlots = UIManager.Instance?.GetUI<PresentationUIRoot>();
-
-        return _stageSlots != null;
-    }
-
-    private bool TryEnsureProtagonistSlotProvider()
-    {
-        if (_protagonistSlot != null)
-            return true;
-
-        _protagonistSlot = UIManager.Instance?.GetUI<DialogueBox00_Portrait>();
-
-        return _protagonistSlot != null;
     }
 }

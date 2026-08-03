@@ -1,16 +1,20 @@
 using UnityEngine;
 
-public static class BackgroundRigSlotResolver
+public sealed class BackgroundRigSlotResolver
 {
-    public static bool TryResolve(
+    private readonly IStageDepthContentSlotProvider _slots;
+
+    public BackgroundRigSlotResolver(IStageDepthContentSlotProvider slots)
+    {
+        _slots = slots;
+    }
+
+    public bool TryResolve(
         PresentationStageKey stage,
         PresentationDepthLayerKey layer,
         out RectTransform parent)
     {
-        IStageDepthContentSlotProvider slots =
-            UIManager.Instance?.GetUI<PresentationUIRoot>();
-        
-        parent = slots?.GetDepthContent(stage, layer);
+        parent = _slots?.GetDepthContent(stage, layer);
         return parent != null;
     }
 }
