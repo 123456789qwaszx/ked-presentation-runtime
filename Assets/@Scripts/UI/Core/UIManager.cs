@@ -61,6 +61,9 @@ public partial class UIManager : MonoBehaviour
         ClearPlacementCacheForEditor();
 
         RegisterLayer(transform);
+
+        // Init() 이후 등록되더라도, 준비 완료를 보장.
+        UIInitializer.Run(_uiMap.Values);
     }
 
     private void RegisterLayer(Transform layer)

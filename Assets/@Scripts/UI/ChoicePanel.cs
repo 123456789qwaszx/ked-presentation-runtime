@@ -101,7 +101,11 @@ public sealed class ChoicePanel : UIPanel<ChoicePanel.Refs>, IManagedUI
 
         for (int i = 0; i < choices.Count; i++)
         {
-            var view = UnityEngine.Object.Instantiate(_choicePrefab, _content);
+            var view = Instantiate(_choicePrefab, _content);
+
+            // 프리팹이 비활성이라 Awake가 안 돔.따라서 사용 전에 초기화.
+            view.EnsureInitialized();
+
             view.gameObject.SetActive(true);
             view.Present(index: i, label: choices[i]);
 

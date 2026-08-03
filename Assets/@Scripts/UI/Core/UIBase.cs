@@ -38,8 +38,19 @@ public interface IUIResetOnAwake { }
 
 public abstract class UIBase : MonoBehaviour
 {
+    private bool _initialized;
+
     private void Awake()
     {
+        EnsureInitialized();
+    }
+
+    public void EnsureInitialized()
+    {
+        if (_initialized) return;
+
+        _initialized = true;
+
         PreInitialize();
         OnInitialize();
     }

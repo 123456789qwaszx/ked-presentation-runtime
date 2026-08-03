@@ -83,7 +83,11 @@ public sealed class BacklogPanel : UIPanel<BacklogPanel.Refs>
 
     private void Spawn(in DialogueLogEntry e)
     {
-        var view = UnityEngine.Object.Instantiate(entryPrefab, _content);
+        var view = Instantiate(entryPrefab, _content);
+
+        // 프리팹이 비활성이면 Awake 아직 안 돔. 사용 전 초기화.
+        view.EnsureInitialized();
+
         view.gameObject.SetActive(true);
         view.Present(e);
 

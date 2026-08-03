@@ -50,6 +50,10 @@ public sealed class ChapterCardRuntimeSpawner
             return null;
         }
 
+        // 프리팹이 비활성으로 저장되거나 부모가 비활성이면 Awake가 지연.
+        // 활성 생성 전제를 없애기 위해 반환 전에 초기화를 보장.
+        card.EnsureInitialized();
+
         return card;
     }
 }
