@@ -12,7 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e39f4c116589f104eb0d8510d5217462, type: 3}
   m_Name: SequenceCatalog
   m_EditorClassIdentifier: Assembly-CSharp::SequenceCatalogSO
-  sequences:
-  - {fileID: 11400000, guid: 3b7aa2627a7ab104486d060cc9a0c904, type: 2}
-  - {fileID: 11400000, guid: 19fcb8af81b72a148b951103680b0c85, type: 2}
-  - {fileID: 11400000, guid: 7104031c5f800614ea97fc3d82b70c4b, type: 2}
+  sequences: []
