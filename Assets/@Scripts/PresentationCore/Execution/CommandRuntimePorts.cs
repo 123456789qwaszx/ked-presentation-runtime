@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 
 /// <summary>
 /// Latches string-based signals and allows one-shot consumption.
@@ -35,4 +36,14 @@ public interface ISignalBus
 {
     event Action<string> OnSignal;
     void Raise(string key);
+}
+
+/// <summary>
+/// Applies a UI theme/locale patch to whatever the host considers the current screen.
+/// The command system knows neither what the current screen is, nor how patching works —
+/// the host resolves both.
+/// </summary>
+public interface IUIThemePatchPort
+{
+    IEnumerator PatchCurrentScreen(string themeId, string localeId);
 }

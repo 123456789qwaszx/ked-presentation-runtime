@@ -139,6 +139,7 @@ public class VnAppBootstrap : MonoBehaviour
     [SerializeField] private CharacterFocusDebugView characterFocusDebugView;
     
     private UIPatchService _uiPatchService;
+    private IUIThemePatchPort _uiThemePatch;
     private VNLoadSeekDriver _vnLoadSeekDriver;
     private VNSaveLoadSystem _vnSaveLoadSystem;
     private EpisodeSelectionSystem _episodeSelectionSystem;
@@ -215,6 +216,8 @@ public class VnAppBootstrap : MonoBehaviour
 
         uiManager.Init();
         uiManager.AttachUIPatchService(_uiPatchService);
+
+        _uiThemePatch = new UIThemePatchAdapter(uiManager, _uiPatchService);
     }
 
     private void BootstrapPresentationSession()
@@ -253,8 +256,7 @@ public class VnAppBootstrap : MonoBehaviour
 
         // Presentation Control
         PresentationControlCommandFactory presentationControlFactory = new(
-            _uiPatchService,
-            uiManager,
+            _uiThemePatch,
             _unityTimeSource,
             unitySignalBus,
             signalLatch);
