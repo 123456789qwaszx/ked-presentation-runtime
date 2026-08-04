@@ -13,7 +13,7 @@ public sealed class AdvanceGate
     private const int AdvanceRequestKindCount = 4;
 
     private readonly VnPlaybackRuntimeState _vnPlaybackSettings;
-    private readonly VNLinePresentationState _lineState;
+    private readonly ISeekStateQuery _lineState;
     private readonly ICommandRunScopeProvider _scopeProvider;
 
     private CommandRunScope CurrentScope => _scopeProvider?.CurrentScope;
@@ -23,7 +23,7 @@ public sealed class AdvanceGate
 
     public AdvanceGate(
         VnPlaybackRuntimeState vnPlaybackSettings,
-        VNLinePresentationState lineState,
+        ISeekStateQuery lineState,
         ICommandRunScopeProvider scopeProvider)
     {
         _vnPlaybackSettings = vnPlaybackSettings;

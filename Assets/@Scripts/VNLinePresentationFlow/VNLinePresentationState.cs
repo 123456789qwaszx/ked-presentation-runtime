@@ -1,4 +1,4 @@
-public sealed class VNLinePresentationState
+public sealed class VNLinePresentationState : ISeekStateQuery
 {
     private readonly VNSeekState _seekState = new ();
     public VNSeekKind SeekKind => _seekState.Kind;

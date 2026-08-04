@@ -17,7 +17,7 @@ public sealed class PresentationSession
     private readonly CommandExecutor _executor;
 
     private readonly PresentationSessionContext _context;
-    private readonly VNLinePresentationState _linePresentationAdvanceState;
+    private readonly ISeekStateQuery _linePresentationAdvanceState;
     private readonly PresentationStage _stage;
 
     private CommandRunScope _scope;
@@ -35,7 +35,7 @@ public sealed class PresentationSession
         StepGateAdvancer gateAdvancer,
         CommandExecutor executor,
         PresentationSessionContext presentationSessionContext,
-        VNLinePresentationState linePresentationAdvanceState,
+        ISeekStateQuery linePresentationAdvanceState,
         PresentationStage presentationStage)
     {
         _gatePlanner = gatePlanner;

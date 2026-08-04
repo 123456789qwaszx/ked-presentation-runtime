@@ -4,7 +4,7 @@ using System.Threading;
 public sealed class CommandRunScope
 {
     private readonly PresentationSessionContext _context;
-    private readonly VNLinePresentationState _linePresentationAdvanceState;
+    private readonly ISeekStateQuery _linePresentationAdvanceState;
     private readonly PresentationStage _stage;
     private readonly bool _reportsNodeBusy;
     
@@ -24,7 +24,7 @@ public sealed class CommandRunScope
 
     public CommandRunScope(
         PresentationSessionContext context,
-        VNLinePresentationState linePresentationAdvanceState,
+        ISeekStateQuery linePresentationAdvanceState,
         PresentationStage stage,
         bool reportsNodeBusy = true)
     {
