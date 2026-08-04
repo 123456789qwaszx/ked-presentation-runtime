@@ -23,7 +23,7 @@ public sealed class SubPresentationScopeProvider : ICommandRunScopeProvider
 public sealed class PresentationLaneScopeSession : ICommandRunScopeProvider
 {
     private readonly PresentationSessionContext _context;
-    private readonly VNLinePresentationState _linePresentationAdvanceState;
+    private readonly ISeekStateQuery _linePresentationAdvanceState;
     private readonly PresentationStage _stage;
 
     private readonly CommandExecutor _executor;
@@ -46,7 +46,7 @@ public sealed class PresentationLaneScopeSession : ICommandRunScopeProvider
         CommandExecutor subExecutor,
         CommandExecutor subOneShotExecutor,
         PresentationSessionContext presentationSessionContext,
-        VNLinePresentationState linePresentationAdvanceState,
+        ISeekStateQuery linePresentationAdvanceState,
         PresentationStage presentationStage)
     {
         _executor = executor;
