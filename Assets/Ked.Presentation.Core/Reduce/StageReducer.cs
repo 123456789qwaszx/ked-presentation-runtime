@@ -95,6 +95,14 @@ namespace Ked.Presentation.Core
                 // show — SetAnchor(리셋+앵커) + 가시성. 초상 스프라이트 축은 아직 없어 부분이다.
                 case "show": return ApplyShow(state, cmd, out reason);
 
+                // 배역·별칭 (커맨드 대상 해석의 전제)
+                case "cast": return ApplyCast(state, cmd, out reason);
+                case "actor": return ApplyActor(state, cmd, out reason);
+
+                // fade — 초상 스프라이트 루트의 가시성 (브리지 EnqueueFadeIn/OutDslSpec과 동일 표적)
+                case "fade_in": return ApplyFade(state, cmd, visible: true, out reason);
+                case "fade_out": return ApplyFade(state, cmd, visible: false, out reason);
+
                 // nudge (MoveBy: Track_X / Track_Y, 상대)
                 case "left":  return ApplyNudge(state, cmd, tuning, -1f, 0f, "CharSlot_Track_X", out reason);
                 case "right": return ApplyNudge(state, cmd, tuning, 1f, 0f, "CharSlot_Track_X", out reason);
@@ -175,6 +183,15 @@ namespace Ked.Presentation.Core
             state.RegisterSlot(slotKey);
             state.SetAttachment(slotKey, new SlotAttachment(stageKey, layerKey));
 
+            // 초기 가시성: 덤프의 CanvasGroup 초기 alpha (초상·이모지 루트는 0으로 태어난다).
+            for (int i = 0; i < rig.nodes.Count; i++)
+            {
+                RigSchemaNodeDto node = rig.nodes[i];
+
+                if (node != null && node.hasCanvasGroup)
+                    state.SetAlpha(slotKey + "/" + node.id, node.canvasGroupAlpha);
+            }
+
             return true;
         }
 
@@ -225,6 +242,58 @@ namespace Ked.Presentation.Core
 
             // 초상 스프라이트(faceToken) 축은 아직 없다 — 상태 없이 넘어가지 않고 기록한다.
             state.AddUnhandled(cmd, "show의 초상 스프라이트 축(faceToken)은 아직 상태 모델에 없다");
+
+            return true;
+        }
+
+        // ── 배역·별칭·fade ───────────────────────────────────────────
+
+        private static bool ApplyCast(StageState state, in StageCommand cmd, out string reason)
+        {
+            if (!TryGetSpawnedSlot(state, cmd, out string slotKey, out reason))
+                return false;
+
+            string characterKey = cmd.Arg(1);
+
+            if (string.IsNullOrEmpty(characterKey))
+            {
+                reason = "cast에 캐릭터 키가 없다";
+                return false;
+            }
+
+            state.SetCast(slotKey, characterKey);
+
+            // 초상 스프라이트(어느 그림·크기) 축은 아직 없다 — 배역 맵만 접고 기록한다.
+            state.AddUnhandled(cmd, "cast의 초상 스프라이트 축(그림·크기)은 아직 상태 모델에 없다");
+            return true;
+        }
+
+        private static bool ApplyActor(StageState state, in StageCommand cmd, out string reason)
+        {
+            string aliasSymbol = cmd.Arg(0);
+            string targetKey = cmd.Arg(1);
+
+            if (string.IsNullOrEmpty(aliasSymbol) || string.IsNullOrEmpty(targetKey))
+            {
+                reason = "actor 인자가 모자란다 (별칭, 대상)";
+                return false;
+            }
+
+            state.SetAlias(aliasSymbol, targetKey);
+            reason = null;
+            return true;
+        }
+
+        private static bool ApplyFade(StageState state, in StageCommand cmd, bool visible, out string reason)
+        {
+            if (!TryGetSpawnedSlot(state, cmd, out string slotKey, out reason))
+                return false;
+
+            string nodeKey = StageState.NodeKeyOf(slotKey, "CharacterPortraitSprite_Root");
+
+            state.Apply(visible
+                ? FadeInReduction.Reduce(nodeKey)
+                : FadeOutReduction.Reduce(nodeKey));
 
             return true;
         }
@@ -469,12 +538,16 @@ namespace Ked.Presentation.Core
         private static bool TryGetSpawnedSlot(
             StageState state, in StageCommand cmd, out string slotKey, out string reason)
         {
-            if (!TryGetSlotKey(cmd, out slotKey, out reason))
-                return false;
-
-            if (!state.HasSlot(slotKey))
+            if (!TryGetSlotKey(cmd, out string targetKey, out reason))
             {
-                reason = $"슬롯 '{slotKey}'가 아직 세워지지 않았다 (slot 커맨드 선행 필요)";
+                slotKey = null;
+                return false;
+            }
+
+            // 별칭("@3")·캐릭터 키("parkeunseol")도 슬롯으로 푼다 (actor/cast 축).
+            if (!state.TryResolveSlot(targetKey, out slotKey))
+            {
+                reason = $"대상 '{targetKey}'를 슬롯으로 풀 수 없다 (slot/cast/actor 선행 필요)";
                 return false;
             }
 

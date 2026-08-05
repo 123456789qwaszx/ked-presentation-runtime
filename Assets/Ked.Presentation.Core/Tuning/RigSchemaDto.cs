@@ -43,6 +43,13 @@ namespace Ked.Presentation.Core
         public Float3Dto localScale;
         public Float3Dto localEulerAngles;
         public Float2Dto measuredRectSize; // 캡처 시점 파생값. 재현 입력으로 쓰지 않는다
+
+        /// <summary>가시성 축 대상인가. 구덤프(필드 없음)는 역직렬화 기본값 false로
+        /// 안전하게 떨어진다 — JsonUtility는 없는 필드를 0/false로 채운다.</summary>
+        public bool hasCanvasGroup;
+
+        /// <summary>hasCanvasGroup일 때만 의미 있는 초기 alpha (스폰 시 가시성).</summary>
+        public float canvasGroupAlpha;
     }
 
     [Serializable]

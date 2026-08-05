@@ -245,6 +245,10 @@ public static class PresentationTuningExporter
 
     private static RigNodeDto CaptureNode(string id, string parent, RectTransform rect)
     {
+        // 가시성 축: CanvasGroup 유무 + 초기 alpha.
+        // U14 폴드가 스폰 시 초기 가시성을 재현하는 데 쓴다.
+        bool hasCanvasGroup = rect.TryGetComponent(out CanvasGroup group);
+
         return new RigNodeDto
         {
             id = id,
@@ -257,6 +261,8 @@ public static class PresentationTuningExporter
             localScale = rect.localScale,
             localEulerAngles = rect.localEulerAngles,
             measuredRectSize = rect.rect.size,
+            hasCanvasGroup = hasCanvasGroup,
+            canvasGroupAlpha = hasCanvasGroup ? group.alpha : 0f,
         };
     }
 
@@ -369,6 +375,8 @@ public static class PresentationTuningExporter
         public Vector3 localScale;
         public Vector3 localEulerAngles;
         public Vector2 measuredRectSize;
+        public bool hasCanvasGroup;      // 가시성 축 대상인가
+        public float canvasGroupAlpha;   // hasCanvasGroup일 때만 의미 있는 초기 alpha
     }
 
     [Serializable]

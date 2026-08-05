@@ -37,6 +37,9 @@ namespace Ked.Presentation.Core.Tests
 
             for (int i = 0; i < chain.Length; i++)
             {
+                // 실물 스키마처럼: 초상 스프라이트 루트는 CanvasGroup alpha 0으로 태어난다.
+                bool isPortraitSpriteRoot = chain[i] == "CharacterPortraitSprite_Root";
+
                 nodes.Add(new RigSchemaNodeDto
                 {
                     id = chain[i],
@@ -49,6 +52,8 @@ namespace Ked.Presentation.Core.Tests
                     localScale = F3(1f, 1f, 1f),
                     localEulerAngles = F3(0f, 0f, 0f),
                     measuredRectSize = F2(1920f, 1080f),
+                    hasCanvasGroup = isPortraitSpriteRoot,
+                    canvasGroupAlpha = 0f,
                 });
             }
 
@@ -226,6 +231,87 @@ namespace Ked.Presentation.Core.Tests
 
             // 초상 축 부재는 침묵이 아니라 기록이다.
             Assert.That(state.Unhandled.Count(u => u.Command.Name == "show"), Is.EqualTo(1));
+        }
+
+        [Test]
+        public void 스폰_시_초기_alpha는_덤프의_CanvasGroup_값이다()
+        {
+            StageReducerTuning tuning = MakeTuning();
+            StageState state = StageReducer.CreateInitialState(tuning);
+
+            state = StageReducer.Apply(state, Cmd("slot", "c1"), tuning);
+
+            // 초상 스프라이트 루트는 0으로 태어나고, CanvasGroup 없는 노드는 1(기본)이다.
+            Assert.That(state.GetAlpha("c1/CharacterPortraitSprite_Root"), Is.EqualTo(0f));
+            Assert.That(state.GetAlpha("c1/CharSlot_Track"), Is.EqualTo(1f));
+        }
+
+        // ── 배역·별칭·fade ───────────────────────────────────────────
+
+        [Test]
+        public void cast와_actor를_거쳐_별칭으로_커맨드가_풀린다()
+        {
+            StageReducerTuning tuning = MakeTuning();
+            StageState state = StageReducer.CreateInitialState(tuning);
+
+            state = StageReducer.ApplyAll(state, new[]
+            {
+                Cmd("slot", "c3"),
+                Cmd("cast", "c3", "parkeunseol"),
+                Cmd("actor", "@3", "parkeunseol"),
+                Cmd("left", "@3", "1u"),           // 별칭 → 캐릭터 → 슬롯
+                Cmd("right", "parkeunseol", "3u"), // 캐릭터 키 직접
+            }, tuning);
+
+            // cast의 초상 축 미지원 기록 1건 외에는 전부 접혀야 한다.
+            Assert.That(state.Unhandled.Count(u => u.Command.Name == "cast"), Is.EqualTo(1));
+            Assert.That(state.Unhandled.Count(u => u.Command.Name != "cast"), Is.EqualTo(0));
+
+            // -40 + 120 = +80px.
+            Assert.That(state.Nodes.GetState("c3/CharSlot_Track_X").AnchoredPosition.X,
+                Is.EqualTo(80f).Within(Eps));
+        }
+
+        [Test]
+        public void 재배역하면_캐릭터가_새_슬롯으로_풀린다()
+        {
+            StageReducerTuning tuning = MakeTuning();
+            StageState state = StageReducer.CreateInitialState(tuning);
+
+            state = StageReducer.ApplyAll(state, new[]
+            {
+                Cmd("slot", "c1"),
+                Cmd("slot", "c2"),
+                Cmd("cast", "c1", "yoonsaea"),
+                Cmd("cast", "c2", "yoonsaea"),      // 같은 캐릭터를 c2로
+                Cmd("left", "yoonsaea", "1u"),
+            }, tuning);
+
+            Assert.That(state.Nodes.GetState("c2/CharSlot_Track_X").AnchoredPosition.X,
+                Is.EqualTo(-40f).Within(Eps));
+            Assert.That(state.Nodes.GetState("c1/CharSlot_Track_X").AnchoredPosition.X,
+                Is.EqualTo(0f).Within(Eps));
+        }
+
+        [Test]
+        public void fade는_초상_스프라이트_루트의_가시성이다()
+        {
+            StageReducerTuning tuning = MakeTuning();
+            StageState state = StageReducer.CreateInitialState(tuning);
+
+            state = StageReducer.ApplyAll(state, new[]
+            {
+                Cmd("slot", "c1"),
+                Cmd("cast", "c1", "yoonsaea"),
+                Cmd("actor", "@1", "yoonsaea"),
+                Cmd("fade_in", "@1"),
+            }, tuning);
+
+            Assert.That(state.GetAlpha("c1/CharacterPortraitSprite_Root"), Is.EqualTo(1f));
+
+            state = StageReducer.Apply(state, Cmd("fade_out", "@1"), tuning);
+
+            Assert.That(state.GetAlpha("c1/CharacterPortraitSprite_Root"), Is.EqualTo(0f));
         }
 
         // ── shot ─────────────────────────────────────────────────────

@@ -81,6 +81,14 @@ namespace Ked.Presentation.Core
         /// <summary>슬롯 키 → 리그 노드 키 prefix ("c1" → "c1/"). 스폰된 슬롯의 존재 기록.</summary>
         private readonly HashSet<string> _slots;
 
+        // 배역 축: cast가 캐릭터를 슬롯에 앉힌다. (초상 스프라이트 축은 아직 없다 —
+        // 여기 담는 것은 커맨드의 대상 해석에 필요한 "누가 어느 슬롯인가"뿐이다.)
+        private readonly Dictionary<string, string> _slotByCharacter;
+        private readonly Dictionary<string, string> _characterBySlot;
+
+        // 별칭 축: actor가 "@3" 같은 기호를 캐릭터/슬롯 키에 잇는다.
+        private readonly Dictionary<string, string> _aliases;
+
         public IReadOnlyList<UnhandledCommand> Unhandled => _unhandled;
         public IReadOnlyCollection<string> Slots => _slots;
 
@@ -92,6 +100,9 @@ namespace Ked.Presentation.Core
             _attachments = new Dictionary<string, SlotAttachment>(StringComparer.Ordinal);
             _unhandled = new List<UnhandledCommand>();
             _slots = new HashSet<string>(StringComparer.Ordinal);
+            _slotByCharacter = new Dictionary<string, string>(StringComparer.Ordinal);
+            _characterBySlot = new Dictionary<string, string>(StringComparer.Ordinal);
+            _aliases = new Dictionary<string, string>(StringComparer.Ordinal);
         }
 
         private StageState(StageState source)
@@ -102,6 +113,9 @@ namespace Ked.Presentation.Core
             _attachments = new Dictionary<string, SlotAttachment>(source._attachments, StringComparer.Ordinal);
             _unhandled = new List<UnhandledCommand>(source._unhandled);
             _slots = new HashSet<string>(source._slots, StringComparer.Ordinal);
+            _slotByCharacter = new Dictionary<string, string>(source._slotByCharacter, StringComparer.Ordinal);
+            _characterBySlot = new Dictionary<string, string>(source._characterBySlot, StringComparer.Ordinal);
+            _aliases = new Dictionary<string, string>(source._aliases, StringComparer.Ordinal);
         }
 
         public StageState Clone() => new StageState(this);
@@ -114,6 +128,52 @@ namespace Ked.Presentation.Core
 
         /// <summary>슬롯 리그의 노드 키. 예: NodeKeyOf("c1", "CharSlot_Track") → "c1/CharSlot_Track".</summary>
         public static string NodeKeyOf(string slotKey, string nodeId) => $"{slotKey}/{nodeId}";
+
+        /// <summary>cast — 캐릭터를 슬롯에 앉힌다. 같은 캐릭터의 재배역은 갈아탄다.</summary>
+        public void SetCast(string slotKey, string characterKey)
+        {
+            // 이전 배역 관계를 정리한다 (슬롯 재사용·캐릭터 이동 양쪽).
+            if (_characterBySlot.TryGetValue(slotKey, out string previousCharacter))
+                _slotByCharacter.Remove(previousCharacter);
+
+            if (_slotByCharacter.TryGetValue(characterKey, out string previousSlot))
+                _characterBySlot.Remove(previousSlot);
+
+            _characterBySlot[slotKey] = characterKey;
+            _slotByCharacter[characterKey] = slotKey;
+        }
+
+        /// <summary>actor — 별칭 기호("@3")를 캐릭터/슬롯 키에 잇는다.</summary>
+        public void SetAlias(string aliasSymbol, string targetKey) => _aliases[aliasSymbol] = targetKey;
+
+        /// <summary>
+        /// 커맨드 대상 키 → 슬롯 키. 별칭이면 풀고, 캐릭터 키면 배역 맵으로 슬롯을 찾는다.
+        /// (런타임 CharacterRigTargetResolver의 해석 순서를 폴드 쪽에서 재현한 것)
+        /// </summary>
+        public bool TryResolveSlot(string targetKey, out string slotKey)
+        {
+            slotKey = null;
+
+            if (string.IsNullOrEmpty(targetKey))
+                return false;
+
+            if (_aliases.TryGetValue(targetKey, out string aliased))
+                targetKey = aliased;
+
+            if (_slots.Contains(targetKey))
+            {
+                slotKey = targetKey;
+                return true;
+            }
+
+            if (_slotByCharacter.TryGetValue(targetKey, out string bySlot) && _slots.Contains(bySlot))
+            {
+                slotKey = bySlot;
+                return true;
+            }
+
+            return false;
+        }
 
         // ── 가시성 축 ────────────────────────────────────────────────
 
