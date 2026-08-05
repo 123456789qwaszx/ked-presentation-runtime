@@ -42,13 +42,12 @@ public static class PresentationTuningExporter
         ("surface-layout", "Assets/Data/Generated/DialogueSurfaceLayoutPresetDB.asset"),
     };
 
-    // U12 지시의 7묶음에 없어서 이번에 내보내지 않는 것들. 존재는 기록한다.
+    // 아직 내보내지 않는 기준값들. 존재는 보고서에 기록한다.
     private static readonly string[] KnownButOutOfScope =
     {
         "Assets/Data/Generated/DialogueSpeakerPresentationPolicyDB.asset (speaker policy — 지시 목록 밖)",
         "Assets/Data/Generated/CharacterEmojiVisualPreset.asset (emoji preset — 지시 목록 밖)",
         "Assets/Data/Generated/CharacterEmojiLibrary.asset (emoji library — 지시 목록 밖)",
-        "Assets/Data/Generated/PortraitGeneratedDB.asset (초상화 — U12-v1의 몫)",
     };
 
     [MenuItem("Ked/U12/Export Presentation Tuning Dump")]

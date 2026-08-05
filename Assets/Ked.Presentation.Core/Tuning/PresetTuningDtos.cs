@@ -142,8 +142,14 @@ namespace Ked.Presentation.Core
             out float aspect, out string reason)
         {
             characterKey = (characterKey ?? "").Trim().ToLowerInvariant();
+            variantSuffix = char.ToLowerInvariant(variantSuffix);
 
-            if (TryFind(characterKey, variantSuffix, emotion, out aspect))
+            // 런타임 MakeKey는 DB 엔트리와 요청 양쪽에 같은 정규화를 적용한다.
+            // 지원하지 않는 토큰은 빈 키로 exact 조회한 뒤 a/01 폴백으로 간다.
+            if (!PortraitEmotionCode.TryNormalize(emotion, out string normalizedEmotion))
+                normalizedEmotion = "";
+
+            if (TryFind(characterKey, variantSuffix, normalizedEmotion, out aspect))
             {
                 reason = null;
                 return true;
@@ -156,7 +162,7 @@ namespace Ked.Presentation.Core
                 return true;
             }
 
-            reason = $"초상 치수가 덤프에 없다: {characterKey}/{variantSuffix}/{emotion}";
+            reason = $"초상 치수가 덤프에 없다: {characterKey}/{variantSuffix}/{normalizedEmotion}";
             return false;
         }
 
@@ -180,7 +186,10 @@ namespace Ked.Presentation.Core
                 if (suffix != variantSuffix)
                     continue;
 
-                if (!string.Equals(entry.emotion, emotion, StringComparison.Ordinal))
+                if (!PortraitEmotionCode.TryNormalize(entry.emotion, out string entryEmotion))
+                    entryEmotion = "";
+
+                if (!string.Equals(entryEmotion, emotion, StringComparison.Ordinal))
                     continue;
 
                 aspect = entry.width / entry.height;

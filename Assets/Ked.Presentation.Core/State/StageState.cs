@@ -63,9 +63,9 @@ namespace Ked.Presentation.Core
     /// <summary>
     /// 무대 확정 상태 — 커맨드 열을 접은 결과이자 정지 프레임의 원료 (U14).
     ///
-    /// 축: 노드 트리(좌표) · 가시성(alpha) · 샷 의도 · 슬롯 부착(구조) · Unhandled.
-    /// 초상(어느 스프라이트)·배경·박스·이펙트 축은 아직 없다 — 커맨드가 오면
-    /// Unhandled에 남지, 조용히 사라지지 않는다.
+    /// 축: 노드 트리(좌표) · 가시성(alpha) · 샷 의도 · 슬롯 부착(구조) ·
+    /// 배역/초상 선택 상태 · Unhandled. 배경·박스·이펙트 축은 아직 없다 —
+    /// 커맨드가 오면 Unhandled에 남지, 조용히 사라지지 않는다.
     ///
     /// 리듀서 계약(§6.2): Apply는 이 객체를 바꾸지 않고 새 상태를 돌려준다.
     /// </summary>
@@ -89,6 +89,10 @@ namespace Ked.Presentation.Core
         // 별칭 축: actor가 "@3" 같은 기호를 캐릭터/슬롯 키에 잇는다.
         private readonly Dictionary<string, string> _aliases;
 
+        // 초상 resolver 입력 축: 슬롯 → (변형 접미사, 정규화된 표정 코드).
+        // pose가 변형을, show/face/face_swap이 표정을 갱신한다.
+        private readonly Dictionary<string, (char variantSuffix, string emotion)> _portraits;
+
         public IReadOnlyList<UnhandledCommand> Unhandled => _unhandled;
         public IReadOnlyCollection<string> Slots => _slots;
 
@@ -103,6 +107,7 @@ namespace Ked.Presentation.Core
             _slotByCharacter = new Dictionary<string, string>(StringComparer.Ordinal);
             _characterBySlot = new Dictionary<string, string>(StringComparer.Ordinal);
             _aliases = new Dictionary<string, string>(StringComparer.Ordinal);
+            _portraits = new Dictionary<string, (char, string)>(StringComparer.Ordinal);
         }
 
         private StageState(StageState source)
@@ -116,9 +121,7 @@ namespace Ked.Presentation.Core
             _slotByCharacter = new Dictionary<string, string>(source._slotByCharacter, StringComparer.Ordinal);
             _characterBySlot = new Dictionary<string, string>(source._characterBySlot, StringComparer.Ordinal);
             _aliases = new Dictionary<string, string>(source._aliases, StringComparer.Ordinal);
-
-            foreach (KeyValuePair<string, (char, string)> pair in source._portraits)
-                _portraits[pair.Key] = pair.Value;
+            _portraits = new Dictionary<string, (char, string)>(source._portraits, StringComparer.Ordinal);
         }
 
         public StageState Clone() => new StageState(this);
@@ -152,10 +155,6 @@ namespace Ked.Presentation.Core
         /// <summary>슬롯에 앉은 캐릭터 키. 배역이 없으면 false — focus 튜닝은 base만 적용된다.</summary>
         public bool TryGetCharacter(string slotKey, out string characterKey)
             => _characterBySlot.TryGetValue(slotKey, out characterKey);
-
-        // 초상 표정 축: 슬롯 → (변형 접미사, 정규화된 표정 코드). 사이징 폴드의 입력이다.
-        private readonly Dictionary<string, (char variantSuffix, string emotion)> _portraits =
-            new Dictionary<string, (char, string)>(StringComparer.Ordinal);
 
         public void SetPortrait(string slotKey, char variantSuffix, string emotion)
             => _portraits[slotKey] = (variantSuffix, emotion);

@@ -21,7 +21,7 @@ namespace Ked.Presentation.Core
         /// <summary>presets/focus-tuning.json — place/size의 focus 오프셋. 없으면 base 0으로 접는다.</summary>
         public FocusTuningBodyDto FocusTuning;
 
-        /// <summary>portrait-dimensions.json — 초상 사이징(cast) 폴드. 없으면 사이징은 Unhandled.</summary>
+        /// <summary>portrait-dimensions.json — 초상 사이징 폴드. 없으면 사이징은 Unhandled.</summary>
         public PortraitDimensionsFileDto PortraitDimensions;
     }
 
@@ -32,12 +32,10 @@ namespace Ked.Presentation.Core
     /// 시간·랜덤·IO 없음 — duration 인자는 정지 프레임에 무의미하므로 파싱조차 안 한다.
     /// 인식 못 하거나 아직 못 접는 커맨드는 버리지 않고 Unhandled에 남는다(커맨드명+출처).
     ///
-    /// v1 어휘: b-5까지 이관된 리덕션이 덮는 것들 —
-    ///   slot 계열(리그 스폰) · show(부분) · nudge/move/scale/rotate 계열 · shot 5종 ·
-    ///   sibling/char_to(구조 축 기록).
-    /// 명시적 한계(전부 Unhandled로 남는다): cast/pose/face(초상 축) ·
-    ///   place/set_depth(정착 solver 폴드 — SettledFocusMath 배선은 후속) ·
-    ///   배경/오버레이/이펙트/오디오/트랜지션.
+    /// 현재 어휘: slot 계열(리그 스폰) · cast/pose/show/face/face_swap(초상 사이징) ·
+    ///   place/size · nudge/move/scale/rotate 계열 · shot 5종 · char_to(구조 축 기록).
+    /// 명시적 한계(전부 Unhandled로 남는다): 배경/오버레이/이펙트/오디오/트랜지션과
+    ///   아직 디스패치되지 않은 캐릭터 연기 커맨드.
     ///
     /// ⚠ v1 가정 둘 — U14 하네스가 판정한다:
     /// 1. 스테이지/레이어 컨테이너는 항등 트랜스폼(스트레치 풀)이라 리그를 루트
@@ -101,11 +99,12 @@ namespace Ked.Presentation.Core
                 case "slot01": return ApplySlot(state, cmd, tuning, "stage01", cmd.Arg(1, "mid"), out reason);
                 case "slot02": return ApplySlot(state, cmd, tuning, "stage02", cmd.Arg(1, "mid"), out reason);
 
-                // show — SetAnchor(리셋+앵커) + 가시성. 초상 스프라이트 축은 아직 없어 부분이다.
+                // show — SetAnchor(리셋+앵커) + 가시성 + 표정별 초상 사이징.
                 case "show": return ApplyShow(state, cmd, tuning, out reason);
 
-                // 배역·별칭 (커맨드 대상 해석의 전제)
+                // 배역·variant·별칭 (커맨드 대상 해석과 portrait resolver의 전제)
                 case "cast": return ApplyCast(state, cmd, tuning, out reason);
+                case "pose": return ApplyPose(state, cmd, out reason);
                 case "actor": return ApplyActor(state, cmd, out reason);
 
                 // fade — 초상 스프라이트 루트의 가시성 (브리지 EnqueueFadeIn/OutDslSpec과 동일 표적)
@@ -280,7 +279,9 @@ namespace Ked.Presentation.Core
             state.Apply(FadeInReduction.Reduce(StageState.NodeKeyOf(slotKey, "CharacterPortraitSprite_Root")));
 
             // 표정: show의 faceToken 별칭("e1", 빈 값은 "2") → 표정 코드 + 사이징 재계산.
-            string faceRaw = PortraitEmotionCode.ParseShowFaceAlias(cmd.Arg(1));
+            // Yarn 브리지의 선택 인자 기본값은 e1이다. Parser의 빈 값 규칙("2")은
+            // 명시적으로 빈 토큰을 넘긴 경우의 규칙이지, 생략된 인자의 기본값이 아니다.
+            string faceRaw = PortraitEmotionCode.ParseShowFaceAlias(cmd.Arg(1, "e1"));
 
             if (PortraitEmotionCode.TryNormalize(faceRaw, out string showEmotion))
             {
@@ -292,6 +293,32 @@ namespace Ked.Presentation.Core
             {
                 state.AddUnhandled(cmd, $"show의 표정 토큰 '{cmd.Arg(1)}'을 읽지 못했다");
             }
+
+            return true;
+        }
+
+        /// <summary>
+        /// pose — CastRegistry의 variant만 바꾼다. 현재 런타임의
+        /// SetPortraitPoseCommandCharR는 sprite 교체 코드가 비활성이라 이 시점에는
+        /// sizeDelta를 다시 계산하지 않는다. 다음 show/face/face_swap이 새 variant로
+        /// resolver를 호출할 때 사이징이 바뀐다.
+        /// </summary>
+        private static bool ApplyPose(StageState state, in StageCommand cmd, out string reason)
+        {
+            if (!TryGetSpawnedSlot(state, cmd, out string slotKey, out reason))
+                return false;
+
+            if (!state.TryGetCharacter(slotKey, out _))
+            {
+                reason = $"pose 대상 슬롯 '{slotKey}'에 cast가 없다";
+                return false;
+            }
+
+            string variant = cmd.Arg(1, "a").Trim().ToLowerInvariant();
+            char variantSuffix = variant.Length > 0 ? variant[variant.Length - 1] : 'a';
+
+            state.TryGetPortrait(slotKey, out _, out string emotion);
+            state.SetPortrait(slotKey, variantSuffix, emotion ?? PortraitEmotionCode.Default);
 
             return true;
         }

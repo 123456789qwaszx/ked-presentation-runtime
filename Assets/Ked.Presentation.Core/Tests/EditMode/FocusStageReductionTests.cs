@@ -103,6 +103,39 @@ namespace Ked.Presentation.Core.Tests
             };
         }
 
+        private static void AddPortraitNodes(StageReducerTuning tuning, float fixedRootHeight = 0f)
+        {
+            List<RigSchemaNodeDto> nodes = tuning.RigSchemas.rigs[0].nodes;
+            bool fixedHeight = fixedRootHeight > 0f;
+
+            string[] chain =
+            {
+                "CharacterPortrait_Track", "CharacterPortrait_Rotation",
+                "CharacterPortrait_Track_Move", "CharacterPortrait_Track_Move_X", "CharacterPortrait_Track_Move_Y",
+                "CharacterPortrait_SwayPivot", "CharacterPortrait_Shake",
+                "CharacterPortrait_ActingScale", "CharacterPortrait_ActingScale_X", "CharacterPortrait_ActingScale_Y",
+                "CharacterPortraitSprite_Root", "CharacterPortraitSprite_Image",
+            };
+
+            for (int i = 0; i < chain.Length; i++)
+            {
+                bool isSpriteRoot = chain[i] == "CharacterPortraitSprite_Root";
+
+                nodes.Add(new RigSchemaNodeDto
+                {
+                    id = chain[i],
+                    parent = i == 0 ? "CharacterPortrait_VisualOffset" : chain[i - 1],
+                    anchoredPosition = F2(0f, 0f),
+                    anchorMin = isSpriteRoot && fixedHeight ? F2(0.5f, 0.5f) : F2(0f, 0f),
+                    anchorMax = isSpriteRoot && fixedHeight ? F2(0.5f, 0.5f) : F2(1f, 1f),
+                    pivot = F2(0.5f, 0.5f),
+                    sizeDelta = isSpriteRoot && fixedHeight ? F2(0f, fixedRootHeight) : F2(0f, 0f),
+                    localScale = new Float3Dto { x = 1f, y = 1f, z = 1f },
+                    localEulerAngles = new Float3Dto(),
+                });
+            }
+        }
+
         private static StageCommand Cmd(string name, params string[] args)
             => new StageCommand(name, args, "t.yarn:1");
 
@@ -246,25 +279,7 @@ namespace Ked.Presentation.Core.Tests
                 },
             };
 
-            // 미니 스키마에 초상 이미지 사슬을 붙인다.
-            List<RigSchemaNodeDto> nodes = tuning.RigSchemas.rigs[0].nodes;
-            Float2Dto F2b(float x, float y) => new Float2Dto { x = x, y = y };
-
-            foreach (string id in new[] { "CharacterPortraitSprite_Root", "CharacterPortraitSprite_Image" })
-            {
-                nodes.Add(new RigSchemaNodeDto
-                {
-                    id = id,
-                    parent = id == "CharacterPortraitSprite_Root" ? "CharacterPortrait_VisualOffset" : "CharacterPortraitSprite_Root",
-                    anchoredPosition = F2b(0f, 0f),
-                    anchorMin = F2b(0f, 0f),
-                    anchorMax = F2b(1f, 1f),
-                    pivot = F2b(0.5f, 0.5f),
-                    sizeDelta = F2b(0f, 0f),
-                    localScale = new Float3Dto { x = 1f, y = 1f, z = 1f },
-                    localEulerAngles = new Float3Dto(),
-                });
-            }
+            AddPortraitNodes(tuning);
 
             StageState state = StageReducer.CreateInitialState(tuning);
 
@@ -285,60 +300,134 @@ namespace Ked.Presentation.Core.Tests
         }
 
         [Test]
-        public void 표정_전환이_표정별_치수로_사이징을_다시_접는다()
+        public void 초상_변경_커맨드가_variant와_표정별_치수로_사이징을_다시_접는다()
         {
-            // parkeunseol 실측: 표정 01은 315/662, 02는 237/548 — 4차 리포트의 두 값.
             StageReducerTuning tuning = MakeTuning();
 
             tuning.PortraitDimensions = new PortraitDimensionsFileDto
             {
                 entries =
                 {
-                    new PortraitDimensionDto { character = "parkeunseol", variant = "parkeunseol_a", emotion = "01", width = 315f, height = 662f },
-                    new PortraitDimensionDto { character = "parkeunseol", variant = "parkeunseol_a", emotion = "02", width = 237f, height = 548f },
+                    new PortraitDimensionDto { character = "x", variant = "x_a", emotion = "01", width = 500f, height = 1000f },
+                    new PortraitDimensionDto { character = "x", variant = "x_a", emotion = "2", width = 700f, height = 1000f },
+                    new PortraitDimensionDto { character = "x", variant = "x_b", emotion = "01", width = 600f, height = 1000f },
+                    new PortraitDimensionDto { character = "x", variant = "x_b", emotion = "02", width = 800f, height = 1000f },
                 },
             };
 
-            List<RigSchemaNodeDto> nodes = tuning.RigSchemas.rigs[0].nodes;
-            Float2Dto F2c(float x, float y) => new Float2Dto { x = x, y = y };
-
-            foreach (string id in new[] { "CharacterPortraitSprite_Root", "CharacterPortraitSprite_Image" })
-            {
-                nodes.Add(new RigSchemaNodeDto
-                {
-                    id = id,
-                    parent = id == "CharacterPortraitSprite_Root" ? "CharacterPortrait_VisualOffset" : "CharacterPortraitSprite_Root",
-                    anchoredPosition = F2c(0f, 0f),
-                    anchorMin = F2c(0f, 0f),
-                    anchorMax = F2c(1f, 1f),
-                    pivot = F2c(0.5f, 0.5f),
-                    sizeDelta = F2c(0f, 0f),
-                    localScale = new Float3Dto { x = 1f, y = 1f, z = 1f },
-                    localEulerAngles = new Float3Dto(),
-                });
-            }
+            AddPortraitNodes(tuning);
 
             StageState state = StageReducer.CreateInitialState(tuning);
 
             state = StageReducer.ApplyAll(state, new[]
             {
-                Cmd("slot", "c3"),
-                Cmd("cast", "c3", "parkeunseol"),        // 기본 표정 01 → 315/662
-                Cmd("actor", "@3", "parkeunseol"),
+                Cmd("slot", "c1"),
+                Cmd("cast", "c1", "x"),
             }, tuning);
 
-            Assert.That(state.Nodes.GetState("c3/CharacterPortraitSprite_Image").SizeDelta.X,
-                Is.EqualTo(1080f * 315f / 662f).Within(0.01f), "표정 01 = 513.90 — 리포트의 그 값");
+            string imageKey = "c1/CharacterPortraitSprite_Image";
+            Assert.That(state.Nodes.GetState(imageKey).SizeDelta.X,
+                Is.EqualTo(540f).Within(Eps), "cast 기본 a/01");
 
-            state = StageReducer.Apply(state, Cmd("face_swap", "@3", "3", "5fr"), tuning);
+            state = StageReducer.Apply(state, Cmd("show", "c1", "e2"), tuning);
+            Assert.That(state.Nodes.GetState(imageKey).SizeDelta.X,
+                Is.EqualTo(756f).Within(Eps), "show e2 → a/02");
 
-            // 표정 03은 덤프에 없다 → 폴백('a', "01")이 아니라... 02와 같은 캔버스라면 두 항목뿐인
-            // 이 테스트에선 폴백이 01로 간다 — 실덤프에선 03도 있으므로 02 치수로 갈 것이다.
-            // 여기서는 02로 직접 전환해 확인한다.
-            state = StageReducer.Apply(state, Cmd("face_swap", "@3", "2", "5fr"), tuning);
+            state = StageReducer.Apply(state, Cmd("face", "c1", "1"), tuning);
+            Assert.That(state.Nodes.GetState(imageKey).SizeDelta.X,
+                Is.EqualTo(540f).Within(Eps), "face 1 → a/01");
 
-            Assert.That(state.Nodes.GetState("c3/CharacterPortraitSprite_Image").SizeDelta.X,
-                Is.EqualTo(1080f * 237f / 548f).Within(0.01f), "표정 02 = 467.08 — 리포트의 그 값");
+            state = StageReducer.Apply(state, Cmd("face_swap", "c1", "2", "5fr"), tuning);
+            Assert.That(state.Nodes.GetState(imageKey).SizeDelta.X,
+                Is.EqualTo(756f).Within(Eps), "face_swap 2 → a/02");
+
+            state = StageReducer.Apply(state, Cmd("show", "c1"), tuning);
+            Assert.That(state.Nodes.GetState(imageKey).SizeDelta.X,
+                Is.EqualTo(540f).Within(Eps), "인자 없는 show의 런타임 기본값은 e1");
+
+            state = StageReducer.Apply(state, Cmd("pose", "c1", "b"), tuning);
+            Assert.That(state.Nodes.GetState(imageKey).SizeDelta.X,
+                Is.EqualTo(540f).Within(Eps), "pose 자체는 현재 런타임에서 sprite를 바꾸지 않는다");
+
+            state = StageReducer.Apply(state, Cmd("face", "c1", "2"), tuning);
+            Assert.That(state.Nodes.GetState(imageKey).SizeDelta.X,
+                Is.EqualTo(864f).Within(Eps), "pose b 뒤 face 2 → b/02");
+
+            Assert.That(state.Unhandled, Is.Empty, string.Join("\n", state.Unhandled));
+        }
+
+        [Test]
+        public void 초상_상태를_바꾼_clone은_원본의_portrait_딕셔너리를_공유하지_않는다()
+        {
+            StageReducerTuning tuning = MakeTuning();
+            tuning.PortraitDimensions = new PortraitDimensionsFileDto
+            {
+                entries =
+                {
+                    new PortraitDimensionDto { character = "x", variant = "x_a", emotion = "01", width = 500f, height = 1000f },
+                    new PortraitDimensionDto { character = "x", variant = "x_a", emotion = "02", width = 700f, height = 1000f },
+                },
+            };
+            AddPortraitNodes(tuning);
+
+            StageState original = StageReducer.ApplyAll(
+                StageReducer.CreateInitialState(tuning),
+                new[] { Cmd("slot", "c1"), Cmd("cast", "c1", "x") },
+                tuning);
+
+            StageState changed = StageReducer.Apply(original, Cmd("face", "c1", "2"), tuning);
+
+            Assert.That(original.TryGetPortrait("c1", out char originalVariant, out string originalEmotion), Is.True);
+            Assert.That(changed.TryGetPortrait("c1", out char changedVariant, out string changedEmotion), Is.True);
+            Assert.That(originalVariant, Is.EqualTo('a'));
+            Assert.That(changedVariant, Is.EqualTo('a'));
+            Assert.That(originalEmotion, Is.EqualTo("01"));
+            Assert.That(changedEmotion, Is.EqualTo("02"));
+            Assert.That(original.Nodes.GetState("c1/CharacterPortraitSprite_Image").SizeDelta.X,
+                Is.EqualTo(540f).Within(Eps));
+            Assert.That(changed.Nodes.GetState("c1/CharacterPortraitSprite_Image").SizeDelta.X,
+                Is.EqualTo(756f).Within(Eps));
+        }
+
+        [Test]
+        public void 초상_폭은_1080_상수가_아니라_현재_부모_높이에서_계산된다()
+        {
+            StageReducerTuning tuning = MakeTuning();
+            tuning.PortraitDimensions = new PortraitDimensionsFileDto
+            {
+                entries =
+                {
+                    new PortraitDimensionDto { character = "x", variant = "x_a", emotion = "01", width = 500f, height = 1000f },
+                },
+            };
+            AddPortraitNodes(tuning, fixedRootHeight: 720f);
+
+            StageState state = StageReducer.ApplyAll(
+                StageReducer.CreateInitialState(tuning),
+                new[] { Cmd("slot", "c1"), Cmd("cast", "c1", "x") },
+                tuning);
+
+            Assert.That(state.Nodes.GetState("c1/CharacterPortraitSprite_Image").SizeDelta.X,
+                Is.EqualTo(360f).Within(Eps));
+            Assert.That(state.Nodes.GetState("c1/CharacterPortraitSprite_Image").SizeDelta.Y,
+                Is.EqualTo(0f));
+        }
+
+        [Test]
+        public void 초상_치수_항목이_없으면_정확한_identity가_Unhandled_이유에_남는다()
+        {
+            StageReducerTuning tuning = MakeTuning();
+            tuning.PortraitDimensions = new PortraitDimensionsFileDto();
+            AddPortraitNodes(tuning);
+
+            StageState state = StageReducer.ApplyAll(
+                StageReducer.CreateInitialState(tuning),
+                new[] { Cmd("slot", "c1"), Cmd("cast", "c1", "missing") },
+                tuning);
+
+            Assert.That(state.Unhandled.Count, Is.EqualTo(1));
+            Assert.That(state.Unhandled[0].Command.Name, Is.EqualTo("cast"));
+            Assert.That(state.Unhandled[0].Reason, Does.Contain("missing/a/01"));
         }
 
         [Test]
@@ -354,7 +443,7 @@ namespace Ked.Presentation.Core.Tests
             };
 
             // 정확 일치.
-            Assert.That(dims.TryGetAspect("x", 'a', "02", out float exact, out _), Is.True);
+            Assert.That(dims.TryGetAspect("x", 'A', "2", out float exact, out _), Is.True);
             Assert.That(exact, Is.EqualTo(0.7f).Within(1e-4f));
 
             // 없는 표정 → 기본('a', "01") 폴백 — 런타임 리졸버와 동일.
@@ -366,8 +455,11 @@ namespace Ked.Presentation.Core.Tests
             Assert.That(missing, Does.Contain("없다"));
 
             // 표정 코드 정규화 규약.
-            Assert.That(PortraitEmotionCode.TryNormalize("2", out string two), Is.True);
-            Assert.That(two, Is.EqualTo("02"));
+            Assert.That(PortraitEmotionCode.TryNormalize("1", out string one), Is.True);
+            Assert.That(one, Is.EqualTo("01"));
+            Assert.That(PortraitEmotionCode.TryNormalize(
+                PortraitEmotionCode.ParseShowFaceAlias("e1"), out string aliasOne), Is.True);
+            Assert.That(aliasOne, Is.EqualTo("01"));
             Assert.That(PortraitEmotionCode.TryNormalize("abc", out _), Is.False);
             Assert.That(PortraitEmotionCode.ParseShowFaceAlias("e1"), Is.EqualTo("1"));
             Assert.That(PortraitEmotionCode.ParseShowFaceAlias(""), Is.EqualTo("2"));

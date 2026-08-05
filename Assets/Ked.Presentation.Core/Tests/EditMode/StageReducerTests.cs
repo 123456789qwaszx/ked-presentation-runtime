@@ -204,7 +204,7 @@ namespace Ked.Presentation.Core.Tests
         // ── show ─────────────────────────────────────────────────────
 
         [Test]
-        public void show는_축을_리셋하고_가시성을_켜고_초상_한계를_기록한다()
+        public void show는_축을_리셋하고_가시성을_켜고_표정_상태를_접는다()
         {
             StageReducerTuning tuning = MakeTuning();
             StageState state = StageReducer.CreateInitialState(tuning);
@@ -267,6 +267,8 @@ namespace Ked.Presentation.Core.Tests
             // cast의 기록 1건(치수 덤프 없는 tuning이라 사이징 미폴드) 외에는 전부 접혀야 한다.
             Assert.That(state.Unhandled.Count(u => u.Command.Name == "cast"), Is.EqualTo(1));
             Assert.That(state.Unhandled.Count(u => u.Command.Name != "cast"), Is.EqualTo(0));
+            Assert.That(state.Unhandled.Single(u => u.Command.Name == "cast").Reason,
+                Does.Contain("portrait-dimensions.json"));
 
             // -40 + 120 = +80px.
             Assert.That(state.Nodes.GetState("c3/CharSlot_Track_X").AnchoredPosition.X,
