@@ -40,6 +40,12 @@ public sealed class StageEquivalenceHarness : MonoBehaviour
     private readonly Dictionary<string, int> _lineIndexById = new(StringComparer.Ordinal);
     private readonly List<StageState> _foldedByLine = new();
 
+    // 원문에 #line 태그가 없는 프로젝트에서는 ID 매칭이 불가능하다(런타임 ID는
+    // 컴파일 시 생성). 그래서 기본은 "전진 순서 커서"이고, 태그가 있으면 ID가 이긴다.
+    // 커서 방식은 선형 전진 전제다 — 롤백/로드가 끼면 대사 검증(아래)이 어긋남을 알린다.
+    private int _lineCursor;
+    private bool _timelineDriftWarned;
+
     private readonly List<LineVerdict> _verdicts = new();
     private bool _ready;
 
@@ -169,6 +175,8 @@ public sealed class StageEquivalenceHarness : MonoBehaviour
         _lineIndexById.Clear();
         _foldedByLine.Clear();
         _verdicts.Clear();
+        _lineCursor = 0;
+        _timelineDriftWarned = false;
 
         for (int i = 0; i < groups.Count; i++)
         {
@@ -253,20 +261,44 @@ public sealed class StageEquivalenceHarness : MonoBehaviour
             string nodeName = _provider.CurrentNodeName;
             string lineId = _provider.CurrentLineId;
 
-            if (string.IsNullOrEmpty(nodeName) || string.IsNullOrEmpty(lineId))
+            if (string.IsNullOrEmpty(nodeName))
                 return;
+
+            // 다른 스토리 노드로 넘어갔다(다음 에피소드 등): 지금까지를 리포트로 내리고 재구축.
+            if (_storyNode != null && nodeName != _storyNode)
+            {
+                if (_verdicts.Count > 0)
+                    WriteReport();
+
+                _storyNode = null;
+            }
 
             if (_storyNode == null && !TryBuildTimeline(nodeName))
                 return;
 
-            if (nodeName != _storyNode)
-                return; // 다른 노드(서브 레인 등)의 라인은 관측 대상이 아니다
+            // 라인 인덱스: 태그가 있으면 ID 매칭, 없으면(이 프로젝트 원문이 그렇다) 전진 순서 커서.
+            int lineIndex;
 
-            if (!_lineIndexById.TryGetValue(lineId, out int lineIndex))
+            if (!string.IsNullOrEmpty(lineId) && _lineIndexById.TryGetValue(lineId, out int byId))
             {
-                Debug.LogWarning($"[StageEquivalenceHarness] 라인 id '{lineId}'가 원문 시간표에 없다 — 건너뜀.");
+                lineIndex = byId;
+                _lineCursor = byId + 1;
+            }
+            else
+            {
+                lineIndex = _lineCursor++;
+            }
+
+            if (lineIndex >= _storyGroups.Count)
+            {
+                Debug.LogWarning(
+                    $"[StageEquivalenceHarness] 라인 커서({lineIndex})가 원문 시간표({_storyGroups.Count}줄)를 " +
+                    "넘었다 — 선형 전진 전제가 깨졌다(분기/롤백?). 이후 판정을 멈춘다.");
                 return;
             }
+
+            // 대사 검증: 커서가 가리키는 원문 대사와 실제 표시 대사가 다르면 시간표가 어긋난 것이다.
+            VerifyLineTextDrift(lineIndex);
 
             StageState folded = FoldedUpTo(lineIndex);
 
@@ -307,6 +339,37 @@ public sealed class StageEquivalenceHarness : MonoBehaviour
         {
             Debug.LogError($"[StageEquivalenceHarness] 판정 중 예외: {ex}");
         }
+    }
+
+    /// <summary>
+    /// 순서 커서의 안전망: 원문 대사와 실제 표시 대사가 어긋나면 알린다(1회).
+    /// 화자 표기·태그 차이가 있을 수 있어 "포함" 수준의 느슨한 검사다.
+    /// </summary>
+    private void VerifyLineTextDrift(int lineIndex)
+    {
+        if (_timelineDriftWarned)
+            return;
+
+        string expected = Normalize(_storyGroups[lineIndex].LineText);
+        string actual = Normalize(_provider.CurrentLinePreview);
+
+        if (string.IsNullOrEmpty(expected) || string.IsNullOrEmpty(actual))
+            return;
+
+        // 짧은 쪽이 긴 쪽에 들어 있으면 같은 대사로 본다.
+        bool matches = expected.Contains(actual) || actual.Contains(expected);
+
+        if (!matches)
+        {
+            _timelineDriftWarned = true;
+            Debug.LogWarning(
+                $"[StageEquivalenceHarness] 라인 {lineIndex}의 대사가 원문 시간표와 다르다 — " +
+                $"시간표 어긋남(분기/롤백/스킵?). 이후 판정의 인덱스를 의심할 것.\n" +
+                $"원문: {_storyGroups[lineIndex].LineText}\n표시: {_provider.CurrentLinePreview}");
+        }
+
+        static string Normalize(string s)
+            => string.IsNullOrEmpty(s) ? null : s.Replace(" ", "").Replace("　", "").Trim();
     }
 
     // ── 리포트 ───────────────────────────────────────────────────────
