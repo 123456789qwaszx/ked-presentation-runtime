@@ -38,7 +38,7 @@ public sealed class BgmPlayer
     {
         if (clip == null)
         {
-            Debug.LogWarning("[BgmPlayer] clip is null.");
+            //Debug.LogWarning("[BgmPlayer] clip is null.");
             return;
         }
 

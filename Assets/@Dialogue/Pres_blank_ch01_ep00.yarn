@@ -55,7 +55,6 @@ title: Set_blank_ch01_ep00
 <<cast c5 moonyujeong>>
 
 // ─── 대사창 / 화면 상태 초기화 ───
-//<<box_reset>>
 <<surface_reset>>
 <<screen_blur_reset>>
 
@@ -246,8 +245,6 @@ title: Pres_blank_ch01_ep00
 <<stop_bgm 1.5s>>
 <<screen_noise memory 0.45 20fr>>
 <<screen_vignette dream 0.75 20fr>>
-<<box_named LetterBox>>
-<<box_protagonist LetterBox>>
 <<tx_daze_out 00 20fr>>
 학교 축제라...
 
@@ -274,7 +271,6 @@ title: Pres_blank_ch01_ep00
 <<bg_scale bg_main 1 0fr>>
 <<screen_noise_clear 14fr>>
 <<screen_vignette_clear 14fr>>
-<<box_reset>>
 <<bgm bgm_school_morning 2s>>
 <<place_center @3 bust 0fr>>
 <<face @3 2>>
@@ -318,8 +314,6 @@ title: Pres_blank_ch01_ep00
 <<bg_fade_out bg_main 1fr>>
 <<stop_bgm 1.5s>>
 <<bgm bgm_monologue 2.5s>>
-<<box_named OnlyText>>
-<<box_protagonist OnlyText>>
 <<tx_strip_out 00 18fr>>
 나는 그다지 성적이 좋은 편은 아니다.
 
@@ -341,8 +335,6 @@ title: Pres_blank_ch01_ep00
 // ─── 시험 종료, 교실로 복귀 ───
 <<bg_sprite bg_main class_lunch>>
 <<bg_fade_in bg_main 24fr>>
-<<box_named LetterBox>>
-<<box_protagonist LetterBox>>
 <<screen_vignette focus 0.6 24fr>>
 어느덧 시곗바늘이 한 바퀴를 돌아 다시 제자리로 돌아왔고.
 
@@ -372,8 +364,6 @@ title: Pres_blank_ch01_ep00
 
 다들 '잘못될까봐 두려워서' 외면한 채 공부하고 있다.
 
-<<box_named OnlyText>>
-<<box_protagonist OnlyText>>
 <<bg_fade_out bg_main 20fr>>
 <<24fr>>
 ...
@@ -390,8 +380,6 @@ title: Pres_blank_ch01_ep00
 // ═════════════════════════════════════════════════════════
 <<screen_blur_reset>>
 <<screen_vignette_clear 16fr>>
-<<box_named LetterBox>>
-<<box_protagonist LetterBox>>
 <<bg_sprite bg_main class_lunch>>
 <<bg_fade_in bg_main 24fr>>
 <<stop_bgm 2s>>
@@ -405,7 +393,6 @@ title: Pres_blank_ch01_ep00
 마치 시험을 보는 것처럼...
 
 
-<<box_reset>>
 윤새아: 야.
 이도윤: 응?
 
@@ -522,8 +509,6 @@ title: Pres_blank_ch01_ep00
 <<bg_fade_out bg_main 16fr>>
 <<stop_bgm 2s>>
 <<24fr>>
-<<box_named LetterBox>>
-<<box_protagonist LetterBox>>
 <<bg_sprite bg_main studio_evening>>
 <<bg_fade_in bg_main 24fr>>
 <<bgm bgm_room 2.5s>>
@@ -535,7 +520,6 @@ title: Pres_blank_ch01_ep00
 
 새아가 찾아온다.
 
-<<box_reset>>
 <<place_center @1 bust 0fr>>
 <<size @1 mid bust 0fr>>
 <<face @1 2>>
@@ -564,8 +548,6 @@ title: Pres_blank_ch01_ep00
 
 // ─── 착의 (화면 밖) ───
 <<fade_out @1 10fr>>
-<<box_named LetterBox>>
-<<box_protagonist LetterBox>>
 윤새아와의 규칙, 그 세 번째.
 
 이도윤은 윤새아의 취미 활동에 적극 협조할 것.
@@ -575,7 +557,6 @@ title: Pres_blank_ch01_ep00
 새아와의 규칙은 전부 나에게 득이 없는 것들 뿐이다.
 
 // ─── 코스프레 등장 ───
-<<box_reset>>
 <<pose @1 b>>
 <<face @1 2>>
 <<place_center @1 body 0fr>>
@@ -782,7 +763,6 @@ title: Pres_blank_ch01_ep00
 <<screen_blur_reset>>
 <<screen_vignette_clear 16fr>>
 <<screen_noise_clear 16fr>>
-<<box_reset>>
 <<surface_reset>>
 <<30fr>>
 
