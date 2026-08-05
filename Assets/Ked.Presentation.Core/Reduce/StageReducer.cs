@@ -14,6 +14,12 @@ namespace Ked.Presentation.Core
 
         /// <summary>기준 해상도. 무대 루트 공간의 크기다.</summary>
         public Vec2 BaseResolution;
+
+        /// <summary>presets/depth.json — size 계열 폴드의 프리셋 값. 없으면 size는 Unhandled.</summary>
+        public DepthPresetSetDto DepthPresets;
+
+        /// <summary>presets/focus-tuning.json — place/size의 focus 오프셋. 없으면 base 0으로 접는다.</summary>
+        public FocusTuningBodyDto FocusTuning;
     }
 
     /// <summary>
@@ -102,6 +108,30 @@ namespace Ked.Presentation.Core
                 // fade — 초상 스프라이트 루트의 가시성 (브리지 EnqueueFadeIn/OutDslSpec과 동일 표적)
                 case "fade_in": return ApplyFade(state, cmd, visible: true, out reason);
                 case "fade_out": return ApplyFade(state, cmd, visible: false, out reason);
+
+                // place 계열 — focus 지점을 화면 지점으로 (SettledFocusMath.SolveFocusPlacement)
+                case "place": return ApplyPlace(state, cmd, tuning, cmd.Arg(2, "center"), out reason);
+                case "place_left": return ApplyPlace(state, cmd, tuning, "left", out reason);
+                case "place_center": return ApplyPlace(state, cmd, tuning, "center", out reason);
+                case "place_right": return ApplyPlace(state, cmd, tuning, "right", out reason);
+                case "place_tl": return ApplyPlace(state, cmd, tuning, "tl", out reason);
+                case "place_top": return ApplyPlace(state, cmd, tuning, "top", out reason);
+                case "place_tr": return ApplyPlace(state, cmd, tuning, "tr", out reason);
+                case "place_bl": return ApplyPlace(state, cmd, tuning, "bl", out reason);
+                case "place_bottom": return ApplyPlace(state, cmd, tuning, "bottom", out reason);
+                case "place_br": return ApplyPlace(state, cmd, tuning, "br", out reason);
+                case "place_inner_tl": return ApplyPlace(state, cmd, tuning, "inner_tl", out reason);
+                case "place_inner_tr": return ApplyPlace(state, cmd, tuning, "inner_tr", out reason);
+                case "place_inner_bl": return ApplyPlace(state, cmd, tuning, "inner_bl", out reason);
+                case "place_inner_br": return ApplyPlace(state, cmd, tuning, "inner_br", out reason);
+
+                // size 계열 — depth 프리셋 (focus 보존 보정 포함, SolveDepthYPreservingFocus)
+                case "size": return ApplySize(state, cmd, tuning, cmd.Arg(1), cmd.Arg(2), out reason);
+                case "size_far": return ApplySize(state, cmd, tuning, "far", cmd.Arg(1), out reason);
+                case "size_back": return ApplySize(state, cmd, tuning, "back", cmd.Arg(1), out reason);
+                case "size_mid": return ApplySize(state, cmd, tuning, "mid", cmd.Arg(1), out reason);
+                case "size_front": return ApplySize(state, cmd, tuning, "front", cmd.Arg(1), out reason);
+                case "size_close": return ApplySize(state, cmd, tuning, "close", cmd.Arg(1), out reason);
 
                 // nudge (MoveBy: Track_X / Track_Y, 상대)
                 case "left":  return ApplyNudge(state, cmd, tuning, -1f, 0f, "CharSlot_Track_X", out reason);
@@ -295,6 +325,58 @@ namespace Ked.Presentation.Core
                 ? FadeInReduction.Reduce(nodeKey)
                 : FadeOutReduction.Reduce(nodeKey));
 
+            return true;
+        }
+
+        // ── place / size ─────────────────────────────────────────────
+
+        private static bool ApplyPlace(
+            StageState state, in StageCommand cmd, StageReducerTuning tuning,
+            string screenPointName, out string reason)
+        {
+            if (!TryGetSpawnedSlot(state, cmd, out string slotKey, out reason))
+                return false;
+
+            // 인자: (대상, focus 토큰 = "face" 기본, [화면 지점], [시간]).
+            if (!FocusPresetName.TryNormalizeToken(cmd.Arg(1, "face"), out string focusName))
+            {
+                reason = $"focus 프리셋 토큰 '{cmd.Arg(1)}'을 모른다";
+                return false;
+            }
+
+            state.TryGetCharacter(slotKey, out string characterKey);
+
+            if (!PlaceFocusStageReduction.TryReduce(
+                    state, slotKey, characterKey, focusName, screenPointName,
+                    tuning.FocusTuning, out StageNodeClaim claim, out reason))
+            {
+                return false;
+            }
+
+            state.Apply(claim);
+            return true;
+        }
+
+        private static bool ApplySize(
+            StageState state, in StageCommand cmd, StageReducerTuning tuning,
+            string depthPresetKey, string preserveFocusToken, out string reason)
+        {
+            if (!TryGetSpawnedSlot(state, cmd, out string slotKey, out reason))
+                return false;
+
+            state.TryGetCharacter(slotKey, out string characterKey);
+
+            if (!SetDepthStageReduction.TryReduce(
+                    state, slotKey, characterKey, depthPresetKey, preserveFocusToken,
+                    tuning.DepthPresets, tuning.FocusTuning,
+                    out StageNodeClaim depthYClaim, out StageNodeClaim depthScaleClaim,
+                    out reason))
+            {
+                return false;
+            }
+
+            state.Apply(depthYClaim);
+            state.Apply(depthScaleClaim);
             return true;
         }
 

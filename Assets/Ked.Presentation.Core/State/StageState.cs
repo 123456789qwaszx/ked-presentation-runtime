@@ -146,6 +146,10 @@ namespace Ked.Presentation.Core
         /// <summary>actor — 별칭 기호("@3")를 캐릭터/슬롯 키에 잇는다.</summary>
         public void SetAlias(string aliasSymbol, string targetKey) => _aliases[aliasSymbol] = targetKey;
 
+        /// <summary>슬롯에 앉은 캐릭터 키. 배역이 없으면 false — focus 튜닝은 base만 적용된다.</summary>
+        public bool TryGetCharacter(string slotKey, out string characterKey)
+            => _characterBySlot.TryGetValue(slotKey, out characterKey);
+
         /// <summary>
         /// 커맨드 대상 키 → 슬롯 키. 별칭이면 풀고, 캐릭터 키면 배역 맵으로 슬롯을 찾는다.
         /// (런타임 CharacterRigTargetResolver의 해석 순서를 폴드 쪽에서 재현한 것)

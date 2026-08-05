@@ -116,6 +116,32 @@ namespace Ked.Presentation.Core
             return size;
         }
 
+        /// <summary>
+        /// 루트→노드 순서의 상태 사슬과 (원하면) 같은 순서의 키 목록.
+        /// SettledFocusMath처럼 체인 인덱스가 필요한 계산에 쓴다.
+        /// </summary>
+        public RectNodeState[] BuildChainTo(string key, List<string> chainKeys = null)
+        {
+            if (chainKeys == null)
+                return BuildChain(key);
+
+            chainKeys.Clear();
+
+            List<string> reversedKeys = new List<string>(16);
+            string current = key;
+
+            while (current != null)
+            {
+                reversedKeys.Add(current);
+                current = Require(current).ParentKey;
+            }
+
+            for (int i = reversedKeys.Count - 1; i >= 0; i--)
+                chainKeys.Add(reversedKeys[i]);
+
+            return BuildChain(key);
+        }
+
         /// <summary>루트→노드 순서의 상태 사슬. RectChainMath 규약(chain[0]의 부모가 RootSpace)과 같다.</summary>
         private RectNodeState[] BuildChain(string key)
         {

@@ -123,6 +123,12 @@ public sealed class StageEquivalenceHarness : MonoBehaviour
         BaseResolutionJson baseResolution = JsonUtility.FromJson<BaseResolutionJson>(
             File.ReadAllText(Path.Combine(tuningDir, "base-resolution.json")));
 
+        DepthTuningFileDto depthTuning = JsonUtility.FromJson<DepthTuningFileDto>(
+            File.ReadAllText(Path.Combine(tuningDir, "presets", "depth.json")));
+
+        FocusTuningFileDto focusTuning = JsonUtility.FromJson<FocusTuningFileDto>(
+            File.ReadAllText(Path.Combine(tuningDir, "presets", "focus-tuning.json")));
+
         _tuning = new StageReducerTuning
         {
             RigSchemas = rigSchemas,
@@ -130,6 +136,8 @@ public sealed class StageEquivalenceHarness : MonoBehaviour
             BaseResolution = new Vec2(
                 baseResolution.referenceResolution.x,
                 baseResolution.referenceResolution.y),
+            DepthPresets = depthTuning?.MonoBehaviour?.presets,
+            FocusTuning = focusTuning?.MonoBehaviour,
         };
     }
 
