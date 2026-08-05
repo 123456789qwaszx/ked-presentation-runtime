@@ -68,6 +68,21 @@ public sealed class CharacterRigRegistry
         }
     }
 
+    /// <summary>키와 함께 살아 있는 리그를 모은다 (U14 등가성 하네스의 캡처용).</summary>
+    public void CollectAliveRigEntries(List<KeyValuePair<string, CharacterRigRefs>> results)
+    {
+        if (results == null)
+            return;
+
+        foreach (KeyValuePair<string, CharacterRigRefs> pair in _rigs)
+        {
+            if (pair.Value == null || pair.Value.RigRoot == null)
+                continue;
+
+            results.Add(pair);
+        }
+    }
+
     private static void DestroyRig(CharacterRigRefs rigRefs)
     {
         if (rigRefs == null)
