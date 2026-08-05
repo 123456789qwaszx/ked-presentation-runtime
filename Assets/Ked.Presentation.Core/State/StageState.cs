@@ -116,6 +116,9 @@ namespace Ked.Presentation.Core
             _slotByCharacter = new Dictionary<string, string>(source._slotByCharacter, StringComparer.Ordinal);
             _characterBySlot = new Dictionary<string, string>(source._characterBySlot, StringComparer.Ordinal);
             _aliases = new Dictionary<string, string>(source._aliases, StringComparer.Ordinal);
+
+            foreach (KeyValuePair<string, (char, string)> pair in source._portraits)
+                _portraits[pair.Key] = pair.Value;
         }
 
         public StageState Clone() => new StageState(this);
@@ -149,6 +152,27 @@ namespace Ked.Presentation.Core
         /// <summary>슬롯에 앉은 캐릭터 키. 배역이 없으면 false — focus 튜닝은 base만 적용된다.</summary>
         public bool TryGetCharacter(string slotKey, out string characterKey)
             => _characterBySlot.TryGetValue(slotKey, out characterKey);
+
+        // 초상 표정 축: 슬롯 → (변형 접미사, 정규화된 표정 코드). 사이징 폴드의 입력이다.
+        private readonly Dictionary<string, (char variantSuffix, string emotion)> _portraits =
+            new Dictionary<string, (char, string)>(StringComparer.Ordinal);
+
+        public void SetPortrait(string slotKey, char variantSuffix, string emotion)
+            => _portraits[slotKey] = (variantSuffix, emotion);
+
+        public bool TryGetPortrait(string slotKey, out char variantSuffix, out string emotion)
+        {
+            if (_portraits.TryGetValue(slotKey, out (char v, string e) p))
+            {
+                variantSuffix = p.v;
+                emotion = p.e;
+                return true;
+            }
+
+            variantSuffix = 'a';
+            emotion = null;
+            return false;
+        }
 
         /// <summary>
         /// 커맨드 대상 키 → 슬롯 키. 별칭이면 풀고, 캐릭터 키면 배역 맵으로 슬롯을 찾는다.

@@ -280,27 +280,97 @@ namespace Ked.Presentation.Core.Tests
             Assert.That(state.Nodes.GetState("c3/CharacterPortraitSprite_Image").SizeDelta.Y,
                 Is.EqualTo(0f));
 
-            // 사이징이 접혔으니 남는 기록은 그림 축 1건뿐이다.
-            Assert.That(state.Unhandled.Count(u => u.Command.Name == "cast"), Is.EqualTo(1));
+            // 사이징까지 접혔으니 cast는 기록 없이 통과다.
+            Assert.That(state.Unhandled.Count(u => u.Command.Name == "cast"), Is.EqualTo(0));
         }
 
         [Test]
-        public void 표정마다_종횡비가_다르면_사이징은_소리를_낸다()
+        public void 표정_전환이_표정별_치수로_사이징을_다시_접는다()
+        {
+            // parkeunseol 실측: 표정 01은 315/662, 02는 237/548 — 4차 리포트의 두 값.
+            StageReducerTuning tuning = MakeTuning();
+
+            tuning.PortraitDimensions = new PortraitDimensionsFileDto
+            {
+                entries =
+                {
+                    new PortraitDimensionDto { character = "parkeunseol", variant = "parkeunseol_a", emotion = "01", width = 315f, height = 662f },
+                    new PortraitDimensionDto { character = "parkeunseol", variant = "parkeunseol_a", emotion = "02", width = 237f, height = 548f },
+                },
+            };
+
+            List<RigSchemaNodeDto> nodes = tuning.RigSchemas.rigs[0].nodes;
+            Float2Dto F2c(float x, float y) => new Float2Dto { x = x, y = y };
+
+            foreach (string id in new[] { "CharacterPortraitSprite_Root", "CharacterPortraitSprite_Image" })
+            {
+                nodes.Add(new RigSchemaNodeDto
+                {
+                    id = id,
+                    parent = id == "CharacterPortraitSprite_Root" ? "CharacterPortrait_VisualOffset" : "CharacterPortraitSprite_Root",
+                    anchoredPosition = F2c(0f, 0f),
+                    anchorMin = F2c(0f, 0f),
+                    anchorMax = F2c(1f, 1f),
+                    pivot = F2c(0.5f, 0.5f),
+                    sizeDelta = F2c(0f, 0f),
+                    localScale = new Float3Dto { x = 1f, y = 1f, z = 1f },
+                    localEulerAngles = new Float3Dto(),
+                });
+            }
+
+            StageState state = StageReducer.CreateInitialState(tuning);
+
+            state = StageReducer.ApplyAll(state, new[]
+            {
+                Cmd("slot", "c3"),
+                Cmd("cast", "c3", "parkeunseol"),        // 기본 표정 01 → 315/662
+                Cmd("actor", "@3", "parkeunseol"),
+            }, tuning);
+
+            Assert.That(state.Nodes.GetState("c3/CharacterPortraitSprite_Image").SizeDelta.X,
+                Is.EqualTo(1080f * 315f / 662f).Within(0.01f), "표정 01 = 513.90 — 리포트의 그 값");
+
+            state = StageReducer.Apply(state, Cmd("face_swap", "@3", "3", "5fr"), tuning);
+
+            // 표정 03은 덤프에 없다 → 폴백('a', "01")이 아니라... 02와 같은 캔버스라면 두 항목뿐인
+            // 이 테스트에선 폴백이 01로 간다 — 실덤프에선 03도 있으므로 02 치수로 갈 것이다.
+            // 여기서는 02로 직접 전환해 확인한다.
+            state = StageReducer.Apply(state, Cmd("face_swap", "@3", "2", "5fr"), tuning);
+
+            Assert.That(state.Nodes.GetState("c3/CharacterPortraitSprite_Image").SizeDelta.X,
+                Is.EqualTo(1080f * 237f / 548f).Within(0.01f), "표정 02 = 467.08 — 리포트의 그 값");
+        }
+
+        [Test]
+        public void 치수_조회는_리졸버의_폴백_규약을_따른다()
         {
             PortraitDimensionsFileDto dims = new PortraitDimensionsFileDto
             {
                 entries =
                 {
-                    new PortraitDimensionDto { character = "x", variant = "a", emotion = "01", width = 500f, height = 1000f },
-                    new PortraitDimensionDto { character = "x", variant = "a", emotion = "02", width = 700f, height = 1000f },
+                    new PortraitDimensionDto { character = "x", variant = "x_a", emotion = "01", width = 500f, height = 1000f },
+                    new PortraitDimensionDto { character = "x", variant = "x_a", emotion = "02", width = 700f, height = 1000f },
                 },
             };
 
-            Assert.That(dims.TryGetUniformAspect("x", out _, out string reason), Is.False);
-            Assert.That(reason, Does.Contain("다르다"));
+            // 정확 일치.
+            Assert.That(dims.TryGetAspect("x", 'a', "02", out float exact, out _), Is.True);
+            Assert.That(exact, Is.EqualTo(0.7f).Within(1e-4f));
 
-            Assert.That(dims.TryGetUniformAspect("없는캐릭터", out _, out string missing), Is.False);
+            // 없는 표정 → 기본('a', "01") 폴백 — 런타임 리졸버와 동일.
+            Assert.That(dims.TryGetAspect("x", 'a', "07", out float fallback, out _), Is.True);
+            Assert.That(fallback, Is.EqualTo(0.5f).Within(1e-4f));
+
+            // 없는 캐릭터 → 이유와 함께 실패.
+            Assert.That(dims.TryGetAspect("없는캐릭터", 'a', "01", out _, out string missing), Is.False);
             Assert.That(missing, Does.Contain("없다"));
+
+            // 표정 코드 정규화 규약.
+            Assert.That(PortraitEmotionCode.TryNormalize("2", out string two), Is.True);
+            Assert.That(two, Is.EqualTo("02"));
+            Assert.That(PortraitEmotionCode.TryNormalize("abc", out _), Is.False);
+            Assert.That(PortraitEmotionCode.ParseShowFaceAlias("e1"), Is.EqualTo("1"));
+            Assert.That(PortraitEmotionCode.ParseShowFaceAlias(""), Is.EqualTo("2"));
         }
 
         [Test]

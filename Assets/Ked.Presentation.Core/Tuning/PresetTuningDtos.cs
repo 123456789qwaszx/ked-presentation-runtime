@@ -134,52 +134,111 @@ namespace Ked.Presentation.Core
         public List<PortraitDimensionDto> entries = new List<PortraitDimensionDto>();
 
         /// <summary>
-        /// 캐릭터의 초상 종횡비(폭/높이)가 변형·표정 전체에서 균일하면 그 값을 준다.
-        /// 상이하면 false — 표정 축 없이는 사이징을 접을 수 없다는 뜻이고,
-        /// 호출자는 이를 침묵 대신 Unhandled로 남긴다.
+        /// (캐릭터, 변형 접미사, 정규화된 표정)의 종횡비. 런타임 PortraitResolver와 같은
+        /// 조회·폴백 규약: 정확 일치 → (캐릭터, 'a', "01") 폴백 → 실패.
         /// </summary>
-        public bool TryGetUniformAspect(string characterKey, out float aspect, out string reason)
+        public bool TryGetAspect(
+            string characterKey, char variantSuffix, string emotion,
+            out float aspect, out string reason)
         {
-            aspect = 0f;
-            reason = null;
+            characterKey = (characterKey ?? "").Trim().ToLowerInvariant();
 
-            bool found = false;
+            if (TryFind(characterKey, variantSuffix, emotion, out aspect))
+            {
+                reason = null;
+                return true;
+            }
 
+            // 리졸버의 폴백: 기본 변형 'a' + 표정 "01".
+            if (TryFind(characterKey, 'a', "01", out aspect))
+            {
+                reason = null;
+                return true;
+            }
+
+            reason = $"초상 치수가 덤프에 없다: {characterKey}/{variantSuffix}/{emotion}";
+            return false;
+        }
+
+        private bool TryFind(string characterKey, char variantSuffix, string emotion, out float aspect)
+        {
             for (int i = 0; i < entries.Count; i++)
             {
                 PortraitDimensionDto entry = entries[i];
 
-                if (entry == null || !string.Equals(entry.character, characterKey, StringComparison.Ordinal))
+                if (entry == null || entry.height <= 0f)
                     continue;
 
-                if (entry.height <= 0f)
+                if (!string.Equals(
+                        (entry.character ?? "").Trim().ToLowerInvariant(), characterKey, StringComparison.Ordinal))
                     continue;
 
-                float entryAspect = entry.width / entry.height;
+                // 변형은 접미사 한 글자로 대응한다 ("parkeunseol_a" → 'a') — 리졸버 규약.
+                string variant = (entry.variant ?? "").Trim().ToLowerInvariant();
+                char suffix = variant.Length > 0 ? variant[variant.Length - 1] : 'a';
 
-                if (!found)
-                {
-                    aspect = entryAspect;
-                    found = true;
+                if (suffix != variantSuffix)
                     continue;
-                }
 
-                if (Math.Abs(entryAspect - aspect) > 1e-4f)
-                {
-                    reason = $"캐릭터 '{characterKey}'의 초상 종횡비가 표정/변형마다 다르다 " +
-                             $"({aspect:F4} vs {entryAspect:F4} at {entry.variant}/{entry.emotion}) — 표정 축 폴드가 필요하다";
-                    return false;
-                }
+                if (!string.Equals(entry.emotion, emotion, StringComparison.Ordinal))
+                    continue;
+
+                aspect = entry.width / entry.height;
+                return true;
             }
 
-            if (!found)
-            {
-                reason = $"캐릭터 '{characterKey}'의 초상 치수가 덤프에 없다";
-                return false;
-            }
-
-            return true;
+            aspect = 0f;
+            return false;
         }
+    }
+
+    /// <summary>초상 표정 코드 규약 (런타임 PortraitResolver.NormalizeEmotionCode와 동일).</summary>
+    public static class PortraitEmotionCode
+    {
+        public const string Default = "01";
+
+        /// <summary>"2" → "02", "02" → "02". 그 외는 실패 — 추측 보정하지 않는다.</summary>
+        public static bool TryNormalize(string input, out string code)
+        {
+            code = null;
+
+            if (string.IsNullOrWhiteSpace(input))
+                return false;
+
+            input = input.Trim();
+
+            if (input.Length == 2 && IsDigit(input[0]) && IsDigit(input[1]))
+            {
+                code = input;
+                return true;
+            }
+
+            if (input.Length == 1 && IsDigit(input[0]))
+            {
+                code = "0" + input;
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>show의 faceToken 별칭("e1"/"emo2"/"face3") → 원시 표정 토큰. 빈 값은 "2" (런타임 규약).</summary>
+        public static string ParseShowFaceAlias(string token)
+        {
+            if (string.IsNullOrWhiteSpace(token))
+                return "2";
+
+            string s = token.Trim().ToLowerInvariant();
+
+            if (s.StartsWith("emotion", StringComparison.Ordinal)) return s.Substring(7);
+            if (s.StartsWith("emo", StringComparison.Ordinal)) return s.Substring(3);
+            if (s.StartsWith("face", StringComparison.Ordinal)) return s.Substring(4);
+            if (s.StartsWith("e", StringComparison.Ordinal)) return s.Substring(1);
+
+            return s;
+        }
+
+        private static bool IsDigit(char c) => c >= '0' && c <= '9';
     }
 
     [Serializable]

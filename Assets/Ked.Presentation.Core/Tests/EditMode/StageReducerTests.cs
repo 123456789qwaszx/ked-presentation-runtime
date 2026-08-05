@@ -229,8 +229,9 @@ namespace Ked.Presentation.Core.Tests
             Assert.That(state.GetAlpha("c1/__root"), Is.EqualTo(1f));
             Assert.That(state.GetAlpha("c1/CharacterPortraitSprite_Root"), Is.EqualTo(1f));
 
-            // 초상 축 부재는 침묵이 아니라 기록이다.
-            Assert.That(state.Unhandled.Count(u => u.Command.Name == "show"), Is.EqualTo(1));
+            // 표정 축이 폴드에 들어왔다(U14-c5). 이 시나리오는 cast가 없어 사이징 대상이
+            // 없고, show 자체는 기록 없이 접힌다.
+            Assert.That(state.Unhandled.Count(u => u.Command.Name == "show"), Is.EqualTo(0));
         }
 
         [Test]
@@ -263,8 +264,8 @@ namespace Ked.Presentation.Core.Tests
                 Cmd("right", "parkeunseol", "3u"), // 캐릭터 키 직접
             }, tuning);
 
-            // cast의 기록 2건(치수 덤프 없는 tuning이라 사이징 미폴드 + 그림 축) 외에는 전부 접혀야 한다.
-            Assert.That(state.Unhandled.Count(u => u.Command.Name == "cast"), Is.EqualTo(2));
+            // cast의 기록 1건(치수 덤프 없는 tuning이라 사이징 미폴드) 외에는 전부 접혀야 한다.
+            Assert.That(state.Unhandled.Count(u => u.Command.Name == "cast"), Is.EqualTo(1));
             Assert.That(state.Unhandled.Count(u => u.Command.Name != "cast"), Is.EqualTo(0));
 
             // -40 + 120 = +80px.

@@ -1,0 +1,1100 @@
+{
+    "storyNode": "Story_blank_ch01_ep00",
+    "verdict": "불일치 71/71라인",
+    "equivalentLines": 0,
+    "mismatchedLines": 71,
+    "lines": [
+        {
+            "lineIndex": 0,
+            "lineId": "line:e12b6262",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 14,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(620.4255, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Root.alpha: 접힘=1 vs 캡처=0.9919342",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 1,
+            "lineId": "line:771b6515",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 14,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(620.4255, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 2,
+            "lineId": "line:a75f27b6",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 16,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(620.4255, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 3,
+            "lineId": "line:316f20c1",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 18,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(620.4255, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 4,
+            "lineId": "line:8b3e2958",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 18,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(620.4255, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 5,
+            "lineId": "line:1d0e2e2f",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 18,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(620.4255, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 6,
+            "lineId": "line:be9b4ab1",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 20,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(620.4255, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 7,
+            "lineId": "line:28ab4dc6",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 20,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(620.4255, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 8,
+            "lineId": "line:92fa445f",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 22,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(620.4255, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 9,
+            "lineId": "line:04ca4328",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 24,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(620.4255, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 10,
+            "lineId": "line:95d7fcb8",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 24,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(620.4255, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 11,
+            "lineId": "line:03e7fbcf",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 26,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(620.4255, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 12,
+            "lineId": "line:e66e3caf",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 26,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(620.4255, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 13,
+            "lineId": "line:705e3bd8",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 26,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(620.4255, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 14,
+            "lineId": "line:ca0f3241",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 32,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(620.4255, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 15,
+            "lineId": "line:5c3f3536",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 32,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(620.4255, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 16,
+            "lineId": "line:ffaa51a8",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 32,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(620.4255, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 17,
+            "lineId": "line:699a56df",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 32,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(620.4255, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 18,
+            "lineId": "line:d3cb5f46",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 32,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(620.4255, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 19,
+            "lineId": "line:45fb5831",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 34,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(620.4255, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 20,
+            "lineId": "line:d4e6e7a1",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 35,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(620.4255, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 21,
+            "lineId": "line:42d6e0d6",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 35,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(620.4255, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 22,
+            "lineId": "line:253d1184",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 35,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(620.4255, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 23,
+            "lineId": "line:b30d16f3",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 36,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(650.3406, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 24,
+            "lineId": "line:095c1f6a",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 39,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(650.3406, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 25,
+            "lineId": "line:9f6c181d",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 39,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(650.3406, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 26,
+            "lineId": "line:3cf97c83",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 39,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(650.3406, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 27,
+            "lineId": "line:aac97bf4",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 43,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(650.3406, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 28,
+            "lineId": "line:1098726d",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 43,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(650.3406, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 29,
+            "lineId": "line:86a8751a",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 44,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(650.3406, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 30,
+            "lineId": "line:17b5ca8a",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 44,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(650.3406, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 31,
+            "lineId": "line:8185cdfd",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 44,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(650.3406, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 32,
+            "lineId": "line:640c0a9d",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 44,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(650.3406, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 33,
+            "lineId": "line:f23c0dea",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 46,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(650.3406, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 34,
+            "lineId": "line:486d0473",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 47,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(650.3406, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 35,
+            "lineId": "line:de5d0304",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 48,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(650.3406, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 36,
+            "lineId": "line:7dc8679a",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 48,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(650.3406, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 37,
+            "lineId": "line:ebf860ed",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 48,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(650.3406, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 38,
+            "lineId": "line:51a96974",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 48,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(650.3406, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 39,
+            "lineId": "line:c7996e03",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 48,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(650.3406, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 40,
+            "lineId": "line:5684d193",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 49,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(650.3406, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(513.8973, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 41,
+            "lineId": "line:c0b4d6e4",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 53,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(650.3406, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 42,
+            "lineId": "line:a39a4bd2",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 53,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(650.3406, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 43,
+            "lineId": "line:35aa4ca5",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 53,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(650.3406, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 44,
+            "lineId": "line:8ffb453c",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 62,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(650.3406, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 45,
+            "lineId": "line:19cb424b",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 62,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(650.3406, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 46,
+            "lineId": "line:ba5e26d5",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 62,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(650.3406, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 47,
+            "lineId": "line:2c6e21a2",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 62,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(650.3406, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 48,
+            "lineId": "line:963f283b",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 62,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(650.3406, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 49,
+            "lineId": "line:000f2f4c",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 62,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(650.3406, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 50,
+            "lineId": "line:911290dc",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 64,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(650.3406, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 51,
+            "lineId": "line:072297ab",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 64,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(650.3406, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 52,
+            "lineId": "line:e2ab50cb",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 73,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(650.3406, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 53,
+            "lineId": "line:749b57bc",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 73,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(650.3406, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 54,
+            "lineId": "line:ceca5e25",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 74,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(650.3406, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 55,
+            "lineId": "line:58fa5952",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 76,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(650.3406, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 56,
+            "lineId": "line:fb6f3dcc",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 76,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(650.3406, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 57,
+            "lineId": "line:6d5f3abb",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 77,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(650.3406, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 58,
+            "lineId": "line:d70e3322",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 78,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(650.3406, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 59,
+            "lineId": "line:413e3455",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 78,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(650.3406, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 60,
+            "lineId": "line:d0238bc5",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 81,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(650.3406, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 61,
+            "lineId": "line:46138cb2",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 87,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(650.3406, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 62,
+            "lineId": "line:21f87de0",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 87,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(650.3406, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 63,
+            "lineId": "line:b7c87a97",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 88,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(650.3406, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 64,
+            "lineId": "line:0d99730e",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 88,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(650.3406, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 65,
+            "lineId": "line:9ba97479",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 88,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(650.3406, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 66,
+            "lineId": "line:383c10e7",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 88,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(650.3406, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 67,
+            "lineId": "line:ae0c1790",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 88,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(650.3406, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 68,
+            "lineId": "line:145d1e09",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 88,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(650.3406, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 69,
+            "lineId": "line:826d197e",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 91,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(650.3406, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        },
+        {
+            "lineIndex": 70,
+            "lineId": "line:1370a6ee",
+            "equivalent": false,
+            "comparedNodes": 330,
+            "unhandledCount": 91,
+            "mismatches": [
+                "c1/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(650.3406, 0)",
+                "c2/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(611.8771, 0)",
+                "c3/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(467.0803, 0)",
+                "c4/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(602.3077, 0)",
+                "c5/CharacterPortraitSprite_Image.sizeDelta: 접힘=(0, 0) vs 캡처=(686.25, 0)"
+            ]
+        }
+    ],
+    "extractWarnings": [
+        "Story_DungeonDinner.yarn:20 옵션(->)은 다루지 않는다 — 선형 파일 전용.",
+        "Story_DungeonDinner.yarn:33 옵션(->)은 다루지 않는다 — 선형 파일 전용."
+    ],
+    "finalUnhandled": [
+        "<<bg_spawn bg_main class_day>> @ Pres_blank_ch01_ep00.yarn:34 — 아직 코어로 이관되지 않은 커맨드",
+        "<<bg_size bg_main 1>> @ Pres_blank_ch01_ep00.yarn:35 — 아직 코어로 이관되지 않은 커맨드",
+        "<<cast c1 yoonsaea>> @ Pres_blank_ch01_ep00.yarn:39 — cast의 초상 스프라이트 축(그림·크기)은 아직 상태 모델에 없다",
+        "<<cast c2 leebyeol>> @ Pres_blank_ch01_ep00.yarn:43 — cast의 초상 스프라이트 축(그림·크기)은 아직 상태 모델에 없다",
+        "<<cast c3 parkeunseol>> @ Pres_blank_ch01_ep00.yarn:47 — cast의 초상 스프라이트 축(그림·크기)은 아직 상태 모델에 없다",
+        "<<cast c4 jineunha>> @ Pres_blank_ch01_ep00.yarn:51 — cast의 초상 스프라이트 축(그림·크기)은 아직 상태 모델에 없다",
+        "<<cast c5 moonyujeong>> @ Pres_blank_ch01_ep00.yarn:55 — cast의 초상 스프라이트 축(그림·크기)은 아직 상태 모델에 없다",
+        "<<surface_reset >> @ Pres_blank_ch01_ep00.yarn:58 — 아직 코어로 이관되지 않은 커맨드",
+        "<<screen_blur_reset >> @ Pres_blank_ch01_ep00.yarn:59 — 아직 코어로 이관되지 않은 커맨드",
+        "<<bg_sprite bg_main class_day>> @ Pres_blank_ch01_ep00.yarn:70 — 아직 코어로 이관되지 않은 커맨드",
+        "<<bg_fade_in bg_main 24fr>> @ Pres_blank_ch01_ep00.yarn:71 — 아직 코어로 이관되지 않은 커맨드",
+        "<<bgm bgm_school_morning 2s>> @ Pres_blank_ch01_ep00.yarn:72 — 아직 코어로 이관되지 않은 커맨드",
+        "<<12fr >> @ Pres_blank_ch01_ep00.yarn:73 — 아직 코어로 이관되지 않은 커맨드",
+        "<<face @3 2>> @ Pres_blank_ch01_ep00.yarn:78 — 아직 코어로 이관되지 않은 커맨드",
+        "<<face_swap @3 3 5fr>> @ Pres_blank_ch01_ep00.yarn:85 — 아직 코어로 이관되지 않은 커맨드",
+        "<<tap @3 up>> @ Pres_blank_ch01_ep00.yarn:86 — 아직 코어로 이관되지 않은 커맨드",
+        "<<face_swap @3 5 4fr>> @ Pres_blank_ch01_ep00.yarn:89 — 아직 코어로 이관되지 않은 커맨드",
+        "<<tap_hard @3 down>> @ Pres_blank_ch01_ep00.yarn:90 — 아직 코어로 이관되지 않은 커맨드",
+        "<<face_swap @3 4 8fr>> @ Pres_blank_ch01_ep00.yarn:97 — 아직 코어로 이관되지 않은 커맨드",
+        "<<sway_away @3>> @ Pres_blank_ch01_ep00.yarn:98 — 아직 코어로 이관되지 않은 커맨드",
+        "<<face_swap @3 5 4fr>> @ Pres_blank_ch01_ep00.yarn:103 — 아직 코어로 이관되지 않은 커맨드",
+        "<<jolt @3 down>> @ Pres_blank_ch01_ep00.yarn:104 — 아직 코어로 이관되지 않은 커맨드",
+        "<<char_visual_defocus @3 1 14fr>> @ Pres_blank_ch01_ep00.yarn:110 — 아직 코어로 이관되지 않은 커맨드",
+        "<<face @2 6>> @ Pres_blank_ch01_ep00.yarn:114 — 아직 코어로 이관되지 않은 커맨드",
+        "<<idle_breathe @2>> @ Pres_blank_ch01_ep00.yarn:121 — 아직 코어로 이관되지 않은 커맨드",
+        "<<screen_vignette dream 0.5 24fr>> @ Pres_blank_ch01_ep00.yarn:122 — 아직 코어로 이관되지 않은 커맨드",
+        "<<idle_stop @2>> @ Pres_blank_ch01_ep00.yarn:129 — 아직 코어로 이관되지 않은 커맨드",
+        "<<screen_vignette_clear 12fr>> @ Pres_blank_ch01_ep00.yarn:130 — 아직 코어로 이관되지 않은 커맨드",
+        "<<char_visual_clear @3 10fr>> @ Pres_blank_ch01_ep00.yarn:131 — 아직 코어로 이관되지 않은 커맨드",
+        "<<char_visual_defocus @2 1 12fr>> @ Pres_blank_ch01_ep00.yarn:132 — 아직 코어로 이관되지 않은 커맨드",
+        "<<face_swap @3 4 8fr>> @ Pres_blank_ch01_ep00.yarn:133 — 아직 코어로 이관되지 않은 커맨드",
+        "<<sway @3>> @ Pres_blank_ch01_ep00.yarn:134 — 아직 코어로 이관되지 않은 커맨드",
+        "<<face_swap @3 3 4fr>> @ Pres_blank_ch01_ep00.yarn:147 — 아직 코어로 이관되지 않은 커맨드",
+        "<<tap @3 up>> @ Pres_blank_ch01_ep00.yarn:148 — 아직 코어로 이관되지 않은 커맨드",
+        "<<face_swap @3 2 8fr>> @ Pres_blank_ch01_ep00.yarn:151 — 아직 코어로 이관되지 않은 커맨드",
+        "<<face @1 2>> @ Pres_blank_ch01_ep00.yarn:163 — 아직 코어로 이관되지 않은 커맨드",
+        "<<char_visual_defocus @3 1 16fr>> @ Pres_blank_ch01_ep00.yarn:171 — 아직 코어로 이관되지 않은 커맨드",
+        "<<screen_blur far 0.8>> @ Pres_blank_ch01_ep00.yarn:172 — 아직 코어로 이관되지 않은 커맨드",
+        "<<screen_vignette focus 0.7 20fr>> @ Pres_blank_ch01_ep00.yarn:173 — 아직 코어로 이관되지 않은 커맨드",
+        "<<screen_vignette_clear 14fr>> @ Pres_blank_ch01_ep00.yarn:182 — 아직 코어로 이관되지 않은 커맨드",
+        "<<screen_blur_reset >> @ Pres_blank_ch01_ep00.yarn:183 — 아직 코어로 이관되지 않은 커맨드",
+        "<<char_visual_clear @2 1fr>> @ Pres_blank_ch01_ep00.yarn:185 — 아직 코어로 이관되지 않은 커맨드",
+        "<<face @2 6>> @ Pres_blank_ch01_ep00.yarn:186 — 아직 코어로 이관되지 않은 커맨드",
+        "<<sway_fast @2>> @ Pres_blank_ch01_ep00.yarn:192 — 아직 코어로 이관되지 않은 커맨드",
+        "<<char_visual_clear @3 1fr>> @ Pres_blank_ch01_ep00.yarn:203 — 아직 코어로 이관되지 않은 커맨드",
+        "<<face @3 4>> @ Pres_blank_ch01_ep00.yarn:204 — 아직 코어로 이관되지 않은 커맨드",
+        "<<sway @3>> @ Pres_blank_ch01_ep00.yarn:208 — 아직 코어로 이관되지 않은 커맨드",
+        "<<face_swap @3 2 8fr>> @ Pres_blank_ch01_ep00.yarn:211 — 아직 코어로 이관되지 않은 커맨드",
+        "<<face_swap @3 1 8fr>> @ Pres_blank_ch01_ep00.yarn:222 — 아직 코어로 이관되지 않은 커맨드",
+        "<<face_swap @3 4 8fr>> @ Pres_blank_ch01_ep00.yarn:225 — 아직 코어로 이관되지 않은 커맨드",
+        "<<char_visual_focus @3 1 14fr>> @ Pres_blank_ch01_ep00.yarn:226 — 아직 코어로 이관되지 않은 커맨드",
+        "<<screen_blur far 1>> @ Pres_blank_ch01_ep00.yarn:227 — 아직 코어로 이관되지 않은 커맨드",
+        "<<dip @3 down>> @ Pres_blank_ch01_ep00.yarn:228 — 아직 코어로 이관되지 않은 커맨드",
+        "<<char_visual_clear @3 8fr>> @ Pres_blank_ch01_ep00.yarn:239 — 아직 코어로 이관되지 않은 커맨드",
+        "<<screen_blur_reset >> @ Pres_blank_ch01_ep00.yarn:240 — 아직 코어로 이관되지 않은 커맨드",
+        "<<tx_daze_in 00 16fr>> @ Pres_blank_ch01_ep00.yarn:242 — 아직 코어로 이관되지 않은 커맨드",
+        "<<18fr >> @ Pres_blank_ch01_ep00.yarn:243 — 아직 코어로 이관되지 않은 커맨드",
+        "<<bg_sprite bg_main festival_last_year>> @ Pres_blank_ch01_ep00.yarn:244 — 아직 코어로 이관되지 않은 커맨드",
+        "<<stop_bgm 1.5s>> @ Pres_blank_ch01_ep00.yarn:245 — 아직 코어로 이관되지 않은 커맨드",
+        "<<screen_noise memory 0.45 20fr>> @ Pres_blank_ch01_ep00.yarn:246 — 아직 코어로 이관되지 않은 커맨드",
+        "<<screen_vignette dream 0.75 20fr>> @ Pres_blank_ch01_ep00.yarn:247 — 아직 코어로 이관되지 않은 커맨드",
+        "<<tx_daze_out 00 20fr>> @ Pres_blank_ch01_ep00.yarn:248 — 아직 코어로 이관되지 않은 커맨드",
+        "<<screen_noise memory 0.7 24fr>> @ Pres_blank_ch01_ep00.yarn:261 — 아직 코어로 이관되지 않은 커맨드",
+        "<<bg_scale bg_main 1.04 90fr>> @ Pres_blank_ch01_ep00.yarn:262 — 아직 코어로 이관되지 않은 커맨드",
+        "<<tx_daze_in 00 14fr>> @ Pres_blank_ch01_ep00.yarn:268 — 아직 코어로 이관되지 않은 커맨드",
+        "<<16fr >> @ Pres_blank_ch01_ep00.yarn:269 — 아직 코어로 이관되지 않은 커맨드",
+        "<<bg_sprite bg_main class_day>> @ Pres_blank_ch01_ep00.yarn:270 — 아직 코어로 이관되지 않은 커맨드",
+        "<<bg_scale bg_main 1 0fr>> @ Pres_blank_ch01_ep00.yarn:271 — 아직 코어로 이관되지 않은 커맨드",
+        "<<screen_noise_clear 14fr>> @ Pres_blank_ch01_ep00.yarn:272 — 아직 코어로 이관되지 않은 커맨드",
+        "<<screen_vignette_clear 14fr>> @ Pres_blank_ch01_ep00.yarn:273 — 아직 코어로 이관되지 않은 커맨드",
+        "<<bgm bgm_school_morning 2s>> @ Pres_blank_ch01_ep00.yarn:274 — 아직 코어로 이관되지 않은 커맨드",
+        "<<face @3 2>> @ Pres_blank_ch01_ep00.yarn:276 — 아직 코어로 이관되지 않은 커맨드",
+        "<<tx_daze_out 00 18fr>> @ Pres_blank_ch01_ep00.yarn:278 — 아직 코어로 이관되지 않은 커맨드",
+        "<<sway @3>> @ Pres_blank_ch01_ep00.yarn:283 — 아직 코어로 이관되지 않은 커맨드",
+        "<<char_visual_focus @3 1 16fr>> @ Pres_blank_ch01_ep00.yarn:287 — 아직 코어로 이관되지 않은 커맨드",
+        "<<screen_blur far 0.9>> @ Pres_blank_ch01_ep00.yarn:288 — 아직 코어로 이관되지 않은 커맨드",
+        "<<face_swap @3 3 8fr>> @ Pres_blank_ch01_ep00.yarn:294 — 아직 코어로 이관되지 않은 커맨드",
+        "<<face_swap @3 2 10fr>> @ Pres_blank_ch01_ep00.yarn:297 — 아직 코어로 이관되지 않은 커맨드",
+        "<<sfx sfx_school_bell>> @ Pres_blank_ch01_ep00.yarn:302 — 아직 코어로 이관되지 않은 커맨드",
+        "<<char_visual_clear @3 8fr>> @ Pres_blank_ch01_ep00.yarn:303 — 아직 코어로 이관되지 않은 커맨드",
+        "<<screen_blur_reset >> @ Pres_blank_ch01_ep00.yarn:304 — 아직 코어로 이관되지 않은 커맨드",
+        "<<tx_strip_in 00 18fr>> @ Pres_blank_ch01_ep00.yarn:312 — 아직 코어로 이관되지 않은 커맨드",
+        "<<20fr >> @ Pres_blank_ch01_ep00.yarn:313 — 아직 코어로 이관되지 않은 커맨드",
+        "<<bg_fade_out bg_main 1fr>> @ Pres_blank_ch01_ep00.yarn:314 — 아직 코어로 이관되지 않은 커맨드",
+        "<<stop_bgm 1.5s>> @ Pres_blank_ch01_ep00.yarn:315 — 아직 코어로 이관되지 않은 커맨드",
+        "<<bgm bgm_monologue 2.5s>> @ Pres_blank_ch01_ep00.yarn:316 — 아직 코어로 이관되지 않은 커맨드",
+        "<<tx_strip_out 00 18fr>> @ Pres_blank_ch01_ep00.yarn:317 — 아직 코어로 이관되지 않은 커맨드",
+        "<<24fr >> @ Pres_blank_ch01_ep00.yarn:322 — 아직 코어로 이관되지 않은 커맨드",
+        "<<bg_sprite bg_main class_lunch>> @ Pres_blank_ch01_ep00.yarn:336 — 아직 코어로 이관되지 않은 커맨드",
+        "<<bg_fade_in bg_main 24fr>> @ Pres_blank_ch01_ep00.yarn:337 — 아직 코어로 이관되지 않은 커맨드",
+        "<<screen_vignette focus 0.6 24fr>> @ Pres_blank_ch01_ep00.yarn:338 — 아직 코어로 이관되지 않은 커맨드"
+    ]
+}

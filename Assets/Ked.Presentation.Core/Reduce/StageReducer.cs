@@ -102,7 +102,7 @@ namespace Ked.Presentation.Core
                 case "slot02": return ApplySlot(state, cmd, tuning, "stage02", cmd.Arg(1, "mid"), out reason);
 
                 // show — SetAnchor(리셋+앵커) + 가시성. 초상 스프라이트 축은 아직 없어 부분이다.
-                case "show": return ApplyShow(state, cmd, out reason);
+                case "show": return ApplyShow(state, cmd, tuning, out reason);
 
                 // 배역·별칭 (커맨드 대상 해석의 전제)
                 case "cast": return ApplyCast(state, cmd, tuning, out reason);
@@ -111,6 +111,10 @@ namespace Ked.Presentation.Core
                 // fade — 초상 스프라이트 루트의 가시성 (브리지 EnqueueFadeIn/OutDslSpec과 동일 표적)
                 case "fade_in": return ApplyFade(state, cmd, visible: true, out reason);
                 case "fade_out": return ApplyFade(state, cmd, visible: false, out reason);
+
+                // 표정 전환 — 사이징 재계산 포함 (face_swap의 와이프 연출은 트윈의 일)
+                case "face": return ApplyFaceChange(state, cmd, tuning, cmd.Arg(1), out reason);
+                case "face_swap": return ApplyFaceChange(state, cmd, tuning, cmd.Arg(1), out reason);
 
                 // place 계열 — focus 지점을 화면 지점으로 (SettledFocusMath.SolveFocusPlacement)
                 case "place": return ApplyPlace(state, cmd, tuning, cmd.Arg(2, "center"), out reason);
@@ -252,7 +256,8 @@ namespace Ked.Presentation.Core
             "CharacterPortrait_ActingScale", "CharacterPortrait_ActingScale_X", "CharacterPortrait_ActingScale_Y",
         };
 
-        private static bool ApplyShow(StageState state, in StageCommand cmd, out string reason)
+        private static bool ApplyShow(
+            StageState state, in StageCommand cmd, StageReducerTuning tuning, out string reason)
         {
             if (!TryGetSpawnedSlot(state, cmd, out string slotKey, out reason))
                 return false;
@@ -274,8 +279,19 @@ namespace Ked.Presentation.Core
             state.Apply(FadeInReduction.Reduce(StageState.NodeKeyOf(slotKey, RigSchemaLoader.RootKey)));
             state.Apply(FadeInReduction.Reduce(StageState.NodeKeyOf(slotKey, "CharacterPortraitSprite_Root")));
 
-            // 초상 스프라이트(faceToken) 축은 아직 없다 — 상태 없이 넘어가지 않고 기록한다.
-            state.AddUnhandled(cmd, "show의 초상 스프라이트 축(faceToken)은 아직 상태 모델에 없다");
+            // 표정: show의 faceToken 별칭("e1", 빈 값은 "2") → 표정 코드 + 사이징 재계산.
+            string faceRaw = PortraitEmotionCode.ParseShowFaceAlias(cmd.Arg(1));
+
+            if (PortraitEmotionCode.TryNormalize(faceRaw, out string showEmotion))
+            {
+                state.TryGetPortrait(slotKey, out char variantSuffix, out _);
+                state.SetPortrait(slotKey, variantSuffix, showEmotion);
+                ApplyPortraitSizing(state, cmd, tuning, slotKey);
+            }
+            else
+            {
+                state.AddUnhandled(cmd, $"show의 표정 토큰 '{cmd.Arg(1)}'을 읽지 못했다");
+            }
 
             return true;
         }
@@ -298,40 +314,74 @@ namespace Ked.Presentation.Core
 
             state.SetCast(slotKey, characterKey);
 
-            // 초상 사이징 (CharRigImageSizingPolicy.HeightFitPreserveAspect 상당):
-            // 폭 = 부모 높이 × 종횡비, sizeDelta.y = 0. 종횡비가 캐릭터 안에서 균일할
-            // 때만 접는다 — 상이하면 표정 축이 필요하므로 침묵 대신 기록한다.
-            float aspect = 0f;
-            string dimReason;
-            bool sized;
+            // cast (slot, char, [variant=a], [emotion=1]) — 브리지가 pose+face로 팬아웃하는
+            // 초기 초상 상태를 그대로 접는다.
+            string variantArg = cmd.Arg(2, "a").Trim().ToLowerInvariant();
+            char variantSuffix = variantArg.Length > 0 ? variantArg[variantArg.Length - 1] : 'a';
+
+            if (!PortraitEmotionCode.TryNormalize(cmd.Arg(3, "1"), out string emotion))
+                emotion = PortraitEmotionCode.Default;
+
+            state.SetPortrait(slotKey, variantSuffix, emotion);
+            ApplyPortraitSizing(state, cmd, tuning, slotKey);
+
+            return true;
+        }
+
+        /// <summary>
+        /// 초상 사이징 (CharRigImageSizingPolicy.HeightFitPreserveAspect 상당):
+        /// 폭 = 부모 높이 × 현재 표정 스프라이트의 종횡비, sizeDelta.y = 0.
+        /// 치수를 못 찾으면 침묵 대신 Unhandled로 남긴다.
+        /// </summary>
+        private static void ApplyPortraitSizing(
+            StageState state, in StageCommand cmd, StageReducerTuning tuning, string slotKey)
+        {
+            if (!state.TryGetCharacter(slotKey, out string characterKey))
+                return; // 배역이 없으면 그릴 초상도 없다
+
+            state.TryGetPortrait(slotKey, out char variantSuffix, out string emotion);
+            emotion ??= PortraitEmotionCode.Default;
 
             if (tuning.PortraitDimensions == null)
             {
-                sized = false;
-                dimReason = "치수 덤프(portrait-dimensions.json)가 없다";
+                state.AddUnhandled(cmd, "초상 사이징을 접지 못했다: 치수 덤프(portrait-dimensions.json)가 없다");
+                return;
             }
-            else
+
+            if (!tuning.PortraitDimensions.TryGetAspect(
+                    characterKey, variantSuffix, emotion, out float aspect, out string reason))
             {
-                sized = tuning.PortraitDimensions.TryGetUniformAspect(characterKey, out aspect, out dimReason);
+                state.AddUnhandled(cmd, "초상 사이징을 접지 못했다: " + reason);
+                return;
             }
 
-            if (sized)
+            string imageKey = StageState.NodeKeyOf(slotKey, "CharacterPortraitSprite_Image");
+            string parentKey = StageState.NodeKeyOf(slotKey, "CharacterPortraitSprite_Root");
+
+            float parentHeight = state.Nodes.GetRectSize(parentKey).Y;
+
+            RectNodeState imageState = state.Nodes.GetState(imageKey);
+            state.Nodes.SetState(imageKey, imageState.WithSizeDelta(new Vec2(parentHeight * aspect, 0f)));
+        }
+
+        /// <summary>face / face_swap — 표정 전환 + 사이징 재계산.</summary>
+        private static bool ApplyFaceChange(
+            StageState state, in StageCommand cmd, StageReducerTuning tuning,
+            string emotionToken, out string reason)
+        {
+            if (!TryGetSpawnedSlot(state, cmd, out string slotKey, out reason))
+                return false;
+
+            if (!PortraitEmotionCode.TryNormalize(emotionToken, out string emotion))
             {
-                string imageKey = StageState.NodeKeyOf(slotKey, "CharacterPortraitSprite_Image");
-                string parentKey = StageState.NodeKeyOf(slotKey, "CharacterPortraitSprite_Root");
-
-                float parentHeight = state.Nodes.GetRectSize(parentKey).Y;
-
-                RectNodeState imageState = state.Nodes.GetState(imageKey);
-                state.Nodes.SetState(imageKey, imageState.WithSizeDelta(new Vec2(parentHeight * aspect, 0f)));
-            }
-            else
-            {
-                state.AddUnhandled(cmd, "초상 사이징을 접지 못했다: " + dimReason);
+                reason = $"표정 토큰 '{emotionToken}'을 읽지 못했다";
+                return false;
             }
 
-            // 어느 그림(표정)인지의 축은 여전히 없다 — 정지 프레임 렌더 시 필요해지면 올린다.
-            state.AddUnhandled(cmd, "cast의 초상 그림 축(표정·변형 선택)은 아직 상태 모델에 없다");
+            state.TryGetPortrait(slotKey, out char variantSuffix, out _);
+            state.SetPortrait(slotKey, variantSuffix, emotion);
+            ApplyPortraitSizing(state, cmd, tuning, slotKey);
+
             return true;
         }
 
