@@ -109,10 +109,16 @@ public sealed class CharacterPlacementTargetLedger
     /// <summary>
     /// stopRoot(제외)부터 endRect(포함)까지의 라이브 상태에 예약 target을 입힌 사슬.
     /// 루트 쪽이 앞이다(RectChainMath 규약).
+    /// chainRects를 주면 같은 순서로 실제 RectTransform을 담아 준다 —
+    /// 호출자가 특정 노드의 체인 인덱스를 찾을 때 쓴다(depth/focus solver).
     /// </summary>
-    private RectNodeState[] CaptureSettledChain(RectTransform endRect, RectTransform stopRoot)
+    public RectNodeState[] CaptureSettledChain(
+        RectTransform endRect,
+        RectTransform stopRoot,
+        List<RectTransform> chainRects = null)
     {
         List<RectNodeState> reversed = new List<RectNodeState>(16);
+        List<RectTransform> reversedRects = chainRects != null ? new List<RectTransform>(16) : null;
 
         Transform current = endRect;
 
@@ -134,6 +140,8 @@ public sealed class CharacterPlacementTargetLedger
                 ? _core.ApplyTo(key, live)
                 : live);
 
+            reversedRects?.Add(rect);
+
             current = current.parent;
         }
 
@@ -148,6 +156,14 @@ public sealed class CharacterPlacementTargetLedger
 
         for (int i = 0; i < chain.Length; i++)
             chain[i] = reversed[chain.Length - 1 - i];
+
+        if (chainRects != null)
+        {
+            chainRects.Clear();
+
+            for (int i = 0; i < reversedRects.Count; i++)
+                chainRects.Add(reversedRects[reversedRects.Count - 1 - i]);
+        }
 
         return chain;
     }
@@ -172,7 +188,8 @@ public sealed class CharacterPlacementTargetLedger
             localEulerAngles: new Vec3(localEuler.x, localEuler.y, localEuler.z));
     }
 
-    private static RectSpace SpaceOf(RectTransform stopRoot)
+    /// <summary>stopRoot의 rect를 코어 좌표 공간으로. depth/focus solver도 같은 규약을 쓴다.</summary>
+    public static RectSpace SpaceOf(RectTransform stopRoot)
     {
         Vector2 size = stopRoot.rect.size;
         Vector2 pivot = stopRoot.pivot;

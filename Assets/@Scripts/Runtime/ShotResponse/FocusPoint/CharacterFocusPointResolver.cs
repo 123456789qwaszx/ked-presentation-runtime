@@ -67,26 +67,30 @@ public static class CharacterFocusPointResolver
             out result);
     }
 
-    public static bool TryResolveFromRigRefs(
+    /// <summary>
+    /// focus 측정의 입력(측정 노드 + 로컬 오프셋)만 뽑는다. 오프셋 수식의 유일한 자리다 —
+    /// TryResolveFromRigRefs와 depth/place solver가 같이 쓴다(사본 금지).
+    /// </summary>
+    public static bool TryResolveFocusMeasureInputs(
         CharacterRigRefs rigRefs,
-        RectTransform rigSpaceRoot,
         string tuningKey,
         CharacterFocusPreset preset,
         Vector2 commandOffset,
         CharacterFocusTuningDBSO tuningDb,
-        bool useSettledPlacementTargets,
         CharacterFacing facing,
         bool mirrorCommandOffset,
-        out CharacterFocusPointResult result)
+        out RectTransform measureRect,
+        out Vector3 focusLocalOffset)
     {
-        result = default;
+        measureRect = null;
+        focusLocalOffset = default;
 
-        if (rigRefs == null || rigSpaceRoot == null || tuningDb == null)
+        if (rigRefs == null || tuningDb == null)
             return false;
 
         // Focus는 "캐릭터의 논리적 위치"를 가리켜야 한다.
         // 즉 CharacterPortrait_VisualOffset를 사용한다.
-        RectTransform measureRect = rigRefs.CharacterPortrait_VisualOffset;
+        measureRect = rigRefs.CharacterPortrait_VisualOffset;
 
         if (measureRect == null)
             return false;
@@ -104,7 +108,34 @@ public static class CharacterFocusPointResolver
 
         focusOffset += effectiveCommandOffset;
 
-        Vector3 focusLocalOffset = new(focusOffset.x, focusOffset.y, 0f);
+        focusLocalOffset = new Vector3(focusOffset.x, focusOffset.y, 0f);
+        return true;
+    }
+
+    public static bool TryResolveFromRigRefs(
+        CharacterRigRefs rigRefs,
+        RectTransform rigSpaceRoot,
+        string tuningKey,
+        CharacterFocusPreset preset,
+        Vector2 commandOffset,
+        CharacterFocusTuningDBSO tuningDb,
+        bool useSettledPlacementTargets,
+        CharacterFacing facing,
+        bool mirrorCommandOffset,
+        out CharacterFocusPointResult result)
+    {
+        result = default;
+
+        if (rigSpaceRoot == null)
+            return false;
+
+        if (!TryResolveFocusMeasureInputs(
+                rigRefs, tuningKey, preset, commandOffset, tuningDb, facing,
+                mirrorCommandOffset,
+                out RectTransform measureRect, out Vector3 focusLocalOffset))
+        {
+            return false;
+        }
 
         // 움직이는 placement 조상(translation/scale/rotation)이 있으면,
         // 그들이 settled target에 도착했을 때의 focusWorld로 보정해 측정한다.
@@ -131,7 +162,7 @@ public static class CharacterFocusPointResolver
         return true;
     }
 
-    private static CharacterFacing ResolveFacing(CommandRunScope scope, string roleKey)
+    public static CharacterFacing ResolveFacing(CommandRunScope scope, string roleKey)
     {
         if (scope != null &&
             scope.CastRegistry != null &&
