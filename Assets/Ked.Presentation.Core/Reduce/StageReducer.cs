@@ -154,6 +154,7 @@ namespace Ked.Presentation.Core
                 case "rotate_reset": return ApplyRotateReset(state, cmd, out reason);
 
                 // shot
+                case "shot_focus_to": return ApplyShotFocusTo(state, cmd, tuning, out reason);
                 case "shot_zoom":  return ApplyShotZoom(state, cmd, out reason);
                 case "shot_to":    return ApplyShotTo(state, cmd, tuning, out reason);
                 case "shot_track": return ApplyShotTrack(state, cmd, tuning, out reason);
@@ -544,6 +545,55 @@ namespace Ked.Presentation.Core
         }
 
         // ── shot ─────────────────────────────────────────────────────
+
+        /// <summary>
+        /// shot_focus_to (roleKey, focus="body", screenPoint="center", zoom=2.5, duration).
+        /// 런타임과 같은 경로: "현재 카메라가 적용된" 측정 focus를 만들어
+        /// ShotZoomFocusReduction에 넘긴다(내부에서 카메라를 벗겨 논리 좌표 복원).
+        /// 폴드의 측정값 = 논리 focus × 현재 배율 + 현재 pan — 적용측 규약 그대로다.
+        /// </summary>
+        private static bool ApplyShotFocusTo(
+            StageState state, in StageCommand cmd, StageReducerTuning tuning, out string reason)
+        {
+            if (!TryGetSpawnedSlot(state, cmd, out string slotKey, out reason))
+                return false;
+
+            if (!FocusPresetName.TryNormalizeToken(cmd.Arg(1, "body"), out string focusName))
+            {
+                reason = $"focus 프리셋 토큰 '{cmd.Arg(1)}'을 모른다";
+                return false;
+            }
+
+            string screenPointName = cmd.Arg(2, "center");
+
+            if (!ScreenPointRatios.TryResolve(state.Nodes.RootSpace.Size, screenPointName, out Vec2 desired))
+            {
+                reason = $"화면 지점 '{screenPointName}'을 모른다";
+                return false;
+            }
+
+            if (!NumberToken.TryParseFloat(cmd.Arg(3, "2.5"), out float zoom))
+            {
+                reason = $"zoom을 읽지 못했다: '{cmd.Arg(3)}'";
+                return false;
+            }
+
+            state.TryGetCharacter(slotKey, out string characterKey);
+            Vec2 focusOffset = FocusOffsetMath.Resolve(tuning.FocusTuning, characterKey, focusName, Vec2.Zero);
+
+            RectNodeState[] chain = state.Nodes.BuildChainTo(
+                StageState.NodeKeyOf(slotKey, "CharacterPortrait_VisualOffset"));
+
+            Vec2 logicalFocus = SettledFocusMath.FocusPointInRigSpace(
+                chain, state.Nodes.RootSpace, focusOffset);
+
+            float currentScale = ShotIntentMath.EvaluateCameraScale(state.Shot.Zoom);
+            Vec2 measuredFocus = logicalFocus * currentScale + state.Shot.PanInRigSpace;
+
+            state.Shot = ShotZoomFocusReduction.Reduce(state.Shot, zoom, measuredFocus, desired);
+            reason = null;
+            return true;
+        }
 
         private static bool ApplyShotZoom(StageState state, in StageCommand cmd, out string reason)
         {

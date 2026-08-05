@@ -187,6 +187,34 @@ namespace Ked.Presentation.Core.Tests
         }
 
         [Test]
+        public void shot_focus_to를_접으면_focus가_목표_배율로_화면_지점에_보인다()
+        {
+            StageReducerTuning tuning = MakeTuning();
+            StageState state = StageReducer.CreateInitialState(tuning);
+
+            state = StageReducer.ApplyAll(state, new[]
+            {
+                Cmd("slot", "c3"),
+                Cmd("cast", "c3", "parkeunseol"),
+                Cmd("place_center", "c3", "bust"),
+                Cmd("shot_focus_to", "c3", "face", "center", "2.5", "1.2s"),
+            }, tuning);
+
+            Assert.That(state.Unhandled.Count(u => u.Command.Name == "shot_focus_to"), Is.EqualTo(0),
+                string.Join("\n", state.Unhandled));
+
+            Assert.That(state.Shot.Zoom, Is.EqualTo(2.5f).Within(1e-4f));
+
+            // 명중 검산: 논리 focus × 목표 배율 + pan = 화면 지점(center = 0,0).
+            Vec2 logical = FocusPointOf(state, "c3", "face", tuning);
+            float scale = ShotIntentMath.EvaluateCameraScale(state.Shot.Zoom);
+            Vec2 visible = logical * scale + state.Shot.PanInRigSpace;
+
+            Assert.That(visible.X, Is.EqualTo(0f).Within(Eps));
+            Assert.That(visible.Y, Is.EqualTo(0f).Within(Eps));
+        }
+
+        [Test]
         public void 모르는_프리셋과_레벨_수치는_Unhandled다()
         {
             StageReducerTuning tuning = MakeTuning();
