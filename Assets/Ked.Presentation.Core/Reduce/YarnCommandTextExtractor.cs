@@ -245,8 +245,10 @@ namespace Ked.Presentation.Core
             {
                 string t = tag.Trim();
 
+                // Yarn 런타임의 라인 ID는 "line:" 접두사를 포함한 전체다
+                // (#line:abc 태그 → ID "line:abc"). 접두사를 벗기면 조회가 빗나간다.
                 if (t.StartsWith("line:", StringComparison.Ordinal))
-                    lineId = t.Substring("line:".Length).Trim();
+                    lineId = t;
             }
 
             return text;

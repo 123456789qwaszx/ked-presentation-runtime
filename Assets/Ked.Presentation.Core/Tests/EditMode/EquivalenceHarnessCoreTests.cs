@@ -37,7 +37,8 @@ namespace Ked.Presentation.Core.Tests
             Assert.That(groups[0].Commands.Select(c => c.Name),
                 Is.EqualTo(new[] { "bg_spawn", "slot", "show" }));
             Assert.That(groups[0].LineText, Does.StartWith("박은설:"));
-            Assert.That(groups[0].LineId, Is.EqualTo("0a1b2c"));
+            // 접두사 포함이 규약이다 — Yarn 런타임의 CurrentLineId와 그대로 맞아야 한다.
+            Assert.That(groups[0].LineId, Is.EqualTo("line:0a1b2c"));
 
             Assert.That(groups[1].Commands.Select(c => c.Name),
                 Is.EqualTo(new[] { "left", "shot_zoom" }));
@@ -101,7 +102,7 @@ title: Pres_sample
 
             Assert.That(nodes[1].NodeName, Is.EqualTo("Pres_sample"));
             Assert.That(nodes[1].Groups.Count, Is.EqualTo(2));
-            Assert.That(nodes[1].Groups[0].LineId, Is.EqualTo("p1"));
+            Assert.That(nodes[1].Groups[0].LineId, Is.EqualTo("line:p1"));
             Assert.That(nodes[1].Groups[1].Commands.Single().Name, Is.EqualTo("left"));
         }
 
