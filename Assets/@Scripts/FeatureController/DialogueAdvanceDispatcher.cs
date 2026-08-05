@@ -7,6 +7,9 @@ public sealed class DialogueAdvanceDispatcher : MonoBehaviour
     private DialogueRunner _dialogueRunner;
     private VNLinePresentationState _linePresentationAdvanceState;
 
+    /// <summary>다음 라인 요청 직전(라인 완전 표시 상태)에 난다. U14 등가성 하네스가 쓴다.</summary>
+    public event System.Action BeforeNextLineDispatched;
+
     public void Initialize(
         AdvanceGate gate,
         DialogueRunner dialogueRunner,
@@ -37,6 +40,9 @@ public sealed class DialogueAdvanceDispatcher : MonoBehaviour
         }
         else
         {
+            // U14 등가성 하네스의 관측점: "라인 완전 표시 + 전진 직전" = 정착 상태가 안정된 순간.
+            BeforeNextLineDispatched?.Invoke();
+
             _dialogueRunner.RequestNextLine();
             _gate.AddCooldownSeconds(_gate.GetCooldownAfterNextLine(kind));
         }

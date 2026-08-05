@@ -23,19 +23,54 @@ namespace Ked.Presentation.Core
     /// 그런 파일은 이 추출기로 접으면 안 된다는 신호다.
     /// (VnTool의 붙여넣기 해석과는 별개의 물건이다 — 그쪽은 저작 규칙, 이쪽은 하네스.)
     /// </summary>
+    /// <summary>노드 하나의 라인 그룹들.</summary>
+    public sealed class YarnNodeGroups
+    {
+        public string NodeName;
+        public readonly List<YarnLineGroup> Groups = new List<YarnLineGroup>();
+    }
+
     public static class YarnCommandTextExtractor
     {
+        /// <summary>파일 전체를 노드 구분 없이 하나의 흐름으로 뽑는다(단일 노드 파일용).</summary>
         public static List<YarnLineGroup> Extract(
+            string yarnText, string sourceName, List<string> warnings = null)
+        {
+            List<YarnLineGroup> flattened = new List<YarnLineGroup>();
+
+            foreach (YarnNodeGroups node in ExtractNodes(yarnText, sourceName, warnings))
+                flattened.AddRange(node.Groups);
+
+            return flattened;
+        }
+
+        /// <summary>노드별로 뽑는다. 한 파일에 여러 노드가 있을 수 있다(예: Set + Pres).</summary>
+        public static List<YarnNodeGroups> ExtractNodes(
             string yarnText, string sourceName, List<string> warnings = null)
         {
             if (yarnText == null)
                 throw new ArgumentNullException(nameof(yarnText));
 
-            List<YarnLineGroup> groups = new List<YarnLineGroup>();
+            List<YarnNodeGroups> nodes = new List<YarnNodeGroups>();
+            YarnNodeGroups node = null;
             YarnLineGroup current = new YarnLineGroup();
+            string pendingTitle = null;
 
             string[] lines = yarnText.Replace("\r\n", "\n").Split('\n');
             bool inHeader = true;
+
+            void FlushNode()
+            {
+                if (node == null)
+                    return;
+
+                if (current.Commands.Count > 0)
+                    node.Groups.Add(current); // 꼬리 커맨드 그룹 (LineText null)
+
+                nodes.Add(node);
+                node = null;
+                current = new YarnLineGroup();
+            }
 
             for (int i = 0; i < lines.Length; i++)
             {
@@ -45,17 +80,25 @@ namespace Ked.Presentation.Core
                 if (line.Length == 0)
                     continue;
 
-                // 노드 헤더: title: ~ --- 사이. === 는 노드 끝(다음 노드 헤더 시작).
+                // 노드 헤더: title: ~ --- 사이. === 는 노드 끝.
                 if (inHeader)
                 {
+                    if (line.StartsWith("title:", StringComparison.Ordinal))
+                        pendingTitle = line.Substring("title:".Length).Trim();
+
                     if (line == "---")
+                    {
+                        node = new YarnNodeGroups { NodeName = pendingTitle };
+                        pendingTitle = null;
                         inHeader = false;
+                    }
 
                     continue;
                 }
 
                 if (line == "===")
                 {
+                    FlushNode();
                     inHeader = true;
                     continue;
                 }
@@ -90,14 +133,12 @@ namespace Ked.Presentation.Core
                 // 대사 라인 = 경계.
                 current.LineText = StripTags(line, out string lineId);
                 current.LineId = lineId;
-                groups.Add(current);
+                node?.Groups.Add(current);
                 current = new YarnLineGroup();
             }
 
-            if (current.Commands.Count > 0)
-                groups.Add(current); // 꼬리 커맨드 그룹 (LineText null)
-
-            return groups;
+            FlushNode();
+            return nodes;
         }
 
         /// <summary>"&lt;&lt;cmd a "b c" d&gt;&gt;" → StageCommand. 따옴표 인자를 존중한다.</summary>

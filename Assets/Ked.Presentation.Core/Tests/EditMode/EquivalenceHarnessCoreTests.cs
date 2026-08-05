@@ -76,6 +76,36 @@ namespace Ked.Presentation.Core.Tests
         }
 
         [Test]
+        public void 한_파일의_여러_노드가_따로_뽑힌다()
+        {
+            // Pres 파일의 실제 모양: Set 노드(커맨드 전용) + Pres 노드(라인별 그룹).
+            const string twoNodes = @"title: Set_sample
+---
+<<bg_spawn bg_main class_day>>
+<<slot c1>>
+===
+title: Pres_sample
+---
+<<show c1 e1>>
+첫 서브 라인 #line:p1
+<<left c1 1u>>
+둘째 서브 라인 #line:p2
+===";
+
+            List<YarnNodeGroups> nodes = YarnCommandTextExtractor.ExtractNodes(twoNodes, "pres.yarn");
+
+            Assert.That(nodes.Count, Is.EqualTo(2));
+            Assert.That(nodes[0].NodeName, Is.EqualTo("Set_sample"));
+            Assert.That(nodes[0].Groups.Single().LineText, Is.Null, "커맨드 전용 노드는 꼬리 그룹 하나");
+            Assert.That(nodes[0].Groups.Single().Commands.Count, Is.EqualTo(2));
+
+            Assert.That(nodes[1].NodeName, Is.EqualTo("Pres_sample"));
+            Assert.That(nodes[1].Groups.Count, Is.EqualTo(2));
+            Assert.That(nodes[1].Groups[0].LineId, Is.EqualTo("p1"));
+            Assert.That(nodes[1].Groups[1].Commands.Single().Name, Is.EqualTo("left"));
+        }
+
+        [Test]
         public void 분기_커맨드는_경고를_남긴다()
         {
             List<string> warnings = new();
