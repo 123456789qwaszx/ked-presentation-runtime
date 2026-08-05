@@ -126,6 +126,72 @@ namespace Ked.Presentation.Core
         }
     }
 
+    // ── 초상 치수 (portrait-dimensions.json) ──────────────────────────
+
+    [Serializable]
+    public sealed class PortraitDimensionsFileDto
+    {
+        public List<PortraitDimensionDto> entries = new List<PortraitDimensionDto>();
+
+        /// <summary>
+        /// 캐릭터의 초상 종횡비(폭/높이)가 변형·표정 전체에서 균일하면 그 값을 준다.
+        /// 상이하면 false — 표정 축 없이는 사이징을 접을 수 없다는 뜻이고,
+        /// 호출자는 이를 침묵 대신 Unhandled로 남긴다.
+        /// </summary>
+        public bool TryGetUniformAspect(string characterKey, out float aspect, out string reason)
+        {
+            aspect = 0f;
+            reason = null;
+
+            bool found = false;
+
+            for (int i = 0; i < entries.Count; i++)
+            {
+                PortraitDimensionDto entry = entries[i];
+
+                if (entry == null || !string.Equals(entry.character, characterKey, StringComparison.Ordinal))
+                    continue;
+
+                if (entry.height <= 0f)
+                    continue;
+
+                float entryAspect = entry.width / entry.height;
+
+                if (!found)
+                {
+                    aspect = entryAspect;
+                    found = true;
+                    continue;
+                }
+
+                if (Math.Abs(entryAspect - aspect) > 1e-4f)
+                {
+                    reason = $"캐릭터 '{characterKey}'의 초상 종횡비가 표정/변형마다 다르다 " +
+                             $"({aspect:F4} vs {entryAspect:F4} at {entry.variant}/{entry.emotion}) — 표정 축 폴드가 필요하다";
+                    return false;
+                }
+            }
+
+            if (!found)
+            {
+                reason = $"캐릭터 '{characterKey}'의 초상 치수가 덤프에 없다";
+                return false;
+            }
+
+            return true;
+        }
+    }
+
+    [Serializable]
+    public sealed class PortraitDimensionDto
+    {
+        public string character;
+        public string variant;
+        public string emotion;
+        public float width;
+        public float height;
+    }
+
     /// <summary>focus 프리셋 어휘 — 런타임 CharacterFocusPreset과의 대응은 값으로 잇는다.</summary>
     public static class FocusPresetName
     {

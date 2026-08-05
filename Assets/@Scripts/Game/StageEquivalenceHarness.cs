@@ -139,6 +139,20 @@ public sealed class StageEquivalenceHarness : MonoBehaviour
             DepthPresets = depthTuning?.MonoBehaviour?.presets,
             FocusTuning = focusTuning?.MonoBehaviour,
         };
+
+        string portraitDimsPath = Path.Combine(tuningDir, "portrait-dimensions.json");
+
+        if (File.Exists(portraitDimsPath))
+        {
+            _tuning.PortraitDimensions = JsonUtility.FromJson<PortraitDimensionsFileDto>(
+                File.ReadAllText(portraitDimsPath));
+        }
+        else
+        {
+            Debug.LogWarning(
+                "[StageEquivalenceHarness] portrait-dimensions.json이 없다 — " +
+                "초상 사이징은 Unhandled로 남는다. Ked/U12 exporter를 재실행할 것.");
+        }
     }
 
     [Serializable]

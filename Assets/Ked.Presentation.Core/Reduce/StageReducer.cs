@@ -20,6 +20,9 @@ namespace Ked.Presentation.Core
 
         /// <summary>presets/focus-tuning.json — place/size의 focus 오프셋. 없으면 base 0으로 접는다.</summary>
         public FocusTuningBodyDto FocusTuning;
+
+        /// <summary>portrait-dimensions.json — 초상 사이징(cast) 폴드. 없으면 사이징은 Unhandled.</summary>
+        public PortraitDimensionsFileDto PortraitDimensions;
     }
 
     /// <summary>
@@ -102,7 +105,7 @@ namespace Ked.Presentation.Core
                 case "show": return ApplyShow(state, cmd, out reason);
 
                 // 배역·별칭 (커맨드 대상 해석의 전제)
-                case "cast": return ApplyCast(state, cmd, out reason);
+                case "cast": return ApplyCast(state, cmd, tuning, out reason);
                 case "actor": return ApplyActor(state, cmd, out reason);
 
                 // fade — 초상 스프라이트 루트의 가시성 (브리지 EnqueueFadeIn/OutDslSpec과 동일 표적)
@@ -279,7 +282,8 @@ namespace Ked.Presentation.Core
 
         // ── 배역·별칭·fade ───────────────────────────────────────────
 
-        private static bool ApplyCast(StageState state, in StageCommand cmd, out string reason)
+        private static bool ApplyCast(
+            StageState state, in StageCommand cmd, StageReducerTuning tuning, out string reason)
         {
             if (!TryGetSpawnedSlot(state, cmd, out string slotKey, out reason))
                 return false;
@@ -294,8 +298,40 @@ namespace Ked.Presentation.Core
 
             state.SetCast(slotKey, characterKey);
 
-            // 초상 스프라이트(어느 그림·크기) 축은 아직 없다 — 배역 맵만 접고 기록한다.
-            state.AddUnhandled(cmd, "cast의 초상 스프라이트 축(그림·크기)은 아직 상태 모델에 없다");
+            // 초상 사이징 (CharRigImageSizingPolicy.HeightFitPreserveAspect 상당):
+            // 폭 = 부모 높이 × 종횡비, sizeDelta.y = 0. 종횡비가 캐릭터 안에서 균일할
+            // 때만 접는다 — 상이하면 표정 축이 필요하므로 침묵 대신 기록한다.
+            float aspect = 0f;
+            string dimReason;
+            bool sized;
+
+            if (tuning.PortraitDimensions == null)
+            {
+                sized = false;
+                dimReason = "치수 덤프(portrait-dimensions.json)가 없다";
+            }
+            else
+            {
+                sized = tuning.PortraitDimensions.TryGetUniformAspect(characterKey, out aspect, out dimReason);
+            }
+
+            if (sized)
+            {
+                string imageKey = StageState.NodeKeyOf(slotKey, "CharacterPortraitSprite_Image");
+                string parentKey = StageState.NodeKeyOf(slotKey, "CharacterPortraitSprite_Root");
+
+                float parentHeight = state.Nodes.GetRectSize(parentKey).Y;
+
+                RectNodeState imageState = state.Nodes.GetState(imageKey);
+                state.Nodes.SetState(imageKey, imageState.WithSizeDelta(new Vec2(parentHeight * aspect, 0f)));
+            }
+            else
+            {
+                state.AddUnhandled(cmd, "초상 사이징을 접지 못했다: " + dimReason);
+            }
+
+            // 어느 그림(표정)인지의 축은 여전히 없다 — 정지 프레임 렌더 시 필요해지면 올린다.
+            state.AddUnhandled(cmd, "cast의 초상 그림 축(표정·변형 선택)은 아직 상태 모델에 없다");
             return true;
         }
 

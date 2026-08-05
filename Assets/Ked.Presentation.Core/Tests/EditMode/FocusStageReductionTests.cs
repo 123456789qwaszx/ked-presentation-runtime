@@ -233,6 +233,77 @@ namespace Ked.Presentation.Core.Tests
         }
 
         [Test]
+        public void cast를_접으면_초상_사이징이_치수_덤프에서_온다()
+        {
+            StageReducerTuning tuning = MakeTuning();
+
+            tuning.PortraitDimensions = new PortraitDimensionsFileDto
+            {
+                entries =
+                {
+                    new PortraitDimensionDto { character = "parkeunseol", variant = "a", emotion = "01", width = 574.5f, height = 1000f },
+                    new PortraitDimensionDto { character = "parkeunseol", variant = "a", emotion = "02", width = 574.5f, height = 1000f },
+                },
+            };
+
+            // 미니 스키마에 초상 이미지 사슬을 붙인다.
+            List<RigSchemaNodeDto> nodes = tuning.RigSchemas.rigs[0].nodes;
+            Float2Dto F2b(float x, float y) => new Float2Dto { x = x, y = y };
+
+            foreach (string id in new[] { "CharacterPortraitSprite_Root", "CharacterPortraitSprite_Image" })
+            {
+                nodes.Add(new RigSchemaNodeDto
+                {
+                    id = id,
+                    parent = id == "CharacterPortraitSprite_Root" ? "CharacterPortrait_VisualOffset" : "CharacterPortraitSprite_Root",
+                    anchoredPosition = F2b(0f, 0f),
+                    anchorMin = F2b(0f, 0f),
+                    anchorMax = F2b(1f, 1f),
+                    pivot = F2b(0.5f, 0.5f),
+                    sizeDelta = F2b(0f, 0f),
+                    localScale = new Float3Dto { x = 1f, y = 1f, z = 1f },
+                    localEulerAngles = new Float3Dto(),
+                });
+            }
+
+            StageState state = StageReducer.CreateInitialState(tuning);
+
+            state = StageReducer.ApplyAll(state, new[]
+            {
+                Cmd("slot", "c3"),
+                Cmd("cast", "c3", "parkeunseol"),
+            }, tuning);
+
+            // 폭 = 부모 높이(1080) × 종횡비(0.5745) = 620.46 — 리포트의 그 계열 값.
+            Assert.That(state.Nodes.GetState("c3/CharacterPortraitSprite_Image").SizeDelta.X,
+                Is.EqualTo(1080f * 0.5745f).Within(0.1f));
+            Assert.That(state.Nodes.GetState("c3/CharacterPortraitSprite_Image").SizeDelta.Y,
+                Is.EqualTo(0f));
+
+            // 사이징이 접혔으니 남는 기록은 그림 축 1건뿐이다.
+            Assert.That(state.Unhandled.Count(u => u.Command.Name == "cast"), Is.EqualTo(1));
+        }
+
+        [Test]
+        public void 표정마다_종횡비가_다르면_사이징은_소리를_낸다()
+        {
+            PortraitDimensionsFileDto dims = new PortraitDimensionsFileDto
+            {
+                entries =
+                {
+                    new PortraitDimensionDto { character = "x", variant = "a", emotion = "01", width = 500f, height = 1000f },
+                    new PortraitDimensionDto { character = "x", variant = "a", emotion = "02", width = 700f, height = 1000f },
+                },
+            };
+
+            Assert.That(dims.TryGetUniformAspect("x", out _, out string reason), Is.False);
+            Assert.That(reason, Does.Contain("다르다"));
+
+            Assert.That(dims.TryGetUniformAspect("없는캐릭터", out _, out string missing), Is.False);
+            Assert.That(missing, Does.Contain("없다"));
+        }
+
+        [Test]
         public void focus_오프셋은_base와_캐릭터_보정의_합이다()
         {
             Vec2 offset = FocusOffsetMath.Resolve(

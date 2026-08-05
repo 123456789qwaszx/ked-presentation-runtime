@@ -263,8 +263,8 @@ namespace Ked.Presentation.Core.Tests
                 Cmd("right", "parkeunseol", "3u"), // 캐릭터 키 직접
             }, tuning);
 
-            // cast의 초상 축 미지원 기록 1건 외에는 전부 접혀야 한다.
-            Assert.That(state.Unhandled.Count(u => u.Command.Name == "cast"), Is.EqualTo(1));
+            // cast의 기록 2건(치수 덤프 없는 tuning이라 사이징 미폴드 + 그림 축) 외에는 전부 접혀야 한다.
+            Assert.That(state.Unhandled.Count(u => u.Command.Name == "cast"), Is.EqualTo(2));
             Assert.That(state.Unhandled.Count(u => u.Command.Name != "cast"), Is.EqualTo(0));
 
             // -40 + 120 = +80px.

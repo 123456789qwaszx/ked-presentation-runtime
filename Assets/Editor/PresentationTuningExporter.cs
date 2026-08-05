@@ -66,6 +66,7 @@ public static class PresentationTuningExporter
         BaseResolutionDto baseResolution = ExportBaseResolution(outDir, warnings);
         ExportRigSchemas(outDir, baseResolution, warnings);
         ExportPresets(outDir, warnings);
+        ExportPortraitDimensions(outDir, warnings);
         WriteReport(outDir, warnings);
 
         Debug.Log($"[PresentationTuningExporter] Done. out={outDir}, warnings={warnings.Count}");
@@ -293,6 +294,64 @@ public static class PresentationTuningExporter
 
             File.WriteAllText(Path.Combine(outDir, "presets", $"{group}.json"), json);
         }
+    }
+
+    // ── 초상 치수 ────────────────────────────────────────────────────
+
+    // 초상 스프라이트의 픽셀 치수 테이블 (U14 사이징 폴드 + VnTool 정지 프레임용).
+    // CharRigImageSizingPolicy.HeightFitPreserveAspect가 폭을 "부모 높이 × 종횡비"로
+    // 정하므로, 치수가 곧 sizeDelta의 원료다.
+    private static void ExportPortraitDimensions(string outDir, List<string> warnings)
+    {
+        const string dbPath = "Assets/Data/Generated/PortraitGeneratedDB.asset";
+
+        PortraitGeneratedDbSo db = AssetDatabase.LoadAssetAtPath<PortraitGeneratedDbSo>(dbPath);
+
+        if (db == null)
+        {
+            warnings.Add($"초상 DB를 찾지 못했다: {dbPath} — portrait-dimensions.json 생략.");
+            return;
+        }
+
+        PortraitDimensionsDto dto = new();
+
+        foreach (PortraitGeneratedDbSo.Entry entry in db.entries)
+        {
+            if (entry.sprite == null)
+            {
+                warnings.Add($"초상 '{entry.characterId}|{entry.variantKey}|{entry.emotionKey}'의 스프라이트가 비어 있다 — 건너뜀.");
+                continue;
+            }
+
+            dto.entries.Add(new PortraitDimensionDto
+            {
+                character = entry.characterId,
+                variant = entry.variantKey,
+                emotion = entry.emotionKey,
+                width = entry.sprite.rect.width,
+                height = entry.sprite.rect.height,
+            });
+        }
+
+        File.WriteAllText(
+            Path.Combine(outDir, "portrait-dimensions.json"),
+            JsonUtility.ToJson(dto, true));
+    }
+
+    [Serializable]
+    private sealed class PortraitDimensionsDto
+    {
+        public List<PortraitDimensionDto> entries = new();
+    }
+
+    [Serializable]
+    private sealed class PortraitDimensionDto
+    {
+        public string character;
+        public string variant;
+        public string emotion;
+        public float width;
+        public float height;
     }
 
     // ── 보고서 ───────────────────────────────────────────────────────
