@@ -15,7 +15,7 @@ public sealed class AudioCommandFactory : INodeCommandFactory
         {
             null => null,
 
-            PlayBgmCommandSpec s => new PlayBgmCommand(_audio, ResolveClip(s.directClip, s.clipKey), s.fadeDuration),
+            PlayBgmCommandSpec s => new PlayBgmCommand(_audio, ResolveClip(s.directClip, s.clipKey), s.clipKey, s.fadeDuration),
             StopBgmCommandSpec s => new StopBgmCommand(_audio, s.fadeDuration),
 
             PlaySfxCommandSpec s => new PlaySfxCommand(_audio, ResolveClip(s.directClip, s.clipKey)),

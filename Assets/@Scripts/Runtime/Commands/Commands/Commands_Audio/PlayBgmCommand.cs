@@ -21,25 +21,27 @@ public sealed class PlayBgmCommand : CommandBase
 {
     private readonly AudioSystem _audio;
     private readonly AudioClip   _clip;
+    private readonly string      _clipKey;
     private readonly float       _fadeDuration;
 
     protected override SkipPolicy SkipPolicy => SkipPolicy.CompleteImmediately;
 
-    public PlayBgmCommand(AudioSystem audio, AudioClip clip, float fadeDuration = 1f)
+    public PlayBgmCommand(AudioSystem audio, AudioClip clip, string clipKey, float fadeDuration = 1f)
     {
         _audio        = audio;
         _clip         = clip;
+        _clipKey      = clipKey;
         _fadeDuration = fadeDuration;
     }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
-        _audio.Bgm.Play(_clip, _fadeDuration, isSkipping: false);
+        _audio.Bgm.Play(_clip, _clipKey, _fadeDuration, isSkipping: false);
         yield break;
     }
 
     protected override void OnSkip(CommandRunScope scope)
     {
-        _audio.Bgm.Play(_clip, _fadeDuration, isSkipping: true);
+        _audio.Bgm.Play(_clip, _clipKey, _fadeDuration, isSkipping: true);
     }
 }

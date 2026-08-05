@@ -16,6 +16,11 @@ public sealed class BgmPlayer
     public AudioClip CurrentClip => _current?.clip;
     public bool IsPlaying => _current != null && _current.isPlaying;
 
+    // 현재(또는 페이드가 끝나면) 재생 중일 BGM의 문자열 키. U12-전체 / U15 상태 스냅샷의 전제.
+    // "예약된 최종값" 의미론이다: Play를 받아들인 순간 목표 키가 되고, Stop이면 null이다.
+    // directClip으로만 재생돼 키가 없으면 빈 문자열일 수 있다 — U15가 이 경우를 경고로 다룬다.
+    public string CurrentClipKey { get; private set; }
+
     public BgmPlayer(AudioSource sourceA, AudioSource sourceB, MonoBehaviour host)
     {
         _sourceA = sourceA;
@@ -34,13 +39,15 @@ public sealed class BgmPlayer
     // Replace policy.
     // If another BGM is already playing, transition to the new clip.
     // While skipping, apply the final state immediately without fade.
-    public void Play(AudioClip clip, float fadeDuration, bool isSkipping)
+    public void Play(AudioClip clip, string clipKey, float fadeDuration, bool isSkipping)
     {
         if (clip == null)
         {
             //Debug.LogWarning("[BgmPlayer] clip is null.");
             return;
         }
+
+        CurrentClipKey = clipKey;
 
         if (_current.clip == clip && _current.isPlaying)
             return;
@@ -58,6 +65,8 @@ public sealed class BgmPlayer
 
     public void Stop(float fadeDuration, bool isSkipping)
     {
+        CurrentClipKey = null;
+
         StopFade();
 
         if (isSkipping || fadeDuration <= 0f)
