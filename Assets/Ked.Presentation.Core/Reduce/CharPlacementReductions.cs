@@ -44,6 +44,35 @@ namespace Ked.Presentation.Core
         }
     }
 
+    /// <summary>rotate_to / rotate_by / rotate_reset — 회전. 절대 또는 현재에 가산.</summary>
+    public static class RotateToReduction
+    {
+        public readonly struct Args
+        {
+            /// <summary>false: ToEuler가 절대 localEulerAngles. true: 현재에 더한다.</summary>
+            public readonly bool RelativeToCurrent;
+            public readonly Vec3 ToEuler;
+
+            public Args(bool relativeToCurrent, Vec3 toEuler)
+            {
+                RelativeToCurrent = relativeToCurrent;
+                ToEuler = toEuler;
+            }
+        }
+
+        public static StageNodeClaim Reduce(
+            string nodeKey,
+            in Args args,
+            Vec3 currentLocalEuler)
+        {
+            Vec3 target = args.RelativeToCurrent
+                ? currentLocalEuler + args.ToEuler
+                : args.ToEuler;
+
+            return StageNodeClaim.LocalEuler(nodeKey, target);
+        }
+    }
+
     /// <summary>scale_to — 스케일 변경. 절대 또는 현재 기준 배율.</summary>
     public static class ScaleToReduction
     {

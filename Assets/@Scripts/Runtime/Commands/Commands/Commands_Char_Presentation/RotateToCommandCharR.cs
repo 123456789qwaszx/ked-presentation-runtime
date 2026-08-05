@@ -123,10 +123,15 @@ public sealed class RotateToCommandCharR : CommandBase
 
     private Vector3 ResolveTargetEuler(Vector3 startEuler)
     {
-        if (!_spec.relativeToCurrent)
-            return _spec.toEuler;
+        // "스펙 → 목표 상태" 변환은 코어 리덕션이 한다 (U13-b-5 staging 묶음).
+        Ked.Presentation.Core.StageNodeClaim claim = Ked.Presentation.Core.RotateToReduction.Reduce(
+            _rect.name,
+            new Ked.Presentation.Core.RotateToReduction.Args(
+                _spec.relativeToCurrent,
+                new Ked.Presentation.Core.Vec3(_spec.toEuler.x, _spec.toEuler.y, _spec.toEuler.z)),
+            new Ked.Presentation.Core.Vec3(startEuler.x, startEuler.y, startEuler.z));
 
-        return startEuler + _spec.toEuler;
+        return new Vector3(claim.Value.X, claim.Value.Y, claim.Value.Z);
     }
 
     private void CommitFinalState()
