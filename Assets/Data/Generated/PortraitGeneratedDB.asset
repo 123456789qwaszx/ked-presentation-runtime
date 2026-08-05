@@ -17,21 +17,66 @@ MonoBehaviour:
     variantKey: harin_a
     emotionKey: 01
     sprite: {fileID: 21300000, guid: 691aea0c41f8e5449b29fa2b247b95e0, type: 3}
-    assetPath: Assets/Art/Portraits/harin/harin_a_01.png
+    assetPath: Assets/Art/Portraits/dungeon/harin/harin_a_01.png
+  - characterId: jineunha
+    variantKey: jineunha_a
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: 78f795c4e1b10b341adb60453100d6aa, type: 3}
+    assetPath: Assets/Art/Portraits/fillintheblank/jineunha/jineunha_a_01.png
   - characterId: kasmi
     variantKey: kasmi_a
     emotionKey: 01
     sprite: {fileID: 21300000, guid: 00cb073c882032c4f9748824d20620a3, type: 3}
-    assetPath: Assets/Art/Portraits/kasmi/kasmi_a_01.png
+    assetPath: Assets/Art/Portraits/dungeon/kasmi/kasmi_a_01.png
+  - characterId: leebyeol
+    variantKey: leebyeol_a
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: a8debc40e4ec37b449788d36f22c8f8e, type: 3}
+    assetPath: Assets/Art/Portraits/fillintheblank/leebyeol/leebyeol_a_01.png
+  - characterId: moonyujeong
+    variantKey: moonyujeong_a
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: 79484ad601f8ad4428db4542691c6b90, type: 3}
+    assetPath: Assets/Art/Portraits/fillintheblank/moonyujeong/moonyujeong_a_01.png
   - characterId: npc
     variantKey: npc_a
     emotionKey: 01
     sprite: {fileID: 21300000, guid: d7e27cd1926c61c43a613ac282df1889, type: 3}
-    assetPath: Assets/Art/Portraits/npc/npc_a_01.png
+    assetPath: Assets/Art/Portraits/dungeon/npc/npc_a_01.png
+  - characterId: parkeunseol
+    variantKey: parkeunseol_a
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: e4ee437c3e6185e46be6f0297982710c, type: 3}
+    assetPath: Assets/Art/Portraits/fillintheblank/parkeunseol/parkeunseol_a_01.png
+  - characterId: parkeunseol
+    variantKey: parkeunseol_a
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: 1f1451f22dcd6924f9dcfd06cabe1267, type: 3}
+    assetPath: Assets/Art/Portraits/fillintheblank/parkeunseol/parkeunseol_a_02.png
   - characterId: sigure
     variantKey: sigure_a
     emotionKey: 01
     sprite: {fileID: 21300000, guid: 5ec67e1c523911d479c2ce4b22a22830, type: 3}
-    assetPath: Assets/Art/Portraits/sigure/sigure_a_01.png
-  generatedTicksUtc: 639199768362211910
-  generatedTimeReadable: 2026-07-18 22:07:16
+    assetPath: Assets/Art/Portraits/dungeon/sigure/sigure_a_01.png
+  - characterId: yoonsaea
+    variantKey: yoonsaea_a
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: 5a59b406f4cb32748ba17f534c2121ee, type: 3}
+    assetPath: Assets/Art/Portraits/fillintheblank/yoonsaea/yoonsaea_a_01.png
+  - characterId: yoonsaea
+    variantKey: yoonsaea_a
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: 480af79d6fa94764f8fbc05b6d1bc031, type: 3}
+    assetPath: Assets/Art/Portraits/fillintheblank/yoonsaea/yoonsaea_a_02.png
+  - characterId: yoonsaea
+    variantKey: yoonsaea_b
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: 29d3835c52270c04a810a6cd64ac82af, type: 3}
+    assetPath: Assets/Art/Portraits/fillintheblank/yoonsaea/yoonsaea_b_01.png
+  - characterId: yoonsaea
+    variantKey: yoonsaea_b
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: 7104108d60865b241be0ff7ee1446e95, type: 3}
+    assetPath: Assets/Art/Portraits/fillintheblank/yoonsaea/yoonsaea_b_02.png
+  generatedTicksUtc: 639215154164366573
+  generatedTimeReadable: 2026-08-05 17:30:16

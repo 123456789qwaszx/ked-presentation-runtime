@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Yarn.Unity;
 
-public sealed class EpisodePlayer : MonoBehaviour, IDungeonCafeNodePlayer
+public sealed class EpisodePlayer : MonoBehaviour
 {
     private VnScreenBindings _vnScreenBindings;
     private RollbackHistory _nodeRollbackHistory;
