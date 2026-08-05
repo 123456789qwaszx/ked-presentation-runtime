@@ -49,6 +49,24 @@ namespace Ked.Presentation.Core
             RectSpace rootSpace,
             string keyPrefix = "")
         {
+            RectNodeTree tree = new RectNodeTree(rootSpace);
+            AddRigTo(tree, rig, keyPrefix, attachParentKey: null);
+            return tree;
+        }
+
+        /// <summary>
+        /// 이미 있는 트리에 리그 인스턴스를 붙인다(StageReducer의 slot 폴드용).
+        /// attachParentKey가 null이면 트리의 루트 공간 직속이다.
+        /// </summary>
+        public static void AddRigTo(
+            RectNodeTree tree,
+            RigSchemaRigDto rig,
+            string keyPrefix = "",
+            string attachParentKey = null)
+        {
+            if (tree == null)
+                throw new ArgumentNullException(nameof(tree));
+
             if (rig == null)
                 throw new ArgumentNullException(nameof(rig));
 
@@ -56,8 +74,6 @@ namespace Ked.Presentation.Core
                 throw new ArgumentException($"리그 '{rig.rigKind}'에 노드가 없다.", nameof(rig));
 
             keyPrefix ??= "";
-
-            RectNodeTree tree = new RectNodeTree(rootSpace);
 
             for (int i = 0; i < rig.nodes.Count; i++)
             {
@@ -67,12 +83,12 @@ namespace Ked.Presentation.Core
                     throw new ArgumentException($"리그 '{rig.rigKind}'의 노드 [{i}]에 id가 없다. 덤프가 손상됐다.", nameof(rig));
 
                 string key = keyPrefix + node.id;
-                string parentKey = string.IsNullOrEmpty(node.parent) ? null : keyPrefix + node.parent;
+                string parentKey = string.IsNullOrEmpty(node.parent)
+                    ? attachParentKey
+                    : keyPrefix + node.parent;
 
                 tree.Add(key, parentKey, ToState(node, rig.rigKind));
             }
-
-            return tree;
         }
 
         /// <summary>덤프 노드 → b-1 상태 값. 필드 해석은 여기 한 곳뿐이다.</summary>
