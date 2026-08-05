@@ -53,7 +53,13 @@ public sealed class UiEffectMaterialBinding : System.IDisposable
     {
         if (_runtimeMaterial != null)
         {
-            Object.Destroy(_runtimeMaterial);
+            // 에디트 모드에서 Destroy는 동작하지 않고 에러만 남긴다(머티리얼 누수).
+            // U12 exporter·EditMode 테스트가 이 경로로 리그를 세운다.
+            if (Application.isPlaying)
+                Object.Destroy(_runtimeMaterial);
+            else
+                Object.DestroyImmediate(_runtimeMaterial);
+
             _runtimeMaterial = null;
         }
     }
