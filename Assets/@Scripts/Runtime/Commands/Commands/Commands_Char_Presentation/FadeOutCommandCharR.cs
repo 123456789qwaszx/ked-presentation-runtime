@@ -29,7 +29,8 @@ public sealed class FadeOutCommandCharR : CommandBase
     private CanvasGroup _canvasGroup;
 
     private float _startAlpha;
-    private const float TargetAlpha = 0f;
+    // 목표값의 원천은 코어 리덕션이다 (U13-b-5 placement 묶음).
+    private const float TargetAlpha = Ked.Presentation.Core.FadeOutReduction.TargetAlpha;
 
     private Tween _tween;
 
