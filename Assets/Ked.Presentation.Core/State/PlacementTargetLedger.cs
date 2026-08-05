@@ -56,6 +56,28 @@ namespace Ked.Presentation.Core
             _targets[Require(key)] = slots;
         }
 
+        /// <summary>리덕션 출력(StageNodeClaim)을 그대로 예약으로 받는다.</summary>
+        public void Publish(in StageNodeClaim claim)
+        {
+            switch (claim.Kind)
+            {
+                case StageNodeClaimKind.AnchoredPosition:
+                    PublishAnchoredPosition(claim.NodeKey, claim.Value.XY);
+                    break;
+
+                case StageNodeClaimKind.LocalScaleXY:
+                    PublishLocalScale(claim.NodeKey, claim.Value.XY);
+                    break;
+
+                case StageNodeClaimKind.LocalEulerAngles:
+                    PublishLocalEuler(claim.NodeKey, claim.Value);
+                    break;
+
+                default:
+                    throw new ArgumentException($"모르는 클레임 종류: {claim.Kind}", nameof(claim));
+            }
+        }
+
         public bool HasTargets(string key)
             => key != null && _targets.ContainsKey(key);
 

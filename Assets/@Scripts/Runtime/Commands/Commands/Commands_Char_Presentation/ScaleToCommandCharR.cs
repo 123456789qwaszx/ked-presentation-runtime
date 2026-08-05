@@ -137,12 +137,15 @@ public sealed class ScaleToCommandCharR : CommandBase
 
     private Vector2 ResolveTargetScale(Vector3 currentScale)
     {
-        if (!_spec.relativeToCurrent)
-            return _spec.toScale;
+        // "스펙 → 목표 상태" 변환은 코어 리덕션이 한다 (U13-b-4 경계).
+        Ked.Presentation.Core.StageNodeClaim claim = Ked.Presentation.Core.ScaleToReduction.Reduce(
+            _rect.name,
+            new Ked.Presentation.Core.ScaleToReduction.Args(
+                _spec.relativeToCurrent,
+                new Ked.Presentation.Core.Vec2(_spec.toScale.x, _spec.toScale.y)),
+            new Ked.Presentation.Core.Vec2(currentScale.x, currentScale.y));
 
-        return new Vector2(
-            currentScale.x * _spec.toScale.x,
-            currentScale.y * _spec.toScale.y);
+        return new Vector2(claim.Value.X, claim.Value.Y);
     }
 
     private void PublishSettledTarget()

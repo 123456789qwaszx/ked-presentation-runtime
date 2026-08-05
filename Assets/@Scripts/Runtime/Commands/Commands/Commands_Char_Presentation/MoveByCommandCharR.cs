@@ -103,18 +103,20 @@ public sealed class MoveByCommandCharR : CommandBase
         _rect.DOKill(true);
 
         _startPos = _rect.anchoredPosition;
-        _destPos = CalculateDestinationPosition();
+
+        // "스펙 → 목표 상태" 변환은 코어 리덕션이 한다 (U13-b-4 경계).
+        // 여기는 현재 상태를 읽어 넘기고, 결과를 트윈 종점·게시로 쓰는 어댑터다.
+        Ked.Presentation.Core.StageNodeClaim claim = Ked.Presentation.Core.MoveByReduction.Reduce(
+            _rect.name,
+            new Ked.Presentation.Core.MoveByReduction.Args(
+                _spec.useAbsolutePosition,
+                new Ked.Presentation.Core.Vec2(_spec.delta.x, _spec.delta.y)),
+            new Ked.Presentation.Core.Vec2(_startPos.x, _startPos.y));
+
+        _destPos = new Vector2(claim.Value.X, claim.Value.Y);
         _rigRefs.PlacementTargets.PublishAnchoredPosition(_rect, _destPos);
 
         HasClaimedTarget = true;
-    }
-
-    private Vector2 CalculateDestinationPosition()
-    {
-        if (_spec.useAbsolutePosition)
-            return _spec.delta;
-
-        return _startPos + _spec.delta;
     }
 
     private void CommitFinalState()
