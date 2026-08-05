@@ -1,55 +1,83 @@
 using System.Collections.Generic;
+using Ked.Presentation.Core;
 using UnityEngine;
 
-// 측정 직전, 움직이는 상위 노드들을
-// - 예약된 최종 target 값에 도착했다고 가정하여 값을 세팅하고,
-// - focus point의 world position을 잠깐 측정하고
-// - 즉시 원복
+// "트윈이 다 끝났다면 어디에 있을 것인가"의 정착 상태 측정.
+//
+// U13-b-3에서 계산부가 코어(PlacementTargetLedger + RectChainMath)로 승격됐고,
+// 이 클래스는 얇은 어댑터만 남았다:
+// - RectTransform ↔ 논리 키(rect.name) 대응
+// - 라이브 체인 캡처 (유니티 → RectNodeState)
+// - 좌표계 변환 (stopRoot 로컬 ↔ 월드)
+//
+// 종전의 "부모들을 target 값으로 잠깐 세팅 → 측정 → 복원" 트릭은 사라졌다.
+// 측정이 유니티에 아무것도 쓰지 않으므로, 예외가 나도 리그가 더러워지지 않는다.
 public sealed class CharacterPlacementTargetLedger
 {
-    private enum TargetKind
-    {
-        AnchoredPosition,
-        LocalScale,
-        LocalEuler,
-    }
+    private readonly PlacementTargetLedger _core = new();
 
-    private readonly struct Entry
-    {
-        public readonly TargetKind kind;
-        public readonly Vector3 value;
-
-        public Entry(TargetKind kind, Vector3 value)
-        {
-            this.kind = kind;
-            this.value = value;
-        }
-    }
-
-    private readonly Dictionary<RectTransform, Entry> _targets = new();
-
-    private readonly List<RectTransform> _scratchNodes = new(16);
-    private readonly List<Entry> _scratchSaved = new(16);
+    // 참조 → 논리 키. 게시된 노드만 담는다. 키는 rect.name이며
+    // (리그 하나당 장부 하나 + 스키마 노드 이름 유일) 충돌하지 않는다 —
+    // 만약 충돌하면 조용히 섞이는 대신 아래 RegisterKey가 소리를 낸다.
+    private readonly Dictionary<RectTransform, string> _keys = new();
+    private readonly Dictionary<string, RectTransform> _byKey = new();
 
     public void PublishAnchoredPosition(RectTransform node, Vector2 targetAnchoredPosition)
     {
-        _targets[node] = new Entry(
-            TargetKind.AnchoredPosition,
-            new Vector3(targetAnchoredPosition.x, targetAnchoredPosition.y, 0f));
+        if (node == null)
+            return;
+
+        _core.PublishAnchoredPosition(RegisterKey(node), new Vec2(targetAnchoredPosition.x, targetAnchoredPosition.y));
     }
 
     public void PublishLocalScale(RectTransform node, Vector2 targetLocalScaleXY)
     {
-        _targets[node] = new Entry(
-            TargetKind.LocalScale,
-            new Vector3(targetLocalScaleXY.x, targetLocalScaleXY.y, 0f));
+        if (node == null)
+            return;
+
+        _core.PublishLocalScale(RegisterKey(node), new Vec2(targetLocalScaleXY.x, targetLocalScaleXY.y));
     }
 
     public void PublishLocalEuler(RectTransform node, Vector3 targetLocalEuler)
     {
-        _targets[node] = new Entry(TargetKind.LocalEuler, targetLocalEuler);
+        if (node == null)
+            return;
+
+        _core.PublishLocalEuler(RegisterKey(node), new Vec3(targetLocalEuler.x, targetLocalEuler.y, targetLocalEuler.z));
     }
-    
+
+    public void Clear(RectTransform node)
+    {
+        if (node != null && _keys.TryGetValue(node, out string key))
+            _core.Clear(key);
+    }
+
+    /// <summary>
+    /// measureRect 로컬 offset이, 예약된 target이 전부 도착했다고 가정할 때
+    /// 월드 어디에 오는지. 예약이 없으면 라이브 측정과 동일하다.
+    /// </summary>
+    public Vector3 MeasureSettledWorldPoint(
+        RectTransform measureRect,
+        Vector3 localOffset,
+        RectTransform stopRoot)
+    {
+        if (_core.IsEmpty)
+            return measureRect.TransformPoint(localOffset);
+
+        RectNodeState[] chain = CaptureSettledChain(measureRect, stopRoot);
+
+        Vec3 stopLocal = RectChainMath.TransformPoint(
+            chain,
+            SpaceOf(stopRoot),
+            new Vec3(localOffset.x, localOffset.y, localOffset.z));
+
+        // stopRoot 위로는 예약이 없으므로 stopRoot의 라이브 포즈로 월드에 올린다.
+        return stopRoot.TransformPoint(new Vector3(stopLocal.X, stopLocal.Y, stopLocal.Z));
+    }
+
+    /// <summary>
+    /// 월드 점이, 예약된 target이 전부 도착한 parentRect의 로컬 어디에 오는지.
+    /// </summary>
     public Vector2 WorldPointToSettledParentLocalPoint(
         RectTransform parentRect,
         Vector3 worldPoint,
@@ -58,121 +86,121 @@ public sealed class CharacterPlacementTargetLedger
         if (parentRect == null)
             return Vector2.zero;
 
-        if (_targets.Count == 0)
+        if (_core.IsEmpty)
         {
             Vector3 liveLocal = parentRect.InverseTransformPoint(worldPoint);
             return new Vector2(liveLocal.x, liveLocal.y);
         }
 
-        _scratchNodes.Clear();
-        _scratchSaved.Clear();
+        RectNodeState[] chain = CaptureSettledChain(parentRect, stopRoot);
 
-        Transform current = parentRect;
+        Vector3 stopLocalUnity = stopRoot.InverseTransformPoint(worldPoint);
+
+        Vec3 local = RectChainMath.InverseTransformPoint(
+            chain,
+            SpaceOf(stopRoot),
+            new Vec3(stopLocalUnity.x, stopLocalUnity.y, stopLocalUnity.z));
+
+        return new Vector2(local.X, local.Y);
+    }
+
+    // ── 체인 캡처 ────────────────────────────────────────────────────
+
+    /// <summary>
+    /// stopRoot(제외)부터 endRect(포함)까지의 라이브 상태에 예약 target을 입힌 사슬.
+    /// 루트 쪽이 앞이다(RectChainMath 규약).
+    /// </summary>
+    private RectNodeState[] CaptureSettledChain(RectTransform endRect, RectTransform stopRoot)
+    {
+        List<RectNodeState> reversed = new List<RectNodeState>(16);
+
+        Transform current = endRect;
 
         while (current != null && current != stopRoot)
         {
-            if (current is RectTransform rect &&
-                _targets.TryGetValue(rect, out Entry entry))
+            if (current is not RectTransform rect)
             {
-                _scratchNodes.Add(rect);
-                _scratchSaved.Add(CaptureLive(rect, entry.kind));
-                ApplyEntry(rect, entry);
+                // 종전 구현은 일반 Transform을 그냥 지나쳤지만, 순수 앵커 수학은
+                // RectTransform이어야 한다. 이 게임의 리그 체인은 전부 RectTransform이라
+                // 도달하지 않는 경로다 — 도달하면 조용히 어긋나는 대신 알린다.
+                throw new System.ArgumentException(
+                    $"[CharacterPlacementTargetLedger] '{current.name}'는 RectTransform이 아니라 " +
+                    "정착 계산을 할 수 없다.");
             }
+
+            RectNodeState live = CaptureLive(rect);
+
+            reversed.Add(_keys.TryGetValue(rect, out string key)
+                ? _core.ApplyTo(key, live)
+                : live);
 
             current = current.parent;
         }
 
-        Vector3 settledLocal = parentRect.InverseTransformPoint(worldPoint);
-
-        for (int i = _scratchNodes.Count - 1; i >= 0; i--)
-            ApplyEntry(_scratchNodes[i], _scratchSaved[i]);
-
-        _scratchNodes.Clear();
-        _scratchSaved.Clear();
-
-        return new Vector2(settledLocal.x, settledLocal.y);
-    }
-
-    public void Clear(RectTransform node)
-    {
-        _targets.Remove(node);
-    }
-
-    public Vector3 MeasureSettledWorldPoint(
-        RectTransform measureRect,
-        Vector3 localOffset,
-        RectTransform stopRoot)
-    {
-        if (_targets.Count == 0)
-            return measureRect.TransformPoint(localOffset);
-
-        _scratchNodes.Clear();
-        _scratchSaved.Clear();
-
-        // 1) measureRect에서 stopRoot까지 부모를 타고 올라가며, target 값이 게시된 RectTransform을 찾은 뒤,
-        // 찾은 노드들의 현재 값을 저장하고,잠깐 target 값으로 바꿈.
-        Transform current = measureRect;
-
-        while (current != null && current != stopRoot)
+        if (current == null)
         {
-            if (current is RectTransform rect && _targets.TryGetValue(rect, out Entry entry))
-            {
-                _scratchNodes.Add(rect);
-                _scratchSaved.Add(CaptureLive(rect, entry.kind));
-                ApplyEntry(rect, entry);
-            }
-
-            current = current.parent;
+            throw new System.ArgumentException(
+                $"[CharacterPlacementTargetLedger] stopRoot '{(stopRoot != null ? stopRoot.name : "null")}'가 " +
+                $"'{endRect.name}'의 조상이 아니다.");
         }
 
-        // 2) 그 상태에서 measureRect.TransformPoint(localOffset)을 측정.
-        Vector3 settledWorld = measureRect.TransformPoint(localOffset);
+        RectNodeState[] chain = new RectNodeState[reversed.Count];
 
-        // 3) 측정이 끝나면 즉시 원래 값으로 복원.
-        for (int i = _scratchNodes.Count - 1; i >= 0; i--)
-            ApplyEntry(_scratchNodes[i], _scratchSaved[i]);
+        for (int i = 0; i < chain.Length; i++)
+            chain[i] = reversed[chain.Length - 1 - i];
 
-        _scratchNodes.Clear();
-        _scratchSaved.Clear();
-
-        return settledWorld;
+        return chain;
     }
 
-    private static Entry CaptureLive(RectTransform rect, TargetKind kind)
+    private static RectNodeState CaptureLive(RectTransform rect)
     {
-        switch (kind)
-        {
-            case TargetKind.AnchoredPosition:
-                Vector2 ap = rect.anchoredPosition;
-                return new Entry(kind, new Vector3(ap.x, ap.y, 0f));
+        Vector2 anchoredPosition = rect.anchoredPosition;
+        Vector2 anchorMin = rect.anchorMin;
+        Vector2 anchorMax = rect.anchorMax;
+        Vector2 pivot = rect.pivot;
+        Vector2 sizeDelta = rect.sizeDelta;
+        Vector3 localScale = rect.localScale;
+        Vector3 localEuler = rect.localEulerAngles;
 
-            case TargetKind.LocalScale:
-                return new Entry(kind, rect.localScale);
-
-            case TargetKind.LocalEuler:
-                return new Entry(kind, rect.localEulerAngles);
-
-            default:
-                return new Entry(kind, Vector3.zero);
-        }
+        return new RectNodeState(
+            anchoredPosition: new Vec2(anchoredPosition.x, anchoredPosition.y),
+            anchorMin: new Vec2(anchorMin.x, anchorMin.y),
+            anchorMax: new Vec2(anchorMax.x, anchorMax.y),
+            pivot: new Vec2(pivot.x, pivot.y),
+            sizeDelta: new Vec2(sizeDelta.x, sizeDelta.y),
+            localScale: new Vec3(localScale.x, localScale.y, localScale.z),
+            localEulerAngles: new Vec3(localEuler.x, localEuler.y, localEuler.z));
     }
 
-    private static void ApplyEntry(RectTransform rect, Entry entry)
+    private static RectSpace SpaceOf(RectTransform stopRoot)
     {
-        switch (entry.kind)
+        Vector2 size = stopRoot.rect.size;
+        Vector2 pivot = stopRoot.pivot;
+
+        return new RectSpace(new Vec2(size.x, size.y), new Vec2(pivot.x, pivot.y));
+    }
+
+    private string RegisterKey(RectTransform node)
+    {
+        if (_keys.TryGetValue(node, out string existing))
+            return existing;
+
+        string key = node.name;
+
+        if (_byKey.TryGetValue(key, out RectTransform other) && other != node && other != null)
         {
-            case TargetKind.AnchoredPosition:
-                rect.anchoredPosition = new Vector2(entry.value.x, entry.value.y);
-                break;
+            // 같은 이름의 다른 노드가 이미 게시 중이다. 리그 하나당 장부 하나라
+            // 정상 경로에서는 없다 — 섞이는 대신 키를 가르고 알린다.
+            key = $"{key}#{node.GetInstanceID()}";
 
-            case TargetKind.LocalScale:
-                Vector3 s = rect.localScale;
-                rect.localScale = new Vector3(entry.value.x, entry.value.y, s.z);
-                break;
-
-            case TargetKind.LocalEuler:
-                rect.localEulerAngles = entry.value;
-                break;
+            Debug.LogWarning(
+                $"[CharacterPlacementTargetLedger] 노드 이름 충돌: '{node.name}'. " +
+                $"'{key}'로 갈라 게시한다. 리그 구성을 확인할 것.");
         }
+
+        _keys[node] = key;
+        _byKey[key] = node;
+
+        return key;
     }
 }
