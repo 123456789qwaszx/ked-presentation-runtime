@@ -23,11 +23,11 @@ public sealed class ShotToCommand : ShotIntentCommandBase<ShotToCommandSpec>
         in PresentationIntentState from,
         CommandRunScope scope)
     {
-        return new PresentationIntentState
-        {
-            zoom = spec.zoom,
-            panInRigSpace = spec.pan,
-            focusPointInRigSpace = from.focusPointInRigSpace,
-        };
+        // "스펙 → 목표 상태" 변환은 코어 리덕션이 한다 (U13-b-5 shot 묶음).
+        return PresentationIntentStateCoreBridge.FromCore(
+            Ked.Presentation.Core.ShotToReduction.Reduce(
+                PresentationIntentStateCoreBridge.ToCore(from),
+                spec.zoom,
+                new Ked.Presentation.Core.Vec2(spec.pan.x, spec.pan.y)));
     }
 }

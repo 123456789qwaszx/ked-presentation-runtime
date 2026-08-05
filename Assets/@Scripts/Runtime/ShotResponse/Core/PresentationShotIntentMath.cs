@@ -3,17 +3,16 @@ using UnityEngine;
 
 public static class PresentationShotIntentMath
 {
-    // Camera scale conversion used by the camera root.
-    private const float DefaultZoomToScaleFactor = 0.05f;
-
+    // zoom→배율·pan 역산 규약의 원천은 코어다 (U13-b-5 shot 묶음).
+    // 커맨드의 목표 계산과 여기 적용측이 같은 규약을 봐야 하므로 위임만 한다.
     public static float EvaluateCameraScale(
-        float zoom) 
-        => 1f + zoom * DefaultZoomToScaleFactor;
+        float zoom)
+        => Ked.Presentation.Core.ShotIntentMath.EvaluateCameraScale(zoom);
 
     // 현재 보이는 위치에서 authored screen-pan 값을 제거하여, 원래 논리 좌표 복원.
     public static Vector2 RemoveCurrentCameraTransformFromFocusPoint(
-        Vector2 focusPointInStageSpace, 
-        Vector2 currentPan, 
+        Vector2 focusPointInStageSpace,
+        Vector2 currentPan,
         float currentScale)
         => (focusPointInStageSpace - currentPan) / currentScale;
     

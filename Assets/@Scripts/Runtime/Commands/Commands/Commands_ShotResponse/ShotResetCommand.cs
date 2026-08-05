@@ -15,6 +15,8 @@ public sealed class ShotResetCommand : ShotIntentCommandBase<ShotResetCommandSpe
         in PresentationIntentState from,
         CommandRunScope scope)
     {
-        return PresentationIntentState.Default;
+        // "스펙 → 목표 상태" 변환은 코어 리덕션이 한다 (U13-b-5 shot 묶음).
+        return PresentationIntentStateCoreBridge.FromCore(
+            Ked.Presentation.Core.ShotResetReduction.Reduce());
     }
 }
