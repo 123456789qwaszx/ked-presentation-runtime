@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using DG.Tweening;
 using UnityEngine;
 
@@ -27,10 +26,8 @@ public sealed class CharVisualFocusCommandSpecCharR : CharacterRigCommandSpecBas
     public Ease ease = Ease.OutCubic;
 }
 
-public sealed class CharVisualFocusCommandCharR : CommandBase
+public sealed class CharVisualFocusCommandCharR : ClaimTweenCommandBase
 {
-    private const float StepFinishSpeedUpMultiplier = 1.5f;
-
     private readonly CharVisualFocusCommandSpecCharR _spec;
     private readonly CharacterVisualFocusPresetDBSO _presetDb;
 
@@ -39,13 +36,12 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
     private VisualState _fromState;
     private VisualState _destState;
 
-    private Tween _tween;
-
-    private bool _resolveAttempted;
-
-    private bool HasClaimedController { get; set; }
-
     public override bool WaitForCompletion => _spec.wait;
+
+    protected override float TweenDuration => _spec.duration;
+
+    // 캐릭터 전체의 밝기·림이 한꺼번에 끊기면 눈에 띄게 튄다 — 훨씬 완만하게 붙인다.
+    protected override float StepFinishSpeedUpMultiplier => 1.5f;
 
     public CharVisualFocusCommandCharR(
         CharVisualFocusCommandSpecCharR spec,
@@ -55,138 +51,64 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
         _presetDb = presetDb;
     }
 
-    protected override IEnumerator ExecuteInner(CommandRunScope scope)
+    protected override bool TryResolveTargets(CommandRunScope scope)
     {
-        if (!_resolveAttempted)
-            ResolveRefs(scope);
-
-        if (_controller == null)
-            yield break;
-
-        ClaimController();
-
-        if (_spec.duration <= 0f)
-        {
-            CommitFinalState();
-            yield break;
-        }
-
-        _tween = DOTween
-            .To(
-                () => 0f,
-                t =>
-                {
-                    VisualState state = VisualState.Lerp(_fromState, _destState, t);
-                    ApplyState(state);
-                },
-                1f,
-                _spec.duration)
-            .SetEase(_spec.ease)
-            .SetUpdate(true)
-            .SetTarget(_controller)
-            .OnComplete(CommitFinalState);
-
-        if (_spec.wait)
-            yield return _tween.WaitForCompletion();
-    }
-
-    protected override void OnSkip(CommandRunScope scope)
-    {
-        if (!_resolveAttempted)
-            ResolveRefs(scope);
-
-        if (_controller == null)
-            return;
-
-        if (!HasClaimedController)
-            ClaimController();
-
-        CommitFinalState();
-    }
-
-    private void ResolveRefs(CommandRunScope scope)
-    {
-        _resolveAttempted = true;
-
         CharacterRigRefs rigRefs =
             CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
 
         _controller = rigRefs?.VisualEffect;
 
         if (_controller != null)
-            return;
+            return true;
 
         Debug.LogWarning(
             $"[CharVisualFocusCommandCharR] VisualEffect controller is missing. " +
             $"SetupCharRig가 컨트롤러를 생성했는지, source material 경로가 맞는지 확인하세요. " +
             $"slotKey='{_spec.slotKey}'.");
+
+        return false;
     }
 
-    private void ClaimController()
+    protected override void ClaimTarget(CommandRunScope scope)
     {
         DOTween.Kill(_controller, false);
 
         _fromState = CaptureCurrentState();
         _destState = BuildDestState();
-
-        HasClaimedController = true;
     }
 
-    private void CommitFinalState()
+    protected override Tween CreateTween(float duration)
+        => DOTween
+            .To(
+                () => 0f,
+                t => ApplyState(VisualState.Lerp(_fromState, _destState, t)),
+                1f,
+                duration)
+            .SetEase(_spec.ease)
+            .SetTarget(_controller);
+
+    /// <summary>
+    /// 진행률(0→1) 트윈이라 그대로 재시작하면 처음부터 다시 돈다 —
+    /// 현재 상태를 새 출발점으로 삼아 남은 구간만 태운다.
+    /// </summary>
+    protected override Tween CreateAcceleratedTween(float duration)
+    {
+        _fromState = CaptureCurrentState();
+
+        return CreateTween(duration);
+    }
+
+    protected override void OnCommitFinalState()
     {
         DOTween.Kill(_controller, false);
 
         ApplyState(_destState);
-
-        HasClaimedController = false;
-        _tween = null;
     }
 
-    #region StepLifetimeHook
-
-    protected override void OnStepLifetimeFinished(CommandRunScope scope)
-    {
-        if (!HasClaimedController)
-            return;
-
-        _tween.Kill(false);
-
-        VisualState currentState = CaptureCurrentState();
-        float duration = CalculateAcceleratedRemainingDuration(currentState);
-
-        _fromState = currentState;
-
-        _tween = DOTween
-            .To(
-                () => 0f,
-                t =>
-                {
-                    VisualState state = VisualState.Lerp(_fromState, _destState, t);
-                    ApplyState(state);
-                },
-                1f,
-                duration)
-            .SetEase(_spec.ease)
-            .SetUpdate(true)
-            .SetTarget(_controller)
-            .OnComplete(CommitFinalState);
-    }
-
-    private float CalculateAcceleratedRemainingDuration(VisualState currentState)
-    {
-        float originalDistance = VisualState.Distance(_fromState, _destState);
-        float remainingDistance = VisualState.Distance(currentState, _destState);
-
-        if (originalDistance <= 0.001f || remainingDistance <= 0.001f)
-            return 0f;
-
-        float remainingRatio = Mathf.Clamp01(remainingDistance / originalDistance);
-        float remainingDuration = _spec.duration * remainingRatio;
-
-        return Mathf.Max(0.01f, remainingDuration / StepFinishSpeedUpMultiplier);
-    }
-
-    #endregion
+    protected override float MeasureRemainingRatio()
+        => RemainingRatio(
+            VisualState.Distance(_fromState, _destState),
+            VisualState.Distance(CaptureCurrentState(), _destState));
 
     private VisualState CaptureCurrentState()
     {

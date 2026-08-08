@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using DG.Tweening;
 using UnityEngine;
 
@@ -51,10 +50,8 @@ public sealed class PivotRotateToCommandSpecCharR : CharacterRigCommandSpecBase
     public float duration = 0.7f;
 }
 
-public sealed class PivotRotateToCommandCharR : CommandBase
+public sealed class PivotRotateToCommandCharR : ClaimTweenCommandBase
 {
-    private const float StepFinishSpeedUpMultiplier = 30f;
-
     private readonly PivotRotateToCommandSpecCharR _spec;
 
     private RectTransform _rect;
@@ -62,34 +59,40 @@ public sealed class PivotRotateToCommandCharR : CommandBase
     private float _startRotationZ;
     private float _finalRotationZ;
 
-    private Tween _tween;
-
-    private bool _resolveAttempted;
-
-    private bool HasClaimedTarget { get; set; }
-
     public override bool WaitForCompletion => _spec.wait;
+
+    protected override float TweenDuration => _spec.duration;
 
     public PivotRotateToCommandCharR(PivotRotateToCommandSpecCharR spec)
     {
         _spec = spec;
     }
 
-    protected override IEnumerator ExecuteInner(CommandRunScope scope)
+    protected override bool TryResolveTargets(CommandRunScope scope)
     {
-        if (!_resolveAttempted)
-            ResolveRefs(scope);
+        CharacterRigRefs rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
+        _rect = rig?.GetRect(_spec.target);
 
-        ClaimTarget();
+        return _rect != null;
+    }
 
-        if (_spec.duration <= 0f)
-        {
-            CommitFinalState();
-            yield break;
-        }
+    protected override void ClaimTarget(CommandRunScope scope)
+    {
+        _rect.DOKill(true);
 
+        _startRotationZ = NormalizeAngle(_rect.localEulerAngles.z);
+
+        _finalRotationZ = _spec.relativeToCurrent
+            ? _startRotationZ + _spec.degree
+            : ResolveNearestEquivalentAngle(_startRotationZ, _spec.degree);
+    }
+
+    /// <summary>예열 → 접근(오버슈트) → 정착의 3구간을 한 진행률 트윈으로 태운다.</summary>
+    protected override Tween CreateTween(float duration)
+    {
         float deltaToFinal = _finalRotationZ - _startRotationZ;
         float mainDirection = Mathf.Sign(deltaToFinal);
+
         if (Mathf.Approximately(mainDirection, 0f))
             mainDirection = 1f;
 
@@ -116,7 +119,7 @@ public sealed class PivotRotateToCommandCharR : CommandBase
         float anticipationZ = _startRotationZ + (-mainDirection * _spec.anticipation);
         float overshootZ = _finalRotationZ + (mainDirection * _spec.overshoot);
 
-        _tween = DOTween
+        return DOTween
             .To(
                 () => 0f,
                 t =>
@@ -153,103 +156,40 @@ public sealed class PivotRotateToCommandCharR : CommandBase
                     SetLocalEulerZ(_rect, z);
                 },
                 1f,
-                _spec.duration
-            )
+                duration)
             .SetEase(Ease.Linear)
-            .SetTarget(_rect)
-            .SetUpdate(true)
-            .OnComplete(CommitFinalState);
-
-        if (_spec.wait)
-            yield return _tween.WaitForCompletion();
+            .SetTarget(_rect);
     }
 
-    protected override void OnSkip(CommandRunScope scope)
+    /// <summary>
+    /// 스텝 경계 마무리는 다단 연출을 다시 태우지 않는다 —
+    /// 현재 각에서 목표까지 최단 경로로 정착만 시킨다.
+    /// </summary>
+    protected override Tween CreateAcceleratedTween(float duration)
     {
-        if (!_resolveAttempted)
-            ResolveRefs(scope);
+        float currentZ = NormalizeAngle(_rect.localEulerAngles.z);
+        float targetZ = ResolveNearestEquivalentAngle(currentZ, _finalRotationZ);
 
-        if (!HasClaimedTarget)
-            ClaimTarget();
-
-        CommitFinalState();
+        return DOTween
+            .To(() => currentZ, z => SetLocalEulerZ(_rect, z), targetZ, duration)
+            .SetEase(_spec.settleEase)
+            .SetTarget(_rect);
     }
 
-    private void ResolveRefs(CommandRunScope scope)
-    {
-        _resolveAttempted = true;
-
-        CharacterRigRefs rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
-        _rect = rig.GetRect(_spec.target);
-    }
-
-    private void ClaimTarget()
-    {
-        _rect.DOKill(true);
-
-        _startRotationZ = NormalizeAngle(_rect.localEulerAngles.z);
-
-        if (_spec.relativeToCurrent)
-            _finalRotationZ = _startRotationZ + _spec.degree;
-        else
-            _finalRotationZ = ResolveNearestEquivalentAngle(_startRotationZ, _spec.degree);
-
-        HasClaimedTarget = true;
-    }
-
-    private void CommitFinalState()
+    protected override void OnCommitFinalState()
     {
         SetLocalEulerZ(_rect, _finalRotationZ);
-
-        HasClaimedTarget = false;
-        _tween = null;
     }
 
-    #region StepLifetimeHook
-
-    protected override void OnStepLifetimeFinished(CommandRunScope scope)
-    {
-        if (!HasClaimedTarget)
-            return;
-        
-        _tween.Kill(false);
-
-        float duration = CalculateAcceleratedRemainingDuration();
-
-        float currentZ = NormalizeAngle(_rect.localEulerAngles.z);
-        float targetZ = ResolveNearestEquivalentAngle(currentZ, _finalRotationZ);
-
-        _tween = DOTween
-            .To(
-                () => currentZ,
-                z => SetLocalEulerZ(_rect, z),
-                targetZ,
-                duration
-            )
-            .SetEase(_spec.settleEase)
-            .SetTarget(_rect)
-            .SetUpdate(true)
-            .OnComplete(CommitFinalState);
-    }
-
-    private float CalculateAcceleratedRemainingDuration()
+    protected override float MeasureRemainingRatio()
     {
         float currentZ = NormalizeAngle(_rect.localEulerAngles.z);
         float targetZ = ResolveNearestEquivalentAngle(currentZ, _finalRotationZ);
 
-        float originalDistance = Mathf.Abs(_finalRotationZ - _startRotationZ);
-        float remainingDistance = Mathf.Abs(targetZ - currentZ);
-
-        if (originalDistance <= 0.001f || remainingDistance <= 0.001f)
-            return 0f;
-
-        float remainingRatio = Mathf.Clamp01(remainingDistance / originalDistance);
-        float remainingDuration = _spec.duration * remainingRatio;
-
-        return Mathf.Max(0.01f, remainingDuration / StepFinishSpeedUpMultiplier);
+        return RemainingRatio(
+            Mathf.Abs(_finalRotationZ - _startRotationZ),
+            Mathf.Abs(targetZ - currentZ));
     }
-
-    #endregion
 
     private static float ResolveNearestEquivalentAngle(float reference, float target)
     {
@@ -267,6 +207,7 @@ public sealed class PivotRotateToCommandCharR : CommandBase
     private static float SafeInverseLerp(float a, float b, float value)
     {
         float d = b - a;
+
         if (Mathf.Abs(d) <= 0.0001f)
             return 1f;
 
@@ -282,6 +223,7 @@ public sealed class PivotRotateToCommandCharR : CommandBase
     {
         while (angle > 180f) angle -= 360f;
         while (angle < -180f) angle += 360f;
+
         return angle;
     }
 }

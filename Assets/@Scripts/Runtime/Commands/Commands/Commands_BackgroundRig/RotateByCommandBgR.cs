@@ -69,12 +69,9 @@ public sealed class RotateByCommandBgR : ClaimTweenCommandBase
         _rect.localRotation = Quaternion.Euler(_destEuler);
     }
 
-    protected override void MeasureTweenDistances(out float originalDistance, out float remainingDistance)
-    {
-        // AccelerateOnStepFinish = false라 불리지 않지만, 계약은 정직하게 채운다.
-        originalDistance = _spec.deltaEuler.magnitude;
-        remainingDistance = 0f;
-    }
+    // AccelerateOnStepFinish = false라 불리지 않지만, 계약은 정직하게 채운다.
+    protected override float MeasureRemainingRatio()
+        => RemainingRatio(_spec.deltaEuler.magnitude, 0f);
 
     private void ApplyProgress(float progress)
     {

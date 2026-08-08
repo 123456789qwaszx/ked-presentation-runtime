@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using DG.Tweening;
 using UnityEngine;
 
@@ -37,10 +36,8 @@ public sealed class SetDepthCommandSpecCharR : CharacterRigCommandSpecBase
     public Ease ease = Ease.OutCubic;
 }
 
-public sealed class SetDepthCommandCharR : CommandBase
+public sealed class SetDepthCommandCharR : ClaimTweenCommandBase
 {
-    private const float StepFinishSpeedUpMultiplier = 30f;
-
     private readonly SetDepthCommandSpecCharR _spec;
     private readonly CharacterDepthTuningSO _globalTuning;
     private readonly CharacterFocusTuningDBSO _focusTuningDb;
@@ -57,12 +54,9 @@ public sealed class SetDepthCommandCharR : CommandBase
     private Vector2 _destFinalDepthY;
     private Vector2 _destDepthScale;
 
-    private Sequence _sequence;
-
-    private bool _resolveAttempted;
-    private bool HasClaimedTarget { get; set; }
-
     public override bool WaitForCompletion => _spec.wait;
+
+    protected override float TweenDuration => _spec.duration;
 
     public SetDepthCommandCharR(
         SetDepthCommandSpecCharR spec,
@@ -76,65 +70,17 @@ public sealed class SetDepthCommandCharR : CommandBase
         _stageProvider = stageProvider;
     }
 
-    protected override IEnumerator ExecuteInner(CommandRunScope scope)
-    {
-        if (!_resolveAttempted)
-            ResolveRefs(scope);
-
-        ClaimTarget(scope);
-
-        if (_spec.duration <= 0f)
-        {
-            CommitFinalState();
-            yield break;
-        }
-
-        _sequence = DOTween.Sequence()
-            .SetUpdate(true)
-            .SetTarget(_depthYRect);
-
-        _sequence.Join(
-            _depthYRect
-                .DOAnchorPos(_destFinalDepthY, _spec.duration)
-                .SetEase(_spec.ease)
-                .SetUpdate(true)
-                .SetTarget(_depthYRect));
-
-        _sequence.Join(
-            _depthScaleRect
-                .DOScale(new Vector3(_destDepthScale.x, _destDepthScale.y, 1f), _spec.duration)
-                .SetEase(_spec.ease)
-                .SetUpdate(true)
-                .SetTarget(_depthScaleRect));
-
-        _sequence.OnComplete(CommitFinalState);
-
-        if (_spec.wait && _sequence != null)
-            yield return _sequence.WaitForCompletion();
-    }
-
-    protected override void OnSkip(CommandRunScope scope)
-    {
-        if (!_resolveAttempted)
-            ResolveRefs(scope);
-
-        if (!HasClaimedTarget)
-            ClaimTarget(scope);
-
-        CommitFinalState();
-    }
-
-    private void ResolveRefs(CommandRunScope scope)
+    protected override bool TryResolveTargets(CommandRunScope scope)
     {
         _rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
-        
-        _depthYRect = _rigRefs.GetRect(_spec.depthYTarget);
-        _depthScaleRect = _rigRefs.GetRect(_spec.depthScaleTarget);
-        
-        _resolveAttempted = true;
+
+        _depthYRect = _rigRefs?.GetRect(_spec.depthYTarget);
+        _depthScaleRect = _rigRefs?.GetRect(_spec.depthScaleTarget);
+
+        return _depthYRect != null && _depthScaleRect != null;
     }
 
-    private void ClaimTarget(CommandRunScope scope)
+    protected override void ClaimTarget(CommandRunScope scope)
     {
         _depthYRect.DOKill(true);
         _depthScaleRect.DOKill(true);
@@ -168,120 +114,56 @@ public sealed class SetDepthCommandCharR : CommandBase
             out Vector2 destFinalDepthY);
         
         _destFinalDepthY = destFinalDepthY;
-        
-        PublishSettledTargets();
 
-        HasClaimedTarget = true;
-    }
-    
-    private void CommitFinalState()
-    {
-        _depthYRect.anchoredPosition = _destFinalDepthY;
-        _depthScaleRect.localScale = new Vector3(_destDepthScale.x, _destDepthScale.y, 1f);
-
-        ClearSettledTargets();
-
-        HasClaimedTarget = false;
-    }
-
-    private void PublishSettledTargets()
-    {
         _rigRefs.PlacementTargets.PublishAnchoredPosition(_depthYRect, _destFinalDepthY);
         _rigRefs.PlacementTargets.PublishLocalScale(_depthScaleRect, _destDepthScale);
     }
 
-    private void ClearSettledTargets()
+    /// <summary>깊이는 Y와 배율이 함께 움직여야 한 몸이라, 두 트윈을 한 시퀀스로 묶는다.</summary>
+    protected override Tween CreateTween(float duration)
     {
-        _rigRefs.PlacementTargets.Clear(_depthYRect);
-        _rigRefs.PlacementTargets.Clear(_depthScaleRect);
-    }
-
-    #region StepLifetimeHook
-
-    protected override void OnStepLifetimeFinished(CommandRunScope scope)
-    {
-        if (!HasClaimedTarget)
-            return;
-
-        if (_sequence.IsActive())
-            _sequence.Kill(false);
-
-        float duration = CalculateAcceleratedRemainingDuration();
-
-        if (duration <= 0f)
-        {
-            CommitFinalState();
-            return;
-        }
-
-        _sequence = DOTween.Sequence()
-            .SetUpdate(true)
+        Sequence sequence = DOTween.Sequence()
             .SetTarget(_depthYRect);
 
-        _sequence.Join(
+        sequence.Join(
             _depthYRect
                 .DOAnchorPos(_destFinalDepthY, duration)
                 .SetEase(_spec.ease)
                 .SetUpdate(true)
                 .SetTarget(_depthYRect));
 
-        _sequence.Join(
+        sequence.Join(
             _depthScaleRect
                 .DOScale(new Vector3(_destDepthScale.x, _destDepthScale.y, 1f), duration)
                 .SetEase(_spec.ease)
                 .SetUpdate(true)
                 .SetTarget(_depthScaleRect));
 
-        _sequence.OnComplete(CommitFinalState);
+        return sequence;
     }
 
-    private float CalculateAcceleratedRemainingDuration()
+    protected override void OnCommitFinalState()
     {
-        float posOriginalDistance = Vector2.Distance(_startDepthY, _destFinalDepthY);
-        float posRemainingDistance = Vector2.Distance(
-            _depthYRect.anchoredPosition,
-            _destFinalDepthY);
+        _depthYRect.anchoredPosition = _destFinalDepthY;
+        _depthScaleRect.localScale = new Vector3(_destDepthScale.x, _destDepthScale.y, 1f);
 
-        float scaleOriginalDistance = Vector2.Distance(_startDepthScale, _destDepthScale);
-        float scaleRemainingDistance = Vector2.Distance(
-            new Vector2(_depthScaleRect.localScale.x, _depthScaleRect.localScale.y),
-            _destDepthScale);
-
-        float posRatio = CalculateRemainingRatio(
-            posRemainingDistance,
-            posOriginalDistance);
-
-        float scaleRatio = CalculateRemainingRatio(
-            scaleRemainingDistance,
-            scaleOriginalDistance);
-
-        float remainingRatio = Mathf.Max(posRatio, scaleRatio);
-
-        if (!float.IsFinite(remainingRatio))
-            return 0f;
-
-        float remainingDuration = _spec.duration * remainingRatio;
-
-        if (!float.IsFinite(remainingDuration))
-            return 0f;
-
-        return remainingDuration / StepFinishSpeedUpMultiplier;
+        _rigRefs.PlacementTargets.Clear(_depthYRect);
+        _rigRefs.PlacementTargets.Clear(_depthScaleRect);
     }
 
-    private static float CalculateRemainingRatio(
-        float remainingDistance,
-        float originalDistance)
+    /// <summary>두 축 중 늦게 도착하는 쪽이 기준이다 — 먼저 붙은 축을 기다려주는 셈.</summary>
+    protected override float MeasureRemainingRatio()
     {
-        if (originalDistance <= Mathf.Epsilon)
-            return 0f;
+        Vector3 currentScale = _depthScaleRect.localScale;
 
-        float ratio = remainingDistance / originalDistance;
+        float posRatio = RemainingRatio(
+            Vector2.Distance(_startDepthY, _destFinalDepthY),
+            Vector2.Distance(_depthYRect.anchoredPosition, _destFinalDepthY));
 
-        if (!float.IsFinite(ratio))
-            return 0f;
+        float scaleRatio = RemainingRatio(
+            Vector2.Distance(_startDepthScale, _destDepthScale),
+            Vector2.Distance(new Vector2(currentScale.x, currentScale.y), _destDepthScale));
 
-        return Mathf.Clamp01(ratio);
+        return Mathf.Max(posRatio, scaleRatio);
     }
-
-    #endregion
 }

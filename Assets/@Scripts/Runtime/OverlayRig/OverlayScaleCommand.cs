@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using DG.Tweening;
 using UnityEngine;
 
@@ -25,10 +24,8 @@ public sealed class OverlayScaleCommandSpec : CommandSpecBase
     public Ease ease = Ease.OutCubic;
 }
 
-public sealed class OverlayScaleCommand : CommandBase
+public sealed class OverlayScaleCommand : ClaimTweenCommandBase
 {
-    private const float StepFinishSpeedUpMultiplier = 30f;
-
     private readonly OverlayScaleCommandSpec _spec;
 
     private OverlayRigRefs _refs;
@@ -37,72 +34,30 @@ public sealed class OverlayScaleCommand : CommandBase
     private Vector3 _startScale;
     private Vector3 _destScale;
 
-    private Tween _tween;
-    private bool _resolveAttempted;
-    private bool _hasClaimedTarget;
-
     public override bool WaitForCompletion => _spec.wait;
+
+    protected override float TweenDuration => _spec.duration;
 
     public OverlayScaleCommand(OverlayScaleCommandSpec spec)
     {
         _spec = spec;
     }
 
-    protected override IEnumerator ExecuteInner(CommandRunScope scope)
+    protected override float ResolvePlaybackDuration(CommandRunScope scope)
+        => scope.ScalePresentationDuration(_spec.duration);
+
+    protected override bool TryResolveTargets(CommandRunScope scope)
     {
-        if (!_resolveAttempted)
-            ResolveRefs(scope);
-
-        ClaimTarget();
-
-        if (_rect == null)
-            yield break;
-
-        float duration = scope.ScalePresentationDuration(_spec.duration);
-
-        if (duration <= 0f)
-        {
-            CommitFinalState();
-            yield break;
-        }
-
-        _tween = _rect
-            .DOScale(_destScale, duration)
-            .SetEase(_spec.ease)
-            .SetUpdate(true)
-            .SetTarget(_rect)
-            .OnComplete(CommitFinalState);
-
-        if (_spec.wait)
-            yield return _tween.WaitForCompletion();
-    }
-
-    protected override void OnSkip(CommandRunScope scope)
-    {
-        if (!_resolveAttempted)
-            ResolveRefs(scope);
-
-        if (!_hasClaimedTarget)
-            ClaimTarget();
-
-        CommitFinalState();
-    }
-
-    private void ResolveRefs(CommandRunScope scope)
-    {
-        _resolveAttempted = true;
-
         if (!scope.OverlayRigs.TryGet(_spec.rigKey, out _refs))
-            return;
+            return false;
 
         _rect = _refs.GetRect(_spec.target);
+
+        return _rect != null;
     }
 
-    private void ClaimTarget()
+    protected override void ClaimTarget(CommandRunScope scope)
     {
-        if (_rect == null)
-            return;
-
         _refs.KillTween(_spec.target, true);
 
         _startScale = _rect.localScale;
@@ -112,61 +67,28 @@ public sealed class OverlayScaleCommand : CommandBase
             _spec.scale.y,
             1f);
 
+        // 상대 배율은 z를 건드리지 않는다 — UI에서 z 배율은 의미가 없다.
         _destScale = _spec.relativeToCurrent
             ? new Vector3(
                 _startScale.x * requested.x,
                 _startScale.y * requested.y,
                 _startScale.z)
             : requested;
-
-        _hasClaimedTarget = true;
     }
 
-    private void CommitFinalState()
-    {
-        if (_refs == null)
-            return;
-
-        _refs.SetLocalScaleImmediate(_spec.target, _destScale);
-
-        _hasClaimedTarget = false;
-        _tween = null;
-    }
-
-    protected override void OnStepLifetimeFinished(CommandRunScope scope)
-    {
-        if (!_hasClaimedTarget || _rect == null)
-            return;
-
-        _tween?.Kill(false);
-
-        float duration = CalculateAcceleratedRemainingDuration();
-
-        if (duration <= 0f)
-        {
-            CommitFinalState();
-            return;
-        }
-
-        _tween = _rect
+    protected override Tween CreateTween(float duration)
+        => _rect
             .DOScale(_destScale, duration)
             .SetEase(_spec.ease)
-            .SetUpdate(true)
-            .SetTarget(_rect)
-            .OnComplete(CommitFinalState);
-    }
+            .SetTarget(_rect);
 
-    private float CalculateAcceleratedRemainingDuration()
+    protected override void OnCommitFinalState()
     {
-        float originalDistance = Vector3.Distance(_startScale, _destScale);
-        float remainingDistance = Vector3.Distance(_rect.localScale, _destScale);
-
-        if (originalDistance <= 0.001f || remainingDistance <= 0.001f)
-            return 0f;
-
-        float remainingRatio = Mathf.Clamp01(remainingDistance / originalDistance);
-        float remainingDuration = _spec.duration * remainingRatio;
-
-        return Mathf.Max(0.01f, remainingDuration / StepFinishSpeedUpMultiplier);
+        _refs.SetLocalScaleImmediate(_spec.target, _destScale);
     }
+
+    protected override float MeasureRemainingRatio()
+        => RemainingRatio(
+            Vector3.Distance(_startScale, _destScale),
+            Vector3.Distance(_rect.localScale, _destScale));
 }

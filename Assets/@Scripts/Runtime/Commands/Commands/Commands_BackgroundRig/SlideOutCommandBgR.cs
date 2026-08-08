@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using DG.Tweening;
 using UnityEngine;
 
@@ -23,161 +22,32 @@ public sealed class SlideOutCommandSpecBgR : BackgroundRigCommandSpecBase
     public float punch = 14f;
 }
 
-public sealed class SlideOutCommandBgR : CommandBase
+public sealed class SlideOutCommandBgR : SlideCommandBase
 {
-    private const float StepFinishSpeedUpMultiplier = 30f;
-
     private readonly SlideOutCommandSpecBgR _spec;
 
-    private RectTransform _rect;
-    private Vector2 _startPos;
-    private Vector2 _endPos;
-
-    private Tween _tween;
-
-    private bool _resolveAttempted;
-
-    private bool HasClaimedTarget { get; set; }
-
     public override bool WaitForCompletion => _spec.wait;
+
+    protected override float TweenDuration => _spec.duration;
+
+    protected override Ease SlideEase => _spec.ease;
+    protected override CharRigDirection SlideDirection => _spec.to;
+    protected override float SlideDistance => _spec.distance;
+    protected override float Punch => _spec.punch;
+
+    protected override bool CurrentPositionIsDestination => false;
 
     public SlideOutCommandBgR(SlideOutCommandSpecBgR spec)
     {
         _spec = spec;
     }
 
-    protected override IEnumerator ExecuteInner(CommandRunScope scope)
+    protected override float Bump(float easedProgress) => BumpFromStart(easedProgress);
+
+    protected override RectTransform ResolveSlideRect(CommandRunScope scope)
     {
-        if (!_resolveAttempted)
-            ResolveRefs(scope);
-
-        ClaimTarget();
-
-        if (_spec.duration <= 0f)
-        {
-            CommitFinalState();
-            yield break;
-        }
-
-        Vector2 start = _startPos;
-        Vector2 end = _endPos;
-
-        Vector2 slideDir = end - start;
-        slideDir = slideDir.sqrMagnitude > 0f
-            ? slideDir.normalized
-            : GetDir(_spec.to);
-
-        _tween = DOTween
-            .To(
-                () => 0f,
-                t =>
-                {
-                    float e = DOVirtual.EasedValue(0f, 1f, t, _spec.ease);
-                    Vector2 basePos = Vector2.LerpUnclamped(start, end, e);
-
-                    float bump = JuicyBumpStart(e);
-                    Vector2 offset = slideDir * (_spec.punch * bump);
-
-                    _rect.anchoredPosition = basePos + offset;
-                },
-                1f,
-                _spec.duration)
-            .SetEase(Ease.Linear)
-            .SetUpdate(true)
-            .SetTarget(_rect)
-            .OnComplete(CommitFinalState);
-
-        if (_spec.wait)
-            yield return _tween.WaitForCompletion();
-    }
-
-    protected override void OnSkip(CommandRunScope scope)
-    {
-        if (!_resolveAttempted)
-            ResolveRefs(scope);
-
-        if (!HasClaimedTarget)
-            ClaimTarget();
-
-        CommitFinalState();
-    }
-
-    private void ResolveRefs(CommandRunScope scope)
-    {
-        _resolveAttempted = true;
-        
         scope.BackgroundRigs.TryGetRig(_spec.rigKey, out BackgroundRigRefs rig);
-        _rect = rig.GetRect(_spec.target);
-    }
 
-    private void ClaimTarget()
-    {
-        _rect.DOKill(true);
-
-        _startPos = _rect.anchoredPosition;
-        _endPos = _startPos + GetDir(_spec.to) * _spec.distance;
-
-        HasClaimedTarget = true;
-    }
-
-    private void CommitFinalState()
-    {
-        _rect.anchoredPosition = _endPos;
-
-        HasClaimedTarget = false;
-        _tween = null;
-    }
-
-    #region StepLifetimeHook
-
-    protected override void OnStepLifetimeFinished(CommandRunScope scope)
-    {
-        if (!HasClaimedTarget)
-            return;
-        
-        _tween.Kill(false);
-
-        float duration = CalculateAcceleratedRemainingDuration();
-
-        _tween = _rect
-            .DOAnchorPos(_endPos, duration)
-            .SetEase(_spec.ease)
-            .SetUpdate(true)
-            .SetTarget(_rect)
-            .OnComplete(CommitFinalState);
-    }
-
-    private float CalculateAcceleratedRemainingDuration()
-    {
-        float originalDistance = Vector2.Distance(_startPos, _endPos);
-        float remainingDistance = Vector2.Distance(_rect.anchoredPosition, _endPos);
-
-        if (originalDistance <= 0.001f || remainingDistance <= 0.001f)
-            return 0f;
-
-        float remainingRatio = Mathf.Clamp01(remainingDistance / originalDistance);
-        float remainingDuration = _spec.duration * remainingRatio;
-
-        return Mathf.Max(0.01f, remainingDuration / StepFinishSpeedUpMultiplier);
-    }
-
-    #endregion
-
-    private static Vector2 GetDir(CharRigDirection from)
-    {
-        return from switch
-        {
-            CharRigDirection.Right => new Vector2(+1f, 0f),
-            CharRigDirection.Up => new Vector2(0f, +1f),
-            CharRigDirection.Down => new Vector2(0f, -1f),
-            _ => new Vector2(-1f, 0f),
-        };
-    }
-
-    private static float JuicyBumpStart(float e)
-    {
-        e = Mathf.Clamp01(e);
-        float oneMinus = 1f - e;
-        return Mathf.Sin(Mathf.PI * e) * (oneMinus * oneMinus);
+        return rig?.GetRect(_spec.target);
     }
 }

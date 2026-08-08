@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using DG.Tweening;
 using UnityEngine;
 
@@ -31,10 +30,8 @@ public sealed class PlaceCharacterFocusCommandSpecCharR : CharacterRigCommandSpe
     public Ease ease = Ease.OutCubic;
 }
 
-public sealed class PlaceCharacterFocusCommandCharR : CommandBase
+public sealed class PlaceCharacterFocusCommandCharR : ClaimTweenCommandBase
 {
-    private const float StepFinishSpeedUpMultiplier = 30f;
-
     private readonly PlaceCharacterFocusCommandSpecCharR _spec;
     private readonly CharacterFocusTuningDBSO _focusTuningDb;
     private readonly IShotResponseStageProvider _stageProvider;
@@ -45,13 +42,9 @@ public sealed class PlaceCharacterFocusCommandCharR : CommandBase
     private Vector2 _startPosition;
     private Vector2 _destination;
 
-    private Tween _tween;
-
-    private bool _resolveAttempted;
-
-    private bool HasClaimedTarget { get; set; }
-
     public override bool WaitForCompletion => _spec.wait;
+
+    protected override float TweenDuration => _spec.duration;
 
     public PlaceCharacterFocusCommandCharR(
         PlaceCharacterFocusCommandSpecCharR spec,
@@ -63,55 +56,20 @@ public sealed class PlaceCharacterFocusCommandCharR : CommandBase
         _stageProvider = stageProvider;
     }
 
-    protected override IEnumerator ExecuteInner(CommandRunScope scope)
-    {
-        if(!_resolveAttempted)
-            ResolveRefs(scope);
-
-        ClaimTarget(scope);
-
-        if (_spec.duration <= 0f)
-        {
-            CommitFinalState();
-            yield break;
-        }
-
-        _tween = _moveRect
-            .DOAnchorPos(_destination, _spec.duration)
-            .SetEase(_spec.ease)
-            .SetUpdate(true)
-            .SetTarget(_moveRect)
-            .OnComplete(CommitFinalState);
-
-        if (_spec.wait)
-            yield return _tween.WaitForCompletion();
-    }
-
-    protected override void OnSkip(CommandRunScope scope)
-    {
-        if(!_resolveAttempted)
-            ResolveRefs(scope);
-
-        if (!HasClaimedTarget)
-            ClaimTarget(scope);
-
-        CommitFinalState();
-    }
-
-    private void ResolveRefs(CommandRunScope scope)
+    protected override bool TryResolveTargets(CommandRunScope scope)
     {
         _rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
-        _moveRect = _rigRefs.GetRect(_spec.moveTarget);
-        
-        _resolveAttempted = true;
+        _moveRect = _rigRefs?.GetRect(_spec.moveTarget);
+
+        return _moveRect != null;
     }
 
-    private void ClaimTarget(CommandRunScope scope)
+    protected override void ClaimTarget(CommandRunScope scope)
     {
         _moveRect.DOKill(true);
 
         _startPosition = _moveRect.anchoredPosition;
-        
+
         CharacterFocusPlacementSolver.TryCalculateFocusPlacement(
             scope,
             _stageProvider,
@@ -123,53 +81,26 @@ public sealed class PlaceCharacterFocusCommandCharR : CommandBase
             _spec.screenPoint,
             _spec.screenOffset,
             out Vector2 destination);
-        
+
         _destination = destination;
-        
+
         _rigRefs.PlacementTargets.PublishAnchoredPosition(_moveRect, _destination);
-        
-        HasClaimedTarget = true;
     }
 
-    private void CommitFinalState()
+    protected override Tween CreateTween(float duration)
+        => _moveRect
+            .DOAnchorPos(_destination, duration)
+            .SetEase(_spec.ease)
+            .SetTarget(_moveRect);
+
+    protected override void OnCommitFinalState()
     {
         _moveRect.anchoredPosition = _destination;
         _rigRefs.PlacementTargets.Clear(_moveRect);
-
-        HasClaimedTarget = false;
-        _tween = null;
     }
 
-    #region StepLifetimeHook
-
-    protected override void OnStepLifetimeFinished(CommandRunScope scope)
-    {
-        if (!HasClaimedTarget)
-            return;
-
-        if (_tween != null && _tween.IsActive())
-            _tween.Kill(false);
-
-        float duration = CalculateAcceleratedRemainingDuration();
-
-        _tween = _moveRect
-            .DOAnchorPos(_destination, duration)
-            .SetEase(_spec.ease)
-            .SetUpdate(true)
-            .SetTarget(_moveRect)
-            .OnComplete(CommitFinalState);
-    }
-
-    private float CalculateAcceleratedRemainingDuration()
-    {
-        float originalDistance = Vector2.Distance(_startPosition, _destination);
-        float remainingDistance = Vector2.Distance(_moveRect.anchoredPosition, _destination);
-        
-        float remainingRatio = Mathf.Clamp01(remainingDistance / originalDistance);
-        float remainingDuration = _spec.duration * remainingRatio;
-        
-        return Mathf.Max(0.01f, remainingDuration / StepFinishSpeedUpMultiplier);
-    }
-
-    #endregion
+    protected override float MeasureRemainingRatio()
+        => RemainingRatio(
+            Vector2.Distance(_startPosition, _destination),
+            Vector2.Distance(_moveRect.anchoredPosition, _destination));
 }

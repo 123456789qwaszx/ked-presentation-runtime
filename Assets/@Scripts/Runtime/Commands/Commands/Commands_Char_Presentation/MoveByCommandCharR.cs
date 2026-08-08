@@ -84,9 +84,8 @@ public sealed class MoveByCommandCharR : ClaimTweenCommandBase
         _rigRefs.PlacementTargets.Clear(_rect);
     }
 
-    protected override void MeasureTweenDistances(out float originalDistance, out float remainingDistance)
-    {
-        originalDistance = Vector2.Distance(_startPos, _destPos);
-        remainingDistance = Vector2.Distance(_rect.anchoredPosition, _destPos);
-    }
+    protected override float MeasureRemainingRatio()
+        => RemainingRatio(
+            Vector2.Distance(_startPos, _destPos),
+            Vector2.Distance(_rect.anchoredPosition, _destPos));
 }

@@ -87,11 +87,10 @@ public sealed class RotateToCommandCharR : ClaimTweenCommandBase
         _rect.localEulerAngles = _targetEuler;
     }
 
-    protected override void MeasureTweenDistances(out float originalDistance, out float remainingDistance)
-    {
-        originalDistance = EulerDistance(_startEuler, _targetEuler);
-        remainingDistance = EulerDistance(_rect.localEulerAngles, _targetEuler);
-    }
+    protected override float MeasureRemainingRatio()
+        => RemainingRatio(
+            EulerDistance(_startEuler, _targetEuler),
+            EulerDistance(_rect.localEulerAngles, _targetEuler));
 
     private static float EulerDistance(Vector3 from, Vector3 to)
     {

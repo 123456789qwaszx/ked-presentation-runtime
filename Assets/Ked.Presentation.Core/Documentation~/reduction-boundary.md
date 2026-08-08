@@ -188,14 +188,29 @@ CharSlot_Track_Idle.anchoredPosition          접힘=(0,0)   vs 캡처=(0, 7.99)
 - `ScreenFocusPoint` 비율표 — 게임별 값이므로 코어 코드가 아니라 **tuning 데이터**가 맞다.
   지금은 호스트 `ScreenFocusPointResolver`에 있다. U12 덤프 추가 후보.
 - `RotateByCommandCharR` 등 SO 저작 전용 스펙 — yarn 4묶음 밖. 필요하면 같은 규약으로.
-- **커맨드 수명 통합** — **착수됨** (`PresentationCore/Base/ClaimTweenCommandBase.cs`).
+- **커맨드 수명 통합** — **완료** (`PresentationCore/Base/ClaimTweenCommandBase.cs`).
   `ShotIntentCommandBase`가 shot 계열에 했던 통합의 일반화. 하네스가 오라클이므로
-  **이관 배치마다 랩드스킵 재판정으로 리포트가 리팩터 전과 같은지 확인한다.**
-  - 배치 1 (완료): MoveBy · ScaleTo · RotateTo (코어 배선이 끝난 셋)
-  - 배치 2~: Fade 쌍(CanvasGroup) → BgR 트랜스폼 계열 → Overlay 계열 →
-    SlideIn/Out·PivotRotateTo·ColorTo → SetDepth/PlaceFocus(클레임 2장 변형점)
-  - 대상 아님: 절차적 연기(Tremble·Sway·Hop…) — 목표값이 정의되지 않는다.
-    즉시 확정(SetAnchor)은 트윈이 없어 이 기반과 모양이 다르다 — 별도 판단.
-  - 기반이 의도적으로 통일한 미세 차이 둘 (실경로 무영향):
-    ① 해석 실패 시 NRE 대신 경고+건너뛰기 ② 가속 잔여시간이 0으로 퇴화하는
-    경계 케이스에서 0초 트윈 대신 즉시 확정 (MoveBy 방식으로 통일).
+  **이관 배치마다 랩드스킵 재판정으로 리포트가 리팩터 전과 같은지 확인했다.**
+  - 배치 1: MoveBy · ScaleTo · RotateTo (코어 배선이 끝난 셋)
+  - 배치 2·3: Fade 4종(`CanvasFadeCommandBase`) · BgR 트랜스폼 계열 · RotateBy 쌍
+  - 배치 4: PivotRotateTo · Slide 4종(`SlideCommandBase`) ·
+    Overlay Move/Scale/Size · Overlay Show/Hide(`OverlayRootFadeCommandBase`) ·
+    SetDepth(클레임 2장 + 시퀀스) · PlaceCharacterFocus(클레임 1장 + 게시) ·
+    MirrorCharacter · CharVisualFocus · StageDepthDefocus
+
+  기반이 제공하는 변형점: `AccelerateOnStepFinish`(가속 여부) ·
+  `CreateAcceleratedTween`(가속 트윈이 본 트윈과 다른 경우) ·
+  `StepFinishSpeedUpMultiplier`(가속 배율) · `ResolvePlaybackDuration`(배속 축약).
+  가속 잔여시간은 `MeasureRemainingRatio` 한 장으로 받는다 — 축이 여럿이면
+  축별 `RemainingRatio`의 최댓값이다(가장 늦게 도착하는 축이 기준).
+
+  - 대상 아님: 절차적 연기(Tremble·Sway·Hop·Jolt·Dip·Emoji 계열) —
+    목표값이 정의되지 않는다. `ColorTo`는 스텝 수명 훅 자체가 없어 이관하면
+    없던 동작이 생긴다. 즉시 확정(SetAnchor)은 트윈이 없어 모양이 다르다.
+  - 기반이 의도적으로 통일한 미세 차이 (실경로 무영향):
+    ① 해석 실패 시 NRE 대신 경고+건너뛰기
+    ② 가속 잔여시간이 0으로 퇴화하는 경계에서 0초 트윈 대신 즉시 확정
+    ③ 가속 잔여시간에 0.01초 하한 — 다수파 규칙으로 통일했다.
+       종전에 하한이 없던 것은 `SetDepth` 하나뿐이다.
+    ④ `PlaceCharacterFocus`는 출발=목표일 때 잔여비율이 NaN이 되어
+       NaN 길이 트윈을 만들고 있었다. 기반의 0 가드가 이를 없앤다.

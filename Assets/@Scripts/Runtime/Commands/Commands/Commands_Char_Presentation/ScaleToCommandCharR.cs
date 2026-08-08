@@ -97,12 +97,13 @@ public sealed class ScaleToCommandCharR : ClaimTweenCommandBase
         _rigRefs.PlacementTargets.Clear(_rect);
     }
 
-    protected override void MeasureTweenDistances(out float originalDistance, out float remainingDistance)
+    protected override float MeasureRemainingRatio()
     {
         Vector3 current = _rect.localScale;
 
-        originalDistance = Vector2.Distance(_startScale, _targetScale);
-        remainingDistance = Vector2.Distance(new Vector2(current.x, current.y), _targetScale);
+        return RemainingRatio(
+            Vector2.Distance(_startScale, _targetScale),
+            Vector2.Distance(new Vector2(current.x, current.y), _targetScale));
     }
 
     private static void ApplyScaleXY(RectTransform rect, Vector2 targetXY)

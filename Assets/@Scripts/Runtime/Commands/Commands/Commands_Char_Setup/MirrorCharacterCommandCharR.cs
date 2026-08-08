@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using DG.Tweening;
 using UnityEngine;
 
@@ -28,80 +27,53 @@ public sealed class MirrorCharacterCommandSpecCharR : CharacterRigCommandSpecBas
     public Ease ease = Ease.OutCubic;
 }
 
-public sealed class MirrorCharacterCommandCharR : CommandBase
+public sealed class MirrorCharacterCommandCharR : ClaimTweenCommandBase
 {
     private readonly MirrorCharacterCommandSpecCharR _spec;
 
     private RectTransform _rect;
-    private Vector3 _baseScale;
     private Vector3 _targetScale;
 
-    private Tween _tween;
-
-    private bool _resolveAttempted;
-    private bool HasClaimedTarget { get; set; }
-
     public override bool WaitForCompletion => _spec.wait;
+
+    protected override float TweenDuration => _spec.duration;
+
+    // 좌우 반전은 0→1 진행이 아니라 배율 부호 뒤집기다 —
+    // 스텝 경계에서는 가속할 것 없이 곧장 확정한다.
+    protected override bool AccelerateOnStepFinish => false;
 
     public MirrorCharacterCommandCharR(MirrorCharacterCommandSpecCharR spec)
     {
         _spec = spec;
     }
 
-    protected override IEnumerator ExecuteInner(CommandRunScope scope)
+    /// <summary>
+    /// 해석과 동시에 방향을 정해 대장에 기록한다 — 대장이 곧 다음 Toggle의 입력이라
+    /// 커맨드가 여러 번 불려도 방향이 한 번만 뒤집히도록 여기(1회 호출)에 둔다.
+    /// </summary>
+    protected override bool TryResolveTargets(CommandRunScope scope)
     {
-        if (!_resolveAttempted)
-            ResolveRefsAndState(scope);
-
-        ClaimTarget();
-
-        if (_spec.duration <= 0f)
-        {
-            CommitFinalState();
-            yield break;
-        }
-
-        _tween = _rect
-            .DOScale(_targetScale, _spec.duration)
-            .SetEase(_spec.ease)
-            .SetUpdate(true)
-            .SetTarget(_rect)
-            .OnComplete(CommitFinalState);
-
-        if (_spec.wait)
-            yield return _tween.WaitForCompletion();
-    }
-
-    protected override void OnSkip(CommandRunScope scope)
-    {
-        if (!_resolveAttempted)
-            ResolveRefsAndState(scope);
-
-        if (!HasClaimedTarget)
-            ClaimTarget();
-
-        CommitFinalState();
-    }
-
-    private void ResolveRefsAndState(CommandRunScope scope)
-    {
-        _resolveAttempted = true;
-
         string resolvedRigKey =
             CharacterRigTargetResolver.ResolveRigKeyByPolicy(scope, _spec.slotKey);
 
         CharacterRigRefs rigRefs =
             CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
 
-        _rect = rigRefs.GetRect(_spec.target);
+        _rect = rigRefs?.GetRect(_spec.target);
+
+        if (_rect == null)
+            return false;
 
         CharacterFacing facing = ResolveTargetFacing(scope, resolvedRigKey);
 
         scope.CastRegistry.SetFacing(resolvedRigKey, facing);
 
-        _baseScale = _rect.localScale;
-        _targetScale = _baseScale;
-        _targetScale.x = Mathf.Abs(_baseScale.x) * facing.Sign();
+        Vector3 baseScale = _rect.localScale;
+
+        _targetScale = baseScale;
+        _targetScale.x = Mathf.Abs(baseScale.x) * facing.Sign();
+
+        return true;
     }
 
     private CharacterFacing ResolveTargetFacing(
@@ -127,35 +99,25 @@ public sealed class MirrorCharacterCommandCharR : CommandBase
         }
     }
 
-    private void ClaimTarget()
+    protected override void ClaimTarget(CommandRunScope scope)
     {
         _rect.DOKill(true);
-        HasClaimedTarget = true;
     }
 
-    private void CommitFinalState()
+    protected override Tween CreateTween(float duration)
+        => _rect
+            .DOScale(_targetScale, duration)
+            .SetEase(_spec.ease)
+            .SetTarget(_rect);
+
+    protected override void OnCommitFinalState()
     {
-        KillTween();
-
-        if (_rect != null)
-            _rect.localScale = _targetScale;
-
-        HasClaimedTarget = false;
+        _rect.localScale = _targetScale;
     }
 
-    protected override void OnStepLifetimeFinished(CommandRunScope scope)
-    {
-        if (!HasClaimedTarget)
-            return;
-
-        CommitFinalState();
-    }
-
-    private void KillTween()
-    {
-        if (_tween != null && _tween.IsActive())
-            _tween.Kill(false);
-
-        _tween = null;
-    }
+    // AccelerateOnStepFinish = false라 불리지 않지만, 계약은 정직하게 채운다.
+    protected override float MeasureRemainingRatio()
+        => RemainingRatio(
+            Mathf.Abs(_targetScale.x - _rect.localScale.x),
+            0f);
 }

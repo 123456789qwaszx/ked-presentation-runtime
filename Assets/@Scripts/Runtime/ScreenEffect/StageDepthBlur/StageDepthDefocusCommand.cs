@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
@@ -39,7 +38,7 @@ public sealed class StageDepthDefocusCommandSpec : CommandSpecBase
 
 // own presentation state, including overlay alpha and character edge hide.
 // The command only asks IStageDepthLayerBlurRuntime to start or stop baking this layer.
-public sealed class StageDepthDefocusCommand : CommandBase
+public sealed class StageDepthDefocusCommand : ClaimTweenCommandBase
 {
     private struct EdgeHideBinding
     {
@@ -55,26 +54,24 @@ public sealed class StageDepthDefocusCommand : CommandBase
         }
     }
     
-    private const float StepFinishSpeedUpMultiplier = 1.5f;
-
     private readonly StageDepthDefocusCommandSpec _spec;
     private readonly IStageDepthLayerBlurRuntime _runtime;
 
-    private bool _resolveAttempted;
     private PresentationDepthDefocusTarget _target;
     private CanvasGroup _canvasGroup;
-    
+
     private readonly List<EdgeHideBinding> _edgeHideBindings = new();
     private readonly List<CharacterRigRefs> _rigScratch = new();
 
     private OverlayState _fromState;
     private OverlayState _destState;
 
-    private Tween _tween;
-
-    private bool HasClaimed { get; set; }
-
     public override bool WaitForCompletion => _spec.wait;
+
+    protected override float TweenDuration => _spec.duration;
+
+    // 화면 절반이 한꺼번에 초점을 되찾으면 눈에 띄게 튄다 — 훨씬 완만하게 붙인다.
+    protected override float StepFinishSpeedUpMultiplier => 1.5f;
 
     public StageDepthDefocusCommand(
         StageDepthDefocusCommandSpec spec,
@@ -84,55 +81,12 @@ public sealed class StageDepthDefocusCommand : CommandBase
         _runtime = runtime;
     }
 
-    protected override IEnumerator ExecuteInner(CommandRunScope scope)
-    {
-        if (!_resolveAttempted)
-            ResolveRefs(scope);
-        
-        ClaimTarget(scope);
-
-        if (_spec.duration <= 0f)
-        {
-            CommitFinalState();
-            yield break;
-        }
-
-        _tween = DOTween
-            .To(
-                () => 0f,
-                t =>
-                {
-                    OverlayState state = OverlayState.Lerp(_fromState, _destState, t);
-                    ApplyState(state, t);
-                },
-                1f,
-                _spec.duration)
-            .SetEase(_spec.ease)
-            .SetUpdate(true)
-            .SetTarget(_canvasGroup)
-            .OnComplete(CommitFinalState);
-
-        if (_spec.wait)
-            yield return _tween.WaitForCompletion();
-    }
-
-    protected override void OnSkip(CommandRunScope scope)
-    {
-        if (!_resolveAttempted)
-            ResolveRefs(scope);
-
-        if (!HasClaimed)
-            ClaimTarget(scope);
-
-        CommitFinalState();
-    }
-
-    private void ResolveRefs(CommandRunScope scope)
+    protected override bool TryResolveTargets(CommandRunScope scope)
     {
         _runtime.ResolveTarget(_spec.stage, _spec.layer, out _target);
         _canvasGroup = _target.OverlayCanvasGroup;
-        
-        _resolveAttempted = true;
+
+        return _canvasGroup != null;
     }
 
     // Captures edge-hide targets under the content root at claim time.
@@ -160,12 +114,12 @@ public sealed class StageDepthDefocusCommand : CommandBase
         }
     }
 
-    private void ClaimTarget(CommandRunScope scope)
+    protected override void ClaimTarget(CommandRunScope scope)
     {
         _canvasGroup.DOKill(true);
 
         CollectEdgeHideControllers(scope);
-        
+
         _fromState = CaptureCurrentState();
         _destState = BuildDestState();
 
@@ -180,11 +134,31 @@ public sealed class StageDepthDefocusCommand : CommandBase
                 scope,
                 BuildBlurParams());
         }
-
-        HasClaimed = true;
     }
 
-    private void CommitFinalState()
+    protected override Tween CreateTween(float duration)
+        => DOTween
+            .To(
+                () => 0f,
+                t => ApplyState(OverlayState.Lerp(_fromState, _destState, t), t),
+                1f,
+                duration)
+            .SetEase(_spec.ease)
+            .SetTarget(_canvasGroup);
+
+    /// <summary>
+    /// 진행률(0→1) 트윈이라 그대로 재시작하면 처음부터 다시 돈다 —
+    /// 현재 상태를 새 출발점으로 삼아 남은 구간만 태운다 (edge hide도 함께 재기준화).
+    /// </summary>
+    protected override Tween CreateAcceleratedTween(float duration)
+    {
+        _fromState = CaptureCurrentState();
+        RefreshEdgeHideFromValues();
+
+        return CreateTween(duration);
+    }
+
+    protected override void OnCommitFinalState()
     {
         DOTween.Kill(_canvasGroup, false);
 
@@ -192,58 +166,13 @@ public sealed class StageDepthDefocusCommand : CommandBase
 
         if (!_spec.visible)
             _runtime.EndLayer(_spec.stage, _spec.layer);
-
-        HasClaimed = false;
-        _tween = null;
     }
 
-    #region StepLifetimeHook
+    protected override float MeasureRemainingRatio()
+        => RemainingRatio(
+            OverlayState.Distance(_fromState, _destState),
+            OverlayState.Distance(CaptureCurrentState(), _destState));
 
-    protected override void OnStepLifetimeFinished(CommandRunScope scope)
-    {
-        if (!HasClaimed)
-            return;
-
-        _tween.Kill(false);
-
-        OverlayState currentState = CaptureCurrentState();
-        float duration = CalculateAcceleratedRemainingDuration(currentState);
-
-        _fromState = currentState;
-        RefreshEdgeHideFromValues();
-
-        _tween = DOTween
-            .To(
-                () => 0f,
-                t =>
-                {
-                    OverlayState state = OverlayState.Lerp(_fromState, _destState, t);
-                    ApplyState(state, t);
-                },
-                1f,
-                duration)
-            .SetEase(_spec.ease)
-            .SetUpdate(true)
-            .SetTarget(_canvasGroup)
-            .OnComplete(CommitFinalState);
-    }
-
-    private float CalculateAcceleratedRemainingDuration(OverlayState currentState)
-    {
-        float originalDistance = OverlayState.Distance(_fromState, _destState);
-        float remainingDistance = OverlayState.Distance(currentState, _destState);
-
-        if (originalDistance <= 0.001f || remainingDistance <= 0.001f)
-            return 0f;
-
-        float remainingRatio = Mathf.Clamp01(remainingDistance / originalDistance);
-        float remainingDuration = _spec.duration * remainingRatio;
-
-        return Mathf.Max(0.01f, remainingDuration / StepFinishSpeedUpMultiplier);
-    }
-
-    #endregion
-    
     private void RefreshEdgeHideFromValues()
     {
         for (int i = 0; i < _edgeHideBindings.Count; i++)

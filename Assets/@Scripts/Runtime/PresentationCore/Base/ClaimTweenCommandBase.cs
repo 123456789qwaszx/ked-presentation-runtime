@@ -15,7 +15,7 @@ using UnityEngine;
 ///   ClaimTarget       — DOKill → (from-override) → 목표 계산(코어 리덕션) → (게시)
 ///   CreateTween       — 목표를 향한 트윈 (ease·target 포함. SetUpdate/OnComplete는 여기서 건다)
 ///   OnCommitFinalState— 최종 쓰기 + 장부 Clear
-///   MeasureTweenDistances — 가속 잔여시간 계산용 거리 (커맨드마다 거리 계량이 다르다)
+///   MeasureRemainingRatio — 가속 잔여시간 계산용 남은 비율 (계량은 커맨드마다 다르다)
 ///
 /// 적용 범위: 목표값이 있는 클레임-트윈 부류만이다. 절차적 연기(Tremble·Sway 등)는
 /// 목표가 정의되지 않으므로 이 기반에 맞지 않는다 (reduction-boundary.md).
@@ -25,16 +25,21 @@ using UnityEngine;
 /// </summary>
 public abstract class ClaimTweenCommandBase : CommandBase
 {
-    protected const float StepFinishSpeedUpMultiplier = 30f;
-
     private Tween _tween;
     private bool _resolveAttempted;
     private bool _resolved;
 
     protected bool HasClaimedTarget { get; private set; }
 
-    /// <summary>스펙의 트윈 시간. ≤ 0이면 즉시 확정(스냅)이다.</summary>
+    /// <summary>스펙의 트윈 시간. ≤ 0이면 즉시 확정(스냅)이다. 가속 잔여시간의 기준이기도 하다.</summary>
     protected abstract float TweenDuration { get; }
+
+    /// <summary>
+    /// 실제로 재생할 시간. 기본은 스펙 그대로다.
+    /// 배속 재생에서 시간을 줄이는 커맨드(오버레이 계열)는 이걸 덮는다 —
+    /// 가속 잔여시간의 기준은 종전대로 줄이지 않은 스펙 시간(TweenDuration)이다.
+    /// </summary>
+    protected virtual float ResolvePlaybackDuration(CommandRunScope scope) => TweenDuration;
 
     /// <summary>
     /// 유니티 참조 해석. 실패하면 커맨드를 건너뛴다 — 종전에는 이 경우 NRE로 터졌는데,
@@ -54,14 +59,31 @@ public abstract class ClaimTweenCommandBase : CommandBase
     /// <summary>최종 쓰기 + 장부 Clear. 수명 플래그 정리는 기반이 한다.</summary>
     protected abstract void OnCommitFinalState();
 
-    /// <summary>가속 잔여시간 계산용 거리. 계량은 커맨드마다 다르다(px·배율·각).</summary>
-    protected abstract void MeasureTweenDistances(out float originalDistance, out float remainingDistance);
+    /// <summary>
+    /// 목표까지 남은 진행 비율 [0,1]. 0이면 가속할 것이 없다는 뜻이라 즉시 확정한다.
+    /// 계량은 커맨드마다 다르다(px·배율·각) — 한 축이면 RemainingRatio 하나로 끝나고,
+    /// 여러 축이면 축별 비율의 최댓값을 쓴다(가장 늦게 도착하는 축이 기준이다).
+    /// </summary>
+    protected abstract float MeasureRemainingRatio();
 
     /// <summary>
     /// 스텝 경계에서 가속 재트윈을 만들 것인가. 진행률(0→1) 트윈 커맨드는 재시작이
     /// 처음부터 다시 도는 것이라 무의미하므로 false — 즉시 확정한다 (RotateBy 계열).
     /// </summary>
     protected virtual bool AccelerateOnStepFinish => true;
+
+    /// <summary>
+    /// 스텝 경계 가속 배율 — 남은 시간을 이만큼 나눠 붙인다. 기본은 사실상 즉시(30배)다.
+    /// 화면 전체가 흔들려 보이는 시각효과는 그렇게 끊으면 튀어서 훨씬 완만하게 쓴다.
+    /// </summary>
+    protected virtual float StepFinishSpeedUpMultiplier => 30f;
+
+    /// <summary>
+    /// 스텝 경계 가속용 트윈. 기본은 본 트윈을 잔여시간으로 다시 만드는 것이다.
+    /// 다단 연출(예열·오버슈트)처럼 "현재 위치에서 목표까지"만 남기고 마무리해야 하는
+    /// 커맨드는 이걸 덮어 별도 트윈을 낸다 (PivotRotateTo).
+    /// </summary>
+    protected virtual Tween CreateAcceleratedTween(float duration) => CreateTween(duration);
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
@@ -70,13 +92,15 @@ public abstract class ClaimTweenCommandBase : CommandBase
 
         Claim(scope);
 
-        if (TweenDuration <= 0f)
+        float duration = ResolvePlaybackDuration(scope);
+
+        if (duration <= 0f)
         {
             Commit();
             yield break;
         }
 
-        _tween = CreateTween(TweenDuration)
+        _tween = CreateTween(duration)
             .SetUpdate(true)
             .OnComplete(Commit);
 
@@ -116,7 +140,7 @@ public abstract class ClaimTweenCommandBase : CommandBase
             return;
         }
 
-        _tween = CreateTween(duration)
+        _tween = CreateAcceleratedTween(duration)
             .SetUpdate(true)
             .OnComplete(Commit);
     }
@@ -151,14 +175,22 @@ public abstract class ClaimTweenCommandBase : CommandBase
 
     private float CalculateAcceleratedRemainingDuration()
     {
-        MeasureTweenDistances(out float originalDistance, out float remainingDistance);
+        float remainingRatio = Mathf.Clamp01(MeasureRemainingRatio());
 
-        if (originalDistance <= 0.001f || remainingDistance <= 0.001f)
+        if (remainingRatio <= 0f)
             return 0f;
 
-        float remainingRatio = Mathf.Clamp01(remainingDistance / originalDistance);
         float remainingDuration = TweenDuration * remainingRatio;
 
         return Mathf.Max(0.01f, remainingDuration / StepFinishSpeedUpMultiplier);
+    }
+
+    /// <summary>한 축의 남은 비율. 출발했던 거리 대비 남은 거리이며, 양끝은 0으로 접는다.</summary>
+    protected static float RemainingRatio(float originalDistance, float remainingDistance)
+    {
+        if (originalDistance <= 0.001f || remainingDistance <= 0.001f)
+            return 0f;
+
+        return Mathf.Clamp01(remainingDistance / originalDistance);
     }
 }

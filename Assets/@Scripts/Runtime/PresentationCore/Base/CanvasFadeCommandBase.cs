@@ -47,11 +47,10 @@ public abstract class CanvasFadeCommandBase : ClaimTweenCommandBase
         _canvasGroup.blocksRaycasts = InteractableAfterCommit;
     }
 
-    protected override void MeasureTweenDistances(out float originalDistance, out float remainingDistance)
-    {
-        originalDistance = Mathf.Abs(TargetAlpha - _startAlpha);
-        remainingDistance = Mathf.Abs(TargetAlpha - _canvasGroup.alpha);
-    }
+    protected override float MeasureRemainingRatio()
+        => RemainingRatio(
+            Mathf.Abs(TargetAlpha - _startAlpha),
+            Mathf.Abs(TargetAlpha - _canvasGroup.alpha));
 
     private CanvasGroup GetOrAddCanvasGroup(RectTransform rect)
     {
