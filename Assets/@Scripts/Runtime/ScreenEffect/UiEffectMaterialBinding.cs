@@ -51,10 +51,17 @@ public sealed class UiEffectMaterialBinding : System.IDisposable
 
     public void Dispose()
     {
-        if (_runtimeMaterial != null)
-        {
+        if (_runtimeMaterial == null)
+            return;
+
+        // 에디트 모드에서는 Object.Destroy가 동작하지 않고 에러만 남긴다(머티리얼 누수).
+        // 익스포터와 EditMode 테스트가 ScreenEffectRigBuilder로 리그를 세울 때
+        // Bind → RebuildMaterial → DisposeMaterial 경로로 이 자리를 지나도록.
+        if (Application.isPlaying)
             Object.Destroy(_runtimeMaterial);
-            _runtimeMaterial = null;
-        }
+        else
+            Object.DestroyImmediate(_runtimeMaterial);
+
+        _runtimeMaterial = null;
     }
 }

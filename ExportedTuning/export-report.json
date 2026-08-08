@@ -1,0 +1,12 @@
+{
+    "exportedAtUtc": "2026-08-08T04:02:16.2442335Z",
+    "unityVersion": "6000.3.16f1",
+    "scenePath": "Assets/Scenes/SampleScene.unity",
+    "warnings": [],
+    "knownButNotExported": [
+        "Assets/Data/Generated/DialogueSpeakerPresentationPolicyDB.asset (speaker policy — 범위 밖)",
+        "Assets/Data/Generated/CharacterEmojiVisualPreset.asset (emoji preset — 범위 밖)",
+        "Assets/Data/Generated/CharacterEmojiLibrary.asset (emoji library — 범위 밖)",
+        "Assets/Data/Generated/PortraitGeneratedDB.asset (초상 치수 — 후속 단계의 몫)"
+    ]
+}
