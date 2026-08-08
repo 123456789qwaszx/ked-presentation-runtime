@@ -15,6 +15,6 @@ public sealed class ShotResetCommand : ShotIntentCommandBase<ShotResetCommandSpe
         in PresentationIntentState from,
         CommandRunScope scope)
     {
-        return PresentationIntentState.Default;
+        return Ked.Presentation.Core.ShotResetReduction.Reduce().ToUnity();
     }
 }

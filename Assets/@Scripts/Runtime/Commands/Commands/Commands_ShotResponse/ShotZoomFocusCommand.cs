@@ -46,6 +46,8 @@ public sealed class ShotZoomFocusCommand : ShotIntentCommandBase<ShotZoomFocusCo
         in PresentationIntentState from,
         CommandRunScope scope)
     {
+        // 입력 수집
+        // 정착 focus 측정("현재 카메라가 적용된 채로 보이는 위치")과 화면 지점 해석.
         CharacterFocusPointResolver.TryResolve(
             scope,
             _stageProvider,
@@ -56,38 +58,16 @@ public sealed class ShotZoomFocusCommand : ShotIntentCommandBase<ShotZoomFocusCo
             useSettledPlacementTargets: true,
             out CharacterFocusPointResult focus);
 
-        // 1. 이번에 원하는 zoom 값을 정한다.
-        float targetZoom = spec.zoom;
-
-        // 2. 현재 zoom이 실제 scale로는 얼마인지 구한다.
-        float fromScale = PresentationShotIntentMath.EvaluateCameraScale(from.zoom);
-        
-        // 3. 목표 zoom이 실제 scale로는 얼마인지 구한다.
-        float targetScale = PresentationShotIntentMath.EvaluateCameraScale(targetZoom);
-
-        // 4. 현재 측정된 캐릭터 focus 위치에서 현재 pan/scale을 제거해서 논리 focusPoint로 되돌린다.
-        Vector2 logicalFocusPoint =
-            PresentationShotIntentMath.RemoveCurrentCameraTransformFromFocusPoint(
-                focus.FocusPointInRigSpace, 
-                from.panInRigSpace, fromScale);
-
-        // 5. 화면의 어느 지점에 focus를 두고 싶은지 구한다. 예: Center, Left, Right, Upper 등
         Vector2 desiredPoint =
             ScreenFocusPointResolver.Resolve(focus.RigSpaceRoot, spec.screenPoint) + spec.screenOffset;
 
-        // 6. targetScale에서 logicalFocusPoint가 desiredPoint에 오도록 필요한 targetPan을 계산한다.
-        Vector2 targetPan =
-            PresentationShotIntentMath.CalculatePanToPlaceFocusAtScreenPoint(
-                logicalFocusPoint,
-                desiredPoint,
-                targetScale);
-
-        // 7. zoom, pan, focusPoint를 새 IntentState로 만든다.
-        return new PresentationIntentState
-        {
-            zoom = targetZoom,
-            panInRigSpace = targetPan,
-            focusPointInRigSpace = logicalFocusPoint,
-        };
+        // 논리 focus 복원 -> 목표 배율에서 pan 역산
+        return Ked.Presentation.Core.ShotZoomFocusReduction
+            .Reduce(
+                from.ToCore(),
+                spec.zoom,
+                focus.FocusPointInRigSpace.ToCore(),
+                desiredPoint.ToCore())
+            .ToUnity();
     }
 }

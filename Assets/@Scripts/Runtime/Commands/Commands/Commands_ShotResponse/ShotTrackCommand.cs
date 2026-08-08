@@ -20,11 +20,8 @@ public sealed class ShotTrackCommand : ShotIntentCommandBase<ShotTrackCommandSpe
         in PresentationIntentState from,
         CommandRunScope scope)
     {
-        return new PresentationIntentState
-        {
-            zoom = from.zoom,
-            panInRigSpace = from.panInRigSpace + spec.pan,
-            focusPointInRigSpace = from.focusPointInRigSpace,
-        };
+        return Ked.Presentation.Core.ShotTrackReduction
+            .Reduce(from.ToCore(), spec.pan.ToCore())
+            .ToUnity();
     }
 }

@@ -23,11 +23,8 @@ public sealed class ShotToCommand : ShotIntentCommandBase<ShotToCommandSpec>
         in PresentationIntentState from,
         CommandRunScope scope)
     {
-        return new PresentationIntentState
-        {
-            zoom = spec.zoom,
-            panInRigSpace = spec.pan,
-            focusPointInRigSpace = from.focusPointInRigSpace,
-        };
+        return Ked.Presentation.Core.ShotToReduction
+            .Reduce(from.ToCore(), spec.zoom, spec.pan.ToCore())
+            .ToUnity();
     }
 }
