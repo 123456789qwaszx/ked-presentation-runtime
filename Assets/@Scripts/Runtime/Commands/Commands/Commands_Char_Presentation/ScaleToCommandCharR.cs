@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using DG.Tweening;
+using Ked.Presentation.Core;
 using UnityEngine;
 
 [Serializable]
@@ -137,12 +138,14 @@ public sealed class ScaleToCommandCharR : CommandBase
 
     private Vector2 ResolveTargetScale(Vector3 currentScale)
     {
-        if (!_spec.relativeToCurrent)
-            return _spec.toScale;
+        // ── 코어: 스펙 → 목표 상태 ──
+        // z는 클레임이 건드리지 않는다. 아래 ApplyScaleXY가 라이브 z를 유지하는 것과 같은 규약이다.
+        StageNodeClaim claim = ScaleToReduction.Reduce(
+            _rect.name,
+            new ScaleToReduction.Args(_spec.relativeToCurrent, _spec.toScale.ToCore()),
+            new Vector2(currentScale.x, currentScale.y).ToCore());
 
-        return new Vector2(
-            currentScale.x * _spec.toScale.x,
-            currentScale.y * _spec.toScale.y);
+        return claim.Value.XY.ToUnity();
     }
 
     private void PublishSettledTarget()

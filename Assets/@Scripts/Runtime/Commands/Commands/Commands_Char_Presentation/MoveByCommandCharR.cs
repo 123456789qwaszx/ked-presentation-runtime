@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using DG.Tweening;
+using Ked.Presentation.Core;
 using UnityEngine;
 
 [Serializable]
@@ -101,20 +102,17 @@ public sealed class MoveByCommandCharR : CommandBase
     private void ClaimTarget()
     {
         _rect.DOKill(true);
-
         _startPos = _rect.anchoredPosition;
-        _destPos = CalculateDestinationPosition();
+
+        StageNodeClaim claim = MoveByReduction.Reduce(
+            _rect.name,
+            new MoveByReduction.Args(_spec.useAbsolutePosition, _spec.delta.ToCore()),
+            _startPos.ToCore());
+
+        _destPos = claim.Value.XY.ToUnity();
         _rigRefs.PlacementTargets.PublishAnchoredPosition(_rect, _destPos);
 
         HasClaimedTarget = true;
-    }
-
-    private Vector2 CalculateDestinationPosition()
-    {
-        if (_spec.useAbsolutePosition)
-            return _spec.delta;
-
-        return _startPos + _spec.delta;
     }
 
     private void CommitFinalState()
