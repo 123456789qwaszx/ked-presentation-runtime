@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using Ked.Presentation.Core;
 using UnityEngine;
 
 public readonly struct CharacterDepthResult
@@ -22,6 +24,8 @@ public readonly struct CharacterDepthResult
 
 public static class CharacterDepthResolver
 {
+    private static readonly List<RectTransform> ChainRects = new(48);
+
     public static void ResolveRawDepth(
         CharacterDepthKey depthKey,
         bool useLevel,
@@ -60,85 +64,59 @@ public static class CharacterDepthResolver
     {
         finalDepthY = rawDepthY;
 
-        // 1. baseline은 targetDepthY가 아니라 현재/settled FocusPoint다.
-        //    따라서 place_focus가 이미 잡아둔 위치를 기준으로 보존한다.
-        CharacterFocusPointResolver.TryResolve(
-            scope,
-            stageProvider,
-            roleKey,
-            preserveFocusPreset,
-            preserveFocusOffset,
-            focusTuningDb,
-            useSettledPlacementTargets: true,
-            out CharacterFocusPointResult currentFocus);
+        if (stageProvider == null || depthYRect == null || depthScaleRect == null)
+            return;
 
-        // 2. rawDepthY + targetDepthScale을 잠깐 실제 transform에 적용해 target focus를 측정한다.
-        //    이 함수는 호출 후 즉시 원복한다.
-        TryMeasureFocusWithTemporaryDepthTransform(
-            scope,
-            stageProvider,
-            roleKey,
-            depthYRect,
-            depthScaleRect,
-            rawDepthY,
-            targetDepthScale,
-            preserveFocusPreset,
-            preserveFocusOffset,
-            focusTuningDb,
-            out CharacterFocusPointResult targetFocus);
+        RectTransform rigSpaceRoot = stageProvider.RigSpaceRoot;
 
-        RectTransform stageRoot = currentFocus.RigSpaceRoot;
-        RectTransform depthYParent = depthYRect.parent as RectTransform;
+        if (rigSpaceRoot == null)
+            return;
 
+        string resolvedRigKey = CharacterRigTargetResolver.ResolveRigKeyByPolicy(scope, roleKey);
+        scope.CharacterRigs.TryGetRig(resolvedRigKey, out CharacterRigRefs rigRefs);
 
-        Vector2 compensationInStageSpace =
-            currentFocus.FocusPointInRigSpace -
-            targetFocus.FocusPointInRigSpace;
+        string tuningKey = CharacterRigTargetResolver.ResolveCharacterKeyFromTargetKey(scope, roleKey);
+        CharacterFacing facing = CharacterFocusPointResolver.ResolveFacing(scope, roleKey);
 
-        Vector2 compensationInDepthYParentSpace =
-            PresentationCoordinateMath.ConvertVectorFromRigSpaceToTargetPositionParentSpace(
-                compensationInStageSpace,
-                stageRoot,
-                depthYParent);
+        if (!CharacterFocusPointResolver.TryResolveFocusMeasureInputs(
+                rigRefs,
+                tuningKey,
+                preserveFocusPreset,
+                preserveFocusOffset,
+                focusTuningDb,
+                facing,
+                mirrorCommandOffset: true,
+                out RectTransform measureRect,
+                out Vector3 focusLocalOffset))
+        {
+            return;
+        }
 
-        finalDepthY = rawDepthY + compensationInDepthYParentSpace;
-    }
+        RectNodeState[] chain = rigRefs.PlacementTargets.CaptureSettledChain(
+            measureRect, rigSpaceRoot, ChainRects);
 
-    private static void TryMeasureFocusWithTemporaryDepthTransform(
-        CommandRunScope scope,
-        IShotResponseStageProvider stageProvider,
-        string roleKey,
-        RectTransform depthYRect,
-        RectTransform depthScaleRect,
-        Vector2 depthYTarget,
-        Vector2 depthScaleTarget,
-        CharacterFocusPreset preserveFocusPreset,
-        Vector2 preserveFocusOffset,
-        CharacterFocusTuningDBSO focusTuningDb,
-        out CharacterFocusPointResult result)
-    {
-        result = default;
+        int depthYIndex = ChainRects.IndexOf(depthYRect);
+        int depthScaleIndex = ChainRects.IndexOf(depthScaleRect);
 
-        Vector2 savedDepthY = depthYRect.anchoredPosition;
-        Vector3 savedDepthScale = depthScaleRect.localScale;
+        if (depthYIndex < 0 || depthScaleIndex < 0)
+        {
+            Debug.LogWarning(
+                $"[CharacterDepthResolver] depth 축이 focus 측정 체인에 없다 " +
+                $"(depthY={depthYIndex}, depthScale={depthScaleIndex}). " +
+                $"보정 없이 raw depthY를 쓴다. role='{roleKey}'");
 
-        depthYRect.anchoredPosition = depthYTarget;
-        depthScaleRect.localScale = new Vector3(
-            depthScaleTarget.x,
-            depthScaleTarget.y,
-            savedDepthScale.z);
+            return;
+        }
 
-        CharacterFocusPointResolver.TryResolve(
-            scope,
-            stageProvider,
-            roleKey,
-            preserveFocusPreset,
-            preserveFocusOffset,
-            focusTuningDb,
-            useSettledPlacementTargets: true,
-            out result);
+        Vec2 solved = SettledFocusMath.SolveDepthYPreservingFocus(
+            chain,
+            CharacterPlacementTargetLedger.SpaceOf(rigSpaceRoot),
+            depthYIndex,
+            depthScaleIndex,
+            new Vector2(focusLocalOffset.x, focusLocalOffset.y).ToCore(),
+            rawDepthY.ToCore(),
+            targetDepthScale.ToCore());
 
-        depthScaleRect.localScale = savedDepthScale;
-        depthYRect.anchoredPosition = savedDepthY;
+        finalDepthY = solved.ToUnity();
     }
 }
