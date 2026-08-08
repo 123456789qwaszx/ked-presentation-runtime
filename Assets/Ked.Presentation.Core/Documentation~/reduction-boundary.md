@@ -188,10 +188,14 @@ CharSlot_Track_Idle.anchoredPosition          접힘=(0,0)   vs 캡처=(0, 7.99)
 - `ScreenFocusPoint` 비율표 — 게임별 값이므로 코어 코드가 아니라 **tuning 데이터**가 맞다.
   지금은 호스트 `ScreenFocusPointResolver`에 있다. U12 덤프 추가 후보.
 - `RotateByCommandCharR` 등 SO 저작 전용 스펙 — yarn 4묶음 밖. 필요하면 같은 규약으로.
-- **커맨드 수명 통합** — `ClaimTweenCommandBase<TSpec>`로 57곳의
-  ResolveRefs / ClaimTarget / Commit / OnStepLifetimeFinished 미니 상태머신 중복을 걷는다.
-  `ShotIntentCommandBase`가 본보기(그 덕에 shot 이관이 커맨드당 몇 줄로 끝났다).
-  커버: 클레임-트윈 부류 전부 + 즉시 확정(SetAnchor)·정착 의존(SetDepth/PlaceFocus)은
-  변형점으로 수용. 절차적 커맨드(Tremble 등)는 대상 아님.
-  **U14 하네스 가동 후 착수** — 라인별 자동 판정이 이 57곳 동작 불변 리팩터의 오라클이다.
-  하네스 전에 하면 검증 수단이 수동 스모크뿐이다.
+- **커맨드 수명 통합** — **착수됨** (`PresentationCore/Base/ClaimTweenCommandBase.cs`).
+  `ShotIntentCommandBase`가 shot 계열에 했던 통합의 일반화. 하네스가 오라클이므로
+  **이관 배치마다 랩드스킵 재판정으로 리포트가 리팩터 전과 같은지 확인한다.**
+  - 배치 1 (완료): MoveBy · ScaleTo · RotateTo (코어 배선이 끝난 셋)
+  - 배치 2~: Fade 쌍(CanvasGroup) → BgR 트랜스폼 계열 → Overlay 계열 →
+    SlideIn/Out·PivotRotateTo·ColorTo → SetDepth/PlaceFocus(클레임 2장 변형점)
+  - 대상 아님: 절차적 연기(Tremble·Sway·Hop…) — 목표값이 정의되지 않는다.
+    즉시 확정(SetAnchor)은 트윈이 없어 이 기반과 모양이 다르다 — 별도 판단.
+  - 기반이 의도적으로 통일한 미세 차이 둘 (실경로 무영향):
+    ① 해석 실패 시 NRE 대신 경고+건너뛰기 ② 가속 잔여시간이 0으로 퇴화하는
+    경계 케이스에서 0초 트윈 대신 즉시 확정 (MoveBy 방식으로 통일).

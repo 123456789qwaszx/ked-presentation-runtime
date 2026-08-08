@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using DG.Tweening;
 using Ked.Presentation.Core;
 using UnityEngine;
@@ -31,10 +30,8 @@ public class ScaleToCommandSpecCharR : CharacterRigCommandSpecBase
     public Ease ease = Ease.OutCubic;
 }
 
-public sealed class ScaleToCommandCharR : CommandBase
+public sealed class ScaleToCommandCharR : ClaimTweenCommandBase
 {
-    private const float StepFinishSpeedUpMultiplier = 30f;
-
     private readonly ScaleToCommandSpecCharR _spec;
 
     private CharacterRigRefs _rigRefs;
@@ -44,133 +41,68 @@ public sealed class ScaleToCommandCharR : CommandBase
     private Vector2 _targetScale;
     private Vector3 _endScale;
 
-    private Tween _tween;
-
-    private bool _resolveAttempted;
-
-    private bool HasClaimedTarget { get; set; }
-
     public override bool WaitForCompletion => _spec.wait;
+
+    protected override float TweenDuration => _spec.duration;
 
     public ScaleToCommandCharR(ScaleToCommandSpecCharR spec)
     {
         _spec = spec;
     }
 
-    protected override IEnumerator ExecuteInner(CommandRunScope scope)
+    protected override bool TryResolveTargets(CommandRunScope scope)
     {
-        if (!_resolveAttempted)
-            ResolveRefs(scope);
+        _rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
+        _rect = _rigRefs?.GetRect(_spec.target);
 
-        ClaimTarget();
+        return _rect != null;
+    }
+
+    protected override void ClaimTarget(CommandRunScope scope)
+    {
+        _rect.DOKill(true);
 
         if (_spec.overrideFromScale)
             ApplyScaleXY(_rect, _spec.fromScale);
 
-        CaptureTweenEndpoints();
-
-        // 중요:
-        // 이 커맨드는 duration 동안 _rect의 localScale을 바꾸는 placement(scale) writer다.
-        // FocusPoint solver가 라이브 scale이 아니라 "정착 scale"을 알 수 있도록 게시한다.
-        PublishSettledTarget();
-
-        if (_spec.duration <= 0f)
-        {
-            CommitFinalState();
-            yield break;
-        }
-
-        _tween = _rect
-            .DOScale(_endScale, _spec.duration)
-            .SetEase(_spec.ease)
-            .SetUpdate(true)
-            .SetTarget(_rect)
-            .OnComplete(CommitFinalState);
-
-        if (_spec.wait)
-            yield return _tween.WaitForCompletion();
-    }
-
-    protected override void OnSkip(CommandRunScope scope)
-    {
-        if (!_resolveAttempted)
-            ResolveRefs(scope);
-
-        if (!HasClaimedTarget)
-        {
-            ClaimTarget();
-
-            if (_spec.overrideFromScale)
-                ApplyScaleXY(_rect, _spec.fromScale);
-
-            CaptureTweenEndpoints();
-            PublishSettledTarget();
-        }
-
-        CommitFinalState();
-    }
-
-    private void ResolveRefs(CommandRunScope scope)
-    {
-        _resolveAttempted = true;
-
-        _rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
-        _rect = _rigRefs.GetRect(_spec.target);
-    }
-
-    private void ClaimTarget()
-    {
-        _rect.DOKill(true);
-        HasClaimedTarget = true;
-    }
-
-    private void CaptureTweenEndpoints()
-    {
         Vector3 currentScale = _rect.localScale;
-
         _startScale = new Vector2(currentScale.x, currentScale.y);
-        _targetScale = ResolveTargetScale(currentScale);
+
+        // ── 코어: 스펙 → 목표 상태. z는 클레임이 건드리지 않는다 (라이브 z 유지 규약) ──
+        StageNodeClaim claim = ScaleToReduction.Reduce(
+            _rect.name,
+            new ScaleToReduction.Args(_spec.relativeToCurrent, _spec.toScale.ToCore()),
+            _startScale.ToCore());
+
+        _targetScale = claim.Value.XY.ToUnity();
 
         _endScale = currentScale;
         _endScale.x = _targetScale.x;
         _endScale.y = _targetScale.y;
-    }
 
-    private Vector2 ResolveTargetScale(Vector3 currentScale)
-    {
-        // ── 코어: 스펙 → 목표 상태 ──
-        // z는 클레임이 건드리지 않는다. 아래 ApplyScaleXY가 라이브 z를 유지하는 것과 같은 규약이다.
-        StageNodeClaim claim = ScaleToReduction.Reduce(
-            _rect.name,
-            new ScaleToReduction.Args(_spec.relativeToCurrent, _spec.toScale.ToCore()),
-            new Vector2(currentScale.x, currentScale.y).ToCore());
-
-        return claim.Value.XY.ToUnity();
-    }
-
-    private void PublishSettledTarget()
-    {
-        if (_rigRefs == null || _rect == null)
-            return;
-
+        // 이 커맨드는 duration 동안 localScale을 바꾸는 placement(scale) writer다.
+        // FocusPoint solver가 라이브 scale이 아니라 "정착 scale"을 알 수 있도록 게시한다.
         _rigRefs.PlacementTargets.PublishLocalScale(_rect, _targetScale);
     }
 
-    private void ClearSettledTarget()
-    {
-        if (_rigRefs == null || _rect == null)
-            return;
+    protected override Tween CreateTween(float duration)
+        => _rect
+            .DOScale(_endScale, duration)
+            .SetEase(_spec.ease)
+            .SetTarget(_rect);
 
+    protected override void OnCommitFinalState()
+    {
+        ApplyScaleXY(_rect, _targetScale);
         _rigRefs.PlacementTargets.Clear(_rect);
     }
 
-    private void CommitFinalState()
+    protected override void MeasureTweenDistances(out float originalDistance, out float remainingDistance)
     {
-        ApplyScaleXY(_rect, _targetScale);
-        ClearSettledTarget();
+        Vector3 current = _rect.localScale;
 
-        HasClaimedTarget = false;
-        _tween = null;
+        originalDistance = Vector2.Distance(_startScale, _targetScale);
+        remainingDistance = Vector2.Distance(new Vector2(current.x, current.y), _targetScale);
     }
 
     private static void ApplyScaleXY(RectTransform rect, Vector2 targetXY)
@@ -180,43 +112,4 @@ public sealed class ScaleToCommandCharR : CommandBase
         scale.y = targetXY.y;
         rect.localScale = scale;
     }
-
-    #region StepLifetimeHook
-
-    protected override void OnStepLifetimeFinished(CommandRunScope scope)
-    {
-        if (!HasClaimedTarget)
-            return;
-
-        if (_tween != null && _tween.IsActive())
-            _tween.Kill(false);
-
-        float duration = CalculateAcceleratedRemainingDuration();
-
-        _tween = _rect
-            .DOScale(_endScale, duration)
-            .SetEase(_spec.ease)
-            .SetUpdate(true)
-            .SetTarget(_rect)
-            .OnComplete(CommitFinalState);
-    }
-
-    private float CalculateAcceleratedRemainingDuration()
-    {
-        Vector3 currentScale = _rect.localScale;
-        Vector2 currentXY = new(currentScale.x, currentScale.y);
-
-        float originalDistance = Vector2.Distance(_startScale, _targetScale);
-        float remainingDistance = Vector2.Distance(currentXY, _targetScale);
-
-        if (originalDistance <= 0.001f || remainingDistance <= 0.001f)
-            return 0f;
-
-        float remainingRatio = Mathf.Clamp01(remainingDistance / originalDistance);
-        float remainingDuration = _spec.duration * remainingRatio;
-
-        return Mathf.Max(0.01f, remainingDuration / StepFinishSpeedUpMultiplier);
-    }
-
-    #endregion
 }

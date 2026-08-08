@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using DG.Tweening;
 using UnityEngine;
 
@@ -24,133 +23,25 @@ public sealed class FadeInCommandSpecBgR : BackgroundRigCommandSpecBase
     public Ease ease = Ease.OutCubic;
 }
 
-public sealed class FadeInCommandBgR : CommandBase
+public sealed class FadeInCommandBgR : CanvasFadeCommandBase
 {
-    private const float StepFinishSpeedUpMultiplier = 30f;
-    private const float TargetAlpha = 1f;
-
     private readonly FadeInCommandSpecBgR _spec;
-
-    private CanvasGroup _canvasGroup;
-
-    private float _startAlpha;
-    private Tween _tween;
-
-    private bool _resolveAttempted;
-
-    private bool HasClaimedTarget { get; set; }
-
-    public override bool WaitForCompletion => _spec.wait;
 
     public FadeInCommandBgR(FadeInCommandSpecBgR spec)
     {
         _spec = spec;
     }
 
-    protected override IEnumerator ExecuteInner(CommandRunScope scope)
+    public override bool WaitForCompletion => _spec.wait;
+
+    protected override float TweenDuration => _spec.duration;
+    protected override Ease FadeEase => _spec.ease;
+    protected override float TargetAlpha => 1f;
+    protected override bool InteractableAfterCommit => true;
+
+    protected override RectTransform ResolveFadeRect(CommandRunScope scope)
     {
-        if (!_resolveAttempted)
-            ResolveRefs(scope);
-
-        ClaimTarget();
-
-        if (_spec.duration <= 0f)
-        {
-            CommitFinalState();
-            yield break;
-        }
-
-        _tween = _canvasGroup
-            .DOFade(TargetAlpha, _spec.duration)
-            .SetEase(_spec.ease)
-            .SetUpdate(true)
-            .SetTarget(_canvasGroup)
-            .OnComplete(CommitFinalState);
-
-        if (_spec.wait)
-            yield return _tween.WaitForCompletion();
-    }
-
-    protected override void OnSkip(CommandRunScope scope)
-    {
-        if (!_resolveAttempted)
-            ResolveRefs(scope);
-
-        if (!HasClaimedTarget)
-            ClaimTarget();
-
-        CommitFinalState();
-    }
-
-    private void ResolveRefs(CommandRunScope scope)
-    {
-        _resolveAttempted = true;
-
         scope.BackgroundRigs.TryGetRig(_spec.rigKey, out BackgroundRigRefs rig);
-        RectTransform target = rig.GetRect(_spec.target);
-        _canvasGroup = GetOrAddCanvasGroup(target);
-    }
-
-    private void ClaimTarget()
-    {
-        _canvasGroup.DOKill(true);
-
-        _startAlpha = _canvasGroup.alpha;
-
-        HasClaimedTarget = true;
-    }
-
-    private void CommitFinalState()
-    {
-        _canvasGroup.alpha = TargetAlpha;
-        _canvasGroup.interactable = true;
-        _canvasGroup.blocksRaycasts = true;
-
-        HasClaimedTarget = false;
-        _tween = null;
-    }
-
-    #region StepLifetimeHook
-
-    protected override void OnStepLifetimeFinished(CommandRunScope scope)
-    {
-        if (!HasClaimedTarget)
-            return;
-        
-        _tween.Kill(false);
-
-        float duration = CalculateAcceleratedRemainingDuration();
-
-        _tween = _canvasGroup
-            .DOFade(TargetAlpha, duration)
-            .SetEase(_spec.ease)
-            .SetUpdate(true)
-            .SetTarget(_canvasGroup)
-            .OnComplete(CommitFinalState);
-    }
-
-    private float CalculateAcceleratedRemainingDuration()
-    {
-        float originalDistance = Mathf.Abs(TargetAlpha - _startAlpha);
-        float remainingDistance = Mathf.Abs(TargetAlpha - _canvasGroup.alpha);
-
-        if (originalDistance <= 0.001f || remainingDistance <= 0.001f)
-            return 0f;
-
-        float remainingRatio = Mathf.Clamp01(remainingDistance / originalDistance);
-        float remainingDuration = _spec.duration * remainingRatio;
-
-        return Mathf.Max(0.01f, remainingDuration / StepFinishSpeedUpMultiplier);
-    }
-
-    #endregion
-
-    private static CanvasGroup GetOrAddCanvasGroup(RectTransform rect)
-    {
-        if (rect.TryGetComponent(out CanvasGroup group))
-            return group;
-
-        Debug.LogWarning($"[FadeInCommandBgR] CanvasGroup missing. Added automatically: {rect.name}", rect);
-        return rect.gameObject.AddComponent<CanvasGroup>();
+        return rig?.GetRect(_spec.target);
     }
 }
