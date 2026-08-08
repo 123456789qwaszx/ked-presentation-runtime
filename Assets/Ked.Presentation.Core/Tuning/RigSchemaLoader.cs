@@ -50,6 +50,24 @@ namespace Ked.Presentation.Core
             RectSpace rootSpace,
             string keyPrefix = "")
         {
+            RectNodeTree tree = new(rootSpace);
+            AddRigTo(tree, rig, keyPrefix, attachParentKey: null);
+            return tree;
+        }
+
+        /// <summary>
+        /// 이미 있는 트리에 리그 인스턴스를 붙인다 — 리듀서의 slot 폴드가 슬롯마다 부른다.
+        /// attachParentKey가 null이면 트리의 루트 공간 직속이다.
+        /// </summary>
+        public static void AddRigTo(
+            RectNodeTree tree,
+            RigSchemaRigDto rig,
+            string keyPrefix = "",
+            string attachParentKey = null)
+        {
+            if (tree == null)
+                throw new ArgumentNullException(nameof(tree));
+
             if (rig == null)
                 throw new ArgumentNullException(nameof(rig));
 
@@ -57,8 +75,6 @@ namespace Ked.Presentation.Core
                 throw new ArgumentException($"리그 '{rig.rigKind}'에 노드가 없다.", nameof(rig));
 
             keyPrefix ??= "";
-
-            RectNodeTree tree = new(rootSpace);
 
             for (int i = 0; i < rig.nodes.Count; i++)
             {
@@ -70,15 +86,13 @@ namespace Ked.Presentation.Core
                 string key = keyPrefix + node.id;
 
                 // 덤프의 빈 parent = 리그 루트 직속. 루트 자신(__root)은 parent가 비어 있고
-                // 트리에서 루트 공간 직속(null)이 된다.
+                // 부착 지점(없으면 루트 공간 직속)에 붙는다.
                 string parentKey = string.IsNullOrEmpty(node.parent)
-                    ? null
+                    ? attachParentKey
                     : keyPrefix + node.parent;
 
                 tree.Add(key, parentKey, ToState(node, rig.rigKind));
             }
-
-            return tree;
         }
 
         //    RigSchemaLoader
