@@ -176,3 +176,10 @@ yarn 4묶음 기준. "이관 안 함"은 **조용히 버린 것이 아니라 판
 - `ScreenFocusPoint` 비율표 — 게임별 값이므로 코어 코드가 아니라 **tuning 데이터**가 맞다.
   지금은 호스트 `ScreenFocusPointResolver`에 있다. U12 덤프 추가 후보.
 - `RotateByCommandCharR` 등 SO 저작 전용 스펙 — yarn 4묶음 밖. 필요하면 같은 규약으로.
+- **커맨드 수명 통합** — `ClaimTweenCommandBase<TSpec>`로 57곳의
+  ResolveRefs / ClaimTarget / Commit / OnStepLifetimeFinished 미니 상태머신 중복을 걷는다.
+  `ShotIntentCommandBase`가 본보기(그 덕에 shot 이관이 커맨드당 몇 줄로 끝났다).
+  커버: 클레임-트윈 부류 전부 + 즉시 확정(SetAnchor)·정착 의존(SetDepth/PlaceFocus)은
+  변형점으로 수용. 절차적 커맨드(Tremble 등)는 대상 아님.
+  **U14 하네스 가동 후 착수** — 라인별 자동 판정이 이 57곳 동작 불변 리팩터의 오라클이다.
+  하네스 전에 하면 검증 수단이 수동 스모크뿐이다.
