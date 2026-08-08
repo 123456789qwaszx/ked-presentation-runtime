@@ -14,12 +14,10 @@ namespace Ked.Presentation.Core
     // 전문: Documentation~/reduction-boundary.md
     // ─────────────────────────────────────────────────────────────────
 
-    /// <summary>move_by — 위치 이동. (MoveByCommandCharR / MoveByCommandBgR 공용 산수)</summary>
     public static class MoveByReduction
     {
         public readonly struct Args
         {
-            /// <summary>false: delta는 현재 위치 기준 오프셋. true: delta가 목표 절대값.</summary>
             public readonly bool UseAbsolutePosition;
             public readonly Vec2 Delta;
 
@@ -42,13 +40,38 @@ namespace Ked.Presentation.Core
             return StageNodeClaim.AnchoredPosition(nodeKey, destination);
         }
     }
+    
+    public static class RotateToReduction
+    {
+        public readonly struct Args
+        {
+            public readonly bool RelativeToCurrent;
+            public readonly Vec3 ToEuler;
 
-    /// <summary>scale_to — 스케일 변경. 절대 또는 현재 기준 배율.</summary>
+            public Args(bool relativeToCurrent, Vec3 toEuler)
+            {
+                RelativeToCurrent = relativeToCurrent;
+                ToEuler = toEuler;
+            }
+        }
+
+        public static StageNodeClaim Reduce(
+            string nodeKey,
+            in Args args,
+            Vec3 currentLocalEuler)
+        {
+            Vec3 target = args.RelativeToCurrent
+                ? currentLocalEuler + args.ToEuler
+                : args.ToEuler;
+
+            return StageNodeClaim.LocalEuler(nodeKey, target);
+        }
+    }
+
     public static class ScaleToReduction
     {
         public readonly struct Args
         {
-            /// <summary>false: ToScale이 절대 스케일. true: 현재 스케일에 곱한다.</summary>
             public readonly bool RelativeToCurrent;
             public readonly Vec2 ToScale;
 

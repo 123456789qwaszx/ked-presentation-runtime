@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using DG.Tweening;
+using Ked.Presentation.Core;
 using UnityEngine;
 
 [Serializable]
@@ -123,10 +124,12 @@ public sealed class RotateToCommandCharR : CommandBase
 
     private Vector3 ResolveTargetEuler(Vector3 startEuler)
     {
-        if (!_spec.relativeToCurrent)
-            return _spec.toEuler;
+        StageNodeClaim claim = RotateToReduction.Reduce(
+            _rect.name,
+            new RotateToReduction.Args(_spec.relativeToCurrent, _spec.toEuler.ToCore()),
+            startEuler.ToCore());
 
-        return startEuler + _spec.toEuler;
+        return claim.Value.ToUnity();
     }
 
     private void CommitFinalState()
