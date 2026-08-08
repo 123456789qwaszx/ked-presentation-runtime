@@ -100,7 +100,12 @@ public class VnAppBootstrap : MonoBehaviour
     [SerializeField] private RectTransform backgroundRigPrefab;
     [SerializeField] private RectTransform overlayRigPrefab;
     
-    [Header("ChapterButtonCard")] 
+    [Header("등가성 하네스")]
+    [Tooltip("켜면 재생 중 라인마다 (코어 리듀서로 접은 상태) vs (실제 무대)를 비교하고 " +
+             "종료 시 EquivalenceReports/*.json을 남긴다. 판정 전용 — 재생에 영향 없음.")]
+    [SerializeField] private bool enableEquivalenceHarness;
+
+    [Header("ChapterButtonCard")]
     [SerializeField] private RectTransform chapterCardPrefab;
     [SerializeField] private RectTransform nodeRigPrefab;
     [SerializeField] private ChapterCardFactory chapterCardFactory;
@@ -192,6 +197,8 @@ public class VnAppBootstrap : MonoBehaviour
         BootstrapEpisodeSelectionRuntime();
         InitializeEpisodePlayer();
         BootstrapScreenBindings();
+
+        BootstrapEquivalenceHarness();
 
         //_screenBindings.StartDungeonCafeCampaign(dungeonCafe);
         //dungeonCafeBootstrap.DungeonCafeStart(_screenBindings);
@@ -550,6 +557,24 @@ public class VnAppBootstrap : MonoBehaviour
             _presentationLaneScopeSession);
     }
     
+    // 등가성 하네스. 토글이 꺼져 있으면 아무것도 만들지 않는다 — 재생 경로 무영향.
+    private void BootstrapEquivalenceHarness()
+    {
+        if (!enableEquivalenceHarness)
+            return;
+
+        GameObject harnessGo = new("StageEquivalenceHarness");
+        harnessGo.transform.SetParent(transform, false);
+
+        StageEquivalenceHarness harness = harnessGo.AddComponent<StageEquivalenceHarness>();
+
+        harness.Initialize(
+            _vnRuntimeStateProvider,
+            _presentationLaneScopeSession,
+            _presentationResponseRig,
+            dialogueAdvanceDispatcher);
+    }
+
     private void BootstrapScreenBindings()
     {
         _screenBindings.ConfigurePresentationView(

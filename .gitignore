@@ -101,3 +101,5 @@ InitTestScene*.unity*
 # Large local portrait art assets
 /[Aa]ssets/[Aa]rt/[Pp]ortraits/
 /[Aa]ssets/[Aa]rt/[Pp]ortraits.meta
+# 등가성 하네스 재생 산출물 (커밋 대상 아님)
+EquivalenceReports/

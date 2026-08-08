@@ -7,6 +7,11 @@ public sealed class DialogueAdvanceDispatcher : MonoBehaviour
     private DialogueRunner _dialogueRunner;
     private VNLinePresentationState _linePresentationAdvanceState;
 
+    /// <summary>
+    /// 다음 라인을 요청하기 직전, 등가성 하네스의 관측점으로 사용.
+    /// </summary>
+    public event System.Action BeforeNextLineDispatched;
+
     public void Initialize(
         AdvanceGate gate,
         DialogueRunner dialogueRunner,
@@ -37,6 +42,8 @@ public sealed class DialogueAdvanceDispatcher : MonoBehaviour
         }
         else
         {
+            BeforeNextLineDispatched?.Invoke();
+
             _dialogueRunner.RequestNextLine();
             _gate.AddCooldownSeconds(_gate.GetCooldownAfterNextLine(kind));
         }
