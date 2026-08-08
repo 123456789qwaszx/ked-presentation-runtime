@@ -458,14 +458,14 @@ namespace Ked.Presentation.Core.Tests
         }
 
         [Test]
-        public void shot_focus_to는_명시적_Unhandled다()
+        public void shot_focus_to는_focus_튜닝_없이도_접힌다()
         {
-            // 리덕션(ShotZoomFocusReduction)은 있다. 입력(focus 튜닝·화면 지점표)이
-            // 아직 배선 전이다 — "디스패치를 빼먹은 것"과 구분되도록 이유를 명시한다.
-            StageState state = Fold(Cmd("slot", "c1"), Cmd("shot_focus_to", "c1"));
+            // 튜닝이 없으면 오프셋이 0일 뿐 폴드 자체는 성립한다.
+            // (오프셋 합의 정확성은 FocusStageReductionTests가 본다.)
+            StageState state = Fold(Cmd("slot", "c1"), Cmd("shot_focus_to", "c1", "body", "center", "2.5"));
 
-            Assert.That(state.Unhandled.Count, Is.EqualTo(1));
-            Assert.That(state.Unhandled[0].Reason, Does.Contain("배선"));
+            Assert.That(state.Unhandled, Is.Empty);
+            Assert.That(state.Shot.Zoom, Is.EqualTo(2.5f));
         }
 
         // ── Unhandled 규율 네 갈래 ───────────────────────────────────

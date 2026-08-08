@@ -145,6 +145,12 @@ public sealed class StageEquivalenceHarness : MonoBehaviour
         RoleAnchorTuningFileDto roleAnchors = JsonUtility.FromJson<RoleAnchorTuningFileDto>(
             File.ReadAllText(Path.Combine(tuningDir, "presets", "role-anchor.json")));
 
+        DepthTuningFileDto depthTuning = JsonUtility.FromJson<DepthTuningFileDto>(
+            File.ReadAllText(Path.Combine(tuningDir, "presets", "depth.json")));
+
+        FocusTuningFileDto focusTuning = JsonUtility.FromJson<FocusTuningFileDto>(
+            File.ReadAllText(Path.Combine(tuningDir, "presets", "focus-tuning.json")));
+
         _tuning = new StageReducerTuning
         {
             RigSchemas = rigSchemas,
@@ -153,6 +159,8 @@ public sealed class StageEquivalenceHarness : MonoBehaviour
                 baseResolution.referenceResolution.x,
                 baseResolution.referenceResolution.y),
             RoleAnchors = roleAnchors?.MonoBehaviour,
+            DepthPresets = depthTuning?.MonoBehaviour?.presets,
+            FocusTuning = focusTuning?.MonoBehaviour,
         };
     }
 

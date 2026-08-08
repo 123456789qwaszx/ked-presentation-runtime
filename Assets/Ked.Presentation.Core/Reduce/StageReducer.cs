@@ -21,6 +21,12 @@ namespace Ked.Presentation.Core
         /// 실측 덤프에 비기본값 엔트리가 있으므로(tyrant·Amber) 침묵하면 그 장면이 어긋난다.
         /// </summary>
         public RoleAnchorTuningBodyDto RoleAnchors;
+
+        /// <summary>presets/depth.json — size 계열 폴드. 없으면 size는 Unhandled.</summary>
+        public DepthPresetSetDto DepthPresets;
+
+        /// <summary>presets/focus-tuning.json — place/size의 focus 오프셋. 없으면 base 0으로 접는다.</summary>
+        public FocusTuningBodyDto FocusTuning;
     }
 
     /// <summary>
@@ -116,6 +122,34 @@ namespace Ked.Presentation.Core
                 case "fade_in": return ApplyFade(state, cmd, visible: true, out reason);
                 case "fade_out": return ApplyFade(state, cmd, visible: false, out reason);
 
+                // place 계열 — focus 지점을 화면 지점으로 (SettledFocusMath.SolveFocusPlacement).
+                // 브리지: place(role, focus="bust", screenPoint="center") /
+                //         place_*(role, focus="face") — 접미사가 화면 지점을 정한다.
+                case "place": return ApplyPlace(state, cmd, tuning, cmd.Arg(2, "center"), "bust", out reason);
+                case "place_left": return ApplyPlace(state, cmd, tuning, "left", "face", out reason);
+                case "place_center": return ApplyPlace(state, cmd, tuning, "center", "face", out reason);
+                case "place_right": return ApplyPlace(state, cmd, tuning, "right", "face", out reason);
+                case "place_top": return ApplyPlace(state, cmd, tuning, "top", "face", out reason);
+                case "place_bottom": return ApplyPlace(state, cmd, tuning, "bottom", "face", out reason);
+                case "place_tl": return ApplyPlace(state, cmd, tuning, "tl", "face", out reason);
+                case "place_tr": return ApplyPlace(state, cmd, tuning, "tr", "face", out reason);
+                case "place_bl": return ApplyPlace(state, cmd, tuning, "bl", "face", out reason);
+                case "place_br": return ApplyPlace(state, cmd, tuning, "br", "face", out reason);
+                case "place_inner_tl": return ApplyPlace(state, cmd, tuning, "inner_tl", "face", out reason);
+                case "place_inner_tr": return ApplyPlace(state, cmd, tuning, "inner_tr", "face", out reason);
+                case "place_inner_bl": return ApplyPlace(state, cmd, tuning, "inner_bl", "face", out reason);
+                case "place_inner_br": return ApplyPlace(state, cmd, tuning, "inner_br", "face", out reason);
+
+                // size 계열 — depth 프리셋 (focus 보존 보정 포함).
+                // 브리지: size(role, depthArg, preserveFocus="bust") / size_*(role, preserveFocus="bust").
+                case "size": return ApplySize(state, cmd, tuning, cmd.Arg(1), cmd.Arg(2, "bust"), out reason);
+                case "size_far": return ApplySize(state, cmd, tuning, "far", cmd.Arg(1, "bust"), out reason);
+                case "size_back": return ApplySize(state, cmd, tuning, "back", cmd.Arg(1, "bust"), out reason);
+                case "size_mid": return ApplySize(state, cmd, tuning, "mid", cmd.Arg(1, "bust"), out reason);
+                case "size_front": return ApplySize(state, cmd, tuning, "front", cmd.Arg(1, "bust"), out reason);
+                case "size_close": return ApplySize(state, cmd, tuning, "close", cmd.Arg(1, "bust"), out reason);
+                case "size_reset": return ApplySize(state, cmd, tuning, "mid", cmd.Arg(1, "bust"), out reason);
+
                 // nudge (unitToken 필수 — 브리지에 기본값이 없다)
                 case "left":  return ApplyNudge(state, cmd, tuning, -1f, 0f, "CharSlot_Track_X", out reason);
                 case "right": return ApplyNudge(state, cmd, tuning, 1f, 0f, "CharSlot_Track_X", out reason);
@@ -144,13 +178,7 @@ namespace Ked.Presentation.Core
                     state.Shot = ShotResetReduction.Reduce();
                     return true;
 
-                case "shot_focus_to":
-                    // 리덕션(ShotZoomFocusReduction)은 이미 있다. 없는 것은 입력이다 —
-                    // 정착 focus 측정에 focus 튜닝(오프셋)과 화면 지점표가 필요한데 아직
-                    // tuning에 배선되지 않았다. 명시적으로 남겨야 "리덕션은 있는데 디스패치를
-                    // 빼먹는" 실수와 구분된다.
-                    reason = "focus 튜닝·화면 지점표가 아직 tuning에 배선되지 않았다";
-                    return false;
+                case "shot_focus_to": return ApplyShotFocusTo(state, cmd, tuning, out reason);
 
                 // 구조 축 (v1: 부착 기록만 — 컨테이너 항등 가정으로 좌표 영향 없음)
                 case "char_to":    return ApplyCharTo(state, cmd, cmd.Arg(1, "stage00"), cmd.Arg(2, "mid"), out reason);
@@ -349,6 +377,57 @@ namespace Ked.Presentation.Core
             return true;
         }
 
+        // ── place / size ─────────────────────────────────────────────
+
+        private static bool ApplyPlace(
+            StageState state, in StageCommand cmd, StageReducerTuning tuning,
+            string screenPointName, string defaultFocusToken, out string reason)
+        {
+            if (!TryGetSpawnedSlot(state, cmd, out string slotKey, out reason))
+                return false;
+
+            if (!FocusPresetName.TryNormalizeToken(cmd.Arg(1, defaultFocusToken), out string focusName))
+            {
+                reason = $"focus 프리셋 토큰 '{cmd.Arg(1)}'을 모른다";
+                return false;
+            }
+
+            state.TryGetCharacter(slotKey, out string characterKey);
+
+            if (!PlaceFocusStageReduction.TryReduce(
+                    state, slotKey, characterKey, focusName, screenPointName,
+                    tuning.FocusTuning, out StageNodeClaim claim, out reason))
+            {
+                return false;
+            }
+
+            state.Apply(claim);
+            return true;
+        }
+
+        private static bool ApplySize(
+            StageState state, in StageCommand cmd, StageReducerTuning tuning,
+            string depthPresetKey, string preserveFocusToken, out string reason)
+        {
+            if (!TryGetSpawnedSlot(state, cmd, out string slotKey, out reason))
+                return false;
+
+            state.TryGetCharacter(slotKey, out string characterKey);
+
+            if (!SetDepthStageReduction.TryReduce(
+                    state, slotKey, characterKey, depthPresetKey, preserveFocusToken,
+                    tuning.DepthPresets, tuning.FocusTuning,
+                    out StageNodeClaim depthYClaim, out StageNodeClaim depthScaleClaim,
+                    out reason))
+            {
+                return false;
+            }
+
+            state.Apply(depthYClaim);
+            state.Apply(depthScaleClaim);
+            return true;
+        }
+
         // ── 이동/스케일/회전 ─────────────────────────────────────────
 
         private static bool ApplyNudge(
@@ -499,6 +578,57 @@ namespace Ked.Presentation.Core
         }
 
         // ── shot ─────────────────────────────────────────────────────
+
+        /// <summary>
+        /// shot_focus_to (role, focus="body", screenPoint="center", zoom=2.5, duration).
+        ///
+        /// 런타임과 같은 경로를 태운다: "현재 카메라가 적용된" 측정 focus를 만들어
+        /// ShotZoomFocusReduction에 넘긴다(내부에서 카메라를 벗겨 논리 좌표 복원).
+        /// 폴드의 측정값 = 논리 focus × 현재 배율 + 현재 pan — 적용측 규약 그대로다.
+        /// 여기서 지름길을 내면 런타임과 폴드가 갈라진다.
+        /// </summary>
+        private static bool ApplyShotFocusTo(
+            StageState state, in StageCommand cmd, StageReducerTuning tuning, out string reason)
+        {
+            if (!TryGetSpawnedSlot(state, cmd, out string slotKey, out reason))
+                return false;
+
+            if (!FocusPresetName.TryNormalizeToken(cmd.Arg(1, "body"), out string focusName))
+            {
+                reason = $"focus 프리셋 토큰 '{cmd.Arg(1)}'을 모른다";
+                return false;
+            }
+
+            string screenPointName = cmd.Arg(2, "center");
+
+            if (!ScreenPointRatios.TryResolve(state.Nodes.RootSpace.Size, screenPointName, out Vec2 desired))
+            {
+                reason = $"화면 지점 '{screenPointName}'을 모른다";
+                return false;
+            }
+
+            if (!NumberToken.TryParseFloat(cmd.Arg(3, "2.5"), out float zoom))
+            {
+                reason = $"zoom을 읽지 못했다: '{cmd.Arg(3)}'";
+                return false;
+            }
+
+            state.TryGetCharacter(slotKey, out string characterKey);
+
+            Vec2 focusOffset = FocusOffsetMath.Resolve(tuning.FocusTuning, characterKey, focusName, Vec2.Zero);
+
+            RectNodeState[] chain = state.Nodes.BuildChainTo(
+                StageState.NodeKeyOf(slotKey, PlaceFocusStageReduction.MeasureNodeId));
+
+            Vec2 logicalFocus = SettledFocusMath.FocusPointInRigSpace(
+                chain, state.Nodes.RootSpace, focusOffset);
+
+            float currentScale = ShotIntentMath.EvaluateCameraScale(state.Shot.Zoom);
+            Vec2 measuredFocus = logicalFocus * currentScale + state.Shot.PanInRigSpace;
+
+            state.Shot = ShotZoomFocusReduction.Reduce(state.Shot, zoom, measuredFocus, desired);
+            return true;
+        }
 
         private static bool ApplyShotZoom(StageState state, in StageCommand cmd, out string reason)
         {
