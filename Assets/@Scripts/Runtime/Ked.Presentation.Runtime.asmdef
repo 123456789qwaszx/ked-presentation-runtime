@@ -2,6 +2,7 @@
     "name": "Ked.Presentation.Runtime",
     "rootNamespace": "",
     "references": [
+        "Ked.Presentation.Core",
         "Unity.TextMeshPro",
         "DOTween.Modules"
     ],
