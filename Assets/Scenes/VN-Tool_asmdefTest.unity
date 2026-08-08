@@ -7944,7 +7944,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 355984e90625bb24fbaa9aa39f39f63f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VnAppBootstrap
-  dungeonCafe: {fileID: 0}
   overlayCommandExecutor: {fileID: 1334588234}
   overlaySequenceRunner: {fileID: 461075912}
   overlaySequenceCatalog: {fileID: 11400000, guid: f5c84b12e7c8a2140a5cecd428a8d63a, type: 2}
@@ -7985,9 +7984,10 @@ MonoBehaviour:
   vnAdvanceInputPoller: {fileID: 1315566987}
   dialogueAdvanceDispatcher: {fileID: 307625745}
   vnFeatureController: {fileID: 775605347}
-  rigPrefab: {fileID: 2306115306432438348, guid: c7b3ab204cabea145aff7affa87d3d9d, type: 3}
+  rigPrefab: {fileID: 0}
   backgroundRigPrefab: {fileID: 6323253774795375343, guid: 18f0ce8dac4b54f44a88bdcceac48012, type: 3}
   overlayRigPrefab: {fileID: 0}
+  enableEquivalenceHarness: 1
   chapterCardPrefab: {fileID: 2410623267660482620, guid: 60640956e3866b44e9e8c9df1a45dbd3, type: 3}
   nodeRigPrefab: {fileID: 8432584506347833489, guid: 5a92676ae0261c54188d2a64469a3787, type: 3}
   chapterCardFactory: {fileID: 767435430}
@@ -33204,7 +33204,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 3356120893837444203}
   m_Direction: 2
   m_Value: 0
-  m_Size: 0.99999607
+  m_Size: 0.99999475
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -36036,7 +36036,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.000017166138, y: -0.00012311168}
+  m_AnchoredPosition: {x: 0.000017166138, y: 0.00015984949}
   m_SizeDelta: {x: 0, y: 300}
   m_Pivot: {x: 0, y: 1}
 --- !u!222 &3549758765554785767

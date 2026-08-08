@@ -197,6 +197,17 @@ namespace Ked.Presentation.Core
             state.RegisterSlot(slotKey);
             state.SetAttachment(slotKey, new SlotAttachment(stageKey, layerKey));
 
+            // 초기 가시성: 덤프의 CanvasGroup alpha.
+            // 초상·오버레이·이모지 루트는 0으로 태어난다 — 기본값 1로 두면
+            // show 전 구간이 전부 어긋난다(첫 리포트의 최대 불일치 클래스였다).
+            for (int i = 0; i < rig.nodes.Count; i++)
+            {
+                RigSchemaNodeDto node = rig.nodes[i];
+
+                if (node != null && node.hasCanvasGroup)
+                    state.SetAlpha(StageState.NodeKeyOf(slotKey, node.id), node.canvasGroupAlpha);
+            }
+
             return true;
         }
 

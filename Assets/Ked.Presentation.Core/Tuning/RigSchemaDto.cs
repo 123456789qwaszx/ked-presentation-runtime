@@ -57,6 +57,16 @@ namespace Ked.Presentation.Core
         /// 트리를 세운 뒤 GetRectSize와 대조하는 검산용이다.
         /// </summary>
         public Float2Dto measuredRectSize;
+
+        /// <summary>
+        /// 가시성 축 대상인가. 구덤프(필드 없음)는 역직렬화 기본값 false로 안전하게 떨어진다 —
+        /// JsonUtility가 없는 필드를 0/false로 채우기 때문에, alpha만 두면
+        /// "CanvasGroup이 없다"와 "alpha가 0이다"가 구분되지 않는다.
+        /// </summary>
+        public bool hasCanvasGroup;
+
+        /// <summary>hasCanvasGroup일 때만 의미 있는 스폰 직후 alpha.</summary>
+        public float canvasGroupAlpha;
     }
 
     [Serializable]

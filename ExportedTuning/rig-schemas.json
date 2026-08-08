@@ -44,7 +44,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": true,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "CharSlot_Track_Focus",
@@ -82,7 +84,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "CharSlot_DepthY",
@@ -120,7 +124,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "CharSlot_DepthScale",
@@ -158,7 +164,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "CharSlot_Track_Idle",
@@ -196,7 +204,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "CharSlot_Track",
@@ -234,7 +244,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "CharSlot_Track_X",
@@ -272,7 +284,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "CharSlot_Track_Y",
@@ -310,7 +324,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "CharSlot_Rotation",
@@ -348,7 +364,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "CharSlot_SwayPivot",
@@ -386,7 +404,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "CharSlot_Scale",
@@ -424,7 +444,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "CharacterPortrait_VisualOffset",
@@ -462,7 +484,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "CharacterPortrait_Track",
@@ -500,7 +524,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "CharacterPortrait_Rotation",
@@ -538,7 +564,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "CharacterPortrait_Track_Move",
@@ -576,7 +604,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "CharacterPortrait_Track_Move_X",
@@ -614,7 +644,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "CharacterPortrait_Track_Move_Y",
@@ -652,7 +684,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "CharacterPortrait_SwayPivot",
@@ -690,7 +724,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "CharacterPortrait_Shake",
@@ -728,7 +764,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "CharacterPortrait_ActingScale",
@@ -766,7 +804,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "CharacterPortrait_ActingScale_X",
@@ -804,7 +844,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "CharacterPortrait_ActingScale_Y",
@@ -842,7 +884,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "CharacterPortraitSprite_Root",
@@ -880,7 +924,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": true,
+                    "canvasGroupAlpha": 0.0
                 },
                 {
                     "id": "CharacterPortraitSprite_Image",
@@ -918,7 +964,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "CharacterPortraitSpriteOverlay_Root",
@@ -956,7 +1004,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": true,
+                    "canvasGroupAlpha": 0.0
                 },
                 {
                     "id": "CharacterPortraitSpriteOverlay_Image",
@@ -994,7 +1044,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "Character_ExtensionsRoot",
@@ -1032,7 +1084,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "EmojiSlot00_Root",
@@ -1070,7 +1124,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": true,
+                    "canvasGroupAlpha": 0.0
                 },
                 {
                     "id": "EmojiSlot00_VisualOffset",
@@ -1108,7 +1164,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "EmojiSlot00_Track",
@@ -1146,7 +1204,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "EmojiSlot00_BaseRotation",
@@ -1184,7 +1244,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "EmojiSlot00_Track_Move",
@@ -1222,7 +1284,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "EmojiSlot00_Track_Move_X",
@@ -1260,7 +1324,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "EmojiSlot00_Track_Move_Y",
@@ -1298,7 +1364,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "EmojiSlot00_Effect",
@@ -1336,7 +1404,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "EmojiSlot00_SwayPivot",
@@ -1374,7 +1444,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "EmojiSlot00_Rotation",
@@ -1412,7 +1484,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "EmojiSlot00_Size",
@@ -1450,7 +1524,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "EmojiSlot00_Scale",
@@ -1488,7 +1564,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "EmojiSlot00_Image",
@@ -1526,7 +1604,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "EmojiSlot01_Root",
@@ -1564,7 +1644,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": true,
+                    "canvasGroupAlpha": 0.0
                 },
                 {
                     "id": "EmojiSlot01_VisualOffset",
@@ -1602,7 +1684,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "EmojiSlot01_Track",
@@ -1640,7 +1724,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "EmojiSlot01_BaseRotation",
@@ -1678,7 +1764,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "EmojiSlot01_Track_Move",
@@ -1716,7 +1804,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "EmojiSlot01_Track_Move_X",
@@ -1754,7 +1844,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "EmojiSlot01_Track_Move_Y",
@@ -1792,7 +1884,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "EmojiSlot01_Effect",
@@ -1830,7 +1924,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "EmojiSlot01_SwayPivot",
@@ -1868,7 +1964,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "EmojiSlot01_Rotation",
@@ -1906,7 +2004,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "EmojiSlot01_Size",
@@ -1944,7 +2044,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "EmojiSlot01_Scale",
@@ -1982,7 +2084,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "EmojiSlot01_Image",
@@ -2020,7 +2124,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "EmojiSlot02_Root",
@@ -2058,7 +2164,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": true,
+                    "canvasGroupAlpha": 0.0
                 },
                 {
                     "id": "EmojiSlot02_VisualOffset",
@@ -2096,7 +2204,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "EmojiSlot02_Track",
@@ -2134,7 +2244,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "EmojiSlot02_BaseRotation",
@@ -2172,7 +2284,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "EmojiSlot02_Track_Move",
@@ -2210,7 +2324,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "EmojiSlot02_Track_Move_X",
@@ -2248,7 +2364,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "EmojiSlot02_Track_Move_Y",
@@ -2286,7 +2404,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "EmojiSlot02_Effect",
@@ -2324,7 +2444,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "EmojiSlot02_SwayPivot",
@@ -2362,7 +2484,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "EmojiSlot02_Rotation",
@@ -2400,7 +2524,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "EmojiSlot02_Size",
@@ -2438,7 +2564,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "EmojiSlot02_Scale",
@@ -2476,7 +2604,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "EmojiSlot02_Image",
@@ -2514,7 +2644,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 }
             ]
         },
@@ -2558,7 +2690,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "Background_Root",
@@ -2596,7 +2730,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": true,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "Background_Anchor",
@@ -2634,7 +2770,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "Background_Track_Move",
@@ -2672,7 +2810,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "Background_Track_X",
@@ -2710,7 +2850,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "Background_Track_Y",
@@ -2748,7 +2890,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "Background_Original_Rotation",
@@ -2786,7 +2930,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "Background_Rotation",
@@ -2824,7 +2970,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "Background_Shake",
@@ -2862,7 +3010,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "Background_Size",
@@ -2900,7 +3050,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "Background_Scale",
@@ -2938,7 +3090,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "Background_DepthScale",
@@ -2976,7 +3130,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "Background_Mask",
@@ -3014,7 +3170,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "Background_ActingScale",
@@ -3052,7 +3210,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "Background_ActingScale_X",
@@ -3090,7 +3250,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "Background_ActingScale_Y",
@@ -3128,7 +3290,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "BackgroundSprite_Root",
@@ -3166,7 +3330,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": true,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "BackgroundSprite_Image",
@@ -3204,7 +3370,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "Background_ObjectSlotRoot",
@@ -3242,7 +3410,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": true,
+                    "canvasGroupAlpha": 0.0
                 }
             ]
         },
@@ -3286,7 +3456,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "Overlay_Root",
@@ -3324,7 +3496,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": true,
+                    "canvasGroupAlpha": 0.0
                 },
                 {
                     "id": "Overlay_Anchor",
@@ -3362,7 +3536,9 @@
                     "measuredRectSize": {
                         "x": 0.0,
                         "y": 0.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "Overlay_Track",
@@ -3400,7 +3576,9 @@
                     "measuredRectSize": {
                         "x": 0.0,
                         "y": 0.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "Overlay_BaseRotation",
@@ -3438,7 +3616,9 @@
                     "measuredRectSize": {
                         "x": 0.0,
                         "y": 0.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "Overlay_Track_Move",
@@ -3476,7 +3656,9 @@
                     "measuredRectSize": {
                         "x": 0.0,
                         "y": 0.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "Overlay_Track_X",
@@ -3514,7 +3696,9 @@
                     "measuredRectSize": {
                         "x": 0.0,
                         "y": 0.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "Overlay_Track_X_Offset",
@@ -3552,7 +3736,9 @@
                     "measuredRectSize": {
                         "x": 0.0,
                         "y": 0.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "Overlay_Track_Y",
@@ -3590,7 +3776,9 @@
                     "measuredRectSize": {
                         "x": 0.0,
                         "y": 0.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "Overlay_Track_Y_Offset",
@@ -3628,7 +3816,9 @@
                     "measuredRectSize": {
                         "x": 0.0,
                         "y": 0.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "Overlay_Rotation",
@@ -3666,7 +3856,9 @@
                     "measuredRectSize": {
                         "x": 0.0,
                         "y": 0.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "Overlay_Size",
@@ -3704,7 +3896,9 @@
                     "measuredRectSize": {
                         "x": 0.0,
                         "y": 0.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "Overlay_Scale",
@@ -3742,7 +3936,9 @@
                     "measuredRectSize": {
                         "x": 0.0,
                         "y": 0.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "Overlay_ActingScale",
@@ -3780,7 +3976,9 @@
                     "measuredRectSize": {
                         "x": 0.0,
                         "y": 0.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "Overlay_ActingScale_X",
@@ -3818,7 +4016,9 @@
                     "measuredRectSize": {
                         "x": 0.0,
                         "y": 0.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "Overlay_ActingScale_Y",
@@ -3856,7 +4056,9 @@
                     "measuredRectSize": {
                         "x": 0.0,
                         "y": 0.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "Overlay_Content",
@@ -3894,7 +4096,9 @@
                     "measuredRectSize": {
                         "x": 0.0,
                         "y": 0.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "Overlay_ImageBox",
@@ -3932,7 +4136,9 @@
                     "measuredRectSize": {
                         "x": 0.0,
                         "y": 0.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "Overlay_ImagePad",
@@ -3970,7 +4176,9 @@
                     "measuredRectSize": {
                         "x": 0.0,
                         "y": 0.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "Overlay_Image",
@@ -4008,7 +4216,9 @@
                     "measuredRectSize": {
                         "x": 0.0,
                         "y": 0.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "Overlay_TextBox",
@@ -4046,7 +4256,9 @@
                     "measuredRectSize": {
                         "x": 0.0,
                         "y": 0.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "Overlay_TextPad",
@@ -4084,7 +4296,9 @@
                     "measuredRectSize": {
                         "x": 0.0,
                         "y": 0.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "Overlay_Text",
@@ -4122,7 +4336,9 @@
                     "measuredRectSize": {
                         "x": 0.0,
                         "y": 0.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 }
             ]
         },
@@ -4166,7 +4382,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "ScreenOverlay_Root",
@@ -4204,7 +4422,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "Vignette_Image",
@@ -4242,7 +4462,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "Noise_Image",
@@ -4280,7 +4502,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 },
                 {
                     "id": "Flash_Image",
@@ -4318,7 +4542,9 @@
                     "measuredRectSize": {
                         "x": 1920.0,
                         "y": 1080.0
-                    }
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0
                 }
             ]
         }

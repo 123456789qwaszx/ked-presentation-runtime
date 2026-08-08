@@ -297,6 +297,12 @@ public static class PresentationTuningExporter
     /// </summary>
     private static RigNodeDto CaptureNode(string id, string parent, RectTransform rect)
     {
+        // 가시성 축: 스폰 직후의 alpha. 초상·이모지 루트는 0으로 태어난다.
+        // ⚠ canvasGroupAlpha만 두면 안 된다 — JsonUtility는 "없는 필드"를 0으로 채우므로
+        // 구덤프를 읽을 때 "CanvasGroup이 없다"와 "alpha가 0이다"가 구분되지 않는다.
+        // bool 게이트를 함께 두면 구덤프는 false로 안전하게 떨어진다.
+        bool hasCanvasGroup = rect.TryGetComponent(out CanvasGroup canvasGroup);
+
         return new RigNodeDto
         {
             id = id,
@@ -309,6 +315,8 @@ public static class PresentationTuningExporter
             localScale = rect.localScale,
             localEulerAngles = rect.localEulerAngles,
             measuredRectSize = rect.rect.size,
+            hasCanvasGroup = hasCanvasGroup,
+            canvasGroupAlpha = hasCanvasGroup ? canvasGroup.alpha : 1f,
         };
     }
 
@@ -473,6 +481,10 @@ public static class PresentationTuningExporter
         public Vector3 localScale;
         public Vector3 localEulerAngles;
         public Vector2 measuredRectSize;
+
+        // 가시성 축. hasCanvasGroup이 bool 게이트다 — 위 CaptureNode 주석 참조.
+        public bool hasCanvasGroup;
+        public float canvasGroupAlpha;
     }
 
     [Serializable]

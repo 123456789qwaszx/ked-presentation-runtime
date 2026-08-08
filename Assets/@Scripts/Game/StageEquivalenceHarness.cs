@@ -22,9 +22,22 @@ using UnityEngine;
 //   런타임 라인 ID는 컴파일 시 생성되므로 ID 매칭이 원리적으로 불가능하다.
 //   그래서 기본은 전진 순서 커서이고, 태그가 있으면 ID가 이긴다.
 //
-// 실행: 부트스트랩의 enableEquivalenceHarness를 켜고 에피소드 재생.
-//   랩드스킵 권장(모든 커맨드가 즉시 확정 = 라이브가 곧 정착 상태).
-//   라인마다 콘솔 판정, 종료 시 EquivalenceReports/*.json.
+// ── 측정 프로토콜 (실측으로 갈린 것이라 지킬 것) ────────────────────────────
+//
+// 【기준】 랩드스킵(좌 Ctrl) 재생 — 폴드 대조는 이 방식으로만 판정한다.
+//   모든 커맨드가 즉시 확정되므로 라이브가 곧 정착 상태다.
+//
+// 【참고】 라인 단위(HurryUpLine) 재생 — 판정 기준으로 쓰지 말 것.
+//   절차적 연기(sway·idle_breathe·jolt·dip·tap)가 실제로 돌 시간이 생기고,
+//   트윈이 진행 중인 중간 상태가 캡처된다. 실측 예:
+//     CharacterPortrait_SwayPivot.localEulerAngles  캡처=(0,0,7.53) / (0,0,359.62) …
+//     CharSlot_Track_Idle.anchoredPosition          캡처=(0, 7.99) …
+//     CharacterPortraitSpriteOverlay_Root.alpha     캡처=0.018 ~ 0.207 (크로스페이드 중)
+//   값이 매 라인 제각각인 것이 특징이다 — 목표값이 아니라 시간 함수의 스냅샷이라서.
+//
+//   이 부류는 정지 프레임에 목표가 **정의되지 않는다**. 리듀서가 접을 수 없고
+//   Unhandled로 남는 것이 맞다(Documentation~/reduction-boundary.md의 "절차적 커맨드").
+//   다만 라인 단위 재생은 **절차적 축이 어디에 있는지 드러내는 용도**로는 유용하다.
 // ─────────────────────────────────────────────────────────────────────────────
 public sealed class StageEquivalenceHarness : MonoBehaviour
 {

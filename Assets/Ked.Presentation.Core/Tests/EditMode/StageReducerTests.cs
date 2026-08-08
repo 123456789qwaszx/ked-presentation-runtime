@@ -23,7 +23,8 @@ namespace Ked.Presentation.Core.Tests
         private static Float2Dto F2(float x, float y) => new() { x = x, y = y };
         private static Float3Dto F3(float x, float y, float z) => new() { x = x, y = y, z = z };
 
-        private static RigSchemaNodeDto Node(string id, string parent, bool bottomPivot = false)
+        private static RigSchemaNodeDto Node(
+            string id, string parent, bool bottomPivot = false, float? canvasGroupAlpha = null)
         {
             return new RigSchemaNodeDto
             {
@@ -37,6 +38,8 @@ namespace Ked.Presentation.Core.Tests
                 localScale = F3(1f, 1f, 1f),
                 localEulerAngles = F3(0f, 0f, 0f),
                 measuredRectSize = F2(0f, 0f),
+                hasCanvasGroup = canvasGroupAlpha.HasValue,
+                canvasGroupAlpha = canvasGroupAlpha ?? 1f,
             };
         }
 
@@ -70,13 +73,15 @@ namespace Ked.Presentation.Core.Tests
                     Node("CharacterPortrait_ActingScale", "CharacterPortrait_Shake"),
                     Node("CharacterPortrait_ActingScale_X", "CharacterPortrait_ActingScale"),
                     Node("CharacterPortrait_ActingScale_Y", "CharacterPortrait_ActingScale_X"),
-                    Node("CharacterPortraitSprite_Root", "CharacterPortrait_ActingScale_Y"),
+                    // 실제 스키마: NeedsCanvasGroup + InitialCanvasGroupAlpha = 0.
+                    Node("CharacterPortraitSprite_Root", "CharacterPortrait_ActingScale_Y", canvasGroupAlpha: 0f),
                     Node("CharacterPortraitSprite_Image", "CharacterPortraitSprite_Root"),
+                    Node("EmojiSlot00_Root", "__root", canvasGroupAlpha: 0f),
                 },
             };
         }
 
-        private const int RigNodeCount = 24;
+        private const int RigNodeCount = 25;
 
         private static StageReducerTuning NewTuning()
         {
@@ -360,6 +365,57 @@ namespace Ked.Presentation.Core.Tests
 
             Assert.That(state.Unhandled.Any(u => u.Reason.Contains("role-anchor")), Is.True,
                 "실측 덤프에 비기본값 엔트리(tyrant·Amber)가 있다 — 침묵하면 그 장면이 어긋난다");
+        }
+
+        // ── 초기 가시성 (첫 리포트의 최대 불일치 클래스) ────────────
+
+        [Test]
+        public void 스폰은_덤프의_초기_alpha를_반영한다()
+        {
+            // 실제 리그에서 초상·오버레이·이모지 루트는 alpha 0으로 태어난다.
+            // 기본값 1로 두면 show 전 구간이 전부 어긋난다.
+            StageState state = Fold(Cmd("slot", "c1"));
+
+            Assert.That(state.GetAlpha("c1/CharacterPortraitSprite_Root"), Is.EqualTo(0f));
+            Assert.That(state.GetAlpha("c1/EmojiSlot00_Root"), Is.EqualTo(0f));
+
+            // CanvasGroup이 없는 노드는 기록하지 않는다 — 기본값 1이 곧 답이다.
+            Assert.That(state.GetAlpha("c1/CharSlot_Track"), Is.EqualTo(1f));
+            Assert.That(state.GetAlpha("c1/__root"), Is.EqualTo(1f));
+        }
+
+        [Test]
+        public void hasCanvasGroup이_false면_alpha를_건드리지_않는다()
+        {
+            // 구덤프 호환: JsonUtility가 없는 필드를 0으로 채우므로 bool 게이트가 필요하다.
+            // 게이트 없이 canvasGroupAlpha만 보면 전 노드가 alpha 0이 된다.
+            StageReducerTuning tuning = NewTuning();
+
+            foreach (RigSchemaNodeDto node in tuning.RigSchemas.rigs[0].nodes)
+            {
+                node.hasCanvasGroup = false;
+                node.canvasGroupAlpha = 0f;   // 구덤프가 읽히는 모양
+            }
+
+            StageState state = Fold(tuning, Cmd("slot", "c1"));
+
+            Assert.That(state.GetAlpha("c1/CharacterPortraitSprite_Root"), Is.EqualTo(1f),
+                "게이트가 false면 기본값이 답이다");
+        }
+
+        [Test]
+        public void show는_초기_alpha_0을_1로_올린다()
+        {
+            // 스폰 직후 0 → show가 1. 첫 리포트에서 Sprite_Root만 419건이었던 이유다
+            // (show 이후로는 폴드도 캡처도 1이라 맞았다).
+            StageState spawned = Fold(Cmd("slot", "c1"));
+            Assert.That(spawned.GetAlpha("c1/CharacterPortraitSprite_Root"), Is.EqualTo(0f));
+
+            StageState shown = StageReducer.Apply(spawned, Cmd("show", "c1"), NewTuning());
+            Assert.That(shown.GetAlpha("c1/CharacterPortraitSprite_Root"), Is.EqualTo(1f));
+
+            // show가 안 건드리는 이모지 루트는 0 그대로 — 캡처도 0이다.
+            Assert.That(shown.GetAlpha("c1/EmojiSlot00_Root"), Is.EqualTo(0f));
         }
 
         [Test]
