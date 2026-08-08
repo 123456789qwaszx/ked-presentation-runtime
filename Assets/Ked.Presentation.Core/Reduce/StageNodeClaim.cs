@@ -7,6 +7,13 @@ namespace Ked.Presentation.Core
         AnchoredPosition,
         LocalScaleXY,
         LocalEulerAngles,
+
+        /// <summary>
+        /// CanvasGroup alpha (가시성 축). RectNodeState에 살지 않는다 —
+        /// 무대 상태의 alpha 저장소로 접히고, 호스트는 CanvasGroup에 쓴다.
+        /// ApplyTo(RectNodeState)는 이 종류를 받으면 예외를 낸다(조용한 무시 금지).
+        /// </summary>
+        CanvasAlpha,
     }
 
     /// <summary>
@@ -45,6 +52,9 @@ namespace Ked.Presentation.Core
         public static StageNodeClaim LocalEuler(string nodeKey, Vec3 value)
             => new(nodeKey, StageNodeClaimKind.LocalEulerAngles, value);
 
+        public static StageNodeClaim CanvasAlpha(string nodeKey, float alpha)
+            => new(nodeKey, StageNodeClaimKind.CanvasAlpha, new Vec3(alpha, 0f, 0f));
+
         /// <summary>클레임을 상태 값에 적용한다. 스케일 z 보존 규약이 여기 산다.</summary>
         public RectNodeState ApplyTo(in RectNodeState state)
         {
@@ -58,6 +68,11 @@ namespace Ked.Presentation.Core
 
                 case StageNodeClaimKind.LocalEulerAngles:
                     return state.WithLocalEuler(Value);
+
+                case StageNodeClaimKind.CanvasAlpha:
+                    throw new InvalidOperationException(
+                        $"CanvasAlpha 클레임('{NodeKey}')은 RectNodeState에 적용할 수 없다 — " +
+                        "alpha는 좌표가 아니라 가시성 축이다. 무대 상태의 alpha 저장소로 보낼 것.");
 
                 default:
                     throw new InvalidOperationException($"모르는 클레임 종류: {Kind}");

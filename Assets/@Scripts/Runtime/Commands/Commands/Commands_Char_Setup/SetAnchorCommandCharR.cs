@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using DG.Tweening;
+using Ked.Presentation.Core;
 using UnityEngine;
 
 [Serializable]
@@ -36,6 +38,11 @@ public sealed class SetAnchorCommandCharR : CommandBase
     private RectTransform _rect;
 
     private bool _resolveAttempted;
+
+    // 리셋 대상 rect 목록. 리덕션에 넘기는 키 목록과 같은 순서로 만들어 zip으로 적용한다.
+    private readonly List<RectTransform> _resetPositionRects = new(16);
+    private readonly List<RectTransform> _resetEulerRects = new(8);
+    private readonly List<RectTransform> _resetScaleRects = new(8);
 
     public SetAnchorCommandCharR(
         SetAnchorCommandSpecCharR spec,
@@ -87,93 +94,130 @@ public sealed class SetAnchorCommandCharR : CommandBase
         // 이전 PlaceTo tween/ledger가 남아 있으면 새 anchor 값과 싸우므로 먼저 정리.
         KillTweenAndClearPlacementTarget(_rect);
 
-        if (_spec.resetSlotPos)
-            ResetSlotLayers();
-
-        if (_spec.resetCharacterPos)
-            ResetCharacterLayers();
+        CollectResetTargets();
 
         string tuningKey =
             CharacterRigTargetResolver.ResolveCharacterKeyFromTargetKey(scope, _spec.slotKey);
 
-        Vector2 anchoredPosition = Vector2.zero;
-        float visualScale = 1f;
+        // ── 코어: 스펙 + 튜닝 → 목표 상태 ──
+        StageNodeClaim[] claims = SetAnchorReduction.Reduce(
+            _rect.name,
+            ResolveRoleAnchorTuning(tuningKey),
+            NamesOf(_resetPositionRects),
+            NamesOf(_resetEulerRects),
+            NamesOf(_resetScaleRects));
 
-        if (_roleTuningDb != null && _roleTuningDb.TryGet(tuningKey, out var entry))
-        {
-            anchoredPosition += entry.offset;
-            visualScale *= Mathf.Max(0.0001f, entry.visualScale);
-        }
+        // ── 호스트: 클레임을 같은 순서로 rect에 적용 ──
+        int i = 0;
 
-        _rect.anchoredPosition = anchoredPosition;
-        _rect.localScale = new Vector3(visualScale, visualScale, 1f);
+        foreach (RectTransform rect in _resetPositionRects)
+            ApplyClaim(rect, claims[i++]);
+
+        foreach (RectTransform rect in _resetEulerRects)
+            ApplyClaim(rect, claims[i++]);
+
+        foreach (RectTransform rect in _resetScaleRects)
+            ApplyClaim(rect, claims[i++]);
+
+        ApplyClaim(_rect, claims[i++]);   // 앵커 위치
+        ApplyClaim(_rect, claims[i]);     // 앵커 스케일
 
         // 즉시 적용이므로 Publish하지 않는다.
         // live transform이 이미 settled target.
         ClearPlacementTarget(_rect);
     }
 
-    private void ResetSlotLayers()
+    /// <summary>
+    /// 리셋 대상을 축별로 모은다. 순서가 리덕션의 클레임 순서와 대응하므로 바꾸지 말 것.
+    /// 없는 노드(null)는 목록에 넣지 않는다 — 키 목록과 rect 목록의 길이가 어긋나면 안 된다.
+    /// </summary>
+    private void CollectResetTargets()
     {
-        ResetAnchoredPosition(_rigRefs.CharSlot_Track);
-        ResetAnchoredPosition(_rigRefs.CharSlot_Track_X);
-        ResetAnchoredPosition(_rigRefs.CharSlot_Track_Y);
+        _resetPositionRects.Clear();
+        _resetEulerRects.Clear();
+        _resetScaleRects.Clear();
 
-        ResetEulerAngles(_rigRefs.CharSlot_Rotation);
+        if (_spec.resetSlotPos)
+        {
+            AddIfPresent(_resetPositionRects, _rigRefs.CharSlot_Track);
+            AddIfPresent(_resetPositionRects, _rigRefs.CharSlot_Track_X);
+            AddIfPresent(_resetPositionRects, _rigRefs.CharSlot_Track_Y);
 
-        ResetLocalScale(_rigRefs.CharSlot_Scale);
+            AddIfPresent(_resetEulerRects, _rigRefs.CharSlot_Rotation);
+
+            AddIfPresent(_resetScaleRects, _rigRefs.CharSlot_Scale);
+        }
+
+        if (_spec.resetCharacterPos)
+        {
+            AddIfPresent(_resetPositionRects, _rigRefs.CharacterPortrait_Track);
+            AddIfPresent(_resetPositionRects, _rigRefs.CharacterPortrait_Track_Move);
+            AddIfPresent(_resetPositionRects, _rigRefs.CharacterPortrait_Track_Move_X);
+            AddIfPresent(_resetPositionRects, _rigRefs.CharacterPortrait_Track_Move_Y);
+            AddIfPresent(_resetPositionRects, _rigRefs.CharacterPortrait_SwayPivot);
+            AddIfPresent(_resetPositionRects, _rigRefs.CharacterPortrait_Shake);
+
+            AddIfPresent(_resetEulerRects, _rigRefs.CharacterPortrait_Rotation);
+            AddIfPresent(_resetEulerRects, _rigRefs.CharacterPortrait_SwayPivot);
+            AddIfPresent(_resetEulerRects, _rigRefs.CharacterPortrait_Shake);
+
+            AddIfPresent(_resetScaleRects, _rigRefs.CharacterPortrait_SwayPivot);
+            AddIfPresent(_resetScaleRects, _rigRefs.CharacterPortrait_Shake);
+            AddIfPresent(_resetScaleRects, _rigRefs.CharacterPortrait_ActingScale);
+            AddIfPresent(_resetScaleRects, _rigRefs.CharacterPortrait_ActingScale_X);
+            AddIfPresent(_resetScaleRects, _rigRefs.CharacterPortrait_ActingScale_Y);
+        }
     }
 
-    private void ResetCharacterLayers()
+    private SetAnchorReduction.RoleAnchorTuning ResolveRoleAnchorTuning(string tuningKey)
     {
-        ResetAnchoredPosition(_rigRefs.CharacterPortrait_Track);
-        ResetAnchoredPosition(_rigRefs.CharacterPortrait_Track_Move);
-        ResetAnchoredPosition(_rigRefs.CharacterPortrait_Track_Move_X);
-        ResetAnchoredPosition(_rigRefs.CharacterPortrait_Track_Move_Y);
+        // 하한 클램프는 리덕션이 한다 — 규약이 사는 자리를 하나로 둔다.
+        if (_roleTuningDb != null && _roleTuningDb.TryGet(tuningKey, out var entry))
+            return new SetAnchorReduction.RoleAnchorTuning(entry.offset.ToCore(), entry.visualScale);
 
-        ResetEulerAngles(_rigRefs.CharacterPortrait_Rotation);
-
-        ResetAnchoredPosition(_rigRefs.CharacterPortrait_SwayPivot);
-        ResetEulerAngles(_rigRefs.CharacterPortrait_SwayPivot);
-        ResetLocalScale(_rigRefs.CharacterPortrait_SwayPivot);
-
-        ResetAnchoredPosition(_rigRefs.CharacterPortrait_Shake);
-        ResetEulerAngles(_rigRefs.CharacterPortrait_Shake);
-        ResetLocalScale(_rigRefs.CharacterPortrait_Shake);
-
-        ResetLocalScale(_rigRefs.CharacterPortrait_ActingScale);
-        ResetLocalScale(_rigRefs.CharacterPortrait_ActingScale_X);
-        ResetLocalScale(_rigRefs.CharacterPortrait_ActingScale_Y);
+        return SetAnchorReduction.RoleAnchorTuning.Default;
     }
 
-    private void ResetAnchoredPosition(RectTransform rect)
+    private void ApplyClaim(RectTransform rect, in StageNodeClaim claim)
     {
-        if (rect == null)
-            return;
-
         KillTweenAndClearPlacementTarget(rect);
 
-        rect.anchoredPosition = Vector2.zero;
+        switch (claim.Kind)
+        {
+            case StageNodeClaimKind.AnchoredPosition:
+                rect.anchoredPosition = claim.Value.XY.ToUnity();
+                break;
+
+            case StageNodeClaimKind.LocalEulerAngles:
+                rect.localEulerAngles = claim.Value.ToUnity();
+                break;
+
+            case StageNodeClaimKind.LocalScaleXY:
+                // z는 1로 확정한다 — 클레임의 z 보존 규약(트윈 종점용)과 다르다.
+                // set_anchor는 리셋 커맨드라 "알려진 상태로 되돌린다"가 종전 동작이다.
+                rect.localScale = new Vector3(claim.Value.X, claim.Value.Y, 1f);
+                break;
+
+            default:
+                throw new InvalidOperationException(
+                    $"[SetAnchorCommandCharR] set_anchor가 낼 수 없는 클레임 종류: {claim.Kind}");
+        }
     }
 
-    private void ResetEulerAngles(RectTransform rect)
+    private static void AddIfPresent(List<RectTransform> list, RectTransform rect)
     {
-        if (rect == null)
-            return;
-
-        KillTweenAndClearPlacementTarget(rect);
-
-        rect.localEulerAngles = Vector3.zero;
+        if (rect != null)
+            list.Add(rect);
     }
 
-    private void ResetLocalScale(RectTransform rect)
+    private static string[] NamesOf(List<RectTransform> rects)
     {
-        if (rect == null)
-            return;
+        string[] names = new string[rects.Count];
 
-        KillTweenAndClearPlacementTarget(rect);
+        for (int i = 0; i < rects.Count; i++)
+            names[i] = rects[i].name;
 
-        rect.localScale = Vector3.one;
+        return names;
     }
 
     private void KillTweenAndClearPlacementTarget(RectTransform rect)

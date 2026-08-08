@@ -29,7 +29,10 @@ public sealed class FadeInCommandCharR : CommandBase
     private CanvasGroup _canvasGroup;
 
     private float _startAlpha;
-    private const float TargetAlpha = 1f;
+
+    // 목표 alpha의 원천은 코어 리덕션이다 — 트윈 종점(여기)과 정지 프레임 폴드가
+    // 같은 값을 봐야 한다. 트윈 자체는 시간의 세계라 호스트에 남는다.
+    private const float TargetAlpha = Ked.Presentation.Core.FadeInReduction.TargetAlpha;
 
     private Tween _tween;
 
