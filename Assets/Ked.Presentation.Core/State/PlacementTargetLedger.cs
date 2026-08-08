@@ -45,6 +45,31 @@ namespace Ked.Presentation.Core
             _targets[key] = slots;
         }
 
+        /// <summary>
+        /// 리덕션 출력을 그대로 예약으로 받는다 — 클레임이 흐르는 세 갈래 중 하나.
+        /// 트윈 종점·상태 폴드와 같은 값을 보게 하는 것이 요점이다.
+        /// </summary>
+        public void Publish(in StageNodeClaim claim)
+        {
+            switch (claim.Kind)
+            {
+                case StageNodeClaimKind.AnchoredPosition:
+                    PublishAnchoredPosition(claim.NodeKey, claim.Value.XY);
+                    break;
+
+                case StageNodeClaimKind.LocalScaleXY:
+                    PublishLocalScale(claim.NodeKey, claim.Value.XY);
+                    break;
+
+                case StageNodeClaimKind.LocalEulerAngles:
+                    PublishLocalEuler(claim.NodeKey, claim.Value);
+                    break;
+
+                default:
+                    throw new ArgumentException($"모르는 클레임 종류: {claim.Kind}", nameof(claim));
+            }
+        }
+
         public bool HasTargets(string key)
             => key != null && _targets.ContainsKey(key);
 
