@@ -134,7 +134,30 @@ yarn 4묶음 기준. "이관 안 함"은 **조용히 버린 것이 아니라 판
 | `set_anchor` / `show` | `SetAnchorReduction` |
 | `fade_in` / `fade_out` | `FadeInReduction` / `FadeOutReduction` (가시성 축) |
 | `place_focus` | `SettledFocusMath.SolveFocusPlacement` |
-| `set_portrait_sprite` | **미이관** — 초상 축(어느 스프라이트인가)은 무대 상태 조립 때 |
+| `set_portrait_sprite` | `PortraitSizingReduction` — 폭만 접는다(아래 참조) |
+
+### 초상 (portrait)
+
+접는 것은 **사이징 한 축**이다: 어느 스프라이트인가가 아니라 그 스프라이트가 만드는
+`CharacterPortraitSprite_Image.sizeDelta`. 종횡비는 `portrait-dimensions.json`에서 오고,
+조회 규약(캐릭터 소문자 · 변형은 마지막 글자 · 표정 2자리 · (캐릭터,'a',"01") 폴백)은
+런타임 `PortraitResolver`를 그대로 옮긴 것이다.
+
+| 커맨드 | 변형 | 표정 | 사이징 |
+|---|---|---|---|
+| `cast (slot, char, var, emo)` | 갱신 | 인자 | ✅ |
+| `show (target, faceToken)` | 유지 | 인자 | ✅ |
+| `face` · `face_swap (target, emo)` | 유지 | 인자 | ✅ |
+| `pose (target, variant)` | 갱신 | — | ❌ |
+
+**표정은 상태가 아니다** — 런타임 `CastBinding`도 변형만 들고, 표정은 커맨드마다 인자로 온다.
+**`pose`가 사이징을 다시 접지 않는 것도 실동작이다** — `SetPortraitPoseCommandCharR`의
+스프라이트 교체가 비활성이라, 폭은 다음 `show`/`face`/`face_swap`에서야 바뀐다.
+
+알려진 한계 하나: `show`의 빈 faceToken은 런타임에서 표정 `"2"`지만
+(생략된 인자의 기본값 `"e1"`과 다른 규칙), **원문 추출기가 빈 토큰을 버리므로**
+폴드는 생략과 구분하지 못하고 둘 다 `"e1"`로 접는다. 실제 원문에 빈 토큰이 나오면
+그 라인만 어긋난다 — 나오면 추출기의 토큰 규칙부터 고칠 일이다.
 
 ### depth
 
@@ -180,6 +203,28 @@ CharSlot_Track_Idle.anchoredPosition          접힘=(0,0)   vs 캡처=(0, 7.99)
 값이 매 라인 제각각인 것이 특징이다 — 목표값이 아니라 **시간 함수의 스냅샷**이라서.
 랩드스킵 재생에서는 즉시 확정되어 누적될 시간이 없으므로 이 축이 보이지 않는다.
 그래서 폴드 대조의 기준 프로토콜은 랩드스킵이다(하네스 파일 상단 주석 참조).
+
+### 남은 Unhandled의 회계 (대표 에피소드 실측)
+
+수렴이 끝난 시점의 리포트 `finalUnhandled` 153건을 **하나도 남김없이** 분류한 것이다.
+"아직 못 접는 것"의 목록은 작업 목록이어야 한다 — 작업이 아닌 것이 섞이면 거짓말이 된다.
+
+| 부류 | 건수 | 판정 |
+|---|---|---|
+| 시간 커맨드 (`pause` · `1fr`~`48fr`) | 19 | **접을 것이 없다** → 무해하게 접도록 고쳤다 |
+| 절차적 연기 (`tap`·`sway*`·`jolt`·`dip`·`idle_*`) | 38 | **이관 대상 아님** — 목표값이 정의되지 않는다 |
+| 화면 효과 (`screen_blur/vignette/noise/flash`) | 36 | 무대 상태 모델 밖 (포스트 이펙트 축) |
+| 배경 리그 (`bg_*`) | 19 | 무대 상태 모델 밖 (`StageState`는 캐릭터 리그만 담는다) |
+| 캐릭터 비주얼 (`char_visual_*`) | 14 | 무대 상태 모델 밖 (머티리얼 축) |
+| 오디오 (`bgm` · `stop_bgm` · `sfx`) | 14 | 무대 상태 모델 밖 |
+| 트랜지션 (`tx_*`) | 10 | 무대 상태 모델 밖 |
+| 캐릭터 리그 트랜스폼 (`slide_in`) | 2 | **유일한 진짜 후보** — 아래 참조 |
+| 대사창 (`surface_reset`) | 1 | 무대 상태 모델 밖 |
+
+즉 **캐릭터 리그의 좌표·가시성 축에서 아직 못 접는 것은 `slide_in` 2건뿐이다.**
+그마저도 정착 상태로는 항등이다 — `SlideCommandBase`에서 등장의 도착점은 클레임 시점의
+현재 위치이고(`CurrentPositionIsDestination`), 화면 밖 출발점은 트윈 중에만 존재한다.
+접는다면 "위치를 바꾸지 않는다"를 명시하는 폴드가 된다. 판정에는 영향이 없다.
 
 ### 백로그
 

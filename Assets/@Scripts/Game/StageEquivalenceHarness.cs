@@ -26,6 +26,15 @@ using UnityEngine;
 //
 // 【기준】 랩드스킵(좌 Ctrl) 재생 — 폴드 대조는 이 방식으로만 판정한다.
 //   모든 커맨드가 즉시 확정되므로 라이브가 곧 정착 상태다.
+//   근거는 CommandBase.Execute다: ShouldCompressCommandExecution이면 SkipPolicy를 보고
+//   OnSkip으로 빠진다 — 트윈이 아예 만들어지지 않는다.
+//
+//   ⚠ **0번 라인 함정.** 좌 Ctrl을 재생 시작 뒤에 누르면 첫 라인만 압축 경로를 타지 않고
+//   실제 트윈으로 돈다. 그러면 0번 라인에서만 진행 중인 중간값이 캡처된다. 실측 예:
+//     lineIndex=0  c3/CharacterPortraitSprite_Root.alpha  접힘=1 vs 캡처=0.9085627
+//   **중간 alpha가 찍혔다는 것 자체가 그 라인이 압축되지 않았다는 증거다** —
+//   랩드스킵이었다면 0 아니면 1만 나온다. 폴드를 의심하기 전에 이걸 먼저 배제할 것.
+//   0번 라인까지 판정하려면 첫 전진 전부터 좌 Ctrl을 누르고 있어야 한다.
 //
 // 【참고】 라인 단위(HurryUpLine) 재생 — 판정 기준으로 쓰지 말 것.
 //   절차적 연기(sway·idle_breathe·jolt·dip·tap)가 실제로 돌 시간이 생기고,
@@ -161,7 +170,38 @@ public sealed class StageEquivalenceHarness : MonoBehaviour
             RoleAnchors = roleAnchors?.MonoBehaviour,
             DepthPresets = depthTuning?.MonoBehaviour?.presets,
             FocusTuning = focusTuning?.MonoBehaviour,
+            PortraitDimensions = LoadPortraitDimensions(tuningDir),
         };
+    }
+
+    /// <summary>
+    /// 초상 치수는 다른 덤프와 달리 없을 수 있다(exporter 재수출 전 브랜치).
+    /// 없으면 초상 사이징 전체가 Unhandled로 잡히므로 **조용히 넘어가지 않고 경고한다.**
+    /// </summary>
+    private static PortraitDimensionsFileDto LoadPortraitDimensions(string tuningDir)
+    {
+        string path = Path.Combine(tuningDir, "portrait-dimensions.json");
+
+        if (!File.Exists(path))
+        {
+            Debug.LogWarning(
+                $"[StageEquivalenceHarness] portrait-dimensions.json이 없다 ({path}). " +
+                "초상 사이징이 전부 Unhandled가 된다 — Ked/U12/Export Presentation Tuning Dump 실행 필요.");
+
+            return null;
+        }
+
+        PortraitDimensionsFileDto dto = JsonUtility.FromJson<PortraitDimensionsFileDto>(
+            File.ReadAllText(path));
+
+        if (dto?.entries == null || dto.entries.Count == 0)
+        {
+            Debug.LogWarning(
+                "[StageEquivalenceHarness] portrait-dimensions.json이 비어 있다 — " +
+                "PortraitGeneratedDB를 읽지 못했을 수 있다. export-report.json의 경고를 확인할 것.");
+        }
+
+        return dto;
     }
 
     [Serializable]

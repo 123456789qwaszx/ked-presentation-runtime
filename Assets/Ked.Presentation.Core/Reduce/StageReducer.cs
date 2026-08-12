@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace Ked.Presentation.Core
 {
@@ -27,6 +28,9 @@ namespace Ked.Presentation.Core
 
         /// <summary>presets/focus-tuning.json — place/size의 focus 오프셋. 없으면 base 0으로 접는다.</summary>
         public FocusTuningBodyDto FocusTuning;
+
+        /// <summary>portrait-dimensions.json — 초상 사이징의 종횡비. 없으면 사이징은 Unhandled.</summary>
+        public PortraitDimensionsFileDto PortraitDimensions;
     }
 
     /// <summary>
@@ -41,9 +45,10 @@ namespace Ked.Presentation.Core
     /// 이 기록이 "아직 못 접는 것"의 유일한 진실이고, 수렴의 작업 목록이 된다.
     ///
     /// 현재 어휘(v1): slot 계열(리그 스폰) · cast/actor(배역·별칭) ·
-    ///   show(리셋+앵커+가시성 — 표정/초상 축은 Unhandled 기록) · fade_in/out ·
-    ///   place/size 계열 · nudge/move/scale/rotate 계열 · shot 5종 · char_to 계열.
-    /// 명시적 한계: 초상 사이징·표정(덤프 확장 전), 배경/오버레이/이펙트/오디오/트랜지션,
+    ///   show(리셋+앵커+사이징+가시성) · fade_in/out · place/size 계열 ·
+    ///   nudge/move/scale/rotate 계열 · shot 5종 · char_to 계열 ·
+    ///   초상 축(pose/face/face_swap) · 시간 커맨드(pause·Nfr — 접을 것이 없다).
+    /// 명시적 한계: 배경/오버레이/이펙트/오디오/트랜지션 리그, 대사창,
     ///   절차적 연기 커맨드(목표값이 정의되지 않음).
     ///
     /// ⚠ v1 가정 — 등가성 하네스가 판정한다:
@@ -120,10 +125,17 @@ namespace Ked.Presentation.Core
                 case "slot02": return ApplySlot(state, cmd, tuning, "stage02", cmd.Arg(1, "mid"), out reason);
 
                 // 배역·별칭 — 커맨드 대상 해석(TryResolveSlot)의 전제.
-                case "cast": return ApplyCast(state, cmd, out reason);
+                // 브리지: cast(slot, character, variant="a", emotion="1") — 뒤 둘은 초상 축이다.
+                case "cast": return ApplyCast(state, cmd, tuning, out reason);
                 case "actor": return ApplyActor(state, cmd, out reason);
 
-                // show — SetAnchor(리셋+역할 앵커) + 가시성. 표정/초상 축은 Unhandled 기록.
+                // 초상 축. 브리지: pose(target, variant) / face(target, emotion) /
+                //                  face_swap(target, emotion, duration)
+                case "pose": return ApplyPose(state, cmd, out reason);
+                case "face": return ApplyFace(state, cmd, tuning, out reason);
+                case "face_swap": return ApplyFace(state, cmd, tuning, out reason);
+
+                // show — SetAnchor(리셋+역할 앵커) + 초상 사이징 + 가시성.
                 case "show": return ApplyShow(state, cmd, tuning, out reason);
 
                 // fade — 브리지와 같은 표적(CharacterPortraitSprite_Root).
@@ -195,12 +207,44 @@ namespace Ked.Presentation.Core
                 case "char_to_s2": return ApplyCharTo(state, cmd, "stage02", cmd.Arg(1, "mid"), out reason);
 
                 default:
+                    // 시간만 쓰는 커맨드는 못 접는 게 아니라 접을 것이 없다 — 아래 참조.
+                    if (IsWaitCommand(cmd.Name))
+                        return true;
+
                     reason = "아직 코어로 이관되지 않은 커맨드";
                     return false;
             }
         }
 
         // ── helper ───────────────────────────────────────────────────
+
+        /// <summary>브리지가 등록하는 프레임 대기 별칭의 상한. `&lt;&lt;48fr&gt;&gt;` = 2초.</summary>
+        private const int MaxFrameWaitAlias = 48;
+
+        /// <summary>
+        /// 시간만 쓰는 커맨드인가 — `&lt;&lt;pause 초&gt;&gt;`와 프레임 별칭 `&lt;&lt;1fr&gt;&gt;`~`&lt;&lt;48fr&gt;&gt;`
+        /// (브리지 BindFramePauseAliases, 24fps 기준).
+        ///
+        /// 정지 프레임에 목표가 **없는 게 아니라 접을 것이 없다** — 무대 상태를 하나도
+        /// 건드리지 않는다. duration 인자를 파싱조차 하지 않는 것과 같은 규율이라
+        /// Unhandled로 남기지 않는다: 남기면 "아직 이관 안 됨" 작업 목록이 거짓말이 된다.
+        /// </summary>
+        private static bool IsWaitCommand(string name)
+        {
+            if (name == "pause")
+                return true;
+
+            if (name == null || name.Length < 3 || !name.EndsWith("fr", StringComparison.Ordinal))
+                return false;
+
+            return int.TryParse(
+                       name.Substring(0, name.Length - 2),
+                       NumberStyles.None,
+                       CultureInfo.InvariantCulture,
+                       out int frames)
+                   && frames >= 1
+                   && frames <= MaxFrameWaitAlias;
+        }
 
         private static bool TryGetSlotKey(in StageCommand cmd, out string slotKey, out string reason)
         {

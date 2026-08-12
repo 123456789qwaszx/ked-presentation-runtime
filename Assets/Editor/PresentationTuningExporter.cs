@@ -50,6 +50,9 @@ public static class PresentationTuningExporter
         ("surface-layout",  "Assets/Data/Generated/DialogueSurfaceLayoutPresetDB.asset"),
     };
 
+    /// <summary>초상 치수의 원천. 스프라이트 참조라 EditorJsonUtility로는 해석할 수 없어 따로 낸다.</summary>
+    private const string PortraitDbPath = "Assets/Data/Generated/PortraitGeneratedDB.asset";
+
     // 이번 범위에 없어서 내보내지 않는 것들. 존재는 기록한다 —
     // 조용히 빠뜨린 것과 알고서 뺀 것은 다르다.
     private static readonly string[] KnownButOutOfScope =
@@ -57,7 +60,6 @@ public static class PresentationTuningExporter
         "Assets/Data/Generated/DialogueSpeakerPresentationPolicyDB.asset (speaker policy — 범위 밖)",
         "Assets/Data/Generated/CharacterEmojiVisualPreset.asset (emoji preset — 범위 밖)",
         "Assets/Data/Generated/CharacterEmojiLibrary.asset (emoji library — 범위 밖)",
-        "Assets/Data/Generated/PortraitGeneratedDB.asset (초상 치수 — 후속 단계의 몫)",
     };
 
     [MenuItem("Ked/U12/Export Presentation Tuning Dump")]
@@ -76,6 +78,7 @@ public static class PresentationTuningExporter
         BaseResolutionDto baseResolution = ExportBaseResolution(outDir, warnings);
         ExportRigSchemas(outDir, baseResolution, warnings);
         ExportPresets(outDir, warnings);
+        ExportPortraitDimensions(outDir, warnings);
         WriteReport(outDir, warnings);
 
         Debug.Log($"[PresentationTuningExporter] 완료. out={outDir}, 경고 {warnings.Count}건");
@@ -394,6 +397,77 @@ public static class PresentationTuningExporter
         }
     }
 
+    // ── 초상 치수 ────────────────────────────────────────────────────
+    //
+    // 다른 프리셋과 달리 직렬화 그대로 낼 수 없다 — PortraitGeneratedDB의 값은
+    // Sprite 참조이고, 그건 instanceID로만 직렬화되어 덤프만으로는 해석이 안 된다.
+    // 그래서 여기서 스프라이트를 실제로 열어 rect 크기를 읽어 낸다.
+    //
+    // 키는 정규화하지 않고 원본 그대로 낸다(원칙: 값은 지금 값 그대로).
+    // 정규화 규칙(문자 소문자화·변형 접미사·표정 2자리)은 코어가 PortraitResolver와
+    // 같은 식으로 조회 시점에 적용한다 — 여기서 미리 접으면 규칙이 두 곳에 살게 된다.
+
+    private static void ExportPortraitDimensions(string outDir, List<string> warnings)
+    {
+        PortraitDimensionsDto dto = new() { sourceAsset = PortraitDbPath };
+
+        PortraitGeneratedDbSo db = AssetDatabase.LoadAssetAtPath<PortraitGeneratedDbSo>(PortraitDbPath);
+
+        if (db == null)
+        {
+            warnings.Add($"초상 치수: {PortraitDbPath} 를 찾지 못했다. 빈 덤프를 냈다 — 초상 사이징 폴드가 전부 Unhandled가 된다.");
+            WritePortraitDimensions(outDir, dto);
+            return;
+        }
+
+        int missingSprites = 0;
+
+        foreach (PortraitGeneratedDbSo.Entry entry in db.entries)
+        {
+            if (entry.sprite == null)
+            {
+                missingSprites++;
+                continue;
+            }
+
+            Rect rect = entry.sprite.rect;
+
+            if (rect.width <= 0f || rect.height <= 0f)
+            {
+                warnings.Add(
+                    $"초상 치수: 스프라이트 rect가 유효하지 않다 " +
+                    $"({entry.characterId}|{entry.variantKey}|{entry.emotionKey} = {rect.size}). 건너뛰었다.");
+
+                continue;
+            }
+
+            dto.entries.Add(new PortraitDimensionDto
+            {
+                character = entry.characterId,
+                variant = entry.variantKey,
+                emotion = entry.emotionKey,
+                width = rect.width,
+                height = rect.height,
+            });
+        }
+
+        if (missingSprites > 0)
+        {
+            warnings.Add(
+                $"초상 치수: 스프라이트가 비어 있는 엔트리 {missingSprites}건을 건너뛰었다. " +
+                "그 (캐릭터·변형·표정)은 재생에서도 초상이 나오지 않는다 — PortraitDb 재생성 필요.");
+        }
+
+        WritePortraitDimensions(outDir, dto);
+    }
+
+    private static void WritePortraitDimensions(string outDir, PortraitDimensionsDto dto)
+    {
+        File.WriteAllText(
+            Path.Combine(outDir, "portrait-dimensions.json"),
+            JsonUtility.ToJson(dto, true));
+    }
+
     // ── 보고서 ───────────────────────────────────────────────────────
 
     private static void WriteReport(string outDir, List<string> warnings)
@@ -485,6 +559,26 @@ public static class PresentationTuningExporter
         // 가시성 축. hasCanvasGroup이 bool 게이트다 — 위 CaptureNode 주석 참조.
         public bool hasCanvasGroup;
         public float canvasGroupAlpha;
+    }
+
+    [Serializable]
+    private sealed class PortraitDimensionsDto
+    {
+        public string sourceAsset;
+        public List<PortraitDimensionDto> entries = new();
+    }
+
+    [Serializable]
+    private sealed class PortraitDimensionDto
+    {
+        public string character;
+        public string variant;
+        public string emotion;
+
+        // 스프라이트 rect의 픽셀 크기. 사이징이 쓰는 건 종횡비 하나지만,
+        // 둘 다 남겨야 나중에 값이 어긋났을 때 어느 쪽이 변했는지 알 수 있다.
+        public float width;
+        public float height;
     }
 
     [Serializable]

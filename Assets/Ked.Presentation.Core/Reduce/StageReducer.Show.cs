@@ -61,12 +61,16 @@ namespace Ked.Presentation.Core
             foreach (StageNodeClaim claim in claims)
                 state.Apply(claim);
 
+            // 초상 사이징. faceToken의 기본값은 "e1"(생략된 인자)이고,
+            // **명시적으로 빈 토큰은 "2"다** — 다른 규칙이라 별칭 파서가 나눠 본다.
+            string emotionKey = PortraitKeyNormalizer.ParseShowFaceAlias(cmd.Arg(1, "e1"));
+
+            if (!ApplyPortraitSizing(state, slotKey, emotionKey, tuning, out string sizingReason))
+                state.AddUnhandled(cmd, sizingReason);
+
             // 가시성 두 장: 리그 루트 + 초상 스프라이트 루트.
             state.Apply(FadeInReduction.Reduce(StageState.NodeKeyOf(slotKey, RigSchemaLoader.RootKey)));
             state.Apply(FadeInReduction.Reduce(StageState.NodeKeyOf(slotKey, "CharacterPortraitSprite_Root")));
-
-            // 표정 토큰(faceToken, 기본 "e1")과 초상 사이징은 아직 상태 모델 밖.
-            state.AddUnhandled(cmd, "표정·초상 사이징 축은 아직 상태 모델 밖");
 
             return true;
         }

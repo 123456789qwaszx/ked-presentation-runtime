@@ -214,7 +214,45 @@ MonoBehaviour.entries[] : { key(캐릭터), offset(px, Vec2), visualScale(무단
 
 ---
 
-## 4. `export-report.json`
+## 4. `portrait-dimensions.json`
+
+`Assets/Data/Generated/PortraitGeneratedDB.asset` → (캐릭터 · 변형 · 표정) → 초상 스프라이트 픽셀 치수.
+
+프리셋과 달리 직렬화 그대로 낼 수 없어 따로 있다: DB가 들고 있는 건 `Sprite` **참조**이고,
+`EditorJsonUtility`는 그걸 `instanceID`로만 적는다 — 덤프만으로는 해석되지 않는 값이다.
+그래서 익스포터가 스프라이트를 실제로 열어 `sprite.rect`를 읽는다.
+
+| 필드 | 뜻 |
+|---|---|
+| `sourceAsset` | 원천 에셋 경로 (재현 정보) |
+| `entries[].character` · `.variant` · `.emotion` | **정규화하지 않은 원본 키** |
+| `entries[].width` · `.height` | `sprite.rect`의 픽셀 크기 |
+
+### 키를 정규화하지 않고 내는 이유
+
+정규화 규칙(캐릭터 소문자화 · 변형은 **마지막 글자만** · 표정 2자리)은 런타임
+`PortraitResolver.MakeKey`가 갖고 있다. 덤프에서 미리 접으면 같은 규칙이 두 곳에 살게 되고,
+한쪽만 바뀌는 순간 폴드가 다른 스프라이트를 고른다. 조회 시점에 코어
+`PortraitKeyNormalizer`가 같은 규칙을 적용한다.
+
+그래서 `variant`가 `yoonsaea_a`처럼 접두사를 달고 있어도 키는 마지막 글자 `a`다.
+
+### 코어가 쓰는 값은 종횡비 하나
+
+초상 사이징은 `HeightFitPreserveAspect` — `폭 = 부모 rect 높이 × (width/height)`,
+`sizeDelta = (폭, 0)`. 폭·높이를 둘 다 남기는 것은 나중에 값이 어긋났을 때
+어느 쪽이 변했는지 알기 위해서다.
+
+**종횡비는 캐릭터당 하나가 아니다.** 실측 덤프에서 `yoonsaea_a/01`은 378×658이고
+`yoonsaea_b/01`은 425×746이다 — 변형·표정마다 다르다. 캐릭터 단위로 균일하다고 가정하면
+`pose` 이후 구간이 통째로 어긋난다.
+
+없는 조합은 `(캐릭터, 'a', "01")`로 한 번 물러선다(런타임 폴백과 같다). 그것도 없으면
+사이징이 `Unhandled`로 남는다 — 짐작으로 잇지 않는다.
+
+---
+
+## 5. `export-report.json`
 
 | 필드 | 뜻 |
 |---|---|
@@ -224,7 +262,7 @@ MonoBehaviour.entries[] : { key(캐릭터), offset(px, Vec2), visualScale(무단
 
 ---
 
-## 5. 덤프가 낡으면
+## 6. 덤프가 낡으면
 
 빌더나 프리팹을 고치고 재내보내기를 잊으면 코어 계산이 조용히 어긋난다.
 그걸 막는 장치는 **코어 쪽 유니티 대조 테스트**다 — 이 덤프로 세운 트리와

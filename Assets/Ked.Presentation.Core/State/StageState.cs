@@ -91,6 +91,10 @@ namespace Ked.Presentation.Core
         // 별칭 축: actor가 "@3" 같은 기호를 캐릭터/슬롯 키에 잇는다.
         private readonly Dictionary<string, string> _aliases;
 
+        // 초상 축: pose가 슬롯의 현재 변형을 정한다. 표정은 상태가 아니다 —
+        // 런타임 CastBinding도 변형만 들고, 표정은 커맨드마다 인자로 온다.
+        private readonly Dictionary<string, string> _variantBySlot;
+
         public IReadOnlyList<UnhandledCommand> Unhandled => _unhandled;
 
         public IReadOnlyCollection<string> Slots => _slots;
@@ -107,6 +111,7 @@ namespace Ked.Presentation.Core
             _slotByCharacter = new Dictionary<string, string>(StringComparer.Ordinal);
             _characterBySlot = new Dictionary<string, string>(StringComparer.Ordinal);
             _aliases = new Dictionary<string, string>(StringComparer.Ordinal);
+            _variantBySlot = new Dictionary<string, string>(StringComparer.Ordinal);
         }
 
         private StageState(StageState source)
@@ -121,6 +126,7 @@ namespace Ked.Presentation.Core
             _slotByCharacter = new Dictionary<string, string>(source._slotByCharacter, StringComparer.Ordinal);
             _characterBySlot = new Dictionary<string, string>(source._characterBySlot, StringComparer.Ordinal);
             _aliases = new Dictionary<string, string>(source._aliases, StringComparer.Ordinal);
+            _variantBySlot = new Dictionary<string, string>(source._variantBySlot, StringComparer.Ordinal);
         }
 
         /// <summary>깊은 복제. 리듀서의 순수성(원본 불변)이 이것 위에 선다.</summary>
@@ -161,7 +167,29 @@ namespace Ked.Presentation.Core
 
             _characterBySlot[slotKey] = characterKey;
             _slotByCharacter[characterKey] = slotKey;
+
+            // 재배역은 변형을 비운다 — 런타임 CastRegistry.CastCharRig이 새 바인딩을
+            // 빈 변형으로 만드는 것과 같다. 뒤따르는 pose가 다시 채운다.
+            _variantBySlot.Remove(slotKey);
         }
+
+        /// <summary>pose — 슬롯의 현재 초상 변형. 빈 값이면 기본 변형으로 되돌린다.</summary>
+        public void SetVariant(string slotKey, string variantKey)
+        {
+            if (string.IsNullOrEmpty(slotKey))
+                throw new ArgumentException("슬롯 키가 비어 있다.", nameof(slotKey));
+
+            if (string.IsNullOrEmpty(variantKey))
+                _variantBySlot.Remove(slotKey);
+            else
+                _variantBySlot[slotKey] = variantKey;
+        }
+
+        /// <summary>슬롯의 현재 변형. 없으면 빈 문자열 — 조회 쪽이 기본 변형으로 물러선다.</summary>
+        public string GetVariant(string slotKey)
+            => slotKey != null && _variantBySlot.TryGetValue(slotKey, out string variantKey)
+                ? variantKey
+                : "";
 
         /// <summary>actor — 별칭 기호("@3")를 캐릭터/슬롯 키에 잇는다.</summary>
         public void SetAlias(string aliasSymbol, string targetKey)

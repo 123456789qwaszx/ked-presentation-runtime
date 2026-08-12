@@ -71,8 +71,14 @@ namespace Ked.Presentation.Core
 
         // ── 배역·별칭 ────────────────────────────────────────────────
 
-        /// <summary>cast (slot, characterKey, [variant="a"], [emotion="1"]) — 배역만 접는다.</summary>
-        private static bool ApplyCast(StageState state, in StageCommand cmd, out string reason)
+        /// <summary>
+        /// cast (slot, characterKey, variant="a", emotion="1").
+        ///
+        /// 브리지는 이걸 셋으로 팬아웃한다: 배역 → pose(변형) → face(표정+사이징).
+        /// 그 순서를 그대로 따른다 — 배역이 변형을 비우므로 pose가 먼저여야 한다.
+        /// </summary>
+        private static bool ApplyCast(
+            StageState state, in StageCommand cmd, StageReducerTuning tuning, out string reason)
         {
             if (!TryGetSpawnedSlot(state, cmd, out string slotKey, out reason))
                 return false;
@@ -86,10 +92,12 @@ namespace Ked.Presentation.Core
             }
 
             state.SetCast(slotKey, characterKey);
+            state.SetVariant(slotKey, cmd.Arg(2, PortraitDimensionsFileDto.DefaultVariantKey));
 
-            // 브리지는 cast를 pose+face로 팬아웃한다(초상 그림·사이징). 그 축은 아직
-            // 상태 모델 밖이다 — 배역은 접되 초상 축은 기록으로 남긴다.
-            state.AddUnhandled(cmd, "초상 축(변형·표정·사이징)은 아직 상태 모델 밖");
+            // 사이징이 실패해도 배역은 접혔다 — 커맨드 전체를 Unhandled로 돌리면
+            // "cast를 못 접었다"는 거짓말이 된다. 못 접은 축만 기록한다.
+            if (!ApplyPortraitSizing(state, slotKey, cmd.Arg(3, "1"), tuning, out string sizingReason))
+                state.AddUnhandled(cmd, sizingReason);
 
             return true;
         }

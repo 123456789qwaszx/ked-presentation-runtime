@@ -102,8 +102,30 @@ namespace Ked.Presentation.Core.Tests
                         new() { key = "tyrant", offset = F2(-30f, -800f), visualScale = 5f },
                     },
                 },
+                PortraitDimensions = NewPortraitDimensions(),
             };
         }
+
+        /// <summary>
+        /// 높이를 전부 1080(= 부모 rect 높이)으로 둔다 — 그러면 접힌 폭이 곧 여기 적은 width다.
+        /// tyrant는 변형·표정마다 폭이 다르다: **종횡비가 캐릭터당 하나라는 가정을 깨는 자리**다.
+        /// </summary>
+        private static PortraitDimensionsFileDto NewPortraitDimensions()
+        {
+            return new PortraitDimensionsFileDto
+            {
+                entries = new List<PortraitDimensionDto>
+                {
+                    new() { character = "tyrant", variant = "a", emotion = "01", width = 620f, height = 1080f },
+                    new() { character = "tyrant", variant = "a", emotion = "02", width = 540f, height = 1080f },
+                    new() { character = "tyrant", variant = "b", emotion = "01", width = 810f, height = 1080f },
+                    new() { character = "parkeunseol", variant = "a", emotion = "01", width = 432f, height = 1080f },
+                },
+            };
+        }
+
+        private static float PortraitWidthOf(StageState state, string slotKey)
+            => state.Nodes.GetState(StageState.NodeKeyOf(slotKey, "CharacterPortraitSprite_Image")).SizeDelta.X;
 
         private static StageCommand Cmd(string name, params string[] args)
             => new(name, args, "test.yarn:1");
@@ -221,16 +243,132 @@ namespace Ked.Presentation.Core.Tests
         }
 
         [Test]
-        public void cast는_배역을_접되_초상_축을_기록으로_남긴다()
+        public void cast는_배역과_변형을_앉히고_초상_폭까지_접는다()
         {
+            // 브리지 팬아웃: 배역 → pose(variant="a") → face(emotion="1" → "01").
             StageState state = Fold(Cmd("slot", "c1"), Cmd("cast", "c1", "tyrant"));
 
             Assert.That(state.TryGetCharacter("c1", out string character), Is.True);
             Assert.That(character, Is.EqualTo("tyrant"));
+            Assert.That(state.GetVariant("c1"), Is.EqualTo("a"));
 
-            // 성공했지만 초상 축(변형·표정·사이징)은 아직 못 접는다 — 침묵 금지.
+            Assert.That(PortraitWidthOf(state, "c1"), Is.EqualTo(620f).Within(Eps));
+            Assert.That(state.Unhandled, Is.Empty);
+        }
+
+        [Test]
+        public void cast의_변형_표정_인자가_초상_폭을_고른다()
+        {
+            StageState state = Fold(
+                Cmd("slot", "c1"),
+                Cmd("cast", "c1", "tyrant", "b", "1"));
+
+            Assert.That(state.GetVariant("c1"), Is.EqualTo("b"));
+            Assert.That(PortraitWidthOf(state, "c1"), Is.EqualTo(810f).Within(Eps));
+        }
+
+        [Test]
+        public void 초상_치수가_없으면_배역은_접히고_사이징만_기록된다()
+        {
+            StageReducerTuning tuning = NewTuning();
+            tuning.PortraitDimensions = null;
+
+            StageState state = Fold(tuning, Cmd("slot", "c1"), Cmd("cast", "c1", "tyrant"));
+
+            Assert.That(state.TryGetCharacter("c1", out _), Is.True, "배역은 접혔다");
             Assert.That(state.Unhandled.Count, Is.EqualTo(1));
-            Assert.That(state.Unhandled[0].Reason, Does.Contain("초상 축"));
+            Assert.That(state.Unhandled[0].Reason, Does.Contain("초상 치수"));
+        }
+
+        // ── 초상 축 (변형 · 표정 · 사이징) ───────────────────────────
+
+        [Test]
+        public void face는_표정마다_폭을_다시_접는다()
+        {
+            // 브리지: face(target, emotion) — 표정은 상태가 아니라 인자다.
+            StageState state = Fold(
+                Cmd("slot", "c1"),
+                Cmd("cast", "c1", "tyrant"),
+                Cmd("face", "c1", "2"));
+
+            Assert.That(PortraitWidthOf(state, "c1"), Is.EqualTo(540f).Within(Eps));
+
+            StageState back = StageReducer.Apply(state, Cmd("face", "c1", "1"), NewTuning());
+            Assert.That(PortraitWidthOf(back, "c1"), Is.EqualTo(620f).Within(Eps));
+        }
+
+        [Test]
+        public void face_swap도_같은_사이징을_탄다()
+        {
+            StageState state = Fold(
+                Cmd("slot", "c1"),
+                Cmd("cast", "c1", "tyrant"),
+                Cmd("face_swap", "c1", "2", "8fr"));
+
+            Assert.That(PortraitWidthOf(state, "c1"), Is.EqualTo(540f).Within(Eps));
+            Assert.That(state.Unhandled, Is.Empty);
+        }
+
+        [Test]
+        public void pose는_변형만_갱신하고_폭은_다음_표정_커맨드가_바꾼다()
+        {
+            // 런타임 실동작: SetPortraitPoseCommandCharR의 스프라이트 교체가 비활성이라
+            // pose 시점에는 sizeDelta가 그대로다.
+            StageState posed = Fold(
+                Cmd("slot", "c1"),
+                Cmd("cast", "c1", "tyrant"),
+                Cmd("pose", "c1", "b"));
+
+            Assert.That(posed.GetVariant("c1"), Is.EqualTo("b"));
+            Assert.That(PortraitWidthOf(posed, "c1"), Is.EqualTo(620f).Within(Eps),
+                "pose는 폭을 건드리지 않는다");
+
+            StageState faced = StageReducer.Apply(posed, Cmd("face", "c1", "1"), NewTuning());
+            Assert.That(PortraitWidthOf(faced, "c1"), Is.EqualTo(810f).Within(Eps),
+                "다음 표정 커맨드가 새 변형으로 다시 고른다");
+        }
+
+        [Test]
+        public void 재배역은_변형을_비운다()
+        {
+            // 런타임 CastRegistry.CastCharRig이 새 바인딩을 빈 변형으로 만든다.
+            StageState state = Fold(
+                Cmd("slot", "c1"),
+                Cmd("cast", "c1", "tyrant", "b", "1"),
+                Cmd("cast", "c1", "parkeunseol"));
+
+            Assert.That(state.GetVariant("c1"), Is.EqualTo("a"));
+            Assert.That(PortraitWidthOf(state, "c1"), Is.EqualTo(432f).Within(Eps));
+        }
+
+        [Test]
+        public void 없는_표정은_기본_변형_01로_물러선다()
+        {
+            // PortraitResolver의 폴백 규약: (캐릭터, 'a', "01").
+            StageState state = Fold(
+                Cmd("slot", "c1"),
+                Cmd("cast", "c1", "tyrant", "b", "9"));
+
+            Assert.That(PortraitWidthOf(state, "c1"), Is.EqualTo(620f).Within(Eps));
+            Assert.That(state.Unhandled, Is.Empty);
+        }
+
+        [Test]
+        public void 치수에_없는_캐릭터는_사이징이_Unhandled다()
+        {
+            StageState state = Fold(Cmd("slot", "c1"), Cmd("cast", "c1", "amber"));
+
+            Assert.That(state.Unhandled.Count, Is.EqualTo(1));
+            Assert.That(state.Unhandled[0].Reason, Does.Contain("초상 치수가 없다"));
+        }
+
+        [Test]
+        public void 배역이_없으면_face는_Unhandled다()
+        {
+            StageState state = Fold(Cmd("slot", "c1"), Cmd("face", "c1", "2"));
+
+            Assert.That(state.Unhandled.Count, Is.EqualTo(1));
+            Assert.That(state.Unhandled[0].Reason, Does.Contain("배역이 없다"));
         }
 
         // ── 이동 계열 (1u = 기준 폭 / 48) ────────────────────────────
@@ -341,18 +479,38 @@ namespace Ked.Presentation.Core.Tests
             Assert.That(state.GetAlpha("c1/__root"), Is.EqualTo(1f));
             Assert.That(state.GetAlpha("c1/CharacterPortraitSprite_Root"), Is.EqualTo(1f));
 
-            // 표정·사이징 축은 기록으로 남는다 (cast의 1건 + show의 1건).
-            Assert.That(state.Unhandled.Any(u => u.Reason.Contains("표정")), Is.True);
+            // 초상 폭: faceToken 생략 → "e1" → 표정 "1" → "01".
+            Assert.That(PortraitWidthOf(state, "c1"), Is.EqualTo(620f).Within(Eps));
+            Assert.That(state.Unhandled, Is.Empty);
         }
 
         [Test]
-        public void 배역이_없으면_show_앵커는_기본값이다()
+        public void show의_faceToken은_별칭을_벗는다()
+        {
+            StageState alias = Fold(
+                Cmd("slot", "c1"), Cmd("cast", "c1", "tyrant"), Cmd("show", "c1", "emo2"));
+
+            Assert.That(PortraitWidthOf(alias, "c1"), Is.EqualTo(540f).Within(Eps));
+
+            StageState shortForm = Fold(
+                Cmd("slot", "c1"), Cmd("cast", "c1", "tyrant"), Cmd("show", "c1", "e2"));
+
+            Assert.That(PortraitWidthOf(shortForm, "c1"), Is.EqualTo(540f).Within(Eps));
+        }
+
+        [Test]
+        public void 배역이_없으면_show_앵커는_기본값이고_사이징만_기록된다()
         {
             StageState state = Fold(Cmd("slot", "c1"), Cmd("show", "c1"));
 
             RectNodeState anchor = state.Nodes.GetState("c1/CharacterPortrait_VisualOffset");
             Assert.That(anchor.AnchoredPosition, Is.EqualTo(Vec2.Zero));
             Assert.That(anchor.LocalScale.XY, Is.EqualTo(Vec2.One));
+
+            Assert.That(state.GetAlpha("c1/CharacterPortraitSprite_Root"), Is.EqualTo(1f),
+                "사이징이 빠져도 가시성은 접힌다");
+            Assert.That(state.Unhandled.Count, Is.EqualTo(1));
+            Assert.That(state.Unhandled[0].Reason, Does.Contain("배역이 없다"));
         }
 
         [Test]
@@ -466,6 +624,37 @@ namespace Ked.Presentation.Core.Tests
 
             Assert.That(state.Unhandled, Is.Empty);
             Assert.That(state.Shot.Zoom, Is.EqualTo(2.5f));
+        }
+
+        // ── 시간 커맨드 (접을 것이 없다) ─────────────────────────────
+
+        [TestCase("1fr")]
+        [TestCase("12fr")]
+        [TestCase("24fr")]
+        [TestCase("48fr")]
+        [TestCase("pause")]
+        public void 시간_커맨드는_무해하게_접힌다(string name)
+        {
+            // 브리지 BindFramePauseAliases: <<1fr>>~<<48fr>>은 대기 별칭이다(24fps 기준).
+            // 무대 상태를 하나도 건드리지 않으므로 Unhandled 작업 목록에 넣지 않는다.
+            StageState state = Fold(Cmd("slot", "c1"), Cmd(name));
+
+            Assert.That(state.Unhandled, Is.Empty);
+        }
+
+        [TestCase("0fr")]
+        [TestCase("49fr")]
+        [TestCase("fr")]
+        [TestCase("-2fr")]
+        [TestCase("2.5fr")]
+        [TestCase("frame")]
+        public void 대기_별칭이_아닌_이름은_그대로_Unhandled다(string name)
+        {
+            // 브리지가 등록하지 않는 이름이다 — 비슷하게 생겼다고 삼키지 않는다.
+            StageState state = Fold(Cmd(name));
+
+            Assert.That(state.Unhandled.Count, Is.EqualTo(1));
+            Assert.That(state.Unhandled[0].Reason, Does.Contain("이관되지 않은"));
         }
 
         // ── Unhandled 규율 네 갈래 ───────────────────────────────────
