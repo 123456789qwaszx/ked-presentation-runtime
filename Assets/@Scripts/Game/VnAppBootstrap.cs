@@ -404,8 +404,6 @@ public class VnAppBootstrap : MonoBehaviour
             dialogueRunner,
             optionsPresentationFlow,
             optionItem);
-
-        vnOptionsPresenter.AttachDialogueRunner(dialogueRunner);
     }
     
     private void BootstrapPlaybackControls()

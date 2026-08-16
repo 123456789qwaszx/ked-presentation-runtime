@@ -14,8 +14,6 @@ public sealed class VNOptionsPresentationFlow
     private readonly VNChoiceBoundary _choiceBoundary;
     private readonly VNLinePresentationState _advanceState;
 
-    private readonly VNOptionEffectPreviewResolver _effectResolver = new();
-
     private readonly OptionsBoxKind _defaultBoxKind;
     private readonly float _fadeDuration;
 
@@ -165,14 +163,12 @@ public sealed class VNOptionsPresentationFlow
         int choiceIndexInNode)
     {
         string label = option.Line.TextWithoutCharacterName.Text;
-        List<VNOptionEffectPreview> effects = _effectResolver.Resolve(option.Line.Metadata);
 
         return new VNOptionViewModel(
             sourceOption: option,
             sourceOptionIndex: sourceOptionIndex,
             choiceIndexInNode: choiceIndexInNode,
             label: label,
-            isAvailable: option.IsAvailable,
-            effects: effects);
+            isAvailable: option.IsAvailable);
     }
 }

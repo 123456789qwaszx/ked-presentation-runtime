@@ -58,7 +58,6 @@ public sealed class VNOptionItem : Selectable, ISubmitHandler, IPointerClickHand
         _hasSubmitted = false;
 
         SetText(_label, viewModel.Label);
-        SetEffectText(viewModel.EffectText);
 
         interactable = viewModel.IsAvailable;
 
@@ -74,7 +73,6 @@ public sealed class VNOptionItem : Selectable, ISubmitHandler, IPointerClickHand
         interactable = false;
 
         SetText(_label, string.Empty);
-        ClearEffectText();
 
         _revealAlpha = 0f;
         _stateAlpha = 0f;
@@ -178,22 +176,6 @@ public sealed class VNOptionItem : Selectable, ISubmitHandler, IPointerClickHand
     {
         if (text != null)
             text.text = value ?? string.Empty;
-    }
-
-    private void SetEffectText(string effectText)
-    {
-        if (_effectText == null)
-            return;
-
-        effectText ??= string.Empty;
-
-        _effectText.text = effectText;
-        _effectText.gameObject.SetActive(!string.IsNullOrEmpty(effectText));
-    }
-
-    private void ClearEffectText()
-    {
-        SetEffectText(string.Empty);
     }
 
     private void SetSelectionIndicator(bool active)
