@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 
-
 public sealed class VNRuntimeStateProvider
 {
     private readonly RollbackHistory _rollbackHistory;

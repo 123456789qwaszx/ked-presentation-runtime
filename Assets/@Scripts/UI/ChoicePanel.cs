@@ -39,7 +39,7 @@ public sealed class ChoicePanel : UIPanel<ChoicePanel.Refs>, IManagedUI
     private RectTransform _content;
 
     [SerializeField]private ChoiceBoxView _choicePrefab;
-    private ButtonWidget _close;
+    //private ButtonWidget _close;
 
     private readonly List<ChoiceBoxView> _spawned = new();
     private bool _valid;
@@ -66,8 +66,8 @@ public sealed class ChoicePanel : UIPanel<ChoicePanel.Refs>, IManagedUI
         if (_titleText != null)
             _titleText.text = "Choice";
 
-        if (_close != null)
-            _close.OnClicked += HandleCloseClicked;
+        // if (_close != null)
+        //     _close.OnClicked += HandleCloseClicked;
 
         // 템플릿은 꺼두고 Instantiate해서 사용
         if (_choicePrefab != null)
@@ -78,8 +78,8 @@ public sealed class ChoicePanel : UIPanel<ChoicePanel.Refs>, IManagedUI
     {
         base.OnDestroy();
 
-        if (_close != null)
-            _close.OnClicked -= HandleCloseClicked;
+        // if (_close != null)
+        //     _close.OnClicked -= HandleCloseClicked;
 
         ClearChoices();
     }

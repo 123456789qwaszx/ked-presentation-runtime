@@ -24,9 +24,6 @@ public class VnAppBootstrap : MonoBehaviour
     private readonly BacklogRecorder _backlogRecorder = new ();
     
     private VnScreenBindings _screenBindings;
-    
-    [Header("VN Trace")]
-    [SerializeField] private VNTraceStream vnTrace = new ();
 
     [Header("UIManager")]
     [SerializeField] private UIManager uiManager;
@@ -101,8 +98,6 @@ public class VnAppBootstrap : MonoBehaviour
     [SerializeField] private RectTransform chapterCardPrefab;
     [SerializeField] private RectTransform nodeRigPrefab;
     
-    [SerializeField] private RollbackHistoryDebugView rollbackHistoryDebugView;
-    
     [Header("Emoji")] 
     [SerializeField] private CharacterEmojiLibrarySO characterEmojiLibrarySo;
     [SerializeField] private CharacterEmojiVisualPresetSO characterEmojiVisualPresetSo;
@@ -141,8 +136,6 @@ public class VnAppBootstrap : MonoBehaviour
         BootstrapUIManager();
         
         _vnRuntimeStateProvider = new VNRuntimeStateProvider(_rollbackHistory, _choiceHistory);
-        
-        rollbackHistoryDebugView.Bind(_rollbackHistory);
         
         _presentationUIRoot = uiManager.GetUI<PresentationUIRoot>();
         _protagonistCharRigSlot = uiManager.GetUI<DialogueBox00_Portrait>();
@@ -500,42 +493,4 @@ public class VnAppBootstrap : MonoBehaviour
     {
         _screenBindings.OpenTitleMenu();
     }
-    
-    #region Helper
-    [ContextMenu("VN Trace/Dump To Console")]
-    public void DumpVNTraceToConsole()
-    {
-        if (vnTrace == null)
-            return;
-
-        vnTrace.DumpToConsole("VN TRACE MANUAL DUMP", this);
-    }
-
-    [ContextMenu("VN Trace/Dump Preview To Console")]
-    public void DumpVNTracePreviewToConsole()
-    {
-        if (vnTrace == null)
-            return;
-
-        vnTrace.DumpPreviewToConsole("VN TRACE PREVIEW MANUAL DUMP", this);
-    }
-
-    [ContextMenu("VN Trace/Clear")]
-    public void ClearVNTrace()
-    {
-        if (vnTrace == null)
-            return;
-
-        vnTrace.Clear(this);
-    }
-
-    [ContextMenu("VN Trace/Dump And Clear")]
-    public void DumpAndClearVNTrace()
-    {
-        if (vnTrace == null)
-            return;
-
-        vnTrace.DumpAndClear("VN TRACE MANUAL DUMP AND CLEAR", this);
-    }
-    #endregion
 }

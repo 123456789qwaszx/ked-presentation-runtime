@@ -15,7 +15,6 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, IVNLineAborter
     private EllipsisBreathTypewriter _typewriter;
     private VNLinePresentationState _vnLinePresentationState;
     private VnPlaybackRuntimeState _vnPlaybackRuntimeState;
-    private VNTraceStream _trace;
 
     private string _currentNodeName;
 
