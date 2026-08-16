@@ -10148,8 +10148,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d33445ca796720740a063be04ae195d0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VNOptionsPresenter
-  _accumulatedStatusText: {fileID: 1753826490}
-  _hideAccumulatedStatusWhenEmpty: 1
 --- !u!4 &1180068360
 Transform:
   m_ObjectHideFlags: 0
@@ -23487,7 +23485,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.000017166138, y: 0.0008478155}
+  m_AnchoredPosition: {x: 0.000017166138, y: 0.0005080421}
   m_SizeDelta: {x: 0, y: 300}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &3566488314143195377
