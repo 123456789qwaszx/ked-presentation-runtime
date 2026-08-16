@@ -1,5 +1,6 @@
 using UnityEngine;
 
+// VN 재생의 유일한 프레임 구동자.
 public sealed class VnAdvanceInputPoller : MonoBehaviour
 {
     [SerializeField] private VnAdvanceInputBindings _bindings = new();
@@ -16,16 +17,11 @@ public sealed class VnAdvanceInputPoller : MonoBehaviour
     public void Initialize(
         DialogueAdvanceDispatcher dialogueAdvanceDispatcher,
         VnFeatureController featureController,
-        VnAdvanceInputBindings bindings,
         VNLinePresentationState linePresentationAdvanceState,
         EpisodePlayer episodePlayer)
     {
         _dialogueAdvanceDispatcher = dialogueAdvanceDispatcher;
         _featureController = featureController;
-
-        if (bindings != null)
-            _bindings = bindings;
-        
         _linePresentationAdvanceState = linePresentationAdvanceState;
         _episodePlayer = episodePlayer;
     }
@@ -35,10 +31,20 @@ public sealed class VnAdvanceInputPoller : MonoBehaviour
         if (_dialogueAdvanceDispatcher == null || _featureController == null)
             return;
 
+        // 입력을 먼저 반영한 뒤 그 결과로 틱을 돌림.
         PollAdvance();
         PollRapidSkip();
         PollSpeedUpMode();
         PollFeatureToggles();
+        PollDebugRunYarn();
+
+        _featureController.Tick();
+    }
+
+    private void PollDebugRunYarn()
+    {
+        if (_bindings.IsRunYarnPressed())
+            _episodePlayer.StartGame(_episodePlayer.YarnEntryKey);
     }
 
     private void PollAdvance()

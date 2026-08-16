@@ -57,14 +57,15 @@ public class VnAppBootstrap : MonoBehaviour
     [SerializeField] private VNOptionsPresenter vnOptionsPresenter;
     [SerializeField] private EllipsisBreathTypewriter ellipsisBreathTypewriter;
     
+    [Header("Entry Keys")]
+    [Tooltip("디버그 키(2번)와 타이틀에서 재생할 yarn 노드 이름.")]
+    [SerializeField] private string yarnEntryKey;
+
     [Header("VnAdvanceGate")]
+    [Tooltip("VN 재생의 유일한 프레임 구동자. 나머지 재생 로직은 MonoBehaviour가 아니다.")]
     [SerializeField] private VnAdvanceInputPoller vnAdvanceInputPoller;
-    [SerializeField] private DialogueAdvanceDispatcher dialogueAdvanceDispatcher;
-    
-    [Header("FeatureController")]
-    [SerializeField] private VnFeatureController vnFeatureController;
-    
-    
+
+
     [Header("RigPrefab")] [Tooltip("CharacterRig prefab used for command presentation. " +
                                    "Empty fields bake a complete rig from CharacterRigSchema at runtime. " +
                                    "Prefab the baked result when you need performance setup, external systems, response targets, or shot helpers.")] 
@@ -80,9 +81,7 @@ public class VnAppBootstrap : MonoBehaviour
     [SerializeField] private CharacterEmojiLibrarySO characterEmojiLibrarySo;
     [SerializeField] private CharacterEmojiVisualPresetSO characterEmojiVisualPresetSo;
     
-    [Header("UI")] 
-    [SerializeField] private EpisodePlayer episodePlayer;
-    
+    [Header("UI")]
     [SerializeField] private ScreenNoisePresetDBSO screenNoisePresetDbso;
     [SerializeField] private ScreenVignettePresetDBSO screenVignettePresetDbso;
     [SerializeField] private ScreenFlashPresetDBSO screenFlashPresetDbso;
@@ -104,6 +103,10 @@ public class VnAppBootstrap : MonoBehaviour
     private VNRuntimeStateProvider _vnRuntimeStateProvider;
     private PresentationShotResponseSystem _presentationResponseRig;
     private PresentationScopeSession _presentationScopeSession;
+
+    private readonly DialogueAdvanceDispatcher _dialogueAdvanceDispatcher = new();
+    private readonly VnFeatureController _vnFeatureController = new();
+    private EpisodePlayer _episodePlayer;
     
     private PresentationUIRoot _presentationUIRoot;
     private IProtagonistCharRigSlotProvider _protagonistCharRigSlot;
@@ -142,8 +145,10 @@ public class VnAppBootstrap : MonoBehaviour
         
         BootstrapLinePresentationRuntime();
         
+        // poller가 EpisodePlayer를 물고 있으므로 재생 컨트롤보다 먼저 만든다.
+        CreateEpisodePlayer();
+
         BootstrapPlaybackControls();
-        InitializeEpisodePlayer();
         BootstrapScreenBindings();
 
         BootstrapEquivalenceHarness();
@@ -324,16 +329,29 @@ public class VnAppBootstrap : MonoBehaviour
             optionItem);
     }
     
+    private void CreateEpisodePlayer()
+    {
+        _episodePlayer = new EpisodePlayer(
+            dialogueRunner,
+            yarnEntryKey,
+            _screenBindings,
+            _rollbackHistory,
+            customLinePresenter,
+            _backlogRecorder,
+            _presentationResponseRig,
+            _presentationScopeSession);
+    }
+
     private void BootstrapPlaybackControls()
     {
         autoAdvanceScheduler.Initialize(
             _playbackState,
-            dialogueAdvanceDispatcher,
+            _dialogueAdvanceDispatcher,
             () => Time.unscaledTimeAsDouble);
 
-        RapidSkipController rapidSkipController = new(dialogueAdvanceDispatcher);
+        RapidSkipController rapidSkipController = new(_dialogueAdvanceDispatcher);
 
-        vnFeatureController.Initialize(
+        _vnFeatureController.Initialize(
             _playbackState,
             _linePresentationAdvanceState,
             ellipsisBreathTypewriter,
@@ -343,32 +361,20 @@ public class VnAppBootstrap : MonoBehaviour
             _rollbackHistory,
             _linePresentationAdvanceState,
             _choiceHistory);
-        
+
         AdvanceGate advanceGate = new(
             _playbackState,
             _linePresentationAdvanceState,
             _presentationScopeSession);
-        
-        VnAdvanceInputBindings vnAdvanceInputBindings = new();
 
-        dialogueAdvanceDispatcher.Initialize(advanceGate, dialogueRunner, _linePresentationAdvanceState);
+        _dialogueAdvanceDispatcher.Initialize(advanceGate, dialogueRunner, _linePresentationAdvanceState);
+
+        // 키 배치는 poller의 인스펙터 필드가 원본이다.
         vnAdvanceInputPoller.Initialize(
-            dialogueAdvanceDispatcher, 
-            vnFeatureController, 
-            vnAdvanceInputBindings,
+            _dialogueAdvanceDispatcher,
+            _vnFeatureController,
             _linePresentationAdvanceState,
-            episodePlayer);
-    }
-    
-    private void InitializeEpisodePlayer()
-    {
-        episodePlayer.Initialize(
-            _screenBindings, 
-            _rollbackHistory, 
-            customLinePresenter,
-            _backlogRecorder,
-            _presentationResponseRig,
-            _presentationScopeSession);
+            _episodePlayer);
     }
     
     // 등가성 하네스. 토글이 꺼져 있으면 아무것도 만들지 않는다 — 재생 경로 무영향.
@@ -386,17 +392,17 @@ public class VnAppBootstrap : MonoBehaviour
             _vnRuntimeStateProvider,
             _presentationScopeSession,
             _presentationResponseRig,
-            dialogueAdvanceDispatcher);
+            _dialogueAdvanceDispatcher);
     }
 
     private void BootstrapScreenBindings()
     {
         _screenBindings.ConfigurePresentationView(
-            vnFeatureController,
-            dialogueAdvanceDispatcher,
+            _vnFeatureController,
+            _dialogueAdvanceDispatcher,
             _linePresentationAdvanceState);
 
-        _screenBindings.ConfigureTitleView(episodePlayer);
+        _screenBindings.ConfigureTitleView(_episodePlayer);
     }
     
     private void Start()

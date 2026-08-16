@@ -2,26 +2,18 @@ using System.Collections.Generic;
 using UnityEngine;
 using Yarn.Unity;
 
-public sealed class EpisodePlayer : MonoBehaviour
+public sealed class EpisodePlayer
 {
-    private VnScreenBindings _vnScreenBindings;
-    private RollbackHistory _nodeRollbackHistory;
-    private IVNLineAborter _linePresentationAborter;
-    private BacklogRecorder _backlogRecorder;
-    private PresentationShotResponseSystem _presentationResponseRig;
-    private PresentationScopeSession _presentationScopeSession;
+    private readonly DialogueRunner _dialogueRunner;
+    private readonly VnScreenBindings _vnScreenBindings;
+    private readonly RollbackHistory _nodeRollbackHistory;
+    private readonly IVNLineAborter _linePresentationAborter;
+    private readonly BacklogRecorder _backlogRecorder;
+    private readonly PresentationShotResponseSystem _presentationResponseRig;
+    private readonly PresentationScopeSession _presentationScopeSession;
 
-    [Header("Yarn")]
-    [SerializeField] private DialogueRunner dialogueRunner;
-    
-    [Header("Entry Keys")]
-    [SerializeField] private string yarnEntryKey;
-
-    [Header("Debug Input")]
-    [Tooltip("Yarn 실행")]
-    [SerializeField] private KeyCode runYarnKey = KeyCode.Alpha2;
-
-    public string YarnEntryKey => yarnEntryKey;
+    /// <summary>디버그 키·타이틀에서 재생할 기본 노드. 부트스트랩의 Entry Key 필드에서 온다.</summary>
+    public string YarnEntryKey { get; }
 
     // 가장 최근 재생 요청의 세대.
     // await 는 취소가 안 되므로, 늦게 깨어난 옛 호출이 스스로 물러나는 기준으로 쓴다.
@@ -31,7 +23,9 @@ public sealed class EpisodePlayer : MonoBehaviour
     // 노드가 재생되는 동안에는 false 다. 재생 중 로드/롤백까지 막으면 안 되기 때문이다.
     private bool _inTransition;
 
-    public void Initialize(
+    public EpisodePlayer(
+        DialogueRunner dialogueRunner,
+        string yarnEntryKey,
         VnScreenBindings vnScreenBindings,
         RollbackHistory nodeRollbackHistory,
         IVNLineAborter linePresentationAborter,
@@ -39,18 +33,14 @@ public sealed class EpisodePlayer : MonoBehaviour
         PresentationShotResponseSystem presentationResponseRig,
         PresentationScopeSession presentationScopeSession)
     {
+        _dialogueRunner = dialogueRunner;
+        YarnEntryKey = yarnEntryKey;
         _vnScreenBindings = vnScreenBindings;
         _nodeRollbackHistory = nodeRollbackHistory;
         _linePresentationAborter = linePresentationAborter;
         _backlogRecorder = backlogRecorder;
         _presentationResponseRig = presentationResponseRig;
         _presentationScopeSession = presentationScopeSession;
-    }
-
-    private void Update()
-    {
-        if (Input.GetKeyDown(runYarnKey))
-            StartGame(yarnEntryKey);
     }
 
     /// <summary>
@@ -68,10 +58,10 @@ public sealed class EpisodePlayer : MonoBehaviour
     /// </summary>
     public async YarnTask StartGameAsync(string nodeName)
     {
-        if (dialogueRunner == null)
+        if (_dialogueRunner == null)
             return;
 
-        if (!dialogueRunner.Dialogue.NodeExists(nodeName))
+        if (!_dialogueRunner.Dialogue.NodeExists(nodeName))
         {
             Debug.LogWarning($"[EpisodePlayer] Node not found. node={nodeName}");
             return;
@@ -117,7 +107,7 @@ public sealed class EpisodePlayer : MonoBehaviour
 
         // Yarn Spinner 3.1 기준, 이 await 는 '모든 dialogue presenter 의 시작 준비 완료'
         // 시점에 반환된다. 노드 종료가 아니므로 아래에서 따로 기다려야 한다.
-        await dialogueRunner.StartDialogue(nodeName);
+        await _dialogueRunner.StartDialogue(nodeName);
 
         await WaitForDialogueEndAsync(generation);
     }
@@ -130,7 +120,7 @@ public sealed class EpisodePlayer : MonoBehaviour
     /// </summary>
     private async YarnTask WaitForDialogueEndAsync(int generation)
     {
-        while (dialogueRunner.IsDialogueRunning)
+        while (_dialogueRunner.IsDialogueRunning)
         {
             // 선점당했으면 조용히 물러난다. 정리는 새 호출이 이미 맡았다.
             if (generation != _runGeneration)
@@ -160,8 +150,8 @@ public sealed class EpisodePlayer : MonoBehaviour
     {
         List<YarnTask> tasks = new List<YarnTask>();
 
-        if (dialogueRunner != null && dialogueRunner.IsDialogueRunning)
-            tasks.Add(dialogueRunner.Stop());
+        if (_dialogueRunner != null && _dialogueRunner.IsDialogueRunning)
+            tasks.Add(_dialogueRunner.Stop());
 
         if (tasks.Count > 0)
             await YarnTask.WhenAll(tasks);

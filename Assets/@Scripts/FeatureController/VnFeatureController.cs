@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public sealed class VnFeatureController : MonoBehaviour
+public sealed class VnFeatureController
 {
     private VnPlaybackRuntimeState _vnPlaybackSettings;
 
@@ -62,7 +62,7 @@ public sealed class VnFeatureController : MonoBehaviour
         _init = true;
     }
 
-    private void Update()
+    public void Tick()
     {
         if (!_init)
             return;

@@ -3,7 +3,7 @@
 Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타임**입니다.
 대사 진행과 캐릭터·배경·화면 효과 등의 연출을 분리하고, Yarn 스크립트의 명령어를 통해 여러 연출 트랙을 조합할 수 있도록 구현했습니다.
 
-사용법: @Dialogue폴더의 'Story_**'.yarnscript의 Node명을 복사하여, 하이어아키의 'EpisodePlayer'의 'Entry Keys'에 복사.
+사용법: @Dialogue폴더의 'Story_**'.yarnscript의 Node명을 복사하여, 하이어아키의 'VnAppBootstrap'의 'Entry Keys'에 복사.
 단축키: 2: Node실행 / 좌ctrl: fastforward / r: Rollback / a: Auto모드 토글 / s: SpeedUp모드 토글 / Space: RequestNextLine
 
 

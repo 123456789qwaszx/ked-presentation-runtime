@@ -1,7 +1,6 @@
-using UnityEngine;
 using Yarn.Unity;
 
-public sealed class DialogueAdvanceDispatcher : MonoBehaviour
+public sealed class DialogueAdvanceDispatcher
 {
     private AdvanceGate _gate;
     private DialogueRunner _dialogueRunner;
@@ -24,7 +23,6 @@ public sealed class DialogueAdvanceDispatcher : MonoBehaviour
 
     public void DispatchAdvance() => DispatchAdvance(AdvanceRequestKind.User);
     public void DispatchAutoAdvance() => DispatchAdvance(AdvanceRequestKind.Auto);
-    public void DispatchSpeedUpModeAdvance() => DispatchAdvance(AdvanceRequestKind.SpeedUpMode);
     public void DispatchRapidSkipAdvance() => DispatchAdvance(AdvanceRequestKind.RapidSkip);
 
     private void DispatchAdvance(AdvanceRequestKind kind)

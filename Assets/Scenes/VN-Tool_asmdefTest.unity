@@ -2699,50 +2699,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &307625743
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 307625744}
-  - component: {fileID: 307625745}
-  m_Layer: 0
-  m_Name: DialogueAdvanceDispatcher
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &307625744
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 307625743}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 69.77765, y: -320.14267, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 596868909}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &307625745
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 307625743}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 67d39d4aa25c4c74dab804adc0de00b8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DialogueAdvanceRouter
 --- !u!1 &313291358
 GameObject:
   m_ObjectHideFlags: 0
@@ -5129,7 +5085,6 @@ Transform:
   - {fileID: 7985477256358699683}
   - {fileID: 552181529}
   - {fileID: 1315566988}
-  - {fileID: 307625744}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &596868910
@@ -5159,24 +5114,18 @@ MonoBehaviour:
   commandExecutor: {fileID: 1257280952}
   mainYarnBridgePlaybackDriver: {fileID: 720935691}
   dialogueRunner: {fileID: 8309902628538800288}
-  linePresenter: {fileID: 2958262985601084670}
   customLinePresenter: {fileID: 2009713540}
   autoAdvanceScheduler: {fileID: 608895337}
   optionItem: {fileID: 8364438180924277572, guid: 3a0acb1fd0e1d604183be29ffcfb79a7, type: 3}
   vnOptionsPresenter: {fileID: 1180068359}
   ellipsisBreathTypewriter: {fileID: 1658226451}
+  yarnEntryKey: Story_blank_ch01_ep00
   vnAdvanceInputPoller: {fileID: 1315566987}
-  dialogueAdvanceDispatcher: {fileID: 307625745}
-  vnFeatureController: {fileID: 775605347}
   rigPrefab: {fileID: 0}
   backgroundRigPrefab: {fileID: 6323253774795375343, guid: 18f0ce8dac4b54f44a88bdcceac48012, type: 3}
-  overlayRigPrefab: {fileID: 0}
   enableEquivalenceHarness: 1
-  chapterCardPrefab: {fileID: 2410623267660482620, guid: 60640956e3866b44e9e8c9df1a45dbd3, type: 3}
-  nodeRigPrefab: {fileID: 8432584506347833489, guid: 5a92676ae0261c54188d2a64469a3787, type: 3}
   characterEmojiLibrarySo: {fileID: 11400000, guid: 50cc0df71f2e038468df66d0c632ebdd, type: 2}
   characterEmojiVisualPresetSo: {fileID: 11400000, guid: e00fbe47d88401f458328299b0b76437, type: 2}
-  episodePlayer: {fileID: 1924806292}
   screenNoisePresetDbso: {fileID: 11400000, guid: afb4892f90a1eff46b623bfa3c11a55d, type: 2}
   screenVignettePresetDbso: {fileID: 11400000, guid: 53356775219299c42981714a7e8b025e, type: 2}
   screenFlashPresetDbso: {fileID: 11400000, guid: fd8b0b7eceef6c549952782158c076ed, type: 2}
@@ -7018,50 +6967,6 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
---- !u!1 &775605346
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 775605348}
-  - component: {fileID: 775605347}
-  m_Layer: 0
-  m_Name: VnFeatureController
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &775605347
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 775605346}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ed44926351ce81f41bd0f46c2700a97e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::VnFeatureController
---- !u!4 &775605348
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 775605346}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -35.09564, y: 715.7131, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &791711320
 GameObject:
   m_ObjectHideFlags: 0
@@ -11941,6 +11846,7 @@ MonoBehaviour:
     speedUpToggle: 115
     autoToggle: 97
     rollback: 114
+    runYarn: 50
 --- !u!4 &1315566988
 Transform:
   m_ObjectHideFlags: 0
@@ -18198,55 +18104,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!1 &1924806291
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1924806293}
-  - component: {fileID: 1924806292}
-  m_Layer: 0
-  m_Name: EpisodePlayer
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1924806292
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1924806291}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c06fad87be108264f992bc97afe88f04, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EpisodePlayer
-  dialogueRunner: {fileID: 8309902628538800288}
-  subPresentationRunner: {fileID: 0}
-  oneShotRunner: {fileID: 0}
-  yarnEntryKey: Story_blank_ch01_ep00
-  runYarnKey: 50
---- !u!4 &1924806293
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1924806291}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2193.4197, y: 1208.8455, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1928094746
 GameObject:
   m_ObjectHideFlags: 0
@@ -29990,7 +29847,5 @@ SceneRoots:
   - {fileID: 63871903}
   - {fileID: 1571925711}
   - {fileID: 1332040256}
-  - {fileID: 1924806293}
-  - {fileID: 775605348}
   - {fileID: 297683114}
   - {fileID: 99511076}

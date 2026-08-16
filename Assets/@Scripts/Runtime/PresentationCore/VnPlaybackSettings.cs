@@ -9,13 +9,8 @@ public class VnPlaybackSettings
     [Min(2f)] public float speedupModeMinMultiplier = 2f;
     [Min(2f)] public float speedupModeMaxMultiplier = 32f;
 
-    [Tooltip("SpeedUpMode에서 라인이 다 보인 뒤 다음 라인으로 넘어가는 최소 간격. 60fps 기준 0.033~0.066초가 2~4프레임.")]
-    public float speedupAdvanceRateLimitSec = 0.05f;
-    public float speedupCooldownAfterHurryUpSec = 0.04f;
-    public float speedupCooldownAfterNextLineSec = 0.05f;
-
     [Header("Rapid Skip")]
-    [Tooltip("Alt RapidSkip용 입력 간격. 책갈피를 촤라락 넘기는 용도라 거의 없다시피 둔다.")]
+    [Tooltip("Alt RapidSkip용 입력 간격. 책갈피를 촤라락 넘기는 용도.")]
     public float rapidSkipAdvanceRateLimitSec = 0.04f;
     public float rapidSkipCooldownAfterHurryUpSec = 0.04f;
     public float rapidSkipCooldownAfterNextLineSec = 0.04f;
