@@ -8,7 +8,7 @@ public sealed class VNLoadSeekDriver
     private readonly RollbackHistory _rollbackHistory;
     private readonly ChoiceHistory _choiceHistory;
     private readonly VNTraceStream _trace;
-    private readonly VNSideRunnerSyncHub _sideRunnerSyncHub;
+    //private readonly VNSideRunnerSyncHub _sideRunnerSyncHub;
 
     private VNSaveData _target;
 
@@ -21,7 +21,7 @@ public sealed class VNLoadSeekDriver
         VNPlaytimeTracker playtimeTracker,
         RollbackHistory rollbackHistory,
         ChoiceHistory choiceHistory,
-        VNSideRunnerSyncHub sideRunnerSyncHub,
+        //VNSideRunnerSyncHub sideRunnerSyncHub,
         VNTraceStream trace = null)
     {
         _restarter = restarter;
@@ -29,7 +29,7 @@ public sealed class VNLoadSeekDriver
         _playtimeTracker = playtimeTracker;
         _rollbackHistory = rollbackHistory;
         _choiceHistory = choiceHistory;
-        _sideRunnerSyncHub = sideRunnerSyncHub;
+        //_sideRunnerSyncHub = sideRunnerSyncHub;
         _trace = trace;
     }
 
@@ -46,7 +46,7 @@ public sealed class VNLoadSeekDriver
 
         _lineAdvanceState.BeginLoadSeek(saveData.nodeName, saveData.lineId);
 
-        _sideRunnerSyncHub.ResetPresentationLane();
+        //_sideRunnerSyncHub.ResetPresentationLane();
 
         _restarter.StartGame(saveData.nodeName);
     }

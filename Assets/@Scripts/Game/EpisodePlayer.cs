@@ -8,7 +8,7 @@ public sealed class EpisodePlayer : MonoBehaviour
     private RollbackHistory _nodeRollbackHistory;
     private IVNLineAborter _linePresentationAborter;
     private BacklogRecorder _backlogRecorder;
-    private VNSideRunnerSyncHub _sideRunnerSyncHub;
+    //private VNSideRunnerSyncHub _sideRunnerSyncHub;
     private PresentationShotResponseSystem _presentationResponseRig;
     private PresentationLaneScopeSession _presentationLaneScopeSession;
 
@@ -39,7 +39,7 @@ public sealed class EpisodePlayer : MonoBehaviour
         RollbackHistory nodeRollbackHistory,
         IVNLineAborter linePresentationAborter,
         BacklogRecorder backlogRecorder,
-        VNSideRunnerSyncHub sideRunnerSyncHub,
+        //VNSideRunnerSyncHub sideRunnerSyncHub,
         PresentationShotResponseSystem presentationResponseRig,
         PresentationLaneScopeSession presentationLaneScopeSession)
     {
@@ -47,7 +47,7 @@ public sealed class EpisodePlayer : MonoBehaviour
         _nodeRollbackHistory = nodeRollbackHistory;
         _linePresentationAborter = linePresentationAborter;
         _backlogRecorder = backlogRecorder;
-        _sideRunnerSyncHub = sideRunnerSyncHub;
+        //_sideRunnerSyncHub = sideRunnerSyncHub;
         _presentationResponseRig = presentationResponseRig;
         _presentationLaneScopeSession = presentationLaneScopeSession;
     }
@@ -180,6 +180,6 @@ public sealed class EpisodePlayer : MonoBehaviour
         if (tasks.Count > 0)
             await YarnTask.WhenAll(tasks);
 
-        _sideRunnerSyncHub.ResetPresentationLane();
+        //_sideRunnerSyncHub.ResetPresentationLane();
     }
 }

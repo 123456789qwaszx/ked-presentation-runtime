@@ -10,7 +10,7 @@ public sealed partial class YarnCommandBridge
     private readonly RectTransform _backgroundRigPrefab;
     private readonly RectTransform _overlayRigPrefab;
 
-    private readonly VNSideRunnerSyncHub _sideRunnerSyncHub;
+    //private readonly VNSideRunnerSyncHub _sideRunnerSyncHub;
     //private readonly OneShotPresentationLane _oneShotPresentationLane;
     private readonly DialogueBoxPresentationController _dialogueBoxPresentation;
     private readonly OverlaySequenceRunner _overlaySequenceRunner;
@@ -19,7 +19,7 @@ public sealed partial class YarnCommandBridge
     public YarnCommandBridge(
         DialogueRunner runner,
         YarnBridgePlaybackDriver playbackDriver,
-        VNSideRunnerSyncHub sideRunnerSyncHub,
+        //VNSideRunnerSyncHub sideRunnerSyncHub,
         RectTransform charRigPrefab,
         RectTransform backgroundRigPrefab,
         RectTransform overlayRigPrefab,
@@ -30,7 +30,7 @@ public sealed partial class YarnCommandBridge
         bool bindMainLaneCommands)
     {
         _playbackDriver = playbackDriver;
-        _sideRunnerSyncHub = sideRunnerSyncHub;
+        //_sideRunnerSyncHub = sideRunnerSyncHub;
         _charRigPrefab = charRigPrefab;
         _backgroundRigPrefab = backgroundRigPrefab;
         _overlayRigPrefab = overlayRigPrefab;
@@ -78,24 +78,24 @@ public sealed partial class YarnCommandBridge
     // Main Runner only commands.
     private void BindMainLaneCommands(DialogueRunner runner)
     {
-        // 자동 진행 제어
-        runner.AddCommandHandler<string>(
-            "pres_start", StartSubPresentationNode);
-        runner.AddCommandHandler(
-            "pres_end", StopSubPresentationNode);
-        
-        runner.AddCommandHandler(
-            "pres_pause",  PauseSubPresentation);  // 일시정지
-        runner.AddCommandHandler(
-            "pres_resume", ResumeSubPresentation); // 재개
-
-        // (재호출 시 마지막 값으로 덮어씀)
-        runner.AddCommandHandler<int>(
-            "pres_hold", HoldSubPresentation); // N라인 멈춤
-        
-        // (재호출 시 누적)
-        runner.AddCommandHandler<int>(
-            "pres_advance", AddSubPresentationForwardAdvance); // 이번 라인 N개 추가
+        // // 자동 진행 제어
+        // runner.AddCommandHandler<string>(
+        //     "pres_start", StartSubPresentationNode);
+        // runner.AddCommandHandler(
+        //     "pres_end", StopSubPresentationNode);
+        //
+        // runner.AddCommandHandler(
+        //     "pres_pause",  PauseSubPresentation);  // 일시정지
+        // runner.AddCommandHandler(
+        //     "pres_resume", ResumeSubPresentation); // 재개
+        //
+        // // (재호출 시 마지막 값으로 덮어씀)
+        // runner.AddCommandHandler<int>(
+        //     "pres_hold", HoldSubPresentation); // N라인 멈춤
+        //
+        // // (재호출 시 누적)
+        // runner.AddCommandHandler<int>(
+        //     "pres_advance", AddSubPresentationForwardAdvance); // 이번 라인 N개 추가
         
         // runner.AddCommandHandler<string>(
         //     "beat", RunOneShotNode); // One-Shot Node 재생. 커맨드로만 이루어졌기에 즉시 재생 및 자동 종료
@@ -122,23 +122,23 @@ public sealed partial class YarnCommandBridge
     
     // Lane registration is explicitly handled by bootstrap:
     // hub.RegisterPresentationLane(subRunner).
-    private void StartSubPresentationNode(string nodeName) 
-        => _sideRunnerSyncHub.StartPresentationLaneCoroutine(nodeName);
-    
-    private IEnumerator StopSubPresentationNode() 
-        => _sideRunnerSyncHub.StopPresentationLaneCoroutine();
-    
-    private void PauseSubPresentation() 
-        => _sideRunnerSyncHub.PausePresentation();
-    
-    private void ResumeSubPresentation() 
-        => _sideRunnerSyncHub.ResumePresentation();
-    
-    private void HoldSubPresentation(int lines = 1) 
-        => _sideRunnerSyncHub.HoldPresentation(lines);
-    
-    private void AddSubPresentationForwardAdvance(int steps = 1) 
-        => _sideRunnerSyncHub.AdvancePresentationExtra(steps);
+    // private void StartSubPresentationNode(string nodeName) 
+    //     => _sideRunnerSyncHub.StartPresentationLaneCoroutine(nodeName);
+    //
+    // private IEnumerator StopSubPresentationNode() 
+    //     => _sideRunnerSyncHub.StopPresentationLaneCoroutine();
+    //
+    // private void PauseSubPresentation() 
+    //     => _sideRunnerSyncHub.PausePresentation();
+    //
+    // private void ResumeSubPresentation() 
+    //     => _sideRunnerSyncHub.ResumePresentation();
+    //
+    // private void HoldSubPresentation(int lines = 1) 
+    //     => _sideRunnerSyncHub.HoldPresentation(lines);
+    //
+    // private void AddSubPresentationForwardAdvance(int steps = 1) 
+    //     => _sideRunnerSyncHub.AdvancePresentationExtra(steps);
     
     // private IEnumerator RunOneShotNode(string nodeName)
     //     => _oneShotPresentationLane.RunNodeCoroutine(nodeName, blockMain: true);

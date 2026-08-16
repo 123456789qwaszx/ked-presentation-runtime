@@ -23,7 +23,7 @@ public class VnAppBootstrap : MonoBehaviour
     
     private readonly PresentationStage _presentationStage = new();
     
-    private readonly VNSideRunnerSyncHub _vnSideRunnerSyncHub = new();
+    //private readonly VNSideRunnerSyncHub _vnSideRunnerSyncHub = new();
     private readonly BacklogRecorder _backlogRecorder = new ();
     
     private VnScreenBindings _screenBindings;
@@ -63,18 +63,18 @@ public class VnAppBootstrap : MonoBehaviour
     [SerializeField] private CommandExecutor commandExecutor;
     [SerializeField] private YarnBridgePlaybackDriver mainYarnBridgePlaybackDriver;
     
-    [Header("SubExecutor")]
-    [SerializeField] private CommandExecutor subCommandExecutor;
-    [SerializeField] private YarnBridgePlaybackDriver subYarnBridgePlaybackDriver;
-    
-    [Header("OneShotExecutor")]
-    [SerializeField] private CommandExecutor oneShotCommandExecutor;
-    [SerializeField] private YarnBridgePlaybackDriver oneShotYarnBridgePlaybackDriver;
+    // [Header("SubExecutor")]
+    // [SerializeField] private CommandExecutor subCommandExecutor;
+    // [SerializeField] private YarnBridgePlaybackDriver subYarnBridgePlaybackDriver;
+    //
+    // [Header("OneShotExecutor")]
+    // [SerializeField] private CommandExecutor oneShotCommandExecutor;
+    // [SerializeField] private YarnBridgePlaybackDriver oneShotYarnBridgePlaybackDriver;
     
     [Header("Yarn")] 
     [SerializeField] private DialogueRunner dialogueRunner;
-    [SerializeField] private DialogueRunner subPresentationRunner;
-    [SerializeField] private DialogueRunner subOneShotRunner;
+    // [SerializeField] private DialogueRunner subPresentationRunner;
+    // [SerializeField] private DialogueRunner subOneShotRunner;
     
     [SerializeField] private LinePresenter linePresenter;
     [SerializeField] private CustomLinePresenter customLinePresenter;
@@ -299,15 +299,15 @@ public class VnAppBootstrap : MonoBehaviour
             overlayRigCommandFactory);
 
         commandExecutor.Initialize(factory);
-        subCommandExecutor.Initialize(factory);
-        oneShotCommandExecutor.Initialize(factory);
+        // subCommandExecutor.Initialize(factory);
+        // oneShotCommandExecutor.Initialize(factory);
         
         PresentationSessionContext presentationSessionContext = new(_playbackState);
         
         _presentationLaneScopeSession = new(
             commandExecutor,
-            subCommandExecutor,
-            oneShotCommandExecutor,
+            // subCommandExecutor,
+            // oneShotCommandExecutor,
             presentationSessionContext,
             _linePresentationAdvanceState,
             _presentationStage);
@@ -363,7 +363,7 @@ public class VnAppBootstrap : MonoBehaviour
         // subYarnBridgePlaybackDriver.Initialize(subCommandExecutor, new SubPresentationScopeProvider(_presentationLaneScopeSession));
         // oneShotYarnBridgePlaybackDriver.Initialize(oneShotCommandExecutor, _presentationLaneScopeSession);
 
-        _vnSideRunnerSyncHub.Initialize(subPresentationRunner);
+        //_vnSideRunnerSyncHub.Initialize(subPresentationRunner);
 
         //OneShotPresentationLane oneShotPresentationLane = new(subOneShotRunner, oneShotYarnBridgePlaybackDriver);
 
@@ -379,7 +379,7 @@ public class VnAppBootstrap : MonoBehaviour
         YarnCommandBridge yarnCommandBridge = new(
             dialogueRunner,
             mainYarnBridgePlaybackDriver,
-            _vnSideRunnerSyncHub,
+            //_vnSideRunnerSyncHub,
             rigPrefab,
             backgroundRigPrefab,
             overlayRigPrefab,
@@ -433,7 +433,7 @@ public class VnAppBootstrap : MonoBehaviour
             _dialogueBoxPresentationController,
             ellipsisBreathTypewriter,
             _vnLoadSeekDriver,
-            _vnSideRunnerSyncHub,
+            //_vnSideRunnerSyncHub,
             mainYarnBridgePlaybackDriver);
 
         customLinePresenter.Initialize(
@@ -506,7 +506,7 @@ public class VnAppBootstrap : MonoBehaviour
             vnPlaytimeTracker,
             _rollbackHistory,
             _choiceHistory,
-            _vnSideRunnerSyncHub,
+            //_vnSideRunnerSyncHub,
             vnTrace);
 
         // 아직 게임 플래그 저장/복원이 없기에 임시로 Empty 사용.
@@ -552,7 +552,7 @@ public class VnAppBootstrap : MonoBehaviour
             _rollbackHistory, 
             customLinePresenter,
             _backlogRecorder,
-            _vnSideRunnerSyncHub,
+            //_vnSideRunnerSyncHub,
             _presentationResponseRig,
             _presentationLaneScopeSession);
     }
