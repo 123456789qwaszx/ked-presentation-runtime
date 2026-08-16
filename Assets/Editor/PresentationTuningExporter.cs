@@ -197,18 +197,18 @@ public static class PresentationTuningExporter
             }
 
             // Overlay
-            {
-                OverlayRigBuilder builder = new();
-                RectTransform root = builder.BuildOverlayRoot(prefabs.overlay);
-                root.SetParent(stage, false);
-                builder.BindRefsFromRoot(root, "", out _);
-
-                dump.rigs.Add(CaptureRig(
-                    "overlay", AssetPathOf(prefabs.overlay), root,
-                    OverlaySchemaNodes(), warnings));
-
-                Object.DestroyImmediate(root.gameObject);
-            }
+            // {
+            //     OverlayRigBuilder builder = new();
+            //     RectTransform root = builder.BuildOverlayRoot(prefabs.overlay);
+            //     root.SetParent(stage, false);
+            //     builder.BindRefsFromRoot(root, "", out _);
+            //
+            //     dump.rigs.Add(CaptureRig(
+            //         "overlay", AssetPathOf(prefabs.overlay), root,
+            //         OverlaySchemaNodes(), warnings));
+            //
+            //     Object.DestroyImmediate(root.gameObject);
+            // }
 
             // ScreenEffect — 부트스트랩에 프리팹 배선이 없다.
             // 스키마 베이크가 곧 런타임 경로라 프리팹 없이 세우는 것이 맞다.
@@ -346,15 +346,15 @@ public static class PresentationTuningExporter
         return nodes;
     }
 
-    private static List<(string, string)> OverlaySchemaNodes()
-    {
-        List<(string, string)> nodes = new(OverlayRigSchema.Nodes.Length);
-
-        foreach (OverlayRigSchema.NodeDef n in OverlayRigSchema.Nodes)
-            nodes.Add((n.Id.ToString(), n.Parent?.ToString()));
-
-        return nodes;
-    }
+    // private static List<(string, string)> OverlaySchemaNodes()
+    // {
+    //     List<(string, string)> nodes = new(OverlayRigSchema.Nodes.Length);
+    //
+    //     foreach (OverlayRigSchema.NodeDef n in OverlayRigSchema.Nodes)
+    //         nodes.Add((n.Id.ToString(), n.Parent?.ToString()));
+    //
+    //     return nodes;
+    // }
 
     private static List<(string, string)> ScreenEffectSchemaNodes()
     {

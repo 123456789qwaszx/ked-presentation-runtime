@@ -7,7 +7,7 @@ public sealed class PresentationStage
     public readonly CharacterRigRegistry characterRigs = new();
     public readonly BackgroundRigRegistry backgroundRigs = new();
     public readonly CastRegistry castRegistry = new();
-    public readonly OverlayRigRegistry overlayRigs = new();
+    //public readonly OverlayRigRegistry overlayRigs = new();
     
     public readonly CharacterRigTargetAliasRegistry characterTargetAliases = new();
 
@@ -21,6 +21,6 @@ public sealed class PresentationStage
         castRegistry.Clear();
         characterRigs.Clear();
         backgroundRigs.Clear();
-        overlayRigs.Clear();
+        //overlayRigs.Clear();
     }
 }

@@ -141,6 +141,6 @@ public sealed partial class VnScreenBindings
 
     private void HandleSkipMenuClicked()
     {
-        OpenEpisodeSkipConfirmPanel();
+        //OpenEpisodeSkipConfirmPanel();
     }
 }

@@ -8,13 +8,10 @@ public sealed partial class YarnCommandBridge
     private readonly YarnBridgePlaybackDriver _playbackDriver;
     private readonly RectTransform _charRigPrefab;
     private readonly RectTransform _backgroundRigPrefab;
-    private readonly RectTransform _overlayRigPrefab;
 
     //private readonly VNSideRunnerSyncHub _sideRunnerSyncHub;
     //private readonly OneShotPresentationLane _oneShotPresentationLane;
     private readonly DialogueBoxPresentationController _dialogueBoxPresentation;
-    private readonly OverlaySequenceRunner _overlaySequenceRunner;
-    private readonly SequenceCatalogSO _overlaySequenceCatalog;
     
     public YarnCommandBridge(
         DialogueRunner runner,
@@ -22,22 +19,16 @@ public sealed partial class YarnCommandBridge
         //VNSideRunnerSyncHub sideRunnerSyncHub,
         RectTransform charRigPrefab,
         RectTransform backgroundRigPrefab,
-        RectTransform overlayRigPrefab,
         //OneShotPresentationLane oneShotPresentationLane,
         DialogueBoxPresentationController dialogueBoxPresentation,
-        OverlaySequenceRunner overlaySequenceRunner,
-        SequenceCatalogSO overlaySequenceCatalog,
         bool bindMainLaneCommands)
     {
         _playbackDriver = playbackDriver;
         //_sideRunnerSyncHub = sideRunnerSyncHub;
         _charRigPrefab = charRigPrefab;
         _backgroundRigPrefab = backgroundRigPrefab;
-        _overlayRigPrefab = overlayRigPrefab;
         //_oneShotPresentationLane = oneShotPresentationLane;
         _dialogueBoxPresentation = dialogueBoxPresentation;
-        _overlaySequenceRunner = overlaySequenceRunner;
-        _overlaySequenceCatalog = overlaySequenceCatalog;
         
         BindRunnerCommands(runner);
 
@@ -72,7 +63,7 @@ public sealed partial class YarnCommandBridge
         BindScreenEffects(runner);
         BindStageDepthDefocus(runner);
 
-        BindOverlayRig(runner);
+        //BindOverlayRig(runner);
     }
     
     // Main Runner only commands.
@@ -117,8 +108,8 @@ public sealed partial class YarnCommandBridge
             "box_reset", ResetDefaultLineBoxKinds);
     }
     
-    private void PlayOverlaySequence(string sequenceKey)
-        => _overlaySequenceRunner.Play(sequenceKey, _overlaySequenceCatalog);
+    // private void PlayOverlaySequence(string sequenceKey)
+    //     => _overlaySequenceRunner.Play(sequenceKey, _overlaySequenceCatalog);
     
     // Lane registration is explicitly handled by bootstrap:
     // hub.RegisterPresentationLane(subRunner).
@@ -165,8 +156,8 @@ public sealed partial class YarnCommandBridge
     {
         BindFramePauseAliases(runner);
         
-        runner.AddCommandHandler<string>(
-            "seq", PlayOverlaySequence);
+        // runner.AddCommandHandler<string>(
+        //     "seq", PlayOverlaySequence);
         
         runner.AddCommandHandler<float>(
             "pause", EnqueueWaitSpec);

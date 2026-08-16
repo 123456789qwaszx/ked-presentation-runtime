@@ -116,14 +116,14 @@ namespace Ked.Presentation.Core.Tests.UnityParity
                     return root;
                 }
 
-                case "overlay":
-                {
-                    OverlayRigBuilder builder = new();
-                    RectTransform root = builder.BuildOverlayRoot(prefab);
-                    root.SetParent(stage, false);
-                    builder.BindRefsFromRoot(root, "", out _);
-                    return root;
-                }
+                // case "overlay":
+                // {
+                //     OverlayRigBuilder builder = new();
+                //     RectTransform root = builder.BuildOverlayRoot(prefab);
+                //     root.SetParent(stage, false);
+                //     builder.BindRefsFromRoot(root, "", out _);
+                //     return root;
+                // }
 
                 case "screenEffect":
                 {

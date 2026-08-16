@@ -11,7 +11,7 @@ public sealed partial class VnScreenBindings : IDisposable
     public VnScreenBindings(UIManager uiManager)
     {
         _ui = uiManager;
-        _chapterCardSpawner = new ChapterCardRuntimeSpawner(uiManager.GetUI<ChapterSelectionPanel>());
+        //_chapterCardSpawner = new ChapterCardRuntimeSpawner(uiManager.GetUI<ChapterSelectionPanel>());
     }
     
     public void OpenTitleMenu() => GoToTitle();

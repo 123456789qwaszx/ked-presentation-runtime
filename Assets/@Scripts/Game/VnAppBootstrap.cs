@@ -7,13 +7,10 @@ public class VnAppBootstrap : MonoBehaviour
 {
     //[SerializeField]DungeonCafeBootstrap dungeonCafe;
     
-    private readonly UnityInputSource _unityInputSource = new();
     private readonly UnityTimeSource _unityTimeSource = new();
     
     private readonly VnPlaybackRuntimeState _playbackState = new();
     
-    private readonly VnUxState _vnUxState = new();
-    private readonly EpisodeSelectionStateData _episodeSelectionStateData = new();
     private readonly RollbackHistory _rollbackHistory = new();
     private readonly ChoiceHistory _choiceHistory = new();
     private readonly VNLinePresentationState _linePresentationAdvanceState = new();
@@ -27,11 +24,6 @@ public class VnAppBootstrap : MonoBehaviour
     private readonly BacklogRecorder _backlogRecorder = new ();
     
     private VnScreenBindings _screenBindings;
-    
-    [Header("Overlay PresentationSession")]
-    [SerializeField] private CommandExecutor overlayCommandExecutor;
-    [SerializeField] private OverlaySequenceRunner overlaySequenceRunner;
-    [SerializeField] private SequenceCatalogSO overlaySequenceCatalog;
     
     [Header("VN Trace")]
     [SerializeField] private VNTraceStream vnTrace = new ();
@@ -108,17 +100,12 @@ public class VnAppBootstrap : MonoBehaviour
     [Header("ChapterButtonCard")]
     [SerializeField] private RectTransform chapterCardPrefab;
     [SerializeField] private RectTransform nodeRigPrefab;
-    [SerializeField] private ChapterCardFactory chapterCardFactory;
     
     [Header("VN Save / Load")]
     [SerializeField] private VNAlbumDatabaseSO albumDatabase;
     [SerializeField] private VNPlaytimeTracker vnPlaytimeTracker;
     [SerializeField] private VNAlbumUnlockDebugList vnAlbumUnlockDebugList;
     
-    [Header("Episode Selection")]
-    [SerializeField] private ChapterEpisodeProgressionCatalogSO chapterEpisodeProgressionCatalog;
-    
-    [SerializeField] private ChapterEpisodeProgressionSO episodeProgressionSo;
     [SerializeField] private RollbackHistoryDebugView rollbackHistoryDebugView;
     
     [Header("Emoji")] 
@@ -146,7 +133,6 @@ public class VnAppBootstrap : MonoBehaviour
     private IUIThemePatchPort _uiThemePatch;
     private VNLoadSeekDriver _vnLoadSeekDriver;
     private VNSaveLoadSystem _vnSaveLoadSystem;
-    private EpisodeSelectionSystem _episodeSelectionSystem;
     private DialogueBoxPresentationController  _dialogueBoxPresentationController;
     
     private VNRuntimeStateProvider _vnRuntimeStateProvider;
@@ -193,7 +179,6 @@ public class VnAppBootstrap : MonoBehaviour
         BootstrapLinePresentationRuntime();
         
         BootstrapPlaybackControls();
-        BootstrapEpisodeSelectionRuntime();
         InitializeEpisodePlayer();
         BootstrapScreenBindings();
 
@@ -281,12 +266,12 @@ public class VnAppBootstrap : MonoBehaviour
             stageMaskMotionPresetDbSo,
             _presentationUIRoot);
         
-        StageOverlayRigSlotResolver stageOverlayRigSlotResolver = new(_presentationUIRoot);
-        OverlayRigBuilder overlayRigBuilder = new();
-        
-        OverlayRigCommandFactory overlayRigCommandFactory = new(
-            stageOverlayRigSlotResolver, 
-            overlayRigBuilder);
+        // StageOverlayRigSlotResolver stageOverlayRigSlotResolver = new(_presentationUIRoot);
+        // OverlayRigBuilder overlayRigBuilder = new();
+        //
+        // OverlayRigCommandFactory overlayRigCommandFactory = new(
+        //     stageOverlayRigSlotResolver, 
+        //     overlayRigBuilder);
 
         CompositeCommandFactory factory = new(
             charRigFactory,
@@ -294,8 +279,7 @@ public class VnAppBootstrap : MonoBehaviour
             presentationShotFactory,
             presentationControlFactory,
             audioFactory,
-            screenEffectFactory,
-            overlayRigCommandFactory);
+            screenEffectFactory);
 
         commandExecutor.Initialize(factory);
         // subCommandExecutor.Initialize(factory);
@@ -311,29 +295,11 @@ public class VnAppBootstrap : MonoBehaviour
             _linePresentationAdvanceState,
             _presentationStage);
         
-        overlayCommandExecutor.Initialize(factory);
 
         PresentationSessionContext overlayContext = new(_playbackState);
 
         SignalLatch overlaySignalLatch = new();
         unitySignalBus.OnSignal += overlaySignalLatch.Latch;
-
-        StepGatePlanBuilder overlayGatePlanner = new();
-        StepGateAdvancer overlayGateAdvancer = new(
-            new NullInputSource(),
-            _unityTimeSource,
-            unitySignalBus,
-            overlaySignalLatch);
-
-        PresentationSession overlaySession = new(
-            overlayGatePlanner,
-            overlayGateAdvancer,
-            overlayCommandExecutor,
-            overlayContext,
-            _linePresentationAdvanceState,
-            _presentationStage);
-
-        overlaySequenceRunner.Initialize(overlaySession);
     }
     
     private ScreenEffectRig EnsureScreenEffectRig()
@@ -381,11 +347,9 @@ public class VnAppBootstrap : MonoBehaviour
             //_vnSideRunnerSyncHub,
             rigPrefab,
             backgroundRigPrefab,
-            overlayRigPrefab,
+            //overlayRigPrefab,
             //oneShotPresentationLane,
             _dialogueBoxPresentationController,
-            overlaySequenceRunner,
-            overlaySequenceCatalog,
             bindMainLaneCommands: true);
         
         // YarnCommandBridge subYarnCommandBridge = new YarnCommandBridge(
@@ -518,29 +482,6 @@ public class VnAppBootstrap : MonoBehaviour
             albumDatabase,
             vnTrace);
     }
-
-    private void BootstrapEpisodeSelectionRuntime()
-    {
-        EpisodeYarnEntryMapBuilder yarnMapBuilder = new();
-        EpisodeProgressionGraphDataBuilder graphDataBuilder = new();
-        EpisodeProgressionRuleDataBuilder ruleDataBuilder = new();
-        EpisodeGraphLayoutOptions layoutOptions = EpisodeGraphLayoutOptions.Compact();
-        IEpisodeGraphScrollRootProvider episodeGraphScrollRoot =
-            uiManager.GetUI<EpisodeSelectionPanel>();
-        
-        EpisodeGraphRenderer episodeGraphRenderer = new(nodeRigPrefab, episodeGraphScrollRoot);
-        
-        EpisodeGraphScrollController scrollController = new(episodeGraphScrollRoot);
-
-        _episodeSelectionSystem = new EpisodeSelectionSystem(
-            chapterEpisodeProgressionCatalog,
-            layoutOptions,
-            yarnMapBuilder,
-            graphDataBuilder,
-            ruleDataBuilder,
-            _episodeSelectionStateData,
-            episodeGraphRenderer);
-    }
     
     private void InitializeEpisodePlayer()
     {
@@ -579,8 +520,6 @@ public class VnAppBootstrap : MonoBehaviour
             dialogueAdvanceDispatcher,
             _linePresentationAdvanceState);
 
-        _screenBindings.ConfigureEpisodeSelection(_episodeSelectionSystem);
-        _screenBindings.ConfigureChapterSelection(chapterCardFactory, chapterCardPrefab);
         _screenBindings.ConfigureAlbumView(_vnSaveLoadSystem);
         _screenBindings.ConfigureTitleView(episodePlayer);
     }
