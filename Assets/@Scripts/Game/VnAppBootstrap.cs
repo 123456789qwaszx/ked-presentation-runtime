@@ -1,12 +1,9 @@
 using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.Serialization;
 using Yarn.Unity;
 
 public class VnAppBootstrap : MonoBehaviour
 {
-    //[SerializeField]DungeonCafeBootstrap dungeonCafe;
-    
     private readonly UnityTimeSource _unityTimeSource = new();
     
     private readonly VnPlaybackRuntimeState _playbackState = new();
@@ -20,7 +17,6 @@ public class VnAppBootstrap : MonoBehaviour
     
     private readonly PresentationStage _presentationStage = new();
     
-    //private readonly VNSideRunnerSyncHub _vnSideRunnerSyncHub = new();
     private readonly BacklogRecorder _backlogRecorder = new ();
     
     private VnScreenBindings _screenBindings;
@@ -51,24 +47,11 @@ public class VnAppBootstrap : MonoBehaviour
     [Header("MainExecutor")]
     [SerializeField] private CommandExecutor commandExecutor;
     [SerializeField] private YarnBridgePlaybackDriver mainYarnBridgePlaybackDriver;
-    
-    // [Header("SubExecutor")]
-    // [SerializeField] private CommandExecutor subCommandExecutor;
-    // [SerializeField] private YarnBridgePlaybackDriver subYarnBridgePlaybackDriver;
-    //
-    // [Header("OneShotExecutor")]
-    // [SerializeField] private CommandExecutor oneShotCommandExecutor;
-    // [SerializeField] private YarnBridgePlaybackDriver oneShotYarnBridgePlaybackDriver;
-    
-    [Header("Yarn")] 
+
+    [Header("Yarn")]
     [SerializeField] private DialogueRunner dialogueRunner;
-    // [SerializeField] private DialogueRunner subPresentationRunner;
-    // [SerializeField] private DialogueRunner subOneShotRunner;
-    
-    [SerializeField] private LinePresenter linePresenter;
+
     [SerializeField] private CustomLinePresenter customLinePresenter;
-    // [SerializeField] private SubPresentationPresenter subPresentationPresenter;
-    // [SerializeField] private OneShotPresentationPresenter oneShotPresentationPresenter;
     [SerializeField] private AutoAdvanceScheduler autoAdvanceScheduler;
     [SerializeField] private VNOptionItem optionItem;
     [SerializeField] private VNOptionsPresenter vnOptionsPresenter;
@@ -87,18 +70,13 @@ public class VnAppBootstrap : MonoBehaviour
                                    "Prefab the baked result when you need performance setup, external systems, response targets, or shot helpers.")] 
     [SerializeField] private RectTransform rigPrefab;
     [SerializeField] private RectTransform backgroundRigPrefab;
-    [SerializeField] private RectTransform overlayRigPrefab;
-    
+
     [Header("등가성 하네스")]
     [Tooltip("켜면 재생 중 라인마다 (코어 리듀서로 접은 상태) vs (실제 무대)를 비교하고 " +
              "종료 시 EquivalenceReports/*.json을 남긴다. 판정 전용 — 재생에 영향 없음.")]
     [SerializeField] private bool enableEquivalenceHarness;
 
-    [Header("ChapterButtonCard")]
-    [SerializeField] private RectTransform chapterCardPrefab;
-    [SerializeField] private RectTransform nodeRigPrefab;
-    
-    [Header("Emoji")] 
+    [Header("Emoji")]
     [SerializeField] private CharacterEmojiLibrarySO characterEmojiLibrarySo;
     [SerializeField] private CharacterEmojiVisualPresetSO characterEmojiVisualPresetSo;
     
@@ -125,7 +103,7 @@ public class VnAppBootstrap : MonoBehaviour
     
     private VNRuntimeStateProvider _vnRuntimeStateProvider;
     private PresentationShotResponseSystem _presentationResponseRig;
-    private PresentationLaneScopeSession _presentationLaneScopeSession;
+    private PresentationScopeSession _presentationScopeSession;
     
     private PresentationUIRoot _presentationUIRoot;
     private IProtagonistCharRigSlotProvider _protagonistCharRigSlot;
@@ -169,9 +147,6 @@ public class VnAppBootstrap : MonoBehaviour
         BootstrapScreenBindings();
 
         BootstrapEquivalenceHarness();
-
-        //_screenBindings.StartDungeonCafeCampaign(dungeonCafe);
-        //dungeonCafeBootstrap.DungeonCafeStart(_screenBindings);
     }
 
     private void BootstrapAudioSystem()
@@ -252,13 +227,6 @@ public class VnAppBootstrap : MonoBehaviour
             stageMaskMotionPresetDbSo,
             _presentationUIRoot);
         
-        // StageOverlayRigSlotResolver stageOverlayRigSlotResolver = new(_presentationUIRoot);
-        // OverlayRigBuilder overlayRigBuilder = new();
-        //
-        // OverlayRigCommandFactory overlayRigCommandFactory = new(
-        //     stageOverlayRigSlotResolver, 
-        //     overlayRigBuilder);
-
         CompositeCommandFactory factory = new(
             charRigFactory,
             backgroundRigFactory,
@@ -268,24 +236,14 @@ public class VnAppBootstrap : MonoBehaviour
             screenEffectFactory);
 
         commandExecutor.Initialize(factory);
-        // subCommandExecutor.Initialize(factory);
-        // oneShotCommandExecutor.Initialize(factory);
-        
+
         PresentationSessionContext presentationSessionContext = new(_playbackState);
-        
-        _presentationLaneScopeSession = new(
+
+        _presentationScopeSession = new(
             commandExecutor,
-            // subCommandExecutor,
-            // oneShotCommandExecutor,
             presentationSessionContext,
             _linePresentationAdvanceState,
             _presentationStage);
-        
-
-        PresentationSessionContext overlayContext = new(_playbackState);
-
-        SignalLatch overlaySignalLatch = new();
-        unitySignalBus.OnSignal += overlaySignalLatch.Latch;
     }
     
     private ScreenEffectRig EnsureScreenEffectRig()
@@ -310,13 +268,7 @@ public class VnAppBootstrap : MonoBehaviour
     
     private void BootstrapYarn()
     {
-        mainYarnBridgePlaybackDriver.Initialize(commandExecutor, _presentationLaneScopeSession);
-        // subYarnBridgePlaybackDriver.Initialize(subCommandExecutor, new SubPresentationScopeProvider(_presentationLaneScopeSession));
-        // oneShotYarnBridgePlaybackDriver.Initialize(oneShotCommandExecutor, _presentationLaneScopeSession);
-
-        //_vnSideRunnerSyncHub.Initialize(subPresentationRunner);
-
-        //OneShotPresentationLane oneShotPresentationLane = new(subOneShotRunner, oneShotYarnBridgePlaybackDriver);
+        mainYarnBridgePlaybackDriver.Initialize(commandExecutor, _presentationScopeSession);
 
         DialogueBoxMetadataResolver metadataResolver = new();
         _dialogueBoxPresentationController = new(
@@ -327,46 +279,13 @@ public class VnAppBootstrap : MonoBehaviour
             surfaceLayoutPresetDbSo,
             _dialogueSpeakerPresentationPolicyDbSo);
         
-        YarnCommandBridge yarnCommandBridge = new(
+        // 생성자가 러너에 커맨드 핸들러를 전부 등록한다 — 이후 참조할 일이 없다.
+        _ = new YarnCommandBridge(
             dialogueRunner,
             mainYarnBridgePlaybackDriver,
-            //_vnSideRunnerSyncHub,
             rigPrefab,
             backgroundRigPrefab,
-            //overlayRigPrefab,
-            //oneShotPresentationLane,
-            _dialogueBoxPresentationController,
-            bindMainLaneCommands: true);
-        
-        // YarnCommandBridge subYarnCommandBridge = new YarnCommandBridge(
-        //     subPresentationRunner, 
-        //     subYarnBridgePlaybackDriver,
-        //     _vnSideRunnerSyncHub, 
-        //     rigPrefab, 
-        //     backgroundRigPrefab,
-        //     overlayRigPrefab,
-        //     //oneShotPresentationLane,
-        //     _dialogueBoxPresentationController,
-        //     overlaySequenceRunner,
-        //     overlaySequenceCatalog,
-        //     bindMainLaneCommands: false);
-        //
-        // YarnCommandBridge subOneShotYarnCommandBridge = new YarnCommandBridge(
-        //     subOneShotRunner, 
-        //     oneShotYarnBridgePlaybackDriver,
-        //     _vnSideRunnerSyncHub, 
-        //     rigPrefab, 
-        //     backgroundRigPrefab,
-        //     overlayRigPrefab,
-        //     oneShotPresentationLane,
-        //     _dialogueBoxPresentationController,
-        //     overlaySequenceRunner,
-        //     overlaySequenceCatalog,
-        //     bindMainLaneCommands: false);
-        //
-        // subPresentationPresenter.Initialize(subPresentationRunner, subYarnBridgePlaybackDriver, _vnSideRunnerSyncHub, yarnLaneDebugView);
-        //
-        // oneShotPresentationPresenter.Initialize(subOneShotRunner, yarnLaneDebugView);
+            _dialogueBoxPresentationController);
     }
     
     private void BootstrapLinePresentationRuntime()
@@ -381,7 +300,6 @@ public class VnAppBootstrap : MonoBehaviour
             _linePresentationAdvanceState,
             _dialogueBoxPresentationController,
             ellipsisBreathTypewriter,
-            //_vnSideRunnerSyncHub,
             mainYarnBridgePlaybackDriver);
 
         customLinePresenter.Initialize(
@@ -429,7 +347,7 @@ public class VnAppBootstrap : MonoBehaviour
         AdvanceGate advanceGate = new(
             _playbackState,
             _linePresentationAdvanceState,
-            _presentationLaneScopeSession);
+            _presentationScopeSession);
         
         VnAdvanceInputBindings vnAdvanceInputBindings = new();
 
@@ -449,9 +367,8 @@ public class VnAppBootstrap : MonoBehaviour
             _rollbackHistory, 
             customLinePresenter,
             _backlogRecorder,
-            //_vnSideRunnerSyncHub,
             _presentationResponseRig,
-            _presentationLaneScopeSession);
+            _presentationScopeSession);
     }
     
     // 등가성 하네스. 토글이 꺼져 있으면 아무것도 만들지 않는다 — 재생 경로 무영향.
@@ -467,7 +384,7 @@ public class VnAppBootstrap : MonoBehaviour
 
         harness.Initialize(
             _vnRuntimeStateProvider,
-            _presentationLaneScopeSession,
+            _presentationScopeSession,
             _presentationResponseRig,
             dialogueAdvanceDispatcher);
     }

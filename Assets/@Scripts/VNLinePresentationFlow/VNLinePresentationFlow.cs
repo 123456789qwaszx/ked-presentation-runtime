@@ -9,7 +9,6 @@ public partial class VNLinePresentationFlow
     private readonly VNLinePresentationState _advanceState;
     private readonly DialogueBoxPresentationController _boxPresentation;
     private readonly EllipsisBreathTypewriter _typewriter;
-    //private readonly VNSideRunnerSyncHub _sideRunnerSyncHub;
     private readonly YarnBridgePlaybackDriver _playbackDriver;
 
     private const float LineHurrySpeedMultiplier = 30f;
@@ -21,31 +20,21 @@ public partial class VNLinePresentationFlow
     public VNLinePresentationPhase CurrentPhase { get; private set; } =
         VNLinePresentationPhase.None;
 
-    // inline [advance/] 디스패치는 per-line, run-scoped 책임이므로 전용 host로 격리한다.
-    // flow는 타입라이터 phase 동안 Begin/End로 이 host를 구동만 한다.
-    //private readonly InlineAdvanceDispatchHost _inlineAdvanceHost;
-
-    //public IInlinePresentationAdvanceHost InlineAdvanceHost => _inlineAdvanceHost;
-
     public VNLinePresentationFlow(
         VNYarnLineBoundary vnYarnLineBoundary,
         VNLinePresentationState advanceState,
         DialogueBoxPresentationController boxPresentation,
         EllipsisBreathTypewriter typewriter,
-        //VNSideRunnerSyncHub vnSideRunnerSyncHub,
         YarnBridgePlaybackDriver playbackDriver)
     {
         _vnYarnLineBoundary = vnYarnLineBoundary;
         _advanceState = advanceState;
         _boxPresentation = boxPresentation;
         _typewriter = typewriter;
-        //_sideRunnerSyncHub = vnSideRunnerSyncHub;
         _playbackDriver = playbackDriver;
-
-        //_inlineAdvanceHost = new InlineAdvanceDispatchHost(vnSideRunnerSyncHub);
     }
 
-    private async YarnTask<bool> TryEnterLineAndResolveSeekAsync(
+    private bool TryEnterLineAndResolveSeek(
         VNLinePresentationContext ctx,
         bool recordToHistory)
     {
@@ -62,10 +51,9 @@ public partial class VNLinePresentationFlow
         VNSeekKind seekKind = default;
 
         if (isSeekingActive)
+        {
             seekKind = _advanceState.SeekKind;
 
-        if (isSeekingActive)
-        {
             ctx.SeekDecision = _advanceState.IsSeekTargetLine(ctx.Meta)
                 ? VNSeekLineDecision.TargetLineReachedAndResumePresentation(seekKind)
                 : VNSeekLineDecision.SkipVisualAndDispatchSeekNext(seekKind);
@@ -77,27 +65,9 @@ public partial class VNLinePresentationFlow
 
         SetPhase(ctx, VNLinePresentationPhase.LineRuntimeStateResolved);
 
-        // SyncGateRunResult syncResult;
-        // if (isSeekingActive)
-        // {
-        //     syncResult = await _sideRunnerSyncHub
-        //         .RunSeekResyncGatePlanAsync(ctx.Token.NextContentToken);
-        // }
-        // else
-        // {
-        //     syncResult = await _sideRunnerSyncHub
-        //         .RunForwardSyncGatePlanAsync(ctx.Token.NextContentToken);
-        // }
-        //
-        // if (syncResult == SyncGateRunResult.Cancelled)
-        // {
-        //     SetPhase(ctx, VNLinePresentationPhase.Stale);
-        //     return false;
-        // }
-
         if (ctx.ShouldSkipVisual)
         {
-            await RunSeekPassThroughAsync(ctx);
+            RunSeekPassThrough(ctx);
             return false;
         }
 
@@ -125,7 +95,7 @@ public partial class VNLinePresentationFlow
         Func<LineCancellationToken, YarnTask> waitForAdvance,
         Func<bool> shouldFastForward)
     {
-        if (!await TryEnterLineAndResolveSeekAsync(ctx, recordToHistory: true))
+        if (!TryEnterLineAndResolveSeek(ctx, recordToHistory: true))
             return;
 
         ctx.Run = beginRun();
@@ -153,7 +123,6 @@ public partial class VNLinePresentationFlow
         _typewriter.PrepareForContent(ctx.Text);
         SetPhase(ctx, VNLinePresentationPhase.TypewriterReady);
 
-        //_inlineAdvanceHost.Begin(ctx.Run);
         try
         {
             await _typewriter
@@ -167,7 +136,6 @@ public partial class VNLinePresentationFlow
         finally
         {
             ExitLineHurrySpeed();
-            //_inlineAdvanceHost.End();
         }
 
         SetPhase(ctx, VNLinePresentationPhase.TypewriterCompleted);
@@ -188,50 +156,17 @@ public partial class VNLinePresentationFlow
         SetPhase(ctx, VNLinePresentationPhase.Completed);
     }
 
-    private async YarnTask RunSeekPassThroughAsync(VNLinePresentationContext ctx)
+    // 시크 통과 라인은 기다릴 것이 없다 — 대사창을 닫고 표시 완료만 찍는다.
+    private void RunSeekPassThrough(VNLinePresentationContext ctx)
     {
         SetPhase(ctx, VNLinePresentationPhase.SeekPassThrough);
 
         _boxPresentation.CloseAll();
 
-        // SyncGateRunResult inlineResult =
-        //     await DrainInlineAdvancesForSeekPassThroughAsync(ctx);
-        //
-        // if (inlineResult == SyncGateRunResult.Cancelled)
-        // {
-        //     SetPhase(ctx, VNLinePresentationPhase.Stale);
-        //     return;
-        // }
-
         _advanceState.MarkLineDisplayCompleted(ctx.Meta, "passThrough");
 
         SetPhase(ctx, VNLinePresentationPhase.Completed);
     }
-
-    // private async YarnTask<SyncGateRunResult> DrainInlineAdvancesForSeekPassThroughAsync(
-    //     VNLinePresentationContext ctx)
-    // {
-    //     InlineAdvanceManifest manifest =
-    //         InlineAdvanceManifest.Build(ctx.Line.TextWithoutCharacterName);
-    //
-    //     int count = manifest.DrainRemaining();
-    //
-    //     for (int i = 0; i < count; i++)
-    //     {
-    //         if (ctx.Token.NextContentToken.IsCancellationRequested)
-    //             return SyncGateRunResult.Cancelled;
-    //
-    //         SyncGateRunResult result =
-    //             await _sideRunnerSyncHub.RunInlineScriptedAdvanceAsync(
-    //                 1,
-    //                 ctx.Token.NextContentToken);
-    //
-    //         if (result == SyncGateRunResult.Cancelled)
-    //             return SyncGateRunResult.Cancelled;
-    //     }
-    //
-    //     return SyncGateRunResult.Completed;
-    // }
 
     private async YarnTask CompleteStaleAfterBoxAsync(
         VNLinePresentationContext ctx,

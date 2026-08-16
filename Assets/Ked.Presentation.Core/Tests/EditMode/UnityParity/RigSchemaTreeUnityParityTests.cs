@@ -116,15 +116,6 @@ namespace Ked.Presentation.Core.Tests.UnityParity
                     return root;
                 }
 
-                // case "overlay":
-                // {
-                //     OverlayRigBuilder builder = new();
-                //     RectTransform root = builder.BuildOverlayRoot(prefab);
-                //     root.SetParent(stage, false);
-                //     builder.BindRefsFromRoot(root, "", out _);
-                //     return root;
-                // }
-
                 case "screenEffect":
                 {
                     ScreenEffectRigBuilder builder = new();
@@ -142,7 +133,7 @@ namespace Ked.Presentation.Core.Tests.UnityParity
 
         private static RectTransform LoadPrefab(string assetPath)
         {
-            // 빈 경로는 "프리팹 없이 스키마 베이크로 세웠다"는 덤프의 기록이다(overlay·screenEffect).
+            // 빈 경로는 "프리팹 없이 스키마 베이크로 세웠다"는 덤프의 기록이다(screenEffect).
             if (string.IsNullOrEmpty(assetPath))
                 return null;
 
@@ -174,7 +165,6 @@ namespace Ked.Presentation.Core.Tests.UnityParity
 
         [TestCase("character")]
         [TestCase("background")]
-        [TestCase("overlay")]
         [TestCase("screenEffect")]
         public void 덤프로_세운_트리가_실제_리그와_같다(string rigKind)
         {

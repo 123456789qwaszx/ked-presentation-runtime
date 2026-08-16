@@ -1,5 +1,3 @@
-using UnityEngine;
-
 public sealed partial class VnScreenBindings
 {
     private VnFeatureController _vnFeatures;
@@ -24,55 +22,38 @@ public sealed partial class VnScreenBindings
         });
     }
 
+    // PresentationUIRoot는 아직 QuickMenu · Expand · Save · Load · OpenSkipPanel 이벤트도 내보내지만
+    // 그 기능들(세이브로드 · 에피소드 스킵)이 없어져서 붙일 핸들러가 없다.
+    // 버튼은 프리팹에 남아 있고, 눌러도 구독자가 없어 아무 일도 일어나지 않는다.
     private void ApplyBindings(PresentationUIRoot root)
     {
         AddBinding(root,
             r => r.AutoClicked += HandleAutoClicked,
             r => r.AutoClicked -= HandleAutoClicked);
-        
+
         AddBinding(root,
             r => r.BackLogClicked += HandleBackLogClicked,
             r => r.BackLogClicked -= HandleBackLogClicked);
-        
-        AddBinding(root, 
+
+        AddBinding(root,
             r => r.RapidSkipDown += HandleFastForwardDown,
             r => r.RapidSkipDown -= HandleFastForwardDown);
-        
+
         AddBinding(root,
             r => r.RapidSkipUp += HandleFastForwardUp,
             r => r.RapidSkipUp -= HandleFastForwardUp);
-        
-        AddBinding(root,
-            r => r.ExpandClicked += HandleExpandClicked,
-            r => r.ExpandClicked -= HandleExpandClicked);
-        
+
         AddBinding(root,
             r => r.StepNextClicked += HandleHurryUpClicked,
             r => r.StepNextClicked -= HandleHurryUpClicked);
-        
-        AddBinding(root,
-            r => r.LoadMenuClicked += HandleLoadMenuClicked,
-            r => r.LoadMenuClicked -= HandleLoadMenuClicked);
-        
+
         AddBinding(root,
             r => r.PlaybackSpeedClicked += HandlePlaybackSpeedClicked,
             r => r.PlaybackSpeedClicked -= HandlePlaybackSpeedClicked);
-        
+
         AddBinding(root,
-            r => r.QuickMenuClicked += HandleQuickMenuClicked,
-            r => r.QuickMenuClicked -= HandleQuickMenuClicked);
-        
-        AddBinding(root, 
-            r => r.RollbackClicked += HandleRollbackClicked, 
+            r => r.RollbackClicked += HandleRollbackClicked,
             r => r.RollbackClicked -= HandleRollbackClicked);
-        
-        AddBinding(root,
-            r => r.SaveMenuClicked += HandleSaveMenuClicked,
-            r => r.SaveMenuClicked -= HandleSaveMenuClicked);
-        
-        AddBinding(root,
-            r => r.OpenSkipPanelClicked += HandleSkipMenuClicked,
-            r => r.OpenSkipPanelClicked -= HandleSkipMenuClicked);
     }
 
     private void HandleAutoClicked()
@@ -100,14 +81,6 @@ public sealed partial class VnScreenBindings
         _dialogueAdvanceDispatcher.DispatchAdvance();
     }
 
-    private void HandleLoadMenuClicked()
-    {
-        if (HasPanel)
-            return;
-
-        //OpenSaveLoadMenu(SaveLoadMenuMode.Load);
-    }
-
     private void HandlePlaybackSpeedClicked()
     {
         _vnFeatures.ToggleSpeedUpMode();
@@ -119,28 +92,5 @@ public sealed partial class VnScreenBindings
             return;
 
         _episodePlayer.StartGame(_linePresentationAdvanceState.SeekTargetNodeName);
-    }
-    
-    private void HandleQuickMenuClicked()
-    {
-        
-    }
-
-    private void HandleExpandClicked()
-    {
-        
-    }
-
-    private void HandleSaveMenuClicked()
-    {
-        if (HasPanel)
-            return;
-
-        //OpenSaveLoadMenu(SaveLoadMenuMode.Save);
-    }
-
-    private void HandleSkipMenuClicked()
-    {
-        //OpenEpisodeSkipConfirmPanel();
     }
 }

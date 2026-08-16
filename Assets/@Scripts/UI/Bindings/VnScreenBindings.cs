@@ -6,12 +6,9 @@ public sealed partial class VnScreenBindings : IDisposable
     private readonly UIManager _ui;
     private UIManager UI => _ui;
 
-    private bool HasPanel => UI.HasPanel;
-
     public VnScreenBindings(UIManager uiManager)
     {
         _ui = uiManager;
-        //_chapterCardSpawner = new ChapterCardRuntimeSpawner(uiManager.GetUI<ChapterSelectionPanel>());
     }
     
     public void OpenTitleMenu() => GoToTitle();

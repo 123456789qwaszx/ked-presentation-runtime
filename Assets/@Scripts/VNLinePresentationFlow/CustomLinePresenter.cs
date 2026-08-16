@@ -46,23 +46,12 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, IVNLineAborter
         
         _vnLinePresentationFlow = vnLinePresentationFlow;
 
-        //WireInlineAdvanceHandlers(vnLinePresentationFlow.InlineAdvanceHost);
-
         _typewriter = typewriter;
         _typewriter.ActionMarkupHandlers = ActionMarkupHandlers;
 
         _vnLinePresentationState = vnLinePresentationState;
         _vnPlaybackRuntimeState = vnPlaybackRuntimeState;
     }
-
-    // private void WireInlineAdvanceHandlers(IInlinePresentationAdvanceHost host)
-    // {
-    //     for (int i = 0; i < eventHandlers.Count; i++)
-    //     {
-    //         if (eventHandlers[i] is InlineAdvanceMarkupHandler inlineAdvance)
-    //             inlineAdvance.Initialize(host);
-    //     }
-    // }
 
     public override async YarnTask RunLineAsync(
         LocalizedLine line,

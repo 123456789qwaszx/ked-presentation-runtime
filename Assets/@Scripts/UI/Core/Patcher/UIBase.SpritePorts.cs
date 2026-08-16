@@ -35,6 +35,7 @@ public abstract partial class UIBase<TRefs> : IUISpritePortProvider
         return _cachedSpritePortIds;
     }
 
+    // portId에 해당하는 Image 컴포넌트에 Sprite 설정.
     public bool TrySetSprite(string portId, Sprite sprite)
     {
         if (string.IsNullOrEmpty(portId))
@@ -65,13 +66,4 @@ public abstract partial class UIBase<TRefs> : IUISpritePortProvider
         image.sprite = sprite;
         return true;
     }
-    // portId에 해당하는 Image 컴포넌트에 Sprite 설정.
-    // public bool TrySetSprite(string portId, Sprite sprite)
-    // {
-    //     Enum.TryParse(portId, out TRefs enumKey);
-    //     
-    //     View.Image(enumKey).sprite = sprite;
-    //     
-    //     return true;
-    // }
 }

@@ -11,10 +11,10 @@ namespace Ked.Presentation.Core
     /// 담은 것
     /// - AnchoredPosition : 커맨드가 위치를 쓰는 자리 (Ledger.PublishAnchoredPosition)
     /// - AnchorMin/Max    : 리그 기본은 스트레치 (0,0)-(1,1)(빌더 StretchFull)이지만
-    ///                      OverlayRigBuilder가 고정 앵커 (0.5,0.5)도 씀.
+    ///                      고정 앵커 (0.5,0.5)를 쓰는 노드도 있다.
     /// - Pivot            : 기본 (0.5,0.5). NeedsBottomPivot 노드는 (0.5,0).
     ///                      CharRigImageSizingPolicy가 정렬 때문에 pivot.x를 바꾸기도 함.
-    /// - SizeDelta        : CharRigImageSizingPolicy(초상 폭, y=0)·OverlayRigOperations(오버레이 크기)가 씀.
+    /// - SizeDelta        : CharRigImageSizingPolicy가 초상 폭(y=0)에 씀.
     ///                      스트레치 앵커면 "앵커 간격 대비 증감", 고정 앵커면 "크기 그 자체"
     /// - LocalScale       : 스케일 커맨드 (Ledger.PublishLocalScale). z는 유니티 기본값 1을 유지.
     /// - LocalEulerAngles : 회전 커맨드. Ledger.PublishLocalEuler가 Vector3를 게시하므로 3축 전부 가져옴.

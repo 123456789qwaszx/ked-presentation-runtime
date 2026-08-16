@@ -14,9 +14,8 @@ using UnityEngine;
 // 판정: StageStateComparer. **불일치가 나면 ε를 늘리는 게 아니라 리듀서를 고친다.**
 //
 // 폴드 모델 (대표 에피소드의 선형 구조 전제):
-//   스토리 그룹 j의 커맨드(beat X → X 노드 전체로 전개, pres_start P → P를 서브 레인 등록)
-//   + 서브 레인 그룹 j — 를 j = 0..현재 라인까지 접는다.
-//   서브 레인은 메인 라인당 1행 전진 가정이다. 어긋나면 판정이 그것을 드러낸다.
+//   스토리 그룹 j의 커맨드를 j = 0..현재 라인까지 누적해서 접는다.
+//   한 노드가 곧 한 시간표다 — 레인은 하나뿐이다.
 //
 // ⚠ 이 프로젝트의 yarn 원문에는 #line 태그가 없다(실측: 8개 파일 전부 0건).
 //   런타임 라인 ID는 컴파일 시 생성되므로 ID 매칭이 원리적으로 불가능하다.
@@ -51,7 +50,7 @@ using UnityEngine;
 public sealed class StageEquivalenceHarness : MonoBehaviour
 {
     private VNRuntimeStateProvider _provider;
-    private PresentationLaneScopeSession _session;
+    private PresentationScopeSession _session;
     private PresentationShotResponseSystem _shotSystem;
     private DialogueAdvanceDispatcher _dispatcher;
 
@@ -63,7 +62,6 @@ public sealed class StageEquivalenceHarness : MonoBehaviour
     // 현재 따라가는 스토리 노드의 시간표.
     private string _storyNode;
     private List<YarnLineGroup> _storyGroups;
-    private List<YarnLineGroup> _presGroups;
     private readonly Dictionary<string, int> _lineIndexById = new(StringComparer.Ordinal);
     private readonly List<StageState> _foldedByLine = new();
 
@@ -101,7 +99,7 @@ public sealed class StageEquivalenceHarness : MonoBehaviour
 
     public void Initialize(
         VNRuntimeStateProvider provider,
-        PresentationLaneScopeSession session,
+        PresentationScopeSession session,
         PresentationShotResponseSystem shotSystem,
         DialogueAdvanceDispatcher dispatcher)
     {
@@ -242,7 +240,6 @@ public sealed class StageEquivalenceHarness : MonoBehaviour
 
         _storyNode = storyNode;
         _storyGroups = groups;
-        _presGroups = null;
         _lineIndexById.Clear();
         _foldedByLine.Clear();
         _verdicts.Clear();
@@ -258,48 +255,6 @@ public sealed class StageEquivalenceHarness : MonoBehaviour
         return true;
     }
 
-    /// <summary>스토리 그룹의 커맨드를 전개한다: beat X → X 노드 전체, pres_start P → 서브 레인 등록.</summary>
-    private IEnumerable<StageCommand> ExpandStoryCommands(List<StageCommand> commands)
-    {
-        foreach (StageCommand command in commands)
-        {
-            if (command.Name == "beat" || command.Name == "beat_fx")
-            {
-                string beatNode = command.Arg(0);
-
-                if (beatNode != null && _nodeGroups.TryGetValue(beatNode, out List<YarnLineGroup> beatGroups))
-                {
-                    foreach (YarnLineGroup group in beatGroups)
-                    {
-                        foreach (StageCommand inner in group.Commands)
-                            yield return inner;
-                    }
-                }
-                else
-                {
-                    // 노드를 못 찾으면 그대로 흘려보낸다 → 리듀서 Unhandled로 남는다.
-                    yield return command;
-                }
-
-                continue;
-            }
-
-            if (command.Name == "pres_start")
-            {
-                string presNode = command.Arg(0);
-
-                if (presNode != null && _nodeGroups.TryGetValue(presNode, out List<YarnLineGroup> presGroups))
-                    _presGroups = presGroups;
-                else
-                    yield return command;
-
-                continue;
-            }
-
-            yield return command;
-        }
-    }
-
     /// <summary>0..lineIndex까지 누적해서 접는다. 이미 접은 라인은 재사용한다.</summary>
     private StageState FoldedUpTo(int lineIndex)
     {
@@ -312,11 +267,7 @@ public sealed class StageEquivalenceHarness : MonoBehaviour
                 : _foldedByLine[j - 1];
 
             if (j < _storyGroups.Count)
-                state = StageReducer.ApplyAll(state, ExpandStoryCommands(_storyGroups[j].Commands), _tuning);
-
-            // 서브 레인은 메인 라인당 1행 전진 가정 — 그룹 j가 메인 라인 j에 실린다.
-            if (_presGroups != null && j < _presGroups.Count)
-                state = StageReducer.ApplyAll(state, _presGroups[j].Commands, _tuning);
+                state = StageReducer.ApplyAll(state, _storyGroups[j].Commands, _tuning);
 
             _foldedByLine.Add(state);
         }

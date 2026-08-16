@@ -14,7 +14,7 @@ public partial class VNLinePresentationFlow
         Func<LineCancellationToken, YarnTask> waitForAdvance,
         Func<bool> shouldFastForward)
     {
-        if (!await TryEnterLineAndResolveSeekAsync(ctx, recordToHistory: false))
+        if (!TryEnterLineAndResolveSeek(ctx, recordToHistory: false))
             return;
     
         ctx.Run = beginRun();

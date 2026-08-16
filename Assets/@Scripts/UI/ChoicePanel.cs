@@ -39,7 +39,6 @@ public sealed class ChoicePanel : UIPanel<ChoicePanel.Refs>, IManagedUI
     private RectTransform _content;
 
     [SerializeField]private ChoiceBoxView _choicePrefab;
-    //private ButtonWidget _close;
 
     private readonly List<ChoiceBoxView> _spawned = new();
     private bool _valid;
@@ -49,12 +48,7 @@ public sealed class ChoicePanel : UIPanel<ChoicePanel.Refs>, IManagedUI
     {
         _bgImage   = View.Image(Refs.ChoiceBG_Image);
         _titleText = View.Text(Refs.Title_Text);
-
-        // 전부 Refs 기반으로 통일
-        //_scrollRect = View.Get<ScrollRect>(Refs.ScrollRect);
-        _content    = View.Rect(Refs.Content);
-
-        //_choicePrefab = View.Get<ChoiceBox>(Refs.ChoicePrefab);
+        _content   = View.Rect(Refs.Content);
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         _valid = ValidateRefs();
@@ -66,9 +60,6 @@ public sealed class ChoicePanel : UIPanel<ChoicePanel.Refs>, IManagedUI
         if (_titleText != null)
             _titleText.text = "Choice";
 
-        // if (_close != null)
-        //     _close.OnClicked += HandleCloseClicked;
-
         // 템플릿은 꺼두고 Instantiate해서 사용
         if (_choicePrefab != null)
             _choicePrefab.gameObject.SetActive(false);
@@ -77,9 +68,6 @@ public sealed class ChoicePanel : UIPanel<ChoicePanel.Refs>, IManagedUI
     protected override void OnDestroy()
     {
         base.OnDestroy();
-
-        // if (_close != null)
-        //     _close.OnClicked -= HandleCloseClicked;
 
         ClearChoices();
     }
@@ -160,11 +148,6 @@ public sealed class ChoicePanel : UIPanel<ChoicePanel.Refs>, IManagedUI
         AppendMissing(ref missing, _content, Refs.Content);
 
         AppendMissing(ref missing, _choicePrefab, Refs.ChoicePrefab);
-
-        // Close 버튼을 "필수"로 볼지 "옵션"으로 볼지에 따라 선택
-        // 필수면 아래 체크를 켜고,
-        // 옵션이면 그대로 두면 됨.
-        // AppendMissing(ref missing, _close, Refs.CloseButton_BWidget);
 
         if (missing.Length > 0)
         {

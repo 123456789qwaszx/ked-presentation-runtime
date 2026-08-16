@@ -6,13 +6,11 @@ public sealed class CommandRunScope
     private readonly PresentationSessionContext _context;
     private readonly ISeekStateQuery _linePresentationAdvanceState;
     private readonly PresentationStage _stage;
-    private readonly bool _reportsNodeBusy;
-    
+
     public CancellationToken Token { get; set; }
-    
+
     public CharacterRigRegistry CharacterRigs => _stage.characterRigs;
     public BackgroundRigRegistry BackgroundRigs => _stage.backgroundRigs;
-    //public OverlayRigRegistry OverlayRigs => _stage.overlayRigs;
     public CastRegistry CastRegistry => _stage.castRegistry;
 
     public CharacterRigTargetAliasRegistry CharacterTargetAliases => _stage.characterTargetAliases;
@@ -25,13 +23,11 @@ public sealed class CommandRunScope
     public CommandRunScope(
         PresentationSessionContext context,
         ISeekStateQuery linePresentationAdvanceState,
-        PresentationStage stage,
-        bool reportsNodeBusy = true)
+        PresentationStage stage)
     {
         _context = context;
         _linePresentationAdvanceState = linePresentationAdvanceState;
         _stage = stage;
-        _reportsNodeBusy = reportsNodeBusy;
         Token = CancellationToken.None;
     }
 
@@ -64,13 +60,7 @@ public sealed class CommandRunScope
         return duration / Math.Max(1f, TimeScale);
     }
 
-    public void SetCommandIsPlaying(bool busy)
-    {
-        if (!_reportsNodeBusy)
-            return;
-
-        CommandIsPlaying = busy;
-    }
+    public void SetCommandIsPlaying(bool busy) => CommandIsPlaying = busy;
     
     public void ClearRuntimeState(CleanupPolicy policy = CleanupPolicy.Cancel)
     {

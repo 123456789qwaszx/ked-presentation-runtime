@@ -34,7 +34,6 @@ public sealed class VNLinePresentationState : ISeekStateQuery
     
     public void MarkLineDisplayCompleted(YarnLineMeta meta, string reason)
     {
-        //Debug.Log($"{meta.rawText}+{reason}");
         IsLineFullyShown = true;
     }
 }

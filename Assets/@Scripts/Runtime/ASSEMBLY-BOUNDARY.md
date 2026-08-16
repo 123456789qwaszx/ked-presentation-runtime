@@ -13,10 +13,9 @@
 
 | 어셈블리 | 위치 | 내용 |
 |---|---|---|
-| `Ked.Presentation.Runtime` | `Assets/@Scripts/Runtime/` | 연출 실행 계층 — PresentationCore · Commands · CharacterRig · ShotResponse · BackgroundRig · ScreenEffect · OverlayRig · Audio |
-| `Ked.PresentationCore.Editor` | `Runtime/PresentationCore/Editor/` | 시퀀스 편집기 등 (Editor 전용) |
+| `Ked.Presentation.Runtime` | `Assets/@Scripts/Runtime/` | 연출 실행 계층 — PresentationCore · Commands · CharacterRig · ShotResponse · BackgroundRig · ScreenEffect · Audio |
 | `Ked.CharacterRig.Editor` | `Runtime/CharacterRig/Editor/` | 이모지 라이브러리 편집기 등 (Editor 전용) |
-| `Assembly-CSharp` (기본) | `Assets/@Scripts/` 나머지 | 글루 — Game · UI · VNLinePresentationFlow · EpisodeSelection · FeatureController · DungeonCafe · **YarnBridge** |
+| `Assembly-CSharp` (기본) | `Assets/@Scripts/` 나머지 | 글루 — Game · UI · VNLinePresentationFlow · FeatureController · **YarnBridge** |
 
 **의존 방향은 한쪽뿐이다.**
 
@@ -27,14 +26,14 @@ Assembly-CSharp (글루)  ──>  Ked.Presentation.Runtime (코어)
 
 ---
 
-## 2. 왜 여덟 폴더가 한 어셈블리인가
+## 2. 왜 일곱 폴더가 한 어셈블리인가
 
 두 사실이 겹친 결과다.
 
 1. **`.asmdef`는 자기 폴더 트리를 덮지, 형제 폴더를 묶지 못한다.**
-2. **코어 여덟 폴더는 서로 순환한다** — `Commands ↔ CharacterRig`, `CharacterRig ↔ ShotResponse`,
-   `ScreenEffect ↔ CharacterRig`, `ScreenEffect ↔ BackgroundRig`, `PresentationCore ↔ OverlayRig` …
-   어셈블리 그래프는 비순환이어야 하므로 이 여덟은 **한 어셈블리일 수밖에 없다.**
+2. **코어 폴더들은 서로 순환한다** — `Commands ↔ CharacterRig`, `CharacterRig ↔ ShotResponse`,
+   `ScreenEffect ↔ CharacterRig`, `ScreenEffect ↔ BackgroundRig` …
+   어셈블리 그래프는 비순환이어야 하므로 이들은 **한 어셈블리일 수밖에 없다.**
 
 그래서 `Runtime/` 부모 폴더를 만들어 모았다. 폴더를 나누고 싶으면 먼저 폴더 간 순환을 없애야 한다.
 
@@ -70,10 +69,7 @@ UI 타입이 기능 폴더의 계약을 구현하는 partial을 전부 여기 �
 | `PresentationUIRoot.DepthDefocusOverlay.cs` | `IPresentationDepthDefocusOverlayProvider` | `Runtime/ScreenEffect/StageDepthBlur/` |
 | `PresentationUIRoot.StageDepthContentSlot.cs` | `IStageDepthContentSlotProvider` | `Runtime/ScreenEffect/StageDepthBlur/` |
 | `PresentationUIRoot.StageMask.cs` | `IStageMaskProvider` | `Runtime/ScreenEffect/StageMask/` |
-| `PresentationUIRoot.StageOverlayRigSlot.cs` | `IStageOverlayRigSlotProvider` | `Runtime/OverlayRig/` |
 | `PresentationUIRoot.StageCounts.cs` | (계약 아님 — enum을 세는 private const) | enum은 `Runtime/ScreenEffect/StageDepthBlur/` |
-| `EpisodeSelectionPanel.EpisodeGraphScrollRoot.cs` | `IEpisodeGraphScrollRootProvider` | `EpisodeSelection/View/` |
-| `ChapterSelectionPanel.ChapterCardRoot.cs` | `IChapterCardRootProvider` | `UI/ChapterButtonCard/` |
 | `DialogueBox00_Portrait.ProtagonistCharRigSlot.cs` | `IProtagonistCharRigSlotProvider` | `Runtime/CharacterRig/` |
 
 > **새 provider를 만들 때**: 계약(interface)은 그것을 필요로 하는 기능 폴더에,

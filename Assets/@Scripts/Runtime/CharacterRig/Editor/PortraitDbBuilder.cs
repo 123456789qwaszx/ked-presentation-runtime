@@ -10,9 +10,6 @@ public static class PortraitDbBuilder
 {
     private const string DefaultSettingsPath = "Assets/Settings/PortraitBuildSettings.asset";
 
-    // [MenuItem("Tools/Build Generated Db")]
-    // public static void Build() => BuildInternal(false);
-
     [MenuItem("Tools/Build Generated Db (Strict)")]
     public static void BuildStrict() => BuildInternal(true);
 

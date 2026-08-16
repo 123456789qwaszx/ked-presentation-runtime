@@ -188,7 +188,6 @@ public abstract partial class UIBase<TRefs> : UIBase
             GameObject go = FindChildGameObjectRecursive(gameObject, objNames[i], true);
             _gos[i] = go;
 
-            //if (go == null) Debug.LogWarning($"[UIBase] Failed to bind GameObject: '{objNames[i]}'", this);
         }
     }
     #endregion
@@ -219,7 +218,6 @@ public abstract partial class UIBase<TRefs> : UIBase
         GameObject go = _gos[idx];
         if (!go)
         {
-//            Debug.LogWarning($"[UIBase] Missing bound GameObject. key={key}, idx={idx} ({typeof(TRefs).Name})",this);
         }
 
         return go;

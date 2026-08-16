@@ -149,7 +149,7 @@ public static class PresentationTuningExporter
     private static void ExportRigSchemas(
         string outDir, BaseResolutionDto baseResolution, List<string> warnings)
     {
-        (RectTransform character, RectTransform background, RectTransform overlay) prefabs =
+        (RectTransform character, RectTransform background) prefabs =
             ResolveRigPrefabs(warnings);
 
         // 리그가 딛고 설 임시 부모: 기준 해상도 크기, 가운데 pivot.
@@ -196,20 +196,6 @@ public static class PresentationTuningExporter
                 Object.DestroyImmediate(root.gameObject);
             }
 
-            // Overlay
-            // {
-            //     OverlayRigBuilder builder = new();
-            //     RectTransform root = builder.BuildOverlayRoot(prefabs.overlay);
-            //     root.SetParent(stage, false);
-            //     builder.BindRefsFromRoot(root, "", out _);
-            //
-            //     dump.rigs.Add(CaptureRig(
-            //         "overlay", AssetPathOf(prefabs.overlay), root,
-            //         OverlaySchemaNodes(), warnings));
-            //
-            //     Object.DestroyImmediate(root.gameObject);
-            // }
-
             // ScreenEffect — 부트스트랩에 프리팹 배선이 없다.
             // 스키마 베이크가 곧 런타임 경로라 프리팹 없이 세우는 것이 맞다.
             {
@@ -240,7 +226,7 @@ public static class PresentationTuningExporter
     /// 부트스트랩이 실제로 쓰는 프리팹을 그대로 꺼낸다(private 필드라 SerializedObject).
     /// 못 찾으면 프리팹 없이 세우되 — 런타임과 다를 수 있으므로 경고한다.
     /// </summary>
-    private static (RectTransform character, RectTransform background, RectTransform overlay)
+    private static (RectTransform character, RectTransform background)
         ResolveRigPrefabs(List<string> warnings)
     {
         VnAppBootstrap bootstrap = Object.FindFirstObjectByType<VnAppBootstrap>(FindObjectsInactive.Include);
@@ -251,15 +237,14 @@ public static class PresentationTuningExporter
                 "VnAppBootstrap을 씬에서 찾지 못했다. 리그를 프리팹 없이(스키마 베이크) 세웠다 — " +
                 "런타임과 다를 수 있다.");
 
-            return (null, null, null);
+            return (null, null);
         }
 
         SerializedObject so = new(bootstrap);
 
         return (
             so.FindProperty("rigPrefab")?.objectReferenceValue as RectTransform,
-            so.FindProperty("backgroundRigPrefab")?.objectReferenceValue as RectTransform,
-            so.FindProperty("overlayRigPrefab")?.objectReferenceValue as RectTransform);
+            so.FindProperty("backgroundRigPrefab")?.objectReferenceValue as RectTransform);
     }
 
     private static RigDto CaptureRig(
@@ -345,16 +330,6 @@ public static class PresentationTuningExporter
 
         return nodes;
     }
-
-    // private static List<(string, string)> OverlaySchemaNodes()
-    // {
-    //     List<(string, string)> nodes = new(OverlayRigSchema.Nodes.Length);
-    //
-    //     foreach (OverlayRigSchema.NodeDef n in OverlayRigSchema.Nodes)
-    //         nodes.Add((n.Id.ToString(), n.Parent?.ToString()));
-    //
-    //     return nodes;
-    // }
 
     private static List<(string, string)> ScreenEffectSchemaNodes()
     {

@@ -196,7 +196,7 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
                 {
                     if (revealAllOnHurry)
                     {
-                        await RevealAllWithFlushAsync(
+                        RevealAllIfRunIsLive(
                             line,
                             totalLineCharacterCount,
                             myRunId,
@@ -224,7 +224,7 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
                     {
                         if (revealAllOnHurry)
                         {
-                            await RevealAllWithFlushAsync(
+                            RevealAllIfRunIsLive(
                                 line,
                                 totalLineCharacterCount,
                                 myRunId,
@@ -258,7 +258,7 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
                         }
                         catch (OperationCanceledException) when (revealAllOnHurry && hurryToken.IsCancellationRequested)
                         {
-                            await RevealAllWithFlushAsync(
+                            RevealAllIfRunIsLive(
                                 line,
                                 totalLineCharacterCount,
                                 myRunId,
@@ -316,7 +316,7 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
                         {
                             if (revealAllOnHurry)
                             {
-                                await RevealAllWithFlushAsync(
+                                RevealAllIfRunIsLive(
                                     line,
                                     totalLineCharacterCount,
                                     myRunId,
@@ -348,7 +348,7 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
         }
         catch (OperationCanceledException) when (revealAllOnHurry && hurryToken.IsCancellationRequested)
         {
-            await RevealAllWithFlushAsync(
+            RevealAllIfRunIsLive(
                 line,
                 totalLineCharacterCount,
                 myRunId,
@@ -390,9 +390,8 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
         }
     }
 
-    // hurry/fast-forward reveal-all 직전, 아직 도달하지 못한 inline advance를 flush한다.
-    // hard cancel 상태에서는 reveal-all 하지 않는다.
-    private async YarnTask RevealAllWithFlushAsync(
+    // 이 run이 아직 유효하고 hard cancel도 아닐 때만 reveal-all 한다.
+    private void RevealAllIfRunIsLive(
         Yarn.Markup.MarkupParseResult line,
         int count,
         int runId,
@@ -403,31 +402,6 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
 
         if (hardCancelToken.IsCancellationRequested)
             return;
-
-        for (int i = 0; i < ActionMarkupHandlers.Count; i++)
-        {
-            // if (ActionMarkupHandlers[i] is not ITypewriterRevealAllFlushHandler flushHandler)
-            //     continue;
-            //
-            // try
-            // {
-            //     await flushHandler.OnTypewriterWillRevealAll(line, hardCancelToken);
-            // }
-            // catch (OperationCanceledException) when (hardCancelToken.IsCancellationRequested)
-            // {
-            //     return;
-            // }
-            // catch (Exception ex)
-            // {
-            //     Debug.LogException(ex);
-            // }
-
-            if (runId != _runId)
-                return;
-
-            if (hardCancelToken.IsCancellationRequested)
-                return;
-        }
 
         RevealAllAndComplete(line, count, runId);
     }

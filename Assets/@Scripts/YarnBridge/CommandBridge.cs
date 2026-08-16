@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using UnityEngine;
 using Yarn.Unity;
 
@@ -9,33 +8,24 @@ public sealed partial class YarnCommandBridge
     private readonly RectTransform _charRigPrefab;
     private readonly RectTransform _backgroundRigPrefab;
 
-    //private readonly VNSideRunnerSyncHub _sideRunnerSyncHub;
-    //private readonly OneShotPresentationLane _oneShotPresentationLane;
     private readonly DialogueBoxPresentationController _dialogueBoxPresentation;
-    
+
     public YarnCommandBridge(
         DialogueRunner runner,
         YarnBridgePlaybackDriver playbackDriver,
-        //VNSideRunnerSyncHub sideRunnerSyncHub,
         RectTransform charRigPrefab,
         RectTransform backgroundRigPrefab,
-        //OneShotPresentationLane oneShotPresentationLane,
-        DialogueBoxPresentationController dialogueBoxPresentation,
-        bool bindMainLaneCommands)
+        DialogueBoxPresentationController dialogueBoxPresentation)
     {
         _playbackDriver = playbackDriver;
-        //_sideRunnerSyncHub = sideRunnerSyncHub;
         _charRigPrefab = charRigPrefab;
         _backgroundRigPrefab = backgroundRigPrefab;
-        //_oneShotPresentationLane = oneShotPresentationLane;
         _dialogueBoxPresentation = dialogueBoxPresentation;
-        
-        BindRunnerCommands(runner);
 
-        if (bindMainLaneCommands)
-            BindMainLaneCommands(runner);
+        BindRunnerCommands(runner);
+        BindDialogueBoxCommands(runner);
     }
-    
+
     private void BindRunnerCommands(DialogueRunner runner)
     {
         RegisterCharFocusPlacementCommands(runner);
@@ -62,44 +52,11 @@ public sealed partial class YarnCommandBridge
         
         BindScreenEffects(runner);
         BindStageDepthDefocus(runner);
-
-        //BindOverlayRig(runner);
     }
-    
-    // Main Runner only commands.
-    private void BindMainLaneCommands(DialogueRunner runner)
+
+    // DialogueBoxKind: Portrait = 0 · Speaker = 1 · LetterBox = 2 · OnlyText = 3 · BlackBook = 4
+    private void BindDialogueBoxCommands(DialogueRunner runner)
     {
-        // // 자동 진행 제어
-        // runner.AddCommandHandler<string>(
-        //     "pres_start", StartSubPresentationNode);
-        // runner.AddCommandHandler(
-        //     "pres_end", StopSubPresentationNode);
-        //
-        // runner.AddCommandHandler(
-        //     "pres_pause",  PauseSubPresentation);  // 일시정지
-        // runner.AddCommandHandler(
-        //     "pres_resume", ResumeSubPresentation); // 재개
-        //
-        // // (재호출 시 마지막 값으로 덮어씀)
-        // runner.AddCommandHandler<int>(
-        //     "pres_hold", HoldSubPresentation); // N라인 멈춤
-        //
-        // // (재호출 시 누적)
-        // runner.AddCommandHandler<int>(
-        //     "pres_advance", AddSubPresentationForwardAdvance); // 이번 라인 N개 추가
-        
-        // runner.AddCommandHandler<string>(
-        //     "beat", RunOneShotNode); // One-Shot Node 재생. 커맨드로만 이루어졌기에 즉시 재생 및 자동 종료
-        
-        // runner.AddCommandHandler<string>(
-        //     "beat_fx",
-        //     RunOneShotNodeFree); // non-blocking decorative effect beat
-        
-        // Portrait = 0,
-        // Speaker = 1,
-        // LetterBox = 2,
-        // OnlyText = 3,
-        // BlackBook= 4
         runner.AddCommandHandler<string>(
             "box_named", SetNamedLineBoxKind);
         runner.AddCommandHandler<string>(
@@ -107,36 +64,7 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler(
             "box_reset", ResetDefaultLineBoxKinds);
     }
-    
-    // private void PlayOverlaySequence(string sequenceKey)
-    //     => _overlaySequenceRunner.Play(sequenceKey, _overlaySequenceCatalog);
-    
-    // Lane registration is explicitly handled by bootstrap:
-    // hub.RegisterPresentationLane(subRunner).
-    // private void StartSubPresentationNode(string nodeName) 
-    //     => _sideRunnerSyncHub.StartPresentationLaneCoroutine(nodeName);
-    //
-    // private IEnumerator StopSubPresentationNode() 
-    //     => _sideRunnerSyncHub.StopPresentationLaneCoroutine();
-    //
-    // private void PauseSubPresentation() 
-    //     => _sideRunnerSyncHub.PausePresentation();
-    //
-    // private void ResumeSubPresentation() 
-    //     => _sideRunnerSyncHub.ResumePresentation();
-    //
-    // private void HoldSubPresentation(int lines = 1) 
-    //     => _sideRunnerSyncHub.HoldPresentation(lines);
-    //
-    // private void AddSubPresentationForwardAdvance(int steps = 1) 
-    //     => _sideRunnerSyncHub.AdvancePresentationExtra(steps);
-    
-    // private IEnumerator RunOneShotNode(string nodeName)
-    //     => _oneShotPresentationLane.RunNodeCoroutine(nodeName, blockMain: true);
-    //
-    // private IEnumerator RunOneShotNodeFree(string nodeName)
-    //     => _oneShotPresentationLane.RunNodeCoroutine(nodeName, blockMain: false);
-    
+
     private void SetNamedLineBoxKind(string key)
     {
         Enum.TryParse(key, true, out DialogueBoxKind kind);
@@ -155,10 +83,7 @@ public sealed partial class YarnCommandBridge
     private void BindControl(DialogueRunner runner)
     {
         BindFramePauseAliases(runner);
-        
-        // runner.AddCommandHandler<string>(
-        //     "seq", PlayOverlaySequence);
-        
+
         runner.AddCommandHandler<float>(
             "pause", EnqueueWaitSpec);
         

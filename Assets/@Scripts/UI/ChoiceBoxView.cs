@@ -22,8 +22,7 @@ public sealed class ChoiceBoxView : UIBase<ChoiceBoxView.Refs>
         ChoiceBoxTextArea01_Anchor,
         ChoiceBoxTextArea01_Text,
 
-        // 버튼을 Refs로 잡으려면 여기 추가 필요:
-        ChoiceBoxHit_Button
+        ChoiceBoxHit_Button,
     }
 
     private TMP_Text _labelText;
@@ -36,28 +35,13 @@ public sealed class ChoiceBoxView : UIBase<ChoiceBoxView.Refs>
     {
         _rootCg   = View.CanvasGroup(Refs.ChoiceBox_Root);
         _labelText = View.Text(Refs.ChoiceBoxTextArea00_Text);
-
-        // ⚠️ 여기서 Button을 Refs로 가져오려면,
-        // 프리팹에서 Button이 붙어있는 오브젝트를 View가 찾을 수 있게
-        // enum에 ChoiceBox_Button 같은 키를 추가하고 그 오브젝트에 붙여줘야 해.
-        //
-        // 우선 “ChoiceBox_Root에 Button이 붙어있다”는 가정이면 아래처럼:
-        _button = View.Button(Refs.ChoiceBoxHit_Button);
-
-        // 템플릿은 기본 숨김(ChoicePanel에서 템플릿 비활성도 함)
-        // if (_rootCg != null)
-        // {
-        //     _rootCg.alpha = 0f;
-        //     _rootCg.interactable = false;
-        //     _rootCg.blocksRaycasts = false;
-        // }
+        _button    = View.Button(Refs.ChoiceBoxHit_Button);
     }
 
     public void Present(int index, string label)
     {
         _index = index;
 
-        // 보이게
         if (_rootCg != null)
         {
             _rootCg.alpha = 1f;

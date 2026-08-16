@@ -31,7 +31,6 @@ public sealed class BacklogPanel : UIPanel<BacklogPanel.Refs>
 
     private Image _bgImage;
     private TMP_Text _headerTitle;
-    //private ButtonWidget _close;
     private RectTransform _content;
     
     #endregion
@@ -47,7 +46,6 @@ public sealed class BacklogPanel : UIPanel<BacklogPanel.Refs>
     {
         _bgImage       = View.Image(Refs.BacklogBG_Image);
         _headerTitle   = View.Text(Refs.HeaderTitle_Text);
-        //_close         = View.Widget<ButtonWidget>(Refs.CloseButton_BWidget);
         _content       = View.Rect(Refs.Content);
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
@@ -58,8 +56,6 @@ public sealed class BacklogPanel : UIPanel<BacklogPanel.Refs>
 #endif
 
         _headerTitle.text = "Backlog";
-
-        //_close.OnClicked += HandleCloseClicked;
     }
     
     #region Present
@@ -130,7 +126,6 @@ public sealed class BacklogPanel : UIPanel<BacklogPanel.Refs>
 
         AppendMissing(ref missing, _bgImage, Refs.BacklogBG_Image);
         AppendMissing(ref missing, _headerTitle, Refs.HeaderTitle_Text);
-        //AppendMissing(ref missing, _close, Refs.CloseButton_BWidget);
 
         AppendMissing(ref missing, scrollRect, Refs.ScrollRect);
         AppendMissing(ref missing, _content, Refs.Content);
@@ -149,8 +144,5 @@ public sealed class BacklogPanel : UIPanel<BacklogPanel.Refs>
     protected override void OnDestroy()
     {
         base.OnDestroy();
-
-        // if (_close != null)
-        //     _close.OnClicked -= HandleCloseClicked;
     }
 }

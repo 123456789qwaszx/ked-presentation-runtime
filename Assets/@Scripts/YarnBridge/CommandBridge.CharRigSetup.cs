@@ -119,7 +119,6 @@ public sealed partial class YarnCommandBridge
         {
             slotKey = slotKey,
             variantKey = variantKey,
-            defaultEmotionKey = PortraitResolver.DefaultEmotion
         });
 
     private void EnqueueSetPortraitFaceSpec(string slotKey, string emotionKey)

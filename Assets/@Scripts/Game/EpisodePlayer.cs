@@ -8,15 +8,12 @@ public sealed class EpisodePlayer : MonoBehaviour
     private RollbackHistory _nodeRollbackHistory;
     private IVNLineAborter _linePresentationAborter;
     private BacklogRecorder _backlogRecorder;
-    //private VNSideRunnerSyncHub _sideRunnerSyncHub;
     private PresentationShotResponseSystem _presentationResponseRig;
-    private PresentationLaneScopeSession _presentationLaneScopeSession;
+    private PresentationScopeSession _presentationScopeSession;
 
     [Header("Yarn")]
     [SerializeField] private DialogueRunner dialogueRunner;
-    [SerializeField] private DialogueRunner subPresentationRunner;
-    [SerializeField] private DialogueRunner oneShotRunner;
-
+    
     [Header("Entry Keys")]
     [SerializeField] private string yarnEntryKey;
 
@@ -39,17 +36,15 @@ public sealed class EpisodePlayer : MonoBehaviour
         RollbackHistory nodeRollbackHistory,
         IVNLineAborter linePresentationAborter,
         BacklogRecorder backlogRecorder,
-        //VNSideRunnerSyncHub sideRunnerSyncHub,
         PresentationShotResponseSystem presentationResponseRig,
-        PresentationLaneScopeSession presentationLaneScopeSession)
+        PresentationScopeSession presentationScopeSession)
     {
         _vnScreenBindings = vnScreenBindings;
         _nodeRollbackHistory = nodeRollbackHistory;
         _linePresentationAborter = linePresentationAborter;
         _backlogRecorder = backlogRecorder;
-        //_sideRunnerSyncHub = sideRunnerSyncHub;
         _presentationResponseRig = presentationResponseRig;
-        _presentationLaneScopeSession = presentationLaneScopeSession;
+        _presentationScopeSession = presentationScopeSession;
     }
 
     private void Update()
@@ -66,9 +61,6 @@ public sealed class EpisodePlayer : MonoBehaviour
     {
         StartGameAsync(nodeName).Forget();
     }
-
-    public YarnTask PlayNodeAsync(string nodeName)
-        => StartGameAsync(nodeName);
 
     /// <summary>
     /// 세션을 초기화한 뒤 노드를 재생한다.
@@ -111,8 +103,8 @@ public sealed class EpisodePlayer : MonoBehaviour
                 return;
 
             _vnScreenBindings.GoToPresentationView();
-            _presentationLaneScopeSession.ClearStage();
-            _presentationLaneScopeSession.Start();
+            _presentationScopeSession.ClearStage();
+            _presentationScopeSession.Start();
         }
         finally
         {
@@ -161,7 +153,7 @@ public sealed class EpisodePlayer : MonoBehaviour
         _linePresentationAborter?.AbortCurrentVnLine();
 
         _presentationResponseRig.Clear();
-        _presentationLaneScopeSession.End();
+        _presentationScopeSession.End();
     }
 
     private async YarnTask StopYarnRunnersAsync()
@@ -171,15 +163,7 @@ public sealed class EpisodePlayer : MonoBehaviour
         if (dialogueRunner != null && dialogueRunner.IsDialogueRunning)
             tasks.Add(dialogueRunner.Stop());
 
-        if (subPresentationRunner != null && subPresentationRunner.IsDialogueRunning)
-            tasks.Add(subPresentationRunner.Stop());
-
-        if (oneShotRunner != null && oneShotRunner.IsDialogueRunning)
-            tasks.Add(oneShotRunner.Stop());
-
         if (tasks.Count > 0)
             await YarnTask.WhenAll(tasks);
-
-        //_sideRunnerSyncHub.ResetPresentationLane();
     }
 }

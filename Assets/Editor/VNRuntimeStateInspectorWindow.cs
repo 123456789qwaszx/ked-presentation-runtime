@@ -94,10 +94,8 @@ public sealed class VNRuntimeStateInspectorWindow : EditorWindow
 
         AppendBootstrapState(sb, bootstrap);
         AppendDialogueRunnerState(sb, bootstrap, "dialogueRunner");
-        AppendDialogueRunnerState(sb, bootstrap, "subPresentationRunner");
         AppendCustomLinePresenterState(sb, bootstrap);
         AppendLineStateMachineState(sb, bootstrap);
-        AppendSideRunnerSyncState(sb, bootstrap);
 
         _dump = sb.ToString();
     }
@@ -427,51 +425,6 @@ public sealed class VNRuntimeStateInspectorWindow : EditorWindow
             text = text.Substring(0, 60) + "...";
 
         return $"node={nodeName}, line={lineId}, char={charName}, text='{text}'";
-    }
-
-    private static void AppendSideRunnerSyncState(StringBuilder sb, VnAppBootstrap bootstrap)
-    {
-        sb.AppendLine("----- VNSideRunnerSyncHub -----");
-
-        object hub = GetFieldValue(bootstrap, "_vnSideRunnerSyncHub");
-        if (hub == null)
-        {
-            sb.AppendLine("  null");
-            sb.AppendLine();
-            return;
-        }
-
-        object lanes = GetFieldValue(hub, "_lanes");
-        IDictionary dictionary = lanes as IDictionary;
-
-        if (dictionary == null)
-        {
-            sb.AppendLine($"  _lanes: {FormatObject(lanes)}");
-            sb.AppendLine();
-            return;
-        }
-
-        sb.AppendLine($"  Lane count: {dictionary.Count}");
-
-        foreach (DictionaryEntry entry in dictionary)
-        {
-            object lane = entry.Value;
-            sb.AppendLine($"  Lane key: {entry.Key}");
-
-            if (lane == null)
-            {
-                sb.AppendLine("    null");
-                continue;
-            }
-
-            sb.AppendLine($"    Snapshot: {InvokeStringMethod(lane, "Snapshot")}");
-            sb.AppendLine($"    PendingAdvanceCount: {GetFieldValue(lane, "PendingAdvanceCount")}");
-            sb.AppendLine($"    IsReadyForAdvance: {GetFieldValue(lane, "IsReadyForAdvance")}");
-            sb.AppendLine($"    Generation: {GetFieldValue(lane, "Generation")}");
-            sb.AppendLine($"    Runner: {FormatObject(GetFieldValue(lane, "Runner"))}");
-        }
-
-        sb.AppendLine();
     }
 
     private static void AppendObjectSummary(StringBuilder sb, string label, object obj)

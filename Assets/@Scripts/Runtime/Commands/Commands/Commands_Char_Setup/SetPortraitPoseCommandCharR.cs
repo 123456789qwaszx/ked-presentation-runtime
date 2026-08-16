@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using UnityEngine;
-using UnityEngine.UI;
 
 [Serializable]
 [CommandMenuHint(
@@ -17,53 +16,28 @@ public sealed class SetPortraitPoseCommandSpecCharR : CharacterRigCommandSpecBas
     [Header("Pose / Variant")]
     [Tooltip("의상/자세/바디 variant 키. 예: a, b.")]
     public string variantKey = PortraitResolver.DefaultVariant;
-
-    [Header("Default Face")]
-    [Tooltip("pose 변경 시 함께 적용할 기본 표정. 비우면 PortraitResolver.DefaultEmotion 사용.")]
-    public string defaultEmotionKey = PortraitResolver.DefaultEmotion;
-
-    [Header("Target")]
-    public CharacterRigTarget target = CharacterRigTarget.CharacterPortraitSprite_Image;
-
-    [Header("Sizing Policy")]
-    public CharRigImageSizingMode sizingMode = CharRigImageSizingMode.HeightFitPreserveAspect;
-
-    public CharRigImageSizingPolicy.HorizontalAlign horizontalAlign =
-        CharRigImageSizingPolicy.HorizontalAlign.Center;
 }
 
+// pose는 cast의 변형만 갈아 끼우고 스프라이트는 건드리지 않는다.
+// 화면의 초상 폭(sizeDelta)은 다음 show/face/face_swap에서야 바뀐다 —
+// 코어의 PortraitSizingReduction이 pose를 접지 않는 근거가 이것이다
+// (Ked.Presentation.Core/Documentation~/reduction-boundary.md 초상 절).
 public sealed class SetPortraitPoseCommandCharR : CommandBase
 {
     private readonly SetPortraitPoseCommandSpecCharR _spec;
-    private readonly PortraitResolver _resolver;
 
-    private Image _image;
-    private bool _resolveAttempted;
-
-    public SetPortraitPoseCommandCharR(
-        SetPortraitPoseCommandSpecCharR spec,
-        PortraitResolver resolver)
+    public SetPortraitPoseCommandCharR(SetPortraitPoseCommandSpecCharR spec)
     {
         _spec = spec;
-        _resolver = resolver;
     }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
-        if (!_resolveAttempted)
-            ResolveRefs(scope);
-
         Apply(scope);
         yield break;
     }
 
-    protected override void OnSkip(CommandRunScope scope)
-    {
-        if (!_resolveAttempted)
-            ResolveRefs(scope);
-
-        Apply(scope);
-    }
+    protected override void OnSkip(CommandRunScope scope) => Apply(scope);
 
     private void Apply(CommandRunScope scope)
     {
@@ -75,35 +49,5 @@ public sealed class SetPortraitPoseCommandCharR : CommandBase
             : _spec.variantKey;
 
         scope.CastRegistry.SetVariant(resolvedSlotKey, variantKey);
-
-        // var portrait = new PortraitIdentity
-        // {
-        //     character = "",
-        //     variant = variantKey,
-        //     emotion = _spec.defaultEmotionKey
-        // };
-        //
-        // Sprite sprite = _resolver.Resolve(
-        //     scope,
-        //     resolvedSlotKey,
-        //     portrait,
-        //     nameof(SetPortraitPoseCommandCharR));
-        //
-        // _image.sprite = sprite;
-        // CharRigImageSizingPolicy.Apply(
-        //     _image,
-        //     sprite,
-        //     _spec.sizingMode,
-        //     _spec.horizontalAlign);
-    }
-
-    private void ResolveRefs(CommandRunScope scope)
-    {
-        _resolveAttempted = true;
-
-        CharacterRigRefs rigRefs =
-            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
-
-        _image = rigRefs.GetImage(_spec.target);
     }
 }

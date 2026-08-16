@@ -14,12 +14,6 @@ public enum StageMaskKind
     CircleIris = 5,
 }
 
-public enum StageMaskEdge
-{
-    Leading = 0,
-    Trailing = 1,
-}
-
 [Flags]
 public enum StageMaskEdgeMode
 {

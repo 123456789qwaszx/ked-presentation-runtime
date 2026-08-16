@@ -1,91 +1,16 @@
-using UnityEngine;
-
 public sealed partial class VnScreenBindings
 {
     private EpisodePlayer _episodePlayer;
-    
+
     public void ConfigureTitleView(EpisodePlayer episodePlayer)
     {
         _episodePlayer = episodePlayer;
     }
-    
+
+    // TitleUIRoot는 현재 이벤트를 내보내지 않는다(버튼 위젯이 없다).
+    // 여기서 붙일 바인딩도 그래서 없다 — 버튼이 돌아오면 AddBinding으로 다시 잇는다.
     private void GoToTitle()
     {
-        UI.SwitchRoot<TitleUIRoot>(root =>
-        {
-            BindMain(root, ApplyBindings);
-            Refresh(root);
-        });
-    }
-    
-    private void ApplyBindings(TitleUIRoot root)
-    {
-        AddBinding(root, 
-            r => r.StartClicked += HandleStartClicked,
-            r => r.StartClicked -= HandleStartClicked);
-
-        AddBinding(root,
-            r => r.ContinueClicked += HandleContinueClicked,
-            r => r.ContinueClicked -= HandleContinueClicked);
-
-        AddBinding(root,
-            r => r.LoadClicked += HandleLoadClicked,
-            r => r.LoadClicked -= HandleLoadClicked);
-
-        AddBinding(root,
-            r => r.AlbumClicked += HandleAlbumClicked,
-            r => r.AlbumClicked -= HandleAlbumClicked);
-
-        AddBinding(root,
-            r => r.SettingsClicked += HandleSettingsClicked,
-            r => r.SettingsClicked -= HandleSettingsClicked);
-
-        AddBinding(root,
-            r => r.QuitClicked += OnQuitPressed,
-            r => r.QuitClicked -= OnQuitPressed);
-    }
-    
-    private void HandleStartClicked()
-    {
-        _episodePlayer.StartGame(_episodePlayer.YarnEntryKey);
-    }
-
-    private void HandleContinueClicked()
-    {
-        // if (!_vnSaveLoadSystem.TryContinue())
-        //     Debug.LogWarning("[VnScreenBindings] Continue failed.");
-    }
-
-    private void HandleLoadClicked()
-    {
-        //OpenSaveLoadMenu(SaveLoadMenuMode.Load);
-    }
-
-    private void HandleAlbumClicked()
-    {
-        //OpenAlbumMenuPanel();
-    }
-
-    private void HandleSettingsClicked()
-    {
-        Debug.Log("[VnScreenBindings] Settings requested.");
-    }
-
-    private void OnQuitPressed()
-    {
-#if UNITY_EDITOR
-        UnityEditor.EditorApplication.isPlaying = false;
-#else
-        Application.Quit();
-#endif
-    }
-    
-    private void Refresh(TitleUIRoot titleRoot)
-    {
-       // bool canContinue = _vnSaveLoadSystem.CanContinue();
-
-        // titleRoot.SetContinueEnabled(canContinue);
-        // titleRoot.SetLoadEnabled(true);
-        // titleRoot.SetAlbumEnabled(true);
+        UI.SwitchRoot<TitleUIRoot>();
     }
 }
