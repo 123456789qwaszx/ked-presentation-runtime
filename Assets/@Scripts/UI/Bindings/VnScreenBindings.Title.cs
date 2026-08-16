@@ -52,18 +52,18 @@ public sealed partial class VnScreenBindings
 
     private void HandleContinueClicked()
     {
-        if (!_vnSaveLoadSystem.TryContinue())
-            Debug.LogWarning("[VnScreenBindings] Continue failed.");
+        // if (!_vnSaveLoadSystem.TryContinue())
+        //     Debug.LogWarning("[VnScreenBindings] Continue failed.");
     }
 
     private void HandleLoadClicked()
     {
-        OpenSaveLoadMenu(SaveLoadMenuMode.Load);
+        //OpenSaveLoadMenu(SaveLoadMenuMode.Load);
     }
 
     private void HandleAlbumClicked()
     {
-        OpenAlbumMenuPanel();
+        //OpenAlbumMenuPanel();
     }
 
     private void HandleSettingsClicked()
@@ -82,10 +82,10 @@ public sealed partial class VnScreenBindings
     
     private void Refresh(TitleUIRoot titleRoot)
     {
-        bool canContinue = _vnSaveLoadSystem.CanContinue();
+       // bool canContinue = _vnSaveLoadSystem.CanContinue();
 
-        titleRoot.SetContinueEnabled(canContinue);
-        titleRoot.SetLoadEnabled(true);
-        titleRoot.SetAlbumEnabled(true);
+        // titleRoot.SetContinueEnabled(canContinue);
+        // titleRoot.SetLoadEnabled(true);
+        // titleRoot.SetAlbumEnabled(true);
     }
 }

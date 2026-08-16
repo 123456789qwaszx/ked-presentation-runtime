@@ -1,39 +1,20 @@
 using System.Collections.Generic;
 
-public interface IVNRuntimeStateProvider
-{
-    string CurrentNodeName { get; }
-    string CurrentLineId { get; }
-    string CurrentCharacterKey { get; }
 
-    int CurrentVisitedIndex { get; }
-    int CurrentLineVisitCountInNode { get; }
-
-    string CurrentChapterLabel { get; }
-    string CurrentLinePreview { get; }
-
-    int CurrentPlaytimeSeconds { get; }
-
-    List<VNChoiceRecord> CreateChoiceSnapshot();
-}
-
-public sealed class VNRuntimeStateProvider : IVNRuntimeStateProvider
+public sealed class VNRuntimeStateProvider
 {
     private readonly RollbackHistory _rollbackHistory;
     private readonly ChoiceHistory _choiceHistory;
-    private readonly VNPlaytimeTracker _playtimeTracker;
 
     private YarnLineMeta _currentLineMeta;
     private bool _hasCurrentLineMeta;
 
     public VNRuntimeStateProvider(
         RollbackHistory rollbackHistory,
-        ChoiceHistory choiceHistory,
-        VNPlaytimeTracker playtimeTracker)
+        ChoiceHistory choiceHistory)
     {
         _rollbackHistory = rollbackHistory;
         _choiceHistory = choiceHistory;
-        _playtimeTracker = playtimeTracker;
     }
 
     public string CurrentNodeName
@@ -106,17 +87,6 @@ public sealed class VNRuntimeStateProvider : IVNRuntimeStateProvider
                 return point.rawText;
 
             return _hasCurrentLineMeta ? _currentLineMeta.rawText : "";
-        }
-    }
-
-    public int CurrentPlaytimeSeconds
-    {
-        get
-        {
-            if (_playtimeTracker == null)
-                return 0;
-
-            return _playtimeTracker.CurrentPlaytimeSeconds;
         }
     }
 

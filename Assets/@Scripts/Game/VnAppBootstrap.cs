@@ -101,11 +101,6 @@ public class VnAppBootstrap : MonoBehaviour
     [SerializeField] private RectTransform chapterCardPrefab;
     [SerializeField] private RectTransform nodeRigPrefab;
     
-    [Header("VN Save / Load")]
-    [SerializeField] private VNAlbumDatabaseSO albumDatabase;
-    [SerializeField] private VNPlaytimeTracker vnPlaytimeTracker;
-    [SerializeField] private VNAlbumUnlockDebugList vnAlbumUnlockDebugList;
-    
     [SerializeField] private RollbackHistoryDebugView rollbackHistoryDebugView;
     
     [Header("Emoji")] 
@@ -131,8 +126,6 @@ public class VnAppBootstrap : MonoBehaviour
     
     private UIPatchService _uiPatchService;
     private IUIThemePatchPort _uiThemePatch;
-    private VNLoadSeekDriver _vnLoadSeekDriver;
-    private VNSaveLoadSystem _vnSaveLoadSystem;
     private DialogueBoxPresentationController  _dialogueBoxPresentationController;
     
     private VNRuntimeStateProvider _vnRuntimeStateProvider;
@@ -147,7 +140,8 @@ public class VnAppBootstrap : MonoBehaviour
     {
         BootstrapUIManager();
         
-        _vnRuntimeStateProvider = new VNRuntimeStateProvider(_rollbackHistory, _choiceHistory, vnPlaytimeTracker);
+        _vnRuntimeStateProvider = new VNRuntimeStateProvider(_rollbackHistory, _choiceHistory);
+        
         rollbackHistoryDebugView.Bind(_rollbackHistory);
         
         _presentationUIRoot = uiManager.GetUI<PresentationUIRoot>();
@@ -175,7 +169,6 @@ public class VnAppBootstrap : MonoBehaviour
         
         BootstrapYarn();
         
-        BootstrapVnSaveLoadRuntime();
         BootstrapLinePresentationRuntime();
         
         BootstrapPlaybackControls();
@@ -395,7 +388,6 @@ public class VnAppBootstrap : MonoBehaviour
             _linePresentationAdvanceState,
             _dialogueBoxPresentationController,
             ellipsisBreathTypewriter,
-            _vnLoadSeekDriver,
             //_vnSideRunnerSyncHub,
             mainYarnBridgePlaybackDriver);
 
@@ -459,30 +451,6 @@ public class VnAppBootstrap : MonoBehaviour
             episodePlayer);
     }
     
-    private void BootstrapVnSaveLoadRuntime()
-    {
-        _vnLoadSeekDriver = new VNLoadSeekDriver(
-            episodePlayer,
-            _linePresentationAdvanceState,
-            vnPlaytimeTracker,
-            _rollbackHistory,
-            _choiceHistory,
-            //_vnSideRunnerSyncHub,
-            vnTrace);
-
-        // 아직 게임 플래그 저장/복원이 없기에 임시로 Empty 사용.
-        // 선택지/분기가 들어가면 실제 구현체로 교체.
-        EmptyVNFlagStore vnFlagStore = new ();
-
-        _vnSaveLoadSystem = new ();
-        _vnSaveLoadSystem.AttachRuntime(
-            _vnRuntimeStateProvider,
-            _vnLoadSeekDriver,
-            vnFlagStore,
-            albumDatabase,
-            vnTrace);
-    }
-    
     private void InitializeEpisodePlayer()
     {
         episodePlayer.Initialize(
@@ -520,15 +488,11 @@ public class VnAppBootstrap : MonoBehaviour
             dialogueAdvanceDispatcher,
             _linePresentationAdvanceState);
 
-        _screenBindings.ConfigureAlbumView(_vnSaveLoadSystem);
         _screenBindings.ConfigureTitleView(episodePlayer);
     }
     
     private void Start()
     {
-        vnAlbumUnlockDebugList.Initialize(_vnSaveLoadSystem);
-        _screenBindings.ConfigureAlbumView(_vnSaveLoadSystem);
-        
         OpenInitialScreen();
     }
     

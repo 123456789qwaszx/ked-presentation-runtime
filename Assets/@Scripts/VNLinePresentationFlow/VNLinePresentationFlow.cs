@@ -9,7 +9,6 @@ public partial class VNLinePresentationFlow
     private readonly VNLinePresentationState _advanceState;
     private readonly DialogueBoxPresentationController _boxPresentation;
     private readonly EllipsisBreathTypewriter _typewriter;
-    private readonly VNLoadSeekDriver _loadSeekDriver;
     //private readonly VNSideRunnerSyncHub _sideRunnerSyncHub;
     private readonly YarnBridgePlaybackDriver _playbackDriver;
 
@@ -33,7 +32,6 @@ public partial class VNLinePresentationFlow
         VNLinePresentationState advanceState,
         DialogueBoxPresentationController boxPresentation,
         EllipsisBreathTypewriter typewriter,
-        VNLoadSeekDriver loadSeekDriver,
         //VNSideRunnerSyncHub vnSideRunnerSyncHub,
         YarnBridgePlaybackDriver playbackDriver)
     {
@@ -41,7 +39,6 @@ public partial class VNLinePresentationFlow
         _advanceState = advanceState;
         _boxPresentation = boxPresentation;
         _typewriter = typewriter;
-        _loadSeekDriver = loadSeekDriver;
         //_sideRunnerSyncHub = vnSideRunnerSyncHub;
         _playbackDriver = playbackDriver;
 
@@ -111,9 +108,6 @@ public partial class VNLinePresentationFlow
             ctx.SeekDecision = seekKind == VNSeekKind.Rollback
                 ? VNSeekLineDecision.TargetLineVisualResumeImmediate(seekKind)
                 : VNSeekLineDecision.TargetLineVisualResumeNormal(seekKind);
-
-            if (seekKind == VNSeekKind.Load)
-                _loadSeekDriver?.Complete();
         }
         else
         {

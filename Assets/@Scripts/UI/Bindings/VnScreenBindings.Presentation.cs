@@ -105,7 +105,7 @@ public sealed partial class VnScreenBindings
         if (HasPanel)
             return;
 
-        OpenSaveLoadMenu(SaveLoadMenuMode.Load);
+        //OpenSaveLoadMenu(SaveLoadMenuMode.Load);
     }
 
     private void HandlePlaybackSpeedClicked()
@@ -136,7 +136,7 @@ public sealed partial class VnScreenBindings
         if (HasPanel)
             return;
 
-        OpenSaveLoadMenu(SaveLoadMenuMode.Save);
+        //OpenSaveLoadMenu(SaveLoadMenuMode.Save);
     }
 
     private void HandleSkipMenuClicked()
