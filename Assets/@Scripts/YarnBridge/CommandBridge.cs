@@ -11,7 +11,7 @@ public sealed partial class YarnCommandBridge
     private readonly RectTransform _overlayRigPrefab;
 
     private readonly VNSideRunnerSyncHub _sideRunnerSyncHub;
-    private readonly OneShotPresentationLane _oneShotPresentationLane;
+    //private readonly OneShotPresentationLane _oneShotPresentationLane;
     private readonly DialogueBoxPresentationController _dialogueBoxPresentation;
     private readonly OverlaySequenceRunner _overlaySequenceRunner;
     private readonly SequenceCatalogSO _overlaySequenceCatalog;
@@ -23,7 +23,7 @@ public sealed partial class YarnCommandBridge
         RectTransform charRigPrefab,
         RectTransform backgroundRigPrefab,
         RectTransform overlayRigPrefab,
-        OneShotPresentationLane oneShotPresentationLane,
+        //OneShotPresentationLane oneShotPresentationLane,
         DialogueBoxPresentationController dialogueBoxPresentation,
         OverlaySequenceRunner overlaySequenceRunner,
         SequenceCatalogSO overlaySequenceCatalog,
@@ -34,7 +34,7 @@ public sealed partial class YarnCommandBridge
         _charRigPrefab = charRigPrefab;
         _backgroundRigPrefab = backgroundRigPrefab;
         _overlayRigPrefab = overlayRigPrefab;
-        _oneShotPresentationLane = oneShotPresentationLane;
+        //_oneShotPresentationLane = oneShotPresentationLane;
         _dialogueBoxPresentation = dialogueBoxPresentation;
         _overlaySequenceRunner = overlaySequenceRunner;
         _overlaySequenceCatalog = overlaySequenceCatalog;
@@ -97,12 +97,12 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler<int>(
             "pres_advance", AddSubPresentationForwardAdvance); // 이번 라인 N개 추가
         
-        runner.AddCommandHandler<string>(
-            "beat", RunOneShotNode); // One-Shot Node 재생. 커맨드로만 이루어졌기에 즉시 재생 및 자동 종료
+        // runner.AddCommandHandler<string>(
+        //     "beat", RunOneShotNode); // One-Shot Node 재생. 커맨드로만 이루어졌기에 즉시 재생 및 자동 종료
         
-        runner.AddCommandHandler<string>(
-            "beat_fx",
-            RunOneShotNodeFree); // non-blocking decorative effect beat
+        // runner.AddCommandHandler<string>(
+        //     "beat_fx",
+        //     RunOneShotNodeFree); // non-blocking decorative effect beat
         
         // Portrait = 0,
         // Speaker = 1,
@@ -140,11 +140,11 @@ public sealed partial class YarnCommandBridge
     private void AddSubPresentationForwardAdvance(int steps = 1) 
         => _sideRunnerSyncHub.AdvancePresentationExtra(steps);
     
-    private IEnumerator RunOneShotNode(string nodeName)
-        => _oneShotPresentationLane.RunNodeCoroutine(nodeName, blockMain: true);
-
-    private IEnumerator RunOneShotNodeFree(string nodeName)
-        => _oneShotPresentationLane.RunNodeCoroutine(nodeName, blockMain: false);
+    // private IEnumerator RunOneShotNode(string nodeName)
+    //     => _oneShotPresentationLane.RunNodeCoroutine(nodeName, blockMain: true);
+    //
+    // private IEnumerator RunOneShotNodeFree(string nodeName)
+    //     => _oneShotPresentationLane.RunNodeCoroutine(nodeName, blockMain: false);
     
     private void SetNamedLineBoxKind(string key)
     {

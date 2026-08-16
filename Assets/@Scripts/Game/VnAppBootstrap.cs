@@ -78,8 +78,8 @@ public class VnAppBootstrap : MonoBehaviour
     
     [SerializeField] private LinePresenter linePresenter;
     [SerializeField] private CustomLinePresenter customLinePresenter;
-    [SerializeField] private SubPresentationPresenter subPresentationPresenter;
-    [SerializeField] private OneShotPresentationPresenter oneShotPresentationPresenter;
+    // [SerializeField] private SubPresentationPresenter subPresentationPresenter;
+    // [SerializeField] private OneShotPresentationPresenter oneShotPresentationPresenter;
     [SerializeField] private AutoAdvanceScheduler autoAdvanceScheduler;
     [SerializeField] private VNOptionItem optionItem;
     [SerializeField] private VNOptionsPresenter vnOptionsPresenter;
@@ -360,12 +360,12 @@ public class VnAppBootstrap : MonoBehaviour
     private void BootstrapYarn()
     {
         mainYarnBridgePlaybackDriver.Initialize(commandExecutor, _presentationLaneScopeSession);
-        subYarnBridgePlaybackDriver.Initialize(subCommandExecutor, new SubPresentationScopeProvider(_presentationLaneScopeSession));
-        oneShotYarnBridgePlaybackDriver.Initialize(oneShotCommandExecutor, _presentationLaneScopeSession);
+        // subYarnBridgePlaybackDriver.Initialize(subCommandExecutor, new SubPresentationScopeProvider(_presentationLaneScopeSession));
+        // oneShotYarnBridgePlaybackDriver.Initialize(oneShotCommandExecutor, _presentationLaneScopeSession);
 
         _vnSideRunnerSyncHub.Initialize(subPresentationRunner);
 
-        OneShotPresentationLane oneShotPresentationLane = new(subOneShotRunner, oneShotYarnBridgePlaybackDriver);
+        //OneShotPresentationLane oneShotPresentationLane = new(subOneShotRunner, oneShotYarnBridgePlaybackDriver);
 
         DialogueBoxMetadataResolver metadataResolver = new();
         _dialogueBoxPresentationController = new(
@@ -383,41 +383,41 @@ public class VnAppBootstrap : MonoBehaviour
             rigPrefab,
             backgroundRigPrefab,
             overlayRigPrefab,
-            oneShotPresentationLane,
+            //oneShotPresentationLane,
             _dialogueBoxPresentationController,
             overlaySequenceRunner,
             overlaySequenceCatalog,
             bindMainLaneCommands: true);
         
-        YarnCommandBridge subYarnCommandBridge = new YarnCommandBridge(
-            subPresentationRunner, 
-            subYarnBridgePlaybackDriver,
-            _vnSideRunnerSyncHub, 
-            rigPrefab, 
-            backgroundRigPrefab,
-            overlayRigPrefab,
-            oneShotPresentationLane,
-            _dialogueBoxPresentationController,
-            overlaySequenceRunner,
-            overlaySequenceCatalog,
-            bindMainLaneCommands: false);
-        
-        YarnCommandBridge subOneShotYarnCommandBridge = new YarnCommandBridge(
-            subOneShotRunner, 
-            oneShotYarnBridgePlaybackDriver,
-            _vnSideRunnerSyncHub, 
-            rigPrefab, 
-            backgroundRigPrefab,
-            overlayRigPrefab,
-            oneShotPresentationLane,
-            _dialogueBoxPresentationController,
-            overlaySequenceRunner,
-            overlaySequenceCatalog,
-            bindMainLaneCommands: false);
-        
-        subPresentationPresenter.Initialize(subPresentationRunner, subYarnBridgePlaybackDriver, _vnSideRunnerSyncHub, yarnLaneDebugView);
-        
-        oneShotPresentationPresenter.Initialize(subOneShotRunner, yarnLaneDebugView);
+        // YarnCommandBridge subYarnCommandBridge = new YarnCommandBridge(
+        //     subPresentationRunner, 
+        //     subYarnBridgePlaybackDriver,
+        //     _vnSideRunnerSyncHub, 
+        //     rigPrefab, 
+        //     backgroundRigPrefab,
+        //     overlayRigPrefab,
+        //     //oneShotPresentationLane,
+        //     _dialogueBoxPresentationController,
+        //     overlaySequenceRunner,
+        //     overlaySequenceCatalog,
+        //     bindMainLaneCommands: false);
+        //
+        // YarnCommandBridge subOneShotYarnCommandBridge = new YarnCommandBridge(
+        //     subOneShotRunner, 
+        //     oneShotYarnBridgePlaybackDriver,
+        //     _vnSideRunnerSyncHub, 
+        //     rigPrefab, 
+        //     backgroundRigPrefab,
+        //     overlayRigPrefab,
+        //     oneShotPresentationLane,
+        //     _dialogueBoxPresentationController,
+        //     overlaySequenceRunner,
+        //     overlaySequenceCatalog,
+        //     bindMainLaneCommands: false);
+        //
+        // subPresentationPresenter.Initialize(subPresentationRunner, subYarnBridgePlaybackDriver, _vnSideRunnerSyncHub, yarnLaneDebugView);
+        //
+        // oneShotPresentationPresenter.Initialize(subOneShotRunner, yarnLaneDebugView);
     }
     
     private void BootstrapLinePresentationRuntime()
