@@ -16,7 +16,6 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, IVNLineAborter
     private VNLinePresentationState _vnLinePresentationState;
     private VnPlaybackRuntimeState _vnPlaybackRuntimeState;
     private VNTraceStream _trace;
-    private IYarnLaneDebugSink _debugSink;
 
     private string _currentNodeName;
 
@@ -41,9 +40,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, IVNLineAborter
         VNLinePresentationFlow vnLinePresentationFlow,
         EllipsisBreathTypewriter typewriter,
         VNLinePresentationState vnLinePresentationState,
-        VnPlaybackRuntimeState vnPlaybackRuntimeState,
-        VNTraceStream trace = null,
-        IYarnLaneDebugSink debugSink = null)
+        VnPlaybackRuntimeState vnPlaybackRuntimeState)
     {
         dialogueRunner.onNodeStart?.AddListener(nodeName => _currentNodeName = nodeName);
         RegisterPresenter(dialogueRunner);
@@ -57,9 +54,6 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, IVNLineAborter
 
         _vnLinePresentationState = vnLinePresentationState;
         _vnPlaybackRuntimeState = vnPlaybackRuntimeState;
-
-        _trace = trace;
-        _debugSink = debugSink;
     }
 
     // private void WireInlineAdvanceHandlers(IInlinePresentationAdvanceHost host)
@@ -75,10 +69,6 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, IVNLineAborter
         LocalizedLine line,
         LineCancellationToken token)
     {
-        _debugSink?.SetMain(
-            _currentNodeName,
-            line.TextWithoutCharacterName.Text);
-
         var ctx = new VNLinePresentationContext
         {
             Line = line,
@@ -158,8 +148,6 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, IVNLineAborter
     {
         CancelLineVisualToken();
         CancelPresenterLifetimeWaiters();
-
-        _debugSink?.ClearMain();
 
         return YarnTask.CompletedTask;
     }

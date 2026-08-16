@@ -140,7 +140,6 @@ public class VnAppBootstrap : MonoBehaviour
     [SerializeField] private RectTransform screenEffectRigPrefab;
     
     [Header("NodeDebug")] 
-    [SerializeField] private YarnLaneDebugView yarnLaneDebugView;
     [SerializeField] private CharacterFocusDebugView characterFocusDebugView;
     
     private UIPatchService _uiPatchService;
@@ -441,9 +440,7 @@ public class VnAppBootstrap : MonoBehaviour
             vnLinePresentationFlow,
             ellipsisBreathTypewriter,
             _linePresentationAdvanceState,
-            _playbackState,
-            trace: null,
-            yarnLaneDebugView);
+            _playbackState);
         
         VNChoiceBoundary vnChoiceBoundary = new(
             _choiceHistory,

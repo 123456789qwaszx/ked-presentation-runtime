@@ -85,7 +85,6 @@ GameObject:
   m_Component:
   - component: {fileID: 8913521829096695511}
   - component: {fileID: 7800873761981424340}
-  - component: {fileID: -6249684825750748157}
   m_Layer: 5
   m_Name: Option Button
   m_TagString: Untagged
@@ -170,20 +169,6 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
---- !u!114 &-6249684825750748157
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7608559884473443727}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 85e0e65a903c0a145aad844a36fe40e0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MessengerOptionButtonView
-  button: {fileID: 7800873761981424340}
-  label: {fileID: 4780764261637893006}
 --- !u!1 &8634811463877344010
 GameObject:
   m_ObjectHideFlags: 0
@@ -287,6 +272,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0

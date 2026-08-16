@@ -406,21 +406,21 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
 
         for (int i = 0; i < ActionMarkupHandlers.Count; i++)
         {
-            if (ActionMarkupHandlers[i] is not ITypewriterRevealAllFlushHandler flushHandler)
-                continue;
-
-            try
-            {
-                await flushHandler.OnTypewriterWillRevealAll(line, hardCancelToken);
-            }
-            catch (OperationCanceledException) when (hardCancelToken.IsCancellationRequested)
-            {
-                return;
-            }
-            catch (Exception ex)
-            {
-                Debug.LogException(ex);
-            }
+            // if (ActionMarkupHandlers[i] is not ITypewriterRevealAllFlushHandler flushHandler)
+            //     continue;
+            //
+            // try
+            // {
+            //     await flushHandler.OnTypewriterWillRevealAll(line, hardCancelToken);
+            // }
+            // catch (OperationCanceledException) when (hardCancelToken.IsCancellationRequested)
+            // {
+            //     return;
+            // }
+            // catch (Exception ex)
+            // {
+            //     Debug.LogException(ex);
+            // }
 
             if (runId != _runId)
                 return;
