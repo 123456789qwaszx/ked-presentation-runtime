@@ -43,6 +43,4 @@ public sealed class PresentationScopeSession : ICommandRunScopeProvider
 
         _sessionScope = null;
     }
-
-    public void ClearStage() => _stage?.Clear();
 }

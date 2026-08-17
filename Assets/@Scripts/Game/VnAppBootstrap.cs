@@ -116,10 +116,6 @@ public class VnAppBootstrap : MonoBehaviour
     {
         BootstrapUIManager();
         
-        GameObject viewGo = new("RollbackHistoryDebugView");
-        viewGo.transform.SetParent(transform, false);
-        viewGo.AddComponent<RollbackHistoryDebugView>().Bind(_rollbackHistory);
-        
         _vnRuntimeStateProvider = new VNRuntimeStateProvider(_rollbackHistory, _choiceHistory);
         
         _presentationUIRoot = uiManager.GetUI<PresentationUIRoot>();
@@ -344,6 +340,7 @@ public class VnAppBootstrap : MonoBehaviour
             customLinePresenter,
             _backlogRecorder,
             _presentationResponseRig,
+            _presentationStage,
             _presentationScopeSession);
     }
 

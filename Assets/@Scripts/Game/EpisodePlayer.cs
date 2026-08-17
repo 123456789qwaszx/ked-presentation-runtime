@@ -8,6 +8,7 @@ public sealed class EpisodePlayer
     private readonly IVNLineAborter _linePresentationAborter;
     private readonly BacklogRecorder _backlogRecorder;
     private readonly PresentationShotResponseSystem _shotResponseSystem;
+    private readonly PresentationStage _presentationStage;
     private readonly PresentationScopeSession _presentationScopeSession;
 
     public EpisodePlayer(
@@ -17,6 +18,7 @@ public sealed class EpisodePlayer
         IVNLineAborter linePresentationAborter,
         BacklogRecorder backlogRecorder,
         PresentationShotResponseSystem presentationResponseRig,
+        PresentationStage presentationStage,
         PresentationScopeSession presentationScopeSession)
     {
         _nodeRunner = nodeRunner;
@@ -25,6 +27,7 @@ public sealed class EpisodePlayer
         _linePresentationAborter = linePresentationAborter;
         _backlogRecorder = backlogRecorder;
         _shotResponseSystem = presentationResponseRig;
+        _presentationStage = presentationStage;
         _presentationScopeSession = presentationScopeSession;
     }
 
@@ -33,7 +36,8 @@ public sealed class EpisodePlayer
         await StopDialogueAsync();
 
         _vnScreenBindings.GoToPresentationView();
-        _presentationScopeSession.ClearStage();
+
+        _presentationStage.Clear();
         _presentationScopeSession.Start();
 
         await _nodeRunner.StartAsync(nodeName);
