@@ -1,7 +1,18 @@
 # ked-presentation-runtime
 
 Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타임**입니다.
-대사 진행과 캐릭터·배경·화면 효과 등의 연출을 분리하고, Yarn 스크립트의 명령어를 통해 여러 연출 트랙을 조합할 수 있도록 구현했습니다.
+대사 진행과 캐릭터·배경·화면 효과 등의 연출을 분리하고, Yarn 스크립트의 명령어로 연출을 조합할 수 있도록 구현했습니다.
+
+## 이 저장소의 범위
+
+> **yarn 노드 하나를 재생한다. 저작·진행·저장은 밖이다.**
+
+저작은 외부 툴(VnTool)이 하고, 그 결과인 `.yarn` 텍스트를 이 런타임이 재생합니다.
+에피소드·챕터 진행과 세이브는 이 저장소의 책임이 아니며, **필요 없어서가 아니라 주인을
+옮기는 중이라서** 여기서 빠져 있습니다.
+
+무엇이 왜 밖으로 나갔고 어떤 모양으로 돌아오는지는 **[SCOPE-BOUNDARY.md](SCOPE-BOUNDARY.md)**
+에 있습니다. 어셈블리 경계는 [ASSEMBLY-BOUNDARY.md](Assets/@Scripts/Runtime/ASSEMBLY-BOUNDARY.md).
 
 사용법: @Dialogue폴더의 'Story_**'.yarnscript의 Node명을 복사하여, 하이어아키의 'VnAppBootstrap'의 'Entry Keys'에 복사.
 단축키: 2: Node실행 / 좌ctrl: fastforward / r: Rollback / a: Auto모드 토글 / s: SpeedUp모드 토글 / Space: RequestNextLine
@@ -41,10 +52,17 @@ Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타�
 
 ### 4. 연출 명령과 실행 구조
 
-* `Assets/@Scripts/PresentationCore/`
-* `Assets/@Scripts/Commands/`
+* `Assets/@Scripts/Runtime/PresentationCore/`
+* `Assets/@Scripts/Runtime/Commands/`
 
-연출 명령의 생성과 실행, 실행 수명 관리, 여러 연출 트랙의 동기화 구조를 확인할 수 있습니다.
+연출 명령의 생성과 실행, 실행 수명 관리(스텝/런 스코프) 구조를 확인할 수 있습니다.
+
+### 5. 순수 코어
+
+`Assets/Ked.Presentation.Core/`
+
+커맨드 열을 "트윈이 끝났다면 어디에 있을 것인가"로 접는 순수 C# 층입니다(엔진 의존 0).
+그 계산이 실제 재생과 같은지는 `Game/StageEquivalenceHarness.cs`가 라인마다 판정합니다.
 
 ## 개발 환경
 

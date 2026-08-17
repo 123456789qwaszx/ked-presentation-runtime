@@ -1,5 +1,3 @@
-using UnityEngine;
-
 public sealed class VNLinePresentationState : ISeekStateQuery
 {
     private readonly VNSeekState _seekState = new ();
@@ -10,23 +8,14 @@ public sealed class VNLinePresentationState : ISeekStateQuery
     public bool IsLineFullyShown { get; private set; } = true;
     
     public void BeginRollbackSeek(string nodeName, string lineId) => BeginSeek(VNSeekKind.Rollback, nodeName, lineId);
-    public void BeginLoadSeek(string nodeName, string lineId) => BeginSeek(VNSeekKind.Load, nodeName, lineId);
-    
+
     private void BeginSeek(VNSeekKind kind, string nodeName, string lineId)
     {
         IsLineFullyShown = false;
         _seekState.Begin(kind, nodeName, lineId);
     }
 
-    public bool IsSeekTargetLine(YarnLineMeta meta)
-    {
-        bool result = _seekState.IsCurrentTarget(meta);
-        
-        if(result)
-            Debug.Log(meta.rawText);
-            
-        return result;
-    }
+    public bool IsSeekTargetLine(YarnLineMeta meta) => _seekState.IsCurrentTarget(meta);
 
     public void ClearSeek()
     {
