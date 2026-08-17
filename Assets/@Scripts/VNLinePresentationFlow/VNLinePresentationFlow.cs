@@ -62,7 +62,7 @@ public sealed class VNLinePresentationFlow
         SetPhase(ctx, VNLinePresentationPhase.LineRuntimeStateResolved);
 
         if (ctx.ShouldSkipVisual) {
-            RunSeekPassThrough(ctx);
+            await RunSeekPassThroughAsync(ctx);
             return;
         }
 
@@ -143,13 +143,22 @@ public sealed class VNLinePresentationFlow
         SetPhase(ctx, VNLinePresentationPhase.Completed);
     }
 
-    private void RunSeekPassThrough(
+    // 통과 라인은 반드시 한 프레임을 양보.
+    // 동기로 완료할 시, 버그 유발
+    // (1) Yarn의 RunLocalisedLine이 WhenAll을 이미 완료된 것으로 처리,
+    // (2) SignalContentComplete() 분기를 탄 뒤,
+    // (3) OnLineReceivedAsync가 Dialogue.Continue() 호출.
+    // (4) 그 Continue가 VM 실행 중에 재진입.
+    // (5) 시크 전체가 한 프레임 안에서 재귀로 돌아감.
+    private async YarnTask RunSeekPassThroughAsync(
         VNLinePresentationContext ctx)
     {
         SetPhase(ctx, VNLinePresentationPhase.SeekPassThrough);
 
         _boxPresentation.CloseAll();
         _advanceState.MarkLineDisplayCompleted(ctx.Meta, "passThrough");
+
+        await YarnTask.Yield();
     }
 
     private async YarnTask CompleteStaleAfterBoxAsync(

@@ -142,7 +142,18 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, IVNLineAborter
         YarnTaskCompletionSource drain = _lineDrain;
 
         if (drain != null)
+        {
             await drain.Task;
+
+            // 스택 탈출용.
+            // drain은 RunLineAsync의 finally에서 닫혀 그 메서드의 SetResult()보다 앞섬.
+            // (1) Stop() 반환과 StartDialogue()가 이 스택 안에서 실행,
+            // (2) 새 dialogueCancellationSource가 먼저 설치,
+            // (3) 뒤늦게 전파된 OnLineReceivedAsync가 그 소스를 보고 Continue() 발사,
+            // (4) 새 대화의 라인 하나가 소비됨.
+            // 양보하면 그 Continue()는 취소/null 소스를 보고 무시된다.
+            await YarnTask.Yield();
+        }
     }
 
     private void CancelPresenterLifetimeWaiters()

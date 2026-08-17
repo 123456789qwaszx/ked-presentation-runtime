@@ -20,7 +20,13 @@ public sealed class YarnEpisodeNodeRunner : IEpisodeNodeRunner
 
     public bool IsRunning => _dialogueRunner.IsDialogueRunning;
 
-    public async Task StopAsync() => await _dialogueRunner.Stop();
+    public async Task StopAsync()
+    {
+        await _dialogueRunner.Stop();
+    }
 
-    public async Task StartAsync(string nodeName) => await _dialogueRunner.StartDialogue(nodeName);
+    public async Task StartAsync(string nodeName)
+    {
+        await _dialogueRunner.StartDialogue(nodeName);
+    }
 }
