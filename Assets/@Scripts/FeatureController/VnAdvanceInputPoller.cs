@@ -11,6 +11,9 @@ public sealed class VnAdvanceInputPoller : MonoBehaviour
     private VNLinePresentationState _linePresentationAdvanceState;
     private EpisodePlayer _episodePlayer;
 
+    // 디버그 키(2번)로 재생할 노드. 이 키를 아는 건 여기뿐이다 — EpisodePlayer는 몰라도 된다.
+    private string _yarnEntryKey;
+
     private bool _rapidSkipHeld;
     private bool _speedUpHeld;
 
@@ -18,12 +21,14 @@ public sealed class VnAdvanceInputPoller : MonoBehaviour
         DialogueAdvanceDispatcher dialogueAdvanceDispatcher,
         VnFeatureController featureController,
         VNLinePresentationState linePresentationAdvanceState,
-        EpisodePlayer episodePlayer)
+        EpisodePlayer episodePlayer,
+        string yarnEntryKey)
     {
         _dialogueAdvanceDispatcher = dialogueAdvanceDispatcher;
         _featureController = featureController;
         _linePresentationAdvanceState = linePresentationAdvanceState;
         _episodePlayer = episodePlayer;
+        _yarnEntryKey = yarnEntryKey;
     }
 
     private void Update()
@@ -41,10 +46,11 @@ public sealed class VnAdvanceInputPoller : MonoBehaviour
         _featureController.Tick();
     }
 
-    private void PollDebugRunYarn()
+    // Update에서 부르는 입력 핸들러라 async void다. 첫 await에서 바로 반환된다.
+    private async void PollDebugRunYarn()
     {
         if (_bindings.IsRunYarnPressed())
-            _episodePlayer.StartGame(_episodePlayer.YarnEntryKey);
+            await _episodePlayer.StartGameAsync(_yarnEntryKey);
     }
 
     private void PollAdvance()
@@ -82,7 +88,7 @@ public sealed class VnAdvanceInputPoller : MonoBehaviour
             _featureController.ToggleSpeedUpMode();
     }
 
-    private void PollFeatureToggles()
+    private async void PollFeatureToggles()
     {
         if (_bindings.IsAutoTogglePressed())
             _featureController.ToggleAuto();
@@ -91,8 +97,8 @@ public sealed class VnAdvanceInputPoller : MonoBehaviour
         {
             if (!_featureController.RequestRollbackOneStep())
                 return;
-            
-            _episodePlayer.StartGame(_linePresentationAdvanceState.SeekTargetNodeName);
+
+            await _episodePlayer.StartGameAsync(_linePresentationAdvanceState.SeekTargetNodeName);
         }
     }
 }

@@ -86,11 +86,12 @@ public sealed partial class VnScreenBindings
         _vnFeatures.ToggleSpeedUpMode();
     }
 
-    private void HandleRollbackClicked()
+    // UI 이벤트 핸들러라 async void다.
+    private async void HandleRollbackClicked()
     {
         if (!_vnFeatures.RequestRollbackOneStep())
             return;
 
-        _episodePlayer.StartGame(_linePresentationAdvanceState.SeekTargetNodeName);
+        await _episodePlayer.StartGameAsync(_linePresentationAdvanceState.SeekTargetNodeName);
     }
 }

@@ -116,6 +116,10 @@ public class VnAppBootstrap : MonoBehaviour
     {
         BootstrapUIManager();
         
+        GameObject viewGo = new("RollbackHistoryDebugView");
+        viewGo.transform.SetParent(transform, false);
+        viewGo.AddComponent<RollbackHistoryDebugView>().Bind(_rollbackHistory);
+        
         _vnRuntimeStateProvider = new VNRuntimeStateProvider(_rollbackHistory, _choiceHistory);
         
         _presentationUIRoot = uiManager.GetUI<PresentationUIRoot>();
@@ -332,8 +336,7 @@ public class VnAppBootstrap : MonoBehaviour
     private void CreateEpisodePlayer()
     {
         _episodePlayer = new EpisodePlayer(
-            dialogueRunner,
-            yarnEntryKey,
+            new YarnEpisodeNodeRunner(dialogueRunner),
             _screenBindings,
             _rollbackHistory,
             customLinePresenter,
@@ -374,7 +377,8 @@ public class VnAppBootstrap : MonoBehaviour
             _dialogueAdvanceDispatcher,
             _vnFeatureController,
             _linePresentationAdvanceState,
-            _episodePlayer);
+            _episodePlayer,
+            yarnEntryKey);
     }
     
     // 등가성 하네스. 토글이 꺼져 있으면 아무것도 만들지 않는다 — 재생 경로 무영향.
