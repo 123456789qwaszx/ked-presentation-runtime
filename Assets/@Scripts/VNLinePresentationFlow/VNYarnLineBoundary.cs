@@ -41,12 +41,9 @@ public sealed class VNYarnLineBoundary
             line.TextWithoutCharacterName.Text);
     }
 
-    public void CommitLineEntered(YarnLineMeta meta, bool recordToHistory)
+    public void CommitLineEntered(YarnLineMeta meta)
     {
         _runtimeStateProvider.UpdateCurrentLineMeta(meta);
-
-        if (!recordToHistory)
-            return;
 
         _backlogRecorder.Record(meta);
         _rollbackHistory.AddRollbackPoint(meta);

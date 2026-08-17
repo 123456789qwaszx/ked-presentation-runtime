@@ -304,12 +304,15 @@ public class VnAppBootstrap : MonoBehaviour
             _rollbackHistory,
             _vnRuntimeStateProvider);
         
+        LineHurrySpeedController lineHurrySpeed = new(ellipsisBreathTypewriter);
+
         VNLinePresentationFlow vnLinePresentationFlow = new(
             vnYarnLineBoundary,
             _linePresentationAdvanceState,
             _dialogueBoxPresentationController,
             ellipsisBreathTypewriter,
-            mainYarnBridgePlaybackDriver);
+            mainYarnBridgePlaybackDriver,
+            lineHurrySpeed);
 
         customLinePresenter.Initialize(
             dialogueRunner,

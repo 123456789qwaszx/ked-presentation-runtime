@@ -64,21 +64,11 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, IVNLineAborter
             NodeName = _currentNodeName,
         };
 
-        if (DialogueBoxMetadataResolver.IsPresentationBeat(line.Metadata))
-        {
-            await _vnLinePresentationFlow.RunPresentationBeatAsync(
-                ctx,
-                beginRun: BeginLinePresentationRun,
-                waitForAdvance: WaitForLineAdvanceAsync,
-                shouldFastForward: ShouldFastForwardLine);
-            return;
-        }
-
         await _vnLinePresentationFlow.RunAsync(
             ctx,
             beginRun: BeginLinePresentationRun,
             waitForAdvance: WaitForLineAdvanceAsync,
-            shouldFastForward: ShouldFastForwardLine);
+            shouldFastForward: () => _vnPlaybackRuntimeState.IsSpeedUpMode);
     }
 
     private LinePresentationRun BeginLinePresentationRun()
@@ -113,12 +103,6 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, IVNLineAborter
         {
             cts?.Dispose();
         }
-    }
-
-    private bool ShouldFastForwardLine()
-    {
-        return _vnLinePresentationState.IsSeekingActive ||
-               _vnPlaybackRuntimeState.IsSpeedUpMode;
     }
 
     public void AbortCurrentVnLine()
