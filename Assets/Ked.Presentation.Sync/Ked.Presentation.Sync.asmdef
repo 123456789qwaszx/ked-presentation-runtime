@@ -1,0 +1,14 @@
+{
+    "name": "Ked.Presentation.Sync",
+    "rootNamespace": "Ked.Presentation.Sync",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": true
+}
