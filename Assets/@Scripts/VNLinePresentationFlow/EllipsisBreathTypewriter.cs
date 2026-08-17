@@ -97,6 +97,8 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
         Yarn.Markup.MarkupParseResult line,
         CancellationToken cancellationToken)
     {
+        Debug.Log(line.Text);
+        
         return RunTypewriter(line, cancellationToken, CancellationToken.None);
     }
 

@@ -13,7 +13,6 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, IVNLineAborter
     private VNLinePresentationFlow _vnLinePresentationFlow;
 
     private EllipsisBreathTypewriter _typewriter;
-    private VNLinePresentationState _vnLinePresentationState;
     private VnPlaybackRuntimeState _vnPlaybackRuntimeState;
 
     private string _currentNodeName;
@@ -21,6 +20,12 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, IVNLineAborter
     private int _presenterGeneration;
     private CancellationTokenSource _presenterLifetimeCts = new();
     private CancellationTokenSource _lineVisualCts;
+
+    // 진행 중인 RunLineAsync가 실제로 빠져나올 때까지 기다리기 위한 통로.
+    // 이게 없으면 정지 이후에도 라인 태스크가 살아남아,
+    // 다음 StartDialogue가 만든 새 dialogueCancellationSource를 보고
+    // Dialogue.Continue()를 한 번 더 씀.
+    private YarnTaskCompletionSource _lineDrain;
 
     [SerializeField] private List<ActionMarkupHandler> eventHandlers = new();
 
@@ -38,7 +43,6 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, IVNLineAborter
         DialogueRunner dialogueRunner,
         VNLinePresentationFlow vnLinePresentationFlow,
         EllipsisBreathTypewriter typewriter,
-        VNLinePresentationState vnLinePresentationState,
         VnPlaybackRuntimeState vnPlaybackRuntimeState)
     {
         dialogueRunner.onNodeStart?.AddListener(nodeName => _currentNodeName = nodeName);
@@ -49,7 +53,6 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, IVNLineAborter
         _typewriter = typewriter;
         _typewriter.ActionMarkupHandlers = ActionMarkupHandlers;
 
-        _vnLinePresentationState = vnLinePresentationState;
         _vnPlaybackRuntimeState = vnPlaybackRuntimeState;
     }
 
@@ -57,18 +60,31 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, IVNLineAborter
         LocalizedLine line,
         LineCancellationToken token)
     {
-        var ctx = new VNLinePresentationContext
-        {
-            Line = line,
-            Token = token,
-            NodeName = _currentNodeName,
-        };
+        var drain = new YarnTaskCompletionSource();
+        _lineDrain = drain;
 
-        await _vnLinePresentationFlow.RunAsync(
-            ctx,
-            beginRun: BeginLinePresentationRun,
-            waitForAdvance: WaitForLineAdvanceAsync,
-            shouldFastForward: () => _vnPlaybackRuntimeState.IsSpeedUpMode);
+        try
+        {
+            var ctx = new VNLinePresentationContext
+            {
+                Line = line,
+                Token = token,
+                NodeName = _currentNodeName,
+            };
+
+            await _vnLinePresentationFlow.RunAsync(
+                ctx,
+                beginRun: BeginLinePresentationRun,
+                waitForAdvance: WaitForLineAdvanceAsync,
+                shouldFastForward: () => _vnPlaybackRuntimeState.IsSpeedUpMode);
+        }
+        finally
+        {
+            drain.TrySetResult();
+
+            if (ReferenceEquals(_lineDrain, drain))
+                _lineDrain = null;
+        }
     }
 
     private LinePresentationRun BeginLinePresentationRun()
@@ -116,12 +132,17 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, IVNLineAborter
         return YarnTask.CompletedTask;
     }
 
-    public override YarnTask OnDialogueCompleteAsync()
+    // DialogueRunner는 Stop()을 끝내기 전에 이 태스크를 기다린 뒤, Task를 닫는다.
+    // 순서: 먼저 취소해서 대기를 풀고, 그 다음 Task가 닫히길 기다림..
+    public override async YarnTask OnDialogueCompleteAsync()
     {
         CancelLineVisualToken();
         CancelPresenterLifetimeWaiters();
 
-        return YarnTask.CompletedTask;
+        YarnTaskCompletionSource drain = _lineDrain;
+
+        if (drain != null)
+            await drain.Task;
     }
 
     private void CancelPresenterLifetimeWaiters()

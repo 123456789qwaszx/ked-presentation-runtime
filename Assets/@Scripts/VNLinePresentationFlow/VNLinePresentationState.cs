@@ -1,3 +1,5 @@
+using UnityEngine;
+
 public sealed class VNLinePresentationState : ISeekStateQuery
 {
     private readonly VNSeekState _seekState = new ();
@@ -19,6 +21,10 @@ public sealed class VNLinePresentationState : ISeekStateQuery
     public bool IsSeekTargetLine(YarnLineMeta meta)
     {
         bool result = _seekState.IsCurrentTarget(meta);
+        
+        if(result)
+            Debug.Log(meta.rawText);
+            
         return result;
     }
 

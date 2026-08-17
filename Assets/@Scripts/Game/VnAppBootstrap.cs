@@ -318,7 +318,6 @@ public class VnAppBootstrap : MonoBehaviour
             dialogueRunner,
             vnLinePresentationFlow,
             ellipsisBreathTypewriter,
-            _linePresentationAdvanceState,
             _playbackState);
         
         VNChoiceBoundary vnChoiceBoundary = new(

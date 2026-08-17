@@ -16,6 +16,11 @@ public sealed partial class VNOptionsPresenter
     private VNOptionSelectionSession _selectionSession;
     private string _currentNodeName;
 
+    // 진행 중인 RunOptionsAsync가 실제로 빠져나올 때까지 기다리기 위한 통로.
+    // 이게 없으면 정지 이후에도 옵션 태스크가 살아남아,
+    // 다음 StartDialogue가 만든 새 대화에 SetSelectedOption/Continue를 씀.
+    private YarnTaskCompletionSource _optionsDrain;
+
     public void Initialize(
         DialogueRunner dialogueRunner,
         VNOptionsPresentationFlow flow,
@@ -38,13 +43,19 @@ public sealed partial class VNOptionsPresenter
         return YarnTask.CompletedTask;
     }
 
-    public override YarnTask OnDialogueCompleteAsync()
+    // DialogueRunner는 Stop()을 끝내기 전에 이 태스크를 기다림.
+    // 먼저 세션을 끝내 대기를 풀고(Dispose가 TrySetResult(null)을 한다),
+    // 그 다음 RunOptionsAsync가 빠져나올 때까지 대기.
+    public override async YarnTask OnDialogueCompleteAsync()
     {
         EndSelectionSession();
         DestroyActiveItems();
         _flow?.EndInteractiveImmediate();
 
-        return YarnTask.CompletedTask;
+        YarnTaskCompletionSource drain = _optionsDrain;
+
+        if (drain != null)
+            await drain.Task;
     }
 
     public override YarnTask RunLineAsync(
@@ -58,39 +69,52 @@ public sealed partial class VNOptionsPresenter
         DialogueOption[] dialogueOptions,
         LineCancellationToken cancellationToken)
     {
-        VNOptionsPresentationContext ctx = new()
-        {
-            SourceOptions = dialogueOptions,
-            Token = cancellationToken,
-            NodeName = _currentNodeName,
-        };
-
-        VNOptionsPresentationBeginResult beginResult = await _flow.BeginAsync(ctx);
-
-        if (beginResult == VNOptionsPresentationBeginResult.NoOption)
-            return await DialogueRunner.NoOptionSelected;
-
-        if (beginResult == VNOptionsPresentationBeginResult.ReplayResolved)
-            return ctx.SelectedOption ?? await DialogueRunner.NoOptionSelected;
+        var drain = new YarnTaskCompletionSource();
+        _optionsDrain = drain;
 
         try
         {
-            if (!PrepareInteractiveItems(ctx))
+            VNOptionsPresentationContext ctx = new()
+            {
+                SourceOptions = dialogueOptions,
+                Token = cancellationToken,
+                NodeName = _currentNodeName,
+            };
+
+            VNOptionsPresentationBeginResult beginResult = await _flow.BeginAsync(ctx);
+
+            if (beginResult == VNOptionsPresentationBeginResult.NoOption)
                 return await DialogueRunner.NoOptionSelected;
 
-            VNOptionViewModel selected = await AwaitSelectionAsync(ctx);
+            if (beginResult == VNOptionsPresentationBeginResult.ReplayResolved)
+                return ctx.SelectedOption ?? await DialogueRunner.NoOptionSelected;
 
-            if (cancellationToken.IsNextContentRequested || selected == null)
-                return await DialogueRunner.NoOptionSelected;
+            try
+            {
+                if (!PrepareInteractiveItems(ctx))
+                    return await DialogueRunner.NoOptionSelected;
 
-            _flow.CommitSelection(ctx, selected);
+                VNOptionViewModel selected = await AwaitSelectionAsync(ctx);
 
-            return ctx.SelectedOption ?? await DialogueRunner.NoOptionSelected;
+                if (cancellationToken.IsNextContentRequested || selected == null)
+                    return await DialogueRunner.NoOptionSelected;
+
+                _flow.CommitSelection(ctx, selected);
+
+                return ctx.SelectedOption ?? await DialogueRunner.NoOptionSelected;
+            }
+            finally
+            {
+                await CleanupInteractiveAsync(ctx);
+                _flow.EndInteractiveImmediate();
+            }
         }
         finally
         {
-            await CleanupInteractiveAsync(ctx);
-            _flow.EndInteractiveImmediate();
+            drain.TrySetResult();
+
+            if (ReferenceEquals(_optionsDrain, drain))
+                _optionsDrain = null;
         }
     }
 
