@@ -70,14 +70,12 @@ public sealed class SetDepthCommandCharR : ClaimTweenCommandBase
         _stageProvider = stageProvider;
     }
 
-    protected override bool TryResolveTargets(CommandRunScope scope)
+    protected override void ResolveTargets(CommandRunScope scope)
     {
         _rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
 
         _depthYRect = _rigRefs?.GetRect(_spec.depthYTarget);
         _depthScaleRect = _rigRefs?.GetRect(_spec.depthScaleTarget);
-
-        return _depthYRect != null && _depthScaleRect != null;
     }
 
     protected override void ClaimTarget(CommandRunScope scope)

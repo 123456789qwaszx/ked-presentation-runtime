@@ -51,22 +51,18 @@ public sealed class CharVisualFocusCommandCharR : ClaimTweenCommandBase
         _presetDb = presetDb;
     }
 
-    protected override bool TryResolveTargets(CommandRunScope scope)
+    protected override void ResolveTargets(CommandRunScope scope)
     {
         CharacterRigRefs rigRefs =
             CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
 
         _controller = rigRefs?.VisualEffect;
 
-        if (_controller != null)
-            return true;
-
-        Debug.LogWarning(
-            $"[CharVisualFocusCommandCharR] VisualEffect controller is missing. " +
-            $"SetupCharRig가 컨트롤러를 생성했는지, source material 경로가 맞는지 확인하세요. " +
-            $"slotKey='{_spec.slotKey}'.");
-
-        return false;
+        if (_controller == null)
+            Debug.LogWarning(
+                $"[CharVisualFocusCommandCharR] VisualEffect controller is missing. " +
+                $"SetupCharRig가 컨트롤러를 생성했는지, source material 경로가 맞는지 확인하세요. " +
+                $"slotKey='{_spec.slotKey}'.");
     }
 
     protected override void ClaimTarget(CommandRunScope scope)

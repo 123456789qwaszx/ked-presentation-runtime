@@ -50,12 +50,10 @@ public sealed class MoveByCommandCharR : ClaimTweenCommandBase
         _spec = spec;
     }
 
-    protected override bool TryResolveTargets(CommandRunScope scope)
+    protected override void ResolveTargets(CommandRunScope scope)
     {
         _rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
         _rect = _rigRefs?.GetRect(_spec.target);
-
-        return _rect != null;
     }
 
     protected override void ClaimTarget(CommandRunScope scope)

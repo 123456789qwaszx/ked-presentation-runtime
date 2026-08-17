@@ -68,12 +68,10 @@ public sealed class PivotRotateToCommandCharR : ClaimTweenCommandBase
         _spec = spec;
     }
 
-    protected override bool TryResolveTargets(CommandRunScope scope)
+    protected override void ResolveTargets(CommandRunScope scope)
     {
         CharacterRigRefs rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
         _rect = rig?.GetRect(_spec.target);
-
-        return _rect != null;
     }
 
     protected override void ClaimTarget(CommandRunScope scope)

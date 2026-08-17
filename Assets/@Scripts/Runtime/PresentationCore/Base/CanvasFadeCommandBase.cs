@@ -17,15 +17,11 @@ public abstract class CanvasFadeCommandBase : ClaimTweenCommandBase
     /// <summary>페이드할 CanvasGroup이 붙은 rect. 리그 종류별 해석은 파생이 안다.</summary>
     protected abstract RectTransform ResolveFadeRect(CommandRunScope scope);
 
-    protected override bool TryResolveTargets(CommandRunScope scope)
+    protected override void ResolveTargets(CommandRunScope scope)
     {
         RectTransform target = ResolveFadeRect(scope);
 
-        if (target == null)
-            return false;
-
         _canvasGroup = GetOrAddCanvasGroup(target);
-        return true;
     }
 
     protected override void ClaimTarget(CommandRunScope scope)

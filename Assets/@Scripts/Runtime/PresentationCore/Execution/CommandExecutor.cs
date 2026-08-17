@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
 
-public partial class CommandExecutor : MonoBehaviour
+public class CommandExecutor : MonoBehaviour
 {
     private SequencePlayer _sequencePlayer;
     private CompositeCommandFactory _factory;

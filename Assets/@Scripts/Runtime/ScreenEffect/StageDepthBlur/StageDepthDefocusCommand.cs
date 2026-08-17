@@ -81,12 +81,10 @@ public sealed class StageDepthDefocusCommand : ClaimTweenCommandBase
         _runtime = runtime;
     }
 
-    protected override bool TryResolveTargets(CommandRunScope scope)
+    protected override void ResolveTargets(CommandRunScope scope)
     {
         _runtime.ResolveTarget(_spec.stage, _spec.layer, out _target);
         _canvasGroup = _target.OverlayCanvasGroup;
-
-        return _canvasGroup != null;
     }
 
     // Captures edge-hide targets under the content root at claim time.

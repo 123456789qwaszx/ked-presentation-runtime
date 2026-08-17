@@ -56,12 +56,10 @@ public sealed class PlaceCharacterFocusCommandCharR : ClaimTweenCommandBase
         _stageProvider = stageProvider;
     }
 
-    protected override bool TryResolveTargets(CommandRunScope scope)
+    protected override void ResolveTargets(CommandRunScope scope)
     {
         _rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
         _moveRect = _rigRefs?.GetRect(_spec.moveTarget);
-
-        return _moveRect != null;
     }
 
     protected override void ClaimTarget(CommandRunScope scope)

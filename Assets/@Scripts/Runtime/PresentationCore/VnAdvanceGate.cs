@@ -15,7 +15,8 @@ public sealed class AdvanceGate
     private readonly ISeekStateQuery _lineState;
     private readonly ICommandRunScopeProvider _scopeProvider;
 
-    private CommandRunScope CurrentScope => _scopeProvider?.CurrentScope;
+    // null이면 세션 미시작 — 방어가 아니라 도메인 상태다.
+    private CommandRunScope CurrentScope => _scopeProvider.CurrentScope;
 
     private readonly double[] _lastAcceptedAt = new double[AdvanceRequestKindCount];
     private double _cooldownUntilUnscaled = double.NegativeInfinity;

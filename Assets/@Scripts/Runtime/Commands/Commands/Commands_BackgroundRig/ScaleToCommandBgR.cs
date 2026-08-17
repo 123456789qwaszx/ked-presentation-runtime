@@ -43,12 +43,10 @@ public sealed class ScaleToCommandBgR : ClaimTweenCommandBase
         _spec = spec;
     }
 
-    protected override bool TryResolveTargets(CommandRunScope scope)
+    protected override void ResolveTargets(CommandRunScope scope)
     {
         scope.BackgroundRigs.TryGetRig(_spec.rigKey, out BackgroundRigRefs rig);
         _rect = rig?.GetRect(_spec.target);
-
-        return _rect != null;
     }
 
     protected override void ClaimTarget(CommandRunScope scope)

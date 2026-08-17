@@ -34,17 +34,15 @@ public sealed class CommandRunScope
     public bool IsCancelled => _isCancelled;
     public void MarkCancelled() => _isCancelled = true;
 
-    public bool IsSpeedUpMode => _context != null && _context.IsSpeedUpMode;
-    public bool IsRapidSkipMode => _context != null && _context.IsRapidSkipMode;
-    public bool IsAutoMode => _context != null && _context.IsAutoMode;
+    public bool IsSpeedUpMode => _context.IsSpeedUpMode;
+    public bool IsRapidSkipMode => _context.IsRapidSkipMode;
+    public bool IsAutoMode => _context.IsAutoMode;
 
-    public float TimeScale => _context != null ? _context.TimeScale : 1f;
+    public float TimeScale => _context.TimeScale;
     
     public bool CommandIsPlaying { get; set; }
 
-    public bool IsSeekPassThrough =>
-        _linePresentationAdvanceState != null &&
-        _linePresentationAdvanceState.IsSeekingActive;
+    public bool IsSeekPassThrough => _linePresentationAdvanceState.IsSeekingActive;
 
     public bool ShouldCompressCommandExecution =>
         IsRapidSkipMode || IsSeekPassThrough;

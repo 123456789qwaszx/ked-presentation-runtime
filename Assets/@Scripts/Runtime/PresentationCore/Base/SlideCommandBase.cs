@@ -34,11 +34,9 @@ public abstract class SlideCommandBase : ClaimTweenCommandBase
     /// <summary>슬라이드할 rect. 리그 종류별 해석은 파생이 안다.</summary>
     protected abstract RectTransform ResolveSlideRect(CommandRunScope scope);
 
-    protected override bool TryResolveTargets(CommandRunScope scope)
+    protected override void ResolveTargets(CommandRunScope scope)
     {
         _rect = ResolveSlideRect(scope);
-
-        return _rect != null;
     }
 
     protected override void ClaimTarget(CommandRunScope scope)

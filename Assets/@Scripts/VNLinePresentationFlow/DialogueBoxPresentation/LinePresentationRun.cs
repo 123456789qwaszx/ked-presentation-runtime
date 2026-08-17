@@ -7,22 +7,11 @@ public sealed class LinePresentationRun
     private readonly Func<int> _getCurrentGeneration;
     private readonly CancellationToken _visualToken;
 
-    public CancellationToken VisualToken
-    {
-        get { return _visualToken; }
-    }
+    public CancellationToken VisualToken => _visualToken;
 
-    public bool IsValid
-    {
-        get
-        {
-            if (_getCurrentGeneration == null)
-                return false;
-
-            return _generation == _getCurrentGeneration() &&
-                   !_visualToken.IsCancellationRequested;
-        }
-    }
+    public bool IsValid =>
+        _generation == _getCurrentGeneration() &&
+        !_visualToken.IsCancellationRequested;
 
     public LinePresentationRun(
         int generation,
