@@ -9,13 +9,6 @@ using Random = UnityEngine.Random;
 // typewriter only controls TMP's maxVisibleCharacters.
 public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
 {
-    // ---- Yarn Commands ----
-    [YarnCommand("SetSpeedPerSec")]
-    public void SetTypeSpeed(float speed) => unitsPerSecond = Mathf.Max(0f, speed);
-
-    [YarnCommand("SetSpeedMul")]
-    public void SetSpeedMultiplierCommand(float multiplier) => SetSpeedMultiplier(multiplier);
-
     // ---- Inspector / Tuning ----
     [Header("Speed")]
     [Min(0f)] public float unitsPerSecond = 30f;
@@ -63,11 +56,9 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
 
     public void SetTextView(TMP_Text textView) => _typewriterText = textView;
 
-    public void AbortRun() => _runId++;
-
     public void ContentDidDismiss()
     {
-        AbortRun();
+        _runId++;
 
         if (_typewriterText == null)
             return;
@@ -90,9 +81,8 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
         InvokeHandlers(h => h.OnPrepareForLine(line, _typewriterText));
     }
 
-    // IAsyncTypewriter 호환 진입점.
-    // Legacy 경로에서는 기존처럼 cancellationToken을 hurry/reveal-all 신호로만 본다.
-    // hard-cancel 개념이 필요한 VN flow는 아래 2-token overload를 직접 호출한다.
+    // IAsyncTypewriter 호환용.
+    // hard-cancel 개념이 필요한 VN flow는 아래 2-token overload를 직접 호출.
     public YarnTask RunTypewriter(
         Yarn.Markup.MarkupParseResult line,
         CancellationToken cancellationToken)
@@ -103,12 +93,11 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
     }
 
     // hurryToken:
-    //  - Legacy 경로에서는 텍스트를 즉시 reveal-all 하는 신호로 본다.
-    //  - VN line flow는 아래 overload를 사용해 reveal-all 대신 line-local hurry speed latch로 처리한다.
+    //  - line-local hurry speed latch로 처리.
     //
     // hardCancelToken:
     //  - 이 line visual run 자체가 무효화됐다는 신호.
-    //  - reveal-all 하지 않고 즉시 중단한다.
+    //  - reveal-all 하지 않고 즉시 중단.
     public YarnTask RunTypewriter(
         Yarn.Markup.MarkupParseResult line,
         CancellationToken hurryToken,
@@ -123,7 +112,8 @@ public sealed class EllipsisBreathTypewriter : MonoBehaviour, IAsyncTypewriter
     }
 
     // VN presentation flow용 진입점.
-    // hurryToken cancel을 reveal-all/flush가 아니라 "현재 라인 끝까지 가속"으로 해석한다.
+    // hurryToken cancel을 reveal-all/flush가 아니라 "현재 라인 끝까지 가속"으로 해석.
+    // InLineAdvance처리를 편하게 하기 위함.
     public YarnTask RunTypewriter(
         Yarn.Markup.MarkupParseResult line,
         CancellationToken hurryToken,

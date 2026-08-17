@@ -5,7 +5,7 @@ using UnityEngine;
 // Owns option item instances, the interactive selection session,
 // and DialoguePresenterBase adapter work.
 // Transaction ordering lives in VNOptionsPresentationFlow.
-public sealed partial class VNOptionsPresenter
+public sealed class VNOptionsPresenter
     : DialoguePresenterBase
 {
     private VNOptionItem _optionItemPrefab;

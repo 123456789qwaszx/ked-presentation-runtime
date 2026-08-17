@@ -41,14 +41,15 @@ public sealed class VNOptionsPresentationFlow
         if (!ctx.HasAnyAvailableOption)
             return VNOptionsPresentationBeginResult.NoOption;
 
-        if (_advanceState.IsSeekingActive)
-        {
+        if (_advanceState.IsSeekingActive) { 
             bool resolved = _choiceBoundary.TryResolveReplayOption(
                 ctx.ChoiceIndexInNode,
                 ctx.SourceOptions,
                 out DialogueOption replayOption);
 
-            ctx.SelectedOption = resolved ? replayOption : null;
+            ctx.SelectedOption = resolved
+                ? replayOption 
+                : null;
 
             return resolved
                 ? VNOptionsPresentationBeginResult.ReplayResolved

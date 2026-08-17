@@ -7,7 +7,7 @@ public sealed class EpisodePlayer
     private readonly RollbackHistory _nodeRollbackHistory;
     private readonly IVNLineAborter _linePresentationAborter;
     private readonly BacklogRecorder _backlogRecorder;
-    private readonly PresentationShotResponseSystem _presentationResponseRig;
+    private readonly PresentationShotResponseSystem _shotResponseSystem;
     private readonly PresentationScopeSession _presentationScopeSession;
 
     public EpisodePlayer(
@@ -24,7 +24,7 @@ public sealed class EpisodePlayer
         _nodeRollbackHistory = nodeRollbackHistory;
         _linePresentationAborter = linePresentationAborter;
         _backlogRecorder = backlogRecorder;
-        _presentationResponseRig = presentationResponseRig;
+        _shotResponseSystem = presentationResponseRig;
         _presentationScopeSession = presentationScopeSession;
     }
 
@@ -49,7 +49,7 @@ public sealed class EpisodePlayer
         _nodeRollbackHistory.ClearRollbackPoints();
         _backlogRecorder.ClearBacklog();
 
-        _presentationResponseRig.Clear();
+        _shotResponseSystem.Clear();
         _presentationScopeSession.End();
     }
 }
