@@ -54,9 +54,6 @@ public sealed class CharacterRigBuilder
             $"rigRoot='{rigRoot.name}', rolePrefix='{rolePrefix}'.",
             rigRoot);
 
-        RectTransform preservedExtensionsRoot =
-            DetachPreservedExtensionsRoot(rigRoot, rolePrefix);
-
         for (int i = rigRoot.childCount - 1; i >= 0; i--)
         {
             Transform child = rigRoot.GetChild(i);
@@ -65,14 +62,6 @@ public sealed class CharacterRigBuilder
         }
 
         EnsureGraph(rigRoot, rolePrefix);
-
-        if (preservedExtensionsRoot != null)
-        {
-            ReattachPreservedExtensionsRoot(
-                rigRoot,
-                rolePrefix,
-                preservedExtensionsRoot);
-        }
 
         map = CollectRefMap(rigRoot, rolePrefix);
     }
@@ -115,62 +104,6 @@ public sealed class CharacterRigBuilder
         return true;
     }
     
-    private RectTransform DetachPreservedExtensionsRoot(RectTransform rigRoot, string rolePrefix)
-    {
-        string extensionRootName = WithRole(rolePrefix, nameof(CharacterRigSchema.Refs.Character_ExtensionsRoot));
-
-        RectTransform extensionsRoot = FindByName(rigRoot, extensionRootName) as RectTransform;
-
-        if (extensionsRoot == null)
-            return null;
-
-        extensionsRoot.SetParent(null, false);
-
-        return extensionsRoot;
-    }
-
-    private void ReattachPreservedExtensionsRoot(
-        RectTransform rigRoot,
-        string rolePrefix,
-        RectTransform preservedExtensionsRoot)
-    {
-        if (preservedExtensionsRoot == null)
-            return;
-
-        string extensionRootName = WithRole(rolePrefix, nameof(CharacterRigSchema.Refs.Character_ExtensionsRoot));
-        string extensionParentName = WithRole(rolePrefix, nameof(CharacterRigSchema.Refs.CharacterPortrait_ActingScale_Y));
-
-        RectTransform newExtensionsRoot = FindByName(rigRoot, extensionRootName) as RectTransform;
-        RectTransform extensionParent = FindByName(rigRoot, extensionParentName) as RectTransform;
-
-        if (extensionParent == null)
-        {
-            Debug.LogWarning(
-                $"[CharacterRigBuilder] Failed to find extension parent '{extensionParentName}'. " +
-                $"Reattaching preserved extensions root under rigRoot. " +
-                $"rigRoot='{rigRoot.name}'.", rigRoot);
-
-            extensionParent = rigRoot;
-        }
-
-        int siblingIndex = -1;
-
-        if (newExtensionsRoot != null && newExtensionsRoot != preservedExtensionsRoot)
-        {
-            siblingIndex = newExtensionsRoot.GetSiblingIndex();
-
-            newExtensionsRoot.SetParent(null, false);
-            Object.Destroy(newExtensionsRoot.gameObject);
-        }
-
-        preservedExtensionsRoot.name = extensionRootName;
-        preservedExtensionsRoot.SetParent(extensionParent, false);
-
-        if (siblingIndex >= 0)
-            preservedExtensionsRoot.SetSiblingIndex(siblingIndex);
-
-        StretchFull(preservedExtensionsRoot);
-    }
     #endregion
 
     #region Auto Create Graph
@@ -296,64 +229,6 @@ public sealed class CharacterRigBuilder
         // Portrait sprite
         refs.CharacterPortraitSprite_Root = GetRt(CharacterRigSchema.Refs.CharacterPortraitSprite_Root);
         refs.CharacterPortraitSprite_Image = GetImg(CharacterRigSchema.Refs.CharacterPortraitSprite_Image);
-
-        // Portrait sprite overlay
-        refs.CharacterPortraitSpriteOverlay_Root = GetRt(CharacterRigSchema.Refs.CharacterPortraitSpriteOverlay_Root);
-        refs.CharacterPortraitSpriteOverlay_Image = GetImg(CharacterRigSchema.Refs.CharacterPortraitSpriteOverlay_Image);
-
-        // Portrait extension / preserved systems
-        refs.Character_ExtensionsRoot = GetRt(CharacterRigSchema.Refs.Character_ExtensionsRoot);
-
-        // Emoji00
-        refs.EmojiSlot00_Root = GetRt(CharacterRigSchema.Refs.EmojiSlot00_Root);
-        refs.EmojiSlot00_VisualOffset = GetRt(CharacterRigSchema.Refs.EmojiSlot00_VisualOffset);
-
-        // Emoji00 sprite motion / effect axis
-        refs.EmojiSlot00_Track = GetRt(CharacterRigSchema.Refs.EmojiSlot00_Track);
-        refs.EmojiSlot00_BaseRotation = GetRt(CharacterRigSchema.Refs.EmojiSlot00_BaseRotation);
-        refs.EmojiSlot00_Track_Move = GetRt(CharacterRigSchema.Refs.EmojiSlot00_Track_Move);
-        refs.EmojiSlot00_Track_Move_X = GetRt(CharacterRigSchema.Refs.EmojiSlot00_Track_Move_X);
-        refs.EmojiSlot00_Track_Move_Y = GetRt(CharacterRigSchema.Refs.EmojiSlot00_Track_Move_Y);
-        refs.EmojiSlot00_Effect = GetRt(CharacterRigSchema.Refs.EmojiSlot00_Effect);
-        refs.EmojiSlot00_SwayPivot = GetRt(CharacterRigSchema.Refs.EmojiSlot00_SwayPivot);
-        refs.EmojiSlot00_Rotation = GetRt(CharacterRigSchema.Refs.EmojiSlot00_Rotation);
-        refs.EmojiSlot00_Size = GetRt(CharacterRigSchema.Refs.EmojiSlot00_Size);
-        refs.EmojiSlot00_Scale = GetRt(CharacterRigSchema.Refs.EmojiSlot00_Scale);
-        refs.EmojiSlot00_Image = GetImg(CharacterRigSchema.Refs.EmojiSlot00_Image);
-
-        // Emoji01
-        refs.EmojiSlot01_Root = GetRt(CharacterRigSchema.Refs.EmojiSlot01_Root);
-        refs.EmojiSlot01_VisualOffset = GetRt(CharacterRigSchema.Refs.EmojiSlot01_VisualOffset);
-
-        // Emoji01 sprite motion / effect axis
-        refs.EmojiSlot01_Track = GetRt(CharacterRigSchema.Refs.EmojiSlot01_Track);
-        refs.EmojiSlot01_BaseRotation = GetRt(CharacterRigSchema.Refs.EmojiSlot01_BaseRotation);
-        refs.EmojiSlot01_Track_Move = GetRt(CharacterRigSchema.Refs.EmojiSlot01_Track_Move);
-        refs.EmojiSlot01_Track_Move_X = GetRt(CharacterRigSchema.Refs.EmojiSlot01_Track_Move_X);
-        refs.EmojiSlot01_Track_Move_Y = GetRt(CharacterRigSchema.Refs.EmojiSlot01_Track_Move_Y);
-        refs.EmojiSlot01_Effect = GetRt(CharacterRigSchema.Refs.EmojiSlot01_Effect);
-        refs.EmojiSlot01_SwayPivot = GetRt(CharacterRigSchema.Refs.EmojiSlot01_SwayPivot);
-        refs.EmojiSlot01_Rotation = GetRt(CharacterRigSchema.Refs.EmojiSlot01_Rotation);
-        refs.EmojiSlot01_Size = GetRt(CharacterRigSchema.Refs.EmojiSlot01_Size);
-        refs.EmojiSlot01_Scale = GetRt(CharacterRigSchema.Refs.EmojiSlot01_Scale);
-        refs.EmojiSlot01_Image = GetImg(CharacterRigSchema.Refs.EmojiSlot01_Image);
-
-        // Emoji02
-        refs.EmojiSlot02_Root = GetRt(CharacterRigSchema.Refs.EmojiSlot02_Root);
-        refs.EmojiSlot02_VisualOffset = GetRt(CharacterRigSchema.Refs.EmojiSlot02_VisualOffset);
-
-        // Emoji02 sprite motion / effect axis
-        refs.EmojiSlot02_Track = GetRt(CharacterRigSchema.Refs.EmojiSlot02_Track);
-        refs.EmojiSlot02_BaseRotation = GetRt(CharacterRigSchema.Refs.EmojiSlot02_BaseRotation);
-        refs.EmojiSlot02_Track_Move = GetRt(CharacterRigSchema.Refs.EmojiSlot02_Track_Move);
-        refs.EmojiSlot02_Track_Move_X = GetRt(CharacterRigSchema.Refs.EmojiSlot02_Track_Move_X);
-        refs.EmojiSlot02_Track_Move_Y = GetRt(CharacterRigSchema.Refs.EmojiSlot02_Track_Move_Y);
-        refs.EmojiSlot02_Effect = GetRt(CharacterRigSchema.Refs.EmojiSlot02_Effect);
-        refs.EmojiSlot02_SwayPivot = GetRt(CharacterRigSchema.Refs.EmojiSlot02_SwayPivot);
-        refs.EmojiSlot02_Rotation = GetRt(CharacterRigSchema.Refs.EmojiSlot02_Rotation);
-        refs.EmojiSlot02_Size = GetRt(CharacterRigSchema.Refs.EmojiSlot02_Size);
-        refs.EmojiSlot02_Scale = GetRt(CharacterRigSchema.Refs.EmojiSlot02_Scale);
-        refs.EmojiSlot02_Image = GetImg(CharacterRigSchema.Refs.EmojiSlot02_Image);
 
         return refs;
     }

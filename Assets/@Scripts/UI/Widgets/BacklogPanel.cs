@@ -140,9 +140,4 @@ public sealed class BacklogPanel : UIPanel<BacklogPanel.Refs>
 
         return true;
     }
-    
-    protected override void OnDestroy()
-    {
-        base.OnDestroy();
-    }
 }

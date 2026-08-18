@@ -293,18 +293,11 @@ public sealed partial class YarnCommandBridge
             "fade_out", EnqueueFadeOutDslSpec);
 
         runner.AddCommandHandler<string, string, string, string>(
-            "face_crossfade", EnqueueSetPortraitCrossfadeDslSpec);
-
-        runner.AddCommandHandler<string, string, string>(
-            "face_swap", EnqueueSetEmotionPortraitWipeDslSpec);
-
-        runner.AddCommandHandler<string, string, string, string>(
             "slide_in", EnqueueSlideInDslSpec);
 
         runner.AddCommandHandler<string, string, string, string>(
             "slide_out", EnqueueSlideOutDslSpec);
-
-
+        
         runner.AddCommandHandler<string, string, string, string>(
             "char_move_to", EnqueueMoveByUnitCharSpec);
         

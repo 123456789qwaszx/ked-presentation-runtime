@@ -22,9 +22,6 @@ public sealed partial class VnScreenBindings
         });
     }
 
-    // PresentationUIRoot는 아직 QuickMenu · Expand · Save · Load · OpenSkipPanel 이벤트도 내보내지만
-    // 그 기능들(세이브로드 · 에피소드 스킵)이 없어져서 붙일 핸들러가 없다.
-    // 버튼은 프리팹에 남아 있고, 눌러도 구독자가 없어 아무 일도 일어나지 않는다.
     private void ApplyBindings(PresentationUIRoot root)
     {
         AddBinding(root,

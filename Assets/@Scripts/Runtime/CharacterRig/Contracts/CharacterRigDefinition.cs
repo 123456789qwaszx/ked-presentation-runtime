@@ -35,64 +35,6 @@ public static class CharacterRigSchema
         // Portrait sprite
         CharacterPortraitSprite_Root,
         CharacterPortraitSprite_Image,
-
-        // Portrait sprite overlay
-        CharacterPortraitSpriteOverlay_Root,
-        CharacterPortraitSpriteOverlay_Image,
-
-        // Portrait extension / preserved systems
-        Character_ExtensionsRoot,
-
-        // Emoji00
-        EmojiSlot00_Root,
-        EmojiSlot00_VisualOffset,
-
-        // Emoji00 sprite motion / effect axis
-        EmojiSlot00_Track,
-        EmojiSlot00_BaseRotation,
-        EmojiSlot00_Track_Move,
-        EmojiSlot00_Track_Move_X,
-        EmojiSlot00_Track_Move_Y,
-        EmojiSlot00_Effect,
-        EmojiSlot00_SwayPivot,
-        EmojiSlot00_Rotation,
-        EmojiSlot00_Size,
-        EmojiSlot00_Scale,
-        EmojiSlot00_Image,
-
-        // Emoji01
-        EmojiSlot01_Root,
-        EmojiSlot01_VisualOffset,
-
-        // Emoji01 sprite motion / effect axis
-        EmojiSlot01_Track,
-        EmojiSlot01_BaseRotation,
-        EmojiSlot01_Track_Move,
-        EmojiSlot01_Track_Move_X,
-        EmojiSlot01_Track_Move_Y,
-        EmojiSlot01_Effect,
-        EmojiSlot01_SwayPivot,
-        EmojiSlot01_Rotation,
-        EmojiSlot01_Size,
-        EmojiSlot01_Scale,
-        EmojiSlot01_Image,
-
-        // Emoji02
-        EmojiSlot02_Root,
-        EmojiSlot02_VisualOffset,
-
-        // Emoji02 sprite motion / effect axis
-        EmojiSlot02_Track,
-        EmojiSlot02_BaseRotation,
-        EmojiSlot02_Track_Move,
-        EmojiSlot02_Track_Move_X,
-        EmojiSlot02_Track_Move_Y,
-        EmojiSlot02_Effect,
-        EmojiSlot02_SwayPivot,
-        EmojiSlot02_Rotation,
-        EmojiSlot02_Size,
-        EmojiSlot02_Scale,
-        EmojiSlot02_Image,
     }
 
     public sealed class NodeDef
@@ -139,64 +81,6 @@ public static class CharacterRigSchema
         // Portrait sprite
         new() { Id = Refs.CharacterPortraitSprite_Root, Parent = Refs.CharacterPortrait_ActingScale_Y, NeedsCanvasGroup = true, InitialCanvasGroupAlpha = 0f },
         new() { Id = Refs.CharacterPortraitSprite_Image, Parent = Refs.CharacterPortraitSprite_Root, NeedsImage = true },
-
-        // Portrait sprite overlay
-        new() { Id = Refs.CharacterPortraitSpriteOverlay_Root, Parent = Refs.CharacterPortrait_ActingScale_Y, NeedsCanvasGroup = true, InitialCanvasGroupAlpha = 0f },
-        new() { Id = Refs.CharacterPortraitSpriteOverlay_Image, Parent = Refs.CharacterPortraitSpriteOverlay_Root, NeedsImage = true },
-
-        // Portrait extension / preserved systems
-        new() { Id = Refs.Character_ExtensionsRoot, Parent = Refs.CharacterPortrait_ActingScale_Y },
-
-        // Emoji00
-        new() { Id = Refs.EmojiSlot00_Root, Parent = Refs.CharacterPortrait_Shake, NeedsCanvasGroup = true, InitialCanvasGroupAlpha = 0f },
-        new() { Id = Refs.EmojiSlot00_VisualOffset, Parent = Refs.EmojiSlot00_Root , NeedsBottomPivot = true},
-
-        // Emoji00 sprite motion / effect axis
-        new() { Id = Refs.EmojiSlot00_Track, Parent = Refs.EmojiSlot00_VisualOffset },
-        new() { Id = Refs.EmojiSlot00_BaseRotation, Parent = Refs.EmojiSlot00_Track },
-        new() { Id = Refs.EmojiSlot00_Track_Move, Parent = Refs.EmojiSlot00_BaseRotation },
-        new() { Id = Refs.EmojiSlot00_Track_Move_X, Parent = Refs.EmojiSlot00_Track_Move },
-        new() { Id = Refs.EmojiSlot00_Track_Move_Y, Parent = Refs.EmojiSlot00_Track_Move_X },
-        new() { Id = Refs.EmojiSlot00_Effect, Parent = Refs.EmojiSlot00_Track_Move_Y },
-        new() { Id = Refs.EmojiSlot00_SwayPivot, Parent = Refs.EmojiSlot00_Effect, NeedsBottomPivot = true },
-        new() { Id = Refs.EmojiSlot00_Rotation, Parent = Refs.EmojiSlot00_SwayPivot },
-        new() { Id = Refs.EmojiSlot00_Size, Parent = Refs.EmojiSlot00_Rotation },
-        new() { Id = Refs.EmojiSlot00_Scale, Parent = Refs.EmojiSlot00_Size },
-        new() { Id = Refs.EmojiSlot00_Image, Parent = Refs.EmojiSlot00_Scale, NeedsImage = true },
-
-        // Emoji01
-        new() { Id = Refs.EmojiSlot01_Root, Parent = Refs.CharacterPortrait_Shake, NeedsCanvasGroup = true, InitialCanvasGroupAlpha = 0f },
-        new() { Id = Refs.EmojiSlot01_VisualOffset, Parent = Refs.EmojiSlot01_Root, NeedsBottomPivot = true },
-
-        // Emoji01 sprite motion / effect axis
-        new() { Id = Refs.EmojiSlot01_Track, Parent = Refs.EmojiSlot01_VisualOffset },
-        new() { Id = Refs.EmojiSlot01_BaseRotation, Parent = Refs.EmojiSlot01_Track },
-        new() { Id = Refs.EmojiSlot01_Track_Move, Parent = Refs.EmojiSlot01_BaseRotation },
-        new() { Id = Refs.EmojiSlot01_Track_Move_X, Parent = Refs.EmojiSlot01_Track_Move },
-        new() { Id = Refs.EmojiSlot01_Track_Move_Y, Parent = Refs.EmojiSlot01_Track_Move_X },
-        new() { Id = Refs.EmojiSlot01_Effect, Parent = Refs.EmojiSlot01_Track_Move_Y },
-        new() { Id = Refs.EmojiSlot01_SwayPivot, Parent = Refs.EmojiSlot01_Effect, NeedsBottomPivot = true },
-        new() { Id = Refs.EmojiSlot01_Rotation, Parent = Refs.EmojiSlot01_SwayPivot },
-        new() { Id = Refs.EmojiSlot01_Size, Parent = Refs.EmojiSlot01_Rotation },
-        new() { Id = Refs.EmojiSlot01_Scale, Parent = Refs.EmojiSlot01_Size },
-        new() { Id = Refs.EmojiSlot01_Image, Parent = Refs.EmojiSlot01_Scale, NeedsImage = true },
-
-        // Emoji02
-        new() { Id = Refs.EmojiSlot02_Root, Parent = Refs.CharacterPortrait_Shake, NeedsCanvasGroup = true, InitialCanvasGroupAlpha = 0f },
-        new() { Id = Refs.EmojiSlot02_VisualOffset, Parent = Refs.EmojiSlot02_Root, NeedsBottomPivot = true },
-
-        // Emoji02 sprite motion / effect axis
-        new() { Id = Refs.EmojiSlot02_Track, Parent = Refs.EmojiSlot02_VisualOffset },
-        new() { Id = Refs.EmojiSlot02_BaseRotation, Parent = Refs.EmojiSlot02_Track },
-        new() { Id = Refs.EmojiSlot02_Track_Move, Parent = Refs.EmojiSlot02_BaseRotation },
-        new() { Id = Refs.EmojiSlot02_Track_Move_X, Parent = Refs.EmojiSlot02_Track_Move },
-        new() { Id = Refs.EmojiSlot02_Track_Move_Y, Parent = Refs.EmojiSlot02_Track_Move_X },
-        new() { Id = Refs.EmojiSlot02_Effect, Parent = Refs.EmojiSlot02_Track_Move_Y },
-        new() { Id = Refs.EmojiSlot02_SwayPivot, Parent = Refs.EmojiSlot02_Effect, NeedsBottomPivot = true },
-        new() { Id = Refs.EmojiSlot02_Rotation, Parent = Refs.EmojiSlot02_SwayPivot },
-        new() { Id = Refs.EmojiSlot02_Size, Parent = Refs.EmojiSlot02_Rotation },
-        new() { Id = Refs.EmojiSlot02_Scale, Parent = Refs.EmojiSlot02_Size },
-        new() { Id = Refs.EmojiSlot02_Image, Parent = Refs.EmojiSlot02_Scale, NeedsImage = true },
     };
 }
 
@@ -234,64 +118,6 @@ public enum CharacterRigTarget
     // Portrait sprite
     CharacterPortraitSprite_Root,
     CharacterPortraitSprite_Image,
-
-    // Portrait sprite overlay
-    CharacterPortraitSpriteOverlay_Root,
-    CharacterPortraitSpriteOverlay_Image,
-
-    // Portrait extension / preserved systems
-    Character_ExtensionsRoot,
-
-    // Emoji00
-    EmojiSlot00_Root,
-    EmojiSlot00_VisualOffset,
-
-    // Emoji00 sprite motion / effect axis
-    EmojiSlot00_Track,
-    EmojiSlot00_BaseRotation,
-    EmojiSlot00_Track_Move,
-    EmojiSlot00_Track_Move_X,
-    EmojiSlot00_Track_Move_Y,
-    EmojiSlot00_Effect,
-    EmojiSlot00_SwayPivot,
-    EmojiSlot00_Rotation,
-    EmojiSlot00_Size,
-    EmojiSlot00_Scale,
-    EmojiSlot00_Image,
-
-    // Emoji01
-    EmojiSlot01_Root,
-    EmojiSlot01_VisualOffset,
-
-    // Emoji01 sprite motion / effect axis
-    EmojiSlot01_Track,
-    EmojiSlot01_BaseRotation,
-    EmojiSlot01_Track_Move,
-    EmojiSlot01_Track_Move_X,
-    EmojiSlot01_Track_Move_Y,
-    EmojiSlot01_Effect,
-    EmojiSlot01_SwayPivot,
-    EmojiSlot01_Rotation,
-    EmojiSlot01_Size,
-    EmojiSlot01_Scale,
-    EmojiSlot01_Image,
-
-    // Emoji02
-    EmojiSlot02_Root,
-    EmojiSlot02_VisualOffset,
-
-    // Emoji02 sprite motion / effect axis
-    EmojiSlot02_Track,
-    EmojiSlot02_BaseRotation,
-    EmojiSlot02_Track_Move,
-    EmojiSlot02_Track_Move_X,
-    EmojiSlot02_Track_Move_Y,
-    EmojiSlot02_Effect,
-    EmojiSlot02_SwayPivot,
-    EmojiSlot02_Rotation,
-    EmojiSlot02_Size,
-    EmojiSlot02_Scale,
-    EmojiSlot02_Image,
 }
 
 public sealed class CharacterRigRefs
@@ -335,64 +161,6 @@ public sealed class CharacterRigRefs
     // Portrait sprite
     public RectTransform CharacterPortraitSprite_Root;
     public Image         CharacterPortraitSprite_Image;
-
-    // Portrait sprite overlay
-    public RectTransform CharacterPortraitSpriteOverlay_Root;
-    public Image         CharacterPortraitSpriteOverlay_Image;
-
-    // Portrait extension / preserved systems
-    public RectTransform Character_ExtensionsRoot;
-
-    // Emoji00
-    public RectTransform EmojiSlot00_Root;
-    public RectTransform EmojiSlot00_VisualOffset;
-
-    // Emoji00 sprite motion / effect axis
-    public RectTransform EmojiSlot00_Track;
-    public RectTransform EmojiSlot00_BaseRotation;
-    public RectTransform EmojiSlot00_Track_Move;
-    public RectTransform EmojiSlot00_Track_Move_X;
-    public RectTransform EmojiSlot00_Track_Move_Y;
-    public RectTransform EmojiSlot00_Effect;
-    public RectTransform EmojiSlot00_SwayPivot;
-    public RectTransform EmojiSlot00_Rotation;
-    public RectTransform EmojiSlot00_Size;
-    public RectTransform EmojiSlot00_Scale;
-    public Image         EmojiSlot00_Image;
-
-    // Emoji01
-    public RectTransform EmojiSlot01_Root;
-    public RectTransform EmojiSlot01_VisualOffset;
-
-    // Emoji01 sprite motion / effect axis
-    public RectTransform EmojiSlot01_Track;
-    public RectTransform EmojiSlot01_BaseRotation;
-    public RectTransform EmojiSlot01_Track_Move;
-    public RectTransform EmojiSlot01_Track_Move_X;
-    public RectTransform EmojiSlot01_Track_Move_Y;
-    public RectTransform EmojiSlot01_Effect;
-    public RectTransform EmojiSlot01_SwayPivot;
-    public RectTransform EmojiSlot01_Rotation;
-    public RectTransform EmojiSlot01_Size;
-    public RectTransform EmojiSlot01_Scale;
-    public Image         EmojiSlot01_Image;
-
-    // Emoji02
-    public RectTransform EmojiSlot02_Root;
-    public RectTransform EmojiSlot02_VisualOffset;
-
-    // Emoji02 sprite motion / effect axis
-    public RectTransform EmojiSlot02_Track;
-    public RectTransform EmojiSlot02_BaseRotation;
-    public RectTransform EmojiSlot02_Track_Move;
-    public RectTransform EmojiSlot02_Track_Move_X;
-    public RectTransform EmojiSlot02_Track_Move_Y;
-    public RectTransform EmojiSlot02_Effect;
-    public RectTransform EmojiSlot02_SwayPivot;
-    public RectTransform EmojiSlot02_Rotation;
-    public RectTransform EmojiSlot02_Size;
-    public RectTransform EmojiSlot02_Scale;
-    public Image         EmojiSlot02_Image;
 }
 
 public static class CharacterRigRefsExtensions
@@ -447,64 +215,6 @@ public static class CharacterRigRefsExtensions
             // Portrait sprite
             CharacterRigTarget.CharacterPortraitSprite_Root => refs.CharacterPortraitSprite_Root,
             CharacterRigTarget.CharacterPortraitSprite_Image => refs.CharacterPortraitSprite_Image,
-
-            // Portrait sprite overlay
-            CharacterRigTarget.CharacterPortraitSpriteOverlay_Root => refs.CharacterPortraitSpriteOverlay_Root,
-            CharacterRigTarget.CharacterPortraitSpriteOverlay_Image => refs.CharacterPortraitSpriteOverlay_Image,
-
-            // Portrait extension / preserved systems
-            CharacterRigTarget.Character_ExtensionsRoot => refs.Character_ExtensionsRoot,
-
-            // Emoji00
-            CharacterRigTarget.EmojiSlot00_Root => refs.EmojiSlot00_Root,
-            CharacterRigTarget.EmojiSlot00_VisualOffset => refs.EmojiSlot00_VisualOffset,
-
-            // Emoji00 sprite motion / effect axis
-            CharacterRigTarget.EmojiSlot00_Track => refs.EmojiSlot00_Track,
-            CharacterRigTarget.EmojiSlot00_BaseRotation => refs.EmojiSlot00_BaseRotation,
-            CharacterRigTarget.EmojiSlot00_Track_Move => refs.EmojiSlot00_Track_Move,
-            CharacterRigTarget.EmojiSlot00_Track_Move_X => refs.EmojiSlot00_Track_Move_X,
-            CharacterRigTarget.EmojiSlot00_Track_Move_Y => refs.EmojiSlot00_Track_Move_Y,
-            CharacterRigTarget.EmojiSlot00_Effect => refs.EmojiSlot00_Effect,
-            CharacterRigTarget.EmojiSlot00_SwayPivot => refs.EmojiSlot00_SwayPivot,
-            CharacterRigTarget.EmojiSlot00_Rotation => refs.EmojiSlot00_Rotation,
-            CharacterRigTarget.EmojiSlot00_Size => refs.EmojiSlot00_Size,
-            CharacterRigTarget.EmojiSlot00_Scale => refs.EmojiSlot00_Scale,
-            CharacterRigTarget.EmojiSlot00_Image => refs.EmojiSlot00_Image,
-
-            // Emoji01
-            CharacterRigTarget.EmojiSlot01_Root => refs.EmojiSlot01_Root,
-            CharacterRigTarget.EmojiSlot01_VisualOffset => refs.EmojiSlot01_VisualOffset,
-
-            // Emoji01 sprite motion / effect axis
-            CharacterRigTarget.EmojiSlot01_Track => refs.EmojiSlot01_Track,
-            CharacterRigTarget.EmojiSlot01_BaseRotation => refs.EmojiSlot01_BaseRotation,
-            CharacterRigTarget.EmojiSlot01_Track_Move => refs.EmojiSlot01_Track_Move,
-            CharacterRigTarget.EmojiSlot01_Track_Move_X => refs.EmojiSlot01_Track_Move_X,
-            CharacterRigTarget.EmojiSlot01_Track_Move_Y => refs.EmojiSlot01_Track_Move_Y,
-            CharacterRigTarget.EmojiSlot01_Effect => refs.EmojiSlot01_Effect,
-            CharacterRigTarget.EmojiSlot01_SwayPivot => refs.EmojiSlot01_SwayPivot,
-            CharacterRigTarget.EmojiSlot01_Rotation => refs.EmojiSlot01_Rotation,
-            CharacterRigTarget.EmojiSlot01_Size => refs.EmojiSlot01_Size,
-            CharacterRigTarget.EmojiSlot01_Scale => refs.EmojiSlot01_Scale,
-            CharacterRigTarget.EmojiSlot01_Image => refs.EmojiSlot01_Image,
-
-            // Emoji02
-            CharacterRigTarget.EmojiSlot02_Root => refs.EmojiSlot02_Root,
-            CharacterRigTarget.EmojiSlot02_VisualOffset => refs.EmojiSlot02_VisualOffset,
-
-            // Emoji02 sprite motion / effect axis
-            CharacterRigTarget.EmojiSlot02_Track => refs.EmojiSlot02_Track,
-            CharacterRigTarget.EmojiSlot02_BaseRotation => refs.EmojiSlot02_BaseRotation,
-            CharacterRigTarget.EmojiSlot02_Track_Move => refs.EmojiSlot02_Track_Move,
-            CharacterRigTarget.EmojiSlot02_Track_Move_X => refs.EmojiSlot02_Track_Move_X,
-            CharacterRigTarget.EmojiSlot02_Track_Move_Y => refs.EmojiSlot02_Track_Move_Y,
-            CharacterRigTarget.EmojiSlot02_Effect => refs.EmojiSlot02_Effect,
-            CharacterRigTarget.EmojiSlot02_SwayPivot => refs.EmojiSlot02_SwayPivot,
-            CharacterRigTarget.EmojiSlot02_Rotation => refs.EmojiSlot02_Rotation,
-            CharacterRigTarget.EmojiSlot02_Size => refs.EmojiSlot02_Size,
-            CharacterRigTarget.EmojiSlot02_Scale => refs.EmojiSlot02_Scale,
-            CharacterRigTarget.EmojiSlot02_Image => refs.EmojiSlot02_Image,
 
             _ => null
         };

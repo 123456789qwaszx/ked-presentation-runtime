@@ -46,7 +46,6 @@ public sealed class CharacterRigVisualEffectController : IDisposable
     private static readonly int StageBlurEdgeSoftnessId = Shader.PropertyToID("_StageBlurEdgeSoftness");
     
     private readonly Image _portraitImage;
-    private readonly Image _portraitOverlayImage;
     
     private Material _runtimeMaterial;
     
@@ -70,23 +69,19 @@ public sealed class CharacterRigVisualEffectController : IDisposable
 
     public CharacterRigVisualEffectController(
         Image portraitImage,
-        Image portraitOverlayImage,
         Material sourceMaterial)
     {
         _portraitImage = portraitImage;
-        _portraitOverlayImage = portraitOverlayImage;
 
-        if (portraitImage == null && portraitOverlayImage == null)
+        if (portraitImage == null)
         {
-            Debug.LogWarning("[CharacterRigVisualEffectController] portraitImage and portraitOverlayImage are null.");
+            Debug.LogWarning("[CharacterRigVisualEffectController] portraitImage is null.");
             return;
         }
 
         if (sourceMaterial == null)
         {
-            Object context = portraitImage != null
-                ? portraitImage
-                : portraitOverlayImage;
+            Object context = portraitImage;
 
             Debug.LogWarning(
                 "[CharacterRigVisualEffectController] sourceMaterial is null. " +
@@ -95,18 +90,13 @@ public sealed class CharacterRigVisualEffectController : IDisposable
             return;
         }
 
-        Image runtimeNameSource = portraitImage != null
-            ? portraitImage
-            : portraitOverlayImage;
+        Image runtimeNameSource = portraitImage;
 
         _runtimeMaterial = Object.Instantiate(sourceMaterial);
         _runtimeMaterial.name = $"{sourceMaterial.name}_Runtime_{runtimeNameSource.name}";
 
         if (portraitImage != null)
             portraitImage.material = _runtimeMaterial;
-
-        if (portraitOverlayImage != null)
-            portraitOverlayImage.material = _runtimeMaterial;
 
         _dimAmount = 0f;
         _outerRimAmount = 0f;
@@ -201,9 +191,6 @@ public sealed class CharacterRigVisualEffectController : IDisposable
     {
         if (_portraitImage != null)
             _portraitImage.SetMaterialDirty();
-
-        if (_portraitOverlayImage != null)
-            _portraitOverlayImage.SetMaterialDirty();
     }
     
     private void ApplyDynamicValuesTo(Material material)
@@ -242,7 +229,6 @@ public sealed class CharacterRigVisualEffectController : IDisposable
     private void PushMaterialToGraphics()
     {
         PushMaterialToGraphic(_portraitImage);
-        PushMaterialToGraphic(_portraitOverlayImage);
     }
 
     private void PushMaterialToGraphic(Image image)

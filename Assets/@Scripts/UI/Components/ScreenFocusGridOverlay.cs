@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.Serialization;
 
 public sealed class ScreenFocusGridOverlay : MonoBehaviour
 {

@@ -47,11 +47,6 @@ public sealed class UIStageDepthLayerSourceCollector
                 continue;
 
             AddAllowedImage(refs.CharacterPortraitSprite_Image);
-            AddAllowedImage(refs.CharacterPortraitSpriteOverlay_Image);
-
-            AddAllowedImage(refs.EmojiSlot00_Image);
-            AddAllowedImage(refs.EmojiSlot01_Image);
-            AddAllowedImage(refs.EmojiSlot02_Image);
         }
 
         // content 하위를 계층 순서로 훑어, 집합에 든 Image만 그리기 순서대로 수집한다.
