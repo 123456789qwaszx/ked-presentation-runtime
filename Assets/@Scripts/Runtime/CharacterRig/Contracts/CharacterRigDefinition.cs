@@ -127,7 +127,7 @@ public sealed class CharacterRigRefs
 
     // Visual effect: CharacterPortraitSprite_Image에 바인딩된 runtime material 소유자.
     // SetupCharRigCommand가 생성, CharacterRigRegistry.DestroyRig가 Dispose.
-    public CharacterRigVisualEffectController VisualEffect;
+    public RigVisualEffectController VisualEffect;
 
     public CharacterPlacementTargetLedger PlacementTargets { get; } = new();
 

@@ -159,6 +159,10 @@ public sealed class BackgroundRigRefs
 
     // Object slots
     public RectTransform Background_ObjectSlotRoot;
+
+    // 런타임 머티리얼 소유자. SetupBackgroundRigCommand가 만들고
+    // BackgroundRigRegistry.DestroyRig가 Dispose한다.
+    public RigVisualEffectController VisualEffect;
 }
 
 public static class BackgroundRigRefsExtensions

@@ -38,11 +38,11 @@ public sealed class StageDepthDefocusCommand : ClaimTweenCommandBase
 {
     private struct EdgeHideBinding
     {
-        public CharacterRigVisualEffectController Controller;
+        public RigVisualEffectController Controller;
         public float FromValue;
 
         public EdgeHideBinding(
-            CharacterRigVisualEffectController controller,
+            RigVisualEffectController controller,
             float fromValue)
         {
             Controller = controller;

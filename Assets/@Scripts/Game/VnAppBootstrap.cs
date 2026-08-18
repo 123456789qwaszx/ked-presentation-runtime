@@ -215,6 +215,7 @@ public class VnAppBootstrap : MonoBehaviour
             screenVignettePresetDbso,
             uiStageDepthLayerBlurRuntime,
             stageMaskMotionPresetDbSo,
+            _presentationUIRoot,
             _presentationUIRoot);
         
         CompositeCommandFactory factory = new(

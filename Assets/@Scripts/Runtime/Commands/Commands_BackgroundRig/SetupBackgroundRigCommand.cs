@@ -36,6 +36,9 @@ public sealed class SetupBackgroundRigCommandSpec : CommandSpecBase
 
 public sealed class SetupBackgroundRigCommand : CommandBase
 {
+    // 캐릭터와 같은 머티리얼을 쓴다 — 리그마다 Instantiate되므로 공유해도 서로 간섭하지 않는다.
+    private const string VisualEffectMaterialPath = "VisualEffects/M_UICharacterVisual";
+
     private readonly BackgroundRigBuilder _rigBuilder;
     private readonly BackgroundRigSlotResolver _slotResolver;
     private readonly SetupBackgroundRigCommandSpec _spec;
@@ -74,6 +77,11 @@ public sealed class SetupBackgroundRigCommand : CommandBase
             rigRoot.SetParent(parent, false);
 
         _rigBuilder.BindRefsFromRoot(rigRoot, rolePrefix, out BackgroundRigRefs refs);
+
+        Material sourceMaterial = Resources.Load<Material>(VisualEffectMaterialPath);
+        refs.VisualEffect = new RigVisualEffectController(
+            refs.BackgroundSprite_Image,
+            sourceMaterial);
 
         scope.BackgroundRigs.Register(rigKey, refs);
 

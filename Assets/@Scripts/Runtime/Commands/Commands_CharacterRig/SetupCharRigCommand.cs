@@ -78,7 +78,7 @@ public sealed class SetupCharRigCommand : CommandBase
         _rigBuilder.BindRefsFromRoot(rigRoot, rolePrefix, out CharacterRigRefs refs);
 
         Material sourceMaterial = Resources.Load<Material>(VisualEffectMaterialPath);
-        refs.VisualEffect = new CharacterRigVisualEffectController(
+        refs.VisualEffect = new RigVisualEffectController(
             refs.CharacterPortraitSprite_Image,
             sourceMaterial);
 

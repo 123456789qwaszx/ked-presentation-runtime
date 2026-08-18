@@ -170,7 +170,13 @@ public sealed class BackgroundRigRegistry
 
     private static void DestroyRig(BackgroundRigRefs rigRefs)
     {
-        if (rigRefs?.RigRoot == null)
+        if (rigRefs == null)
+            return;
+
+        rigRefs.VisualEffect?.Dispose();
+        rigRefs.VisualEffect = null;
+
+        if (rigRefs.RigRoot == null)
             return;
 
         KillTweenOnHierarchy(rigRefs.RigRoot);

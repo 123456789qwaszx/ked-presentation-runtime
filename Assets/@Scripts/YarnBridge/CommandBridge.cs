@@ -440,16 +440,16 @@ public sealed partial class YarnCommandBridge
     private void BindStageDepthDefocus(DialogueRunner runner)
     {
         runner.AddCommandHandler<string, float>(
-            "screen_blur", EnqueueStage00DepthBlurSpec);
+            "screen_blur", EnqueueStage00LayerBlurSpec);
 
         runner.AddCommandHandler<string, float>(
-            "screen_blur_s1", EnqueueStage01DepthBlurSpec);
+            "screen_blur_s1", EnqueueStage01LayerBlurSpec);
 
         runner.AddCommandHandler<string, float>(
-            "screen_blur_s2", EnqueueStage02DepthBlurSpec);
+            "screen_blur_s2", EnqueueStage02LayerBlurSpec);
 
         runner.AddCommandHandler(
-            "screen_blur_reset", EnqueueStageDepthBlurClearSpec);
+            "screen_blur_reset", EnqueueStageLayerBlurClearSpec);
     }
 
     private void Collect(CommandSpecBase spec)

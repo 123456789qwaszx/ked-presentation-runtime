@@ -22,7 +22,7 @@ public sealed class CharVisualFocusCommandCharR : ClaimTweenCommandBase
     private readonly CharVisualFocusCommandSpecCharR _spec;
     private readonly CharacterVisualFocusPresetDBSO _presetDb;
 
-    private CharacterRigVisualEffectController _controller;
+    private RigVisualEffectController _controller;
 
     private VisualState _fromState;
     private VisualState _destState;

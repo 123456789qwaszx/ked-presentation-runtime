@@ -8,6 +8,7 @@ public sealed class ScreenEffectCommandFactory : INodeCommandFactory
     
     private readonly StageMaskMotionPresetDBSO _stageMaskMotionPresetDbSo;
     private readonly IStageMaskProvider _stageMaskProvider;
+    private readonly IStageDepthContentSlotProvider _stageDepthContentSlots;
 
     public ScreenEffectCommandFactory(
         ScreenEffectRig screenEffects,
@@ -16,7 +17,8 @@ public sealed class ScreenEffectCommandFactory : INodeCommandFactory
         ScreenVignettePresetDBSO vignettePresetDb,
         UIStageDepthLayerBlurRuntime stageDepthLayerBlurRuntime,
         StageMaskMotionPresetDBSO stageMaskMotionPresetDbSo,
-        IStageMaskProvider stageMaskProvider)
+        IStageMaskProvider stageMaskProvider,
+        IStageDepthContentSlotProvider stageDepthContentSlots)
     {
         _screenEffects = screenEffects;
         _flashPresetDb = flashPresetDb;
@@ -25,6 +27,7 @@ public sealed class ScreenEffectCommandFactory : INodeCommandFactory
         _stageDepthLayerBlurRuntime = stageDepthLayerBlurRuntime;
         _stageMaskMotionPresetDbSo = stageMaskMotionPresetDbSo;
         _stageMaskProvider = stageMaskProvider;
+        _stageDepthContentSlots = stageDepthContentSlots;
     }
 
     public bool TryCreate(CommandSpecBase spec, out ISequenceCommand command)
@@ -36,6 +39,8 @@ public sealed class ScreenEffectCommandFactory : INodeCommandFactory
             ScreenVignetteCommandSpec s => new ScreenVignetteCommand(s, _screenEffects, _vignettePresetDb),
             
             StageDepthDefocusCommandSpec s => new StageDepthDefocusCommand(s, _stageDepthLayerBlurRuntime),
+
+            StageLayerBlurCommandSpec s => new StageLayerBlurCommand(s, _stageDepthContentSlots),
             
             // Stage-local Mask
             StageMaskMotionCommandSpec s => new StageMaskMotionCommand(s, _stageMaskMotionPresetDbSo, _stageMaskProvider),

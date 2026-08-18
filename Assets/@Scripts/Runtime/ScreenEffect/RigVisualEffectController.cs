@@ -4,11 +4,11 @@ using UnityEngine;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
-// Runtime material owner for character portrait Images.
-// POCO (not MonoBehaviour): created by SetupCharRigCommand, held in CharacterRigRefs.VisualEffect,
-// disposed by CharacterRigRegistry.DestroyRig.
+// Runtime material owner for a rig's UI Image (character portrait / background sprite).
+// POCO (not MonoBehaviour): created by the rig's Setup command, held in {Character,Background}RigRefs.VisualEffect,
+// disposed by the matching registry's DestroyRig.
 // 주의: runtime material은 rig마다 Instantiate되므로 Dispose가 누락되면 teardown(롤백/seek 리빌드)마다 누수됩니다.
-public sealed class CharacterRigVisualEffectController : IDisposable
+public sealed class RigVisualEffectController : IDisposable
 {
     private const float DimBrightness = 0.62f;
     private const float DimSaturation = 0.70f;
@@ -53,7 +53,7 @@ public sealed class CharacterRigVisualEffectController : IDisposable
     // 0에 가까운 값까지 켜 두면 눈에 안 보이는 블러 때문에 비싼 변형을 쓰게 된다.
     private const float BlurKeywordThreshold = 0.001f;
     
-    private readonly Image _portraitImage;
+    private readonly Image _targetImage;
     
     private Material _runtimeMaterial;
     
@@ -77,36 +77,36 @@ public sealed class CharacterRigVisualEffectController : IDisposable
     public Color OuterRimColor => _outerRimColor;
     public Color InnerRimColor => _innerRimColor;
 
-    public CharacterRigVisualEffectController(
-        Image portraitImage,
+    public RigVisualEffectController(
+        Image targetImage,
         Material sourceMaterial)
     {
-        _portraitImage = portraitImage;
+        _targetImage = targetImage;
 
-        if (portraitImage == null)
+        if (targetImage == null)
         {
-            Debug.LogWarning("[CharacterRigVisualEffectController] portraitImage is null.");
+            Debug.LogWarning("[RigVisualEffectController] targetImage is null.");
             return;
         }
 
         if (sourceMaterial == null)
         {
-            Object context = portraitImage;
+            Object context = targetImage;
 
             Debug.LogWarning(
-                "[CharacterRigVisualEffectController] sourceMaterial is null. " +
-                "Check the Resources path in SetupCharRigCommand.",
+                "[RigVisualEffectController] sourceMaterial is null. " +
+                "Check the Resources path in the rig's Setup command.",
                 context);
             return;
         }
 
-        Image runtimeNameSource = portraitImage;
+        Image runtimeNameSource = targetImage;
 
         _runtimeMaterial = Object.Instantiate(sourceMaterial);
         _runtimeMaterial.name = $"{sourceMaterial.name}_Runtime_{runtimeNameSource.name}";
 
-        if (portraitImage != null)
-            portraitImage.material = _runtimeMaterial;
+        if (targetImage != null)
+            targetImage.material = _runtimeMaterial;
 
         _dimAmount = 0f;
         _outerRimAmount = 0f;
@@ -145,6 +145,16 @@ public sealed class CharacterRigVisualEffectController : IDisposable
         _innerRimColor = innerColor;
         _blurAmount = Mathf.Clamp01(blur);
 
+        ApplyDynamicValues();
+        MarkMaterialDirty();
+    }
+
+    public void SetBlurAmountImmediate(float value)
+    {
+        if (_runtimeMaterial == null)
+            return;
+
+        _blurAmount = Mathf.Clamp01(value);
         ApplyDynamicValues();
         MarkMaterialDirty();
     }
@@ -202,8 +212,8 @@ public sealed class CharacterRigVisualEffectController : IDisposable
     
     private void MarkMaterialDirty()
     {
-        if (_portraitImage != null)
-            _portraitImage.SetMaterialDirty();
+        if (_targetImage != null)
+            _targetImage.SetMaterialDirty();
     }
     
     private void ApplyDynamicValuesTo(Material material)
@@ -250,7 +260,7 @@ public sealed class CharacterRigVisualEffectController : IDisposable
     // Mask 등에 의해 Canvas가 서브 Material을 생성했을 때, 실제 사용하는 것과 Image의 Material을 같게 함.
     private void PushMaterialToGraphics()
     {
-        PushMaterialToGraphic(_portraitImage);
+        PushMaterialToGraphic(_targetImage);
     }
 
     private void PushMaterialToGraphic(Image image)
