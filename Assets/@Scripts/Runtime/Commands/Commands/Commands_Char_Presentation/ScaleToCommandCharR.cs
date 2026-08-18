@@ -4,11 +4,6 @@ using Ked.Presentation.Core;
 using UnityEngine;
 
 [Serializable]
-[CommandMenuHint(
-    "Char Rig Motion",
-    "Scale (From -> To)",
-    Order = -170
-)]
 public class ScaleToCommandSpecCharR : CharacterRigCommandSpecBase
 {
     [Header("Target")]

@@ -4,15 +4,6 @@ using UnityEngine;
 using UnityEngine.UI;
 
 [Serializable]
-[CommandMenuHint(
-    "Background Rig",
-    "Set Background Sprite",
-    Order = 870,
-    Sets = new[]
-    {
-        CommandMenuSets.SetupBackground,
-    },
-    SetOrder = -964)]
 public sealed class SetBackgroundSpriteCommandSpecBgR : BackgroundRigCommandSpecBase
 {
     [Header("Sprite")]

@@ -11,10 +11,6 @@ public enum StageMaskClearMode
 }
 
 [Serializable]
-[CommandMenuHint(
-    "Presentation Motion",
-    "Stage Mask Clear",
-    Order = -890)]
 public sealed class StageMaskClearCommandSpec : CommandSpecBase
 {
     [Header("Target")]

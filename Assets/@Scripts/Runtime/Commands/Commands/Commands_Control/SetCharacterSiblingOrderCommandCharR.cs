@@ -9,10 +9,6 @@ public enum CharacterRigSiblingOrderMode
 }
 
 [Serializable]
-[CommandMenuHint(
-    "Char Rig Layout",
-    "Set Sibling Order",
-    Order = -960)]
 public sealed class SetCharacterSiblingOrderCommandSpecCharR : CharacterRigCommandSpecBase
 {
     [Header("Order")]

@@ -4,10 +4,6 @@ using DG.Tweening;
 using UnityEngine;
 
 [Serializable]
-[CommandMenuHint(
-    "Stage Depth Visual",
-    "Depth Defocus",
-    Order = -120)]
 public sealed class StageDepthDefocusCommandSpec : CommandSpecBase
 {
     [Header("Target")]

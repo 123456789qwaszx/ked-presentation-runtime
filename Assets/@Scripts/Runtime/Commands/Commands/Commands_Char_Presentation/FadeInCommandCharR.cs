@@ -3,11 +3,6 @@ using DG.Tweening;
 using UnityEngine;
 
 [Serializable]
-[CommandMenuHint(
-    "Char Rig Motion",
-    "Fade In",
-    Order = -820
-)]
 public class FadeInCommandSpecCharR : CharacterRigCommandSpecBase
 {
     [Header("Target")]

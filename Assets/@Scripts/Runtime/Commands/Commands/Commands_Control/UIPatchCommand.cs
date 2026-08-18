@@ -3,10 +3,6 @@ using System.Collections;
 using UnityEngine;
 
 [Serializable]
-[CommandMenuHint(
-    "UI",
-    "Patch UI",
-    Order = 500)]
 public sealed class UIPatchCommandSpec : CommandSpecBase
 {
     [Header("Context")]

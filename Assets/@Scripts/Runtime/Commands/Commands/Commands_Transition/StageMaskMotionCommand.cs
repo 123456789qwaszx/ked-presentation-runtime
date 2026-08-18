@@ -3,10 +3,6 @@ using DG.Tweening;
 using UnityEngine;
 
 [System.Serializable]
-[CommandMenuHint(
-    "Presentation Motion",
-    "Stage Mask Motion",
-    Order = -899)]
 public sealed class StageMaskMotionCommandSpec : CommandSpecBase
 {
     [Header("Target")]

@@ -3,11 +3,6 @@ using UnityEngine;
 using IEnumerator = System.Collections.IEnumerator;
 
 [Serializable]
-[CommandMenuHint(
-    "Signal",
-    "Hold Signal",
-    SetOrder = 10,
-    Order = 20)]
 public sealed class HoldSignalCommandSpec : CommandSpecBase
 {
     public string signalKey;

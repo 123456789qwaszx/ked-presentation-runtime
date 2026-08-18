@@ -3,15 +3,6 @@ using System.Collections;
 using UnityEngine;
 
 [Serializable]
-[CommandMenuHint(
-    "Background Rig",
-    "Set Anchor",
-    Order = -930,
-    Sets = new[]
-    {
-        CommandMenuSets.SetupBackground,
-    },
-    SetOrder = -930)]
 public sealed class SetAnchorCommandSpecBgR : BackgroundRigCommandSpecBase
 {
     [Header("Target")]

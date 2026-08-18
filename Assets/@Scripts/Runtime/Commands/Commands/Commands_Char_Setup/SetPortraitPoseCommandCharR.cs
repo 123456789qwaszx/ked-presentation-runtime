@@ -3,14 +3,6 @@ using System.Collections;
 using UnityEngine;
 
 [Serializable]
-[CommandMenuHint(
-    "Char Rig", "Set Portrait Pose", Order = 869,
-    Sets = new[]
-    {
-        CommandMenuSets.BuildChar,
-        CommandMenuSets.SetupEmotion
-    },
-    SetOrder = -963)]
 public sealed class SetPortraitPoseCommandSpecCharR : CharacterRigCommandSpecBase
 {
     [Header("Pose / Variant")]

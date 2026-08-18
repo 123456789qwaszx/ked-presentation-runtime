@@ -3,7 +3,6 @@ using System.Collections;
 using UnityEngine;
 
 [Serializable]
-[CommandMenuHint("Sound", "Play BGM", Order = -900)]
 public sealed class PlayBgmCommandSpec : CommandSpecBase
 {
     [Header("Source")]

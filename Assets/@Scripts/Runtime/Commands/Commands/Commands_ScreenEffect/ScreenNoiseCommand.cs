@@ -4,15 +4,6 @@ using DG.Tweening;
 using UnityEngine;
 
 [Serializable]
-[CommandMenuHint(
-    "Screen Effect",
-    "Screen Noise",
-    Order = -680,
-    Sets = new[]
-    {
-        CommandMenuSets.SetupEmotion
-    },
-    SetOrder = -680)]
 public sealed class ScreenNoiseCommandSpec : CommandSpecBase
 {
     [Header("Preset")]

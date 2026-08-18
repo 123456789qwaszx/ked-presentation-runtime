@@ -3,7 +3,6 @@ using System.Collections;
 using UnityEngine;
 
 [Serializable]
-[CommandMenuHint("Sound", "Stop BGM", Order = -899)]
 public sealed class StopBgmCommandSpec : CommandSpecBase
 {
     [Min(0f)]

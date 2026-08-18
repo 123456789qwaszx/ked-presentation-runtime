@@ -3,15 +3,6 @@ using DG.Tweening;
 using UnityEngine;
 
 [Serializable]
-[CommandMenuHint(
-    "Background Rig Motion",
-    "Fade In",
-    Order = -820,
-    Sets = new[]
-    {
-        CommandMenuSets.SetupBackground,
-    },
-    SetOrder = -820)]
 public sealed class FadeInCommandSpecBgR : BackgroundRigCommandSpecBase
 {
     [Header("Target")]

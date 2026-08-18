@@ -3,10 +3,6 @@ using System.Collections;
 using UnityEngine;
 
 [Serializable]
-[CommandMenuHint(
-    "Char Rig Setup",
-    "Actor Alias",
-    Order = -980)]
 public sealed class SetPresentationActorAliasCommandSpec : CommandSpecBase
 {
     [Header("Alias")]

@@ -3,16 +3,6 @@ using DG.Tweening;
 using UnityEngine;
 
 [Serializable]
-[CommandMenuHint(
-    "Char Rig Composition",
-    "Set Depth",
-    Order = -198,
-    Sets = new[]
-    {
-        CommandMenuSets.SetupChar,
-        CommandMenuSets.SetupEmotion
-    },
-    SetOrder = -928)]
 public sealed class SetDepthCommandSpecCharR : CharacterRigCommandSpecBase
 {
     [Header("Depth")]

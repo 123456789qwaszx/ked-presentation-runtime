@@ -4,15 +4,6 @@ using DG.Tweening;
 using UnityEngine;
 
 [Serializable]
-[CommandMenuHint(
-    "Char Rig",
-    "#ApplyTrackOffset (default = ResetToZero)",
-    Order = -890,
-    Sets = new[]
-    {
-        CommandMenuSets.ResetChar,
-    },
-    SetOrder = -940)]
 public class ApplyTrackOffsetCommandSpecCharR : CharacterRigCommandSpecBase
 {
     [Header("Target")]

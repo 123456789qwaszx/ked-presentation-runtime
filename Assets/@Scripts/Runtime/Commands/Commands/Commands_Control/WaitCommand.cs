@@ -4,11 +4,6 @@ using DG.Tweening;
 using UnityEngine;
 
 [Serializable]
-[CommandMenuHint(
-    "Signal",
-    "Wait",
-    SetOrder = 10,
-    Order = 10)]
 public sealed class WaitCommandSpec : CommandSpecBase
 {
     public float duration = 0.2f;

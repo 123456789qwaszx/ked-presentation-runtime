@@ -3,7 +3,6 @@ using DG.Tweening;
 using UnityEngine;
 
 [Serializable]
-[CommandMenuHint("Char Rig Motion", "Slide In", Order = -771)]
 public sealed class SlideInCommandSpecCharR : CharacterRigCommandSpecBase
 {
     [Header("Target (Track)")]

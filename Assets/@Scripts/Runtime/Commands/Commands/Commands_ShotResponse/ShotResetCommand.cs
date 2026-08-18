@@ -1,7 +1,6 @@
 using System;
 
 [Serializable]
-[CommandMenuHint("Presentation Shot", "Shot Reset", Order = -849)]
 public sealed class ShotResetCommandSpec : ShotIntentCommandSpecBase 
 { }
 

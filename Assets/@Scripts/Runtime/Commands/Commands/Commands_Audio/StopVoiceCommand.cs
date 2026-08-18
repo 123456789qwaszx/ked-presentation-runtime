@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 
 [Serializable]
-[CommandMenuHint("Sound", "Stop Voice", Order = -897)]
 public sealed class StopVoiceCommandSpec : CommandSpecBase { }
 
 // StopVoiceCommand -> ExecuteEvenIfSkipping

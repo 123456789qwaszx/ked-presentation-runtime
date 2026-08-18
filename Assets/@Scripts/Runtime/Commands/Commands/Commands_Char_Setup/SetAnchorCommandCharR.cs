@@ -6,16 +6,6 @@ using Ked.Presentation.Core;
 using UnityEngine;
 
 [Serializable]
-[CommandMenuHint(
-    "Char Rig",
-    "Set Anchor",
-    Order = -930,
-    Sets = new[]
-    {
-        CommandMenuSets.SetupChar,
-        CommandMenuSets.SetupEmotion
-    },
-    SetOrder = -930)]
 public sealed class SetAnchorCommandSpecCharR : CharacterRigCommandSpecBase
 {
     [Header("Target (Anchor only)")]

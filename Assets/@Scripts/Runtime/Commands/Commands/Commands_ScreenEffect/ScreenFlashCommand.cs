@@ -4,15 +4,6 @@ using DG.Tweening;
 using UnityEngine;
 
 [Serializable]
-[CommandMenuHint(
-    "Screen Effect",
-    "Screen Flash",
-    Order = -700,
-    Sets = new[]
-    {
-        CommandMenuSets.SetupEmotion
-    },
-    SetOrder = -700)]
 public sealed class ScreenFlashCommandSpec : CommandSpecBase
 {
     [Header("Preset")]

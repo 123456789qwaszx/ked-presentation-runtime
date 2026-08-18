@@ -3,15 +3,6 @@ using DG.Tweening;
 using UnityEngine;
 
 [Serializable]
-[CommandMenuHint(
-    "Char Rig Visual",
-    "Visual Focus",
-    Order = -850,
-    Sets = new[]
-    {
-        CommandMenuSets.SetupEmotion
-    },
-    SetOrder = -850)]
 public sealed class CharVisualFocusCommandSpecCharR : CharacterRigCommandSpecBase
 {
     [Header("Preset")]

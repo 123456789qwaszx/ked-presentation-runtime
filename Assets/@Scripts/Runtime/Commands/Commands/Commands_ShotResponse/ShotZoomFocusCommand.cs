@@ -2,7 +2,6 @@ using System;
 using UnityEngine;
 
 [Serializable]
-[CommandMenuHint("Presentation Shot", "Shot Zoom Focus", Order = -849)]
 public sealed class ShotZoomFocusCommandSpec : ShotIntentCommandSpecBase
 {
     [Header("Character Focus")]

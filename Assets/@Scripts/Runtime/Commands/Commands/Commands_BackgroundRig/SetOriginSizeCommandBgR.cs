@@ -3,15 +3,6 @@ using System.Collections;
 using UnityEngine;
 
 [Serializable]
-[CommandMenuHint(
-    "Background Rig",
-    "Set Origin Size",
-    Order = -929,
-    Sets = new[]
-    {
-        CommandMenuSets.SetupBackground,
-    },
-    SetOrder = -929)]
 public sealed class SetOriginSizeCommandSpecBgR : BackgroundRigCommandSpecBase
 {
     [Header("Target")]

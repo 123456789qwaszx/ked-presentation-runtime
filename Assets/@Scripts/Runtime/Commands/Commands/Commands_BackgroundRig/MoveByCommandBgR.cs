@@ -3,10 +3,6 @@ using DG.Tweening;
 using UnityEngine;
 
 [Serializable]
-[CommandMenuHint(
-    "Background Rig Motion",
-    "Move By (XY)",
-    Order = -200)]
 public sealed class MoveByCommandSpecBgR : BackgroundRigCommandSpecBase
 {
     [Header("Target")]

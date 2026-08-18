@@ -3,7 +3,6 @@ using DG.Tweening;
 using UnityEngine;
 
 [Serializable]
-[CommandMenuHint("Char Rig Motion", "Slide Out", Order = -772)]
 public sealed class SlideOutCommandSpecCharR : CharacterRigCommandSpecBase
 {
     [Header("Target (Track)")]

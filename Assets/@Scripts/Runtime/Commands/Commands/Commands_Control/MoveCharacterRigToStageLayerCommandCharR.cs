@@ -10,10 +10,6 @@ public enum CharacterRigReparentSiblingMode
 }
 
 [Serializable]
-[CommandMenuHint(
-    "Char Rig Layout",
-    "Move To Stage Layer",
-    Order = -959)]
 public sealed class MoveCharacterRigToStageLayerCommandSpecCharR
     : CharacterRigCommandSpecBase
 {

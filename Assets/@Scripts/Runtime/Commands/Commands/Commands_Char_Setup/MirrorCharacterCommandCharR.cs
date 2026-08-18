@@ -10,10 +10,6 @@ public enum CharacterMirrorMode
 }
 
 [Serializable]
-[CommandMenuHint(
-    "Char Rig Composition",
-    "Mirror Character",
-    Order = -198)]
 public sealed class MirrorCharacterCommandSpecCharR : CharacterRigCommandSpecBase
 {
     [Header("Mirror")]

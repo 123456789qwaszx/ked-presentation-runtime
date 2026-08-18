@@ -2,7 +2,6 @@ using System;
 using UnityEngine;
 
 [Serializable]
-[CommandMenuHint("Presentation Shot", "Shot Track", Order = -848)]
 public sealed class ShotTrackCommandSpec : ShotIntentCommandSpecBase
 {
     [Header("Pan")]

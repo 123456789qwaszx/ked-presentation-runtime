@@ -3,13 +3,6 @@ using System.Collections;
 using UnityEngine;
 
 [Serializable]
-[CommandMenuHint(
-    "Char Rig", "@Set Character Rig", Order = -999,
-    Sets = new[]
-    {
-        CommandMenuSets.BuildChar,
-    },
-    SetOrder = -980)]
 public sealed class SetupCharRigCommandSpec : CommandSpecBase
 {
     [Header("Role / Slot")]

@@ -3,7 +3,6 @@ using System.Collections;
 using UnityEngine;
 
 [Serializable]
-[CommandMenuHint("Sound", "Play SFX", Order = -896)]
 public sealed class PlaySfxCommandSpec : CommandSpecBase
 {
     [Header("Source")]

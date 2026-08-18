@@ -4,15 +4,6 @@ using DG.Tweening;
 using UnityEngine;
 
 [Serializable]
-[CommandMenuHint(
-    "Screen Effect",
-    "Screen Vignette",
-    Order = -690,
-    Sets = new[]
-    {
-        CommandMenuSets.SetupEmotion
-    },
-    SetOrder = -690)]
 public sealed class ScreenVignetteCommandSpec : CommandSpecBase
 {
     [Header("Preset")]

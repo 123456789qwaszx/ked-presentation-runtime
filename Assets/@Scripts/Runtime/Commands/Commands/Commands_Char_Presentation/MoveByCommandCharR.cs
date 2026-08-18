@@ -4,10 +4,6 @@ using Ked.Presentation.Core;
 using UnityEngine;
 
 [Serializable]
-[CommandMenuHint(
-    "Char Rig Motion",
-    "Move By (XY)",
-    Order = -200)]
 public class MoveByCommandSpecCharR : CharacterRigCommandSpecBase
 {
     [Header("Target (Track or Rig)")]

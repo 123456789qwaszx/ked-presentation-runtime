@@ -4,13 +4,6 @@ using UnityEngine;
 using UnityEngine.UI;
 
 [Serializable]
-[CommandMenuHint(
-    "Char Rig", "Set Portrait Sprite", Order = 870,
-    Sets = new[]
-    {
-        CommandMenuSets.BuildChar,
-        CommandMenuSets.SetupEmotion
-    }, SetOrder = -964)]
 public sealed class SetPortraitSpriteCommandSpecCharR : CharacterRigCommandSpecBase
 {
     [Header("Portrait Identity")]

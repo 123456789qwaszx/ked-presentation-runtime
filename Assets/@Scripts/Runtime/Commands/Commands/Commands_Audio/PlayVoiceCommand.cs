@@ -3,7 +3,6 @@ using System.Collections;
 using UnityEngine;
 
 [Serializable]
-[CommandMenuHint("Sound", "Play Voice", Order = -898)]
 public sealed class PlayVoiceCommandSpec : CommandSpecBase
 {
     [Header("Source")]

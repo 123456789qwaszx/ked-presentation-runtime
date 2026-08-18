@@ -3,10 +3,6 @@ using UnityEngine;
 using IEnumerator = System.Collections.IEnumerator;
 
 [Serializable]
-[CommandMenuHint(
-    "Signal",
-    "Raise Signal",
-    Order = 30)]
 public sealed class RaiseSignalCommandSpec : CommandSpecBase
 {
     [Header("Signal")]

@@ -3,10 +3,6 @@ using DG.Tweening;
 using UnityEngine;
 
 [Serializable]
-[CommandMenuHint(
-    "Char Rig Composition",
-    "Place Character Focus",
-    Order = -155)]
 public sealed class PlaceCharacterFocusCommandSpecCharR : CharacterRigCommandSpecBase
 {
     [Header("Focus")]

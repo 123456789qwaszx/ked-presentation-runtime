@@ -4,8 +4,6 @@ using UnityEngine;
 using UnityEngine.UI;
 
 [Serializable]
-[CommandMenuHint(
-    "Char Rig", "Set Sprite (CharRig)", Order = 875, SetOrder = -965)]
 public sealed class SetSpriteCommandSpecCharR : CharacterRigCommandSpecBase
 {
     [Header("Target")]
