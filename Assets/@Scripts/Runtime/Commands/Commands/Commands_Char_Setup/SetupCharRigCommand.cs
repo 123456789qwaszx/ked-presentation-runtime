@@ -18,9 +18,6 @@ public sealed class SetupCharRigCommandSpec : CommandSpecBase
     public PresentationStageKey stage = PresentationStageKey.Stage00;
     public PresentationDepthLayerKey layer = PresentationDepthLayerKey.Mid;
 
-    [Header("Special Parent")]
-    public bool useProtagonistSlot = false;
-
     [Tooltip("Base root name. Final name is '{rolePrefix}{rigRootName}'.")]
     public string rigRootName = "CharacterRig";
 
@@ -70,9 +67,10 @@ public sealed class SetupCharRigCommand : CommandBase
             rolePrefix,
             spec.rigRootName);
 
-        bool resolved = spec.useProtagonistSlot
-            ? _slotResolver.TryResolveProtagonist(out RectTransform parent)
-            : _slotResolver.TryResolve(spec.stage, spec.layer, out parent);
+        bool resolved = _slotResolver.TryResolve(
+            spec.stage,
+            spec.layer,
+            out RectTransform parent);
 
         if (resolved)
             rigRoot.SetParent(parent, false);

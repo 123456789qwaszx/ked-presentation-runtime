@@ -1,6 +1,11 @@
 using System;
 using UnityEngine;
 
+/// <summary>
+/// 대화 박스의 종류. <b>더 이상 "어느 뷰인가"가 아니다</b> —
+/// 박스는 <c>DialogueSurfaceBox</c> 하나뿐이고, kind는
+/// <c>DialogueSurfaceLayoutPresetDBSO</c>에서 어느 레이아웃 프리셋을 쓸지를 가리킨다.
+/// </summary>
 public enum DialogueBoxKind
 {
     Portrait = 0,
@@ -17,15 +22,6 @@ public enum OptionsBoxKind
 }
 
 [Serializable]
-public struct DialogueBoxHostEntry
-{
-    public DialogueBoxKind kind;
-
-    [Tooltip("IPresentationDialogueBoxView 구현체")]
-    public MonoBehaviour view;
-}
-
-[Serializable]
 public struct OptionsBoxHostEntry
 {
     public OptionsBoxKind kind;
@@ -34,52 +30,19 @@ public struct OptionsBoxHostEntry
     public MonoBehaviour view;
 }
 
+/// <summary>
+/// 선택지 박스 뷰의 해석기.
+///
+/// 대화 박스 쪽은 걷혔다 — 뷰가 하나뿐이라 해석할 것이 없고,
+/// <c>DialogueBoxPresentationController</c>가 <c>DialogueSurfaceBox</c>를 직접 들고 있다.
+///
+/// ⚠ 선택지 박스도 같은 길을 갈 예정이다: 단일 표면 + 레이아웃 프리셋 데이터.
+/// 그때 이 호스트 전체가 사라진다.
+/// </summary>
 public sealed class DialogueBoxHost : MonoBehaviour
 {
-    [Header("Dialogue Box Entries")]
-    [SerializeField] private DialogueBoxHostEntry[] entries;
-
     [Header("Options Box Entries")]
     [SerializeField] private OptionsBoxHostEntry[] optionEntries;
-
-    public IPresentationDialogueBoxView ResolveTarget(DialogueBoxKind kind)
-    {
-        if (entries == null || entries.Length == 0)
-        {
-            Debug.LogWarning($"[DialogueBoxHost] No dialogue box entries are assigned. kind={kind}", this);
-            return null;
-        }
-
-        for (int i = 0; i < entries.Length; i++)
-        {
-            if (entries[i].kind != kind)
-                continue;
-
-            MonoBehaviour behaviour = entries[i].view;
-
-            if (!behaviour)
-            {
-                Debug.LogWarning($"[DialogueBoxHost] View is null. kind={entries[i].kind}", this);
-                return null;
-            }
-
-            IPresentationDialogueBoxView view = behaviour as IPresentationDialogueBoxView;
-
-            if (view == null)
-            {
-                Debug.LogWarning(
-                    $"[DialogueBoxHost] View must implement IPresentationDialogueBoxView. kind={entries[i].kind}, go={behaviour.name}",
-                    behaviour);
-
-                return null;
-            }
-
-            return view;
-        }
-
-        Debug.LogWarning($"[DialogueBoxHost] Entry not found. kind={kind}", this);
-        return null;
-    }
 
     public IPresentationOptionsBoxView ResolveOptionsTarget(OptionsBoxKind kind)
     {
@@ -118,47 +81,6 @@ public sealed class DialogueBoxHost : MonoBehaviour
 
         Debug.LogWarning($"[DialogueBoxHost] Options entry not found. kind={kind}", this);
         return null;
-    }
-
-    public void HideAllDialogueBoxes()
-    {
-        if (entries == null)
-            return;
-
-        for (int i = 0; i < entries.Length; i++)
-        {
-            MonoBehaviour behaviour = entries[i].view;
-            if (!behaviour)
-                continue;
-
-            IPresentationDialogueBoxView view = behaviour as IPresentationDialogueBoxView;
-            if (view == null)
-                continue;
-
-            view.SetVisibleImmediate(false);
-        }
-    }
-
-    public void HideAllDialogueBoxesExcept(IPresentationDialogueBoxView target)
-    {
-        if (entries == null)
-            return;
-
-        for (int i = 0; i < entries.Length; i++)
-        {
-            MonoBehaviour behaviour = entries[i].view;
-            if (!behaviour)
-                continue;
-
-            IPresentationDialogueBoxView view = behaviour as IPresentationDialogueBoxView;
-            if (view == null)
-                continue;
-
-            if (ReferenceEquals(view, target))
-                continue;
-
-            view.SetVisibleImmediate(false);
-        }
     }
 
     public void HideAllOptionsBoxes()
@@ -206,54 +128,11 @@ public sealed class DialogueBoxHost : MonoBehaviour
 
     private void OnValidate()
     {
-        ValidateDialogueEntries();
-        ValidateOptionsEntries();
-    }
-
-    private void ValidateDialogueEntries()
-    {
-        if (entries == null)
-        {
-            Debug.LogWarning("[DialogueBoxHost] entries is null.", this);
-            return;
-        }
-
-        if (entries.Length == 0)
-        {
-            Debug.LogWarning(
-                "[DialogueBoxHost] entries is empty. At least one dialogue box view should be assigned.",
-                this);
-
-            return;
-        }
-
-        ValidateDuplicateDialogueKinds();
-        ValidateDialogueEntryViews();
-    }
-
-    private void ValidateOptionsEntries()
-    {
         if (optionEntries == null || optionEntries.Length == 0)
             return;
 
         ValidateDuplicateOptionsKinds();
         ValidateOptionsEntryViews();
-    }
-
-    private void ValidateDuplicateDialogueKinds()
-    {
-        for (int i = 0; i < entries.Length; i++)
-        {
-            for (int j = i + 1; j < entries.Length; j++)
-            {
-                if (entries[i].kind != entries[j].kind)
-                    continue;
-
-                Debug.LogWarning(
-                    $"[DialogueBoxHost] Duplicate entry for DialogueBoxKind.{entries[i].kind}. indices={i}, {j}",
-                    this);
-            }
-        }
     }
 
     private void ValidateDuplicateOptionsKinds()
@@ -269,30 +148,6 @@ public sealed class DialogueBoxHost : MonoBehaviour
                     $"[DialogueBoxHost] Duplicate entry for OptionsBoxKind.{optionEntries[i].kind}. indices={i}, {j}",
                     this);
             }
-        }
-    }
-
-    private void ValidateDialogueEntryViews()
-    {
-        for (int i = 0; i < entries.Length; i++)
-        {
-            MonoBehaviour behaviour = entries[i].view;
-
-            if (behaviour == null)
-            {
-                Debug.LogWarning(
-                    $"[DialogueBoxHost] Entry view is null. index={i}, kind={entries[i].kind}",
-                    this);
-
-                continue;
-            }
-
-            if (behaviour is IPresentationDialogueBoxView)
-                continue;
-
-            Debug.LogWarning(
-                $"[DialogueBoxHost] Entry view must implement IPresentationDialogueBoxView. index={i}, kind={entries[i].kind}, go={behaviour.name}",
-                behaviour);
         }
     }
 

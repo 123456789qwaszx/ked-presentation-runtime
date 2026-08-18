@@ -2,32 +2,30 @@ using Yarn.Unity;
 
 public partial class DialogueBoxPresentationController
 {
-    private const DialogueBoxKind DefaultProtagonistLineBoxKind = DialogueBoxKind.Surface;
-    private const DialogueBoxKind DefaultNamedLineBoxKind = DialogueBoxKind.Speaker;
+    private const DialogueBoxKind DefaultLineBoxKind = DialogueBoxKind.Surface;
 
-    private readonly DialogueBoxHost _host;
+    private readonly IPresentationDialogueBoxView _box;
     private readonly DialogueBoxMetadataResolver _metadataResolver;
     private readonly DialogueBoxCurrentState _boxState;
     private readonly DialogueSurfaceState _surfaceState;
     private readonly DialogueSurfaceLayoutPresetDBSO _surfaceLayoutDb;
     private readonly DialogueSpeakerPresentationPolicyDBSO _speakerPolicyDb;
 
-    private DialogueBoxKind _protagonistLineBoxKind = DefaultProtagonistLineBoxKind;
-    private DialogueBoxKind _namedLineBoxKind = DefaultNamedLineBoxKind;
+    private DialogueBoxKind _lineBoxKind = DefaultLineBoxKind;
 
     private float _fadeUpDuration = 0.25f;
     private float _fadeDownDuration = 0.1f;
 
     public DialogueBoxPresentationController(
         DialogueBoxCurrentState dialogueBoxState,
-        DialogueBoxHost host,
+        IPresentationDialogueBoxView box,
         DialogueBoxMetadataResolver metadataResolver,
         DialogueSurfaceState surfaceState,
         DialogueSurfaceLayoutPresetDBSO surfaceLayoutDb,
         DialogueSpeakerPresentationPolicyDBSO speakerPolicyDb)
     {
         _boxState = dialogueBoxState;
-        _host = host;
+        _box = box;
         _metadataResolver = metadataResolver;
         _surfaceState = surfaceState;
         _surfaceLayoutDb = surfaceLayoutDb;
@@ -57,7 +55,7 @@ public partial class DialogueBoxPresentationController
             hasSpeakerPolicy,
             speakerPolicy);
 
-        IPresentationDialogueBoxView nextBox = _host.ResolveTarget(nextBoxKind);
+        IPresentationDialogueBoxView nextBox = _box;
 
         DialogueBoxTransitionKind transitionKind = ResolveTransitionKind(
             ctx,
@@ -75,8 +73,7 @@ public partial class DialogueBoxPresentationController
 
         nextBox.ResetPresentationTransform();
 
-        if (nextBoxKind == DialogueBoxKind.Surface)
-            ApplyCurrentSurfaceLayout(nextBox);
+        ApplySurfaceLayoutFor(nextBox, nextBoxKind);
 
         nextBox.PrimeText(
             ctx.Text,
@@ -110,9 +107,7 @@ public partial class DialogueBoxPresentationController
         if (hasSpeakerPolicy && speakerPolicy.useBoxKindOverride)
             return speakerPolicy.boxKind;
 
-        return ctx.HasCharacterName
-            ? _namedLineBoxKind
-            : _protagonistLineBoxKind;
+        return _lineBoxKind;
     }
 
     private DialogueBoxTransitionKind ResolveTransitionKind(
@@ -135,10 +130,12 @@ public partial class DialogueBoxPresentationController
         return DialogueBoxTransitionKind.FadeOutIn;
     }
 
-    private void ApplyCurrentSurfaceLayout(IPresentationDialogueBoxView box)
+    // 레이아웃 결정: surface_layout 오버라이드 or 없으면 kind가 고른 프리셋.
+    private void ApplySurfaceLayoutFor(IPresentationDialogueBoxView box, DialogueBoxKind kind)
     {
-        DialogueSurfaceLayoutPresetDBSO.Entry entry =
-            _surfaceLayoutDb.FindOrDefault(_surfaceState.CurrentLayoutKey);
+        DialogueSurfaceLayoutPresetDBSO.Entry entry = _surfaceState.HasOverride
+            ? _surfaceLayoutDb.FindOrDefault(_surfaceState.OverrideLayoutKey)
+            : _surfaceLayoutDb.FindByKind(kind);
 
         box.ApplySurfaceLayout(entry);
     }
@@ -161,7 +158,6 @@ public partial class DialogueBoxPresentationController
             case DialogueBoxTransitionKind.Cut:
                 if (immediate || run.IsValid)
                 {
-                    _host.HideAllDialogueBoxesExcept(nextBox);
                     nextBox.SetVisibleImmediate(true);
                 }
 
@@ -170,12 +166,10 @@ public partial class DialogueBoxPresentationController
             case DialogueBoxTransitionKind.FadeIn:
                 if (immediate)
                 {
-                    _host.HideAllDialogueBoxesExcept(nextBox);
                     nextBox.SetVisibleImmediate(true);
                 }
                 else
                 {
-                    _host.HideAllDialogueBoxesExcept(nextBox);
                     nextBox.PrepareHidden();
                     await nextBox.FadeInAsync(_fadeUpDuration, run);
                 }
@@ -188,7 +182,6 @@ public partial class DialogueBoxPresentationController
                     if (previousBox != null && !ReferenceEquals(previousBox, nextBox))
                         previousBox.SetVisibleImmediate(false);
 
-                    _host.HideAllDialogueBoxesExcept(nextBox);
                     nextBox.SetVisibleImmediate(true);
                 }
                 else
@@ -233,7 +226,7 @@ public partial class DialogueBoxPresentationController
     {
         InvalidateVisibilityTransition();
 
-        _host.HideAllDialogueBoxes();
+        _box.SetVisibleImmediate(false);
         _boxState.Reset();
     }
 

@@ -23,7 +23,6 @@ public sealed partial class YarnCommandBridge
         _dialogueBoxPresentation = dialogueBoxPresentation;
 
         BindRunnerCommands(runner);
-        BindDialogueBoxCommands(runner);
     }
 
     private void BindRunnerCommands(DialogueRunner runner)
@@ -47,32 +46,6 @@ public sealed partial class YarnCommandBridge
         BindScreenEffects(runner);
         BindStageDepthDefocus(runner);
     }
-
-    // DialogueBoxKind: Portrait = 0 · Speaker = 1 · LetterBox = 2 · OnlyText = 3 · BlackBook = 4
-    private void BindDialogueBoxCommands(DialogueRunner runner)
-    {
-        runner.AddCommandHandler<string>(
-            "box_named", SetNamedLineBoxKind);
-        runner.AddCommandHandler<string>(
-            "box_protagonist", SetProtagonistLineBoxKind);
-        runner.AddCommandHandler(
-            "box_reset", ResetDefaultLineBoxKinds);
-    }
-
-    private void SetNamedLineBoxKind(string key)
-    {
-        Enum.TryParse(key, true, out DialogueBoxKind kind);
-        _dialogueBoxPresentation.SetNamedLineBoxKind(kind);
-    }
-
-    private void SetProtagonistLineBoxKind(string key)
-    {
-        Enum.TryParse(key, true, out DialogueBoxKind kind);
-        _dialogueBoxPresentation.SetProtagonistLineBoxKind(kind);
-    }
-
-    private void ResetDefaultLineBoxKinds()
-        => _dialogueBoxPresentation.ResetDefaultLineBoxKinds();
 
     private void BindControl(DialogueRunner runner)
     {
@@ -117,9 +90,6 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler<string, string>(
             "slot02", EnqueueSetupCharRigStage02Spec);
 
-        runner.AddCommandHandler(
-            "slot_tyrant", EnqueueSetupTyrantProtagonistSpec);
-        
         runner.AddCommandHandler<string, string, string, string>(
             "cast", EnqueueCastCharacterSpec);
         runner.AddCommandHandler<string, string>(

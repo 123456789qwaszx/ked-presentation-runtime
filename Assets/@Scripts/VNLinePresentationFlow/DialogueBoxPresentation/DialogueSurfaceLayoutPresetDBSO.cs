@@ -16,6 +16,11 @@ public sealed class DialogueSurfaceLayoutPresetDBSO : ScriptableObject
         [Header("Identity")]
         public string key;
 
+        [Tooltip(
+            "이 프리셋이 담당하는 박스 종류. 박스가 하나뿐이므로 kind는 '어느 뷰인가'가 아니라 " +
+            "'어느 레이아웃인가'를 뜻한다. 같은 kind가 여러 개면 첫 번째를 쓴다.")]
+        public DialogueBoxKind kind;
+
         [Header("Line Rect")]
         public Vector2 lineAnchorMin;
         public Vector2 lineAnchorMax;
@@ -57,6 +62,7 @@ public sealed class DialogueSurfaceLayoutPresetDBSO : ScriptableObject
             return new Entry
             {
                 key = DefaultPresetKey,
+                kind = DialogueBoxKind.Surface,
 
                 lineAnchorMin = new Vector2(0.08f, 0.08f),
                 lineAnchorMax = new Vector2(0.92f, 0.28f),
@@ -89,11 +95,99 @@ public sealed class DialogueSurfaceLayoutPresetDBSO : ScriptableObject
             };
         }
 
+        /// <summary>
+        /// 이름 있는 라인용. bottom과 같은 자리지만 이름표가 별도 판처럼 두드러진다
+        /// (옛 DialogueBox01_Speaker가 이름 박스를 따로 갖고 있던 것에 대응).
+        /// 시작값이 bottom과 거의 같다 — 여기서 갈라져 나가는 것이 데이터로 둔 이유다.
+        /// </summary>
+        public static Entry CreateSpeakerBottom()
+        {
+            return new Entry
+            {
+                key = "speaker_bottom",
+                kind = DialogueBoxKind.Speaker,
+
+                lineAnchorMin = new Vector2(0.08f, 0.08f),
+                lineAnchorMax = new Vector2(0.92f, 0.26f),
+                linePivot = new Vector2(0.5f, 0.5f),
+                lineAnchoredPosition = Vector2.zero,
+                lineSizeDelta = Vector2.zero,
+
+                lineAlignment = TextAlignmentOptions.TopLeft,
+                lineFontSize = 36f,
+                lineSpacing = 0f,
+                paragraphSpacing = 0f,
+                lineMargin = Vector4.zero,
+                lineOverflowMode = TextOverflowModes.Overflow,
+                lineTextWrappingMode = TextWrappingModes.Normal,
+
+                useName = true,
+                clearNameWhenHidden = true,
+
+                nameAnchorMin = new Vector2(0.08f, 0.28f),
+                nameAnchorMax = new Vector2(0.38f, 0.35f),
+                namePivot = new Vector2(0f, 0.5f),
+                nameAnchoredPosition = Vector2.zero,
+                nameSizeDelta = Vector2.zero,
+
+                nameAlignment = TextAlignmentOptions.Left,
+                nameFontSize = 30f,
+                nameMargin = Vector4.zero,
+                nameOverflowMode = TextOverflowModes.Overflow,
+                nameTextWrappingMode = TextWrappingModes.NoWrap,
+            };
+        }
+
+        /// <summary>
+        /// 초상 컷인이 한쪽에 서는 경우의 좁은 텍스트 폭.
+        /// 컷인 자체는 Spine이 그리고, 이 프리셋은 그 옆에 남는 글 자리만 정한다.
+        /// 말하는 주체가 초상 당사자라 이름표는 쓰지 않는다(옛 Portrait 박스와 같다).
+        /// </summary>
+        public static Entry CreatePortraitNarrow()
+        {
+            return new Entry
+            {
+                key = "portrait_narrow",
+                kind = DialogueBoxKind.Portrait,
+
+                // 왼쪽 30%를 컷인 자리로 비운다.
+                lineAnchorMin = new Vector2(0.32f, 0.08f),
+                lineAnchorMax = new Vector2(0.92f, 0.30f),
+                linePivot = new Vector2(0.5f, 0.5f),
+                lineAnchoredPosition = Vector2.zero,
+                lineSizeDelta = Vector2.zero,
+
+                lineAlignment = TextAlignmentOptions.TopLeft,
+                lineFontSize = 34f,
+                lineSpacing = 0f,
+                paragraphSpacing = 0f,
+                lineMargin = Vector4.zero,
+                lineOverflowMode = TextOverflowModes.Overflow,
+                lineTextWrappingMode = TextWrappingModes.Normal,
+
+                useName = false,
+                clearNameWhenHidden = true,
+
+                nameAnchorMin = new Vector2(0.32f, 0.31f),
+                nameAnchorMax = new Vector2(0.60f, 0.37f),
+                namePivot = new Vector2(0f, 0.5f),
+                nameAnchoredPosition = Vector2.zero,
+                nameSizeDelta = Vector2.zero,
+
+                nameAlignment = TextAlignmentOptions.Left,
+                nameFontSize = 26f,
+                nameMargin = Vector4.zero,
+                nameOverflowMode = TextOverflowModes.Overflow,
+                nameTextWrappingMode = TextWrappingModes.NoWrap,
+            };
+        }
+
         public static Entry CreateLetterboxBottom()
         {
             return new Entry
             {
                 key = "letterbox_bottom",
+                kind = DialogueBoxKind.LetterBox,
 
                 lineAnchorMin = new Vector2(0.12f, 0.04f),
                 lineAnchorMax = new Vector2(0.88f, 0.17f),
@@ -131,6 +225,7 @@ public sealed class DialogueSurfaceLayoutPresetDBSO : ScriptableObject
             return new Entry
             {
                 key = "blackbook_page",
+                kind = DialogueBoxKind.BlackBook,
 
                 lineAnchorMin = new Vector2(0.22f, 0.18f),
                 lineAnchorMax = new Vector2(0.78f, 0.82f),
@@ -168,6 +263,7 @@ public sealed class DialogueSurfaceLayoutPresetDBSO : ScriptableObject
             return new Entry
             {
                 key = "full_top_left",
+                kind = DialogueBoxKind.OnlyText,
 
                 lineAnchorMin = new Vector2(0.08f, 0.10f),
                 lineAnchorMax = new Vector2(0.92f, 0.90f),
@@ -201,12 +297,15 @@ public sealed class DialogueSurfaceLayoutPresetDBSO : ScriptableObject
         }
     }
 
+    // kind 6종에 하나씩 대응한다 — 박스가 하나뿐이므로 이 배열이 곧 "박스 종류의 정의"다.
     [SerializeField] private Entry[] entries =
     {
-        Entry.CreateBottom(),
-        Entry.CreateLetterboxBottom(),
-        Entry.CreateBlackBookPage(),
-        Entry.CreateFullTopLeft(),
+        Entry.CreateBottom(),          // Surface
+        Entry.CreateSpeakerBottom(),   // Speaker
+        Entry.CreatePortraitNarrow(),  // Portrait
+        Entry.CreateLetterboxBottom(), // LetterBox
+        Entry.CreateFullTopLeft(),     // OnlyText
+        Entry.CreateBlackBookPage(),   // BlackBook
     };
 
     public Entry FindOrDefault(string key)
@@ -236,6 +335,29 @@ public sealed class DialogueSurfaceLayoutPresetDBSO : ScriptableObject
             this);
 
         return Entry.CreateFallback();
+    }
+
+    /// <summary>
+    /// 박스 종류 → 레이아웃. 박스가 하나뿐이므로 kind는 뷰가 아니라 이 프리셋을 고른다.
+    /// 해당 kind가 없으면 기본 프리셋으로 물러선다 — 조용히 아무것도 안 하지 않는다.
+    /// </summary>
+    public Entry FindByKind(DialogueBoxKind kind)
+    {
+        if (entries != null)
+        {
+            for (int i = 0; i < entries.Length; i++)
+            {
+                if (entries[i].kind == kind)
+                    return entries[i];
+            }
+        }
+
+        Debug.LogWarning(
+            $"[DialogueSurfaceLayoutPresetDBSO] No preset declares kind={kind}. " +
+            $"Falling back to key='{DefaultPresetKey}'.",
+            this);
+
+        return FindOrDefault(DefaultPresetKey);
     }
 
     public bool Contains(string key)
@@ -279,6 +401,7 @@ public sealed class DialogueSurfaceLayoutPresetDBSO : ScriptableObject
 
         bool hasDefault = false;
         var seenKeys = new HashSet<string>();
+        var seenKinds = new HashSet<DialogueBoxKind>();
 
         for (int i = 0; i < entries.Length; i++)
         {
@@ -301,6 +424,15 @@ public sealed class DialogueSurfaceLayoutPresetDBSO : ScriptableObject
                     $"[DialogueSurfaceLayoutPresetDBSO] Duplicate key='{normalizedKey}' at index={i}.",
                     this);
             }
+
+            // FindByKind가 첫 번째를 쓰므로, 중복은 뒤쪽 엔트리가 조용히 무시된다는 뜻이다.
+            if (!seenKinds.Add(entries[i].kind))
+            {
+                Debug.LogWarning(
+                    $"[DialogueSurfaceLayoutPresetDBSO] Duplicate kind={entries[i].kind} at index={i}. " +
+                    $"FindByKind는 첫 번째만 쓴다.",
+                    this);
+            }
         }
 
         if (!hasDefault)
@@ -308,6 +440,18 @@ public sealed class DialogueSurfaceLayoutPresetDBSO : ScriptableObject
             Debug.LogWarning(
                 $"[DialogueSurfaceLayoutPresetDBSO] Missing default preset key='{DefaultPresetKey}'.",
                 this);
+        }
+
+        // kind 하나라도 빠지면 그 박스 종류가 기본 레이아웃으로 조용히 떨어진다.
+        foreach (DialogueBoxKind kind in Enum.GetValues(typeof(DialogueBoxKind)))
+        {
+            if (!seenKinds.Contains(kind))
+            {
+                Debug.LogWarning(
+                    $"[DialogueSurfaceLayoutPresetDBSO] No preset for kind={kind}. " +
+                    $"그 종류는 기본 레이아웃으로 떨어진다.",
+                    this);
+            }
         }
     }
 #endif

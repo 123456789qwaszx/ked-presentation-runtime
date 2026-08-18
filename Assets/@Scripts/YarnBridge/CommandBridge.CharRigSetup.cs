@@ -2,12 +2,6 @@ using UnityEngine;
 
 public sealed partial class YarnCommandBridge
 {
-    private const string TyrantProtagonistSlotKey = "tyrant";
-
-    private const string DefaultTyrantScale = "5";
-    private const string DefaultTyrantDownUnit = "4u";
-    private const string DefaultTyrantRightUnit = "0.6u";
-    
     private void EnqueueSetupCharRigSpec(
         string slotKey,
         string stageKey = "stage00",
@@ -41,37 +35,6 @@ public sealed partial class YarnCommandBridge
 
             stage = stage,
             layer = PresentationDepthLayerKeyParser.Parse(layerKey)
-        });
-
-    private void EnqueueSetupTyrantProtagonistSpec()
-    {
-        EnqueueSetupProtagonistCharRigSpec(TyrantProtagonistSlotKey);
-        
-        EnqueueCastCharacterSpec(
-            TyrantProtagonistSlotKey,
-            "Tyrant",
-            "a",
-            emotionKey: "2");
-
-        EnqueueFadeInDslSpec(
-            TyrantProtagonistSlotKey,
-            "-1s");
-
-        EnqueueNudgeDownSpec(
-            TyrantProtagonistSlotKey,
-            DefaultTyrantDownUnit);
-
-        EnqueueNudgeRightSpec(
-            TyrantProtagonistSlotKey,
-            DefaultTyrantRightUnit);
-    }
-
-    private void EnqueueSetupProtagonistCharRigSpec(string slotKey)
-        => Collect(new SetupCharRigCommandSpec
-        {
-            roleKey = slotKey,
-            rigPrefab = _charRigPrefab,
-            useProtagonistSlot = true
         });
 
     private void EnqueueCastCharacterSpec(

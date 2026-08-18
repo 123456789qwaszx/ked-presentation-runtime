@@ -105,7 +105,7 @@ public class VnAppBootstrap : MonoBehaviour
     private EpisodePlayer _episodePlayer;
     
     private PresentationUIRoot _presentationUIRoot;
-    private IProtagonistCharRigSlotProvider _protagonistCharRigSlot;
+    private DialogueSurfaceBox _dialogueSurfaceBox;
     
     
     private void Awake()
@@ -115,7 +115,7 @@ public class VnAppBootstrap : MonoBehaviour
         _vnRuntimeStateProvider = new VNRuntimeStateProvider(_rollbackHistory, _choiceHistory);
         
         _presentationUIRoot = uiManager.GetUI<PresentationUIRoot>();
-        _protagonistCharRigSlot = uiManager.GetUI<DialogueBox00_Portrait>();
+        _dialogueSurfaceBox = uiManager.GetUI<DialogueSurfaceBox>();
         
         _screenBindings = new VnScreenBindings(uiManager);
         
@@ -179,7 +179,7 @@ public class VnAppBootstrap : MonoBehaviour
         unitySignalBus.OnSignal += signalLatch.Latch;
 
         // Character Rig
-        CharRigSlotResolver charRigSlotResolver = new(_presentationUIRoot, _protagonistCharRigSlot);
+        CharRigSlotResolver charRigSlotResolver = new(_presentationUIRoot);
         CharacterRigBuilder characterRigBuilder = new();
         PortraitResolver portraitResolver = new(portraitGeneratedDbSo);
 
@@ -271,7 +271,7 @@ public class VnAppBootstrap : MonoBehaviour
         DialogueBoxMetadataResolver metadataResolver = new();
         _dialogueBoxPresentationController = new(
             _dialogueBoxState, 
-            dialogueBoxHost,
+            _dialogueSurfaceBox,
             metadataResolver, 
             _dialogueSurfaceState, 
             surfaceLayoutPresetDbSo,

@@ -20,18 +20,6 @@ public partial class DialogueBoxPresentationController
         }
     }
 
-    public void SetProtagonistLineBoxKind(DialogueBoxKind kind)
-        => _protagonistLineBoxKind = kind;
-
-    public void SetNamedLineBoxKind(DialogueBoxKind kind)
-        => _namedLineBoxKind = kind;
-
-    public void ResetDefaultLineBoxKinds()
-    {
-        _protagonistLineBoxKind = DefaultProtagonistLineBoxKind;
-        _namedLineBoxKind = DefaultNamedLineBoxKind;
-    }
-
     // surface_layout is a persistent presentation state mutation.
     // It is intentionally not applied to the currently committed box here,
     // because front-matter commands for the next line may run while the previous
@@ -52,7 +40,9 @@ public partial class DialogueBoxPresentationController
         if (_boxState.Box == null)
             return;
 
-        ApplyCurrentSurfaceLayout(_boxState.Box);
+        ApplySurfaceLayoutFor(
+            _boxState.Box,
+            _boxState.BoxKind ?? DefaultLineBoxKind);
     }
 
     public async YarnTask HideCurrentAsync()
@@ -63,7 +53,7 @@ public partial class DialogueBoxPresentationController
 
         if (currentBox == null)
         {
-            _host.HideAllDialogueBoxes();
+            _box.SetVisibleImmediate(false);
             _boxState.MarkHidden();
             return;
         }
@@ -105,7 +95,6 @@ public partial class DialogueBoxPresentationController
         if (currentBox == null)
             return;
 
-        _host.HideAllDialogueBoxesExcept(currentBox);
 
         if (_boxState.IsVisible)
         {
@@ -133,7 +122,6 @@ public partial class DialogueBoxPresentationController
             return;
         }
 
-        _host.HideAllDialogueBoxesExcept(currentBox);
         currentBox.SetVisibleImmediate(true);
         _boxState.TryMarkVisible();
     }
