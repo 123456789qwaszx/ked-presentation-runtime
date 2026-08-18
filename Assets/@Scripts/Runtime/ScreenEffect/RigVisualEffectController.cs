@@ -22,10 +22,6 @@ public sealed class RigVisualEffectController : IDisposable
     private const float InnerRimWidth = 0.003f;
     private const float InnerRimSoftness = 0.8f;
 
-    private const float DefaultStageBlurEdgeHide = 0f;
-    private const float DefaultStageBlurEdgeWidth = 2.88f;
-    private const float DefaultStageBlurEdgeSoftness = 0.88f;
-
     private static readonly int DimAmountId = Shader.PropertyToID("_DimAmount");
     private static readonly int DimBrightnessId = Shader.PropertyToID("_DimBrightness");
     private static readonly int DimSaturationId = Shader.PropertyToID("_DimSaturation");
@@ -41,9 +37,6 @@ public sealed class RigVisualEffectController : IDisposable
     private static readonly int InnerRimWidthId = Shader.PropertyToID("_InnerRimWidth");
     private static readonly int InnerRimSoftnessId = Shader.PropertyToID("_InnerRimSoftness");
 
-    private static readonly int StageBlurEdgeHideId = Shader.PropertyToID("_StageBlurEdgeHide");
-    private static readonly int StageBlurEdgeWidthId = Shader.PropertyToID("_StageBlurEdgeWidth");
-    private static readonly int StageBlurEdgeSoftnessId = Shader.PropertyToID("_StageBlurEdgeSoftness");
 
     private static readonly int BlurAmountId = Shader.PropertyToID("_BlurAmount");
 
@@ -60,7 +53,6 @@ public sealed class RigVisualEffectController : IDisposable
     private float _dimAmount;
     private float _outerRimAmount;
     private float _innerRimAmount;
-    private float _stageBlurEdgeHide;
     private float _blurAmount;
 
     private Color _dimTintColor;
@@ -70,7 +62,6 @@ public sealed class RigVisualEffectController : IDisposable
     public float DimAmount => _dimAmount;
     public float OuterRimAmount => _outerRimAmount;
     public float InnerRimAmount => _innerRimAmount;
-    public float StageBlurEdgeHide => _stageBlurEdgeHide;
     public float BlurAmount => _blurAmount;
 
     public Color DimTintColor => _dimTintColor;
@@ -111,7 +102,6 @@ public sealed class RigVisualEffectController : IDisposable
         _dimAmount = 0f;
         _outerRimAmount = 0f;
         _innerRimAmount = 0f;
-        _stageBlurEdgeHide = DefaultStageBlurEdgeHide;
         _blurAmount = 0f;
 
         _dimTintColor = DefaultDimTintColor;
@@ -120,7 +110,6 @@ public sealed class RigVisualEffectController : IDisposable
 
         ApplyStaticStyle();
         ApplyDynamicValues();
-        ApplyStageBlurEdgeValues();
 
         MarkMaterialDirty();
     }
@@ -159,16 +148,6 @@ public sealed class RigVisualEffectController : IDisposable
         MarkMaterialDirty();
     }
 
-    public void SetStageBlurEdgeHideImmediate(float value)
-    {
-        if (_runtimeMaterial == null)
-            return;
-
-        _stageBlurEdgeHide = Mathf.Clamp01(value);
-        ApplyStageBlurEdgeValues();
-        MarkMaterialDirty();
-    }
-
     // 스타일은 생성 시 한 번만 기록. tween마다 반복하지 않음.
     private void ApplyStaticStyle()
     {
@@ -185,15 +164,6 @@ public sealed class RigVisualEffectController : IDisposable
             return;
 
         ApplyDynamicValuesTo(_runtimeMaterial);
-        PushMaterialToGraphics();
-    }
-
-    private void ApplyStageBlurEdgeValues()
-    {
-        if (_runtimeMaterial == null)
-            return;
-
-        ApplyStageBlurEdgeValuesTo(_runtimeMaterial);
         PushMaterialToGraphics();
     }
 
@@ -247,16 +217,8 @@ public sealed class RigVisualEffectController : IDisposable
 
         material.SetFloat(InnerRimWidthId, InnerRimWidth);
         material.SetFloat(InnerRimSoftnessId, InnerRimSoftness);
-
-        material.SetFloat(StageBlurEdgeWidthId, DefaultStageBlurEdgeWidth);
-        material.SetFloat(StageBlurEdgeSoftnessId, DefaultStageBlurEdgeSoftness);
     }
 
-    private void ApplyStageBlurEdgeValuesTo(Material material)
-    {
-        material.SetFloat(StageBlurEdgeHideId, _stageBlurEdgeHide);
-    }
-    
     // Mask 등에 의해 Canvas가 서브 Material을 생성했을 때, 실제 사용하는 것과 Image의 Material을 같게 함.
     private void PushMaterialToGraphics()
     {
@@ -276,7 +238,6 @@ public sealed class RigVisualEffectController : IDisposable
 
         ApplyStaticStyleTo(renderingMaterial);
         ApplyDynamicValuesTo(renderingMaterial);
-        ApplyStageBlurEdgeValuesTo(renderingMaterial);
 
         image.canvasRenderer.SetMaterial(renderingMaterial, image.mainTexture);
     }

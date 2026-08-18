@@ -13,7 +13,7 @@
 
 | 어셈블리 | 위치 | 내용 |
 |---|---|---|
-| `Ked.Presentation.Runtime` | `Assets/@Scripts/Runtime/` | 연출 실행 계층 — PresentationCore · Commands · CharacterRig · ShotResponse · BackgroundRig · ScreenEffect · Audio |
+| `Ked.Presentation.Runtime` | `Assets/@Scripts/Runtime/` | 연출 실행 계층 — PresentationCore · Commands · CharacterRig · ShotResponse · BackgroundRig · ScreenEffect · StageMask · Audio |
 | `Assembly-CSharp` (기본) | `Assets/@Scripts/` 나머지 | 글루 — Game · UI · VNLinePresentationFlow · FeatureController · **YarnBridge** |
 | `Assembly-CSharp-Editor` (기본) | `Assets/Editor/` | 에디터 도구 — 초상 DB 빌더 · 튜닝 덤프 익스포터 · 폰트 교체 |
 
@@ -71,7 +71,7 @@ UI 타입이 기능 폴더의 계약을 구현하는 partial을 전부 여기 �
 |---|---|---|
 | `PresentationUIRoot.ShotResponseStage.cs` | `IShotResponseStageProvider` | `Runtime/ShotResponse/` |
 | `PresentationUIRoot.StageDepthContentSlot.cs` | `IStageDepthContentSlotProvider` | `Runtime/PresentationCore/` |
-| `PresentationUIRoot.StageMask.cs` | `IStageMaskProvider` | `Runtime/ScreenEffect/StageMask/` |
+| `PresentationUIRoot.StageMask.cs` | `IStageMaskProvider` | `Runtime/StageMask/` |
 | `PresentationUIRoot.StageCounts.cs` | (계약 아님 — enum을 세는 private const) | enum은 `Runtime/PresentationCore/` |
 
 > **새 provider를 만들 때**: 계약(interface)은 그것을 필요로 하는 기능 폴더에,
