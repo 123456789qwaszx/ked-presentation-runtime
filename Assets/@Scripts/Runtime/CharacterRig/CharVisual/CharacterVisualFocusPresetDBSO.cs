@@ -24,6 +24,10 @@ public sealed class CharacterVisualFocusPresetDBSO : ScriptableObject
         [Range(0f, 1f)] public float innerRim;
         public Color outerRimColor;
         public Color innerRimColor;
+
+        [Header("Blur")]
+        [Tooltip("밉+5탭 디포커스. 0이면 _BLUR 키워드가 꺼져 블러 경로 자체가 실행되지 않는다.")]
+        [Range(0f, 1f)] public float blur;
     }
 
     [SerializeField] private List<Entry> entries = new();
@@ -73,6 +77,8 @@ public sealed class CharacterVisualFocusPresetDBSO : ScriptableObject
             {
                 key = "clear",
 
+                blur = 0f,
+
                 dim = 0f,
                 dimTintColor = defaultDimTint,
 
@@ -85,6 +91,8 @@ public sealed class CharacterVisualFocusPresetDBSO : ScriptableObject
             new()
             {
                 key = "focus",
+
+                blur = 0f,
 
                 dim = 0f,
                 dimTintColor = defaultDimTint,
@@ -99,6 +107,8 @@ public sealed class CharacterVisualFocusPresetDBSO : ScriptableObject
             {
                 key = "defocus",
 
+                blur = 0.5f,
+
                 dim = 0.45f,
                 dimTintColor = defaultDimTint,
 
@@ -111,6 +121,8 @@ public sealed class CharacterVisualFocusPresetDBSO : ScriptableObject
             new()
             {
                 key = "dim",
+
+                blur = 0f,
 
                 dim = 0.55f,
                 dimTintColor = defaultDimTint,
@@ -125,6 +137,8 @@ public sealed class CharacterVisualFocusPresetDBSO : ScriptableObject
             {
                 key = "silhouette",
 
+                blur = 0f,
+
                 dim = 1f,
                 dimTintColor = Color.black,
 
@@ -138,6 +152,8 @@ public sealed class CharacterVisualFocusPresetDBSO : ScriptableObject
             {
                 key = "inner_rim",
 
+                blur = 0f,
+
                 dim = 0f,
                 dimTintColor = defaultDimTint,
 
@@ -150,6 +166,8 @@ public sealed class CharacterVisualFocusPresetDBSO : ScriptableObject
             new()
             {
                 key = "outer_rim",
+
+                blur = 0f,
 
                 dim = 0f,
                 dimTintColor = defaultDimTint,

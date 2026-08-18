@@ -105,7 +105,8 @@ public sealed class CharVisualFocusCommandCharR : ClaimTweenCommandBase
             _controller.OuterRimAmount,
             _controller.InnerRimAmount,
             _controller.OuterRimColor,
-            _controller.InnerRimColor);
+            _controller.InnerRimColor,
+            _controller.BlurAmount);
     }
 
     private VisualState BuildDestState()
@@ -138,7 +139,8 @@ public sealed class CharVisualFocusCommandCharR : ClaimTweenCommandBase
             0.4f * intensity,
             0.09f * intensity,
             Color.white,
-            new Color(1f, 0.96f, 0.86f, 1f));
+            new Color(1f, 0.96f, 0.86f, 1f),
+            0f);
     }
 
     private static VisualState EntryToState(
@@ -151,7 +153,8 @@ public sealed class CharVisualFocusCommandCharR : ClaimTweenCommandBase
             entry.outerRim * intensity,
             entry.innerRim * intensity,
             entry.outerRimColor,
-            entry.innerRimColor);
+            entry.innerRimColor,
+            entry.blur * intensity);
     }
 
     private void ApplyState(VisualState state)
@@ -162,7 +165,8 @@ public sealed class CharVisualFocusCommandCharR : ClaimTweenCommandBase
             state.OuterRim,
             state.InnerRim,
             state.OuterRimColor,
-            state.InnerRimColor);
+            state.InnerRimColor,
+            state.Blur);
     }
 
     private readonly struct VisualState
@@ -173,6 +177,7 @@ public sealed class CharVisualFocusCommandCharR : ClaimTweenCommandBase
         public readonly float InnerRim;
         public readonly Color OuterRimColor;
         public readonly Color InnerRimColor;
+        public readonly float Blur;
 
         public VisualState(
             float dim,
@@ -180,7 +185,8 @@ public sealed class CharVisualFocusCommandCharR : ClaimTweenCommandBase
             float outerRim,
             float innerRim,
             Color outerRimColor,
-            Color innerRimColor)
+            Color innerRimColor,
+            float blur)
         {
             Dim = Mathf.Clamp01(dim);
             DimTintColor = dimTintColor;
@@ -188,6 +194,7 @@ public sealed class CharVisualFocusCommandCharR : ClaimTweenCommandBase
             InnerRim = Mathf.Clamp01(innerRim);
             OuterRimColor = outerRimColor;
             InnerRimColor = innerRimColor;
+            Blur = Mathf.Clamp01(blur);
         }
 
         public static VisualState Lerp(VisualState from, VisualState to, float t)
@@ -200,7 +207,8 @@ public sealed class CharVisualFocusCommandCharR : ClaimTweenCommandBase
                 Mathf.Lerp(from.OuterRim, to.OuterRim, t),
                 Mathf.Lerp(from.InnerRim, to.InnerRim, t),
                 Color.Lerp(from.OuterRimColor, to.OuterRimColor, t),
-                Color.Lerp(from.InnerRimColor, to.InnerRimColor, t));
+                Color.Lerp(from.InnerRimColor, to.InnerRimColor, t),
+                Mathf.Lerp(from.Blur, to.Blur, t));
         }
 
         public static float Distance(VisualState from, VisualState to)
@@ -208,6 +216,7 @@ public sealed class CharVisualFocusCommandCharR : ClaimTweenCommandBase
             float dim = Mathf.Abs(to.Dim - from.Dim);
             float outerRim = Mathf.Abs(to.OuterRim - from.OuterRim);
             float innerRim = Mathf.Abs(to.InnerRim - from.InnerRim);
+            float blur = Mathf.Abs(to.Blur - from.Blur);
 
             float dimTint = ColorDistance(from.DimTintColor, to.DimTintColor);
             float outerRimColor = ColorDistance(from.OuterRimColor, to.OuterRimColor);
@@ -216,6 +225,7 @@ public sealed class CharVisualFocusCommandCharR : ClaimTweenCommandBase
             return dim +
                    outerRim +
                    innerRim +
+                   blur +
                    dimTint +
                    outerRimColor +
                    innerRimColor;

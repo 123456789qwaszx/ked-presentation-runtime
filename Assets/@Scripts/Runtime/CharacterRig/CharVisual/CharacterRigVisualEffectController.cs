@@ -44,6 +44,14 @@ public sealed class CharacterRigVisualEffectController : IDisposable
     private static readonly int StageBlurEdgeHideId = Shader.PropertyToID("_StageBlurEdgeHide");
     private static readonly int StageBlurEdgeWidthId = Shader.PropertyToID("_StageBlurEdgeWidth");
     private static readonly int StageBlurEdgeSoftnessId = Shader.PropertyToID("_StageBlurEdgeSoftness");
+
+    private static readonly int BlurAmountId = Shader.PropertyToID("_BlurAmount");
+
+    // 셰이더 그래프의 Boolean Keyword(Multi Compile). 꺼져 있으면 밉+5탭 경로가 변형에서 통째로 빠진다.
+    private const string BlurKeyword = "_BLUR";
+
+    // 0에 가까운 값까지 켜 두면 눈에 안 보이는 블러 때문에 비싼 변형을 쓰게 된다.
+    private const float BlurKeywordThreshold = 0.001f;
     
     private readonly Image _portraitImage;
     
@@ -53,6 +61,7 @@ public sealed class CharacterRigVisualEffectController : IDisposable
     private float _outerRimAmount;
     private float _innerRimAmount;
     private float _stageBlurEdgeHide;
+    private float _blurAmount;
 
     private Color _dimTintColor;
     private Color _outerRimColor;
@@ -62,6 +71,7 @@ public sealed class CharacterRigVisualEffectController : IDisposable
     public float OuterRimAmount => _outerRimAmount;
     public float InnerRimAmount => _innerRimAmount;
     public float StageBlurEdgeHide => _stageBlurEdgeHide;
+    public float BlurAmount => _blurAmount;
 
     public Color DimTintColor => _dimTintColor;
     public Color OuterRimColor => _outerRimColor;
@@ -102,6 +112,7 @@ public sealed class CharacterRigVisualEffectController : IDisposable
         _outerRimAmount = 0f;
         _innerRimAmount = 0f;
         _stageBlurEdgeHide = DefaultStageBlurEdgeHide;
+        _blurAmount = 0f;
 
         _dimTintColor = DefaultDimTintColor;
         _outerRimColor = DefaultOuterRimColor;
@@ -120,7 +131,8 @@ public sealed class CharacterRigVisualEffectController : IDisposable
         float outerRim,
         float innerRim,
         Color outerColor,
-        Color innerColor)
+        Color innerColor,
+        float blur)
     {
         if (_runtimeMaterial == null)
             return;
@@ -131,6 +143,7 @@ public sealed class CharacterRigVisualEffectController : IDisposable
         _innerRimAmount = Mathf.Clamp01(innerRim);
         _outerRimColor = outerColor;
         _innerRimColor = innerColor;
+        _blurAmount = Mathf.Clamp01(blur);
 
         ApplyDynamicValues();
         MarkMaterialDirty();
@@ -203,6 +216,15 @@ public sealed class CharacterRigVisualEffectController : IDisposable
 
         material.SetFloat(InnerRimAmountId, _innerRimAmount);
         material.SetColor(InnerRimColorId, _innerRimColor);
+
+        material.SetFloat(BlurAmountId, _blurAmount);
+
+        // 캐시한 on/off로 가드하지 않는다 — materialForRendering은 Mask 등에 의해 새로 만들어질 수 있고,
+        // 그때 키워드가 빠지면 Keyword의 Off 분기로 떨어진다.
+        if (_blurAmount > BlurKeywordThreshold)
+            material.EnableKeyword(BlurKeyword);
+        else
+            material.DisableKeyword(BlurKeyword);
     }
 
     private void ApplyStaticStyleTo(Material material)
