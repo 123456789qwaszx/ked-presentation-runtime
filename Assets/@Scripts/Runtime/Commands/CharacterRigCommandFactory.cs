@@ -71,6 +71,7 @@ public sealed class CharacterRigCommandFactory : INodeCommandFactory
             SetSpriteCommandSpecCharR s => new SetSpriteCommandCharR(s),
             
             CharVisualFocusCommandSpecCharR s => new CharVisualFocusCommandCharR(s, _characterVisualFocusPresetDb),
+            DepthFocusCommandSpecCharR s => new DepthFocusCommandCharR(s),
 
             _ => null
         };

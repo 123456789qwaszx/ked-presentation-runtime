@@ -44,6 +44,7 @@ public sealed partial class YarnCommandBridge
         
         BindScreenEffects(runner);
         BindStageDepthDefocus(runner);
+        BindDepthFocus(runner);
     }
 
     private void BindControl(DialogueRunner runner)
@@ -437,6 +438,15 @@ public sealed partial class YarnCommandBridge
             "screen_noise_clear", EnqueueScreenNoiseClearSpec);
     }
     
+    private void BindDepthFocus(DialogueRunner runner)
+    {
+        runner.AddCommandHandler<string, float, string>(
+            "focus_on", EnqueueDepthFocusOnSpec);
+
+        runner.AddCommandHandler<string>(
+            "focus_clear", EnqueueDepthFocusClearSpec);
+    }
+
     private void BindStageDepthDefocus(DialogueRunner runner)
     {
         runner.AddCommandHandler<string, float>(

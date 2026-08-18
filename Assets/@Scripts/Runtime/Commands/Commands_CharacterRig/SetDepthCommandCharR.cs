@@ -87,6 +87,10 @@ public sealed class SetDepthCommandCharR : ClaimTweenCommandBase
 
         _destRawDepthY = rawDepth.RawDepthYAnchoredPosition;
         _destDepthScale = rawDepth.DepthScale;
+
+        // 착란원 계산이 읽는 정지 프레임 값. 트윈 시작 시점에 확정된다.
+        if (_rigRefs != null)
+            _rigRefs.SettledDepthScale = _destDepthScale.x;
         
         CharacterDepthResolver.CalculateDepthYThatPreservesCurrentFocus(
             scope,

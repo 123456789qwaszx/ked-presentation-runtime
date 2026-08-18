@@ -131,6 +131,12 @@ public sealed class CharacterRigRefs
 
     public CharacterPlacementTargetLedger PlacementTargets { get; } = new();
 
+    // 정지 프레임의 깊이 스케일. SetDepthCommandCharR가 목표값을 확정할 때 기록한다.
+    // 트윈이 도는 중에도 "끝나면 어디인가"를 들고 있어야 착란원 계산이 흔들리지 않는다.
+    // 열거형(CharacterDepthKey)이 아니라 스케일 값인 이유: useLevel=true 경로는 프리셋 키가 없고,
+    // CoC 공식이 필요로 하는 것도 스케일이다. Far 0.68 ~ Close 1.38로 단조증가한다.
+    public float SettledDepthScale = 1f;
+
     // Slot axis - stage placement
     public RectTransform CharSlot_Track_Focus;
     public RectTransform CharSlot_DepthY;

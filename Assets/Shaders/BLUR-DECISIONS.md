@@ -170,23 +170,45 @@ v2 캡처 시스템의 경계 처리다. 유일한 writer였던 `StageDepthDefoc
 확실히 하려면 분기를 HLSL 안(`#ifdef _BLUR`)으로 옮기면 되고, 그러면 Keyword 노드 2개와
 베이스 샘플이 불필요해진다.
 
-## 7. 아직 없는 것
-
-**CoC 정책이 없다.** 캐릭터별 블러 *기구*는 섰지만 깊이에 따라 흐림을 정하는 *정책*이 없다.
-이것이 서야 v2를 버린 이유(§3)가 실제로 해결된다.
+## 7. CoC 정책 — focus_on
 
 ```
-coc = saturate(|depthScale_char − depthScale_focus| × k)
+<<focus_on @1>>            @1에 초점. 나머지는 깊이 차이만큼 흐려진다
+<<focus_on @1 0.6>>        최대 흐림 0.6으로 제한
+<<focus_on @1 0.6 0.8s>>   0.8초에 걸쳐
+<<focus_clear>>            전원 복귀
 ```
 
-`depthScale`은 Far 0.68 → Back 0.86 → Mid 1.00 → Front 1.18 → Close 1.38로 단조증가하므로
-깊이 대용값으로 그대로 쓸 수 있다.
+```
+coc = saturate(|depthScale_char − depthScale_focus| × falloff) × maxBlur
+```
 
-> 다만 **저작이 아직 이걸 부르지 않는다.** 에피소드의 `screen_blur` 7회는 전부 `far`
-> (= 배경 레이어) 대상이고 캐릭터를 흐리는 호출은 0건이다. 그래서 이건 기존 기능의
-> 재구현이 아니라 **신규 기능**이고, 우선순위는 기술이 아니라 제품 판단이다.
->
-> 설계 쟁점 하나: 캐릭터는 대부분 `mid` 레이어에 몰려 있고 깊이는 `size` 커맨드의
-> 프리셋으로 갈린다. 따라서 CoC는 **레이어가 아니라 depth 프리셋**에서 나와야 한다 —
-> 레이어 기준으로 하면 전원이 같은 값이 되어 v2의 실패를 반복한다.
-> 그런데 리그는 현재 depth 키를 기록하지 않는다(`SetDepthCommandCharR`가 트랜스폼에만 적용).
+**깊이는 레이어가 아니라 depth 프리셋에서 온다.** 캐릭터는 대부분 `mid` 레이어에 몰려 있고
+깊이는 `size` 커맨드로 갈리기 때문에, 레이어를 기준으로 삼으면 전원이 같은 값이 되어
+**v2의 실패를 그대로 반복한다.**
+
+그래서 `CharacterRigRefs.SettledDepthScale`을 추가했다. `SetDepthCommandCharR`가 목표값을
+확정할 때 기록하므로 **트윈이 도는 중에도 "끝나면 어디인가"** 를 들고 있다 — 정지 프레임 원칙.
+열거형이 아니라 스케일 값인 이유는 `useLevel=true` 경로에 프리셋 키가 없고, 공식이 필요로 하는
+것도 스케일이기 때문이다.
+
+`falloff` 기본값 1.43은 depthScale 범위(Far 0.68 ~ Close 1.38, 간격 0.70)의 역수다 —
+무대 양 끝이 최대로 흐려진다.
+
+배경은 대상이 아니다. `screen_blur far`가 이미 레이어 단위로 처리한다.
+
+### ⚠ 블러를 쓰는 커맨드가 셋이다
+
+`focus_on` · `screen_blur` · `char_visual_focus/defocus`(프리셋의 `blur` 필드)가 모두
+같은 `_BlurAmount`를 쓴다. 서로 죽이지 않으므로 **동시에 걸면 매 프레임 싸운다.**
+
+재발행만은 막아 두었다 — 트윈 타깃을 커맨드 인스턴스가 아니라 공유 스코프로 잡는다:
+
+| 커맨드 | 트윈 타깃 |
+|---|---|
+| `focus_on` | `CharacterRigRegistry` (모든 캐릭터) |
+| `screen_blur` | 레이어의 content root |
+| `char_visual_*` | 해당 리그의 컨트롤러 |
+
+같은 커맨드를 다시 걸면 이전 트윈이 죽는다. **다른 커맨드끼리는 여전히 겹칠 수 있다** —
+저작에서 한 번에 하나만 쓰는 것이 전제다.

@@ -122,7 +122,9 @@ public sealed class StageLayerBlurCommand : ClaimTweenCommandBase
 
     protected override void ClaimTarget(CommandRunScope scope)
     {
-        DOTween.Kill(this, false);
+        // 트윈 타깃은 커맨드 인스턴스가 아니라 레이어의 content root다 —
+        // this로 잡으면 같은 레이어에 screen_blur를 다시 걸 때 이전 트윈이 안 죽어 둘이 싸운다.
+        DOTween.Kill(_contentRoot, false);
 
         CollectBindings(scope);
 
@@ -137,7 +139,7 @@ public sealed class StageLayerBlurCommand : ClaimTweenCommandBase
                 1f,
                 duration)
             .SetEase(_spec.ease)
-            .SetTarget(this);
+            .SetTarget(_contentRoot);
 
     /// <summary>
     /// 진행률(0→1) 트윈이라 그대로 재시작하면 처음부터 다시 돈다 —
@@ -152,7 +154,7 @@ public sealed class StageLayerBlurCommand : ClaimTweenCommandBase
 
     protected override void OnCommitFinalState()
     {
-        DOTween.Kill(this, false);
+        DOTween.Kill(_contentRoot, false);
 
         ApplyAt(1f);
     }
