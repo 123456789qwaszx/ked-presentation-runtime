@@ -85,43 +85,6 @@ public static class PresentationCommandKeyParser
         return false;
     }
 
-    public static bool TryParseBlurDownsampleKey(string key, out UIStageBlurDownsample downsample)
-    {
-        string normalized = Normalize(key);
-
-        switch (normalized)
-        {
-            case "1":
-            case "full":
-                downsample = UIStageBlurDownsample.Full;
-                return true;
-
-            case "2":
-            case "half":
-                downsample = UIStageBlurDownsample.Half;
-                return true;
-
-            case "4":
-            case "quarter":
-            case "q":
-                downsample = UIStageBlurDownsample.Quarter;
-                return true;
-
-            case "8":
-            case "eighth":
-            case "e":
-                downsample = UIStageBlurDownsample.Eighth;
-                return true;
-        }
-
-        if (System.Enum.TryParse(key, true, out downsample))
-            return true;
-
-        Debug.LogWarning($"[PresentationCommandKeyParser] Unknown blur downsample key: {key}");
-        downsample = default;
-        return false;
-    }
-
     public static string Normalize(string key)
     {
         if (string.IsNullOrWhiteSpace(key))

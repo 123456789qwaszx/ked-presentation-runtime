@@ -70,8 +70,7 @@ UI 타입이 기능 폴더의 계약을 구현하는 partial을 전부 여기 �
 | UI/Providers/ | 구현하는 계약 | 계약의 위치 |
 |---|---|---|
 | `PresentationUIRoot.ShotResponseStage.cs` | `IShotResponseStageProvider` | `Runtime/ShotResponse/` |
-| `PresentationUIRoot.DepthDefocusOverlay.cs` | `IPresentationDepthDefocusOverlayProvider` | `Runtime/ScreenEffect/StageDepthBlur/` |
-| `PresentationUIRoot.StageDepthContentSlot.cs` | `IStageDepthContentSlotProvider` | `Runtime/ScreenEffect/StageDepthBlur/` |
+| `PresentationUIRoot.StageDepthContentSlot.cs` | `IStageDepthContentSlotProvider` | `Runtime/PresentationCore/` |
 | `PresentationUIRoot.StageMask.cs` | `IStageMaskProvider` | `Runtime/ScreenEffect/StageMask/` |
 | `PresentationUIRoot.StageCounts.cs` | (계약 아님 — enum을 세는 private const) | enum은 `Runtime/PresentationCore/` |
 

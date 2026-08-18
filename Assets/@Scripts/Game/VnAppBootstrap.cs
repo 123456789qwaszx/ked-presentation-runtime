@@ -80,7 +80,6 @@ public class VnAppBootstrap : MonoBehaviour
     [SerializeField] private ScreenNoisePresetDBSO screenNoisePresetDbso;
     [SerializeField] private ScreenVignettePresetDBSO screenVignettePresetDbso;
     [SerializeField] private ScreenFlashPresetDBSO screenFlashPresetDbso;
-    [SerializeField] private UIStageDepthLayerBlurRuntime uiStageDepthLayerBlurRuntime;
     
     [SerializeField] private StageMaskMotionPresetDBSO stageMaskMotionPresetDbSo;
     
@@ -118,7 +117,6 @@ public class VnAppBootstrap : MonoBehaviour
         
         _screenBindings = new VnScreenBindings(uiManager);
         
-        uiStageDepthLayerBlurRuntime.Initialize(_presentationUIRoot);
         
         IShotResponseStageProvider shotResponseStageProvider = _presentationUIRoot;
         
@@ -213,7 +211,6 @@ public class VnAppBootstrap : MonoBehaviour
             screenFlashPresetDbso,
             screenNoisePresetDbso, 
             screenVignettePresetDbso,
-            uiStageDepthLayerBlurRuntime,
             stageMaskMotionPresetDbSo,
             _presentationUIRoot,
             _presentationUIRoot);

@@ -25,36 +25,26 @@ public partial class PresentationUIRoot
     private RectTransform _stage00DepthFarFramingTransform;
     private RectTransform _stage00DepthFarFramingScale;
     private RectTransform _stage00DepthFarContent;
-    private RectTransform _stage00FarFrostedGlassMask;
-    private RawImage _stage00FarFrostedGlassRawImage;
 
     private RectTransform _stage00DepthBackRoot;
     private RectTransform _stage00DepthBackFramingTransform;
     private RectTransform _stage00DepthBackFramingScale;
     private RectTransform _stage00DepthBackContent;
-    private RectTransform _stage00BackFrostedGlassMask;
-    private RawImage _stage00BackFrostedGlassRawImage;
 
     private RectTransform _stage00DepthMidRoot;
     private RectTransform _stage00DepthMidFramingTransform;
     private RectTransform _stage00DepthMidFramingScale;
     private RectTransform _stage00DepthMidContent;
-    private RectTransform _stage00MidFrostedGlassMask;
-    private RawImage _stage00MidFrostedGlassRawImage;
 
     private RectTransform _stage00DepthFrontRoot;
     private RectTransform _stage00DepthFrontFramingTransform;
     private RectTransform _stage00DepthFrontFramingScale;
     private RectTransform _stage00DepthFrontContent;
-    private RectTransform _stage00FrontFrostedGlassMask;
-    private RawImage _stage00FrontFrostedGlassRawImage;
 
     private RectTransform _stage00DepthCloseRoot;
     private RectTransform _stage00DepthCloseFramingTransform;
     private RectTransform _stage00DepthCloseFramingScale;
     private RectTransform _stage00DepthCloseContent;
-    private RectTransform _stage00CloseFrostedGlassMask;
-    private RawImage _stage00CloseFrostedGlassRawImage;
 
     private RectTransform _stage01Root;
 
@@ -63,36 +53,26 @@ public partial class PresentationUIRoot
     private RectTransform _stage01DepthFarFramingTransform;
     private RectTransform _stage01DepthFarFramingScale;
     private RectTransform _stage01DepthFarContent;
-    private RectTransform _stage01FarFrostedGlassMask;
-    private RawImage _stage01FarFrostedGlassRawImage;
 
     private RectTransform _stage01DepthBackRoot;
     private RectTransform _stage01DepthBackFramingTransform;
     private RectTransform _stage01DepthBackFramingScale;
     private RectTransform _stage01DepthBackContent;
-    private RectTransform _stage01BackFrostedGlassMask;
-    private RawImage _stage01BackFrostedGlassRawImage;
 
     private RectTransform _stage01DepthMidRoot;
     private RectTransform _stage01DepthMidFramingTransform;
     private RectTransform _stage01DepthMidFramingScale;
     private RectTransform _stage01DepthMidContent;
-    private RectTransform _stage01MidFrostedGlassMask;
-    private RawImage _stage01MidFrostedGlassRawImage;
 
     private RectTransform _stage01DepthFrontRoot;
     private RectTransform _stage01DepthFrontFramingTransform;
     private RectTransform _stage01DepthFrontFramingScale;
     private RectTransform _stage01DepthFrontContent;
-    private RectTransform _stage01FrontFrostedGlassMask;
-    private RawImage _stage01FrontFrostedGlassRawImage;
 
     private RectTransform _stage01DepthCloseRoot;
     private RectTransform _stage01DepthCloseFramingTransform;
     private RectTransform _stage01DepthCloseFramingScale;
     private RectTransform _stage01DepthCloseContent;
-    private RectTransform _stage01CloseFrostedGlassMask;
-    private RawImage _stage01CloseFrostedGlassRawImage;
 
     private RectTransform _stage02Root;
 
@@ -101,36 +81,26 @@ public partial class PresentationUIRoot
     private RectTransform _stage02DepthFarFramingTransform;
     private RectTransform _stage02DepthFarFramingScale;
     private RectTransform _stage02DepthFarContent;
-    private RectTransform _stage02FarFrostedGlassMask;
-    private RawImage _stage02FarFrostedGlassRawImage;
 
     private RectTransform _stage02DepthBackRoot;
     private RectTransform _stage02DepthBackFramingTransform;
     private RectTransform _stage02DepthBackFramingScale;
     private RectTransform _stage02DepthBackContent;
-    private RectTransform _stage02BackFrostedGlassMask;
-    private RawImage _stage02BackFrostedGlassRawImage;
 
     private RectTransform _stage02DepthMidRoot;
     private RectTransform _stage02DepthMidFramingTransform;
     private RectTransform _stage02DepthMidFramingScale;
     private RectTransform _stage02DepthMidContent;
-    private RectTransform _stage02MidFrostedGlassMask;
-    private RawImage _stage02MidFrostedGlassRawImage;
 
     private RectTransform _stage02DepthFrontRoot;
     private RectTransform _stage02DepthFrontFramingTransform;
     private RectTransform _stage02DepthFrontFramingScale;
     private RectTransform _stage02DepthFrontContent;
-    private RectTransform _stage02FrontFrostedGlassMask;
-    private RawImage _stage02FrontFrostedGlassRawImage;
 
     private RectTransform _stage02DepthCloseRoot;
     private RectTransform _stage02DepthCloseFramingTransform;
     private RectTransform _stage02DepthCloseFramingScale;
     private RectTransform _stage02DepthCloseContent;
-    private RectTransform _stage02CloseFrostedGlassMask;
-    private RawImage _stage02CloseFrostedGlassRawImage;
 
     #endregion
 
@@ -274,36 +244,26 @@ public partial class PresentationUIRoot
         _stage00DepthFarFramingTransform = View.Rect(Refs.Stage00Depth_Far_FramingTransform);
         _stage00DepthFarFramingScale = View.Rect(Refs.Stage00Depth_Far_FramingScale);
         _stage00DepthFarContent = View.Rect(Refs.Stage00Depth_Far_Content);
-        _stage00FarFrostedGlassMask = View.Rect(Refs.Stage00FarFrostedGlassMask);
-        _stage00FarFrostedGlassRawImage = View.Component<RawImage>(Refs.Stage00FarFrostedGlassRawImage);
 
         _stage00DepthBackRoot = View.Rect(Refs.Stage00Depth_Back_Root);
         _stage00DepthBackFramingTransform = View.Rect(Refs.Stage00Depth_Back_FramingTransform);
         _stage00DepthBackFramingScale = View.Rect(Refs.Stage00Depth_Back_FramingScale);
         _stage00DepthBackContent = View.Rect(Refs.Stage00Depth_Back_Content);
-        _stage00BackFrostedGlassMask = View.Rect(Refs.Stage00BackFrostedGlassMask);
-        _stage00BackFrostedGlassRawImage = View.Component<RawImage>(Refs.Stage00BackFrostedGlassRawImage);
 
         _stage00DepthMidRoot = View.Rect(Refs.Stage00Depth_Mid_Root);
         _stage00DepthMidFramingTransform = View.Rect(Refs.Stage00Depth_Mid_FramingTransform);
         _stage00DepthMidFramingScale = View.Rect(Refs.Stage00Depth_Mid_FramingScale);
         _stage00DepthMidContent = View.Rect(Refs.Stage00Depth_Mid_Content);
-        _stage00MidFrostedGlassMask = View.Rect(Refs.Stage00MidFrostedGlassMask);
-        _stage00MidFrostedGlassRawImage = View.Component<RawImage>(Refs.Stage00MidFrostedGlassRawImage);
 
         _stage00DepthFrontRoot = View.Rect(Refs.Stage00Depth_Front_Root);
         _stage00DepthFrontFramingTransform = View.Rect(Refs.Stage00Depth_Front_FramingTransform);
         _stage00DepthFrontFramingScale = View.Rect(Refs.Stage00Depth_Front_FramingScale);
         _stage00DepthFrontContent = View.Rect(Refs.Stage00Depth_Front_Content);
-        _stage00FrontFrostedGlassMask = View.Rect(Refs.Stage00FrontFrostedGlassMask);
-        _stage00FrontFrostedGlassRawImage = View.Component<RawImage>(Refs.Stage00FrontFrostedGlassRawImage);
 
         _stage00DepthCloseRoot = View.Rect(Refs.Stage00Depth_Close_Root);
         _stage00DepthCloseFramingTransform = View.Rect(Refs.Stage00Depth_Close_FramingTransform);
         _stage00DepthCloseFramingScale = View.Rect(Refs.Stage00Depth_Close_FramingScale);
         _stage00DepthCloseContent = View.Rect(Refs.Stage00Depth_Close_Content);
-        _stage00CloseFrostedGlassMask = View.Rect(Refs.Stage00CloseFrostedGlassMask);
-        _stage00CloseFrostedGlassRawImage = View.Component<RawImage>(Refs.Stage00CloseFrostedGlassRawImage);
 
         _stage01Root = View.Rect(Refs.Stage01_Root);
 
@@ -312,36 +272,26 @@ public partial class PresentationUIRoot
         _stage01DepthFarFramingTransform = View.Rect(Refs.Stage01Depth_Far_FramingTransform);
         _stage01DepthFarFramingScale = View.Rect(Refs.Stage01Depth_Far_FramingScale);
         _stage01DepthFarContent = View.Rect(Refs.Stage01Depth_Far_Content);
-        _stage01FarFrostedGlassMask = View.Rect(Refs.Stage01FarFrostedGlassMask);
-        _stage01FarFrostedGlassRawImage = View.Component<RawImage>(Refs.Stage01FarFrostedGlassRawImage);
 
         _stage01DepthBackRoot = View.Rect(Refs.Stage01Depth_Back_Root);
         _stage01DepthBackFramingTransform = View.Rect(Refs.Stage01Depth_Back_FramingTransform);
         _stage01DepthBackFramingScale = View.Rect(Refs.Stage01Depth_Back_FramingScale);
         _stage01DepthBackContent = View.Rect(Refs.Stage01Depth_Back_Content);
-        _stage01BackFrostedGlassMask = View.Rect(Refs.Stage01BackFrostedGlassMask);
-        _stage01BackFrostedGlassRawImage = View.Component<RawImage>(Refs.Stage01BackFrostedGlassRawImage);
 
         _stage01DepthMidRoot = View.Rect(Refs.Stage01Depth_Mid_Root);
         _stage01DepthMidFramingTransform = View.Rect(Refs.Stage01Depth_Mid_FramingTransform);
         _stage01DepthMidFramingScale = View.Rect(Refs.Stage01Depth_Mid_FramingScale);
         _stage01DepthMidContent = View.Rect(Refs.Stage01Depth_Mid_Content);
-        _stage01MidFrostedGlassMask = View.Rect(Refs.Stage01MidFrostedGlassMask);
-        _stage01MidFrostedGlassRawImage = View.Component<RawImage>(Refs.Stage01MidFrostedGlassRawImage);
 
         _stage01DepthFrontRoot = View.Rect(Refs.Stage01Depth_Front_Root);
         _stage01DepthFrontFramingTransform = View.Rect(Refs.Stage01Depth_Front_FramingTransform);
         _stage01DepthFrontFramingScale = View.Rect(Refs.Stage01Depth_Front_FramingScale);
         _stage01DepthFrontContent = View.Rect(Refs.Stage01Depth_Front_Content);
-        _stage01FrontFrostedGlassMask = View.Rect(Refs.Stage01FrontFrostedGlassMask);
-        _stage01FrontFrostedGlassRawImage = View.Component<RawImage>(Refs.Stage01FrontFrostedGlassRawImage);
 
         _stage01DepthCloseRoot = View.Rect(Refs.Stage01Depth_Close_Root);
         _stage01DepthCloseFramingTransform = View.Rect(Refs.Stage01Depth_Close_FramingTransform);
         _stage01DepthCloseFramingScale = View.Rect(Refs.Stage01Depth_Close_FramingScale);
         _stage01DepthCloseContent = View.Rect(Refs.Stage01Depth_Close_Content);
-        _stage01CloseFrostedGlassMask = View.Rect(Refs.Stage01CloseFrostedGlassMask);
-        _stage01CloseFrostedGlassRawImage = View.Component<RawImage>(Refs.Stage01CloseFrostedGlassRawImage);
 
         _stage02Root = View.Rect(Refs.Stage02_Root);
 
@@ -350,36 +300,26 @@ public partial class PresentationUIRoot
         _stage02DepthFarFramingTransform = View.Rect(Refs.Stage02Depth_Far_FramingTransform);
         _stage02DepthFarFramingScale = View.Rect(Refs.Stage02Depth_Far_FramingScale);
         _stage02DepthFarContent = View.Rect(Refs.Stage02Depth_Far_Content);
-        _stage02FarFrostedGlassMask = View.Rect(Refs.Stage02FarFrostedGlassMask);
-        _stage02FarFrostedGlassRawImage = View.Component<RawImage>(Refs.Stage02FarFrostedGlassRawImage);
 
         _stage02DepthBackRoot = View.Rect(Refs.Stage02Depth_Back_Root);
         _stage02DepthBackFramingTransform = View.Rect(Refs.Stage02Depth_Back_FramingTransform);
         _stage02DepthBackFramingScale = View.Rect(Refs.Stage02Depth_Back_FramingScale);
         _stage02DepthBackContent = View.Rect(Refs.Stage02Depth_Back_Content);
-        _stage02BackFrostedGlassMask = View.Rect(Refs.Stage02BackFrostedGlassMask);
-        _stage02BackFrostedGlassRawImage = View.Component<RawImage>(Refs.Stage02BackFrostedGlassRawImage);
 
         _stage02DepthMidRoot = View.Rect(Refs.Stage02Depth_Mid_Root);
         _stage02DepthMidFramingTransform = View.Rect(Refs.Stage02Depth_Mid_FramingTransform);
         _stage02DepthMidFramingScale = View.Rect(Refs.Stage02Depth_Mid_FramingScale);
         _stage02DepthMidContent = View.Rect(Refs.Stage02Depth_Mid_Content);
-        _stage02MidFrostedGlassMask = View.Rect(Refs.Stage02MidFrostedGlassMask);
-        _stage02MidFrostedGlassRawImage = View.Component<RawImage>(Refs.Stage02MidFrostedGlassRawImage);
 
         _stage02DepthFrontRoot = View.Rect(Refs.Stage02Depth_Front_Root);
         _stage02DepthFrontFramingTransform = View.Rect(Refs.Stage02Depth_Front_FramingTransform);
         _stage02DepthFrontFramingScale = View.Rect(Refs.Stage02Depth_Front_FramingScale);
         _stage02DepthFrontContent = View.Rect(Refs.Stage02Depth_Front_Content);
-        _stage02FrontFrostedGlassMask = View.Rect(Refs.Stage02FrontFrostedGlassMask);
-        _stage02FrontFrostedGlassRawImage = View.Component<RawImage>(Refs.Stage02FrontFrostedGlassRawImage);
 
         _stage02DepthCloseRoot = View.Rect(Refs.Stage02Depth_Close_Root);
         _stage02DepthCloseFramingTransform = View.Rect(Refs.Stage02Depth_Close_FramingTransform);
         _stage02DepthCloseFramingScale = View.Rect(Refs.Stage02Depth_Close_FramingScale);
         _stage02DepthCloseContent = View.Rect(Refs.Stage02Depth_Close_Content);
-        _stage02CloseFrostedGlassMask = View.Rect(Refs.Stage02CloseFrostedGlassMask);
-        _stage02CloseFrostedGlassRawImage = View.Component<RawImage>(Refs.Stage02CloseFrostedGlassRawImage);
     }
 
     private bool ValidateStageViewportRefs()
@@ -398,36 +338,26 @@ public partial class PresentationUIRoot
         AppendMissing(ref missing, _stage00DepthFarFramingTransform, Refs.Stage00Depth_Far_FramingTransform);
         AppendMissing(ref missing, _stage00DepthFarFramingScale, Refs.Stage00Depth_Far_FramingScale);
         AppendMissing(ref missing, _stage00DepthFarContent, Refs.Stage00Depth_Far_Content);
-        AppendMissing(ref missing, _stage00FarFrostedGlassMask, Refs.Stage00FarFrostedGlassMask);
-        AppendMissing(ref missing, _stage00FarFrostedGlassRawImage, Refs.Stage00FarFrostedGlassRawImage);
 
         AppendMissing(ref missing, _stage00DepthBackRoot, Refs.Stage00Depth_Back_Root);
         AppendMissing(ref missing, _stage00DepthBackFramingTransform, Refs.Stage00Depth_Back_FramingTransform);
         AppendMissing(ref missing, _stage00DepthBackFramingScale, Refs.Stage00Depth_Back_FramingScale);
         AppendMissing(ref missing, _stage00DepthBackContent, Refs.Stage00Depth_Back_Content);
-        AppendMissing(ref missing, _stage00BackFrostedGlassMask, Refs.Stage00BackFrostedGlassMask);
-        AppendMissing(ref missing, _stage00BackFrostedGlassRawImage, Refs.Stage00BackFrostedGlassRawImage);
 
         AppendMissing(ref missing, _stage00DepthMidRoot, Refs.Stage00Depth_Mid_Root);
         AppendMissing(ref missing, _stage00DepthMidFramingTransform, Refs.Stage00Depth_Mid_FramingTransform);
         AppendMissing(ref missing, _stage00DepthMidFramingScale, Refs.Stage00Depth_Mid_FramingScale);
         AppendMissing(ref missing, _stage00DepthMidContent, Refs.Stage00Depth_Mid_Content);
-        AppendMissing(ref missing, _stage00MidFrostedGlassMask, Refs.Stage00MidFrostedGlassMask);
-        AppendMissing(ref missing, _stage00MidFrostedGlassRawImage, Refs.Stage00MidFrostedGlassRawImage);
 
         AppendMissing(ref missing, _stage00DepthFrontRoot, Refs.Stage00Depth_Front_Root);
         AppendMissing(ref missing, _stage00DepthFrontFramingTransform, Refs.Stage00Depth_Front_FramingTransform);
         AppendMissing(ref missing, _stage00DepthFrontFramingScale, Refs.Stage00Depth_Front_FramingScale);
         AppendMissing(ref missing, _stage00DepthFrontContent, Refs.Stage00Depth_Front_Content);
-        AppendMissing(ref missing, _stage00FrontFrostedGlassMask, Refs.Stage00FrontFrostedGlassMask);
-        AppendMissing(ref missing, _stage00FrontFrostedGlassRawImage, Refs.Stage00FrontFrostedGlassRawImage);
 
         AppendMissing(ref missing, _stage00DepthCloseRoot, Refs.Stage00Depth_Close_Root);
         AppendMissing(ref missing, _stage00DepthCloseFramingTransform, Refs.Stage00Depth_Close_FramingTransform);
         AppendMissing(ref missing, _stage00DepthCloseFramingScale, Refs.Stage00Depth_Close_FramingScale);
         AppendMissing(ref missing, _stage00DepthCloseContent, Refs.Stage00Depth_Close_Content);
-        AppendMissing(ref missing, _stage00CloseFrostedGlassMask, Refs.Stage00CloseFrostedGlassMask);
-        AppendMissing(ref missing, _stage00CloseFrostedGlassRawImage, Refs.Stage00CloseFrostedGlassRawImage);
 
         AppendMissing(ref missing, _stage01Root, Refs.Stage01_Root);
         AppendMissing(ref missing, _stage01DepthSystemRoot, Refs.Stage01DepthSystem_Root);
@@ -435,36 +365,26 @@ public partial class PresentationUIRoot
         AppendMissing(ref missing, _stage01DepthFarFramingTransform, Refs.Stage01Depth_Far_FramingTransform);
         AppendMissing(ref missing, _stage01DepthFarFramingScale, Refs.Stage01Depth_Far_FramingScale);
         AppendMissing(ref missing, _stage01DepthFarContent, Refs.Stage01Depth_Far_Content);
-        AppendMissing(ref missing, _stage01FarFrostedGlassMask, Refs.Stage01FarFrostedGlassMask);
-        AppendMissing(ref missing, _stage01FarFrostedGlassRawImage, Refs.Stage01FarFrostedGlassRawImage);
 
         AppendMissing(ref missing, _stage01DepthBackRoot, Refs.Stage01Depth_Back_Root);
         AppendMissing(ref missing, _stage01DepthBackFramingTransform, Refs.Stage01Depth_Back_FramingTransform);
         AppendMissing(ref missing, _stage01DepthBackFramingScale, Refs.Stage01Depth_Back_FramingScale);
         AppendMissing(ref missing, _stage01DepthBackContent, Refs.Stage01Depth_Back_Content);
-        AppendMissing(ref missing, _stage01BackFrostedGlassMask, Refs.Stage01BackFrostedGlassMask);
-        AppendMissing(ref missing, _stage01BackFrostedGlassRawImage, Refs.Stage01BackFrostedGlassRawImage);
 
         AppendMissing(ref missing, _stage01DepthMidRoot, Refs.Stage01Depth_Mid_Root);
         AppendMissing(ref missing, _stage01DepthMidFramingTransform, Refs.Stage01Depth_Mid_FramingTransform);
         AppendMissing(ref missing, _stage01DepthMidFramingScale, Refs.Stage01Depth_Mid_FramingScale);
         AppendMissing(ref missing, _stage01DepthMidContent, Refs.Stage01Depth_Mid_Content);
-        AppendMissing(ref missing, _stage01MidFrostedGlassMask, Refs.Stage01MidFrostedGlassMask);
-        AppendMissing(ref missing, _stage01MidFrostedGlassRawImage, Refs.Stage01MidFrostedGlassRawImage);
 
         AppendMissing(ref missing, _stage01DepthFrontRoot, Refs.Stage01Depth_Front_Root);
         AppendMissing(ref missing, _stage01DepthFrontFramingTransform, Refs.Stage01Depth_Front_FramingTransform);
         AppendMissing(ref missing, _stage01DepthFrontFramingScale, Refs.Stage01Depth_Front_FramingScale);
         AppendMissing(ref missing, _stage01DepthFrontContent, Refs.Stage01Depth_Front_Content);
-        AppendMissing(ref missing, _stage01FrontFrostedGlassMask, Refs.Stage01FrontFrostedGlassMask);
-        AppendMissing(ref missing, _stage01FrontFrostedGlassRawImage, Refs.Stage01FrontFrostedGlassRawImage);
 
         AppendMissing(ref missing, _stage01DepthCloseRoot, Refs.Stage01Depth_Close_Root);
         AppendMissing(ref missing, _stage01DepthCloseFramingTransform, Refs.Stage01Depth_Close_FramingTransform);
         AppendMissing(ref missing, _stage01DepthCloseFramingScale, Refs.Stage01Depth_Close_FramingScale);
         AppendMissing(ref missing, _stage01DepthCloseContent, Refs.Stage01Depth_Close_Content);
-        AppendMissing(ref missing, _stage01CloseFrostedGlassMask, Refs.Stage01CloseFrostedGlassMask);
-        AppendMissing(ref missing, _stage01CloseFrostedGlassRawImage, Refs.Stage01CloseFrostedGlassRawImage);
 
         AppendMissing(ref missing, _stage02Root, Refs.Stage02_Root);
         AppendMissing(ref missing, _stage02DepthSystemRoot, Refs.Stage02DepthSystem_Root);
@@ -472,36 +392,26 @@ public partial class PresentationUIRoot
         AppendMissing(ref missing, _stage02DepthFarFramingTransform, Refs.Stage02Depth_Far_FramingTransform);
         AppendMissing(ref missing, _stage02DepthFarFramingScale, Refs.Stage02Depth_Far_FramingScale);
         AppendMissing(ref missing, _stage02DepthFarContent, Refs.Stage02Depth_Far_Content);
-        AppendMissing(ref missing, _stage02FarFrostedGlassMask, Refs.Stage02FarFrostedGlassMask);
-        AppendMissing(ref missing, _stage02FarFrostedGlassRawImage, Refs.Stage02FarFrostedGlassRawImage);
 
         AppendMissing(ref missing, _stage02DepthBackRoot, Refs.Stage02Depth_Back_Root);
         AppendMissing(ref missing, _stage02DepthBackFramingTransform, Refs.Stage02Depth_Back_FramingTransform);
         AppendMissing(ref missing, _stage02DepthBackFramingScale, Refs.Stage02Depth_Back_FramingScale);
         AppendMissing(ref missing, _stage02DepthBackContent, Refs.Stage02Depth_Back_Content);
-        AppendMissing(ref missing, _stage02BackFrostedGlassMask, Refs.Stage02BackFrostedGlassMask);
-        AppendMissing(ref missing, _stage02BackFrostedGlassRawImage, Refs.Stage02BackFrostedGlassRawImage);
 
         AppendMissing(ref missing, _stage02DepthMidRoot, Refs.Stage02Depth_Mid_Root);
         AppendMissing(ref missing, _stage02DepthMidFramingTransform, Refs.Stage02Depth_Mid_FramingTransform);
         AppendMissing(ref missing, _stage02DepthMidFramingScale, Refs.Stage02Depth_Mid_FramingScale);
         AppendMissing(ref missing, _stage02DepthMidContent, Refs.Stage02Depth_Mid_Content);
-        AppendMissing(ref missing, _stage02MidFrostedGlassMask, Refs.Stage02MidFrostedGlassMask);
-        AppendMissing(ref missing, _stage02MidFrostedGlassRawImage, Refs.Stage02MidFrostedGlassRawImage);
 
         AppendMissing(ref missing, _stage02DepthFrontRoot, Refs.Stage02Depth_Front_Root);
         AppendMissing(ref missing, _stage02DepthFrontFramingTransform, Refs.Stage02Depth_Front_FramingTransform);
         AppendMissing(ref missing, _stage02DepthFrontFramingScale, Refs.Stage02Depth_Front_FramingScale);
         AppendMissing(ref missing, _stage02DepthFrontContent, Refs.Stage02Depth_Front_Content);
-        AppendMissing(ref missing, _stage02FrontFrostedGlassMask, Refs.Stage02FrontFrostedGlassMask);
-        AppendMissing(ref missing, _stage02FrontFrostedGlassRawImage, Refs.Stage02FrontFrostedGlassRawImage);
 
         AppendMissing(ref missing, _stage02DepthCloseRoot, Refs.Stage02Depth_Close_Root);
         AppendMissing(ref missing, _stage02DepthCloseFramingTransform, Refs.Stage02Depth_Close_FramingTransform);
         AppendMissing(ref missing, _stage02DepthCloseFramingScale, Refs.Stage02Depth_Close_FramingScale);
         AppendMissing(ref missing, _stage02DepthCloseContent, Refs.Stage02Depth_Close_Content);
-        AppendMissing(ref missing, _stage02CloseFrostedGlassMask, Refs.Stage02CloseFrostedGlassMask);
-        AppendMissing(ref missing, _stage02CloseFrostedGlassRawImage, Refs.Stage02CloseFrostedGlassRawImage);
 
         return LogMissingRefs("StageViewport Layer", missing);
     }
