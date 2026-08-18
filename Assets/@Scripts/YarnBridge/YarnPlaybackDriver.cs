@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public sealed class YarnBridgePlaybackDriver : MonoBehaviour
+public sealed class YarnPlaybackDriver : MonoBehaviour
 {
     private CommandExecutor _executor;
     private ICommandRunScopeProvider _scopeProvider;

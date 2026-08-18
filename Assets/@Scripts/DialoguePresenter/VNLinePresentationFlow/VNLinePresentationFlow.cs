@@ -8,7 +8,7 @@ public sealed class VNLinePresentationFlow
     private readonly VNLinePresentationState _advanceState;
     private readonly DialogueBoxPresentationController _boxPresentation;
     private readonly EllipsisBreathTypewriter _typewriter;
-    private readonly YarnBridgePlaybackDriver _playbackDriver;
+    private readonly YarnPlaybackDriver _playbackDriver;
     private readonly LineHurrySpeedController _lineHurrySpeed;
 
     public VNLinePresentationPhase CurrentPhase { get; private set; } =
@@ -19,7 +19,7 @@ public sealed class VNLinePresentationFlow
         VNLinePresentationState advanceState,
         DialogueBoxPresentationController boxPresentation,
         EllipsisBreathTypewriter typewriter,
-        YarnBridgePlaybackDriver playbackDriver,
+        YarnPlaybackDriver playbackDriver,
         LineHurrySpeedController lineHurrySpeed)
     {
         _vnYarnLineBoundary = vnYarnLineBoundary;

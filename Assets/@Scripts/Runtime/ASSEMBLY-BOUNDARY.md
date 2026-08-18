@@ -14,8 +14,12 @@
 | 어셈블리 | 위치 | 내용 |
 |---|---|---|
 | `Ked.Presentation.Runtime` | `Assets/@Scripts/Runtime/` | 연출 실행 계층 — PresentationCore · Commands · CharacterRig · ShotResponse · BackgroundRig · ScreenEffect · Audio |
-| `Ked.CharacterRig.Editor` | `Runtime/CharacterRig/Editor/` | 이모지 라이브러리 편집기 등 (Editor 전용) |
 | `Assembly-CSharp` (기본) | `Assets/@Scripts/` 나머지 | 글루 — Game · UI · VNLinePresentationFlow · FeatureController · **YarnBridge** |
+| `Assembly-CSharp-Editor` (기본) | `Assets/Editor/` | 에디터 도구 — 초상 DB 빌더 · 튜닝 덤프 익스포터 · 폰트 교체 |
+
+> **에디터 도구는 런타임 폴더 안에 두지 않는다.** 한때 런타임 트리 안에 에디터 전용
+> 어셈블리가 하나 더 있었으나, 그러면 폴더를 읽는 사람이 매번 "이건 빌드에 들어가나"를
+> 확인해야 한다. `Assets/Editor/`로 모으면 **위치가 곧 답이다.**
 
 **의존 방향은 한쪽뿐이다.**
 
@@ -69,8 +73,7 @@ UI 타입이 기능 폴더의 계약을 구현하는 partial을 전부 여기 �
 | `PresentationUIRoot.DepthDefocusOverlay.cs` | `IPresentationDepthDefocusOverlayProvider` | `Runtime/ScreenEffect/StageDepthBlur/` |
 | `PresentationUIRoot.StageDepthContentSlot.cs` | `IStageDepthContentSlotProvider` | `Runtime/ScreenEffect/StageDepthBlur/` |
 | `PresentationUIRoot.StageMask.cs` | `IStageMaskProvider` | `Runtime/ScreenEffect/StageMask/` |
-| `PresentationUIRoot.StageCounts.cs` | (계약 아님 — enum을 세는 private const) | enum은 `Runtime/ScreenEffect/StageDepthBlur/` |
-| `DialogueBox00_Portrait.ProtagonistCharRigSlot.cs` | `IProtagonistCharRigSlotProvider` | `Runtime/CharacterRig/` |
+| `PresentationUIRoot.StageCounts.cs` | (계약 아님 — enum을 세는 private const) | enum은 `Runtime/PresentationCore/` |
 
 > **새 provider를 만들 때**: 계약(interface)은 그것을 필요로 하는 기능 폴더에,
 > 구현 partial은 `UI/Providers/`에. **한 파일에 같이 두지 말 것.**

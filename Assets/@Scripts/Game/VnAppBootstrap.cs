@@ -45,7 +45,7 @@ public class VnAppBootstrap : MonoBehaviour
     
     [Header("MainExecutor")]
     [SerializeField] private CommandExecutor commandExecutor;
-    [SerializeField] private YarnBridgePlaybackDriver mainYarnBridgePlaybackDriver;
+    [SerializeField] private YarnPlaybackDriver mainYarnBridgePlaybackDriver;
 
     [Header("Yarn")]
     [SerializeField] private DialogueRunner dialogueRunner;

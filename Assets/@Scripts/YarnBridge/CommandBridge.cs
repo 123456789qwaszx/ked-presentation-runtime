@@ -1,10 +1,9 @@
-using System;
 using UnityEngine;
 using Yarn.Unity;
 
 public sealed partial class YarnCommandBridge
 {
-    private readonly YarnBridgePlaybackDriver _playbackDriver;
+    private readonly YarnPlaybackDriver _playbackDriver;
     private readonly RectTransform _charRigPrefab;
     private readonly RectTransform _backgroundRigPrefab;
 
@@ -12,7 +11,7 @@ public sealed partial class YarnCommandBridge
 
     public YarnCommandBridge(
         DialogueRunner runner,
-        YarnBridgePlaybackDriver playbackDriver,
+        YarnPlaybackDriver playbackDriver,
         RectTransform charRigPrefab,
         RectTransform backgroundRigPrefab,
         DialogueBoxPresentationController dialogueBoxPresentation)
