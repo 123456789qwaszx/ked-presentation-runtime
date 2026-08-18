@@ -5124,8 +5124,6 @@ MonoBehaviour:
   rigPrefab: {fileID: 0}
   backgroundRigPrefab: {fileID: 6323253774795375343, guid: 18f0ce8dac4b54f44a88bdcceac48012, type: 3}
   enableEquivalenceHarness: 1
-  characterEmojiLibrarySo: {fileID: 11400000, guid: 50cc0df71f2e038468df66d0c632ebdd, type: 2}
-  characterEmojiVisualPresetSo: {fileID: 11400000, guid: e00fbe47d88401f458328299b0b76437, type: 2}
   screenNoisePresetDbso: {fileID: 11400000, guid: afb4892f90a1eff46b623bfa3c11a55d, type: 2}
   screenVignettePresetDbso: {fileID: 11400000, guid: 53356775219299c42981714a7e8b025e, type: 2}
   screenFlashPresetDbso: {fileID: 11400000, guid: fd8b0b7eceef6c549952782158c076ed, type: 2}
@@ -21807,7 +21805,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 3356120893837444203}
   m_Direction: 2
   m_Value: 0
-  m_Size: 0.9844651
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -23342,7 +23340,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.000017166138, y: 0.00027589442}
+  m_AnchoredPosition: {x: 0.000017166138, y: -0.00008869843}
   m_SizeDelta: {x: 0, y: 300}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &3566488314143195377

@@ -3,7 +3,6 @@ public sealed class CharacterRigCommandFactory : INodeCommandFactory
     private readonly CharRigSlotResolver _rigSlotResolver;
     private readonly CharacterRigBuilder _rigBuilder;
     private readonly PortraitResolver _portraitResolver;
-    private readonly CharacterEmojiResolver _emojiResolver;
 
     private readonly RoleAnchorTuningDBSO _roleTuningDb;
     
@@ -11,30 +10,25 @@ public sealed class CharacterRigCommandFactory : INodeCommandFactory
     private readonly CharacterVisualFocusPresetDBSO _characterVisualFocusPresetDb;
     
     private readonly CharacterDepthTuningSO _characterDepthTuning;
-    private readonly CharacterEmojiVisualPresetSO _characterEmojiVisualPresetSo;
     private readonly IShotResponseStageProvider _stageProvider;
 
     public CharacterRigCommandFactory(
         CharRigSlotResolver charRigSlotResolver,
         CharacterRigBuilder charRigBuilder,
         PortraitResolver portraitResolver,
-        CharacterEmojiResolver emojiResolver,
         RoleAnchorTuningDBSO roleTuningDb,
         CharacterFocusTuningDBSO characterFocusTuningDb,
         CharacterVisualFocusPresetDBSO characterVisualFocusPresetDb,
         CharacterDepthTuningSO characterDepthTuning,
-        CharacterEmojiVisualPresetSO characterEmojiVisualPresetSo,
         IShotResponseStageProvider stageProvider)
     {
         _rigSlotResolver = charRigSlotResolver;
         _rigBuilder = charRigBuilder;
         _portraitResolver = portraitResolver;
-        _emojiResolver = emojiResolver;
         _roleTuningDb = roleTuningDb;
         _characterFocusTuningDb = characterFocusTuningDb;
         _characterVisualFocusPresetDb = characterVisualFocusPresetDb;
         _characterDepthTuning = characterDepthTuning;
-        _characterEmojiVisualPresetSo = characterEmojiVisualPresetSo;
         _stageProvider = stageProvider;
     }
 
@@ -66,8 +60,11 @@ public sealed class CharacterRigCommandFactory : INodeCommandFactory
             // Basic Transform
             MoveByCommandSpecCharR s => new MoveByCommandCharR(s),
             ScaleToCommandSpecCharR s => new ScaleToCommandCharR(s),
+            SlideInCommandSpecCharR s => new SlideInCommandCharR(s),
+            SlideOutCommandSpecCharR s => new SlideOutCommandCharR(s),
             SetPortraitSpriteCommandSpecCharR s => new SetPortraitSpriteCommandCharR(s, _portraitResolver),
             SetPortraitCrossfadeCommandSpecCharR s => new SetPortraitCrossfadeCommandCharR(s, _portraitResolver),
+            SetEmotionPortraitWipeCommandSpec s => new SetEmotionPortraitWipeCommand(s, _portraitResolver),
             
             // Composition / Focus-aware Placement
             PlaceCharacterFocusCommandSpecCharR s => new PlaceCharacterFocusCommandCharR(s, _characterFocusTuningDb, _stageProvider),

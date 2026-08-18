@@ -76,10 +76,6 @@ public class VnAppBootstrap : MonoBehaviour
     [Tooltip("켜면 재생 중 라인마다 (코어 리듀서로 접은 상태) vs (실제 무대)를 비교하고 " +
              "종료 시 EquivalenceReports/*.json을 남긴다. 판정 전용 — 재생에 영향 없음.")]
     [SerializeField] private bool enableEquivalenceHarness;
-
-    [Header("Emoji")]
-    [SerializeField] private CharacterEmojiLibrarySO characterEmojiLibrarySo;
-    [SerializeField] private CharacterEmojiVisualPresetSO characterEmojiVisualPresetSo;
     
     [Header("UI")]
     [SerializeField] private ScreenNoisePresetDBSO screenNoisePresetDbso;
@@ -186,18 +182,15 @@ public class VnAppBootstrap : MonoBehaviour
         CharRigSlotResolver charRigSlotResolver = new(_presentationUIRoot, _protagonistCharRigSlot);
         CharacterRigBuilder characterRigBuilder = new();
         PortraitResolver portraitResolver = new(portraitGeneratedDbSo);
-        CharacterEmojiResolver emojiResolver = new(characterEmojiLibrarySo);
 
         CharacterRigCommandFactory charRigFactory = new(
             charRigSlotResolver,
             characterRigBuilder,
             portraitResolver,
-            emojiResolver,
             roleTuningDb,
             characterFocusTuningDb,
             characterVisualFocusPresetDb,
             characterDepthTuning,
-            characterEmojiVisualPresetSo,
             _presentationUIRoot);
 
         // Background Rig
