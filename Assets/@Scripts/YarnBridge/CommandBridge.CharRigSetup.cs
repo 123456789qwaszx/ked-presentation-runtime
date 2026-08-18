@@ -159,18 +159,6 @@ public sealed partial class YarnCommandBridge
             duration = YarnDurationParser.Parse(durationToken)
         });
 
-    private void EnqueueRotateBySpec(string roleKey, float degree, string durationToken = "0.4s")
-        => Collect(new RotateToCommandSpecCharR
-        {
-            slotKey = roleKey,
-            target = CharacterRigTarget.CharSlot_SwayPivot,
-
-            toEuler = new Vector3(0f, 0f, degree),
-            relativeToCurrent = true,
-
-            duration = YarnDurationParser.Parse(durationToken)
-        });
-
     private void EnqueueSetPlaceResetSpecs(string slotKey, string durationToken = "0.4s")
     {
         float duration = YarnDurationParser.Parse(durationToken);
@@ -197,17 +185,6 @@ public sealed partial class YarnCommandBridge
         Collect(spec2);
     }
 
-    private void EnqueueRotateResetSpec(string roleKey, string durationToken = "0.4s")
-        => Collect(new RotateToCommandSpecCharR
-        {
-            slotKey = roleKey,
-            target = CharacterRigTarget.CharSlot_SwayPivot,
-
-            toEuler = new Vector3(0f, 0f, 0f),
-
-            duration = YarnDurationParser.Parse(durationToken)
-        });
-
     private void EnqueueSizeResetSpec(string roleKey, string durationToken = "0.4s")
         => Collect(new ScaleToCommandSpecCharR
         {
@@ -217,21 +194,6 @@ public sealed partial class YarnCommandBridge
             toScale = new Vector2(1, 1),
 
             duration = YarnDurationParser.Parse(durationToken)
-        });
-
-    private void EnqueueSpriteColorToDslSpec(
-        string roleKey,
-        float r,
-        float g,
-        float b,
-        string durationToken = "8fr")
-        => Collect(new ColorToCommandSpecCharR
-        {
-            slotKey = roleKey,
-            target = CharacterRigTarget.CharacterPortraitSprite_Image,
-            color = new Color(r, g, b, 1f),
-            keepAlpha = true,
-            duration = YarnDurationParser.Parse(durationToken, 0.35f)
         });
 
     private void EnqueueCharacterSiblingFrontSpec(string roleKey)

@@ -37,19 +37,6 @@ public sealed partial class YarnCommandBridge
         Debug.Log($"[YarnCommandBridge] {message}");
     }
 
-    private void EnqueueAttachCharRigToBackgroundObjectSlotSpec(
-        string charRigKey,
-        string backgroundRigKey,
-        string parentTarget = "Background_ObjectSlotRoot")
-        => Collect(new AttachCharRigToBackgroundObjectSlotCommandSpec
-        {
-            charRigKey = charRigKey,
-            backgroundRigKey = backgroundRigKey,
-            parentTarget = ParseBackgroundRigTargetOrDefault(parentTarget),
-            worldPositionStays = false,
-            setAsLastSibling = false,
-        });
-
     private void EnqueuePresentationActorAliasSpec(
         string aliasSymbol,
         string targetKey)

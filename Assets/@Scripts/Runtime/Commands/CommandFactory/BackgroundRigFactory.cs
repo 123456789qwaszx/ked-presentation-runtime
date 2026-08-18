@@ -32,15 +32,6 @@ public sealed class BackgroundRigCommandFactory : INodeCommandFactory
             // Transform
             MoveByCommandSpecBgR s => new MoveByCommandBgR(s),
             ScaleToCommandSpecBgR s => new ScaleToCommandBgR(s),
-            RotateToCommandSpecBgR s => new RotateToCommandBgR(s),
-            RotateByCommandSpecBgR s => new RotateByCommandBgR(s),
-
-            // Motion / Acting
-            SlideInCommandSpecBgR s => new SlideInCommandBgR(s),
-            SlideOutCommandSpecBgR s => new SlideOutCommandBgR(s),
-            JoltCommandSpecBgR s => new JoltCommandBgR(s),
-            TrembleCommandSpecBgR s => new TrembleCommandBgR(s),
-            BreathInPlaceCommandSpecBgR s => new BreathInPlaceCommandBgR(s),
 
             _ => null
         };
