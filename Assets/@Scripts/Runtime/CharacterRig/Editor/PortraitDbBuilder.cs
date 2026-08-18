@@ -52,8 +52,6 @@ public static class PortraitDbBuilder
 
         Selection.activeObject = db;
         EditorGUIUtility.PingObject(db);
-
-        PortraitEditorCache.Rebuild(db);
     }
 
     private static List<PortraitGeneratedDbSo.Entry> ScanPortraits(PortraitBuildSettings settings, List<string> report)
@@ -313,40 +311,6 @@ public static class PortraitDbBuilder
                 AssetDatabase.CreateFolder(cur, parts[i]);
             cur = next;
         }
-    }
-
-    [InitializeOnLoad]
-    static class PortraitEditorCacheBootstrap
-    {
-        static PortraitEditorCacheBootstrap()
-        {
-            EditorApplication.delayCall += TryInit;
-        }
-
-        static void TryInit()
-        {
-            PortraitBuildSettings settings = AssetDatabase.LoadAssetAtPath<PortraitBuildSettings>(DefaultSettingsPath);
-            if (settings != null && !string.IsNullOrEmpty(settings.generatedDbPath))
-            {
-                PortraitGeneratedDbSo db = AssetDatabase.LoadAssetAtPath<PortraitGeneratedDbSo>(settings.generatedDbPath);
-                if (db != null)
-                {
-                    PortraitEditorCache.Rebuild(db);
-                    return;
-                }
-            }
-
-            // 2) fallback: 프로젝트에서 첫 번째 DB를 찾기 (설정이 없거나 경로가 틀린 경우)
-            var guid = AssetDatabase.FindAssets("t:PortraitGeneratedDbSo").FirstOrDefault();
-            if (!string.IsNullOrEmpty(guid))
-            {
-                var path = AssetDatabase.GUIDToAssetPath(guid);
-                var db = AssetDatabase.LoadAssetAtPath<PortraitGeneratedDbSo>(path);
-                if (db != null)
-                    PortraitEditorCache.Rebuild(db);
-            }
-        }
-
     }
 }
 #endif
