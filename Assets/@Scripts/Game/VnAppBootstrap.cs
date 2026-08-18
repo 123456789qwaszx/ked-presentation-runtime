@@ -26,7 +26,6 @@ public class VnAppBootstrap : MonoBehaviour
     
     [Header("Sound")] 
     [SerializeField] private AudioSystem audioSystem;
-    [SerializeField] private InlineSfxPlaybackHost inlineSfxHost;
     
     [Header("DialogueBox")] 
     [SerializeField] private DialogueBoxHost dialogueBoxHost;
@@ -132,8 +131,6 @@ public class VnAppBootstrap : MonoBehaviour
         
 
         BootstrapAudioSystem();
-        ConnectAudioSystemToYarn();
-
 
         BootstrapPresentationSession();
         
@@ -153,11 +150,6 @@ public class VnAppBootstrap : MonoBehaviour
     private void BootstrapAudioSystem()
     {
         audioSystem.Initialize();
-    }
-
-    private void ConnectAudioSystemToYarn()
-    {
-        inlineSfxHost.Initialize(audioSystem);
     }
 
     private void BootstrapUIManager()
