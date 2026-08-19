@@ -1,6 +1,6 @@
 {
     "name": "Ked.Presentation.Sync",
-    "rootNamespace": "Ked.Presentation.Sync",
+    "rootNamespace": "",
     "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -152,7 +152,7 @@ VnTool ↔ 런타임 계약서는 §3의 이동을 아직 반영하지 않았다
 
 | | |
 |---|---|
-| 씬 잔해 | 정리 완료 — `SampleScene` · `DungeonCafe` 삭제, `VN-Tool_asmdefTest.unity` 하나만 남았다. `OneShot*` · `subPresentationRunner` 참조 0건, 러너는 하나다 |
+| 씬 잔해 | 정리 완료 — `SampleScene` · `DungeonCafe` 삭제, `PresentationSample.unity` 하나만 남았다. `OneShot*` · `subPresentationRunner` 참조 0건, 러너는 하나다 |
 | 에디터 도구 | `VNRuntimeStateInspectorWindow`의 `[VNLoadSeekDriver]` 절 제거. 함께 죽어 있던 `_presentationSessionContext` 리플렉션 대상을 `_presentationScopeSession`으로 교정 |
 | 죽은 진입점 | `VNLinePresentationState.BeginLoadSeek` 제거 |
 

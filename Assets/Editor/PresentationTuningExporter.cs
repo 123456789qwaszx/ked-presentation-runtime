@@ -29,7 +29,7 @@ using Object = UnityEngine.Object;
 // ─────────────────────────────────────────────────────────────────────────────
 public static class PresentationTuningExporter
 {
-    private const string ScenePath = "Assets/Scenes/SampleScene.unity";
+    private const string ScenePath = "Assets/Scenes/PresentationSample.unity";
 
     /// <summary>리그를 세울 때 쓰는 임시 부모. 캡처가 끝나면 지운다.</summary>
     private const string ExportStageName = "__U12ExportStage";

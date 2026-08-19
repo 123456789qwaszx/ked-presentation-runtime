@@ -7,39 +7,54 @@ Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타�
 
 > **yarn 노드 하나를 재생한다. 저작·진행·저장은 밖이다.**
 
-저작은 외부 툴(VnTool)이 하고, 그 결과인 `.yarn` 텍스트를 이 런타임이 재생합니다.
+저작은 외부 툴(VNTool)이 하고, 그 결과인 `.yarn` 텍스트를 이 런타임이 재생합니다.
 에피소드·챕터 진행과 세이브는 이 저장소의 책임이 아니며, **필요 없어서가 아니라 주인을
 옮기는 중이라서** 여기서 빠져 있습니다.
 
 무엇이 왜 밖으로 나갔고 어떤 모양으로 돌아오는지는 **[SCOPE-BOUNDARY.md](SCOPE-BOUNDARY.md)**
 에 있습니다. 어셈블리 경계는 [ASSEMBLY-BOUNDARY.md](Assets/@Scripts/Runtime/ASSEMBLY-BOUNDARY.md).
 
-사용법: @Dialogue폴더의 'Story_**'.yarnscript의 Node명을 복사하여, 하이어아키의 'VnAppBootstrap'의 'Entry Keys'에 복사.
-단축키: 2: Node실행 / 좌ctrl: fastforward / r: Rollback / a: Auto모드 토글 / s: SpeedUp모드 토글 / Space: RequestNextLine
+## 사용법
 
+1. `Assets/Scenes/PresentationSample.unity`를 연다.
+2. `Assets/@Dialogue/`의 `.yarn` 파일에서 재생할 노드 이름(`title:`)을 복사한다.
+3. 하이어라키의 `[VNAppBootstrap]`을 선택하고 **Entry Keys** 항목에 붙여넣는다.
+4. 재생 후 `2`를 눌러 해당 노드를 실행한다.
+
+| 키 | 동작 |
+|---|---|
+| `2` | Node 실행 |
+| `Space` | RequestNextLine |
+| `좌 Ctrl` | FastForward |
+| `R` | Rollback |
+| `A` | Auto 모드 토글 |
+| `S` | SpeedUp 모드 토글 |
+
+
+## 둘러볼 곳
 
 ### 1. 실행 예제
 
-`Assets/Scenes/SampleScene.unity`
+`Assets/Scenes/PresentationSample.unity`
 
-프로젝트의 전체 동작을 확인할 수 있는 메인 샘플 씬입니다.
+프로젝트의 전체 동작을 확인할 수 있는 유일한 씬입니다.
 
 ### 2. 연출 스크립트 예제
 
-`Assets/@Dialogue/Story_StellaEvent01_01.yarn`
+`Assets/@Dialogue/Story_blank_ch01_ep00.yarn`
 
-대사와 함께 캐릭터 배치, 크기 변경, 페이드, 화면 효과와 같은 연출 명령을 작성한 예제입니다.
+대사와 함께 배경·캐릭터 배치, 페이드, 화면 효과와 같은 연출 명령을 작성한 예제입니다.
 
 ```yarn
-<<cast c4 bandi a 3>>
-<<place_center @4 bust 24fr>>
-<<size @4 14 bust -1>>
-<<fade_in @4>>
+<<bg_sprite bg_main class_day>>
+<<bg_fade_in bg_main 24fr>>
+<<bgm bgm_school_morning 2s>>
+<<12fr>>
 ```
 
 ### 3. 대사 실행 흐름
 
-`Assets/@Scripts/VNLinePresentationFlow/`
+`Assets/@Scripts/DialoguePresenter/VNLinePresentationFlow/`
 
 한 줄의 대사가 들어온 뒤 연출 실행, 텍스트 출력, 입력 대기, 스킵 및 상태 복원으로 이어지는 흐름을 담당합니다.
 
