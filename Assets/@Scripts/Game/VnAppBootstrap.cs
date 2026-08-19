@@ -89,36 +89,18 @@ public class VnAppBootstrap : MonoBehaviour
     private EpisodePlayer _episodePlayer;
     
     private PresentationUIRoot _presentationUIRoot;
+    private ScreenEffectRig _screenEffectRig;
     
     
     private void Awake()
     {
         BootstrapUIManager();
-        
-        _vnRuntimeStateProvider = new VNRuntimeStateProvider(_rollbackHistory, _choiceHistory);
-        
-        _presentationUIRoot = uiManager.GetUI<PresentationUIRoot>();
-        
-        _screenBindings = new VnScreenBindings(uiManager);
-        
-        
-        IShotResponseStageProvider shotResponseStageProvider = _presentationUIRoot;
-        
-        _presentationResponseRig = new PresentationShotResponseSystem(shotResponseStageProvider);
-        
-        characterFocusDebugView.Initialize(
-            _presentationStage,
-            shotResponseStageProvider,
-            characterFocusTuningDb);
-        
-
+        BootstrapPresentationRoots();
         BootstrapAudioSystem();
 
         BootstrapPresentationSession();
-        
         BootstrapYarn();
-        
-        // poller가 EpisodePlayer를 물고 있으므로 재생 컨트롤보다 먼저 만든다.
+
         CreateEpisodePlayer();
 
         BootstrapPlaybackControls();
@@ -126,12 +108,7 @@ public class VnAppBootstrap : MonoBehaviour
 
         BootstrapEquivalenceHarness();
     }
-
-    private void BootstrapAudioSystem()
-    {
-        audioSystem.Initialize();
-    }
-
+    
     private void BootstrapUIManager()
     {
         SpritePortAssignmentBuilder spritePortAssignmentBuilder = new();
@@ -143,8 +120,53 @@ public class VnAppBootstrap : MonoBehaviour
         uiManager.AttachUIPatchService(uiPatchService);
 
         _uiThemePatch = new UIThemePatchAdapter(uiManager, uiPatchService);
+        _screenBindings = new VnScreenBindings(uiManager);
     }
 
+    private void BootstrapPresentationRoots()
+    {
+        _vnRuntimeStateProvider = new VNRuntimeStateProvider(_rollbackHistory, _choiceHistory);
+
+        _presentationUIRoot = uiManager.GetUI<PresentationUIRoot>();
+
+        IShotResponseStageProvider shotResponseStageProvider = _presentationUIRoot;
+
+        _presentationResponseRig = new PresentationShotResponseSystem(shotResponseStageProvider);
+        _screenEffectRig = EnsureScreenEffectRig();
+
+        characterFocusDebugView.Initialize(
+            _presentationStage,
+            shotResponseStageProvider,
+            characterFocusTuningDb);
+    }
+
+    private ScreenEffectRig EnsureScreenEffectRig()
+    {
+        ScreenEffectRig screenEffectRig = screenEffectRigMount.GetComponentInChildren<ScreenEffectRig>(true);
+
+        if (screenEffectRig == null)
+        {
+            ScreenEffectRigBuilder screenEffectRigBuilder = new();
+            
+            RectTransform rigRoot = screenEffectRigBuilder.BuildRigRoot(
+                screenEffectRigPrefab);
+
+            rigRoot.SetParent(screenEffectRigMount, false);
+
+            if (!rigRoot.TryGetComponent(out screenEffectRig))
+                screenEffectRig = rigRoot.gameObject.AddComponent<ScreenEffectRig>();
+        }
+
+        screenEffectRig.Initialize();
+
+        return screenEffectRig;
+    }
+
+    private void BootstrapAudioSystem()
+    {
+        audioSystem.Initialize();
+    }
+    
     private void BootstrapPresentationSession()
     {
         SignalLatch signalLatch = new();
@@ -188,11 +210,9 @@ public class VnAppBootstrap : MonoBehaviour
 
         // Audio
         AudioCommandFactory audioFactory = new(audioSystem);
-        
-        ScreenEffectRig screenEffectRig = EnsureScreenEffectRig();
 
         ScreenEffectCommandFactory screenEffectFactory = new(
-            screenEffectRig,
+            _screenEffectRig,
             screenFlashPresetDbso,
             screenNoisePresetDbso, 
             screenVignettePresetDbso,
@@ -218,29 +238,7 @@ public class VnAppBootstrap : MonoBehaviour
             _linePresentationAdvanceState,
             _presentationStage);
     }
-    
-    private ScreenEffectRig EnsureScreenEffectRig()
-    {
-        ScreenEffectRig screenEffectRig = screenEffectRigMount.GetComponentInChildren<ScreenEffectRig>(true);
 
-        if (screenEffectRig == null)
-        {
-            ScreenEffectRigBuilder screenEffectRigBuilder = new();
-            
-            RectTransform rigRoot = screenEffectRigBuilder.BuildRigRoot(
-                screenEffectRigPrefab);
-
-            rigRoot.SetParent(screenEffectRigMount, false);
-
-            if (!rigRoot.TryGetComponent(out screenEffectRig))
-                screenEffectRig = rigRoot.gameObject.AddComponent<ScreenEffectRig>();
-        }
-
-        screenEffectRig.Initialize();
-
-        return screenEffectRig;
-    }
-    
     private void BootstrapYarn()
     {
         YarnPlaybackDriver yarnPlaybackDriver = new(commandExecutor, _presentationScopeSession);
@@ -344,7 +342,6 @@ public class VnAppBootstrap : MonoBehaviour
 
         _dialogueAdvanceDispatcher.Initialize(advanceGate, dialogueRunner, _linePresentationAdvanceState);
 
-        // 키 배치는 poller의 인스펙터 필드가 원본이다.
         vnAdvanceInputPoller.Initialize(
             _dialogueAdvanceDispatcher,
             _vnFeatureController,
@@ -353,7 +350,6 @@ public class VnAppBootstrap : MonoBehaviour
             yarnEntryKey);
     }
     
-    // 등가성 하네스. 토글이 꺼져 있으면 아무것도 만들지 않는다 — 재생 경로 무영향.
     private void BootstrapEquivalenceHarness()
     {
         if (!enableEquivalenceHarness)
