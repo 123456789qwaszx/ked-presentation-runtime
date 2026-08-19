@@ -85,7 +85,7 @@ public class VnAppBootstrap : MonoBehaviour
     private PresentationScopeSession _presentationScopeSession;
 
     private readonly DialogueAdvanceDispatcher _dialogueAdvanceDispatcher = new();
-    private readonly VnFeatureController _vnFeatureController = new();
+    private VnFeatureController _vnFeatureController;
     private EpisodePlayer _episodePlayer;
     
     private PresentationUIRoot _presentationUIRoot;
@@ -327,7 +327,7 @@ public class VnAppBootstrap : MonoBehaviour
 
         RapidSkipController rapidSkipController = new(_dialogueAdvanceDispatcher);
 
-        _vnFeatureController.Initialize(
+        _vnFeatureController = new(
             _playbackState,
             _linePresentationAdvanceState,
             ellipsisBreathTypewriter,

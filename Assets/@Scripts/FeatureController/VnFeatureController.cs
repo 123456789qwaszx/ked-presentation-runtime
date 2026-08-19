@@ -3,16 +3,16 @@ using UnityEngine;
 
 public sealed class VnFeatureController
 {
-    private VnPlaybackRuntimeState _vnPlaybackSettings;
+    private readonly VnPlaybackRuntimeState _vnPlaybackSettings;
 
-    private EllipsisBreathTypewriter _typewriter;
-    private VNLinePresentationState _linePresentationAdvanceState;
+    private readonly EllipsisBreathTypewriter _typewriter;
+    private readonly VNLinePresentationState _linePresentationAdvanceState;
 
-    private BacklogRecorder _backlogRecorder;
-    private AutoAdvanceScheduler _autoAdvanceScheduler;
-    private RapidSkipController _rapidSkipController;
-    private RollbackHistory _rollbackController;
-    private ChoiceHistory _choiceHistory;
+    private readonly BacklogRecorder _backlogRecorder;
+    private readonly AutoAdvanceScheduler _autoAdvanceScheduler;
+    private readonly RapidSkipController _rapidSkipController;
+    private readonly RollbackHistory _rollbackController;
+    private readonly ChoiceHistory _choiceHistory;
 
     private bool _speedUpToggled;
     private bool _speedUpHeld;
@@ -24,9 +24,7 @@ public sealed class VnFeatureController
 
     public IReadOnlyList<DialogueLogEntry> Backlogs => _backlogRecorder.Entries;
 
-    private bool _init;
-
-    public void Initialize(
+    public VnFeatureController(
         VnPlaybackRuntimeState vnPlaybackSettings,
         VNLinePresentationState linePresentationAdvanceState,
         EllipsisBreathTypewriter ellipsisBreathTypewriter,
@@ -36,9 +34,6 @@ public sealed class VnFeatureController
         RollbackHistory rollbackController,
         ChoiceHistory choiceHistory)
     {
-        if (_init)
-            return;
-
         _vnPlaybackSettings = vnPlaybackSettings;
         _linePresentationAdvanceState = linePresentationAdvanceState;
         _typewriter = ellipsisBreathTypewriter;
@@ -49,21 +44,12 @@ public sealed class VnFeatureController
         _rollbackController = rollbackController;
         _choiceHistory = choiceHistory;
 
-        _speedUpToggled = false;
-        _speedUpHeld = false;
-        _rapidSkipHeld = false;
-
         ApplySpeedUpModeState();
         ApplyRapidSkipState();
-
-        _init = true;
     }
 
     public void Tick()
     {
-        if (!_init)
-            return;
-
         if (IsAuto && LineFullyShown)
             _autoAdvanceScheduler.Tick();
 
