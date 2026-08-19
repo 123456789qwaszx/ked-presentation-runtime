@@ -15,59 +15,41 @@ public sealed class SequencePlayer
     }
 
     public IEnumerator PlayCommands(
-        IReadOnlyList<ISequenceCommand> commands, CommandRunScope scope, Func<bool> isValid, CommandRunTicket ticket)
+        IReadOnlyList<ISequenceCommand> commands, CommandRunScope scope, Func<bool> isValid)
     {
         int total = commands.Count;
 
-        try
+        for (int i = 0; i < total; i++)
         {
-            for (int i = 0; i < total; i++)
+            ISequenceCommand command = commands[i];
+            IEnumerator routine = command.Execute(scope);
+
+            bool hasMore = routine.MoveNext();
+            object firstYield = hasMore 
+                ? routine.Current 
+                : null;
+            
+            if (!hasMore)
+                continue;
+
+            if (command.WaitForCompletion && !scope.ShouldCompressCommandExecution)
             {
-                ISequenceCommand command = commands[i];
-                IEnumerator routine = command.Execute(scope);
-
-                bool hasMore;
-                object firstYield;
-
-                try
-                {
-                    hasMore = routine.MoveNext();
-                    firstYield = hasMore 
-                        ? routine.Current 
-                        : null;
-
-                    ticket.MarkCommandEntered();
-                }
-                catch (Exception e)
-                {
-                    Debug.LogException(e);
-                    ticket.MarkCommandFailed();
-                    continue;
-                }
-
-                if (!hasMore)
-                    continue;
-
-                if (command.WaitForCompletion && !scope.ShouldCompressCommandExecution)
-                {
-                    yield return RunAfterFirstYield(routine, firstYield, scope, isValid);
-                }
-                else
-                {
-                    IEnumerator wrappedRoutine = RunAfterFirstYield(routine, firstYield, scope, isValid);
-                    BindBackgroundLifetime(command, scope, wrappedRoutine);
-                    _host.StartCoroutine(wrappedRoutine);
-                }
+                yield return RunAfterFirstYield(routine, firstYield, scope, isValid);
             }
-        }
-        finally
-        {
-            ticket?.CloseEntry(CommandRunTicketCloseReason.Completed);
+            else
+            {
+                IEnumerator wrappedRoutine = RunAfterFirstYield(routine, firstYield, scope, isValid);
+                BindBackgroundLifetime(command, scope, wrappedRoutine);
+                _host.StartCoroutine(wrappedRoutine);
+            }
         }
     }
 
     private static IEnumerator RunAfterFirstYield(
-        IEnumerator routine, object firstYield, CommandRunScope scope, Func<bool> isValid)
+        IEnumerator routine, 
+        object firstYield,
+        CommandRunScope scope,
+        Func<bool> isValid)
     {
         if (isValid() && !scope.Token.IsCancellationRequested)
             yield return firstYield;

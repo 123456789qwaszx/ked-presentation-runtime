@@ -43,7 +43,7 @@ public sealed class VNLinePresentationFlow
         ctx.Meta = _vnYarnLineBoundary.BuildLineMeta(ctx.Line, ctx.NodeName);
         _vnYarnLineBoundary.CommitLineEntered(ctx.Meta);
 
-        ctx.CommandTicket = _playbackDriver.PlayCollected();
+        _playbackDriver.PlayCollected();
         SetPhase(ctx, VNLinePresentationPhase.LineEnteredCommitted);
 
         // Phase: LineRuntimeStateResolved

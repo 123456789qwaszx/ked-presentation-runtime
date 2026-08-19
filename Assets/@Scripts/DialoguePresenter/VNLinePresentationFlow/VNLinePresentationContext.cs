@@ -12,9 +12,6 @@ public sealed class VNLinePresentationContext
     // Derived
     public YarnLineMeta Meta { get; set; }
 
-    // Command batch ticket from PlayCollected.
-    public CommandRunTicket CommandTicket { get; set; }
-
     // Seek Decision
     public VNSeekLineDecision SeekDecision { get; set; }
 

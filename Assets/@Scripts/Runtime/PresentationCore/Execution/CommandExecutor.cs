@@ -11,7 +11,6 @@ public class CommandExecutor : MonoBehaviour
     private CancellationTokenSource _cts;
     private Coroutine _mainRoutine;
     private CommandRunScope _activeScope;
-    private CommandRunTicket _activeTicket;
 
     private int _runId;
 
@@ -21,10 +20,8 @@ public class CommandExecutor : MonoBehaviour
         _factory = factory;
     }
     
-    public CommandRunTicket PlaySpecs(IReadOnlyList<CommandSpecBase> specs, CommandRunScope scope)
+    public void PlaySpecs(IReadOnlyList<CommandSpecBase> specs, CommandRunScope scope)
     {
-        CloseActiveTicketIfOpen(CommandRunTicketCloseReason.Superseded);
-
         int runId = _runId;
         _activeScope = scope;
 
@@ -32,17 +29,11 @@ public class CommandExecutor : MonoBehaviour
         _activeScope.CleanupStep(policy);
 
         List<ISequenceCommand> commands = BuildCommandsFromSpecs(specs);
-        int commandCount = commands.Count;
-
-        var ticket = new CommandRunTicket(commandCount);
-        _activeTicket = ticket;
 
         ResetToken();
         _activeScope.Token = _cts.Token;
 
-        _mainRoutine = StartCoroutine(RunNode(commands, _activeScope, runId, ticket));
-
-        return ticket;
+        _mainRoutine = StartCoroutine(RunNode(commands, _activeScope, runId));
     }
 
     private List<ISequenceCommand> BuildCommandsFromSpecs(IReadOnlyList<CommandSpecBase> specs)
@@ -74,8 +65,7 @@ public class CommandExecutor : MonoBehaviour
     private IEnumerator RunNode(
         List<ISequenceCommand> commands,
         CommandRunScope scope,
-        int runId,
-        CommandRunTicket ticket)
+        int runId)
     {
         scope.SetCommandIsPlaying(true);
 
@@ -84,21 +74,15 @@ public class CommandExecutor : MonoBehaviour
             yield return _sequencePlayer.PlayCommands(
                 commands,
                 scope,
-                isValid: () => runId == _runId,
-                ticket: ticket);
+                isValid: () => runId == _runId);
         }
         finally
         {
-            if (!ticket.EntryClosed)
-                ticket.CloseEntry(CommandRunTicketCloseReason.Completed);
-
             if (runId == _runId)
             {
                 scope.Token = CancellationToken.None;
                 _mainRoutine = null;
 
-                if (_activeTicket == ticket)
-                    _activeTicket = null;
             }
 
             scope.SetCommandIsPlaying(false);
@@ -112,11 +96,6 @@ public class CommandExecutor : MonoBehaviour
         if(policy == CleanupPolicy.Cancel)
             _activeScope?.MarkCancelled();
         
-        CommandRunTicketCloseReason reason = policy == CleanupPolicy.Cancel
-            ? CommandRunTicketCloseReason.Cancelled
-            : CommandRunTicketCloseReason.Finished;
-
-        CloseActiveTicketIfOpen(reason);
         CancelAndDisposeToken();
         
         if (_mainRoutine != null)
@@ -143,17 +122,6 @@ public class CommandExecutor : MonoBehaviour
 
         _cts.Dispose();
         _cts = null;
-    }
-
-    private void CloseActiveTicketIfOpen(CommandRunTicketCloseReason reason)
-    {
-        if (_activeTicket == null)
-            return;
-
-        if (!_activeTicket.EntryClosed)
-            _activeTicket.CloseEntry(reason);
-
-        _activeTicket = null;
     }
 
     private CleanupPolicy DecideCleanupPolicy(CommandRunScope scope)

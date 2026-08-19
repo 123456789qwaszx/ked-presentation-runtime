@@ -19,24 +19,14 @@ public sealed class YarnPlaybackDriver : MonoBehaviour
     public void Enqueue(CommandSpecBase spec) => _collectedSpecs.Add(spec);
     public void Clear() => _collectedSpecs.Clear();
     
-    public CommandRunTicket PlayCollected()
+    public void PlayCollected()
     {
         var specs = new List<CommandSpecBase>(_collectedSpecs);
         _collectedSpecs.Clear();
 
         if (specs.Count == 0)
-            return CreateCompletedEmptyTicket();
+            CurrentScope?.CleanupStep(CleanupPolicy.Finish);
 
-        return _executor.PlaySpecs(specs, CurrentScope);
-    }
-    
-    private CommandRunTicket CreateCompletedEmptyTicket()
-    {
-        var ticket = new CommandRunTicket(0);
-
-        CurrentScope?.CleanupStep(CleanupPolicy.Finish);
-
-        ticket.CloseEntry(CommandRunTicketCloseReason.Completed);
-        return ticket;
+        _executor.PlaySpecs(specs, CurrentScope);
     }
 }
