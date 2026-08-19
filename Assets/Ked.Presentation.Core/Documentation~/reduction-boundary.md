@@ -84,6 +84,13 @@ Ledger.Publish   DOTween 종점     claim.ApplyTo(tree)
 
 착수 전 표본 8곳 정독(placement / setup / acting / color / overlay). 결과:
 
+> ⚠ **이 절은 조사 시점의 기록이다.** 아래에 근거로 든 커맨드 중
+> 절차적 연기 계열(`Tremble` · `Sway` · `Breath` · `Walk` · `Hop` · `Bounce`)과
+> `ColorTo` · 오버레이/이모지 리그는 **이후 삭제됐다**(연기는 Spine으로 주인이 바뀌었다 —
+> [SCOPE-BOUNDARY.md](../../../SCOPE-BOUNDARY.md) 참조).
+> 이름을 남겨 둔 이유는 **경계가 왜 여기 그어졌는지의 근거**이기 때문이다.
+> 코드에서 찾지 말 것.
+
 ### 축 ① — dest 출처
 
 | 유형 | 예 | 이관 |
@@ -249,9 +256,8 @@ CharSlot_Track_Idle.anchoredPosition          접힘=(0,0)   vs 캡처=(0, 7.99)
   가속 잔여시간은 `MeasureRemainingRatio` 한 장으로 받는다 — 축이 여럿이면
   축별 `RemainingRatio`의 최댓값이다(가장 늦게 도착하는 축이 기준).
 
-  - 대상 아님: 절차적 연기(Tremble·Sway·Hop·Jolt·Dip·Emoji 계열) —
-    목표값이 정의되지 않는다. `ColorTo`는 스텝 수명 훅 자체가 없어 이관하면
-    없던 동작이 생긴다. 즉시 확정(SetAnchor)은 트윈이 없어 모양이 다르다.
+  - 대상 아님: 절차적 연기 —
+    목표값이 정의되지 않는다. 즉시 확정(`SetAnchor`)은 트윈이 없어 모양이 다르다.
   - 기반이 의도적으로 통일한 미세 차이 (실경로 무영향):
     ① 해석 실패 시 NRE 대신 경고+건너뛰기
     ② 가속 잔여시간이 0으로 퇴화하는 경계에서 0초 트윈 대신 즉시 확정

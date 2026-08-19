@@ -31,7 +31,7 @@ public sealed class CharVisualFocusCommandCharR : ClaimTweenCommandBase
 
     protected override float TweenDuration => _spec.duration;
 
-    // 캐릭터 전체의 밝기·림이 한꺼번에 끊기면 눈에 띄게 튄다 — 훨씬 완만하게 붙인다.
+    // 캐릭터 전체의 밝기, 림이 한꺼번에 끊기면 튐. 완만하게 조정
     protected override float StepFinishSpeedUpMultiplier => 1.5f;
 
     public CharVisualFocusCommandCharR(

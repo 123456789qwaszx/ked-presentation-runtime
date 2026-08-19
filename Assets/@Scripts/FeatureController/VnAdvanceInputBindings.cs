@@ -29,8 +29,7 @@ public sealed class VnAdvanceInputBindings
     public bool IsAdvancePressed() => IsPressed(advance);
     public bool IsRunYarnPressed() => IsPressed(runYarn);
 
-
-
+    
     private static bool IsHeld(KeyCode key)
     {
         return key != KeyCode.None && Input.GetKey(key);

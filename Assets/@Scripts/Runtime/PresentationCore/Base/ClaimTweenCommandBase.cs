@@ -30,47 +30,46 @@ public abstract class ClaimTweenCommandBase : CommandBase
 
     protected bool HasClaimedTarget { get; private set; }
 
-    // ≤ 0이면 즉시 확정(스냅)
+    // 0이하일 시 즉시 스냅
     protected abstract float TweenDuration { get; }
 
-    /// <summary>유니티 참조 해석. 한 번만 불린다.</summary>
     protected abstract void ResolveTargets(CommandRunScope scope);
 
-    /// <summary>
-    /// DOKill → (from-override) → 목표 계산(코어 리덕션) → (장부 게시).
-    /// 이 메서드가 끝나면 목표값이 확정돼 있어야 한다. HasClaimedTarget은 기반이 올린다.
-    /// </summary>
+    // DOKill -> (from-override) -> 목표 계산 및 확정(코어 리덕션) -> (장부 게시).
     protected abstract void ClaimTarget(CommandRunScope scope);
 
-    /// <summary>목표를 향한 트윈. ease·SetTarget은 파생이, SetUpdate·OnComplete는 기반이 건다.</summary>
+    // ease, SetTarget은 구현 커맨드가 직접. (SetUpdate,OnComplete는 Base측 정책)
     protected abstract Tween CreateTween(float duration);
 
-    /// <summary>최종 쓰기 + 장부 Clear. 수명 플래그 정리는 기반이 함.</summary>
+    // 최종 쓰기 + 장부 Clear. (수명 플래그 정리는 Base측 정책)
     protected abstract void OnCommitFinalState();
 
-    /// <summary>
-    /// 목표까지 남은 진행 비율 [0,1]. 0이면 가속할 것이 없다는 뜻이라 즉시 확정.
-    /// 여러 축이면 축별 비율의 최댓값을 사용(가장 늦게 도착하는 축이 기준).
-    /// </summary>
+    // 목표까지 남은 진행 비율 [0,1]. 0이면 가속할 것이 없다는 뜻이라 즉시 확정.
+    // 여러 축이면 축별 비율의 최댓값을 사용(가장 늦게 도착하는 축이 기준).
     protected abstract float MeasureRemainingRatio();
 
-    // 스텝 경계에서 가속 재트윈을 만들 것인가. 진행률(0→1) 트윈 커맨드는 재시작이
-    // 처음부터 다시 도는 것이라 무의미하므로 false — 즉시 확정한다 (RotateBy 계열).
+    // 스텝 경계에서 가속 재트윈을 만들 것인가.
+    // 진행률(0->1) 트윈 커맨드는 (RotateBy 계열) = false(즉시확정)
+    // 처음부터 다시 도는 것이라 무의미하기 때문.
     protected virtual bool AccelerateOnStepFinish => true;
 
     protected virtual float StepFinishSpeedUpMultiplier => 30f;
 
-    /// <summary>
-    /// 스텝 경계 가속용 트윈. 기본은 본 트윈을 잔여시간으로 다시 만드는 것이다.
-    /// 다단 연출(예열·오버슈트)처럼 "현재 위치에서 목표까지"만 남기고 마무리해야 하는
-    /// 커맨드는 이걸 덮어 별도 트윈을 낸다 (PivotRotateTo).
-    /// </summary>
+    // 스텝 경계 가속용 트윈. 기존 트윈을 다시 만드는 것.(잔여시간 기반 재계산)
+    // 다단 연출 커맨드(PivotRotateTo)는 이걸로 덮음.
+    // "현재 위치에서 목표까지"만 남기고 마무리해야 하기 때문.
     protected virtual Tween CreateAcceleratedTween(float duration) => CreateTween(duration);
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
-        ResolveOnce(scope);
-        Claim(scope);
+        if (!_resolved)
+        {
+            _resolved = true;
+            ResolveTargets(scope);
+        }
+        
+        ClaimTarget(scope);
+        HasClaimedTarget = true;
 
         float duration = TweenDuration;
 
@@ -90,10 +89,17 @@ public abstract class ClaimTweenCommandBase : CommandBase
 
     protected override void OnSkip(CommandRunScope scope)
     {
-        ResolveOnce(scope);
+        if (!_resolved)
+        {
+            _resolved = true;
+            ResolveTargets(scope);
+        }
 
         if (!HasClaimedTarget)
-            Claim(scope);
+        {
+            ClaimTarget(scope);
+            HasClaimedTarget = true;
+        }
 
         Commit();
     }
@@ -124,21 +130,6 @@ public abstract class ClaimTweenCommandBase : CommandBase
             .OnComplete(Commit);
     }
 
-    private void ResolveOnce(CommandRunScope scope)
-    {
-        if (_resolved)
-            return;
-
-        _resolved = true;
-        ResolveTargets(scope);
-    }
-
-    private void Claim(CommandRunScope scope)
-    {
-        ClaimTarget(scope);
-        HasClaimedTarget = true;
-    }
-
     private void Commit()
     {
         OnCommitFinalState();
@@ -159,7 +150,7 @@ public abstract class ClaimTweenCommandBase : CommandBase
         return Mathf.Max(0.01f, remainingDuration / StepFinishSpeedUpMultiplier);
     }
 
-    /// <summary>한 축의 남은 비율. 출발했던 거리 대비 남은 거리이며, 양끝은 0으로 접는다.</summary>
+    /// <summary>한 축의 남은 비율. 출발했던 거리 대비 남은 거리. Clamp01</summary>
     protected static float RemainingRatio(float originalDistance, float remainingDistance)
     {
         if (originalDistance <= 0.001f || remainingDistance <= 0.001f)

@@ -30,11 +30,17 @@ public sealed class ScreenFlashEffectController :
     public float FlashAmount => _flashAmount;
     public Color FlashColor => _flashColor;
 
-    private void Reset() => EnsureTarget();
+    private void Reset()
+    {
+        if (targetImage == null)
+            targetImage = GetComponent<Image>();
+    }
 
     private void Awake()
     {
-        EnsureTarget();
+        if (targetImage == null)
+            targetImage = GetComponent<Image>();
+        
         InitializeStateIfNeeded();
         EnsureMaterial();
 
@@ -58,7 +64,9 @@ public sealed class ScreenFlashEffectController :
         if (material != null)
             sourceMaterial = material;
 
-        EnsureTarget();
+        if (targetImage == null)
+            targetImage = GetComponent<Image>();
+        
         InitializeStateIfNeeded();
         RebuildMaterial();
 
@@ -97,12 +105,6 @@ public sealed class ScreenFlashEffectController :
         _stateInitialized = true;
     }
 
-    private void EnsureTarget()
-    {
-        if (targetImage == null)
-            targetImage = GetComponent<Image>();
-    }
-
     private void RebuildMaterial()
     {
         DisposeMaterial();
@@ -111,7 +113,8 @@ public sealed class ScreenFlashEffectController :
 
     private void EnsureMaterial()
     {
-        EnsureTarget();
+        if (targetImage == null)
+            targetImage = GetComponent<Image>();
 
         if (_material != null)
             return;

@@ -53,7 +53,8 @@ public sealed class HoldSignalCommand : CommandBase
         bool hasTimeout = _timeoutSeconds > 0f;
         if (hasTimeout && _time == null)
         {
-            Debug.LogWarning($"[CpsHoldSignalCommand] timeoutSeconds>0 but TimeSource is null. Hold becomes infinite. key='{_key}'");
+            Debug.LogWarning(
+                $"[CpsHoldSignalCommand] timeoutSeconds>0 but TimeSource is null. Hold becomes infinite. key='{_key}'");
             hasTimeout = false;
         }
 
@@ -79,5 +80,7 @@ public sealed class HoldSignalCommand : CommandBase
         }
     }
     
-    private bool IsSatisfied() => _consumeSignal ? _latch.Consume(_key) : _latch.IsLatched(_key);
+    private bool IsSatisfied() => _consumeSignal 
+        ? _latch.Consume(_key) 
+        : _latch.IsLatched(_key);
 }

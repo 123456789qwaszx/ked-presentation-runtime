@@ -22,8 +22,7 @@ public sealed class UIPatchCommand : CommandBase
         _uiThemePatch = uiThemePatch;
         _spec = spec;
     }
-
-
+    
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
         yield return _uiThemePatch.PatchCurrentScreen(_spec.themeId, _spec.localeId);

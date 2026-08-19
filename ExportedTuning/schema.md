@@ -67,13 +67,12 @@ new RectSpace(capturedUnderParentSize, Vec2.Half)
 
 | 필드 | 뜻 |
 |---|---|
-| `rigKind` | `character` (66노드) · `background` (19) · `overlay` (23) · `screenEffect` (5) |
+| `rigKind` | `character` · `background` · `screenEffect` — 익스포터가 내보내는 세 종류다. 노드 수는 스키마를 따라 변하므로 여기 적지 않는다 |
 | `sourcePrefab` | 세울 때 쓴 프리팹 에셋 경로. **빈 문자열이면 프리팹 없이 스키마 베이크로 세웠다는 뜻** |
 | `nodes` | 부모가 항상 자식보다 먼저 온다 — 순서대로 넣으면 트리가 세워진다 |
 
-> `overlay`와 `screenEffect`의 `sourcePrefab`이 비어 있는 것은 정상이다.
-> 씬의 `VnAppBootstrap.overlayRigPrefab`이 배선되지 않았고 screenEffect는 프리팹 필드
-> 자체가 없어서, **부트스트랩도 `null`을 넘긴다** — 스키마 베이크가 곧 런타임 경로다.
+> `screenEffect`의 `sourcePrefab`이 비어 있는 것은 정상이다. 프리팹 필드 자체가 없어
+> **부트스트랩도 `null`을 넘긴다** — 스키마 베이크가 곧 런타임 경로다.
 
 ### `nodes[]` — 코어 `RectNodeState`와 1:1
 
@@ -94,16 +93,17 @@ new RectSpace(capturedUnderParentSize, Vec2.Half)
 
 ### 검산 포인트
 
-`character` 리그에서 `pivot`이 `(0.5, 0)`인 노드는 **정확히 11개**여야 하고,
-그 목록이 `CharacterRigSchema`의 `NeedsBottomPivot` 노드와 일치해야 한다:
+`character` 리그에서 `pivot`이 `(0.5, 0)`인 노드의 목록이
+**`CharacterRigSchema`의 `NeedsBottomPivot` 노드와 정확히 일치**해야 한다.
 
-```
-CharSlot_DepthScale · CharSlot_SwayPivot · CharSlot_Scale ·
-CharacterPortrait_VisualOffset · CharacterPortrait_SwayPivot ·
-EmojiSlot00/01/02_VisualOffset · EmojiSlot00/01/02_SwayPivot
-```
+개수를 여기 적지 않는 이유: 스키마가 바뀌면 문서가 거짓이 된다. 실제로 한 번 그랬다 —
+이모지 서브시스템(리그 노드 39개)을 지운 뒤 덤프를 재생성하지 않아,
+문서의 "11개"와 코드의 5개가 하루 넘게 어긋나 있었다.
 
-어긋나면 값이 실측이 아니거나 덤프가 낡은 것이다.
+어긋나면 값이 실측이 아니거나 **덤프가 낡은 것이다.** 후자가 훨씬 흔하다 —
+스키마를 바꿨으면 `Ked / U12 / Export Presentation Tuning Dump`를 다시 돌려야 한다.
+`RigSchemaTreeUnityParityTests`가 이 덤프를 라이브 리그와 대조하므로,
+재생성을 빠뜨리면 **테스트가 코드가 아니라 낡은 덤프를 신고한다.**
 
 ---
 
