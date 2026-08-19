@@ -2,48 +2,6 @@ using UnityEngine;
 
 public static class PresentationCommandKeyParser
 {
-    public static bool TryParseStageKey(string key, out PresentationStageKey stage)
-    {
-        string normalized = Normalize(key);
-
-        switch (normalized)
-        {
-            case "0":
-            case "00":
-            case "s0":
-            case "s00":
-            case "stage0":
-            case "stage00":
-                stage = PresentationStageKey.Stage00;
-                return true;
-
-            case "1":
-            case "01":
-            case "s1":
-            case "s01":
-            case "stage1":
-            case "stage01":
-                stage = PresentationStageKey.Stage01;
-                return true;
-
-            case "2":
-            case "02":
-            case "s2":
-            case "s02":
-            case "stage2":
-            case "stage02":
-                stage = PresentationStageKey.Stage02;
-                return true;
-        }
-
-        if (System.Enum.TryParse(key, true, out stage))
-            return true;
-
-        Debug.LogWarning($"[PresentationCommandKeyParser] Unknown stage key: {key}");
-        stage = default;
-        return false;
-    }
-
     public static bool TryParseDepthLayerKey(string key, out PresentationDepthLayerKey layer)
     {
         string normalized = Normalize(key);

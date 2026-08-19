@@ -118,7 +118,6 @@ public sealed partial class YarnCommandBridge
         });
     #endregion
     
-    
     #region CharFocusDepth
     private void EnqueueDepthAtPresetSpec(
         string roleKey,

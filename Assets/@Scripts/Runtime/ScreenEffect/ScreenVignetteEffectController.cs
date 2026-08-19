@@ -21,7 +21,7 @@ public sealed class ScreenVignetteEffectController :
     [SerializeField, Range(0.001f, 1f)] private float defaultSoftness = 0.35f;
     [SerializeField, Min(0f)] private float defaultAspect = 1.777f;
 
-    private UiEffectMaterialBinding _material;
+    private UIEffectMaterialBinding _material;
 
     private bool _stateInitialized;
 
@@ -149,7 +149,7 @@ public sealed class ScreenVignetteEffectController :
             return;
         }
 
-        _material = new UiEffectMaterialBinding(targetImage, sourceMaterial, gameObject.name);
+        _material = new UIEffectMaterialBinding(targetImage, sourceMaterial, gameObject.name);
     }
 
     private void ApplyMaterialValues()

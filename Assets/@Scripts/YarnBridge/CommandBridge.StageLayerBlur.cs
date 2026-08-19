@@ -1,8 +1,5 @@
 using UnityEngine;
 
-// screen_blur 계열의 새 경로. 야른 어휘는 그대로 두고 기구만 바꾼다 —
-// 레이어를 통째로 캡처해 오버레이로 덮는 대신, 그 레이어 아래 리그들의 셰이더 블러를 직접 움직인다.
-//
 // 옛 경로로 되돌리려면 CommandBridge.cs의 BindStageDepthDefocus가
 // Enqueue*DepthBlurSpec(= CommandBridge.StageDepthDefocus.cs)을 부르게 하면 된다.
 public sealed partial class YarnCommandBridge
@@ -47,8 +44,7 @@ public sealed partial class YarnCommandBridge
             stage = stage,
             layer = layer,
 
-            // 옛 blurRadius는 0~8 범위였다. 새 amount는 0~1이라 저작값(0.8~1.2)이
-            // 그대로 옮겨오지 않는다 — 기구가 바뀌었으므로 어차피 재조정 대상이다.
+            // 옛 blurRadius는 0~8 범위였다. 새 amount는 0~1이라 조정 필요함.
             amount = Mathf.Clamp01(amount)
         });
     }

@@ -17,7 +17,6 @@ public sealed class YarnPlaybackDriver : MonoBehaviour
     }
     
     public void Enqueue(CommandSpecBase spec) => _collectedSpecs.Add(spec);
-    public void Clear() => _collectedSpecs.Clear();
     
     public void PlayCollected()
     {

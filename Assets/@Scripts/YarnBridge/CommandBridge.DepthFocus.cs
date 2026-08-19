@@ -6,7 +6,7 @@ public sealed partial class YarnCommandBridge
     private void EnqueueDepthFocusOnSpec(
         string slotKey,
         float maxBlur = 1f,
-        string durationToken = "0.4s")
+        string durationToken = "0.4s") 
         => Collect(new DepthFocusCommandSpecCharR
         {
             slotKey = slotKey,

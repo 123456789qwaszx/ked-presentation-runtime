@@ -65,6 +65,7 @@ public sealed partial class YarnCommandBridge
         
         runner.AddCommandHandler(
             "box_hide", HideDialogueBox);
+        
         runner.AddCommandHandler(
             "box_show", ShowDialogueBox);
         
@@ -257,22 +258,22 @@ public sealed partial class YarnCommandBridge
     private void BindCharRigPresentation(DialogueRunner runner)
     {
         runner.AddCommandHandler<string, string>(
-            "fade_in", EnqueueFadeInDslSpec);
+            "fade_in", EnqueueFadeInSpec);
 
         runner.AddCommandHandler<string, string>(
-            "fade_out", EnqueueFadeOutDslSpec);
+            "fade_out", EnqueueFadeOutSpec);
 
         runner.AddCommandHandler<string, string, string, string>(
-            "slide_in", EnqueueSlideInDslSpec);
+            "slide_in", EnqueueSlideInSpec);
 
         runner.AddCommandHandler<string, string, string, string>(
-            "slide_out", EnqueueSlideOutDslSpec);
+            "slide_out", EnqueueSlideOutSpec);
         
         runner.AddCommandHandler<string, string, string, string>(
             "char_move_to", EnqueueMoveByUnitCharSpec);
         
         runner.AddCommandHandler<string, float, string>(
-            "char_scale_to", EnqueueScaleToDslSpec);
+            "char_scale_to", EnqueueScaleSpec);
     }
     
     private void BindCharRigComposition(DialogueRunner runner)

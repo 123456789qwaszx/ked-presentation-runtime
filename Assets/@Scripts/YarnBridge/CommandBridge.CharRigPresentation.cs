@@ -2,7 +2,7 @@ using UnityEngine;
 
 public sealed partial class YarnCommandBridge
 {
-    private void EnqueueFadeInDslSpec(string roleKey, string durationToken = "14fr")
+    private void EnqueueFadeInSpec(string roleKey, string durationToken = "14fr")
         => Collect(new FadeInCommandSpecCharR
         {
             target = CharacterRigTarget.CharacterPortraitSprite_Root,
@@ -10,7 +10,7 @@ public sealed partial class YarnCommandBridge
             duration = YarnDurationParser.Parse(durationToken)
         });
 
-    private void EnqueueFadeOutDslSpec(string roleKey, string durationToken = "14fr")
+    private void EnqueueFadeOutSpec(string roleKey, string durationToken = "14fr")
         => Collect(new FadeOutCommandSpecCharR
         {
             target = CharacterRigTarget.CharacterPortraitSprite_Root,
@@ -18,9 +18,7 @@ public sealed partial class YarnCommandBridge
             duration = YarnDurationParser.Parse(durationToken)
         });
 
-    // 등퇴장. 연기가 아니라 이동이다 — 정지 프레임에 최종 위치가 남으므로
-    // 무대 축(CharSlot_Track)에 걸리고 코어가 모델링한다.
-    private void EnqueueSlideInDslSpec(
+    private void EnqueueSlideInSpec(
         string roleKey,
         string direction = "left",
         string distanceToken = "12u",
@@ -33,7 +31,7 @@ public sealed partial class YarnCommandBridge
             duration = YarnDurationParser.Parse(durationToken)
         });
 
-    private void EnqueueSlideOutDslSpec(
+    private void EnqueueSlideOutSpec(
         string roleKey,
         string direction = "right",
         string distanceToken = "12u",
@@ -59,7 +57,7 @@ public sealed partial class YarnCommandBridge
             duration = YarnDurationParser.Parse(durationToken),
         });
 
-    private void EnqueueScaleToDslSpec(
+    private void EnqueueScaleSpec(
         string roleKey,
         float xyValue,
         string durationToken = "10fr")

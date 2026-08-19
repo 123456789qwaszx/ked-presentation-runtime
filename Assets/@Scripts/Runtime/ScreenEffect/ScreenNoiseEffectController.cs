@@ -22,7 +22,7 @@ public sealed class ScreenNoiseEffectController :
     [SerializeField] private float defaultSpeedY = 0.012f;
     [SerializeField, Min(0f)] private float defaultContrast = 1f;
 
-    private UiEffectMaterialBinding _material;
+    private UIEffectMaterialBinding _material;
 
     private bool _stateInitialized;
 
@@ -156,7 +156,7 @@ public sealed class ScreenNoiseEffectController :
             return;
         }
 
-        _material = new UiEffectMaterialBinding(targetImage, sourceMaterial, gameObject.name);
+        _material = new UIEffectMaterialBinding(targetImage, sourceMaterial, gameObject.name);
     }
 
     private void ApplyMaterialValues()

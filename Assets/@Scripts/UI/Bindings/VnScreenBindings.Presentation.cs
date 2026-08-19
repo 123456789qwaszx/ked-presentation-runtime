@@ -83,7 +83,6 @@ public sealed partial class VnScreenBindings
         _vnFeatures.ToggleSpeedUpMode();
     }
 
-    // UI 이벤트 핸들러라 async void다.
     private async void HandleRollbackClicked()
     {
         if (!_vnFeatures.RequestRollbackOneStep())

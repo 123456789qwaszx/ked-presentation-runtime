@@ -17,7 +17,7 @@ public sealed class ScreenFlashEffectController :
     [Header("Default")]
     [SerializeField] private Color defaultFlashColor = Color.white;
 
-    private UiEffectMaterialBinding _material;
+    private UIEffectMaterialBinding _material;
 
     private bool _stateInitialized;
 
@@ -125,7 +125,7 @@ public sealed class ScreenFlashEffectController :
             return;
         }
 
-        _material = new UiEffectMaterialBinding(targetImage, sourceMaterial, gameObject.name);
+        _material = new UIEffectMaterialBinding(targetImage, sourceMaterial, gameObject.name);
     }
 
     private void ApplyMaterialValues()
