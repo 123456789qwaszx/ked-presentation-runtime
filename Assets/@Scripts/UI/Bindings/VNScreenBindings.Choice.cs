@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-public sealed partial class VnScreenBindings
+public sealed partial class VNScreenBindings
 {
     private void OpenChoicePanel(IReadOnlyList<string> choices)
     {

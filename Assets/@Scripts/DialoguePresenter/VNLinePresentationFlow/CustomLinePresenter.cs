@@ -5,7 +5,7 @@ using Yarn.Unity;
 
 public interface IVNLineAborter
 {
-    void AbortCurrentVnLine();
+    void AbortCurrentVNLine();
 }
 
 public sealed class CustomLinePresenter : DialoguePresenterBase, IVNLineAborter
@@ -13,7 +13,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, IVNLineAborter
     private VNLinePresentationFlow _vnLinePresentationFlow;
 
     private EllipsisBreathTypewriter _typewriter;
-    private VnPlaybackRuntimeState _vnPlaybackRuntimeState;
+    private VNPlaybackRuntimeState _vnPlaybackRuntimeState;
 
     private string _currentNodeName;
 
@@ -43,7 +43,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, IVNLineAborter
         DialogueRunner dialogueRunner,
         VNLinePresentationFlow vnLinePresentationFlow,
         EllipsisBreathTypewriter typewriter,
-        VnPlaybackRuntimeState vnPlaybackRuntimeState)
+        VNPlaybackRuntimeState vnPlaybackRuntimeState)
     {
         dialogueRunner.onNodeStart?.AddListener(nodeName => _currentNodeName = nodeName);
         RegisterPresenter(dialogueRunner);
@@ -121,7 +121,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, IVNLineAborter
         }
     }
 
-    public void AbortCurrentVnLine()
+    public void AbortCurrentVNLine()
     {
         _presenterGeneration++;
         CancelLineVisualToken();

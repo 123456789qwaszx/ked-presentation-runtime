@@ -1,38 +1,56 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 using Yarn.Unity;
 
-public class VnAppBootstrap : MonoBehaviour
+public class VNAppBootstrap : MonoBehaviour
 {
-    private readonly VnPlaybackRuntimeState _playbackState = new();
-    
+    private readonly VNPlaybackRuntimeState _playbackState = new();
+
     private readonly RollbackHistory _rollbackHistory = new();
     private readonly ChoiceHistory _choiceHistory = new();
     private readonly VNLinePresentationState _linePresentationAdvanceState = new();
-    
+
     private readonly PresentationStage _presentationStage = new();
-    private readonly BacklogRecorder _backlogRecorder = new ();
-    
-    private VnScreenBindings _screenBindings;
+    private readonly BacklogRecorder _backlogRecorder = new();
+
+    private readonly DialogueAdvanceDispatcher _dialogueAdvanceDispatcher = new();
+
+    private VNScreenBindings _screenBindings;
+    private IUIThemePatchPort _uiThemePatch;
+
+    private VNRuntimeStateProvider _vnRuntimeStateProvider;
+
+    private PresentationUIRoot _presentationUIRoot;
+    private PresentationShotResponseSystem _presentationResponseRig;
+    private ScreenEffectRig _screenEffectRig;
+
+    private PresentationScopeSession _presentationScopeSession;
+    private VNFeatureController _vnFeatureController;
+    private EpisodePlayer _episodePlayer;
 
     [Header("UIManager")]
     [SerializeField] private UIManager uiManager;
-    
-    [Header("Sound")] 
+
+    [Header("Sound")]
     [SerializeField] private AudioSystem audioSystem;
-    
-    [Header("DialogueBox")] 
-    [SerializeField] private DialogueSurfaceLayoutPresetDBSO surfaceLayoutPresetDbSo;
-    [SerializeField] private DialogueSpeakerPresentationPolicyDBSO _dialogueSpeakerPresentationPolicyDbSo;
-    
-    [Header("Presentation")] 
+
+    [Header("DialogueBox")]
+    [FormerlySerializedAs("surfaceLayoutPresetDbSo")]
+    [SerializeField] private DialogueSurfaceLayoutPresetDBSO surfaceLayoutPresetDb;
+    [FormerlySerializedAs("_dialogueSpeakerPresentationPolicyDbSo")]
+    [SerializeField] private DialogueSpeakerPresentationPolicyDBSO speakerPolicyDb;
+
+    [Header("Presentation")]
     [SerializeField] private RoleAnchorTuningDBSO roleTuningDb;
-    
-    [SerializeField] private PortraitGeneratedDbSo portraitGeneratedDbSo;
+
+    [FormerlySerializedAs("portraitGeneratedDbSo")]
+    [SerializeField] private PortraitGeneratedDBSO portraitGeneratedDb;
     [SerializeField] private CharacterFocusTuningDBSO characterFocusTuningDb;
     [SerializeField] private CharacterVisualFocusPresetDBSO characterVisualFocusPresetDb;
-    
+
     [SerializeField] private CharacterDepthTuningSO characterDepthTuning;
-    
+
+    [Header("Command")]
     [SerializeField] private CommandExecutor commandExecutor;
 
     [Header("Yarn")]
@@ -41,21 +59,21 @@ public class VnAppBootstrap : MonoBehaviour
     [SerializeField] private CustomLinePresenter customLinePresenter;
     [SerializeField] private EllipsisBreathTypewriter ellipsisBreathTypewriter;
     [SerializeField] private AutoAdvanceScheduler autoAdvanceScheduler;
-    
+
     [SerializeField] private VNOptionsPresenter vnOptionsPresenter;
     [SerializeField] private VNOptionItem optionItem;
-    
+
     [Header("Entry Keys")]
     [Tooltip("디버그 키(2번)와 타이틀에서 재생할 yarn 노드 이름.")]
     [SerializeField] private string yarnEntryKey;
 
-    [Header("VnAdvanceGate")]
-    [SerializeField] private VnAdvanceInputPoller vnAdvanceInputPoller;
+    [Header("VNAdvanceGate")]
+    [SerializeField] private VNAdvanceInputPoller vnAdvanceInputPoller;
 
-
-    [Header("RigPrefab")] [Tooltip("CharacterRig prefab used for command presentation. " +
-                                   "Empty fields bake a complete rig from CharacterRigSchema at runtime. " +
-                                   "Prefab the baked result when you need performance setup, external systems, response targets, or shot helpers.")] 
+    [Header("RigPrefab")]
+    [Tooltip("CharacterRig prefab used for command presentation. " +
+             "Empty fields bake a complete rig from CharacterRigSchema at runtime. " +
+             "Prefab the baked result when you need performance setup, external systems, response targets, or shot helpers.")]
     [SerializeField] private RectTransform rigPrefab;
     [SerializeField] private RectTransform backgroundRigPrefab;
 
@@ -63,52 +81,46 @@ public class VnAppBootstrap : MonoBehaviour
     [Tooltip("켜면 재생 중 라인마다 (코어 리듀서로 접은 상태) vs (실제 무대)를 비교하고 " +
              "종료 시 EquivalenceReports/*.json을 남긴다. 판정 전용 — 재생에 영향 없음.")]
     [SerializeField] private bool enableEquivalenceHarness;
-    
+
     [Header("UI")]
-    [SerializeField] private ScreenNoisePresetDBSO screenNoisePresetDbso;
-    [SerializeField] private ScreenVignettePresetDBSO screenVignettePresetDbso;
-    [SerializeField] private ScreenFlashPresetDBSO screenFlashPresetDbso;
-    
-    [SerializeField] private StageMaskMotionPresetDBSO stageMaskMotionPresetDbSo;
-    
+    [FormerlySerializedAs("screenNoisePresetDbso")]
+    [SerializeField] private ScreenNoisePresetDBSO screenNoisePresetDb;
+    [FormerlySerializedAs("screenVignettePresetDbso")]
+    [SerializeField] private ScreenVignettePresetDBSO screenVignettePresetDb;
+    [FormerlySerializedAs("screenFlashPresetDbso")]
+    [SerializeField] private ScreenFlashPresetDBSO screenFlashPresetDb;
+
+    [FormerlySerializedAs("stageMaskMotionPresetDbSo")]
+    [SerializeField] private StageMaskMotionPresetDBSO stageMaskMotionPresetDb;
+
     [Header("Screen Effect Rig")]
     [SerializeField] private RectTransform screenEffectRigMount;
     [SerializeField] private RectTransform screenEffectRigPrefab;
-    
-    [Header("NodeDebug")] 
-    [SerializeField] private CharacterFocusDebugView characterFocusDebugView;
-    
-    private IUIThemePatchPort _uiThemePatch;
-    
-    private VNRuntimeStateProvider _vnRuntimeStateProvider;
-    private PresentationShotResponseSystem _presentationResponseRig;
-    private PresentationScopeSession _presentationScopeSession;
 
-    private readonly DialogueAdvanceDispatcher _dialogueAdvanceDispatcher = new();
-    private VnFeatureController _vnFeatureController;
-    private EpisodePlayer _episodePlayer;
-    
-    private PresentationUIRoot _presentationUIRoot;
-    private ScreenEffectRig _screenEffectRig;
-    
-    
+    [Header("NodeDebug")]
+    [SerializeField] private CharacterFocusDebugView characterFocusDebugView;
+
     private void Awake()
     {
         BootstrapUIManager();
+
         BootstrapPresentationRoots();
+
         BootstrapAudioSystem();
 
         BootstrapPresentationSession();
+
         BootstrapYarn();
 
         CreateEpisodePlayer();
 
         BootstrapPlaybackControls();
+
         BootstrapScreenBindings();
 
         BootstrapEquivalenceHarness();
     }
-    
+
     private void BootstrapUIManager()
     {
         SpritePortAssignmentBuilder spritePortAssignmentBuilder = new();
@@ -120,7 +132,7 @@ public class VnAppBootstrap : MonoBehaviour
         uiManager.AttachUIPatchService(uiPatchService);
 
         _uiThemePatch = new UIThemePatchAdapter(uiManager, uiPatchService);
-        _screenBindings = new VnScreenBindings(uiManager);
+        _screenBindings = new VNScreenBindings(uiManager);
     }
 
     private void BootstrapPresentationRoots()
@@ -176,7 +188,7 @@ public class VnAppBootstrap : MonoBehaviour
         // Character Rig
         CharRigSlotResolver charRigSlotResolver = new(_presentationUIRoot);
         CharacterRigBuilder characterRigBuilder = new();
-        PortraitResolver portraitResolver = new(portraitGeneratedDbSo);
+        PortraitResolver portraitResolver = new(portraitGeneratedDb);
 
         CharacterRigCommandFactory charRigFactory = new(
             charRigSlotResolver,
@@ -213,10 +225,10 @@ public class VnAppBootstrap : MonoBehaviour
 
         ScreenEffectCommandFactory screenEffectFactory = new(
             _screenEffectRig,
-            screenFlashPresetDbso,
-            screenNoisePresetDbso, 
-            screenVignettePresetDbso,
-            stageMaskMotionPresetDbSo,
+            screenFlashPresetDb,
+            screenNoisePresetDb, 
+            screenVignettePresetDb,
+            stageMaskMotionPresetDb,
             _presentationUIRoot,
             _presentationUIRoot);
         
@@ -254,8 +266,8 @@ public class VnAppBootstrap : MonoBehaviour
             dialogueSurfaceBox,
             metadataResolver, 
             dialogueSurfaceState, 
-            surfaceLayoutPresetDbSo,
-            _dialogueSpeakerPresentationPolicyDbSo);
+            surfaceLayoutPresetDb,
+            speakerPolicyDb);
         
         // 생성자가 러너에 커맨드 핸들러를 전부 등록.
         _ = new YarnCommandBridge(
@@ -350,6 +362,16 @@ public class VnAppBootstrap : MonoBehaviour
             yarnEntryKey);
     }
     
+    private void BootstrapScreenBindings()
+    {
+        _screenBindings.ConfigurePresentationView(
+            _vnFeatureController,
+            _dialogueAdvanceDispatcher,
+            _linePresentationAdvanceState);
+
+        _screenBindings.ConfigureTitleView(_episodePlayer);
+    }
+    
     private void BootstrapEquivalenceHarness()
     {
         if (!enableEquivalenceHarness)
@@ -365,16 +387,6 @@ public class VnAppBootstrap : MonoBehaviour
             _presentationScopeSession,
             _presentationResponseRig,
             _dialogueAdvanceDispatcher);
-    }
-
-    private void BootstrapScreenBindings()
-    {
-        _screenBindings.ConfigurePresentationView(
-            _vnFeatureController,
-            _dialogueAdvanceDispatcher,
-            _linePresentationAdvanceState);
-
-        _screenBindings.ConfigureTitleView(_episodePlayer);
     }
     
     private void Start()

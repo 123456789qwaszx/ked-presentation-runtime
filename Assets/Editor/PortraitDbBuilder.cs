@@ -20,10 +20,10 @@ public static class PortraitDbBuilder
 
         EnsureFolder(Path.GetDirectoryName(settings.generatedDbPath));
 
-        var db = AssetDatabase.LoadAssetAtPath<PortraitGeneratedDbSo>(settings.generatedDbPath);
+        var db = AssetDatabase.LoadAssetAtPath<PortraitGeneratedDBSO>(settings.generatedDbPath);
         if (!db)
         {
-            db = ScriptableObject.CreateInstance<PortraitGeneratedDbSo>();
+            db = ScriptableObject.CreateInstance<PortraitGeneratedDBSO>();
             AssetDatabase.CreateAsset(db, settings.generatedDbPath);
         }
 
@@ -54,9 +54,9 @@ public static class PortraitDbBuilder
         EditorGUIUtility.PingObject(db);
     }
 
-    private static List<PortraitGeneratedDbSo.Entry> ScanPortraits(PortraitBuildSettings settings, List<string> report)
+    private static List<PortraitGeneratedDBSO.Entry> ScanPortraits(PortraitBuildSettings settings, List<string> report)
     {
-        var list = new List<PortraitGeneratedDbSo.Entry>();
+        var list = new List<PortraitGeneratedDBSO.Entry>();
         var seen = new HashSet<string>(StringComparer.Ordinal);
 
         var validRoots = new List<string>();
@@ -159,7 +159,7 @@ public static class PortraitDbBuilder
                 return;
             }
 
-            list.Add(new PortraitGeneratedDbSo.Entry
+            list.Add(new PortraitGeneratedDBSO.Entry
             {
                 characterId = cid,
                 variantKey  = variant,
@@ -263,7 +263,7 @@ public static class PortraitDbBuilder
         return (variantFromFile ?? "").Trim();
     }
 
-    private static string BuildReportText(PortraitGeneratedDbSo db, List<string> report, bool strictMode)
+    private static string BuildReportText(PortraitGeneratedDBSO db, List<string> report, bool strictMode)
     {
         var head =
             $"[PortraitDb] Build complete ({(strictMode ? "STRICT" : "NORMAL")} mode)\n" +

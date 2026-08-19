@@ -99,7 +99,7 @@ namespace Ked.Presentation.Core
         //           │
         // ┌─────────┼─────────┐
         // ↓         ↓         ↓
-        // Unity     VnTool     Tests
+        // Unity     VNTool     Tests
         /// <summary>
         /// 덤프 노드 → 상태 값. 필드 해석은 여기 한 곳뿐이다.
         /// </summary>

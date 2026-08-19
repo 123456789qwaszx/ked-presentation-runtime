@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 public sealed class EpisodePlayer
 {
     private readonly IEpisodeNodeRunner _nodeRunner;
-    private readonly VnScreenBindings _vnScreenBindings;
+    private readonly VNScreenBindings _vnScreenBindings;
     private readonly RollbackHistory _nodeRollbackHistory;
     private readonly IVNLineAborter _linePresentationAborter;
     private readonly BacklogRecorder _backlogRecorder;
@@ -13,7 +13,7 @@ public sealed class EpisodePlayer
 
     public EpisodePlayer(
         IEpisodeNodeRunner nodeRunner,
-        VnScreenBindings vnScreenBindings,
+        VNScreenBindings vnScreenBindings,
         RollbackHistory nodeRollbackHistory,
         IVNLineAborter linePresentationAborter,
         BacklogRecorder backlogRecorder,
@@ -48,7 +48,7 @@ public sealed class EpisodePlayer
         if (_nodeRunner.IsRunning)
             await _nodeRunner.StopAsync();
 
-        _linePresentationAborter.AbortCurrentVnLine();
+        _linePresentationAborter.AbortCurrentVNLine();
 
         _nodeRollbackHistory.ClearRollbackPoints();
         _backlogRecorder.ClearBacklog();

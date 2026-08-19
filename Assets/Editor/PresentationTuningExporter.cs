@@ -229,12 +229,12 @@ public static class PresentationTuningExporter
     private static (RectTransform character, RectTransform background)
         ResolveRigPrefabs(List<string> warnings)
     {
-        VnAppBootstrap bootstrap = Object.FindFirstObjectByType<VnAppBootstrap>(FindObjectsInactive.Include);
+        VNAppBootstrap bootstrap = Object.FindFirstObjectByType<VNAppBootstrap>(FindObjectsInactive.Include);
 
         if (bootstrap == null)
         {
             warnings.Add(
-                "VnAppBootstrap을 씬에서 찾지 못했다. 리그를 프리팹 없이(스키마 베이크) 세웠다 — " +
+                "VNAppBootstrap을 씬에서 찾지 못했다. 리그를 프리팹 없이(스키마 베이크) 세웠다 — " +
                 "런타임과 다를 수 있다.");
 
             return (null, null);
@@ -386,7 +386,7 @@ public static class PresentationTuningExporter
     {
         PortraitDimensionsDto dto = new() { sourceAsset = PortraitDbPath };
 
-        PortraitGeneratedDbSo db = AssetDatabase.LoadAssetAtPath<PortraitGeneratedDbSo>(PortraitDbPath);
+        PortraitGeneratedDBSO db = AssetDatabase.LoadAssetAtPath<PortraitGeneratedDBSO>(PortraitDbPath);
 
         if (db == null)
         {
@@ -397,7 +397,7 @@ public static class PresentationTuningExporter
 
         int missingSprites = 0;
 
-        foreach (PortraitGeneratedDbSo.Entry entry in db.entries)
+        foreach (PortraitGeneratedDBSO.Entry entry in db.entries)
         {
             if (entry.sprite == null)
             {

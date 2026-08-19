@@ -1,4 +1,4 @@
-public sealed partial class VnScreenBindings
+public sealed partial class VNScreenBindings
 {
     private EpisodePlayer _episodePlayer;
 

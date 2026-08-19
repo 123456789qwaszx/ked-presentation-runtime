@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 
 [Serializable]
-public class VnPlaybackSettings
+public class VNPlaybackSettings
 {
     [Header("SpeedUp Mode")]
     [Min(2f)] public float speedupModeMultiplier = 12f;

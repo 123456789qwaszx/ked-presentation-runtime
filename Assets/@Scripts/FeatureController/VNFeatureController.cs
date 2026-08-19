@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public sealed class VnFeatureController
+public sealed class VNFeatureController
 {
-    private readonly VnPlaybackRuntimeState _vnPlaybackSettings;
+    private readonly VNPlaybackRuntimeState _vnPlaybackSettings;
 
     private readonly EllipsisBreathTypewriter _typewriter;
     private readonly VNLinePresentationState _linePresentationAdvanceState;
@@ -24,8 +24,8 @@ public sealed class VnFeatureController
 
     public IReadOnlyList<DialogueLogEntry> Backlogs => _backlogRecorder.Entries;
 
-    public VnFeatureController(
-        VnPlaybackRuntimeState vnPlaybackSettings,
+    public VNFeatureController(
+        VNPlaybackRuntimeState vnPlaybackSettings,
         VNLinePresentationState linePresentationAdvanceState,
         EllipsisBreathTypewriter ellipsisBreathTypewriter,
         BacklogRecorder backlogRecorder,

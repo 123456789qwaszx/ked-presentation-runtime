@@ -6,14 +6,14 @@ using Yarn.Unity;
 
 public sealed class AutoAdvanceScheduler : ActionMarkupHandler
 {
-    private VnPlaybackRuntimeState _playbackSettings;
+    private VNPlaybackRuntimeState _playbackSettings;
     private DialogueAdvanceDispatcher _dialogueAdvanceDispatcher;
     private Func<double> _getNow;
 
     private double _nextAutoAdvanceAt = double.PositiveInfinity;
 
     public void Initialize(
-        VnPlaybackRuntimeState vnPlaybackSettings,
+        VNPlaybackRuntimeState vnPlaybackSettings,
         DialogueAdvanceDispatcher dialogueAdvanceDispatcher,
         Func<double> getNow)
     {

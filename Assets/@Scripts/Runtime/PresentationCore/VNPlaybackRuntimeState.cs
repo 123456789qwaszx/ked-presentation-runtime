@@ -1,8 +1,8 @@
 using UnityEngine;
 
-public sealed class VnPlaybackRuntimeState
+public sealed class VNPlaybackRuntimeState
 {
-    public VnPlaybackSettings PlaybackSettings { get; set; } = new();
+    public VNPlaybackSettings PlaybackSettings { get; set; } = new();
     
     private bool _isAutoMode;
     private bool _isSpeedUpMode;

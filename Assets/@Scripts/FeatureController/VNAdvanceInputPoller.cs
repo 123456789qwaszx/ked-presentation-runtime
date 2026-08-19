@@ -1,12 +1,12 @@
 using UnityEngine;
 
 // VN 재생의 유일한 프레임 구동자.
-public sealed class VnAdvanceInputPoller : MonoBehaviour
+public sealed class VNAdvanceInputPoller : MonoBehaviour
 {
-    [SerializeField] private VnAdvanceInputBindings _bindings = new();
+    [SerializeField] private VNAdvanceInputBindings _bindings = new();
 
     private DialogueAdvanceDispatcher _dialogueAdvanceDispatcher;
-    private VnFeatureController _featureController;
+    private VNFeatureController _featureController;
     
     private VNLinePresentationState _linePresentationAdvanceState;
     private EpisodePlayer _episodePlayer;
@@ -19,7 +19,7 @@ public sealed class VnAdvanceInputPoller : MonoBehaviour
 
     public void Initialize(
         DialogueAdvanceDispatcher dialogueAdvanceDispatcher,
-        VnFeatureController featureController,
+        VNFeatureController featureController,
         VNLinePresentationState linePresentationAdvanceState,
         EpisodePlayer episodePlayer,
         string yarnEntryKey)

@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
 
-public sealed partial class VnScreenBindings : IDisposable
+public sealed partial class VNScreenBindings : IDisposable
 {
     private readonly UIManager _ui;
     private UIManager UI => _ui;
 
-    public VnScreenBindings(UIManager uiManager)
+    public VNScreenBindings(UIManager uiManager)
     {
         _ui = uiManager;
     }
@@ -14,7 +14,7 @@ public sealed partial class VnScreenBindings : IDisposable
     public void OpenTitleMenu() => GoToTitle();
     
     /// <summary>
-    /// Closes the top panel and releases its VnScreenBindings cleanup entries.
+    /// Closes the top panel and releases its VNScreenBindings cleanup entries.
     /// </summary>
     private void ClosePanel()
     {

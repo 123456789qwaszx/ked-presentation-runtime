@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ba5599f350ee0eb4da73ea693b4bd57c, type: 3}
   m_Name: PortraitGeneratedDB
-  m_EditorClassIdentifier: Assembly-CSharp::PortraitGeneratedDbSo
+  m_EditorClassIdentifier: Ked.Presentation.Runtime::PortraitGeneratedDBSO
   entries:
   - characterId: harin
     variantKey: harin_a
@@ -218,5 +218,5 @@ MonoBehaviour:
     emotionKey: 06
     sprite: {fileID: 21300000, guid: 645d9b3b0543ff142a13c6f4d96df87d, type: 3}
     assetPath: Assets/Art/Portraits/fillintheblank/yoonsaea/yoonsaea_b_06.png
-  generatedTicksUtc: 639215159911946952
-  generatedTimeReadable: 2026-08-05 17:39:51
+  generatedTicksUtc: 639227646765949113
+  generatedTimeReadable: 2026-08-20 04:31:16

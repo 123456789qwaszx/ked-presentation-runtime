@@ -9,18 +9,18 @@ public sealed class PortraitResolver
 
     private readonly Dictionary<(string characterId, char variantSuffix, string emotionKey), Sprite> _map = new();
 
-    public PortraitResolver(PortraitGeneratedDbSo db)
+    public PortraitResolver(PortraitGeneratedDBSO db)
     {
         BuildPortraitMap(db);
     }
     
-    private void BuildPortraitMap(PortraitGeneratedDbSo db)
+    private void BuildPortraitMap(PortraitGeneratedDBSO db)
     {
         var entries = db.entries;
         
         for (int i = 0; i < entries.Count; i++)
         {
-            PortraitGeneratedDbSo.Entry e = entries[i];
+            PortraitGeneratedDBSO.Entry e = entries[i];
             
             var key = MakeKey(e.characterId, e.variantKey, e.emotionKey);
 

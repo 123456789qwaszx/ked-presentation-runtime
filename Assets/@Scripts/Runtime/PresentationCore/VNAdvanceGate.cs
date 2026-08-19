@@ -11,7 +11,7 @@ public sealed class AdvanceGate
 {
     private const int AdvanceRequestKindCount = 3;
 
-    private readonly VnPlaybackRuntimeState _vnPlaybackSettings;
+    private readonly VNPlaybackRuntimeState _vnPlaybackSettings;
     private readonly ISeekStateQuery _lineState;
     private readonly ICommandRunScopeProvider _scopeProvider;
 
@@ -22,7 +22,7 @@ public sealed class AdvanceGate
     private double _cooldownUntilUnscaled = double.NegativeInfinity;
 
     public AdvanceGate(
-        VnPlaybackRuntimeState vnPlaybackSettings,
+        VNPlaybackRuntimeState vnPlaybackSettings,
         ISeekStateQuery lineState,
         ICommandRunScopeProvider scopeProvider)
     {

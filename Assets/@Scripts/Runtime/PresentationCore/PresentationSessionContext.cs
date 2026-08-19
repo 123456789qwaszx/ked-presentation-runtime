@@ -3,7 +3,7 @@ using System;
 [Serializable]
 public sealed class PresentationSessionContext
 {
-    private VnPlaybackRuntimeState _playback;
+    private VNPlaybackRuntimeState _playback;
 
     private bool _isStepCommandBusy;
     private bool _isBlockingInput;
@@ -20,7 +20,7 @@ public sealed class PresentationSessionContext
     public float TimeScale => _playback != null ? _playback.TimeScale : 1f;
     public float AutoAdvanceDelay => _playback != null ? _playback.AutoAdvanceDelay : 1.5f;
 
-    public PresentationSessionContext(VnPlaybackRuntimeState playback)
+    public PresentationSessionContext(VNPlaybackRuntimeState playback)
     {
         _playback = playback;
     }

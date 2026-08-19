@@ -1,11 +1,11 @@
-public sealed partial class VnScreenBindings
+public sealed partial class VNScreenBindings
 {
-    private VnFeatureController _vnFeatures;
+    private VNFeatureController _vnFeatures;
     private DialogueAdvanceDispatcher _dialogueAdvanceDispatcher;
     private VNLinePresentationState _linePresentationAdvanceState;
     
     public void ConfigurePresentationView(
-        VnFeatureController vnFeatures,
+        VNFeatureController vnFeatures,
         DialogueAdvanceDispatcher dialogueAdvanceDispatcher,
         VNLinePresentationState linePresentationAdvanceState)
     {
