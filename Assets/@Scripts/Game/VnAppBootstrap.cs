@@ -1,22 +1,15 @@
-using Unity.VisualScripting;
 using UnityEngine;
 using Yarn.Unity;
 
 public class VnAppBootstrap : MonoBehaviour
 {
-    private readonly UnityTimeSource _unityTimeSource = new();
-    
     private readonly VnPlaybackRuntimeState _playbackState = new();
     
     private readonly RollbackHistory _rollbackHistory = new();
     private readonly ChoiceHistory _choiceHistory = new();
     private readonly VNLinePresentationState _linePresentationAdvanceState = new();
-    private readonly DialogueBoxCurrentState _dialogueBoxState = new();
-    
-    private readonly DialogueSurfaceState _dialogueSurfaceState = new();
     
     private readonly PresentationStage _presentationStage = new();
-    
     private readonly BacklogRecorder _backlogRecorder = new ();
     
     private VnScreenBindings _screenBindings;
@@ -46,17 +39,17 @@ public class VnAppBootstrap : MonoBehaviour
     [SerializeField] private DialogueRunner dialogueRunner;
 
     [SerializeField] private CustomLinePresenter customLinePresenter;
-    [SerializeField] private AutoAdvanceScheduler autoAdvanceScheduler;
-    [SerializeField] private VNOptionItem optionItem;
-    [SerializeField] private VNOptionsPresenter vnOptionsPresenter;
     [SerializeField] private EllipsisBreathTypewriter ellipsisBreathTypewriter;
+    [SerializeField] private AutoAdvanceScheduler autoAdvanceScheduler;
+    
+    [SerializeField] private VNOptionsPresenter vnOptionsPresenter;
+    [SerializeField] private VNOptionItem optionItem;
     
     [Header("Entry Keys")]
     [Tooltip("디버그 키(2번)와 타이틀에서 재생할 yarn 노드 이름.")]
     [SerializeField] private string yarnEntryKey;
 
     [Header("VnAdvanceGate")]
-    [Tooltip("VN 재생의 유일한 프레임 구동자. 나머지 재생 로직은 MonoBehaviour가 아니다.")]
     [SerializeField] private VnAdvanceInputPoller vnAdvanceInputPoller;
 
 
@@ -85,9 +78,7 @@ public class VnAppBootstrap : MonoBehaviour
     [Header("NodeDebug")] 
     [SerializeField] private CharacterFocusDebugView characterFocusDebugView;
     
-    private UIPatchService _uiPatchService;
     private IUIThemePatchPort _uiThemePatch;
-    private DialogueBoxPresentationController  _dialogueBoxPresentationController;
     
     private VNRuntimeStateProvider _vnRuntimeStateProvider;
     private PresentationShotResponseSystem _presentationResponseRig;
@@ -98,8 +89,6 @@ public class VnAppBootstrap : MonoBehaviour
     private EpisodePlayer _episodePlayer;
     
     private PresentationUIRoot _presentationUIRoot;
-    private DialogueSurfaceBox _dialogueSurfaceBox;
-    private VNDefaultOptionsPanel _vnDefaultOptionsPanel;
     
     
     private void Awake()
@@ -109,8 +98,6 @@ public class VnAppBootstrap : MonoBehaviour
         _vnRuntimeStateProvider = new VNRuntimeStateProvider(_rollbackHistory, _choiceHistory);
         
         _presentationUIRoot = uiManager.GetUI<PresentationUIRoot>();
-        _dialogueSurfaceBox = uiManager.GetUI<DialogueSurfaceBox>();
-        _vnDefaultOptionsPanel = uiManager.GetUI<VNDefaultOptionsPanel>();
         
         _screenBindings = new VnScreenBindings(uiManager);
         
@@ -150,12 +137,12 @@ public class VnAppBootstrap : MonoBehaviour
         SpritePortAssignmentBuilder spritePortAssignmentBuilder = new();
         ResourcesUISpriteLoader resourcesUISpriteLoader = new();
         UISpritePatcher uiSpritePatcher = new(resourcesUISpriteLoader);
-        _uiPatchService = new UIPatchService(spritePortAssignmentBuilder, uiSpritePatcher);
+        UIPatchService uiPatchService = new(spritePortAssignmentBuilder, uiSpritePatcher);
 
         uiManager.Init();
-        uiManager.AttachUIPatchService(_uiPatchService);
+        uiManager.AttachUIPatchService(uiPatchService);
 
-        _uiThemePatch = new UIThemePatchAdapter(uiManager, _uiPatchService);
+        _uiThemePatch = new UIThemePatchAdapter(uiManager, uiPatchService);
     }
 
     private void BootstrapPresentationSession()
@@ -191,9 +178,11 @@ public class VnAppBootstrap : MonoBehaviour
             _presentationResponseRig, characterFocusTuningDb, _presentationUIRoot);
 
         // Presentation Control
+        UnityTimeSource unityTimeSource = new();
+
         PresentationControlCommandFactory presentationControlFactory = new(
             _uiThemePatch,
-            _unityTimeSource,
+            unityTimeSource,
             unitySignalBus,
             signalLatch);
 
@@ -241,8 +230,10 @@ public class VnAppBootstrap : MonoBehaviour
             RectTransform rigRoot = screenEffectRigBuilder.BuildRigRoot(
                 screenEffectRigPrefab);
 
-            rigRoot.SetParent(screenEffectRigMount, false); 
-            screenEffectRig = rigRoot.gameObject.GetOrAddComponent<ScreenEffectRig>();
+            rigRoot.SetParent(screenEffectRigMount, false);
+
+            if (!rigRoot.TryGetComponent(out screenEffectRig))
+                screenEffectRig = rigRoot.gameObject.AddComponent<ScreenEffectRig>();
         }
 
         screenEffectRig.Initialize();
@@ -254,12 +245,17 @@ public class VnAppBootstrap : MonoBehaviour
     {
         YarnPlaybackDriver yarnPlaybackDriver = new(commandExecutor, _presentationScopeSession);
 
+        DialogueSurfaceBox dialogueSurfaceBox = uiManager.GetUI<DialogueSurfaceBox>();
+
+        DialogueBoxCurrentState dialogueBoxState = new();
+        DialogueSurfaceState dialogueSurfaceState = new();
         DialogueBoxMetadataResolver metadataResolver = new();
-        _dialogueBoxPresentationController = new(
-            _dialogueBoxState, 
-            _dialogueSurfaceBox,
+
+        DialogueBoxPresentationController dialogueBoxPresentationController = new(
+            dialogueBoxState, 
+            dialogueSurfaceBox,
             metadataResolver, 
-            _dialogueSurfaceState, 
+            dialogueSurfaceState, 
             surfaceLayoutPresetDbSo,
             _dialogueSpeakerPresentationPolicyDbSo);
         
@@ -269,7 +265,7 @@ public class VnAppBootstrap : MonoBehaviour
             yarnPlaybackDriver,
             rigPrefab,
             backgroundRigPrefab,
-            _dialogueBoxPresentationController);
+            dialogueBoxPresentationController);
         
         VNYarnLineBoundary vnYarnLineBoundary = new (
             _backlogRecorder,
@@ -281,7 +277,7 @@ public class VnAppBootstrap : MonoBehaviour
         VNLinePresentationFlow vnLinePresentationFlow = new(
             vnYarnLineBoundary,
             _linePresentationAdvanceState,
-            _dialogueBoxPresentationController,
+            dialogueBoxPresentationController,
             ellipsisBreathTypewriter,
             yarnPlaybackDriver,
             lineHurrySpeed);
@@ -296,8 +292,10 @@ public class VnAppBootstrap : MonoBehaviour
             _choiceHistory,
             _rollbackHistory);
 
+        VNDefaultOptionsPanel vnDefaultOptionsPanel = uiManager.GetUI<VNDefaultOptionsPanel>();
+
         VNOptionsPresentationFlow optionsPresentationFlow = new(
-            _vnDefaultOptionsPanel,
+            vnDefaultOptionsPanel,
             vnChoiceBoundary,
             _linePresentationAdvanceState);
 
@@ -337,7 +335,6 @@ public class VnAppBootstrap : MonoBehaviour
             autoAdvanceScheduler,
             rapidSkipController,
             _rollbackHistory,
-            _linePresentationAdvanceState,
             _choiceHistory);
 
         AdvanceGate advanceGate = new(

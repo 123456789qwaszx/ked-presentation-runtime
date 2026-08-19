@@ -12,7 +12,6 @@ public sealed class VnFeatureController
     private AutoAdvanceScheduler _autoAdvanceScheduler;
     private RapidSkipController _rapidSkipController;
     private RollbackHistory _rollbackController;
-    private VNLinePresentationState _vnLinePresentationState;
     private ChoiceHistory _choiceHistory;
 
     private bool _speedUpToggled;
@@ -29,27 +28,25 @@ public sealed class VnFeatureController
 
     public void Initialize(
         VnPlaybackRuntimeState vnPlaybackSettings,
-        VNLinePresentationState yarnLineLifecycleBridge,
+        VNLinePresentationState linePresentationAdvanceState,
         EllipsisBreathTypewriter ellipsisBreathTypewriter,
         BacklogRecorder backlogRecorder,
         AutoAdvanceScheduler autoAdvanceScheduler,
         RapidSkipController rapidSkipController,
         RollbackHistory rollbackController,
-        VNLinePresentationState vnLinePresentationState,
         ChoiceHistory choiceHistory)
     {
         if (_init)
             return;
 
         _vnPlaybackSettings = vnPlaybackSettings;
-        _linePresentationAdvanceState = yarnLineLifecycleBridge;
+        _linePresentationAdvanceState = linePresentationAdvanceState;
         _typewriter = ellipsisBreathTypewriter;
 
         _backlogRecorder = backlogRecorder;
         _autoAdvanceScheduler = autoAdvanceScheduler;
         _rapidSkipController = rapidSkipController;
         _rollbackController = rollbackController;
-        _vnLinePresentationState = vnLinePresentationState;
         _choiceHistory = choiceHistory;
 
         _speedUpToggled = false;
@@ -118,7 +115,7 @@ public sealed class VnFeatureController
 
     public bool RequestRollbackOneStep()
     {
-        if (_vnLinePresentationState.IsSeekingActive)
+        if (_linePresentationAdvanceState.IsSeekingActive)
             return false;
 
         if (!_rollbackController.GetRollbackPoint(out RollbackPoint target))
@@ -127,7 +124,7 @@ public sealed class VnFeatureController
         _choiceHistory.RemoveChoiceAnchorAfterRollbackPoint(target);
 
         _rollbackController.ClearRollbackPoints();
-        _vnLinePresentationState.BeginRollbackSeek(target.nodeName, target.lineId);
+        _linePresentationAdvanceState.BeginRollbackSeek(target.nodeName, target.lineId);
 
         DisablePlaybackModifiersForSeek();
 
