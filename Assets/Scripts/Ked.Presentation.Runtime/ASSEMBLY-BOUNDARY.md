@@ -1,6 +1,6 @@
 # 어셈블리 경계 (U13-a)
 
-이 폴더(`Assets/@Scripts/Runtime/`)는 **하나의 어셈블리**다. 왜 이렇게 생겼는지를 여기 남긴다.
+이 폴더(`Assets/Scripts/Ked.Presentation.Runtime/`)는 **하나의 어셈블리**다. 왜 이렇게 생겼는지를 여기 남긴다.
 경계는 코드 어디에도 안 보이고 `.asmdef` 파일 안에만 있어서, 근거가 없으면 다음 사람이
 "왜 폴더가 이렇게 묶여 있지"를 알 수 없다.
 
@@ -13,8 +13,8 @@
 
 | 어셈블리 | 위치 | 내용 |
 |---|---|---|
-| `Ked.Presentation.Runtime` | `Assets/@Scripts/Runtime/` | 연출 실행 계층 — PresentationCore · Commands · CharacterRig · ShotResponse · BackgroundRig · ScreenEffect · StageMask · Audio |
-| `Assembly-CSharp` (기본) | `Assets/@Scripts/` 나머지 | 글루 — Game · UI · VNLinePresentationFlow · FeatureController · **YarnBridge** |
+| `Ked.Presentation.Runtime` | `Assets/Scripts/Ked.Presentation.Runtime/` | 연출 실행 계층 — PresentationCore · Commands · CharacterRig · ShotResponse · BackgroundRig · ScreenEffect · StageMask · Audio |
+| `Assembly-CSharp` (기본) | `Assets/Scripts/` 나머지 | 글루 — Game · UI · VNLinePresentationFlow · FeatureController · **YarnBridge** |
 | `Assembly-CSharp-Editor` (기본) | `Assets/Editor/` | 에디터 도구 — 초상 DB 빌더 · 튜닝 덤프 익스포터 · 폰트 교체 |
 
 > **에디터 도구는 런타임 폴더 안에 두지 않는다.** 한때 런타임 트리 안에 에디터 전용
@@ -64,7 +64,7 @@ U13-b(순수 코어 추출)의 전제다.
 이 저장소는 "provider 계약과 그 구현을 한 파일에 둔다"는 관습이 있었다. 읽기엔 좋지만
 경계에서는 정확히 벽이 된다 — 계약은 코어가, 구현은 UI가 가져야 하는데 한 파일이라 못 가른다.
 
-**그래서 생긴 것이 `Assets/@Scripts/UI/Providers/`다.**
+**그래서 생긴 것이 `Assets/Scripts/UI/Providers/`다.**
 UI 타입이 기능 폴더의 계약을 구현하는 partial을 전부 여기 모았다.
 
 | UI/Providers/ | 구현하는 계약 | 계약의 위치 |
@@ -119,7 +119,7 @@ UI 타입이 기능 폴더의 계약을 구현하는 partial을 전부 여기 �
 U13-a는 경계를 그었을 뿐이고, 순수 C# 상태 계산 층(`Ked.Presentation.Core`, netstandard2.1)을
 뽑는 것은 **U13-b**의 일이다.
 
-참고 수치(U13-a 착수 시점, `Assets/@Scripts` 572파일 기준):
+참고 수치(U13-a 착수 시점, `Assets/Scripts` 572파일 기준):
 
 - `Commands/` 116파일 중 `MonoBehaviour`는 **1개**, `PresentationCore/` 54파일 중 **2개**
   → 엉킴은 `MonoBehaviour`가 아니라 **`RectTransform`을 상태 담지체로 쓰는 것**(402회)이다

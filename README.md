@@ -12,7 +12,7 @@ Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타�
 옮기는 중이라서** 여기서 빠져 있습니다.
 
 무엇이 왜 밖으로 나갔고 어떤 모양으로 돌아오는지는 **[SCOPE-BOUNDARY.md](SCOPE-BOUNDARY.md)**
-에 있습니다. 어셈블리 경계는 [ASSEMBLY-BOUNDARY.md](Assets/@Scripts/Runtime/ASSEMBLY-BOUNDARY.md).
+에 있습니다. 어셈블리 경계는 [ASSEMBLY-BOUNDARY.md](Assets/Scripts/Ked.Presentation.Runtime/ASSEMBLY-BOUNDARY.md).
 
 ## 사용법
 
@@ -54,7 +54,7 @@ Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타�
 
 ### 3. 대사 실행 흐름
 
-`Assets/@Scripts/DialoguePresenter/VNLinePresentationFlow/`
+`Assets/Scripts/DialoguePresenter/VNLinePresentationFlow/`
 
 한 줄의 대사가 들어온 뒤 연출 실행, 텍스트 출력, 입력 대기, 스킵 및 상태 복원으로 이어지는 흐름을 담당합니다.
 
@@ -67,8 +67,8 @@ Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타�
 
 ### 4. 연출 명령과 실행 구조
 
-* `Assets/@Scripts/Runtime/PresentationCore/`
-* `Assets/@Scripts/Runtime/Commands/`
+* `Assets/Scripts/Ked.Presentation.Runtime/PresentationCore/`
+* `Assets/Scripts/Ked.Presentation.Runtime/Commands/`
 
 연출 명령의 생성과 실행, 실행 수명 관리(스텝/런 스코프) 구조를 확인할 수 있습니다.
 

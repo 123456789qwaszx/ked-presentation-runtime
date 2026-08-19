@@ -89,10 +89,10 @@
 
 | 책임 | 위치 |
 |---|---|
-| yarn 텍스트 → 커맨드 스펙 파싱 | `@Scripts/YarnBridge/` |
-| 커맨드 실행과 수명 (91종) | `@Scripts/Runtime/` |
-| 한 라인의 표시 트랜잭션 — 진입·시크·박스·타자기·전진 대기 | `@Scripts/VNLinePresentationFlow/` |
-| 전진 판정 · 롤백 시킹 · 백로그 | `@Scripts/FeatureController/` |
+| yarn 텍스트 → 커맨드 스펙 파싱 | `Scripts/YarnBridge/` |
+| 커맨드 실행과 수명 (91종) | `Scripts/Ked.Presentation.Runtime/` |
+| 한 라인의 표시 트랜잭션 — 진입·시크·박스·타자기·전진 대기 | `Scripts/DialoguePresenter/VNLinePresentationFlow/` |
+| 전진 판정 · 롤백 시킹 · 백로그 | `Scripts/FeatureController/` |
 | 정지 프레임 계산과 등가성 판정 | `Ked.Presentation.Core/` + `Game/StageEquivalenceHarness.cs` |
 
 한 줄로: **노드 하나가 들어오면, 그것을 화면에 정확히 재생한다.**
