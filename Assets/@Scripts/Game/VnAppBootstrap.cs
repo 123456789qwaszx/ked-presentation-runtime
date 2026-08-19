@@ -43,9 +43,7 @@ public class VnAppBootstrap : MonoBehaviour
 
     [SerializeField] private UnitySignalBus unitySignalBus;
     
-    [Header("MainExecutor")]
     [SerializeField] private CommandExecutor commandExecutor;
-    [SerializeField] private YarnPlaybackDriver mainYarnBridgePlaybackDriver;
 
     [Header("Yarn")]
     [SerializeField] private DialogueRunner dialogueRunner;
@@ -133,8 +131,6 @@ public class VnAppBootstrap : MonoBehaviour
         BootstrapPresentationSession();
         
         BootstrapYarn();
-        
-        BootstrapLinePresentationRuntime();
         
         // poller가 EpisodePlayer를 물고 있으므로 재생 컨트롤보다 먼저 만든다.
         CreateEpisodePlayer();
@@ -256,7 +252,7 @@ public class VnAppBootstrap : MonoBehaviour
     
     private void BootstrapYarn()
     {
-        mainYarnBridgePlaybackDriver.Initialize(commandExecutor, _presentationScopeSession);
+        YarnPlaybackDriver yarnPlaybackDriver = new(commandExecutor, _presentationScopeSession);
 
         DialogueBoxMetadataResolver metadataResolver = new();
         _dialogueBoxPresentationController = new(
@@ -267,17 +263,14 @@ public class VnAppBootstrap : MonoBehaviour
             surfaceLayoutPresetDbSo,
             _dialogueSpeakerPresentationPolicyDbSo);
         
-        // 생성자가 러너에 커맨드 핸들러를 전부 등록한다 — 이후 참조할 일이 없다.
+        // 생성자가 러너에 커맨드 핸들러를 전부 등록.
         _ = new YarnCommandBridge(
             dialogueRunner,
-            mainYarnBridgePlaybackDriver,
+            yarnPlaybackDriver,
             rigPrefab,
             backgroundRigPrefab,
             _dialogueBoxPresentationController);
-    }
-    
-    private void BootstrapLinePresentationRuntime()
-    {
+        
         VNYarnLineBoundary vnYarnLineBoundary = new (
             _backlogRecorder,
             _rollbackHistory,
@@ -290,7 +283,7 @@ public class VnAppBootstrap : MonoBehaviour
             _linePresentationAdvanceState,
             _dialogueBoxPresentationController,
             ellipsisBreathTypewriter,
-            mainYarnBridgePlaybackDriver,
+            yarnPlaybackDriver,
             lineHurrySpeed);
 
         customLinePresenter.Initialize(

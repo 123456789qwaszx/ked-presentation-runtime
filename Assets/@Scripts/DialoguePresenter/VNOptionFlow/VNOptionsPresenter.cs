@@ -164,6 +164,9 @@ public sealed class VNOptionsPresenter
         for (int i = 0; i < viewModels.Count; i++)
         {
             VNOptionItem item = Instantiate(_optionItemPrefab, container);
+            
+            if (!item.gameObject.activeSelf)
+                item.gameObject.SetActive(true);
 
             item.Submitted += HandleItemSubmitted;
             item.Bind(viewModels[i]);

@@ -3666,7 +3666,6 @@ MonoBehaviour:
   characterDepthTuning: {fileID: 11400000, guid: e3a8987f7d373d2479069557356adab4, type: 2}
   unitySignalBus: {fileID: 552181530}
   commandExecutor: {fileID: 1257280952}
-  mainYarnBridgePlaybackDriver: {fileID: 720935691}
   dialogueRunner: {fileID: 8309902628538800288}
   customLinePresenter: {fileID: 2009713540}
   autoAdvanceScheduler: {fileID: 608895337}
@@ -4678,50 +4677,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 32255927}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &720935690
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 720935692}
-  - component: {fileID: 720935691}
-  m_Layer: 0
-  m_Name: MainYarnBridgePlaybackDriver
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &720935691
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 720935690}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 198fdff9603208d49ac312acbafe6a81, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::YarnBridgePlaybackDriver
---- !u!4 &720935692
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 720935690}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 817.828, y: -97.450836, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 7985477256358699683}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &721982115
 GameObject:
@@ -8998,7 +8953,7 @@ GameObject:
   - component: {fileID: 1257280953}
   - component: {fileID: 1257280952}
   m_Layer: 0
-  m_Name: MainCommandExecutor
+  m_Name: CommandExecutor
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -18003,7 +17958,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 3356120893837444203}
   m_Direction: 2
   m_Value: 0
-  m_Size: 1
+  m_Size: 0.9999817
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -19408,7 +19363,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.000017166138, y: -0.00005126507}
+  m_AnchoredPosition: {x: 0.000017166138, y: -0.00013452554}
   m_SizeDelta: {x: 0, y: 300}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &3566488314143195377
@@ -22607,7 +22562,6 @@ Transform:
   - {fileID: 1658226452}
   - {fileID: 608895338}
   - {fileID: 1257280953}
-  - {fileID: 720935692}
   m_Father: {fileID: 596868909}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!224 &7998844445993692750

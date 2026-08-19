@@ -1,7 +1,6 @@
 using System.Collections.Generic;
-using UnityEngine;
 
-public sealed class YarnPlaybackDriver : MonoBehaviour
+public sealed class YarnPlaybackDriver
 {
     private CommandExecutor _executor;
     private ICommandRunScopeProvider _scopeProvider;
@@ -10,7 +9,7 @@ public sealed class YarnPlaybackDriver : MonoBehaviour
 
     private CommandRunScope CurrentScope => _scopeProvider?.CurrentScope;
 
-    public void Initialize(CommandExecutor executor, ICommandRunScopeProvider scopeProvider)
+    public YarnPlaybackDriver(CommandExecutor executor, ICommandRunScopeProvider scopeProvider)
     {
         _executor = executor;
         _scopeProvider = scopeProvider;
