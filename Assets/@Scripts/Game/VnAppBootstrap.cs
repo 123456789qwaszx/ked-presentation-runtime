@@ -28,7 +28,6 @@ public class VnAppBootstrap : MonoBehaviour
     [SerializeField] private AudioSystem audioSystem;
     
     [Header("DialogueBox")] 
-    [SerializeField] private DialogueBoxHost dialogueBoxHost;
     [SerializeField] private DialogueSurfaceLayoutPresetDBSO surfaceLayoutPresetDbSo;
     [SerializeField] private DialogueSpeakerPresentationPolicyDBSO _dialogueSpeakerPresentationPolicyDbSo;
     
@@ -40,8 +39,6 @@ public class VnAppBootstrap : MonoBehaviour
     [SerializeField] private CharacterVisualFocusPresetDBSO characterVisualFocusPresetDb;
     
     [SerializeField] private CharacterDepthTuningSO characterDepthTuning;
-
-    [SerializeField] private UnitySignalBus unitySignalBus;
     
     [SerializeField] private CommandExecutor commandExecutor;
 
@@ -102,6 +99,7 @@ public class VnAppBootstrap : MonoBehaviour
     
     private PresentationUIRoot _presentationUIRoot;
     private DialogueSurfaceBox _dialogueSurfaceBox;
+    private VNDefaultOptionsPanel _vnDefaultOptionsPanel;
     
     
     private void Awake()
@@ -112,6 +110,7 @@ public class VnAppBootstrap : MonoBehaviour
         
         _presentationUIRoot = uiManager.GetUI<PresentationUIRoot>();
         _dialogueSurfaceBox = uiManager.GetUI<DialogueSurfaceBox>();
+        _vnDefaultOptionsPanel = uiManager.GetUI<VNDefaultOptionsPanel>();
         
         _screenBindings = new VnScreenBindings(uiManager);
         
@@ -162,6 +161,7 @@ public class VnAppBootstrap : MonoBehaviour
     private void BootstrapPresentationSession()
     {
         SignalLatch signalLatch = new();
+        UnitySignalBus unitySignalBus = new();
         unitySignalBus.OnSignal += signalLatch.Latch;
 
         // Character Rig
@@ -297,7 +297,7 @@ public class VnAppBootstrap : MonoBehaviour
             _rollbackHistory);
 
         VNOptionsPresentationFlow optionsPresentationFlow = new(
-            dialogueBoxHost,
+            _vnDefaultOptionsPanel,
             vnChoiceBoundary,
             _linePresentationAdvanceState);
 

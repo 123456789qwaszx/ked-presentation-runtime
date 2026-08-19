@@ -1,7 +1,6 @@
 using System;
-using UnityEngine;
 
-public sealed class UnitySignalBus : MonoBehaviour, ISignalBus
+public sealed class UnitySignalBus : ISignalBus
 {
     public event Action<string> OnSignal;
 

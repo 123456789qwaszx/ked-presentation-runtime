@@ -10,26 +10,21 @@ public enum VNOptionsPresentationBeginResult
 
 public sealed class VNOptionsPresentationFlow
 {
-    private readonly DialogueBoxHost _dialogueBoxHost;
+    private readonly IPresentationOptionsBoxView _optionsBox;
     private readonly VNChoiceBoundary _choiceBoundary;
     private readonly VNLinePresentationState _advanceState;
 
-    private readonly OptionsBoxKind _defaultBoxKind;
     private readonly float _fadeDuration;
 
-    private IPresentationOptionsBoxView _currentView;
-
     public VNOptionsPresentationFlow(
-        DialogueBoxHost dialogueBoxHost,
+        IPresentationOptionsBoxView optionsBox,
         VNChoiceBoundary choiceBoundary,
         VNLinePresentationState advanceState,
-        OptionsBoxKind defaultBoxKind = OptionsBoxKind.Default,
         float fadeDuration = 0.12f)
     {
-        _dialogueBoxHost = dialogueBoxHost;
+        _optionsBox = optionsBox;
         _choiceBoundary = choiceBoundary;
         _advanceState = advanceState;
-        _defaultBoxKind = defaultBoxKind;
         _fadeDuration = fadeDuration;
     }
 
@@ -89,45 +84,35 @@ public sealed class VNOptionsPresentationFlow
 
     public void EndInteractiveImmediate()
     {
-        if (_currentView != null)
-        {
-            _currentView.SetInputEnabled(false);
-            _currentView.SetVisibleImmediate(false);
-        }
-
-        _currentView = null;
+        _optionsBox.SetInputEnabled(false);
+        _optionsBox.SetVisibleImmediate(false);
     }
 
     private async YarnTask<IPresentationOptionsBoxView> ShowOptionsBoxAsync(
         bool useImmediateTransition,
         VNOptionsPresentationContext ctx)
     {
-        IPresentationOptionsBoxView nextView = _dialogueBoxHost.ResolveOptionsTarget(_defaultBoxKind);
-
-        _dialogueBoxHost.HideAllOptionsBoxesExcept(nextView);
-        _currentView = nextView;
-
-        _currentView.ResetPresentationTransform();
-        _currentView.PrepareHidden();
-        _currentView.SetInputEnabled(false);
+        _optionsBox.ResetPresentationTransform();
+        _optionsBox.PrepareHidden();
+        _optionsBox.SetInputEnabled(false);
 
         if (useImmediateTransition)
         {
-            _currentView.SetVisibleImmediate(true);
-            _currentView.SetInputEnabled(false);
-            return _currentView;
+            _optionsBox.SetVisibleImmediate(true);
+            _optionsBox.SetInputEnabled(false);
+            return _optionsBox;
         }
 
-        await _currentView
+        await _optionsBox
             .FadeInAsync(_fadeDuration, ctx.Token.NextContentToken)
             .SuppressCancellationThrow();
 
         if (ctx.Token.IsNextContentRequested)
             return null;
 
-        _currentView.SetInputEnabled(false);
+        _optionsBox.SetInputEnabled(false);
 
-        return _currentView;
+        return _optionsBox;
     }
 
     private List<VNOptionViewModel> BuildViewModels(
