@@ -25,6 +25,11 @@ public class MoveByCommandSpecCharR : CharacterRigCommandSpecBase
     public float duration = 0.4f;
 
     public Ease ease = Ease.OutCubic;
+
+    [Tooltip(
+        "커스텀 이징 곡선 키(@이름 다섯째 인자에서). " +
+        "null/빈 배열이면 ease를 쓴다. 종점(dest)에는 관여하지 않는다 — 모양만 바꾼다.")]
+    public CurveKey[] customCurveKeys;
 }
 
 public sealed class MoveByCommandCharR : ClaimTweenCommandBase
@@ -67,10 +72,19 @@ public sealed class MoveByCommandCharR : ClaimTweenCommandBase
     }
 
     protected override Tween CreateTween(float duration)
-        => _rect
+    {
+        Tween tween = _rect
             .DOAnchorPos(_destPos, duration)
-            .SetEase(_spec.ease)
             .SetTarget(_rect);
+
+        // 커스텀 곡선은 DOTween 커스텀 이즈 델리게이트로 — 트윈 경로 구조 불변.
+        // 프리뷰(VnTool)와 같은 CurveFunctions.Evaluate가 모양의 정본이다.
+        if (_spec.customCurveKeys is { Length: > 0 })
+            return tween.SetEase((time, dur, _, _) =>
+                CurveFunctions.Evaluate(_spec.customCurveKeys, dur <= 0f ? 1f : time / dur));
+
+        return tween.SetEase(_spec.ease);
+    }
 
     protected override void OnCommitFinalState()
     {

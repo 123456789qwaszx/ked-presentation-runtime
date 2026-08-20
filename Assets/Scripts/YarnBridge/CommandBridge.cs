@@ -8,18 +8,21 @@ public sealed partial class YarnCommandBridge
     private readonly RectTransform _backgroundRigPrefab;
 
     private readonly DialogueBoxPresentationController _dialogueBoxPresentation;
+    private readonly EaseCurveLibrary _easeCurves;
 
     public YarnCommandBridge(
         DialogueRunner runner,
         YarnPlaybackDriver playbackDriver,
         RectTransform charRigPrefab,
         RectTransform backgroundRigPrefab,
-        DialogueBoxPresentationController dialogueBoxPresentation)
+        DialogueBoxPresentationController dialogueBoxPresentation,
+        EaseCurveLibrary easeCurves = null)
     {
         _playbackDriver = playbackDriver;
         _charRigPrefab = charRigPrefab;
         _backgroundRigPrefab = backgroundRigPrefab;
         _dialogueBoxPresentation = dialogueBoxPresentation;
+        _easeCurves = easeCurves ?? EaseCurveLibrary.Empty;
 
         BindRunnerCommands(runner);
     }

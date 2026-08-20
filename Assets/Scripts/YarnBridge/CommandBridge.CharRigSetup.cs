@@ -102,16 +102,46 @@ public sealed partial class YarnCommandBridge
         string yToken = "0u",
         string durationToken = "0.4s",
         string easeToken = "")
-        => Collect(new MoveByCommandSpecCharR
+    {
+        var spec = new MoveByCommandSpecCharR
         {
             slotKey = slotKey,
             target = CharacterRigTarget.CharSlot_Track,
             useAbsolutePosition = false,
             delta = new Vector2(ParseSignedUnit(xToken), ParseSignedUnit(yToken)),
-            duration = YarnDurationParser.Parse(durationToken),
-            // 미지정("") = 스펙 기본값 OutCubic — 기존 4-인자 대본의 재생 결과 불변.
-            ease = YarnEaseParser.Parse(easeToken)
-        });
+            duration = YarnDurationParser.Parse(durationToken)
+        };
+
+        ApplyEaseToken(spec, easeToken);
+        Collect(spec);
+    }
+
+    /// <summary>
+    /// 다섯째 토큰의 두 갈래: "@이름" = curves.json의 커스텀 곡선,
+    /// 그 외 = EaseKind 이름. 미지정("")·실패는 스펙 기본값 OutCubic —
+    /// 기존 4-인자 대본의 재생 결과 불변.
+    /// </summary>
+    private void ApplyEaseToken(MoveByCommandSpecCharR spec, string easeToken)
+    {
+        if (!string.IsNullOrWhiteSpace(easeToken) && easeToken[0] == '@')
+        {
+            string curveName = easeToken.Substring(1);
+
+            if (_easeCurves.TryGet(curveName, out Ked.Presentation.Core.CurveKey[] keys))
+            {
+                spec.customCurveKeys = keys;
+                return;
+            }
+
+            // 침묵 금지 — 1차 방어는 VnTool 저작 검증이고, 여기서는 소리 내고 굴러간다.
+            Debug.LogError(
+                $"[YarnCommandBridge] Unknown ease curve '{easeToken}' — " +
+                $"{EaseCurveLibrary.BundleFileName}에 없다. Fallback to {spec.ease}.");
+            return;
+        }
+
+        spec.ease = YarnEaseParser.Parse(easeToken);
+    }
 
     private void EnqueueSizeBySpec(string roleKey, float multiplier, string durationToken = "0.4s")
         => Collect(new ScaleToCommandSpecCharR

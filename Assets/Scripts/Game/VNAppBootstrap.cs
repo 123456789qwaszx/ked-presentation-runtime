@@ -269,13 +269,18 @@ public class VNAppBootstrap : MonoBehaviour
             surfaceLayoutPresetDb,
             speakerPolicyDb);
         
+        // 커스텀 이징 곡선 — 번들 옆 curves.json. 없으면 커브 0개(무음)가 정상 경로.
+        EaseCurveLibrary easeCurves = EaseCurveLibrary.LoadFrom(
+            System.IO.Path.Combine(Application.dataPath, "@Dialogue", EaseCurveLibrary.BundleFileName));
+
         // 생성자가 러너에 커맨드 핸들러를 전부 등록.
         _ = new YarnCommandBridge(
             dialogueRunner,
             yarnPlaybackDriver,
             rigPrefab,
             backgroundRigPrefab,
-            dialogueBoxPresentationController);
+            dialogueBoxPresentationController,
+            easeCurves);
         
         VNYarnLineBoundary vnYarnLineBoundary = new (
             _backlogRecorder,
