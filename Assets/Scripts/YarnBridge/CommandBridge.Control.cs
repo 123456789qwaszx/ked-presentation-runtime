@@ -3,7 +3,6 @@ using Yarn.Unity;
 
 public sealed partial class YarnCommandBridge
 {
-    private const float PauseFramesPerSecond = 24f;
     private const int FramePauseAliasMaxFrame = 48;
     
     // Animator-style frame wait aliases.
@@ -15,7 +14,7 @@ public sealed partial class YarnCommandBridge
         for (int i = 1; i <= FramePauseAliasMaxFrame; i++)
         {
             int frame = i;
-            float seconds = frame / PauseFramesPerSecond;
+            float seconds = YarnDurationParser.FramesToSeconds(frame);
 
             runner.AddCommandHandler(
                 $"{frame}fr",
