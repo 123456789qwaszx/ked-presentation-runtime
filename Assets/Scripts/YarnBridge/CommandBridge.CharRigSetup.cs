@@ -100,14 +100,17 @@ public sealed partial class YarnCommandBridge
         string slotKey,
         string xToken = "0u",
         string yToken = "0u",
-        string durationToken = "0.4s")
+        string durationToken = "0.4s",
+        string easeToken = "")
         => Collect(new MoveByCommandSpecCharR
         {
             slotKey = slotKey,
             target = CharacterRigTarget.CharSlot_Track,
             useAbsolutePosition = false,
             delta = new Vector2(ParseSignedUnit(xToken), ParseSignedUnit(yToken)),
-            duration = YarnDurationParser.Parse(durationToken)
+            duration = YarnDurationParser.Parse(durationToken),
+            // 미지정("") = 스펙 기본값 OutCubic — 기존 4-인자 대본의 재생 결과 불변.
+            ease = YarnEaseParser.Parse(easeToken)
         });
 
     private void EnqueueSizeBySpec(string roleKey, float multiplier, string durationToken = "0.4s")

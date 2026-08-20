@@ -104,7 +104,7 @@ public sealed partial class YarnCommandBridge
     
     private void BindCharRigStaging(DialogueRunner runner)
     {
-        runner.AddCommandHandler<string, string, string, string>(
+        runner.AddCommandHandler<string, string, string, string, string>(
             "move_by", EnqueueSetAnchorOffsetSpecs);
         runner.AddCommandHandler<string, float, string>(
             "scale_by", EnqueueSizeBySpec);
