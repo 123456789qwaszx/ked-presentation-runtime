@@ -3,7 +3,7 @@ using UnityEngine;
 // VN 재생의 유일한 프레임 구동자.
 public sealed class VNAdvanceInputPoller : MonoBehaviour
 {
-    [SerializeField] private VNAdvanceInputBindings _bindings = new();
+    private readonly VNAdvanceInputBindings _bindings = new();
 
     private DialogueAdvanceDispatcher _dialogueAdvanceDispatcher;
     private VNFeatureController _featureController;
@@ -11,7 +11,7 @@ public sealed class VNAdvanceInputPoller : MonoBehaviour
     private VNLinePresentationState _linePresentationAdvanceState;
     private EpisodePlayer _episodePlayer;
 
-    // 디버그 키(2번)로 재생할 노드. 이 키를 아는 건 여기뿐이다 — EpisodePlayer는 몰라도 된다.
+    // 디버그 키(2번)로 재생할 노드.
     private string _yarnEntryKey;
 
     private bool _rapidSkipHeld;
@@ -98,7 +98,7 @@ public sealed class VNAdvanceInputPoller : MonoBehaviour
             if (!_featureController.RequestRollbackOneStep())
                 return;
 
-            await _episodePlayer.StartGameAsync(_linePresentationAdvanceState.SeekTargetNodeName);
+            await _episodePlayer.ReplayCurrentSceneAsync();
         }
     }
 }

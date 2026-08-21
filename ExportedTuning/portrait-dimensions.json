@@ -58,6 +58,20 @@
             "height": 2048.0
         },
         {
+            "character": "laru",
+            "variant": "a",
+            "emotion": "01",
+            "width": 1166.0,
+            "height": 1899.0
+        },
+        {
+            "character": "laru",
+            "variant": "a",
+            "emotion": "02",
+            "width": 1166.0,
+            "height": 1899.0
+        },
+        {
             "character": "leebyeol",
             "variant": "a",
             "emotion": "01",
@@ -203,6 +217,20 @@
             "emotion": "01",
             "width": 1647.0,
             "height": 2048.0
+        },
+        {
+            "character": "willow",
+            "variant": "a",
+            "emotion": "01",
+            "width": 789.0,
+            "height": 1938.0
+        },
+        {
+            "character": "willow",
+            "variant": "a",
+            "emotion": "02",
+            "width": 789.0,
+            "height": 1938.0
         },
         {
             "character": "yoonsaea",

@@ -3,7 +3,6 @@ public sealed class VNLinePresentationState : ISeekStateQuery
     private readonly VNSeekState _seekState = new ();
     public VNSeekKind SeekKind => _seekState.Kind;
     public bool IsSeekingActive => _seekState.IsSeeking;
-    public string SeekTargetNodeName => _seekState.TargetNodeName;
     
     public bool IsLineFullyShown { get; private set; } = true;
     
