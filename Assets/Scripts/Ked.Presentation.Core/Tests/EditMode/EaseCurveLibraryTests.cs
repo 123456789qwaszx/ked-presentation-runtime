@@ -28,7 +28,7 @@ public class EaseCurveLibraryTests
         EaseCurveLibrary library = EaseCurveLibrary.Parse(ValidJson, "test");
 
         Assert.AreEqual(1, library.Count);
-        Assert.IsTrue(library.TryGet("hop_snappy", out CurveKey[] keys));
+        Assert.IsTrue(library.TryGet("hop_snappy", CurveKind.Motion, out CurveKey[] keys, out _));
         Assert.AreEqual(3, keys.Length);
         Assert.AreEqual(0.4f, keys[1].Time, 0f);
         Assert.AreEqual(0.9f, keys[1].Value, 0f);
@@ -50,13 +50,12 @@ public class EaseCurveLibraryTests
         Assert.AreEqual(0, library.Count, label);
     }
 
-    // 끝값 규약: 곡선은 모양만 정하고 종점은 명목 목표값이다.
-    // v≠0/1로 끝나는 곡선은 재생에서 양 끝이 한 프레임 튀고 툴 프리뷰와도 어긋나므로
-    // 저작 단계에서 막는다 — "1.2배 지점에 착지"는 delta를 키울 일이다.
+    // 끝값이 곡선의 종류를 가른다: 1이면 이동(Motion), 0이면 진동(Oscillation).
+    // 어느 쪽도 아닌 값은 거부한다 — 이동이면 끝에서 튀고, 진동이면 제자리로 안 돌아온다.
     [TestCase(@"{ ""name"": ""overshoot_end"", ""keys"": [ { ""t"": 0, ""v"": 0 }, { ""t"": 1, ""v"": 1.2 } ] }", "끝값 1.2")]
-    [TestCase(@"{ ""name"": ""undershoot_end"", ""keys"": [ { ""t"": 0, ""v"": 0 }, { ""t"": 1, ""v"": 0.8 } ] }", "끝값 0.8")]
+    [TestCase(@"{ ""name"": ""half_end"", ""keys"": [ { ""t"": 0, ""v"": 0 }, { ""t"": 1, ""v"": 0.5 } ] }", "끝값 0.5")]
     [TestCase(@"{ ""name"": ""jump_start"", ""keys"": [ { ""t"": 0, ""v"": 0.1 }, { ""t"": 1, ""v"": 1 } ] }", "시작값 0.1")]
-    public void 끝값이_0과_1이_아닌_커브는_거부된다(string curveJson, string label)
+    public void 끝값이_1도_0도_아닌_커브는_거부된다(string curveJson, string label)
     {
         LogAssert.Expect(LogType.Warning, new Regex("EaseCurveLibrary.*무시"));
 
@@ -79,9 +78,33 @@ public class EaseCurveLibraryTests
         EaseCurveLibrary library = EaseCurveLibrary.Parse(json, "test");
 
         Assert.AreEqual(1, library.Count);
-        Assert.IsTrue(library.TryGet("back_like", out CurveKey[] keys));
+        Assert.IsTrue(library.TryGet("back_like", CurveKind.Motion, out CurveKey[] keys, out _));
         Assert.Greater(CurveFunctions.Evaluate(keys, 0.6f), 1f, "비행 중 오버슛이 살아 있어야 한다");
         Assert.AreEqual(1f, CurveFunctions.Evaluate(keys, 1f), 1e-4f, "종점은 1이다");
+    }
+
+    [Test]
+    public void 끝값_0인_진동_곡선은_받아들이고_종류로_격리한다()
+    {
+        // gesture가 쓰는 곡선이다 — 순변위 0이라 (0,0)에서 시작해 (1,0)으로 끝난다.
+        string json = Doc(@"{ ""name"": ""shake"",
+            ""keys"": [
+                { ""t"": 0, ""v"": 0, ""outTangent"": 6 },
+                { ""t"": 0.5, ""v"": -1 },
+                { ""t"": 1, ""v"": 0 }
+            ] }");
+
+        EaseCurveLibrary library = EaseCurveLibrary.Parse(json, "test");
+
+        Assert.AreEqual(1, library.Count);
+
+        // 진동으로 찾으면 나온다.
+        Assert.IsTrue(library.TryGet("shake", CurveKind.Oscillation, out CurveKey[] keys, out _));
+        Assert.AreEqual(0f, CurveFunctions.Evaluate(keys, 1f), 1e-4f, "끝은 제자리다");
+
+        // 이동 자리에 끼우려 하면 못 찾은 것으로 치고 종류가 다르다고 알린다.
+        Assert.IsFalse(library.TryGet("shake", CurveKind.Motion, out _, out bool wrongKind));
+        Assert.IsTrue(wrongKind, "이동 곡선이 아니라는 사실이 호출부에 전달돼야 한다");
     }
 
     [Test]
@@ -101,6 +124,6 @@ public class EaseCurveLibraryTests
             System.IO.Path.Combine(Application.temporaryCachePath, "no-such-curves.json"));
 
         Assert.AreEqual(0, library.Count);
-        Assert.IsFalse(library.TryGet("anything", out _));
+        Assert.IsFalse(library.TryGet("anything", CurveKind.Motion, out _, out _));
     }
 }

@@ -1,4 +1,6 @@
+using System;
 using DG.Tweening;
+using Ked.Presentation.Core;
 using UnityEngine;
 
 public sealed partial class YarnCommandBridge
@@ -130,13 +132,17 @@ public sealed partial class YarnCommandBridge
         {
             string curveName = easeToken.Substring(1);
 
-            if (_easeCurves.TryGet(curveName, out Ked.Presentation.Core.CurveKey[] keys))
+            if (_easeCurves.TryGet(
+                    curveName, CurveKind.Motion, out CurveKey[] keys, out bool wrongKind))
                 return new EaseSelection(fallback, keys);
 
             // 침묵 금지 — 1차 방어는 VnTool 저작 검증이고, 여기서는 소리 내고 굴러간다.
             Debug.LogError(
-                $"[YarnCommandBridge] Unknown ease curve '{easeToken}' — " +
-                $"{EaseCurveLibrary.BundleFileName}에 없다. Fallback to {fallback}.");
+                wrongKind
+                    ? $"[YarnCommandBridge] Ease curve '{easeToken}' is an oscillation curve " +
+                      $"(gesture 전용 — 끝값이 0이다). 이동 커맨드에는 쓸 수 없다. Fallback to {fallback}."
+                    : $"[YarnCommandBridge] Unknown ease curve '{easeToken}' — " +
+                      $"{EaseCurveLibrary.BundleFileName}에 없다. Fallback to {fallback}.");
 
             return new EaseSelection(fallback);
         }
@@ -144,6 +150,74 @@ public sealed partial class YarnCommandBridge
         return new EaseSelection(YarnEaseParser.Parse(easeToken, fallback));
     }
 
+    /// <summary>
+    /// gesture의 축 진동 해석. 셋을 받는다:
+    ///   빈 토큰    → 내장 기본 혹(sin πt)
+    ///   "@이름"    → curves.json의 진동 곡선
+    ///   표준 이징  → 그 이징의 **핑퐁**(왕복의 절반). 0→1 이징이 그대로 몸짓이 된다.
+    ///
+    /// 못 읽는 낱말만 경고 + 기본 혹으로 굴러간다(침묵 금지).
+    /// </summary>
+    private OscillationSource ResolveOscillation(string token)
+    {
+        if (string.IsNullOrWhiteSpace(token))
+            return OscillationSource.Default;
+
+        if (token[0] == '@')
+        {
+            string curveName = token.Substring(1);
+
+            if (_easeCurves.TryGet(
+                    curveName, CurveKind.Oscillation, out CurveKey[] keys, out bool wrongKind))
+                return OscillationSource.FromCurve(keys);
+
+            Debug.LogError(
+                wrongKind
+                    ? $"[YarnCommandBridge] Gesture curve '{token}' is a motion curve " +
+                      $"(끝값이 1이라 제자리로 안 돌아온다). 기본 혹으로 재생한다."
+                    : $"[YarnCommandBridge] Unknown gesture curve '{token}' — " +
+                      $"{EaseCurveLibrary.BundleFileName}에 없다. 기본 혹으로 재생한다.");
+
+            return OscillationSource.Default;
+        }
+
+        // 표준 이징 이름 → 핑퐁. 숫자 토큰은 거부한다(EaseKind가 임의 정수로도 파싱되므로).
+        string trimmed = token.Trim();
+
+        if (!char.IsDigit(trimmed[0]) && trimmed[0] != '-' && trimmed[0] != '+'
+            && Enum.TryParse(trimmed, ignoreCase: true, out EaseKind kind))
+            return OscillationSource.FromEase(kind);
+
+        Debug.LogWarning(
+            $"[YarnCommandBridge] Invalid gesture ease token '{token}'. " +
+            "진동 곡선(@이름)이나 표준 이징 이름(OutBack 등)을 써라. 기본 혹으로 재생한다.");
+
+        return OscillationSource.Default;
+    }
+
+
+    // ── 제자리 몸짓 ───────────────────────────────────────────────
+    // 순변위 0이 정체다. 표적(CharacterPortrait_Shake)이 이동 계열과 다른 노드라
+    // 같은 라인에서 move_by와 나란히 놀 수 있다 — "총총 뛰며 이동"이 그 조합이다.
+
+    private void EnqueueGestureSpec(
+        string roleKey,
+        string xAmpToken = "0u",
+        string yAmpToken = "0u",
+        string durationToken = "12fr",
+        string xEaseToken = "",
+        string yEaseToken = "")
+        => Collect(new GestureCommandSpecCharR
+        {
+            slotKey = roleKey,
+            target = CharacterRigTarget.CharacterPortrait_Shake,
+
+            amplitude = new Vector2(ParseSignedUnit(xAmpToken, 0f), ParseSignedUnit(yAmpToken, 0f)),
+            duration = YarnDurationParser.Parse(durationToken),
+
+            xOscillation = ResolveOscillation(xEaseToken),
+            yOscillation = ResolveOscillation(yEaseToken)
+        });
 
     // ── 회전 (3a75d4f6에서 지운 것을 되살린 자리) ──────────────────
     // 표적은 CharSlot_SwayPivot이다 — 코어 리듀서(ApplyRotateBy/ApplyRotateReset)가

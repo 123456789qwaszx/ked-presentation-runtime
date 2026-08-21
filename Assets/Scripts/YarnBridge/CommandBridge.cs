@@ -122,6 +122,10 @@ public sealed partial class YarnCommandBridge
 
         runner.AddCommandHandler<string, string, string>(
             "scale_reset", EnqueueSizeResetSpec);
+
+        // 제자리 몸짓 — 순변위 0. 이동 계열과 다른 노드라 같은 라인에 겹칠 수 있다.
+        runner.AddCommandHandler<string, string, string, string, string, string>(
+            "gesture", EnqueueGestureSpec);
         
         runner.AddCommandHandler<string>(
             "sibling_front", EnqueueCharacterSiblingFrontSpec);
@@ -176,7 +180,8 @@ public sealed partial class YarnCommandBridge
             "up", EnqueueNudgeUpSpec);
 
         runner.AddCommandHandler<string, string, string, string>(
-            "down", EnqueueNudgeDownSpec);    }
+            "down", EnqueueNudgeDownSpec);
+    }
     
     private void RegisterCharFocusPlacementCommands(DialogueRunner runner)
     {

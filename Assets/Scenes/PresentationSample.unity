@@ -3827,7 +3827,7 @@ MonoBehaviour:
   autoAdvanceScheduler: {fileID: 608895337}
   vnOptionsPresenter: {fileID: 1180068359}
   optionItem: {fileID: 8364438180924277572, guid: 3a0acb1fd0e1d604183be29ffcfb79a7, type: 3}
-  yarnEntryKey: Story_blank_ch01_ep00
+  yarnEntryKey: Story_new01
   vnAdvanceInputPoller: {fileID: 1315566987}
   rigPrefab: {fileID: 2306115306432438348, guid: c7b3ab204cabea145aff7affa87d3d9d, type: 3}
   backgroundRigPrefab: {fileID: 6323253774795375343, guid: 18f0ce8dac4b54f44a88bdcceac48012, type: 3}
@@ -4651,7 +4651,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 34.3
+  m_fontSize: 38.65
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -5063,7 +5063,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 25
+  m_fontSize: 28.1
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -6857,7 +6857,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 23.05
+  m_fontSize: 20.5
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -7647,7 +7647,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 44.3
+  m_fontSize: 39.35
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -11864,7 +11864,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 25
+  m_fontSize: 28.1
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -15253,7 +15253,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 34.3
+  m_fontSize: 38.65
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -16087,7 +16087,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 34.3
+  m_fontSize: 38.65
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -18590,7 +18590,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 2902762178350035390}
   m_HandleRect: {fileID: 4203907743985503386}
   m_Direction: 0
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:

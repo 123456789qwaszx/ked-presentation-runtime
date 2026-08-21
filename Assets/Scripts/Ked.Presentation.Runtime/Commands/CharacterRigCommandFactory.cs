@@ -62,6 +62,7 @@ public sealed class CharacterRigCommandFactory : INodeCommandFactory
             ScaleToCommandSpecCharR s => new ScaleToCommandCharR(s),
             RotateToCommandSpecCharR s => new RotateToCommandCharR(s),
             RotateByCommandSpecCharR s => new RotateByCommandCharR(s),
+            GestureCommandSpecCharR s => new GestureCommandCharR(s),
             SlideInCommandSpecCharR s => new SlideInCommandCharR(s),
             SlideOutCommandSpecCharR s => new SlideOutCommandCharR(s),
             SetPortraitSpriteCommandSpecCharR s => new SetPortraitSpriteCommandCharR(s, _portraitResolver),

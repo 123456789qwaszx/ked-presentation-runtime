@@ -23,10 +23,13 @@ using UnityEngine;
 // }
 //
 // 검증(어긋난 커브는 로그 + 무시 — 조용히 빠뜨리지 않는다):
-// 이름 [a-z0-9_]+ · 키 2개 이상 · t 오름차순 · 첫 키 (t,v)=(0,0) · 마지막 키 (t,v)=(1,1).
+// 이름 [a-z0-9_]+ · 키 2개 이상 · t 오름차순 · 첫 키 (t,v)=(0,0) · 마지막 키 t=1.
 //
-// 끝값을 못 박는 이유: 곡선은 "경로의 모양"만 정하고 종점은 언제나 명목 목표값이다
-// (호스트 커밋이 명목값을 쓴다). 중간이 1을 넘는 오버슛은 정상 — OutBack이 그렇게 논다.
+// 마지막 키의 v가 곡선의 **종류**를 가른다(CurveKindRules):
+//   v=1 → 이동 곡선(Motion)   — move_by·place·size·shot·scale·rotate. 종점이 명목 목표값이다.
+//   v=0 → 진동 곡선(Oscillation) — gesture. 순변위 0이 정체다.
+// 그 외 값은 어느 쪽도 아니라 거부한다. 중간이 1을 넘는 오버슛은 두 종류 모두 정상이다.
+// 종류는 선언이 아니라 키에서 파생되므로 curves.json 스키마는 그대로다.
 // ─────────────────────────────────────────────────────────────────────────────
 public sealed class EaseCurveLibrary
 {
@@ -35,22 +38,51 @@ public sealed class EaseCurveLibrary
 
     private static readonly Regex NameRule = new("^[a-z0-9_]+$", RegexOptions.Compiled);
 
-    /// <summary>끝값 판정 허용 오차. JSON 왕복의 부동소수 잡음만 흡수한다.</summary>
-    private const float EndpointTolerance = 1e-4f;
+    private readonly Dictionary<string, Entry> _curves;
 
-    private readonly Dictionary<string, CurveKey[]> _curves;
+    private readonly struct Entry
+    {
+        public readonly CurveKind Kind;
+        public readonly CurveKey[] Keys;
 
-    public static EaseCurveLibrary Empty { get; } = new(new Dictionary<string, CurveKey[]>());
+        public Entry(CurveKind kind, CurveKey[] keys)
+        {
+            Kind = kind;
+            Keys = keys;
+        }
+    }
 
-    private EaseCurveLibrary(Dictionary<string, CurveKey[]> curves)
+    public static EaseCurveLibrary Empty { get; } = new(new Dictionary<string, Entry>());
+
+    private EaseCurveLibrary(Dictionary<string, Entry> curves)
     {
         _curves = curves;
     }
 
     public int Count => _curves.Count;
 
-    public bool TryGet(string name, out CurveKey[] keys)
-        => _curves.TryGetValue(name, out keys);
+    /// <summary>
+    /// 이름 + **종류**로 찾는다. 종류가 다르면 못 찾은 것으로 친다 —
+    /// 이동 자리에 진동 곡선을 끼우면 끝에서 튀고, 그 반대는 제자리로 안 돌아온다.
+    /// 호출부가 그 사정을 아는 메시지로 경고하도록 종류 불일치는 out으로 알린다.
+    /// </summary>
+    public bool TryGet(string name, CurveKind kind, out CurveKey[] keys, out bool wrongKind)
+    {
+        keys = null;
+        wrongKind = false;
+
+        if (!_curves.TryGetValue(name, out Entry entry))
+            return false;
+
+        if (entry.Kind != kind)
+        {
+            wrongKind = true;
+            return false;
+        }
+
+        keys = entry.Keys;
+        return true;
+    }
 
     /// <summary>파일이 없으면 무음으로 Empty — 커브를 안 쓰는 프로젝트가 정상 경로다.</summary>
     public static EaseCurveLibrary LoadFrom(string jsonPath)
@@ -88,25 +120,27 @@ public sealed class EaseCurveLibrary
                 "읽기는 시도한다 — 어긋나면 커브 단위 검증이 거른다.");
         }
 
-        Dictionary<string, CurveKey[]> curves = new();
+        Dictionary<string, Entry> curves = new();
 
         if (file.curves != null)
         {
             foreach (CurveDto curve in file.curves)
             {
-                if (!TryValidate(curve, sourceLabel, out CurveKey[] keys))
+                if (!TryValidate(curve, sourceLabel, out CurveKey[] keys, out CurveKind kind))
                     continue;
 
-                curves[curve.name] = keys;
+                curves[curve.name] = new Entry(kind, keys);
             }
         }
 
         return new EaseCurveLibrary(curves);
     }
 
-    private static bool TryValidate(CurveDto curve, string sourceLabel, out CurveKey[] keys)
+    private static bool TryValidate(
+        CurveDto curve, string sourceLabel, out CurveKey[] keys, out CurveKind kind)
     {
         keys = null;
+        kind = CurveKind.Motion;
 
         string name = curve?.name ?? "(null)";
 
@@ -134,28 +168,6 @@ public sealed class EaseCurveLibrary
             return false;
         }
 
-        // ── 끝값 규약 ────────────────────────────────────────────────
-        // 곡선은 "경로의 모양"만 정한다. 종점은 언제나 명목 목표값이다 —
-        // 호스트 커밋(OnCommitFinalState)이 명목값을 쓰기 때문이다.
-        // 그래서 v가 0이 아닌 데서 시작하거나 1이 아닌 데서 끝나는 곡선은
-        // 재생에서 양 끝 한 프레임이 튀고, 툴 프리뷰와도 어긋난다.
-        // (중간이 1을 넘는 것은 정상이다 — OutBack·OutElastic이 그렇게 논다.
-        //  "1.2배 지점에 착지"는 곡선이 아니라 delta를 1.2배로 쓸 일이다.)
-        if (Math.Abs(curve.keys[0].v) > EndpointTolerance)
-        {
-            Warn(sourceLabel, name,
-                $"첫 키 v가 0이 아니다 ({curve.keys[0].v}) — 곡선은 모양만 정한다");
-            return false;
-        }
-
-        if (Math.Abs(curve.keys[curve.keys.Count - 1].v - 1f) > EndpointTolerance)
-        {
-            Warn(sourceLabel, name,
-                $"마지막 키 v가 1이 아니다 ({curve.keys[curve.keys.Count - 1].v}) — " +
-                "종점은 명목 목표값이다. 더 멀리 보내려면 delta를 키워라");
-            return false;
-        }
-
         for (int i = 1; i < curve.keys.Count; i++)
         {
             if (curve.keys[i].t <= curve.keys[i - 1].t)
@@ -165,14 +177,23 @@ public sealed class EaseCurveLibrary
             }
         }
 
-        keys = new CurveKey[curve.keys.Count];
+        CurveKey[] parsed = new CurveKey[curve.keys.Count];
 
         for (int i = 0; i < curve.keys.Count; i++)
         {
             KeyDto k = curve.keys[i];
-            keys[i] = new CurveKey(k.t, k.v, k.inTangent, k.outTangent);
+            parsed[i] = new CurveKey(k.t, k.v, k.inTangent, k.outTangent);
         }
 
+        // 끝값이 종류를 가른다 — 규칙은 코어 한 곳(CurveKindRules)이 진다.
+        // 툴 저작 검증도 같은 규칙을 써야 "툴에선 되는데 재생에서 사라지는" 곡선이 안 생긴다.
+        if (!CurveKindRules.TryClassify(parsed, out kind, out string why))
+        {
+            Warn(sourceLabel, name, why);
+            return false;
+        }
+
+        keys = parsed;
         return true;
     }
 
