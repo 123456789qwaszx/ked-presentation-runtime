@@ -23,6 +23,11 @@ public class ScaleToCommandSpecCharR : CharacterRigCommandSpecBase
     [Header("Tween")]
     public float duration = 0.4f;
     public Ease ease = Ease.OutCubic;
+
+    [Tooltip(
+        "커스텀 이징 곡선 키(@이름 인자에서). null/빈 배열이면 ease를 쓴다. " +
+        "종점(목표 scale)에는 관여하지 않는다 — 모양만 바꾼다.")]
+    public CurveKey[] customCurveKeys;
 }
 
 public sealed class ScaleToCommandCharR : ClaimTweenCommandBase
@@ -81,7 +86,7 @@ public sealed class ScaleToCommandCharR : ClaimTweenCommandBase
     protected override Tween CreateTween(float duration)
         => _rect
             .DOScale(_endScale, duration)
-            .SetEase(_spec.ease)
+            .ApplyEase(_spec.ease, _spec.customCurveKeys)
             .SetTarget(_rect);
 
     protected override void OnCommitFinalState()

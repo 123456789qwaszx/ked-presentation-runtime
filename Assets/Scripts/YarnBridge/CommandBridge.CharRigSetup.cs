@@ -214,8 +214,16 @@ public sealed partial class YarnCommandBridge
             customCurveKeys = ease.CurveKeys
         });
     }
-    private void EnqueueSizeBySpec(string roleKey, float multiplier, string durationToken = "0.4s")
-        => Collect(new ScaleToCommandSpecCharR
+
+    private void EnqueueSizeBySpec(
+        string roleKey,
+        float multiplier,
+        string durationToken = "0.4s",
+        string easeToken = "")
+    {
+        EaseSelection ease = ResolveEase(easeToken);
+
+        Collect(new ScaleToCommandSpecCharR
         {
             slotKey = roleKey,
             target = CharacterRigTarget.CharSlot_Scale,
@@ -223,8 +231,11 @@ public sealed partial class YarnCommandBridge
             toScale = new Vector2(multiplier, multiplier),
             relativeToCurrent = true,
 
-            duration = YarnDurationParser.Parse(durationToken)
+            duration = YarnDurationParser.Parse(durationToken),
+            ease = ease.Ease,
+            customCurveKeys = ease.CurveKeys
         });
+    }
 
     private void EnqueueSetPlaceResetSpecs(string slotKey, string durationToken = "0.4s")
     {
@@ -252,16 +263,25 @@ public sealed partial class YarnCommandBridge
         Collect(spec2);
     }
 
-    private void EnqueueSizeResetSpec(string roleKey, string durationToken = "0.4s")
-        => Collect(new ScaleToCommandSpecCharR
+    private void EnqueueSizeResetSpec(
+        string roleKey,
+        string durationToken = "0.4s",
+        string easeToken = "")
+    {
+        EaseSelection ease = ResolveEase(easeToken);
+
+        Collect(new ScaleToCommandSpecCharR
         {
             slotKey = roleKey,
             target = CharacterRigTarget.CharSlot_Scale,
 
             toScale = new Vector2(1, 1),
 
-            duration = YarnDurationParser.Parse(durationToken)
+            duration = YarnDurationParser.Parse(durationToken),
+            ease = ease.Ease,
+            customCurveKeys = ease.CurveKeys
         });
+    }
 
     private void EnqueueCharacterSiblingFrontSpec(string roleKey)
         => Collect(new SetCharacterSiblingOrderCommandSpecCharR

@@ -60,12 +60,19 @@ public sealed partial class YarnCommandBridge
     private void EnqueueScaleSpec(
         string roleKey,
         float xyValue,
-        string durationToken = "10fr")
-        => Collect(new ScaleToCommandSpecCharR
+        string durationToken = "10fr",
+        string easeToken = "")
+    {
+        EaseSelection ease = ResolveEase(easeToken);
+
+        Collect(new ScaleToCommandSpecCharR
         {
             slotKey = roleKey,
             target = CharacterRigTarget.CharacterPortrait_ActingScale,
             duration = YarnDurationParser.Parse(durationToken),
-            toScale = new Vector2(xyValue, xyValue)
+            toScale = new Vector2(xyValue, xyValue),
+            ease = ease.Ease,
+            customCurveKeys = ease.CurveKeys
         });
+    }
 }

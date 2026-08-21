@@ -11,6 +11,11 @@ public abstract class ShotIntentCommandSpecBase : CommandSpecBase
     public float duration = 0.45f;
 
     public Ease ease = Ease.OutCubic;
+
+    [Tooltip(
+        "커스텀 이징 곡선 키(@이름 인자에서). null/빈 배열이면 ease를 쓴다. " +
+        "종점(intent)에는 관여하지 않는다 — 모양만 바꾼다.")]
+    public Ked.Presentation.Core.CurveKey[] customCurveKeys;
 }
 
 public abstract class ShotIntentCommandBase<TSpec> : CommandBase
@@ -58,7 +63,7 @@ public abstract class ShotIntentCommandBase<TSpec> : CommandBase
                 },
                 1f,
                 spec.duration)
-            .SetEase(spec.ease)
+            .ApplyEase(spec.ease, spec.customCurveKeys)
             .SetUpdate(true)
             .SetTarget(rig)
             .OnComplete(CommitFinalState);
@@ -123,7 +128,7 @@ public abstract class ShotIntentCommandBase<TSpec> : CommandBase
                 },
                 1f,
                 duration)
-            .SetEase(spec.ease)
+            .ApplyEase(spec.ease, spec.customCurveKeys)
             .SetUpdate(true)
             .SetTarget(rig)
             .OnComplete(CommitFinalState);

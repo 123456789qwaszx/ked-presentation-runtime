@@ -391,6 +391,60 @@ namespace Ked.Presentation.Core.Tests
             Assert.That(state.Unhandled.Any(u => u.Reason.Contains("커브")), Is.True);
         }
 
+        // ── 이징 인자는 폴드에 무해하다 ──────────────────────────────
+
+        [Test]
+        public void scale_계열의_마지막_이징_인자는_폴드에_무해하다()
+        {
+            // 이징은 경로의 모양만 정한다 — 종점(목표 scale)은 그대로다.
+            // 지키는 것은 인자 자리다: 이징 토큰이 붙어도 배율을 읽는 인덱스가 밀리면 안 된다.
+            StageReducerTuning tuning = NewTuning();
+
+            StageState plain = Fold(tuning,
+                Cmd("slot", "c1"), Cmd("scale_by", "c1", "1.5", "24fr"));
+
+            StageState eased = Fold(tuning,
+                Cmd("slot", "c1"), Cmd("scale_by", "c1", "1.5", "24fr", "OutBack"));
+
+            Assert.That(eased.Unhandled.Count, Is.EqualTo(0));
+            Assert.That(eased.Nodes.GetState("c1/CharSlot_Scale").LocalScale.XY.X,
+                Is.EqualTo(plain.Nodes.GetState("c1/CharSlot_Scale").LocalScale.XY.X).Within(Eps));
+
+            // scale_reset도 같다 — 모르는 커브 이름이 붙어도 폴드는 흔들리지 않는다.
+            StageState reset = Fold(tuning,
+                Cmd("slot", "c1"), Cmd("scale_by", "c1", "1.5"),
+                Cmd("scale_reset", "c1", "12fr", "@no_such_curve"));
+
+            Assert.That(reset.Nodes.GetState("c1/CharSlot_Scale").LocalScale.XY.X,
+                Is.EqualTo(1f).Within(Eps));
+        }
+
+        // ── shot 계열의 이징 인자 ────────────────────────────────────
+
+        [Test]
+        public void shot_계열의_마지막_이징_인자는_폴드에_무해하다()
+        {
+            // 이징은 경로의 모양만 정한다 — 종점(shot intent)은 그대로다.
+            // 이 테스트가 지키는 것은 인자 자리다: 이징 토큰이 붙어도
+            // zoom·pan·focus를 읽는 인덱스가 밀리지 않아야 한다.
+            StageReducerTuning tuning = NewTuning();
+
+            StageState plain = Fold(tuning,
+                Cmd("slot", "c1"),
+                Cmd("shot_to", "3", "1u", "0u", "24fr"),
+                Cmd("shot_focus_to", "c1", "bust", "left", "2", "1.2s"));
+
+            StageState eased = Fold(tuning,
+                Cmd("slot", "c1"),
+                Cmd("shot_to", "3", "1u", "0u", "24fr", "InOutCubic"),
+                Cmd("shot_focus_to", "c1", "bust", "left", "2", "1.2s", "@push_in"));
+
+            Assert.That(eased.Unhandled.Count, Is.EqualTo(0));
+            Assert.That(eased.Shot.Zoom, Is.EqualTo(plain.Shot.Zoom).Within(Eps));
+            Assert.That(eased.Shot.PanInRigSpace.X, Is.EqualTo(plain.Shot.PanInRigSpace.X).Within(Eps));
+            Assert.That(eased.Shot.PanInRigSpace.Y, Is.EqualTo(plain.Shot.PanInRigSpace.Y).Within(Eps));
+        }
+
         // ── shot_focus_to ────────────────────────────────────────────
 
         [Test]

@@ -112,7 +112,7 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler<string, float, string, string>(
             "rotate_by", EnqueueRotateBySpec);
 
-        runner.AddCommandHandler<string, float, string>(
+        runner.AddCommandHandler<string, float, string, string>(
             "scale_by", EnqueueSizeBySpec);
 
         runner.AddCommandHandler<string, string>(
@@ -120,7 +120,7 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler<string, string, string>(
             "rotate_reset", EnqueueRotateResetSpec);
 
-        runner.AddCommandHandler<string, string>(
+        runner.AddCommandHandler<string, string, string>(
             "scale_reset", EnqueueSizeResetSpec);
         
         runner.AddCommandHandler<string>(
@@ -145,17 +145,17 @@ public sealed partial class YarnCommandBridge
     
     private void BindShotStaging(DialogueRunner runner)
     {
-        runner.AddCommandHandler<string, string, string, float, string>(
+        runner.AddCommandHandler<string, string, string, float, string, string>(
             "shot_focus_to", EnqueueShotZoomFocusSpec);
-        runner.AddCommandHandler<float, string, string, string>(
+        runner.AddCommandHandler<float, string, string, string, string>(
             "shot_to", EnqueueShotToSpec);
         
-        runner.AddCommandHandler<float, string>(
+        runner.AddCommandHandler<float, string, string>(
             "shot_zoom", EnqueueShotZoomSpec);
-        runner.AddCommandHandler<string, string, string>(
+        runner.AddCommandHandler<string, string, string, string>(
             "shot_track", EnqueueShotTrackSpec);
         
-        runner.AddCommandHandler<string>(
+        runner.AddCommandHandler<string, string>(
             "shot_reset", EnqueueShotResetSpec);
     }
     
@@ -281,7 +281,7 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler<string, string, string, string>(
             "char_move_to", EnqueueMoveByUnitCharSpec);
         
-        runner.AddCommandHandler<string, float, string>(
+        runner.AddCommandHandler<string, float, string, string>(
             "char_scale_to", EnqueueScaleSpec);
 
         runner.AddCommandHandler<string, float, string, string>(
