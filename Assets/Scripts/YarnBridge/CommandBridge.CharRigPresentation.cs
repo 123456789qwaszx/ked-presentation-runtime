@@ -57,6 +57,19 @@ public sealed partial class YarnCommandBridge
             duration = YarnDurationParser.Parse(durationToken),
         });
 
+    // 표정 교체. 밑장을 즉시 갈아끼우는 face와 달리 위 겹을 페이드로 덮었다 걷는다 —
+    // 정지 프레임의 결과는 face와 같으므로 코어는 둘을 한 자리에서 접는다.
+    private void EnqueueSetEmotionPortraitWipeSpec(
+        string targetKey,
+        string emotion,
+        string durationToken = "10fr")
+        => Collect(new SetEmotionPortraitWipeCommandSpecCharR
+        {
+            slotKey = targetKey,
+            portrait = new PortraitIdentity { emotion = emotion },
+            duration = YarnDurationParser.Parse(durationToken)
+        });
+
     private void EnqueueScaleSpec(
         string roleKey,
         float xyValue,

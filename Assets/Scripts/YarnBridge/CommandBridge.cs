@@ -100,6 +100,8 @@ public sealed partial class YarnCommandBridge
             "pose", EnqueueSetPortraitPoseSpec);
         runner.AddCommandHandler<string, string>(
             "face", EnqueueSetPortraitFaceSpec);
+        runner.AddCommandHandler<string, string, string>(
+            "face_swap", EnqueueSetEmotionPortraitWipeSpec);
 
         runner.AddCommandHandler<string, string>(
             "mirror", EnqueueMirrorSetSpec);

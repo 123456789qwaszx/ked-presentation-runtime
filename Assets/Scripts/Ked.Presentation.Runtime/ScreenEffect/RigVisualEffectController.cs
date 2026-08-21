@@ -47,6 +47,10 @@ public sealed class RigVisualEffectController : IDisposable
     private const float BlurKeywordThreshold = 0.001f;
     
     private readonly Image _targetImage;
+
+    // 같은 runtime material을 함께 쓰는 두 번째 그래픽(캐릭터 초상의 위 겹).
+    // 없을 수 있다 — 배경 리그처럼 그래픽이 하나뿐인 경우는 null이다.
+    private readonly Image _companionImage;
     
     private Material _runtimeMaterial;
     
@@ -70,9 +74,11 @@ public sealed class RigVisualEffectController : IDisposable
 
     public RigVisualEffectController(
         Image targetImage,
-        Material sourceMaterial)
+        Material sourceMaterial,
+        Image companionImage = null)
     {
         _targetImage = targetImage;
+        _companionImage = companionImage;
 
         if (targetImage == null)
         {
@@ -98,6 +104,9 @@ public sealed class RigVisualEffectController : IDisposable
 
         if (targetImage != null)
             targetImage.material = _runtimeMaterial;
+
+        if (_companionImage != null)
+            _companionImage.material = _runtimeMaterial;
 
         _dimAmount = 0f;
         _outerRimAmount = 0f;
@@ -184,6 +193,9 @@ public sealed class RigVisualEffectController : IDisposable
     {
         if (_targetImage != null)
             _targetImage.SetMaterialDirty();
+
+        if (_companionImage != null)
+            _companionImage.SetMaterialDirty();
     }
     
     private void ApplyDynamicValuesTo(Material material)
@@ -223,6 +235,7 @@ public sealed class RigVisualEffectController : IDisposable
     private void PushMaterialToGraphics()
     {
         PushMaterialToGraphic(_targetImage);
+        PushMaterialToGraphic(_companionImage);
     }
 
     private void PushMaterialToGraphic(Image image)

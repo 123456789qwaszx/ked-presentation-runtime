@@ -35,6 +35,10 @@ public static class CharacterRigSchema
         // Portrait sprite
         CharacterPortraitSprite_Root,
         CharacterPortraitSprite_Image,
+
+        // Portrait sprite overlay
+        CharacterPortraitSpriteOverlay_Root,
+        CharacterPortraitSpriteOverlay_Image,
     }
 
     public sealed class NodeDef
@@ -81,6 +85,10 @@ public static class CharacterRigSchema
         // Portrait sprite
         new() { Id = Refs.CharacterPortraitSprite_Root, Parent = Refs.CharacterPortrait_ActingScale_Y, NeedsCanvasGroup = true, InitialCanvasGroupAlpha = 0f },
         new() { Id = Refs.CharacterPortraitSprite_Image, Parent = Refs.CharacterPortraitSprite_Root, NeedsImage = true },
+
+        // Portrait sprite overlay
+        new() { Id = Refs.CharacterPortraitSpriteOverlay_Root, Parent = Refs.CharacterPortrait_ActingScale_Y, NeedsCanvasGroup = true, InitialCanvasGroupAlpha = 0f },
+        new() { Id = Refs.CharacterPortraitSpriteOverlay_Image, Parent = Refs.CharacterPortraitSpriteOverlay_Root, NeedsImage = true },
     };
 }
 
@@ -118,6 +126,10 @@ public enum CharacterRigTarget
     // Portrait sprite
     CharacterPortraitSprite_Root,
     CharacterPortraitSprite_Image,
+
+    // Portrait sprite overlay
+    CharacterPortraitSpriteOverlay_Root,
+    CharacterPortraitSpriteOverlay_Image,
 }
 
 public sealed class CharacterRigRefs
@@ -167,6 +179,11 @@ public sealed class CharacterRigRefs
     // Portrait sprite
     public RectTransform CharacterPortraitSprite_Root;
     public Image         CharacterPortraitSprite_Image;
+
+    // Portrait sprite overlay — face_swap이 페이드로 겹치는 위 층.
+    // 정지 프레임에서는 alpha 0에 Image가 비활성이라 코어 폴드에 남지 않는다.
+    public RectTransform CharacterPortraitSpriteOverlay_Root;
+    public Image         CharacterPortraitSpriteOverlay_Image;
 }
 
 public static class CharacterRigRefsExtensions
@@ -221,6 +238,10 @@ public static class CharacterRigRefsExtensions
             // Portrait sprite
             CharacterRigTarget.CharacterPortraitSprite_Root => refs.CharacterPortraitSprite_Root,
             CharacterRigTarget.CharacterPortraitSprite_Image => refs.CharacterPortraitSprite_Image,
+
+            // Portrait sprite overlay
+            CharacterRigTarget.CharacterPortraitSpriteOverlay_Root => refs.CharacterPortraitSpriteOverlay_Root,
+            CharacterRigTarget.CharacterPortraitSpriteOverlay_Image => refs.CharacterPortraitSpriteOverlay_Image,
 
             _ => null
         };

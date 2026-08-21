@@ -14,209 +14,229 @@ MonoBehaviour:
   m_EditorClassIdentifier: Ked.Presentation.Runtime::PortraitGeneratedDBSO
   entries:
   - characterId: harin
-    variantKey: harin_a
+    variantKey: a
     emotionKey: 01
     sprite: {fileID: 21300000, guid: 691aea0c41f8e5449b29fa2b247b95e0, type: 3}
-    assetPath: Assets/Art/Portraits/dungeon/harin/harin_a_01.png
+    assetPath: Assets/Art/Portraits/dungeon/harin/a/01.png
   - characterId: jineunha
-    variantKey: jineunha_a
+    variantKey: a
     emotionKey: 01
     sprite: {fileID: 21300000, guid: 78f795c4e1b10b341adb60453100d6aa, type: 3}
-    assetPath: Assets/Art/Portraits/fillintheblank/jineunha/jineunha_a_01.png
+    assetPath: Assets/Art/Portraits/fillintheblank/jineunha/a/01.png
   - characterId: jineunha
-    variantKey: jineunha_a
+    variantKey: a
     emotionKey: 02
     sprite: {fileID: 21300000, guid: 9cf26333591496d438f312ebe3571cb7, type: 3}
-    assetPath: Assets/Art/Portraits/fillintheblank/jineunha/jineunha_a_02.png
+    assetPath: Assets/Art/Portraits/fillintheblank/jineunha/a/02.png
   - characterId: jineunha
-    variantKey: jineunha_a
+    variantKey: a
     emotionKey: 03
     sprite: {fileID: 21300000, guid: f850da137a7fc33478ef68fb03e0f5ba, type: 3}
-    assetPath: Assets/Art/Portraits/fillintheblank/jineunha/jineunha_a_03.png
+    assetPath: Assets/Art/Portraits/fillintheblank/jineunha/a/03.png
   - characterId: jineunha
-    variantKey: jineunha_a
+    variantKey: a
     emotionKey: 04
     sprite: {fileID: 21300000, guid: 33ba0e8805a10f8419bd66a8fa216618, type: 3}
-    assetPath: Assets/Art/Portraits/fillintheblank/jineunha/jineunha_a_04.png
+    assetPath: Assets/Art/Portraits/fillintheblank/jineunha/a/04.png
   - characterId: jineunha
-    variantKey: jineunha_a
+    variantKey: a
     emotionKey: 05
     sprite: {fileID: 21300000, guid: a17386d2abd783546864065149289bf1, type: 3}
-    assetPath: Assets/Art/Portraits/fillintheblank/jineunha/jineunha_a_05.png
+    assetPath: Assets/Art/Portraits/fillintheblank/jineunha/a/05.png
   - characterId: jineunha
-    variantKey: jineunha_a
+    variantKey: a
     emotionKey: 06
     sprite: {fileID: 21300000, guid: 625a6b1e8d470374fbba059bad9b3b06, type: 3}
-    assetPath: Assets/Art/Portraits/fillintheblank/jineunha/jineunha_a_06.png
+    assetPath: Assets/Art/Portraits/fillintheblank/jineunha/a/06.png
   - characterId: kasmi
-    variantKey: kasmi_a
+    variantKey: a
     emotionKey: 01
     sprite: {fileID: 21300000, guid: 00cb073c882032c4f9748824d20620a3, type: 3}
-    assetPath: Assets/Art/Portraits/dungeon/kasmi/kasmi_a_01.png
+    assetPath: Assets/Art/Portraits/dungeon/kasmi/a/01.png
+  - characterId: laru
+    variantKey: a
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: d1f6d42e32df5d046ba48cd8f5205677, type: 3}
+    assetPath: Assets/Art/Portraits/dungeon/laru/a/01.png
+  - characterId: laru
+    variantKey: a
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: 84abc6bd6084a3048b970ae96cd3d513, type: 3}
+    assetPath: Assets/Art/Portraits/dungeon/laru/a/02.png
   - characterId: leebyeol
-    variantKey: leebyeol_a
+    variantKey: a
     emotionKey: 01
     sprite: {fileID: 21300000, guid: a8debc40e4ec37b449788d36f22c8f8e, type: 3}
-    assetPath: Assets/Art/Portraits/fillintheblank/leebyeol/leebyeol_a_01.png
+    assetPath: Assets/Art/Portraits/fillintheblank/leebyeol/a/01.png
   - characterId: leebyeol
-    variantKey: leebyeol_a
+    variantKey: a
     emotionKey: 02
     sprite: {fileID: 21300000, guid: 2e924fa9b4e593342a3af044fbd7a965, type: 3}
-    assetPath: Assets/Art/Portraits/fillintheblank/leebyeol/leebyeol_a_02.png
+    assetPath: Assets/Art/Portraits/fillintheblank/leebyeol/a/02.png
   - characterId: leebyeol
-    variantKey: leebyeol_a
+    variantKey: a
     emotionKey: 03
     sprite: {fileID: 21300000, guid: ea280ff28fc03cc448e2171b9f1d4a1c, type: 3}
-    assetPath: Assets/Art/Portraits/fillintheblank/leebyeol/leebyeol_a_03.png
+    assetPath: Assets/Art/Portraits/fillintheblank/leebyeol/a/03.png
   - characterId: leebyeol
-    variantKey: leebyeol_a
+    variantKey: a
     emotionKey: 04
     sprite: {fileID: 21300000, guid: 7aac0de8d3562624c98c732473ae9912, type: 3}
-    assetPath: Assets/Art/Portraits/fillintheblank/leebyeol/leebyeol_a_04.png
+    assetPath: Assets/Art/Portraits/fillintheblank/leebyeol/a/04.png
   - characterId: leebyeol
-    variantKey: leebyeol_a
+    variantKey: a
     emotionKey: 05
     sprite: {fileID: 21300000, guid: 0c0d54253a53dab4f943f99c611f3acb, type: 3}
-    assetPath: Assets/Art/Portraits/fillintheblank/leebyeol/leebyeol_a_05.png
+    assetPath: Assets/Art/Portraits/fillintheblank/leebyeol/a/05.png
   - characterId: leebyeol
-    variantKey: leebyeol_a
+    variantKey: a
     emotionKey: 06
     sprite: {fileID: 21300000, guid: d1e2ec8f1ab62444b943d466715ab339, type: 3}
-    assetPath: Assets/Art/Portraits/fillintheblank/leebyeol/leebyeol_a_06.png
+    assetPath: Assets/Art/Portraits/fillintheblank/leebyeol/a/06.png
   - characterId: moonyujeong
-    variantKey: moonyujeong_a
+    variantKey: a
     emotionKey: 01
     sprite: {fileID: 21300000, guid: 79484ad601f8ad4428db4542691c6b90, type: 3}
-    assetPath: Assets/Art/Portraits/fillintheblank/moonyujeong/moonyujeong_a_01.png
+    assetPath: Assets/Art/Portraits/fillintheblank/moonyujeong/a/01.png
   - characterId: moonyujeong
-    variantKey: moonyujeong_a
+    variantKey: a
     emotionKey: 02
     sprite: {fileID: 21300000, guid: a3f445fe492530f4a88203fa5e2093b5, type: 3}
-    assetPath: Assets/Art/Portraits/fillintheblank/moonyujeong/moonyujeong_a_02.png
+    assetPath: Assets/Art/Portraits/fillintheblank/moonyujeong/a/02.png
   - characterId: moonyujeong
-    variantKey: moonyujeong_a
+    variantKey: a
     emotionKey: 03
     sprite: {fileID: 21300000, guid: 567152d5df11e474e9c97eec70b71c0d, type: 3}
-    assetPath: Assets/Art/Portraits/fillintheblank/moonyujeong/moonyujeong_a_03.png
+    assetPath: Assets/Art/Portraits/fillintheblank/moonyujeong/a/03.png
   - characterId: moonyujeong
-    variantKey: moonyujeong_a
+    variantKey: a
     emotionKey: 04
     sprite: {fileID: 21300000, guid: 361f11d92e622504593e1e66a115216f, type: 3}
-    assetPath: Assets/Art/Portraits/fillintheblank/moonyujeong/moonyujeong_a_04.png
+    assetPath: Assets/Art/Portraits/fillintheblank/moonyujeong/a/04.png
   - characterId: moonyujeong
-    variantKey: moonyujeong_a
+    variantKey: a
     emotionKey: 05
     sprite: {fileID: 21300000, guid: fd75e670ff8790941b0281b20df81b98, type: 3}
-    assetPath: Assets/Art/Portraits/fillintheblank/moonyujeong/moonyujeong_a_05.png
+    assetPath: Assets/Art/Portraits/fillintheblank/moonyujeong/a/05.png
   - characterId: moonyujeong
-    variantKey: moonyujeong_a
+    variantKey: a
     emotionKey: 06
     sprite: {fileID: 21300000, guid: fc25f137b38d7cd4691d0359518990c8, type: 3}
-    assetPath: Assets/Art/Portraits/fillintheblank/moonyujeong/moonyujeong_a_06.png
+    assetPath: Assets/Art/Portraits/fillintheblank/moonyujeong/a/06.png
   - characterId: npc
-    variantKey: npc_a
+    variantKey: a
     emotionKey: 01
     sprite: {fileID: 21300000, guid: d7e27cd1926c61c43a613ac282df1889, type: 3}
-    assetPath: Assets/Art/Portraits/dungeon/npc/npc_a_01.png
+    assetPath: Assets/Art/Portraits/dungeon/npc/a/01.png
   - characterId: parkeunseol
-    variantKey: parkeunseol_a
+    variantKey: a
     emotionKey: 01
     sprite: {fileID: 21300000, guid: e4ee437c3e6185e46be6f0297982710c, type: 3}
-    assetPath: Assets/Art/Portraits/fillintheblank/parkeunseol/parkeunseol_a_01.png
+    assetPath: Assets/Art/Portraits/fillintheblank/parkeunseol/a/01.png
   - characterId: parkeunseol
-    variantKey: parkeunseol_a
+    variantKey: a
     emotionKey: 02
     sprite: {fileID: 21300000, guid: 1f1451f22dcd6924f9dcfd06cabe1267, type: 3}
-    assetPath: Assets/Art/Portraits/fillintheblank/parkeunseol/parkeunseol_a_02.png
+    assetPath: Assets/Art/Portraits/fillintheblank/parkeunseol/a/02.png
   - characterId: parkeunseol
-    variantKey: parkeunseol_a
+    variantKey: a
     emotionKey: 03
     sprite: {fileID: 21300000, guid: e3a0b7ec5a2351c42b80ac04e1b90667, type: 3}
-    assetPath: Assets/Art/Portraits/fillintheblank/parkeunseol/parkeunseol_a_03.png
+    assetPath: Assets/Art/Portraits/fillintheblank/parkeunseol/a/03.png
   - characterId: parkeunseol
-    variantKey: parkeunseol_a
+    variantKey: a
     emotionKey: 04
     sprite: {fileID: 21300000, guid: 3370d4139506f8d42bec6d5ca1482b62, type: 3}
-    assetPath: Assets/Art/Portraits/fillintheblank/parkeunseol/parkeunseol_a_04.png
+    assetPath: Assets/Art/Portraits/fillintheblank/parkeunseol/a/04.png
   - characterId: parkeunseol
-    variantKey: parkeunseol_a
+    variantKey: a
     emotionKey: 05
     sprite: {fileID: 21300000, guid: 51be0d15f93d5db478d5b7de3770ab4a, type: 3}
-    assetPath: Assets/Art/Portraits/fillintheblank/parkeunseol/parkeunseol_a_05.png
+    assetPath: Assets/Art/Portraits/fillintheblank/parkeunseol/a/05.png
   - characterId: parkeunseol
-    variantKey: parkeunseol_a
+    variantKey: a
     emotionKey: 06
     sprite: {fileID: 21300000, guid: b70864a5aadad8240817860acc1dae20, type: 3}
-    assetPath: Assets/Art/Portraits/fillintheblank/parkeunseol/parkeunseol_a_06.png
+    assetPath: Assets/Art/Portraits/fillintheblank/parkeunseol/a/06.png
   - characterId: parkeunseol
-    variantKey: parkeunseol_a
+    variantKey: a
     emotionKey: 07
     sprite: {fileID: 21300000, guid: b9e16baaec9c620488e0035fab7fed78, type: 3}
-    assetPath: Assets/Art/Portraits/fillintheblank/parkeunseol/parkeunseol_a_07.png
+    assetPath: Assets/Art/Portraits/fillintheblank/parkeunseol/a/07.png
   - characterId: sigure
-    variantKey: sigure_a
+    variantKey: a
     emotionKey: 01
     sprite: {fileID: 21300000, guid: 5ec67e1c523911d479c2ce4b22a22830, type: 3}
-    assetPath: Assets/Art/Portraits/dungeon/sigure/sigure_a_01.png
+    assetPath: Assets/Art/Portraits/dungeon/sigure/a/01.png
+  - characterId: willow
+    variantKey: a
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: 1e3ddc6e3233448498f9a4c91eb93441, type: 3}
+    assetPath: Assets/Art/Portraits/dungeon/willow/a/01.png
+  - characterId: willow
+    variantKey: a
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: 78b4aef2a5d0cbd4ea11aa77bdd52141, type: 3}
+    assetPath: Assets/Art/Portraits/dungeon/willow/a/02.png
   - characterId: yoonsaea
-    variantKey: yoonsaea_a
+    variantKey: a
     emotionKey: 01
     sprite: {fileID: 21300000, guid: 5a59b406f4cb32748ba17f534c2121ee, type: 3}
-    assetPath: Assets/Art/Portraits/fillintheblank/yoonsaea/yoonsaea_a_01.png
+    assetPath: Assets/Art/Portraits/fillintheblank/yoonsaea/a/01.png
   - characterId: yoonsaea
-    variantKey: yoonsaea_a
+    variantKey: a
     emotionKey: 02
     sprite: {fileID: 21300000, guid: 480af79d6fa94764f8fbc05b6d1bc031, type: 3}
-    assetPath: Assets/Art/Portraits/fillintheblank/yoonsaea/yoonsaea_a_02.png
+    assetPath: Assets/Art/Portraits/fillintheblank/yoonsaea/a/02.png
   - characterId: yoonsaea
-    variantKey: yoonsaea_a
+    variantKey: a
     emotionKey: 03
     sprite: {fileID: 21300000, guid: 8a7c4e324d277e546a871faeb768f7e8, type: 3}
-    assetPath: Assets/Art/Portraits/fillintheblank/yoonsaea/yoonsaea_a_03.png
+    assetPath: Assets/Art/Portraits/fillintheblank/yoonsaea/a/03.png
   - characterId: yoonsaea
-    variantKey: yoonsaea_a
+    variantKey: a
     emotionKey: 04
     sprite: {fileID: 21300000, guid: 17346648b574f384c99b3bc7f6c5576d, type: 3}
-    assetPath: Assets/Art/Portraits/fillintheblank/yoonsaea/yoonsaea_a_04.png
+    assetPath: Assets/Art/Portraits/fillintheblank/yoonsaea/a/04.png
   - characterId: yoonsaea
-    variantKey: yoonsaea_a
+    variantKey: a
     emotionKey: 05
     sprite: {fileID: 21300000, guid: 4e564a12185ee1346a179bb722a027c6, type: 3}
-    assetPath: Assets/Art/Portraits/fillintheblank/yoonsaea/yoonsaea_a_05.png
+    assetPath: Assets/Art/Portraits/fillintheblank/yoonsaea/a/05.png
   - characterId: yoonsaea
-    variantKey: yoonsaea_a
+    variantKey: a
     emotionKey: 06
     sprite: {fileID: 21300000, guid: eab3a94f0c6559f44a3f47207256f6bc, type: 3}
-    assetPath: Assets/Art/Portraits/fillintheblank/yoonsaea/yoonsaea_a_06.png
+    assetPath: Assets/Art/Portraits/fillintheblank/yoonsaea/a/06.png
   - characterId: yoonsaea
-    variantKey: yoonsaea_b
+    variantKey: b
     emotionKey: 01
     sprite: {fileID: 21300000, guid: 29d3835c52270c04a810a6cd64ac82af, type: 3}
-    assetPath: Assets/Art/Portraits/fillintheblank/yoonsaea/yoonsaea_b_01.png
+    assetPath: Assets/Art/Portraits/fillintheblank/yoonsaea/b/01.png
   - characterId: yoonsaea
-    variantKey: yoonsaea_b
+    variantKey: b
     emotionKey: 02
     sprite: {fileID: 21300000, guid: 7104108d60865b241be0ff7ee1446e95, type: 3}
-    assetPath: Assets/Art/Portraits/fillintheblank/yoonsaea/yoonsaea_b_02.png
+    assetPath: Assets/Art/Portraits/fillintheblank/yoonsaea/b/02.png
   - characterId: yoonsaea
-    variantKey: yoonsaea_b
+    variantKey: b
     emotionKey: 03
     sprite: {fileID: 21300000, guid: a3ed1499bffa6a54bba0a8e443d57437, type: 3}
-    assetPath: Assets/Art/Portraits/fillintheblank/yoonsaea/yoonsaea_b_03.png
+    assetPath: Assets/Art/Portraits/fillintheblank/yoonsaea/b/03.png
   - characterId: yoonsaea
-    variantKey: yoonsaea_b
+    variantKey: b
     emotionKey: 04
     sprite: {fileID: 21300000, guid: 50c10c397d7d5454e8db0efa702f1d5b, type: 3}
-    assetPath: Assets/Art/Portraits/fillintheblank/yoonsaea/yoonsaea_b_04.png
+    assetPath: Assets/Art/Portraits/fillintheblank/yoonsaea/b/04.png
   - characterId: yoonsaea
-    variantKey: yoonsaea_b
+    variantKey: b
     emotionKey: 05
     sprite: {fileID: 21300000, guid: 3ec8eef824ca8674abbea3be59a93037, type: 3}
-    assetPath: Assets/Art/Portraits/fillintheblank/yoonsaea/yoonsaea_b_05.png
+    assetPath: Assets/Art/Portraits/fillintheblank/yoonsaea/b/05.png
   - characterId: yoonsaea
-    variantKey: yoonsaea_b
+    variantKey: b
     emotionKey: 06
     sprite: {fileID: 21300000, guid: 645d9b3b0543ff142a13c6f4d96df87d, type: 3}
-    assetPath: Assets/Art/Portraits/fillintheblank/yoonsaea/yoonsaea_b_06.png
-  generatedTicksUtc: 639227646765949113
-  generatedTimeReadable: 2026-08-20 04:31:16
+    assetPath: Assets/Art/Portraits/fillintheblank/yoonsaea/b/06.png
+  generatedTicksUtc: 639229157784529292
+  generatedTimeReadable: 2026-08-21 22:29:38

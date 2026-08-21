@@ -66,6 +66,7 @@ public sealed class CharacterRigCommandFactory : INodeCommandFactory
             SlideInCommandSpecCharR s => new SlideInCommandCharR(s),
             SlideOutCommandSpecCharR s => new SlideOutCommandCharR(s),
             SetPortraitSpriteCommandSpecCharR s => new SetPortraitSpriteCommandCharR(s, _portraitResolver),
+            SetEmotionPortraitWipeCommandSpecCharR s => new SetEmotionPortraitWipeCommandCharR(s, _portraitResolver),
             
             // Composition / Focus-aware Placement
             PlaceCharacterFocusCommandSpecCharR s => new PlaceCharacterFocusCommandCharR(s, _characterFocusTuningDb, _stageProvider),

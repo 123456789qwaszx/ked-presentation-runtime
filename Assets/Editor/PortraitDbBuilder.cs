@@ -90,8 +90,13 @@ public static class PortraitDbBuilder
             if (importer == null || importer.textureType != TextureImporterType.Sprite)
                 continue;
 
-            if (!TryParse(path, validRoots, out var cid, out var variantFromFile))
-                continue; // 조용히 스킵 (warn spam 방지)
+            if (!TryParse(path, validRoots, out var cid, out var variant, out var fileEmotionToken))
+            {
+                // 폴더 규약(<root>/<캐릭터>/<변형>/<표정>.png) 밖의 파일.
+                // 스캔 뿌리 안에 있는데 모양이 다르면 실수일 확률이 높으니 소리를 낸다.
+                report.Add($"[WARN] Not in <character>/<variant>/<emotion> layout: {path}");
+                continue;
+            }
 
             var sprites = LoadSprites(path);
 
@@ -103,18 +108,20 @@ public static class PortraitDbBuilder
 
             if (sprites.Length == 1)
             {
-                if (!TrySplitBaseVariantAndEmotion(variantFromFile, out var baseVariant, out var emotionKey))
+                // 낱장: 파일 이름이 곧 표정 코드다 (01.png / 1.png).
+                var emotionKey = PortraitResolver.NormalizeEmotionCode(fileEmotionToken);
+
+                if (string.IsNullOrEmpty(emotionKey))
                 {
-                    report.Add($"[WARN] Cannot parse emotion from filename: {path}");
+                    report.Add($"[WARN] Filename is not a numeric emotion code: '{fileEmotionToken}' ({path})");
                     continue;
                 }
 
-                AddEntry(cid, baseVariant, emotionKey, sprites[0], path);
+                AddEntry(cid, variant, emotionKey, sprites[0], path);
             }
             else
             {
-                var baseVariant = NormalizeBaseVariant(variantFromFile);
-
+                // 시트: 서브 스프라이트 이름이 표정 코드다. 변형은 폴더가 정한다.
                 foreach (var sp in sprites)
                 {
                     if (!sp) continue;
@@ -134,7 +141,7 @@ public static class PortraitDbBuilder
                         continue;
                     }
 
-                    AddEntry(cid, baseVariant, emotion, sp, path);
+                    AddEntry(cid, variant, emotion, sp, path);
                 }
             }
         }
@@ -188,10 +195,25 @@ public static class PortraitDbBuilder
         return new Sprite[0];
     }
 
-    private static bool TryParse(string assetPath, List<string> validRoots, out string characterId, out string variantKeyFromFile)
+    // 초상 에셋 규약: <스캔 뿌리>/<캐릭터>/<변형>/<표정>.png
+    //
+    //   Assets/Art/Portraits/fillintheblank/yoonsaea/b/03.png
+    //                        └ 뿌리        └ 캐릭터  └변형 └표정
+    //
+    // 변형이 폴더로 서면서 파일 이름에서 캐릭터·변형이 빠졌다. 그래서 variantKey는
+    // 종전의 'yoonsaea_b'가 아니라 폴더 이름 그대로인 'b'다 —
+    // 조회 쪽(PortraitResolver·코어 PortraitKeyNormalizer)도 변형 키를 문자열 전체로 보므로
+    // 여기서 내는 값이 곧 대본이 쓰는 변형 이름이다. 'school'·'casual'처럼 여러 글자도 된다.
+    private static bool TryParse(
+        string assetPath,
+        List<string> validRoots,
+        out string characterId,
+        out string variantKey,
+        out string emotionToken)
     {
         characterId = "";
-        variantKeyFromFile = "";
+        variantKey = "";
+        emotionToken = "";
 
         assetPath = assetPath.Replace('\\', '/');
 
@@ -208,59 +230,21 @@ public static class PortraitDbBuilder
 
         if (matchedPrefix == null) return false;
 
-        string rest = assetPath.Substring(matchedPrefix.Length); // {cid}/{file}
+        string rest = assetPath.Substring(matchedPrefix.Length); // {cid}/{variant}/{file}
         var parts = rest.Split('/');
 
-        // 현재 규칙: root/cid/file (2단계 고정)
-        if (parts.Length != 2) return false;
+        // 규칙: root/cid/variant/file (3단계 고정)
+        if (parts.Length != 3) return false;
 
         characterId = parts[0].Trim();
-        var file = parts[parts.Length - 1];
-        variantKeyFromFile = (Path.GetFileNameWithoutExtension(file) ?? "").Trim();
+        variantKey = parts[1].Trim();
+        emotionToken = (Path.GetFileNameWithoutExtension(parts[2]) ?? "").Trim();
 
         if (string.IsNullOrEmpty(characterId)) return false;
-        if (string.IsNullOrEmpty(variantKeyFromFile)) return false;
+        if (string.IsNullOrEmpty(variantKey)) return false;
+        if (string.IsNullOrEmpty(emotionToken)) return false;
 
         return true;
-    }
-
-    private static bool TrySplitBaseVariantAndEmotion(
-        string variantFromFile,
-        out string baseVariant,
-        out string emotionKey)
-    {
-        baseVariant = "";
-        emotionKey = "";
-
-        variantFromFile = (variantFromFile ?? "").Trim();
-        if (variantFromFile.Length == 0)
-            return false;
-
-        int us = variantFromFile.LastIndexOf('_');
-        if (us < 0 || us >= variantFromFile.Length - 1)
-            return false;
-
-        string rawEmotion = variantFromFile.Substring(us + 1).Trim();
-        if (rawEmotion.Length == 0)
-            return false;
-
-        string normalized = PortraitResolver.NormalizeEmotionCode(rawEmotion);
-        if (normalized.Length == 0)
-            return false;
-
-        baseVariant = variantFromFile.Substring(0, us);
-        if (baseVariant.Length == 0)
-            return false;
-
-        emotionKey = normalized;
-        return true;
-    }
-
-    private static string NormalizeBaseVariant(string variantFromFile)
-    {
-        if (TrySplitBaseVariantAndEmotion(variantFromFile, out var baseVariant, out _))
-            return baseVariant;
-        return (variantFromFile ?? "").Trim();
     }
 
     private static string BuildReportText(PortraitGeneratedDBSO db, List<string> report, bool strictMode)

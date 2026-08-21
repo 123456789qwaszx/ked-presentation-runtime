@@ -7,7 +7,7 @@ public sealed class PortraitResolver
     public const string DefaultEmotion = "01";
     public const string FallbackEmotion = "01";
 
-    private readonly Dictionary<(string characterId, char variantSuffix, string emotionKey), Sprite> _map = new();
+    private readonly Dictionary<(string characterId, string variantKey, string emotionKey), Sprite> _map = new();
 
     public PortraitResolver(PortraitGeneratedDBSO db)
     {
@@ -77,16 +77,18 @@ public sealed class PortraitResolver
         return sprite;
     }
 
-    private static (string characterId, char variantSuffix, string emotionKey) MakeKey(
+    // 조회 키의 규약. 코어 PortraitKeyNormalizer가 같은 규칙을 들고 있으니 함께 바꿀 것 —
+    // 두 곳이 갈라지면 폴드가 재생과 다른 스프라이트를 고른다.
+    private static (string characterId, string variantKey, string emotionKey) MakeKey(
         string characterId,
         string variantKey,
         string emotionKey)
     {
         characterId = PresentationKeyNormalizer.NormalizeCharacterKey(characterId);
-        char suffix = PresentationKeyNormalizer.NormalizeVariantSuffix(variantKey);
+        variantKey = PresentationKeyNormalizer.NormalizeVariantKey(variantKey);
         emotionKey = NormalizeEmotionCode(emotionKey);
 
-        return (characterId, suffix, emotionKey);
+        return (characterId, variantKey, emotionKey);
     }
 
     // Normalizes the input into a 2-digit code in the form "02".

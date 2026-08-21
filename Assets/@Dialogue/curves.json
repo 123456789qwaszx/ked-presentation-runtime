@@ -1,0 +1,93 @@
+{
+  "schema": "ease-curves/1",
+  "curves": [
+    {
+      "name": "cmd_pc_m112mz76",
+      "keys": [
+        { "t": 0, "v": 0, "inTangent": 2.9882965, "outTangent": 2.9882965 },
+        { "t": 0.255, "v": 1.0828571, "inTangent": 1.6875153, "outTangent": 1.6875153 },
+        { "t": 0.46333334, "v": -0.5, "inTangent": 0.75001526, "outTangent": 0.75001526 },
+        { "t": 0.63166666, "v": 1.1571429, "inTangent": 0.18751526, "outTangent": 0.18751526 },
+        { "t": 0.8283333, "v": -0.34571427, "inTangent": -0.67658424, "outTangent": -0.67658424 },
+        { "t": 1, "v": 1, "inTangent": 1.5258789e-05, "outTangent": 1.5258789e-05 }
+      ]
+    },
+    {
+      "name": "curve_1",
+      "keys": [
+        { "t": 0, "v": 0, "inTangent": 5.953247, "outTangent": 5.953247 },
+        { "t": 0.125, "v": 0.578125, "inTangent": 3.375122, "outTangent": 3.375122 },
+        { "t": 0.25166667, "v": 0.64857143, "inTangent": -3.279503, "outTangent": -3.279503 },
+        { "t": 0.37, "v": 0.1, "inTangent": 0.37512207, "outTangent": 0.37512207 },
+        { "t": 0.41666666, "v": 0.15714286, "inTangent": 1.8801848, "outTangent": 1.8801848 },
+        { "t": 0.5083333, "v": 0.9514286, "inTangent": 2.5714293, "outTangent": 2.5714293 },
+        { "t": 0.57166666, "v": 1.0542858, "inTangent": -0.37512207, "outTangent": -0.37512207 },
+        { "t": 0.63, "v": 0.99142855, "inTangent": -3.4285707, "outTangent": -3.4285707 },
+        { "t": 0.73, "v": 0.08857143, "inTangent": -3.375122, "outTangent": -3.375122 },
+        { "t": 0.77166665, "v": 0.045953844, "inTangent": 0.93688667, "outTangent": 0.93688667 },
+        { "t": 0.88166666, "v": 0.3342857, "inTangent": 1.696957, "outTangent": 1.696957 },
+        { "t": 0.94666666, "v": 0.25428572, "inTangent": -2.1876082, "outTangent": -2.1876082 },
+        { "t": 1, "v": 0, "inTangent": -5.953247, "outTangent": -5.953247 }
+      ]
+    },
+    {
+      "name": "cmd_pc_a57u5ha2",
+      "keys": [
+        { "t": 0, "v": 0, "inTangent": 5.953247, "outTangent": 5.953247 },
+        { "t": 0.125, "v": 0.578125, "inTangent": 3.375122, "outTangent": 3.375122 },
+        { "t": 0.25166667, "v": 0.64857143, "inTangent": -3.279503, "outTangent": -3.279503 },
+        { "t": 0.32, "v": -0.35142857, "inTangent": -4.3636355, "outTangent": -4.3636355 },
+        { "t": 0.50333333, "v": -0.42571428, "inTangent": 1.8801848, "outTangent": 1.8801848 },
+        { "t": 0.56166667, "v": 0.67142856, "inTangent": 8.190476, "outTangent": 8.190476 },
+        { "t": 0.675, "v": 0.79714286, "inTangent": -3.4285707, "outTangent": -3.4285707 },
+        { "t": 0.78333336, "v": -0.41428572, "inTangent": 0.93688667, "outTangent": 0.93688667 },
+        { "t": 1, "v": 0, "inTangent": -5.953247, "outTangent": -5.953247 }
+      ]
+    },
+    {
+      "name": "cmd_pc_km8iqgyk",
+      "keys": [
+        { "t": 0, "v": 0, "inTangent": 0.47619048, "outTangent": 0.47619048 },
+        { "t": 0.12166667, "v": 0.27714285, "inTangent": 4.0714283, "outTangent": 4.0714283 },
+        { "t": 0.225, "v": 0.80857146, "inTangent": 2.8051949, "outTangent": 2.8051949 },
+        { "t": 0.29833335, "v": 0.9342857, "inTangent": 2.2645168e-07, "outTangent": 2.2645168e-07 },
+        { "t": 0.35666665, "v": 0.82, "inTangent": -3.40316, "outTangent": -3.40316 },
+        { "t": 0.435, "v": 0.3857143, "inTangent": -3.8086967, "outTangent": -3.8086967 },
+        { "t": 0.49, "v": 0.22, "inTangent": -0.17406791, "outTangent": -0.17406791 },
+        { "t": 0.5366667, "v": 0.2942857, "inTangent": 4.9517527, "outTangent": 4.9517527 },
+        { "t": 0.645, "v": 0.9057143, "inTangent": 2.4615383, "outTangent": 2.4615383 },
+        { "t": 0.7133333, "v": 0.9685714, "inTangent": -0.20449758, "outTangent": -0.20449758 },
+        { "t": 0.765, "v": 0.8657143, "inTangent": -3.40316, "outTangent": -3.40316 },
+        { "t": 0.88, "v": 0.24857143, "inTangent": -3.40316, "outTangent": -3.40316 },
+        { "t": 1, "v": 0, "inTangent": -0.1863354, "outTangent": -0.1863354 }
+      ]
+    },
+    {
+      "name": "curve_2",
+      "keys": [
+        { "t": 0, "v": 0, "inTangent": 0.47619048, "outTangent": 0.47619048 },
+        { "t": 0.12166667, "v": 0.27714285, "inTangent": 4.0714283, "outTangent": 4.0714283 },
+        { "t": 0.225, "v": 0.80857146, "inTangent": 2.8051949, "outTangent": 2.8051949 },
+        { "t": 0.29833335, "v": 0.9342857, "inTangent": 2.2645168e-07, "outTangent": 2.2645168e-07 },
+        { "t": 0.35666665, "v": 0.82, "inTangent": -3.40316, "outTangent": -3.40316 },
+        { "t": 0.435, "v": 0.3857143, "inTangent": -3.8086967, "outTangent": -3.8086967 },
+        { "t": 0.49, "v": 0.22, "inTangent": -0.17406791, "outTangent": -0.17406791 },
+        { "t": 0.5366667, "v": 0.2942857, "inTangent": 4.9517527, "outTangent": 4.9517527 },
+        { "t": 0.645, "v": 0.9057143, "inTangent": 2.4615383, "outTangent": 2.4615383 },
+        { "t": 0.7133333, "v": 0.9685714, "inTangent": -0.20449758, "outTangent": -0.20449758 },
+        { "t": 0.765, "v": 0.8657143, "inTangent": -3.40316, "outTangent": -3.40316 },
+        { "t": 0.88, "v": 0.24857143, "inTangent": -3.40316, "outTangent": -3.40316 },
+        { "t": 1, "v": 0, "inTangent": -0.1863354, "outTangent": -0.1863354 }
+      ]
+    },
+    {
+      "name": "cmd_pc_v5e0imu2",
+      "keys": [
+        { "t": 0, "v": 0, "inTangent": -0.10942249, "outTangent": -0.10942249 },
+        { "t": 0.16166666, "v": 0.065714285, "inTangent": 1, "outTangent": 1 },
+        { "t": 0.79833335, "v": 0.91714287, "inTangent": 1, "outTangent": 1 },
+        { "t": 1, "v": 1, "inTangent": -0.031168832, "outTangent": -0.031168832 }
+      ]
+    }
+  ]
+}

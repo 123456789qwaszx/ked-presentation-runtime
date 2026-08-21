@@ -80,7 +80,8 @@ public sealed class SetupCharRigCommand : CommandBase
         Material sourceMaterial = Resources.Load<Material>(VisualEffectMaterialPath);
         refs.VisualEffect = new RigVisualEffectController(
             refs.CharacterPortraitSprite_Image,
-            sourceMaterial);
+            sourceMaterial,
+            refs.CharacterPortraitSpriteOverlay_Image);
 
         scope.CharacterRigs.Register(rigKey, refs);
 
