@@ -8,8 +8,6 @@ public sealed partial class YarnCommandBridge
     
     private const string DefaultNudgeDurationToken = "8fr";
     
-    private const string DefaultMoveOneUnitPerFrameToken = "1fr";
-    
     #region Show
     private void EnqueueShowAtSpec(
         string roleKey,
@@ -59,92 +57,57 @@ public sealed partial class YarnCommandBridge
         float ySign,
         string unitToken,
         string durationToken,
+        string easeToken,
         CharacterRigTarget target)
     {
         float pixels = YarnUnitParser.Parse(unitToken);
         float duration = YarnDurationParser.Parse(durationToken);
 
-        var spec = new MoveByCommandSpecCharR
+        // 미지정이면 종전 하드코딩 값과 같은 OutCubic이다 — 기존 대본 불변.
+        EaseSelection ease = ResolveEase(easeToken);
+
+        Collect(new MoveByCommandSpecCharR
         {
             slotKey = roleKey,
             target = target,
             useAbsolutePosition = false,
             delta = new Vector2(pixels * xSign, pixels * ySign),
             duration = duration,
-            ease = Ease.OutCubic
-        };
-
-        Collect(spec);
+            ease = ease.Ease,
+            customCurveKeys = ease.CurveKeys
+        });
     }
+    
     
     private void EnqueueNudgeLeftSpec(
-        string roleKey, 
-        string unitToken, 
-        string durationToken = DefaultNudgeDurationToken)
-        => EnqueueDirectionalNudgeSpec(roleKey, -1f, 0f, unitToken, durationToken, CharacterRigTarget.CharSlot_Track_X);
+        string roleKey,
+        string unitToken,
+        string durationToken = DefaultNudgeDurationToken,
+        string easeToken = "")
+        => EnqueueDirectionalNudgeSpec(roleKey, -1f, 0f, unitToken, durationToken, easeToken, CharacterRigTarget.CharSlot_Track_X);
 
+    
     private void EnqueueNudgeRightSpec(
         string roleKey,
-        string unitToken, 
-        string durationToken = DefaultNudgeDurationToken)
-        => EnqueueDirectionalNudgeSpec(roleKey, 1f, 0f, unitToken, durationToken, CharacterRigTarget.CharSlot_Track_X);
+        string unitToken,
+        string durationToken = DefaultNudgeDurationToken,
+        string easeToken = "")
+        => EnqueueDirectionalNudgeSpec(roleKey, 1f, 0f, unitToken, durationToken, easeToken, CharacterRigTarget.CharSlot_Track_X);
 
+    
     private void EnqueueNudgeUpSpec(
-        string roleKey, 
-        string unitToken, 
-        string durationToken = DefaultNudgeDurationToken)
-        => EnqueueDirectionalNudgeSpec(roleKey, 0f, 1f, unitToken, durationToken, CharacterRigTarget.CharSlot_Track_Y);
+        string roleKey,
+        string unitToken,
+        string durationToken = DefaultNudgeDurationToken,
+        string easeToken = "")
+        => EnqueueDirectionalNudgeSpec(roleKey, 0f, 1f, unitToken, durationToken, easeToken, CharacterRigTarget.CharSlot_Track_Y);
 
+    
     private void EnqueueNudgeDownSpec(
-        string roleKey, 
-        string unitToken, string durationToken = DefaultNudgeDurationToken)
-        => EnqueueDirectionalNudgeSpec(roleKey, 0f, -1f, unitToken, durationToken, CharacterRigTarget.CharSlot_Track_Y);
-    #endregion
-    
-    #region MoveOneUnitPerFrame
-    private void EnqueueDirectionalMoveOneUnitPerFrameSpec(
         string roleKey,
-        float xSign,
-        float ySign,
-        string frameToken,
-        CharacterRigTarget target)
-    {
-        float frames = YarnDurationParser.ParseFrames(frameToken, 8f);
-
-        float pixels = YarnUnitParser.Parse("1u") * frames;
-        float duration = YarnDurationParser.FramesToSeconds(frames);
-
-        var spec = new MoveByCommandSpecCharR
-        {
-            slotKey = roleKey,
-            target = target,
-            useAbsolutePosition = false,
-            delta = new Vector2(pixels * xSign, pixels * ySign),
-            duration = duration,
-            ease = Ease.Linear
-        };
-
-        Collect(spec);
-    }
-    
-    private void EnqueueMoveLeftOneUnitPerFrameSpec(
-        string roleKey,
-        string frameToken = DefaultMoveOneUnitPerFrameToken)
-        => EnqueueDirectionalMoveOneUnitPerFrameSpec(roleKey, -1f, 0f, frameToken, CharacterRigTarget.CharSlot_Track_X);
-
-    private void EnqueueMoveRightOneUnitPerFrameSpec(
-        string roleKey, 
-        string frameToken = DefaultMoveOneUnitPerFrameToken)
-        => EnqueueDirectionalMoveOneUnitPerFrameSpec(roleKey, 1f, 0f, frameToken, CharacterRigTarget.CharSlot_Track_X);
-
-    private void EnqueueMoveUpOneUnitPerFrameSpec(
-        string roleKey,
-        string frameToken = DefaultMoveOneUnitPerFrameToken)
-        => EnqueueDirectionalMoveOneUnitPerFrameSpec(roleKey, 0f, 1f, frameToken, CharacterRigTarget.CharSlot_Track_Y);
-
-    private void EnqueueMoveDownOneUnitPerFrameSpec(
-        string roleKey, 
-        string frameToken = DefaultMoveOneUnitPerFrameToken)
-        => EnqueueDirectionalMoveOneUnitPerFrameSpec(roleKey, 0f, -1f, frameToken, CharacterRigTarget.CharSlot_Track_Y);
+        string unitToken,
+        string durationToken = DefaultNudgeDurationToken,
+        string easeToken = "")
+        => EnqueueDirectionalNudgeSpec(roleKey, 0f, -1f, unitToken, durationToken, easeToken, CharacterRigTarget.CharSlot_Track_Y);
     #endregion
 }

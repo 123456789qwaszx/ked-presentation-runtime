@@ -166,31 +166,17 @@ public sealed partial class YarnCommandBridge
             "show", EnqueueShowAtSpec);
         
         // Nudge
-        runner.AddCommandHandler<string, string, string>(
+        runner.AddCommandHandler<string, string, string, string>(
             "left", EnqueueNudgeLeftSpec);
 
-        runner.AddCommandHandler<string, string, string>(
+        runner.AddCommandHandler<string, string, string, string>(
             "right", EnqueueNudgeRightSpec);
 
-        runner.AddCommandHandler<string, string, string>(
+        runner.AddCommandHandler<string, string, string, string>(
             "up", EnqueueNudgeUpSpec);
 
-        runner.AddCommandHandler<string, string, string>(
-            "down", EnqueueNudgeDownSpec);
-        
-        // MoveOneUnitPerFrame
-        runner.AddCommandHandler<string, string>(
-            "left_per", EnqueueMoveLeftOneUnitPerFrameSpec);
-
-        runner.AddCommandHandler<string, string>(
-            "right_per", EnqueueMoveRightOneUnitPerFrameSpec);
-
-        runner.AddCommandHandler<string, string>(
-            "up_per", EnqueueMoveUpOneUnitPerFrameSpec);
-
-        runner.AddCommandHandler<string, string>(
-            "down_per", EnqueueMoveDownOneUnitPerFrameSpec);
-    }
+        runner.AddCommandHandler<string, string, string, string>(
+            "down", EnqueueNudgeDownSpec);    }
     
     private void RegisterCharFocusPlacementCommands(DialogueRunner runner)
     {
