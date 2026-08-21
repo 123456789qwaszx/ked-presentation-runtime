@@ -109,11 +109,17 @@ public sealed partial class YarnCommandBridge
     {
         runner.AddCommandHandler<string, string, string, string, string>(
             "move_by", EnqueueSetAnchorOffsetSpecs);
+        runner.AddCommandHandler<string, float, string, string>(
+            "rotate_by", EnqueueRotateBySpec);
+
         runner.AddCommandHandler<string, float, string>(
             "scale_by", EnqueueSizeBySpec);
 
         runner.AddCommandHandler<string, string>(
             "move_reset", EnqueueSetPlaceResetSpecs);
+        runner.AddCommandHandler<string, string, string>(
+            "rotate_reset", EnqueueRotateResetSpec);
+
         runner.AddCommandHandler<string, string>(
             "scale_reset", EnqueueSizeResetSpec);
         
@@ -189,46 +195,46 @@ public sealed partial class YarnCommandBridge
     private void RegisterCharFocusPlacementCommands(DialogueRunner runner)
     {
         // Char focus placement
-        runner.AddCommandHandler<string, string, string, string>(
+        runner.AddCommandHandler<string, string, string, string, string>(
             "place", EnqueuePlaceCharacterFocusSpec);
         
-        runner.AddCommandHandler<string, string, string>(
+        runner.AddCommandHandler<string, string, string, string>(
             "place_left", EnqueueFocusToLeftSpec);
 
-        runner.AddCommandHandler<string, string, string>(
+        runner.AddCommandHandler<string, string, string, string>(
             "place_center", EnqueueFocusToCenterSpec);
 
-        runner.AddCommandHandler<string, string, string>(
+        runner.AddCommandHandler<string, string, string, string>(
             "place_right", EnqueueFocusToRightSpec);
 
-        runner.AddCommandHandler<string, string, string>(
+        runner.AddCommandHandler<string, string, string, string>(
             "place_tl", EnqueueFocusToTopLeftSpec);
 
-        runner.AddCommandHandler<string, string, string>(
+        runner.AddCommandHandler<string, string, string, string>(
             "place_top", EnqueueFocusToTopSpec);
 
-        runner.AddCommandHandler<string, string, string>(
+        runner.AddCommandHandler<string, string, string, string>(
             "place_tr", EnqueueFocusToTopRightSpec);
 
-        runner.AddCommandHandler<string, string, string>(
+        runner.AddCommandHandler<string, string, string, string>(
             "place_bl", EnqueueFocusToBottomLeftSpec);
 
-        runner.AddCommandHandler<string, string, string>(
+        runner.AddCommandHandler<string, string, string, string>(
             "place_bottom", EnqueueFocusToBottomSpec);
 
-        runner.AddCommandHandler<string, string, string>(
+        runner.AddCommandHandler<string, string, string, string>(
             "place_br", EnqueueFocusToBottomRightSpec);
 
-        runner.AddCommandHandler<string, string, string>(
+        runner.AddCommandHandler<string, string, string, string>(
             "place_inner_tl", EnqueueFocusToInnerTopLeftSpec);
 
-        runner.AddCommandHandler<string, string, string>(
+        runner.AddCommandHandler<string, string, string, string>(
             "place_inner_tr", EnqueueFocusToInnerTopRightSpec);
 
-        runner.AddCommandHandler<string, string, string>(
+        runner.AddCommandHandler<string, string, string, string>(
             "place_inner_bl", EnqueueFocusToInnerBottomLeftSpec);
 
-        runner.AddCommandHandler<string, string, string>(
+        runner.AddCommandHandler<string, string, string, string>(
             "place_inner_br", EnqueueFocusToInnerBottomRightSpec);
         
         // Char focus depth
@@ -236,25 +242,25 @@ public sealed partial class YarnCommandBridge
         // <<at c1 close bust 12fr>>
         // <<at c1 front>>
         // <<at c1 7 face 8fr>>
-        runner.AddCommandHandler<string, string, string, string>(
+        runner.AddCommandHandler<string, string, string, string, string>(
             "size", EnqueueDepthAtPresetSpec);
 
-        runner.AddCommandHandler<string, string, string>(
+        runner.AddCommandHandler<string, string, string, string>(
             "size_far", EnqueueDepthAtFarSpec);
         
-        runner.AddCommandHandler<string, string, string>(
+        runner.AddCommandHandler<string, string, string, string>(
             "size_back", EnqueueDepthAtBackSpec);
         
-        runner.AddCommandHandler<string, string, string>(
+        runner.AddCommandHandler<string, string, string, string>(
             "size_mid", EnqueueDepthAtMidSpec);
 
-        runner.AddCommandHandler<string, string, string>(
+        runner.AddCommandHandler<string, string, string, string>(
             "size_front", EnqueueDepthAtFrontSpec);
         
-        runner.AddCommandHandler<string, string, string>(
+        runner.AddCommandHandler<string, string, string, string>(
             "size_close", EnqueueDepthAtCloseSpec);
         
-        runner.AddCommandHandler<string, float>(
+        runner.AddCommandHandler<string, float, string>(
             "size_reset", EnqueueDepthResetSpec);
     }
     
@@ -277,6 +283,9 @@ public sealed partial class YarnCommandBridge
         
         runner.AddCommandHandler<string, float, string>(
             "char_scale_to", EnqueueScaleSpec);
+
+        runner.AddCommandHandler<string, float, string, string>(
+            "char_rotate_to", EnqueuePortraitRotateToSpec);
     }
     
     private void BindCharRigComposition(DialogueRunner runner)

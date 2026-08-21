@@ -1,3 +1,4 @@
+using DG.Tweening;
 using UnityEngine;
 
 public sealed partial class YarnCommandBridge
@@ -103,46 +104,116 @@ public sealed partial class YarnCommandBridge
         string durationToken = "0.4s",
         string easeToken = "")
     {
-        var spec = new MoveByCommandSpecCharR
+        EaseSelection ease = ResolveEase(easeToken);
+
+        Collect(new MoveByCommandSpecCharR
         {
             slotKey = slotKey,
             target = CharacterRigTarget.CharSlot_Track,
             useAbsolutePosition = false,
             delta = new Vector2(ParseSignedUnit(xToken), ParseSignedUnit(yToken)),
-            duration = YarnDurationParser.Parse(durationToken)
-        };
-
-        ApplyEaseToken(spec, easeToken);
-        Collect(spec);
+            duration = YarnDurationParser.Parse(durationToken),
+            ease = ease.Ease,
+            customCurveKeys = ease.CurveKeys
+        });
     }
 
     /// <summary>
-    /// 다섯째 토큰의 두 갈래: "@이름" = curves.json의 커스텀 곡선,
+    /// 이징 토큰의 두 갈래: "@이름" = curves.json의 커스텀 곡선,
     /// 그 외 = EaseKind 이름. 미지정("")·실패는 스펙 기본값 OutCubic —
-    /// 기존 4-인자 대본의 재생 결과 불변.
+    /// 기존 대본은 인자가 없으므로 재생 결과가 그대로다.
+    /// move_by·place 계열·size 계열·rotate 계열이 이 한 자리를 함께 쓴다.
     /// </summary>
-    private void ApplyEaseToken(MoveByCommandSpecCharR spec, string easeToken)
+    private EaseSelection ResolveEase(string easeToken, Ease fallback = Ease.OutCubic)
     {
         if (!string.IsNullOrWhiteSpace(easeToken) && easeToken[0] == '@')
         {
             string curveName = easeToken.Substring(1);
 
             if (_easeCurves.TryGet(curveName, out Ked.Presentation.Core.CurveKey[] keys))
-            {
-                spec.customCurveKeys = keys;
-                return;
-            }
+                return new EaseSelection(fallback, keys);
 
             // 침묵 금지 — 1차 방어는 VnTool 저작 검증이고, 여기서는 소리 내고 굴러간다.
             Debug.LogError(
                 $"[YarnCommandBridge] Unknown ease curve '{easeToken}' — " +
-                $"{EaseCurveLibrary.BundleFileName}에 없다. Fallback to {spec.ease}.");
-            return;
+                $"{EaseCurveLibrary.BundleFileName}에 없다. Fallback to {fallback}.");
+
+            return new EaseSelection(fallback);
         }
 
-        spec.ease = YarnEaseParser.Parse(easeToken);
+        return new EaseSelection(YarnEaseParser.Parse(easeToken, fallback));
     }
 
+
+    // ── 회전 (3a75d4f6에서 지운 것을 되살린 자리) ──────────────────
+    // 표적은 CharSlot_SwayPivot이다 — 코어 리듀서(ApplyRotateBy/ApplyRotateReset)가
+    // 접는 노드와 같아야 "재생 = 정지 프레임"이 유지된다.
+
+    private void EnqueueRotateBySpec(
+        string roleKey,
+        float degree,
+        string durationToken = "0.4s",
+        string easeToken = "")
+    {
+        EaseSelection ease = ResolveEase(easeToken);
+
+        Collect(new RotateToCommandSpecCharR
+        {
+            slotKey = roleKey,
+            target = CharacterRigTarget.CharSlot_SwayPivot,
+
+            toEuler = new Vector3(0f, 0f, degree),
+            relativeToCurrent = true,
+
+            duration = YarnDurationParser.Parse(durationToken),
+            ease = ease.Ease,
+            customCurveKeys = ease.CurveKeys
+        });
+    }
+
+    private void EnqueueRotateResetSpec(
+        string roleKey,
+        string durationToken = "0.4s",
+        string easeToken = "")
+    {
+        EaseSelection ease = ResolveEase(easeToken);
+
+        Collect(new RotateToCommandSpecCharR
+        {
+            slotKey = roleKey,
+            target = CharacterRigTarget.CharSlot_SwayPivot,
+
+            toEuler = Vector3.zero,
+
+            duration = YarnDurationParser.Parse(durationToken),
+            ease = ease.Ease,
+            customCurveKeys = ease.CurveKeys
+        });
+    }
+
+    // 초상 축의 절대 회전. 종전 char_rotate_to는 다단 연출(PivotRotateTo)이었고
+    // 그 커맨드는 되살리지 않았다 — 여기서는 RotateTo의 절대 모드로 선다.
+    private void EnqueuePortraitRotateToSpec(
+        string roleKey,
+        float degree,
+        string durationToken = "10fr",
+        string easeToken = "")
+    {
+        EaseSelection ease = ResolveEase(easeToken);
+
+        Collect(new RotateToCommandSpecCharR
+        {
+            slotKey = roleKey,
+            target = CharacterRigTarget.CharacterPortrait_SwayPivot,
+
+            toEuler = new Vector3(0f, 0f, degree),
+            relativeToCurrent = false,
+
+            duration = YarnDurationParser.Parse(durationToken),
+            ease = ease.Ease,
+            customCurveKeys = ease.CurveKeys
+        });
+    }
     private void EnqueueSizeBySpec(string roleKey, float multiplier, string durationToken = "0.4s")
         => Collect(new ScaleToCommandSpecCharR
         {

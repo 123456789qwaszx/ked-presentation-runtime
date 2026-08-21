@@ -72,19 +72,10 @@ public sealed class MoveByCommandCharR : ClaimTweenCommandBase
     }
 
     protected override Tween CreateTween(float duration)
-    {
-        Tween tween = _rect
+        => _rect
             .DOAnchorPos(_destPos, duration)
+            .ApplyEase(_spec.ease, _spec.customCurveKeys)
             .SetTarget(_rect);
-
-        // 커스텀 곡선은 DOTween 커스텀 이즈 델리게이트로 — 트윈 경로 구조 불변.
-        // 프리뷰(VnTool)와 같은 CurveFunctions.Evaluate가 모양의 정본이다.
-        if (_spec.customCurveKeys is { Length: > 0 })
-            return tween.SetEase((time, dur, _, _) =>
-                CurveFunctions.Evaluate(_spec.customCurveKeys, dur <= 0f ? 1f : time / dur));
-
-        return tween.SetEase(_spec.ease);
-    }
 
     protected override void OnCommitFinalState()
     {
