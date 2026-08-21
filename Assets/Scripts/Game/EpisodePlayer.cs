@@ -19,6 +19,7 @@ public sealed class EpisodePlayer
     private readonly PresentationStage _presentationStage;
     private readonly PresentationScopeSession _presentationScopeSession;
     private readonly YarnVariableCheckpoint _variableCheckpoint;
+    private readonly ChoiceHistory _choiceHistory;
 
     private string _sceneRootNodeName;
 
@@ -31,7 +32,8 @@ public sealed class EpisodePlayer
         PresentationShotResponseSystem presentationResponseRig,
         PresentationStage presentationStage,
         PresentationScopeSession presentationScopeSession,
-        YarnVariableCheckpoint variableCheckpoint)
+        YarnVariableCheckpoint variableCheckpoint,
+        ChoiceHistory choiceHistory)
     {
         _nodeRunner = nodeRunner;
         _vnScreenBindings = vnScreenBindings;
@@ -42,6 +44,7 @@ public sealed class EpisodePlayer
         _presentationStage = presentationStage;
         _presentationScopeSession = presentationScopeSession;
         _variableCheckpoint = variableCheckpoint;
+        _choiceHistory = choiceHistory;
     }
 
     // 새 장면 진입. 이 순간의 (시작에피소드와 variable변수)가 롤백 리플레이의 체크포인트가 된다.
@@ -51,6 +54,10 @@ public sealed class EpisodePlayer
 
         _sceneRootNodeName = nodeName;
         _variableCheckpoint.Capture();
+
+        // 선택지 기록은 장면 스코프. 따라서 여기서만 리셋.
+        // ReplayCurrentSceneAsync에서는 지우면 안 됨.
+        _choiceHistory.ClearChoiceRecords();
 
         await RunSceneAsync(nodeName);
     }

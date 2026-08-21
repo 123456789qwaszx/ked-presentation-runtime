@@ -331,7 +331,8 @@ public class VNAppBootstrap : MonoBehaviour
             _presentationResponseRig,
             _presentationStage,
             _presentationScopeSession,
-            new YarnVariableCheckpoint(dialogueRunner.VariableStorage));
+            new YarnVariableCheckpoint(dialogueRunner.VariableStorage),
+            _choiceHistory);
     }
 
     private void BootstrapPlaybackControls()

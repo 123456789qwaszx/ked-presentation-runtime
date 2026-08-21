@@ -110,7 +110,7 @@ public sealed class VNFeatureController
         _choiceHistory.RemoveChoiceAnchorAfterRollbackPoint(target);
 
         _rollbackController.ClearRollbackPoints();
-        _linePresentationAdvanceState.BeginRollbackSeek(target.nodeName, target.lineId);
+        _linePresentationAdvanceState.BeginRollbackSeek(target.nodeName, target.lineId, target.occurrence);
 
         DisablePlaybackModifiersForSeek();
 

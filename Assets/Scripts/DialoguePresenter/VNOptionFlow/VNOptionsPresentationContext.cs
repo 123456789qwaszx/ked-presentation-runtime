@@ -7,7 +7,7 @@ public sealed class VNOptionsPresentationContext
     public LineCancellationToken Token;
     public string NodeName;
 
-    public int ChoiceIndexInNode;
+    public int ChoiceSequence;
 
     public List<VNOptionViewModel> ViewModels;
     public IPresentationOptionsBoxView OptionsBoxView;

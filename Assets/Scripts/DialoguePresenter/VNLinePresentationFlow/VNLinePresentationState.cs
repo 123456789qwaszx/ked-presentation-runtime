@@ -6,12 +6,13 @@ public sealed class VNLinePresentationState : ISeekStateQuery
     
     public bool IsLineFullyShown { get; private set; } = true;
     
-    public void BeginRollbackSeek(string nodeName, string lineId) => BeginSeek(VNSeekKind.Rollback, nodeName, lineId);
+    public void BeginRollbackSeek(string nodeName, string lineId, int occurrence)
+        => BeginSeek(VNSeekKind.Rollback, nodeName, lineId, occurrence);
 
-    private void BeginSeek(VNSeekKind kind, string nodeName, string lineId)
+    private void BeginSeek(VNSeekKind kind, string nodeName, string lineId, int occurrence)
     {
         IsLineFullyShown = false;
-        _seekState.Begin(kind, nodeName, lineId);
+        _seekState.Begin(kind, nodeName, lineId, occurrence);
     }
 
     public bool IsSeekTargetLine(YarnLineMeta meta) => _seekState.IsCurrentTarget(meta);

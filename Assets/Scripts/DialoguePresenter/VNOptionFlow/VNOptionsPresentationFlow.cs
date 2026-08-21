@@ -31,14 +31,14 @@ public sealed class VNOptionsPresentationFlow
     public async YarnTask<VNOptionsPresentationBeginResult> BeginAsync(
         VNOptionsPresentationContext ctx)
     {
-        ctx.ChoiceIndexInNode = _choiceBoundary.ReserveChoiceIndex();
+        ctx.ChoiceSequence = _choiceBoundary.ReserveChoiceSequence();
 
         if (!ctx.HasAnyAvailableOption)
             return VNOptionsPresentationBeginResult.NoOption;
 
         if (_advanceState.IsSeekingActive) { 
             bool resolved = _choiceBoundary.TryResolveReplayOption(
-                ctx.ChoiceIndexInNode,
+                ctx.ChoiceSequence,
                 ctx.SourceOptions,
                 out DialogueOption replayOption);
 
@@ -53,7 +53,7 @@ public sealed class VNOptionsPresentationFlow
 
         ctx.ViewModels = BuildViewModels(
             ctx.SourceOptions,
-            ctx.ChoiceIndexInNode);
+            ctx.ChoiceSequence);
 
         if (ctx.ViewModels.Count == 0)
             return VNOptionsPresentationBeginResult.NoOption;
@@ -75,7 +75,7 @@ public sealed class VNOptionsPresentationFlow
     {
         _choiceBoundary.CommitSelection(
             ctx.NodeName,
-            selected.ChoiceIndexInNode,
+            selected.ChoiceSequence,
             selected.SourceOptionIndex,
             selected.SourceOption.Line.TextID);
 
@@ -117,7 +117,7 @@ public sealed class VNOptionsPresentationFlow
 
     private List<VNOptionViewModel> BuildViewModels(
         DialogueOption[] options,
-        int choiceIndexInNode)
+        int choiceSequence)
     {
         var result = new List<VNOptionViewModel>();
 
@@ -137,7 +137,7 @@ public sealed class VNOptionsPresentationFlow
             result.Add(BuildViewModel(
                 option,
                 sourceOptionIndex: i,
-                choiceIndexInNode: choiceIndexInNode));
+                choiceSequence: choiceSequence));
         }
 
         return result;
@@ -146,14 +146,14 @@ public sealed class VNOptionsPresentationFlow
     private VNOptionViewModel BuildViewModel(
         DialogueOption option,
         int sourceOptionIndex,
-        int choiceIndexInNode)
+        int choiceSequence)
     {
         string label = option.Line.TextWithoutCharacterName.Text;
 
         return new VNOptionViewModel(
             sourceOption: option,
             sourceOptionIndex: sourceOptionIndex,
-            choiceIndexInNode: choiceIndexInNode,
+            choiceSequence: choiceSequence,
             label: label,
             isAvailable: option.IsAvailable);
     }

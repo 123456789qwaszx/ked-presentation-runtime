@@ -13,20 +13,19 @@ public sealed class VNChoiceBoundary
         _rollbackController = rollbackController;
     }
 
-    // Reserves this option set's choice index within the node and advances the cursor.
-    // The index is stable across replay.
-    public int ReserveChoiceIndex()
+    // 이 선택지 묶음의 장면 내 순번을 예약하고 커서를 전진.
+    public int ReserveChoiceSequence()
     {
-        int choiceIndexInNode = _choiceHistory.NextChoiceIndex;
-        _choiceHistory.NextChoiceIndex++;
-        return choiceIndexInNode;
+        int choiceSequence = _choiceHistory.NextChoiceSequence;
+        _choiceHistory.NextChoiceSequence++;
+        return choiceSequence;
     }
 
-    public bool TryResolveReplayOption(int choiceIndexInNode, DialogueOption[] sourceOptions, out DialogueOption option)
+    public bool TryResolveReplayOption(int choiceSequence, DialogueOption[] sourceOptions, out DialogueOption option)
     {
         option = null;
 
-        if (!_choiceHistory.TryGetChoiceRecord(choiceIndexInNode, out VNChoiceRecord record))
+        if (!_choiceHistory.TryGetChoiceRecord(choiceSequence, out VNChoiceRecord record))
             return false;
 
         if (record.selectedOptionIndex < 0 || record.selectedOptionIndex >= sourceOptions.Length)
@@ -41,12 +40,12 @@ public sealed class VNChoiceBoundary
         return true;
     }
 
-    public void CommitSelection(string nodeName, int choiceIndexInNode, int selectedOptionIndex, string selectedOptionLineId)
+    public void CommitSelection(string nodeName, int choiceSequence, int selectedOptionIndex, string selectedOptionLineId)
     {
         _choiceHistory.AddChoiceRecord(
             _rollbackController.Points,
             nodeName,
-            choiceIndexInNode,
+            choiceSequence,
             selectedOptionIndex,
             selectedOptionLineId);
     }
