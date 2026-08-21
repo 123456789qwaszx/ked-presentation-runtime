@@ -55,6 +55,10 @@ public sealed class EpisodePlayer
         _sceneRootNodeName = nodeName;
         _variableCheckpoint.Capture();
 
+        // 백로그는 세션 스코프 — 새 판 시작인 여기서만 비운다. 장면 체이닝이 생기면
+        // "이어지는 장면 진입"은 비우지 않는 별도 경로로 갈라야 한다.
+        _backlogRecorder.ClearBacklog();
+
         // 선택지 기록은 장면 스코프. 따라서 여기서만 리셋.
         // ReplayCurrentSceneAsync에서는 지우면 안 됨.
         _choiceHistory.ClearChoiceRecords();
@@ -99,7 +103,6 @@ public sealed class EpisodePlayer
         _linePresentationAborter.AbortCurrentVNLine();
 
         _nodeRollbackHistory.ClearRollbackPoints();
-        _backlogRecorder.ClearBacklog();
 
         _shotResponseSystem.Clear();
         _presentationScopeSession.End();

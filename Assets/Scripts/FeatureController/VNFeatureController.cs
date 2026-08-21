@@ -109,6 +109,11 @@ public sealed class VNFeatureController
 
         _choiceHistory.RemoveChoiceAnchorAfterRollbackPoint(target);
 
+        // 백로그는 세션 연속 — 지우고 다시 쌓는 게 아니라 표적 뒤 꼬리만 걷는다.
+        // 리플레이 패스스루는 백로그를 다시 적지 않으므로(VNYarnLineBoundary)
+        // 표적까지의 기록이 그대로 남는다.
+        _backlogRecorder.TruncateFromEnd(_rollbackController.CountPointsAfter(target));
+
         _rollbackController.ClearRollbackPoints();
         _linePresentationAdvanceState.BeginRollbackSeek(target.nodeName, target.lineId, target.occurrence);
 

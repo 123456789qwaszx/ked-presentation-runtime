@@ -285,7 +285,8 @@ public class VNAppBootstrap : MonoBehaviour
         VNYarnLineBoundary vnYarnLineBoundary = new (
             _backlogRecorder,
             _rollbackHistory,
-            _vnRuntimeStateProvider);
+            _vnRuntimeStateProvider,
+            _linePresentationAdvanceState);
         
         LineHurrySpeedController lineHurrySpeed = new(ellipsisBreathTypewriter);
 

@@ -54,6 +54,23 @@ public sealed class RollbackHistory
             occurrence: occurrence));
     }
 
+    // 표적 뒤에 커밋된 라인 수 — 백로그 꼬리를 걷을 폭이다.
+    // historyIndex는 장면 안에서 단조증가하므로 비교만으로 충분하다.
+    public int CountPointsAfter(in RollbackPoint target)
+    {
+        int count = 0;
+
+        for (int i = _points.Count - 1; i >= 0; i--)
+        {
+            if (_points[i].historyIndex <= target.historyIndex)
+                break;
+
+            count++;
+        }
+
+        return count;
+    }
+
     public bool GetRollbackPoint(out RollbackPoint target)
     {
         target = default;
