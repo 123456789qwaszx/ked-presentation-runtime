@@ -43,15 +43,29 @@ namespace Ked.Presentation.Core.Tests
             },
         };
 
-        /// <summary>presets/depth.json의 실값.</summary>
-        private static DepthPresetSetDto DepthPresets() => new()
+        /// <summary>presets/depth.json의 level 커브 실값 — 깊이의 유일한 진실.</summary>
+        private static DepthLevelTuningDto DepthLevel() => new()
         {
-            far = new DepthPresetDto { depthY = F2(0f, 480f), depthScale = 1.00f, preserveFocusPreset = 0 },
-            back = new DepthPresetDto { depthY = F2(0f, 240f), depthScale = 1.14f, preserveFocusPreset = 20 },
-            mid = new DepthPresetDto { depthY = F2(0f, 0f), depthScale = 1.00f, preserveFocusPreset = 20 },
-            front = new DepthPresetDto { depthY = F2(0f, -320f), depthScale = 1.38f, preserveFocusPreset = 20 },
-            close = new DepthPresetDto { depthY = F2(0f, 440f), depthScale = 1.58f, preserveFocusPreset = 30 },
+            yCurve = Curve((0f, 120f, 0f, -56f), (20f, -1000f, -56f, 0f)),
+            scaleCurve = Curve(
+                (0f, 0.86f, 0f, 0.052f),
+                (10f, 1.38f, 0.052f, 0.082f),
+                (20f, 2.2f, 0.082f, 0f)),
         };
+
+        private static AnimationCurveDto Curve(
+            params (float time, float value, float inSlope, float outSlope)[] keys)
+        {
+            AnimationCurveDto dto = new();
+
+            foreach ((float time, float value, float inSlope, float outSlope) k in keys)
+                dto.m_Curve.Add(new KeyframeDto
+                {
+                    time = k.time, value = k.value, inSlope = k.inSlope, outSlope = k.outSlope,
+                });
+
+            return dto;
+        }
 
         // ── 합성 리그 (실제 부모 사슬) ───────────────────────────────
 
@@ -101,7 +115,7 @@ namespace Ked.Presentation.Core.Tests
                 ReferenceStageWidth = 1920f,
                 BaseResolution = new Vec2(1920f, 1080f),
                 RoleAnchors = new RoleAnchorTuningBodyDto(),
-                DepthPresets = DepthPresets(),
+                DepthLevel = DepthLevel(),
                 FocusTuning = FocusTuning(),
             };
         }
@@ -256,10 +270,13 @@ namespace Ked.Presentation.Core.Tests
 
         // ── size: 보존 ───────────────────────────────────────────────
 
-        [TestCase("size_back", 1.14f)]
-        [TestCase("size_front", 1.38f)]
-        [TestCase("size_close", 1.58f)]
-        [TestCase("size_far", 1.00f)]
+        // 라벨은 level 커브 위의 눈금이다(DepthLevelLabels):
+        // far=0 · back=10 · mid=14 · front=16 · close=20 (2026-08-21 소유자 상향).
+        // scale은 무릎(레벨 10) 아래 0.86+0.052L, 위 1.38+0.082(L-10).
+        [TestCase("size_back", 1.38f)]
+        [TestCase("size_front", 1.872f)]
+        [TestCase("size_close", 2.2f)]
+        [TestCase("size_far", 0.86f)]
         public void size는_배율을_적용하고_focus를_보존한다(string command, float expectedScale)
         {
             StageReducerTuning tuning = NewTuning();
@@ -310,27 +327,68 @@ namespace Ked.Presentation.Core.Tests
         }
 
         [Test]
-        public void size의_숫자_레벨은_커브_미지원으로_Unhandled다()
+        public void size의_숫자_레벨이_커브로_접힌다()
         {
             // 실제 원문이 쓴다: <<size c1 5>>, <<size @4 14 bust>>, <<size 22 face>>
+            // 무릎(레벨 10) 위쪽도 거부하지 않는다 — 위 구간 기울기 0.082로 선다.
             StageState state = Fold(NewTuning(), Cmd("slot", "c1"), Cmd("size", "c1", "14", "bust"));
 
-            Assert.That(state.Unhandled.Count, Is.EqualTo(1));
-            Assert.That(state.Unhandled[0].Reason, Does.Contain("커브 폴드 미지원"));
+            Assert.That(state.Unhandled.Count, Is.EqualTo(0));
+            Assert.That(state.Nodes.GetState("c1/CharSlot_DepthScale").LocalScale.XY.X,
+                Is.EqualTo(1.38f + 0.082f * 4f).Within(1e-3f));
+        }
 
-            // 실패한 커맨드는 상태를 바꾸지 않는다.
-            Assert.That(state.Nodes.GetState("c1/CharSlot_DepthScale").LocalScale.XY, Is.EqualTo(Vec2.One));
+        [Test]
+        public void close_위의_무릎이_라벨_구간을_건드리지_않는다()
+        {
+            // scale 커브는 레벨 10에 무릎이 있다 — 그 위로 더 가파르다(0.052 → 0.082).
+            // 2026-08-21 상향으로 back(10)이 무릎에 서고 mid·front·close는 무릎 위에 산다.
+            StageReducerTuning tuning = NewTuning();
+
+            foreach ((string command, float expected) in new[]
+                     {
+                         ("size_far", 0.86f), ("size_back", 1.38f),
+                         ("size_mid", 1.708f), ("size_front", 1.872f), ("size_close", 2.2f),
+                     })
+            {
+                StageState state = Fold(tuning, Cmd("slot", "c1"), Cmd(command, "c1", "bust"));
+
+                Assert.That(state.Nodes.GetState("c1/CharSlot_DepthScale").LocalScale.XY.X,
+                    Is.EqualTo(expected).Within(1e-3f), command);
+            }
+
+            // 무릎 위: 상한 20이 2.2다(직선 연장이면 1.9였을 자리).
+            StageState top = Fold(tuning, Cmd("slot", "c1"), Cmd("size", "c1", "20", "bust"));
+
+            Assert.That(top.Nodes.GetState("c1/CharSlot_DepthScale").LocalScale.XY.X,
+                Is.EqualTo(2.2f).Within(1e-3f));
+        }
+
+        [Test]
+        public void 라벨과_같은_레벨의_숫자는_같은_값으로_접힌다()
+        {
+            // 라벨은 커브 위의 눈금일 뿐이다 — size_front와 size 16은 같은 자리다.
+            StageReducerTuning tuning = NewTuning();
+
+            StageState byLabel = Fold(tuning, Cmd("slot", "c1"), Cmd("size_front", "c1", "bust"));
+            StageState byNumber = Fold(tuning, Cmd("slot", "c1"), Cmd("size", "c1", "16", "bust"));
+
+            Assert.That(byNumber.Nodes.GetState("c1/CharSlot_DepthScale").LocalScale.XY.X,
+                Is.EqualTo(byLabel.Nodes.GetState("c1/CharSlot_DepthScale").LocalScale.XY.X).Within(1e-4f));
+
+            Assert.That(byNumber.Nodes.GetState("c1/CharSlot_DepthY").AnchoredPosition.Y,
+                Is.EqualTo(byLabel.Nodes.GetState("c1/CharSlot_DepthY").AnchoredPosition.Y).Within(1e-3f));
         }
 
         [Test]
         public void depth_튜닝이_없으면_size가_소리를_낸다()
         {
             StageReducerTuning tuning = NewTuning();
-            tuning.DepthPresets = null;
+            tuning.DepthLevel = null;
 
             StageState state = Fold(tuning, Cmd("slot", "c1"), Cmd("size_close", "c1"));
 
-            Assert.That(state.Unhandled.Any(u => u.Reason.Contains("depth 프리셋")), Is.True);
+            Assert.That(state.Unhandled.Any(u => u.Reason.Contains("커브")), Is.True);
         }
 
         // ── shot_focus_to ────────────────────────────────────────────

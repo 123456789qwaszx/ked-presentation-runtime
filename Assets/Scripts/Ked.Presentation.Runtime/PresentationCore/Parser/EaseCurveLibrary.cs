@@ -23,7 +23,10 @@ using UnityEngine;
 // }
 //
 // 검증(어긋난 커브는 로그 + 무시 — 조용히 빠뜨리지 않는다):
-// 이름 [a-z0-9_]+ · 키 2개 이상 · t 오름차순 · 첫 키 t=0 · 마지막 키 t=1.
+// 이름 [a-z0-9_]+ · 키 2개 이상 · t 오름차순 · 첫 키 (t,v)=(0,0) · 마지막 키 (t,v)=(1,1).
+//
+// 끝값을 못 박는 이유: 곡선은 "경로의 모양"만 정하고 종점은 언제나 명목 목표값이다
+// (호스트 커밋이 명목값을 쓴다). 중간이 1을 넘는 오버슛은 정상 — OutBack이 그렇게 논다.
 // ─────────────────────────────────────────────────────────────────────────────
 public sealed class EaseCurveLibrary
 {
@@ -31,6 +34,9 @@ public sealed class EaseCurveLibrary
     private const string ExpectedSchema = "ease-curves/1";
 
     private static readonly Regex NameRule = new("^[a-z0-9_]+$", RegexOptions.Compiled);
+
+    /// <summary>끝값 판정 허용 오차. JSON 왕복의 부동소수 잡음만 흡수한다.</summary>
+    private const float EndpointTolerance = 1e-4f;
 
     private readonly Dictionary<string, CurveKey[]> _curves;
 
@@ -125,6 +131,28 @@ public sealed class EaseCurveLibrary
         if (curve.keys[curve.keys.Count - 1].t != 1f)
         {
             Warn(sourceLabel, name, $"마지막 키 t가 1이 아니다 ({curve.keys[curve.keys.Count - 1].t})");
+            return false;
+        }
+
+        // ── 끝값 규약 ────────────────────────────────────────────────
+        // 곡선은 "경로의 모양"만 정한다. 종점은 언제나 명목 목표값이다 —
+        // 호스트 커밋(OnCommitFinalState)이 명목값을 쓰기 때문이다.
+        // 그래서 v가 0이 아닌 데서 시작하거나 1이 아닌 데서 끝나는 곡선은
+        // 재생에서 양 끝 한 프레임이 튀고, 툴 프리뷰와도 어긋난다.
+        // (중간이 1을 넘는 것은 정상이다 — OutBack·OutElastic이 그렇게 논다.
+        //  "1.2배 지점에 착지"는 곡선이 아니라 delta를 1.2배로 쓸 일이다.)
+        if (Math.Abs(curve.keys[0].v) > EndpointTolerance)
+        {
+            Warn(sourceLabel, name,
+                $"첫 키 v가 0이 아니다 ({curve.keys[0].v}) — 곡선은 모양만 정한다");
+            return false;
+        }
+
+        if (Math.Abs(curve.keys[curve.keys.Count - 1].v - 1f) > EndpointTolerance)
+        {
+            Warn(sourceLabel, name,
+                $"마지막 키 v가 1이 아니다 ({curve.keys[curve.keys.Count - 1].v}) — " +
+                "종점은 명목 목표값이다. 더 멀리 보내려면 delta를 키워라");
             return false;
         }
 

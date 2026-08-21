@@ -96,7 +96,9 @@ public struct CharacterDepthTuningSet
     };
 }
 
-// 연속 numeric level(0~10 커브) 입력 모델. preset과 동일한 CharacterDepthPresetValue를 산출.
+// 연속 numeric level(설계 구간 [0,20] 커브) 입력 모델. 라벨(far·mid…)도 이 커브 위의
+// 눈금이므로(코어 DepthLevelLabels) 모든 depth가 이 한 장을 지난다.
+// 구간 밖 수치도 받는다 — 끝 두 키의 할선으로 외삽한다.
 [Serializable]
 public struct CharacterDepthLevelTuningSet
 {
@@ -146,8 +148,15 @@ public struct CharacterDepthLevelTuningSet
 
     public static CharacterDepthLevelTuningSet Default => new()
     {
-        yCurve = AnimationCurve.Linear(0f, 120f, 10f, -440f),
-        scaleCurve = AnimationCurve.Linear(0f, 0.86f, 10f, 1.38f),
+        // 설계 구간은 [0,20]이다.
+        // y는 종전 기울기 그대로 직선(-56/레벨).
+        // scale은 close(레벨 10)에 무릎이 있다: 0~10은 종전 기울기(+0.052/레벨)라
+        // 라벨 값이 그대로고, 10~20은 더 가파르다(+0.082/레벨 → 상한 2.2).
+        yCurve = AnimationCurve.Linear(0f, 120f, 20f, -1000f),
+        scaleCurve = new AnimationCurve(
+            new Keyframe(0f, 0.86f, 0f, 0.052f),
+            new Keyframe(10f, 1.38f, 0.052f, 0.082f),
+            new Keyframe(20f, 2.2f, 0.082f, 0f)),
 
         farPreserveFocus = CharacterFocusPreset.Feet,
         midPreserveFocus = CharacterFocusPreset.Bust,
@@ -199,15 +208,25 @@ public struct CharacterDepthLevelTuningSet
 [CreateAssetMenu(menuName = "CPS/CharRig/Tuning/Character Depth Tuning", fileName = "CharacterDepthTuning")]
 public sealed class CharacterDepthTuningSO : ScriptableObject
 {
-    [Header("Preset")]
+    [Header("Preset (사장 데이터 — 읽지 않는다)")]
+    [Tooltip(
+        "라벨이 level 커브의 눈금이 된 뒤로 이 표는 읽지 않는다. 에셋 호환을 위해 필드만 남겼다. " +
+        "깊이 값을 바꾸려면 아래 Numeric Level 커브를 고쳐라.")]
     public CharacterDepthTuningSet presets = CharacterDepthTuningSet.Default;
 
     [Header("Numeric Level")]
     public CharacterDepthLevelTuningSet level = CharacterDepthLevelTuningSet.Default;
 
+    /// <summary>
+    /// 라벨(far·mid…)은 독립 프리셋이 아니라 level 커브 위의 눈금이다 —
+    /// 코어 DepthLevelLabels가 그 눈금표이고, 재생·폴드·툴 프리뷰가 같은 커브를 지난다.
+    /// (presets 표는 더 이상 읽지 않는다. 필드 주석 참조.)
+    /// </summary>
     public CharacterDepthPresetValue ResolvePreset(CharacterDepthKey preset)
     {
-        return presets.Get(preset);
+        Ked.Presentation.Core.DepthLevelLabels.TryGetLevel(preset.ToString(), out float levelValue);
+
+        return ResolveLevel(levelValue);
     }
 
     public CharacterDepthPresetValue ResolveLevel(float levelValue)

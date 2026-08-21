@@ -167,6 +167,7 @@ public sealed class StageEquivalenceHarness : MonoBehaviour
                 baseResolution.referenceResolution.y),
             RoleAnchors = roleAnchors?.MonoBehaviour,
             DepthPresets = depthTuning?.MonoBehaviour?.presets,
+            DepthLevel = depthTuning?.MonoBehaviour?.level,
             FocusTuning = focusTuning?.MonoBehaviour,
             PortraitDimensions = LoadPortraitDimensions(tuningDir),
         };
