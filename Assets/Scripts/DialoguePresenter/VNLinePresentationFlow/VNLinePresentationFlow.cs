@@ -73,9 +73,8 @@ public sealed class VNLinePresentationFlow
             ctx.ShouldUseImmediateTransition);
 
         // Phase: BoxTransitioning -> BoxReady
-        ctx.BoxResult = 
-            await _boxPresentation.ShowLineAsync(boxCtx);
-        
+        await _boxPresentation.ShowLineAsync(boxCtx);
+
         SetPhase(ctx, VNLinePresentationPhase.DialogueSurfaceResolved);
 
         if (!ctx.Run.IsValid) {
@@ -84,7 +83,7 @@ public sealed class VNLinePresentationFlow
         }
 
         // Phase: TypewriterReady
-        ctx.LineText = ctx.BoxResult.NextBox.GetLineText();
+        ctx.LineText = _boxPresentation.LineTextTarget;
         _typewriter.SetTextView(ctx.LineText);
 
         ctx.Text = ctx.Line.TextWithoutCharacterName;
@@ -140,7 +139,7 @@ public sealed class VNLinePresentationFlow
     {
         SetPhase(ctx, VNLinePresentationPhase.Stale);
 
-        _boxPresentation.CleanupStale(ctx.BoxResult);
+        _boxPresentation.CleanupStale();
         _advanceState.MarkLineTornDown(ctx.Meta, "StaleAfterBox");
 
         SetPhase(ctx, VNLinePresentationPhase.WaitingForAdvance);

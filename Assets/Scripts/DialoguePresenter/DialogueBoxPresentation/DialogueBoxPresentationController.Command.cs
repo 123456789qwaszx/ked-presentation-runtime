@@ -35,54 +35,25 @@ public partial class DialogueBoxPresentationController
         _surfaceState.Reset();
     }
 
-    public void ApplyCurrentSurfaceLayoutToCommittedBox()
-    {
-        if (_boxState.Box == null)
-            return;
-
-        ApplySurfaceLayoutFor(
-            _boxState.Box,
-            _boxState.BoxKind ?? DefaultLineBoxKind);
-    }
-
     public async YarnTask HideCurrentAsync()
     {
         VisibilityTransitionRun visibilityRun = BeginVisibilityTransition();
 
-        IPresentationDialogueBoxView currentBox = _boxState.Box;
-
-        if (currentBox == null)
+        if (_boxState.Box == null || !_boxState.IsVisible)
         {
             _box.SetVisibleImmediate(false);
             _boxState.MarkHidden();
             return;
         }
 
-        if (!_boxState.IsVisible)
-        {
-            currentBox.SetVisibleImmediate(false);
-            _boxState.MarkHidden();
-            return;
-        }
-
-        await currentBox.FadeOutAsync(
-            _fadeDownDuration,
+        await _box.FadeOutAsync(
+            FadeDownDuration,
             visibilityRun.Token);
 
         if (!IsCurrentVisibilityTransition(visibilityRun))
             return;
 
-        if (!ReferenceEquals(_boxState.Box, currentBox))
-        {
-            currentBox.SetVisibleImmediate(false);
-
-            if (_boxState.IsVisible && _boxState.Box != null)
-                _boxState.Box.SetVisibleImmediate(true);
-
-            return;
-        }
-
-        currentBox.SetVisibleImmediate(false);
+        _box.SetVisibleImmediate(false);
         _boxState.MarkHidden();
     }
 
@@ -90,39 +61,26 @@ public partial class DialogueBoxPresentationController
     {
         VisibilityTransitionRun visibilityRun = BeginVisibilityTransition();
 
-        IPresentationDialogueBoxView currentBox = _boxState.Box;
-
-        if (currentBox == null)
+        if (_boxState.Box == null)
             return;
-
 
         if (_boxState.IsVisible)
         {
-            currentBox.SetVisibleImmediate(true);
+            _box.SetVisibleImmediate(true);
             _boxState.TryMarkVisible();
             return;
         }
 
-        currentBox.PrepareHidden();
+        _box.PrepareHidden();
 
-        await currentBox.FadeInAsync(
-            _fadeUpDuration,
+        await _box.FadeInAsync(
+            FadeUpDuration,
             visibilityRun.Token);
 
         if (!IsCurrentVisibilityTransition(visibilityRun))
             return;
 
-        if (!ReferenceEquals(_boxState.Box, currentBox))
-        {
-            currentBox.SetVisibleImmediate(false);
-
-            if (_boxState.IsVisible && _boxState.Box != null)
-                _boxState.Box.SetVisibleImmediate(true);
-
-            return;
-        }
-
-        currentBox.SetVisibleImmediate(true);
+        _box.SetVisibleImmediate(true);
         _boxState.TryMarkVisible();
     }
 

@@ -16,6 +16,17 @@ public sealed class DialogueSurfaceLayoutPresetDBSO : ScriptableObject
         [Header("Identity")]
         public string key;
 
+        [Header("Box Image")]
+        [Tooltip(
+            "이 프리셋이 박스 이미지를 정하는가. 끄면 이미지를 건드리지 않는다 — " +
+            "아직 값을 안 채운 프리셋에서 씬에 놓인 이미지가 사라지지 않도록 하는 기본값이다.")]
+        public bool overrideImage;
+
+        [Tooltip(
+            "overrideImage가 켜져 있을 때 박스에 얹을 스프라이트. " +
+            "비워 두면 이미지를 끈다 — 텍스트만 있는 종류(OnlyText 계열)가 이 모양이다.")]
+        public Sprite image;
+
         [Tooltip(
             "이 프리셋이 담당하는 박스 종류. 박스가 하나뿐이므로 kind는 '어느 뷰인가'가 아니라 " +
             "'어느 레이아웃인가'를 뜻한다. 같은 kind가 여러 개면 첫 번째를 쓴다.")]

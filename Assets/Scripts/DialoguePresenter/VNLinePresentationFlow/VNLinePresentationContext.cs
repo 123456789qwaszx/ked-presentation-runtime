@@ -23,7 +23,6 @@ public sealed class VNLinePresentationContext
     public LinePresentationRun Run { get; set; }
 
     // Box Presentation
-    public DialogueBoxPresentationResult BoxResult { get; set; }
     public TMP_Text LineText { get; set; }
     public MarkupParseResult Text { get; set; }
 

@@ -2,6 +2,7 @@ using System;
 using System.Threading;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 using Yarn.Unity;
 
 public abstract class PresentationDialogueBoxViewBase<TRefs>
@@ -10,6 +11,7 @@ public abstract class PresentationDialogueBoxViewBase<TRefs>
 {
     public abstract RectTransform Root { get; }
     public abstract CanvasGroup CanvasGroup { get; }
+    public abstract Image BoxImage { get; }
     public abstract TMP_Text LineText { get; }
     public abstract TMP_Text NameText { get; }
 
@@ -24,8 +26,29 @@ public abstract class PresentationDialogueBoxViewBase<TRefs>
     public virtual void ApplySurfaceLayout(
         DialogueSurfaceLayoutPresetDBSO.Entry entry)
     {
+        ApplyBoxImage(entry);
         ApplyLineLayout(entry);
         ApplyNameLayout(entry);
+    }
+
+    // 박스는 이미지 한 장에 텍스트를 얹은 것이므로, 어떤 이미지인가도 레이아웃의 일부다.
+    // 교체 시점은 컨트롤러가 정한다 — 종류가 바뀌는 전환에서는 감춘 뒤에 불린다.
+    private void ApplyBoxImage(
+        DialogueSurfaceLayoutPresetDBSO.Entry entry)
+    {
+        Image image = BoxImage;
+
+        if (image == null)
+            return;
+
+        // 프리셋이 이미지를 정하지 않으면 손대지 않는다 — 씬에 놓인 상태를 그대로 둔다.
+        if (!entry.overrideImage)
+            return;
+
+        image.sprite = entry.image;
+
+        // SetActive가 아니라 enabled — RectTransform이 살아 있어야 레이아웃이 안 흔들린다.
+        image.enabled = entry.image != null;
     }
 
     private void ApplyLineLayout(
