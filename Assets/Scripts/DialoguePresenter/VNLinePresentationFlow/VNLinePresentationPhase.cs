@@ -18,11 +18,6 @@ public enum VNLinePresentationPhase
     // The line is being consumed silently as part of an active seek.
     // It should complete processing without showing the dialogue box or typewriter.
     SeekPassThrough = 31,
-    
-    // The pending seek target line has been reached, and the target resume policy has been resolved.
-    // This phase decides whether the target line resumes with immediate rules or normal visual flow.
-    // It does not mean that the visual presentation itself has started.
-    ResumePolicyResolved = 32,
 
     // A new LinePresentationRun has started.
     // The previous visual run has been cancelled by the presenter owner.

@@ -46,17 +46,13 @@ public sealed class VNLinePresentationFlow
         SetPhase(ctx, VNLinePresentationPhase.LineEnteredCommitted);
 
         // Phase: LineRuntimeStateResolved
-        VNSeekLineDecision enteredDecision;
-        
-        if (_advanceState.IsSeekingActive) {
-
-            enteredDecision = _advanceState.IsSeekTargetLine(ctx.Meta)
-                ? VNSeekLineDecision.TargetLineReached()
-                : VNSeekLineDecision.SkipVisualAndDispatchSeekNext();
+        if (_advanceState.IsSeekingActive){
+            ctx.SeekDecision = _advanceState.IsSeekTargetLine(ctx.Meta)
+                ? VNSeekLineDecision.TargetLineReached
+                : VNSeekLineDecision.SkipVisualAndDispatchSeekNext;
         }
-        else enteredDecision = VNSeekLineDecision.NotSeeking();
-        
-        ctx.SeekDecision = enteredDecision;
+        else ctx.SeekDecision = VNSeekLineDecision.NotSeeking;
+
         SetPhase(ctx, VNLinePresentationPhase.LineRuntimeStateResolved);
 
         if (ctx.ShouldSkipVisual) {
@@ -77,7 +73,9 @@ public sealed class VNLinePresentationFlow
             ctx.ShouldUseImmediateTransition);
 
         // Phase: BoxTransitioning -> BoxReady
-        ctx.BoxResult = await _boxPresentation.ShowLineAsync(boxCtx);
+        ctx.BoxResult = 
+            await _boxPresentation.ShowLineAsync(boxCtx);
+        
         SetPhase(ctx, VNLinePresentationPhase.DialogueSurfaceResolved);
 
         if (!ctx.Run.IsValid) {
@@ -94,7 +92,7 @@ public sealed class VNLinePresentationFlow
         SetPhase(ctx, VNLinePresentationPhase.TypewriterReady);
         
         // Phase: TypewriterCompleted
-        try
+        try 
         {
             await _typewriter
                 .RunTypewriter(
@@ -104,7 +102,7 @@ public sealed class VNLinePresentationFlow
                     _lineHurrySpeed.Enter)
                 .SuppressCancellationThrow();
         }
-        finally
+        finally 
         {
             _lineHurrySpeed.Exit();
         }

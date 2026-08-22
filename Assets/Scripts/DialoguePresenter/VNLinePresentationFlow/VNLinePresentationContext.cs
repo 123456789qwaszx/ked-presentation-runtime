@@ -8,6 +8,7 @@ public sealed class VNLinePresentationContext
     public LocalizedLine Line { get; set; }
     public LineCancellationToken Token { get; set; }
     public string NodeName { get; set; }
+    public bool ShouldUseImmediateTransition { get; set; }
 
     // Derived
     public YarnLineMeta Meta { get; set; }
@@ -15,11 +16,9 @@ public sealed class VNLinePresentationContext
     // Seek Decision
     public VNSeekLineDecision SeekDecision { get; set; }
 
-    public bool IsTargetLineReached => SeekDecision != null && SeekDecision.IsTargetLineReached;
-    public bool ShouldSkipVisual => SeekDecision != null && SeekDecision.ShouldSkipVisual;
+    public bool IsTargetLineReached => SeekDecision == VNSeekLineDecision.TargetLineReached;
+    public bool ShouldSkipVisual => SeekDecision == VNSeekLineDecision.SkipVisualAndDispatchSeekNext;
     
-    public bool ShouldUseImmediateTransition;
-
     // Visual Run
     public LinePresentationRun Run { get; set; }
 
