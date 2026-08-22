@@ -9,7 +9,6 @@ public partial class DialogueBoxPresentationController
     private const float FadeDownDuration = 0.1f;
 
     private readonly IPresentationDialogueBoxView _box;
-    private readonly DialogueBoxTagResolver _tagResolver;
     private readonly DialogueBoxCurrentState _boxState;
     private readonly DialogueSurfaceState _surfaceState;
     private readonly DialogueSurfaceLayoutPresetDBSO _surfaceLayoutDb;
@@ -18,14 +17,12 @@ public partial class DialogueBoxPresentationController
     public DialogueBoxPresentationController(
         DialogueBoxCurrentState dialogueBoxState,
         IPresentationDialogueBoxView box,
-        DialogueBoxTagResolver tagResolver,
         DialogueSurfaceState surfaceState,
         DialogueSurfaceLayoutPresetDBSO surfaceLayoutDb,
         DialogueSpeakerPresentationPolicyDBSO speakerPolicyDb)
     {
         _boxState = dialogueBoxState;
         _box = box;
-        _tagResolver = tagResolver;
         _surfaceState = surfaceState;
         _surfaceLayoutDb = surfaceLayoutDb;
         _speakerPolicyDb = speakerPolicyDb;
@@ -43,7 +40,8 @@ public partial class DialogueBoxPresentationController
         DialogueSpeakerPresentationPolicyDBSO.Entry speakerPolicy = default;
         bool hasSpeakerPolicy = false;
 
-        if (ctx.HasCharacterName) {
+        if (ctx.HasCharacterName) 
+        {
             hasSpeakerPolicy = _speakerPolicyDb.TryFind(ctx.CharacterName,
                 out speakerPolicy);
         }
@@ -72,7 +70,7 @@ public partial class DialogueBoxPresentationController
         bool hasSpeakerPolicy,
         DialogueSpeakerPresentationPolicyDBSO.Entry speakerPolicy)
     {
-        if (_tagResolver.TryResolveBoxKind(
+        if (DialogueBoxTagResolver.TryResolveBoxKind(
                 ctx.Metadata,
                 out DialogueBoxKind metadataBoxKind))
             return metadataBoxKind;
@@ -91,7 +89,8 @@ public partial class DialogueBoxPresentationController
         if (ctx.UseImmediateTransition)
             return DialogueBoxTransitionKind.Cut;
 
-        if (_tagResolver.TryResolveTransitionKind(ctx.Metadata, out DialogueBoxTransitionKind metadataTransition))
+        if (DialogueBoxTagResolver.TryResolveTransitionKind(ctx.Metadata, 
+                out DialogueBoxTransitionKind metadataTransition))
             return metadataTransition;
 
         if (!_boxState.IsVisible || currentBoxKind.HasValue == false)

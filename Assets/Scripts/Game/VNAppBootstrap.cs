@@ -259,12 +259,10 @@ public class VNAppBootstrap : MonoBehaviour
 
         DialogueBoxCurrentState dialogueBoxState = new();
         DialogueSurfaceState dialogueSurfaceState = new();
-        DialogueBoxTagResolver tagResolver = new();
 
         DialogueBoxPresentationController dialogueBoxPresentationController = new(
             dialogueBoxState, 
             dialogueSurfaceBox,
-            tagResolver, 
             dialogueSurfaceState, 
             surfaceLayoutPresetDb,
             speakerPolicyDb);
