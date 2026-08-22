@@ -23,35 +23,48 @@ public class UI_EventHandler : MonoBehaviour,
     [SerializeField] private float _longPressDuration = 1.0f;
 
     [Header("Drag / Click Feel")]
-    [SerializeField] private float _dragClickLockDelay = 0.04f;
+    // 지금 이 값은 동작하지 않음.
+    // TryConfirmDrag는 유니티의 OnBeginDrag / OnDrag에서만 불리는데,
+    // 유니티는 EventSystem.pixelDragThreshold(기본값 10)를 넘어야 OnBeginDrag를 보낸다.
+    // 즉 거리 검사에 도달한 시점에 이미 10px 이상이므로, 값을 바꿔도 조작감이 변하지 않음.
+    //
+    // 실제로 쓰려면 둘 중 하나가 선행:
+    //  [1] EventSystem의 pixelDragThreshold를 이 값보다 작게 내린다.
+    //    가장 싸지만 전역 설정이라 스크롤뷰 등 다른 드래그에 같이 영향을 줌.
+    //  [2] 드래그 확정을 유니티의 OnBeginDrag에 얹지 말고,
+    //    OnPointerDown 이후 포인터 위치를 이 클래스가 직접 추적해 판정.
     [SerializeField] private float _minDragDistance = 3.8f;
-    
+
     private bool _isDragging;
     private bool _isDragConfirmed;
     private bool _isLongPressTriggered;
-    private bool _isClickAllowed = true;
 
     private Vector2 _pointerDownPosition;
     private PointerEventData _cachedEventData;
 
     private Coroutine _longPressCoroutine;
-    private Coroutine _dragClickLockCoroutine;
 
+    // 유니티는 press와 drag를 같은 오브젝트가 받으면 eligibleForClick을 내리지 않음.
+    // 그래서 드래그나 롱프레스 뒤에도 OnPointerClick이 그대로 옴.
+    //
+    // 유니티의 릴리즈 순서는 PointerUp → PointerClick → EndDrag다.
+    // 두 플래그를 리셋하는 곳이 OnEndDrag / OnPointerDown이므로, 클릭이 도착하는 시점에
+    // 둘 다 아직 살아 있다. 시간(지연 코루틴)이 아니라 상태로 판정해야함.
     public void OnPointerClick(PointerEventData eventData)
     {
-        if (_isClickAllowed)
-            OnClickHandler?.Invoke(eventData);
+        if (_isDragConfirmed || _isLongPressTriggered)
+            return;
+
+        OnClickHandler?.Invoke(eventData);
     }
 
     public void OnPointerDown(PointerEventData eventData)
     {
         StopLongPressCheck();
-        StopDragClickLockCheck();
 
         _isDragging = false;
         _isDragConfirmed = false;
         _isLongPressTriggered = false;
-        _isClickAllowed = true;
 
         _pointerDownPosition = eventData.position;
         _cachedEventData = eventData;
@@ -65,7 +78,6 @@ public class UI_EventHandler : MonoBehaviour,
     public void OnPointerUp(PointerEventData eventData)
     {
         StopLongPressCheck();
-        StopDragClickLockCheck();
 
         _cachedEventData = null;
 
@@ -96,12 +108,11 @@ public class UI_EventHandler : MonoBehaviour,
             OnDragHandler?.Invoke(eventData);
     }
 
+    // 클릭보다 뒤에 오므로, 여기서 리셋해도 OnPointerClick의 판정은 이미 끝나 있음.
     public void OnEndDrag(PointerEventData eventData)
     {
         if (_isDragConfirmed)
             OnEndDragHandler?.Invoke(eventData);
-
-        StopDragClickLockCheck();
 
         _isDragging = false;
         _isDragConfirmed = false;
@@ -121,9 +132,6 @@ public class UI_EventHandler : MonoBehaviour,
         _isDragConfirmed = true;
 
         OnBeginDragHandler?.Invoke(eventData);
-
-        StopDragClickLockCheck();
-        _dragClickLockCoroutine = StartCoroutine(LockClickAfterDragDelay());
     }
 
     private IEnumerator CheckLongPress()
@@ -133,21 +141,10 @@ public class UI_EventHandler : MonoBehaviour,
         if (_cachedEventData != null && !_isLongPressTriggered && !_isDragConfirmed)
         {
             _isLongPressTriggered = true;
-            _isClickAllowed = false;
             OnLongPressHandler?.Invoke(_cachedEventData);
         }
 
         _longPressCoroutine = null;
-    }
-
-    private IEnumerator LockClickAfterDragDelay()
-    {
-        yield return new WaitForSecondsRealtime(_dragClickLockDelay);
-
-        if (_isDragConfirmed)
-            _isClickAllowed = false;
-
-        _dragClickLockCoroutine = null;
     }
 
     private void StopLongPressCheck()
@@ -159,24 +156,13 @@ public class UI_EventHandler : MonoBehaviour,
         _longPressCoroutine = null;
     }
 
-    private void StopDragClickLockCheck()
-    {
-        if (_dragClickLockCoroutine == null)
-            return;
-
-        StopCoroutine(_dragClickLockCoroutine);
-        _dragClickLockCoroutine = null;
-    }
-
     private void OnDisable()
     {
         StopLongPressCheck();
-        StopDragClickLockCheck();
 
         _isDragging = false;
         _isDragConfirmed = false;
         _isLongPressTriggered = false;
-        _isClickAllowed = true;
         _cachedEventData = null;
     }
 }
