@@ -135,15 +135,13 @@ public sealed class VNOptionsPresenter
         EndSelectionSession();
         DestroyActiveItems();
 
-        IPresentationOptionsBoxView boxView = ctx.OptionsBoxView;
-
-        boxView.SetInputEnabled(false);
+        _flow.SetInputEnabled(false);
 
         _selectionSession = new VNOptionSelectionSession(ctx.Token);
 
-        CreateItems(ctx.ViewModels, boxView.ItemContainer);
+        CreateItems(ctx.ViewModels, ctx.ItemContainer);
 
-        boxView.SetInputEnabled(true);
+        _flow.SetInputEnabled(true);
         SelectFirstAvailableItem();
     }
 
@@ -157,14 +155,14 @@ public sealed class VNOptionsPresenter
 
         VNOptionViewModel selected = await _selectionSession.Task;
 
-        ctx.OptionsBoxView?.SetInputEnabled(false);
+        _flow.SetInputEnabled(false);
 
         return selected;
     }
 
     private async YarnTask CleanupInteractiveAsync(VNOptionsPresentationContext ctx)
     {
-        ctx.OptionsBoxView?.SetInputEnabled(false);
+        _flow.SetInputEnabled(false);
 
         EndSelectionSession();
         DestroyActiveItems();

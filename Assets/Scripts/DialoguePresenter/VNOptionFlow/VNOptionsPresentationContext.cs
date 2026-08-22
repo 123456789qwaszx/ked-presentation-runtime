@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEngine;
 using Yarn.Unity;
 
 public sealed class VNOptionsPresentationContext
@@ -10,7 +11,9 @@ public sealed class VNOptionsPresentationContext
     public int ChoiceSequence;
 
     public List<VNOptionViewModel> ViewModels;
-    public IPresentationOptionsBoxView OptionsBoxView;
+
+    // 옵션 항목을 붙일 자리. 박스가 뜬 뒤 flow가 채운다.
+    public RectTransform ItemContainer;
 
     public DialogueOption SelectedOption;
 

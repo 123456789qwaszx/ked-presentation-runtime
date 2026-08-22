@@ -28,7 +28,14 @@ public sealed class VNChoiceBoundary
         option = null;
 
         if (!_choiceHistory.TryGetChoiceRecord(choiceSequence, out VNChoiceRecord record))
+        {
+            // 이 순번을 지나갔다면 기록이 있어야 한다. 없다는 건 기록이 누락됐거나 잘렸다는 뜻.
+            Debug.LogWarning(
+                $"[VNChoiceBoundary] 리플레이 복원 실패 — 이 순번의 선택 기록이 없다. " +
+                $"choiceSequence={choiceSequence}.");
+
             return false;
+        }
 
         bool hasLineId = !string.IsNullOrEmpty(record.selectedOptionLineId);
 
@@ -36,7 +43,15 @@ public sealed class VNChoiceBoundary
             return true;
 
         if (!TryFindByIndex(sourceOptions, record.selectedOptionIndex, out option))
+        {
+            // 기록은 있는데 그 선택지가 지금 목록에 없다(대본 변경) 또는 지금은 잠겨 있다(조건 변경).
+            Debug.LogWarning(
+                $"[VNChoiceBoundary] 리플레이 복원 실패 — 기록된 선택지를 지금 목록에서 고를 수 없다. " +
+                $"choiceSequence={choiceSequence}, lineId='{record.selectedOptionLineId}', " +
+                $"index={record.selectedOptionIndex}, optionCount={sourceOptions.Length}.");
+
             return false;
+        }
 
         // lineId를 적어 뒀는데 그 라인이 지금 대본에 없다 -
         // 대본이 바뀐 것이고, 위치로 기반으로 고른 것.

@@ -308,8 +308,10 @@ public class VNAppBootstrap : MonoBehaviour
 
         VNDefaultOptionsPanel vnDefaultOptionsPanel = uiManager.GetUI<VNDefaultOptionsPanel>();
 
+        OptionsBoxPresentationController optionsBoxPresentation = new(vnDefaultOptionsPanel);
+
         VNOptionsPresentationFlow optionsPresentationFlow = new(
-            vnDefaultOptionsPanel,
+            optionsBoxPresentation,
             vnChoiceBoundary,
             _linePresentationAdvanceState);
 
