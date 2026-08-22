@@ -15,10 +15,10 @@ public sealed class VNLinePresentationContext
     // Seek Decision
     public VNSeekLineDecision SeekDecision { get; set; }
 
-    public bool IsPendingSeekTargetLine => SeekDecision != null && SeekDecision.IsTargetLineReached;
-    public bool ShouldSkipVisual => SeekDecision != null && SeekDecision.ShouldPassThroughPresentation;
+    public bool IsTargetLineReached => SeekDecision != null && SeekDecision.IsTargetLineReached;
+    public bool ShouldSkipVisual => SeekDecision != null && SeekDecision.ShouldSkipVisual;
     
-    public bool ShouldUseImmediateTransition => SeekDecision != null && SeekDecision.ShouldUseImmediateTransition;
+    public bool ShouldUseImmediateTransition;
 
     // Visual Run
     public LinePresentationRun Run { get; set; }

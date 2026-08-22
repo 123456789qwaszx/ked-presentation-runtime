@@ -70,13 +70,13 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, IVNLineAborter
                 Line = line,
                 Token = token,
                 NodeName = _currentNodeName,
+                ShouldUseImmediateTransition = _vnPlaybackRuntimeState.IsSpeedUpMode
             };
 
             await _vnLinePresentationFlow.RunAsync(
                 ctx,
                 beginRun: BeginLinePresentationRun,
-                waitForAdvance: WaitForLineAdvanceAsync,
-                shouldFastForward: () => _vnPlaybackRuntimeState.IsSpeedUpMode);
+                waitForAdvance: WaitForLineAdvanceAsync);
         }
         finally
         {

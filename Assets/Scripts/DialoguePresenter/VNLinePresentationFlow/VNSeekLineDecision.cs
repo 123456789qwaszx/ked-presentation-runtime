@@ -1,65 +1,25 @@
 public sealed class VNSeekLineDecision
 {
-    public VNSeekKind SeekKind { get; set; }
-
-    public bool ShouldSkipVisualAndDispatchSeekNext { get; private set; }
-    public bool ShouldPassThroughPresentation { get; private set; }
-    public bool ShouldUseImmediateTransition { get; private set; }
     public bool IsTargetLineReached { get; private set; }
+    public bool ShouldSkipVisual { get; private set; }
 
     public static VNSeekLineDecision NotSeeking()
     {
-        return new VNSeekLineDecision
-        {
-            SeekKind = VNSeekKind.None,
-        };
+        return new VNSeekLineDecision { };
     }
 
-    public static VNSeekLineDecision SkipVisualAndDispatchSeekNext(VNSeekKind seekKind)
+    public static VNSeekLineDecision SkipVisualAndDispatchSeekNext()
     {
         return new VNSeekLineDecision
         {
-            SeekKind = seekKind,
-
-            ShouldSkipVisualAndDispatchSeekNext = true,
-            ShouldPassThroughPresentation = true,
-            ShouldUseImmediateTransition = true,
-            IsTargetLineReached = false,
+            ShouldSkipVisual = true,
         };
     }
 
-    public static VNSeekLineDecision TargetLineReachedAndResumePresentation(VNSeekKind seekKind)
+    public static VNSeekLineDecision TargetLineReached()
     {
         return new VNSeekLineDecision
         {
-            SeekKind = seekKind,
-
-            ShouldPassThroughPresentation = false,
-            ShouldUseImmediateTransition = false,
-            IsTargetLineReached = true,
-        };
-    }
-    
-    public static VNSeekLineDecision TargetLineVisualResumeImmediate(VNSeekKind seekKind)
-    {
-        return new VNSeekLineDecision
-        {
-            SeekKind = seekKind,
-
-            ShouldPassThroughPresentation = true,
-            ShouldUseImmediateTransition = true,
-            IsTargetLineReached = true,
-        };
-    }
-
-    public static VNSeekLineDecision TargetLineVisualResumeNormal(VNSeekKind seekKind)
-    {
-        return new VNSeekLineDecision
-        {
-            SeekKind = seekKind,
-
-            ShouldPassThroughPresentation = false,
-            ShouldUseImmediateTransition = false,
             IsTargetLineReached = true,
         };
     }

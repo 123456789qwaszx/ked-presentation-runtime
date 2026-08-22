@@ -33,8 +33,7 @@ public sealed class VNLinePresentationFlow
     public async YarnTask RunAsync(
         VNLinePresentationContext ctx,
         Func<LinePresentationRun> beginRun,
-        Func<LineCancellationToken, YarnTask> waitForAdvance,
-        Func<bool> shouldFastForward)
+        Func<LineCancellationToken, YarnTask> waitForAdvance)
     {
         // Phase: LineReceived -> LineEnteredCommitted
         SetPhase(ctx, VNLinePresentationPhase.LineReceived);
@@ -50,11 +49,10 @@ public sealed class VNLinePresentationFlow
         VNSeekLineDecision enteredDecision;
         
         if (_advanceState.IsSeekingActive) {
-            VNSeekKind seekKind = _advanceState.SeekKind;
 
             enteredDecision = _advanceState.IsSeekTargetLine(ctx.Meta)
-                ? VNSeekLineDecision.TargetLineReachedAndResumePresentation(seekKind)
-                : VNSeekLineDecision.SkipVisualAndDispatchSeekNext(seekKind);
+                ? VNSeekLineDecision.TargetLineReached()
+                : VNSeekLineDecision.SkipVisualAndDispatchSeekNext();
         }
         else enteredDecision = VNSeekLineDecision.NotSeeking();
         
@@ -62,25 +60,12 @@ public sealed class VNLinePresentationFlow
         SetPhase(ctx, VNLinePresentationPhase.LineRuntimeStateResolved);
 
         if (ctx.ShouldSkipVisual) {
-            RunSeekPassThroughAsync(ctx);
+            RunSeekPassThrough(ctx);
             return;
         }
 
-        // Phase: ResumePolicyResolved
-        VNSeekLineDecision presentationSeekDecision;
-        
-        if (ctx.IsPendingSeekTargetLine) {
-            VNSeekKind seekKind = _advanceState.SeekKind;
+        if (ctx.IsTargetLineReached)
             _advanceState.ClearSeek();
-
-            presentationSeekDecision = shouldFastForward()
-                ? VNSeekLineDecision.TargetLineVisualResumeImmediate(seekKind)
-                : VNSeekLineDecision.TargetLineVisualResumeNormal(seekKind);
-        }
-        else presentationSeekDecision = VNSeekLineDecision.NotSeeking();
-        
-        ctx.SeekDecision = presentationSeekDecision;
-        SetPhase(ctx, VNLinePresentationPhase.ResumePolicyResolved);
 
         // Phase: VisualRunStarted
         ctx.Run = beginRun();
@@ -143,7 +128,7 @@ public sealed class VNLinePresentationFlow
         SetPhase(ctx, VNLinePresentationPhase.Completed);
     }
 
-    private void RunSeekPassThroughAsync(VNLinePresentationContext ctx)
+    private void RunSeekPassThrough(VNLinePresentationContext ctx)
     {
         SetPhase(ctx, VNLinePresentationPhase.SeekPassThrough);
 
