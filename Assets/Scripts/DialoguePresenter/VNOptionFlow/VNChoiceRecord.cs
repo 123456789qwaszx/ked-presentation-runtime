@@ -8,6 +8,15 @@ public struct VNChoiceRecord
 
     // 장면 시작 이후 몇 번째 선택지 묶음인가 (0부터).
     public int choiceSequence;
+
+    // 고른 선택지를 찾는 키가 둘이다. 순서 = 우선순위:
+    //
+    // (1) selectedOptionLineId - 위치와 무관.
+    // 작가가 선택지 순서를 바꾸거나 사이에 하나를 끼워 넣어도 같은 것을 고른다.
+    
+    // (2) selectedOptionIndex  - 위치 기반.
+    // lineId가 없는 옛 기록이거나 그 라인이 대본에서 사라졌을 때만 쓰는 폴백.
+    public string selectedOptionLineId;
     public int selectedOptionIndex;
 
     public VNChoiceRecord(
@@ -19,6 +28,7 @@ public struct VNChoiceRecord
         this.anchorHistoryIndex = anchorHistoryIndex;
         this.choiceSequence = choiceSequence;
         this.selectedOptionIndex = selectedOptionIndex;
+        this.selectedOptionLineId = selectedOptionLineId;
     }
 }
 

@@ -81,25 +81,37 @@ public sealed class VNOptionsPresenter
                 NodeName = _currentNodeName,
             };
 
+            // Phase: ChoiceSequenceReserved -> (ReplayResolved | Stale | Aborted | ViewModelsBuilt -> OptionsBoxShown)
             VNOptionsPresentationBeginResult beginResult = await _flow.BeginAsync(ctx);
 
-            if (beginResult == VNOptionsPresentationBeginResult.NoOption)
-                return await DialogueRunner.NoOptionSelected;
+            switch (beginResult)
+            {
+                case VNOptionsPresentationBeginResult.NoOption:
+                case VNOptionsPresentationBeginResult.Stale:
+                case VNOptionsPresentationBeginResult.Aborted:
+                    return await DialogueRunner.NoOptionSelected;
 
-            if (beginResult == VNOptionsPresentationBeginResult.ReplayResolved)
-                return ctx.SelectedOption ?? await DialogueRunner.NoOptionSelected;
+                case VNOptionsPresentationBeginResult.ReplayResolved:
+                    return ctx.SelectedOption;
+            }
 
             try
             {
-                if (!PrepareInteractiveItems(ctx))
-                    return await DialogueRunner.NoOptionSelected;
+                // Phase: InteractiveReady -> AwaitingSelection
+                PrepareInteractiveItems(ctx);
+                SetPhase(ctx, VNOptionsPresentationPhase.InteractiveReady);
 
                 VNOptionViewModel selected = await AwaitSelectionAsync(ctx);
 
                 if (cancellationToken.IsNextContentRequested || selected == null)
+                {
+                    SetPhase(ctx, VNOptionsPresentationPhase.Aborted);
                     return await DialogueRunner.NoOptionSelected;
+                }
 
+                // Phase: SelectionCommitted
                 _flow.CommitSelection(ctx, selected);
+                SetPhase(ctx, VNOptionsPresentationPhase.SelectionCommitted);
 
                 return ctx.SelectedOption ?? await DialogueRunner.NoOptionSelected;
             }
@@ -118,7 +130,7 @@ public sealed class VNOptionsPresenter
         }
     }
 
-    private bool PrepareInteractiveItems(VNOptionsPresentationContext ctx)
+    private void PrepareInteractiveItems(VNOptionsPresentationContext ctx)
     {
         EndSelectionSession();
         DestroyActiveItems();
@@ -133,14 +145,15 @@ public sealed class VNOptionsPresenter
 
         boxView.SetInputEnabled(true);
         SelectFirstAvailableItem();
-
-        return true;
     }
 
     private async YarnTask<VNOptionViewModel> AwaitSelectionAsync(VNOptionsPresentationContext ctx)
     {
         if (_selectionSession == null)
             return null;
+
+        // Phase: AwaitingSelection
+        SetPhase(ctx, VNOptionsPresentationPhase.AwaitingSelection);
 
         VNOptionViewModel selected = await _selectionSession.Task;
 
@@ -159,7 +172,9 @@ public sealed class VNOptionsPresenter
         await YarnTask.Yield();
     }
 
-    private bool CreateItems(List<VNOptionViewModel> viewModels, RectTransform container)
+    private void CreateItems(
+        List<VNOptionViewModel> viewModels,
+        RectTransform container)
     {
         for (int i = 0; i < viewModels.Count; i++)
         {
@@ -174,8 +189,6 @@ public sealed class VNOptionsPresenter
 
             _activeItems.Add(item);
         }
-
-        return _activeItems.Count > 0;
     }
 
     private void DestroyActiveItems()
@@ -225,5 +238,10 @@ public sealed class VNOptionsPresenter
                 return;
             }
         }
+    }
+
+    private static void SetPhase(VNOptionsPresentationContext ctx, VNOptionsPresentationPhase phase)
+    {
+        ctx.Phase = phase;
     }
 }

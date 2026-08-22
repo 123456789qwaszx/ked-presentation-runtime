@@ -14,18 +14,16 @@ public sealed class VNOptionsPresentationContext
 
     public DialogueOption SelectedOption;
 
+    // Phase Tracking
+    public VNOptionsPresentationPhase Phase = VNOptionsPresentationPhase.None;
+
     public bool HasAnyAvailableOption
     {
         get
         {
-            if (SourceOptions == null)
-                return false;
-
             for (int i = 0; i < SourceOptions.Length; i++)
             {
-                DialogueOption option = SourceOptions[i];
-
-                if (option != null && option.IsAvailable)
+                if (SourceOptions[i].IsAvailable)
                     return true;
             }
 

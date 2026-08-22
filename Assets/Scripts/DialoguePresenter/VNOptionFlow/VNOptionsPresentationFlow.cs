@@ -1,11 +1,24 @@
 using System.Collections.Generic;
+using UnityEngine;
 using Yarn.Unity;
 
 public enum VNOptionsPresentationBeginResult
 {
+    // 고를 수 있는 옵션이 없다 — 정상적인 종료다.
     NoOption = 0,
+
+    // 시크 중이라 기록된 선택을 UI 없이 복원했다. ctx.SelectedOption은 반드시 채워져 있다.
     ReplayResolved = 1,
+
+    // 옵션 박스가 떠 있고 입력을 열 수 있다.
     InteractiveReady = 2,
+
+    // 이 트랜잭션의 전제가 깨졌다 — 리플레이 복원 실패, 또는 옵션 박스 배선 문제.
+    // 리플레이 복원 실패로 온 경우 시크는 이미 꺼졌고 일반 재생으로 복귀한 상태다.
+    Stale = 3,
+
+    // 옵션 박스를 띄우는 도중 플레이어가 다음 콘텐츠를 요청했다 — 선택 없이 끊긴다.
+    Aborted = 4,
 }
 
 public sealed class VNOptionsPresentationFlow
@@ -31,42 +44,86 @@ public sealed class VNOptionsPresentationFlow
     public async YarnTask<VNOptionsPresentationBeginResult> BeginAsync(
         VNOptionsPresentationContext ctx)
     {
+        // Phase: ChoiceSequenceReserved
         ctx.ChoiceSequence = _choiceBoundary.ReserveChoiceSequence();
+        SetPhase(ctx, VNOptionsPresentationPhase.ChoiceSequenceReserved);
 
-        if (!ctx.HasAnyAvailableOption)
-            return VNOptionsPresentationBeginResult.NoOption;
+        // Phase: ReplayResolved | Stale
+        if (_advanceState.IsSeekingActive)
+        {
+            // 옵션들이 있지만, 조건 제한등으로 선택불가능할 경우.
+            if (!ctx.HasAnyAvailableOption)
+            {
+                SetPhase(ctx, VNOptionsPresentationPhase.NoOption);
+                return VNOptionsPresentationBeginResult.NoOption;
+            }
+            
+            if (!_choiceBoundary.TryResolveReplayOption(
+                    ctx.ChoiceSequence,
+                    ctx.SourceOptions,
+                    out DialogueOption replayOption))
+            {
+                Debug.LogWarning(
+                    $"[VNOptionsPresentationFlow] 리플레이에서 기존 선택 복원 실패. " +
+                    $"node='{ctx.NodeName}', choiceSequence={ctx.ChoiceSequence}.");
 
-        if (_advanceState.IsSeekingActive) { 
-            bool resolved = _choiceBoundary.TryResolveReplayOption(
-                ctx.ChoiceSequence,
-                ctx.SourceOptions,
-                out DialogueOption replayOption);
+                //시크를 끄고 일반 재생으로 복귀.
+                _advanceState.ClearSeek();
 
-            ctx.SelectedOption = resolved
-                ? replayOption 
-                : null;
+                ctx.SelectedOption = null;
+                SetPhase(ctx, VNOptionsPresentationPhase.Stale);
 
-            return resolved
-                ? VNOptionsPresentationBeginResult.ReplayResolved
-                : VNOptionsPresentationBeginResult.NoOption;
+                return VNOptionsPresentationBeginResult.Stale;
+            }
+
+            // Pass the restored choice to the normal flow without user input.
+            ctx.SelectedOption = replayOption;
+            SetPhase(ctx, VNOptionsPresentationPhase.ReplayResolved);
+
+            return VNOptionsPresentationBeginResult.ReplayResolved;
         }
 
-        ctx.ViewModels = BuildViewModels(
-            ctx.SourceOptions,
-            ctx.ChoiceSequence);
+        // Phase: ViewModelsBuilt
+        ctx.ViewModels = BuildViewModels(ctx.SourceOptions, ctx.ChoiceSequence);
 
         if (ctx.ViewModels.Count == 0)
+        {
+            SetPhase(ctx, VNOptionsPresentationPhase.NoOption);
             return VNOptionsPresentationBeginResult.NoOption;
+        }
 
+        SetPhase(ctx, VNOptionsPresentationPhase.ViewModelsBuilt);
+
+        // Phase: OptionsBoxShown
         ctx.OptionsBoxView = await ShowOptionsBoxAsync(
             useImmediateTransition: false,
             ctx);
 
-        if (ctx.OptionsBoxView == null || ctx.OptionsBoxView.ItemContainer == null)
+        // 페이드인 도중 다음 콘텐츠 요청이 들어옴(ShowOptionsBoxAsync가 null을 주는 유일한 경우).
+        // 옵션이 없었던 게 아니라 플레이어가 선택 전에 끊은 것.
+        if (ctx.OptionsBoxView == null)
         {
             EndInteractiveImmediate();
-            return VNOptionsPresentationBeginResult.NoOption;
+
+            SetPhase(ctx, VNOptionsPresentationPhase.Aborted);
+            return VNOptionsPresentationBeginResult.Aborted;
         }
+
+        // 박스는 떴는데 항목을 붙일 자리가 없음 — 뷰 배선이 깨짐.
+        if (ctx.OptionsBoxView.ItemContainer == null)
+        {
+            Debug.LogError(
+                $"[VNOptionsPresentationFlow] 옵션 박스에 ItemContainer가 없어 선택지를 띄우지 못했다. " +
+                $"node='{ctx.NodeName}', choiceSequence={ctx.ChoiceSequence}, " +
+                $"optionCount={ctx.ViewModels.Count}.");
+
+            EndInteractiveImmediate();
+
+            SetPhase(ctx, VNOptionsPresentationPhase.Stale);
+            return VNOptionsPresentationBeginResult.Stale;
+        }
+
+        SetPhase(ctx, VNOptionsPresentationPhase.OptionsBoxShown);
 
         return VNOptionsPresentationBeginResult.InteractiveReady;
     }
@@ -115,21 +172,13 @@ public sealed class VNOptionsPresentationFlow
         return _optionsBox;
     }
 
-    private List<VNOptionViewModel> BuildViewModels(
-        DialogueOption[] options,
-        int choiceSequence)
+    private List<VNOptionViewModel> BuildViewModels(DialogueOption[] options, int choiceSequence)
     {
         var result = new List<VNOptionViewModel>();
-
-        if (options == null)
-            return result;
 
         for (int i = 0; i < options.Length; i++)
         {
             DialogueOption option = options[i];
-
-            if (option == null)
-                continue;
 
             if (!option.IsAvailable)
                 continue;
@@ -156,5 +205,10 @@ public sealed class VNOptionsPresentationFlow
             choiceSequence: choiceSequence,
             label: label,
             isAvailable: option.IsAvailable);
+    }
+
+    private static void SetPhase(VNOptionsPresentationContext ctx, VNOptionsPresentationPhase phase)
+    {
+        ctx.Phase = phase;
     }
 }

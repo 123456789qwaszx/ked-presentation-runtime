@@ -2,6 +2,13 @@ using TMPro;
 using Yarn.Markup;
 using Yarn.Unity;
 
+public enum VNSeekLineDecision
+{
+    NotSeeking = 0,
+    SkipVisualAndDispatchSeekNext,
+    TargetLineReached,
+}
+
 public sealed class VNLinePresentationContext
 {
     // Input

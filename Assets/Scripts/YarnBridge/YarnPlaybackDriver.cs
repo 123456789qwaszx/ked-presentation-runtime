@@ -2,8 +2,8 @@ using System.Collections.Generic;
 
 public sealed class YarnPlaybackDriver
 {
-    private CommandExecutor _executor;
-    private ICommandRunScopeProvider _scopeProvider;
+    private readonly CommandExecutor _executor;
+    private readonly ICommandRunScopeProvider _scopeProvider;
 
     private readonly List<CommandSpecBase> _collectedSpecs = new();
 
