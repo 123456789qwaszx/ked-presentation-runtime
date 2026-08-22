@@ -9,7 +9,7 @@ public partial class DialogueBoxPresentationController
     private const float FadeDownDuration = 0.1f;
 
     private readonly IPresentationDialogueBoxView _box;
-    private readonly DialogueBoxMetadataResolver _metadataResolver;
+    private readonly DialogueBoxTagResolver _tagResolver;
     private readonly DialogueBoxCurrentState _boxState;
     private readonly DialogueSurfaceState _surfaceState;
     private readonly DialogueSurfaceLayoutPresetDBSO _surfaceLayoutDb;
@@ -18,20 +18,21 @@ public partial class DialogueBoxPresentationController
     public DialogueBoxPresentationController(
         DialogueBoxCurrentState dialogueBoxState,
         IPresentationDialogueBoxView box,
-        DialogueBoxMetadataResolver metadataResolver,
+        DialogueBoxTagResolver tagResolver,
         DialogueSurfaceState surfaceState,
         DialogueSurfaceLayoutPresetDBSO surfaceLayoutDb,
         DialogueSpeakerPresentationPolicyDBSO speakerPolicyDb)
     {
         _boxState = dialogueBoxState;
         _box = box;
-        _metadataResolver = metadataResolver;
+        _tagResolver = tagResolver;
         _surfaceState = surfaceState;
         _surfaceLayoutDb = surfaceLayoutDb;
         _speakerPolicyDb = speakerPolicyDb;
     }
 
-    // 타이프라이터가 글자를 채워 넣을 대상. ShowLineAsync가 레이아웃을 얹은 뒤에 읽어야 함.
+    // 타이프라이터가 글자를 채워 넣을 대상.
+    // ShowLineAsync가 레이아웃을 얹은 뒤에 읽어야 함.
     public TMP_Text LineTextTarget => _box.GetLineText();
 
     public async YarnTask ShowLineAsync(
@@ -71,7 +72,7 @@ public partial class DialogueBoxPresentationController
         bool hasSpeakerPolicy,
         DialogueSpeakerPresentationPolicyDBSO.Entry speakerPolicy)
     {
-        if (_metadataResolver.TryResolveBoxKind(
+        if (_tagResolver.TryResolveBoxKind(
                 ctx.Metadata,
                 out DialogueBoxKind metadataBoxKind))
             return metadataBoxKind;
@@ -90,7 +91,7 @@ public partial class DialogueBoxPresentationController
         if (ctx.UseImmediateTransition)
             return DialogueBoxTransitionKind.Cut;
 
-        if (_metadataResolver.TryResolveTransitionKind(ctx.Metadata, out DialogueBoxTransitionKind metadataTransition))
+        if (_tagResolver.TryResolveTransitionKind(ctx.Metadata, out DialogueBoxTransitionKind metadataTransition))
             return metadataTransition;
 
         if (!_boxState.IsVisible || currentBoxKind.HasValue == false)
