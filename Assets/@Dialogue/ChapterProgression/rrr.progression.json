@@ -1,0 +1,126 @@
+{
+  "ChapterId": "rrr",
+  "DisplayName": "rrr",
+  "StartEpisodeId": "new01",
+  "Stats": [
+    {
+      "Key": "int",
+      "DisplayName": "int",
+      "Type": "Number",
+      "Initial": 0,
+      "Minimum": 0,
+      "Maximum": 10
+    }
+  ],
+  "Nodes": [
+    {
+      "EpisodeId": "new01",
+      "Title": "",
+      "IndexText": "",
+      "Kind": "Main",
+      "DialogueEntryId": "Story_new01",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "new02",
+          "ChoiceLabel": "",
+          "Kind": "Auto",
+          "VisibleConditions": [],
+          "Conditions": [],
+          "HideWhenLocked": false,
+          "LockedReasonText": "",
+          "ViaNodeId": "",
+          "StatChanges": []
+        }
+      ],
+      "Attachments": [],
+      "IsChapterEndingCandidate": false,
+      "EndingKey": "",
+      "DesignerNote": "",
+      "Position": {
+        "X": 0,
+        "Y": 0
+      }
+    },
+    {
+      "EpisodeId": "new02",
+      "Title": "",
+      "IndexText": "",
+      "Kind": "Main",
+      "DialogueEntryId": "Story_new02",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "new03",
+          "ChoiceLabel": "",
+          "Kind": "Auto",
+          "VisibleConditions": [],
+          "Conditions": [],
+          "HideWhenLocked": false,
+          "LockedReasonText": "",
+          "ViaNodeId": "",
+          "StatChanges": []
+        }
+      ],
+      "Attachments": [],
+      "IsChapterEndingCandidate": false,
+      "EndingKey": "",
+      "DesignerNote": "",
+      "Position": {
+        "X": 220,
+        "Y": 0
+      }
+    },
+    {
+      "EpisodeId": "new03",
+      "Title": "",
+      "IndexText": "",
+      "Kind": "Main",
+      "DialogueEntryId": "Story_new03",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "new05",
+          "ChoiceLabel": "",
+          "Kind": "Auto",
+          "VisibleConditions": [],
+          "Conditions": [],
+          "HideWhenLocked": false,
+          "LockedReasonText": "",
+          "ViaNodeId": "",
+          "StatChanges": []
+        }
+      ],
+      "Attachments": [],
+      "IsChapterEndingCandidate": false,
+      "EndingKey": "",
+      "DesignerNote": "",
+      "Position": {
+        "X": 440,
+        "Y": 0
+      }
+    },
+    {
+      "EpisodeId": "new05",
+      "Title": "",
+      "IndexText": "",
+      "Kind": "Main",
+      "DialogueEntryId": "Story_new05",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [],
+      "Attachments": [],
+      "IsChapterEndingCandidate": false,
+      "EndingKey": "",
+      "DesignerNote": "",
+      "Position": {
+        "X": 660,
+        "Y": 150
+      }
+    }
+  ],
+  "EndingRules": []
+}
