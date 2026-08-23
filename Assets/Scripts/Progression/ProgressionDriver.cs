@@ -11,6 +11,7 @@ public sealed class ProgressionDriver
 {
     private readonly EpisodePlayer _player;
     private readonly IChapterOptionsView _options;
+    private readonly ProgressionYarnBridge _yarnBridge;
 
     private EpisodeFlow _flow;
     private bool _stopRequested;
@@ -18,10 +19,12 @@ public sealed class ProgressionDriver
 
     public bool IsRunning { get; private set; }
 
-    public ProgressionDriver(EpisodePlayer player, IChapterOptionsView options)
+    public ProgressionDriver(
+        EpisodePlayer player, IChapterOptionsView options, ProgressionYarnBridge yarnBridge)
     {
         _player = player;
         _options = options;
+        _yarnBridge = yarnBridge;
     }
 
     // 새 게임 또는 이어 하기.
@@ -119,6 +122,9 @@ public sealed class ProgressionDriver
     private async Task<bool> PlayNodeAsync(string nodeName, string what)
     {
         Debug.Log($"[진행] {what} 시작 — \"{nodeName}\"");
+
+        // "[2] 에피소드 상태"를 대사가 읽을 수 있게 정의
+        _yarnBridge?.PublishStats(_flow.State.Stats);
 
         // 첫 진입 이후로는 백로그를 유지해야 하기 때문에 구분.
         if (_firstEpisode)

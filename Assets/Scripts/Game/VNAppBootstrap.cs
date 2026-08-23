@@ -353,10 +353,13 @@ public class VNAppBootstrap : MonoBehaviour
         _progressionOptions = new ChapterOptionsView(
             uiManager.GetUI<VNDefaultOptionsPanel>(), optionItem);
 
-        _progressionDriver = new ProgressionDriver(_episodePlayer, _progressionOptions);
+        // 진행 층이 Yarn 변수 저장소에 하는 일 전부 — [2] 심기(단방향)와 [3] 챕터 되돌리기.
+        ProgressionYarnBridge yarnBridge = new(dialogueRunner.VariableStorage);
+
+        _progressionDriver = new ProgressionDriver(_episodePlayer, _progressionOptions, yarnBridge);
 
         _progressionLauncher = new ProgressionLauncher(
-            _progressionDriver, dialogueRunner, progressionChapterJson);
+            _progressionDriver, dialogueRunner, progressionChapterJson, yarnBridge);
     }
 
     private void BootstrapPlaybackControls()
