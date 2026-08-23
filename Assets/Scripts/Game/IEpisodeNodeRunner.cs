@@ -31,8 +31,8 @@ public sealed class YarnEpisodeNodeRunner : IEpisodeNodeRunner
         await _dialogueRunner.StartDialogue(nodeName);
         await _dialogueRunner.DialogueTask;
 
-        // 스택 탈출용. 지우지 말 것.
-        // Yarn의 입력 대기 없이 SeekPassThrough로 Line을 넘겼기에, Yarn내부 순서 꼬인걸 푸는 용도.
+        // DialogueTask 완료 콜백의 현재 호출 스택에서 빠져나오기 위한 양보.
+        // 제거 시 Stop/Start 재진입으로 데드락이 발생할 수 있음.
         await YarnTask.Yield();
     }
 }

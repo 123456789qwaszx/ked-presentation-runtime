@@ -3827,7 +3827,7 @@ MonoBehaviour:
   autoAdvanceScheduler: {fileID: 608895337}
   vnOptionsPresenter: {fileID: 1180068359}
   optionItem: {fileID: 8364438180924277572, guid: 3a0acb1fd0e1d604183be29ffcfb79a7, type: 3}
-  yarnEntryKey: Story_blank_ch01_ep00
+  yarnEntryKey: Story_new01
   debugEpisodeChain:
   - Story_new01
   - Story_new02

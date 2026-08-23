@@ -25,7 +25,7 @@
         {
           "TargetEpisodeId": "new02",
           "ChoiceLabel": "",
-          "Kind": "Auto",
+          "Kind": "AutoAdvance",
           "VisibleConditions": [],
           "Conditions": [],
           "HideWhenLocked": false,
@@ -55,7 +55,7 @@
         {
           "TargetEpisodeId": "new03",
           "ChoiceLabel": "",
-          "Kind": "Auto",
+          "Kind": "AutoAdvance",
           "VisibleConditions": [],
           "Conditions": [],
           "HideWhenLocked": false,
@@ -85,7 +85,7 @@
         {
           "TargetEpisodeId": "new05",
           "ChoiceLabel": "",
-          "Kind": "Auto",
+          "Kind": "AutoAdvance",
           "VisibleConditions": [],
           "Conditions": [],
           "HideWhenLocked": false,

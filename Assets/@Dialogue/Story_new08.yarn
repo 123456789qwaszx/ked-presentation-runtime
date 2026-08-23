@@ -1,9 +1,10 @@
-title: Story_new03
+title: Story_new08
 ---
 <<set $__t1_sf_qtqz9ujy_qwe = 0>>
 <<set $__t1_sf_qtqz9ujy_qwrr = 0>>
 <<set $__t1_sf_qtqz9ujy_trqweqw = false>>
 
-e: qw #line:ln_7fvikvrg
+윌로: 그냥길 #line:ln_h1cj01k0
 
+<<jump Story_장면_3>>
 ===

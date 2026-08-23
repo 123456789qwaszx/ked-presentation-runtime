@@ -10,6 +10,14 @@
       "Initial": 0,
       "Minimum": 0,
       "Maximum": 5
+    },
+    {
+      "Key": "power",
+      "DisplayName": "힘",
+      "Type": "Number",
+      "Initial": 0,
+      "Minimum": 0,
+      "Maximum": 5
     }
   ],
   "Nodes": [
@@ -25,7 +33,7 @@
         {
           "TargetEpisodeId": "new02",
           "ChoiceLabel": "선택지 골라.",
-          "Kind": "Choice",
+          "Kind": "PlayerChoice",
           "VisibleConditions": [],
           "Conditions": [],
           "HideWhenLocked": false,
@@ -38,6 +46,28 @@
               "Op": "Add"
             }
           ]
+        },
+        {
+          "TargetEpisodeId": "new05",
+          "ChoiceLabel": "선택지1",
+          "Kind": "PlayerChoice",
+          "VisibleConditions": [],
+          "Conditions": [],
+          "HideWhenLocked": false,
+          "LockedReasonText": "",
+          "ViaNodeId": "",
+          "StatChanges": []
+        },
+        {
+          "TargetEpisodeId": "new06",
+          "ChoiceLabel": "그냥길",
+          "Kind": "PlayerChoice",
+          "VisibleConditions": [],
+          "Conditions": [],
+          "HideWhenLocked": false,
+          "LockedReasonText": "",
+          "ViaNodeId": "",
+          "StatChanges": []
         }
       ],
       "Attachments": [],
@@ -61,7 +91,7 @@
         {
           "TargetEpisodeId": "new03",
           "ChoiceLabel": "",
-          "Kind": "Auto",
+          "Kind": "AutoAdvance",
           "VisibleConditions": [],
           "Conditions": [],
           "HideWhenLocked": false,
@@ -95,6 +125,156 @@
       "Position": {
         "X": 440,
         "Y": 0
+      }
+    },
+    {
+      "EpisodeId": "new04",
+      "Title": "",
+      "IndexText": "",
+      "Kind": "Main",
+      "DialogueEntryId": "Story_new04",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "new07",
+          "ChoiceLabel": "힘2보다커야함. 잠금경로",
+          "Kind": "PlayerChoice",
+          "VisibleConditions": [],
+          "Conditions": [
+            {
+              "Kind": "Stat",
+              "Key": "power",
+              "Op": "GreaterThan",
+              "IntValue": 2
+            }
+          ],
+          "HideWhenLocked": false,
+          "LockedReasonText": "",
+          "ViaNodeId": "",
+          "StatChanges": []
+        },
+        {
+          "TargetEpisodeId": "new08",
+          "ChoiceLabel": "그냥길",
+          "Kind": "PlayerChoice",
+          "VisibleConditions": [],
+          "Conditions": [],
+          "HideWhenLocked": false,
+          "LockedReasonText": "",
+          "ViaNodeId": "",
+          "StatChanges": []
+        }
+      ],
+      "Attachments": [],
+      "IsChapterEndingCandidate": false,
+      "EndingKey": "",
+      "DesignerNote": "",
+      "Position": {
+        "X": 220,
+        "Y": 150
+      }
+    },
+    {
+      "EpisodeId": "new05",
+      "Title": "",
+      "IndexText": "",
+      "Kind": "Main",
+      "DialogueEntryId": "Story_new05",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "new04",
+          "ChoiceLabel": "힘+4",
+          "Kind": "PlayerChoice",
+          "VisibleConditions": [],
+          "Conditions": [],
+          "HideWhenLocked": false,
+          "LockedReasonText": "",
+          "ViaNodeId": "",
+          "StatChanges": [
+            {
+              "Key": "power",
+              "Amount": 4,
+              "Op": "Add"
+            }
+          ]
+        }
+      ],
+      "Attachments": [],
+      "IsChapterEndingCandidate": false,
+      "EndingKey": "",
+      "DesignerNote": "",
+      "Position": {
+        "X": 220,
+        "Y": 300
+      }
+    },
+    {
+      "EpisodeId": "new06",
+      "Title": "",
+      "IndexText": "",
+      "Kind": "Main",
+      "DialogueEntryId": "Story_new06",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "new04",
+          "ChoiceLabel": "힘안줌",
+          "Kind": "PlayerChoice",
+          "VisibleConditions": [],
+          "Conditions": [],
+          "HideWhenLocked": false,
+          "LockedReasonText": "",
+          "ViaNodeId": "",
+          "StatChanges": []
+        }
+      ],
+      "Attachments": [],
+      "IsChapterEndingCandidate": false,
+      "EndingKey": "",
+      "DesignerNote": "",
+      "Position": {
+        "X": 220,
+        "Y": 450
+      }
+    },
+    {
+      "EpisodeId": "new07",
+      "Title": "",
+      "IndexText": "",
+      "Kind": "Main",
+      "DialogueEntryId": "Story_new07",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [],
+      "Attachments": [],
+      "IsChapterEndingCandidate": false,
+      "EndingKey": "",
+      "DesignerNote": "",
+      "Position": {
+        "X": 660,
+        "Y": 150
+      }
+    },
+    {
+      "EpisodeId": "new08",
+      "Title": "",
+      "IndexText": "",
+      "Kind": "Main",
+      "DialogueEntryId": "Story_new08",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [],
+      "Attachments": [],
+      "IsChapterEndingCandidate": false,
+      "EndingKey": "",
+      "DesignerNote": "",
+      "Position": {
+        "X": 660,
+        "Y": 300
       }
     }
   ],

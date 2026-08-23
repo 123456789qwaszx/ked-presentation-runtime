@@ -1,9 +1,16 @@
 title: Story_장면_1
 ---
+<<set $__t1_sf_qtqz9ujy_qwe = 0>>
+<<set $__t1_sf_qtqz9ujy_qwrr = 0>>
+<<set $__t1_sf_qtqz9ujy_trqweqw = false>>
 
 라루: 뭐시라? #line:ln_2t1hx7hf
-    <<detour Story_new02>>
 
-윌로: 또 왜 그러는데? #line:ln_5i0ijguh
+<<if $__t1_sf_qtqz9ujy_qwe >= 0>>
+    윌로: 또 왜 그러는데? #line:ln_5i0ijguh
+<<endif>>
+qwe #line:ln_49b4r3hs
 
+-> qweerrr #line:ln_4wadcn5w
+    윌로: 어라라? #line:ln_3u0i00p6
 ===
