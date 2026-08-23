@@ -65,6 +65,20 @@ public sealed class VNOptionItem : Selectable, ISubmitHandler, IPointerClickHand
         SetHighlighted(false);
     }
 
+    // Yarn 옵션이 아닌 곳에서 바인드:
+    // 진행 층의 에피소드 선택지(ChapterOptionsView).
+    public void Bind(string label, bool isAvailable, string effectText = null)
+    {
+        Bind(new VNOptionViewModel(
+            sourceOption: null,
+            sourceOptionIndex: -1,
+            choiceSequence: -1,
+            label: label,
+            isAvailable: isAvailable));
+
+        SetText(_effectText, effectText);
+    }
+
     public void ResetView()
     {
         _viewModel = null;
@@ -73,6 +87,7 @@ public sealed class VNOptionItem : Selectable, ISubmitHandler, IPointerClickHand
         interactable = false;
 
         SetText(_label, string.Empty);
+        SetText(_effectText, string.Empty);
 
         _revealAlpha = 0f;
         _stateAlpha = 0f;

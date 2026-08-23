@@ -28,7 +28,7 @@ public class VNAppBootstrap : MonoBehaviour
     private VNFeatureController _vnFeatureController;
     private EpisodePlayer _episodePlayer;
 
-    private DebugKeyChapterOptionsView _progressionOptions;
+    private IChapterOptionsView _progressionOptions;
     private ProgressionDriver _progressionDriver;
 
     [Header("UIManager")]
@@ -347,9 +347,10 @@ public class VNAppBootstrap : MonoBehaviour
             new YarnVariableCheckpoint(dialogueRunner.VariableStorage),
             _choiceHistory);
 
-        // 관문 5에서 진짜 UI로 갈아 끼운다 — 인터페이스(IChapterOptionsView)가 이미 서 있으므로
-        // 그때는 구현 교체로 끝난다. 여기서 UI를 먼저 만들면 어디서 막혔는지가 흐려진다.
-        _progressionOptions = new DebugKeyChapterOptionsView();
+        // 선택지 박스는 Yarn 옵션과 같은 것을 쓴다. 둘이 동시에 뜨는 일은 없음.
+        // Yarn 옵션은 노드 안에서, 에피소드 선택지는 노드와 노드 사이에서 뜬다.
+        _progressionOptions = new ChapterOptionsView(
+            uiManager.GetUI<VNDefaultOptionsPanel>(), optionItem);
 
         _progressionDriver = new ProgressionDriver(_episodePlayer, _progressionOptions);
     }
@@ -389,8 +390,7 @@ public class VNAppBootstrap : MonoBehaviour
             debugEpisodeChain,
             progressionChapterJson,
             dialogueRunner.YarnProject,
-            _progressionDriver,
-            _progressionOptions);
+            _progressionDriver);
     }
     
     private void BootstrapScreenBindings()

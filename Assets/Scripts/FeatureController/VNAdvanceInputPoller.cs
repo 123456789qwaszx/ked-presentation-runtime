@@ -21,10 +21,9 @@ public sealed class VNAdvanceInputPoller : MonoBehaviour
     // 툴에서 가져온 챕터와, 대조 대상.
     private TextAsset _progressionChapterJson;
     private YarnProject _yarnProject;
-
+    // 진행 층을 모는 것.
     // 진행 층을 모는 것과, 그 선택지를 받는 임시 화면.
     private ProgressionDriver _progressionDriver;
-    private DebugKeyChapterOptionsView _progressionOptions;
 
     private bool _rapidSkipHeld;
     private bool _speedUpHeld;
@@ -38,8 +37,7 @@ public sealed class VNAdvanceInputPoller : MonoBehaviour
         string[] debugEpisodeChain,
         TextAsset progressionChapterJson,
         YarnProject yarnProject,
-        ProgressionDriver progressionDriver,
-        DebugKeyChapterOptionsView progressionOptions)
+        ProgressionDriver progressionDriver)
     {
         _dialogueAdvanceDispatcher = dialogueAdvanceDispatcher;
         _featureController = featureController;
@@ -50,7 +48,6 @@ public sealed class VNAdvanceInputPoller : MonoBehaviour
         _progressionChapterJson = progressionChapterJson;
         _yarnProject = yarnProject;
         _progressionDriver = progressionDriver;
-        _progressionOptions = progressionOptions;
     }
 
     private void Update()
@@ -118,17 +115,8 @@ public sealed class VNAdvanceInputPoller : MonoBehaviour
     // 로드 후 비교. 이 후 실행까지 담당.
     private void PollDebugRunProgression()
     {
-        // 선택지를 기다리는 동안에만 숫자 키 선택. 테스트용 키와 충돌 방지.
-        if (_progressionOptions != null && _progressionOptions.IsWaiting)
-        {
-            int index = _bindings.PressedOptionIndex();
-
-            if (index >= 0)
-                _progressionOptions.TrySelect(index);
-
-            return;
-        }
-
+        // 선택지 입력은 여기로 안 온다. VNOptionItem 이 Selectable 이라 마우스와
+        // EventSystem 이 알아서 다룬다 — 폴링할 것이 없다.
         if (_bindings.IsLoadProgressionPressed())
             StartProgression();
     }
