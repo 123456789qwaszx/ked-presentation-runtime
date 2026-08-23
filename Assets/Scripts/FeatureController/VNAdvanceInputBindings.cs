@@ -21,6 +21,8 @@ public sealed class VNAdvanceInputBindings
 
     public KeyCode runYarn = KeyCode.Alpha2;
 
+    public KeyCode runEpisodeChain = KeyCode.Alpha3;
+
     public bool IsRapidSkipHeld() => IsHeld(rapidSkipLeft) || IsHeld(rapidSkipRight);
     public bool IsSpeedUpHeld() => IsHeld(speedUpHold);
     public bool IsSpeedUpTogglePressed() => IsPressed(speedUpToggle);
@@ -28,6 +30,7 @@ public sealed class VNAdvanceInputBindings
     public bool IsRollbackPressed() => IsPressed(rollback);
     public bool IsAdvancePressed() => IsPressed(advance);
     public bool IsRunYarnPressed() => IsPressed(runYarn);
+    public bool IsRunEpisodeChainPressed() => IsPressed(runEpisodeChain);
 
     
     private static bool IsHeld(KeyCode key)

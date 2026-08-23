@@ -67,6 +67,10 @@ public class VNAppBootstrap : MonoBehaviour
     [Tooltip("디버그 키(2번)와 타이틀에서 재생할 yarn 노드 이름.")]
     [SerializeField] private string yarnEntryKey;
 
+    [Tooltip("진행 층 없이 노드 사슬만 시험한다. " +
+             "씬에 값이 없으면 여기 적힌 기본값을 쓴다.")]
+    [SerializeField] private string[] debugEpisodeChain = { "Story_new01", "Story_new02" };
+
     [Header("VNAdvanceGate")]
     [SerializeField] private VNAdvanceInputPoller vnAdvanceInputPoller;
 
@@ -367,7 +371,8 @@ public class VNAppBootstrap : MonoBehaviour
             _vnFeatureController,
             _linePresentationAdvanceState,
             _episodePlayer,
-            yarnEntryKey);
+            yarnEntryKey,
+            debugEpisodeChain);
     }
     
     private void BootstrapScreenBindings()

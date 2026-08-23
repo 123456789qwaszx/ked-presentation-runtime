@@ -14,6 +14,8 @@ public sealed class VNAdvanceInputPoller : MonoBehaviour
     // 디버그 키(2번)로 재생할 노드.
     private string _yarnEntryKey;
 
+    private string[] _debugEpisodeChain;
+
     private bool _rapidSkipHeld;
     private bool _speedUpHeld;
 
@@ -22,13 +24,15 @@ public sealed class VNAdvanceInputPoller : MonoBehaviour
         VNFeatureController featureController,
         VNLinePresentationState linePresentationAdvanceState,
         EpisodePlayer episodePlayer,
-        string yarnEntryKey)
+        string yarnEntryKey,
+        string[] debugEpisodeChain)
     {
         _dialogueAdvanceDispatcher = dialogueAdvanceDispatcher;
         _featureController = featureController;
         _linePresentationAdvanceState = linePresentationAdvanceState;
         _episodePlayer = episodePlayer;
         _yarnEntryKey = yarnEntryKey;
+        _debugEpisodeChain = debugEpisodeChain;
     }
 
     private void Update()
@@ -42,15 +46,46 @@ public sealed class VNAdvanceInputPoller : MonoBehaviour
         PollSpeedUpMode();
         PollFeatureToggles();
         PollDebugRunYarn();
+        PollDebugRunEpisodeChain();
 
         _featureController.Tick();
     }
 
-    // Update에서 부르는 입력 핸들러라 async void다. 첫 await에서 바로 반환된다.
+    // Update에서 부르는 입력 핸들러라 async void다. 첫 await에서 바로 반환.
     private async void PollDebugRunYarn()
     {
         if (_bindings.IsRunYarnPressed())
             await _episodePlayer.StartGameAsync(_yarnEntryKey);
+    }
+
+    private async void PollDebugRunEpisodeChain()
+    {
+        if (!_bindings.IsRunEpisodeChainPressed())
+            return;
+
+        if (_debugEpisodeChain == null || _debugEpisodeChain.Length == 0)
+        {
+            Debug.LogWarning("[연결] 이어 재생할 노드가 비어 있다.");
+            return;
+        }
+
+        // 시작과 끝을 둘 다 찍음.
+        for (int i = 0; i < _debugEpisodeChain.Length; i++)
+        {
+            string nodeName = _debugEpisodeChain[i];
+
+            Debug.Log($"[연결] {i + 1}/{_debugEpisodeChain.Length} 시작 — \"{nodeName}\"");
+
+            // 첫 진입 이후로는 백로그를 이어야 하므로 다른 경로 사용.
+            if (i == 0)
+                await _episodePlayer.StartGameAsync(nodeName);
+            else
+                await _episodePlayer.ContinueEpisodeAsync(nodeName);
+
+            Debug.Log($"[연결] {i + 1}/{_debugEpisodeChain.Length} 끝 — \"{nodeName}\"");
+        }
+
+        Debug.Log("[연결] 사슬 끝.");
     }
 
     private void PollAdvance()

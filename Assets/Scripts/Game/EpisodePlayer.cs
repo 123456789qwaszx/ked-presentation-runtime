@@ -47,19 +47,51 @@ public sealed class EpisodePlayer
         _choiceHistory = choiceHistory;
     }
 
-    // 새 장면 진입. 이 순간의 (시작에피소드와 variable변수)가 롤백 리플레이의 체크포인트가 된다.
+    // 세션 경계.
+    // 이 순간의 (시작에피소드와 variable변수)가 롤백 리플레이의 체크포인트가 된다.
+    // 백로그를 포함해 전부 비움.
     public async Task StartGameAsync(string nodeName)
+    {
+        await EnterSceneAsync(nodeName, isNewSession: true);
+    }
+
+    // 이어지는 장면 진입 = 세션 안.
+    // 백로그만 기록.
+    //
+    // 기록 하지 않는 것과 이유:
+    
+    // 롤백 포인트:
+    // - 진행 층에 언커밋이 없음.
+    // - 롤백이 에피소드 경계를 넘으면 되돌릴 수 없는 스탯 커밋 앞으로 돌아가게 된다.
+    // - 에피소드 안으로만 제한.(차후 개선)
+    
+    // 변수 체크포인트:
+    // - 롤백과 동일
+    
+    // 선택 기록:
+    // - 롤백 리플레이용이고 롤백이 장면 스코프.
+    
+    // 무대:
+    // - 이어야 하는 것이 맞지만 아직 못 잇는다.
+    // - ReplayCurrentSceneAsync가 RunSceneAsync를 거치며 무대를 비우므로, 승계해 두면 롤백 한 번에 무대가 갈린다.
+    // - 승계하려면 StageState를 굽고 되살리는 짝이 필요한데 지금은 굽는 쪽(StageStateCapture)만 있다.
+    public async Task ContinueEpisodeAsync(string nodeName)
+    {
+        await EnterSceneAsync(nodeName, isNewSession: false);
+    }
+
+    private async Task EnterSceneAsync(string nodeName, bool isNewSession)
     {
         await StopDialogueAsync();
 
         _sceneRootNodeName = nodeName;
         _variableCheckpoint.Capture();
 
-        // 백로그는 세션 스코프 — 새 판 시작인 여기서만 비운다. 장면 체이닝이 생기면
-        // "이어지는 장면 진입"은 비우지 않는 별도 경로로 갈라야 한다.
-        _backlogRecorder.ClearBacklog();
+        // 백로그는 세션 스코프 - 새 판 시작에서만 비운다.
+        if (isNewSession)
+            _backlogRecorder.ClearBacklog();
 
-        // 선택지 기록은 장면 스코프. 따라서 여기서만 리셋.
+        // 선택지 기록은 장면 스코프. 따라서 장면 진입마다 리셋.
         // ReplayCurrentSceneAsync에서는 지우면 안 됨.
         _choiceHistory.ClearChoiceRecords();
 
