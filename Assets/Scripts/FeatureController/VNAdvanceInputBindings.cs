@@ -23,6 +23,8 @@ public sealed class VNAdvanceInputBindings
 
     public KeyCode runEpisodeChain = KeyCode.Alpha3;
 
+    public KeyCode loadProgression = KeyCode.Alpha4;
+
     public bool IsRapidSkipHeld() => IsHeld(rapidSkipLeft) || IsHeld(rapidSkipRight);
     public bool IsSpeedUpHeld() => IsHeld(speedUpHold);
     public bool IsSpeedUpTogglePressed() => IsPressed(speedUpToggle);
@@ -31,6 +33,19 @@ public sealed class VNAdvanceInputBindings
     public bool IsAdvancePressed() => IsPressed(advance);
     public bool IsRunYarnPressed() => IsPressed(runYarn);
     public bool IsRunEpisodeChainPressed() => IsPressed(runEpisodeChain);
+    public bool IsLoadProgressionPressed() => IsPressed(loadProgression);
+
+    // 테스트용 선택지 진행.
+    public int PressedOptionIndex()
+    {
+        for (int i = 0; i < 9; i++)
+        {
+            if (Input.GetKeyDown(KeyCode.Alpha1 + i))
+                return i;
+        }
+
+        return -1;
+    }
 
     
     private static bool IsHeld(KeyCode key)

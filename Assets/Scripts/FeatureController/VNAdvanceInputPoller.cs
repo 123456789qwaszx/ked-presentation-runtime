@@ -1,4 +1,6 @@
+using Ked.Progression;
 using UnityEngine;
+using Yarn.Unity;
 
 // VN 재생의 유일한 프레임 구동자.
 public sealed class VNAdvanceInputPoller : MonoBehaviour
@@ -16,6 +18,14 @@ public sealed class VNAdvanceInputPoller : MonoBehaviour
 
     private string[] _debugEpisodeChain;
 
+    // 툴에서 가져온 챕터와, 대조 대상.
+    private TextAsset _progressionChapterJson;
+    private YarnProject _yarnProject;
+
+    // 진행 층을 모는 것과, 그 선택지를 받는 임시 화면.
+    private ProgressionDriver _progressionDriver;
+    private DebugKeyChapterOptionsView _progressionOptions;
+
     private bool _rapidSkipHeld;
     private bool _speedUpHeld;
 
@@ -25,7 +35,11 @@ public sealed class VNAdvanceInputPoller : MonoBehaviour
         VNLinePresentationState linePresentationAdvanceState,
         EpisodePlayer episodePlayer,
         string yarnEntryKey,
-        string[] debugEpisodeChain)
+        string[] debugEpisodeChain,
+        TextAsset progressionChapterJson,
+        YarnProject yarnProject,
+        ProgressionDriver progressionDriver,
+        DebugKeyChapterOptionsView progressionOptions)
     {
         _dialogueAdvanceDispatcher = dialogueAdvanceDispatcher;
         _featureController = featureController;
@@ -33,6 +47,10 @@ public sealed class VNAdvanceInputPoller : MonoBehaviour
         _episodePlayer = episodePlayer;
         _yarnEntryKey = yarnEntryKey;
         _debugEpisodeChain = debugEpisodeChain;
+        _progressionChapterJson = progressionChapterJson;
+        _yarnProject = yarnProject;
+        _progressionDriver = progressionDriver;
+        _progressionOptions = progressionOptions;
     }
 
     private void Update()
@@ -47,6 +65,7 @@ public sealed class VNAdvanceInputPoller : MonoBehaviour
         PollFeatureToggles();
         PollDebugRunYarn();
         PollDebugRunEpisodeChain();
+        PollDebugRunProgression();
 
         _featureController.Tick();
     }
@@ -54,13 +73,21 @@ public sealed class VNAdvanceInputPoller : MonoBehaviour
     // Update에서 부르는 입력 핸들러라 async void다. 첫 await에서 바로 반환.
     private async void PollDebugRunYarn()
     {
-        if (_bindings.IsRunYarnPressed())
-            await _episodePlayer.StartGameAsync(_yarnEntryKey);
+        if (!_bindings.IsRunYarnPressed())
+            return;
+
+        if (IsProgressionRunning())
+            return;
+
+        await _episodePlayer.StartGameAsync(_yarnEntryKey);
     }
 
     private async void PollDebugRunEpisodeChain()
     {
         if (!_bindings.IsRunEpisodeChainPressed())
+            return;
+
+        if (IsProgressionRunning())
             return;
 
         if (_debugEpisodeChain == null || _debugEpisodeChain.Length == 0)
@@ -86,6 +113,50 @@ public sealed class VNAdvanceInputPoller : MonoBehaviour
         }
 
         Debug.Log("[연결] 사슬 끝.");
+    }
+
+    // 로드 후 비교. 이 후 실행까지 담당.
+    private void PollDebugRunProgression()
+    {
+        // 선택지를 기다리는 동안에만 숫자 키 선택. 테스트용 키와 충돌 방지.
+        if (_progressionOptions != null && _progressionOptions.IsWaiting)
+        {
+            int index = _bindings.PressedOptionIndex();
+
+            if (index >= 0)
+                _progressionOptions.TrySelect(index);
+
+            return;
+        }
+
+        if (_bindings.IsLoadProgressionPressed())
+            StartProgression();
+    }
+
+    private async void StartProgression()
+    {
+        if (_progressionDriver == null || _progressionDriver.IsRunning)
+            return;
+
+        ScenarioProgression scenario =
+            ProgressionContentLoader.LoadSingleChapter(_progressionChapterJson);
+
+        if (scenario == null)
+            return;
+
+        if (!ProgressionContentPreflight.CheckAndLog(scenario, _yarnProject))
+            return;
+
+        await _progressionDriver.RunAsync(scenario);
+    }
+
+    private bool IsProgressionRunning()
+    {
+        if (_progressionDriver == null || !_progressionDriver.IsRunning)
+            return false;
+
+        Debug.Log("[진행] 도는 중이라 대사 단독 재생 키를 무시한다.");
+        return true;
     }
 
     private void PollAdvance()

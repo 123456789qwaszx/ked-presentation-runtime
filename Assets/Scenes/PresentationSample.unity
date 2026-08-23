@@ -3828,6 +3828,10 @@ MonoBehaviour:
   vnOptionsPresenter: {fileID: 1180068359}
   optionItem: {fileID: 8364438180924277572, guid: 3a0acb1fd0e1d604183be29ffcfb79a7, type: 3}
   yarnEntryKey: Story_blank_ch01_ep00
+  debugEpisodeChain:
+  - Story_new01
+  - Story_new02
+  progressionChapterJson: {fileID: 4900000, guid: 94018137973bf554a9817f7e869d0de0, type: 3}
   vnAdvanceInputPoller: {fileID: 1315566987}
   rigPrefab: {fileID: 2306115306432438348, guid: c7b3ab204cabea145aff7affa87d3d9d, type: 3}
   backgroundRigPrefab: {fileID: 6323253774795375343, guid: 18f0ce8dac4b54f44a88bdcceac48012, type: 3}

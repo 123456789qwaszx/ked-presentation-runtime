@@ -28,6 +28,9 @@ public class VNAppBootstrap : MonoBehaviour
     private VNFeatureController _vnFeatureController;
     private EpisodePlayer _episodePlayer;
 
+    private DebugKeyChapterOptionsView _progressionOptions;
+    private ProgressionDriver _progressionDriver;
+
     [Header("UIManager")]
     [SerializeField] private UIManager uiManager;
 
@@ -70,6 +73,11 @@ public class VNAppBootstrap : MonoBehaviour
     [Tooltip("진행 층 없이 노드 사슬만 시험한다. " +
              "씬에 값이 없으면 여기 적힌 기본값을 쓴다.")]
     [SerializeField] private string[] debugEpisodeChain = { "Story_new01", "Story_new02" };
+
+    [Header("진행 층")]
+    [Tooltip("툴이 낸 챕터 JSON. Assets/@Dialogue/ChapterProgression/ 아래의 .json 을 넣는다. " +
+             "경로 문자열이 아니라 에셋 참조다 — 머신에 안 매이고 빌드에도 실린다.")]
+    [SerializeField] private TextAsset progressionChapterJson;
 
     [Header("VNAdvanceGate")]
     [SerializeField] private VNAdvanceInputPoller vnAdvanceInputPoller;
@@ -338,6 +346,12 @@ public class VNAppBootstrap : MonoBehaviour
             _presentationScopeSession,
             new YarnVariableCheckpoint(dialogueRunner.VariableStorage),
             _choiceHistory);
+
+        // 관문 5에서 진짜 UI로 갈아 끼운다 — 인터페이스(IChapterOptionsView)가 이미 서 있으므로
+        // 그때는 구현 교체로 끝난다. 여기서 UI를 먼저 만들면 어디서 막혔는지가 흐려진다.
+        _progressionOptions = new DebugKeyChapterOptionsView();
+
+        _progressionDriver = new ProgressionDriver(_episodePlayer, _progressionOptions);
     }
 
     private void BootstrapPlaybackControls()
@@ -372,7 +386,11 @@ public class VNAppBootstrap : MonoBehaviour
             _linePresentationAdvanceState,
             _episodePlayer,
             yarnEntryKey,
-            debugEpisodeChain);
+            debugEpisodeChain,
+            progressionChapterJson,
+            dialogueRunner.YarnProject,
+            _progressionDriver,
+            _progressionOptions);
     }
     
     private void BootstrapScreenBindings()
