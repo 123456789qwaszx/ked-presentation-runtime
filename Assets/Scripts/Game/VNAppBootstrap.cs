@@ -30,6 +30,7 @@ public class VNAppBootstrap : MonoBehaviour
 
     private IChapterOptionsView _progressionOptions;
     private ProgressionDriver _progressionDriver;
+    private ProgressionLauncher _progressionLauncher;
 
     [Header("UIManager")]
     [SerializeField] private UIManager uiManager;
@@ -353,6 +354,9 @@ public class VNAppBootstrap : MonoBehaviour
             uiManager.GetUI<VNDefaultOptionsPanel>(), optionItem);
 
         _progressionDriver = new ProgressionDriver(_episodePlayer, _progressionOptions);
+
+        _progressionLauncher = new ProgressionLauncher(
+            _progressionDriver, dialogueRunner, progressionChapterJson);
     }
 
     private void BootstrapPlaybackControls()
@@ -388,9 +392,7 @@ public class VNAppBootstrap : MonoBehaviour
             _episodePlayer,
             yarnEntryKey,
             debugEpisodeChain,
-            progressionChapterJson,
-            dialogueRunner.YarnProject,
-            _progressionDriver);
+            _progressionLauncher);
     }
     
     private void BootstrapScreenBindings()

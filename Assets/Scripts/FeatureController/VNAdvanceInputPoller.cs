@@ -1,6 +1,4 @@
-using Ked.Progression;
 using UnityEngine;
-using Yarn.Unity;
 
 // VN 재생의 유일한 프레임 구동자.
 public sealed class VNAdvanceInputPoller : MonoBehaviour
@@ -18,12 +16,8 @@ public sealed class VNAdvanceInputPoller : MonoBehaviour
 
     private string[] _debugEpisodeChain;
 
-    // 툴에서 가져온 챕터와, 대조 대상.
-    private TextAsset _progressionChapterJson;
-    private YarnProject _yarnProject;
-    // 진행 층을 모는 것.
-    // 진행 층을 모는 것과, 그 선택지를 받는 임시 화면.
-    private ProgressionDriver _progressionDriver;
+    // 진행 층을 시작 경로.
+    private ProgressionLauncher _progressionLauncher;
 
     private bool _rapidSkipHeld;
     private bool _speedUpHeld;
@@ -35,9 +29,7 @@ public sealed class VNAdvanceInputPoller : MonoBehaviour
         EpisodePlayer episodePlayer,
         string yarnEntryKey,
         string[] debugEpisodeChain,
-        TextAsset progressionChapterJson,
-        YarnProject yarnProject,
-        ProgressionDriver progressionDriver)
+        ProgressionLauncher progressionLauncher)
     {
         _dialogueAdvanceDispatcher = dialogueAdvanceDispatcher;
         _featureController = featureController;
@@ -45,9 +37,7 @@ public sealed class VNAdvanceInputPoller : MonoBehaviour
         _episodePlayer = episodePlayer;
         _yarnEntryKey = yarnEntryKey;
         _debugEpisodeChain = debugEpisodeChain;
-        _progressionChapterJson = progressionChapterJson;
-        _yarnProject = yarnProject;
-        _progressionDriver = progressionDriver;
+        _progressionLauncher = progressionLauncher;
     }
 
     private void Update()
@@ -112,35 +102,25 @@ public sealed class VNAdvanceInputPoller : MonoBehaviour
         Debug.Log("[연결] 사슬 끝.");
     }
 
-    // 로드 후 비교. 이 후 실행까지 담당.
+    // 싣고·대조하고·모는 것은 런처 담당.
     private void PollDebugRunProgression()
     {
-        // 선택지 입력은 여기로 안 온다. VNOptionItem 이 Selectable 이라 마우스와
-        // EventSystem 이 알아서 다룬다 — 폴링할 것이 없다.
+        // 선택지 입력은 여기로 안 옴. VNOptionItem 이 Selectable이기에 EventSystem 사용.
         if (_bindings.IsLoadProgressionPressed())
             StartProgression();
     }
 
     private async void StartProgression()
     {
-        if (_progressionDriver == null || _progressionDriver.IsRunning)
+        if (_progressionLauncher == null)
             return;
 
-        ScenarioProgression scenario =
-            ProgressionContentLoader.LoadSingleChapter(_progressionChapterJson);
-
-        if (scenario == null)
-            return;
-
-        if (!ProgressionContentPreflight.CheckAndLog(scenario, _yarnProject))
-            return;
-
-        await _progressionDriver.RunAsync(scenario);
+        await _progressionLauncher.LaunchAsync();
     }
 
     private bool IsProgressionRunning()
     {
-        if (_progressionDriver == null || !_progressionDriver.IsRunning)
+        if (_progressionLauncher == null || !_progressionLauncher.IsRunning)
             return false;
 
         Debug.Log("[진행] 도는 중이라 대사 단독 재생 키를 무시한다.");
