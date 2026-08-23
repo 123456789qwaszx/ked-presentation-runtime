@@ -4,15 +4,10 @@ namespace Ked.Progression
 {
     public enum StatType
     {
-        // 정수 스탯. 경계는 저작이 정함.
         Number = 0,
-
-        // 참/거짓 스탯. 값 공간은 0·1이고 조건은 "ComparisonOp.Equal"만 사용
-        // 런타임에 bool이라는 별도 종류 추가 안함.
         Bool = 1,
     }
 
-    // 스탯 정의.
     public sealed class StatDefinition
     {
         public string Key { get; }

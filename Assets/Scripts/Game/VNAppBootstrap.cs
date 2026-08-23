@@ -73,7 +73,7 @@ public class VNAppBootstrap : MonoBehaviour
 
     [Tooltip("진행 층 없이 노드 사슬만 시험한다. " +
              "씬에 값이 없으면 여기 적힌 기본값을 쓴다.")]
-    [SerializeField] private string[] debugEpisodeChain = { "Story_new01", "Story_new02" };
+    [SerializeField] private string[] debugEpisodeChain = { "new01", "new02" };
 
     [Header("진행 층")]
     [Tooltip("툴이 낸 챕터 JSON. Assets/@Dialogue/ChapterProgression/ 아래의 .json 을 넣는다. " +
