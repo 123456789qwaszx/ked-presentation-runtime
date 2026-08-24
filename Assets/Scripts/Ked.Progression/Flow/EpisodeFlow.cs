@@ -7,19 +7,24 @@ namespace Ked.Progression
     /// 에피소드 하나를 트랜잭션으로 굴리고, 챕터 경계를 넘긴다.
     ///
     /// <code>
-    ///   EpisodeEntered ──[대사]──► (판정) ──┬─► AwaitingChoice ──[선택]──┐
-    ///        ▲                              ├─► (자동 진행) ─────────────┤
-    ///        │                              │                            ▼
-    ///        │                              │                       ViaPlaying
-    ///        │                              │                            │
-    ///        └───────[세이브]──── Committed ◄┼────────────────────────────┘
-    ///                                       │
-    ///                                       └─► (챕터 끝) ──► 시나리오 층
+    ///   PlayDialogue ──[대사]──► (판정) ──┬─► PresentOptions ──[선택]──┐
+    ///        ▲                            ├─► (자동 진행) ─────────────┤
+    ///        │                            │                            ▼
+    ///        │                            │                        PlayVia
+    ///        │                            │                            │
+    ///        └──[세이브]──── PersistSave ◄─┼────────────────────────────┘
+    ///                                     │
+    ///                                     └─► (챕터 끝) ──► 시나리오 층
     /// </code>
     ///
     /// <b>이 흐름은 끌려간다.</b> 스스로 무엇을 부르지 않고, 지금 필요한 것을
-    /// <see cref="Pending"/>으로 내놓은 뒤 호스트가 마쳤다고 알려 주기를 기다린다. 그래서
-    /// 인터페이스도 콜백도 <c>async</c>도 없고, 유니티와 Avalonia가 같은 흐름을 공유한다.
+    /// <see cref="Pending"/>으로 내놓은 뒤 호스트가 마쳤다고 알려 주기를 기다린다.
+    /// 인터페이스도 콜백도 <c>async</c>도 없다 — 그래서 <b>즉시 완료로 모는 호스트</b>가
+    /// 같은 흐름을 그대로 걸을 수 있다(미리보기·테스트).
+    ///
+    /// <b>서 있는 자리는 <see cref="Pending"/>이 곧 말한다.</b> 자리를 따로 든 적이
+    /// 있었는데, 대입하는 자리마다 <c>Pending</c>과 함께 세워서 둘이 갈릴 수가 없었다 —
+    /// 같은 것을 두 번 적고 있었을 뿐이다.
     ///
     /// <b>판단과 실행이 시간으로 갈라져 있다</b>(P4) — <see cref="DialogueCompleted"/>가
     /// 한 번 판정하고, 그 뒤 <see cref="Choose"/>는 이미 정해진 목록에서 고르기만 한다.
@@ -33,19 +38,20 @@ namespace Ked.Progression
         private ChapterAdvance _advance;
         private EpisodeOption _chosen;
 
-        private EpisodePhase Phase { get; set; } = EpisodePhase.None;
-
-        /// <summary>지금 호스트가 해야 하는 일. 흐름이 멈출 때마다 채워진다.</summary>
+        /// <summary>
+        /// 지금 호스트가 해야 하는 일. 흐름이 멈출 때마다 채워지고,
+        /// <b>흐름이 어디에 서 있는지도 이 값이 말한다</b>.
+        /// </summary>
         public FlowRequest Pending { get; private set; }
 
         /// <summary>
         /// 지금 진행. <b>이 흐름이 들고 있는 유일한 저장 대상이다</b> —
-        /// <see cref="Pending"/>도 <see cref="Phase"/>도 세이브에 가지 않는다(P3).
+        /// <see cref="Pending"/>은 세이브에 가지 않는다(P3).
         /// </summary>
         public ProgressionState State => _state;
 
-        public bool IsFinished =>
-            Phase == EpisodePhase.ScenarioFinished || Phase == EpisodePhase.DeadEnd;
+        // 의도한 종착인지 막다른 곳인지는 Pending.Outcome이 나른다.
+        public bool IsFinished => Pending.Kind == FlowRequestKind.Finished;
 
         private EpisodeFlow(ScenarioProgression scenario, ProgressionState state)
         {
@@ -62,10 +68,7 @@ namespace Ked.Progression
             if (scenario == null)
                 throw new ArgumentNullException(nameof(scenario));
 
-            var flow = new EpisodeFlow(scenario, scenario.StartChapter.CreateEntryState());
-            flow.EnterEpisode();
-
-            return flow;
+            return Resume(scenario, scenario.StartChapter.CreateEntryState());
         }
 
         /// <summary>
@@ -92,8 +95,9 @@ namespace Ked.Progression
 
         // ── 호스트가 마쳤다고 알리는 것들 ────────────────────────────
         //
-        // 넷 다 한 자리에서만 유효하다. 자리가 아니면 던진다 — 무효 조합을 타입으로 못
-        // 올렸으므로 생성자 급에서 막는다(규칙을 위로 올린다: 타입 > 생성자 > 로더).
+        // 넷 다 <b>자기가 부탁받은 자리에서만</b> 유효하다. 자리가 아니면 던진다 —
+        // 무효 조합을 타입으로 못 올렸으므로 생성자 급에서 막는다
+        // (규칙을 위로 올린다: 타입 > 생성자 > 로더).
 
         /// <summary>
         /// 대사가 끝났다. <b>이 호출이 이 회차의 판단을 확정한다</b> — 조건 판정은
@@ -101,14 +105,13 @@ namespace Ked.Progression
         /// </summary>
         public void DialogueCompleted()
         {
-            Require(EpisodePhase.EpisodeEntered, nameof(DialogueCompleted));
+            Require(FlowRequestKind.PlayDialogue, nameof(DialogueCompleted));
 
             _advance = ChapterTransition.Resolve(CurrentChapter(), _state);
 
             switch (_advance.Kind)
             {
                 case ChapterAdvanceKind.AwaitPlayerChoice:
-                    Phase = EpisodePhase.AwaitingChoice;
                     Pending = FlowRequest.PresentOptions(_advance.Options, _advance.HiddenCount);
                     return;
 
@@ -128,7 +131,7 @@ namespace Ked.Progression
         /// </summary>
         public void Choose(int optionIndex)
         {
-            Require(EpisodePhase.AwaitingChoice, nameof(Choose));
+            Require(FlowRequestKind.PresentOptions, nameof(Choose));
 
             if (optionIndex < 0 || optionIndex >= _advance.Options.Count)
             {
@@ -151,7 +154,7 @@ namespace Ked.Progression
         /// <summary>연출이 끝났다. 지나가는 자리이므로 상태는 아직 안 바뀌었다.</summary>
         public void ViaCompleted()
         {
-            Require(EpisodePhase.ViaPlaying, nameof(ViaCompleted));
+            Require(FlowRequestKind.PlayVia, nameof(ViaCompleted));
 
             CommitChosen();
         }
@@ -164,12 +167,7 @@ namespace Ked.Progression
         /// </summary>
         public void SavePersisted()
         {
-            if (Phase != EpisodePhase.Committed && Phase != EpisodePhase.ChapterBoundaryCommitted)
-            {
-                throw new InvalidOperationException(
-                    $"{nameof(SavePersisted)}는 Committed 또는 ChapterBoundaryCommitted에서만 " +
-                    $"부를 수 있다. 지금은 {Phase}다.");
-            }
+            Require(FlowRequestKind.PersistSave, nameof(SavePersisted));
 
             EnterEpisode();
         }
@@ -178,11 +176,13 @@ namespace Ked.Progression
 
         private void EnterEpisode()
         {
-            Phase = EpisodePhase.EpisodeEntered;
             _advance = default;
             _chosen = null;
 
-            Pending = FlowRequest.PlayDialogue(CurrentNode().DialogueEntryId);
+            // 노드도 챕터도 검증된 곳만 가리킨다(아래 CurrentChapter 주석과 같은 이유).
+            CurrentChapter().TryGetNode(_state.CurrentEpisodeId, out EpisodeNode node);
+
+            Pending = FlowRequest.PlayDialogue(node.DialogueEntryId);
         }
 
         private void Take(EpisodeOption option)
@@ -192,7 +192,6 @@ namespace Ked.Progression
             // 연출은 지나가며 거쳐 갈 뿐이라 상태를 안 바꾼다. 이름이 비면 곧장 간다.
             if (option.HasVia)
             {
-                Phase = EpisodePhase.ViaPlaying;
                 Pending = FlowRequest.PlayVia(option.ViaNodeId);
 
                 return;
@@ -208,7 +207,6 @@ namespace Ked.Progression
             _state = _state.Commit(CurrentChapter(), _chosen);
             _chosen = null;
 
-            Phase = EpisodePhase.Committed;
             Pending = FlowRequest.PersistSave(ProgressionSave.Capture(_scenario, _state));
         }
 
@@ -230,10 +228,7 @@ namespace Ked.Progression
             if (next.Kind != ScenarioAdvanceKind.NextChapter)
             {
                 // 의도한 종착과 막다른 곳을 섞지 않는다 — 화면에서 구별되어야 한다.
-                Phase = next.Kind == ScenarioAdvanceKind.ScenarioEnded
-                    ? EpisodePhase.ScenarioFinished
-                    : EpisodePhase.DeadEnd;
-
+                // 그 구별은 Outcome이 나른다.
                 Pending = FlowRequest.Finished(next);
 
                 return;
@@ -242,12 +237,12 @@ namespace Ked.Progression
             // 스탯은 새 챕터의 초기값에서 다시 선다 — 수명이 챕터다.
             _state = _state.CommitChapterEnding(_scenario, next);
 
-            Phase = EpisodePhase.ChapterBoundaryCommitted;
+            // 에피소드 안에서 굽는 것과 같은 부탁이다 — 돌아오는 자리도 같다.
             Pending = FlowRequest.PersistSave(ProgressionSave.Capture(_scenario, _state));
         }
 
-        // 로더가 이미 참조를 다 검증했고 Commit은 검증된 곳으로만 옮긴다. 그래서 둘 다
-        // 전체 함수다 — 여기에 방어 코드가 생기면 경계가 샜다는 신호다(P2).
+        // 로더가 참조를 다 검증했고 Commit은 검증된 곳으로만 옮긴다 — 전체 함수다.
+        // 여기에 방어 코드가 생기면 경계가 샜다는 신호다(P2).
         private ChapterProgression CurrentChapter()
         {
             _scenario.TryGetChapter(_state.CurrentChapterId, out ChapterProgression chapter);
@@ -255,23 +250,17 @@ namespace Ked.Progression
             return chapter;
         }
 
-        private EpisodeNode CurrentNode()
+        private void Require(FlowRequestKind expected, string called)
         {
-            CurrentChapter().TryGetNode(_state.CurrentEpisodeId, out EpisodeNode node);
-
-            return node;
-        }
-
-        private void Require(EpisodePhase expected, string called)
-        {
-            if (Phase != expected)
+            if (Pending.Kind != expected)
             {
                 throw new InvalidOperationException(
-                    $"{called}는 {expected}에서만 부를 수 있다. 지금은 {Phase}다.");
+                    $"{called}는 {expected}를 부탁한 자리에서만 부를 수 있다. " +
+                    $"지금 부탁한 것은 {Pending.Kind}다.");
             }
         }
 
         public override string ToString() =>
-            $"{_state.CurrentChapterId}/{_state.CurrentEpisodeId} [{Phase}] {Pending}";
+            $"{_state.CurrentChapterId}/{_state.CurrentEpisodeId} — {Pending}";
     }
 }

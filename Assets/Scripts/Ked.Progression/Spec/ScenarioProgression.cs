@@ -3,14 +3,10 @@ using System.Collections.Generic;
 
 namespace Ked.Progression
 {
-    /// <summary>
-    /// 챕터들을 묶는 자리. <b>껍데기다</b> — 시나리오 수명을 사는 상태를 하나도 들지
-    /// 않는다. 진행 상태의 수명은 챕터이고(스탯은 챕터 경계에서 다시 선다), 시나리오
-    /// 전체를 사는 기억은 [1] 영구 계층의 것인데 그 계층은 아직 서지 않았다.
-    ///
-    /// 그래서 여기가 지키는 것은 셋뿐이다 — 챕터 ID가 유일한가, 시작 챕터가 실재하는가,
-    /// 엔딩이 가리키는 다음 챕터가 실재하는가.
-    /// </summary>
+    // 챕터들을 묶는 자리.
+    // [1] 영구 계층을 다루지 않기에 사실상 껍데기.
+    //
+    // 챕터 ID가 유일한가, 시작 챕터가 실재하는가, 엔딩이 가리키는 다음 챕터가 실재하는가.
     public sealed class ScenarioProgression
     {
         private readonly Dictionary<string, ChapterProgression> _chaptersById;
