@@ -1,4 +1,5 @@
 using DG.Tweening;
+using Ked.Presentation.Core;
 using UnityEngine;
 
 /// <summary>
@@ -103,29 +104,32 @@ public abstract class SlideCommandBase : ClaimTweenCommandBase
         _rect.anchoredPosition = basePos + offset;
     }
 
-    protected static Vector2 DirectionToVector(CharRigDirection direction) => direction switch
+    // ⚠ 방향 표와 튐 모양의 <b>주인은 코어 SlideMotion 하나</b>다 (2026-08-24). 저작 도구의
+    //   프리뷰가 같은 값으로 궤적을 그리기 때문이다 — 여기 사본을 두면 둘이 갈리고, 그
+    //   어긋남은 "프리뷰와 게임이 다르다"로만 드러난다. 열거형 → 낱말만 이쪽이 진다
+    //   (코어는 CharRigDirection을 모른다). 사슬 전체는 SlideMotionParityTests가 잡는다.
+
+    // public인 이유: 순수 함수이고, 등가성 하네스가 <b>파서 → 열거형 → 벡터</b> 사슬을
+    // 코어와 대조해야 한다(SlideMotionParityTests). 상태를 안 들므로 열어도 잃을 것이 없다.
+    public static Vector2 DirectionToVector(CharRigDirection direction)
     {
-        CharRigDirection.Right => new Vector2(+1f, 0f),
-        CharRigDirection.Up => new Vector2(0f, +1f),
-        CharRigDirection.Down => new Vector2(0f, -1f),
-        _ => new Vector2(-1f, 0f),
+        Vec2 axis = SlideMotion.DirectionVector(CanonicalWord(direction));
+
+        return new Vector2(axis.X, axis.Y);
+    }
+
+    /// <summary>열거형 → 파서가 읽는 정본 낱말. 별칭이 아니라 대표 낱말이다.</summary>
+    private static string CanonicalWord(CharRigDirection direction) => direction switch
+    {
+        CharRigDirection.Right => "right",
+        CharRigDirection.Up => "up",
+        CharRigDirection.Down => "down",
+        _ => "left",
     };
 
     /// <summary>도착 직전에 부풀었다 사그라드는 튐 — 등장용.</summary>
-    protected static float BumpTowardEnd(float e)
-    {
-        e = Mathf.Clamp01(e);
-
-        return Mathf.Sin(Mathf.PI * e) * (e * e);
-    }
+    public static float BumpTowardEnd(float e) => SlideMotion.PunchTowardEnd(e);
 
     /// <summary>출발 직후에 부풀었다 사그라드는 튐 — 퇴장용.</summary>
-    protected static float BumpFromStart(float e)
-    {
-        e = Mathf.Clamp01(e);
-
-        float oneMinus = 1f - e;
-
-        return Mathf.Sin(Mathf.PI * e) * (oneMinus * oneMinus);
-    }
+    public static float BumpFromStart(float e) => SlideMotion.PunchFromStart(e);
 }

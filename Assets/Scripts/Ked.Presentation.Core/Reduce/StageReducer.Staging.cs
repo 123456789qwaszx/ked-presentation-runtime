@@ -44,6 +44,46 @@ namespace Ked.Presentation.Core
             return true;
         }
 
+        /// <summary>
+        /// 접는 것은 "위치를 바꾸지 않는다"는 사실 그 자체.
+        /// 접지 않으면 프리뷰가 이 커맨드를 영원히 "반영 안 된 연출"로 짚음.
+        /// </summary>
+        private static bool ApplySlideIn(
+            StageState state, in StageCommand cmd, StageReducerTuning tuning, out string reason)
+            => TryReadSlide(state, cmd, tuning, SlideMotion.DefaultInDirection, out _, out _, out reason);
+
+        private static bool ApplySlideOut(
+            StageState state, in StageCommand cmd, StageReducerTuning tuning, out string reason)
+        {
+            if (!TryReadSlide(state, cmd, tuning, SlideMotion.DefaultOutDirection,
+                    out string slotKey, out Vec2 offset, out reason))
+                return false;
+
+            ApplyMoveClaim(state, slotKey, "CharSlot_Track", relative: true, offset);
+            return true;
+        }
+
+        private static bool TryReadSlide(
+            StageState state, in StageCommand cmd, StageReducerTuning tuning,
+            string defaultDirection, out string slotKey, out Vec2 offset, out string reason)
+        {
+            offset = Vec2.Zero;
+
+            if (!TryGetSpawnedSlot(state, cmd, out slotKey, out reason))
+                return false;
+
+            string distanceToken = cmd.Arg(2, SlideMotion.DefaultDistanceToken);
+
+            if (!UnitToken.TryParsePixels(distanceToken, tuning.ReferenceStageWidth, out float pixels))
+            {
+                reason = $"거리 토큰을 읽지 못했다: '{distanceToken}'";
+                return false;
+            }
+
+            offset = SlideMotion.DirectionVector(cmd.Arg(1, defaultDirection)) * pixels;
+            return true;
+        }
+
         private static bool ApplyMoveReset(StageState state, in StageCommand cmd, out string reason)
         {
             if (!TryGetSpawnedSlot(state, cmd, out string slotKey, out reason))
