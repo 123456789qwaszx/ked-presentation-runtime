@@ -53,13 +53,16 @@ namespace Ked.Progression
             _state = state;
         }
 
-        /// <summary>새 게임. 시작값은 <b>시나리오가 한 번만</b> 세운다(D1).</summary>
+        /// <summary>
+        /// 새 게임. 시작값은 <b>시작 챕터가</b> 세운다 — 스탯의 수명이 챕터이므로
+        /// 챕터를 넘을 때마다 같은 자리에서 다시 선다.
+        /// </summary>
         public static EpisodeFlow Begin(ScenarioProgression scenario)
         {
             if (scenario == null)
                 throw new ArgumentNullException(nameof(scenario));
 
-            var flow = new EpisodeFlow(scenario, scenario.CreateInitialState());
+            var flow = new EpisodeFlow(scenario, scenario.StartChapter.CreateEntryState());
             flow.EnterEpisode();
 
             return flow;
@@ -68,7 +71,7 @@ namespace Ked.Progression
         /// <summary>
         /// 이어 하기.
         ///
-        /// ⚠ <paramref name="state"/>는 <see cref="ScenarioProgression.CreateInitialState"/>나
+        /// ⚠ <paramref name="state"/>는 <see cref="ChapterProgression.CreateEntryState"/>나
         /// <see cref="ProgressionSave.Restore"/>가 낸 것이어야 한다. <b>둘 다 이 시나리오에
         /// 대해 이미 검증된 상태다</b> — 그래서 이 안쪽은 전체 함수로 남고 방어 코드가 없다(P2).
         /// 검증되지 않은 상태를 손으로 만들어 넣으면 그 순간 경계가 새는 것이다.
@@ -236,7 +239,7 @@ namespace Ked.Progression
                 return;
             }
 
-            // 스탯은 다시 세우지 않는다. 챕터를 넘어도 그대로 간다(D1).
+            // 스탯은 새 챕터의 초기값에서 다시 선다 — 수명이 챕터다.
             _state = _state.CommitChapterEnding(_scenario, next);
 
             Phase = EpisodePhase.ChapterBoundaryCommitted;

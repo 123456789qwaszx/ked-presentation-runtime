@@ -38,8 +38,8 @@ namespace Ked.Progression
         Committed = 60,
 
         /// <summary>
-        /// 챕터 경계를 넘었다. 다음 챕터의 시작 에피소드에 서 있고 <b>스탯은 그대로 넘어왔다</b>.
-        /// <b>멈춘다</b> — 경계도 저장 자리다.
+        /// 챕터 경계를 넘었다. 다음 챕터의 시작 에피소드에 서 있고 <b>스탯은 그 챕터의
+        /// 초기값에서 다시 섰다</b>. <b>멈춘다</b> — 경계도 저장 자리다.
         /// </summary>
         ChapterBoundaryCommitted = 81,
 

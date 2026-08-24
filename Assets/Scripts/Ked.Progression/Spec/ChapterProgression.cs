@@ -28,7 +28,10 @@ namespace Ked.Progression
         public string StartEpisodeId { get; }
 
         public IReadOnlyList<EpisodeNode> Nodes { get; } // 챕터 내 에피소드들
-        public IReadOnlyList<StatDefinition> Stats { get; } // 챕터 내 스탯들
+
+        // 챕터 내 스탯들. 초기값·경계·타입 모두 이 챕터의 것이다 — 스탯의 수명이
+        // 챕터라서, 같은 이름이라도 다른 챕터의 것과는 아무 연관이 없다.
+        public IReadOnlyList<StatDefinition> Stats { get; }
 
         public IReadOnlyList<EndingRule> EndingRules { get; }
 
@@ -81,11 +84,13 @@ namespace Ked.Progression
         public EpisodeNode StartNode => _nodesById[StartEpisodeId];
 
         /// <summary>
-        /// 챕터의 진행 그래프를 분석/증명하기 위한 가상의 시작 상태.
-        /// 도달성 증명을 위해서만 사용.
-        /// 플레이 시작 용도가 아님.
+        /// 이 챕터에 들어설 때의 상태.
+        ///
+        /// <b>실제 플레이와 도달성 증명이 같은 자리에서 출발한다.</b> 스탯의 수명이
+        /// 챕터라서 챕터를 넘을 때마다 여기서 다시 서고, 증명도 같은 값에서 걷는다 —
+        /// 그래서 증명이 통과한 길은 플레이에서도 통과한다.
         /// </summary>
-        public ProgressionState CreateProofEntryState() =>
+        public ProgressionState CreateEntryState() =>
             ProgressionState.CreateInitial(Stats, ChapterId, StartEpisodeId);
 
         public override string ToString() =>

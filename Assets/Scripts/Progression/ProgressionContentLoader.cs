@@ -53,7 +53,7 @@ public static class ProgressionContentLoader
         Debug.Log(
             $"[진행] 실었다 — {result.Scenario.ScenarioId} " +
             $"(에피소드 {result.Scenario.StartChapter.Nodes.Count}, " +
-            $"스탯 {result.Scenario.Stats.Count})");
+            $"스탯 {result.Scenario.StartChapter.Stats.Count})");
 
         return result.Scenario;
     }

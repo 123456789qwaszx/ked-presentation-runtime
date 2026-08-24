@@ -85,7 +85,7 @@ namespace Ked.Progression
         /// 세이브 블록을 지금 콘텐츠로 되살린다. 규칙은 아래 표 그대로다.
         ///
         /// <list type="table">
-        /// <item>세이브에 없는 스탯이 정의에 생김 → <b>초기값으로 채운다(조용히)</b></item>
+        /// <item>세이브에 없는 스탯이 <b>그 챕터의</b> 정의에 생김 → <b>초기값으로 채운다(조용히)</b></item>
         /// <item>정의에 없는 스탯이 세이브에 있음 → 버린다 + 경고</item>
         /// <item>값이 새 경계 밖 → clamp + 경고</item>
         /// <item>지금 챕터·에피소드가 사라짐 → <b>오류.</b> 조용히 시작점으로 보내지 않는다</item>
@@ -111,7 +111,13 @@ namespace Ked.Progression
 
             VerifyIdentity(scenario, save, diagnostics);
 
-            Dictionary<string, int> stats = RestoreStats(scenario, save, diagnostics);
+            // 스탯 정의의 주인은 세이브가 가리키는 <b>챕터</b>다 — 수명이 챕터라서 다른
+            // 챕터의 정의로 세우면 이름만 같은 다른 값이 된다. 챕터를 못 찾았다면 위에서
+            // 이미 오류가 붙었고 아래 검사가 빈손으로 돌려보낸다.
+            Dictionary<string, int> stats =
+                scenario.TryGetChapter(save.CurrentChapterId, out ChapterProgression chapter)
+                    ? RestoreStats(chapter, save, diagnostics)
+                    : new Dictionary<string, int>(StringComparer.Ordinal);
 
             for (int i = 0; i < diagnostics.Count; i++)
             {
@@ -171,7 +177,7 @@ namespace Ked.Progression
         // ── 스탯 ────────────────────────────────────────────────────────────
 
         private static Dictionary<string, int> RestoreStats(
-            ScenarioProgression scenario, ProgressionSaveDto save,
+            ChapterProgression chapter, ProgressionSaveDto save,
             List<ProgressionDiagnostic> diagnostics)
         {
             var values = new Dictionary<string, int>(StringComparer.Ordinal);
@@ -180,9 +186,9 @@ namespace Ked.Progression
             // ① 정의를 기준으로 세운다 — 세이브에 없는 것은 초기값이 메운다.
             //    **조용해도 되는 유일한 경우다.** 스탯이 새로 생기는 것은 콘텐츠가 자라는
             //    정상 경로이고, 그때 옛 세이브를 못 열게 하면 개발이 멈춘다.
-            for (int i = 0; i < scenario.Stats.Count; i++)
+            for (int i = 0; i < chapter.Stats.Count; i++)
             {
-                StatDefinition definition = scenario.Stats[i];
+                StatDefinition definition = chapter.Stats[i];
 
                 int value;
 
@@ -211,11 +217,12 @@ namespace Ked.Progression
             {
                 foreach (KeyValuePair<string, int> pair in saved)
                 {
-                    if (!scenario.StatsByKey.ContainsKey(pair.Key))
+                    if (!chapter.StatsByKey.ContainsKey(pair.Key))
                     {
                         diagnostics.Add(ProgressionDiagnostic.Warning(
                             $"Stats[{pair.Key}]",
-                            $"세이브의 스탯 '{pair.Key}'가 지금 시나리오에 정의되어 있지 않아 버린다."));
+                            $"세이브의 스탯 '{pair.Key}'가 챕터 '{chapter.ChapterId}'에 " +
+                            "정의되어 있지 않아 버린다."));
                     }
                 }
             }

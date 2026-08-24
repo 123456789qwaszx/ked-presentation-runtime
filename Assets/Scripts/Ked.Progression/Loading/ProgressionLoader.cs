@@ -21,16 +21,7 @@ namespace Ked.Progression
     /// </summary>
     public static class ProgressionLoader
     {
-        public static ProgressionLoadResult Load(ChapterProgressionDto dto) =>
-            Load(dto, null);
-
-        /// <param name="fallbackStats">
-        /// 챕터가 스탯을 안 적었을 때 쓸 정의 — 시나리오가 내려 준다(D1: 소유가 시나리오다).
-        /// 챕터가 적어 두었으면 그쪽이 이기고, 경계·타입이 시나리오와 갈리는지는
-        /// <c>ScenarioInvariants</c>가 본다.
-        /// </param>
-        private static ProgressionLoadResult Load(
-            ChapterProgressionDto dto, List<StatDto> fallbackStats)
+        public static ProgressionLoadResult Load(ChapterProgressionDto dto)
         {
             var diagnostics = new List<ProgressionDiagnostic>();
 
@@ -44,9 +35,7 @@ namespace Ked.Progression
 
             var autoPaths = new List<string>();
 
-            List<StatDto> statDtos = Count(dto.Stats) > 0 ? dto.Stats : fallbackStats;
-
-            List<StatDefinition> stats = LoadStats(statDtos, diagnostics);
+            List<StatDefinition> stats = LoadStats(dto.Stats, diagnostics);
             List<EpisodeNode> nodes = LoadNodes(dto.Nodes, diagnostics, autoPaths);
             List<EndingRule> endingRules = LoadEndingRules(dto.EndingRules, diagnostics);
 
@@ -108,7 +97,6 @@ namespace Ked.Progression
                 diagnostics.Add(ProgressionDiagnostic.Error("ScenarioId", "시나리오 ID가 비어 있다."));
             }
 
-            List<StatDefinition> stats = LoadStats(dto.Stats, diagnostics);
             var chapters = new List<ChapterProgression>();
 
             List<ChapterProgressionDto> chapterDtos = dto.Chapters;
@@ -121,9 +109,7 @@ namespace Ked.Progression
                     ? $"Chapters[{chapterDto.ChapterId}]"
                     : $"Chapters[{i}]";
 
-                // 챕터가 스탯을 안 적었으면 시나리오 것을 쓴다. 조용한 기본값이 아니라
-                // 소유 규칙을 그대로 적용하는 것이다.
-                ProgressionLoadResult result = Load(chapterDto, dto.Stats);
+                ProgressionLoadResult result = Load(chapterDto);
 
                 foreach (ProgressionDiagnostic diagnostic in result.Diagnostics)
                 {
@@ -144,8 +130,7 @@ namespace Ked.Progression
                 return new ScenarioLoadResult(null, diagnostics);
             }
 
-            ScenarioInvariants.Collect(
-                stats, chapters, dto.StartChapterId, diagnostics, out _, out _);
+            ScenarioInvariants.Collect(chapters, dto.StartChapterId, diagnostics, out _);
 
             if (HasError(diagnostics))
             {
@@ -153,7 +138,7 @@ namespace Ked.Progression
             }
 
             var scenario = new ScenarioProgression(
-                dto.ScenarioId, dto.DisplayName, dto.StartChapterId, stats, chapters);
+                dto.ScenarioId, dto.DisplayName, dto.StartChapterId, chapters);
 
             return new ScenarioLoadResult(scenario, diagnostics);
         }
@@ -165,8 +150,8 @@ namespace Ked.Progression
         /// 이 길은 시나리오 저작이 생긴 뒤에도 사라지지 않는다 — 작가가 ch03만 돌려 보고
         /// 싶은 때가 영원히 있다. 호스트 둘이 각자 감싸는 코드를 만들지 않게 여기 한 번 둔다.
         ///
-        /// 감싼 결과: <c>ScenarioId</c> = <c>StartChapterId</c> = 챕터 ID, 챕터 하나,
-        /// <c>Stats</c>는 챕터 것을 시나리오로 승격.
+        /// 감싼 결과: <c>ScenarioId</c> = <c>StartChapterId</c> = 챕터 ID, 챕터 하나.
+        /// 스탯은 챕터가 그대로 들고 있으므로 옮길 것이 없다.
         ///
         /// ⚠ 챕터가 든 <c>EndingRules</c>는 그대로 실린다. 그중 다음 챕터로 가는 규칙이
         /// 있으면 갈 곳이 없으므로 <c>ScenarioInvariants</c>가 허공 간선으로 잡는다 —
@@ -194,26 +179,11 @@ namespace Ked.Progression
                 return new ScenarioLoadResult(null, diagnostics);
             }
 
-            if (Count(dto.Stats) == 0)
-            {
-                // 시나리오가 스탯 정의의 주인인데(D1) 줄 것이 없다. 빈 목록으로 감싸면
-                // 조건이 가리키는 스탯이 전부 "정의되지 않음"이 되어, 진짜 원인인
-                // "이 JSON에는 스탯이 없다"가 진단 수십 개 밑에 묻힌다.
-                diagnostics.Add(ProgressionDiagnostic.Error(
-                    "Stats",
-                    $"챕터 '{dto.ChapterId}'에 스탯 정의가 없어 시나리오로 감쌀 수 없다(D1). " +
-                    "스탯 정의의 주인은 시나리오이고 단일 챕터에서는 챕터 것을 승격한다 — " +
-                    "승격할 것이 없다. 스탯 칸이 서기 전에 내보낸 옛 JSON이라면 다시 내보낼 것."));
-
-                return new ScenarioLoadResult(null, diagnostics);
-            }
-
             return Load(new ScenarioProgressionDto
             {
                 ScenarioId = dto.ChapterId,
                 DisplayName = dto.DisplayName,
                 StartChapterId = dto.ChapterId,
-                Stats = dto.Stats,
                 Chapters = new List<ChapterProgressionDto> { dto },
             });
         }

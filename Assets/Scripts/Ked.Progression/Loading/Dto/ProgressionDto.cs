@@ -52,9 +52,6 @@ namespace Ked.Progression.Dto
         public string DisplayName { get; set; }
         public string StartChapterId { get; set; }
 
-        /// <summary>D1 — 스탯 정의의 유일한 원천이다.</summary>
-        public List<StatDto> Stats { get; set; }
-
         public List<ChapterProgressionDto> Chapters { get; set; }
     }
 

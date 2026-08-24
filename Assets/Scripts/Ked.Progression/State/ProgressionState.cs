@@ -93,8 +93,13 @@ namespace Ked.Progression
                         $"정의된 것: {string.Join(", ", chapter.StatsByKey.Keys)}");
                 }
 
+                // 상태는 이 챕터의 스탯을 전부 들고 시작한다(CreateEntryState·Restore 둘 다).
+                // 없다는 것은 상태와 챕터가 갈렸다는 뜻이라 초기값으로 메우지 않는다 —
+                // 조용히 메우면 "이 챕터 처음부터 다시 센 값"이 한 칸에만 섞인다.
                 if (!stats.TryGetValue(change.Key, out int current))
-                    current = definition.Initial;
+                    throw new InvalidOperationException(
+                        $"상태에 스탯 '{change.Key}'가 없다. " +
+                        $"이 상태는 챕터 '{chapter.ChapterId}'의 것이 아니다.");
 
                 stats[change.Key] = definition.Clamp(change.ApplyTo(current));
             }
@@ -102,39 +107,32 @@ namespace Ked.Progression
             return new ProgressionState(CurrentChapterId, chosen.TargetEpisodeId, stats);
         }
 
-        // 챕터 하나를 끝낼 시 발생하는 트랙잭션:
-        // - 다음 챕터의 시작 에피소드로 옮김.
+        // 챕터 경계를 넘는 트랜잭션.
         //
         // 무엇이 다음인지는 "ScenarioTransition.Resolve"가 먼저 정하고,
         // 여기서는 그 결정을 적용만 함.
+        //
+        // 지금 스탯은 <b>가져가지 않는다</b>. 스탯의 수명은 챕터라, 새 챕터는 자기
+        // 초기값에서 다시 선다 — 같은 이름이어도 챕터가 다르면 다른 것이다.
+        // 챕터를 넘는 기억이 필요하면 그것은 [1] 영구 계층의 일이다.
         public ProgressionState CommitChapterEnding(
             ScenarioProgression scenario, in ScenarioAdvance advance)
         {
             if (scenario == null)
                 throw new ArgumentNullException(nameof(scenario));
 
-            if (string.IsNullOrEmpty(CurrentChapterId))
-                throw new InvalidOperationException(
-                    "지금 챕터가 비어 있다. 챕터를 끝낼 수 없다.");
+            // EpisodeFlow는 다음 챕터가 있을 때만 여기까지 온다. 아니면 이미 끝났다.
+            if (advance.Kind != ScenarioAdvanceKind.NextChapter)
+                throw new ArgumentException(
+                    $"다음 챕터로 가는 결정이 아니다: {advance.Kind}.", nameof(advance));
 
-            string nextChapterId = CurrentChapterId;
-            string nextEpisodeId = CurrentEpisodeId;
+            if (!scenario.TryGetChapter(advance.NextChapterId, out ChapterProgression next))
+                throw new ArgumentException(
+                    $"다음 챕터 '{advance.NextChapterId}'가 시나리오 " +
+                    $"'{scenario.ScenarioId}'에 없다.",
+                    nameof(advance));
 
-            if (advance.Kind == ScenarioAdvanceKind.NextChapter)
-            {
-                if (!scenario.TryGetChapter(advance.NextChapterId, out ChapterProgression next))
-                    throw new ArgumentException(
-                        $"다음 챕터 '{advance.NextChapterId}'가 시나리오 " + $"'{scenario.ScenarioId}'에 없다.", 
-                        nameof(advance));
-
-                nextChapterId = next.ChapterId;
-                nextEpisodeId = next.StartEpisodeId;
-            }
-
-            return new ProgressionState(
-                nextChapterId,
-                nextEpisodeId,
-                new Dictionary<string, int>(_stats, StringComparer.Ordinal));
+            return next.CreateEntryState();
         }
     }
 }
