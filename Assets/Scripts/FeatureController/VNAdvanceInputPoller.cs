@@ -172,7 +172,7 @@ public sealed class VNAdvanceInputPoller : MonoBehaviour
             if (!_featureController.RequestRollbackOneStep())
                 return;
 
-            await _episodePlayer.ReplayCurrentSceneAsync();
+            await _episodePlayer.RequestReplayAsync();
         }
     }
 }

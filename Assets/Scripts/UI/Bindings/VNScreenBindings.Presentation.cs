@@ -88,6 +88,6 @@ public sealed partial class VNScreenBindings
         if (!_vnFeatures.RequestRollbackOneStep())
             return;
 
-        await _episodePlayer.ReplayCurrentSceneAsync();
+        await _episodePlayer.RequestReplayAsync();
     }
 }
