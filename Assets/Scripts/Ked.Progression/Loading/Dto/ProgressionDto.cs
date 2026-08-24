@@ -42,18 +42,6 @@ namespace Ked.Progression.Dto
         public string DesignerNote { get; set; }
     }
 
-    /// <summary>
-    /// 시나리오 하나. <b>이 모양은 이 패키지가 정한다</b> — 툴에 시나리오 저작이 아직 없어
-    /// 손으로 쓴 JSON이 먼저 온다(X4).
-    /// </summary>
-    public sealed class ScenarioProgressionDto
-    {
-        public string ScenarioId { get; set; }
-        public string DisplayName { get; set; }
-        public string StartChapterId { get; set; }
-
-        public List<ChapterProgressionDto> Chapters { get; set; }
-    }
 
     /// <summary>
     /// ⚠ <see cref="Type"/>은 <c>"Number"</c> 또는 <c>"Bool"</c>이다.

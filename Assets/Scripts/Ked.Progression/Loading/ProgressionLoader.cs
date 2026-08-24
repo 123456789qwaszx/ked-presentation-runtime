@@ -62,33 +62,31 @@ namespace Ked.Progression
             return new ProgressionLoadResult(chapter, diagnostics);
         }
 
-        /// <summary>
-        /// 시나리오 하나를 싣는다. 챕터마다 <see cref="Load(ChapterProgressionDto)"/>를 돌리고
-        /// 진단에 <c>Chapters[...]</c> 접두를 붙여 모은다 — 어느 챕터의 어느 자리인지가
-        /// 한 줄에 다 있어야 한다.
-        /// </summary>
-        public static ScenarioLoadResult Load(ScenarioProgressionDto dto)
+        // 챕터 여러 개를 시나리오로 묶어 싣는다.
+        //
+        // 시나리오는 저작물이 아니다 — 툴은 챕터 JSON만 낸다. 그래서 조립은 호스트의
+        // 일이고, 입구가 DTO가 아니라 인자다. 시나리오 JSON 모양을 두면 아무도 안 쓰는
+        // 직렬화 껍질이 하나 늘 뿐이다.
+        //
+        // 진단에는 Chapters[...] 접두가 붙는다 — 어느 챕터의 어느 자리인지가 한 줄에 다
+        // 있어야 한다.
+        public static ScenarioLoadResult LoadScenario(
+            string scenarioId,
+            string displayName,
+            string startChapterId,
+            IReadOnlyList<ChapterProgressionDto> chapterDtos)
         {
             var diagnostics = new List<ProgressionDiagnostic>();
 
-            if (dto == null)
-            {
-                diagnostics.Add(ProgressionDiagnostic.Error(
-                    string.Empty, "시나리오 DTO가 null이다."));
-
-                return new ScenarioLoadResult(null, diagnostics);
-            }
-
-            if (string.IsNullOrEmpty(dto.ScenarioId))
+            if (string.IsNullOrEmpty(scenarioId))
             {
                 diagnostics.Add(ProgressionDiagnostic.Error("ScenarioId", "시나리오 ID가 비어 있다."));
             }
 
             var chapters = new List<ChapterProgression>();
+            int count = chapterDtos == null ? 0 : chapterDtos.Count;
 
-            List<ChapterProgressionDto> chapterDtos = dto.Chapters;
-
-            for (int i = 0; i < Count(chapterDtos); i++)
+            for (int i = 0; i < count; i++)
             {
                 ChapterProgressionDto chapterDto = chapterDtos[i];
 
@@ -117,7 +115,7 @@ namespace Ked.Progression
                 return new ScenarioLoadResult(null, diagnostics);
             }
 
-            ScenarioInvariants.Collect(chapters, dto.StartChapterId, diagnostics, out _);
+            ScenarioInvariants.Collect(chapters, startChapterId, diagnostics, out _);
 
             if (HasError(diagnostics))
             {
@@ -125,25 +123,19 @@ namespace Ked.Progression
             }
 
             var scenario = new ScenarioProgression(
-                dto.ScenarioId, dto.DisplayName, dto.StartChapterId, chapters);
+                scenarioId, displayName, startChapterId, chapters);
 
             return new ScenarioLoadResult(scenario, diagnostics);
         }
 
-        /// <summary>
-        /// 챕터 하나를 시나리오로 감싸 싣는다 — <b>챕터만 떼어 테스트 플레이하는 길</b>이다.
-        ///
-        /// 툴은 챕터 JSON만 내는데 <see cref="ScenarioTransition"/>은 시나리오를 요구한다.
-        /// 그런데 이 길은 시나리오 저작이 생긴 뒤에도 사라지지 않는다 — 작가가 ch03만 돌려
-        /// 보고 싶은 때가 영원히 있다. 호스트 둘이 각자 감싸는 코드를 만들지 않게 여기 한 번 둔다.
-        ///
-        /// 감싼 결과: <c>ScenarioId</c> = <c>StartChapterId</c> = 챕터 ID, 챕터 하나.
-        /// 스탯은 챕터가 그대로 들고 있으므로 옮길 것이 없다.
-        ///
-        /// ⚠ 챕터가 든 <c>EndingRules</c>는 그대로 실린다. 그중 다음 챕터로 가는 규칙이
-        /// 있으면 갈 곳이 없으므로 <c>ScenarioInvariants</c>가 허공 간선으로 잡는다 —
-        /// <b>그게 맞는 동작이다.</b> 단일 챕터인데 다음 챕터를 적었다는 뜻이니까.
-        /// </summary>
+        // 챕터 하나만 떼어 돌리는 길 — LoadScenario의 N=1이다.
+        //
+        // 챕터가 여럿이 된 뒤에도 사라지지 않는다. 작가가 ch03만 돌려 보고 싶은 때가
+        // 영원히 있고, 호스트 둘이 각자 감싸는 코드를 만들지 않게 여기 한 번 둔다.
+        //
+        // 챕터가 든 EndingRules는 그대로 실린다. 그중 다음 챕터로 가는 규칙이 있으면
+        // 갈 곳이 없어 ScenarioInvariants가 허공 간선으로 잡는다 — 그게 맞는 동작이다.
+        // 챕터 하나뿐인데 다음 챕터를 적었다는 뜻이니까.
         public static ScenarioLoadResult LoadAsSingleChapterScenario(ChapterProgressionDto dto)
         {
             var diagnostics = new List<ProgressionDiagnostic>();
@@ -161,18 +153,14 @@ namespace Ked.Progression
                 // 시나리오 ID와 시작 챕터 ID를 둘 다 여기서 가져온다 — 비면 감쌀 이름이 없다.
                 diagnostics.Add(ProgressionDiagnostic.Error(
                     "ChapterId",
-                    "챕터 ID가 비어 있다. 단일 챕터 시나리오는 이 ID를 시나리오 ID로도 쓴다."));
+                    "챕터 ID가 비어 있다. 챕터 하나짜리 시나리오는 이 ID를 시나리오 ID로도 쓴다."));
 
                 return new ScenarioLoadResult(null, diagnostics);
             }
 
-            return Load(new ScenarioProgressionDto
-            {
-                ScenarioId = dto.ChapterId,
-                DisplayName = dto.DisplayName,
-                StartChapterId = dto.ChapterId,
-                Chapters = new List<ChapterProgressionDto> { dto },
-            });
+            return LoadScenario(
+                dto.ChapterId, dto.DisplayName, dto.ChapterId,
+                new List<ChapterProgressionDto> { dto });
         }
 
         // ── 엔딩 규칙 ───────────────────────────────────────────────────────
