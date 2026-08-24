@@ -29,14 +29,5 @@ namespace Ked.Progression.Dto
         public string CurrentEpisodeId { get; set; }
 
         public Dictionary<string, int> Stats { get; set; }
-        public List<string> ClearedEpisodeIds { get; set; }
-        public List<string> ClearedChapterIds { get; set; }
-        public List<ChapterEndingDto> EndingHistory { get; set; }
-    }
-
-    public sealed class ChapterEndingDto
-    {
-        public string ChapterId { get; set; }
-        public string EndingKey { get; set; }
     }
 }

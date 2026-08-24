@@ -200,7 +200,7 @@ namespace Ked.Progression
 
         private void CommitChosen()
         {
-            // 스탯 반영 · 클리어 표시 · 이동이 한 연산이다. 그래서 "스탯만 오르고 안 옮겨 간"
+            // 스탯 반영과 이동이 한 연산이다. 그래서 "스탯만 오르고 안 옮겨 간"
             // 상태가 세이브에 실릴 수 없다 — 트랜잭션 경계가 곧 저장 경계다.
             _state = _state.Commit(CurrentChapter(), _chosen);
             _chosen = null;

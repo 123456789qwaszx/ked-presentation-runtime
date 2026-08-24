@@ -171,52 +171,7 @@ namespace Ked.Progression
                             $"다음 챕터 '{rule.NextChapterId}'가 시나리오에 없다. " +
                             $"있는 것: {Join(chaptersById.Keys)}"));
                     }
-
-                    VerifyChapterClearedTargets(rule.Conditions, chaptersById, at + ".Conditions", into);
                 }
-
-                foreach (EpisodeNode node in chapter.Nodes)
-                {
-                    IReadOnlyList<EpisodeOption> options = node.NextOptions;
-
-                    for (int i = 0; i < options.Count; i++)
-                    {
-                        string at =
-                            $"Chapters[{chapter.ChapterId}].Nodes[{node.EpisodeId}].NextOptions[{i}]";
-
-                        VerifyChapterClearedTargets(
-                            options[i].VisibleConditions, chaptersById, at + ".VisibleConditions", into);
-                        VerifyChapterClearedTargets(
-                            options[i].Conditions, chaptersById, at + ".Conditions", into);
-                    }
-                }
-            }
-        }
-
-        // ChapterCleared의 대상이 실재하는지 체크.
-        private static void VerifyChapterClearedTargets(
-            IReadOnlyList<ProgressionCondition> conditions,
-            Dictionary<string, ChapterProgression> chaptersById,
-            string where,
-            ICollection<ProgressionDiagnostic> into)
-        {
-            for (int i = 0; i < conditions.Count; i++)
-            {
-                ProgressionCondition condition = conditions[i];
-
-                if (condition.Kind != ConditionKind.ChapterCleared)
-                {
-                    continue;
-                }
-
-                if (chaptersById.ContainsKey(condition.Key))
-                {
-                    continue;
-                }
-
-                into.Add(ProgressionDiagnostic.Error(
-                    $"{where}[{i}]",
-                    $"챕터 '{condition.Key}'가 시나리오에 없다. 있는 것: {Join(chaptersById.Keys)}"));
             }
         }
 

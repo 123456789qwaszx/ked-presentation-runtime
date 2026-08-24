@@ -167,14 +167,6 @@ public sealed class ProgressionDriver
         foreach (var stat in save.Stats)
             text.Append(' ').Append(stat.Key).Append('=').Append(stat.Value);
 
-        if (save.EndingHistory != null && save.EndingHistory.Count > 0)
-        {
-            text.Append("  엔딩이력:");
-
-            for (int i = 0; i < save.EndingHistory.Count; i++)
-                text.Append(' ').Append(save.EndingHistory[i].EndingKey);
-        }
-
         return text.ToString();
     }
 }

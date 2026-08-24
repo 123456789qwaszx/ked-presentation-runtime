@@ -30,7 +30,7 @@ namespace Ked.Progression
         ViaPlaying = 50,
 
         /// <summary>
-        /// <see cref="ProgressionState.Commit"/>이 끝났다. 스탯·클리어·이동이 한 번에 반영됐다.
+        /// <see cref="ProgressionState.Commit"/>이 끝났다. 스탯 반영과 이동이 한 번에 일어났다.
         ///
         /// <b>트랜잭션 경계이자 저장 경계다.</b> 여기서 굽기 때문에 "스탯만 오르고 안 옮겨 간
         /// 세이브"가 존재할 수 없다. <b>멈춘다</b> — 파일로 쓰라고 부탁한다.

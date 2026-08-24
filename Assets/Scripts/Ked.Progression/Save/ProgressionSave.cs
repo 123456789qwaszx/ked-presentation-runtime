@@ -54,7 +54,7 @@ namespace Ked.Progression
         /// 지금 모양의 번호. <b>필드가 사라지거나 뜻이 바뀔 때만</b> 올린다 —
         /// 추가는 올리지 않는다(없는 값은 정의의 초기값이 메운다).
         /// </summary>
-        public const int CurrentSchemaVersion = 1;
+        public const int CurrentSchemaVersion = 2;
 
         /// <summary>
         /// 상태를 세이브 블록으로 굽는다.
@@ -71,17 +71,6 @@ namespace Ked.Progression
             if (state == null)
                 throw new ArgumentNullException(nameof(state));
 
-            var endings = new List<ChapterEndingDto>();
-
-            for (int i = 0; i < state.EndingHistory.Count; i++)
-            {
-                endings.Add(new ChapterEndingDto
-                {
-                    ChapterId = state.EndingHistory[i].ChapterId,
-                    EndingKey = state.EndingHistory[i].EndingKey,
-                });
-            }
-
             return new ProgressionSaveDto
             {
                 SchemaVersion = CurrentSchemaVersion,
@@ -89,9 +78,6 @@ namespace Ked.Progression
                 CurrentChapterId = state.CurrentChapterId,
                 CurrentEpisodeId = state.CurrentEpisodeId,
                 Stats = new Dictionary<string, int>(state.Stats, StringComparer.Ordinal),
-                ClearedEpisodeIds = new List<string>(state.ClearedEpisodeIds),
-                ClearedChapterIds = new List<string>(state.ClearedChapterIds),
-                EndingHistory = endings,
             };
         }
 
@@ -102,7 +88,6 @@ namespace Ked.Progression
         /// <item>세이브에 없는 스탯이 정의에 생김 → <b>초기값으로 채운다(조용히)</b></item>
         /// <item>정의에 없는 스탯이 세이브에 있음 → 버린다 + 경고</item>
         /// <item>값이 새 경계 밖 → clamp + 경고</item>
-        /// <item>클리어 목록에 없는 에피소드·챕터 → 버린다 + 경고 (관문이 다시 잠길 수 있다)</item>
         /// <item>지금 챕터·에피소드가 사라짐 → <b>오류.</b> 조용히 시작점으로 보내지 않는다</item>
         /// <item>시나리오가 다름 → <b>오류</b></item>
         /// <item><see cref="CurrentSchemaVersion"/>보다 높은 세이브 → <b>오류.</b> 미래를 추측하지 않는다</item>
@@ -128,16 +113,6 @@ namespace Ked.Progression
 
             Dictionary<string, int> stats = RestoreStats(scenario, save, diagnostics);
 
-            HashSet<string> clearedEpisodes = RestoreCleared(
-                save.ClearedEpisodeIds, "ClearedEpisodeIds", diagnostics,
-                id => KnowsEpisode(scenario, id));
-
-            HashSet<string> clearedChapters = RestoreCleared(
-                save.ClearedChapterIds, "ClearedChapterIds", diagnostics,
-                id => scenario.TryGetChapter(id, out _));
-
-            List<ChapterEnding> endings = RestoreEndings(scenario, save, diagnostics);
-
             for (int i = 0; i < diagnostics.Count; i++)
             {
                 if (diagnostics[i].Severity == ProgressionDiagnosticSeverity.Error)
@@ -147,8 +122,7 @@ namespace Ked.Progression
             }
 
             ProgressionState state = ProgressionState.FromSave(
-                save.CurrentChapterId, save.CurrentEpisodeId,
-                stats, clearedEpisodes, clearedChapters, endings);
+                save.CurrentChapterId, save.CurrentEpisodeId, stats);
 
             return new ProgressionRestoreResult(state, diagnostics);
         }
@@ -247,88 +221,6 @@ namespace Ked.Progression
             }
 
             return values;
-        }
-
-        // ── 클리어 · 엔딩 이력 ──────────────────────────────────────────────
-
-        private static HashSet<string> RestoreCleared(
-            List<string> saved,
-            string where,
-            List<ProgressionDiagnostic> diagnostics,
-            Func<string, bool> known)
-        {
-            var kept = new HashSet<string>(StringComparer.Ordinal);
-
-            if (saved == null)
-            {
-                return kept;
-            }
-
-            for (int i = 0; i < saved.Count; i++)
-            {
-                if (known(saved[i]))
-                {
-                    kept.Add(saved[i]);
-                    continue;
-                }
-
-                // 콘텐츠에서 지워진 것이다. 조용히 버리면 그것을 보던 관문이 다시 잠긴다 —
-                // 플레이어에게는 "열려 있던 길이 닫힌" 것으로 보인다.
-                diagnostics.Add(ProgressionDiagnostic.Warning(
-                    $"{where}[{i}]",
-                    $"'{saved[i]}'가 지금 콘텐츠에 없어 클리어 기록에서 버린다. " +
-                    "이것을 보던 관문이 있었다면 다시 잠긴다."));
-            }
-
-            return kept;
-        }
-
-        private static List<ChapterEnding> RestoreEndings(
-            ScenarioProgression scenario, ProgressionSaveDto save,
-            List<ProgressionDiagnostic> diagnostics)
-        {
-            var endings = new List<ChapterEnding>();
-
-            if (save.EndingHistory == null)
-            {
-                return endings;
-            }
-
-            for (int i = 0; i < save.EndingHistory.Count; i++)
-            {
-                ChapterEndingDto entry = save.EndingHistory[i];
-
-                if (entry == null)
-                {
-                    continue;
-                }
-
-                if (!scenario.TryGetChapter(entry.ChapterId, out _))
-                {
-                    diagnostics.Add(ProgressionDiagnostic.Warning(
-                        $"EndingHistory[{i}]",
-                        $"챕터 '{entry.ChapterId}'가 지금 시나리오에 없어 엔딩 이력에서 버린다."));
-
-                    continue;
-                }
-
-                endings.Add(new ChapterEnding(entry.ChapterId, entry.EndingKey));
-            }
-
-            return endings;
-        }
-
-        private static bool KnowsEpisode(ScenarioProgression scenario, string episodeId)
-        {
-            for (int i = 0; i < scenario.Chapters.Count; i++)
-            {
-                if (scenario.Chapters[i].TryGetNode(episodeId, out _))
-                {
-                    return true;
-                }
-            }
-
-            return false;
         }
     }
 }

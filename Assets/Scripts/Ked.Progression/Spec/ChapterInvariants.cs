@@ -244,17 +244,6 @@ namespace Ked.Progression
                 ProgressionCondition condition = conditions[i];
                 string at = $"{where}[{i}]";
 
-                // Cleared 계열은 값 비교가 아니다 — 클리어했는가만 묻는다
-                // 연산을 여기서 확인하지 않는 이유: 팩토리가 Exists 말고는 만들 수 없게 한다.
-                //
-                // 대상의 실재도 여기서 보지 않는다. 에피소드 오타는 "영원히 안 열리는 관문"이
-                // 되는데 그건 도달성 증명이 잡는 자리이고, 챕터 오타는 시나리오가 잡는다.
-                if (condition.Kind == ConditionKind.EpisodeCleared ||
-                    condition.Kind == ConditionKind.ChapterCleared)
-                {
-                    continue;
-                }
-
                 if (condition.Kind != ConditionKind.Stat)
                 {
                     into.Add(ProgressionDiagnostic.Error(

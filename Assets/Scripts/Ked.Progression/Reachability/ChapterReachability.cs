@@ -110,15 +110,10 @@ namespace Ked.Progression
         // 완전 탐색 상한. 스탯 5개 × 범위 0~10정도로 가정.
         public const int StateLimit = 250_000;
 
-        public static ReachabilityResult Prove(
-            ChapterProgression chapter, IEnumerable<string> clearedChapterIds = null)
+        public static ReachabilityResult Prove(ChapterProgression chapter)
         {
             if (chapter == null)
                 throw new ArgumentNullException(nameof(chapter));
-
-            var clearedChapters = clearedChapterIds == null
-                ? new HashSet<string>(StringComparer.Ordinal)
-                : new HashSet<string>(clearedChapterIds, StringComparer.Ordinal);
 
             var spans = new Dictionary<string, (int[] Min, int[] Max)>(StringComparer.Ordinal);
             var empty = new List<UnreachableEpisode>();
@@ -132,34 +127,16 @@ namespace Ked.Progression
 
             IReadOnlyList<StatDefinition> stats = chapter.Stats;
 
-            var reachable = new HashSet<string>(StringComparer.Ordinal);
-            bool complete = true;
-
             int[] maxSeen = Initial(stats);
             int[] minSeen = Initial(stats);
 
-            // cleared:가 도달 가능 집합을 참조하므로, 집합이 자라지 않을 때까지 반복한다.
-            while (true)
-            {
-                HashSet<string> found;
-                bool finished;
-
-                Explore(chapter, reachable, clearedChapters, maxSeen, minSeen, spans,
-                    out found, out finished);
-
-                complete &= finished;
-
-                if (found.Count == reachable.Count)
-                {
-                    reachable = found;
-                    break;
-                }
-
-                reachable = found;
-            }
+            // 관문이 (에피소드, 스탯 벡터)에만 의존하므로 탐색 결과가 탐색 입력으로
+            // 되먹임되지 않는다 — 완전 탐색 한 번이면 끝난다.
+            Explore(chapter, maxSeen, minSeen, spans,
+                out HashSet<string> reachable, out bool complete);
 
             List<UnreachableEpisode> unreachable =
-                CollectUnreachable(chapter, reachable, clearedChapters, maxSeen, minSeen);
+                CollectUnreachable(chapter, reachable, maxSeen, minSeen);
 
             return new ReachabilityResult(
                 reachable, unreachable, complete, BuildSpans(stats, spans));
@@ -169,8 +146,6 @@ namespace Ked.Progression
 
         private static void Explore(
             ChapterProgression chapter,
-            HashSet<string> clearedAssumption,
-            HashSet<string> clearedChapters,
             int[] maxSeen,
             int[] minSeen,
             Dictionary<string, (int[] Min, int[] Max)> spans,
@@ -212,10 +187,8 @@ namespace Ked.Progression
 
                     // 관문 판정은 커밋 전 값으로 — 플레이어가 선택지를 보는 시점의 값이다.
                     // 표시조건과 해금조건 둘 다 서야 탄다.
-                    if (!Satisfied(chapter, option.VisibleConditions, current.Value,
-                            clearedAssumption, clearedChapters) ||
-                        !Satisfied(chapter, option.Conditions, current.Value,
-                            clearedAssumption, clearedChapters))
+                    if (!Satisfied(chapter, option.VisibleConditions, current.Value) ||
+                        !Satisfied(chapter, option.Conditions, current.Value))
                     {
                         continue;
                     }
@@ -277,32 +250,11 @@ namespace Ked.Progression
         private static bool Satisfied(
             ChapterProgression chapter,
             IReadOnlyList<ProgressionCondition> conditions,
-            int[] stats,
-            HashSet<string> clearedEpisodes,
-            HashSet<string> clearedChapters)
+            int[] stats)
         {
             for (int i = 0; i < conditions.Count; i++)
             {
-                ProgressionCondition condition = conditions[i];
-
-                bool holds;
-
-                switch (condition.Kind)
-                {
-                    case ConditionKind.EpisodeCleared:
-                        holds = clearedEpisodes.Contains(condition.Key);
-                        break;
-
-                    case ConditionKind.ChapterCleared:
-                        holds = clearedChapters.Contains(condition.Key);
-                        break;
-
-                    default:
-                        holds = CompareStat(chapter, condition, stats);
-                        break;
-                }
-
-                if (!holds)
+                if (!CompareStat(chapter, conditions[i], stats))
                 {
                     return false;
                 }
@@ -345,26 +297,12 @@ namespace Ked.Progression
         private static bool SatisfiableWithinEnvelope(
             ChapterProgression chapter,
             IReadOnlyList<ProgressionCondition> conditions,
-            HashSet<string> clearedEpisodes,
-            HashSet<string> clearedChapters,
             int[] maxSeen,
             int[] minSeen)
         {
             for (int i = 0; i < conditions.Count; i++)
             {
                 ProgressionCondition condition = conditions[i];
-
-                if (condition.Kind == ConditionKind.EpisodeCleared)
-                {
-                    if (!clearedEpisodes.Contains(condition.Key)) return false;
-                    continue;
-                }
-
-                if (condition.Kind == ConditionKind.ChapterCleared)
-                {
-                    if (!clearedChapters.Contains(condition.Key)) return false;
-                    continue;
-                }
 
                 int index = IndexOfStat(chapter.Stats, condition.Key);
 
@@ -406,7 +344,6 @@ namespace Ked.Progression
         private static List<UnreachableEpisode> CollectUnreachable(
             ChapterProgression chapter,
             HashSet<string> reachable,
-            HashSet<string> clearedChapters,
             int[] maxSeen,
             int[] minSeen)
         {
@@ -436,7 +373,7 @@ namespace Ked.Progression
                 }
 
                 ProgressionCondition blocking =
-                    FindBlocking(chapter, incoming, reachable, clearedChapters, maxSeen, minSeen);
+                    FindBlocking(chapter, incoming, maxSeen, minSeen);
 
                 found.Add(new UnreachableEpisode(
                     node.EpisodeId,
@@ -452,21 +389,18 @@ namespace Ked.Progression
         private static ProgressionCondition FindBlocking(
             ChapterProgression chapter,
             List<EpisodeOption> incoming,
-            HashSet<string> reachable,
-            HashSet<string> clearedChapters,
             int[] maxSeen,
             int[] minSeen)
         {
             for (int i = 0; i < incoming.Count; i++)
             {
                 ProgressionCondition blocking =
-                    FirstUnsatisfiable(chapter, incoming[i].Conditions, reachable, clearedChapters,
-                        maxSeen, minSeen);
+                    FirstUnsatisfiable(chapter, incoming[i].Conditions, maxSeen, minSeen);
 
                 if (blocking.IsConstructed) return blocking;
 
-                blocking = FirstUnsatisfiable(chapter, incoming[i].VisibleConditions, reachable,
-                    clearedChapters, maxSeen, minSeen);
+                blocking = FirstUnsatisfiable(
+                    chapter, incoming[i].VisibleConditions, maxSeen, minSeen);
 
                 if (blocking.IsConstructed) return blocking;
             }
@@ -477,8 +411,6 @@ namespace Ked.Progression
         private static ProgressionCondition FirstUnsatisfiable(
             ChapterProgression chapter,
             IReadOnlyList<ProgressionCondition> conditions,
-            HashSet<string> reachable,
-            HashSet<string> clearedChapters,
             int[] maxSeen,
             int[] minSeen)
         {
@@ -486,8 +418,7 @@ namespace Ked.Progression
             {
                 var one = new[] { conditions[i] };
 
-                if (!SatisfiableWithinEnvelope(
-                        chapter, one, reachable, clearedChapters, maxSeen, minSeen))
+                if (!SatisfiableWithinEnvelope(chapter, one, maxSeen, minSeen))
                 {
                     return conditions[i];
                 }

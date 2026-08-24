@@ -3,11 +3,16 @@ using System.Collections.Generic;
 
 namespace Ked.Progression
 {
+    /// <summary>
+    /// 조건이 무엇을 묻는가.
+    ///
+    /// 지금은 하나뿐이다. <b>그래도 열거형으로 남긴다</b> — 시나리오 수명의 상태(클리어
+    /// 이력·본 라인·화자)가 [1] 영구 계층으로 제대로 서면 그때 갈래가 다시 늘어난다.
+    /// 그때까지 로더가 모르는 이름을 오류로 잡아 주어야 옛 데이터가 조용히 미끄러지지 않는다.
+    /// </summary>
     public enum ConditionKind
     {
-        Stat = 0,           // Compares a stat value using "ComparisonOp".
-        EpisodeCleared = 1, // Checks whether an episode has been cleared. Uses "ComparisonOp.Exists".
-        ChapterCleared = 2, // Checks whether a chapter has been cleared. Uses "ComparisonOp.Exists".
+        Stat = 0, // Compares a stat value using "ComparisonOp".
     }
 
     public readonly struct ProgressionCondition
@@ -31,12 +36,6 @@ namespace Ked.Progression
         public static ProgressionCondition Stat(string key, ComparisonOp op, int value = 0) =>
             new(ConditionKind.Stat, Require(key, nameof(key)), op, value);
 
-        public static ProgressionCondition EpisodeCleared(string episodeId) =>
-            new(ConditionKind.EpisodeCleared, Require(episodeId, nameof(episodeId)), ComparisonOp.Exists, 0);
-
-        public static ProgressionCondition ChapterCleared(string chapterId) =>
-            new(ConditionKind.ChapterCleared, Require(chapterId, nameof(chapterId)), ComparisonOp.Exists, 0);
-
         // Whether this value was created through one of the factory methods.
         // C# can always create default(ProgressionCondition).
         // If such a value appears in an array, the owning type rejects it;
@@ -53,17 +52,12 @@ namespace Ked.Progression
                 
                 throw new ArgumentException(
                     $"{paramName}[{i}] is an unconstructed condition (default value). " +
-                    "Create conditions using ProgressionCondition.Stat/EpisodeCleared/ChapterCleared.",
+                    "Create conditions using ProgressionCondition.Stat.",
                     paramName);
             }
         }
 
-        public override string ToString()
-        {
-            return Kind == ConditionKind.Stat
-                ? $"{Key} {Op} {Value}"
-                : $"{Kind}({Key})";
-        }
+        public override string ToString() => $"{Key} {Op} {Value}";
 
         private static string Require(string value, string paramName)
         {

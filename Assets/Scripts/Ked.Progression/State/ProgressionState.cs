@@ -10,41 +10,26 @@ namespace Ked.Progression
     public sealed class ProgressionState
     {
         private readonly Dictionary<string, int> _stats;
-        private readonly HashSet<string> _clearedEpisodes;
-        private readonly HashSet<string> _clearedChapters;
-        private readonly List<ChapterEnding> _endingHistory;
 
         public string CurrentChapterId { get; }
         public string CurrentEpisodeId { get; }
 
         public IReadOnlyDictionary<string, int> Stats => _stats;
-        public IReadOnlyCollection<string> ClearedEpisodeIds => _clearedEpisodes;
-        public IReadOnlyCollection<string> ClearedChapterIds => _clearedChapters;
-
-        // 끝낸 챕터와 그 엔딩키.
-        public IReadOnlyList<ChapterEnding> EndingHistory => _endingHistory;
 
         private ProgressionState(
             string currentChapterId,
             string currentEpisodeId,
-            Dictionary<string, int> stats,
-            HashSet<string> clearedEpisodes,
-            HashSet<string> clearedChapters,
-            List<ChapterEnding> endingHistory)
+            Dictionary<string, int> stats)
         {
             CurrentChapterId = currentChapterId;
             CurrentEpisodeId = currentEpisodeId;
             _stats = stats;
-            _clearedEpisodes = clearedEpisodes;
-            _clearedChapters = clearedChapters;
-            _endingHistory = endingHistory;
         }
 
         public static ProgressionState CreateInitial(
             IEnumerable<StatDefinition> stats,
             string startChapterId,
-            string startEpisodeId,
-            IEnumerable<string> clearedChapterIds = null)
+            string startEpisodeId)
         {
             if (stats == null)
                 throw new ArgumentNullException(nameof(stats));
@@ -59,29 +44,14 @@ namespace Ked.Progression
                 values[stat.Key] = stat.Initial;
             }
 
-            var chapters = clearedChapterIds == null
-                ? new HashSet<string>(StringComparer.Ordinal)
-                : new HashSet<string>(clearedChapterIds, StringComparer.Ordinal);
-
             return new ProgressionState(
-                startChapterId ?? string.Empty,
-                startEpisodeId,
-                values,
-                new HashSet<string>(StringComparer.Ordinal),
-                chapters,
-                new List<ChapterEnding>());
+                startChapterId ?? string.Empty, startEpisodeId, values);
         }
 
         internal static ProgressionState FromSave(
-            string chapterId,
-            string episodeId,
-            Dictionary<string, int> stats,
-            HashSet<string> clearedEpisodes,
-            HashSet<string> clearedChapters,
-            List<ChapterEnding> endingHistory)
+            string chapterId, string episodeId, Dictionary<string, int> stats)
         {
-            return new ProgressionState(
-                chapterId, episodeId, stats, clearedEpisodes, clearedChapters, endingHistory);
+            return new ProgressionState(chapterId, episodeId, stats);
         }
 
         // 스탯 값:
@@ -97,13 +67,8 @@ namespace Ked.Progression
                 $"정의되지 않은 스탯 '{key}'. 정의된 것: {string.Join(", ", _stats.Keys)}");
         }
 
-        public bool IsEpisodeCleared(string episodeId) => _clearedEpisodes.Contains(episodeId);
-
-        public bool IsChapterCleared(string chapterId) => _clearedChapters.Contains(chapterId);
-
         // 선택지 커밋:
         // - 스탯 증감을 원자적으로 1회 반영,
-        // - 지금 에피소드를 클리어로 표시,
         // - 도착 에피소드로 옮긴 새 상태 반환.
         public ProgressionState Commit(ChapterProgression chapter, EpisodeOption chosen)
         {
@@ -134,25 +99,12 @@ namespace Ked.Progression
                 stats[change.Key] = definition.Clamp(change.ApplyTo(current));
             }
 
-            var clearedEpisodes = new HashSet<string>(_clearedEpisodes, StringComparer.Ordinal);
-
-            if (!string.IsNullOrEmpty(CurrentEpisodeId))
-                clearedEpisodes.Add(CurrentEpisodeId);
-
-            return new ProgressionState(
-                CurrentChapterId,
-                chosen.TargetEpisodeId,
-                stats,
-                clearedEpisodes,
-                new HashSet<string>(_clearedChapters, StringComparer.Ordinal),
-                new List<ChapterEnding>(_endingHistory));
+            return new ProgressionState(CurrentChapterId, chosen.TargetEpisodeId, stats);
         }
 
         // 챕터 하나를 끝낼 시 발생하는 트랙잭션:
-        // - 지금 챕터를 클리어로 표시,
-        // - 엔딩을 이력에 남기고,
         // - 다음 챕터의 시작 에피소드로 옮김.
-        // 
+        //
         // 무엇이 다음인지는 "ScenarioTransition.Resolve"가 먼저 정하고,
         // 여기서는 그 결정을 적용만 함.
         public ProgressionState CommitChapterEnding(
@@ -164,16 +116,6 @@ namespace Ked.Progression
             if (string.IsNullOrEmpty(CurrentChapterId))
                 throw new InvalidOperationException(
                     "지금 챕터가 비어 있다. 챕터를 끝낼 수 없다.");
-
-            var clearedChapters = new HashSet<string>(_clearedChapters, StringComparer.Ordinal)
-            {
-                CurrentChapterId
-            };
-
-            var history = new List<ChapterEnding>(_endingHistory)
-            {
-                new(CurrentChapterId, advance.EndingKey)
-            };
 
             string nextChapterId = CurrentChapterId;
             string nextEpisodeId = CurrentEpisodeId;
@@ -192,10 +134,7 @@ namespace Ked.Progression
             return new ProgressionState(
                 nextChapterId,
                 nextEpisodeId,
-                new Dictionary<string, int>(_stats, StringComparer.Ordinal),
-                new HashSet<string>(_clearedEpisodes, StringComparer.Ordinal),
-                clearedChapters,
-                history);
+                new Dictionary<string, int>(_stats, StringComparer.Ordinal));
         }
     }
 }

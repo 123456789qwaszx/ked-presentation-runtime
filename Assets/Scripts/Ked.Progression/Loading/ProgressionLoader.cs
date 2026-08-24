@@ -520,12 +520,10 @@ namespace Ked.Progression
                     continue;
                 }
 
-                if (!TryParseConditionKind(dto.Kind, out ConditionKind kind))
+                if (!TryParseConditionKind(dto.Kind, out _))
                 {
                     into.Add(ProgressionDiagnostic.Error(
-                        at,
-                        $"알 수 없는 조건 종류 '{dto.Kind}'. " +
-                        "가능한 값: Stat, EpisodeCleared, ChapterCleared."));
+                        at, $"알 수 없는 조건 종류 '{dto.Kind}'. 가능한 값: Stat."));
                     continue;
                 }
 
@@ -541,26 +539,7 @@ namespace Ked.Progression
 
                 try
                 {
-                    if (kind == ConditionKind.Stat)
-                    {
-                        conditions.Add(ProgressionCondition.Stat(dto.Key, op, dto.IntValue));
-                        continue;
-                    }
-
-                    // Cleared 계열의 연산은 팩토리가 정한다. 데이터가 다른 연산을 말하고
-                    // 있다면 조용히 Exists로 바꾸지 않는다 — 뜻이 달라지는 변환이다.
-                    if (op != ComparisonOp.Exists)
-                    {
-                        into.Add(ProgressionDiagnostic.Error(
-                            at,
-                            $"{kind} 조건은 Exists만 쓴다. 받은 연산: {op}. " +
-                            "저작 쪽 출력을 먼저 확인할 것."));
-                        continue;
-                    }
-
-                    conditions.Add(kind == ConditionKind.EpisodeCleared
-                        ? ProgressionCondition.EpisodeCleared(dto.Key)
-                        : ProgressionCondition.ChapterCleared(dto.Key));
+                    conditions.Add(ProgressionCondition.Stat(dto.Key, op, dto.IntValue));
                 }
                 catch (ArgumentException error)
                 {
@@ -651,8 +630,6 @@ namespace Ked.Progression
             switch (name)
             {
                 case "Stat": value = ConditionKind.Stat; return true;
-                case "EpisodeCleared": value = ConditionKind.EpisodeCleared; return true;
-                case "ChapterCleared": value = ConditionKind.ChapterCleared; return true;
                 default: value = default; return false;
             }
         }
