@@ -3,24 +3,19 @@ using System.Collections.Generic;
 
 namespace Ked.Progression
 {
-    // Determines what happens when a chapter run ends.
-    // The ending key is read directly from the current node.
+    // 챕터 하나가 끝났을 때 무엇이 다음인가. 엔딩키는 지금 노드에서 곧장 읽는다.
+    //
+    // 상태를 만들지도 옮기지도 않는다 — "끝" 또는 "다음 챕터 ID"만 낸다.
+    // 다음 챕터의 실재는 ScenarioInvariants가 이미 보장했다.
     public static class ScenarioTransition
     {
-        public static ScenarioAdvance Resolve(ScenarioProgression scenario, ProgressionState state)
+        public static ScenarioAdvance Resolve(ChapterProgression chapter, ProgressionState state)
         {
-            if (scenario == null)
-                throw new ArgumentNullException(nameof(scenario));
+            if (chapter == null)
+                throw new ArgumentNullException(nameof(chapter));
 
             if (state == null)
                 throw new ArgumentNullException(nameof(state));
-
-            if (!scenario.TryGetChapter(state.CurrentChapterId, out ChapterProgression chapter))
-            {
-                throw new ArgumentException(
-                    $"지금 챕터 '{state.CurrentChapterId}'가 시나리오 '{scenario.ScenarioId}'에 없다.",
-                    nameof(state));
-            }
 
             if (!chapter.TryGetNode(state.CurrentEpisodeId, out EpisodeNode node))
             {

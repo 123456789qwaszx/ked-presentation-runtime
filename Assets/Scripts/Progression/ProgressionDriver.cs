@@ -12,6 +12,10 @@ using Yarn.Unity;
 //   · 연출은 커밋보다 앞 — 지나가는 자리라 상태를 안 바꾼다
 //   · 스탯 반영과 이동이 한 연산 — "스탯만 오르고 안 옮겨 간" 상태가 없다
 //
+// 루프가 둘이다. 바깥이 챕터, 안쪽이 에피소드. 진행 상태([2])의 수명이 챕터라 챕터마다
+// 새로 만들고 이전 챕터의 값은 넘어오지 않는다 — 챕터를 넘어 사는 계층([1])은 아직
+// 서지 않았고, 그것이 설 때까지 스탯을 바꾸는 자리는 간선 하나뿐이다.
+//
 // 나중에 이 순서를 쓰는 두 번째 소비자(툴의 걷기 모드 등)가 생기면, 이 루프를 코어로
 // 올리고 await를 pull로 되접어야 한다. 순서를 두 곳에 적으면 작가가 미리보는 게임과
 // 플레이어가 하는 게임이 갈린다.
@@ -22,13 +26,14 @@ public sealed class ProgressionDriver
     private readonly ProgressionYarnBridge _yarnBridge;
 
     private ScenarioProgression _scenario;
+    private ChapterProgression _chapter;
     private ProgressionState _state;
     private bool _stopRequested;
     private bool _firstEpisode;
 
     private YarnProject _yarnProject;
 
-    // Yarn 저장소가 지금 어느 챕터의 것인지. 이것이 상태와 갈리면 [3]을 다시 세운다.
+    // Yarn 저장소가 지금 어느 챕터의 것인지. 이것이 _chapter와 갈리면 [3]을 다시 세운다.
     private string _yarnChapterId;
 
     public bool IsRunning { get; private set; }
@@ -58,11 +63,6 @@ public sealed class ProgressionDriver
 
         try
         {
-            // 시작값은 시작 챕터가 세운다 — 스탯의 수명이 챕터다.
-            _state = scenario.StartChapter.CreateEntryState();
-
-            Debug.Log($"[진행] 시작 — {Describe()}");
-
             await PumpAsync();
         }
         catch (OperationCanceledException)
@@ -77,6 +77,7 @@ public sealed class ProgressionDriver
         {
             IsRunning = false;
             _scenario = null;
+            _chapter = null;
             _state = null;
             _yarnProject = null;
             _yarnChapterId = null;
@@ -90,39 +91,64 @@ public sealed class ProgressionDriver
         _options.Cancel();
     }
 
+    // 바깥 루프 — 챕터.
     private async Task PumpAsync()
+    {
+        _chapter = _scenario.StartChapter;
+
+        while (true)
+        {
+            // 이 챕터의 진행 상태는 챕터가 만든다. 이전 챕터의 값은 넘어오지 않는다.
+            _state = _chapter.CreateEntryState();
+
+            Debug.Log($"[진행] 챕터 시작 — {Describe()}");
+
+            ScenarioAdvance? outcome = await RunChapterAsync();
+
+            if (outcome == null)
+                return;
+
+            ScenarioAdvance next = outcome.Value;
+
+            if (next.Kind != ScenarioAdvanceKind.NextChapter)
+            {
+                ShowEnding(next);
+                return;
+            }
+
+            // 실재는 ScenarioInvariants가 이미 보장했다.
+            _scenario.TryGetChapter(next.NextChapterId, out _chapter);
+        }
+    }
+
+    // 안쪽 루프 — 에피소드. 챕터가 끝나면 그 결말을, 멈춤 요청이면 null을 낸다.
+    private async Task<ScenarioAdvance?> RunChapterAsync()
     {
         while (true)
         {
-            ChapterProgression chapter = CurrentChapter();
-            chapter.TryGetNode(_state.CurrentEpisodeId, out EpisodeNode node);
+            _chapter.TryGetNode(_state.CurrentEpisodeId, out EpisodeNode node);
 
             if (!await PlayNodeAsync(node.DialogueEntryId, "대사"))
-                return;
+                return null;
 
             // 이 회차의 판단은 여기서 확정된다. 아래는 이미 정해진 목록에서 고르기만 한다.
-            ChapterAdvance advance = ChapterTransition.Resolve(chapter, _state);
+            ChapterAdvance advance = ChapterTransition.Resolve(_chapter, _state);
 
             if (advance.Kind == ChapterAdvanceKind.ChapterEnded)
-            {
-                if (!CrossChapterBoundary())
-                    return;
-
-                continue;
-            }
+                return ScenarioTransition.Resolve(_chapter, _state);
 
             EpisodeOption chosen = advance.Kind == ChapterAdvanceKind.AutoAdvance
                 ? advance.AutoOption
                 : await PickAsync(advance);
 
             if (chosen == null)
-                return;
+                return null;
 
             // 연출도 Story 노드. 별도 경로를 만들지 않는다.
             if (chosen.HasVia && !await PlayNodeAsync(chosen.ViaNodeId, "연출"))
-                return;
+                return null;
 
-            _state = _state.Commit(chapter, chosen);
+            _state = _state.Commit(_chapter, chosen);
         }
     }
 
@@ -148,24 +174,6 @@ public sealed class ProgressionDriver
         Debug.Log($"[진행] 골랐다 — {resolved.Option.ChoiceLabel}");
 
         return resolved.Option;
-    }
-
-    // 에피소드 층과 시나리오 층이 만나는 유일한 자리. 건너가는 것은 엔딩키 하나다.
-    // 계속 갈 수 있으면 true.
-    private bool CrossChapterBoundary()
-    {
-        ScenarioAdvance next = ScenarioTransition.Resolve(_scenario, _state);
-
-        if (next.Kind != ScenarioAdvanceKind.NextChapter)
-        {
-            ShowEnding(next);
-            return false;
-        }
-
-        // 스탯은 새 챕터의 초기값에서 다시 선다 — 수명이 챕터다.
-        _state = _state.CommitChapterEnding(_scenario, next);
-
-        return true;
     }
 
     private async Task<bool> PlayNodeAsync(string nodeName, string what)
@@ -200,16 +208,14 @@ public sealed class ProgressionDriver
         if (_yarnBridge == null)
             return;
 
-        string chapterId = _state.CurrentChapterId;
-
         // "[3] 연출 실행 상태"는 챕터 수명이다. 챕터가 바뀌는 이 자리에서 선언 초기값으로
         // 되돌린다 — 이전 챕터가 남긴 값도, 이 챕터를 아까 한 번 돌린 값도 안 물려받는다.
-        if (!string.Equals(_yarnChapterId, chapterId, StringComparison.Ordinal))
+        if (!string.Equals(_yarnChapterId, _chapter.ChapterId, StringComparison.Ordinal))
         {
             _yarnBridge.BeginChapter(_yarnProject);
-            _yarnChapterId = chapterId;
+            _yarnChapterId = _chapter.ChapterId;
 
-            Debug.Log($"[진행] Yarn 변수 초기화 — 챕터 \"{chapterId}\"");
+            Debug.Log($"[진행] Yarn 변수 초기화 — 챕터 \"{_chapter.ChapterId}\"");
         }
 
         // "[2] 에피소드 상태"를 대사가 읽을 수 있게 심는다. 진행 코어가 쥔 값이라
@@ -217,16 +223,7 @@ public sealed class ProgressionDriver
         //
         // 정의를 함께 넘기는 이유: 깃발을 숫자로 심으면 Yarn 저장소가 그 변수를
         // float으로 도장해, bool로 선언된 변수가 그 뒤로 읽히지 않는다.
-        _yarnBridge.PublishStats(CurrentChapter().Stats, _state.Stats);
-    }
-
-    // 로더가 참조를 다 검증했고 Commit은 검증된 곳으로만 옮긴다 — 전체 함수다.
-    // 여기에 방어 코드가 생기면 경계가 샜다는 신호다.
-    private ChapterProgression CurrentChapter()
-    {
-        _scenario.TryGetChapter(_state.CurrentChapterId, out ChapterProgression chapter);
-
-        return chapter;
+        _yarnBridge.PublishStats(_chapter.Stats, _state.Stats);
     }
 
     private static void ShowEnding(in ScenarioAdvance outcome)
@@ -244,7 +241,7 @@ public sealed class ProgressionDriver
     }
 
     private string Describe() =>
-        _state == null
+        _chapter == null
             ? "(시작 전)"
-            : $"{_state.CurrentChapterId}/{_state.CurrentEpisodeId}";
+            : $"{_chapter.ChapterId}/{_state?.CurrentEpisodeId}";
 }

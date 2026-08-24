@@ -3,33 +3,31 @@ using System.Collections.Generic;
 
 namespace Ked.Progression
 {
-    // 진행상태:
-    // - 세이브가 담을 내용. 여기 없는 것은 저장되지 않음.
-    // - (잠김/표시/도달 가능 집합은 ChapterTransition.Resolve의 출력)
-    // - 기존 객체를 수정하지 않고 선택/챕터 종료 시, 새로운 객체를 생성하여 커밋함.
+    // 챕터 하나를 도는 동안의 진행 상태 — [2] 계층.
+    //
+    // 수명이 챕터다. 챕터가 끝나면 이 객체는 버려지고, 다음 챕터는 자기 것을 새로 만든다.
+    // 챕터를 넘어 사는 것은 [1] 영구 계층의 일인데 그 계층은 아직 서지 않았다 —
+    // 그래서 여기에 챕터 ID가 없다. "지금 어느 챕터인가"는 이 상태를 굴리는 쪽이 안다.
+    //
+    // 스탯이 바뀌는 자리는 Commit 하나뿐이고, 그 입력은 간선이 든 StatChange뿐이다.
+    // - 잠김/표시/도달 가능 집합은 ChapterTransition.Resolve의 출력이지 상태가 아니다.
+    // - 기존 객체를 수정하지 않고 선택마다 새 객체를 만들어 커밋한다.
     public sealed class ProgressionState
     {
         private readonly Dictionary<string, int> _stats;
 
-        public string CurrentChapterId { get; }
         public string CurrentEpisodeId { get; }
 
         public IReadOnlyDictionary<string, int> Stats => _stats;
 
-        private ProgressionState(
-            string currentChapterId,
-            string currentEpisodeId,
-            Dictionary<string, int> stats)
+        private ProgressionState(string currentEpisodeId, Dictionary<string, int> stats)
         {
-            CurrentChapterId = currentChapterId;
             CurrentEpisodeId = currentEpisodeId;
             _stats = stats;
         }
 
         public static ProgressionState CreateInitial(
-            IEnumerable<StatDefinition> stats,
-            string startChapterId,
-            string startEpisodeId)
+            IEnumerable<StatDefinition> stats, string startEpisodeId)
         {
             if (stats == null)
                 throw new ArgumentNullException(nameof(stats));
@@ -44,10 +42,8 @@ namespace Ked.Progression
                 values[stat.Key] = stat.Initial;
             }
 
-            return new ProgressionState(
-                startChapterId ?? string.Empty, startEpisodeId, values);
+            return new ProgressionState(startEpisodeId, values);
         }
-
 
         // 스탯 값:
         // - 정의되지 않은 키는 0으로 떨어뜨리지 않고 던짐.
@@ -62,8 +58,8 @@ namespace Ked.Progression
                 $"정의되지 않은 스탯 '{key}'. 정의된 것: {string.Join(", ", _stats.Keys)}");
         }
 
-        // 선택지 커밋:
-        // - 스탯 증감을 원자적으로 1회 반영,
+        // 선택지 커밋 — 스탯이 바뀌는 유일한 자리:
+        // - 간선이 든 증감을 원자적으로 1회 반영,
         // - 도착 에피소드로 옮긴 새 상태 반환.
         public ProgressionState Commit(ChapterProgression chapter, EpisodeOption chosen)
         {
@@ -88,9 +84,9 @@ namespace Ked.Progression
                         $"정의된 것: {string.Join(", ", chapter.StatsByKey.Keys)}");
                 }
 
-                // 상태는 이 챕터의 스탯을 전부 들고 시작한다(CreateEntryState·Restore 둘 다).
+                // 상태는 이 챕터의 스탯을 전부 들고 시작한다(CreateEntryState).
                 // 없다는 것은 상태와 챕터가 갈렸다는 뜻이라 초기값으로 메우지 않는다 —
-                // 조용히 메우면 "이 챕터 처음부터 다시 센 값"이 한 칸에만 섞인다.
+                // 조용히 메우면 다른 챕터의 값이 한 칸에만 섞인다.
                 if (!stats.TryGetValue(change.Key, out int current))
                     throw new InvalidOperationException(
                         $"상태에 스탯 '{change.Key}'가 없다. " +
@@ -99,35 +95,7 @@ namespace Ked.Progression
                 stats[change.Key] = definition.Clamp(change.ApplyTo(current));
             }
 
-            return new ProgressionState(CurrentChapterId, chosen.TargetEpisodeId, stats);
-        }
-
-        // 챕터 경계를 넘는 트랜잭션.
-        //
-        // 무엇이 다음인지는 "ScenarioTransition.Resolve"가 먼저 정하고,
-        // 여기서는 그 결정을 적용만 함.
-        //
-        // 지금 스탯은 <b>가져가지 않는다</b>. 스탯의 수명은 챕터라, 새 챕터는 자기
-        // 초기값에서 다시 선다 — 같은 이름이어도 챕터가 다르면 다른 것이다.
-        // 챕터를 넘는 기억이 필요하면 그것은 [1] 영구 계층의 일이다.
-        public ProgressionState CommitChapterEnding(
-            ScenarioProgression scenario, in ScenarioAdvance advance)
-        {
-            if (scenario == null)
-                throw new ArgumentNullException(nameof(scenario));
-
-            // 호출자는 다음 챕터가 있을 때만 여기까지 온다. 아니면 그 자리에서 이미 끝났다.
-            if (advance.Kind != ScenarioAdvanceKind.NextChapter)
-                throw new ArgumentException(
-                    $"다음 챕터로 가는 결정이 아니다: {advance.Kind}.", nameof(advance));
-
-            if (!scenario.TryGetChapter(advance.NextChapterId, out ChapterProgression next))
-                throw new ArgumentException(
-                    $"다음 챕터 '{advance.NextChapterId}'가 시나리오 " +
-                    $"'{scenario.ScenarioId}'에 없다.",
-                    nameof(advance));
-
-            return next.CreateEntryState();
+            return new ProgressionState(chosen.TargetEpisodeId, stats);
         }
     }
 }
