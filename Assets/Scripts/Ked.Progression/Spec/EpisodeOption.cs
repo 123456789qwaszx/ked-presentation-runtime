@@ -32,7 +32,6 @@ namespace Ked.Progression
         // 왜 잠겼는지 알려 줌.
         public IReadOnlyList<ProgressionCondition> Conditions { get; }
 
-        public bool HideWhenLocked { get; }
         public string LockedReasonText { get; }
 
         // 스탯이 변하는 유일한 자리
@@ -51,7 +50,6 @@ namespace Ked.Progression
             string targetEpisodeId,
             IReadOnlyList<ProgressionCondition> visibleConditions,
             IReadOnlyList<ProgressionCondition> conditions,
-            bool hideWhenLocked,
             string lockedReasonText,
             IReadOnlyList<StatChange> statChanges,
             string viaNodeId)
@@ -72,7 +70,6 @@ namespace Ked.Progression
             StatChanges = statChanges ?? Array.Empty<StatChange>();
 
             TargetEpisodeId = targetEpisodeId;
-            HideWhenLocked = hideWhenLocked;
             ViaNodeId = viaNodeId ?? string.Empty;
 
             ProgressionCondition.RequireAllConstructed(
@@ -87,7 +84,6 @@ namespace Ked.Progression
             string targetEpisodeId,
             IReadOnlyList<ProgressionCondition> visibleConditions = null,
             IReadOnlyList<ProgressionCondition> conditions = null,
-            bool hideWhenLocked = false,
             string lockedReasonText = null,
             IReadOnlyList<StatChange> statChanges = null,
             string viaNodeId = null)
@@ -106,7 +102,6 @@ namespace Ked.Progression
                 targetEpisodeId,
                 visibleConditions,
                 conditions,
-                hideWhenLocked,
                 lockedReasonText,
                 statChanges,
                 viaNodeId);
@@ -124,7 +119,6 @@ namespace Ked.Progression
                 targetEpisodeId,
                 null,
                 null,
-                false,
                 null,
                 statChanges,
                 viaNodeId);

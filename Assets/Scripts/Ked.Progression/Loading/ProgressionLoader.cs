@@ -475,7 +475,6 @@ namespace Ked.Progression
                             dto.TargetEpisodeId,
                             visible,
                             conditions,
-                            dto.HideWhenLocked,
                             dto.LockedReasonText,
                             changes,
                             dto.ViaNodeId));
@@ -494,7 +493,7 @@ namespace Ked.Progression
                         continue;
                     }
 
-                    if (dto.HideWhenLocked || !string.IsNullOrEmpty(dto.LockedReasonText))
+                    if (!string.IsNullOrEmpty(dto.LockedReasonText))
                     {
                         into.Add(ProgressionDiagnostic.Error(
                             at,

@@ -119,7 +119,7 @@ namespace Ked.Progression.Dto
 
         public List<ConditionDto> VisibleConditions { get; set; }
         public List<ConditionDto> Conditions { get; set; }
-        public bool HideWhenLocked { get; set; }
+
         public string LockedReasonText { get; set; }
         public List<StatChangeDto> StatChanges { get; set; }
 

@@ -15,7 +15,7 @@ public interface IChapterOptionsView
 {
     /// <param name="options">
     /// 보이는 것 전부. 잠긴 것도 들어 있음.
-    /// HideWhenLocked가 걸린 것은 코어가 이미 뺀 상태.
+    /// 표시조건 미달로 빠진 것은 코어가 이미 뺀 상태.
     /// </param>
     /// <param name="hiddenCount">
     /// 숨겨진 개수. 로그·디버그용.
