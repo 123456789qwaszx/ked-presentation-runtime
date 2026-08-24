@@ -360,13 +360,6 @@ namespace Ked.Progression
                     ? at
                     : $"Nodes[{dto.EpisodeId}]";
 
-                if (!TryParseEpisodeKind(dto.Kind, out EpisodeKind kind))
-                {
-                    into.Add(ProgressionDiagnostic.Error(
-                        where, $"알 수 없는 에피소드 종류 '{dto.Kind}'. 가능한 값: Main, Attachment."));
-                    continue;
-                }
-
                 VerifyNodeIsLeanedOut(dto, where, into);
 
                 List<EpisodeOption> options =
@@ -377,7 +370,6 @@ namespace Ked.Progression
                     nodes.Add(new EpisodeNode(
                         dto.EpisodeId,
                         dto.Title,
-                        kind,
                         dto.DialogueEntryId,
                         options,
                         dto.EndingKey,
@@ -407,14 +399,6 @@ namespace Ked.Progression
                     "노드에 표시조건·해금조건이 실려 있다. v8에서 관문은 간선(NextOptions)의 " +
                     "것이 됐고 노드 쪽은 언제나 비어 나온다. 이대로 실으면 그 관문이 " +
                     "조용히 사라져 전부 열린 채로 돈다 — 구판 내보내기가 만든 데이터인지 확인할 것."));
-            }
-
-            if (Count(dto.Attachments) > 0)
-            {
-                into.Add(ProgressionDiagnostic.Error(
-                    where,
-                    $"부착 {Count(dto.Attachments)}개가 왔는데 v1은 싣지 못한다(§G9). " +
-                    "조용히 버리지 않는다."));
             }
 
             // sentinel 쌍 — 4조합 중 둘이 무효다.
@@ -658,16 +642,6 @@ namespace Ked.Progression
             {
                 case "Add": value = StatChangeKind.Add; return true;
                 case "Set": value = StatChangeKind.Set; return true;
-                default: value = default; return false;
-            }
-        }
-
-        private static bool TryParseEpisodeKind(string name, out EpisodeKind value)
-        {
-            switch (name)
-            {
-                case "Main": value = EpisodeKind.Main; return true;
-                case "Attachment": value = EpisodeKind.Attachment; return true;
                 default: value = default; return false;
             }
         }

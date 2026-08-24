@@ -80,7 +80,6 @@ namespace Ked.Progression.Dto
         /// <summary>v5에서 폐지됐다. 언제나 빈 문자열 — 통과값이다.</summary>
         public string IndexText { get; set; }
 
-        public string Kind { get; set; }
         public string DialogueEntryId { get; set; }
 
         /// <summary>v8에서 간선으로 내려갔다. 언제나 빈 배열이어야 한다 — 로더가 확인한다.</summary>
@@ -90,9 +89,6 @@ namespace Ked.Progression.Dto
         public List<ConditionDto> UnlockConditions { get; set; }
 
         public List<EpisodeOptionDto> NextOptions { get; set; }
-
-        /// <summary>v1 비범위(§G9). 비어 있지 않으면 로더가 오류를 낸다.</summary>
-        public List<object> Attachments { get; set; }
 
         /// <summary>
         /// ⚠ 모델에는 없다. <see cref="EndingKey"/> 하나로 판별하고, 이 값과 어긋나면

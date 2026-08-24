@@ -148,7 +148,6 @@ namespace Ked.Progression
                     out found, out finished);
 
                 complete &= finished;
-                AddReachableAttachments(chapter, found, clearedChapters, maxSeen, minSeen);
 
                 if (found.Count == reachable.Count)
                 {
@@ -336,45 +335,13 @@ namespace Ked.Progression
         }
 
         /// <summary>
-        /// 부착 에피소드는 간선으로 들어가는 노드가 아니다 — 부모 곁에 뜨는 사이드다.
-        /// 그래서 도달 판정도 간선이 아니라 <b>관문 조건이 어느 도달 상태에서든 만족될 수
-        /// 있는가</b>로 한다. 탐색이 본 스탯의 겉둘레로 판정하므로 <b>과대근사</b>이고,
-        /// "도달 가능"이 넓게 잡혀 진짜 도달 불가를 놓치지 않는다.
+        /// 조건이 <b>탐색이 실제로 본 스탯의 겉둘레 안에서</b> 성립할 수 있는가.
+        ///
+        /// ⚠ 과대근사다 — 겉둘레는 에피소드별이 아니라 챕터 전체의 폭이고, 조건들이
+        /// 한 상태에서 <b>동시에</b> 서는지도 보지 않는다. 그래서 도달 여부는 여기서
+        /// 정하지 않는다(<see cref="Explore"/>의 완전 탐색만 정한다). 이미 못 간다고
+        /// 판정된 에피소드에 대해 <b>어느 조건을 짚어 줄지</b> 고르는 진단 재료다.
         /// </summary>
-        private static void AddReachableAttachments(
-            ChapterProgression chapter,
-            HashSet<string> reachable,
-            HashSet<string> clearedChapters,
-            int[] maxSeen,
-            int[] minSeen)
-        {
-            foreach (EpisodeNode node in chapter.Nodes)
-            {
-                if (node.Kind != EpisodeKind.Attachment || reachable.Contains(node.EpisodeId))
-                {
-                    continue;
-                }
-
-                List<EpisodeOption> incoming = IncomingTo(chapter, node.EpisodeId);
-
-                bool satisfiable = incoming.Count == 0;
-
-                for (int i = 0; !satisfiable && i < incoming.Count; i++)
-                {
-                    satisfiable =
-                        SatisfiableWithinEnvelope(chapter, incoming[i].VisibleConditions,
-                            reachable, clearedChapters, maxSeen, minSeen) &&
-                        SatisfiableWithinEnvelope(chapter, incoming[i].Conditions,
-                            reachable, clearedChapters, maxSeen, minSeen);
-                }
-
-                if (satisfiable)
-                {
-                    reachable.Add(node.EpisodeId);
-                }
-            }
-        }
-
         private static bool SatisfiableWithinEnvelope(
             ChapterProgression chapter,
             IReadOnlyList<ProgressionCondition> conditions,
