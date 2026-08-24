@@ -24,30 +24,25 @@ namespace Ked.Progression
         // Empty when "Kind == ScenarioAdvanceKind.DeadEnd".
         public string EndingKey { get; }
 
-        // The matched ending rule.
-        // Null when the chapter has no ending rules at all (single-chapter scenario).
-        public EndingRule MatchedRule { get; }
-
         /// Populated only when <see cref="ScenarioAdvanceKind.NextChapter"/>.
         public string NextChapterId { get; }
 
         private ScenarioAdvance(
-            ScenarioAdvanceKind kind, string endingKey, EndingRule matchedRule, string nextChapterId)
+            ScenarioAdvanceKind kind, string endingKey, string nextChapterId)
         {
             Kind = kind;
             EndingKey = endingKey;
-            MatchedRule = matchedRule;
             NextChapterId = nextChapterId;
         }
 
-        internal static ScenarioAdvance ToChapter(string endingKey, EndingRule rule) =>
-            new(ScenarioAdvanceKind.NextChapter, endingKey, rule, rule.NextChapterId);
+        internal static ScenarioAdvance ToChapter(string endingKey, string nextChapterId) =>
+            new(ScenarioAdvanceKind.NextChapter, endingKey, nextChapterId);
 
-        internal static ScenarioAdvance Ended(string endingKey, EndingRule rule) => 
-            new(ScenarioAdvanceKind.ScenarioEnded, endingKey, rule, string.Empty);
+        internal static ScenarioAdvance Ended(string endingKey) =>
+            new(ScenarioAdvanceKind.ScenarioEnded, endingKey, string.Empty);
 
         internal static ScenarioAdvance DeadEnd() =>
-            new(ScenarioAdvanceKind.DeadEnd, string.Empty, null, string.Empty);
+            new(ScenarioAdvanceKind.DeadEnd, string.Empty, string.Empty);
 
         public override string ToString() => 
             Kind == ScenarioAdvanceKind.NextChapter 

@@ -1,16 +1,16 @@
 namespace Ked.Progression
 {
     /// <summary>
-    /// 한 에피소드 트랜잭션이 지나는 자리들.
+    /// 한 에피소드 트랜잭션이 <b>멈추는</b> 자리들. 전부 호스트가 무언가 해야 해서 흐름이
+    /// 선 자리이고, 그때마다 <see cref="FlowRequest"/>가 채워진다.
     ///
-    /// <b>둘로 나뉜다</b> — 호스트가 무언가 해야 해서 <b>멈추는 자리</b>와, 지나가며 찍기만
-    /// 하는 <b>통과 자리</b>. 멈추는 자리에서만 <see cref="FlowRequest"/>가 채워지고,
-    /// 통과 자리는 "어디까지 갔다가 죽었나"를 남기려고 있다.
+    /// <b>한 호출 안에서 덮어써지는 중간 자리는 두지 않는다.</b> 호스트는 호출과 호출
+    /// 사이에만 이 값을 볼 수 있어서, 그런 자리는 크래시 로그 한 줄 말고는 쓸 데가 없었다.
     ///
     /// 번호는 주 흐름이 10단위, 곁가지가 +1, 종료가 900대다. 사이에 자리를 넣을 수 있게
     /// 비워 둔 것이고, 값 자체에 뜻은 없다.
     /// </summary>
-    public enum EpisodePhase
+    internal enum EpisodePhase
     {
         None = 0,
 
@@ -20,20 +20,8 @@ namespace Ked.Progression
         /// </summary>
         EpisodeEntered = 10,
 
-        /// <summary>
-        /// 대사가 끝났고 <see cref="ChapterTransition.Resolve"/>가 답을 냈다.
-        /// <b>이 순간 이 회차의 판단이 얼어붙는다</b>(P4) — 뒤로는 다시 판정하지 않는다.
-        /// 통과 자리다.
-        /// </summary>
-        OptionsResolved = 30,
-
         /// <summary>고를 수 있는 것이 있다. <b>멈춘다</b> — 그리고 기다린다.</summary>
         AwaitingChoice = 40,
-
-        /// <summary>
-        /// 고를 수 있는 것이 없고 문구 없는 간선이 있다. 입력 없이 지나간다. 통과 자리다.
-        /// </summary>
-        AutoAdvancing = 41,
 
         /// <summary>
         /// 고른 간선에 <c>ViaNodeId</c>가 있다. <b>멈춘다</b> — 지나며 거쳐 갈 연출이다.
@@ -48,14 +36,6 @@ namespace Ked.Progression
         /// 세이브"가 존재할 수 없다. <b>멈춘다</b> — 파일로 쓰라고 부탁한다.
         /// </summary>
         Committed = 60,
-
-        /// <summary>
-        /// 고를 수 있는 것이 하나도 없었다. 이 노드의 엔딩키가 실렸다.
-        ///
-        /// <b>여기가 에피소드 층과 시나리오 층이 만나는 유일한 자리다.</b> 통과 자리이고,
-        /// 곧바로 <see cref="ScenarioTransition.Resolve"/>가 다음을 정한다.
-        /// </summary>
-        ChapterEnded = 80,
 
         /// <summary>
         /// 챕터 경계를 넘었다. 다음 챕터의 시작 에피소드에 서 있고 <b>스탯은 그대로 넘어왔다</b>.

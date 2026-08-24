@@ -11,7 +11,10 @@ namespace Ked.Progression
     /// </summary>
     public enum FlowRequestKind
     {
-        /// <summary>통과 자리라 부탁할 것이 없다.</summary>
+        /// <summary>
+        /// <c>default(FlowRequest)</c>의 값. <b>흐름이 이 값을 내놓는 일은 없다</b> —
+        /// 0번 자리를 비워 두면 struct 기본값이 정의되지 않은 값으로 읽히므로 남긴다.
+        /// </summary>
         None = 0,
 
         /// <summary>대사를 재생하라. 이름은 <see cref="EpisodeNode.DialogueEntryId"/>다.</summary>
@@ -93,8 +96,6 @@ namespace Ked.Progression
             Outcome = outcome;
         }
 
-        internal static FlowRequest None() =>
-            new FlowRequest(FlowRequestKind.None, string.Empty, null, 0, null, default);
 
         internal static FlowRequest PlayDialogue(string nodeName) =>
             new FlowRequest(FlowRequestKind.PlayDialogue, nodeName, null, 0, null, default);

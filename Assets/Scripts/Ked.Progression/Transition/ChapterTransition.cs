@@ -54,15 +54,15 @@ namespace Ked.Progression
 
             if (anySelectable)
                 return new ChapterAdvance(
-                    ChapterAdvanceKind.AwaitPlayerChoice, shownOrLocked, null, string.Empty, hidden);
+                    ChapterAdvanceKind.AwaitPlayerChoice, shownOrLocked, null, hidden);
 
             // 고를 수 있는 것이 하나도 없다. 잠긴 것들은 화면에 세우지 않는다.
             if (node.TryGetAutoOption(out EpisodeOption auto))
                 return new ChapterAdvance(
-                    ChapterAdvanceKind.AutoAdvance, None, auto, string.Empty, hidden);
+                    ChapterAdvanceKind.AutoAdvance, None, auto, hidden);
             
             return new ChapterAdvance(
-                ChapterAdvanceKind.ChapterEnded, None, null, node.EndingKey, hidden);
+                ChapterAdvanceKind.ChapterEnded, None, null, hidden);
         }
 
         // 미달 조건 중 첫번째 것.

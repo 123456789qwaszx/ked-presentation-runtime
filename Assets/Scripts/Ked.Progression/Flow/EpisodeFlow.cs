@@ -7,14 +7,14 @@ namespace Ked.Progression
     /// 에피소드 하나를 트랜잭션으로 굴리고, 챕터 경계를 넘긴다.
     ///
     /// <code>
-    ///   EpisodeEntered ──[대사]──► OptionsResolved ──┬─► AwaitingChoice ──[선택]──┐
-    ///        ▲                                        ├─► AutoAdvancing ──────────┤
-    ///        │                                        │                           ▼
-    ///        │                                        │                    (ViaPlaying)
-    ///        │                                        │                           │
-    ///        └────────[세이브]──── Committed ◄─────────┼───────────────────────────┘
-    ///                                                 │
-    ///                                                 └─► ChapterEnded ──► 시나리오 층
+    ///   EpisodeEntered ──[대사]──► (판정) ──┬─► AwaitingChoice ──[선택]──┐
+    ///        ▲                              ├─► (자동 진행) ─────────────┤
+    ///        │                              │                            ▼
+    ///        │                              │                       ViaPlaying
+    ///        │                              │                            │
+    ///        └───────[세이브]──── Committed ◄┼────────────────────────────┘
+    ///                                       │
+    ///                                       └─► (챕터 끝) ──► 시나리오 층
     /// </code>
     ///
     /// <b>이 흐름은 끌려간다.</b> 스스로 무엇을 부르지 않고, 지금 필요한 것을
@@ -33,9 +33,9 @@ namespace Ked.Progression
         private ChapterAdvance _advance;
         private EpisodeOption _chosen;
 
-        public EpisodePhase Phase { get; private set; } = EpisodePhase.None;
+        private EpisodePhase Phase { get; set; } = EpisodePhase.None;
 
-        /// <summary>지금 호스트가 해야 하는 일. 통과 자리에서는 비어 있다.</summary>
+        /// <summary>지금 호스트가 해야 하는 일. 흐름이 멈출 때마다 채워진다.</summary>
         public FlowRequest Pending { get; private set; }
 
         /// <summary>
@@ -101,7 +101,6 @@ namespace Ked.Progression
             Require(EpisodePhase.EpisodeEntered, nameof(DialogueCompleted));
 
             _advance = ChapterTransition.Resolve(CurrentChapter(), _state);
-            Phase = EpisodePhase.OptionsResolved;
 
             switch (_advance.Kind)
             {
@@ -111,7 +110,6 @@ namespace Ked.Progression
                     return;
 
                 case ChapterAdvanceKind.AutoAdvance:
-                    Phase = EpisodePhase.AutoAdvancing;
                     Take(_advance.AutoOption);
                     return;
 
@@ -224,8 +222,6 @@ namespace Ked.Progression
         /// </summary>
         private void CrossChapterBoundary()
         {
-            Phase = EpisodePhase.ChapterEnded;
-
             ScenarioAdvance next = ScenarioTransition.Resolve(_scenario, _state);
 
             if (next.Kind != ScenarioAdvanceKind.NextChapter)

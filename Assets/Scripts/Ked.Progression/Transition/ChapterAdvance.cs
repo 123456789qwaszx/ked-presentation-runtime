@@ -21,9 +21,6 @@ namespace Ked.Progression
         // "ChapterAdvanceKind.AutoAdvance일 때만 사용.
         public EpisodeOption AutoOption { get; }
 
-        // "ChapterAdvanceKind.ChapterEnded"일 때 지금 노드의 엔딩키.
-        // 엔딩 후보가 아닌 노드에서 끝났으면 빈 문자열.
-        public string EndingKey { get; }
 
         // 표시조건 미달로 목록에서 빠진 개수. 그리는 데는 안 쓰인다.
         // (에디터 및 디버깅 용)
@@ -33,13 +30,11 @@ namespace Ked.Progression
             ChapterAdvanceKind kind,
             IReadOnlyList<ResolvedOption> options,
             EpisodeOption autoOption,
-            string endingKey,
             int hiddenCount)
         {
             Kind = kind;
             Options = options;
             AutoOption = autoOption;
-            EndingKey = endingKey;
             HiddenCount = hiddenCount;
         }
 

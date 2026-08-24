@@ -49,12 +49,12 @@ namespace Ked.Progression
                     continue;
 
                 return rule.Outcome == EndingOutcome.ScenarioEnd
-                    ? ScenarioAdvance.Ended(endingKey, rule)
-                    : ScenarioAdvance.ToChapter(endingKey, rule);
+                    ? ScenarioAdvance.Ended(endingKey)
+                    : ScenarioAdvance.ToChapter(endingKey, rule.NextChapterId);
             }
 
             if (!sawKey)
-                return ScenarioAdvance.Ended(endingKey, null);
+                return ScenarioAdvance.Ended(endingKey);
             
             // 여기 도달할 수 없다 — 같은 키의 마지막 규칙은 조건이 없어야 하고(무조건 성립),
             // 생성자가 그것을 강제한다. 도달했다면 불변식이 깨진 것이므로 조용히 끝내지 않는다.

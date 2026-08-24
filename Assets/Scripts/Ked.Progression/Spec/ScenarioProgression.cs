@@ -3,14 +3,6 @@ using System.Collections.Generic;
 
 namespace Ked.Progression
 {
-    /// <summary>
-    /// 시나리오 하나 — 챕터들과 그 사이의 길.
-    /// 챕터 워크북이 값을 적지만, 챕터가 이어지는 순간 그 초기값이 두 번 의미를 갖는다:
-    /// ch01을 끝내고 ch02에 들어갈 때 <c>trust</c>가 ch02의 초기값으로 되돌아가면
-    /// "스탯이 챕터를 넘나든다"가 거짓이 된다. 그래서 <b>실제 플레이의 시작값은 시나리오가
-    /// 한 번만 세우고</b>, 챕터에 실린 초기값은 <b>도달성 증명의 진입 가정</b>으로 역할이
-    /// 바뀐다.
-    /// </summary>
     public sealed class ScenarioProgression
     {
         private readonly Dictionary<string, ChapterProgression> _chaptersById;
@@ -22,8 +14,7 @@ namespace Ked.Progression
         // 새 게임이 시작하는 챕터.
         public string StartChapterId { get; }
 
-        // 스탯 정의의 유일한 원천
-        public IReadOnlyList<StatDefinition> Stats { get; }
+        public IReadOnlyList<StatDefinition> Stats { get; } // 스탯 정의의 유일한 원천
 
         public IReadOnlyList<ChapterProgression> Chapters { get; }
 
