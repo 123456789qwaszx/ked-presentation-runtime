@@ -3,7 +3,7 @@ namespace Ked.Progression
     public enum StatChangeKind
     {
         Add = 0,
-        Set = 1,
+        Set = 1, // Stat.bool에만 사용.
     }
 
     public readonly struct StatChange
