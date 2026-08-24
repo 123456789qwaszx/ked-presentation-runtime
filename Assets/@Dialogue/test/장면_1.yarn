@@ -1,0 +1,18 @@
+title: 장면_1
+---
+
+라루: 뭐시라? #line:ln_2t1hx7hf
+
+<<if $__t1_sf_qtqz9ujy_qwe >= 0>>
+    윌로: 또 왜 그러는데? #line:ln_5i0ijguh
+    <<detour 장면_5>>
+<<endif>>
+qwe #line:ln_49b4r3hs
+
+-> qweerrr #line:ln_4wadcn5w
+    <<set $__t1_sf_qtqz9ujy_추리1 = true>>
+    <<set $__t1_sf_qtqz9ujy_능력이바뀌 += 4>>
+    윌로: 어라라? #line:ln_3u0i00p6
+  #line:ln_94a8dpgf
+
+===

@@ -1,0 +1,14 @@
+title: 장면_3
+---
+<<slot s1 stage00 mid>>
+<<cast s1 willow a 1>>
+
+<<fade_in s1 14fr>>
+윌로: 엔딩에 도달했어! #line:ln_yv6kuadz
+
+<<place s1 face center 0fr>>
+<<size s1 close bust 0fr>>
+<<gesture s1 0u +2u 12fr>>
+윌로: 축하해. #line:ln_2eg1g9j8
+
+===

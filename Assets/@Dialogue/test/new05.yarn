@@ -1,0 +1,13 @@
+title: new05
+---
+
+윌로: 힘을 4 얻었어? #line:ln_8xdmvpv5
+
+라루: rr #line:ln_8ww00afu
+
+<<if $power > 2>>
+    라루: 어라? #line:ln_2ujaw3r7
+<<elseif $int >= 0>>
+    네루: 응? #line:ln_67c7wu4v
+<<endif>>
+===

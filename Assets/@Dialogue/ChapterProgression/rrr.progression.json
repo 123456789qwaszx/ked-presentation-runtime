@@ -1,7 +1,7 @@
 {
   "ChapterId": "rrr",
   "DisplayName": "rrr",
-  "StartEpisodeId": "new01",
+  "StartEpisodeId": "new01rrr",
   "Stats": [
     {
       "Key": "int",
@@ -14,27 +14,23 @@
   ],
   "Nodes": [
     {
-      "EpisodeId": "new01",
+      "EpisodeId": "new01rrr",
       "Title": "",
       "IndexText": "",
-      "Kind": "Main",
-      "DialogueEntryId": "Story_new01",
+      "DialogueEntryId": "new01rrr",
       "VisibleConditions": [],
       "UnlockConditions": [],
       "NextOptions": [
         {
-          "TargetEpisodeId": "new02",
-          "ChoiceLabel": "",
-          "Kind": "AutoAdvance",
+          "TargetEpisodeId": "new02r",
+          "ChoiceLabel": "계속",
           "VisibleConditions": [],
           "Conditions": [],
-          "HideWhenLocked": false,
           "LockedReasonText": "",
           "ViaNodeId": "",
           "StatChanges": []
         }
       ],
-      "Attachments": [],
       "IsChapterEndingCandidate": false,
       "EndingKey": "",
       "DesignerNote": "",
@@ -44,27 +40,23 @@
       }
     },
     {
-      "EpisodeId": "new02",
+      "EpisodeId": "new02r",
       "Title": "",
       "IndexText": "",
-      "Kind": "Main",
-      "DialogueEntryId": "Story_new02",
+      "DialogueEntryId": "new02r",
       "VisibleConditions": [],
       "UnlockConditions": [],
       "NextOptions": [
         {
-          "TargetEpisodeId": "new03",
-          "ChoiceLabel": "",
-          "Kind": "AutoAdvance",
+          "TargetEpisodeId": "new03r",
+          "ChoiceLabel": "계속",
           "VisibleConditions": [],
           "Conditions": [],
-          "HideWhenLocked": false,
           "LockedReasonText": "",
           "ViaNodeId": "",
           "StatChanges": []
         }
       ],
-      "Attachments": [],
       "IsChapterEndingCandidate": false,
       "EndingKey": "",
       "DesignerNote": "",
@@ -74,27 +66,23 @@
       }
     },
     {
-      "EpisodeId": "new03",
+      "EpisodeId": "new03r",
       "Title": "",
       "IndexText": "",
-      "Kind": "Main",
-      "DialogueEntryId": "Story_new03",
+      "DialogueEntryId": "new03r",
       "VisibleConditions": [],
       "UnlockConditions": [],
       "NextOptions": [
         {
-          "TargetEpisodeId": "new05",
-          "ChoiceLabel": "",
-          "Kind": "AutoAdvance",
+          "TargetEpisodeId": "new05r",
+          "ChoiceLabel": "계속",
           "VisibleConditions": [],
           "Conditions": [],
-          "HideWhenLocked": false,
           "LockedReasonText": "",
           "ViaNodeId": "",
           "StatChanges": []
         }
       ],
-      "Attachments": [],
       "IsChapterEndingCandidate": false,
       "EndingKey": "",
       "DesignerNote": "",
@@ -104,15 +92,13 @@
       }
     },
     {
-      "EpisodeId": "new05",
+      "EpisodeId": "new05r",
       "Title": "",
       "IndexText": "",
-      "Kind": "Main",
-      "DialogueEntryId": "Story_new05",
+      "DialogueEntryId": "new05r",
       "VisibleConditions": [],
       "UnlockConditions": [],
       "NextOptions": [],
-      "Attachments": [],
       "IsChapterEndingCandidate": false,
       "EndingKey": "",
       "DesignerNote": "",

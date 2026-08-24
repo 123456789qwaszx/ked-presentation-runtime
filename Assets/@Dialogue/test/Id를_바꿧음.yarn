@@ -1,0 +1,16 @@
+title: Id를_바꿧음
+---
+<<slot s1 stage00 mid>>
+<<cast s1 toki a 1>>
+
+<<face s1 01>>
+<<fade_in s1 14fr>>
+<<size s1 mid bust 0fr>>
+<<place s1 bust right 0fr>>
+<<mirror s1 left>>
+qw: s #line:ln_hteghi8b
+
+<<if $power > 2>>
+<<elseif $int >= 0>>
+<<endif>>
+===

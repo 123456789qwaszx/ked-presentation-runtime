@@ -1,0 +1,13 @@
+title: new04
+---
+<<slot s1 stage00 mid>>
+<<cast s1 laru a 3>>
+
+<<place s1 bust left 0fr>>
+<<size s1 front bust 0fr>>
+<<shot_focus_to s1 face center 11 29fr>>
+<<left s1 5u 8fr>>
+<<fade_in s1 14fr>>
+세이나: new04 아무말 #line:ln_s7ee48a4
+
+===

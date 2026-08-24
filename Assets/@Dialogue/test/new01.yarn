@@ -1,0 +1,16 @@
+title: new01
+---
+
+q: e #line:ln_63q44qyk
+
+q: r #line:ln_kt6kf254
+
+q: s #line:ln_dhie2qeg
+
+<<if $int >= 0>>
+    윌로: 지능있을경우. #line:ln_5j4byhz2
+    <<detour 장면_1>>
+<<endif>>
+라루: qwer #line:ln_h284v5qz
+
+===
