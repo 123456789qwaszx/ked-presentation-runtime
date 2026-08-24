@@ -1,13 +1,20 @@
 using System;
-using System.Text;
 using System.Threading.Tasks;
 using Ked.Progression;
-using Ked.Progression.Dto;
 using UnityEngine;
 using Yarn.Unity;
 
-// EpisodeFlow를 쥐는 유일한 소유자.
-// 진행 층과 대사 층을 잇는 유일한 자리.
+// 진행 순서를 쥐는 유일한 자리. 진행 층과 대사 층을 잇는다.
+//
+// 코어는 "무엇이 참인가"만 답한다(ChapterTransition·ScenarioTransition·Commit 전부 순수 함수).
+// "어떤 순서로 부르는가"는 여기 있고, 그것이 이 루프가 지는 세 규칙이다:
+//   · 판정은 대사 뒤 한 번 — 화면에 뜬 것과 실제가 갈릴 수 없다
+//   · 연출은 커밋보다 앞 — 지나가는 자리라 상태를 안 바꾼다
+//   · 스탯 반영과 이동이 한 연산 — "스탯만 오르고 안 옮겨 간" 상태가 없다
+//
+// 나중에 이 순서를 쓰는 두 번째 소비자(툴의 걷기 모드 등)가 생기면, 이 루프를 코어로
+// 올리고 await를 pull로 되접어야 한다. 순서를 두 곳에 적으면 작가가 미리보는 게임과
+// 플레이어가 하는 게임이 갈린다.
 public sealed class ProgressionDriver
 {
     private readonly EpisodePlayer _player;
@@ -15,13 +22,13 @@ public sealed class ProgressionDriver
     private readonly ProgressionYarnBridge _yarnBridge;
 
     private ScenarioProgression _scenario;
-    private EpisodeFlow _flow;
+    private ProgressionState _state;
     private bool _stopRequested;
     private bool _firstEpisode;
 
     private YarnProject _yarnProject;
 
-    // Yarn 저장소가 지금 어느 챕터의 것인지. 이것이 흐름과 갈리면 [3]을 다시 세운다.
+    // Yarn 저장소가 지금 어느 챕터의 것인지. 이것이 상태와 갈리면 [3]을 다시 세운다.
     private string _yarnChapterId;
 
     public bool IsRunning { get; private set; }
@@ -34,9 +41,7 @@ public sealed class ProgressionDriver
         _yarnBridge = yarnBridge;
     }
 
-    // 새 게임 또는 이어 하기.
-    public async Task RunAsync(
-        ScenarioProgression scenario, YarnProject project, ProgressionState restored = null)
+    public async Task RunAsync(ScenarioProgression scenario, YarnProject project)
     {
         if (IsRunning)
         {
@@ -53,11 +58,10 @@ public sealed class ProgressionDriver
 
         try
         {
-            _flow = restored == null
-                ? EpisodeFlow.Begin(scenario)
-                : EpisodeFlow.Resume(scenario, restored);
+            // 시작값은 시작 챕터가 세운다 — 스탯의 수명이 챕터다.
+            _state = scenario.StartChapter.CreateEntryState();
 
-            Debug.Log($"[진행] 시작 — {_flow}");
+            Debug.Log($"[진행] 시작 — {Describe()}");
 
             await PumpAsync();
         }
@@ -67,13 +71,13 @@ public sealed class ProgressionDriver
         }
         catch (Exception error)
         {
-            Debug.LogError($"[진행] 멈췄다 — {_flow}\n{error}");
+            Debug.LogError($"[진행] 멈췄다 — {Describe()}\n{error}");
         }
         finally
         {
             IsRunning = false;
-            _flow = null;
             _scenario = null;
+            _state = null;
             _yarnProject = null;
             _yarnChapterId = null;
         }
@@ -88,49 +92,80 @@ public sealed class ProgressionDriver
 
     private async Task PumpAsync()
     {
-        while (!_flow.IsFinished)
+        while (true)
         {
-            FlowRequest request = _flow.Pending;
+            ChapterProgression chapter = CurrentChapter();
+            chapter.TryGetNode(_state.CurrentEpisodeId, out EpisodeNode node);
 
-            switch (request.Kind)
+            if (!await PlayNodeAsync(node.DialogueEntryId, "대사"))
+                return;
+
+            // 이 회차의 판단은 여기서 확정된다. 아래는 이미 정해진 목록에서 고르기만 한다.
+            ChapterAdvance advance = ChapterTransition.Resolve(chapter, _state);
+
+            if (advance.Kind == ChapterAdvanceKind.ChapterEnded)
             {
-                case FlowRequestKind.PlayDialogue:
-                    if (!await PlayNodeAsync(request.NodeName, "대사"))
-                        return;
+                if (!CrossChapterBoundary())
+                    return;
 
-                    _flow.DialogueCompleted();
-                    break;
-
-                case FlowRequestKind.PresentOptions:
-                    int picked = await _options.ShowAsync(request.Options, request.HiddenCount);
-
-                    if (_stopRequested)
-                        return;
-
-                    Debug.Log($"[진행] 골랐다 — {request.Options[picked].Option.ChoiceLabel}");
-                    _flow.Choose(picked);
-                    break;
-
-                case FlowRequestKind.PlayVia:
-                    // 연출도 Story 노드. 별도 경로를 만들지 않음.
-                    if (!await PlayNodeAsync(request.NodeName, "연출"))
-                        return;
-
-                    _flow.ViaCompleted();
-                    break;
-
-                case FlowRequestKind.PersistSave:
-                    // 지금은 로그만. "처리했다"지 "디스크에 썼다"가 아님.
-                    Debug.Log(DescribeSave(request.Save));
-                    _flow.SavePersisted();
-                    break;
-
-                default:
-                    throw new InvalidOperationException($"모르는 요청: {request.Kind}");
+                continue;
             }
+
+            EpisodeOption chosen = advance.Kind == ChapterAdvanceKind.AutoAdvance
+                ? advance.AutoOption
+                : await PickAsync(advance);
+
+            if (chosen == null)
+                return;
+
+            // 연출도 Story 노드. 별도 경로를 만들지 않는다.
+            if (chosen.HasVia && !await PlayNodeAsync(chosen.ViaNodeId, "연출"))
+                return;
+
+            _state = _state.Commit(chapter, chosen);
+        }
+    }
+
+    // 고르지 못했으면(멈춤 요청) null.
+    private async Task<EpisodeOption> PickAsync(ChapterAdvance advance)
+    {
+        int picked = await _options.ShowAsync(advance.Options, advance.HiddenCount);
+
+        if (_stopRequested)
+            return null;
+
+        if (picked < 0 || picked >= advance.Options.Count)
+            throw new ArgumentOutOfRangeException(
+                nameof(picked), $"선택지는 {advance.Options.Count}개인데 {picked}번이 왔다.");
+
+        ResolvedOption resolved = advance.Options[picked];
+
+        // 화면이 잠긴 것을 못 고르게 하지만, 뚫렸을 때 무엇 때문에 잠겼는지를 지목한다.
+        if (!resolved.IsSelectable)
+            throw new InvalidOperationException(
+                $"잠긴 선택지다: [{resolved.Option.ChoiceLabel}] — {resolved.BlockingCondition}");
+
+        Debug.Log($"[진행] 골랐다 — {resolved.Option.ChoiceLabel}");
+
+        return resolved.Option;
+    }
+
+    // 에피소드 층과 시나리오 층이 만나는 유일한 자리. 건너가는 것은 엔딩키 하나다.
+    // 계속 갈 수 있으면 true.
+    private bool CrossChapterBoundary()
+    {
+        ScenarioAdvance next = ScenarioTransition.Resolve(_scenario, _state);
+
+        if (next.Kind != ScenarioAdvanceKind.NextChapter)
+        {
+            ShowEnding(next);
+            return false;
         }
 
-        ShowEnding(_flow.Pending.Outcome);
+        // 스탯은 새 챕터의 초기값에서 다시 선다 — 수명이 챕터다.
+        _state = _state.CommitChapterEnding(_scenario, next);
+
+        return true;
     }
 
     private async Task<bool> PlayNodeAsync(string nodeName, string what)
@@ -165,7 +200,7 @@ public sealed class ProgressionDriver
         if (_yarnBridge == null)
             return;
 
-        string chapterId = _flow.State.CurrentChapterId;
+        string chapterId = _state.CurrentChapterId;
 
         // "[3] 연출 실행 상태"는 챕터 수명이다. 챕터가 바뀌는 이 자리에서 선언 초기값으로
         // 되돌린다 — 이전 챕터가 남긴 값도, 이 챕터를 아까 한 번 돌린 값도 안 물려받는다.
@@ -182,11 +217,19 @@ public sealed class ProgressionDriver
         //
         // 정의를 함께 넘기는 이유: 깃발을 숫자로 심으면 Yarn 저장소가 그 변수를
         // float으로 도장해, bool로 선언된 변수가 그 뒤로 읽히지 않는다.
-        if (_scenario.TryGetChapter(chapterId, out ChapterProgression chapter))
-            _yarnBridge.PublishStats(chapter.Stats, _flow.State.Stats);
+        _yarnBridge.PublishStats(CurrentChapter().Stats, _state.Stats);
     }
 
-    private static void ShowEnding(ScenarioAdvance outcome)
+    // 로더가 참조를 다 검증했고 Commit은 검증된 곳으로만 옮긴다 — 전체 함수다.
+    // 여기에 방어 코드가 생기면 경계가 샜다는 신호다.
+    private ChapterProgression CurrentChapter()
+    {
+        _scenario.TryGetChapter(_state.CurrentChapterId, out ChapterProgression chapter);
+
+        return chapter;
+    }
+
+    private static void ShowEnding(in ScenarioAdvance outcome)
     {
         // 의도한 종착과 막다른 곳을 섞지 않는다. 화면에서 구별되어야 한다.
         if (outcome.Kind == ScenarioAdvanceKind.ScenarioEnded)
@@ -200,17 +243,8 @@ public sealed class ProgressionDriver
             "나가는 길이 하나도 없는데 엔딩도 아니다(작가가 아직 안 이은 자리).");
     }
 
-    private static string DescribeSave(ProgressionSaveDto save)
-    {
-        var text = new StringBuilder();
-
-        text.Append("[진행] 세이브 요청 — ")
-            .Append(save.CurrentChapterId).Append('/').Append(save.CurrentEpisodeId)
-            .Append("  스탯:");
-
-        foreach (var stat in save.Stats)
-            text.Append(' ').Append(stat.Key).Append('=').Append(stat.Value);
-
-        return text.ToString();
-    }
+    private string Describe() =>
+        _state == null
+            ? "(시작 전)"
+            : $"{_state.CurrentChapterId}/{_state.CurrentEpisodeId}";
 }

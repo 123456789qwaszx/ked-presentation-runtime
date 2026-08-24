@@ -48,11 +48,6 @@ namespace Ked.Progression
                 startChapterId ?? string.Empty, startEpisodeId, values);
         }
 
-        internal static ProgressionState FromSave(
-            string chapterId, string episodeId, Dictionary<string, int> stats)
-        {
-            return new ProgressionState(chapterId, episodeId, stats);
-        }
 
         // 스탯 값:
         // - 정의되지 않은 키는 0으로 떨어뜨리지 않고 던짐.
@@ -121,7 +116,7 @@ namespace Ked.Progression
             if (scenario == null)
                 throw new ArgumentNullException(nameof(scenario));
 
-            // EpisodeFlow는 다음 챕터가 있을 때만 여기까지 온다. 아니면 이미 끝났다.
+            // 호출자는 다음 챕터가 있을 때만 여기까지 온다. 아니면 그 자리에서 이미 끝났다.
             if (advance.Kind != ScenarioAdvanceKind.NextChapter)
                 throw new ArgumentException(
                     $"다음 챕터로 가는 결정이 아니다: {advance.Kind}.", nameof(advance));
