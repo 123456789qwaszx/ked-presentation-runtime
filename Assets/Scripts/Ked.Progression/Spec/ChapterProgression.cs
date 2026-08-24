@@ -29,8 +29,7 @@ namespace Ked.Progression
 
         public IReadOnlyList<EpisodeNode> Nodes { get; } // 챕터 내 에피소드들
 
-        // 챕터 내 스탯들. 초기값·경계·타입 모두 이 챕터의 것이다 — 스탯의 수명이
-        // 챕터라서, 같은 이름이라도 다른 챕터의 것과는 아무 연관이 없다.
+        // 챕터 고유의 스탯.
         public IReadOnlyList<StatDefinition> Stats { get; }
 
         public IReadOnlyList<EndingRule> EndingRules { get; }

@@ -6,15 +6,12 @@ namespace Ked.Progression
     public enum OptionKind
     {
         PlayerChoice = 0,
-
-        // 고를 수 있는 것이 하나도 없을 때 자동으로 타는 길.
-        // 에피소드당 하나 제한. 문구나 게이트 없음.
         AutoAdvance = 1,
     }
 
     // 에피소드에서 나가는 길 - 저작 쪽 `간선` 시트의 한 행에 대응.
     //
-    // 이전에는 에피소드 노드가 표시조건·해금조건을 들고 있었는데, 이젠 간선으로 책임.
+    // 이전에는 에피소드 노드가 표시조건/해금조건을 들고 있었는데, 이젠 간선으로 책임.
     // 그래서 "같은 곳으로 가되 조건이 다른 길"을 여럿 둘 수 있음.
     public sealed class EpisodeOption
     {

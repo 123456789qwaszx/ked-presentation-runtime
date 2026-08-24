@@ -105,8 +105,11 @@ namespace Ked.Progression.Dto
         public string TargetEpisodeId { get; set; }
 
         /// <summary>
-        /// ⚠ <b>비어 있으면 자동 진행으로 읽는다.</b> 저작 데이터에 종류 열이 없어서 생긴
-        /// 유일한 sentinel이고, <b>그 해석이 일어나는 자리는 로더 한 곳뿐이다</b>(D5).
+        /// 화면에 뜨는 문구. <b>비어 있으면 자동 진행이다</b> — 간선의 종류는 따로 적지 않고
+        /// 문구의 유무로 가른다. 이것이 규약이다.
+        ///
+        /// ⚠ 그래서 문구를 실수로 지운 선택지는 조용히 자동 진행이 된다. 한 에피소드에서
+        /// 둘 이상 지우면 <c>EpisodeNode</c>가 "자동 진행 간선이 둘 이상"으로 잡는다.
         /// </summary>
         public string ChoiceLabel { get; set; }
 

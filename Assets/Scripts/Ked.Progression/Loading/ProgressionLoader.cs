@@ -33,22 +33,9 @@ namespace Ked.Progression
                 return new ProgressionLoadResult(null, diagnostics);
             }
 
-            var autoPaths = new List<string>();
-
             List<StatDefinition> stats = LoadStats(dto.Stats, diagnostics);
-            List<EpisodeNode> nodes = LoadNodes(dto.Nodes, diagnostics, autoPaths);
+            List<EpisodeNode> nodes = LoadNodes(dto.Nodes, diagnostics);
             List<EndingRule> endingRules = LoadEndingRules(dto.EndingRules, diagnostics);
-
-            if (autoPaths.Count > 0)
-            {
-                // 저작 데이터에 종류 열이 없어 문구가 빈 간선을 자동 진행으로 읽음.
-                diagnostics.Add(ProgressionDiagnostic.Warning(
-                    "NextOptions",
-                    $"문구가 빈 간선 {autoPaths.Count}개를 자동 진행으로 읽었다: " +
-                    $"{string.Join(", ", autoPaths)}. " +
-                    "저작 데이터에 종류 열이 없어 문구의 유무로 판별한다 — " +
-                    "선택지 문구를 실수로 지운 것이라면 여기 나타난다(D5)."));
-            }
 
             if (HasError(diagnostics))
             {
@@ -306,7 +293,7 @@ namespace Ked.Progression
         // ── 노드 ────────────────────────────────────────────────────────────
 
         private static List<EpisodeNode> LoadNodes(
-            List<EpisodeNodeDto> dtos, List<ProgressionDiagnostic> into, List<string> autoPaths)
+            List<EpisodeNodeDto> dtos, List<ProgressionDiagnostic> into)
         {
             var nodes = new List<EpisodeNode>();
 
@@ -332,8 +319,7 @@ namespace Ked.Progression
 
                 VerifyNodeIsLeanedOut(dto, where, into);
 
-                List<EpisodeOption> options =
-                    LoadOptions(dto.NextOptions, where, into, autoPaths);
+                List<EpisodeOption> options = LoadOptions(dto.NextOptions, where, into);
 
                 try
                 {
@@ -388,10 +374,7 @@ namespace Ked.Progression
         // ── 간선 ────────────────────────────────────────────────────────────
 
         private static List<EpisodeOption> LoadOptions(
-            List<EpisodeOptionDto> dtos,
-            string nodePath,
-            List<ProgressionDiagnostic> into,
-            List<string> autoPaths)
+            List<EpisodeOptionDto> dtos, string nodePath, List<ProgressionDiagnostic> into)
         {
             var options = new List<EpisodeOption>();
 
@@ -457,7 +440,6 @@ namespace Ked.Progression
                         continue;
                     }
 
-                    autoPaths.Add(at);
                     options.Add(EpisodeOption.Auto(dto.TargetEpisodeId, changes, dto.ViaNodeId));
                 }
                 catch (ArgumentException error)
