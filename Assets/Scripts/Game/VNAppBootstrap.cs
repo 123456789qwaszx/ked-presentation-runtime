@@ -359,7 +359,7 @@ public class VNAppBootstrap : MonoBehaviour
         _progressionDriver = new ProgressionDriver(_episodePlayer, _progressionOptions, yarnBridge);
 
         _progressionLauncher = new ProgressionLauncher(
-            _progressionDriver, dialogueRunner, progressionChapterJson, yarnBridge);
+            _progressionDriver, dialogueRunner, progressionChapterJson);
     }
 
     private void BootstrapPlaybackControls()

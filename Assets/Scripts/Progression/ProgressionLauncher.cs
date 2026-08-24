@@ -12,19 +12,16 @@ public sealed class ProgressionLauncher
     private readonly ProgressionDriver _driver;
     private readonly DialogueRunner _dialogueRunner;
     private readonly TextAsset _chapterJson;
-    private readonly ProgressionYarnBridge _yarnBridge;
 
     //"DialogueRunner.YarnProject"를 꺼내 대조 및 검사.
     public ProgressionLauncher(
         ProgressionDriver driver,
         DialogueRunner dialogueRunner,
-        TextAsset chapterJson,
-        ProgressionYarnBridge yarnBridge)
+        TextAsset chapterJson)
     {
         _driver = driver;
         _dialogueRunner = dialogueRunner;
         _chapterJson = chapterJson;
-        _yarnBridge = yarnBridge;
     }
 
     public bool IsRunning => _driver.IsRunning;
@@ -42,10 +39,8 @@ public sealed class ProgressionLauncher
         if (!ProgressionContentPreflight.CheckAndLog(scenario, _dialogueRunner.YarnProject))
             return;
 
-        // "[3] 연출 실행 상태"는 챕터 수명이다. 챕터를 시작하는 이 자리에서 선언 초기값으로 되돌린다
-        // 다른 챕터가 남긴 값도, 이 챕터를 아까 한 번 돌린 값도 안 물려받는다.
-        _yarnBridge?.BeginChapter(_dialogueRunner.YarnProject);
-
-        await _driver.RunAsync(scenario);
+        // Yarn 변수 두 계층을 세우는 일은 드라이버가 한다 — 챕터가 바뀔 때마다 다시
+        // 세워야 하고, 챕터가 바뀌는 것을 아는 쪽은 흐름을 쥔 드라이버뿐이다.
+        await _driver.RunAsync(scenario, _dialogueRunner.YarnProject);
     }
 }

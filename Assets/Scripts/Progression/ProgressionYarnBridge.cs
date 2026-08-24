@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Ked.Progression;
 using Yarn.Unity;
 
 /// <summary>
@@ -32,9 +33,16 @@ public sealed class ProgressionYarnBridge
     /// 이으려면 작가가 이전 챕터의 마지막 값을 새 챕터의 초기값으로 직접 지정.
     ///
     /// 챕터 안에서는 에피소드 경계를 자유롭게 넘는다.
+    ///
+    /// <b>Clear()는 계층을 가리지 않는다</b> — [2]도 같이 지워진다. 그래서 이 뒤에
+    /// 반드시 <see cref="PublishStats"/>가 따라와야 하고, 그 순서를 지키는 것은
+    /// 챕터가 바뀌는 것을 아는 쪽(ProgressionDriver)의 일이다.
     /// </summary>
     public void BeginChapter(YarnProject project)
     {
+        if (_storage == null || project == null)
+            return;
+
         _storage.Clear();
 
         // 초기값 선언(<<declare>>)
@@ -54,14 +62,34 @@ public sealed class ProgressionYarnBridge
     ///
     /// 선언 지점은, YarnVariableCheckpoint.Capture()보다 앞이어야 한다
     /// 그래야 롤백 리플레이가 같은 값에서 다시 출발.
+    ///
+    /// 값만 건너가고 <b>정의는 건너가지 않는다.</b> 그래서 bool 스탯도 숫자로 심긴다 —
+    /// Yarn 쪽 선언이 bool이면 그 뒤로 읽히지 않는다. 그 어긋남은
+    /// <c>ProgressionContentPreflight</c>가 재생 전에 잡는다.
     /// </summary>
-    public void PublishStats(IReadOnlyDictionary<string, int> stats)
+    public void PublishStats(
+        IReadOnlyList<StatDefinition> definitions, IReadOnlyDictionary<string, int> values)
     {
-        if (_storage == null || stats == null)
+        if (_storage == null || definitions == null || values == null)
             return;
 
-        foreach (KeyValuePair<string, int> stat in stats)
-            _storage.SetValue(NameOf(stat.Key), stat.Value);
+        for (int i = 0; i < definitions.Count; i++)
+        {
+            StatDefinition definition = definitions[i];
+
+            if (!values.TryGetValue(definition.Key, out int value))
+                continue;
+
+            string name = NameOf(definition.Key);
+
+            // 깃발은 bool로 심는다. 숫자로 심으면 저장소가 그 변수의 런타임 타입을
+            // float으로 도장해 버려서, 작가가 "<<declare $깃발 = false>>"로 적어 둔
+            // 변수를 그 뒤로 읽을 수 없다 — 조용히 다른 분기를 탄다.
+            if (definition.Type == StatType.Bool)
+                _storage.SetValue(name, value != 0);
+            else
+                _storage.SetValue(name, (float)value);
+        }
     }
 
     //저작 쪽은 "$" 없이 적고(기획자 언어)

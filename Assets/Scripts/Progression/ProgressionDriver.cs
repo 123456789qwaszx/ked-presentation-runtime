@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Ked.Progression;
 using Ked.Progression.Dto;
 using UnityEngine;
+using Yarn.Unity;
 
 // EpisodeFlow를 쥐는 유일한 소유자.
 // 진행 층과 대사 층을 잇는 유일한 자리.
@@ -13,9 +14,15 @@ public sealed class ProgressionDriver
     private readonly IChapterOptionsView _options;
     private readonly ProgressionYarnBridge _yarnBridge;
 
+    private ScenarioProgression _scenario;
     private EpisodeFlow _flow;
     private bool _stopRequested;
     private bool _firstEpisode;
+
+    private YarnProject _yarnProject;
+
+    // Yarn 저장소가 지금 어느 챕터의 것인지. 이것이 흐름과 갈리면 [3]을 다시 세운다.
+    private string _yarnChapterId;
 
     public bool IsRunning { get; private set; }
 
@@ -28,7 +35,8 @@ public sealed class ProgressionDriver
     }
 
     // 새 게임 또는 이어 하기.
-    public async Task RunAsync(ScenarioProgression scenario, ProgressionState restored = null)
+    public async Task RunAsync(
+        ScenarioProgression scenario, YarnProject project, ProgressionState restored = null)
     {
         if (IsRunning)
         {
@@ -39,6 +47,9 @@ public sealed class ProgressionDriver
         IsRunning = true;
         _stopRequested = false;
         _firstEpisode = true;
+        _scenario = scenario;
+        _yarnProject = project;
+        _yarnChapterId = null;
 
         try
         {
@@ -62,6 +73,9 @@ public sealed class ProgressionDriver
         {
             IsRunning = false;
             _flow = null;
+            _scenario = null;
+            _yarnProject = null;
+            _yarnChapterId = null;
         }
     }
 
@@ -123,8 +137,7 @@ public sealed class ProgressionDriver
     {
         Debug.Log($"[진행] {what} 시작 — \"{nodeName}\"");
 
-        // "[2] 에피소드 상태"를 대사가 읽을 수 있게 정의
-        _yarnBridge?.PublishStats(_flow.State.Stats);
+        SyncYarnVariables();
 
         // 첫 진입 이후로는 백로그를 유지해야 하기 때문에 구분.
         if (_firstEpisode)
@@ -140,6 +153,37 @@ public sealed class ProgressionDriver
         Debug.Log($"[진행] {what} 끝 — \"{nodeName}\"");
 
         return !_stopRequested;
+    }
+
+    // Yarn 변수의 두 계층을 이 회차의 상태로 맞춘다.
+    //
+    // 순서가 뜻을 가진다. BeginChapter의 Clear()는 계층을 가리지 않으므로 [2]를 먼저
+    // 심으면 곧바로 지워진다. 그리고 둘 다 YarnVariableCheckpoint.Capture()보다 앞이어야
+    // 롤백 리플레이가 같은 값에서 다시 출발한다.
+    private void SyncYarnVariables()
+    {
+        if (_yarnBridge == null)
+            return;
+
+        string chapterId = _flow.State.CurrentChapterId;
+
+        // "[3] 연출 실행 상태"는 챕터 수명이다. 챕터가 바뀌는 이 자리에서 선언 초기값으로
+        // 되돌린다 — 이전 챕터가 남긴 값도, 이 챕터를 아까 한 번 돌린 값도 안 물려받는다.
+        if (!string.Equals(_yarnChapterId, chapterId, StringComparison.Ordinal))
+        {
+            _yarnBridge.BeginChapter(_yarnProject);
+            _yarnChapterId = chapterId;
+
+            Debug.Log($"[진행] Yarn 변수 초기화 — 챕터 \"{chapterId}\"");
+        }
+
+        // "[2] 에피소드 상태"를 대사가 읽을 수 있게 심는다. 진행 코어가 쥔 값이라
+        // 매 노드마다 다시 심고, Yarn에서 바뀐 값은 돌려받지 않는다.
+        //
+        // 정의를 함께 넘기는 이유: 깃발을 숫자로 심으면 Yarn 저장소가 그 변수를
+        // float으로 도장해, bool로 선언된 변수가 그 뒤로 읽히지 않는다.
+        if (_scenario.TryGetChapter(chapterId, out ChapterProgression chapter))
+            _yarnBridge.PublishStats(chapter.Stats, _flow.State.Stats);
     }
 
     private static void ShowEnding(ScenarioAdvance outcome)
