@@ -1,0 +1,20 @@
+title: EP02_01
+---
+<<slot s1 stage00 mid>>
+
+<<face s1 01>>
+<<fade_in s1 14fr>>
+<<size s1 back bust 0fr>>
+<<place s1 bust right 0fr>>
+<<mirror s1 right>>
+<<shot_focus_to s1 bust center 2.5 30fr>>
+<<down s1 1.25u 30fr>>
+<<face_swap s1 02 10fr>>
+<<bg_spawn bg0 1. 골동품상점_에피1용오픈>>
+<<bg_fade_in "" 10fr>>
+라루: 당연하지 여긴 내 두 번째 집과 다름없으니까! #line:ln_hteghi8b
+
+<<if $power > 2>>
+<<elseif $int >= 0>>
+<<endif>>
+===

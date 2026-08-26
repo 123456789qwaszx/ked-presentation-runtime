@@ -1,0 +1,36 @@
+title: EP01
+---
+<<slot s1 stage00 mid>>
+<<cast s1 laru a 1>>
+<<slot s2 stage00 mid>>
+<<cast s2 bestina a 1>>
+
+<<fade_in s1 18fr>>
+<<place s1 bust right 0fr>>
+<<size s1 12.5 face 14fr Linear>>
+<<face_swap s1 02 10fr>>
+<<mirror s1 right>>
+<<bg_spawn bg0 1_골동품상점_에피1용오픈>>
+라루: 아~ 역시 감자튀김은 소파에 누워서 먹어야 제맛이야. #line:ln_63q44qyk
+
+<<fade_in s2 0fr>>
+<<size s2 mid bust 0fr>>
+<<place s2 bust left 0fr OutExpo>>
+<<place s2 bust left 0fr>>
+<<bg_sprite bg0 3_한옥_에피소드시작>>
+<<face_swap s1 02 10fr>>
+<<place s1 bust right 0fr>>
+<<size s1 front bust 0fr>>
+<<shot_to 12.5 +12u -6.5u 36fr>>
+베스티나: 라루 선배, 남의 사무실 소파에 누워서 먹는 건... 좀 그렇지 않나요? #line:ln_kt6kf254
+
+라루: 걱정 마~ 윌로는 이런 거 신경 안 쓰니까~ #line:ln_dhie2qeg
+
+<<if $int >= 0>>
+    라루: 너도 자기 집이라 생각하고 편하게 있어. #line:ln_5j4byhz2
+    라루: 아, 저쪽 소파 쿠션은 좀 꺼졌으니까 다른 데 앉고. #line:ln_5bm47n9x
+    <<detour 장면_1>>
+<<endif>>
+베스티나: 라루 선배, 여기가 완전 익숙하신가 봐요...... #line:ln_h284v5qz
+
+===

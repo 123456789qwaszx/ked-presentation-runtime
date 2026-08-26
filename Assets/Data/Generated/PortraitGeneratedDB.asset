@@ -13,6 +13,21 @@ MonoBehaviour:
   m_Name: PortraitGeneratedDB
   m_EditorClassIdentifier: Ked.Presentation.Runtime::PortraitGeneratedDBSO
   entries:
+  - characterId: bestina
+    variantKey: a
+    emotionKey: 01
+    sprite: {fileID: 21300000, guid: 1f90e91d2aa60994799b7508350cd0c2, type: 3}
+    assetPath: Assets/Art/Portraits/dungeon/bestina/a/01.png
+  - characterId: bestina
+    variantKey: a
+    emotionKey: 02
+    sprite: {fileID: 21300000, guid: 4cca61882da41cf42a9a4f0390d1eb96, type: 3}
+    assetPath: Assets/Art/Portraits/dungeon/bestina/a/02.png
+  - characterId: bestina
+    variantKey: a
+    emotionKey: 03
+    sprite: {fileID: 21300000, guid: dd52f0e9ba970d943a81f74de10b7307, type: 3}
+    assetPath: Assets/Art/Portraits/dungeon/bestina/a/03.png
   - characterId: harin
     variantKey: a
     emotionKey: 01
@@ -238,5 +253,5 @@ MonoBehaviour:
     emotionKey: 06
     sprite: {fileID: 21300000, guid: 645d9b3b0543ff142a13c6f4d96df87d, type: 3}
     assetPath: Assets/Art/Portraits/fillintheblank/yoonsaea/b/06.png
-  generatedTicksUtc: 639229157784529292
-  generatedTimeReadable: 2026-08-21 22:29:38
+  generatedTicksUtc: 639233548941045663
+  generatedTimeReadable: 2026-08-27 00:28:14

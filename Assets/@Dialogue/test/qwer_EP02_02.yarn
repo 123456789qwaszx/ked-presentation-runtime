@@ -1,0 +1,13 @@
+title: EP02_02
+---
+
+베스티나: 전 괜찮아요...... 오게 되더라도, 휴가 내고 올게요. #line:ln_8xdmvpv5
+
+라루: 그건 안 돼. 휴가 내면 월급 깍이고, 상사한테 찍혀. #line:ln_8ww00afu
+
+<<if $power > 2>>
+    라루: 좋은 선택이야. 쉬엄쉬엄해야지. #line:ln_2ujaw3r7
+<<elseif $int >= 0>>
+    라루: 성실하구나. #line:ln_67c7wu4v
+<<endif>>
+===

@@ -1,0 +1,15 @@
+title: EP03_02
+---
+<<slot s1 stage00 mid>>
+<<cast s1 laru a 2>>
+
+<<place s1 bust left 0fr>>
+<<size s1 front bust 0fr>>
+<<shot_focus_to s1 face center 11 29fr>>
+<<left s1 5u 8fr>>
+<<fade_in s1 14fr>>
+라루: 얘가 뭘 모르네. #line:ln_s7ee48a4
+
+라루: 회사가 돈을 주는 건 우리가 일한 시간만큼이 아니라, 일 처리 능력만큼 주는 거야! #line:ln_vb4mr2af
+
+===

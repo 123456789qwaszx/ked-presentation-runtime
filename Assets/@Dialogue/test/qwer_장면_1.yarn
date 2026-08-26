@@ -1,0 +1,22 @@
+title: 장면_1
+---
+// <<slot s1 stage00 mid>>
+// <<cast s1 bestina a 1>>
+
+<<shot_to 2.5 2.5u 0u 0.45s>>
+<<fade_in s1 14fr>>
+라루: 그건 그렇고 윌로가 없으니 무지 심심하네. #line:ln_2t1hx7hf
+
+<<if $__t1_sf_qtqz9ujy_qwe >= 0>>
+    라루: 너 낚시 좋아해? 우리 낚시하러 갈까? #line:ln_5i0ijguh
+    <<detour 장면_5>>
+<<endif>>
+베스티나: 선배, 저한테 업무 알려주시기로 한 거 아니였어요? #line:ln_49b4r3hs
+
+-> 그게 말이 된다고 생각해요? #line:ln_4wadcn5w
+    <<set $__t1_sf_qtqz9ujy_추리1 = true>>
+    <<set $__t1_sf_qtqz9ujy_능력이바뀌 += 4>>
+    베스티나: 지금 갔다가 윌로님이 돌아오시기라도 하면 어떻게 하시려고요? #line:ln_3u0i00p6
+라루: 참... 그렇네. #line:ln_94a8dpgf
+
+===

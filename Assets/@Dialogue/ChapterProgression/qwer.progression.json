@@ -1,11 +1,11 @@
 {
   "ChapterId": "qwer",
   "DisplayName": "qwer",
-  "StartEpisodeId": "new01",
+  "StartEpisodeId": "EP01",
   "Stats": [
     {
       "Key": "int",
-      "DisplayName": "지능",
+      "DisplayName": "성실성",
       "Type": "Number",
       "Initial": 0,
       "Minimum": 0,
@@ -13,7 +13,7 @@
     },
     {
       "Key": "power",
-      "DisplayName": "힘",
+      "DisplayName": "요령있음",
       "Type": "Number",
       "Initial": 0,
       "Minimum": 0,
@@ -22,20 +22,20 @@
   ],
   "Nodes": [
     {
-      "EpisodeId": "new01",
-      "Title": "제목1",
+      "EpisodeId": "EP01",
+      "Title": "",
       "IndexText": "",
-      "DialogueEntryId": "new01",
+      "DialogueEntryId": "EP01",
       "VisibleConditions": [],
       "UnlockConditions": [],
       "NextOptions": [
         {
-          "TargetEpisodeId": "Id를 바꿧음",
+          "TargetEpisodeId": "EP02_01",
           "ChoiceLabel": "선택지 골라.",
           "VisibleConditions": [],
           "Conditions": [],
           "LockedReasonText": "",
-          "ViaNodeId": "이건연출전용이야",
+          "ViaNodeId": "",
           "StatChanges": [
             {
               "Key": "int",
@@ -45,7 +45,7 @@
           ]
         },
         {
-          "TargetEpisodeId": "new06",
+          "TargetEpisodeId": "EP02_03",
           "ChoiceLabel": "그냥길",
           "VisibleConditions": [],
           "Conditions": [],
@@ -54,7 +54,7 @@
           "StatChanges": []
         },
         {
-          "TargetEpisodeId": "new05",
+          "TargetEpisodeId": "EP02_02",
           "ChoiceLabel": "선택지1",
           "VisibleConditions": [],
           "Conditions": [],
@@ -63,8 +63,7 @@
           "StatChanges": []
         }
       ],
-      "IsChapterEndingCandidate": false,
-      "EndingKey": "",
+      "EventKey": "",
       "DesignerNote": "",
       "Position": {
         "X": 0,
@@ -72,15 +71,15 @@
       }
     },
     {
-      "EpisodeId": "Id를 바꿧음",
-      "Title": "제목2",
+      "EpisodeId": "EP02_01",
+      "Title": "",
       "IndexText": "",
-      "DialogueEntryId": "Id를_바꿧음",
+      "DialogueEntryId": "EP02_01",
       "VisibleConditions": [],
       "UnlockConditions": [],
       "NextOptions": [
         {
-          "TargetEpisodeId": "new03",
+          "TargetEpisodeId": "EP03_01",
           "ChoiceLabel": "선택지1",
           "VisibleConditions": [],
           "Conditions": [],
@@ -89,8 +88,7 @@
           "StatChanges": []
         }
       ],
-      "IsChapterEndingCandidate": false,
-      "EndingKey": "",
+      "EventKey": "",
       "DesignerNote": "",
       "Position": {
         "X": 220,
@@ -98,15 +96,14 @@
       }
     },
     {
-      "EpisodeId": "new03",
-      "Title": "제목3",
+      "EpisodeId": "EP03_01",
+      "Title": "",
       "IndexText": "",
-      "DialogueEntryId": "new03",
+      "DialogueEntryId": "EP03_01",
       "VisibleConditions": [],
       "UnlockConditions": [],
       "NextOptions": [],
-      "IsChapterEndingCandidate": false,
-      "EndingKey": "",
+      "EventKey": "",
       "DesignerNote": "",
       "Position": {
         "X": 440,
@@ -114,16 +111,16 @@
       }
     },
     {
-      "EpisodeId": "new04",
+      "EpisodeId": "EP03_02",
       "Title": "",
       "IndexText": "",
-      "DialogueEntryId": "new04",
+      "DialogueEntryId": "EP03_02",
       "VisibleConditions": [],
       "UnlockConditions": [],
       "NextOptions": [
         {
-          "TargetEpisodeId": "qweqwe",
-          "ChoiceLabel": "힘2보다커야함. 잠금경로",
+          "TargetEpisodeId": "EP04_01",
+          "ChoiceLabel": "농땡이 피움",
           "VisibleConditions": [],
           "Conditions": [
             {
@@ -138,7 +135,7 @@
           "StatChanges": []
         },
         {
-          "TargetEpisodeId": "new08",
+          "TargetEpisodeId": "EP04_02",
           "ChoiceLabel": "그냥길",
           "VisibleConditions": [],
           "Conditions": [],
@@ -147,8 +144,7 @@
           "StatChanges": []
         }
       ],
-      "IsChapterEndingCandidate": false,
-      "EndingKey": "",
+      "EventKey": "",
       "DesignerNote": "",
       "Position": {
         "X": 220,
@@ -156,16 +152,16 @@
       }
     },
     {
-      "EpisodeId": "new05",
+      "EpisodeId": "EP02_02",
       "Title": "",
       "IndexText": "",
-      "DialogueEntryId": "new05",
+      "DialogueEntryId": "EP02_02",
       "VisibleConditions": [],
       "UnlockConditions": [],
       "NextOptions": [
         {
-          "TargetEpisodeId": "new04",
-          "ChoiceLabel": "힘+4",
+          "TargetEpisodeId": "EP03_02",
+          "ChoiceLabel": "요령이 늘었다",
           "VisibleConditions": [],
           "Conditions": [],
           "LockedReasonText": "",
@@ -179,8 +175,7 @@
           ]
         }
       ],
-      "IsChapterEndingCandidate": false,
-      "EndingKey": "",
+      "EventKey": "",
       "DesignerNote": "",
       "Position": {
         "X": 220,
@@ -188,16 +183,16 @@
       }
     },
     {
-      "EpisodeId": "new06",
+      "EpisodeId": "EP02_03",
       "Title": "",
       "IndexText": "",
-      "DialogueEntryId": "new06",
+      "DialogueEntryId": "EP02_03",
       "VisibleConditions": [],
       "UnlockConditions": [],
       "NextOptions": [
         {
-          "TargetEpisodeId": "new04",
-          "ChoiceLabel": "힘안줌",
+          "TargetEpisodeId": "EP03_02",
+          "ChoiceLabel": "요령없음",
           "VisibleConditions": [],
           "Conditions": [],
           "LockedReasonText": "",
@@ -205,8 +200,7 @@
           "StatChanges": []
         }
       ],
-      "IsChapterEndingCandidate": false,
-      "EndingKey": "",
+      "EventKey": "",
       "DesignerNote": "",
       "Position": {
         "X": 220,
@@ -214,43 +208,14 @@
       }
     },
     {
-      "EpisodeId": "qweqwe",
+      "EpisodeId": "EP04_01",
       "Title": "",
       "IndexText": "",
-      "DialogueEntryId": "qweqwe",
+      "DialogueEntryId": "EP04_01",
       "VisibleConditions": [],
       "UnlockConditions": [],
-      "NextOptions": [
-        {
-          "TargetEpisodeId": "new09",
-          "ChoiceLabel": "계속",
-          "VisibleConditions": [],
-          "Conditions": [],
-          "LockedReasonText": "",
-          "ViaNodeId": "",
-          "StatChanges": []
-        },
-        {
-          "TargetEpisodeId": "new10",
-          "ChoiceLabel": "선택지1",
-          "VisibleConditions": [],
-          "Conditions": [],
-          "LockedReasonText": "",
-          "ViaNodeId": "",
-          "StatChanges": []
-        },
-        {
-          "TargetEpisodeId": "new11",
-          "ChoiceLabel": "선택지 골라.",
-          "VisibleConditions": [],
-          "Conditions": [],
-          "LockedReasonText": "",
-          "ViaNodeId": "",
-          "StatChanges": []
-        }
-      ],
-      "IsChapterEndingCandidate": false,
-      "EndingKey": "",
+      "NextOptions": [],
+      "EventKey": "",
       "DesignerNote": "",
       "Position": {
         "X": 660,
@@ -258,170 +223,18 @@
       }
     },
     {
-      "EpisodeId": "new08",
+      "EpisodeId": "EP04_02",
       "Title": "",
       "IndexText": "",
-      "DialogueEntryId": "new08",
+      "DialogueEntryId": "EP04_02",
       "VisibleConditions": [],
       "UnlockConditions": [],
       "NextOptions": [],
-      "IsChapterEndingCandidate": false,
-      "EndingKey": "",
+      "EventKey": "",
       "DesignerNote": "",
       "Position": {
         "X": 660,
         "Y": 700
-      }
-    },
-    {
-      "EpisodeId": "new09",
-      "Title": "",
-      "IndexText": "",
-      "DialogueEntryId": "new09",
-      "VisibleConditions": [],
-      "UnlockConditions": [],
-      "NextOptions": [],
-      "IsChapterEndingCandidate": false,
-      "EndingKey": "",
-      "DesignerNote": "",
-      "Position": {
-        "X": 880,
-        "Y": 150
-      }
-    },
-    {
-      "EpisodeId": "new10",
-      "Title": "",
-      "IndexText": "",
-      "DialogueEntryId": "new10",
-      "VisibleConditions": [],
-      "UnlockConditions": [],
-      "NextOptions": [],
-      "IsChapterEndingCandidate": false,
-      "EndingKey": "",
-      "DesignerNote": "",
-      "Position": {
-        "X": 880,
-        "Y": 300
-      }
-    },
-    {
-      "EpisodeId": "new11",
-      "Title": "",
-      "IndexText": "",
-      "DialogueEntryId": "new11",
-      "VisibleConditions": [],
-      "UnlockConditions": [],
-      "NextOptions": [
-        {
-          "TargetEpisodeId": "new12",
-          "ChoiceLabel": "계속",
-          "VisibleConditions": [],
-          "Conditions": [],
-          "LockedReasonText": "",
-          "ViaNodeId": "",
-          "StatChanges": []
-        }
-      ],
-      "IsChapterEndingCandidate": false,
-      "EndingKey": "",
-      "DesignerNote": "",
-      "Position": {
-        "X": 880,
-        "Y": 450
-      }
-    },
-    {
-      "EpisodeId": "new12",
-      "Title": "",
-      "IndexText": "",
-      "DialogueEntryId": "new12",
-      "VisibleConditions": [],
-      "UnlockConditions": [],
-      "NextOptions": [
-        {
-          "TargetEpisodeId": "분기1",
-          "ChoiceLabel": "계속",
-          "VisibleConditions": [],
-          "Conditions": [],
-          "LockedReasonText": "",
-          "ViaNodeId": "",
-          "StatChanges": []
-        },
-        {
-          "TargetEpisodeId": "분기2",
-          "ChoiceLabel": "그냥길",
-          "VisibleConditions": [],
-          "Conditions": [],
-          "LockedReasonText": "",
-          "ViaNodeId": "",
-          "StatChanges": []
-        }
-      ],
-      "IsChapterEndingCandidate": false,
-      "EndingKey": "",
-      "DesignerNote": "",
-      "Position": {
-        "X": 1100,
-        "Y": 450
-      }
-    },
-    {
-      "EpisodeId": "분기1",
-      "Title": "",
-      "IndexText": "",
-      "DialogueEntryId": "분기1",
-      "VisibleConditions": [],
-      "UnlockConditions": [],
-      "NextOptions": [
-        {
-          "TargetEpisodeId": "new14",
-          "ChoiceLabel": "계속",
-          "VisibleConditions": [],
-          "Conditions": [],
-          "LockedReasonText": "",
-          "ViaNodeId": "",
-          "StatChanges": []
-        }
-      ],
-      "IsChapterEndingCandidate": false,
-      "EndingKey": "",
-      "DesignerNote": "",
-      "Position": {
-        "X": 1320,
-        "Y": 450
-      }
-    },
-    {
-      "EpisodeId": "new14",
-      "Title": "",
-      "IndexText": "",
-      "DialogueEntryId": "new14",
-      "VisibleConditions": [],
-      "UnlockConditions": [],
-      "NextOptions": [],
-      "IsChapterEndingCandidate": false,
-      "EndingKey": "",
-      "DesignerNote": "",
-      "Position": {
-        "X": 1540,
-        "Y": 450
-      }
-    },
-    {
-      "EpisodeId": "분기2",
-      "Title": "",
-      "IndexText": "",
-      "DialogueEntryId": "분기2",
-      "VisibleConditions": [],
-      "UnlockConditions": [],
-      "NextOptions": [],
-      "IsChapterEndingCandidate": false,
-      "EndingKey": "",
-      "DesignerNote": "",
-      "Position": {
-        "X": 1320,
-        "Y": 600
       }
     }
   ],
