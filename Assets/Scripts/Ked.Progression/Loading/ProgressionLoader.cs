@@ -304,8 +304,6 @@ namespace Ked.Progression
                     ? at
                     : $"Nodes[{dto.EpisodeId}]";
 
-                VerifyNodeIsLeanedOut(dto, where, into);
-
                 List<EpisodeOption> options = LoadOptions(dto.NextOptions, where, into);
 
                 try
@@ -314,9 +312,7 @@ namespace Ked.Progression
                         dto.EpisodeId,
                         dto.Title,
                         dto.DialogueEntryId,
-                        options,
-                        dto.EndingKey,
-                        dto.DesignerNote));
+                        options));
                 }
                 catch (ArgumentException error)
                 {
@@ -325,37 +321,6 @@ namespace Ked.Progression
             }
 
             return nodes;
-        }
-
-        /// <summary>
-        /// 모델이 안 받는 칸에 값이 들어 있는지 본다. <b>이 검사가 없으면 그 데이터가
-        /// 조용히 사라진다.</b>
-        /// </summary>
-        private static void VerifyNodeIsLeanedOut(
-            EpisodeNodeDto dto, string where, List<ProgressionDiagnostic> into)
-        {
-            // 분기 관문이 노드에서 간선으로 내려감. 마이그레이션 검사용.
-            if (Count(dto.VisibleConditions) > 0 || Count(dto.UnlockConditions) > 0)
-            {
-                into.Add(ProgressionDiagnostic.Error(
-                    where,
-                    "노드에 표시조건·해금조건이 실려 있다. v8에서 관문은 간선(NextOptions)의 " +
-                    "것이 됐고 노드 쪽은 언제나 비어 나온다. 이대로 실으면 그 관문이 " +
-                    "조용히 사라져 전부 열린 채로 돈다 — 구판 내보내기가 만든 데이터인지 확인할 것."));
-            }
-
-            // sentinel 쌍 — 4조합 중 둘이 무효다.
-            bool hasKey = !string.IsNullOrEmpty(dto.EndingKey);
-
-            if (dto.IsChapterEndingCandidate != hasKey)
-            {
-                into.Add(ProgressionDiagnostic.Error(
-                    where,
-                    dto.IsChapterEndingCandidate
-                        ? "엔딩 후보로 표시됐는데 EndingKey가 비어 있다. 어느 엔딩인지 알 수 없다."
-                        : $"EndingKey('{dto.EndingKey}')가 있는데 엔딩 후보로 표시되지 않았다. " +
-                          "둘 중 어느 쪽이 뜻인지 추측하지 않는다."));
-            }
         }
 
         // ── 간선 ────────────────────────────────────────────────────────────
