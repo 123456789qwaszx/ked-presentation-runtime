@@ -72,6 +72,12 @@ namespace Ked.Progression
                     continue;
                 }
 
+                if (string.IsNullOrEmpty(node.EpisodeId))
+                {
+                    into.Add(ProgressionDiagnostic.Error($"Nodes[{i}]", "에피소드 ID가 비어 있다."));
+                    continue;
+                }
+
                 if (byId.ContainsKey(node.EpisodeId))
                 {
                     // 같은 ID가 둘이면 간선이 어느 쪽으로 가는지가 사전 구현에 달린다.

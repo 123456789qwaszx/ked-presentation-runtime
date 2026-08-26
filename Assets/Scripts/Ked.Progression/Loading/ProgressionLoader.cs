@@ -10,10 +10,8 @@ namespace Ked.Progression
     /// <see cref="ProgressionLoadResult.Chapter"/>를 <c>null</c>로 냄.
     /// (부분 통과 금지)
     ///
-    /// 여기서 새로 쓰는 규칙은 데이터의 모양에 관한 것뿐이다
-    /// 알 수 없는 enum 이름,
-    /// 언제나 비어 있어야 할 칸이 안 비었을 때,
-    /// sentinel 쌍의 불일치.
+    /// 여기서 새로 쓰는 규칙은 데이터의 모양에 관한 것뿐이다 —
+    /// 알 수 없는 enum 이름, 비어서는 안 될 칸이 비었을 때.
     /// 
     /// 챕터 전체의 불변식은 <see cref="ChapterInvariants"/> 한 곳에 있고
     /// 여기서는 그것을 모으는 방식으로 쓴다.
@@ -148,7 +146,11 @@ namespace Ked.Progression
             List<StatDto> dtos, List<ProgressionDiagnostic> into)
         {
             var stats = new List<StatDefinition>();
-            
+
+            // JSON에 칸이 없으면 null로 온다 — "없음"은 "빈 것"과 같게 읽는다.
+            if (dtos == null)
+                return stats;
+
             for (int i = 0; i < dtos.Count; i++)
             {
                 StatDto dto = dtos[i];
@@ -189,7 +191,10 @@ namespace Ked.Progression
             List<EpisodeNodeDto> dtos, List<ProgressionDiagnostic> into)
         {
             var nodes = new List<EpisodeNode>();
-            
+
+            if (dtos == null)
+                return nodes;
+
             for (int i = 0; i < dtos.Count; i++)
             {
                 EpisodeNodeDto dto = dtos[i];
@@ -207,19 +212,12 @@ namespace Ked.Progression
 
                 List<EpisodeOption> options = LoadOptions(dto.NextOptions, where, into);
 
-                try
-                {
-                    nodes.Add(new EpisodeNode(
-                        dto.EpisodeId,
-                        dto.Title,
-                        dto.DialogueEntryId,
-                        options,
-                        dto.EventKey));
-                }
-                catch (ArgumentException error)
-                {
-                    into.Add(ProgressionDiagnostic.Error(where, error.Message));
-                }
+                nodes.Add(new EpisodeNode(
+                    dto.EpisodeId,
+                    dto.Title,
+                    dto.DialogueEntryId,
+                    options,
+                    dto.EventKey));
             }
 
             return nodes;
@@ -231,6 +229,9 @@ namespace Ked.Progression
             List<EpisodeOptionDto> dtos, string nodePath, List<ProgressionDiagnostic> into)
         {
             var options = new List<EpisodeOption>();
+
+            if (dtos == null)
+                return options;
 
             for (int i = 0; i < dtos.Count; i++)
             {
@@ -248,6 +249,13 @@ namespace Ked.Progression
                 {
                     into.Add(ProgressionDiagnostic.Error(
                         at, "간선의 문구가 비어 있다. 자동 진행은 폐지됐다 — 문구를 줄 것."));
+
+                    continue;
+                }
+
+                if (string.IsNullOrEmpty(dto.TargetEpisodeId))
+                {
+                    into.Add(ProgressionDiagnostic.Error(at, "간선의 도착 에피소드가 비어 있다."));
 
                     continue;
                 }
@@ -283,6 +291,9 @@ namespace Ked.Progression
             List<ConditionDto> dtos, string where, List<ProgressionDiagnostic> into)
         {
             var conditions = new List<ProgressionCondition>();
+
+            if (dtos == null)
+                return conditions;
 
             for (int i = 0; i < dtos.Count; i++)
             {
@@ -329,6 +340,9 @@ namespace Ked.Progression
             List<StatChangeDto> dtos, string where, List<ProgressionDiagnostic> into)
         {
             var changes = new List<StatChange>();
+
+            if (dtos == null)
+                return changes;
 
             for (int i = 0; i < dtos.Count; i++)
             {

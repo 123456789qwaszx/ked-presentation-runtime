@@ -6,7 +6,7 @@ using Yarn.Unity;
 
 // 진행 순서를 쥐는 유일한 자리. 진행 층과 대사 층을 잇는다.
 //
-// 코어는 "무엇이 참인가"만 답한다(ChapterTransition·ScenarioTransition·Commit 전부 순수 함수).
+// 코어는 "무엇이 참인가"만 답한다(ChapterTransition·Commit 전부 순수 함수).
 // "어떤 순서로 부르는가"는 여기 있고, 그것이 이 루프가 지는 세 규칙이다:
 //   · 판정은 대사 뒤 한 번 — 화면에 뜬 것과 실제가 갈릴 수 없다
 //   · 연출은 커밋보다 앞 — 지나가는 자리라 상태를 안 바꾼다
@@ -99,36 +99,34 @@ public sealed class ProgressionDriver
 
         Debug.Log($"[진행] 챕터 시작 — {Describe()}");
 
-        ScenarioAdvance? outcome = await RunChapterAsync();
-
-        if (outcome != null)
-            ShowEnding(outcome.Value);
+        if (await RunChapterAsync())
+            Debug.Log($"[진행] 챕터 끝 — {Describe()}");
     }
 
-    // 에피소드 루프. 챕터가 끝나면 그 결말을, 멈춤 요청이면 null을 낸다.
-    private async Task<ScenarioAdvance?> RunChapterAsync()
+    // 에피소드 루프. 챕터가 끝나면 true, 멈춤 요청이면 false.
+    private async Task<bool> RunChapterAsync()
     {
         while (true)
         {
             _chapter.TryGetNode(_state.CurrentEpisodeId, out EpisodeNode node);
 
             if (!await PlayNodeAsync(node.DialogueEntryId, "대사"))
-                return null;
+                return false;
 
             // 이 회차의 판단은 여기서 확정된다. 아래는 이미 정해진 목록에서 고르기만 한다.
             ChapterAdvance advance = ChapterTransition.Resolve(_chapter, _state);
 
             if (advance.Kind == ChapterAdvanceKind.ChapterEnded)
-                return ScenarioTransition.Resolve(_chapter, _state);
+                return true;
 
             EpisodeOption chosen = await PickAsync(advance);
 
             if (chosen == null)
-                return null;
+                return false;
 
             // 연출도 Story 노드. 별도 경로를 만들지 않는다.
             if (chosen.HasVia && !await PlayNodeAsync(chosen.ViaNodeId, "연출"))
-                return null;
+                return false;
 
             _state = _state.Commit(_chapter, chosen);
         }
@@ -206,13 +204,6 @@ public sealed class ProgressionDriver
         // 정의를 함께 넘기는 이유: 깃발을 숫자로 심으면 Yarn 저장소가 그 변수를
         // float으로 도장해, bool로 선언된 변수가 그 뒤로 읽히지 않는다.
         _yarnBridge.PublishStats(_chapter.Stats, _state.Stats);
-    }
-
-    private static void ShowEnding(in ScenarioAdvance outcome)
-    {
-        Debug.Log(outcome.EventKey.Length != 0
-            ? $"[진행] 챕터 끝 — 이벤트키 \"{outcome.EventKey}\""
-            : "[진행] 챕터 끝");
     }
 
     private string Describe() =>

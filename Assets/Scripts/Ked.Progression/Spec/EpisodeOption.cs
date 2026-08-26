@@ -37,7 +37,7 @@ namespace Ked.Progression
             Conditions = conditions ?? Array.Empty<ProgressionCondition>();
             StatChanges = statChanges ?? Array.Empty<StatChange>();
 
-            TargetEpisodeId = targetEpisodeId;
+            TargetEpisodeId = targetEpisodeId ?? string.Empty;
             ViaNodeId = viaNodeId ?? string.Empty;
 
             ProgressionCondition.RequireAllConstructed(VisibleConditions, nameof(visibleConditions));
