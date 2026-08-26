@@ -10,13 +10,12 @@ namespace Ked.Progression
     // [4]런타임 암묵적 결정 제거.
     
     // ChapterProgression, ProgressionLoader가 사용.
-    // - 챕터 그래프와 스탯/엔딩 규칙간 모순을 찾아서 차단.
+    // - 챕터 그래프와 스탯 간 모순을 찾아서 차단.
     internal static class ChapterInvariants
     {
         public static void Collect(
             IReadOnlyList<StatDefinition> stats,
             IReadOnlyList<EpisodeNode> nodes,
-            IReadOnlyList<EndingRule> endingRules,
             string startEpisodeId,
             ICollection<ProgressionDiagnostic> into,
             out Dictionary<string, StatDefinition> statsByKey,
@@ -27,100 +26,6 @@ namespace Ked.Progression
 
             VerifyStart(startEpisodeId, nodesById, into);
             VerifyEdges(nodes, nodesById, statsByKey, into);
-            VerifyEndingRules(endingRules, nodes, statsByKey, into);
-        }
-
-        // 어느 엔딩인지는 노드의 EndingKey가 정하고, 규칙은 그 키로 조회.
-        private static void VerifyEndingRules(
-            IReadOnlyList<EndingRule> rules,
-            IReadOnlyList<EpisodeNode> nodes,
-            Dictionary<string, StatDefinition> statsByKey,
-            ICollection<ProgressionDiagnostic> into)
-        {
-            var lastIndexByKey = new Dictionary<string, int>(StringComparer.Ordinal);
-
-            for (int i = 0; i < rules.Count; i++)
-            {
-                if (rules[i] == null)
-                {
-                    into.Add(ProgressionDiagnostic.Error($"EndingRules[{i}]", "엔딩 규칙이 null이다."));
-                    continue;
-                }
-
-                lastIndexByKey[rules[i].EndingKey] = i;
-            }
-
-            for (int i = 0; i < rules.Count; i++)
-            {
-                EndingRule rule = rules[i];
-
-                if (rule == null)
-                    continue;
-
-                string at = $"EndingRules[{i}]";
-
-                VerifyConditions(rule.Conditions, statsByKey, at + ".Conditions", into);
-
-                bool isLastOfKey = lastIndexByKey[rule.EndingKey] == i;
-
-                if (isLastOfKey && !rule.IsCatchAll)
-                {
-                    // 조건이 전부 미달이면 갈 곳이 없어진다.
-                    // 모든 조건 검사 후, Catch-all 체크.
-                    into.Add(ProgressionDiagnostic.Error(
-                        at,
-                        $"엔딩 '{rule.EndingKey}'의 마지막 규칙에 조건이 달렸다. " +
-                        "조건이 전부 미달이면 엔딩에 도달하고도 갈 곳이 없다 — " +
-                        "조건 없는 규칙을 마지막에 하나 두어 어디로 갈지(또는 끝난다고) 적을 것."));
-                }
-
-                if (!isLastOfKey && rule.IsCatchAll)
-                {
-                    into.Add(ProgressionDiagnostic.Error(
-                        at,
-                        $"엔딩 '{rule.EndingKey}'의 조건 없는 규칙 뒤에 같은 키의 규칙이 더 있다. " +
-                        "무조건 성립하므로 뒤엣것은 영원히 타지 않는다."));
-                }
-            }
-
-            VerifyEndingKeysMatch(rules, nodes, lastIndexByKey, into);
-        }
-
-        // 양방향 검사:
-        // - EndingKey = "happy" 일 때, Rule에도 "EndingKey "happy"가 있는지
-        private static void VerifyEndingKeysMatch(
-            IReadOnlyList<EndingRule> rules,
-            IReadOnlyList<EpisodeNode> nodes,
-            Dictionary<string, int> lastIndexByKey,
-            ICollection<ProgressionDiagnostic> into)
-        {
-            var producedKeys = new HashSet<string>(StringComparer.Ordinal);
-
-            foreach (EpisodeNode node in nodes)
-            {
-                if (node == null || !node.IsEndingCandidate)
-                    continue;
-
-                producedKeys.Add(node.EndingKey);
-
-                if (rules.Count > 0 && !lastIndexByKey.ContainsKey(node.EndingKey))
-                {
-                    into.Add(ProgressionDiagnostic.Error(
-                        $"Nodes[{node.EpisodeId}]",
-                        $"엔딩키 '{node.EndingKey}'에 맞는 규칙이 없다. " +
-                        $"있는 것: {Join(lastIndexByKey.Keys)}"));
-                }
-            }
-
-            foreach (KeyValuePair<string, int> pair in lastIndexByKey)
-            {
-                if (producedKeys.Contains(pair.Key))
-                    continue;
-                
-                into.Add(ProgressionDiagnostic.Error(
-                    $"EndingRules[{pair.Value}]",
-                    $"엔딩키 '{pair.Key}'를 내는 노드가 없다. 이 규칙은 영원히 타지 않는다."));
-            }
         }
 
         private static Dictionary<string, StatDefinition> IndexStats(

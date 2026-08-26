@@ -12,9 +12,8 @@ using Yarn.Unity;
 //   · 연출은 커밋보다 앞 — 지나가는 자리라 상태를 안 바꾼다
 //   · 스탯 반영과 이동이 한 연산 — "스탯만 오르고 안 옮겨 간" 상태가 없다
 //
-// 루프가 둘이다. 바깥이 챕터, 안쪽이 에피소드. 진행 상태([2])의 수명이 챕터라 챕터마다
-// 새로 만들고 이전 챕터의 값은 넘어오지 않는다 — 챕터를 넘어 사는 계층([1])은 아직
-// 서지 않았고, 그것이 설 때까지 스탯을 바꾸는 자리는 간선 하나뿐이다.
+// 진행 상태([2])의 수명이 챕터다 — 시작할 때 새로 만든다. 챕터를 넘어 사는 계층([1])은
+// 아직 서지 않았고, 그것이 설 때까지 스탯을 바꾸는 자리는 간선 하나뿐이다.
 //
 // 나중에 이 순서를 쓰는 두 번째 소비자(툴의 걷기 모드 등)가 생기면, 이 루프를 코어로
 // 올리고 await를 pull로 되접어야 한다. 순서를 두 곳에 적으면 작가가 미리보는 게임과
@@ -91,37 +90,22 @@ public sealed class ProgressionDriver
         _options.Cancel();
     }
 
-    // 바깥 루프 — 챕터.
     private async Task PumpAsync()
     {
         _chapter = _scenario.StartChapter;
 
-        while (true)
-        {
-            // 이 챕터의 진행 상태는 챕터가 만든다. 이전 챕터의 값은 넘어오지 않는다.
-            _state = _chapter.CreateEntryState();
+        // 이 챕터의 진행 상태는 챕터가 만든다.
+        _state = _chapter.CreateEntryState();
 
-            Debug.Log($"[진행] 챕터 시작 — {Describe()}");
+        Debug.Log($"[진행] 챕터 시작 — {Describe()}");
 
-            ScenarioAdvance? outcome = await RunChapterAsync();
+        ScenarioAdvance? outcome = await RunChapterAsync();
 
-            if (outcome == null)
-                return;
-
-            ScenarioAdvance next = outcome.Value;
-
-            if (next.Kind != ScenarioAdvanceKind.NextChapter)
-            {
-                ShowEnding(next);
-                return;
-            }
-
-            // 실재는 ScenarioInvariants가 이미 보장했다.
-            _scenario.TryGetChapter(next.NextChapterId, out _chapter);
-        }
+        if (outcome != null)
+            ShowEnding(outcome.Value);
     }
 
-    // 안쪽 루프 — 에피소드. 챕터가 끝나면 그 결말을, 멈춤 요청이면 null을 낸다.
+    // 에피소드 루프. 챕터가 끝나면 그 결말을, 멈춤 요청이면 null을 낸다.
     private async Task<ScenarioAdvance?> RunChapterAsync()
     {
         while (true)

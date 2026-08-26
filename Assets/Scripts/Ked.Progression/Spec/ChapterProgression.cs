@@ -32,8 +32,6 @@ namespace Ked.Progression
         // 챕터 고유의 스탯.
         public IReadOnlyList<StatDefinition> Stats { get; }
 
-        public IReadOnlyList<EndingRule> EndingRules { get; }
-
         // 특정 스탯 정의. "ProgressionState.Commit"이 쓰는 시스템 경계.
         // (진행 상태 시스템과 챕터 정의 사이의 공식 경계.)
         public IReadOnlyDictionary<string, StatDefinition> StatsByKey => _statsByKey;
@@ -43,24 +41,22 @@ namespace Ked.Progression
             string displayName,
             string startEpisodeId,
             IReadOnlyList<StatDefinition> stats,
-            IReadOnlyList<EpisodeNode> nodes,
-            IReadOnlyList<EndingRule> endingRules = null)
+            IReadOnlyList<EpisodeNode> nodes)
         {
             if (string.IsNullOrEmpty(chapterId))
                 throw new ArgumentException("챕터 ID가 비어 있다.", nameof(chapterId));
-            
+
             ChapterId = chapterId;
             DisplayName = displayName ?? string.Empty;
             StartEpisodeId = startEpisodeId ?? string.Empty;
             Stats = stats ?? Array.Empty<StatDefinition>();
             Nodes = nodes ?? Array.Empty<EpisodeNode>();
-            EndingRules = endingRules ?? Array.Empty<EndingRule>();
 
             var diagnostics = new List<ProgressionDiagnostic>();
 
             // 챕터 데이터 검증.
             ChapterInvariants.Collect(
-                Stats, Nodes, EndingRules, StartEpisodeId,
+                Stats, Nodes, StartEpisodeId,
                 diagnostics, out _statsByKey, out _nodesById);
 
             // 오류가 있으면 생성 자체를 실패시킴.
