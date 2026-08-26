@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Ked.Progression.Dto;
 
 namespace Ked.Progression
 {

@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Text;
 using Ked.Progression;
-using Ked.Progression.Dto;
 using Newtonsoft.Json;
 using UnityEngine;
 
