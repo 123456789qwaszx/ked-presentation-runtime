@@ -14,7 +14,7 @@ namespace Ked.Progression
     
     // - 위와 같은 구조적 무결성은 보장하지만,
     // - 진행 그래프의 유효성을 증명하진 않음.
-    // (끊긴 노드, 불가능한 조건, 달성 불가능한 엔딩 등)
+    // (끊긴 노드, 불가능한 조건 등)
     public sealed class ChapterProgression
     {
         private readonly Dictionary<string, EpisodeNode> _nodesById;

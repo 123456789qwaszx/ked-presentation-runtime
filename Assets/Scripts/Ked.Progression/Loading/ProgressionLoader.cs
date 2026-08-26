@@ -36,23 +36,17 @@ namespace Ked.Progression
             List<EpisodeNode> nodes = LoadNodes(dto.Nodes, diagnostics);
 
             if (HasError(diagnostics))
-            {
                 return new ProgressionLoadResult(null, diagnostics);
-            }
-
+            
             // 챕터 전체의 불변식은 ChapterInvariants가 소유. 여기서는 수집만.
             ChapterInvariants.Collect(
                 stats, nodes, dto.StartEpisodeId, diagnostics, out _, out _);
 
             if (string.IsNullOrEmpty(dto.ChapterId))
-            {
                 diagnostics.Add(ProgressionDiagnostic.Error("ChapterId", "챕터 ID가 비어 있다."));
-            }
-
+            
             if (HasError(diagnostics))
-            {
                 return new ProgressionLoadResult(null, diagnostics);
-            }
 
             var chapter = new ChapterProgression(
                 dto.ChapterId, dto.DisplayName, dto.StartEpisodeId, stats, nodes);
@@ -77,10 +71,8 @@ namespace Ked.Progression
             var diagnostics = new List<ProgressionDiagnostic>();
 
             if (string.IsNullOrEmpty(scenarioId))
-            {
                 diagnostics.Add(ProgressionDiagnostic.Error("ScenarioId", "시나리오 ID가 비어 있다."));
-            }
-
+            
             var chapters = new List<ChapterProgression>();
             int count = chapterDtos == null ? 0 : chapterDtos.Count;
 
@@ -103,25 +95,18 @@ namespace Ked.Progression
                 }
 
                 if (result.Chapter != null)
-                {
                     chapters.Add(result.Chapter);
-                }
             }
 
             if (HasError(diagnostics))
-            {
                 return new ScenarioLoadResult(null, diagnostics);
-            }
-
+            
             ScenarioInvariants.Collect(chapters, startChapterId, diagnostics, out _);
 
             if (HasError(diagnostics))
-            {
                 return new ScenarioLoadResult(null, diagnostics);
-            }
-
-            var scenario = new ScenarioProgression(
-                scenarioId, displayName, startChapterId, chapters);
+            
+            ScenarioProgression scenario = new(scenarioId, displayName, startChapterId, chapters);
 
             return new ScenarioLoadResult(scenario, diagnostics);
         }
@@ -163,12 +148,7 @@ namespace Ked.Progression
             List<StatDto> dtos, List<ProgressionDiagnostic> into)
         {
             var stats = new List<StatDefinition>();
-
-            if (dtos == null)
-            {
-                return stats;
-            }
-
+            
             for (int i = 0; i < dtos.Count; i++)
             {
                 StatDto dto = dtos[i];
@@ -209,12 +189,7 @@ namespace Ked.Progression
             List<EpisodeNodeDto> dtos, List<ProgressionDiagnostic> into)
         {
             var nodes = new List<EpisodeNode>();
-
-            if (dtos == null)
-            {
-                return nodes;
-            }
-
+            
             for (int i = 0; i < dtos.Count; i++)
             {
                 EpisodeNodeDto dto = dtos[i];
@@ -238,7 +213,8 @@ namespace Ked.Progression
                         dto.EpisodeId,
                         dto.Title,
                         dto.DialogueEntryId,
-                        options));
+                        options,
+                        dto.EventKey));
                 }
                 catch (ArgumentException error)
                 {
@@ -255,11 +231,6 @@ namespace Ked.Progression
             List<EpisodeOptionDto> dtos, string nodePath, List<ProgressionDiagnostic> into)
         {
             var options = new List<EpisodeOption>();
-
-            if (dtos == null)
-            {
-                return options;
-            }
 
             for (int i = 0; i < dtos.Count; i++)
             {
@@ -313,11 +284,6 @@ namespace Ked.Progression
         {
             var conditions = new List<ProgressionCondition>();
 
-            if (dtos == null)
-            {
-                return conditions;
-            }
-
             for (int i = 0; i < dtos.Count; i++)
             {
                 ConditionDto dto = dtos[i];
@@ -364,19 +330,12 @@ namespace Ked.Progression
         {
             var changes = new List<StatChange>();
 
-            if (dtos == null)
-            {
-                return changes;
-            }
-
             for (int i = 0; i < dtos.Count; i++)
             {
                 StatChangeDto dto = dtos[i];
 
                 if (dto == null)
-                {
                     continue;
-                }
 
                 string at = $"{where}[{i}]";
 

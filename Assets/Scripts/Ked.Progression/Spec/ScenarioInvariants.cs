@@ -51,9 +51,7 @@ namespace Ked.Progression
             ICollection<ProgressionDiagnostic> into)
         {
             if (!string.IsNullOrEmpty(startChapterId) && chaptersById.ContainsKey(startChapterId))
-            {
                 return;
-            }
 
             into.Add(ProgressionDiagnostic.Error(
                 "StartChapterId",

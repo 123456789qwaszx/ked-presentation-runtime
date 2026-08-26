@@ -18,7 +18,7 @@ namespace Ked.Progression
         // 스탯이 변하는 유일한 곳
         public IReadOnlyList<StatChange> StatChanges { get; } 
         
-        public string ViaNodeId { get; }             // (Optional Node)
+        public string ViaNodeId { get; } // (Optional Node)
         public bool HasVia => ViaNodeId.Length != 0; // 이 길에 연출이 달려 있는지 체크.
 
         private EpisodeOption(

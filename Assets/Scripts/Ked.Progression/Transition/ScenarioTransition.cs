@@ -6,7 +6,7 @@ namespace Ked.Progression
         {
             chapter.TryGetNode(state.CurrentEpisodeId, out EpisodeNode node);
 
-            return ScenarioAdvance.Ended(node.EndingKey);
+            return new ScenarioAdvance(node.EventKey);
         }
     }
 }

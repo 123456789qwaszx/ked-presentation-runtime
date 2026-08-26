@@ -210,16 +210,9 @@ public sealed class ProgressionDriver
 
     private static void ShowEnding(in ScenarioAdvance outcome)
     {
-        // 의도한 종착과 막다른 곳을 섞지 않는다. 화면에서 구별되어야 한다.
-        if (outcome.Kind == ScenarioAdvanceKind.ScenarioEnded)
-        {
-            Debug.Log($"[진행] 엔딩 — \"{outcome.EndingKey}\"");
-            return;
-        }
-
-        Debug.LogWarning(
-            "[진행] 미완성 — 엔딩키가 없는 노드에서 멈췄다. " +
-            "나가는 길이 하나도 없는데 엔딩도 아니다(작가가 아직 안 이은 자리).");
+        Debug.Log(outcome.EventKey.Length != 0
+            ? $"[진행] 챕터 끝 — 이벤트키 \"{outcome.EventKey}\""
+            : "[진행] 챕터 끝");
     }
 
     private string Describe() =>
