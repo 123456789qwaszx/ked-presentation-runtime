@@ -272,6 +272,15 @@ namespace Ked.Progression
                     continue;
                 }
 
+                // 자동 진행(문구 없는 간선)은 폐지됐다. 옛 데이터를 조용히 버리지 않는다.
+                if (string.IsNullOrEmpty(dto.ChoiceLabel))
+                {
+                    into.Add(ProgressionDiagnostic.Error(
+                        at, "간선의 문구가 비어 있다. 자동 진행은 폐지됐다 — 문구를 줄 것."));
+
+                    continue;
+                }
+
                 List<ProgressionCondition> visible =
                     LoadConditions(dto.VisibleConditions, at + ".VisibleConditions", into);
                 List<ProgressionCondition> conditions =
@@ -279,46 +288,16 @@ namespace Ked.Progression
                 List<StatChange> changes =
                     LoadStatChanges(dto.StatChanges, at + ".StatChanges", into);
 
-                bool isAuto = string.IsNullOrEmpty(dto.ChoiceLabel);
-
                 try
                 {
-                    if (!isAuto)
-                    {
-                        options.Add(EpisodeOption.Choice(
-                            dto.ChoiceLabel,
-                            dto.TargetEpisodeId,
-                            visible,
-                            conditions,
-                            dto.LockedReasonText,
-                            changes,
-                            dto.ViaNodeId));
-
-                        continue;
-                    }
-
-                    // 자동 진행이 받지 않는 칸에 값이 있으면 그대로 실을 때 조용히 사라진다.
-                    if (visible.Count > 0 || conditions.Count > 0)
-                    {
-                        into.Add(ProgressionDiagnostic.Error(
-                            at,
-                            "문구 없는 간선(자동 진행)에 관문이 달렸다(§G6-2). 그 관문마저 막히면 " +
-                            "챕터가 조용히 끝난다 — 문구를 주어 보통 선택지로 만들거나 조건을 뗄 것."));
-
-                        continue;
-                    }
-
-                    if (!string.IsNullOrEmpty(dto.LockedReasonText))
-                    {
-                        into.Add(ProgressionDiagnostic.Error(
-                            at,
-                            "문구 없는 간선(자동 진행)에 잠금 설정이 달렸다. 자동 진행은 잠기지 " +
-                            "않으므로 이 값은 실리지 않는다 — 조용히 버리지 않는다."));
-
-                        continue;
-                    }
-
-                    options.Add(EpisodeOption.Auto(dto.TargetEpisodeId, changes, dto.ViaNodeId));
+                    options.Add(EpisodeOption.Choice(
+                        dto.ChoiceLabel,
+                        dto.TargetEpisodeId,
+                        visible,
+                        conditions,
+                        dto.LockedReasonText,
+                        changes,
+                        dto.ViaNodeId));
                 }
                 catch (ArgumentException error)
                 {
@@ -477,8 +456,6 @@ namespace Ked.Progression
                 default: value = default; return false;
             }
         }
-
-        private static int Count<T>(List<T> list) => list == null ? 0 : list.Count;
 
         private static bool HasError(List<ProgressionDiagnostic> diagnostics)
         {

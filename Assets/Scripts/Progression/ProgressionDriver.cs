@@ -121,9 +121,7 @@ public sealed class ProgressionDriver
             if (advance.Kind == ChapterAdvanceKind.ChapterEnded)
                 return ScenarioTransition.Resolve(_chapter, _state);
 
-            EpisodeOption chosen = advance.Kind == ChapterAdvanceKind.AutoAdvance
-                ? advance.AutoOption
-                : await PickAsync(advance);
+            EpisodeOption chosen = await PickAsync(advance);
 
             if (chosen == null)
                 return null;

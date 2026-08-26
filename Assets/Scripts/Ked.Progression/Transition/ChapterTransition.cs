@@ -29,9 +29,6 @@ namespace Ked.Progression
             for (int i = 0; i < options.Count; i++)
             {
                 EpisodeOption option = options[i];
-
-                if (option.Kind == OptionKind.AutoAdvance)
-                    continue;
                 
                 if (FirstUnmet(option.VisibleConditions, state).IsConstructed)
                 {
@@ -54,15 +51,10 @@ namespace Ked.Progression
 
             if (anySelectable)
                 return new ChapterAdvance(
-                    ChapterAdvanceKind.AwaitPlayerChoice, shownOrLocked, null, hidden);
-
-            // 고를 수 있는 것이 하나도 없다. 잠긴 것들은 화면에 세우지 않는다.
-            if (node.TryGetAutoOption(out EpisodeOption auto))
-                return new ChapterAdvance(
-                    ChapterAdvanceKind.AutoAdvance, None, auto, hidden);
+                    ChapterAdvanceKind.AwaitPlayerChoice, shownOrLocked, hidden);
             
             return new ChapterAdvance(
-                ChapterAdvanceKind.ChapterEnded, None, null, hidden);
+                ChapterAdvanceKind.ChapterEnded, None, hidden);
         }
 
         // 미달 조건 중 첫번째 것.
