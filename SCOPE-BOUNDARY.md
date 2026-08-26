@@ -2,7 +2,9 @@
 
 ## 0. 한 문장
 
-> **이 저장소는 yarn 노드 하나를 재생한다. 저작·진행·저장은 밖이다.**
+> **이 저장소는 yarn 노드를 재생하고, 챕터 진행을 돌린다. 저작·저장은 밖이다.**
+
+(진행은 §3.3대로 나갔다가, 별도 저장소의 순수 코어로 서서 복사 반입으로 돌아왔다.)
 
 ---
 
@@ -49,7 +51,7 @@
 | **왜 여기서 빠졌나** | 저작이 VnTool로 나갔다. **테이블 분리는 이미터의 일이다** — 런타임이 커서 두 개를 돌려 락스텝을 맞추는 것은 같은 문제를 두 번 푸는 것이다.<br>그리고 그 비용이 컸다: 레인이 둘이면 "누가 전진을 소비했는가"가 **항상 두 갈래**가 되어, 디버깅과 신규 학습 비용이 자릿수로 오른다 |
 | **새 주인** | **VnTool 이미터.** 어느 커맨드가 어느 라인에 붙는지를 텍스트로 확정해 내보낸다. 런타임은 파싱과 실행만 한다 |
 | **여기 남은 대체** | 시간 축 분리는 **수명 스코프**가 표현한다 — `IStepScopedCommand`(다음 라인 경계에서 정리) / `IRunScopedCommand`(세션 끝까지 산다). 커서를 늘리지 않고 같은 표현력을 얻는다 |
-| **보존** | 게이트 기계 자체는 지우지 않았다. `Assets/Ked.Presentation.Sync/`에 **엔진 의존 0으로 순수화해 보관**돼 있다. 두 흐름을 프레임 단위로 동기화하는 문제가 다시 생기면 여기서 꺼낸다 |
+| **보존** | 게이트 기계를 `Assets/Ked.Presentation.Sync/`에 순수화해 보관했으나, 소비자·테스트가 0인 채라 **이후 트리에서 뺐다**(`d31e80c4`). 다시 필요하면 git 역사에서 꺼낸다 |
 | **커밋** | `a220a5a8` (subLane 제거) · `8eeb2829` (InlineAdvance·SyncHub 제거) · `4cd185a8` (Sync 순수화 보관) · `a2f7e7af` (연출 전용 라인 제거) |
 
 ### 3.2 세이브 · 로드
@@ -73,6 +75,7 @@
 | **새 주인** | **별도 프로젝트(순수 C#).** 에피소드·챕터를 잇고 그리는 방식은 **게임 공용**이다. 순수 층으로 빼면 툴과 런타임이 **같은 평가기**를 쓰므로 G7의 불일치가 원천 소멸한다.<br>`Ked.Presentation.Core`가 그 선례다 — 같은 수를 진행 층에 한 번 더 두는 것이다 |
 | **이 저장소와의 경계** | `EpisodePlayer.StartGameAsync(nodeName)`.<br>진행 층은 **"이 노드를 재생해 줘"** 까지 말하고, 그 안쪽은 이 저장소가 전부 책임진다 |
 | **커밋** | `1805c555` |
+| **✅ 돌아왔다** | 새 주인이 실제로 섰다 — `ked-progression`(형제 저장소, 순수 C#·자체 dotnet 테스트). 그 `Runtime/`이 `Assets/Scripts/Ked.Progression/`으로 **복사 반입**돼 있고([vendoring.md](Assets/Scripts/Ked.Progression/Documentation~/vendoring.md)), 순서는 `Assets/Scripts/Progression/ProgressionDriver.cs`가 쥔다. 진행은 더 이상 "빠진 것"이 아니다 |
 
 ### 3.4 플레이어 스탯 — 카탈로그만
 
@@ -144,7 +147,6 @@ VnTool ↔ 런타임 계약서는 §3의 이동을 아직 반영하지 않았다
 
 | | 내용 |
 |---|---|
-| 보관 어셈블리 | `Ked.Presentation.Sync` — 의도된 보관(§3.1)이나 **소비자와 테스트가 모두 0**이다. 실행되지 않는 코드는 검증되지 않는다. 붙이거나 · 테스트를 달거나 · 트리에서 빼거나 중 하나를 골라야 한다 |
 | 생산자 없는 값 | `VNSeekKind.Load` — 이 값을 만드는 코드가 없다(`BeginLoadSeek` 제거와 함께). **§3.2의 스냅샷 세이브가 돌아올 자리라 남겨 두었다.** 그때까지 시크 종류는 `Rollback` 하나뿐이다 |
 | 시크 종류의 미사용 | `SeekKind`는 `VNSeekLineDecision`으로 실려 다니지만 **분기하는 코드가 없다.** 현재는 진단용이다 |
 
@@ -152,6 +154,7 @@ VnTool ↔ 런타임 계약서는 §3의 이동을 아직 반영하지 않았다
 
 | | |
 |---|---|
+| 보관 어셈블리 | `Ked.Presentation.Sync` — 소비자·테스트 0인 채 두지 않고 **트리에서 뺐다**(`d31e80c4`). git 역사가 보관처다 |
 | 씬 잔해 | 정리 완료 — `SampleScene` · `DungeonCafe` 삭제, `PresentationSample.unity` 하나만 남았다. `OneShot*` · `subPresentationRunner` 참조 0건, 러너는 하나다 |
 | 에디터 도구 | `VNRuntimeStateInspectorWindow`의 `[VNLoadSeekDriver]` 절 제거. 함께 죽어 있던 `_presentationSessionContext` 리플렉션 대상을 `_presentationScopeSession`으로 교정 |
 | 죽은 진입점 | `VNLinePresentationState.BeginLoadSeek` 제거 |

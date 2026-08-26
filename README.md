@@ -5,31 +5,38 @@ Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타�
 
 ## 이 저장소의 범위
 
-> **yarn 노드 하나를 재생한다. 저작·진행·저장은 밖이다.**
+> **yarn 노드를 재생하고, 챕터 진행을 돌린다. 저작·저장은 밖이다.**
 
-저작은 외부 툴(VNTool)이 하고, 그 결과인 `.yarn` 텍스트를 이 런타임이 재생합니다.
-에피소드·챕터 진행과 세이브는 이 저장소의 책임이 아니며, **필요 없어서가 아니라 주인을
-옮기는 중이라서** 여기서 빠져 있습니다.
+저작은 외부 툴(VnTool)이 하고, 그 결과인 `.yarn` 텍스트와 챕터 JSON(`*.progression.json`)을
+이 런타임이 재생합니다.
 
-무엇이 왜 밖으로 나갔고 어떤 모양으로 돌아오는지는 **[SCOPE-BOUNDARY.md](SCOPE-BOUNDARY.md)**
-에 있습니다. 어셈블리 경계는 [ASSEMBLY-BOUNDARY.md](Assets/Scripts/Ked.Presentation.Runtime/ASSEMBLY-BOUNDARY.md).
+에피소드·챕터 진행 판정은 별도 저장소(`ked-progression`)가 원본인 순수 C# 코어를
+복사 반입해([Assets/Scripts/Ked.Progression/](Assets/Scripts/Ked.Progression) ·
+[vendoring.md](Assets/Scripts/Ked.Progression/Documentation~/vendoring.md)) 이 저장소의
+드라이버가 돌립니다. 세이브는 아직 밖이며, 스냅샷 기반으로 재도입할 예정입니다.
+
+경계의 내력은 **[SCOPE-BOUNDARY.md](SCOPE-BOUNDARY.md)**,
+어셈블리 경계는 [ASSEMBLY-BOUNDARY.md](Assets/Scripts/Ked.Presentation.Runtime/ASSEMBLY-BOUNDARY.md).
 
 ## 사용법
 
-1. `Assets/Scenes/PresentationSample.unity`를 연다.
-2. `Assets/@Dialogue/`의 `.yarn` 파일에서 재생할 노드 이름(`title:`)을 복사한다.
-3. 하이어라키의 `[VNAppBootstrap]`을 선택하고 **Entry Keys** 항목에 붙여넣는다.
-4. 재생 후 `2`를 눌러 해당 노드를 실행한다.
+`Assets/Scenes/PresentationSample.unity`를 열고 하이어라키의 `[VNAppBootstrap]`을 선택한다.
+
+- **노드 하나 재생**: `Assets/@Dialogue/`의 `.yarn`에서 노드 이름(`title:`)을 복사해
+  **Entry Keys › Yarn Entry Key**에 넣고, 재생 후 `2`.
+- **챕터 진행 재생**: **진행 층 › Progression Chapter Json**에
+  `Assets/@Dialogue/ChapterProgression/`의 `.json`을 물리고, 재생 후 `4`.
 
 | 키 | 동작 |
 |---|---|
-| `2` | Node 실행 |
+| `2` | 노드 하나 실행 (Yarn Entry Key) |
+| `3` | 디버그 에피소드 사슬 실행 |
+| `4` | 챕터 진행 시작 (Progression Chapter Json) |
 | `Space` | RequestNextLine |
-| `좌 Ctrl` | FastForward |
+| `좌/우 Ctrl` | FastForward |
 | `R` | Rollback |
 | `A` | Auto 모드 토글 |
 | `S` | SpeedUp 모드 토글 |
-
 
 ## 둘러볼 곳
 
@@ -74,10 +81,19 @@ Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타�
 
 ### 5. 순수 코어
 
-`Assets/Ked.Presentation.Core/`
+`Assets/Scripts/Ked.Presentation.Core/`
 
 커맨드 열을 "트윈이 끝났다면 어디에 있을 것인가"로 접는 순수 C# 층입니다(엔진 의존 0).
 그 계산이 실제 재생과 같은지는 `Game/StageEquivalenceHarness.cs`가 라인마다 판정합니다.
+
+### 6. 진행 층
+
+* `Assets/Scripts/Ked.Progression/` — 챕터·에피소드 판정 코어(엔진 의존 0, 복사 반입)
+* `Assets/Scripts/Progression/` — 로딩·프리플라이트·드라이버(호스트 접착)
+
+챕터 JSON을 실어 불변식을 검사하고, 대사 재생 뒤 한 번 판정해 선택지를 띄우고
+스탯 반영과 이동을 한 연산으로 커밋하는 루프는
+[ProgressionDriver.cs](Assets/Scripts/Progression/ProgressionDriver.cs)에 있습니다.
 
 ## 개발 환경
 

@@ -29,7 +29,8 @@ namespace Ked.Progression
         }
 
         private static Dictionary<string, StatDefinition> IndexStats(
-            IReadOnlyList<StatDefinition> stats, ICollection<ProgressionDiagnostic> into)
+            IReadOnlyList<StatDefinition> stats, 
+            ICollection<ProgressionDiagnostic> into)
         {
             var byKey = new Dictionary<string, StatDefinition>(StringComparer.Ordinal);
 
@@ -58,7 +59,8 @@ namespace Ked.Progression
         }
 
         private static Dictionary<string, EpisodeNode> IndexNodes(
-            IReadOnlyList<EpisodeNode> nodes, ICollection<ProgressionDiagnostic> into)
+            IReadOnlyList<EpisodeNode> nodes, 
+            ICollection<ProgressionDiagnostic> into)
         {
             var byId = new Dictionary<string, EpisodeNode>(StringComparer.Ordinal);
 

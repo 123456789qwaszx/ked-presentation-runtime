@@ -54,8 +54,7 @@ public sealed class EpisodePlayer
     }
 
     // 세션 경계.
-    // 이 순간의 (시작에피소드와 variable변수)가 롤백 리플레이의 체크포인트가 된다.
-    // 백로그를 포함해 전부 비움.
+    // 이 순간의 (시작에피소드, variable변수)가 롤백 리플레이의 체크포인트 됨.
     public async Task StartGameAsync(string nodeName)
     {
         await EnterSceneAsync(nodeName, isNewSession: true);

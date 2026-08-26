@@ -16,11 +16,22 @@
 
 | | |
 |---|---|
-| 원본 커밋 | `ab30af3` (`chore: 0.2.0`) |
-| 원본 태그 | `0.2.0` |
-| 반입일 | 2026-08-23 |
+| 원본 브랜치 | `feat/host-integration` (커밋 미정 — 아래 참조) |
+| 마지막 동기화 | 2026-08-26 · **사본 → 원본** (역방향) |
+| 코드 일치 | `diff -r` 0건 |
 
 **갈리면 이 표를 고친다.** 표가 낡으면 사본이 어디서 왔는지 아무도 모른다.
+
+### 2026-08-26 — 역방향 동기화를 했다
+
+이 회차의 작업은 전부 **이 사본에서** 이루어졌고(EndingRule·시나리오 간선 제거, 자동 진행
+폐지, `EndingKey` → `EventKey`, DTO 파일 분리), 그것을 원본 `Runtime/`에 통째로 덮었다.
+원본 테스트도 새 계약에 맞춰 다시 썼다 — **135개 통과**.
+
+원본 커밋은 아직 안 했다. 커밋한 뒤 위 표의 커밋 해시를 채울 것.
+
+> ⚠ 지금 아래의 "원본 → 사본" 절차를 돌려도 안전하다(양쪽이 같다). 다만 원본을
+> 커밋하기 전에 원본 트리를 건드리면 그 작업이 사라지므로 순서를 지킬 것.
 
 ## 왜 UPM 패키지가 아닌가
 
@@ -44,7 +55,7 @@ diff -r -x "*.csproj" -x "*.csproj.meta" \
 원본 → 사본으로 다시 받는다:
 
 ```bash
-rm -rf Assets/Scripts/Ked.Progression/{Flow,Loading,Reachability,Save,Spec,State,Transition,Vocabulary}
+rm -rf Assets/Scripts/Ked.Progression/{Loading,Reachability,Spec,State,Transition,Vocabulary}
 cp -r ../ked-progression/Runtime/. Assets/Scripts/Ked.Progression/
 rm -f Assets/Scripts/Ked.Progression/Ked.Progression.csproj*
 ```

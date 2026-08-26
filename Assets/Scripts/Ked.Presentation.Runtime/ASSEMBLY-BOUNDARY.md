@@ -4,18 +4,22 @@
 경계는 코드 어디에도 안 보이고 `.asmdef` 파일 안에만 있어서, 근거가 없으면 다음 사람이
 "왜 폴더가 이렇게 묶여 있지"를 알 수 없다.
 
-**목적**: 나중에 `Ked.Presentation.Core`(순수 C# 상태 계산 층)를 뽑아
-외부 도구(VnTool)가 참조할 수 있게 하는 것. 그 준비로 **경계만 그었다.**
+**목적**: `Ked.Presentation.Core`(순수 C# 상태 계산 층)를 뽑아 외부 도구(VnTool)가
+참조할 수 있게 하는 것. U13-a에서 경계를 긋고, **U13-b에서 실제로 뽑았다** —
+지금은 VnTool에 `src/Ked.Presentation.Core`로 복사 반입돼 있다.
 
 ---
 
-## 1. 어셈블리 셋
+## 1. 어셈블리 다섯 (+ 테스트)
 
 | 어셈블리 | 위치 | 내용 |
 |---|---|---|
-| `Ked.Presentation.Runtime` | `Assets/Scripts/Ked.Presentation.Runtime/` | 연출 실행 계층 — PresentationCore · Commands · CharacterRig · ShotResponse · BackgroundRig · ScreenEffect · StageMask · Audio |
-| `Assembly-CSharp` (기본) | `Assets/Scripts/` 나머지 | 글루 — Game · UI · VNLinePresentationFlow · FeatureController · **YarnBridge** |
+| `Ked.Presentation.Core` | `Assets/Scripts/Ked.Presentation.Core/` | 순수 상태 계산 — 정지 프레임 리듀스·이징·튜닝 (**엔진 의존 0**, 참조 0) |
+| `Ked.Progression` | `Assets/Scripts/Ked.Progression/` | 진행 판정 코어 — 챕터·에피소드·스탯 (**엔진 의존 0**, 참조 0. 원본은 형제 저장소 `ked-progression`, [vendoring.md](../Ked.Progression/Documentation~/vendoring.md)) |
+| `Ked.Presentation.Runtime` | `Assets/Scripts/Ked.Presentation.Runtime/` | 연출 실행 계층 — PresentationCore · Commands · CharacterRig · ShotResponse · BackgroundRig · ScreenEffect · StageMask · Audio (참조: Core · TextMeshPro · DOTween.Modules) |
+| `Assembly-CSharp` (기본) | `Assets/Scripts/` 나머지 | 글루 — Game · UI · VNLinePresentationFlow · FeatureController · Progression 드라이버 · **YarnBridge** |
 | `Assembly-CSharp-Editor` (기본) | `Assets/Editor/` | 에디터 도구 — 초상 DB 빌더 · 튜닝 덤프 익스포터 · 폰트 교체 |
+| `Ked.Presentation.Core.Tests` | `Assets/Scripts/Ked.Presentation.Core/Tests/EditMode/` | EditMode 테스트 (참조: Core · Runtime) |
 
 > **에디터 도구는 런타임 폴더 안에 두지 않는다.** 한때 런타임 트리 안에 에디터 전용
 > 어셈블리가 하나 더 있었으나, 그러면 폴더를 읽는 사람이 매번 "이건 빌드에 들어가나"를
@@ -24,9 +28,12 @@
 **의존 방향은 한쪽뿐이다.**
 
 ```
-Assembly-CSharp (글루)  ──>  Ked.Presentation.Runtime (코어)
+Assembly-CSharp (글루) ──> Ked.Presentation.Runtime ──> Ked.Presentation.Core
+        └────────────────> Ked.Progression
         ✗ 역방향 불가 (컴파일러가 막는다)
 ```
+
+순수 코어 둘(`Ked.Presentation.Core` · `Ked.Progression`)은 서로도, 유니티도 모른다.
 
 ---
 
@@ -113,11 +120,11 @@ UI 타입이 기능 폴더의 계약을 구현하는 partial을 전부 여기 �
 3. **확장 메서드가 안 보이는가?**
    → 그 확장이 어느 어셈블리에 있는지 본다. `Assembly-CSharp`이면 asmdef가 필요하다(§7).
 
-## 9. 여기가 아직 "순수 코어"는 아니다
+## 9. `Ked.Presentation.Runtime`은 "순수 코어"가 아니다
 
-`Ked.Presentation.Runtime`은 **여전히 `UnityEngine`·DOTween·`MonoBehaviour`에 의존한다.**
-U13-a는 경계를 그었을 뿐이고, 순수 C# 상태 계산 층(`Ked.Presentation.Core`, netstandard2.1)을
-뽑는 것은 **U13-b**의 일이다.
+이 어셈블리는 **의도적으로 `UnityEngine`·DOTween·`MonoBehaviour`에 의존한다** — 실행 계층이다.
+순수 상태 계산은 U13-b에서 `Ked.Presentation.Core`로 뽑혀 나갔고(§1),
+이 어셈블리는 그 계산을 실제 무대에 재생하는 쪽을 맡는다.
 
 참고 수치(U13-a 착수 시점, `Assets/Scripts` 572파일 기준):
 
