@@ -27,6 +27,7 @@ public sealed class ProgressionDriver
     private ScenarioProgression _scenario;
     private ChapterProgression _chapter;
     private ProgressionState _state;
+    private ProgressionResumePoint _resumeFrom;
     private bool _stopRequested;
     private bool _firstEpisode;
 
@@ -37,15 +38,29 @@ public sealed class ProgressionDriver
 
     public bool IsRunning { get; private set; }
 
+    // 저장 층이 구독하는 보고 (M7, ProgressionReports.cs). 드라이버는 알리기만 한다 —
+    // 반환값도, 대기도 없다. 구독자가 없어도(에디터 단독 실행 등) 진행은 그대로다.
+    // 구독자 예외로 진행이 멈추지 않는 책임은 구독자 쪽에 있다(SaveCoordinator가 전부 삼킨다).
+    public event Action<ChoiceCommitReport> ChoiceCommitted;
+    public event Action<EpisodeWatchReport> EpisodeWatched;
+
     public ProgressionDriver(
-        EpisodePlayer player, IChapterOptionsView options, ProgressionYarnBridge yarnBridge)
+        EpisodePlayer player, 
+        IChapterOptionsView options, 
+        ProgressionYarnBridge yarnBridge)
     {
         _player = player;
         _options = options;
         _yarnBridge = yarnBridge;
     }
 
-    public async Task RunAsync(ScenarioProgression scenario, YarnProject project)
+    // resumeFrom: null이면 새 게임. 값이 있으면 그 에피소드부터.
+    // - 선택/스탯은 보존되고,
+    // - 그 에피소드의 대사는 처음부터 재생.
+    public async Task RunAsync(
+        ScenarioProgression scenario,
+        YarnProject project, 
+        ProgressionResumePoint resumeFrom = null)
     {
         if (IsRunning)
         {
@@ -57,6 +72,7 @@ public sealed class ProgressionDriver
         _stopRequested = false;
         _firstEpisode = true;
         _scenario = scenario;
+        _resumeFrom = resumeFrom;
         _yarnProject = project;
         _yarnChapterId = null;
 
@@ -78,6 +94,7 @@ public sealed class ProgressionDriver
             _scenario = null;
             _chapter = null;
             _state = null;
+            _resumeFrom = null;
             _yarnProject = null;
             _yarnChapterId = null;
         }
@@ -94,13 +111,48 @@ public sealed class ProgressionDriver
     {
         _chapter = _scenario.StartChapter;
 
-        // 이 챕터의 진행 상태는 챕터가 만든다.
-        _state = _chapter.CreateEntryState();
+        // 이 챕터의 진행 상태는 챕터가 만든다. 재개점이 있으면 거기서 (M7).
+        _state = CreateStartState();
 
         Debug.Log($"[진행] 챕터 시작 — {Describe()}");
 
         if (await RunChapterAsync())
             Debug.Log($"[진행] 챕터 끝 — {Describe()}");
+    }
+
+    // 재개점 검증과 "그럼 어떻게" 는 전부 여기 (M7). 상태(Restore)는 성립 불가면 던지기만
+    // 하고, 새 게임으로 물러서는 결정은 흐름을 쥔 드라이버가 한다.
+    //
+    // 물러서는 경우는 전부 저장 후 데이터가 바뀐 것이다(챕터 교체, 에피소드 삭제).
+    // 조용히 이어 가는 척하는 것보다 "처음부터"가 낫고, 경고 로그가 이유를 남긴다.
+    private ProgressionState CreateStartState()
+    {
+        if (_resumeFrom == null)
+            return _chapter.CreateEntryState();
+
+        // 저장된 챕터가 시나리오에 있으면 그 챕터에서 잇는다. 지금은 단일 챕터라
+        // StartChapter와 같지만, 챕터가 늘어도 이 줄은 그대로다.
+        if (_scenario.TryGetChapter(_resumeFrom.ChapterId, out ChapterProgression saved))
+        {
+            _chapter = saved;
+        }
+        else
+        {
+            Debug.LogWarning(
+                $"[진행] 저장된 챕터 '{_resumeFrom.ChapterId}'가 시나리오에 없다. 새로 시작한다.");
+            return _chapter.CreateEntryState();
+        }
+
+        if (!_chapter.TryGetNode(_resumeFrom.EpisodeId, out _))
+        {
+            Debug.LogWarning(
+                $"[진행] 저장된 에피소드 '{_resumeFrom.EpisodeId}'가 챕터에 없다. 새로 시작한다.");
+            return _chapter.CreateEntryState();
+        }
+
+        Debug.Log($"[진행] 재개 — {_resumeFrom.ChapterId}/{_resumeFrom.EpisodeId}");
+
+        return ProgressionState.Restore(_chapter, _resumeFrom.EpisodeId, _resumeFrom.Stats);
     }
 
     // 에피소드 루프. 챕터가 끝나면 true, 멈춤 요청이면 false.
@@ -112,6 +164,14 @@ public sealed class ProgressionDriver
 
             if (!await PlayNodeAsync(node.DialogueEntryId, "대사"))
                 return false;
+
+            // "시청 완료" 보고 (M7). 대사가 끝까지 재생된 직후 — EventKey의 정의 그대로다.
+            // 멈춤 요청으로 빠져나간 경우는 위에서 걸러졌으니 여기 오면 완주다.
+            if (node.EventKey.Length != 0)
+            {
+                EpisodeWatched?.Invoke(new EpisodeWatchReport(
+                    _chapter.ChapterId, node.EpisodeId, node.EventKey));
+            }
 
             // 이 회차의 판단은 여기서 확정된다. 아래는 이미 정해진 목록에서 고르기만 한다.
             ChapterAdvance advance = ChapterTransition.Resolve(_chapter, _state);
@@ -129,7 +189,34 @@ public sealed class ProgressionDriver
                 return false;
 
             _state = _state.Commit(_chapter, chosen);
+
+            // Commit이 성공한 뒤라 여기 오면 상태 전이는 이미 끝남.
+            // (구독자가 무엇을 하든 진행은 되돌아가지 않는다.)
+            
+            // OptionIndex는 원본 NextOptions의 순번.
+            // 서버가 option_count로 검사하는 값이고, 콘텐츠가 같으면 언제나 같은 번호.
+            ChoiceCommitted?.Invoke(
+                new ChoiceCommitReport(
+                    _chapter.ChapterId, 
+                    node.EpisodeId, 
+                    IndexOfOption(node, chosen), 
+                    chosen, 
+                    _state));
         }
+    }
+
+    // 원본 간선 목록에서의 서수. Commit의 VerifyReachableFromHere가 방금 같은 스캔으로
+    // 존재를 증명했으므로 여기서 -1이 나올 수는 없지만, 나온다면 버그를 조용히 넘기지 않는다.
+    private static int IndexOfOption(EpisodeNode node, EpisodeOption chosen)
+    {
+        for (int i = 0; i < node.NextOptions.Count; i++)
+        {
+            if (ReferenceEquals(node.NextOptions[i], chosen))
+                return i;
+        }
+
+        throw new InvalidOperationException(
+            $"커밋된 선택지({chosen})가 에피소드 '{node.EpisodeId}'의 간선 목록에 없다.");
     }
 
     // 고르지 못했으면(멈춤 요청) null.

@@ -1,3 +1,5 @@
+using System.IO;
+using Ked.Save;
 using UnityEngine;
 using UnityEngine.Serialization;
 using Yarn.Unity;
@@ -31,6 +33,8 @@ public class VNAppBootstrap : MonoBehaviour
     private IChapterOptionsView _progressionOptions;
     private ProgressionDriver _progressionDriver;
     private ProgressionLauncher _progressionLauncher;
+
+    private SaveCoordinator _saveCoordinator;
 
     [Header("UIManager")]
     [SerializeField] private UIManager uiManager;
@@ -79,6 +83,10 @@ public class VNAppBootstrap : MonoBehaviour
     [Tooltip("툴이 낸 챕터 JSON. Assets/@Dialogue/ChapterProgression/ 아래의 .json 을 넣는다. " +
              "경로 문자열이 아니라 에셋 참조다 — 머신에 안 매이고 빌드에도 실린다.")]
     [SerializeField] private TextAsset progressionChapterJson;
+
+    [Header("저장·동기화 (M7)")]
+    [Tooltip("spring-prepare 서버 주소. 비우면 서버 동기화 없이 로컬 저장만 한다.")]
+    [SerializeField] private string serverBaseUrl = "http://localhost:8080";
 
     [Header("VNAdvanceGate")]
     [SerializeField] private VNAdvanceInputPoller vnAdvanceInputPoller;
@@ -358,8 +366,47 @@ public class VNAppBootstrap : MonoBehaviour
 
         _progressionDriver = new ProgressionDriver(_episodePlayer, _progressionOptions, yarnBridge);
 
+        BootstrapSaveStack();
+
         _progressionLauncher = new ProgressionLauncher(
-            _progressionDriver, dialogueRunner, progressionChapterJson);
+            _progressionDriver, dialogueRunner, progressionChapterJson,
+            _saveCoordinator.GetResumePoint);
+    }
+
+    // 저장·동기화 스택 (M7). 로컬이 진실(파일), 서버는 사본(큐로 민다).
+    // 조립만 여기서 하고 규칙은 전부 Save/ 아래 각자에게 있다.
+    private void BootstrapSaveStack()
+    {
+        string saveRoot = Path.Combine(Application.persistentDataPath, "saves");
+
+        LocalFileSaveStore localStore = new(saveRoot);
+        SyncQueue syncQueue = new(Path.Combine(saveRoot, "sync_queue.json"));
+
+        ServerSyncSaveStore serverSync = null;
+
+        if (!string.IsNullOrWhiteSpace(serverBaseUrl))
+        {
+            ServerApi serverApi = new(serverBaseUrl);
+
+            GuestSession guestSession = new(
+                serverApi, Path.Combine(Application.persistentDataPath, "account.json"));
+
+            ChapterVersionResolver versionResolver = new(serverApi, progressionChapterJson);
+
+            // deviceKey는 devices 테이블(VARCHAR 64)의 "설치 고유값".
+            // deviceUniqueIdentifier가 플랫폼에 따라 64자를 넘을 수 있어 자른다.
+            string deviceKey = SystemInfo.deviceUniqueIdentifier;
+
+            if (deviceKey.Length > 64)
+                deviceKey = deviceKey.Substring(0, 64);
+
+            serverSync = new ServerSyncSaveStore(
+                serverApi, guestSession, syncQueue, versionResolver, localStore, deviceKey);
+        }
+
+        // 슬롯 1 고정 — 슬롯 UI는 뒤 M의 일이고, 서버는 1~127을 이미 받는다(D-008).
+        _saveCoordinator = new SaveCoordinator(localStore, syncQueue, serverSync, slotNo: 1);
+        _saveCoordinator.Attach(_progressionDriver);
     }
 
     private void BootstrapPlaybackControls()
@@ -428,6 +475,10 @@ public class VNAppBootstrap : MonoBehaviour
     private void Start()
     {
         OpenInitialScreen();
+
+        // 지난 실행이 남긴 큐를 민다 (M7 — 동기화 트리거는 "커밋 시"와 "앱 시작 시" 둘뿐).
+        // 결과를 기다릴 이유가 없고, 실패해도 큐는 남는다.
+        _ = _saveCoordinator.SyncPendingAsync();
     }
     
     private void OpenInitialScreen()
