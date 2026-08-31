@@ -1,12 +1,13 @@
 using System.Collections.Generic;
 
-// 서버로 보낼 것을 쌓는 큐 (M7). 파일 하나 — sync_queue.json.
+// 서버로 보낼 것을 쌓는 큐. (sync_queue.json)
 //
-// 규칙 셋:
-//   · seq 발급과 적재는 한 번의 파일 쓰기다.
-//   · 비우는 조건은 "200을 받았다"뿐 — accepted*와 보낸 수를 비교하지 않는다.
-//   · 큐는 뒤에만 붙는다(append-only). 그래서 전송 시점의 사본(배치)은 언제나 현재 큐의
-//     접두사고, 성공하면 그 길이만큼 앞에서 지운다. 전송 중에 쌓인 것은 뒤에 남는다.
+// 규칙:
+// - seq 발급과 적재는 한 번의 파일 쓰기.
+// - 비우는 조건은 "200을 받았다"뿐. (accepted*와 보낸 수를 비교하지 않음.)
+// - 큐는 뒤에만 붙는다(append-only).
+//   그래서 전송 시점의 사본(배치)은 언제나 현재 큐의 접두사고,
+//   성공하면 그 길이만큼 앞에서 지움. 전송 중에 쌓인 것은 뒤에 남는다.
 public sealed class SyncQueue
 {
     private readonly string _path;
@@ -17,14 +18,16 @@ public sealed class SyncQueue
         _path = path;
 
         string json = AtomicFile.ReadAllTextOrNull(path);
-        _file = json == null ? new SyncQueueFile() : SaveJson.Deserialize<SyncQueueFile>(json);
+        _file = json == null 
+            ? new SyncQueueFile()
+            : SaveJson.Deserialize<SyncQueueFile>(json);
     }
 
     public long? PlaythroughId => _file.PlaythroughId;
     public long? BaseRevision => _file.BaseRevision;
     public int PendingCount => _file.PendingChoices.Count + _file.PendingEvents.Count;
 
-    // 새 회차. PlaythroughId 없음/seq 1부터/revision 없음 - 다음 동기화가 회차를 새로 만든다.
+    // 새 회차. PlaythroughId 없음/seq 1부터/revision 없음.
     // 남아 있던 항목은 이전 회차 것이라 함께 버려짐
     public void Reset()
     {
@@ -64,13 +67,15 @@ public sealed class SyncQueue
         Persist();
     }
 
-    // 지금 쌓인 것의 사본 — 전송 한 번에 실을 것.
+    // "CaptureBatch() -> 서버 전송 -> 성공 -> Acknowledge()"
+    // Captures the current queue contents for one sync attempt.
     public SyncBatch CaptureBatch() =>
         new SyncBatch(
             new List<PendingChoice>(_file.PendingChoices),
             new List<PendingEvent>(_file.PendingEvents));
 
-    // 200을 받았다 — 보냈던 배치(접두사)를 지우고 서버의 revision을 적는다.
+    // '200 수신 확인'
+    // Acknowledges a successfully synced batch.
     public void Acknowledge(SyncBatch batch, long newRevision)
     {
         _file.PendingChoices.RemoveRange(0, batch.Choices.Count);

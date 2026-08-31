@@ -2,10 +2,20 @@ using System;
 using System.Threading.Tasks;
 using UnityEngine;
 
-// 큐 → 서버 (M7). 로컬이 진실이고 여기는 사본을 미는 곳 — 실패하면 큐가 남아 다음 기회에 다시 온다.
+// Syncs locally persisted changes to the server.
 //
-// 한 번의 동기화: 토큰 → 회차(없으면 POST) → 버전(D-015) → 배치 캡처 → PUT → 200이면 배치 삭제.
-// 어느 단계든 안 되면 조용히 접는다. 오프라인이 정상 경로다.
+// The local save is authoritative. This class only uploads a server-side copy.
+// Failed sync attempts leave the queue untouched so they can be retried later.
+//
+// One sync attempt:
+// [1] Acquire an authentication token.
+// [2] Resolve or create the server-side playthrough.
+// [3] Resolve the chapter version.
+// [4] Capture the current pending queue as a batch.
+// [5] Upload the batch together with the latest local save snapshot.
+// [6] Acknowledge and remove the batch only after a successful response.
+//
+// Any failure simply ends the current attempt. Offline play is an expected path.
 public sealed class ServerSyncSaveStore
 {
     private readonly ServerApi _api;
@@ -15,11 +25,14 @@ public sealed class ServerSyncSaveStore
     private readonly ISaveStore _localStore;
     private readonly string _deviceKey;
 
-    // 지금 나가 있는 동기화. 하나만 돈다 — 겹치면 "끝나고 한 번 더"로 접는다.
+    
+    // Only one sync may run at a time.
+    // Requests arriving while one is in flight are coalesced into one follow-up sync.
     private Task _inFlight;
     private bool _syncAgain;
-
-    // 409 — 다른 기기가 먼저 저장했다. M7은 알리기만 하고 큐를 보존한다. 해소(폐기 vs force)는 M8.
+    
+    // '409' - 다른 기기가 먼저 저장함. 알리기만 하고 큐 보존.
+    // (해소(폐기 vs force)는 차후 진행.)
     public event Action<string> ConflictDetected;
 
     public ServerSyncSaveStore(
@@ -38,8 +51,9 @@ public sealed class ServerSyncSaveStore
         _deviceKey = deviceKey;
     }
 
-    // 겹쳐 불러도 안전하다 — 도는 중이면 "끝나고 한 번 더"만 표시하고 지금 것을 돌려준다.
-    // 기다리는 이 없이(fire-and-forget) 불리는 자리가 많아 예외를 밖으로 내지 않는다.
+    // Starts a sync attempt if none is running.
+    // If a sync is already in progress,
+    // schedules one follow-up attempt and returns the current task.
     public Task TrySyncAsync(int slotNo)
     {
         if (_inFlight != null)
@@ -50,14 +64,16 @@ public sealed class ServerSyncSaveStore
 
         Task run = RunAsync(slotNo);
 
-        // 첫 await 전에 끝났으면(보낼 것이 없어 곧장 돌아온 경우) finally 가 이미 지나갔다 — 걸어 두지 않는다.
+        // Avoid marking an already-completed sync as in flight.
         if (!run.IsCompleted)
             _inFlight = run;
 
         return run;
     }
 
-    // 큐가 나갈 수 있는 만큼 나가고 조용해질 때까지 (새 게임 직전). 진행이 멈춰 있어 새 커밋은 없다.
+    // Waits for the current sync and any queued follow-up sync to finish.
+    // Intended for transition points such as starting a new game,
+    // where no new commits are expected.
     public async Task FlushAsync(int slotNo)
     {
         if (_inFlight == null)
@@ -93,22 +109,20 @@ public sealed class ServerSyncSaveStore
     {
         LocalSaveFile save = _localStore.Load(slotNo);
 
-        // 스냅샷이 없으면 보낼 것도 없다 — 큐는 스냅샷과 같은 커밋에서 쌓인다.
+        // Queue entries are added only after the local snapshot is saved.
+        // Without a local save, there is no valid state to upload.
         if (save == null)
             return;
 
         string token = await _session.EnsureTokenAsync();
-
         if (token == null)
             return;
 
         long? playthroughId = _queue.PlaythroughId ?? await CreatePlaythroughAsync(token);
-
         if (playthroughId == null)
             return;
 
         int? chapterVersion = await _versionResolver.ResolveAsync(save.ChapterId);
-
         if (chapterVersion == null)
             return;
 
@@ -130,7 +144,8 @@ public sealed class ServerSyncSaveStore
         ApiResult<SaveUploadResponseDto> result =
             await _api.PutSaveAsync(playthroughId.Value, slotNo, request, token);
 
-        // 토큰이 죽어 있었다(서버 재시작 등). 한 번만 새로 받아 다시 민다.
+        // A 401 may indicate that the cached token is no longer valid,
+        // for example after a server restart. Refresh it once and retry.
         if (result.Status == 401)
         {
             _session.InvalidateToken();

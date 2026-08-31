@@ -3,8 +3,9 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine.Networking;
 
-// 서버 호출의 전부 (M7). UnityWebRequest를 Task로 감싼 얇은 층 — 재시도·큐 판단은 부르는 쪽의 정책이다.
-// 던지지 않고 ApiResult로 돌아온다. 오프라인이 정상 경로인 앱이라 네트워크 실패는 예외가 아니다.
+// Unity 클라이언트에서 서버 HTTP API를 호출하는 공통 통신 계층
+// - UnityWebRequest를 Task로 감싼 얇은 층 (재시도/큐 판단은 부르는 쪽의 정책)
+// - 오프라인이 정상 경로인 앱이라 네트워크 실패는 예외가 아님.
 public sealed class ServerApi
 {
     private readonly string _baseUrl;
@@ -23,7 +24,7 @@ public sealed class ServerApi
     public Task<ApiResult<PlaythroughCreatedDto>> CreatePlaythroughAsync(long userId, string token) =>
         SendAsync<PlaythroughCreatedDto>("POST", $"/users/{userId}/playthroughs", null, token);
 
-    // 공개 GET — /content GET은 토큰이 필요 없다.
+    // 공개 GET - /content GET은 토큰이 필요 없음. (로그인하지 않은 클라이언트도 조회할 수 있는 공개 엔드포인트)
     public Task<ApiResult<List<ChapterVersionInfoDto>>> GetChapterVersionsAsync(string chapterId) =>
         SendAsync<List<ChapterVersionInfoDto>>("GET", $"/content/chapters/{chapterId}/versions", null, token: null);
 
@@ -36,19 +37,26 @@ public sealed class ServerApi
 
     private async Task<ApiResult<T>> SendAsync<T>(string method, string path, object body, string token)
     {
+        // 요청 수명은 이 호출 안. 성공-실패-예외와 관계없이 끝나면 Dispose.
         using (var request = new UnityWebRequest(_baseUrl + path, method))
         {
             request.downloadHandler = new DownloadHandlerBuffer();
-            request.timeout = 10;
+            request.timeout = 1;
 
             if (body != null)
             {
+                // 요청 본문을 JSON 바이트로.
                 request.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(SaveJson.Serialize(body)));
+                
+                // 서버에게 "이 본문은 JSON이라고 알림.
                 request.SetRequestHeader("Content-Type", "application/json");
             }
 
             if (token != null)
+            {
+                // 서버에게 "Bearer 방식의 인증 토큰이라고 알림.
                 request.SetRequestHeader("Authorization", "Bearer " + token);
+            }
 
             await AwaitOperation(request.SendWebRequest());
 
@@ -64,7 +72,8 @@ public sealed class ServerApi
             if (status >= 200 && status < 300)
                 return ApiResult<T>.Success(status, SaveJson.Deserialize<T>(raw), raw);
 
-            // 4xx/5xx — 공통 계약(D-004)의 code. 서버 형식이 아닌 본문(프록시 HTML 등)은 null.
+            // 우리 서버 형식이 아닌 본문(프록시 HTML 등)은 null로 둠.
+            // 억지로 읽다가 안 터지도록.
             string code = null;
 
             try
@@ -79,7 +88,8 @@ public sealed class ServerApi
         }
     }
 
-    // 콜백 → Task. 완료 후 등록해도 곧장 불리는 것이 AsyncOperation의 계약이라 경쟁이 없다.
+    // Bridges Unity's completion callback to Task. (so the operation can be awaited.)
+    // AsyncOperation invokes completed even if the handler is registered after completion.
     private static Task AwaitOperation(UnityWebRequestAsyncOperation operation)
     {
         var completion = new TaskCompletionSource<bool>();
@@ -88,25 +98,4 @@ public sealed class ServerApi
 
         return completion.Task;
     }
-}
-
-// 한 호출의 결과. 셋 중 하나 — 못 닿음(NetworkError) / 2xx(Ok) / 4xx·5xx(ErrorCode).
-public sealed class ApiResult<T>
-{
-    public bool NetworkError { get; private set; }
-    public long Status { get; private set; }
-    public T Body { get; private set; }
-    public string ErrorCode { get; private set; }
-    public string RawBody { get; private set; }
-
-    public bool Ok => !NetworkError && Status >= 200 && Status < 300;
-
-    public static ApiResult<T> Network(string message) =>
-        new ApiResult<T> { NetworkError = true, RawBody = message };
-
-    public static ApiResult<T> Success(long status, T body, string raw) =>
-        new ApiResult<T> { Status = status, Body = body, RawBody = raw };
-
-    public static ApiResult<T> Failure(long status, string code, string raw) =>
-        new ApiResult<T> { Status = status, ErrorCode = code, RawBody = raw };
 }

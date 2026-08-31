@@ -4,13 +4,17 @@ using System.IO;
 using System.Threading.Tasks;
 using UnityEngine;
 
-// 게스트 계정과 토큰 (D-016) — account.json.
+// 세션 관리자:
+// - 게임 클라가 서버 동기화를 할 때 사용할 "게스트 계정 + 로그인 토큰"을 관리(account.json)
 //
-// 문은 EnsureTokenAsync 하나: 유효한 토큰 → 그대로 / 없거나 만료 임박 → 로그인 /
-// 계정 없음 → 가입부터. 서버가 안 닿으면 null — 이번 동기화만 접는다.
+// EnsureTokenAsync:
+// 유효한 토큰 -> 그대로 /
+// 없거나 만료 임박 -> 로그인 /
+// 계정 없음 -> 가입부터 /
+// 서버가 안 닿으면 null - 이번 동기화만 포기
 public sealed class GuestSession
 {
-    // 만료(24h) 전에 미리 갈아탄다 — 요청 도중 만료를 넘는 경계를 피한다.
+    // 만료(24h) 전에 미리 갈아탄다 - 요청 도중 만료를 넘는 경계를 피하는 용도.
     private static readonly TimeSpan ExpiryMargin = TimeSpan.FromMinutes(5);
 
     private readonly ServerApi _api;
@@ -23,12 +27,15 @@ public sealed class GuestSession
         _accountPath = accountPath;
 
         string json = AtomicFile.ReadAllTextOrNull(accountPath);
-        _account = json == null ? null : SaveJson.Deserialize<AccountFile>(json);
+        _account = json == null 
+            ? null 
+            : SaveJson.Deserialize<AccountFile>(json);
     }
 
     public long? UserId => _account?.UserId;
 
-    // 401을 받은 호출자가 부른다 — 서버 재시작으로 sessions가 비면 expiresAt이 남았어도 토큰은 죽는다.
+    // 401을 받고 호출.
+    // - 서버 재시작으로 sessions가 비면 expiresAt이 남았어도 토큰을 비움.
     public void InvalidateToken()
     {
         _account.Token = null;
@@ -37,12 +44,22 @@ public sealed class GuestSession
 
     public async Task<string> EnsureTokenAsync()
     {
+        // 계정도 있고 토큰도 유효:
+        // - 기존 토큰 반환.(서버요청 없음)
         if (HasUsableToken())
             return _account.Token;
 
-        if (_account == null && !await SignUpAsync())
+        // account.json 자체가 없음(_account == null):
+        // A-1) await SignUpAsync()실행. 성공 후 _account 생성.
+        // A-2) return await LoginAsync()실행. 토큰 발급.
+        //
+        // B-1) await SignUpAsync()실패.
+        // B-2) 진행도 동기화만 포기. 게임 진행 자체는 가능.
+        if (_account == null && !await SignUpAsync()) 
             return null;
 
+        // 계정은 있는데 토큰이 없음/만료:
+        // - 재 로그인 및 새 토큰 발급.
         return await LoginAsync();
     }
 
@@ -59,7 +76,7 @@ public sealed class GuestSession
 
     private async Task<bool> SignUpAsync()
     {
-        // 이 두 값이 계정의 전부다 — account.json을 잃으면 계정도 잃는다(게스트의 계약).
+        // 이 두 값만으로 계정 표현. (게스트는 account.json을 잃으면 계정 상실. 찾을 방법 없음.)
         string username = "guest-" + Guid.NewGuid().ToString("N").Substring(0, 12);
         string password = Guid.NewGuid().ToString("N");
 
@@ -91,10 +108,13 @@ public sealed class GuestSession
 
         if (!result.Ok)
         {
-            // 401 = 서버에서 계정이 사라졌다(DB 재생성 등). 버리면 다음 동기화가 새 게스트로 선다.
+            // 401 = 서버에서 계정이 사라졌다(DB 재생성 등).
+            // 클라는 계정이 있다고 알고있음에도 서버가 거부된 상황
+            // e.g.) 개발 중 DB날려먹음. 테스트 DB 재생성. 서버 데이터 초기화 등
+            // 따라서 account.json을 신뢰하지 않고 버림. 다음에 동기화 시 새 게스트.
             if (result.Status == 401)
             {
-                Debug.LogWarning($"[계정] '{_account.Username}' 로그인 거부 — 계정을 버린다.");
+                Debug.LogWarning($"[계정] '{_account.Username}' 로그인 거부 - 계정을 버린다.");
                 _account = null;
                 File.Delete(_accountPath);
             }

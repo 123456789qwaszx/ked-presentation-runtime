@@ -373,7 +373,7 @@ public class VNAppBootstrap : MonoBehaviour
             _saveCoordinator.GetResumePoint);
     }
 
-    // 저장·동기화 스택 (M7). 로컬이 진실(파일), 서버는 사본(큐로 민다). 슬롯 1 고정.
+    // 저장·동기화 스택. 로컬이 진실(파일), 서버는 사본(큐로 민다). 슬롯 1 고정.
     private SaveCoordinator CreateSaveCoordinator()
     {
         string saveRoot = Path.Combine(Application.persistentDataPath, "saves");
@@ -468,8 +468,7 @@ public class VNAppBootstrap : MonoBehaviour
     {
         OpenInitialScreen();
 
-        // 지난 실행이 남긴 큐를 민다 (M7 — 동기화 트리거는 "커밋 시"와 "앱 시작 시" 둘뿐).
-        // 결과를 기다릴 이유가 없고, 실패해도 큐는 남는다.
+        // 지난 실행이 남긴 큐를 민다 (동기화 트리거는 "커밋 시"와 "앱 시작 시" 둘뿐).
         _ = _saveCoordinator.SyncPendingAsync();
     }
     

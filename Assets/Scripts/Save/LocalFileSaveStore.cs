@@ -1,6 +1,7 @@
 using System.IO;
 
-// {directory}/slot{n}.json (M7). 경로는 조립 시점에 문자열로 받는다 — Unity에 안 기댄다.
+// {directory}/slot{n}.json.
+// 경로는 조립 시점에 문자열로 받음.
 public sealed class LocalFileSaveStore : ISaveStore
 {
     private readonly string _directory;
@@ -17,7 +18,9 @@ public sealed class LocalFileSaveStore : ISaveStore
     {
         string json = AtomicFile.ReadAllTextOrNull(PathOf(slotNo));
 
-        return json == null ? null : SaveJson.Deserialize<LocalSaveFile>(json);
+        return json == null 
+            ? null 
+            : SaveJson.Deserialize<LocalSaveFile>(json);
     }
 
     public void Delete(int slotNo) =>
