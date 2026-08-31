@@ -41,12 +41,12 @@ namespace Ked.Progression
 
                 if (!blocking.IsConstructed)
                 {
-                    shownOrLocked.Add(ResolvedOption.Shown(option));
+                    shownOrLocked.Add(ResolvedOption.Shown(option, i));
                     anySelectable = true;
                     continue;
                 }
 
-                shownOrLocked.Add(ResolvedOption.Locked(option, blocking));
+                shownOrLocked.Add(ResolvedOption.Locked(option, i, blocking));
             }
 
             if (anySelectable)

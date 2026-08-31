@@ -40,9 +40,6 @@ public sealed class ProgressionYarnBridge
     /// </summary>
     public void BeginChapter(YarnProject project)
     {
-        if (_storage == null || project == null)
-            return;
-
         _storage.Clear();
 
         // 초기값 선언(<<declare>>)

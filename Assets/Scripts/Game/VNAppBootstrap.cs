@@ -1,5 +1,4 @@
 using System.IO;
-using Ked.Save;
 using UnityEngine;
 using UnityEngine.Serialization;
 using Yarn.Unity;
@@ -364,49 +363,41 @@ public class VNAppBootstrap : MonoBehaviour
         // 진행 층이 Yarn 변수 저장소에 하는 일 전부 — [2] 심기(단방향)와 [3] 챕터 되돌리기.
         ProgressionYarnBridge yarnBridge = new(dialogueRunner.VariableStorage);
 
-        _progressionDriver = new ProgressionDriver(_episodePlayer, _progressionOptions, yarnBridge);
+        _saveCoordinator = CreateSaveCoordinator();
 
-        BootstrapSaveStack();
+        _progressionDriver = new ProgressionDriver(
+            _episodePlayer, _progressionOptions, yarnBridge, _saveCoordinator);
 
         _progressionLauncher = new ProgressionLauncher(
             _progressionDriver, dialogueRunner, progressionChapterJson,
             _saveCoordinator.GetResumePoint);
     }
 
-    // 저장·동기화 스택 (M7). 로컬이 진실(파일), 서버는 사본(큐로 민다).
-    // 조립만 여기서 하고 규칙은 전부 Save/ 아래 각자에게 있다.
-    private void BootstrapSaveStack()
+    // 저장·동기화 스택 (M7). 로컬이 진실(파일), 서버는 사본(큐로 민다). 슬롯 1 고정.
+    private SaveCoordinator CreateSaveCoordinator()
     {
         string saveRoot = Path.Combine(Application.persistentDataPath, "saves");
 
         LocalFileSaveStore localStore = new(saveRoot);
         SyncQueue syncQueue = new(Path.Combine(saveRoot, "sync_queue.json"));
 
-        ServerSyncSaveStore serverSync = null;
+        if (string.IsNullOrWhiteSpace(serverBaseUrl))
+            return new SaveCoordinator(localStore, syncQueue, server: null, slotNo: 1);
 
-        if (!string.IsNullOrWhiteSpace(serverBaseUrl))
-        {
-            ServerApi serverApi = new(serverBaseUrl);
+        ServerApi serverApi = new(serverBaseUrl);
+        GuestSession guestSession = new(serverApi, Path.Combine(Application.persistentDataPath, "account.json"));
+        ChapterVersionResolver versionResolver = new(serverApi, progressionChapterJson);
 
-            GuestSession guestSession = new(
-                serverApi, Path.Combine(Application.persistentDataPath, "account.json"));
+        // devices.device_key 는 VARCHAR(64). deviceUniqueIdentifier 가 플랫폼에 따라 더 길 수 있다.
+        string deviceKey = SystemInfo.deviceUniqueIdentifier;
 
-            ChapterVersionResolver versionResolver = new(serverApi, progressionChapterJson);
+        if (deviceKey.Length > 64)
+            deviceKey = deviceKey.Substring(0, 64);
 
-            // deviceKey는 devices 테이블(VARCHAR 64)의 "설치 고유값".
-            // deviceUniqueIdentifier가 플랫폼에 따라 64자를 넘을 수 있어 자른다.
-            string deviceKey = SystemInfo.deviceUniqueIdentifier;
+        ServerSyncSaveStore serverSync = new(
+            serverApi, guestSession, syncQueue, versionResolver, localStore, deviceKey);
 
-            if (deviceKey.Length > 64)
-                deviceKey = deviceKey.Substring(0, 64);
-
-            serverSync = new ServerSyncSaveStore(
-                serverApi, guestSession, syncQueue, versionResolver, localStore, deviceKey);
-        }
-
-        // 슬롯 1 고정 — 슬롯 UI는 뒤 M의 일이고, 서버는 1~127을 이미 받는다(D-008).
-        _saveCoordinator = new SaveCoordinator(localStore, syncQueue, serverSync, slotNo: 1);
-        _saveCoordinator.Attach(_progressionDriver);
+        return new SaveCoordinator(localStore, syncQueue, serverSync, slotNo: 1);
     }
 
     private void BootstrapPlaybackControls()
