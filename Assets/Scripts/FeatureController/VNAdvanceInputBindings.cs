@@ -25,6 +25,8 @@ public sealed class VNAdvanceInputBindings
 
     public KeyCode loadProgression = KeyCode.Alpha4;
 
+    public KeyCode newGame = KeyCode.Alpha5;
+
     public bool IsRapidSkipHeld() => IsHeld(rapidSkipLeft) || IsHeld(rapidSkipRight);
     public bool IsSpeedUpHeld() => IsHeld(speedUpHold);
     public bool IsSpeedUpTogglePressed() => IsPressed(speedUpToggle);
@@ -34,8 +36,9 @@ public sealed class VNAdvanceInputBindings
     public bool IsRunYarnPressed() => IsPressed(runYarn);
     public bool IsRunEpisodeChainPressed() => IsPressed(runEpisodeChain);
     public bool IsLoadProgressionPressed() => IsPressed(loadProgression);
+    public bool IsNewGamePressed() => IsPressed(newGame);
 
-    
+
     private static bool IsHeld(KeyCode key)
     {
         return key != KeyCode.None && Input.GetKey(key);

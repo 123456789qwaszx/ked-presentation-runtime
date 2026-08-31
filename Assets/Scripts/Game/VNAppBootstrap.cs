@@ -433,7 +433,8 @@ public class VNAppBootstrap : MonoBehaviour
             _episodePlayer,
             yarnEntryKey,
             debugEpisodeChain,
-            _progressionLauncher);
+            _progressionLauncher,
+            _saveCoordinator);
     }
     
     private void BootstrapScreenBindings()

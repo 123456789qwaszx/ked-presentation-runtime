@@ -9,4 +9,7 @@ public interface ISaveStore
 
     // 없으면 null.
     LocalSaveFile Load(int slotNo);
+
+    // 없어도 조용하다.
+    void Delete(int slotNo);
 }

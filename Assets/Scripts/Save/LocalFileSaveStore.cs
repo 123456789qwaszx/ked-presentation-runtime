@@ -20,6 +20,9 @@ public sealed class LocalFileSaveStore : ISaveStore
         return json == null ? null : SaveJson.Deserialize<LocalSaveFile>(json);
     }
 
+    public void Delete(int slotNo) =>
+        File.Delete(PathOf(slotNo));
+
     private string PathOf(int slotNo) =>
         Path.Combine(_directory, $"slot{slotNo}.json");
 }

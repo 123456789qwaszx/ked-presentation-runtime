@@ -44,6 +44,25 @@ public sealed class SaveCoordinator : IProgressionReporter
     public Task SyncPendingAsync() =>
         _server == null ? Task.CompletedTask : _server.TrySyncAsync(_slotNo);
 
+    // 새 게임 . 밀 수 있는 건 밀고, 로컬을 비운다. 다음 커밋의 동기화가 서버에 새 회차를 만듬.
+    // 아직 이전 회차는 서버에 열린 채 남는다 (회차 종료 API 는 타이틀 UI 만들 때 같이.)
+    public async Task StartNewGameAsync()
+    {
+        if (_server != null)
+            await _server.FlushAsync(_slotNo);
+
+        int dropped = _queue.PendingCount;
+
+        if (dropped > 0)
+            Debug.LogWarning($"[저장] 새 게임 — 서버에 못 보낸 이력 {dropped}건을 버린다.");
+
+        _queue.Reset();
+        _localStore.Delete(_slotNo);
+        _basePlaySeconds = 0;
+
+        Debug.Log("[저장] 새 게임 — 세이브·큐 초기화.");
+    }
+
     public void ReportChoiceCommitted(ChoiceCommitReport report)
     {
         string now = NowUtc();

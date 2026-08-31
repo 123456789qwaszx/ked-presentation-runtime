@@ -15,7 +15,8 @@ public sealed class ServerSyncSaveStore
     private readonly ISaveStore _localStore;
     private readonly string _deviceKey;
 
-    private bool _syncing;
+    // 지금 나가 있는 동기화. 하나만 돈다 — 겹치면 "끝나고 한 번 더"로 접는다.
+    private Task _inFlight;
     private bool _syncAgain;
 
     // 409 — 다른 기기가 먼저 저장했다. M7은 알리기만 하고 큐를 보존한다. 해소(폐기 vs force)는 M8.
@@ -37,18 +38,37 @@ public sealed class ServerSyncSaveStore
         _deviceKey = deviceKey;
     }
 
-    // 겹쳐 불러도 안전하다 — 도는 중이면 "끝나고 한 번 더"만 표시한다.
-    // 이 메서드는 기다리는 이 없이(fire-and-forget) 불리므로 예외를 밖으로 내지 않는다.
-    public async Task TrySyncAsync(int slotNo)
+    // 겹쳐 불러도 안전하다 — 도는 중이면 "끝나고 한 번 더"만 표시하고 지금 것을 돌려준다.
+    // 기다리는 이 없이(fire-and-forget) 불리는 자리가 많아 예외를 밖으로 내지 않는다.
+    public Task TrySyncAsync(int slotNo)
     {
-        if (_syncing)
+        if (_inFlight != null)
         {
             _syncAgain = true;
-            return;
+            return _inFlight;
         }
 
-        _syncing = true;
+        Task run = RunAsync(slotNo);
 
+        // 첫 await 전에 끝났으면(보낼 것이 없어 곧장 돌아온 경우) finally 가 이미 지나갔다 — 걸어 두지 않는다.
+        if (!run.IsCompleted)
+            _inFlight = run;
+
+        return run;
+    }
+
+    // 큐가 나갈 수 있는 만큼 나가고 조용해질 때까지 (새 게임 직전). 진행이 멈춰 있어 새 커밋은 없다.
+    public async Task FlushAsync(int slotNo)
+    {
+        if (_inFlight == null)
+            await TrySyncAsync(slotNo);
+
+        while (_inFlight != null)
+            await _inFlight;
+    }
+
+    private async Task RunAsync(int slotNo)
+    {
         try
         {
             await SyncOnceAsync(slotNo);
@@ -59,7 +79,7 @@ public sealed class ServerSyncSaveStore
         }
         finally
         {
-            _syncing = false;
+            _inFlight = null;
 
             if (_syncAgain)
             {

@@ -10,7 +10,7 @@ using System.Collections.Generic;
 public sealed class SyncQueue
 {
     private readonly string _path;
-    private readonly SyncQueueFile _file;
+    private SyncQueueFile _file;
 
     public SyncQueue(string path)
     {
@@ -22,6 +22,15 @@ public sealed class SyncQueue
 
     public long? PlaythroughId => _file.PlaythroughId;
     public long? BaseRevision => _file.BaseRevision;
+    public int PendingCount => _file.PendingChoices.Count + _file.PendingEvents.Count;
+
+    // 새 회차. PlaythroughId 없음/seq 1부터/revision 없음 - 다음 동기화가 회차를 새로 만든다.
+    // 남아 있던 항목은 이전 회차 것이라 함께 버려짐
+    public void Reset()
+    {
+        _file = new SyncQueueFile();
+        Persist();
+    }
 
     public void SetPlaythroughId(long playthroughId)
     {

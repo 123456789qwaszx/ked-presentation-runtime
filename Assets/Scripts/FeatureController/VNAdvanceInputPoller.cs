@@ -16,8 +16,11 @@ public sealed class VNAdvanceInputPoller : MonoBehaviour
 
     private string[] _debugEpisodeChain;
 
-    // 진행 층을 시작 경로.
+    // 진행 층 시작 경로.
     private ProgressionLauncher _progressionLauncher;
+
+    // 세이브 정리.
+    private SaveCoordinator _saveCoordinator;
 
     private bool _rapidSkipHeld;
     private bool _speedUpHeld;
@@ -29,7 +32,8 @@ public sealed class VNAdvanceInputPoller : MonoBehaviour
         EpisodePlayer episodePlayer,
         string yarnEntryKey,
         string[] debugEpisodeChain,
-        ProgressionLauncher progressionLauncher)
+        ProgressionLauncher progressionLauncher,
+        SaveCoordinator saveCoordinator)
     {
         _dialogueAdvanceDispatcher = dialogueAdvanceDispatcher;
         _featureController = featureController;
@@ -38,6 +42,7 @@ public sealed class VNAdvanceInputPoller : MonoBehaviour
         _yarnEntryKey = yarnEntryKey;
         _debugEpisodeChain = debugEpisodeChain;
         _progressionLauncher = progressionLauncher;
+        _saveCoordinator = saveCoordinator;
     }
 
     private void Update()
@@ -53,6 +58,7 @@ public sealed class VNAdvanceInputPoller : MonoBehaviour
         PollDebugRunYarn();
         PollDebugRunEpisodeChain();
         PollDebugRunProgression();
+        PollDebugNewGame();
 
         _featureController.Tick();
     }
@@ -102,7 +108,7 @@ public sealed class VNAdvanceInputPoller : MonoBehaviour
         Debug.Log("[연결] 사슬 끝.");
     }
 
-    // 싣고·대조하고·모는 것은 런처 담당.
+    // 싣고·대조하고·모는 것은 런처 담당. 세이브가 있으면 이어하기, 없으면 새 게임.
     private void PollDebugRunProgression()
     {
         // 선택지 입력은 여기로 안 옴. VNOptionItem 이 Selectable이기에 EventSystem 사용.
@@ -110,11 +116,27 @@ public sealed class VNAdvanceInputPoller : MonoBehaviour
             StartProgression();
     }
 
+    // 세이브를 버리고 새 회차로 (M7). 순서가 뜻이다 — 비운 뒤에 시작해야 런처가 새 게임으로 본다.
+    private void PollDebugNewGame()
+    {
+        if (_bindings.IsNewGamePressed())
+            StartNewGame();
+    }
+
     private async void StartProgression()
     {
         if (_progressionLauncher == null)
             return;
 
+        await _progressionLauncher.LaunchAsync();
+    }
+
+    private async void StartNewGame()
+    {
+        if (_progressionLauncher == null || _progressionLauncher.IsRunning)
+            return;
+
+        await _saveCoordinator.StartNewGameAsync();
         await _progressionLauncher.LaunchAsync();
     }
 
