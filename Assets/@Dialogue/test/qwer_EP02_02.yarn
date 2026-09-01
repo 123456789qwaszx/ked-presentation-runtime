@@ -5,9 +5,10 @@ title: EP02_02
 
 라루: 그건 안 돼. 휴가 내면 월급 깍이고, 상사한테 찍혀. #line:ln_8ww00afu
 
-<<if $power > 2>>
+// [3]은 챕터 수명 — EP01의 장면_1에서 세운 값이 에피소드를 넘어 읽히는지 확인.
+<<if $__t1_sf_qtqz9ujy_능력이바뀌 > 2>>
     라루: 좋은 선택이야. 쉬엄쉬엄해야지. #line:ln_2ujaw3r7
-<<elseif $int >= 0>>
+<<else>>
     라루: 성실하구나. #line:ln_67c7wu4v
 <<endif>>
 ===

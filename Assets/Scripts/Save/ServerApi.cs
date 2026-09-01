@@ -41,7 +41,7 @@ public sealed class ServerApi
         using (var request = new UnityWebRequest(_baseUrl + path, method))
         {
             request.downloadHandler = new DownloadHandlerBuffer();
-            request.timeout = 1;
+            request.timeout = 10;
 
             if (body != null)
             {

@@ -360,7 +360,7 @@ public class VNAppBootstrap : MonoBehaviour
         _progressionOptions = new ChapterOptionsView(
             uiManager.GetUI<VNDefaultOptionsPanel>(), optionItem);
 
-        // 진행 층이 Yarn 변수 저장소에 하는 일 전부 — [2] 심기(단방향)와 [3] 챕터 되돌리기.
+        // 진행 층이 Yarn 변수 저장소에 하는 일 전부 — [3] 챕터 되돌리기.
         ProgressionYarnBridge yarnBridge = new(dialogueRunner.VariableStorage);
 
         _saveCoordinator = CreateSaveCoordinator();

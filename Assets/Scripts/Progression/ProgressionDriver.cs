@@ -167,7 +167,7 @@ public sealed class ProgressionDriver
     {
         Debug.Log($"[진행] {what} 시작 — \"{nodeName}\"");
 
-        SyncYarnVariables();
+        SyncChapterVariables();
 
         // 첫 진입 이후로는 백로그를 유지해야 하기 때문에 구분.
         if (_firstEpisode)
@@ -192,29 +192,20 @@ public sealed class ProgressionDriver
         _options.Cancel();
     }
 
-    // Yarn 변수의 두 계층을 이 회차의 상태로 복원.
+    // "[3] 연출 실행 상태"는 챕터 수명 — 챕터가 바뀔 때만 초기값으로 되돌린다.
+    // YarnVariableCheckpoint.Capture()보다 먼저 실행되어야 리플레이 정상 재생.
     //
-    // 순서 중요.
-    // BeginChapter의 Clear()는 계층을 가리지 않으므로 [2]를 먼저 심으면 바로 지워짐.
-    // 둘 다 YarnVariableCheckpoint.Capture()보다 먼저 실행되어야 리플레이 정상 재생.
-    private void SyncYarnVariables()
+    // [2]는 여기 오지 않는다. 진행 코어만 알고, 대사에서 읽는 것도 금지 —
+    // 스탯 분기는 그래프 간선으로 올린다.
+    private void SyncChapterVariables()
     {
-        // "[3] 연출 실행 상태"는 챕터 수명.
-        // 챕터가 바뀌는 이 자리에서만 초기값 선언.(다른 챕터의 것은 무시)
-        if (!string.Equals(_yarnChapterId, _chapter.ChapterId, StringComparison.Ordinal))
-        {
-            _yarnBridge.BeginChapter(_yarnProject);
-            _yarnChapterId = _chapter.ChapterId;
+        if (string.Equals(_yarnChapterId, _chapter.ChapterId, StringComparison.Ordinal))
+            return;
 
-            Debug.Log($"[진행] Yarn 변수 초기화 — 챕터 \"{_chapter.ChapterId}\"");
-        }
+        _yarnBridge.BeginChapter(_yarnProject);
+        _yarnChapterId = _chapter.ChapterId;
 
-        // "[2] 에피소드 상태"를 대사가 읽을 수 있게 심는다. 진행 코어가 쥔 값이라
-        // 매 노드마다 다시 심고, Yarn에서 바뀐 값은 돌려받지 않음.
-        //
-        // 정의를 함께 넘기는 이유: 깃발을 숫자로 심으면 Yarn 저장소가 그 변수를
-        // float으로 도장해, bool로 선언된 변수가 그 뒤로 안 읽힘.
-        _yarnBridge.PublishStats(_chapter.Stats, _state.Stats);
+        Debug.Log($"[진행] Yarn 변수 초기화 — 챕터 \"{_chapter.ChapterId}\"");
     }
 
     private string Describe() =>
