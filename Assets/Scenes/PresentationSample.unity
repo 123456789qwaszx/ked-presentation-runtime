@@ -3542,7 +3542,7 @@ MonoBehaviour:
   debugEpisodeChain:
   - Story_new01
   - Story_new02
-  progressionChapterJson: {fileID: 4900000, guid: 1220671ebc3165547bbbd3f140c473ca, type: 3}
+  progressionChapterJson: {fileID: 4900000, guid: d256bcdce1b8afb41ba14c16cc873ff1, type: 3}
   serverBaseUrl: http://localhost:8080
   vnAdvanceInputPoller: {fileID: 1315566987}
   rigPrefab: {fileID: 2306115306432438348, guid: c7b3ab204cabea145aff7affa87d3d9d, type: 3}
@@ -9240,6 +9240,7 @@ MonoBehaviour:
     runYarn: 50
     runEpisodeChain: 51
     loadProgression: 52
+    newGame: 53
 --- !u!4 &1315566988
 Transform:
   m_ObjectHideFlags: 0

@@ -1,0 +1,60 @@
+{
+  "ChapterId": "qwer_scene",
+  "DisplayName": "qwer (장면 묶음 테스트)",
+  "StartEpisodeId": "EP01",
+  "Stats": [
+    { "Key": "int", "DisplayName": "성실성", "Type": "Number", "Initial": 0, "Minimum": 0, "Maximum": 5 },
+    { "Key": "power", "DisplayName": "요령있음", "Type": "Number", "Initial": 0, "Minimum": 0, "Maximum": 5 }
+  ],
+  "Nodes": [
+    {
+      "EpisodeId": "EP01",
+      "Title": "사무실 - 도착",
+      "DialogueEntryId": "SC_EP01",
+      "SceneId": "사무실",
+      "EventKey": "",
+      "NextOptions": [
+        { "TargetEpisodeId": "EP02_01", "ChoiceLabel": "성실하게 (Via 있음, 같은 장면)", "VisibleConditions": [], "Conditions": [], "LockedReasonText": "", "ViaNodeId": "SC_VIA_1", "StatChanges": [ { "Key": "int", "Amount": 2, "Op": "Add" } ] },
+        { "TargetEpisodeId": "EP02_02", "ChoiceLabel": "요령있게 (Via 없음, 같은 장면)", "VisibleConditions": [], "Conditions": [], "LockedReasonText": "", "ViaNodeId": "", "StatChanges": [ { "Key": "power", "Amount": 2, "Op": "Add" } ] }
+      ]
+    },
+    {
+      "EpisodeId": "EP02_01",
+      "Title": "사무실 - 성실 루트",
+      "DialogueEntryId": "SC_EP02_01",
+      "SceneId": "사무실",
+      "EventKey": "",
+      "NextOptions": [
+        { "TargetEpisodeId": "EP03", "ChoiceLabel": "복도로 (장면 나감)", "VisibleConditions": [], "Conditions": [], "LockedReasonText": "", "ViaNodeId": "", "StatChanges": [] }
+      ]
+    },
+    {
+      "EpisodeId": "EP02_02",
+      "Title": "사무실 - 요령 루트",
+      "DialogueEntryId": "SC_EP02_02",
+      "SceneId": "사무실",
+      "EventKey": "",
+      "NextOptions": [
+        { "TargetEpisodeId": "EP03", "ChoiceLabel": "복도로 (Via 있음, 장면 나감)", "VisibleConditions": [], "Conditions": [], "LockedReasonText": "", "ViaNodeId": "SC_VIA_2", "StatChanges": [] }
+      ]
+    },
+    {
+      "EpisodeId": "EP03",
+      "Title": "복도",
+      "DialogueEntryId": "SC_EP03",
+      "SceneId": "복도",
+      "EventKey": "",
+      "NextOptions": [
+        { "TargetEpisodeId": "EP04", "ChoiceLabel": "교실로 (같은 장면)", "VisibleConditions": [], "Conditions": [], "LockedReasonText": "", "ViaNodeId": "", "StatChanges": [] }
+      ]
+    },
+    {
+      "EpisodeId": "EP04",
+      "Title": "복도 - 끝",
+      "DialogueEntryId": "SC_EP04",
+      "SceneId": "복도",
+      "EventKey": "",
+      "NextOptions": []
+    }
+  ]
+}
