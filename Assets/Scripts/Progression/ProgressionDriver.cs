@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Ked.Progression;
 using UnityEngine;
@@ -44,22 +45,32 @@ public sealed class ProgressionDriver
         IChapterOptionsView options,
         VNLinePresentationState seek,
         RollbackHistory rollbackHistory,
+        BacklogRecorder backlog,
+        ChoiceHistory choiceHistory,
         ProgressionYarnBridge yarnBridge,
         IProgressionReporter reporter)
     {
         _options = options;
         _yarnBridge = yarnBridge;
+        _backlog = backlog;
 
         _scenes = new SceneRunner(
-            player, options, seek, rollbackHistory, reporter, yarnBridge.Capture, () => _stopRequested);
+            player, options, seek, rollbackHistory, reporter, backlog, choiceHistory,
+            yarnBridge.Capture, () => _stopRequested);
     }
+
+    private readonly BacklogRecorder _backlog;
 
     // 이어하기의 [3] 덤프 — 첫 BeginChapter 뒤에 한 번 덮고 버린다.
     private YarnVariableSnapshot _restoreVariables;
 
+    // 이어하기의 백로그(이전 장면들) — 첫 장면 진입 전에 되살리고 버린다.
+    private IReadOnlyList<DialogueLogEntry> _restoreBacklog;
+
     public async Task RunAsync(
         YarnProject project, ChapterProgression chapter, ProgressionState entryState,
-        YarnVariableSnapshot restoreVariables = null)
+        YarnVariableSnapshot restoreVariables = null,
+        IReadOnlyList<DialogueLogEntry> restoreBacklog = null)
     {
         if (IsRunning)
         {
@@ -74,6 +85,7 @@ public sealed class ProgressionDriver
         _yarnProject = project;
         _yarnChapterId = null;
         _restoreVariables = restoreVariables;
+        _restoreBacklog = restoreBacklog;
 
         try
         {
@@ -104,7 +116,17 @@ public sealed class ProgressionDriver
     private async Task<bool> RunChapterAsync()
     {
         // 백로그는 회차 스코프 — 첫 장면 진입에서만 비운다.
+        // 이어하기면 비우는 대신 이전 장면들의 백로그를 되살린다. 현재 장면의 라인은 재생이 다시 적는다.
         bool isNewSession = true;
+
+        if (_restoreBacklog != null)
+        {
+            _backlog.Restore(_restoreBacklog);
+            isNewSession = false;
+
+            Debug.Log($"[진행] 백로그 복원 — {_restoreBacklog.Count}개");
+            _restoreBacklog = null;
+        }
 
         while (true)
         {

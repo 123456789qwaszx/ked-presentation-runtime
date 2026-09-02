@@ -61,6 +61,8 @@ public sealed class SceneRunner
     private readonly VNLinePresentationState _seek;
     private readonly RollbackHistory _rollbackHistory;
     private readonly IProgressionReporter _reporter;
+    private readonly BacklogRecorder _backlog;
+    private readonly ChoiceHistory _choiceHistory;
     private readonly Func<YarnVariableSnapshot> _captureVariables;
     private readonly Func<bool> _isStopRequested;
 
@@ -77,9 +79,13 @@ public sealed class SceneRunner
         VNLinePresentationState seek,
         RollbackHistory rollbackHistory,
         IProgressionReporter reporter,
+        BacklogRecorder backlog,
+        ChoiceHistory choiceHistory,
         Func<YarnVariableSnapshot> captureVariables,
         Func<bool> isStopRequested)
     {
+        _backlog = backlog;
+        _choiceHistory = choiceHistory;
         _captureVariables = captureVariables;
         _player = player;
         _options = options;
@@ -107,6 +113,10 @@ public sealed class SceneRunner
         Debug.Log($"[장면] 진입 — {chapter.SceneIdOf(rootEpisodeId)} @ {rootEpisodeId}");
 
         await _player.EnterSceneAsync(root.DialogueEntryId, isNewSession);
+
+        // 진입 스냅샷 — 장면 기록의 앞부분. 아직 라인이 없으니 지금 [3]이 곧 진입값이다.
+        _reporter.ReportSceneEntered(new SceneEntryReport(
+            chapter.ChapterId, entryState, _captureVariables(), _backlog.NextSerial));
 
         string episodeId = rootEpisodeId;
 
@@ -299,12 +309,16 @@ public sealed class SceneRunner
 
         Debug.Log($"[장면] 확정 — 선택 {choices.Count}개, 시청 {watched.Count}개 → {state.CurrentEpisodeId}");
 
+        // 백로그도 여기서 굽는다 — 다음 장면 입장에서 "이전 장면들"이고, 다음 장면의 첫 순번은 지금 NextSerial.
         _reporter.ReportSceneCommitted(new SceneCommitReport(
             chapter.ChapterId,
             choices,
+            _choiceHistory.CreateChoiceSnapshot(),
             watched,
             state,
             variables,
+            backlog: new List<DialogueLogEntry>(_backlog.Entries),
+            backlogSerialStart: _backlog.NextSerial,
             chapterCompleted: outcome == SceneRunOutcome.ChapterEnded));
 
         return new SceneRunResult(outcome, state);

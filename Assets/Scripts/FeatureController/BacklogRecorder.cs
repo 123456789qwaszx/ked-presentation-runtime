@@ -51,6 +51,38 @@ public sealed class BacklogRecorder
         _sceneStartSerial = 0;
     }
 
+    // 다음 라인이 받을 순번. 세이브가 "이 장면의 첫 라인 순번"으로 적어 둔다 — 되감기의 자르는 자리.
+    public int NextSerial => _nextSerial;
+
+    // 세이브에서 되살린다 — 이전 장면들의 항목. 순번은 저장된 것을 그대로 쓰고, 다음 순번은 그 뒤를 잇는다.
+    // 이 뒤에 장면 진입이 MarkSceneStart를 찍고, 현재 장면의 라인은 Load 시크가 다시 적는다.
+    public void Restore(IReadOnlyList<DialogueLogEntry> entries)
+    {
+        _entries.Clear();
+
+        if (entries != null)
+        {
+            for (int i = 0; i < entries.Count; i++)
+                Add(entries[i]);
+        }
+
+        _nextSerial = _entries.Count == 0 ? 0 : _entries[^1].lineSerial + 1;
+        _sceneStartSerial = _nextSerial;
+    }
+
+    // 되감기 — 순번 경계 뒤의 항목을 걷어낸다(이전 장면 루트 점프).
+    public void TruncateFromSerial(int serial)
+    {
+        for (int i = _entries.Count - 1; i >= 0; i--)
+        {
+            if (_entries[i].lineSerial >= serial)
+                _entries.RemoveAt(i);
+        }
+
+        _nextSerial = serial;
+        _sceneStartSerial = serial;
+    }
+
     // 장면 진입. 이 뒤에 적히는 라인의 순번 - 시작 순번 = 그 장면의 롤백 포인트 historyIndex.
     // 롤백 포인트가 같은 순간에 비워지므로 두 좌표계가 0에서 나란히 출발한다.
     public void MarkSceneStart()

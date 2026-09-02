@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Ked.Progression;
 using UnityEngine;
@@ -57,6 +58,7 @@ public sealed class ProgressionLauncher
         // 세이브(장면 개념 전의 구형식)나 챕터를 끝낸 세이브는 이어갈 것이 없으니 새로 시작한다.
         ProgressionResumePoint resume = _resumeProvider();
         YarnVariableSnapshot variables = null;
+        IReadOnlyList<DialogueLogEntry> backlog = null;
 
         if (resume != null)
         {
@@ -81,6 +83,7 @@ public sealed class ProgressionLauncher
                 chapter = saved;
                 state = ProgressionState.Restore(saved, resume.EpisodeId, resume.Stats);
                 variables = resume.Variables;
+                backlog = resume.Backlog;
 
                 Debug.Log(
                     $"[진행] 재개 — {resume.ChapterId}/{resume.EpisodeId}, [3] {variables?.Count ?? 0}개");
@@ -89,6 +92,6 @@ public sealed class ProgressionLauncher
 
         // Yarn 변수를 세우는 일은 드라이버가 한다 — 챕터가 바뀔 때마다 다시 세워야 하고,
         // 챕터가 바뀌는 것을 아는 쪽은 흐름을 쥔 드라이버뿐이다. 덤프도 그 뒤에 덮는다.
-        await _driver.RunAsync(_dialogueRunner.YarnProject, chapter, state, variables);
+        await _driver.RunAsync(_dialogueRunner.YarnProject, chapter, state, variables, backlog);
     }
 }

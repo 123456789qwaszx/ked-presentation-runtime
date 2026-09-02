@@ -24,6 +24,9 @@ public sealed class SyncQueue
     }
 
     public long? PlaythroughId => _file.PlaythroughId;
+
+    // 다음 선택이 받을 seq. 체크포인트가 "여기까지의 마지막 seq"를 적어 두는 데 쓴다(되감기 표식 재료).
+    public int NextSeq => _file.NextSeq;
     public long? BaseRevision => _file.BaseRevision;
     public int PendingCount => _file.PendingChoices.Count + _file.PendingEvents.Count;
 

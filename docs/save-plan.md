@@ -208,5 +208,4 @@ v1 §2의 결론 그대로다. 즐겨찾기가 "장면 진입 스냅샷 + 경로
 
 ## 9. 진행 상태
 
-- 2026-09-02: S1(v1) 코드 작성 중 v2로 전환. 그 코드는 F1의 첫 조각으로 그대로 쓴다(`ProgressionDriver.cs`에
-  `using System.Collections.Generic;` 한 줄이 빠져 빌드 오류 2개 — F1 착수 시 정리).
+- 2026-09-02: **F1 작성됨** (Unity 확인 남음). 회차 파일에 `PlaythroughId`·`ForkedFrom(null)`·`Scenes[]`(진입 스냅샷 + 경로 + Yarn 선택 + 순번 경계)·`Backlog[]`·`InheritedPlaySeconds`/`OwnPlaySeconds`(합은 `PlaySeconds`). `IProgressionReporter.ReportSceneEntered` 신설 — SceneRunner가 장면 진입 직후 진입 스냅샷을 보고하고, fold에서 경로·Yarn 선택을 붙여 장면 기록으로 접는다. 재개 시 백로그 복원. 파일 이름은 아직 `slot1.json`.

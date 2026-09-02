@@ -371,6 +371,8 @@ public class VNAppBootstrap : MonoBehaviour
             _progressionOptions,
             _linePresentationAdvanceState,
             _rollbackHistory,
+            _backlogRecorder,
+            _choiceHistory,
             yarnBridge,
             _saveCoordinator);
 
