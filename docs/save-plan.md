@@ -111,7 +111,7 @@ v1 §2의 결론 그대로다. 즐겨찾기가 "장면 진입 스냅샷 + 경로
 재실행을 전제로 한다. `StageState` 복원(A)은 즉시 복원·썸네일이 필요해지는 날 되살리기 반쪽을 만들 때
 다시 본다 — 데이터가 겹쳐 길이 막히지 않는다. 표적을 못 찾으면 그 장면 루트에서 시작하고 알린다.
 
-## 5. 서버 측 요구 (spring-prepare에 넘김 — F6, 별도 논의)
+## 5. 서버 측 요구 (spring-prepare에 넘김 — F6, 별도 논의) — 인수인계 사양서: `docs/server-handoff.md`
 
 | # | 요구 | 근거 |
 |---|---|---|
@@ -131,8 +131,8 @@ v1 §2의 결론 그대로다. 즐겨찾기가 "장면 진입 스냅샷 + 경로
 | F2 | 갈래 로드 런타임 | Load 시크(`BeginLoadSeek`·`LoadPlan`·`RestoreChoices`·퇴행·실측) + 회차 생성·물려받기. 먼저 "이력 장면 루트로"(경로 없음)로 검증 | F1 |
 | F3 | 즐겨찾기 | 현재 라인에서 캡처(옵션 박스 중 허용) → `bookmarks.json`. 즐겨찾기 로드 = 경로 있는 갈라지기 | F2 |
 | F4 | 이력·백로그 통합 | 백로그의 이전 장면 항목 → "여기서 갈라져 다시 보기"(장면 루트). 회고적 라인 갈라지기는 데이터만 준비, UI 후속 | F2 |
-| F5 | UI | 즐겨찾기 목록(라벨·미리보기·시각·출처), 이력 화면(장면 목록, 접힌 갈래), 로딩 화면(F2 실측 뒤) | F3·F4 |
-| F6 | 서버 | R1~R5. 보류 — 별도 논의 | F2·F3, 서버 |
+| F5 | UI | 즐겨찾기 목록(라벨·미리보기·시각·출처), 이력 화면(장면 목록, 접힌 갈래) | F3·F4 — **보류(소유자 일괄)**. 데이터 API는 준비됨 |
+| F6 | 서버(M8-B) | B-1~B-6 — 서버 M8-A 완료 후 착수. 계약 단절 구간이라 먼저 시작하지 않는다 | F2·F3, 서버 M8-A |
 
 ### F1. 이력 모델 (동작 불변)
 
@@ -177,6 +177,21 @@ v1 §2의 결론 그대로다. 즐겨찾기가 "장면 진입 스냅샷 + 경로
 - 회고적 라인 갈라지기(이전 장면의 특정 라인): 데이터(`SceneRecord`)로 가능하다. UI는 후속 — 열 때 백로그
   항목에서 장면 기록을 찾아 `LoadPlan`을 만드는 함수만 F4에서 둔다.
 
+### F6. 서버 연동 — M8-B (착수 대기: 서버 M8-A 완료 후. 계약 단절 구간이라 먼저 시작하지 않는다)
+
+서버 결정 D-018~D-024(spring-prepare `DECISIONS.md`)에 맞춘 클라 작업 여섯. 순서대로.
+
+| # | 작업 | 클라 변경 | 서버 계약 |
+|---|---|---|---|
+| B-1 | **회차 생성 멱등 + 갈래 동승** | `PlaythroughCreateRequestDto { clientPlaythroughId, forkedFrom?{ clientPlaythroughId, playthroughId?, sceneIndex } }`. `ServerSyncSaveStore.CreatePlaythroughAsync`가 활성 회차 파일의 `PlaythroughId`·`ForkedFrom`을 싣는다. 부모 서버 id는 부모 큐 파일(`QueuePathOf(부모 client id)`)의 `PlaythroughId`가 있으면 함께. 갈라지기 직전 `FlushAsync`(best-effort) — `ForkFromScene`/`ForkFromBookmark`를 async로 | D-019·D-020. 200/201 둘 다 Ok |
+| B-2 | **PUT 본문 확장** | `SaveUploadRequestDto`에 `inheritedPlaySeconds`·`ownPlaySeconds`·`chapterCompleted` — `LocalSaveFile`에서 그대로 | A-4 (선택 필드, null→0/false) |
+| B-3 | **즐겨찾기 동기화** | `ServerApi.PutBookmarkAsync/DeleteBookmarkAsync/GetBookmarksAsync`, `BookmarkUploadRequestDto { label, preview, chapterId, chapterVersion, playthroughClientId, sceneIndex, createdAt, snapshot }`. 생성·이름 변경 → PUT(멱등 upsert), 삭제 → DELETE(soft). 큐 없이 직접, 실패하면 `Bookmark.SyncedAtUtc`(신설)가 비어 있어 다음 시작에 재시도 | D-021·D-022(1MB → 413이면 로그·보류) |
+| B-4 | **시작 시 모든 회차 큐 순회** | `SaveCoordinator.SyncPendingAsync`가 `ListPlaythroughIds()`를 돌며 미전송이 있는 큐마다 동기화. `ServerSyncSaveStore.SyncOnceAsync`를 (회차 파일, 큐) 인자로 받게 분리 — 지금은 활성 슬롯·큐에 묶여 있다. 순서 무관(서버가 되채움) | D-020 |
+| B-5 | **복구(새 기기)** | `GET /users/{uid}/playthroughs`(+clientPlaythroughId·forkedFrom·시간·완료) → 회차마다 `GET /saves/1` 스냅샷 → `playthroughs/{clientId}.json` + 큐 파일(서버 id·baseRevision) 재구성. 즐겨찾기는 목록(메타) + **개별 스냅샷 GET** → `bookmarks.json`. 가장 최근 저장 회차를 활성으로(D-e) | **계약 공백 하나**: 즐겨찾기 목록이 메타만이라 복구용 `GET /users/{uid}/bookmarks/{id}`(스냅샷 포함)가 필요 — 서버에 알릴 것 |
+| B-6 | **409 해소 = 갈라지기** (D-023 제안 채택 권장) | `ConflictDetected` 시: 로컬 회차에 새 client id를 주고 `ForkedFrom = { 부모 client id, sceneIndex = 미전송 선택이 시작되는 장면 }`, 새 큐(seq 1부터)에 미전송을 옮겨 적고 `baseRevision 0`으로 PUT. 재생·이력은 손대지 않는다(리플레이 없는 갈라지기) — 옛 회차 파일은 서버와 같은 상태로 남기고, 로컬 진행은 새 회차로 이어진다. UI는 알림만 | D-023(서버 비용 없음) |
+
+부수: 서버 M8-A는 F6 전 클라가 회차 생성에서 400을 맞는 **의도된 단절**(D-019). 로컬 `serverBaseUrl`이 비어 있으면 무관.
+
 ### F5. UI
 
 - 즐겨찾기 목록: 라벨·미리보기·시각·출처(회차/장면), 로드 확인, 삭제. 100개 이상 스크롤.
@@ -194,7 +209,7 @@ v1 §2의 결론 그대로다. 즐겨찾기가 "장면 진입 스냅샷 + 경로
 | 7-5 | 옛 회차의 나머지 이력 | 새 회차에서 보이지 않는다 |
 | 7-6 | 옵션 박스 중 즐겨찾기 | 허용 — 표적은 노드 마지막 라인, 로드 뒤 판정이 박스를 다시 띄운다 |
 | 7-7 | 즐겨찾기 수 | 제한 없음(100개 이상 전제, 목록 파일) |
-| 7-8 | 복원 방식 | B(루트부터 달리기). 로딩 화면은 F2 실측 뒤 |
+| 7-8 | 복원 방식 | B(루트부터 달리기). **로딩 화면은 당장 두지 않는다 — 재실행을 그대로 노출** (소유자, 2026-09-02). 장면이 길어져 거슬리면 그때 도입 |
 | 7-9 | 서버 | 로컬 관문 뒤 별도 논의 |
 
 ## 8. 위험
@@ -211,4 +226,6 @@ v1 §2의 결론 그대로다. 즐겨찾기가 "장면 진입 스냅샷 + 경로
 - 2026-09-02: **F1 검증됨·커밋.**
 - 2026-09-02: **F2-a 검증됨·커밋.** 회차 파일 id화(`playthroughs/{id}.json` + `active.json` + `{id}.queue.json`, 옛 `slot1.json`·`sync_queue.json`은 첫 읽기에 1회 이전), `SyncQueue.SwitchTo`, `SaveCoordinator.ForkFromScene`(이력 장면 기록을 물려받아 새 회차 파일 → 활성 전환 → 큐 새로), `ProgressionLauncher.StopAsync`/`ProgressionDriver.StopAsync`/`EpisodePlayer.StopSceneAsync`(멈추고 끝까지 기다림). 트리거: 백로그의 이전 장면 항목 클릭 → 멈춤 → 갈라지기 → 다시 띄움(재개 경로가 새 회차를 장면 루트에서 연다). F2-b(Load 시크)는 다음.
 - 2026-09-02: **F2-b 검증됨(1~4 실물, 5·6은 흐름상 정상으로 간주)·커밋.** `VNLinePresentationState.BeginLoadSeek`, `SavedLoadPlan`(경로·Yarn 선택·표적)이 회차 파일의 `PendingLoad`로 실려 첫 장면에서 소비됨(첫 fold 저장에서 사라진다). `SceneRunner.BeginLoad`: 경로를 미리 실린 기록으로(앵커는 자동 응답 시점에), `ChoiceHistory.RestoreChoices`, Load 시크 시작, 도착 시간 실측 로그, 경로가 챕터와 안 맞으면 계획을 버리고 루트에서·표적을 못 찾으면 그 자리에서 일반 재생(경고). `SaveCoordinator.TryMakeLineTarget`: 백로그 항목 → (노드·라인ID·장면 안 등장 순번). 트리거: 백로그 이전 장면 항목 클릭 = **그 라인까지** 갈라지기(회고적 라인 갈라지기 — F4 데이터가 이미 있어 UI까지 열었다).
-- 2026-09-02: **F3 작성됨** (Unity 확인 남음). `bookmarks.json`(`BookmarkFile`/`Bookmark` — 진입 스냅샷·찍은 순간까지의 경로·Yarn 선택·표적·이전 백로그·누적 시간의 사본). `SaveCoordinator.CreateBookmark`/`ForkFromBookmark`/`Bookmarks`, `VNFeatureController.TryGetCurrentLine`·`CreateYarnChoiceSnapshot`, `SceneRunner.PendingPath`(드라이버·런처로 노출). 디버그 키 6 = 지금 라인 즐겨찾기, 7 = 마지막 즐겨찾기로 갈라지기. 옵션 박스 중에도 된다(표적 = 노드 마지막 라인). 목록 UI는 F5.
+- 2026-09-02: **F3 검증됨·커밋.** `bookmarks.json`(`BookmarkFile`/`Bookmark` — 진입 스냅샷·찍은 순간까지의 경로·Yarn 선택·표적·이전 백로그·누적 시간의 사본). `SaveCoordinator.CreateBookmark`/`ForkFromBookmark`/`Bookmarks`, `VNFeatureController.TryGetCurrentLine`·`CreateYarnChoiceSnapshot`, `SceneRunner.PendingPath`(드라이버·런처로 노출). 디버그 키 6 = 지금 라인 즐겨찾기, 7 = 마지막 즐겨찾기로 갈라지기. 옵션 박스 중에도 된다(표적 = 노드 마지막 라인). 목록 UI는 F5.
+- 2026-09-02: **F4 검증됨** — 코드는 F2-b에 이미 들어갔다(백로그 이전 장면 항목 → 그 라인까지 갈라지기, `TryMakeLineTarget`). 남은 것은 UI 문구뿐(F5).
+- 2026-09-02: **F5 준비(데이터 API) 작성됨.** UI 바인딩이 쓸 것만 미리: `SaveCoordinator.DeleteBookmark`/`RenameBookmark`/`ListPlaythroughs`(`PlaythroughSummary` — 활성 여부·출처·장면 수·즐겨찾기 수·두 시간·시각), `ISaveStore.ListPlaythroughIds`. **F5 UI(즐겨찾기 목록·이력 화면·로딩 화면)와 F6 서버는 보류 — 소유자가 프리팹·UI 연동을 한꺼번에 하기로.**

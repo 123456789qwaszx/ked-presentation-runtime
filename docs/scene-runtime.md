@@ -136,3 +136,27 @@ Via 연출 노드도 장면 안 노드로 이어서 튼다. 드라이버의 세 
 - 테스트 콘텐츠: `qwer.progression.json`(퇴화 기준선) / `qwer_scene.progression.json` +
   `test/qwer_scene.yarn`(장면 2개, Via 2개, 대사에 `[사무실 7]` 식 번호).
 
+
+## 10. 회차·이력·즐겨찾기·갈라지기 (2026-09-02, `save-plan.md` v2)
+
+한 문장: **확정된 것은 되돌리지 않는다. 대신 갈라진다.** 현재 장면 안은 롤백(미확정), 이전 장면은 갈라지기(확정).
+
+- **회차** — `saves/playthroughs/{id}.json` + `{id}.queue.json`, 활성 포인터 `saves/active.json`. 파일은
+  지우지 않는다(새 게임은 포인터만 비움). 옛 `slot1.json`은 첫 읽기에 한 번 옮긴다.
+- **이력** — 회차 파일의 `Scenes[]`. 장면 기록 하나 = 진입 스냅샷(`SceneCheckpoint`: 루트·[2]·[3]·백로그
+  시작 순번·마지막 seq·진입 시 누적 시간) + 경로(`Path`) + Yarn 인라인 선택(`YarnChoices`) + 순번 끝.
+  `ReportSceneEntered`(진입)와 `ReportSceneCommitted`(fold)가 앞뒤를 만든다. 이력은 현재 챕터 안에서만.
+  `Backlog[]`는 현재 장면 이전 항목만 — 현재 장면의 라인은 재생이 다시 적어 롤백 포인트와 순번을 맞춘다.
+- **시간** — `InheritedPlaySeconds`(갈라진 지점까지 물려받음) + `OwnPlaySeconds`(이 회차) = `PlaySeconds`.
+- **갈라지기** — `SaveCoordinator.ForkFromScene(sceneIndex, target?)` / `ForkFromBookmark`: 새 회차 파일
+  (`ForkedFrom`, 물려받은 기록·백로그·시간, 표적이 있으면 `PendingLoad`)을 쓰고 활성 전환, 큐 새로. 그 뒤
+  `ProgressionLauncher.StopAsync()` → `LaunchAsync()` — 재개 경로가 새 회차를 장면 루트에서 연다.
+- **Load 시크** — `PendingLoad`(경로·Yarn 선택·표적)가 있으면 `SceneRunner.BeginLoad`가 경로를 미리 실린
+  선택 기록으로, Yarn 선택을 `ChoiceHistory`로, 표적을 `BeginLoadSeek`로 건다. 롤백 리플레이와 같은 규칙으로
+  표적까지 자동 응답하며 달리고(백로그는 적는다), 표적에 닿으면 사람이 조작. 첫 fold 저장에서 소비된다.
+  경로가 챕터와 안 맞으면 루트에서, 표적을 못 찾으면 그 자리에서 일반 재생(경고). 도착 시간은 로그.
+- **즐겨찾기** — `saves/bookmarks.json`. 스스로 완결된 사본(진입 스냅샷·찍은 순간까지의 경로·Yarn 선택·표적·
+  이전 백로그·누적 시간·출처). 옵션 박스가 떠 있을 때도 찍는다(표적 = 노드 마지막 라인). 로드 = 즐겨찾기로
+  갈라지기. 디버그 키 6/7. 목록 UI는 후속.
+- **백로그** — 현재 장면 항목 클릭 = 롤백, 이전 장면 항목 클릭 = 그 라인까지 갈라지기, 지금 라인·다른 챕터 항목은 흐림.
+- **서버** — 보류. 계약은 `save-plan.md` §5(`forkedFrom`, 되감기 표식 없음).
