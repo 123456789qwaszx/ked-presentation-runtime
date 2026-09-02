@@ -18,5 +18,9 @@ namespace Ked.Progression
         /// 비어 있으면 곧장 감.
         /// </summary>
         public string ViaNodeId { get; set; }
+
+        // 자동 간선 — 묻지 않고 지나간다. 비어 있으면 false.
+        // 조건·스탯 변화가 있거나 형제 간선이 있거나 장면을 나가면 로드에서 거부된다.
+        public bool Auto { get; set; }
     }
 }

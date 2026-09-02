@@ -129,13 +129,16 @@ namespace Ked.Progression
                     EpisodeOption option = options[i];
                     string where = $"Nodes[{node.EpisodeId}].NextOptions[{i}]";
 
-                    if (!nodesById.ContainsKey(option.TargetEpisodeId))
+                    if (!nodesById.TryGetValue(option.TargetEpisodeId, out EpisodeNode target))
                     {
                         into.Add(ProgressionDiagnostic.Error(
                             where,
                             $"도착 '{option.TargetEpisodeId}'가 노드에 없다. " +
                             $"있는 것: {Join(nodesById.Keys)}"));
                     }
+
+                    if (option.IsAuto)
+                        VerifyAuto(node, options.Count, option, target, where, into);
 
                     VerifyConditions(
                         option.VisibleConditions, statsByKey, where + ".VisibleConditions", into);
@@ -231,6 +234,50 @@ namespace Ked.Progression
             // 같은 자리로 여러 간선이 들어오는 것은 정상이다 — 자리의 수만 센다.
             if (into.Add(episodeId) && into.Count == 2)
                 offending[sceneId] = path;
+        }
+
+        // 자동 간선 — 묻지 않고 지나가는 길은 넷을 지켜야 한다.
+        // 유일한 간선(고를 것이 없어야 묻지 않는 게 맞다) · 조건 없음(판정할 것이 없어야 한다) ·
+        // 스탯 변화 없음(스탯 효과는 플레이어에게 보이는 선택지에서만 일어난다 — 도달성 증명과 UX의 근거) ·
+        // 같은 장면(장면 경계는 무대가 갈리는 자리라 모르게 넘어가면 이상하다).
+        private static void VerifyAuto(
+            EpisodeNode node,
+            int siblingCount,
+            EpisodeOption option,
+            EpisodeNode target,
+            string where,
+            ICollection<ProgressionDiagnostic> into)
+        {
+            if (siblingCount != 1)
+            {
+                into.Add(ProgressionDiagnostic.Error(
+                    where,
+                    $"자동 간선은 그 에피소드의 유일한 간선이어야 한다. 지금 {siblingCount}개 — " +
+                    "고를 것이 있으면 묻는 선택지로, 없으면 나머지를 지울 것."));
+            }
+
+            if (option.VisibleConditions.Count > 0 || option.Conditions.Count > 0)
+            {
+                into.Add(ProgressionDiagnostic.Error(
+                    where, "자동 간선에는 조건을 둘 수 없다 — 판정할 것이 있으면 묻는 선택지다."));
+            }
+
+            if (option.StatChanges.Count > 0)
+            {
+                into.Add(ProgressionDiagnostic.Error(
+                    where,
+                    "자동 간선에는 스탯 변화를 둘 수 없다 — 스탯 효과는 플레이어에게 보이는 선택지에서만 " +
+                    "일어난다. 스탯을 바꾸려면 문구를 주고 Auto를 끌 것."));
+            }
+
+            if (target != null &&
+                !string.Equals(node.SceneId, target.SceneId, StringComparison.Ordinal))
+            {
+                into.Add(ProgressionDiagnostic.Error(
+                    where,
+                    $"자동 간선은 장면을 나갈 수 없다 ('{node.SceneId}' → '{target.SceneId}'). " +
+                    "장면 경계는 무대가 갈리는 자리다 — 묻는 선택지로 둘 것."));
+            }
         }
 
         private static void VerifyConditions(

@@ -171,17 +171,26 @@ public sealed class SceneRunner
 
             ResolvedOption? picked;
 
-            try
+            if (advance.Kind == ChapterAdvanceKind.AutoAdvance)
             {
-                picked = await PickAsync(advance);
+                // 자동 간선 — 묻지 않는다. 기록·pending·리플레이는 보통 선택과 똑같이 지나간다.
+                picked = advance.Options[0];
+                Debug.Log($"[장면] 자동 간선 — {picked.Value.Option}");
             }
-            catch (OperationCanceledException) when (_player.IsReplayPending)
+            else
             {
-                // 선택지 대기 중 롤백 — 박스가 접혔다. 멈춤(RequestStop)의 취소는 그대로 던져진다.
-                await BeginReplayAsync();
+                try
+                {
+                    picked = await PickAsync(advance);
+                }
+                catch (OperationCanceledException) when (_player.IsReplayPending)
+                {
+                    // 선택지 대기 중 롤백 — 박스가 접혔다. 멈춤(RequestStop)의 취소는 그대로 던져진다.
+                    await BeginReplayAsync();
 
-                episodeId = rootEpisodeId;
-                continue;
+                    episodeId = rootEpisodeId;
+                    continue;
+                }
             }
 
             if (!picked.HasValue)

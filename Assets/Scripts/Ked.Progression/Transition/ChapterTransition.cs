@@ -20,11 +20,18 @@ namespace Ked.Progression
                 throw new ArgumentException(
                     $"지금 에피소드 '{state.CurrentEpisodeId}'가 챕터 '{chapter.ChapterId}'에 없다.", nameof(state));
             
+            IReadOnlyList<EpisodeOption> options = node.NextOptions;
+
+            // 자동 간선 — 불변식이 "유일한 간선·조건 없음"을 보장하므로 판정할 것이 없다.
+            if (options.Count == 1 && options[0].IsAuto)
+                return new ChapterAdvance(
+                    ChapterAdvanceKind.AutoAdvance,
+                    new[] { ResolvedOption.Shown(options[0], 0) },
+                    0);
+
             var shownOrLocked = new List<ResolvedOption>();
             int hidden = 0;
             bool anySelectable = false;
-
-            IReadOnlyList<EpisodeOption> options = node.NextOptions;
 
             for (int i = 0; i < options.Count; i++)
             {

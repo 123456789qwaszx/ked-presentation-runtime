@@ -64,6 +64,8 @@ namespace Ked.Progression
         // 도착 에피소드로 이동한 새 ProgressionState를 반환.
         public ProgressionState ApplyChoice(ChapterProgression chapter, EpisodeOption choices)
         {
+            RequireOutgoingEdge(chapter, choices);
+
             var stats = new Dictionary<string, int>(_stats, StringComparer.Ordinal);
 
             IReadOnlyList<StatChange> changes = choices.StatChanges;
@@ -82,6 +84,28 @@ namespace Ked.Progression
             return new ProgressionState(choices.TargetEpisodeId, stats);
         }
         
+        // 고른 간선이 지금 에피소드에서 나가는 길인지 — 참조 동일성으로 본다.
+        // 챕터 생성자는 "모든 간선이 실재하는 노드에 착지한다"까지만 보장한다. 호출자가 엉뚱한 노드의
+        // 간선을 넘기면 그래프에 없는 경로로 이동한 상태가 생기고, 도달성 증명이 보증한 것과 실제
+        // 플레이가 갈린다. 상태가 챕터 ID를 들지 않으므로 챕터가 짝이 맞는지도 여기서 함께 걸린다.
+        private void RequireOutgoingEdge(ChapterProgression chapter, EpisodeOption chosen)
+        {
+            if (!chapter.TryGetNode(CurrentEpisodeId, out EpisodeNode node))
+                throw new ArgumentException(
+                    $"지금 에피소드 '{CurrentEpisodeId}'가 챕터 '{chapter.ChapterId}'에 없다.", nameof(chapter));
+
+            IReadOnlyList<EpisodeOption> options = node.NextOptions;
+
+            for (int i = 0; i < options.Count; i++)
+            {
+                if (ReferenceEquals(options[i], chosen))
+                    return;
+            }
+
+            throw new ArgumentException(
+                $"고른 간선({chosen})이 에피소드 '{CurrentEpisodeId}'에서 나가는 길이 아니다.", nameof(chosen));
+        }
+
         public static ProgressionState Restore(
             ChapterProgression chapter, 
             string currentEpisodeId, 

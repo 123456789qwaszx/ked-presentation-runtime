@@ -6,6 +6,7 @@ namespace Ked.Progression
     {
         AwaitPlayerChoice = 0, // 고를 수 있는 것이 하나 이상 있다. 플레이어의 입력 대기.
         ChapterEnded = 1,
+        AutoAdvance = 2,       // 자동 간선 하나뿐. 묻지 않고 Options[0]으로 간다.
     }
 
     // 현재 노드 전체의 진행 판정 결과

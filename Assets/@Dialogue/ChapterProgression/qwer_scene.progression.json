@@ -45,7 +45,7 @@
       "SceneId": "복도",
       "EventKey": "",
       "NextOptions": [
-        { "TargetEpisodeId": "EP04", "ChoiceLabel": "교실로 (같은 장면)", "VisibleConditions": [], "Conditions": [], "LockedReasonText": "", "ViaNodeId": "", "StatChanges": [] }
+        { "TargetEpisodeId": "EP04", "ChoiceLabel": "", "Auto": true, "VisibleConditions": [], "Conditions": [], "LockedReasonText": "", "ViaNodeId": "", "StatChanges": [] }
       ]
     },
     {

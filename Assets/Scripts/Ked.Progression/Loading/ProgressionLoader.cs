@@ -245,11 +245,12 @@ namespace Ked.Progression
                     continue;
                 }
 
-                // 자동 진행(문구 없는 간선)은 폐지됐다. 옛 데이터를 조용히 버리지 않는다.
-                if (string.IsNullOrEmpty(dto.ChoiceLabel))
+                // 문구 없는 간선으로 자동 진행을 추론하던 것은 폐지됐다 — 툴의 실수가 조용히 지나갔다.
+                // 자동 간선은 Auto 깃발로만 켠다(규칙은 ChapterInvariants가 본다).
+                if (string.IsNullOrEmpty(dto.ChoiceLabel) && !dto.Auto)
                 {
                     into.Add(ProgressionDiagnostic.Error(
-                        at, "간선의 문구가 비어 있다. 자동 진행은 폐지됐다 — 문구를 줄 것."));
+                        at, "간선의 문구가 비어 있다. 묻지 않고 지나가려면 Auto를 켤 것 — 문구만 비우는 것으로는 안 된다."));
 
                     continue;
                 }
@@ -277,7 +278,8 @@ namespace Ked.Progression
                         conditions,
                         dto.LockedReasonText,
                         changes,
-                        dto.ViaNodeId));
+                        dto.ViaNodeId,
+                        dto.Auto));
                 }
                 catch (ArgumentException error)
                 {
