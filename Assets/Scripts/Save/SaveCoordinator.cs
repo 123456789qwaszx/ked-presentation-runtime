@@ -7,9 +7,10 @@ using UnityEngine;
 // Bridges progression reports into the save layer.
 // This is the save layer's only dependency on progression-specific types.
 //
-// 1) 현재 상태를 먼저 보존    / localStore.Save(...); 
-// 2) 서버용 이력을 남김       / _queue.EnqueueChoice(...);
-// 3) 서버 전송은 기다리지 않음 / _server.TrySyncAsync(...);
+// 저장 단위는 장면이다 (G4). 장면 끝 fold 한 번에:
+// 1) 현재 상태를 먼저 보존    / localStore.Save(...)  — 장면 진입 스냅샷 또는 챕터 완료
+// 2) 서버용 이력을 남김       / _queue.EnqueueChoice/Event(...)  — 확정 순서대로
+// 3) 서버 전송은 기다리지 않음 / _server.TrySyncAsync(...)
 public sealed class SaveCoordinator : IProgressionReporter
 {
     private readonly ISaveStore _localStore;
@@ -22,7 +23,7 @@ public sealed class SaveCoordinator : IProgressionReporter
 
     public SaveCoordinator(
         ISaveStore localStore,
-        SyncQueue queue, 
+        SyncQueue queue,
         ServerSyncSaveStore server,
         int slotNo)
     {
@@ -31,13 +32,13 @@ public sealed class SaveCoordinator : IProgressionReporter
         _server = server;
         _slotNo = slotNo;
     }
-    
+
     // Syncs any pending items left from the previous session on startup.
     public Task SyncPendingAsync() =>
-        _server == null 
-            ? Task.CompletedTask 
+        _server == null
+            ? Task.CompletedTask
             : _server.TrySyncAsync(_slotNo);
-    
+
     // Flushes pending sync work, then clears the local save and queue for a new game.
     // The previous server-side playthrough remains open until session-ending support is added.
     public async Task StartNewGameAsync()
@@ -67,40 +68,41 @@ public sealed class SaveCoordinator : IProgressionReporter
         _basePlaySeconds = save.PlaySeconds;
 
         return new ProgressionResumePoint(
-            save.ChapterId, 
+            save.ChapterId,
             save.CurrentEpisodeId,
-            save.Stats);
+            save.Stats,
+            save.Variables,
+            save.ChapterCompleted);
     }
 
-    // 게임에서 선택 하나가 확정됐을 때 호출.
-    // 로컬 저장 -> 큐 적재 -> 동기화 시도.
-    public void ReportChoiceCommitted(ChoiceCommitReport report)
+    // 장면이 끝나 확정됐을 때 호출 — 로컬 저장 1회 -> 큐 적재(순서대로) -> 동기화 시도.
+    public void ReportSceneCommitted(SceneCommitReport report)
     {
         string now = NowUtc();
 
-        // 현재 게임 상태 전체를 스냅샷으로 저장.
-        // report.NewState 사용.(선택이 이미 확정된 후의 결과 상태)
         _localStore.Save(new LocalSaveFile
         {
             SlotNo = _slotNo,
             ChapterId = report.ChapterId,
-            CurrentEpisodeId = report.NewState.CurrentEpisodeId,
-            Stats = report.NewState.Stats.ToDictionary(p => p.Key, p => p.Value, StringComparer.Ordinal),
+            CurrentEpisodeId = report.State.CurrentEpisodeId,
+            Stats = report.State.Stats.ToDictionary(p => p.Key, p => p.Value, StringComparer.Ordinal),
+            Variables = report.Variables,
+            ChapterCompleted = report.ChapterCompleted,
             PlaySeconds = _basePlaySeconds + (int)(Time.realtimeSinceStartup - _startedAt),
             SavedAtUtc = now,
         });
 
-        _queue.EnqueueChoice(report.FromEpisodeId, report.OptionIndex, now);
+        for (int i = 0; i < report.Choices.Count; i++)
+            _queue.EnqueueChoice(report.Choices[i].FromEpisodeId, report.Choices[i].OptionIndex, now);
 
-        if (_server != null)
-            _ = _server.TrySyncAsync(_slotNo);
-    }
-
-    public void ReportEpisodeWatched(EpisodeWatchReport report)
-    {
-        // Records history only. progression state is unchanged.
         // Repeated visits are deduplicated server-side via the episode's EventKey.
-        _queue.EnqueueEvent(report.EpisodeId, NowUtc());
+        for (int i = 0; i < report.WatchedEpisodeIds.Count; i++)
+            _queue.EnqueueEvent(report.WatchedEpisodeIds[i], now);
+
+        Debug.Log(
+            $"[저장] 장면 확정 — 선택 {report.Choices.Count}, 시청 {report.WatchedEpisodeIds.Count}, " +
+            $"[3] {report.Variables?.Count ?? 0}개 → {report.State.CurrentEpisodeId}" +
+            (report.ChapterCompleted ? " (챕터 완료)" : string.Empty));
 
         if (_server != null)
             _ = _server.TrySyncAsync(_slotNo);

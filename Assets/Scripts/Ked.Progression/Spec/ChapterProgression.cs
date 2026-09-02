@@ -62,6 +62,36 @@ namespace Ked.Progression
             // 오류가 있으면 생성 자체를 실패시킴.
             if (diagnostics.Count > 0)
                 throw new ArgumentException(diagnostics[0].ToString());
+
+            _sceneRoots = CollectSceneRoots();
+        }
+
+        // 장면 루트 = 밖에서 들어오는 간선이 착지하는 자리(챕터 시작 포함). 불변식이 장면마다
+        // 하나임을 보장한다. 이어하기가 재개할 수 있는 자리는 이것뿐이다 — 무대 기준선이 여기 선다.
+        private readonly HashSet<string> _sceneRoots;
+
+        public bool IsSceneRoot(string episodeId) =>
+            episodeId != null && _sceneRoots.Contains(episodeId);
+
+        private HashSet<string> CollectSceneRoots()
+        {
+            var roots = new HashSet<string>(StringComparer.Ordinal) { StartEpisodeId };
+
+            foreach (EpisodeNode node in Nodes)
+            {
+                IReadOnlyList<EpisodeOption> options = node.NextOptions;
+
+                for (int i = 0; i < options.Count; i++)
+                {
+                    if (_nodesById.TryGetValue(options[i].TargetEpisodeId, out EpisodeNode target) &&
+                        !string.Equals(node.SceneId, target.SceneId, StringComparison.Ordinal))
+                    {
+                        roots.Add(target.EpisodeId);
+                    }
+                }
+            }
+
+            return roots;
         }
 
         // 에피소드를 ID로 찾는다. 생성자 보장.

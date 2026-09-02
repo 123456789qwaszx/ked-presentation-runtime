@@ -1,12 +1,22 @@
 using System.Collections.Generic;
 
 // saves/slot{n}.json — 세이브 한 슬롯. 로컬이 진실.
+//
+// 뜻은 둘 중 하나다: 장면 진입 스냅샷(CurrentEpisodeId = 장면 루트, Stats·Variables = 그 시점)
+// 또는 챕터 완료(ChapterCompleted). 장면 중간을 가리키는 세이브는 만들지 않는다.
 public sealed class LocalSaveFile
 {
     public int SlotNo;
     public string ChapterId;
     public string CurrentEpisodeId;
     public Dictionary<string, int> Stats = new();
+
+    // [3] 연출 변수 통덤프. 없으면(구세이브) 덮지 않는다.
+    public YarnVariableSnapshot Variables;
+
+    // 챕터를 끝낸 세이브 — 이어갈 장면이 없다.
+    public bool ChapterCompleted;
+
     public int PlaySeconds;
     public string SavedAtUtc;
 }

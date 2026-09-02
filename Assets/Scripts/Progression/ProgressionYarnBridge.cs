@@ -43,4 +43,31 @@ public sealed class ProgressionYarnBridge
         }
     }
 
+    // [3] 통덤프 — 장면 끝에 굽는다. 저장소에 [2]가 없으니 필터링 없이 전부.
+    public YarnVariableSnapshot Capture()
+    {
+        (Dictionary<string, float> floats,
+         Dictionary<string, string> strings,
+         Dictionary<string, bool> bools) = _storage.GetAllVariables();
+
+        var snapshot = new YarnVariableSnapshot();
+
+        foreach (KeyValuePair<string, float> pair in floats) snapshot.Floats[pair.Key] = pair.Value;
+        foreach (KeyValuePair<string, string> pair in strings) snapshot.Strings[pair.Key] = pair.Value;
+        foreach (KeyValuePair<string, bool> pair in bools) snapshot.Bools[pair.Key] = pair.Value;
+
+        return snapshot;
+    }
+
+    // 덤프를 declare 초기값 위에 덮는다 — BeginChapter 뒤에. Clear하지 않으므로 덤프에 없는
+    // 신규 declare는 초기값으로 남는다 ([2] Restore가 저장 후 추가된 스탯을 다루는 것과 같은 문장).
+    public void Restore(YarnVariableSnapshot snapshot)
+    {
+        if (snapshot == null)
+            return;
+
+        foreach (KeyValuePair<string, float> pair in snapshot.Floats) _storage.SetValue(pair.Key, pair.Value);
+        foreach (KeyValuePair<string, string> pair in snapshot.Strings) _storage.SetValue(pair.Key, pair.Value);
+        foreach (KeyValuePair<string, bool> pair in snapshot.Bools) _storage.SetValue(pair.Key, pair.Value);
+    }
 }

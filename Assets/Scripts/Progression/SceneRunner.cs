@@ -61,6 +61,7 @@ public sealed class SceneRunner
     private readonly VNLinePresentationState _seek;
     private readonly RollbackHistory _rollbackHistory;
     private readonly IProgressionReporter _reporter;
+    private readonly Func<YarnVariableSnapshot> _captureVariables;
     private readonly Func<bool> _isStopRequested;
 
     private readonly List<ProgressionPick> _picks = new();
@@ -76,8 +77,10 @@ public sealed class SceneRunner
         VNLinePresentationState seek,
         RollbackHistory rollbackHistory,
         IProgressionReporter reporter,
+        Func<YarnVariableSnapshot> captureVariables,
         Func<bool> isStopRequested)
     {
+        _captureVariables = captureVariables;
         _player = player;
         _options = options;
         _seek = seek;
@@ -263,30 +266,35 @@ public sealed class SceneRunner
     private SceneRunResult Fold(
         ChapterProgression chapter, ProgressionState entryState, SceneRunOutcome outcome)
     {
-        for (int i = 0; i < _watched.Count; i++)
-        {
-            _reporter.ReportEpisodeWatched(
-                new EpisodeWatchReport(chapter.ChapterId, _watched[i].EpisodeId, _watched[i].EventKey));
-        }
-
         ProgressionState state = entryState;
+
+        var choices = new List<CommittedChoice>(_replayCursor);
 
         for (int i = 0; i < _replayCursor; i++)
         {
             ProgressionPick pick = _picks[i];
 
             state = state.Commit(chapter, pick.Option);
-
-            _reporter.ReportChoiceCommitted(
-                new ChoiceCommitReport(
-                    chapter.ChapterId,
-                    pick.FromEpisodeId,
-                    pick.SourceIndex,
-                    pick.Option,
-                    state));
+            choices.Add(new CommittedChoice(pick.FromEpisodeId, pick.SourceIndex));
         }
 
-        Debug.Log($"[장면] 확정 — 선택 {_replayCursor}개, 시청 {_watched.Count}개 → {state.CurrentEpisodeId}");
+        var watched = new List<string>(_watched.Count);
+
+        for (int i = 0; i < _watched.Count; i++)
+            watched.Add(_watched[i].EpisodeId);
+
+        // [3]은 여기서 굽는다 — 다음 장면 Enter 전이라 이 장면의 <<set>>까지만 든다.
+        YarnVariableSnapshot variables = _captureVariables();
+
+        Debug.Log($"[장면] 확정 — 선택 {choices.Count}개, 시청 {watched.Count}개 → {state.CurrentEpisodeId}");
+
+        _reporter.ReportSceneCommitted(new SceneCommitReport(
+            chapter.ChapterId,
+            choices,
+            watched,
+            state,
+            variables,
+            chapterCompleted: outcome == SceneRunOutcome.ChapterEnded));
 
         return new SceneRunResult(outcome, state);
     }

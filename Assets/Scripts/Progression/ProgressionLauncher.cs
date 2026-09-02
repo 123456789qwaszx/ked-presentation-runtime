@@ -52,27 +52,43 @@ public sealed class ProgressionLauncher
 
         // 세이브가 있고 그 지점이 아직 콘텐츠에 있으면 거기서 (D-017). 없으면 새 게임 —
         // 저장 후 콘텐츠가 바뀐 것이고, 이어 가는 척하지 않는다.
+        //
+        // 재개할 수 있는 자리는 장면 루트뿐이다 — 무대 기준선이 거기 선다. 장면 중간을 가리키는
+        // 세이브(장면 개념 전의 구형식)나 챕터를 끝낸 세이브는 이어갈 것이 없으니 새로 시작한다.
         ProgressionResumePoint resume = _resumeProvider();
+        YarnVariableSnapshot variables = null;
 
         if (resume != null)
         {
-            if (scenario.TryGetChapter(resume.ChapterId, out ChapterProgression saved)
-                && saved.TryGetNode(resume.EpisodeId, out _))
+            if (resume.ChapterCompleted)
             {
-                chapter = saved;
-                state = ProgressionState.Restore(saved, resume.EpisodeId, resume.Stats);
-
-                Debug.Log($"[진행] 재개 — {resume.ChapterId}/{resume.EpisodeId}");
+                Debug.Log($"[진행] 끝낸 챕터의 세이브({resume.ChapterId}) — 새로 시작한다.");
             }
-            else
+            else if (!scenario.TryGetChapter(resume.ChapterId, out ChapterProgression saved)
+                     || !saved.TryGetNode(resume.EpisodeId, out _))
             {
                 Debug.LogWarning(
                     $"[진행] 저장 지점 {resume.ChapterId}/{resume.EpisodeId}가 콘텐츠에 없다. 새로 시작한다.");
             }
+            else if (!saved.IsSceneRoot(resume.EpisodeId))
+            {
+                Debug.LogWarning(
+                    $"[진행] 저장 지점 {resume.ChapterId}/{resume.EpisodeId}가 장면 중간이다(구형식 세이브). " +
+                    "이어 가는 척하지 않고 새로 시작한다.");
+            }
+            else
+            {
+                chapter = saved;
+                state = ProgressionState.Restore(saved, resume.EpisodeId, resume.Stats);
+                variables = resume.Variables;
+
+                Debug.Log(
+                    $"[진행] 재개 — {resume.ChapterId}/{resume.EpisodeId}, [3] {variables?.Count ?? 0}개");
+            }
         }
 
-        // Yarn 변수 두 계층을 세우는 일은 드라이버가 한다 — 챕터가 바뀔 때마다 다시
-        // 세워야 하고, 챕터가 바뀌는 것을 아는 쪽은 흐름을 쥔 드라이버뿐이다.
-        await _driver.RunAsync(_dialogueRunner.YarnProject, chapter, state);
+        // Yarn 변수를 세우는 일은 드라이버가 한다 — 챕터가 바뀔 때마다 다시 세워야 하고,
+        // 챕터가 바뀌는 것을 아는 쪽은 흐름을 쥔 드라이버뿐이다. 덤프도 그 뒤에 덮는다.
+        await _driver.RunAsync(_dialogueRunner.YarnProject, chapter, state, variables);
     }
 }

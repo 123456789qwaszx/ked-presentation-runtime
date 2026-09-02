@@ -101,6 +101,34 @@ public sealed class SceneBoundaryTests
         Assert.That(Messages(result), Does.Contain("교실"));
     }
 
+    [Test]
+    public void 장면_루트는_밖에서_들어오는_자리다()
+    {
+        ChapterProgression chapter = Load(
+            Chapter("A",
+                Node("A", "교실", "B"),
+                Node("B", "교실", "C"),
+                Node("C", "복도", "D"),
+                Node("D", "복도")));
+
+        Assert.That(chapter.IsSceneRoot("A"), Is.True, "챕터 시작");
+        Assert.That(chapter.IsSceneRoot("C"), Is.True, "밖에서 들어오는 자리");
+        Assert.That(chapter.IsSceneRoot("B"), Is.False);
+        Assert.That(chapter.IsSceneRoot("D"), Is.False);
+        Assert.That(chapter.IsSceneRoot("없는것"), Is.False);
+    }
+
+    [Test]
+    public void 퇴화_상태에서는_모든_에피소드가_루트다()
+    {
+        ChapterProgression chapter = Load(
+            Chapter("A", Node("A", null, "B"), Node("B", null, "C"), Node("C", null)));
+
+        Assert.That(chapter.IsSceneRoot("A"), Is.True);
+        Assert.That(chapter.IsSceneRoot("B"), Is.True);
+        Assert.That(chapter.IsSceneRoot("C"), Is.True);
+    }
+
     // ── 재료 ────────────────────────────────────────────────────────────────
 
     private static ChapterProgression Load(ChapterProgressionDto dto)

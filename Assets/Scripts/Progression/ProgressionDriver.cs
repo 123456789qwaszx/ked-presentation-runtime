@@ -51,10 +51,15 @@ public sealed class ProgressionDriver
         _yarnBridge = yarnBridge;
 
         _scenes = new SceneRunner(
-            player, options, seek, rollbackHistory, reporter, () => _stopRequested);
+            player, options, seek, rollbackHistory, reporter, yarnBridge.Capture, () => _stopRequested);
     }
 
-    public async Task RunAsync(YarnProject project, ChapterProgression chapter, ProgressionState entryState)
+    // 이어하기의 [3] 덤프 — 첫 BeginChapter 뒤에 한 번 덮고 버린다.
+    private YarnVariableSnapshot _restoreVariables;
+
+    public async Task RunAsync(
+        YarnProject project, ChapterProgression chapter, ProgressionState entryState,
+        YarnVariableSnapshot restoreVariables = null)
     {
         if (IsRunning)
         {
@@ -68,6 +73,7 @@ public sealed class ProgressionDriver
         _state = entryState;
         _yarnProject = project;
         _yarnChapterId = null;
+        _restoreVariables = restoreVariables;
 
         try
         {
@@ -138,6 +144,14 @@ public sealed class ProgressionDriver
         _yarnChapterId = _chapter.ChapterId;
 
         Debug.Log($"[진행] Yarn 변수 초기화 — 챕터 \"{_chapter.ChapterId}\"");
+
+        // 이어하기 — 초기값 위에 덤프를 덮는다. 장면 진입의 Capture보다 앞이라 리플레이도 이 값에서 출발.
+        if (_restoreVariables != null)
+        {
+            _yarnBridge.Restore(_restoreVariables);
+            Debug.Log($"[진행] [3] 복원 — {_restoreVariables.Count}개");
+            _restoreVariables = null;
+        }
     }
 
     private string Describe() =>
