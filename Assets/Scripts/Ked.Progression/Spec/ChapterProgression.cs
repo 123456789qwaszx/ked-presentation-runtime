@@ -78,6 +78,25 @@ namespace Ked.Progression
 
         public EpisodeNode StartNode => _nodesById[StartEpisodeId];
 
+        // 두 에피소드가 한 장면 안에 있는가. 장면 경계를 판단하는 자리는 이 답 하나만 본다.
+        //
+        // 모르는 에피소드는 "다르다"로 읽는다 — 새 장면으로 여는 쪽이 안전하다.
+        // 이어 놓고 틀리면 무대가 이전 장면의 것을 물고 가지만, 끊어 놓고 틀리면
+        // 한 번 더 초기화될 뿐이다.
+        public bool IsSameScene(string episodeId, string otherEpisodeId)
+        {
+            if (!TryGetNode(episodeId, out EpisodeNode node) ||
+                !TryGetNode(otherEpisodeId, out EpisodeNode other))
+            {
+                return false;
+            }
+
+            return string.Equals(node.SceneId, other.SceneId, StringComparison.Ordinal);
+        }
+
+        public string SceneIdOf(string episodeId) =>
+            TryGetNode(episodeId, out EpisodeNode node) ? node.SceneId : null;
+
         // 이 챕터에 들어설 때의 [2] 상태. 챕터 데이터가 챕터 수명 상태를 만든다.
         //
         // 실제 플레이와 도달성 증명이 같은 자리에서 출발한다 — 증명이 통과한 길은

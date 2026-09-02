@@ -13,6 +13,10 @@ namespace Ked.Progression
         // (툴은 해석하지 않음.)
         public string EventKey { get; set; }
 
+        // 이 에피소드가 속한 장면. 비어 있으면 에피소드마다 고유 장면으로 읽는다 —
+        // 장면 칸이 서기 전에 나간 JSON이 그대로 실려야 한다.
+        public string SceneId { get; set; }
+
         public List<EpisodeOptionDto> NextOptions { get; set; }
     }
 }

@@ -217,7 +217,8 @@ namespace Ked.Progression
                     dto.Title,
                     dto.DialogueEntryId,
                     options,
-                    dto.EventKey));
+                    dto.EventKey,
+                    dto.SceneId));
             }
 
             return nodes;

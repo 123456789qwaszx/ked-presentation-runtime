@@ -26,6 +26,7 @@ namespace Ked.Progression
 
             VerifyStart(startEpisodeId, nodesById, into);
             VerifyEdges(nodes, nodesById, statsByKey, into);
+            VerifySceneEntries(nodes, nodesById, startEpisodeId, into);
         }
 
         private static Dictionary<string, StatDefinition> IndexStats(
@@ -144,6 +145,92 @@ namespace Ked.Progression
                         option.StatChanges, statsByKey, where + ".StatChanges", into);
                 }
             }
+        }
+
+        // 장면에 밖에서 들어오는 자리는 하나다.
+        //
+        // 그 자리가 장면 루트이고, 롤백이 되돌아가는 곳과 이어하기가 재개하는 곳이
+        // 전부 그것이다. 착지점이 여럿이면 "이 장면은 어디서 시작하는가"가 경로마다
+        // 달라져 데이터로 정해지지 않는다.
+        //
+        // 이 규칙 하나가 연결성까지 함께 본다 — 밖에서 오는 길이 루트뿐이므로 도달
+        // 가능한 에피소드는 전부 루트에서 장면 안 간선으로 이어진다. 아무 데서도
+        // 안 들어오는 고아 노드는 여기서 보지 않는다(도달성의 일이고, 이 클래스는
+        // 구조적 무결성만 본다).
+        //
+        // 장면을 나갔다 되돌아오는 것은 막지 않는다 — 허브 구조(교실 ↔ 복도)가
+        // 그것이고, 재진입은 루트에서 다시 여는 새 장면 방문일 뿐이다.
+        private static void VerifySceneEntries(
+            IReadOnlyList<EpisodeNode> nodes,
+            Dictionary<string, EpisodeNode> nodesById,
+            string startEpisodeId,
+            ICollection<ProgressionDiagnostic> into)
+        {
+            var landings = new Dictionary<string, HashSet<string>>(StringComparer.Ordinal);
+
+            // 규칙을 깬 자리 = 그 장면에 두 번째 착지점을 만든 간선.
+            var offending = new Dictionary<string, string>(StringComparer.Ordinal);
+
+            // 챕터 시작도 밖에서 들어오는 길이다 — 챕터가 그 장면을 여는 자리.
+            if (!string.IsNullOrEmpty(startEpisodeId) &&
+                nodesById.TryGetValue(startEpisodeId, out EpisodeNode start))
+            {
+                Land(landings, offending, start.SceneId, start.EpisodeId, "StartEpisodeId");
+            }
+
+            foreach (EpisodeNode node in nodes)
+            {
+                if (node == null)
+                    continue;
+
+                IReadOnlyList<EpisodeOption> options = node.NextOptions;
+
+                for (int i = 0; i < options.Count; i++)
+                {
+                    // 도착이 실재하지 않는 간선은 VerifyEdges가 이미 잡았다.
+                    if (!nodesById.TryGetValue(options[i].TargetEpisodeId, out EpisodeNode target))
+                        continue;
+
+                    // 장면 안에서 움직이는 간선은 들어오는 길이 아니다.
+                    if (string.Equals(node.SceneId, target.SceneId, StringComparison.Ordinal))
+                        continue;
+
+                    Land(
+                        landings, offending, target.SceneId, target.EpisodeId,
+                        $"Nodes[{node.EpisodeId}].NextOptions[{i}]");
+                }
+            }
+
+            foreach (KeyValuePair<string, HashSet<string>> scene in landings)
+            {
+                if (scene.Value.Count <= 1)
+                    continue;
+
+                into.Add(ProgressionDiagnostic.Error(
+                    offending[scene.Key],
+                    $"장면 '{scene.Key}'에 밖에서 들어오는 자리가 {scene.Value.Count}개다: " +
+                    $"{Join(scene.Value)}. 장면은 한 자리에서만 시작해야 한다 — " +
+                    "롤백이 되돌아갈 곳과 이어하기가 재개할 곳이 그 자리다. " +
+                    "나머지 착지점은 다른 장면으로 나눌 것."));
+            }
+        }
+
+        private static void Land(
+            Dictionary<string, HashSet<string>> landings,
+            Dictionary<string, string> offending,
+            string sceneId,
+            string episodeId,
+            string path)
+        {
+            if (!landings.TryGetValue(sceneId, out HashSet<string> into))
+            {
+                into = new HashSet<string>(StringComparer.Ordinal);
+                landings[sceneId] = into;
+            }
+
+            // 같은 자리로 여러 간선이 들어오는 것은 정상이다 — 자리의 수만 센다.
+            if (into.Add(episodeId) && into.Count == 2)
+                offending[sceneId] = path;
         }
 
         private static void VerifyConditions(
