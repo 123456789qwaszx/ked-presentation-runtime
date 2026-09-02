@@ -7,19 +7,20 @@ using UnityEngine;
 // 장면(Scene)진입에서 장면 끝(또는 챕터 끝, 멈춤)까지 진행.
 //
 // 흐름:
-// 노드 재생 -> (리플레이면 루트로) -> 시청 보고 -> 판정 -> 선택 -> Via -> 커밋 -> 다음 에피소드.
+// 노드 재생 -> (리플레이면 루트로) -> 시청 기록 -> 판정 -> 선택 -> Via -> 다음 에피소드 … -> 장면 끝에 fold.
 // 챕터 루프(어느 장면 다음에 어느 장면인가, 챕터 변수, 상태 소유)는 ProgressionDriver.
 //
-// 롤백 리플레이는 장면(Scene) 루트부터 다시 진행.
-// 그 길에 진행 선택지가 있었다면 기록대로 자동 선택.
+// 커밋 유예: 장면 안의 선택은 전부 미확정(pending)이다. 판정은 "진입 상태 + pending"을 접은
+// 작업 상태로 하고, 장면을 나가는 순간 한 번에 확정·보고한다. 롤백은 pending을 자르는 것.
+// 그래서 장면 안에서는 어디로든 돌아갈 수 있고, 장면 중간 멈춤은 pending을 버린다.
 //
-// 리플레이 중 커밋은 다시 적용하지 않음.
-// 커밋되지 않은 채 끊긴 선택(Via 도중 롤백)만 리플레이가 Via를 지난 뒤 커밋.
+// 롤백 리플레이는 장면 루트부터 다시 진행. 그 길에 진행 선택지가 있었다면 기록대로 자동 선택 —
+// 시크가 살아 있는 동안만. 표적에 닿아 시크가 꺼졌으면 그 뒤 선택은 사람이 다시 고른다.
 public enum SceneRunOutcome
 {
     SceneEnded = 0,   // 장면을 나가는 간선을 탔다. State.CurrentEpisodeId가 다음 장면의 루트.
     ChapterEnded = 1, // 나갈 길이 없다.
-    Stopped = 2,      // 멈춤 요청.
+    Stopped = 2,      // 멈춤 요청. State는 진입 상태 그대로 — pending은 버렸다.
 }
 
 public readonly struct SceneRunResult
@@ -36,17 +37,23 @@ public readonly struct SceneRunResult
 
 public sealed class SceneRunner
 {
-    // 장면 안에서 지나온 진행 선택 하나. 리플레이의 자동 응답 근거.
+    // 장면 안에서 지나온 진행 선택 하나 — 미확정. 리플레이의 자동 응답 근거이자 fold의 입력.
     private sealed class ProgressionPick
     {
         public EpisodeOption Option;
         public string FromEpisodeId;
         public int SourceIndex;
 
-        // 선택 시점의 마지막 롤백 포인트.
+        // 선택 시점의 마지막 롤백 포인트. 롤백 표적이 이 앞이면 이 선택은 물린 것.
         public int Anchor;
+    }
 
-        public bool Committed;
+    // 다 본 EventKey 에피소드 — 보고는 fold에서. 물린 시청은 보고하지 않는다.
+    private sealed class WatchedEpisode
+    {
+        public string EpisodeId;
+        public string EventKey;
+        public int Anchor;
     }
 
     private readonly EpisodePlayer _player;
@@ -57,7 +64,8 @@ public sealed class SceneRunner
     private readonly Func<bool> _isStopRequested;
 
     private readonly List<ProgressionPick> _picks = new();
-    private readonly HashSet<string> _watchedReported = new(StringComparer.Ordinal);
+    private readonly List<WatchedEpisode> _watched = new();
+    private readonly List<EpisodeOption> _foldBuffer = new();
 
     // 리플레이 자동 응답 커서. _picks.Count라면 자동 응답할 것 없음.
     private int _replayCursor;
@@ -86,18 +94,16 @@ public sealed class SceneRunner
         ChapterProgression chapter, ProgressionState entryState, bool isNewSession)
     {
         string rootEpisodeId = entryState.CurrentEpisodeId;
-        ProgressionState state = entryState;
 
         chapter.TryGetNode(rootEpisodeId, out EpisodeNode root);
 
         _picks.Clear();
-        _watchedReported.Clear();
+        _watched.Clear();
         _replayCursor = 0;
 
         Debug.Log($"[장면] 진입 — {chapter.SceneIdOf(rootEpisodeId)} @ {rootEpisodeId}");
 
         await _player.EnterSceneAsync(root.DialogueEntryId, isNewSession);
-        _rollbackHistory.ResetRollbackFloor();
 
         string episodeId = rootEpisodeId;
 
@@ -108,15 +114,15 @@ public sealed class SceneRunner
             if (!await PlayAsync(node.DialogueEntryId, "대사"))
             {
                 if (_isStopRequested())
-                    return new SceneRunResult(SceneRunOutcome.Stopped, state);
+                    return Discard(entryState);
 
                 episodeId = rootEpisodeId;
                 continue;
             }
 
-            ReportWatchedOnce(chapter, node);
+            NoteWatched(node);
 
-            // 리플레이 자동 응답
+            // 리플레이 자동 응답 — 커서만 옮긴다. 상태는 fold가 만든다.
             if (_replayCursor < _picks.Count && _seek.IsSeekingActive)
             {
                 ProgressionPick pick = _picks[_replayCursor++];
@@ -126,25 +132,21 @@ public sealed class SceneRunner
                 if (pick.Option.HasVia && !await PlayAsync(pick.Option.ViaNodeId, "연출"))
                 {
                     if (_isStopRequested())
-                        return new SceneRunResult(SceneRunOutcome.Stopped, state);
+                        return Discard(entryState);
 
                     episodeId = rootEpisodeId;
                     continue;
                 }
 
-                if (!pick.Committed)
-                    state = Commit(chapter, state, pick);
-
                 episodeId = pick.Option.TargetEpisodeId;
 
                 if (!chapter.IsSameScene(pick.FromEpisodeId, episodeId))
-                    return new SceneRunResult(SceneRunOutcome.SceneEnded, state);
+                    return Fold(chapter, entryState, SceneRunOutcome.SceneEnded);
 
                 continue;
             }
 
-            // 시크가 꺼졌는데 기록이 남았다 - 표적이 선택 직전 라인인 것.
-            // 그 때부턴 선택.
+            // 시크가 꺼졌는데 기록이 남았다 - 표적이 선택 직전 라인인 것. 그 뒤는 사람이 고른다.
             if (_replayCursor < _picks.Count)
                 _picks.RemoveRange(_replayCursor, _picks.Count - _replayCursor);
 
@@ -156,10 +158,13 @@ public sealed class SceneRunner
                 _seek.ClearSeek();
             }
 
-            ChapterAdvance advance = ChapterTransition.Resolve(chapter, state);
+            // 판정은 작업 상태로 — 진입 상태에 지금까지의 선택을 접은 것.
+            ProgressionState working = entryState.Fold(chapter, PendingOptions());
+
+            ChapterAdvance advance = ChapterTransition.Resolve(chapter, working);
 
             if (advance.Kind == ChapterAdvanceKind.ChapterEnded)
-                return new SceneRunResult(SceneRunOutcome.ChapterEnded, state);
+                return Fold(chapter, entryState, SceneRunOutcome.ChapterEnded);
 
             ResolvedOption? picked;
 
@@ -177,7 +182,7 @@ public sealed class SceneRunner
             }
 
             if (!picked.HasValue)
-                return new SceneRunResult(SceneRunOutcome.Stopped, state);
+                return Discard(entryState);
 
             var chosen = new ProgressionPick
             {
@@ -185,28 +190,25 @@ public sealed class SceneRunner
                 FromEpisodeId = node.EpisodeId,
                 SourceIndex = picked.Value.SourceIndex,
                 Anchor = _rollbackHistory.LastHistoryIndex,
-                Committed = false,
             };
 
             _picks.Add(chosen);
             _replayCursor = _picks.Count;
 
-            // 연출도 Story 노드.
+            // 연출도 Story 노드. 아직 미확정 — Via 안에서 롤백하면 이 선택도 물릴 수 있다.
             if (chosen.Option.HasVia && !await PlayAsync(chosen.Option.ViaNodeId, "연출"))
             {
                 if (_isStopRequested())
-                    return new SceneRunResult(SceneRunOutcome.Stopped, state);
+                    return Discard(entryState);
 
                 episodeId = rootEpisodeId;
                 continue;
             }
 
-            state = Commit(chapter, state, chosen);
-
             episodeId = chosen.Option.TargetEpisodeId;
 
             if (!chapter.IsSameScene(chosen.FromEpisodeId, episodeId))
-                return new SceneRunResult(SceneRunOutcome.SceneEnded, state);
+                return Fold(chapter, entryState, SceneRunOutcome.SceneEnded);
         }
     }
 
@@ -231,8 +233,7 @@ public sealed class SceneRunner
         return true;
     }
 
-    // 리플레이 직전. 표적 뒤의 선택 기록을 물린다 - ChoiceHistory가 Yarn 선택에 하는 것과 같은 규칙.
-    // 커밋된 기록은 하한 덕에 표적보다 항상 앞이라 물리지 않는다.
+    // 리플레이 직전. 표적 뒤의 선택·시청 기록을 물린다 - ChoiceHistory가 Yarn 선택에 하는 것과 같은 규칙.
     private async Task BeginReplayAsync()
     {
         await _player.PrepareReplayAsync();
@@ -244,6 +245,12 @@ public sealed class SceneRunner
                 if (_picks[i].Anchor > target.historyIndex)
                     _picks.RemoveAt(i);
             }
+
+            for (int i = _watched.Count - 1; i >= 0; i--)
+            {
+                if (_watched[i].Anchor > target.historyIndex)
+                    _watched.RemoveAt(i);
+            }
         }
 
         _replayCursor = 0;
@@ -251,38 +258,76 @@ public sealed class SceneRunner
         Debug.Log($"[장면] 리플레이 — 루트부터. 자동 응답할 선택 {_picks.Count}개");
     }
 
-    private ProgressionState Commit(
-        ChapterProgression chapter, ProgressionState state, ProgressionPick pick)
+    // 장면 끝 — 여기가 커밋이다. pending을 순서대로 접어 확정 상태를 만들고, 그 순서대로 보고한다.
+    // 스탯 반영과 이동이 한 연산이라는 규칙이 장면 단위로 선다.
+    private SceneRunResult Fold(
+        ChapterProgression chapter, ProgressionState entryState, SceneRunOutcome outcome)
     {
-        ProgressionState next = state.Commit(chapter, pick.Option);
+        for (int i = 0; i < _watched.Count; i++)
+        {
+            _reporter.ReportEpisodeWatched(
+                new EpisodeWatchReport(chapter.ChapterId, _watched[i].EpisodeId, _watched[i].EventKey));
+        }
 
-        pick.Committed = true;
+        ProgressionState state = entryState;
 
-        // 커밋 앞으로는 못 돌아간다 (잠정 한계 — G3에서 해제).
-        _rollbackHistory.SetRollbackFloor(_rollbackHistory.LastHistoryIndex);
+        for (int i = 0; i < _replayCursor; i++)
+        {
+            ProgressionPick pick = _picks[i];
 
-        _reporter.ReportChoiceCommitted(
-            new ChoiceCommitReport(
-                chapter.ChapterId,
-                pick.FromEpisodeId,
-                pick.SourceIndex,
-                pick.Option,
-                next));
+            state = state.Commit(chapter, pick.Option);
 
-        return next;
+            _reporter.ReportChoiceCommitted(
+                new ChoiceCommitReport(
+                    chapter.ChapterId,
+                    pick.FromEpisodeId,
+                    pick.SourceIndex,
+                    pick.Option,
+                    state));
+        }
+
+        Debug.Log($"[장면] 확정 — 선택 {_replayCursor}개, 시청 {_watched.Count}개 → {state.CurrentEpisodeId}");
+
+        return new SceneRunResult(outcome, state);
     }
 
-    // 장면 안에서 한 번만. 리플레이로 같은 노드를 다시 끝내도 두 번 보고하지 않음.
-    private void ReportWatchedOnce(ChapterProgression chapter, EpisodeNode node)
+    // 장면 중간 멈춤 — pending은 확정하지도 보고하지도 않는다. 이어하기는 장면 처음부터.
+    private SceneRunResult Discard(ProgressionState entryState)
+    {
+        if (_picks.Count > 0 || _watched.Count > 0)
+            Debug.Log($"[장면] 멈춤 — 미확정 선택 {_picks.Count}개, 시청 {_watched.Count}개 버림");
+
+        return new SceneRunResult(SceneRunOutcome.Stopped, entryState);
+    }
+
+    private IReadOnlyList<EpisodeOption> PendingOptions()
+    {
+        _foldBuffer.Clear();
+
+        for (int i = 0; i < _replayCursor; i++)
+            _foldBuffer.Add(_picks[i].Option);
+
+        return _foldBuffer;
+    }
+
+    // 다 본 EventKey 에피소드를 적어 둔다. 같은 노드를 리플레이로 다시 끝내도 한 번만.
+    private void NoteWatched(EpisodeNode node)
     {
         if (node.EventKey.Length == 0)
             return;
 
-        if (!_watchedReported.Add(node.EpisodeId))
-            return;
+        for (int i = 0; i < _watched.Count; i++)
+        {
+            if (string.Equals(_watched[i].EpisodeId, node.EpisodeId, StringComparison.Ordinal))
+                return;
+        }
 
-        _reporter.ReportEpisodeWatched(
-            new EpisodeWatchReport(chapter.ChapterId, node.EpisodeId, node.EventKey));
+        _watched.Add(new WatchedEpisode
+        {
+            EpisodeId = node.EpisodeId,
+            EventKey = node.EventKey,
+            Anchor = _rollbackHistory.LastHistoryIndex,
+        });
     }
 
     private async Task<ResolvedOption?> PickAsync(ChapterAdvance advance)

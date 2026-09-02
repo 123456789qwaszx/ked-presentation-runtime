@@ -124,6 +124,24 @@ namespace Ked.Progression
             return new ProgressionState(chosen.TargetEpisodeId, stats);
         }
 
+        // 여러 선택을 순서대로 접는다 — Commit의 합성일 뿐이라 규칙이 갈릴 수 없다.
+        //
+        // 장면 안의 미확정 선택(pending)에서 작업 상태를 얻는 자리. 진입 상태는 그대로 두고
+        // 입력(선택 목록)만 줄이거나 늘려 다시 계산하면, 롤백이 상태를 되돌리는 코드가 아니라
+        // 입력을 자르는 코드가 된다.
+        public ProgressionState Fold(ChapterProgression chapter, IReadOnlyList<EpisodeOption> chosen)
+        {
+            if (chosen == null)
+                throw new ArgumentNullException(nameof(chosen));
+
+            ProgressionState state = this;
+
+            for (int i = 0; i < chosen.Count; i++)
+                state = state.Commit(chapter, chosen[i]);
+
+            return state;
+        }
+
         // 고른 선택지가 지금 있는 에피소드에서 나가는 길인지 확인한다.
         //
         // 챕터 생성자는 "모든 간선이 실재하는 노드에 착지한다"까지만 보장하지, 호출자가

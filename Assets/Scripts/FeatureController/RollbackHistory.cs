@@ -35,12 +35,6 @@ public sealed class RollbackHistory
     // (노드, 라인)별 등장 횟수. 시크 좌표 용도(occurrence).
     private readonly Dictionary<(string nodeName, string lineId), int> _seenCount = new();
 
-    // 롤백 하한 — 이 historyIndex 이하로는 되돌아가지 않는다.
-    // 진행 층이 커밋 직후 세운다: 커밋 앞으로 돌아가면 되감을 수 없는 스탯 앞으로 가는 것.
-    // 장면 진입에서 리셋. 롤백 요청의 클리어에서는 유지(커밋은 그대로니까).
-    // (G3 커밋 유예가 서면 필요 없어진다.)
-    private int _floorHistoryIndex = -1;
-
     // 마지막 롤백 요청의 표적. 리플레이를 여는 쪽이 가져가서 표적 뒤 기록을 정리한다.
     private RollbackPoint _pendingTarget;
     private bool _hasPendingTarget;
@@ -97,20 +91,6 @@ public sealed class RollbackHistory
         return true;
     }
 
-    // 롤백 가능한 경계 지정
-    public void SetRollbackFloor(int historyIndex)
-    {
-        if (historyIndex > _floorHistoryIndex)
-            _floorHistoryIndex = historyIndex;
-    }
-
-    public void ResetRollbackFloor()
-    {
-        _floorHistoryIndex = -1;
-    }
-
-    public bool IsAtOrBelowFloor(in RollbackPoint target) =>
-        target.historyIndex <= _floorHistoryIndex;
     
     // Seek 판정
     public void MarkRollbackTarget(in RollbackPoint target)

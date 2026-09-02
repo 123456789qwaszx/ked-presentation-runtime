@@ -149,9 +149,8 @@ public sealed class EpisodePlayer
             return;
         }
 
-        // 노드 밖(진행 선택지 대기)에서도 받는다. 장면 안이면 되돌릴 루프가 있다.
-        // 커밋 앞으로 물리는 것은 여기가 아니라 롤백 하한(RollbackHistory)이 막는다 —
-        // 그 벽은 커밋 유예(G3)가 없앤다.
+        // 노드 밖(진행 선택지 대기)에서도 받는다. 장면 안이면 되돌릴 루프가 있고,
+        // 장면 안의 선택은 전부 미확정이라 어디로든 물릴 수 있다.
         bool wasRunning = _nodeRunner.IsRunning;
 
         _replayRequested = true;
