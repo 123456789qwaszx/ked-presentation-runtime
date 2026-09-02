@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -96,12 +97,24 @@ public sealed class EpisodePlayer
     // 노드 하나 실행.
     public async Task<NodePlayOutcome> PlayNodeAsync(string nodeName)
     {
+        // 노드 사이의 틈에 들어온 요청 — 틀지 않고 바로 되감는다.
+        if (_replayRequested)
+            return NodePlayOutcome.ReplayRequested;
+
         await _nodeRunner.StartAsync(nodeName);
 
         return _replayRequested
             ? NodePlayOutcome.ReplayRequested
             : NodePlayOutcome.Completed;
     }
+
+    // 리플레이가 요청됐는데 아직 되감지 않았다.
+    // 노드 밖(선택지 대기)에서 취소가 왔을 때 리플레이 때문인지 가리는 용도.
+    public bool IsReplayPending => _replayRequested;
+
+    // 노드가 돌지 않을 때 리플레이가 요청됐다 — 장면 루프가 기다리는 것(진행 선택지)을 접어야 한다.
+    // 노드 안이면 Stop이 그 일을 하므로 안 울린다.
+    public event Action ReplayRequestedWhileIdle;
 
     // 리플레이 준비.
     public async Task PrepareReplayAsync()
@@ -136,24 +149,21 @@ public sealed class EpisodePlayer
             return;
         }
 
-        if (!_nodeRunner.IsRunning)
-        {
-            // 노드가 이미 끝났다 - 되돌려 줄 루프가 없다. 진행 선택지가 떠 있는 자리가 여기.
-            
-            // 이걸 챕터단위로 롤백가능하게 하려면,
-            // 확정된 상태를 되돌리고 저장 기록까지 다시 써야하는 보상/취소 연산.
-            
-            // 따라서 챕터 단위 롤백을 원할 시,
-            // 방법1.챕터를 하나의 장면으로 통일하는 방식을 사용하는 방법.
-            // 방법2. 커밋유예.
-            Debug.LogWarning("[EpisodePlayer] 재생 중이 아니라 롤백을 무시한다.");
-            return;
-        }
+        // 노드 밖(진행 선택지 대기)에서도 받는다. 장면 안이면 되돌릴 루프가 있다.
+        // 커밋 앞으로 물리는 것은 여기가 아니라 롤백 하한(RollbackHistory)이 막는다 —
+        // 그 벽은 커밋 유예(G3)가 없앤다.
+        bool wasRunning = _nodeRunner.IsRunning;
 
         _replayRequested = true;
 
+        // 노드 밖에서도 같은 정리 — 라인 중단·롤백 포인트·샷 응답·스코프 종료.
+        // 러너 Stop만 건너뛴다(돌고 있지 않으니까).
         Task stop = StopDialogueAsync();
         _replayStop = stop;
+
+        // 노드 밖이면 장면 루프가 선택지를 기다리는 중 — 접으라고 알린다.
+        if (!wasRunning)
+            ReplayRequestedWhileIdle?.Invoke();
 
         await stop;
     }

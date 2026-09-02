@@ -76,6 +76,10 @@ public sealed class SceneRunner
         _rollbackHistory = rollbackHistory;
         _reporter = reporter;
         _isStopRequested = isStopRequested;
+
+        // 선택지를 기다리는 중에 롤백이 오면 박스를 접는다. 기다리는 중이 아니면 아무 일도 없다.
+        // 접힌 ShowAsync는 취소 예외로 깨어나고, RunAsync가 그것을 리플레이로 읽는다.
+        _player.ReplayRequestedWhileIdle += _options.Cancel;
     }
 
     public async Task<SceneRunResult> RunAsync(
@@ -157,7 +161,20 @@ public sealed class SceneRunner
             if (advance.Kind == ChapterAdvanceKind.ChapterEnded)
                 return new SceneRunResult(SceneRunOutcome.ChapterEnded, state);
 
-            ResolvedOption? picked = await PickAsync(advance);
+            ResolvedOption? picked;
+
+            try
+            {
+                picked = await PickAsync(advance);
+            }
+            catch (OperationCanceledException) when (_player.IsReplayPending)
+            {
+                // 선택지 대기 중 롤백 — 박스가 접혔다. 멈춤(RequestStop)의 취소는 그대로 던져진다.
+                await BeginReplayAsync();
+
+                episodeId = rootEpisodeId;
+                continue;
+            }
 
             if (!picked.HasValue)
                 return new SceneRunResult(SceneRunOutcome.Stopped, state);
