@@ -31,6 +31,10 @@ public sealed class LocalSaveFile
     // 순번을 롤백 포인트와 나란히 세운다.
     public List<DialogueLogEntry> Backlog = new();
 
+    // 갈라진 회차가 첫 장면에서 소비하는 로드 계획 — 장면 루트에서 표적 라인까지 경로대로 달린다.
+    // 첫 장면이 끝나 저장되면 사라진다(소비됨). null이면 장면 루트에서 시작.
+    public SavedLoadPlan PendingLoad;
+
     // 시간은 둘로 센다 — 갈라진 지점까지 물려받은 이야기상의 시간과, 이 회차에서 새로 플레이한 시간.
     public int InheritedPlaySeconds;
     public int OwnPlaySeconds;
@@ -96,6 +100,15 @@ public sealed class SavedChoice
 {
     public string FromEpisodeId;
     public int OptionIndex;
+}
+
+// 장면 루트에서 표적 라인까지 달리는 계획. 장면 기록의 경로 + Yarn 선택 + 표적.
+// 경로가 표적 뒤까지 이어져 있어도 된다 — 표적에 닿아 시크가 꺼지면 나머지는 버려진다.
+public sealed class SavedLoadPlan
+{
+    public List<SavedChoice> Path = new();
+    public List<VNChoiceRecord> YarnChoices = new();
+    public SaveLineTarget Target;
 }
 
 // saves/sync_queue.json - 서버로 아직 못 보낸 것과, 서버에 대해 아는 것.

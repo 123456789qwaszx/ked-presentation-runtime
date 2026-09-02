@@ -68,10 +68,14 @@ public sealed class ProgressionDriver
     // 이어하기의 백로그(이전 장면들) — 첫 장면 진입 전에 되살리고 버린다.
     private IReadOnlyList<DialogueLogEntry> _restoreBacklog;
 
+    // 첫 장면에서 표적 라인까지 달리는 계획(갈라지기·즐겨찾기 로드). 한 번 쓰고 버린다.
+    private SavedLoadPlan _loadPlan;
+
     public async Task RunAsync(
         YarnProject project, ChapterProgression chapter, ProgressionState entryState,
         YarnVariableSnapshot restoreVariables = null,
-        IReadOnlyList<DialogueLogEntry> restoreBacklog = null)
+        IReadOnlyList<DialogueLogEntry> restoreBacklog = null,
+        SavedLoadPlan loadPlan = null)
     {
         if (IsRunning)
         {
@@ -87,6 +91,7 @@ public sealed class ProgressionDriver
         _yarnChapterId = null;
         _restoreVariables = restoreVariables;
         _restoreBacklog = restoreBacklog;
+        _loadPlan = loadPlan;
 
         try
         {
@@ -134,7 +139,10 @@ public sealed class ProgressionDriver
             // 장면 진입의 체크포인트 Capture보다 앞이어야 리플레이가 초기화된 [3]에서 출발한다.
             SyncChapterVariables();
 
-            SceneRunResult result = await _scenes.RunAsync(_chapter, _state, isNewSession);
+            SavedLoadPlan loadPlan = _loadPlan;
+            _loadPlan = null;
+
+            SceneRunResult result = await _scenes.RunAsync(_chapter, _state, isNewSession, loadPlan);
 
             isNewSession = false;
             _state = result.State;

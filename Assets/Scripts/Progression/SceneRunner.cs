@@ -99,8 +99,13 @@ public sealed class SceneRunner
         _player.ReplayRequestedWhileIdle += _options.Cancel;
     }
 
+    // 로드 중인가 — 표적에 닿을 때까지. 시간 실측용.
+    private bool _loading;
+    private float _loadStartedAt;
+
+    // loadPlan이 있으면 루트에서 표적 라인까지 경로대로 달린다(Load 시크). 리플레이 자동 응답과 같은 기전.
     public async Task<SceneRunResult> RunAsync(
-        ChapterProgression chapter, ProgressionState entryState, bool isNewSession)
+        ChapterProgression chapter, ProgressionState entryState, bool isNewSession, SavedLoadPlan loadPlan = null)
     {
         string rootEpisodeId = entryState.CurrentEpisodeId;
 
@@ -109,6 +114,7 @@ public sealed class SceneRunner
         _picks.Clear();
         _watched.Clear();
         _replayCursor = 0;
+        _loading = false;
 
         Debug.Log($"[장면] 진입 — {chapter.SceneIdOf(rootEpisodeId)} @ {rootEpisodeId}");
 
@@ -117,6 +123,9 @@ public sealed class SceneRunner
         // 진입 스냅샷 — 장면 기록의 앞부분. 아직 라인이 없으니 지금 [3]이 곧 진입값이다.
         _reporter.ReportSceneEntered(new SceneEntryReport(
             chapter.ChapterId, entryState, _captureVariables(), _backlog.NextSerial));
+
+        if (loadPlan != null)
+            BeginLoad(chapter, rootEpisodeId, loadPlan);
 
         string episodeId = rootEpisodeId;
 
@@ -133,12 +142,16 @@ public sealed class SceneRunner
                 continue;
             }
 
+            NoteLoadProgress();
             NoteWatched(node);
 
             // 리플레이 자동 응답 — 커서만 옮긴다. 상태는 fold가 만든다.
             if (_replayCursor < _picks.Count && _seek.IsSeekingActive)
             {
                 ProgressionPick pick = _picks[_replayCursor++];
+
+                // 앵커는 이 노드의 마지막 라인 — 리플레이면 원래 값 그대로고, 로드로 미리 실린 기록은 여기서 처음 받는다.
+                pick.Anchor = _rollbackHistory.LastHistoryIndex;
 
                 Debug.Log($"[장면] 자동 응답 — {pick.Option}");
 
@@ -164,11 +177,14 @@ public sealed class SceneRunner
                 _picks.RemoveRange(_replayCursor, _picks.Count - _replayCursor);
 
             // 기록이 없는데 시크가 살아 있다 - 표적을 못 찾은 채 노드가 끝남.
-            // 끝까지 passThrough 대신, 멈추고 일반 재생으로.(차후 룰 고정할 것)
+            // 끝까지 passThrough 대신, 멈추고 일반 재생으로. 로드였다면 정직한 퇴행 — 표적이 콘텐츠에서 사라진 것.
             if (_seek.IsSeekingActive)
             {
-                Debug.LogWarning("[장면] 롤백 표적을 못 찾은 채 선택지에 닿았다 — 시크를 끄고 일반 재생으로.");
+                Debug.LogWarning(_loading
+                    ? "[장면] 로드 표적을 못 찾은 채 선택지에 닿았다 — 시크를 끄고 여기서 일반 재생으로. (콘텐츠가 바뀌었을 수 있다)"
+                    : "[장면] 롤백 표적을 못 찾은 채 선택지에 닿았다 — 시크를 끄고 일반 재생으로.");
                 _seek.ClearSeek();
+                _loading = false;
             }
 
             // 판정은 작업 상태로 — 진입 상태에 지금까지의 선택을 접은 것.
@@ -232,6 +248,69 @@ public sealed class SceneRunner
             if (!chapter.IsSameScene(chosen.FromEpisodeId, episodeId))
                 return FinalizeScene(chapter, entryState, SceneRunOutcome.SceneEnded);
         }
+    }
+
+    // 로드 계획을 장면에 싣는다 — 경로를 미리 실린 기록으로, Yarn 선택을 ChoiceHistory로, 표적을 Load 시크로.
+    // 경로가 챕터와 안 맞으면(콘텐츠 변경) 계획을 버리고 루트에서 일반 재생한다.
+    private void BeginLoad(ChapterProgression chapter, string rootEpisodeId, SavedLoadPlan plan)
+    {
+        if (plan.Target == null || string.IsNullOrEmpty(plan.Target.NodeName))
+        {
+            Debug.LogWarning("[장면] 로드 계획에 표적이 없다 — 루트에서 시작.");
+            return;
+        }
+
+        string cursor = rootEpisodeId;
+
+        for (int i = 0; i < plan.Path.Count; i++)
+        {
+            SavedChoice step = plan.Path[i];
+
+            if (!string.Equals(step.FromEpisodeId, cursor, StringComparison.Ordinal) ||
+                !chapter.TryGetNode(cursor, out EpisodeNode node) ||
+                step.OptionIndex < 0 || step.OptionIndex >= node.NextOptions.Count)
+            {
+                Debug.LogWarning(
+                    $"[장면] 로드 경로가 챕터와 안 맞는다({i}번째, {step.FromEpisodeId}[{step.OptionIndex}]) — " +
+                    "계획을 버리고 루트에서 시작.");
+                _picks.Clear();
+                return;
+            }
+
+            EpisodeOption option = node.NextOptions[step.OptionIndex];
+
+            _picks.Add(new ProgressionPick
+            {
+                Option = option,
+                FromEpisodeId = cursor,
+                SourceIndex = step.OptionIndex,
+                Anchor = -1, // 자동 응답 시점에 받는다.
+            });
+
+            cursor = option.TargetEpisodeId;
+        }
+
+        _replayCursor = 0;
+        _choiceHistory.RestoreChoices(plan.YarnChoices);
+        _seek.BeginLoadSeek(plan.Target.NodeName, plan.Target.LineId, plan.Target.Occurrence);
+
+        _loading = true;
+        _loadStartedAt = Time.realtimeSinceStartup;
+
+        Debug.Log(
+            $"[장면] 로드 — 루트 {rootEpisodeId}에서 {plan.Target.NodeName}/{plan.Target.LineId}#{plan.Target.Occurrence}까지. " +
+            $"경로 {_picks.Count}개, Yarn 선택 {plan.YarnChoices.Count}개");
+    }
+
+    // 표적에 닿았는가(노드 하나가 끝난 뒤 확인). 로딩 화면이 필요한지 판단하는 실측.
+    private void NoteLoadProgress()
+    {
+        if (!_loading || _seek.IsSeekingActive)
+            return;
+
+        _loading = false;
+
+        Debug.Log($"[장면] 로드 도착 — {(Time.realtimeSinceStartup - _loadStartedAt) * 1000f:F0}ms");
     }
 
     // 노드 하나 진행. 끝까지 갔으면 true. 리플레이가 요청됐으면 되감아 두고 false

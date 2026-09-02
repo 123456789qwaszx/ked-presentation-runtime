@@ -45,19 +45,25 @@ public sealed partial class VNScreenBindings
             return;
         }
 
-        // 이전 장면 — 확정된 것은 되돌리지 않는다. 그 장면 기록을 물려받아 새 회차로 갈라진다(장면 루트부터).
+        // 이전 장면 — 확정된 것은 되돌리지 않는다. 그 장면 기록을 물려받아 새 회차로 갈라지고,
+        // 루트에서 그 라인까지 달린다(Load 시크). 라인 좌표를 못 세우면 장면 루트에서.
         if (_saveCoordinator == null || _progressionLauncher == null)
             return;
 
-        int sceneIndex = _saveCoordinator.FindSceneIndexBySerial(entry.lineSerial);
+        int sceneIndex;
 
-        if (sceneIndex < 0)
-            return;
+        if (!_saveCoordinator.TryMakeLineTarget(entry, out sceneIndex, out SaveLineTarget target))
+        {
+            sceneIndex = _saveCoordinator.FindSceneIndexBySerial(entry.lineSerial);
+
+            if (sceneIndex < 0)
+                return;
+        }
 
         ClosePanel();
 
         await _progressionLauncher.StopAsync();
-        _saveCoordinator.ForkFromScene(sceneIndex);
+        _saveCoordinator.ForkFromScene(sceneIndex, target);
         await _progressionLauncher.LaunchAsync();
     }
 }

@@ -9,6 +9,10 @@ public sealed class VNLinePresentationState : ISeekStateQuery
     public void BeginRollbackSeek(string nodeName, string lineId, int occurrence)
         => BeginSeek(VNSeekKind.Rollback, nodeName, lineId, occurrence);
 
+    // 로드 — 장면 루트에서 표적까지. 롤백과 달리 백로그를 다시 적는다(VNYarnLineBoundary).
+    public void BeginLoadSeek(string nodeName, string lineId, int occurrence)
+        => BeginSeek(VNSeekKind.Load, nodeName, lineId, occurrence);
+
     private void BeginSeek(VNSeekKind kind, string nodeName, string lineId, int occurrence)
     {
         IsLineFullyShown = false;

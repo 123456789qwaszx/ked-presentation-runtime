@@ -114,7 +114,47 @@ public sealed class SaveCoordinator : IProgressionReporter
             save.Stats,
             save.Variables,
             save.Backlog,
+            save.PendingLoad,
             save.ChapterCompleted);
+    }
+
+    // 백로그 항목 → 그 장면 안 라인 좌표. 등장 순번은 그 장면의 백로그 안에서 같은 (노드, 라인)을 센 것 —
+    // 롤백 포인트의 occurrence와 같은 좌표계다(둘 다 장면 시작에서 0부터 센다).
+    public bool TryMakeLineTarget(in DialogueLogEntry entry, out int sceneIndex, out SaveLineTarget target)
+    {
+        target = null;
+        sceneIndex = FindSceneIndexBySerial(entry.lineSerial);
+
+        if (sceneIndex < 0)
+            return false;
+
+        LocalSaveFile current = _localStore.Load(_slotNo);
+
+        if (current?.Backlog == null)
+            return false;
+
+        int start = _scenes[sceneIndex].Checkpoint.BacklogSerialStart;
+        int occurrence = 0;
+
+        for (int i = 0; i < current.Backlog.Count; i++)
+        {
+            DialogueLogEntry e = current.Backlog[i];
+
+            if (e.lineSerial < start || e.lineSerial > entry.lineSerial)
+                continue;
+
+            if (string.Equals(e.nodeName, entry.nodeName, StringComparison.Ordinal) &&
+                string.Equals(e.lineId, entry.lineId, StringComparison.Ordinal))
+            {
+                occurrence++;
+            }
+        }
+
+        if (occurrence == 0)
+            return false;
+
+        target = new SaveLineTarget { NodeName = entry.nodeName, LineId = entry.lineId, Occurrence = occurrence };
+        return true;
     }
 
     // ── 갈라지기 ─────────────────────────────────────────────────────────────
@@ -138,8 +178,8 @@ public sealed class SaveCoordinator : IProgressionReporter
     // 이력의 장면 기록 하나를 물려받아 새 회차를 쓰고 활성으로 세운다. 호출자는 드라이버를 멈춘 뒤
     // 부르고, 그 뒤 런처를 다시 띄운다 — 재개 경로가 새 회차를 그 장면 루트에서 연다.
     //
-    // target이 있으면 출처 표시로만 남긴다(F2-b가 LoadPlan으로 쓴다). 물려받는 것: 그 장면 앞까지의
-    // 기록·백로그·누적 시간. 옛 회차 파일과 큐는 그대로.
+    // target이 있으면 그 장면의 경로·Yarn 선택과 함께 로드 계획(PendingLoad)으로 실린다 — 첫 장면이
+    // 루트에서 표적까지 달린다. 물려받는 것: 그 장면 앞까지의 기록·백로그·누적 시간. 옛 회차 파일과 큐는 그대로.
     public void ForkFromScene(int sceneIndex, SaveLineTarget target = null)
     {
         if (sceneIndex < 0 || sceneIndex >= _scenes.Count)
@@ -176,6 +216,14 @@ public sealed class SaveCoordinator : IProgressionReporter
             ChapterCompleted = false,
             Scenes = _scenes.Take(sceneIndex).ToList(),
             Backlog = backlog,
+            PendingLoad = target == null
+                ? null
+                : new SavedLoadPlan
+                {
+                    Path = origin.Path.Select(c => new SavedChoice { FromEpisodeId = c.FromEpisodeId, OptionIndex = c.OptionIndex }).ToList(),
+                    YarnChoices = new List<VNChoiceRecord>(origin.YarnChoices),
+                    Target = target,
+                },
             InheritedPlaySeconds = checkpoint.PlaySecondsAtEntry,
             OwnPlaySeconds = 0,
             PlaySeconds = checkpoint.PlaySecondsAtEntry,
@@ -189,7 +237,8 @@ public sealed class SaveCoordinator : IProgressionReporter
 
         Debug.Log(
             $"[저장] 갈라지기 — {fromId} 장면 {sceneIndex}({checkpoint.EpisodeId}) → 새 회차 {newId}. " +
-            $"물려받은 기록 {file.Scenes.Count}개, 백로그 {backlog.Count}줄, 시간 {checkpoint.PlaySecondsAtEntry}s");
+            $"물려받은 기록 {file.Scenes.Count}개, 백로그 {backlog.Count}줄, 시간 {checkpoint.PlaySecondsAtEntry}s" +
+            (target == null ? " — 장면 루트에서" : $" — {target.NodeName}/{target.LineId}#{target.Occurrence}까지 달린다"));
     }
 
     // ── 보고 ────────────────────────────────────────────────────────────────

@@ -81,6 +81,7 @@ public sealed class ProgressionLauncher
         ProgressionResumePoint resume = _resumeProvider();
         YarnVariableSnapshot variables = null;
         IReadOnlyList<DialogueLogEntry> backlog = null;
+        SavedLoadPlan loadPlan = null;
 
         if (resume != null)
         {
@@ -106,6 +107,7 @@ public sealed class ProgressionLauncher
                 state = ProgressionState.Restore(saved, resume.EpisodeId, resume.Stats);
                 variables = resume.Variables;
                 backlog = resume.Backlog;
+                loadPlan = resume.LoadPlan;
 
                 Debug.Log(
                     $"[진행] 재개 — {resume.ChapterId}/{resume.EpisodeId}, [3] {variables?.Count ?? 0}개");
@@ -114,6 +116,6 @@ public sealed class ProgressionLauncher
 
         // Yarn 변수를 세우는 일은 드라이버가 한다 — 챕터가 바뀔 때마다 다시 세워야 하고,
         // 챕터가 바뀌는 것을 아는 쪽은 흐름을 쥔 드라이버뿐이다. 덤프도 그 뒤에 덮는다.
-        await _driver.RunAsync(_dialogueRunner.YarnProject, chapter, state, variables, backlog);
+        await _driver.RunAsync(_dialogueRunner.YarnProject, chapter, state, variables, backlog, loadPlan);
     }
 }
