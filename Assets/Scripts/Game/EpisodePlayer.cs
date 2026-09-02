@@ -2,18 +2,11 @@ using System;
 using System.Threading.Tasks;
 using UnityEngine;
 
-// 전제: 이 프로젝트의 롤백은 "복원"이 아니라 "다시 재생"임.
-// 리플레이시 직전, 어느 노드에서 출발했는지와, 변수 스냅샷 챙김.
-
-// <<jump>>와 <<detour>>의 차이 - detour와 콜스택
-// jump = goto. 그 노드로 넘어가면 끝.
-// detour = 함수 호출. VM이 "끝나면 여기로 돌아와라"라는 복귀 주소를 스택에 쌓고 들어감.
-
-// 장면(Scene)의 연출 수명과 노드 실행을 맡음.
+// 장면(Scene)의 연출 수명과 노드 실행.
 //
-// - EnterSceneAsync   (장면 진입 묶음): 이전 대화 Stop, 체크포인트, 기록 리셋, 무대 기준선
-//   PlayNodeAsync     (노드 하나 실행): 리플레이가 요청됐으면 그렇다고 알려준다
-//   PrepareReplayAsync (리플레이 준비): 요청 쪽 Stop 대기, 변수 되감기, 무대 기준선
+// - EnterSceneAsync    (장면 진입 묶음): 이전 대화 Stop, 체크포인트, 기록 리셋, 연출 무대 기준선
+//   PlayNodeAsync      (노드 하나 실행): 리플레이 요청 전달.
+//   PrepareReplayAsync (리플레이 준비) : 요청 쪽 Stop 대기, 변수 되감기, 연출 무대 기준선
 //
 // StartGameAsync/ContinueEpisodeAsync는 디버깅용.
 // 진행 층 없이 노드만 틀어 보는 경로(RunYarn, RunEpisodeChain)가 사용.
@@ -37,12 +30,18 @@ public sealed class EpisodePlayer
     private readonly ChoiceHistory _choiceHistory;
 
     private string _sceneRootNodeName;
-
-    // 롤백이 걸렸는가. 호출자의 장면 루프가 이 깃발을 보고 같은 자리에서 다시 튼다.
-    private bool _replayRequested;
-
-    // 요청 쪽의 멈춤. 그것이 끝난 뒤에 다시 틀어야 Stop과 Start가 안 겹친다.
-    private Task _replayStop;
+    
+    private bool _replayRequested; // 롤백이 걸렸는가. 호출자의 장면 루프가 이 깃발을 보고 같은 자리에서 다시 튼다.
+    private Task _replayStop;// 요청 쪽의 멈춤. 그것이 끝난 뒤에 다시 틀어야 Stop과 Start가 안 겹친다.
+    
+    // 리플레이가 요청됐는데 아직 되감지 않았다.
+    // 노드 밖(선택지 대기)에서 취소가 왔을 때 리플레이 때문인지 가리는 용도.
+    public bool IsReplayPending => _replayRequested;
+    public string SceneRootNodeName => _sceneRootNodeName;
+    
+    // 노드가 돌지 않을 때 리플레이가 요청됐다 — 장면 루프가 기다리는 것(진행 선택지)을 접어야 한다.
+    // 노드 안이면 Stop이 그 일을 하므로 안 울린다.
+    public event Action ReplayRequestedWhileIdle;
 
     public EpisodePlayer(
         IEpisodeNodeRunner nodeRunner,
@@ -94,10 +93,8 @@ public sealed class EpisodePlayer
         BeginSceneRun();
     }
 
-    // 노드 하나 실행.
     public async Task<NodePlayOutcome> PlayNodeAsync(string nodeName)
     {
-        // 노드 사이의 틈에 들어온 요청 — 틀지 않고 바로 되감는다.
         if (_replayRequested)
             return NodePlayOutcome.ReplayRequested;
 
@@ -108,15 +105,6 @@ public sealed class EpisodePlayer
             : NodePlayOutcome.Completed;
     }
 
-    // 리플레이가 요청됐는데 아직 되감지 않았다.
-    // 노드 밖(선택지 대기)에서 취소가 왔을 때 리플레이 때문인지 가리는 용도.
-    public bool IsReplayPending => _replayRequested;
-
-    // 노드가 돌지 않을 때 리플레이가 요청됐다 — 장면 루프가 기다리는 것(진행 선택지)을 접어야 한다.
-    // 노드 안이면 Stop이 그 일을 하므로 안 울린다.
-    public event Action ReplayRequestedWhileIdle;
-
-    // 리플레이 준비.
     public async Task PrepareReplayAsync()
     {
         // 요청 쪽의 Stop이 끝나기를 기다린 뒤에 다시 틈.
@@ -133,9 +121,7 @@ public sealed class EpisodePlayer
 
         BeginSceneRun();
     }
-
-    public string SceneRootNodeName => _sceneRootNodeName;
-
+    
     // 롤백 리플레이 요청을 받고 준비. - 지금 노드를 멈추기만 함.
     // 되돌리고 다시 트는 것은 호출자의 장면 루프 책임.
     //
@@ -143,12 +129,6 @@ public sealed class EpisodePlayer
     // 표적이 detour 안이더라도 출발 노드명을 유지하기 위함.
     public async Task RequestReplayAsync()
     {
-        if (string.IsNullOrEmpty(_sceneRootNodeName))
-        {
-            Debug.LogWarning("[EpisodePlayer] Replay requested before any scene started. Ignored.");
-            return;
-        }
-
         // 노드 밖(진행 선택지 대기)에서도 받는다. 장면 안이면 되돌릴 루프가 있고,
         // 장면 안의 선택은 전부 미확정이라 어디로든 물릴 수 있다.
         bool wasRunning = _nodeRunner.IsRunning;
@@ -166,21 +146,7 @@ public sealed class EpisodePlayer
 
         await stop;
     }
-
-    // 디버그 경로
-
-    public Task StartGameAsync(string nodeName) => PlaySingleNodeSceneAsync(nodeName, isNewSession: true);
-
-    public Task ContinueEpisodeAsync(string nodeName) => PlaySingleNodeSceneAsync(nodeName, isNewSession: false);
-
-    private async Task PlaySingleNodeSceneAsync(string nodeName, bool isNewSession)
-    {
-        await EnterSceneAsync(nodeName, isNewSession);
-
-        while (await PlayNodeAsync(_sceneRootNodeName) == NodePlayOutcome.ReplayRequested)
-            await PrepareReplayAsync();
-    }
-
+    
     // 무대 기준선. 장면 진입과 리플레이 직전, 두 자리에서만.
     private void BeginSceneRun()
     {
@@ -201,5 +167,19 @@ public sealed class EpisodePlayer
 
         _shotResponseSystem.Clear();
         _presentationScopeSession.End();
+    }
+
+    
+    // 디버그 경로
+    public Task StartGameAsync(string nodeName) => PlaySingleNodeSceneAsync(nodeName, isNewSession: true);
+
+    public Task ContinueEpisodeAsync(string nodeName) => PlaySingleNodeSceneAsync(nodeName, isNewSession: false);
+
+    private async Task PlaySingleNodeSceneAsync(string nodeName, bool isNewSession)
+    {
+        await EnterSceneAsync(nodeName, isNewSession);
+
+        while (await PlayNodeAsync(_sceneRootNodeName) == NodePlayOutcome.ReplayRequested)
+            await PrepareReplayAsync();
     }
 }

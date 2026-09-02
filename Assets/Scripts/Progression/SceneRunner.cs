@@ -144,7 +144,7 @@ public sealed class SceneRunner
                 episodeId = pick.Option.TargetEpisodeId;
 
                 if (!chapter.IsSameScene(pick.FromEpisodeId, episodeId))
-                    return Fold(chapter, entryState, SceneRunOutcome.SceneEnded);
+                    return FinalizeScene(chapter, entryState, SceneRunOutcome.SceneEnded);
 
                 continue;
             }
@@ -162,12 +162,12 @@ public sealed class SceneRunner
             }
 
             // 판정은 작업 상태로 — 진입 상태에 지금까지의 선택을 접은 것.
-            ProgressionState working = entryState.Fold(chapter, PendingOptions());
+            ProgressionState working = entryState.FoldChoices(chapter, PendingOptions());
 
             ChapterAdvance advance = ChapterTransition.Resolve(chapter, working);
 
             if (advance.Kind == ChapterAdvanceKind.ChapterEnded)
-                return Fold(chapter, entryState, SceneRunOutcome.ChapterEnded);
+                return FinalizeScene(chapter, entryState, SceneRunOutcome.ChapterEnded);
 
             ResolvedOption? picked;
 
@@ -211,7 +211,7 @@ public sealed class SceneRunner
             episodeId = chosen.Option.TargetEpisodeId;
 
             if (!chapter.IsSameScene(chosen.FromEpisodeId, episodeId))
-                return Fold(chapter, entryState, SceneRunOutcome.SceneEnded);
+                return FinalizeScene(chapter, entryState, SceneRunOutcome.SceneEnded);
         }
     }
 
@@ -263,8 +263,10 @@ public sealed class SceneRunner
 
     // 장면 끝 — 여기가 커밋이다. pending을 순서대로 접어 확정 상태를 만들고, 그 순서대로 보고한다.
     // 스탯 반영과 이동이 한 연산이라는 규칙이 장면 단위로 선다.
-    private SceneRunResult Fold(
-        ChapterProgression chapter, ProgressionState entryState, SceneRunOutcome outcome)
+    private SceneRunResult FinalizeScene(
+        ChapterProgression chapter,
+        ProgressionState entryState,
+        SceneRunOutcome outcome)
     {
         ProgressionState state = entryState;
 
@@ -274,7 +276,7 @@ public sealed class SceneRunner
         {
             ProgressionPick pick = _picks[i];
 
-            state = state.Commit(chapter, pick.Option);
+            state = state.ApplyChoice(chapter, pick.Option);
             choices.Add(new CommittedChoice(pick.FromEpisodeId, pick.SourceIndex));
         }
 

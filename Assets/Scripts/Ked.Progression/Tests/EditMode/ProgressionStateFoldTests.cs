@@ -12,7 +12,7 @@ public sealed class ProgressionStateFoldTests
         ChapterProgression chapter = Chapter();
         ProgressionState entry = chapter.CreateEntryState();
 
-        ProgressionState folded = entry.Fold(chapter, Array.Empty<EpisodeOption>());
+        ProgressionState folded = entry.FoldChoices(chapter, Array.Empty<EpisodeOption>());
 
         Assert.That(folded.CurrentEpisodeId, Is.EqualTo("A"));
         Assert.That(folded.GetStat("int"), Is.EqualTo(0));
@@ -26,7 +26,7 @@ public sealed class ProgressionStateFoldTests
 
         var path = new List<EpisodeOption> { Edge(chapter, "A", 0), Edge(chapter, "B", 0) };
 
-        ProgressionState folded = entry.Fold(chapter, path);
+        ProgressionState folded = entry.FoldChoices(chapter, path);
 
         Assert.That(folded.CurrentEpisodeId, Is.EqualTo("C"));
         Assert.That(folded.GetStat("int"), Is.EqualTo(3)); // A→B +2, B→C +1
@@ -40,10 +40,10 @@ public sealed class ProgressionStateFoldTests
         ProgressionState entry = chapter.CreateEntryState();
 
         ProgressionState stepwise = entry
-            .Commit(chapter, Edge(chapter, "A", 0))
-            .Commit(chapter, Edge(chapter, "B", 0));
+            .ApplyChoice(chapter, Edge(chapter, "A", 0))
+            .ApplyChoice(chapter, Edge(chapter, "B", 0));
 
-        ProgressionState folded = entry.Fold(
+        ProgressionState folded = entry.FoldChoices(
             chapter, new List<EpisodeOption> { Edge(chapter, "A", 0), Edge(chapter, "B", 0) });
 
         Assert.That(folded.CurrentEpisodeId, Is.EqualTo(stepwise.CurrentEpisodeId));
@@ -57,7 +57,7 @@ public sealed class ProgressionStateFoldTests
         ChapterProgression chapter = Chapter();
         ProgressionState entry = chapter.CreateEntryState();
 
-        ProgressionState folded = entry.Fold(
+        ProgressionState folded = entry.FoldChoices(
             chapter,
             new List<EpisodeOption> { Edge(chapter, "A", 0), Edge(chapter, "B", 0), Edge(chapter, "C", 0) });
 
@@ -73,7 +73,7 @@ public sealed class ProgressionStateFoldTests
         ProgressionState entry = chapter.CreateEntryState();
 
         Assert.Throws<ArgumentException>(() =>
-            entry.Fold(chapter, new List<EpisodeOption> { Edge(chapter, "B", 0) }));
+            entry.FoldChoices(chapter, new List<EpisodeOption> { Edge(chapter, "B", 0) }));
     }
 
     // ── 재료 ────────────────────────────────────────────────────────────────
