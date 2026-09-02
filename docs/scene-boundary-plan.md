@@ -64,6 +64,7 @@
 | G4 | 저장 정렬 + [3] 덤프 | 저장 = 장면 끝 1회, 재개 = 장면 루트, [3] 통덤프 | `e1f3dadd` |
 | G5 | 백로그·롤백 UX 경계 | 회차 수명 확정, 이전 장면 점프는 구조상 불가 | (코드 없음) |
 | G6 | 자동 간선 | 장면 안 에피소드 경계에 묻지 않는 간선(`Auto`) | (2026-09-02, 소유자 커밋 예정) |
+| G7 | 백점프(현재 장면) | 백로그 항목 → 그 라인으로 되감기. 롤백과 같은 기전, 표적만 다름 | (2026-09-02, 소유자 커밋 예정) |
 
 ## 4. 관문별 작업 내역
 
@@ -198,6 +199,24 @@ Yarn 저장소에 [2] 투영이 없어야 뒤의 체크포인트·[3] 덤프가 
 자동 간선이면 판정 없이 반환. `SceneRunner`는 AutoAdvance면 박스를 건너뛰고 기록에 바로 적는다 —
 리플레이·pending·fold는 보통 선택과 동일. 테스트 `AutoEdgeTests`(7건). 테스트 콘텐츠의 EP03→EP04를
 자동 간선으로. 툴 UX("여기서 에피소드 나누기"가 자동 간선을 끼운다)는 후속.
+
+### G7. 백점프 — 현재 장면 라인으로 (2026-09-02)
+
+**근거.** 백로그에서 라인으로 되돌아가는 것은 한 걸음 롤백의 일반화다 — 표적을 "뒤에서 두 번째"가
+아니라 "그 항목"으로 정하면 나머지 순서(선택 기록 정리·백로그 꼬리 걷기·포인트 클리어·시크)는 같다.
+항목의 장면 소속은 항목마다 태그를 싣는 대신 "장면 진입 시점의 백로그 순번" 하나로 판정한다. 백로그와
+롤백 포인트는 같은 자리(`CommitLineEntered`)에서 쌓이고 같은 순간(장면 진입·롤백 요청)에 리셋되므로
+`순번 - 장면 시작 = historyIndex`가 성립하고, 롤백 truncate가 순번도 되감아 정렬을 지킨다.
+
+**범위.** 현재 장면 항목만. 이전 장면은 확정·저장된 것이라 되감기가 아니라 "다시 여는" 일이고, 회차 안
+장면 스냅샷 보관과 서버 이력 분기를 정해야 한다 — `scene-future-plan.md` §1에 결정 필요로 남김.
+
+**한 일.** `BacklogRecorder`: 순번 발급·`MarkSceneStart`·`IsInCurrentScene`·`HistoryIndexOf`, truncate가
+순번을 되감음. `RollbackHistory.TryGetRollbackPoint(historyIndex)`. `VNFeatureController`: `RequestRollbackTo`
+로 본체를 뽑고 `RequestBacklogJump`·`CanJumpTo`(표적 lineId 대조로 좌표 어긋남 방어, 지금 라인은 표적 아님).
+`EpisodePlayer.EnterSceneAsync`가 장면 시작 순번을 찍는다. UI: `BacklogEntryView`가 클릭(루트
+`IPointerClickHandler`)과 흐림 표시, `BacklogPanel.OnJumpRequested`, `VNScreenBindings.Backlog`가 패널을
+접고 `RequestReplayAsync`.
 
 ## 5. 결정 목록
 

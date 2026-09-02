@@ -78,6 +78,22 @@ public sealed class RollbackHistory
         return count;
     }
 
+    // 백점프용 — historyIndex로 표적을 찾는다. 장면 진입에서 비워져 0부터 빈틈없이 쌓이므로
+    // 목록 인덱스가 곧 historyIndex다. 그래도 값을 대조한다.
+    public bool TryGetRollbackPoint(int historyIndex, out RollbackPoint target)
+    {
+        target = default;
+
+        if (historyIndex < 0 || historyIndex >= _points.Count)
+            return false;
+
+        if (_points[historyIndex].historyIndex != historyIndex)
+            return false;
+
+        target = _points[historyIndex];
+        return true;
+    }
+
     public bool GetRollbackPoint(out RollbackPoint target)
     {
         target = default;

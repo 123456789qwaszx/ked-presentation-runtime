@@ -86,6 +86,9 @@ public sealed class EpisodePlayer
         if (isNewSession)
             _backlogRecorder.ClearBacklog();
 
+        // 백로그 순번의 장면 시작점 — 롤백 포인트가 같은 순간에 비워져 두 좌표계가 나란히 출발한다.
+        _backlogRecorder.MarkSceneStart();
+
         _choiceHistory.ClearChoiceRecords();
 
         _replayRequested = false;
