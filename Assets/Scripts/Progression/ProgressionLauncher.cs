@@ -35,6 +35,8 @@ public sealed class ProgressionLauncher
 
     public bool IsRunning => _driver.IsRunning;
 
+    public IReadOnlyList<CommittedChoice> PendingPath => _driver.PendingPath;
+
     // 지금 도는 회차의 실행. 멈춤이 끝까지 갔는지 기다리는 데 쓴다.
     private Task _running;
 

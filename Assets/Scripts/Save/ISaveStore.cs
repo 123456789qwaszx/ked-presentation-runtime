@@ -18,4 +18,11 @@ public interface ISaveStore
 
     // 그 회차의 큐 파일 경로.
     string QueuePathOf(string playthroughId);
+
+    // 즐겨찾기 목록. 없으면 빈 목록.
+    BookmarkFile LoadBookmarks();
+    void SaveBookmarks(BookmarkFile bookmarks);
+
+    // 보관 중인 회차 id 전부(활성 포함). 이력 화면이 접기/펼치기를 판단하는 재료.
+    System.Collections.Generic.IReadOnlyList<string> ListPlaythroughIds();
 }

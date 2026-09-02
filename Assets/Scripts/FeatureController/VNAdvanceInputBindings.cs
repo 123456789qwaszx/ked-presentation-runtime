@@ -27,6 +27,10 @@ public sealed class VNAdvanceInputBindings
 
     public KeyCode newGame = KeyCode.Alpha5;
 
+    // 즐겨찾기(현재 라인) / 마지막 즐겨찾기로 갈라지기 — 디버그. 메뉴 UI는 F5.
+    public KeyCode bookmark = KeyCode.Alpha6;
+    public KeyCode loadBookmark = KeyCode.Alpha7;
+
     public bool IsRapidSkipHeld() => IsHeld(rapidSkipLeft) || IsHeld(rapidSkipRight);
     public bool IsSpeedUpHeld() => IsHeld(speedUpHold);
     public bool IsSpeedUpTogglePressed() => IsPressed(speedUpToggle);
@@ -37,6 +41,8 @@ public sealed class VNAdvanceInputBindings
     public bool IsRunEpisodeChainPressed() => IsPressed(runEpisodeChain);
     public bool IsLoadProgressionPressed() => IsPressed(loadProgression);
     public bool IsNewGamePressed() => IsPressed(newGame);
+    public bool IsBookmarkPressed() => IsPressed(bookmark);
+    public bool IsLoadBookmarkPressed() => IsPressed(loadBookmark);
 
 
     private static bool IsHeld(KeyCode key)

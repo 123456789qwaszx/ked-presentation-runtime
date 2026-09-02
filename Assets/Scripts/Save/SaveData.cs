@@ -153,3 +153,46 @@ public sealed class AccountFile
     public string Token;
     public string ExpiresAtUtc;
 }
+// saves/bookmarks.json — 즐겨찾기 목록. 수 제한 없음.
+public sealed class BookmarkFile
+{
+    public List<Bookmark> Items = new();
+}
+
+// 이력 위의 한 점 — 스스로 완결된 사본. 출처 회차 파일이 없어도 로드된다.
+// 로드 = 이 점을 물려받아 새 회차로 갈라지기(루트에서 표적까지 달린다).
+public sealed class Bookmark
+{
+    public string Id;
+    public string Label;
+    public string Preview;      // 라인 텍스트.
+    public string CreatedAtUtc;
+
+    // 출처. SceneIndex는 그 회차 이력에서 이 장면이 갖는(가질) 자리 — 앞의 기록을 물려받는 데 쓴다.
+    public string PlaythroughId;
+    public int SceneIndex;
+
+    public string ChapterId;
+    public SceneCheckpoint Checkpoint;   // 그 장면의 진입 스냅샷.
+    public SavedLoadPlan Load;           // 그 장면 안 경로·Yarn 선택·표적 — 찍은 순간까지.
+    public List<DialogueLogEntry> Backlog = new(); // 그 장면 이전의 항목들.
+
+    // 찍은 순간까지의 누적 시간(계승 + 자체). 갈라진 회차가 물려받는다.
+    public int PlaySecondsAtBookmark;
+}
+
+// 이력 화면이 회차 하나를 그리는 데 필요한 것. 파일을 열지 않고 목록을 그리려고 요약만 뽑는다.
+public sealed class PlaythroughSummary
+{
+    public string PlaythroughId;
+    public bool IsActive;
+    public ForkOrigin ForkedFrom;     // null이면 새 게임으로 시작한 회차.
+    public string ChapterId;
+    public string CurrentEpisodeId;
+    public bool ChapterCompleted;
+    public int SceneCount;
+    public int BookmarkCount;         // 0이고 활성이 아니면 UI가 접는다(기본).
+    public int InheritedPlaySeconds;
+    public int OwnPlaySeconds;
+    public string SavedAtUtc;
+}

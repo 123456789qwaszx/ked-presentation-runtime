@@ -73,6 +73,20 @@ public sealed class SceneRunner
     // 리플레이 자동 응답 커서. _picks.Count라면 자동 응답할 것 없음.
     private int _replayCursor;
 
+    // 지금 장면에서 지나온 미확정 경로 — 즐겨찾기가 찍은 순간의 경로로 가져간다.
+    public IReadOnlyList<CommittedChoice> PendingPath
+    {
+        get
+        {
+            var path = new List<CommittedChoice>(_replayCursor);
+
+            for (int i = 0; i < _replayCursor; i++)
+                path.Add(new CommittedChoice(_picks[i].FromEpisodeId, _picks[i].SourceIndex));
+
+            return path;
+        }
+    }
+
     public SceneRunner(
         EpisodePlayer player,
         IChapterOptionsView options,

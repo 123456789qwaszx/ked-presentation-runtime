@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 // VN 재생의 유일한 프레임 구동자.
@@ -59,6 +60,8 @@ public sealed class VNAdvanceInputPoller : MonoBehaviour
         PollDebugRunEpisodeChain();
         PollDebugRunProgression();
         PollDebugNewGame();
+        PollDebugBookmark();
+        PollDebugLoadBookmark();
 
         _featureController.Tick();
     }
@@ -121,6 +124,52 @@ public sealed class VNAdvanceInputPoller : MonoBehaviour
     {
         if (_bindings.IsNewGamePressed())
             StartNewGame();
+    }
+
+    // 즐겨찾기(현재 라인) — 디버그 키. 라인 표시 중이든 옵션 박스가 떠 있든 된다. 시크 중엔 안 된다.
+    private void PollDebugBookmark()
+    {
+        if (!_bindings.IsBookmarkPressed())
+            return;
+
+        if (_progressionLauncher == null || !_progressionLauncher.IsRunning || _saveCoordinator == null)
+            return;
+
+        if (!_featureController.TryGetCurrentLine(out SaveLineTarget target, out string preview))
+        {
+            Debug.Log("[즐겨찾기] 지금은 찍을 라인이 없다(시크 중이거나 라인 전).");
+            return;
+        }
+
+        _saveCoordinator.CreateBookmark(
+            _progressionLauncher.PendingPath,
+            _featureController.CreateYarnChoiceSnapshot(),
+            target,
+            preview);
+    }
+
+    // 마지막 즐겨찾기로 갈라지기 — 디버그 키. 목록 UI는 F5.
+    private async void PollDebugLoadBookmark()
+    {
+        if (!_bindings.IsLoadBookmarkPressed())
+            return;
+
+        if (_progressionLauncher == null || _saveCoordinator == null)
+            return;
+
+        IReadOnlyList<Bookmark> bookmarks = _saveCoordinator.Bookmarks;
+
+        if (bookmarks.Count == 0)
+        {
+            Debug.Log("[즐겨찾기] 아직 없다.");
+            return;
+        }
+
+        Bookmark latest = bookmarks[bookmarks.Count - 1];
+
+        await _progressionLauncher.StopAsync();
+        _saveCoordinator.ForkFromBookmark(latest);
+        await _progressionLauncher.LaunchAsync();
     }
 
     private async void StartProgression()

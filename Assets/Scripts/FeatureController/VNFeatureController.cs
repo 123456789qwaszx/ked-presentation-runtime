@@ -100,6 +100,24 @@ public sealed class VNFeatureController
         ApplyRapidSkipState();
     }
 
+    // 즐겨찾기 재료 — 지금 라인의 좌표와 미리보기, 이 장면의 Yarn 선택 기록. 시크 중이거나 라인이 없으면 false.
+    public bool TryGetCurrentLine(out SaveLineTarget target, out string preview)
+    {
+        target = null;
+        preview = null;
+
+        if (_linePresentationAdvanceState.IsSeekingActive || _rollbackController.Points.Count == 0)
+            return false;
+
+        RollbackPoint point = _rollbackController.Points[^1];
+
+        target = new SaveLineTarget { NodeName = point.nodeName, LineId = point.lineId, Occurrence = point.occurrence };
+        preview = point.rawText;
+        return true;
+    }
+
+    public List<VNChoiceRecord> CreateYarnChoiceSnapshot() => _choiceHistory.CreateChoiceSnapshot();
+
     public bool RequestRollbackOneStep()
     {
         if (_linePresentationAdvanceState.IsSeekingActive)

@@ -69,6 +69,41 @@ public sealed class LocalFileSaveStore : ISaveStore
     public string QueuePathOf(string playthroughId) =>
         Path.Combine(PlaythroughsDirectory, $"{playthroughId}.queue.json");
 
+    public BookmarkFile LoadBookmarks()
+    {
+        string json = AtomicFile.ReadAllTextOrNull(BookmarksPath);
+
+        return json == null
+            ? new BookmarkFile()
+            : SaveJson.Deserialize<BookmarkFile>(json) ?? new BookmarkFile();
+    }
+
+    public void SaveBookmarks(BookmarkFile bookmarks) =>
+        AtomicFile.WriteAllText(BookmarksPath, SaveJson.SerializePretty(bookmarks));
+
+    public System.Collections.Generic.IReadOnlyList<string> ListPlaythroughIds()
+    {
+        var ids = new System.Collections.Generic.List<string>();
+
+        if (!Directory.Exists(PlaythroughsDirectory))
+            return ids;
+
+        foreach (string path in Directory.GetFiles(PlaythroughsDirectory, "*.json"))
+        {
+            string name = Path.GetFileNameWithoutExtension(path);
+
+            // {id}.queue.json은 큐다.
+            if (name.EndsWith(".queue", StringComparison.Ordinal))
+                continue;
+
+            ids.Add(name);
+        }
+
+        return ids;
+    }
+
+    private string BookmarksPath => Path.Combine(_directory, "bookmarks.json");
+
     // 옛 slot{n}.json → playthroughs/{id}.json, sync_queue.json → {id}.queue.json. 한 번뿐.
     private LocalSaveFile MigrateLegacy(int slotNo)
     {

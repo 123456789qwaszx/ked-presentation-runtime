@@ -241,6 +241,169 @@ public sealed class SaveCoordinator : IProgressionReporter
             (target == null ? " — 장면 루트에서" : $" — {target.NodeName}/{target.LineId}#{target.Occurrence}까지 달린다"));
     }
 
+    // ── 즐겨찾기 ─────────────────────────────────────────────────────────────
+
+    public IReadOnlyList<Bookmark> Bookmarks => _localStore.LoadBookmarks().Items;
+
+    // 지금 라인을 즐겨찾기로. 스스로 완결된 사본 — 진입 스냅샷·찍은 순간까지의 경로·Yarn 선택·표적·이전 백로그.
+    // 장면 밖(진입 보고 전)이면 null.
+    public Bookmark CreateBookmark(
+        IReadOnlyList<CommittedChoice> path,
+        IReadOnlyList<VNChoiceRecord> yarnChoices,
+        SaveLineTarget target,
+        string preview,
+        string label = null)
+    {
+        if (_currentEntry == null || target == null)
+            return null;
+
+        LocalSaveFile current = _localStore.Load(_slotNo);
+
+        var bookmark = new Bookmark
+        {
+            Id = NewPlaythroughId(),
+            Label = string.IsNullOrEmpty(label) ? preview : label,
+            Preview = preview,
+            CreatedAtUtc = NowUtc(),
+            PlaythroughId = _playthroughId,
+            SceneIndex = _scenes.Count,
+            ChapterId = _currentEntry.ChapterId,
+            Checkpoint = _currentEntry,
+            Load = new SavedLoadPlan
+            {
+                Path = path.Select(c => new SavedChoice { FromEpisodeId = c.FromEpisodeId, OptionIndex = c.OptionIndex }).ToList(),
+                YarnChoices = new List<VNChoiceRecord>(yarnChoices),
+                Target = target,
+            },
+            Backlog = current?.Backlog != null ? new List<DialogueLogEntry>(current.Backlog) : new List<DialogueLogEntry>(),
+            PlaySecondsAtBookmark = TotalSeconds,
+        };
+
+        BookmarkFile file = _localStore.LoadBookmarks();
+        file.Items.Add(bookmark);
+        _localStore.SaveBookmarks(file);
+
+        Debug.Log(
+            $"[저장] 즐겨찾기 — \"{bookmark.Preview}\" @ {target.NodeName}/{target.LineId}#{target.Occurrence}, " +
+            $"경로 {bookmark.Load.Path.Count}개, Yarn 선택 {bookmark.Load.YarnChoices.Count}개 (총 {file.Items.Count}개)");
+
+        return bookmark;
+    }
+
+    public bool DeleteBookmark(string id)
+    {
+        BookmarkFile file = _localStore.LoadBookmarks();
+        int removed = file.Items.RemoveAll(b => string.Equals(b.Id, id, StringComparison.Ordinal));
+
+        if (removed == 0)
+            return false;
+
+        _localStore.SaveBookmarks(file);
+        return true;
+    }
+
+    public bool RenameBookmark(string id, string label)
+    {
+        BookmarkFile file = _localStore.LoadBookmarks();
+        Bookmark bookmark = file.Items.Find(b => string.Equals(b.Id, id, StringComparison.Ordinal));
+
+        if (bookmark == null)
+            return false;
+
+        bookmark.Label = string.IsNullOrEmpty(label) ? bookmark.Preview : label;
+        _localStore.SaveBookmarks(file);
+        return true;
+    }
+
+    // ── 회차 목록 (이력 화면 재료) ────────────────────────────────────────────
+
+    // 보관 중인 회차 요약. 활성 회차와 즐겨찾기가 걸린 회차를 펼치고 나머지는 접는 것은 UI의 일 —
+    // 여기서는 그 판단에 필요한 것만 준다.
+    public IReadOnlyList<PlaythroughSummary> ListPlaythroughs()
+    {
+        var summaries = new List<PlaythroughSummary>();
+
+        string activeId = _localStore.ActiveId;
+        BookmarkFile bookmarks = _localStore.LoadBookmarks();
+
+        foreach (string id in _localStore.ListPlaythroughIds())
+        {
+            LocalSaveFile file = _localStore.LoadPlaythrough(id);
+
+            if (file == null)
+                continue;
+
+            summaries.Add(new PlaythroughSummary
+            {
+                PlaythroughId = id,
+                IsActive = string.Equals(id, activeId, StringComparison.Ordinal),
+                ForkedFrom = file.ForkedFrom,
+                ChapterId = file.ChapterId,
+                CurrentEpisodeId = file.CurrentEpisodeId,
+                ChapterCompleted = file.ChapterCompleted,
+                SceneCount = file.Scenes?.Count ?? 0,
+                BookmarkCount = bookmarks.Items.Count(b => string.Equals(b.PlaythroughId, id, StringComparison.Ordinal)),
+                InheritedPlaySeconds = file.InheritedPlaySeconds,
+                OwnPlaySeconds = file.OwnPlaySeconds,
+                SavedAtUtc = file.SavedAtUtc,
+            });
+        }
+
+        summaries.Sort((a, b) => string.CompareOrdinal(b.SavedAtUtc, a.SavedAtUtc));
+
+        return summaries;
+    }
+
+    // 즐겨찾기를 물려받아 새 회차로. 출처 회차 파일이 있으면 앞의 장면 기록도 물려받는다.
+    // 호출자는 드라이버를 멈춘 뒤 부르고, 그 뒤 런처를 다시 띄운다.
+    public void ForkFromBookmark(Bookmark bookmark)
+    {
+        SceneCheckpoint checkpoint = bookmark.Checkpoint;
+
+        LocalSaveFile origin = string.IsNullOrEmpty(bookmark.PlaythroughId)
+            ? null
+            : _localStore.LoadPlaythrough(bookmark.PlaythroughId);
+
+        List<SceneRecord> inherited = origin?.Scenes != null
+            ? origin.Scenes.Take(Math.Min(bookmark.SceneIndex, origin.Scenes.Count)).ToList()
+            : new List<SceneRecord>();
+
+        string newId = NewPlaythroughId();
+
+        var file = new LocalSaveFile
+        {
+            SlotNo = _slotNo,
+            PlaythroughId = newId,
+            ForkedFrom = new ForkOrigin
+            {
+                PlaythroughId = bookmark.PlaythroughId,
+                SceneIndex = bookmark.SceneIndex,
+                Target = bookmark.Load?.Target,
+            },
+            ChapterId = checkpoint.ChapterId,
+            CurrentEpisodeId = checkpoint.EpisodeId,
+            Stats = new Dictionary<string, int>(checkpoint.Stats, StringComparer.Ordinal),
+            Variables = checkpoint.Variables,
+            ChapterCompleted = false,
+            Scenes = inherited,
+            Backlog = new List<DialogueLogEntry>(bookmark.Backlog),
+            PendingLoad = bookmark.Load,
+            InheritedPlaySeconds = bookmark.PlaySecondsAtBookmark,
+            OwnPlaySeconds = 0,
+            PlaySeconds = bookmark.PlaySecondsAtBookmark,
+            SavedAtUtc = NowUtc(),
+        };
+
+        _localStore.Save(file);
+
+        _queue.SwitchTo(_localStore.QueuePathOf(newId));
+        _queue.Reset();
+
+        Debug.Log(
+            $"[저장] 즐겨찾기로 갈라지기 — \"{bookmark.Preview}\" → 새 회차 {newId}. " +
+            $"물려받은 기록 {inherited.Count}개, 백로그 {file.Backlog.Count}줄, 시간 {bookmark.PlaySecondsAtBookmark}s");
+    }
+
     // ── 보고 ────────────────────────────────────────────────────────────────
 
     // 장면에 들어섰다 — 진입 스냅샷을 받아 둔다. 이력은 현재 챕터 안에서만.

@@ -40,6 +40,9 @@ public sealed class ProgressionDriver
 
     public bool IsRunning { get; private set; }
 
+    // 지금 장면의 미확정 경로 — 즐겨찾기 캡처용.
+    public IReadOnlyList<CommittedChoice> PendingPath => _scenes.PendingPath;
+
     public ProgressionDriver(
         EpisodePlayer player,
         IChapterOptionsView options,
