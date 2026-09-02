@@ -50,6 +50,7 @@ public sealed class ProgressionDriver
         ProgressionYarnBridge yarnBridge,
         IProgressionReporter reporter)
     {
+        _player = player;
         _options = options;
         _yarnBridge = yarnBridge;
         _backlog = backlog;
@@ -146,11 +147,19 @@ public sealed class ProgressionDriver
         }
     }
 
-    // 타이틀로 나가기 등.
-    public void RequestStop()
+    private readonly EpisodePlayer _player;
+
+    // 타이틀로 나가기·갈라지기. 선택지를 접고 노드를 멈추면 장면 루프가 멈춤 깃발을 보고 끝난다 —
+    // 미확정 선택은 버린다. RunAsync가 끝나는 것은 호출자가 기다린다(런처).
+    public async Task StopAsync()
     {
+        if (!IsRunning)
+            return;
+
         _stopRequested = true;
         _options.Cancel();
+
+        await _player.StopSceneAsync();
     }
 
     // "[3] 연출 실행 상태"는 챕터 수명 — 챕터가 바뀔 때만 초기값으로 되돌린다.

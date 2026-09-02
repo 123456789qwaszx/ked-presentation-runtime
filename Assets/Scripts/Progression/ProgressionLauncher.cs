@@ -35,10 +35,32 @@ public sealed class ProgressionLauncher
 
     public bool IsRunning => _driver.IsRunning;
 
-    public async Task LaunchAsync()
+    // 지금 도는 회차의 실행. 멈춤이 끝까지 갔는지 기다리는 데 쓴다.
+    private Task _running;
+
+    // 멈추고 끝날 때까지 기다린다. 갈라지기·타이틀로 나가기가 이 뒤에 다시 띄운다.
+    public async Task StopAsync()
+    {
+        if (!_driver.IsRunning)
+            return;
+
+        await _driver.StopAsync();
+
+        if (_running != null)
+            await _running;
+    }
+
+    public Task LaunchAsync()
     {
         if (_driver.IsRunning)
-            return;
+            return Task.CompletedTask;
+
+        _running = LaunchCoreAsync();
+        return _running;
+    }
+
+    private async Task LaunchCoreAsync()
+    {
 
         ScenarioProgression scenario = ProgressionContentLoader.LoadSingleChapter(_chapterJson);
 

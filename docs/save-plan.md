@@ -208,4 +208,5 @@ v1 §2의 결론 그대로다. 즐겨찾기가 "장면 진입 스냅샷 + 경로
 
 ## 9. 진행 상태
 
-- 2026-09-02: **F1 작성됨** (Unity 확인 남음). 회차 파일에 `PlaythroughId`·`ForkedFrom(null)`·`Scenes[]`(진입 스냅샷 + 경로 + Yarn 선택 + 순번 경계)·`Backlog[]`·`InheritedPlaySeconds`/`OwnPlaySeconds`(합은 `PlaySeconds`). `IProgressionReporter.ReportSceneEntered` 신설 — SceneRunner가 장면 진입 직후 진입 스냅샷을 보고하고, fold에서 경로·Yarn 선택을 붙여 장면 기록으로 접는다. 재개 시 백로그 복원. 파일 이름은 아직 `slot1.json`.
+- 2026-09-02: **F1 검증됨·커밋.**
+- 2026-09-02: **F2-a 작성됨** (Unity 확인 남음). 회차 파일 id화(`playthroughs/{id}.json` + `active.json` + `{id}.queue.json`, 옛 `slot1.json`·`sync_queue.json`은 첫 읽기에 1회 이전), `SyncQueue.SwitchTo`, `SaveCoordinator.ForkFromScene`(이력 장면 기록을 물려받아 새 회차 파일 → 활성 전환 → 큐 새로), `ProgressionLauncher.StopAsync`/`ProgressionDriver.StopAsync`/`EpisodePlayer.StopSceneAsync`(멈추고 끝까지 기다림). 트리거: 백로그의 이전 장면 항목 클릭 → 멈춤 → 갈라지기 → 다시 띄움(재개 경로가 새 회차를 장면 루트에서 연다). F2-b(Load 시크)는 다음.

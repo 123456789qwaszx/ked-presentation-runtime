@@ -453,6 +453,7 @@ public class VNAppBootstrap : MonoBehaviour
             _linePresentationAdvanceState);
 
         _screenBindings.ConfigureTitleView(_episodePlayer);
+        _screenBindings.ConfigureProgression(_progressionLauncher, _saveCoordinator);
     }
     
     private void BootstrapEquivalenceHarness()

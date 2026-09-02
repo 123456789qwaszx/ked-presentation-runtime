@@ -10,15 +10,24 @@ using System.Collections.Generic;
 //   성공하면 그 길이만큼 앞에서 지움. 전송 중에 쌓인 것은 뒤에 남는다.
 public sealed class SyncQueue
 {
-    private readonly string _path;
+    private string _path;
     private SyncQueueFile _file;
 
     public SyncQueue(string path)
     {
+        SwitchTo(path);
+    }
+
+    public string Path => _path;
+
+    // 큐는 회차마다 하나다. 활성 회차가 바뀌면(재개·새 게임·갈라지기) 그 회차의 큐 파일로 옮겨 탄다.
+    // 인스턴스는 그대로라 동기화 쪽이 쥔 참조가 안 깨진다. 전송 중에 바꾸지 않는 것은 호출자의 몫.
+    public void SwitchTo(string path)
+    {
         _path = path;
 
         string json = AtomicFile.ReadAllTextOrNull(path);
-        _file = json == null 
+        _file = json == null
             ? new SyncQueueFile()
             : SaveJson.Deserialize<SyncQueueFile>(json);
     }

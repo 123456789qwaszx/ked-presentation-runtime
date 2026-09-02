@@ -150,6 +150,9 @@ public sealed class EpisodePlayer
         await stop;
     }
     
+    // 장면을 밖에서 멈춘다 — 타이틀로 나가기·갈라지기. 노드 Stop과 같은 정리. 장면 루프는 멈춤 깃발로 끝난다.
+    public Task StopSceneAsync() => StopDialogueAsync();
+
     // 무대 기준선. 장면 진입과 리플레이 직전, 두 자리에서만.
     private void BeginSceneRun()
     {
