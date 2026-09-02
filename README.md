@@ -10,14 +10,6 @@ Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타�
 저작은 외부 툴(VnTool)이 하고, 그 결과인 `.yarn` 텍스트와 챕터 JSON(`*.progression.json`)을
 이 런타임이 재생합니다.
 
-에피소드·챕터 진행 판정은 별도 저장소(`ked-progression`)가 원본인 순수 C# 코어를
-복사 반입해([Assets/Scripts/Ked.Progression/](Assets/Scripts/Ked.Progression) ·
-[vendoring.md](Assets/Scripts/Ked.Progression/Documentation~/vendoring.md)) 이 저장소의
-드라이버가 돌립니다. 세이브는 아직 밖이며, 스냅샷 기반으로 재도입할 예정입니다.
-
-경계의 내력은 **[SCOPE-BOUNDARY.md](SCOPE-BOUNDARY.md)**,
-어셈블리 경계는 [ASSEMBLY-BOUNDARY.md](Assets/Scripts/Ked.Presentation.Runtime/ASSEMBLY-BOUNDARY.md).
-
 ## 사용법
 
 `Assets/Scenes/PresentationSample.unity`를 열고 하이어라키의 `[VNAppBootstrap]`을 선택한다.
