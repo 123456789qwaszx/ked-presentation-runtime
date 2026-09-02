@@ -360,13 +360,19 @@ public class VNAppBootstrap : MonoBehaviour
         _progressionOptions = new ChapterOptionsView(
             uiManager.GetUI<VNDefaultOptionsPanel>(), optionItem);
 
-        // 진행 층이 Yarn 변수 저장소에 하는 일 전부 — [3] 챕터 되돌리기.
+        // 진행 층이 Yarn 변수 저장소에 하는 일 전부 - [3] 챕터 되돌리기.
         ProgressionYarnBridge yarnBridge = new(dialogueRunner.VariableStorage);
 
         _saveCoordinator = CreateSaveCoordinator();
 
+        // 시크 상태와 롤백 이력은 장면 루프의 것 - 리플레이 자동 응답과 롤백 하한이 사용.
         _progressionDriver = new ProgressionDriver(
-            _episodePlayer, _progressionOptions, yarnBridge, _saveCoordinator);
+            _episodePlayer,
+            _progressionOptions,
+            _linePresentationAdvanceState,
+            _rollbackHistory,
+            yarnBridge,
+            _saveCoordinator);
 
         _progressionLauncher = new ProgressionLauncher(
             _progressionDriver, dialogueRunner, progressionChapterJson,

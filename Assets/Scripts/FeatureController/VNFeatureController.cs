@@ -107,11 +107,21 @@ public sealed class VNFeatureController
         if (!_rollbackController.GetRollbackPoint(out RollbackPoint target))
             return false;
 
+        // 잠정 한계 — 커밋 앞으로는 못 돌아간다. 진행 층이 커밋 직후 하한을 세운다.
+        // (커밋 유예가 서면 하한 자체가 사라짐.)
+        if (_rollbackController.IsAtOrBelowFloor(target))
+        {
+            Debug.Log("[롤백] 마지막 커밋 앞으로는 되돌아가지 않는다 — 표적 무시.");
+            return false;
+        }
+
+        // 리플레이를 여는 쪽(장면 루프)이 표적 뒤의 진행 선택 기록을 정리하는 데 사용.
+        _rollbackController.MarkRollbackTarget(target);
+
         _choiceHistory.RemoveChoiceAnchorAfterRollbackPoint(target);
 
-        // 백로그는 세션 연속 — 지우고 다시 쌓는 게 아니라 표적 뒤 꼬리만 걷는다.
-        // 리플레이 패스스루는 백로그를 다시 적지 않으므로(VNYarnLineBoundary)
-        // 표적까지의 기록이 그대로 남는다.
+        // 백로그는 세션 연속 - 지우고 다시 쌓는 게 아니라 표적 이후 진행.
+        // 리플레이 패스스루 - 백로그를 다시 적지 않으므로(VNYarnLineBoundary) 표적까지의 기록이 그대로 남음.
         _backlogRecorder.TruncateFromEnd(_rollbackController.CountPointsAfter(target));
 
         _rollbackController.ClearRollbackPoints();

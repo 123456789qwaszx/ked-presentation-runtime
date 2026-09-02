@@ -4,10 +4,13 @@ using Ked.Progression;
 using UnityEngine;
 using Yarn.Unity;
 
-// 진행 순서를 쥐는 유일한 자리. 진행 층과 대사 층을 잇는다.
+// 진행 순서를 쥐는 자리. 진행 층과 대사 층을 잇는다.
 //
 // 코어는 "무엇이 참인가"만 답한다(ChapterTransition·Commit 전부 순수 함수).
-// "어떤 순서로 부르는가"는 여기 있고, 그것이 이 루프가 지는 세 규칙이다:
+// "어떤 순서로 부르는가"는 여기와 SceneRunner에 있다:
+//   · 챕터 루프 — 어느 장면 다음에 어느 장면인가, 챕터 변수, [2] 상태 소유 (여기)
+//   · 장면 루프 — 노드 재생·판정·선택·Via·커밋, 롤백 리플레이 (SceneRunner)
+// 이 루프가 지는 세 규칙은 장면 루프가 지킨다:
 //   · 판정은 대사 뒤 한 번 — 화면에 뜬 것과 실제가 갈릴 수 없다
 //   · 연출은 커밋보다 앞 — 지나가는 자리라 상태를 안 바꾼다
 //   · 스탯 반영과 이동이 한 연산 — "스탯만 오르고 안 옮겨 간" 상태가 없다
@@ -21,15 +24,13 @@ using Yarn.Unity;
 // 플레이어가 하는 게임이 갈린다.
 public sealed class ProgressionDriver
 {
-    private readonly EpisodePlayer _player;
+    private readonly SceneRunner _scenes;
     private readonly IChapterOptionsView _options;
     private readonly ProgressionYarnBridge _yarnBridge;
-    private readonly IProgressionReporter _reporter;
 
     private ChapterProgression _chapter;
     private ProgressionState _state;
     private bool _stopRequested;
-    private bool _firstEpisode;
 
     private YarnProject _yarnProject;
 
@@ -41,13 +42,16 @@ public sealed class ProgressionDriver
     public ProgressionDriver(
         EpisodePlayer player,
         IChapterOptionsView options,
+        VNLinePresentationState seek,
+        RollbackHistory rollbackHistory,
         ProgressionYarnBridge yarnBridge,
         IProgressionReporter reporter)
     {
-        _player = player;
         _options = options;
         _yarnBridge = yarnBridge;
-        _reporter = reporter;
+
+        _scenes = new SceneRunner(
+            player, options, seek, rollbackHistory, reporter, () => _stopRequested);
     }
 
     public async Task RunAsync(YarnProject project, ChapterProgression chapter, ProgressionState entryState)
@@ -60,7 +64,6 @@ public sealed class ProgressionDriver
 
         IsRunning = true;
         _stopRequested = false;
-        _firstEpisode = true;
         _chapter = chapter;
         _state = entryState;
         _yarnProject = project;
@@ -91,100 +94,30 @@ public sealed class ProgressionDriver
         }
     }
 
-    // 에피소드 루프. 챕터가 끝나면 true, 멈춤 요청이면 false.
+    // 장면 루프. 챕터가 끝나면 true, 멈춤 요청이면 false.
     private async Task<bool> RunChapterAsync()
     {
+        // 백로그는 회차 스코프 — 첫 장면 진입에서만 비운다.
+        bool isNewSession = true;
+
         while (true)
         {
-            _chapter.TryGetNode(_state.CurrentEpisodeId, out EpisodeNode node);
+            // 장면 진입의 체크포인트 Capture보다 앞이어야 리플레이가 초기화된 [3]에서 출발한다.
+            SyncChapterVariables();
 
-            if (!await PlayNodeAsync(node.DialogueEntryId, "대사"))
-                return false;
+            SceneRunResult result = await _scenes.RunAsync(_chapter, _state, isNewSession);
 
-            if (node.EventKey.Length != 0)
+            isNewSession = false;
+            _state = result.State;
+
+            switch (result.Outcome)
             {
-                _reporter.ReportEpisodeWatched(
-                    new EpisodeWatchReport(_chapter.ChapterId, node.EpisodeId, node.EventKey));
+                case SceneRunOutcome.ChapterEnded: return true;
+                case SceneRunOutcome.Stopped: return false;
             }
-
-            ChapterAdvance advance = 
-                ChapterTransition.Resolve(_chapter, _state);
-
-            if (advance.Kind == ChapterAdvanceKind.ChapterEnded)
-                return true;
-
-            ResolvedOption? picked = await PickAsync(advance);
-
-            if (!picked.HasValue)
-                return false;
-
-            ResolvedOption resolved = picked.Value;
-            EpisodeOption chosen = resolved.Option;
-
-            // 연출도 Story 노드. 별도 경로를 만들지 않는다.
-            if (chosen.HasVia &&
-                !await PlayNodeAsync(chosen.ViaNodeId, "연출"))
-            {
-                return false;
-            }
-
-            _state = _state.Commit(_chapter, chosen);
-
-            _reporter.ReportChoiceCommitted(
-                new ChoiceCommitReport(
-                    _chapter.ChapterId, 
-                    node.EpisodeId,
-                    resolved.SourceIndex,
-                    chosen, 
-                    _state));
         }
     }
 
-    private async Task<ResolvedOption?> PickAsync(ChapterAdvance advance)
-    {
-        int picked = await _options.ShowAsync(
-            advance.Options,
-            advance.HiddenCount);
-
-        if (_stopRequested)
-            return null;
-
-        if (picked < 0 || picked >= advance.Options.Count)
-            throw new ArgumentOutOfRangeException(
-                nameof(picked),
-                $"선택지는 {advance.Options.Count}개인데 {picked}번이 왔다.");
-
-        ResolvedOption resolved = advance.Options[picked];
-
-        if (!resolved.IsSelectable)
-            throw new InvalidOperationException(
-                $"잠긴 선택지다: [{resolved.Option.ChoiceLabel}] — {resolved.BlockingCondition}");
-
-        return resolved;
-    }
-
-    private async Task<bool> PlayNodeAsync(string nodeName, string what)
-    {
-        Debug.Log($"[진행] {what} 시작 — \"{nodeName}\"");
-
-        SyncChapterVariables();
-
-        // 첫 진입 이후로는 백로그를 유지해야 하기 때문에 구분.
-        if (_firstEpisode)
-        {
-            _firstEpisode = false;
-            await _player.StartGameAsync(nodeName);
-        }
-        else
-        {
-            await _player.ContinueEpisodeAsync(nodeName);
-        }
-
-        Debug.Log($"[진행] {what} 끝 — \"{nodeName}\"");
-
-        return !_stopRequested;
-    }
-    
     // 타이틀로 나가기 등.
     public void RequestStop()
     {
@@ -193,7 +126,6 @@ public sealed class ProgressionDriver
     }
 
     // "[3] 연출 실행 상태"는 챕터 수명 — 챕터가 바뀔 때만 초기값으로 되돌린다.
-    // YarnVariableCheckpoint.Capture()보다 먼저 실행되어야 리플레이 정상 재생.
     //
     // [2]는 여기 오지 않는다. 진행 코어만 알고, 대사에서 읽는 것도 금지 —
     // 스탯 분기는 그래프 간선으로 올린다.
