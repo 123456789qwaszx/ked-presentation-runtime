@@ -130,8 +130,8 @@ public sealed class SaveCoordinator : IProgressionReporter
             return null;
 
         // 구세이브(회차 id 없음)는 지금 id를 받는다.
-        string id = string.IsNullOrEmpty(save.PlaythroughId) 
-            ? NewPlaythroughId() 
+        string id = string.IsNullOrEmpty(save.PlaythroughId)
+            ? NewPlaythroughId()
             : save.PlaythroughId;
 
         int playSeconds = save.InheritedPlaySeconds == 0 && save.OwnPlaySeconds == 0
@@ -257,7 +257,8 @@ public sealed class SaveCoordinator : IProgressionReporter
                 ? null
                 : new SavedLoadPlan
                 {
-                    Path = origin.Path.Select(c => new SavedChoice { FromEpisodeId = c.FromEpisodeId, OptionIndex = c.OptionIndex }).ToList(),
+                    Path = origin.Path.Select(c => new SavedChoice
+                        { FromEpisodeId = c.FromEpisodeId, OptionIndex = c.OptionIndex }).ToList(),
                     YarnChoices = new List<VNChoiceRecord>(origin.YarnChoices),
                     Target = target,
                 },
@@ -308,11 +309,15 @@ public sealed class SaveCoordinator : IProgressionReporter
             Checkpoint = _currentEntry,
             Load = new SavedLoadPlan
             {
-                Path = path.Select(c => new SavedChoice { FromEpisodeId = c.FromEpisodeId, OptionIndex = c.OptionIndex }).ToList(),
+                Path = path
+                    .Select(c => new SavedChoice { FromEpisodeId = c.FromEpisodeId, OptionIndex = c.OptionIndex })
+                    .ToList(),
                 YarnChoices = new List<VNChoiceRecord>(yarnChoices),
                 Target = target,
             },
-            Backlog = current?.Backlog != null ? new List<DialogueLogEntry>(current.Backlog) : new List<DialogueLogEntry>(),
+            Backlog = current?.Backlog != null
+                ? new List<DialogueLogEntry>(current.Backlog)
+                : new List<DialogueLogEntry>(),
             PlaySecondsAtBookmark = TotalSeconds,
         };
 
@@ -397,7 +402,8 @@ public sealed class SaveCoordinator : IProgressionReporter
                 CurrentEpisodeId = file.CurrentEpisodeId,
                 ChapterCompleted = file.ChapterCompleted,
                 SceneCount = file.Scenes?.Count ?? 0,
-                BookmarkCount = bookmarks.Items.Count(b => string.Equals(b.PlaythroughId, id, StringComparison.Ordinal)),
+                BookmarkCount =
+                    bookmarks.Items.Count(b => string.Equals(b.PlaythroughId, id, StringComparison.Ordinal)),
                 InheritedPlaySeconds = file.InheritedPlaySeconds,
                 OwnPlaySeconds = file.OwnPlaySeconds,
                 SavedAtUtc = file.SavedAtUtc,
@@ -466,8 +472,19 @@ public sealed class SaveCoordinator : IProgressionReporter
     // 장면에 들어섰다 — 진입 스냅샷을 받아 둔다. 이력은 현재 챕터 안에서만.
     public void ReportSceneEntered(SceneEntryReport report)
     {
+        if (_playthroughId == null)
+            BecomePlaythrough(
+                NewPlaythroughId(),
+                forkedFrom: null,
+                inheritedSeconds: 0,
+                ownSeconds: 0,
+                scenes: null);
+
         if (_scenes.Count > 0 &&
-            !string.Equals(_scenes[^1].Checkpoint.ChapterId, report.ChapterId, StringComparison.Ordinal))
+            !string.Equals(
+                _scenes[^1].Checkpoint.ChapterId,
+                report.ChapterId,
+                StringComparison.Ordinal))
         {
             _scenes.Clear();
         }
@@ -476,7 +493,10 @@ public sealed class SaveCoordinator : IProgressionReporter
         {
             ChapterId = report.ChapterId,
             EpisodeId = report.State.CurrentEpisodeId,
-            Stats = report.State.Stats.ToDictionary(p => p.Key, p => p.Value, StringComparer.Ordinal),
+            Stats = report.State.Stats.ToDictionary(
+                p => p.Key,
+                p => p.Value,
+                StringComparer.Ordinal),
             Variables = report.Variables,
             BacklogSerialStart = report.BacklogSerialStart,
             LastChoiceSeq = _queue.NextSeq - 1,
@@ -488,37 +508,38 @@ public sealed class SaveCoordinator : IProgressionReporter
     // 장면이 끝나 확정됐을 때 호출 — 장면 기록 완성 -> 로컬 저장 1회 -> 큐 적재(순서대로) -> 동기화 시도.
     public void ReportSceneCommitted(SceneCommitReport report)
     {
+        if (_playthroughId == null)
+        {
+            throw new InvalidOperationException(
+                "장면 진입 전에 회차가 만들어지지 않았다.");
+        }
+
+        if (_currentEntry == null)
+        {
+            throw new InvalidOperationException(
+                "장면 진입 보고 없이 장면 커밋이 호출됐다.");
+        }
+
         string now = NowUtc();
 
-        if (_playthroughId == null)
-            BecomePlaythrough(NewPlaythroughId(), null, 0, 0, null);
+        var path = new List<SavedChoice>(report.Choices.Count);
 
-        // 진입 보고 없이 fold가 왔다면(있어서는 안 된다) 기록 없이 상태만 저장한다.
-        if (_currentEntry != null)
-        {
-            var path = new List<SavedChoice>(report.Choices.Count);
-
-            for (int i = 0; i < report.Choices.Count; i++)
-                path.Add(new SavedChoice
-                {
-                    FromEpisodeId = report.Choices[i].FromEpisodeId,
-                    OptionIndex = report.Choices[i].OptionIndex,
-                });
-
-            _scenes.Add(new SceneRecord
+        for (int i = 0; i < report.Choices.Count; i++)
+            path.Add(new SavedChoice
             {
-                Checkpoint = _currentEntry,
-                Path = path,
-                YarnChoices = new List<VNChoiceRecord>(report.YarnChoices),
-                BacklogSerialEnd = report.BacklogSerialStart,
+                FromEpisodeId = report.Choices[i].FromEpisodeId,
+                OptionIndex = report.Choices[i].OptionIndex,
             });
 
-            _currentEntry = null;
-        }
-        else
+        _scenes.Add(new SceneRecord
         {
-            Debug.LogWarning("[저장] 진입 보고 없이 장면이 끝났다 — 장면 기록 없이 상태만 저장한다.");
-        }
+            Checkpoint = _currentEntry,
+            Path = path,
+            YarnChoices = new List<VNChoiceRecord>(report.YarnChoices),
+            BacklogSerialEnd = report.BacklogSerialStart,
+        });
+
+        _currentEntry = null;
 
         int own = OwnSeconds;
 
