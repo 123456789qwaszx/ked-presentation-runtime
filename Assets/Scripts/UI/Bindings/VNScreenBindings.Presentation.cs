@@ -2,16 +2,13 @@ public sealed partial class VNScreenBindings
 {
     private VNFeatureController _vnFeatures;
     private DialogueAdvanceDispatcher _dialogueAdvanceDispatcher;
-    private VNLinePresentationState _linePresentationAdvanceState;
     
     public void ConfigurePresentationView(
         VNFeatureController vnFeatures,
-        DialogueAdvanceDispatcher dialogueAdvanceDispatcher,
-        VNLinePresentationState linePresentationAdvanceState)
+        DialogueAdvanceDispatcher dialogueAdvanceDispatcher)
     {
         _vnFeatures = vnFeatures;
         _dialogueAdvanceDispatcher = dialogueAdvanceDispatcher;
-        _linePresentationAdvanceState = linePresentationAdvanceState;
     }
 
     public void GoToPresentationView()
@@ -88,6 +85,6 @@ public sealed partial class VNScreenBindings
         if (!_vnFeatures.RequestRollbackOneStep())
             return;
 
-        await _scenePlaybackSession.RequestReplayAsync();
+        await _progressionLauncher.RequestReplayAsync();
     }
 }

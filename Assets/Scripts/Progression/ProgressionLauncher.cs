@@ -32,6 +32,8 @@ public sealed class ProgressionLauncher
     public IReadOnlyList<CommittedChoice> PendingPath => _driver.PendingPath;
 
     private Task _running;
+    
+    public Task RequestReplayAsync() => _driver.RequestReplayAsync();
 
     public async Task StopAsync()
     {

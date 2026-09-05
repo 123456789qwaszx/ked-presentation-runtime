@@ -245,6 +245,17 @@ public sealed class VNAdvanceInputPoller : MonoBehaviour
         if (!_featureController.RequestRollbackOneStep())
             return;
 
-        await _scenePlayback.RequestReplayAsync();
+        if (_progressionLauncher != null &&
+            _progressionLauncher.IsRunning)
+        {
+            await _progressionLauncher.RequestReplayAsync();
+            return;
+        }
+
+        if (_debugPlayback != null &&
+            _debugPlayback.IsRunning)
+        {
+            await _debugPlayback.RequestReplayAsync();
+        }
     }
 }

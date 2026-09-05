@@ -9,8 +9,8 @@ using Yarn.Unity;
 // 챕터 진행:
 // - ProgressionState 소유
 // - Scene 반복 실행
-// - 챕터 단위 Yarn 변수 초기화/복원
-// - 회차 Backlog 초기화/복원
+// - 챕터 단위 Yarn 변수 초기화 / 복원
+// - 회차 Backlog 초기화 / 복원
 public sealed class ProgressionDriver
 {
     private readonly SceneRunner _sceneRunner;
@@ -27,12 +27,13 @@ public sealed class ProgressionDriver
     private IReadOnlyList<DialogueLogEntry> _restoreBacklog;
     private SavedLoadPlan _loadPlan;
 
+    private SceneRunContext _currentScene;
     private CancellationTokenSource _runCancellation;
 
     public bool IsRunning { get; private set; }
 
     public IReadOnlyList<CommittedChoice> PendingPath =>
-        _sceneRunner.PendingPath;
+        _currentScene?.PendingPath ?? Array.Empty<CommittedChoice>();
 
     public ProgressionDriver(
         SceneRunner sceneRunner,
@@ -61,6 +62,7 @@ public sealed class ProgressionDriver
         var cancellation = new CancellationTokenSource();
 
         _runCancellation = cancellation;
+
         IsRunning = true;
 
         _chapter = chapter;
@@ -96,6 +98,8 @@ public sealed class ProgressionDriver
             if (ReferenceEquals(_runCancellation, cancellation))
                 _runCancellation = null;
 
+            _currentScene = null;
+
             IsRunning = false;
 
             _chapter = null;
@@ -124,54 +128,56 @@ public sealed class ProgressionDriver
             SavedLoadPlan loadPlan = _loadPlan;
             _loadPlan = null;
 
-            var context = new SceneRunContext(
-                _chapter,
-                _state,
-                loadPlan);
+            var context = new SceneRunContext(_chapter, _state, loadPlan);
 
-            SceneRunResult result = await _sceneRunner.RunAsync(
-                context,
-                cancellationToken);
+            _currentScene = context;
 
-            _state = result.State;
-
-            switch (result.Outcome)
+            try
             {
-                case SceneRunOutcome.SceneEnded:
-                    continue;
+                SceneRunResult result =
+                    await _sceneRunner.RunAsync(context, cancellationToken);
 
-                case SceneRunOutcome.ChapterEnded:
-                    return;
+                _state = result.State;
 
-                default:
-                    throw new ArgumentOutOfRangeException(
-                        nameof(result.Outcome),
-                        result.Outcome,
-                        "알 수 없는 장면 실행 결과다.");
+                switch (result.Outcome)
+                {
+                    case SceneRunOutcome.SceneEnded:
+                        continue;
+
+                    case SceneRunOutcome.ChapterEnded:
+                        return;
+
+                    default:
+                        throw new ArgumentOutOfRangeException(
+                            nameof(result.Outcome),
+                            result.Outcome,
+                            "알 수 없는 장면 실행 결과다.");
+                }
+            }
+            finally
+            {
+                if (ReferenceEquals(_currentScene, context))
+                    _currentScene = null;
             }
         }
     }
 
-    // 회차 Backlog는 Scene playback이 아니라 Driver가 준비한다.
     private void PrepareBacklog()
     {
-        if (_restoreBacklog == null)
-        {
-            _backlog.ClearBacklog();
-            return;
-        }
-
         _backlog.Restore(_restoreBacklog);
-
-        Debug.Log($"[진행] 백로그 복원 — {_restoreBacklog.Count}개");
-
         _restoreBacklog = null;
     }
+    
+    public Task RequestReplayAsync()
+    {
+        SceneRunContext scene = _currentScene;
 
-    // 전체 progression을 중단한다.
-    //
-    // Driver가 cancellation을 기록하고,
-    // SceneRunner가 현재 UI/playback을 실제로 깨운다.
+        if (!IsRunning || scene == null)
+            return Task.CompletedTask;
+
+        return _sceneRunner.RequestReplayAsync(scene);
+    }
+
     public async Task StopAsync()
     {
         CancellationTokenSource cancellation = _runCancellation;
@@ -186,27 +192,17 @@ public sealed class ProgressionDriver
 
     private void SyncChapterVariables()
     {
-        if (string.Equals(
-                _yarnChapterId,
-                _chapter.ChapterId,
-                StringComparison.Ordinal))
-        {
+        if (string.Equals(_yarnChapterId, _chapter.ChapterId))
             return;
-        }
 
         _yarnBridge.BeginChapter(_yarnProject);
-        _yarnChapterId = _chapter.ChapterId;
 
-        Debug.Log(
-            $"[진행] Yarn 변수 초기화 — 챕터 \"{_chapter.ChapterId}\"");
+        _yarnChapterId = _chapter.ChapterId;
 
         if (_restoreVariables == null)
             return;
 
         _yarnBridge.Restore(_restoreVariables);
-
-        Debug.Log(
-            $"[진행] Yarn 변수 복원 — {_restoreVariables.Count}개");
 
         _restoreVariables = null;
     }

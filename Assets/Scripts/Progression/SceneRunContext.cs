@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Ked.Progression;
 
 public sealed class SceneRunContext
@@ -12,8 +13,15 @@ public sealed class SceneRunContext
 
     public SceneRunPhase Phase { get; internal set; } = SceneRunPhase.None;
 
+    public bool ReplayRequested { get; internal set; }
+
     public EpisodeNode RootEpisode => GetEpisode(RootEpisodeId);
     public EpisodeNode CurrentEpisode => GetEpisode(CurrentEpisodeId);
+
+    public IReadOnlyList<CommittedChoice> PendingPath =>
+        History.CreatePendingPath();
+
+    internal ScenePendingHistory History { get; } = new();
 
     public SceneRunContext(
         ChapterProgression chapter,

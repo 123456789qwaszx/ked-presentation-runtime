@@ -348,8 +348,7 @@ public class VNAppBootstrap : MonoBehaviour
             new YarnEpisodeNodeRunner(dialogueRunner);
 
         YarnVariableCheckpoint variableCheckpoint =
-            new YarnVariableCheckpoint(
-                dialogueRunner.VariableStorage);
+            new YarnVariableCheckpoint(dialogueRunner.VariableStorage);
 
         _scenePlayback = new ScenePlaybackSession(
             nodeRunner,
@@ -366,7 +365,6 @@ public class VNAppBootstrap : MonoBehaviour
             _scenePlayback,
             _backlogRecorder);
 
-        // Yarn 옵션과 progression 옵션은 서로 다른 presentation contract.
         _progressionOptions = new ChapterOptionsView(
             uiManager.GetUI<VNDefaultOptionsPanel>(),
             optionItem);
@@ -472,8 +470,7 @@ public class VNAppBootstrap : MonoBehaviour
     {
         _screenBindings.ConfigurePresentationView(
             _vnFeatureController,
-            _dialogueAdvanceDispatcher,
-            _linePresentationAdvanceState);
+            _dialogueAdvanceDispatcher);
 
         _screenBindings.ConfigureTitleView(_scenePlayback);
         _screenBindings.ConfigureProgression(_progressionLauncher, _saveCoordinator);

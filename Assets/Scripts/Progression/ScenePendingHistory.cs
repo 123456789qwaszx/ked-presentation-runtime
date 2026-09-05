@@ -22,10 +22,8 @@ internal sealed class ScenePendingHistory
     private readonly List<WatchedEpisode> _watched = new();
     private readonly List<EpisodeOption> _foldBuffer = new();
 
-    // [0, PathCursor)까지가 현재 실제로 지나온 pending 경로다.
-    //
-    // 일반 진행 중에는 _picks.Count와 같고,
-    // Load / Replay에서는 0부터 기록을 다시 소비하며 증가한다.
+    // [0, PathCursor)까지가 현재 실제로 지나온 pending 경로.
+    // Load / Replay 중에는 기존 기록을 0부터 다시 소비한다.
     public int PathCursor { get; private set; }
 
     public bool HasRecordedChoice =>
@@ -46,7 +44,7 @@ internal sealed class ScenePendingHistory
                 FromEpisodeId = fromEpisodeId,
                 SourceIndex = sourceIndex,
 
-                // Load path는 실제 자동 응답 시점에 anchor를 얻는다.
+                // 실제 replay 시점에 현재 rollback anchor로 갱신된다.
                 Anchor = -1,
             });
     }
@@ -59,8 +57,7 @@ internal sealed class ScenePendingHistory
                 "자동 응답할 진행 선택 기록이 없다.");
         }
 
-        ProgressionPick pick =
-            _picks[PathCursor++];
+        ProgressionPick pick = _picks[PathCursor++];
 
         pick.Anchor = anchor;
 
@@ -178,12 +175,9 @@ internal sealed class ScenePendingHistory
         ChapterProgression chapter,
         ProgressionState entryState)
     {
-        ProgressionState state = entryState;
-
-        for (int i = 0; i < PathCursor; i++)
-            state = state.ApplyChoice(chapter, _picks[i].Option);
-
-        return state;
+        return entryState.FoldChoices(
+            chapter,
+            PendingOptions());
     }
 
     public List<CommittedChoice> CreateCommittedChoices()

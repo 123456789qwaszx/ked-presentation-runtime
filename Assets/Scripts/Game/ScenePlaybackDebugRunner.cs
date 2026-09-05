@@ -2,11 +2,13 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 
-// Progression 계층을 거치지 않고 Yarn node를 직접 실행하는 디버그 경로.
+// Progression 계층 없이 Yarn node를 직접 실행하는 디버그 경로.
 public sealed class ScenePlaybackDebugRunner
 {
     private readonly ScenePlaybackSession _playback;
     private readonly BacklogRecorder _backlog;
+
+    private bool _replayRequested;
 
     public bool IsRunning { get; private set; }
 
@@ -28,7 +30,6 @@ public sealed class ScenePlaybackDebugRunner
         try
         {
             _backlog.ClearBacklog();
-
             await RunNodeAsync(nodeName);
         }
         finally
@@ -37,7 +38,8 @@ public sealed class ScenePlaybackDebugRunner
         }
     }
 
-    public async Task RunNodeChainAsync(IReadOnlyList<string> nodeNames)
+    public async Task RunNodeChainAsync(
+        IReadOnlyList<string> nodeNames)
     {
         if (IsRunning)
             return;
@@ -52,13 +54,11 @@ public sealed class ScenePlaybackDebugRunner
             {
                 string nodeName = nodeNames[i];
 
-                Debug.Log(
-                    $"[연결] {i + 1}/{nodeNames.Count} 시작 — \"{nodeName}\"");
+                Debug.Log($"[연결] {i + 1}/{nodeNames.Count} 시작 — \"{nodeName}\"");
 
                 await RunNodeAsync(nodeName);
 
-                Debug.Log(
-                    $"[연결] {i + 1}/{nodeNames.Count} 끝 — \"{nodeName}\"");
+                Debug.Log($"[연결] {i + 1}/{nodeNames.Count} 끝 — \"{nodeName}\"");
             }
 
             Debug.Log("[연결] 사슬 끝.");
@@ -69,15 +69,31 @@ public sealed class ScenePlaybackDebugRunner
         }
     }
 
+    public async Task RequestReplayAsync()
+    {
+        if (!IsRunning || _replayRequested)
+            return;
+
+        _replayRequested = true;
+
+        await _playback.StopAsync();
+    }
+
     private async Task RunNodeAsync(string nodeName)
     {
         await _playback.BeginSceneAsync();
 
         _backlog.MarkSceneStart();
 
-        while (await _playback.PlayNodeAsync(nodeName)
-               == NodePlayOutcome.ReplayRequested)
+        while (true)
         {
+            _replayRequested = false;
+
+            await _playback.PlayNodeAsync(nodeName);
+
+            if (!_replayRequested)
+                return;
+
             await _playback.PrepareReplayAsync();
         }
     }
