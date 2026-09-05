@@ -39,16 +39,30 @@ public sealed class SaveCoordinator : IProgressionReporter
     // 진행 중 장면의 진입 스냅샷. 장면 끝에 경로와 합쳐 기록이 된다.
     private SceneCheckpoint _currentEntry;
 
+    // 서버 사본 쪽. 셋 다 서버가 없으면 null.
+    private readonly ServerBookmarkSync _bookmarkSync;
+    private readonly ServerRestore _restore;
+
+    // 409로 갈라졌다 — UI가 한 줄 알릴 재료(출처). 사용자가 시키지 않았는데 회차가 둘이 된 경우다.
+    public event Action<ForkOrigin> ConflictForked;
+
     public SaveCoordinator(
         ISaveStore localStore,
         SyncQueue queue,
         ServerSyncSaveStore server,
-        int slotNo)
+        int slotNo,
+        ServerBookmarkSync bookmarkSync = null,
+        ServerRestore restore = null)
     {
         _localStore = localStore;
         _queue = queue;
         _server = server;
         _slotNo = slotNo;
+        _bookmarkSync = bookmarkSync;
+        _restore = restore;
+
+        if (_server != null)
+            _server.ConflictDetected += HandleConflict;
     }
 
     public IReadOnlyList<SceneRecord> Scenes => _scenes;
@@ -57,11 +71,22 @@ public sealed class SaveCoordinator : IProgressionReporter
     private int OwnSeconds => _ownSecondsBase + (int)(Time.realtimeSinceStartup - _startedAt);
     private int TotalSeconds => _inheritedSeconds + OwnSeconds;
 
-    // Syncs any pending items left from the previous session on startup.
-    public Task SyncPendingAsync()
+    // 시작 동기화의 Task. 복구·409 갈라지기가 활성 파일을 쓰는 동안 진행을 시작하면 안 되니,
+    // 재개·새 게임은 이것을 먼저 기다린다.
+    public Task StartupSync { get; private set; } = Task.CompletedTask;
+
+    public Task SyncPendingAsync() => StartupSync = SyncPendingCoreAsync();
+
+    // 시작 시 서버와 맞춘다: 새 기기면 복구 → 옛 회차 큐 순회 → 즐겨찾기 → 활성 회차. 순서대로 기다린다.
+    // 복구는 로컬에 회차가 하나도 없을 때만 — 로컬이 진실이라 있는 것은 덮지 않는다.
+    private async Task SyncPendingCoreAsync()
     {
         if (_server == null)
-            return Task.CompletedTask;
+            return;
+
+        // Load가 옛 형식(slot1.json)을 먼저 옮긴다. 그 뒤에도 비어 있으면 새 기기.
+        if (_restore != null && _localStore.Load(_slotNo) == null && _localStore.ListPlaythroughIds().Count == 0)
+            await _restore.RestoreAsync();
 
         // 큐를 활성 회차 것으로 맞춘 뒤에 보낸다.
         string activeId = _localStore.ActiveId;
@@ -69,7 +94,12 @@ public sealed class SaveCoordinator : IProgressionReporter
         if (activeId != null)
             _queue.SwitchTo(_localStore.QueuePathOf(activeId));
 
-        return _server.TrySyncAsync(_slotNo);
+        await _server.SyncStaleQueuesAsync(_slotNo, _localStore.ListPlaythroughIds(), activeId);
+
+        if (_bookmarkSync != null)
+            await _bookmarkSync.SyncAllAsync();
+
+        await _server.TrySyncAsync(_slotNo);
     }
 
     // Flushes pending sync work, then clears the active pointer and starts a fresh playthrough.
@@ -82,7 +112,7 @@ public sealed class SaveCoordinator : IProgressionReporter
         int dropped = _queue.PendingCount;
 
         if (dropped > 0)
-            Debug.LogWarning($"[저장] 새 게임 - 서버에 못 보낸 이력 {dropped} 남겨 둠(옛 회차 큐).");
+            Debug.LogWarning($"[저장] 새 게임 - 서버에 못 보낸 이력 {dropped} 남겨 둠(옛 회차 큐). 다음 시작에 다시 보낸다.");
 
         _localStore.Delete(_slotNo);
 
@@ -180,10 +210,15 @@ public sealed class SaveCoordinator : IProgressionReporter
     //
     // target이 있으면 그 장면의 경로·Yarn 선택과 함께 로드 계획(PendingLoad)으로 실린다 — 첫 장면이
     // 루트에서 표적까지 달린다. 물려받는 것: 그 장면 앞까지의 기록·백로그·누적 시간. 옛 회차 파일과 큐는 그대로.
-    public void ForkFromScene(int sceneIndex, SaveLineTarget target = null)
+    //
+    // 갈라지기 전에 옛 회차 큐를 한 번 비워 본다(best-effort) — 부모의 마지막 장면 이력이 서버에 먼저 닿도록.
+    // 실패해도 갈라진다. 남은 것은 시작 시 큐 순회가 살린다.
+    public async Task ForkFromScene(int sceneIndex, SaveLineTarget target = null)
     {
         if (sceneIndex < 0 || sceneIndex >= _scenes.Count)
             throw new ArgumentOutOfRangeException(nameof(sceneIndex));
+
+        await FlushBeforeForkAsync();
 
         SceneRecord origin = _scenes[sceneIndex];
         SceneCheckpoint checkpoint = origin.Checkpoint;
@@ -287,9 +322,14 @@ public sealed class SaveCoordinator : IProgressionReporter
             $"[저장] 즐겨찾기 — \"{bookmark.Preview}\" @ {target.NodeName}/{target.LineId}#{target.Occurrence}, " +
             $"경로 {bookmark.Load.Path.Count}개, Yarn 선택 {bookmark.Load.YarnChoices.Count}개 (총 {file.Items.Count}개)");
 
+        // 서버엔 직접 PUT — 큐 없이. 실패하면 SyncedAtUtc가 비어 있어 다음 시작에 다시.
+        if (_bookmarkSync != null)
+            _ = _bookmarkSync.PushAsync(bookmark.Id);
+
         return bookmark;
     }
 
+    // 로컬에서 빼고 서버 DELETE. 못 지우면 PendingDeletes에 남아 다음 시작에 다시.
     public bool DeleteBookmark(string id)
     {
         BookmarkFile file = _localStore.LoadBookmarks();
@@ -298,10 +338,18 @@ public sealed class SaveCoordinator : IProgressionReporter
         if (removed == 0)
             return false;
 
+        if (_bookmarkSync != null && !file.PendingDeletes.Contains(id))
+            file.PendingDeletes.Add(id);
+
         _localStore.SaveBookmarks(file);
+
+        if (_bookmarkSync != null)
+            _ = _bookmarkSync.DeleteAsync(id);
+
         return true;
     }
 
+    // 이름이 바뀌면 서버 사본도 바뀌어야 한다 — 같은 id로 다시 PUT(멱등 upsert).
     public bool RenameBookmark(string id, string label)
     {
         BookmarkFile file = _localStore.LoadBookmarks();
@@ -311,7 +359,12 @@ public sealed class SaveCoordinator : IProgressionReporter
             return false;
 
         bookmark.Label = string.IsNullOrEmpty(label) ? bookmark.Preview : label;
+        bookmark.SyncedAtUtc = null;
         _localStore.SaveBookmarks(file);
+
+        if (_bookmarkSync != null)
+            _ = _bookmarkSync.PushAsync(id);
+
         return true;
     }
 
@@ -356,8 +409,10 @@ public sealed class SaveCoordinator : IProgressionReporter
 
     // 즐겨찾기를 물려받아 새 회차로. 출처 회차 파일이 있으면 앞의 장면 기록도 물려받는다.
     // 호출자는 드라이버를 멈춘 뒤 부르고, 그 뒤 런처를 다시 띄운다.
-    public void ForkFromBookmark(Bookmark bookmark)
+    public async Task ForkFromBookmark(Bookmark bookmark)
     {
+        await FlushBeforeForkAsync();
+
         SceneCheckpoint checkpoint = bookmark.Checkpoint;
 
         LocalSaveFile origin = string.IsNullOrEmpty(bookmark.PlaythroughId)
@@ -500,7 +555,80 @@ public sealed class SaveCoordinator : IProgressionReporter
             _ = _server.TrySyncAsync(_slotNo);
     }
 
+    // ── 409 ─────────────────────────────────────────────────────────────────
+
+    // 다른 기기가 이 회차를 먼저 저장했다. 확정된 것은 되돌리지 않는다 — 이 기기의 진행을 새 회차로 갈라 이어 간다.
+    // 미전송 선택·이벤트는 새 회차 큐의 seq 1..n으로 다시 매기고, 출처 장면은 서버가 마지막으로 받아 준 자리.
+    // 재생·이력·진입 스냅샷은 손대지 않는다. 옛 회차 파일은 남고(서버와 같은 지점까지의 기록), 활성만 새 회차로.
+    // 옛 큐는 미전송을 넘겼으니 비운다 — 시작 시 순회가 같은 409를 또 맞지 않게. force(덮어쓰기)는 노출하지 않는다.
+    private void HandleConflict()
+    {
+        LocalSaveFile current = _localStore.Load(_slotNo);
+
+        if (current == null)
+            return;
+
+        // 메모리가 회차를 알고 있는데 파일과 다르면 활성이 그 사이 바뀐 것 — 이번 충돌은 지나간 회차의 것.
+        if (_playthroughId != null && !string.Equals(_playthroughId, current.PlaythroughId, StringComparison.Ordinal))
+            return;
+
+        SyncBatch pending = _queue.CaptureBatch();
+        int sceneIndex = _queue.SyncedSceneCount;
+        string fromId = current.PlaythroughId;
+        string newId = NewPlaythroughId();
+
+        var origin = new ForkOrigin { PlaythroughId = fromId, SceneIndex = sceneIndex, Target = null };
+
+        current.PlaythroughId = newId;
+        current.ForkedFrom = origin;
+        current.SavedAtUtc = NowUtc();
+
+        // 시간도 다른 갈라지기처럼 나눈다 — 출처 장면 진입까지가 물려받은 것, 나머지가 이 회차 것.
+        if (current.Scenes != null && sceneIndex < current.Scenes.Count)
+        {
+            current.InheritedPlaySeconds = current.Scenes[sceneIndex].Checkpoint.PlaySecondsAtEntry;
+            current.OwnPlaySeconds = Math.Max(0, current.PlaySeconds - current.InheritedPlaySeconds);
+        }
+
+        _localStore.Save(current);
+
+        _queue.Discard(pending);
+        _queue.SwitchTo(_localStore.QueuePathOf(newId));
+        _queue.Reset(pending.Choices, pending.Events);
+
+        // 재개 전(시작 시 동기화)이면 메모리는 비어 있다 — 재개가 새 파일을 읽으며 채운다.
+        if (_playthroughId != null)
+        {
+            _playthroughId = newId;
+            _forkedFrom = origin;
+            _inheritedSeconds = current.InheritedPlaySeconds;
+            _ownSecondsBase = current.OwnPlaySeconds;
+            _startedAt = Time.realtimeSinceStartup;
+        }
+
+        Debug.LogWarning(
+            $"[저장] 충돌(409) — 다른 기기가 회차 {fromId}를 먼저 저장했다. 이 기기의 진행은 새 회차 {newId}로 갈라 이어 간다 " +
+            $"(출처 장면 {sceneIndex}, 미전송 선택 {pending.Choices.Count}건 → seq 1부터, 이벤트 {pending.Events.Count}건).");
+
+        ConflictForked?.Invoke(origin);
+
+        _ = _server.TrySyncAsync(_slotNo);
+    }
+
     // ── 잔손 ────────────────────────────────────────────────────────────────
+
+    private async Task FlushBeforeForkAsync()
+    {
+        if (_server == null)
+            return;
+
+        await _server.FlushAsync(_slotNo);
+
+        int left = _queue.PendingCount;
+
+        if (left > 0)
+            Debug.LogWarning($"[저장] 갈라지기 전 동기화 못 함 — 옛 회차 큐에 {left}건 남김. 다음 시작에 다시 보낸다.");
+    }
 
     // 메모리를 이 회차의 것으로. 큐도 그 회차의 파일로 옮겨 탄다.
     private void BecomePlaythrough(

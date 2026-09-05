@@ -404,8 +404,10 @@ public class VNAppBootstrap : MonoBehaviour
 
         ServerSyncSaveStore serverSync = new(
             serverApi, guestSession, syncQueue, versionResolver, localStore, deviceKey);
+        ServerBookmarkSync bookmarkSync = new(serverApi, guestSession, versionResolver, localStore);
+        ServerRestore restore = new(serverApi, guestSession, localStore, slotNo: 1);
 
-        return new SaveCoordinator(localStore, syncQueue, serverSync, slotNo: 1);
+        return new SaveCoordinator(localStore, syncQueue, serverSync, slotNo: 1, bookmarkSync, restore);
     }
 
     private void BootstrapPlaybackControls()

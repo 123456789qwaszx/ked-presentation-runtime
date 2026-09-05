@@ -39,11 +39,58 @@ public sealed class SyncQueue
     public long? BaseRevision => _file.BaseRevision;
     public int PendingCount => _file.PendingChoices.Count + _file.PendingEvents.Count;
 
+    // 서버가 마지막으로 받아 준 시점의 장면 기록 수. 409로 갈라질 때 "어디까지 같은가"의 답.
+    public int SyncedSceneCount => _file.SyncedSceneCount;
+
+    public string ConflictedAtUtc => _file.ConflictedAtUtc;
+
+    public void MarkConflicted(string nowUtc)
+    {
+        _file.ConflictedAtUtc = nowUtc;
+        Persist();
+    }
+
     // 새 회차. PlaythroughId 없음/seq 1부터/revision 없음.
     // 남아 있던 항목은 이전 회차 것이라 함께 버려짐
     public void Reset()
     {
         _file = new SyncQueueFile();
+        Persist();
+    }
+
+    // 새 회차인데 미전송을 들고 시작한다 — 409로 갈라질 때. seq는 1부터 다시 매긴다.
+    public void Reset(IReadOnlyList<PendingChoice> choices, IReadOnlyList<PendingEvent> events)
+    {
+        _file = new SyncQueueFile();
+
+        for (int i = 0; i < choices.Count; i++)
+        {
+            _file.PendingChoices.Add(new PendingChoice
+            {
+                Seq = _file.NextSeq++,
+                EpisodeId = choices[i].EpisodeId,
+                OptionIndex = choices[i].OptionIndex,
+                ChosenAt = choices[i].ChosenAt,
+            });
+        }
+
+        for (int i = 0; i < events.Count; i++)
+            _file.PendingEvents.Add(new PendingEvent { EpisodeId = events[i].EpisodeId, OccurredAt = events[i].OccurredAt });
+
+        Persist();
+    }
+
+    // 서버에서 복구한 회차의 큐 — 미전송 없음, 서버가 아는 것만.
+    public void Restore(long playthroughId, long baseRevision, int nextSeq, int syncedSceneCount)
+    {
+        _file = new SyncQueueFile
+        {
+            PlaythroughId = playthroughId,
+            BaseRevision = baseRevision,
+            NextSeq = nextSeq,
+            SyncedSceneCount = syncedSceneCount,
+        };
+
         Persist();
     }
 
@@ -88,11 +135,21 @@ public sealed class SyncQueue
 
     // '200 수신 확인'
     // Acknowledges a successfully synced batch.
-    public void Acknowledge(SyncBatch batch, long newRevision)
+    public void Acknowledge(SyncBatch batch, long newRevision, int syncedSceneCount)
     {
         _file.PendingChoices.RemoveRange(0, batch.Choices.Count);
         _file.PendingEvents.RemoveRange(0, batch.Events.Count);
         _file.BaseRevision = newRevision;
+        _file.SyncedSceneCount = syncedSceneCount;
+
+        Persist();
+    }
+
+    // 미전송을 다른 회차 큐로 옮긴 뒤 — 여기서는 뺀다. 서버 id·revision은 그대로(200이 아니었다).
+    public void Discard(SyncBatch batch)
+    {
+        _file.PendingChoices.RemoveRange(0, batch.Choices.Count);
+        _file.PendingEvents.RemoveRange(0, batch.Events.Count);
 
         Persist();
     }

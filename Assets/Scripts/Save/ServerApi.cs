@@ -21,8 +21,9 @@ public sealed class ServerApi
     public Task<ApiResult<LoginResponseDto>> LoginAsync(string username, string password) =>
         SendAsync<LoginResponseDto>("POST", "/auth/login", Credentials(username, password), token: null);
 
-    public Task<ApiResult<PlaythroughCreatedDto>> CreatePlaythroughAsync(long userId, string token) =>
-        SendAsync<PlaythroughCreatedDto>("POST", $"/users/{userId}/playthroughs", null, token);
+    public Task<ApiResult<PlaythroughCreatedDto>> CreatePlaythroughAsync(
+        long userId, PlaythroughCreateRequestDto request, string token) =>
+        SendAsync<PlaythroughCreatedDto>("POST", $"/users/{userId}/playthroughs", request, token);
 
     // 공개 GET - /content GET은 토큰이 필요 없음. (로그인하지 않은 클라이언트도 조회할 수 있는 공개 엔드포인트)
     public Task<ApiResult<List<ChapterVersionInfoDto>>> GetChapterVersionsAsync(string chapterId) =>
@@ -31,6 +32,33 @@ public sealed class ServerApi
     public Task<ApiResult<SaveUploadResponseDto>> PutSaveAsync(
         long playthroughId, int slotNo, SaveUploadRequestDto request, string token) =>
         SendAsync<SaveUploadResponseDto>("PUT", $"/playthroughs/{playthroughId}/saves/{slotNo}", request, token);
+
+    // ── 복구용 GET ──
+
+    public Task<ApiResult<List<PlaythroughSummaryDto>>> GetPlaythroughsAsync(long userId, string token) =>
+        SendAsync<List<PlaythroughSummaryDto>>("GET", $"/users/{userId}/playthroughs", null, token);
+
+    public Task<ApiResult<SaveSlotDetailDto>> GetSaveAsync(long playthroughId, int slotNo, string token) =>
+        SendAsync<SaveSlotDetailDto>("GET", $"/playthroughs/{playthroughId}/saves/{slotNo}", null, token);
+
+    public Task<ApiResult<List<ChoiceHistoryItemDto>>> GetChoicesAsync(long playthroughId, int slotNo, string token) =>
+        SendAsync<List<ChoiceHistoryItemDto>>("GET", $"/playthroughs/{playthroughId}/saves/{slotNo}/choices", null, token);
+
+    // ── 즐겨찾기 — revision 없음, 마지막 PUT이 이긴다 ──
+
+    public Task<ApiResult<BookmarkUpsertResponseDto>> PutBookmarkAsync(
+        long userId, string clientBookmarkId, BookmarkUpsertRequestDto request, string token) =>
+        SendAsync<BookmarkUpsertResponseDto>("PUT", $"/users/{userId}/bookmarks/{clientBookmarkId}", request, token);
+
+    // 204, 본문 없음. 없어도·이미 지웠어도 204.
+    public Task<ApiResult<object>> DeleteBookmarkAsync(long userId, string clientBookmarkId, string token) =>
+        SendAsync<object>("DELETE", $"/users/{userId}/bookmarks/{clientBookmarkId}", null, token);
+
+    public Task<ApiResult<List<BookmarkDetailDto>>> GetBookmarksAsync(long userId, string token) =>
+        SendAsync<List<BookmarkDetailDto>>("GET", $"/users/{userId}/bookmarks", null, token);
+
+    public Task<ApiResult<BookmarkDetailDto>> GetBookmarkAsync(long userId, string clientBookmarkId, string token) =>
+        SendAsync<BookmarkDetailDto>("GET", $"/users/{userId}/bookmarks/{clientBookmarkId}", null, token);
 
     private static Dictionary<string, string> Credentials(string username, string password) =>
         new Dictionary<string, string> { ["username"] = username, ["password"] = password };

@@ -20,6 +20,9 @@ public static class SaveJson
         NullValueHandling = NullValueHandling.Include,
     };
 
+    // 응답 안에 그대로 실려 온 JSON(스냅샷)을 같은 규약으로 되읽을 때.
+    public static readonly JsonSerializer Serializer = JsonSerializer.Create(Settings);
+
     public static string Serialize(object value) =>
         JsonConvert.SerializeObject(value, Settings);
 

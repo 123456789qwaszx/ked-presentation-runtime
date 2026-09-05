@@ -168,23 +168,28 @@ public sealed class VNAdvanceInputPoller : MonoBehaviour
         Bookmark latest = bookmarks[bookmarks.Count - 1];
 
         await _progressionLauncher.StopAsync();
-        _saveCoordinator.ForkFromBookmark(latest);
+        await _saveCoordinator.ForkFromBookmark(latest);
         await _progressionLauncher.LaunchAsync();
     }
 
+    // 진행을 시작하는 두 경로는 시작 동기화(복구·409 갈라지기가 활성 파일을 쓸 수 있다)를 먼저 기다린다.
     private async void StartProgression()
     {
         if (_progressionLauncher == null)
             return;
+
+        if (_saveCoordinator != null)
+            await _saveCoordinator.StartupSync;
 
         await _progressionLauncher.LaunchAsync();
     }
 
     private async void StartNewGame()
     {
-        if (_progressionLauncher == null || _progressionLauncher.IsRunning)
+        if (_progressionLauncher == null || _saveCoordinator == null || _progressionLauncher.IsRunning)
             return;
 
+        await _saveCoordinator.StartupSync;
         await _saveCoordinator.StartNewGameAsync();
         await _progressionLauncher.LaunchAsync();
     }

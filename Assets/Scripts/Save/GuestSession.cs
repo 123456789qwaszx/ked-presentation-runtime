@@ -42,6 +42,29 @@ public sealed class GuestSession
         Persist();
     }
 
+    // 토큰을 붙여 한 번 부른다. 401이면(서버 재시작 등) 토큰을 버리고 새로 받아 한 번 더.
+    // 토큰을 못 받으면 NetworkError 결과 — 부르는 쪽은 "닿지 않았다"로 본다.
+    public async Task<ApiResult<T>> CallAsync<T>(Func<string, Task<ApiResult<T>>> call)
+    {
+        string token = await EnsureTokenAsync();
+
+        if (token == null)
+            return ApiResult<T>.Network("토큰 없음");
+
+        ApiResult<T> result = await call(token);
+
+        if (result.Status != 401)
+            return result;
+
+        InvalidateToken();
+        token = await EnsureTokenAsync();
+
+        return token == null ? result : await call(token);
+    }
+
+    // 토큰 확보는 단일 비행 — 동시에 몇이 부르든 가입·로그인은 한 번. 아니면 계정이 둘 생겨 뒤가 앞을 덮는다.
+    private Task<string> _ensuring;
+
     public async Task<string> EnsureTokenAsync()
     {
         // 계정도 있고 토큰도 유효:
@@ -49,6 +72,22 @@ public sealed class GuestSession
         if (HasUsableToken())
             return _account.Token;
 
+        if (_ensuring == null)
+            _ensuring = EnsureTokenCoreAsync();
+
+        try
+        {
+            return await _ensuring;
+        }
+        finally
+        {
+            // 대기자 여럿이 각자 null로 두어도 무해 — 다음 호출은 HasUsableToken이 먼저 답한다.
+            _ensuring = null;
+        }
+    }
+
+    private async Task<string> EnsureTokenCoreAsync()
+    {
         // account.json 자체가 없음(_account == null):
         // A-1) await SignUpAsync()실행. 성공 후 _account 생성.
         // A-2) return await LoginAsync()실행. 토큰 발급.

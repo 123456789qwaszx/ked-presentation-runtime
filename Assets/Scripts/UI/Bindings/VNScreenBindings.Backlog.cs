@@ -63,7 +63,7 @@ public sealed partial class VNScreenBindings
         ClosePanel();
 
         await _progressionLauncher.StopAsync();
-        _saveCoordinator.ForkFromScene(sceneIndex, target);
+        await _saveCoordinator.ForkFromScene(sceneIndex, target);
         await _progressionLauncher.LaunchAsync();
     }
 }

@@ -177,20 +177,28 @@ v1 §2의 결론 그대로다. 즐겨찾기가 "장면 진입 스냅샷 + 경로
 - 회고적 라인 갈라지기(이전 장면의 특정 라인): 데이터(`SceneRecord`)로 가능하다. UI는 후속 — 열 때 백로그
   항목에서 장면 기록을 찾아 `LoadPlan`을 만드는 함수만 F4에서 둔다.
 
-### F6. 서버 연동 — M8-B (착수 대기: 서버 M8-A 완료 후. 계약 단절 구간이라 먼저 시작하지 않는다)
+### F6. 서버 연동 — M8-B (착수 2026-09-02: 서버 M8-A 검증·커밋 완료. 계약 정본 = spring-prepare `docs/handoff/server-2026-09-02.md`)
 
 서버 결정 D-018~D-024(spring-prepare `DECISIONS.md`)에 맞춘 클라 작업 여섯. 순서대로.
 
 | # | 작업 | 클라 변경 | 서버 계약 |
 |---|---|---|---|
-| B-1 | **회차 생성 멱등 + 갈래 동승** | `PlaythroughCreateRequestDto { clientPlaythroughId, forkedFrom?{ clientPlaythroughId, playthroughId?, sceneIndex } }`. `ServerSyncSaveStore.CreatePlaythroughAsync`가 활성 회차 파일의 `PlaythroughId`·`ForkedFrom`을 싣는다. 부모 서버 id는 부모 큐 파일(`QueuePathOf(부모 client id)`)의 `PlaythroughId`가 있으면 함께. 갈라지기 직전 `FlushAsync`(best-effort) — `ForkFromScene`/`ForkFromBookmark`를 async로 | D-019·D-020. 200/201 둘 다 Ok |
-| B-2 | **PUT 본문 확장** | `SaveUploadRequestDto`에 `inheritedPlaySeconds`·`ownPlaySeconds`·`chapterCompleted` — `LocalSaveFile`에서 그대로 | A-4 (선택 필드, null→0/false) |
-| B-3 | **즐겨찾기 동기화** | `ServerApi.PutBookmarkAsync/DeleteBookmarkAsync/GetBookmarksAsync`, `BookmarkUploadRequestDto { label, preview, chapterId, chapterVersion, playthroughClientId, sceneIndex, createdAt, snapshot }`. 생성·이름 변경 → PUT(멱등 upsert), 삭제 → DELETE(soft). 큐 없이 직접, 실패하면 `Bookmark.SyncedAtUtc`(신설)가 비어 있어 다음 시작에 재시도 | D-021·D-022(1MB → 413이면 로그·보류) |
-| B-4 | **시작 시 모든 회차 큐 순회** | `SaveCoordinator.SyncPendingAsync`가 `ListPlaythroughIds()`를 돌며 미전송이 있는 큐마다 동기화. `ServerSyncSaveStore.SyncOnceAsync`를 (회차 파일, 큐) 인자로 받게 분리 — 지금은 활성 슬롯·큐에 묶여 있다. 순서 무관(서버가 되채움) | D-020 |
-| B-5 | **복구(새 기기)** | `GET /users/{uid}/playthroughs`(+clientPlaythroughId·forkedFrom·시간·완료) → 회차마다 `GET /saves/1` 스냅샷 → `playthroughs/{clientId}.json` + 큐 파일(서버 id·baseRevision) 재구성. 즐겨찾기는 목록(메타) + **개별 스냅샷 GET** → `bookmarks.json`. 가장 최근 저장 회차를 활성으로(D-e) | **계약 공백 하나**: 즐겨찾기 목록이 메타만이라 복구용 `GET /users/{uid}/bookmarks/{id}`(스냅샷 포함)가 필요 — 서버에 알릴 것 |
-| B-6 | **409 해소 = 갈라지기** (D-023 제안 채택 권장) | `ConflictDetected` 시: 로컬 회차에 새 client id를 주고 `ForkedFrom = { 부모 client id, sceneIndex = 미전송 선택이 시작되는 장면 }`, 새 큐(seq 1부터)에 미전송을 옮겨 적고 `baseRevision 0`으로 PUT. 재생·이력은 손대지 않는다(리플레이 없는 갈라지기) — 옛 회차 파일은 서버와 같은 상태로 남기고, 로컬 진행은 새 회차로 이어진다. UI는 알림만 | D-023(서버 비용 없음) |
+| B-1 | **회차 생성 멱등 + 갈래 동승** — **코드 완료** | `PlaythroughCreateRequestDto { clientPlaythroughId, forkedFrom?{ clientPlaythroughId, sceneIndex } }`. `ServerSyncSaveStore.CreatePlaythroughAsync(save, token)`가 활성 회차 파일의 `PlaythroughId`·`ForkedFrom`을 싣는다. ~~부모 서버 id 동승~~ → 답신 §3-2로 **보내지 않는다**(서버가 읽지 않는다). 갈라지기 직전 `FlushBeforeForkAsync`(best-effort, 남으면 경고) — `ForkFromScene`/`ForkFromBookmark`가 `Task` | D-019·D-020. 200/201 둘 다 Ok — 로그가 "생성(201)/확인(200)"으로 가른다 |
+| B-2 | **PUT 본문 확장** — **코드 완료** | `SaveUploadRequestDto`에 `inheritedPlaySeconds`·`ownPlaySeconds`·`chapterCompleted` — `LocalSaveFile`에서 그대로 | A-4 (선택 필드, null→0/false) |
+| B-3 | **즐겨찾기 동기화** — **코드 완료** | `ServerBookmarkSync`(신설): `PushAsync(id)`(PUT upsert, 스냅샷 = `Bookmark` 통째, label 100·preview 200으로 자름) / `DeleteAsync(id)`(DELETE 204) / `SyncAllAsync()`(시작 시 `PendingDeletes` → `SyncedAtUtc` 빈 것). 찍기·이름 변경 → PUT, 삭제 → 로컬에서 빼고 `BookmarkFile.PendingDeletes`에 적은 뒤 DELETE. 성공 시 `Bookmark.SyncedAtUtc`, 413이면 `SyncError`(재시도 안 함) | D-021·D-022. 409 없음 |
+| B-4 | **시작 시 모든 회차 큐 순회** — **코드 완료** | `ServerSyncSaveStore.SyncOnceAsync(save, queue, slotNo)`로 분리. `SyncStaleQueuesAsync(slotNo, ids, activeId)`가 활성 아닌 회차마다 큐 파일을 열어 미전송이 있으면 보낸다(옛 회차 409는 갈라지지 않고 경고). `SaveCoordinator.SyncPendingAsync` 순서: 복구(새 기기) → 옛 큐 순회 → 즐겨찾기 → 활성. 401 재시도는 `GuestSession.CallAsync`로 한 곳에 | D-020 |
+| B-5 | **복구(새 기기)** — **코드 완료** | `ServerRestore`(신설): 로컬에 회차가 하나도 없고 `account.json`이 있을 때만. 회차 목록 GET → 클라 id·슬롯 있는 것만 `lastSavedAt` 오름차순으로 → 슬롯 1 GET(스냅샷 = `LocalSaveFile`) + 선택 이력 GET(다음 seq) → `playthroughs/{clientId}.json` + `{id}.queue.json`(`SyncQueue.Restore`: 서버 id·revision·nextSeq·`SyncedSceneCount`). 마지막 저장이 활성으로 남는다. 즐겨찾기는 목록 → 단건 GET → `bookmarks.json`(`SyncedAtUtc` = 서버 `updatedAt`) | §1.4·§1.3·`GET /saves/1`·`/choices`. `@JsonRawValue` 스냅샷은 `JToken`으로 받아 `SaveJson.Serializer`로 되읽는다 |
+| B-6 | **409 해소 = 갈라지기** — **코드 완료 (D-023 결정: 소유자 2026-09-02, 권장안 그대로)** | `SaveCoordinator.HandleConflict`(`ServerSyncSaveStore.ConflictDetected`): ① 갈라진다 — 활성 파일에 새 client id, `ForkedFrom = { 옛 id, sceneIndex = 큐의 SyncedSceneCount(마지막 200 시점의 장면 기록 수) }`; ② force 비노출; ③ 옛 큐의 미전송을 `Discard`하고 새 큐에 `Reset(choices, events)`로 seq 1..n 재번호, `baseRevision 0`; ④ `ConflictForked` 이벤트 + 경고 로그 — 목록은 `ForkedFrom`으로 갈래 표시. 재생·이력·진입 스냅샷은 손대지 않는다. 옛 회차 409(순회 중)는 갈라지지 않고 큐 보존 | D-023. 서버 비용 0 |
 
 부수: 서버 M8-A는 F6 전 클라가 회차 생성에서 400을 맞는 **의도된 단절**(D-019). 로컬 `serverBaseUrl`이 비어 있으면 무관.
+
+**답신 대조(2026-09-02, 작업 지시 §0)** — 어긋난 곳 하나, 순서는 같다(1→2→4→3→5→6):
+- ① 답신에 없는 걸 기대: 없음. B-5의 "즐겨찾기 단건 GET"은 답신 §1.3에 있다.
+- ② 답신이 안 한다고 한 것: B-1의 `forkedFrom.playthroughId`(서버 id) — 뺐다.
+- ③ 순서: 같다. 정정 F46(null은 키 있음·값 null — Newtonsoft `== null`로 충분)·F47(옛 POST는 400 `MALFORMED_JSON`)은 코드에 영향 없음.
+- D-023 네 물음(작업 지시 §2) — 소유자 결정(2026-09-02): ① 갈라진다 / ② force 비노출 / ③ 진 기기의 미전송을 새 회차 seq 1..n으로 옮김 / ④ 목록에 갈래 표시. B-6은 이대로 구현했다.
+
+검증 절차는 `docs/m8b-check.md`(B절), 서버에 돌려줄 답신 초안은 `docs/m8b-handoff.md`.
 
 ### F5. UI
 
@@ -229,3 +237,6 @@ v1 §2의 결론 그대로다. 즐겨찾기가 "장면 진입 스냅샷 + 경로
 - 2026-09-02: **F3 검증됨·커밋.** `bookmarks.json`(`BookmarkFile`/`Bookmark` — 진입 스냅샷·찍은 순간까지의 경로·Yarn 선택·표적·이전 백로그·누적 시간의 사본). `SaveCoordinator.CreateBookmark`/`ForkFromBookmark`/`Bookmarks`, `VNFeatureController.TryGetCurrentLine`·`CreateYarnChoiceSnapshot`, `SceneRunner.PendingPath`(드라이버·런처로 노출). 디버그 키 6 = 지금 라인 즐겨찾기, 7 = 마지막 즐겨찾기로 갈라지기. 옵션 박스 중에도 된다(표적 = 노드 마지막 라인). 목록 UI는 F5.
 - 2026-09-02: **F4 검증됨** — 코드는 F2-b에 이미 들어갔다(백로그 이전 장면 항목 → 그 라인까지 갈라지기, `TryMakeLineTarget`). 남은 것은 UI 문구뿐(F5).
 - 2026-09-02: **F5 준비(데이터 API) 작성됨.** UI 바인딩이 쓸 것만 미리: `SaveCoordinator.DeleteBookmark`/`RenameBookmark`/`ListPlaythroughs`(`PlaythroughSummary` — 활성 여부·출처·장면 수·즐겨찾기 수·두 시간·시각), `ISaveStore.ListPlaythroughIds`. **F5 UI(즐겨찾기 목록·이력 화면·로딩 화면)와 F6 서버는 보류 — 소유자가 프리팹·UI 연동을 한꺼번에 하기로.**
+- 2026-09-02: **F6 전부(B-1~B-6) 코드 완료, 빌드 통과. 소유자 Unity 검증 대기 — 절차는 `docs/m8b-check.md`.** 새 파일 `ServerBookmarkSync.cs`·`ServerRestore.cs`(Unity가 csproj를 다시 만든다). D-023은 소유자가 권장안대로 결정. 옛 회차의 409는 갈라지지 않는다(활성만) — 남겨 둔 결정 하나.
+- 2026-09-02: **서버 검토(검증 전) 반영** — `StartupSync`(재개·새 게임이 시작 동기화를 기다림), `GuestSession.EnsureTokenAsync` 단일 비행(게스트 계정 둘 생기는 경쟁 제거), 즐겨찾기 동기화를 기다린 뒤 활성, 409 갈래의 시간 나누기, 옛 회차 409는 `ConflictedAtUtc`로 표시해 다음부터 건너뜀. M9 후보: 옛 회차 409도 갈라 두기.
+- 2026-09-02: F6 1단계(B-1·B-2) 확인법: 서버 `bootRun` → 4번(재개) → 첫 fold에 콘솔 `[동기화] 회차 생성(201) — playthroughId N, client <로컬 guid>` → 5번 두 번 → 둘째 회차도 201 → `{id}.queue.json`을 지우고 재시작 4번 → 같은 guid로 `확인(200)`, 같은 N. 갈라지기(백로그 이전 장면 클릭·7번) 뒤 첫 fold → `갈래 ← <부모 guid> 장면 k`. `GET /users/{uid}/playthroughs` 슬롯 1의 `inheritedPlaySeconds`·`ownPlaySeconds`·`chapterCompleted`가 로컬 파일과 같다.

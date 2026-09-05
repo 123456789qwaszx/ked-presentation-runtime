@@ -159,4 +159,7 @@ Via 연출 노드도 장면 안 노드로 이어서 튼다. 드라이버의 세 
   이전 백로그·누적 시간·출처). 옵션 박스가 떠 있을 때도 찍는다(표적 = 노드 마지막 라인). 로드 = 즐겨찾기로
   갈라지기. 디버그 키 6/7. 목록 UI는 후속.
 - **백로그** — 현재 장면 항목 클릭 = 롤백, 이전 장면 항목 클릭 = 그 라인까지 갈라지기, 지금 라인·다른 챕터 항목은 흐림.
-- **서버** — 보류. 계약은 `save-plan.md` §5(`forkedFrom`, 되감기 표식 없음).
+- **서버** — 사본이다(로컬이 진실). 회차 생성은 로컬 guid로 멱등(`clientPlaythroughId`), 갈래는 `forkedFrom{부모 guid, sceneIndex}`.
+  장면 fold마다 회차 큐를 PUT(`ServerSyncSaveStore`), 시작 시엔 새 기기면 복구(`ServerRestore`) → 옛 회차 큐 순회 →
+  즐겨찾기(`ServerBookmarkSync`, 큐 없이 직접 PUT/DELETE) → 활성. 409는 갈라지기 — 이 기기의 진행을 새 회차로 옮기고
+  미전송을 seq 1부터 다시(`SaveCoordinator.HandleConflict`). 계약 정본은 spring-prepare `docs/handoff/server-2026-09-02.md`.

@@ -124,6 +124,12 @@ public sealed class SyncQueueFile
 
     public long? BaseRevision;
 
+    // 마지막 200 시점의 장면 기록 수. 409로 갈라질 때 forkedFrom.sceneIndex가 된다.
+    public int SyncedSceneCount;
+
+    // 옛 회차 큐가 409를 맞은 시각. 있으면 시작 시 순회가 건너뛴다 — 같은 baseRevision은 다시 보내도 409다.
+    public string ConflictedAtUtc;
+
     public List<PendingChoice> PendingChoices = new();
     public List<PendingEvent> PendingEvents = new();
 }
@@ -157,6 +163,9 @@ public sealed class AccountFile
 public sealed class BookmarkFile
 {
     public List<Bookmark> Items = new();
+
+    // 서버에 아직 못 지운 즐겨찾기 id. DELETE가 204를 주면 빠진다.
+    public List<string> PendingDeletes = new();
 }
 
 // 이력 위의 한 점 — 스스로 완결된 사본. 출처 회차 파일이 없어도 로드된다.
@@ -179,6 +188,12 @@ public sealed class Bookmark
 
     // 찍은 순간까지의 누적 시간(계승 + 자체). 갈라진 회차가 물려받는다.
     public int PlaySecondsAtBookmark;
+
+    // 서버가 받아 준 시각. 비어 있으면 다음 기회에 다시 PUT. 이름을 바꾸면 비운다.
+    public string SyncedAtUtc;
+
+    // 서버가 거절한 이유(413 등). 있으면 재시도하지 않는다 — 고쳐 보내는 게 아니라 줄여 보내야 한다.
+    public string SyncError;
 }
 
 // 이력 화면이 회차 하나를 그리는 데 필요한 것. 파일을 열지 않고 목록을 그리려고 요약만 뽑는다.
