@@ -42,7 +42,7 @@ public sealed partial class VNScreenBindings
         if (_vnFeatures.RequestBacklogJump(entry))
         {
             ClosePanel();
-            await _episodePlayer.RequestReplayAsync();
+            await _scenePlaybackSession.RequestReplayAsync();
             return;
         }
 

@@ -8,7 +8,6 @@ public sealed class SceneRunContext
     public string RootEpisodeId { get; }
     public string CurrentEpisodeId { get; internal set; }
 
-    public bool IsNewSession { get; }
     public SavedLoadPlan LoadPlan { get; }
 
     public SceneRunPhase Phase { get; internal set; } = SceneRunPhase.None;
@@ -19,7 +18,6 @@ public sealed class SceneRunContext
     public SceneRunContext(
         ChapterProgression chapter,
         ProgressionState entryState,
-        bool isNewSession,
         SavedLoadPlan loadPlan = null)
     {
         Chapter = chapter;
@@ -28,7 +26,6 @@ public sealed class SceneRunContext
         RootEpisodeId = entryState.CurrentEpisodeId;
         CurrentEpisodeId = RootEpisodeId;
 
-        IsNewSession = isNewSession;
         LoadPlan = loadPlan;
     }
 

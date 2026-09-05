@@ -5,6 +5,8 @@ title: EP01
 <<slot s2 stage00 mid>>
 <<cast s2 bestina a 1>>
 
+<<shot_reset>>
+
 <<fade_in s1 18fr>>
 <<place s1 bust right 0fr>>
 <<size s1 12.5 face 14fr Linear>>

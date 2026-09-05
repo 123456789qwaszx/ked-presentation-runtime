@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
@@ -5,12 +6,8 @@ using System.Threading.Tasks;
 using Ked.Progression;
 using UnityEngine;
 
-// 에피소드 선택지 화면. Yarn 옵션 프레젠터와 프리팹은 공유. 프레젠터는 분리.
-// IPresentationOptionsBoxView(박스)와 VNOptionItem(항목)을 공유.
-//
-// Yarn 옵션은 잠기는 개념이 없기에 구분.
-// 고르면 스탯이 커밋되고 에피소드가 넘어감. Yarn 옵션은 VM 안에서 처리되는 방식.
-// LineCancellationToken 미사용.
+// Progression 계층의 에피소드 선택지 화면.
+// Yarn option과 prefab은 공유할 수 있지만 presentation contract는 별도다.
 public sealed class ChapterOptionsView : IChapterOptionsView
 {
     private const float FadeInDuration = 0.12f;
@@ -20,38 +17,56 @@ public sealed class ChapterOptionsView : IChapterOptionsView
 
     private readonly List<VNOptionItem> _activeItems = new();
 
+    // 현재 ShowAsync transaction에 외부 Cancel/Select가 접근하기 위한 handle.
     private TaskCompletionSource<int> _pending;
 
-    public ChapterOptionsView(IPresentationOptionsBoxView box, VNOptionItem itemPrefab)
+    public ChapterOptionsView(
+        IPresentationOptionsBoxView box,
+        VNOptionItem itemPrefab)
     {
         _box = box;
         _itemPrefab = itemPrefab;
     }
 
-    public async Task<int> ShowAsync(IReadOnlyList<ResolvedOption> options, int hiddenCount)
+    public async Task<int> ShowAsync(
+        IReadOnlyList<ResolvedOption> options,
+        int hiddenCount)
     {
+        if (_pending != null)
+            throw new InvalidOperationException("진행 선택지를 이미 기다리고 있다.");
+
         if (hiddenCount > 0)
             Debug.Log($"[진행] 선택지 {options.Count}개 · 숨김 {hiddenCount}개");
 
-        _pending = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var pending = new TaskCompletionSource<int>(
+            TaskCreationOptions.RunContinuationsAsynchronously);
 
-        BuildItems(options);
-
-        _box.ResetPresentationTransform();
-        _box.PrepareHidden();
-        _box.SetInputEnabled(false);
-
-        await _box.FadeInAsync(FadeInDuration, CancellationToken.None);
-
-        _box.SetInputEnabled(true);
-        SelectFirstSelectable();
+        _pending = pending;
 
         try
         {
-            return await _pending.Task;
+            BuildItems(options);
+
+            _box.ResetPresentationTransform();
+            _box.PrepareHidden();
+            _box.SetInputEnabled(false);
+
+            await _box.FadeInAsync(FadeInDuration, CancellationToken.None);
+
+            // Fade 도중 Cancel되었다면 UI를 다시 활성화하지 않는다.
+            if (pending.Task.IsCompleted)
+                return await pending.Task;
+
+            _box.SetInputEnabled(true);
+            SelectFirstSelectable();
+
+            return await pending.Task;
         }
         finally
         {
+            if (ReferenceEquals(_pending, pending))
+                _pending = null;
+
             Close();
         }
     }
@@ -64,7 +79,6 @@ public sealed class ChapterOptionsView : IChapterOptionsView
             return;
 
         _pending = null;
-
         pending.TrySetCanceled();
     }
 
@@ -75,7 +89,6 @@ public sealed class ChapterOptionsView : IChapterOptionsView
         for (int i = 0; i < options.Count; i++)
         {
             ResolvedOption resolved = options[i];
-
             VNOptionItem item = UnityEngine.Object.Instantiate(_itemPrefab, _box.ItemContainer);
 
             if (!item.gameObject.activeSelf)
@@ -84,7 +97,6 @@ public sealed class ChapterOptionsView : IChapterOptionsView
             int index = i;
             item.Submitted += _ => Select(index);
 
-            // 잠긴 것은 회색으로 보이되 눌리지 않는다.
             item.Bind(
                 LabelOf(resolved),
                 resolved.IsSelectable,
@@ -132,9 +144,6 @@ public sealed class ChapterOptionsView : IChapterOptionsView
             return;
 
         _pending = null;
-
-        // 잠긴 항목은 VNOptionItem 이 interactable=false 라 여기까지 오지 않는다.
-        // 그래도 코어의 Choose 는 잠긴 것을 던진다
         pending.TrySetResult(index);
     }
 
@@ -170,7 +179,6 @@ public sealed class ChapterOptionsView : IChapterOptionsView
                 continue;
 
             item.ResetView();
-
             UnityEngine.Object.Destroy(item.gameObject);
         }
 

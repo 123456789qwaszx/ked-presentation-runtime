@@ -1,10 +1,11 @@
 public sealed partial class VNScreenBindings
 {
-    private EpisodePlayer _episodePlayer;
+    private ScenePlaybackSession _scenePlaybackSession;
 
-    public void ConfigureTitleView(EpisodePlayer episodePlayer)
+    public void ConfigureTitleView(
+        ScenePlaybackSession scenePlaybackSession)
     {
-        _episodePlayer = episodePlayer;
+        _scenePlaybackSession = scenePlaybackSession;
     }
 
     private void GoToTitle()

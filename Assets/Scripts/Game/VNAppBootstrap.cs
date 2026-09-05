@@ -27,7 +27,8 @@ public class VNAppBootstrap : MonoBehaviour
 
     private PresentationScopeSession _presentationScopeSession;
     private VNFeatureController _vnFeatureController;
-    private EpisodePlayer _episodePlayer;
+    private ScenePlaybackSession _scenePlayback;
+    private ScenePlaybackDebugRunner _debugPlayback;
 
     private IChapterOptionsView _progressionOptions;
     private ProgressionDriver _progressionDriver;
@@ -132,7 +133,7 @@ public class VNAppBootstrap : MonoBehaviour
 
         BootstrapYarn();
 
-        CreateEpisodePlayer();
+        CreateScenePlayback();
 
         BootstrapPlaybackControls();
 
@@ -341,7 +342,7 @@ public class VNAppBootstrap : MonoBehaviour
             optionItem);
     }
     
-    private void CreateEpisodePlayer()
+    private void CreateScenePlayback()
     {
         IEpisodeNodeRunner nodeRunner =
             new YarnEpisodeNodeRunner(dialogueRunner);
@@ -350,33 +351,33 @@ public class VNAppBootstrap : MonoBehaviour
             new YarnVariableCheckpoint(
                 dialogueRunner.VariableStorage);
 
-        _episodePlayer = new EpisodePlayer(
+        _scenePlayback = new ScenePlaybackSession(
             nodeRunner,
             _screenBindings,
             _rollbackHistory,
             customLinePresenter,
-            _backlogRecorder,
             _presentationResponseRig,
             _presentationStage,
             _presentationScopeSession,
             variableCheckpoint,
             _choiceHistory);
 
-        // Yarn 옵션은 노드 안에서,
-        // 진행 선택지는 노드와 노드 사이에서 표시되므로 동시에 뜨지 않는다.
+        _debugPlayback = new ScenePlaybackDebugRunner(
+            _scenePlayback,
+            _backlogRecorder);
+
+        // Yarn 옵션과 progression 옵션은 서로 다른 presentation contract.
         _progressionOptions = new ChapterOptionsView(
             uiManager.GetUI<VNDefaultOptionsPanel>(),
             optionItem);
 
-        // 진행 층이 Yarn 변수 저장소에 하는 일을 모은다.
         ProgressionYarnBridge yarnBridge =
-            new ProgressionYarnBridge(
-                dialogueRunner.VariableStorage);
+            new ProgressionYarnBridge(dialogueRunner.VariableStorage);
 
         _saveCoordinator = CreateSaveCoordinator();
 
         SceneRunner sceneRunner = new SceneRunner(
-            _episodePlayer,
+            _scenePlayback,
             _progressionOptions,
             _linePresentationAdvanceState,
             _rollbackHistory,
@@ -433,7 +434,8 @@ public class VNAppBootstrap : MonoBehaviour
             _dialogueAdvanceDispatcher,
             () => Time.unscaledTimeAsDouble);
 
-        RapidSkipController rapidSkipController = new(_dialogueAdvanceDispatcher);
+        RapidSkipController rapidSkipController = new(
+            _dialogueAdvanceDispatcher);
 
         _vnFeatureController = new(
             _playbackState,
@@ -450,13 +452,16 @@ public class VNAppBootstrap : MonoBehaviour
             _linePresentationAdvanceState,
             _presentationScopeSession);
 
-        _dialogueAdvanceDispatcher.Initialize(advanceGate, dialogueRunner, _linePresentationAdvanceState);
+        _dialogueAdvanceDispatcher.Initialize(
+            advanceGate,
+            dialogueRunner,
+            _linePresentationAdvanceState);
 
         vnAdvanceInputPoller.Initialize(
             _dialogueAdvanceDispatcher,
             _vnFeatureController,
-            _linePresentationAdvanceState,
-            _episodePlayer,
+            _scenePlayback,
+            _debugPlayback,
             yarnEntryKey,
             debugEpisodeChain,
             _progressionLauncher,
@@ -470,7 +475,7 @@ public class VNAppBootstrap : MonoBehaviour
             _dialogueAdvanceDispatcher,
             _linePresentationAdvanceState);
 
-        _screenBindings.ConfigureTitleView(_episodePlayer);
+        _screenBindings.ConfigureTitleView(_scenePlayback);
         _screenBindings.ConfigureProgression(_progressionLauncher, _saveCoordinator);
     }
     
