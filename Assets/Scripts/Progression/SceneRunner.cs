@@ -468,8 +468,7 @@ public sealed class SceneRunner
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        Debug.Log(
-            $"[진행] {what} 시작 — \"{nodeName}\"");
+        Debug.Log($"[진행] {what} 시작 — \"{nodeName}\"");
 
         NodePlayOutcome outcome =
             await _player.PlayNodeAsync(nodeName);
