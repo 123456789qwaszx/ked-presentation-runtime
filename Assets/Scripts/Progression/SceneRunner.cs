@@ -1,4 +1,11 @@
-#region SceneRunner 동작 규칙
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using Ked.Progression;
+using UnityEngine;
+
+#region Scene 동작 규칙
 
 // 1) 장면 상태 규칙
 // - entryState는 장면 진입 시점의 확정 상태다.
@@ -29,61 +36,9 @@
 // - ReportSceneCommitted()는 장면당 최대 한 번 호출한다.
 
 #endregion
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using Ked.Progression;
-using UnityEngine;
 
-public enum SceneRunOutcome
-{
-    SceneEnded = 0,
-    ChapterEnded = 1,
-}
-
-public readonly struct SceneRunResult
-{
-    public SceneRunOutcome Outcome { get; }
-    public ProgressionState State { get; }
-
-    public SceneRunResult(
-        SceneRunOutcome outcome,
-        ProgressionState state)
-    {
-        Outcome = outcome;
-        State = state;
-    }
-}
-
-// 챕터 내 한 장면(Scene) 진행
-// - checkPoint, pending 초기화.
-//
-// <Pending = 장면 안의 선택>
-// - 장면 안의 선택은 모두 미확정(pending).
-// - 장면 나갈 시, 한번에 상태에 반영 및 세이브.
-// - 롤백은 pending을 되돌리고, 장면 중간 중단은 pending 전체를 버림.
 public sealed class SceneRunner
 {
-    // 장면 내 하나의 에피소드가 끝날 시, 제시되는 진행 선택지.(계약: 에피소드 1 = 선택지 1)
-    private sealed class ProgressionPick
-    {
-        public EpisodeOption Option;
-        public string FromEpisodeId;
-        public int SourceIndex;
-
-        // 선택 시점의 마지막 롤백 포인트.
-        public int Anchor;
-    }
-
-    // 장면 안에서 끝까지 본 EventKey 에피소드. (장면 종료 시 보고)
-    private sealed class WatchedEpisode
-    {
-        public string EpisodeId;
-        public string EventKey;
-        public int Anchor;
-    }
-
     private readonly EpisodePlayer _player;
     private readonly IChapterOptionsView _options;
     private readonly VNLinePresentationState _seek;
@@ -93,39 +48,12 @@ public sealed class SceneRunner
     private readonly ChoiceHistory _choiceHistory;
     private readonly Func<YarnVariableSnapshot> _captureVariables;
 
-    private readonly List<ProgressionPick> _picks = new();
-    private readonly List<WatchedEpisode> _watched = new();
-    private readonly List<EpisodeOption> _foldBuffer = new();
+    private ScenePendingHistory _currentHistory;
 
-    // 리플레이 자동 응답 커서.
-    // _picks.Count와 같으면 자동 응답할 선택지가 없다.
-    private int _replayCursor;
+    public SceneRunPhase CurrentPhase { get; private set; } = SceneRunPhase.None;
 
-    // 로드 표적까지 이동 중인지 나타낸다.
-    // 도착 시간 측정에 사용한다.
-    private bool _loading;
-    private float _loadStartedAt;
-
-    // 현재 장면에서 지나온 미확정 경로.
-    // 즐겨찾기 저장 시 현재 위치를 캡처하는 데 사용한다.
-    public IReadOnlyList<CommittedChoice> PendingPath
-    {
-        get
-        {
-            var path = new List<CommittedChoice>(_replayCursor);
-
-            for (int i = 0; i < _replayCursor; i++)
-            {
-                ProgressionPick pick = _picks[i];
-
-                path.Add(new CommittedChoice(
-                    pick.FromEpisodeId,
-                    pick.SourceIndex));
-            }
-
-            return path;
-        }
-    }
+    public IReadOnlyList<CommittedChoice> PendingPath =>
+        _currentHistory?.CreatePendingPath() ?? Array.Empty<CommittedChoice>();
 
     public SceneRunner(
         EpisodePlayer player,
@@ -146,490 +74,258 @@ public sealed class SceneRunner
         _choiceHistory = choiceHistory;
         _captureVariables = captureVariables;
 
-        // 선택지를 기다리는 중에 롤백이 요청되면 선택지 박스를 닫는다.
-        //
-        // ShowAsync는 취소 예외로 깨어나며,
-        // RunAsync가 이를 롤백 리플레이 요청으로 처리한다.
+        // 진행 선택지를 기다리는 중 rollback이 오면 ShowAsync 취소.
         _player.ReplayRequestedWhileIdle += _options.Cancel;
     }
 
     public async Task<SceneRunResult> RunAsync(
-        ChapterProgression chapter,
-        ProgressionState entryState,
-        bool isNewSession,
-        CancellationToken cancellationToken,
-        SavedLoadPlan loadPlan = null)
+        SceneRunContext ctx,
+        CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        string rootEpisodeId = entryState.CurrentEpisodeId;
+        var history = new ScenePendingHistory();
+        _currentHistory = history;
 
-        chapter.TryGetNode(rootEpisodeId, out EpisodeNode root);
+        // Load Seek가 살아 있는 동안만 값을 가진다.
+        float? loadStartedAt = null;
 
-        _picks.Clear();
-        _watched.Clear();
-
-        _replayCursor = 0;
-        _loading = false;
-
-        Debug.Log($"[장면] 진입 - {chapter.SceneIdOf(rootEpisodeId)} @ {rootEpisodeId}");
-
-        await _player.EnterSceneAsync(root.DialogueEntryId, isNewSession);
-
-        cancellationToken.ThrowIfCancellationRequested();
-
-        _reporter.ReportSceneEntered(
-            new SceneEntryReport(
-                chapter.ChapterId, 
-                entryState, 
-                _captureVariables(),
-                _backlog.NextSerial));
-
-        if (loadPlan != null)
-            BeginLoad(chapter, rootEpisodeId, loadPlan);
-
-        string episodeId = rootEpisodeId;
-
-        while (true)
+        try
         {
-            chapter.TryGetNode(episodeId, out EpisodeNode node);
+            // Phase: SceneEntering -> EntryReported
+            SetPhase(ctx, SceneRunPhase.SceneEntering);
 
-            bool dialogueCompleted = await PlayAsync(
-                node.DialogueEntryId,
-                "대사",
-                cancellationToken);
+            await _player.EnterSceneAsync(
+                ctx.RootEpisode.DialogueEntryId,
+                ctx.IsNewSession);
 
-            if (!dialogueCompleted)
+            cancellationToken.ThrowIfCancellationRequested();
+
+            SetPhase(ctx, SceneRunPhase.SceneEntered);
+
+            _reporter.ReportSceneEntered(
+                new SceneEntryReport(
+                    ctx.Chapter.ChapterId,
+                    ctx.EntryState,
+                    _captureVariables(),
+                    _backlog.NextSerial));
+
+            SetPhase(ctx, SceneRunPhase.EntryReported);
+
+            // Phase: LoadPlanApplied
+            loadStartedAt = ApplyLoadPlan(ctx, history);
+
+            SetPhase(ctx, SceneRunPhase.LoadPlanApplied);
+
+            while (true)
             {
-                episodeId = rootEpisodeId;
-                continue;
-            }
+                EpisodeNode episode = ctx.CurrentEpisode;
 
-            NoteLoadProgress();
-            NoteWatched(node);
+                // Phase: EpisodePlaying -> EpisodeCompleted
+                SetPhase(ctx, SceneRunPhase.EpisodePlaying);
 
-            // 리플레이 자동 응답.
-            //
-            // 이미 기록된 진행 선택이 있고 Seek가 활성 상태라면
-            // 사용자에게 다시 묻지 않고 기존 선택을 사용한다.
-            if (_replayCursor < _picks.Count &&
-                _seek.IsSeekingActive)
-            {
-                ProgressionPick pick =
-                    _picks[_replayCursor++];
+                NodePlayOutcome episodeOutcome = await PlayNodeAsync(
+                    episode.DialogueEntryId,
+                    "대사",
+                    cancellationToken);
 
-                // 현재 노드의 마지막 라인을 선택의 롤백 기준점으로 삼는다.
-                //
-                // 리플레이에서는 원래 값과 같고,
-                // 로드로 미리 넣은 선택은 여기서 처음 기준점을 얻는다.
-                pick.Anchor = _rollbackHistory.LastHistoryIndex;
-
-                Debug.Log($"[장면] 자동 응답 — {pick.Option}");
-
-                if (pick.Option.HasVia)
+                if (episodeOutcome == NodePlayOutcome.ReplayRequested)
                 {
-                    bool viaCompleted = await PlayAsync(pick.Option.ViaNodeId, "연출", cancellationToken);
+                    await RestartReplayAsync(ctx, history, cancellationToken);
+                    continue;
+                }
 
-                    if (!viaCompleted)
+                // Load Seek가 여기서 끝났다면 표적 Episode에 도착한 것이다.
+                if (loadStartedAt.HasValue && !_seek.IsSeekingActive)
+                {
+                    float elapsed = (Time.realtimeSinceStartup - loadStartedAt.Value) * 1000f;
+                    Debug.Log($"[장면] 로드 도착 - {elapsed:F0}ms");
+
+                    loadStartedAt = null;
+                }
+
+                history.NoteWatched(episode, _rollbackHistory.LastHistoryIndex);
+
+                SetPhase(ctx, SceneRunPhase.EpisodeCompleted);
+
+                // Phase: ChoiceResolving
+                SetPhase(ctx, SceneRunPhase.ChoiceResolving);
+
+                SceneChoiceResolution resolution;
+
+                // Load / Replay 중 이미 기록된 선택이 있으면 사용자에게 다시 묻지 않는다.
+                if (history.HasRecordedChoice && _seek.IsSeekingActive)
+                {
+                    SceneChoice recorded = history.TakeRecordedChoice(
+                        _rollbackHistory.LastHistoryIndex);
+
+                    Debug.Log($"[장면] 자동 응답 — {recorded.Option}");
+
+                    resolution = SceneChoiceResolution.FromChoice(recorded);
+                }
+                else
+                {
+                    // Seek 표적에 도착한 뒤 남아 있는 과거 선택은 새 경로에서 사용하지 않는다.
+                    if (history.HasRecordedChoice)
+                        history.DiscardUnconsumedChoices();
+
+                    // 기록된 선택을 모두 소비했는데 Seek가 남아 있다면 표적을 찾지 못했다.
+                    if (_seek.IsSeekingActive)
                     {
-                        episodeId = rootEpisodeId;
+                        Debug.LogWarning(
+                            loadStartedAt.HasValue
+                                ? "[장면] 로드 표적을 못 찾은 채 선택지에 닿았다 — " +
+                                  "시크를 끄고 여기서 일반 재생으로. (콘텐츠가 바뀌었을 수 있다)"
+                                : "[장면] 롤백 표적을 못 찾은 채 선택지에 닿았다 — " +
+                                  "시크를 끄고 일반 재생으로.");
+
+                        _seek.ClearSeek();
+                        loadStartedAt = null;
+                    }
+
+                    resolution = await ResolveNextChoiceAsync(
+                        ctx,
+                        history,
+                        episode,
+                        cancellationToken);
+                }
+
+                if (resolution.Kind == SceneChoiceResolutionKind.ReplayRequested)
+                {
+                    await RestartReplayAsync(ctx, history, cancellationToken);
+                    continue;
+                }
+
+                if (resolution.Kind == SceneChoiceResolutionKind.ChapterEnded)
+                    return CommitScene(ctx, history, SceneRunOutcome.ChapterEnded);
+
+                SceneChoice choice = resolution.Choice;
+
+                // Recorded 선택은 이미 history에 존재한다.
+                // 새 선택은 Via 전에 기록해야 Via 안의 rollback으로 되돌릴 수 있다.
+                if (choice.Source != SceneChoiceSource.Recorded)
+                    history.RecordChoice(choice, _rollbackHistory.LastHistoryIndex);
+
+                SetPhase(ctx, SceneRunPhase.ChoiceResolved);
+
+                // Phase: ViaPlaying
+                if (choice.Option.HasVia)
+                {
+                    SetPhase(ctx, SceneRunPhase.ViaPlaying);
+
+                    NodePlayOutcome viaOutcome = await PlayNodeAsync(
+                        choice.Option.ViaNodeId,
+                        "연출",
+                        cancellationToken);
+
+                    if (viaOutcome == NodePlayOutcome.ReplayRequested)
+                    {
+                        await RestartReplayAsync(ctx, history, cancellationToken);
                         continue;
                     }
                 }
 
-                episodeId = pick.Option.TargetEpisodeId;
+                // Phase: TargetMoved
+                ctx.CurrentEpisodeId = choice.Option.TargetEpisodeId;
 
-                if (!chapter.IsSameScene(pick.FromEpisodeId, episodeId))
-                    return FinalizeScene(chapter, entryState, SceneRunOutcome.SceneEnded);
+                SetPhase(ctx, SceneRunPhase.TargetMoved);
 
-                continue;
+                if (!ctx.Chapter.IsSameScene(choice.FromEpisodeId, ctx.CurrentEpisodeId))
+                    return CommitScene(ctx, history, SceneRunOutcome.SceneEnded);
             }
-
-            // Seek는 끝났지만 기록된 선택이 남았다.
-            //
-            // 표적이 선택 직전 라인이었던 경우이므로
-            // 표적 이후의 기존 선택은 버리고 사용자에게 다시 묻는다.
-            if (_replayCursor < _picks.Count)
-            {
-                _picks.RemoveRange(
-                    _replayCursor,
-                    _picks.Count - _replayCursor);
-            }
-
-            // 자동 응답할 기록은 없는데 Seek가 여전히 살아 있다.
-            //
-            // 저장 또는 롤백 표적을 찾지 못하고 선택지까지 도착한 경우다.
-            // 콘텐츠가 바뀌었을 수 있으므로 여기부터 일반 재생으로 전환한다.
-            if (_seek.IsSeekingActive)
-            {
-                Debug.LogWarning(
-                    _loading
-                        ? "[장면] 로드 표적을 못 찾은 채 선택지에 닿았다 — " +
-                          "시크를 끄고 여기서 일반 재생으로. " +
-                          "(콘텐츠가 바뀌었을 수 있다)"
-                        : "[장면] 롤백 표적을 못 찾은 채 선택지에 닿았다 — " +
-                          "시크를 끄고 일반 재생으로.");
-
-                _seek.ClearSeek();
-                _loading = false;
-            }
-
-            // 아직 확정하지 않은 선택들을 진입 상태에 임시로 접어
-            // 현재 선택지를 판정할 작업 상태를 만든다.
-            ProgressionState working =
-                entryState.FoldChoices(chapter, PendingOptions());
-
-            ChapterAdvance advance =
-                ChapterTransition.Resolve(chapter, working);
-
-            if (advance.Kind == ChapterAdvanceKind.ChapterEnded)
-                return FinalizeScene(chapter, entryState, SceneRunOutcome.ChapterEnded);
-
-            ResolvedOption picked;
-
-            if (advance.Kind == ChapterAdvanceKind.AutoAdvance)
-            {
-                picked = advance.Options[0];
-                Debug.Log($"[장면] 자동 간선 - {picked.Option}");
-            }
-            else
-            {
-                try
-                {
-                    picked = await PickAsync(
-                        advance,
-                        cancellationToken);
-                }
-                catch (OperationCanceledException)
-                    when (!cancellationToken.IsCancellationRequested
-                          && _player.IsReplayPending)
-                {
-                    await BeginReplayAsync(cancellationToken);
-
-                    episodeId = rootEpisodeId;
-                    continue;
-                }
-            }
-
-            var chosen = new ProgressionPick
-            {
-                Option = picked.Option,
-                FromEpisodeId = node.EpisodeId,
-                SourceIndex = picked.SourceIndex,
-                Anchor = _rollbackHistory.LastHistoryIndex,
-            };
-
-            _picks.Add(chosen);
-            _replayCursor = _picks.Count;
-
-            // Via도 Story 노드이며 아직 미확정이다.
-            // Via 안에서 롤백하면 이 선택까지 되돌릴 수 있다.
-            if (chosen.Option.HasVia)
-            {
-                bool viaCompleted = await PlayAsync(
-                    chosen.Option.ViaNodeId,
-                    "연출",
-                    cancellationToken);
-
-                if (!viaCompleted)
-                {
-                    episodeId = rootEpisodeId;
-                    continue;
-                }
-            }
-
-            episodeId =
-                chosen.Option.TargetEpisodeId;
-
-            if (!chapter.IsSameScene(
-                    chosen.FromEpisodeId,
-                    episodeId))
-            {
-                return FinalizeScene(
-                    chapter,
-                    entryState,
-                    SceneRunOutcome.SceneEnded);
-            }
+        }
+        catch (OperationCanceledException)
+        {
+            SetPhase(ctx, SceneRunPhase.Cancelled);
+            throw;
+        }
+        catch
+        {
+            SetPhase(ctx, SceneRunPhase.Faulted);
+            throw;
+        }
+        finally
+        {
+            if (ReferenceEquals(_currentHistory, history))
+                _currentHistory = null;
         }
     }
 
-    // 타이틀로 나가기나 갈라지기에서 현재 장면을 중단한다.
-    //
-    // SceneRunner는 실제 중단 방법을 소유한다.
-    // 전체 진행을 중단할지 결정하고 중단 상태를 기록하는 것은
-    // ProgressionDriver의 책임이다.
+    // 전체 진행 Cancellation은 Driver 책임.
+    // 여기서는 현재 선택지와 Yarn 실행을 실제로 깨운다.
     public async Task StopAsync()
     {
-        // 노드와 노드 사이에서 진행 선택지를 기다리고 있을 수 있다.
         _options.Cancel();
-
-        // Yarn 노드, 라인 연출, 롤백 포인트,
-        // 샷 응답 및 Presentation Scope를 정리한다.
         await _player.StopSceneAsync();
     }
 
-    // 로드 계획을 장면에 적용한다.
-    //
-    // 진행 경로를 자동 응답 기록으로 복원하고,
-    // Yarn 선택 기록과 표적 라인을 Seek 상태로 설정한다.
-    //
-    // 경로가 현재 챕터와 맞지 않으면
-    // 계획을 버리고 장면 루트부터 일반 재생한다.
-    private void BeginLoad(
-        ChapterProgression chapter,
-        string rootEpisodeId, 
-        SavedLoadPlan plan)
-    {
-        if (plan.Target == null || string.IsNullOrEmpty(plan.Target.NodeName))
-        {
-            Debug.LogWarning("[장면] 로드 계획에 표적이 없다 - 루트에서 시작.");
-            return;
-        }
-
-        string cursor = rootEpisodeId;
-
-        for (int i = 0; i < plan.Path.Count; i++)
-        {
-            SavedChoice step = plan.Path[i];
-
-            if (!string.Equals(step.FromEpisodeId, cursor, StringComparison.Ordinal)
-                || !chapter.TryGetNode(cursor, out EpisodeNode node) 
-                || step.OptionIndex < 0 
-                || step.OptionIndex >= node.NextOptions.Count)
-            {
-                Debug.LogWarning(
-                    $"[장면] 로드 경로가 챕터와 안 맞는다" +
-                    $"({i}번째, " +
-                    $"{step.FromEpisodeId}[{step.OptionIndex}]) — " +
-                    "계획을 버리고 루트에서 시작.");
-
-                _picks.Clear();
-                return;
-            }
-
-            EpisodeOption option = node.NextOptions[step.OptionIndex];
-
-            _picks.Add(
-                new ProgressionPick 
-                {
-                    Option = option,
-                    FromEpisodeId = cursor,
-                    SourceIndex = step.OptionIndex,
-
-                    // 실제 자동 응답 시점에 롤백 기준점을 받는다.
-                    Anchor = -1,
-                });
-
-            cursor = option.TargetEpisodeId;
-        }
-
-        _replayCursor = 0;
-
-        _choiceHistory.RestoreChoices(plan.YarnChoices);
-
-        _seek.BeginLoadSeek(
-            plan.Target.NodeName,
-            plan.Target.LineId,
-            plan.Target.Occurrence);
-
-        _loading = true;
-        _loadStartedAt = Time.realtimeSinceStartup;
-
-        Debug.Log(
-            $"[장면] 로드 — 루트 {rootEpisodeId}에서 " +
-            $"{plan.Target.NodeName}/" +
-            $"{plan.Target.LineId}#" +
-            $"{plan.Target.Occurrence}까지. " +
-            $"경로 {_picks.Count}개, " +
-            $"Yarn 선택 {plan.YarnChoices.Count}개");
-    }
-
-    // 로드 표적에 도착했는지 확인하고 걸린 시간을 기록한다.
-    private void NoteLoadProgress()
-    {
-        if (!_loading || _seek.IsSeekingActive)
-            return;
-
-        _loading = false;
-        
-        float elapsedMilliseconds = (Time.realtimeSinceStartup - _loadStartedAt) * 1000f;
-        
-        Debug.Log($"[장면] 로드 도착 - {elapsedMilliseconds:F0}ms");
-    }
-
-    // 노드 하나를 실행한다.
-    //
-    // 정상 완료면 true.
-    // 리플레이나 외부 중단이면 false를 반환한다.
-    private async Task<bool> PlayAsync(
+    private async Task<NodePlayOutcome> PlayNodeAsync(
         string nodeName,
-        string what,
+        string description,
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        Debug.Log($"[진행] {what} 시작 — \"{nodeName}\"");
+        Debug.Log($"[진행] {description} 시작 — \"{nodeName}\"");
 
-        NodePlayOutcome outcome =
-            await _player.PlayNodeAsync(nodeName);
+        NodePlayOutcome outcome = await _player.PlayNodeAsync(nodeName);
 
-        // StopAsync가 Yarn 실행을 끝냈다면
-        // 이를 정상적인 노드 완료로 처리하지 않는다.
+        // 외부 Stop으로 Yarn이 끝난 경우 정상 완료로 해석하지 않는다.
         cancellationToken.ThrowIfCancellationRequested();
 
         if (outcome == NodePlayOutcome.ReplayRequested)
-        {
-            await BeginReplayAsync(cancellationToken);
-            return false;
-        }
+            return NodePlayOutcome.ReplayRequested;
 
-        Debug.Log(
-            $"[진행] {what} 끝 — \"{nodeName}\"");
+        Debug.Log($"[진행] {description} 끝 — \"{nodeName}\"");
 
-        return true;
+        return NodePlayOutcome.Completed;
     }
 
-    // 리플레이 직전 준비.
-    //
-    // 표적 뒤에 만들어진 진행 선택과 시청 기록을 되돌린다.
-    // ChoiceHistory가 Yarn 선택 기록을 되돌리는 것과 같은 규칙이다.
-    private async Task BeginReplayAsync(
+    private async Task<SceneChoiceResolution> ResolveNextChoiceAsync(
+        SceneRunContext ctx,
+        ScenePendingHistory history,
+        EpisodeNode episode,
         CancellationToken cancellationToken)
     {
-        cancellationToken.ThrowIfCancellationRequested();
+        ProgressionState working = ctx.EntryState.FoldChoices(
+            ctx.Chapter,
+            history.PendingOptions());
 
-        await _player.PrepareReplayAsync();
+        ChapterAdvance advance = ChapterTransition.Resolve(ctx.Chapter, working);
 
-        cancellationToken.ThrowIfCancellationRequested();
+        if (advance.Kind == ChapterAdvanceKind.ChapterEnded)
+            return SceneChoiceResolution.ChapterEnded();
 
-        if (_rollbackHistory.TakeRollbackTarget(
-                out RollbackPoint target))
+        if (advance.Kind == ChapterAdvanceKind.AutoAdvance)
         {
-            for (int i = _picks.Count - 1; i >= 0; i--)
-            {
-                if (_picks[i].Anchor > target.historyIndex)
-                    _picks.RemoveAt(i);
-            }
+            ResolvedOption resolved = advance.Options[0];
 
-            for (int i = _watched.Count - 1; i >= 0; i--)
-            {
-                if (_watched[i].Anchor > target.historyIndex)
-                    _watched.RemoveAt(i);
-            }
+            Debug.Log($"[장면] 자동 간선 - {resolved.Option}");
+
+            return SceneChoiceResolution.FromChoice(
+                new SceneChoice(
+                    resolved.Option,
+                    episode.EpisodeId,
+                    resolved.SourceIndex,
+                    SceneChoiceSource.AutoAdvance));
         }
 
-        _replayCursor = 0;
-
-        Debug.Log(
-            $"[장면] 리플레이 — 루트부터. " +
-            $"자동 응답할 선택 {_picks.Count}개");
-    }
-
-    // 장면 종료 커밋.
-    //
-    // pending을 순서대로 접어 확정 상태를 만들고,
-    // 같은 순서로 저장 계층에 보고한다.
-    //
-    // 여기서 스탯 반영과 다음 에피소드 이동이
-    // 하나의 장면 단위 연산으로 확정된다.
-    private SceneRunResult FinalizeScene(
-        ChapterProgression chapter,
-        ProgressionState entryState,
-        SceneRunOutcome outcome)
-    {
-        ProgressionState state = entryState;
-
-        var choices =
-            new List<CommittedChoice>(_replayCursor);
-
-        for (int i = 0; i < _replayCursor; i++)
+        try
         {
-            ProgressionPick pick = _picks[i];
+            ResolvedOption resolved = await PickAsync(advance, cancellationToken);
 
-            state = state.ApplyChoice(
-                chapter,
-                pick.Option);
-
-            choices.Add(
-                new CommittedChoice(
-                    pick.FromEpisodeId,
-                    pick.SourceIndex));
+            return SceneChoiceResolution.FromChoice(
+                new SceneChoice(
+                    resolved.Option,
+                    episode.EpisodeId,
+                    resolved.SourceIndex,
+                    SceneChoiceSource.User));
         }
-
-        var watched =
-            new List<string>(_watched.Count);
-
-        for (int i = 0; i < _watched.Count; i++)
-            watched.Add(_watched[i].EpisodeId);
-
-        // 다음 장면에 진입하기 전에 현재 Yarn 변수를 캡처한다.
-        // 따라서 이번 장면에서 수행된 set 명령까지만 포함한다.
-        YarnVariableSnapshot variables =
-            _captureVariables();
-
-        Debug.Log(
-            $"[장면] 확정 — " +
-            $"선택 {choices.Count}개, " +
-            $"시청 {watched.Count}개 " +
-            $"→ {state.CurrentEpisodeId}");
-
-        // 다음 장면 입장에서 현재 백로그는 이전 장면들의 기록이다.
-        // NextSerial은 다음 장면의 첫 백로그 순번이 된다.
-        _reporter.ReportSceneCommitted(
-            new SceneCommitReport(
-                chapter.ChapterId,
-                choices,
-                _choiceHistory.CreateChoiceSnapshot(),
-                watched,
-                state,
-                variables,
-                backlog:
-                    new List<DialogueLogEntry>(_backlog.Entries),
-                backlogSerialStart:
-                    _backlog.NextSerial,
-                chapterCompleted:
-                    outcome == SceneRunOutcome.ChapterEnded));
-
-        return new SceneRunResult(
-            outcome,
-            state);
-    }
-
-    private IReadOnlyList<EpisodeOption> PendingOptions()
-    {
-        _foldBuffer.Clear();
-
-        for (int i = 0; i < _replayCursor; i++)
-            _foldBuffer.Add(_picks[i].Option);
-
-        return _foldBuffer;
-    }
-
-    // 끝까지 본 EventKey 에피소드를 기록한다.
-    // 같은 노드를 리플레이로 다시 끝내더라도 한 번만 기록한다.
-    private void NoteWatched(EpisodeNode node)
-    {
-        if (node.EventKey.Length == 0)
-            return;
-
-        for (int i = 0; i < _watched.Count; i++)
+        catch (OperationCanceledException)
+            when (!cancellationToken.IsCancellationRequested && _player.IsReplayPending)
         {
-            if (string.Equals(
-                    _watched[i].EpisodeId,
-                    node.EpisodeId,
-                    StringComparison.Ordinal))
-            {
-                return;
-            }
+            return SceneChoiceResolution.ReplayRequested();
         }
-
-        _watched.Add(
-            new WatchedEpisode
-            {
-                EpisodeId = node.EpisodeId,
-                EventKey = node.EventKey,
-                Anchor = _rollbackHistory.LastHistoryIndex,
-            });
     }
 
     private async Task<ResolvedOption> PickAsync(
@@ -642,30 +338,159 @@ public sealed class SceneRunner
             advance.Options,
             advance.HiddenCount);
 
-        // StopAsync가 선택지 창을 닫고 ShowAsync가 반환했다면
-        // 반환값을 정상적인 선택으로 해석하지 않는다.
         cancellationToken.ThrowIfCancellationRequested();
 
-        if (picked < 0 ||
-            picked >= advance.Options.Count)
+        if (picked < 0 || picked >= advance.Options.Count)
         {
             throw new ArgumentOutOfRangeException(
                 nameof(picked),
-                $"선택지는 {advance.Options.Count}개인데 " +
-                $"{picked}번이 왔다.");
+                $"선택지는 {advance.Options.Count}개인데 {picked}번이 왔다.");
         }
 
-        ResolvedOption resolved =
-            advance.Options[picked];
+        ResolvedOption resolved = advance.Options[picked];
 
         if (!resolved.IsSelectable)
         {
             throw new InvalidOperationException(
-                $"잠긴 선택지다: " +
-                $"[{resolved.Option.ChoiceLabel}] — " +
-                $"{resolved.BlockingCondition}");
+                $"잠긴 선택지다: [{resolved.Option.ChoiceLabel}] — {resolved.BlockingCondition}");
         }
 
         return resolved;
+    }
+
+    private async Task RestartReplayAsync(
+        SceneRunContext ctx,
+        ScenePendingHistory history,
+        CancellationToken cancellationToken)
+    {
+        SetPhase(ctx, SceneRunPhase.Replaying);
+
+        cancellationToken.ThrowIfCancellationRequested();
+
+        await _player.PrepareReplayAsync();
+
+        cancellationToken.ThrowIfCancellationRequested();
+
+        if (_rollbackHistory.TakeRollbackTarget(out RollbackPoint target))
+            history.RewindAfter(target.historyIndex);
+
+        history.RestartReplay();
+        ctx.CurrentEpisodeId = ctx.RootEpisodeId;
+
+        Debug.Log(
+            $"[장면] 리플레이 — 루트부터. " +
+            $"자동 응답할 선택 {history.RecordedChoiceCount}개");
+    }
+
+    // null이면 Load Seek가 시작되지 않았다.
+    private float? ApplyLoadPlan(
+        SceneRunContext ctx,
+        ScenePendingHistory history)
+    {
+        SavedLoadPlan plan = ctx.LoadPlan;
+
+        if (plan == null)
+            return null;
+
+        if (plan.Target == null || string.IsNullOrEmpty(plan.Target.NodeName))
+        {
+            Debug.LogWarning("[장면] 로드 계획에 표적이 없다 - 루트에서 시작.");
+            return null;
+        }
+
+        string cursor = ctx.RootEpisodeId;
+
+        for (int i = 0; i < plan.Path.Count; i++)
+        {
+            SavedChoice step = plan.Path[i];
+
+            if (!TryResolveSavedChoice(ctx.Chapter, cursor, step, out EpisodeOption option))
+            {
+                Debug.LogWarning(
+                    $"[장면] 로드 경로가 챕터와 안 맞는다" +
+                    $"({i}번째, {step.FromEpisodeId}[{step.OptionIndex}]) — " +
+                    "계획을 버리고 루트에서 시작.");
+
+                history.ClearChoices();
+                return null;
+            }
+
+            history.RestoreChoice(option, cursor, step.OptionIndex);
+            cursor = option.TargetEpisodeId;
+        }
+
+        _choiceHistory.RestoreChoices(plan.YarnChoices);
+
+        _seek.BeginLoadSeek(
+            plan.Target.NodeName,
+            plan.Target.LineId,
+            plan.Target.Occurrence);
+
+        Debug.Log(
+            $"[장면] 로드 — 루트 {ctx.RootEpisodeId}에서 " +
+            $"{plan.Target.NodeName}/{plan.Target.LineId}#{plan.Target.Occurrence}까지. " +
+            $"경로 {history.RecordedChoiceCount}개, Yarn 선택 {plan.YarnChoices.Count}개");
+
+        return Time.realtimeSinceStartup;
+    }
+
+    private static bool TryResolveSavedChoice(
+        ChapterProgression chapter,
+        string cursor,
+        SavedChoice step,
+        out EpisodeOption option)
+    {
+        option = null;
+
+        if (!string.Equals(step.FromEpisodeId, cursor, StringComparison.Ordinal))
+            return false;
+
+        if (!chapter.TryGetNode(cursor, out EpisodeNode episode))
+            return false;
+
+        if (step.OptionIndex < 0 || step.OptionIndex >= episode.NextOptions.Count)
+            return false;
+
+        option = episode.NextOptions[step.OptionIndex];
+        return true;
+    }
+
+    private SceneRunResult CommitScene(
+        SceneRunContext ctx,
+        ScenePendingHistory history,
+        SceneRunOutcome outcome)
+    {
+        SetPhase(ctx, SceneRunPhase.SceneCommitting);
+
+        ProgressionState state = history.FoldInto(ctx.Chapter, ctx.EntryState);
+        List<CommittedChoice> choices = history.CreateCommittedChoices();
+        List<string> watched = history.CreateWatchedEpisodeIds();
+        YarnVariableSnapshot variables = _captureVariables();
+
+        Debug.Log(
+            $"[장면] 확정 — 선택 {choices.Count}개, " +
+            $"시청 {watched.Count}개 → {state.CurrentEpisodeId}");
+
+        _reporter.ReportSceneCommitted(
+            new SceneCommitReport(
+                ctx.Chapter.ChapterId,
+                choices,
+                _choiceHistory.CreateChoiceSnapshot(),
+                watched,
+                state,
+                variables,
+                new List<DialogueLogEntry>(_backlog.Entries),
+                _backlog.NextSerial,
+                outcome == SceneRunOutcome.ChapterEnded));
+
+        SetPhase(ctx, SceneRunPhase.Completed);
+
+        return new SceneRunResult(outcome, state);
+    }
+
+    private void SetPhase(SceneRunContext ctx, SceneRunPhase phase)
+    {
+        ctx.Phase = phase;
+        CurrentPhase = phase;
     }
 }
