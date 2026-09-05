@@ -5,8 +5,8 @@
 // - 장면 안의 진행 선택은 _picks에 미확정 상태로 쌓인다.
 // - 판정할 때는 entryState + 현재까지의 pending으로 작업 상태를 만든다.
 // - 장면을 나갈 때만 pending을 실제 상태에 반영한다.
-// - 장면 중간 중단에서는 entryState를 그대로 반환한다.
-// - 중단된 장면은 커밋하거나 보고하지 않는다.
+// - 외부 중단은 OperationCanceledException으로 상위 Driver에 전달한다.
+// - 중단된 장면의 pending은 확정하거나 보고하지 않는다.
 //
 // 2) 리플레이 규칙
 // - 리플레이는 항상 장면 루트에서 시작한다.
@@ -31,30 +31,20 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Ked.Progression;
 using UnityEngine;
 
 public enum SceneRunOutcome
 {
-    // 장면 밖으로 나가는 간선을 탔다.
-    // State.CurrentEpisodeId는 다음 장면의 루트다.
     SceneEnded = 0,
-
-    // 더 이상 진행할 간선이 없다.
     ChapterEnded = 1,
-
-    // 외부 중단 요청.
-    // State는 장면 진입 상태 그대로이며 pending은 버린다.
-    Stopped = 2,
 }
 
 public readonly struct SceneRunResult
 {
     public SceneRunOutcome Outcome { get; }
-    
-    // 장면(Scene)이 아닌 챕터의 상태지만,
-    // Scene종류 시 새롭게 만들어서 커밋.
     public ProgressionState State { get; }
 
     public SceneRunResult(
@@ -167,11 +157,10 @@ public sealed class SceneRunner
         ChapterProgression chapter,
         ProgressionState entryState,
         bool isNewSession,
-        Func<bool> isStopRequested,
+        CancellationToken cancellationToken,
         SavedLoadPlan loadPlan = null)
     {
-        if (isStopRequested())
-            return new SceneRunResult(SceneRunOutcome.Stopped, entryState);
+        cancellationToken.ThrowIfCancellationRequested();
 
         string rootEpisodeId = entryState.CurrentEpisodeId;
 
@@ -187,8 +176,7 @@ public sealed class SceneRunner
 
         await _player.EnterSceneAsync(root.DialogueEntryId, isNewSession);
 
-        if (isStopRequested())
-            return new SceneRunResult(SceneRunOutcome.Stopped, entryState);
+        cancellationToken.ThrowIfCancellationRequested();
 
         _reporter.ReportSceneEntered(
             new SceneEntryReport(
@@ -206,13 +194,13 @@ public sealed class SceneRunner
         {
             chapter.TryGetNode(episodeId, out EpisodeNode node);
 
-            bool dialogueCompleted = await PlayAsync(node.DialogueEntryId, "대사", isStopRequested);
+            bool dialogueCompleted = await PlayAsync(
+                node.DialogueEntryId,
+                "대사",
+                cancellationToken);
 
             if (!dialogueCompleted)
             {
-                if (isStopRequested())
-                    return new SceneRunResult(SceneRunOutcome.Stopped, entryState);
-
                 episodeId = rootEpisodeId;
                 continue;
             }
@@ -240,16 +228,10 @@ public sealed class SceneRunner
 
                 if (pick.Option.HasVia)
                 {
-                    bool viaCompleted = await PlayAsync(
-                        pick.Option.ViaNodeId,
-                        "연출",
-                        isStopRequested);
+                    bool viaCompleted = await PlayAsync(pick.Option.ViaNodeId, "연출", cancellationToken);
 
                     if (!viaCompleted)
                     {
-                        if (isStopRequested())
-                            return new SceneRunResult(SceneRunOutcome.Stopped, entryState);
-
                         episodeId = rootEpisodeId;
                         continue;
                     }
@@ -303,40 +285,37 @@ public sealed class SceneRunner
             if (advance.Kind == ChapterAdvanceKind.ChapterEnded)
                 return FinalizeScene(chapter, entryState, SceneRunOutcome.ChapterEnded);
 
-            ResolvedOption? picked;
+            ResolvedOption picked;
 
             if (advance.Kind == ChapterAdvanceKind.AutoAdvance)
             {
                 picked = advance.Options[0];
-                Debug.Log($"[장면] 자동 간선 - {picked.Value.Option}");
+                Debug.Log($"[장면] 자동 간선 - {picked.Option}");
             }
             else
             {
                 try
                 {
-                    picked = await PickAsync(advance, isStopRequested);
+                    picked = await PickAsync(
+                        advance,
+                        cancellationToken);
                 }
-                catch (OperationCanceledException)when (_player.IsReplayPending)
+                catch (OperationCanceledException)
+                    when (!cancellationToken.IsCancellationRequested
+                          && _player.IsReplayPending)
                 {
-                    // 선택지를 기다리는 중 롤백이 요청.
-                    //
-                    // 외부 중단으로 인한 취소는 여기서 잡지 않고
-                    // ProgressionDriver까지 전달.
-                    await BeginReplayAsync();
+                    await BeginReplayAsync(cancellationToken);
 
                     episodeId = rootEpisodeId;
                     continue;
                 }
             }
 
-            if (!picked.HasValue)
-                return new SceneRunResult(SceneRunOutcome.Stopped, entryState);
-
             var chosen = new ProgressionPick
             {
-                Option = picked.Value.Option,
+                Option = picked.Option,
                 FromEpisodeId = node.EpisodeId,
-                SourceIndex = picked.Value.SourceIndex,
+                SourceIndex = picked.SourceIndex,
                 Anchor = _rollbackHistory.LastHistoryIndex,
             };
 
@@ -350,13 +329,10 @@ public sealed class SceneRunner
                 bool viaCompleted = await PlayAsync(
                     chosen.Option.ViaNodeId,
                     "연출",
-                    isStopRequested);
+                    cancellationToken);
 
                 if (!viaCompleted)
                 {
-                    if (isStopRequested())
-                        return new SceneRunResult(SceneRunOutcome.Stopped, entryState);
-
                     episodeId = rootEpisodeId;
                     continue;
                 }
@@ -488,23 +464,28 @@ public sealed class SceneRunner
     private async Task<bool> PlayAsync(
         string nodeName,
         string what,
-        Func<bool> isStopRequested)
+        CancellationToken cancellationToken)
     {
-        Debug.Log($"[진행] {what} 시작 — \"{nodeName}\"");
+        cancellationToken.ThrowIfCancellationRequested();
+
+        Debug.Log(
+            $"[진행] {what} 시작 — \"{nodeName}\"");
 
         NodePlayOutcome outcome =
             await _player.PlayNodeAsync(nodeName);
 
-        if (isStopRequested())
-            return false;
+        // StopAsync가 Yarn 실행을 끝냈다면
+        // 이를 정상적인 노드 완료로 처리하지 않는다.
+        cancellationToken.ThrowIfCancellationRequested();
 
         if (outcome == NodePlayOutcome.ReplayRequested)
         {
-            await BeginReplayAsync();
+            await BeginReplayAsync(cancellationToken);
             return false;
         }
 
-        Debug.Log($"[진행] {what} 끝 — \"{nodeName}\"");
+        Debug.Log(
+            $"[진행] {what} 끝 — \"{nodeName}\"");
 
         return true;
     }
@@ -513,9 +494,14 @@ public sealed class SceneRunner
     //
     // 표적 뒤에 만들어진 진행 선택과 시청 기록을 되돌린다.
     // ChoiceHistory가 Yarn 선택 기록을 되돌리는 것과 같은 규칙이다.
-    private async Task BeginReplayAsync()
+    private async Task BeginReplayAsync(
+        CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         await _player.PrepareReplayAsync();
+
+        cancellationToken.ThrowIfCancellationRequested();
 
         if (_rollbackHistory.TakeRollbackTarget(
                 out RollbackPoint target))
@@ -647,16 +633,19 @@ public sealed class SceneRunner
             });
     }
 
-    private async Task<ResolvedOption?> PickAsync(
+    private async Task<ResolvedOption> PickAsync(
         ChapterAdvance advance,
-        Func<bool> isStopRequested)
+        CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         int picked = await _options.ShowAsync(
             advance.Options,
             advance.HiddenCount);
 
-        if (isStopRequested())
-            return null;
+        // StopAsync가 선택지 창을 닫고 ShowAsync가 반환했다면
+        // 반환값을 정상적인 선택으로 해석하지 않는다.
+        cancellationToken.ThrowIfCancellationRequested();
 
         if (picked < 0 ||
             picked >= advance.Options.Count)

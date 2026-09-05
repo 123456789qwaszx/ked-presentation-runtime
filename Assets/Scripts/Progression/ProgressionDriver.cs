@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Ked.Progression;
 using UnityEngine;
@@ -20,8 +21,6 @@ public sealed class ProgressionDriver
     private ProgressionState _state;
     private YarnProject _yarnProject;
 
-    private bool _stopRequested;
-
     // Yarn 저장소가 어느 챕터 기준으로 초기화되었는지 기록.
     // 현재 챕터와 다르면 Yarn 변수를 새 챕터 기준으로 초기화한다.
     private string _yarnChapterId;
@@ -37,6 +36,8 @@ public sealed class ProgressionDriver
     // 첫 장면에서 저장된 표적 라인까지 달리는 계획.
     // 첫 장면 실행에 한 번 전달하고 버린다.
     private SavedLoadPlan _loadPlan;
+
+    private CancellationTokenSource _runCancellation;
 
     public bool IsRunning { get; private set; }
 
@@ -67,9 +68,11 @@ public sealed class ProgressionDriver
             Debug.LogWarning("[진행] 이미 돌고 있다. 새 요청을 무시한다.");
             return;
         }
-
+        
+        var cancellation = new CancellationTokenSource();
+        
+        _runCancellation = cancellation;
         IsRunning = true;
-        _stopRequested = false;
 
         _chapter = chapter;
         _state = entryState;
@@ -83,11 +86,13 @@ public sealed class ProgressionDriver
         try
         {
             Debug.Log($"[진행] 챕터 시작 — {Describe()}");
-
-            if (await RunChapterAsync())
-                Debug.Log($"[진행] 챕터 끝 — {Describe()}");
+            
+            await RunChapterAsync(cancellation.Token);
+            
+            Debug.Log($"[진행] 챕터 끝 — {Describe()}");
         }
         catch (OperationCanceledException)
+            when(cancellation.IsCancellationRequested)
         {
             Debug.Log("[진행] 취소됨.");
         }
@@ -97,8 +102,10 @@ public sealed class ProgressionDriver
         }
         finally
         {
+            if(ReferenceEquals(_runCancellation, cancellation))
+                _runCancellation = null;
+            
             IsRunning = false;
-            _stopRequested = false;
 
             _chapter = null;
             _state = null;
@@ -108,12 +115,14 @@ public sealed class ProgressionDriver
             _restoreVariables = null;
             _restoreBacklog = null;
             _loadPlan = null;
+
+            cancellation.Dispose();
         }
     }
 
     // 장면 루프.
     // 챕터가 끝나면 true, 중단 요청이면 false.
-    private async Task<bool> RunChapterAsync()
+    private async Task RunChapterAsync(CancellationToken cancellation)
     {
         bool isNewSession = true;
 
@@ -129,6 +138,8 @@ public sealed class ProgressionDriver
 
         while (true)
         {
+            cancellation.ThrowIfCancellationRequested();
+            
             // 장면 진입 체크포인트보다 먼저 복원해야
             // 리플레이가 복원된 Yarn 변수에서 출발한다.
             SyncChapterVariables();
@@ -140,7 +151,7 @@ public sealed class ProgressionDriver
                 _chapter,
                 _state,
                 isNewSession,
-                () => _stopRequested,
+                cancellation,
                 loadPlan);
 
             isNewSession = false;
@@ -152,10 +163,7 @@ public sealed class ProgressionDriver
                     continue;
 
                 case SceneRunOutcome.ChapterEnded:
-                    return true;
-
-                case SceneRunOutcome.Stopped:
-                    return false;
+                    return;
 
                 default:
                     throw new ArgumentOutOfRangeException(
@@ -172,10 +180,12 @@ public sealed class ProgressionDriver
     // SceneRunner는 현재 선택지와 장면을 실제로 멈춘다.
     public async Task StopAsync()
     {
-        if (!IsRunning)
+        CancellationTokenSource cts = _runCancellation;
+        
+        if (!IsRunning || cts == null)
             return;
 
-        _stopRequested = true;
+        cts.Cancel();
 
         await _sceneRunner.StopAsync();
     }
