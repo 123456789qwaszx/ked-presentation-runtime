@@ -5,77 +5,59 @@ using Ked.Progression;
 using UnityEngine;
 using Yarn.Unity;
 
-// 진행 순서를 쥐는 자리. 진행 층과 대사 층을 잇는다.
-//
-// 코어는 "무엇이 참인가"만 답한다(ChapterTransition·Commit 전부 순수 함수).
-// "어떤 순서로 부르는가"는 여기와 SceneRunner에 있다:
-//   · 챕터 루프 — 어느 장면 다음에 어느 장면인가, 챕터 변수, [2] 상태 소유 (여기)
-//   · 장면 루프 — 노드 재생·판정·선택·Via·커밋, 롤백 리플레이 (SceneRunner)
-// 이 루프가 지는 세 규칙은 장면 루프가 지킨다:
-//   · 판정은 대사 뒤 한 번 — 화면에 뜬 것과 실제가 갈릴 수 없다
-//   · 연출은 커밋보다 앞 — 지나가는 자리라 상태를 안 바꾼다
-//   · 스탯 반영과 이동이 한 연산 — "스탯만 오르고 안 옮겨 간" 상태가 없다
-//
-// 진행 상태([2])의 수명이 챕터다. 시작 상태(새 게임의 진입 상태든 저장에서 복원한 것이든)는
-// 호출자가 만들어 준다 — 저장 파일을 콘텐츠와 대조하는 일은 런처의 것이고, 여기서는
-// 받은 챕터와 상태가 짝이 맞는다고 믿는다.
-//
-// 나중에 이 순서를 쓰는 두 번째 소비자(툴의 걷기 모드 등)가 생기면, 이 루프를 코어로
-// 올리고 await를 pull로 되접어야 한다. 순서를 두 곳에 적으면 작가가 미리보는 게임과
-// 플레이어가 하는 게임이 갈린다.
+// 챕터 진행:
+// - ProgressionState 소유
+// - 장면 반복 실행
+// - 챕터 단위 Yarn 변수 초기화 및 복원
+// - SceneRunner호출(Scene 진입)
 public sealed class ProgressionDriver
 {
-    private readonly SceneRunner _scenes;
-    private readonly IChapterOptionsView _options;
+    private readonly SceneRunner _sceneRunner;
+    private readonly BacklogRecorder _backlog;
     private readonly ProgressionYarnBridge _yarnBridge;
 
     private ChapterProgression _chapter;
     private ProgressionState _state;
-    private bool _stopRequested;
-
     private YarnProject _yarnProject;
 
-    // Yarn 저장소가 지금 어느 챕터의 것인지. 이것이 _chapter와 갈리면 [3]을 다시 세운다.
+    private bool _stopRequested;
+
+    // Yarn 저장소가 어느 챕터 기준으로 초기화되었는지 기록.
+    // 현재 챕터와 다르면 Yarn 변수를 새 챕터 기준으로 초기화한다.
     private string _yarnChapterId;
+
+    // 이어하기의 Yarn 변수 덤프.
+    // 첫 BeginChapter 직후 한 번 복원하고 버린다.
+    private YarnVariableSnapshot _restoreVariables;
+
+    // 이어하기의 이전 장면 백로그.
+    // 첫 장면 진입 전에 한 번 복원하고 버린다.
+    private IReadOnlyList<DialogueLogEntry> _restoreBacklog;
+
+    // 첫 장면에서 저장된 표적 라인까지 달리는 계획.
+    // 첫 장면 실행에 한 번 전달하고 버린다.
+    private SavedLoadPlan _loadPlan;
 
     public bool IsRunning { get; private set; }
 
-    // 지금 장면의 미확정 경로 — 즐겨찾기 캡처용.
-    public IReadOnlyList<CommittedChoice> PendingPath => _scenes.PendingPath;
+    // 현재 장면의 미확정 경로. 즐겨찾기 캡처에 사용한다.
+    public IReadOnlyList<CommittedChoice> PendingPath =>
+        _sceneRunner.PendingPath;
 
     public ProgressionDriver(
-        EpisodePlayer player,
-        IChapterOptionsView options,
-        VNLinePresentationState seek,
-        RollbackHistory rollbackHistory,
+        SceneRunner scenes,
         BacklogRecorder backlog,
-        ChoiceHistory choiceHistory,
-        ProgressionYarnBridge yarnBridge,
-        IProgressionReporter reporter)
+        ProgressionYarnBridge yarnBridge)
     {
-        _player = player;
-        _options = options;
-        _yarnBridge = yarnBridge;
+        _sceneRunner = scenes;
         _backlog = backlog;
-
-        _scenes = new SceneRunner(
-            player, options, seek, rollbackHistory, reporter, backlog, choiceHistory,
-            yarnBridge.Capture, () => _stopRequested);
+        _yarnBridge = yarnBridge;
     }
 
-    private readonly BacklogRecorder _backlog;
-
-    // 이어하기의 [3] 덤프 — 첫 BeginChapter 뒤에 한 번 덮고 버린다.
-    private YarnVariableSnapshot _restoreVariables;
-
-    // 이어하기의 백로그(이전 장면들) — 첫 장면 진입 전에 되살리고 버린다.
-    private IReadOnlyList<DialogueLogEntry> _restoreBacklog;
-
-    // 첫 장면에서 표적 라인까지 달리는 계획(갈라지기·즐겨찾기 로드). 한 번 쓰고 버린다.
-    private SavedLoadPlan _loadPlan;
-
     public async Task RunAsync(
-        YarnProject project, ChapterProgression chapter, ProgressionState entryState,
+        YarnProject project,
+        ChapterProgression chapter,
+        ProgressionState entryState,
         YarnVariableSnapshot restoreVariables = null,
         IReadOnlyList<DialogueLogEntry> restoreBacklog = null,
         SavedLoadPlan loadPlan = null)
@@ -88,10 +70,12 @@ public sealed class ProgressionDriver
 
         IsRunning = true;
         _stopRequested = false;
+
         _chapter = chapter;
         _state = entryState;
         _yarnProject = project;
         _yarnChapterId = null;
+
         _restoreVariables = restoreVariables;
         _restoreBacklog = restoreBacklog;
         _loadPlan = loadPlan;
@@ -114,18 +98,23 @@ public sealed class ProgressionDriver
         finally
         {
             IsRunning = false;
+            _stopRequested = false;
+
             _chapter = null;
             _state = null;
             _yarnProject = null;
             _yarnChapterId = null;
+
+            _restoreVariables = null;
+            _restoreBacklog = null;
+            _loadPlan = null;
         }
     }
 
-    // 장면 루프. 챕터가 끝나면 true, 멈춤 요청이면 false.
+    // 장면 루프.
+    // 챕터가 끝나면 true, 중단 요청이면 false.
     private async Task<bool> RunChapterAsync()
     {
-        // 백로그는 회차 스코프 — 첫 장면 진입에서만 비운다.
-        // 이어하기면 비우는 대신 이전 장면들의 백로그를 되살린다. 현재 장면의 라인은 재생이 다시 적는다.
         bool isNewSession = true;
 
         if (_restoreBacklog != null)
@@ -134,66 +123,88 @@ public sealed class ProgressionDriver
             isNewSession = false;
 
             Debug.Log($"[진행] 백로그 복원 — {_restoreBacklog.Count}개");
+
             _restoreBacklog = null;
         }
 
         while (true)
         {
-            // 장면 진입의 체크포인트 Capture보다 앞이어야 리플레이가 초기화된 [3]에서 출발한다.
+            // 장면 진입 체크포인트보다 먼저 복원해야
+            // 리플레이가 복원된 Yarn 변수에서 출발한다.
             SyncChapterVariables();
 
             SavedLoadPlan loadPlan = _loadPlan;
             _loadPlan = null;
 
-            SceneRunResult result = await _scenes.RunAsync(_chapter, _state, isNewSession, loadPlan);
+            SceneRunResult result = await _sceneRunner.RunAsync(
+                _chapter,
+                _state,
+                isNewSession,
+                () => _stopRequested,
+                loadPlan);
 
             isNewSession = false;
             _state = result.State;
 
             switch (result.Outcome)
             {
-                case SceneRunOutcome.ChapterEnded: return true;
-                case SceneRunOutcome.Stopped: return false;
+                case SceneRunOutcome.SceneEnded:
+                    continue;
+
+                case SceneRunOutcome.ChapterEnded:
+                    return true;
+
+                case SceneRunOutcome.Stopped:
+                    return false;
+
+                default:
+                    throw new ArgumentOutOfRangeException(
+                        nameof(result.Outcome),
+                        result.Outcome,
+                        "알 수 없는 장면 실행 결과다.");
             }
         }
     }
 
-    private readonly EpisodePlayer _player;
-
-    // 타이틀로 나가기·갈라지기. 선택지를 접고 노드를 멈추면 장면 루프가 멈춤 깃발을 보고 끝난다 —
-    // 미확정 선택은 버린다. RunAsync가 끝나는 것은 호출자가 기다린다(런처).
+    // 전체 진행을 중단한다.
+    //
+    // Driver는 중단 의도를 기록하고,
+    // SceneRunner는 현재 선택지와 장면을 실제로 멈춘다.
     public async Task StopAsync()
     {
         if (!IsRunning)
             return;
 
         _stopRequested = true;
-        _options.Cancel();
 
-        await _player.StopSceneAsync();
+        await _sceneRunner.StopAsync();
     }
 
-    // "[3] 연출 실행 상태"는 챕터 수명 — 챕터가 바뀔 때만 초기값으로 되돌린다.
-    //
-    // [2]는 여기 오지 않는다. 진행 코어만 알고, 대사에서 읽는 것도 금지 —
-    // 스탯 분기는 그래프 간선으로 올린다.
+    // Yarn 연출 변수는 챕터 수명이다.
+    // 챕터가 바뀔 때만 초기값으로 되돌린다.
     private void SyncChapterVariables()
     {
-        if (string.Equals(_yarnChapterId, _chapter.ChapterId, StringComparison.Ordinal))
+        if (string.Equals(
+                _yarnChapterId,
+                _chapter.ChapterId,
+                StringComparison.Ordinal))
+        {
             return;
+        }
 
         _yarnBridge.BeginChapter(_yarnProject);
         _yarnChapterId = _chapter.ChapterId;
 
         Debug.Log($"[진행] Yarn 변수 초기화 — 챕터 \"{_chapter.ChapterId}\"");
 
-        // 이어하기 — 초기값 위에 덤프를 덮는다. 장면 진입의 Capture보다 앞이라 리플레이도 이 값에서 출발.
-        if (_restoreVariables != null)
-        {
-            _yarnBridge.Restore(_restoreVariables);
-            Debug.Log($"[진행] [3] 복원 — {_restoreVariables.Count}개");
-            _restoreVariables = null;
-        }
+        if (_restoreVariables == null)
+            return;
+
+        _yarnBridge.Restore(_restoreVariables);
+
+        Debug.Log($"[진행] Yarn 변수 복원 — {_restoreVariables.Count}개");
+
+        _restoreVariables = null;
     }
 
     private string Describe() =>

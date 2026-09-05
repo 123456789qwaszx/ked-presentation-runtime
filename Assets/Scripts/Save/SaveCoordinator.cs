@@ -129,14 +129,16 @@ public sealed class SaveCoordinator : IProgressionReporter
         if (save == null)
             return null;
 
-        // 구세이브(회차 id 없음)는 지금 id를 받는다. 시간이 한 칸뿐이면 전부 자체 시간으로 본다.
-        string id = string.IsNullOrEmpty(save.PlaythroughId) ? NewPlaythroughId() : save.PlaythroughId;
+        // 구세이브(회차 id 없음)는 지금 id를 받는다.
+        string id = string.IsNullOrEmpty(save.PlaythroughId) 
+            ? NewPlaythroughId() 
+            : save.PlaythroughId;
 
-        int own = save.InheritedPlaySeconds == 0 && save.OwnPlaySeconds == 0
+        int playSeconds = save.InheritedPlaySeconds == 0 && save.OwnPlaySeconds == 0
             ? save.PlaySeconds
             : save.OwnPlaySeconds;
 
-        BecomePlaythrough(id, save.ForkedFrom, save.InheritedPlaySeconds, own, save.Scenes);
+        BecomePlaythrough(id, save.ForkedFrom, save.InheritedPlaySeconds, playSeconds, save.Scenes);
 
         return new ProgressionResumePoint(
             save.ChapterId,

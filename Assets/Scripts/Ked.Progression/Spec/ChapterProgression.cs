@@ -127,10 +127,6 @@ namespace Ked.Progression
         public string SceneIdOf(string episodeId) =>
             TryGetNode(episodeId, out EpisodeNode node) ? node.SceneId : null;
 
-        // 이 챕터에 들어설 때의 [2] 상태. 챕터 데이터가 챕터 수명 상태를 만든다.
-        //
-        // 실제 플레이와 도달성 증명이 같은 자리에서 출발한다 — 증명이 통과한 길은
-        // 플레이에서도 통과한다.
         public ProgressionState CreateEntryState() =>
             ProgressionState.CreateInitial(Stats, StartEpisodeId);
 

@@ -343,8 +343,15 @@ public class VNAppBootstrap : MonoBehaviour
     
     private void CreateEpisodePlayer()
     {
+        IEpisodeNodeRunner nodeRunner =
+            new YarnEpisodeNodeRunner(dialogueRunner);
+
+        YarnVariableCheckpoint variableCheckpoint =
+            new YarnVariableCheckpoint(
+                dialogueRunner.VariableStorage);
+
         _episodePlayer = new EpisodePlayer(
-            new YarnEpisodeNodeRunner(dialogueRunner),
+            nodeRunner,
             _screenBindings,
             _rollbackHistory,
             customLinePresenter,
@@ -352,32 +359,41 @@ public class VNAppBootstrap : MonoBehaviour
             _presentationResponseRig,
             _presentationStage,
             _presentationScopeSession,
-            new YarnVariableCheckpoint(dialogueRunner.VariableStorage),
+            variableCheckpoint,
             _choiceHistory);
 
-        // 선택지 박스는 Yarn 옵션과 같은 것을 쓴다. 둘이 동시에 뜨는 일은 없음.
-        // Yarn 옵션은 노드 안에서, 에피소드 선택지는 노드와 노드 사이에서 뜬다.
+        // Yarn 옵션은 노드 안에서,
+        // 진행 선택지는 노드와 노드 사이에서 표시되므로 동시에 뜨지 않는다.
         _progressionOptions = new ChapterOptionsView(
-            uiManager.GetUI<VNDefaultOptionsPanel>(), optionItem);
+            uiManager.GetUI<VNDefaultOptionsPanel>(),
+            optionItem);
 
-        // 진행 층이 Yarn 변수 저장소에 하는 일 전부 - [3] 챕터 되돌리기.
-        ProgressionYarnBridge yarnBridge = new(dialogueRunner.VariableStorage);
+        // 진행 층이 Yarn 변수 저장소에 하는 일을 모은다.
+        ProgressionYarnBridge yarnBridge =
+            new ProgressionYarnBridge(
+                dialogueRunner.VariableStorage);
 
         _saveCoordinator = CreateSaveCoordinator();
 
-        // 시크 상태와 롤백 이력은 장면 루프의 것 - 리플레이 자동 응답과 롤백 하한이 사용.
-        _progressionDriver = new ProgressionDriver(
+        SceneRunner sceneRunner = new SceneRunner(
             _episodePlayer,
             _progressionOptions,
             _linePresentationAdvanceState,
             _rollbackHistory,
+            _saveCoordinator,
             _backlogRecorder,
             _choiceHistory,
-            yarnBridge,
-            _saveCoordinator);
+            yarnBridge.Capture);
+
+        _progressionDriver = new ProgressionDriver(
+            sceneRunner,
+            _backlogRecorder,
+            yarnBridge);
 
         _progressionLauncher = new ProgressionLauncher(
-            _progressionDriver, dialogueRunner, progressionChapterJson,
+            _progressionDriver,
+            dialogueRunner,
+            progressionChapterJson,
             _saveCoordinator.GetResumePoint);
     }
 

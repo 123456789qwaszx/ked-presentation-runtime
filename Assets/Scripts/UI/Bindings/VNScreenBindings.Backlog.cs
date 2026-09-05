@@ -4,7 +4,9 @@ public sealed partial class VNScreenBindings
     private SaveCoordinator _saveCoordinator;
 
     // 갈라지기(이전 장면 루트로)에 필요한 둘. 진행 층 없이 도는 디버그 경로면 null.
-    public void ConfigureProgression(ProgressionLauncher launcher, SaveCoordinator saveCoordinator)
+    public void ConfigureProgression(
+        ProgressionLauncher launcher,
+        SaveCoordinator saveCoordinator)
     {
         _progressionLauncher = launcher;
         _saveCoordinator = saveCoordinator;
@@ -30,14 +32,13 @@ public sealed partial class VNScreenBindings
             p => p.OnJumpRequested -= HandleBacklogJump);
     }
 
-    // 현재 장면 항목은 되감기(롤백), 이전 장면 항목은 갈라지기. 둘 다 아니면(지금 라인·다른 챕터) 흐림.
     private bool CanActOn(DialogueLogEntry entry) =>
         _vnFeatures.CanJumpTo(entry) ||
         (_saveCoordinator != null && _progressionLauncher != null && _saveCoordinator.CanForkTo(entry.lineSerial));
 
     private async void HandleBacklogJump(DialogueLogEntry entry)
     {
-        // 현재 장면 — 미확정이니 되감는다. 롤백 한 걸음과 같은 기전(표적만 다르다).
+        // 현재 장면(아직 pending). 롤백과 동일
         if (_vnFeatures.RequestBacklogJump(entry))
         {
             ClosePanel();
@@ -45,11 +46,7 @@ public sealed partial class VNScreenBindings
             return;
         }
 
-        // 이전 장면 — 확정된 것은 되돌리지 않는다. 그 장면 기록을 물려받아 새 회차로 갈라지고,
-        // 루트에서 그 라인까지 달린다(Load 시크). 라인 좌표를 못 세우면 장면 루트에서.
-        if (_saveCoordinator == null || _progressionLauncher == null)
-            return;
-
+        // 이전 장면(이미 Committed) 개념적으로 새 회차 시작 + 장면 루트에서 그 라인까지 재생.
         int sceneIndex;
 
         if (!_saveCoordinator.TryMakeLineTarget(entry, out sceneIndex, out SaveLineTarget target))
