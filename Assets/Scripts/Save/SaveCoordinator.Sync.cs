@@ -16,7 +16,10 @@ public sealed partial class SaveCoordinator
     {
         return _startupSync;
     }
-    
+
+
+    // ---- Startup Sync ----
+
     // 서버 없으면 끝
     // -> 필요하면 복구
     // -> active queue 선택
@@ -61,97 +64,124 @@ public sealed partial class SaveCoordinator
     }
 
 
-    // 409
-    // HandleConflict Transaction 계약
-    // [1]현재 Save 읽기
-    // [2]충돌 대상 검증
-    // [3]Pending 캡처
-    // [4]Fork metadata 생성
-    // [5]Save를 새 Playthrough로 변경
-    // [6]Save 저장
-    // [7]기존 Queue pending 제거
-    // [8]새 Queue로 Switch
-    // [9]Pending을 새 Queue에 Reset
-    // [10]Runtime state 변경
-    // [11]Event 발행
-    // [12]TrySync
+    // ---- "409 Conflict" ----
+
+    // 다른 기기가 현재 회차를 먼저 저장했다.
+    //
+    // 이미 확정된 서버 기록은 되돌리거나 덮어쓰지 않는다.
+    // 이 기기에서 아직 서버에 전달하지 못한 진행만 새 회차로 갈라 이어 간다.
     private void HandleConflict()
     {
+        // Phase: ContextPrepared
         LocalSaveFile current = _localStore.LoadActive();
 
         // Active Save가 없을 경우 아무것도 하지 않음.
         if (current == null)
             return;
-
-        // 메모리 PlaythroughId != Active Save PlaythroughId라면,
-        // 지나간 회차의 Conflict이므로 아무것도 하지 않음.
-        if (_playthroughId != null 
-            && !string.Equals(_playthroughId, current.PlaythroughId, StringComparison.Ordinal))
+        
+        // 지나간 회차의 Conflict일 경우 아무것도 하지 않음.
+        if (_playthroughId != null
+            && !string.Equals(_playthroughId, current.PlaythroughId, StringComparison.Ordinal)) 
             return;
 
-        // 정상 Conflict
-        // - 현재 pending은 새 회차로 이전.
-        // - 새 Playthrough가 active가 됨.
-        // - pending seq는 다시 시작.
-        // - runtime이 존재하면 runtime도 fork를 따라감.
-        // - ConflictForked 발생.
-        // - 새 회차 sync 재시도.
         SyncBatch pending = _queue.CaptureBatch();
-        
+
         int sceneIndex = _queue.SyncedSceneCount;
-        string fromId = current.PlaythroughId;
-        string newId = NewPlaythroughId();
+        string sourcePlaythroughId = current.PlaythroughId;
+        string forkPlaythroughId = NewPlaythroughId();
 
-        var origin = new ForkOrigin { PlaythroughId = fromId, SceneIndex = sceneIndex, Target = null };
-
-        current.PlaythroughId = newId;
-        current.ForkedFrom = origin;
-        current.SavedAtUtc = NowUtc();
-
-        // 시간도 다른 갈라지기처럼 나눈다 — 출처 장면 진입까지가 물려받은 것, 나머지가 이 회차 것.
-        if (current.Scenes != null && sceneIndex < current.Scenes.Count)
+        var origin = new ForkOrigin
         {
-            current.InheritedPlaySeconds = current.Scenes[sceneIndex].Checkpoint.PlaySecondsAtEntry;
-            current.OwnPlaySeconds = Math.Max(0, current.PlaySeconds - current.InheritedPlaySeconds);
+            PlaythroughId = sourcePlaythroughId,
+            SceneIndex = sceneIndex,
+            Target = null,
+        };
+
+        var ctx = new ConflictForkContext(
+            current,
+            pending,
+            sceneIndex,
+            sourcePlaythroughId,
+            forkPlaythroughId,
+            origin);
+        
+        SetPhase(ctx, ConflictForkPhase.ContextPrepared);
+        
+        // Phase: SavePrepared
+        ctx.Save.PlaythroughId = ctx.ForkPlaythroughId;
+        ctx.Save.ForkedFrom = ctx.Origin;
+        ctx.Save.SavedAtUtc = NowUtc();
+
+        if (ctx.Save.Scenes != null
+            && ctx.SceneIndex < ctx.Save.Scenes.Count)
+        {
+            ctx.Save.InheritedPlaySeconds =
+                ctx.Save.Scenes[ctx.SceneIndex].Checkpoint.PlaySecondsAtEntry;
+
+            ctx.Save.OwnPlaySeconds =
+                Math.Max(0, ctx.Save.PlaySeconds - ctx.Save.InheritedPlaySeconds);
         }
-
-        _localStore.Save(current);
-
-        _queue.Discard(pending);
-        _queue.SwitchTo(_localStore.QueuePathOf(newId));
-        _queue.Reset(pending.Choices, pending.Events);
-
-        // 재개 전(시작 시 동기화)이면 메모리는 비어 있다 — 재개가 새 파일을 읽으며 채운다.
+        
+        SetPhase(ctx, ConflictForkPhase.SavePrepared);
+        
+        // Phase: SavePersisted
+        _localStore.Save(ctx.Save);
+        
+        SetPhase(ctx, ConflictForkPhase.SavePersisted);
+        
+        // Phase: SourceQueueReleased
+        _queue.Discard(ctx.Pending);
+        
+        SetPhase(ctx, ConflictForkPhase.SourceQueueReleased);
+        
+        // Phase: ForkQueueSelected
+        _queue.SwitchTo(
+            _localStore.QueuePathOf(ctx.ForkPlaythroughId));
+        
+        SetPhase(ctx, ConflictForkPhase.ForkQueueSelected);
+        
+        // Phase: PendingRequeued
+        _queue.Reset(ctx.Pending.Choices, ctx.Pending.Events);
+        
+        SetPhase(ctx, ConflictForkPhase.PendingRequeued);
+        
+        // Phase: RuntimeStateResolved
         if (_playthroughId != null)
         {
-            _playthroughId = newId;
-            _forkedFrom = origin;
-            _inheritedSeconds = current.InheritedPlaySeconds;
-            _ownSecondsBase = current.OwnPlaySeconds;
+            _playthroughId = ctx.ForkPlaythroughId;
+            _forkedFrom = ctx.Origin;
+
+            _inheritedSeconds = ctx.Save.InheritedPlaySeconds;
+            _ownSecondsBase = ctx.Save.OwnPlaySeconds;
+
             _startedAt = Time.realtimeSinceStartup;
         }
 
+        SetPhase(ctx, ConflictForkPhase.RuntimeStateResolved);
+        
+        // Phase: ConflictPublished
         Debug.LogWarning(
-            $"[저장] 충돌(409) — 다른 기기가 회차 {fromId}를 먼저 저장했다. 이 기기의 진행은 새 회차 {newId}로 갈라 이어 간다 " +
-            $"(출처 장면 {sceneIndex}, 미전송 선택 {pending.Choices.Count}건 → seq 1부터, 이벤트 {pending.Events.Count}건).");
+            $"[저장] 충돌(409) — 다른 기기가 회차 {ctx.SourcePlaythroughId}를 먼저 저장했다. " +
+            $"이 기기의 진행은 새 회차 {ctx.ForkPlaythroughId}로 갈라 이어 간다 " +
+            $"(출처 장면 {ctx.SceneIndex}, " +
+            $"미전송 선택 {ctx.Pending.Choices.Count}건 → seq 1부터, " +
+            $"이벤트 {ctx.Pending.Events.Count}건).");
 
-        ConflictForked?.Invoke(origin);
+        ConflictForked?.Invoke(ctx.Origin);
 
+        SetPhase(ctx, ConflictForkPhase.ConflictPublished);
+        
+        // Phase: ResyncRequested
         _ = _server.TrySyncAsync();
+
+        SetPhase(ctx, ConflictForkPhase.ResyncRequested);
+        
+        // Phase: Completed
+        SetPhase(ctx, ConflictForkPhase.Completed);
     }
 
-    // ── 잔손 ────────────────────────────────────────────────────────────────
-
-    private async Task FlushBeforeForkAsync()
+    private void SetPhase(ConflictForkContext ctx, ConflictForkPhase phase)
     {
-        if (_server == null)
-            return;
-
-        await _server.FlushAsync();
-
-        int left = _queue.PendingCount;
-
-        if (left > 0)
-            Debug.LogWarning($"[저장] 갈라지기 전 동기화 못 함 — 옛 회차 큐에 {left}건 남김. 다음 시작에 다시 보낸다.");
+        ctx.Phase = phase;
     }
 }

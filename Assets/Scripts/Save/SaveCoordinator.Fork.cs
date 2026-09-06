@@ -184,4 +184,21 @@ public sealed partial class SaveCoordinator
             $"[저장] 즐겨찾기로 갈라지기 — \"{bookmark.Preview}\" → 새 회차 {newId}. " +
             $"물려받은 기록 {inherited.Count}개, 백로그 {file.Backlog.Count}줄, 시간 {bookmark.PlaySecondsAtBookmark}s");
     }
+    
+    private async Task FlushBeforeForkAsync()
+    {
+        if (_server == null)
+            return;
+
+        await _server.FlushAsync();
+
+        int left = _queue.PendingCount;
+
+        if (left > 0)
+        {
+            Debug.LogWarning(
+                $"[저장] 갈라지기 전 동기화 못 함 — " +
+                $"옛 회차 큐에 {left}건 남김. 다음 시작에 다시 보낸다.");
+        }
+    }
 }
