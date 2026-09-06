@@ -166,20 +166,17 @@ public sealed class VNAdvanceInputPoller : MonoBehaviour
             return;
 
         if (_saveCoordinator != null)
-            await _saveCoordinator.StartupSync;
+            await _saveCoordinator.WaitForStartupSyncAsync();
 
         await _progressionLauncher.LaunchAsync();
     }
 
     private async void StartNewGame()
     {
-        if (_progressionLauncher.IsRunning 
-            || _debugPlayback.IsRunning)
-        {
+        if (_progressionLauncher.IsRunning || _debugPlayback.IsRunning)
             return;
-        }
-
-        await _saveCoordinator.StartupSync;
+        
+        await _saveCoordinator.WaitForStartupSyncAsync();
         await _saveCoordinator.PrepareNewPlaythroughAsync();
         await _progressionLauncher.LaunchAsync();
     }

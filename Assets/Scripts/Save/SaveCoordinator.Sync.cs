@@ -4,36 +4,62 @@ using UnityEngine;
 
 public sealed partial class SaveCoordinator
 {
-    // 시작 동기화의 Task. 복구·409 갈라지기가 활성 파일을 쓰는 동안 진행을 시작하면 안 되니,
-    // 재개·새 게임은 이것을 먼저 기다린다.
-    public Task StartupSync { get; private set; } = Task.CompletedTask;
+    private Task _startupSync = Task.CompletedTask;
 
-    public Task SyncPendingAsync() => StartupSync = SyncPendingCoreAsync();
+    public Task SyncPendingAsync()
+    {
+        _startupSync = SyncPendingCoreAsync();
+        return _startupSync;
+    }
 
-    // 시작 시 서버와 맞춘다: 새 기기면 복구 → 옛 회차 큐 순회 → 즐겨찾기 → 활성 회차. 순서대로 기다린다.
-    // 복구는 로컬에 회차가 하나도 없을 때만 — 로컬이 진실이라 있는 것은 덮지 않는다.
+    public Task WaitForStartupSyncAsync()
+    {
+        return _startupSync;
+    }
+    
+    // 서버 없으면 끝
+    // -> 필요하면 복구
+    // -> active queue 선택
+    // -> 이전 회차 queue 동기화
+    // -> bookmark 동기화
+    // -> active 회차 동기화
     private async Task SyncPendingCoreAsync()
     {
         if (_server == null)
             return;
 
-        // Load가 옛 형식(slot1.json)을 먼저 옮긴다. 그 뒤에도 비어 있으면 새 기기.
-        if (_restore != null && _localStore.LoadActive() == null && _localStore.ListPlaythroughIds().Count == 0)
-            await _restore.RestoreAsync();
+        await RestoreIfNeededAsync();
 
-        // 큐를 활성 회차 것으로 맞춘 뒤에 보낸다.
         string activeId = _localStore.ActiveId;
 
         if (activeId != null)
             _queue.SwitchTo(_localStore.QueuePathOf(activeId));
 
-        await _server.SyncStaleQueuesAsync(_localStore.ListPlaythroughIds(), activeId);
+        await _server.SyncStaleQueuesAsync(
+            _localStore.ListPlaythroughIds(),
+            activeId);
 
         if (_bookmarkSync != null)
             await _bookmarkSync.SyncAllAsync();
 
         await _server.TrySyncAsync();
     }
+
+    private async Task RestoreIfNeededAsync()
+    {
+        if (_restore == null)
+            return;
+
+        bool hasActiveSave = _localStore.LoadActive() != null;
+        bool hasAnyPlaythrough =
+            _localStore.ListPlaythroughIds().Count > 0;
+
+        if (hasActiveSave || hasAnyPlaythrough)
+            return;
+
+        await _restore.RestoreAsync();
+    }
+
 
     // ── 409 ─────────────────────────────────────────────────────────────────
 
