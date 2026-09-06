@@ -61,24 +61,43 @@ public sealed partial class SaveCoordinator
     }
 
 
-    // ── 409 ─────────────────────────────────────────────────────────────────
-
-    // 다른 기기가 이 회차를 먼저 저장했다. 확정된 것은 되돌리지 않는다 — 이 기기의 진행을 새 회차로 갈라 이어 간다.
-    // 미전송 선택·이벤트는 새 회차 큐의 seq 1..n으로 다시 매기고, 출처 장면은 서버가 마지막으로 받아 준 자리.
-    // 재생·이력·진입 스냅샷은 손대지 않는다. 옛 회차 파일은 남고(서버와 같은 지점까지의 기록), 활성만 새 회차로.
-    // 옛 큐는 미전송을 넘겼으니 비운다 — 시작 시 순회가 같은 409를 또 맞지 않게. force(덮어쓰기)는 노출하지 않는다.
+    // 409
+    // HandleConflict Transaction 계약
+    // [1]현재 Save 읽기
+    // [2]충돌 대상 검증
+    // [3]Pending 캡처
+    // [4]Fork metadata 생성
+    // [5]Save를 새 Playthrough로 변경
+    // [6]Save 저장
+    // [7]기존 Queue pending 제거
+    // [8]새 Queue로 Switch
+    // [9]Pending을 새 Queue에 Reset
+    // [10]Runtime state 변경
+    // [11]Event 발행
+    // [12]TrySync
     private void HandleConflict()
     {
         LocalSaveFile current = _localStore.LoadActive();
 
+        // Active Save가 없을 경우 아무것도 하지 않음.
         if (current == null)
             return;
 
-        // 메모리가 회차를 알고 있는데 파일과 다르면 활성이 그 사이 바뀐 것 — 이번 충돌은 지나간 회차의 것.
-        if (_playthroughId != null && !string.Equals(_playthroughId, current.PlaythroughId, StringComparison.Ordinal))
+        // 메모리 PlaythroughId != Active Save PlaythroughId라면,
+        // 지나간 회차의 Conflict이므로 아무것도 하지 않음.
+        if (_playthroughId != null 
+            && !string.Equals(_playthroughId, current.PlaythroughId, StringComparison.Ordinal))
             return;
 
+        // 정상 Conflict
+        // - 현재 pending은 새 회차로 이전.
+        // - 새 Playthrough가 active가 됨.
+        // - pending seq는 다시 시작.
+        // - runtime이 존재하면 runtime도 fork를 따라감.
+        // - ConflictForked 발생.
+        // - 새 회차 sync 재시도.
         SyncBatch pending = _queue.CaptureBatch();
+        
         int sceneIndex = _queue.SyncedSceneCount;
         string fromId = current.PlaythroughId;
         string newId = NewPlaythroughId();
