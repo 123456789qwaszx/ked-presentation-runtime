@@ -7,8 +7,6 @@ using System.Collections.Generic;
 // 그 아래에 회차의 이력(Scenes)이 쌓인다 — 즐겨찾기와 갈라지기의 재료(save-plan.md v2).
 public sealed class LocalSaveFile
 {
-    public int SlotNo;
-
     // 회차 id(로컬 guid). 서버 id는 큐 파일이 든다. 갈라진 회차면 출처가 ForkedFrom에.
     public string PlaythroughId;
     public ForkOrigin ForkedFrom;

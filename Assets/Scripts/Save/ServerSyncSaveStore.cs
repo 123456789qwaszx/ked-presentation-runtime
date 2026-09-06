@@ -61,7 +61,7 @@ public sealed class ServerSyncSaveStore
     // Starts a sync attempt if none is running.
     // If a sync is already in progress,
     // schedules one follow-up attempt and returns the current task.
-    public Task TrySyncAsync(int slotNo)
+    public Task TrySyncAsync()
     {
         if (_inFlight != null)
         {
@@ -69,7 +69,7 @@ public sealed class ServerSyncSaveStore
             return _inFlight;
         }
 
-        Task run = RunAsync(slotNo);
+        Task run = RunAsync();
 
         // Avoid marking an already-completed sync as in flight.
         if (!run.IsCompleted)
@@ -81,10 +81,10 @@ public sealed class ServerSyncSaveStore
     // Waits for the current sync and any queued follow-up sync to finish.
     // Intended for transition points such as starting a new game or forking,
     // where no new commits are expected.
-    public async Task FlushAsync(int slotNo)
+    public async Task FlushAsync()
     {
         if (_inFlight == null)
-            await TrySyncAsync(slotNo);
+            await TrySyncAsync();
 
         while (_inFlight != null)
             await _inFlight;
@@ -92,7 +92,9 @@ public sealed class ServerSyncSaveStore
 
     // 옛 회차 큐에 남은 미전송. 활성 회차는 건너뛴다 — 같은 큐 파일을 두 인스턴스가 쓰지 않도록.
     // 순서는 맞추지 않는다. 자식이 부모보다 먼저 가도 서버가 나중에 잇는다.
-    public async Task SyncStaleQueuesAsync(int slotNo, IReadOnlyList<string> playthroughIds, string activeId)
+    public async Task SyncStaleQueuesAsync(
+        IReadOnlyList<string> playthroughIds,
+        string activeId)
     {
         for (int i = 0; i < playthroughIds.Count; i++)
         {
@@ -115,7 +117,8 @@ public sealed class ServerSyncSaveStore
 
             try
             {
-                SyncOutcome outcome = await SyncOnceAsync(save, queue, slotNo);
+                SyncOutcome outcome = 
+                    await SyncOnceAsync(save, queue);
 
                 // 옛 회차의 409는 갈라지지 않는다 — 활성이 아니라 이어 갈 진행이 없다. 표시해 두고 다음부터 건너뛴다.
                 if (outcome == SyncOutcome.Conflict)
@@ -131,11 +134,11 @@ public sealed class ServerSyncSaveStore
         }
     }
 
-    private async Task RunAsync(int slotNo)
+    private async Task RunAsync()
     {
         try
         {
-            await SyncActiveAsync(slotNo);
+            await SyncActiveAsync();
         }
         catch (Exception error)
         {
@@ -148,34 +151,40 @@ public sealed class ServerSyncSaveStore
             if (_syncAgain)
             {
                 _syncAgain = false;
-                _ = TrySyncAsync(slotNo);
+                _ = TrySyncAsync();
             }
         }
     }
 
-    private async Task SyncActiveAsync(int slotNo)
+    private async Task SyncActiveAsync()
     {
-        LocalSaveFile save = _localStore.Load(slotNo);
+        LocalSaveFile save = _localStore.LoadActive();
 
         // Queue entries are added only after the local snapshot is saved.
         // Without a local save, there is no valid state to upload.
         if (save == null)
             return;
 
-        SyncOutcome outcome = await SyncOnceAsync(save, _queue, slotNo);
+        SyncOutcome outcome = 
+            await SyncOnceAsync(save, _queue);
 
         if (outcome == SyncOutcome.Conflict)
             ConflictDetected?.Invoke();
     }
 
-    private async Task<SyncOutcome> SyncOnceAsync(LocalSaveFile save, SyncQueue queue, int slotNo)
+    private async Task<SyncOutcome> SyncOnceAsync(
+        LocalSaveFile save, 
+        SyncQueue queue)
     {
-        long? playthroughId = queue.PlaythroughId ?? await CreatePlaythroughAsync(save, queue);
+        long? playthroughId = 
+            queue.PlaythroughId ?? 
+            await CreatePlaythroughAsync(save, queue);
 
         if (playthroughId == null)
             return SyncOutcome.Failed;
 
-        int? chapterVersion = await _versionResolver.ResolveAsync(save.ChapterId);
+        int? chapterVersion = 
+            await _versionResolver.ResolveAsync(save.ChapterId);
 
         if (chapterVersion == null)
             return SyncOutcome.Failed;
@@ -199,7 +208,13 @@ public sealed class ServerSyncSaveStore
         };
 
         ApiResult<SaveUploadResponseDto> result =
-            await _session.CallAsync(token => _api.PutSaveAsync(playthroughId.Value, slotNo, request, token));
+            await _session.CallAsync(
+                token
+                    => _api.PutSaveAsync(
+                        playthroughId.Value,
+                        ServerSaveContract.PrimarySlotNo,
+                        request,
+                        token));
 
         if (result.Ok)
         {

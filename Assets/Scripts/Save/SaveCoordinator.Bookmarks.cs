@@ -21,7 +21,7 @@ public sealed partial class SaveCoordinator
         if (_currentEntry == null || target == null)
             return null;
 
-        LocalSaveFile current = _localStore.Load(_slotNo);
+        LocalSaveFile current = _localStore.LoadActive();
 
         var bookmark = new Bookmark
         {

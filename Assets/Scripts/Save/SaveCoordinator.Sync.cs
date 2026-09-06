@@ -18,7 +18,7 @@ public sealed partial class SaveCoordinator
             return;
 
         // Load가 옛 형식(slot1.json)을 먼저 옮긴다. 그 뒤에도 비어 있으면 새 기기.
-        if (_restore != null && _localStore.Load(_slotNo) == null && _localStore.ListPlaythroughIds().Count == 0)
+        if (_restore != null && _localStore.LoadActive() == null && _localStore.ListPlaythroughIds().Count == 0)
             await _restore.RestoreAsync();
 
         // 큐를 활성 회차 것으로 맞춘 뒤에 보낸다.
@@ -27,12 +27,12 @@ public sealed partial class SaveCoordinator
         if (activeId != null)
             _queue.SwitchTo(_localStore.QueuePathOf(activeId));
 
-        await _server.SyncStaleQueuesAsync(_slotNo, _localStore.ListPlaythroughIds(), activeId);
+        await _server.SyncStaleQueuesAsync(_localStore.ListPlaythroughIds(), activeId);
 
         if (_bookmarkSync != null)
             await _bookmarkSync.SyncAllAsync();
 
-        await _server.TrySyncAsync(_slotNo);
+        await _server.TrySyncAsync();
     }
 
     // ── 409 ─────────────────────────────────────────────────────────────────
@@ -43,7 +43,7 @@ public sealed partial class SaveCoordinator
     // 옛 큐는 미전송을 넘겼으니 비운다 — 시작 시 순회가 같은 409를 또 맞지 않게. force(덮어쓰기)는 노출하지 않는다.
     private void HandleConflict()
     {
-        LocalSaveFile current = _localStore.Load(_slotNo);
+        LocalSaveFile current = _localStore.LoadActive();
 
         if (current == null)
             return;
@@ -92,7 +92,7 @@ public sealed partial class SaveCoordinator
 
         ConflictForked?.Invoke(origin);
 
-        _ = _server.TrySyncAsync(_slotNo);
+        _ = _server.TrySyncAsync();
     }
 
     // ── 잔손 ────────────────────────────────────────────────────────────────
@@ -102,7 +102,7 @@ public sealed partial class SaveCoordinator
         if (_server == null)
             return;
 
-        await _server.FlushAsync(_slotNo);
+        await _server.FlushAsync();
 
         int left = _queue.PendingCount;
 

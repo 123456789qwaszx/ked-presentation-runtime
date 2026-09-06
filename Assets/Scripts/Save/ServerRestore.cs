@@ -15,14 +15,15 @@ public sealed class ServerRestore
     private readonly ServerApi _api;
     private readonly GuestSession _session;
     private readonly ISaveStore _localStore;
-    private readonly int _slotNo;
 
-    public ServerRestore(ServerApi api, GuestSession session, ISaveStore localStore, int slotNo)
+    public ServerRestore(
+        ServerApi api,
+        GuestSession session,
+        ISaveStore localStore)
     {
         _api = api;
         _session = session;
         _localStore = localStore;
-        _slotNo = slotNo;
     }
 
     // 하나라도 재구성했으면 true.
@@ -77,7 +78,12 @@ public sealed class ServerRestore
     private async Task<bool> RestorePlaythroughAsync(PlaythroughSummaryDto summary)
     {
         ApiResult<SaveSlotDetailDto> detail =
-            await _session.CallAsync(token => _api.GetSaveAsync(summary.Id, _slotNo, token));
+            await _session.CallAsync(
+                token => 
+                    _api.GetSaveAsync(
+                        summary.Id,
+                        ServerSaveContract.PrimarySlotNo,
+                        token));
 
         if (!detail.Ok || detail.Body.Snapshot == null)
         {
@@ -85,14 +91,18 @@ public sealed class ServerRestore
             return false;
         }
 
-        LocalSaveFile file = detail.Body.Snapshot.ToObject<LocalSaveFile>(SaveJson.Serializer);
+        LocalSaveFile file = 
+            detail.Body.Snapshot.ToObject<LocalSaveFile>(SaveJson.Serializer);
 
         if (file == null)
             return false;
 
         // 다음 seq는 서버 이력의 마지막 + 1. 이력을 못 읽으면 seq가 겹칠 수 있어 이 회차는 건너뛴다.
         ApiResult<List<ChoiceHistoryItemDto>> choices =
-            await _session.CallAsync(token => _api.GetChoicesAsync(summary.Id, _slotNo, token));
+            await _session.CallAsync(
+                token => 
+                    _api.GetChoicesAsync(
+                        summary.Id, ServerSaveContract.PrimarySlotNo, token));
 
         if (!choices.Ok)
         {
@@ -106,7 +116,6 @@ public sealed class ServerRestore
             lastSeq = Math.Max(lastSeq, choices.Body[i].Seq);
 
         file.PlaythroughId = summary.ClientPlaythroughId;
-        file.SlotNo = _slotNo;
 
         _localStore.Save(file);
 

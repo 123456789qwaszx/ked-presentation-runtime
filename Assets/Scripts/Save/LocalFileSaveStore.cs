@@ -42,17 +42,14 @@ public sealed class LocalFileSaveStore : ISaveStore
         SetActive(save.PlaythroughId);
     }
 
-    public LocalSaveFile Load(int slotNo)
+    public LocalSaveFile LoadActive()
     {
         string activeId = ActiveId;
-
-        if (activeId == null)
-            return MigrateLegacy(slotNo);
 
         return LoadPlaythrough(activeId);
     }
 
-    public void Delete(int slotNo)
+    public void ClearActive()
     {
         File.Delete(ActivePath);
     }
@@ -103,38 +100,6 @@ public sealed class LocalFileSaveStore : ISaveStore
     }
 
     private string BookmarksPath => Path.Combine(_directory, "bookmarks.json");
-
-    // 옛 slot{n}.json → playthroughs/{id}.json, sync_queue.json → {id}.queue.json. 한 번뿐.
-    private LocalSaveFile MigrateLegacy(int slotNo)
-    {
-        string legacyPath = Path.Combine(_directory, $"slot{slotNo}.json");
-        string json = AtomicFile.ReadAllTextOrNull(legacyPath);
-
-        if (json == null)
-            return null;
-
-        LocalSaveFile save = SaveJson.Deserialize<LocalSaveFile>(json);
-
-        if (save == null)
-            return null;
-
-        if (string.IsNullOrEmpty(save.PlaythroughId))
-            save.PlaythroughId = Guid.NewGuid().ToString("N");
-
-        Save(save);
-
-        string legacyQueue = Path.Combine(_directory, "sync_queue.json");
-        string queuePath = QueuePathOf(save.PlaythroughId);
-
-        if (File.Exists(legacyQueue) && !File.Exists(queuePath))
-            File.Move(legacyQueue, queuePath);
-
-        File.Delete(legacyPath);
-
-        Debug.Log($"[저장] 옛 세이브를 회차 파일로 옮겼다 — {save.PlaythroughId}");
-
-        return save;
-    }
 
     private void SetActive(string playthroughId) =>
         AtomicFile.WriteAllText(ActivePath, SaveJson.SerializePretty(new ActiveFile { ActiveId = playthroughId }));

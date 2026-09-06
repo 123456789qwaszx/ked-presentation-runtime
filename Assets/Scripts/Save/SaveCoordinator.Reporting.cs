@@ -79,7 +79,6 @@ public sealed partial class SaveCoordinator
 
         _localStore.Save(new LocalSaveFile
         {
-            SlotNo = _slotNo,
             PlaythroughId = _playthroughId,
             ForkedFrom = _forkedFrom,
             ChapterId = report.ChapterId,
@@ -109,6 +108,6 @@ public sealed partial class SaveCoordinator
             (report.ChapterCompleted ? " (챕터 완료)" : string.Empty));
 
         if (_server != null)
-            _ = _server.TrySyncAsync(_slotNo);
+            _ = _server.TrySyncAsync();
     }
 }

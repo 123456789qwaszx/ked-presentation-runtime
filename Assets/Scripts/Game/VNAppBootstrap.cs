@@ -405,7 +405,7 @@ public class VNAppBootstrap : MonoBehaviour
         SyncQueue syncQueue = new(Path.Combine(saveRoot, "sync_queue.json"));
 
         if (string.IsNullOrWhiteSpace(serverBaseUrl))
-            return new SaveCoordinator(localStore, syncQueue, server: null, slotNo: 1);
+            return new SaveCoordinator(localStore, syncQueue, server: null);
 
         ServerApi serverApi = new(serverBaseUrl);
         GuestSession guestSession = new(serverApi, Path.Combine(Application.persistentDataPath, "account.json"));
@@ -420,9 +420,9 @@ public class VNAppBootstrap : MonoBehaviour
         ServerSyncSaveStore serverSync = new(
             serverApi, guestSession, syncQueue, versionResolver, localStore, deviceKey);
         ServerBookmarkSync bookmarkSync = new(serverApi, guestSession, versionResolver, localStore);
-        ServerRestore restore = new(serverApi, guestSession, localStore, slotNo: 1);
+        ServerRestore restore = new(serverApi, guestSession, localStore);
 
-        return new SaveCoordinator(localStore, syncQueue, serverSync, slotNo: 1, bookmarkSync, restore);
+        return new SaveCoordinator(localStore, syncQueue, serverSync, bookmarkSync, restore);
     }
 
     private void BootstrapPlaybackControls()

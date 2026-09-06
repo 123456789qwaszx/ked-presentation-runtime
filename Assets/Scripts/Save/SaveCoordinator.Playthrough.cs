@@ -14,9 +14,9 @@ public sealed partial class SaveCoordinator
     public async Task PrepareNewPlaythroughAsync()
     {
         if (_server != null)
-            await _server.FlushAsync(_slotNo);
+            await _server.FlushAsync();
 
-        _localStore.Delete(_slotNo);
+        _localStore.ClearActive();
 
         BecomePlaythrough(
             NewPlaythroughId(),
@@ -32,7 +32,7 @@ public sealed partial class SaveCoordinator
 
     public ProgressionResumePoint LoadActiveResumePoint()
     {
-        LocalSaveFile save = _localStore.Load(_slotNo);
+        LocalSaveFile save = _localStore.LoadActive();
 
         if (save == null)
             return null;

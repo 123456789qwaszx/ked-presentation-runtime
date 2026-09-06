@@ -22,7 +22,6 @@ public sealed partial class SaveCoordinator : IProgressionReporter
     private readonly ISaveStore _localStore;
     private readonly SyncQueue _queue; // 서버에 아직 보내지 못한 변경사항들.
     private readonly ServerSyncSaveStore _server;
-    private readonly int _slotNo;
 
     private float _startedAt = Time.realtimeSinceStartup;
     private int _inheritedSeconds;
@@ -45,14 +44,12 @@ public sealed partial class SaveCoordinator : IProgressionReporter
         ISaveStore localStore,
         SyncQueue queue,
         ServerSyncSaveStore server,
-        int slotNo,
         ServerBookmarkSync bookmarkSync = null,
         ServerRestore restore = null)
     {
         _localStore = localStore;
         _queue = queue;
         _server = server;
-        _slotNo = slotNo;
         _bookmarkSync = bookmarkSync;
         _restore = restore;
 

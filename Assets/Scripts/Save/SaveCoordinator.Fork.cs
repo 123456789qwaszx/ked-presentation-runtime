@@ -16,7 +16,7 @@ public sealed partial class SaveCoordinator
         if (sceneIndex < 0)
             return false;
 
-        LocalSaveFile current = _localStore.Load(_slotNo);
+        LocalSaveFile current = _localStore.LoadActive();
 
         if (current?.Backlog == null)
             return false;
@@ -81,7 +81,7 @@ public sealed partial class SaveCoordinator
         SceneRecord origin = _scenes[sceneIndex];
         SceneCheckpoint checkpoint = origin.Checkpoint;
 
-        LocalSaveFile current = _localStore.Load(_slotNo);
+        LocalSaveFile current = _localStore.LoadActive();
 
         var backlog = new List<DialogueLogEntry>();
 
@@ -99,7 +99,6 @@ public sealed partial class SaveCoordinator
 
         var file = new LocalSaveFile
         {
-            SlotNo = _slotNo,
             PlaythroughId = newId,
             ForkedFrom = new ForkOrigin { PlaythroughId = fromId, SceneIndex = sceneIndex, Target = target },
             ChapterId = checkpoint.ChapterId,
@@ -155,7 +154,6 @@ public sealed partial class SaveCoordinator
 
         var file = new LocalSaveFile
         {
-            SlotNo = _slotNo,
             PlaythroughId = newId,
             ForkedFrom = new ForkOrigin
             {
