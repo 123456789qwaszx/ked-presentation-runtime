@@ -13,7 +13,7 @@ public sealed class SceneCommitReport
     public ProgressionState State { get; }
     public YarnVariableSnapshot Variables { get; }              // [3] 통덤프. 장면 끝 시점.
 
-    // 지금까지의 백로그 전부 — 다음 장면 입장에서는 "이전 장면들"이다.
+    // 지금까지의 백로그 전부 - 다음 장면 입장에서는 "이전 장면들"이다.
     public IReadOnlyList<DialogueLogEntry> Backlog { get; }
 
     // 다음 장면의 첫 라인이 받을 백로그 순번 (= 이 장면의 BacklogSerialEnd).

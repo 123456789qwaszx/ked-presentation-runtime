@@ -393,7 +393,7 @@ public class VNAppBootstrap : MonoBehaviour
             _progressionDriver,
             dialogueRunner,
             progressionChapterJson,
-            _saveCoordinator.GetResumePoint);
+            _saveCoordinator.LoadActiveResumePoint);
     }
 
     // 저장·동기화 스택. 로컬이 진실(파일), 서버는 사본(큐로 민다). 슬롯 1 고정.

@@ -171,13 +171,9 @@ internal sealed class ScenePendingHistory
         return _foldBuffer;
     }
 
-    public ProgressionState FoldInto(
-        ChapterProgression chapter,
-        ProgressionState entryState)
+    public ProgressionState FoldInto(ChapterProgression chapter, ProgressionState entryState)
     {
-        return entryState.FoldChoices(
-            chapter,
-            PendingOptions());
+        return entryState.FoldChoices(chapter, PendingOptions());
     }
 
     public List<CommittedChoice> CreateCommittedChoices()

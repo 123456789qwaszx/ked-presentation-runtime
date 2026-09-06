@@ -127,9 +127,7 @@ public sealed class SceneRunner
                     continue;
                 }
 
-                history.NoteWatched(
-                    episode,
-                    _rollbackHistory.LastHistoryIndex);
+                history.NoteWatched(episode, _rollbackHistory.LastHistoryIndex);
 
                 SetPhase(ctx, SceneRunPhase.EpisodeCompleted);
 
@@ -141,11 +139,8 @@ public sealed class SceneRunner
                 // Load / Replay 중 기존 progression 경로가 있으면 자동 응답한다.
                 if (history.HasRecordedChoice && _seek.IsSeekingActive)
                 {
-                    SceneChoice recorded = history.TakeRecordedChoice(
-                        _rollbackHistory.LastHistoryIndex);
-
-                    Debug.Log($"[장면] 자동 응답 — {recorded.Option}");
-
+                    SceneChoice recorded = history.TakeRecordedChoice(_rollbackHistory.LastHistoryIndex);
+                    
                     resolution =
                         SceneChoiceResolution.FromChoice(recorded);
                 }
@@ -159,39 +154,27 @@ public sealed class SceneRunner
                     // 표적을 찾지 못한 것이다.
                     if (_seek.IsSeekingActive)
                     {
-                        Debug.LogWarning(
-                            "[장면] 시크 표적을 못 찾은 채 선택지에 닿았다 — " +
-                            "시크를 끄고 일반 재생으로.");
-
+                        Debug.LogWarning("[장면] 시크 표적을 못 찾은 채 선택지에 닿았다 -시크를 끄고 일반 재생으로.");
                         _seek.ClearSeek();
                     }
 
-                    resolution = await ResolveNextChoiceAsync(
-                        ctx,
-                        history,
-                        episode,
-                        cancellationToken);
+                    resolution = 
+                        await ResolveNextChoiceAsync(ctx, history, episode, cancellationToken);
                 }
 
                 // 선택을 구한 직후 Replay가 들어왔을 수도 있다.
                 // 이 경우 선택을 pending에 기록하거나 Chapter를 끝내지 않는다.
-                if (ctx.ReplayRequested ||
-                    resolution.Kind == SceneChoiceResolutionKind.ReplayRequested)
+                if (ctx.ReplayRequested 
+                    || resolution.Kind == SceneChoiceResolutionKind.ReplayRequested)
                 {
-                    await RestartReplayAsync(
-                        ctx,
-                        history,
-                        cancellationToken);
-
+                    await RestartReplayAsync(ctx, history, cancellationToken);
+                    
                     continue;
                 }
 
                 if (resolution.Kind == SceneChoiceResolutionKind.ChapterEnded)
                 {
-                    return CommitScene(
-                        ctx,
-                        history,
-                        SceneRunOutcome.ChapterEnded);
+                    return CommitScene(ctx, history, SceneRunOutcome.ChapterEnded);
                 }
 
                 SceneChoice choice = resolution.Choice;
@@ -207,19 +190,12 @@ public sealed class SceneRunner
                 if (choice.Option.HasVia)
                 {
                     SetPhase(ctx, SceneRunPhase.ViaPlaying);
-
-                    await PlayNodeAsync(
-                        choice.Option.ViaNodeId,
-                        "연출",
-                        cancellationToken);
+                    
+                    await PlayNodeAsync(choice.Option.ViaNodeId, "연출", cancellationToken);
 
                     if (ctx.ReplayRequested)
                     {
-                        await RestartReplayAsync(
-                            ctx,
-                            history,
-                            cancellationToken);
-
+                        await RestartReplayAsync(ctx, history, cancellationToken);
                         continue;
                     }
                 }
@@ -229,14 +205,9 @@ public sealed class SceneRunner
 
                 SetPhase(ctx, SceneRunPhase.TargetMoved);
 
-                if (!ctx.Chapter.IsSameScene(
-                        choice.FromEpisodeId,
-                        ctx.CurrentEpisodeId))
+                if (!ctx.Chapter.IsSameScene(choice.FromEpisodeId, ctx.CurrentEpisodeId))
                 {
-                    return CommitScene(
-                        ctx,
-                        history,
-                        SceneRunOutcome.SceneEnded);
+                    return CommitScene(ctx, history, SceneRunOutcome.SceneEnded);
                 }
             }
         }
@@ -331,6 +302,7 @@ public sealed class SceneRunner
         if (ctx.ReplayRequested)
             return SceneChoiceResolution.ReplayRequested();
 
+        // 선택지 도중 Replay 요청 시, 기다리는 걸 그만두고 Replay 진행.
         try
         {
             ResolvedOption resolved = 
@@ -499,9 +471,8 @@ public sealed class SceneRunner
     {
         SetPhase(ctx, SceneRunPhase.SceneCommitting);
 
-        ProgressionState state = history.FoldInto(
-            ctx.Chapter,
-            ctx.EntryState);
+        ProgressionState state = 
+            history.FoldInto(ctx.Chapter, ctx.EntryState);
 
         List<CommittedChoice> choices =
             history.CreateCommittedChoices();
