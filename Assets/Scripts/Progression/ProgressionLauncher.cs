@@ -172,4 +172,24 @@ public sealed class ProgressionLauncher
             backlog,
             loadPlan);
     }
+    
+    // 현재 진행을 끝내고 idle 상태로 빠진다.
+    // 새 진행을 시작하지 않으며, 대기 중이던 이전 전환 요청도 무효화한다.
+    public async Task ExitAsync()
+    {
+        if (_transitioning)
+            return;
+
+        _transitioning = true;
+        _transitionVersion++;
+
+        try
+        {
+            await StopAsync();
+        }
+        finally
+        {
+            _transitioning = false;
+        }
+    }
 }

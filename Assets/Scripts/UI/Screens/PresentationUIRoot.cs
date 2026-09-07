@@ -21,6 +21,8 @@ public partial class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
     public event Action SaveMenuClicked;
     public event Action LoadMenuClicked;
     
+    public event Action GoToTitleClicked;
+    
     #region Refs
     
     public enum Refs
@@ -240,6 +242,8 @@ public partial class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
         LoadMenu_Text,
         LoadMenu_Button,
         
+        GoToTitleButton_Button,
+        
         #endregion
     }
     
@@ -282,6 +286,10 @@ public partial class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
         
         BindEvent(View.Button(Refs.Rollback_Button), _ 
             => RollbackClicked?.Invoke(), ETouchEvent.Click);
+        
+        BindEvent(
+            View.Button(Refs.GoToTitleButton_Button),
+            PressGoToTitleButton);
     }
     
     #region Handlers
@@ -335,6 +343,13 @@ public partial class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
     {
         SetExpanded(false);
         LoadMenuClicked?.Invoke();
+    }
+    
+    private void PressGoToTitleButton(PointerEventData _)
+    {
+        SetExpanded(false);
+
+        GoToTitleClicked?.Invoke();
     }
     
     #endregion

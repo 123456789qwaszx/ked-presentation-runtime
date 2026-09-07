@@ -60,6 +60,10 @@ public sealed partial class VNScreenBindings
         AddBinding(root,
             r => r.OpenSkipPanelClicked += HandleOpenSkipPanelClicked,
             r => r.OpenSkipPanelClicked -= HandleOpenSkipPanelClicked);
+
+        AddBinding(root,
+            r => r.GoToTitleClicked += HandleGoToTitleClicked,
+            r => r.GoToTitleClicked -= HandleGoToTitleClicked);
     }
 
     private void HandleAutoClicked()
@@ -113,5 +117,10 @@ public sealed partial class VNScreenBindings
     private void HandleOpenSkipPanelClicked()
     {
         OpenSkipConfirmPanel();
+    }
+
+    private void HandleGoToTitleClicked()
+    {
+        OpenGoToTitleConfirmPanel();
     }
 }
