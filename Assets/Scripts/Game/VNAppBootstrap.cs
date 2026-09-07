@@ -472,7 +472,6 @@ public class VNAppBootstrap : MonoBehaviour
             _vnFeatureController,
             _dialogueAdvanceDispatcher);
 
-        _screenBindings.ConfigureTitleView(_scenePlayback);
         _screenBindings.ConfigureProgression(_progressionLauncher, _saveCoordinator);
     }
     
