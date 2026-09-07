@@ -116,7 +116,7 @@ public sealed class SavedLoadPlan
 // 슬롯을 늘릴 때, NextSeq/BaseRevision/PendingChoices에 슬롯 계층 추가.
 public sealed class SyncQueueFile
 {
-    public int SlotNo = 1;
+    // - 서버에 대해 알고 있는 상태 ---
     public long? PlaythroughId;
     public int NextSeq = 1;
 
@@ -128,6 +128,7 @@ public sealed class SyncQueueFile
     // 옛 회차 큐가 409를 맞은 시각. 있으면 시작 시 순회가 건너뛴다 — 같은 baseRevision은 다시 보내도 409다.
     public string ConflictedAtUtc;
 
+    // --- 아직 서버에 보내야 할 상태 ---
     public List<PendingChoice> PendingChoices = new();
     public List<PendingEvent> PendingEvents = new();
 }

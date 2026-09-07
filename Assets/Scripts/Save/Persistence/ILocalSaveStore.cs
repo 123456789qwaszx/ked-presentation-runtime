@@ -1,7 +1,7 @@
 // 회차 파일 저장소. slotNo는 "활성 회차"를 뜻하는 옛 좌표 — 파일은 회차 id로 산다.
-public interface ISaveStore
+public interface ILocalSaveStore
 {
-    void Save(LocalSaveFile save);
+    void SaveAndSetActive(LocalSaveFile save);
     
     // 현재 회차 로드.
     LocalSaveFile LoadActive();

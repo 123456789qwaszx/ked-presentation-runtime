@@ -125,7 +125,7 @@ public sealed partial class SaveCoordinator
         SetPhase(ctx, ConflictForkPhase.SavePrepared);
         
         // Phase: SavePersisted
-        _localStore.Save(ctx.Save);
+        _localStore.SaveAndSetActive(ctx.Save);
         
         SetPhase(ctx, ConflictForkPhase.SavePersisted);
         

@@ -74,7 +74,7 @@ public sealed partial class SaveCoordinator
 
         int own = OwnSeconds;
 
-        _localStore.Save(new LocalSaveFile
+        _localStore.SaveAndSetActive(new LocalSaveFile
         {
             PlaythroughId = _playthroughId,
             ForkedFrom = _forkedFrom,

@@ -1,14 +1,11 @@
 using System;
 using System.IO;
-using UnityEngine;
 
-// {directory}/playthroughs/{id}.json — 회차 파일. {directory}/active.json — 활성 회차 포인터.
-// 큐는 {directory}/playthroughs/{id}.queue.json.
-//
-// 옛 형식({directory}/slot1.json + sync_queue.json)은 처음 읽을 때 한 번 옮긴다.
-// 회차 파일은 지우지 않는다 — 갈라진 옛 회차도 데이터는 남긴다(save-plan.md §3.3).
-public sealed class LocalFileSaveStore : ISaveStore
+public sealed class LocalFileSaveStore : ILocalSaveStore
 {
+    // active.json의 JSON 형태를 정의하기 위한 작은 DTO
+    // 실제 세이브 파일이 아니라 포인터.
+    // active.json (ActiveId = B)-> playthroughs/B.json
     private sealed class ActiveFile
     {
         public string ActiveId;
@@ -27,18 +24,23 @@ public sealed class LocalFileSaveStore : ISaveStore
         {
             string json = AtomicFile.ReadAllTextOrNull(ActivePath);
 
-            return json == null ? null : SaveJson.Deserialize<ActiveFile>(json)?.ActiveId;
+            return json == null 
+                ? null 
+                : SaveJson.Deserialize<ActiveFile>(json)?.ActiveId;
         }
     }
 
-    public void Save(LocalSaveFile save)
+    // 회차 저장 + 그 회차를 active로 지정.
+    public void SaveAndSetActive(LocalSaveFile save)
     {
         if (string.IsNullOrEmpty(save.PlaythroughId))
-            throw new ArgumentException("회차 id가 비어 있다 — 회차 파일은 id로 산다.", nameof(save));
+            throw new ArgumentException("회차 id가 비어 있다 " +
+                                        "LocalSaveFile을 저장하려면 PlaythroughId가 반드시 있어야 함.", nameof(save));
 
         Directory.CreateDirectory(PlaythroughsDirectory);
-
+        
         AtomicFile.WriteAllText(PlaythroughPathOf(save.PlaythroughId), SaveJson.SerializePretty(save));
+        
         SetActive(save.PlaythroughId);
     }
 

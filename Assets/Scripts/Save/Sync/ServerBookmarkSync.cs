@@ -3,19 +3,25 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 
-// 즐겨찾기를 서버에 올리고 지운다. 큐 없이 직접 — 멱등이라 실패는 다음 기회(다음 시작·다음 찍기)에 다시.
+// 즐겨찾기를 서버에 올리고 지운다.
+// 큐 없이 직접 - 멱등이라 실패는 다음에 다시.
 // revision이 없다. 마지막 PUT이 이긴다. 409 처리는 만들지 않는다.
 //
-// 로컬 파일이 진실. 못 올린 것은 SyncedAtUtc가 비어 있고, 못 지운 것은 PendingDeletes에 남는다.
+// 로컬 파일이 진실.
+// 아직 서버 동기화가 완료되지 않은 북마크는 SyncedAtUtc가 비어 있고,
+// 서버 삭제가 완료되지 않은 북마크 id는 PendingDeletes에 남는다
 public sealed class ServerBookmarkSync
 {
     private readonly ServerApi _api;
     private readonly GuestSession _session;
     private readonly ChapterVersionResolver _versionResolver;
-    private readonly ISaveStore _localStore;
+    private readonly ILocalSaveStore _localStore;
 
     public ServerBookmarkSync(
-        ServerApi api, GuestSession session, ChapterVersionResolver versionResolver, ISaveStore localStore)
+        ServerApi api,
+        GuestSession session,
+        ChapterVersionResolver versionResolver,
+        ILocalSaveStore localStore)
     {
         _api = api;
         _session = session;
@@ -23,7 +29,6 @@ public sealed class ServerBookmarkSync
         _localStore = localStore;
     }
 
-    // 시작 시 — 못 지운 것부터, 그다음 못 올린 것.
     public async Task SyncAllAsync()
     {
         BookmarkFile file = _localStore.LoadBookmarks();
@@ -39,6 +44,7 @@ public sealed class ServerBookmarkSync
         {
             Bookmark b = file.Bookmarks[i];
 
+            // 서버에 올라간 적 없고, 재시도 불가능 표기도 없을 경우.
             if (b.SyncedAtUtc == null && b.SyncError == null)
                 pushes.Add(b.Id);
         }
@@ -47,20 +53,23 @@ public sealed class ServerBookmarkSync
             await PushAsync(pushes[i]);
     }
 
-    // 파일에서 다시 읽어 보낸다 — 부르는 사이에 이름이 바뀌었을 수 있다. 성공하면 SyncedAtUtc를 적는다.
     public async Task<bool> PushAsync(string bookmarkId)
     {
-        Bookmark bookmark = Find(_localStore.LoadBookmarks(), bookmarkId);
+        // 전송 직전 최신 로컬 상태로 다시 읽기.
+        Bookmark bookmark =
+            Find(_localStore.LoadBookmarks(), bookmarkId);
 
         if (bookmark == null)
             return false;
 
-        int? chapterVersion = await _versionResolver.ResolveAsync(bookmark.ChapterId);
+        int? chapterVersion =
+            await _versionResolver.ResolveAsync(bookmark.ChapterId);
 
         if (chapterVersion == null)
             return false;
 
-        // 서버 상한: label 100, preview 200. 라인 텍스트가 길면 잘라 보낸다 — 원문은 스냅샷 안에 그대로 있다.
+        // 서버 상한: label 100, preview 200.
+        // 라인 텍스트가 길면 잘라 보냄(원문은 스냅샷 안에 보관 중)
         var request = new BookmarkUpsertRequestDto
         {
             Label = Clip(bookmark.Label, 100),
@@ -74,8 +83,15 @@ public sealed class ServerBookmarkSync
         };
 
         ApiResult<BookmarkUpsertResponseDto> result =
-            await _session.CallAsync(token => _api.PutBookmarkAsync(_session.UserId.Value, bookmarkId, request, token));
+            await _session.CallAsync(
+                token => _api.PutBookmarkAsync(
+                    _session.UserId.Value,
+                    bookmarkId,
+                    request,
+                    token));
 
+        // 전송 중 Bookmark 수정이 흐름 상 허용되서 race 발생 가능.
+        // 이건 UI로 막을 것.
         BookmarkFile file = _localStore.LoadBookmarks();
         Bookmark now = Find(file, bookmarkId);
 
@@ -93,7 +109,7 @@ public sealed class ServerBookmarkSync
             return true;
         }
 
-        // 413은 재시도하지 않는다 — 줄여 보내야 한다. 표시해 두고 로그로 드러낸다.
+        // 413은 재시도하지 않는다 - 줄여 보내야 한다. 표시해 두고 로그로 드러낸다.
         if (result.Status == 413)
         {
             if (now != null)
@@ -112,11 +128,17 @@ public sealed class ServerBookmarkSync
         return false;
     }
 
-    // 204면 PendingDeletes에서 뺀다. 서버에 없어도 204라 재시도가 자유롭다.
+    // 204면 PendingDeletes에서 뺀다.
+    // 서버에 반영 실패하더라도, 클라측에서는 삭제 완료기에 204.
+    // 차후 PendingDeletes를 토대로 서버 반영을 재시도 하면 그만임.
     public async Task<bool> DeleteAsync(string bookmarkId)
     {
         ApiResult<object> result =
-            await _session.CallAsync(token => _api.DeleteBookmarkAsync(_session.UserId.Value, bookmarkId, token));
+            await _session.CallAsync(
+                token => _api.DeleteBookmarkAsync(
+                    _session.UserId.Value,
+                    bookmarkId,
+                    token));
 
         if (!result.Ok)
         {

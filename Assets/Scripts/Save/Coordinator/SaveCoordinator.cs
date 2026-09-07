@@ -19,7 +19,7 @@ using UnityEngine;
 // 옛 회차 파일은 그대로 남는다. 그 뒤 런처가 다시 띄우면 재개 경로가 새 회차를 연다.
 public sealed partial class SaveCoordinator : IProgressionReporter
 {
-    private readonly ISaveStore _localStore;
+    private readonly ILocalSaveStore _localStore;
     private readonly SyncQueue _queue; // 서버에 아직 보내지 못한 변경사항들.
     private readonly ServerSyncSaveStore _server;
 
@@ -41,7 +41,7 @@ public sealed partial class SaveCoordinator : IProgressionReporter
     public event Action<ForkOrigin> ConflictForked;
 
     public SaveCoordinator(
-        ISaveStore localStore,
+        ILocalSaveStore localStore,
         SyncQueue queue,
         ServerSyncSaveStore server,
         ServerBookmarkSync bookmarkSync = null,

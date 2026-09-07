@@ -335,7 +335,7 @@ public sealed partial class SaveCoordinator
 
     private void SaveAndActivateFork(LocalSaveFile file)
     {
-        _localStore.Save(file);
+        _localStore.SaveAndSetActive(file);
 
         _queue.SwitchTo(
             _localStore.QueuePathOf(file.PlaythroughId));

@@ -42,8 +42,9 @@ public sealed class GuestSession
         Persist();
     }
 
-    // 토큰을 붙여 한 번 부른다. 401이면(서버 재시작 등) 토큰을 버리고 새로 받아 한 번 더.
-    // 토큰을 못 받으면 NetworkError 결과 — 부르는 쪽은 "닿지 않았다"로 본다.
+    // 토큰을 붙여 한 번 부른다.
+    // 401이면(서버 재시작 등) 토큰을 버리고 새로 받아 한 번 더.
+    // 토큰을 못 받으면 NetworkError 결과 - 부르는 쪽은 "닿지 않았다"로 본다.
     public async Task<ApiResult<T>> CallAsync<T>(Func<string, Task<ApiResult<T>>> call)
     {
         string token = await EnsureTokenAsync();
@@ -57,9 +58,15 @@ public sealed class GuestSession
             return result;
 
         InvalidateToken();
+
         token = await EnsureTokenAsync();
 
-        return token == null ? result : await call(token);
+        if (token == null)
+            return result;
+
+        ApiResult<T> retryResult = await call(token);
+
+        return retryResult;
     }
 
     // 토큰 확보는 단일 비행 — 동시에 몇이 부르든 가입·로그인은 한 번. 아니면 계정이 둘 생겨 뒤가 앞을 덮는다.

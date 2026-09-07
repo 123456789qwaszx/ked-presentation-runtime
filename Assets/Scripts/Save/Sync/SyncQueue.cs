@@ -1,13 +1,10 @@
 using System.Collections.Generic;
 
 // 서버로 보낼 것을 쌓는 큐. (sync_queue.json)
-//
-// 규칙:
-// - seq 발급과 적재는 한 번의 파일 쓰기.
-// - 비우는 조건은 "200을 받았다"뿐. (accepted*와 보낸 수를 비교하지 않음.)
-// - 큐는 뒤에만 붙는다(append-only).
-//   그래서 전송 시점의 사본(배치)은 언제나 현재 큐의 접두사고,
-//   성공하면 그 길이만큼 앞에서 지움. 전송 중에 쌓인 것은 뒤에 남는다.
+// - 메모리 큐가 아님.
+// - 변경 시 마다 Persist()
+// - playthrough/A.queue.json에 계속 저장.
+// - 큐파일 하나가 회차 하나에 대응.
 public sealed class SyncQueue
 {
     private string _path;
@@ -18,10 +15,7 @@ public sealed class SyncQueue
         SwitchTo(path);
     }
 
-    public string Path => _path;
-
-    // 큐는 회차마다 하나다. 활성 회차가 바뀌면(재개·새 게임·갈라지기) 그 회차의 큐 파일로 옮겨 탄다.
-    // 인스턴스는 그대로라 동기화 쪽이 쥔 참조가 안 깨진다. 전송 중에 바꾸지 않는 것은 호출자의 몫.
+    // 동기화 쪽의 참조가 안 깨지도록 인스턴스 유지.
     public void SwitchTo(string path)
     {
         _path = path;
@@ -44,6 +38,7 @@ public sealed class SyncQueue
 
     public string ConflictedAtUtc => _file.ConflictedAtUtc;
 
+    // 다음 startup에서 이 queue를 계속 재 전송하지 않도록 '409 처리 기록'
     public void MarkConflicted(string nowUtc)
     {
         _file.ConflictedAtUtc = nowUtc;
@@ -58,7 +53,7 @@ public sealed class SyncQueue
         Persist();
     }
 
-    // 새 회차인데 미전송을 들고 시작한다 — 409로 갈라질 때. seq는 1부터 다시 매긴다.
+    // 409 fork용. (새 회차인데 미전송을 들고 시작, seq는 1부터 다시 매김.)
     public void Reset(IReadOnlyList<PendingChoice> choices, IReadOnlyList<PendingEvent> events)
     {
         _file = new SyncQueueFile();
@@ -80,7 +75,8 @@ public sealed class SyncQueue
         Persist();
     }
 
-    // 서버에서 복구한 회차의 큐 — 미전송 없음, 서버가 아는 것만.
+    // 서버에서 복구한 회차의 큐
+    // 미전송 데이터는 없음, 서버 상태는 이미 암.
     public void Restore(long playthroughId, long baseRevision, int nextSeq, int syncedSceneCount)
     {
         _file = new SyncQueueFile
@@ -100,6 +96,10 @@ public sealed class SyncQueue
         Persist();
     }
 
+    // - seq 발급과 적재는 한 번의 파일 쓰기.
+    // - 큐는 뒤에만 붙는다(append-only).
+    //   그래서 전송 시점의 사본(배치)은 언제나 현재 큐의 접두사고,
+    //   성공하면 그 길이만큼 앞에서 지움. 전송 중에 쌓인 것은 뒤에 남는다.
     public void EnqueueChoice(string episodeId, int optionIndex, string chosenAtUtc)
     {
         _file.PendingChoices.Add(new PendingChoice
@@ -145,7 +145,9 @@ public sealed class SyncQueue
         Persist();
     }
 
-    // 미전송을 다른 회차 큐로 옮긴 뒤 — 여기서는 뺀다. 서버 id·revision은 그대로(200이 아니었다).
+    // '서버가 받은 게 아님(200이 아님)'
+    // 다른 회차 queue로 옮겼으니, 이 source queue에서만 제거.
+    // 서버 id·revision은 그대로.
     public void Discard(SyncBatch batch)
     {
         _file.PendingChoices.RemoveRange(0, batch.Choices.Count);

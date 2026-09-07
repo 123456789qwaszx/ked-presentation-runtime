@@ -31,7 +31,7 @@ public sealed class ServerSyncSaveStore
     private readonly GuestSession _session;
     private readonly SyncQueue _queue;
     private readonly ChapterVersionResolver _versionResolver;
-    private readonly ISaveStore _localStore;
+    private readonly ILocalSaveStore _localStore;
     private readonly string _deviceKey;
 
     // Only one active sync may run at a time.
@@ -39,7 +39,8 @@ public sealed class ServerSyncSaveStore
     private Task _inFlight;
     private bool _syncAgain;
 
-    // 409 — 다른 기기가 활성 회차를 먼저 저장했다. 큐는 손대지 않은 채 넘긴다. 해소(갈라지기)는 코디네이터.
+    // 409 - 다른 기기가 활성 회차를 먼저 저장했다.
+    // 큐는 손대지 않은 채 넘긴다.
     public event Action ConflictDetected;
 
     public ServerSyncSaveStore(
@@ -47,7 +48,7 @@ public sealed class ServerSyncSaveStore
         GuestSession session,
         SyncQueue queue,
         ChapterVersionResolver versionResolver,
-        ISaveStore localStore,
+        ILocalSaveStore localStore,
         string deviceKey)
     {
         _api = api;
@@ -58,9 +59,9 @@ public sealed class ServerSyncSaveStore
         _deviceKey = deviceKey;
     }
 
-    // Starts a sync attempt if none is running.
-    // If a sync is already in progress,
-    // schedules one follow-up attempt and returns the current task.
+    // - _inflight가 없을 경우만 RunAsync();
+    // - 이 후엔 몇번을 호출되든 syncAgain = true로 합쳐서 구분
+    // - 현재 Sync가 끝날 경우 후속 Sync 딱 한 번.
     public Task TrySyncAsync()
     {
         if (_inFlight != null)
@@ -78,9 +79,11 @@ public sealed class ServerSyncSaveStore
         return run;
     }
 
-    // Waits for the current sync and any queued follow-up sync to finish.
-    // Intended for transition points such as starting a new game or forking,
-    // where no new commits are expected.
+    // 현재 pending sync들이 정리 될 때까지 gameplay를 막음.
+    //
+    // - 일반 진행에서는 _=server.TrySyncAsync();처럼 시간을 잡아두지 않지만,
+    //   새 게임이나 fork 처럼 지금 회차를 바꾸기 전에 기존 동기화 작업을 끝내야 하는 경우
+    //   transition boundary에서 유저를 대기시킨다.
     public async Task FlushAsync()
     {
         if (_inFlight == null)
@@ -90,8 +93,8 @@ public sealed class ServerSyncSaveStore
             await _inFlight;
     }
 
-    // 옛 회차 큐에 남은 미전송. 활성 회차는 건너뛴다 — 같은 큐 파일을 두 인스턴스가 쓰지 않도록.
-    // 순서는 맞추지 않는다. 자식이 부모보다 먼저 가도 서버가 나중에 잇는다.
+    // 옛 회차 큐에 남은 미전송 처리.
+    // 현재 활성 회차는 건너뜀.
     public async Task SyncStaleQueuesAsync(
         IReadOnlyList<string> playthroughIds,
         string activeId)
@@ -113,14 +116,16 @@ public sealed class ServerSyncSaveStore
             if (save == null)
                 continue;
 
-            Debug.Log($"[동기화] 옛 회차 {id} — 미전송 {queue.PendingCount}건을 보낸다.");
+            Debug.Log($"[동기화] 옛 회차 {id} " +
+                      $"미전송 {queue.PendingCount}건을 보낸다.");
 
             try
             {
                 SyncOutcome outcome = 
                     await SyncOnceAsync(save, queue);
 
-                // 옛 회차의 409는 갈라지지 않는다 — 활성이 아니라 이어 갈 진행이 없다. 표시해 두고 다음부터 건너뛴다.
+                // 옛 회차의 409는 갈라지지 않는다
+                // (활성이 아니라 이어 갈 진행이 없다. 표시해 두고 다음부터 건너뛴다.)
                 if (outcome == SyncOutcome.Conflict)
                 {
                     queue.MarkConflicted(DateTime.UtcNow.ToString("o", System.Globalization.CultureInfo.InvariantCulture));
@@ -161,7 +166,6 @@ public sealed class ServerSyncSaveStore
         LocalSaveFile save = _localStore.LoadActive();
 
         // Queue entries are added only after the local snapshot is saved.
-        // Without a local save, there is no valid state to upload.
         if (save == null)
             return;
 
@@ -230,17 +234,24 @@ public sealed class ServerSyncSaveStore
         if (result.ErrorCode == "CONFLICT")
             return SyncOutcome.Conflict;
 
-        // 413은 "줄여 보내라"다. 백로그 상한(300줄) 안이면 닿지 않는다 — 닿았다면 상한이 깨진 것.
+        // 413은 "줄여 보내라".
+        // 백로그 상한(300줄) 안이면 닿지 않는다 - 닿았다면 상한이 깨진 것.
         if (result.Status == 413)
             Debug.LogError($"[동기화] 스냅샷이 서버 상한을 넘었다(413) — {result.RawBody}");
         else if (!result.NetworkError)
             Debug.LogWarning($"[동기화] 실패 — HTTP {result.Status} {result.ErrorCode}. 큐 보존.");
 
+        // 일반 실패도 Queue보존. 서버 sync 실패하더라도 LocalSaveFile은 성공한 상태.
+        // 나중에 다시 보내면 됨.
         return SyncOutcome.Failed;
     }
 
-    // 회차 파일의 로컬 guid가 멱등 키다 — 같은 guid로 다시 보내면 서버는 있던 회차를 돌려준다(200).
-    // 갈래면 부모의 로컬 guid와 장면 번호를 함께. 부모가 아직 서버에 없어도 서버가 나중에 잇는다.
+    // 최초 서버 회차 생성.
+    // 회차 파일의 '로컬 GUID'가 멱등 키.
+    // 같은 guid로 다시 보내면 서버는 있던 회차를 돌려준다(200).
+    // fork로 생성되었다면 부모의 로컬 guid와 장면 번호를 함께.
+    // 부모가 아직 서버에 업로드 되지 않았더라도,
+    // client의 GUID를 기반으로 나중에 관계를 자체적으로 연결함.
     private async Task<long?> CreatePlaythroughAsync(LocalSaveFile save, SyncQueue queue)
     {
         var request = new PlaythroughCreateRequestDto
