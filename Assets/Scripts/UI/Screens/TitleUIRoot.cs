@@ -1,12 +1,18 @@
+using System;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using static UIRefValidation;
 
-// 현재 타이틀 화면은 배경과 로고만 그린다.
-// 버튼 배선은 ButtonWidget이 사라지면서 함께 없어졌다 — Refs의 *Button_BWidget 항목은
-// 프리팹에 남아 있는 자리이고, 버튼을 되살리려면 위젯 타입부터 다시 만들어야 한다.
 public sealed class TitleUIRoot : UIRoot<TitleUIRoot.Refs>
 {
+    public event Action ContinueClicked;
+    public event Action StartClicked;
+    public event Action LoadClicked;
+    public event Action AlbumClicked;
+    public event Action SettingsClicked;
+    public event Action QuitClicked;
+
     #region Refs
 
     public enum Refs
@@ -14,28 +20,93 @@ public sealed class TitleUIRoot : UIRoot<TitleUIRoot.Refs>
         TitleBG_Image,
         TitleLogo_Image,
 
-        StartButton_BWidget,
-        ContinueButton_BWidget,
-        LoadButton_BWidget,
-        AlbumButton_BWidget,
-        SettingsButton_BWidget,
-        QuitButton_BWidget,
+        ContinueButton_Button,
+        StartButton_Button,
+        LoadButton_Button,
+        AlbumButton_Button,
+        SettingsButton_Button,
+        QuitButton_Button,
     }
 
     private Image _titleBg;
     private Image _titleLogo;
 
+    private Button _continueButton;
+    private Button _startButton;
+    private Button _loadButton;
+    private Button _albumButton;
+    private Button _settingsButton;
+    private Button _quitButton;
+
     #endregion
 
     protected override void OnInitialize()
     {
-        _titleBg   = View.Image(Refs.TitleBG_Image);
-        _titleLogo = View.Image(Refs.TitleLogo_Image);
+        CacheRefs();
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         ValidateRefs();
 #endif
+
+        BindHandlers();
     }
+
+    private void CacheRefs()
+    {
+        _titleBg   = View.Image(Refs.TitleBG_Image);
+        _titleLogo = View.Image(Refs.TitleLogo_Image);
+
+        _continueButton = View.Button(Refs.ContinueButton_Button);
+        _startButton    = View.Button(Refs.StartButton_Button);
+        _loadButton     = View.Button(Refs.LoadButton_Button);
+        _albumButton    = View.Button(Refs.AlbumButton_Button);
+        _settingsButton = View.Button(Refs.SettingsButton_Button);
+        _quitButton     = View.Button(Refs.QuitButton_Button);
+    }
+
+    private void BindHandlers()
+    {
+        BindEvent(_continueButton, PressContinueButton);
+        BindEvent(_startButton, PressStartButton);
+        BindEvent(_loadButton, PressLoadButton);
+        BindEvent(_albumButton, PressAlbumButton);
+        BindEvent(_settingsButton, PressSettingsButton);
+        BindEvent(_quitButton, PressQuitButton);
+    }
+
+    #region Handlers
+
+    private void PressContinueButton(PointerEventData _)
+    {
+        ContinueClicked?.Invoke();
+    }
+
+    private void PressStartButton(PointerEventData _)
+    {
+        StartClicked?.Invoke();
+    }
+
+    private void PressLoadButton(PointerEventData _)
+    {
+        LoadClicked?.Invoke();
+    }
+
+    private void PressAlbumButton(PointerEventData _)
+    {
+        AlbumClicked?.Invoke();
+    }
+
+    private void PressSettingsButton(PointerEventData _)
+    {
+        SettingsClicked?.Invoke();
+    }
+
+    private void PressQuitButton(PointerEventData _)
+    {
+        QuitClicked?.Invoke();
+    }
+
+    #endregion
 
     private bool ValidateRefs()
     {
@@ -43,6 +114,13 @@ public sealed class TitleUIRoot : UIRoot<TitleUIRoot.Refs>
 
         AppendMissing(ref missing, _titleBg,   Refs.TitleBG_Image);
         AppendMissing(ref missing, _titleLogo, Refs.TitleLogo_Image);
+
+        AppendMissing(ref missing, _continueButton, Refs.ContinueButton_Button);
+        AppendMissing(ref missing, _startButton,    Refs.StartButton_Button);
+        AppendMissing(ref missing, _loadButton,     Refs.LoadButton_Button);
+        AppendMissing(ref missing, _albumButton,    Refs.AlbumButton_Button);
+        AppendMissing(ref missing, _settingsButton, Refs.SettingsButton_Button);
+        AppendMissing(ref missing, _quitButton,     Refs.QuitButton_Button);
 
         if (missing.Length > 0)
         {
