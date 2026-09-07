@@ -48,6 +48,14 @@ public sealed partial class VNScreenBindings
         AddBinding(root,
             r => r.RollbackClicked += HandleRollbackClicked,
             r => r.RollbackClicked -= HandleRollbackClicked);
+
+        AddBinding(root,
+            r => r.SaveMenuClicked += HandleSaveMenuClicked,
+            r => r.SaveMenuClicked -= HandleSaveMenuClicked);
+
+        AddBinding(root,
+            r => r.LoadMenuClicked += HandleLoadMenuClicked,
+            r => r.LoadMenuClicked -= HandleLoadMenuClicked);
     }
 
     private void HandleAutoClicked()
@@ -86,5 +94,15 @@ public sealed partial class VNScreenBindings
             return;
 
         await _progressionLauncher.RequestReplayAsync();
+    }
+    
+    private void HandleSaveMenuClicked()
+    {
+        OpenSaveLoadMenu(SaveLoadMenuMode.Save);
+    }
+
+    private void HandleLoadMenuClicked()
+    {
+        OpenSaveLoadMenu(SaveLoadMenuMode.Load);
     }
 }

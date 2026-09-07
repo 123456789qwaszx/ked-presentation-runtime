@@ -63,7 +63,7 @@ public sealed partial class VNScreenBindings
 
     private void HandleLoadClicked()
     {
-        Debug.Log("불러오기 화면.");
+        OpenSaveLoadMenu(SaveLoadMenuMode.Load);
     }
 
     private void HandleAlbumClicked()
