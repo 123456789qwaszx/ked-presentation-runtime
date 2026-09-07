@@ -40,5 +40,8 @@ public sealed class RestoreProgress
 {
     public bool Started;
     public bool Completed;
+    public bool ResumeCompleted;
+    public bool BookmarksCompleted;
+    public string BookmarkCursor;
     public bool AllowActivation = true;
 }

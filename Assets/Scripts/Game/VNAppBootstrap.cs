@@ -497,8 +497,14 @@ public class VNAppBootstrap : MonoBehaviour
     {
         OpenInitialScreen();
 
-        // 지난 실행이 남긴 큐를 민다 (동기화 트리거는 "커밋 시"와 "앱 시작 시" 둘뿐).
+        // 이어하기 복구를 시작하고, 나머지 작업은 Update의 유지보수에서 재시도한다.
         _ = _saveCoordinator.SyncPendingAsync();
+    }
+
+    private void Update()
+    {
+        _saveCoordinator?.TickSync(Time.realtimeSinceStartup,
+            Application.internetReachability != NetworkReachability.NotReachable);
     }
     
     private void OpenInitialScreen()

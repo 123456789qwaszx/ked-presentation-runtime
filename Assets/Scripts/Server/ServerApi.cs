@@ -45,8 +45,19 @@ public sealed class ServerApi
     public Task<ApiResult<List<ChoiceHistoryItemDto>>> GetChoicesAsync(long playthroughId, int slotNo, string token) =>
         SendAsync<List<ChoiceHistoryItemDto>>("GET", $"/playthroughs/{playthroughId}/saves/{slotNo}/choices", null, token);
 
+    // 이어하기 복구는 full snapshot 1개 + 다음 seq를 한 번에 받는다.
+    public Task<ApiResult<object>> SetResumeAsync(long userId, ResumePointerRequestDto request, string token) =>
+        SendAsync<object>("PUT", $"/users/{userId}/resume", request, token);
+
+    public Task<ApiResult<ResumeSaveDto>> GetResumeAsync(long userId, string token) =>
+        SendAsync<ResumeSaveDto>("GET", $"/users/{userId}/resume", null, token);
+
+    public Task<ApiResult<BookmarkPageDto>> GetBookmarkPageAsync(long userId, string cursor, string token) =>
+        SendAsync<BookmarkPageDto>("GET", $"/users/{userId}/bookmarks?limit=50" +
+            (cursor == null ? "" : "&cursor=" + Uri.EscapeDataString(cursor)), null, token);
+
     // ---- 즐겨찾기 ----
-    // revision 없음, 마지막 PUT이 이김.
+    // ClientVersion으로 늦은 덮어쓰기를 거부하며 DELETE한 ID는 재사용하지 않는다.
 
     public Task<ApiResult<BookmarkUpsertResponseDto>> PutBookmarkAsync(
         long userId, string clientBookmarkId, BookmarkUpsertRequestDto request, string token) =>

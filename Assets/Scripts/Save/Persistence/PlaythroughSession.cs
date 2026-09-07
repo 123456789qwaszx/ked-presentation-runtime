@@ -10,6 +10,8 @@ public sealed class PlaythroughSession
     private readonly Action<string, string> _write;
     private PlaythroughFile _file;
     private bool _transferPending;
+    private bool _closed;
+    internal void Close() { lock (_gate) _closed = true; }
     internal void SuspendCommits() { lock (_gate) _transferPending = true; }
     public string Id { get; }
 
@@ -29,7 +31,7 @@ public sealed class PlaythroughSession
         get
         {
             lock (_gate)
-                return _file.ReleasedTo == null && _file.Sync.ConflictedAtUtc == null
+                return !_closed && _file.ReleasedTo == null && _file.Sync.ConflictedAtUtc == null && _file.Sync.BlockedReason == null
                     && (_file.InFlight != null || _file.LocalCommitVersion > _file.SyncedCommitVersion);
         }
     }
@@ -38,6 +40,7 @@ public sealed class PlaythroughSession
     {
         lock (_gate)
         {
+            if (_closed) throw new InvalidOperationException("정리된 회차에는 쓸 수 없다.");
             PlaythroughFile next = Copy(_file);
             change(next);
             _write(_path, SaveJson.SerializePretty(next));
@@ -98,13 +101,16 @@ public sealed class PlaythroughSession
         {
             RequireWork(next, workId);
             SyncWork sent = next.InFlight;
-            // pendingは追記専用。送った接頭部分だけ削り、後続コミットを残す。
+            // 전송한 접두부만 제거하고 후속 커밋은 남긴다.
             next.Sync.PendingChoices.RemoveRange(0, sent.Choices.Count);
             next.Sync.PendingEvents.RemoveRange(0, sent.Events.Count);
             next.Sync.BaseRevision = revision;
             next.Sync.SyncedSceneCount = sent.Snapshot.Scenes?.Count ?? 0;
             next.SyncedCommitVersion = sent.CommitVersion;
             next.InFlight = null;
+            next.Sync.RetryCount = 0;
+            next.Sync.RetryAfterUtc = null;
+            next.Sync.BlockedReason = null;
         });
     }
 
@@ -118,6 +124,58 @@ public sealed class PlaythroughSession
         next.Sync.PendingChoices.Clear();
         next.Sync.PendingEvents.Clear();
         next.InFlight = null;
+        next.Sync.ConflictedAtUtc = null;
+        next.Sync.BlockedReason = null;
+        next.Sync.RetryAfterUtc = null;
+    });
+
+
+    public PlaythroughSummary GetSummary()
+    {
+        lock (_gate)
+        {
+            LocalSaveFile save = _file.Snapshot;
+            return new PlaythroughSummary
+            {
+                PlaythroughId = Id, ForkedFrom = Copy(save.ForkedFrom), ChapterId = save.ChapterId,
+                CurrentEpisodeId = save.CurrentEpisodeId, ChapterCompleted = save.ChapterCompleted,
+                SceneCount = save.Scenes?.Count ?? 0, InheritedPlaySeconds = save.InheritedPlaySeconds,
+                OwnPlaySeconds = save.OwnPlaySeconds, SavedAtUtc = save.SavedAtUtc,
+            };
+        }
+    }
+
+    internal bool CanCollect(bool requireSynced)
+    {
+        lock (_gate)
+        {
+            if (_closed || _transferPending && _file.ReleasedTo == null || _file.InFlight != null) return false;
+            if (_file.Sync.ConflictedAtUtc != null || _file.Sync.BlockedReason != null) return false;
+            if (_file.ReleasedTo != null) return true;
+            return !requireSynced || (_file.LocalCommitVersion == _file.SyncedCommitVersion
+                && _file.Sync.PendingChoices.Count == 0 && _file.Sync.PendingEvents.Count == 0);
+        }
+    }
+
+    public bool CanRetry(DateTime now)
+    {
+        lock (_gate) return NeedsSync && (_file.Sync.RetryAfterUtc == null
+            || DateTime.Parse(_file.Sync.RetryAfterUtc, null, System.Globalization.DateTimeStyles.RoundtripKind) <= now);
+    }
+
+    public void RecordFailure(DateTime now, string blockedReason = null) => Update(next =>
+    {
+        next.Sync.RetryCount = Math.Min(10, next.Sync.RetryCount + 1);
+        double seconds = Math.Min(300, 5 * Math.Pow(2, next.Sync.RetryCount - 1));
+        next.Sync.RetryAfterUtc = now.AddSeconds(seconds).ToString("o");
+        next.Sync.BlockedReason = blockedReason;
+    });
+
+    public void ResetRetry() => Update(next =>
+    {
+        next.Sync.RetryCount = 0;
+        next.Sync.RetryAfterUtc = null;
+        next.Sync.BlockedReason = null;
     });
 
     private static void RequireWork(PlaythroughFile file, string workId)

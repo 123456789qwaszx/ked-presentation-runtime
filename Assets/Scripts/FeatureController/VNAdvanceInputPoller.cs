@@ -152,7 +152,13 @@ public sealed class VNAdvanceInputPoller : MonoBehaviour
 
         Bookmark latest = bookmarks[bookmarks.Count - 1];
 
-        await _progressionLauncher.TransitionAsync(() => _saveCoordinator.ForkFromBookmark(latest));
+        try
+        {
+            await _progressionLauncher.TransitionAfterAsync(
+                async () => await _saveCoordinator.GetBookmarkAsync(latest.Id) != null,
+                () => _saveCoordinator.ForkFromBookmark(latest));
+        }
+        catch (System.Exception error) { Debug.LogError($"[수동 저장] 불러오기 실패\n{error}"); }
     }
 
     private async void StartProgression()

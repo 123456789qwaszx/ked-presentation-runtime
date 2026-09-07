@@ -1,108 +1,132 @@
 using System;
-using System.Linq;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 
-// 새 기기 복구. 완료 표시는 회차·북마크가 모두 성공했을 때만 저장한다.
-// 매 응답 후 최신 로컬을 다시 확인하며, 이미 생긴 로컬 데이터는 덮지 않는다.
+// 이어하기 snapshot 하나와 수동 슬롯 요약을 복구한다. 북마크 본문은 선택 시 받는다.
 public sealed class ServerRestore
 {
     private readonly ServerApi _api;
     private readonly GuestSession _session;
     private readonly ILocalSaveStore _localStore;
+    private Task<bool> _resumeTask;
+    private Task<bool> _indexTask;
 
     public ServerRestore(ServerApi api, GuestSession session, ILocalSaveStore localStore)
     {
         _api = api; _session = session; _localStore = localStore;
     }
 
-    public async Task<bool> RestoreAsync()
+    private bool Begin()
     {
         if (_session.UserId == null) return false;
         RestoreProgress progress = _localStore.LoadRestoreProgress();
-        if (progress.Completed) return false;
-        if (!progress.Started)
-        {
-            if (_localStore.ListPlaythroughIds().Count > 0 || !progress.AllowActivation) return false;
-            progress.Started = true;
-            _localStore.SaveRestoreProgress(progress);
-        }
-
-        long userId = _session.UserId.Value;
-        var list = await _session.CallAsync(token => _api.GetPlaythroughsAsync(userId, token));
-        if (!list.Ok || list.Body == null) return false;
-        bool complete = true;
-        var candidates = list.Body.Where(p => p.ClientPlaythroughId != null && p.ChapterId != null)
-            .OrderByDescending(p => p.LastSavedAt, StringComparer.Ordinal);
-        foreach (PlaythroughSummaryDto summary in candidates)
-        {
-            try
-            {
-                if (await RestorePlaythroughAsync(summary))
-                    _localStore.TryActivateRestored(summary.ClientPlaythroughId);
-                else complete = false;
-            }
-            catch (Exception error)
-            {
-                complete = false;
-                Debug.LogError($"[복구] 회차 {summary.ClientPlaythroughId} 보류\n{error}");
-            }
-        }
-        complete &= await RestoreBookmarksAsync(userId);
-        // await 동안 명시적 새 게임이 AllowActivation을 바꿨을 수 있다.
-        progress = _localStore.LoadRestoreProgress();
-        progress.Completed = complete;
+        if (progress.Started) return true;
+        if (_localStore.ListPlaythroughIds().Count > 0 || !progress.AllowActivation) return false;
+        progress.Started = true;
         _localStore.SaveRestoreProgress(progress);
-        return complete;
-    }
-
-    private async Task<bool> RestorePlaythroughAsync(PlaythroughSummaryDto summary)
-    {
-        if (_localStore.Open(summary.ClientPlaythroughId) != null) return true;
-        var detail = await _session.CallAsync(token =>
-            _api.GetSaveAsync(summary.Id, ServerSaveContract.PrimarySlotNo, token));
-        if (!detail.Ok || detail.Body?.Snapshot == null) return false;
-        LocalSaveFile file = detail.Body.Snapshot.ToObject<LocalSaveFile>(SaveJson.Serializer);
-        if (file == null) return false;
-        var choices = await _session.CallAsync(token =>
-            _api.GetChoicesAsync(summary.Id, ServerSaveContract.PrimarySlotNo, token));
-        if (!choices.Ok || choices.Body == null) return false;
-        int lastSeq = choices.Body.Count == 0 ? 0 : choices.Body.Max(c => c.Seq);
-        file.PlaythroughId = summary.ClientPlaythroughId;
-        _localStore.ImportRestored(file, summary.Id, detail.Body.Revision, lastSeq + 1);
         return true;
     }
 
-    private async Task<bool> RestoreBookmarksAsync(long userId)
+    public async Task<bool> RestoreAsync()
     {
-        var list = await _session.CallAsync(token => _api.GetBookmarksAsync(userId, token));
-        if (!list.Ok || list.Body == null) return false;
-        bool complete = true;
-        foreach (BookmarkDetailDto item in list.Body)
+        bool resume = await RestoreResumeAsync();
+        bool index = await RestoreBookmarkIndexAsync();
+        return resume && index;
+    }
+
+    public Task<bool> RestoreResumeAsync()
+    {
+        if (_resumeTask != null && !_resumeTask.IsCompleted) return _resumeTask;
+        return _resumeTask = RestoreResumeCoreAsync();
+    }
+
+    private async Task<bool> RestoreResumeCoreAsync()
+    {
+        if (!Begin()) return false;
+        if (_localStore.LoadRestoreProgress().ResumeCompleted) return true;
+        var result = await _session.CallAsync(token => _api.GetResumeAsync(_session.UserId.Value, token));
+        if (!result.Ok) return false;
+        if (result.Status != 204)
         {
-            try
-            {
-                string id = item.ClientBookmarkId;
-                BookmarkFile local = _localStore.LoadBookmarks();
-                if (local.Bookmarks.Any(b => b.Id == id) || local.DeletedIds.Contains(id)) continue;
-                var single = await _session.CallAsync(token => _api.GetBookmarkAsync(userId, id, token));
-                if (!single.Ok || single.Body?.Snapshot == null) { complete = false; continue; }
-                Bookmark bookmark = single.Body.Snapshot.ToObject<Bookmark>(SaveJson.Serializer);
-                if (bookmark == null) { complete = false; continue; }
-                local = _localStore.LoadBookmarks();
-                if (local.Bookmarks.Any(b => b.Id == id) || local.DeletedIds.Contains(id)) continue;
-                bookmark.Id = id;
-                bookmark.SyncedAtUtc = single.Body.UpdatedAt;
-                bookmark.SyncError = null;
-                local.Bookmarks.Add(bookmark);
-                _localStore.SaveBookmarks(local);
-            }
-            catch (Exception error)
-            {
-                complete = false;
-                Debug.LogError($"[복구] 즐겨찾기 {item.ClientBookmarkId} 보류\n{error}");
-            }
+            ResumeSaveDto data = result.Body;
+            if (data?.Playthrough?.ClientPlaythroughId == null || data.Save?.Snapshot == null || data.NextChoiceSeq < 1) return false;
+            LocalSaveFile save = data.Save.Snapshot.ToObject<LocalSaveFile>(SaveJson.Serializer);
+            if (save == null) return false;
+            save.PlaythroughId = data.Playthrough.ClientPlaythroughId;
+            _localStore.ImportRestored(save, data.Playthrough.Id, data.Save.Revision, data.NextChoiceSeq);
+            _localStore.TryActivateRestored(save.PlaythroughId);
         }
-        return complete;
+        RestoreProgress progress = _localStore.LoadRestoreProgress();
+        progress.ResumeCompleted = true;
+        progress.Completed = progress.BookmarksCompleted;
+        _localStore.SaveRestoreProgress(progress);
+        return true;
+    }
+
+    public Task<bool> RestoreBookmarkIndexAsync()
+    {
+        if (_indexTask != null && !_indexTask.IsCompleted) return _indexTask;
+        return _indexTask = RestoreBookmarkIndexCoreAsync();
+    }
+
+    private async Task<bool> RestoreBookmarkIndexCoreAsync()
+    {
+        if (!Begin()) return false;
+        var seen = new HashSet<string>(StringComparer.Ordinal);
+        while (true)
+        {
+            RestoreProgress progress = _localStore.LoadRestoreProgress();
+            if (progress.BookmarksCompleted) return true;
+            string cursor = progress.BookmarkCursor;
+            if (!seen.Add(cursor ?? "")) throw new InvalidOperationException("서버 bookmark cursor가 반복된다.");
+            var result = await _session.CallAsync(token => _api.GetBookmarkPageAsync(_session.UserId.Value, cursor, token));
+            if (!result.Ok || result.Body?.Items == null) return false;
+            BookmarkFile file = _localStore.LoadBookmarks();
+            foreach (BookmarkDetailDto remote in result.Body.Items)
+            {
+                string id = remote.ClientBookmarkId;
+                if (string.IsNullOrEmpty(id) || file.DeletedIds.Contains(id) || file.Bookmarks.Exists(b => b.Id == id)) continue;
+                file.Bookmarks.Add(new Bookmark
+                {
+                    Id = id, Label = remote.Label, Preview = remote.Preview, CreatedAtUtc = remote.CreatedAt,
+                    ChapterId = remote.ChapterId, PlaythroughId = remote.PlaythroughClientId, SceneIndex = remote.SceneIndex,
+                    LocalVersion = Math.Max(1, remote.ClientVersion), SyncedVersion = remote.ClientVersion, SyncedAtUtc = remote.UpdatedAt,
+                });
+            }
+            _localStore.SaveBookmarks(file);
+            progress = _localStore.LoadRestoreProgress();
+            progress.BookmarkCursor = result.Body.NextCursor;
+            progress.BookmarksCompleted = result.Body.NextCursor == null;
+            progress.Completed = progress.ResumeCompleted && progress.BookmarksCompleted;
+            _localStore.SaveRestoreProgress(progress);
+        }
+    }
+
+    public async Task<Bookmark> HydrateBookmarkAsync(string id)
+    {
+        Bookmark loaded = _localStore.LoadBookmark(id);
+        if (loaded != null) return loaded;
+        Bookmark before = _localStore.LoadBookmarks().Bookmarks.Find(b => b.Id == id);
+        if (before == null || _session.UserId == null) return null;
+        var result = await _session.CallAsync(token => _api.GetBookmarkAsync(_session.UserId.Value, id, token));
+        if (!result.Ok || result.Body?.Snapshot == null) return null;
+        BookmarkFile file = _localStore.LoadBookmarks();
+        Bookmark now = file.Bookmarks.Find(b => b.Id == id);
+        if (now == null || file.DeletedIds.Contains(id)) return null;
+        if (now.LocalVersion != before.LocalVersion || now.SnapshotKey != null) return _localStore.LoadBookmark(id);
+        if (result.Body.ClientVersion < before.LocalVersion) return null;
+        Bookmark body = result.Body.Snapshot.ToObject<Bookmark>(SaveJson.Serializer);
+        if (body?.Checkpoint == null) return null;
+        body.Id = id;
+        body.SnapshotKey = null;
+        body.LocalVersion = result.Body.ClientVersion;
+        body.SyncedVersion = result.Body.ClientVersion;
+        body.Label = result.Body.Label;
+        body.SyncedAtUtc = result.Body.UpdatedAt;
+        body.SyncError = null;
+        file.Bookmarks[file.Bookmarks.IndexOf(now)] = body;
+        _localStore.SaveBookmarks(file);
+        return _localStore.LoadBookmark(id);
     }
 }

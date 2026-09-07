@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 public interface ISaveSyncTransport
 {
     Task<long?> CreatePlaythroughAsync(LocalSaveFile save);
+    Task<bool> SetResumeAsync(string id, long selectionVersion, string selectionScopeId);
     Task<int?> ResolveChapterVersionAsync(string chapterId);
     Task<ApiResult<SaveUploadResponseDto>> UploadAsync(long serverId, SyncWork work);
 }
@@ -18,6 +19,14 @@ public sealed class SaveSyncTransport : ISaveSyncTransport
     public SaveSyncTransport(ServerApi api, GuestSession session, ChapterVersionResolver versions, string deviceKey)
     {
         _api = api; _session = session; _versions = versions; _deviceKey = deviceKey;
+    }
+
+    public async Task<bool> SetResumeAsync(string id, long selectionVersion, string selectionScopeId)
+    {
+        var request = new ResumePointerRequestDto { ClientPlaythroughId = id,
+            SelectionVersion = selectionVersion, SelectionScopeId = selectionScopeId, DeviceKey = _deviceKey };
+        var result = await _session.CallAsync(token => _api.SetResumeAsync(_session.UserId.Value, request, token));
+        return result.Ok;
     }
 
     public async Task<long?> CreatePlaythroughAsync(LocalSaveFile save)

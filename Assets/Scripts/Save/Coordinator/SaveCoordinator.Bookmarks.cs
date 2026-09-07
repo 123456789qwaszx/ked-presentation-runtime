@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public sealed partial class SaveCoordinator
@@ -10,21 +11,64 @@ public sealed partial class SaveCoordinator
     // - 재생 가능한 save fragment.(복원 시 필요한 재생 상태를 묶어둠)
     public IReadOnlyList<Bookmark> Bookmarks => _localStore.LoadBookmarks().Bookmarks;
 
+    public async Task<Bookmark> GetBookmarkAsync(string id) =>
+        _localStore.LoadBookmark(id) ?? (_restore == null ? null : await _restore.HydrateBookmarkAsync(id));
+
+    public async Task<bool> RenameBookmarkAsync(string id, string label)
+    {
+        if (await GetBookmarkAsync(id) == null) return false;
+        return RenameBookmark(id, label);
+    }
+
+    // 충돌한 로컬 내용은 새 슬롯으로 보존할 수 있다. 원래 슬롯의 삭제는 별도 사용자 선택이다.
+    public async Task<Bookmark> DuplicateBookmarkAsync(string id, string label = null)
+    {
+        Bookmark bookmark = await GetBookmarkAsync(id);
+        if (bookmark == null) return null;
+        bookmark.Id = NewPlaythroughId();
+        bookmark.LocalVersion = 1;
+        bookmark.SyncedVersion = 0;
+        bookmark.SnapshotKey = null;
+        bookmark.SyncedAtUtc = null;
+        bookmark.SyncError = null;
+        bookmark.CreatedAtUtc = NowUtc();
+        if (label != null) bookmark.Label = label;
+        BookmarkFile file = _localStore.LoadBookmarks();
+        file.Bookmarks.Add(bookmark);
+        _localStore.SaveBookmarks(file);
+        if (_bookmarkSync != null) _ = _bookmarkSync.PushAsync(bookmark.Id);
+        return bookmark;
+    }
+
     public Bookmark CreateBookmark(
-        IReadOnlyList<CommittedChoice> path,
-        IReadOnlyList<VNChoiceRecord> yarnChoices,
-        SaveLineTarget target,
-        string preview,
-        string label = null)
+        IReadOnlyList<CommittedChoice> path, IReadOnlyList<VNChoiceRecord> yarnChoices,
+        SaveLineTarget target, string preview, string label = null) =>
+        WriteBookmark(null, path, yarnChoices, target, preview, label);
+
+    // 같은 수동 슬롯 ID에 현재 도달한 지점을 저장한다. 실패하면 기존 슬롯은 유지된다.
+    public Bookmark OverwriteBookmark(
+        string id, IReadOnlyList<CommittedChoice> path, IReadOnlyList<VNChoiceRecord> yarnChoices,
+        SaveLineTarget target, string preview, string label = null) =>
+        WriteBookmark(id ?? throw new ArgumentNullException(nameof(id)), path, yarnChoices, target, preview, label);
+
+    private Bookmark WriteBookmark(
+        string id, IReadOnlyList<CommittedChoice> path, IReadOnlyList<VNChoiceRecord> yarnChoices,
+        SaveLineTarget target, string preview, string label)
     {
         if (_currentEntry == null || target == null)
             return null;
 
+        BookmarkFile file = _localStore.LoadBookmarks();
+        Bookmark previous = id == null ? null : file.Bookmarks.Find(b => b.Id == id);
+        if (id != null && previous == null) throw new InvalidOperationException("덮어쓸 수동 저장이 없다.");
         LocalSaveFile current = _localStore.LoadActive();
 
         var bookmark = new Bookmark
         {
-            Id = NewPlaythroughId(),
+            Id = id ?? NewPlaythroughId(),
+            LocalVersion = (previous?.LocalVersion ?? 0) + 1,
+            SyncedVersion = previous?.SyncedVersion ?? 0,
+            Scenes = PlaythroughSession.Copy(_scenes),
             Label = string.IsNullOrEmpty(label) ? preview : label,
             Preview = preview,
             CreatedAtUtc = NowUtc(),
@@ -46,7 +90,7 @@ public sealed partial class SaveCoordinator
             PlaySecondsAtBookmark = TotalSeconds,
         };
 
-        BookmarkFile file = _localStore.LoadBookmarks();
+        if (previous != null) file.Bookmarks.Remove(previous);
         file.Bookmarks.Add(bookmark);
         _localStore.SaveBookmarks(file);
 
@@ -89,11 +133,13 @@ public sealed partial class SaveCoordinator
         BookmarkFile file = _localStore.LoadBookmarks();
         Bookmark bookmark = file.Bookmarks.Find(b => string.Equals(b.Id, id, StringComparison.Ordinal));
 
-        if (bookmark == null)
+        if (bookmark == null || _localStore.LoadBookmark(id) == null)
             return false;
 
         bookmark.Label = string.IsNullOrEmpty(label) ? bookmark.Preview : label;
         bookmark.SyncedAtUtc = null;
+        bookmark.LocalVersion++;
+        bookmark.SyncError = null;
         _localStore.SaveBookmarks(file);
 
         if (_bookmarkSync != null)

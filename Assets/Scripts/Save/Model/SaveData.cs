@@ -123,6 +123,9 @@ public sealed class PlaythroughSyncState
 
     // 옛 회차 큐가 409를 맞은 시각. 있으면 시작 시 순회가 건너뛴다 — 같은 baseRevision은 다시 보내도 409다.
     public string ConflictedAtUtc;
+    public int RetryCount;
+    public string RetryAfterUtc;
+    public string BlockedReason;
 
     // --- 아직 서버에 보내야 할 상태 ---
     public List<PendingChoice> PendingChoices = new();
@@ -177,6 +180,11 @@ public sealed class BookmarkFile
 // - UI용 이름/미리보기
 public sealed class Bookmark
 {
+    // 수동 저장 슬롯. ID는 덮어써도 유지하고 LocalVersion만 증가한다.
+    public long LocalVersion = 1;
+    public long SyncedVersion;
+    public string SnapshotKey;
+    public List<SceneRecord> Scenes = new();
     public string Id;
     public string Label;
     public string Preview;

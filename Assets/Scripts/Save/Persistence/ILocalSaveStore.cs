@@ -11,10 +11,15 @@ public interface ILocalSaveStore
     bool TryActivateRestored(string id);
     LocalSaveFile LoadActive();
     string ActiveId { get; }
+    long SelectionVersion { get; }
+    string SelectionScopeId { get; }
     LocalSaveFile LoadPlaythrough(string id);
     IReadOnlyList<string> ListPlaythroughIds();
     BookmarkFile LoadBookmarks();
     void SaveBookmarks(BookmarkFile file);
+    Bookmark LoadBookmark(string id);
+    IReadOnlyList<PlaythroughSummary> ListPlaythroughSummaries();
+    int CollectUnusedPlaythroughs(bool requireSynced);
     RestoreProgress LoadRestoreProgress();
     void SaveRestoreProgress(RestoreProgress progress);
     PlaythroughSession ForkConflict(string sourceId);

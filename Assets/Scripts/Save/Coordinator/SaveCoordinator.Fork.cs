@@ -259,21 +259,23 @@ public sealed partial class SaveCoordinator
 
     // 즐겨찾기에 저장된 복원 정보를 기반으로 새로운 Playthrough를 만든다.
     //
-    // 출처 회차 파일이 남아 있다면,
-    // Bookmark가 만들어진 Scene 이전의 SceneRecord도 물려받는다.
-    public Task ForkFromBookmark(Bookmark bookmark)
+    // 수동 슬롯 자체에 저장된 과거 SceneRecord를 물려받는다.
+    public async Task ForkFromBookmark(Bookmark bookmark)
     {
+        if (bookmark == null) throw new ArgumentNullException(nameof(bookmark));
+        if (bookmark.Id != null)
+        {
+            string id = bookmark.Id;
+            bookmark = _localStore.LoadBookmark(id);
+            if (bookmark == null && _restore != null) bookmark = await _restore.HydrateBookmarkAsync(id);
+        }
+        if (bookmark?.Checkpoint == null)
+            throw new InvalidOperationException("수동 저장 내용을 가져올 수 없다. 연결 후 다시 시도해야 한다.");
         _localStore.SelectLocalPlaythrough();
 
         SceneCheckpoint checkpoint = bookmark.Checkpoint;
 
-        LocalSaveFile origin =
-            string.IsNullOrEmpty(bookmark.PlaythroughId)
-                ? null
-                : _localStore.LoadPlaythrough(bookmark.PlaythroughId);
-
-        List<SceneRecord> inheritedScenes =
-            GetInheritedScenes(origin, bookmark.SceneIndex);
+        List<SceneRecord> inheritedScenes = PlaythroughSession.Copy(bookmark.Scenes ?? new List<SceneRecord>());
 
         string newId = NewPlaythroughId();
 
@@ -318,21 +320,6 @@ public sealed partial class SaveCoordinator
             $"물려받은 기록 {inheritedScenes.Count}개, " +
             $"백로그 {file.Backlog.Count}줄, " +
             $"시간 {bookmark.PlaySecondsAtBookmark}s");
-        return Task.CompletedTask;
-    }
-
-    private static List<SceneRecord> GetInheritedScenes(
-        LocalSaveFile origin,
-        int sceneIndex)
-    {
-        if (origin?.Scenes == null)
-            return new List<SceneRecord>();
-
-        int count = Math.Min(sceneIndex, origin.Scenes.Count);
-
-        return origin.Scenes
-            .Take(count)
-            .ToList();
     }
 
     private void SaveAndActivateFork(LocalSaveFile file)

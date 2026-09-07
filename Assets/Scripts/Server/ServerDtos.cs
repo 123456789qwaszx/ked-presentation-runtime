@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-// 서버(spring-prepare)의 요청,응답 모양. 서버 record와 1:1 대응.
+// 클라이언트가 요구하는 서버 계약. 추가 계약은 docs/save-manual-slots.md 참고.
 // - POST /auth/login -> 200.
 // - 실패는 원인 구분 없는 401.
 public sealed class LoginResponseDto
@@ -132,6 +132,8 @@ public sealed class ChoiceHistoryItemDto
 // PUT /users/{uid}/bookmarks/{clientBookmarkId} 본문. snapshot은 Bookmark 통째 — 서버는 열지 않는다.
 public sealed class BookmarkUpsertRequestDto
 {
+    public long ClientVersion;
+    public long BaseVersion;
     public string Label;
     public string Preview;
     public string ChapterId;
@@ -142,7 +144,7 @@ public sealed class BookmarkUpsertRequestDto
     public object Snapshot;
 }
 
-// PUT -> 201(신규) / 200(갱신·부활).
+// PUT -> 201(신규) / 200(갱신·멱등 재전송). 삭제된 ID는 410, 부활 금지.
 public sealed class BookmarkUpsertResponseDto
 {
     public string ClientBookmarkId;
@@ -153,6 +155,7 @@ public sealed class BookmarkUpsertResponseDto
 // GET 목록의 한 줄(snapshot 없음) / GET 단건(snapshot 있음).
 public sealed class BookmarkDetailDto
 {
+    public long ClientVersion;
     public string ClientBookmarkId;
     public string Label;
     public string Preview;
@@ -171,4 +174,25 @@ public sealed class ErrorResponseDto
 {
     public string Code;
     public string Message;
+}
+// 서버는 현재 이어하기 대상으로 지정된 회차 하나를 반환한다. 오래된 전체 회차 목록이 아니다.
+public sealed class ResumeSaveDto
+{
+    public PlaythroughSummaryDto Playthrough;
+    public SaveSlotDetailDto Save;
+    public int NextChoiceSeq;
+}
+
+public sealed class BookmarkPageDto
+{
+    public List<BookmarkDetailDto> Items = new();
+    public string NextCursor;
+}
+
+public sealed class ResumePointerRequestDto
+{
+    public string ClientPlaythroughId;
+    public string DeviceKey;
+    public long SelectionVersion;
+    public string SelectionScopeId;
 }

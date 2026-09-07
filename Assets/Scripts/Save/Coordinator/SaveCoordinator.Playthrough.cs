@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
-using System.Linq;
 
 public sealed partial class SaveCoordinator
 {
@@ -52,44 +51,5 @@ public sealed partial class SaveCoordinator
             save.ChapterCompleted);
     }
 
-    // 회차 목록 (이력 UI용 query)
-    // - UI 작성에 필요한 것을 전달.
-    // (활성 회차와 즐겨찾기가 걸린 회차를 펼치고 나머지는 접는 것은 UI의 일)
-    public IReadOnlyList<PlaythroughSummary> ListPlaythroughs()
-    {
-        var summaries = new List<PlaythroughSummary>();
-
-        string activeId = _localStore.ActiveId;
-        BookmarkFile bookmarks = _localStore.LoadBookmarks();
-
-        foreach (string id in _localStore.ListPlaythroughIds())
-        {
-            LocalSaveFile file = _localStore.LoadPlaythrough(id);
-
-            if (file == null)
-                continue;
-
-            summaries.Add(new PlaythroughSummary
-            {
-                PlaythroughId = id,
-                IsActive = string.Equals(id, activeId, StringComparison.Ordinal),
-                ForkedFrom = file.ForkedFrom,
-                ChapterId = file.ChapterId,
-                CurrentEpisodeId = file.CurrentEpisodeId,
-                ChapterCompleted = file.ChapterCompleted,
-                SceneCount = file.Scenes?.Count ?? 0,
-                BookmarkCount =
-                    bookmarks.Bookmarks.Count(b 
-                        => string.Equals(b.PlaythroughId, id, StringComparison.Ordinal)),
-                InheritedPlaySeconds = file.InheritedPlaySeconds,
-                OwnPlaySeconds = file.OwnPlaySeconds,
-                SavedAtUtc = file.SavedAtUtc,
-            });
-        }
-
-        summaries.Sort((a, b)
-            => string.CompareOrdinal(b.SavedAtUtc, a.SavedAtUtc));
-
-        return summaries;
-    }
+    public IReadOnlyList<PlaythroughSummary> ListPlaythroughs() => _localStore.ListPlaythroughSummaries();
 }

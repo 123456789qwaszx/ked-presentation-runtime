@@ -46,6 +46,15 @@ public sealed class ProgressionDriver
 }
 public sealed class ServerApi
 {
+    public Func<Task<ApiResult<ResumeSaveDto>>> OnResume;
+    public Func<string,Task<ApiResult<BookmarkPageDto>>> OnPage;
+    public Func<BookmarkUpsertRequestDto,Task<ApiResult<BookmarkUpsertResponseDto>>> OnPutBookmark;
+    public Func<string,Task<ApiResult<object>>> OnDeleteBookmark;
+    public Func<string,Task<ApiResult<List<ChapterVersionInfoDto>>>> OnVersions;
+    public Task<ApiResult<ResumeSaveDto>> GetResumeAsync(long id,string t) => OnResume();
+    public Task<ApiResult<BookmarkPageDto>> GetBookmarkPageAsync(long id,string cursor,string t) => OnPage(cursor);
+    public Task<ApiResult<object>> SetResumeAsync(long id,ResumePointerRequestDto r,string t)
+        => Task.FromResult(ApiResult<object>.Success(204,null,""));
     public Func<Task<ApiResult<List<PlaythroughSummaryDto>>>> OnList;
     public Func<long,Task<ApiResult<SaveSlotDetailDto>>> OnSave;
     public Func<long,Task<ApiResult<List<ChoiceHistoryItemDto>>>> OnChoices;
@@ -57,7 +66,7 @@ public sealed class ServerApi
     public Task<ApiResult<PlaythroughCreatedDto>> CreatePlaythroughAsync(long u,PlaythroughCreateRequestDto r,string t)
         => Task.FromResult(ApiResult<PlaythroughCreatedDto>.Success(201,new PlaythroughCreatedDto { PlaythroughId = 10 }, ""));
     public Task<ApiResult<List<ChapterVersionInfoDto>>> GetChapterVersionsAsync(string id)
-        => Task.FromResult(ApiResult<List<ChapterVersionInfoDto>>.Network("offline"));
+        => OnVersions == null ? Task.FromResult(ApiResult<List<ChapterVersionInfoDto>>.Network("offline")) : OnVersions(id);
     public Task<ApiResult<SaveUploadResponseDto>> PutSaveAsync(long id,int slot,SaveUploadRequestDto r,string t) => OnUpload(r);
     public Task<ApiResult<List<PlaythroughSummaryDto>>> GetPlaythroughsAsync(long id,string t) => OnList();
     public Task<ApiResult<SaveSlotDetailDto>> GetSaveAsync(long id,int slot,string t) => OnSave(id);
@@ -65,7 +74,7 @@ public sealed class ServerApi
     public Task<ApiResult<List<BookmarkDetailDto>>> GetBookmarksAsync(long id,string t) => OnBookmarks();
     public Task<ApiResult<BookmarkDetailDto>> GetBookmarkAsync(long uid,string id,string t) => OnBookmark(id);
     public Task<ApiResult<BookmarkUpsertResponseDto>> PutBookmarkAsync(long uid,string id,BookmarkUpsertRequestDto r,string t)
-        => Task.FromResult(ApiResult<BookmarkUpsertResponseDto>.Network("offline"));
+        => OnPutBookmark == null ? Task.FromResult(ApiResult<BookmarkUpsertResponseDto>.Network("offline")) : OnPutBookmark(r);
     public Task<ApiResult<object>> DeleteBookmarkAsync(long uid,string id,string t)
-        => Task.FromResult(ApiResult<object>.Success(204,null,""));
+        => OnDeleteBookmark == null ? Task.FromResult(ApiResult<object>.Success(204,null,"")) : OnDeleteBookmark(id);
 }

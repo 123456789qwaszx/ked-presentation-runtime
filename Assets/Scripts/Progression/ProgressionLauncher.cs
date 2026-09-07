@@ -65,6 +65,15 @@ public sealed class ProgressionLauncher
         await TransitionAsync(() => Task.CompletedTask);
     }
 
+    // 서버에만 있는 수동 저장은 현재 재생을 멈추기 전에 받는다.
+    // 다운로드 중 다른 전환을 선택하면 늦게 도착한 요청은 취소한다.
+    public async Task TransitionAfterAsync(Func<Task<bool>> ready, Func<Task> prepare)
+    {
+        long requestedAt = _transitionVersion;
+        if (!await ready() || requestedAt != _transitionVersion) return;
+        await TransitionAsync(prepare);
+    }
+
     
     public Task RequestReplayAsync() => _driver.RequestReplayAsync();
 

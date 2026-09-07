@@ -4,11 +4,12 @@ using System.IO;
 using System.Linq;
 
 // Unity 메인 스레드에서 사용하는 repository. 회차 파일의 수정은 Session만 수행한다.
-public sealed class LocalFileSaveStore : ILocalSaveStore
+public sealed partial class LocalFileSaveStore : ILocalSaveStore
 {
     private sealed class ActiveFile
     {
         public string ActiveId;
+        public string SelectionScopeId = Guid.NewGuid().ToString("N");
         public long SelectionVersion;
     }
 
@@ -39,6 +40,8 @@ public sealed class LocalFileSaveStore : ILocalSaveStore
     private void Write(string path, object value) => _write(path, SaveJson.SerializePretty(value));
     private ActiveFile ReadActive() => Read<ActiveFile>(ActivePath) ?? new ActiveFile();
     public string ActiveId => ReadActive().ActiveId;
+    public long SelectionVersion => ReadActive().SelectionVersion;
+    public string SelectionScopeId => ReadActive().SelectionScopeId;
 
     // 로컬 초기화에서는 중단된 회차 이동만 복구한다. 구형식 마이그레이션은 지원하지 않는다.
     public void Initialize()
@@ -117,7 +120,7 @@ public sealed class LocalFileSaveStore : ILocalSaveStore
         ? Array.Empty<string>()
         : Directory.GetFiles(DataDirectory, "*.json").Select(Path.GetFileNameWithoutExtension).OrderBy(id => id, StringComparer.Ordinal).ToArray();
     public BookmarkFile LoadBookmarks() => Read<BookmarkFile>(Path.Combine(_directory, "bookmarks.json")) ?? new BookmarkFile();
-    public void SaveBookmarks(BookmarkFile file) => Write(Path.Combine(_directory, "bookmarks.json"), file);
+
     public RestoreProgress LoadRestoreProgress() => Read<RestoreProgress>(RestorePath) ?? new RestoreProgress();
     public void SaveRestoreProgress(RestoreProgress progress) => Write(RestorePath, progress);
 
