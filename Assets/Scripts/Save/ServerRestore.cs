@@ -166,12 +166,12 @@ public sealed class ServerRestore
             bookmark.SyncedAtUtc = single.Body.UpdatedAt;
             bookmark.SyncError = null;
 
-            file.Items.Add(bookmark);
+            file.Bookmarks.Add(bookmark);
         }
 
-        if (file.Items.Count > 0)
+        if (file.Bookmarks.Count > 0)
             _localStore.SaveBookmarks(file);
 
-        return file.Items.Count;
+        return file.Bookmarks.Count;
     }
 }

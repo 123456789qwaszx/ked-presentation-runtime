@@ -160,37 +160,42 @@ public sealed class AccountFile
 // saves/bookmarks.json — 즐겨찾기 목록. 수 제한 없음.
 public sealed class BookmarkFile
 {
-    public List<Bookmark> Items = new();
+    public List<Bookmark> Bookmarks = new();
 
     // 서버에 아직 못 지운 즐겨찾기 id. DELETE가 204를 주면 빠진다.
     public List<string> PendingDeletes = new();
 }
 
-// 이력 위의 한 점 — 스스로 완결된 사본. 출처 회차 파일이 없어도 로드된다.
-// 로드 = 이 점을 물려받아 새 회차로 갈라지기(루트에서 표적까지 달린다).
+// Bookmark
+// - 만든 회차
+// - 만들어진 챕터
+// - 장면 진입 시점의 체크포인트
+// - 그 지점까지 선택한 진행 경로
+// - Yarn 내부 선택 기록
+// - 정확히 어느 대사까지 갈 것인지
+// - 그 때까지의 Backlog
+// - 그 시점의 플레이 시간
+// - UI용 이름/미리보기
 public sealed class Bookmark
 {
     public string Id;
     public string Label;
-    public string Preview;      // 라인 텍스트.
+    public string Preview;
     public string CreatedAtUtc;
-
-    // 출처. SceneIndex는 그 회차 이력에서 이 장면이 갖는(가질) 자리 — 앞의 기록을 물려받는 데 쓴다.
+    
     public string PlaythroughId;
     public int SceneIndex;
 
     public string ChapterId;
-    public SceneCheckpoint Checkpoint;   // 그 장면의 진입 스냅샷.
-    public SavedLoadPlan Load;           // 그 장면 안 경로·Yarn 선택·표적 — 찍은 순간까지.
-    public List<DialogueLogEntry> Backlog = new(); // 그 장면 이전의 항목들.
+    public SceneCheckpoint Checkpoint;
+    public SavedLoadPlan Load;
+    public List<DialogueLogEntry> Backlog = new();
 
-    // 찍은 순간까지의 누적 시간(계승 + 자체). 갈라진 회차가 물려받는다.
     public int PlaySecondsAtBookmark;
-
-    // 서버가 받아 준 시각. 비어 있으면 다음 기회에 다시 PUT. 이름을 바꾸면 비운다.
+    
     public string SyncedAtUtc;
 
-    // 서버가 거절한 이유(413 등). 있으면 재시도하지 않는다 — 고쳐 보내는 게 아니라 줄여 보내야 한다.
+    // 서버가 거절한 이유(413 등). 있으면 재시도하지 않음.
     public string SyncError;
 }
 

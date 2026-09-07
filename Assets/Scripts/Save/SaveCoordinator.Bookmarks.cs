@@ -5,12 +5,11 @@ using UnityEngine;
 
 public sealed partial class SaveCoordinator
 {
-    // ── 즐겨찾기 ─────────────────────────────────────────────────────────────
+    // 북마크:
+    // - 단순 즐겨찾기가 아닌,
+    // - 재생 가능한 save fragment.(복원 시 필요한 재생 상태를 묶어둠)
+    public IReadOnlyList<Bookmark> Bookmarks => _localStore.LoadBookmarks().Bookmarks;
 
-    public IReadOnlyList<Bookmark> Bookmarks => _localStore.LoadBookmarks().Items;
-
-    // 지금 라인을 즐겨찾기로. 스스로 완결된 사본 — 진입 스냅샷·찍은 순간까지의 경로·Yarn 선택·표적·이전 백로그.
-    // 장면 밖(진입 보고 전)이면 null.
     public Bookmark CreateBookmark(
         IReadOnlyList<CommittedChoice> path,
         IReadOnlyList<VNChoiceRecord> yarnChoices,
@@ -48,14 +47,14 @@ public sealed partial class SaveCoordinator
         };
 
         BookmarkFile file = _localStore.LoadBookmarks();
-        file.Items.Add(bookmark);
+        file.Bookmarks.Add(bookmark);
         _localStore.SaveBookmarks(file);
 
         Debug.Log(
             $"[저장] 즐겨찾기 — \"{bookmark.Preview}\" @ {target.NodeName}/{target.LineId}#{target.Occurrence}, " +
-            $"경로 {bookmark.Load.Path.Count}개, Yarn 선택 {bookmark.Load.YarnChoices.Count}개 (총 {file.Items.Count}개)");
+            $"경로 {bookmark.Load.Path.Count}개, Yarn 선택 {bookmark.Load.YarnChoices.Count}개 (총 {file.Bookmarks.Count}개)");
 
-        // 서버엔 직접 PUT — 큐 없이. 실패하면 SyncedAtUtc가 비어 있어 다음 시작에 다시.
+        // 서버엔 직접 PUT - 큐 없이. 실패하면 SyncedAtUtc가 비어 있어 다음 시작에 다시.
         if (_bookmarkSync != null)
             _ = _bookmarkSync.PushAsync(bookmark.Id);
 
@@ -66,7 +65,7 @@ public sealed partial class SaveCoordinator
     public bool DeleteBookmark(string id)
     {
         BookmarkFile file = _localStore.LoadBookmarks();
-        int removed = file.Items.RemoveAll(b => string.Equals(b.Id, id, StringComparison.Ordinal));
+        int removed = file.Bookmarks.RemoveAll(b => string.Equals(b.Id, id, StringComparison.Ordinal));
 
         if (removed == 0)
             return false;
@@ -82,11 +81,11 @@ public sealed partial class SaveCoordinator
         return true;
     }
 
-    // 이름이 바뀌면 서버 사본도 바뀌어야 한다 — 같은 id로 다시 PUT(멱등 upsert).
+    // 이름이 바뀌면 서버 사본도 바뀌어야 한다 - 같은 id로 다시 PUT(멱등 upsert).
     public bool RenameBookmark(string id, string label)
     {
         BookmarkFile file = _localStore.LoadBookmarks();
-        Bookmark bookmark = file.Items.Find(b => string.Equals(b.Id, id, StringComparison.Ordinal));
+        Bookmark bookmark = file.Bookmarks.Find(b => string.Equals(b.Id, id, StringComparison.Ordinal));
 
         if (bookmark == null)
             return false;

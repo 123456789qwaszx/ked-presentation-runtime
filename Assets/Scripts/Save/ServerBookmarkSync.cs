@@ -35,9 +35,9 @@ public sealed class ServerBookmarkSync
 
         var pushes = new List<string>();
 
-        for (int i = 0; i < file.Items.Count; i++)
+        for (int i = 0; i < file.Bookmarks.Count; i++)
         {
-            Bookmark b = file.Items[i];
+            Bookmark b = file.Bookmarks[i];
 
             if (b.SyncedAtUtc == null && b.SyncError == null)
                 pushes.Add(b.Id);
@@ -140,5 +140,5 @@ public sealed class ServerBookmarkSync
         text == null || text.Length <= max ? text : text.Substring(0, max);
 
     private static Bookmark Find(BookmarkFile file, string id) =>
-        file.Items.Find(b => string.Equals(b.Id, id, StringComparison.Ordinal));
+        file.Bookmarks.Find(b => string.Equals(b.Id, id, StringComparison.Ordinal));
 }

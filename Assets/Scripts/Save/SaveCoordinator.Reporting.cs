@@ -16,10 +16,7 @@ public sealed partial class SaveCoordinator
                 scenes: null);
 
         if (_scenes.Count > 0 &&
-            !string.Equals(
-                _scenes[^1].Checkpoint.ChapterId,
-                report.ChapterId,
-                StringComparison.Ordinal))
+            !string.Equals(_scenes[^1].Checkpoint.ChapterId, report.ChapterId))
         {
             _scenes.Clear();
         }
