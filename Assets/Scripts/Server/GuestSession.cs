@@ -69,7 +69,8 @@ public sealed class GuestSession
         return retryResult;
     }
 
-    // 토큰 확보는 단일 비행 — 동시에 몇이 부르든 가입·로그인은 한 번. 아니면 계정이 둘 생겨 뒤가 앞을 덮는다.
+    // 토큰 확보는 단일 flight.
+    // 동시에 몇이 부르든 가입/로그인은 한 번. 아니면 계정이 둘 생겨 뒤가 앞을 덮는다.
     private Task<string> _ensuring;
 
     public async Task<string> EnsureTokenAsync()
@@ -95,12 +96,15 @@ public sealed class GuestSession
 
     private async Task<string> EnsureTokenCoreAsync()
     {
-        // account.json 자체가 없음(_account == null):
-        // A-1) await SignUpAsync()실행. 성공 후 _account 생성.
-        // A-2) return await LoginAsync()실행. 토큰 발급.
+        // A) 계정은 있음, 토큰만 없음:
+        // - 바로 LoginAsync(토큰발급)
         //
-        // B-1) await SignUpAsync()실패.
-        // B-2) 진행도 동기화만 포기. 게임 진행 자체는 가능.
+        // B) 첫실행이라 계정(account.json) 자체가 없음:
+        // - SignUpAsync 실행.
+        // - a)성공 후 LoginAsync(토큰 발급)
+        //
+        // - b)만약 await SignUpAsync 실패 시,
+        //     진행도 동기화만 포기. 게임 진행 자체는 가능.
         if (_account == null && !await SignUpAsync()) 
             return null;
 
@@ -114,19 +118,27 @@ public sealed class GuestSession
         if (_account?.Token == null)
             return false;
 
-        DateTimeOffset expiresAt = DateTimeOffset.Parse(
-            _account.ExpiresAtUtc, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
+        DateTimeOffset expiresAt =
+            DateTimeOffset.Parse(
+                _account.ExpiresAtUtc, 
+                CultureInfo.InvariantCulture, 
+                DateTimeStyles.RoundtripKind);
 
         return DateTimeOffset.UtcNow + ExpiryMargin < expiresAt;
     }
 
     private async Task<bool> SignUpAsync()
     {
-        // 이 두 값만으로 계정 표현. (게스트는 account.json을 잃으면 계정 상실. 찾을 방법 없음.)
-        string username = "guest-" + Guid.NewGuid().ToString("N").Substring(0, 12);
+        // 이 두 값만으로 계정 표현.
+        // (게스트는 account.json을 잃으면 계정 상실. 찾을 방법 없음.)
+        string username =
+            "guest-" + Guid.NewGuid()
+                .ToString("N")
+                .Substring(0, 12);
         string password = Guid.NewGuid().ToString("N");
 
-        ApiResult<UserResponseDto> result = await _api.SignUpAsync(username, password);
+        ApiResult<UserResponseDto> result =
+            await _api.SignUpAsync(username, password);
 
         if (!result.Ok)
         {
@@ -143,7 +155,7 @@ public sealed class GuestSession
 
         Persist();
 
-        Debug.Log($"[계정] 게스트 계정 생성 — {username} (userId {result.Body.Id})");
+        Debug.Log($"[계정] 게스트 계정 생성 - {username} (userId {result.Body.Id})");
 
         return true;
     }
@@ -160,7 +172,9 @@ public sealed class GuestSession
             // 따라서 account.json을 신뢰하지 않고 버림. 다음에 동기화 시 새 게스트.
             if (result.Status == 401)
             {
-                Debug.LogWarning($"[계정] '{_account.Username}' 로그인 거부 - 계정을 버린다.");
+                Debug.LogWarning(
+                    $"[계정] '{_account.Username}' 로그인 거부 - 계정을 버린다.");
+                
                 _account = null;
                 File.Delete(_accountPath);
             }
@@ -186,8 +200,10 @@ public sealed class GuestSession
     private static void LogFailure<T>(string what, ApiResult<T> result)
     {
         if (result.NetworkError)
-            Debug.Log($"[계정] {what} — 서버에 닿지 않는다 (오프라인이면 정상).");
+            Debug.Log(
+                $"[계정] {what} - 서버에 닿지 않는다 (오프라인이면 정상).");
         else
-            Debug.LogWarning($"[계정] {what} 실패 — HTTP {result.Status} {result.ErrorCode}");
+            Debug.LogWarning(
+                $"[계정] {what} 실패 - HTTP {result.Status} {result.ErrorCode}");
     }
 }

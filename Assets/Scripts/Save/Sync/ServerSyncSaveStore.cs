@@ -81,7 +81,7 @@ public sealed class ServerSyncSaveStore
 
     // 현재 pending sync들이 정리 될 때까지 gameplay를 막음.
     //
-    // - 일반 진행에서는 _=server.TrySyncAsync();처럼 시간을 잡아두지 않지만,
+    // - 일반 진행에서는 _= server.TrySyncAsync();처럼 시간을 잡아두지 않지만,
     //   새 게임이나 fork 처럼 지금 회차를 바꾸기 전에 기존 동기화 작업을 끝내야 하는 경우
     //   transition boundary에서 유저를 대기시킨다.
     public async Task FlushAsync()

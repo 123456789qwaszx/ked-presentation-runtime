@@ -25,7 +25,8 @@ public sealed class ServerApi
         long userId, PlaythroughCreateRequestDto request, string token) =>
         SendAsync<PlaythroughCreatedDto>("POST", $"/users/{userId}/playthroughs", request, token);
 
-    // 공개 GET - /content GET은 토큰이 필요 없음. (로그인하지 않은 클라이언트도 조회할 수 있는 공개 엔드포인트)
+    // 공개 GET - /content GET은 토큰이 필요 없음.
+    // (로그인하지 않은 클라이언트도 조회할 수 있는 공개 엔드포인트)
     public Task<ApiResult<List<ChapterVersionInfoDto>>> GetChapterVersionsAsync(string chapterId) =>
         SendAsync<List<ChapterVersionInfoDto>>("GET", $"/content/chapters/{chapterId}/versions", null, token: null);
 
@@ -33,8 +34,8 @@ public sealed class ServerApi
         long playthroughId, int slotNo, SaveUploadRequestDto request, string token) =>
         SendAsync<SaveUploadResponseDto>("PUT", $"/playthroughs/{playthroughId}/saves/{slotNo}", request, token);
 
-    // ── 복구용 GET ──
-
+    // ---- 복구용 GET ----
+    
     public Task<ApiResult<List<PlaythroughSummaryDto>>> GetPlaythroughsAsync(long userId, string token) =>
         SendAsync<List<PlaythroughSummaryDto>>("GET", $"/users/{userId}/playthroughs", null, token);
 
@@ -44,26 +45,32 @@ public sealed class ServerApi
     public Task<ApiResult<List<ChoiceHistoryItemDto>>> GetChoicesAsync(long playthroughId, int slotNo, string token) =>
         SendAsync<List<ChoiceHistoryItemDto>>("GET", $"/playthroughs/{playthroughId}/saves/{slotNo}/choices", null, token);
 
-    // ── 즐겨찾기 — revision 없음, 마지막 PUT이 이긴다 ──
+    // ---- 즐겨찾기 ----
+    // revision 없음, 마지막 PUT이 이김.
 
     public Task<ApiResult<BookmarkUpsertResponseDto>> PutBookmarkAsync(
         long userId, string clientBookmarkId, BookmarkUpsertRequestDto request, string token) =>
-        SendAsync<BookmarkUpsertResponseDto>("PUT", $"/users/{userId}/bookmarks/{clientBookmarkId}", request, token);
+        SendAsync<BookmarkUpsertResponseDto>(
+            "PUT", $"/users/{userId}/bookmarks/{clientBookmarkId}", request, token);
 
     // 204, 본문 없음. 없어도·이미 지웠어도 204.
     public Task<ApiResult<object>> DeleteBookmarkAsync(long userId, string clientBookmarkId, string token) =>
-        SendAsync<object>("DELETE", $"/users/{userId}/bookmarks/{clientBookmarkId}", null, token);
+        SendAsync<object>(
+            "DELETE", $"/users/{userId}/bookmarks/{clientBookmarkId}", null, token);
 
     public Task<ApiResult<List<BookmarkDetailDto>>> GetBookmarksAsync(long userId, string token) =>
-        SendAsync<List<BookmarkDetailDto>>("GET", $"/users/{userId}/bookmarks", null, token);
+        SendAsync<List<BookmarkDetailDto>>(
+            "GET", $"/users/{userId}/bookmarks", null, token);
 
     public Task<ApiResult<BookmarkDetailDto>> GetBookmarkAsync(long userId, string clientBookmarkId, string token) =>
-        SendAsync<BookmarkDetailDto>("GET", $"/users/{userId}/bookmarks/{clientBookmarkId}", null, token);
+        SendAsync<BookmarkDetailDto>(
+            "GET", $"/users/{userId}/bookmarks/{clientBookmarkId}", null, token);
 
     private static Dictionary<string, string> Credentials(string username, string password) =>
         new Dictionary<string, string> { ["username"] = username, ["password"] = password };
 
-    private async Task<ApiResult<T>> SendAsync<T>(string method, string path, object body, string token)
+    private async Task<ApiResult<T>> SendAsync<T>(
+        string method, string path, object body, string token)
     {
         // 요청 수명은 이 호출 안. 성공-실패-예외와 관계없이 끝나면 Dispose.
         using (var request = new UnityWebRequest(_baseUrl + path, method))
@@ -74,7 +81,8 @@ public sealed class ServerApi
             if (body != null)
             {
                 // 요청 본문을 JSON 바이트로.
-                request.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(SaveJson.Serialize(body)));
+                request.uploadHandler =
+                    new UploadHandlerRaw(Encoding.UTF8.GetBytes(SaveJson.Serialize(body)));
                 
                 // 서버에게 "이 본문은 JSON이라고 알림.
                 request.SetRequestHeader("Content-Type", "application/json");
