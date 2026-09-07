@@ -13,8 +13,9 @@ public class VNAppBootstrap : MonoBehaviour
 
     private readonly PresentationStage _presentationStage = new();
     private readonly BacklogRecorder _backlogRecorder = new();
-
+    
     private readonly DialogueAdvanceDispatcher _dialogueAdvanceDispatcher = new();
+    private readonly EpisodeSkipController _episodeSkipController = new();
 
     private VNScreenBindings _screenBindings;
     private IUIThemePatchPort _uiThemePatch;
@@ -359,7 +360,8 @@ public class VNAppBootstrap : MonoBehaviour
             _presentationStage,
             _presentationScopeSession,
             variableCheckpoint,
-            _choiceHistory);
+            _choiceHistory,
+            _episodeSkipController);
 
         _debugPlayback = new ScenePlaybackDebugRunner(
             _scenePlayback,
@@ -435,13 +437,17 @@ public class VNAppBootstrap : MonoBehaviour
         RapidSkipController rapidSkipController = new(
             _dialogueAdvanceDispatcher);
 
-        _vnFeatureController = new(
+        _episodeSkipController.Initialize(
+            _dialogueAdvanceDispatcher);
+
+        _vnFeatureController = new VNFeatureController(
             _playbackState,
             _linePresentationAdvanceState,
             ellipsisBreathTypewriter,
             _backlogRecorder,
             autoAdvanceScheduler,
             rapidSkipController,
+            _episodeSkipController,
             _rollbackHistory,
             _choiceHistory);
 

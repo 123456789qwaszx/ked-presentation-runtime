@@ -56,6 +56,10 @@ public sealed partial class VNScreenBindings
         AddBinding(root,
             r => r.LoadMenuClicked += HandleLoadMenuClicked,
             r => r.LoadMenuClicked -= HandleLoadMenuClicked);
+        
+        AddBinding(root,
+            r => r.OpenSkipPanelClicked += HandleOpenSkipPanelClicked,
+            r => r.OpenSkipPanelClicked -= HandleOpenSkipPanelClicked);
     }
 
     private void HandleAutoClicked()
@@ -104,5 +108,10 @@ public sealed partial class VNScreenBindings
     private void HandleLoadMenuClicked()
     {
         OpenSaveLoadMenu(SaveLoadMenuMode.Load);
+    }
+    
+    private void HandleOpenSkipPanelClicked()
+    {
+        OpenSkipConfirmPanel();
     }
 }

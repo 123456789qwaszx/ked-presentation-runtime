@@ -14,6 +14,7 @@ public sealed class VNFeatureController
     private readonly RapidSkipController _rapidSkipController;
     private readonly RollbackHistory _rollbackController;
     private readonly ChoiceHistory _choiceHistory;
+    private readonly EpisodeSkipController _episodeSkipController;
 
     private bool _speedUpToggled;
     private bool _speedUpHeld;
@@ -32,6 +33,7 @@ public sealed class VNFeatureController
         BacklogRecorder backlogRecorder,
         AutoAdvanceScheduler autoAdvanceScheduler,
         RapidSkipController rapidSkipController,
+        EpisodeSkipController episodeSkipController,
         RollbackHistory rollbackController,
         ChoiceHistory choiceHistory)
     {
@@ -42,6 +44,8 @@ public sealed class VNFeatureController
         _backlogRecorder = backlogRecorder;
         _autoAdvanceScheduler = autoAdvanceScheduler;
         _rapidSkipController = rapidSkipController;
+        _episodeSkipController = episodeSkipController;
+
         _rollbackController = rollbackController;
         _choiceHistory = choiceHistory;
 
@@ -54,10 +58,14 @@ public sealed class VNFeatureController
         if (IsAuto && LineFullyShown)
             _autoAdvanceScheduler.Tick();
 
-        if (_vnPlaybackSettings.IsSpeedUpMode && LineFullyShown)
+        if (_vnPlaybackSettings.IsSpeedUpMode &&
+            LineFullyShown)
+        {
             _autoAdvanceScheduler.ResetAutoAdvanceTimer();
+        }
 
         _rapidSkipController.Tick();
+        _episodeSkipController.Tick();
     }
 
     public void ToggleAuto()
@@ -184,14 +192,14 @@ public sealed class VNFeatureController
         _rollbackController.ClearRollbackPoints();
         _linePresentationAdvanceState.BeginRollbackSeek(target.nodeName, target.lineId, target.occurrence);
 
-        DisablePlaybackModifiersForSeek();
+        DisablePlaybackModifiers();
 
         _autoAdvanceScheduler.ResetAutoAdvanceTimer();
 
         return true;
     }
 
-    private void DisablePlaybackModifiersForSeek()
+    private void DisablePlaybackModifiers()
     {
         _vnPlaybackSettings.SetAutoModeEnabled(false);
 
@@ -203,6 +211,8 @@ public sealed class VNFeatureController
 
         ApplySpeedUpModeState();
         ApplyRapidSkipState();
+
+        _autoAdvanceScheduler.ResetAutoAdvanceTimer();
     }
 
     private void ApplySpeedUpModeState()
@@ -229,5 +239,19 @@ public sealed class VNFeatureController
     {
         _vnPlaybackSettings.SetRapidSkipModeEnabled(_rapidSkipHeld);
         _rapidSkipController.SetHeld(_rapidSkipHeld);
+    }
+    
+    public bool RequestSkipCurrentEpisode()
+    {
+        // Load / Rollback replay 중에는 별도 Skip을 열지 않는다.
+        if (_linePresentationAdvanceState.IsSeekingActive)
+            return false;
+
+        if (!_episodeSkipController.Request())
+            return false;
+
+        DisablePlaybackModifiers();
+
+        return true;
     }
 }

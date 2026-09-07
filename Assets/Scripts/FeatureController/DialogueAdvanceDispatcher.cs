@@ -6,6 +6,10 @@ public sealed class DialogueAdvanceDispatcher
     private DialogueRunner _dialogueRunner;
     private VNLinePresentationState _linePresentationAdvanceState;
 
+    public bool IsDialogueRunning =>
+        _dialogueRunner != null &&
+        _dialogueRunner.IsDialogueRunning;
+    
     /// <summary>
     /// 다음 라인을 요청하기 직전, 등가성 하네스의 관측점으로 사용.
     /// </summary>

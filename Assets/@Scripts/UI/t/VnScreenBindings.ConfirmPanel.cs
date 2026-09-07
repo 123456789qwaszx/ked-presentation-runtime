@@ -1,45 +1,42 @@
-public sealed partial class VnScreenBindings
+using UnityEngine;
+
+public sealed partial class VNScreenBindings
 {
     #region EpisodeSelectionPanel
     
-    private void OpenEpisodeConfirmPanel()
+    private void OpenSkipConfirmPanel()
     {
-        // string episodeId = _episodeSelectionSystem.SelectionState.SelectedEpisodeId;
-        // string dialogueEntryId = _episodeSelectionSystem.GetYarnNodeName(episodeId);
-        // string summary = $"현재 에피소드: {episodeId}\n" +
-        //                  $"실행 엔트리: {dialogueEntryId}";
-        //
-        // UI.PushPanel<ConfirmPanel>(panel =>
-        // {
-        //     BindPanel(panel, openEpisode =>
-        //         {
-        //             AddBinding(openEpisode,
-        //                 p => p.ConfirmClicked += HandleEpisodeStartConfirmed,
-        //                 p => p.ConfirmClicked -= HandleEpisodeStartConfirmed);
-        //
-        //             AddBinding(openEpisode,
-        //                 p => p.CloseClicked += ClosePanel,
-        //                 p => p.CloseClicked -= ClosePanel);
-        //         });
-        //
-        //     panel.Present(
-        //         title: "에피소드를 시작할까요??",
-        //         body: summary,
-        //         confirmLabel: "확인",
-        //         cancelLabel: "취소");
-        // });
+        UI.PushPanel<SkipConfirmPanel>(panel =>
+        {
+            BindPanel(panel, openedPanel =>
+            {
+                AddBinding(
+                    openedPanel,
+                    p => p.ConfirmClicked += HandleSkipConfirmed,
+                    p => p.ConfirmClicked -= HandleSkipConfirmed);
+
+                AddBinding(
+                    openedPanel,
+                    p => p.CloseClicked += ClosePanel,
+                    p => p.CloseClicked -= ClosePanel);
+            });
+
+            panel.Present(
+                title: "현재 에피소드를 건너뛸까요?",
+                body:
+                "현재 재생 중인 에피소드의 남은 대사를 빠르게 진행합니다.\n" +
+                "Yarn 선택지가 나오면 선택을 기다립니다.",
+                confirmLabel: "스킵",
+                cancelLabel: "취소");
+        });
     }
 
-    private void HandleEpisodeStartConfirmed()
+    private void HandleSkipConfirmed()
     {
-        // string episodeId = _episodeSelectionSystem.SelectionState.SelectedEpisodeId;
-        // string dialogueEntryId = _episodeSelectionSystem.GetYarnNodeName(episodeId);
-        // if (string.IsNullOrEmpty(dialogueEntryId))
-        //     return;
-        //
-        // CloseAllPanels();
-        //
-        // _episodePlayer.StartGame(dialogueEntryId);
+        ClosePanel();
+
+        if (!_vnFeatures.RequestSkipCurrentEpisode())
+            Debug.Log("[스킵] 현재 건너뛸 수 있는 Episode가 없다.");
     }
     #endregion
 }

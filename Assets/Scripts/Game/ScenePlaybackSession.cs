@@ -15,6 +15,7 @@ public sealed class ScenePlaybackSession
     private readonly PresentationScopeSession _presentationScope;
     private readonly YarnVariableCheckpoint _variableCheckpoint;
     private readonly ChoiceHistory _choiceHistory;
+    private readonly EpisodeSkipController _episodeSkipController;
 
     private Task _stopTask;
 
@@ -27,7 +28,8 @@ public sealed class ScenePlaybackSession
         PresentationStage presentationStage,
         PresentationScopeSession presentationScope,
         YarnVariableCheckpoint variableCheckpoint,
-        ChoiceHistory choiceHistory)
+        ChoiceHistory choiceHistory,
+        EpisodeSkipController episodeSkipController)
     {
         _nodeRunner = nodeRunner;
         _vnScreenBindings = vnScreenBindings;
@@ -38,6 +40,7 @@ public sealed class ScenePlaybackSession
         _presentationScope = presentationScope;
         _variableCheckpoint = variableCheckpoint;
         _choiceHistory = choiceHistory;
+        _episodeSkipController = episodeSkipController;
     }
 
     public async Task BeginSceneAsync()
@@ -51,8 +54,19 @@ public sealed class ScenePlaybackSession
         BeginPlayback();
     }
 
-    public Task PlayNodeAsync(string nodeName) =>
-        _nodeRunner.StartAsync(nodeName);
+    public async Task PlayNodeAsync(string nodeName)
+    {
+        try
+        {
+            await _nodeRunner.StartAsync(nodeName);
+        }
+        finally
+        {
+            // 현재 Yarn node의 수명이 끝났으므로
+            // one-shot Episode Skip도 여기서 끝난다.
+            _episodeSkipController.CompleteEpisode();
+        }
+    }
 
     public async Task PrepareReplayAsync()
     {
@@ -96,6 +110,8 @@ public sealed class ScenePlaybackSession
 
     private async Task StopPlaybackAsync()
     {
+        _episodeSkipController.Cancel();
+
         if (_nodeRunner.IsRunning)
             await _nodeRunner.StopAsync();
 
