@@ -38,12 +38,15 @@ public sealed class ProgressionLauncher
     private bool _transitioning;
     private long _transitionVersion;
 
-    // Stop → 로컬 전환 → Launch 전체가 하나의 요청이다. 중복 요청은 합류하지 않고 무시한다.
+    // Stop -> 로컬 전환 -> Launch 전체가 하나의 요청이다. 중복 요청은 합류하지 않고 무시한다.
     public async Task TransitionAsync(Func<Task> prepare)
     {
-        if (_transitioning) return;
+        if (_transitioning)
+            return;
+        
         _transitioning = true;
         _transitionVersion++;
+        
         Task running;
         try
         {
@@ -53,24 +56,32 @@ public sealed class ProgressionLauncher
             running = _running;
         }
         finally { _transitioning = false; }
+        
         await running;
     }
 
     public async Task ResumeAfterAsync(Task ready)
     {
         long requestedAt = _transitionVersion;
+        
         await ready;
-        // 복구를 기다리는 동안 새 게임·fork를 선택했으면 옛 요청은 취소한다.
-        if (requestedAt != _transitionVersion || IsRunning) return;
+        
+        // 복구를 기다리는 동안 새 게임/fork를 선택했으면 옛 요청은 취소.
+        if (requestedAt != _transitionVersion || IsRunning)
+            return;
+        
         await TransitionAsync(() => Task.CompletedTask);
     }
 
-    // 서버에만 있는 수동 저장은 현재 재생을 멈추기 전에 받는다.
-    // 다운로드 중 다른 전환을 선택하면 늦게 도착한 요청은 취소한다.
+    // 서버에만 있는 수동 저장은 현재 재생을 멈추기 전에 받음.
+    // 다운로드 중 다른 전환을 선택하면 늦게 도착한 요청은 취소.
     public async Task TransitionAfterAsync(Func<Task<bool>> ready, Func<Task> prepare)
     {
         long requestedAt = _transitionVersion;
-        if (!await ready() || requestedAt != _transitionVersion) return;
+        
+        if (!await ready() || requestedAt != _transitionVersion)
+            return;
+        
         await TransitionAsync(prepare);
     }
 

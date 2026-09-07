@@ -155,7 +155,7 @@ public sealed class BookmarkUpsertResponseDto
 // GET 목록의 한 줄(snapshot 없음) / GET 단건(snapshot 있음).
 public sealed class BookmarkDetailDto
 {
-    public long ClientVersion;
+    public int ClientVersion;
     public string ClientBookmarkId;
     public string Label;
     public string Preview;

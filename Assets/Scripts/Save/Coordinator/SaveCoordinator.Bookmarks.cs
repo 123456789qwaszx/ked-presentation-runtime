@@ -11,8 +11,18 @@ public sealed partial class SaveCoordinator
     // - 재생 가능한 save fragment.(복원 시 필요한 재생 상태를 묶어둠)
     public IReadOnlyList<Bookmark> Bookmarks => _localStore.LoadBookmarks().Bookmarks;
 
-    public async Task<Bookmark> GetBookmarkAsync(string id) =>
-        _localStore.LoadBookmark(id) ?? (_restore == null ? null : await _restore.HydrateBookmarkAsync(id));
+    public async Task<Bookmark> GetBookmarkAsync(string id)
+    {
+        Bookmark bookmark = _localStore.LoadBookmark(id);
+
+        if (bookmark != null)
+            return bookmark;
+
+        if (_restore == null)
+            return null;
+
+        return await _restore.HydrateBookmarkAsync(id);
+    }
 
     public async Task<bool> RenameBookmarkAsync(string id, string label)
     {

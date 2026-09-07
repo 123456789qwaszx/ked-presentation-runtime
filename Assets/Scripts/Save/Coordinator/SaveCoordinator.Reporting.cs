@@ -15,12 +15,9 @@ public sealed partial class SaveCoordinator
                 ownSeconds: 0,
                 scenes: null);
 
-        if (_scenes.Count > 0 &&
-            !string.Equals(_scenes[^1].Checkpoint.ChapterId, report.ChapterId))
-        {
+        if (_scenes.Count > 0 && !string.Equals(_scenes[^1].Checkpoint.ChapterId, report.ChapterId)) 
             _scenes.Clear();
-        }
-
+        
         _currentEntry = new SceneCheckpoint
         {
             ChapterId = report.ChapterId,
@@ -40,16 +37,23 @@ public sealed partial class SaveCoordinator
         {
             var initial = new LocalSaveFile
             {
-                PlaythroughId = _playthroughId, ForkedFrom = _forkedFrom,
-                ChapterId = report.ChapterId, CurrentEpisodeId = report.State.CurrentEpisodeId,
-                Stats = new Dictionary<string, int>(_currentEntry.Stats), Variables = report.Variables,
-                SavedAtUtc = NowUtc(), InheritedPlaySeconds = _inheritedSeconds,
-                OwnPlaySeconds = OwnSeconds, PlaySeconds = TotalSeconds,
+                PlaythroughId = _playthroughId,
+                ForkedFrom = _forkedFrom,
+                ChapterId = report.ChapterId, 
+                CurrentEpisodeId = report.State.CurrentEpisodeId,
+                Stats = new Dictionary<string, int>(_currentEntry.Stats),
+                Variables = report.Variables,
+                SavedAtUtc = NowUtc(),
+                InheritedPlaySeconds = _inheritedSeconds,
+                OwnPlaySeconds = OwnSeconds,
+                PlaySeconds = TotalSeconds,
             };
             _active = _localStore.Create(initial);
             _localStore.SetActive(_playthroughId);
             _newPrepared = false;
-            if (_server != null) _ = _server.RequestSyncAsync(_playthroughId);
+            
+            if (_server != null)
+                _ = _server.RequestSyncAsync(_playthroughId);
         }
     }
 
@@ -110,10 +114,12 @@ public sealed partial class SaveCoordinator
         {
             EpisodeId = c.FromEpisodeId, OptionIndex = c.OptionIndex, ChosenAt = now,
         }).ToList();
+        
         var events = report.WatchedEpisodeIds.Select(id => new PendingEvent
         {
             EpisodeId = id, OccurredAt = now,
         }).ToList();
+        
         _active.Commit(snapshot, choices, events);
         _scenes.Clear();
         _scenes.AddRange(scenes);
