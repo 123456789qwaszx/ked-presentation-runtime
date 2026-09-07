@@ -19827,7 +19827,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5027bd71ec8c82e4d914a1bc72497f37, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AlbumUIRoot
-  _slotButtonPrefab: {fileID: 376596384390720174, guid: ba0312a841e13c74f9f48a25df1a4be8, type: 3}
+  slotButtonPrefab: {fileID: 3500765054095396716, guid: 65ada437c4382424ba1be5273fccb2f0, type: 3}
 --- !u!114 &2241514900074843704
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -20310,7 +20310,7 @@ GameObject:
   - component: {fileID: 5472344258549591123}
   - component: {fileID: 3483049989738582984}
   m_Layer: 5
-  m_Name: Preview_Button
+  m_Name: PreviewButton_Button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -24366,7 +24366,7 @@ GameObject:
   - component: {fileID: 5530162065709975495}
   - component: {fileID: 7683485560445790401}
   m_Layer: 5
-  m_Name: BacklogBG_Image
+  m_Name: AlbumBG_Image
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -25715,7 +25715,7 @@ GameObject:
   - component: {fileID: 4714711175957728181}
   - component: {fileID: 6748033727481753213}
   m_Layer: 5
-  m_Name: BWidgetHit_Button
+  m_Name: BackButton_Button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -26454,7 +26454,7 @@ GameObject:
   - component: {fileID: 3868538655146593429}
   - component: {fileID: 3874848209769562937}
   m_Layer: 5
-  m_Name: ContentRoot_Rect
+  m_Name: Content_Root
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

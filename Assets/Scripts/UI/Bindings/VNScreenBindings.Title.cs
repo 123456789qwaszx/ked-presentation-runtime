@@ -68,7 +68,7 @@ public sealed partial class VNScreenBindings
 
     private void HandleAlbumClicked()
     {
-        Debug.Log("앨범 화면.");
+        GoToAlbum();
     }
 
     private void HandleSettingsClicked()
