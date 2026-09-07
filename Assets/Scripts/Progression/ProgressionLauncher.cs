@@ -14,17 +14,20 @@ public sealed class ProgressionLauncher
     private readonly DialogueRunner _dialogueRunner; //"DialogueRunner.YarnProject"를 꺼내 대조 및 검사.
     private readonly TextAsset _chapterJson;
     private readonly Func<ProgressionResumePoint> _resumeProvider;
+    private readonly Func<Task> _prepareNewPlaythrough;
 
     public ProgressionLauncher(
         ProgressionDriver driver,
         DialogueRunner dialogueRunner,
         TextAsset chapterJson,
-        Func<ProgressionResumePoint> resumeProvider)
+        Func<ProgressionResumePoint> resumeProvider,
+        Func<Task> prepareNewPlaythrough)
     {
         _driver = driver;
         _dialogueRunner = dialogueRunner;
         _chapterJson = chapterJson;
         _resumeProvider = resumeProvider;
+        _prepareNewPlaythrough = prepareNewPlaythrough;
     }
 
     public bool IsRunning => _driver.IsRunning;
@@ -32,6 +35,36 @@ public sealed class ProgressionLauncher
     public IReadOnlyList<CommittedChoice> PendingPath => _driver.PendingPath;
 
     private Task _running;
+    private bool _transitioning;
+    private long _transitionVersion;
+
+    // Stop → 로컬 전환 → Launch 전체가 하나의 요청이다. 중복 요청은 합류하지 않고 무시한다.
+    public async Task TransitionAsync(Func<Task> prepare)
+    {
+        if (_transitioning) return;
+        _transitioning = true;
+        _transitionVersion++;
+        Task running;
+        try
+        {
+            await StopAsync();
+            await prepare();
+            _running = LaunchCoreAsync();
+            running = _running;
+        }
+        finally { _transitioning = false; }
+        await running;
+    }
+
+    public async Task ResumeAfterAsync(Task ready)
+    {
+        long requestedAt = _transitionVersion;
+        await ready;
+        // 복구를 기다리는 동안 새 게임·fork를 선택했으면 옛 요청은 취소한다.
+        if (requestedAt != _transitionVersion || IsRunning) return;
+        await TransitionAsync(() => Task.CompletedTask);
+    }
+
     
     public Task RequestReplayAsync() => _driver.RequestReplayAsync();
 
@@ -48,7 +81,7 @@ public sealed class ProgressionLauncher
 
     public Task LaunchAsync()
     {
-        if (_driver.IsRunning)
+        if (_driver.IsRunning || _transitioning)
             return Task.CompletedTask;
 
         _running = LaunchCoreAsync();
@@ -76,6 +109,7 @@ public sealed class ProgressionLauncher
 
         ProgressionResumePoint resume = _resumeProvider();
 
+        bool resumeAccepted = false;
         if (resume != null)
         {
             if (resume.ChapterCompleted)
@@ -95,6 +129,7 @@ public sealed class ProgressionLauncher
             }
             else
             {
+                resumeAccepted = true;
                 chapter = savedChapter;
                 state = ProgressionState.Restore(savedChapter, resume.EpisodeId, resume.Stats);
                 variables = resume.Variables;
@@ -105,6 +140,9 @@ public sealed class ProgressionLauncher
                     $"[진행] 재개 - {resume.ChapterId}/{resume.EpisodeId}, Yarn 변수 {variables?.Count ?? 0}개");
             }
         }
+
+        if (resume != null && !resumeAccepted)
+            await _prepareNewPlaythrough();
 
         await _driver.RunAsync(
             _dialogueRunner.YarnProject,

@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-// saves/slot{n}.json — 회차 파일. 로컬이 진실. (회차 폴더 구조는 F2에서.)
+// 회차의 진행 snapshot. 로컬 envelope에 저장하고 서버에는 이 snapshot만 전송한다.
 //
 // 최상위 필드의 뜻은 둘 중 하나다: 장면 진입 스냅샷(CurrentEpisodeId = 장면 루트, Stats·Variables = 그 시점)
 // 또는 챕터 완료(ChapterCompleted). 장면 중간을 가리키는 세이브는 만들지 않는다.
@@ -109,12 +109,8 @@ public sealed class SavedLoadPlan
     public SaveLineTarget Target;
 }
 
-// saves/sync_queue.json - 서버로 아직 못 보낸 것과, 서버에 대해 아는 것.
-//
-// NextSeq가 큐와 같은 파일에 있는 것: 발급과 적재가 한 번의 쓰기.
-// 아직 단일 슬롯.
-// 슬롯을 늘릴 때, NextSeq/BaseRevision/PendingChoices에 슬롯 계층 추가.
-public sealed class SyncQueueFile
+// 회차 envelope 안의 미전송 이력과 서버 상태. snapshot과 함께 원자적으로 저장한다.
+public sealed class PlaythroughSyncState
 {
     // - 서버에 대해 알고 있는 상태 ---
     public long? PlaythroughId;
@@ -161,6 +157,8 @@ public sealed class AccountFile
 // saves/bookmarks.json — 즐겨찾기 목록. 수 제한 없음.
 public sealed class BookmarkFile
 {
+    // 복구 응답이 늦게 도착해도 이 기기에서 삭제한 북마크를 되살리지 않는다.
+    public List<string> DeletedIds = new();
     public List<Bookmark> Bookmarks = new();
 
     // 서버에 아직 못 지운 즐겨찾기 id. DELETE가 204를 주면 빠진다.

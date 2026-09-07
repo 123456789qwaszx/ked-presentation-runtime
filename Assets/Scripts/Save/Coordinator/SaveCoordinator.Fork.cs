@@ -135,19 +135,19 @@ public sealed partial class SaveCoordinator
 
     // 과거 Scene 하나를 출발점으로 새로운 Playthrough를 만든다.
     //
-    // 1. 기존 회차 서버 동기화 시도
+    // 1. 로컬 회차 선택 확정
     // 2. 해당 Scene 진입 Checkpoint 복원
     // 3. 그 Scene 이전 기록만 상속
     // 4. target이 있으면 저장된 선택을 replay
     // 5. 새로운 Playthrough로 저장
-    private async Task ForkFromScene(
+    private Task ForkFromScene(
         int sceneIndex,
         SaveLineTarget target = null)
     {
         if (sceneIndex < 0 || sceneIndex >= _scenes.Count)
             throw new ArgumentOutOfRangeException(nameof(sceneIndex));
 
-        await FlushBeforeForkAsync();
+        _localStore.SelectLocalPlaythrough();
 
         SceneRecord origin = _scenes[sceneIndex];
         SceneCheckpoint checkpoint = origin.Checkpoint;
@@ -210,6 +210,7 @@ public sealed partial class SaveCoordinator
             (target == null
                 ? " — 장면 루트에서"
                 : $" — {target.NodeName}/{target.LineId}#{target.Occurrence}까지 달린다"));
+        return Task.CompletedTask;
     }
 
     private static List<DialogueLogEntry> BuildBacklogBefore(
@@ -260,9 +261,9 @@ public sealed partial class SaveCoordinator
     //
     // 출처 회차 파일이 남아 있다면,
     // Bookmark가 만들어진 Scene 이전의 SceneRecord도 물려받는다.
-    public async Task ForkFromBookmark(Bookmark bookmark)
+    public Task ForkFromBookmark(Bookmark bookmark)
     {
-        await FlushBeforeForkAsync();
+        _localStore.SelectLocalPlaythrough();
 
         SceneCheckpoint checkpoint = bookmark.Checkpoint;
 
@@ -317,6 +318,7 @@ public sealed partial class SaveCoordinator
             $"물려받은 기록 {inheritedScenes.Count}개, " +
             $"백로그 {file.Backlog.Count}줄, " +
             $"시간 {bookmark.PlaySecondsAtBookmark}s");
+        return Task.CompletedTask;
     }
 
     private static List<SceneRecord> GetInheritedScenes(
@@ -335,28 +337,11 @@ public sealed partial class SaveCoordinator
 
     private void SaveAndActivateFork(LocalSaveFile file)
     {
-        _localStore.SaveAndSetActive(file);
-
-        _queue.SwitchTo(
-            _localStore.QueuePathOf(file.PlaythroughId));
-
-        _queue.Reset();
-    }
-
-    private async Task FlushBeforeForkAsync()
-    {
-        if (_server == null)
-            return;
-
-        await _server.FlushAsync();
-
-        int left = _queue.PendingCount;
-
-        if (left <= 0)
-            return;
-
-        Debug.LogWarning(
-            $"[저장] 갈라지기 전 동기화 못 함 - " +
-            $"옛 회차 큐에 {left}건 남김. 다음 시작에 다시 보낸다.");
+        _localStore.Create(file);
+        _localStore.SetActive(file.PlaythroughId);
+        BecomePlaythrough(file.PlaythroughId, file.ForkedFrom,
+            file.InheritedPlaySeconds, file.OwnPlaySeconds, file.Scenes);
+        _newPrepared = false;
+        if (_server != null) _ = _server.RequestSyncAsync(file.PlaythroughId);
     }
 }

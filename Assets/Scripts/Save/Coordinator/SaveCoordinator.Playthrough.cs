@@ -6,36 +6,21 @@ using System.Linq;
 
 public sealed partial class SaveCoordinator
 {
-    // 새 회차 준비:
-    // - 진행 중인 서버 동기화를 먼저 정리.
-    // - 기존 활성 회차는 해제하지만 저장 파일은 보존됨.
-    // - 새 PlaythroughId로 전환.
-    //
-    // 서버의 이전 회차 종료 처리는 아직 지원하지 않음.
-    // (현재 쌓이는 중. 지연시간 증가)
-    public async Task PrepareNewPlaythroughAsync()
+    // 네트워크 대기 없이 새 회차를 예약한다. 첫 Scene 진입 snapshot을 쓴 뒤 active를 바꾼다.
+    public Task PrepareNewPlaythroughAsync()
     {
-        if (_server != null)
-            await _server.FlushAsync();
-
-        _localStore.ClearActive();
-
-        BecomePlaythrough(
-            NewPlaythroughId(),
-            forkedFrom: null,
-            inheritedSeconds: 0,
-            ownSeconds: 0,
-            scenes: null);
-        
-        _queue.Reset();
-
-        Debug.Log($"[저장] 새 게임 - 회차 {_playthroughId}");
+        if (_newPrepared) return Task.CompletedTask;
+        _localStore.SelectLocalPlaythrough();
+        BecomePlaythrough(NewPlaythroughId(), null, 0, 0, null);
+        _newPrepared = true;
+        return Task.CompletedTask;
     }
 
     // active pointer가 가리키는 저장 파일을 읽어옴.
     // 예) 만약 'active = playthrough-B' -> playthrough-B.json
     public ProgressionResumePoint LoadActiveResumePoint()
     {
+        if (_newPrepared) return null;
         LocalSaveFile save = _localStore.LoadActive();
 
         if (save == null)

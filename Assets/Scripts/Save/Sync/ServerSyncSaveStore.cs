@@ -3,287 +3,123 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 
-// Syncs locally persisted changes to the server.
-//
-// The local save is authoritative. This class only uploads a server-side copy.
-// Failed sync attempts leave the queue untouched so they can be retried later.
-//
-// One sync attempt (per playthrough file + its queue):
-// [1] Resolve or create the server-side playthrough (idempotent on the local guid).
-// [2] Resolve the chapter version.
-// [3] Capture the current pending queue as a batch.
-// [4] Upload the batch together with the latest local save snapshot.
-// [5] Acknowledge and remove the batch only after a successful response.
-//
-// Any failure simply ends the current attempt. Offline play is an expected path.
-//
-// 활성 회차는 TrySyncAsync(코디네이터가 쥔 큐 인스턴스), 옛 회차들은 SyncStaleQueuesAsync(파일마다 큐를 새로 연다).
+// Unity 메인 스레드의 순차 worker. 활성·과거 회차를 같은 ID 큐로 처리한다.
+// 실패한 ID는 이번 drain에서는 재시도하지 않는다. 다음 명시적 sync/커밋/앱 시작이 재시도 기회다.
 public sealed class ServerSyncSaveStore
 {
-    private enum SyncOutcome
-    {
-        Done,
-        Failed,
-        Conflict,
-    }
-
-    private readonly ServerApi _api;
-    private readonly GuestSession _session;
-    private readonly SyncQueue _queue;
-    private readonly ChapterVersionResolver _versionResolver;
     private readonly ILocalSaveStore _localStore;
-    private readonly string _deviceKey;
-
-    // Only one active sync may run at a time.
-    // Requests arriving while one is in flight are coalesced into one follow-up sync.
+    private readonly ISaveSyncTransport _transport;
+    private readonly Queue<string> _pending = new();
+    private readonly HashSet<string> _queued = new(StringComparer.Ordinal);
     private Task _inFlight;
-    private bool _syncAgain;
 
-    // 409 - 다른 기기가 활성 회차를 먼저 저장했다.
-    // 큐는 손대지 않은 채 넘긴다.
-    public event Action ConflictDetected;
+    public event Action<string, LocalSaveFile> ConflictForked;
 
-    public ServerSyncSaveStore(
-        ServerApi api,
-        GuestSession session,
-        SyncQueue queue,
-        ChapterVersionResolver versionResolver,
-        ILocalSaveStore localStore,
-        string deviceKey)
+    public ServerSyncSaveStore(ILocalSaveStore localStore, ISaveSyncTransport transport)
     {
-        _api = api;
-        _session = session;
-        _queue = queue;
-        _versionResolver = versionResolver;
         _localStore = localStore;
-        _deviceKey = deviceKey;
+        _transport = transport;
     }
 
-    // - _inflight가 없을 경우만 RunAsync();
-    // - 이 후엔 몇번을 호출되든 syncAgain = true로 합쳐서 구분
-    // - 현재 Sync가 끝날 경우 후속 Sync 딱 한 번.
     public Task TrySyncAsync()
     {
-        if (_inFlight != null)
-        {
-            _syncAgain = true;
-            return _inFlight;
-        }
-
-        Task run = RunAsync();
-
-        // Avoid marking an already-completed sync as in flight.
-        if (!run.IsCompleted)
-            _inFlight = run;
-
-        return run;
+        foreach (string id in _localStore.ListPlaythroughIds()) Queue(id);
+        return Start();
     }
 
-    // 현재 pending sync들이 정리 될 때까지 gameplay를 막음.
-    //
-    // - 일반 진행에서는 _= server.TrySyncAsync();처럼 시간을 잡아두지 않지만,
-    //   새 게임이나 fork 처럼 지금 회차를 바꾸기 전에 기존 동기화 작업을 끝내야 하는 경우
-    //   transition boundary에서 유저를 대기시킨다.
-    public async Task FlushAsync()
+    public Task RequestSyncAsync(string id)
     {
-        if (_inFlight == null)
-            await TrySyncAsync();
-
-        while (_inFlight != null)
-            await _inFlight;
+        Queue(id);
+        return Start();
     }
 
-    // 옛 회차 큐에 남은 미전송 처리.
-    // 현재 활성 회차는 건너뜀.
-    public async Task SyncStaleQueuesAsync(
-        IReadOnlyList<string> playthroughIds,
-        string activeId)
+    private void Queue(string id)
     {
-        for (int i = 0; i < playthroughIds.Count; i++)
-        {
-            string id = playthroughIds[i];
-
-            if (string.Equals(id, activeId, StringComparison.Ordinal))
-                continue;
-
-            var queue = new SyncQueue(_localStore.QueuePathOf(id));
-
-            if (queue.PendingCount == 0 || queue.ConflictedAtUtc != null)
-                continue;
-
-            LocalSaveFile save = _localStore.LoadPlaythrough(id);
-
-            if (save == null)
-                continue;
-
-            Debug.Log($"[동기화] 옛 회차 {id} " +
-                      $"미전송 {queue.PendingCount}건을 보낸다.");
-
-            try
-            {
-                SyncOutcome outcome = 
-                    await SyncOnceAsync(save, queue);
-
-                // 옛 회차의 409는 갈라지지 않는다
-                // (활성이 아니라 이어 갈 진행이 없다. 표시해 두고 다음부터 건너뛴다.)
-                if (outcome == SyncOutcome.Conflict)
-                {
-                    queue.MarkConflicted(DateTime.UtcNow.ToString("o", System.Globalization.CultureInfo.InvariantCulture));
-                    Debug.LogWarning($"[동기화] 옛 회차 {id} 충돌(409) — 다른 기기가 앞섰다. 큐 보존, 다시 보내지 않는다.");
-                }
-            }
-            catch (Exception error)
-            {
-                Debug.LogError($"[동기화] 옛 회차 {id} 실패\n{error}");
-            }
-        }
+        if (id != null && _localStore.Open(id)?.NeedsSync == true && _queued.Add(id)) _pending.Enqueue(id);
     }
 
-    private async Task RunAsync()
+    private Task Start()
     {
+        if (_inFlight != null) return _inFlight;
+        // 먼저 task를 게시하므로 동기 완료·재진입도 같은 drain을 관찰한다.
+        var completion = new TaskCompletionSource<bool>();
+        _inFlight = completion.Task;
+        _ = DrainAsync(completion);
+        return completion.Task;
+    }
+
+    private async Task DrainAsync(TaskCompletionSource<bool> completion)
+    {
+        var failed = new HashSet<string>(StringComparer.Ordinal);
         try
         {
-            await SyncActiveAsync();
-        }
-        catch (Exception error)
-        {
-            Debug.LogError($"[동기화] 실패\n{error}");
+            while (_pending.Count > 0)
+            {
+                string id = _pending.Dequeue();
+                _queued.Remove(id);
+                if (failed.Contains(id)) continue;
+                try
+                {
+                    if (await SyncOnceAsync(id)) Queue(id);
+                    else failed.Add(id);
+                }
+                catch (Exception error)
+                {
+                    failed.Add(id);
+                    Debug.LogError($"[동기화] 회차 {id} 실패. 로컬 기록 보존\n{error}");
+                }
+            }
         }
         finally
         {
             _inFlight = null;
-
-            if (_syncAgain)
-            {
-                _syncAgain = false;
-                _ = TrySyncAsync();
-            }
+            completion.TrySetResult(true);
         }
     }
 
-    private async Task SyncActiveAsync()
+    private async Task<bool> SyncOnceAsync(string id)
     {
-        LocalSaveFile save = _localStore.LoadActive();
+        PlaythroughSession session = _localStore.Open(id);
+        SyncWork work = session?.CaptureSyncWork();
+        if (work == null) return true;
 
-        // Queue entries are added only after the local snapshot is saved.
-        if (save == null)
-            return;
-
-        SyncOutcome outcome = 
-            await SyncOnceAsync(save, _queue);
-
-        if (outcome == SyncOutcome.Conflict)
-            ConflictDetected?.Invoke();
-    }
-
-    private async Task<SyncOutcome> SyncOnceAsync(
-        LocalSaveFile save, 
-        SyncQueue queue)
-    {
-        long? playthroughId = 
-            queue.PlaythroughId ?? 
-            await CreatePlaythroughAsync(save, queue);
-
-        if (playthroughId == null)
-            return SyncOutcome.Failed;
-
-        int? chapterVersion = 
-            await _versionResolver.ResolveAsync(save.ChapterId);
-
-        if (chapterVersion == null)
-            return SyncOutcome.Failed;
-
-        SyncBatch batch = queue.CaptureBatch();
-
-        var request = new SaveUploadRequestDto
+        long? serverId = session.Read().Sync.PlaythroughId;
+        if (serverId == null)
         {
-            ChapterId = save.ChapterId,
-            ChapterVersion = chapterVersion.Value,
-            CurrentEpisodeId = save.CurrentEpisodeId,
-            Snapshot = save,
-            PlaySeconds = save.PlaySeconds,
-            DeviceKey = _deviceKey,
-            BaseRevision = queue.BaseRevision ?? 0,
-            Choices = batch.Choices,
-            Events = batch.Events,
-            InheritedPlaySeconds = save.InheritedPlaySeconds,
-            OwnPlaySeconds = save.OwnPlaySeconds,
-            ChapterCompleted = save.ChapterCompleted,
-        };
+            serverId = await _transport.CreatePlaythroughAsync(work.Snapshot);
+            if (serverId == null) return false;
+            session.SetServerId(serverId.Value);
+        }
+        if (work.ChapterVersion == null)
+        {
+            int? version = await _transport.ResolveChapterVersionAsync(work.Snapshot.ChapterId);
+            if (version == null) return false;
+            session.SetChapterVersion(work.Id, version.Value);
+            work.ChapterVersion = version;
+        }
 
-        ApiResult<SaveUploadResponseDto> result =
-            await _session.CallAsync(
-                token
-                    => _api.PutSaveAsync(
-                        playthroughId.Value,
-                        ServerSaveContract.PrimarySlotNo,
-                        request,
-                        token));
-
+        var result = await _transport.UploadAsync(serverId.Value, work);
         if (result.Ok)
         {
-            queue.Acknowledge(batch, result.Body.Revision, save.Scenes?.Count ?? 0);
-
-            Debug.Log($"[동기화] 완료 — revision {result.Body.Revision}, "
-                      + $"선택 {batch.Choices.Count}건, 이벤트 {batch.Events.Count}건"
-                      + (result.Body.Replayed ? " (재전송 흡수)" : ""));
-
-            return SyncOutcome.Done;
+            session.Acknowledge(work.Id, result.Body.Revision);
+            Debug.Log($"[동기화] {id} commit {work.CommitVersion} 완료 — revision {result.Body.Revision}");
+            return true;
         }
-
         if (result.ErrorCode == "CONFLICT")
-            return SyncOutcome.Conflict;
-
-        // 413은 "줄여 보내라".
-        // 백로그 상한(300줄) 안이면 닿지 않는다 - 닿았다면 상한이 깨진 것.
-        if (result.Status == 413)
-            Debug.LogError($"[동기화] 스냅샷이 서버 상한을 넘었다(413) — {result.RawBody}");
-        else if (!result.NetworkError)
-            Debug.LogWarning($"[동기화] 실패 — HTTP {result.Status} {result.ErrorCode}. 큐 보존.");
-
-        // 일반 실패도 Queue보존. 서버 sync 실패하더라도 LocalSaveFile은 성공한 상태.
-        // 나중에 다시 보내면 됨.
-        return SyncOutcome.Failed;
-    }
-
-    // 최초 서버 회차 생성.
-    // 회차 파일의 '로컬 GUID'가 멱등 키.
-    // 같은 guid로 다시 보내면 서버는 있던 회차를 돌려준다(200).
-    // fork로 생성되었다면 부모의 로컬 guid와 장면 번호를 함께.
-    // 부모가 아직 서버에 업로드 되지 않았더라도,
-    // client의 GUID를 기반으로 나중에 관계를 자체적으로 연결함.
-    private async Task<long?> CreatePlaythroughAsync(LocalSaveFile save, SyncQueue queue)
-    {
-        var request = new PlaythroughCreateRequestDto
         {
-            ClientPlaythroughId = save.PlaythroughId,
-            ForkedFrom = save.ForkedFrom == null
-                ? null
-                : new ForkOriginDto
-                {
-                    ClientPlaythroughId = save.ForkedFrom.PlaythroughId,
-                    SceneIndex = save.ForkedFrom.SceneIndex,
-                },
-        };
-
-        ApiResult<PlaythroughCreatedDto> result =
-            await _session.CallAsync(token => _api.CreatePlaythroughAsync(_session.UserId.Value, request, token));
-
-        if (!result.Ok)
-        {
-            if (!result.NetworkError)
-                Debug.LogWarning($"[동기화] 회차 생성 실패 — HTTP {result.Status} {result.ErrorCode}");
-
-            return null;
+            if (work.BaseRevision == 0)
+            {
+                // 신규 회차까지 충돌하는 서버 오류에서 무한 fork를 만들지 않는다.
+                session.MarkConflicted(DateTime.UtcNow.ToString("o"));
+                return false;
+            }
+            // 응답의 원래 회차를 갈라 보존한다. active가 바뀌었으면 현재 진행은 건드리지 않는다.
+            PlaythroughSession fork = _localStore.ForkConflict(id);
+            Queue(fork.Id);
+            ConflictForked?.Invoke(id, fork.Read().Snapshot);
+            return true;
         }
-
-        queue.SetPlaythroughId(result.Body.PlaythroughId);
-
-        Debug.Log(
-            $"[동기화] 회차 {(result.Status == 201 ? "생성" : "확인")}({result.Status}) — playthroughId {result.Body.PlaythroughId}, " +
-            $"client {result.Body.ClientPlaythroughId}" +
-            (request.ForkedFrom == null ? "" : $", 갈래 ← {request.ForkedFrom.ClientPlaythroughId} 장면 {request.ForkedFrom.SceneIndex}"));
-
-        return result.Body.PlaythroughId;
+        Debug.LogWarning($"[동기화] {id} 전송 보류 — HTTP {result.Status} {result.ErrorCode}");
+        return false;
     }
 }

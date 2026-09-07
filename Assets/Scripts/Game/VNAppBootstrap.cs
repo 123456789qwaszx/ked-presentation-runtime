@@ -393,7 +393,8 @@ public class VNAppBootstrap : MonoBehaviour
             _progressionDriver,
             dialogueRunner,
             progressionChapterJson,
-            _saveCoordinator.LoadActiveResumePoint);
+            _saveCoordinator.LoadActiveResumePoint,
+            _saveCoordinator.PrepareNewPlaythroughAsync);
     }
 
     // 저장·동기화 스택. 로컬이 진실(파일), 서버는 사본(큐로 민다). 슬롯 1 고정.
@@ -402,10 +403,9 @@ public class VNAppBootstrap : MonoBehaviour
         string saveRoot = Path.Combine(Application.persistentDataPath, "saves");
 
         LocalFileSaveStore localStore = new(saveRoot);
-        SyncQueue syncQueue = new(Path.Combine(saveRoot, "sync_queue.json"));
 
         if (string.IsNullOrWhiteSpace(serverBaseUrl))
-            return new SaveCoordinator(localStore, syncQueue, server: null);
+            return new SaveCoordinator(localStore, server: null);
 
         ServerApi serverApi = new(serverBaseUrl);
         GuestSession guestSession = new(serverApi, Path.Combine(Application.persistentDataPath, "account.json"));
@@ -417,12 +417,12 @@ public class VNAppBootstrap : MonoBehaviour
         if (deviceKey.Length > 64)
             deviceKey = deviceKey.Substring(0, 64);
 
-        ServerSyncSaveStore serverSync = new(
-            serverApi, guestSession, syncQueue, versionResolver, localStore, deviceKey);
+        SaveSyncTransport transport = new(serverApi, guestSession, versionResolver, deviceKey);
+        ServerSyncSaveStore serverSync = new(localStore, transport);
         ServerBookmarkSync bookmarkSync = new(serverApi, guestSession, versionResolver, localStore);
         ServerRestore restore = new(serverApi, guestSession, localStore);
 
-        return new SaveCoordinator(localStore, syncQueue, serverSync, bookmarkSync, restore);
+        return new SaveCoordinator(localStore, serverSync, bookmarkSync, restore);
     }
 
     private void BootstrapPlaybackControls()

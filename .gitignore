@@ -103,3 +103,8 @@ InitTestScene*.unity*
 /[Aa]ssets/[Aa]rt/[Pp]ortraits.meta
 # 등가성 하네스 재생 산출물 (커밋 대상 아님)
 EquivalenceReports/
+
+# Maintained standalone save lifecycle harness
+!tests/SaveLifecycle/SaveLifecycle.csproj
+tests/**/bin/
+tests/**/obj/

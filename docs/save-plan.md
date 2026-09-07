@@ -1,3 +1,5 @@
+> server_DB_Test의 최신 구현은 [save-lifecycle-v3.md](save-lifecycle-v3.md)를 따른다. 아래 문서는 이전 설계 이력이다.
+
 # 세이브 확장 — 작업 계획 (정본, v2 갈래 모델)
 
 2026-09-02. 장면 경계 재정렬(`scene-boundary-plan.md`) 위에 **이력 · 즐겨찾기 · 갈래 로드**를 올린다.

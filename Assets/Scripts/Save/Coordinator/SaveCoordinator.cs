@@ -3,24 +3,13 @@ using System.Collections.Generic;
 using System.Globalization;
 using UnityEngine;
 
-// Bridges progression reports into the save layer.
-// This is the save layer's only dependency on progression-specific types.
-//
-// 저장 단위는 장면이다 (G4). 장면 끝 fold 한 번에:
-// 1) 현재 상태를 먼저 보존    / localStore.Save(...)  — 장면 진입 스냅샷 또는 챕터 완료
-// 2) 서버용 이력을 남김       / _queue.EnqueueChoice/Event(...)  — 확정 순서대로
-// 3) 서버 전송은 기다리지 않음 / _server.TrySyncAsync(...)
-//
-// 회차 파일은 이력(Scenes)을 든다 (F1). 장면 진입에서 스냅샷을 받아 두고, 장면 끝에 경로를 붙여
-// 장면 기록 하나로 접는다. 이력은 현재 챕터 안에서만 쌓이고 챕터가 바뀌면 비운다.
-// 시간은 둘로 센다 — 물려받은 것(Inherited)과 이 회차에서 새로 플레이한 것(Own).
-//
-// 갈라지기 (F2): 이력의 장면 기록 하나를 물려받아 새 회차 파일을 쓰고 활성으로 세운다.
-// 옛 회차 파일은 그대로 남는다. 그 뒤 런처가 다시 띄우면 재개 경로가 새 회차를 연다.
+// 장면 보고를 회차 snapshot과 outbox로 함께 확정한다.
+// 진행은 active session을 사용하고, 동기화는 회차 ID가 고정된 작업을 사용한다.
 public sealed partial class SaveCoordinator : IProgressionReporter
 {
     private readonly ILocalSaveStore _localStore;
-    private readonly SyncQueue _queue; // 서버에 아직 보내지 못한 변경사항들.
+    private PlaythroughSession _active;
+    private bool _newPrepared;
     private readonly ServerSyncSaveStore _server;
 
     private float _startedAt = Time.realtimeSinceStartup;
@@ -42,19 +31,18 @@ public sealed partial class SaveCoordinator : IProgressionReporter
 
     public SaveCoordinator(
         ILocalSaveStore localStore,
-        SyncQueue queue,
         ServerSyncSaveStore server,
         ServerBookmarkSync bookmarkSync = null,
         ServerRestore restore = null)
     {
         _localStore = localStore;
-        _queue = queue;
+        _localStore.Initialize();
         _server = server;
         _bookmarkSync = bookmarkSync;
         _restore = restore;
 
         if (_server != null)
-            _server.ConflictDetected += HandleConflict;
+            _server.ConflictForked += HandleConflictForked;
     }
 
     public IReadOnlyList<SceneRecord> Scenes => _scenes;
@@ -64,7 +52,7 @@ public sealed partial class SaveCoordinator : IProgressionReporter
     private int TotalSeconds => _inheritedSeconds + OwnSeconds;
 
     // SaveCoordinator 전체를 특정 회차에 접속.
-    // - 메모리 상태, Scene이력, 플레이 시간, SyncQueue
+    // - 메모리 상태, Scene 이력, 플레이 시간, 고정 회차 session
     private void BecomePlaythrough(
         string id, 
         ForkOrigin forkedFrom,
@@ -85,7 +73,7 @@ public sealed partial class SaveCoordinator : IProgressionReporter
 
         _currentEntry = null;
 
-        _queue.SwitchTo(_localStore.QueuePathOf(id));
+        _active = _localStore.Open(id);
     }
 
     private static string NewPlaythroughId() => Guid.NewGuid().ToString("N");

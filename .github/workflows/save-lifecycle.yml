@@ -1,0 +1,29 @@
+name: Save lifecycle
+on:
+  push:
+    branches: [server_DB_Test]
+  pull_request:
+    paths:
+      - 'Assets/Scripts/Save/**'
+      - 'Assets/Scripts/Server/**'
+      - 'Assets/Scripts/Progression/**'
+      - 'tests/SaveLifecycle/**'
+      - '.github/workflows/save-lifecycle.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  save-lifecycle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            Assets/Scripts
+            tests/SaveLifecycle
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Run save lifecycle regression harness
+        run: dotnet run --project tests/SaveLifecycle/SaveLifecycle.csproj --configuration Release

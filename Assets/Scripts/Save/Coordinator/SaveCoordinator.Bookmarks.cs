@@ -70,6 +70,8 @@ public sealed partial class SaveCoordinator
         if (removed == 0)
             return false;
 
+        if (!file.DeletedIds.Contains(id)) file.DeletedIds.Add(id);
+
         if (_bookmarkSync != null && !file.PendingDeletes.Contains(id))
             file.PendingDeletes.Add(id);
 

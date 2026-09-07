@@ -4,184 +4,53 @@ using UnityEngine;
 
 public sealed partial class SaveCoordinator
 {
-    private Task _startupSync = Task.CompletedTask;
+    private Task _startupRestore = Task.CompletedTask;
+    private bool _startupStarted;
+
+    // 이어하기만 초기 복구를 기다린다. 기존 로컬이 있으면 즉시 완료된다.
+    public Task WaitForStartupSyncAsync() => _startupRestore;
 
     public Task SyncPendingAsync()
     {
-        _startupSync = SyncPendingCoreAsync();
-        return _startupSync;
+        if (_startupStarted) return _startupRestore;
+        _startupStarted = true;
+        _startupRestore = RestoreThenSyncAsync();
+        return _startupRestore;
     }
 
-    public Task WaitForStartupSyncAsync()
+    private async Task RestoreThenSyncAsync()
     {
-        return _startupSync;
-    }
-
-
-    // ---- Startup Sync ----
-
-    // 서버 없으면 끝
-    // -> 필요하면 복구
-    // -> active queue 선택
-    // -> 이전 회차 queue 동기화
-    // -> bookmark 동기화
-    // -> active 회차 동기화
-    private async Task SyncPendingCoreAsync()
-    {
-        if (_server == null)
-            return;
-
-        await RestoreIfNeededAsync();
-
-        string activeId = _localStore.ActiveId;
-
-        if (activeId != null)
-            _queue.SwitchTo(_localStore.QueuePathOf(activeId));
-
-        await _server.SyncStaleQueuesAsync(
-            _localStore.ListPlaythroughIds(),
-            activeId);
-
-        if (_bookmarkSync != null)
-            await _bookmarkSync.SyncAllAsync();
-
-        await _server.TrySyncAsync();
-    }
-
-    private async Task RestoreIfNeededAsync()
-    {
-        if (_restore == null)
-            return;
-
-        bool hasActiveSave = _localStore.LoadActive() != null;
-        bool hasAnyPlaythrough =
-            _localStore.ListPlaythroughIds().Count > 0;
-
-        if (hasActiveSave || hasAnyPlaythrough)
-            return;
-
-        await _restore.RestoreAsync();
-    }
-
-
-    // ---- "409 Conflict" ----
-
-    // 다른 기기가 현재 회차를 먼저 저장했다.
-    //
-    // 이미 확정된 서버 기록은 되돌리거나 덮어쓰지 않는다.
-    // 이 기기에서 아직 서버에 전달하지 못한 진행만 새 회차로 갈라 이어 간다.
-    private void HandleConflict()
-    {
-        // Phase: ContextPrepared
-        LocalSaveFile current = _localStore.LoadActive();
-
-        // Active Save가 없을 경우 아무것도 하지 않음.
-        if (current == null)
-            return;
-        
-        // 지나간 회차의 Conflict일 경우 아무것도 하지 않음.
-        if (_playthroughId != null
-            && !string.Equals(_playthroughId, current.PlaythroughId, StringComparison.Ordinal)) 
-            return;
-
-        SyncBatch pending = _queue.CaptureBatch();
-
-        int sceneIndex = _queue.SyncedSceneCount;
-        string sourcePlaythroughId = current.PlaythroughId;
-        string forkPlaythroughId = NewPlaythroughId();
-
-        var origin = new ForkOrigin
+        try
         {
-            PlaythroughId = sourcePlaythroughId,
-            SceneIndex = sceneIndex,
-            Target = null,
-        };
-
-        var ctx = new ConflictForkContext(
-            current,
-            pending,
-            sceneIndex,
-            sourcePlaythroughId,
-            forkPlaythroughId,
-            origin);
-        
-        SetPhase(ctx, ConflictForkPhase.ContextPrepared);
-        
-        // Phase: SavePrepared
-        ctx.Save.PlaythroughId = ctx.ForkPlaythroughId;
-        ctx.Save.ForkedFrom = ctx.Origin;
-        ctx.Save.SavedAtUtc = NowUtc();
-
-        if (ctx.Save.Scenes != null
-            && ctx.SceneIndex < ctx.Save.Scenes.Count)
-        {
-            ctx.Save.InheritedPlaySeconds =
-                ctx.Save.Scenes[ctx.SceneIndex].Checkpoint.PlaySecondsAtEntry;
-
-            ctx.Save.OwnPlaySeconds =
-                Math.Max(0, ctx.Save.PlaySeconds - ctx.Save.InheritedPlaySeconds);
+            if (_restore != null) await _restore.RestoreAsync();
         }
-        
-        SetPhase(ctx, ConflictForkPhase.SavePrepared);
-        
-        // Phase: SavePersisted
-        _localStore.SaveAndSetActive(ctx.Save);
-        
-        SetPhase(ctx, ConflictForkPhase.SavePersisted);
-        
-        // Phase: SourceQueueReleased
-        _queue.Discard(ctx.Pending);
-        
-        SetPhase(ctx, ConflictForkPhase.SourceQueueReleased);
-        
-        // Phase: ForkQueueSelected
-        _queue.SwitchTo(
-            _localStore.QueuePathOf(ctx.ForkPlaythroughId));
-        
-        SetPhase(ctx, ConflictForkPhase.ForkQueueSelected);
-        
-        // Phase: PendingRequeued
-        _queue.Reset(ctx.Pending.Choices, ctx.Pending.Events);
-        
-        SetPhase(ctx, ConflictForkPhase.PendingRequeued);
-        
-        // Phase: RuntimeStateResolved
-        if (_playthroughId != null)
+        catch (Exception error)
         {
-            _playthroughId = ctx.ForkPlaythroughId;
-            _forkedFrom = ctx.Origin;
-
-            _inheritedSeconds = ctx.Save.InheritedPlaySeconds;
-            _ownSecondsBase = ctx.Save.OwnPlaySeconds;
-
-            _startedAt = Time.realtimeSinceStartup;
+            Debug.LogError($"[복구] 초기 복구 실패. 다음 시작에 재시도\n{error}");
         }
-
-        SetPhase(ctx, ConflictForkPhase.RuntimeStateResolved);
-        
-        // Phase: ConflictPublished
-        Debug.LogWarning(
-            $"[저장] 충돌(409) — 다른 기기가 회차 {ctx.SourcePlaythroughId}를 먼저 저장했다. " +
-            $"이 기기의 진행은 새 회차 {ctx.ForkPlaythroughId}로 갈라 이어 간다 " +
-            $"(출처 장면 {ctx.SceneIndex}, " +
-            $"미전송 선택 {ctx.Pending.Choices.Count}건 → seq 1부터, " +
-            $"이벤트 {ctx.Pending.Events.Count}건).");
-
-        ConflictForked?.Invoke(ctx.Origin);
-
-        SetPhase(ctx, ConflictForkPhase.ConflictPublished);
-        
-        // Phase: ResyncRequested
-        _ = _server.TrySyncAsync();
-
-        SetPhase(ctx, ConflictForkPhase.ResyncRequested);
-        
-        // Phase: Completed
-        SetPhase(ctx, ConflictForkPhase.Completed);
+        // 이 작업들은 startup 장벽에 포함하지 않는다.
+        if (_server != null) _ = _server.TrySyncAsync();
+        if (_bookmarkSync != null) _ = SyncBookmarksSafelyAsync();
     }
 
-    private void SetPhase(ConflictForkContext ctx, ConflictForkPhase phase)
+    private async Task SyncBookmarksSafelyAsync()
     {
-        ctx.Phase = phase;
+        try { await _bookmarkSync.SyncAllAsync(); }
+        catch (Exception error) { Debug.LogError($"[즐겨찾기] 동기화 보류\n{error}"); }
+    }
+
+    private void HandleConflictForked(string sourceId, LocalSaveFile fork)
+    {
+        // 네트워크 작업이 시작된 뒤 사용자가 다른 회차를 선택했을 수 있다.
+        if (_newPrepared || _playthroughId != sourceId || _localStore.ActiveId != fork.PlaythroughId) return;
+        // 진행 중인 Scene의 체크포인트와 경로는 그대로 두고 회차 소유권만 바꾼다.
+        _playthroughId = fork.PlaythroughId;
+        _forkedFrom = fork.ForkedFrom;
+        _active = _localStore.Open(fork.PlaythroughId);
+        int ownNow = OwnSeconds;
+        _ownSecondsBase = Math.Max(0, _inheritedSeconds + ownNow - fork.InheritedPlaySeconds);
+        _inheritedSeconds = fork.InheritedPlaySeconds;
+        _startedAt = Time.realtimeSinceStartup;
+        ConflictForked?.Invoke(fork.ForkedFrom);
     }
 }

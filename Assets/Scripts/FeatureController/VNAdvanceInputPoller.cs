@@ -152,9 +152,7 @@ public sealed class VNAdvanceInputPoller : MonoBehaviour
 
         Bookmark latest = bookmarks[bookmarks.Count - 1];
 
-        await _progressionLauncher.StopAsync();
-        await _saveCoordinator.ForkFromBookmark(latest);
-        await _progressionLauncher.LaunchAsync();
+        await _progressionLauncher.TransitionAsync(() => _saveCoordinator.ForkFromBookmark(latest));
     }
 
     private async void StartProgression()
@@ -165,10 +163,8 @@ public sealed class VNAdvanceInputPoller : MonoBehaviour
         if (_debugPlayback != null && _debugPlayback.IsRunning)
             return;
 
-        if (_saveCoordinator != null)
-            await _saveCoordinator.WaitForStartupSyncAsync();
-
-        await _progressionLauncher.LaunchAsync();
+        await _progressionLauncher.ResumeAfterAsync(
+            _saveCoordinator?.WaitForStartupSyncAsync() ?? Task.CompletedTask);
     }
 
     private async void StartNewGame()
@@ -176,9 +172,7 @@ public sealed class VNAdvanceInputPoller : MonoBehaviour
         if (_progressionLauncher.IsRunning || _debugPlayback.IsRunning)
             return;
         
-        await _saveCoordinator.WaitForStartupSyncAsync();
-        await _saveCoordinator.PrepareNewPlaythroughAsync();
-        await _progressionLauncher.LaunchAsync();
+        await _progressionLauncher.TransitionAsync(_saveCoordinator.PrepareNewPlaythroughAsync);
     }
 
     private bool CanRunDebugPlayback()
