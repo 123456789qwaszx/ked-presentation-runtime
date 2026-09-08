@@ -17,9 +17,12 @@ public sealed partial class SaveCoordinator
 
     public Task SyncPendingAsync()
     {
-        if (_startupStarted) return _startupRestore;
+        if (_startupStarted) 
+            return _startupRestore;
+        
         _startupStarted = true;
         _startupRestore = RestoreThenSyncAsync();
+        
         return _startupRestore;
     }
 
@@ -27,7 +30,8 @@ public sealed partial class SaveCoordinator
     {
         try
         {
-            if (_restore != null) await _restore.RestoreResumeAsync();
+            if (_restore != null) 
+                await _restore.RestoreResumeAsync();
         }
         catch (Exception error)
         {

@@ -36,6 +36,9 @@ public class VNAppBootstrap : MonoBehaviour
     private ProgressionLauncher _progressionLauncher;
 
     private SaveCoordinator _saveCoordinator;
+    
+    private AlbumUnlockService _albumUnlockService;
+    private AlbumController _albumController;
 
     [Header("UIManager")]
     [SerializeField] private UIManager uiManager;
@@ -88,6 +91,9 @@ public class VNAppBootstrap : MonoBehaviour
     [Header("저장·동기화 (M7)")]
     [Tooltip("spring-prepare 서버 주소. 비우면 서버 동기화 없이 로컬 저장만 한다.")]
     [SerializeField] private string serverBaseUrl = "http://localhost:8080";
+    
+    [Header("Album")]
+    [SerializeField] private VNAlbumDatabaseSO albumDatabase;
 
     [Header("VNAdvanceGate")]
     [SerializeField] private VNAdvanceInputPoller vnAdvanceInputPoller;
@@ -125,6 +131,8 @@ public class VNAppBootstrap : MonoBehaviour
     private void Awake()
     {
         BootstrapUIManager();
+        
+        BootstrapAlbum();
 
         BootstrapPresentationRoots();
 
@@ -155,6 +163,17 @@ public class VNAppBootstrap : MonoBehaviour
 
         _uiThemePatch = new UIThemePatchAdapter(uiManager, uiPatchService);
         _screenBindings = new VNScreenBindings(uiManager);
+    }
+    
+    private void BootstrapAlbum()
+    {
+        string albumPath = Path.Combine(
+            Application.persistentDataPath, "saves", "album.json");
+
+        IAlbumProgressStore albumStore = new LocalAlbumProgressStore(albumPath);
+
+        _albumUnlockService = new(albumDatabase, albumStore);
+        _albumController = new(albumDatabase, _albumUnlockService);
     }
 
     private void BootstrapPresentationRoots()

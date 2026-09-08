@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 51cb4dabf44f8f7438b19785d7b6adbc, type: 3}
+  m_Name: AlbumDatabase
+  m_EditorClassIdentifier: Assembly-CSharp::VNAlbumDatabaseSO
+  items:
+  - {fileID: 11400000, guid: 038c1ae10239c6b449ca13cd06cb664f, type: 2}
+  - {fileID: 11400000, guid: 4871de64ccbf1884f98020ae5b4b915a, type: 2}
