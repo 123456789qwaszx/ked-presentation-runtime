@@ -185,7 +185,7 @@ GameObject:
   - component: {fileID: 2006796239862671402}
   - component: {fileID: 7291935014901849373}
   m_Layer: 5
-  m_Name: BacklogEntryView(Clone)
+  m_Name: BacklogEntryView
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
