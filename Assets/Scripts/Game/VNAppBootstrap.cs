@@ -497,7 +497,12 @@ public class VNAppBootstrap : MonoBehaviour
             _vnFeatureController,
             _dialogueAdvanceDispatcher);
 
-        _screenBindings.ConfigureProgression(_progressionLauncher, _saveCoordinator);
+        _screenBindings.ConfigureProgression(
+            _progressionLauncher,
+            _saveCoordinator);
+
+        _screenBindings.ConfigureAlbum(
+            _albumController);
     }
     
     private void BootstrapEquivalenceHarness()
