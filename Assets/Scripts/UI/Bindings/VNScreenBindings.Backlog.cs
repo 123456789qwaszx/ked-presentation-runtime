@@ -2,15 +2,18 @@ public sealed partial class VNScreenBindings
 {
     private ProgressionLauncher _progressionLauncher;
     private SaveCoordinator _saveCoordinator;
+    private bool _learningMode;
 
     // 백로그 갈라지기는 진행 계층과 저장 계층이 모두 필요.
     // 진행 계층 없이 도는 디버그 경로에서는 null일 수 있음.
     public void ConfigureProgression(
         ProgressionLauncher launcher,
-        SaveCoordinator saveCoordinator)
+        SaveCoordinator saveCoordinator,
+        bool learningMode = false)
     {
         _progressionLauncher = launcher;
         _saveCoordinator = saveCoordinator;
+        _learningMode = learningMode;
     }
 
     private void OpenBacklogPanel()
@@ -46,7 +49,7 @@ public sealed partial class VNScreenBindings
             return true;
 
         // 완료된 이전 Scene이라면 새 회차로 갈라질 수 있다.
-        return _saveCoordinator != null &&
+        return !_learningMode && _saveCoordinator != null &&
                _saveCoordinator.CanForkFrom(entry);
     }
 
@@ -71,7 +74,7 @@ public sealed partial class VNScreenBindings
         //  - 정확한 라인까지 replay 가능한지
         //  - 불가능하면 Scene 루트로 fallback할지
         // 를 모두 판단.
-        if (_saveCoordinator == null ||
+        if (_learningMode || _saveCoordinator == null ||
             !_saveCoordinator.TryResolveForkTarget(entry, out SaveForkTarget forkTarget))
             return;
 

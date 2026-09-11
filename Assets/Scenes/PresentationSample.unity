@@ -4393,6 +4393,8 @@ MonoBehaviour:
   - Story_new02
   progressionChapterJson: {fileID: 4900000, guid: 1220671ebc3165547bbbd3f140c473ca, type: 3}
   serverBaseUrl: 
+  learningMode: 1
+  learningChapterJson: {fileID: 4900000, guid: d256bcdce1b8afb41ba14c16cc873ff1, type: 3}
   albumDatabase: {fileID: 11400000, guid: 3ebdaff3a5d47c4478f5010bca6aa2f1, type: 2}
   vnAdvanceInputPoller: {fileID: 1315566987}
   rigPrefab: {fileID: 2306115306432438348, guid: c7b3ab204cabea145aff7affa87d3d9d, type: 3}

@@ -15,6 +15,12 @@ public sealed partial class VNScreenBindings
 
     private void OpenSaveLoadMenu(SaveLoadMenuMode mode)
     {
+        if (_learningMode)
+        {
+            Debug.Log("[학습] 수동 슬롯은 이후 단계에서 연결한다. 현재는 새 게임·이어하기를 사용한다.");
+            return;
+        }
+
         if (_saveCoordinator == null)
             return;
 

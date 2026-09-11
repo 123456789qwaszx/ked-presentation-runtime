@@ -1,7 +1,7 @@
 name: Save lifecycle
 on:
   push:
-    branches: [server_DB_Test]
+    branches: [server_DB_Test, learning/vn-play-analytics]
   pull_request:
     paths:
       - 'Assets/Scripts/Save/**'

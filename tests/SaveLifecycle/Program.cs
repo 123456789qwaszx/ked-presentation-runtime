@@ -211,9 +211,82 @@ internal static class Program
             await TestRestore();
             await TestManualSlots();
             await TestRetryAndRetention();
+            await TestLearningReporter();
             Console.WriteLine($"{Passed.Count} tests passed.");
         }
         finally { if(Directory.Exists(Root)) Directory.Delete(Root,true); }
+    }
+
+    private static async Task TestLearningReporter()
+    {
+        await Test("Learning reporter observes persisted entry and committed path without acknowledging sync", () => Run(() =>
+        {
+            string dir = Dir();
+            var store = new LocalFileSaveStore(dir);
+            var coordinator = new SaveCoordinator(store, null);
+            var logs = new List<string>();
+            var reporter = new LearningProgressionReporter(coordinator, store, logs.Add);
+
+            reporter.ReportSceneEntered(new SceneEntryReport("qwer_scene",
+                Ked.Progression.ProgressionState.CreateInitial(Array.Empty<Ked.Progression.StatDefinition>(), "EP01"), null, 0));
+
+            string id = coordinator.PlaythroughId;
+            Check(store.ActiveId == id && logs.Single().Contains("SceneEntered"), "entry was not persisted before observation");
+            Check(new LocalFileSaveStore(dir).LoadActive().CurrentEpisodeId == "EP01", "initial snapshot missing on disk");
+
+            reporter.ReportSceneCommitted(new SceneCommitReport("qwer_scene",
+                new[] { new CommittedChoice("EP01", 0), new CommittedChoice("EP02_01", 0) },
+                Array.Empty<VNChoiceRecord>(), Array.Empty<string>(),
+                Ked.Progression.ProgressionState.CreateInitial(Array.Empty<Ked.Progression.StatDefinition>(), "EP03"),
+                null, Array.Empty<DialogueLogEntry>(), 0, false));
+
+            PlaythroughFile file = new LocalFileSaveStore(dir).Open(id).Read();
+            Check(logs.Count == 2 && logs[1].Contains("SceneCommitted") && logs[1].Contains("EP03"), "commit observation missing");
+            Check(file.Snapshot.Scenes.Single().Path.Select(c => c.FromEpisodeId).SequenceEqual(new[] { "EP01", "EP02_01" }), "wrong committed path");
+            Check(file.Snapshot.CurrentEpisodeId == "EP03" && !file.Snapshot.ChapterCompleted, "wrong resume point");
+            Check(file.Sync.PendingChoices.Count == 2 && file.Sync.PlaythroughId == null && file.Sync.BaseRevision == null
+                && file.SyncedCommitVersion == 0 && file.InFlight == null, "learning observation altered sync state");
+        }));
+
+        await Test("Learning reporter never reports a failed local commit as persisted", () => Run(() =>
+        {
+            string dir = Dir();
+            bool fail = false;
+            var store = new LocalFileSaveStore(dir, (path, content) =>
+            {
+                if (fail) throw new IOException("injected write failure");
+                AtomicFile.WriteAllText(path, content);
+            });
+            var logs = new List<string>();
+            var reporter = new LearningProgressionReporter(new SaveCoordinator(store, null), store, logs.Add);
+            reporter.ReportSceneEntered(new SceneEntryReport("chapter",
+                Ked.Progression.ProgressionState.CreateInitial(Array.Empty<Ked.Progression.StatDefinition>(), "scene1"), null, 0));
+            fail = true;
+
+            Throws(() => reporter.ReportSceneCommitted(new SceneCommitReport("chapter",
+                Array.Empty<CommittedChoice>(), Array.Empty<VNChoiceRecord>(), Array.Empty<string>(),
+                Ked.Progression.ProgressionState.CreateInitial(Array.Empty<Ked.Progression.StatDefinition>(), "scene2"),
+                null, Array.Empty<DialogueLogEntry>(), 0, false)));
+
+            Check(logs.Count == 1, "failed write was reported as a commit");
+            Check(new LocalFileSaveStore(dir).LoadActive().CurrentEpisodeId == "scene1", "failed write replaced resume point");
+        }));
+
+        await Test("Learning log failure does not cancel a successful completed save", () => Run(() =>
+        {
+            var store = new LocalFileSaveStore(Dir());
+            var reporter = new LearningProgressionReporter(new SaveCoordinator(store, null), store,
+                message => throw new InvalidOperationException("unavailable observer"));
+            reporter.ReportSceneEntered(new SceneEntryReport("chapter",
+                Ked.Progression.ProgressionState.CreateInitial(Array.Empty<Ked.Progression.StatDefinition>(), "scene1"), null, 0));
+            reporter.ReportSceneCommitted(new SceneCommitReport("chapter",
+                Array.Empty<CommittedChoice>(), Array.Empty<VNChoiceRecord>(), Array.Empty<string>(),
+                Ked.Progression.ProgressionState.CreateInitial(Array.Empty<Ked.Progression.StatDefinition>(), "scene1"),
+                null, Array.Empty<DialogueLogEntry>(), 0, true));
+
+            Check(store.LoadActive().ChapterCompleted && store.LoadActive().Scenes.Count == 1,
+                "observer failure cancelled the successful save");
+        }));
     }
 
     private static GuestSession Account(ServerApi api,string dir)

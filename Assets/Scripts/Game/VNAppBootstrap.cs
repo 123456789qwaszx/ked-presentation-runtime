@@ -36,6 +36,10 @@ public class VNAppBootstrap : MonoBehaviour
     private ProgressionLauncher _progressionLauncher;
 
     private SaveCoordinator _saveCoordinator;
+    private ILocalSaveStore _localSaveStore;
+    private bool _learningMode;
+    private string _saveRoot;
+    private TextAsset _chapterJson;
     
     private AlbumUnlockService _albumUnlockService;
     private AlbumController _albumController;
@@ -91,6 +95,11 @@ public class VNAppBootstrap : MonoBehaviour
     [Header("저장·동기화 (M7)")]
     [Tooltip("spring-prepare 서버 주소. 비우면 서버 동기화 없이 로컬 저장만 한다.")]
     [SerializeField] private string serverBaseUrl = "http://localhost:8080";
+
+    [Header("학습 모드")]
+    [Tooltip("실행 전에 설정한다. 학습 저장을 분리하고 기존 서버 동기화와 과거 회차 로드를 끈다.")]
+    [SerializeField] private bool learningMode;
+    [SerializeField] private TextAsset learningChapterJson;
     
     [Header("Album")]
     [SerializeField] private VNAlbumDatabaseSO albumDatabase;
@@ -130,6 +139,21 @@ public class VNAppBootstrap : MonoBehaviour
 
     private void Awake()
     {
+        // 실행 중 Inspector를 바꿔도 저장 경로와 기능 구성이 서로 엇갈리지 않는다.
+        _learningMode = learningMode;
+        _saveRoot = Path.Combine(Application.persistentDataPath,
+            _learningMode ? "saves-learning" : "saves");
+        _chapterJson = _learningMode ? learningChapterJson : progressionChapterJson;
+
+        Debug.Log($"[저장] 경로: {_saveRoot}");
+
+        if (_learningMode && _chapterJson == null)
+        {
+            Debug.LogError("[학습] Learning Chapter Json에 qwer_scene.progression.json을 지정해야 한다.");
+            enabled = false;
+            return;
+        }
+
         BootstrapUIManager();
         
         BootstrapAlbum();
@@ -167,8 +191,7 @@ public class VNAppBootstrap : MonoBehaviour
     
     private void BootstrapAlbum()
     {
-        string albumPath = Path.Combine(
-            Application.persistentDataPath, "saves", "album.json");
+        string albumPath = Path.Combine(_saveRoot, "album.json");
 
         IAlbumProgressStore albumStore = new LocalAlbumProgressStore(albumPath);
 
@@ -395,12 +418,17 @@ public class VNAppBootstrap : MonoBehaviour
 
         _saveCoordinator = CreateSaveCoordinator();
 
+        IProgressionReporter reporter = _saveCoordinator;
+
+        if (_learningMode)
+            reporter = new LearningProgressionReporter(_saveCoordinator, _localSaveStore);
+
         SceneRunner sceneRunner = new SceneRunner(
             _scenePlayback,
             _progressionOptions,
             _linePresentationAdvanceState,
             _rollbackHistory,
-            _saveCoordinator,
+            reporter,
             _backlogRecorder,
             _choiceHistory,
             yarnBridge.Capture);
@@ -413,7 +441,7 @@ public class VNAppBootstrap : MonoBehaviour
         _progressionLauncher = new ProgressionLauncher(
             _progressionDriver,
             dialogueRunner,
-            progressionChapterJson,
+            _chapterJson,
             _saveCoordinator.LoadActiveResumePoint,
             _saveCoordinator.PrepareNewPlaythroughAsync);
     }
@@ -421,16 +449,21 @@ public class VNAppBootstrap : MonoBehaviour
     // 저장·동기화 스택. 로컬이 진실(파일), 서버는 사본(큐로 민다). 슬롯 1 고정.
     private SaveCoordinator CreateSaveCoordinator()
     {
-        string saveRoot = Path.Combine(Application.persistentDataPath, "saves");
+        LocalFileSaveStore localStore = new(_saveRoot);
+        _localSaveStore = localStore;
 
-        LocalFileSaveStore localStore = new(saveRoot);
+        if (_learningMode)
+        {
+            Debug.Log("[학습] 로컬 저장 모드 — 기존 서버 동기화 없음, 수동 슬롯·과거 장면 포크 제한");
+            return new SaveCoordinator(localStore, server: null);
+        }
 
         if (string.IsNullOrWhiteSpace(serverBaseUrl))
             return new SaveCoordinator(localStore, server: null);
 
         ServerApi serverApi = new(serverBaseUrl);
         GuestSession guestSession = new(serverApi, Path.Combine(Application.persistentDataPath, "account.json"));
-        ChapterVersionResolver versionResolver = new(serverApi, progressionChapterJson);
+        ChapterVersionResolver versionResolver = new(serverApi, _chapterJson);
 
         // devices.device_key 는 VARCHAR(64). deviceUniqueIdentifier 가 플랫폼에 따라 더 길 수 있다.
         string deviceKey = SystemInfo.deviceUniqueIdentifier;
@@ -488,7 +521,8 @@ public class VNAppBootstrap : MonoBehaviour
             yarnEntryKey,
             debugEpisodeChain,
             _progressionLauncher,
-            _saveCoordinator);
+            _saveCoordinator,
+            learningMode: _learningMode);
     }
     
     private void BootstrapScreenBindings()
@@ -499,7 +533,8 @@ public class VNAppBootstrap : MonoBehaviour
 
         _screenBindings.ConfigureProgression(
             _progressionLauncher,
-            _saveCoordinator);
+            _saveCoordinator,
+            learningMode: _learningMode);
 
         _screenBindings.ConfigureAlbum(
             _albumController);
@@ -539,5 +574,25 @@ public class VNAppBootstrap : MonoBehaviour
     private void OpenInitialScreen()
     {
         _screenBindings.OpenTitleMenu();
+    }
+
+    [ContextMenu("Learning/Log current save snapshot")]
+    private void LogLearningSnapshot()
+    {
+        if (!Application.isPlaying || !_learningMode || _localSaveStore == null)
+        {
+            Debug.Log("[학습] 학습 모드로 실행한 뒤 저장 snapshot을 확인할 수 있다.");
+            return;
+        }
+
+        LocalSaveFile snapshot = _localSaveStore.LoadActive();
+
+        if (snapshot == null)
+        {
+            Debug.Log("[학습] 아직 첫 장면에 진입하지 않아 저장된 회차가 없다.");
+            return;
+        }
+
+        Debug.Log($"[학습] 현재 확정 snapshot (로컬 envelope 제외)\n{SaveJson.SerializePretty(snapshot)}");
     }
 }

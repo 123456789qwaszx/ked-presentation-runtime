@@ -16,6 +16,7 @@
     <Compile Include="../../Assets/Scripts/Server/GuestSession.cs" />
     <Compile Include="../../Assets/Scripts/Progression/Response/*.cs" />
     <Compile Include="../../Assets/Scripts/Progression/IProgressionReporter.cs" />
+    <Compile Include="../../Assets/Scripts/Progression/LearningProgressionReporter.cs" />
     <Compile Include="../../Assets/Scripts/Progression/ProgressionLauncher.cs" />
     <Compile Include="../../Assets/Scripts/Ked.Progression/Spec/*.cs" />
     <Compile Include="../../Assets/Scripts/Ked.Progression/State/*.cs" />
