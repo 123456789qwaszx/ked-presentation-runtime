@@ -41,6 +41,7 @@ public class VNAppBootstrap : MonoBehaviour
     private string _saveRoot;
     private TextAsset _chapterJson;
     private LearningAnalyticsConnection _learningAnalytics;
+    private LearningChoiceSync _learningChoiceSync;
     
     private AlbumUnlockService _albumUnlockService;
     private AlbumController _albumController;
@@ -424,9 +425,14 @@ public class VNAppBootstrap : MonoBehaviour
         if (_learningMode)
         {
             _learningAnalytics = new LearningAnalyticsConnection(analyticsBaseUrl);
+            _learningChoiceSync = new LearningChoiceSync(analyticsBaseUrl);
+            LearningSession.BindServerObserver(_learningChoiceSync.OnServerBound);
+
             reporter = new LearningProgressionReporter(
-                _saveCoordinator, _localSaveStore,
-                onSceneEntered: _learningAnalytics.OnSceneEntered);
+                _saveCoordinator,
+                _localSaveStore,
+                onSceneEntered: _learningAnalytics.OnSceneEntered,
+                onSnapshotCommitted: _learningChoiceSync.OnSnapshotCommitted);
         }
 
         SceneRunner sceneRunner = new SceneRunner(
