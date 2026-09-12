@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using UnityEngine.Networking;
@@ -56,21 +57,89 @@ public sealed class AnalyticsApi
                 }
             }
 
-            AnalyticsErrorResponseDto errorResponse = null;
-
-            try
-            {
-                errorResponse = JsonConvert.DeserializeObject<AnalyticsErrorResponseDto>(raw);
-            }
-            catch (JsonException)
-            {
-            }
+            AnalyticsErrorResponseDto errorResponse = TryReadError(raw);
 
             return AnalyticsApiResult<List<AnalyticsChapterSummaryDto>>.Failure(
                 status,
                 errorResponse?.ErrorCode,
                 errorResponse?.Message,
                 raw);
+        }
+    }
+
+    public async Task<AnalyticsApiResult<AnalyticsPlaythroughDto>> CreateOrGetPlaythroughAsync(
+        string chapterKey,
+        string clientPlaythroughId)
+    {
+        string rawRequest = JsonConvert.SerializeObject(new
+        {
+            chapterKey,
+            clientPlaythroughId,
+        });
+
+        using (var request = new UnityWebRequest(
+                   _baseUrl + "/playthroughs",
+                   UnityWebRequest.kHttpVerbPOST))
+        {
+            request.timeout = 10;
+            request.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(rawRequest));
+            request.downloadHandler = new DownloadHandlerBuffer();
+            request.SetRequestHeader("Content-Type", "application/json");
+
+            await AwaitOperation(request.SendWebRequest());
+
+            if (request.result == UnityWebRequest.Result.ConnectionError
+                || request.result == UnityWebRequest.Result.DataProcessingError)
+            {
+                return AnalyticsApiResult<AnalyticsPlaythroughDto>
+                    .Network(request.error);
+            }
+
+            long status = request.responseCode;
+            string raw = request.downloadHandler.text;
+
+            if (status >= 200 && status < 300)
+            {
+                try
+                {
+                    AnalyticsPlaythroughDto body =
+                        JsonConvert.DeserializeObject<AnalyticsPlaythroughDto>(raw);
+
+                    if (body == null)
+                    {
+                        return AnalyticsApiResult<AnalyticsPlaythroughDto>
+                            .Failure(status, "INVALID_RESPONSE", "회차 응답 본문이 비어 있다.", raw);
+                    }
+
+                    return AnalyticsApiResult<AnalyticsPlaythroughDto>
+                        .Success(status, body, raw);
+                }
+                catch (JsonException error)
+                {
+                    return AnalyticsApiResult<AnalyticsPlaythroughDto>
+                        .Failure(status, "INVALID_RESPONSE", error.Message, raw);
+                }
+            }
+
+            AnalyticsErrorResponseDto errorResponse = TryReadError(raw);
+
+            return AnalyticsApiResult<AnalyticsPlaythroughDto>.Failure(
+                status,
+                errorResponse?.ErrorCode,
+                errorResponse?.Message,
+                raw);
+        }
+    }
+
+    private static AnalyticsErrorResponseDto TryReadError(string raw)
+    {
+        try
+        {
+            return JsonConvert.DeserializeObject<AnalyticsErrorResponseDto>(raw);
+        }
+        catch (JsonException)
+        {
+            return null;
         }
     }
 
@@ -90,6 +159,12 @@ public sealed class AnalyticsChapterSummaryDto
     public long ChapterId { get; set; }
     public string ChapterKey { get; set; }
     public string Title { get; set; }
+}
+
+public sealed class AnalyticsPlaythroughDto
+{
+    public long PlaythroughId { get; set; }
+    public string ClientPlaythroughId { get; set; }
 }
 
 public sealed class AnalyticsErrorResponseDto
