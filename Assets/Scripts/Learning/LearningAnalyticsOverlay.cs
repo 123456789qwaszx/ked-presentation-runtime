@@ -1,14 +1,23 @@
+using System;
 using UnityEngine;
 
-// U1 학습용 표시창. 실제 게임 UI 계약에는 들어가지 않는다.
+// 학습용 표시창. 실제 게임 UI 계약에는 들어가지 않는다.
 public sealed class LearningAnalyticsOverlay : MonoBehaviour
 {
     private static LearningAnalyticsOverlay _instance;
-    private string _message = "[U1 서버 콘텐츠] 조회 대기";
+    private static Action _backupAction;
+
+    private string _message = "[학습 서버] 대기";
 
     public static void Show(string message)
     {
         Ensure()._message = message;
+    }
+
+    public static void SetBackupAction(Action backupAction)
+    {
+        _backupAction = backupAction;
+        Ensure();
     }
 
     private static LearningAnalyticsOverlay Ensure()
@@ -25,7 +34,18 @@ public sealed class LearningAnalyticsOverlay : MonoBehaviour
     private void OnGUI()
     {
         GUI.Box(
-            new Rect(12f, 12f, 520f, 110f),
+            new Rect(12f, 12f, 560f, 150f),
             _message);
+
+        GUI.enabled = _backupAction != null;
+
+        if (GUI.Button(
+                new Rect(22f, 122f, 160f, 28f),
+                "서버에 저장"))
+        {
+            _backupAction?.Invoke();
+        }
+
+        GUI.enabled = true;
     }
 }
