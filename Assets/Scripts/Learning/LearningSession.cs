@@ -6,6 +6,12 @@ public static class LearningSession
     public static string ClientPlaythroughId { get; private set; }
     public static long? ServerPlaythroughId { get; private set; }
     public static LocalSaveFile LatestSnapshot { get; private set; }
+    public static ILocalSaveStore LocalStore { get; private set; }
+
+    public static void BindLocalStore(ILocalSaveStore localStore)
+    {
+        LocalStore = localStore;
+    }
 
     public static void Capture(LocalSaveFile snapshot)
     {
