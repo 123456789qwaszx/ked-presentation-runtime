@@ -4,19 +4,19 @@ using UnityEngine;
 // 학습 연결:
 // - 기존 SaveCoordinator에 먼저 위임해 로컬 저장 경계를 보존한다.
 // - 저장 성공 뒤 확정 snapshot을 관찰한다.
-// - U1에서는 첫 SceneEntered의 chapterKey로 학습 서버 콘텐츠를 한 번 조회한다.
+// - 학습 HTTP 자체는 LearningAnalyticsConnection에 맡긴다.
 public sealed class LearningProgressionReporter : IProgressionReporter
 {
     private readonly SaveCoordinator _save;
     private readonly ILocalSaveStore _localStore;
-    private readonly Action<string> _onSceneEntered;
+    private readonly Action<string, string> _onSceneEntered;
     private readonly Action<string> _log;
 
     public LearningProgressionReporter(
         SaveCoordinator save,
         ILocalSaveStore localStore,
         Action<string> log = null,
-        Action<string> onSceneEntered = null)
+        Action<string, string> onSceneEntered = null)
     {
         _save = save ?? throw new ArgumentNullException(nameof(save));
         _localStore = localStore ?? throw new ArgumentNullException(nameof(localStore));
@@ -27,15 +27,17 @@ public sealed class LearningProgressionReporter : IProgressionReporter
     public void ReportSceneEntered(SceneEntryReport report)
     {
         _save.ReportSceneEntered(report);
+
+        string clientPlaythroughId = _save.PlaythroughId;
         LogSnapshot("SceneEntered", report.ChapterId, report.State.CurrentEpisodeId);
 
         try
         {
-            _onSceneEntered?.Invoke(report.ChapterId);
+            _onSceneEntered?.Invoke(report.ChapterId, clientPlaythroughId);
         }
         catch (Exception error)
         {
-            Debug.LogWarning($"[U1 서버 콘텐츠] 연결 시작 실패: {error}");
+            Debug.LogWarning($"[학습 서버] 연결 시작 실패: {error}");
         }
     }
 
