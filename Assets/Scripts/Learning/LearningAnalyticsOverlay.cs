@@ -7,8 +7,10 @@ public sealed class LearningAnalyticsOverlay : MonoBehaviour
     private static LearningAnalyticsOverlay _instance;
     private static Action _backupAction;
     private static Action _restoreCheckAction;
+    private static Action<long> _restoreAction;
 
     private string _message = "[학습 서버] 대기";
+    private string _restoreServerId = string.Empty;
 
     public static void Show(string message)
     {
@@ -27,6 +29,12 @@ public sealed class LearningAnalyticsOverlay : MonoBehaviour
         Ensure();
     }
 
+    public static void SetRestoreAction(Action<long> restoreAction)
+    {
+        _restoreAction = restoreAction;
+        Ensure();
+    }
+
     private static LearningAnalyticsOverlay Ensure()
     {
         if (_instance != null)
@@ -41,7 +49,7 @@ public sealed class LearningAnalyticsOverlay : MonoBehaviour
     private void OnGUI()
     {
         GUI.Box(
-            new Rect(12f, 12f, 560f, 150f),
+            new Rect(12f, 12f, 560f, 205f),
             _message);
 
         GUI.enabled = _backupAction != null;
@@ -60,6 +68,32 @@ public sealed class LearningAnalyticsOverlay : MonoBehaviour
                 "서버 저장 확인"))
         {
             _restoreCheckAction?.Invoke();
+        }
+
+        GUI.enabled = true;
+        GUI.Label(
+            new Rect(22f, 160f, 140f, 24f),
+            "server playthroughId");
+
+        _restoreServerId = GUI.TextField(
+            new Rect(164f, 158f, 110f, 26f),
+            _restoreServerId);
+
+        GUI.enabled = _restoreAction != null;
+
+        if (GUI.Button(
+                new Rect(284f, 157f, 160f, 28f),
+                "서버에서 복원"))
+        {
+            if (!long.TryParse(_restoreServerId, out long serverPlaythroughId)
+                || serverPlaythroughId <= 0)
+            {
+                Show("[U4 서버 복원] 숫자 server playthroughId를 입력하세요.");
+            }
+            else
+            {
+                _restoreAction?.Invoke(serverPlaythroughId);
+            }
         }
 
         GUI.enabled = true;
