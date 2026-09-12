@@ -5,12 +5,13 @@ using UnityEngine;
 // 학습 HTTP와 표시를 저장 관찰자에서 분리한다.
 // U2: 로컬 회차를 서버 회차에 연결한다.
 // U3: 마지막으로 로컬 저장에 성공한 snapshot을 명시적으로 서버에 백업한다.
-// U4: 서버 checkpoint를 LocalSaveFile로 읽고, 로컬에 없는 회차만 안전하게 복원한다.
+// U4: 서버 checkpoint를 LocalSaveFile로 복원하고 기존 Progression 재개 경계로 실행한다.
 public sealed class LearningAnalyticsConnection
 {
     private readonly string _baseUrl;
     private readonly AnalyticsApi _api;
 
+    private ProgressionLauncher _progressionLauncher;
     private string _chapterKey;
     private string _clientPlaythroughId;
     private Task _connectionTask;
@@ -27,6 +28,11 @@ public sealed class LearningAnalyticsConnection
         LearningAnalyticsOverlay.SetRestoreCheckAction(CheckServerSnapshot);
         LearningAnalyticsOverlay.SetRestoreAction(RestoreFromServer);
         Publish($"[학습 서버] 연결 초기화\nserver: {_baseUrl}\n첫 장면 진입 대기");
+    }
+
+    public void BindProgressionLauncher(ProgressionLauncher progressionLauncher)
+    {
+        _progressionLauncher = progressionLauncher;
     }
 
     public void OnSceneEntered(
@@ -128,6 +134,12 @@ public sealed class LearningAnalyticsConnection
         if (localStore == null)
         {
             Publish("[U4 서버 복원] 로컬 저장소가 아직 준비되지 않았습니다.", warning: true);
+            return;
+        }
+
+        if (_progressionLauncher == null)
+        {
+            Publish("[U4 서버 복원] 진행 재개 경계가 아직 준비되지 않았습니다.", warning: true);
             return;
         }
 
@@ -379,25 +391,42 @@ public sealed class LearningAnalyticsConnection
                 return;
             }
 
-            localStore.Create(snapshot);
-            localStore.SetActive(snapshot.PlaythroughId);
-
-            LearningSession.Capture(snapshot);
-            LearningSession.BindServer(
-                snapshot.PlaythroughId,
-                serverPlaythroughId);
-
-            _chapterKey = snapshot.ChapterId;
-            _clientPlaythroughId = snapshot.PlaythroughId;
-
             Publish(
                 prefix +
                 $"HTTP {result.Status}\n" +
-                $"로컬 회차 생성 완료\n" +
-                $"clientPlaythroughId: {snapshot.PlaythroughId}\n" +
+                $"snapshot 검증 완료\n" +
                 $"episodeKey: {snapshot.CurrentEpisodeId}\n" +
-                $"active 지정 완료\n" +
-                $"게임 재개는 아직 하지 않음");
+                $"현재 재생 종료 후 로컬 복원 시작");
+
+            await _progressionLauncher.TransitionAsync(() =>
+            {
+                if (localStore.LoadPlaythrough(snapshot.PlaythroughId) != null)
+                {
+                    throw new InvalidOperationException(
+                        "재생 전환 중 같은 로컬 회차가 생겨 복원을 중단했다.");
+                }
+
+                localStore.Create(snapshot);
+                localStore.SetActive(snapshot.PlaythroughId);
+
+                LearningSession.Capture(snapshot);
+                LearningSession.BindServer(
+                    snapshot.PlaythroughId,
+                    serverPlaythroughId);
+
+                _chapterKey = snapshot.ChapterId;
+                _clientPlaythroughId = snapshot.PlaythroughId;
+
+                Publish(
+                    prefix +
+                    $"로컬 회차 생성 완료\n" +
+                    $"clientPlaythroughId: {snapshot.PlaythroughId}\n" +
+                    $"episodeKey: {snapshot.CurrentEpisodeId}\n" +
+                    $"active 지정 완료\n" +
+                    $"기존 이어하기 경계로 재생 시작");
+
+                return Task.CompletedTask;
+            });
         }
         catch (Exception error)
         {
