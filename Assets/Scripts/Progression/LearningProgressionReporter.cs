@@ -3,7 +3,7 @@ using UnityEngine;
 
 // 학습 연결:
 // - 기존 SaveCoordinator에 먼저 위임해 로컬 저장 경계를 보존한다.
-// - 저장 성공 뒤 확정 snapshot을 관찰한다.
+// - 저장 성공 뒤 확정 snapshot을 관찰하고 LearningSession에 보관한다.
 // - 학습 HTTP 자체는 LearningAnalyticsConnection에 맡긴다.
 public sealed class LearningProgressionReporter : IProgressionReporter
 {
@@ -29,6 +29,7 @@ public sealed class LearningProgressionReporter : IProgressionReporter
         _save.ReportSceneEntered(report);
 
         string clientPlaythroughId = _save.PlaythroughId;
+        CaptureLatestSnapshot(clientPlaythroughId);
         LogSnapshot("SceneEntered", report.ChapterId, report.State.CurrentEpisodeId);
 
         try
@@ -44,12 +45,30 @@ public sealed class LearningProgressionReporter : IProgressionReporter
     public void ReportSceneCommitted(SceneCommitReport report)
     {
         _save.ReportSceneCommitted(report);
+
+        CaptureLatestSnapshot(_save.PlaythroughId);
         LogSnapshot("SceneCommitted", report.ChapterId, report.State.CurrentEpisodeId);
+    }
+
+    private void CaptureLatestSnapshot(string id)
+    {
+        try
+        {
+            LocalSaveFile snapshot = _localStore.LoadPlaythrough(id);
+
+            if (snapshot == null)
+                throw new InvalidOperationException("확정된 로컬 snapshot을 찾을 수 없다.");
+
+            LearningSession.Capture(snapshot);
+        }
+        catch (Exception error)
+        {
+            Debug.LogWarning($"[U3 서버 백업] 확정 snapshot 확보 실패: {error.Message}");
+        }
     }
 
     private void LogSnapshot(string boundary, string chapterId, string episodeId)
     {
-        // 저장 호출 뒤에 ID를 확보한다. 첫 SceneEntered에서 회차가 만들어진다.
         string id = _save.PlaythroughId;
 
         try
@@ -79,7 +98,6 @@ public sealed class LearningProgressionReporter : IProgressionReporter
         }
         catch (Exception error)
         {
-            // 관찰 실패가 이미 성공한 저장과 다음 장면 진행을 취소해서는 안 된다.
             Debug.LogWarning($"[학습] 저장은 성공했지만 관찰 로그를 만들지 못했다: {error.Message}");
         }
     }
