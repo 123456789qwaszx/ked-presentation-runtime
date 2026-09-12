@@ -253,8 +253,7 @@ public sealed partial class VNScreenBindings
                 {
                     transitionStarted = true;
 
-                    // 다운로드와 전환 유효성 검사가 끝난 뒤에 닫는다.
-                    // 다운로드 실패 시에는 Load 화면을 그대로 유지.
+                    // 로컬 슬롯 확인과 전환 유효성 검사가 끝난 뒤에 닫는다.
                     _saveLoadRequestInProgress = false;
                     _saveLoadPanel = null;
 
@@ -341,9 +340,6 @@ public sealed partial class VNScreenBindings
             SavedAtUtc = bookmark.CreatedAtUtc,
 
             PlaySeconds = bookmark.PlaySecondsAtBookmark,
-
-            RequiresDownload =
-                bookmark.SnapshotKey == null,
 
         };
     }
