@@ -15,5 +15,4 @@ public sealed class VNSaveSlotMeta
     public bool RequiresDownload;
 
     // 서버가 거절해 자동 동기화가 멈춘 상태.
-    public bool HasSyncError;
 }

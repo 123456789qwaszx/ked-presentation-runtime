@@ -48,7 +48,7 @@ public sealed partial class LocalFileSaveStore
 
     // 수동 슬롯 출처·오토세이브·미완료 작업을 제외한 내부 회차만 정리한다.
     // 날짜나 개수로 수동 저장을 만료시키지 않는다.
-    public int CollectUnusedPlaythroughs(bool requireSynced)
+    public int CollectUnusedPlaythroughs()
     {
         if (File.Exists(TransferPath)) return 0;
         var roots = LoadBookmarks().Bookmarks.Select(b => b.PlaythroughId).Where(id => id != null).ToHashSet(StringComparer.Ordinal);
@@ -58,7 +58,6 @@ public sealed partial class LocalFileSaveStore
         {
             if (roots.Contains(id)) continue;
             PlaythroughSession session = Open(id);
-            if (!session.CanCollect(requireSynced)) continue;
             File.Delete(PathOf(id));
             session.Close();
             _sessions.Remove(id);

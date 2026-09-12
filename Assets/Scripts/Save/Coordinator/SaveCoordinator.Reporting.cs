@@ -28,7 +28,6 @@ public sealed partial class SaveCoordinator
                 StringComparer.Ordinal),
             Variables = report.Variables,
             BacklogSerialStart = report.BacklogSerialStart,
-            LastChoiceSeq = (_active?.NextSeq ?? 1) - 1,
             PlaySecondsAtEntry = TotalSeconds,
             EnteredAtUtc = NowUtc(),
         };
@@ -48,19 +47,17 @@ public sealed partial class SaveCoordinator
                 OwnPlaySeconds = OwnSeconds,
                 PlaySeconds = TotalSeconds,
             };
-            _active = _localStore.Create(initial);
+            var session = _localStore.Open(_playthroughId) ?? _localStore.Create(initial);
             _localStore.SetActive(_playthroughId);
+            _active = session;
             _newPrepared = false;
-            
-            if (_server != null)
-                _ = _server.RequestSyncAsync(_playthroughId);
         }
     }
 
     // 장면이 끝나 확정됐을 때 호출
     // [1]SceneRecord 완성
     // [2]LocalSaveFile 저장
-    // [3]서버용 변경 기록 + 동기화
+    // 디스크 확정 성공 뒤 메모리 장면 기록을 교체한다.
     public void ReportSceneCommitted(SceneCommitReport report)
     {
         if (_playthroughId == null)
@@ -110,17 +107,7 @@ public sealed partial class SaveCoordinator
             SavedAtUtc = now,
         };
 
-        var choices = report.Choices.Select(c => new PendingChoice
-        {
-            EpisodeId = c.FromEpisodeId, OptionIndex = c.OptionIndex, ChosenAt = now,
-        }).ToList();
-        
-        var events = report.WatchedEpisodeIds.Select(id => new PendingEvent
-        {
-            EpisodeId = id, OccurredAt = now,
-        }).ToList();
-        
-        _active.Commit(snapshot, choices, events);
+        _active.Commit(snapshot);
         _scenes.Clear();
         _scenes.AddRange(scenes);
         _currentEntry = null;
@@ -130,8 +117,5 @@ public sealed partial class SaveCoordinator
             $"시청 {report.WatchedEpisodeIds.Count}, [3] {report.Variables?.Count ?? 0}개, 백로그 {report.Backlog.Count}줄, " +
             $"기록 {_scenes.Count}개, 시간 {_inheritedSeconds}+{own}s → {report.State.CurrentEpisodeId}" +
             (report.ChapterCompleted ? " (챕터 완료)" : string.Empty));
-
-        if (_server != null)
-            _ = _server.RequestSyncAsync(_playthroughId);
     }
 }

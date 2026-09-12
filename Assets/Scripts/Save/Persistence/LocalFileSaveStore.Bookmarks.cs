@@ -22,9 +22,6 @@ public sealed partial class LocalFileSaveStore
         if (bookmark == null || bookmark.Id != id) throw new InvalidDataException("수동 저장 snapshot이 없다: " + id);
         bookmark.Label = metadata.Label;
         bookmark.LocalVersion = metadata.LocalVersion;
-        bookmark.SyncedVersion = metadata.SyncedVersion;
-        bookmark.SyncedAtUtc = metadata.SyncedAtUtc;
-        bookmark.SyncError = metadata.SyncError;
         bookmark.SnapshotKey = metadata.SnapshotKey;
         return bookmark;
     }

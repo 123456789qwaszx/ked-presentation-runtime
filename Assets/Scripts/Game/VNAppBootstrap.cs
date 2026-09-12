@@ -37,11 +37,10 @@ public class VNAppBootstrap : MonoBehaviour
 
     private SaveCoordinator _saveCoordinator;
     private ILocalSaveStore _localSaveStore;
-    private bool _learningMode;
+    private bool _useLearningSaveData;
     private string _saveRoot;
     private TextAsset _chapterJson;
-    private LearningAnalyticsConnection _learningAnalytics;
-    private LearningChoiceSync _learningChoiceSync;
+    private AnalyticsSync _analytics;
     
     private AlbumUnlockService _albumUnlockService;
     private AlbumController _albumController;
@@ -143,14 +142,14 @@ public class VNAppBootstrap : MonoBehaviour
     private void Awake()
     {
         // 실행 중 Inspector를 바꿔도 저장 경로와 기능 구성이 서로 엇갈리지 않는다.
-        _learningMode = useLearningSaveData;
+        _useLearningSaveData = useLearningSaveData;
         _saveRoot = Path.Combine(Application.persistentDataPath,
-            _learningMode ? "saves-learning" : "saves");
-        _chapterJson = _learningMode ? learningChapterJson : progressionChapterJson;
+            _useLearningSaveData ? "saves-learning" : "saves");
+        _chapterJson = _useLearningSaveData ? learningChapterJson : progressionChapterJson;
 
         Debug.Log($"[저장] 경로: {_saveRoot}");
 
-        if (_learningMode && _chapterJson == null)
+        if (_useLearningSaveData && _chapterJson == null)
         {
             Debug.LogError("[학습] Learning Chapter Json에 qwer_scene.progression.json을 지정해야 한다.");
             enabled = false;
@@ -420,6 +419,19 @@ public class VNAppBootstrap : MonoBehaviour
         _saveCoordinator = CreateSaveCoordinator();
 
         IProgressionReporter reporter = _saveCoordinator;
+        if (enableAnalytics)
+        {
+            try
+            {
+                _analytics = new AnalyticsSync(new AnalyticsApi(analyticsBaseUrl),
+                    message => Debug.LogWarning(message));
+                reporter = new AnalyticsProgressionReporter(_saveCoordinator, _localSaveStore, _analytics.Observe);
+            }
+            catch (System.Exception error)
+            {
+                Debug.LogWarning($"[통계] 연결 설정 오류. 로컬 저장으로 계속합니다: {error.Message}");
+            }
+        }
 
         SceneRunner sceneRunner = new SceneRunner(
             _scenePlayback,
@@ -443,14 +455,13 @@ public class VNAppBootstrap : MonoBehaviour
             _saveCoordinator.LoadActiveResumePoint,
             _saveCoordinator.PrepareNewPlaythroughAsync);
 
-
     }
 
     // 모든 실행 모드에서 로컬 저장을 기본으로 사용한다.
     private SaveCoordinator CreateSaveCoordinator()
     {
         _localSaveStore = new LocalFileSaveStore(_saveRoot);
-        return new SaveCoordinator(_localSaveStore, server: null);
+        return new SaveCoordinator(_localSaveStore);
     }
 
     private void BootstrapPlaybackControls()
@@ -533,13 +544,12 @@ public class VNAppBootstrap : MonoBehaviour
     {
         OpenInitialScreen();
 
-        _ = _saveCoordinator.SyncPendingAsync();
     }
 
     private void Update()
     {
-        _saveCoordinator?.TickSync(Time.realtimeSinceStartup,
-            Application.internetReachability != NetworkReachability.NotReachable);
+        _saveCoordinator?.TickMaintenance(Time.realtimeSinceStartup);
+        _analytics?.Tick();
     }
     
     private void OpenInitialScreen()
@@ -547,12 +557,12 @@ public class VNAppBootstrap : MonoBehaviour
         _screenBindings.OpenTitleMenu();
     }
 
-    [ContextMenu("Learning/Log current save snapshot")]
-    private void LogLearningSnapshot()
+    [ContextMenu("Save/Log current snapshot")]
+    private void LogSaveSnapshot()
     {
-        if (!Application.isPlaying || !_learningMode || _localSaveStore == null)
+        if (!Application.isPlaying || _localSaveStore == null)
         {
-            Debug.Log("[학습] 학습 모드로 실행한 뒤 저장 snapshot을 확인할 수 있다.");
+            Debug.Log("[저장] 실행한 뒤 저장 snapshot을 확인할 수 있다.");
             return;
         }
 
@@ -560,10 +570,14 @@ public class VNAppBootstrap : MonoBehaviour
 
         if (snapshot == null)
         {
-            Debug.Log("[학습] 아직 첫 장면에 진입하지 않아 저장된 회차가 없다.");
+            Debug.Log("[저장] 아직 첫 장면에 진입하지 않아 저장된 회차가 없다.");
             return;
         }
 
-        Debug.Log($"[학습] 현재 확정 snapshot (로컬 envelope 제외)\n{SaveJson.SerializePretty(snapshot)}");
+        Debug.Log($"[저장] 현재 확정 snapshot (로컬 envelope 제외)\n{SaveJson.SerializePretty(snapshot)}");
+    }
+    private void OnDestroy()
+    {
+        _analytics?.Dispose();
     }
 }

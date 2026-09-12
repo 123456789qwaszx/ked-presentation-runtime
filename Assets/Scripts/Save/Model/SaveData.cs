@@ -7,7 +7,7 @@ using System.Collections.Generic;
 // 그 아래에 회차의 이력(Scenes)이 쌓인다 — 즐겨찾기와 갈라지기의 재료(save-plan.md v2).
 public sealed class LocalSaveFile
 {
-    // 회차 id(로컬 guid). 서버 id는 큐 파일이 든다. 갈라진 회차면 출처가 ForkedFrom에.
+    // 로컬 회차 GUID. 갈라진 회차의 출처는 ForkedFrom에 보관한다.
     public string PlaythroughId;
     public ForkOrigin ForkedFrom;
 
@@ -70,9 +70,6 @@ public sealed class SceneCheckpoint
     // 이 장면의 첫 라인이 받을 백로그 순번.
     public int BacklogSerialStart;
 
-    // 이 장면에 들어설 때까지 큐에 적힌 마지막 선택 seq. 없으면 0.
-    public int LastChoiceSeq;
-
     // 들어설 때의 누적 플레이 시간(계승 + 자체). 갈라지기가 물려받는 값.
     public int PlaySecondsAtEntry;
 
@@ -109,63 +106,10 @@ public sealed class SavedLoadPlan
     public SaveLineTarget Target;
 }
 
-// 회차 envelope 안의 미전송 이력과 서버 상태. snapshot과 함께 원자적으로 저장한다.
-public sealed class PlaythroughSyncState
-{
-    // - 서버에 대해 알고 있는 상태 ---
-    public long? PlaythroughId;
-    public int NextSeq = 1;
-
-    public long? BaseRevision;
-
-    // 마지막 200 시점의 장면 기록 수. 409로 갈라질 때 forkedFrom.sceneIndex가 된다.
-    public int SyncedSceneCount;
-
-    // 옛 회차 큐가 409를 맞은 시각. 있으면 시작 시 순회가 건너뛴다 — 같은 baseRevision은 다시 보내도 409다.
-    public string ConflictedAtUtc;
-    public int RetryCount;
-    public string RetryAfterUtc;
-    public string BlockedReason;
-
-    // --- 아직 서버에 보내야 할 상태 ---
-    public List<PendingChoice> PendingChoices = new();
-    public List<PendingEvent> PendingEvents = new();
-}
-
-// 서버 ChoiceUpload와 대응.
-public sealed class PendingChoice
-{
-    public int Seq;
-    public string EpisodeId; // 선택지가 붙어 있던 에피소드
-    public int OptionIndex;  // 원본 NextOptions 서수
-    public string ChosenAt;
-}
-
-// 서버 EventUpload와 대응.
-public sealed class PendingEvent
-{
-    public string EpisodeId;
-    public string OccurredAt;
-}
-
-// account.json - (게스트 계정)
-public sealed class AccountFile
-{
-    public string Username;
-    public string Password;
-    public long UserId;
-    public string Token;
-    public string ExpiresAtUtc;
-}
-// saves/bookmarks.json — 즐겨찾기 목록. 수 제한 없음.
+// 수동 슬롯 목록. 본문은 bookmark-snapshots에 별도로 보존한다.
 public sealed class BookmarkFile
 {
-    // 복구 응답이 늦게 도착해도 이 기기에서 삭제한 북마크를 되살리지 않는다.
-    public List<string> DeletedIds = new();
     public List<Bookmark> Bookmarks = new();
-
-    // 서버에 아직 못 지운 즐겨찾기 id. DELETE가 204를 주면 빠진다.
-    public List<string> PendingDeletes = new();
 }
 
 // Bookmark
@@ -182,7 +126,6 @@ public sealed class Bookmark
 {
     // 수동 저장 슬롯. ID는 덮어써도 유지하고 LocalVersion만 증가한다.
     public long LocalVersion = 1;
-    public long SyncedVersion;
     public string SnapshotKey;
     public List<SceneRecord> Scenes = new();
     public string Id;
@@ -199,11 +142,7 @@ public sealed class Bookmark
     public List<DialogueLogEntry> Backlog = new();
 
     public int PlaySecondsAtBookmark;
-    
-    public string SyncedAtUtc;
 
-    // 서버가 거절한 이유(413 등). 있으면 재시도하지 않음.
-    public string SyncError;
 }
 
 // 이력 화면이 회차 하나를 그리는 데 필요한 것. 파일을 열지 않고 목록을 그리려고 요약만 뽑는다.

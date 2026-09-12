@@ -147,8 +147,6 @@ public sealed partial class SaveCoordinator
         if (sceneIndex < 0 || sceneIndex >= _scenes.Count)
             throw new ArgumentOutOfRangeException(nameof(sceneIndex));
 
-        _localStore.SelectLocalPlaythrough();
-
         SceneRecord origin = _scenes[sceneIndex];
         SceneCheckpoint checkpoint = origin.Checkpoint;
 
@@ -260,18 +258,16 @@ public sealed partial class SaveCoordinator
     // 즐겨찾기에 저장된 복원 정보를 기반으로 새로운 Playthrough를 만든다.
     //
     // 수동 슬롯 자체에 저장된 과거 SceneRecord를 물려받는다.
-    public async Task ForkFromBookmark(Bookmark bookmark)
+    public Task ForkFromBookmark(Bookmark bookmark)
     {
         if (bookmark == null) throw new ArgumentNullException(nameof(bookmark));
         if (bookmark.Id != null)
         {
             string id = bookmark.Id;
             bookmark = _localStore.LoadBookmark(id);
-            if (bookmark == null && _restore != null) bookmark = await _restore.HydrateBookmarkAsync(id);
         }
         if (bookmark?.Checkpoint == null)
-            throw new InvalidOperationException("수동 저장 내용을 가져올 수 없다. 연결 후 다시 시도해야 한다.");
-        _localStore.SelectLocalPlaythrough();
+            throw new InvalidOperationException("수동 저장 본문이 없거나 손상되어 불러올 수 없다.");
 
         SceneCheckpoint checkpoint = bookmark.Checkpoint;
 
@@ -320,6 +316,7 @@ public sealed partial class SaveCoordinator
             $"물려받은 기록 {inheritedScenes.Count}개, " +
             $"백로그 {file.Backlog.Count}줄, " +
             $"시간 {bookmark.PlaySecondsAtBookmark}s");
+        return Task.CompletedTask;
     }
 
     private void SaveAndActivateFork(LocalSaveFile file)
@@ -329,6 +326,5 @@ public sealed partial class SaveCoordinator
         BecomePlaythrough(file.PlaythroughId, file.ForkedFrom,
             file.InheritedPlaySeconds, file.OwnPlaySeconds, file.Scenes);
         _newPrepared = false;
-        if (_server != null) _ = _server.RequestSyncAsync(file.PlaythroughId);
     }
 }

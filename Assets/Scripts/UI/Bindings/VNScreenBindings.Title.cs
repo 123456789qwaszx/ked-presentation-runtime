@@ -46,7 +46,7 @@ public sealed partial class VNScreenBindings
             return;
 
         await _progressionLauncher.ResumeAfterAsync(
-            _saveCoordinator?.WaitForStartupSyncAsync() ?? Task.CompletedTask);
+            Task.CompletedTask);
     }
 
     private async void HandleStartClicked()

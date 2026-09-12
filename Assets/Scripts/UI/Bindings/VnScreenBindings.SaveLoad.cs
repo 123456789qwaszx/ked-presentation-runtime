@@ -345,8 +345,6 @@ public sealed partial class VNScreenBindings
             RequiresDownload =
                 bookmark.SnapshotKey == null,
 
-            HasSyncError =
-                !string.IsNullOrEmpty(bookmark.SyncError),
         };
     }
 

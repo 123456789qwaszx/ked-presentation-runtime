@@ -9,7 +9,6 @@ public sealed partial class SaveCoordinator
     public Task PrepareNewPlaythroughAsync()
     {
         if (_newPrepared) return Task.CompletedTask;
-        _localStore.SelectLocalPlaythrough();
         BecomePlaythrough(NewPlaythroughId(), null, 0, 0, null);
         _newPrepared = true;
         return Task.CompletedTask;

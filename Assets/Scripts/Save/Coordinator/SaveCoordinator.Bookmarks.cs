@@ -11,18 +11,8 @@ public sealed partial class SaveCoordinator
     // - 재생 가능한 save fragment.(복원 시 필요한 재생 상태를 묶어둠)
     public IReadOnlyList<Bookmark> Bookmarks => _localStore.LoadBookmarks().Bookmarks;
 
-    public async Task<Bookmark> GetBookmarkAsync(string id)
-    {
-        Bookmark bookmark = _localStore.LoadBookmark(id);
-
-        if (bookmark != null)
-            return bookmark;
-
-        if (_restore == null)
-            return null;
-
-        return await _restore.HydrateBookmarkAsync(id);
-    }
+    public Task<Bookmark> GetBookmarkAsync(string id) =>
+        Task.FromResult(_localStore.LoadBookmark(id));
 
     public async Task<bool> RenameBookmarkAsync(string id, string label)
     {
@@ -30,23 +20,19 @@ public sealed partial class SaveCoordinator
         return RenameBookmark(id, label);
     }
 
-    // 충돌한 로컬 내용은 새 슬롯으로 보존할 수 있다. 원래 슬롯의 삭제는 별도 사용자 선택이다.
+    // 현재 슬롯을 새 ID로 복제한다. 원본은 유지한다.
     public async Task<Bookmark> DuplicateBookmarkAsync(string id, string label = null)
     {
         Bookmark bookmark = await GetBookmarkAsync(id);
         if (bookmark == null) return null;
         bookmark.Id = NewPlaythroughId();
         bookmark.LocalVersion = 1;
-        bookmark.SyncedVersion = 0;
         bookmark.SnapshotKey = null;
-        bookmark.SyncedAtUtc = null;
-        bookmark.SyncError = null;
         bookmark.CreatedAtUtc = NowUtc();
         if (label != null) bookmark.Label = label;
         BookmarkFile file = _localStore.LoadBookmarks();
         file.Bookmarks.Add(bookmark);
         _localStore.SaveBookmarks(file);
-        if (_bookmarkSync != null) _ = _bookmarkSync.PushAsync(bookmark.Id);
         return bookmark;
     }
 
@@ -77,7 +63,6 @@ public sealed partial class SaveCoordinator
         {
             Id = id ?? NewPlaythroughId(),
             LocalVersion = (previous?.LocalVersion ?? 0) + 1,
-            SyncedVersion = previous?.SyncedVersion ?? 0,
             Scenes = PlaythroughSession.Copy(_scenes),
             Label = string.IsNullOrEmpty(label) ? preview : label,
             Preview = preview,
@@ -108,14 +93,10 @@ public sealed partial class SaveCoordinator
             $"[저장] 즐겨찾기 — \"{bookmark.Preview}\" @ {target.NodeName}/{target.LineId}#{target.Occurrence}, " +
             $"경로 {bookmark.Load.Path.Count}개, Yarn 선택 {bookmark.Load.YarnChoices.Count}개 (총 {file.Bookmarks.Count}개)");
 
-        // 서버엔 직접 PUT - 큐 없이. 실패하면 SyncedAtUtc가 비어 있어 다음 시작에 다시.
-        if (_bookmarkSync != null)
-            _ = _bookmarkSync.PushAsync(bookmark.Id);
-
         return bookmark;
     }
 
-    // 로컬에서 빼고 서버 DELETE. 못 지우면 PendingDeletes에 남아 다음 시작에 다시.
+    // 슬롯 index를 확정한 뒤 미참조 본문을 정리한다.
     public bool DeleteBookmark(string id)
     {
         BookmarkFile file = _localStore.LoadBookmarks();
@@ -124,20 +105,12 @@ public sealed partial class SaveCoordinator
         if (removed == 0)
             return false;
 
-        if (!file.DeletedIds.Contains(id)) file.DeletedIds.Add(id);
-
-        if (_bookmarkSync != null && !file.PendingDeletes.Contains(id))
-            file.PendingDeletes.Add(id);
-
         _localStore.SaveBookmarks(file);
-
-        if (_bookmarkSync != null)
-            _ = _bookmarkSync.DeleteAsync(id);
 
         return true;
     }
 
-    // 이름이 바뀌면 서버 사본도 바뀌어야 한다 - 같은 id로 다시 PUT(멱등 upsert).
+    // 슬롯의 이름만 바꾼다.
     public bool RenameBookmark(string id, string label)
     {
         BookmarkFile file = _localStore.LoadBookmarks();
@@ -147,13 +120,8 @@ public sealed partial class SaveCoordinator
             return false;
 
         bookmark.Label = string.IsNullOrEmpty(label) ? bookmark.Preview : label;
-        bookmark.SyncedAtUtc = null;
         bookmark.LocalVersion++;
-        bookmark.SyncError = null;
         _localStore.SaveBookmarks(file);
-
-        if (_bookmarkSync != null)
-            _ = _bookmarkSync.PushAsync(id);
 
         return true;
     }
