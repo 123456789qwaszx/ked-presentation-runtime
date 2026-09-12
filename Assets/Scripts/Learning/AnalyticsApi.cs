@@ -105,6 +105,27 @@ public sealed class AnalyticsApi
         }
     }
 
+    public async Task<AnalyticsApiResult<bool>> ReplaceChoicesAsync(
+        long playthroughId,
+        IReadOnlyList<AnalyticsChoiceItemDto> choices)
+    {
+        string rawRequest = JsonConvert.SerializeObject(new
+        {
+            choices,
+        });
+
+        string url = _baseUrl + $"/playthroughs/{playthroughId}/choices";
+
+        using (var request = CreateJsonRequest(
+                   url,
+                   UnityWebRequest.kHttpVerbPUT,
+                   rawRequest))
+        {
+            await AwaitOperation(request.SendWebRequest());
+            return ReadNoContentResponse(request);
+        }
+    }
+
     private static UnityWebRequest CreateJsonRequest(
         string url,
         string method,
@@ -119,6 +140,30 @@ public sealed class AnalyticsApi
 
         request.SetRequestHeader("Content-Type", "application/json");
         return request;
+    }
+
+    private static AnalyticsApiResult<bool> ReadNoContentResponse(
+        UnityWebRequest request)
+    {
+        if (request.result == UnityWebRequest.Result.ConnectionError
+            || request.result == UnityWebRequest.Result.DataProcessingError)
+        {
+            return AnalyticsApiResult<bool>.Network(request.error);
+        }
+
+        long status = request.responseCode;
+        string raw = request.downloadHandler.text;
+
+        if (status >= 200 && status < 300)
+            return AnalyticsApiResult<bool>.Success(status, true, raw);
+
+        AnalyticsErrorResponseDto errorResponse = TryReadError(raw);
+
+        return AnalyticsApiResult<bool>.Failure(
+            status,
+            errorResponse?.ErrorCode,
+            errorResponse?.Message,
+            raw);
     }
 
     private static AnalyticsApiResult<T> ReadResponse<T>(
@@ -214,6 +259,15 @@ public sealed class AnalyticsCheckpointDto
     public bool ChapterCompleted { get; set; }
     public string SnapshotJson { get; set; }
     public string SavedAt { get; set; }
+}
+
+public sealed class AnalyticsChoiceItemDto
+{
+    [JsonProperty("episodeKey")]
+    public string EpisodeKey { get; set; }
+
+    [JsonProperty("optionIndex")]
+    public int OptionIndex { get; set; }
 }
 
 public sealed class AnalyticsErrorResponseDto
