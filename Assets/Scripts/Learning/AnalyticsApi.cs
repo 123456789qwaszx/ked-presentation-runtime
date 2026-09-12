@@ -27,43 +27,8 @@ public sealed class AnalyticsApi
         using (var request = UnityWebRequest.Get(_baseUrl + path))
         {
             request.timeout = 10;
-
             await AwaitOperation(request.SendWebRequest());
-
-            if (request.result == UnityWebRequest.Result.ConnectionError
-                || request.result == UnityWebRequest.Result.DataProcessingError)
-            {
-                return AnalyticsApiResult<List<AnalyticsChapterSummaryDto>>
-                    .Network(request.error);
-            }
-
-            long status = request.responseCode;
-            string raw = request.downloadHandler.text;
-
-            if (status >= 200 && status < 300)
-            {
-                try
-                {
-                    List<AnalyticsChapterSummaryDto> body =
-                        JsonConvert.DeserializeObject<List<AnalyticsChapterSummaryDto>>(raw);
-
-                    return AnalyticsApiResult<List<AnalyticsChapterSummaryDto>>
-                        .Success(status, body ?? new List<AnalyticsChapterSummaryDto>(), raw);
-                }
-                catch (JsonException error)
-                {
-                    return AnalyticsApiResult<List<AnalyticsChapterSummaryDto>>
-                        .Failure(status, "INVALID_RESPONSE", error.Message, raw);
-                }
-            }
-
-            AnalyticsErrorResponseDto errorResponse = TryReadError(raw);
-
-            return AnalyticsApiResult<List<AnalyticsChapterSummaryDto>>.Failure(
-                status,
-                errorResponse?.ErrorCode,
-                errorResponse?.Message,
-                raw);
+            return ReadResponse<List<AnalyticsChapterSummaryDto>>(request, emptyListOnNull: true);
         }
     }
 
@@ -77,58 +42,104 @@ public sealed class AnalyticsApi
             clientPlaythroughId,
         });
 
-        using (var request = new UnityWebRequest(
+        using (var request = CreateJsonRequest(
                    _baseUrl + "/playthroughs",
-                   UnityWebRequest.kHttpVerbPOST))
+                   UnityWebRequest.kHttpVerbPOST,
+                   rawRequest))
         {
-            request.timeout = 10;
-            request.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(rawRequest));
-            request.downloadHandler = new DownloadHandlerBuffer();
-            request.SetRequestHeader("Content-Type", "application/json");
-
             await AwaitOperation(request.SendWebRequest());
+            return ReadResponse<AnalyticsPlaythroughDto>(request);
+        }
+    }
 
-            if (request.result == UnityWebRequest.Result.ConnectionError
-                || request.result == UnityWebRequest.Result.DataProcessingError)
+    public async Task<AnalyticsApiResult<AnalyticsCheckpointDto>> SaveCheckpointAsync(
+        long playthroughId,
+        string episodeKey,
+        bool chapterCompleted,
+        string snapshotJson)
+    {
+        string rawRequest = JsonConvert.SerializeObject(new
+        {
+            episodeKey,
+            chapterCompleted,
+            snapshotJson,
+        });
+
+        string url = _baseUrl + $"/playthroughs/{playthroughId}/checkpoint";
+
+        using (var request = CreateJsonRequest(
+                   url,
+                   UnityWebRequest.kHttpVerbPUT,
+                   rawRequest))
+        {
+            await AwaitOperation(request.SendWebRequest());
+            return ReadResponse<AnalyticsCheckpointDto>(request);
+        }
+    }
+
+    private static UnityWebRequest CreateJsonRequest(
+        string url,
+        string method,
+        string rawRequest)
+    {
+        var request = new UnityWebRequest(url, method)
+        {
+            timeout = 10,
+            uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(rawRequest)),
+            downloadHandler = new DownloadHandlerBuffer(),
+        };
+
+        request.SetRequestHeader("Content-Type", "application/json");
+        return request;
+    }
+
+    private static AnalyticsApiResult<T> ReadResponse<T>(
+        UnityWebRequest request,
+        bool emptyListOnNull = false)
+    {
+        if (request.result == UnityWebRequest.Result.ConnectionError
+            || request.result == UnityWebRequest.Result.DataProcessingError)
+        {
+            return AnalyticsApiResult<T>.Network(request.error);
+        }
+
+        long status = request.responseCode;
+        string raw = request.downloadHandler.text;
+
+        if (status >= 200 && status < 300)
+        {
+            try
             {
-                return AnalyticsApiResult<AnalyticsPlaythroughDto>
-                    .Network(request.error);
-            }
+                T body = JsonConvert.DeserializeObject<T>(raw);
 
-            long status = request.responseCode;
-            string raw = request.downloadHandler.text;
-
-            if (status >= 200 && status < 300)
-            {
-                try
+                if (body == null)
                 {
-                    AnalyticsPlaythroughDto body =
-                        JsonConvert.DeserializeObject<AnalyticsPlaythroughDto>(raw);
-
-                    if (body == null)
+                    if (emptyListOnNull && typeof(T) == typeof(List<AnalyticsChapterSummaryDto>))
                     {
-                        return AnalyticsApiResult<AnalyticsPlaythroughDto>
-                            .Failure(status, "INVALID_RESPONSE", "회차 응답 본문이 비어 있다.", raw);
+                        object empty = new List<AnalyticsChapterSummaryDto>();
+                        return AnalyticsApiResult<T>.Success(status, (T)empty, raw);
                     }
 
-                    return AnalyticsApiResult<AnalyticsPlaythroughDto>
-                        .Success(status, body, raw);
+                    return AnalyticsApiResult<T>
+                        .Failure(status, "INVALID_RESPONSE", "응답 본문이 비어 있다.", raw);
                 }
-                catch (JsonException error)
-                {
-                    return AnalyticsApiResult<AnalyticsPlaythroughDto>
-                        .Failure(status, "INVALID_RESPONSE", error.Message, raw);
-                }
+
+                return AnalyticsApiResult<T>.Success(status, body, raw);
             }
-
-            AnalyticsErrorResponseDto errorResponse = TryReadError(raw);
-
-            return AnalyticsApiResult<AnalyticsPlaythroughDto>.Failure(
-                status,
-                errorResponse?.ErrorCode,
-                errorResponse?.Message,
-                raw);
+            catch (JsonException error)
+            {
+                return AnalyticsApiResult<T>
+                    .Failure(status, "INVALID_RESPONSE", error.Message, raw);
+            }
         }
+
+        AnalyticsErrorResponseDto errorResponse = TryReadError(raw);
+
+        return AnalyticsApiResult<T>.Failure(
+            status,
+            errorResponse?.ErrorCode,
+            errorResponse?.Message,
+            raw);
     }
 
     private static AnalyticsErrorResponseDto TryReadError(string raw)
@@ -165,6 +176,16 @@ public sealed class AnalyticsPlaythroughDto
 {
     public long PlaythroughId { get; set; }
     public string ClientPlaythroughId { get; set; }
+}
+
+public sealed class AnalyticsCheckpointDto
+{
+    public long CheckpointId { get; set; }
+    public long PlaythroughId { get; set; }
+    public string EpisodeKey { get; set; }
+    public bool ChapterCompleted { get; set; }
+    public string SnapshotJson { get; set; }
+    public string SavedAt { get; set; }
 }
 
 public sealed class AnalyticsErrorResponseDto
