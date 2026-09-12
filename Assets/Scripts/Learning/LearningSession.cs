@@ -1,3 +1,5 @@
+using System;
+
 // 학습 서버 연결 상태만 보관한다.
 // 기존 PlaythroughFile.Sync의 서버 ID/revision/ACK와 섞지 않는다.
 public static class LearningSession
@@ -8,9 +10,16 @@ public static class LearningSession
     public static LocalSaveFile LatestSnapshot { get; private set; }
     public static ILocalSaveStore LocalStore { get; private set; }
 
+    private static Action _onServerBound;
+
     public static void BindLocalStore(ILocalSaveStore localStore)
     {
         LocalStore = localStore;
+    }
+
+    public static void BindServerObserver(Action onServerBound)
+    {
+        _onServerBound = onServerBound;
     }
 
     public static void Capture(LocalSaveFile snapshot)
@@ -37,5 +46,6 @@ public static class LearningSession
             return;
 
         ServerPlaythroughId = serverPlaythroughId;
+        _onServerBound?.Invoke();
     }
 }
