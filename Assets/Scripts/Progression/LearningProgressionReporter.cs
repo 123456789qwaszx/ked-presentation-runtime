@@ -4,23 +4,26 @@ using UnityEngine;
 // 학습 연결:
 // - 기존 SaveCoordinator에 먼저 위임해 로컬 저장 경계를 보존한다.
 // - 저장 성공 뒤 확정 snapshot을 관찰하고 LearningSession에 보관한다.
-// - 학습 HTTP 자체는 LearningAnalyticsConnection에 맡긴다.
+// - 학습 HTTP 자체는 LearningAnalyticsConnection/LearningChoiceSync에 맡긴다.
 public sealed class LearningProgressionReporter : IProgressionReporter
 {
     private readonly SaveCoordinator _save;
     private readonly ILocalSaveStore _localStore;
     private readonly Action<string, string> _onSceneEntered;
+    private readonly Action<LocalSaveFile> _onSnapshotCommitted;
     private readonly Action<string> _log;
 
     public LearningProgressionReporter(
         SaveCoordinator save,
         ILocalSaveStore localStore,
         Action<string> log = null,
-        Action<string, string> onSceneEntered = null)
+        Action<string, string> onSceneEntered = null,
+        Action<LocalSaveFile> onSnapshotCommitted = null)
     {
         _save = save ?? throw new ArgumentNullException(nameof(save));
         _localStore = localStore ?? throw new ArgumentNullException(nameof(localStore));
         _onSceneEntered = onSceneEntered;
+        _onSnapshotCommitted = onSnapshotCommitted;
         _log = log ?? (message => Debug.Log(message));
 
         LearningSession.BindLocalStore(_localStore);
@@ -48,11 +51,23 @@ public sealed class LearningProgressionReporter : IProgressionReporter
     {
         _save.ReportSceneCommitted(report);
 
-        CaptureLatestSnapshot(_save.PlaythroughId);
+        LocalSaveFile snapshot = CaptureLatestSnapshot(_save.PlaythroughId);
         LogSnapshot("SceneCommitted", report.ChapterId, report.State.CurrentEpisodeId);
+
+        if (snapshot == null)
+            return;
+
+        try
+        {
+            _onSnapshotCommitted?.Invoke(snapshot);
+        }
+        catch (Exception error)
+        {
+            Debug.LogWarning($"[U5 선택 동기화] 시작 실패: {error}");
+        }
     }
 
-    private void CaptureLatestSnapshot(string id)
+    private LocalSaveFile CaptureLatestSnapshot(string id)
     {
         try
         {
@@ -62,10 +77,12 @@ public sealed class LearningProgressionReporter : IProgressionReporter
                 throw new InvalidOperationException("확정된 로컬 snapshot을 찾을 수 없다.");
 
             LearningSession.Capture(snapshot);
+            return snapshot;
         }
         catch (Exception error)
         {
             Debug.LogWarning($"[U3 서버 백업] 확정 snapshot 확보 실패: {error.Message}");
+            return null;
         }
     }
 
