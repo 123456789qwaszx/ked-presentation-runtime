@@ -10,13 +10,8 @@
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <Compile Include="../../Assets/Scripts/Save/**/*.cs" />
-    <Compile Include="../../Assets/Scripts/Server/ApiResult.cs" />
-    <Compile Include="../../Assets/Scripts/Server/ServerDtos.cs" />
-    <Compile Include="../../Assets/Scripts/Server/ServerSaveContract.cs" />
-    <Compile Include="../../Assets/Scripts/Server/GuestSession.cs" />
     <Compile Include="../../Assets/Scripts/Progression/Response/*.cs" />
     <Compile Include="../../Assets/Scripts/Progression/IProgressionReporter.cs" />
-    <Compile Include="../../Assets/Scripts/Progression/LearningProgressionReporter.cs" />
     <Compile Include="../../Assets/Scripts/Progression/ProgressionLauncher.cs" />
     <Compile Include="../../Assets/Scripts/Ked.Progression/Spec/*.cs" />
     <Compile Include="../../Assets/Scripts/Ked.Progression/State/*.cs" />
@@ -24,6 +19,7 @@
     <Compile Include="../../Assets/Scripts/Ked.Progression/Vocabulary/*.cs" />
     <Compile Include="../../Assets/Scripts/FeatureController/BacklogRecorder.cs" />
     <Compile Include="../../Assets/Scripts/DialoguePresenter/VNOptionFlow/VNChoiceRecord.cs" />
+    <Compile Include="../../Assets/Scripts/Analytics/*.cs" />
     <Compile Include="Stubs.cs" />
     <Compile Include="Program.cs" />
   </ItemGroup>

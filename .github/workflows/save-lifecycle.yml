@@ -1,11 +1,14 @@
 name: Save lifecycle
 on:
   push:
-    branches: [server_DB_Test, learning/vn-play-analytics]
+    branches: [server_DB_Test, learning/vn-play-analytics, refactor/offline-local-save]
   pull_request:
     paths:
       - 'Assets/Scripts/Save/**'
-      - 'Assets/Scripts/Server/**'
+      - 'Assets/Scripts/Analytics/**'
+      - 'Assets/Scripts/Game/**'
+      - 'Assets/Scripts/UI/**'
+      - 'Assets/Scripts/FeatureController/**'
       - 'Assets/Scripts/Progression/**'
       - 'tests/SaveLifecycle/**'
       - '.github/workflows/save-lifecycle.yml'

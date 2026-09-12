@@ -1,5 +1,5 @@
 // 이 harness의 대역 범위는 Unity/Yarn 재생과 HTTP 경계뿐이다.
-// Save, Coordinator, Restore, Worker, GuestSession, Launcher는 실제 소스를 컴파일한다.
+// Save, Coordinator, Analytics, Launcher는 실제 소스를 컴파일한다.
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -44,37 +44,29 @@ public sealed class ProgressionDriver
         YarnVariableSnapshot variables, IReadOnlyList<DialogueLogEntry> backlog, SavedLoadPlan plan)
     { Starts++; IsRunning = true; return Task.CompletedTask; }
 }
-public sealed class ServerApi
+namespace UnityEngine.Networking
 {
-    public Func<Task<ApiResult<ResumeSaveDto>>> OnResume;
-    public Func<string,Task<ApiResult<BookmarkPageDto>>> OnPage;
-    public Func<BookmarkUpsertRequestDto,Task<ApiResult<BookmarkUpsertResponseDto>>> OnPutBookmark;
-    public Func<string,Task<ApiResult<object>>> OnDeleteBookmark;
-    public Func<string,Task<ApiResult<List<ChapterVersionInfoDto>>>> OnVersions;
-    public Task<ApiResult<ResumeSaveDto>> GetResumeAsync(long id,string t) => OnResume();
-    public Task<ApiResult<BookmarkPageDto>> GetBookmarkPageAsync(long id,string cursor,string t) => OnPage(cursor);
-    public Task<ApiResult<object>> SetResumeAsync(long id,ResumePointerRequestDto r,string t)
-        => Task.FromResult(ApiResult<object>.Success(204,null,""));
-    public Func<Task<ApiResult<List<PlaythroughSummaryDto>>>> OnList;
-    public Func<long,Task<ApiResult<SaveSlotDetailDto>>> OnSave;
-    public Func<long,Task<ApiResult<List<ChoiceHistoryItemDto>>>> OnChoices;
-    public Func<Task<ApiResult<List<BookmarkDetailDto>>>> OnBookmarks;
-    public Func<string,Task<ApiResult<BookmarkDetailDto>>> OnBookmark;
-    public Func<SaveUploadRequestDto,Task<ApiResult<SaveUploadResponseDto>>> OnUpload;
-    public Task<ApiResult<UserResponseDto>> SignUpAsync(string u,string p) => Task.FromResult(ApiResult<UserResponseDto>.Network("offline"));
-    public Task<ApiResult<LoginResponseDto>> LoginAsync(string u,string p) => Task.FromResult(ApiResult<LoginResponseDto>.Network("offline"));
-    public Task<ApiResult<PlaythroughCreatedDto>> CreatePlaythroughAsync(long u,PlaythroughCreateRequestDto r,string t)
-        => Task.FromResult(ApiResult<PlaythroughCreatedDto>.Success(201,new PlaythroughCreatedDto { PlaythroughId = 10 }, ""));
-    public Task<ApiResult<List<ChapterVersionInfoDto>>> GetChapterVersionsAsync(string id)
-        => OnVersions == null ? Task.FromResult(ApiResult<List<ChapterVersionInfoDto>>.Network("offline")) : OnVersions(id);
-    public Task<ApiResult<SaveUploadResponseDto>> PutSaveAsync(long id,int slot,SaveUploadRequestDto r,string t) => OnUpload(r);
-    public Task<ApiResult<List<PlaythroughSummaryDto>>> GetPlaythroughsAsync(long id,string t) => OnList();
-    public Task<ApiResult<SaveSlotDetailDto>> GetSaveAsync(long id,int slot,string t) => OnSave(id);
-    public Task<ApiResult<List<ChoiceHistoryItemDto>>> GetChoicesAsync(long id,int slot,string t) => OnChoices(id);
-    public Task<ApiResult<List<BookmarkDetailDto>>> GetBookmarksAsync(long id,string t) => OnBookmarks();
-    public Task<ApiResult<BookmarkDetailDto>> GetBookmarkAsync(long uid,string id,string t) => OnBookmark(id);
-    public Task<ApiResult<BookmarkUpsertResponseDto>> PutBookmarkAsync(long uid,string id,BookmarkUpsertRequestDto r,string t)
-        => OnPutBookmark == null ? Task.FromResult(ApiResult<BookmarkUpsertResponseDto>.Network("offline")) : OnPutBookmark(r);
-    public Task<ApiResult<object>> DeleteBookmarkAsync(long uid,string id,string t)
-        => OnDeleteBookmark == null ? Task.FromResult(ApiResult<object>.Success(204,null,"")) : OnDeleteBookmark(id);
+    public sealed class UnityWebRequestAsyncOperation
+    {
+        public bool isDone = true;
+        public event Action<UnityWebRequestAsyncOperation> completed { add { } remove { } }
+    }
+    public class UploadHandlerRaw { public UploadHandlerRaw(byte[] bytes) {} }
+    public class DownloadHandlerBuffer { public string text = ""; }
+    public sealed class UnityWebRequest : IDisposable
+    {
+        public enum Result { ConnectionError, DataProcessingError, Success, ProtocolError }
+        public const string kHttpVerbPOST="POST", kHttpVerbPUT="PUT";
+        public int timeout;
+        public UploadHandlerRaw uploadHandler;
+        public DownloadHandlerBuffer downloadHandler = new();
+        public Result result=Result.ConnectionError;
+        public long responseCode;
+        public string error="offline";
+        public UnityWebRequest(string url,string method) {}
+        public static UnityWebRequest Get(string url) => new(url,"GET");
+        public void SetRequestHeader(string key,string value) {}
+        public UnityWebRequestAsyncOperation SendWebRequest() => new();
+        public void Dispose() {}
+    }
 }
