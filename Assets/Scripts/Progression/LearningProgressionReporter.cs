@@ -22,6 +22,8 @@ public sealed class LearningProgressionReporter : IProgressionReporter
         _localStore = localStore ?? throw new ArgumentNullException(nameof(localStore));
         _onSceneEntered = onSceneEntered;
         _log = log ?? (message => Debug.Log(message));
+
+        LearningSession.BindLocalStore(_localStore);
     }
 
     public void ReportSceneEntered(SceneEntryReport report)
