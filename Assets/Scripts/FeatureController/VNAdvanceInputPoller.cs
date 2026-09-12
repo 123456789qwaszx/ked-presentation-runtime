@@ -19,7 +19,6 @@ public sealed class VNAdvanceInputPoller : MonoBehaviour
 
     private ProgressionLauncher _progressionLauncher;
     private SaveCoordinator _saveCoordinator;
-    private bool _learningMode;
 
     private bool _rapidSkipHeld;
     private bool _speedUpHeld;
@@ -32,8 +31,7 @@ public sealed class VNAdvanceInputPoller : MonoBehaviour
         string yarnEntryKey,
         string[] debugEpisodeChain,
         ProgressionLauncher progressionLauncher,
-        SaveCoordinator saveCoordinator,
-        bool learningMode = false)
+        SaveCoordinator saveCoordinator)
     {
         _dialogueAdvanceDispatcher = dialogueAdvanceDispatcher;
         _featureController = featureController;
@@ -43,7 +41,6 @@ public sealed class VNAdvanceInputPoller : MonoBehaviour
         _debugEpisodeChain = debugEpisodeChain;
         _progressionLauncher = progressionLauncher;
         _saveCoordinator = saveCoordinator;
-        _learningMode = learningMode;
     }
 
     private void Update()
@@ -56,12 +53,8 @@ public sealed class VNAdvanceInputPoller : MonoBehaviour
         PollSpeedUpMode();
         PollFeatureToggles();
 
-        // 학습에서는 진행·저장을 거치지 않는 직접 Yarn 재생을 열지 않는다.
-        if (!_learningMode)
-        {
-            PollDebugRunYarn();
-            PollDebugRunEpisodeChain();
-        }
+        PollDebugRunYarn();
+        PollDebugRunEpisodeChain();
         PollDebugRunProgression();
         PollDebugNewGame();
         PollDebugBookmark();
@@ -117,12 +110,6 @@ public sealed class VNAdvanceInputPoller : MonoBehaviour
         if (!_bindings.IsBookmarkPressed())
             return;
 
-        if (_learningMode)
-        {
-            Debug.Log("[학습] 수동 저장 단축키는 이후 단계에서 연결한다.");
-            return;
-        }
-
         if (_progressionLauncher == null
             || !_progressionLauncher.IsRunning
             || _saveCoordinator == null)
@@ -151,12 +138,6 @@ public sealed class VNAdvanceInputPoller : MonoBehaviour
     {
         if (!_bindings.IsLoadBookmarkPressed())
             return;
-
-        if (_learningMode)
-        {
-            Debug.Log("[학습] 수동 슬롯 로드는 이후 단계에서 연결한다.");
-            return;
-        }
 
         if (_progressionLauncher == null || _saveCoordinator == null)
             return;

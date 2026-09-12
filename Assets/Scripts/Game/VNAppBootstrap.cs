@@ -94,17 +94,16 @@ public class VNAppBootstrap : MonoBehaviour
              "경로 문자열이 아니라 에셋 참조다 — 머신에 안 매이고 빌드에도 실린다.")]
     [SerializeField] private TextAsset progressionChapterJson;
 
-    [Header("저장·동기화 (M7)")]
-    [Tooltip("spring-prepare 서버 주소. 비우면 서버 동기화 없이 로컬 저장만 한다.")]
-    [SerializeField] private string serverBaseUrl = "http://localhost:8080";
-
-    [Header("학습 모드")]
-    [Tooltip("실행 전에 설정한다. 학습 저장을 분리하고 기존 서버 동기화와 과거 회차 로드를 끈다.")]
-    [SerializeField] private bool learningMode;
+    [Header("로컬 저장 데이터")]
+    [FormerlySerializedAs("learningMode")]
+    [Tooltip("기존 학습용 콘텐츠와 saves-learning 경로를 선택한다. 저장 기능과 네트워크 사용 여부에는 영향이 없다.")]
+    [SerializeField] private bool useLearningSaveData;
     [SerializeField] private TextAsset learningChapterJson;
-    [Tooltip("vn-play-analytics 학습 서버 주소. 기존 저장 동기화 주소와 별개다.")]
+
+    [Header("선택 통계 (선택 사항)")]
+    [SerializeField] private bool enableAnalytics;
     [SerializeField] private string analyticsBaseUrl = "http://localhost:8080";
-    
+
     [Header("Album")]
     [SerializeField] private VNAlbumDatabaseSO albumDatabase;
 
@@ -144,7 +143,7 @@ public class VNAppBootstrap : MonoBehaviour
     private void Awake()
     {
         // 실행 중 Inspector를 바꿔도 저장 경로와 기능 구성이 서로 엇갈리지 않는다.
-        _learningMode = learningMode;
+        _learningMode = useLearningSaveData;
         _saveRoot = Path.Combine(Application.persistentDataPath,
             _learningMode ? "saves-learning" : "saves");
         _chapterJson = _learningMode ? learningChapterJson : progressionChapterJson;
@@ -422,19 +421,6 @@ public class VNAppBootstrap : MonoBehaviour
 
         IProgressionReporter reporter = _saveCoordinator;
 
-        if (_learningMode)
-        {
-            _learningAnalytics = new LearningAnalyticsConnection(analyticsBaseUrl);
-            _learningChoiceSync = new LearningChoiceSync(analyticsBaseUrl);
-            LearningSession.BindServerObserver(_learningChoiceSync.OnServerBound);
-
-            reporter = new LearningProgressionReporter(
-                _saveCoordinator,
-                _localSaveStore,
-                onSceneEntered: _learningAnalytics.OnSceneEntered,
-                onSnapshotCommitted: _learningChoiceSync.OnSnapshotCommitted);
-        }
-
         SceneRunner sceneRunner = new SceneRunner(
             _scenePlayback,
             _progressionOptions,
@@ -457,40 +443,14 @@ public class VNAppBootstrap : MonoBehaviour
             _saveCoordinator.LoadActiveResumePoint,
             _saveCoordinator.PrepareNewPlaythroughAsync);
 
-        if (_learningMode)
-            _learningAnalytics.BindProgressionLauncher(_progressionLauncher);
+
     }
 
-    // 저장·동기화 스택. 로컬이 진실(파일), 서버는 사본(큐로 민다). 슬롯 1 고정.
+    // 모든 실행 모드에서 로컬 저장을 기본으로 사용한다.
     private SaveCoordinator CreateSaveCoordinator()
     {
-        LocalFileSaveStore localStore = new(_saveRoot);
-        _localSaveStore = localStore;
-
-        if (_learningMode)
-        {
-            Debug.Log("[학습] 로컬 저장 모드 — 기존 서버 동기화 없음, 수동 슬롯·과거 장면 포크 제한");
-            return new SaveCoordinator(localStore, server: null);
-        }
-
-        if (string.IsNullOrWhiteSpace(serverBaseUrl))
-            return new SaveCoordinator(localStore, server: null);
-
-        ServerApi serverApi = new(serverBaseUrl);
-        GuestSession guestSession = new(serverApi, Path.Combine(Application.persistentDataPath, "account.json"));
-        ChapterVersionResolver versionResolver = new(serverApi, _chapterJson);
-
-        string deviceKey = SystemInfo.deviceUniqueIdentifier;
-
-        if (deviceKey.Length > 64)
-            deviceKey = deviceKey.Substring(0, 64);
-
-        SaveSyncTransport transport = new(serverApi, guestSession, versionResolver, deviceKey);
-        ServerSyncSaveStore serverSync = new(localStore, transport);
-        ServerBookmarkSync bookmarkSync = new(serverApi, guestSession, versionResolver, localStore);
-        ServerRestore restore = new(serverApi, guestSession, localStore);
-
-        return new SaveCoordinator(localStore, serverSync, bookmarkSync, restore);
+        _localSaveStore = new LocalFileSaveStore(_saveRoot);
+        return new SaveCoordinator(_localSaveStore, server: null);
     }
 
     private void BootstrapPlaybackControls()
@@ -535,8 +495,7 @@ public class VNAppBootstrap : MonoBehaviour
             yarnEntryKey,
             debugEpisodeChain,
             _progressionLauncher,
-            _saveCoordinator,
-            learningMode: _learningMode);
+            _saveCoordinator);
     }
     
     private void BootstrapScreenBindings()
@@ -547,8 +506,7 @@ public class VNAppBootstrap : MonoBehaviour
 
         _screenBindings.ConfigureProgression(
             _progressionLauncher,
-            _saveCoordinator,
-            learningMode: _learningMode);
+            _saveCoordinator);
 
         _screenBindings.ConfigureAlbum(
             _albumController);
@@ -587,18 +545,6 @@ public class VNAppBootstrap : MonoBehaviour
     private void OpenInitialScreen()
     {
         _screenBindings.OpenTitleMenu();
-    }
-
-    [ContextMenu("Learning/Retry chapter lookup")]
-    private void RetryLearningChapterLookup()
-    {
-        if (!Application.isPlaying || _learningAnalytics == null)
-        {
-            Debug.Log("[U1 서버 콘텐츠] 학습 모드로 실행한 뒤 다시 조회할 수 있다.");
-            return;
-        }
-
-        _learningAnalytics.Retry();
     }
 
     [ContextMenu("Learning/Log current save snapshot")]
