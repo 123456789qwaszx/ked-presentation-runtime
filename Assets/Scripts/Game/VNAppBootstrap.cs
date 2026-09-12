@@ -40,6 +40,7 @@ public class VNAppBootstrap : MonoBehaviour
     private bool _learningMode;
     private string _saveRoot;
     private TextAsset _chapterJson;
+    private LearningAnalyticsConnection _learningAnalytics;
     
     private AlbumUnlockService _albumUnlockService;
     private AlbumController _albumController;
@@ -100,6 +101,8 @@ public class VNAppBootstrap : MonoBehaviour
     [Tooltip("실행 전에 설정한다. 학습 저장을 분리하고 기존 서버 동기화와 과거 회차 로드를 끈다.")]
     [SerializeField] private bool learningMode;
     [SerializeField] private TextAsset learningChapterJson;
+    [Tooltip("vn-play-analytics 학습 서버 주소. 기존 저장 동기화 주소와 별개다.")]
+    [SerializeField] private string analyticsBaseUrl = "http://localhost:8080";
     
     [Header("Album")]
     [SerializeField] private VNAlbumDatabaseSO albumDatabase;
@@ -421,7 +424,12 @@ public class VNAppBootstrap : MonoBehaviour
         IProgressionReporter reporter = _saveCoordinator;
 
         if (_learningMode)
-            reporter = new LearningProgressionReporter(_saveCoordinator, _localSaveStore);
+        {
+            _learningAnalytics = new LearningAnalyticsConnection(analyticsBaseUrl);
+            reporter = new LearningProgressionReporter(
+                _saveCoordinator, _localSaveStore,
+                onSceneEntered: _learningAnalytics.OnSceneEntered);
+        }
 
         SceneRunner sceneRunner = new SceneRunner(
             _scenePlayback,
@@ -574,6 +582,18 @@ public class VNAppBootstrap : MonoBehaviour
     private void OpenInitialScreen()
     {
         _screenBindings.OpenTitleMenu();
+    }
+
+    [ContextMenu("Learning/Retry chapter lookup")]
+    private void RetryLearningChapterLookup()
+    {
+        if (!Application.isPlaying || _learningAnalytics == null)
+        {
+            Debug.Log("[U1 서버 콘텐츠] 학습 모드로 실행한 뒤 다시 조회할 수 있다.");
+            return;
+        }
+
+        _learningAnalytics.Retry();
     }
 
     [ContextMenu("Learning/Log current save snapshot")]

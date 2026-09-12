@@ -15,7 +15,7 @@ public sealed class AnalyticsApi
         if (string.IsNullOrWhiteSpace(baseUrl))
             throw new ArgumentException("Analytics 서버 주소가 비어 있다.", nameof(baseUrl));
 
-        _baseUrl = baseUrl.TrimEnd('/');
+        _baseUrl = baseUrl.Trim().TrimEnd('/');
     }
 
     public async Task<AnalyticsApiResult<List<AnalyticsChapterSummaryDto>>> FindChaptersAsync(
@@ -76,6 +76,9 @@ public sealed class AnalyticsApi
 
     private static Task AwaitOperation(UnityWebRequestAsyncOperation operation)
     {
+        if (operation.isDone)
+            return Task.CompletedTask;
+
         var completion = new TaskCompletionSource<bool>();
         operation.completed += _ => completion.TrySetResult(true);
         return completion.Task;

@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using UnityEngine;
 
 // 학습 연결:
@@ -11,20 +9,18 @@ public sealed class LearningProgressionReporter : IProgressionReporter
 {
     private readonly SaveCoordinator _save;
     private readonly ILocalSaveStore _localStore;
-    private readonly AnalyticsApi _analyticsApi;
+    private readonly Action<string> _onSceneEntered;
     private readonly Action<string> _log;
-
-    private bool _catalogLookupStarted;
 
     public LearningProgressionReporter(
         SaveCoordinator save,
         ILocalSaveStore localStore,
         Action<string> log = null,
-        string analyticsBaseUrl = "http://localhost:8080")
+        Action<string> onSceneEntered = null)
     {
         _save = save ?? throw new ArgumentNullException(nameof(save));
         _localStore = localStore ?? throw new ArgumentNullException(nameof(localStore));
-        _analyticsApi = new AnalyticsApi(analyticsBaseUrl);
+        _onSceneEntered = onSceneEntered;
         _log = log ?? (message => Debug.Log(message));
     }
 
@@ -33,10 +29,13 @@ public sealed class LearningProgressionReporter : IProgressionReporter
         _save.ReportSceneEntered(report);
         LogSnapshot("SceneEntered", report.ChapterId, report.State.CurrentEpisodeId);
 
-        if (!_catalogLookupStarted)
+        try
         {
-            _catalogLookupStarted = true;
-            _ = LookupChapterAsync(report.ChapterId);
+            _onSceneEntered?.Invoke(report.ChapterId);
+        }
+        catch (Exception error)
+        {
+            Debug.LogWarning($"[U1 서버 콘텐츠] 연결 시작 실패: {error}");
         }
     }
 
@@ -44,67 +43,6 @@ public sealed class LearningProgressionReporter : IProgressionReporter
     {
         _save.ReportSceneCommitted(report);
         LogSnapshot("SceneCommitted", report.ChapterId, report.State.CurrentEpisodeId);
-    }
-
-    private async Task LookupChapterAsync(string chapterKey)
-    {
-        LearningAnalyticsOverlay.Show(
-            $"[U1 서버 콘텐츠]\nlocal chapterKey: {chapterKey}\n조회 중...");
-
-        try
-        {
-            AnalyticsApiResult<List<AnalyticsChapterSummaryDto>> result =
-                await _analyticsApi.FindChaptersAsync(chapterKey);
-
-            if (result.NetworkError)
-            {
-                string message =
-                    $"[U1 서버 콘텐츠]\nlocal chapterKey: {chapterKey}\n통신 실패: {result.ErrorMessage}";
-
-                LearningAnalyticsOverlay.Show(message);
-                Debug.LogWarning(message);
-                return;
-            }
-
-            if (!result.IsSuccess)
-            {
-                string message =
-                    $"[U1 서버 콘텐츠]\nlocal chapterKey: {chapterKey}\n" +
-                    $"HTTP {result.Status} {result.ErrorCode}: {result.ErrorMessage}";
-
-                LearningAnalyticsOverlay.Show(message);
-                Debug.LogWarning(message);
-                return;
-            }
-
-            if (result.Body.Count == 0)
-            {
-                string message =
-                    $"[U1 서버 콘텐츠]\nlocal chapterKey: {chapterKey}\n서버에 등록되지 않음";
-
-                LearningAnalyticsOverlay.Show(message);
-                Debug.Log(message);
-                return;
-            }
-
-            AnalyticsChapterSummaryDto chapter = result.Body[0];
-
-            string success =
-                $"[U1 서버 콘텐츠]\n" +
-                $"local chapterKey: {chapterKey}\n" +
-                $"server chapterId: {chapter.ChapterId} / title: {chapter.Title}";
-
-            LearningAnalyticsOverlay.Show(success);
-            Debug.Log(success);
-        }
-        catch (Exception error)
-        {
-            string message =
-                $"[U1 서버 콘텐츠]\nlocal chapterKey: {chapterKey}\n조회 처리 실패: {error.Message}";
-
-            LearningAnalyticsOverlay.Show(message);
-            Debug.LogWarning(message);
-        }
     }
 
     private void LogSnapshot(string boundary, string chapterId, string episodeId)

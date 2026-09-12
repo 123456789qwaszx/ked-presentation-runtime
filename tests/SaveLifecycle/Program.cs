@@ -219,6 +219,37 @@ internal static class Program
 
     private static async Task TestLearningReporter()
     {
+        await Test("Learning HTTP callback runs after local persistence and failure does not stop playback", () => Run(() =>
+        {
+            var store = new LocalFileSaveStore(Dir());
+            int calls = 0;
+            bool persisted = false;
+            var reporter = new LearningProgressionReporter(new SaveCoordinator(store, null), store,
+                onSceneEntered: key =>
+                {
+                    calls++;
+                    persisted = store.LoadActive()?.ChapterId == key;
+                    throw new InvalidOperationException("injected connection failure");
+                });
+            reporter.ReportSceneEntered(new SceneEntryReport("chapter",
+                Ked.Progression.ProgressionState.CreateInitial(Array.Empty<Ked.Progression.StatDefinition>(), "scene1"), null, 0));
+
+            Check(calls == 1 && persisted, "HTTP callback did not observe persisted entry");
+            Check(store.LoadActive().CurrentEpisodeId == "scene1", "connection failure cancelled local save");
+        }));
+
+        await Test("Failed scene entry never starts learning HTTP callback", () => Run(() =>
+        {
+            var store = new LocalFileSaveStore(Dir(), (path, content) =>
+                throw new IOException("injected write failure"));
+            int calls = 0;
+            var reporter = new LearningProgressionReporter(new SaveCoordinator(store, null), store,
+                onSceneEntered: key => calls++);
+            Throws(() => reporter.ReportSceneEntered(new SceneEntryReport("chapter",
+                Ked.Progression.ProgressionState.CreateInitial(Array.Empty<Ked.Progression.StatDefinition>(), "scene1"), null, 0)));
+            Check(calls == 0, "failed local save started HTTP callback");
+        }));
+
         await Test("Learning reporter observes persisted entry and committed path without acknowledging sync", () => Run(() =>
         {
             string dir = Dir();
