@@ -2,52 +2,89 @@ using System;
 using System.Threading.Tasks;
 using UnityEngine;
 
-// 학습 HTTP와 표시를 저장 관찰자에서 분리한다. 표시 실패도 로컬 진행을 막지 않는다.
+// 학습 HTTP와 표시를 저장 관찰자에서 분리한다.
+// 로컬 저장 성공 뒤 chapterKey + clientPlaythroughId를 받아 서버 연결을 수행한다.
 public sealed class LearningAnalyticsConnection
 {
     private readonly string _baseUrl;
+    private readonly AnalyticsApi _api;
+
     private string _chapterKey;
-    private Task _lookup;
+    private string _clientPlaythroughId;
+    private Task _connectionTask;
 
     public LearningAnalyticsConnection(string baseUrl)
     {
         _baseUrl = baseUrl;
-        Publish($"[U1 서버 콘텐츠] 연결 초기화\nserver: {_baseUrl}\n첫 장면 진입 대기");
+        _api = new AnalyticsApi(baseUrl);
+
+        Publish($"[학습 서버] 연결 초기화\nserver: {_baseUrl}\n첫 장면 진입 대기");
     }
 
-    public void OnSceneEntered(string chapterKey)
+    public void OnSceneEntered(
+        string chapterKey,
+        string clientPlaythroughId)
     {
-        if (_chapterKey == chapterKey)
+        bool samePlaythrough =
+            _chapterKey == chapterKey
+            && _clientPlaythroughId == clientPlaythroughId;
+
+        if (samePlaythrough)
             return;
 
         _chapterKey = chapterKey;
+        _clientPlaythroughId = clientPlaythroughId;
         Retry();
     }
 
     public void Retry()
     {
-        if (string.IsNullOrEmpty(_chapterKey))
+        if (string.IsNullOrEmpty(_chapterKey)
+            || string.IsNullOrEmpty(_clientPlaythroughId))
         {
-            Publish("[U1 서버 콘텐츠] 새 게임 또는 이어하기로 첫 장면에 진입하세요.");
+            Publish("[학습 서버] 새 게임 또는 이어하기로 첫 장면에 진입하세요.");
             return;
         }
 
-        if (_lookup != null && !_lookup.IsCompleted)
+        if (_connectionTask != null && !_connectionTask.IsCompleted)
             return;
 
-        _lookup = LookupChapterAsync(_chapterKey);
+        string chapterKey = _chapterKey;
+        string clientPlaythroughId = _clientPlaythroughId;
+
+        _connectionTask = ConnectAsync(chapterKey, clientPlaythroughId);
     }
 
-    private async Task LookupChapterAsync(string chapterKey)
+    private async Task ConnectAsync(
+        string chapterKey,
+        string clientPlaythroughId)
     {
-        // HTTP 시작 전에 Console에도 기록한다. 화면 생성 성공 여부와 독립적이다.
-        Publish($"[U1 서버 콘텐츠] 조회 시작\nGET {_baseUrl}/chapters?chapterKey={Uri.EscapeDataString(chapterKey)}");
+        Publish(
+            $"[U2 서버 회차] 연결 시작\n" +
+            $"chapterKey: {chapterKey}\n" +
+            $"clientPlaythroughId: {clientPlaythroughId}");
 
         try
         {
-            var api = new AnalyticsApi(_baseUrl);
-            var result = await api.FindChaptersAsync(chapterKey);
-            string prefix = $"[U1 서버 콘텐츠]\nlocal chapterKey: {chapterKey}\n";
+            AnalyticsApiResult<AnalyticsPlaythroughDto> result =
+                await _api.CreateOrGetPlaythroughAsync(
+                    chapterKey,
+                    clientPlaythroughId);
+
+            // 요청 중 새 게임으로 전환됐다면 예전 응답을 현재 회차 결과로 채택하지 않는다.
+            if (_chapterKey != chapterKey
+                || _clientPlaythroughId != clientPlaythroughId)
+            {
+                Debug.Log(
+                    $"[U2 서버 회차] 이전 회차 응답 무시\n" +
+                    $"clientPlaythroughId: {clientPlaythroughId}");
+                return;
+            }
+
+            string prefix =
+                $"[U2 서버 회차]\n" +
+                $"chapterKey: {chapterKey}\n" +
+                $"clientPlaythroughId: {clientPlaythroughId}\n";
 
             if (result.NetworkError)
             {
@@ -57,22 +94,21 @@ public sealed class LearningAnalyticsConnection
 
             if (!result.IsSuccess)
             {
-                Publish(prefix + $"HTTP {result.Status} {result.ErrorCode}: {result.ErrorMessage}", warning: true);
+                Publish(
+                    prefix +
+                    $"HTTP {result.Status} {result.ErrorCode}: {result.ErrorMessage}",
+                    warning: true);
                 return;
             }
 
-            if (result.Body.Count == 0)
-            {
-                Publish(prefix + $"HTTP {result.Status} / 서버에 등록되지 않음");
-                return;
-            }
-
-            var chapter = result.Body[0];
-            Publish(prefix + $"HTTP {result.Status}\nserver chapterId: {chapter.ChapterId} / title: {chapter.Title}");
+            Publish(
+                prefix +
+                $"HTTP {result.Status}\n" +
+                $"server playthroughId: {result.Body.PlaythroughId}");
         }
         catch (Exception error)
         {
-            Publish($"[U1 서버 콘텐츠] 조회 처리 실패\n{error}", warning: true);
+            Publish($"[U2 서버 회차] 연결 처리 실패\n{error}", warning: true);
         }
     }
 
@@ -89,7 +125,7 @@ public sealed class LearningAnalyticsConnection
         }
         catch (Exception error)
         {
-            Debug.LogWarning($"[U1 서버 콘텐츠] 화면 표시 실패 (HTTP 조회는 계속 진행): {error}");
+            Debug.LogWarning($"[학습 서버] 화면 표시 실패 (HTTP 연결은 계속 진행): {error}");
         }
     }
 }
