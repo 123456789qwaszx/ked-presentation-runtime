@@ -142,7 +142,6 @@ public class VNAppBootstrap : MonoBehaviour
 
     private void Awake()
     {
-        // 실행 중 Inspector를 바꿔도 저장 경로와 기능 구성이 서로 엇갈리지 않는다.
         _learningMode = learningMode;
         _saveRoot = Path.Combine(Application.persistentDataPath,
             _learningMode ? "saves-learning" : "saves");
@@ -158,23 +157,14 @@ public class VNAppBootstrap : MonoBehaviour
         }
 
         BootstrapUIManager();
-        
         BootstrapAlbum();
-
         BootstrapPresentationRoots();
-
         BootstrapAudioSystem();
-
         BootstrapPresentationSession();
-
         BootstrapYarn();
-
         CreateScenePlayback();
-
         BootstrapPlaybackControls();
-
         BootstrapScreenBindings();
-
         BootstrapEquivalenceHarness();
     }
 
@@ -195,9 +185,7 @@ public class VNAppBootstrap : MonoBehaviour
     private void BootstrapAlbum()
     {
         string albumPath = Path.Combine(_saveRoot, "album.json");
-
         IAlbumProgressStore albumStore = new LocalAlbumProgressStore(albumPath);
-
         _albumUnlockService = new(albumDatabase, albumStore);
         _albumController = new(albumDatabase, _albumUnlockService);
     }
@@ -205,222 +193,123 @@ public class VNAppBootstrap : MonoBehaviour
     private void BootstrapPresentationRoots()
     {
         _vnRuntimeStateProvider = new VNRuntimeStateProvider(_rollbackHistory, _choiceHistory);
-
         _presentationUIRoot = uiManager.GetUI<PresentationUIRoot>();
-
         IShotResponseStageProvider shotResponseStageProvider = _presentationUIRoot;
-
         _presentationResponseRig = new PresentationShotResponseSystem(shotResponseStageProvider);
         _screenEffectRig = EnsureScreenEffectRig();
-
-        characterFocusDebugView.Initialize(
-            _presentationStage,
-            shotResponseStageProvider,
-            characterFocusTuningDb);
+        characterFocusDebugView.Initialize(_presentationStage, shotResponseStageProvider, characterFocusTuningDb);
     }
 
     private ScreenEffectRig EnsureScreenEffectRig()
     {
         ScreenEffectRig screenEffectRig = screenEffectRigMount.GetComponentInChildren<ScreenEffectRig>(true);
-
         if (screenEffectRig == null)
         {
             ScreenEffectRigBuilder screenEffectRigBuilder = new();
-            
-            RectTransform rigRoot = screenEffectRigBuilder.BuildRigRoot(
-                screenEffectRigPrefab);
-
+            RectTransform rigRoot = screenEffectRigBuilder.BuildRigRoot(screenEffectRigPrefab);
             rigRoot.SetParent(screenEffectRigMount, false);
-
             if (!rigRoot.TryGetComponent(out screenEffectRig))
                 screenEffectRig = rigRoot.gameObject.AddComponent<ScreenEffectRig>();
         }
-
         screenEffectRig.Initialize();
-
         return screenEffectRig;
     }
 
-    private void BootstrapAudioSystem()
-    {
-        audioSystem.Initialize();
-    }
-    
+    private void BootstrapAudioSystem() => audioSystem.Initialize();
+
     private void BootstrapPresentationSession()
     {
         SignalLatch signalLatch = new();
         UnitySignalBus unitySignalBus = new();
         unitySignalBus.OnSignal += signalLatch.Latch;
 
-        // Character Rig
         CharRigSlotResolver charRigSlotResolver = new(_presentationUIRoot);
         CharacterRigBuilder characterRigBuilder = new();
         PortraitResolver portraitResolver = new(portraitGeneratedDb);
 
         CharacterRigCommandFactory charRigFactory = new(
-            charRigSlotResolver,
-            characterRigBuilder,
-            portraitResolver,
-            roleTuningDb,
-            characterFocusTuningDb,
-            characterVisualFocusPresetDb,
-            characterDepthTuning,
+            charRigSlotResolver, characterRigBuilder, portraitResolver, roleTuningDb,
+            characterFocusTuningDb, characterVisualFocusPresetDb, characterDepthTuning,
             _presentationUIRoot);
 
-        // Background Rig
         BackgroundRigBuilder backgroundRigBuilder = new();
         BackgroundRigSlotResolver backgroundRigSlotResolver = new(_presentationUIRoot);
-        
-        BackgroundRigCommandFactory backgroundRigFactory = new(
-            backgroundRigBuilder,
-            backgroundRigSlotResolver);
+        BackgroundRigCommandFactory backgroundRigFactory = new(backgroundRigBuilder, backgroundRigSlotResolver);
 
         ShotResponseCommandFactory presentationShotFactory = new(
             _presentationResponseRig, characterFocusTuningDb, _presentationUIRoot);
 
-        // Presentation Control
         UnityTimeSource unityTimeSource = new();
-
         PresentationControlCommandFactory presentationControlFactory = new(
-            _uiThemePatch,
-            unityTimeSource,
-            unitySignalBus,
-            signalLatch);
+            _uiThemePatch, unityTimeSource, unitySignalBus, signalLatch);
 
-        // Audio
         AudioCommandFactory audioFactory = new(audioSystem);
 
         ScreenEffectCommandFactory screenEffectFactory = new(
-            _screenEffectRig,
-            screenFlashPresetDb,
-            screenNoisePresetDb, 
-            screenVignettePresetDb,
-            stageMaskMotionPresetDb,
-            _presentationUIRoot,
-            _presentationUIRoot);
-        
+            _screenEffectRig, screenFlashPresetDb, screenNoisePresetDb, screenVignettePresetDb,
+            stageMaskMotionPresetDb, _presentationUIRoot, _presentationUIRoot);
+
         CompositeCommandFactory factory = new(
-            charRigFactory,
-            backgroundRigFactory,
-            presentationShotFactory,
-            presentationControlFactory,
-            audioFactory,
-            screenEffectFactory);
+            charRigFactory, backgroundRigFactory, presentationShotFactory,
+            presentationControlFactory, audioFactory, screenEffectFactory);
 
         commandExecutor.Initialize(factory);
-
         PresentationSessionContext presentationSessionContext = new(_playbackState);
-
         _presentationScopeSession = new(
-            commandExecutor,
-            presentationSessionContext,
-            _linePresentationAdvanceState,
-            _presentationStage);
+            commandExecutor, presentationSessionContext,
+            _linePresentationAdvanceState, _presentationStage);
     }
 
     private void BootstrapYarn()
     {
         YarnPlaybackDriver yarnPlaybackDriver = new(commandExecutor, _presentationScopeSession);
-
         DialogueSurfaceBox dialogueSurfaceBox = uiManager.GetUI<DialogueSurfaceBox>();
-
         DialogueBoxCurrentState dialogueBoxState = new();
         DialogueSurfaceState dialogueSurfaceState = new();
-
         DialogueBoxPresentationController dialogueBoxPresentationController = new(
-            dialogueBoxState, 
-            dialogueSurfaceBox,
-            dialogueSurfaceState, 
-            surfaceLayoutPresetDb,
-            speakerPolicyDb);
-        
-        // 커스텀 이징 곡선 — 번들 옆 curves.json. 없으면 커브 0개(무음)가 정상 경로.
+            dialogueBoxState, dialogueSurfaceBox, dialogueSurfaceState, surfaceLayoutPresetDb, speakerPolicyDb);
+
         EaseCurveLibrary easeCurves = EaseCurveLibrary.LoadFrom(
             System.IO.Path.Combine(Application.dataPath, "@Dialogue", EaseCurveLibrary.BundleFileName));
 
-        // 생성자가 러너에 커맨드 핸들러를 전부 등록.
         _ = new YarnCommandBridge(
-            dialogueRunner,
-            yarnPlaybackDriver,
-            rigPrefab,
-            backgroundRigPrefab,
-            dialogueBoxPresentationController,
-            easeCurves);
-        
-        VNYarnLineBoundary vnYarnLineBoundary = new (
-            _backlogRecorder,
-            _rollbackHistory,
-            _vnRuntimeStateProvider,
-            _linePresentationAdvanceState);
-        
-        LineHurrySpeedController lineHurrySpeed = new(ellipsisBreathTypewriter);
+            dialogueRunner, yarnPlaybackDriver, rigPrefab, backgroundRigPrefab,
+            dialogueBoxPresentationController, easeCurves);
 
+        VNYarnLineBoundary vnYarnLineBoundary = new(
+            _backlogRecorder, _rollbackHistory, _vnRuntimeStateProvider, _linePresentationAdvanceState);
+        LineHurrySpeedController lineHurrySpeed = new(ellipsisBreathTypewriter);
         VNLinePresentationFlow vnLinePresentationFlow = new(
-            vnYarnLineBoundary,
-            _linePresentationAdvanceState,
-            dialogueBoxPresentationController,
-            ellipsisBreathTypewriter,
-            yarnPlaybackDriver,
-            lineHurrySpeed);
+            vnYarnLineBoundary, _linePresentationAdvanceState, dialogueBoxPresentationController,
+            ellipsisBreathTypewriter, yarnPlaybackDriver, lineHurrySpeed);
 
         customLinePresenter.Initialize(
-            dialogueRunner,
-            vnLinePresentationFlow,
-            ellipsisBreathTypewriter,
-            _playbackState);
-        
-        VNChoiceBoundary vnChoiceBoundary = new(
-            _choiceHistory,
-            _rollbackHistory);
+            dialogueRunner, vnLinePresentationFlow, ellipsisBreathTypewriter, _playbackState);
 
+        VNChoiceBoundary vnChoiceBoundary = new(_choiceHistory, _rollbackHistory);
         VNDefaultOptionsPanel vnDefaultOptionsPanel = uiManager.GetUI<VNDefaultOptionsPanel>();
-
         OptionsBoxPresentationController optionsBoxPresentation = new(vnDefaultOptionsPanel);
-
         VNOptionsPresentationFlow optionsPresentationFlow = new(
-            optionsBoxPresentation,
-            vnChoiceBoundary,
-            _linePresentationAdvanceState);
+            optionsBoxPresentation, vnChoiceBoundary, _linePresentationAdvanceState);
 
-        vnOptionsPresenter.Initialize(
-            dialogueRunner,
-            optionsPresentationFlow,
-            optionItem);
+        vnOptionsPresenter.Initialize(dialogueRunner, optionsPresentationFlow, optionItem);
     }
-    
+
     private void CreateScenePlayback()
     {
-        IEpisodeNodeRunner nodeRunner =
-            new YarnEpisodeNodeRunner(dialogueRunner);
-
-        YarnVariableCheckpoint variableCheckpoint =
-            new YarnVariableCheckpoint(dialogueRunner.VariableStorage);
+        IEpisodeNodeRunner nodeRunner = new YarnEpisodeNodeRunner(dialogueRunner);
+        YarnVariableCheckpoint variableCheckpoint = new YarnVariableCheckpoint(dialogueRunner.VariableStorage);
 
         _scenePlayback = new ScenePlaybackSession(
-            nodeRunner,
-            _screenBindings,
-            _rollbackHistory,
-            customLinePresenter,
-            _presentationResponseRig,
-            _presentationStage,
-            _presentationScopeSession,
-            variableCheckpoint,
-            _choiceHistory,
-            _episodeSkipController);
+            nodeRunner, _screenBindings, _rollbackHistory, customLinePresenter,
+            _presentationResponseRig, _presentationStage, _presentationScopeSession,
+            variableCheckpoint, _choiceHistory, _episodeSkipController);
 
-        _debugPlayback = new ScenePlaybackDebugRunner(
-            _scenePlayback,
-            _backlogRecorder);
-
-        _progressionOptions = new ChapterOptionsView(
-            uiManager.GetUI<VNDefaultOptionsPanel>(),
-            optionItem);
-
-        ProgressionYarnBridge yarnBridge =
-            new ProgressionYarnBridge(dialogueRunner.VariableStorage);
+        _debugPlayback = new ScenePlaybackDebugRunner(_scenePlayback, _backlogRecorder);
+        _progressionOptions = new ChapterOptionsView(uiManager.GetUI<VNDefaultOptionsPanel>(), optionItem);
+        ProgressionYarnBridge yarnBridge = new ProgressionYarnBridge(dialogueRunner.VariableStorage);
 
         _saveCoordinator = CreateSaveCoordinator();
-
         IProgressionReporter reporter = _saveCoordinator;
 
         if (_learningMode)
@@ -432,19 +321,10 @@ public class VNAppBootstrap : MonoBehaviour
         }
 
         SceneRunner sceneRunner = new SceneRunner(
-            _scenePlayback,
-            _progressionOptions,
-            _linePresentationAdvanceState,
-            _rollbackHistory,
-            reporter,
-            _backlogRecorder,
-            _choiceHistory,
-            yarnBridge.Capture);
+            _scenePlayback, _progressionOptions, _linePresentationAdvanceState,
+            _rollbackHistory, reporter, _backlogRecorder, _choiceHistory, yarnBridge.Capture);
 
-        _progressionDriver = new ProgressionDriver(
-            sceneRunner,
-            _backlogRecorder,
-            yarnBridge);
+        _progressionDriver = new ProgressionDriver(sceneRunner, _backlogRecorder, yarnBridge);
 
         _progressionLauncher = new ProgressionLauncher(
             _progressionDriver,
@@ -452,9 +332,11 @@ public class VNAppBootstrap : MonoBehaviour
             _chapterJson,
             _saveCoordinator.LoadActiveResumePoint,
             _saveCoordinator.PrepareNewPlaythroughAsync);
+
+        if (_learningMode)
+            _learningAnalytics.BindProgressionLauncher(_progressionLauncher);
     }
 
-    // 저장·동기화 스택. 로컬이 진실(파일), 서버는 사본(큐로 민다). 슬롯 1 고정.
     private SaveCoordinator CreateSaveCoordinator()
     {
         LocalFileSaveStore localStore = new(_saveRoot);
@@ -472,10 +354,7 @@ public class VNAppBootstrap : MonoBehaviour
         ServerApi serverApi = new(serverBaseUrl);
         GuestSession guestSession = new(serverApi, Path.Combine(Application.persistentDataPath, "account.json"));
         ChapterVersionResolver versionResolver = new(serverApi, _chapterJson);
-
-        // devices.device_key 는 VARCHAR(64). deviceUniqueIdentifier 가 플랫폼에 따라 더 길 수 있다.
         string deviceKey = SystemInfo.deviceUniqueIdentifier;
-
         if (deviceKey.Length > 64)
             deviceKey = deviceKey.Substring(0, 64);
 
@@ -483,136 +362,42 @@ public class VNAppBootstrap : MonoBehaviour
         ServerSyncSaveStore serverSync = new(localStore, transport);
         ServerBookmarkSync bookmarkSync = new(serverApi, guestSession, versionResolver, localStore);
         ServerRestore restore = new(serverApi, guestSession, localStore);
-
         return new SaveCoordinator(localStore, serverSync, bookmarkSync, restore);
     }
 
     private void BootstrapPlaybackControls()
     {
         autoAdvanceScheduler.Initialize(
-            _playbackState,
-            _dialogueAdvanceDispatcher,
-            () => Time.unscaledTimeAsDouble);
+            _playbackState, _dialogueAdvanceDispatcher, () => Time.unscaledTimeAsDouble);
 
-        RapidSkipController rapidSkipController = new(
-            _dialogueAdvanceDispatcher);
-
-        _episodeSkipController.Initialize(
-            _dialogueAdvanceDispatcher);
+        RapidSkipController rapidSkipController = new(_dialogueAdvanceDispatcher);
+        _episodeSkipController.Initialize(_dialogueAdvanceDispatcher);
 
         _vnFeatureController = new VNFeatureController(
-            _playbackState,
-            _linePresentationAdvanceState,
-            ellipsisBreathTypewriter,
-            _backlogRecorder,
-            autoAdvanceScheduler,
-            rapidSkipController,
-            _episodeSkipController,
-            _rollbackHistory,
-            _choiceHistory);
+            _playbackState, _linePresentationAdvanceState, ellipsisBreathTypewriter,
+            _backlogRecorder, autoAdvanceScheduler, rapidSkipController,
+            _episodeSkipController, _rollbackHistory, _choiceHistory);
 
         AdvanceGate advanceGate = new(
-            _playbackState,
-            _linePresentationAdvanceState,
-            _presentationScopeSession);
+            _playbackState, _linePresentationAdvanceState, _presentationScopeSession);
 
         _dialogueAdvanceDispatcher.Initialize(
-            advanceGate,
-            dialogueRunner,
-            _linePresentationAdvanceState);
+            advanceGate, dialogueRunner, _linePresentationAdvanceState);
 
         vnAdvanceInputPoller.Initialize(
-            _dialogueAdvanceDispatcher,
-            _vnFeatureController,
-            _scenePlayback,
-            _debugPlayback,
-            yarnEntryKey,
-            debugEpisodeChain,
-            _progressionLauncher,
-            _saveCoordinator,
-            learningMode: _learningMode);
+            _dialogueAdvanceDispatcher, _vnFeatureController,
+            _scenePlayback, _debugPlayback, yarnEntryKey, debugEpisodeChain,
+            _progressionLauncher, _saveCoordinator, learningMode: _learningMode);
     }
-    
+
     private void BootstrapScreenBindings()
     {
-        _screenBindings.ConfigurePresentationView(
-            _vnFeatureController,
-            _dialogueAdvanceDispatcher);
-
-        _screenBindings.ConfigureProgression(
-            _progressionLauncher,
-            _saveCoordinator,
-            learningMode: _learningMode);
-
-        _screenBindings.ConfigureAlbum(
-            _albumController);
+        _screenBindings.ConfigurePresentationView(_vnFeatureController, _dialogueAdvanceDispatcher);
     }
-    
+
     private void BootstrapEquivalenceHarness()
     {
         if (!enableEquivalenceHarness)
             return;
-
-        GameObject harnessGo = new("StageEquivalenceHarness");
-        harnessGo.transform.SetParent(transform, false);
-
-        StageEquivalenceHarness harness = harnessGo.AddComponent<StageEquivalenceHarness>();
-
-        harness.Initialize(
-            _vnRuntimeStateProvider,
-            _presentationScopeSession,
-            _presentationResponseRig,
-            _dialogueAdvanceDispatcher);
-    }
-    
-    private void Start()
-    {
-        OpenInitialScreen();
-
-        // 이어하기 복구를 시작하고, 나머지 작업은 Update의 유지보수에서 재시도한다.
-        _ = _saveCoordinator.SyncPendingAsync();
-    }
-
-    private void Update()
-    {
-        _saveCoordinator?.TickSync(Time.realtimeSinceStartup,
-            Application.internetReachability != NetworkReachability.NotReachable);
-    }
-    
-    private void OpenInitialScreen()
-    {
-        _screenBindings.OpenTitleMenu();
-    }
-
-    [ContextMenu("Learning/Retry chapter lookup")]
-    private void RetryLearningChapterLookup()
-    {
-        if (!Application.isPlaying || _learningAnalytics == null)
-        {
-            Debug.Log("[U1 서버 콘텐츠] 학습 모드로 실행한 뒤 다시 조회할 수 있다.");
-            return;
-        }
-
-        _learningAnalytics.Retry();
-    }
-
-    [ContextMenu("Learning/Log current save snapshot")]
-    private void LogLearningSnapshot()
-    {
-        if (!Application.isPlaying || !_learningMode || _localSaveStore == null)
-        {
-            Debug.Log("[학습] 학습 모드로 실행한 뒤 저장 snapshot을 확인할 수 있다.");
-            return;
-        }
-
-        LocalSaveFile snapshot = _localSaveStore.LoadActive();
-
-        if (snapshot == null)
-        {
-            Debug.Log("[학습] 아직 첫 장면에 진입하지 않아 저장된 회차가 없다.");
-            return;
-        }
-
-        Debug.Log($"[학습] 현재 확정 snapshot (로컬 envelope 제외)\n{SaveJson.SerializePretty(snapshot)}");
     }
 }
