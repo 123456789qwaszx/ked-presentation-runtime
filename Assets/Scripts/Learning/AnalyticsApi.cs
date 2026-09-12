@@ -77,6 +77,34 @@ public sealed class AnalyticsApi
         }
     }
 
+    public async Task<AnalyticsApiResult<AnalyticsCheckpointDto>> GetCheckpointAsync(
+        long playthroughId)
+    {
+        string url = _baseUrl + $"/playthroughs/{playthroughId}/checkpoint";
+
+        using (var request = UnityWebRequest.Get(url))
+        {
+            request.timeout = 10;
+            await AwaitOperation(request.SendWebRequest());
+
+            if (request.result == UnityWebRequest.Result.ConnectionError
+                || request.result == UnityWebRequest.Result.DataProcessingError)
+            {
+                return AnalyticsApiResult<AnalyticsCheckpointDto>
+                    .Network(request.error);
+            }
+
+            // 회차는 있지만 아직 서버 checkpoint가 없는 정상 상태.
+            if (request.responseCode == 204)
+            {
+                return AnalyticsApiResult<AnalyticsCheckpointDto>
+                    .Success(204, null, request.downloadHandler.text);
+            }
+
+            return ReadResponse<AnalyticsCheckpointDto>(request);
+        }
+    }
+
     private static UnityWebRequest CreateJsonRequest(
         string url,
         string method,
