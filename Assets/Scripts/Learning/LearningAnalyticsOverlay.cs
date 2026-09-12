@@ -6,6 +6,7 @@ public sealed class LearningAnalyticsOverlay : MonoBehaviour
 {
     private static LearningAnalyticsOverlay _instance;
     private static Action _backupAction;
+    private static Action _restoreCheckAction;
 
     private string _message = "[학습 서버] 대기";
 
@@ -17,6 +18,12 @@ public sealed class LearningAnalyticsOverlay : MonoBehaviour
     public static void SetBackupAction(Action backupAction)
     {
         _backupAction = backupAction;
+        Ensure();
+    }
+
+    public static void SetRestoreCheckAction(Action restoreCheckAction)
+    {
+        _restoreCheckAction = restoreCheckAction;
         Ensure();
     }
 
@@ -44,6 +51,15 @@ public sealed class LearningAnalyticsOverlay : MonoBehaviour
                 "서버에 저장"))
         {
             _backupAction?.Invoke();
+        }
+
+        GUI.enabled = _restoreCheckAction != null;
+
+        if (GUI.Button(
+                new Rect(192f, 122f, 160f, 28f),
+                "서버 저장 확인"))
+        {
+            _restoreCheckAction?.Invoke();
         }
 
         GUI.enabled = true;
