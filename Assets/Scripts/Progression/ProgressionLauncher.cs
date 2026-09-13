@@ -15,7 +15,7 @@ public sealed class ProgressionLauncher
     private readonly TextAsset _chapterJson;
     private readonly Func<ProgressionResumePoint> _resumeProvider;
     private readonly Func<Task> _prepareNewPlaythrough;
-    private Task _transitionTask = Task.CompletedTask;
+    private bool _isTransitioning;
 
     public ProgressionLauncher(
         ProgressionDriver driver,
@@ -35,23 +35,24 @@ public sealed class ProgressionLauncher
 
     public IReadOnlyList<CommittedChoice> PendingPath => _driver.PendingPath;
 
-    private bool IsTransitioning => !_transitionTask.IsCompleted;
-
     // Stop -> 로컬 전환 -> Launch 전체가 하나의 요청이다. 중복 요청은 합류하지 않고 무시한다.
-    public Task TransitionAsync(Func<Task> prepare)
+    public async Task TransitionAsync(Func<Task> prepare)
     {
-        if (IsTransitioning)
-            return Task.CompletedTask;
+        if (_isTransitioning)
+            return;
 
-        _transitionTask = TransitionCoreAsync(prepare);
-        return _transitionTask;
-    }
+        _isTransitioning = true;
 
-    private async Task TransitionCoreAsync(Func<Task> prepare)
-    {
-        await _driver.StopAsync();
-        await prepare();
-        await LaunchCoreAsync();
+        try
+        {
+            await _driver.StopAsync();
+            await prepare();
+            await LaunchCoreAsync();
+        }
+        finally
+        {
+            _isTransitioning = false;
+        }
     }
 
     public Task ResumeAsync()
@@ -131,12 +132,20 @@ public sealed class ProgressionLauncher
 
     // 현재 진행을 끝내고 idle 상태로 빠진다.
     // 새 진행을 시작하지 않는다.
-    public Task ExitAsync()
+    public async Task ExitAsync()
     {
-        if (IsTransitioning)
-            return Task.CompletedTask;
+        if (_isTransitioning)
+            return;
 
-        _transitionTask = _driver.StopAsync();
-        return _transitionTask;
+        _isTransitioning = true;
+
+        try
+        {
+            await _driver.StopAsync();
+        }
+        finally
+        {
+            _isTransitioning = false;
+        }
     }
 }
