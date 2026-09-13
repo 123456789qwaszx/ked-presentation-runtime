@@ -1,8 +1,12 @@
-// v3 envelope의 게임 데이터 부분. 기존 서버 metadata는 역직렬화 시 무시한다.
-// 디렉터리와 FormatVersion을 유지하여 기존 로컬 저장을 그대로 읽는다.
+// 회차 파일 envelope. FormatVersion은 저장 JSON의 모양만 판별한다.
 public sealed class PlaythroughFile
 {
-    public int FormatVersion = 3;
+    public int FormatVersion;
     public LocalSaveFile Snapshot;
-    public long LocalCommitVersion;
+}
+
+public static class SaveFormat
+{
+    public const int PlaythroughVersion = 3;
+    public const int SaveSlotVersion = 1;
 }

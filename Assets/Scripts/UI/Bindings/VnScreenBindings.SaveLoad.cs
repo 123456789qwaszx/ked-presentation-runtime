@@ -6,9 +6,8 @@ public sealed partial class VNScreenBindings
 {
     private SaveLoadMenuMode _currentSaveLoadMode;
 
-    // 현재 패널에 표시된 Bookmark 순서.
-    // UI의 숫자 slotIndex를 영속 Bookmark.Id로 변환하기 위한 화면 전용 매핑.
-    private readonly List<Bookmark> _saveLoadSlots = new();
+    // UI의 숫자 slotIndex를 영속 SaveSlotEntry.Id로 변환하는 화면 전용 매핑.
+    private readonly List<SaveSlotEntry> _saveLoadSlots = new();
 
     private SaveLoadMenuUIPanel _saveLoadPanel;
     private bool _saveLoadRequestInProgress;
@@ -112,10 +111,10 @@ public sealed partial class VNScreenBindings
             return;
         }
 
-        // 기존 Bookmark를 누름 = 덮어쓰기.
+        // 기존 슬롯을 누르면 덮어쓴다.
         if (index < _saveLoadSlots.Count)
         {
-            Bookmark existing = _saveLoadSlots[index];
+            SaveSlotEntry existing = _saveLoadSlots[index];
 
             OverwriteManualSave(
                 existing,
@@ -179,13 +178,13 @@ public sealed partial class VNScreenBindings
         SaveLineTarget target,
         string preview)
     {
-        Bookmark bookmark = _saveCoordinator.CreateBookmark(
+        SaveSlotEntry slot = _saveCoordinator.CreateSaveSlot(
             path,
             yarnChoices,
             target,
             preview);
 
-        if (bookmark == null)
+        if (slot == null)
         {
             Debug.LogWarning("[수동 저장] 저장하지 못했다.");
             return;
@@ -195,7 +194,7 @@ public sealed partial class VNScreenBindings
     }
 
     private void OverwriteManualSave(
-        Bookmark existing,
+        SaveSlotEntry existing,
         IReadOnlyList<CommittedChoice> path,
         IReadOnlyList<VNChoiceRecord> yarnChoices,
         SaveLineTarget target,
@@ -204,7 +203,7 @@ public sealed partial class VNScreenBindings
         if (existing == null)
             return;
 
-        _saveCoordinator.OverwriteBookmark(
+        _saveCoordinator.OverwriteSaveSlot(
             existing.Id,
             path,
             yarnChoices,
@@ -230,9 +229,9 @@ public sealed partial class VNScreenBindings
         if (index < 0 || index >= _saveLoadSlots.Count)
             return;
 
-        Bookmark bookmark = _saveLoadSlots[index];
+        SaveSlotEntry slot = _saveLoadSlots[index];
 
-        if (bookmark == null || string.IsNullOrEmpty(bookmark.Id))
+        if (slot == null || string.IsNullOrEmpty(slot.Id))
             return;
 
         _saveLoadRequestInProgress = true;
@@ -241,14 +240,11 @@ public sealed partial class VNScreenBindings
 
         try
         {
-            await _progressionLauncher.TransitionAfterAsync(
-                async () =>
-                {
-                    Bookmark hydrated =
-                        await _saveCoordinator.GetBookmarkAsync(bookmark.Id);
+            // 재생을 멈추기 전에 로컬 본문과 형식을 확인한다.
+            if (_saveCoordinator.LoadSaveSlot(slot.Id) == null)
+                return;
 
-                    return hydrated != null;
-                },
+            await _progressionLauncher.TransitionAsync(
                 () =>
                 {
                     transitionStarted = true;
@@ -259,7 +255,7 @@ public sealed partial class VNScreenBindings
 
                     ClosePanel();
 
-                    return _saveCoordinator.ForkFromBookmark(bookmark);
+                    return _saveCoordinator.ForkFromSaveSlot(slot);
                 });
         }
         catch (Exception error)
@@ -269,8 +265,7 @@ public sealed partial class VNScreenBindings
         }
         finally
         {
-            // Transition이 시작되지 않았다면
-            // hydration 실패 또는 늦은 요청 취소.
+            // Transition이 시작되지 않았다면 요청 상태만 되돌린다.
             if (!transitionStarted)
                 _saveLoadRequestInProgress = false;
         }
@@ -294,17 +289,16 @@ public sealed partial class VNScreenBindings
             return;
         }
 
-        IReadOnlyList<Bookmark> bookmarks =
-            _saveCoordinator.Bookmarks;
+        IReadOnlyList<SaveSlotEntry> slots = _saveCoordinator.SaveSlots;
 
         _saveLoadSlots.Clear();
 
-        for (int i = 0; i < bookmarks.Count; i++)
+        for (int i = 0; i < slots.Count; i++)
         {
-            Bookmark bookmark = bookmarks[i];
+            SaveSlotEntry slot = slots[i];
 
-            if (bookmark != null)
-                _saveLoadSlots.Add(bookmark);
+            if (slot != null)
+                _saveLoadSlots.Add(slot);
         }
 
         int visibleCount = _saveLoadSlots.Count;
@@ -327,19 +321,19 @@ public sealed partial class VNScreenBindings
             metas);
     }
 
-    private static VNSaveSlotMeta CreateSlotMeta(Bookmark bookmark)
+    private static VNSaveSlotMeta CreateSlotMeta(SaveSlotEntry slot)
     {
         return new VNSaveSlotMeta
         {
             IsEmpty = false,
 
-            Label = bookmark.Label,
-            Preview = bookmark.Preview,
+            Label = slot.Label,
+            Preview = slot.Preview,
 
-            ChapterId = bookmark.ChapterId,
-            SavedAtUtc = bookmark.CreatedAtUtc,
+            ChapterId = slot.ChapterId,
+            SavedAtUtc = slot.SavedAtUtc,
 
-            PlaySeconds = bookmark.PlaySecondsAtBookmark,
+            PlaySeconds = slot.PlaySeconds,
 
         };
     }

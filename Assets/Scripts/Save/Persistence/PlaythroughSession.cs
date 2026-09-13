@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 
 // 경로와 회차 ID가 수명 동안 고정된다. 한 repository에서 회차당 하나만 연다.
 // 쓰기는 사본에 적용 → 디스크 교체 성공 → 메모리 채택. await는 이 경계 밖에서만 한다.
@@ -39,26 +38,12 @@ public sealed class PlaythroughSession
     {
         if (snapshot.PlaythroughId != Id)
             throw new InvalidOperationException("회차가 다른 snapshot이다.");
-        Update(next =>
+        var file = new PlaythroughFile
         {
-            next.Snapshot = Copy(snapshot);
-            next.LocalCommitVersion++;
-        });
+            FormatVersion = SaveFormat.PlaythroughVersion,
+            Snapshot = Copy(snapshot),
+        };
+        SaveDataValidator.ValidatePlaythrough(file, Id);
+        Update(next => next.Snapshot = file.Snapshot);
     }
-
-    public PlaythroughSummary GetSummary()
-    {
-        lock (_gate)
-        {
-            LocalSaveFile save = _file.Snapshot;
-            return new PlaythroughSummary
-            {
-                PlaythroughId = Id, ForkedFrom = Copy(save.ForkedFrom), ChapterId = save.ChapterId,
-                CurrentEpisodeId = save.CurrentEpisodeId, ChapterCompleted = save.ChapterCompleted,
-                SceneCount = save.Scenes?.Count ?? 0, InheritedPlaySeconds = save.InheritedPlaySeconds,
-                OwnPlaySeconds = save.OwnPlaySeconds, SavedAtUtc = save.SavedAtUtc,
-            };
-        }
-    }
-
 }

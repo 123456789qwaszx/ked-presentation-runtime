@@ -9,7 +9,7 @@ public sealed partial class SaveCoordinator
     public Task PrepareNewPlaythroughAsync()
     {
         if (_newPrepared) return Task.CompletedTask;
-        BecomePlaythrough(NewPlaythroughId(), null, 0, 0, null);
+        BecomePlaythrough(NewPlaythroughId(), 0, null);
         _newPrepared = true;
         return Task.CompletedTask;
     }
@@ -24,20 +24,24 @@ public sealed partial class SaveCoordinator
         if (save == null)
             return null;
 
+        // 버전 도입 전의 개발용 저장은 현재 콘텐츠로 한 번 승계한다.
+        if (string.IsNullOrEmpty(save.ContentVersion))
+            save.ContentVersion = _contentVersion;
+
+        if (!string.Equals(save.ContentVersion, _contentVersion, StringComparison.Ordinal))
+        {
+            Debug.LogWarning(
+                $"[저장] 콘텐츠 버전이 달라 이어하지 않는다: {save.ContentVersion} → {_contentVersion}");
+            return null;
+        }
+
         string id = string.IsNullOrEmpty(save.PlaythroughId)
             ? NewPlaythroughId()
             : save.PlaythroughId;
 
-        int playSeconds = save.InheritedPlaySeconds == 0 
-                          && save.OwnPlaySeconds == 0 
-            ? save.PlaySeconds
-            : save.OwnPlaySeconds;
-
         BecomePlaythrough(
             id,
-            save.ForkedFrom,
-            save.InheritedPlaySeconds,
-            playSeconds,
+            save.PlaySeconds,
             save.Scenes);
 
         return new ProgressionResumePoint(
@@ -49,6 +53,4 @@ public sealed partial class SaveCoordinator
             save.PendingLoad,
             save.ChapterCompleted);
     }
-
-    public IReadOnlyList<PlaythroughSummary> ListPlaythroughs() => _localStore.ListPlaythroughSummaries();
 }

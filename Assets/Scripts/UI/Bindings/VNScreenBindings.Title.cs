@@ -1,4 +1,3 @@
-using System.Threading.Tasks;
 using UnityEngine;
 
 public sealed partial class VNScreenBindings
@@ -45,8 +44,7 @@ public sealed partial class VNScreenBindings
         if (_progressionLauncher == null)
             return;
 
-        await _progressionLauncher.ResumeAfterAsync(
-            Task.CompletedTask);
+        await _progressionLauncher.ResumeAsync();
     }
 
     private async void HandleStartClicked()

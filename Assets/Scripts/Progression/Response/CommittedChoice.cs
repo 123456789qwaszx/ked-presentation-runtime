@@ -1,4 +1,4 @@
-// 장면 안에서 확정된 선택 하나. 서버 큐의 ChoiceUpload와 대응.
+// 장면 안에서 확정된 선택 하나.
 public readonly struct CommittedChoice
 {
     public string FromEpisodeId { get; } // 선택지가 붙어 있던 에피소드.

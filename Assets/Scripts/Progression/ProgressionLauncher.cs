@@ -36,7 +36,6 @@ public sealed class ProgressionLauncher
 
     private Task _running;
     private bool _transitioning;
-    private long _transitionVersion;
 
     // Stop -> 로컬 전환 -> Launch 전체가 하나의 요청이다. 중복 요청은 합류하지 않고 무시한다.
     public async Task TransitionAsync(Func<Task> prepare)
@@ -45,7 +44,6 @@ public sealed class ProgressionLauncher
             return;
         
         _transitioning = true;
-        _transitionVersion++;
         
         Task running;
         try
@@ -60,29 +58,12 @@ public sealed class ProgressionLauncher
         await running;
     }
 
-    public async Task ResumeAfterAsync(Task ready)
+    public Task ResumeAsync()
     {
-        long requestedAt = _transitionVersion;
-        
-        await ready;
-        
-        // 복구를 기다리는 동안 새 게임/fork를 선택했으면 옛 요청은 취소.
-        if (requestedAt != _transitionVersion || IsRunning)
-            return;
-        
-        await TransitionAsync(() => Task.CompletedTask);
-    }
+        if (IsRunning)
+            return Task.CompletedTask;
 
-    // 서버에만 있는 수동 저장은 현재 재생을 멈추기 전에 받음.
-    // 다운로드 중 다른 전환을 선택하면 늦게 도착한 요청은 취소.
-    public async Task TransitionAfterAsync(Func<Task<bool>> ready, Func<Task> prepare)
-    {
-        long requestedAt = _transitionVersion;
-        
-        if (!await ready() || requestedAt != _transitionVersion)
-            return;
-        
-        await TransitionAsync(prepare);
+        return TransitionAsync(() => Task.CompletedTask);
     }
 
     
@@ -174,14 +155,13 @@ public sealed class ProgressionLauncher
     }
     
     // 현재 진행을 끝내고 idle 상태로 빠진다.
-    // 새 진행을 시작하지 않으며, 대기 중이던 이전 전환 요청도 무효화한다.
+    // 새 진행을 시작하지 않는다.
     public async Task ExitAsync()
     {
         if (_transitioning)
             return;
 
         _transitioning = true;
-        _transitionVersion++;
 
         try
         {

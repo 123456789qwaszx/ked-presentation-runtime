@@ -1,57 +1,23 @@
 using System.Collections.Generic;
 
-// 회차의 진행 snapshot. 로컬 envelope에 저장하고 서버에는 이 snapshot만 전송한다.
-//
-// 최상위 필드의 뜻은 둘 중 하나다: 장면 진입 스냅샷(CurrentEpisodeId = 장면 루트, Stats·Variables = 그 시점)
-// 또는 챕터 완료(ChapterCompleted). 장면 중간을 가리키는 세이브는 만들지 않는다.
-// 그 아래에 회차의 이력(Scenes)이 쌓인다 — 즐겨찾기와 갈라지기의 재료(save-plan.md v2).
+// 자동 저장 한 건. 완료 장면의 시작 상태와 경로를 보존하여 이어하기와 과거 장면 이동을 지원한다.
 public sealed class LocalSaveFile
 {
-    // 로컬 회차 GUID. 갈라진 회차의 출처는 ForkedFrom에 보관한다.
     public string PlaythroughId;
-    public ForkOrigin ForkedFrom;
-
+    public string ContentVersion;
     public string ChapterId;
     public string CurrentEpisodeId;
     public Dictionary<string, int> Stats = new();
-
-    // [3] 연출 변수 통덤프. 없으면(구세이브) 덮지 않는다.
     public YarnVariableSnapshot Variables;
-
-    // 챕터를 끝낸 세이브 — 이어갈 장면이 없다.
     public bool ChapterCompleted;
-
-    // 이 회차가 지나온 장면 기록의 이력(현재 챕터 안). 갈라진 회차는 물려받은 것으로 시작한다.
-    // 없으면(구세이브) 빈 목록.
     public List<SceneRecord> Scenes = new();
-
-    // 현재 장면 이전의 백로그 항목들. 현재 장면의 것은 싣지 않는다 — 로드 뒤 재실행이 다시 적으며
-    // 순번을 롤백 포인트와 나란히 세운다.
     public List<DialogueLogEntry> Backlog = new();
-
-    // 갈라진 회차가 첫 장면에서 소비하는 로드 계획 — 장면 루트에서 표적 라인까지 경로대로 달린다.
-    // 첫 장면이 끝나 저장되면 사라진다(소비됨). null이면 장면 루트에서 시작.
     public SavedLoadPlan PendingLoad;
-
-    // 시간은 둘로 센다 — 갈라진 지점까지 물려받은 이야기상의 시간과, 이 회차에서 새로 플레이한 시간.
-    public int InheritedPlaySeconds;
-    public int OwnPlaySeconds;
-
-    // 둘의 합. 서버 DTO와 구세이브가 이 이름을 쓴다.
     public int PlaySeconds;
-
     public string SavedAtUtc;
 }
 
-// 갈라진 출처 — 어느 회차의 어느 장면 기록, 어느 라인에서.
-public sealed class ForkOrigin
-{
-    public string PlaythroughId;
-    public int SceneIndex;
-    public SaveLineTarget Target; // null이면 장면 루트.
-}
-
-// 라인 좌표 — 시크 표적과 같은 좌표계(노드·라인ID·장면 안 등장 순번).
+// 대본 안의 한 라인. 같은 line ID가 반복될 수 있어 장면 안 등장 순번까지 사용한다.
 public sealed class SaveLineTarget
 {
     public string NodeName;
@@ -59,35 +25,24 @@ public sealed class SaveLineTarget
     public int Occurrence;
 }
 
-// 장면 진입 스냅샷. 로드가 재개할 수 있는 자리는 이것뿐이다.
+// 장면 진입 당시 상태. 완료된 장면으로 돌아갈 때 유일한 시작점이다.
 public sealed class SceneCheckpoint
 {
     public string ChapterId;
-    public string EpisodeId;   // 장면 루트.
+    public string EpisodeId;
     public Dictionary<string, int> Stats = new();
     public YarnVariableSnapshot Variables;
-
-    // 이 장면의 첫 라인이 받을 백로그 순번.
     public int BacklogSerialStart;
-
-    // 들어설 때의 누적 플레이 시간(계승 + 자체). 갈라지기가 물려받는 값.
     public int PlaySecondsAtEntry;
-
     public string EnteredAtUtc;
 }
 
-// 장면 기록 하나 = 진입 스냅샷 + 그 장면 안에서 지나온 경로. 이 넷이면 장면 안 어느 라인이든 좌표가 선다.
+// 완료된 장면 하나: 진입 상태와 그 장면 안에서 확정된 선택 기록.
 public sealed class SceneRecord
 {
     public SceneCheckpoint Checkpoint;
-
-    // 장면 안에서 확정된 진행 선택.
     public List<SavedChoice> Path = new();
-
-    // 장면 안 Yarn 인라인 선택(리플레이가 자동 응답하는 기록). 처음부터 싣는다 — 회고적 즐겨찾기의 재료.
     public List<VNChoiceRecord> YarnChoices = new();
-
-    // 이 장면의 마지막 라인 순번 + 1 (= 다음 장면의 BacklogSerialStart).
     public int BacklogSerialEnd;
 }
 
@@ -97,8 +52,7 @@ public sealed class SavedChoice
     public int OptionIndex;
 }
 
-// 장면 루트에서 표적 라인까지 달리는 계획. 장면 기록의 경로 + Yarn 선택 + 표적.
-// 경로가 표적 뒤까지 이어져 있어도 된다 — 표적에 닿아 시크가 꺼지면 나머지는 버려진다.
+// 장면 루트에서 저장한 라인까지 재생하기 위한 일회성 계획.
 public sealed class SavedLoadPlan
 {
     public List<SavedChoice> Path = new();
@@ -106,57 +60,39 @@ public sealed class SavedLoadPlan
     public SaveLineTarget Target;
 }
 
-// 수동 슬롯 목록. 본문은 bookmark-snapshots에 별도로 보존한다.
-public sealed class BookmarkFile
+// 슬롯 목록 파일에 들어가는 가벼운 표시 정보.
+public sealed class SaveSlotIndexFile
 {
-    public List<Bookmark> Bookmarks = new();
+    public int FormatVersion;
+    public List<SaveSlotEntry> Slots = new();
 }
 
-// Bookmark
-// - 만든 회차
-// - 만들어진 챕터
-// - 장면 진입 시점의 체크포인트
-// - 그 지점까지 선택한 진행 경로
-// - Yarn 내부 선택 기록
-// - 정확히 어느 대사까지 갈 것인지
-// - 그 때까지의 Backlog
-// - 그 시점의 플레이 시간
-// - UI용 이름/미리보기
-public sealed class Bookmark
+public sealed class SaveSlotEntry
 {
-    // 수동 저장 슬롯. ID는 덮어써도 유지하고 LocalVersion만 증가한다.
-    public long LocalVersion = 1;
-    public string SnapshotKey;
-    public List<SceneRecord> Scenes = new();
     public string Id;
+    public string DataKey;
     public string Label;
     public string Preview;
-    public string CreatedAtUtc;
-    
-    public string PlaythroughId;
-    public int SceneIndex;
-
     public string ChapterId;
-    public SceneCheckpoint Checkpoint;
-    public SavedLoadPlan Load;
-    public List<DialogueLogEntry> Backlog = new();
-
-    public int PlaySecondsAtBookmark;
-
+    public string SavedAtUtc;
+    public int PlaySeconds;
 }
 
-// 이력 화면이 회차 하나를 그리는 데 필요한 것. 파일을 열지 않고 목록을 그리려고 요약만 뽑는다.
-public sealed class PlaythroughSummary
+// 슬롯 본문 파일의 envelope.
+public sealed class SaveSlotFile
 {
-    public string PlaythroughId;
-    public bool IsActive;
-    public ForkOrigin ForkedFrom;     // null이면 새 게임으로 시작한 회차.
-    public string ChapterId;
-    public string CurrentEpisodeId;
-    public bool ChapterCompleted;
-    public int SceneCount;
-    public int BookmarkCount;         // 0이고 활성이 아니면 UI가 접는다(기본).
-    public int InheritedPlaySeconds;
-    public int OwnPlaySeconds;
-    public string SavedAtUtc;
+    public int FormatVersion;
+    public SaveSlotData Data;
+}
+
+// 슬롯 하나를 원래 회차 파일 없이도 복원할 수 있는 독립 데이터.
+public sealed class SaveSlotData
+{
+    public string Id;
+    public string ContentVersion;
+    public SceneCheckpoint Checkpoint;
+    public SavedLoadPlan LoadPlan;
+    public List<SceneRecord> Scenes = new();
+    public List<DialogueLogEntry> Backlog = new();
+    public int PlaySeconds;
 }

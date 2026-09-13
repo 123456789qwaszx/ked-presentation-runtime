@@ -8,12 +8,7 @@ public sealed partial class SaveCoordinator
     public void ReportSceneEntered(SceneEntryReport report)
     {
         if (_playthroughId == null)
-            BecomePlaythrough(
-                NewPlaythroughId(),
-                forkedFrom: null,
-                inheritedSeconds: 0,
-                ownSeconds: 0,
-                scenes: null);
+            BecomePlaythrough(NewPlaythroughId(), 0, null);
 
         if (_scenes.Count > 0 && !string.Equals(_scenes[^1].Checkpoint.ChapterId, report.ChapterId)) 
             _scenes.Clear();
@@ -37,14 +32,12 @@ public sealed partial class SaveCoordinator
             var initial = new LocalSaveFile
             {
                 PlaythroughId = _playthroughId,
-                ForkedFrom = _forkedFrom,
+                ContentVersion = _contentVersion,
                 ChapterId = report.ChapterId, 
                 CurrentEpisodeId = report.State.CurrentEpisodeId,
                 Stats = new Dictionary<string, int>(_currentEntry.Stats),
                 Variables = report.Variables,
                 SavedAtUtc = NowUtc(),
-                InheritedPlaySeconds = _inheritedSeconds,
-                OwnPlaySeconds = OwnSeconds,
                 PlaySeconds = TotalSeconds,
             };
             var session = _localStore.Open(_playthroughId) ?? _localStore.Create(initial);
@@ -88,12 +81,10 @@ public sealed partial class SaveCoordinator
             BacklogSerialEnd = report.BacklogSerialStart,
         });
 
-        int own = OwnSeconds;
-
         var snapshot = new LocalSaveFile
         {
             PlaythroughId = _playthroughId,
-            ForkedFrom = _forkedFrom,
+            ContentVersion = _contentVersion,
             ChapterId = report.ChapterId,
             CurrentEpisodeId = report.State.CurrentEpisodeId,
             Stats = report.State.Stats.ToDictionary(p => p.Key, p => p.Value, StringComparer.Ordinal),
@@ -101,9 +92,7 @@ public sealed partial class SaveCoordinator
             ChapterCompleted = report.ChapterCompleted,
             Scenes = scenes,
             Backlog = new List<DialogueLogEntry>(report.Backlog),
-            InheritedPlaySeconds = _inheritedSeconds,
-            OwnPlaySeconds = own,
-            PlaySeconds = _inheritedSeconds + own,
+            PlaySeconds = TotalSeconds,
             SavedAtUtc = now,
         };
 
@@ -115,7 +104,7 @@ public sealed partial class SaveCoordinator
         Debug.Log(
             $"[저장] 장면 확정 - 선택 {report.Choices.Count}, Yarn 선택 {report.YarnChoices.Count}, " +
             $"시청 {report.WatchedEpisodeIds.Count}, [3] {report.Variables?.Count ?? 0}개, 백로그 {report.Backlog.Count}줄, " +
-            $"기록 {_scenes.Count}개, 시간 {_inheritedSeconds}+{own}s → {report.State.CurrentEpisodeId}" +
+            $"기록 {_scenes.Count}개, 시간 {snapshot.PlaySeconds}s → {report.State.CurrentEpisodeId}" +
             (report.ChapterCompleted ? " (챕터 완료)" : string.Empty));
     }
 }

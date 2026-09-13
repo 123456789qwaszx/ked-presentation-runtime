@@ -5,9 +5,7 @@ using Newtonsoft.Json.Serialization;
 
 // C# 객체와 JSON간 통일된 변환 규칙.
 // (표현 형식 책임)
-// 로컬 파일과 서버 요청/응답이 전부 이 설정을 사용.
-//
-// 멤버 이름은 camelCase(서버 Jackson과 같게),
+// 로컬 저장 파일은 camelCase를 사용한다.
 // 딕셔너리 키는 그대로 - CamelCasePropertyNamesContractResolver를 그냥 쓰면 스탯 키까지 바뀜.
 public static class SaveJson
 {
@@ -29,7 +27,7 @@ public static class SaveJson
     // 응답 안에 그대로 실려 온 JSON(스냅샷)을 같은 규약으로 되읽을 때.
     public static readonly JsonSerializer Serializer = JsonSerializer.Create(Settings);
 
-    // 한 줄로. HTTP body에 사용.
+    // 깊은 복사와 진단 출력에 사용하는 한 줄 형식.
     public static string Serialize(object value) =>
         JsonConvert.SerializeObject(value, Settings);
 

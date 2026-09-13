@@ -10,9 +10,11 @@ public interface ILocalSaveStore
     string ActiveId { get; }
     LocalSaveFile LoadPlaythrough(string id);
     IReadOnlyList<string> ListPlaythroughIds();
-    BookmarkFile LoadBookmarks();
-    void SaveBookmarks(BookmarkFile file);
-    Bookmark LoadBookmark(string id);
-    IReadOnlyList<PlaythroughSummary> ListPlaythroughSummaries();
+
+    SaveSlotIndexFile LoadSaveSlotIndex();
+    SaveSlotData LoadSaveSlot(string id);
+    void WriteSaveSlot(SaveSlotEntry entry, SaveSlotData data);
+    void WriteSaveSlotIndex(SaveSlotIndexFile index);
+
     int CollectUnusedPlaythroughs();
 }

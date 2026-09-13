@@ -9,17 +9,13 @@ public sealed partial class LocalFileSaveStore : ILocalSaveStore
     private sealed class ActiveFile
     {
         public string ActiveId;
-        public string SelectionScopeId = Guid.NewGuid().ToString("N");
-        public long SelectionVersion;
     }
 
     private readonly string _directory;
     private readonly Dictionary<string, PlaythroughSession> _sessions = new(StringComparer.Ordinal);
     private readonly Action<string, string> _write;
-    private bool _initialized;
     private string DataDirectory => Path.Combine(_directory, "playthroughs-v3");
     private string ActivePath => Path.Combine(_directory, "active.json");
-    private string TransferPath => Path.Combine(_directory, "conflict-transfer.json");
 
     public LocalFileSaveStore(string directory, Action<string, string> write = null)
     {
@@ -40,19 +36,7 @@ public sealed partial class LocalFileSaveStore : ILocalSaveStore
     private ActiveFile ReadActive() => Read<ActiveFile>(ActivePath) ?? new ActiveFile();
     public string ActiveId => ReadActive().ActiveId;
 
-    // 로컬 초기화에서는 중단된 회차 이동만 복구한다. 구형식 마이그레이션은 지원하지 않는다.
-    public void Initialize()
-    {
-        if (_initialized) return;
-        RecoverTransfer();
-        _initialized = true;
-    }
-
-    private static void Validate(PlaythroughFile file, string id)
-    {
-        if (file == null || file.FormatVersion != 3 || file.Snapshot?.PlaythroughId != id)
-            throw new InvalidDataException("지원하지 않거나 손상된 회차 파일: " + id);
-    }
+    public void Initialize() { }
 
     public PlaythroughSession Open(string id)
     {
@@ -60,7 +44,7 @@ public sealed partial class LocalFileSaveStore : ILocalSaveStore
         if (_sessions.TryGetValue(id, out PlaythroughSession session)) return session;
         PlaythroughFile file = Read<PlaythroughFile>(PathOf(id));
         if (file == null) return null;
-        Validate(file, id);
+        SaveDataValidator.ValidatePlaythrough(file, id, allowMissingContentVersion: true);
         session = new PlaythroughSession(id, PathOf(id), file, _write);
         _sessions.Add(id, session);
         return session;
@@ -69,7 +53,12 @@ public sealed partial class LocalFileSaveStore : ILocalSaveStore
     public PlaythroughSession Create(LocalSaveFile save)
     {
         if (Open(save.PlaythroughId) != null) throw new InvalidOperationException("이미 존재하는 회차다.");
-        var file = new PlaythroughFile { Snapshot = PlaythroughSession.Copy(save), LocalCommitVersion = 1 };
+        var file = new PlaythroughFile
+        {
+            FormatVersion = SaveFormat.PlaythroughVersion,
+            Snapshot = PlaythroughSession.Copy(save),
+        };
+        SaveDataValidator.ValidatePlaythrough(file, save.PlaythroughId);
         Write(PathOf(save.PlaythroughId), file);
         return Open(save.PlaythroughId);
     }
@@ -79,7 +68,6 @@ public sealed partial class LocalFileSaveStore : ILocalSaveStore
         if (Open(id) == null) throw new InvalidOperationException("파일이 없는 회차는 active로 지정할 수 없다.");
         ActiveFile active = ReadActive();
         active.ActiveId = id;
-        active.SelectionVersion++;
         Write(ActivePath, active);
     }
 
@@ -88,28 +76,4 @@ public sealed partial class LocalFileSaveStore : ILocalSaveStore
     public IReadOnlyList<string> ListPlaythroughIds() => !Directory.Exists(DataDirectory)
         ? Array.Empty<string>()
         : Directory.GetFiles(DataDirectory, "*.json").Select(Path.GetFileNameWithoutExtension).OrderBy(id => id, StringComparer.Ordinal).ToArray();
-    public BookmarkFile LoadBookmarks() => Read<BookmarkFile>(Path.Combine(_directory, "bookmarks.json")) ?? new BookmarkFile();
-
-    private sealed class LegacyTransfer
-    {
-        public string SourceId { get; set; }
-        public string DestinationId { get; set; }
-        public PlaythroughFile Destination { get; set; }
-        public long SelectionVersion { get; set; }
-        public bool WasActive { get; set; }
-    }
-
-    private void RecoverTransfer()
-    {
-        LegacyTransfer transfer = Read<LegacyTransfer>(TransferPath);
-        if (transfer == null) return;
-        Validate(transfer.Destination, transfer.DestinationId);
-        if (Open(transfer.DestinationId) == null)
-            Write(PathOf(transfer.DestinationId), transfer.Destination);
-        ActiveFile active = ReadActive();
-        if (transfer.WasActive && active.ActiveId == transfer.SourceId
-            && active.SelectionVersion == transfer.SelectionVersion)
-            SetActive(transfer.DestinationId);
-        File.Delete(TransferPath);
-    }
 }

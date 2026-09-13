@@ -40,7 +40,6 @@ public class VNAppBootstrap : MonoBehaviour
     private bool _useLearningSaveData;
     private string _saveRoot;
     private TextAsset _chapterJson;
-    private AnalyticsSync _analytics;
     
     private AlbumUnlockService _albumUnlockService;
     private AlbumController _albumController;
@@ -98,10 +97,8 @@ public class VNAppBootstrap : MonoBehaviour
     [Tooltip("기존 학습용 콘텐츠와 saves-learning 경로를 선택한다. 저장 기능과 네트워크 사용 여부에는 영향이 없다.")]
     [SerializeField] private bool useLearningSaveData;
     [SerializeField] private TextAsset learningChapterJson;
-
-    [Header("선택 통계 (선택 사항)")]
-    [SerializeField] private bool enableAnalytics;
-    [SerializeField] private string analyticsBaseUrl = "http://localhost:8080";
+    [Tooltip("저장과 현재 대본의 호환성을 판별한다. 복원에 영향을 주는 대본 변경 시 값을 올린다.")]
+    [SerializeField] private string saveContentVersion = "1";
 
     [Header("Album")]
     [SerializeField] private VNAlbumDatabaseSO albumDatabase;
@@ -152,6 +149,13 @@ public class VNAppBootstrap : MonoBehaviour
         if (_useLearningSaveData && _chapterJson == null)
         {
             Debug.LogError("[학습] Learning Chapter Json에 qwer_scene.progression.json을 지정해야 한다.");
+            enabled = false;
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(saveContentVersion))
+        {
+            Debug.LogError("[저장] Save Content Version을 지정해야 한다.");
             enabled = false;
             return;
         }
@@ -418,27 +422,12 @@ public class VNAppBootstrap : MonoBehaviour
 
         _saveCoordinator = CreateSaveCoordinator();
 
-        IProgressionReporter reporter = _saveCoordinator;
-        if (enableAnalytics)
-        {
-            try
-            {
-                _analytics = new AnalyticsSync(new AnalyticsApi(analyticsBaseUrl),
-                    message => Debug.LogWarning(message));
-                reporter = new AnalyticsProgressionReporter(_saveCoordinator, _localSaveStore, _analytics.Observe);
-            }
-            catch (System.Exception error)
-            {
-                Debug.LogWarning($"[통계] 연결 설정 오류. 로컬 저장으로 계속합니다: {error.Message}");
-            }
-        }
-
         SceneRunner sceneRunner = new SceneRunner(
             _scenePlayback,
             _progressionOptions,
             _linePresentationAdvanceState,
             _rollbackHistory,
-            reporter,
+            _saveCoordinator,
             _backlogRecorder,
             _choiceHistory,
             yarnBridge.Capture);
@@ -461,7 +450,7 @@ public class VNAppBootstrap : MonoBehaviour
     private SaveCoordinator CreateSaveCoordinator()
     {
         _localSaveStore = new LocalFileSaveStore(_saveRoot);
-        return new SaveCoordinator(_localSaveStore);
+        return new SaveCoordinator(_localSaveStore, saveContentVersion);
     }
 
     private void BootstrapPlaybackControls()
@@ -549,7 +538,6 @@ public class VNAppBootstrap : MonoBehaviour
     private void Update()
     {
         _saveCoordinator?.TickMaintenance(Time.realtimeSinceStartup);
-        _analytics?.Tick();
     }
     
     private void OpenInitialScreen()
@@ -575,9 +563,5 @@ public class VNAppBootstrap : MonoBehaviour
         }
 
         Debug.Log($"[저장] 현재 확정 snapshot (로컬 envelope 제외)\n{SaveJson.SerializePretty(snapshot)}");
-    }
-    private void OnDestroy()
-    {
-        _analytics?.Dispose();
     }
 }

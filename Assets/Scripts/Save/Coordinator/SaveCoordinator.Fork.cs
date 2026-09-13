@@ -18,12 +18,6 @@ using UnityEngine;
 // SavedLoadPlan
 // = 목적지까지 재생할 방법
 //
-// ForkOrigin
-// = 새 회차의 부모 정보
-//
-// Bookmark
-// = 나중에 Fork하기 위해 보존해 둔 복원 패키지
-//
 // SaveForkTarget
 // = 백로그 항목으로부터 해석된 갈라지기 목적지.
 //   SceneIndex는 항상 유효하고,
@@ -161,14 +155,7 @@ public sealed partial class SaveCoordinator
         var file = new LocalSaveFile
         {
             PlaythroughId = newId,
-
-            ForkedFrom = new ForkOrigin
-            {
-                PlaythroughId = fromId,
-                SceneIndex = sceneIndex,
-                Target = target,
-            },
-
+            ContentVersion = _contentVersion,
             ChapterId = checkpoint.ChapterId,
             CurrentEpisodeId = checkpoint.EpisodeId,
 
@@ -190,8 +177,6 @@ public sealed partial class SaveCoordinator
             // 있으면 기존 선택을 재현해 target까지 이동한다.
             PendingLoad = CreateLoadPlan(origin, target),
 
-            InheritedPlaySeconds = checkpoint.PlaySecondsAtEntry,
-            OwnPlaySeconds = 0,
             PlaySeconds = checkpoint.PlaySecondsAtEntry,
 
             SavedAtUtc = NowUtc(),
@@ -255,37 +240,24 @@ public sealed partial class SaveCoordinator
         };
     }
 
-    // 즐겨찾기에 저장된 복원 정보를 기반으로 새로운 Playthrough를 만든다.
-    //
-    // 수동 슬롯 자체에 저장된 과거 SceneRecord를 물려받는다.
-    public Task ForkFromBookmark(Bookmark bookmark)
+    // 수동 슬롯 본문을 독립된 새 회차로 연다. 슬롯 원본은 바꾸지 않는다.
+    public Task ForkFromSaveSlot(SaveSlotEntry entry)
     {
-        if (bookmark == null) throw new ArgumentNullException(nameof(bookmark));
-        if (bookmark.Id != null)
-        {
-            string id = bookmark.Id;
-            bookmark = _localStore.LoadBookmark(id);
-        }
-        if (bookmark?.Checkpoint == null)
+        if (entry == null) throw new ArgumentNullException(nameof(entry));
+        SaveSlotData data = LoadSaveSlot(entry.Id);
+        if (data?.Checkpoint == null)
             throw new InvalidOperationException("수동 저장 본문이 없거나 손상되어 불러올 수 없다.");
 
-        SceneCheckpoint checkpoint = bookmark.Checkpoint;
+        SceneCheckpoint checkpoint = data.Checkpoint;
 
-        List<SceneRecord> inheritedScenes = PlaythroughSession.Copy(bookmark.Scenes ?? new List<SceneRecord>());
+        List<SceneRecord> inheritedScenes = PlaythroughSession.Copy(data.Scenes);
 
         string newId = NewPlaythroughId();
 
         var file = new LocalSaveFile
         {
             PlaythroughId = newId,
-
-            ForkedFrom = new ForkOrigin
-            {
-                PlaythroughId = bookmark.PlaythroughId,
-                SceneIndex = bookmark.SceneIndex,
-                Target = bookmark.Load?.Target,
-            },
-
+            ContentVersion = _contentVersion,
             ChapterId = checkpoint.ChapterId,
             CurrentEpisodeId = checkpoint.EpisodeId,
 
@@ -298,12 +270,9 @@ public sealed partial class SaveCoordinator
             ChapterCompleted = false,
 
             Scenes = inheritedScenes,
-            Backlog = new List<DialogueLogEntry>(bookmark.Backlog),
-            PendingLoad = bookmark.Load,
-
-            InheritedPlaySeconds = bookmark.PlaySecondsAtBookmark,
-            OwnPlaySeconds = 0,
-            PlaySeconds = bookmark.PlaySecondsAtBookmark,
+            Backlog = new List<DialogueLogEntry>(data.Backlog),
+            PendingLoad = PlaythroughSession.Copy(data.LoadPlan),
+            PlaySeconds = data.PlaySeconds,
 
             SavedAtUtc = NowUtc(),
         };
@@ -311,11 +280,11 @@ public sealed partial class SaveCoordinator
         SaveAndActivateFork(file);
 
         Debug.Log(
-            $"[저장] 즐겨찾기로 갈라지기 — " +
-            $"\"{bookmark.Preview}\" → 새 회차 {newId}. " +
+            $"[저장] 수동 슬롯 불러오기 — " +
+            $"\"{entry.Preview}\" → 새 회차 {newId}. " +
             $"물려받은 기록 {inheritedScenes.Count}개, " +
             $"백로그 {file.Backlog.Count}줄, " +
-            $"시간 {bookmark.PlaySecondsAtBookmark}s");
+            $"시간 {data.PlaySeconds}s");
         return Task.CompletedTask;
     }
 
@@ -323,8 +292,7 @@ public sealed partial class SaveCoordinator
     {
         _localStore.Create(file);
         _localStore.SetActive(file.PlaythroughId);
-        BecomePlaythrough(file.PlaythroughId, file.ForkedFrom,
-            file.InheritedPlaySeconds, file.OwnPlaySeconds, file.Scenes);
+        BecomePlaythrough(file.PlaythroughId, file.PlaySeconds, file.Scenes);
         _newPrepared = false;
     }
 }

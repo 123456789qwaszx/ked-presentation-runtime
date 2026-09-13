@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using UnityEngine;
 
 // VN 재생의 유일한 프레임 입력 구동자.
@@ -57,8 +56,8 @@ public sealed class VNAdvanceInputPoller : MonoBehaviour
         PollDebugRunEpisodeChain();
         PollDebugRunProgression();
         PollDebugNewGame();
-        PollDebugBookmark();
-        PollDebugLoadBookmark();
+        PollDebugSaveSlot();
+        PollDebugLoadSaveSlot();
 
         _featureController.Tick();
     }
@@ -105,9 +104,9 @@ public sealed class VNAdvanceInputPoller : MonoBehaviour
             StartNewGame();
     }
 
-    private void PollDebugBookmark()
+    private void PollDebugSaveSlot()
     {
-        if (!_bindings.IsBookmarkPressed())
+        if (!_bindings.IsSaveSlotPressed())
             return;
 
         if (_progressionLauncher == null
@@ -122,41 +121,43 @@ public sealed class VNAdvanceInputPoller : MonoBehaviour
                 out string preview))
         {
             Debug.Log(
-                "[즐겨찾기] 지금은 찍을 라인이 없다(시크 중이거나 라인 전).");
+                "[수동 저장] 지금은 저장할 라인이 없다(시크 중이거나 라인 전).");
 
             return;
         }
 
-        _saveCoordinator.CreateBookmark(
+        _saveCoordinator.CreateSaveSlot(
             _progressionLauncher.PendingPath,
             _featureController.CreateYarnChoiceSnapshot(),
             target,
             preview);
     }
 
-    private async void PollDebugLoadBookmark()
+    private async void PollDebugLoadSaveSlot()
     {
-        if (!_bindings.IsLoadBookmarkPressed())
+        if (!_bindings.IsLoadSaveSlotPressed())
             return;
 
         if (_progressionLauncher == null || _saveCoordinator == null)
             return;
 
-        IReadOnlyList<Bookmark> bookmarks = _saveCoordinator.Bookmarks;
+        IReadOnlyList<SaveSlotEntry> slots = _saveCoordinator.SaveSlots;
 
-        if (bookmarks.Count == 0)
+        if (slots.Count == 0)
         {
-            Debug.Log("[즐겨찾기] 아직 없다.");
+            Debug.Log("[수동 저장] 아직 슬롯이 없다.");
             return;
         }
 
-        Bookmark latest = bookmarks[bookmarks.Count - 1];
+        SaveSlotEntry latest = slots[slots.Count - 1];
 
         try
         {
-            await _progressionLauncher.TransitionAfterAsync(
-                async () => await _saveCoordinator.GetBookmarkAsync(latest.Id) != null,
-                () => _saveCoordinator.ForkFromBookmark(latest));
+            if (_saveCoordinator.LoadSaveSlot(latest.Id) == null)
+                return;
+
+            await _progressionLauncher.TransitionAsync(
+                () => _saveCoordinator.ForkFromSaveSlot(latest));
         }
         catch (System.Exception error) { Debug.LogError($"[수동 저장] 불러오기 실패\n{error}"); }
     }
@@ -169,7 +170,7 @@ public sealed class VNAdvanceInputPoller : MonoBehaviour
         if (_debugPlayback != null && _debugPlayback.IsRunning)
             return;
 
-        await _progressionLauncher.ResumeAfterAsync(Task.CompletedTask);
+        await _progressionLauncher.ResumeAsync();
     }
 
     private async void StartNewGame()

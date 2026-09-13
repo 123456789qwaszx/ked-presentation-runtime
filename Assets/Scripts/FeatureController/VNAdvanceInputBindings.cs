@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 [Serializable]
 public sealed class VNAdvanceInputBindings
@@ -27,9 +28,11 @@ public sealed class VNAdvanceInputBindings
 
     public KeyCode newGame = KeyCode.Alpha5;
 
-    // 즐겨찾기(현재 라인) / 마지막 즐겨찾기로 갈라지기 — 디버그. 메뉴 UI는 F5.
-    public KeyCode bookmark = KeyCode.Alpha6;
-    public KeyCode loadBookmark = KeyCode.Alpha7;
+    // 현재 라인 수동 저장 / 마지막 수동 저장 불러오기 — 디버그.
+    [FormerlySerializedAs("bookmark")]
+    public KeyCode saveSlot = KeyCode.Alpha6;
+    [FormerlySerializedAs("loadBookmark")]
+    public KeyCode loadSaveSlot = KeyCode.Alpha7;
 
     public bool IsRapidSkipHeld() => IsHeld(rapidSkipLeft) || IsHeld(rapidSkipRight);
     public bool IsSpeedUpHeld() => IsHeld(speedUpHold);
@@ -41,8 +44,8 @@ public sealed class VNAdvanceInputBindings
     public bool IsRunEpisodeChainPressed() => IsPressed(runEpisodeChain);
     public bool IsLoadProgressionPressed() => IsPressed(loadProgression);
     public bool IsNewGamePressed() => IsPressed(newGame);
-    public bool IsBookmarkPressed() => IsPressed(bookmark);
-    public bool IsLoadBookmarkPressed() => IsPressed(loadBookmark);
+    public bool IsSaveSlotPressed() => IsPressed(saveSlot);
+    public bool IsLoadSaveSlotPressed() => IsPressed(loadSaveSlot);
 
 
     private static bool IsHeld(KeyCode key)
