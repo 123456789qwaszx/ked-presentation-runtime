@@ -1,18 +1,28 @@
-using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public sealed partial class VNScreenBindings
 {
     private SaveLoadMenuMode _saveLoadMode;
-
-    // UI의 slotIndex를 실제 SaveSlotEntry에 연결하는 화면용 목록.
-    private readonly List<SaveSlotEntry> _saveSlots = new();
-
     private SaveLoadMenuUIPanel _saveLoadPanel;
-    private ManualSaveFlow _manualSaveFlow;
-
     private bool _isLoadingSave;
+
+    private void OpenSaveMenu()
+    {
+        if (!_manualSaveFlow.CanSave)
+        {
+            Debug.Log("[수동 저장] 현재는 저장할 수 없다.");
+            return;
+        }
+
+        OpenSaveLoadMenu(SaveLoadMenuMode.Save);
+    }
+
+    private void OpenLoadMenu()
+    {
+        OpenSaveLoadMenu(SaveLoadMenuMode.Load);
+    }
 
     private void OpenSaveLoadMenu(SaveLoadMenuMode mode)
     {
@@ -43,38 +53,34 @@ public sealed partial class VNScreenBindings
 
         AddBinding(
             panel,
-            p => p.CloseClicked += HandleSaveLoadCloseClicked,
-            p => p.CloseClicked -= HandleSaveLoadCloseClicked);
+            p => p.CloseClicked += CloseSaveLoadMenu,
+            p => p.CloseClicked -= CloseSaveLoadMenu);
     }
 
     #region Handlers
 
-    private async void HandleSlotClicked(int slotIndex)
+    private async void HandleSlotClicked(VNSaveSlotMeta meta)
     {
+        if (meta == null) return;
+        
         if (_isLoadingSave)
-            return;
-
-        int index = slotIndex - 1;
-
-        if (index < 0)
             return;
 
         switch (_saveLoadMode)
         {
             case SaveLoadMenuMode.Save:
-                SaveToSlot(index);
+                SaveToSlot(meta);
                 break;
 
             case SaveLoadMenuMode.Load:
-                await LoadFromSlotAsync(index);
+                await LoadFromSlotAsync(meta);
                 break;
         }
     }
 
     private void HandleSaveLoadModeChanged(SaveLoadMenuMode mode)
     {
-        if (mode == SaveLoadMenuMode.Save &&
-            !_manualSaveFlow.CanSave)
+        if (mode == SaveLoadMenuMode.Save && !_manualSaveFlow.CanSave)
         {
             Debug.Log(
                 "[수동 저장] 진행 중이 아니므로 저장 모드로 전환할 수 없다.");
@@ -89,56 +95,32 @@ public sealed partial class VNScreenBindings
         _saveLoadPanel?.ResetPage();
     }
 
-    private void HandleSaveLoadCloseClicked()
-    {
-        CloseSaveLoadMenu();
-    }
-
     #endregion
 
     #region Save / Load
 
-    private void SaveToSlot(int index)
+    private void SaveToSlot(VNSaveSlotMeta meta)
     {
-        bool saved;
-
-        if (index < _saveSlots.Count)
-        {
-            saved = _manualSaveFlow.TryOverwrite(
-                _saveSlots[index]);
-        }
-        else if (index == _saveSlots.Count)
-        {
-            saved = _manualSaveFlow.TryCreate();
-        }
-        else
-        {
-            return;
-        }
+        bool saved = meta.IsNewSlot
+            ? _manualSaveFlow.TryCreate()
+            : _manualSaveFlow.TryOverwrite(meta.Id);
 
         if (saved)
             RefreshSaveLoadMenu();
     }
 
-    private async System.Threading.Tasks.Task LoadFromSlotAsync(int index)
+    private async Task LoadFromSlotAsync(VNSaveSlotMeta meta)
     {
-        if (index < 0 || index >= _saveSlots.Count)
+        if (meta.IsNewSlot)
             return;
-
-        SaveSlotEntry slot = _saveSlots[index];
 
         _isLoadingSave = true;
 
         try
         {
-            await _manualSaveFlow.LoadAsync(
-                slot,
+            await _manualSaveFlow.TryLoadAsync(
+                meta.Id,
                 CloseSaveLoadMenu);
-        }
-        catch (Exception error)
-        {
-            Debug.LogError(
-                $"[수동 저장] 불러오기 실패\n{error}");
         }
         finally
         {
@@ -152,35 +134,29 @@ public sealed partial class VNScreenBindings
 
     private void RefreshSaveLoadMenu()
     {
-        // CollectSaveSlots
-        _saveSlots.Clear();
+        if (_saveLoadPanel == null)
+            return;
 
         IReadOnlyList<SaveSlotEntry> slots =
             _saveCoordinator.SaveSlots;
 
-        for (int i = 0; i < slots.Count; i++)
-        {
-            SaveSlotEntry slot = slots[i];
-
-            if (slot != null)
-                _saveSlots.Add(slot);
-        }
-        
-        // BuildSaveSlotMetas
-        int count = _saveSlots.Count;
+        int count = slots.Count;
 
         if (_saveLoadMode == SaveLoadMenuMode.Save)
             count++;
 
-        var metas = new VNSaveSlotMeta[count];
+        VNSaveSlotMeta[] metas =
+            new VNSaveSlotMeta[count];
 
-        for (int i = 0; i < _saveSlots.Count; i++)
-            metas[i] = VNSaveSlotMeta.From(_saveSlots[i]);
+        for (int i = 0; i < slots.Count; i++)
+            metas[i] = VNSaveSlotMeta.ExistingSlot(slots[i]);
 
         if (_saveLoadMode == SaveLoadMenuMode.Save)
-            metas[^1] = VNSaveSlotMeta.Empty();
+            metas[^1] = VNSaveSlotMeta.NewSlot();
 
-        _saveLoadPanel.Rebuild(_saveLoadMode, metas);
+        _saveLoadPanel.Rebuild(
+            _saveLoadMode,
+            metas);
     }
 
     private void CloseSaveLoadMenu()

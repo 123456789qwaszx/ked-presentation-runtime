@@ -43,9 +43,11 @@ public sealed class ManualSaveFlow
         return false;
     }
 
-    public bool TryOverwrite(SaveSlotEntry slot)
+    public bool TryOverwrite(string slotId)
     {
-        if (slot == null || string.IsNullOrEmpty(slot.Id))
+        SaveSlotEntry slot = FindSaveSlot(slotId);
+
+        if (slot == null)
             return false;
 
         if (!TryCapture(out ManualSaveData save))
@@ -62,31 +64,59 @@ public sealed class ManualSaveFlow
         return true;
     }
 
-    public async Task<bool> LoadAsync(
-        SaveSlotEntry slot,
+    private SaveSlotEntry FindSaveSlot(string slotId)
+    {
+        IReadOnlyList<SaveSlotEntry> slots =
+            _saveCoordinator.SaveSlots;
+
+        for (int i = 0; i < slots.Count; i++)
+        {
+            SaveSlotEntry slot = slots[i];
+
+            if (slot != null &&
+                slot.Id == slotId)
+            {
+                return slot;
+            }
+        }
+
+        return null;
+    }
+
+    public async Task<bool> TryLoadAsync(
+        string slotId,
         Action onTransitionStarted = null)
     {
-        if (slot == null || string.IsNullOrEmpty(slot.Id))
+        try
+        {
+            SaveSlotEntry slot = FindSaveSlot(slotId);
+
+            if (slot == null)
+                return false;
+
+            if (_saveCoordinator.LoadSaveSlot(slot.Id) == null)
+                return false;
+
+            bool transitionStarted = false;
+
+            await _progressionLauncher.TransitionAsync(
+                () =>
+                {
+                    transitionStarted = true;
+
+                    onTransitionStarted?.Invoke();
+
+                    return _saveCoordinator.ForkFromSaveSlot(slot);
+                });
+
+            return transitionStarted;
+        }
+        catch (Exception error)
+        {
+            Debug.LogError($"[수동 저장] 불러오기 실패\n{error}");
+
             return false;
-
-        // 현재 재생을 멈추기 전에
-        // 슬롯 본문과 형식을 먼저 확인한다.
-        if (_saveCoordinator.LoadSaveSlot(slot.Id) == null)
-            return false;
-
-        bool transitionStarted = false;
-
-        await _progressionLauncher.TransitionAsync(
-            () =>
-            {
-                transitionStarted = true;
-
-                onTransitionStarted?.Invoke();
-
-                return _saveCoordinator.ForkFromSaveSlot(slot);
-            });
-
-        return transitionStarted;
+        }
     }
 
     private bool TryCapture(out ManualSaveData save)

@@ -1,18 +1,5 @@
 public sealed partial class VNScreenBindings
 {
-    private ProgressionLauncher _progressionLauncher;
-    private SaveCoordinator _saveCoordinator;
-
-    // 백로그 갈라지기는 진행 계층과 저장 계층이 모두 필요.
-    // 진행 계층 없이 도는 디버그 경로에서는 null일 수 있음.
-    public void ConfigureProgression(
-        ProgressionLauncher launcher,
-        SaveCoordinator saveCoordinator)
-    {
-        _progressionLauncher = launcher;
-        _saveCoordinator = saveCoordinator;
-    }
-
     private void OpenBacklogPanel()
     {
         UI.PushPanel<BacklogPanel>(panel =>

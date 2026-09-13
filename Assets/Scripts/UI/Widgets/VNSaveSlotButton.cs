@@ -10,7 +10,7 @@ using static UIRefValidation;
 // 저장 데이터의 의미는 모르고, 전달받은 표시 정보만 그린다.
 public sealed class VNSaveSlotButton : UIBase<VNSaveSlotButton.Refs>
 {
-    public event Action<int> Clicked;
+    public event Action<VNSaveSlotMeta> Clicked;
 
     #region Refs
 
@@ -36,7 +36,7 @@ public sealed class VNSaveSlotButton : UIBase<VNSaveSlotButton.Refs>
     #endregion
 
     private bool _valid;
-    private int _slotIndex;
+    private VNSaveSlotMeta _meta;
 
     protected override void OnInitialize()
     {
@@ -72,18 +72,22 @@ public sealed class VNSaveSlotButton : UIBase<VNSaveSlotButton.Refs>
     #region Present
 
     public void Present(
-        int slotIndex,
+        int displayIndex,
         VNSaveSlotMeta meta,
         bool isSaveMode)
     {
         if (!_valid)
             return;
 
-        _slotIndex = slotIndex;
+        _meta = meta;
 
-        bool isEmpty = meta == null || meta.IsEmpty;
+        bool isEmpty =
+            meta == null || meta.IsNewSlot;
 
-        PresentSlotLabel(slotIndex, meta, isEmpty);
+        PresentSlotLabel(
+            displayIndex,
+            meta,
+            isEmpty);
 
         _chapterLabel.text =
             isEmpty ? "Empty" : meta.ChapterId;
@@ -97,12 +101,6 @@ public sealed class VNSaveSlotButton : UIBase<VNSaveSlotButton.Refs>
         _playtimeLabel.text =
             isEmpty ? "" : FormatPlaytime(meta.PlaySeconds);
 
-        // Save:
-        // - 기존 슬롯 덮어쓰기 가능
-        // - 빈 슬롯 신규 저장 가능
-        //
-        // Load:
-        // - 실제 저장이 있는 슬롯만 선택 가능
         _slotButton.interactable =
             isSaveMode || !isEmpty;
     }
@@ -113,14 +111,16 @@ public sealed class VNSaveSlotButton : UIBase<VNSaveSlotButton.Refs>
     }
 
     private void PresentSlotLabel(
-        int slotIndex,
+        int displayIndex,
         VNSaveSlotMeta meta,
         bool isEmpty)
     {
         if (isEmpty ||
             string.IsNullOrWhiteSpace(meta.Label))
         {
-            _slotLabel.text = $"Slot {slotIndex:D2}";
+            _slotLabel.text =
+                $"Slot {displayIndex:D2}";
+
             return;
         }
 
@@ -133,7 +133,7 @@ public sealed class VNSaveSlotButton : UIBase<VNSaveSlotButton.Refs>
 
     private void PressSlotButton(PointerEventData _)
     {
-        Clicked?.Invoke(_slotIndex);
+        Clicked?.Invoke(_meta);
     }
 
     #endregion

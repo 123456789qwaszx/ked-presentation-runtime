@@ -500,16 +500,18 @@ public class VNAppBootstrap : MonoBehaviour
     
     private void BootstrapScreenBindings()
     {
-        _screenBindings.ConfigurePresentationView(
-            _vnFeatureController,
-            _dialogueAdvanceDispatcher);
-
-        _screenBindings.ConfigureProgression(
+        ManualSaveFlow manualSaveFlow = new(
+            _saveCoordinator,
             _progressionLauncher,
-            _saveCoordinator);
-
-        _screenBindings.ConfigureAlbum(
-            _albumController);
+            _vnFeatureController);
+        
+        _screenBindings.Configure(
+            _vnFeatureController,
+            _dialogueAdvanceDispatcher,
+            _progressionLauncher,
+            _saveCoordinator,
+            _albumController,
+            manualSaveFlow);
     }
     
     private void BootstrapEquivalenceHarness()

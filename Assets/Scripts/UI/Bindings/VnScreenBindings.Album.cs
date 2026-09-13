@@ -1,13 +1,5 @@
 public sealed partial class VNScreenBindings
 {
-    private AlbumController _albumController;
-
-    public void ConfigureAlbum(
-        AlbumController albumController)
-    {
-        _albumController = albumController;
-    }
-
     private void GoToAlbum()
     {
         UI.SwitchRoot<AlbumUIRoot>(root =>

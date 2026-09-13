@@ -5,10 +5,38 @@ public sealed partial class VNScreenBindings : IDisposable
 {
     private readonly UIManager _ui;
     private UIManager UI => _ui;
+    
+    private VNFeatureController _vnFeatures;
+    private DialogueAdvanceDispatcher _dialogueAdvanceDispatcher;
+
+    private ProgressionLauncher _progressionLauncher;
+    private SaveCoordinator _saveCoordinator;
+
+    private AlbumController _albumController;
+    private ManualSaveFlow _manualSaveFlow;
 
     public VNScreenBindings(UIManager uiManager)
     {
         _ui = uiManager;
+    }
+    
+    
+    public void Configure(
+        VNFeatureController vnFeatures,
+        DialogueAdvanceDispatcher dialogueAdvanceDispatcher,
+        ProgressionLauncher progressionLauncher,
+        SaveCoordinator saveCoordinator,
+        AlbumController albumController,
+        ManualSaveFlow manualSaveFlow)
+    {
+        _vnFeatures = vnFeatures;
+        _dialogueAdvanceDispatcher = dialogueAdvanceDispatcher;
+
+        _progressionLauncher = progressionLauncher;
+        _saveCoordinator = saveCoordinator;
+
+        _albumController = albumController;
+        _manualSaveFlow = manualSaveFlow;
     }
     
     public void OpenTitleMenu() => GoToTitle();

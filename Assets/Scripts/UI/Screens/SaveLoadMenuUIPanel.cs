@@ -14,7 +14,7 @@ public enum SaveLoadMenuMode
 
 public sealed class SaveLoadMenuUIPanel : UIPanel<SaveLoadMenuUIPanel.Refs>
 {
-    public event Action<int> SlotClicked;
+    public event Action<VNSaveSlotMeta> SlotClicked;
     public event Action<SaveLoadMenuMode> ModeChanged;
     public event Action CloseClicked;
 
@@ -266,9 +266,9 @@ public sealed class SaveLoadMenuUIPanel : UIPanel<SaveLoadMenuUIPanel.Refs>
         CloseClicked?.Invoke();
     }
 
-    private void HandleSlotClicked(int slotIndex)
+    private void HandleSlotClicked(VNSaveSlotMeta slot)
     {
-        SlotClicked?.Invoke(slotIndex);
+        SlotClicked?.Invoke(slot);
     }
 
     #endregion

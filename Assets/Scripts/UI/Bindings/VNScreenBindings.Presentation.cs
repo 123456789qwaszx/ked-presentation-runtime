@@ -1,16 +1,5 @@
 public sealed partial class VNScreenBindings
 {
-    private VNFeatureController _vnFeatures;
-    private DialogueAdvanceDispatcher _dialogueAdvanceDispatcher;
-    
-    public void ConfigurePresentationView(
-        VNFeatureController vnFeatures,
-        DialogueAdvanceDispatcher dialogueAdvanceDispatcher)
-    {
-        _vnFeatures = vnFeatures;
-        _dialogueAdvanceDispatcher = dialogueAdvanceDispatcher;
-    }
-
     public void GoToPresentationView()
     {
         UI.SwitchRoot<PresentationUIRoot>(root =>
@@ -106,12 +95,12 @@ public sealed partial class VNScreenBindings
     
     private void HandleSaveMenuClicked()
     {
-        OpenSaveLoadMenu(SaveLoadMenuMode.Save);
+        OpenSaveMenu();
     }
 
     private void HandleLoadMenuClicked()
     {
-        OpenSaveLoadMenu(SaveLoadMenuMode.Load);
+        OpenLoadMenu();
     }
     
     private void HandleOpenSkipPanelClicked()

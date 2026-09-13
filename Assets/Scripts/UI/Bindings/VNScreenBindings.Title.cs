@@ -63,7 +63,7 @@ public sealed partial class VNScreenBindings
 
     private void HandleLoadClicked()
     {
-        OpenSaveLoadMenu(SaveLoadMenuMode.Load);
+        OpenLoadMenu();
     }
 
     private void HandleAlbumClicked()
