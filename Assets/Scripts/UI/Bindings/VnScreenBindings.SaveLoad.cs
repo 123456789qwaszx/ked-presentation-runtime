@@ -4,20 +4,19 @@ using UnityEngine;
 
 public sealed partial class VNScreenBindings
 {
-    private SaveLoadMenuMode _currentSaveLoadMode;
+    private SaveLoadMenuMode _saveLoadMode;
 
-    // UI의 숫자 slotIndex를 영속 SaveSlotEntry.Id로 변환하는 화면 전용 매핑.
-    private readonly List<SaveSlotEntry> _saveLoadSlots = new();
+    // UI의 slotIndex를 실제 SaveSlotEntry에 연결하는 화면용 목록.
+    private readonly List<SaveSlotEntry> _saveSlots = new();
 
     private SaveLoadMenuUIPanel _saveLoadPanel;
-    private bool _saveLoadRequestInProgress;
+    private ManualSaveFlow _manualSaveFlow;
+
+    private bool _isLoadingSave;
 
     private void OpenSaveLoadMenu(SaveLoadMenuMode mode)
     {
-        if (_saveCoordinator == null)
-            return;
-
-        _currentSaveLoadMode = mode;
+        _saveLoadMode = mode;
 
         UI.PushPanel<SaveLoadMenuUIPanel>(panel =>
         {
@@ -25,7 +24,7 @@ public sealed partial class VNScreenBindings
 
             BindPanel(panel, ApplyBindings);
 
-            Refresh(panel);
+            RefreshSaveLoadMenu();
             panel.ResetPage();
         });
     }
@@ -50,9 +49,9 @@ public sealed partial class VNScreenBindings
 
     #region Handlers
 
-    private void HandleSlotClicked(int slotIndex)
+    private async void HandleSlotClicked(int slotIndex)
     {
-        if (_saveLoadRequestInProgress)
+        if (_isLoadingSave)
             return;
 
         int index = slotIndex - 1;
@@ -60,203 +59,81 @@ public sealed partial class VNScreenBindings
         if (index < 0)
             return;
 
-        switch (_currentSaveLoadMode)
+        switch (_saveLoadMode)
         {
             case SaveLoadMenuMode.Save:
-                HandleSaveSlotClicked(index);
+                SaveToSlot(index);
                 break;
 
             case SaveLoadMenuMode.Load:
-                HandleLoadSlotClicked(index);
+                await LoadFromSlotAsync(index);
                 break;
         }
     }
 
     private void HandleSaveLoadModeChanged(SaveLoadMenuMode mode)
     {
-        // 타이틀처럼 진행 중이 아닌 곳에서는 저장할 현재 라인이 없다.
         if (mode == SaveLoadMenuMode.Save &&
-            (_progressionLauncher == null || !_progressionLauncher.IsRunning))
+            !_manualSaveFlow.CanSave)
         {
-            Debug.Log("[수동 저장] 진행 중이 아니므로 저장 모드로 전환할 수 없다.");
+            Debug.Log(
+                "[수동 저장] 진행 중이 아니므로 저장 모드로 전환할 수 없다.");
 
-            RefreshCurrentSaveLoadPanel();
+            RefreshSaveLoadMenu();
             return;
         }
 
-        _currentSaveLoadMode = mode;
+        _saveLoadMode = mode;
 
-        RefreshCurrentSaveLoadPanel();
+        RefreshSaveLoadMenu();
         _saveLoadPanel?.ResetPage();
     }
 
     private void HandleSaveLoadCloseClicked()
     {
-        _saveLoadPanel = null;
-        ClosePanel();
+        CloseSaveLoadMenu();
     }
 
     #endregion
 
-    #region Save
+    #region Save / Load
 
-    private void HandleSaveSlotClicked(int index)
+    private void SaveToSlot(int index)
     {
-        if (!TryCaptureManualSave(
-                out IReadOnlyList<CommittedChoice> path,
-                out IReadOnlyList<VNChoiceRecord> yarnChoices,
-                out SaveLineTarget target,
-                out string preview))
+        bool saved;
+
+        if (index < _saveSlots.Count)
+        {
+            saved = _manualSaveFlow.TryOverwrite(
+                _saveSlots[index]);
+        }
+        else if (index == _saveSlots.Count)
+        {
+            saved = _manualSaveFlow.TryCreate();
+        }
+        else
         {
             return;
         }
 
-        // 기존 슬롯을 누르면 덮어쓴다.
-        if (index < _saveLoadSlots.Count)
-        {
-            SaveSlotEntry existing = _saveLoadSlots[index];
-
-            OverwriteManualSave(
-                existing,
-                path,
-                yarnChoices,
-                target,
-                preview);
-
-            return;
-        }
-
-        // Save 모드에서 기존 슬롯 뒤에 붙인 빈 슬롯.
-        if (index == _saveLoadSlots.Count)
-        {
-            CreateManualSave(
-                path,
-                yarnChoices,
-                target,
-                preview);
-        }
+        if (saved)
+            RefreshSaveLoadMenu();
     }
 
-    private bool TryCaptureManualSave(
-        out IReadOnlyList<CommittedChoice> path,
-        out IReadOnlyList<VNChoiceRecord> yarnChoices,
-        out SaveLineTarget target,
-        out string preview)
+    private async System.Threading.Tasks.Task LoadFromSlotAsync(int index)
     {
-        path = null;
-        yarnChoices = null;
-        target = null;
-        preview = null;
-
-        if (_saveCoordinator == null ||
-            _progressionLauncher == null ||
-            _vnFeatures == null ||
-            !_progressionLauncher.IsRunning)
-        {
-            return false;
-        }
-
-        if (!_vnFeatures.TryGetCurrentLine(
-                out target,
-                out preview))
-        {
-            Debug.Log(
-                "[수동 저장] 지금은 저장할 수 있는 대사 위치가 아니다.");
-
-            return false;
-        }
-
-        path = _progressionLauncher.PendingPath;
-        yarnChoices = _vnFeatures.CreateYarnChoiceSnapshot();
-
-        return true;
-    }
-
-    private void CreateManualSave(
-        IReadOnlyList<CommittedChoice> path,
-        IReadOnlyList<VNChoiceRecord> yarnChoices,
-        SaveLineTarget target,
-        string preview)
-    {
-        SaveSlotEntry slot = _saveCoordinator.CreateSaveSlot(
-            path,
-            yarnChoices,
-            target,
-            preview);
-
-        if (slot == null)
-        {
-            Debug.LogWarning("[수동 저장] 저장하지 못했다.");
-            return;
-        }
-
-        RefreshCurrentSaveLoadPanel();
-    }
-
-    private void OverwriteManualSave(
-        SaveSlotEntry existing,
-        IReadOnlyList<CommittedChoice> path,
-        IReadOnlyList<VNChoiceRecord> yarnChoices,
-        SaveLineTarget target,
-        string preview)
-    {
-        if (existing == null)
+        if (index < 0 || index >= _saveSlots.Count)
             return;
 
-        _saveCoordinator.OverwriteSaveSlot(
-            existing.Id,
-            path,
-            yarnChoices,
-            target,
-            preview,
-            existing.Label);
+        SaveSlotEntry slot = _saveSlots[index];
 
-        RefreshCurrentSaveLoadPanel();
-    }
-
-    #endregion
-
-    #region Load
-
-    private async void HandleLoadSlotClicked(int index)
-    {
-        if (_progressionLauncher == null ||
-            _saveCoordinator == null)
-        {
-            return;
-        }
-
-        if (index < 0 || index >= _saveLoadSlots.Count)
-            return;
-
-        SaveSlotEntry slot = _saveLoadSlots[index];
-
-        if (slot == null || string.IsNullOrEmpty(slot.Id))
-            return;
-
-        _saveLoadRequestInProgress = true;
-
-        bool transitionStarted = false;
+        _isLoadingSave = true;
 
         try
         {
-            // 재생을 멈추기 전에 로컬 본문과 형식을 확인한다.
-            if (_saveCoordinator.LoadSaveSlot(slot.Id) == null)
-                return;
-
-            await _progressionLauncher.TransitionAsync(
-                () =>
-                {
-                    transitionStarted = true;
-
-                    // 로컬 슬롯 확인과 전환 유효성 검사가 끝난 뒤에 닫는다.
-                    _saveLoadRequestInProgress = false;
-                    _saveLoadPanel = null;
-
-                    ClosePanel();
-
-                    return _saveCoordinator.ForkFromSaveSlot(slot);
-                });
+            await _manualSaveFlow.LoadAsync(
+                slot,
+                CloseSaveLoadMenu);
         }
         catch (Exception error)
         {
@@ -265,9 +142,7 @@ public sealed partial class VNScreenBindings
         }
         finally
         {
-            // Transition이 시작되지 않았다면 요청 상태만 되돌린다.
-            if (!transitionStarted)
-                _saveLoadRequestInProgress = false;
+            _isLoadingSave = false;
         }
     }
 
@@ -275,75 +150,43 @@ public sealed partial class VNScreenBindings
 
     #region Refresh
 
-    private void RefreshCurrentSaveLoadPanel()
+    private void RefreshSaveLoadMenu()
     {
-        if (_saveLoadPanel != null)
-            Refresh(_saveLoadPanel);
-    }
+        // CollectSaveSlots
+        _saveSlots.Clear();
 
-    private void Refresh(SaveLoadMenuUIPanel saveLoadPanel)
-    {
-        if (saveLoadPanel == null ||
-            _saveCoordinator == null)
-        {
-            return;
-        }
-
-        IReadOnlyList<SaveSlotEntry> slots = _saveCoordinator.SaveSlots;
-
-        _saveLoadSlots.Clear();
+        IReadOnlyList<SaveSlotEntry> slots =
+            _saveCoordinator.SaveSlots;
 
         for (int i = 0; i < slots.Count; i++)
         {
             SaveSlotEntry slot = slots[i];
 
             if (slot != null)
-                _saveLoadSlots.Add(slot);
+                _saveSlots.Add(slot);
         }
+        
+        // BuildSaveSlotMetas
+        int count = _saveSlots.Count;
 
-        int visibleCount = _saveLoadSlots.Count;
+        if (_saveLoadMode == SaveLoadMenuMode.Save)
+            count++;
 
-        // Save 모드에서는 기존 저장들 뒤에
-        // "새 저장"용 빈 슬롯 하나를 추가한다.
-        if (_currentSaveLoadMode == SaveLoadMenuMode.Save)
-            visibleCount++;
+        var metas = new VNSaveSlotMeta[count];
 
-        var metas = new VNSaveSlotMeta[visibleCount];
+        for (int i = 0; i < _saveSlots.Count; i++)
+            metas[i] = VNSaveSlotMeta.From(_saveSlots[i]);
 
-        for (int i = 0; i < _saveLoadSlots.Count; i++)
-            metas[i] = CreateSlotMeta(_saveLoadSlots[i]);
+        if (_saveLoadMode == SaveLoadMenuMode.Save)
+            metas[^1] = VNSaveSlotMeta.Empty();
 
-        if (_currentSaveLoadMode == SaveLoadMenuMode.Save)
-            metas[^1] = CreateEmptySlotMeta();
-
-        saveLoadPanel.Rebuild(
-            _currentSaveLoadMode,
-            metas);
+        _saveLoadPanel.Rebuild(_saveLoadMode, metas);
     }
 
-    private static VNSaveSlotMeta CreateSlotMeta(SaveSlotEntry slot)
+    private void CloseSaveLoadMenu()
     {
-        return new VNSaveSlotMeta
-        {
-            IsEmpty = false,
-
-            Label = slot.Label,
-            Preview = slot.Preview,
-
-            ChapterId = slot.ChapterId,
-            SavedAtUtc = slot.SavedAtUtc,
-
-            PlaySeconds = slot.PlaySeconds,
-
-        };
-    }
-
-    private static VNSaveSlotMeta CreateEmptySlotMeta()
-    {
-        return new VNSaveSlotMeta
-        {
-            IsEmpty = true,
-        };
+        _saveLoadPanel = null;
+        ClosePanel();
     }
 
     #endregion

@@ -35,8 +35,7 @@ public sealed class ProgressionLauncher
 
     public IReadOnlyList<CommittedChoice> PendingPath => _driver.PendingPath;
 
-    // Stop -> 로컬 전환 -> Launch 전체가 하나의 요청이다. 중복 요청은 합류하지 않고 무시한다.
-    public async Task TransitionAsync(Func<Task> prepare)
+    public async Task TransitionAsync(Func<Task> change)
     {
         if (_isTransitioning)
             return;
@@ -45,9 +44,9 @@ public sealed class ProgressionLauncher
 
         try
         {
-            await _driver.StopAsync();
-            await prepare();
-            await LaunchCoreAsync();
+            await _driver.StopAsync(); // 1. 현재 재생 중단
+            await change();            // 2. 새 게임/로드/포크 등 상태 변경
+            await LaunchCoreAsync();   // 3. 변경된 상태로 다시 재생
         }
         finally
         {
@@ -55,12 +54,22 @@ public sealed class ProgressionLauncher
         }
     }
 
-    public Task ResumeAsync()
+    // 현재 진행 가능한 회차를 이어서 재생
+    public async Task ResumeAsync()
     {
-        if (IsRunning)
-            return Task.CompletedTask;
+        if (IsRunning || _isTransitioning)
+            return;
 
-        return TransitionAsync(() => Task.CompletedTask);
+        _isTransitioning = true;
+
+        try
+        {
+            await LaunchCoreAsync();
+        }
+        finally
+        {
+            _isTransitioning = false;
+        }
     }
 
     public Task RequestReplayAsync() => _driver.RequestReplayAsync();

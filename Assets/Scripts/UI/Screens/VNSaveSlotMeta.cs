@@ -9,4 +9,24 @@ public sealed class VNSaveSlotMeta
     public string SavedAtUtc;
 
     public int PlaySeconds;
+
+    public static VNSaveSlotMeta From(SaveSlotEntry slot)
+    {
+        return new VNSaveSlotMeta
+        {
+            Label = slot.Label,
+            Preview = slot.Preview,
+            ChapterId = slot.ChapterId,
+            SavedAtUtc = slot.SavedAtUtc,
+            PlaySeconds = slot.PlaySeconds,
+        };
+    }
+
+    public static VNSaveSlotMeta Empty()
+    {
+        return new VNSaveSlotMeta
+        {
+            IsEmpty = true,
+        };
+    }
 }

@@ -44,6 +44,7 @@ public sealed partial class VNScreenBindings
         if (_progressionLauncher == null)
             return;
 
+        // 이어하기
         await _progressionLauncher.ResumeAsync();
     }
 
@@ -54,7 +55,8 @@ public sealed partial class VNScreenBindings
         {
             return;
         }
-
+        
+        // 새 게임
         await _progressionLauncher.TransitionAsync(
             _saveCoordinator.PrepareNewPlaythroughAsync);
     }
