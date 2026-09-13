@@ -39,7 +39,7 @@ public sealed class ProgressionDriver
     public int Starts;
     public Task RequestReplayAsync() => Task.CompletedTask;
     public async Task StopAsync() { if (OnStop != null) await OnStop(); IsRunning = false; }
-    public Task RunAsync(object yarn, Ked.Progression.ChapterProgression chapter, Ked.Progression.ProgressionState state,
+    public void Start(object yarn, Ked.Progression.ChapterProgression chapter, Ked.Progression.ProgressionState state,
         YarnVariableSnapshot variables, IReadOnlyList<DialogueLogEntry> backlog, SavedLoadPlan plan)
-    { Starts++; IsRunning = true; return Task.CompletedTask; }
+    { Starts++; IsRunning = true; }
 }

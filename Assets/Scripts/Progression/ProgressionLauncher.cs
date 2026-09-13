@@ -15,6 +15,7 @@ public sealed class ProgressionLauncher
     private readonly TextAsset _chapterJson;
     private readonly Func<ProgressionResumePoint> _resumeProvider;
     private readonly Func<Task> _prepareNewPlaythrough;
+    private Task _transitionTask = Task.CompletedTask;
 
     public ProgressionLauncher(
         ProgressionDriver driver,
@@ -34,28 +35,23 @@ public sealed class ProgressionLauncher
 
     public IReadOnlyList<CommittedChoice> PendingPath => _driver.PendingPath;
 
-    private Task _running;
-    private bool _transitioning;
+    private bool IsTransitioning => !_transitionTask.IsCompleted;
 
     // Stop -> 로컬 전환 -> Launch 전체가 하나의 요청이다. 중복 요청은 합류하지 않고 무시한다.
-    public async Task TransitionAsync(Func<Task> prepare)
+    public Task TransitionAsync(Func<Task> prepare)
     {
-        if (_transitioning)
-            return;
-        
-        _transitioning = true;
-        
-        Task running;
-        try
-        {
-            await StopAsync();
-            await prepare();
-            _running = LaunchCoreAsync();
-            running = _running;
-        }
-        finally { _transitioning = false; }
-        
-        await running;
+        if (IsTransitioning)
+            return Task.CompletedTask;
+
+        _transitionTask = TransitionCoreAsync(prepare);
+        return _transitionTask;
+    }
+
+    private async Task TransitionCoreAsync(Func<Task> prepare)
+    {
+        await _driver.StopAsync();
+        await prepare();
+        await LaunchCoreAsync();
     }
 
     public Task ResumeAsync()
@@ -66,28 +62,7 @@ public sealed class ProgressionLauncher
         return TransitionAsync(() => Task.CompletedTask);
     }
 
-    
     public Task RequestReplayAsync() => _driver.RequestReplayAsync();
-
-    public async Task StopAsync()
-    {
-        if (!_driver.IsRunning)
-            return;
-
-        await _driver.StopAsync();
-
-        if (_running != null)
-            await _running;
-    }
-
-    public Task LaunchAsync()
-    {
-        if (_driver.IsRunning || _transitioning)
-            return Task.CompletedTask;
-
-        _running = LaunchCoreAsync();
-        return _running;
-    }
 
     private async Task LaunchCoreAsync()
     {
@@ -145,7 +120,7 @@ public sealed class ProgressionLauncher
         if (resume != null && !resumeAccepted)
             await _prepareNewPlaythrough();
 
-        await _driver.RunAsync(
+        _driver.Start(
             _dialogueRunner.YarnProject,
             chapter,
             state,
@@ -153,23 +128,15 @@ public sealed class ProgressionLauncher
             backlog,
             loadPlan);
     }
-    
+
     // 현재 진행을 끝내고 idle 상태로 빠진다.
     // 새 진행을 시작하지 않는다.
-    public async Task ExitAsync()
+    public Task ExitAsync()
     {
-        if (_transitioning)
-            return;
+        if (IsTransitioning)
+            return Task.CompletedTask;
 
-        _transitioning = true;
-
-        try
-        {
-            await StopAsync();
-        }
-        finally
-        {
-            _transitioning = false;
-        }
+        _transitionTask = _driver.StopAsync();
+        return _transitionTask;
     }
 }

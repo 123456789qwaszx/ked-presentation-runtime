@@ -29,8 +29,9 @@ public sealed class ProgressionDriver
 
     private SceneRunContext _currentScene;
     private CancellationTokenSource _runCancellation;
+    private Task _runTask = Task.CompletedTask;
 
-    public bool IsRunning { get; private set; }
+    public bool IsRunning => !_runTask.IsCompleted;
 
     public IReadOnlyList<CommittedChoice> PendingPath =>
         _currentScene?.PendingPath ?? Array.Empty<CommittedChoice>();
@@ -45,7 +46,7 @@ public sealed class ProgressionDriver
         _yarnBridge = yarnBridge;
     }
 
-    public async Task RunAsync(
+    public void Start(
         YarnProject project,
         ChapterProgression chapter,
         ProgressionState entryState,
@@ -59,11 +60,26 @@ public sealed class ProgressionDriver
             return;
         }
 
+        _runTask = RunCoreAsync(
+            project,
+            chapter,
+            entryState,
+            restoreVariables,
+            restoreBacklog,
+            loadPlan);
+    }
+
+    private async Task RunCoreAsync(
+        YarnProject project,
+        ChapterProgression chapter,
+        ProgressionState entryState,
+        YarnVariableSnapshot restoreVariables,
+        IReadOnlyList<DialogueLogEntry> restoreBacklog,
+        SavedLoadPlan loadPlan)
+    {
         var cancellation = new CancellationTokenSource();
 
         _runCancellation = cancellation;
-
-        IsRunning = true;
 
         _chapter = chapter;
         _state = entryState;
@@ -99,8 +115,6 @@ public sealed class ProgressionDriver
                 _runCancellation = null;
 
             _currentScene = null;
-
-            IsRunning = false;
 
             _chapter = null;
             _state = null;
@@ -167,7 +181,7 @@ public sealed class ProgressionDriver
         _backlog.Restore(_restoreBacklog);
         _restoreBacklog = null;
     }
-    
+
     public Task RequestReplayAsync()
     {
         SceneRunContext scene = _currentScene;
@@ -181,13 +195,16 @@ public sealed class ProgressionDriver
     public async Task StopAsync()
     {
         CancellationTokenSource cancellation = _runCancellation;
+        Task runTask = _runTask;
 
         if (!IsRunning || cancellation == null)
             return;
 
         cancellation.Cancel();
 
-        await _sceneRunner.StopAsync();
+        await Task.WhenAll(
+            _sceneRunner.StopAsync(),
+            runTask);
     }
 
     private void SyncChapterVariables()
