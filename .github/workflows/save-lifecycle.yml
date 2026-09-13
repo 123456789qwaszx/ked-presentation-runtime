@@ -5,7 +5,6 @@ on:
   pull_request:
     paths:
       - 'Assets/Scripts/Save/**'
-      - 'Assets/Scripts/Analytics/**'
       - 'Assets/Scripts/Game/**'
       - 'Assets/Scripts/UI/**'
       - 'Assets/Scripts/FeatureController/**'

@@ -1,5 +1,4 @@
-// 이 harness의 대역 범위는 Unity/Yarn 재생과 HTTP 경계뿐이다.
-// Save, Coordinator, Analytics, Launcher는 실제 소스를 컴파일한다.
+// 이 harness는 Unity/Yarn 재생만 대역으로 두고 저장 코드는 실제 소스를 컴파일한다.
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -43,30 +42,4 @@ public sealed class ProgressionDriver
     public Task RunAsync(object yarn, Ked.Progression.ChapterProgression chapter, Ked.Progression.ProgressionState state,
         YarnVariableSnapshot variables, IReadOnlyList<DialogueLogEntry> backlog, SavedLoadPlan plan)
     { Starts++; IsRunning = true; return Task.CompletedTask; }
-}
-namespace UnityEngine.Networking
-{
-    public sealed class UnityWebRequestAsyncOperation
-    {
-        public bool isDone = true;
-        public event Action<UnityWebRequestAsyncOperation> completed { add { } remove { } }
-    }
-    public class UploadHandlerRaw { public UploadHandlerRaw(byte[] bytes) {} }
-    public class DownloadHandlerBuffer { public string text = ""; }
-    public sealed class UnityWebRequest : IDisposable
-    {
-        public enum Result { ConnectionError, DataProcessingError, Success, ProtocolError }
-        public const string kHttpVerbPOST="POST", kHttpVerbPUT="PUT";
-        public int timeout;
-        public UploadHandlerRaw uploadHandler;
-        public DownloadHandlerBuffer downloadHandler = new();
-        public Result result=Result.ConnectionError;
-        public long responseCode;
-        public string error="offline";
-        public UnityWebRequest(string url,string method) {}
-        public static UnityWebRequest Get(string url) => new(url,"GET");
-        public void SetRequestHeader(string key,string value) {}
-        public UnityWebRequestAsyncOperation SendWebRequest() => new();
-        public void Dispose() {}
-    }
 }
