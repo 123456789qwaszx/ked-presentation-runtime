@@ -4,7 +4,8 @@ public partial class UIManager
 {
     public void SwitchRoot<T>(
         Action<T> afterPatched = null,
-        bool forceRefresh = false)
+        bool forceRefresh = false,
+        Action<UIBase> afterClosed = null)
         where T : UIBase, IUIRoot
     {
         if (!TryResolve("Root", out T root))
@@ -23,8 +24,12 @@ public partial class UIManager
 
         if (CurSceneRoot != null && !sameRoot)
         {
-            ClosePage(CurSceneRoot);
-            HideManagedUI(CurSceneRoot);
+            UIBase previousRoot = CurSceneRoot;
+
+            ClosePage(previousRoot, afterClosed);
+            HideManagedUI(previousRoot);
+
+            afterClosed?.Invoke(previousRoot);
         }
 
         CurSceneRoot = root;
