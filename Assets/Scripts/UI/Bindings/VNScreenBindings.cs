@@ -58,20 +58,6 @@ public sealed partial class VNScreenBindings : IDisposable
     
     private readonly Dictionary<UIBase, List<Action>> _cleanupByOwner = new();
     
-    private UIBase _boundMain;
-    
-    private void BindMain<T>(T owner, Action<T> apply)
-        where T : UIBase
-    {
-        if (_boundMain != null && _boundMain != owner)
-            Unbind(_boundMain);
-
-        Unbind(owner);
-
-        _boundMain = owner;
-        apply(owner);
-    }
-
     private void BindView<T>(T owner, Action<T> apply)
         where T : UIBase
     {
@@ -112,7 +98,6 @@ public sealed partial class VNScreenBindings : IDisposable
             RunCleanups(kv.Value);
 
         _cleanupByOwner.Clear();
-        _boundMain = null;
     }
 
     private static void RunCleanups(List<Action> cleanups)
