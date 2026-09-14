@@ -72,7 +72,7 @@ public sealed partial class VNScreenBindings : IDisposable
         apply(owner);
     }
 
-    private void BindPanel<T>(T owner, Action<T> apply)
+    private void BindView<T>(T owner, Action<T> apply)
         where T : UIBase
     {
         Unbind(owner);
