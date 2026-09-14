@@ -22,7 +22,10 @@ public partial class UIManager
         BumpShowVersion();
 
         if (CurSceneRoot != null && !sameRoot)
+        {
+            ClosePage(CurSceneRoot);
             HideManagedUI(CurSceneRoot);
+        }
 
         CurSceneRoot = root;
 
