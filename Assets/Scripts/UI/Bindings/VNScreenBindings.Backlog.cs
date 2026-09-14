@@ -4,7 +4,7 @@ public sealed partial class VNScreenBindings
     {
         UI.PushPanel<BacklogPanel>(panel =>
         {
-            BindPanel(panel, ApplyBindings);
+            BindView(panel, ApplyBindings);
             panel.Present(_vnFeatures.Backlogs, CanActOn);
         });
     }
