@@ -2,12 +2,14 @@ public sealed partial class VNScreenBindings
 {
     private void GoToAlbum()
     {
-        UI.SwitchRoot<AlbumUIRoot>(root =>
-        {
-            BindMain(root, ApplyBindings);
+        UI.SwitchRoot<AlbumUIRoot>(
+            afterPatched: root =>
+            {
+                BindView(root, ApplyBindings);
 
-            RefreshAlbum(root);
-        });
+                RefreshAlbum(root);
+            },
+            afterClosed: Unbind);
     }
 
     private void ApplyBindings(
