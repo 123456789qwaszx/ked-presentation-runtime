@@ -24,7 +24,7 @@ public sealed partial class VNScreenBindings
                 {
                     _savePage = page;
 
-                    BindPanel(page, ApplyBindings);
+                    BindView(page, ApplyBindings);
 
                     RefreshSavePage();
                     page.ResetPage();
@@ -43,7 +43,7 @@ public sealed partial class VNScreenBindings
                 {
                     _loadPage = page;
 
-                    BindPanel(page, ApplyBindings);
+                    BindView(page, ApplyBindings);
 
                     RefreshLoadPage();
                     page.ResetPage();
