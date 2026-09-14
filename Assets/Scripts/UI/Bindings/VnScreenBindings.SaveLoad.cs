@@ -5,7 +5,7 @@ using UnityEngine;
 public sealed partial class VNScreenBindings
 {
     private SaveLoadMenuMode _saveLoadMode;
-    private SaveLoadMenuUIPanel _saveLoadPanel;
+    private SaveLoadPage _saveLoadPage;
     private bool _isLoadingSave;
 
     private void OpenSaveMenu()
@@ -28,31 +28,37 @@ public sealed partial class VNScreenBindings
     {
         _saveLoadMode = mode;
 
-        UI.PushPanel<SaveLoadMenuUIPanel>(panel =>
+        UI.PushPanel<SystemMenuPanel>(owner =>
         {
-            _saveLoadPanel = panel;
+            UI.SwitchPage<SaveLoadPage>(
+                owner,
+                afterPatched: page =>
+                {
+                    _saveLoadPage = page;
 
-            BindPanel(panel, ApplyBindings);
+                    BindPanel(page, ApplyBindings);
 
-            RefreshSaveLoadMenu();
-            panel.ResetPage();
+                    RefreshSaveLoadMenu();
+                    page.ResetPage();
+                },
+                afterClosed: Unbind);
         });
     }
 
-    private void ApplyBindings(SaveLoadMenuUIPanel panel)
+    private void ApplyBindings(SaveLoadPage page)
     {
         AddBinding(
-            panel,
+            page,
             p => p.SlotClicked += HandleSlotClicked,
             p => p.SlotClicked -= HandleSlotClicked);
 
         AddBinding(
-            panel,
+            page,
             p => p.ModeChanged += HandleSaveLoadModeChanged,
             p => p.ModeChanged -= HandleSaveLoadModeChanged);
 
         AddBinding(
-            panel,
+            page,
             p => p.CloseClicked += CloseSaveLoadMenu,
             p => p.CloseClicked -= CloseSaveLoadMenu);
     }
@@ -92,7 +98,7 @@ public sealed partial class VNScreenBindings
         _saveLoadMode = mode;
 
         RefreshSaveLoadMenu();
-        _saveLoadPanel?.ResetPage();
+        _saveLoadPage?.ResetPage();
     }
 
     #endregion
@@ -134,7 +140,7 @@ public sealed partial class VNScreenBindings
 
     private void RefreshSaveLoadMenu()
     {
-        if (_saveLoadPanel == null)
+        if (_saveLoadPage == null)
             return;
 
         IReadOnlyList<SaveSlotEntry> slots =
@@ -154,14 +160,14 @@ public sealed partial class VNScreenBindings
         if (_saveLoadMode == SaveLoadMenuMode.Save)
             metas[^1] = VNSaveSlotMeta.NewSlot();
 
-        _saveLoadPanel.Rebuild(
+        _saveLoadPage.Rebuild(
             _saveLoadMode,
             metas);
     }
 
     private void CloseSaveLoadMenu()
     {
-        _saveLoadPanel = null;
+        _saveLoadPage = null;
         ClosePanel();
     }
 
