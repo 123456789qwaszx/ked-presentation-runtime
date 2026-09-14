@@ -4,10 +4,12 @@ public sealed partial class VNScreenBindings
 {
     private void GoToTitle()
     {
-        UI.SwitchRoot<TitleUIRoot>(root =>
-        {
-            BindMain(root, ApplyBindings);
-        });
+        UI.SwitchRoot<TitleUIRoot>(
+            afterPatched: root =>
+            {
+                BindView(root, ApplyBindings);
+            },
+            afterClosed: Unbind);
     }
 
     private void ApplyBindings(TitleUIRoot root)
