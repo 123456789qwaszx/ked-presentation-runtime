@@ -2,10 +2,12 @@ public sealed partial class VNScreenBindings
 {
     public void GoToPresentationView()
     {
-        UI.SwitchRoot<PresentationUIRoot>(root =>
-        {
-            BindMain(root, ApplyBindings);
-        });
+        UI.SwitchRoot<PresentationUIRoot>(
+            afterPatched: root =>
+            {
+                BindView(root, ApplyBindings);
+            },
+            afterClosed: Unbind);
     }
 
     private void ApplyBindings(PresentationUIRoot root)
