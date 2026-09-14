@@ -4,8 +4,8 @@ using UnityEngine;
 
 public sealed partial class VNScreenBindings
 {
-    private SaveLoadMenuMode _saveLoadMode;
-    private SaveLoadPage _saveLoadPage;
+    private SavePage _savePage;
+    private LoadPage _loadPage;
     private bool _isLoadingSave;
 
     private void OpenSaveMenu()
@@ -16,46 +16,61 @@ public sealed partial class VNScreenBindings
             return;
         }
 
-        OpenSaveLoadMenu(SaveLoadMenuMode.Save);
+        UI.PushPanel<SystemMenuPanel>(owner =>
+        {
+            UI.SwitchPage<SavePage>(
+                owner,
+                afterPatched: page =>
+                {
+                    _savePage = page;
+
+                    BindPanel(page, ApplyBindings);
+
+                    RefreshSavePage();
+                    page.ResetPage();
+                },
+                afterClosed: HandleSaveLoadPageClosed);
+        });
     }
 
     private void OpenLoadMenu()
     {
-        OpenSaveLoadMenu(SaveLoadMenuMode.Load);
-    }
-
-    private void OpenSaveLoadMenu(SaveLoadMenuMode mode)
-    {
-        _saveLoadMode = mode;
-
         UI.PushPanel<SystemMenuPanel>(owner =>
         {
-            UI.SwitchPage<SaveLoadPage>(
+            UI.SwitchPage<LoadPage>(
                 owner,
                 afterPatched: page =>
                 {
-                    _saveLoadPage = page;
+                    _loadPage = page;
 
                     BindPanel(page, ApplyBindings);
 
-                    RefreshSaveLoadMenu();
+                    RefreshLoadPage();
                     page.ResetPage();
                 },
-                afterClosed: Unbind);
+                afterClosed: HandleSaveLoadPageClosed);
         });
     }
 
-    private void ApplyBindings(SaveLoadPage page)
+    private void ApplyBindings(SavePage page)
     {
         AddBinding(
             page,
-            p => p.SlotClicked += HandleSlotClicked,
-            p => p.SlotClicked -= HandleSlotClicked);
+            p => p.SlotClicked += HandleSaveSlotClicked,
+            p => p.SlotClicked -= HandleSaveSlotClicked);
 
         AddBinding(
             page,
-            p => p.ModeChanged += HandleSaveLoadModeChanged,
-            p => p.ModeChanged -= HandleSaveLoadModeChanged);
+            p => p.CloseClicked += CloseSaveLoadMenu,
+            p => p.CloseClicked -= CloseSaveLoadMenu);
+    }
+
+    private void ApplyBindings(LoadPage page)
+    {
+        AddBinding(
+            page,
+            p => p.SlotClicked += HandleLoadSlotClicked,
+            p => p.SlotClicked -= HandleLoadSlotClicked);
 
         AddBinding(
             page,
@@ -65,40 +80,31 @@ public sealed partial class VNScreenBindings
 
     #region Handlers
 
-    private async void HandleSlotClicked(VNSaveSlotMeta meta)
+    private void HandleSaveSlotClicked(VNSaveSlotMeta meta)
     {
-        if (meta == null) return;
-        
-        if (_isLoadingSave)
+        if (meta == null)
             return;
 
-        switch (_saveLoadMode)
-        {
-            case SaveLoadMenuMode.Save:
-                SaveToSlot(meta);
-                break;
-
-            case SaveLoadMenuMode.Load:
-                await LoadFromSlotAsync(meta);
-                break;
-        }
+        SaveToSlot(meta);
     }
 
-    private void HandleSaveLoadModeChanged(SaveLoadMenuMode mode)
+    private async void HandleLoadSlotClicked(VNSaveSlotMeta meta)
     {
-        if (mode == SaveLoadMenuMode.Save && !_manualSaveFlow.CanSave)
-        {
-            Debug.Log(
-                "[수동 저장] 진행 중이 아니므로 저장 모드로 전환할 수 없다.");
-
-            RefreshSaveLoadMenu();
+        if (meta == null || _isLoadingSave)
             return;
-        }
 
-        _saveLoadMode = mode;
+        await LoadFromSlotAsync(meta);
+    }
 
-        RefreshSaveLoadMenu();
-        _saveLoadPage?.ResetPage();
+    private void HandleSaveLoadPageClosed(UIBase page)
+    {
+        Unbind(page);
+
+        if (_savePage == page)
+            _savePage = null;
+
+        if (_loadPage == page)
+            _loadPage = null;
     }
 
     #endregion
@@ -112,7 +118,7 @@ public sealed partial class VNScreenBindings
             : _manualSaveFlow.TryOverwrite(meta.Id);
 
         if (saved)
-            RefreshSaveLoadMenu();
+            RefreshSavePage();
     }
 
     private async Task LoadFromSlotAsync(VNSaveSlotMeta meta)
@@ -138,36 +144,46 @@ public sealed partial class VNScreenBindings
 
     #region Refresh
 
-    private void RefreshSaveLoadMenu()
+    private void RefreshSavePage()
     {
-        if (_saveLoadPage == null)
+        if (_savePage == null)
             return;
 
         IReadOnlyList<SaveSlotEntry> slots =
             _saveCoordinator.SaveSlots;
 
-        int count = slots.Count;
-
-        if (_saveLoadMode == SaveLoadMenuMode.Save)
-            count++;
-
         VNSaveSlotMeta[] metas =
-            new VNSaveSlotMeta[count];
+            new VNSaveSlotMeta[slots.Count + 1];
 
         for (int i = 0; i < slots.Count; i++)
             metas[i] = VNSaveSlotMeta.ExistingSlot(slots[i]);
 
-        if (_saveLoadMode == SaveLoadMenuMode.Save)
-            metas[^1] = VNSaveSlotMeta.NewSlot();
+        metas[^1] = VNSaveSlotMeta.NewSlot();
 
-        _saveLoadPage.Rebuild(
-            _saveLoadMode,
-            metas);
+        _savePage.Rebuild(metas);
+    }
+
+    private void RefreshLoadPage()
+    {
+        if (_loadPage == null)
+            return;
+
+        IReadOnlyList<SaveSlotEntry> slots =
+            _saveCoordinator.SaveSlots;
+
+        VNSaveSlotMeta[] metas =
+            new VNSaveSlotMeta[slots.Count];
+
+        for (int i = 0; i < slots.Count; i++)
+            metas[i] = VNSaveSlotMeta.ExistingSlot(slots[i]);
+
+        _loadPage.Rebuild(metas);
     }
 
     private void CloseSaveLoadMenu()
     {
-        _saveLoadPage = null;
+        _savePage = null;
+        _loadPage = null;
         ClosePanel();
     }
 
