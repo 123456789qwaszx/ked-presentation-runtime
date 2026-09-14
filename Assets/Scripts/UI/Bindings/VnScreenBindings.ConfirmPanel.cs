@@ -8,7 +8,7 @@ public sealed partial class VNScreenBindings
     {
         UI.PushPanel<ConfirmPanel>(panel =>
         {
-            BindPanel(panel, openedPanel =>
+            BindView(panel, openedPanel =>
             {
                 AddBinding(
                     openedPanel,
@@ -50,7 +50,7 @@ public sealed partial class VNScreenBindings
     {
         UI.PushPanel<ConfirmPanel>(panel =>
         {
-            BindPanel(panel, openedPanel =>
+            BindView(panel, openedPanel =>
             {
                 AddBinding(
                     openedPanel,
