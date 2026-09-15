@@ -7,13 +7,13 @@ public sealed class SceneRunContext
     public ProgressionState EntryState { get; }
 
     public string RootEpisodeId { get; }
-    public string CurrentEpisodeId { get; internal set; }
+    public string CurrentEpisodeId { get; private set; }
 
     public SavedLoadPlan LoadPlan { get; }
 
-    public SceneRunPhase Phase { get; internal set; } = SceneRunPhase.None;
+    public SceneRunPhase Phase { get; private set; } = SceneRunPhase.None;
 
-    public bool ReplayRequested { get; internal set; }
+    public bool ReplayRequested { get; private set; }
 
     public EpisodeNode RootEpisode => GetEpisode(RootEpisodeId);
     public EpisodeNode CurrentEpisode => GetEpisode(CurrentEpisodeId);
@@ -35,6 +35,31 @@ public sealed class SceneRunContext
         CurrentEpisodeId = RootEpisodeId;
 
         LoadPlan = loadPlan;
+    }
+
+    internal void SetPhase(SceneRunPhase phase)
+    {
+        Phase = phase;
+    }
+
+    internal void MoveTo(string episodeId)
+    {
+        CurrentEpisodeId = episodeId;
+    }
+
+    internal bool RequestReplay()
+    {
+        if (ReplayRequested)
+            return false;
+
+        ReplayRequested = true;
+        return true;
+    }
+
+    internal void RestartFromRoot()
+    {
+        CurrentEpisodeId = RootEpisodeId;
+        ReplayRequested = false;
     }
 
     private EpisodeNode GetEpisode(string episodeId)

@@ -81,7 +81,7 @@ public sealed class SceneRunner
         try
         {
             // Phase: SceneEntering -> EntryReported
-            SetPhase(ctx, SceneRunPhase.SceneEntering);
+            ctx.SetPhase(SceneRunPhase.SceneEntering);
 
             await _playback.BeginSceneAsync();
 
@@ -89,7 +89,7 @@ public sealed class SceneRunner
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            SetPhase(ctx, SceneRunPhase.SceneEntered);
+            ctx.SetPhase(SceneRunPhase.SceneEntered);
 
             _reporter.ReportSceneEntered(
                 new SceneEntryReport(
@@ -98,19 +98,19 @@ public sealed class SceneRunner
                     _captureVariables(),
                     _backlog.NextSerial));
 
-            SetPhase(ctx, SceneRunPhase.EntryReported);
+            ctx.SetPhase(SceneRunPhase.EntryReported);
 
             // Phase: LoadPlanApplied
             ApplyLoadPlan(ctx, history);
 
-            SetPhase(ctx, SceneRunPhase.LoadPlanApplied);
+            ctx.SetPhase(SceneRunPhase.LoadPlanApplied);
 
             while (true)
             {
                 EpisodeNode episode = ctx.CurrentEpisode;
 
                 // Phase: EpisodePlaying -> EpisodeCompleted
-                SetPhase(ctx, SceneRunPhase.EpisodePlaying);
+                ctx.SetPhase(SceneRunPhase.EpisodePlaying);
 
                 await PlayNodeAsync(
                     episode.DialogueEntryId,
@@ -129,10 +129,10 @@ public sealed class SceneRunner
 
                 history.NoteWatched(episode, _rollbackHistory.LastHistoryIndex);
 
-                SetPhase(ctx, SceneRunPhase.EpisodeCompleted);
+                ctx.SetPhase(SceneRunPhase.EpisodeCompleted);
 
                 // Phase: ChoiceResolving
-                SetPhase(ctx, SceneRunPhase.ChoiceResolving);
+                ctx.SetPhase(SceneRunPhase.ChoiceResolving);
 
                 SceneChoiceResolution resolution;
 
@@ -140,7 +140,7 @@ public sealed class SceneRunner
                 if (history.HasRecordedChoice && _seek.IsSeekingActive)
                 {
                     SceneChoice recorded = history.TakeRecordedChoice(_rollbackHistory.LastHistoryIndex);
-                    
+
                     resolution =
                         SceneChoiceResolution.FromChoice(recorded);
                 }
@@ -158,17 +158,17 @@ public sealed class SceneRunner
                         _seek.ClearSeek();
                     }
 
-                    resolution = 
+                    resolution =
                         await ResolveNextChoiceAsync(ctx, history, episode, cancellationToken);
                 }
 
                 // 선택을 구한 직후 Replay가 들어왔을 수도 있다.
                 // 이 경우 선택을 pending에 기록하거나 Chapter를 끝내지 않는다.
-                if (ctx.ReplayRequested 
+                if (ctx.ReplayRequested
                     || resolution.Kind == SceneChoiceResolutionKind.ReplayRequested)
                 {
                     await RestartReplayAsync(ctx, history, cancellationToken);
-                    
+
                     continue;
                 }
 
@@ -184,13 +184,13 @@ public sealed class SceneRunner
                 if (choice.Source != SceneChoiceSource.Recorded)
                     history.RecordChoice(choice, _rollbackHistory.LastHistoryIndex);
 
-                SetPhase(ctx, SceneRunPhase.ChoiceResolved);
+                ctx.SetPhase(SceneRunPhase.ChoiceResolved);
 
                 // Phase: ViaPlaying
                 if (choice.Option.HasVia)
                 {
-                    SetPhase(ctx, SceneRunPhase.ViaPlaying);
-                    
+                    ctx.SetPhase(SceneRunPhase.ViaPlaying);
+
                     await PlayNodeAsync(choice.Option.ViaNodeId, "연출", cancellationToken);
 
                     if (ctx.ReplayRequested)
@@ -201,9 +201,9 @@ public sealed class SceneRunner
                 }
 
                 // Phase: TargetMoved
-                ctx.CurrentEpisodeId = choice.Option.TargetEpisodeId;
+                ctx.MoveTo(choice.Option.TargetEpisodeId);
 
-                SetPhase(ctx, SceneRunPhase.TargetMoved);
+                ctx.SetPhase(SceneRunPhase.TargetMoved);
 
                 if (!ctx.Chapter.IsSameScene(choice.FromEpisodeId, ctx.CurrentEpisodeId))
                 {
@@ -213,12 +213,12 @@ public sealed class SceneRunner
         }
         catch (OperationCanceledException)
         {
-            SetPhase(ctx, SceneRunPhase.Cancelled);
+            ctx.SetPhase(SceneRunPhase.Cancelled);
             throw;
         }
         catch
         {
-            SetPhase(ctx, SceneRunPhase.Faulted);
+            ctx.SetPhase(SceneRunPhase.Faulted);
             throw;
         }
     }
@@ -229,10 +229,8 @@ public sealed class SceneRunner
     // Playback은 이유를 모르고 현재 재생을 중단할 뿐이다.
     public async Task RequestReplayAsync(SceneRunContext ctx)
     {
-        if (ctx.ReplayRequested)
+        if (!ctx.RequestReplay())
             return;
-
-        ctx.ReplayRequested = true;
 
         // Node 재생 중이면 playback을 중단한다.
         // 선택지 대기 중이면 ShowAsync도 깨운다.
@@ -273,10 +271,10 @@ public sealed class SceneRunner
         if (ctx.ReplayRequested)
             return SceneChoiceResolution.ReplayRequested();
 
-        ProgressionState working = 
+        ProgressionState working =
             ctx.EntryState.FoldChoices(ctx.Chapter, history.PendingOptions());
 
-        ChapterAdvance advance = 
+        ChapterAdvance advance =
             ChapterTransition.Resolve(ctx.Chapter, working);
 
         if (ctx.ReplayRequested)
@@ -305,7 +303,7 @@ public sealed class SceneRunner
         // 선택지 도중 Replay 요청 시, 기다리는 걸 그만두고 Replay 진행.
         try
         {
-            ResolvedOption resolved = 
+            ResolvedOption resolved =
                 await PickAsync(advance, cancellationToken);
 
             if (ctx.ReplayRequested)
@@ -362,7 +360,7 @@ public sealed class SceneRunner
         ScenePendingHistory history,
         CancellationToken cancellationToken)
     {
-        SetPhase(ctx, SceneRunPhase.Replaying);
+        ctx.SetPhase(SceneRunPhase.Replaying);
 
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -376,10 +374,7 @@ public sealed class SceneRunner
             history.RewindAfter(target.historyIndex);
 
         history.RestartReplay();
-        ctx.CurrentEpisodeId = ctx.RootEpisodeId;
-
-        // 현재 Replay 요청을 모두 소비했다.
-        ctx.ReplayRequested = false;
+        ctx.RestartFromRoot();
 
         Debug.Log(
             $"[장면] 리플레이 — 루트부터. " +
@@ -469,9 +464,9 @@ public sealed class SceneRunner
         ScenePendingHistory history,
         SceneRunOutcome outcome)
     {
-        SetPhase(ctx, SceneRunPhase.SceneCommitting);
+        ctx.SetPhase(SceneRunPhase.SceneCommitting);
 
-        ProgressionState state = 
+        ProgressionState state =
             history.FoldInto(ctx.Chapter, ctx.EntryState);
 
         List<CommittedChoice> choices =
@@ -499,13 +494,8 @@ public sealed class SceneRunner
                 _backlog.NextSerial,
                 outcome == SceneRunOutcome.ChapterEnded));
 
-        SetPhase(ctx, SceneRunPhase.Completed);
+        ctx.SetPhase(SceneRunPhase.Completed);
 
         return new SceneRunResult(outcome, state);
-    }
-
-    private static void SetPhase(SceneRunContext ctx, SceneRunPhase phase)
-    {
-        ctx.Phase = phase;
     }
 }
