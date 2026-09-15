@@ -490,12 +490,7 @@ public class VNAppBootstrap : MonoBehaviour
         vnAdvanceInputPoller.Initialize(
             _dialogueAdvanceDispatcher,
             _vnFeatureController,
-            _scenePlayback,
-            _debugPlayback,
-            yarnEntryKey,
-            debugEpisodeChain,
-            _progressionLauncher,
-            _saveCoordinator);
+            _progressionLauncher);
     }
     
     private void BootstrapScreenBindings()

@@ -45,11 +45,9 @@ public sealed class ManualSaveFlow
 
     public bool TryOverwrite(string slotId)
     {
-        SaveSlotEntry slot = FindSaveSlot(slotId);
-
-        if (slot == null)
-            return false;
-
+        SaveSlotEntry slot = 
+            _saveCoordinator.FindSaveSlot(slotId);
+        
         if (!TryCapture(out ManualSaveData save))
             return false;
 
@@ -64,59 +62,21 @@ public sealed class ManualSaveFlow
         return true;
     }
 
-    private SaveSlotEntry FindSaveSlot(string slotId)
-    {
-        IReadOnlyList<SaveSlotEntry> slots =
-            _saveCoordinator.SaveSlots;
-
-        for (int i = 0; i < slots.Count; i++)
-        {
-            SaveSlotEntry slot = slots[i];
-
-            if (slot != null &&
-                slot.Id == slotId)
-            {
-                return slot;
-            }
-        }
-
-        return null;
-    }
-
-    public async Task<bool> TryLoadAsync(
-        string slotId,
-        Action onTransitionStarted = null)
+    public async Task LoadAsync(string slotId, Action onTransitionStarted = null)
     {
         try
         {
-            SaveSlotEntry slot = FindSaveSlot(slotId);
+            SaveSlotEntry slot = _saveCoordinator.FindSaveSlot(slotId);
+            SaveSlotData data = _saveCoordinator.LoadSaveSlot(slot.Id);
 
-            if (slot == null)
-                return false;
-
-            if (_saveCoordinator.LoadSaveSlot(slot.Id) == null)
-                return false;
-
-            bool transitionStarted = false;
-
-            await _progressionLauncher.TransitionAsync(
-                () =>
-                {
-                    transitionStarted = true;
-
-                    onTransitionStarted?.Invoke();
-
-                    return _saveCoordinator.ForkFromSaveSlot(slot);
+            await _progressionLauncher.TransitionAsync(() =>
+                { 
+                    onTransitionStarted?.Invoke(); 
+                    
+                    return _saveCoordinator.ForkFromSaveSlot(slot, data);
                 });
-
-            return transitionStarted;
         }
-        catch (Exception error)
-        {
-            Debug.LogError($"[수동 저장] 불러오기 실패\n{error}");
-
-            return false;
-        }
+        catch (Exception error) { Debug.LogError($"[수동 저장] 불러오기 실패\n{error}"); }
     }
 
     private bool TryCapture(out ManualSaveData save)
@@ -130,9 +90,7 @@ public sealed class ManualSaveFlow
                 out SaveLineTarget target,
                 out string preview))
         {
-            Debug.Log(
-                "[수동 저장] 지금은 저장할 수 있는 대사 위치가 아니다.");
-
+            Debug.Log("[수동 저장] 지금은 저장할 수 있는 대사 위치가 아니다.");
             return false;
         }
 

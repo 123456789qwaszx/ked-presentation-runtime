@@ -9,13 +9,19 @@ public sealed partial class SaveCoordinator
 
     public SaveSlotData LoadSaveSlot(string id)
     {
-        SaveSlotData data = _localStore.LoadSaveSlot(id);
-        if (data == null) return null;
+        SaveSlotData data = 
+            _localStore.LoadSaveSlot(id);
+        
+        if (data == null)
+            return null;
+        
         if (string.IsNullOrEmpty(data.ContentVersion))
             data.ContentVersion = _contentVersion;
+        
         if (!string.Equals(data.ContentVersion, _contentVersion, StringComparison.Ordinal))
             throw new InvalidOperationException(
                 $"수동 저장의 콘텐츠 버전이 다르다: {data.ContentVersion} → {_contentVersion}");
+        
         return data;
     }
 
@@ -43,9 +49,18 @@ public sealed partial class SaveCoordinator
     }
 
     public SaveSlotEntry CreateSaveSlot(
-        IReadOnlyList<CommittedChoice> path, IReadOnlyList<VNChoiceRecord> yarnChoices,
-        SaveLineTarget target, string preview, string label = null) =>
-        WriteSaveSlot(null, path, yarnChoices, target, preview, label);
+        IReadOnlyList<CommittedChoice> path,
+        IReadOnlyList<VNChoiceRecord> yarnChoices,
+        SaveLineTarget target,
+        string preview, 
+        string label = null) => 
+        WriteSaveSlot(
+            null, 
+            path,
+            yarnChoices,
+            target,
+            preview,
+            label);
 
     public SaveSlotEntry OverwriteSaveSlot(
         string id, IReadOnlyList<CommittedChoice> path, IReadOnlyList<VNChoiceRecord> yarnChoices,
@@ -53,8 +68,12 @@ public sealed partial class SaveCoordinator
         WriteSaveSlot(id ?? throw new ArgumentNullException(nameof(id)), path, yarnChoices, target, preview, label);
 
     private SaveSlotEntry WriteSaveSlot(
-        string id, IReadOnlyList<CommittedChoice> path, IReadOnlyList<VNChoiceRecord> yarnChoices,
-        SaveLineTarget target, string preview, string label)
+        string id,
+        IReadOnlyList<CommittedChoice> path,
+        IReadOnlyList<VNChoiceRecord> yarnChoices,
+        SaveLineTarget target,
+        string preview, 
+        string label)
     {
         if (_currentEntry == null || target == null)
             return null;
@@ -122,6 +141,8 @@ public sealed partial class SaveCoordinator
         return true;
     }
 
-    private SaveSlotEntry FindSaveSlot(string id) =>
-        _localStore.LoadSaveSlotIndex().Slots.Find(slot => slot.Id == id);
+    public SaveSlotEntry FindSaveSlot(string id) =>
+        _localStore.LoadSaveSlotIndex()
+            .Slots
+            .Find(slot => slot.Id == id);
 }

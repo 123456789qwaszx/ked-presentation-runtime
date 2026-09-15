@@ -241,16 +241,12 @@ public sealed partial class SaveCoordinator
     }
 
     // 수동 슬롯 본문을 독립된 새 회차로 연다. 슬롯 원본은 바꾸지 않는다.
-    public Task ForkFromSaveSlot(SaveSlotEntry entry)
+    public Task ForkFromSaveSlot(SaveSlotEntry entry, SaveSlotData data)
     {
-        if (entry == null) throw new ArgumentNullException(nameof(entry));
-        SaveSlotData data = LoadSaveSlot(entry.Id);
-        if (data?.Checkpoint == null)
-            throw new InvalidOperationException("수동 저장 본문이 없거나 손상되어 불러올 수 없다.");
-
         SceneCheckpoint checkpoint = data.Checkpoint;
 
-        List<SceneRecord> inheritedScenes = PlaythroughSession.Copy(data.Scenes);
+        List<SceneRecord> inheritedScenes =
+            PlaythroughSession.Copy(data.Scenes);
 
         string newId = NewPlaythroughId();
 
@@ -285,6 +281,7 @@ public sealed partial class SaveCoordinator
             $"물려받은 기록 {inheritedScenes.Count}개, " +
             $"백로그 {file.Backlog.Count}줄, " +
             $"시간 {data.PlaySeconds}s");
+
         return Task.CompletedTask;
     }
 

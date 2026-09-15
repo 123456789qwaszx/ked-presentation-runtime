@@ -130,9 +130,7 @@ public sealed partial class VNScreenBindings
 
         try
         {
-            await _manualSaveFlow.TryLoadAsync(
-                meta.Id,
-                CloseSaveLoadMenu);
+            await _manualSaveFlow.LoadAsync(meta.Id, CloseSaveLoadMenu);
         }
         finally
         {

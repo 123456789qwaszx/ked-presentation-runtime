@@ -61,10 +61,7 @@ public abstract class SaveSlotPage : UIPage<SaveSlotPage.Refs>
     private int TotalPageCount =>
         _metas.Length <= 0
             ? 1
-            : Mathf.Max(
-                1,
-                Mathf.CeilToInt(
-                    _metas.Length / (float)slotsPerPage));
+            : Mathf.Max(1, Mathf.CeilToInt(_metas.Length / (float)slotsPerPage));
 
     protected override void OnInitialize()
     {
@@ -100,25 +97,11 @@ public abstract class SaveSlotPage : UIPage<SaveSlotPage.Refs>
 
     private void BindHandlers()
     {
-        BindEvent(
-            _firstPageButton,
-            PressFirstPageButton);
-
-        BindEvent(
-            _previousPageButton,
-            PressPreviousPageButton);
-
-        BindEvent(
-            _nextPageButton,
-            PressNextPageButton);
-
-        BindEvent(
-            _lastPageButton,
-            PressLastPageButton);
-
-        BindEvent(
-            _closeButton,
-            PressCloseButton);
+        BindEvent(_firstPageButton, PressFirstPageButton);
+        BindEvent(_previousPageButton, PressPreviousPageButton);
+        BindEvent(_nextPageButton, PressNextPageButton);
+        BindEvent(_lastPageButton, PressLastPageButton);
+        BindEvent(_closeButton, PressCloseButton);
     }
 
     #region Present
@@ -130,10 +113,7 @@ public abstract class SaveSlotPage : UIPage<SaveSlotPage.Refs>
 
         _metas = metas ?? Array.Empty<VNSaveSlotMeta>();
 
-        _pageIndex = Mathf.Clamp(
-            _pageIndex,
-            0,
-            TotalPageCount - 1);
+        _pageIndex = Mathf.Clamp(_pageIndex, 0, TotalPageCount - 1);
 
         CreateSlotButtonsIfNeeded();
         RefreshPage();
@@ -305,45 +285,14 @@ public abstract class SaveSlotPage : UIPage<SaveSlotPage.Refs>
     {
         string missing = "";
 
-        AppendMissing(
-            ref missing,
-            _saveLoadBg,
-            Refs.SaveLoadBG_Image);
-
-        AppendMissing(
-            ref missing,
-            _content,
-            Refs.Content_Root);
-
-        AppendMissing(
-            ref missing,
-            _firstPageButton,
-            Refs.FirstPageButton_Button);
-
-        AppendMissing(
-            ref missing,
-            _previousPageButton,
-            Refs.PreviousPageButton_Button);
-
-        AppendMissing(
-            ref missing,
-            _pageLabel,
-            Refs.PageLabel_Text);
-
-        AppendMissing(
-            ref missing,
-            _nextPageButton,
-            Refs.NextPageButton_Button);
-
-        AppendMissing(
-            ref missing,
-            _lastPageButton,
-            Refs.LastPageButton_Button);
-
-        AppendMissing(
-            ref missing,
-            _closeButton,
-            Refs.CloseButton_Button);
+        AppendMissing(ref missing, _saveLoadBg, Refs.SaveLoadBG_Image);
+        AppendMissing(ref missing, _content, Refs.Content_Root);
+        AppendMissing(ref missing, _firstPageButton, Refs.FirstPageButton_Button);
+        AppendMissing(ref missing, _previousPageButton, Refs.PreviousPageButton_Button);
+        AppendMissing(ref missing, _pageLabel, Refs.PageLabel_Text);
+        AppendMissing(ref missing, _nextPageButton, Refs.NextPageButton_Button);
+        AppendMissing(ref missing, _lastPageButton, Refs.LastPageButton_Button);
+        AppendMissing(ref missing, _closeButton, Refs.CloseButton_Button);
 
         if (slotButtonPrefab == null)
             missing += "\n- slotButtonPrefab";
