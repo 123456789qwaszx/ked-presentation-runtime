@@ -13,21 +13,22 @@ public sealed class ProgressionLauncher
     private readonly ProgressionDriver _driver;
     private readonly DialogueRunner _dialogueRunner; //"DialogueRunner.YarnProject"를 꺼내 대조 및 검사.
     private readonly TextAsset _chapterJson;
-    private readonly Func<ProgressionResumePoint> _resumeProvider;
+    private readonly Func<ProgressionResumePoint> _loadResumePoint;
     private readonly Func<Task> _prepareNewPlaythrough;
+    
     private bool _isTransitioning;
 
     public ProgressionLauncher(
         ProgressionDriver driver,
         DialogueRunner dialogueRunner,
         TextAsset chapterJson,
-        Func<ProgressionResumePoint> resumeProvider,
+        Func<ProgressionResumePoint> loadResumePoint,
         Func<Task> prepareNewPlaythrough)
     {
         _driver = driver;
         _dialogueRunner = dialogueRunner;
         _chapterJson = chapterJson;
-        _resumeProvider = resumeProvider;
+        _loadResumePoint = loadResumePoint;
         _prepareNewPlaythrough = prepareNewPlaythrough;
     }
 
@@ -93,7 +94,7 @@ public sealed class ProgressionLauncher
         IReadOnlyList<DialogueLogEntry> backlog = null;
         SavedLoadPlan loadPlan = null;
 
-        ProgressionResumePoint resume = _resumeProvider();
+        ProgressionResumePoint resume = _loadResumePoint();
 
         bool resumeAccepted = false;
         if (resume != null)

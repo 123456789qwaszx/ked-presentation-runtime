@@ -8,9 +8,13 @@ public sealed partial class SaveCoordinator
     // 네트워크 대기 없이 새 회차를 예약한다. 첫 Scene 진입 snapshot을 쓴 뒤 active를 바꾼다.
     public Task PrepareNewPlaythroughAsync()
     {
-        if (_newPrepared) return Task.CompletedTask;
+        if (_newPrepared) 
+            return Task.CompletedTask;
+        
         BecomePlaythrough(NewPlaythroughId(), 0, null);
+        
         _newPrepared = true;
+        
         return Task.CompletedTask;
     }
 
@@ -18,7 +22,9 @@ public sealed partial class SaveCoordinator
     // 예) 만약 'active = playthrough-B' -> playthrough-B.json
     public ProgressionResumePoint LoadActiveResumePoint()
     {
-        if (_newPrepared) return null;
+        if (_newPrepared)
+            return null;
+        
         LocalSaveFile save = _localStore.LoadActive();
 
         if (save == null)

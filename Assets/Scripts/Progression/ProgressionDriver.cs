@@ -29,6 +29,7 @@ public sealed class ProgressionDriver
 
     private SceneRunContext _currentScene;
     private CancellationTokenSource _runCancellation;
+    
     private Task _runTask = Task.CompletedTask;
 
     public bool IsRunning => !_runTask.IsCompleted;
@@ -60,7 +61,7 @@ public sealed class ProgressionDriver
             return;
         }
 
-        _runTask = RunCoreAsync(
+        _runTask = RunAsync(
             project,
             chapter,
             entryState,
@@ -69,7 +70,7 @@ public sealed class ProgressionDriver
             loadPlan);
     }
 
-    private async Task RunCoreAsync(
+    private async Task RunAsync(
         YarnProject project,
         ChapterProgression chapter,
         ProgressionState entryState,
@@ -92,13 +93,10 @@ public sealed class ProgressionDriver
 
         try
         {
-            Debug.Log($"[진행] 챕터 시작 — {Describe()}");
-
-            PrepareBacklog();
-
+            _backlog.Restore(_restoreBacklog);
+            _restoreBacklog = null;
+            
             await RunChapterAsync(cancellation.Token);
-
-            Debug.Log($"[진행] 챕터 끝 — {Describe()}");
         }
         catch (OperationCanceledException)
             when (cancellation.IsCancellationRequested)
@@ -107,7 +105,7 @@ public sealed class ProgressionDriver
         }
         catch (Exception error)
         {
-            Debug.LogError($"[진행] 멈췄다 — {Describe()}\n{error}");
+            Debug.LogError($"[진행] 멈췄다 \n{error}");
         }
         finally
         {
@@ -176,17 +174,11 @@ public sealed class ProgressionDriver
         }
     }
 
-    private void PrepareBacklog()
-    {
-        _backlog.Restore(_restoreBacklog);
-        _restoreBacklog = null;
-    }
-
     public Task RequestReplayAsync()
     {
         SceneRunContext scene = _currentScene;
 
-        if (!IsRunning || scene == null)
+        if (scene == null)
             return Task.CompletedTask;
 
         return _sceneRunner.RequestReplayAsync(scene);
@@ -223,9 +215,4 @@ public sealed class ProgressionDriver
 
         _restoreVariables = null;
     }
-
-    private string Describe() =>
-        _chapter == null
-            ? "(시작 전)"
-            : $"{_chapter.ChapterId}/{_state?.CurrentEpisodeId}";
 }
