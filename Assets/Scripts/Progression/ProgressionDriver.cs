@@ -27,7 +27,7 @@ public sealed class ProgressionDriver
     private IReadOnlyList<DialogueLogEntry> _restoreBacklog;
     private SavedLoadPlan _loadPlan;
 
-    private SceneRunContext _currentScene;
+    private SceneTransaction _currentScene;
     private CancellationTokenSource _runCancellation;
     
     private Task _runTask = Task.CompletedTask;
@@ -140,14 +140,14 @@ public sealed class ProgressionDriver
             SavedLoadPlan loadPlan = _loadPlan;
             _loadPlan = null;
 
-            var context = new SceneRunContext(_chapter, _state, loadPlan);
+            var scene = new SceneTransaction(_chapter, _state, loadPlan);
 
-            _currentScene = context;
+            _currentScene = scene;
 
             try
             {
                 SceneRunResult result =
-                    await _sceneRunner.RunAsync(context, cancellationToken);
+                    await _sceneRunner.RunAsync(scene, cancellationToken);
 
                 _state = result.State;
 
@@ -168,7 +168,7 @@ public sealed class ProgressionDriver
             }
             finally
             {
-                if (ReferenceEquals(_currentScene, context))
+                if (ReferenceEquals(_currentScene, scene))
                     _currentScene = null;
             }
         }
@@ -176,7 +176,7 @@ public sealed class ProgressionDriver
 
     public Task RequestReplayAsync()
     {
-        SceneRunContext scene = _currentScene;
+        SceneTransaction scene = _currentScene;
 
         if (scene == null)
             return Task.CompletedTask;

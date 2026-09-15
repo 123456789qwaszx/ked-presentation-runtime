@@ -16,7 +16,7 @@ using UnityEngine;
 // - 중단된 장면의 pending은 확정하거나 보고하지 않는다.
 //
 // 2) 리플레이 규칙
-// - ReplayRequested는 현재 SceneRunContext가 소유한다.
+// - ReplayPending은 현재 SceneTransaction이 소유한다.
 // - 리플레이는 항상 장면 루트에서 시작한다.
 // - 롤백 표적 뒤에서 발생한 진행 선택과 시청 기록은 제거한다.
 // - 표적까지는 이전 진행 선택과 Yarn 선택을 자동 응답한다.
@@ -101,24 +101,24 @@ public sealed class SceneRunner
     }
 
     public async Task<SceneRunResult> RunAsync(
-        SceneRunContext ctx,
+        SceneTransaction scene,
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        ScenePendingHistory history = ctx.History;
+        ScenePendingHistory history = scene.History;
 
         try
         {
-            await EnterSceneAsync(ctx, cancellationToken);
+            await EnterSceneAsync(scene, cancellationToken);
 
-            ApplyLoadPlan(ctx, history);
-            ctx.SetPhase(SceneRunPhase.LoadPlanApplied);
+            ApplyLoadPlan(scene, history);
+            scene.SetPhase(SceneRunPhase.LoadPlanApplied);
 
             while (true)
             {
                 SceneStepResult step =
-                    await RunEpisodeStepAsync(ctx, history, cancellationToken);
+                    await RunEpisodeStepAsync(scene, history, cancellationToken);
 
                 switch (step.Kind)
                 {
@@ -126,14 +126,14 @@ public sealed class SceneRunner
                         continue;
 
                     case SceneStepKind.Replay:
-                        await RestartReplayAsync(ctx, history, cancellationToken);
+                        await RestartReplayAsync(scene, history, cancellationToken);
                         continue;
 
                     case SceneStepKind.SceneEnded:
-                        return CommitScene(ctx, history, SceneRunOutcome.SceneEnded);
+                        return CommitScene(scene, history, SceneRunOutcome.SceneEnded);
 
                     case SceneStepKind.ChapterEnded:
-                        return CommitScene(ctx, history, SceneRunOutcome.ChapterEnded);
+                        return CommitScene(scene, history, SceneRunOutcome.ChapterEnded);
 
                     default:
                         throw new ArgumentOutOfRangeException(
@@ -145,23 +145,23 @@ public sealed class SceneRunner
         }
         catch (OperationCanceledException)
         {
-            ctx.SetPhase(SceneRunPhase.Cancelled);
+            scene.SetPhase(SceneRunPhase.Cancelled);
             throw;
         }
         catch
         {
-            ctx.SetPhase(SceneRunPhase.Faulted);
+            scene.SetPhase(SceneRunPhase.Faulted);
             throw;
         }
     }
 
     // 현재 Scene transaction에 rollback replay를 요청한다.
     //
-    // Replay 상태는 SceneRunContext가 소유한다.
+    // Replay 상태는 SceneTransaction이 소유한다.
     // Playback은 이유를 모르고 현재 재생을 중단할 뿐이다.
-    public async Task RequestReplayAsync(SceneRunContext ctx)
+    public async Task RequestReplayAsync(SceneTransaction scene)
     {
-        if (!ctx.RequestReplay())
+        if (!scene.RequestReplay())
             return;
 
         // Node 재생 중이면 playback을 중단한다.
@@ -183,10 +183,10 @@ public sealed class SceneRunner
     }
 
     private async Task EnterSceneAsync(
-        SceneRunContext ctx,
+        SceneTransaction scene,
         CancellationToken cancellationToken)
     {
-        ctx.SetPhase(SceneRunPhase.SceneEntering);
+        scene.SetPhase(SceneRunPhase.SceneEntering);
 
         await _playback.BeginSceneAsync();
 
@@ -194,42 +194,42 @@ public sealed class SceneRunner
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        ctx.SetPhase(SceneRunPhase.SceneEntered);
+        scene.SetPhase(SceneRunPhase.SceneEntered);
 
         _reporter.ReportSceneEntered(
             new SceneEntryReport(
-                ctx.Chapter.ChapterId,
-                ctx.EntryState,
+                scene.Chapter.ChapterId,
+                scene.EntryState,
                 _captureVariables(),
                 _backlog.NextSerial));
 
-        ctx.SetPhase(SceneRunPhase.EntryReported);
+        scene.SetPhase(SceneRunPhase.EntryReported);
     }
 
     private async Task<SceneStepResult> RunEpisodeStepAsync(
-        SceneRunContext ctx,
+        SceneTransaction scene,
         ScenePendingHistory history,
         CancellationToken cancellationToken)
     {
-        EpisodeNode episode = ctx.CurrentEpisode;
+        EpisodeNode episode = scene.CurrentEpisode;
 
         // Phase: EpisodePlaying -> EpisodeCompleted
-        ctx.SetPhase(SceneRunPhase.EpisodePlaying);
+        scene.SetPhase(SceneRunPhase.EpisodePlaying);
 
         await PlayNodeAsync(
             episode.DialogueEntryId,
             "대사",
             cancellationToken);
 
-        if (ctx.ReplayRequested)
+        if (scene.ReplayPending)
             return SceneStepResult.Replay();
 
         history.NoteWatched(episode, _rollbackHistory.LastHistoryIndex);
 
-        ctx.SetPhase(SceneRunPhase.EpisodeCompleted);
+        scene.SetPhase(SceneRunPhase.EpisodeCompleted);
 
         // Phase: ChoiceResolving
-        ctx.SetPhase(SceneRunPhase.ChoiceResolving);
+        scene.SetPhase(SceneRunPhase.ChoiceResolving);
 
         SceneChoiceResolution resolution;
 
@@ -259,7 +259,7 @@ public sealed class SceneRunner
 
             resolution =
                 await ResolveNextChoiceAsync(
-                    ctx,
+                    scene,
                     history,
                     episode,
                     cancellationToken);
@@ -267,7 +267,7 @@ public sealed class SceneRunner
 
         // 선택을 구한 직후 Replay가 들어왔을 수도 있다.
         // 이 경우 선택을 pending에 기록하거나 Chapter를 끝내지 않는다.
-        if (ctx.ReplayRequested
+        if (scene.ReplayPending
             || resolution.Kind == SceneChoiceResolutionKind.ReplayRequested)
         {
             return SceneStepResult.Replay();
@@ -283,27 +283,27 @@ public sealed class SceneRunner
         if (choice.Source != SceneChoiceSource.Recorded)
             history.RecordChoice(choice, _rollbackHistory.LastHistoryIndex);
 
-        ctx.SetPhase(SceneRunPhase.ChoiceResolved);
+        scene.SetPhase(SceneRunPhase.ChoiceResolved);
 
         // Phase: ViaPlaying
         if (choice.Option.HasVia)
         {
-            ctx.SetPhase(SceneRunPhase.ViaPlaying);
+            scene.SetPhase(SceneRunPhase.ViaPlaying);
 
             await PlayNodeAsync(
                 choice.Option.ViaNodeId,
                 "연출",
                 cancellationToken);
 
-            if (ctx.ReplayRequested)
+            if (scene.ReplayPending)
                 return SceneStepResult.Replay();
         }
 
         // Phase: TargetMoved
-        ctx.MoveTo(choice.Option.TargetEpisodeId);
-        ctx.SetPhase(SceneRunPhase.TargetMoved);
+        scene.MoveTo(choice.Option.TargetEpisodeId);
+        scene.SetPhase(SceneRunPhase.TargetMoved);
 
-        if (!ctx.Chapter.IsSameScene(choice.FromEpisodeId, ctx.CurrentEpisodeId))
+        if (!scene.Chapter.IsSameScene(choice.FromEpisodeId, scene.CurrentEpisodeId))
             return SceneStepResult.SceneEnded();
 
         return SceneStepResult.Continue();
@@ -322,21 +322,21 @@ public sealed class SceneRunner
     }
 
     private async Task<SceneChoiceResolution> ResolveNextChoiceAsync(
-        SceneRunContext ctx,
+        SceneTransaction scene,
         ScenePendingHistory history,
         EpisodeNode episode,
         CancellationToken cancellationToken)
     {
-        if (ctx.ReplayRequested)
+        if (scene.ReplayPending)
             return SceneChoiceResolution.ReplayRequested();
 
         ProgressionState working =
-            ctx.EntryState.FoldChoices(ctx.Chapter, history.PendingOptions());
+            scene.EntryState.FoldChoices(scene.Chapter, history.PendingOptions());
 
         ChapterAdvance advance =
-            ChapterTransition.Resolve(ctx.Chapter, working);
+            ChapterTransition.Resolve(scene.Chapter, working);
 
-        if (ctx.ReplayRequested)
+        if (scene.ReplayPending)
             return SceneChoiceResolution.ReplayRequested();
 
         if (advance.Kind == ChapterAdvanceKind.ChapterEnded)
@@ -356,7 +356,7 @@ public sealed class SceneRunner
                     SceneChoiceSource.AutoAdvance));
         }
 
-        if (ctx.ReplayRequested)
+        if (scene.ReplayPending)
             return SceneChoiceResolution.ReplayRequested();
 
         // 선택지 도중 Replay 요청 시, 기다리는 걸 그만두고 Replay 진행.
@@ -365,7 +365,7 @@ public sealed class SceneRunner
             ResolvedOption resolved =
                 await PickAsync(advance, cancellationToken);
 
-            if (ctx.ReplayRequested)
+            if (scene.ReplayPending)
                 return SceneChoiceResolution.ReplayRequested();
 
             return SceneChoiceResolution.FromChoice(
@@ -377,7 +377,7 @@ public sealed class SceneRunner
         }
         catch (OperationCanceledException)
             when (!cancellationToken.IsCancellationRequested
-                  && ctx.ReplayRequested)
+                  && scene.ReplayPending)
         {
             return SceneChoiceResolution.ReplayRequested();
         }
@@ -415,11 +415,11 @@ public sealed class SceneRunner
     }
 
     private async Task RestartReplayAsync(
-        SceneRunContext ctx,
+        SceneTransaction scene,
         ScenePendingHistory history,
         CancellationToken cancellationToken)
     {
-        ctx.SetPhase(SceneRunPhase.Replaying);
+        scene.SetPhase(SceneRunPhase.Replaying);
 
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -433,7 +433,7 @@ public sealed class SceneRunner
             history.RewindAfter(target.historyIndex);
 
         history.RestartReplay();
-        ctx.RestartFromRoot();
+        scene.RestartFromRoot();
 
         Debug.Log(
             $"[장면] 리플레이 — 루트부터. " +
@@ -441,10 +441,10 @@ public sealed class SceneRunner
     }
 
     private void ApplyLoadPlan(
-        SceneRunContext ctx,
+        SceneTransaction scene,
         ScenePendingHistory history)
     {
-        SavedLoadPlan plan = ctx.LoadPlan;
+        SavedLoadPlan plan = scene.LoadPlan;
 
         if (plan == null)
             return;
@@ -455,14 +455,14 @@ public sealed class SceneRunner
             return;
         }
 
-        string cursor = ctx.RootEpisodeId;
+        string cursor = scene.RootEpisodeId;
 
         for (int i = 0; i < plan.Path.Count; i++)
         {
             SavedChoice step = plan.Path[i];
 
             if (!TryResolveSavedChoice(
-                    ctx.Chapter,
+                    scene.Chapter,
                     cursor,
                     step,
                     out EpisodeOption option))
@@ -490,7 +490,7 @@ public sealed class SceneRunner
             plan.Target.Occurrence);
 
         Debug.Log(
-            $"[장면] 로드 — 루트 {ctx.RootEpisodeId}에서 " +
+            $"[장면] 로드 — 루트 {scene.RootEpisodeId}에서 " +
             $"{plan.Target.NodeName}/{plan.Target.LineId}#{plan.Target.Occurrence}까지. " +
             $"경로 {history.RecordedChoiceCount}개, " +
             $"Yarn 선택 {plan.YarnChoices.Count}개");
@@ -519,14 +519,14 @@ public sealed class SceneRunner
     }
 
     private SceneRunResult CommitScene(
-        SceneRunContext ctx,
+        SceneTransaction scene,
         ScenePendingHistory history,
         SceneRunOutcome outcome)
     {
-        ctx.SetPhase(SceneRunPhase.SceneCommitting);
+        scene.SetPhase(SceneRunPhase.SceneCommitting);
 
         ProgressionState state =
-            history.FoldInto(ctx.Chapter, ctx.EntryState);
+            history.FoldInto(scene.Chapter, scene.EntryState);
 
         List<CommittedChoice> choices =
             history.CreateCommittedChoices();
@@ -543,7 +543,7 @@ public sealed class SceneRunner
 
         _reporter.ReportSceneCommitted(
             new SceneCommitReport(
-                ctx.Chapter.ChapterId,
+                scene.Chapter.ChapterId,
                 choices,
                 _choiceHistory.CreateChoiceSnapshot(),
                 watched,
@@ -553,7 +553,7 @@ public sealed class SceneRunner
                 _backlog.NextSerial,
                 outcome == SceneRunOutcome.ChapterEnded));
 
-        ctx.SetPhase(SceneRunPhase.Completed);
+        scene.SetPhase(SceneRunPhase.Completed);
 
         return new SceneRunResult(outcome, state);
     }

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Ked.Progression;
 
-public sealed class SceneRunContext
+public sealed class SceneTransaction
 {
     public ChapterProgression Chapter { get; }
     public ProgressionState EntryState { get; }
@@ -13,7 +13,7 @@ public sealed class SceneRunContext
 
     public SceneRunPhase Phase { get; private set; } = SceneRunPhase.None;
 
-    public bool ReplayRequested { get; private set; }
+    public bool ReplayPending { get; private set; }
 
     public EpisodeNode RootEpisode => GetEpisode(RootEpisodeId);
     public EpisodeNode CurrentEpisode => GetEpisode(CurrentEpisodeId);
@@ -23,7 +23,7 @@ public sealed class SceneRunContext
 
     internal ScenePendingHistory History { get; } = new();
 
-    public SceneRunContext(
+    public SceneTransaction(
         ChapterProgression chapter,
         ProgressionState entryState,
         SavedLoadPlan loadPlan = null)
@@ -49,17 +49,17 @@ public sealed class SceneRunContext
 
     internal bool RequestReplay()
     {
-        if (ReplayRequested)
+        if (ReplayPending)
             return false;
 
-        ReplayRequested = true;
+        ReplayPending = true;
         return true;
     }
 
     internal void RestartFromRoot()
     {
         CurrentEpisodeId = RootEpisodeId;
-        ReplayRequested = false;
+        ReplayPending = false;
     }
 
     private EpisodeNode GetEpisode(string episodeId)
