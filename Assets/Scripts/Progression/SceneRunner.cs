@@ -110,29 +110,9 @@ public sealed class SceneRunner
 
         try
         {
-            // Phase: SceneEntering -> EntryReported
-            ctx.SetPhase(SceneRunPhase.SceneEntering);
+            await EnterSceneAsync(ctx, cancellationToken);
 
-            await _playback.BeginSceneAsync();
-
-            _backlog.MarkSceneStart();
-
-            cancellationToken.ThrowIfCancellationRequested();
-
-            ctx.SetPhase(SceneRunPhase.SceneEntered);
-
-            _reporter.ReportSceneEntered(
-                new SceneEntryReport(
-                    ctx.Chapter.ChapterId,
-                    ctx.EntryState,
-                    _captureVariables(),
-                    _backlog.NextSerial));
-
-            ctx.SetPhase(SceneRunPhase.EntryReported);
-
-            // Phase: LoadPlanApplied
             ApplyLoadPlan(ctx, history);
-
             ctx.SetPhase(SceneRunPhase.LoadPlanApplied);
 
             while (true)
@@ -200,6 +180,30 @@ public sealed class SceneRunner
         _options.Cancel();
 
         await _playback.StopAsync();
+    }
+
+    private async Task EnterSceneAsync(
+        SceneRunContext ctx,
+        CancellationToken cancellationToken)
+    {
+        ctx.SetPhase(SceneRunPhase.SceneEntering);
+
+        await _playback.BeginSceneAsync();
+
+        _backlog.MarkSceneStart();
+
+        cancellationToken.ThrowIfCancellationRequested();
+
+        ctx.SetPhase(SceneRunPhase.SceneEntered);
+
+        _reporter.ReportSceneEntered(
+            new SceneEntryReport(
+                ctx.Chapter.ChapterId,
+                ctx.EntryState,
+                _captureVariables(),
+                _backlog.NextSerial));
+
+        ctx.SetPhase(SceneRunPhase.EntryReported);
     }
 
     private async Task<SceneStepResult> RunEpisodeStepAsync(
