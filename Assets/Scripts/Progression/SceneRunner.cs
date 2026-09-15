@@ -41,6 +41,36 @@ using UnityEngine;
 
 public sealed class SceneRunner
 {
+    private enum SceneStepKind
+    {
+        Continue,
+        Replay,
+        SceneEnded,
+        ChapterEnded,
+    }
+
+    private readonly struct SceneStepResult
+    {
+        public SceneStepKind Kind { get; }
+
+        private SceneStepResult(SceneStepKind kind)
+        {
+            Kind = kind;
+        }
+
+        public static SceneStepResult Continue() =>
+            new(SceneStepKind.Continue);
+
+        public static SceneStepResult Replay() =>
+            new(SceneStepKind.Replay);
+
+        public static SceneStepResult SceneEnded() =>
+            new(SceneStepKind.SceneEnded);
+
+        public static SceneStepResult ChapterEnded() =>
+            new(SceneStepKind.ChapterEnded);
+    }
+
     private readonly ScenePlaybackSession _playback;
     private readonly IChapterOptionsView _options;
     private readonly VNLinePresentationState _seek;
@@ -107,107 +137,29 @@ public sealed class SceneRunner
 
             while (true)
             {
-                EpisodeNode episode = ctx.CurrentEpisode;
+                SceneStepResult step =
+                    await RunEpisodeStepAsync(ctx, history, cancellationToken);
 
-                // Phase: EpisodePlaying -> EpisodeCompleted
-                ctx.SetPhase(SceneRunPhase.EpisodePlaying);
-
-                await PlayNodeAsync(
-                    episode.DialogueEntryId,
-                    "대사",
-                    cancellationToken);
-
-                if (ctx.ReplayRequested)
+                switch (step.Kind)
                 {
-                    await RestartReplayAsync(
-                        ctx,
-                        history,
-                        cancellationToken);
+                    case SceneStepKind.Continue:
+                        continue;
 
-                    continue;
-                }
-
-                history.NoteWatched(episode, _rollbackHistory.LastHistoryIndex);
-
-                ctx.SetPhase(SceneRunPhase.EpisodeCompleted);
-
-                // Phase: ChoiceResolving
-                ctx.SetPhase(SceneRunPhase.ChoiceResolving);
-
-                SceneChoiceResolution resolution;
-
-                // Load / Replay 중 기존 progression 경로가 있으면 자동 응답한다.
-                if (history.HasRecordedChoice && _seek.IsSeekingActive)
-                {
-                    SceneChoice recorded = history.TakeRecordedChoice(_rollbackHistory.LastHistoryIndex);
-
-                    resolution =
-                        SceneChoiceResolution.FromChoice(recorded);
-                }
-                else
-                {
-                    // Seek 표적에 도착한 뒤 남아 있는 과거 선택은 버린다.
-                    if (history.HasRecordedChoice)
-                        history.DiscardUnconsumedChoices();
-
-                    // 기록을 모두 소비했는데 Seek가 남아 있다면
-                    // 표적을 찾지 못한 것이다.
-                    if (_seek.IsSeekingActive)
-                    {
-                        Debug.LogWarning("[장면] 시크 표적을 못 찾은 채 선택지에 닿았다 -시크를 끄고 일반 재생으로.");
-                        _seek.ClearSeek();
-                    }
-
-                    resolution =
-                        await ResolveNextChoiceAsync(ctx, history, episode, cancellationToken);
-                }
-
-                // 선택을 구한 직후 Replay가 들어왔을 수도 있다.
-                // 이 경우 선택을 pending에 기록하거나 Chapter를 끝내지 않는다.
-                if (ctx.ReplayRequested
-                    || resolution.Kind == SceneChoiceResolutionKind.ReplayRequested)
-                {
-                    await RestartReplayAsync(ctx, history, cancellationToken);
-
-                    continue;
-                }
-
-                if (resolution.Kind == SceneChoiceResolutionKind.ChapterEnded)
-                {
-                    return CommitScene(ctx, history, SceneRunOutcome.ChapterEnded);
-                }
-
-                SceneChoice choice = resolution.Choice;
-
-                // Recorded 선택은 이미 history에 있다.
-                // 새 선택은 Via 전에 기록해야 Via 안 rollback으로 되돌릴 수 있다.
-                if (choice.Source != SceneChoiceSource.Recorded)
-                    history.RecordChoice(choice, _rollbackHistory.LastHistoryIndex);
-
-                ctx.SetPhase(SceneRunPhase.ChoiceResolved);
-
-                // Phase: ViaPlaying
-                if (choice.Option.HasVia)
-                {
-                    ctx.SetPhase(SceneRunPhase.ViaPlaying);
-
-                    await PlayNodeAsync(choice.Option.ViaNodeId, "연출", cancellationToken);
-
-                    if (ctx.ReplayRequested)
-                    {
+                    case SceneStepKind.Replay:
                         await RestartReplayAsync(ctx, history, cancellationToken);
                         continue;
-                    }
-                }
 
-                // Phase: TargetMoved
-                ctx.MoveTo(choice.Option.TargetEpisodeId);
+                    case SceneStepKind.SceneEnded:
+                        return CommitScene(ctx, history, SceneRunOutcome.SceneEnded);
 
-                ctx.SetPhase(SceneRunPhase.TargetMoved);
+                    case SceneStepKind.ChapterEnded:
+                        return CommitScene(ctx, history, SceneRunOutcome.ChapterEnded);
 
-                if (!ctx.Chapter.IsSameScene(choice.FromEpisodeId, ctx.CurrentEpisodeId))
-                {
-                    return CommitScene(ctx, history, SceneRunOutcome.SceneEnded);
+                    default:
+                        throw new ArgumentOutOfRangeException(
+                            nameof(step.Kind),
+                            step.Kind,
+                            "알 수 없는 장면 실행 결과다.");
                 }
             }
         }
@@ -248,6 +200,109 @@ public sealed class SceneRunner
         _options.Cancel();
 
         await _playback.StopAsync();
+    }
+
+    private async Task<SceneStepResult> RunEpisodeStepAsync(
+        SceneRunContext ctx,
+        ScenePendingHistory history,
+        CancellationToken cancellationToken)
+    {
+        EpisodeNode episode = ctx.CurrentEpisode;
+
+        // Phase: EpisodePlaying -> EpisodeCompleted
+        ctx.SetPhase(SceneRunPhase.EpisodePlaying);
+
+        await PlayNodeAsync(
+            episode.DialogueEntryId,
+            "대사",
+            cancellationToken);
+
+        if (ctx.ReplayRequested)
+            return SceneStepResult.Replay();
+
+        history.NoteWatched(episode, _rollbackHistory.LastHistoryIndex);
+
+        ctx.SetPhase(SceneRunPhase.EpisodeCompleted);
+
+        // Phase: ChoiceResolving
+        ctx.SetPhase(SceneRunPhase.ChoiceResolving);
+
+        SceneChoiceResolution resolution;
+
+        // Load / Replay 중 기존 progression 경로가 있으면 자동 응답한다.
+        if (history.HasRecordedChoice && _seek.IsSeekingActive)
+        {
+            SceneChoice recorded =
+                history.TakeRecordedChoice(_rollbackHistory.LastHistoryIndex);
+
+            resolution = SceneChoiceResolution.FromChoice(recorded);
+        }
+        else
+        {
+            // Seek 표적에 도착한 뒤 남아 있는 과거 선택은 버린다.
+            if (history.HasRecordedChoice)
+                history.DiscardUnconsumedChoices();
+
+            // 기록을 모두 소비했는데 Seek가 남아 있다면
+            // 표적을 찾지 못한 것이다.
+            if (_seek.IsSeekingActive)
+            {
+                Debug.LogWarning(
+                    "[장면] 시크 표적을 못 찾은 채 선택지에 닿았다 -시크를 끄고 일반 재생으로.");
+
+                _seek.ClearSeek();
+            }
+
+            resolution =
+                await ResolveNextChoiceAsync(
+                    ctx,
+                    history,
+                    episode,
+                    cancellationToken);
+        }
+
+        // 선택을 구한 직후 Replay가 들어왔을 수도 있다.
+        // 이 경우 선택을 pending에 기록하거나 Chapter를 끝내지 않는다.
+        if (ctx.ReplayRequested
+            || resolution.Kind == SceneChoiceResolutionKind.ReplayRequested)
+        {
+            return SceneStepResult.Replay();
+        }
+
+        if (resolution.Kind == SceneChoiceResolutionKind.ChapterEnded)
+            return SceneStepResult.ChapterEnded();
+
+        SceneChoice choice = resolution.Choice;
+
+        // Recorded 선택은 이미 history에 있다.
+        // 새 선택은 Via 전에 기록해야 Via 안 rollback으로 되돌릴 수 있다.
+        if (choice.Source != SceneChoiceSource.Recorded)
+            history.RecordChoice(choice, _rollbackHistory.LastHistoryIndex);
+
+        ctx.SetPhase(SceneRunPhase.ChoiceResolved);
+
+        // Phase: ViaPlaying
+        if (choice.Option.HasVia)
+        {
+            ctx.SetPhase(SceneRunPhase.ViaPlaying);
+
+            await PlayNodeAsync(
+                choice.Option.ViaNodeId,
+                "연출",
+                cancellationToken);
+
+            if (ctx.ReplayRequested)
+                return SceneStepResult.Replay();
+        }
+
+        // Phase: TargetMoved
+        ctx.MoveTo(choice.Option.TargetEpisodeId);
+        ctx.SetPhase(SceneRunPhase.TargetMoved);
+
+        if (!ctx.Chapter.IsSameScene(choice.FromEpisodeId, ctx.CurrentEpisodeId))
+            return SceneStepResult.SceneEnded();
+
+        return SceneStepResult.Continue();
     }
 
     private async Task PlayNodeAsync(
