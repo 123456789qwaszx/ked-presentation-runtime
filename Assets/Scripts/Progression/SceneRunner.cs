@@ -49,28 +49,6 @@ public sealed class SceneRunner
         ChapterEnded,
     }
 
-    private readonly struct SceneStepResult
-    {
-        public SceneStepKind Kind { get; }
-
-        private SceneStepResult(SceneStepKind kind)
-        {
-            Kind = kind;
-        }
-
-        public static SceneStepResult Continue() =>
-            new(SceneStepKind.Continue);
-
-        public static SceneStepResult Replay() =>
-            new(SceneStepKind.Replay);
-
-        public static SceneStepResult SceneEnded() =>
-            new(SceneStepKind.SceneEnded);
-
-        public static SceneStepResult ChapterEnded() =>
-            new(SceneStepKind.ChapterEnded);
-    }
-
     private readonly ScenePlaybackSession _playback;
     private readonly IChapterOptionsView _options;
     private readonly VNLinePresentationState _seek;
@@ -117,10 +95,10 @@ public sealed class SceneRunner
 
             while (true)
             {
-                SceneStepResult step =
+                SceneStepKind step =
                     await RunEpisodeStepAsync(scene, history, cancellationToken);
 
-                switch (step.Kind)
+                switch (step)
                 {
                     case SceneStepKind.Continue:
                         continue;
@@ -137,8 +115,8 @@ public sealed class SceneRunner
 
                     default:
                         throw new ArgumentOutOfRangeException(
-                            nameof(step.Kind),
-                            step.Kind,
+                            nameof(step),
+                            step,
                             "알 수 없는 장면 실행 결과다.");
                 }
             }
@@ -206,7 +184,7 @@ public sealed class SceneRunner
         scene.SetPhase(SceneRunPhase.EntryReported);
     }
 
-    private async Task<SceneStepResult> RunEpisodeStepAsync(
+    private async Task<SceneStepKind> RunEpisodeStepAsync(
         SceneTransaction scene,
         ScenePendingHistory history,
         CancellationToken cancellationToken)
@@ -222,7 +200,7 @@ public sealed class SceneRunner
             cancellationToken);
 
         if (scene.ReplayPending)
-            return SceneStepResult.Replay();
+            return SceneStepKind.Replay;
 
         history.NoteWatched(episode, _rollbackHistory.LastHistoryIndex);
 
@@ -270,11 +248,11 @@ public sealed class SceneRunner
         if (scene.ReplayPending
             || resolution.Kind == SceneChoiceResolutionKind.ReplayRequested)
         {
-            return SceneStepResult.Replay();
+            return SceneStepKind.Replay;
         }
 
         if (resolution.Kind == SceneChoiceResolutionKind.ChapterEnded)
-            return SceneStepResult.ChapterEnded();
+            return SceneStepKind.ChapterEnded;
 
         SceneChoice choice = resolution.Choice;
 
@@ -296,7 +274,7 @@ public sealed class SceneRunner
                 cancellationToken);
 
             if (scene.ReplayPending)
-                return SceneStepResult.Replay();
+                return SceneStepKind.Replay;
         }
 
         // Phase: TargetMoved
@@ -304,9 +282,9 @@ public sealed class SceneRunner
         scene.SetPhase(SceneRunPhase.TargetMoved);
 
         if (!scene.Chapter.IsSameScene(choice.FromEpisodeId, scene.CurrentEpisodeId))
-            return SceneStepResult.SceneEnded();
+            return SceneStepKind.SceneEnded;
 
-        return SceneStepResult.Continue();
+        return SceneStepKind.Continue;
     }
 
     private async Task PlayNodeAsync(
