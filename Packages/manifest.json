@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "com.ked.progression-runtime": "https://github.com/123456789qwaszx/ked-progression-runtime.git?path=/Assets/Progression/Runtime#f26d973058700e1213933525e4f5d940f7a081e6",
     "com.unity.ai.navigation": "2.0.12",
     "com.unity.collab-proxy": "2.12.4",
     "com.unity.ide.rider": "3.0.40",
