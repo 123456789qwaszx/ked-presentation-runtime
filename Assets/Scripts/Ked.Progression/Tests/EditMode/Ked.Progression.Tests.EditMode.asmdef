@@ -1,5 +1,5 @@
 {
-    "name": "Ked.Progression.Tests",
+    "name": "Ked.Progression.Tests.EditMode",
     "rootNamespace": "",
     "references": [
         "Ked.Progression",

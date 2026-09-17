@@ -78,6 +78,7 @@
 | **✅ 돌아왔다** | 새 주인이 실제로 섰다 — `ked-progression-runtime`(형제 저장소). 판정 규칙(Core)뿐 아니라 **실행 순서(Runtime)까지** 그쪽이 소유하고, 그 `Assets/Progression/Runtime/`이 `Assets/Scripts/Ked.Progression/`으로 **복사 반입**돼 있다([vendoring.md](Assets/Scripts/Ked.Progression/Documentation~/vendoring.md)). 진행은 더 이상 "빠진 것"이 아니다 |
 | **이 저장소에 남은 몫** | **Host 구현뿐이다.** 진행 층은 `IScenePlayback` · `IChapterOptionsView` · `ISceneReplayState` · `IRollbackHistory` · `ISceneBacklog` · `IChapterLifecycle` · `IScenePersistence` · `IProgressionReporter` · `IProgressionLog` 아홉 계약으로만 바깥에 닿고, 그것을 Yarn/Stage/Save로 잇는 자리가 `Assets/Scripts/ProgressionHost/`다.<br>⚠ 이전 판의 `Assets/Scripts/Progression/ProgressionDriver.cs`는 **없다.** 실행 순서는 반입본 안의 `Ked.Progression/ProgressionDriver.cs`가 쥔다 |
 | **자동 검증** | `dotnet test tests/ProgressionCore/ProgressionCore.csproj` — 반입본은 `noEngineReferences: true`인 순수 C#이라 유니티 없이 돈다. `.github/workflows/progression-core.yml`이 게이트다 |
+| **함께 나간 것 — 도달성 증명** | `Reachability/`(5파일)를 반입본에서 걷었다(2026-09-17). **도달성은 저작 시각의 판정**이고 실행 중에 증명할 일이 없다 — 이 저장소에서 부르는 곳이 0건이었다.<br>새 주인은 **저작 도구의 `ChapterReachabilityProver`** 하나다. 그동안은 두 구현이 서로를 검증했으나(`ked-progression`의 `ReachabilityEquivalenceTests` + `reachability-oracle.json` 코퍼스), 그 저장소가 은퇴하면서 함께 닫혔다.<br>⚠ **잃은 것을 적어 둔다**: 저작 도구의 증명기가 **두 번째 증인을 잃었다.** 이제 그쪽 프루버를 고쳐도 여기서 울지 않는다 — 대신 두 구현이 조용히 갈릴 위험도 함께 사라졌다 |
 
 ### 3.4 플레이어 스탯 — 카탈로그만
 

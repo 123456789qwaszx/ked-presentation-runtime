@@ -45,7 +45,7 @@ diff -r --strip-trailing-cr \
   Assets/Scripts/Ked.Progression
 ```
 
-`Reachability/`(사본에만 있음)와 `Tests/`(양쪽 구성이 다름)는 차이로 나온다. 그 둘은 아래를 본다.
+`Tests/`(양쪽 구성이 다름)는 차이로 나온다. 그것은 아래를 본다.
 
 원본 → 사본으로 다시 받는다:
 
@@ -89,8 +89,8 @@ dotnet test tests/ProgressionCore/ProgressionCore.csproj
 | `Debug/` (원본의 Progression Debug Host) | 원본의 uGUI 프레임워크(`UIManager`·`UIBase`·`UIRoot`)가 이 저장소의 동명 타입과 충돌한다. 통로 검증은 여기서 실제 Presentation으로 한다 |
 | `Tests/PlayMode/` | `UnityEngine.TestTools`에 매인 smoke 1건. 여기서는 어셈블리 이름만 확인하는 내용이라 뜻이 없다 |
 
-`Reachability/`는 **사본에만 있다.** 런타임 참조가 0건이고 저작 도구의 도달성 증명 쪽 자산이다.
-원본으로 옮길지 버릴지는 아직 정하지 않았다.
+`Reachability/`는 **2026-09-17에 걷었다.** 도달성 증명의 주인은 저작 도구 하나다 — 이유는
+[SCOPE-BOUNDARY.md](../../../../SCOPE-BOUNDARY.md) §3.3에 있다.
 
 ## `.meta` GUID — 항상 갈려 보이는 네 개
 

@@ -469,6 +469,10 @@ public class VNAppBootstrap : MonoBehaviour
             _backlogRecorder,
             chapterLifecycle,
             replayState);
+
+        // 대사가 스탯을 읽는 길. 드라이버가 선 뒤에 등록해야 람다가 null을 잡지 않는다.
+        new ProgressionStatFunction(() => _progressionDriver.CurrentState)
+            .Register(dialogueRunner);
     }
 
     // 모든 실행 모드에서 로컬 저장을 기본으로 사용한다.

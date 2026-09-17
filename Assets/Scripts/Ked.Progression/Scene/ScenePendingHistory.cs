@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Ked.Progression
 {
-    public sealed class ScenePendingHistory
+    internal sealed class ScenePendingHistory
     {
         private sealed class ProgressionPick
         {

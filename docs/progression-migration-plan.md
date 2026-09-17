@@ -320,10 +320,25 @@ Host     ked-presentation-runtime       Yarn / Stage / UI / Save
 남은 숙제 하나: `ked-progression`의 dotnet 테스트 자산(`Tests/` 15파일)을 Source로 옮길지 버릴지.
 Source의 EditMode 테스트와 겹치는 범위가 있으므로 M0에서 실제 커버리지를 본 뒤 정한다.
 
+## 4.2 ✔ Reachability — 저작 도구에 위임, 반입본에서 걷었다 (2026-09-17 결정·완료)
+
+도달성 증명의 주인은 저작 도구의 `ChapterReachabilityProver` 하나다. 반입본의 `Reachability/`(5파일)를
+삭제했다 — 이 저장소 참조 0건이었고, 원본(`ked-progression-runtime`)에는 애초에 들어오지도 않았다.
+
+이 결정이 작업 지시서(`one-stat-layer-orders.md`) §D를 **답이 아니라 소멸로 닫는다.** 상태 벡터 축소를
+합의할 상대가 없어졌고, `reachability-oracle.json` 코퍼스 재생성 시점도 물을 필요가 없다.
+저작 쪽은 프루버를 자유롭게 고칠 수 있다.
+
+⚠ 잃은 것은 **두 번째 증인**이다. 이유와 함께 `SCOPE-BOUNDARY.md` §3.3에 적었다.
+
+<details><summary>결정 전에 적어 둔 검토 (보존)</summary>
+
 ## 4.2 Reachability를 어디 둘 것인가
 
 런타임 사용처 0건. 원본이 Source로 정해졌으므로 그쪽으로 옮기되 **Unity 반입본에는 넣지 않는** 선택이 가능하다.
 지금 사본에는 들어와 있으므로, 이관 시 유지/제거를 명시적으로 정한다. 권장: **반입본에서 뺀다**(툴 전용).
+
+</details>
 
 ## 4.3 `ChapterCompleted`를 어떻게 얻을 것인가 — 계약이 직접 준다 (결정됨)
 
