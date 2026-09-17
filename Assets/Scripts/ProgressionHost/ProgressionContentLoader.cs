@@ -49,10 +49,10 @@ public static class ProgressionContentLoader
             return null;
         }
 
-        Debug.Log(
-            $"[진행] 실었다 — {result.Scenario.ScenarioId} " +
-            $"(에피소드 {result.Scenario.StartChapter.Nodes.Count}, " +
-            $"스탯 {result.Scenario.StartChapter.Stats.Count})");
+        // Debug.Log(
+        //     $"[진행] 실었다 — {result.Scenario.ScenarioId} " +
+        //     $"(에피소드 {result.Scenario.StartChapter.Nodes.Count}, " +
+        //     $"스탯 {result.Scenario.StartChapter.Stats.Count})");
 
         return result.Scenario;
     }

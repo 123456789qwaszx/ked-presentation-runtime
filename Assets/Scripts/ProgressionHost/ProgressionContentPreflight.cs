@@ -48,7 +48,7 @@ public static class ProgressionContentPreflight
 
         if (report.IsClear)
         {
-            Debug.Log("[진행] 사전 대조 통과 - 부르는 노드가 전부 YarnProject에 있다.");
+            //Debug.Log("[진행] 사전 대조 통과 - 부르는 노드가 전부 YarnProject에 있다.");
             return true;
         }
 

@@ -32,7 +32,10 @@ public sealed class PresentationScopeSession : ICommandRunScopeProvider
 
     public void Start()
     {
-        _sessionScope = new CommandRunScope(_context, _linePresentationAdvanceState, _stage);
+        _sessionScope = new CommandRunScope(
+            _context,
+            _linePresentationAdvanceState,
+            _stage);
 
         _context.ResetSessionFlagsForStart();
     }

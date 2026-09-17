@@ -1,11 +1,8 @@
 using System.Threading.Tasks;
 using Ked.Progression;
 
-// 한 Scene 동안 Yarn / Presentation playback의 수명을 관리한다.
-//
-// SceneRunner는 어디로 진행할지를 결정하고,
-// 이 클래스는 현재 Yarn node의 실행 / 중단 / 복원을 책임진다.
-public sealed class ScenePlaybackSession : IScenePlayback
+// 실제 게임에서 Scene 실행에 필요한 Yarn / Presentation 수명을 관리.
+public sealed class ScenePresentation : IScenePresentation
 {
     private readonly IEpisodeNodeRunner _nodeRunner;
     private readonly VNScreenBindings _vnScreenBindings;
@@ -17,7 +14,7 @@ public sealed class ScenePlaybackSession : IScenePlayback
     private readonly ChoiceHistory _choiceHistory;
     private readonly EpisodeSkipController _episodeSkipController;
 
-    public ScenePlaybackSession(
+    public ScenePresentation(
         IEpisodeNodeRunner nodeRunner,
         VNScreenBindings vnScreenBindings,
         RollbackHistory rollbackHistory,
@@ -39,43 +36,41 @@ public sealed class ScenePlaybackSession : IScenePlayback
         _episodeSkipController = episodeSkipController;
     }
 
-    public Task BeginSceneAsync()
+    public void BeginScene()
     {
         _choiceHistory.ClearChoiceRecords();
 
         _vnScreenBindings.GoToPresentationView();
         _presentationStage.Clear();
         _presentationScope.Start();
-
-        return Task.CompletedTask;
     }
-
-    public async Task PlayNodeAsync(string nodeName)
+    
+    public async Task PlayEpisodeAsync(string nodeName)
     {
         try
         {
-            await _nodeRunner.StartAsync(nodeName);
+            await _nodeRunner.RunNodeAsync(nodeName);
         }
         finally
         {
             // 현재 Yarn node의 수명이 끝났으므로
             // one-shot Episode Skip도 여기서 끝난다.
-            _episodeSkipController.CompleteEpisode();
+            _episodeSkipController.Reset();
         }
     }
-
-    public Task PrepareReplayAsync()
+    
+    public void PrepareReplay()
     {
         _vnScreenBindings.GoToPresentationView();
+        
         _presentationStage.Clear();
+        
         _presentationScope.Start();
-
-        return Task.CompletedTask;
     }
 
     public async Task StopAsync()
     {
-        _episodeSkipController.Cancel();
+        _episodeSkipController.Reset();
 
         if (_nodeRunner.IsRunning)
             await _nodeRunner.StopAsync();

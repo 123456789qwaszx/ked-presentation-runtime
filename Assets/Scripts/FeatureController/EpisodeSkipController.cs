@@ -13,8 +13,7 @@ public sealed class EpisodeSkipController
 
     public bool IsActive { get; private set; }
 
-    public void Initialize(
-        DialogueAdvanceDispatcher dispatcher)
+    public void Initialize(DialogueAdvanceDispatcher dispatcher)
     {
         _dispatcher = dispatcher;
     }
@@ -24,12 +23,9 @@ public sealed class EpisodeSkipController
         if (IsActive)
             return true;
 
-        if (_dispatcher == null ||
-            !_dispatcher.IsDialogueRunning)
-        {
+        if (!_dispatcher.IsDialogueRunning)
             return false;
-        }
-
+        
         IsActive = true;
 
         return true;
@@ -43,14 +39,7 @@ public sealed class EpisodeSkipController
         _dispatcher.DispatchRapidSkipAdvance();
     }
 
-    // 정상적인 node 완료.
-    public void CompleteEpisode()
-    {
-        IsActive = false;
-    }
-
-    // Stop / Replay 등 외부 중단.
-    public void Cancel()
+    public void Reset()
     {
         IsActive = false;
     }

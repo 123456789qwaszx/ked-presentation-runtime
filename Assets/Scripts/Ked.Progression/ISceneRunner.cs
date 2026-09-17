@@ -6,10 +6,10 @@ namespace Ked.Progression
     public interface ISceneRunner
     {
         Task<SceneRunResult> RunAsync(
-            SceneRunContext context,
+            SceneRunSession context,
             CancellationToken cancellationToken);
 
-        Task RequestReplayAsync(SceneRunContext scene);
+        Task RequestReplayAsync(SceneRunSession scene);
 
         Task StopAsync();
     }

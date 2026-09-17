@@ -1,5 +1,3 @@
-using Ked.Progression;
-
 public sealed class ProgressionReplayState
 {
     private readonly VNLinePresentationState _lineState;

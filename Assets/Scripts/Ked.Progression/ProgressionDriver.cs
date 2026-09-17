@@ -20,15 +20,14 @@ namespace Ked.Progression
         private ChapterState _chapterState;
         private IReadOnlyList<ScenePathStep> _restorePath;
 
-        private SceneRunContext _currentContext;
+        private SceneRunSession _currentSession;
         private CancellationTokenSource _runCancellation;
         private Task _runTask = Task.CompletedTask;
 
         public bool IsRunning => !_runTask.IsCompleted;
-        public Task Completion => _runTask;
 
         public IReadOnlyList<CommittedChoice> PendingPath =>
-            _currentContext?.Progress.PendingPath ?? Array.Empty<CommittedChoice>();
+            _currentSession?.Progress.PendingPath ?? Array.Empty<CommittedChoice>();
 
         // 지금 이 순간의 진행 상태. 대사가 스탯을 읽는 유일한 통로다.
         //
@@ -38,7 +37,7 @@ namespace Ked.Progression
         // Scene 경계 사이처럼 실행 중인 Scene이 없으면 마지막 확정 상태를 준다.
         // 실행 자체가 없으면 null이다 — 호출자가 그 뜻을 정한다.
         public ChapterState CurrentState =>
-            _currentContext?.Progress.WorkingState ?? _chapterState;
+            _currentSession?.Progress.WorkingState ?? _chapterState;
 
         public ProgressionDriver(
             ISceneRunner sceneRunner,
@@ -97,7 +96,7 @@ namespace Ked.Progression
                 if (ReferenceEquals(_runCancellation, cancellation))
                     _runCancellation = null;
 
-                _currentContext = null;
+                _currentSession = null;
                 _chapterDef = null;
                 _chapterState = null;
                 _restorePath = null;
@@ -113,17 +112,21 @@ namespace Ked.Progression
                 cancellationToken.ThrowIfCancellationRequested();
 
                 SceneProgress progress = new(_chapterDef, _chapterState);
+                
                 IReadOnlyList<ScenePathStep> restorePath = _restorePath;
                 _restorePath = null;
                 
-                SceneRunContext ctx = new(progress, restorePath);
-                
-                _currentContext = ctx;
+                SceneRunSession session =
+                    restorePath == null
+                        ? SceneRunSession.StartNew(progress)
+                        : SceneRunSession.Restore(progress, restorePath);
+
+                _currentSession = session;
 
                 try
                 {
                     SceneRunResult result =
-                        await _sceneRunner.RunAsync(ctx, cancellationToken);
+                        await _sceneRunner.RunAsync(session, cancellationToken);
 
                     _chapterState = result.ExitState;
 
@@ -142,21 +145,21 @@ namespace Ked.Progression
                 }
                 finally
                 {
-                    if (ReferenceEquals(_currentContext, ctx))
-                        _currentContext = null;
+                    if (ReferenceEquals(_currentSession, session))
+                        _currentSession = null;
                 }
             }
         }
 
         public Task RequestReplayAsync()
         {
-            SceneRunContext ctx = _currentContext;
+            SceneRunSession session = _currentSession;
 
-            if (ctx == null)
+            if (session == null)
                 return Task.CompletedTask;
 
             _log?.Info("[REPLAY] REQUEST — 현재 Scene을 유지하고 root부터 다시 실행한다.");
-            return _sceneRunner.RequestReplayAsync(ctx);
+            return _sceneRunner.RequestReplayAsync(session);
         }
 
         public async Task StopAsync()

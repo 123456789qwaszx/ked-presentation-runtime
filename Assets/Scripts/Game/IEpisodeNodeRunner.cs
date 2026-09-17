@@ -7,7 +7,7 @@ public interface IEpisodeNodeRunner
 
     Task StopAsync();
 
-    Task StartAsync(string nodeName);
+    Task RunNodeAsync(string nodeName);
 }
 
 public sealed class YarnEpisodeNodeRunner : IEpisodeNodeRunner
@@ -26,7 +26,7 @@ public sealed class YarnEpisodeNodeRunner : IEpisodeNodeRunner
         await _dialogueRunner.Stop();
     }
 
-    public async Task StartAsync(string nodeName)
+    public async Task RunNodeAsync(string nodeName)
     {
         await _dialogueRunner.StartDialogue(nodeName);
         await _dialogueRunner.DialogueTask;

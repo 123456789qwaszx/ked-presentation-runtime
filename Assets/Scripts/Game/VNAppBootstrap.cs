@@ -29,7 +29,7 @@ public class VNAppBootstrap : MonoBehaviour
 
     private PresentationScopeSession _presentationScopeSession;
     private VNFeatureController _vnFeatureController;
-    private ScenePlaybackSession _scenePlayback;
+    private ScenePresentation _scenePlayback;
 
     private IChapterOptionsView _progressionOptions;
     private ProgressionDriver _progressionDriver;
@@ -137,7 +137,7 @@ public class VNAppBootstrap : MonoBehaviour
             _useLearningSaveData ? "saves-learning" : "saves");
         _chapterJson = _useLearningSaveData ? learningChapterJson : progressionChapterJson;
 
-        Debug.Log($"[저장] 경로: {_saveRoot}");
+        //Debug.Log($"[저장] 경로: {_saveRoot}");
 
         if (_useLearningSaveData && _chapterJson == null)
         {
@@ -387,7 +387,7 @@ public class VNAppBootstrap : MonoBehaviour
         IEpisodeNodeRunner nodeRunner =
             new YarnEpisodeNodeRunner(dialogueRunner);
 
-        _scenePlayback = new ScenePlaybackSession(
+        _scenePlayback = new ScenePresentation(
             nodeRunner,
             _screenBindings,
             _rollbackHistory,
