@@ -1,13 +1,13 @@
 namespace Ked.Progression
 {
-    internal enum SceneChoiceResolutionKind
+    public enum SceneChoiceResolutionKind
     {
         Choice = 0,
         ChapterEnded = 1,
         ReplayRequested = 2,
     }
 
-    internal readonly struct SceneChoiceResolution
+    public readonly struct SceneChoiceResolution
     {
         public SceneChoiceResolutionKind Kind { get; }
         public SceneChoice Choice { get; }

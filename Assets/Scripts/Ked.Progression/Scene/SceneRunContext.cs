@@ -25,7 +25,7 @@ namespace Ked.Progression
             RestorePath = restorePath;
         }
 
-        internal bool RequestReplay()
+        public bool RequestReplay()
         {
             if (ReplayPending)
                 return false;
@@ -34,7 +34,7 @@ namespace Ked.Progression
             return true;
         }
         
-        internal void ClearReplayRequest()
+        public void ClearReplayRequest()
         {
             ReplayPending = false;
         }

@@ -12,7 +12,7 @@ namespace Ked.Progression
     // - progression 전체 cancellation 소유
     public sealed class ProgressionDriver
     {
-        private readonly SceneRunner _sceneRunner;
+        private readonly ISceneRunner _sceneRunner;
         private readonly IProgressionReporter _reporter;
         private readonly IProgressionLog _log;
 
@@ -41,7 +41,7 @@ namespace Ked.Progression
             _currentContext?.Progress.WorkingState ?? _chapterState;
 
         public ProgressionDriver(
-            SceneRunner sceneRunner,
+            ISceneRunner sceneRunner,
             IProgressionReporter reporter = null,
             IProgressionLog log = null)
         {
