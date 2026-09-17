@@ -12,7 +12,7 @@ public sealed class ProgressionStateFoldTests
         ChapterDefinition chapter = Chapter();
         ChapterState entry = chapter.CreateEntryState();
 
-        ChapterState folded = entry.FoldChoices(chapter, Array.Empty<EpisodeOption>());
+        ChapterState folded = entry.ApplyChoices(chapter, Array.Empty<EpisodeOption>());
 
         Assert.That(folded.CurrentEpisodeId, Is.EqualTo("A"));
         Assert.That(folded.GetStat("int"), Is.EqualTo(0));
@@ -26,7 +26,7 @@ public sealed class ProgressionStateFoldTests
 
         var path = new List<EpisodeOption> { Edge(chapter, "A", 0), Edge(chapter, "B", 0) };
 
-        ChapterState folded = entry.FoldChoices(chapter, path);
+        ChapterState folded = entry.ApplyChoices(chapter, path);
 
         Assert.That(folded.CurrentEpisodeId, Is.EqualTo("C"));
         Assert.That(folded.GetStat("int"), Is.EqualTo(3)); // A→B +2, B→C +1
@@ -43,7 +43,7 @@ public sealed class ProgressionStateFoldTests
             .ApplyChoice(chapter, Edge(chapter, "A", 0))
             .ApplyChoice(chapter, Edge(chapter, "B", 0));
 
-        ChapterState folded = entry.FoldChoices(
+        ChapterState folded = entry.ApplyChoices(
             chapter, new List<EpisodeOption> { Edge(chapter, "A", 0), Edge(chapter, "B", 0) });
 
         Assert.That(folded.CurrentEpisodeId, Is.EqualTo(stepwise.CurrentEpisodeId));
@@ -57,7 +57,7 @@ public sealed class ProgressionStateFoldTests
         ChapterDefinition chapter = Chapter();
         ChapterState entry = chapter.CreateEntryState();
 
-        ChapterState folded = entry.FoldChoices(
+        ChapterState folded = entry.ApplyChoices(
             chapter,
             new List<EpisodeOption> { Edge(chapter, "A", 0), Edge(chapter, "B", 0), Edge(chapter, "C", 0) });
 
@@ -73,7 +73,7 @@ public sealed class ProgressionStateFoldTests
         ChapterState entry = chapter.CreateEntryState();
 
         Assert.Throws<ArgumentException>(() =>
-            entry.FoldChoices(chapter, new List<EpisodeOption> { Edge(chapter, "B", 0) }));
+            entry.ApplyChoices(chapter, new List<EpisodeOption> { Edge(chapter, "B", 0) }));
     }
 
     // ── 재료 ────────────────────────────────────────────────────────────────

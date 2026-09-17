@@ -24,7 +24,7 @@ public sealed class SceneRunner : ISceneRunner
     private readonly BacklogRecorder _backlog;
 
     // Replay 요청과 실행 루프가 같은 Stop 완료를 기다린다.
-    private Task _playbackStopTask = Task.CompletedTask;
+    private Task _stopPlaybackTask = Task.CompletedTask;
 
     public SceneRunner(
         IScenePresentation presentation,
@@ -97,6 +97,7 @@ public sealed class SceneRunner : ISceneRunner
         await StopPlaybackAsync();
     }
 
+    
     private async Task EnterSceneAsync(
         SceneProgress progress,
         CancellationToken cancellationToken)
@@ -114,7 +115,25 @@ public sealed class SceneRunner : ISceneRunner
             progress.SceneId,
             progress.EntryState);
     }
+    
+    private SceneRunResult CommitScene(
+        SceneProgress progress,
+        SceneRunOutcome outcome)
+    {
+        SceneCommitResult commit = progress.CreateCommitResult();
 
+        _persistence.CommitScene(
+            progress.Definition.ChapterId,
+            progress.SceneId,
+            commit,
+            outcome);
+
+        return new SceneRunResult(
+            outcome,
+            commit.State);
+    }
+
+    
     private async Task<SceneStepKind> RunEpisodeStepAsync(
         SceneRunSession session,
         CancellationToken cancellationToken)
@@ -135,14 +154,12 @@ public sealed class SceneRunner : ISceneRunner
 
         SceneChoiceResolution resolution;
 
-        if (progress.HasRecordedChoice && _replayState.IsSeekingActive)
+        if (_replayState.IsSeekingActive && progress.HasRecordedChoice)
         {
             SceneChoice recorded =
-                progress.TakeRecordedChoice(
-                    _rollbackHistory.LastHistoryIndex);
+                progress.TakeRecordedChoice(_rollbackHistory.LastHistoryIndex);
 
-            resolution =
-                SceneChoiceResolution.FromChoice(recorded);
+            resolution = SceneChoiceResolution.FromChoice(recorded);
         }
         else
         {
@@ -151,16 +168,15 @@ public sealed class SceneRunner : ISceneRunner
 
             if (_replayState.IsSeekingActive)
             {
-                Debug.LogWarning(
-                    "[장면] 시크 표적을 못 찾은 채 선택지에 닿았다 - 시크를 끄고 일반 재생으로 전환한다.");
+                Debug.LogError(
+                    "[장면] Seeking 중 선택지에 닿았으나, 기록된 기록이 없다" +
+                    " - 시크를 끄고 일반 재생으로 전환.");
 
                 _replayState.ClearSeek();
             }
 
             resolution =
-                await ResolveNextChoiceAsync(
-                    session,
-                    cancellationToken);
+                await ResolveNextChoiceAsync(session, cancellationToken);
         }
 
         if (session.ReplayPending ||
@@ -174,6 +190,8 @@ public sealed class SceneRunner : ISceneRunner
 
         SceneChoice choice = resolution.Choice;
 
+        // 새로 결정된 선택만 기록
+        // (만약 Recorded라면 Load나 Replay 중 기존 선택 기록을 다시 소비한 것임)
         if (choice.Source != SceneChoiceSource.Recorded)
         {
             progress.RecordChoice(
@@ -181,8 +199,10 @@ public sealed class SceneRunner : ISceneRunner
                 _rollbackHistory.LastHistoryIndex);
         }
 
-        progress.MoveTo(choice.Option.TargetEpisodeId);
+        // 선택을 기록하는 것과 별개로, 현재 위치를 이동.
+        progress.AdvanceTo(choice.Option.TargetEpisodeId);
 
+        // 씬 경계를 넘었는 지 확인
         if (!progress.Definition.IsSameScene(
                 choice.FromEpisodeId,
                 progress.CurrentEpisodeId))
@@ -192,7 +212,12 @@ public sealed class SceneRunner : ISceneRunner
 
         return SceneStepKind.Continue;
     }
-
+    
+    
+    // 세 가지 중 하나 반환
+    // 1. 자동 간선 또는 사용자 선택
+    // 2. Chapter 종료
+    // 3. 선택 UI를 기다리는 중 들어온 Replay 요청
     private async Task<SceneChoiceResolution> ResolveNextChoiceAsync(
         SceneRunSession session,
         CancellationToken cancellationToken)
@@ -203,7 +228,7 @@ public sealed class SceneRunner : ISceneRunner
         ChapterAdvance advance =
             ChapterTransition.Resolve(
                 session.Progress.Definition,
-                session.Progress.WorkingState);
+                session.Progress.EffectiveState);
 
         if (session.ReplayPending)
             return SceneChoiceResolution.ReplayRequested();
@@ -257,9 +282,8 @@ public sealed class SceneRunner : ISceneRunner
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        int picked = await _options.ShowAsync(
-            advance.Options,
-            advance.HiddenCount);
+        int picked = 
+            await _options.ShowAsync(advance.Options, advance.HiddenCount);
 
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -281,6 +305,7 @@ public sealed class SceneRunner : ISceneRunner
 
         return resolved;
     }
+    
 
     private async Task RestartReplayAsync(
         SceneRunSession session,
@@ -289,43 +314,26 @@ public sealed class SceneRunner : ISceneRunner
         cancellationToken.ThrowIfCancellationRequested();
 
         // RequestReplayAsync가 시작한 Stop이 끝날 때까지 기다린다.
-        await _playbackStopTask;
+        await _stopPlaybackTask;
 
-        // Stop을 기다리는 동안 New Game/Load/Exit가 요청됐을 수 있다.
         cancellationToken.ThrowIfCancellationRequested();
 
         _presentation.PrepareReplay();
 
         if (_rollbackHistory.TakeRollbackTarget(out RollbackPoint target))
-            session.Progress.RewindAfter(target.historyIndex);
+            session.Progress.RollbackTo(target.historyIndex);
 
-        session.Progress.RestartReplay();
-        session.ClearReplayRequest();
+        session.Progress.ResetForReplay();
+        session.CompleteReplayRequest();
     }
+    
 
     private Task StopPlaybackAsync()
     {
-        if (!_playbackStopTask.IsCompleted)
-            return _playbackStopTask;
+        if (!_stopPlaybackTask.IsCompleted)
+            return _stopPlaybackTask;
 
-        _playbackStopTask = _presentation.StopAsync();
-        return _playbackStopTask;
-    }
-
-    private SceneRunResult CommitScene(
-        SceneProgress progress,
-        SceneRunOutcome outcome)
-    {
-        SceneCommitResult commit = progress.CreateCommitResult();
-
-        _persistence.CommitScene(
-            progress.Definition.ChapterId,
-            progress.SceneId,
-            commit,
-            outcome);
-
-        return new SceneRunResult(
-            outcome,
-            commit.State);
+        _stopPlaybackTask = _presentation.StopAsync();
+        return _stopPlaybackTask;
     }
 }

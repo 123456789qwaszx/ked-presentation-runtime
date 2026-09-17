@@ -49,7 +49,9 @@ namespace Ked.Progression
         // - 이후 선택지의 조건 판정에 사용.
         // - 롤백 시 pending을 줄여 다시 계산.
         // - Scene이 끝나면 최종 상태로 확정.
-        public ChapterState FoldChoices(ChapterDefinition chapter, IReadOnlyList<EpisodeOption> choices)
+        public ChapterState ApplyChoices(
+            ChapterDefinition chapter, 
+            IReadOnlyList<EpisodeOption> choices)
         {
             ChapterState state = this;
 
@@ -62,7 +64,9 @@ namespace Ked.Progression
         // 유일한 스탯 입력 자리.
         // 간선의 StatChange를 순서대로 반영하고,
         // 도착 에피소드로 이동한 새 ProgressionState를 반환.
-        public ChapterState ApplyChoice(ChapterDefinition chapter, EpisodeOption choices)
+        public ChapterState ApplyChoice(
+            ChapterDefinition chapter, 
+            EpisodeOption choices)
         {
             RequireOutgoingEdge(chapter, choices);
 

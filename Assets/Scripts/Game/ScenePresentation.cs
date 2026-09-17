@@ -62,9 +62,7 @@ public sealed class ScenePresentation : IScenePresentation
     public void PrepareReplay()
     {
         _vnScreenBindings.GoToPresentationView();
-        
         _presentationStage.Clear();
-        
         _presentationScope.Start();
     }
 

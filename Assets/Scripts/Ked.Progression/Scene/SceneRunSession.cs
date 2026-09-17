@@ -53,7 +53,7 @@ namespace Ked.Progression
             return true;
         }
 
-        public void ClearReplayRequest()
+        public void CompleteReplayRequest()
         {
             ReplayPending = false;
         }
