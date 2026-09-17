@@ -9,7 +9,7 @@ namespace Ked.Progression
         void EnterScene(
             string chapterId,
             string sceneId,
-            ProgressionState entryState);
+            ChapterState entryState);
 
         void CommitScene(
             string chapterId,
@@ -29,7 +29,7 @@ namespace Ked.Progression
         public void EnterScene(
             string chapterId,
             string sceneId,
-            ProgressionState entryState)
+            ChapterState entryState)
         {
         }
 

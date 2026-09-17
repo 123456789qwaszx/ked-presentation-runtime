@@ -83,15 +83,15 @@ public sealed class ProgressionLauncher
 
     private async Task LaunchCoreAsync()
     {
-        ScenarioDefinition scenario =
+        ScenarioDefinition scenarioDef =
             ProgressionContentLoader.LoadSingleChapter(_chapterJson);
 
-        if (!ProgressionContentPreflight.CheckAndLog(scenario, _dialogueRunner.YarnProject))
+        if (!ProgressionContentPreflight.CheckAndLog(scenarioDef, _dialogueRunner.YarnProject))
             return;
 
         // 기본값은 새 게임 시작.
-        ChapterDefinition chapter = scenario.StartChapter;
-        ProgressionState state = chapter.CreateEntryState();
+        ChapterDefinition chapterDef = scenarioDef.StartChapter;
+        ChapterState state = chapterDef.CreateEntryState();
 
         IReadOnlyList<DialogueLogEntry> backlog = null;
         SavedLoadPlan loadPlan = null;
@@ -105,7 +105,7 @@ public sealed class ProgressionLauncher
             {
                 Debug.Log($"[진행] 완료된 챕터의 세이브({resume.ChapterId}). 새로 시작.");
             }
-            else if (!scenario.TryGetChapter(resume.ChapterId, out ChapterDefinition savedChapter)
+            else if (!scenarioDef.TryGetChapter(resume.ChapterId, out ChapterDefinition savedChapter)
                      || !savedChapter.TryGetNode(resume.EpisodeId, out _))
             {
                 Debug.LogWarning(
@@ -119,8 +119,8 @@ public sealed class ProgressionLauncher
             else
             {
                 resumeAccepted = true;
-                chapter = savedChapter;
-                state = ProgressionState.Restore(savedChapter, resume.EpisodeId, resume.Stats);
+                chapterDef = savedChapter;
+                state = ChapterState.Restore(savedChapter, resume.EpisodeId, resume.Stats);
                 backlog = resume.Backlog;
                 loadPlan = resume.LoadPlan;
 
@@ -137,7 +137,7 @@ public sealed class ProgressionLauncher
         _backlog.Restore(backlog);
         _replayState.Stage(loadPlan?.YarnChoices, loadPlan?.Target);
 
-        _driver.Start(chapter, state, BuildRestorePath(loadPlan));
+        _driver.Start(chapterDef, state, BuildRestorePath(loadPlan));
     }
 
     // SavedLoadPlan에서 진행 좌표만 잘라 낸다.

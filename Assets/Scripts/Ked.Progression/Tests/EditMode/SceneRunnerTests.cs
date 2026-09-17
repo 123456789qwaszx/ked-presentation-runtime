@@ -12,7 +12,7 @@ namespace Ked.Progression.Tests
         public async Task RunAsync_ChoiceAcrossScene_CommitsEntryScene()
         {
             ChapterDefinition chapter = TestChapterFactory.CreateTwoSceneChapter();
-            ProgressionState entry = chapter.CreateEntryState();
+            ChapterState entry = chapter.CreateEntryState();
 
             var playback = new FakeScenePlayback();
             var reporter = new FakeProgressionReporter();
@@ -566,12 +566,12 @@ namespace Ked.Progression.Tests
         public IReadOnlyList<CommittedChoice> LastChoices { get; private set; } =
             Array.Empty<CommittedChoice>();
 
-        public void ReportChapterEntered(string chapterId, ProgressionState state)
+        public void ReportChapterEntered(string chapterId, ChapterState state)
         {
             Events.Add($"ChapterEnter:{chapterId}");
         }
 
-        public void ReportChapterExited(string chapterId, ProgressionState state)
+        public void ReportChapterExited(string chapterId, ChapterState state)
         {
             Events.Add($"ChapterExit:{chapterId}");
         }
@@ -579,7 +579,7 @@ namespace Ked.Progression.Tests
         public void ReportSceneEntered(
             string chapterId,
             string sceneId,
-            ProgressionState entryState)
+            ChapterState entryState)
         {
             SceneEnteredCount++;
             Events.Add($"SceneEnter:{sceneId}");
@@ -590,7 +590,7 @@ namespace Ked.Progression.Tests
             string sceneId,
             IReadOnlyList<CommittedChoice> choices,
             IReadOnlyList<string> watchedEpisodeIds,
-            ProgressionState state)
+            ChapterState state)
         {
             SceneCommittedCount++;
             LastChoices = choices;
@@ -600,7 +600,7 @@ namespace Ked.Progression.Tests
         public void ReportSceneExited(
             string chapterId,
             string sceneId,
-            ProgressionState committedState)
+            ChapterState committedState)
         {
             SceneExitedCount++;
             Events.Add($"SceneExit:{sceneId}");
@@ -631,7 +631,7 @@ namespace Ked.Progression.Tests
         public void EnterScene(
             string chapterId,
             string sceneId,
-            ProgressionState entryState)
+            ChapterState entryState)
         {
             EnterCount++;
         }

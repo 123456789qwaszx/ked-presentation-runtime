@@ -19,9 +19,9 @@ public sealed class ProgressionStatFunction
     // 이름을 바꾸려면 양쪽을 함께 바꾼다.
     public const string FunctionName = "stat";
 
-    private readonly Func<ProgressionState> _currentState;
+    private readonly Func<ChapterState> _currentState;
 
-    public ProgressionStatFunction(Func<ProgressionState> currentState)
+    public ProgressionStatFunction(Func<ChapterState> currentState)
     {
         _currentState = currentState;
     }
@@ -34,7 +34,7 @@ public sealed class ProgressionStatFunction
     // 깃발도 정수 0/1이다 — 별도 타입을 두지 않는다.
     private int Read(string key)
     {
-        ProgressionState state = _currentState();
+        ChapterState state = _currentState();
 
         if (state == null)
         {

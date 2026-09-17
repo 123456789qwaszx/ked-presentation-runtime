@@ -12,13 +12,13 @@ using UnityEngine;
 // 따라서 저장이 실패하면 아래 Commit/Exit 로그는 아예 나오지 않는다.
 public sealed class ProgressionLifecycleLog : IProgressionReporter
 {
-    public void ReportChapterEntered(string chapterId, ProgressionState state) =>
+    public void ReportChapterEntered(string chapterId, ChapterState state) =>
         Debug.Log($"[진행][챕터] 진입 — {chapterId} @ {state.CurrentEpisodeId}");
 
-    public void ReportChapterExited(string chapterId, ProgressionState state) =>
+    public void ReportChapterExited(string chapterId, ChapterState state) =>
         Debug.Log($"[진행][챕터] 종료 — {chapterId} @ {state.CurrentEpisodeId}");
 
-    public void ReportSceneEntered(string chapterId, string sceneId, ProgressionState entryState) =>
+    public void ReportSceneEntered(string chapterId, string sceneId, ChapterState entryState) =>
         Debug.Log($"[진행][장면] 진입 — {sceneId} @ {entryState.CurrentEpisodeId}");
 
     public void ReportSceneCommitted(
@@ -26,12 +26,12 @@ public sealed class ProgressionLifecycleLog : IProgressionReporter
         string sceneId,
         IReadOnlyList<CommittedChoice> choices,
         IReadOnlyList<string> watchedEpisodeIds,
-        ProgressionState state) =>
+        ChapterState state) =>
         Debug.Log(
             $"[진행][장면] 확정 — {sceneId}, 선택 {choices.Count}개, " +
             $"시청 {watchedEpisodeIds.Count}개 → {state.CurrentEpisodeId}");
 
-    public void ReportSceneExited(string chapterId, string sceneId, ProgressionState committedState) =>
+    public void ReportSceneExited(string chapterId, string sceneId, ChapterState committedState) =>
         Debug.Log($"[진행][장면] 종료 — {sceneId} → {committedState.CurrentEpisodeId}");
 
     // 에피소드 경계는 한 장면에서도 여러 번 지나므로 기본 로그로 남기지 않는다.

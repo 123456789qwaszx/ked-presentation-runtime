@@ -13,7 +13,7 @@ namespace Ked.Progression
 
         public static ChapterAdvance Resolve(
             ChapterDefinition chapter,
-            ProgressionState state)
+            ChapterState state)
         {
             if (chapter == null) throw new ArgumentNullException(nameof(chapter));
             if (state == null) throw new ArgumentNullException(nameof(state));
@@ -70,7 +70,7 @@ namespace Ked.Progression
 
         // 미달 조건 중 첫번째 것.
         private static ProgressionCondition FirstUnmet(
-            IReadOnlyList<ProgressionCondition> conditions, ProgressionState state)
+            IReadOnlyList<ProgressionCondition> conditions, ChapterState state)
         {
             for (int i = 0; i < conditions.Count; i++)
             {

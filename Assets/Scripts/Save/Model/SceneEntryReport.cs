@@ -4,12 +4,12 @@ using Ked.Progression;
 public sealed class SceneEntryReport
 {
     public string ChapterId { get; }
-    public ProgressionState State { get; }
+    public ChapterState State { get; }
     public int BacklogSerialStart { get; }
 
     public SceneEntryReport(
         string chapterId, 
-        ProgressionState state,
+        ChapterState state,
         int backlogSerialStart)
     {
         ChapterId = chapterId;

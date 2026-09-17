@@ -17,7 +17,7 @@ namespace Ked.Progression
         private readonly IProgressionLog _log;
 
         private ChapterDefinition _chapterDef;
-        private ProgressionState _chapterState;
+        private ChapterState _chapterState;
         private IReadOnlyList<ScenePathStep> _restorePath;
 
         private SceneRunContext _currentContext;
@@ -37,7 +37,7 @@ namespace Ked.Progression
         //
         // Scene 경계 사이처럼 실행 중인 Scene이 없으면 마지막 확정 상태를 준다.
         // 실행 자체가 없으면 null이다 — 호출자가 그 뜻을 정한다.
-        public ProgressionState CurrentState =>
+        public ChapterState CurrentState =>
             _currentContext?.Progress.WorkingState ?? _chapterState;
 
         public ProgressionDriver(
@@ -52,7 +52,7 @@ namespace Ked.Progression
 
         public void Start(
             ChapterDefinition chapter,
-            ProgressionState entryState,
+            ChapterState entryState,
             IReadOnlyList<ScenePathStep> restorePath = null)
         {
             if (chapter == null)
@@ -72,7 +72,7 @@ namespace Ked.Progression
 
         private async Task RunAsync(
             ChapterDefinition chapter,
-            ProgressionState entryState,
+            ChapterState entryState,
             IReadOnlyList<ScenePathStep> restorePath)
         {
             var cancellation = new CancellationTokenSource();

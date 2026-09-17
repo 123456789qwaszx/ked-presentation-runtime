@@ -137,7 +137,7 @@ namespace Ked.Progression
             return _foldBuffer;
         }
 
-        public ProgressionState FoldInto(ChapterDefinition chapter, ProgressionState entryState)
+        public ChapterState FoldInto(ChapterDefinition chapter, ChapterState entryState)
         {
             return entryState.FoldChoices(chapter, PendingOptions());
         }

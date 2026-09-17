@@ -11,28 +11,28 @@ namespace Ked.Progression
     {
         void ReportChapterEntered(
             string chapterId,
-            ProgressionState state);
+            ChapterState state);
 
         void ReportChapterExited(
             string chapterId,
-            ProgressionState state);
+            ChapterState state);
 
         void ReportSceneEntered(
             string chapterId,
             string sceneId,
-            ProgressionState entryState);
+            ChapterState entryState);
 
         void ReportSceneCommitted(
             string chapterId,
             string sceneId,
             IReadOnlyList<CommittedChoice> choices,
             IReadOnlyList<string> watchedEpisodeIds,
-            ProgressionState state);
+            ChapterState state);
 
         void ReportSceneExited(
             string chapterId,
             string sceneId,
-            ProgressionState committedState);
+            ChapterState committedState);
 
         void ReportEpisodeEntered(
             string chapterId,

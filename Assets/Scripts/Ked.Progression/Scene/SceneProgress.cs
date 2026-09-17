@@ -17,7 +17,7 @@ namespace Ked.Progression
         private readonly ScenePendingHistory _history = new();
 
         public ChapterDefinition Definition { get; }
-        public ProgressionState EntryState { get; }
+        public ChapterState EntryState { get; }
 
         public string SceneId { get; }
         public string RootEpisodeId { get; }
@@ -25,7 +25,7 @@ namespace Ked.Progression
 
         public EpisodeNode CurrentEpisode => GetEpisode(CurrentEpisodeId);
 
-        public ProgressionState WorkingState =>
+        public ChapterState WorkingState =>
             _history.FoldInto(Definition, EntryState);
 
         public IReadOnlyList<CommittedChoice> PendingPath =>
@@ -36,7 +36,7 @@ namespace Ked.Progression
 
         public SceneProgress(
             ChapterDefinition definition,
-            ProgressionState entryState)
+            ChapterState entryState)
         {
             Definition = definition;
             EntryState = entryState;

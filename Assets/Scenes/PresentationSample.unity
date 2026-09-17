@@ -5094,10 +5094,6 @@ MonoBehaviour:
   autoAdvanceScheduler: {fileID: 608895337}
   vnOptionsPresenter: {fileID: 1180068359}
   optionItem: {fileID: 8364438180924277572, guid: 3a0acb1fd0e1d604183be29ffcfb79a7, type: 3}
-  yarnEntryKey: Story_blank_ch01_ep00
-  debugEpisodeChain:
-  - Story_new01
-  - Story_new02
   progressionChapterJson: {fileID: 4900000, guid: 1220671ebc3165547bbbd3f140c473ca, type: 3}
   useLearningSaveData: 1
   learningChapterJson: {fileID: 4900000, guid: d256bcdce1b8afb41ba14c16cc873ff1, type: 3}

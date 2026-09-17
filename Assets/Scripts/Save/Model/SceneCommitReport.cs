@@ -10,7 +10,7 @@ public sealed class SceneCommitReport
     public IReadOnlyList<CommittedChoice> Choices { get; }      // 확정 순서 = 큐 Seq 순서 = 장면 기록의 경로.
     public IReadOnlyList<VNChoiceRecord> YarnChoices { get; }   // 장면 안 Yarn 인라인 선택 기록.
     public IReadOnlyList<string> WatchedEpisodeIds { get; }     // EventKey가 달린 에피소드를 다 본 것.
-    public ProgressionState State { get; }
+    public ChapterState State { get; }
 
     // 지금까지의 백로그 전부 - 다음 장면 입장에서는 "이전 장면들"이다.
     public IReadOnlyList<DialogueLogEntry> Backlog { get; }
@@ -25,7 +25,7 @@ public sealed class SceneCommitReport
         IReadOnlyList<CommittedChoice> choices,
         IReadOnlyList<VNChoiceRecord> yarnChoices,
         IReadOnlyList<string> watchedEpisodeIds,
-        ProgressionState state,
+        ChapterState state,
         IReadOnlyList<DialogueLogEntry> backlog,
         int backlogSerialStart,
         bool chapterCompleted)

@@ -32,7 +32,7 @@ public sealed class ProgressionSaveBridge : IScenePersistence
     public void EnterScene(
         string chapterId,
         string sceneId,
-        ProgressionState entryState)
+        ChapterState entryState)
     {
         _records.ReportSceneEntered(
             new SceneEntryReport(

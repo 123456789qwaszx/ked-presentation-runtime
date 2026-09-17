@@ -10,9 +10,9 @@ public sealed class ProgressionStateFoldTests
     public void 빈_목록을_접으면_그대로다()
     {
         ChapterDefinition chapter = Chapter();
-        ProgressionState entry = chapter.CreateEntryState();
+        ChapterState entry = chapter.CreateEntryState();
 
-        ProgressionState folded = entry.FoldChoices(chapter, Array.Empty<EpisodeOption>());
+        ChapterState folded = entry.FoldChoices(chapter, Array.Empty<EpisodeOption>());
 
         Assert.That(folded.CurrentEpisodeId, Is.EqualTo("A"));
         Assert.That(folded.GetStat("int"), Is.EqualTo(0));
@@ -22,11 +22,11 @@ public sealed class ProgressionStateFoldTests
     public void 여러_선택을_순서대로_접는다()
     {
         ChapterDefinition chapter = Chapter();
-        ProgressionState entry = chapter.CreateEntryState();
+        ChapterState entry = chapter.CreateEntryState();
 
         var path = new List<EpisodeOption> { Edge(chapter, "A", 0), Edge(chapter, "B", 0) };
 
-        ProgressionState folded = entry.FoldChoices(chapter, path);
+        ChapterState folded = entry.FoldChoices(chapter, path);
 
         Assert.That(folded.CurrentEpisodeId, Is.EqualTo("C"));
         Assert.That(folded.GetStat("int"), Is.EqualTo(3)); // A→B +2, B→C +1
@@ -37,13 +37,13 @@ public sealed class ProgressionStateFoldTests
     public void 접은_결과는_하나씩_커밋한_것과_같다()
     {
         ChapterDefinition chapter = Chapter();
-        ProgressionState entry = chapter.CreateEntryState();
+        ChapterState entry = chapter.CreateEntryState();
 
-        ProgressionState stepwise = entry
+        ChapterState stepwise = entry
             .ApplyChoice(chapter, Edge(chapter, "A", 0))
             .ApplyChoice(chapter, Edge(chapter, "B", 0));
 
-        ProgressionState folded = entry.FoldChoices(
+        ChapterState folded = entry.FoldChoices(
             chapter, new List<EpisodeOption> { Edge(chapter, "A", 0), Edge(chapter, "B", 0) });
 
         Assert.That(folded.CurrentEpisodeId, Is.EqualTo(stepwise.CurrentEpisodeId));
@@ -55,9 +55,9 @@ public sealed class ProgressionStateFoldTests
     {
         // A→B +2, B→C +1 뒤 C→D +9 — 최대 5에서 잘려야 한다.
         ChapterDefinition chapter = Chapter();
-        ProgressionState entry = chapter.CreateEntryState();
+        ChapterState entry = chapter.CreateEntryState();
 
-        ProgressionState folded = entry.FoldChoices(
+        ChapterState folded = entry.FoldChoices(
             chapter,
             new List<EpisodeOption> { Edge(chapter, "A", 0), Edge(chapter, "B", 0), Edge(chapter, "C", 0) });
 
@@ -70,7 +70,7 @@ public sealed class ProgressionStateFoldTests
     {
         // 지금 A에 있는데 B에서 나가는 간선을 먼저 접으려 한다.
         ChapterDefinition chapter = Chapter();
-        ProgressionState entry = chapter.CreateEntryState();
+        ChapterState entry = chapter.CreateEntryState();
 
         Assert.Throws<ArgumentException>(() =>
             entry.FoldChoices(chapter, new List<EpisodeOption> { Edge(chapter, "B", 0) }));
