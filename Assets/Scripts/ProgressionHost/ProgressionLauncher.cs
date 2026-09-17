@@ -205,6 +205,9 @@ public sealed class ProgressionLauncher
     // - non-empty: Scene root부터 저장 위치까지 다시 소비할 선택 경로
     private static IReadOnlyList<ScenePathStep> ToScenePath(SavedLoadPlan plan)
     {
+        if (plan == null)
+            return null;
+
         var path = new List<ScenePathStep>(plan.Path.Count);
 
         for (int i = 0; i < plan.Path.Count; i++)

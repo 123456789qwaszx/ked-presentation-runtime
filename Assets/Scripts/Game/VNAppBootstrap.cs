@@ -29,6 +29,8 @@ public class VNAppBootstrap : MonoBehaviour
 
     private PresentationScopeSession _presentationScopeSession;
     private VNFeatureController _vnFeatureController;
+    private VNLinePresentationFlow _linePresentationFlow;
+    private ActiveResumeSaveFlow _activeResumeSaveFlow;
     private ScenePresentation _scenePlayback;
 
     private IChapterOptionsView _progressionOptions;
@@ -349,7 +351,7 @@ public class VNAppBootstrap : MonoBehaviour
         
         LineHurrySpeedController lineHurrySpeed = new(ellipsisBreathTypewriter);
 
-        VNLinePresentationFlow vnLinePresentationFlow = new(
+        _linePresentationFlow = new VNLinePresentationFlow(
             vnYarnLineBoundary,
             _linePresentationAdvanceState,
             dialogueBoxPresentationController,
@@ -359,7 +361,7 @@ public class VNAppBootstrap : MonoBehaviour
 
         customLinePresenter.Initialize(
             dialogueRunner,
-            vnLinePresentationFlow,
+            _linePresentationFlow,
             ellipsisBreathTypewriter,
             _playbackState);
         
@@ -488,6 +490,13 @@ public class VNAppBootstrap : MonoBehaviour
     
     private void BootstrapScreenBindings()
     {
+        _activeResumeSaveFlow = new(
+            _saveCoordinator,
+            _progressionLauncher,
+            _vnFeatureController);
+
+        _linePresentationFlow.LineDisplayed += _activeResumeSaveFlow.Update;
+
         ManualSaveFlow manualSaveFlow = new(
             _saveCoordinator,
             _progressionLauncher,

@@ -65,6 +65,21 @@ internal static class Program
 
     private static Ked.Progression.ChapterState State(string episode = "scene1") =>
         Ked.Progression.ChapterState.CreateInitial(Array.Empty<Ked.Progression.StatDefinition>(), episode);
+
+    private static Ked.Progression.ChapterState StateWithScore(int score) =>
+        Ked.Progression.ChapterState.CreateInitial(
+            new[]
+            {
+                new Ked.Progression.StatDefinition(
+                    "score",
+                    "Score",
+                    Ked.Progression.StatType.Number,
+                    score,
+                    0,
+                    100),
+            },
+            "scene1");
+
     private static SceneEntryReport Entry() => new("chapter", State(), 0);
     private static SceneCommitReport Completion() => new("chapter", Array.Empty<Ked.Progression.CommittedChoice>(),
         Array.Empty<VNChoiceRecord>(), Array.Empty<string>(), State("scene2"),
@@ -239,6 +254,151 @@ internal static class Program
                 PlaythroughSession session = new LocalFileSaveStore(dir).Open("A"); session.Commit(Save("A", 2));
                 JObject written = JObject.Parse(File.ReadAllText(path));
                 Check(written["localCommitVersion"] == null && written["sync"] == null, "server fields survived");
+            }));
+
+            await Test("Active resume keeps the scene entry snapshot and replay data", () => Run(() =>
+            {
+                var store = new LocalFileSaveStore(Dir());
+                LocalSaveFile file = Save("A");
+                file.Scenes.Add(new SceneRecord
+                {
+                    Checkpoint = Checkpoint(),
+                    BacklogSerialEnd = 1,
+                });
+                file.Backlog.Add(new DialogueLogEntry
+                {
+                    lineId = "old-line",
+                    lineSerial = 0,
+                    nodeName = "old-node",
+                    rawText = "old",
+                });
+                store.Create(file);
+                store.SetActive("A");
+
+                var save = new SaveCoordinator(store, ContentVersion);
+                save.LoadActiveResumePoint();
+                save.ReportSceneEntered(new SceneEntryReport("chapter", StateWithScore(20), 1));
+
+                save.UpdateResumePoint(
+                    new[] { new Ked.Progression.CommittedChoice("scene1", 2) },
+                    new[] { new VNChoiceRecord(0, 0, 1, "choice-line") },
+                    new SaveLineTarget { NodeName = "node", LineId = "line", Occurrence = 2 });
+
+                LocalSaveFile snapshot = store.LoadActive();
+                Check(snapshot.CurrentEpisodeId == "scene1", "resume left the scene entry");
+                Check(snapshot.Stats["score"] == 20, "effective state was stored as entry state");
+                Check(snapshot.Scenes.Count == 1, "completed scenes changed");
+                Check(snapshot.Backlog.Count == 1 && snapshot.Backlog[0].lineId == "old-line",
+                    "current scene backlog leaked into the snapshot");
+                Check(snapshot.PendingLoad.Path.Single().OptionIndex == 2, "progression path missing");
+                Check(snapshot.PendingLoad.YarnChoices.Single().selectedOptionLineId == "choice-line",
+                    "Yarn choices missing");
+                Check(snapshot.PendingLoad.Target.Occurrence == 2, "line occurrence missing");
+            }));
+
+            await Test("Failed active resume update keeps the previous disk and memory snapshot", () => Run(() =>
+            {
+                string dir = Dir();
+                bool fail = false;
+                var store = new LocalFileSaveStore(dir, (path, json) =>
+                {
+                    if (fail && path.EndsWith(".json", StringComparison.Ordinal))
+                        throw new IOException();
+
+                    AtomicFile.WriteAllText(path, json);
+                });
+                var save = new SaveCoordinator(store, ContentVersion);
+                save.BeginNewPlaythrough();
+                save.ReportSceneEntered(Entry());
+                save.UpdateResumePoint(
+                    Array.Empty<Ked.Progression.CommittedChoice>(),
+                    Array.Empty<VNChoiceRecord>(),
+                    new SaveLineTarget { NodeName = "node", LineId = "first", Occurrence = 1 });
+
+                fail = true;
+                Throws<IOException>(() => save.UpdateResumePoint(
+                    Array.Empty<Ked.Progression.CommittedChoice>(),
+                    Array.Empty<VNChoiceRecord>(),
+                    new SaveLineTarget { NodeName = "node", LineId = "second", Occurrence = 1 }));
+
+                Check(store.Open(save.PlaythroughId).Read().Snapshot.PendingLoad.Target.LineId == "first",
+                    "failed update changed memory");
+                Check(new LocalFileSaveStore(dir).LoadPlaythrough(save.PlaythroughId)
+                        .PendingLoad.Target.LineId == "first",
+                    "failed update changed disk");
+            }));
+
+            await Test("Scene commit clears the active line resume plan", () => Run(() =>
+            {
+                var store = new LocalFileSaveStore(Dir());
+                var save = new SaveCoordinator(store, ContentVersion);
+                save.BeginNewPlaythrough();
+                save.ReportSceneEntered(Entry());
+                save.UpdateResumePoint(
+                    Array.Empty<Ked.Progression.CommittedChoice>(),
+                    Array.Empty<VNChoiceRecord>(),
+                    new SaveLineTarget { NodeName = "node", LineId = "line", Occurrence = 1 });
+
+                save.ReportSceneCommitted(Completion());
+
+                Check(store.LoadActive().PendingLoad == null, "committed scene kept a line resume plan");
+            }));
+
+            await Test("Resume without a load plan starts from the scene root", () => Run(() =>
+            {
+                var store = new LocalFileSaveStore(Dir());
+                store.Create(Save("A"));
+                store.SetActive("A");
+
+                var driver = new ProgressionDriver();
+                var replay = new ProgressionReplayState();
+                var launcher = new ProgressionLauncher(
+                    driver,
+                    new Yarn.Unity.DialogueRunner(),
+                    new UnityEngine.TextAsset(),
+                    new SaveCoordinator(store, ContentVersion),
+                    new BacklogRecorder(),
+                    replay);
+
+                launcher.Resume();
+
+                Check(driver.Starts == 1 && driver.LastRestorePath == null,
+                    "scene root resume was treated as mid-scene restore");
+                Check(replay.PreparedLoads == 1 && replay.StagedTarget == null,
+                    "old staged load plan was not cleared");
+            }));
+
+            await Test("Resume with an empty path still opens line seek", () => Run(() =>
+            {
+                var store = new LocalFileSaveStore(Dir());
+                LocalSaveFile file = Save("A");
+                file.PendingLoad = new SavedLoadPlan
+                {
+                    Target = new SaveLineTarget
+                    {
+                        NodeName = "node",
+                        LineId = "line",
+                        Occurrence = 2,
+                    },
+                };
+                store.Create(file);
+                store.SetActive("A");
+
+                var driver = new ProgressionDriver();
+                var replay = new ProgressionReplayState();
+                var launcher = new ProgressionLauncher(
+                    driver,
+                    new Yarn.Unity.DialogueRunner(),
+                    new UnityEngine.TextAsset(),
+                    new SaveCoordinator(store, ContentVersion),
+                    new BacklogRecorder(),
+                    replay);
+
+                launcher.Resume();
+
+                Check(driver.LastRestorePath != null && driver.LastRestorePath.Count == 0,
+                    "empty replay path was collapsed into scene root resume");
+                Check(replay.StagedTarget?.Occurrence == 2, "line target was not staged");
             }));
 
             await Test("Duplicate transitions are ignored and resume starts locally", async () =>

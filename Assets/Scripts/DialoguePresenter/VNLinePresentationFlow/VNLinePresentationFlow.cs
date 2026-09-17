@@ -4,6 +4,8 @@ using Yarn.Unity;
 // Runs one line presentation transaction through its explicit phase sequence.
 public sealed class VNLinePresentationFlow
 {
+    public event Action LineDisplayed;
+
     private readonly VNYarnLineBoundary _vnYarnLineBoundary;
     private readonly VNLinePresentationState _advanceState;
     private readonly DialogueBoxPresentationController _boxPresentation;
@@ -117,6 +119,8 @@ public sealed class VNLinePresentationFlow
         _advanceState.MarkLineDisplayCompleted(ctx.Meta, "normal");
         _typewriter.ContentWillDismiss();
         SetPhase(ctx, VNLinePresentationPhase.DisplayCommitted);
+
+        LineDisplayed?.Invoke();
 
         // Phase: WaitingForAdvance -> Completed
         SetPhase(ctx, VNLinePresentationPhase.WaitingForAdvance);

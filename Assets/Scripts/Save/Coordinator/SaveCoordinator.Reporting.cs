@@ -88,6 +88,7 @@ public sealed partial class SaveCoordinator
             ChapterCompleted = report.ChapterCompleted,
             Scenes = scenes,
             Backlog = new List<DialogueLogEntry>(report.Backlog),
+            PendingLoad = null,
             PlaySeconds = TotalSeconds,
             SavedAtUtc = now,
         };

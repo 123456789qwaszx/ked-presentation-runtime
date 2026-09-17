@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Ked.Progression;
 using UnityEngine;
 
@@ -100,16 +99,7 @@ public sealed partial class SaveCoordinator
             ContentVersion = _contentVersion,
             Scenes = PlaythroughSession.Copy(_scenes),
             Checkpoint = PlaythroughSession.Copy(_currentEntry),
-            LoadPlan = new SavedLoadPlan
-            {
-                Path = path.Select(choice => new SavedChoice
-                {
-                    FromEpisodeId = choice.FromEpisodeId,
-                    OptionIndex = choice.OptionIndex,
-                }).ToList(),
-                YarnChoices = new List<VNChoiceRecord>(yarnChoices),
-                Target = PlaythroughSession.Copy(target),
-            },
+            LoadPlan = CreateLoadPlan(path, yarnChoices, target),
             Backlog = _localStore.LoadActive()?.Backlog is List<DialogueLogEntry> backlog
                 ? new List<DialogueLogEntry>(backlog)
                 : new List<DialogueLogEntry>(),
