@@ -42,60 +42,54 @@ namespace Ked.Progression
 
         public ProgressionDriver(
             SceneRunner sceneRunner,
-            IProgressionReporter reporter,
+            IProgressionReporter reporter = null,
             IProgressionLog log = null)
         {
             _sceneRunner = sceneRunner;
             _reporter = reporter;
-            _log = log ?? NullProgressionLog.Instance;
+            _log = log;
         }
 
         public void Start(
-            ChapterDefinition chapter,
-            ChapterState entryState,
+            ChapterDefinition chapterDef,
+            ChapterState chapterState,
             IReadOnlyList<ScenePathStep> restorePath = null)
         {
-            if (chapter == null)
-                throw new ArgumentNullException(nameof(chapter));
-
-            if (entryState == null)
-                throw new ArgumentNullException(nameof(entryState));
-
             if (IsRunning)
             {
-                _log.Warning("[RUN] 이미 실행 중이다. 새 요청을 무시한다.");
+                _log?.Warning("[RUN] 이미 실행 중이다. 새 요청을 무시한다.");
                 return;
             }
 
-            _runTask = RunAsync(chapter, entryState, restorePath);
+            _runTask = RunAsync(chapterDef, chapterState, restorePath);
         }
 
         private async Task RunAsync(
-            ChapterDefinition chapter,
-            ChapterState entryState,
+            ChapterDefinition chapterDef,
+            ChapterState chapterState,
             IReadOnlyList<ScenePathStep> restorePath)
         {
             var cancellation = new CancellationTokenSource();
 
             _runCancellation = cancellation;
-            _chapterDef = chapter;
-            _chapterState = entryState;
+            _chapterDef = chapterDef;
+            _chapterState = chapterState;
             _restorePath = restorePath;
 
             try
             {
-                _reporter.ReportChapterEntered(_chapterDef.ChapterId, _chapterState);
+                _reporter?.ReportChapterEntered(_chapterDef.ChapterId, _chapterState);
 
                 await RunChapterAsync(cancellation.Token);
             }
             catch (OperationCanceledException)
                 when (cancellation.IsCancellationRequested)
             {
-                _log.Info("[RUN] CANCELLED — 현재 Scene pending은 commit하지 않는다.");
+                _log?.Info("[RUN] CANCELLED — 현재 Scene pending은 commit하지 않는다.");
             }
             catch (Exception error)
             {
-                _log.Error($"[RUN] FAULTED\n{error}");
+                _log?.Error($"[RUN] FAULTED\n{error}");
                 throw;
             }
             finally
@@ -139,7 +133,7 @@ namespace Ked.Progression
                             continue;
 
                         case SceneRunOutcome.ChapterEnded:
-                            _reporter.ReportChapterExited(_chapterDef.ChapterId, _chapterState);
+                            _reporter?.ReportChapterExited(_chapterDef.ChapterId, _chapterState);
                             return;
 
                         default:
@@ -161,7 +155,7 @@ namespace Ked.Progression
             if (ctx == null)
                 return Task.CompletedTask;
 
-            _log.Info("[REPLAY] REQUEST — 현재 Scene을 유지하고 root부터 다시 실행한다.");
+            _log?.Info("[REPLAY] REQUEST — 현재 Scene을 유지하고 root부터 다시 실행한다.");
             return _sceneRunner.RequestReplayAsync(ctx);
         }
 
@@ -173,7 +167,7 @@ namespace Ked.Progression
             if (!IsRunning || cancellation == null)
                 return;
 
-            _log.Info("[RUN] STOP REQUEST");
+            _log?.Info("[RUN] STOP REQUEST");
             cancellation.Cancel();
 
             await Task.WhenAll(

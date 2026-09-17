@@ -20,16 +20,16 @@ public struct YarnLineMeta { public string lineId, nodeName, rawText; }
 public sealed class RollbackPoint { public int historyIndex; }
 public static class ProgressionContentLoader
 {
-    public static Ked.Progression.ScenarioProgression LoadSingleChapter(UnityEngine.TextAsset asset)
+    public static Ked.Progression.ScenarioDefinition LoadSingleChapter(UnityEngine.TextAsset asset)
     {
         var chapter = new Ked.Progression.ChapterDefinition("chapter", "", "scene1", null,
             new[] { new Ked.Progression.EpisodeNode("scene1", "", "node") });
-        return new Ked.Progression.ScenarioProgression("scenario", "", "chapter", new[] { chapter });
+        return new Ked.Progression.ScenarioDefinition("scenario", "", "chapter", new[] { chapter });
     }
 }
 public static class ProgressionContentPreflight
 {
-    public static bool CheckAndLog(Ked.Progression.ScenarioProgression scenario, object yarn) => true;
+    public static bool CheckAndLog(Ked.Progression.ScenarioDefinition scenario, object yarn) => true;
 }
 public sealed class ProgressionDriver
 {
@@ -39,7 +39,7 @@ public sealed class ProgressionDriver
     public int Starts;
     public Task RequestReplayAsync() => Task.CompletedTask;
     public async Task StopAsync() { if (OnStop != null) await OnStop(); IsRunning = false; }
-    public void Start(Ked.Progression.ChapterDefinition chapter, Ked.Progression.ProgressionState state,
+    public void Start(Ked.Progression.ChapterDefinition chapter, Ked.Progression.ChapterState state,
         IReadOnlyList<Ked.Progression.ScenePathStep> restorePath)
     { Starts++; IsRunning = true; LastRestorePath = restorePath; }
 

@@ -646,6 +646,30 @@ namespace Ked.Progression.Tests
             throw new InvalidOperationException("저장 실패");
         }
     }
+    
+    public sealed class NullScenePersistence : IScenePersistence
+    {
+        public static readonly NullScenePersistence Instance = new();
+
+        private NullScenePersistence()
+        {
+        }
+
+        public void EnterScene(
+            string chapterId,
+            string sceneId,
+            ChapterState entryState)
+        {
+        }
+
+        public void CommitScene(
+            string chapterId,
+            string sceneId,
+            SceneCommitResult result,
+            SceneRunOutcome outcome)
+        {
+        }
+    }
 
     internal sealed class FakeSceneBacklog : ISceneBacklog
     {

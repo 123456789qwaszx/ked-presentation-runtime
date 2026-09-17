@@ -25,8 +25,10 @@ public sealed class ProgressionReplayState : ISceneReplayState
         _choiceHistory = choiceHistory;
     }
 
-    // 실행 시작 전에 Host가 준비한다. 로드가 아니면 둘 다 null이다.
-    public void Stage(IReadOnlyList<VNChoiceRecord> yarnChoices, SaveLineTarget target)
+    // null: NewGame
+    public void Stage(
+        IReadOnlyList<VNChoiceRecord> yarnChoices,
+        SaveLineTarget target)
     {
         _stagedChoices = yarnChoices;
         _stagedTarget = target;

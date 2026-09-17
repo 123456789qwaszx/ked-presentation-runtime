@@ -10,8 +10,9 @@ namespace Ked.Progression
     public sealed class SceneRunContext
     {
         public SceneProgress Progress { get; }
-
-        // null이면 일반 진입, 빈 목록도 유효한 restore 진입이다.
+        
+        // - null: New Game.
+        // - 빈 목록: 장면 루트 자체가 저장 위치.
         public IReadOnlyList<ScenePathStep> RestorePath { get; }
 
         public bool ReplayPending { get; private set; }

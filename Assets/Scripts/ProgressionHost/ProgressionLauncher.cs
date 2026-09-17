@@ -47,18 +47,24 @@ public sealed class ProgressionLauncher
             return;
 
         _saveCoordinator.BeginNewPlaythrough();
-        LaunchCore();
+
+        ScenarioDefinition scenarioDef = LoadScenarioDef();
+
+        LaunchNewGame(scenarioDef.StartChapter);
     }
 
+    
     public void Resume()
     {
         if (_isTransitioning)
             return;
 
-        ProgressionResumePoint resume =
+        ProgressionResumePoint resume = 
             _saveCoordinator.LoadActiveResumePoint();
+        
+        ScenarioDefinition scenarioDef = LoadScenarioDef();
 
-        LaunchCore(resume);
+        LaunchResume(scenarioDef, resume);
     }
 
     public async Task TransitionAndResumeAsync(Action change)
@@ -74,8 +80,12 @@ public sealed class ProgressionLauncher
 
             change();
 
-            ProgressionResumePoint resume = _saveCoordinator.LoadActiveResumePoint();
-            LaunchCore(resume);
+            ProgressionResumePoint resume = 
+                _saveCoordinator.LoadActiveResumePoint();
+            
+            ScenarioDefinition scenarioDef = LoadScenarioDef();
+
+            LaunchResume(scenarioDef, resume);
         }
         finally
         {
@@ -83,49 +93,69 @@ public sealed class ProgressionLauncher
         }
     }
     
-    private void LaunchCore(ProgressionResumePoint resume = null)
+    public async Task ExitAsync()
     {
-        ScenarioDefinition scenarioDef =
-            ProgressionContentLoader.LoadSingleChapter(_chapterJson);
-
-        if (!ProgressionContentPreflight.CheckAndLog(scenarioDef, _dialogueRunner.YarnProject))
+        if (_isTransitioning)
             return;
 
-        ChapterDefinition chapterDef = scenarioDef.StartChapter;
-        ChapterState chapterState = chapterDef.CreateEntryState();
+        _isTransitioning = true;
 
-        IReadOnlyList<DialogueLogEntry> backlog = null;
-        SavedLoadPlan loadPlan = null;
-
-        if (resume != null)
+        try
         {
-            if (TryValidateResume(scenarioDef, resume, 
-                    out ChapterDefinition savedChapter))
-            {
-                chapterDef = savedChapter;
-                chapterState = ChapterState.Restore(
-                    savedChapter,
-                    resume.EpisodeId,
-                    resume.Stats);
-
-                backlog = resume.Backlog;
-                loadPlan = resume.LoadPlan;
-            }
-            else { _saveCoordinator.BeginNewPlaythrough(); }
+            await _driver.StopAsync();
         }
+        finally
+        {
+            _isTransitioning = false;
+        }
+    }
+    
+    public Task RequestReplayAsync()
+    {
+        return _driver.RequestReplayAsync();
+    }
+    
+    
+    private void LaunchNewGame(ChapterDefinition chapterDef)
+    {
+        ChapterState chapterState =
+            chapterDef.CreateEntryState();
 
-        _backlog.Restore(backlog);
-        _replayState.Stage(
-            loadPlan?.YarnChoices,
-            loadPlan?.Target);
+        _backlog.Restore(null);
+        _replayState.PrepareLoad(null);
 
         _driver.Start(
             chapterDef,
             chapterState,
-            BuildRestorePath(loadPlan));
+            restorePath: null);
     }
+    
+    private void LaunchResume(
+        ScenarioDefinition scenarioDef,
+        ProgressionResumePoint resume)
+    {
+        if (!TryResolveResumeChapter(scenarioDef, resume, out ChapterDefinition chapterDef))
+        {
+            _saveCoordinator.BeginNewPlaythrough();
+            LaunchNewGame(scenarioDef.StartChapter);
+            return;
+        }
 
-    private bool TryValidateResume(
+        ChapterState chapterState =
+            ChapterState.Restore(chapterDef, resume.EpisodeId, resume.Stats);
+
+        SavedLoadPlan loadPlan = resume.LoadPlan;
+
+        _backlog.Restore(resume.Backlog);
+        _replayState.PrepareLoad(loadPlan);
+
+        _driver.Start(
+            chapterDef,
+            chapterState,
+            restorePath: ToScenePath(loadPlan));
+    }
+    
+    private bool TryResolveResumeChapter(
         ScenarioDefinition scenarioDef,
         ProgressionResumePoint resume,
         out ChapterDefinition savedChapter)
@@ -153,22 +183,25 @@ public sealed class ProgressionLauncher
 
         return true;
     }
-
-    // SavedLoadPlan에서 진행 좌표만 잘라냄
-    // - null: 일반 진입. 복원을 시작하지 않는다.
-    // - 빈 목록: 유효한 복원 진입. 장면 루트 자체가 저장 위치일 수 있다.
-    //
-    // 표적이 없으면 재생할 라인이 없으므로 복원 자체를 하지 않는다(null).
-    private IReadOnlyList<ScenePathStep> BuildRestorePath(SavedLoadPlan plan)
+    
+    private ScenarioDefinition LoadScenarioDef()
     {
-        if (plan?.Target == null || string.IsNullOrEmpty(plan.Target.NodeName))
-        {
-            if (plan != null)
-                Debug.LogWarning("[진행] 로드 계획에 표적이 없다 - 장면 루트에서 시작.");
+        ScenarioDefinition scenarioDef = ProgressionContentLoader.LoadSingleChapter(_chapterJson);
 
-            return null;
+        if (!ProgressionContentPreflight.CheckAndLog(scenarioDef, _dialogueRunner.YarnProject))
+        {
+            throw new InvalidOperationException(
+                "Progression 콘텐츠 Preflight 검증에 실패했다.");
         }
 
+        return scenarioDef;
+    }
+    
+    // 저장된 Scene 경로를 Progression의 복원 경로로 변환한다.
+    // - empty: Scene root 복원
+    // - non-empty: Scene root부터 저장 위치까지 다시 소비할 선택 경로
+    private static IReadOnlyList<ScenePathStep> ToScenePath(SavedLoadPlan plan)
+    {
         var path = new List<ScenePathStep>(plan.Path.Count);
 
         for (int i = 0; i < plan.Path.Count; i++)
@@ -180,27 +213,5 @@ public sealed class ProgressionLauncher
         }
 
         return path;
-    }
-    
-    public async Task ExitAsync()
-    {
-        if (_isTransitioning)
-            return;
-
-        _isTransitioning = true;
-
-        try
-        {
-            await _driver.StopAsync();
-        }
-        finally
-        {
-            _isTransitioning = false;
-        }
-    }
-    
-    public Task RequestReplayAsync()
-    {
-        return _driver.RequestReplayAsync();
     }
 }

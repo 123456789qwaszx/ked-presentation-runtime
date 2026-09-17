@@ -432,10 +432,7 @@ public class VNAppBootstrap : MonoBehaviour
             _backlogRecorder,
             progressionLog);
 
-        _progressionDriver = new ProgressionDriver(
-            sceneRunner,
-            lifecycleLog,
-            progressionLog);
+        _progressionDriver = new ProgressionDriver(sceneRunner);
 
         _progressionLauncher = new ProgressionLauncher(
             _progressionDriver,

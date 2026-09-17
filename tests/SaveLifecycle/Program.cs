@@ -63,8 +63,8 @@ internal static class Program
         PlaySeconds = 3,
     };
 
-    private static Ked.Progression.ProgressionState State(string episode = "scene1") =>
-        Ked.Progression.ProgressionState.CreateInitial(Array.Empty<Ked.Progression.StatDefinition>(), episode);
+    private static Ked.Progression.ChapterState State(string episode = "scene1") =>
+        Ked.Progression.ChapterState.CreateInitial(Array.Empty<Ked.Progression.StatDefinition>(), episode);
     private static SceneEntryReport Entry() => new("chapter", State(), 0);
     private static SceneCommitReport Completion() => new("chapter", Array.Empty<Ked.Progression.CommittedChoice>(),
         Array.Empty<VNChoiceRecord>(), Array.Empty<string>(), State("scene2"),
@@ -178,7 +178,7 @@ internal static class Program
                 var store = new LocalFileSaveStore(dir, (path, json) =>
                 { if (fail) throw new IOException(); AtomicFile.WriteAllText(path, json); });
                 store.Create(Save("A")); store.SetActive("A"); var save = new SaveCoordinator(store, ContentVersion);
-                save.LoadActiveResumePoint(); save.PrepareNewPlaythrough(); string id = save.PlaythroughId;
+                save.LoadActiveResumePoint(); save.BeginNewPlaythrough(); string id = save.PlaythroughId;
                 fail = true; Throws<IOException>(() => save.ReportSceneEntered(Entry()));
                 Check(store.ActiveId == "A", "old active was lost");
                 fail = false; save.ReportSceneEntered(Entry());
@@ -191,7 +191,7 @@ internal static class Program
                 var store = new LocalFileSaveStore(dir, (path, json) =>
                 { if (fail && Path.GetFileName(path) == "active.json") throw new IOException(); AtomicFile.WriteAllText(path, json); });
                 store.Create(Save("A")); store.SetActive("A"); var save = new SaveCoordinator(store, ContentVersion);
-                save.LoadActiveResumePoint(); save.PrepareNewPlaythrough(); string id = save.PlaythroughId;
+                save.LoadActiveResumePoint(); save.BeginNewPlaythrough(); string id = save.PlaythroughId;
                 fail = true; Throws<IOException>(() => save.ReportSceneEntered(Entry()));
                 Check(store.ActiveId == "A", "old active was lost");
                 fail = false; save.ReportSceneEntered(Entry()); save.ReportSceneCommitted(Completion());
@@ -248,10 +248,10 @@ internal static class Program
                 var launcher = new ProgressionLauncher(driver, new Yarn.Unity.DialogueRunner(),
                     new UnityEngine.TextAsset(), new SaveCoordinator(new LocalFileSaveStore(Dir()), ContentVersion),
                     new BacklogRecorder(), new ProgressionReplayState());
-                int prepares = 0; Task first = launcher.TransitionAsync(() => prepares++);
-                await launcher.TransitionAsync(() => prepares++);
+                int prepares = 0; Task first = launcher.TransitionAndResumeAsync(() => prepares++);
+                await launcher.TransitionAndResumeAsync(() => prepares++);
                 stopped.SetResult(true); await first;
-                driver.IsRunning = false; await launcher.ResumeAsync();
+                driver.IsRunning = false; launcher.Resume();
                 Check(prepares == 1 && driver.Starts == 2, "transition guard failed");
             });
 
