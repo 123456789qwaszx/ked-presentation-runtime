@@ -60,7 +60,7 @@ public sealed partial class VNScreenBindings
         
         // 새 게임
         await _progressionLauncher.TransitionAsync(
-            _saveCoordinator.PrepareNewPlaythroughAsync);
+            _saveCoordinator.PrepareNewPlaythrough);
     }
 
     private void HandleLoadClicked()

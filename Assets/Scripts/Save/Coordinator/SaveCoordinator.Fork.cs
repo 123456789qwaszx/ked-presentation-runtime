@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using UnityEngine;
 
 #region 용어 설명
@@ -42,7 +41,7 @@ public sealed partial class SaveCoordinator
     public bool CanForkFrom(in DialogueLogEntry entry) 
         => FindSceneIndexBySerial(entry.lineSerial) >= 0;
     
-    public Task ForkFromScene(SaveForkTarget forkTarget) 
+    public void ForkFromScene(SaveForkTarget forkTarget)
         => ForkFromScene(forkTarget.SceneIndex, forkTarget.LineTarget);
 
     public bool TryResolveForkTarget(in DialogueLogEntry entry, out SaveForkTarget forkTarget)
@@ -134,7 +133,7 @@ public sealed partial class SaveCoordinator
     // 3. 그 Scene 이전 기록만 상속
     // 4. target이 있으면 저장된 선택을 replay
     // 5. 새로운 Playthrough로 저장
-    private Task ForkFromScene(
+    private void ForkFromScene(
         int sceneIndex,
         SaveLineTarget target = null)
     {
@@ -192,7 +191,6 @@ public sealed partial class SaveCoordinator
             (target == null
                 ? " — 장면 루트에서"
                 : $" — {target.NodeName}/{target.LineId}#{target.Occurrence}까지 달린다"));
-        return Task.CompletedTask;
     }
 
     private static List<DialogueLogEntry> BuildBacklogBefore(
@@ -240,7 +238,7 @@ public sealed partial class SaveCoordinator
     }
 
     // 수동 슬롯 본문을 독립된 새 회차로 연다. 슬롯 원본은 바꾸지 않는다.
-    public Task ForkFromSaveSlot(SaveSlotEntry entry, SaveSlotData data)
+    public void ForkFromSaveSlot(SaveSlotEntry entry, SaveSlotData data)
     {
         SceneCheckpoint checkpoint = data.Checkpoint;
 
@@ -279,8 +277,6 @@ public sealed partial class SaveCoordinator
             $"물려받은 기록 {inheritedScenes.Count}개, " +
             $"백로그 {file.Backlog.Count}줄, " +
             $"시간 {data.PlaySeconds}s");
-
-        return Task.CompletedTask;
     }
 
     private void SaveAndActivateFork(LocalSaveFile file)

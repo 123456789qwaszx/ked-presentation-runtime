@@ -1,21 +1,18 @@
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using UnityEngine;
 
 public sealed partial class SaveCoordinator
 {
-    // 네트워크 대기 없이 새 회차를 예약한다. 첫 Scene 진입 snapshot을 쓴 뒤 active를 바꾼다.
-    public Task PrepareNewPlaythroughAsync()
+    // 새 회차를 예약한다. 첫 Scene 진입 snapshot을 쓴 뒤 active를 바꾼다.
+    public void PrepareNewPlaythrough()
     {
-        if (_newPrepared) 
-            return Task.CompletedTask;
-        
+        if (_newPrepared)
+            return;
+
         BecomePlaythrough(NewPlaythroughId(), 0, null);
-        
+
         _newPrepared = true;
-        
-        return Task.CompletedTask;
     }
 
     // active pointer가 가리키는 저장 파일을 읽어옴.

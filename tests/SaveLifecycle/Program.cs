@@ -166,7 +166,7 @@ internal static class Program
                 store.WriteSaveSlot(SlotEntry("slot"), SlotData("slot"));
                 var save = new SaveCoordinator(store, ContentVersion);
                 SaveSlotEntry slot = store.LoadSaveSlotIndex().Slots.Single();
-                await save.ForkFromSaveSlot(slot, save.LoadSaveSlot(slot.Id));
+                save.ForkFromSaveSlot(slot, save.LoadSaveSlot(slot.Id));
                 string loadedId = store.ActiveId;
                 store.Open(loadedId).Commit(Save(loadedId, 8));
                 Check(store.LoadSaveSlot("slot").LoadPlan.Target.LineId == "L", "slot followed autosave");
@@ -178,7 +178,7 @@ internal static class Program
                 var store = new LocalFileSaveStore(dir, (path, json) =>
                 { if (fail) throw new IOException(); AtomicFile.WriteAllText(path, json); });
                 store.Create(Save("A")); store.SetActive("A"); var save = new SaveCoordinator(store, ContentVersion);
-                save.LoadActiveResumePoint(); await save.PrepareNewPlaythroughAsync(); string id = save.PlaythroughId;
+                save.LoadActiveResumePoint(); save.PrepareNewPlaythrough(); string id = save.PlaythroughId;
                 fail = true; Throws<IOException>(() => save.ReportSceneEntered(Entry()));
                 Check(store.ActiveId == "A", "old active was lost");
                 fail = false; save.ReportSceneEntered(Entry());
@@ -191,7 +191,7 @@ internal static class Program
                 var store = new LocalFileSaveStore(dir, (path, json) =>
                 { if (fail && Path.GetFileName(path) == "active.json") throw new IOException(); AtomicFile.WriteAllText(path, json); });
                 store.Create(Save("A")); store.SetActive("A"); var save = new SaveCoordinator(store, ContentVersion);
-                save.LoadActiveResumePoint(); await save.PrepareNewPlaythroughAsync(); string id = save.PlaythroughId;
+                save.LoadActiveResumePoint(); save.PrepareNewPlaythrough(); string id = save.PlaythroughId;
                 fail = true; Throws<IOException>(() => save.ReportSceneEntered(Entry()));
                 Check(store.ActiveId == "A", "old active was lost");
                 fail = false; save.ReportSceneEntered(Entry()); save.ReportSceneCommitted(Completion());
@@ -209,7 +209,7 @@ internal static class Program
                 });
                 store.Create(file); store.SetActive("A"); var save = new SaveCoordinator(store, ContentVersion);
                 save.LoadActiveResumePoint();
-                await save.ForkFromScene(new SaveForkTarget(0,
+                save.ForkFromScene(new SaveForkTarget(0,
                     new SaveLineTarget { NodeName = "node", LineId = "L", Occurrence = 1 }));
                 LocalSaveFile fork = store.LoadActive();
                 Check(fork.PlaythroughId != "A" && fork.PendingLoad.Path.Single().OptionIndex == 1
@@ -248,8 +248,8 @@ internal static class Program
                 var launcher = new ProgressionLauncher(driver, new Yarn.Unity.DialogueRunner(),
                     new UnityEngine.TextAsset(), new SaveCoordinator(new LocalFileSaveStore(Dir()), ContentVersion),
                     new BacklogRecorder(), new ProgressionReplayState());
-                int prepares = 0; Task first = launcher.TransitionAsync(() => { prepares++; return Task.CompletedTask; });
-                await launcher.TransitionAsync(() => { prepares++; return Task.CompletedTask; });
+                int prepares = 0; Task first = launcher.TransitionAsync(() => prepares++);
+                await launcher.TransitionAsync(() => prepares++);
                 stopped.SetResult(true); await first;
                 driver.IsRunning = false; await launcher.ResumeAsync();
                 Check(prepares == 1 && driver.Starts == 2, "transition guard failed");

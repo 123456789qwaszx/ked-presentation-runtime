@@ -42,7 +42,7 @@ public sealed class ProgressionLauncher
 
     public IReadOnlyList<CommittedChoice> PendingPath => _driver.PendingPath;
 
-    public async Task TransitionAsync(Func<Task> change)
+    public async Task TransitionAsync(Action change)
     {
         if (_isTransitioning)
             return;
@@ -52,7 +52,7 @@ public sealed class ProgressionLauncher
         try
         {
             await _driver.StopAsync(); // 1. 현재 재생 중단
-            await change();            // 2. 새 게임/로드/포크 등 상태 변경
+            change();                  // 2. 새 게임/로드/포크 등 상태 변경 (로컬 저장이라 기다릴 것이 없음)
             await LaunchCoreAsync();   // 3. 변경된 상태로 다시 재생
         }
         finally
@@ -133,7 +133,7 @@ public sealed class ProgressionLauncher
         }
 
         if (resume != null && !resumeAccepted)
-            await _saveCoordinator.PrepareNewPlaythroughAsync();
+            _saveCoordinator.PrepareNewPlaythrough();
 
         // 진행 런타임에는 ScenePathStep[]만 들어간다.
         // Yarn 프로젝트/변수, 백로그, Yarn 선택, 라인 표적은 실행 전에 Host가 준비한다.

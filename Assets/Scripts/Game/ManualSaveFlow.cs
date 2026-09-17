@@ -74,7 +74,7 @@ public sealed class ManualSaveFlow
                 { 
                     onTransitionStarted?.Invoke(); 
                     
-                    return _saveCoordinator.ForkFromSaveSlot(slot, data);
+                    _saveCoordinator.ForkFromSaveSlot(slot, data);
                 });
         }
         catch (Exception error) { Debug.LogError($"[수동 저장] 불러오기 실패\n{error}"); }
