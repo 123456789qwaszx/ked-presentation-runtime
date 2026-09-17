@@ -284,6 +284,5 @@ public sealed partial class SaveCoordinator
         _localStore.Create(file);
         _localStore.SetActive(file.PlaythroughId);
         BecomePlaythrough(file.PlaythroughId, file.PlaySeconds, file.Scenes);
-        _newPrepared = false;
     }
 }

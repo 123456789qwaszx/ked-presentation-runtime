@@ -41,26 +41,14 @@ public sealed partial class VNScreenBindings
 
     #region Handlers
 
-    private async void HandleContinueClicked()
+    private void HandleContinueClicked()
     {
-        if (_progressionLauncher == null)
-            return;
-
-        // 이어하기
-        await _progressionLauncher.ResumeAsync();
+        _progressionLauncher.Resume();
     }
 
-    private async void HandleStartClicked()
+    private void HandleStartClicked()
     {
-        if (_progressionLauncher == null ||
-            _saveCoordinator == null)
-        {
-            return;
-        }
-        
-        // 새 게임
-        await _progressionLauncher.TransitionAsync(
-            _saveCoordinator.PrepareNewPlaythrough);
+        _progressionLauncher.StartNewGame();
     }
 
     private void HandleLoadClicked()

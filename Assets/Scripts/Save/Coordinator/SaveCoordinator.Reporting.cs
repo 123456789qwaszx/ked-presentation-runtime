@@ -41,7 +41,6 @@ public sealed partial class SaveCoordinator
             var session = _localStore.Open(_playthroughId) ?? _localStore.Create(initial);
             _localStore.SetActive(_playthroughId);
             _active = session;
-            _newPrepared = false;
         }
     }
 

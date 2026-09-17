@@ -11,12 +11,11 @@ using Yarn.Unity;
 public sealed class ProgressionLauncher
 {
     private readonly ProgressionDriver _driver;
-    private readonly DialogueRunner _dialogueRunner; //"DialogueRunner.YarnProject"를 꺼내 대조 및 검사.
+    private readonly DialogueRunner _dialogueRunner; // DialogueRunner.YarnProject를 꺼내 대조 및 검사.
     private readonly TextAsset _chapterJson;
 
     private readonly SaveCoordinator _saveCoordinator;
 
-    // 진행 런타임이 모르는 복원 payload를 실행 전에 준비해 두는 자리들.
     private readonly BacklogRecorder _backlog;
     private readonly ProgressionReplayState _replayState;
 
@@ -41,8 +40,28 @@ public sealed class ProgressionLauncher
     public bool IsRunning => _driver.IsRunning;
 
     public IReadOnlyList<CommittedChoice> PendingPath => _driver.PendingPath;
+    
+    public void StartNewGame()
+    {
+        if (_isTransitioning)
+            return;
 
-    public async Task TransitionAsync(Action change)
+        _saveCoordinator.BeginNewPlaythrough();
+        LaunchCore();
+    }
+
+    public void Resume()
+    {
+        if (_isTransitioning)
+            return;
+
+        ProgressionResumePoint resume =
+            _saveCoordinator.LoadActiveResumePoint();
+
+        LaunchCore(resume);
+    }
+
+    public async Task TransitionAndResumeAsync(Action change)
     {
         if (_isTransitioning)
             return;
@@ -51,37 +70,20 @@ public sealed class ProgressionLauncher
 
         try
         {
-            await _driver.StopAsync(); // 1. 현재 재생 중단
-            change();                  // 2. 새 게임/로드/포크 등 상태 변경 (로컬 저장이라 기다릴 것이 없음)
-            await LaunchCoreAsync();   // 3. 변경된 상태로 다시 재생
+            await _driver.StopAsync();
+
+            change();
+
+            ProgressionResumePoint resume = _saveCoordinator.LoadActiveResumePoint();
+            LaunchCore(resume);
         }
         finally
         {
             _isTransitioning = false;
         }
     }
-
-    // 현재 진행 가능한 회차를 이어서 재생
-    public async Task ResumeAsync()
-    {
-        if (IsRunning || _isTransitioning)
-            return;
-
-        _isTransitioning = true;
-
-        try
-        {
-            await LaunchCoreAsync();
-        }
-        finally
-        {
-            _isTransitioning = false;
-        }
-    }
-
-    public Task RequestReplayAsync() => _driver.RequestReplayAsync();
-
-    private async Task LaunchCoreAsync()
+    
+    private void LaunchCore(ProgressionResumePoint resume = null)
     {
         ScenarioDefinition scenarioDef =
             ProgressionContentLoader.LoadSingleChapter(_chapterJson);
@@ -89,64 +91,75 @@ public sealed class ProgressionLauncher
         if (!ProgressionContentPreflight.CheckAndLog(scenarioDef, _dialogueRunner.YarnProject))
             return;
 
-        // 기본값은 새 게임 시작.
         ChapterDefinition chapterDef = scenarioDef.StartChapter;
-        ChapterState state = chapterDef.CreateEntryState();
+        ChapterState chapterState = chapterDef.CreateEntryState();
 
         IReadOnlyList<DialogueLogEntry> backlog = null;
         SavedLoadPlan loadPlan = null;
 
-        ProgressionResumePoint resume = _saveCoordinator.LoadActiveResumePoint();
-
-        bool resumeAccepted = false;
         if (resume != null)
         {
-            if (resume.ChapterCompleted)
+            if (TryValidateResume(scenarioDef, resume, 
+                    out ChapterDefinition savedChapter))
             {
-                Debug.Log($"[진행] 완료된 챕터의 세이브({resume.ChapterId}). 새로 시작.");
-            }
-            else if (!scenarioDef.TryGetChapter(resume.ChapterId, out ChapterDefinition savedChapter)
-                     || !savedChapter.TryGetNode(resume.EpisodeId, out _))
-            {
-                Debug.LogWarning(
-                    $"[진행] 저장 지점 {resume.ChapterId}/{resume.EpisodeId}가 현재 콘텐츠에 없다. 새로 시작.");
-            }
-            else if (!savedChapter.IsSceneRoot(resume.EpisodeId))
-            {
-                Debug.LogWarning(
-                    $"[진행] 저장 지점 {resume.ChapterId}/{resume.EpisodeId}가 장면 중간(구형식 세이브). 새로 시작.");
-            }
-            else
-            {
-                resumeAccepted = true;
                 chapterDef = savedChapter;
-                state = ChapterState.Restore(savedChapter, resume.EpisodeId, resume.Stats);
+                chapterState = ChapterState.Restore(
+                    savedChapter,
+                    resume.EpisodeId,
+                    resume.Stats);
+
                 backlog = resume.Backlog;
                 loadPlan = resume.LoadPlan;
-
-                Debug.Log(
-                    $"[진행] 재개 - {resume.ChapterId}/{resume.EpisodeId}");
             }
+            else { _saveCoordinator.BeginNewPlaythrough(); }
         }
 
-        if (resume != null && !resumeAccepted)
-            _saveCoordinator.PrepareNewPlaythrough();
-
-        // 진행 런타임에는 ScenePathStep[]만 들어간다.
-        // Yarn 프로젝트/변수, 백로그, Yarn 선택, 라인 표적은 실행 전에 Host가 준비한다.
         _backlog.Restore(backlog);
-        _replayState.Stage(loadPlan?.YarnChoices, loadPlan?.Target);
+        _replayState.Stage(
+            loadPlan?.YarnChoices,
+            loadPlan?.Target);
 
-        _driver.Start(chapterDef, state, BuildRestorePath(loadPlan));
+        _driver.Start(
+            chapterDef,
+            chapterState,
+            BuildRestorePath(loadPlan));
     }
 
-    // SavedLoadPlan에서 진행 좌표만 잘라 낸다.
+    private bool TryValidateResume(
+        ScenarioDefinition scenarioDef,
+        ProgressionResumePoint resume,
+        out ChapterDefinition savedChapter)
+    {
+        savedChapter = null;
+
+        if (resume.ChapterCompleted)
+        {
+            Debug.Log($"[진행] 완료된 챕터의 세이브({resume.ChapterId}). 새로 시작.");
+            return false;
+        }
+
+        if (!scenarioDef.TryGetChapter(resume.ChapterId, out savedChapter)
+            || !savedChapter.TryGetNode(resume.EpisodeId, out _))
+        {
+            Debug.LogWarning($"[진행] 저장 지점 {resume.ChapterId}/{resume.EpisodeId}가 현재 콘텐츠에 없다. 새로 시작.");
+            return false;
+        }
+
+        if (!savedChapter.IsSceneRoot(resume.EpisodeId))
+        {
+            Debug.LogWarning($"[진행] 저장 지점 {resume.ChapterId}/{resume.EpisodeId}가 장면 중간(구형식 세이브). 새로 시작.");
+            return false;
+        }
+
+        return true;
+    }
+
+    // SavedLoadPlan에서 진행 좌표만 잘라냄
+    // - null: 일반 진입. 복원을 시작하지 않는다.
+    // - 빈 목록: 유효한 복원 진입. 장면 루트 자체가 저장 위치일 수 있다.
     //
-    // ⚠ null과 빈 목록은 다른 뜻이다.
-    //     null      - 일반 진입. 복원을 시작하지 않는다.
-    //     빈 목록   - 유효한 복원 진입. 장면 루트 자체가 저장 위치일 수 있다.
-    //   표적이 없으면 재생할 라인이 없으므로 복원 자체를 하지 않는다(null).
-    private static IReadOnlyList<ScenePathStep> BuildRestorePath(SavedLoadPlan plan)
+    // 표적이 없으면 재생할 라인이 없으므로 복원 자체를 하지 않는다(null).
+    private IReadOnlyList<ScenePathStep> BuildRestorePath(SavedLoadPlan plan)
     {
         if (plan?.Target == null || string.IsNullOrEmpty(plan.Target.NodeName))
         {
@@ -159,13 +172,16 @@ public sealed class ProgressionLauncher
         var path = new List<ScenePathStep>(plan.Path.Count);
 
         for (int i = 0; i < plan.Path.Count; i++)
-            path.Add(new ScenePathStep(plan.Path[i].FromEpisodeId, plan.Path[i].OptionIndex));
+        {
+            path.Add(
+                new ScenePathStep(
+                    plan.Path[i].FromEpisodeId,
+                    plan.Path[i].OptionIndex));
+        }
 
         return path;
     }
-
-    // 현재 진행을 끝내고 idle 상태로 빠진다.
-    // 새 진행을 시작하지 않는다.
+    
     public async Task ExitAsync()
     {
         if (_isTransitioning)
@@ -181,5 +197,10 @@ public sealed class ProgressionLauncher
         {
             _isTransitioning = false;
         }
+    }
+    
+    public Task RequestReplayAsync()
+    {
+        return _driver.RequestReplayAsync();
     }
 }

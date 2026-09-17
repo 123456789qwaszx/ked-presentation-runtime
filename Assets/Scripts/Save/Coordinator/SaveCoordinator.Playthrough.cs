@@ -1,27 +1,15 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 public sealed partial class SaveCoordinator
 {
-    // 새 회차를 예약한다. 첫 Scene 진입 snapshot을 쓴 뒤 active를 바꾼다.
-    public void PrepareNewPlaythrough()
-    {
-        if (_newPrepared)
-            return;
-
-        BecomePlaythrough(NewPlaythroughId(), 0, null);
-
-        _newPrepared = true;
-    }
+    public void BeginNewPlaythrough() 
+        => BecomePlaythrough(NewPlaythroughId(), 0, null);
 
     // active pointer가 가리키는 저장 파일을 읽어옴.
     // 예) 만약 'active = playthrough-B' -> playthrough-B.json
     public ProgressionResumePoint LoadActiveResumePoint()
     {
-        if (_newPrepared)
-            return null;
-        
         LocalSaveFile save = _localStore.LoadActive();
 
         if (save == null)

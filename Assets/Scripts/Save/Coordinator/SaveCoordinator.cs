@@ -9,7 +9,6 @@ public sealed partial class SaveCoordinator : ISceneRecordReporter
     private readonly ILocalSaveStore _localStore;
     private readonly string _contentVersion;
     private PlaythroughSession _active;
-    private bool _newPrepared;
 
     private float _startedAt = Time.realtimeSinceStartup;
     private int _playSecondsBase;

@@ -70,7 +70,7 @@ public sealed class ManualSaveFlow
             SaveSlotEntry slot = _saveCoordinator.FindSaveSlot(slotId);
             SaveSlotData data = _saveCoordinator.LoadSaveSlot(slot.Id);
 
-            await _progressionLauncher.TransitionAsync(() =>
+            await _progressionLauncher.TransitionAndResumeAsync(() =>
                 { 
                     onTransitionStarted?.Invoke(); 
                     
