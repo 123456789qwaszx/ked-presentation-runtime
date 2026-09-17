@@ -17,8 +17,6 @@ public sealed class ScenePlaybackSession : IScenePlayback
     private readonly ChoiceHistory _choiceHistory;
     private readonly EpisodeSkipController _episodeSkipController;
 
-    private Task _stopTask;
-
     public ScenePlaybackSession(
         IEpisodeNodeRunner nodeRunner,
         VNScreenBindings vnScreenBindings,
@@ -41,16 +39,15 @@ public sealed class ScenePlaybackSession : IScenePlayback
         _episodeSkipController = episodeSkipController;
     }
 
-    public async Task BeginSceneAsync()
+    public Task BeginSceneAsync()
     {
-        await AwaitCurrentStopAsync();
-        await StopAsync();
-
         _choiceHistory.ClearChoiceRecords();
 
         _vnScreenBindings.GoToPresentationView();
         _presentationStage.Clear();
         _presentationScope.Start();
+
+        return Task.CompletedTask;
     }
 
     public async Task PlayNodeAsync(string nodeName)
@@ -67,40 +64,16 @@ public sealed class ScenePlaybackSession : IScenePlayback
         }
     }
 
-    public async Task PrepareReplayAsync()
+    public Task PrepareReplayAsync()
     {
-        // Replay 요청 측 Stop과 RunAsync 측 Replay 준비가
-        // 동시에 진행되더라도 이전 Stop이 끝난 뒤 다시 시작한다.
-        await AwaitCurrentStopAsync();
-
         _vnScreenBindings.GoToPresentationView();
-        
         _presentationStage.Clear();
         _presentationScope.Start();
+
+        return Task.CompletedTask;
     }
 
     public async Task StopAsync()
-    {
-        Task stop = _stopTask;
-
-        if (stop == null)
-        {
-            stop = StopPlaybackAsync();
-            _stopTask = stop;
-        }
-
-        try
-        {
-            await stop;
-        }
-        finally
-        {
-            if (ReferenceEquals(_stopTask, stop))
-                _stopTask = null;
-        }
-    }
-
-    private async Task StopPlaybackAsync()
     {
         _episodeSkipController.Cancel();
 
@@ -111,18 +84,5 @@ public sealed class ScenePlaybackSession : IScenePlayback
         _rollbackHistory.ClearRollbackPoints();
         _shotResponseSystem.Clear();
         _presentationScope.End();
-    }
-
-    private async Task AwaitCurrentStopAsync()
-    {
-        Task stop = _stopTask;
-
-        if (stop == null)
-            return;
-
-        await stop;
-
-        if (ReferenceEquals(_stopTask, stop))
-            _stopTask = null;
     }
 }

@@ -33,6 +33,7 @@ M5  Save 분리        ✔ 완료
 M6  Launcher/조립    ✔ 완료
 M7  실기 검증·문서    ◐ 문서만 완료 — G3/G4가 남았다
 M8  SceneRunner Host 정리  ✔ 완료    고정 구현은 구체 타입, 비동기·실패 경계만 계약 유지
+M9  Playback Stop 조정     ✔ 완료    Stop 합류는 SceneRunner, 실제 정리는 ScenePlaybackSession
 ```
 
 검증 상태:
@@ -578,6 +579,28 @@ ProgressionCore · SaveLifecycle 회귀 테스트
 활성 Runtime 코드에서 삭제한 세 계약과 ProgressionRollbackHistory 참조 0건
 Unity 컴파일과 G3/G4 실기 검증은 M7의 미완료 항목으로 유지
 ```
+
+## M9 — Playback Stop 조정 책임 이동
+
+`ScenePlaybackSession` 안에서 `_stopTask`와 `AwaitCurrentStopAsync()`로 숨겨 처리하던
+Stop 동시성 조정을 `SceneRunner`로 올렸다.
+
+```text
+SceneRunner
+  RequestReplayAsync  Stop 시작
+  RestartReplayAsync  같은 Stop 완료 후 Replay 준비
+  StopAsync           진행 중인 Stop에 합류
+  EnterSceneAsync     이전 playback Stop 완료 후 새 Scene 시작
+
+ScenePlaybackSession
+  BeginSceneAsync     Scene용 화면·무대·Scope 시작
+  PlayNodeAsync       Yarn node 실행과 Episode Skip 종료
+  PrepareReplayAsync  Replay용 화면·무대·Scope 시작
+  StopAsync           Yarn/라인/롤백/무대/Scope 실제 정리
+```
+
+말단 객체는 더 이상 호출 경쟁을 방어하지 않는다. Replay 요청 Task와 실행 중인 Run Task가
+서로 다른 흐름이라는 사실은 둘을 조립하는 `SceneRunner`의 `_playbackStopTask`가 한 곳에서 처리한다.
 
 ---
 

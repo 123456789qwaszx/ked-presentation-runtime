@@ -24,6 +24,9 @@ public sealed class SceneRunner : ISceneRunner
     private readonly IScenePersistence _persistence;
     private readonly BacklogRecorder _backlog;
 
+    // Replay 요청과 실행 루프가 같은 Stop 완료를 기다린다.
+    private Task _playbackStopTask = Task.CompletedTask;
+
     public SceneRunner(
         IScenePlayback playback,
         IChapterOptionsView options,
@@ -97,7 +100,7 @@ public sealed class SceneRunner : ISceneRunner
         if (!scene.RequestReplay())
             return;
 
-        Task stopTask = _playback.StopAsync();
+        Task stopTask = StopPlaybackAsync();
         _options.Cancel();
         await stopTask;
     }
@@ -105,17 +108,22 @@ public sealed class SceneRunner : ISceneRunner
     public async Task StopAsync()
     {
         _options.Cancel();
-        await _playback.StopAsync();
+        await StopPlaybackAsync();
     }
 
     private async Task EnterSceneAsync(
         SceneRunContext ctx,
         CancellationToken cancellationToken)
     {
-        await _playback.BeginSceneAsync();
-        _backlog.MarkSceneStart();
+        await StopPlaybackAsync();
 
         cancellationToken.ThrowIfCancellationRequested();
+
+        await _playback.BeginSceneAsync();
+
+        cancellationToken.ThrowIfCancellationRequested();
+
+        _backlog.MarkSceneStart();
 
         _persistence.EnterScene(
             ctx.Progress.Definition.ChapterId,
@@ -308,6 +316,10 @@ public sealed class SceneRunner : ISceneRunner
     {
         cancellationToken.ThrowIfCancellationRequested();
 
+        await _playbackStopTask;
+
+        cancellationToken.ThrowIfCancellationRequested();
+
         await _playback.PrepareReplayAsync();
 
         cancellationToken.ThrowIfCancellationRequested();
@@ -321,6 +333,15 @@ public sealed class SceneRunner : ISceneRunner
         Debug.LogWarning(
             $"[장면] 리플레이 — 루트부터. " +
             $"자동 응답할 선택 {progression.RecordedChoiceCount}개");
+    }
+
+    private Task StopPlaybackAsync()
+    {
+        if (!_playbackStopTask.IsCompleted)
+            return _playbackStopTask;
+
+        _playbackStopTask = _playback.StopAsync();
+        return _playbackStopTask;
     }
 
     private void ApplyRestorePath(
